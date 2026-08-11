@@ -60,6 +60,10 @@ int main(int argc, char** argv) {
   long long seed = 20260810;
   mhgp3v::CloudFamily family = mhgp3v::CloudFamily::kUniform;
   bool hybrid_mask = false;
+  // FACTORISATION DES EX AEQUO (reponse Q3) : les requetes ne lisent que les
+  // lots anterieurs — le lot est stage a sa cloture. La masse mesuree est
+  // celle du chemin autoritatif sous fermeture des carriers.
+  bool factorise = false;
   auto integer = [](const char* text, long long* value) {
     const char* last = text + strlen(text);
     unsigned long long magnitude = 0;
@@ -87,7 +91,10 @@ int main(int argc, char** argv) {
       ++i;
       if (!strcmp(argv[i], "all")) hybrid_mask = false;
       else if (!strcmp(argv[i], "hybrid")) hybrid_mask = true;
-      else { std::printf("ECHEC : masque inconnu %s\n", argv[i]); return 2; }
+      else if (!strcmp(argv[i], "hybrid-factorised")) {
+        hybrid_mask = true;
+        factorise = true;
+      } else { std::printf("ECHEC : masque inconnu %s\n", argv[i]); return 2; }
       continue;
     }
     long long value = 0;
@@ -134,7 +141,7 @@ int main(int argc, char** argv) {
   std::printf("provenance : --points %d --coord %d --smax %d --max-order %d --seed %lld"
               " --family %s --catalogue-threads %d --mask %s --threshold %d\n", n, coord, smax,
               max_order, seed, mhgp3v::cloud_family_name(family), catalogue_threads,
-              hybrid_mask ? "hybrid" : "all", threshold);
+              factorise ? "hybrid-factorised" : (hybrid_mask ? "hybrid" : "all"), threshold);
   std::printf("catalogue  : %zu generateurs en %.3f s — DIAGNOSTIC DE MASSE (%s),"
               " aucune semantique de fold\n", count,
               std::chrono::duration<double>(t1 - t0).count(),
@@ -278,7 +285,8 @@ int main(int argc, char** argv) {
                 principal[(std::size_t)m] != 0, solo_batch, false)
                 ? 1
                 : 0;
-        receipt.entries += mhgp3v::prefix_stage(&index, m, members[(std::size_t)m], k);
+        if (!factorise)
+          receipt.entries += mhgp3v::prefix_stage(&index, m, members[(std::size_t)m], k);
       }
       if (batch_generators.size() > 1) ++multi_generator_batches;
       // CLOTURE DU STAGING DU LOT : preflight fige, H_Q du lot.
@@ -311,6 +319,9 @@ int main(int argc, char** argv) {
           }
         }
       }
+      if (factorise)
+        for (int m : batch_generators)
+          receipt.entries += mhgp3v::prefix_stage(&index, m, members[(std::size_t)m], k);
       for (int m : batch_generators) is_query_now[(std::size_t)m] = 0;
     }
     for (const std::vector<int>& list : index.lists)

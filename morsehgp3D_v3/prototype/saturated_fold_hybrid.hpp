@@ -227,6 +227,22 @@ inline bool hybrid_is_fallback_query(int rank, int k, int support_size, bool is_
 // jamais devenir un flux persistant du produit.
 using HybridPairLedger = std::vector<std::array<int, 4>>;
 
+// `factorise_exaequo` (reponse auditeur 20260811, Q3 « factorisation stricte
+// des ex aequo ») : sous la PRETENTION DE FAMILLE COMPLETE et l'unicite du
+// handle par boule exacte, deux generateurs canoniques distincts M != N de
+// MEME niveau exact avec |M∩N| >= k possedent un carrier strict commun
+// Sat(F), F ⊆ M∩N de taille k : l'egalite beta(F) = alpha ferait de B_M et
+// B_N deux boules minimales couvrant F, donc la MEME boule par unicite de la
+// miniboule — contradiction avec la distinction des handles. Aucune arete
+// nouveau--nouveau du lot n'est alors essentielle : chaque nouveau se relie
+// aux racines STRICTES gelees qu'il touche (le carrier est un generateur
+// anterieur avec |M ∩ Sat(F)| >= k, donc trouve par la requete prefixe sur
+// les lots anterieurs), et le quotient biparti nouveaux--racines strictes
+// ferme exactement le lot. Le mode saute donc TOUS les candidats du lot
+// courant ; la source shallow seule ne donne PAS cette fermeture (fixture
+// des deux triangles prives du carrier AB) — le differentiel des formes est
+// le juge en campagne bornee, le contrat Gate D l'est a l'echelle.
+//
 // `prefix_all` (reponse auditeur 20260811, ordre recommande §2) : le join
 // prefixe RELATIF a toute `GeneratorTable` recue — toutes les requetes, aucun
 // certificat principal, aucun theoreme des q attaches, donc AUCUNE pretention
@@ -238,7 +254,7 @@ inline SaturatedFold build_saturated_fold_hybrid(
     int maximum_order, bool keep_partitions, HybridReceipt* receipt,
     bool enforce_event_guard = false, HybridMutants mutants = {},
     bool prefix_fallback = false, HybridPairLedger* prefix_pair_ledger = nullptr,
-    bool prefix_all = false) {
+    bool prefix_all = false, bool factorise_exaequo = false) {
   SaturatedFold fold;
   fold.maximum_order = maximum_order;
   if (receipt != nullptr) *receipt = HybridReceipt{};
@@ -248,6 +264,11 @@ inline SaturatedFold build_saturated_fold_hybrid(
   }
   if (prefix_all && !prefix_fallback) {
     fold.refusal = "prefix-all exige le fallback prefixe";
+    return fold;
+  }
+  if (factorise_exaequo && (!prefix_fallback || prefix_all)) {
+    fold.refusal = "la factorisation des ex aequo exige le fallback prefixe sous"
+                   " pretention de famille complete";
     return fold;
   }
   const std::size_t count = catalogue.spheres.size();
@@ -431,7 +452,11 @@ inline SaturatedFold build_saturated_fold_hybrid(
                                               solo_batch, mutants.force_principal)
                          ? 1
                          : 0);
-          if (!mutants.prefix.future_visible && !mutants.prefix.stage_query_sequentially)
+          // FACTORISATION DES EX AEQUO : le lot est stage a sa CLOTURE — les
+          // requetes du lot ne lisent que les lots anterieurs, aucun candidat
+          // nouveau--nouveau n'apparait (le carrier strict fait la connexite).
+          if (!mutants.prefix.future_visible && !mutants.prefix.stage_query_sequentially &&
+              !factorise_exaequo)
             out.prefix.entries +=
                 prefix_stage(&prefix_index, m, members[(std::size_t)m], k, mutants.prefix);
         } else {
@@ -675,8 +700,14 @@ inline SaturatedFold build_saturated_fold_hybrid(
         }
       }
 
-      if (prefix_fallback)
+      if (prefix_fallback) {
+        if (factorise_exaequo && !mutants.prefix.future_visible &&
+            !mutants.prefix.stage_query_sequentially)
+          for (int m : batch_generators)
+            out.prefix.entries +=
+                prefix_stage(&prefix_index, m, members[(std::size_t)m], k, mutants.prefix);
         for (int m : batch_generators) is_query_now[(std::size_t)m] = 0;
+      }
       if (touched.empty()) continue;
       std::map<int, std::set<long long>> strict_of;
       std::map<int, std::size_t> strict_cov_of;

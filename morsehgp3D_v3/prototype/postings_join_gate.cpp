@@ -309,7 +309,7 @@ bool independent_weights_agree(const mhgp::Catalogue& catalogue,
 bool prefix_ledger_agrees(const std::vector<mhgp::P3>& points, const mhgp::Catalogue& catalogue,
                           int maximum_order, mhgp3v::HybridMutants hybrid_mutants,
                           const mhgp3v::HybridPairLedger& got, std::string* why,
-                          bool prefix_all = false) {
+                          bool prefix_all = false, bool factorise_exaequo = false) {
   const std::size_t count = catalogue.spheres.size();
   std::vector<std::vector<mhgp::i32>> members(count);
   for (std::size_t s = 0; s < count; ++s) {
@@ -354,7 +354,9 @@ bool prefix_ledger_agrees(const std::vector<mhgp::P3>& points, const mhgp::Catal
         if ((int)members[a].size() < k || (int)members[b].size() < k) continue;
         if (!mhgp3v::prefix_recertify(members[a], members[b], k)) continue;
         if (batch_of[a] == batch_of[b]) {
-          if (is_query[a] != 0 || is_query[b] != 0)
+          // FACTORISATION : les paires du meme lot ne sont jamais produites —
+          // le carrier strict commun fait la connexite via les lots anterieurs.
+          if (!factorise_exaequo && (is_query[a] != 0 || is_query[b] != 0))
             want.push_back({k, batch_of[a], (int)a, (int)b});
         } else {
           const std::size_t late = batch_of[a] < batch_of[b] ? b : a;
@@ -561,6 +563,29 @@ bool run_differential(const mhgp::Catalogue& catalogue, int maximum_order,
     if (!prefix_ledger_agrees(*points, catalogue, maximum_order, hybrid_mutants,
                               prefix_all_ledger, why, /*prefix_all=*/true))
       return false;
+    // LA HUITIEME FORME : la factorisation stricte des ex aequo (reponse Q3)
+    // — sous pretention de famille complete, les paires du meme lot sont
+    // sautees, la connexite passe par les carriers stricts des lots
+    // anterieurs. Meme fold bit a bit ; ledger possede sans paires de lot.
+    mhgp3v::HybridReceipt factorised_receipt;
+    mhgp3v::HybridPairLedger factorised_ledger;
+    const mhgp3v::SaturatedFold factorised = mhgp3v::build_saturated_fold_hybrid(
+        *points, (int)points->size(), catalogue, maximum_order,
+        /*keep_partitions=*/true, &factorised_receipt, /*enforce_event_guard=*/true,
+        hybrid_mutants, /*prefix_fallback=*/true, &factorised_ledger,
+        /*prefix_all=*/false, /*factorise_exaequo=*/true);
+    if (!factorised.ok) {
+      *why = std::string("fold factorise refuse : ") + factorised.refusal;
+      return false;
+    }
+    if (!folds_agree(truth, factorised, /*ignore_representatives=*/false, why)) {
+      *why = "forme factorisee : " + *why;
+      return false;
+    }
+    if (!prefix_ledger_agrees(*points, catalogue, maximum_order, hybrid_mutants,
+                              factorised_ledger, why, /*prefix_all=*/false,
+                              /*factorise_exaequo=*/true))
+      return false;
     if (prefix_accum != nullptr) {
       prefix_accum->entries += prefix_receipt.prefix.entries;
       prefix_accum->queries += prefix_receipt.prefix.queries;
@@ -748,6 +773,97 @@ int main(int argc, char** argv) {
     }
     std::printf("cosphere   : dix points cospheriques, K=6, record aux dix-sept temoins"
                 " stricts recu — quatre formes en accord\n");
+  }
+
+  // ETAGE 1ter : LA FIXTURE DES DEUX TRIANGLES (reponse Q3, factorisation des
+  // ex aequo). ABC et ABD portent deux miniboules distinctes de MEME rayon
+  // carre 25 et partagent AB ; le carrier strict AB (rayon carre 16) est le
+  // pivot de la factorisation. Sur le catalogue COMPLET, les huit formes
+  // concordent (differentiel ci-dessous). Sur la table AMPUTEE du carrier
+  // {A,B}, la factorisation doit REFUSER ou DIVERGER de la verite de la meme
+  // table — jamais concorder silencieusement — pendant que le chemin partiel
+  // avec staging (prefix-all) y reste exact.
+  {
+    const std::vector<mhgp::P3> two_triangles = {
+        mhgp::P3{6, 10, 0}, mhgp::P3{14, 10, 0}, mhgp::P3{10, 18, 0},
+        mhgp::P3{10, 2, 0}, mhgp::P3{0, 0, 20}};
+    mhgp3v::FlatStatistics st{};
+    mhgp3v::CloudStatus status = mhgp3v::CloudStatus::kOk;
+    const mhgp::Catalogue full =
+        mhgp3v::flat_catalogue(two_triangles, 5, &st, &status, false, true);
+    if (status != mhgp3v::CloudStatus::kOk) {
+      std::printf("ECHEC deux triangles : statut nuage %s\n",
+                  mhgp3v::cloud_status_name(status));
+      return 1;
+    }
+    std::string why;
+    if (!run_differential(full, 2, mutants, nullptr, 0, &why, faceowner_mutants,
+                          &two_triangles, hybrid_mutants)) {
+      if (mutant_name != nullptr || faceowner_mutant_name != nullptr ||
+          hybrid_mutant_name != nullptr) {
+        std::printf("mutant tue par les deux triangles : %s\n", why.c_str());
+        return 4;
+      }
+      std::printf("ECHEC deux triangles : %s\n", why.c_str());
+      return 1;
+    }
+    // La table amputee du carrier AB = membres {0,1}.
+    mhgp::Catalogue doctored;
+    bool carrier_found = false;
+    for (const mhgp::CriticalSphere& sphere : full.spheres) {
+      const bool is_ab =
+          sphere.rank == 2 && full.members[(std::size_t)sphere.members_begin] == 0 &&
+          full.members[(std::size_t)sphere.members_begin + 1] == 1;
+      if (is_ab) {
+        carrier_found = true;
+        continue;
+      }
+      mhgp::CriticalSphere copy = sphere;
+      copy.members_begin = (mhgp::i32)doctored.members.size();
+      doctored.members.insert(doctored.members.end(),
+                              full.members.begin() + sphere.members_begin,
+                              full.members.begin() + sphere.members_begin + sphere.rank);
+      doctored.spheres.push_back(copy);
+    }
+    if (!carrier_found) {
+      std::printf("ECHEC deux triangles : la fixture est contredite, le carrier AB"
+                  " n'est pas au catalogue complet\n");
+      return 1;
+    }
+    if (mutant_name == nullptr && faceowner_mutant_name == nullptr &&
+        hybrid_mutant_name == nullptr) {
+      const mhgp3v::SaturatedFold amputated_truth =
+          mhgp3v::build_saturated_fold(doctored, 2, /*keep_partitions=*/true,
+                                       /*enforce_event_guard=*/false);
+      mhgp3v::HybridReceipt partial_receipt;
+      const mhgp3v::SaturatedFold partial = mhgp3v::build_saturated_fold_hybrid(
+          two_triangles, 5, doctored, 2, /*keep_partitions=*/true, &partial_receipt,
+          /*enforce_event_guard=*/false, {}, /*prefix_fallback=*/true, nullptr,
+          /*prefix_all=*/true);
+      std::string partial_why;
+      if (!amputated_truth.ok || !partial.ok ||
+          !folds_agree(amputated_truth, partial, /*ignore_representatives=*/false,
+                       &partial_why)) {
+        std::printf("ECHEC deux triangles : le chemin partiel n'est plus exact sur la"
+                    " table amputee (%s)\n", partial_why.c_str());
+        return 1;
+      }
+      mhgp3v::HybridReceipt factorised_receipt;
+      const mhgp3v::SaturatedFold factorised = mhgp3v::build_saturated_fold_hybrid(
+          two_triangles, 5, doctored, 2, /*keep_partitions=*/true, &factorised_receipt,
+          /*enforce_event_guard=*/false, {}, /*prefix_fallback=*/true, nullptr,
+          /*prefix_all=*/false, /*factorise_exaequo=*/true);
+      std::string factorised_why;
+      if (factorised.ok &&
+          folds_agree(amputated_truth, factorised, /*ignore_representatives=*/false,
+                      &factorised_why)) {
+        std::printf("ECHEC deux triangles : la factorisation sans fermeture des carriers"
+                    " a concorde silencieusement\n");
+        return 1;
+      }
+    }
+    std::printf("triangles  : lot ex aequo rayon carre 25 recu — factorisation exacte avec"
+                " le carrier AB, refus/divergence prouves sans lui, chemin partiel intact\n");
   }
 
   // ETAGE 2 : la campagne differentielle sur nuages reels.
