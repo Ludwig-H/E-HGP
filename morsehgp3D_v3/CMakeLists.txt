@@ -1104,7 +1104,7 @@ mhgp3v_add_expected_code_test_for(mhgp3v_pair_selfjoin_probe
 # strict la refuse deja) et documente dans le source ; la fixture tueuse
 # d'oracle-accept-nonpositive est un travail restant note dans la livraison.
 foreach(anchor_fixture thin-acute contact-q3 contact-q4 nine-axial eight-axial
-        seven-axial q4-tetra)
+        seven-axial q4-tetra depth-rays scope-depth)
   add_test(NAME mhgp3v_pair_anchor_fixture_${anchor_fixture} COMMAND
            mhgp3v_pair_anchor_probe --fixture ${anchor_fixture})
   set_tests_properties(mhgp3v_pair_anchor_fixture_${anchor_fixture} PROPERTIES
@@ -1143,7 +1143,17 @@ mhgp3v_add_expected_code_test_for(mhgp3v_pair_anchor_probe
   mhgp3v_pair_anchor_kill_anchor_non_maximal "mutant tue" 4 --fixture thin-acute
   --inject anchor-non-maximal)
 mhgp3v_add_expected_code_test_for(mhgp3v_pair_anchor_probe
-  mhgp3v_pair_anchor_reject_depth_mode "non implemente" 2 --mode depth)
+  mhgp3v_pair_anchor_kill_depth_open_boundary "mutant tue" 4 --fixture depth-rays
+  --inject depth-open-boundary)
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_anchor_probe
+  mhgp3v_pair_anchor_kill_depth_always_dropped "mutant tue" 4 --fixture depth-rays
+  --inject depth-always-dropped)
+add_test(NAME mhgp3v_pair_anchor_oracle_depth_code COMMAND mhgp3v_pair_anchor_probe
+         --points 24 --seed 20260810 --family uniform --oracle 1 --mode depth)
+add_test(NAME mhgp3v_pair_anchor_oracle_combined_code COMMAND mhgp3v_pair_anchor_probe
+         --points 24 --seed 20260810 --family uniform --oracle 1 --mode combined)
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_anchor_probe
+  mhgp3v_pair_anchor_reject_unknown_mode "mode inconnu" 2 --mode inexistant)
 mhgp3v_add_expected_code_test_for(mhgp3v_pair_anchor_probe
   mhgp3v_pair_anchor_reject_unknown "argument inconnu" 2 --inexistant 1)
 

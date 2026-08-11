@@ -135,9 +135,13 @@ struct ProbeInjections {
   bool duplicate_compensated = false;// fils duplique + fils omis, masses egales
   bool anchor_non_maximal = false;   // ORACLE : ancre = plus petite arete
   bool oracle_accept_nonpositive = false;  // ORACLE : support non propre accepte
+  // MUTANTS DE LA PROFONDEUR FERMEE (tranche 2, REPONSE_AUDIT_ANCRES) :
+  bool depth_open_boundary = false;  // l'antipode compte dans l'arc semi-ouvert
+  bool depth_always_dropped = false; // la banque des projections nulles perdue
   bool any() const {
     return gt_to_ge || threshold_minus_one || witness_duplicated || last_block_omitted ||
-           duplicate_compensated || anchor_non_maximal || oracle_accept_nonpositive;
+           duplicate_compensated || anchor_non_maximal || oracle_accept_nonpositive ||
+           depth_open_boundary || depth_always_dropped;
   }
 };
 
@@ -215,9 +219,13 @@ inline bool node_universal_for_pair(int arity, const Node& node, const mhgp::P3&
 
 enum class PairFate : std::uint8_t { kUnassigned = 0, kPruned = 1, kResidual = 2 };
 
+// Les trois modes exiges par l'audit : le partage du parcours ne doit pas
+// masquer le cout marginal d'un certificat.
+enum class LaneMode : std::uint8_t { kCore = 0, kDepth = 1, kCombined = 2 };
+
 struct LaneReceipt {
   i64 states = 0;
-  i64 block_prunes = 0;         // blocs entiers prunes
+  i64 block_prunes = 0;         // blocs entiers prunes (coeur seulement)
   i64 pruned_pairs = 0;
   i64 residual_pairs = 0;       // LA sortie : les candidates ancres
   i64 terminal_pairs = 0;       // paires resolues une a une
@@ -227,21 +235,94 @@ struct LaneReceipt {
   i64 spindle_block_hits = 0;
   i64 depth_max = 0;
   i64 stack_high_water = 0;
+  // La profondeur fermee (multiplicites de travail) :
+  i64 depth_pairs = 0;          // paires passees au sweep
+  i64 depth_dead = 0;           // paires tuees par delta >= seuil
+  i64 depth_witnesses = 0;      // temoins diametraux collectes
+  i64 depth_always = 0;         // projections nulles (banque always)
+  i64 depth_biggest_m = 0;      // plus grand m d'un sweep
 };
 
 // Le certificat d'un prune, pour le rejeu de l'oracle : plages d'extremites
 // et positions des temoins credites (>= seuil). `pair_a/pair_b < 0` : bloc ;
-// sinon paire terminale (positions exactes).
+// sinon paire terminale (positions exactes). Un prune de PROFONDEUR porte le
+// delta revendique : le juge le recalcule depuis les coordonnees brutes.
 struct PruneCertificate {
   int a_begin = 0, a_end = 0, b_begin = 0, b_end = 0;
   int pair_a = -1, pair_b = -1;
+  bool depth_kind = false;
+  i64 claimed_delta = -1;
   std::vector<int> witness_positions;
 };
+
+// LE SWEEP EXACT DE PROFONDEUR FERMEE (REPONSE_AUDIT_ANCRES, recu) : pour la
+// paire (a,b), P = temoins stricts de la boule diametrale, V = 2z-a-b. Les
+// projections NULLES (V parallele a d : d x V = 0) vont a la banque
+// `always` — elles comptent dans TOUT demi-plan ferme. Les autres se
+// reduisent EXACTEMENT en 2D : base entiere e1 perpendiculaire a d
+// ((-dy,dx,0), ou (1,0,0) si d est axial en z), e2 = d x e1 ; pour toute
+// direction nu = alpha*e1 + beta*e2 du plan mediateur,
+// V.nu = alpha*(V.e1) + beta*(V.e2) — les comptes de demi-plans de V sont
+// ceux des vecteurs 2D w = (V.e1, V.e2), sans normalisation. Identite :
+//
+//     min ferme = always + m - max ouvert,
+//
+// et le max ouvert est atteint sur un arc semi-ouvert [theta_i, theta_i+pi)
+// porte par un vecteur : w_j y appartient ssi cross(w_i,w_j) > 0, ou
+// cross = 0 avec dot > 0 (rayon confondu) — l'ANTIPODE (cross = 0, dot < 0)
+// est exclu. Bornes : |w1| < 2^38, |w2| < 2^56 (i64) ; cross/dot en i128
+// (~2^93). O(m^2), permutation-invariant par construction.
+inline i64 exact_closed_depth(const std::vector<mhgp::P3>& pts, const mhgp::P3& a,
+                              const mhgp::P3& b, const std::vector<int>& witness_ids,
+                              i64* always_out, const ProbeInjections& injections) {
+  const i64 dx = (i64)b.x - a.x, dy = (i64)b.y - a.y, dz = (i64)b.z - a.z;
+  i64 e1x, e1y, e1z;
+  if (dx != 0 || dy != 0) { e1x = -dy; e1y = dx; e1z = 0; }
+  else { e1x = 1; e1y = 0; e1z = 0; }
+  const i64 e2x = dy * e1z - dz * e1y;
+  const i64 e2y = dz * e1x - dx * e1z;
+  const i64 e2z = dx * e1y - dy * e1x;
+  i64 always = 0;
+  std::vector<std::pair<i64, i64>> planar;
+  planar.reserve(witness_ids.size());
+  for (int id : witness_ids) {
+    const mhgp::P3& z = pts[(std::size_t)id];
+    const i64 vx = 2 * (i64)z.x - a.x - b.x;
+    const i64 vy = 2 * (i64)z.y - a.y - b.y;
+    const i64 vz = 2 * (i64)z.z - a.z - b.z;
+    const i64 cx = dy * vz - dz * vy;
+    const i64 cy = dz * vx - dx * vz;
+    const i64 cz = dx * vy - dy * vx;
+    if (cx == 0 && cy == 0 && cz == 0) {
+      if (!injections.depth_always_dropped) ++always;   // MUTANT : banque perdue
+      continue;
+    }
+    planar.push_back({vx * e1x + vy * e1y + vz * e1z, vx * e2x + vy * e2y + vz * e2z});
+  }
+  const i64 m = (i64)planar.size();
+  i64 max_open = 0;
+  for (std::size_t i = 0; i < planar.size(); ++i) {
+    i64 in_arc = 0;
+    for (std::size_t j = 0; j < planar.size(); ++j) {
+      const i128 cross = (i128)planar[i].first * planar[j].second -
+                         (i128)planar[i].second * planar[j].first;
+      const i128 dot = (i128)planar[i].first * planar[j].first +
+                       (i128)planar[i].second * planar[j].second;
+      // MUTANT depth-open-boundary : l'antipode compterait dans l'arc.
+      if (cross > 0 || (cross == 0 && (injections.depth_open_boundary || dot > 0)))
+        ++in_arc;
+    }
+    max_open = std::max(max_open, in_arc);
+  }
+  if (always_out != nullptr) *always_out = always;
+  return always + m - max_open;
+}
 
 struct LaneProbe {
   const Tree* tree = nullptr;
   int arity = 3;
   int threshold = 9;
+  LaneMode mode = LaneMode::kCore;
   ProbeInjections injections;
   LaneReceipt receipt;
   i64 max_states = 0;
@@ -252,6 +333,7 @@ struct LaneProbe {
   std::vector<PruneCertificate>* certificates = nullptr;   // mode oracle
   std::vector<int> stack_;
   std::vector<int> harvest_;
+  std::vector<int> diametral_scratch_;
   i64 last_residual_pair = -1;   // pour last-block-omitted
 
   int effective_threshold() const {
@@ -418,17 +500,112 @@ struct LaneProbe {
     certificates->push_back(std::move(certificate));
   }
 
+  // COLLECTE des temoins stricts de la boule diametrale d'une paire EXACTE,
+  // par l'arbre : sup < 0 sur un noeud disjoint des positions d'extremites
+  // credite tout le noeud, l'infimum >= 0 le retire, les feuilles testent le
+  // prédicat exact (2w-2a).(2w-2b), positions d'extremites exclues.
+  void collect_diametral_witnesses(int pos_a, int pos_b, std::vector<int>* out) {
+    out->clear();
+    const mhgp::P3& a = (*tree->points)[(std::size_t)tree->order[(std::size_t)pos_a]];
+    const mhgp::P3& b = (*tree->points)[(std::size_t)tree->order[(std::size_t)pos_b]];
+    const i64 ax[3] = {(i64)a.x, (i64)a.y, (i64)a.z};
+    const i64 bx[3] = {(i64)b.x, (i64)b.y, (i64)b.z};
+    stack_.clear();
+    stack_.push_back(0);
+    while (!stack_.empty()) {
+      const int node_index = stack_.back();
+      stack_.pop_back();
+      const Node& node = tree->nodes[(std::size_t)node_index];
+      ++receipt.node_visits;
+      // Par axe, 4*(w-a)(w-b) = V^2 - d^2 avec V = 2w-a-b : le maximum sur
+      // [lo,hi] est aux extremes ; le minimum vaut EXACTEMENT -d^2 quand
+      // l'intervalle contient zero (V=0), sinon l'extreme le plus proche.
+      i64 sup = 0, inf = 0;
+      for (int d = 0; d < 3; ++d) {
+        const i64 lo = 2 * node.lo[d] - ax[d] - bx[d];
+        const i64 hi = 2 * node.hi[d] - ax[d] - bx[d];
+        const i64 dd = bx[d] - ax[d];
+        const i64 pa = lo * lo - dd * dd;
+        const i64 pb = hi * hi - dd * dd;
+        sup += std::max(pa, pb);
+        inf += (lo <= 0 && 0 <= hi) ? -(dd * dd) : std::min(pa, pb);
+      }
+      if (inf >= 0) continue;   // aucun temoin strict dans la boite
+      const bool holds_endpoint = (pos_a >= node.begin && pos_a < node.end) ||
+                                  (pos_b >= node.begin && pos_b < node.end);
+      if (sup < 0 && !holds_endpoint) {
+        for (int t = node.begin; t < node.end; ++t)
+          out->push_back(tree->order[(std::size_t)t]);
+        continue;
+      }
+      if (node.left < 0) {
+        for (int t = node.begin; t < node.end; ++t) {
+          if (t == pos_a || t == pos_b) continue;
+          const mhgp::P3& w = (*tree->points)[(std::size_t)tree->order[(std::size_t)t]];
+          ++receipt.point_tests;
+          i64 dot = 0;
+          for (int d = 0; d < 3; ++d) {
+            const i64 c = d == 0 ? (i64)w.x : (d == 1 ? (i64)w.y : (i64)w.z);
+            dot += (2 * c - ax[d] - bx[d] - (bx[d] - ax[d])) *
+                   (2 * c - ax[d] - bx[d] + (bx[d] - ax[d]));
+          }
+          if (dot < 0) out->push_back(tree->order[(std::size_t)t]);
+        }
+        continue;
+      }
+      stack_.push_back(node.right);
+      stack_.push_back(node.left);
+    }
+  }
+
+  // Le sweep de profondeur pour une paire : delta = always + m - max ouvert.
+  i64 pair_depth(int pos_a, int pos_b) {
+    collect_diametral_witnesses(pos_a, pos_b, &diametral_scratch_);
+    const mhgp::P3& a = (*tree->points)[(std::size_t)tree->order[(std::size_t)pos_a]];
+    const mhgp::P3& b = (*tree->points)[(std::size_t)tree->order[(std::size_t)pos_b]];
+    i64 always = 0;
+    const i64 delta = exact_closed_depth(*tree->points, a, b, diametral_scratch_, &always,
+                                         injections);
+    ++receipt.depth_pairs;
+    receipt.depth_witnesses += (i64)diametral_scratch_.size();
+    receipt.depth_always += always;
+    receipt.depth_biggest_m =
+        std::max(receipt.depth_biggest_m, (i64)diametral_scratch_.size());
+    return delta;
+  }
+
   // Resolution TERMINALE d'une paire : prunee ou residuelle, sort unique.
+  // core : coeur universel seul ; depth : profondeur seule ; combined :
+  // coeur d'abord (sortie precoce), profondeur pour les survivantes.
   void resolve_pair(int pos_a, int pos_b) {
     ++receipt.terminal_pairs;
-    const i64 found = count_universal_pair(pos_a, pos_b);
     const int ia = tree->order[(std::size_t)pos_a];
     const int ib = tree->order[(std::size_t)pos_b];
-    if (found >= effective_threshold()) {
-      ++receipt.pruned_pairs;
-      assign_pair(ia, ib, PairFate::kPruned);
-      record_pair_certificate(pos_a, pos_b);
-      return;
+    if (mode != LaneMode::kDepth) {
+      const i64 found = count_universal_pair(pos_a, pos_b);
+      if (found >= effective_threshold()) {
+        ++receipt.pruned_pairs;
+        assign_pair(ia, ib, PairFate::kPruned);
+        record_pair_certificate(pos_a, pos_b);
+        return;
+      }
+    }
+    if (mode != LaneMode::kCore) {
+      const i64 delta = pair_depth(pos_a, pos_b);
+      if (delta >= effective_threshold()) {
+        ++receipt.depth_dead;
+        ++receipt.pruned_pairs;
+        assign_pair(ia, ib, PairFate::kPruned);
+        if (certificates != nullptr) {
+          PruneCertificate certificate;
+          certificate.pair_a = pos_a;
+          certificate.pair_b = pos_b;
+          certificate.depth_kind = true;
+          certificate.claimed_delta = delta;
+          certificates->push_back(std::move(certificate));
+        }
+        return;
+      }
     }
     ++receipt.residual_pairs;
     last_residual_pair = (i64)pos_a * tree->order.size() + pos_b;
@@ -456,18 +633,22 @@ struct LaneProbe {
       process(a.right, a.right, depth + 1);
       return;
     }
-    const i64 found = count_universal_block(a, b);
-    if (found >= effective_threshold()) {
-      ++receipt.block_prunes;
-      const i64 pairs = (i64)(a.end - a.begin) * (i64)(b.end - b.begin);
-      receipt.pruned_pairs += pairs;
-      record_block_certificate(a, b);
-      if (fate != nullptr)
-        for (int ta = a.begin; ta < a.end; ++ta)
-          for (int tb = b.begin; tb < b.end; ++tb)
-            assign_pair(tree->order[(std::size_t)ta], tree->order[(std::size_t)tb],
-                        PairFate::kPruned);
-      return;
+    // En mode profondeur SEULE, aucun prune de bloc : l'isolation du cout du
+    // sweep exige que chaque paire atteigne son terminal.
+    if (mode != LaneMode::kDepth) {
+      const i64 found = count_universal_block(a, b);
+      if (found >= effective_threshold()) {
+        ++receipt.block_prunes;
+        const i64 pairs = (i64)(a.end - a.begin) * (i64)(b.end - b.begin);
+        receipt.pruned_pairs += pairs;
+        record_block_certificate(a, b);
+        if (fate != nullptr)
+          for (int ta = a.begin; ta < a.end; ++ta)
+            for (int tb = b.begin; tb < b.end; ++tb)
+              assign_pair(tree->order[(std::size_t)ta], tree->order[(std::size_t)tb],
+                          PairFate::kPruned);
+        return;
+      }
     }
     const bool a_leaf = a.left < 0, b_leaf = b.left < 0;
     if (a_leaf && b_leaf) {
@@ -600,6 +781,10 @@ int main(int argc, char** argv) {
       else if (!strcmp(argv[i], "anchor-non-maximal")) injections.anchor_non_maximal = true;
       else if (!strcmp(argv[i], "oracle-accept-nonpositive"))
         injections.oracle_accept_nonpositive = true;
+      else if (!strcmp(argv[i], "depth-open-boundary"))
+        injections.depth_open_boundary = true;
+      else if (!strcmp(argv[i], "depth-always-dropped"))
+        injections.depth_always_dropped = true;
       else { std::printf("ECHEC : injection inconnue %s\n", argv[i]); return 2; }
       continue;
     }
@@ -615,10 +800,12 @@ int main(int argc, char** argv) {
     else { std::printf("ECHEC : argument inconnu %s\n", argv[i]); return 2; }
     ++i;
   }
-  if (mode != "core") {
-    std::printf("ECHEC : --mode %s non implemente dans cette tranche — la profondeur"
-                " fermee est le filtre terminal de la tranche suivante (REPONSE_AUDIT"
-                "_ANCRES) ; seul `core` est disponible\n", mode.c_str());
+  LaneMode lane_mode;
+  if (mode == "core") lane_mode = LaneMode::kCore;
+  else if (mode == "depth") lane_mode = LaneMode::kDepth;
+  else if (mode == "combined") lane_mode = LaneMode::kCombined;
+  else {
+    std::printf("ECHEC : mode inconnu %s (core, depth, combined)\n", mode.c_str());
     return 2;
   }
   if (n < 4 || n > 100000 || coord < 0 || coord > 65536 || leaf_size < 2 ||
@@ -671,6 +858,35 @@ int main(int argc, char** argv) {
       // doit etre residuelle en q4.
       pts = {mhgp::P3{40001, 40001, 40001}, mhgp::P3{40001, 39989, 39989},
              mhgp::P3{39989, 40001, 39989}, mhgp::P3{39989, 39989, 40001}};
+    } else if (fixture_name == "depth-rays") {
+      // LE SWEEP AUX CAS DE BORD (rayons confondus, antipodes, banque
+      // always) : paire axiale en z, deux temoins confondus +x, deux
+      // antipodes -x, un +y, un AXIAL (projection nulle). Derive a la main :
+      // always = 1, m = 5, max ouvert = 3 (arc ancre en +x : les deux
+      // confondus + le +y, antipodes exclus) — delta = 1 + 5 - 3 = 3,
+      // invariant par permutation des temoins.
+      pts = {mhgp::P3{500, 500, 400}, mhgp::P3{500, 500, 600},
+             mhgp::P3{530, 500, 500}, mhgp::P3{540, 500, 500},
+             mhgp::P3{460, 500, 500}, mhgp::P3{450, 500, 500},
+             mhgp::P3{500, 530, 500}, mhgp::P3{500, 500, 520}};
+      mode = "combined";
+      lane_mode = LaneMode::kCombined;
+    } else if (fixture_name == "scope-depth") {
+      // Le nuage de portee de l'audit, cote PROFONDEUR : les dix temoins de
+      // (a,b) se projettent TOUS sur le meme rayon du plan mediateur
+      // (z = 100 constant, y < 100) — max ouvert = m = 10, delta = 0. La
+      // paire SURVIT a la profondeur comme au coeur : ab reste l'ancre du
+      // support q3 {a,b,z}, dans les deux formalismes.
+      pts.push_back(mhgp::P3{50, 100, 100});
+      pts.push_back(mhgp::P3{150, 100, 100});
+      pts.push_back(mhgp::P3{100, 160, 100});
+      const i64 scope_witnesses[10][2] = {{51, 95}, {149, 95}, {51, 94}, {149, 94},
+                                          {51, 93}, {149, 93}, {52, 92}, {148, 92},
+                                          {51, 92}, {149, 92}};
+      for (const auto& w : scope_witnesses)
+        pts.push_back(mhgp::P3{(mhgp::i32)w[0], (mhgp::i32)w[1], 100});
+      mode = "combined";
+      lane_mode = LaneMode::kCombined;
     } else {
       std::printf("ECHEC : fixture inconnue %s\n", fixture_name.c_str());
       return 2;
@@ -679,7 +895,7 @@ int main(int argc, char** argv) {
     leaf_size = 2;
     oracle = 1;
     std::printf("provenance : --fixture %s (%d points graves, feuilles <= %d, oracle"
-                " force)\n", fixture_name.c_str(), n, leaf_size);
+                " force, --mode %s)\n", fixture_name.c_str(), n, leaf_size, mode.c_str());
   } else {
     if (coord == 0) coord = mhgp3v::cloud_family_default_coord(family, n);
     pts = mhgp3v::make_family_cloud(family, n, coord, seed);
@@ -692,8 +908,8 @@ int main(int argc, char** argv) {
       return 1;
     }
     std::printf("provenance : --points %d --coord %d --seed %lld --family %s"
-                " --leaf-size %d --mode core\n", n, coord, seed,
-                mhgp3v::cloud_family_name(family), leaf_size);
+                " --leaf-size %d --mode %s\n", n, coord, seed,
+                mhgp3v::cloud_family_name(family), leaf_size, mode.c_str());
   }
   if (oracle == 1 && n > 32) {
     std::printf("ECHEC : l'oracle exhaustif exige n <= 32\n");
@@ -729,6 +945,7 @@ int main(int argc, char** argv) {
     probe.tree = &tree;
     probe.arity = run.arity;
     probe.threshold = run.threshold;
+    probe.mode = lane_mode;
     probe.injections = injections;
     probe.max_states = max_states;
     if (oracle == 1) {
@@ -768,6 +985,31 @@ int main(int argc, char** argv) {
       // brutes, contre CHAQUE paire couverte — prédicat nominal (jamais le
       // mutant : le juge n'herite pas des injections du sujet).
       for (const PruneCertificate& certificate : run.certificates) {
+        if (certificate.depth_kind) {
+          // REJEU D'UN PRUNE DE PROFONDEUR : delta recalcule de zero depuis
+          // les coordonnees brutes, au prédicat NOMINAL (le juge n'herite
+          // jamais des injections du sujet), par balayage complet du nuage.
+          const mhgp::P3& a = pts[(std::size_t)tree.order[(std::size_t)certificate.pair_a]];
+          const mhgp::P3& b = pts[(std::size_t)tree.order[(std::size_t)certificate.pair_b]];
+          std::vector<int> replay_ids;
+          for (int x = 0; x < n; ++x) {
+            if (x == tree.order[(std::size_t)certificate.pair_a] ||
+                x == tree.order[(std::size_t)certificate.pair_b])
+              continue;
+            i64 dot = 0;
+            const mhgp::P3& w = pts[(std::size_t)x];
+            const i64 va[3] = {(i64)w.x - a.x, (i64)w.y - a.y, (i64)w.z - a.z};
+            const i64 vb[3] = {(i64)w.x - b.x, (i64)w.y - b.y, (i64)w.z - b.z};
+            dot = va[0] * vb[0] + va[1] * vb[1] + va[2] * vb[2];
+            if (dot < 0) replay_ids.push_back(x);
+          }
+          const i64 replay_delta =
+              exact_closed_depth(pts, a, b, replay_ids, nullptr, ProbeInjections{});
+          if (replay_delta != certificate.claimed_delta || replay_delta < run.threshold)
+            return fail("le rejeu des certificats de profondeur",
+                        "le delta rejoue ne confirme pas le prune");
+          continue;
+        }
         std::vector<std::pair<int, int>> pairs;
         if (certificate.pair_a >= 0) {
           pairs.push_back({certificate.pair_a, certificate.pair_b});
@@ -914,6 +1156,38 @@ int main(int argc, char** argv) {
       if (q4 != nullptr && fate_of(*q4, 0, 1) != PairFate::kResidual)
         return fail("la fixture q4-tetra",
                     "l'ancre canonique du tetraedre non inerte n'est pas residuelle");
+    } else if (fixture_name == "depth-rays") {
+      // ASSERTION DIRECTE du sweep : delta = 3 exactement (always = 1,
+      // m = 5, max ouvert = 3), et permutation-invariance des temoins.
+      std::vector<int> witness_ids = {2, 3, 4, 5, 6, 7};
+      i64 always = 0;
+      const i64 delta = exact_closed_depth(pts, pts[0], pts[1], witness_ids, &always,
+                                           injections);
+      if (delta != 3)
+        return fail("la fixture depth-rays",
+                    "delta != 3 — rayons confondus, antipodes ou banque always faux");
+      if (always != (injections.depth_always_dropped ? 0 : 1))
+        return fail("la fixture depth-rays", "la banque always ne compte pas l'axial");
+      std::reverse(witness_ids.begin(), witness_ids.end());
+      const i64 delta_reversed = exact_closed_depth(pts, pts[0], pts[1], witness_ids,
+                                                    nullptr, injections);
+      if (delta_reversed != delta)
+        return fail("la fixture depth-rays", "delta depend de l'ordre des temoins");
+    } else if (fixture_name == "scope-depth") {
+      // Les dix temoins se projettent sur UN rayon : delta = 0, la paire
+      // survit a la profondeur — et le sort machine de (a,b) en q3 est
+      // RESIDUEL (aucun des deux certificats ne la tue).
+      std::vector<int> witness_ids;
+      for (int w = 3; w < n; ++w) witness_ids.push_back(w);
+      const i64 delta = exact_closed_depth(pts, pts[0], pts[1], witness_ids, nullptr,
+                                           injections);
+      if (delta != 0)
+        return fail("la fixture scope-depth",
+                    "delta != 0 — dix temoins d'un seul cote devraient s'annuler");
+      const LaneRun* q3 = lane_run(3);
+      if (q3 != nullptr && fate_of(*q3, 0, 1) != PairFate::kResidual)
+        return fail("la fixture scope-depth",
+                    "ab a ete prunee alors que coeur et profondeur la gardent");
     }
   }
 
@@ -938,6 +1212,11 @@ int main(int argc, char** argv) {
                 " un warm_e2e)\n", run.receipt.node_visits, run.receipt.corner_tests,
                 run.receipt.point_tests, run.receipt.spindle_block_hits,
                 run.receipt.stack_high_water, run.receipt.depth_max, run.seconds);
+    if (run.receipt.depth_pairs > 0)
+      std::printf("  sweep    : paires=%lld tuees-delta=%lld temoins=%lld (max m=%lld)"
+                  " always=%lld\n", run.receipt.depth_pairs, run.receipt.depth_dead,
+                  run.receipt.depth_witnesses, run.receipt.depth_biggest_m,
+                  run.receipt.depth_always);
   }
   if (oracle == 1)
     std::printf("oracle     : certificats rejoues et ancres exhaustives comparees —"

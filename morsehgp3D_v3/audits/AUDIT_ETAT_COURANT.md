@@ -10,25 +10,26 @@ Cadre : `phase=exploration_v3_hors_registre`,
 
 ## Fraîcheur
 
-`HEAD` audité : `f41e7993245625f6bb76ca5cb4d973bc78934c70`, sujet
-`enforce the generator cardinality contract and split the scale receipts into immutable snapshots`.
-Le tableau ci-dessous épingle le `HEAD` Release rejoué. Le worktree postérieur
-modifie aussi q2 : il esquisse un mode baseline et cinq mutants `L4`/héritage,
-mais ce delta concurrent n'a encore ni binaire épinglé ni porte CMake complète.
+`HEAD` audité : `9f6ea3c52b10aa9e9487407e11d17fc213046a6a`, sujet
+`close the remaining sidecar trust-boundary gates under sanitizers`. Il inclut
+le différentiel q2 de `d705bcde`. Au moment du pincement, le code du worktree
+est identique au `HEAD`; les seules modifications de l'auditeur concernent la
+documentation de ce verdict.
 
 | objet | SHA-256 |
 | --- | --- |
-| `CMakeLists.txt` | `9d0255c2096c86af046e1f18d92b788494a556122a603897112517ac148dec6d` |
+| `CMakeLists.txt` | `5a7919c6ead14210dd1516811bc2f966b1dfbeb6f8672339298d2f8c586781a0` |
 | `prototype/cloud_families.hpp` | `1a3e3027c2e0880e6ff381fc80b707b9ec88dbf573579aac535cfc80bb307b54` |
-| `prototype/pair_selfjoin_probe.cpp` | `c7fbbe629a04df6829ec49e111c68ccf3f95f02a769e24385fb7d38e55365fc5` |
+| `prototype/pair_selfjoin_probe.cpp` | `510c8306c7c99aa65b01506f7d2d3eac7317ff4e6f7de2f94f3ad60b19e583ac` |
 | `prototype/pair_anchor_probe.cpp` | `21197ff83c91f4419114e8c9a7e2b947c10369eb949fe98a722c44b2ec3cbf35` |
-| `prototype/validated_hybrid_sidecar.hpp` | `41eee48a4aad0393e1692f295322fcdd3004d951053bec4dc2defdd8462556a1` |
-| `prototype/sealed_source.hpp` | `7156c090f0e0690784842579fd9a104e8c1e1279c4d6092e47eed60dfc3b9cee` |
-| `prototype/sidecar_factory_gate.cpp` | `97b9443610edaa8cae0e889780d6e2edc066e519c37878bf8e3322ed0b9d3491` |
+| `prototype/validated_hybrid_sidecar.hpp` | `4df79198794c64c824abc04525a753dac0855d8e3bb43f6eb87f8f9ff2efbda7` |
+| `prototype/sealed_source.hpp` | `98277903b46f93ec8cba85e54f212952942344363757851550427cd5fa489603` |
+| `prototype/sidecar_factory_gate.cpp` | `c5e43ee6bda923eac29e4e77f9269b7196f108c6b065f6f5043d5cd761b327d2` |
 | `prototype/sidecar_sha256.hpp` | `401df9cccd0cd0a5dc99d06e8836f01797dd37095e8aaafa9b68a59d43f3cb3e` |
-| binaire Release q2 | `283c5d1a5737d82226697e9e777cd37991ae5f1da06f6ac1970d05c5f549f8e2` |
+| binaire Release q2 | `719b1ce1e628814807f72110de2ab3bae44da9f93f613329415db0b14f03c9b7` |
 | binaire Release ancres | `82fb1bda12e085ae1c6d11d25540afff605d198e0d50998238f6d2ee765166c4` |
-| binaire Release sidecar | `82a38438410e9444eacede515d16474df67e069f2d67f6be354c9d3e485a55fb` |
+| binaire Release sidecar | `b2dbdd2cf3aa46755f13c093cff0b3d779b8d69b1f18d9c88eb0ffd3f21b6a4a` |
+| binaire ASan/UBSan sidecar | `887d722b876632d302f8805538f364e085a201413f7d1bf4983ba34d4d3bd18e` |
 
 Une suite lancée avant la dernière modification ou un binaire construit sur une
 autre empreinte ne reçoit pas ce worktree. Cet audit est la seule autorité
@@ -42,8 +43,9 @@ Aucun backend public exact n'est qualifié.
 
 Le verrou reste une source q2/q3/q4 exacte, complète et parcimonieuse, suivie
 du census fermé, des `BallActivation`, du resolver, du fold horizontal et du
-payload. Les sondes actuelles sont des falsificateurs bornés avec budgets.
-Elles ne forment ni supports q3/q4, ni activations, ni hiérarchie bout en bout.
+payload. Les sondes actuelles sont des falsificateurs bornés avec budgets. Le
+chemin candidat ne streame aucun support q3/q4, aucune activation et aucune
+hiérarchie bout en bout; l'oracle borné d'ancres, lui, énumère bien des tuples.
 
 Gamma/v2 exhaustif et `hgp_reduced_normalized_h0_v3` restent deux sorties
 distinctes. Une tombstone H0 ne prouve ni l'absence d'un support, ni celle
@@ -52,19 +54,20 @@ horizontal et gardent une porte séparée.
 
 ## État des tests
 
-Le registre CTest du `HEAD` compte 256 tests, dont 24 q2, 26 ancres et 6
-sidecar. Après régénération et build Release des trois cibles, la commande
-ciblée ci-dessous passe `56/56` en 0,83 s : q2 `24/24`, ancres `26/26`,
-sidecar `6/6`.
+Le registre CTest du `HEAD` compte 267 tests, dont 34 q2, 26 ancres et 7
+sidecar. Sur les binaires épinglés ci-dessus, trois rejeux ciblés passent : q2
+`34/34` en 0,93 s, ancres `26/26` en 0,23 s et sidecar `7/7` en 0,32 s.
 
 ```bash
-ctest --test-dir build/v3-audit-live --output-on-failure -R '^mhgp3v_(pair_selfjoin_|pair_anchor_|sidecar_)'
+ctest --test-dir build/v3 --output-on-failure -R '^mhgp3v_pair_selfjoin_'
+ctest --test-dir build/v3 --output-on-failure -R '^mhgp3v_pair_anchor_'
+ctest --test-dir build/v3 --output-on-failure -R '^mhgp3v_sidecar_'
 ```
 
-Aucun résultat global `256/256` n'est revendiqué. Le dernier résultat complet
-disponible, `228/228` en 1 119,53 s, portait sur `40050c4` avant les sondes
-d'ancres et les portes de cardinalité; il ne reçoit donc pas ce `HEAD`. Le
-ciblé vert ne ferme pas les contre-résultats statiques ci-dessous.
+Aucun résultat global `267/267` n'est revendiqué. Un journal antérieur consigne
+`254/254`, mais sa suite a traversé des reconstructions concurrentes et précède
+les deux derniers commits; il ne reçoit donc pas ce `HEAD`. Le ciblé vert ne
+ferme pas les contre-résultats statiques ci-dessous.
 `python tools/check_docs.py` ne parcourt pas le dossier v3; ses liens et règles
 LaTeX demandent un contrôle séparé.
 
@@ -112,23 +115,31 @@ compensation paire par paire.
 
 L'infimum `L4` committé est l'infimum exact sur les AABB continues. `L4>=0`
 exclut correctement tout témoin strict. Hériter au plus neuf positions est
-inductivement sûr tant que `tree.order` est immuable et engagé par le reçu.
+inductivement sûr tant que `tree.order` est immuable. Le format publié actuel
+n'engage toutefois pas complètement cet ordre, les points et la topologie.
 Pour une future frontière persistante, le frère d'extrémité libéré par chaque
 split doit être réintroduit puis reclassifié; hériter seulement l'ancienne
 antichaîne perdrait des témoins nouvellement admissibles.
 
-L'intégration `L4`/héritage du `HEAD` n'est toutefois pas reçue. Le worktree
-commence à combler ces lacunes, sans encore constituer une livraison :
+Le commit `d705bcde`, inclus dans le `HEAD`, reçoit une préservation
+sémantique bornée : sa référence interne désactive `L4` et tous les crédits
+hérités, puis compare au candidat les cinq masses structurantes et chaque sort
+de paire. Le balayage exact vérifie séparément qu'aucune paire non inerte n'est
+prunée. Les deux campagnes nominales sont `terrain, n=400` et
+`uniform, n=1000`; cinq mutants terrain meurent à code 4 et le plancher
+`9+nouveau` est non vacant. Cette baseline partage arbre, partition, `U4` et
+plomberie et récolte encore des handles : c'est une référence de décisions,
+pas une seconde implémentation ni une baseline de coût.
+
+La réception générale et industrielle reste refusée pour les motifs suivants :
 
 - le CTest q2 scanline n'a pas de double imposant le code zéro; sa seule
   `PASS_REGULAR_EXPRESSION` peut ignorer un code non nul après avoir vu
   `FERME`;
-- le mode baseline compare désormais cinq masses et le sort de chaque paire,
-  mais CMake n'enregistre encore ni nominal ni mutant et aucun binaire de ce
-  delta n'est reçu;
-- cinq mutants sont parsés; restent à couvrir clip/axe de `L4`, mauvais frère
-  libéré et exclusion d'un hérité, avec un plancher non vacant pour neuf
-  hérités plus du nouveau;
+- aucune porte n'impose que `L4` morde : le remplacer par une borne toujours
+  négative ou le désactiver peut conserver tous les sorts et masses. Le mutant
+  `l4-sign` substitue `U4` et ne couvre ni axe omis, ni clip, ni frontière
+  `L4=0`;
 - `--min-nine-plus-one` est silencieusement ignoré hors mode différentiel;
   cette combinaison doit refuser;
 - une défaillance interne de la baseline passe actuellement par `fail()` et
@@ -137,10 +148,12 @@ commence à combler ces lacunes, sans encore constituer une livraison :
   qu'aucun sort baseline ne reste non assigné;
 - le SHA-256 de l'ordre n'est imprimé que sur 16 hexadécimaux et n'engage ni
   points ni topologie; cela ne suffit pas à identifier un reçu de handles;
-- la fixture u16 extrême est présente, mais manquent encore parité grille,
+- la fixture u16 extrême n'active pas le différentiel et aucune configuration
+  sanitizer n'est enregistrée pour q2. Manquent encore parité grille,
   `L4<0`, `L4=0`, `L4>0`, clips des deux côtés et demi-entiers;
-- le commentaire source affirme encore que la porte terrain 400 vérifie le
-  triplet de masses, ce qu'elle ne pince pas.
+- les campagnes CMake n'utilisent qu'un seed et les mutants seulement terrain.
+  Elles prouvent une équivalence bornée, jamais un gain de coût ni une route
+  vers 50 k.
 
 Sous u16, un infimum grille plus fort est disponible au même coût : minimiser
 sur l'entier `w0=clip(floor((x+y)/2),[w_min,w_max])` pour chaque couple de
@@ -261,18 +274,26 @@ terminale vient ensuite, avec mesures `core`, `depth` et `combined` séparées.
 
 Le successeur de `cbac109` ferme les contre-exemples initiaux sur son périmètre :
 construction privée et anti-forge, doublon `[r1,r2,r1]`, bornes u16 avant
-géométrie, magnitudes sans UB, support canonique unique, SHA-256 canonique,
-reçu déplacé invalidé et self-test dans la factory. Les 6 CTests ciblés du
-snapshot courant sont verts.
+géométrie, magnitudes sans UB, support canonique unique, SHA-256 canonique et
+reçu déplacé invalidé. `9f6ea3c` ajoute les bornes hautes u16, quatre mauvaises
+identités producteur et un mutant `sha-fault`; les identités erronées laissent
+bien la fermeture inconnue. Les 7 CTests Release ciblés passent en 0,32 s.
+
+Le même sous-ensemble passe `7/7` en 0,57 s dans un build `RelWithDebInfo`
+`-fsanitize=address,undefined -fno-sanitize-recover=all
+-fno-omit-frame-pointer`, avec `ASAN_OPTIONS=detect_leaks=1` et
+`UBSAN_OPTIONS=halt_on_error=1`. Ce rejeu borne l'absence d'erreur sanitizer à
+ces fixtures; il ne qualifie ni provenance ni complétude du producteur.
 
 Trois limites restent ouvertes :
 
-- `producer_code_digest` hache un littéral de version, pas le source, l'ELF ou
-  un manifeste vérifié; `claims_complete_family()` ne le compare pas à une
-  identité attendue;
-- aucun mutant ne vise mauvais contrat, profil, schéma de tâche, statut
-  terminal ou digest; la gate préteste aussi SHA directement et ne prouve pas
-  isolément que l'appel interne de la factory est obligatoire;
+- `producer_version_digest` est désormais honnêtement nommé, mais reste le
+  hash d'un littéral. `claims_complete_family()` ne le compare pas à une valeur
+  attendue et aucun manifeste ne lie source, ELF ou options de build;
+- `sha-fault` ajoute directement une branche de refus à côté du vrai résultat
+  du self-test; il ne sabote pas `sidecar_sha256_selftest()`. Supprimer l'appel
+  réel laisserait ce mutant vert, d'autant que la gate préteste SHA en dehors
+  de la factory. L'obligation du contrôle interne n'est donc pas reçue;
 - le pipeline exige `smax>=n`, refuse `smax>32`, double l'énumération et rescane
   par générateur. Il demeure à jamais un oracle CPU `n<=32`, jamais la source
   50 k.
@@ -282,8 +303,10 @@ Trois limites restent ouvertes :
 1. Corriger la garde dégénérée q4 et graver la campagne de blocs non vide;
    compléter en parallèle la porte de cardinalité du générateur partagé et le
    code zéro du CTest q2 scanline.
-2. Ajouter à q2 baseline, égalité paire par paire et mutants `L4`/héritage;
-   mesurer seulement ce delta reçu et le comparer à Yao48/LBVH+census.
+2. Durcir la gate q2 : juge de référence indépendant des injections, sort
+   baseline totalement assigné, plancher de non-vacuité `L4`, mutants de
+   formule/clip et identité complète de l'arbre. Comparer ensuite à
+   Yao48/LBVH+census; ne pas extrapoler le différentiel borné vers 50 k.
 3. Ajouter au cœur `L4`, héritage et frontière lossless; appliquer la gate
    d'exposant avant toute campagne 12,5 k ou tout port G4.
 4. Construire l'owner et la positivité dans la source q3/q4 aval, puis

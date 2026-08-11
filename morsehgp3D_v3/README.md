@@ -75,16 +75,19 @@ Le self-join q2 actuel reste un oracle/falsificateur ou un second prune tant que
 ses compteurs complets ne battent pas la route Yao/LBVH. Son prune q2 ne retire
 jamais une ancre q3/q4.
 
-Le commit `1dfe07b` ajoute au self-join q2 `L4`, l'héritage de témoins et une
-sortie précoce. Ces transformations ont une preuve mathématique locale, mais
-leur intégration n'est pas reçue : aucune gate ne compare encore tous les
-sorts et masses à une baseline sans optimisation. Le commit `f41e799` borne
-chaque émission multi-écho, exige exactement `n` points et tue le mutant
-d'overshoot dans q2; les journaux ancien et correctif sont maintenant séparés.
-Une gate directe du générateur partagé reste nécessaire pour tous ses
-consommateurs. Les segments q2 à 50 k comptent encore 53 à 724 millions de
-visites `L4` et 86 millions à 1,36 milliard de tests ponctuels pour q2 seul.
-Les chronos sous charge ne qualifient aucun gain; voir
+Le commit `d705bcd` ajoute une gate bi-mode : sur deux campagnes bornées, une
+référence sans `L4` ni crédit hérité et le mode optimisé ont les mêmes cinq
+masses et le même sort pour chaque paire; cinq mutants ciblés meurent. Cela
+reçoit une préservation sémantique locale, pas un reçu général ni une baseline
+de coût. La porte reste vacuable si `L4` est désactivé, son chemin d'erreur peut
+attribuer une panne de la référence au mutant sujet, et le digest d'ordre n'est
+publié que sur 16 hexadécimaux sans engager points ni topologie. Les clips,
+parités et extrêmes u16 différentiels ne sont pas tous gravés. Le commit
+`f41e799` borne chaque émission multi-écho, exige exactement `n` points et tue
+le mutant d'overshoot dans q2; une gate directe du générateur partagé reste
+nécessaire pour tous ses consommateurs. Les segments q2 à 50 k comptent encore
+53 à 724 millions de visites `L4` et 86 millions à 1,36 milliard de tests
+ponctuels pour q2 seul. Les chronos sous charge ne qualifient aucun gain; voir
 [`AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md).
 
 Le cœur universel de Jung fournit une suppression supérieure exacte, distincte
@@ -131,12 +134,13 @@ prototype doit être revu avant toute campagne 50 k ou tout port CUDA.
 1. Corriger la garde q4 dégénérée, rendre non vacue le rejeu des certificats de
    bloc, imposer le code zéro au CTest q2 scanline et étendre la porte de
    cardinalité au générateur partagé.
-2. Recevoir `L4` et l'héritage q2 par différentiel baseline, mutants ciblés et
-   extrêmes u16; construire le classifieur terminal et comparer ensuite cette
-   route à Yao48/LBVH avec census fermé.
-3. Remplacer le tag de version du sidecar par une identité producteur vérifiée,
-   ajouter ses mutants de métadonnées et cibler l'appel du self-test dans la
-   factory; conserver ce chemin comme oracle permanent `n<=32`.
+2. Durcir la gate q2 : erreurs de référence indépendantes, non-vacuité de `L4`,
+   fixtures de formule/parité/clip, digest complet et identités persistantes;
+   construire ensuite le classifieur terminal et comparer à Yao48/LBVH avec
+   census fermé.
+3. Lier le tag de version du sidecar à une provenance source/ELF vérifiée et
+   cibler réellement l'appel du self-test dans la factory; conserver ce chemin
+   comme oracle permanent `n<=32`.
 4. Ajouter au cœur q3/q4 `L4`, héritage et frontière lossless, puis appliquer
    la gate d'exposant avant tout port; implémenter ensuite séparément profondeur
    de demi-boule et cover par patches, avec coûts isolés.

@@ -382,12 +382,14 @@ reconstruit ou normalise un unique support canonique qui devient l'autorité des
 certificats, carriers, digests et du fold.
 
 La preuve de complétude ne se réduit ni à `rank_bound>=point_count` ni au digest
-d'une table. Le reçu engage contrat et SHA du producteur, profil, schéma et
-identité des tâches, counts prévus/remplis/consommés, statut terminal sans
-censure, points, catalogue et paramètres. Les clés sont multiprécision et
-canoniques; les digests emploient une sérialisation champ par champ, taggée,
-versionnée et SHA-256. Le digest lie le reçu aux données; le ledger et les
-certificats en prouvent la portée.
+d'une table. Le reçu engage contrat, version sémantique et provenance vérifiée
+du producteur, profil, schéma et identité des tâches, counts
+prévus/remplis/consommés, statut terminal sans censure, points, catalogue et
+paramètres. La provenance distingue explicitement version, source/manifeste,
+ELF et options de build; le hash d'un littéral ne les remplace pas. Les clés
+sont multiprécision et canoniques; les digests emploient une sérialisation champ
+par champ, taggée, versionnée et SHA-256. Le digest lie le reçu aux données; le
+ledger et les certificats en prouvent la portée.
 
 Les défauts précis d'une livraison n'appartiennent pas à cette proposition
 durable; ils sont tenus dans
@@ -453,8 +455,9 @@ un refus de ressource sont trois statuts distincts.
 
 1. Étendre la porte de cardinalité reçue dans q2 au générateur partagé et à
    tous ses consommateurs, imposer le code zéro à chaque CTest nominal, puis
-   recevoir la borne inférieure q2 et l'héritage de témoins par différentiel
-   baseline, mutants ciblés et égalité de tous les sorts et masses.
+   durcir le différentiel `L4`/héritage : erreurs de référence indépendantes,
+   non-vacuité de la borne, formules/contacts/clips, identité persistante et
+   familles/seeds adversariaux.
 2. Implémenter et comparer la route q2 Yao48/LBVH avec census fermé; conserver
    le self-join comme oracle ou second prune selon les masses.
 3. Lier le reçu sidecar à une identité producteur vérifiée, tuer les mauvaises
