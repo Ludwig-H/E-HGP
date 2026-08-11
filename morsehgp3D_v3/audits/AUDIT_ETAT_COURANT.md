@@ -10,24 +10,24 @@ Cadre : `phase=exploration_v3_hors_registre`,
 
 ## Fraîcheur
 
-`HEAD` audité : `9f6ea3c52b10aa9e9487407e11d17fc213046a6a`, sujet
-`close the remaining sidecar trust-boundary gates under sanitizers`. Il inclut
-le différentiel q2 de `d705bcde`. Au moment du pincement, le code du worktree
-est identique au `HEAD`; les seules modifications de l'auditeur concernent la
-documentation de ce verdict.
+`HEAD` audité : `041169150f07f88118084c7ac5556a790ed814b7`, sujet
+`deliver the exact closed-depth terminal filter with three isolated modes`. Il
+inclut le différentiel q2 de `d705bcde` et le sidecar de `9f6ea3c`. Au moment du
+pincement, le code du worktree est identique au `HEAD`; les seules modifications
+de l'auditeur concernent la documentation de ce verdict.
 
 | objet | SHA-256 |
 | --- | --- |
-| `CMakeLists.txt` | `5a7919c6ead14210dd1516811bc2f966b1dfbeb6f8672339298d2f8c586781a0` |
+| `CMakeLists.txt` | `d0d5dfa9330b84262879d8df54229720e05176c36c38a88b7b44dbf56942c7ac` |
 | `prototype/cloud_families.hpp` | `1a3e3027c2e0880e6ff381fc80b707b9ec88dbf573579aac535cfc80bb307b54` |
 | `prototype/pair_selfjoin_probe.cpp` | `510c8306c7c99aa65b01506f7d2d3eac7317ff4e6f7de2f94f3ad60b19e583ac` |
-| `prototype/pair_anchor_probe.cpp` | `21197ff83c91f4419114e8c9a7e2b947c10369eb949fe98a722c44b2ec3cbf35` |
+| `prototype/pair_anchor_probe.cpp` | `e214280550e8cce986282a6150e3e4e675ed122b8d89d023b8cb9d02fe026520` |
 | `prototype/validated_hybrid_sidecar.hpp` | `4df79198794c64c824abc04525a753dac0855d8e3bb43f6eb87f8f9ff2efbda7` |
 | `prototype/sealed_source.hpp` | `98277903b46f93ec8cba85e54f212952942344363757851550427cd5fa489603` |
 | `prototype/sidecar_factory_gate.cpp` | `c5e43ee6bda923eac29e4e77f9269b7196f108c6b065f6f5043d5cd761b327d2` |
 | `prototype/sidecar_sha256.hpp` | `401df9cccd0cd0a5dc99d06e8836f01797dd37095e8aaafa9b68a59d43f3cb3e` |
 | binaire Release q2 | `719b1ce1e628814807f72110de2ab3bae44da9f93f613329415db0b14f03c9b7` |
-| binaire Release ancres | `82fb1bda12e085ae1c6d11d25540afff605d198e0d50998238f6d2ee765166c4` |
+| binaire Release ancres | `ac87a36ec24eae2114c701a8bf4577dd120df8808e7b5316ea555e6c49cac442` |
 | binaire Release sidecar | `b2dbdd2cf3aa46755f13c093cff0b3d779b8d69b1f18d9c88eb0ffd3f21b6a4a` |
 | binaire ASan/UBSan sidecar | `887d722b876632d302f8805538f364e085a201413f7d1bf4983ba34d4d3bd18e` |
 
@@ -54,9 +54,11 @@ horizontal et gardent une porte séparée.
 
 ## État des tests
 
-Le registre CTest du `HEAD` compte 267 tests, dont 34 q2, 26 ancres et 7
+Le registre CTest du `HEAD` compte 275 tests, dont 34 q2, 34 ancres et 7
 sidecar. Sur les binaires épinglés ci-dessus, trois rejeux ciblés passent : q2
-`34/34` en 0,93 s, ancres `26/26` en 0,23 s et sidecar `7/7` en 0,32 s.
+`34/34` en 0,93 s, ancres `34/34` en 3,38 s et sidecar `7/7` en 0,32 s, soit
+`75/75` ciblés. Les réserves ci-dessous montrent pourquoi ce vert n'est pas une
+réception générale.
 
 ```bash
 ctest --test-dir build/v3 --output-on-failure -R '^mhgp3v_pair_selfjoin_'
@@ -64,7 +66,7 @@ ctest --test-dir build/v3 --output-on-failure -R '^mhgp3v_pair_anchor_'
 ctest --test-dir build/v3 --output-on-failure -R '^mhgp3v_sidecar_'
 ```
 
-Aucun résultat global `267/267` n'est revendiqué. Un journal antérieur consigne
+Aucun résultat global `275/275` n'est revendiqué. Un journal antérieur consigne
 `254/254`, mais sa suite a traversé des reconstructions concurrentes et précède
 les deux derniers commits; il ne reçoit donc pas ce `HEAD`. Le ciblé vert ne
 ferme pas les contre-résultats statiques ci-dessous.
