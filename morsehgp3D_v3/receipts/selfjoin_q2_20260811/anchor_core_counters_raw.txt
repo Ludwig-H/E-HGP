@@ -94,3 +94,21 @@ lane q4    : etats=77986 blocs-prunes=16532 — prunees=2789462 residuelles=8933
 OK : falsificateur d'ancres count-only — les residuelles sont la sortie, aucune admission n'est prononcee
 exit=0
 === n=2400 family=scanline_overlap_multiecho ===
+provenance : --points 2400 (rendus 2400) --coord 309 --seed 20260810 --family scanline_overlap_multiecho --leaf-size 8 --mode core
+arbre      : 1023 noeuds, feuilles <= 8, 75072 octets
+lane q3    : etats=93268 blocs-prunes=17288 — prunees=2769461 residuelles=109339 (3.80 % de C(n,2)=2878800) — terminales=654103 — ledger FERME
+  travail  : visites=460611265 coins=368631295 points=1071265282 inscrites=5469 pile-max=10 profondeur=17 — 17.916 s de phase locale (1 thread, pas un warm_e2e)
+lane q4    : etats=104502 blocs-prunes=19377 — prunees=2763263 residuelles=115537 (4.01 % de C(n,2)=2878800) — terminales=732853 — ledger FERME
+  travail  : visites=507253907 coins=404204705 points=1179780491 inscrites=4500 pile-max=10 profondeur=17 — 21.137 s de phase locale (1 thread, pas un warm_e2e)
+OK : falsificateur d'ancres count-only — les residuelles sont la sortie, aucune admission n'est prononcee
+exit=0
+=== n=2400 family=uniform ===
+provenance : --points 2400 (rendus 2400) --coord 133 --seed 20260810 --family uniform --leaf-size 8 --mode core
+arbre      : 1023 noeuds, feuilles <= 8, 75072 octets
+lane q3    : etats=208832 blocs-prunes=32490 — prunees=2668139 residuelles=210661 (7.32 % de C(n,2)=2878800) — terminales=1596339 — ledger FERME
+  travail  : visites=977499681 coins=765254685 points=2273158569 inscrites=4130 pile-max=10 profondeur=17 — 99.066 s de phase locale (1 thread, pas un warm_e2e)
+lane q4    : etats=224740 blocs-prunes=30954 — prunees=2646695 residuelles=232105 (8.06 % de C(n,2)=2878800) — terminales=1806562 — ledger FERME
+  travail  : visites=1081818363 coins=850549734 points=2515888030 inscrites=3059 pile-max=10 profondeur=17 — 112.594 s de phase locale (1 thread, pas un warm_e2e)
+OK : falsificateur d'ancres count-only — les residuelles sont la sortie, aucune admission n'est prononcee
+exit=0
+CAMPAGNE_ANCRES_TERMINEE
