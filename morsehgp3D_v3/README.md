@@ -44,9 +44,10 @@ même sous une seconde, elle ne ferme pas ce SLO.
 
 ## Faits établis
 
-- À `k=1`, les partitions strictes et fermées sont celles du single linkage;
-  une route EMST/Boruvka exacte peut éviter tout catalogue Morse d'ordre
-  supérieur.
+- À `k=1`, les partitions strictes et fermées sont celles du single linkage.
+  Les plus proches voisins exacts dans les 48 chambres Yao forment un graphe
+  de taille au plus `48n` qui contient un EMST; la réduction sparse évite tout
+  catalogue Morse d'ordre supérieur.
 - Pour une boule avec `p` points strictement intérieurs et un support propre
   positif de taille `q`, les ordres `1<=k<=p+q-2` sont des continuations H0
   sans fusion ni nouveau `PointId`.
@@ -82,7 +83,7 @@ temps. La preuve est dans
 
 ```text
 points u16 + LBVH exact résidents
-  |-> k=1 : EMST/Boruvka exact
+  |-> k=1 : Yao-1 exact mutualisé -> EMST sparse
   |-> q2 : Yao48/LBVH strict + classifieur terminal et census fermé
   `-> q3/q4 : center-cover de blocs complet et fail-open
        -> banque Jung--Yao + groupes de Helly terminaux
@@ -103,6 +104,14 @@ de tuiles, d'epochs, de lease/reprise/backpressure, de ledger et de
 requalifier. Les décisions sémantiques, layouts, ABI et juges enregistrés ne
 sont ni une autorité v3 ni une preuve de SLO. Leur inventaire est dans
 [`AUDIT_REEMPLOI_YAO48_P1A_LIGNE_ENREGISTREE_20260811.md`](audits/AUDIT_REEMPLOI_YAO48_P1A_LIGNE_ENREGISTREE_20260811.md).
+
+La ligne enregistrée contient aussi le théorème Yao-1/EMST, son oracle
+quadratique borné et un prototype LBVH/Kruskal hôte. Ce dernier est un
+blueprint rejeté comme chemin CPU produit, pas une preuve de débit. La route
+v3 ne mutualise son premier voisin par chambre avec q2 que si la complétude et
+les ex æquo canoniques sont certifiés; un budget épuisé ne prouve jamais une
+chambre vide. Le contrat est détaillé dans
+[`AUDIT_REEMPLOI_EMST_YAO48_LIGNE_ENREGISTREE_20260811.md`](audits/AUDIT_REEMPLOI_EMST_YAO48_LIGNE_ENREGISTREE_20260811.md).
 
 Le self-join q2 de diagnostic reste un oracle/falsificateur ou un second prune
 tant que ses compteurs complets ne battent pas la route Yao/LBVH. Son prune q2
@@ -179,14 +188,19 @@ préfixe comme objet complet.
    portes locales ou oracles. Fermer les identités persistantes et les juges
    vraiment indépendants encore ouverts, sans promouvoir le rescan en route
    50 k.
-2. Réemployer les motifs de lease, ledger et `count--scan` de la ligne
+2. Conserver le Borůvka point--LBVH courant comme diagnostic borné. Pour la
+   route `k=1`, extraire le premier voisin exact et canonique de chaque chambre
+   pendant le parcours q2, avec reçu `candidate` ou `empty` complet; dédupliquer
+   au plus `48n` arêtes, réduire ce graphe sparse et trier les `n-1` arêtes par
+   niveau avant les lots atomiques.
+3. Réemployer les motifs de lease, ledger et `count--scan` de la ligne
    enregistrée, sans copier ses layouts binary64 ni ses décisions de rang
    fermé. Remplacer les recherches par ancre par des banques Yao strictes en
    antichaînes de nœuds dans l'enveloppe tuilée `O(B*48*K)`. Le certificat à
    l'autre extrémité reste une optimisation facultative, seulement si sa banque
    est déjà dans la tuile ou un cache borné. Fermer ensuite q2 par un census
    résident multi-ordre avec offsets 64 bits.
-3. Porter et requalifier le falsificateur q4 mass-only `P15-HOCUDA-P1a` : partition
+4. Porter et requalifier le falsificateur q4 mass-only `P15-HOCUDA-P1a` : partition
    triangulaire implicite des paires, 64 patches de centres, seuil de huit
    témoins par antichaînes de sous-arbres, range-query collective, ledger
    `pruned_mass+microtile_mass=C(n,2)` et aucune arène globale de paires. Cette
@@ -194,13 +208,13 @@ préfixe comme objet complet.
    certificat exact emploie des coins rationnels à l'échelle seize et un juge
    bijectif indépendant; il est spécifié dans
    [`NOTE_SOLUTION_P1A_CENTER_COVER_MASSONLY_20260811.md`](audits/NOTE_SOLUTION_P1A_CENTER_COVER_MASSONLY_20260811.md).
-4. Sur les seules ancres admises, mesurer séparément cœur de Jung, Helly,
+5. Sur les seules ancres admises, mesurer séparément cœur de Jung, Helly,
    composition cœur--profondeur et profondeur terminale. Le gain marginal doit
    payer collecte et tri; toute ambiguïté retombe fail-open.
-5. Recevoir `BallActivation`, census, resolver, fold et reconstruction des
+6. Recevoir `BallActivation`, census, resolver, fold et reconstruction des
    verticales contre Gamma exhaustif borné. Installer le harness du payload
    officiel avant toute optimisation GPU.
-6. Pour P1a seulement, fermer le différentiel hôte à `n=32`, puis, dans la même
+7. Pour P1a seulement, fermer le différentiel hôte à `n=32`, puis, dans la même
    session G4 gardée, exécuter la parité native, `n=32` sous Compute Sanitizer
    et le profil 50 k direct, sans taille intermédiaire ni retry. Pour les autres
    routes de source, appliquer la gate de compteurs à

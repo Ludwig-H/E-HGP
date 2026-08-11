@@ -1,0 +1,41 @@
+famille                      metrique        12500        25000        50000     e1     e2
+terrain                      pops          7984918     16596557     34569452   1.06   1.06
+terrain                      cone          6419622     15568558     38060624   1.28   1.29
+terrain                      cvis          6518144     17053362     44410730   1.39   1.38 <<ROUGE
+terrain                      surv          4543219     11976420     32178328   1.40   1.43 <<ROUGE
+terrain                      kbox        138313442    407594791   1272482762   1.56   1.64 <<ROUGE
+terrain                      ktests       78842261    220421610    634162865   1.48   1.52 <<ROUGE
+terrain                      liste        19419815     39427097     79392032   1.02   1.01
+terrain                      census         253129       511675      1028895   1.02   1.01
+terrain                      secs                9           25           73   1.39   1.55
+terrain                      %coupe          94.2%        96.2%        97.4%
+scanline_single_pass         pops          7739094     15725671     31833782   1.02   1.02
+scanline_single_pass         cone          4708836     12152900     31006788   1.37   1.35 <<ROUGE
+scanline_single_pass         cvis          5720352     15683656     45896400   1.46   1.55 <<ROUGE
+scanline_single_pass         surv          5441193     15532971     49966914   1.51   1.69 <<ROUGE
+scanline_single_pass         kbox        132629734    438172030   1562383427   1.72   1.83 <<ROUGE
+scanline_single_pass         ktests       76872508    247522431    785944992   1.69   1.67 <<ROUGE
+scanline_single_pass         liste        19474838     39461161     79798362   1.02   1.02
+scanline_single_pass         census         254272       513417      1030497   1.01   1.01
+scanline_single_pass         secs                6           19          105   1.58   2.45
+scanline_single_pass         %coupe          93.0%        95.0%        96.0%
+scanline_overlap_multiecho   pops          8991896     19281068     40162749   1.10   1.06
+scanline_overlap_multiecho   cone          5769514     14579438     35222903   1.34   1.27
+scanline_overlap_multiecho   cvis          5473268     14978912     40114756   1.45   1.42 <<ROUGE
+scanline_overlap_multiecho   surv          4814547     13184630     36680862   1.45   1.48 <<ROUGE
+scanline_overlap_multiecho   kbox        134969265    436672195   1370456014   1.69   1.65 <<ROUGE
+scanline_overlap_multiecho   ktests       81811426    241387669    713111397   1.56   1.56 <<ROUGE
+scanline_overlap_multiecho   liste        22573411     45927088     92739677   1.02   1.01
+scanline_overlap_multiecho   census         302460       611119      1227940   1.01   1.01
+scanline_overlap_multiecho   secs               18           29           70   0.69   1.25
+scanline_overlap_multiecho   %coupe          93.8%        95.8%        97.1%
+uniform                      pops          8565909     17571921     35826378   1.04   1.03
+uniform                      cone          4636969     10605284     22535668   1.19   1.09
+uniform                      cvis          7267878     16927482     37485440   1.22   1.15
+uniform                      surv          5071660     10908561     23003452   1.10   1.08
+uniform                      kbox        191490734    464757100    992291204   1.28   1.09
+uniform                      ktests      149547259    326601673    710593514   1.13   1.12
+uniform                      liste        30676228     62803204    127451845   1.03   1.02
+uniform                      census         449940       920390      1874239   1.03   1.03
+uniform                      secs               11           31           76   1.51   1.28
+uniform                      %coupe          93.5%        96.5%        98.2%

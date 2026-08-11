@@ -38,6 +38,7 @@ spécifications et le registre des preuves sous `docs/` restent supérieurs.
 | [`NOTE_SOLUTION_SOURCE_Q2_YAO48_LBVH_U16_20260811.md`](NOTE_SOLUTION_SOURCE_Q2_YAO48_LBVH_U16_20260811.md) | spécification de la route produit q2 : Morton/LBVH, coupe Yao48 stricte fail-open, classifieur terminal, census fermé, ledger, juge indépendant et gate d'exposant; statut logiciel exclusivement dans l'audit live |
 | [`NOTE_SOLUTION_P1A_CENTER_COVER_MASSONLY_20260811.md`](NOTE_SOLUTION_P1A_CENTER_COVER_MASSONLY_20260811.md) | spécification auditée du falsificateur P1a q4 mass-only : domaine de Jung, 64 patchs rationnels, témoins collectifs, ledger bijectif et protocole direct `n=32` vers 50 k; statut logiciel exclusivement dans l'audit live |
 | [`AUDIT_REEMPLOI_YAO48_P1A_LIGNE_ENREGISTREE_20260811.md`](AUDIT_REEMPLOI_YAO48_P1A_LIGNE_ENREGISTREE_20260811.md) | inventaire du prior art CUDA Yao48/LBVH et P1a dans `morsehgp3d/`, limites de qualification et propositions exactes de réemploi; différentiel, jamais autorité v3 |
+| [`AUDIT_REEMPLOI_EMST_YAO48_LIGNE_ENREGISTREE_20260811.md`](AUDIT_REEMPLOI_EMST_YAO48_LIGNE_ENREGISTREE_20260811.md) | théorème Yao-1 contenant l'EMST canonique, prior art LBVH/Kruskal enregistré, rejet CPU et contrat de mutualisation exacte avec q2; blueprint, jamais preuve de débit |
 
 ## Lemmes conditionnels, contre-fixtures et portes citées
 

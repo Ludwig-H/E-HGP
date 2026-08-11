@@ -130,9 +130,25 @@ même `BallKey`; les supports multiples ne créent pas plusieurs boules.
 ### 6.1 Ordre un : EMST exact
 
 L'ordre un est exactement le single linkage, au niveau
-`distance_squared/4`. La route candidate calcule un EMST par Boruvka exact sur
-points u16, trie ses arêtes par niveau rationnel et rejoue chaque lot d'égalité
+`distance_squared/4`. La route candidate extrait, pour chaque point, le plus
+proche voisin exact selon la clé canonique dans chacune des 48 chambres Yao.
+Le diamètre angulaire de chaque chambre est strictement inférieur à 60 degrés :
+l'union non orientée de ces arêtes contient l'EMST canonique du graphe complet
+et possède au plus `48n` candidats dirigés.
+
+Le parcours peut être mutualisé avec les banques q2, mais son reçu est plus
+fort : une chambre publie un candidat seulement après fermeture de toutes les
+bornes plus petites et de tous les ex æquo canoniques, ou publie `empty` après
+épuisement de tous les nœuds compatibles. Un budget interrompu ou une banque
+q2 sous-pleine ne certifie jamais le vide. Après déduplication, Kruskal ou
+Borůvka s'exécute sur le graphe sparse; les `n-1` arêtes finales sont triées
+par `(distance_squared,PointId,PointId)` et chaque lot d'égalité est rejoué
 atomiquement.
+
+Le Borůvka point--LBVH reste un diagnostic exact borné, pas la route
+industrielle : il répète les requêtes géométriques à chaque ronde. Le prior art,
+sa preuve et le rejet de son prototype CPU à 50 k sont dans
+[`AUDIT_REEMPLOI_EMST_YAO48_LIGNE_ENREGISTREE_20260811.md`](audits/AUDIT_REEMPLOI_EMST_YAO48_LIGNE_ENREGISTREE_20260811.md).
 
 La réception compare, après chaque coupe stricte et fermée, les partitions
 canoniques de `PointId` à l'oracle EMST CPU. Elle couvre les ex æquo, plusieurs
@@ -587,7 +603,7 @@ durable; ils sont tenus dans
 
 ```text
 points u16 + LBVH exact résidents
-  |-> k=1 : Boruvka/EMST exact
+  |-> k=1 : Yao-1 exact mutualisé -> EMST sparse
   |-> q2 : Yao48 strict + classification LBVH et census fermé
   `-> q3/q4 : center-cover de blocs complet et fail-open
        -> banques Jung--Yao + groupes de Helly + profondeur terminale
@@ -652,28 +668,32 @@ un refus de ressource sont trois statuts distincts.
 1. Conserver générateur, self-joins, sidecar borné, cellules et ancres comme
    portes locales ou oracles. Fermer les identités persistantes et les juges
    indépendants encore ouverts sans promouvoir ces parcours exhaustifs.
-2. Réemployer les motifs de lease, ledger et `count--scan` de la ligne
+2. Pour `k=1`, conserver le Borůvka point--LBVH comme diagnostic et produire
+   le transcript Yao-1 exact mutualisé avec q2 : fermeture des ex æquo et du
+   vide par chambre, au plus `48n` candidats, réduction sparse puis tri des
+   arêtes finales par niveau.
+3. Réemployer les motifs de lease, ledger et `count--scan` de la ligne
    enregistrée, sans copier ses layouts binary64 ni ses décisions de rang
    fermé. Fermer q2 par Yao48 strict fail-open, classification terminale et
    census fermé multi-ordre; conserver le self-join comme oracle ou second
    prune selon les masses.
-3. Porter et requalifier `P15-HOCUDA-P1a` en mass-only q4 : partition triangulaire
+4. Porter et requalifier `P15-HOCUDA-P1a` en mass-only q4 : partition triangulaire
    implicite, 64 patches, seuil huit, range-query collective, microtuiles
    terminales et ledger complet. Cette tranche n'émet aucune ancre.
    Après le différentiel hôte à `n=32`, la même session G4 ferme la parité
    native et `n=32` sous Compute Sanitizer, puis va directement au profil 50 k.
    Une masse majoritairement terminale, un rescan par bloc ou une queue lourde
    arrêtent la route avant son extension à P1.
-4. Sur les seules ancres admises, recevoir séparément Jung--Yao, la borne AABB
+5. Sur les seules ancres admises, recevoir séparément Jung--Yao, la borne AABB
    `g_min/Q_max`, Helly, la composition cœur--profondeur et la profondeur
    terminale. Mesurer le gain marginal de chacun contre son coût exact.
-5. Construire les range-reports q3 et les niveaux shallow q4 sans développer
+6. Construire les range-reports q3 et les niveaux shallow q4 sans développer
    tous les triples ou quadruples, puis recevoir owner, positivité et census.
-6. Recevoir `BallActivation`, census fermé, tombstones, resolver, fold et
+7. Recevoir `BallActivation`, census fermé, tombstones, resolver, fold et
    reconstruction des verticales contre Gamma exhaustif à petit `n`.
-7. Installer deux harnesses nommés : le diagnostic horizontal réduit et le
+8. Installer deux harnesses nommés : le diagnostic horizontal réduit et le
    `BenchmarkOutputContract-v1` officiel. Ils ne partagent aucun verdict SLO.
-8. Appliquer la gate `12 500/25 000/50 000` aux autres routes de source,
+9. Appliquer la gate `12 500/25 000/50 000` aux autres routes de source,
    porter seulement les routes admises sur CUDA avec arènes préallouées et une
    synchronisation terminale, puis mesurer le payload officiel complet dans
    un même `warm_e2e`.
