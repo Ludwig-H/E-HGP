@@ -34,16 +34,32 @@
 namespace mhgp3v {
 
 // Les mutants du front d'onde vivent ici pour que la porte prouve qu'elle
-// mord : perdre un sous-arbre de la frontiere doit se voir dans le catalogue.
+// mord : perdre un sous-arbre de la frontiere doit se voir dans le MULTIENSEMBLE
+// des sommets emis, et un sous-arbre rejoue deux fois doit se voir dans la
+// MULTIPLICITE — la deduplication finale de la recolte masque les deux, c'est
+// precisement pourquoi elle n'est pas le certificat.
 struct ParallelCatalogueMutants {
   bool drop_odd_roots = false;   // MUTANT : un sous-arbre de frontiere sur deux est perdu
+  bool duplicate_root = false;   // MUTANT : le premier sous-arbre est rejoue DEUX fois
+};
+
+// LES SOMMETS EMIS, exposes pour la porte : la couronne et chaque sous-arbre,
+// separement et dans l'ordre de la frontiere. La porte en construit le
+// multiensemble canonique (coquille, interieur, niveau) et le compare a la
+// verite sequentielle — l'identite couronne+sous-arbres exige que chaque
+// sommet soit couvert EXACTEMENT une fois (multiplicite un), ce que le
+// catalogue dedupliqueur ne peut pas certifier.
+struct ParallelEmission {
+  std::vector<flats::Vertex> crown;
+  std::vector<std::vector<flats::Vertex>> subtrees;   // une entree par racine traitee
 };
 
 inline mhgp::Catalogue flat_catalogue_parallel(const std::vector<mhgp::P3>& points, int s_max,
                                                FlatStatistics* st, CloudStatus* status,
                                                int threads, bool use_index = true,
                                                int crown_depth = 8,
-                                               ParallelCatalogueMutants mutants = {}) {
+                                               ParallelCatalogueMutants mutants = {},
+                                               ParallelEmission* emission = nullptr) {
   *st = FlatStatistics{};
   *status = CloudStatus::kOk;
   if (threads < 1) threads = (int)std::thread::hardware_concurrency();
@@ -80,6 +96,11 @@ inline mhgp::Catalogue flat_catalogue_parallel(const std::vector<mhgp::P3>& poin
     for (std::size_t r = 0; r < frontier.size(); r += 2) kept.push_back(frontier[r]);
     frontier = std::move(kept);
   }
+  // MUTANT duplicate-root : la meme racine est soumise DEUX fois aux workers.
+  // Le catalogue final ne bouge pas — la deduplication de la recolte avale la
+  // copie — mais le multiensemble des sommets emis porte chaque sommet du
+  // sous-arbre en multiplicite deux : seule la porte multiensemble le voit.
+  if (mutants.duplicate_root && !frontier.empty()) frontier.push_back(frontier.front());
   const auto t1 = tick();
 
   // 2. LES SOUS-ARBRES, ordonnances DYNAMIQUEMENT (compteur atomique) : la
@@ -94,6 +115,11 @@ inline mhgp::Catalogue flat_catalogue_parallel(const std::vector<mhgp::P3>& poin
     std::vector<std::thread> workers;
     for (int w = 0; w < threads; ++w)
       workers.push_back(std::thread([&, w]() {
+        // SCRATCH PAR WORKER : l'epoque de `neighbour_along` dure sur toutes
+        // les racines de ce thread — une allocation par worker, zero partage.
+        // L'index `grid`, lui, est immuable pendant les requetes : les
+        // metriques de descente vont dans `partial[w].index_metrics`.
+        flats::NeighbourScratch scratch;
         for (std::size_t r = next_root.fetch_add(1); r < frontier.size();
              r = next_root.fetch_add(1)) {
           CloudStatus local = CloudStatus::kOk;
@@ -103,7 +129,7 @@ inline mhgp::Catalogue flat_catalogue_parallel(const std::vector<mhgp::P3>& poin
                                   return true;
                                 },
                                 indexed ? &grid : nullptr, &frontier[r], &shared_root_base, 0,
-                                nullptr);
+                                nullptr, nullptr, &scratch);
           if (local != CloudStatus::kOk) partial_status[(std::size_t)w] = local;
         }
       }));
@@ -124,6 +150,12 @@ inline mhgp::Catalogue flat_catalogue_parallel(const std::vector<mhgp::P3>& poin
                "[parallel] couronne %zu sommets %.3f s | frontiere %zu racines,"
                " sous-arbres %zu sommets %.3f s (%d threads)\n",
                crown.size(), lap(t0, t1), frontier.size(), subtree_total, lap(t1, t2), threads);
+  // L'EMISSION est copiee AVANT la concatenation destructrice : la porte recoit
+  // exactement ce que la recolte va consommer, mutants compris.
+  if (emission != nullptr) {
+    emission->crown = crown;
+    emission->subtrees = harvested;
+  }
   // 3. CONCATENATION DETERMINISTE puis LA MEME recolte que la voie
   // sequentielle, sur les sommets precalcules.
   std::vector<flats::Vertex> vertices = std::move(crown);

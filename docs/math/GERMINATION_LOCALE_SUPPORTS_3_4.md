@@ -17,7 +17,7 @@ exact déjà porté par le pipeline.
 
 $U$ est **minimal bien centré** ssi toutes les coordonnées barycentriques de
 $c_U$ dans $U$ sont strictement positives, c'est-à-dire
-$c_U\in\operatorname{relint}\operatorname{conv}(U)$ — de façon équivalente,
+$c_U\in\mathrm{relint}\mathrm{conv}(U)$ — de façon équivalente,
 $\bar B(c_U,r_U)$ est la miniboule de $U$ et $U$ en est le support minimal.
 
 $U$ est **accepté à l'ordre $K$** ssi il est minimal bien centré, son shell vaut
@@ -39,24 +39,24 @@ alors $\lvert p_i-p_j\rvert^2=2r_U^2-2\langle v_i,v_j\rangle>2r_U^2$. $\square$
 Comme par ailleurs deux points d'une sphère de rayon $r_U$ sont à distance au
 plus $2r_U$, on obtient l'**encadrement à deux côtés**
 
-$$r_U\sqrt2\;<\;\operatorname{diam}(U)\;\le\;2\,r_U .$$
+$$r_U\sqrt{2}\;<\;\mathrm{diam}(U)\;\le\;2\,r_U .$$
 
-Pour $m=3$ la borne inférieure se resserre en $r_U\sqrt3$ : dans un triangle
+Pour $m=3$ la borne inférieure se resserre en $r_U\sqrt{3}$ : dans un triangle
 d'angles tous aigus, le plus grand angle $A$ vérifie $\pi/3\le A<\pi/2$ et le
-côté opposé vaut $2r_U\sin A\ge r_U\sqrt3$. La vérification numérique sur
+côté opposé vaut $2r_U\sin A\ge r_U\sqrt{3}$. La vérification numérique sur
 93 837 supports minimaux bien centrés tirés au hasard donne un rapport
-$\operatorname{diam}/r$ observé dans $[1{,}691,\;2{,}000]$, compatible avec les
+$\mathrm{diam}/r$ observé dans $[1{,}691,\;2{,}000]$, compatible avec les
 deux bornes et suggérant $\sqrt{8/3}$ comme infimum pour $m=4$ (tétraèdre
 régulier) — non utilisé ci-dessous, non démontré.
 
-Ces comparaisons sont exactes sans arithmétique nouvelle : $\operatorname{diam}^2$
+Ces comparaisons sont exactes sans arithmétique nouvelle : $\mathrm{diam}^2$
 et $\beta(U)$ sont déjà des rationnels canoniques du pipeline.
 
 ## 3. Premier résultat négatif : la localité seule ne réduit rien
 
 Il est tentant d'attribuer chaque support à un **propriétaire dyadique** : le
-niveau $h$ tel que $h/2<\operatorname{diam}(U)\le h$, et la cellule de la grille
-de côté $h$ contenant $c_U$. Le Lemme 1 donne alors $h/4<r_U<h/\sqrt2$, donc tout
+niveau $h$ tel que $h/2<\mathrm{diam}(U)\le h$, et la cellule de la grille
+de côté $h$ contenant $c_U$. Le Lemme 1 donne alors $h/4<r_U<h/\sqrt{2}$, donc tout
 sommet est à distance $<h$ de $c_U$ : $U$ tient dans le bloc $3\times3\times3$
 autour de sa cellule. La complétude est gratuite, puisque le propriétaire est une
 fonction de $U$.
@@ -99,14 +99,13 @@ du rang et non de la longueur. La voici, et elle est immédiate.
 
 > **Théorème.** Soit $U$ accepté à l'ordre $K$ et $p\in U$. Alors
 > $\bar B(c_U,r_U)$ est une boule dont le bord passe par $p$, dont le centre
-> appartient à $\operatorname{conv}(U)\subseteq\operatorname{conv}(P)$, et qui
+> appartient à $\mathrm{conv}(U)\subseteq\mathrm{conv}(P)$, et qui
 > contient au plus $s_{\max}$ points de $P$.
 >
 > Par conséquent, en posant
-> $$R(p)\;=\;\sup\bigl\{\rho>0\;:\;\exists\,c,\;\lvert c-p\rvert=\rho,\;
-> c\in\operatorname{conv}(P),\;\lvert P\cap\bar B(c,\rho)\rvert\le s_{\max}\bigr\},$$
+> $$R(p)\;=\;\sup\bigl\{\rho>0\;:\;\exists\,c,\;\lvert c-p\rvert=\rho,\;c\in\mathrm{conv}(P),\;\lvert P\cap\bar B(c,\rho)\rvert\le s_{\max}\bigr\},$$
 > on a $r_U\le R(p)$ pour **tout** sommet $p$ de $U$, donc
-> $$\operatorname{diam}(U)\;\le\;2\,r_U\;\le\;2\min_{p\in U}R(p).$$
+> $$\mathrm{diam}(U)\;\le\;2\,r_U\;\le\;2\min_{p\in U}R(p).$$
 
 *Démonstration.* Le circumball lui-même est un témoin admissible pour chacun de
 ses points de bord. $\square$
@@ -185,28 +184,26 @@ recouvrement, ni d'enveloppe convexe.
 
 #### Jung donne la constante optimale, et le lemme d'angle devient un corollaire
 
-Le lemme d'angle du §2 majore $r_U$ par $\operatorname{diam}(U)/\sqrt2$. Ce n'est
+Le lemme d'angle du §2 majore $r_U$ par $\mathrm{diam}(U)/\sqrt{2}$. Ce n'est
 pas la meilleure borne : **le théorème de Jung** l'est.
 
 > **Théorème (Jung).** Toute partie bornée de $\mathbb{R}^d$ de diamètre $D$ est
 > contenue dans une boule de rayon au plus $\gamma_d D$ avec
-> $\gamma_d=\sqrt{\tfrac{d}{2(d+1)}}$, soit $\gamma_2=1/\sqrt3$ et
+> $\gamma_d=\sqrt{\frac{d}{2(d+1)}}$, soit $\gamma_2=1/\sqrt{3}$ et
 > $\gamma_3=\sqrt{3/8}$. La borne est atteinte par le simplexe régulier.
 
 Il s'applique ici parce qu'un support **minimal bien centré** a précisément pour
-miniboule sa boule circonscrite : $c_U$ est dans $\operatorname{conv}(U)$ et tous
+miniboule sa boule circonscrite : $c_U$ est dans $\mathrm{conv}(U)$ et tous
 les points de $U$ sont à distance $r_U$ de $c_U$, ce qui est exactement la
 caractérisation du centre de la miniboule et de son ensemble de support. Donc
 
-$$r_U \;\le\; \gamma_m\,\operatorname{diam}(U),\qquad
-\gamma_3=\tfrac1{\sqrt3}\ (\text{triangle, plan}),\quad
-\gamma_4=\sqrt{\tfrac38}\ (\text{tétraèdre}).$$
+$$r_U \;\le\; \gamma_m\,\mathrm{diam}(U),\qquad\gamma_3=1/\sqrt{3}\ (\text{triangle, plan}),\quad\gamma_4=\sqrt{3/8}\ (\text{tétraèdre}).$$
 
-Autrement dit $\operatorname{diam}(U)\ge r_U\sqrt3$ pour $m=3$ et
-$\ge r_U\sqrt{8/3}$ pour $m=4$, contre $r_U\sqrt2$ par le lemme d'angle. Jung est
+Autrement dit $\mathrm{diam}(U)\ge r_U\sqrt{3}$ pour $m=3$ et
+$\ge r_U\sqrt{8/3}$ pour $m=4$, contre $r_U\sqrt{2}$ par le lemme d'angle. Jung est
 donc strictement meilleur, **et optimal** : la vérification numérique sur 300 000
 tirages donne un minimum observé de $1{,}7354$ pour $m=3$ contre la borne
-$\sqrt3=1{,}7321$, et $1{,}6709$ pour $m=4$ contre $\sqrt{8/3}=1{,}6330$. Le
+$\sqrt{3}=1{,}7321$, et $1{,}6709$ pour $m=4$ contre $\sqrt{8/3}=1{,}6330$. Le
 lemme d'angle garde sa valeur — il est élémentaire, il vaut en toute dimension et
 il ne suppose rien sur $m$ — mais il n'est plus la borne employée.
 
@@ -227,8 +224,7 @@ $\lvert s_i-c\rvert\le r$, donc le membre de gauche est au plus $r^2$. $\square$
 
 > **Corollaire (test certifié, forme générale).** Soit $U$ accepté, $(p,q)$ sa
 > paire diamétrale, $D=\lvert p-q\rvert$, et $S\subseteq U$ **connu**. Alors
-> $$\bar B\Bigl(c_{mb}(S),\;\gamma_m D-\sqrt{\gamma_m^2D^2-R_{mb}(S)^2}\Bigr)
->   \;\subseteq\;\bar B(c_U,r_U),$$
+> $$\bar B\Bigl(c_{mb}(S),\;\gamma_m D-\sqrt{\gamma_m^2D^2-R_{mb}(S)^2}\Bigr) \;\subseteq\;\bar B(c_U,r_U),$$
 > et cette boule contient donc au plus $s_{\max}$ points. Le rayon est
 > **croissant en $R_{mb}(S)$** : le test se renforce à chaque sommet ajouté.
 
@@ -239,9 +235,7 @@ son minimum sur l'intervalle admissible est atteint en $r=\gamma_m D$.
 **Le cas $S=\{p,q\}$** — le germe — donne $c_{mb}=M$, $R_{mb}=D/2$ et la
 constante fermée
 
-$$\kappa_m=\gamma_m-\sqrt{\gamma_m^2-\tfrac14},\qquad
-\kappa_3=\tfrac1{2\sqrt3}=0{,}288675,\qquad
-\kappa_4=\sin 15^\circ=0{,}258819 .$$
+$$\kappa_m=\gamma_m-\sqrt{\gamma_m^2-\frac{1}{4}},\qquad \kappa_3=\frac{1}{2\sqrt{3}}=0{,}288675,\qquad \kappa_4=\sin 15^\circ=0{,}258819 .$$
 
 > **Test de germe.** Si
 > $\lvert P\cap\bar B(M,\;\kappa_m\lvert p-q\rvert)\rvert>s_{\max}$, alors
@@ -308,12 +302,12 @@ seule grandeur encore très loin de son optimum.
 
 ### 5.1 La contrainte de coque n'est pas cosmétique
 
-Sans la condition $c\in\operatorname{conv}(P)$, $R(p)=+\infty$ pour tout point de
+Sans la condition $c\in\mathrm{conv}(P)$, $R(p)=+\infty$ pour tout point de
 la coque : une boule tangente en $p$ peut croître indéfiniment vers l'extérieur
 en restant vide. Mesuré sur `uniform_latin` à 50 000 points, $s_{\max}=11$, avec
 48 directions et dichotomie sur le rayon :
 
-| | sans contrainte | centre dans $\operatorname{conv}(P)$ |
+| | sans contrainte | centre dans $\mathrm{conv}(P)$ |
 | --- | ---: | ---: |
 | $R(p)/\rho_{s_{\max}}(p)$ médian | 1,073 | 1,073 |
 | p99 | 12,17 | **1,376** |

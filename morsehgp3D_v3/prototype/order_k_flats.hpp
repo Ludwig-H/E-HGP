@@ -277,6 +277,22 @@ struct ShellHash {
 // ---------------------------------------------------------------------------
 // Diagnostics. Aucun n'est optionnel : un compteur muet est une branche morte.
 // ---------------------------------------------------------------------------
+// METRIQUES DE DESCENTE DE L'INDEX, portees par l'APPELANT et jamais par
+// l'arbre. La version precedente stockait ces compteurs en `mutable` dans
+// `CertifiedIndex` : la topologie KD, partagee entre tous les workers du
+// catalogue parallele, etait alors ECRITE par des methodes `const` et
+// ThreadSanitizer a confirme la data race dans `sign_disagreement` (audit
+// 50 k, sortie 66). L'arbre est desormais immuable pendant les requetes ;
+// chaque worker possede ses propres metriques — pas d'atomics, la contention
+// serait un cout que rien ne justifie.
+struct IndexMetrics {
+  // NOEUDS REELLEMENT VISITES. « Points touches » ne dit pas si l'arbre elague :
+  // un arbre a feuille unique touche tout le nuage en une descente et affiche le
+  // meme compteur qu'un arbre profond qui coupe. Celui-ci mesure la descente.
+  long long nodes_visited = 0;
+  long long leaves_visited = 0;
+};
+
 struct FlatStatistics {
   long long seed_scans = 0;
   long long vertices_visited = 0;
@@ -342,9 +358,12 @@ struct FlatStatistics {
   long long reverse_reject_backward = 0;
   long long reverse_reject_by_parent = 0;
   long long reverse_decisions = 0;         // decisions de filiation, sans requete de retour
+  // La descente de l'index, par appelant. C'est CE champ que les requetes de
+  // `CertifiedIndex` remplissent — l'arbre lui-meme n'ecrit plus rien.
+  IndexMetrics index_metrics;
 
   void absorb(const FlatStatistics& o) {
-    static_assert(sizeof(FlatStatistics) == 49 * sizeof(long long),
+    static_assert(sizeof(FlatStatistics) == 51 * sizeof(long long),
                   "champ ajoute a FlatStatistics : le sommer dans absorb()");
     navigate_seconds += o.navigate_seconds;
     seed_scans += o.seed_scans;
@@ -391,6 +410,8 @@ struct FlatStatistics {
     reverse_reject_backward += o.reverse_reject_backward;
     reverse_reject_by_parent += o.reverse_reject_by_parent;
     reverse_decisions += o.reverse_decisions;
+    index_metrics.nodes_visited += o.index_metrics.nodes_visited;
+    index_metrics.leaves_visited += o.index_metrics.leaves_visited;
   }
 };
 
@@ -834,11 +855,12 @@ struct CertifiedIndex {
   std::vector<mhgp::i32> order;
   const std::vector<mhgp::P3>* points = nullptr;
   int leaf_size = 16;
-  // NOEUDS REELLEMENT VISITES. « Points touches » ne dit pas si l'arbre elague :
-  // un arbre a feuille unique touche tout le nuage en une descente et affiche le
-  // meme compteur qu'un arbre profond qui coupe. Celui-ci mesure la descente.
-  mutable long long nodes_visited = 0;
-  mutable long long leaves_visited = 0;
+  // AUCUN COMPTEUR ICI. Les anciens `mutable nodes_visited/leaves_visited`
+  // etaient incrementes par des methodes `const` sur une instance PARTAGEE
+  // entre les workers du catalogue parallele : data race confirmee par
+  // ThreadSanitizer dans `sign_disagreement`. Les metriques de descente sont
+  // desormais portees par l'appelant (`IndexMetrics*`, nullable), comme le
+  // `long long* touched` : la topologie KD est immuable pendant les requetes.
 
   void build(const std::vector<mhgp::P3>& cloud, int leaf = 16) {
     points = &cloud;
@@ -995,8 +1017,10 @@ struct CertifiedIndex {
 
   // Visite tous les points du nuage dans la boule FERMEE, et rien d'autre. La
   // decision d'appartenance est exacte et garde l'egalite, donc la coquille.
+  // `metrics` est nullable : un appelant sans instrumentation passe nullptr.
   template <class Fn>
-  void closed_ball(const mhgp::Sphere& sphere, long long* touched, Fn&& visit) const {
+  void closed_ball(const mhgp::Sphere& sphere, long long* touched, Fn&& visit,
+                   IndexMetrics* metrics = nullptr) const {
     if (nodes.empty()) return;
     const LooseBall ball = loosen(sphere);
     int stack[128];
@@ -1004,10 +1028,10 @@ struct CertifiedIndex {
     stack[top++] = 0;
     while (top > 0) {
       const Node& node = nodes[(std::size_t)stack[--top]];
-      ++nodes_visited;
+      if (metrics != nullptr) ++metrics->nodes_visited;
       if (!node_may_touch(node, ball)) continue;
       if (node.left < 0) {
-        ++leaves_visited;
+        if (metrics != nullptr) ++metrics->leaves_visited;
         for (int t = node.begin; t < node.end; ++t) {
           const mhgp::i32 id = order[(std::size_t)t];
           ++(*touched);
@@ -1016,8 +1040,8 @@ struct CertifiedIndex {
       } else {
         if (top + 2 <= 128) { stack[top++] = node.left; stack[top++] = node.right; }
         else {                                  // pile saturee : ne rien omettre
-          descend_all(node.left, sphere, ball, touched, visit);
-          descend_all(node.right, sphere, ball, touched, visit);
+          descend_all(node.left, sphere, ball, touched, visit, metrics);
+          descend_all(node.right, sphere, ball, touched, visit, metrics);
         }
       }
     }
@@ -1025,12 +1049,12 @@ struct CertifiedIndex {
 
   template <class Fn>
   void descend_all(int index, const mhgp::Sphere& sphere, const LooseBall& ball,
-                   long long* touched, Fn&& visit) const {
+                   long long* touched, Fn&& visit, IndexMetrics* metrics = nullptr) const {
     const Node& node = nodes[(std::size_t)index];
-    ++nodes_visited;
+    if (metrics != nullptr) ++metrics->nodes_visited;
     if (!node_may_touch(node, ball)) return;
     if (node.left < 0) {
-      ++leaves_visited;
+      if (metrics != nullptr) ++metrics->leaves_visited;
       for (int t = node.begin; t < node.end; ++t) {
         const mhgp::i32 id = order[(std::size_t)t];
         ++(*touched);
@@ -1038,8 +1062,8 @@ struct CertifiedIndex {
       }
       return;
     }
-    descend_all(node.left, sphere, ball, touched, visit);
-    descend_all(node.right, sphere, ball, touched, visit);
+    descend_all(node.left, sphere, ball, touched, visit, metrics);
+    descend_all(node.right, sphere, ball, touched, visit, metrics);
   }
 
   // DESACCORD DE SIGNE entre deux spheres du meme pinceau.
@@ -1095,7 +1119,8 @@ struct CertifiedIndex {
 
   template <class Fn>
   void sign_disagreement(const mhgp::Sphere& a, const mhgp::Sphere& b,
-                            long long* touched, Fn&& visit) const {
+                            long long* touched, Fn&& visit,
+                            IndexMetrics* metrics = nullptr) const {
     if (nodes.empty()) return;
     const LooseBall la = loosen(a), lb = loosen(b);
     int stack[128];
@@ -1104,12 +1129,12 @@ struct CertifiedIndex {
     while (top > 0) {
       const int self = stack[--top];
       const Node& node = nodes[(std::size_t)self];
-      ++nodes_visited;
+      if (metrics != nullptr) ++metrics->nodes_visited;
       const Straddle sa = classify(node, la), sb = classify(node, lb);
       if ((sa.certainly_inside && sb.certainly_inside) ||
           (sa.certainly_outside && sb.certainly_outside)) continue;
       if (node.left < 0) {
-        ++leaves_visited;
+        if (metrics != nullptr) ++metrics->leaves_visited;
         for (int t = node.begin; t < node.end; ++t) {
           const mhgp::i32 id = order[(std::size_t)t];
           ++(*touched);
@@ -1122,8 +1147,8 @@ struct CertifiedIndex {
         stack[top++] = node.left;
         stack[top++] = node.right;
       } else {
-        sign_disagreement_at(node.left, a, b, la, lb, touched, visit);
-        sign_disagreement_at(node.right, a, b, la, lb, touched, visit);
+        sign_disagreement_at(node.left, a, b, la, lb, touched, visit, metrics);
+        sign_disagreement_at(node.right, a, b, la, lb, touched, visit, metrics);
       }
     }
   }
@@ -1131,9 +1156,10 @@ struct CertifiedIndex {
   template <class Fn>
   void sign_disagreement_at(int index, const mhgp::Sphere& a, const mhgp::Sphere& b,
                                const LooseBall& la, const LooseBall& lb,
-                               long long* touched, Fn&& visit) const {
+                               long long* touched, Fn&& visit,
+                               IndexMetrics* metrics = nullptr) const {
     const Node& node = nodes[(std::size_t)index];
-    ++nodes_visited;
+    if (metrics != nullptr) ++metrics->nodes_visited;
     const Straddle sa = classify(node, la), sb = classify(node, lb);
     if ((sa.certainly_inside && sb.certainly_inside) ||
         (sa.certainly_outside && sb.certainly_outside)) return;
@@ -1146,26 +1172,27 @@ struct CertifiedIndex {
       }
       return;
     }
-    sign_disagreement_at(node.left, a, b, la, lb, touched, visit);
-    sign_disagreement_at(node.right, a, b, la, lb, touched, visit);
+    sign_disagreement_at(node.left, a, b, la, lb, touched, visit, metrics);
+    sign_disagreement_at(node.right, a, b, la, lb, touched, visit, metrics);
   }
 
   // Pave ENTIER, teste exactement. Sert d'amorce : aucune exactitude n'en depend.
   template <class Fn>
-  void box(const long long* lo, const long long* hi, long long* touched, Fn&& visit) const {
+  void box(const long long* lo, const long long* hi, long long* touched, Fn&& visit,
+           IndexMetrics* metrics = nullptr) const {
     if (nodes.empty()) return;
     int stack[128];
     int top = 0;
     stack[top++] = 0;
     while (top > 0) {
       const Node& node = nodes[(std::size_t)stack[--top]];
-      ++nodes_visited;
+      if (metrics != nullptr) ++metrics->nodes_visited;
       bool disjoint = false;
       for (int d = 0; d < 3; ++d)
         if ((long long)node.hi[d] < lo[d] || (long long)node.lo[d] > hi[d]) disjoint = true;
       if (disjoint) continue;
       if (node.left < 0) {
-        ++leaves_visited;
+        if (metrics != nullptr) ++metrics->leaves_visited;
         for (int t = node.begin; t < node.end; ++t) {
           const mhgp::i32 id = order[(std::size_t)t];
           const mhgp::P3& p = (*points)[(std::size_t)id];
@@ -1181,21 +1208,21 @@ struct CertifiedIndex {
         // PILE SATUREE : les deux autres requetes retombaient sur une descente
         // recursive, celle-ci OMETTAIT le sous-arbre en silence. Une requete
         // d'index n'a pas le droit de perdre un point.
-        box_at(node.left, lo, hi, touched, visit);
-        box_at(node.right, lo, hi, touched, visit);
+        box_at(node.left, lo, hi, touched, visit, metrics);
+        box_at(node.right, lo, hi, touched, visit, metrics);
       }
     }
   }
 
   template <class Fn>
   void box_at(int index, const long long* lo, const long long* hi, long long* touched,
-              Fn&& visit) const {
+              Fn&& visit, IndexMetrics* metrics = nullptr) const {
     const Node& node = nodes[(std::size_t)index];
-    ++nodes_visited;
+    if (metrics != nullptr) ++metrics->nodes_visited;
     for (int d = 0; d < 3; ++d)
       if ((long long)node.hi[d] < lo[d] || (long long)node.lo[d] > hi[d]) return;
     if (node.left < 0) {
-      ++leaves_visited;
+      if (metrics != nullptr) ++metrics->leaves_visited;
       for (int t = node.begin; t < node.end; ++t) {
         const mhgp::i32 id = order[(std::size_t)t];
         const mhgp::P3& p = (*points)[(std::size_t)id];
@@ -1206,8 +1233,8 @@ struct CertifiedIndex {
       }
       return;
     }
-    box_at(node.left, lo, hi, touched, visit);
-    box_at(node.right, lo, hi, touched, visit);
+    box_at(node.left, lo, hi, touched, visit, metrics);
+    box_at(node.right, lo, hi, touched, visit, metrics);
   }
 };
 
@@ -1672,13 +1699,29 @@ inline bool canonical_parent(const std::vector<P3>& points, const Vertex& v,
   return found;
 }
 
+// SCRATCH DE TRAVERSEE pour `neighbour_along`, possede par l'APPELANT.
+//
+// L'ancienne version allouait `std::vector<char> seen_candidate(n, 0)` A CHAQUE
+// APPEL : un zeroing O(n) par requete de voisin, le verrou de debit denonce par
+// l'audit 50 k. Le remplacement est une EPOQUE par appel : un point est « vu »
+// si et seulement si sa case porte l'epoque courante, et la liste `touched`
+// garde les points reellement contactes — semantique STRICTEMENT identique a un
+// tableau remis a zero, sans zeroing. Le scratch appartient a une traversee (un
+// `reverse_search_stream`, un worker) et n'est JAMAIS partage entre threads.
+struct NeighbourScratch {
+  std::vector<unsigned long long> seen_epoch;   // epoque du dernier contact, 0 = jamais
+  unsigned long long epoch = 0;                 // 64 bits : ne reboucle pas en pratique
+  std::vector<i32> touched;
+};
+
 // Suit un flat dans une direction et rend le sommet suivant, ou `false` si le
 // pinceau est non borne de ce cote. Meme certification qu'au BFS : amorce par
 // l'ensemble interieur puis pave croissant, puis desaccord de signe entre les
 // deux spheres terminales, puis repli exhaustif.
 inline bool neighbour_along(const std::vector<P3>& points, const Vertex& v,
                             const FlatAtVertex& flat, int direction,
-                            const CertifiedIndex* index, FlatStatistics* st, Vertex* out) {
+                            const CertifiedIndex* index, FlatStatistics* st, Vertex* out,
+                            NeighbourScratch* scratch = nullptr) {
   const int n = (int)points.size();
   const int m = (int)v.shell.size();
   Pencil pencil{&points, flat.base[0], flat.base[1], flat.base[2]};
@@ -1694,11 +1737,21 @@ inline bool neighbour_along(const std::vector<P3>& points, const Vertex& v,
   ++st->pencil_queries;
   i32 best = -1;
   int best_orient = 0;
-  std::vector<char> seen_candidate((std::size_t)n, 0);
-  std::vector<i32> touched;
+  // Sans scratch fourni, un scratch local reproduit l'ancien cout — c'est le
+  // chemin des juges ponctuels, jamais celui d'une traversee.
+  NeighbourScratch local_scratch;
+  NeighbourScratch& scr = scratch != nullptr ? *scratch : local_scratch;
+  if ((int)scr.seen_epoch.size() != n) {
+    scr.seen_epoch.assign((std::size_t)n, 0);
+    scr.epoch = 0;
+  }
+  ++scr.epoch;
+  const unsigned long long epoch = scr.epoch;
+  scr.touched.clear();
+  std::vector<i32>& touched = scr.touched;
   auto absorb = [&](i32 z) {
-    if (seen_candidate[(std::size_t)z]) return;
-    seen_candidate[(std::size_t)z] = 1;
+    if (scr.seen_epoch[(std::size_t)z] == epoch) return;
+    scr.seen_epoch[(std::size_t)z] = epoch;
     touched.push_back(z);
     if (std::binary_search(v.shell.begin(), v.shell.end(), z)) return;
     const int oz = pencil.orient_of(z);
@@ -1729,7 +1782,7 @@ inline bool neighbour_along(const std::vector<P3>& points, const Vertex& v,
                                (long long)anchor.z - half};
       const long long hi[3] = {(long long)anchor.x + half, (long long)anchor.y + half,
                                (long long)anchor.z + half};
-      index->box(lo, hi, &st->grid_points_touched, absorb);
+      index->box(lo, hi, &st->grid_points_touched, absorb, &st->index_metrics);
       covered = (half >= (long long)kDeclaredGridMaximum);
       half *= 2;
     }
@@ -1743,7 +1796,8 @@ inline bool neighbour_along(const std::vector<P3>& points, const Vertex& v,
                          points[(std::size_t)bs[2]], points[(std::size_t)bs[3]],
                          &best_sphere)) break;
       ++st->disagreement_sweeps;
-      index->sign_disagreement(apex_sphere, best_sphere, &st->grid_points_touched, absorb);
+      index->sign_disagreement(apex_sphere, best_sphere, &st->grid_points_touched, absorb,
+                               &st->index_metrics);
       if (best == previous) break;
     }
     if (best < 0) {
@@ -2096,7 +2150,7 @@ inline std::vector<flats::Vertex> navigate_shallow(const std::vector<mhgp::P3>& 
                                      (long long)anchor.z - half};
             const long long hi[3] = {(long long)anchor.x + half, (long long)anchor.y + half,
                                      (long long)anchor.z + half};
-            index->box(lo, hi, &st->grid_points_touched, absorb);
+            index->box(lo, hi, &st->grid_points_touched, absorb, &st->index_metrics);
             covered_grid = (half >= (long long)kDeclaredGridMaximum);
             half *= 2;
           }
@@ -2119,7 +2173,7 @@ inline std::vector<flats::Vertex> navigate_shallow(const std::vector<mhgp::P3>& 
                                &best_sphere)) break;
             ++st->disagreement_sweeps;
             index->sign_disagreement(apex_sphere, best_sphere, &st->grid_points_touched,
-                                        absorb);
+                                        absorb, &st->index_metrics);
             if (best == previous) break;
           }
         }
@@ -2218,6 +2272,11 @@ inline std::vector<flats::Vertex> navigate_shallow(const std::vector<mhgp::P3>& 
 // Le sink rend `false` pour interrompre. Une sortie interrompue n'est pas une
 // sortie complete : le statut devient `kInvariantViolated` seulement si le sink
 // n'a jamais demande l'arret, sinon l'appelant sait ce qu'il a fait.
+// `neighbour_scratch` : scratch de traversee REUTILISABLE (epoque + touched),
+// possede par l'appelant — un worker le fait durer sur toutes ses racines. Nul,
+// un scratch local a cette traversee est cree : dans les deux cas, plus aucune
+// allocation O(n) par requete de voisin, et jamais de tableau partage entre
+// threads.
 template <class Sink>
 inline void reverse_search_stream(const std::vector<mhgp::P3>& points,
                                   int level_ceiling, FlatStatistics* st, CloudStatus* status,
@@ -2226,7 +2285,8 @@ inline void reverse_search_stream(const std::vector<mhgp::P3>& points,
                                   const std::vector<mhgp::i32>* forced_root_base = nullptr,
                                   int crown_depth = 0,
                                   std::vector<flats::Vertex>* frontier = nullptr,
-                                  std::vector<mhgp::i32>* export_root_base = nullptr) {
+                                  std::vector<mhgp::i32>* export_root_base = nullptr,
+                                  flats::NeighbourScratch* neighbour_scratch = nullptr) {
   using namespace flats;
   const int n = (int)points.size();
   *status = CloudStatus::kOk;
@@ -2300,6 +2360,11 @@ inline void reverse_search_stream(const std::vector<mhgp::P3>& points,
   // fente de direction, donc la reprise ne touche plus rien avant elle.
   struct Level { Vertex vertex; int i = 0, j = 1, k = 2, dir = 0; };
   std::vector<Level> stack;
+  // Le scratch de `neighbour_along` vit a l'echelle de la traversee : une seule
+  // allocation, une epoque par requete.
+  NeighbourScratch local_neighbour_scratch;
+  NeighbourScratch* const scratch =
+      neighbour_scratch != nullptr ? neighbour_scratch : &local_neighbour_scratch;
   // SLOTS VIFS : la somme des tailles des sommets du chemin. C'est la borne de
   // memoire que le parcours revendique, donc celle qu'il doit publier.
   long long live = 0;
@@ -2335,7 +2400,8 @@ inline void reverse_search_stream(const std::vector<mhgp::P3>& points,
       for (int slot = first_slot; slot < 2; ++slot) {
         const int direction = slot == 0 ? -1 : 1;
         Vertex candidate;
-        if (!neighbour_along(points, top.vertex, flat, direction, index, st, &candidate)) continue;
+        if (!neighbour_along(points, top.vertex, flat, direction, index, st, &candidate,
+                             scratch)) continue;
         if (candidate.level > level_ceiling) continue;
         ++st->reverse_children_tested;
         if (!backward_pair_admissible(points, candidate, flat.base, direction, root_base)) {
@@ -2474,7 +2540,7 @@ inline mhgp::Catalogue flat_catalogue(const std::vector<mhgp::P3>& points, int s
       grid.closed_ball(mb.sph, &st->grid_points_touched, [&](mhgp::i32 z) {
         members.push_back(z);
         if (mhgp::sphere_side(mb.sph, points[(std::size_t)z]) == 0) shell.push_back(z);
-      });
+      }, &st->index_metrics);
       std::sort(members.begin(), members.end());
       std::sort(shell.begin(), shell.end());
     } else {

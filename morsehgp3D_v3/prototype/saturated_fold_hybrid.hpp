@@ -36,6 +36,7 @@
 #pragma once
 
 #include <algorithm>
+#include <array>
 #include <map>
 #include <set>
 #include <cstdio>
@@ -129,22 +130,124 @@ inline HybridBallKey hybrid_ball_key(const mhgp::Sphere& sphere, bool raw_mutant
   return key;
 }
 
+// L'ORDRE GLOBAL D'ACTIVATION et ses lots de niveau exact : tri par
+// (sphere_cmp_beta, indice catalogue), lots = plages d'egalite exacte. La
+// POSITION dans cet ordre est l'ActivationId v1 de la possession canonique.
+inline void hybrid_level_batches(const mhgp::Catalogue& catalogue, std::vector<int>* by_level,
+                                 std::vector<std::pair<std::size_t, std::size_t>>* batches) {
+  const std::size_t count = catalogue.spheres.size();
+  by_level->resize(count);
+  for (std::size_t s = 0; s < count; ++s) (*by_level)[s] = (int)s;
+  std::sort(by_level->begin(), by_level->end(), [&](int x, int y) {
+    const int c = mhgp::sphere_cmp_beta(catalogue.spheres[(std::size_t)x].sph,
+                                        catalogue.spheres[(std::size_t)y].sph);
+    if (c != 0) return c < 0;
+    return x < y;
+  });
+  batches->clear();
+  std::size_t cursor = 0;
+  while (cursor < count) {
+    std::size_t batch_end = cursor + 1;
+    while (batch_end < count &&
+           mhgp::sphere_cmp_beta(
+               catalogue.spheres[(std::size_t)(*by_level)[cursor]].sph,
+               catalogue.spheres[(std::size_t)(*by_level)[batch_end]].sph) == 0)
+      ++batch_end;
+    batches->push_back({cursor, batch_end});
+    cursor = batch_end;
+  }
+}
+
+// LE CERTIFICAT DE SUPPORT PRINCIPAL (note miniboules supprimees) : u
+// obligatoire ssi miniball(M \ {u}) est STRICTEMENT sous B ; U principal ssi
+// tous ses points sont obligatoires. Partage entre le fold et la sonde de
+// masse pour que le masque hybride de la sonde soit CELUI du fold, pas une
+// reimplementation divergente.
+template <class PointArray>
+inline void hybrid_principal_certificates(const PointArray& pts, const mhgp::Catalogue& catalogue,
+                                          const std::vector<std::vector<mhgp::i32>>& members,
+                                          bool force_principal, std::vector<char>* principal,
+                                          long long* verified, long long* failed) {
+  const std::size_t count = catalogue.spheres.size();
+  principal->assign(count, 0);
+  std::vector<mhgp::i32> scratch;
+  for (std::size_t s = 0; s < count; ++s) {
+    const mhgp::CriticalSphere& sphere = catalogue.spheres[s];
+    if (force_principal) {   // MUTANT : refute par la cosphere
+      (*principal)[s] = 1;
+      continue;
+    }
+    if ((int)members[s].size() <= (int)sphere.n_support) {
+      // M == U (coquille = support) : aucun support alternatif possible.
+      (*principal)[s] = 1;
+      ++(*verified);
+      continue;
+    }
+    bool all_obligatory = true;
+    for (int u = 0; u < (int)sphere.n_support && all_obligatory; ++u) {
+      scratch.clear();
+      for (mhgp::i32 x : members[s])
+        if (x != sphere.support[u]) scratch.push_back(x);
+      const mhgp::MiniballResult removed =
+          mhgp::miniball_of(pts, scratch.data(), (int)scratch.size());
+      if (!removed.ok ||
+          mhgp::sphere_cmp_beta(removed.sph, sphere.sph) >= 0)
+        all_obligatory = false;
+    }
+    (*principal)[s] = all_obligatory ? 1 : 0;
+    if (all_obligatory)
+      ++(*verified);
+    else
+      ++(*failed);
+  }
+}
+
+// LA DECISION DE REQUETE du fold hybride, partagee avec la sonde : un
+// generateur est une requete fallback ssi il n'est ni redondant (q > k+1 en
+// lot solo), ni une naissance rang k, ni un fast principal en lot solo. La
+// meme chaine, dans le meme ordre, que le corps du fold.
+inline bool hybrid_is_fallback_query(int rank, int k, int support_size, bool is_principal,
+                                     bool solo_batch, bool force_principal) {
+  if (support_size > k + 1 && (solo_batch || force_principal)) return false;
+  if (rank == k) return false;
+  if ((is_principal && solo_batch) || force_principal) return false;
+  return true;
+}
+
 // `prefix_fallback` remplace le fallback demand-driven par l'index exact
 // prefixe--prefixe de la note : memes attaches semantiques (unir M a toute
 // racine d'un N partageant au moins k points), candidats par prefixes
 // r-k+1 sous l'ordre des identifiants puis recertification |M∩N| >= k —
-// aucun trie de faces, aucun scan des postings complets.
+// aucun trie de faces, aucun scan des postings complets. La possession
+// canonique (en-tete de prefix_index.hpp) garde chaque paire une fois.
+// `prefix_pair_ledger` est une CAPABILITY DE TEST (reponse auditeur Q2) : le
+// multiensemble canonique (ordre, lot, min(GeneratorId), max(GeneratorId))
+// des paires possedees et recertifiees AVANT toute union DSU — l'idempotence
+// des unions rend deux directions indiscernables, le ledger non. Il ne doit
+// jamais devenir un flux persistant du produit.
+using HybridPairLedger = std::vector<std::array<int, 4>>;
+
+// `prefix_all` (reponse auditeur 20260811, ordre recommande §2) : le join
+// prefixe RELATIF a toute `GeneratorTable` recue — toutes les requetes, aucun
+// certificat principal, aucun theoreme des q attaches, donc AUCUNE pretention
+// de famille complete. Il separe la correction du join de la completude de la
+// source : exact relativement a la table, jamais un claim sur l'amont.
 template <class PointArray>
 inline SaturatedFold build_saturated_fold_hybrid(
     const PointArray& pts, int point_count, const mhgp::Catalogue& catalogue,
     int maximum_order, bool keep_partitions, HybridReceipt* receipt,
     bool enforce_event_guard = false, HybridMutants mutants = {},
-    bool prefix_fallback = false) {
+    bool prefix_fallback = false, HybridPairLedger* prefix_pair_ledger = nullptr,
+    bool prefix_all = false) {
   SaturatedFold fold;
   fold.maximum_order = maximum_order;
   if (receipt != nullptr) *receipt = HybridReceipt{};
   if (maximum_order < 1 || maximum_order > mhgp::kMaxRank) {
     fold.refusal = "ordre maximal hors contrat";
+    return fold;
+  }
+  if (prefix_all && !prefix_fallback) {
+    fold.refusal = "prefix-all exige le fallback prefixe";
     return fold;
   }
   const std::size_t count = catalogue.spheres.size();
@@ -192,27 +295,14 @@ inline SaturatedFold build_saturated_fold_hybrid(
 
   // 2. LOTS par niveau exact, et INDEX DE BOULES par cle canonique : centre
   // reduit -> candidats, egalite finale par `sphere_cmp_beta` exact.
-  std::vector<int> by_level((std::size_t)count);
-  for (std::size_t s = 0; s < count; ++s) by_level[s] = (int)s;
-  std::sort(by_level.begin(), by_level.end(), [&](int x, int y) {
-    const int c = mhgp::sphere_cmp_beta(catalogue.spheres[(std::size_t)x].sph,
-                                        catalogue.spheres[(std::size_t)y].sph);
-    if (c != 0) return c < 0;
-    return x < y;
-  });
+  // L'ActivationId v1 de la possession canonique est la POSITION dans
+  // l'ordre global — jamais un numero de racine DSU.
+  std::vector<int> by_level;
   std::vector<std::pair<std::size_t, std::size_t>> batches;
-  {
-    std::size_t cursor = 0;
-    while (cursor < count) {
-      std::size_t batch_end = cursor + 1;
-      while (batch_end < count &&
-             mhgp::sphere_cmp_beta(catalogue.spheres[(std::size_t)by_level[cursor]].sph,
-                                   catalogue.spheres[(std::size_t)by_level[batch_end]].sph) == 0)
-        ++batch_end;
-      batches.push_back({cursor, batch_end});
-      cursor = batch_end;
-    }
-  }
+  hybrid_level_batches(catalogue, &by_level, &batches);
+  std::vector<int> activation_of((std::size_t)count);
+  for (std::size_t i = 0; i < count; ++i)
+    activation_of[(std::size_t)by_level[i]] = (int)i;
   HybridReceipt out;
   std::unordered_map<HybridBallKey, std::vector<int>, HybridBallKeyHash> ball_index;
   for (std::size_t s = 0; s < count; ++s)
@@ -230,42 +320,15 @@ inline SaturatedFold build_saturated_fold_hybrid(
     return -1;
   };
 
-  // 3. LE CERTIFICAT DE SUPPORT PRINCIPAL (note miniboules supprimees) : u
-  // obligatoire ssi miniball(M \ {u}) est STRICTEMENT sous B ; U principal
-  // ssi tous ses points sont obligatoires. Primitives exactes existantes.
-  std::vector<char> principal(count, 0);
-  {
-    std::vector<mhgp::i32> scratch;
-    for (std::size_t s = 0; s < count; ++s) {
-      const mhgp::CriticalSphere& sphere = catalogue.spheres[s];
-      if (mutants.force_principal) {   // MUTANT : refute par la cosphere
-        principal[s] = 1;
-        continue;
-      }
-      if ((int)members[s].size() <= (int)sphere.n_support) {
-        // M == U (coquille = support) : aucun support alternatif possible.
-        principal[s] = 1;
-        ++out.certificates_verified;
-        continue;
-      }
-      bool all_obligatory = true;
-      for (int u = 0; u < (int)sphere.n_support && all_obligatory; ++u) {
-        scratch.clear();
-        for (mhgp::i32 x : members[s])
-          if (x != sphere.support[u]) scratch.push_back(x);
-        const mhgp::MiniballResult removed =
-            mhgp::miniball_of(pts, scratch.data(), (int)scratch.size());
-        if (!removed.ok ||
-            mhgp::sphere_cmp_beta(removed.sph, sphere.sph) >= 0)
-          all_obligatory = false;
-      }
-      principal[s] = all_obligatory ? 1 : 0;
-      if (all_obligatory)
-        ++out.certificates_verified;
-      else
-        ++out.certificates_failed;
-    }
-  }
+  // 3. LE CERTIFICAT DE SUPPORT PRINCIPAL — l'aide partagee avec la sonde de
+  // masse : primitives exactes existantes, memes compteurs. En mode
+  // prefix-all il n'y a ni fast path ni redondants : aucune miniboule payee.
+  std::vector<char> principal;
+  if (prefix_all)
+    principal.assign(count, 0);
+  else
+    hybrid_principal_certificates(pts, catalogue, members, mutants.force_principal, &principal,
+                                  &out.certificates_verified, &out.certificates_failed);
 
   // 4. UN ORDRE A LA FOIS : attaches (fast path, redondants, fallback) puis
   // rejeu du lot — capture d'epoque, marquage q_min, records par temoin,
@@ -305,14 +368,32 @@ inline SaturatedFold build_saturated_fold_hybrid(
     st.staged_witness.resize(count);
     // Postings par point pour le fallback demand-driven, OU index
     // prefixe--prefixe : generateurs actifs (rang >= k), le lot courant STAGE
-    // avant toute recherche, publies a la fermeture.
+    // avant toute recherche, publies a la fermeture. `staged_epoch` grave le
+    // lot logique de chaque generateur et `is_query_now` le masque de
+    // requetes du lot courant — les deux ingredients de la possession.
     std::vector<std::vector<int>> postings;
     PrefixIndex prefix_index;
-    if (prefix_fallback) prefix_index.reset(point_count);
-    else postings.assign((std::size_t)point_count, {});
+    std::vector<long long> staged_epoch;
+    std::vector<char> is_query_now;
+    if (prefix_fallback) {
+      prefix_index.reset(point_count);
+      staged_epoch.assign(count, -1);
+      is_query_now.assign(count, 0);
+      if (mutants.prefix.future_visible) {
+        // MUTANT : les lots futurs sont visibles d'avance — les requetes
+        // unissent trop tot, le differentiel des formes le voit.
+        for (std::size_t s = 0; s < count; ++s)
+          if ((int)members[s].size() >= k)
+            out.prefix.entries +=
+                prefix_stage(&prefix_index, (int)s, members[s], k, mutants.prefix);
+      }
+    } else {
+      postings.assign((std::size_t)point_count, {});
+    }
 
     for (std::size_t batch = 0; batch < batches.size(); ++batch) {
       const long long epoch = (long long)batch + 1;
+      const bool solo_batch = batches[batch].second - batches[batch].first == 1;
       const auto touch = [&](int root) {
         if (st.touch_epoch[(std::size_t)root] != epoch) {
           st.touch_epoch[(std::size_t)root] = epoch;
@@ -338,13 +419,33 @@ inline SaturatedFold build_saturated_fold_hybrid(
         batch_generators.push_back(m);
         if (support_size <= k + 1) events.push_back({m, support_size});
         // STAGING : le lot entier est visible avant la premiere recherche —
-        // les generateurs futurs restent invisibles (contrat de la note).
-        if (prefix_fallback)
-          out.prefix.entries +=
-              prefix_stage(&prefix_index, m, members[(std::size_t)m], k, mutants.prefix);
-        else
+        // les generateurs futurs restent invisibles (contrat de la note). Le
+        // masque de requetes du lot est fige ICI, avant tout travail.
+        if (prefix_fallback) {
+          staged_epoch[(std::size_t)m] = epoch;
+          is_query_now[(std::size_t)m] =
+              prefix_all
+                  ? ((int)members[(std::size_t)m].size() > k ? 1 : 0)
+                  : (hybrid_is_fallback_query((int)members[(std::size_t)m].size(), k,
+                                              support_size, principal[(std::size_t)m] != 0,
+                                              solo_batch, mutants.force_principal)
+                         ? 1
+                         : 0);
+          if (!mutants.prefix.future_visible && !mutants.prefix.stage_query_sequentially)
+            out.prefix.entries +=
+                prefix_stage(&prefix_index, m, members[(std::size_t)m], k, mutants.prefix);
+        } else {
           for (mhgp::i32 x : members[(std::size_t)m]) postings[(std::size_t)x].push_back(m);
+        }
       }
+      // PREFLIGHT H_Q (audit 8df7ac8) : les degres sont figes a la cloture du
+      // staging du lot ; la somme q_x*d_x est la masse EXACTE que les requetes
+      // du lot liront. L'identite contre `hits` est un invariant a refus.
+      if (prefix_fallback)
+        for (int m : batch_generators)
+          if (is_query_now[(std::size_t)m] != 0)
+            out.prefix.predicted_hits += prefix_predicted_hits(
+                prefix_index, members[(std::size_t)m], k, mutants.prefix);
 
       const auto unite = [&](int a, int b) {
         ++out.unions_attempted;
@@ -372,12 +473,17 @@ inline SaturatedFold build_saturated_fold_hybrid(
       // support. Tant que ce cas n'est pas recu separement, les lots d'ex
       // aequo passent au fallback exact — le generique n'en a presque pas,
       // la grille saturee en a partout et le fallback y est deja requis.
-      const bool solo_batch = batches[batch].second - batches[batch].first == 1;
       for (int m : batch_generators) {
+        if (prefix_fallback && mutants.prefix.stage_query_sequentially)
+          // MUTANT : stager au tour de traitement au lieu du lot entier —
+          // une requete precoce perd ses candidats tardifs du meme lot, et
+          // le preflight fige a la cloture du staging ne colle plus.
+          out.prefix.entries +=
+              prefix_stage(&prefix_index, m, members[(std::size_t)m], k, mutants.prefix);
         const mhgp::CriticalSphere& sphere = catalogue.spheres[(std::size_t)m];
         const int q = (int)sphere.n_support;
         const int rank = (int)members[(std::size_t)m].size();
-        if (q > k + 1 && (solo_batch || mutants.force_principal)) {
+        if (!prefix_all && q > k + 1 && (solo_batch || mutants.force_principal)) {
           // REDONDANT (theoreme 2, famille complete) : ses k-faces sont deja
           // UNE composante a son niveau — une attache par first_k suffit.
           ++out.redundant_generators;
@@ -397,7 +503,8 @@ inline SaturatedFold build_saturated_fold_hybrid(
           ++out.principal_generators;
           continue;
         }
-        if ((principal[(std::size_t)m] != 0 && solo_batch) || mutants.force_principal) {
+        if (!prefix_all &&
+            ((principal[(std::size_t)m] != 0 && solo_batch) || mutants.force_principal)) {
           // FAST PATH : les q attaches S_u = (U \ {u}) ∪ T.
           ++out.principal_generators;
           // T = les k-q+1 plus petits identifiants de M \ U — VIDE pour la
@@ -437,11 +544,25 @@ inline SaturatedFold build_saturated_fold_hybrid(
           // |M∩N| >= k sur les MEMBRES DU GENERATEUR — jamais sur une
           // projection DSU (le mutant project-root-first grave ce piege) —
           // puis union ; les doublons de composante sont idempotents.
+          if (is_query_now[(std::size_t)m] == 0) {
+            fold.refusal = "masque de requetes incoherent avec la decision du fold";
+            return fold;
+          }
           std::vector<int> candidates;
           prefix_query(prefix_index, members[(std::size_t)m], k, &candidates, &out.prefix,
                        mutants.prefix);
           for (int candidate : candidates) {
             if (candidate == m) continue;
+            // POSSESSION CANONIQUE : M garde N ssi N est d'un lot anterieur,
+            // ou non-requete du lot courant, ou ActivationId(N) < ActivationId(M).
+            // Une paire Q--Q est ainsi possedee UNE fois par l'ActivationId le
+            // plus grand ; Q--R reste a la requete meme si le R est posterieur.
+            if (!mutants.prefix.double_query_pair &&
+                staged_epoch[(std::size_t)candidate] == epoch &&
+                is_query_now[(std::size_t)candidate] != 0 &&
+                activation_of[(std::size_t)candidate] > activation_of[(std::size_t)m])
+              continue;
+            ++out.prefix.candidate_pairs_after_filter;
             bool certified;
             if (mutants.prefix.skip_recertification) {
               certified = true;
@@ -464,6 +585,9 @@ inline SaturatedFold build_saturated_fold_hybrid(
               continue;
             }
             ++out.prefix.recertified_true;
+            if (prefix_pair_ledger != nullptr)
+              prefix_pair_ledger->push_back({k, (int)batch, std::min(m, candidate),
+                                             std::max(m, candidate)});
             ++out.attaches;
             unite(m, candidate);
           }
@@ -551,6 +675,8 @@ inline SaturatedFold build_saturated_fold_hybrid(
         }
       }
 
+      if (prefix_fallback)
+        for (int m : batch_generators) is_query_now[(std::size_t)m] = 0;
       if (touched.empty()) continue;
       std::map<int, std::set<long long>> strict_of;
       std::map<int, std::size_t> strict_cov_of;
@@ -658,11 +784,34 @@ inline SaturatedFold build_saturated_fold_hybrid(
       }
     }
   }
-  out.identities_ok = out.attaches == out.unions_attempted;
-  if (!out.identities_ok) {
+  if (out.attaches != out.unions_attempted) {
     fold.refusal = "identite hybride violee : attaches != unions tentees";
     return fold;
   }
+  // L'IDENTITE DE PREFLIGHT : les hits reellement lus doivent egaler la
+  // prediction aux degres figes a la cloture du staging de chaque lot. Un
+  // staging pendant la phase de requetes — le mutant sequentiel — la casse.
+  if (prefix_fallback && out.prefix.predicted_hits != out.prefix.hits) {
+    fold.refusal = "identite prefixe violee : hits lus != hits prevus au staging";
+    return fold;
+  }
+  // L'IDENTITE DE MASSE (reponse auditeur Q3) : les entrees posees doivent
+  // egaler exactement la somme L(r,K) des membres — duplicate-posting peut
+  // respecter le preflight (la prediction relit le posting duplique), il
+  // meurt ici.
+  if (prefix_fallback) {
+    long long expected_mass = 0;
+    for (std::size_t s = 0; s < count; ++s) {
+      const long long r = (long long)members[s].size();
+      const long long m = std::min((long long)K, r);
+      expected_mass += m * (r + 1) - m * (m + 1) / 2;
+    }
+    if (out.prefix.entries != expected_mass) {
+      fold.refusal = "identite de masse violee : entrees != somme L(r,K)";
+      return fold;
+    }
+  }
+  out.identities_ok = true;
   if (receipt != nullptr) *receipt = out;
   fold.ok = true;
   return fold;

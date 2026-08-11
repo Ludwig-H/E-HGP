@@ -143,13 +143,29 @@ target_include_directories(mhgp3v_structural_scale_check PRIVATE ${CMAKE_CURRENT
 target_link_libraries(mhgp3v_structural_scale_check PRIVATE mhgp)
 target_compile_options(mhgp3v_structural_scale_check PRIVATE -Wall -Wextra -Werror)
 
-# LA PORTE DU CATALOGUE PARALLELE : front d'onde CPU == sequentiel par la clef
-# compacte (membres tries) + support canonique + rang, travail invariant entre
-# 2 et 3 threads (insensible a l'horloge), mutant drop-last-root tue.
+# LA PORTE DU CATALOGUE PARALLELE : le MULTIENSEMBLE COMPLET des sommets emis
+# (coquille, interieur, niveau) == reverse_search_stream sequentiel, avec
+# MULTIPLICITE UN (identite couronne+sous-arbres), puis le catalogue canonique
+# (membres tries + support + rang), travail invariant entre threads et
+# threads+1 (insensible a l'horloge). Mutants : drop-odd-roots meurt par le
+# multiensemble, duplicate-root par la multiplicite. La porte tourne
+# MULTITHREAD (>= 4) : la data race des compteurs mutable du CertifiedIndex
+# partage est reparee (metriques par worker, arbre immuable en requete).
 add_executable(mhgp3v_parallel_catalogue_gate prototype/parallel_catalogue_gate.cpp)
 target_include_directories(mhgp3v_parallel_catalogue_gate PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(mhgp3v_parallel_catalogue_gate PRIVATE mhgp Threads::Threads)
 target_compile_options(mhgp3v_parallel_catalogue_gate PRIVATE -Wall -Wextra -Werror)
+# ThreadSanitizer sur le chemin CPU multithread (OFF par defaut). Incompatible
+# CUDA, comme MORSEHGP3D_ENABLE_SANITIZERS cote produit. Portee : la cible de
+# la porte parallele — le seul chemin multithread que cette porte recoit.
+option(MHGP3V_ENABLE_TSAN "Instrumenter la porte parallele avec ThreadSanitizer" OFF)
+if(MHGP3V_ENABLE_TSAN)
+  if(MHGP3V_ENABLE_CUDA)
+    message(FATAL_ERROR "MHGP3V_ENABLE_TSAN est incompatible avec MHGP3V_ENABLE_CUDA")
+  endif()
+  target_compile_options(mhgp3v_parallel_catalogue_gate PRIVATE -fsanitize=thread -g)
+  target_link_options(mhgp3v_parallel_catalogue_gate PRIVATE -fsanitize=thread)
+endif()
 
 # LA PORTE DU ROUTEUR MEDIAN (note dendrogramme, Th. 5.1 et §14) : la descente
 # a majorite stricte == l'enumeration de TOUS les terminaux (perte minimale ET
@@ -173,6 +189,14 @@ add_executable(mhgp3v_prefix_mass_probe prototype/prefix_mass_probe.cpp)
 target_include_directories(mhgp3v_prefix_mass_probe PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(mhgp3v_prefix_mass_probe PRIVATE mhgp Threads::Threads)
 target_compile_options(mhgp3v_prefix_mass_probe PRIVATE -Wall -Wextra -Werror)
+
+# LA SONDE DE MASSE DE LA SOURCE PAR CELLULES DE CENTRES (reponse 20260811) :
+# theoreme cellule--candidat, temoins top-t_q par anneaux, dilations exactes —
+# le prealable de decision 50 k, sans former un seul tuple.
+add_executable(mhgp3v_cell_source_mass_probe prototype/cell_source_mass_probe.cpp)
+target_include_directories(mhgp3v_cell_source_mass_probe PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(mhgp3v_cell_source_mass_probe PRIVATE mhgp Threads::Threads)
+target_compile_options(mhgp3v_cell_source_mass_probe PRIVATE -Wall -Wextra -Werror)
 
 option(MHGP3V_ENABLE_CUDA "Compiler le kernel de front d'onde pour sm_120" OFF)
 if(MHGP3V_ENABLE_CUDA)
@@ -806,9 +830,36 @@ mhgp3v_add_expected_code_test_for(mhgp3v_postings_join_gate
 mhgp3v_add_expected_code_test_for(mhgp3v_postings_join_gate
   mhgp3v_hybrid_prefix_kill_project_root "mutant tue" 4
   --hybrid-mutant project-root-first)
-# LA PORTE ENSEMBLISTE de l'index : autorite combinatoire du theoreme.
+# LES MUTANTS DE POSSESSION ET DE CALENDRIER au niveau du FOLD REEL (audit
+# 8df7ac8 + reponse Q2/Q3) : un ordre par requete perd des paires ; les lots
+# futurs stages d'avance unissent trop tot ; le staging sequentiel casse le
+# preflight fige a la cloture du lot ; la possession desactivee duplique la
+# paire dans le ledger pre-DSU ; le posting duplique casse l'identite L(r,K).
+mhgp3v_add_expected_code_test_for(mhgp3v_postings_join_gate
+  mhgp3v_hybrid_prefix_kill_order_per_query "mutant tue" 4
+  --hybrid-mutant order-per-query)
+mhgp3v_add_expected_code_test_for(mhgp3v_postings_join_gate
+  mhgp3v_hybrid_prefix_kill_future_visible "mutant tue" 4
+  --hybrid-mutant future-visible)
+mhgp3v_add_expected_code_test_for(mhgp3v_postings_join_gate
+  mhgp3v_hybrid_prefix_kill_stage_sequentially "mutant tue" 4
+  --hybrid-mutant stage-query-sequentially)
+mhgp3v_add_expected_code_test_for(mhgp3v_postings_join_gate
+  mhgp3v_hybrid_prefix_kill_double_query "mutant tue" 4
+  --hybrid-mutant double-query-pair)
+mhgp3v_add_expected_code_test_for(mhgp3v_postings_join_gate
+  mhgp3v_hybrid_prefix_kill_duplicate_posting "mutant tue" 4
+  --hybrid-mutant duplicate-posting)
+# LA PORTE MULTIENSEMBLISTE de l'index : autorite combinatoire du theoreme,
+# possession canonique par lots, preflight fige, permutation globale commune.
 add_test(NAME mhgp3v_prefix_index_differential COMMAND mhgp3v_prefix_index_gate
          --families 400 --sets 24 --universe 30 --max-order 8 --seed 20260810)
+# LA TERMINAISON HOSTILE (audit 8df7ac8 P2) : universe=8 < 11 bouclait a
+# l'infini ; le rang est desormais borne par min(11, universe) et la campagne
+# TERMINE — planchers reduits a la non-vacuite de paires.
+add_test(NAME mhgp3v_prefix_index_universe8 COMMAND mhgp3v_prefix_index_gate
+         --families 20 --sets 8 --universe 8 --max-order 3 --seed 20260810
+         --min-pairs 1 --min-false 0 --min-qq 0 --min-prior 0 --min-later 0 --min-rr 0)
 mhgp3v_add_expected_code_test_for(mhgp3v_prefix_index_gate
   mhgp3v_prefix_index_kill_length "mutant tue" 4
   --families 50 --mutant prefix-length-minus-one)
@@ -819,26 +870,103 @@ mhgp3v_add_expected_code_test_for(mhgp3v_prefix_index_gate
   mhgp3v_prefix_index_kill_skip_recert "mutant tue" 4
   --families 50 --mutant skip-recertification)
 mhgp3v_add_expected_code_test_for(mhgp3v_prefix_index_gate
+  mhgp3v_prefix_index_kill_duplicate_posting "mutant tue" 4
+  --families 50 --mutant duplicate-posting)
+mhgp3v_add_expected_code_test_for(mhgp3v_prefix_index_gate
+  mhgp3v_prefix_index_kill_double_query "mutant tue" 4
+  --families 50 --mutant double-query-pair)
+mhgp3v_add_expected_code_test_for(mhgp3v_prefix_index_gate
+  mhgp3v_prefix_index_kill_order_per_query "mutant tue" 4
+  --families 50 --mutant order-per-query)
+mhgp3v_add_expected_code_test_for(mhgp3v_prefix_index_gate
+  mhgp3v_prefix_index_kill_stage_sequentially "mutant tue" 4
+  --families 50 --mutant stage-query-sequentially)
+mhgp3v_add_expected_code_test_for(mhgp3v_prefix_index_gate
+  mhgp3v_prefix_index_kill_future_visible "mutant tue" 4
+  --families 50 --mutant future-visible)
+mhgp3v_add_expected_code_test_for(mhgp3v_prefix_index_gate
   mhgp3v_prefix_index_reject_unknown_mutant "mutant inconnu" 2 --mutant inexistant)
 add_test(NAME mhgp3v_prefix_mass_probe_diagnostic COMMAND mhgp3v_prefix_mass_probe
          --points 48 --smax 11 --max-order 3 --seed 20260810)
 set_tests_properties(mhgp3v_prefix_mass_probe_diagnostic PROPERTIES
   PASS_REGULAR_EXPRESSION "OK : sonde de masse terminee")
+# LE MASQUE HYBRIDE de la sonde (audit 8df7ac8 P0) : staging par lot, requetes
+# = les fallback reels du fold, preflight fige, percentiles H_Q — le recu qui
+# dimensionne les chunks device. Les deux familles scanline (reponse Q5) sont
+# le regime declare proche LiDAR : ex aequo massifs, stries, multi-echos.
+add_test(NAME mhgp3v_prefix_mass_probe_hybrid_mask COMMAND mhgp3v_prefix_mass_probe
+         --points 32 --smax 11 --max-order 3 --seed 20260810 --mask hybrid)
+set_tests_properties(mhgp3v_prefix_mass_probe_hybrid_mask PROPERTIES
+  PASS_REGULAR_EXPRESSION "OK : sonde de masse terminee \\(masque hybride")
+add_test(NAME mhgp3v_prefix_mass_probe_scanline COMMAND mhgp3v_prefix_mass_probe
+         --points 32 --smax 11 --max-order 3 --seed 20260810
+         --family scanline_single_pass --mask hybrid)
+set_tests_properties(mhgp3v_prefix_mass_probe_scanline PROPERTIES
+  PASS_REGULAR_EXPRESSION "OK : sonde de masse terminee \\(masque hybride")
+add_test(NAME mhgp3v_prefix_mass_probe_scanline_overlap COMMAND mhgp3v_prefix_mass_probe
+         --points 32 --smax 11 --max-order 3 --seed 20260810
+         --family scanline_overlap_multiecho --mask hybrid)
+set_tests_properties(mhgp3v_prefix_mass_probe_scanline_overlap PROPERTIES
+  PASS_REGULAR_EXPRESSION "OK : sonde de masse terminee \\(masque hybride")
 mhgp3v_add_expected_code_test_for(mhgp3v_prefix_mass_probe
   mhgp3v_prefix_mass_probe_reject_unknown "argument inconnu" 2 --inexistant 1)
+mhgp3v_add_expected_code_test_for(mhgp3v_prefix_mass_probe
+  mhgp3v_prefix_mass_probe_reject_hybrid_threshold "baseline t=1" 2
+  --mask hybrid --threshold 2)
+# LA SONDE CELLULES : l'identite de dilation (marche par anneaux == balayage
+# complet) est verifiee cellule par cellule sur un petit nuage de chaque
+# famille ; la CLI hostile est refusee avant tout calcul.
+add_test(NAME mhgp3v_cell_source_mass_terrain COMMAND mhgp3v_cell_source_mass_probe
+         --points 400 --smax 11 --seed 20260810 --family terrain --verify-bruteforce 1)
+set_tests_properties(mhgp3v_cell_source_mass_terrain PROPERTIES
+  PASS_REGULAR_EXPRESSION "OK : sonde de masse de la source par cellules terminee")
+add_test(NAME mhgp3v_cell_source_mass_scanline COMMAND mhgp3v_cell_source_mass_probe
+         --points 400 --smax 11 --seed 20260810 --family scanline_overlap_multiecho
+         --verify-bruteforce 1)
+set_tests_properties(mhgp3v_cell_source_mass_scanline PROPERTIES
+  PASS_REGULAR_EXPRESSION "OK : sonde de masse de la source par cellules terminee")
+mhgp3v_add_expected_code_test_for(mhgp3v_cell_source_mass_probe
+  mhgp3v_cell_source_mass_reject_unknown "argument inconnu" 2 --inexistant 1)
 add_test(NAME mhgp3v_structural_scale_k1_emst COMMAND mhgp3v_structural_scale_check
          --points 200 --smax 11 --seed 20260810)
 mhgp3v_add_expected_code_test_for(mhgp3v_structural_scale_check
   mhgp3v_structural_scale_kill_shift "REFUTATION" 1
   --points 100 --smax 11 --seed 7 --force-shift-fusion 1)
+# LE RENFORCEMENT PAR PARTITIONS (reponse 20260811) : deux dendrogrammes de
+# memes poids sont indistinguables par les seuls niveaux — la partition
+# canonique des PointId est comparee en strict et en ferme a chaque niveau
+# exact, et une union un lot trop tot doit rougir.
+mhgp3v_add_expected_code_test_for(mhgp3v_structural_scale_check
+  mhgp3v_structural_scale_kill_merge_early "REFUTATION : partition" 1
+  --points 100 --smax 11 --seed 7 --force-merge-early 1)
+# LA PORTE PARALLELE DURCIE, a QUATRE threads et plus (la data race du
+# CertifiedIndex partage est reparee : les metriques de descente sont par
+# worker). Les planchers (racines de frontiere, sommets de sous-arbres) sont
+# calibres a environ la moitie de la campagne mesuree (1155 racines, 311 481
+# sommets) : une frontiere vide ou des sous-arbres muets ne rendent plus OK.
 add_test(NAME mhgp3v_parallel_catalogue_differential COMMAND mhgp3v_parallel_catalogue_gate
-         --points 120 --smax 11 --clouds 3 --seed 20260810)
+         --points 120 --smax 11 --clouds 3 --seed 20260810 --threads 4
+         --min-roots 600 --min-subtree-vertices 150000)
+# drop-odd-roots meurt par le MULTIENSEMBLE (des sommets manquent meme si leurs
+# boules sont redecouvertes) ; duplicate-root meurt par la MULTIPLICITE (le
+# catalogue deduplique, lui, resterait identique — c'est le certificat que la
+# porte precedente n'avait pas).
 mhgp3v_add_expected_code_test_for(mhgp3v_parallel_catalogue_gate
-  mhgp3v_parallel_catalogue_kill_drop_roots "mutant tue" 4
-  --points 120 --smax 11 --clouds 3 --mutant drop-odd-roots)
+  mhgp3v_parallel_catalogue_kill_drop_roots "mutant tue par le multiensemble" 4
+  --points 120 --smax 11 --clouds 3 --threads 4 --mutant drop-odd-roots)
+mhgp3v_add_expected_code_test_for(mhgp3v_parallel_catalogue_gate
+  mhgp3v_parallel_catalogue_kill_duplicate_root "mutant tue par la multiplicite" 4
+  --points 120 --smax 11 --clouds 3 --threads 4 --mutant duplicate-root)
 mhgp3v_add_expected_code_test_for(mhgp3v_parallel_catalogue_gate
   mhgp3v_parallel_catalogue_reject_unknown_mutant "mutant inconnu" 2
   --mutant inexistant)
+mhgp3v_add_expected_code_test_for(mhgp3v_parallel_catalogue_gate
+  mhgp3v_parallel_catalogue_reject_low_threads "threads >= 4 exiges" 2
+  --points 60 --smax 8 --clouds 1 --threads 2)
+mhgp3v_add_expected_code_test_for(mhgp3v_parallel_catalogue_gate
+  mhgp3v_parallel_catalogue_reject_floor "plancher de couverture" 3
+  --points 60 --smax 8 --clouds 1 --seed 20260810 --threads 4
+  --min-roots 100000000)
 # LE ROUTEUR MEDIAN : le differentiel contre l'enumeration, puis les quatre
 # mutants de la note (glouton renomme mediane, seuil inclusif, stay structurel
 # interdit, descente sur egalite 1/2--1/2) — chacun meurt par une fixture
@@ -902,8 +1030,11 @@ add_test(NAME mhgp3v_saturated_pipeline_compare_joins_terrain COMMAND mhgp3v_sat
 mhgp3v_add_expected_code_test_for(mhgp3v_saturated_pipeline
   mhgp3v_saturated_pipeline_reject_unknown_family "famille inconnue" 2
   --family martienne)
+# Terrain mesure : 825 racines, 155 701 sommets de sous-arbres — planchers a
+# environ la moitie, memes threads que la porte uniforme.
 add_test(NAME mhgp3v_parallel_catalogue_terrain COMMAND mhgp3v_parallel_catalogue_gate
-         --points 100 --smax 11 --clouds 2 --family terrain --seed 20260810)
+         --points 100 --smax 11 --clouds 2 --family terrain --seed 20260810 --threads 4
+         --min-roots 400 --min-subtree-vertices 75000)
 # LE PREFLIGHT REFUSE UN BUDGET INSUFFISANT AVANT TOUTE EMISSION, et publie le
 # manifeste du refus (P_post predit, pic conservateur, plus gros lot).
 mhgp3v_add_expected_code_test_for(mhgp3v_saturated_pipeline
@@ -927,6 +1058,18 @@ add_test(NAME mhgp3v_saturated_pipeline_compare_joins_hybrid_prefix
 mhgp3v_add_expected_code_test_for(mhgp3v_saturated_pipeline
   mhgp3v_saturated_pipeline_reject_hybrid_prefix_partial "famille complete" 2
   --points 32 --smax 11 --max-order 3 --join hybrid-prefix)
+# LE MODE PREFIX-ALL (reponse 20260811, ordre recommande §2) : le join prefixe
+# RELATIF a toute table recue — il ne refuse PAS la famille tronquee, c'est
+# son objet : separer la correction du join de la completude de la source.
+# `--compare-joins 1` grave le DIFFERENTIEL contre la verite G^2 sur la meme
+# famille partielle (reception live 20260811) : la provenance seule ne recoit
+# rien.
+add_test(NAME mhgp3v_saturated_pipeline_prefix_all_partial
+         COMMAND mhgp3v_saturated_pipeline
+         --points 32 --smax 11 --max-order 3 --seed 20260810 --join prefix-all
+         --compare-joins 1)
+set_tests_properties(mhgp3v_saturated_pipeline_prefix_all_partial PROPERTIES
+  PASS_REGULAR_EXPRESSION "prefix-all, relatif a la table recue")
 mhgp3v_add_expected_code_test_for(mhgp3v_saturated_pipeline
   mhgp3v_saturated_pipeline_reject_budget_faceowner "preflight" 3
   --points 32 --smax 11 --max-order 3 --seed 20260810 --join faceowner

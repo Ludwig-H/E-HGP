@@ -25,6 +25,7 @@
 // nuage ; 4 mutant tue (seul code attendu sous --mutant).
 
 #include <algorithm>
+#include <array>
 #include <cstdio>
 #include <cstring>
 #include <charconv>
@@ -300,6 +301,89 @@ bool independent_weights_agree(const mhgp::Catalogue& catalogue,
   return true;
 }
 
+// LE LEDGER PRE-DSU (reponse auditeur Q2) : la verite independante des paires
+// possedees, par ENUMERATION DIRECTE des couples de generateurs — jamais via
+// l'index prefixe — comparee en multiensemble exact au ledger du fold.
+// L'idempotence des unions DSU rend deux directions indiscernables dans les
+// partitions ; le ledger, lui, voit une paire possedee deux fois.
+bool prefix_ledger_agrees(const std::vector<mhgp::P3>& points, const mhgp::Catalogue& catalogue,
+                          int maximum_order, mhgp3v::HybridMutants hybrid_mutants,
+                          const mhgp3v::HybridPairLedger& got, std::string* why,
+                          bool prefix_all = false) {
+  const std::size_t count = catalogue.spheres.size();
+  std::vector<std::vector<mhgp::i32>> members(count);
+  for (std::size_t s = 0; s < count; ++s) {
+    const mhgp::CriticalSphere& sphere = catalogue.spheres[s];
+    members[s].assign(catalogue.members.begin() + sphere.members_begin,
+                      catalogue.members.begin() + sphere.members_begin + sphere.rank);
+  }
+  std::vector<int> by_level;
+  std::vector<std::pair<std::size_t, std::size_t>> batches;
+  mhgp3v::hybrid_level_batches(catalogue, &by_level, &batches);
+  std::vector<int> batch_of(count, -1);
+  std::vector<char> solo_of(count, 0);
+  for (std::size_t bi = 0; bi < batches.size(); ++bi) {
+    const bool solo = batches[bi].second - batches[bi].first == 1;
+    for (std::size_t b = batches[bi].first; b < batches[bi].second; ++b) {
+      batch_of[(std::size_t)by_level[b]] = (int)bi;
+      solo_of[(std::size_t)by_level[b]] = solo ? 1 : 0;
+    }
+  }
+  std::vector<char> principal(count, 0);
+  long long verified = 0, failed = 0;
+  if (!prefix_all)
+    mhgp3v::hybrid_principal_certificates(points, catalogue, members,
+                                          hybrid_mutants.force_principal, &principal,
+                                          &verified, &failed);
+  mhgp3v::HybridPairLedger want;
+  for (int k = 1; k <= maximum_order; ++k) {
+    std::vector<char> is_query(count, 0);
+    for (std::size_t s = 0; s < count; ++s) {
+      if ((int)members[s].size() < k) continue;
+      is_query[s] =
+          prefix_all
+              ? ((int)members[s].size() > k ? 1 : 0)
+              : (mhgp3v::hybrid_is_fallback_query(
+                     (int)members[s].size(), k, (int)catalogue.spheres[s].n_support,
+                     principal[s] != 0, solo_of[s] != 0, hybrid_mutants.force_principal)
+                     ? 1
+                     : 0);
+    }
+    for (std::size_t a = 0; a < count; ++a)
+      for (std::size_t b = a + 1; b < count; ++b) {
+        if ((int)members[a].size() < k || (int)members[b].size() < k) continue;
+        if (!mhgp3v::prefix_recertify(members[a], members[b], k)) continue;
+        if (batch_of[a] == batch_of[b]) {
+          if (is_query[a] != 0 || is_query[b] != 0)
+            want.push_back({k, batch_of[a], (int)a, (int)b});
+        } else {
+          const std::size_t late = batch_of[a] < batch_of[b] ? b : a;
+          if (is_query[late] != 0)
+            want.push_back({k, batch_of[late], (int)a, (int)b});
+        }
+      }
+  }
+  mhgp3v::HybridPairLedger sorted_got = got;
+  std::sort(sorted_got.begin(), sorted_got.end());
+  std::sort(want.begin(), want.end());
+  if (sorted_got == want) return true;
+  if (sorted_got.size() != want.size()) {
+    *why = "ledger pre-DSU : " + std::to_string(sorted_got.size()) +
+           " paires possedees contre " + std::to_string(want.size()) + " attendues";
+    return false;
+  }
+  for (std::size_t i = 0; i < want.size(); ++i)
+    if (sorted_got[i] != want[i]) {
+      *why = "ledger pre-DSU : entree " + std::to_string(i) + " divergente (k=" +
+             std::to_string(sorted_got[i][0]) + " lot=" + std::to_string(sorted_got[i][1]) +
+             " {" + std::to_string(sorted_got[i][2]) + "," + std::to_string(sorted_got[i][3]) +
+             "})";
+      return false;
+    }
+  *why = "ledger pre-DSU : divergent";
+  return false;
+}
+
 // Un tour complet sur un catalogue : verite, candidat, differentiel, recu.
 // Rend faux avec `why` au premier ecart. Sous mutant, un ecart est un SUCCES
 // pour l'appelant --mutant.
@@ -439,10 +523,11 @@ bool run_differential(const mhgp::Catalogue& catalogue, int maximum_order,
   // (faux candidats > 0 sur la campagne, sinon la porte est vide).
   if (points != nullptr) {
     mhgp3v::HybridReceipt prefix_receipt;
+    mhgp3v::HybridPairLedger prefix_ledger;
     const mhgp3v::SaturatedFold prefixed = mhgp3v::build_saturated_fold_hybrid(
         *points, (int)points->size(), catalogue, maximum_order,
         /*keep_partitions=*/true, &prefix_receipt, /*enforce_event_guard=*/true,
-        hybrid_mutants, /*prefix_fallback=*/true);
+        hybrid_mutants, /*prefix_fallback=*/true, &prefix_ledger);
     if (!prefixed.ok) {
       *why = std::string("fold hybride-prefixe refuse : ") + prefixed.refusal;
       return false;
@@ -451,11 +536,40 @@ bool run_differential(const mhgp::Catalogue& catalogue, int maximum_order,
       *why = "forme hybride-prefixe : " + *why;
       return false;
     }
+    if (!prefix_ledger_agrees(*points, catalogue, maximum_order, hybrid_mutants,
+                              prefix_ledger, why))
+      return false;
+    // LA SEPTIEME FORME : prefix-all (reponse 20260811, ordre recommande §2)
+    // — le meme join prefixe RELATIF a la table recue, toutes les requetes,
+    // sans certificat principal ni theoreme des q attaches : la correction du
+    // join est separee de la completude de la source. Meme fold bit a bit, et
+    // son ledger possede sous is_query = rang > k.
+    mhgp3v::HybridReceipt prefix_all_receipt;
+    mhgp3v::HybridPairLedger prefix_all_ledger;
+    const mhgp3v::SaturatedFold prefix_all = mhgp3v::build_saturated_fold_hybrid(
+        *points, (int)points->size(), catalogue, maximum_order,
+        /*keep_partitions=*/true, &prefix_all_receipt, /*enforce_event_guard=*/true,
+        hybrid_mutants, /*prefix_fallback=*/true, &prefix_all_ledger, /*prefix_all=*/true);
+    if (!prefix_all.ok) {
+      *why = std::string("fold prefix-all refuse : ") + prefix_all.refusal;
+      return false;
+    }
+    if (!folds_agree(truth, prefix_all, /*ignore_representatives=*/false, why)) {
+      *why = "forme prefix-all : " + *why;
+      return false;
+    }
+    if (!prefix_ledger_agrees(*points, catalogue, maximum_order, hybrid_mutants,
+                              prefix_all_ledger, why, /*prefix_all=*/true))
+      return false;
     if (prefix_accum != nullptr) {
       prefix_accum->entries += prefix_receipt.prefix.entries;
       prefix_accum->queries += prefix_receipt.prefix.queries;
+      prefix_accum->predicted_hits += prefix_receipt.prefix.predicted_hits;
       prefix_accum->hits += prefix_receipt.prefix.hits;
-      prefix_accum->unique_candidates += prefix_receipt.prefix.unique_candidates;
+      prefix_accum->candidate_ids_including_self +=
+          prefix_receipt.prefix.candidate_ids_including_self;
+      prefix_accum->candidate_pairs_after_filter +=
+          prefix_receipt.prefix.candidate_pairs_after_filter;
       prefix_accum->recertified_true += prefix_receipt.prefix.recertified_true;
       prefix_accum->false_candidates += prefix_receipt.prefix.false_candidates;
     }
@@ -546,6 +660,16 @@ int main(int argc, char** argv) {
       hybrid_mutants.prefix.skip_recertification = true;
     else if (!strcmp(hybrid_mutant_name, "project-root-first"))
       hybrid_mutants.prefix.project_root_first = true;
+    else if (!strcmp(hybrid_mutant_name, "order-per-query"))
+      hybrid_mutants.prefix.order_per_query = true;
+    else if (!strcmp(hybrid_mutant_name, "future-visible"))
+      hybrid_mutants.prefix.future_visible = true;
+    else if (!strcmp(hybrid_mutant_name, "stage-query-sequentially"))
+      hybrid_mutants.prefix.stage_query_sequentially = true;
+    else if (!strcmp(hybrid_mutant_name, "double-query-pair"))
+      hybrid_mutants.prefix.double_query_pair = true;
+    else if (!strcmp(hybrid_mutant_name, "duplicate-posting"))
+      hybrid_mutants.prefix.duplicate_posting = true;
     else { std::printf("ECHEC : mutant hybride inconnu %s\n", hybrid_mutant_name); return 2; }
   }
   mhgp3v::PostingsMutants mutants{};
@@ -807,10 +931,12 @@ int main(int argc, char** argv) {
     std::printf("recus      : P_post=%lld poids=%lld unions=%lld silencieux=%lld"
                 " niveaux=%lld |P_x| max=%zu\n",
                 total_p_post, total_weight, total_unions, total_silent, total_levels, max_posting);
-    std::printf("prefixe    : requetes=%lld hits=%lld candidats=%lld recertifies=%lld"
-                " faux=%lld\n", prefix_campaign.queries, prefix_campaign.hits,
-                prefix_campaign.unique_candidates, prefix_campaign.recertified_true,
-                prefix_campaign.false_candidates);
+    std::printf("prefixe    : requetes=%lld hits=%lld (prevus=%lld) candidats+self=%lld"
+                " paires filtrees=%lld recertifies=%lld faux=%lld\n",
+                prefix_campaign.queries, prefix_campaign.hits, prefix_campaign.predicted_hits,
+                prefix_campaign.candidate_ids_including_self,
+                prefix_campaign.candidate_pairs_after_filter,
+                prefix_campaign.recertified_true, prefix_campaign.false_candidates);
     if (total_generators < minimum_generators || total_unions < minimum_unions ||
         total_silent < minimum_silent || total_levels < minimum_levels || processed < 1) {
       std::printf("ECHEC : plancher non atteint (generateurs>=%lld unions>=%lld"

@@ -2054,10 +2054,10 @@ puis $3{,}03\cdot10^{15}$. Écartée.
 
 **Ce qui marche, et ne demande ni recouvrement ni enveloppe convexe.** Pour la
 paire diamétrale $(p,q)$ d'un support accepté, le lemme d'angle borne le rayon
-dans l'intervalle **compact** $[D/2,\,D/\sqrt2)$ avec $D=\lvert p-q\rvert$. Le
+dans l'intervalle **compact** $[D/2,\,D/\sqrt{2})$ avec $D=\lvert p-q\rvert$. Le
 centre est alors à distance $\sqrt{r^2-D^2/4}$ du milieu $M$, et
 $\bar B\bigl(M,\ r-\sqrt{r^2-D^2/4}\bigr)\subseteq\bar B(c,r)$ ; ce rayon décroît
-en $r$, donc il vaut au moins $(1/\sqrt2-1/2)D=0{,}2071\,D$. D'où le test :
+en $r$, donc il vaut au moins $(1/\sqrt{2}-1/2)D=0{,}2071\,D$. D'où le test :
 
 > si $\lvert P\cap\bar B(M,\ 0{,}2071\,\lvert p-q\rvert)\rvert>s_{\max}$, alors
 > $(p,q)$ n'est la paire diamétrale d'aucun support accepté.
@@ -2101,20 +2101,20 @@ conservée, seule la quantité conservée changeant.
 Le suivi reste `phase=15`, `deployment_status=architecture_only`,
 `public_status=not_claimed`. GCP non utilisé.
 
-Le lemme d'angle majorait $r_U$ par $\operatorname{diam}(U)/\sqrt2$. Ce n'est pas
+Le lemme d'angle majorait $r_U$ par $\mathrm{diam}(U)/\sqrt{2}$. Ce n'est pas
 la meilleure borne : **le théorème de Jung** l'est, et elle est optimale.
 
 **Pourquoi il s'applique ici.** Un support minimal bien centré a précisément pour
-miniboule sa boule circonscrite — $c_U\in\operatorname{conv}(U)$ et tous les
+miniboule sa boule circonscrite — $c_U\in\mathrm{conv}(U)$ et tous les
 points de $U$ à distance $r_U$, ce qui est la caractérisation du centre de la
 miniboule et de son ensemble de support. Jung donne donc
-$r_U\le\gamma_m\operatorname{diam}(U)$ avec $\gamma_3=1/\sqrt3$ et
-$\gamma_4=\sqrt{3/8}$, c'est-à-dire $\operatorname{diam}(U)\ge r_U\sqrt3$ pour un
-triangle et $\ge r_U\sqrt{8/3}$ pour un tétraèdre, contre $r_U\sqrt2$ auparavant.
+$r_U\le\gamma_m\mathrm{diam}(U)$ avec $\gamma_3=1/\sqrt{3}$ et
+$\gamma_4=\sqrt{3/8}$, c'est-à-dire $\mathrm{diam}(U)\ge r_U\sqrt{3}$ pour un
+triangle et $\ge r_U\sqrt{8/3}$ pour un tétraèdre, contre $r_U\sqrt{2}$ auparavant.
 
 **C'est optimal, et la mesure le confirme.** Sur 300 000 tirages de supports
-minimaux bien centrés, le minimum observé de $\operatorname{diam}/r$ vaut
-$1{,}7354$ pour $m=3$ contre la borne $\sqrt3=1{,}7321$, et $1{,}6709$ pour $m=4$
+minimaux bien centrés, le minimum observé de $\mathrm{diam}/r$ vaut
+$1{,}7354$ pour $m=3$ contre la borne $\sqrt{3}=1{,}7321$, et $1{,}6709$ pour $m=4$
 contre $\sqrt{8/3}=1{,}6330$ — les deux bornes sont approchées, celle de $m=3$ à
 0,2 %. Le lemme d'angle garde sa valeur propre : il est élémentaire, vaut en
 toute dimension et ne suppose rien sur $m$ ; il n'est simplement plus la borne
@@ -2126,8 +2126,7 @@ $\bar B(c,r)\supseteq S$, on a $\lvert c-c_{mb}(S)\rvert^2\le r^2-R_{mb}(S)^2$ �
 quatre lignes, en développant $\sum\lambda_i\lvert s_i-c\rvert^2$ autour de
 $c_{mb}$. Le lemme d'arête en est le cas $S=\{p,q\}$. Combiné à Jung :
 
-$$\bar B\Bigl(c_{mb}(S),\ \gamma_m D-\sqrt{\gamma_m^2D^2-R_{mb}(S)^2}\Bigr)
-  \subseteq \bar B(c_U,r_U)$$
+$$\bar B\Bigl(c_{mb}(S),\ \gamma_m D-\sqrt{\gamma_m^2D^2-R_{mb}(S)^2}\Bigr)\subseteq\bar B(c_U,r_U)$$
 
 pour tout $S\subseteq U$ connu, $D$ étant la longueur de l'arête diamétrale. Ce
 rayon **croît avec $R_{mb}(S)$** : le test se renforce à chaque sommet ajouté à
@@ -2136,7 +2135,7 @@ germe.
 
 **Constantes de germe fermées**, cas $S=\{p,q\}$ :
 $\kappa_m=\gamma_m-\sqrt{\gamma_m^2-1/4}$, soit
-$\kappa_3=1/(2\sqrt3)=0{,}288675$ et $\kappa_4=\sin15^\circ=0{,}258819$.
+$\kappa_3=1/(2\sqrt{3})=0{,}288675$ et $\kappa_4=\sin15^\circ=0{,}258819$.
 
 **Mesuré à 50 000 points, $s_{\max}=11$** :
 
@@ -2165,7 +2164,7 @@ Le dernier énoncé non mesuré de la recension Jung est le recouvrement du
 
 **Une borne inférieure meilleure.** Tout point équidistant des trois sommets d'un
 triangle $S$ à distance $\rho$ vérifie
-$\rho^2=r_\triangle^2+\operatorname{dist}(\cdot,\Pi)^2$, donc
+$\rho^2=r_\triangle^2+\mathrm{dist}(\cdot,\Pi)^2$, donc
 $r_U\ge r_\triangle\ge R_{mb}(S)$ : c'est le **circumrayon**, et non le rayon de
 miniboule, qui minore le circumrayon cherché. Le test en devient plus tranchant
 à deux endroits — le rayon des boules-test, et le test libre

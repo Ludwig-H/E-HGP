@@ -1,4 +1,45 @@
-# Instructions pour les Agents IA / AI Agent Instructions
+# Repository Guidelines
+
+Ce guide s'applique à tout le dépôt. Les règles de sécurité et de preuve ci-dessous sont impératives, même lorsqu'une tâche ne touche qu'un prototype ou de la documentation.
+
+## Cible de travail et statut
+
+Par défaut, tout nouveau travail MorseHGP3D cible **`morsehgp3D_v3/`**, sauf tâche visant explicitement la ligne enregistrée `morsehgp3d/`. Cette priorité ne constitue ni une promotion dans le registre officiel, ni l'ouverture d'une phase, ni un claim produit. Le cadre v3 déclaré est `phase=exploration_v3_hors_registre`, `backend=cpu_reference_bounded_oracles_and_g4_diagnostic`, `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`; l'annoncer au début de toute tâche v3 et vérifier sa fraîcheur dans `morsehgp3D_v3/audits/AUDIT_ETAT_COURANT.md` par rapport au `HEAD` et au worktree.
+
+`morsehgp3D_v2/` est un sujet différentiel et une dépendance, jamais une autorité. `morsehgp3d/` porte la ligne enregistrée, tandis que `HGP-old/` est historique. Ne pas y placer une implémentation v3 ni synchroniser ces arbres sans demande explicite.
+
+## Structure du projet
+
+- `morsehgp3D_v3/oracle/` : arithmétique, géométrie et juges indépendants bornés.
+- `morsehgp3D_v3/prototype/` : candidats CPU/CUDA, probes et portes différentielles.
+- `morsehgp3D_v3/audits/` et `morsehgp3D_v3/receipts/` : autorité d'audit, réfutations, mesures et reçus reproductibles.
+- `docs/` : spécification, preuves, roadmap, plan de tests et registre formel; `tests/` : contrats et fixtures transverses.
+- `gcp-migration/` : seuls scripts autorisés pour les sessions GPU GCP.
+- `build/v3/` : artefacts générés; ne pas les éditer ni les versionner.
+
+## Construction, tests et développement
+
+Depuis la racine :
+
+```bash
+cmake -S morsehgp3D_v3 -B build/v3 -DCMAKE_BUILD_TYPE=Release
+cmake --build build/v3 --parallel
+ctest --test-dir build/v3 --output-on-failure
+```
+
+Filtrer pendant l'itération, par exemple avec `ctest --test-dir build/v3 --output-on-failure -R '^mhgp3v_flats_'`, puis exécuter la suite pertinente complète avant livraison. La CI GitHub actuelle ne construit pas la v3 : les résultats CTest locaux doivent donc être rapportés explicitement. Python 3 est requis pour une validation complète, car son absence retire des portes F0 de CTest. CUDA est opt-in avec `-DMHGP3V_ENABLE_CUDA=ON`; toute exécution sur une VM GCP applique les garde-fous ci-dessous. Pour la documentation et le registre, exécuter respectivement `python tools/check_docs.py` et `python tools/check_implementation_status.py`.
+
+## Style et conventions de test
+
+La v3 utilise C++20 sans extensions, une indentation de deux espaces, `snake_case` pour fonctions/variables, `PascalCase` pour les types et le namespace `mhgp3v`. Les exécutables et CTests commencent par `mhgp3v_`. Le Python suit PEP 8 (quatre espaces, annotations de type, `snake_case`). Aucun formateur automatique propre à la v3 n'est imposé; suivre le fichier voisin et respecter les avertissements CMake (`-Wall -Wextra`, généralement `-Werror`, et `-Wpedantic` pour les oracles). Ne jamais faire porter une porte Python par `assert`, car elle doit rester effective sous `python3 -O`.
+
+Chaque changement sémantique reçoit un test positif, un rejet ou mutant ciblé, un plancher de non-vacuité et, si le contrat le fixe, le code de sortie exact. Une contradiction mathématique devient une fixture minimale permanente.
+
+## Commits et pull requests
+
+Les sujets récents sont des phrases anglaises impératives en minuscules, sans préfixe Conventional Commits, par exemple `prove k=1 equals single linkage`. Garder chaque commit cohérent et joindre code, fixture, audit et statut lorsqu'ils décrivent la même décision. Une pull request doit préciser le périmètre, le statut/claim borné, les commandes et résultats exacts, les mutants exercés et les liens vers audits ou reçus; séparer clairement mesures CPU, GPU et estimations.
+
+## Règles impératives pour les agents
 
 > [!IMPORTANT]
 > **Règle absolue :** Ne jamais créer de branches Git dans ce dépôt sans l'accord explicite de l'utilisateur.
@@ -43,12 +84,12 @@
 - **Pas de benchmark sans garde-fou** : aucun test GPU, installation, reboot ou benchmark ne commence avant la certification des deux coupe-circuits. Après un reboot, réarmer et revérifier le coupe-circuit invité.
 - **No raw starts, no forgotten targeted shutdowns**: agents must use the guarded scripts, keep each run between 30 seconds and eight hours, treat an unverifiable target state as failure, and verify the exact session they started is `TERMINATED` before handoff. Other labelled VMs are report-only.
 
-### Développement MorseHGP3D / MorseHGP3D Development
+### Développement MorseHGP3D (v3 incluse) / MorseHGP3D Development (including v3)
 
-- Avant toute implémentation, lire les deux premières parties de `docs/references/MANUSCRIT_THESE_HAUSEUX.pdf` — Partie I, pages PDF 35 à 76, puis Partie II, pages PDF 77 à 134 — ainsi que `docs/SPECIFICATION_MORSEHGP3D.md`, `docs/math/STATUT_PREUVES_ET_HEURISTIQUES.md`, `docs/ROADMAP_IMPLEMENTATION_MORSEHGP3D.md` et `docs/TEST_PLAN_MORSEHGP3D.md`.
+- Avant toute implémentation, lire les deux premières parties de `docs/references/MANUSCRIT_THESE_HAUSEUX.pdf` — Partie I, pages PDF 35 à 76, puis Partie II, pages PDF 77 à 134 — ainsi que `docs/SPECIFICATION_MORSEHGP3D.md`, `docs/math/STATUT_PREUVES_ET_HEURISTIQUES.md`, `docs/ROADMAP_IMPLEMENTATION_MORSEHGP3D.md`, `docs/TEST_PLAN_MORSEHGP3D.md`, `morsehgp3D_v3/README.md` et `morsehgp3D_v3/audits/AUDIT_ETAT_COURANT.md`.
 - Garder comme invariant d'architecture que MorseHGP3D doit alléger fortement `HGP-old` : calculer la hiérarchie utile sans matérialiser la mosaïque de Delaunay d'ordre supérieur. Tout nouveau jalon doit expliquer quelles structures globales, cellules, cofaces ou incidences il évite de construire et pourquoi son coût intermédiaire reste compatible avec les cibles produit. Un oracle exhaustif borné peut falsifier ou recertifier le chemin produit, mais ne doit jamais devenir son architecture par défaut ni être réimplémenté sous un autre nom.
-- Annoncer la phase, le `backend`, le `profile` et le `mode`; ne pas commencer si la porte d'entrée de la phase n'est pas documentée comme satisfaite.
-- Mettre à jour `docs/implementation_status.toml` dans le même commit que toute ouverture ou fermeture de phase, puis exécuter `python tools/check_implementation_status.py`.
+- Pour la v3, annoncer les cinq champs du cadre hors registre indiqués plus haut. Si une tâche vise une phase formelle, annoncer la phase, le `backend`, le `profile`, le `mode` et le statut public enregistrés; ne pas commencer si sa porte d'entrée n'est pas documentée comme satisfaite.
+- Ne pas modifier `docs/implementation_status.toml` pour une exploration v3 ordinaire. Lorsqu'une phase formelle est explicitement ouverte ou fermée, mettre le registre à jour dans le même commit que les preuves correspondantes, puis exécuter `python tools/check_implementation_status.py`.
 - Un benchmark, un accord moyen ou une sortie plausible ne peut jamais promouvoir `public_status=exact`; seuls les certificats et oracles prévus le peuvent.
 - Toute contradiction mathématique devient une fixture minimale permanente et met à jour le registre des preuves avant la poursuite des optimisations.
 - Distinguer dans le code et les rapports : proposition flottante, décision certifiée, réduction hiérarchique et statut public.

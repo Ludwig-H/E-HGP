@@ -10,7 +10,7 @@ constante fermée, son coût et ce qu'il vaut mesuré.
 
 > **Théorème (Jung, 1901).** Toute partie bornée de $\mathbb{R}^d$ de diamètre
 > $D$ est contenue dans une boule de rayon au plus $\gamma_d D$, avec
-> $\gamma_d=\sqrt{\tfrac{d}{2(d+1)}}$. La borne est atteinte exactement par les
+> $\gamma_d=\sqrt{\frac{d}{2(d+1)}}$. La borne est atteinte exactement par les
 > ensembles contenant un $d$-simplexe régulier d'arête $D$.
 
 L'application n'est pas automatique : Jung parle de la **miniboule**, notre objet
@@ -21,27 +21,22 @@ l'hypothèse « minimal bien centré ».
 > miniboule de $U$ et $U$ en est l'ensemble de support.
 
 *Démonstration.* La miniboule d'un compact $S$ est caractérisée par : son centre
-appartient à $\operatorname{conv}(S\cap\partial B)$. Ici tout $U$ est sur la
-sphère et $c_U\in\operatorname{relint}\operatorname{conv}(U)$ par définition du
+appartient à $\mathrm{conv}(S\cap\partial B)$. Ici tout $U$ est sur la
+sphère et $c_U\in\mathrm{relint}\mathrm{conv}(U)$ par définition du
 bon centrage. $\square$
 
 D'où, pour $m=\lvert U\rvert$ :
 
-$$\boxed{\;r_U\;\le\;\gamma_m\,\operatorname{diam}(U)\;},\qquad
-\gamma_3=\tfrac1{\sqrt3}\ (\text{le triangle est plan}),\qquad
-\gamma_4=\sqrt{\tfrac38}.$$
+$$\boxed{\;r_U\;\le\;\gamma_m\,\mathrm{diam}(U)\;},\qquad \gamma_3=\frac{1}{\sqrt{3}}\ (\text{le triangle est plan}),\qquad \gamma_4=\sqrt{\frac{3}{8}}.$$
 
 L'arité fixe la dimension à employer : un triangle vit dans un plan, donc c'est
-$\gamma_2^{\text{Jung}}=1/\sqrt3$ qui s'applique, pas $\gamma_3^{\text{Jung}}$.
+$\gamma_2^{\text{Jung}}=1/\sqrt{3}$ qui s'applique, pas $\gamma_3^{\text{Jung}}$.
 
 ## 1. L'encadrement et le rapport d'aspect
 
-Avec la borne triviale $\operatorname{diam}(U)\le 2r_U$ :
+Avec la borne triviale $\mathrm{diam}(U)\le 2r_U$ :
 
-$$\frac{D}{2}\;\le\;r_U\;\le\;\gamma_m D,
-\qquad\text{soit}\qquad
-\frac{D}{r_U}\in\Bigl[\tfrac1{\gamma_m},\,2\Bigr]
-=\begin{cases}[1{,}7321,\;2] & m=3\\ [1{,}6330,\;2] & m=4.\end{cases}$$
+$$\frac{D}{2}\;\le\;r_U\;\le\;\gamma_m D, \qquad\text{soit}\qquad \frac{D}{r_U}\in\Bigl[\frac{1}{\gamma_m},\,2\Bigr] =\begin{cases}[1{,}7321,\;2] & m=3\\ [1{,}6330,\;2] & m=4.\end{cases}$$
 
 **J1 — Rigidité de forme.** Le rapport diamètre sur circumrayon d'un support
 accepté est confiné dans une bande de largeur relative $1{,}15$ ($m=3$) ou
@@ -57,7 +52,7 @@ elle précède toutes les constantes.
 **Vérification.** Sur 300 000 supports minimaux bien centrés tirés au hasard, le
 minimum observé de $D/r$ vaut $1{,}7354$ ($m=3$) contre la borne $1{,}7321$, et
 $1{,}6709$ ($m=4$) contre $1{,}6330$ : les deux bornes sont approchées, celle des
-triangles à 0,2 %. La borne antérieure $\sqrt2=1{,}4142$, obtenue par un lemme
+triangles à 0,2 %. La borne antérieure $\sqrt{2}=1{,}4142$, obtenue par un lemme
 d'angle élémentaire, était donc loin de l'optimum.
 
 ## 2. Le résultat unificateur : la cascade de dimensions
@@ -67,14 +62,13 @@ C'est l'énoncé dont tout le reste découle.
 > **Théorème (cascade).** Soit $U$ accepté, $(p,q)$ sa paire diamétrale,
 > $D=\lvert p-q\rvert$, et $S\subseteq U$ contenant $\{p,q\}$. Le lieu des
 > centres compatibles
-> $$\mathcal{C}(S)=\bigl\{x:\ \lvert x-s\rvert \text{ constant sur } S,\
-> \lvert x-p\rvert\le\gamma_m D\bigr\}$$
+> $$\mathcal{C}(S)=\bigl\{x:\ \lvert x-s\rvert \text{ constant sur } S,\ \lvert x-p\rvert\le\gamma_m D\bigr\}$$
 > est un **compact de dimension $3-(\lvert S\rvert-1)$**, d'extension bornée
 > explicitement par Jung :
 >
 > | $S$ | lieu | dimension | extension |
 > | --- | --- | ---: | --- |
-> | $\{p,q\}$ | disque du plan médiateur, centré en $M$ | 2 | rayon $\sqrt{\gamma_m^2-\tfrac14}\,D$ |
+> | $\{p,q\}$ | disque du plan médiateur, centré en $M$ | 2 | rayon $\sqrt{\gamma_m^2-\frac{1}{4}}\,D$ |
 > | $\{p,q,z\}$ | segment $\perp$ au plan de $S$, centré en $o_S$ | 1 | demi-longueur $\sqrt{\gamma_m^2D^2-r_\triangle^2}$ |
 > | $\{p,q,z,w\}$ | le circumcentre | 0 | — |
 >
@@ -88,8 +82,8 @@ Pythagore : $\lvert c_U-M\rvert^2=r_U^2-D^2/4$ et
 $\lvert c_U-o_S\rvert^2=r_U^2-r_\triangle^2$, puis $r_U\le\gamma_m D$. $\square$
 
 **Constantes fermées du disque** :
-$\sqrt{\gamma_3^2-\tfrac14}=\sqrt{\tfrac1{12}}=0{,}288675$ et
-$\sqrt{\gamma_4^2-\tfrac14}=\sqrt{\tfrac18}=0{,}353553$.
+$\sqrt{\gamma_3^2-\frac{1}{4}}=\sqrt{\frac{1}{12}}=0{,}288675$ et
+$\sqrt{\gamma_4^2-\frac{1}{4}}=\sqrt{\frac{1}{8}}=0{,}353553$.
 
 **J3 — Chaque sommet ajouté fait tomber la dimension du lieu de centres d'une
 unité, et Jung en borne l'extension à chaque étage.** C'est la structure
@@ -114,7 +108,7 @@ $R_{mb}(S)\le R_{mb}(U)=r_U\le\gamma_m D$. $\square$
 Coût : **zéro requête spatiale**. Une miniboule de $\lvert S\rvert\le4$ points et
 une comparaison. À appliquer avant tout comptage, à chaque étage.
 
-Forme rationnelle exacte : $\gamma_3^2=\tfrac13$ et $\gamma_4^2=\tfrac38$ sont
+Forme rationnelle exacte : $\gamma_3^2=\frac{1}{3}$ et $\gamma_4^2=\frac{3}{8}$ sont
 **rationnels**, donc le test s'écrit $3R_{mb}^2\le D^2$ et $8R_{mb}^2\le 3D^2$ —
 des inégalités polynomiales dans l'arithmétique entière déjà présente, sans
 racine carrée.
@@ -134,16 +128,14 @@ croisé s'annulant. Chaque $\lvert s_i-c\rvert\le r$. $\square$
 
 Cas $S=\{p,q\}$ : $c_{mb}=M$, $R_{mb}=D/2$, et la constante fermée est
 
-$$\kappa_m=\gamma_m-\sqrt{\gamma_m^2-\tfrac14},\qquad
-\kappa_3=\frac{\gamma_3}{2}=\frac1{2\sqrt3}=0{,}288675,\qquad
-\kappa_4=\sin15^\circ=0{,}258819 .$$
+$$\kappa_m=\gamma_m-\sqrt{\gamma_m^2-\frac{1}{4}},\qquad \kappa_3=\frac{\gamma_3}{2}=\frac{1}{2\sqrt{3}}=0{,}288675,\qquad \kappa_4=\sin15^\circ=0{,}258819 .$$
 
-L'identité $\kappa_3=\gamma_3/2$ tient parce que $\gamma_3^2-\tfrac14=\gamma_3^2/4$.
+L'identité $\kappa_3=\gamma_3/2$ tient parce que $\gamma_3^2-\frac{1}{4}=\gamma_3^2/4$.
 
-**Exactitude rationnelle.** $\kappa_3^2=\tfrac1{12}$ est **rationnel** : le test
+**Exactitude rationnelle.** $\kappa_3^2=\frac{1}{12}$ est **rationnel** : le test
 des triangles s'écrit exactement $12\lvert x-M\rvert^2\le D^2$. Pour les
-tétraèdres $\kappa_4^2=\tfrac{2-\sqrt3}{4}$ est irrationnel ; on emploie un
-**minorant rationnel** — par exemple $\tfrac1{15}<\kappa_4^2$ — ce qui rétrécit
+tétraèdres $\kappa_4^2=\frac{2-\sqrt{3}}{4}$ est irrationnel ; on emploie un
+**minorant rationnel** — par exemple $\frac{1}{15}<\kappa_4^2$ — ce qui rétrécit
 la boule-test et ne peut donc qu'affaiblir le rejet, jamais le fausser.
 
 ### 3.3 Test de germe, recouvrement du disque
@@ -160,8 +152,8 @@ rayon, donc on peut le **recouvrir**.
 pour un $i$ ; et $r_U\ge D/2$, donc
 $\bar B(x_i,\tfrac D2-\delta)\subseteq\bar B(c_U,r_U)$. $\square$
 
-Avec $\delta=\alpha D$, la constante effective devient $\tfrac12-\alpha$ au lieu
-de $\kappa_m$, pour $N\approx1{,}2\,\bigl(\sqrt{\gamma_m^2-\tfrac14}/\alpha\bigr)^2$
+Avec $\delta=\alpha D$, la constante effective devient $\frac{1}{2}-\alpha$ au lieu
+de $\kappa_m$, pour $N\approx1{,}2\,\bigl(\sqrt{\gamma_m^2-\frac{1}{4}}/\alpha\bigr)^2$
 positions.
 
 **Mesuré à 50 000 points, $s_{\max}=11$** (anneaux hexagonaux, $N$ positions par
@@ -202,7 +194,7 @@ $O(1/\delta)$ positions au lieu de $O(1/\delta^2)$.
 > alors aucun support accepté de paire diamétrale $(p,q)$ ne contient $z$.
 
 *Démonstration.* Tout point équidistant des trois sommets à distance $\rho$
-vérifie $\rho^2=r_\triangle^2+\operatorname{dist}(\cdot,\Pi)^2$ où $\Pi$ est le
+vérifie $\rho^2=r_\triangle^2+\mathrm{dist}(\cdot,\Pi)^2$ où $\Pi$ est le
 plan de $S$. Donc $c_U$ est sur la droite $o_S+\mathbb{R}\nu$, à distance
 $\sqrt{r_U^2-r_\triangle^2}\le\sqrt{\gamma_m^2D^2-r_\triangle^2}$ de $o_S$ : il
 est sur le segment. La même identité donne
@@ -249,8 +241,8 @@ que $r_\triangle$ approche $\gamma_m D$, indépendamment de $R_{mb}$.
 
 > **J10.** Toute la géométrie utile à l'arête $(p,q)$ est contenue dans une seule
 > boule autour du milieu :
-> $$\bar B(c_U,r_U)\ \subseteq\ \bar B\bigl(M,\ (\gamma_m+\sqrt{\gamma_m^2-\tfrac14})\,D\bigr),$$
-> de rayon $\tfrac{\sqrt3}{2}D=0{,}866\,D$ pour $m=3$ et $\cos15^\circ\,D=0{,}966\,D$
+> $$\bar B(c_U,r_U)\ \subseteq\ \bar B\bigl(M,\ (\gamma_m+\sqrt{\gamma_m^2-\frac{1}{4}})\,D\bigr),$$
+> de rayon $\frac{\sqrt{3}}{2}D=0{,}866\,D$ pour $m=3$ et $\cos15^\circ\,D=0{,}966\,D$
 > pour $m=4$.
 
 *Démonstration.* $\lvert x-M\rvert\le\lvert x-c_U\rvert+\lvert c_U-M\rvert\le r_U+\sqrt{r_U^2-D^2/4}$,
@@ -299,7 +291,7 @@ Il faut le dire aussi nettement que le reste.
 
 | énoncé | statut | effet |
 | --- | --- | --- |
-| J1 encadrement $[D/2,\gamma_mD]$ | mesuré | remplace $\sqrt2$ par l'optimum ; **facteur 6,5** sur le travail du germe |
+| J1 encadrement $[D/2,\gamma_mD]$ | mesuré | remplace $\sqrt{2}$ par l'optimum ; **facteur 6,5** sur le travail du germe |
 | J4 test sans requête | à implémenter | rejet gratuit avant tout comptage |
 | J6 germe, boule unique | mesuré | degré $546{,}4$ ($m=4$), $394{,}8$ ($m=3$) |
 | J9 incrémental, boule unique | mesuré | **facteur 1,91** sur les quadruples ; limité par les sommets internes |
@@ -388,10 +380,10 @@ $R(p)$, donc affaiblit la restriction sans jamais perdre de support. Mesuré à
 | --- | --- | ---: | ---: | ---: |
 | `uniform_latin` | AABB (6 plans) | 1,496 | 114,9 | 170 |
 | `uniform_latin` | $k$-DOP (26) | 1,421 | 114,3 | 170 |
-| `uniform_latin` | $\operatorname{conv}(P)$ | 1,348 | 113,6 | 168 |
+| `uniform_latin` | $\mathrm{conv}(P)$ | 1,348 | 113,6 | 168 |
 | `eight_clusters` | AABB (6 plans) | **347,2** | **1 375,5** | **25 026** |
 | `eight_clusters` | $k$-DOP (26) | 347,2 | 1 375,2 | 25 026 |
-| `eight_clusters` | $\operatorname{conv}(P)$ | 347,2 | 1 374,4 | 25 026 |
+| `eight_clusters` | $\mathrm{conv}(P)$ | 347,2 | 1 374,4 | 25 026 |
 
 **Deux conclusions, et la seconde est la plus importante.**
 
@@ -438,10 +430,10 @@ directions : un $\theta$ sous-estimé laisserait une direction non testée et
 pourrait perdre un support. Il faut donc un jeu dont le rayon soit **démontré**,
 pas estimé.
 
-> **Six axes signés, rayon $\arccos(1/\sqrt3)$.** Pour tout $u$ unitaire,
-> $\sum_i u_i^2=1$ force $\max_i\lvert u_i\rvert\ge1/\sqrt3$, donc l'axe signé le
-> plus proche est à au plus $\arccos(1/\sqrt3)=54{,}7356^\circ$ ; et
-> $(1,1,1)/\sqrt3$ atteint cette borne, qui est donc exacte.
+> **Six axes signés, rayon $\arccos(1/\sqrt{3})$.** Pour tout $u$ unitaire,
+> $\sum_i u_i^2=1$ force $\max_i\lvert u_i\rvert\ge1/\sqrt{3}$, donc l'axe signé le
+> plus proche est à au plus $\arccos(1/\sqrt{3})=54{,}7356^\circ$ ; et
+> $(1,1,1)/\sqrt{3}$ atteint cette borne, qui est donc exacte.
 
 C'est une preuve d'une ligne, et c'est **la seule dont on dispose**. Voici ce
 qu'elle coûte, mesuré à 50 000 points, $s_{\max}=11$, sur `uniform_latin`, la
@@ -482,8 +474,7 @@ octaédral complet. Il suffit donc de borner sur le domaine fondamental
 $x\ge y\ge z\ge0$. Sur ce domaine, le cosinus maximal à chaque type est atteint
 tous signes positifs et composantes décroissantes :
 
-$$\text{face}\to x,\qquad \text{arête}\to\frac{x+y}{\sqrt2},\qquad
-\text{sommet}\to\frac{x+y+z}{\sqrt3}.$$
+$$\text{face}\to x,\qquad \text{arête}\to\frac{x+y}{\sqrt{2}},\qquad \text{sommet}\to\frac{x+y+z}{\sqrt{3}}.$$
 
 Le rayon de recouvrement est $\arccos$ du **minimum du maximum** de ces formes.
 
@@ -503,12 +494,12 @@ bords donnent des valeurs strictement plus grandes (jeu 26) :
 
 | jeu | $\cos\theta$ | $\theta$ | $1-\sin\theta$ | scellé (millidegrés) |
 | ---: | --- | ---: | ---: | ---: |
-| 6 | $1/\sqrt3$ | $54{,}735610^\circ$ | $0{,}183503$ | 54 736 |
-| 14 | $1/\sqrt{5-2\sqrt3}$ | $36{,}206023^\circ$ | $0{,}409310$ | 36 207 |
-| **26** | $\mathbf{1/\sqrt{9-2\sqrt2-2\sqrt6}}$ | $\mathbf{27{,}569276^\circ}$ | $\mathbf{0{,}537179}$ | **27 570** |
+| 6 | $1/\sqrt{3}$ | $54{,}735610^\circ$ | $0{,}183503$ | 54 736 |
+| 14 | $1/\sqrt{5-2\sqrt{3}}$ | $36{,}206023^\circ$ | $0{,}409310$ | 36 207 |
+| **26** | $\mathbf{1/\sqrt{9-2\sqrt{2}-2\sqrt{6}}}$ | $\mathbf{27{,}569276^\circ}$ | $\mathbf{0{,}537179}$ | **27 570** |
 
-Pour le jeu 26, l'équioscillation donne $x=t$, $y=(\sqrt2-1)t$,
-$z=(\sqrt3-\sqrt2)t$ et la normalisation $t^2\,(9-2\sqrt2-2\sqrt6)=1$. Une
+Pour le jeu 26, l'équioscillation donne $x=t$, $y=(\sqrt{2}-1)t$,
+$z=(\sqrt{3}-\sqrt{2})t$ et la normalisation $t^2\,(9-2\sqrt{2}-2\sqrt{6})=1$. Une
 recherche brute sur quatre millions de directions du domaine confirme les trois
 valeurs à $2\cdot10^{-5}$ près — et par en dessous, comme il se doit puisqu'un
 échantillon ne tombe pas exactement dans le trou profond.

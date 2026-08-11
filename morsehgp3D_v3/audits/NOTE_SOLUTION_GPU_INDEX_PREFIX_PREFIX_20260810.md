@@ -3,7 +3,7 @@
 Date : 10 août 2026 UTC.
 
 Cadre : `phase=exploration_v3_hors_registre`, `backend=candidat_gpu_g4`,
-`profile=hgp_reduced_K10`, `mode=validated_hybrid_fallback`,
+`profile=hgp_reduced_K10`, `mode=proved_filter_implementation_blueprint`,
 `public_status=not_claimed`.
 
 ## Résultat directement exploitable
@@ -47,8 +47,10 @@ le contrat courant de rang au plus 11, cette dernière intersection tient dans
 un warp et n'exige ni sous-simplexe, ni mosaïque, ni table de faces.
 
 Comme $I_x^{(k)}$ est inclus dans le posting complet du point $x$, la masse lue
-est monotoniquement inférieure ou égale au cover $t=1$ déjà spécifié. La masse
-persistante vaut exactement :
+est inférieure ou égale à celle du cover $t=1$ **pour le même préfixe global**.
+Ce n'est pas une domination d'un cover adaptatif autorisé à choisir, pour chaque
+requête, d'autres points de plus faible degré visible. La masse persistante vaut
+exactement :
 
 $$L_k=\sum_{N:\lvert N\rvert\geq k}(\lvert N\rvert-k+1).$$
 
@@ -62,6 +64,26 @@ Ainsi $r=11,K=10$ donne 65 entrées, contre 110 entrées si les onze membres
 étaient matérialisées. Ces nombres bornent le stockage de l'index, pas le nombre
 de hits : les corrélations des postings restent à mesurer avant admission.
 
+Le préflight des hits bruts possède néanmoins une identité exacte qui évite de
+lancer le join pour savoir s'il tient. Poser $d_{x,k}=\lvert I_x^{(k)}\rvert$ et,
+pour le masque de requêtes $Q$, poser
+$q_{x,k}=\lvert\lbrace M\in Q:x\in P_k(M)\rbrace\rvert$. La concaténation lit
+exactement :
+
+$$H_Q^{(k)}=\sum_x q_{x,k}d_{x,k}.$$
+
+En mode tout-requête, $q_{x,k}=d_{x,k}$ et donc :
+
+$$H_{\mathrm{all}}^{(k)}=\sum_x d_{x,k}^{2}.$$
+
+Les occurrences self valent exactement $L_k$; le flux dirigé hors self vaut
+donc $H_{\mathrm{all}}^{(k)}-L_k$ avant unique. Pour un staging par lots, le
+même produit avec les degrés visibles de chaque lot donne la masse exacte; le
+degré final fournit une borne haute. Un histogramme des degrés, deux réductions
+et des entiers larges suffisent ainsi à refuser avant allocation. Les candidats
+uniques et les faux positifs dépendent encore des corrélations d'ordre supérieur
+et exigent la sonde ou le vrai kernel.
+
 Le choix de $\prec$ ne touche pas à l'exactitude. La première version peut
 prendre `PointId`, ce qui autorise un flux en une passe. Une version rare-first
 peut prendre `(degre_global,PointId)`, à condition de calculer les degrés sur le
@@ -74,13 +96,16 @@ Un degré recalculé par requête, par lot ou par worker invalide le théorème.
 requête; les générateurs futurs restent invisibles. `ActivationId` est un ordre
 canonique dans le lot, indépendant de l'ordonnancement GPU.
 
-Pour un `query_mask` de fallback, une paire recertifiée $(M,N)$ est conservée
-si et seulement si `N` n'est pas une requête du lot courant, ou si
+Pour le masque $Q$ des fallback effectivement interrogés dans le lot courant,
+une paire recertifiée $(M,N)$ avec $M\in Q$ est conservée si et seulement si
+`N` n'est pas une requête du lot courant, ou si
 `ActivationId(N)<ActivationId(M)`. Le self est exclu séparément. Cette règle :
 
 - possède une paire fallback--fallback exactement une fois;
-- conserve toute paire fallback--fast, même si le fast est postérieur;
-- laisse les seules paires fast--fast au certificat du chemin principal.
+- conserve toute paire entre une requête fallback courante et un fast, y
+  compris si le fast est postérieur dans le même lot;
+- laisse au certificat du chemin principal toutes les paires sans extrémité
+  dans $Q$, notamment fast--fast et ancien-fallback--nouveau-fast.
 
 Le `GeneratorId` réel et les $k$ points témoins sont conservés jusqu'à la
 recertification. Projeter d'abord un posting vers une racine DSU est faux : des
@@ -128,7 +153,8 @@ fallback rare, index préfixé », pas d'une prétention que toute CSR est petit
 ## Reçu et portes permanentes
 
 Publier par ordre et par lot : `prefix_index_entries`, `prefix_queries`,
-`prefix_hits`, `unique_candidates`, `recertified_true`, faux candidats,
+`predicted_prefix_hits`, `prefix_hits`, leur identité exacte,
+`unique_candidates`, `recertified_true`, faux candidats,
 longueur maximale d'un posting, high-water des slabs, principal/fallback,
 arêtes fast--fast certifiées, commits, rollbacks et digests de l'ordre global,
 du catalogue et du nuage.

@@ -98,11 +98,11 @@ et non de la combinatoire.
 ## 4. Ce qui ne répond pas au problème du contrat
 
 La proposition centrale du rapport — remplacer Gabriel par un
-$\operatorname{RNG}^{\mathrm{HGP}}_K$ défini par la connexité d'un graphe de
+$\mathrm{RNG}^{\mathrm{HGP}}_K$ défini par la connexité d'un graphe de
 contournement $\mathcal{B}_\sigma$ sur les facettes actives — est
 mathématiquement séduisante, avec une chaîne
-$\operatorname{Sep}_K \subseteq \operatorname{RNG}^{\mathrm{HGP}}_K
-\subsetneq \operatorname{Gab}_K$ dont l'inclusion stricte est établie par un
+$\mathrm{Sep}_K \subseteq \mathrm{RNG}^{\mathrm{HGP}}_K
+\subsetneq \mathrm{Gab}_K$ dont l'inclusion stricte est établie par un
 contre-exemple explicite en dimension 2.
 
 Trois raisons de ne pas l'engager pour le contrat 50 000 points :

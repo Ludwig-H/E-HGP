@@ -931,8 +931,11 @@ static bool compare(const char* tag, const std::vector<P3>& pts, int s_max, bool
       coverage.reverse_triplets += ist.reverse_triplets_scanned;
       coverage.reverse_closures += ist.reverse_closures_built;
       coverage.exhaustive_scans += ist.exhaustive_scans;
-      coverage.index_nodes_visited += tree.nodes_visited;
-      coverage.index_leaves_visited += tree.leaves_visited;
+      // Les metriques de descente sont desormais portees par les statistiques de
+      // L'APPELANT (la course indexee `ist`), plus jamais par l'arbre partage :
+      // le plancher `min_internal_nodes` mord sur le meme chemin qu'avant.
+      coverage.index_nodes_visited += ist.index_metrics.nodes_visited;
+      coverage.index_leaves_visited += ist.index_metrics.leaves_visited;
       // LE SINK BORNE, juge par un consommateur qui ne tient RIEN : il compte et
       // replie un hachage independant de l'ordre. Si le compte et le repli egalent
       // ceux de la sortie materialisee, le parcours a bien rendu la meme chose
@@ -1578,10 +1581,12 @@ int main(int argc, char** argv) {
         for (int trial = 0; trial < 100 && !pruned; ++trial) {
           long long lo[3], hi[3];
           for (int d = 0; d < 3; ++d) { lo[d] = trial; hi[d] = trial + 2; }
-          tree.nodes_visited = 0;
+          // Les metriques appartiennent a l'appelant : une instance FRAICHE par
+          // essai remplace l'ancienne remise a zero du compteur de l'arbre.
+          mhgp3v::IndexMetrics metrics;
           long long touched = 0;
-          tree.box(lo, hi, &touched, [](i32) {});
-          if (tree.nodes_visited < best) { best = tree.nodes_visited; pruned = true; }
+          tree.box(lo, hi, &touched, [](i32) {}, &metrics);
+          if (metrics.nodes_visited < best) { best = metrics.nodes_visited; pruned = true; }
         }
         if (!pruned || (int)tree.nodes.size() < 3) {
           printf("[index] aucun elagage exerce : %lld noeuds visites pour %zu noeuds\n", best,

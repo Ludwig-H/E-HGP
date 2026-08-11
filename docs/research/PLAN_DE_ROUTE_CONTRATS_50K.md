@@ -255,8 +255,8 @@ vrai : à $K=10$, 99,0 % des arêtes ont un rang fermé $\le 11$ en uniforme, 86
 en aggloméré, mais la queue monte à 16 et 38. Et la géométrie explique
 exactement pourquoi il ne peut pas en être autrement : pour un triangle acutangle
 de circumcentre $O$ et de rayon $R$, la boule diamétrale d'un côté est contenue
-dans $B(O, \sqrt2 R)$ et **jamais** dans $B(O,R)$ — son point le plus éloigné est
-à $R(\cos\gamma + \sin\gamma)$, qui vaut $R\sqrt2$ au pire et $1{,}366\,R$ même en
+dans $B(O, \sqrt{2} R)$ et **jamais** dans $B(O,R)$ — son point le plus éloigné est
+à $R(\cos\gamma + \sin\gamma)$, qui vaut $R\sqrt{2}$ au pire et $1{,}366\,R$ même en
 se restreignant à l'arête du diamètre. Un pré-filtre par rang d'arête est donc
 **prouvablement incomplet**, quel que soit le seuil.
 
