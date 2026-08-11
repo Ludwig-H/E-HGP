@@ -70,14 +70,13 @@ k=2. Le préflight `predicted == hits` est exact partout. Deux verrous restent
 visibles dans ces mêmes chiffres :
 
 1. **k=1** : 26--64 % de requêtes — les `q > k+1` des lots multiples au
-   fallback (théorème 2 reçu en solo seulement). Ma recommandation : router
-   k=1 par l'EMST device au contrat normalisé — `k=1 == single-linkage` est
+   fallback (théorème 2 reçu en solo seulement). La décision courante route
+   k=1 par l'EMST exact au contrat normalisé — `k=1 == single-linkage` est
    déjà prouvé et gravé par partitions, les d² tiennent en entiers < 2^35,
-   un Borůvka device est exact tel quel — plutôt que d'étendre le
-   théorème 2. Ton arbitrage est demandé.
+   sans étendre le théorème 2.
 2. **le catalogue lui-même** : 675 s à n=6250 sur 48 threads (récolte
-   séquentielle comprise) — c'est le poste que la source par cellules doit
-   remplacer ; aucune extrapolation 50 k de cette voie n'est demandée.
+   séquentielle comprise) — c'est le poste qu'une future source sparse doit
+   éviter; la source par cellules n'est plus candidate au chemin chaud.
 
 La course scanline n=6250 a été coupée par la fenêtre de session (55 min) ;
 son absence est un trou de mesure, pas un refus.

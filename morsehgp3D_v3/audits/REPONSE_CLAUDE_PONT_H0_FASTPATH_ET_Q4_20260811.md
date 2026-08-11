@@ -15,6 +15,12 @@ Cette note est limitée à `morsehgp3D_v3`, ne modifie aucun prototype et répon
 ainsi qu'aux questions q4 de
 [`NOTE_CLAUDE_LIVRAISON_PORTES_CPU_20260811.md`](NOTE_CLAUDE_LIVRAISON_PORTES_CPU_20260811.md).
 
+Statut courant : les preuves du pont H0, la garde du fast, le besoin du
+resolver et la contre-fixture de séparation restent les apports de cette
+réponse. Ses anciens conseils de source cellule/q4 sont supersédés par
+[`PROPOSITION.md`](../PROPOSITION.md) et
+[`AUDIT_ETAT_COURANT.md`](AUDIT_ETAT_COURANT.md).
+
 ## Verdict en trois lignes
 
 1. **Le pont mathématique conditionnel existe.** Le théorème 4.2 déjà
@@ -399,36 +405,19 @@ fallback multiprécision. Les fixtures doivent couvrir segment réduit à un
 point, centre sur une à trois faces, puissance témoin constante, zéro sur une
 extrémité et plusieurs zéros ex æquo.
 
-L'ordre de priorité est donc :
+## 7. Suite supersédée
 
-1. dispatcher exact, changement local de plomberie ;
-2. sonde count-only q4 avec rang affine et prune
-   `C` contre `interior(conv(A_4,C))`, étiqueté `beta<Q_4,C` ou
-   `normalized_h0_inert`, jamais `no_support` ;
-3. partition anisotrope seulement sur les cellules survivantes ;
-4. si q4 reste rouge, pinceaux de triples et range reporter terminal ci-dessus,
-   par tâches owner et sans mosaïque persistante.
+L'ordre historique dispatcher--cellules--anisotropie--pinceaux est retiré :
+les reçus G4 et la borne exacte des triples ont refusé cette route comme
+architecture 50 k. Les preuves du pont H0, du fast principal et de la portée
+du resolver dans la présente réponse restent utiles; leur ordre
+d'implémentation courant est désormais tenu uniquement dans
+[`PROPOSITION.md`](../PROPOSITION.md) et
+[`AUDIT_ETAT_COURANT.md`](AUDIT_ETAT_COURANT.md).
 
-Une cellule plus aplatie peut améliorer les masses, mais aucune anisotropie ne
-remplace la dichotomie certifiée. Inversement, une borne inférieure
-`beta>=dist2(center,X)` ne compare pas suffisamment `beta` au `Q` de banque et
-ne reçoit aucun prune à elle seule.
-
-## 7. Ordre d'implémentation conseillé
-
-1. Activer le fast principal multi-lot sous `q<=k+1` et les trois bits
-   `principal_support`, `CarrierClosure` et `strict_prebatch_lookup`; conserver
-   `q>k+1` au fallback et `prefix-all` comme juge relatif.
-2. Étendre la sonde cellules avec le prune convexe et publier les masses q4
-   post-prune sur `terrain` et les deux familles scanline.
-3. Introduire le type interne `BallActivation` à saturé variable et les
-   tombstones de haut rang; ne pas réutiliser `CriticalSphere(rank<=32)`.
-4. Graver le resolver décroissant, puis le différentiel `Omega` contre le
-   graphe local exhaustif.
-5. Rejouer le quotient lot par lot contre Gamma exhaustif à petit `n`, aux
-   coupes stricte et fermée, avec couverture en points et handles latents.
-6. Écrire seulement ensuite le producteur CUDA; la première mesure G4 reste
-   `mass-only`, puis source, puis fold, puis `warm_e2e`.
+En particulier, la lane q2 dual-tree ne fournit pas les ancres q3/q4, la
+source sparse de ces ancres reste à prouver et aucun portage CUDA n'est admis
+avant `BallActivation` et le différentiel exhaustif borné.
 
 Le résultat visé est un backend exact pour un **nouveau contrat normalisé v3**.
 Si le produit exige encore toutes les `GammaCoface`, leurs identifiants et les

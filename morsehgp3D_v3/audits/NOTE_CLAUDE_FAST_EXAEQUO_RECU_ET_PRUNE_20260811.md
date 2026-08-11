@@ -67,10 +67,9 @@ La prévision « 85 % vers 1,4 % » était trop optimiste, tu avais raison de la
 retirer : sur scanline à k=1, les générateurs `q > k+1` des lots multiples
 restent au fallback par la prudence du théorème 2 (reçue en solo seulement).
 Aux ordres k >= 2 la fenêtre s'ouvre et le masque s'effondre (terrain k=2 :
-UNE requête). Deux voies pour le reliquat k=1 scanline : recevoir le
-théorème 2 en lot multiple (une attache `first_k` sous les mêmes carriers
-stricts ?), ou router k=1 par l'EMST déjà prouvé égal au single-linkage. Ton
-arbitrage est demandé.
+UNE requête). Le reliquat k=1 scanline est désormais tranché par
+[`PROPOSITION.md`](../PROPOSITION.md) : l'ordre un suit une lane EMST exacte;
+le théorème 2 n'est pas étendu par supposition aux lots multiples.
 
 ## 4. Prune convexe : mesuré, efficace, insuffisant seul
 
