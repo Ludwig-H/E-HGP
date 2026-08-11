@@ -22,11 +22,8 @@ class FoldError(ValueError):
 class GateFailure(AssertionError):
     """Obligation de la porte non tenue.
 
-    Les obligations étaient portées par `assert`. Sous `python3 -O` elles
-    disparaissent toutes et le script imprime `PASS` sans rien avoir vérifié :
-    une porte qui peut être désactivée par un drapeau d'interpréteur n'est pas
-    une porte. Chaque obligation passe donc par `_require`, qui lève
-    inconditionnellement.
+    Chaque obligation passe par `_require`, qui reste active sous `python3 -O`;
+    une porte désactivable par un drapeau d'interpréteur ne serait pas valide.
     """
 
 
@@ -275,22 +272,12 @@ def _truth_classify(
         if q == 1:
             return Component(nodes, 1, "untouched_root", decision_roots[0], ())
         raise FoldError("invalid strict snapshot: several roots already connected")
-    # LA GARDE DE CARRIER EST RETIRÉE, ET C'ÉTAIT UN P0.
-    #
-    # L'ancienne ligne refusait toute composante portant un record sans `R` ni
-    # `L`. Elle contredisait la table du fold général : une composante à zéro
-    # racine stricte portant une `DirectHyperedge` DOIT créer une naissance. Le
-    # carré tout `N_a` (ABCD de la note §2.3) est exactement ce cas, et il est
-    # géométrique — quatre facettes de même miniboule, deux supports diagonaux.
-    # La vérité et le sujet le rejetaient ENSEMBLE, si bien que le différentiel
-    # ne pouvait pas le voir : deux implémentations d'une règle fausse
-    # concordent parfaitement.
-    #
-    # L'invariant « au moins deux facettes strictes » existe bien, mais il
-    # appartient au validateur de source RÉGULIÈRE, qui juge chaque record BRUT
-    # avant projection. Une garde posée après fermeture, au niveau de la
-    # composante, ne valide même pas cet invariant : un second record porteur
-    # d'un `L` masque le premier record malformé.
+    # Une composante à zéro racine stricte qui porte une DirectHyperedge crée
+    # une naissance. L'invariant « au moins deux facettes strictes » appartient
+    # au validateur de source régulière, qui juge chaque record brut avant
+    # projection; une garde après fermeture au niveau de la composante ne le
+    # prouverait pas, car un autre record porteur d'un `L` pourrait masquer le
+    # record malformé.
     has_direct = any(record.kind == "direct" for record in records)
     if q == 0:
         if not has_direct:

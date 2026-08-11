@@ -422,9 +422,9 @@ struct SourceCounters {
 // la construit depuis un catalogue, en triant les événements par comparaison
 // EXACTE des niveaux rationnels.
 //
-// Mais `ForestNode::source` est un indice DANS le catalogue, et l'audit
-// `AUDIT_CONTRAT_CATALOGUE_FORET_ORDER_K_CF9374` a montré que cet indice dépend
-// du générateur. Comparer deux forêts par leurs indices comparerait donc l'ordre
+// Mais `ForestNode::source` est un indice DANS le catalogue, et cet indice
+// dépend du générateur — fait durable, rejoué par la porte de signature
+// ci-dessous. Comparer deux forêts par leurs indices comparerait donc l'ordre
 // d'énumération, pas la structure.
 //
 // La signature ci-dessous est récursive et canonique : le type du nœud, les
@@ -434,8 +434,8 @@ struct SourceCounters {
 // de racines coïncident, et cela ne suppose aucun ordre commun.
 // LE RANG EXACT DU NIVEAU. `ForestNode::source` d'une MULTIFUSION est, par
 // contrat de `build_forest`, « la plus petite PAR INDEX des sphères de rang k+1
-// du lot » : cet indice dépend du générateur, et l'audit
-// `AUDIT_CONTRAT_CATALOGUE_FORET_ORDER_K_CF9374` l'avait déjà dit. Deux forêts
+// du lot » : cet indice dépend du générateur — le fait durable
+// ci-dessus, qui a motivé cette signature canonique. Deux forêts
 // structurellement identiques peuvent donc nommer un représentant différent pour
 // le même événement de fusion — c'est exactement ce que la première version de
 // cette signature a détecté, et ce n'était pas une divergence.

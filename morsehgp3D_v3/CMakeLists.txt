@@ -214,6 +214,47 @@ target_include_directories(mhgp3v_pair_anchor_probe PRIVATE ${CMAKE_CURRENT_SOUR
 target_link_libraries(mhgp3v_pair_anchor_probe PRIVATE mhgp)
 target_compile_options(mhgp3v_pair_anchor_probe PRIVATE -Wall -Wextra -Werror)
 
+# LE DOUBLE SANITIZER DU NOYAU ANGULAIRE (audit etat courant, profondeur
+# durcissement 2 : « ajouter une fixture extreme non colineaire et un build
+# sanitizer cible ») : la meme source du falsificateur d'ancres, compilee
+# ASan+UBSan sans recouvrement — le debordement signe (i64 comme __int128)
+# y est fatal, pas silencieux. Cible CPU seule ; les sanitizers restent
+# incompatibles CUDA, comme MHGP3V_ENABLE_TSAN et le produit.
+if(NOT MHGP3V_ENABLE_CUDA)
+  add_executable(mhgp3v_pair_anchor_probe_san prototype/pair_anchor_probe.cpp)
+  target_include_directories(mhgp3v_pair_anchor_probe_san PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+  target_link_libraries(mhgp3v_pair_anchor_probe_san PRIVATE mhgp)
+  target_compile_options(mhgp3v_pair_anchor_probe_san PRIVATE -Wall -Wextra -Werror
+    -fsanitize=address,undefined -fno-sanitize-recover=all -g)
+  target_link_options(mhgp3v_pair_anchor_probe_san PRIVATE
+    -fsanitize=address,undefined)
+endif()
+
+# LA PORTE DIRECTE DU GENERATEUR PARTAGE (audit etat courant, porte 1) : le
+# contrat « exactement n, ou refus ferme » sur make_family_cloud nu, quatre
+# familles, contre-exemple 12500/707 rejoue, insuffisance visible.
+add_executable(mhgp3v_cloud_family_gate prototype/cloud_family_gate.cpp)
+target_include_directories(mhgp3v_cloud_family_gate PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(mhgp3v_cloud_family_gate PRIVATE mhgp)
+target_compile_options(mhgp3v_cloud_family_gate PRIVATE -Wall -Wextra -Werror)
+
+# LA PORTE DU DEGRE GABRIEL (audit degre/kissing/smax=11 du 11/08) : deux
+# fixtures u16 gravees a treize voisins, rangs fermes exacts 2 et 11 — la
+# refutation executable du cap 12 et de toute ligne CSR a largeur fixe.
+add_executable(mhgp3v_gabriel_degree_gate prototype/gabriel_degree_gate.cpp)
+target_include_directories(mhgp3v_gabriel_degree_gate PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(mhgp3v_gabriel_degree_gate PRIVATE mhgp)
+target_compile_options(mhgp3v_gabriel_degree_gate PRIVATE -Wall -Wextra -Werror)
+
+# LA SOURCE q2 CANDIDATE PRODUIT (NOTE_SOLUTION_SOURCE_Q2_YAO48_LBVH_U16,
+# ordre d'implementation points 2--3 de l'audit etat courant) : Morton/LBVH
+# radix, coupe Yao48 stricte fail-open en banques 48x10, classification
+# terminale, census ferme, ledger complet et juge quadratique independant.
+add_executable(mhgp3v_pair_yao48_source prototype/pair_yao48_source.cpp)
+target_include_directories(mhgp3v_pair_yao48_source PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(mhgp3v_pair_yao48_source PRIVATE mhgp)
+target_compile_options(mhgp3v_pair_yao48_source PRIVATE -Wall -Wextra -Werror)
+
 # LE PRUNE CONVEXE CERTIFIE (reponse pont/q4 20260811 §6) : le predicat
 # partage axes + plan du barycentre, verification entiere seule decisive.
 add_executable(mhgp3v_cell_prune_gate prototype/cell_prune_gate.cpp)
@@ -698,7 +739,8 @@ mhgp3v_add_expected_code_test_for(mhgp3v_gamma_judge
   --min-decided 1000)
 
 # LE PREDICAT STRUCTUREL D'EVENEMENT GAMMA, EN PORTES PERMANENTES. Les
-# theoremes 1--2 de NOTE_SOLUTION_TRANSCRIPT_GAMMA_QMIN sont RECUS contre la
+# theoremes 1--2 du predicat q_min (enonce intemporel, l'unique autorite est
+# la porte elle-meme) sont RECUS contre la
 # verite exhaustive : un niveau du sature est un vrai niveau Gamma_k ssi son
 # lot contient un generateur avec |M| >= k et q_min(B) <= k+1. Le juge calcule
 # q_min par enumeration INDEPENDANTE (miniboule rationnelle de l'oracle),
@@ -985,6 +1027,11 @@ add_test(NAME mhgp3v_pair_selfjoin_q2_scanline COMMAND mhgp3v_pair_selfjoin_prob
          --verify-bruteforce 1)
 set_tests_properties(mhgp3v_pair_selfjoin_q2_scanline PROPERTIES
   PASS_REGULAR_EXPRESSION "FERME")
+# Le double a code exact exige par l'audit etat courant : la regex seule peut
+# ignorer un code non nul apres avoir vu FERME.
+add_test(NAME mhgp3v_pair_selfjoin_q2_scanline_code COMMAND mhgp3v_pair_selfjoin_probe
+         --points 400 --seed 20260810 --family scanline_overlap_multiecho
+         --verify-bruteforce 1)
 # Doubles a code exact des regex : un add_test SANS regex exige le code 0
 # nativement (expect_failure.cmake refuse par construction les codes nuls).
 add_test(NAME mhgp3v_pair_selfjoin_terrain_code COMMAND mhgp3v_pair_selfjoin_probe
@@ -1099,12 +1146,18 @@ mhgp3v_add_expected_code_test_for(mhgp3v_pair_selfjoin_probe
   mhgp3v_pair_selfjoin_reject_unknown "argument inconnu" 2 --inexistant 1)
 
 # LE FALSIFICATEUR D'ANCRES q3/q4 : fixtures gravees (code 0 + regex), oracle
-# exhaustif sur un petit nuage, mutants a code exact. Le mutant « plage
-# recouvrant une extremite » est mort-ne (g = 0 a l'extremite, le prédicat
-# strict la refuse deja) et documente dans le source ; la fixture tueuse
-# d'oracle-accept-nonpositive est un travail restant note dans la livraison.
+# exhaustif sur un petit nuage, mutants a code exact. Deux mutants sont
+# MORT-NES et documentes dans le source, sans porte tueuse possible : « plage
+# recouvrant une extremite » (g = 0 a l'extremite, le prédicat strict la
+# refuse deja) et « oracle-accept-nonpositive » (toute paire prunee place, par
+# monotonie axiale et la borne de Jung sur la miniboule d'un tuple d'arete
+# maximale prunee, ses 9/8 temoins strictement dans cette miniboule — le juge
+# elargi aux tuples non propres ne peut jamais mordre ; preuve au champ de
+# l'injection).
 foreach(anchor_fixture thin-acute contact-q3 contact-q4 nine-axial eight-axial
-        seven-axial q4-tetra depth-rays scope-depth)
+        seven-axial q4-tetra depth-rays scope-depth q4-colocated
+        q4-rational-equality u16-extremes-anchor diametral-contact
+        confounded-arc u16-extremes-skew)
   add_test(NAME mhgp3v_pair_anchor_fixture_${anchor_fixture} COMMAND
            mhgp3v_pair_anchor_probe --fixture ${anchor_fixture})
   set_tests_properties(mhgp3v_pair_anchor_fixture_${anchor_fixture} PROPERTIES
@@ -1156,6 +1209,187 @@ mhgp3v_add_expected_code_test_for(mhgp3v_pair_anchor_probe
   mhgp3v_pair_anchor_reject_unknown_mode "mode inconnu" 2 --mode inexistant)
 mhgp3v_add_expected_code_test_for(mhgp3v_pair_anchor_probe
   mhgp3v_pair_anchor_reject_unknown "argument inconnu" 2 --inexistant 1)
+# LA CAMPAGNE DE BLOCS NON VACUE (audit etat courant, coeur point 5 et porte
+# 1) : terrain n=32 graine 13 feuilles 2 — l'oracle rejoue des certificats de
+# BLOC dans chaque lane (2 en q3, 1 en q4) et les planchers separes coins/
+# terminaux refusent le vert-par-vacuite. La campagne uniform n=24, elle,
+# n'a AUCUN bloc : le meme plancher y refuse a code 3, gravure de la vacuite.
+add_test(NAME mhgp3v_pair_anchor_blocks_terrain32 COMMAND mhgp3v_pair_anchor_probe
+         --points 32 --seed 13 --family terrain --leaf-size 2 --oracle 1
+         --min-block-prunes 1 --min-corner-accepts 1 --min-terminal-prunes 1)
+set_tests_properties(mhgp3v_pair_anchor_blocks_terrain32 PROPERTIES
+  PASS_REGULAR_EXPRESSION "aucun desaccord")
+add_test(NAME mhgp3v_pair_anchor_blocks_terrain32_code COMMAND mhgp3v_pair_anchor_probe
+         --points 32 --seed 13 --family terrain --leaf-size 2 --oracle 1
+         --min-block-prunes 1 --min-corner-accepts 1 --min-terminal-prunes 1)
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_anchor_probe
+  mhgp3v_pair_anchor_floor_bites_uniform24 "plancher viole" 3 --points 24
+  --seed 20260810 --family uniform --oracle 1 --min-block-prunes 1)
+# LES DECISIONS DE PROFONDEUR ARMEES (audit, profondeur point 1) : les
+# fixtures axiales en mode depth forment de vrais certificats delta>=seuil ;
+# le mutant qui debranche le prune meurt ici.
+add_test(NAME mhgp3v_pair_anchor_nine_axial_depth COMMAND mhgp3v_pair_anchor_probe
+         --fixture nine-axial --mode depth --lane q3)
+set_tests_properties(mhgp3v_pair_anchor_nine_axial_depth PROPERTIES
+  PASS_REGULAR_EXPRESSION "OK : fixture nine-axial recue")
+add_test(NAME mhgp3v_pair_anchor_nine_axial_depth_code COMMAND mhgp3v_pair_anchor_probe
+         --fixture nine-axial --mode depth --lane q3)
+add_test(NAME mhgp3v_pair_anchor_eight_axial_depth COMMAND mhgp3v_pair_anchor_probe
+         --fixture eight-axial --mode depth --lane q4)
+set_tests_properties(mhgp3v_pair_anchor_eight_axial_depth PROPERTIES
+  PASS_REGULAR_EXPRESSION "OK : fixture eight-axial recue")
+add_test(NAME mhgp3v_pair_anchor_eight_axial_depth_code COMMAND mhgp3v_pair_anchor_probe
+         --fixture eight-axial --mode depth --lane q4)
+add_test(NAME mhgp3v_pair_anchor_u16_extremes_depth_code COMMAND mhgp3v_pair_anchor_probe
+         --fixture u16-extremes-anchor --mode depth --lane q3)
+# LA FIXTURE EXTREME NON COLINEAIRE (audit etat courant, profondeur
+# durcissement 2) : neuf paires antipodales exactes aux magnitudes u16
+# maximales, delta = 9 derive a la main et rejoue par le juge n <= 32 —
+# grands w1/w2, cross et dot non nuls, la ou u16-extremes-anchor n'exercait
+# que des projections nulles. Le double a code exact accompagne la regex.
+add_test(NAME mhgp3v_pair_anchor_u16_extremes_skew_code COMMAND mhgp3v_pair_anchor_probe
+         --fixture u16-extremes-skew)
+# LES REJEUX SANITIZES DU SWEEP : les fixtures qui exercent le tri, les
+# groupes confondus, les antipodes et les magnitudes extremes tournent aussi
+# sous ASan+UBSan a code exact ; un debordement signe du noyau ou de ses
+# adaptateurs y meurt au lieu de se compenser.
+if(NOT MHGP3V_ENABLE_CUDA)
+  foreach(san_fixture depth-rays confounded-arc diametral-contact
+          u16-extremes-anchor u16-extremes-skew)
+    add_test(NAME mhgp3v_pair_anchor_san_${san_fixture} COMMAND
+             mhgp3v_pair_anchor_probe_san --fixture ${san_fixture})
+  endforeach()
+  add_test(NAME mhgp3v_pair_anchor_san_depth_campaign COMMAND
+           mhgp3v_pair_anchor_probe_san --points 32 --seed 13 --family terrain
+           --leaf-size 2 --mode depth --oracle 1 --min-depth-pairs 400)
+endif()
+# LES MUTANTS DES PORTES 1 ET 3 : garde degeneree q4, egalite rationnelle
+# sure, prune de profondeur debranche, rayons confondus otes de l'arc,
+# contacts diametraux credites — cinq codes 4 exacts.
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_anchor_probe
+  mhgp3v_pair_anchor_kill_q4_degenerate "mutant tue" 4 --fixture q4-colocated
+  --inject q4-degenerate-accept)
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_anchor_probe
+  mhgp3v_pair_anchor_kill_q4_large_to_strict "mutant tue" 4
+  --fixture q4-rational-equality --inject q4-large-to-strict)
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_anchor_probe
+  mhgp3v_pair_anchor_kill_depth_disarmed "mutant tue" 4 --fixture nine-axial
+  --mode depth --lane q3 --inject depth-prune-disarmed)
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_anchor_probe
+  mhgp3v_pair_anchor_kill_confounded_dropped "mutant tue" 4
+  --fixture confounded-arc --inject depth-confounded-dropped)
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_anchor_probe
+  mhgp3v_pair_anchor_kill_diametral_closed "mutant tue" 4
+  --fixture diametral-contact --inject diametral-open-to-closed)
+# LA RECEPTION L4/HERITAGE DU COEUR (audit etat courant, porte 3 ; miroir de
+# la gate q2 d705bcde) : differentiel bi-mode — baseline sans L4 ni heritage,
+# sans les injections du sujet, sort baseline totalement assigne ; egalite de
+# TOUS les sorts et masses ; plancher plein+1 arme (1533 cas q3 a terrain
+# 400) ; cinq mutants a code 4 exact ; le plancher hors differentiel REFUSE.
+add_test(NAME mhgp3v_pair_anchor_differential_terrain COMMAND mhgp3v_pair_anchor_probe
+         --points 400 --seed 20260810 --family terrain --differential 1
+         --min-full-plus-one 100)
+set_tests_properties(mhgp3v_pair_anchor_differential_terrain PROPERTIES
+  PASS_REGULAR_EXPRESSION "sorts et masses IDENTIQUES")
+add_test(NAME mhgp3v_pair_anchor_differential_terrain_code COMMAND mhgp3v_pair_anchor_probe
+         --points 400 --seed 20260810 --family terrain --differential 1
+         --min-full-plus-one 100)
+add_test(NAME mhgp3v_pair_anchor_differential_multiecho_code COMMAND
+         mhgp3v_pair_anchor_probe --points 400 --seed 20260810
+         --family scanline_overlap_multiecho --differential 1)
+foreach(core_mutant l4-sign inherit-shift inherit-double-count inherit-stale-sibling
+        stop-at-inherited)
+  mhgp3v_add_expected_code_test_for(mhgp3v_pair_anchor_probe
+    mhgp3v_pair_anchor_kill_core_${core_mutant} "mutant tue" 4 --points 400
+    --seed 20260810 --family terrain --differential 1 --min-full-plus-one 10
+    --inject ${core_mutant})
+endforeach()
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_anchor_probe
+  mhgp3v_pair_anchor_floor_without_differential "plancher" 2 --points 400
+  --seed 20260810 --family terrain --min-full-plus-one 10)
+# LA PORTE DIRECTE DU GENERATEUR (audit, porte 1) : nominal code 0 + regex,
+# mutant overshoot code 4, CLI hostile code 2.
+add_test(NAME mhgp3v_cloud_family_cardinality COMMAND mhgp3v_cloud_family_gate)
+set_tests_properties(mhgp3v_cloud_family_cardinality PROPERTIES
+  PASS_REGULAR_EXPRESSION "OK : contrat de cardinalite du generateur partage")
+add_test(NAME mhgp3v_cloud_family_cardinality_code COMMAND mhgp3v_cloud_family_gate)
+mhgp3v_add_expected_code_test_for(mhgp3v_cloud_family_gate
+  mhgp3v_cloud_family_kill_overshoot "mutant tue" 4 --mutant generator-overshoot)
+mhgp3v_add_expected_code_test_for(mhgp3v_cloud_family_gate
+  mhgp3v_cloud_family_reject_unknown_mutant "mutant inconnu" 2 --mutant inexistant)
+
+# LA PORTE DU DEGRE GABRIEL : nominal code 0 + regex, mutant cap-12 code 4,
+# CLI hostile code 2. Le PASS_REGULAR_EXPRESSION ignore le code de retour :
+# la porte a code double le nominal.
+add_test(NAME mhgp3v_gabriel_degree COMMAND mhgp3v_gabriel_degree_gate)
+set_tests_properties(mhgp3v_gabriel_degree PROPERTIES
+  PASS_REGULAR_EXPRESSION "OK : gate du degre Gabriel recue")
+add_test(NAME mhgp3v_gabriel_degree_code COMMAND mhgp3v_gabriel_degree_gate)
+mhgp3v_add_expected_code_test_for(mhgp3v_gabriel_degree_gate
+  mhgp3v_gabriel_degree_kill_cap12 "mutant tue" 4 --inject degree-cap-12)
+mhgp3v_add_expected_code_test_for(mhgp3v_gabriel_degree_gate
+  mhgp3v_gabriel_degree_reject_unknown_arg "argument inconnu" 2 --zzz)
+mhgp3v_add_expected_code_test_for(mhgp3v_gabriel_degree_gate
+  mhgp3v_gabriel_degree_reject_unknown_inject "injection inconnue" 2 --inject inexistant)
+
+# LA SOURCE q2 YAO48/LBVH : six fixtures gravees (regex + doubles a code),
+# campagnes oracle avec juge quadratique independant, differentiel bi-mode,
+# equivariance par renversement, sept mutants a code exact et planchers de
+# non-vacuite. Le detail des contrats est en tete de pair_yao48_source.cpp.
+foreach(yao_fixture directional-equality region-prune underfull nonconverse
+        u16-extremes colocated)
+  add_test(NAME mhgp3v_yao48_fixture_${yao_fixture} COMMAND
+           mhgp3v_pair_yao48_source --fixture ${yao_fixture})
+  set_tests_properties(mhgp3v_yao48_fixture_${yao_fixture} PROPERTIES
+    PASS_REGULAR_EXPRESSION "OK : fixture ${yao_fixture} recue")
+  add_test(NAME mhgp3v_yao48_fixture_${yao_fixture}_code COMMAND
+           mhgp3v_pair_yao48_source --fixture ${yao_fixture})
+endforeach()
+add_test(NAME mhgp3v_yao48_oracle_terrain200 COMMAND mhgp3v_pair_yao48_source
+         --points 200 --seed 20260810 --family terrain --oracle 1 --permute 1
+         --min-census-records 1 --min-underfull 1)
+set_tests_properties(mhgp3v_yao48_oracle_terrain200 PROPERTIES
+  PASS_REGULAR_EXPRESSION "aucun desaccord")
+add_test(NAME mhgp3v_yao48_oracle_terrain200_code COMMAND mhgp3v_pair_yao48_source
+         --points 200 --seed 20260810 --family terrain --oracle 1 --permute 1
+         --min-census-records 1 --min-underfull 1)
+add_test(NAME mhgp3v_yao48_oracle_uniform128_code COMMAND mhgp3v_pair_yao48_source
+         --points 128 --seed 7 --family uniform --oracle 1 --permute 1)
+add_test(NAME mhgp3v_yao48_oracle_multiecho256_code COMMAND mhgp3v_pair_yao48_source
+         --points 256 --seed 20260810 --family scanline_overlap_multiecho --oracle 1
+         --permute 1)
+add_test(NAME mhgp3v_yao48_differential_terrain400_code COMMAND mhgp3v_pair_yao48_source
+         --points 400 --seed 20260810 --family terrain --differential 1)
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_yao48_source
+  mhgp3v_yao48_kill_strict_to_large "mutant tue" 4 --fixture directional-equality
+  --inject strict-to-large)
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_yao48_source
+  mhgp3v_yao48_kill_d_understated "mutant tue" 4 --fixture directional-equality
+  --inject d-understated)
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_yao48_source
+  mhgp3v_yao48_kill_threshold_minus_one "mutant tue" 4 --fixture directional-equality
+  --inject threshold-minus-one)
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_yao48_source
+  mhgp3v_yao48_kill_chamber_perm_swapped "mutant tue" 4 --fixture region-prune
+  --inject chamber-perm-swapped)
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_yao48_source
+  mhgp3v_yao48_kill_last_region_omitted "mutant tue" 4 --fixture region-prune
+  --inject last-region-omitted)
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_yao48_source
+  mhgp3v_yao48_kill_ownership_doubled "mutant tue" 4 --fixture region-prune
+  --inject ownership-doubled)
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_yao48_source
+  mhgp3v_yao48_kill_census_skips "mutant tue" 4 --fixture colocated
+  --inject census-skips-inf-zero)
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_yao48_source
+  mhgp3v_yao48_reject_unknown "argument inconnu" 2 --inexistant 1)
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_yao48_source
+  mhgp3v_yao48_reject_absurd "campagne absurde" 2 --points 2)
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_yao48_source
+  mhgp3v_yao48_reject_oracle_large "oracle exhaustif exige" 2 --points 300 --oracle 1)
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_yao48_source
+  mhgp3v_yao48_floor_bites "plancher viole" 3 --fixture underfull
+  --min-region-prunes 1)
 
 # LA PORTE DU PRUNE : contact conserve, pics lointains separes en local,
 # nappe inclinee separee par le plan general ; deux mutants tues.

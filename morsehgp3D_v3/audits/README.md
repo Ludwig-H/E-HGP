@@ -6,21 +6,23 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-Ce dossier est volontairement réduit aux autorités encore utiles. Les anciennes
-notes de livraison, réponses, benchmarks sans reçu et snapshots remplacés ont
-été supprimés du dépôt actif; leur historique reste consultable dans Git. Un titre,
-un message de commit ou un CTest vert ne vaut jamais réception.
+Cet index est volontairement réduit aux autorités encore utiles. Les snapshots
+historiques conservés sont explicitement étiquetés; aucun statut ancien n'est
+recopié dans les documents live. Une référence de prototype vers un fichier
+supprimé est un défaut documentaire à inventorier dans l'audit courant, pas une
+autorité ressuscitée. Un titre, un message de commit ou un CTest vert ne vaut
+jamais réception.
 
 ## Verdict live
 
 - [`AUDIT_ETAT_COURANT.md`](AUDIT_ETAT_COURANT.md) est l'unique verdict mutable :
-  il épingle le `HEAD`, les empreintes utiles, les contre-exemples, les tests
-  qualifiables et les portes ouvertes.
+  il distingue le `HEAD`, le delta éventuel du worktree, les empreintes utiles,
+  les contre-exemples, les tests qualifiables et les portes ouvertes.
 
 Le résumé est [`../README.md`](../README.md) et l'architecture durable est
-[`../PROPOSITION.md`](../PROPOSITION.md). En cas de dérive temporelle, corriger
-ces trois fichiers dans le même passage; les spécifications et le registre des
-preuves sous `docs/` restent supérieurs.
+[`../PROPOSITION.md`](../PROPOSITION.md). Ces deux documents ne doivent pas
+dupliquer un statut de commit : ils renvoient au verdict live. Les
+spécifications et le registre des preuves sous `docs/` restent supérieurs.
 
 ## Snapshots et preuves conservés
 
@@ -30,12 +32,17 @@ preuves sous `docs/` restent supérieurs.
 | [`AUDIT_DELTA_CBAC109_SIDECAR_ET_SOURCE_20260811.md`](AUDIT_DELTA_CBAC109_SIDECAR_ET_SOURCE_20260811.md) | contre-exemples du sidecar `cbac109` et contrat de frontière; le statut du successeur est uniquement live |
 | [`AUDIT_JUNG_ANCHOR_389A742.md`](AUDIT_JUNG_ANCHOR_389A742.md) | contre-fixture permanente à une ancre de Jung insuffisamment certifiée |
 | [`NOTE_COEUR_UNIVERSEL_JUNG_ANCRES_Q3_Q4_20260811.md`](NOTE_COEUR_UNIVERSEL_JUNG_ANCRES_Q3_Q4_20260811.md) | preuve des certificats cœur/profondeur q3/q4, hypothèses, égalités fail-open et limites industrielles |
+| [`NOTE_CERTIFICAT_HELLY_DISQUE_JUNG_20260811.md`](NOTE_CERTIFICAT_HELLY_DISQUE_JUNG_20260811.md) | preuve du certificat de couverture du disque par groupes disjoints de trois témoins au plus, décision exacte et limites de complexité |
+| [`AUDIT_DEGRE_GABRIEL_KISSING_SMAX11_20260811.md`](AUDIT_DEGRE_GABRIEL_KISSING_SMAX11_20260811.md) | réfutation exacte de toute borne de degré Gabriel par le kissing number ou `smax`; deux constructions u16 aux rangs 2 et 11, baseline de Poisson et conséquences industrielles; leur gate exécutable reste à construire |
 | [`NOTE_CLAUDE_SESSION_G4_MASSONLY_50K_20260811.md`](NOTE_CLAUDE_SESSION_G4_MASSONLY_50K_20260811.md) | provenance de la session G4 mass-only et arrêt de la cible; déclaration de session, pas verdict produit |
+| [`NOTE_SOLUTION_SOURCE_Q2_YAO48_LBVH_U16_20260811.md`](NOTE_SOLUTION_SOURCE_Q2_YAO48_LBVH_U16_20260811.md) | spécification de la route produit q2 : Morton/LBVH, coupe Yao48 stricte fail-open, classifieur terminal, census fermé, ledger, juge indépendant et gate d'exposant; aucune réception |
 
-## Preuves statiques citées par les prototypes
+## Lemmes conditionnels, contre-fixtures et portes citées
 
-Ces fichiers ne décrivent pas le `HEAD`; ils conservent un théorème, une
-contre-fixture ou le contrat d'une gate encore citée par le code :
+Ces fichiers ne décrivent pas le `HEAD`. Ils conservent une contre-fixture, un
+lemme dont les hypothèses restent explicites ou le contrat d'une porte encore
+citée par le code. Leur présence dans cet index ne les promeut pas en preuve
+formelle enregistrée :
 
 | objet | portée |
 | --- | --- |
@@ -50,6 +57,14 @@ contre-fixture ou le contrat d'une gate encore citée par le code :
 | [`check_gate_d_fold_f0.py`](check_gate_d_fold_f0.py) | gate Python F0 enregistrée par CMake; son succès reste local à ses fixtures |
 
 ## Reçus
+
+Deux reçus à la racine de `receipts/` sont conservés comme diagnostics datés,
+jamais comme portes v3 actuelles :
+
+| fichier | SHA-256 | portée |
+| --- | --- | --- |
+| [`census_tukey_shallow_20260808.json`](../receipts/census_tukey_shallow_20260808.json) | `aba8abc5e479a8900a2c83aa0cc5618a3e0a05bc9a59963572c140738a5ea128` | minorant heuristique par 4 096 directions aléatoires; `git_commit=unavailable`, aucune complétude exacte |
+| [`oracle_campaign_20260808.json`](../receipts/oracle_campaign_20260808.json) | `2579cd5a8eee14bc6e3d7e6ef83bdf052faacbcf90d2636e37e5c29c0c755bca` | différentiel exhaustif borné du sujet v2 à `n=8/11`; ne reçoit aucun worktree v3 |
 
 Les reçus G4 mass-only sont dans
 [`../receipts/g4_massonly_20260811/`](../receipts/g4_massonly_20260811/).

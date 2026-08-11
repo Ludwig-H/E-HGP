@@ -42,12 +42,13 @@ Le prune d'axe élague environ 46,9--91,7 % des cellules. Les réductions
 observées atteignent 136,3x sur R_4 terrain au pas 6 et 584,3x sur R_4
 multiecho au pas 6. Les quatre ratios R_3 scanline sont 49,4x, 55,0x, 79,2x
 et 83,3x; aucun reçu ne porte 750x. Chaque lane count-only se mesure entre
-0,174 et 29,153 s sur 48 threads. Ces temps sont déjà à budgéter; ils ne
+0,174 et 29,153 s sur 48 threads. Ces temps appartiennent au coût mesuré; ils ne
 mesurent ni formation de tuples, ni certification, ni fold.
 
-**Verdict mass-only** : aucune lane n'est admise. Aucun tuple n'a été formé
-et aucun budget d'octets, de fill, de certification ou de consommation n'a
-été mesuré. Après prune, q2 porte encore 4,65e8--2,86e9 tuples, q3
+**Verdict mass-only de cette session** : aucune lane n'est admise par ce reçu.
+Aucun tuple n'a été formé et aucun compte d'octets, de fill, de certification
+ou de consommation n'a été mesuré. Après prune, q2 porte encore
+4,65e8--2,86e9 tuples, q3
 1,47e10--1,32e11 et q4 3,30e11--9,97e12 selon la famille et le pas. q2 est
 seulement la lane la moins rouge. Toute route qui énumère ces masses est
 incompatible avec `warm_e2e < 1 s`; le pas 10 ne change pas ce verdict.
@@ -83,13 +84,14 @@ son absence est un trou de mesure, pas un refus.
 
 ## 3. Ce que cette session ne dit pas
 
-Aucun kernel n'a tourné, aucun fold n'a été rejoué à 50 k, aucun statut
-n'avance. Les nombres ci-dessus sont des autorités de réfutation : ils disent
-où le budget mourra si on l'ignore. L'ancien ordre
-plan--anisotropie--CUDA est supersédé. Les prochaines portes sont tenues dans
-[`PROPOSITION.md`](../PROPOSITION.md) et
-[`AUDIT_DELTA_CBAC109_SIDECAR_ET_SOURCE_20260811.md`](AUDIT_DELTA_CBAC109_SIDECAR_ET_SOURCE_20260811.md);
-aucune lane n'est actuellement admise.
+Aucun kernel n'a tourné et aucun fold n'a été rejoué à 50 k. Les nombres
+ci-dessus sont des autorités de réfutation : ils disent où l'enveloppe de
+travail et de latence observée devient incompatible avec la cible. Cette note
+datée ne prescrit aucun ordre de travail et ne décrit aucun successeur; le
+verdict vivant est uniquement
+[`AUDIT_ETAT_COURANT.md`](AUDIT_ETAT_COURANT.md).
 
-GCP : session unique, cible certifiée TERMINATED, aucune autre VM du label
-`project=e-hgp` active.
+GCP au passage de relais de cette session : cible créée par Claude certifiée
+`TERMINATED`; l'inventaire effectué à cet instant ne montrait aucune autre VM
+active du label `project=e-hgp`. Cette phrase est un reçu daté, pas un état GCP
+live.

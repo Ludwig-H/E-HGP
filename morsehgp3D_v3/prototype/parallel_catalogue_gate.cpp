@@ -184,6 +184,13 @@ int main(int argc, char** argv) {
     const std::vector<mhgp::P3> pts = mhgp3v::make_family_cloud(
         family, points, mhgp3v::cloud_family_default_coord(family, points), cloud_seed);
     if ((int)pts.size() < points) { std::printf("ECHEC : nuage non genere\n"); return 3; }
+    // CONTRAT DE CARDINALITE (audit etat courant) : egalite explicite a la
+    // frontiere du consommateur, jamais le seul test `< n`.
+    if ((int)pts.size() != points) {
+      std::printf("ECHEC : contrat de cardinalite viole — %zu points rendus pour %d"
+                  " demandes\n", pts.size(), points);
+      return 1;
+    }
 
     // LA VERITE SEQUENTIELLE : le `reverse_search_stream` sequentiel, indexe
     // comme la voie parallele, emet chaque sommet exactement une fois. Son

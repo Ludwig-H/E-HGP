@@ -1,7 +1,7 @@
 // MorseHGP3D v3 — LA PORTE DU JOIN PAR POSTINGS.
 //
-// `build_saturated_fold_postings` est la FORME D'ECHELLE du fold sature
-// (NOTE_SOLUTION_JOIN_POSTINGS_50K_20260810) ; `build_saturated_fold` est la
+// `build_saturated_fold_postings` est la FORME D'ECHELLE du fold sature ;
+// `build_saturated_fold` est la
 // FORME DE VERITE O(G^2). Cette porte les DIFFERENCIE bit a bit — niveaux,
 // partitions fermees, transcript (naissances/fusions/croissances/silencieux) —
 // et verifie les identites combinatoires du recu :

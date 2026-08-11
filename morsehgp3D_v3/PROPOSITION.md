@@ -27,10 +27,19 @@ Le candidat vise un contrat distinct,
 exacts, lots atomiques et unions exactes des `PointId`, après quotient certifié
 des blocs H0 inertes.
 
-Il ne remplace pas Gamma/v2. Une boule H0-inerte peut encore porter des
-facettes, des incidences silencieuses ou une application verticale. Tant que
+Il ne remplace pas le contrat Gamma de la ligne enregistrée. Une boule
+H0-inerte peut encore porter des facettes, des incidences silencieuses ou une
+application verticale. Tant que
 ces informations ne sont pas reconstruites par une preuve séparée, la sortie
-ne peut revendiquer ni le transcript v2 ni la hiérarchie verticale complète.
+ne peut revendiquer ni le transcript Gamma enregistré ni la hiérarchie
+verticale complète. `morsehgp3D_v2` reste un différentiel et une dépendance,
+jamais l'autorité de cette décision.
+
+Le `warm_e2e` officiel de la section 14.4 du plan de tests emploie
+`BenchmarkOutputContract-v1`, qui matérialise dix forêts, applications
+verticales, lots et certificat minimal. Le payload horizontal ci-dessus peut
+avoir sa propre série diagnostique, mais son p95 ne ferme ni le seuil
+secondaire d'une seconde ni le seuil principal de 100 ms du contrat officiel.
 
 ## 2. Invariants
 
@@ -154,7 +163,9 @@ La source candidate reprend l'architecture exacte de
 Le ledger ferme simultanément
 `candidate+certified_pruned+unresolved=C(n,2)`, la partition terminale
 `below+exact+above`, la multiplicité canonique un et la liste fermée de chaque
-record. Une frontière non vide ou un budget épuisé refuse la publication.
+record. Une frontière non vide refuse toute revendication d'exactitude. Le
+chemin industriel sans budget la reprend avec backpressure jusqu'à fermeture;
+il rend l'objet exact complet ou échoue sur une ressource physique réelle.
 
 Le self-join AABB par témoins communs est une seconde preuve exacte : chaque
 état représente un ensemble disjoint de paires et dix témoins universels
@@ -163,6 +174,33 @@ ou un second prune tant que ses compteurs ne battent pas Yao48/LBVH. Le juge
 borné peut tenir un sort quadratique à petit `n`; aucun chemin produit ne
 matérialise de matrice ou de liste globale de paires. Le pire cas reste
 quadratique en sortie.
+
+`smax` ne transforme pas ce pire cas en graphe de degré borné. Dans l'espace
+euclidien, pour tout `m`, un point `p` et `m` points distincts `q_i` sur une
+sphère centrée en `p` vérifient, pour `j!=i`,
+
+$$\Phi_{p,q_i}(q_j)=R^{2}\left(1-\cos\theta_{ij}\right)>0.$$
+
+Les `m` paires `p q_i` ont donc toutes le rang fermé deux. En ajoutant `h`
+points communs strictement intérieurs sur l'axe d'une petite calotte de
+directions, la même construction donne un degré arbitraire dans le bucket
+exact `closed_rank=h+2`; ceci vaut notamment au rang exact 11. Le kissing
+number 12 est inapplicable et `smax=11` borne le contenu d'un record, jamais le
+degré de `p`. Sur la grille u16 finie, les caps triviaux sont `n-1` et
+`2^48-1`; deux constructions documentées à treize voisins réfutent le cap 12.
+Le statut de leur gate appartient à l'audit live. Un record q2 de rang `R<=11`
+propose localement au plus neuf
+triplets et 36 quadruplets de même miniboule; cela ne fournit aucune source
+complète pour q3/q4. L'audit et les fixtures u16 permanentes demandées sont dans
+[`AUDIT_DEGRE_GABRIEL_KISSING_SMAX11_20260811.md`](audits/AUDIT_DEGRE_GABRIEL_KISSING_SMAX11_20260811.md).
+
+Une baseline probabiliste peut dimensionner un régime favorable sans devenir
+un contrat. Sous le Palm d'un processus de Poisson homogène simple dans
+`R^d`, le degré moyen cumulé jusqu'à `h` tiers diamétraux vaut
+`2^d(h+1)`. En dimension trois et sous `smax=11`, il vaut donc 80, soit 8 par
+bucket exact. Cette moyenne ne borne ni le maximum, ni la queue, ni les paires
+inspectées, et n'est pas exacte pour une fenêtre tronquée, la grille u16 ou les
+familles G4 du dépôt.
 
 Pour trois AABB `W,X,Y`, le certificat exact combine le supremum `U4` et
 l'infimum `L4`. Par axe, pour chaque couple d'extrémités `x,y`, poser
@@ -175,14 +213,15 @@ contact écarté de la recherche stricte reste obligatoirement rescanné pour le
 census fermé terminal.
 
 Sur le profil quantifié, une borne plus forte au même nombre de produits est
-l'infimum exact sur la grille entière. Pour chaque couple `x,y`, prendre
+l'infimum exact sur le produit cartésien entier des trois AABB. Pour chaque couple `x,y`, prendre
 `w0=clip(floor((x+y)/2),[w_min,w_max])` et évaluer
 `4*(w0-x)*(w0-y)`; lorsque `x+y` est impair, l'autre entier voisin donne la
 même valeur s'il appartient à l'intervalle. Le minimum sur les quatre couples,
-puis la somme des axes, est au moins l'infimum continu et reste exact sur les
-coordonnées u16. Son admission exige un différentiel exhaustif borné, notamment
-sommes impaires et clips aux deux bords; aucune arithmétique flottante n'entre
-dans la décision.
+puis la somme des axes, est au moins l'infimum continu et reste une borne sûre
+pour les `PointId` réellement contenus dans les nœuds, dont le sous-ensemble
+peut être plus clairsemé. Son admission exige un différentiel exhaustif borné,
+notamment sommes impaires et clips aux deux bords; aucune arithmétique flottante
+n'entre dans la décision.
 
 Une frontière persistante reste une antichaîne exacte sans cap. Lorsqu'un bloc
 d'extrémités est scindé, le sous-arbre du frère libéré devient admissible comme
@@ -230,6 +269,28 @@ diamétral strict. Les 9/8 témoins déjà universels peuvent être hérités so
 raffinement. Toute frontière persistante reste lossless, sans cap, et
 réintroduit les sous-arbres d'extrémités devenus disjoints après un split.
 
+Une route par ancre évite le rescan d'un arbre de témoins pour chaque paire.
+Pour une ancre `p`, un témoin `w`, une cible `q`, poser `s=w-p`, `d=q-p` et
+`A=d dot s-||s||^2`. Le témoin est universel sous les tests :
+
+$$\text{q3: }A>0\ \text{ et }\ 3A^2>\lVert d\mathbin{\times}s\rVert^2,\qquad\text{q4: }A>0\ \text{ et }\ 2A^2>\lVert d\mathbin{\times}s\rVert^2.$$
+
+Pour `p,w` fixes et un nœud AABB de cibles, `A_min` s'obtient exactement par
+choix d'extrémités. La fonction convexe `||d cross s||^2` atteint son maximum
+sur l'un des huit sommets. Les mêmes comparaisons avec ces deux bornes peuvent
+donc créditer le témoin pour tout le nœud; une égalité ou une boîte indécise
+descend. Une banque de neuf ou huit `PointId` distincts certifie le nœud sans
+partager ni univers ni sort avec q2. Aucun nombre fixe de banques
+directionnelles n'est affirmé complet : ce `Jung--Yao target range` est un
+certificat fail-open à mesurer.
+
+Pour un produit général de boîtes d'extrémités et de témoins, une borne plus
+orientée utilise `g_min=D2_min-U2_max` et une majoration entière `Q_max` de
+`||d cross U||^2` par intervalles. Le bloc est universel sous `g_min>0` puis
+`3*g_min^2>4*Q_max` en q3 ou `g_min^2>2*Q_max` en q4. Toute incertitude et
+toute égalité descendent. Cette borne doit être reçue contre les huit coins et
+un juge ponctuel indépendant avant de remplacer le préfiltre norm-only.
+
 La profondeur fermée de demi-boule fournit un filtre terminal complémentaire.
 Si `P={z:(z-a) dot (z-b)<0}` et `delta(a,b)` est le minimum du nombre de
 projections de `P` dans un demi-plan fermé du plan médiateur, toute sphère de
@@ -237,22 +298,82 @@ coquille contenant `a,b` possède au moins `delta` intérieurs. Les seuils sont
 `delta>=9` en q3 et `delta>=8` en q4, à condition que la `BallKey` porte un
 support propre positif q3/q4 certifié contenant la paire. `q_min=2` ou un
 `q_cert=2` seul n'autorise pas ces seuils; une même `BallKey` avec un
-`q_cert=3/4` certifié peut en bénéficier. La lane q2 emploie séparément le total `|P|`; ses
-survivants et ceux de q3/q4 ne sont pas emboîtés. Le schéma conditionnel de
-center-cover par 64 patches reste une troisième preuve, non encore reçue comme
-composant complet; sa banque dépend du patch plutôt que d'être universelle
-pour toute la paire.
+`q_cert=3/4` certifié peut en bénéficier. La lane q2 emploie séparément le total
+`|P|`; ses survivants et ceux de q3/q4 ne sont pas emboîtés.
+
+Le center-cover par 64 patches intervient plus tôt : `P15-HOCUDA-P1` est le
+candidat de complétude par blocs q3/q4, pas un filtre terminal interchangeable.
+Il partitionne implicitement toutes les paires, couvre extérieurement leur
+domaine de centres de Jung et ne supprime un bloc que si chaque patch faisable
+possède 9/8 `PointId` stricts certifiés. Un patch ou un range-query ambigu
+force le partage du bloc. Sa première tranche `P15-HOCUDA-P1a` profile seulement
+le prune q4 au seuil huit et n'émet aucune ancre. Elle ferme uniquement
+`pruned_mass+microtile_mass=C(n,2)`; elle ne prouve pas la complétude de P1.
+Les preuves ponctuelles ci-dessous ne peuvent remplacer cette fermeture
+globale.
+
+Un certificat collectif borné peut précéder le sweep complet. Pour un point
+`z`, poser `V_z=2z-a-b` et `g_z=D^2-||V_z||^2`. Tout centre de sphère passant
+par `a,b` s'écrit `M+t` avec `t` orthogonal à `d`, et la marge intérieure de
+`z` vaut
+
+$$\frac{g_z}{4}+V_z\mathbin{\cdot}t.$$
+
+Pour chaque point, le mauvais côté fermé est
+`B_z={t:g_z+4 V_z dot t<=0}`. Un groupe couvre le disque de Jung exactement si
+l'intersection du disque avec tous ses `B_z` est vide. Par Helly dans le plan,
+toute couverture possède un sous-groupe de trois `PointId` au plus. Neuf
+groupes disjoints certifient q3 et huit certifient q4, avec au plus 27 ou 24
+identifiants. Un greedy est sûr mais incomplet; son échec conserve la paire.
+L'égalité au bord reste mauvaise. Le solveur rationnel, les formules entières
+et les limites sont dans
+[`NOTE_CERTIFICAT_HELLY_DISQUE_JUNG_20260811.md`](audits/NOTE_CERTIFICAT_HELLY_DISQUE_JUNG_20260811.md).
+Le test `0 in conv{Proj(V_z)}` avec tous les `g_z>0` demeure un cas particulier
+qui couvre tout le plan. Les groupes et les témoins individuels ne peuvent
+partager aucun `PointId` lorsqu'ils additionnent leurs crédits.
+
+Une autre composition exacte réutilise les crédits singleton. Si `C` contient
+`c` témoins Jung universels distincts et si la profondeur est calculée sur les
+témoins diamétraux `P` privés de `C`, chaque sphère admissible contient au
+moins `c+delta(P minus C)` points stricts. La soustraction de `C` et la
+déduplication des `PointId` sont indispensables : additionner le cœur et une
+profondeur calculée sur `P` compterait deux fois les mêmes témoins. Cette
+composition peut gagner des cas où aucun certificat seul n'atteint 9/8, mais
+elle ne supprime pas le coût de collecte par paire.
+
+Le noyau produit commun de `delta` reçoit un rayon par `PointId` distinct et
+la banque scalaire `always`. Des identifiants distincts peuvent avoir des
+rayons confondus, mais un même identifiant ne peut jamais être réinjecté. Les
+adaptateurs de projection peuvent employer `r=d cross V` ou une base entière
+équivalente, mais aucun consommateur produit ne conserve une seconde copie du
+tri et du sweep. Le noyau trie les rayons par
+demi-tour et produit croisé, puis balaie l'arc semi-ouvert
+`[theta_i,theta_i+pi)` à deux pointeurs. Rayons confondus inclus et antipodes
+exclus donnent
+
+$$\delta=\mathrm{always}+m-\mathrm{max\_open}$$
+
+en `O(m log m)`. Lorsqu'un noyau partagé est présent, sa qualification et son
+pincement appartiennent à l'audit live. Le juge reste une minimisation fermée
+quadratique `n<=32`, avec une autre collecte et
+une autre base, afin qu'un défaut du tri ou des frontières ne soit pas rejoué
+par le même code. Chaque adaptateur engage aussi une borne d'amplitude : l'API
+générique en `int64` ne suffit pas à prouver que ses produits `i128` ne
+débordent pas.
 
 Le total diamétral q2 et la profondeur q3/q4 ont des résiduels incomparables.
 Une seule machine peut partager l'arbre et la partition des paires, mais chaque
 lane conserve son propre sort, son ledger et ses compteurs. Le cœur seul, la
-profondeur seule et leur combinaison devront être mesurés séparément; seul le
-cœur possède aujourd'hui un falsificateur.
+profondeur seule et leur combinaison doivent toujours être reçus et mesurés
+séparément. Leur état d'implémentation appartient exclusivement à
+[`AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md).
 
 Cette preuve donne la couverture, pas la parcimonie. Le nombre d'ancres peut
 rester quadratique et une recherche naïve des témoins cubique. La source ne
-devient candidate produit qu'après un ledger pair-à-pair borné et une admission
-des masses à `12 500/25 000/50 000`. Chaque reçu de prune déduplique ses
+devient candidate produit qu'après fermeture du ledger de l'univers implicite
+complet et admission des masses à `12 500/25 000/50 000`. Un cap appartient
+seulement au falsificateur diagnostique et ne tronque jamais un résultat
+produit. Chaque reçu de prune déduplique ses
 `PointId` témoins avant d'appliquer le seuil. Le juge de couverture doit être
 indépendant des primitives du sujet; c'est une exigence d'admission. Une
 dépendance v2 commune peut servir de différentiel supplémentaire, jamais
@@ -275,6 +396,14 @@ admis dans le chemin produit.
 Pour un support tétraédrique propre positif et une ancre diamètre, Jung donne
 `h^2<=D^2/8`. Dans ce disque, chaque autre point induit une droite d'égalité de
 puissance et un demi-plan strictement intérieur.
+
+L'hypothèse diamètre doit être vérifiée sur les six arêtes du support. Le fait
+que deux carriers appartiennent séparément à la lentille de l'ancre ne borne
+pas leur distance mutuelle. Toute intersection shallow doit donc vérifier que
+la paire ancre reste maximale, ou retomber fail-open. La contre-fixture
+permanente est dans
+[`AUDIT_JUNG_ANCHOR_389A742.md`](audits/AUDIT_JUNG_ANCHOR_389A742.md); le
+statut du prototype correspondant appartient à l'audit live.
 
 Un q4 pertinent est une intersection de deux droites dont la profondeur
 stricte est au plus `K-3=7`. La route construit directement les premiers
@@ -401,24 +530,29 @@ durable; ils sont tenus dans
 points u16 + LBVH exact résidents
   |-> k=1 : Boruvka/EMST exact
   |-> q2 : Yao48 strict + classification LBVH et census fermé
-  `-> q3/q4 : cœur de Jung + profondeur fermée + reporters shallow
+  `-> q3/q4 : center-cover de blocs complet et fail-open
+       -> banques Jung--Yao + groupes de Helly + profondeur terminale
+       -> range-report q3 + niveaux shallow q4
        -> BallActivation/tombstones streamées
        -> sort/RLE par BallKey exacte
        -> carriers stricts + resolver latent
        -> fast/fallback recertifiés par lot
-       -> composantes et payload horizontal normalisé
+       -> composantes, verticales et payload officiel nommé
 ```
 
 Aucun tableau global de tuples, paires, cellules, faces ou cofaces ne persiste.
-Chaque kernel a un count, une arène bornée, un fill et une identité de
-consommation. Les slabs ne coupent ni une `BallKey`, ni un lot exact, ni une
-unité de recertification.
+Chaque kernel a un count exact, une arène dimensionnée ou un segment
+reprenable, un fill et une identité de consommation. Les segments ne coupent
+ni une `BallKey`, ni un lot exact, ni une unité de recertification. Une
+insuffisance physique refuse atomiquement; aucun budget configurable ne publie
+un préfixe.
 
 Les cellules adaptatives et l'oracle exhaustif restent hors du chrono produit.
 Ils recertifient des échantillons et des fixtures, puis comparent digests,
 masses et décisions à la source device.
 
-Pour le jalon secondaire d'une seconde, l'enveloppe provisoire est :
+Pour le seul diagnostic horizontal `warm_e2e_h0_v3_diagnostic`, l'enveloppe de
+falsification provisoire est :
 
 | tranche | enveloppe chaude |
 | --- | ---: |
@@ -429,9 +563,12 @@ Pour le jalon secondaire d'une seconde, l'enveloppe provisoire est :
 | reducer + payload | 200 ms |
 | réserve | 60 ms |
 
-Source, cover et cordes au-dessus de 400 ms chaud classent la route no-go.
+Source, cover et cordes au-dessus de 400 ms chaud classent cette route no-go.
 Ces enveloppes sont des seuils de falsification d'architecture, pas une
-qualification : seul le p95 du pipeline complet décide `warm_e2e`.
+qualification. Elles ne ferment ni la seconde secondaire ni les 100 ms
+principaux du contrat officiel. Celui-ci exige en plus les dix forêts, les
+verticales, les lots, le certificat minimal et le retour hôte dans le même p95;
+aucune enveloppe par tranche n'est revendiquée avant leur architecture.
 
 ## 12. Admission et reçus
 
@@ -453,31 +590,31 @@ un refus de ressource sont trois statuts distincts.
 
 ## 13. Jalons
 
-1. Étendre la porte de cardinalité reçue dans q2 au générateur partagé et à
-   tous ses consommateurs, imposer le code zéro à chaque CTest nominal, puis
-   durcir le différentiel `L4`/héritage : erreurs de référence indépendantes,
-   non-vacuité de la borne, formules/contacts/clips, identité persistante et
-   familles/seeds adversariaux.
-2. Implémenter et comparer la route q2 Yao48/LBVH avec census fermé; conserver
-   le self-join comme oracle ou second prune selon les masses.
-3. Lier le reçu sidecar à une identité producteur vérifiée, tuer les mauvaises
-   métadonnées et cibler le self-test interne à la factory; recevoir ce chemin
-   uniquement comme oracle permanent `n<=32`.
-4. Recevoir le prune de cellule avec sa portée exacte de branche et le
-   conserver comme diagnostic adaptatif, hors chemin chaud.
-5. Corriger la garde de bloc q4 `min D^2>0`, rendre le rejeu de blocs non
-   vacu, puis recevoir le self-join cœur q3/q4 avec certificats dédupliqués et
-   juge indépendant. Ajouter `L4`, héritage et frontière lossless; abandonner
-   cette route produit si sa gate d'exposant mord avant tout sweep G4.
-6. Prototyper ensuite la profondeur fermée terminale et le center-cover
-   séparément, avec positivité et owner canonique reçus dans le constructeur
-   aval.
-7. Recevoir `BallActivation`, census fermé, tombstones et resolver contre Gamma
-   exhaustif à petit `n`.
-8. Porter les seules routes admises sur CUDA et mesurer source, certification,
-   fold et payload dans un même `warm_e2e`.
-9. Spécifier séparément les verticales ou conserver explicitement le contrat
-   horizontal réduit.
+1. Conserver générateur, self-joins, sidecar borné, cellules et ancres comme
+   portes locales ou oracles. Fermer les identités persistantes et les juges
+   indépendants encore ouverts sans promouvoir ces parcours exhaustifs.
+2. Construire une disposition unique `(MortonKey, PointId)` et un LBVH exact
+   résidents. Implémenter q2 par Yao48 strict fail-open, classification
+   terminale et census fermé multi-ordre; conserver le self-join comme oracle
+   ou second prune selon les masses.
+3. Implémenter `P15-HOCUDA-P1a` en mass-only q4 : partition triangulaire
+   implicite, 64 patches, seuil huit, range-query collective, microtuiles
+   terminales et ledger complet. Cette tranche n'émet aucune ancre.
+   Deux pentes rouges, une masse majoritairement terminale ou un rescan par
+   paire arrêtent la route avant G4.
+4. Sur les seules ancres admises, recevoir séparément Jung--Yao, la borne AABB
+   `g_min/Q_max`, Helly, la composition cœur--profondeur et la profondeur
+   terminale. Mesurer le gain marginal de chacun contre son coût exact.
+5. Construire les range-reports q3 et les niveaux shallow q4 sans développer
+   tous les triples ou quadruples, puis recevoir owner, positivité et census.
+6. Recevoir `BallActivation`, census fermé, tombstones, resolver, fold et
+   reconstruction des verticales contre Gamma exhaustif à petit `n`.
+7. Installer deux harnesses nommés : le diagnostic horizontal réduit et le
+   `BenchmarkOutputContract-v1` officiel. Ils ne partagent aucun verdict SLO.
+8. Appliquer la gate de compteurs aux tailles contractuelles, porter seulement
+   les routes admises sur CUDA avec arènes préallouées et une synchronisation
+   terminale, puis mesurer le payload officiel complet dans un même
+   `warm_e2e`.
 
 ## 14. Conditions de GO
 
@@ -490,10 +627,11 @@ Le backend G4 devient candidat uniquement si :
 - aucun cap, timeout ou buffer plein ne publie un préfixe ;
 - le pic mémoire réel tient l'enveloppe avec marge ;
 - le gate secondaire demandé établit un p95 `warm_e2e<1 s`, puis la porte
-  produit principale établit un p95 `warm_e2e<100 ms`; tous deux incluent
-  index, source, certification, census, resolver, fold et payload ;
-- le contrat de sortie et le statut des verticales sont nommés sans
-  ambiguïté.
+  produit principale établit un p95 `warm_e2e<100 ms`; pour le SLO officiel,
+  tous deux utilisent exactement `BenchmarkOutputContract-v1`, dont dix
+  forêts, verticales, lots et certificat minimal ;
+- toute série horizontale réduite est nommée séparément et ne revendique aucun
+  de ces deux seuils officiels.
 
 Jusque-là : `public_status=not_claimed`.
 

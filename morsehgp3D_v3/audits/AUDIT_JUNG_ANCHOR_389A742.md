@@ -2,7 +2,7 @@
 
 Date : 9 août 2026 UTC.
 
-Phase annoncée : M2.2, dictionnaire de profondeur ancré par arête. Backend : CPU exact. Profil : probe Release, puis comparaison avec l'oracle rationnel exact. Mode : audit strict ; aucun code du dépôt modifié, aucun Git, aucun GCP, probes et variante corrective uniquement sous `/tmp`.
+Cadre du dossier : `phase=exploration_v3_hors_registre`, `backend=cpu_reference_bounded_oracles_and_g4_diagnostic`, `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`. Sous-portée historique du snapshot : dictionnaire de profondeur ancré par arête, probe Release CPU et comparaison à un oracle rationnel exact; aucun code du dépôt n'avait été modifié, les probes correctifs étaient restés sous `/tmp`.
 
 ## 0. Snapshot et verdict
 
@@ -17,11 +17,11 @@ Le snapshot audité est le commit complet `389a7428c88d9dede7a9c767634774b9ea842
 > [!CAUTION]
 > **P0 de qualification : l'hypothèse diamétrale utilisée par le clipping de Jung n'est pas imposée aux deux carriers.** Le masque vérifie séparément que chacun est dans la lentille de `pq`, mais le code ne vérifie pas leur distance mutuelle. Une fixture entière, bien centrée et dans `RelevantGP` fait alors classer un vrai témoin intérieur comme « extérieur constant », calcule le rang 4 au lieu de 5 sur cette ancre et incrémente fatalement `dictionary_refuted`.
 
-La fixture ne prouve pas une erreur du catalogue final actuel : l'énumération de toutes les paires retrouve le même support depuis sa véritable arête maximale. Elle prouve en revanche que le sujet utilisé pour « vérifier le dictionnaire » applique ce dictionnaire hors de son hypothèse, rougit à tort sur une entrée valide et publie des compteurs d'ancres diamétrales faux.
+La fixture ne prouve pas une erreur du catalogue exhaustif du snapshot : l'énumération de toutes les paires retrouve le même support depuis sa véritable arête maximale. Elle prouve en revanche que le sujet utilisé pour « vérifier le dictionnaire » applique ce dictionnaire hors de son hypothèse, rougit à tort sur une entrée valide et publie des compteurs d'ancres diamétrales faux.
 
 ## 1. Rupture exacte de l'implication « deux points dans la lentille, donc ancre diamétrale »
 
-Le contrat mathématique de `PROPOSITION.md` §4.1 commence par une **ancre diamétrale** `e=pq`. L'ellipse $J_e^{(4)}$ est justifiée par Jung seulement lorsque $D=\lVert p-q\rVert$ est le diamètre du support considéré.
+Le contrat mathématique de `PROPOSITION.md` §6.3 commence par une **ancre diamétrale** `e=pq`. L'ellipse $J_e^{(4)}$ est justifiée par Jung seulement lorsque $D=\lVert p-q\rVert$ est le diamètre du support considéré.
 
 Le prototype dit la même chose dans son commentaire aux lignes 237--240, puis construit pourtant `in_lens` aux lignes 268--270 par les deux seuls tests individuels $\lVert x-p\rVert^2\leq D^2$ et $\lVert x-q\rVert^2\leq D^2$. Au sommet de deux droites, les lignes 464--470 demandent que les deux bits `active_lens` soient vrais, mais ne testent jamais $\lVert x-y\rVert^2\leq D^2$.
 
@@ -163,14 +163,14 @@ Ce que la fixture établit :
 
 - le masque individuel de lentille n'est pas un certificat d'arête diamétrale pour un support d'arité quatre ;
 - le clipping de témoins par $J_e^{(4)}$ est appliqué hors de son domaine ;
-- une entrée u16 bien centrée et `RelevantGP` peut faire échouer la porte du dictionnaire alors que l'oracle et le catalogue final concordent ;
+- une entrée u16 bien centrée et `RelevantGP` peut faire échouer la porte du dictionnaire du snapshot alors que son oracle et son catalogue exhaustif concordent ;
 - `dictionary_refuted` mélange une réfutation de l'identité sous ses hypothèses avec une violation préalable de ces hypothèses ;
 - `edges_retained` peut compter une ancre non diamétrale.
 
 Ce que la fixture n'établit pas :
 
 - elle ne réfute pas l'identité $4+c_e+\delta_e$ lorsque `pq` est réellement diamétrale ;
-- elle ne montre pas de support absent du catalogue final actuel, car l'énumération de toutes les paires fournit l'ancre maximale `xy` ;
+- elle ne montre pas de support absent du catalogue exhaustif du snapshot, car l'énumération de toutes les paires fournit l'ancre maximale `xy` ;
 - elle ne justifie pas de supprimer du flux témoin les points hors lentille : `w` est hors de la lentille de `pq` mais reste précisément le témoin de rang nécessaire.
 
 Cette distinction est importante : la correction doit agir sur l'**éligibilité de la paire de carriers**, jamais sur le flux témoin complet.

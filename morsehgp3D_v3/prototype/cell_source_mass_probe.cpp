@@ -138,6 +138,13 @@ int main(int argc, char** argv) {
   if (coord == 0) coord = mhgp3v::cloud_family_default_coord(family, n);
   const std::vector<mhgp::P3> pts = mhgp3v::make_family_cloud(family, n, coord, seed);
   if ((int)pts.size() < n) { std::printf("ECHEC : nuage non genere\n"); return 3; }
+  // CONTRAT DE CARDINALITE (audit etat courant) : egalite explicite a la
+  // frontiere du consommateur, jamais le seul test `< n`.
+  if ((int)pts.size() != n) {
+    std::printf("ECHEC : contrat de cardinalite viole — %zu points rendus pour %d"
+                " demandes\n", pts.size(), n);
+    return 1;
+  }
 
   // La boite racine : produit des [min_i, max_i + 1), fermetures entieres.
   i64 lo[3] = {65536, 65536, 65536}, hi[3] = {0, 0, 0};

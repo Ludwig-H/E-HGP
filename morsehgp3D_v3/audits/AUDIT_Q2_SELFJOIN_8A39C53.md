@@ -99,7 +99,7 @@ terminal naïf ajoute un autre terme cubique. Le budget `--max-states` classe
 en outre l'exécutable comme falsificateur censuré, même lorsqu'il n'est pas
 atteint.
 
-## Borne inférieure exacte à ajouter dans un successeur
+## Borne inférieure exacte absente du snapshot
 
 Le même produit d'AABB possède un infimum séparable exact. Pour un axe, avec
 `W=[wl,wh]` et des extrémités `x,y` de `X,Y`, poser
@@ -120,8 +120,10 @@ signé sous u16.
 
 Une frontière héritée reste exacte seulement si elle conserve sans cap tous
 les nœuds ambigus, y compris les feuilles, et si elle remplace un nœud
-développé par ses enfants. Un cap exige un redémarrage ou un refus explicite;
-il ne peut jamais supprimer silencieusement une partie de la recherche.
+développé par ses enfants. Un cap diagnostique exige un redémarrage ou un
+refus explicite; il ne peut jamais supprimer silencieusement une partie de la
+recherche. Le statut de cette borne dans tout successeur appartient uniquement
+à [`AUDIT_ETAT_COURANT.md`](AUDIT_ETAT_COURANT.md).
 
 ## Portée q2 seulement
 

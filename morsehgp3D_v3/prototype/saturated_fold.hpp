@@ -181,11 +181,11 @@ struct SaturatedOrderFold {
   // sans croissance de couverture et les activations redondantes (une
   // continuation peut ne changer ni partition ni couverture — refutation de
   // l'audit live). La separation exacte est le predicat structurel
-  // |M| >= k et q_min(B) <= k+1 (NOTE_SOLUTION_TRANSCRIPT_GAMMA_QMIN,
-  // theoremes 1--2), a recevoir contre l'oracle Gamma avant d'etre publie.
+  // |M| >= k et q_min(B) <= k+1 (theoremes 1--2 du predicat q_min, recus par
+  // la porte du juge des forets) ; sa publication ICI reste a faire.
   long long births = 0, fusions = 0;
   long long coverage_growth_batches = 0, silent_generator_batches = 0;
-  // LE TRANSCRIPT GAMMA PAR MARQUAGE (theoremes 1--2 de la note q_min, recus
+  // LE TRANSCRIPT GAMMA PAR MARQUAGE (theoremes 1--2 du predicat q_min, recus
   // par le juge) : seules les racines finales atteintes par un GENERATEUR
   // D'EVENEMENT (|M| >= k et q_min <= k+1, q_min lu dans n_support — une
   // provenance CERTIFIEE par le juge sur ce chemin) produisent un evenement

@@ -166,6 +166,7 @@
 #include <vector>
 
 #include "mhgp/mhgp.hpp"
+#include "prototype/exact_ray_sweep.hpp"
 #include "prototype/order_k_flats.hpp"
 
 using mhgp::P3;
@@ -179,52 +180,24 @@ struct Planar {
 };
 
 inline i128 cross2(const Planar& a, const Planar& b) { return a.x * b.y - a.y * b.x; }
-inline i128 dot2(const Planar& a, const Planar& b) { return a.x * b.x + a.y * b.y; }
-
-// L'ordre angulaire, sans angle : d'abord le demi-tour (y > 0, ou y == 0 et
-// x > 0) contre l'autre, puis le signe du produit croisé. Deux points du même
-// rayon sont égaux pour cet ordre — c'est exactement ce qu'exige le balayage.
-inline int angular_half(const Planar& a) {
-  if (a.y > 0) return 0;
-  if (a.y < 0) return 1;
-  return a.x > 0 ? 0 : 1;
-}
-
-inline bool angular_less(const Planar& a, const Planar& b) {
-  const int ha = angular_half(a), hb = angular_half(b);
-  if (ha != hb) return ha < hb;
-  return cross2(a, b) > 0;
-}
-
-// `y` est-il dans l'arc semi-ouvert [angle(d), angle(d) + pi) ?
-inline bool in_half_open_arc(const Planar& d, const Planar& y) {
-  const i128 c = cross2(d, y);
-  if (c > 0) return true;
-  if (c < 0) return false;
-  return dot2(d, y) > 0;                    // même rayon : oui ; antipode : non
-}
-
-// Le maximum, sur les demi-plans OUVERTS bordés par une droite passant par
-// l'origine, du nombre de points. Balayage à deux pointeurs sur l'ordre
-// angulaire ; les points doivent être non nuls.
-int maximum_open_halfplane(std::vector<Planar>& points) {
-  const int m = (int)points.size();
-  if (m == 0) return 0;
-  std::sort(points.begin(), points.end(), angular_less);
-  int best = 0, j = 0;
-  for (int i = 0; i < m; ++i) {
-    if (j < i) j = i;
-    while (j < i + m && in_half_open_arc(points[(std::size_t)i], points[(std::size_t)(j % m)]))
-      ++j;
-    best = std::max(best, j - i);
-  }
-  return best;
-}
 
 // Le minimum, sur les demi-plans FERMÉS, du nombre de points ; `always_inside`
 // compte les points de la droite frontière, qui appartiennent à tous.
-int minimum_closed_halfplane(std::vector<Planar>& points, int always_inside) {
-  return always_inside + (int)points.size() - maximum_open_halfplane(points);
+//
+// LE NOYAU EST PARTAGÉ (PROPOSITION §6.3 : « aucun consommateur produit ne
+// conserve une seconde copie du tri et du sweep ») : ce probe ne garde que son
+// ADAPTATEUR — la projection étroite r = d x e dont les composantes tiennent
+// sous 2^34 (démontré plus haut), donc convertibles sans perte vers les rayons
+// i64 du noyau commun de `exact_ray_sweep.hpp`, qui rend directement
+// always + m - max_ouvert. Le mutant par directions vives ci-dessous n'est PAS
+// une seconde copie du sweep : c'est la version RÉFUTÉE, conservée séparée
+// pour que les fixtures prouvent qu'elle diverge encore.
+int minimum_closed_halfplane(const std::vector<Planar>& points, int always_inside) {
+  std::vector<std::pair<long long, long long>> rays;
+  rays.reserve(points.size());
+  for (const Planar& p : points)
+    rays.push_back({(long long)p.x, (long long)p.y});   // < 2^34 : sans perte
+  return (int)mhgp3v::closed_depth_from_rays(&rays, always_inside, {});
 }
 
 // LE MUTANT. C'est la version réfutée : seules les directions vives, frontière

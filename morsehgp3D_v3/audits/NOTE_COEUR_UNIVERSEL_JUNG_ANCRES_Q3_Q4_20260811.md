@@ -19,9 +19,9 @@ l'inertie du seul quotient horizontal jusqu'à `K=10`.
 Le lemme complémentaire de profondeur fermée de demi-boule peut supprimer
 d'autres paires sans hypothèse de diamètre. Le cœur universel et la profondeur
 sont deux certificats suffisants lorsqu'ils mordent et ils sont incomparables.
-Ils ne sont pas les seuls prunes exacts : le schéma conditionnel de
-center-cover par 64 patches est une troisième voie déjà documentée, mais son
-composant complet n'est pas reçu.
+Un center-cover conditionnel peut fournir un autre certificat, à condition que
+chaque patch et son domaine soient prouvés et rejouables. Le statut logiciel de
+ces composants appartient uniquement à l'audit courant.
 
 Ce résultat ferme une question mathématique, pas la porte industrielle : il ne
 prouve ni que les ancres survivantes sont peu nombreuses, ni qu'on peut trouver
@@ -209,9 +209,42 @@ q3. Inversement, neuf `PointId` distincts sur le segment ouvert `(a,b)` donnent
 
 Le calcul ponctuel exact de `delta` est un balayage angulaire. Les projections
 nulles sont créditées dans une banque `always`; rayons confondus, antipodes et
-demi-plans fermés doivent être traités exactement. Le relèvement sectoriel à
-un produit AABB n'est pas encore prouvé et reste fail-open. Cette profondeur
-est donc d'abord un filtre terminal, après le cœur universel par blocs.
+demi-plans fermés doivent être traités exactement. Ce lemme ponctuel n'affirme
+aucune extension sectorielle à un produit AABB : une telle extension exige une
+preuve séparée et reste fail-open en son absence.
+
+## Complément exact : groupes collectifs bornés
+
+Un certificat suffisant plus petit que le sweep complet peut exploiter des
+témoins qui ne sont pas individuellement universels. Pour une paire distincte
+`a,b`, poser `d=b-a`, `M=(a+b)/2`, `D^2=||d||^2`,
+`V_z=2z-a-b` et `g_z=D^2-||V_z||^2`. Un témoin diamétral strict vérifie
+`g_z>0`. Tout centre d'une sphère passant par `a,b` s'écrit `M+t` avec
+`t` orthogonal à `d`; sa marge intérieure au point `z` vaut exactement
+
+$$\mu_z(t)=\frac{g_z}{4}+V_z\mathbin{\cdot}t.$$
+
+Soit `p_z` la projection de `V_z` sur le plan orthogonal à `d`. Si un groupe
+`G` vérifie que zéro appartient à l'enveloppe convexe de ses `p_z`, alors pour
+tout `t` au moins un membre satisfait `p_z dot t>=0`. Ce membre est strictement
+intérieur puisque `g_z>0`. Des groupes disjoints fournissent des membres
+distincts : `r` groupes certifient au moins `r` intérieurs pour toute sphère de
+coquille contenant la paire.
+
+Carathéodory dans ce plan réduit chaque groupe à au plus trois `PointId` : une
+projection nulle, deux projections antipodales ou un triangle dont l'enveloppe
+convexe contient zéro. Neuf groupes disjoints ferment q3 et huit ferment q4,
+soit des reçus de 27 ou 24 identifiants au plus. Ils peuvent s'ajouter aux
+témoins Jung individuels seulement si tous les `PointId` crédités restent
+disjoints.
+
+Ce critère d'enveloppe convexe couvre tout le plan médiateur. Le certificat de
+Helly sur le disque de Jung exploite en plus les offsets `g_z` et le rayon
+borné; il est donc plus général tout en conservant des groupes d'au plus trois
+identifiants. Sa preuve, son solveur rationnel et ses bords fail-open sont dans
+[`NOTE_CERTIFICAT_HELLY_DISQUE_JUNG_20260811.md`](NOTE_CERTIFICAT_HELLY_DISQUE_JUNG_20260811.md).
+Un greedy de groupes disjoints reste sûr mais incomplet; son échec conserve la
+paire. Aucun de ces certificats ne borne le nombre global de paires.
 
 ## Contacts exacts de référence
 
@@ -259,50 +292,46 @@ produit : bords, surfaces, LiDAR, amas et entrées adversariales peuvent
 conserver beaucoup plus de paires. Ils justifient une sonde falsifiable,
 jamais une extrapolation à 50 k.
 
-## Portes d'implémentation
+## Obligations d'admission durables
 
-Le commit `1dfe07b` implémente seulement la tranche `core`; son statut logiciel
-est tenu dans l'audit courant. La profondeur fermée et le center-cover restent
-des composants séparés à construire. La réception complète suit cet ordre :
+Le statut logiciel par commit ou worktree n'appartient pas à cette note de
+preuve; il est tenu uniquement dans
+[`AUDIT_ETAT_COURANT.md`](AUDIT_ETAT_COURANT.md). Le cœur, la profondeur et le
+center-cover restent trois familles de certificats séparées, avec mesures et
+sorts séparés. Leur admission exige :
 
-1. Recevoir le falsificateur count-only du cœur sans catalogue global de
-   paires : self-join canonique, garde ponctuelle `D^2>0`, garde de bloc q4
-   `min D^2>0`, test de boule par blocs, test polynomial terminal et sortie des
-   seules ancres survivantes.
-2. Sur `n<=32`, tenir un sort par paire et rejouer chaque certificat; comparer
-   ensuite toutes les ancres de supports q3/q4 non inertes au sur-ensemble
-   émis avec un juge mathématique indépendant du sujet. Le rejeu courant qui
-   partage `universal_witness`, `miniball_of` et `sphere_side` reste un
-   différentiel utile, pas cette autorité indépendante. Les témoins sont
-   dédupliqués comme `PointId`; une position locale n'est valide que si l'arbre
-   et son ordre sont engagés par le reçu. La campagne minimale non vacue est
-   `--points 32 --seed 13 --family terrain --leaf-size 2 --oracle 1` : elle
-   doit conserver au moins un prune de bloc dans chaque lane.
-3. Tuer dans le cœur les mutants mordants `>` vers `>=`, seuil `9/8` diminué
-   d'un, paire non maximale, témoin dupliqué, partition compensée et dernier
-   bloc omis. Trois mutations ne constituent pas des gates de ce count-only :
-   une plage recouvrant une extrémité est déjà refusée par `g=0`; accepter un
-   tuple non positif est observationnellement équivalent car toute paire
-   prunée place déjà ses 9/8 témoins dans sa miniboule; choisir un autre
-   diamètre maximal ex æquo ne change pas l'ensemble résiduel. Positivité et
-   ownership restent obligatoires et sont testés dans le constructeur aval.
-   Pour la profondeur, ajouter profondeur zéro, rayons confondus, antipodes,
-   permutation et demi-plan ouvert à la place du fermé.
-4. Publier par famille les états, visites, certificats boule/spindle, ancres
-   survivantes, octets et high-water à `12 500/25 000/50 000` points. Le seuil
-   de deux exposants consécutifs supérieurs à `1,35` est une règle de gate
-   opérationnelle choisie pour falsifier tôt la route; ce n'est pas un
-   théorème de complexité.
-5. Avant la profondeur, ajouter au cœur le rejet `L4` q2, l'héritage lossless
-   des 9/8 témoins et une frontière exacte sans cap; réintroduire les
-   sous-arbres d'extrémités libérés par chaque split. Si deux exposants
-   consécutifs restent au-dessus de 1,35, classer ce self-join `NO-GO` produit.
-   Implémenter ensuite la profondeur fermée aux terminaux et, séparément, le
-   center-cover conditionnel. Une seule machine de blocs peut partager l'arbre
-   et la partition des paires, mais q2, q3 et q4 gardent trois sorts et trois
-   ledgers indépendants. Mesurer au futur `cœur seul`, `profondeur seule` et
-   `combiné`; un résiduel d'une lane ne sert jamais d'univers à une autre.
-6. Ne porter sur G4 que si les masses passent, puis mesurer le pipeline complet
-   avec q3/q4 shallow, census, resolver, fold et payload.
+1. Pour le cœur, un self-join canonique sans tableau global de paires, les
+   gardes ponctuelle `D^2>0` et q4 de bloc `min D^2>0`, le test convexe de
+   boîte, le prédicat polynomial terminal et une partition exacte de chaque
+   paire.
+2. Pour la profondeur, la collecte strictement diamétrale, la banque des
+   projections nulles, puis un tri exact des rayons et un sweep à deux
+   pointeurs en `O(m log m)`. Rayons confondus, antipodes et frontière fermée
+   sont des cas de contrat. Un noyau commun prend les rayons non nuls et la
+   banque `always`; chaque consommateur garde seulement son adaptateur de
+   projection. Le juge conserve une collecte, une base et une minimisation
+   quadratique indépendantes à `n<=32`.
+3. Chaque reçu déduplique les témoins comme `PointId`. Une position locale
+   n'est valide que si points, arbre et permutation sont engagés; un format
+   exporté préfère les identifiants stables. Le juge de couverture ne partage
+   pas les prédicats décisifs du sujet; la dépendance v2 reste seulement un
+   différentiel supplémentaire.
+4. Les gates non vacues tuent `>` vers `>=`, seuil `9/8` diminué, garde q4
+   dégénérée, égalité rationnelle rendue stricte, prune de profondeur désarmé,
+   rayons confondus omis, contacts diamétraux crédités, témoin dupliqué,
+   partition compensée et dernier bloc omis. Elles couvrent aussi projections
+   nulles, antipodes, permutations et extrêmes u16 non colinéaires.
+5. Positivité et owner canonique sont reçus dans le constructeur aval, où leurs
+   mutants sont observables. Une même machine peut partager arbre et parcours,
+   mais q2, q3 et q4 gardent leurs propres sorts, ledgers et compteurs; le
+   résiduel d'une lane n'est jamais l'univers d'une autre.
+6. Le certificat collectif sur le disque possède ses propres fixtures de
+   faisabilité, de bord, de disjonction et d'incomplétude. Son échec reste
+   fail-open et son gain marginal est mesuré séparément du sweep complet.
+7. Publier par famille états, visites, témoins, comparaisons de tri, prunes
+   marginales, octets et high-water à `12 500/25 000/50 000`. Deux exposants
+   consécutifs supérieurs à `1,35` classent la route `NO-GO` avant CUDA. Seules
+   les routes admises entrent ensuite dans un `warm_e2e` comprenant source,
+   shallow, census, resolver, fold et payload nommé.
 
 GCP non utilisé.

@@ -502,8 +502,8 @@ int main(int argc, char** argv) {
   int shift_level = 0;   // mutant : decale un noeud sujet vers un niveau etranger
   int subject_fold = 0;  // 0 = chaine build_forest, 1 = fold sature (S.4/S.5)
   int require_degenerate = 0;   // exiger l'accord AUSSI sur les ordres degeneres
-  // LE PREDICAT STRUCTUREL D'EVENEMENT GAMMA (theoremes 1--2 de la note
-  // NOTE_SOLUTION_TRANSCRIPT_GAMMA_QMIN) : un niveau du sature est un vrai
+  // LE PREDICAT STRUCTUREL D'EVENEMENT GAMMA (theoremes 1--2 du predicat
+  // q_min — enonce intemporel, recu par cette porte) : un niveau du sature est un vrai
   // niveau Gamma_k ssi son lot contient un generateur avec |M| >= k et
   // q_min(B) <= k+1, ou q_min est la PLUS PETITE taille d'un sous-ensemble du
   // sature dont la miniboule est B — calculee ICI par enumeration exacte de

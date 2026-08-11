@@ -27,13 +27,20 @@ Deux sorties sont distinctes :
 
 | sortie | contenu | portée actuelle |
 | --- | --- | --- |
-| Gamma/v2 exhaustif | facettes, cofaces, incidences silencieuses, lots, `coverage_delta` et verticales | oracle borné; l'implémentation exhaustive actuelle n'est pas une route 50 k |
+| Gamma exhaustif enregistré | facettes, cofaces, incidences silencieuses, lots, `coverage_log` et ses `coverage_delta`, et verticales | oracle borné; l'implémentation exhaustive actuelle n'est pas une route 50 k |
 | `hgp_reduced_normalized_h0_v3` | composantes horizontales exactes, niveaux exacts et unions des `PointId`, après quotient certifié des blocs H0 inertes | candidat non reçu et non revendiqué publiquement |
 
 Une boule H0-inerte peut porter de vraies incidences Gamma. Une tombstone du
 quotient horizontal ne prouve ni l'absence d'un support, ni l'absence d'une
 incidence, ni une application verticale. Les verticales sont hors du contrat
 horizontal et demandent leur propre spécification.
+
+Le SLO officiel de la section 14.4 du
+[`TEST_PLAN_MORSEHGP3D.md`](../docs/TEST_PLAN_MORSEHGP3D.md) porte sur
+`BenchmarkOutputContract-v1` : dix forêts, applications verticales, lots et
+certificat minimal sont matérialisés avant la fin de `warm_e2e`. Une mesure du
+seul payload horizontal v3 appartient donc à une série diagnostique distincte;
+même sous une seconde, elle ne ferme pas ce SLO.
 
 ## Faits établis
 
@@ -54,9 +61,21 @@ horizontal et demandent leur propre spécification.
 - `prefix-all` est exact relativement à la `GeneratorTable` fournie; il ne
   prouve jamais que cette table est géométriquement complète.
 
-Les contre-exemples du manuscrit interdisent d'utiliser un graphe Gabriel, un
-RNG d'ordre fini, une cascade low-rank ou le résiduel q2 comme source complète
-des supports q3/q4.
+Les contre-fixtures exactes du dépôt réfutent la réduction du graphe point au
+K-graphe de Gabriel brut proposée dans le manuscrit. Elles interdisent
+d'utiliser ce graphe, un RNG d'ordre fini, une cascade low-rank ou le résiduel
+q2 comme source complète des supports q3/q4.
+
+`smax=11` borne le contenu de chaque record fermé, jamais le nombre d'arêtes
+Gabriel incidentes à un point. Le kissing number 12 ne s'applique pas : dans
+l'espace euclidien, le degré est arbitraire même dans un bucket de rang fermé
+fixé. Sur la grille u16 finie, seuls les caps triviaux `n-1` et `2^48-1`
+subsistent; deux constructions à treize voisins réfutent déjà le cap 12 aux
+rangs exacts 2 et 11. Elles sont démontrées mais leur gate exécutable reste à
+construire. Sous un modèle de Poisson homogène 3D sans bord, le degré moyen
+jusqu'à `smax=11` vaut 80; c'est une baseline, pas un cap ni une garantie de
+temps. La preuve est dans
+[`AUDIT_DEGRE_GABRIEL_KISSING_SMAX11_20260811.md`](audits/AUDIT_DEGRE_GABRIEL_KISSING_SMAX11_20260811.md).
 
 ## Architecture candidate
 
@@ -64,55 +83,61 @@ des supports q3/q4.
 points u16 + LBVH exact résidents
   |-> k=1 : EMST/Boruvka exact
   |-> q2 : Yao48/LBVH strict + classifieur terminal et census fermé
-  `-> q3/q4 : cœur de Jung à recevoir, profondeur et cover à construire
+  `-> q3/q4 : center-cover de blocs complet et fail-open
+       -> banque Jung--Yao + groupes de Helly terminaux
        -> centres q3 et niveaux shallow q4 dans le disque médiateur
        -> BallActivation/tombstones streamées et RLE par BallKey
        -> resolver latent, fast/fallback et lots atomiques
-       -> composantes et payload horizontal normalisé
+       -> composantes, verticales et payload officiel nommé
 ```
 
-Le self-join q2 actuel reste un oracle/falsificateur ou un second prune tant que
-ses compteurs complets ne battent pas la route Yao/LBVH. Son prune q2 ne retire
-jamais une ancre q3/q4.
+Le self-join q2 de diagnostic reste un oracle/falsificateur ou un second prune
+tant que ses compteurs complets ne battent pas la route Yao/LBVH. Son prune q2
+ne retire jamais une ancre q3/q4.
 
-Le commit `d705bcd` ajoute une gate bi-mode : sur deux campagnes bornées, une
-référence sans `L4` ni crédit hérité et le mode optimisé ont les mêmes cinq
-masses et le même sort pour chaque paire; cinq mutants ciblés meurent. Cela
-reçoit une préservation sémantique locale, pas un reçu général ni une baseline
-de coût. La porte reste vacuable si `L4` est désactivé, son chemin d'erreur peut
-attribuer une panne de la référence au mutant sujet, et le digest d'ordre n'est
-publié que sur 16 hexadécimaux sans engager points ni topologie. Les clips,
-parités et extrêmes u16 différentiels ne sont pas tous gravés. Le commit
-`f41e799` borne chaque émission multi-écho, exige exactement `n` points et tue
-le mutant d'overshoot dans q2; une gate directe du générateur partagé reste
-nécessaire pour tous ses consommateurs. Les segments q2 à 50 k comptent encore
-53 à 724 millions de visites `L4` et 86 millions à 1,36 milliard de tests
-ponctuels pour q2 seul. Les chronos sous charge ne qualifient aucun gain; voir
-[`AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md).
+La preuve locale q2 combine un supremum `U4`, un infimum `L4`, des témoins
+distincts et une partition exacte des paires. Sa réception logicielle, ses
+mutants et ses insuffisances ne sont pas dupliqués ici : voir le verdict live.
+Les compteurs historiques à 50 k atteignent déjà 53 à 724 millions de visites
+`L4` et 86 millions à 1,36 milliard de tests ponctuels pour q2 seul. Le reçu
+brut est dans
+[`scale_counters_raw.txt`](receipts/selfjoin_q2_20260811/scale_counters_raw.txt).
+Cette route reste très loin du jalon d'une seconde avant census, q3/q4 et
+fold.
 
 Le cœur universel de Jung fournit une suppression supérieure exacte, distincte
 de q2 : pour une paire distincte certifiée arête maximale d'un support propre
 positif, neuf `PointId` q3 ou huit q4 distincts satisfaisant le prédicat strict
-certifient toutes les sphères admissibles dans le disque de centres. Le
-falsificateur `core` de `1dfe07b` est présent, mais non reçu : sa porte partage
-les primitives géométriques v2 et le prédicat du sujet, sa campagne CMake ne
-rejoue aucun prune de bloc, et sa branche q4 accepte le certificat dégénéré
-`D^2=U^2=0`. Le producteur nominal ne duplique pas ses positions témoins, mais
-le juge ne les déduplique pas défensivement. Les mutants « support non
-positif » et « autre diamètre maximal ex æquo » sont non observables dans ce
-count-only; positivité et ownership se testent dans le constructeur aval. La
-profondeur fermée de demi-boule reste un filtre terminal exact complémentaire
-à implémenter, sans hypothèse de diamètre sous un support q3/q4 certifié; le
-cover par 64 patches reste un troisième schéma conditionnel exact. Ces
-certificats ne définissent aucune chaîne d'inclusion entre leurs résiduels. Les
-preuves, la provenance, les prédicats et les limites sont dans
-[`NOTE_COEUR_UNIVERSEL_JUNG_ANCRES_Q3_Q4_20260811.md`](audits/NOTE_COEUR_UNIVERSEL_JUNG_ANCRES_Q3_Q4_20260811.md).
+certifient toutes les sphères admissibles dans le disque de centres. Pour une
+ancre et un témoin fixes, une borne entière par les huit coins certifie
+uniformément un nœud AABB de cibles sans rescan par paire. Cette propriété est
+prouvée; la banque, son parcours et sa gate restent à construire. Le certificat
+ponctuel de Helly exploite les offsets des
+demi-plans sur le disque : chaque crédit possède un sous-groupe de trois
+identifiants au plus, et neuf ou huit groupes disjoints ferment la lane
+correspondante. Contrairement au certificat plus étroit par enveloppe convexe,
+Helly n'exige pas que chaque membre soit diamétral strict. Un greedy qui échoue
+reste fail-open.
 
-La campagne `core` atteint déjà, à 2 400 points, 309 millions à 1,08 milliard
-de visites de nœuds et 718 millions à 2,52 milliards de tests ponctuels par
-lane/famille. La parcimonie globale des ancres et des arrangements n'est pas
-prouvée; le pire cas est quadratique en sortie et cubique en recherche. Ce
-prototype doit être revu avant toute campagne 50 k ou tout port CUDA.
+La profondeur fermée de demi-boule et son noyau angulaire partagé restent des
+falsificateurs exacts complémentaires. Les mesures live refusent leur collecte
+complète par paire dans le chemin chaud : elle coûte davantage qu'elle
+n'élimine après le cœur. Cœur, groupes de Helly, profondeur et center-cover par
+patches gardent des sorts et des compteurs séparés. Les preuves et limites sont
+dans
+[`NOTE_COEUR_UNIVERSEL_JUNG_ANCRES_Q3_Q4_20260811.md`](audits/NOTE_COEUR_UNIVERSEL_JUNG_ANCRES_Q3_Q4_20260811.md)
+et
+[`NOTE_CERTIFICAT_HELLY_DISQUE_JUNG_20260811.md`](audits/NOTE_CERTIFICAT_HELLY_DISQUE_JUNG_20260811.md).
+Le statut précis des composants et de leurs portes reste exclusivement dans
+[`AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md).
+
+Le self-join d'ancres couvre implicitement toutes les paires et redémarre ses
+recherches de témoins à la racine. L'audit live classe cette route rouge avant
+CUDA : le résiduel est plus mince que le travail, mais les deux pentes
+successives de visites dépassent 1,35 dans les huit séries diagnostiques et
+l'extrapolation la plus favorable reste en milliards à 50 k. Ce diagnostic ne
+remplace pas la porte contractuelle aux tailles `12 500/25 000/50 000`; les
+valeurs, hashes et limites exactes restent uniquement dans l'audit live.
 
 ## Invariants industriels
 
@@ -120,6 +145,8 @@ prototype doit être revu avant toute campagne 50 k ou tout port CUDA.
   incidences n'est construit dans le chemin produit.
 - Un oracle exhaustif borné falsifie ou recertifie le produit; il ne devient
   jamais son architecture par défaut.
+- Le chemin industriel exact n'a aucun budget configurable : il produit
+  l'objet complet ou échoue sur une ressource physique réelle.
 - Count, fill et consommation portent la même identité. Une insuffisance de
   ressource refuse atomiquement; elle ne tronque aucune sortie.
 - Toute égalité géométrique reste dans la branche conservée. Pour l'oracle de
@@ -129,25 +156,33 @@ prototype doit être revu avant toute campagne 50 k ou tout port CUDA.
 - Exactitude, réduction hiérarchique, performance et statut public sont quatre
   décisions séparées.
 
+La section 1.1 de la spécification fixe le chemin produit sans budget
+configurable. Un cap diagnostique peut refuser, mais ne peut jamais publier un
+préfixe comme objet complet.
+
 ## Prochain ordre de travail
 
-1. Corriger la garde q4 dégénérée, rendre non vacue le rejeu des certificats de
-   bloc, imposer le code zéro au CTest q2 scanline et étendre la porte de
-   cardinalité au générateur partagé.
-2. Durcir la gate q2 : erreurs de référence indépendantes, non-vacuité de `L4`,
-   fixtures de formule/parité/clip, digest complet et identités persistantes;
-   construire ensuite le classifieur terminal et comparer à Yao48/LBVH avec
-   census fermé.
-3. Lier le tag de version du sidecar à une provenance source/ELF vérifiée et
-   cibler réellement l'appel du self-test dans la factory; conserver ce chemin
-   comme oracle permanent `n<=32`.
-4. Ajouter au cœur q3/q4 `L4`, héritage et frontière lossless, puis appliquer
-   la gate d'exposant avant tout port; implémenter ensuite séparément profondeur
-   de demi-boule et cover par patches, avec coûts isolés.
-5. Recevoir `BallActivation`, census, resolver et fold horizontal contre Gamma
-   exhaustif borné.
-6. Mesurer seulement ensuite le pipeline complet sur G4 : build, source,
-   certification, fold et payload inclus dans le p95 `warm_e2e`.
+1. Conserver le générateur, les self-joins, le sidecar borné et les ancres comme
+   portes locales ou oracles. Fermer les identités persistantes et les juges
+   vraiment indépendants encore ouverts, sans promouvoir le rescan en route
+   50 k.
+2. Construire une disposition unique `(MortonKey, PointId)` et un LBVH exact
+   résidents. Implémenter q2 par Yao48 strict fail-open, classifieur terminal et
+   census fermé multi-ordre avec offsets 64 bits.
+3. Implémenter le falsificateur q4 mass-only `P15-HOCUDA-P1a` : partition
+   triangulaire implicite des paires, 64 patches de centres, seuil de huit
+   témoins, range-query collective, ledger
+   `pruned_mass+microtile_mass=C(n,2)` et aucune arène globale de paires. Cette
+   tranche n'émet aucune ancre et ne prouve pas la complétude de P1.
+4. Sur les seules ancres admises, mesurer séparément cœur de Jung, Helly,
+   composition cœur--profondeur et profondeur terminale. Le gain marginal doit
+   payer collecte et tri; toute ambiguïté retombe fail-open.
+5. Recevoir `BallActivation`, census, resolver, fold et reconstruction des
+   verticales contre Gamma exhaustif borné. Installer le harness du payload
+   officiel avant toute optimisation GPU.
+6. Appliquer d'abord la gate de compteurs à `12 500/25 000/50 000`, puis mesurer
+   sur G4 build, transferts, source, certification, dix forêts, verticales,
+   lots, certificat minimal et retour hôte dans le même p95 `warm_e2e`.
 
 ## Construction des juges
 

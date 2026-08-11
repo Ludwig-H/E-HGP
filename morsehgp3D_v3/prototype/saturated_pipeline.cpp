@@ -159,6 +159,13 @@ int main(int argc, char** argv) {
 
   const std::vector<mhgp::P3> pts = mhgp3v::make_family_cloud(family, n, coord, seed);
   if ((int)pts.size() < n) { std::printf("ECHEC : nuage non genere\n"); return 3; }
+  // CONTRAT DE CARDINALITE (audit etat courant) : egalite explicite a la
+  // frontiere du consommateur, jamais le seul test `< n`.
+  if ((int)pts.size() != n) {
+    std::printf("ECHEC : contrat de cardinalite viole — %zu points rendus pour %d"
+                " demandes\n", pts.size(), n);
+    return 1;
+  }
 
   mhgp3v::FlatStatistics st{};
   mhgp3v::CloudStatus status = mhgp3v::CloudStatus::kOk;
@@ -427,8 +434,8 @@ int main(int argc, char** argv) {
                 total_comparisons, total_unions, max_generator);
   std::printf("           : les lots dits silencieux MELANGENT encore continuations Gamma"
               " sans croissance et activations redondantes — la separation exacte est le"
-              " predicat q_min (NOTE_SOLUTION_TRANSCRIPT_GAMMA_QMIN), en cours de"
-              " reception\n");
+              " predicat q_min (|M| >= k et q_min(B) <= k+1), recu par la porte du juge"
+              " des forets mais non publie ici\n");
   std::printf("temps      : catalogue %.3f s, fold %.3f s, total %.3f s\n", catalogue_seconds,
               fold_seconds, catalogue_seconds + fold_seconds);
   return 0;
