@@ -1,0 +1,41 @@
+BUILD_OK
+CELL_DONE
+===
+=== mask terrain n=2400 ===
+provenance : --points 2400 --coord 244 --smax 11 --max-order 3 --seed 20260810 --family terrain --catalogue-threads 48 --mask hybrid-fast --threshold 1
+catalogue  : 166064 generateurs en 60.931 s — DIAGNOSTIC DE MASSE (masque hybride du fold, lots de niveau exact), aucune semantique de fold
+certificats: 165971 principaux, 93 non principaux en 0.553 s ; 91924 lots de niveau exact
+k=1 hybrid : entrees=1280137 requetes-fallback=42816 hits=68028816 (prevus=68028816) candidats+self=25994618 filtres=25994618 recertifies=25994618 faux=0 lots-multiples=17081 posting-max=1153 — 2.801 s
+           : H_Q par requete p50=1183 p95=4377 p99=5527 max=7710 ; par lot p50=3567 p95=9801 p99=13201 max=30570
+k=2 hybrid : entrees=1114073 requetes-fallback=345 hits=467169 (prevus=467169) candidats+self=199069 filtres=199069 recertifies=143953 faux=55116 lots-multiples=17080 posting-max=1151 — 0.040 s
+           : H_Q par requete p50=1040 p95=3577 p99=4982 max=5930 ; par lot p50=1696 p95=5662 p99=12409 max=13429
+k=3 hybrid : entrees=950409 requetes-fallback=93 hits=123669 (prevus=123669) candidats+self=58787 filtres=58787 recertifies=30646 faux=28141 lots-multiples=17077 posting-max=1133 — 0.023 s
+           : H_Q par requete p50=1012 p95=3307 p99=4927 max=5580 ; par lot p50=1106 p95=4214 p99=4927 max=5580
+OK : sonde de masse terminee (masque hybride du fold, possession canonique)
+exit=0
+=== mask scanline_single_pass n=2400 ===
+provenance : --points 2400 --coord 309 --smax 11 --max-order 3 --seed 20260810 --family scanline_single_pass --catalogue-threads 48 --mask hybrid-fast --threshold 1
+catalogue  : 158587 generateurs en 77.119 s — DIAGNOSTIC DE MASSE (masque hybride du fold, lots de niveau exact), aucune semantique de fold
+certificats: 156098 principaux, 2489 non principaux en 0.367 s ; 18346 lots de niveau exact
+k=1 hybrid : entrees=1216952 requetes-fallback=101732 hits=224017216 (prevus=224017216) candidats+self=84592066 filtres=84592066 recertifies=84592066 faux=0 lots-multiples=6916 posting-max=2128 — 8.268 s
+           : H_Q par requete p50=1928 p95=5199 p99=6132 max=13704 ; par lot p50=12175 p95=113128 p99=486873 max=1173005
+k=2 hybrid : entrees=1058365 requetes-fallback=9131 hits=13837992 (prevus=13837992) candidats+self=5871230 filtres=5871230 recertifies=4752972 faux=1118258 lots-multiples=6915 posting-max=2041 — 0.548 s
+           : H_Q par requete p50=1248 p95=3738 p99=4593 max=9199 ; par lot p50=6094 p95=63729 p99=116363 max=296628
+k=3 hybrid : entrees=902178 requetes-fallback=2489 hits=2625336 (prevus=2625336) candidats+self=1221011 filtres=1221011 recertifies=783624 faux=437387 lots-multiples=6908 posting-max=1936 — 0.117 s
+           : H_Q par requete p50=836 p95=2718 p99=3793 max=7707 ; par lot p50=2850 p95=37217 p99=65434 max=97726
+OK : sonde de masse terminee (masque hybride du fold, possession canonique)
+exit=0
+=== mask terrain n=6250 ===
+provenance : --points 6250 --coord 395 --smax 11 --max-order 3 --seed 20260810 --family terrain --catalogue-threads 48 --mask hybrid-fast --threshold 1
+catalogue  : 444570 generateurs en 675.407 s — DIAGNOSTIC DE MASSE (masque hybride du fold, lots de niveau exact), aucune semantique de fold
+certificats: 444287 principaux, 283 non principaux en 1.485 s ; 200387 lots de niveau exact
+k=1 hybrid : entrees=3434140 requetes-fallback=166821 hits=303155098 (prevus=303155098) candidats+self=115750431 filtres=115750431 recertifies=115750431 faux=0 lots-multiples=51298 posting-max=1399 — 12.983 s
+           : H_Q par requete p50=1464 p95=4676 p99=5615 max=8373 ; par lot p50=5388 p95=14023 p99=20070 max=101859
+k=2 hybrid : entrees=2989570 requetes-fallback=1421 hits=1818461 (prevus=1818461) candidats+self=771314 filtres=771314 recertifies=562289 faux=209025 lots-multiples=51297 posting-max=1398 — 0.153 s
+           : H_Q par requete p50=909 p95=3676 p99=4778 max=6311 ; par lot p50=1697 p95=6971 p99=11905 max=27898
+k=3 hybrid : entrees=2551250 requetes-fallback=283 hits=314550 (prevus=314550) candidats+self=146547 filtres=146547 recertifies=78608 faux=67939 lots-multiples=51249 posting-max=1392 — 0.076 s
+           : H_Q par requete p50=754 p95=3402 p99=4275 max=4793 ; par lot p50=886 p95=4056 p99=5867 max=6674
+OK : sonde de masse terminee (masque hybride du fold, possession canonique)
+exit=0
+=== mask scanline_single_pass n=6250 ===
+===

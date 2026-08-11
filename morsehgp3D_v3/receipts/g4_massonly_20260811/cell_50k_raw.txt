@@ -1,0 +1,84 @@
+=== cell terrain side=6 ===
+provenance : --points 50000 --coord 1118 --smax 11 --seed 20260810 --family terrain --cell-side 6
+boite      : [0,1118)x[0,1118)x[0,404) — grille 187x187x68 = 2377892 cellules half-open (l'espace des CENTRES, vides comprises)
+q=2 t_q=10 : B=2377892 cellules (2347723 vides) — m p50=15 p95=155 p99=286 max=3565 — anneaux temoins max=56
+           : L_A=1.184646e+08  R=8.413883e+09 tuples  T_max=3.436141e+12 census — cellules lourdes (R>100000)=6627 — 29.153 s (48 threads)
+           : prune convexe (axe) = 1470417 cellules separees — branche beta<Q vide, l'autre branche normalized_h0_inert — R'=2.862879e+09 T'=3.596962e+11
+q=3 t_q=9  : B=2377892 cellules (2347723 vides) — m p50=14 p95=149 p99=283 max=3563 — anneaux temoins max=55
+           : L_A=1.111350e+08  R=1.101581e+12 tuples  T_max=1.354848e+15 census — cellules lourdes (R>100000)=481192 — 28.158 s (48 threads)
+           : prune convexe (axe) = 1486842 cellules separees — branche beta<Q vide, l'autre branche normalized_h0_inert — R'=9.650080e+10 T'=1.293987e+13
+q=4 t_q=8  : B=2377892 cellules (2347723 vides) — m p50=12 p95=144 p99=281 max=3550 — anneaux temoins max=55
+           : L_A=1.038478e+08  R=3.314466e+14 tuples  T_max=6.951207e+17 census — cellules lourdes (R>100000)=763978 — 27.145 s (48 threads)
+           : prune convexe (axe) = 1505271 cellules separees — branche beta<Q vide, l'autre branche normalized_h0_inert — R'=2.432370e+12 T'=3.417182e+14
+OK : sonde de masse de la source par cellules terminee (aucun tuple forme — l'admission 50 k se lit sur R_q et l'arene, jamais sur un cap)
+exit=0
+=== cell terrain side=10 ===
+provenance : --points 50000 --coord 1118 --smax 11 --seed 20260810 --family terrain --cell-side 10
+boite      : [0,1118)x[0,1118)x[0,404) — grille 112x112x41 = 514304 cellules half-open (l'espace des CENTRES, vides comprises)
+q=2 t_q=10 : B=514304 cellules (498474 vides) — m p50=19 p95=271 p99=491 max=4327 — anneaux temoins max=34
+           : L_A=4.345753e+07  R=5.526965e+09 tuples  T_max=3.597862e+12 census — cellules lourdes (R>100000)=6536 — 1.837 s (48 threads)
+           : prune convexe (axe) = 289654 cellules separees — branche beta<Q vide, l'autre branche normalized_h0_inert — R'=2.215355e+09 T'=4.765486e+11
+q=3 t_q=9  : B=514304 cellules (498474 vides) — m p50=17 p95=262 p99=488 max=4326 — anneaux temoins max=33
+           : L_A=4.095052e+07  R=1.159887e+12 tuples  T_max=1.977944e+15 census — cellules lourdes (R>100000)=167030 — 1.783 s (48 threads)
+           : prune convexe (axe) = 292759 cellules separees — branche beta<Q vide, l'autre branche normalized_h0_inert — R'=1.317621e+11 T'=3.035341e+13
+q=4 t_q=8  : B=514304 cellules (498474 vides) — m p50=15 p95=254 p99=486 max=4318 — anneaux temoins max=33
+           : L_A=3.846750e+07  R=4.868130e+14 tuples  T_max=1.314655e+18 census — cellules lourdes (R>100000)=197659 — 1.679 s (48 threads)
+           : prune convexe (axe) = 296166 cellules separees — branche beta<Q vide, l'autre branche normalized_h0_inert — R'=5.942842e+12 T'=1.437068e+15
+OK : sonde de masse de la source par cellules terminee (aucun tuple forme — l'admission 50 k se lit sur R_q et l'arene, jamais sur un cap)
+exit=0
+=== cell scanline_single_pass side=6 ===
+provenance : --points 50000 --coord 1414 --smax 11 --seed 20260810 --family scanline_single_pass --cell-side 6
+boite      : [0,1413)x[1,818)x[0,240) — grille 236x137x40 = 1293280 cellules half-open (l'espace des CENTRES, vides comprises)
+q=2 t_q=10 : B=1293280 cellules (1270241 vides) — m p50=152 p95=395 p99=460 max=986 — anneaux temoins max=41
+           : L_A=2.294237e+08  R=2.909867e+10 tuples  T_max=9.126197e+12 census — cellules lourdes (R>100000)=16968 — 8.904 s (48 threads)
+           : prune convexe (axe) = 1182842 cellules separees — branche beta<Q vide, l'autre branche normalized_h0_inert — R'=4.839762e+08 T'=1.138949e+11
+q=3 t_q=9  : B=1293280 cellules (1270241 vides) — m p50=150 p95=391 p99=456 max=979 — anneaux temoins max=40
+           : L_A=2.264108e+08  R=2.929727e+12 tuples  T_max=1.043930e+15 census — cellules lourdes (R>100000)=926154 — 8.832 s (48 threads)
+           : prune convexe (axe) = 1184237 cellules separees — branche beta<Q vide, l'autre branche normalized_h0_inert — R'=3.518531e+10 T'=1.134378e+13
+q=4 t_q=8  : B=1293280 cellules (1270241 vides) — m p50=148 p95=387 p99=451 max=979 — anneaux temoins max=40
+           : L_A=2.232205e+08  R=2.478658e+14 tuples  T_max=9.770514e+16 census — cellules lourdes (R>100000)=1170662 — 8.829 s (48 threads)
+           : prune convexe (axe) = 1185776 cellules separees — branche beta<Q vide, l'autre branche normalized_h0_inert — R'=2.603368e+12 T'=1.027817e+15
+OK : sonde de masse de la source par cellules terminee (aucun tuple forme — l'admission 50 k se lit sur R_q et l'arene, jamais sur un cap)
+exit=0
+=== cell scanline_single_pass side=10 ===
+provenance : --points 50000 --coord 1414 --smax 11 --seed 20260810 --family scanline_single_pass --cell-side 10
+boite      : [0,1413)x[1,818)x[0,240) — grille 142x82x24 = 279456 cellules half-open (l'espace des CENTRES, vides comprises)
+q=2 t_q=10 : B=279456 cellules (267366 vides) — m p50=264 p95=706 p99=834 max=1528 — anneaux temoins max=25
+           : L_A=8.695710e+07  R=1.959164e+10 tuples  T_max=1.096892e+13 census — cellules lourdes (R>100000)=69870 — 0.664 s (48 threads)
+           : prune convexe (axe) = 242632 cellules separees — branche beta<Q vide, l'autre branche normalized_h0_inert — R'=5.442285e+08 T'=2.285812e+11
+q=3 t_q=9  : B=279456 cellules (267366 vides) — m p50=262 p95=702 p99=829 max=1520 — anneaux temoins max=24
+           : L_A=8.622081e+07  R=3.574407e+12 tuples  T_max=2.286909e+15 census — cellules lourdes (R>100000)=242945 — 0.659 s (48 threads)
+           : prune convexe (axe) = 242919 cellules separees — branche beta<Q vide, l'autre branche normalized_h0_inert — R'=7.229607e+10 T'=4.223936e+13
+q=4 t_q=8  : B=279456 cellules (267366 vides) — m p50=260 p95=698 p99=824 max=1513 — anneaux temoins max=24
+           : L_A=8.543738e+07  R=5.542028e+14 tuples  T_max=3.924075e+17 census — cellules lourdes (R>100000)=276954 — 0.654 s (48 threads)
+           : prune convexe (axe) = 243209 cellules separees — branche beta<Q vide, l'autre branche normalized_h0_inert — R'=9.968861e+12 T'=7.073378e+15
+OK : sonde de masse de la source par cellules terminee (aucun tuple forme — l'admission 50 k se lit sur R_q et l'arene, jamais sur un cap)
+exit=0
+=== cell scanline_overlap_multiecho side=6 ===
+provenance : --points 50000 --coord 1414 --smax 11 --seed 20260810 --family scanline_overlap_multiecho --cell-side 6
+boite      : [0,1413)x[1,410)x[0,311) — grille 236x69x52 = 846768 cellules half-open (l'espace des CENTRES, vides comprises)
+q=2 t_q=10 : B=846768 cellules (824001 vides) — m p50=22 p95=262 p99=605 max=1299 — anneaux temoins max=35
+           : L_A=5.189094e+07  R=6.765417e+09 tuples  T_max=3.574222e+12 census — cellules lourdes (R>100000)=17762 — 2.226 s (48 threads)
+           : prune convexe (axe) = 418879 cellules separees — branche beta<Q vide, l'autre branche normalized_h0_inert — R'=5.334394e+08 T'=5.169148e+10
+q=3 t_q=9  : B=846768 cellules (824001 vides) — m p50=20 p95=259 p99=601 max=1298 — anneaux temoins max=35
+           : L_A=5.010875e+07  R=1.161189e+12 tuples  T_max=7.977862e+14 census — cellules lourdes (R>100000)=142154 — 2.179 s (48 threads)
+           : prune convexe (axe) = 420959 cellules separees — branche beta<Q vide, l'autre branche normalized_h0_inert — R'=1.466753e+10 T'=1.636201e+12
+q=4 t_q=8  : B=846768 cellules (824001 vides) — m p50=18 p95=257 p99=597 max=1295 — anneaux temoins max=35
+           : L_A=4.828365e+07  R=1.930678e+14 tuples  T_max=1.517325e+17 census — cellules lourdes (R>100000)=212812 — 2.110 s (48 threads)
+           : prune convexe (axe) = 423329 cellules separees — branche beta<Q vide, l'autre branche normalized_h0_inert — R'=3.304374e+11 T'=3.902415e+13
+OK : sonde de masse de la source par cellules terminee (aucun tuple forme — l'admission 50 k se lit sur R_q et l'arene, jamais sur un cap)
+exit=0
+=== cell scanline_overlap_multiecho side=10 ===
+provenance : --points 50000 --coord 1414 --smax 11 --seed 20260810 --family scanline_overlap_multiecho --cell-side 10
+boite      : [0,1413)x[1,410)x[0,311) — grille 142x41x32 = 186304 cellules half-open (l'espace des CENTRES, vides comprises)
+q=2 t_q=10 : B=186304 cellules (172587 vides) — m p50=32 p95=452 p99=1062 max=2297 — anneaux temoins max=21
+           : L_A=1.955401e+07  R=4.629600e+09 tuples  T_max=4.350613e+12 census — cellules lourdes (R>100000)=9439 — 0.189 s (48 threads)
+           : prune convexe (axe) = 87426 cellules separees — branche beta<Q vide, l'autre branche normalized_h0_inert — R'=4.653715e+08 T'=8.742975e+10
+q=3 t_q=9  : B=186304 cellules (172587 vides) — m p50=30 p95=449 p99=1058 max=2297 — anneaux temoins max=21
+           : L_A=1.901976e+07  R=1.427334e+12 tuples  T_max=1.761609e+15 census — cellules lourdes (R>100000)=47877 — 0.185 s (48 threads)
+           : prune convexe (axe) = 87822 cellules separees — branche beta<Q vide, l'autre branche normalized_h0_inert — R'=2.596641e+10 T'=5.460793e+12
+q=4 t_q=8  : B=186304 cellules (172587 vides) — m p50=27 p95=447 p99=1054 max=2297 — anneaux temoins max=21
+           : L_A=1.846720e+07  R=4.321944e+14 tuples  T_max=6.141840e+17 census — cellules lourdes (R>100000)=55272 — 0.174 s (48 threads)
+           : prune convexe (axe) = 88247 cellules separees — branche beta<Q vide, l'autre branche normalized_h0_inert — R'=1.171580e+12 T'=2.600388e+14
+OK : sonde de masse de la source par cellules terminee (aucun tuple forme — l'admission 50 k se lit sur R_q et l'arene, jamais sur un cap)
+exit=0
