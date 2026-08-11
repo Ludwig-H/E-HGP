@@ -96,9 +96,13 @@ la banque chaude conserve donc `K+1=11` candidats distincts. Elle exclut `q`,
 choisit les dix premiers restants et recalcule `D` sur ces dix. Si une chambre
 contient `t<=10` points hors ancre, chaque cible y possède au plus neuf autres
 témoins et ce certificat précis est impossible; `t=0` ne porte aucune cible.
-Le reçu engage les dix identifiants effectivement choisis. Pour une boîte de
-cibles, préférer une antichaîne témoin disjointe de la boîte à une banque de
-taille `K+|Q|`.
+La table factorisée des onze candidats est immuable. Le reçu engage un masque
+de onze bits dont exactement dix sont levés; `D` est recalculé depuis ces dix
+slots. Une enveloppe radiale engage un couple `(bank_index,mask)` distinct pour
+chaque chambre référencée. La sélection ne peut pas être stockée comme état
+mutable de la banque, car deux cibles peuvent exclure des slots différents.
+Pour une boîte de cibles, préférer une antichaîne témoin disjointe de la boîte
+à une banque de taille `K+|Q|`.
 
 ### Banque compressée par antichaîne
 
@@ -255,9 +259,11 @@ Le ledger ferme simultanément, par lane et par run :
 L'égalité globale des masses ne suffit pas : une omission et une duplication
 de même cardinal pourraient se compenser. Le reçu produit ferme aussi, pour
 chaque ancre, la masse attendue `pos(j)`, les intervalles de régions disjoints,
-les cibles ponctuelles et le digest canonique de leur union. Les banques sont
-factorisées par `(ancre, chambre, version)` afin qu'un reçu de région référence
-dix identifiants une seule fois au lieu de les recopier pour chaque nœud.
+les cibles ponctuelles et le digest canonique de leur union. Les banques
+immuables sont factorisées par `(ancre, chambre, version)` afin que les reçus ne
+recopient pas leurs onze identifiants. Chaque reçu référence en plus son masque
+d'engagement propre; le juge en recalcule les dix `PointId`, `D`, l'exclusion de
+la plage cible et les inégalités strictes.
 
 Aucun tableau global de paires ni de banques ponctuelles `n*48*(K+1)` n'est
 matérialisé : les

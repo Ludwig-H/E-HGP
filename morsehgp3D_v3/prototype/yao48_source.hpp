@@ -774,54 +774,59 @@ struct YaoSource {
 
   struct DualFrame {
     int node = 0;
-    int arena_begin = 0, arena_end = 0;   // temoins herites (plages acceptees)
+    int accepted_begin = 0, accepted_end = 0;   // antichaine heritee
+    int frontier_begin = 0, frontier_end = 0;   // noeuds AMBIGUS herites
     i64 mass = 0;
   };
   std::vector<std::pair<int, int>> dual_arena_;   // (begin,end) des W acceptes
+  std::vector<int> dual_frontier_;               // arene des noeuds ambigus
   std::vector<DualFrame> dual_stack_;
-  std::vector<int> dual_search_;
 
-  // Cherche des temoins supplementaires pour la boite Q, en ignorant les
-  // plages deja acceptees (l'antichaine reste disjointe). Rend la masse
-  // totale atteinte.
-  i64 dual_collect(const Node& q_node, const mhgp::P3& p, int anchor_pos,
-                   int arena_begin, i64 mass) {
-    dual_search_.clear();
-    dual_search_.push_back(0);
-    while (!dual_search_.empty() && mass < kOrderK) {
-      const int index = dual_search_.back();
-      dual_search_.pop_back();
+  // LA FRONTIERE PERSISTANTE (aucun rescan de racine par bloc — l'audit le
+  // refuse explicitement). Les DEUX verdicts s'heritent exactement :
+  //   accepte  : Q' inclus dans Q donne min A' >= min A > 0 ;
+  //   rejete   : Q' inclus dans Q donne max A' <= max A <= 0.
+  // Seuls les noeuds AMBIGUS du parent sont reexamines par l'enfant, et la
+  // frontiere ne repart jamais de la racine. Rend la masse atteinte ; la
+  // nouvelle frontiere est append-only dans `dual_frontier_`.
+  std::vector<int> dual_work_;
+
+  i64 dual_expand(const Node& q_node, const mhgp::P3& p, int anchor_pos,
+                  int frontier_begin, int frontier_end, i64 mass, int* out_begin,
+                  int* out_end) {
+    // La FILE de travail part de la frontiere ambigue HERITEE — jamais de la
+    // racine — et descend jusqu'a ce que chaque branche soit acceptee,
+    // rejetee, ou reduite a une feuille ambigue.
+    dual_work_.assign(dual_frontier_.begin() + frontier_begin,
+                      dual_frontier_.begin() + frontier_end);
+    *out_begin = (int)dual_frontier_.size();
+    std::size_t head = 0;
+    while (head < dual_work_.size() && mass < kOrderK) {
+      const int index = dual_work_[head++];
       const Node& w = tree->nodes[(std::size_t)index];
       ++receipt.dual_witness_visits;
-      // Jamais l'ancre, jamais une cible du bloc, jamais un sous-arbre deja
-      // accepte (les plages restent disjointes).
-      if (anchor_pos >= w.begin && anchor_pos < w.end) {
-        if (w.left >= 0) { dual_search_.push_back(w.right); dual_search_.push_back(w.left); }
+      const bool holds_anchor = anchor_pos >= w.begin && anchor_pos < w.end;
+      const bool overlaps_q = w.begin < q_node.end && q_node.begin < w.end;
+      if (!holds_anchor && !overlaps_q) {
+        if (dual_max_a(q_node, w, p) <= 0) continue;   // rejete DEFINITIVEMENT
+        if (dual_min_a(q_node, w, p) > 0) {
+          ++receipt.dual_accepted;
+          dual_arena_.push_back({w.begin, w.end});
+          mass += w.end - w.begin;
+          continue;                                     // antichaine : jamais descendu
+        }
+      }
+      if (w.left < 0) {
+        dual_frontier_.push_back(index);   // feuille ambigue : transmise telle quelle
         continue;
       }
-      if (w.begin < q_node.end && q_node.begin < w.end) {
-        if (w.left >= 0) { dual_search_.push_back(w.right); dual_search_.push_back(w.left); }
-        continue;
-      }
-      bool overlaps_accepted = false;
-      for (std::size_t k = (std::size_t)arena_begin; k < dual_arena_.size(); ++k)
-        if (w.begin < dual_arena_[k].second && dual_arena_[k].first < w.end)
-          overlaps_accepted = true;
-      if (overlaps_accepted) {
-        if (w.left >= 0) { dual_search_.push_back(w.right); dual_search_.push_back(w.left); }
-        continue;
-      }
-      if (dual_max_a(q_node, w, p) <= 0) continue;   // aucun temoin possible
-      if (dual_min_a(q_node, w, p) > 0) {
-        ++receipt.dual_accepted;
-        dual_arena_.push_back({w.begin, w.end});
-        mass += w.end - w.begin;
-        continue;                       // antichaine : jamais descendu
-      }
-      if (w.left < 0) continue;         // feuille indecise : rien a tirer
-      dual_search_.push_back(w.right);
-      dual_search_.push_back(w.left);
+      dual_work_.push_back(w.left);
+      dual_work_.push_back(w.right);
     }
+    // Les noeuds non examines (arret anticipe au seuil) restent ambigus.
+    for (; head < dual_work_.size(); ++head)
+      dual_frontier_.push_back(dual_work_[head]);
+    *out_end = (int)dual_frontier_.size();
     return mass;
   }
 
@@ -833,8 +838,10 @@ struct YaoSource {
     batch_.clear();
     anchor_regions_.clear();
     dual_arena_.clear();
+    dual_frontier_.clear();
+    dual_frontier_.push_back(0);   // la frontiere initiale : la racine SEULE
     dual_stack_.clear();
-    dual_stack_.push_back({0, 0, 0, 0});
+    dual_stack_.push_back({0, 0, 0, 0, 1, 0});
     while (!dual_stack_.empty()) {
       receipt.stack_high_water =
           std::max(receipt.stack_high_water, (i64)dual_stack_.size());
@@ -845,13 +852,15 @@ struct YaoSource {
       if (q_node.begin >= anchor_pos) continue;          // rien de possede
       const bool fully_owned = q_node.end <= anchor_pos;
       i64 mass = frame.mass;
-      receipt.dual_inherited += frame.arena_end - frame.arena_begin;
-      int arena_begin = frame.arena_begin;
+      receipt.dual_inherited += frame.accepted_end - frame.accepted_begin;
+      int child_begin = frame.frontier_begin, child_end = frame.frontier_end;
       if (fully_owned) {
-        // Les temoins herites restent valides (Q' inclus dans Q) : on ne
-        // reevalue que le complement.
-        dual_arena_.resize((std::size_t)frame.arena_end);
-        if (mass < kOrderK) mass = dual_collect(q_node, p, anchor_pos, arena_begin, mass);
+        // Les temoins herites restent valides (Q' inclus dans Q) ; seuls les
+        // AMBIGUS du parent sont reexamines, jamais la racine.
+        dual_arena_.resize((std::size_t)frame.accepted_end);
+        if (mass < kOrderK)
+          mass = dual_expand(q_node, p, anchor_pos, frame.frontier_begin,
+                             frame.frontier_end, mass, &child_begin, &child_end);
         if (mass >= kOrderK) {
           ++receipt.dual_prunes;
           const i64 covered = q_node.end - q_node.begin;
@@ -876,9 +885,14 @@ struct YaoSource {
         }
         continue;
       }
-      const int arena_end = (int)dual_arena_.size();
-      dual_stack_.push_back({q_node.right, arena_begin, arena_end, mass});
-      dual_stack_.push_back({q_node.left, arena_begin, arena_end, mass});
+      const int accepted_end = (int)dual_arena_.size();
+      // La nouvelle frontiere ambigue est le segment append-only produit
+      // ci-dessus ; si le noeud n'etait pas possede, on transmet celle du
+      // parent inchangee.
+      dual_stack_.push_back({q_node.right, frame.accepted_begin, accepted_end,
+                             child_begin, child_end, mass});
+      dual_stack_.push_back({q_node.left, frame.accepted_begin, accepted_end,
+                             child_begin, child_end, mass});
     }
     if (oracle_mode && anchor_regions_.size() > 1) {
       std::sort(anchor_regions_.begin(), anchor_regions_.end());
