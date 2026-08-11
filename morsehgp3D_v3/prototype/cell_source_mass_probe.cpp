@@ -47,6 +47,7 @@
 #include <vector>
 
 #include "mhgp/mhgp.hpp"
+#include "prototype/cell_prune.hpp"
 #include "prototype/cloud_families.hpp"
 
 namespace {
@@ -252,10 +253,11 @@ int main(int argc, char** argv) {
       // conv(A_C) strictement separes => la cellule ne possede aucun support
       // propre de la BRANCHE beta<Q ; l'autre branche (tous temoins
       // interieurs) est normalized_h0_inert — jamais un « no_support ». Le
-      // separateur d'axe est le certificat entier v1 : tous les points de
-      // A_C STRICTEMENT d'un cote, les huit coins fermes de l'autre.
+      // predicat partage `cell_prune` certifie en entiers : six axes puis la
+      // direction du barycentre (le plan general) — le flottant propose, la
+      // verification exacte decide, sans certificat la cellule est gardee.
       i128 sum_r_pruned = 0, sum_t_pruned = 0;
-      i64 pruned = 0, heavy = 0, empty = 0, rings_max = 0;
+      i64 pruned_axis = 0, pruned_plane = 0, heavy = 0, empty = 0, rings_max = 0;
     };
     std::vector<Slice> slices((std::size_t)threads);
     std::atomic<i64> next_x{0};
@@ -267,6 +269,7 @@ int main(int argc, char** argv) {
     const auto worker = [&](int w) {
       Slice& slice = slices[(std::size_t)w];
       std::vector<std::pair<i64, int>> best;   // (score, point) — top t_q
+      std::vector<mhgp::P3> dilation;          // A_C materialisee pour le prune
       for (i64 cx = next_x.fetch_add(1); cx < grid[0] && !failed.load();
            cx = next_x.fetch_add(1))
         for (i64 cy = 0; cy < grid[1] && !failed.load(); ++cy)
@@ -310,7 +313,7 @@ int main(int argc, char** argv) {
             // 2. LA DILATION : m = |{x : dist^2(x, fermeture) < Q}| par
             // anneaux, coupure exacte quand l'anneau ne peut plus toucher.
             i64 m = 0;
-            i64 a_lo[3] = {65536, 65536, 65536}, a_hi[3] = {-1, -1, -1};
+            dilation.clear();
             for (i64 ring = 0; ring <= ring_limit; ++ring) {
               const i64 floor_gap = (ring - 1) * side;
               if (ring >= 1 && floor_gap * floor_gap >= q_cell) break;
@@ -318,20 +321,18 @@ int main(int argc, char** argv) {
                 for (int p : bucket[(std::size_t)((ux * grid[1] + uy) * grid[2] + uz)])
                   if (point_gap(pts[(std::size_t)p], box_lo, box_hi) < q_cell) {
                     ++m;
-                    const i64 c[3] = {(i64)pts[(std::size_t)p].x, (i64)pts[(std::size_t)p].y,
-                                      (i64)pts[(std::size_t)p].z};
-                    for (int d = 0; d < 3; ++d) {
-                      a_lo[d] = std::min(a_lo[d], c[d]);
-                      a_hi[d] = std::max(a_hi[d], c[d]);
-                    }
+                    dilation.push_back(pts[(std::size_t)p]);
                   }
               });
             }
-            // SEPARATION D'AXE stricte : tout A_C d'un cote STRICT du plan,
-            // les coins fermes de C de l'autre — certificat entier exact.
-            bool separated = false;
-            for (int d = 0; d < 3 && !separated; ++d)
-              if (a_hi[d] < box_lo[d] || a_lo[d] > box_hi[d]) separated = true;
+            const mhgp::i64 prune_lo[3] = {(mhgp::i64)box_lo[0], (mhgp::i64)box_lo[1],
+                                           (mhgp::i64)box_lo[2]};
+            const mhgp::i64 prune_hi[3] = {(mhgp::i64)box_hi[0], (mhgp::i64)box_hi[1],
+                                           (mhgp::i64)box_hi[2]};
+            const mhgp3v::CellPruneVerdict prune_verdict = mhgp3v::cell_prune(
+                prune_lo, prune_hi, [&](std::size_t i) { return dilation[i]; },
+                dilation.size());
+            const bool separated = prune_verdict.separated;
             if (verify_bruteforce == 1) {
               i64 check = 0;
               for (const mhgp::P3& p : pts)
@@ -350,7 +351,8 @@ int main(int argc, char** argv) {
             slice.sum_r += r_cell;
             slice.sum_t += (i128)m * r_cell;
             if (separated) {
-              ++slice.pruned;
+              if (prune_verdict.by_axis) ++slice.pruned_axis;
+              else ++slice.pruned_plane;
             } else {
               slice.sum_r_pruned += r_cell;
               slice.sum_t_pruned += (i128)m * r_cell;
@@ -369,7 +371,8 @@ int main(int argc, char** argv) {
     }
     std::vector<i64> masses;
     i128 sum_m = 0, sum_r = 0, sum_t = 0, sum_r_pruned = 0, sum_t_pruned = 0;
-    i64 heavy_cells = 0, empty_cells = 0, witness_rings_max = 0, pruned_cells = 0;
+    i64 heavy_cells = 0, empty_cells = 0, witness_rings_max = 0;
+    i64 pruned_axis = 0, pruned_plane = 0;
     for (Slice& slice : slices) {
       masses.insert(masses.end(), slice.masses.begin(), slice.masses.end());
       sum_m += slice.sum_m;
@@ -377,7 +380,8 @@ int main(int argc, char** argv) {
       sum_t += slice.sum_t;
       sum_r_pruned += slice.sum_r_pruned;
       sum_t_pruned += slice.sum_t_pruned;
-      pruned_cells += slice.pruned;
+      pruned_axis += slice.pruned_axis;
+      pruned_plane += slice.pruned_plane;
       heavy_cells += slice.heavy;
       empty_cells += slice.empty;
       witness_rings_max = std::max(witness_rings_max, slice.rings_max);
@@ -391,9 +395,11 @@ int main(int argc, char** argv) {
                 " (R>%lld)=%lld — %.3f s (%d threads)\n", to_double(sum_m), to_double(sum_r),
                 to_double(sum_t), heavy_r, heavy_cells,
                 std::chrono::duration<double>(s1 - s0).count(), threads);
-    std::printf("           : prune convexe (axe) = %lld cellules separees — branche"
-                " beta<Q vide, l'autre branche normalized_h0_inert — R'=%.6e T'=%.6e\n",
-                pruned_cells, to_double(sum_r_pruned), to_double(sum_t_pruned));
+    std::printf("           : prune convexe = %lld cellules (axe %lld + plan %lld) —"
+                " branche beta<Q vide, l'autre branche normalized_h0_inert — R'=%.6e"
+                " T'=%.6e\n",
+                pruned_axis + pruned_plane, pruned_axis, pruned_plane,
+                to_double(sum_r_pruned), to_double(sum_t_pruned));
   }
   std::printf("OK : sonde de masse de la source par cellules terminee (aucun tuple forme —"
               " l'admission 50 k se lit sur R_q et l'arene, jamais sur un cap)\n");

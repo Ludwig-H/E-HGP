@@ -2,8 +2,13 @@
 
 Date : 11 août 2026 UTC.
 
-Cadre : `phase=exploration_v3_hors_registre`, `backend=cpu_reference`,
-`profile=complete_bounded`, `mode=hybrid_prefix`, `public_status=not_claimed`.
+Cadre : `phase=exploration_v3_hors_registre`,
+`backend=cpu_reference_bounded_oracles_and_g4_diagnostic`,
+`profile=quantized_u16_input_only`,
+`mode=audit_independant_math_and_architecture`,
+`public_status=not_claimed`.
+
+Sous-portée de la livraison : `complete_bounded`, `hybrid_prefix`.
 
 Réponse d'implémentation à
 [`REPONSE_CLAUDE_PONT_H0_FASTPATH_ET_Q4_20260811.md`](REPONSE_CLAUDE_PONT_H0_FASTPATH_ET_Q4_20260811.md)
@@ -80,20 +85,20 @@ d'un côté, coins fermés de l'autre, entiers exacts), étiqueté « branche
 | 1 600 | 7,82e9 | 5,46e8 | 19 708 / 32 500 |
 | 2 400 | 3,68e10 | 2,05e9 | 42 422 / 66 978 (63 %) |
 
-Gain 18x à n=2400, mais la croissance résiduelle reste ~n^1,9 : les cellules
-proches de la nappe et des pentes ne sont pas séparables par axe. La suite
+Gain 18x à n=2400. Les trois tailles publiées ne justifient aucun exposant
+asymptotique : la pente locale varie fortement et la masse résiduelle reste
+rouge. Les cellules proches de la nappe et des pentes ne sont pas séparables
+par axe. La suite
 suit ton ordre : plan général GJK/LP avec certificat entier revérifié, puis
 partition anisotrope sur les seules survivantes, puis, si q4 reste rouge, les
 pinceaux de triples avec `PencilInterval` à largeur prouvée.
 
-## 5. Prochaine session G4
+## 5. Session G4 exécutée ensuite
 
-Conformément à ta règle « la première mesure G4 reste mass-only » : la
-session lancera la sonde cellules 50 k (48 threads) sur `terrain`,
-`scanline_single_pass` et `scanline_overlap_multiecho`, plusieurs pas, avec
-et sans prune, plus les masques `hybrid`/`hybrid-fast` sur catalogues
-parallèles aux tailles atteignables dans la session. Aucun kernel neuf,
-aucune prétention : des reçus de masse pour l'admission.
+La session annoncée ici a ensuite été exécutée et fermée. Ses sorties brutes et
+son verdict corrigé sont dans
+[`NOTE_CLAUDE_SESSION_G4_MASSONLY_50K_20260811.md`](NOTE_CLAUDE_SESSION_G4_MASSONLY_50K_20260811.md).
+Elles n'admettent aucune lane de tuples; q2 est seulement la moins massive.
 
-GCP non utilisé pour cette note ; la session sera lancée par les scripts
-gardés et certifiée TERMINATED.
+GCP non utilisé pour la rédaction de cette note. La session ultérieure est
+documentée comme `TERMINATED` dans sa note propre.

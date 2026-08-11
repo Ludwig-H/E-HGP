@@ -198,6 +198,13 @@ target_include_directories(mhgp3v_sidecar_factory_gate PRIVATE ${CMAKE_CURRENT_S
 target_link_libraries(mhgp3v_sidecar_factory_gate PRIVATE mhgp)
 target_compile_options(mhgp3v_sidecar_factory_gate PRIVATE -Wall -Wextra -Werror)
 
+# LE PRUNE CONVEXE CERTIFIE (reponse pont/q4 20260811 §6) : le predicat
+# partage axes + plan du barycentre, verification entiere seule decisive.
+add_executable(mhgp3v_cell_prune_gate prototype/cell_prune_gate.cpp)
+target_include_directories(mhgp3v_cell_prune_gate PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(mhgp3v_cell_prune_gate PRIVATE mhgp)
+target_compile_options(mhgp3v_cell_prune_gate PRIVATE -Wall -Wextra -Werror)
+
 # LA SONDE DE MASSE DE LA SOURCE PAR CELLULES DE CENTRES (reponse 20260811) :
 # theoreme cellule--candidat, temoins top-t_q par anneaux, dilations exactes —
 # le prealable de decision 50 k, sans former un seul tuple.
@@ -946,6 +953,18 @@ set_tests_properties(mhgp3v_cell_source_mass_scanline PROPERTIES
   PASS_REGULAR_EXPRESSION "OK : sonde de masse de la source par cellules terminee")
 mhgp3v_add_expected_code_test_for(mhgp3v_cell_source_mass_probe
   mhgp3v_cell_source_mass_reject_unknown "argument inconnu" 2 --inexistant 1)
+# LA PORTE DU PRUNE : contact conserve, pics lointains separes en local,
+# nappe inclinee separee par le plan general ; deux mutants tues.
+add_test(NAME mhgp3v_cell_prune_fixtures COMMAND mhgp3v_cell_prune_gate)
+set_tests_properties(mhgp3v_cell_prune_fixtures PROPERTIES
+  PASS_REGULAR_EXPRESSION "OK : prune convexe certifie")
+mhgp3v_add_expected_code_test_for(mhgp3v_cell_prune_gate
+  mhgp3v_cell_prune_kill_contact "mutant tue" 4 --mutant contact-as-separation)
+mhgp3v_add_expected_code_test_for(mhgp3v_cell_prune_gate
+  mhgp3v_cell_prune_kill_from_cloud "mutant tue" 4 --mutant prune-from-cloud)
+mhgp3v_add_expected_code_test_for(mhgp3v_cell_prune_gate
+  mhgp3v_cell_prune_reject_unknown_mutant "mutant inconnu" 2 --mutant inexistant)
+
 # LA PORTE DE LA FACTORY : sept fixtures du contrat, trois mutants tues.
 add_test(NAME mhgp3v_sidecar_factory_fixtures COMMAND mhgp3v_sidecar_factory_gate)
 set_tests_properties(mhgp3v_sidecar_factory_fixtures PROPERTIES

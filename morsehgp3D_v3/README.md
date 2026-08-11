@@ -1,213 +1,196 @@
 # MorseHGP3D v3
 
 MorseHGP3D v3 explore une construction exacte et industrielle de la hiérarchie
-Morse/HGP en dimension trois, sans matérialiser la mosaïque de Delaunay d'ordre
-supérieur. La cible d'échelle est `50 000 points`, `K=10`, sur une machine G4,
-avec un objectif secondaire `warm_e2e < 1 s`.
+Morse/HGP en dimension trois, sans matérialiser de mosaïque de Delaunay d'ordre
+supérieur. Le profil traité est le nuage quantifié u16; il n'affirme rien sur
+le nuage réel antérieur à la quantification.
 
-Ce README décrit uniquement l'état courant. Les chronologies, contre-exemples
-et anciens snapshots restent dans [`audits/`](audits/README.md).
+Cadre : `phase=exploration_v3_hors_registre`,
+`backend=cpu_reference_bounded_oracles_and_g4_diagnostic`,
+`profile=quantized_u16_input_only`,
+`mode=audit_independant_math_and_architecture`,
+`public_status=not_claimed`.
 
-## Statut courant
+## Verdict courant
+
+Le contrat n'est pas rempli. La spécification fixe comme cible principale un
+p95 `warm_e2e < 100 ms` à 50 000 points et `K=10`; la seconde est une cible
+secondaire et le jalon immédiat demandé. Aucun chemin actuel n'atteint l'une ou
+l'autre, et aucun backend public exact n'est qualifié.
 
 Snapshot committé audité :
-`ab5a3c86f032bb793b868a9162c3eb299a1f100c`.
+`232470cbaf2449e5e68c92f2c42c532c4df20458`. Les livraisons stables utiles
+sont :
 
-Cadre : `phase=exploration_v3_hors_registre`, `backend=cpu_reference`,
-`profile=quantized_u16_input_only`, `public_status=not_claimed`.
-
-Le contrat 50 k/G4/seconde n'est pas rempli. Aucun backend public exact n'est
-qualifié. Un chantier non committé ajoute actuellement le fast path principal
-dans les lots ex æquo; ses empreintes et ses obligations de réception sont dans
-[`AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md).
-
-Le pipeline `hybrid`/`hybrid-prefix` committé exige encore `smax>=n`, tandis que
-le type historique borne le rang à 32. Il ne peut donc pas être le pipeline
-50 k. Le mode `prefix-all` contourne cette garde pour juger exactement un fold
-relatif à une table partielle; il ne transforme pas cette table en source
-géométriquement complète.
-
-## Deux contrats à ne pas confondre
-
-| contrat | contenu | état |
+| commit | contenu | verdict |
 | --- | --- | --- |
-| Gamma/v2 exhaustif | cofaces, incidences, lots silencieux, identifiants et verticales | spécifié, non scalable et non qualifié à 50 k |
-| `hgp_reduced_normalized_h0_v3` candidat | composantes horizontales exactes et union des `PointId`, avec quotient des blocs H0 silencieux | pont mathématique disponible, contrat produit et verticales non reçus |
+| `84ba459` | fast principal multi-lot sous garde `q<=k+1` | reçu relativement à la table fournie |
+| `3c13cbd`, `4b9d9a1` | session et sorties brutes G4 mass-only | reçus de diagnostic, aucune lane admise |
+| `9483b1c` | factory `ValidatedHybridSidecar` v0 | livrée, non reçue comme frontière de confiance |
+| `232470c` | index documentaire du sidecar | snapshot documentaire courant |
 
-Une boule peut être silencieuse pour H0 tout en portant de vraies facettes ou
-cofaces Gamma. Toute sortie qui applique le nouveau quotient doit donc être
-versionnée séparément; elle ne peut pas revendiquer l'identité du payload v2.
+Un worktree concurrent corrige le sidecar et ajoute un plan séparateur pour la
+sonde par cellules. Ces changements restent non reçus jusqu'à stabilisation de
+leurs empreintes et nouveau différentiel. Le détail exact est tenu dans
+[`AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md) et
+[`AUDIT_LIVE_SIDECAR_SOURCE_50K_20260811.md`](audits/AUDIT_LIVE_SIDECAR_SOURCE_50K_20260811.md).
 
-## État du pipeline
+## Deux sorties à ne pas confondre
 
-```text
-points u16 exacts
-  -> source géométrique / catalogue borné CPU
-  -> sidecar de certificats
-  -> lots de niveau exact
-  -> fast support-principal + fallback préfixe exact
-  -> DSU et transcript borné
-```
+| contrat | contenu | état v3 |
+| --- | --- | --- |
+| Gamma exhaustif | facettes, cofaces, incidences silencieuses, lots, `coverage_delta` et verticales | spécifié, non scalable et non qualifié à 50 k |
+| `hgp_reduced_normalized_h0_v3` candidat | composantes horizontales exactes, niveaux exacts et union des `PointId`, avec quotient certifié des blocs H0 silencieux | pont mathématique disponible; resolver, source et verticales non reçus |
 
-Cette chaîne est une référence CPU et un ensemble de falsificateurs. Le chemin
-produit 50 k proposé remplace la première flèche et les payloads bornés par :
+Une boule H0-inerte peut encore porter de vraies incidences Gamma. Le quotient
+horizontal doit donc avoir son propre schéma et ne peut jamais revendiquer une
+sortie Gamma/v2 byte-identique.
 
-```text
-points résidents + index spatial
-  -> BallActivation à coquille variable, streamées par cellule owner
-  -> tombstones H0 certifiés + activations pertinentes
-  -> carriers stricts / resolver latent
-  -> fold sparse atomique par lot
-  -> sortie horizontale normalisée
-```
+## Ce qui est établi
 
-La proposition complète est dans [`PROPOSITION.md`](PROPOSITION.md).
+- À `k=1`, les partitions strictes et fermées sont celles du single-linkage et
+  peuvent être produites par un EMST exact. Le Prim quadratique actuel est un
+  juge borné, pas la lane 50 k.
+- Pour une boule avec `p` points strictement intérieurs et un support propre
+  positif de taille `q`, les ordres `1<=k<=p+q-2` sont des continuations H0
+  sans fusion ni nouveau `PointId`.
+- À `K=10`, une preuve `p+q_cert>=12` autorise une tombstone pour le seul
+  quotient horizontal, avec resolver latent. Les seuils témoins des lanes
+  q2/q3/q4 sont respectivement `10/9/8`.
+- `q_min` décrit la provenance Morse; `q_cert` est la plus grande arité d'un
+  support propre positif effectivement certifié. Ils n'ont ni le même champ ni
+  la même sémantique.
+- Le fast principal d'un lot multiple exige `q<=k+1`, une vraie
+  `CarrierClosure` et des carriers stricts résolus dans le snapshot pré-lot.
+  `q>k+1` reste au fallback.
+- `prefix-all` est exact relativement à la `GeneratorTable` reçue; il ne prouve
+  jamais la complétude géométrique de cette table.
 
-## Portes CPU reçues
-
-- Index préfixe : possession temporelle canonique des paires par lots,
-  terminaison hostile, longueur indépendante `L`, préflight
-  `predicted_hits==actual_hits`, recertification et ledger pré-DSU.
-- `prefix-all` : différentiel permanent contre le fold quadratique sur la même
-  `GeneratorTable`, y compris lorsqu'elle est partielle.
-- Lots ex æquo : factorisation exacte par carriers stricts sous hypothèse de
-  fermeture et handle unique par boule.
-- `k=1` : comparaison de la partition canonique des `PointId` au replay EMST,
-  avant et après chaque niveau exact.
-- Catalogue parallèle : résultats séquentiels/parallèles comparés en
-  multiensemble, scratch et métriques par worker; campagne TSan déclarée verte
-  sur la livraison courante.
-- Source cellules : préflight count-only exact de ses listes et masses; cette
-  porte diagnostique un refus de coût, elle ne cappe jamais une énumération.
-
-Les commandes, compteurs et fixtures de la livraison sont dans
-[`NOTE_CLAUDE_LIVRAISON_PORTES_CPU_20260811.md`](audits/NOTE_CLAUDE_LIVRAISON_PORTES_CPU_20260811.md).
-
-## Pont mathématique actuellement retenu
-
-Pour une boule fermée `B`, soit `p` le nombre de points strictement intérieurs
-et soit `q` l'arité d'un support propre positif. Le théorème 4.2 de
-[`INCIDENCES_SILENCIEUSES_GAMMA.md`](../docs/math/INCIDENCES_SILENCIEUSES_GAMMA.md) prouve :
-
-$$1\leq k\leq p+q-2\Longrightarrow B\text{ ne produit ni fusion }H_0\text{ ni nouveau PointId à l'ordre }k.$$
-
-Conséquences pour `K=10` :
-
-- une preuve positive `p+q>=12` permet de tombstoner la boule pour tout le
-  quotient horizontal demandé ;
-- les banques exactes de la source par cellules ont les tailles `10/9/8` pour
-  les supports `q=2/3/4` ;
-- `q_min` reste la provenance Morse, tandis que la plus grande arité positive
-  effectivement certifiée, `q_cert`, fournit la meilleure preuve d'inertie ;
-- un ensemble cosphérique redondant n'est jamais un support propre positif ;
-- l'omission exige un resolver de carriers silencieux et ne dispense pas des
-  preuves verticales.
-
-La preuve constructive, le resolver, le quotient local par `Omega`, les
-fixtures et la portée exacte sont consolidés dans
+La preuve et ses contre-fixtures sont consolidées dans
 [`REPONSE_CLAUDE_PONT_H0_FASTPATH_ET_Q4_20260811.md`](audits/REPONSE_CLAUDE_PONT_H0_FASTPATH_ET_Q4_20260811.md).
 
-## Fast path et fallback
+## Ce que la G4 a réellement mesuré
 
-Le fast path d'un générateur principal dans un lot multiple est sûr seulement
-si toutes les conditions suivantes sont vraies :
+La session 50 k a utilisé les 48 vCPU de la machine G4; aucun kernel GPU n'a
+tourné. La sonde a construit les banques, dilations et comptes, sans former un
+seul tuple, sans census terminal, sans fold et sans payload.
 
-- `q<=k+1` ;
-- support principal certifié ;
-- `CarrierClosure` liée aux digests et à la complétude de l'ordre ;
-- chaque face `S_u` résolue dans le snapshot pré-lot à un niveau strictement
-  inférieur.
+| lane après prune d'axe | minimum observé | maximum observé | verdict |
+| --- | ---: | ---: | --- |
+| q2 | 465 371 500 | 2 862 879 000 | moins massive, non admise |
+| q3 | 14 667 530 000 | 131 762 100 000 | rouge |
+| q4 | 330 437 400 000 | 9 968 861 000 000 | rouge |
 
-Le cas `q>k+1` reste au fallback dans un lot multiple. Un lookup égal ou absent
-sous prétention complète est un refus atomique, jamais une chaîne de carriers
-du niveau courant. La capability cible est `ValidatedHybridSidecar`; un simple
-booléen CLI n'est pas une frontière de confiance.
+Les temps count-only vont de `0,174 s` à `29,153 s`. Ils ne sont pas des temps
+de source ni des temps `warm_e2e`. Le catalogue historique demande déjà
+`60,931 s` à n=2 400 sur `terrain`, `77,119 s` à n=2 400 sur scanline et
+`675,407 s` à n=6 250 sur `terrain`.
 
-Le fallback préfixe utilise un même ordre global, des préfixes de longueur
-`rank-k+1`, un préflight exact des hits et une recertification réelle de
-`|M intersection N|>=k`. Sur les familles scanline de la livraison, 79--85 %
-des générateurs sont encore interrogés à cause des lots ex æquo. Le gain du
-fast multi-lot doit être remesuré par catégorie, en conservant séparément le
-fallback `q>k+1`.
+Le pinceau q4 par triples n'évite pas le verrou actuel. Au pas 6, même le choix
+canonique des trois plus petits identifiants impose avant toute requête plus de
+`2,74e9` triples sur `terrain`, `1,063e10` sur scanline simple et `1,020e9`
+sur multi-écho. Il reste un oracle/fallback borné, pas la prochaine source
+produit.
 
-## Verrou source à 50 k
+Les reçus bruts sont
+[`cell_50k_raw.txt`](receipts/g4_massonly_20260811/cell_50k_raw.txt) et
+[`mask_scale_raw.txt`](receipts/g4_massonly_20260811/mask_scale_raw.txt), de
+SHA-256 respectifs
+`6b355d0d9c7bf01dbdeb1d14dc442cab75570e6be044dcd50f314d79b9010afe`
+et `d82e43c7f4b32a5731cfdb2bbb9edf22cd7cecef0fdc73e84d1457277d61c740`.
 
-La sonde uniforme par cellules de centres est rouge en lane q4. Sur `terrain`,
-`cell-side=4`, seed `20260810`, elle prédit sans former les tuples :
+## Sidecar : statut exact
 
-| n | cellules | `R_2` | `R_3` | `R_4` |
-| ---: | ---: | ---: | ---: | ---: |
-| 400 | 4 375 | 2,16 M | 21,6 M | 159 M |
-| 1 600 | 32 500 | 32,9 M | 560 M | 7,82 G |
-| 2 400 | 66 978 | 94,4 M | 2,03 G | 36,8 G |
+La v0 committée est utile comme harnais CPU borné, mais ne porte pas encore la
+confiance annoncée :
 
-Ces nombres interdisent de porter l'énumération aveugle des quadruplets sur
-GPU. Ils ne sont ni une extrapolation 50 k ni un débit CUDA.
+- le reçu du commit est fabricable avec les digests d'une table amputée;
+- le pipeline le reconstruit depuis `smax`, `n` et le statut de l'énumération;
+- le sidecar est détruit avant le fold, qui reçoit encore le catalogue brut;
+- la clé de rayon forme des carrés pouvant dépasser 128 bits sur u16;
+- `q_min` et le support propre positif ne sont pas reconstruits;
+- le digest FNV de l'image mémoire n'est pas canonique;
+- le census `O(G*n)` en fait un juge borné, jamais un chemin chaud 50 k.
 
-La prochaine réduction exacte est la condition nécessaire locale
-`closure(C) intersect conv(A_C) != empty`. Un séparateur flottant peut proposer
-un prune, mais seule sa revérification entière ou rationnelle sur tous les
-points de `A_C` et les coins fermés de `C` l'autorise. Les masses après prune,
-pas le nombre de cellules, décident l'admission.
+Le correctif concurrent traite une partie de ces points, mais n'est pas encore
+reçu. La frontière finale doit être issue d'un producteur terminal rejouable,
+être consommée par le fold et porter une sérialisation canonique exacte.
 
-Si cette réduction ne suffit pas, la baseline q4 est un pinceau par triple
-canonique avec reporter terminal des zéros le long de sa droite de centres.
-Scanner tous les points par triple recrée `4*R_4+3*R_3` et reste un NO-GO.
+## Architecture candidate unique
 
-## Ce que la G4 a réellement montré
+```text
+k=1 : EMST exact distinct
 
-Le flux device déjà mesuré trie et réduit un catalogue préconstruit. Il valide
-des primitives GPU et un débit de join borné; il n'inclut pas la construction
-de la source, la certification, les verticales ni un run 50 k bout en bout. Il
-ne faut donc pas citer son temps comme latence produit.
+k>=2 : points u16 + LBVH résidents
+  -> self-join canonique de blocs de paires
+  -> center-cover fail-open, seuils 10/9/8
+  -> ancres diamètre résiduelles
+  -> cordes dans le disque de Jung
+  -> niveaux de profondeur faible construits directement
+  -> census terminal et BallActivation streamées
+  -> tombstones H0 + resolver latent
+  -> fast principal / fallback préfixe
+  -> lots atomiques et sortie horizontale normalisée
+```
 
-Le prochain passage G4 n'est utile qu'après admission CPU des masses et
-réception des prédicats exacts. L'ordre de mesure est :
+Pour une ancre q4 ayant `m_e` cordes et `c_e` intérieurs constants, le rang
+vaut `4+c_e+profondeur_stricte` et le nombre de sommets utiles est au plus
+`m_e*(8-c_e)`. Cette borne retire le carré local seulement si le constructeur
+ne forme jamais d'abord toutes les intersections de cordes.
 
-1. count-only et arènes ;
-2. source streamée ;
-3. fold et lots ;
-4. `warm_e2e` complet.
+La parcimonie globale du nombre d'ancres et de `M=sum_e m_e` n'est pas prouvée.
+L'ancien `center-cover` a dépassé 600 secondes à 50 k; il est rejeté comme
+implémentation. Le prochain prototype doit être une nouvelle sonde par blocs,
+sans boucle ancre--nuage, et non une réactivation de ce chemin.
 
-## Priorités d'implémentation
+La source uniforme par cellules, son plan séparateur et l'anisotropie restent
+des falsificateurs mass-only. Ils ne redeviennent candidats que si leurs
+préflights de tuples et de triples passent une enveloppe mesurée.
 
-1. Recevoir le fast principal multi-lot avec la fixture `q=k+2`, les lookups
-   égal/manquant, les permutations et les records complets.
-2. Construire `ValidatedHybridSidecar` et rendre impossible une fausse
-   `CarrierClosure`.
-3. Ajouter le prune convexe à la sonde, puis un dispatcher exact par lane.
-4. Introduire `BallActivation`, `q_min/q_cert`, tombstones, handles latents et
-   census de coquille variable.
-5. Recevoir le resolver décroissant et `Omega` contre des oracles exhaustifs à
-   petit `n`.
-6. Porter seulement les routes admises sur CUDA et mesurer la G4 avec reçus
-   séparés.
+## Prochaines portes, dans l'ordre
 
-## Construire et lancer les portes
+1. Stabiliser puis contre-auditer les correctifs sidecar : forge fraîche,
+   multiprécision, support redondant/dépendant, digest canonique et consommation
+   réelle par le fold.
+2. Fermer la porte locale du plan séparateur, y compris la contre-fixture où un
+   support `beta>=Q` subsiste; publier les masses de triples, pas seulement le
+   nombre de cellules.
+3. Construire P1a mass-only `self-join -> center-cover -> cordes`, avec
+   `pruned + microtile = C(n,2)`, transcript rationnel à petit `n`, compteurs
+   `a`, `M`, `c_e`, `sum Z_e`, files, ambiguïtés et octets.
+4. Refuser P1a si `source-cover + cordes > 400 ms` chaud sur G4, si la majorité
+   des paires atteint les microtuiles ou si le travail contient
+   `sum_e m_e^2`.
+5. Recevoir `BallActivation`, le resolver décroissant et le quotient local des
+   grandes coquilles contre Gamma exhaustif à petit `n`.
+6. Porter sur CUDA seulement les primitives dont les masses terminales sont
+   admises, puis mesurer `count-only`, source+census, fold et enfin
+   `warm_e2e` complet.
+
+Une insuffisance de ressource refuse ou reprend exactement; elle ne tronque
+jamais une sortie. Aucun tableau global de tuples, de faces, de cofaces ou
+d'incidences n'est autorisé dans le chemin produit.
+
+## Construire les juges locaux
 
 ```bash
 cmake -S morsehgp3D_v3 -B build/v3 -DCMAKE_BUILD_TYPE=Release
-cmake --build build/v3 -j
+cmake --build build/v3 --parallel
 ctest --test-dir build/v3 --output-on-failure
 ```
 
-Pour les audits ciblés, préférer les exécutables et CTests nommés
-`prefix_index`, `postings_join`, `saturated_pipeline_prefix_all`,
-`structural_scale`, `parallel_catalogue` et `cell_source_mass`. Une campagne
-locale ne promeut aucun statut public; les reçus doivent rester liés au commit,
-au binaire, au profil, à la graine et aux digests d'entrée.
+Ces commandes valident des portes locales. Elles ne promeuvent ni la source,
+ni la performance, ni le statut public.
 
-## Documentation courante
+## Autorités documentaires
 
-- [`PROPOSITION.md`](PROPOSITION.md) : architecture candidate unique.
-- [`audits/README.md`](audits/README.md) : index courant et règle d'archive.
-- [`audits/AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md) : verdict de
-  snapshot.
+- [`PROPOSITION.md`](PROPOSITION.md) : architecture candidate et gates.
+- [`audits/README.md`](audits/README.md) : index courant et archives.
+- [`audits/AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md) : verdict du
+  snapshot et du worktree.
 - [`../docs/SPECIFICATION_MORSEHGP3D.md`](../docs/SPECIFICATION_MORSEHGP3D.md) :
-  autorité du contrat existant.
-- [`../docs/math/STATUT_PREUVES_ET_HEURISTIQUES.md`](../docs/math/STATUT_PREUVES_ET_HEURISTIQUES.md) : registre des preuves.
-
-Les audits datés sont conservés comme preuves historiques. Leurs phrases au
-présent ne décrivent pas l'état live lorsqu'elles précèdent le snapshot ci-dessus.
+  contrat.
+- [`../docs/math/STATUT_PREUVES_ET_HEURISTIQUES.md`](../docs/math/STATUT_PREUVES_ET_HEURISTIQUES.md) :
+  statut des preuves.
 
 GCP non utilisé pour cette consolidation.

@@ -2,9 +2,14 @@
 
 Date : 11 août 2026 UTC.
 
-Cadre : `phase=exploration_v3_hors_registre`, `backend=cpu_reference_sur_g4`,
-`profile=quantized_u16_input_only/K10/smax11`, `mode=mass_only_diagnostic`,
+Cadre : `phase=exploration_v3_hors_registre`,
+`backend=cpu_reference_bounded_oracles_and_g4_diagnostic`,
+`profile=quantized_u16_input_only`,
+`mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
+
+Sous-portée mesurée : `K=10`, `smax=11`, `cpu_reference_sur_g4`,
+`mass_only_diagnostic`.
 
 ## Provenance de session
 
@@ -33,16 +38,19 @@ Extraits décisifs (pas 6 ; R = tuples avant prune, R' = après) :
 | scanline_single_pass | 1 293 280 | 2,9e10 | **4,8e8** | 2,9e12 | 3,5e10 | 2,5e14 | 2,6e12 |
 | scanline_overlap_multiecho | 846 768 | 6,8e9 | **5,3e8** | 1,2e12 | 1,5e10 | 1,9e14 | 3,3e11 |
 
-Le prune d'axe élague 50--91 % des cellules (jusqu'à 136x sur R_4 terrain,
-750x sur R_3 scanline). Chaque lane se mesure en 1,7--29 s sur 48 threads :
-la sonde elle-même n'est jamais le poste de coût.
+Le prune d'axe élague environ 46,9--91,7 % des cellules. Les réductions
+observées atteignent 136,3x sur R_4 terrain au pas 6 et 584,3x sur R_4
+multiecho au pas 6. Les quatre ratios R_3 scanline sont 49,4x, 55,0x, 79,2x
+et 83,3x; aucun reçu ne porte 750x. Chaque lane count-only se mesure entre
+0,174 et 29,153 s sur 48 threads. Ces temps sont déjà à budgéter; ils ne
+mesurent ni formation de tuples, ni certification, ni fold.
 
-**Verdict d'admission mass-only** : la lane q=2 est admissible après prune
-(5e8--3e9 tuples) ; les lanes q=3 (1e10--1e11) et q=4 (3e11--2,4e12) restent
-rouges sur grille uniforme — la suite est exactement ton escalade : plan
-séparateur général certifié, partition anisotrope sur les seules
-survivantes, puis pinceaux de triples avec `PencilInterval` si q4 résiste.
-Le pas 10 ne change pas le verdict (R'_4 monte même à 5,9e12 sur terrain).
+**Verdict mass-only** : aucune lane n'est admise. Aucun tuple n'a été formé
+et aucun budget d'octets, de fill, de certification ou de consommation n'a
+été mesuré. Après prune, q2 porte encore 4,65e8--2,86e9 tuples, q3
+1,47e10--1,32e11 et q4 3,30e11--9,97e12 selon la famille et le pas. q2 est
+seulement la lane la moins rouge. Toute route qui énumère ces masses est
+incompatible avec `warm_e2e < 1 s`; le pas 10 ne change pas ce verdict.
 
 ## 2. Masque hybrid-fast à l'échelle (catalogues parallèles 48 threads)
 
@@ -54,10 +62,11 @@ Le pas 10 ne change pas le verdict (R'_4 monte même à 5,9e12 sur terrain).
 | scanline 2 400 | 158 587 | 77,1 s | 101 732 (64 %) | 9 131 (5,8 %) | 2 489 (1,6 %) |
 | terrain 6 250 | 444 570 | 675,4 s | 166 821 (37 %) | **1 421 (0,32 %)** | 283 (0,06 %) |
 
-Aux ordres k >= 2, le fast principal multi-lot sous garde stricte réduit le
-masque fallback à une fraction de pour cent, et les hits associés se lisent
-en dizaines de millisecondes CPU (1,8 M hits à k=2 sur 444 570 générateurs).
-Le préflight `predicted == hits` est exact partout. Deux verrous restent
+Aux ordres k >= 2, le fast principal multi-lot réduit fortement le masque
+fallback, mais pas uniformément à une fraction de pour cent ni à quelques
+dizaines de millisecondes : le scanline n=2400 conserve 5,8 % / 0,548 s à
+k=2 et 1,6 % / 0,117 s à k=3; terrain n=6250 atteint 0,32 % / 0,153 s à
+k=2. Le préflight `predicted == hits` est exact partout. Deux verrous restent
 visibles dans ces mêmes chiffres :
 
 1. **k=1** : 26--64 % de requêtes — les `q > k+1` des lots multiples au

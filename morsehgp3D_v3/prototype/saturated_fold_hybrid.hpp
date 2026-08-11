@@ -289,7 +289,8 @@ inline SaturatedFold build_saturated_fold_hybrid(
     int maximum_order, bool keep_partitions, HybridReceipt* receipt,
     bool enforce_event_guard = false, HybridMutants mutants = {},
     bool prefix_fallback = false, HybridPairLedger* prefix_pair_ledger = nullptr,
-    bool prefix_all = false, bool factorise_exaequo = false, bool fast_exaequo = false) {
+    bool prefix_all = false, bool factorise_exaequo = false, bool fast_exaequo = false,
+    const std::vector<char>* principal_override = nullptr) {
   SaturatedFold fold;
   fold.maximum_order = maximum_order;
   if (receipt != nullptr) *receipt = HybridReceipt{};
@@ -384,9 +385,15 @@ inline SaturatedFold build_saturated_fold_hybrid(
   // 3. LE CERTIFICAT DE SUPPORT PRINCIPAL — l'aide partagee avec la sonde de
   // masse : primitives exactes existantes, memes compteurs. En mode
   // prefix-all il n'y a ni fast path ni redondants : aucune miniboule payee.
+  // Un `principal_override` vient des CERTIFICATS du sidecar valide (audit
+  // S1/porte 2) : le moteur consomme alors la frontiere typee au lieu de
+  // recalculer.
   std::vector<char> principal;
   if (prefix_all)
     principal.assign(count, 0);
+  else if (principal_override != nullptr && principal_override->size() == count &&
+           !mutants.force_principal)
+    principal = *principal_override;
   else
     hybrid_principal_certificates(pts, catalogue, members, mutants.force_principal, &principal,
                                   &out.certificates_verified, &out.certificates_failed);

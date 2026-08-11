@@ -55,23 +55,21 @@ enum class PrincipalState : std::uint8_t {
 
 enum class CarrierClosure : std::uint8_t { kUnknown = 0, kCertified = 1 };
 
-// La cle de boule EXACTE : centre rationnel reduit ET rayon carre rationnel
-// reduit. Le `HybridBallKey` du fold live est un index de CENTRE a deux
-// etages ; il n'est pas une cle de boule autonome.
+// La cle de CENTRE exacte (audit S2) : le carre des numerateurs u16 peut
+// atteindre ~181 bits et DEBORDE i128 — la cle ne porte donc QUE le centre
+// rationnel reduit (numerateurs ~90 bits, surs en i128), et l'egalite de
+// NIVEAU est deleguee a `sphere_cmp_beta`, deja multiprecision (BigInt<6>).
+// L'egalite de BOULE = egalite de centre reduit ET sphere_cmp_beta == 0.
 struct ExactBallKey {
   mhgp::i128 cx = 0, cy = 0, cz = 0, cden = 0;   // centre reduit, cden > 0
-  mhgp::i128 r2num = 0, r2den = 0;               // rayon carre reduit, r2den > 0
   bool operator==(const ExactBallKey& other) const {
-    return cx == other.cx && cy == other.cy && cz == other.cz && cden == other.cden &&
-           r2num == other.r2num && r2den == other.r2den;
+    return cx == other.cx && cy == other.cy && cz == other.cz && cden == other.cden;
   }
   bool operator<(const ExactBallKey& other) const {
     if (cx != other.cx) return cx < other.cx;
     if (cy != other.cy) return cy < other.cy;
     if (cz != other.cz) return cz < other.cz;
-    if (cden != other.cden) return cden < other.cden;
-    if (r2num != other.r2num) return r2num < other.r2num;
-    return r2den < other.r2den;
+    return cden < other.cden;
   }
 };
 
@@ -99,24 +97,33 @@ struct GeneratorCertificate {
   std::uint8_t evidence_count = 0;
 };
 
+// LE JETON DE PRODUCTEUR (audit S1) : le recu de source n'est PAS
+// constructible par un appelant ordinaire — recalculer les digests d'une
+// table amputee et forger un recu frais serait sinon trivial. Seule la
+// fonction de production terminale `flat_catalogue_sealed` (qui ENUMERE
+// elle-meme et sait que son enumeration est achevee sans censure) detient le
+// jeton, par amitie. La forge fraiche sur table amputee est ainsi refusee a
+// la COMPILATION ; la fixture de desynchronisation couvre le reemploi.
+class SourceProducerToken {
+ private:
+  SourceProducerToken() = default;
+  friend class SealedSourceProducer;
+};
+
 // LE RECU DE SOURCE opaque : construit par le PRODUCTEUR exact, au moment ou
 // lui seul sait que l'enumeration est achevee sans censure. Les digests
 // lient le recu au nuage et au catalogue exacts ; la factory refuse tout
-// recu desynchronise. `complete_rank_bound >= n` signifie : aucun support
-// n'a ete censure par le rang — la pretention de famille complete.
+// recu desynchronise.
 class HybridSourceReceipt {
  public:
-  static HybridSourceReceipt make(unsigned long long points_digest,
-                                  unsigned long long catalogue_digest, int rank_bound,
-                                  int point_count, bool enumeration_completed) {
-    HybridSourceReceipt receipt;
-    receipt.points_digest_ = points_digest;
-    receipt.catalogue_digest_ = catalogue_digest;
-    receipt.rank_bound_ = rank_bound;
-    receipt.point_count_ = point_count;
-    receipt.enumeration_completed_ = enumeration_completed;
-    return receipt;
-  }
+  HybridSourceReceipt(SourceProducerToken, unsigned long long points_digest,
+                      unsigned long long catalogue_digest, int rank_bound, int point_count,
+                      bool enumeration_completed)
+      : points_digest_(points_digest),
+        catalogue_digest_(catalogue_digest),
+        rank_bound_(rank_bound),
+        point_count_(point_count),
+        enumeration_completed_(enumeration_completed) {}
   unsigned long long points_digest() const { return points_digest_; }
   unsigned long long catalogue_digest() const { return catalogue_digest_; }
   bool claims_complete_family() const {
@@ -124,7 +131,6 @@ class HybridSourceReceipt {
   }
 
  private:
-  HybridSourceReceipt() = default;
   unsigned long long points_digest_ = 0;
   unsigned long long catalogue_digest_ = 0;
   int rank_bound_ = 0;
@@ -154,12 +160,39 @@ inline unsigned long long sidecar_points_digest(const std::vector<mhgp::P3>& poi
   return digest;
 }
 
+// SERIALISATION CANONIQUE champ par champ (audit S4) : jamais l'image
+// memoire brute — ni padding ABI, ni projection `double beta` ; les i128
+// sont serialises en deux moities 64 bits. FNV v0 lie les octets ; le schema
+// final exigera le SHA-256 contractuel.
+inline unsigned long long sidecar_fold_i128(unsigned long long digest, mhgp::i128 value) {
+  const unsigned long long low = (unsigned long long)(unsigned __int128)value;
+  const unsigned long long high = (unsigned long long)(((unsigned __int128)value) >> 64);
+  digest = sidecar_fnv1a(digest, &low, sizeof(low));
+  return sidecar_fnv1a(digest, &high, sizeof(high));
+}
+
 inline unsigned long long sidecar_catalogue_digest(const mhgp::Catalogue& catalogue) {
   unsigned long long digest = 1469598103934665603ULL;
-  for (const mhgp::CriticalSphere& sphere : catalogue.spheres)
-    digest = sidecar_fnv1a(digest, &sphere, sizeof(sphere));
-  digest = sidecar_fnv1a(digest, catalogue.members.data(),
-                         catalogue.members.size() * sizeof(mhgp::i32));
+  for (const mhgp::CriticalSphere& sphere : catalogue.spheres) {
+    const mhgp::i64 base_fields[3] = {(mhgp::i64)sphere.sph.base.x,
+                                      (mhgp::i64)sphere.sph.base.y,
+                                      (mhgp::i64)sphere.sph.base.z};
+    digest = sidecar_fnv1a(digest, base_fields, sizeof(base_fields));
+    digest = sidecar_fold_i128(digest, sphere.sph.nx);
+    digest = sidecar_fold_i128(digest, sphere.sph.ny);
+    digest = sidecar_fold_i128(digest, sphere.sph.nz);
+    digest = sidecar_fold_i128(digest, sphere.sph.den);
+    const mhgp::i64 shape_fields[8] = {
+        (mhgp::i64)sphere.sph.support,  (mhgp::i64)sphere.rank,
+        (mhgp::i64)sphere.members_begin, (mhgp::i64)sphere.n_support,
+        (mhgp::i64)sphere.support[0],   (mhgp::i64)sphere.support[1],
+        (mhgp::i64)sphere.support[2],   (mhgp::i64)sphere.support[3]};
+    digest = sidecar_fnv1a(digest, shape_fields, sizeof(shape_fields));
+  }
+  for (mhgp::i32 member : catalogue.members) {
+    const mhgp::i64 value = (mhgp::i64)member;
+    digest = sidecar_fnv1a(digest, &value, sizeof(value));
+  }
   return digest;
 }
 
@@ -231,8 +264,9 @@ inline mhgp::i128 sidecar_gcd(mhgp::i128 a, mhgp::i128 b) {
   return a;
 }
 
-// La cle exacte depuis la representation entiere : centre (base*den+n)/den
-// reduit, rayon carre |n|^2/den^2 reduit.
+// La cle de centre depuis la representation entiere : (base*den+n)/den
+// reduit. AUCUN carre n'est forme (audit S2) : le niveau est compare par
+// `sphere_cmp_beta`, multiprecision.
 inline ExactBallKey exact_ball_key(const mhgp::Sphere& sphere) {
   ExactBallKey key;
   const mhgp::i128 cx = (mhgp::i128)sphere.base.x * sphere.den + sphere.nx;
@@ -245,15 +279,12 @@ inline ExactBallKey exact_ball_key(const mhgp::Sphere& sphere) {
   key.cy = cy / g;
   key.cz = cz / g;
   key.cden = den / g;
-  const mhgp::i128 r2num = (mhgp::i128)sphere.nx * sphere.nx +
-                           (mhgp::i128)sphere.ny * sphere.ny +
-                           (mhgp::i128)sphere.nz * sphere.nz;
-  const mhgp::i128 r2den = (mhgp::i128)sphere.den * sphere.den;
-  mhgp::i128 rg = sidecar_gcd(r2num, r2den);
-  if (rg == 0) rg = 1;
-  key.r2num = r2num / rg;
-  key.r2den = r2den / rg;
   return key;
+}
+
+// L'egalite de BOULE exacte : centre reduit egal ET niveau egal (multiprecision).
+inline bool same_exact_ball(const mhgp::Sphere& a, const mhgp::Sphere& b) {
+  return exact_ball_key(a) == exact_ball_key(b) && mhgp::sphere_cmp_beta(a, b) == 0;
 }
 
 inline ValidatedHybridSidecar ValidatedHybridSidecar::build(
@@ -310,6 +341,10 @@ inline ValidatedHybridSidecar ValidatedHybridSidecar::build(
     const int q = (int)sphere.n_support;
     if (q < 1 || q > std::min(mhgp::kMaxSupport, (int)sphere.rank))
       return refuse("support hors contrat : cardinal invalide");
+    // COHERENCE DU CHAMP INTERNE (audit S3) : la taille de support portee par
+    // la representation `Sphere` doit egaler le cardinal declare.
+    if (sphere.sph.support != q)
+      return refuse("champ support de la sphere incoherent avec n_support");
     for (int u = 0; u < q; ++u) {
       if (u > 0 && sphere.support[u - 1] >= sphere.support[u])
         return refuse("support non trie ou duplique");
@@ -328,12 +363,45 @@ inline ValidatedHybridSidecar ValidatedHybridSidecar::build(
     // MINIBOULE DES MEMBRES == BOULE DECLAREE, exactement.
     const mhgp::MiniballResult recomputed =
         mhgp::miniball_of(sidecar.points_, members[s].data(), (int)members[s].size());
-    if (!recomputed.ok || mhgp::sphere_cmp_beta(recomputed.sph, sphere.sph) != 0 ||
-        !(exact_ball_key(recomputed.sph) == exact_ball_key(sphere.sph)))
+    if (!recomputed.ok || !same_exact_ball(recomputed.sph, sphere.sph))
       return refuse("la boule declaree n'est pas la miniboule exacte de ses membres");
+    // SUPPORT PROPRE RECALCULE (audit S3) : le support declare doit (i) avoir
+    // le CARDINAL du support minimal recalcule independamment — q_min est
+    // RECALCULE, pas recopie — (ii) ENGENDRER exactement la boule declaree,
+    // et (iii) etre MINIMAL : aucun sous-ensemble propre n'engendre la boule.
+    // Deux supports minimaux distincts d'une meme boule cospherique restent
+    // tous deux valides : l'egalite d'identifiants n'est pas exigee (le
+    // tie-break du producteur est libre), la validite et la minimalite le
+    // sont — un support redondant ou non generateur est refuse.
+    {
+      if ((int)sphere.n_support != recomputed.n_support)
+        return refuse("support declare : cardinal different du support minimal recalcule");
+      std::array<mhgp::i32, 4> declared = {-1, -1, -1, -1};
+      const int q_declared = (int)sphere.n_support;
+      for (int u = 0; u < q_declared; ++u) declared[(std::size_t)u] = sphere.support[u];
+      const mhgp::MiniballResult spanned =
+          mhgp::miniball_of(sidecar.points_, declared.data(), q_declared);
+      if (!spanned.ok || !same_exact_ball(spanned.sph, sphere.sph))
+        return refuse("support declare : il n'engendre pas la boule declaree");
+      if (q_declared > 1) {
+        std::array<mhgp::i32, 4> subset = {-1, -1, -1, -1};
+        for (int drop = 0; drop < q_declared; ++drop) {
+          int cursor = 0;
+          for (int u = 0; u < q_declared; ++u)
+            if (u != drop) subset[(std::size_t)cursor++] = sphere.support[u];
+          const mhgp::MiniballResult sub =
+              mhgp::miniball_of(sidecar.points_, subset.data(), q_declared - 1);
+          if (sub.ok && same_exact_ball(sub.sph, sphere.sph))
+            return refuse("support declare : non minimal, un sous-ensemble engendre la"
+                          " boule");
+        }
+      }
+    }
   }
 
-  // 6. UNICITE DES HANDLES par cle exacte centre+rayon.
+  // 6. UNICITE DES HANDLES : centre reduit egal ET niveau exact egal
+  // (`sphere_cmp_beta`, multiprecision) — les concentriques de rayons
+  // distincts partagent la cle de centre et restent acceptees.
   sidecar.ball_index_.reserve(count);
   for (std::size_t s = 0; s < count; ++s)
     sidecar.ball_index_.push_back({exact_ball_key(sidecar.catalogue_.spheres[s].sph), (int)s});
@@ -343,7 +411,11 @@ inline ValidatedHybridSidecar ValidatedHybridSidecar::build(
               return a.second < b.second;
             });
   for (std::size_t i = 1; i < sidecar.ball_index_.size(); ++i)
-    if (sidecar.ball_index_[i].first == sidecar.ball_index_[i - 1].first)
+    if (sidecar.ball_index_[i].first == sidecar.ball_index_[i - 1].first &&
+        mhgp::sphere_cmp_beta(
+            sidecar.catalogue_.spheres[(std::size_t)sidecar.ball_index_[i].second].sph,
+            sidecar.catalogue_.spheres[(std::size_t)sidecar.ball_index_[i - 1].second].sph) ==
+            0)
       return refuse("deux handles pour la meme boule exacte");
 
   // 7. ORDRE D'ACTIVATION canonique et lots par niveau exact.

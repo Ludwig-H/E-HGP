@@ -31,7 +31,9 @@
 #include "prototype/parallel_catalogue.hpp"
 #include "prototype/saturated_fold.hpp"
 #include "prototype/saturated_fold_faceowner.hpp"
+#include "prototype/hybrid_fold_validated.hpp"
 #include "prototype/saturated_fold_hybrid.hpp"
+#include "prototype/sealed_source.hpp"
 #include "prototype/validated_hybrid_sidecar.hpp"
 #include "prototype/saturated_fold_global.hpp"
 
@@ -173,18 +175,29 @@ int main(int argc, char** argv) {
   // La garde d'evenement ne REFUSE que sous famille complete (s_max >= n) ;
   // sous famille tronquee ses violations sont comptees et publiees.
   const bool enforce_guard = smax >= n;
-  // LA FRONTIERE DE CONFIANCE TYPEE (contrat sidecar 20260810) : les modes
-  // hybrides autoritaires n'inferent plus la famille complete de `smax >= n`
-  // lu ici — le PRODUCTEUR scelle un recu (digests, borne de rang,
-  // enumeration achevee) et la factory `ValidatedHybridSidecar` certifie ou
-  // refuse. `prefix-all` reste relatif et ne l'exige pas.
+  // LA FRONTIERE DE CONFIANCE TYPEE (contrat sidecar 20260810, audit S1) :
+  // les modes hybrides autoritaires n'inferent plus la famille complete de
+  // `smax >= n` lu ici — le PRODUCTEUR TERMINAL SCELLE (seul detenteur du
+  // jeton) enumere lui-meme et scelle son recu, la factory certifie ou
+  // refuse, et le FOLD recoit le sidecar type, jamais le Catalogue brut.
+  // `prefix-all` reste relatif et ne l'exige pas.
+  std::vector<mhgp3v::ValidatedHybridSidecar> sidecar_slot;
   if (join_mode == 4 || join_mode == 5) {
-    const mhgp3v::HybridSourceReceipt receipt = mhgp3v::HybridSourceReceipt::make(
-        mhgp3v::sidecar_points_digest(pts), mhgp3v::sidecar_catalogue_digest(catalogue),
-        smax, n, status == mhgp3v::CloudStatus::kOk);
+    if (catalogue_threads > 1) {
+      std::printf("ECHEC : le producteur scelle v0 est sequentiel — le producteur"
+                  " parallele n'a pas encore de scelle recevable\n");
+      return 2;
+    }
+    const mhgp3v::SealedSourceProducer::Result sealed =
+        mhgp3v::SealedSourceProducer::run(pts, smax);
+    if (!sealed.ok || sealed.receipt.empty()) {
+      std::printf("ECHEC : producteur scelle refuse (statut nuage %s)\n",
+                  mhgp3v::cloud_status_name(sealed.status));
+      return 3;
+    }
     std::string sidecar_refusal;
-    const auto sidecar = mhgp3v::ValidatedHybridSidecar::build(
-        pts, catalogue, &receipt, max_order, &sidecar_refusal);
+    auto sidecar = mhgp3v::ValidatedHybridSidecar::build(
+        pts, sealed.catalogue, &sealed.receipt[0], max_order, &sidecar_refusal);
     if (!sidecar.ok()) {
       std::printf("ECHEC : sidecar refuse : %s\n", sidecar_refusal.c_str());
       return 2;
@@ -195,17 +208,22 @@ int main(int argc, char** argv) {
                   " recue (smax < points ou enumeration non achevee)\n");
       return 2;
     }
+    sidecar_slot.push_back(std::move(sidecar));
   }
   mhgp3v::PostingsReceipt receipt;
   mhgp3v::FaceOwnerReceipt faceowner_receipt;
   mhgp3v::HybridReceipt hybrid_receipt;
   const mhgp3v::SaturatedFold fold =
-      join_mode == 4 || join_mode == 5 || join_mode == 6
+      join_mode == 4 || join_mode == 5
+          ? mhgp3v::build_saturated_fold_hybrid_validated(
+                sidecar_slot[0], max_order, /*keep_partitions=*/false, &hybrid_receipt,
+                enforce_guard, /*prefix_fallback=*/join_mode == 5)
+      : join_mode == 6
           ? mhgp3v::build_saturated_fold_hybrid(pts, (int)pts.size(), catalogue, max_order,
                                                 /*keep_partitions=*/false, &hybrid_receipt,
                                                 enforce_guard, {},
-                                                /*prefix_fallback=*/join_mode >= 5, nullptr,
-                                                /*prefix_all=*/join_mode == 6)
+                                                /*prefix_fallback=*/true, nullptr,
+                                                /*prefix_all=*/true)
       : join_mode == 3
           ? mhgp3v::build_saturated_fold_faceowner(
                 catalogue, max_order, /*keep_partitions=*/false, &faceowner_receipt,

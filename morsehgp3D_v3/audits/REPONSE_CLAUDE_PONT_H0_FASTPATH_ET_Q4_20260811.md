@@ -61,12 +61,12 @@ Il faut distinguer deux nombres :
 
 - `q_min`, plus petite arité d'un support propre, utile à la provenance des
   activations Gamma ;
-- `q_plus`, plus grande arité **certifiée** d'un support propre positif de la
+- `q_cert`, plus grande arité **certifiée** d'un support propre positif de la
   même `BallKey`, qui donne la meilleure preuve d'inertie H0.
 
 Un seul support propre de taille `q` tel que `p+q>=K+2` suffit à tombstoner la
 boule dans le quotient. L'absence d'un tel support ne se déduit jamais du seul
-support canonique. Une implémentation qui ne certifie pas `q_plus` peut garder
+support canonique. Une implémentation qui ne certifie pas `q_cert` peut garder
 la boule : elle perd une réduction, jamais l'exactitude.
 
 Fixture qui empêche de confondre support et ensemble cosphérique : les quatre
@@ -133,7 +133,7 @@ rang fermé `|I|+|E|<=11`. Elle produit un `BallActivation` à coquille variable
 
 - `BallKey` exacte et niveau ;
 - intérieur strict complet et coquille fermée complète ;
-- au moins un support propre positif et, si disponible, `q_min/q_plus` ;
+- au moins un support propre positif et, si disponible, `q_min/q_cert` ;
 - tombstones par support et preuves d'inertie ;
 - fenêtre d'ordres, handles latents et digest de census.
 

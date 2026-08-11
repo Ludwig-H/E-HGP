@@ -26,20 +26,24 @@
 
 #include "mhgp/mhgp.hpp"
 #include "prototype/order_k_flats.hpp"
+#include "prototype/sealed_source.hpp"
 #include "prototype/validated_hybrid_sidecar.hpp"
 
 namespace {
 
 // Une sphere exacte depuis un point de coquille `base` et le vecteur entier
-// vers le centre : centre = base + n/den, rayon^2 = |n|^2/den^2.
+// vers le centre : centre = base + n/den, rayon^2 = |n|^2/den^2. Le champ
+// interne `support` (taille 1..4) doit etre COHERENT avec le n_support
+// declare — la factory le verifie (audit S3).
 mhgp::Sphere make_sphere(mhgp::P3 base, mhgp::i32 nx, mhgp::i32 ny, mhgp::i32 nz,
-                         mhgp::i32 den) {
+                         mhgp::i32 den, int support_size) {
   mhgp::Sphere sphere{};
   sphere.base = base;
   sphere.nx = nx;
   sphere.ny = ny;
   sphere.nz = nz;
   sphere.den = den;
+  sphere.support = support_size;
   return sphere;
 }
 
@@ -97,7 +101,7 @@ int main(int argc, char** argv) {
   // FIXTURE 1 : deux handles de la meme boule singleton.
   {
     const std::vector<mhgp::P3> cloud = {mhgp::P3{5, 5, 5}};
-    const mhgp::Sphere singleton = make_sphere(cloud[0], 0, 0, 0, 1);
+    const mhgp::Sphere singleton = make_sphere(cloud[0], 0, 0, 0, 1, 1);
     const auto sidecar = mhgp3v::ValidatedHybridSidecar::build(
         cloud, make_catalogue({{singleton, {0}, {0}}, {singleton, {0}, {0}}}), nullptr, 3,
         &refusal, mutants);
@@ -109,7 +113,7 @@ int main(int argc, char** argv) {
   {
     const std::vector<mhgp::P3> cloud = {mhgp::P3{0, 0, 0}, mhgp::P3{1, 0, 0},
                                          mhgp::P3{2, 0, 0}};
-    const mhgp::Sphere diametral = make_sphere(cloud[0], 1, 0, 0, 1);
+    const mhgp::Sphere diametral = make_sphere(cloud[0], 1, 0, 0, 1, 2);
     const auto sidecar = mhgp3v::ValidatedHybridSidecar::build(
         cloud, make_catalogue({{diametral, {0, 2}, {0, 2}}}), nullptr, 3, &refusal, mutants);
     if (sidecar.ok() || refusal.find("saturation incomplete") == std::string::npos)
@@ -120,8 +124,8 @@ int main(int argc, char** argv) {
   {
     const std::vector<mhgp::P3> cloud = {mhgp::P3{1, 2, 0}, mhgp::P3{3, 2, 0},
                                          mhgp::P3{0, 2, 0}, mhgp::P3{4, 2, 0}};
-    const mhgp::Sphere inner = make_sphere(cloud[0], 1, 0, 0, 1);
-    const mhgp::Sphere outer = make_sphere(cloud[2], 2, 0, 0, 1);
+    const mhgp::Sphere inner = make_sphere(cloud[0], 1, 0, 0, 1, 2);
+    const mhgp::Sphere outer = make_sphere(cloud[2], 2, 0, 0, 1, 2);
     const auto sidecar = mhgp3v::ValidatedHybridSidecar::build(
         cloud, make_catalogue({{inner, {0, 1}, {0, 1}}, {outer, {0, 1, 2, 3}, {2, 3}}}),
         nullptr, 3, &refusal, mutants);
@@ -145,7 +149,7 @@ int main(int argc, char** argv) {
   {
     const std::vector<mhgp::P3> cloud = {mhgp::P3{0, 1, 0}, mhgp::P3{2, 1, 0},
                                          mhgp::P3{1, 2, 0}, mhgp::P3{1, 0, 0}};
-    const mhgp::Sphere circle = make_sphere(cloud[0], 1, 0, 0, 1);
+    const mhgp::Sphere circle = make_sphere(cloud[0], 1, 0, 0, 1, 2);
     const auto sidecar = mhgp3v::ValidatedHybridSidecar::build(
         cloud, make_catalogue({{circle, {0, 1, 2, 3}, {0, 1}}}), nullptr, 3, &refusal,
         mutants);
@@ -173,7 +177,7 @@ int main(int argc, char** argv) {
   {
     const std::vector<mhgp::P3> cloud = {mhgp::P3{0, 1, 0}, mhgp::P3{2, 1, 0},
                                          mhgp::P3{1, 2, 0}};
-    const mhgp::Sphere circle = make_sphere(cloud[0], 1, 0, 0, 1);
+    const mhgp::Sphere circle = make_sphere(cloud[0], 1, 0, 0, 1, 2);
     const auto sidecar = mhgp3v::ValidatedHybridSidecar::build(
         cloud, make_catalogue({{circle, {0, 1, 2}, {0, 1}}}), nullptr, 3, &refusal, mutants);
     if (!sidecar.ok())
@@ -181,49 +185,43 @@ int main(int argc, char** argv) {
     if (sidecar.generators()[0].principal != mhgp3v::PrincipalState::kPrincipalCertified)
       return kill("la fixture du diametre", "le principal n'a pas ete certifie");
   }
-  // FIXTURE 6 : recu conserve sur table amputee — la fermeture reste kUnknown.
+  // FIXTURE 6 : recu du PRODUCTEUR SCELLE (audit S1 : la forge fraiche est
+  // refusee a la compilation, seul le producteur terminal detient le jeton) ;
+  // reemploye sur la table amputee, la fermeture reste kUnknown.
   {
     const std::vector<mhgp::P3> two_triangles = {
         mhgp::P3{6, 10, 0}, mhgp::P3{14, 10, 0}, mhgp::P3{10, 18, 0}, mhgp::P3{10, 2, 0},
         mhgp::P3{0, 0, 20}};
-    mhgp3v::FlatStatistics st{};
-    mhgp3v::CloudStatus status = mhgp3v::CloudStatus::kOk;
-    const mhgp::Catalogue full =
-        mhgp3v::flat_catalogue(two_triangles, 5, &st, &status, false, true);
-    if (status != mhgp3v::CloudStatus::kOk) {
-      std::printf("ECHEC : nuage des deux triangles refuse\n");
+    const mhgp3v::SealedSourceProducer::Result sealed =
+        mhgp3v::SealedSourceProducer::run(two_triangles, 5);
+    if (!sealed.ok || sealed.receipt.empty()) {
+      std::printf("ECHEC : producteur scelle refuse sur les deux triangles\n");
       return 1;
     }
-    // Le recu du producteur, lie aux digests de la table COMPLETE.
-    std::string full_refusal;
-    const auto full_sidecar = mhgp3v::ValidatedHybridSidecar::build(
-        two_triangles, full, nullptr, 2, &full_refusal, mutants);
-    if (!full_sidecar.ok())
-      return kill("la fixture du recu", "table complete refusee : " + full_refusal);
-    const mhgp3v::HybridSourceReceipt receipt = mhgp3v::HybridSourceReceipt::make(
-        full_sidecar.points_digest(), full_sidecar.catalogue_digest(), 5, 5, true);
-    // Table complete + recu lie : fermeture certifiee.
+    // Table complete + recu scelle : fermeture certifiee.
     const auto certified = mhgp3v::ValidatedHybridSidecar::build(
-        two_triangles, full, &receipt, 2, &refusal, mutants);
+        two_triangles, sealed.catalogue, &sealed.receipt[0], 2, &refusal, mutants);
     if (!certified.ok() || !certified.closure_certified_all_orders())
-      return kill("la fixture du recu", "la fermeture liee n'a pas ete certifiee");
+      return kill("la fixture du recu", "la fermeture scellee n'a pas ete certifiee : " +
+                                            refusal);
     // Table AMPUTEE du carrier AB + le MEME recu : digest desynchronise, la
     // fermeture reste kUnknown — jamais inventee.
     mhgp::Catalogue doctored;
-    for (const mhgp::CriticalSphere& sphere : full.spheres) {
-      const bool is_ab = sphere.rank == 2 &&
-                         full.members[(std::size_t)sphere.members_begin] == 0 &&
-                         full.members[(std::size_t)sphere.members_begin + 1] == 1;
+    for (const mhgp::CriticalSphere& sphere : sealed.catalogue.spheres) {
+      const bool is_ab =
+          sphere.rank == 2 &&
+          sealed.catalogue.members[(std::size_t)sphere.members_begin] == 0 &&
+          sealed.catalogue.members[(std::size_t)sphere.members_begin + 1] == 1;
       if (is_ab) continue;
       mhgp::CriticalSphere copy = sphere;
       copy.members_begin = (mhgp::i32)doctored.members.size();
-      doctored.members.insert(doctored.members.end(),
-                              full.members.begin() + sphere.members_begin,
-                              full.members.begin() + sphere.members_begin + sphere.rank);
+      doctored.members.insert(
+          doctored.members.end(), sealed.catalogue.members.begin() + sphere.members_begin,
+          sealed.catalogue.members.begin() + sphere.members_begin + sphere.rank);
       doctored.spheres.push_back(copy);
     }
     const auto amputated = mhgp3v::ValidatedHybridSidecar::build(
-        two_triangles, doctored, &receipt, 2, &refusal, mutants);
+        two_triangles, doctored, &sealed.receipt[0], 2, &refusal, mutants);
     if (!amputated.ok())
       return kill("la fixture du recu", "table amputee refusee pour une autre raison : " +
                                             refusal);
@@ -231,10 +229,65 @@ int main(int argc, char** argv) {
       return kill("la fixture du recu",
                   "la fermeture a ete certifiee sur une table desynchronisee");
   }
+  // FIXTURE 8 (audit S3) : support REDONDANT cospherique — les quatre points
+  // du carre declares support q=4 : le support canonique recalcule est la
+  // paire diametrale, le cardinal differe, refus.
+  {
+    const std::vector<mhgp::P3> cloud = {mhgp::P3{0, 1, 0}, mhgp::P3{2, 1, 0},
+                                         mhgp::P3{1, 2, 0}, mhgp::P3{1, 0, 0}};
+    const mhgp::Sphere circle = make_sphere(cloud[0], 1, 0, 0, 1, 4);
+    const auto sidecar = mhgp3v::ValidatedHybridSidecar::build(
+        cloud, make_catalogue({{circle, {0, 1, 2, 3}, {0, 1, 2, 3}}}), nullptr, 3, &refusal,
+        mutants);
+    if (sidecar.ok() || refusal.find("support") == std::string::npos)
+      return kill("la fixture du support redondant",
+                  sidecar.ok() ? "certifiee a tort" : refusal);
+  }
+  // FIXTURE 9 (audit S3) : champ `Sphere.support` incoherent avec n_support.
+  {
+    const std::vector<mhgp::P3> cloud = {mhgp::P3{0, 1, 0}, mhgp::P3{2, 1, 0},
+                                         mhgp::P3{1, 2, 0}};
+    const mhgp::Sphere circle = make_sphere(cloud[0], 1, 0, 0, 1, 3);   // ment : 3
+    const auto sidecar = mhgp3v::ValidatedHybridSidecar::build(
+        cloud, make_catalogue({{circle, {0, 1, 2}, {0, 1}}}), nullptr, 3, &refusal, mutants);
+    if (sidecar.ok() || refusal.find("incoherent") == std::string::npos)
+      return kill("la fixture du champ support",
+                  sidecar.ok() ? "acceptee a tort" : refusal);
+  }
+  // FIXTURE 10 (audit S3) : support NON CANONIQUE {0,2} la ou le recalcul
+  // independant rend la paire diametrale {0,1} — refus, jamais un certificat.
+  {
+    const std::vector<mhgp::P3> cloud = {mhgp::P3{0, 1, 0}, mhgp::P3{2, 1, 0},
+                                         mhgp::P3{1, 2, 0}};
+    const mhgp::Sphere circle = make_sphere(cloud[0], 1, 0, 0, 1, 2);
+    const auto sidecar = mhgp3v::ValidatedHybridSidecar::build(
+        cloud, make_catalogue({{circle, {0, 1, 2}, {0, 2}}}), nullptr, 3, &refusal, mutants);
+    if (sidecar.ok() || refusal.find("support") == std::string::npos)
+      return kill("la fixture du support non canonique",
+                  sidecar.ok() ? "acceptee a tort" : refusal);
+  }
+  // FIXTURE 11 (audit S2) : la refutation u16 aux numerateurs geants — la cle
+  // de centre seule (sans carre) doit accepter SANS deborder ; la campagne
+  // sanitizers juge l'absence d'UB.
+  {
+    const std::vector<mhgp::P3> wide = {mhgp::P3{32767, 32767, 0}, mhgp::P3{57863, 57862, 0},
+                                        mhgp::P3{7672, 7673, 0}, mhgp::P3{60104, 30135, 1}};
+    const mhgp3v::SealedSourceProducer::Result sealed =
+        mhgp3v::SealedSourceProducer::run(wide, 4);
+    if (!sealed.ok || sealed.receipt.empty()) {
+      std::printf("ECHEC : producteur scelle refuse la refutation u16\n");
+      return 1;
+    }
+    const auto sidecar = mhgp3v::ValidatedHybridSidecar::build(
+        wide, sealed.catalogue, &sealed.receipt[0], 3, &refusal, mutants);
+    if (!sidecar.ok())
+      return kill("la fixture des numerateurs geants",
+                  "la refutation u16 a ete refusee : " + refusal);
+  }
   // FIXTURE 7 : den=0, support hors coquille, pool chevauche — refus.
   {
     const std::vector<mhgp::P3> cloud = {mhgp::P3{0, 1, 0}, mhgp::P3{2, 1, 0}};
-    mhgp::Sphere bad = make_sphere(cloud[0], 1, 0, 0, 1);
+    mhgp::Sphere bad = make_sphere(cloud[0], 1, 0, 0, 1, 2);
     bad.den = 0;
     const auto zero_den = mhgp3v::ValidatedHybridSidecar::build(
         cloud, make_catalogue({{bad, {0, 1}, {0, 1}}}), nullptr, 2, &refusal, mutants);
@@ -242,7 +295,7 @@ int main(int argc, char** argv) {
       return kill("la fixture den=0", zero_den.ok() ? "acceptee a tort" : refusal);
     const std::vector<mhgp::P3> cloud3 = {mhgp::P3{0, 1, 0}, mhgp::P3{2, 1, 0},
                                           mhgp::P3{1, 2, 0}};
-    const mhgp::Sphere circle = make_sphere(cloud3[0], 1, 0, 0, 1);
+    const mhgp::Sphere circle = make_sphere(cloud3[0], 1, 0, 0, 1, 2);
     // SUPPORT HORS COQUILLE : declarer un support contenant un point
     // STRICTEMENT interieur — cloud4 ajoute (1,1,0), centre de la boule.
     const std::vector<mhgp::P3> cloud4 = {mhgp::P3{0, 1, 0}, mhgp::P3{2, 1, 0},

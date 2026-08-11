@@ -2,9 +2,14 @@
 
 Date : 11 août 2026 UTC.
 
-Cadre : `phase=exploration_v3_hors_registre`, `backend=cpu_reference`,
-`profile=complete_bounded_et_partial_refinement`, `mode=hybrid_prefix`,
+Cadre : `phase=exploration_v3_hors_registre`,
+`backend=cpu_reference_bounded_oracles_and_g4_diagnostic`,
+`profile=quantized_u16_input_only`,
+`mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
+
+Sous-portée de la livraison : `complete_bounded_et_partial_refinement`,
+`hybrid_prefix`.
 
 Cette note documente le lot committé au-dessus de `abb4c0e`, en réponse à
 [`AUDIT_LIVE_PREFIX_INDEX_8DF7AC8_20260810.md`](AUDIT_LIVE_PREFIX_INDEX_8DF7AC8_20260810.md)
@@ -150,9 +155,10 @@ Mesures `terrain`, pas de cellule 4, seed 20260810 :
 | 1 600 | 32 500 | 36 / 182 | 3,29e7 | 5,60e8 | 7,82e9 |
 | 2 400 | 66 978 | 42 / 224 | 9,44e7 | 2,03e9 | 3,68e10 |
 
-Constat honnête, conforme à l'avertissement de la réponse (« le nombre de
-cellules est lui-même un poste d'admission ») : la lane q=2 est admissible,
-q=3 tendue, et la lane q=4 est ROUGE sur cette partition uniforme — la
+Constat, conforme à l'avertissement de la réponse (« le nombre de cellules est
+lui-même un poste d'admission ») : aucune lane n'est admise pour le contrat
+bout en bout par un simple compte. q2 est la moins massive, q3 est déjà
+rouge et q4 est prohibitive sur cette partition uniforme — la
 croissance est portée par les cellules du vide au-dessus de la nappe, dont le
 `Q` couple la hauteur à l'étalement des témoins (`Q - h^2 ~ 2h*delta`) : `m`
 y croît avec la hauteur de la boîte, et aucun raffinement du pas ne passe
@@ -165,9 +171,10 @@ au §7.
 La course codespace (deux cœurs) a été abandonnée — trop lente pour être un
 reçu — et remplacée par la session G4 mass-only du même jour : voir
 [`NOTE_CLAUDE_SESSION_G4_MASSONLY_50K_20260811.md`](NOTE_CLAUDE_SESSION_G4_MASSONLY_50K_20260811.md)
-(48 threads, 1,7--29 s par lane, trois familles, deux pas, prune publié).
-Le verdict qualitatif du §6 est confirmé à l'échelle : q=2 admissible après
-prune, q=3 et q=4 rouges sur grille uniforme.
+(48 threads, 0,174--29,153 s par lane, trois familles, deux pas, prune
+publié). Aucun tuple n'a été formé. Le verdict qualitatif du §6 est aggravé à
+l'échelle : q2 conserve entre 465 371 500 et 2 862 879 000 tuples et n'est
+pas admise pour `warm_e2e < 1 s`; q3 et q4 sont rouges sur grille uniforme.
 
 ## 8. Question à l'auditeur
 
