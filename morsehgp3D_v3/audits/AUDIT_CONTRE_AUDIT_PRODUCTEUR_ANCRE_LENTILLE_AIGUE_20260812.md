@@ -80,6 +80,15 @@ de `D/2` de `z_0`. En une dimension, `a=0`, `B=[10,12]`, `b=10` et `z_0=5,5`
 donnent `|b-z_0|=4,5<D/2=5` ; le rayon compensé vaut exactement `4,5`, donc la
 boule ouverte exclut encore `b`.
 
+La géométrie ne valide pas le commentaire logiciel « coût borné par les
+seuils ». Une recherche qui trouve moins que le seuil, ou dont les boîtes sont
+ambiguës, peut visiter tout le LBVH. De plus, le parcours observé appelle
+`witness_closes` depuis la racine pour chaque nœud partenaire proposé. Les
+seuils bornent les crédits acceptés, jamais `front_witness_visits`. Les reçus
+doivent publier séparément appels, visites, pops, masse de paires fermée et
+high-water ; deux pentes rouges de visites refusent cette ordonnance même si
+le nombre de partenaires survivants est linéaire.
+
 ### 2. Une face adjacente aiguë suffit pour q4
 
 Soit un q4 propre positif et `ab` une de ses arêtes maximales. Placer le milieu
@@ -386,10 +395,14 @@ profondeur. Construire les niveaux sur `E` donne ainsi un sur-ensemble complet.
 
 La profondeur restreinte à `E` ne doit **jamais** être publiée comme `p`.
 Après génération d'un centre, le census exact porte sur tout le préfixe complet
-`2||z-a||^2<=3D^2`, avec les sites retirés par `theta` encore disponibles pour
-la coquille. Un site prouvé jamais intérieur peut néanmoins vérifier
-`F_z(w)=0` et appartenir à `U_B`. Cette séparation est indispensable pour
-recevoir `(I_B,U_B)`.
+`2||z-a||^2<=3D^2`. L'objection initiale sur une coquille perdue par `theta`
+est levée par le lemme de Claude : si `U_z<theta` et `F_z(w)=0`, alors
+`theta>0` et les `smax-2` sites qui définissent le seuil sont tous strictement
+intérieurs en `w`. Le support dépasse donc déjà les budgets q3 et q4 et ne peut
+être accepté. Ainsi les sites conservés suffisent au shell des sorties
+acceptées. Cela ne fournit toujours pas les **identités** de `I_B` : les
+`always_inside` actuellement réduits à un compte doivent être enregistrés ou
+rejoués, et l'oracle indépendant doit comparer les listes triées `I_B/U_B`.
 
 ### Borne sur les centres distincts
 
@@ -500,6 +513,142 @@ octets et high-water. Les deux pentes `<=1,35` doivent être complétées par de
 caps absolus à 50 k ; une masse linéaire peut encore être trop grande pour une
 seconde.
 
+## Réponses à la reprise de Claude après `55e972e`
+
+La note
+[`REPONSE_CLAUDE_CONTRE_AUDIT_LENTILLE_AIGUE_20260812.md`](REPONSE_CLAUDE_CONTRE_AUDIT_LENTILLE_AIGUE_20260812.md)
+accepte les deux réfutations, paramètre `smax`, remplace les tris et pose quatre
+questions d'implémentation. La paramétrisation des seuils est mathématiquement
+correcte et la preuve shell--`theta` est reçue ci-dessus. Deux réserves restent
+avant de déclarer le domaine fermé : le différentiel annoncé s'arrête à
+`smax=30` alors que la CLI monte à `34`, et les CTests ajoutés couvrent `5`,
+`20` et `24`, pas les deux bornes `4/34`. Il faut graver `4`, `34`, le refus
+`35`, les deux moteurs et l'index terminal `depth=32`. L'explication du facteur
+deux par la seule taille des feuilles est encore une hypothèse : une ablation
+`leaf=1/2/4/8/16` doit publier partenaires **et** visites sur le même nuage.
+
+### Q1 — amplitude exacte de la cisaille
+
+Poser `M=65535`, choisir l'indice `r` où `|d_r|` est maximal et orienter
+`d_r>0`. Pour les deux autres indices `p,q`, prendre les vecteurs entiers
+`e_p=d_r unit_p-d_p unit_r` et `e_q=d_r unit_q-d_q unit_r`. Ils appartiennent à
+`d^perp` et toutes leurs composantes ont une valeur absolue au plus `M`.
+Après substitution `w=(x e_p+y e_q)/d_r`, multiplier la forme par `d_r` :
+
+$$d_rF_z=A_zx+B_zy+C_z,qquad A_z=2U_z\mathbin{\cdot}e_p,qquad B_z=2U_z\mathbin{\cdot}e_q,qquad C_z=d_rg_z.$$
+
+Comme `|U_i|<=2M`, les bornes uniformes sont :
+
+$$|A_z|,|B_z|\leq8M^2=34\,358\,689\,800<2^{35},qquad |C_z|\leq12M^3=3\,377\,545\,104\,064\,500<2^{52}.$$
+
+Employer la cisaille `x=x'+s y'`, `y=y'`. Le nouveau coefficient vertical est
+`B'_z=B_z+sA_z`. Chaque ligne avec `A_z!=0` interdit au plus un entier `s` ; un
+choix dans `0..m` existe donc et vérifie :
+
+$$|B'_z|\leq(m+1)8M^2.$$
+
+Au cap courant `m<=1024`, `A`, `B'`, `C` occupent respectivement au plus
+`35`, `46`, `52` bits. Même sans ce cap et avec `m<=65533`, `B'` reste sous
+`2^51` : les **coefficients** tiennent donc en `i64` signé.
+
+Ce résultat ne suffit pas aux comparateurs. Avec
+`Delta=A_iB'_j-A_jB'_i`, `X=B'_iC_j-B'_jC_i`, la comparaison de deux
+abscisses rationnelles multiplie typiquement `X_1*Delta_2`. Les bornes sûres
+atteignent environ `173` bits dès `m=100`, `180` bits à `m=1024` et `192` bits
+à `m=65533`. `i128` est donc insuffisant au **pire cas u16**, même avec deux
+lignes presque dégénérées ; ce n'est pas un seuil statistique vers cent sites.
+
+L'ordonnance recommandée est un filtre rapide `i64/i128`, avec intervalle
+d'erreur prouvé, puis un repli signé 256 bits pour les cas non séparés. Sous le
+profil u16 et `m<=65533`, `int256` doit suffire si chaque déterminant, test de
+Jung et produit croisé reçoit préalablement sa borne ; tant que cet inventaire
+n'est pas complet, `cpp_int` reste le fallback de référence. Un `double` peut
+ordonner des propositions, jamais décider une égalité.
+
+### Q2 — sweep streamé sans stocker toutes les chaînes
+
+Il n'est pas nécessaire de matérialiser les `2(k+1)` chaînes complètes. Chaque
+constructeur de niveau émet ses segments x-monotones dans l'ordre croissant de
+`x`. Maintenir un curseur par niveau inférieur de `P` et supérieur de `N`, avec
+son segment actif et son prochain breakpoint. Un calendrier rationnel fusionne
+les breakpoints `P-P`, `N-N`, le bord du disque et les intersections des seuls
+segments actifs `P-N` dont `r+s<=k`.
+
+Lorsqu'un segment change, invalider ses événements par numéro de génération,
+avancer son curseur et reprogrammer seulement ses couples opposés. Tous les
+événements de même abscisse et de même centre sont traités atomiquement avant
+la reprise. À un sommet `P-P`, les curseurs supérieurs actifs de `N` donnent le
+rang opposé ; le cas `N-N` est symétrique. Les égalités incidentes ne sont pas
+comptées dans le rang strict.
+
+La mémoire transitoire devient `O(m+k^2)` : ordre des `m` lignes pour les
+constructeurs, `2(k+1)` curseurs et au plus
+`(k+1)(k+2)/2` couples `P-N` admissibles. Pour le SLO `smax=11`, cela signifie
+au plus seize curseurs et trente-six couples, pas seize catalogues de segments.
+La CLI générale monte toutefois à `k=30`; aucun tableau ne doit rester figé à
+sept. Le travail de sortie des constructeurs reste `O(mk+V)`.
+
+Pour un premier oracle CPU, matérialiser les chaînes est acceptable si le
+high-water est publié. Pour le chemin device, employer soit ces producteurs
+streamés par bloc d'ancre, soit une cutting `count/scan/fill` par slabs ; une
+copie complète par slot recréerait le défaut de scratch déjà mesuré. Cette
+ordonnance suppose encore un constructeur exact des niveaux et doit être reçue
+contre toutes les paires à petit `m`.
+
+### Q3 — concurrences : aucun quotient de plateau n'est reçu
+
+Le quotient de plateau H0 est une **cible**, pas une capacité reçue. Le
+propriétaire par arête maximale retire les occurrences multiples d'un même
+support, mais plusieurs `SupportKey` peuvent partager une `BallKey`. Ni le
+resolver, ni les premières incidences, ni les verticales du contrat officiel
+ne sont aujourd'hui prouvés sur une représentation comprimée de cette masse.
+
+La politique sûre actuelle est :
+
+1. grouper le centre rationnel une fois et construire un `BallKey` exact ;
+2. conserver la liste complète des bundles et des `PointId` co-shell ;
+3. calculer `H` en `u64` vérifié avant expansion ;
+4. dans l'oracle borné, émettre tous les supports canoniques ;
+5. dans le chemin candidat, envoyer l'événement vers une side queue lossless et
+   backpressurée ; si `H` dépasse la capacité reçue, rendre
+   `unsupported_degeneracy` ou `resource_exhausted`, jamais un préfixe ni un
+   quotient implicite.
+
+Un futur `PlateauRecord` pourra être admis pour le diagnostic H0 seulement
+après preuve qu'il conserve `BallActivation`, census, gateways, resolver et lot
+atomique. Il ne remplacera pas automatiquement les sorties Gamma et verticales
+de `BenchmarkOutputContract-v1`. Le profil u16 n'exclut pas les cosphères ; une
+route qui refuse cette branche n'a donc pas encore fermé son domaine.
+
+### Q4 — `ALL` borne une relation, pas les supports
+
+Le classifieur de lentille ne borne **que** le coût de certification de la
+relation carrier. `NONE` est un prune. `ALL` signifie que tout site du bloc
+`C` satisfait la condition de face positive pour toute paire du bloc `A*B` ;
+il ne dit rien sur le rang de leurs circumcentres, le partenaire q4, l'owner ou
+le nombre de sorties. La masse potentielle q3 est encore
+`|A|*|B|*|C|`, et q4 peut ajouter des couples de carriers.
+
+`ALL` ne crédite donc jamais `pruned_pair_mass`. Il crédite séparément une
+`carrier_all_relation_mass`, garde le produit factorisé et le passe au
+center/rank cover. Les médianes rapportées sur le blueprint `eight_clusters`
+indiquent précisément que la vacuité de lentille y sera faible ; elles ne sont
+pas encore un reçu, puisque la famille u16 versionnée manque. Si les supports
+réels sont eux-mêmes quadratiques, leur coût est incontournable pour une sortie
+explicite jusqu'à réception du quotient de plateau. La lentille évite un atlas
+intermédiaire, pas une borne inférieure de sortie.
+
+### Ordre expérimental résultant
+
+Avant G4, quatre harnesses indépendants suffisent : `front-only` ferme la masse
+des paires et les visites ; `carrier-block-only` reçoit `NONE/ALL/UNKNOWN` ;
+`levels-only` compare les centres proposés aux toutes-paires sur une ancre
+explicite ; `owner-census-only` compare `(BallKey,SupportKey,I_B,U_B,owner)` à
+un juge rationnel. `eight_clusters_u16_v1` doit être défini et hashé avant le
+premier scale. Une pente ou un cap rouge à une étape suspend les suivantes ; la
+session G4 scriptée n'a aucune raison scientifique d'être lancée avant ces
+portes CPU.
+
 ## Fixtures et mutants à remettre à Claude
 
 Fixtures entières minimales :
@@ -527,7 +676,8 @@ explicitement `(cloud,a,b)`, compare l'ensemble des centres rationnels proposés
 census à un juge rationnel indépendant. Les fixtures imposent des événements
 `P-P`, `N-N` et `P-N` non vides, `k=0`, `p=7/8`, tangence à Jung, verticale
 avant cisaille, parallèles, bundles confondus d'orientations opposées,
-concurrence d'au moins trois bundles et site shell retiré du rang restreint.
+concurrence d'au moins trois bundles et cas `U_z<theta,F_z=0` qui doit tuer le
+support par profondeur plutôt que publier une coquille partielle.
 Les mutants omettent `P-N`, construisent seulement `k` niveaux au lieu de
 `k+1`, prolongent les segments actifs en droites entières, publient `p_E` comme
 census global, séquencent une concurrence ou décident l'ordre en `double`.
@@ -537,16 +687,20 @@ Chaque canal porte un plancher de non-vacuité.
 
 Ordre recommandé à Claude :
 
-1. fermer immédiatement le domaine `smax` et ajouter le contre-exemple ;
-2. raccorder l'oracle rationnel indépendant et comparer `(S,I_B,U_B)` ;
-3. publier le moteur, les caps, les vrais compteurs de paires q4 et le
-   high-water complet ;
+1. pincer la correction `smax` de `55e972e` et graver les bornes `4/34`, le
+   refus `35`, les deux moteurs et le mutant historique ;
+2. raccorder l'oracle rationnel indépendant et comparer
+   `(BallKey,SupportKey,I_B,U_B,owner)` ;
+3. définir `eight_clusters_u16_v1`, puis exécuter l'ablation de feuilles sur le
+   seul front en publiant partenaires, visites et high-water ;
 4. implémenter seulement le classifieur `NONE/ALL/UNKNOWN` de lentille comme
-   prune collectif mesurable ;
-5. remplacer les tris et `C(nlens,2)` par la composition patch/top-k avant G4 ;
-6. qualifier CUDA puis mesurer `W_front` et `W_extend` sur `uniform` et
-   `eight_clusters` avant tout claim de temps ;
-7. raccorder ensuite census de boule, plateaux, resolver, fold et
+   relation collective factorisée et mesurable ;
+5. construire le harness `levels-only`, d'abord matérialisé comme oracle puis
+   streamé, et remplacer `C(nlens,2)` seulement après accord toutes-paires ;
+6. qualifier CUDA et mesurer `W_front/W_carrier/W_levels` sur `uniform` et
+   `eight_clusters` uniquement si les portes CPU et caps absolus sont verts ;
+7. raccorder ensuite census de boule, plateau reçu ou refus explicite,
+   resolver, fold et
    `BenchmarkOutputContract-v1` dans le chrono officiel.
 
 GCP non utilisé.

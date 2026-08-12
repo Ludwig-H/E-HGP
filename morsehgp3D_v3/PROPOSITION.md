@@ -772,8 +772,12 @@ incidentes et le nombre de lignes de `E` strictement positives est au plus le
 census global privé des `c` témoins permanents, donc au plus `k`. Retirer les
 formes non-carriers ne peut qu'abaisser cette profondeur. Le rang de cet
 sous-arrangement n'est toutefois jamais publié comme `p`; le census final
-rejoue tous les sites nécessaires à `I_B` et `U_B`, y compris un site filtré
-par l'enveloppe qui peut encore être shell.
+rejoue tous les sites nécessaires à `I_B` et `U_B`. Si un site écarté par
+`U_z<theta` était shell d'un centre, les `smax-2` bornes qui définissent
+`theta>0` donneraient déjà autant d'intérieurs stricts et le support serait
+hors budget ; le shell d'une sortie acceptée est donc conservé. En revanche,
+les identités des `always_inside` doivent encore être transportées pour
+recevoir `I_B`, pas seulement leur cardinal.
 
 Cette structure mono-ancre ne doit pas être confondue avec le plein arrangement
 relevé de la section suivante. Si `m=|E|`, le nombre de centres géométriques
@@ -1336,7 +1340,7 @@ points u16 + LBVH exact résidents
        -> center-cover persistant + enveloppe top-(smax-2), ledger fail-open
        -> q3 intrinsèque + niveaux q4 P/P, N/N, P/N ou shallow cutting certifiée
        -> owner génératif exact-once ou RLE SupportKey -> une géométrie/owner
-       -> census I/U complet, y compris shell retiré par theta
+       -> census I/U complet + identités always-inside, lemme shell--theta
        -> side queue H!=empty/plateau, ou second RLE BallKey A/B
        -> BallActivation/tombstones streamées + gate regular/plateau/high-rank
        -> facettes du cœur + gateway canonique de première incidence

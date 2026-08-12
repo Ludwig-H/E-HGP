@@ -391,11 +391,15 @@ top-`(9-c)`, égalités incluses; les profondeurs maximales sont `8-c` en q3 et
 C'est une réduction exacte, pas une heuristique de voisinage fixe autour des
 extrémités. Les neuf voisins dépendent du centre mobile dans le disque. En
 position générale, les premiers `k` niveaux d'un arrangement de `m` lignes ont
-une complexité cumulative `O(km)`. Ici, le nombre de sommets q4 shallow est au
-plus `m(8-c)`, au lieu de `C(m,2)`. Sous u16, une concurrence est groupée
+une complexité cumulative `O(km)`. Ici, le nombre de centres q4 shallow
+distincts est `O(m(8-c))` et la preuve d'échantillonnage reçue donne la borne
+explicite `<e(8-c)m`, au lieu de `C(m,2)` ; le coefficient un précédemment
+affiché n'était pas justifié. Sous u16, une concurrence est groupée
 par centre rationnel et toutes ses égalités sont conservées; si le plateau ne
 tient pas le contrat de dégénérescence, la branche rend le statut explicite au
-lieu de choisir deux lignes.
+lieu de choisir deux lignes. La distinction entre arrangement global relevé et
+niveaux mono-ancre, ainsi que l'ordonnance `P-P/N-N/P-N`, sont fixées dans
+[`AUDIT_CONTRE_AUDIT_PRODUCTEUR_ANCRE_LENTILLE_AIGUE_20260812.md`](AUDIT_CONTRE_AUDIT_PRODUCTEUR_ANCRE_LENTILLE_AIGUE_20260812.md).
 
 Une écriture q4 sans normalisation est directement device-friendly. Pour deux
 carriers `x,y`, poser :

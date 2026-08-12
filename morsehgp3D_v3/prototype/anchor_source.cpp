@@ -1127,6 +1127,7 @@ int main(int argc, char** argv) {
       else if (val == "terrain") family = CloudFamily::kTerrain;
       else if (val == "scanline_single_pass") family = CloudFamily::kScanlineSinglePass;
       else if (val == "scanline_overlap_multiecho") family = CloudFamily::kScanlineOverlapMultiecho;
+      else if (val == "eight_clusters") family = CloudFamily::kEightClusters;
       else refuse("--family inconnue");
     } else {
       refuse("argument inconnu");

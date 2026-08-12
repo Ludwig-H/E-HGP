@@ -92,13 +92,19 @@ disque et d'enveloppe d'un seul coup : n'importe lequel qui couperait à tort
 ferait chuter le compte.
 
 **Travail.** Le compteur décisif est `candidate_pairs / n`, c'est-à-dire le
-nombre de partenaires que le certificat de front laisse passer par point. Sur
-`uniform` il vaut `227` à `n=500`, `351` à `n=1 000` et `465` à `n=2 000`. La
-valeur asymptotique attendue en bulk Poisson pour un rayon de coupure
-`4,8\rho^{-1/3}` est `(4\pi/3)(4,8)^3 \simeq 463`. Le certificat est donc serré,
-et la croissance observée est la fermeture d'un effet de bord, pas une
-superlinéarité : à `n=500` la boîte `u16` ne fait que `1,3` fois le rayon de
-coupure, à `n=2 000` elle en fait `2,6`, à `n=50 000` elle en fera `7,7`.
+nombre de paires **non ordonnées** que le certificat de front laisse passer par
+point. Sur `uniform` il vaut `227` à `n=500`, `351` à `n=1 000` et `465` à
+`n=2 000`.
+
+**Claim retiré.** Cette note comparait ces valeurs à `(4\pi/3)(4,8)^3\simeq463`.
+C'est faux : cette quantité est un degré **dirigé**, et la baseline pointwise
+est sa moitié, environ `231,6`; la dérivation exacte du front q4 par boule de
+milieu donne `232,379n` et la coalescence des trois lanes `233,807n`. Les
+valeurs observées sont donc environ **deux fois** la baseline, pas égales à
+elle. Le certificat de nœud laisse encore passer un facteur deux, attribuable à
+la granularité des feuilles — il ne peut pas couper plus fin qu'une boîte. Ce
+facteur doit être mesuré en fonction de `--leaf`, pas expliqué. La correction
+est due au contre-audit du 12 août.
 
 **Sortie.** À `n=4 000`, `1 459 968` supports, soit `365` par point, à comparer
 à la baseline bulk Poisson d'environ `440`. L'écart est encore l'effet de bord.

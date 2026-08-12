@@ -274,7 +274,7 @@ points u16 + LBVH exact résidents
        -> center-cover persistant + enveloppe top-(smax-2) half-open
        -> q3 intrinsèque + niveaux q4 P/P, N/N, P/N ou cutting certifiée
        -> owner génératif exact-once ou RLE SupportKey -> une géométrie/owner
-       -> census I/U complet, y compris shell retiré par theta
+       -> census I/U complet + identités always-inside, lemme shell--theta
        -> side queue H!=empty/plateau ou second RLE BallKey A/B
        -> gate régulière / plateau / inertie de haut rang
        -> facettes du cœur, gateways et resolver strict
@@ -485,8 +485,9 @@ préfixe comme objet complet.
    `C(nlens,2)` par les niveaux mono-ancre `P-P/N-N/P-N` sur leurs segments
    actifs ou par une shallow cutting certifiée. Le rang restreint génère des
    centres, jamais le census publié. Recevoir le patch half-open avec
-   `occurrences=SupportKey_unique`; rejouer un census complet `(I_B,U_B)`, y
-   compris le shell qu'un filtre `theta` peut retirer du set intérieur. Garder les
+   `occurrences=SupportKey_unique`; rejouer un census complet `(I_B,U_B)` et
+   transporter les identités `always_inside`. Un site shell écarté par `theta`
+   implique déjà un support hors budget et ne peut appartenir à une sortie. Garder les
    lanes q2/q3/q4 et budgets `h` comme comparateur support-first. Pour cette
    baseline, employer une partition terminale commune, émettre les occurrences
    compactes puis faire un premier RLE par `SupportKey` **avant** tout lift.

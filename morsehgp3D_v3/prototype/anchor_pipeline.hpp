@@ -68,6 +68,8 @@ struct WorkCounters {
   long long front_witness_calls = 0;
   long long front_witness_visits = 0;
   long long front_witness_prunes = 0;
+  long long front_witness_skipped = 0;   // tentatives evitees par la garde de densite
+  long long front_mass_closed = 0;       // points fermes par un noeud pruné
   long long lane_probe_visits = 0;
   long long candidate_pairs = 0;
   long long anchors_opened = 0;
@@ -396,10 +398,27 @@ MHGP_HD inline void run_anchor_point(const TreeView& t, int a, int smax, Scratch
       ++ctr->front_node_visits;
       const WitnessBall wb = witness_ball_of(t, ni, pa);
       if (wb.usable) {
-        ++ctr->front_witness_calls;
-        if (witness_closes(t, wb, smax, ctr, flags)) {
-          ++ctr->front_witness_prunes;
-          continue;
+        // GARDE DE DENSITE. Le parcours temoin repart de la racine : son cout
+        // n'est PAS borne par les seuils, seulement les credits acceptes le
+        // sont. On n'engage donc la recherche que la ou elle peut aboutir,
+        // en estimant la population de la boule temoin par la densite du
+        // noeud lui-meme. Sauter une tentative ne peut jamais supprimer un
+        // support : c'est une decision d'ORDONNANCEMENT, le prune reste
+        // decide par le compte entier exact.
+        const i128 r = (i128)isqrt_i128((i128)wb.tau[0]) / 4;
+        const i128 e = (i128)isqrt_i128(node_extent2(t, ni)) + 1;
+        const i128 mass = (i128)(t.end[ni] - t.begin[ni]);
+        const i128 lhs = 2177 * r * r * r * mass;
+        const i128 rhs = 100 * (i128)lane_death_threshold(smax, 2) * e * e * e;
+        if (lhs < rhs) {
+          ++ctr->front_witness_skipped;
+        } else {
+          ++ctr->front_witness_calls;
+          if (witness_closes(t, wb, smax, ctr, flags)) {
+            ++ctr->front_witness_prunes;
+            ctr->front_mass_closed += t.end[ni] - t.begin[ni];
+            continue;
+          }
         }
       }
       if (t.left[ni] < 0) {

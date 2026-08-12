@@ -39,7 +39,13 @@
 
 namespace mhgp3v {
 
-enum class CloudFamily { kUniform, kTerrain, kScanlineSinglePass, kScanlineOverlapMultiecho };
+enum class CloudFamily {
+  kUniform,
+  kTerrain,
+  kScanlineSinglePass,
+  kScanlineOverlapMultiecho,
+  kEightClusters
+};
 
 inline const char* cloud_family_name(CloudFamily family) {
   switch (family) {
@@ -47,6 +53,7 @@ inline const char* cloud_family_name(CloudFamily family) {
     case CloudFamily::kTerrain: return "terrain";
     case CloudFamily::kScanlineSinglePass: return "scanline_single_pass";
     case CloudFamily::kScanlineOverlapMultiecho: return "scanline_overlap_multiecho";
+    case CloudFamily::kEightClusters: return "eight_clusters";
   }
   return "?";
 }
@@ -60,6 +67,10 @@ inline int cloud_family_default_coord(CloudFamily family, int n) {
   double c = 0.0;
   switch (family) {
     case CloudFamily::kUniform: c = std::cbrt((double)n * 1000.0); break;
+    // Huit amas equilibres : meme densite INTERNE que `uniform`, mais separes.
+    // L'emprise est donc celle d'un nuage huit fois plus dense, dilatee par le
+    // pas d'amas ; le regime 2 du plan de test le nomme melange equilibre.
+    case CloudFamily::kEightClusters: c = 4.0 * std::cbrt((double)n * 1000.0 / 8.0); break;
     case CloudFamily::kTerrain: c = std::sqrt((double)n * 25.0); break;
     case CloudFamily::kScanlineSinglePass:
     case CloudFamily::kScanlineOverlapMultiecho: c = std::sqrt((double)n * 40.0); break;
@@ -82,6 +93,47 @@ inline std::vector<mhgp::P3> uniform_cloud(int n, int coord, long long seed) {
     q.z = (mhgp::i32)pick(rng);
     const long long key = ((long long)q.x << 34) | ((long long)q.y << 17) | (long long)q.z;
     if (!keys.insert(key).second) continue;
+    pts.push_back(q);
+  }
+  return pts;
+}
+
+// LA FAMILLE ADVERSARIALE. Huit amas equilibres aux sommets d'un cube, chacun
+// de densite interne egale a celle de `uniform`, separes par un vide large.
+// Elle attaque precisement les certificats de temoins : une paire inter-amas a
+// un milieu situe dans le vide, donc aucune boule de milieu ne la tue, et seule
+// la geometrie des amas eux-memes peut la fermer. Construction entiere,
+// deduplication identique aux autres familles.
+inline std::vector<mhgp::P3> eight_clusters_cloud(int n, int coord, long long seed) {
+  std::mt19937 rng((unsigned)seed);
+  // Demi-cote d'un amas : le quart de l'emprise, ce qui laisse un vide egal a
+  // deux fois ce demi-cote entre deux amas voisins.
+  const int half = std::max(1, coord / 8);
+  const int lo = coord / 4;
+  const int hi = coord - coord / 4;
+  const int centres[8][3] = {{lo, lo, lo}, {hi, lo, lo}, {lo, hi, lo}, {hi, hi, lo},
+                             {lo, lo, hi}, {hi, lo, hi}, {lo, hi, hi}, {hi, hi, hi}};
+  std::uniform_int_distribution<int> jitter(-half, half);
+  std::vector<mhgp::P3> pts;
+  std::set<long long> keys;
+  int placed[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+  const int quota = (n + 7) / 8;
+  for (int guard = 0; (int)pts.size() < n && guard < 400 * n; ++guard) {
+    // Tourniquet strict : les amas restent equilibres a un point pres, meme si
+    // la deduplication rejette. Un amas sature cede son tour au suivant.
+    int c = -1;
+    for (int t = 0; t < 8; ++t) {
+      const int cand = (guard + t) % 8;
+      if (placed[cand] < quota) { c = cand; break; }
+    }
+    if (c < 0) break;
+    mhgp::P3 q{};
+    q.x = (mhgp::i32)std::min(coord - 1, std::max(0, centres[c][0] + jitter(rng)));
+    q.y = (mhgp::i32)std::min(coord - 1, std::max(0, centres[c][1] + jitter(rng)));
+    q.z = (mhgp::i32)std::min(coord - 1, std::max(0, centres[c][2] + jitter(rng)));
+    const long long key = ((long long)q.x << 34) | ((long long)q.y << 17) | (long long)q.z;
+    if (!keys.insert(key).second) continue;
+    ++placed[c];
     pts.push_back(q);
   }
   return pts;
@@ -253,6 +305,7 @@ inline std::vector<mhgp::P3> make_family_cloud(CloudFamily family, int n, int co
                                                bool mutant_overshoot = false) {
   switch (family) {
     case CloudFamily::kUniform: return uniform_cloud(n, coord, seed);
+    case CloudFamily::kEightClusters: return eight_clusters_cloud(n, coord, seed);
     case CloudFamily::kTerrain: return terrain_cloud(n, coord, seed);
     case CloudFamily::kScanlineSinglePass:
       return scanline_cloud(n, coord, seed, false, mutant_overshoot);
