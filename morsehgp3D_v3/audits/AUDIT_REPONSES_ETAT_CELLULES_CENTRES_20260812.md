@@ -35,17 +35,19 @@ cellules serait une régression sans reçu.
 
 ## 1. Fraîcheur et portée des nombres
 
-La question auditée est
+Le snapshot initial des questions auditées est
 [`NOTE_CLAUDE_ETAT_CELLULES_CENTRES_20260812.md`](NOTE_CLAUDE_ETAT_CELLULES_CENTRES_20260812.md),
 SHA-256 `40290ef72de2d29df9f05081f5d0d7596a7afbf6b91e562b3cba11216d11f385`.
-Le `HEAD` observé vaut
-`b79dd12f1ed947fb82118f8bb0902b36da65c8cd`. Le worktree était mouvant :
+Le `HEAD` au début de l'audit valait
+`b79dd12f1ed947fb82118f8bb0902b36da65c8cd`. Pendant l'audit, Claude a commité
+le successeur `3bad5aee4ceb815d0188b542595bb8f215e1bb24`, qui embarque la première
+version de cette réponse, puis a poursuivi le source dans le worktree. Les
+observations successives étaient :
 `prototype/centre_cell_source.cpp` valait `5c802306...` au premier relevé puis
-`c6308e9a...` pendant l'audit; le binaire Release local, plus ancien que ces
-deux sources, valait `8fc8f523...`. `CMakeLists.txt` valait `d0738d1e...`.
-Le binaire n'embarque pas les nouveaux libellés `potential_triples` et
-`potential_quads` du source live. Aucune mesure de cette note ne peut donc être
-transférée au source live ou à ce binaire par simple proximité temporelle.
+`c6308e9a...` dans le commit, puis `4884b293...` dans le worktree. Le binaire
+Release local a lui aussi été reconstruit plusieurs fois; `CMakeLists.txt`
+valait `d0738d1e...`. Aucune mesure de la note ne peut donc être transférée à
+un de ces couples source/ELF par simple proximité temporelle.
 
 Les tables de la note ne donnent pas ensemble SHA source, SHA ELF, SHA CMake,
 commande complète, graine, paramètres de cellule et transcript brut. Elles
@@ -289,6 +291,50 @@ Référence primaire sur les algorithmes connus :
 7. N'ouvrir G4 qu'après passage de la porte de compteurs et existence d'un
    kernel/source/payload à mesurer; ne pas porter littéralement le producteur
    CPU courant.
+
+## 6. Contre-audit des ajouts de l'autre auditeur
+
+Les ajouts parallèles dans
+[`AUDIT_REPONSES_CELLULES_CENTRES_20260812.md`](AUDIT_REPONSES_CELLULES_CENTRES_20260812.md)
+et
+[`NOTE_ARCHITECTURE_GPU_LISTES_CELLULES_CENTRES_20260812.md`](NOTE_ARCHITECTURE_GPU_LISTES_CELLULES_CENTRES_20260812.md)
+ont été relus. Trois apports sont mathématiquement utiles et sont conservés :
+
+1. **`SupportKey` avant lift.** Grouper toutes les occurrences intercellules
+   d'un même tuple avant de construire sa géométrie est exact si le run garde
+   chaque `CellId` et son `CensusContext` vivant jusqu'au choix de l'unique
+   owner. Le premier RLE ne doit jamais choisir arbitrairement la première
+   occurrence. Au second RLE par boule, le contexte doit vérifier
+   `b_cert>=H_run`, avec `H_run=smax-q_min`; sinon le census est global.
+2. **Scores affines i64.** Avec `S=2^d`, `z=Sc` et
+   `F_x(z)=S||x||^2-2<x,z>`, les comparaisons de listes et de bissecteurs
+   éliminent le terme commun `||z||^2`. Sous u16 et `d<=26`, les bornes
+   annoncées restent sous l'entier signé 64 bits. Cette preuve reçoit ces
+   scores, pas tous les solves, déterminants ou clés de sphère de la génération.
+3. **Certificat local d'expansion.** Si `diam(K)<=delta`, si `rho` est la
+   distance au `(H+1)`-ième voisin du point `c0` dans le pool et si
+   `delta<=alpha*rho`, alors
+   `D_H(K)` est inclus dans la boule centrée en `c0` de rayon
+   `(1+2*alpha)*rho`. Un compte fermé de cette boule peut donc certifier
+   `|D_H|<=64` avant le choix d'un bitset; sans ce compte, la parcimonie reste
+   inconnue.
+
+Quatre corrections étaient nécessaires et ont été reportées dans les textes :
+
+- le sweep binomial est exact seulement pour le graphe d'intervalles; le score
+  pondéré n'est pas un coût terminal exact;
+- le diagramme local d'ordre supérieur n'est pas un fallback industriel
+  autorisé par le plan actuel, même s'il est détruit après chaque feuille;
+- le RLE inter-arités doit sélectionner un contexte certifié pour `H_run`, pas
+  seulement un représentant rejouable quelconque;
+- l'absence actuelle de kernel et de payload justifie de différer G4, mais ne
+  démontre pas l'échec de latence d'une future implémentation CUDA.
+
+Le théorème « un tétraèdre strictement bien centré possède au moins deux faces
+aiguës » est valide, mais il n'est pas la justification du filtre axe courant :
+la droite d'équidistance existe pour toute face non colinéaire, aiguë ou
+obtuse. L'acuité ne sert que si une future ordonnance choisit explicitement un
+carrier aigu canonique.
 
 GCP non utilisé. Aucun fichier de code n'a été modifié et aucun test du
 prototype n'a été relancé pour cet audit.

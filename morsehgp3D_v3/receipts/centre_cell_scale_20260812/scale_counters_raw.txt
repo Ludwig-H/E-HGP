@@ -1,0 +1,13 @@
+CentreCellScaleReceipt-v1
+date_utc=2026-08-12T14:45:08Z
+git_commit=238cf1299dbbe339ed9f863f87a854584dceddf3
+git_dirty=4
+sha256_source=4884b29388d9617917810a03cde221430b66bc43cc320e9f06ba56be6e540793
+sha256_ball_front=221356332743af11481a5387d65f6d27e0ec2b0ce0e10e2118f3796bb763d490
+sha256_cloud_families=1a3e3027c2e0880e6ff381fc80b707b9ec88dbf573579aac535cfc80bb307b54
+sha256_cmake=d0738d1e3bfc103ecebc0c8e6dae8149aae3727322c34af4c3a0dcd8c12d440e
+sha256_elf=5b422644b6b461b919202f6c0257e27dc0af811110ad49fd82eca18a224f2283
+compiler=g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+host_cores=2
+note=temps sous charge partagee, non qualifiables; seuls les compteurs sont deterministes
+=== command=build/v3/mhgp3v_centre_cell --points=12500 --family=terrain --smax=11 --seed=11 --work-cap=20000

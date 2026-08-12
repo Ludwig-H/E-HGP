@@ -362,6 +362,21 @@ exacte axe--bissecteur donne le centre q4
 Le triangle paie ainsi son lift une fois et chaque apex seulement des
 produits--sommes, l'owner et les barycentriques avant la clé de sphère.
 
+On peut attaquer l'owner encore plus tôt. Intersecter une fois la droite
+`c0+t*n` du triangle avec le domaine actif donne un intervalle rationnel fermé
+`T`. Pour chaque apex non coplanaire `d`, l'équation de son bissecteur détermine
+un unique paramètre `t_d`; tester `t_d in T` par produits croisés précède le
+lift q4 complet. Une égalité reste conservée. Cette condition par apex est plus
+sélective que le seul test « la droite rencontre la cellule » et mutualise
+`c0/n/T` par triangle; elle exige i128 ou un filtre i64 gardé avec fallback
+exact.
+
+Dans la lane q3 seulement, la positivité d'un triangle propre équivaut à son
+acuité stricte. Les trois produits scalaires aux sommets, calculables en i64
+sous u16, rejettent donc les triangles droits ou obtus avant le lift. Ce filtre
+ne conditionne jamais la lane q4 : une face canonique d'un q4 positif peut être
+obtuse.
+
 ### Certificat local de liste bornée
 
 Choisir `c0` dans le domaine actif `K`, supposer `diam(K)<=delta` et noter

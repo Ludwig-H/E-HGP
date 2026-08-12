@@ -1019,6 +1019,17 @@ les bisecteurs du diagramme de Voronoi d'ordre supérieur. La structure reste
 donc transitoire, sans atlas ni adjacences, et hors du chemin chaud tant
 qu'aucune borne d'admission n'existe.
 
+Une borne conditionnelle mesurable est toutefois disponible. Pour `c0` dans le
+domaine actif `K`, `diam(K)<=delta`, et `rho` distance au `(H+1)`-ième voisin
+de `c0` dans le pool, on a `R_(H,P)(K)<=(rho+delta)^2` puis
+`D_(H,P)(K) subseteq B(c0,rho+2 delta)`. Ainsi, si
+`delta<=alpha*rho` et si un census local certifie au plus
+`Lambda*(H+1)` sites dans `B(c0,(1+2 alpha)rho)`, la liste terminale a au plus
+ce cardinal. Cette propriété, mesurée sur `uniform` et `eight_clusters`, peut
+autoriser un bitset warp `m<=64`; en son absence, la branche choisit CSR,
+subdivision ou `resource_exhausted`. `max_depth` seul n'est jamais un
+certificat sparse.
+
 ## 8. Resolver des blocs silencieux
 
 Omettre un bloc H0-inerte sans locator est faux : une de ses facettes peut

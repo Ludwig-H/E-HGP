@@ -865,6 +865,13 @@ La formule Poisson auditée donne précisément une réponse nuancée. Dans le b
 stationnaire continu et en position générique, le nombre attendu de supports
 positifs de Source S jusqu'à `smax=11` vaut
 `(175+495*pi^2/16) rho |Omega|`, soit environ `480,340886` par point attendu.
+
+| arité | profondeurs | espérance divisée par `rho*|Omega|` |
+| --- | --- | ---: |
+| q2 | `p=0..9` | `40` |
+| q3 | `p=0..8` | `45*(3+3*pi^2/16)=218,2748...` |
+| q4 | `p=0..7` | `120*(3*pi^2/16)=222,0661...` |
+
 Il est donc **linéaire en espérance**, mais avec une constante qui n'est pas
 petite : environ 24,017 millions de supports à 50 000 points. La densité locale
 se résorbe par changement d'échelle; un mélange de gros amas homogènes bien
@@ -993,6 +1000,18 @@ barycentriques avant de former la clé de sphère. Cette formulation utilise
 n'importe quelle face canonique non dégénérée et ne dépend pas de sa pertinence
 q3.
 
+Une version plus sélective calcule une fois l'intervalle rationnel fermé `T`
+des paramètres tels que `N/G+t*n` appartient à la cellule. Le bissecteur entre
+`a` et chaque apex détermine un unique `t_d`; tester `t_d in T` par produits
+croisés **avant** le lift q4 attaque directement les rejets owner. La tangence
+reste conservée et `n dot (d-a)=0` classe le quadruplet coplanaire. Cette porte
+doit compter ses fallbacks de largeur.
+
+Dans la seule lane q3, un support triangulaire propre positif est exactement
+un triangle strictement aigu. Tester d'abord les trois produits scalaires aux
+sommets rejette donc droits et obtus en i64 u16 avant `lift_triangle`. Ce filtre
+ne doit jamais conditionner q4 : sa face canonique peut être obtuse.
+
 Un diagramme de Voronoï/Delaunay local d'ordre au plus `k` n'est pas le prochain
 jalon. Répété dans des feuilles recouvrantes, il peut recréer la même
 duplication et matérialiser localement la mosaïque d'ordre supérieur interdite.
@@ -1016,6 +1035,13 @@ au cap 256. Cette politique peut donc échanger quelques lifts contre un grand
 nombre de cellules. Elle doit employer des comptes lane-specific, des additions
 saturées, et comparer le coût prévu du terminal à celui des huit enfants; elle
 ne doit pas être appelée « critère de split exact ».
+
+La décision à deux étages la plus propre emploie d'abord ce potentiel comme
+majorant saturé bon marché, puis, seulement près du seuil, construit une fois
+l'adjacence bissectrice et compte ses vrais `E/T/Q` par bitsets. Elle compare
+alors le coût terminal aux huit enfants, réplication, octets CSR, lancements et
+census compris; un cap dense route vers un fallback exact préflighté ou
+`resource_exhausted`, jamais vers une sortie censurée.
 
 ### 13.6 Ordre de travail corrigé
 
