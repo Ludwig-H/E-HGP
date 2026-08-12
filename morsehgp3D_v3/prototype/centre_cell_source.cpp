@@ -138,6 +138,8 @@ struct Stats {
   i64 candidate_ids = 0, candidate_high_water = 0;
   i64 separation_tests = 0, separation_pruned = 0;
   i64 child_separation_tests = 0, child_separation_pruned = 0;
+  i64 normal_tests = 0, normal_pruned = 0;
+  i64 rank_cell_tests = 0, rank_cell_pruned = 0;
   i64 overlap_pairs = 0, terminal_overlaps = 0, max_terminal_overlaps = 0;
   i64 potential_triples = 0, potential_quads = 0;
   i64 clique_pairs = 0, clique_triples = 0, clique_quads = 0;
@@ -148,6 +150,13 @@ struct Stats {
   i64 occurrences_degenerate = 0, owner_tests = 0, owner_multiple = 0, batches_flushed = 0;
   i64 probe_tests = 0, probe_accepted = 0, probe_edges = 0, probe_triangles = 0, probe_quads = 0;
   i64 incidence_checks = 0;
+  i64 stall_levels_seen = 0, stall_terminals = 0;
+  // HISTOGRAMME EN PROFONDEUR. Le seul moyen de savoir si l'arbre paie la
+  // SURFACE ou le VOLUME : si les terminaux se concentrent au dernier niveau et
+  // que leur nombre quadruple par niveau, l'arbre suit une surface; s'il
+  // octuple, il suit un volume.
+  i64 terminal_by_depth[32] = {0};
+  i64 supports_by_depth[32] = {0};
   i64 axis_tests = 0, axis_pruned = 0, axis_unusable = 0;
   i64 lifts_built = 0, degenerate_lifts = 0;
   // LEDGER DES CAUSES, PAR ARITE. Sans lui, « les petites cellules causent le
@@ -226,6 +235,68 @@ inline bool bisector_meets_cell(const mhgp::P3& a, const mhgp::P3& b,
   }
   if (strict_mutant) return lo < 0 && 0 < hi;
   return lo <= 0 && 0 <= hi;
+}
+
+// ---------------------------------------------------------------------------
+// SEPARATION PAR LA NORMALE LOCALE.
+//
+// Le k-DOP a directions fixes est aveugle au cas qui domine les nuages
+// surfaciques : une cellule situee AU-DESSUS d'une plaque quasi planaire. Ses
+// dix plus proches sites sont presque cospheriques vus de loin, donc leurs
+// intervalles se recouvrent tous et le critere de travail la fait decouper
+// indefiniment — alors qu'AUCUN support positif ne peut y avoir son centre,
+// puisque le centre devrait appartenir a `conv(U)`, contenu dans le plan.
+//
+// On choisit donc la direction de test dans les DONNEES : la normale du plan
+// des moindres carres de la liste. Pour une covariance de rang deux, l'adjugee
+// vaut `det(C) C^{-1}` et devient proportionnelle a `n n^T` : sa colonne de plus
+// grande norme donne la normale. Ce calcul flottant ne fait que CHOISIR une
+// direction; le test de separation lui-meme reste entier et exact, donc le prune
+// est exact et rejouable. Une direction mal choisie ne coupe rien.
+struct SepDir {
+  i64 d[3] = {0, 0, 0};
+  bool ok = false;
+};
+
+inline SepDir normal_direction(const mhgp::P3* pts, const int* ids, int m) {
+  SepDir out;
+  if (m < 3) return out;
+  double cx = 0, cy = 0, cz = 0;
+  for (int i = 0; i < m; ++i) {
+    cx += (double)pts[ids[i]].x;
+    cy += (double)pts[ids[i]].y;
+    cz += (double)pts[ids[i]].z;
+  }
+  cx /= m; cy /= m; cz /= m;
+  double xx = 0, xy = 0, xz = 0, yy = 0, yz = 0, zz = 0;
+  for (int i = 0; i < m; ++i) {
+    const double ax = (double)pts[ids[i]].x - cx;
+    const double ay = (double)pts[ids[i]].y - cy;
+    const double az = (double)pts[ids[i]].z - cz;
+    xx += ax * ax; xy += ax * ay; xz += ax * az;
+    yy += ay * ay; yz += ay * az; zz += az * az;
+  }
+  // Adjugee de la covariance symetrique.
+  const double a00 = yy * zz - yz * yz;
+  const double a01 = xz * yz - xy * zz;
+  const double a02 = xy * yz - xz * yy;
+  const double a11 = xx * zz - xz * xz;
+  const double a12 = xy * xz - xx * yz;
+  const double a22 = xx * yy - xy * xy;
+  const double n0 = a00 * a00 + a01 * a01 + a02 * a02;
+  const double n1 = a01 * a01 + a11 * a11 + a12 * a12;
+  const double n2 = a02 * a02 + a12 * a12 + a22 * a22;
+  double v[3];
+  if (n0 >= n1 && n0 >= n2) { v[0] = a00; v[1] = a01; v[2] = a02; }
+  else if (n1 >= n2) { v[0] = a01; v[1] = a11; v[2] = a12; }
+  else { v[0] = a02; v[1] = a12; v[2] = a22; }
+  double norm = 0;
+  for (int i = 0; i < 3; ++i) norm = std::max(norm, v[i] < 0 ? -v[i] : v[i]);
+  if (!(norm > 0)) return out;
+  for (int i = 0; i < 3; ++i) out.d[i] = (i64)(v[i] / norm * 256.0);
+  if (out.d[0] == 0 && out.d[1] == 0 && out.d[2] == 0) return out;
+  out.ok = true;
+  return out;
 }
 
 constexpr int kDopDirs = 4;
@@ -445,6 +516,8 @@ struct Engine {
   // device doit le recalibrer avant tout defaut different.
   int probe_factor = 1;
   int probe_top_cap = 96;
+  int stall_ratio = 90;   // pourcentage : progres exige sous 90 % du parent
+  int stall_levels = 3;   // steriles consecutifs avant fermeture
   int max_depth = 22;
   bool axis_filter = false;
   Mutant mutant = Mutant::kNone;
@@ -489,6 +562,8 @@ struct Engine {
   std::vector<BatchRec> batch_recs;
   int batch_rec_cap = 1 << 20;
   int cur_slot = -1;
+  int cur_depth = 0;
+  bool no_normal = false;
   bool deferred_lift = false;
   // ABLATION A FLOT IDENTIQUE. Mode de MESURE uniquement : chaque niveau coupe
   // une phase en laissant intactes toutes celles qui la precedent. La sortie
@@ -508,6 +583,7 @@ struct Engine {
   // de clique. Recopier les coordonnees de la liste — quelques dizaines de
   // triplets — les rend sequentielles pour toute la cellule.
   std::vector<mhgp::P3> cell_pts;
+  std::vector<int> sep_ids;
   std::vector<char> group_done;
   // HISTOGRAMME DE MULTIPLICITE, exige par le contre-audit. Un meme tuple
   // geometrique est propose dans plusieurs cellules; seul son circumcentre en
@@ -538,7 +614,7 @@ struct Engine {
     level.assign((std::size_t)max_depth + 2, {});
     current_batch = 0;
     batch_counter = 0;
-    descend(root, seed);
+    descend(root, seed, -1, 0);
     if (deferred_lift) flush_batch();
   }
 
@@ -546,7 +622,8 @@ struct Engine {
   int batch_counter = 0;
   int current_batch = 0;
 
-  void descend(const CentreCell& cell, const std::vector<Cand>& parent) {
+  void descend(const CentreCell& cell, const std::vector<Cand>& parent,
+               i64 parent_work = -1, int stalls = 0) {
     stats.max_depth_reached = std::max(stats.max_depth_reached, (i64)cell.depth);
     std::vector<Cand>& mine = level[(std::size_t)cell.depth];
     mine.clear();
@@ -608,26 +685,39 @@ struct Engine {
           return;
         }
       }
-      for (int d = 0; d < kDopDirs; ++d) {
+      // Directions candidates : les quatre diagonales fixes, puis la normale du
+      // plan local, qui est la seule capable de voir une cellule hors du plan.
+      sep_ids.clear();
+      for (const Cand& c : mine) sep_ids.push_back(c.id);
+      const SepDir normal = normal_direction(pts, sep_ids.data(), (int)sep_ids.size());
+      for (int d = 0; d < kDopDirs + 1; ++d) {
+        i64 dir[3];
+        if (d < kDopDirs) {
+          dir[0] = kDop[d][0]; dir[1] = kDop[d][1]; dir[2] = kDop[d][2];
+        } else {
+          if (!normal.ok || no_normal) continue;
+          dir[0] = normal.d[0]; dir[1] = normal.d[1]; dir[2] = normal.d[2];
+          ++stats.normal_tests;
+        }
         i64 pmin = 0, pmax = 0;
         bool one = true;
         for (const Cand& c : mine) {
           const mhgp::P3& p = pts[c.id];
-          const i64 proj = (i64)kDop[d][0] * p.x + (i64)kDop[d][1] * p.y +
-                           (i64)kDop[d][2] * p.z;
+          const i64 proj = dir[0] * p.x + dir[1] * p.y + dir[2] * p.z;
           if (one) { pmin = pmax = proj; one = false; }
           else { pmin = std::min(pmin, proj); pmax = std::max(pmax, proj); }
         }
         i64 bmin = 0, bmax = 0;
         for (int a = 0; a < 3; ++a) {
-          const i64 at_lo = (i64)kDop[d][a] * tight.lo[a];
-          const i64 at_hi = (i64)kDop[d][a] * tight.hi[a];
+          const i64 at_lo = dir[a] * tight.lo[a];
+          const i64 at_hi = dir[a] * tight.hi[a];
           bmin += std::min(at_lo, at_hi);
           bmax += std::max(at_lo, at_hi);
         }
         ++stats.separation_tests;
         if (bmax < pmin * scale || bmin > pmax * scale) {
           ++stats.separation_pruned;
+          if (d == kDopDirs) ++stats.normal_pruned;
           ++stats.cells_pruned;
           return;
         }
@@ -641,6 +731,72 @@ struct Engine {
         c.l = lo;
         c.u = hi;
         scratch_u.push_back(hi);
+      }
+    }
+
+    // PRUNE DE RANG AU NIVEAU CELLULE — le vrai remede au volume vide.
+    //
+    // La positivite impose `c` dans `relint conv(U)` : pour TOUTE direction `d`,
+    // le support contient un point strictement du cote `+`. Le rayon carre
+    // verifie donc, pour chaque `d`,
+    //   beta >= min{ l_C(x) : x peut etre du cote + de d }.
+    // En prenant le maximum sur un jeu de directions, on obtient une borne
+    // INFERIEURE `lambda` sur `beta`. Tout site verifiant `u_C(x) < lambda` est
+    // alors STRICTEMENT interieur a la boule. S'il y en a plus de `smax-2`,
+    // aucun support positif d'arite au moins deux ne peut avoir son centre dans
+    // la cellule : elle est vide, et toute sa descendance aussi par monotonie.
+    //
+    // C'est ce prune qui manque aux nuages a grand volume vide : une cellule
+    // suspendue entre le sol et la canopee doit, pour etre positive, atteindre
+    // les deux, donc contenir tout ce qui est plus proche. Le k-DOP et la
+    // normale ne le voient pas : la cellule est bien dans l'enveloppe convexe.
+    if (have_thresholds && (int)mine.size() >= 2) {
+      static constexpr int kRankDirs = 7;
+      static constexpr int kRankDir[kRankDirs][3] = {
+          {1, 0, 0}, {0, 1, 0}, {0, 0, 1}, {1, 1, 1}, {1, 1, -1}, {1, -1, 1}, {-1, 1, 1}};
+      const i64 scale_r = (i64)1 << tight.depth;
+      i128 lambda = 0;
+      for (int d = 0; d < kRankDirs; ++d) {
+        i64 box_lo = 0, box_hi = 0;
+        for (int a = 0; a < 3; ++a) {
+          const i64 at_lo = (i64)kRankDir[d][a] * tight.lo[a];
+          const i64 at_hi = (i64)kRankDir[d][a] * tight.hi[a];
+          box_lo += std::min(at_lo, at_hi);
+          box_hi += std::max(at_lo, at_hi);
+        }
+        // Cote `+` : tout site dont la projection depasse le MINIMUM de la
+        // cellule peut etre du bon cote pour un `c` de la cellule. Inclure ces
+        // sites baisse le minimum, donc la borne reste inferieure : fail-open.
+        i128 best_plus = -1, best_minus = -1;
+        for (const Cand& c : mine) {
+          const mhgp::P3& p = pts[c.id];
+          const i64 proj = (i64)kRankDir[d][0] * p.x + (i64)kRankDir[d][1] * p.y +
+                           (i64)kRankDir[d][2] * p.z;
+          const i64 sp = proj * scale_r;
+          if (sp >= box_lo && (best_plus < 0 || c.l < best_plus)) best_plus = c.l;
+          if (sp <= box_hi && (best_minus < 0 || c.l < best_minus)) best_minus = c.l;
+        }
+        if (best_plus < 0 || best_minus < 0) {
+          // Aucun site d'un cote : aucun support positif possible.
+          lambda = -1;
+          break;
+        }
+        // Le support doit atteindre LES DEUX cotes, donc `beta` majore chacune
+        // des deux distances minimales : on prend leur MAXIMUM.
+        lambda = std::max(lambda, std::max(best_plus, best_minus));
+      }
+      ++stats.rank_cell_tests;
+      bool dead = lambda < 0;
+      if (!dead && lambda > 0) {
+        int certainly_inside = 0;
+        for (const Cand& c : mine)
+          if (c.u < lambda) ++certainly_inside;
+        if (certainly_inside > smax - 2) dead = true;
+      }
+      if (dead) {
+        ++stats.rank_cell_pruned;
+        ++stats.cells_pruned;
+        return;
       }
     }
 
@@ -719,7 +875,11 @@ struct Engine {
     stats.potential_quads += pot_q;
     // Poids de travail : un triplet paie un `lift_triangle`, un quadruplet un
     // `lift_of` et son auto-centrage, donc environ trois et six fois une paire.
-    const i64 work = pot_e + 3 * pot_t + 6 * pot_q;
+    // Le potentiel sature : pres de la racine `C(a_i,3)` deborde tout entier
+    // signe, et seule la comparaison de progres nous interesse.
+    constexpr i64 kWorkSat = (i64)1000000000000000LL;
+    i64 work = pot_e + 3 * pot_t + 6 * pot_q;
+    if (work < 0 || work > kWorkSat) work = kWorkSat;
     // CRITERE A DEUX ETAGES (auditeur). Le potentiel d'intervalles est un
     // MAJORANT grossier : le graphe d'intervalles est un surgraphe du graphe de
     // bissecteurs 3D. Pres de la racine il explose et force a decouper la ou le
@@ -727,8 +887,30 @@ struct Engine {
     // On sonde donc le VRAI graphe dans une bande d'indecision, une seule fois,
     // et on reutilise l'adjacence si la cellule devient terminale.
     adj_ready = false;
+    // DETECTION DE STAGNATION — le correctif de la pente rouge des cellules.
+    //
+    // Le critere de plafond decoupe tant que le travail estime depasse la cible,
+    // sans jamais constater qu'AUCUN decoupage supplementaire ne le reduira. Sur
+    // un nuage localement quasi coplanaire, le graphe d'ambiguite reste dense le
+    // long de la normale a toute echelle : l'arbre descend alors tres au-dessous
+    // du pas d'echantillonnage sans rien gagner, et le nombre de cellules croit
+    // superlineairement.
+    //
+    // On mesure donc le PROGRES : si le travail d'une cellule ne descend pas
+    // sous une fraction de celui de son parent, le split est compte comme
+    // sterile. Apres `stall_levels` steriles consecutifs, la cellule est
+    // terminale quelle que soit sa taille. L'EXACTITUDE NE DEPEND PAS DE CE
+    // CHOIX : le theoreme s'applique a toute cellule, et la porte de rang reste
+    // la seule autorite. Seul le cout change.
+    int my_stalls = 0;
+    if (parent_work > 0 && work * 100 > (i64)stall_ratio * parent_work) {
+      my_stalls = stalls + 1;
+      ++stats.stall_levels_seen;
+    }
+    const i64 my_work = work;
     bool terminal = work <= (i64)work_cap || (int)mine.size() <= leaf ||
-                    cell.depth >= max_depth;
+                    cell.depth >= max_depth || my_stalls >= stall_levels;
+    if (my_stalls >= stall_levels && work > (i64)work_cap) ++stats.stall_terminals;
     if (!terminal && work <= (i64)work_cap * (i64)probe_factor &&
         (int)mine.size() <= probe_top_cap) {
       int m3p = (int)mine.size(), m4p = (int)mine.size();
@@ -772,6 +954,8 @@ struct Engine {
     const i64 overlaps = pot_e;
     if (terminal) {
       ++stats.cells_terminal;
+      if (cell.depth < 32) ++stats.terminal_by_depth[cell.depth];
+      cur_depth = cell.depth;
       stats.terminal_overlaps += overlaps;
       stats.max_terminal_overlaps = std::max(stats.max_terminal_overlaps, overlaps);
       if (ablate < 5) generate(cell, tight, mine, have_thresholds);
@@ -823,7 +1007,7 @@ struct Engine {
       ++stats.cells_created;
       const int saved = current_batch;
       if (child.depth == batch_depth) current_batch = ++batch_counter;
-      descend(child, mine);
+      descend(child, mine, my_work, my_stalls);
       current_batch = saved;
     }
   }
@@ -1466,6 +1650,7 @@ struct Engine {
         continue;
       }
       ++stats.supports[p.q];
+      if (cur_depth < 32) ++stats.supports_by_depth[cur_depth];
       Record rec;
       rec.support.assign(p.ids, p.ids + p.q);
       rec.interior = interior_ids;
@@ -1585,9 +1770,13 @@ struct Options {
   bool deferred_lift = false;
   int probe_factor = 1;
   int ablate = 0;
+  int stall_ratio = 90;
+  int stall_levels = 3;
   Mutant mutant = Mutant::kNone;
   bool judge = false;
   i64 min_supports = 0, min_cells = 0, min_quads = 0, min_probes = 0;
+  i64 min_normal_pruned = 0;
+  bool no_normal = false;
   std::string label;
 };
 
@@ -1606,6 +1795,9 @@ int run_engine(const std::vector<mhgp::P3>& cloud, const Options& opt) {
   engine.deferred_lift = opt.deferred_lift;
   engine.probe_factor = opt.probe_factor < 1 ? 1 : opt.probe_factor;
   engine.ablate = opt.ablate;
+  engine.stall_ratio = opt.stall_ratio;
+  engine.stall_levels = opt.stall_levels;
+  engine.no_normal = opt.no_normal;
   engine.max_depth = opt.max_depth;
   engine.mutant = opt.mutant;
   engine.collect = opt.judge;
@@ -1644,6 +1836,8 @@ int run_engine(const std::vector<mhgp::P3>& cloud, const Options& opt) {
   std::printf("separation_tests=%lld separation_pruned=%lld child_sep_tests=%lld child_sep_pruned=%lld\n",
               s.separation_tests, s.separation_pruned, s.child_separation_tests,
               s.child_separation_pruned);
+  std::printf("normal_tests=%lld normal_pruned=%lld rank_cell_tests=%lld rank_cell_pruned=%lld\n",
+              s.normal_tests, s.normal_pruned, s.rank_cell_tests, s.rank_cell_pruned);
   std::printf("overlap_pairs=%lld potential_triples=%lld potential_quads=%lld\n",
               s.overlap_pairs, s.potential_triples, s.potential_quads);
   std::printf("terminal_overlaps=%lld max_terminal_overlaps=%lld\n",
@@ -1663,7 +1857,12 @@ int run_engine(const std::vector<mhgp::P3>& cloud, const Options& opt) {
   std::printf("probe_tests=%lld probe_accepted=%lld probe_edges=%lld probe_triangles=%lld probe_quads=%lld\n",
               s.probe_tests, s.probe_accepted, s.probe_edges, s.probe_triangles,
               s.probe_quads);
-  std::printf("incidence_checks=%lld\n", s.incidence_checks);
+  std::printf("incidence_checks=%lld stall_levels_seen=%lld stall_terminals=%lld\n",
+              s.incidence_checks, s.stall_levels_seen, s.stall_terminals);
+  for (int d = 0; d < 32; ++d)
+    if (s.terminal_by_depth[d] || s.supports_by_depth[d])
+      std::printf("profondeur=%d terminaux=%lld supports=%lld\n", d,
+                  s.terminal_by_depth[d], s.supports_by_depth[d]);
   std::printf("axis_tests=%lld axis_pruned=%lld axis_unusable=%lld\n", s.axis_tests,
               s.axis_pruned, s.axis_unusable);
   {
@@ -1739,11 +1938,14 @@ int run_engine(const std::vector<mhgp::P3>& cloud, const Options& opt) {
     return 3;
   }
   if (total < opt.min_supports || s.cells_terminal < opt.min_cells ||
-      s.clique_quads < opt.min_quads || s.incidence_checks < opt.min_probes) {
+      s.clique_quads < opt.min_quads || s.incidence_checks < opt.min_probes ||
+      s.normal_pruned < opt.min_normal_pruned) {
     std::fprintf(stderr,
                  "PLANCHER viole : supports=%lld<%lld cells=%lld<%lld quads=%lld<%lld sondes=%lld<%lld\n",
                  total, opt.min_supports, s.cells_terminal, opt.min_cells, s.clique_quads,
                  opt.min_quads, s.incidence_checks, opt.min_probes);
+    std::fprintf(stderr, "PLANCHER normal_pruned=%lld<%lld\n", s.normal_pruned,
+                 opt.min_normal_pruned);
     return 3;
   }
   if (!opt.judge) {
@@ -2068,6 +2270,10 @@ int main(int argc, char** argv) {
     else if (arg.rfind("--probe-factor=", 0) == 0)
       opt.probe_factor = parse_int(arg.substr(15).c_str(), &ok);
     else if (arg.rfind("--ablate=", 0) == 0) opt.ablate = parse_int(arg.substr(9).c_str(), &ok);
+    else if (arg.rfind("--stall-ratio=", 0) == 0)
+      opt.stall_ratio = parse_int(arg.substr(14).c_str(), &ok);
+    else if (arg.rfind("--stall-levels=", 0) == 0)
+      opt.stall_levels = parse_int(arg.substr(15).c_str(), &ok);
     else if (arg.rfind("--max-depth=", 0) == 0)
       opt.max_depth = parse_int(arg.substr(12).c_str(), &ok);
     else if (arg.rfind("--min-supports=", 0) == 0)
@@ -2078,6 +2284,9 @@ int main(int argc, char** argv) {
       opt.min_quads = parse_int(arg.substr(12).c_str(), &ok);
     else if (arg.rfind("--min-probes=", 0) == 0)
       opt.min_probes = parse_int(arg.substr(13).c_str(), &ok);
+    else if (arg.rfind("--min-normal-pruned=", 0) == 0)
+      opt.min_normal_pruned = parse_int(arg.substr(20).c_str(), &ok);
+    else if (arg == "--no-normal-separation") opt.no_normal = true;
     else if (arg.rfind("--family=", 0) == 0) family = arg.substr(9);
     else if (arg == "--judge") opt.judge = true;
     else if (arg == "--fixtures") fixtures = "toutes";
@@ -2094,7 +2303,8 @@ int main(int argc, char** argv) {
   }
 
   if (opt.smax < 4 || opt.smax > 24 || opt.leaf < 4 || opt.work_cap < 1 ||
-      opt.max_depth < 1 || opt.max_depth > 26 || opt.ablate < 0 || opt.ablate > 5) {
+      opt.max_depth < 1 || opt.max_depth > 26 || opt.ablate < 0 || opt.ablate > 5 ||
+      opt.stall_ratio < 1 || opt.stall_ratio > 100 || opt.stall_levels < 1) {
     std::fprintf(stderr, "REFUS domaine\n");
     return 2;
   }

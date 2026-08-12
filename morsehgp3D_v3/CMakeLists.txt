@@ -2325,6 +2325,33 @@ set_tests_properties(mhgp3v_centre_cell_fixture_arite3
 set_tests_properties(mhgp3v_centre_cell_fixture_arite4
                      PROPERTIES PASS_REGULAR_EXPRESSION "TET=1 faces=0000")
 
+# LA SEPARATION PAR LA NORMALE LOCALE.
+#
+# Le k-DOP a directions fixes ne voit pas le cas dominant des nuages
+# surfaciques : une cellule hors du plan local, dont les dix plus proches sites
+# sont presque cospheriques vus de loin. Le critere de travail la decoupait
+# indefiniment alors qu'aucun support POSITIF ne peut y avoir son centre. La
+# direction est choisie dans les donnees — normale du plan des moindres carres,
+# via l'adjugee de la covariance — mais le test reste entier et exact, donc le
+# prune l'est aussi. Le plancher interdit le vert par vacuite; l'accord du juge
+# sur les quatre nuages interdit qu'il retire un support.
+add_test(NAME mhgp3v_centre_cell_normale_plancher COMMAND mhgp3v_centre_cell
+         --points=400 --smax=11 --family=terrain --seed=11 --min-normal-pruned=1
+         --min-supports=1)
+set_tests_properties(mhgp3v_centre_cell_normale_plancher
+                     PROPERTIES PASS_REGULAR_EXPRESSION "normal_pruned=[1-9]")
+add_test(NAME mhgp3v_centre_cell_normale_juge COMMAND mhgp3v_centre_cell
+         --points=125 --smax=11 --family=terrain --seed=11 --judge --min-supports=1)
+set_tests_properties(mhgp3v_centre_cell_normale_juge
+                     PROPERTIES PASS_REGULAR_EXPRESSION "ACCORD juge")
+# LA VARIANTE SANS NORMALE doit rendre EXACTEMENT la meme sortie : le prune est
+# une decision de cout, jamais de semantique.
+add_test(NAME mhgp3v_centre_cell_sans_normale COMMAND mhgp3v_centre_cell
+         --points=125 --smax=11 --family=terrain --seed=11 --judge
+         --no-normal-separation --min-supports=1)
+set_tests_properties(mhgp3v_centre_cell_sans_normale
+                     PROPERTIES PASS_REGULAR_EXPRESSION "ACCORD juge")
+
 # LE SONDAGE DU VRAI GRAPHE ET SA BORNE D'INCIDENCE.
 #
 # Le critere de split employait le potentiel d'intervalles, majorant grossier
