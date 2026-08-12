@@ -120,6 +120,7 @@
 #include <chrono>
 #include <cstdio>
 #include <cstring>
+#include <functional>
 #include <map>
 #include <string>
 #include <thread>
@@ -666,7 +667,7 @@ int main(int argc, char** argv) {
   mhgp3v::CloudFamily family = mhgp3v::CloudFamily::kTerrain;
   Injections inject;
   i64 min_anchors = 0, min_activations = 0, min_uncertified_report = -1, min_far_pairs = 0;
-  int judge_arity = 4, judge_census = 0;
+  int judge_arity = 4, judge_census = 0, support_window = 48;
   i64 min_q4 = 0;
 
   auto integer = [](const char* text, i64* value) {
@@ -703,6 +704,9 @@ int main(int argc, char** argv) {
     } else if (const char* sb = suffix("--min-far-pairs=")) {
       if (!integer(sb, &v)) return 2;
       min_far_pairs = v;
+    } else if (const char* sw = suffix("--support-window=")) {
+      if (!integer(sw, &v) || v < 2 || v > 4096) return 2;
+      support_window = (int)v;
     } else if (const char* sq = suffix("--min-q4=")) {
       if (!integer(sq, &v)) return 2;
       min_q4 = v;
@@ -744,7 +748,7 @@ int main(int argc, char** argv) {
     std::printf("REFUS : parametres hors domaine\n");
     return 2;
   }
-  if (mode != "fixture" && mode != "profile" && mode != "census" && mode != "directional") {
+  if (mode != "fixture" && mode != "profile" && mode != "census" && mode != "directional" && mode != "arity") {
     std::printf("REFUS : mode inconnu %s\n", mode.c_str());
     return 2;
   }
@@ -805,6 +809,26 @@ int main(int argc, char** argv) {
       std::printf("ECHEC : MUTANT SURVIVANT — la fixture d'orientation q4 ne l'a pas vu\n");
       return 3;
     }
+    // FIXTURE PERMANENTE DU PREDICAT q3. Triangle rectangle isocele : son
+    // circumcentre est le milieu de l'hypotenuse, le support n'est donc PAS
+    // propre positif (barycentrique nulle). Triangle acutangle : support
+    // positif, circumcentre strictement interieur a la boule, sommet oppose
+    // sur le bord (donc non interieur), point lointain exterieur.
+    const mhgp::P3 ra{0, 0, 0}, rb{100, 0, 0}, rc{0, 100, 0};
+    const judge::Q3Ball rect = judge::q3_ball(ra, rb, rc);
+    const mhgp::P3 aa{0, 0, 0}, ab{100, 0, 0}, ac{50, 80, 0};
+    const judge::Q3Ball acute = judge::q3_ball(aa, ab, ac);
+    const bool rect_ok = rect.ok && !rect.positive;
+    const bool acute_ok = acute.ok && acute.positive &&
+                          judge::inside_q3(acute, aa, mhgp::P3{50, 30, 0}) &&
+                          !judge::inside_q3(acute, aa, ab) &&
+                          !judge::inside_q3(acute, aa, mhgp::P3{5000, 0, 0});
+    if (!rect_ok || !acute_ok) {
+      std::printf("ECHEC : la fixture du predicat q3 est violee (rectangle rejete=%d,"
+                  " acutangle accepte=%d)\n",
+                  (int)rect_ok, (int)acute_ok);
+      return 3;
+    }
   }
   const DirGrid grid = make_dir_grid(grid_m);
   mhgp3v::MortonLbvh tree;
@@ -861,7 +885,7 @@ int main(int argc, char** argv) {
     }
   }
   const double cert_s = std::chrono::duration<double>(t_cert - t_start).count();
-  if (mode != "directional")
+  if (mode != "directional" && mode != "arity")
   std::printf("certificat : %lld ancres certifiees, %lld non certifiees (%.4f %%),"
               " M* moyen=%.2f p50=%.0f p95=%.0f p99=%.0f max=%lld,"
               " %lld tests de sommet, %.3f s (%d threads, machine de mesure)\n",
@@ -1326,6 +1350,254 @@ int main(int argc, char** argv) {
     if (min_activations > 0 && (i64)emitted.load() < min_activations) {
       std::printf("ECHEC : plancher d'activations %lld non atteint (%lld)\n", min_activations,
                   (i64)emitted.load());
+      return 3;
+    }
+    return 0;
+  }
+
+  // -------------------------------------------------------------------------
+  // Mode `arity` : la TAILLE DE SORTIE des trois arites, par le corollaire de
+  // Jung. Toute arete de support d'une activation est une activation q2 : les
+  // supports se lisent donc dans le voisinage q2 de l'ancre, et rien d'autre.
+  // Le proprietaire canonique est le plus petit `PointId` du support, si bien
+  // que chaque tuple est emis exactement une fois.
+  //
+  // Pour l'interiorite, Jung donne D^2 <= (3/2) diam(S)^2 : le balayage de la
+  // liste triee s'arrete des que 2 d_z^2 > 3 diam(S)^2. Si la liste s'epuise
+  // avant ce seuil, la lane N'EST PAS close et le probe le dit.
+  // -------------------------------------------------------------------------
+  if (mode == "arity") {
+    std::atomic<i64> a2{0}, a3{0}, a4{0}, cand3{0}, cand4{0}, tests{0}, unclosed{0},
+        support_max{0};
+    std::atomic<int> cursor{0};
+    const auto t0 = std::chrono::steady_clock::now();
+    std::vector<std::thread> pool;
+    for (int t = 0; t < threads; ++t)
+      pool.emplace_back([&]() {
+        std::vector<Neighbour> nbrs;
+        std::vector<Rho2> radii;
+        std::vector<std::vector<Rho2>> heaps;
+        std::vector<int> hit;
+        std::vector<Neighbour> act;  // partenaires d'activation q2, tries
+        i64 l2 = 0, l3 = 0, l4 = 0, c3 = 0, c4 = 0, lt = 0, lu = 0, sm = 0;
+        for (;;) {
+          const int a = cursor.fetch_add(1);
+          if (a >= n) break;
+          const int want = max_neighbours < n - 1 ? max_neighbours : n - 1;
+          knn(tree, pts, a, want, &nbrs);
+          const mhgp::P3& px = pts[(std::size_t)a];
+          i64 dummy = 0;
+          compute_cell_radii(px, nbrs, grid, kmin, pts, &radii, &heaps, &dummy, &dummy, inject);
+          // 1. les partenaires d'activation q2 de l'ancre, TOUS (pas seulement
+          //    ceux dont l'ancre est proprietaire) : ils portent les supports.
+          act.clear();
+          for (const Neighbour& nb : nbrs) {
+            const mhgp::P3& py = pts[(std::size_t)nb.id];
+            const i64 sv[3] = {py.x - px.x, py.y - px.y, py.z - px.z};
+            locate_cells(sv, grid_m, grid, grid.cells_at, &hit, inject.locate_drop_boundary);
+            bool keep = false;
+            for (int c : hit)
+              if (within_rho(nb.d2, radii[(std::size_t)c])) { keep = true; break; }
+            if (!keep) continue;
+            int inside = 0;
+            for (const Neighbour& nz : nbrs) {
+              if (nz.d2 >= nb.d2) break;
+              if (nz.id == nb.id) continue;
+              if (judge::inside_q2(px, py, pts[(std::size_t)nz.id]) && ++inside >= kmin) break;
+            }
+            if (inside < kmin) act.push_back(nb);
+          }
+          if ((i64)act.size() > sm) sm = (i64)act.size();
+          for (const Neighbour& nb : act)
+            if (nb.id > a) ++l2;
+          // 2. supports q3 et q4. ATTENTION : les points de support ne sont PAS
+          //    les partenaires d'activation q2. La boule diametrale d'une corde
+          //    n'est pas incluse dans la boule — pour le triangle
+          //    (0,0,0) (120,0,0) (60,100,0), de rayon circonscrit 68, la boule
+          //    diametrale de la premiere arete porte jusqu'a 92 depuis le
+          //    circumcentre. Une arete de support peut donc etre tombstonee en
+          //    q2 tout en portant un support q3/q4 retenu. Les candidats sont
+          //    pris dans une FENETRE explicite de voisins, et la mesure n'est
+          //    recevable que si elle sature quand la fenetre croit.
+          std::vector<int> up;
+          up.reserve((std::size_t)support_window);
+          for (const Neighbour& nb : nbrs) {
+            if ((int)up.size() >= support_window) break;
+            if (nb.id > a) up.push_back(nb.id);
+          }
+          auto interior_count = [&](const std::vector<int>& sup, int limit,
+                                    const std::function<bool(const mhgp::P3&)>& in) {
+            i64 dmax2 = 0;
+            for (std::size_t i = 0; i + 1 < sup.size(); ++i)
+              for (std::size_t j = i + 1; j < sup.size(); ++j) {
+                const mhgp::P3& u = pts[(std::size_t)sup[i]];
+                const mhgp::P3& v = pts[(std::size_t)sup[j]];
+                const i64 dx = u.x - v.x, dy = u.y - v.y, dz = u.z - v.z;
+                const i64 d2 = dx * dx + dy * dy + dz * dz;
+                if (d2 > dmax2) dmax2 = d2;
+              }
+            int inside = 0;
+            bool closed = false;
+            for (const Neighbour& nz : nbrs) {
+              // Jung : D^2 <= (3/2) diam(S)^2. Au-dela, plus aucun interieur.
+              if (2 * nz.d2 > 3 * dmax2) { closed = true; break; }
+              bool is_support = false;
+              for (int t2 : sup)
+                if (t2 == nz.id) { is_support = true; break; }
+              if (is_support) continue;
+              ++lt;
+              if (in(pts[(std::size_t)nz.id]) && ++inside >= limit) { closed = true; break; }
+            }
+            if (!closed && (int)nbrs.size() >= n - 1) closed = true;
+            return std::pair<int, bool>{inside, closed};
+          };
+          for (std::size_t i = 0; i + 1 < up.size(); ++i)
+            for (std::size_t j = i + 1; j < up.size(); ++j) {
+              ++c3;
+              const judge::Q3Ball ball =
+                  judge::q3_ball(px, pts[(std::size_t)up[i]], pts[(std::size_t)up[j]]);
+              if (!ball.ok || !ball.positive) continue;
+              const std::vector<int> sup{a, up[i], up[j]};
+              const auto r = interior_count(sup, kmin - 1, [&](const mhgp::P3& z) {
+                return judge::inside_q3(ball, px, z);
+              });
+              if (!r.second) { ++lu; continue; }
+              if (r.first <= kmin - 2) ++l3;
+            }
+          for (std::size_t i = 0; i + 2 < up.size(); ++i)
+            for (std::size_t j = i + 1; j + 1 < up.size(); ++j)
+              for (std::size_t k = j + 1; k < up.size(); ++k) {
+                ++c4;
+                const judge::Q4Ball ball =
+                    judge::q4_ball(px, pts[(std::size_t)up[i]], pts[(std::size_t)up[j]],
+                                   pts[(std::size_t)up[k]]);
+                if (!ball.ok || !ball.positive) continue;
+                const std::vector<int> sup{a, up[i], up[j], up[k]};
+                const auto r = interior_count(sup, kmin - 2, [&](const mhgp::P3& z) {
+                  const i128 det = judge::det4_insphere(px, pts[(std::size_t)up[i]],
+                                                        pts[(std::size_t)up[j]],
+                                                        pts[(std::size_t)up[k]], z);
+                  return det != 0 && ((det > 0) != (ball.orient > 0));
+                });
+                if (!r.second) { ++lu; continue; }
+                if (r.first <= kmin - 3) ++l4;
+              }
+        }
+        a2.fetch_add(l2);
+        a3.fetch_add(l3);
+        a4.fetch_add(l4);
+        cand3.fetch_add(c3);
+        cand4.fetch_add(c4);
+        tests.fetch_add(lt);
+        unclosed.fetch_add(lu);
+        i64 prev = support_max.load();
+        while (sm > prev && !support_max.compare_exchange_weak(prev, sm)) {
+        }
+      });
+    for (std::thread& th : pool) th.join();
+    const double sec =
+        std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count();
+    const i64 e2 = (i64)a2.load(), e3 = (i64)a3.load(), e4 = (i64)a4.load();
+    std::printf("arites : q2=%lld q3=%lld q4=%lld supports emis"
+                " (%.4f / %.4f / %.4f par point), total %.4f par point\n",
+                e2, e3, e4, (double)e2 / n, (double)e3 / n, (double)e4 / n,
+                (double)(e2 + e3 + e4) / n);
+    std::printf("fenetre de support = %d voisins ; la mesure n'est recevable que si"
+                " elle sature quand cette fenetre croit\n", support_window);
+    std::printf("travail : %lld supports q3 essayes, %lld supports q4 essayes,"
+                " %lld tests d'interiorite, voisinage q2 maximal %lld, %.3f s"
+                " (%d threads, machine de mesure)\n",
+                (i64)cand3.load(), (i64)cand4.load(), (i64)tests.load(),
+                (i64)support_max.load(), sec, threads);
+    // LE JUGE DES TROIS ARITES — enumeration exhaustive de tous les triplets et
+    // quadruplets a support propre positif, sans fenetre, sans cellule, sans
+    // Jung. La generation locale doit lui etre EGALE, sans quoi sa fenetre de
+    // support n'a pas sature.
+    if (judge_census) {
+      if (n > 400) {
+        std::printf("REFUS : le juge exhaustif des arites est borne a 400 points\n");
+        return 2;
+      }
+      i64 j2 = 0, j3 = 0, j4 = 0;
+      std::vector<int> inter;
+      for (int i = 0; i < n; ++i)
+        for (int j = i + 1; j < n; ++j) {
+          int c = 0;
+          for (int z = 0; z < n && c < kmin; ++z)
+            if (z != i && z != j &&
+                judge::inside_q2(pts[(std::size_t)i], pts[(std::size_t)j], pts[(std::size_t)z]))
+              ++c;
+          if (c <= kmin - 1) ++j2;
+        }
+      for (int i = 0; i < n; ++i)
+        for (int j = i + 1; j < n; ++j)
+          for (int k = j + 1; k < n; ++k) {
+            const judge::Q3Ball b3 =
+                judge::q3_ball(pts[(std::size_t)i], pts[(std::size_t)j], pts[(std::size_t)k]);
+            if (!b3.ok || !b3.positive) continue;
+            int c = 0;
+            for (int z = 0; z < n && c < kmin - 1; ++z)
+              if (z != i && z != j && z != k &&
+                  judge::inside_q3(b3, pts[(std::size_t)i], pts[(std::size_t)z]))
+                ++c;
+            if (c <= kmin - 2) ++j3;
+          }
+      for (int i = 0; i < n; ++i)
+        for (int j = i + 1; j < n; ++j)
+          for (int k = j + 1; k < n; ++k)
+            for (int l = k + 1; l < n; ++l) {
+              const judge::Q4Ball b4 =
+                  judge::q4_ball(pts[(std::size_t)i], pts[(std::size_t)j], pts[(std::size_t)k],
+                                 pts[(std::size_t)l]);
+              if (!b4.ok || !b4.positive) continue;
+              int c = 0;
+              for (int z = 0; z < n && c < kmin - 2; ++z) {
+                if (z == i || z == j || z == k || z == l) continue;
+                const i128 det = judge::det4_insphere(
+                    pts[(std::size_t)i], pts[(std::size_t)j], pts[(std::size_t)k],
+                    pts[(std::size_t)l], pts[(std::size_t)z]);
+                if (det != 0 && ((det > 0) != (b4.orient > 0))) ++c;
+              }
+              if (c <= kmin - 3) ++j4;
+            }
+      std::printf("juge des arites : exhaustif q2=%lld q3=%lld q4=%lld ;"
+                  " local q2=%lld q3=%lld q4=%lld\n",
+                  j2, j3, j4, e2, e3, e4);
+      const bool mutated = inject.rho_min_corner || inject.rho_first_corner ||
+                           inject.rho_kth_short || inject.locate_drop_boundary ||
+                           inject.insphere_sign_flip;
+      if (j3 + j4 == 0) {
+        std::printf("ECHEC : juge des arites vide (vert par vacuite)\n");
+        return 3;
+      }
+      if (j2 != e2 || j3 != e3 || j4 != e4) {
+        if (mutated) {
+          std::printf("OK : mutant tue par le juge des arites\n");
+          return 4;
+        }
+        std::printf("ECHEC : la generation locale ne reproduit pas le juge exhaustif —"
+                    " la fenetre de support n'a pas sature\n");
+        return 1;
+      }
+      if (mutated) {
+        std::printf("ECHEC : MUTANT SURVIVANT — les trois arites sont identiques\n");
+        return 3;
+      }
+      std::printf("OK : generation locale EXACTE sur les trois arites\n");
+    }
+    if ((i64)unclosed.load() > 0) {
+      std::printf("ECHEC : %lld supports dont la fenetre ne couvre pas la borne de"
+                  " Jung — la lane n'est pas close, la mesure est refusee\n",
+                  (i64)unclosed.load());
+      return 3;
+    }
+    if (min_activations > 0 && e2 + e3 + e4 < min_activations) {
+      std::printf("ECHEC : plancher d'activations %lld non atteint (%lld)\n", min_activations,
+                  e2 + e3 + e4);
+      return 3;
+    }
+    if (min_q4 > 0 && e4 < min_q4) {
+      std::printf("ECHEC : plancher q4 %lld non atteint (%lld)\n", min_q4, e4);
       return 3;
     }
     return 0;

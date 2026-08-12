@@ -2056,3 +2056,33 @@ mhgp3v_add_expected_code_test_for(mhgp3v_certified_locality_probe
   mhgp3v_locality_plancher_paires_lointaines "plancher de paires lointaines" 3
   --mode=fixture --points=70 --family=uniform --grid=4 --seed=1 --kmin=4
   --judge-arity=1 --min-far-pairs=999999999)
+
+# LA GENERATION LOCALE DES TROIS ARITES. La fenetre de support est explicite :
+# la boule diametrale d'une corde N'EST PAS incluse dans la boule (triangle
+# (0,0,0) (120,0,0) (60,100,0), rayon circonscrit 68, portee diametrale 92),
+# donc un support q3/q4 peut avoir une arete tombstonee en q2. La mesure n'est
+# recevable que si elle sature ; le juge exhaustif des trois arites l'exige.
+add_test(NAME mhgp3v_locality_arites_exactes COMMAND mhgp3v_certified_locality_probe
+         --mode=arity --points=70 --family=uniform --grid=4 --seed=1 --kmin=4
+         --max-neighbours=69 --support-window=40 --judge-census=1 --min-q4=200)
+add_test(NAME mhgp3v_locality_arites_terrain COMMAND mhgp3v_certified_locality_probe
+         --mode=arity --points=120 --family=terrain --grid=4 --seed=5 --kmin=5
+         --max-neighbours=119 --support-window=60 --judge-census=1)
+# Fenetre non saturee : la generation manque des supports et le juge le dit.
+mhgp3v_add_expected_code_test_for(mhgp3v_certified_locality_probe
+  mhgp3v_locality_fenetre_non_saturee "la fenetre de support n'a pas sature" 1
+  --mode=arity --points=70 --family=uniform --grid=4 --seed=1 --kmin=4
+  --max-neighbours=69 --support-window=20 --judge-census=1)
+mhgp3v_add_expected_code_test_for(mhgp3v_certified_locality_probe
+  mhgp3v_locality_arites_mutant_rho "mutant tue par le juge des arites" 4
+  --mode=arity --points=70 --family=uniform --grid=4 --seed=1 --kmin=4
+  --max-neighbours=69 --support-window=40 --judge-census=1 --inject=rho-min-corner)
+mhgp3v_add_expected_code_test_for(mhgp3v_certified_locality_probe
+  mhgp3v_locality_arites_mutant_locate "mutant tue par le juge des arites" 4
+  --mode=arity --points=70 --family=uniform --grid=4 --seed=1 --kmin=4
+  --max-neighbours=69 --support-window=40 --judge-census=1
+  --inject=locate-drop-boundary)
+mhgp3v_add_expected_code_test_for(mhgp3v_certified_locality_probe
+  mhgp3v_locality_arites_juge_borne "borne a 400 points" 2
+  --mode=arity --points=500 --family=terrain --grid=4 --seed=3 --kmin=10
+  --judge-census=1)

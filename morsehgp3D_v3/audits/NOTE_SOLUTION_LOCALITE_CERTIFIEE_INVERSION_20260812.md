@@ -125,28 +125,46 @@ Aucun flottant, aucun rationnel, aucune racine n'entre dans une décision. Les
 amplitudes tiennent dans `__int128` : `||s||^2 < 2^34`, `||g||^2 <= m^2`, et la
 comparaison croisée de deux `rho` reste sous `2^118`.
 
-## 5. Le corollaire de Jung, qui ferme q3 et q4 sans nouvelle coupe
+## 5. Jung borne le diamètre ; il ne localise pas le support
 
 Soit une activation de support propre positif `S` contenant `x`. Le centre est
-dans l'intérieur relatif de `conv(S)`, donc **`B` est la miniboule de `S`**. Par
-le théorème de Jung en dimension trois,
+dans l'intérieur relatif de `conv(S)`, donc `B` est la miniboule de `S`. Par le
+théorème de Jung en dimension trois,
 
-$$R\leq\mathrm{diam}(S)\sqrt{\tfrac{3}{8}},\qquad\text{donc}\qquad D\leq\sqrt{\tfrac{3}{2}}\ \mathrm{diam}(S).$$
+$$R\leq\mathrm{diam}(S)\sqrt{\tfrac{3}{8}},\qquad\text{donc}\qquad D^{2}\leq\tfrac{3}{2}\,\mathrm{diam}(S)^{2}.$$
 
-Par ailleurs, pour toute paire `(y,z)` de `S`, la boule diamétrale de `[y,z]`
-est incluse dans `B`, donc a au plus `p <= 9` intérieurs : **toute arête de
-support d'une activation d'arité quelconque est une activation q2**. Tous les
-points de `S` sont donc à distance au plus `rho_x`, le plus long arc
-d'activation q2 issu de `x`, d'où `diam(S) <= 2 rho_x` et
+Cette borne est **exacte, entière et utile** : elle arrête le balayage
+d'intériorité d'un support candidat dès que `2 d_z^2 > 3 diam(S)^2`, sans
+calculer aucun circumcentre.
 
-$$D\leq 2\sqrt{\tfrac{3}{2}}\ \rho_x<2{,}4495\ \rho_x .$$
+### La rétractation
 
-Comme `x` est sur le bord de `B`, **toute** l'activation — support et intérieurs
-— tient dans `B(x, 2.4495 rho_x)`. La lane q3/q4 hérite donc entièrement de la
-borne q2 : il n'y a pas de second verrou de localité à lever, et aucune
-couverture de cellule n'est requise dans les directions vides. C'est la réponse
-à l'objection Q4 de l'audit pour les arités supérieures ; elle ne dit rien du
-coût de la requête, qui reste à compter.
+Une version antérieure de cette note en déduisait que « toute arête de support
+d'une activation d'arité quelconque est une activation q2 », donc que les
+supports q3/q4 se lisaient dans le voisinage q2. **C'est faux, et la mesure l'a
+réfuté avant l'audit** : la génération locale rendait `q3 = 857` contre `884` au
+juge exhaustif, et `q4 = 193` contre `202`, à `n = 70`.
+
+L'erreur est que **la boule diamétrale d'une corde n'est pas incluse dans la
+boule**. Pour une corde de demi-longueur `t` dans une boule de rayon `R`, la
+distance du centre au milieu de la corde vaut `sqrt(R^2-t^2)`, et la portée de
+la boule diamétrale depuis le centre vaut `t + sqrt(R^2-t^2)`, qui dépasse `R`
+pour tout `t > 0`, jusqu'à `R\sqrt{2}`.
+
+**Contre-fixture permanente**, en coordonnées entières exactes : le triangle
+`(0,0,0)`, `(120,0,0)`, `(60,100,0)` a un support propre positif, un
+circumcentre `(60,32,0)` et `R^2 = 4624`, donc `R = 68`. La boule diamétrale de
+sa première arête a pour rayon carré `3 600` et son centre est à `1 024` au
+carré du circumcentre : sa portée carrée depuis le circumcentre vaut `8 464`,
+soit `92`, c'est-à-dire **36 % au-delà du rayon circonscrit**. Dix points placés
+dans ce croissant tombstonent l'arête en q2 sans toucher le triangle en q3.
+
+Le support d'une activation est donc une arête du graphe de Delaunay d'ordre au
+plus neuf, pas du graphe de Gabriel d'ordre au plus neuf ; le second est
+strictement inclus dans le premier. **La localité des arités supérieures n'est
+pas fermée par la lane q2** : elle demande une fenêtre de support explicite,
+dont la saturation doit être mesurée et non supposée. Le probe la publie
+(`--support-window`) et refuse toute mesure dont la fenêtre n'a pas saturé.
 
 ## 6. Mesures obtenues
 
