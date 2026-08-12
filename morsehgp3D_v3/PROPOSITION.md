@@ -766,18 +766,27 @@ statut du prototype correspondant appartient à l'audit live.
 
 Fixer l'ancre et compter `c` sites strictement intérieurs sur tout le disque.
 Pour q4, poser `k=smax-4-c`, soit `k=7-c` à `smax=11`. Construire l'arrangement
-seulement sur l'ensemble `E` des lignes qui peuvent porter un carrier est une
+seulement sur le multiensemble `E` des contraintes orientées de la lentille
+fermée `||z-a||^2<=D^2,||z-b||^2<=D^2` dont la ligne coupe le disque est une
 génération superset exacte : au centre d'un vrai support, ses deux lignes sont
 incidentes et le nombre de lignes de `E` strictement positives est au plus le
 census global privé des `c` témoins permanents, donc au plus `k`. Retirer les
 formes non-carriers ne peut qu'abaisser cette profondeur. Le rang de cet
 sous-arrangement n'est toutefois jamais publié comme `p`; le census final
-rejoue tous les sites nécessaires à `I_B` et `U_B`. Si un site écarté par
-`U_z<theta` était shell d'un centre, les `smax-2` bornes qui définissent
-`theta>0` donneraient déjà autant d'intérieurs stricts et le support serait
-hors budget ; le shell d'une sortie acceptée est donc conservé. En revanche,
-les identités des `always_inside` doivent encore être transportées pour
-recevoir `I_B`, pas seulement leur cardinal.
+rejoue tous les sites nécessaires à `I_B` et `U_B`. Plus précisément, poser
+`d=smax-2` et `theta` égal à la d-ième plus grande borne inférieure. Sur un
+domaine vivant, moins de `d` bornes sont strictement positives, donc
+`theta<=0` et `U_z<theta` implique déjà `U_z<0`. Si au moins `d` bornes sont
+positives, q3 et q4 sont mortes. Le filtre global `theta` est donc redondant
+sur tout domaine vivant ; le top-k sert seulement de certificat de mort. Les
+identités des `always_inside` doivent être transportées pour recevoir `I_B`,
+pas seulement leur cardinal, tandis que `U_z<0` est le seul rejet global utile.
+
+La lentille **aiguë** n'est qu'un certificat collectif d'existence : tout q4
+possède au moins un carrier aigu adjacent à l'ancre. Elle ne filtre jamais les
+deux lignes de `E`. Le bit `acute(z)` reste attaché à chaque ligne et un couple
+n'est admissible que si `acute(x) ou acute(y)`. La fixture à une seule face
+positive est une porte permanente de cette distinction.
 
 Cette structure mono-ancre ne doit pas être confondue avec le plein arrangement
 relevé de la section suivante. Si `m=|E|`, le nombre de centres géométriques
@@ -787,6 +796,13 @@ au plus `m` pour `k=0`. La preuve échantillonne chaque ligne avec probabilité
 des demi-plans négatifs échantillonnés. Cette borne n'affirme ni que la somme
 des `m` sur toutes les ancres est linéaire, ni qu'une concurrence ne porte pas
 quadratiquement beaucoup de `SupportKey`.
+
+Le même argument borne la masse d'incidences orientées centre--contrainte :
+`I_<=0<=2m` et `I_<=k<2e(k+1)m` pour `k>=1`. Une contrainte échantillonnée est
+incidente à au plus deux sommets de l'intersection convexe négative. Le ledger
+porte donc `shell_incidence_mass` séparément ; le vrai résiduel potentiellement
+quadratique commence aux couples cross-bundle `J_pos`; l'aval paie ensuite le
+payload des `H_out` sorties acceptées.
 
 Une ordonnance exacte concrète choisit un chart entier du plan médiateur et
 une cisaille unimodulaire sans ligne verticale, puis sépare les formes `P`
@@ -799,8 +815,14 @@ suffit. Les candidats sont les sommets `P-P` dont le rang opposé ferme le
 budget, les sommets `N-N` symétriques et les overlays des **segments actifs**
 des niveaux `r,s` avec `r+s<=k`. Les droites porteuses entières ne sont jamais
 croisées deux à deux. Une construction conservatrice vise
-`O(m log m+m*k^2+V+H)`, où `V` compte les centres shallow uniques et `H` les
-supports réellement développés aux concurrences. Tout candidat valide ensuite
+`O(m*k^2+m*alpha(m)*log m+V+J_pos)` jusqu'aux candidats géométriques, où `V`
+compte les centres shallow uniques et `J_pos` les couples cross-bundle qui
+passent le reporting de positivité. Owner et census ajoutent un terme séparé
+`W_census`, qui doit être fourni par les listes de conflits/identités plutôt
+que par un rescan du nuage. Le payload aval ajoute le coût de ses `H_out`
+sorties acceptées, avec `H_out<=J_pos`. Cette borne reste une cible conditionnelle :
+la référence des niveaux ordinaires ne reçoit pas encore leur variante
+pondérée. Tout candidat valide ensuite
 Jung, indépendance affine, positivité, les six distances, owner, census et clé.
 
 Les parallèles distinctes ne créent aucun événement. Les droites confondues
@@ -809,6 +831,28 @@ multiples sont groupées par centre rationnel et traitées atomiquement, toutes
 les lignes incidentes étant exclues du rang strict. Une perturbation
 séquentielle n'est pas exacte. Une grande cosphère est quotientée par une
 branche de plateau reçue, développée selon le contrat, ou refusée explicitement.
+
+La positivité d'un lot concurrent admet un terminal sortie-sensible plus fort
+que toutes les paires. Fixer son centre `c_v`, poser `d=b-a`, `m_ab=(a+b)/2`,
+`u=c_v-m_ab` et `n=d cross u`. Si `u=0`, aucun q4 propre positif ne peut avoir
+cette ancre. Pour tout carrier incident `z`, définir
+`t_z=d dot (z-c_v)`, `r_z=u dot (z-c_v)` et `s_z=n dot (z-c_v)`. Soit `h_v`
+le nombre de `PointId` incidents hors endpoints. Une paire `x,y`
+porte un tétraèdre propre positif avant le test de diamètre si et seulement si
+`s_x*s_y<0` et :
+
+$$D^2R-2\left\lVert u\right\rVert^2T>0,\qquad D^2R+2\left\lVert u\right\rVert^2T>0.$$
+
+où `R=|s_y|r_x+|s_x|r_y` et `T=|s_y|t_x+|s_x|t_y`. En posant
+`S_z^-=(D^2r_z-2||u||^2t_z)/|s_z|` et
+`S_z^+=(D^2r_z+2||u||^2t_z)/|s_z|`, la condition devient
+`S_x^-+S_y^->0` et `S_x^++S_y^+>0` entre côtés opposés et bundles distincts.
+Un reporting de dominance 2D exact produit ces couples en
+`O(h_v log h_v+J_pos)`, puis la sixième distance,
+l'owner et le census les décident. Si un côté est vide, tout le centre est
+rejeté en `O(h_v)`. `J_pos` peut encore être quadratique alors que la distance
+rejette tout ; il reste donc un compteur et une obligation de cap, pas une
+borne générale de sortie.
 
 Pour un layout device, une shallow cutting certifiée emploie des cellules
 half-open, un `base_inside` exact et des listes de conflits complètes. Sous un
@@ -1336,11 +1380,11 @@ durable; ils sont tenus dans
 points u16 + LBVH exact résidents
   |-> k=1 : Yao-1 exact mutualisé -> EMST sparse
   |-> q2 : lane cellules D_9 comparée à Yao--affine--dual suspendu
-  `-> q3/q4 : front Jung coalescé + lentille aiguë factorisée
-       -> center-cover persistant + enveloppe top-(smax-2), ledger fail-open
+  `-> q3/q4 : front Jung + lentille fermée factorisée, bit/certificat aigu
+       -> center-cover persistant + cutting signée; top-k tue le patch
        -> q3 intrinsèque + niveaux q4 P/P, N/N, P/N ou shallow cutting certifiée
        -> owner génératif exact-once ou RLE SupportKey -> une géométrie/owner
-       -> census I/U complet + identités always-inside, lemme shell--theta
+       -> census I/U complet + identités always-inside et support explicite
        -> side queue H!=empty/plateau, ou second RLE BallKey A/B
        -> BallActivation/tombstones streamées + gate regular/plateau/high-rank
        -> facettes du cœur + gateway canonique de première incidence

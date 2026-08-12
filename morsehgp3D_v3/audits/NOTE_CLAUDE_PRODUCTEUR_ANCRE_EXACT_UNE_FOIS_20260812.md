@@ -106,8 +106,10 @@ la granularité des feuilles — il ne peut pas couper plus fin qu'une boîte. C
 facteur doit être mesuré en fonction de `--leaf`, pas expliqué. La correction
 est due au contre-audit du 12 août.
 
-**Sortie.** À `n=4 000`, `1 459 968` supports, soit `365` par point, à comparer
-à la baseline bulk Poisson d'environ `440`. L'écart est encore l'effet de bord.
+**Sortie.** À `n=4 000`, `1 459 968` supports, soit `365` par point. La baseline
+`440,340886n` ne couvre que q3+q4 ; Source S q2+q3+q4 vaut
+`480,340886n`. L'écart à cette baseline totale reste un diagnostic de bord, pas
+une validation de coût.
 
 Aucun temps n'est publié comme mesure : la machine de développement a deux
 cœurs et les campagnes se chevauchent.
@@ -187,7 +189,7 @@ invariants sautent à cette taille et doivent être anticipés :
   dès `n > 65 535`; il faut `DensePointIndex:u32` et une clé de 128 bits, ou un
   fingerprint routeur suivi d'une comparaison exacte en bucket;
 - Source S ne peut plus être matérialisée : à `10^7` points la baseline donne
-  environ `4,4\times10^{9}` supports. Le fold H0 doit donc consommer les
+  environ `4,80340886\times10^{9}` supports. Le fold H0 doit donc consommer les
   supports **en flux**, par lots de niveau, sans catalogue global.
 
 Le producteur par ancre est compatible avec ces deux contraintes : son travail

@@ -15,15 +15,21 @@ génératif exact-une-fois pour tout support propre positif. Les bornes de milie
 le théorème de face aiguë, la mutualisation du disque q4 pour q3 et le census du
 shell q2 demandés par Claude sont également exacts dans leur domaine déclaré.
 
-Le producteur n'est toutefois pas reçu :
+Au pin initial `760469d`, le contrat CLI était réfuté pour `smax>11`, la
+baseline `candidate_pairs/n` oubliait le facteur `1/2` et deux tris par
+insertion grevaient le pipeline. Le successeur `55e972e` paramètre les seuils,
+corrige la baseline dans la note, supprime le tri des partenaires et remplace
+celui des sites par un tas. Ces corrections retirent les réfutations
+correspondantes ; elles ne reçoivent pas encore le producteur :
 
-- son contrat CLI est réfuté pour `smax>11` ;
-- son différentiel partage trop de primitives avec le sujet et ne compare pas
-  l'identité du shell ;
-- sa baseline `candidate_pairs/n` oublie le facteur `1/2` des paires non
-  ordonnées ;
-- son pipeline device paie un scratch fixe de `222 208` octets par slot, deux
-  tris par insertion et encore toutes les paires de la lentille q4 ;
+- les bornes CLI `4/34` et le refus `35` ne sont pas encore gravés sur les deux
+  moteurs, bien que le tampon annonce ce domaine ;
+- le différentiel partage trop de primitives avec le sujet, compare seulement
+  la cardinalité du shell et ne transporte pas les identités `I_B/U_B` ;
+- l'explication du facteur de front par la taille des feuilles reste une
+  hypothèse sans ablation visites/partenaires ;
+- le pipeline device paie encore `222 208` octets de scratch par slot et toutes
+  les paires de la lentille q4 ;
 - aucun binaire CUDA ni résultat G4 n'est reçu, et le payload chronométré du SLO
   reste absent.
 
@@ -45,7 +51,7 @@ et complète
 
 ## Provenance observée
 
-Le snapshot finalement stabilisé pendant l'audit est :
+Le pin initial stabilisé qui porte les reproductions historiques est :
 
 | objet | identité |
 | --- | --- |
@@ -195,6 +201,23 @@ commun hôte/device, les refus et deux planchers. C'est un progrès réel par
 rapport à la section 6 de la note de Claude, désormais périmée. Le vert reste
 borné au noyau partagé et à `smax=11`; il n'exerce ni oracle indépendant
 `I_B/U_B`, ni compilation CUDA, ni G4, ni payload officiel.
+
+Sur le successeur `9bcd137`, après reconfiguration, l'inventaire monte à `550`
+tests dont `33` `mhgp3v_anchor_`. L'ELF Release SHA-256
+`59425e5708251fe890b57ea271887735fe8e9ab3a30f6cb0f9951e12c514e7f3`
+rend `32/33` en `503,57 s`. La seule porte rouge est
+`mhgp3v_anchor_mutant_census` : le processus est tué par signal après environ
+62 s et le wrapper refuse correctement de compter ce crash comme mutant tué.
+Ce résultat ne réfute pas encore la sémantique du census, mais il réfute la
+suite entièrement verte et demande une reproduction isolée avec RSS/limite de
+temps pincées. Les autres 32 portes passent, y compris `smax=5/20/24` et le
+mutant des seuils figés.
+
+La relance isolée de `mhgp3v_anchor_mutant_census` passe ensuite `1/1` en
+`39,15 s`. Le signal de la campagne complète n'est donc pas reproductible
+isolément et indique une pression de ressources ou une limite de session à
+instrumenter. Le rapport honnête demeure « `32/33` dans un run, puis `1/1`
+isolé », pas « `33/33` ».
 
 ## Correction du modèle de coût
 
@@ -376,10 +399,14 @@ stricte sont recherchés.
 
 Fixer une ancre reçue, son disque de Jung q4 `K_4` et les formes affines
 `F_z`. Soit `c` le nombre de sites strictement positifs sur tout `K_4`, et
-poser `k=smax-4-c`; à `smax=11`, `k=7-c`. Soit `E` l'ensemble des lignes des
-sites qui peuvent être carriers : la ligne coupe ou tangente `K_4`, le site
-appartient à la lentille maximale, et tout filtre antérieur conserve toutes
-les lignes incidentes à un vrai support.
+poser `k=smax-4-c`; si `k<0`, la lane q4 est morte. À `smax=11`,
+`k=7-c`. Soit `E` le multiensemble des contraintes orientées des sites dont la
+ligne coupe ou tangente `K_4` et qui appartiennent à la lentille fermée
+`L_ab={z:||z-a||^2<=D^2,||z-b||^2<=D^2}`. L'acuité est un bit séparé : le
+théorème de face positive garantit `acute(x) ou acute(y)` pour un vrai q4, pas
+que les deux carriers appartiennent à la lentille **aiguë** `C_ab`. Filtrer `E`
+par `Q_ab(z)>0` perdrait exactement les supports n'ayant qu'une face adjacente
+positive.
 
 ### Théorème de génération
 
@@ -421,13 +448,32 @@ espérance :
 
 $$|V_{\leq k}|\rho^2(1-\rho)^k\leq\rho m,$$
 
-d'où la borne annoncée. Elle compte un centre concurrent une fois, pas la masse
-des `SupportKey` qui pourront y être développées. Les constructions exactes
+d'où plus précisément
+`|V_<=k|<e(k+1)m`. Ici `m` compte les contraintes orientées avec multiplicité,
+tandis que la borne compte un centre concurrent une fois, pas la masse des
+`SupportKey` qui pourront y être développées. Cette preuve borne une sortie
+géométrique ; elle ne construit pas à elle seule les niveaux pondérés. Les
+constructions exactes
 randomisées classiques des niveaux `<=k` d'un arrangement de lignes ont une
 borne attendue `O(mk+m alpha(m) log m)` ; voir
 [Agarwal, de Berg, Matousek et Schwarzkopf, 1998](https://doi.org/10.1137/S0097539795281840).
 Cette référence fonde la possibilité algorithmique, pas la réception de notre
 arithmétique u16 ni de notre layout CUDA.
+
+Le même échantillonnage borne la collecte des incidences shell. Soit
+`I_<=k=sum_v deg_E(v)`, avec multiplicité des contraintes orientées incidentes à
+chaque centre shallow. Alors `I_<=0<=2m` et, pour `k>=1` :
+
+$$I_{\leq k}<2e(k+1)m.$$
+
+Pour une incidence `(v,i)`, choisir canoniquement une autre contrainte
+incidente non parallèle `j`. Si `i,j` sont échantillonnées et aucun demi-plan
+strictement positif en `v` ne l'est, `(v,i)` devient une incidence active de
+l'intersection convexe négative. Chaque copie de contrainte échantillonnée est
+incidente à au plus deux sommets de ce polygone, donc
+`I_<=k*rho^2*(1-rho)^k<=2*rho*m`. Cette porte linéaire sur
+`shell_incidence_mass` reste compatible avec les bundles pondérés. Elle ne
+borne pas les couples cross-bundle `J_pos` ni les supports `H`.
 
 ### Ordonnance exacte concrète sans toutes les paires
 
@@ -447,7 +493,10 @@ Hors des lignes, la profondeur restreinte vaut exactement :
 $$p_E(x,y)=\#\left\lbrace i\in P:l_i(x)<y\right\rbrace+\#\left\lbrace i\in N:l_i(x)>y\right\rbrace.$$
 
 Construire les niveaux `0..k` inclus, soit `k+1` niveaux, inférieurs de `P` et
-supérieurs de `N`, tous restreints au disque fermé `K_4`. Les événements
+supérieurs de `N`. Les chaînes peuvent rester dans le plan complet : leurs
+intersections sont rationnelles et le test entier de Jung rejette ensuite tout
+centre hors `K_4`. Les couper géométriquement au cercle produirait des
+extrémités algébriques et n'est pas requis. Les événements
 complets sont alors :
 
 1. les sommets `P-P` d'un niveau inférieur `r`, gardés seulement si le rang
@@ -457,23 +506,38 @@ complets sont alors :
    le segment actif du niveau supérieur `s`, seulement pour `r+s<=k`.
 
 L'overlay porte sur les **segments actifs des niveaux**, jamais sur leurs
-droites porteuses entières. Tout sommet shallow appartient à exactement une de
-ces trois classes. Chaque candidat est ensuite regroupé par centre rationnel,
-recompté en profondeur stricte, testé contre Jung, l'indépendance affine, la
-positivité, les six distances, l'owner canonique et le census complet. Une
-implémentation conservatrice peut viser
-`O(m log m+m*k^2+|V_<=k|)` avant expansion des coquilles, avec `k<=7` dans le
-profil courant.
+droites porteuses entières. Tout sommet shallow appartient à au moins une de
+ces trois classes ; à une concurrence, plusieurs canaux peuvent proposer le
+même centre. Chaque candidat est donc regroupé par centre rationnel avant
+décision. Un batch retire toutes les lignes incidentes des deux rangs, mesure la
+profondeur stricte, puis applique Jung, indépendance affine, positivité, six
+distances, owner et census. Un rank fermé ou une perturbation séquentielle peut
+tuer à tort un événement de profondeur zéro.
+
+Sous un constructeur de niveaux pondérés exact et des requêtes opposées
+amorties, une cible conservatrice est
+`O(m*k^2+m*alpha(m)*log m+|V_<=k|+J+H)` avant expansion des coquilles, avec
+`k<=7` dans le profil SLO courant. Ici `J` compte les paires cross-bundle
+effectivement décidées à un centre concurrent et `H` les supports réellement
+émis ; `J` peut être grand même lorsque la positivité rend `H=0`. La preuve de
+cardinal ne reçoit pas à elle seule ce temps, et la référence ordinaire ne
+reçoit pas encore l'extension aux niveaux pondérés ;
+les événements de niveau zéro-dimensionnels, sauts pondérés et propositions de
+centres dupliquées appartiennent au ledger.
 
 ### Dégénérescences et vrai coût de sortie
 
 Normaliser chaque triple de droite par `gcd` et signe. Deux parallèles
-distinctes ne créent aucun événement. Les lignes confondues forment un bundle
-qui conserve les `PointId` et les deux orientations ; deux membres d'un même
-bundle ne définissent pas un q4 propre. Une concurrence de plusieurs bundles
-est un unique centre rationnel traité atomiquement : toutes ses lignes
-incidentes sont shell et sont exclues du rang strict. Une perturbation
-séquentielle n'est pas une décision exacte.
+distinctes ne créent aucun événement. Une ligne géométrique confondue forme un
+bundle qui conserve les listes de `PointId` et deux poids
+`(mu_plus,mu_minus)` selon l'orientation. Les niveaux sont pondérés : traverser
+le bundle change le rang par le poids du côté quitté ou entré, tandis que sur
+la ligne les deux poids sont exclus du rang strict. Deux membres d'un même
+bundle ne définissent pas un q4 propre, mais chacun devient shell au croisement
+d'un autre bundle. Une concurrence de plusieurs bundles est un unique centre
+rationnel traité atomiquement : toutes ses lignes incidentes sont shell et
+sont exclues avant toute décision de rang. Une perturbation séquentielle n'est
+pas exacte.
 
 Si un centre concurrent porte `H` supports distincts exigés par Source S, leur
 développement coûte nécessairement `Omega(H)` et `H` peut être quadratique.
@@ -482,9 +546,10 @@ cosphère lourde. Une branche de plateau reçue peut quotienter cette masse pour
 H0 ; sinon la route doit l'émettre ou refuser explicitement la dégénérescence.
 
 La conséquence industrielle est précise : la boucle actuelle
-`C(nlens,2)` peut être remplacée par un producteur mono-ancre à travail régulier
-quasi linéaire en `nlens`, sans autoriser un arrangement global. Cela ne résout
-pas encore le coût `sum(nlens)`, les rescans LBVH du front ni le payload aval.
+`C(nlens,2)` peut être remplacée par une génération des centres distincts à
+travail attendu quasi linéaire à profondeur fixée, sans autoriser un arrangement
+global. Cette borne exclut l'expansion `J/H` des concurrences et ne résout pas
+le coût `sum(nlens)`, les rescans LBVH du front, le census ni le payload aval.
 
 ## Variante device : shallow cutting certifiée
 
@@ -507,8 +572,9 @@ half-open, `base_inside`, conflits et ledger. À défaut, le statut est
 `resource_exhausted`, sans préfixe publié.
 
 Les compteurs minimaux sont `line_forms`, `line_bundles`, `P/N`, segments par
-niveau, overlays, centres rationnels uniques, incidences shell, masse de
-concurrence `H`, comparaisons larges, `sum_choose2_terminal`, visites du census,
+niveau, overlays, `weighted_rank_jumps`, `zero_dimensional_level_events`,
+`duplicate_center_occurrences`, centres rationnels uniques, incidences shell,
+masse de concurrence `H`, comparaisons larges, `sum_choose2_terminal`, visites du census,
 octets et high-water. Les deux pentes `<=1,35` doivent être complétées par des
 caps absolus à 50 k ; une masse linéaire peut encore être trop grande pour une
 seconde.
@@ -535,7 +601,7 @@ Poser `M=65535`, choisir l'indice `r` où `|d_r|` est maximal et orienter
 `d^perp` et toutes leurs composantes ont une valeur absolue au plus `M`.
 Après substitution `w=(x e_p+y e_q)/d_r`, multiplier la forme par `d_r` :
 
-$$d_rF_z=A_zx+B_zy+C_z,qquad A_z=2U_z\mathbin{\cdot}e_p,qquad B_z=2U_z\mathbin{\cdot}e_q,qquad C_z=d_rg_z.$$
+$$d_rF_z=A_zx+B_zy+C_z,\qquad A_z=2U_z\mathbin{\cdot}e_p,\qquad B_z=2U_z\mathbin{\cdot}e_q,\qquad C_z=d_rg_z.$$
 
 Comme `|U_i|<=2M`, les bornes uniformes sont :
 
@@ -578,8 +644,10 @@ Lorsqu'un segment change, invalider ses événements par numéro de génération
 avancer son curseur et reprogrammer seulement ses couples opposés. Tous les
 événements de même abscisse et de même centre sont traités atomiquement avant
 la reprise. À un sommet `P-P`, les curseurs supérieurs actifs de `N` donnent le
-rang opposé ; le cas `N-N` est symétrique. Les égalités incidentes ne sont pas
-comptées dans le rang strict.
+rang opposé ; le cas `N-N` est symétrique. Tous les bundles incidents de tout
+canal sont d'abord retirés du rang ; le batch mesure ensuite le rang strict
+pondéré. Les arêtes ouvertes des chaînes ne suffisent pas si un sommet
+concurrent isolé est une composante zéro-dimensionnelle d'un niveau.
 
 La mémoire transitoire devient `O(m+k^2)` : ordre des `m` lignes pour les
 constructeurs, `2(k+1)` curseurs et au plus
@@ -632,8 +700,9 @@ le nombre de sorties. La masse potentielle q3 est encore
 `ALL` ne crédite donc jamais `pruned_pair_mass`. Il crédite séparément une
 `carrier_all_relation_mass`, garde le produit factorisé et le passe au
 center/rank cover. Les médianes rapportées sur le blueprint `eight_clusters`
-indiquent précisément que la vacuité de lentille y sera faible ; elles ne sont
-pas encore un reçu, puisque la famille u16 versionnée manque. Si les supports
+indiquent précisément que la vacuité de lentille y sera faible. Le générateur
+est désormais versionné par `9bcd137`, mais son contrat `eight_clusters_u16_v1`,
+son hash, son CTest et son reçu de ledger manquent encore. Si les supports
 réels sont eux-mêmes quadratiques, leur coût est incontournable pour une sortie
 explicite jusqu'à réception du quotient de plateau. La lentille évite un atlas
 intermédiaire, pas une borne inférieure de sortie.
@@ -644,10 +713,45 @@ Avant G4, quatre harnesses indépendants suffisent : `front-only` ferme la masse
 des paires et les visites ; `carrier-block-only` reçoit `NONE/ALL/UNKNOWN` ;
 `levels-only` compare les centres proposés aux toutes-paires sur une ancre
 explicite ; `owner-census-only` compare `(BallKey,SupportKey,I_B,U_B,owner)` à
-un juge rationnel. `eight_clusters_u16_v1` doit être défini et hashé avant le
-premier scale. Une pente ou un cap rouge à une étape suspend les suivantes ; la
+un juge rationnel. Le générateur `eight_clusters` doit recevoir son contrat
+`u16_v1`, son ordre et son hash avant le premier scale. Une pente ou un cap
+rouge à une étape suspend les suivantes ; la
 session G4 scriptée n'a aucune raison scientifique d'être lancée avant ces
 portes CPU.
+
+## Contre-audit du successeur `9bcd137`
+
+Le commit ajoute `eight_clusters` et une garde qui décide **quand essayer** le
+range-count de témoins. Sauter une tentative de prune est fail-open et conserve
+donc les supports. En revanche, la condition
+`2177*r^3*mass >= 100*h*ext^3` extrapole la densité du nœud partenaire vers une
+autre boule du nuage. Elle ne prouve pas que des témoins ne peuvent pas être
+trouvés lorsque l'inégalité échoue ; le message de commit doit être lu comme
+ordonnancement heuristique, pas comme certificat de vide. La constante provient
+apparemment de l'arrondi supérieur de `100*4*pi*sqrt(3)`, ratio entre volume de
+la boule et volume maximal d'une boîte de diagonale `ext`; cette provenance
+n'en fait pas une borne pour un nuage discret ou non homogène.
+
+Les nouveaux champs `front_witness_skipped` et `front_mass_closed` sont
+présents dans `WorkCounters`, mais le pin observé ne les recopie pas vers les
+`Counters` du binaire CPU et ne les imprime pas. Le claim « le reçu publie les
+tentatives sautées et la masse fermée » est donc faux à ce pin. La porte utile
+est une ablation garde ON/OFF sur les mêmes points, chaque `leaf`, et publie au
+minimum `skipped`, `skipped_node_mass`, `calls`, `visits`, `visits/call`,
+`mass_closed`, partenaires, supports et high-water. Le champ actuel
+`front_mass_closed` additionne tous les points du nœud, pas seulement les
+`PointId b>a`; ce n'est donc pas encore la masse de paires non ordonnées du
+ledger. L'accord exact vérifie le fail-open ; seul le delta de visites mesure
+le gain. Enfin, la rampe CPU du script G4 emploie le moteur `reference` par
+défaut, alors que cette garde vit dans `pipeline/device` : cette rampe ne peut
+qualifier ni son coût ni ses compteurs sans ablation explicitement raccordée.
+
+La famille `eight_clusters` est désormais entière et versionnée, mais elle ne
+figure encore dans aucun CTest ni reçu de rampe. Son commentaire « aucune boule
+de milieu ne tue une paire inter-amas » est une intuition de générateur, pas un
+invariant vrai pour toute paire jitterée et toute lane. Le ledger doit mesurer
+classes intra/inter-amas, front fermé, résiduel, tailles de lentilles et paires
+q4 ; aucun commentaire de famille ne remplace cette mesure.
 
 ## Fixtures et mutants à remettre à Claude
 

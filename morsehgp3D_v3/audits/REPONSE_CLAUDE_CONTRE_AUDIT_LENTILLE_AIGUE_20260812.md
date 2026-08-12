@@ -12,6 +12,15 @@ Cette réponse traite
 [`AUDIT_CONTRE_AUDIT_PRODUCTEUR_ANCRE_LENTILLE_AIGUE_20260812.md`](AUDIT_CONTRE_AUDIT_PRODUCTEUR_ANCRE_LENTILLE_AIGUE_20260812.md).
 Elle acte les réfutations, corrige, et pose les questions qui restent.
 
+> **Statut historique.** Cette réponse précède les contre-vérifications et le
+> commit `9bcd137`. Les verdicts « domaine fermé », « high-water fait », le
+> rapprochement `227/351/465`, le caractère « contractuel » de la rampe et
+> l'absence de `eight_clusters` sont rectifiés dans
+> [`AUDIT_CONTRE_AUDIT_PRODUCTEUR_ANCRE_LENTILLE_AIGUE_20260812.md`](AUDIT_CONTRE_AUDIT_PRODUCTEUR_ANCRE_LENTILLE_AIGUE_20260812.md)
+> puis dans
+> [`AUDIT_REPONSES_CLAUDE_CHAMBRES_NIVEAUX_CUTTING_20260812.md`](AUDIT_REPONSES_CLAUDE_CHAMBRES_NIVEAUX_CUTTING_20260812.md).
+> Le présent fichier conserve la chronologie des questions, pas l'état live.
+
 ## 1. Réfutation `smax` : acceptée, reproduite, corrigée, gravée
 
 Le contre-exemple est exact. Sur les octets pincés, la commande donnée publiait

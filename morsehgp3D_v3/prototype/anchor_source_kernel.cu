@@ -58,7 +58,8 @@ __device__ void accumulate(unsigned long long* dst, const WorkCounters& w) {
 }
 
 __global__ void anchor_kernel(TreeView tree, int smax, Scratch base, int slots,
-                              unsigned long long* counters, DeviceSink sink, unsigned* flags) {
+                              unsigned long long* counters, DeviceSink sink, unsigned* flags,
+                              bool theta_audit) {
   const int slot = blockIdx.x * blockDim.x + threadIdx.x;
   if (slot >= slots) return;
   Scratch sc;
@@ -75,7 +76,7 @@ __global__ void anchor_kernel(TreeView tree, int smax, Scratch base, int slots,
   WorkCounters w{};
   unsigned local_flags = 0;
   for (int a = slot; a < tree.n; a += slots)
-    run_anchor_point(tree, a, smax, sc, sink, &w, &local_flags);
+    run_anchor_point(tree, a, smax, sc, sink, &w, &local_flags, theta_audit);
   if (local_flags != 0) atomicOr(flags, local_flags);
   accumulate(counters, w);
 }
@@ -99,7 +100,8 @@ DeviceRun run_device(const std::vector<int>& lo, const std::vector<int>& hi,
                      const std::vector<int>& left, const std::vector<int>& right,
                      const std::vector<int>& order, const std::vector<int>& px,
                      const std::vector<int>& py, const std::vector<int>& pz, int smax,
-                     bool store, unsigned long long output_capacity, int slots) {
+                     bool store, unsigned long long output_capacity, int slots,
+                     bool theta_audit) {
   DeviceRun run{};
   run.slots = slots;
   const int nodes = (int)begin_.size();
@@ -194,7 +196,8 @@ DeviceRun run_device(const std::vector<int>& lo, const std::vector<int>& hi,
   MHGP3V_CUDA_CHECK(cudaEventCreate(&ev0));
   MHGP3V_CUDA_CHECK(cudaEventCreate(&ev1));
   MHGP3V_CUDA_CHECK(cudaEventRecord(ev0));
-  anchor_kernel<<<grid, block>>>(tree, smax, base, slots, d_counters, sink, d_flags);
+  anchor_kernel<<<grid, block>>>(tree, smax, base, slots, d_counters, sink, d_flags,
+                                 theta_audit);
   MHGP3V_CUDA_CHECK(cudaEventRecord(ev1));
   MHGP3V_CUDA_CHECK(cudaEventSynchronize(ev1));
   MHGP3V_CUDA_CHECK(cudaGetLastError());

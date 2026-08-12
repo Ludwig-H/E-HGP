@@ -98,6 +98,7 @@ int main(int argc, char** argv) {
   long long n = 2000, coord = -1, seed = 1, smax = 11, threads = 1, slots = 16384;
   CloudFamily family = CloudFamily::kUniform;
   bool store = true;
+  bool theta_audit = false;
   for (int i = 1; i < argc; ++i) {
     const std::string arg = argv[i];
     const auto eq = arg.find('=');
@@ -111,6 +112,7 @@ int main(int argc, char** argv) {
     else if (key == "--threads") { if (!parse_ll(val.c_str(), &parsed)) refuse("--threads invalide"); threads = parsed; }
     else if (key == "--slots") { if (!parse_ll(val.c_str(), &parsed)) refuse("--slots invalide"); slots = parsed; }
     else if (key == "--no-store") { store = false; }
+    else if (key == "--theta-audit") { theta_audit = true; }
     else if (key == "--family") {
       if (val == "uniform") family = CloudFamily::kUniform;
       else if (val == "terrain") family = CloudFamily::kTerrain;
@@ -192,7 +194,7 @@ int main(int argc, char** argv) {
           const int a1 = std::min((int)n, a0 + chunk);
           for (int a = a0; a < a1; ++a)
             run_anchor_point(tv, a, (int)smax, sc, sink, &wc[(std::size_t)t],
-                             &fl[(std::size_t)t]);
+                             &fl[(std::size_t)t], theta_audit);
         }
       });
     }
@@ -215,7 +217,7 @@ int main(int argc, char** argv) {
       (unsigned long long)(host_ctr.supports_q2 + host_ctr.supports_q3 + host_ctr.supports_q4);
   const unsigned long long capacity = emitted_host + emitted_host / 8 + 1024;
   DeviceRun dev = run_device(lo, hi, nb, ne, nl, nr, tree.order, px, py, pz, (int)smax, store,
-                             capacity, (int)slots);
+                             capacity, (int)slots, theta_audit);
 
   std::printf("AnchorDeviceReceipt-v1\n");
   std::printf("cadre phase=exploration_v3_hors_registre backend=cuda_g4_diagnostic"

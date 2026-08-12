@@ -36,6 +36,11 @@ la géométrie du sujet, son ABI ne transporte pas encore `I_B/U_B`, et sa boucl
 q4 forme toujours toutes les paires de la lentille. Le contre-audit et la route
 de remplacement par niveaux mono-ancre sont dans
 [`AUDIT_CONTRE_AUDIT_PRODUCTEUR_ANCRE_LENTILLE_AIGUE_20260812.md`](audits/AUDIT_CONTRE_AUDIT_PRODUCTEUR_ANCRE_LENTILLE_AIGUE_20260812.md).
+La reprise la plus récente simplifie encore ce chemin : le filtre global
+`theta` est redondant sur tout domaine vivant, tandis qu'une cutting signée
+locale peut tuer des patches ; les concurrences se traitent par bundles
+pondérés et dominance exacte avant toute microtuile. Voir
+[`AUDIT_REPONSES_CLAUDE_CHAMBRES_NIVEAUX_CUTTING_20260812.md`](audits/AUDIT_REPONSES_CLAUDE_CHAMBRES_NIVEAUX_CUTTING_20260812.md).
 
 ## Contrat visé
 
@@ -172,7 +177,7 @@ admission produit :
 | --- | --- | --- |
 | `k=1` | Yao-1 exact puis EMST sparse | Borůvka point--LBVH borné |
 | q2 profond | cellules de centres, lane `D_9`, à comparer avant tout port | cascade Yao--banque affine--dual et self-join conservés comme diagnostics/falsificateurs |
-| q3/q4 | front de Jung coalescé, lentille aiguë et niveaux mono-ancre exacts, en exploration | cellules de centres et exhaustif borné comme comparateurs d'identités/coût |
+| q3/q4 | front de Jung coalescé, lentille fermée avec bit/certificat aigu et niveaux mono-ancre exacts, en exploration | cellules de centres et exhaustif borné comme comparateurs d'identités/coût |
 | quotient H0 | fusion device vers activations, gateways et token Johnson | catalogue exhaustif exigé seulement par Gamma/verticales tant que leur reconstruction n'est pas prouvée |
 
 Le transcript Yao-1 de `k=1` n'est donc pas abandonné avec la cascade q2.
@@ -226,13 +231,16 @@ douze points, scanner `X minus U`. Le top-12 global reste sûr, mais n'est pas
 minimal une fois `U` connu; top-`(11-q)` ne distingue pas le dernier intérieur
 ou contact caché.
 
-Un producteur reçu peut éviter cette requête terminale. L'enveloppe affine
-top-9 q3/q4, prise dans `X minus {a,b}` et conservant tous les ex aequo du
-neuvième niveau, connaît déjà exactement `I/E` au centre. Avec l'arête maximale
-canonique et un patch half-open owner, elle vise en outre une émission exacte
-par `SupportKey` avant RLE. Ces deux propriétés restent des gates à comparer à
-la sentinelle hors support et à l'oracle borné; elles ne sont pas encore un
-résultat produit.
+Un producteur reçu peut éviter cette requête terminale. Sur un domaine q3/q4
+encore vivant, le filtre global au top-`(smax-2)` est toutefois redondant : si
+moins de `smax-2` bornes inférieures sont positives, son seuil est non positif
+et `U<theta` est déjà couvert par `U<0`; sinon les lanes sont mortes. Le top-k
+sert donc à tuer un domaine ou un patch, pas à réduire la lentille d'un domaine
+vivant. Une cutting signée half-open transporte les identités
+`always_inside`, les conflits et le bit aigu, puis le census exact `I_B/U_B` au
+centre owner. L'arête maximale canonique vise une émission par `SupportKey`,
+mais plusieurs supports peuvent encore partager une `BallKey`. Ces propriétés
+restent des gates contre la sentinelle hors support et l'oracle borné.
 
 Dans le modèle continu, ou dans une famille de précision croissante, une sortie
 exhaustive n'est même pas universellement linéaire : quatre amas de sites sur
@@ -270,11 +278,11 @@ une baseline, pas un cap ni une garantie de temps. La preuve est dans
 points u16 + LBVH exact résidents
   |-> k=1 : Yao-1 exact mutualisé -> EMST sparse
   |-> q2 : lane cellules D_9 en comparaison avec Yao--affine--dual suspendu
-  `-> q3/q4 : front de Jung coalescé + lentille aiguë factorisée
-       -> center-cover persistant + enveloppe top-(smax-2) half-open
+  `-> q3/q4 : front Jung + lentille fermée factorisée, bit/certificat aigu
+       -> center-cover persistant + cutting signée half-open; top-k tue le patch
        -> q3 intrinsèque + niveaux q4 P/P, N/N, P/N ou cutting certifiée
        -> owner génératif exact-once ou RLE SupportKey -> une géométrie/owner
-       -> census I/U complet + identités always-inside, lemme shell--theta
+       -> census I/U complet + identités always-inside et support explicite
        -> side queue H!=empty/plateau ou second RLE BallKey A/B
        -> gate régulière / plateau / inertie de haut rang
        -> facettes du cœur, gateways et resolver strict
@@ -479,9 +487,11 @@ préfixe comme objet complet.
    Jung, Helly, composition cœur--profondeur et profondeur terminale. Le gain
    marginal doit payer collecte et tri ; toute ambiguïté retombe fail-open et
    aucun rescan racine n'est admis comme route.
-6. Construire le front de Jung coalescé et son enveloppe top-`(smax-2)` q3/q4
-   sans parcourir le plein arrangement ni remplacer le transcript Yao-1 de
-   `k=1`. Recevoir l'arête maximale canonique, puis remplacer la boucle
+6. Construire le front de Jung coalescé et sa cutting signée q3/q4 sans
+   parcourir le plein arrangement ni remplacer le transcript Yao-1 de `k=1`.
+   Graver `theta_only_prunes_on_live=0` et supprimer la sélection globale après
+   ablation ; conserver le top-`(smax-2)` seulement comme certificat de mort
+   d'un patch. Recevoir l'arête maximale canonique, puis remplacer la boucle
    `C(nlens,2)` par les niveaux mono-ancre `P-P/N-N/P-N` sur leurs segments
    actifs ou par une shallow cutting certifiée. Le rang restreint génère des
    centres, jamais le census publié. Recevoir le patch half-open avec

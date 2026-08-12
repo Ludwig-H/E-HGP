@@ -107,6 +107,8 @@ struct Counters {
   long long site_gather_visits = 0;     // noeuds visites par les listes de sites
   long long site_evaluations = 0;       // sites charges dans une enveloppe
   long long kept_sites = 0;             // sites survivant au filtre d'enveloppe
+  long long theta_only_prunes_on_live = 0;  // doit etre identiquement nul
+  long long theta_anchors_active = 0;   // ancres vivantes ou theta a ete arme
   long long lens_carriers = 0;          // carriers retenus par la lentille
   long long q3_candidates = 0;
   long long q4_pairs_walked = 0;
@@ -140,6 +142,8 @@ struct Counters {
     site_gather_visits += o.site_gather_visits;
     site_evaluations += o.site_evaluations;
     kept_sites += o.kept_sites;
+    theta_only_prunes_on_live += o.theta_only_prunes_on_live;
+    theta_anchors_active += o.theta_anchors_active;
     lens_carriers += o.lens_carriers;
     q3_candidates += o.q3_candidates;
     q4_pairs_walked += o.q4_pairs_walked;
@@ -571,7 +575,7 @@ int census(const std::vector<P3>& pts, const std::vector<int>& crossing, int alw
 // Extension d'une ancre (a,b) : q2 direct, q3 par droite, q4 par paire.
 // ---------------------------------------------------------------------------
 void extend_anchor(const std::vector<P3>& pts, int a, int b, i64 d2, int smax, bool lane3,
-                   bool lane4, bool use_filter, Workspace* ws) {
+                   bool lane4, bool theta_audit, Workspace* ws) {
   const P3& pa = pts[(std::size_t)a];
   const P3& pb = pts[(std::size_t)b];
   const int budget3 = smax - 3, budget4 = smax - 4;
@@ -611,7 +615,7 @@ void extend_anchor(const std::vector<P3>& pts, int a, int b, i64 d2, int smax, b
   }
   i64 theta = 0;
   bool theta_active = false;
-  if (use_filter) {
+  if (theta_audit) {
     ws->select_buf.clear();
     for (int t = 0; t < site_count; ++t)
       if (ws->margins[(std::size_t)t].id != b)
@@ -630,13 +634,14 @@ void extend_anchor(const std::vector<P3>& pts, int a, int b, i64 d2, int smax, b
   // strictement plus fort que la boule de milieu.
   ws->kept.clear();
   int always_inside = 0;
+  long long theta_extra = 0;
   for (int t = 0; t < site_count; ++t) {
     const SiteMargin& sm = ws->margins[(std::size_t)t];
     if (sm.id == b) continue;
     if (sm.llow > 0) { ++always_inside; continue; }   // interieur de toute boule
     if (sm.uhigh < 0) continue;                       // exterieur a toute boule
     const i64 probe = (ws->inject == Inject::kThetaNoFailOpen) ? sm.llow : sm.uhigh;
-    if (theta_active && probe < theta) continue;      // Theoreme D : jamais interieur
+    if (theta_active && probe < theta) { ++theta_extra; continue; }
     ws->kept.push_back(sm.id);
   }
   ws->ctr.kept_sites += (long long)ws->kept.size();
@@ -645,6 +650,10 @@ void extend_anchor(const std::vector<P3>& pts, int a, int b, i64 d2, int smax, b
       (ws->inject == Inject::kCensusNoAlways) ? 0 : always_inside;
   const bool disk3 = lane3 && always_inside <= budget3;
   const bool disk4 = lane4 && always_inside <= budget4;
+  if (disk3 || disk4) {
+    ws->ctr.theta_only_prunes_on_live += theta_extra;
+    if (theta_active) ++ws->ctr.theta_anchors_active;
+  }
   if (!disk3 && !disk4) {
     ++ws->ctr.anchors_disk_dead;
     return;
@@ -748,7 +757,7 @@ struct RunResult {
 };
 
 void run_range(const MortonLbvh& tree, const std::vector<P3>& pts, int lo, int hi, int smax,
-               bool exhaustive_front, bool use_filter, Workspace* ws) {
+               bool exhaustive_front, bool theta_audit, Workspace* ws) {
   // `ws->inject` porte le mutant : il n'est jamais actif sur la reference.
   const int n = (int)pts.size();
   for (int a = lo; a < hi; ++a) {
@@ -810,12 +819,12 @@ void run_range(const MortonLbvh& tree, const std::vector<P3>& pts, int lo, int h
                 return u.d2 < v.d2 || (u.d2 == v.d2 && u.b < v.b);
               });
     for (const SurvivingAnchor& sa : ws->survivors)
-      extend_anchor(pts, a, sa.b, sa.d2, smax, sa.lane3, sa.lane4, use_filter, ws);
+      extend_anchor(pts, a, sa.b, sa.d2, smax, sa.lane3, sa.lane4, theta_audit, ws);
   }
 }
 
 RunResult produce(const std::vector<P3>& pts, int smax, int threads, bool exhaustive_front,
-                  bool use_filter, bool store, Inject inject) {
+                  bool theta_audit, bool store, Inject inject) {
   RunResult res{};
   MortonLbvh tree;
   tree.build(pts, g_leaf_size);
@@ -834,7 +843,7 @@ RunResult produce(const std::vector<P3>& pts, int smax, int threads, bool exhaus
           const int lo = cursor.fetch_add(chunk);
           if (lo >= n) break;
           const int hi = std::min(n, lo + chunk);
-          run_range(tree, pts, lo, hi, smax, exhaustive_front, use_filter,
+          run_range(tree, pts, lo, hi, smax, exhaustive_front, theta_audit,
                     &spaces[(std::size_t)t]);
         }
       });
@@ -962,7 +971,8 @@ FlatTree flatten(const MortonLbvh& tree, const std::vector<P3>& pts) {
   return f;
 }
 
-RunResult produce_pipeline(const std::vector<P3>& pts, int smax, int threads, bool store) {
+RunResult produce_pipeline(const std::vector<P3>& pts, int smax, int threads, bool store,
+                           bool theta_audit) {
   RunResult res{};
   MortonLbvh tree;
   tree.build(pts, g_leaf_size);
@@ -989,7 +999,7 @@ RunResult produce_pipeline(const std::vector<P3>& pts, int smax, int threads, bo
           const int hi = std::min(n, lo + chunk);
           for (int a = lo; a < hi; ++a)
             run_anchor_point(tv, a, smax, sc, sink, &wc[(std::size_t)t],
-                             &flags[(std::size_t)t]);
+                             &flags[(std::size_t)t], theta_audit);
         }
       });
     }
@@ -1018,6 +1028,8 @@ RunResult produce_pipeline(const std::vector<P3>& pts, int smax, int threads, bo
     res.ctr.site_gather_visits += w.site_gather_visits;
     res.ctr.site_evaluations += w.site_evaluations;
     res.ctr.kept_sites += w.kept_sites;
+    res.ctr.theta_only_prunes_on_live += w.theta_only_prunes_on_live;
+    res.ctr.theta_anchors_active += w.theta_anchors_active;
     res.ctr.lens_carriers += w.lens_carriers;
     res.ctr.q3_candidates += w.q3_candidates;
     res.ctr.q4_pairs_walked += w.q4_pairs_walked;
@@ -1070,7 +1082,10 @@ int main(int argc, char** argv) {
   long long threads = 1;
   CloudFamily family = CloudFamily::kUniform;
   bool verify = false;
-  bool no_filter = false;
+  // `theta` est PROUVE redondant sur toute ancre vivante ; il n'est donc plus
+  // sur le chemin par defaut. `--theta-audit` le rearme pour que le compteur
+  // de redondance et le mutant `theta-no-fail-open` restent exercables.
+  bool theta_audit = false;
   bool no_store = false;
   long long leaf = 8;
   Inject inject = Inject::kNone;
@@ -1080,6 +1095,7 @@ int main(int argc, char** argv) {
   long long min_supports = 0;
   long long min_anchors = 0;
   long long min_prunes = 0;
+  long long min_theta_active = 0;
 
   for (int i = 1; i < argc; ++i) {
     const std::string arg = argv[i];
@@ -1095,8 +1111,9 @@ int main(int argc, char** argv) {
     else if (key == "--min-supports") { if (!parse_ll(val.c_str(), &parsed)) refuse("--min-supports invalide"); min_supports = parsed; }
     else if (key == "--min-anchors") { if (!parse_ll(val.c_str(), &parsed)) refuse("--min-anchors invalide"); min_anchors = parsed; }
     else if (key == "--min-prunes") { if (!parse_ll(val.c_str(), &parsed)) refuse("--min-prunes invalide"); min_prunes = parsed; }
+    else if (key == "--min-theta-active") { if (!parse_ll(val.c_str(), &parsed)) refuse("--min-theta-active invalide"); min_theta_active = parsed; }
     else if (key == "--verify") { verify = true; }
-    else if (key == "--no-filter") { no_filter = true; }
+    else if (key == "--theta-audit") { theta_audit = true; }
     else if (key == "--leaf") { if (!parse_ll(val.c_str(), &parsed)) refuse("--leaf invalide"); leaf = parsed; }
     else if (key == "--no-store") { no_store = true; }
     else if (key == "--engine") {
@@ -1143,6 +1160,12 @@ int main(int argc, char** argv) {
   if (verify && no_store) refuse("--verify exige le stockage des supports");
   if (inject != Inject::kNone && !verify) refuse("un mutant sans juge ne prouve rien");
   if (inject != Inject::kNone && engine_pipeline) refuse("les mutants visent le moteur de reference");
+  // Un mutant qui casse un filtre desarme ne prouve rien : il serait tue par
+  // hasard ou survivrait par vacuite. Le refus est contractuel, avant calcul.
+  if (inject == Inject::kThetaNoFailOpen && !theta_audit)
+    refuse("le mutant theta exige --theta-audit, sinon le filtre est desarme");
+  if (min_theta_active > 0 && !theta_audit)
+    refuse("--min-theta-active exige --theta-audit");
 
   // FIXTURE GRAVEE `ties` : le tetraedre regulier (0,0,0),(2,2,0),(2,0,2),(0,2,2)
   // a ses SIX aretes de carre 8 et son circumcentre exact en (1,1,1), donc
@@ -1171,8 +1194,8 @@ int main(int argc, char** argv) {
 
   const auto t_start = std::chrono::steady_clock::now();
   RunResult res = engine_pipeline
-                      ? produce_pipeline(pts, (int)smax, (int)threads, !no_store)
-                      : produce(pts, (int)smax, (int)threads, false, !no_filter, !no_store, inject);
+                      ? produce_pipeline(pts, (int)smax, (int)threads, !no_store, theta_audit)
+                      : produce(pts, (int)smax, (int)threads, false, theta_audit, !no_store, inject);
   const double wall = std::chrono::duration<double>(std::chrono::steady_clock::now() - t_start).count();
 
   std::printf("AnchorSourceReceipt-v1\n");
@@ -1203,6 +1226,9 @@ int main(int argc, char** argv) {
               c.supports_q2 + c.supports_q3 + c.supports_q4, c.shell_extra_supports);
   std::printf("high_water partners=%lld site_list=%lld kept=%lld lens=%lld\n",
               c.max_partners, c.max_site_list, c.max_kept, c.max_lens);
+  std::printf("theta arme=%s ancres_vivantes_armees=%lld prunes_en_plus_sur_ancre_vivante=%lld\n",
+              theta_audit ? "oui" : "non", c.theta_anchors_active,
+              c.theta_only_prunes_on_live);
   std::printf("moteur %s caps partners=%d sites=%d kept=%d lens=%d\n",
               engine_pipeline ? "pipeline" : "reference", kPartnerCap, kSiteCap, kKeptCap,
               kLensCap);
@@ -1223,6 +1249,19 @@ int main(int argc, char** argv) {
       return 4;
     }
     std::fprintf(stderr, "REFUS : l'emission exacte-une-fois est violee\n");
+    return 3;
+  }
+
+  // INVARIANT DE REDONDANCE DE `theta`. Sur une ancre restee vivante, moins de
+  // `smax-2` sites verifient `Llow>0`; la `(smax-2)`-ieme plus grande borne
+  // inferieure est donc <= 0, et `Uhigh < theta` implique `Uhigh < 0`, deja
+  // couvert par `always_outside`. Le compteur ne peut donc pas etre non nul.
+  // S'il l'est, le theoreme est faux ou le code ne l'implemente pas : refus.
+  if (inject == Inject::kNone && c.theta_only_prunes_on_live != 0) {
+    std::fprintf(stderr,
+                 "REFUS : theta a retire %lld sites d'ancres vivantes, le theoreme"
+                 " de redondance est falsifie\n",
+                 c.theta_only_prunes_on_live);
     return 3;
   }
 
@@ -1276,6 +1315,11 @@ int main(int argc, char** argv) {
   if (c.front_witness_prunes < min_prunes) {
     std::fprintf(stderr, "REFUS : plancher de prunes %lld > %lld\n", min_prunes,
                  c.front_witness_prunes);
+    return 3;
+  }
+  if (c.theta_anchors_active < min_theta_active) {
+    std::fprintf(stderr, "REFUS : plancher d'ancres theta %lld > %lld\n", min_theta_active,
+                 c.theta_anchors_active);
     return 3;
   }
   return 0;

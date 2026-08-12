@@ -79,6 +79,16 @@ struct WorkCounters {
   long long site_gather_visits = 0;
   long long site_evaluations = 0;
   long long kept_sites = 0;
+  // Sites que `theta` retire EN PLUS de `Uhigh<0`, sur une ancre restee vivante.
+  // L'audit du 12 aout prouve que ce compteur est identiquement nul : sur une
+  // ancre vivante, moins de smax-2 sites sont toujours-interieurs, donc la
+  // (smax-2)-ieme plus grande borne inferieure est <= 0, donc `Uhigh < theta`
+  // implique `Uhigh < 0`. Le compteur le DEMONTRE au lieu de le croire.
+  long long theta_only_prunes_on_live = 0;
+  // Ancres vivantes sur lesquelles `theta` a reellement ete arme. Sans ce
+  // compteur, un zero au champ precedent ne distingue pas la redondance
+  // demontree d'un filtre jamais atteint : c'est le plancher de non-vacuite.
+  long long theta_anchors_active = 0;
   long long lens_carriers = 0;
   long long q3_candidates = 0;
   long long q4_pairs_walked = 0;   // paires de lentille parcourues, non aigues comprises
@@ -380,9 +390,16 @@ MHGP_HD inline int census(const TreeView& t, const int* crossing, int ncross, in
 //   `out` peut etre nul : le mode compte-seulement ne stocke rien.
 //   `out_count` est incremente atomiquement par l'appelant via `reserve`.
 // ---------------------------------------------------------------------------
+// `theta_audit` arme le filtre d'enveloppe `theta`. Il est FAUX sur le chemin
+// produit : l'audit du 12 aout 2026 prouve que ce filtre ne retire aucun site
+// d'une ancre vivante (voir `theta_only_prunes_on_live`), et sa selection des
+// `smax-2` plus grandes bornes inferieures coute ici un balayage
+// `O(site_count * (smax-2))` par ancre. Le laisser arme paierait donc un
+// travail proportionnel a la liste de sites pour un resultat identique. Le
+// mode audit existe pour que le compteur et le mutant restent exercables.
 template <typename Sink>
 MHGP_HD inline void run_anchor_point(const TreeView& t, int a, int smax, Scratch sc, Sink& sink,
-                                     WorkCounters* ctr, unsigned* flags) {
+                                     WorkCounters* ctr, unsigned* flags, bool theta_audit) {
   const P3 pa = tree_point(t, a);
   const int budget2 = smax - 2, budget3 = smax - 3, budget4 = smax - 4;
 
@@ -579,7 +596,7 @@ MHGP_HD inline void run_anchor_point(const TreeView& t, int a, int smax, Scratch
     // theta : neuvieme plus grande borne inferieure Llow sur X \ {a,b}.
     i64 theta = 0;
     bool theta_active = false;
-    {
+    if (theta_audit) {
       int m = 0;
       for (int k = 0; k < site_count; ++k)
         if (sc.site_id[k] != b) ++m;
@@ -613,11 +630,12 @@ MHGP_HD inline void run_anchor_point(const TreeView& t, int a, int smax, Scratch
 
     int nkept = 0;
     int always_inside = 0;
+    long long theta_extra = 0;
     for (int k = 0; k < site_count; ++k) {
       if (sc.site_id[k] == b) continue;
       if (sc.margin_llow[k] > 0) { ++always_inside; continue; }
       if (sc.margin_uhigh[k] < 0) continue;
-      if (theta_active && sc.margin_uhigh[k] < theta) continue;
+      if (theta_active && sc.margin_uhigh[k] < theta) { ++theta_extra; continue; }
       if (nkept >= kKeptCap) { *flags |= kOverflowKept; return; }
       sc.kept[nkept++] = sc.site_id[k];
     }
@@ -626,6 +644,10 @@ MHGP_HD inline void run_anchor_point(const TreeView& t, int a, int smax, Scratch
 
     const bool disk3 = lane3 && always_inside <= budget3;
     const bool disk4 = lane4 && always_inside <= budget4;
+    if (disk3 || disk4) {
+      ctr->theta_only_prunes_on_live += theta_extra;
+      if (theta_active) ++ctr->theta_anchors_active;
+    }
     if (!disk3 && !disk4) { ++ctr->anchors_disk_dead; continue; }
 
     int nl = 0;

@@ -28,7 +28,8 @@ DeviceRun run_device(const std::vector<int>& lo, const std::vector<int>& hi,
                      const std::vector<int>& left, const std::vector<int>& right,
                      const std::vector<int>& order, const std::vector<int>& px,
                      const std::vector<int>& py, const std::vector<int>& pz, int smax,
-                     bool store, unsigned long long output_capacity, int slots);
+                     bool store, unsigned long long output_capacity, int slots,
+                     bool theta_audit);
 
 }  // namespace anchor
 }  // namespace mhgp3v

@@ -2653,9 +2653,50 @@ set_tests_properties(mhgp3v_anchor_uniform mhgp3v_anchor_terrain
                      mhgp3v_anchor_front_exerce mhgp3v_anchor_fixture_ties
                      PROPERTIES PASS_REGULAR_EXPRESSION "accord=OUI")
 
+# REDONDANCE DE `theta`, DEMONTREE PUIS GRAVEE.
+# Sur une ancre restee vivante, moins de `smax-2` sites verifient `Llow>0`; la
+# `(smax-2)`-ieme plus grande borne inferieure est donc <= 0, et `Uhigh<theta`
+# implique `Uhigh<0`, deja couvert par `always_outside`. Le filtre ne retire
+# donc AUCUN site d'une ancre vivante. Il n'est plus sur le chemin par defaut;
+# `--theta-audit` le rearme pour ces portes. Le plancher `--min-theta-active`
+# interdit le vert par vacuite : sans lui, un filtre jamais atteint donnerait
+# le meme zero qu'un filtre demontre redondant.
+add_test(NAME mhgp3v_anchor_theta_redondant_uniform COMMAND mhgp3v_anchor_source
+         --points=120 --family=uniform --seed=1 --verify --theta-audit
+         --min-theta-active=5000 --min-supports=20000)
+add_test(NAME mhgp3v_anchor_theta_redondant_terrain COMMAND mhgp3v_anchor_source
+         --points=140 --family=terrain --seed=5 --verify --theta-audit
+         --min-theta-active=3000 --min-supports=5000)
+add_test(NAME mhgp3v_anchor_theta_redondant_clusters COMMAND mhgp3v_anchor_source
+         --points=80 --family=eight_clusters --seed=3 --verify --theta-audit
+         --min-theta-active=2000 --min-supports=6000)
+set_tests_properties(mhgp3v_anchor_theta_redondant_uniform
+                     mhgp3v_anchor_theta_redondant_terrain
+                     mhgp3v_anchor_theta_redondant_clusters PROPERTIES
+  PASS_REGULAR_EXPRESSION "prunes_en_plus_sur_ancre_vivante=0\n")
+# Le regex ci-dessus ignore le code de retour : la porte a code le double. Si
+# le theoreme etait faux, le sujet rendrait 3 avec ce diagnostic.
+mhgp3v_add_expected_code_test_for(mhgp3v_anchor_source
+  mhgp3v_anchor_theta_plancher_vacuite "plancher d'ancres theta" 3
+  --points=120 --family=uniform --seed=1 --theta-audit
+  --min-theta-active=100000000)
+mhgp3v_add_expected_code_test_for(mhgp3v_anchor_source
+  mhgp3v_anchor_theta_reject_plancher_sans_audit "--min-theta-active exige --theta-audit" 2
+  --points=120 --min-theta-active=10)
+
 # Mutants : chacun casse UNE decision exacte et doit sortir en code 4.
+# Le mutant theta exige le filtre ARME : casser un filtre desarme ne prouve
+# rien. Le diagnostic exige en outre un compteur NON NUL, ce qui interdit que
+# la porte de redondance ci-dessus passe sur un compteur mort.
 mhgp3v_add_expected_code_test_for(mhgp3v_anchor_source
   mhgp3v_anchor_mutant_theta "MUTANT TUE" 4
+  --points=500 --seed=4 --verify --theta-audit --inject=theta-no-fail-open)
+mhgp3v_add_expected_code_test_for(mhgp3v_anchor_source
+  mhgp3v_anchor_theta_compteur_causal "prunes_en_plus_sur_ancre_vivante=[1-9]" 4
+  --points=500 --seed=4 --verify --theta-audit --inject=theta-no-fail-open)
+mhgp3v_add_expected_code_test_for(mhgp3v_anchor_source
+  mhgp3v_anchor_reject_mutant_theta_desarme
+  "le mutant theta exige --theta-audit" 2
   --points=500 --seed=4 --verify --inject=theta-no-fail-open)
 mhgp3v_add_expected_code_test_for(mhgp3v_anchor_source
   mhgp3v_anchor_mutant_arete_min "MUTANT TUE" 4
@@ -2692,6 +2733,31 @@ add_test(NAME mhgp3v_anchor_fixture_q4only COMMAND mhgp3v_anchor_source
          --fixture=q4only --verify --min-supports=55)
 set_tests_properties(mhgp3v_anchor_fixture_q4only PROPERTIES
   PASS_REGULAR_EXPRESSION "accord=OUI")
+
+# ---- FAMILLE ADVERSAIRE `eight_clusters` -----------------------------------
+# Elle etait versionnee mais qu'aucune porte n'exercait. Ces deux portes
+# recoivent son EXACTITUDE dans les deux moteurs.
+add_test(NAME mhgp3v_anchor_eight_clusters COMMAND mhgp3v_anchor_source
+         --points=80 --family=eight_clusters --seed=3 --verify
+         --min-supports=6000 --min-anchors=3000)
+add_test(NAME mhgp3v_anchor_eight_clusters_pipeline COMMAND mhgp3v_anchor_source
+         --points=80 --family=eight_clusters --seed=3 --engine=pipeline --verify
+         --min-supports=6000 --min-anchors=3000)
+set_tests_properties(mhgp3v_anchor_eight_clusters
+                     mhgp3v_anchor_eight_clusters_pipeline PROPERTIES
+  PASS_REGULAR_EXPRESSION "accord=OUI")
+# MUR GRAVE, PAS UN VERT. Sur cette famille le certificat de front ne ferme
+# AUCUN noeud : la boule temoin d'une ancre inter-amas tombe dans le vide qui
+# separe les amas, ou aucun PointId ne peut la peupler. `candidate_pairs` vaut
+# donc exactement C(n,2) et le producteur est cubique : mesure du 12 aout 2026
+# sur l'ELF pince, n=100/200/500 -> 2 446 467 / 17 892 952 / 191 538 784 paires
+# q4 parcourues, pentes successives 2,65 a 3,03, wall 0,685 / 6,855 / 92,458 s.
+# Cette porte EXIGE que le plancher d'un seul prune soit refuse. Elle deviendra
+# rouge le jour ou une route ferme reellement ces ancres — et c'est exactement
+# le signal attendu. Ne pas la supprimer sans reecrire cette mesure.
+mhgp3v_add_expected_code_test_for(mhgp3v_anchor_source
+  mhgp3v_anchor_eight_clusters_front_inerte "plancher de prunes" 3
+  --points=100 --family=eight_clusters --seed=3 --no-store --min-prunes=1)
 # Le moteur `pipeline` est EXACTEMENT le code que nvcc compile. Le comparer a
 # l'exhaustif ferme la chaine hote -> pipeline -> device.
 add_test(NAME mhgp3v_anchor_pipeline_uniform COMMAND mhgp3v_anchor_source

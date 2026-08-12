@@ -8,37 +8,71 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-## Observation live postérieure — `HEAD=ae2658a`, worktree en édition
+## Observation live postérieure — `HEAD=9bcd137`
 
 Au 12 août 2026 pendant la reprise d'audit, le `HEAD` est
-`ae2658a08f59e832118adb8d627c6954b9cae894`, commit
-`script the whole G4 session so nothing is typed by hand`. Par rapport au pin
-CPU `760469d` ci-dessous, ce commit ajoute seulement le script gardé
-`gcp-migration/session_anchor_source_g4.sh`; aucune session GCP n'a été lancée
-par les auditeurs et aucun résultat device n'est reçu.
+`9bcd137087cc5bb2ed873f3a78238883fd83e030`, commit
+`stop searching for witnesses where they cannot be found, and build the
+adversarial family the audits keep naming`. Les successeurs de `760469d`
+paramètrent `smax`, remplacent les tris historiques, ajoutent le script G4
+gardé, une garde de densité du front et la famille `eight_clusters`. La boucle
+q4 locale forme encore les couples de la lentille. Aucune session GCP n'a été
+lancée pour ce producteur depuis ce pin et aucun résultat device n'est reçu.
 
-Le worktree est plus récent et encore en édition : `CMakeLists.txt`,
-`anchor_envelope.hpp`, `anchor_pipeline.hpp` et `anchor_source.cpp` sont
-modifiés. Le delta observé paramètre les seuils par `smax`, ajoute le mutant de
-régression historique et expose la granularité des feuilles ; il ne devient
-une autorité qu'après pin source/ELF et portes rejouées. La boucle q4 locale
-forme encore les couples de la lentille au moment de cette observation.
+La garde de densité est fail-open et ne menace pas l'exactitude : elle saute
+seulement une tentative de prune. Sa constante `2177/100` estime toutefois la
+population depuis la densité du nœud partenaire, qui ne borne pas la population
+de la boule témoin ailleurs. C'est donc un ordonnanceur heuristique à ablater,
+pas un certificat « témoin impossible ». Ses compteurs
+`front_witness_skipped/front_mass_closed` existent dans le pipeline device mais
+ne sont pas encore remontés ni imprimés par le reçu CPU. La nouvelle famille
+`eight_clusters` est versionnée, mais aucun CTest ni reçu de scale ne l'exerce
+encore **au pin `9bcd137`**.
+
+Le worktree postérieur à `9bcd137` est de nouveau en édition : Claude désarme
+désormais `theta` par défaut, ajoute `--theta-audit` et les compteurs
+`theta_only_prunes_on_live/theta_anchors_active`, puis propage cette option dans
+`anchor_device.hpp`, `anchor_pipeline.hpp`, `anchor_source.cpp`,
+`anchor_source_kernel.cu` et `anchor_source_device_qualification.cpp`. Ce delta
+n'est ni commité ni reçu par l'ELF stable ci-dessous. Une première observation
+était rouge parce que le CTest mutant n'ajoutait pas `--theta-audit`; Claude a
+ensuite raccordé ce flag, un plancher non-vide et des portes `eight_clusters`
+dans le même worktree. Après reconfiguration, l'ELF worktree SHA-256
+`114be24e...` passe les neuf portes ciblées
+`^mhgp3v_anchor_(theta|eight_clusters)` en `48,64 s`. Les deux moteurs donnent
+aussi, sur la sonde `n=120`, seed `1`, `5 176` ancres theta armées, zéro prune
+theta-only, `22 488` supports et `accord=OUI`. C'est une bonne réception locale
+du lemme. L'inventaire worktree est désormais `560` CTests, dont `43`
+`mhgp3v_anchor_`, contre `550/33` au pin stable. Ce n'est pas encore un pin :
+CMake et cinq sources restent modifiés, aucun rejeu de la totalité des 43
+portes ni aucune rampe 50 k n'est attaché à ces octets.
+Les modifications documentaires des auditeurs restent limitées au README, à la
+proposition et à `audits/`.
 
 Le contre-audit courant répond aux cinq questions de Claude, sépare le bug
-historique `smax` de sa réparation en cours et apporte deux résultats utiles :
-le classifieur collectif de lentille aiguë avant `PairId`, puis la génération
-q4 par niveaux peu profonds d'une ancre fixe. Le nombre de centres distincts à
-profondeur `k` y est `O(m(k+1))`; cette borne ne couvre ni la masse des ancres,
-ni les rescans LBVH, ni les cosphères lourdes. Voir
+historique `smax` de sa réparation et apporte deux résultats utiles : le
+classifieur collectif de relation aiguë avant `PairId`, sans retirer le second
+carrier de la lentille fermée, puis la génération q4 par niveaux peu profonds
+d'une ancre fixe. Le nombre de centres distincts à profondeur `k` y est
+`O(m(k+1))`; cette borne ne couvre ni la masse des ancres, ni les rescans LBVH,
+ni les cosphères lourdes. Voir
 [`AUDIT_CONTRE_AUDIT_PRODUCTEUR_ANCRE_LENTILLE_AIGUE_20260812.md`](AUDIT_CONTRE_AUDIT_PRODUCTEUR_ANCRE_LENTILLE_AIGUE_20260812.md).
 
-Le dernier résultat CPU stable ci-dessous reste `28/28` portes locales. Il ne
-reçoit ni oracle rationnel indépendant, ni `(BallKey,I_B,U_B)`, ni CUDA/G4, ni
-`BenchmarkOutputContract-v1`. Le contrat 50 k/1 s demeure donc ouvert.
+La configuration du pin stable expose `550` CTests, dont `33` portes
+`mhgp3v_anchor_`. Le premier rejeu local sur l'ELF Release SHA-256
+`59425e5708251fe890b57ea271887735fe8e9ab3a30f6cb0f9951e12c514e7f3`
+rend `32/33` en `503,57 s` : `mhgp3v_anchor_mutant_census` est tué par signal
+après environ 62 s, et le wrapper refuse justement d'assimiler un crash à un
+rejet contractuel. La relance isolée de cette porte passe `1/1` en `39,15 s` ;
+le rouge complet n'est donc pas reproductible isolément et reste une anomalie
+de ressource/session, pas un accord `33/33` d'un seul run. Ces portes ne
+reçoivent de toute façon ni oracle rationnel indépendant, ni
+`(BallKey,I_B,U_B)`, ni CUDA/G4, ni `BenchmarkOutputContract-v1`. Le contrat
+50 k/1 s demeure donc ouvert.
 
 ## Pin CPU stable — producteur par ancre au `HEAD=760469d`
 
-Le `HEAD` live contre-audité est
+Le pin CPU historique contre-audité est
 `760469df0320a1f081be586a0a352034b38c6a40`, commit
 `run the same function on the CPU and on the GPU, then difference it`. Le
 worktree était propre au pin final. Ce successeur ajoute un pipeline commun
@@ -904,9 +938,14 @@ le fold ne peut donc pas être déclaré complet.
    `frontier-clear`, états immuables, `DualReceipt`, maximum entier, fusion,
    télémétrie et rampe `12 500/25 000/50 000`.
 5. Garder P1a actuel comme falsificateur; construire le front de Jung coalescé,
-   puis l'enveloppe top-9 dans `X minus {a,b}`. Recevoir l'arête maximale
-   canonique et le patch half-open avec `occurrences=SupportKey_unique`, ainsi
-   que le census `(I,E)` fourni directement par l'enveloppe.
+   puis la lentille fermée avec bit aigu et une cutting signée half-open. Le
+   top-`(smax-2)` ne sert qu'à tuer un patch : sur tout patch vivant, son rejet
+   est redondant avec `U_z<0`. Générer les centres q4 par niveaux pondérés
+   `P-P/N-N/P-N`, grouper les concurrences, puis traiter leur masse `J/H` par
+   dominance ou terminal borné. Recevoir l'arête maximale canonique avec
+   `occurrences=SupportKey_unique`; reconstruire `(I_B,U_B)` depuis les
+   identités `always_inside` authentifiées, le support et les conflits au
+   centre, puis comparer l'enregistrement complet à l'oracle rationnel.
 6. Garder les lanes cellulaires `D_9/D_8/D_7` comme comparateur exact, avec
    partition terminale commune, `e0` immuable et promotion. Après génération,
    faire un premier RLE `SupportKey` avant lift et choisir le contexte owner.
