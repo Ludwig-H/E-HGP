@@ -210,7 +210,7 @@ warp évitent seulement les retests.
 - CSR par niveau : `cell_offsets`, `candidate_ids` de `D_8`, rangs d'entrée
   `tau_C`, puis `D_7` comme préfixe/buckets; ajouter `D_9` seulement si q2
   emprunte cette machine;
-- seuils `R_p` exacts, compteurs, sorts et digests par cellule;
+- seuils de budget `R_h` exacts, compteurs, sorts et digests par cellule;
 - arènes séparées pour candidats support, census et `BallRecord`.
 
 Les frères peuvent partager des sites. L'exact-once ne vient pas de la liste,
@@ -228,12 +228,12 @@ jamais les deux conventions.
 1. `bounds_kernel` calcule `l_D/u_D` pour chaque couple
    `(child,candidate_parent)` en arithmétique exacte.
 2. Une réduction warp/block conserve les neuf plus petites clés
-   `(u_D,PointId)` pour q3/q4 (`p=0..8`); q2 séparé demanderait top-10.
+   `(u_D,PointId)` pour q3/q4 (`h=0..8`); q2 séparé demanderait top-10.
 3. `count_kernel` compte les rangs d'entrée `tau_D` et tous les
    `l_D<=R_8(D)`.
 4. Un scan exclusif réserve la CSR.
 5. `fill_kernel` compacte les identifiants par bucket `tau_D`, puis publie
-   digest et invariants : inclusion parent et `R_p(child)<=R_p(parent)`.
+   digest et invariants : inclusion parent et `R_h(child)<=R_h(parent)`.
 6. Une classification décide `prune`, `terminal`, `split` ou `resource_exhausted`.
 
 Le noyau q3 utilise `D_8`; q4 utilise son sous-ensemble `D_7`.
@@ -280,12 +280,16 @@ la cellule singleton de son centre; deux arbres de budgets indépendants
 l'émettraient deux fois.
 
 Après indépendance affine, barycentriques positives et owner, chaque candidat
-émet seulement `(GeometricBallKey,SupportKey,e0,cell_id)`. Le radix/RLE par clé
-géométrique arrive **avant** la promotion et conserve tous les `SupportKey`.
-Un représentant rejouable du run effectue ensuite une seule promotion et un
-seul census fermé pour la boule :
+émet `(cloud_epoch,GeometricBallKey,SupportKey,CensusContext)`. Le contexte lie
+`cell_id`, digests du pool/domaine, backend ou arène encore vivante, `e0` et
+`b_cert`, budget maximal dont toute l'ascendance certifie l'invariant de pool.
+Le radix/RLE par `(cloud_epoch,GeometricBallKey)` arrive **avant** la promotion
+et conserve tous les supports et contextes. Pour
+`H_run=smax-q_min`, il sélectionne atomiquement un contexte avec
+`b_cert>=H_run`; ce contexte seul effectue la promotion et le census fermé :
 
-- partir de son `e0` immuable avec un curseur `h` séparé;
+- partir de **son** `e0` immuable et de **ses** buckets avec un curseur `h`
+  séparé;
 - scanner chaque bucket ajouté une fois, en accumulant intérieurs stricts et
   contacts nuls;
 - rejeter tôt au premier compte total supérieur au plus grand `smax-q` encore
@@ -294,6 +298,12 @@ seul census fermé pour la boule :
   support, `relevant_by_min_support=(p+q<=smax)` de
   `accepted_closed_rank=(p+|U_B|<=smax)`;
 - envoyer une extra-shell pertinente au quotient saturé ou au refus fermé.
+
+Une arène q4 filtrée ancestralement à `D_7` ne certifie pas rétroactivement un
+support q3 à `p=8`, même si elle matérialise un `D_8` terminal. Si q2 vient d'un
+backend Yao/LBVH séparé ou si aucun contexte local ne certifie `H_run`, le run
+est routé vers un census global exact. `cell_id` et les digests ne font pas
+partie de la clé sphère; ils restent des contextes candidats du run.
 
 Promouvoir avant le RLE répéterait le census pour chaque support incident à la
 même boule. Inversement, le rejet d'un support de grande arité ne permet pas de

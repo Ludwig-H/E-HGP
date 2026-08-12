@@ -10,8 +10,9 @@ Cadre : `phase=exploration_v3_hors_registre`,
 
 ## Fraîcheur
 
-`HEAD` audité : `8c00ab07695ef353e673ab73a778a6f260c87509`, commit
-`size the sparse route: arms, facets and the three J_F branches`.
+`HEAD` observé à la consolidation :
+`b79dd12f1ed947fb82118f8bb0902b36da65c8cd`, commit
+`subdivide the centre space and judge the source on identities`.
 
 Le worktree n'est pas identique à ce `HEAD`. Dans le delta de code pertinent
 observé le 12 août, `CMakeLists.txt` et
@@ -22,11 +23,12 @@ nouveaux et non suivis. `prototype/centre_cell_source.cpp` est aussi nouveau,
 non suivi et raccordé à CMake. Le front q4 et la sonde d'échelle sont désormais
 raccordés à CMake. L'audit n'a modifié aucun de ces fichiers de code. Le source
 `centre_cell` changeait encore pendant l'audit; ses mesures sont donc pincées
-séparément et ne décrivent pas automatiquement les octets live.
+séparément. Le dernier snapshot ci-dessous est resté stable pendant sa
+configuration, sa reconstruction et toute sa porte ciblée.
 
 | objet | SHA-256 |
 | --- | --- |
-| `CMakeLists.txt` | `dee88c760e0ddc2d53406a07de8ff1a1a2d1685e89d49a3c5af4ef14063eacd0` |
+| `CMakeLists.txt` à 13:50 UTC | `f663ada0ecbedb63a5bb651915bb41dcf3f12da4a96b34f7be5b806c9b4029cd` |
 | `prototype/certified_locality_probe.cpp` | `e687b62787631d31c2fd5c4211e21fee808ac4f53edbaf72bfb0b9669dd4f20f` |
 | `oracle/locality_census_judge.cpp` | `a7812b3959a2a0752a7ac6413c26947eec2e763546c979a6695439786de7ac65` |
 | `prototype/ball_front.hpp` | `221356332743af11481a5387d65f6d27e0ec2b0ce0e10e2118f3796bb763d490` |
@@ -35,9 +37,10 @@ séparément et ne décrivent pas automatiquement les octets live.
 | `prototype/order_k_flats.hpp` | `a70f990adfff9bec9b810059c32ba9ec62aef95a3b06e679a3fb6f06b5af8bc8` |
 | `prototype/flats_scale_probe.cpp` | `b3ecf5db981bab9741a97e828a6a00db996dab1f2be2678ddb5f50375e793a2d` |
 | binaire Release sonde flats | `4f8d7da3d41b2a368ce18d1007c0544e90b22077f516253ea5c93463fb20f396` |
-| `prototype/centre_cell_source.cpp`, dernier relevé à 13:38 UTC, non testé | `50cd659ff14863db050cd12f25969d0e99c2fd78ad054a171b3316751f9ba92c` |
-| snapshot `centre_cell` testé à 13:31 UTC | `fd73409257bf61e3b41d872f92e3b4eedda5eaeda836399beec2c4aacb4959b1` |
-| binaire Release de ce snapshot | `b2b430bb91a449ba0d8279316b58ebd99b683aebba044ef351068fdff49c50cd` |
+| `prototype/centre_cell_source.cpp` testé à 13:49--13:50 UTC | `343718804b0ada609a2f08f318c81e4cd19b1f13c0ac181f86e0ee35a25da7a8` |
+| binaire Release de ce snapshot | `f927e47b4e19d5c49c1032e0d0993b2af523470a87b8895add601613294dd3a6` |
+| `prototype/centre_cell_source.cpp` live à 14:05 UTC après le pin, non qualifié | `c07ce5019358910d907d0f80440ddbe0337a1e17ceb67cdc9d94d3824f18785e` |
+| binaire Release local postérieur, non qualifié par 22/22 | `dcf9eef3ddbd58173bd8347de724ea620a6a0de5d903b56d9e47ee91f5b1e0ff` |
 | binaire Release localité | `27c984e29c1e6a53171adf03c557669c7ff3dda392004691301e6b797757ece9` |
 | binaire Release juge rationnel | `989150541dfb7a04241f5c8d9929f394eaffc1066083b916b719f6d6d25c9d75` |
 | `prototype/morton_lbvh.hpp` | `23ffc797c35e24823cf346be934643b0447f8d69a5c0843b4fd090ddc548b267` |
@@ -96,7 +99,22 @@ diagnostics CPU count-only.
 
 ## Tests sur les octets pincés
 
-La configuration Release observée à 13:05 UTC enregistre `468` CTests : `34`
+La configuration Release `f663ada0...` observée à 13:50 UTC enregistre `482`
+CTests : `34` préfixés `mhgp3v_locality_`, `10` préfixés
+`mhgp3v_ball_front_`, `4` préfixés `mhgp3v_flats_scale_` et `22` préfixés
+`mhgp3v_centre_cell_`. Après configuration et reconstruction ciblée, la
+commande
+
+```bash
+ctest --test-dir build/v3 --output-on-failure -R '^mhgp3v_centre_cell_'
+```
+
+rend `22/22` en `106,22 s` sur source `34371880...` et ELF `f927e47b...`. Les
+empreintes sont identiques après la porte. Ce vert reçoit les fixtures et
+mutants raccordés; il ne reçoit ni une complexité sparse, ni CUDA, ni le
+payload officiel.
+
+La configuration Release historique observée à 13:05 UTC enregistrait `468` CTests : `34`
 préfixés `mhgp3v_locality_`, `10` préfixés `mhgp3v_ball_front_`, `4` préfixés
 `mhgp3v_flats_scale_` et `8` préfixés `mhgp3v_centre_cell_`. Après
 reconstruction des snapshots correspondants, les portes anciennes restent
@@ -132,17 +150,19 @@ auditée plus bas. Ils ne réparent ni la suite localité rouge ni le pipeline
 produit. Les contrôles documentaires sont rapportés seulement après la
 consolidation finale.
 
-Le snapshot `centre_cell` `fd734092...` et son binaire `b2b430bb...` ont été
-reconstruits ensemble. Leur filtre CTest rend `8/8` en `3,18 s`; `--fixtures`
-exerce égalité, owner et les deux contre-fixtures inter-arités. Le source live
-`50cd659f...` est postérieur et n'est pas qualifié par ce passage.
+Le snapshot historique `centre_cell` `fd734092...` et son binaire
+`b2b430bb...` avaient été reconstruits ensemble. Leur filtre CTest rendait
+`8/8` en `3,18 s`; `--fixtures` exerçait égalité, owner et les deux
+contre-fixtures inter-arités. Ces octets ont été remplacés et ne sont plus
+reconstructibles depuis le worktree courant.
 
-La porte verte ne tue pas réellement tous les mutants annoncés. Le helper
-d'égalité ne fait pas traverser la machine avec `drop-ties`; sur
-`terrain,n=60,smax=6,seed=3`, ce mutant reproduit les 918 identités et rend le
-code 3, donc survit. Les campagnes manuelles tuent `strata-stop` et
-`arity-cascade`, mais CMake ne raccorde encore que `shrink-list` comme mutant
-de la machine.
+Le successeur `34371880...` raccorde désormais sept mutants, dont `drop-ties`
+et `arity-cascade`; ils passent dans les 22 portes. `strata-stop`, qui arrête la
+promotion au premier bucket, reste seulement enregistré dans le CLI et sans
+CTest. L'égalité de fermeture découle du flot : la garde initiale établit
+`r>=e0`, puis chaque promotion pose `h=r` et les scans suivants ne peuvent
+qu'augmenter `r`; sortir sur `r<=h` donne donc `r=h`. Une assertion explicite
+serait défensive, mais le trou reçu est le mutant non raccordé.
 
 ## État q2 Yao48/LBVH
 
@@ -441,8 +461,9 @@ par budgets d'intérieurs, `e0` immuable et promotion est dans
 et son audit complet dans
 [`AUDIT_REPONSES_CELLULES_CENTRES_20260812.md`](AUDIT_REPONSES_CELLULES_CENTRES_20260812.md).
 
-Le successeur testé `fd734092...` a réparé le CLI, les lanes inter-arités, le
-shell dynamique et le groupement avant census. Il reste combinatoire. Sur
+Le successeur historique `fd734092...` a réparé le CLI, les lanes inter-arités,
+le shell dynamique et le groupement avant census; le snapshot actuel conserve
+ces réparations et ajoute des portes. L'ordonnance reste combinatoire. Sur
 `uniform,seed=3,smax=11`, `n=100/200/400`, les créations de cellules, lectures
 parentes, IDs candidats et census ont deux pentes successives supérieures à
 1,35. À `n=400`, 7 240 129 lifts produisent 103 978 supports et 85,7 % des

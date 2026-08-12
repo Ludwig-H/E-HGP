@@ -2300,6 +2300,17 @@ mhgp3v_add_expected_code_test_for(mhgp3v_centre_cell
 mhgp3v_add_expected_code_test_for(mhgp3v_centre_cell
   mhgp3v_centre_cell_kill_bisector_strict "MUTANT TUE" 4
   --points=125 --smax=11 --family=grave_grid --judge --inject=bisector-strict)
+# LE MUTANT DE STRATE : il arrete le census au premier bucket, sans promotion.
+# Le census restreint est alors incomplet et les identites `I_B`/`U_B` faussent.
+# La grille gravee ne le tue PAS — ses budgets d'entree y sont deja corrects —
+# et c'est pourquoi la porte porte sur deux familles.
+mhgp3v_add_expected_code_test_for(mhgp3v_centre_cell
+  mhgp3v_centre_cell_kill_strata_stop "MUTANT TUE" 4
+  --points=125 --smax=11 --family=terrain --seed=11 --judge --inject=strata-stop)
+mhgp3v_add_expected_code_test_for(mhgp3v_centre_cell
+  mhgp3v_centre_cell_kill_strata_stop_uniform "MUTANT TUE" 4
+  --points=125 --smax=11 --family=uniform --seed=11 --judge --inject=strata-stop)
+
 # LE MUTANT DE CASCADE D'ARITES : il conditionne la lane q3 au succes de la lane
 # q2 et la lane q4 au succes de q3. Seule la contre-fixture d'arite trois le tue,
 # et c'est exactement la faute que l'auditeur a exigee de graver.

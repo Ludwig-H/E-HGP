@@ -17,39 +17,72 @@ Elle ne revendique **ni** borne de complexité, **ni** GO pour G4, **ni** statut
 public. Le verdict live reste
 [`AUDIT_ETAT_COURANT.md`](AUDIT_ETAT_COURANT.md).
 
-## 1. Ce que la machine produit
+## 1. Contrat visé et portée reçue
 
-Pour un nuage u16 de sites deux à deux distincts et une fenêtre `smax`, elle
-énumère **tous** les supports minimaux positifs `U` d'arité `q` dans
+Pour un nuage u16 de sites deux à deux distincts et une fenêtre `smax`, le
+contrat de la machine est d'énumérer **tous** les supports minimaux positifs
+`U` d'arité `q` dans
 `{2,3,4}` dont la boule circonscrite `B` vérifie `p+q<=smax`, avec `p=|I_B|`, et
 publie pour chacun le census **global exact** `I_B` et `U_B`, ainsi que la
 classification `accepted_closed_rank` contre `extra_shell`.
+
+Le snapshot source `34371880...`, CMake `f663ada0...`, ELF `f927e47b...` passe
+`22/22` CTests ciblés en `106,22 s`. Cela reçoit les fixtures et mutants
+raccordés, pas encore la complétude générale de l'implémentation : le juge
+partage les lifts et `power_of`, et reste borné. Le théorème ci-dessous reçoit
+le schéma sous ses invariants; le statut live demeure celui de l'audit courant.
+Le source live a changé après ce pin, notamment par un filtre q4 supplémentaire;
+aucun résultat `22/22` ne lui est transféré sans reconstruction et nouvelle
+porte.
 
 Elle ne produit ni `BallActivation`, ni facettes du cœur, ni gateways, ni
 resolver, ni MSF, ni fold, ni verticales, ni `BenchmarkOutputContract-v1`. Elle
 ne contient aucun noyau CUDA.
 
-## 2. Le lemme profondeur--cellule, tel qu'implémenté
+## 2. Le lemme budget--cellule, tel qu'implémenté
 
 Pour une cellule `C` de fermeture compacte `K_C`, poser
 
 $$l_{C}(x)=\min_{c\in K_{C}}\left\Vert x-c\right\Vert^{2},\qquad u_{C}(x)=\max_{c\in K_{C}}\left\Vert x-c\right\Vert^{2}.$$
 
-Pour `p>=0`, `R_p(C)` est la `(p+1)`-ième plus petite valeur de `u_C` et
-`A_p(C)={x : l_C(x)<=R_p(C)}`. Si une boule positive possédée par `C` a
+Pour un budget `h>=0`, `R_h(C)` est la `(h+1)`-ième plus petite valeur de `u_C`
+et `A_h(C)={x : l_C(x)<=R_h(C)}`. Si une boule positive possédée par `C` a
 exactement `p` intérieurs stricts, alors `beta<=R_p(C)` et `I_B union U_B` est
 inclus dans `A_p(C)`.
 
 La cellule dyadique reste seule autorité pour la propriété half-open et pour la
-subdivision. Les bornes, les seuils et tous les filtres emploient la boîte
-**resserrée** `K_C inter bbox(A(C))` : c'est un convexe plus petit qui contient
-encore tous les centres possédés, puisque `c` appartient à `relint conv(U)`.
+subdivision. Une première passe sur sa fermeture globale conserve l'enveloppe
+de budget maximal. Seulement ensuite, les bornes et seuils terminaux emploient
+la boîte **resserrée** `K_C inter bbox(A(C))`. Pour tout support pertinent déjà
+conservé, `U` est inclus dans le pool et `c` appartient à `relint conv(U)` : la
+boîte resserrée contient donc encore son centre. Les seuils suivants sont
+relatifs au pool hérité; ils conservent le census pertinent, mais ne doivent pas
+être appelés les seuils globaux d'un enfant dyadique qui déborde de cette boîte.
+
+La preuve utile pour éviter toute circularité est dichotomique. Poser
+`H=smax-2`, le budget maximal commun du snapshot, et `S_B=I_B union U_B`. Pour
+toute boule candidate positive dont le support a survécu le long d'un chemin,
+le pool courant `P` maintient :
+
+`S_B subseteq P` **ou** `|I_B intersection P|>=H+1`.
+
+La propriété est vraie à la racine `P=X`. Lors d'un filtre
+`D_(H,P)(K)`, si `beta<=R_(H,P)`, tous les membres déjà conservés de la boule
+restent; sinon les `H+1` témoins de borne supérieure sont strictement
+intérieurs et conservés. Le resserrement garde le centre puisque le support
+positif `U` survit et `c_B in conv(U) subseteq bbox(P)`. À une fermeture locale
+`r_h<=h<=H`, la seconde branche est impossible : elle fournirait encore
+`H+1>h` intérieurs dans la liste scannée. Le census local fermé est donc bien
+le census global. Cet invariant, et non l'identité avec des listes recalculées
+depuis `X`, reçoit le resserrement implémenté.
 
 ## 3. Les deux lemmes soumis et leur sort
 
-`L1` — le census restreint est exact dès qu'il est accepté — est reçu. La porte
+`L1` — le census restreint est exact dès qu'il est accepté — est reçu sous
+l'invariant de pool précédent. La porte
 de rejet est `p'+q>smax` avec `q` l'arité du support minimal. La comparaison
-rationnelle `beta<=R_p(C)`, qui déborde `i128`, n'est jamais formée. Le rang
+rationnelle `beta<=R_p(C)`, dont la largeur worst-case peut dépasser `i128`,
+n'est jamais formée. Le rang
 fermé `p+|U_B|<=smax` reste une **classification** distincte : la classe
 `p+q<=smax<p+|U_B|` est publiée sous le nom `extra_shell`, jamais effacée.
 
@@ -60,15 +93,32 @@ deux rayons de même centre. L'audit propose mieux : le 5-uplet homogène
 primitif `H=(D, C-2Da, D||a||^2 - C.a)` issu de la forme liftée, disponible
 avant tout census et de taille fixe. Cette migration n'est pas faite.
 
-## 4. Exact-once entre profondeurs
+## 4. Exact-once entre budgets
 
-`tau_C(x)=min{p : x in A_p(C)}` et `e(U)=max_{x in U} tau_C(x)`. Le census part
-du bucket `A_e`. Si le compte intérieur partiel `r` vérifie `r<=e`, le census
-est global; et comme un membre au moins n'est pas dans `A_{e-1}`, on a
-`beta>R_{e-1}`, donc `r>=e`, donc **`r=e` exactement**. C'est un invariant
-vérifié à l'exécution : sa violation rend le code 3. Si `r>e`, l'indice est
-promu à `r` et seuls les nouveaux buckets sont scannés. Si `r>smax-q`, le
-support est `above_support_window` et **aucun shell partiel n'est publié**.
+Dans une cellule figée, poser `tau_C(x)=min{h : x in A_h(C)}` et l'entrée
+immuable `e0(U)=max_{x in U} tau_C(x)`. Le census emploie un curseur distinct
+`h=e0`. Après le scan complet de `A_h`, noter `r_h` le compte intérieur total.
+L'invariant est `h<=r_h<=p`. Si `r_h<=h`, le census est global et
+`r_h=p=h`. Si `r_h>h`, poser `h=r_h` et scanner seulement les nouveaux buckets.
+Si `r_h>smax-q_min` pour un run de boule, aucun support du run n'est pertinent
+et **aucun shell partiel n'est publié**. Les contacts nuls rencontrés dans tous
+les buckets sont accumulés.
+
+L'exact-once demande une partition terminale commune à tous les budgets d'une
+arité. Le code courant possède un seul arbre et énumère une fois chaque tuple
+dans `A_(h_max)`, où `h_max=smax-q`; il calcule ensuite `e0=max tau(U)`. Deux
+arbres indépendants pourraient émettre le même support à deux cellules de
+résolution différente. La fixture à ajouter est
+`A=(10,10,10),B=(20,10,10),C=(15,18,10),W=(15,12,10)` : `ABC` entre à `e0=0`
+dans la racine, mais à `e0=1` au singleton de son centre.
+
+Le champ `Pending.e` conserve actuellement `e0`; une variable locale est
+ensuite promue. Au premier tour, la garde `interior<e_start` vérifie la borne
+basse non structurelle; après chaque promotion, `h` prend l'ancien compte et le
+nouveau compte ne peut qu'augmenter. La sortie `interior<=h` implique donc bien
+`interior==h` par le flot nominal. Une assertion finale explicite serait
+redondante mais utile comme défense; le vrai trou de réception est que le mutant
+`strata-stop` n'est pas raccordé à CTest.
 
 ## 5. Lanes d'arité indépendantes — l'invariant de complétude
 
@@ -90,8 +140,9 @@ de q3, est **tué** par `arite3` : `judge_mine=558` contre `judge_truth=1391`,
 Tous sont des refus exacts; aucun n'est une heuristique flottante.
 
 1. **Séparation convexe** par boîte resserrée puis quatre directions
-   diagonales. Sans elle l'octree ne coupe jamais : `A(C)` contient toujours au
-   moins `t` sites, même au milieu du vide.
+   diagonales. Le seul seuil ne peut pas certifier le vide puisque `A(C)`
+   contient toujours au moins `t` sites; la séparation apporte ce refus sans
+   prétendre être nécessaire ni rendre l'octree sparse.
 2. **Recouvrement d'intervalles** : les membres d'un support de rayon carré
    `beta` vérifient `l_C<=beta<=u_C`, donc leurs intervalles s'intersectent.
 3. **Bissecteur exact** : `g(c)=||c-a||^2-||c-b||^2` est affine, ses extrema sur
@@ -108,7 +159,7 @@ Le commentaire de surclaim « `O(nombre de cliques)` au lieu de `C(m,q)` » est
 retiré : le pire cas reste `C(m,4)` et les bitsets suppriment les retests, pas
 les cliques.
 
-## 7. Mesure du filtre d'enveloppe
+## 7. Mesure historique du filtre d'enveloppe
 
 Sur `terrain`, `n=2000`, `smax=11`, `pair_cap=256`, même sortie
 `supports_total=134 300` avant et après :
@@ -118,8 +169,11 @@ Sur `terrain`, `n=2000`, `smax=11`, `pair_cap=256`, même sortie
 | sans filtre d'enveloppe | `31 246 503` | `6,95 s` |
 | avec filtre d'enveloppe | `12 156 467` | `4,85 s` |
 
-`hull_pruned=19 090 036` sur `31 246 503` tests. Les temps proviennent d'une
-machine partagée à deux cœurs et ne sont pas un benchmark.
+`hull_pruned=19 090 036` sur `31 246 503` tests. Les deux sources, ELF,
+commandes et sorties brutes ne sont pas archivés; ce relevé est donc historique
+et non reproductible depuis le worktree courant. L'égalité du seul compte de
+supports ne remplace pas une comparaison d'identités. Les temps proviennent
+d'une machine partagée à deux cœurs et ne sont pas un benchmark.
 
 ## 8. Portes permanentes
 
@@ -129,7 +183,7 @@ la **grille gravée**. Cette dernière existe parce qu'aucun nuage aléatoire ne
 produit l'égalité entière `l_C(x)=R_p(C)` : sans elle le mutant `drop-ties`
 survit partout, ce qui a été vérifié sur les quatre familles.
 
-Quatre fixtures gravées : `egalite`, `proprietaire`, `arite3`, `arite4`,
+Cinq fixtures gravées : `egalite`, `proprietaire`, `arite3`, `arite4`,
 `coquille`. La dernière est la contre-fixture de coquille de l'audit : trente
 points de rayon cinq autour de `(10,10,10)`, paire antipodale à `p=0, q=2` et
 `|U_B|=30`. Elle rend `shell_high_water=30` et classe extra-shell. Le tampon
@@ -153,8 +207,11 @@ Plancher de couverture à code 3.
 2. Le test **droite--cellule** pour q4, légitimé par le fait que tout tétraèdre
    propre positif possède au moins deux faces aiguës, n'est pas implémenté.
    C'est le filtre net attendu pour la lane la plus coûteuse.
-3. Le critère de split exact `sum_i C(a_i,q-1)` par sweep n'est pas implémenté :
-   le critère courant compte seulement les paires d'intervalles compatibles.
+3. Le majorant de split `sum_i C(a_i,q-1)` par sweep n'est pas implémenté. Il
+   compte exactement les cliques du graphe d'intervalles scalaires, pas celles
+   du graphe 3D de bissecteurs; après construction du bitset, les vrais
+   `E/T/Q` doivent être comptés séparément. Le critère courant compte seulement
+   les paires d'intervalles compatibles.
 4. La jauge dyadique commune `s_x(c)` n'est pas implémentée. Elle rendrait les
    bornes affines et réduirait la largeur; la borne actuelle est
    `l,u<=3(65535\cdot 2^{d})^{2}<2^{34+2d}`, sous `i128` jusqu'à `d<=26` mais
@@ -164,6 +221,10 @@ Plancher de couverture à code 3.
 6. Le régime « mélange équilibré de huit amas » de la section 14.5 du plan de
    tests n'existe pas dans le générateur v3.
 7. Aucun noyau CUDA, aucun producteur du payload officiel, aucune session G4.
+8. Le groupement avant census trie les centres, puis compare encore
+   quadratiquement les rayons concentriques et omet ces comparaisons exactes du
+   ledger. La clé homogène primitive doit supprimer ce sous-produit avant toute
+   qualification de débit.
 
 ## 10. Non-claims
 

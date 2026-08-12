@@ -117,9 +117,9 @@ Les propriétés d'implémentation sont favorables :
   `p+q<=11` membres.
 
 Pour q3, les budgets utiles sont `h=0..8`; pour q4, `h=0..7`. Ils tiennent dans
-une seule CSR `D_8`, chaque site portant son premier `p` d'appartenance. Une
+une seule CSR `D_8`, chaque site portant son premier budget `h` d'appartenance. Une
 réduction top-9 produit tous les seuils. Si q2 est aussi traité par cette
-machine, il faut ajouter `p=9`, `D_9` et un top-10; la route Yao-1/q2 séparée
+machine, il faut ajouter `h=9`, `D_9` et un top-10; la route Yao-1/q2 séparée
 permet de laisser ce coût hors de la source q3/q4.
 
 Définir `tau_C(x)=min{h:x in D_h(C)}` et, pour un support proposé `U`, son
@@ -241,25 +241,42 @@ inférieure. Il faut préserver cet invariant.
 
 La route la plus simple à falsifier est maintenant :
 
-1. calculer top-9, `tau_C` et les buckets imbriqués `D_p` par
+1. calculer top-9, `tau_C` et les buckets imbriqués `D_h` par
    `count/scan/fill`;
 2. subdiviser selon une estimation du travail maximal de tous les budgets,
    avec une décision terminale commune par arité;
 3. lorsque `|D_(h_max)|<=M`, énumérer une fois et séparément les triplets q3 et
    quadruplets q4, puis attacher leur `e0=max tau(U)`;
 4. décider Gram--Cramer, indépendance et barycentriques exactes, puis owner;
-5. produire `(GeometricBallKey,SupportKey,e0,cell_id)`, radix/RLE par clé
-   géométrique en conservant **tous** les supports et choisir un représentant
-   rejouable;
-6. pour ce représentant seulement, partir de `h=e0`, promouvoir par compte
-   intérieur total et scanner les nouveaux buckets jusqu'à fermeture ou
-   dépassement; attacher le même `p` à la boule, puis appliquer `p+q<=smax`
-   séparément à chacun de ses supports.
+5. produire `(cloud_epoch,GeometricBallKey,SupportKey,CensusContext)`, où le
+   contexte contient `cell_id`, digests du pool/domaine, backend ou arène de
+   buckets, `e0` et un budget certifié `b_cert`; radix/RLE par
+   `(cloud_epoch,GeometricBallKey)` en conservant **tous** les supports et tous
+   leurs contextes;
+6. pour le run, poser `H_run=max(smax-q)=smax-q_min`, choisir atomiquement un
+   contexte ayant `b_cert>=H_run`, puis employer **son** `e0` et **ses** buckets
+   pour promouvoir par compte intérieur total jusqu'à fermeture ou dépassement;
+   attacher le même `p` à la boule, puis appliquer `p+q<=smax` séparément à
+   chacun de ses supports. Si aucun contexte local ne certifie `H_run`, router
+   vers un census global exact.
 
 Placer la promotion avant le RLE répéterait précisément le strict-count pour
 tous les supports d'une même boule et contredirait « un seul census par
 `BallKey` ». Un support rejeté à une arité ne tombstone jamais toute la boule :
 un support d'arité inférieure de la même clé peut rester pertinent.
+
+Le snapshot CPU pincé possède un contexte commun plus fort : un seul arbre
+q2/q3/q4 filtre toute l'ascendance au budget `smax-2`, puis groupe seulement
+dans l'unique feuille owner. Il peut donc initialiser le curseur au maximum des
+`e0` du run. Ce raccourci ne se transfère pas à une architecture où q2 vient
+d'un LBVH et q3/q4 de partitions différentes : prendre `e0` d'une cellule et
+les buckets d'une autre est interdit. Une fixture de run multi-arité fixe le
+risque : centre `(20,20,20)`, rayon carré 25, support q3
+`(25,20,20),(16,23,20),(17,16,20)`, support q4
+`(23,24,20),(23,16,20),(17,20,24),(17,20,16)`, et les huit intérieurs
+`(20,20,20)`, ses six voisins axiaux à distance un, puis `(21,21,21)`. Le shell
+exact a sept labels et `p=8` : q3 est pertinent, q4 ne l'est pas. Un contexte
+q4 certifié seulement à sept ne doit jamais tombstoner la boule; `H_run=8`.
 
 Dans le cas idéal régulier, `M=11` donne au plus `C(11,3)=165` triplets ou
 `C(11,4)=330` quadruplets par cellule et lane. `M=12..16` peut être testé comme
@@ -269,7 +286,8 @@ ressource physique réelle.
 
 Les filtres suivants sont sûrs, mais secondaires :
 
-- k-DOP ou séparation convexe stricte de la cellule et de `conv(D_p)`;
+- k-DOP ou séparation convexe stricte de la cellule et de
+  `conv(D_(h_max))`;
 - graphe local éphémère de bissecteurs, en bitsets registre/shared pour
   `M<=64`, puis triangles par intersection de deux lignes et q4 par intersection
   de trois lignes;
@@ -618,6 +636,45 @@ avec test droite--cellule et clé primitive de sphère. Le regroupement actuel
 par centre compare encore quadratiquement les rayons concentriques; la clé
 primitive supprime cette classe de collision.
 
+### Réponse à la note de solution de Claude, snapshot pincé
+
+La nouvelle
+[`NOTE_SOLUTION_SOURCE_CELLULES_CENTRES_20260812.md`](NOTE_SOLUTION_SOURCE_CELLULES_CENTRES_20260812.md)
+décrit correctement l'intention générale, mais sa version initiale ne pouvait
+pas encore servir de reçu de complétude. Elle confondait l'entrée immuable `e0`
+avec le curseur promu `h`, ne disait pas que tous les budgets partagent la même
+partition terminale, appelait exact le potentiel du seul graphe d'intervalles
+et annonçait quatre fixtures tout en en listant cinq. Ces points sont corrigés
+dans la note.
+
+Le snapshot resté stable pendant configuration, build et test est :
+
+- CMake `f663ada0ecbedb63a5bb651915bb41dcf3f12da4a96b34f7be5b806c9b4029cd`;
+- source `343718804b0ada609a2f08f318c81e4cd19b1f13c0ac181f86e0ee35a25da7a8`;
+- ELF Release `f927e47b4e19d5c49c1032e0d0993b2af523470a87b8895add601613294dd3a6`.
+
+La configuration contient `482` CTests et le filtre
+`^mhgp3v_centre_cell_` rend `22/22` en `106,22 s`; les trois empreintes sont
+inchangées après la porte. Les cinq accords/fixtures, sept mutants raccordés et
+cinq refus sont donc bien exercés. `strata-stop` reste enregistré mais sans
+CTest. La garde initiale et la monotonie des scans impliquent bien
+`interior==h` à la fermeture; une assertion explicite serait seulement
+défensive. Le juge partage toujours lifts et `power_of` avec le sujet.
+
+Le code pincé possède bien un seul arbre commun aux budgets, garde `Pending.e`
+comme entrée et groupe centre/rayon avant `census_group`; le noyau mathématique
+de la promotion est donc cohérent sous les invariants énoncés. Cela reçoit la
+**conception exacte conditionnelle et les petits cas raccordés**, pas encore la
+complétude indépendante du binaire. Cela ne change surtout pas le verdict
+industriel : le split reste fondé sur les seules paires d'intervalles, les
+bitsets sont denses, les cliques peuvent être quartiques, le groupement des
+rayons concentriques est quadratique et non compté, la rampe contractuelle
+n'existe pas, et aucun kernel CUDA/payload/fold n'est présent. Réponse à Claude :
+**conserver cette machine comme source CPU de référence et banc de réduction;
+ne pas la porter sur G4 avant une nouvelle rampe montrant que les réductions
+pré-lift ferment les compteurs dominants.** Le source a encore changé après ce
+pin; aucun résultat `22/22` n'est transféré automatiquement à son successeur.
+
 ## 9. Réponses Q2 et Q3
 
 `terrain` et `scanline_overlap_multiecho` sont de bons diagnostics LiDAR. Ils ne
@@ -708,5 +765,223 @@ rampe de compteurs sur `12 500/25 000/50 000`. Installer immédiatement le
 squelette de `BenchmarkOutputContract-v1` et l'interface verticale avec statut
 `incomplete`; G4 n'est justifiée qu'après passage de la gate de travail et
 existence du producteur device complet.
+
+## 13. Réponses aux trois nouvelles questions de Claude
+
+La note
+[`NOTE_CLAUDE_ETAT_CELLULES_CENTRES_20260812.md`](NOTE_CLAUDE_ETAT_CELLULES_CENTRES_20260812.md)
+pose trois questions de décision. Les réponses courtes sont :
+
+| question | réponse | décision |
+| --- | --- | --- |
+| conserver le filtre droite--cellule malgré son coût CPU | **oui comme prune exact optionnel, non comme défaut inconditionnel** | garder `off/on/adaptive`; défaut CPU `off`, défaut device seulement après une mesure A/B native et un seuil d'amortissement par nombre d'apex |
+| un régime volumique officiel peut-il donner une petite Source S | **linéaire en espérance, mais pas à petite constante connue** | `Poisson uniforme` et `8 amas équilibrés` restent bloquants; une surface ne peut pas les remplacer |
+| réduire environ 115 lifts par support ou changer de producteur | **réduire d'abord les occurrences avant lift** | radix/RLE `SupportKey` avant géométrie, puis `BallKey` avant census; un diagramme local d'ordre supérieur reste au plus un fallback terminal borné |
+
+### 13.1 La rampe annoncée n'est pas encore un reçu
+
+Les nombres `n=2 000` et `n=12 500` de la note de Claude n'engagent ni la
+commande complète, ni la graine pour le premier point, ni les SHA-256 des deux
+sources et ELF, ni une sortie brute archivée. Le point `12 500` porte sur le
+binaire avec filtre d'enveloppe, tandis que la table du filtre d'axe porte sur
+un autre successeur. L'égalité du seul `supports_total` ne remplace pas une
+égalité des identités. Le temps ayant servi à l'extrapolation « deux cents
+secondes » n'est pas publié. Ces nombres sont donc des diagnostics historiques
+utiles, pas la rampe contractuelle.
+
+Le verdict `NO-GO` ne dépend pas de cette extrapolation CPU vers G4. Il découle
+déjà de l'absence de producteur CUDA et de payload officiel, de la répétition
+des mêmes tuples dans de nombreuses cellules et de la comptabilité incomplète
+des primitives exactes. Sur le snapshot pincé `c07ce501...`, `terrain,n=500`,
+`seed=11`, `smax=11`, `pair_cap=256`, le ledger affichait
+`lifts_built=2 980 691` et `axis_tests=1 575 265`. Chaque test d'axe construisait
+un second `TriangleLift`; le nombre physique était donc au moins `4 555 956`,
+soit 52,85 % de plus que le compteur nommé `lifts_built`. Parmi les
+propositions comptées, `2 786 275`, soit 93,48 %, mouraient seulement à
+l'owner. La réduction prioritaire doit intervenir avant ces lifts.
+
+### 13.2 Q1 — politique exacte pour le filtre droite--cellule
+
+Le filtre live est un refus exact sur une face canonique quelconque. Si
+`F=(a,b,c)` est non colinéaire, le centre de tout tétraèdre
+`(a,b,c,d)` appartient à la droite des points équidistants de `a,b,c`, que la
+face soit aiguë ou obtuse. La projection du pavé sur le plan normal à cette
+droite est un zonotope; ses trois familles de facettes ont pour normales
+`n cross e_i`. Les trois tests d'axes employés sont donc suffisants. Le rejet
+strict laisse la tangence dans la branche conservée.
+
+Le théorème « un tétraèdre bien centré possède au moins deux faces aiguës »
+n'est pas requis par ce filtre. Il ne devient utile que pour énumérer les
+tétraèdres depuis des *carriers aigus*. Ajouter simplement `if (!acute) continue`
+à la boucle actuelle serait incomplet, car elle utilise seulement la face des
+trois plus petits identifiants. La fixture exacte suivante doit précéder toute
+spécialisation aiguë :
+
+- `P0=(5,10,10)`, `P1=(6,7,10)`, `P2=(10,13,6)`, `P3=(14,10,13)`;
+- les quatre points sont sur la sphère de centre `(10,10,10)` et rayon carré
+  `25`;
+- les barycentriques du centre sont `(12,45,45,60)/162`, donc le q4 est
+  strictement positif;
+- la face `P0P1P2` est obtuse, tandis que les trois autres sont aiguës.
+
+Deux implémentations exactes sont possibles : garder la face canonique même
+obtuse, comme aujourd'hui, ou énumérer toutes les faces aiguës puis ne retenir
+que la plus petite face aiguë canonique de chaque q4. Il ne faut jamais
+conditionner q4 à l'acceptation de cette face dans la lane q3.
+
+La politique de performance peut être adaptative parce que **désactiver** ce
+prune ne change aucune décision scientifique. Avant le test, masquer réellement
+les bits `t<c4`, compter `a=popcount(row_ij & row_k & mask_c4)` et ne construire
+le carrier que si `a>0`. Le snapshot live teste encore l'axe lorsque les seuls
+bits présents ont `t>=c4`. Il recalcule aussi le `TriangleLift` déjà construit
+par q3 : le paramètre `tri_in` existe mais aucun appel ne lui passe `&tri`.
+
+La version device doit calculer le carrier une fois par triangle et amortir son
+test sur ses `a` apex. Un seuil de coût calibré hors chrono peut activer le
+prune lorsque `a` rend le coût attendu des q4 évités supérieur au coût de
+l'axe; les modes forcés `off` et `on` fournissent l'ablation. Le reçu publie
+`valid_apex_before_axis`, `valid_apex_after_axis`, constructions physiques de
+carrier, fallbacks de largeur et cycles device, pas seulement un nombre de
+triangles rejetés. Le défaut CPU reste `off` tant que `on` le ralentit; le mode
+`on` reste dans les fixtures et campagnes de réduction.
+
+Une porte indépendante doit comparer ligne--AABB aux trois intervalles
+rationnels de paramètre, couvrir tangence fermée et coordonnées extrêmes, et
+tuer le mutant `>` remplacé par `>=`. Les accords actuels du juge, qui partage
+les lifts, ne reçoivent pas seuls cette primitive.
+
+### 13.3 Q2 — ce que signifie réellement « volumique favorable »
+
+La section 14.5 du plan de tests tranche la question : les objectifs de latence
+sont évalués sur **le Poisson uniforme volumique et le mélange équilibré de
+huit amas**. `terrain`, LiDAR ou une surface bruitée restent diagnostiques et
+ne peuvent pas devenir les seuls cas bloquants.
+
+La formule Poisson auditée donne précisément une réponse nuancée. Dans le bulk
+stationnaire continu et en position générique, le nombre attendu de supports
+positifs de Source S jusqu'à `smax=11` vaut
+`(175+495*pi^2/16) rho |Omega|`, soit environ `480,340886` par point attendu.
+Il est donc **linéaire en espérance**, mais avec une constante qui n'est pas
+petite : environ 24,017 millions de supports à 50 000 points. La densité locale
+se résorbe par changement d'échelle; un mélange de gros amas homogènes bien
+séparés n'offre donc pas, dans son bulk, un mécanisme général qui ferait tomber
+cette constante. Les bords, ponts et quantification u16 modifient la valeur,
+mais ne fournissent aucune garantie plus favorable.
+
+Cette formule n'est ni une identité pour une boîte finie, ni une borne
+déterministe, ni un minorant pour tout algorithme H0. Elle réfute en revanche
+l'interprétation « certificat sparse = catalogue exhaustif de Source S à petite
+constante ». Le certificat demandé peut rester sparse alors que l'objet ambiant
+de tous les supports est beaucoup plus grand, exactement comme un MST reste
+sparse sans matérialiser son graphe complet. La bonne cible est donc de fusionner
+sur device vers les événements/facettes réellement consommés par H0, ou de
+représenter un plateau par son token Johnson, jamais de rapatrier un catalogue
+hôte de tous les supports.
+
+Le reçu de volumétrie doit publier, séparément par `(q,p)`,
+`support_occurrences`, `unique_support_keys`, `unique_ball_keys`,
+`effective_h0_events`, octets avant/après fold et D2H. Le SLO ne peut être
+réouvert que sur `uniform` **et** `eight_clusters`, avec le même
+`BenchmarkOutputContract-v1`.
+
+### 13.4 Q3 — RLE `SupportKey` avant toute géométrie
+
+Le facteur observé n'est pas une fatalité du théorème de cellules. Il provient
+d'abord d'un ordre d'opérations défavorable : chaque cellule construit la
+géométrie d'un tuple, puis découvre tardivement que le centre appartient à une
+autre feuille. La transformation suivante est exacte.
+
+1. Chaque feuille émet après les seuls filtres sûrs intervalle--bissecteur--hull
+   une occurrence compacte `(SupportKey,CellId,e0)`, sans lift q3/q4.
+2. Un radix stable groupe les occurrences par `SupportKey`, c'est-à-dire les
+   identifiants triés et l'arité.
+3. Un seul lane du run calcule centre, positivité et clé homogène de sphère.
+4. Le run sélectionne l'unique occurrence dont la cellule half-open possède le
+   centre. L'absence ou la multiplicité d'un owner est un échec d'invariant;
+   l'occurrence owner fournit son `e0` et son `CensusContext`.
+5. Un second radix/RLE par `GeometricBallKey` agrège les supports d'une même
+   boule, puis exécute une seule promotion et un seul census fermé.
+
+**Preuve.** La complétude cellulaire garantit que tout support pertinent
+survit dans sa feuille owner. Sa positivité, son centre et sa sphère dépendent
+uniquement du tuple `U`, pas de la cellule qui l'a proposé. Supprimer les autres
+occurrences du même `SupportKey` ne peut donc supprimer ni changer le candidat
+owner. Après calcul du centre, la partition half-open choisit exactement une
+occurrence; le rejeu `U subseteq D_(smax-q)(C_owner)` et le contexte de cette
+occurrence recertifient l'hypothèse de liste. Les tuples non positifs ou sans
+owner sont rejetés une seule fois. Le RLE suivant conserve tous les supports
+distincts d'une même boule et ne mutualise que son census.
+
+Cette transformation attaque directement les 93,48 % de rejets owner du
+snapshot pincé. Elle n'est pas gratuitement sparse : l'arène d'occurrences et
+le radix peuvent eux-mêmes devenir trop grands. Le gate préalable publie, par
+arité, multiplicité p50/p95/max des `SupportKey`, octets count/fill, workspace
+radix, runs segmentés, `owner_lookup_failures` et rapport
+`occurrences/unique`. Les segments sont une partition radix de la clé entière;
+ils ne coupent jamais un run.
+
+Pour q2, le centre doublé est simplement `x+y`, entier u17 : l'owner peut être
+testé avant toute puissance. Il n'est donc pas rationnel d'élargir par défaut
+toutes les cellules q3/q4 jusqu'à `D_9` pour remplacer sans comparaison la
+route q2. La voie cellules reste aujourd'hui une référence différentielle q2;
+la cascade Yao--affine--résiduel reste une candidate produit séparée tant
+qu'aucune gate comparative complète ne les départage.
+
+### 13.5 Deux primitives device à essayer avant un Voronoï local
+
+La première remplace les bornes de distances i128 par des scores affines
+entiers. Pour une profondeur `d`, poser `S=2^d`, écrire le centre `c=z/S` et
+définir `F_x(z)=S||x||^2-2<x,z>`. On a
+`S^2||x-c||^2=S F_x(z)+||z||^2`; le dernier terme est commun aux sites à centre
+fixé. Pour une cellule, définir séparément `L_x^F=min F_x`, `U_x^F=max F_x`,
+`R_h^F` comme la `(h+1)`-ième valeur de `U_x^F`, puis
+`D_h^F={x:L_x^F<=R_h^F}`. Le lemme budget--cellule se répète mot pour mot avec
+le niveau affine de la boule; il ne faut pas affirmer que `R_h^F` est
+numériquement le même que le seuil de distance.
+
+Sous `x in [0,65535]^3` et `d<=26`, `|F_x|<9*2^58<2^62` et
+`|F_x-F_y|<18*2^58<2^63`. Extrema, top-9, égalités et bissecteurs tiennent donc
+exactement en `int64` signé, sans l'hypothèse empirique « le rayon local vaut
+quelques dizaines ». La géométrie des survivants garde ses limbs exacts.
+
+La seconde partage un carrier q3 entre tous ses apex q4. Si le circumcentre du
+triangle est `N/G`, sa normale est `n`, `v=d-a` et
+`Delta=||d||^2-||a||^2`, alors, pour `n dot v !=0`, le centre tétraédrique est
+`[2(n dot v)N+n(G Delta-2<N,v>)]/[2G(n dot v)]`. Le triangle paie son lift une
+fois; chaque apex paie ensuite produits scalaires, produits--sommes, owner et
+barycentriques avant de former la clé de sphère. Cette formulation utilise
+n'importe quelle face canonique non dégénérée et ne dépend pas de sa pertinence
+q3.
+
+Un diagramme de Voronoï/Delaunay local d'ordre au plus `k` n'est pas le prochain
+jalon. Répété dans des feuilles recouvrantes, il peut recréer la même
+duplication et matérialiser localement la mosaïque d'ordre supérieur interdite.
+Il reste admissible comme fallback **transitoire et borné** d'une feuille après
+préflight, sans atlas ni incidences persistantes, avec preuve de complétude et
+travail entièrement compté. On ne l'étudie qu'après la gate
+`SupportKey-before-lift`; si `occurrences/unique` devient proche de un mais que
+`unique/effective_h0_events` reste rouge, le verrou sera alors bien le
+producteur scientifique et non l'owner tardif.
+
+### 13.6 Ordre de travail corrigé
+
+1. Pincer les commandes, sources, ELF et sorties brutes; compter les
+   constructions physiques par type. Le `lifts_built` actuel n'est pas cette
+   quantité.
+2. Graver l'oracle indépendant de promotion, ligne--pavé et identités de Source
+   S, ainsi que les fixtures face canonique obtuse et boule multi-supports avec
+   `e0` distincts.
+3. Émettre puis dédupliquer `SupportKey` avant géométrie; sélectionner le
+   contexte owner; seulement ensuite former `GeometricBallKey` et faire un
+   census par boule.
+4. Employer les scores affines i64 pour listes et bissecteurs; séparer q2 de
+   q3/q4; réutiliser le carrier par apex et rendre l'axe adaptatif.
+5. Dimensionner bitset seulement pour `m<=64` ou après préflight; sinon CSR
+   sparse, split ou `resource_exhausted`. Toute arène est SoA
+   `count--scan--fill`, sans allocation par support.
+6. Mesurer les deux pentes de `12 500/25 000/50 000` sur `uniform` et
+   `eight_clusters`, puis seulement décider d'un kernel G4. Le payload officiel
+   et l'interface verticale restent installés dès le premier jalon avec statut
+   `incomplete`.
 
 GCP non utilisé.

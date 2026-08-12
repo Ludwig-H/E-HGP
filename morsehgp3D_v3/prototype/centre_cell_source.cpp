@@ -136,9 +136,11 @@ struct Stats {
   i64 candidate_ids = 0, candidate_high_water = 0;
   i64 separation_tests = 0, separation_pruned = 0;
   i64 overlap_pairs = 0, terminal_overlaps = 0, max_terminal_overlaps = 0;
+  i64 potential_triples = 0, potential_quads = 0;
   i64 clique_pairs = 0, clique_triples = 0, clique_quads = 0;
   i64 bisector_tests = 0, bisector_pruned = 0;
   i64 hull_tests = 0, hull_pruned = 0;
+  i64 axis_tests = 0, axis_pruned = 0, axis_unusable = 0;
   i64 lifts_built = 0, degenerate_lifts = 0;
   i64 owner_rejected = 0, self_centre_rejected = 0, rank_rejected = 0;
   i64 ball_groups = 0, group_saved_scans = 0;
@@ -283,6 +285,83 @@ inline bool hull_meets_cell(const HullBox& h, const CentreCell& cell) {
   return true;
 }
 
+// ---------------------------------------------------------------------------
+// TEST DROITE--CELLULE POUR LA LANE q4.
+//
+// Legitimation (auditeur, section 5) : tout tetraedre propre POSITIF possede au
+// moins une face aigue, donc positive — au moins deux, en fait. Le lieu des
+// centres equidistants des trois sommets d'un triangle NON degenere est la
+// droite rationnelle normale a son plan passant par son circumcentre. Un q4
+// possede par la cellule impose donc que cette droite rencontre la cellule.
+// Le triangle n'a PAS besoin d'etre un support q3 pertinent, ni meme positif :
+// la condition est purement geometrique, ce qui preserve l'independance des
+// lanes.
+//
+// Le test employe est le theoreme de l'axe separateur droite--pave, sans
+// division : la droite `c0 + t n` manque le pave de centre `m` et de demi-cote
+// `h` s'il existe `i` tel que, pour `A = n x e_i`,
+//   |<c0 - m, A>| > sum_j h_j |A_j|,
+// car `<n,A>=0` rend la projection de la droite constante. Le test est exact et
+// FAIL-OPEN : en cas de risque de debordement il ne coupe rien.
+//
+// ARITHMETIQUE. Les coordonnees sont ramenees a une origine entiere `o` proche
+// de la cellule. En notant `L` le rayon local et `W` la largeur de la cellule a
+// l'echelle `S=2^depth`, la plus grande quantite formee est bornee par
+// `41472 S L^7 + 20736 W L^6`. Le garde `L<=4096, depth<=26` la maintient sous
+// `2^127`. En pratique `L` vaut quelques dizaines.
+struct LocalFrame {
+  i64 origin[3] = {0, 0, 0};
+  i64 lo[3] = {0, 0, 0};  // cellule a l'echelle S, translatee
+  i64 hi[3] = {0, 0, 0};
+  i64 scale = 1;
+  bool usable = false;
+};
+
+inline i64 floor_div_i64(i64 a, i64 b) {
+  i64 q = a / b;
+  if ((a % b != 0) && ((a < 0) != (b < 0))) --q;
+  return q;
+}
+
+// La droite normale au triangle, passant par son circumcentre, rencontre-t-elle
+// la cellule ? Renvoie `true` si elle la rencontre OU si le test est indecis.
+inline bool triangle_axis_meets_cell(const mhgp::P3& a, const V3& p1, const V3& p2,
+                                     const TriangleLift& tri, const LocalFrame& frame) {
+  if (!frame.usable) return true;
+  const i64 nx = p1.y * p2.z - p1.z * p2.y;
+  const i64 ny = p1.z * p2.x - p1.x * p2.z;
+  const i64 nz = p1.x * p2.y - p1.y * p2.x;
+  if (nx == 0 && ny == 0 && nz == 0) return true;  // colineaires : indecis
+  if (!tri.lift.ok || tri.gg <= 0) return true;
+  const i128 den = tri.gg;  // > 0
+  // Numerateur du circumcentre dans le repere local, a l'echelle `den`.
+  i128 num[3];
+  num[0] = (i128)(a.x - frame.origin[0]) * den + tri.galpha * p1.x + tri.gbeta * p2.x;
+  num[1] = (i128)(a.y - frame.origin[1]) * den + tri.galpha * p1.y + tri.gbeta * p2.y;
+  num[2] = (i128)(a.z - frame.origin[2]) * den + tri.galpha * p1.z + tri.gbeta * p2.z;
+  const i64 nvec[3] = {nx, ny, nz};
+  for (int i = 0; i < 3; ++i) {
+    // A = n x e_i
+    i64 A[3] = {0, 0, 0};
+    const int u = (i + 1) % 3, v = (i + 2) % 3;
+    A[u] = nvec[v];
+    A[v] = -nvec[u];
+    if (A[0] == 0 && A[1] == 0 && A[2] == 0) continue;
+    // 2*S*den*<c0-m,A> = <2*S*num - (lo+hi)*den, A>
+    i128 dot = 0, radius = 0;
+    for (int d = 0; d < 3; ++d) {
+      const i128 term = 2 * (i128)frame.scale * num[d] -
+                        (i128)(frame.lo[d] + frame.hi[d]) * den;
+      dot += term * A[d];
+      const i128 width = (i128)(frame.hi[d] - frame.lo[d]) * den;
+      radius += width * (A[d] < 0 ? -(i128)A[d] : (i128)A[d]);
+    }
+    const i128 abs_dot = dot < 0 ? -dot : dot;
+    if (abs_dot > radius) return false;  // axe separateur exact
+  }
+  return true;
+}
+
 // Un candidat de la liste d'une cellule, trie par `l` croissant.
 struct Cand {
   i128 l = 0, u = 0;
@@ -312,7 +391,7 @@ struct Engine {
   int n = 0;
   int smax = 11;
   int leaf = 4;
-  int pair_cap = 256;
+  int work_cap = 20000;
   int max_depth = 22;
   Mutant mutant = Mutant::kNone;
   bool collect = false;
@@ -480,20 +559,42 @@ struct Engine {
       for (Cand& c : mine) c.tau = 0;
     }
 
-    i64 overlaps = 0;
+    // POTENTIEL EXACT DE CLIQUES (auditeur). En triant par borne gauche, soit
+    // `a_i` le nombre d'intervalles anterieurs dont la borne droite atteint la
+    // borne gauche de `i`. Le nombre EXACT de q-cliques d'intervalles vaut
+    // `sum_i C(a_i,q-1)`, calculable par un seul sweep. Il distingue une liste
+    // longue mais ORDONNEE — beaucoup de paires, peu de triangles — d'une liste
+    // reellement ambigue, ce qu'un simple compte de paires ne fait pas.
+    //
+    // Un fait utile : `u_j < l_i` entraine `l_j <= u_j < l_i`, donc `j < i`
+    // puisque `l` est trie. Le compte global des `u` strictement inferieurs a
+    // `l_i` est donc exactement le compte des anterieurs.
+    i64 pot_e = 0, pot_t = 0, pot_q = 0;
     {
       const int m = (int)mine.size();
+      scratch_u.clear();
+      scratch_u.reserve((std::size_t)m);
+      for (const Cand& c : mine) scratch_u.push_back(c.u);
+      std::sort(scratch_u.begin(), scratch_u.end());
+      int j = 0;
       for (int i = 0; i < m; ++i) {
-        const i128 u_i = mine[(std::size_t)i].u;
-        for (int j = i + 1; j < m; ++j) {
-          if (mine[(std::size_t)j].l > u_i) break;
-          ++overlaps;
-        }
+        while (j < m && scratch_u[(std::size_t)j] < mine[(std::size_t)i].l) ++j;
+        const i64 a = (i64)i - (i64)j;  // >= 0
+        if (a <= 0) continue;
+        pot_e += a;
+        pot_t += a * (a - 1) / 2;
+        pot_q += a * (a - 1) * (a - 2) / 6;
       }
     }
-    stats.overlap_pairs += overlaps;
+    stats.overlap_pairs += pot_e;
+    stats.potential_triples += pot_t;
+    stats.potential_quads += pot_q;
+    // Poids de travail : un triplet paie un `lift_triangle`, un quadruplet un
+    // `lift_of` et son auto-centrage, donc environ trois et six fois une paire.
+    const i64 work = pot_e + 3 * pot_t + 6 * pot_q;
     const bool terminal =
-        overlaps <= pair_cap || (int)mine.size() <= leaf || cell.depth >= max_depth;
+        work <= (i64)work_cap || (int)mine.size() <= leaf || cell.depth >= max_depth;
+    const i64 overlaps = pot_e;
     if (terminal) {
       ++stats.cells_terminal;
       stats.terminal_overlaps += overlaps;
@@ -548,6 +649,30 @@ struct Engine {
     const int c2 = lane_cut(2), c3 = lane_cut(3), c4 = lane_cut(4);
     const int top = std::max(c2, std::max(c3, c4));
     if (top < 2) return;
+
+    // REPERE LOCAL pour le test droite--cellule. Origine entiere proche de la
+    // cellule; le garde `L<=4096` maintient toutes les quantites sous 2^127.
+    LocalFrame frame;
+    {
+      frame.scale = (i64)1 << tight.depth;
+      for (int d = 0; d < 3; ++d) {
+        frame.origin[d] = floor_div_i64(tight.lo[d], frame.scale);
+        frame.lo[d] = tight.lo[d] - frame.origin[d] * frame.scale;
+        frame.hi[d] = tight.hi[d] - frame.origin[d] * frame.scale;
+      }
+      i64 local_max = 0;
+      for (int i = 0; i < top; ++i) {
+        const mhgp::P3& p = pts[cands[(std::size_t)i].id];
+        const i64 v[3] = {p.x - frame.origin[0], p.y - frame.origin[1],
+                          p.z - frame.origin[2]};
+        for (int d = 0; d < 3; ++d)
+          local_max = std::max(local_max, v[d] < 0 ? -v[d] : v[d]);
+      }
+      i64 width = 0;
+      for (int d = 0; d < 3; ++d) width = std::max(width, frame.hi[d] - frame.lo[d]);
+      frame.usable = local_max <= 4096 && tight.depth <= 26 && width <= (i64)1 << 40;
+      if (!frame.usable) ++stats.axis_unusable;
+    }
 
     const int words = (top + 63) / 64;
     adj.assign((std::size_t)top * (std::size_t)words, 0);
@@ -620,8 +745,27 @@ struct Engine {
               if (mutant == Mutant::kArityCascade && !tri_kept) continue;
               if (k >= c4) continue;
               const unsigned long long* rk = &adj[(std::size_t)k * (std::size_t)words];
-              for (int w = 0; w < words; ++w)
+              bool any_apex = false;
+              for (int w = 0; w < words; ++w) {
                 row_ijk[(std::size_t)w] = row_ij[(std::size_t)w] & rk[w];
+                if (row_ijk[(std::size_t)w]) any_apex = true;
+              }
+              if (!any_apex) continue;
+              // LE FILTRE DE LA LANE q4, applique SEULEMENT quand un apex existe :
+              // la droite des centres equidistants du triangle GEOMETRIQUE doit
+              // rencontrer la cellule. Aucun verdict de l'arite trois n'est
+              // consulte, conformement a l'independance des lanes.
+              int sorted3[3] = {ids[0], ids[1], ids[2]};
+              std::sort(sorted3, sorted3 + 3);
+              const mhgp::P3& ta = pts[sorted3[0]];
+              const V3 tp1 = sub(pts[sorted3[1]], ta), tp2 = sub(pts[sorted3[2]], ta);
+              const TriangleLift tri =
+                  mhgp3v::ballfront::lift_triangle(ta, pts[sorted3[1]], pts[sorted3[2]]);
+              ++stats.axis_tests;
+              if (!triangle_axis_meets_cell(ta, tp1, tp2, tri, frame)) {
+                ++stats.axis_pruned;
+                continue;
+              }
               bool stop_t = false;
               for (int wt = 0; wt < words && !stop_t; ++wt) {
                 unsigned long long bt = row_ijk[(std::size_t)wt];
@@ -651,7 +795,8 @@ struct Engine {
 
   // UN SEUL LIFT PAR CANDIDAT : centre rationnel, auto-centrage et forme de
   // puissance proviennent du meme calcul.
-  bool propose(const CentreCell& cell, const int* raw, int q, int e) {
+  bool propose(const CentreCell& cell, const int* raw, int q, int e,
+               const TriangleLift* tri_in = nullptr) {
     int ids[4];
     std::memcpy(ids, raw, sizeof(int) * (std::size_t)q);
     std::sort(ids, ids + q);
@@ -671,7 +816,8 @@ struct Engine {
       den = 2;
       positive = true;
     } else if (q == 3) {
-      const TriangleLift tri = mhgp3v::ballfront::lift_triangle(a, pts[ids[1]], pts[ids[2]]);
+      const TriangleLift tri =
+          tri_in ? *tri_in : mhgp3v::ballfront::lift_triangle(a, pts[ids[1]], pts[ids[2]]);
       if (!tri.lift.ok || tri.gg <= 0) { ++stats.degenerate_lifts; return false; }
       lift = tri.lift;
       const V3 p1 = sub(pts[ids[1]], a);
@@ -796,9 +942,14 @@ struct Engine {
       e = interior;
       if (e > budget) { ++stats.rank_rejected; return; }
     }
-    // INVARIANT DU LEMME : a la fermeture, `r == e` exactement.
-    if (have_thresholds && interior < e_start && mutant == Mutant::kNone) {
-      std::fprintf(stderr, "INVARIANT viole : r=%d < e=%d\n", interior, e_start);
+    // INVARIANT DU LEMME, VERIFIE A LA FERMETURE. Le curseur `h` s'arrete quand
+    // `r_h<=h`; le lemme impose alors l'EGALITE `r_h==h`, car un membre au moins
+    // du support n'est pas dans `A_{h-1}`, donc `beta>R_{h-1}` et les `h`
+    // temoins de `R_{h-1}` sont interieurs stricts. Une inegalite stricte
+    // signalerait un seuil ou un bucket faux.
+    if (have_thresholds && mutant == Mutant::kNone && interior != e) {
+      std::fprintf(stderr, "INVARIANT viole : r=%d != h=%d (entree e0=%d)\n", interior, e,
+                   e_start);
       invariant_broken = 1;
     }
     const int shell = (int)shell_ids.size();
@@ -924,7 +1075,7 @@ void ground_truth(const std::vector<mhgp::P3>& cloud, int smax,
 }
 
 struct Options {
-  int smax = 11, leaf = 4, pair_cap = 256, max_depth = 22;
+  int smax = 11, leaf = 4, work_cap = 20000, max_depth = 22;
   Mutant mutant = Mutant::kNone;
   bool judge = false;
   i64 min_supports = 0, min_cells = 0, min_quads = 0;
@@ -938,7 +1089,7 @@ int run_engine(const std::vector<mhgp::P3>& cloud, const Options& opt) {
   engine.n = points;
   engine.smax = opt.smax;
   engine.leaf = opt.leaf;
-  engine.pair_cap = opt.pair_cap;
+  engine.work_cap = opt.work_cap;
   engine.max_depth = opt.max_depth;
   engine.mutant = opt.mutant;
   engine.collect = opt.judge;
@@ -965,8 +1116,8 @@ int run_engine(const std::vector<mhgp::P3>& cloud, const Options& opt) {
 
   const Stats& s = engine.stats;
   std::printf("CentreCellReceipt-v3\n");
-  std::printf("cloud=%s points=%d smax=%d leaf=%d pair_cap=%d max_depth=%d inject=%s\n",
-              opt.label.c_str(), points, opt.smax, opt.leaf, opt.pair_cap, opt.max_depth,
+  std::printf("cloud=%s points=%d smax=%d leaf=%d work_cap=%d max_depth=%d inject=%s\n",
+              opt.label.c_str(), points, opt.smax, opt.leaf, opt.work_cap, opt.max_depth,
               mutant_name(opt.mutant));
   std::printf("cells_created=%lld split=%lld terminal=%lld pruned=%lld depth_max=%lld\n",
               s.cells_created, s.cells_split, s.cells_terminal, s.cells_pruned,
@@ -976,12 +1127,16 @@ int run_engine(const std::vector<mhgp::P3>& cloud, const Options& opt) {
               s.candidate_high_water);
   std::printf("separation_tests=%lld separation_pruned=%lld\n", s.separation_tests,
               s.separation_pruned);
-  std::printf("overlap_pairs=%lld terminal_overlaps=%lld max_terminal_overlaps=%lld\n",
-              s.overlap_pairs, s.terminal_overlaps, s.max_terminal_overlaps);
+  std::printf("overlap_pairs=%lld potential_triples=%lld potential_quads=%lld\n",
+              s.overlap_pairs, s.potential_triples, s.potential_quads);
+  std::printf("terminal_overlaps=%lld max_terminal_overlaps=%lld\n",
+              s.terminal_overlaps, s.max_terminal_overlaps);
   std::printf("clique_pairs=%lld clique_triples=%lld clique_quads=%lld\n", s.clique_pairs,
               s.clique_triples, s.clique_quads);
   std::printf("bisector_tests=%lld bisector_pruned=%lld hull_tests=%lld hull_pruned=%lld\n",
               s.bisector_tests, s.bisector_pruned, s.hull_tests, s.hull_pruned);
+  std::printf("axis_tests=%lld axis_pruned=%lld axis_unusable=%lld\n", s.axis_tests,
+              s.axis_pruned, s.axis_unusable);
   std::printf("lifts_built=%lld degenerate=%lld\n", s.lifts_built, s.degenerate_lifts);
   std::printf("owner_rejected=%lld self_centre_rejected=%lld rank_rejected=%lld\n",
               s.owner_rejected, s.self_centre_rejected, s.rank_rejected);
@@ -1319,8 +1474,8 @@ int main(int argc, char** argv) {
     else if (arg.rfind("--coord=", 0) == 0) coord = parse_int(arg.substr(8).c_str(), &ok);
     else if (arg.rfind("--seed=", 0) == 0) seed = parse_int(arg.substr(7).c_str(), &ok);
     else if (arg.rfind("--leaf=", 0) == 0) opt.leaf = parse_int(arg.substr(7).c_str(), &ok);
-    else if (arg.rfind("--pair-cap=", 0) == 0)
-      opt.pair_cap = parse_int(arg.substr(11).c_str(), &ok);
+    else if (arg.rfind("--work-cap=", 0) == 0)
+      opt.work_cap = parse_int(arg.substr(11).c_str(), &ok);
     else if (arg.rfind("--max-depth=", 0) == 0)
       opt.max_depth = parse_int(arg.substr(12).c_str(), &ok);
     else if (arg.rfind("--min-supports=", 0) == 0)
@@ -1344,7 +1499,7 @@ int main(int argc, char** argv) {
     }
   }
 
-  if (opt.smax < 4 || opt.smax > 24 || opt.leaf < 4 || opt.pair_cap < 1 ||
+  if (opt.smax < 4 || opt.smax > 24 || opt.leaf < 4 || opt.work_cap < 1 ||
       opt.max_depth < 1 || opt.max_depth > 26) {
     std::fprintf(stderr, "REFUS domaine\n");
     return 2;

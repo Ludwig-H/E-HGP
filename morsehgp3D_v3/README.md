@@ -135,9 +135,11 @@ d'intérieurs, un indice d'entrée immuable et une promotion par buckets. Le RLE
 par clé géométrique précède l'unique census par boule; `U_B` reste un certificat
 post-census. Après resserrement `tight`, la preuve exacte est une conservation
 relative au pool hérité de `I_B union U_B`, pas l'identité avec les listes
-globales d'un rescan. Le successeur CPU testé reste `NO-GO` avant G4 : quatre
-compteurs ont deux pentes successives supérieures à 1,35 et 85,7 % des lifts
-meurent à l'owner à `n=400`. La note
+globales d'un rescan. Un snapshot CPU historique reste `NO-GO` pour son
+ordonnance mesurée : quatre compteurs avaient deux pentes successives
+supérieures à 1,35 et 85,7 % des lifts mouraient à l'owner à `n=400`. Le
+successeur courant n'hérite ni de ce NO-GO chiffré ni d'un GO : il doit publier
+sa propre rampe contractuelle. La note
 restructurée et le contre-audit pincé sont dans
 [`NOTE_ARCHITECTURE_GPU_LISTES_CELLULES_CENTRES_20260812.md`](audits/NOTE_ARCHITECTURE_GPU_LISTES_CELLULES_CENTRES_20260812.md)
 et

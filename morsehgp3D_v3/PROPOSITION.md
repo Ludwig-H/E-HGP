@@ -816,9 +816,10 @@ séparée s'arrête à sept. Ce sont des plafonds de complétude, pas une obliga
 d'énumérer tous les sommets qui les respectent.
 
 Après génération géométrique, positivité et owner, chaque proposition produit
-`(GeometricBallKey,SupportKey)` sans census. Le RLE par clé exacte de taille
-fixe conserve tous les supports d'une même boule. Un représentant de chaque run
-effectue alors seul le census terminal : une première passe additionne en bloc
+`(cloud_epoch,GeometricBallKey,SupportKey,CensusContext)` sans census. Le RLE
+par clé exacte de taille fixe conserve tous les supports et contextes d'une
+même boule. Pour `H_run=smax-q_min`, un contexte avec `b_cert>=H_run` effectue
+alors seul le census terminal, ou le run appelle un census global : une première passe additionne en bloc
 les nœuds strictement intérieurs et désactive chaque support dès son
 `(12-q)`-ième témoin; si au moins un support reste pertinent, une seconde passe
 matérialise `I_B/U_B` complet et attache `U_B` comme identité sémantique aval.
@@ -929,7 +930,7 @@ accumulés durant les promotions.
 L'exact-once exige une partition terminale commune à tous les budgets d'une
 arité. Une cellule ne peut pas émettre pour `h=0` pendant qu'une autre lane de
 budget subdivise le même domaine. Dans une feuille commune, chaque
-q-sous-ensemble de `D_pmax` est formé une seule fois et étiqueté par son `e0`;
+q-sous-ensemble de `D_(h_max)` est formé une seule fois et étiqueté par son `e0`;
 une génération par buckets impose `max tau(U)=e0`. Avec
 `h_max=smax-q`, la somme sur les strates reste exactement
 `C(|D_(h_max)|,q)` : cette technique retire les doublons de
@@ -955,8 +956,12 @@ Le RLE chaud emploie une clé géométrique exacte de taille fixe calculée depu
 le lift. Si la forme est `D||y-a||^2+C dot (y-a)=0`, le 5-uplet homogène
 `(D,C-2Da,D||a||^2-C dot a)`, normalisé par signe puis pgcd, est une clé
 primitive de sphère disponible avant census. Chaque proposition produit d'abord
-`(GeometricBallKey,SupportKey,e0,cell_id)`; le RLE conserve tous les supports,
-puis un représentant effectue une seule promotion et un seul census par boule.
+`(cloud_epoch,GeometricBallKey,SupportKey,CensusContext)`; le contexte lie
+cellule, digests de pool/domaine, arène ou backend, `e0` et budget certifié
+`b_cert`. Le RLE conserve tous les supports et contextes. Pour
+`H_run=smax-q_min`, il choisit atomiquement un contexte avec
+`b_cert>=H_run`, puis emploie son `e0` et ses buckets pour une seule promotion
+et un seul census par boule; sans tel contexte, il appelle le census global.
 Le `p` obtenu est commun à la boule, mais `p+q<=smax` se décide séparément pour
 chaque support. Le shell trié `U_B` identifie sémantiquement la boule dans un
 cloud/epoch fixé, mais il n'existe qu'après census et peut avoir `Theta(n)`
