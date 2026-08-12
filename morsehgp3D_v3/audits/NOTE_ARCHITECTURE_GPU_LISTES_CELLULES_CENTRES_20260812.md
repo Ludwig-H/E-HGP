@@ -272,19 +272,31 @@ liste ne se contracte pas, la branche splitte, appelle un producteur exact
 alternatif ou rend `resource_exhausted`.
 
 Le propriétaire de centre élimine les doublons intercellules, à condition que
-tous les budgets d'une arité partagent la même partition terminale. Une
+tous les budgets d'une arité partagent la même partition terminale. Il ne doit
+toutefois pas être évalué après un lift dans chaque vue de cellule : ce choix
+répète précisément la géométrie coûteuse que l'owner devait éviter. Une
 fixture minimale impose cet invariant : pour
 `A=(10,10,10),B=(20,10,10),C=(15,18,10),W=(15,12,10)`, le support `ABC` a
 exactement `W` intérieur. Il entre à `e0=0` dans la racine, mais à `e0=1` dans
 la cellule singleton de son centre; deux arbres de budgets indépendants
 l'émettraient deux fois.
 
-Après indépendance affine, barycentriques positives et owner, chaque candidat
-émet `(cloud_epoch,GeometricBallKey,SupportKey,CensusContext)`. Le contexte lie
-`cell_id`, digests du pool/domaine, backend ou arène encore vivante, `e0` et
-`b_cert`, budget maximal dont toute l'ascendance certifie l'invariant de pool.
-Le radix/RLE par `(cloud_epoch,GeometricBallKey)` arrive **avant** la promotion
-et conserve tous les supports et contextes. Pour
+L'ordonnance GPU recommandée possède deux RLE. Chaque feuille émet d'abord,
+après les seuls filtres intervalle--bissecteur--enveloppe, une occurrence
+`(cloud_epoch,SupportKey,CensusContext)` **sans lift**. `SupportKey` contient
+l'arité et les identifiants triés. Le contexte lie `cell_id`, digests du
+pool/domaine, backend ou arène encore vivante, `e0` et `b_cert`, budget maximal
+dont toute l'ascendance certifie l'invariant de pool. Un premier radix/RLE par
+`SupportKey` calcule la géométrie une seule fois, puis choisit dans le run
+l'unique contexte dont la cellule half-open possède le centre. La complétude
+garantit l'existence de cette occurrence pour tout support pertinent; zéro ou
+plusieurs owners est un échec d'invariant. Le contexte owner rejoue
+`U subseteq D_(smax-q)` avant d'être engagé.
+
+Le candidat positif owner émet ensuite
+`(cloud_epoch,GeometricBallKey,SupportKey,CensusContext)`. Le second radix/RLE
+par `(cloud_epoch,GeometricBallKey)` arrive **avant** la promotion et conserve
+tous les supports et contextes. Pour
 `H_run=smax-q_min`, il sélectionne atomiquement un contexte avec
 `b_cert>=H_run`; ce contexte seul effectue la promotion et le census fermé :
 
@@ -305,9 +317,13 @@ backend Yao/LBVH séparé ou si aucun contexte local ne certifie `H_run`, le run
 est routé vers un census global exact. `cell_id` et les digests ne font pas
 partie de la clé sphère; ils restent des contextes candidats du run.
 
-Promouvoir avant le RLE répéterait le census pour chaque support incident à la
-même boule. Inversement, le rejet d'un support de grande arité ne permet pas de
-supprimer la boule entière si un support plus petit du même run reste pertinent.
+Construire la géométrie avant le premier RLE la répéterait dans chaque cellule;
+promouvoir avant le second répéterait le census pour chaque support incident à
+la même boule. Inversement, le rejet d'un support de grande arité ne permet pas
+de supprimer la boule entière si un support plus petit du même run reste
+pertinent. Les deux arènes sont comptées et segmentées par clés entières sans
+couper un run; un flot de tuples trop grand termine en `resource_exhausted`, pas
+en troncature.
 
 Cette génération est une proposition d'implémentation, pas encore un théorème
 de complexité. Son admission dépend des masses mesurées de cellules, listes,
@@ -315,25 +331,56 @@ candidats q3/q4, requêtes de pinceau et supports uniques. Les cliques
 d'intervalles restent un filtre potentiellement `Theta(m^4)`, jamais une preuve
 de parcimonie.
 
-### Carrier aigu q4
+### Axe de face q4 et spécialisation par carriers aigus
 
 Un support q4 propre positif a son circumcentre strictement à l'intérieur du
 tétraèdre. Un tel tétraèdre possède au moins deux faces aiguës, résultat établi
 dans la solution du problème 3653 de
 [`Crux Mathematicorum 38(8), pages 341--343`](https://cms.math.ca/wp-content/uploads/crux-pdfs/CRUXv38n8.pdf).
-Pour une face aiguë `F`, le lieu des centres équidistants de ses trois sommets
-est la droite rationnelle normale au plan de `F` passant par son circumcentre.
-L'intersection de cette droite avec le domaine actif de la cellule est une
-condition nécessaire exacte et bien plus forte que les trois seuls tests de
-bissecteurs.
+Pour **toute** face non dégénérée `F`, aiguë ou obtuse, le lieu des centres
+équidistants de ses trois sommets est la droite rationnelle normale au plan de
+`F` passant par son circumcentre. Le centre q4 appartient à cette droite.
+L'intersection de la droite d'une face canonique quelconque avec le domaine
+actif de la cellule est donc une condition nécessaire exacte, plus forte que
+les trois seuls tests de bissecteurs; elle ne requiert pas le théorème d'acuité.
 
-On peut donc énumérer les faces aiguës géométriques indépendamment de leur
+Le théorème d'acuité autorise une spécialisation différente : énumérer les
+faces aiguës géométriques indépendamment de leur
 admission q3, rejeter celles dont la droite ne rencontre pas la cellule, puis
 chercher leurs apex. Chaque q4 survivant choisit sa plus petite face aiguë
 canonique pour éviter les doublons intracellule. Ce théorème réduit les K4
-tentés; il ne donne aucune borne sparse sur le nombre de faces carriers.
+tentés; il ne donne aucune borne sparse sur le nombre de faces carriers. Il est
+incomplet de tester seulement si la face des trois plus petits `PointId` est
+aiguë : cette face peut être obtuse lorsque d'autres faces sont aiguës.
 
-### Potentiel exact avant terminalisation
+Pour un carrier de circumcentre `N/G`, de normale `n`, et un apex `d`, poser
+`v=d-a` et `Delta=||d||^2-||a||^2`. Si `n dot v` est non nul, l'intersection
+exacte axe--bissecteur donne le centre q4
+
+`[2(n dot v)N+n(G Delta-2<N,v>)]/[2G(n dot v)]`.
+
+Le triangle paie ainsi son lift une fois et chaque apex seulement des
+produits--sommes, l'owner et les barycentriques avant la clé de sphère.
+
+### Certificat local de liste bornée
+
+Choisir `c0` dans le domaine actif `K`, supposer `diam(K)<=delta` et noter
+`rho` la distance au `(H+1)`-ième voisin de `c0` dans le pool. Les `H+1`
+voisins ont `u_K<=(rho+delta)^2`, donc
+`R_(H,P)(K)<=(rho+delta)^2`. Tout site de `D_(H,P)(K)` appartient alors à
+`B(c0,rho+2 delta)`.
+
+Si `delta<=alpha rho` et si un census local certifie
+
+`|P intersection B(c0,(1+2 alpha)rho)|<=Lambda(H+1)`,
+
+la liste terminale contient au plus `Lambda(H+1)` sites. Cette implication
+conditionnelle est la gate exacte pour choisir une warp et un bitset de taille
+au plus 64. Sans certificat d'expansion, le code choisit CSR, subdivise ou
+échoue sur la ressource physique; une profondeur maximale ne transforme jamais
+une liste dense en liste sparse.
+
+### Potentiel exact du graphe d'intervalles avant terminalisation
 
 Pour des intervalles `[l_i,u_i]` triés par `l_i`, soit `a_i` le nombre
 d'intervalles antérieurs `j<i` tels que `u_j>=l_i`. La propriété de Helly des

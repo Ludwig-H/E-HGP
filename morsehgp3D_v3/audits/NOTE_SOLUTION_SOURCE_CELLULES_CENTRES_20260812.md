@@ -189,10 +189,13 @@ points de rayon cinq autour de `(10,10,10)`, paire antipodale à `p=0, q=2` et
 `|U_B|=30`. Elle rend `shell_high_water=30` et classe extra-shell. Le tampon
 `[24]` et son `exit(3)` sont supprimés.
 
-Sept mutants tués : `drop-ties`, `owner-closed`, `rank-closed`,
-`tight-threshold`, `bisector-strict`, `shrink-list`, `arity-cascade`. Le mutant
-`strata-stop`, qui arrête le census au premier bucket sans promotion, est
-enregistré mais n'est pas encore rattaché à une porte.
+Sur le snapshot pincé `34371880...`, sept mutants étaient tués : `drop-ties`,
+`owner-closed`, `rank-closed`, `tight-threshold`, `bisector-strict`,
+`shrink-list`, `arity-cascade`. Dans le CMake successeur `d0738d1e...`,
+`strata-stop` et sa variante uniforme sont désormais rattachés, pour neuf
+portes mutantes et vingt-quatre CTests `centre_cell` au total. Leur présence
+dans le registre ne transfère pas le résultat historique `22/22`; le source et
+le binaire successeurs doivent être pincés et exécutés ensemble.
 
 Refus à code 2 : argument inconnu, suffixe numérique (`--points=60junk`), juge
 au-delà de 220 points, doublons exacts par le nuage gravé `grave_doublon` — les
@@ -204,14 +207,17 @@ Plancher de couverture à code 3.
 1. Le juge partage `ball_front.hpp`, les lifts et `power_of` avec le sujet.
    L'accord d'identités est utile, mais ce n'est pas un juge arithmétiquement
    indépendant. `oracle/locality_census_judge.cpp` doit être étendu.
-2. Le test **droite--cellule** pour q4, légitimé par le fait que tout tétraèdre
-   propre positif possède au moins deux faces aiguës, n'est pas implémenté.
-   C'est le filtre net attendu pour la lane la plus coûteuse.
-3. Le majorant de split `sum_i C(a_i,q-1)` par sweep n'est pas implémenté. Il
-   compte exactement les cliques du graphe d'intervalles scalaires, pas celles
-   du graphe 3D de bissecteurs; après construction du bitset, les vrais
-   `E/T/Q` doivent être comptés séparément. Le critère courant compte seulement
-   les paires d'intervalles compatibles.
+2. Le successeur live implémente un test **droite--cellule** q4 depuis une face
+   canonique non colinéaire. Sa sûreté vient du lieu équidistant de cette face;
+   elle ne dépend ni de son acuité, ni de sa pertinence dans la lane q3. La
+   variante a réduit les quadruplets et lifts sur un petit diagnostic, mais a
+   ralenti le CPU; elle reste optionnelle et non reçue sur device.
+3. Le successeur live implémente le sweep `sum_i C(a_i,q-1)`. Il compte
+   exactement les cliques du graphe d'intervalles scalaires, pas celles du
+   graphe 3D de bissecteurs; sa pondération `E+3T+6Q` reste un modèle de coût.
+   Après construction du bitset, les vrais `E/T/Q` doivent être comptés
+   séparément. Aucun résultat de split du source live ne se transfère au pin
+   historique `34371880...`.
 4. La jauge dyadique commune `s_x(c)` n'est pas implémentée. Elle rendrait les
    bornes affines et réduirait la largeur; la borne actuelle est
    `l,u<=3(65535\cdot 2^{d})^{2}<2^{34+2d}`, sous `i128` jusqu'à `d<=26` mais

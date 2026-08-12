@@ -52,7 +52,10 @@ Réparations faites depuis l'audit du 12 août :
 ## 3. Mesures
 
 Machine partagée à deux cœurs, fortement chargée : seuls les temps `user` sont
-cités, et aucun n'est un benchmark. Les compteurs, eux, sont déterministes.
+cités, et aucun n'est un benchmark. Les compteurs sont déterministes pour un
+binaire, une commande, une graine et des paramètres fixés, mais les tables
+ci-dessous ne pincent pas ensemble ces éléments et leur transcript brut. Elles
+sont des observations historiques de laboratoire, pas un reçu reproductible.
 
 ### Effet du filtre d'enveloppe du support
 
@@ -75,9 +78,10 @@ Même configuration, sortie identique :
 
 `axis_pruned=3 501 372` sur `10 525 157` tests, `axis_unusable=0`. Le filtre est
 exact et fail-open, mais sur CPU son coût annule son gain : `user` passe de
-`4,85 s` à `6,7 s`. Il est conservé parce qu'il déplace du travail vers un test
-sans division, plus favorable à un portage device, mais **il n'est pas reçu
-comme une accélération**.
+`4,85 s` à `6,7 s`. Il reste une variante diagnostique parce qu'il déplace du
+travail vers un test sans division, mais son intérêt device est une hypothèse
+non mesurée. Il n'est reçu ni comme accélération CPU, ni comme accélération
+CUDA, et la politique par défaut est tranchée dans la réponse d'audit.
 
 ### Rampe contractuelle, premier point
 
@@ -94,21 +98,24 @@ supports_total=906 078  supports_per_point=72,4862
 ```
 
 Entre `n=2 000` et `n=12 500`, les supports croissent d'un facteur `6,75` pour
-un facteur de taille `6,25` : la sortie est quasi linéaire. Les lifts croissent
-d'un facteur `8,58`, soit un exposant `1,17`. Les points `25 000` et `50 000`
-ne sont pas terminés à cette heure et ne sont pas publiés.
+un facteur de taille `6,25`, soit une pente sécante observée `1,04`. Les lifts
+croissent d'un facteur `8,58`, soit une pente sécante `1,17` pour la variante
+sans filtre axe au point bas. Ce seul intervalle n'établit aucune asymptotique;
+la gate exige les deux pentes `12 500/25 000/50 000`. Les points `25 000` et
+`50 000` ne sont pas terminés à cette heure et ne sont pas publiés.
 
 ## 4. Verdict que je tire moi-même
 
-L'ordonnance mesurée **ne tient pas** la seconde à 50 000 points. Sur un cœur de
-cette machine, l'extrapolation du premier point donne de l'ordre de deux cents
-secondes pour `terrain`. Même en supposant deux ordres de grandeur de
-parallélisme sur une G4, le budget serait consommé par la seule Source S, sans
-`k=1`, sans gateways, sans resolver, sans MSF, sans fold, sans verticales et
-sans payload officiel.
+L'ordonnance mesurée ne fournit **aucun GO** vers la seconde à 50 000 points.
+Sur un cœur de cette machine, une extrapolation diagnostique du premier point
+donne de l'ordre de deux cents secondes pour `terrain`. Ce n'est ni une mesure
+50 000, ni un modèle G4 : un facteur hypothétique de parallélisme ne peut pas
+qualifier la seule Source S, encore moins `k=1`, gateways, resolver, MSF, fold,
+verticales et payload officiel.
 
 Je ne demande donc **pas** de session G4 pour un benchmark de latence. Le
-`NO-GO` de l'audit est repris tel quel.
+verdict opérationnel est « route non prête pour G4 »; les données présentes ne
+constituent pas un NO-GO de latence G4 démontré.
 
 Le rapport travail/sortie est le vrai verrou : environ cent-quinze lifts par
 support à `n=12 500`. Il vient de ce que les filtres de bissecteur et
@@ -119,19 +126,21 @@ configuration, tandis que le nombre de cellules croît quand elle rétrécit.
 
 1. **Coordonnées locales et arithmétique 64 bits.** Dans une cellule terminale,
    le rayon local mesuré vaut quelques dizaines d'unités u16, jamais `65 535`.
-   Tous les prédicats de la génération terminale tiennent alors en `i64` au lieu
-   de `i128`, avec un garde de magnitude et un repli `i128`. C'est le seul levier
-   qui vaut un facteur trois à quatre sans changer un seul verdict, et il est
-   indispensable au portage device, où l'entier 64 bits est déjà lent.
-2. ~~Critère de split exact~~ — **fait**. Le comptage de paires compatibles est
-   remplacé par le potentiel exact `sum_i C(a_i,q-1)` calculé par un seul sweep,
-   pondéré `E+3T+6Q`, et l'option est renommée `--work-cap`. Le fait utilisé est
-   que `u_j<l_i` entraîne `j<i` quand `l` est trié, donc le compte global des
-   `u` inférieurs est exactement le compte des antérieurs. À `n=1 500` sur
-   `terrain`, `--work-cap=20000` rend `208 705` cellules et `7 015 571` lifts,
-   contre `86 361` cellules et `9 181 507` lifts à `100000` : l'optimum est
-   plat et le critère distingue enfin une liste ordonnée d'une liste ambiguë.
-   Les vingt-quatre portes restent vertes.
+   Un fast path `i64` peut alors remplacer certains prédicats `i128`, avec une
+   borne prouvée avant chaque opération, un garde de magnitude et un repli
+   compté. Le facteur trois à quatre et l'applicabilité à tous les prédicats
+   restent à mesurer, y compris sur les entrées u16 adversariales.
+2. ~~Potentiel d'intervalles pour le split~~ — **prototype raccordé**. Le
+   comptage de paires compatibles est remplacé par
+   `sum_i C(a_i,q-1)` calculé par sweep et pondéré `E+3T+6Q`; l'option est
+   renommée `--work-cap`. La formule compte exactement les cliques du graphe
+   d'intervalles scalaire. Celui-ci est un surgraphe du graphe réel de
+   bissecteurs 3D : la pondération est donc un modèle de travail, pas le compte
+   exact des candidats terminaux ni du runtime. À `n=1 500` sur `terrain`,
+   `--work-cap=20000` rend `208 705` cellules et `7 015 571` lifts, contre
+   `86 361` cellules et `9 181 507` lifts à `100000`. Ces deux observations et
+   les vingt-quatre portes annoncées ne sont transférables qu'aux octets,
+   commandes et transcripts qui les ont produits.
 3. **Clé chaude à cinq coefficients primitifs** issue de la forme liftée, à la
    place du centre réduit et du test de puissance.
 4. **Préflight d'octets** choisissant bitset, CSR sparse ou
@@ -139,8 +148,10 @@ configuration, tandis que le nombre de cellules croît quand elle rétrécit.
 5. **Juge arithmétiquement indépendant** : étendre
    `oracle/locality_census_judge.cpp` aux identités `(support, I_B, U_B)` de
    cette source, sans partager `ball_front.hpp`.
-6. Seulement ensuite : rampe complète sur quatre familles plus le mélange
-   d'amas manquant, puis décision de portage.
+6. Seulement ensuite : rampe d'architecture `12 500/25 000/50 000`, puis
+   matrice contractuelle des six régimes. Poisson uniforme et mélange équilibré
+   de huit amas sont les deux portes de latence; les quatre autres régimes
+   caractérisent la dégradation.
 
 ## 6. Questions ouvertes pour l'auditeur
 
@@ -157,5 +168,8 @@ configuration, tandis que le nombre de cellules croît quand elle rétrécit.
    dans ce cadre, ou considérez-vous qu'il faut un producteur terminal d'une
    autre nature — diagramme de Voronoï local d'ordre `<=k` sur la liste — pour
    descendre à un facteur constant petit ?
+
+Les réponses et corrections de l'audit sont dans
+[`AUDIT_REPONSES_ETAT_CELLULES_CENTRES_20260812.md`](AUDIT_REPONSES_ETAT_CELLULES_CENTRES_20260812.md).
 
 GCP non utilisé.

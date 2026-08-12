@@ -809,15 +809,36 @@ Elle impose un ledger de débit et une fusion device vers le fold, pas un
 catalogue hôte. Ce n'est ni une identité pour une boîte u16 finie, ni un
 minorant sur tout algorithme H0, ni une borne sur le travail de découverte.
 
+Cette espérance ne donne pas de borne déterministe sur la sortie exhaustive.
+Quatre petites calottes autour des directions d'un tétraèdre régulier, toutes
+sur une même sphère, fournissent `Theta(m^4)` supports q4 positifs ayant la
+même `GeometricBallKey`. Un RLE par boule mutualise le census, jamais les
+`SupportKey` exigés par Gamma. Un SLO universel exige donc un quotient de
+plateau explicitement autorisé pour H0 ou une hypothèse d'entrée qui exclut
+cette sortie; `smax` seul ne la borne pas.
+
+La décision d'exploration est tenue par tranche, sans promotion implicite :
+
+| tranche | candidat examiné | comparateur ou voie suspendue |
+| --- | --- | --- |
+| `k=1` | Yao-1 exact puis EMST sparse | Borůvka point--LBVH borné |
+| q2 profond | lane cellules `D_9` | Yao--banque affine--dual et self-join comme diagnostics/falsificateurs |
+| q3/q4 | cellules de centres, arités et budgets indépendants | exhaustif borné et fronts historiques comme falsificateurs |
+| quotient H0 | fusion vers activations, gateways et token Johnson | provenance exhaustive conservée tant que Gamma/verticales ne sont pas reconstructibles |
+
 Le théorème de propriétaire donne des plafonds de couverture par arité : neuf
 pour q2, huit pour q3 et sept pour q4. Une route scindée qui produit q2 sans
 arrangement ne doit pas conserver le plafond neuf pour q3/q4; une lane q4
 séparée s'arrête à sept. Ce sont des plafonds de complétude, pas une obligation
 d'énumérer tous les sommets qui les respectent.
 
-Après génération géométrique, positivité et owner, chaque proposition produit
-`(cloud_epoch,GeometricBallKey,SupportKey,CensusContext)` sans census. Le RLE
-par clé exacte de taille fixe conserve tous les supports et contextes d'une
+Chaque feuille produit d'abord une occurrence compacte
+`(cloud_epoch,SupportKey,CensusContext)` après les seuls filtres sûrs qui ne
+demandent pas la géométrie complète. Un premier radix/RLE par `SupportKey`
+calcule centre, positivité et owner une seule fois, puis sélectionne l'unique
+contexte de la feuille half-open propriétaire. Le candidat owner produit alors
+`(cloud_epoch,GeometricBallKey,SupportKey,CensusContext)` sans census. Le second
+RLE par clé exacte de taille fixe conserve tous les supports et contextes d'une
 même boule. Pour `H_run=smax-q_min`, un contexte avec `b_cert>=H_run` effectue
 alors seul le census terminal, ou le run appelle un census global : une première passe additionne en bloc
 les nœuds strictement intérieurs et désactive chaque support dès son
@@ -842,9 +863,11 @@ facette canonique arbitraire perd des multifusions et des interfaces futures.
 Les contre-fixtures et les six réponses sont dans
 [`AUDIT_REPONSES_SOURCE_FRONT_INVERSE_20260812.md`](audits/AUDIT_REPONSES_SOURCE_FRONT_INVERSE_20260812.md).
 
-## 7. Cellules de centres : oracle actuel, source candidate transitoire
+## 7. Cellules de centres : sujet CPU borné, source candidate transitoire
 
-Le prototype CPU actuel est un oracle/falsificateur branch-and-bound. Un
+Le prototype CPU actuel est un sujet/référence différentielle branch-and-bound,
+pas un oracle arithmétiquement indépendant : son juge partage encore des lifts
+et puissances. Un
 successeur device ne devient une source produit qu'après preuve de complétude,
 gate de travail et inclusion de tout son coût dans `warm_e2e`. Les CSR de
 cellules de centres sont alors transitoires; aucun atlas de cellules
@@ -952,8 +975,18 @@ actif de la cellule; ce test droite--cellule précède les apex. Le q4 choisit s
 plus petite face aiguë canonique. Le résultat géométrique est documenté dans
 [`Crux Mathematicorum 38(8), problème 3653`](https://cms.math.ca/wp-content/uploads/crux-pdfs/CRUXv38n8.pdf).
 
-Le RLE chaud emploie une clé géométrique exacte de taille fixe calculée depuis
-le lift. Si la forme est `D||y-a||^2+C dot (y-a)=0`, le 5-uplet homogène
+Le filtre du prototype courant n'emploie pas cette spécialisation : la droite
+des centres équidistants de **toute** face non colinéaire, aiguë ou obtuse,
+contient le circumcentre q4. Tester l'intersection de la droite de la face
+canonique avec la cellule est donc exact sans hypothèse d'acuité. Ajouter un
+test `acute` à cette seule face serait incomplet; pour exploiter le théorème de
+Crux, il faut énumérer toutes les faces aiguës puis choisir la plus petite face
+aiguë canonique.
+
+Le premier RLE chaud emploie `SupportKey` avant toute géométrie. Après calcul
+unique du lift et choix du contexte owner, le second RLE emploie une clé
+géométrique exacte de taille fixe. Si la forme est
+`D||y-a||^2+C dot (y-a)=0`, le 5-uplet homogène
 `(D,C-2Da,D||a||^2-C dot a)`, normalisé par signe puis pgcd, est une clé
 primitive de sphère disponible avant census. Chaque proposition produit d'abord
 `(cloud_epoch,GeometricBallKey,SupportKey,CensusContext)`; le contexte lie
@@ -1063,10 +1096,11 @@ durable; ils sont tenus dans
 ```text
 points u16 + LBVH exact résidents
   |-> k=1 : Yao-1 exact mutualisé -> EMST sparse
-  |-> q2 : Yao48 -> banque affine -> dual résiduel -> candidats support
-  `-> q3/q4 : cellules + arités indépendantes, ledger fail-open
+  |-> q2 : lane cellules D_9 comparée à Yao--affine--dual suspendu
+  `-> q3/q4 : cellules + arités/budgets indépendants, ledger fail-open
        -> partition commune, D_h imbriquées, e0 fixe, promotion h
        -> filtres Jung--Helly--bissecteurs, génération q3/q4 directe
+       -> RLE SupportKey -> une géométrie et un owner
        -> RLE GeometricBallKey -> strict-count/census I/E unique -> U_B
        -> BallActivation/tombstones streamées + gate regular/plateau/high-rank
        -> facettes du cœur + gateway canonique de première incidence
@@ -1158,11 +1192,13 @@ un refus de ressource sont trois statuts distincts.
 5. Sur les seules ancres admises, recevoir séparément Jung--Yao, la borne AABB
    `g_min/Q_max`, Helly, la composition cœur--profondeur et la profondeur
    terminale. Mesurer le gain marginal de chacun contre son coût exact.
-6. Construire q3/q4 par arités indépendantes et budgets `h`, avec partition
+6. Construire q2/q3/q4 par lanes indépendantes et budgets `h`, avec partition
    terminale commune, `e0` immuable et promotion, sans dépendre des supports
-   inférieurs retenus. Recevoir owner et positivité, faire le RLE par clé
-   primitive de sphère, puis un unique strict-count/census par boule; `U_B` est
-   un certificat aval. Gamma conserve les `SupportKey` requis; le H0 normalisé
+   inférieurs retenus et sans supprimer le transcript Yao-1 de `k=1`. Émettre
+   les occurrences compactes, faire le RLE `SupportKey` avant le lift, choisir
+   le contexte owner, puis faire le RLE par clé primitive de sphère et un
+   unique strict-count/census par boule; `U_B` est un certificat aval. Gamma
+   conserve les `SupportKey` requis; le H0 normalisé
    emploie le token Johnson et un support canonique. Graver les fixtures
    q3-sans-q2, q4-sans-q3, pool-relative, budgets indépendants et shell 30.
    La famille exacte à deux droites reste une gate adversariale : toute

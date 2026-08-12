@@ -142,6 +142,14 @@ struct Stats {
   i64 hull_tests = 0, hull_pruned = 0;
   i64 axis_tests = 0, axis_pruned = 0, axis_unusable = 0;
   i64 lifts_built = 0, degenerate_lifts = 0;
+  // LEDGER DES CAUSES, PAR ARITE. Sans lui, « les petites cellules causent le
+  // ratio » reste une hypothese et non une mesure.
+  i64 lifts_q[5] = {0, 0, 0, 0, 0};
+  i64 owner_rejected_q[5] = {0, 0, 0, 0, 0};
+  i64 positive_rejected_q[5] = {0, 0, 0, 0, 0};
+  i64 degenerate_q[5] = {0, 0, 0, 0, 0};
+  i64 rank_rejected_q[5] = {0, 0, 0, 0, 0};
+  i64 hull_pruned_q[5] = {0, 0, 0, 0, 0};
   i64 owner_rejected = 0, self_centre_rejected = 0, rank_rejected = 0;
   i64 ball_groups = 0, group_saved_scans = 0;
   i64 census_scans = 0, census_point_tests = 0, census_promotions = 0;
@@ -393,6 +401,7 @@ struct Engine {
   int leaf = 4;
   int work_cap = 20000;
   int max_depth = 22;
+  bool axis_filter = false;
   Mutant mutant = Mutant::kNone;
   bool collect = false;
   i64 root_hi[3] = {0, 0, 0};
@@ -708,7 +717,7 @@ struct Engine {
           hull_add(pts[cands[(std::size_t)j].id], hi_box, &hij);
           ++stats.hull_tests;
           const bool hull_ij = hull_meets_cell(hij, tight);
-          if (!hull_ij) ++stats.hull_pruned;
+          if (!hull_ij) { ++stats.hull_pruned; ++stats.hull_pruned_q[2]; }
           bool pair_kept = false;
           if (j < c2 && hull_ij) {
             ++stats.clique_pairs;
@@ -734,7 +743,7 @@ struct Engine {
               hull_add(pts[cands[(std::size_t)k].id], hij, &hijk);
               ++stats.hull_tests;
               const bool hull_ijk = hull_meets_cell(hijk, tight);
-              if (!hull_ijk) ++stats.hull_pruned;
+              if (!hull_ijk) { ++stats.hull_pruned; ++stats.hull_pruned_q[3]; }
               ids[0] = cands[(std::size_t)i].id;
               ids[1] = cands[(std::size_t)j].id;
               ids[2] = cands[(std::size_t)k].id;
@@ -755,16 +764,22 @@ struct Engine {
               // la droite des centres equidistants du triangle GEOMETRIQUE doit
               // rencontrer la cellule. Aucun verdict de l'arite trois n'est
               // consulte, conformement a l'independance des lanes.
-              int sorted3[3] = {ids[0], ids[1], ids[2]};
-              std::sort(sorted3, sorted3 + 3);
-              const mhgp::P3& ta = pts[sorted3[0]];
-              const V3 tp1 = sub(pts[sorted3[1]], ta), tp2 = sub(pts[sorted3[2]], ta);
-              const TriangleLift tri =
-                  mhgp3v::ballfront::lift_triangle(ta, pts[sorted3[1]], pts[sorted3[2]]);
-              ++stats.axis_tests;
-              if (!triangle_axis_meets_cell(ta, tp1, tp2, tri, frame)) {
-                ++stats.axis_pruned;
-                continue;
+              // VARIANTE A/B, DESACTIVEE PAR DEFAUT sur ce backend CPU. Le
+              // filtre est une condition necessaire exacte et fail-open, mais
+              // son cout annule son gain ici; « sans division » ne prouve rien
+              // sur un device tant qu'aucun kernel n'est mesure.
+              if (axis_filter) {
+                int sorted3[3] = {ids[0], ids[1], ids[2]};
+                std::sort(sorted3, sorted3 + 3);
+                const mhgp::P3& ta = pts[sorted3[0]];
+                const V3 tp1 = sub(pts[sorted3[1]], ta), tp2 = sub(pts[sorted3[2]], ta);
+                const TriangleLift tri =
+                    mhgp3v::ballfront::lift_triangle(ta, pts[sorted3[1]], pts[sorted3[2]]);
+                ++stats.axis_tests;
+                if (!triangle_axis_meets_cell(ta, tp1, tp2, tri, frame)) {
+                  ++stats.axis_pruned;
+                  continue;
+                }
               }
               bool stop_t = false;
               for (int wt = 0; wt < words && !stop_t; ++wt) {
@@ -776,7 +791,11 @@ struct Engine {
                   ++stats.clique_quads;
                   hull_add(pts[cands[(std::size_t)t].id], hijk, &hijkt);
                   ++stats.hull_tests;
-                  if (!hull_meets_cell(hijkt, tight)) { ++stats.hull_pruned; continue; }
+                  if (!hull_meets_cell(hijkt, tight)) {
+                    ++stats.hull_pruned;
+                    ++stats.hull_pruned_q[4];
+                    continue;
+                  }
                   ids[0] = cands[(std::size_t)i].id;
                   ids[1] = cands[(std::size_t)j].id;
                   ids[2] = cands[(std::size_t)k].id;
@@ -805,11 +824,12 @@ struct Engine {
     Lift lift;
     bool positive = false;
     ++stats.lifts_built;
+    ++stats.lifts_q[q];
     const mhgp::P3& a = pts[ids[0]];
     if (q == 2) {
       const mhgp::P3& b = pts[ids[1]];
       lift = mhgp3v::ballfront::lift_pair(a, b);
-      if (!lift.ok) { ++stats.degenerate_lifts; return false; }
+      if (!lift.ok) { ++stats.degenerate_lifts; ++stats.degenerate_q[q]; return false; }
       num[0] = (i128)(a.x + b.x);
       num[1] = (i128)(a.y + b.y);
       num[2] = (i128)(a.z + b.z);
@@ -818,7 +838,7 @@ struct Engine {
     } else if (q == 3) {
       const TriangleLift tri =
           tri_in ? *tri_in : mhgp3v::ballfront::lift_triangle(a, pts[ids[1]], pts[ids[2]]);
-      if (!tri.lift.ok || tri.gg <= 0) { ++stats.degenerate_lifts; return false; }
+      if (!tri.lift.ok || tri.gg <= 0) { ++stats.degenerate_lifts; ++stats.degenerate_q[q]; return false; }
       lift = tri.lift;
       const V3 p1 = sub(pts[ids[1]], a);
       const V3 p2 = sub(pts[ids[2]], a);
@@ -829,7 +849,7 @@ struct Engine {
       positive = tri.galpha > 0 && tri.gbeta > 0 && (tri.galpha + tri.gbeta) < tri.gg;
     } else {
       lift = mhgp3v::ballfront::lift_of(a, pts[ids[1]], pts[ids[2]], pts[ids[3]]);
-      if (!lift.ok) { ++stats.degenerate_lifts; return false; }
+      if (!lift.ok) { ++stats.degenerate_lifts; ++stats.degenerate_q[q]; return false; }
       den = 2 * lift.dd;
       i128 cx = -lift.cx, cy = -lift.cy, cz = -lift.cz;
       if (den < 0) { den = -den; cx = -cx; cy = -cy; cz = -cz; }
@@ -848,10 +868,12 @@ struct Engine {
     }
     if (!owns_centre(cell, num, den, root_hi, mutant == Mutant::kOwnerClosed)) {
       ++stats.owner_rejected;
+      ++stats.owner_rejected_q[q];
       return false;
     }
     if (!positive) {
       ++stats.self_centre_rejected;
+      ++stats.positive_rejected_q[q];
       return false;
     }
     Pending p;
@@ -958,7 +980,11 @@ struct Engine {
     std::sort(shell_ids.begin(), shell_ids.end());
     for (int gi : group) {
       const Pending& p = pending[(std::size_t)gi];
-      if (interior + p.q > smax) { ++stats.rank_rejected; continue; }
+      if (interior + p.q > smax) {
+        ++stats.rank_rejected;
+        ++stats.rank_rejected_q[p.q];
+        continue;
+      }
       if (mutant == Mutant::kRankClosed && interior + shell > smax) {
         ++stats.rank_rejected;
         continue;
@@ -1076,6 +1102,7 @@ void ground_truth(const std::vector<mhgp::P3>& cloud, int smax,
 
 struct Options {
   int smax = 11, leaf = 4, work_cap = 20000, max_depth = 22;
+  bool axis_filter = false;
   Mutant mutant = Mutant::kNone;
   bool judge = false;
   i64 min_supports = 0, min_cells = 0, min_quads = 0;
@@ -1090,6 +1117,7 @@ int run_engine(const std::vector<mhgp::P3>& cloud, const Options& opt) {
   engine.smax = opt.smax;
   engine.leaf = opt.leaf;
   engine.work_cap = opt.work_cap;
+  engine.axis_filter = opt.axis_filter;
   engine.max_depth = opt.max_depth;
   engine.mutant = opt.mutant;
   engine.collect = opt.judge;
@@ -1116,9 +1144,9 @@ int run_engine(const std::vector<mhgp::P3>& cloud, const Options& opt) {
 
   const Stats& s = engine.stats;
   std::printf("CentreCellReceipt-v3\n");
-  std::printf("cloud=%s points=%d smax=%d leaf=%d work_cap=%d max_depth=%d inject=%s\n",
+  std::printf("cloud=%s points=%d smax=%d leaf=%d work_cap=%d max_depth=%d axis_filter=%d inject=%s\n",
               opt.label.c_str(), points, opt.smax, opt.leaf, opt.work_cap, opt.max_depth,
-              mutant_name(opt.mutant));
+              opt.axis_filter ? 1 : 0, mutant_name(opt.mutant));
   std::printf("cells_created=%lld split=%lld terminal=%lld pruned=%lld depth_max=%lld\n",
               s.cells_created, s.cells_split, s.cells_terminal, s.cells_pruned,
               s.max_depth_reached);
@@ -1137,6 +1165,11 @@ int run_engine(const std::vector<mhgp::P3>& cloud, const Options& opt) {
               s.bisector_tests, s.bisector_pruned, s.hull_tests, s.hull_pruned);
   std::printf("axis_tests=%lld axis_pruned=%lld axis_unusable=%lld\n", s.axis_tests,
               s.axis_pruned, s.axis_unusable);
+  for (int q = 2; q <= 4; ++q)
+    std::printf("ledger_q%d lifts=%lld degenerate=%lld owner_rejected=%lld positive_rejected=%lld rank_rejected=%lld hull_pruned=%lld accepted=%lld\n",
+                q, s.lifts_q[q], s.degenerate_q[q], s.owner_rejected_q[q],
+                s.positive_rejected_q[q], s.rank_rejected_q[q], s.hull_pruned_q[q],
+                s.supports[q]);
   std::printf("lifts_built=%lld degenerate=%lld\n", s.lifts_built, s.degenerate_lifts);
   std::printf("owner_rejected=%lld self_centre_rejected=%lld rank_rejected=%lld\n",
               s.owner_rejected, s.self_centre_rejected, s.rank_rejected);
@@ -1476,6 +1509,7 @@ int main(int argc, char** argv) {
     else if (arg.rfind("--leaf=", 0) == 0) opt.leaf = parse_int(arg.substr(7).c_str(), &ok);
     else if (arg.rfind("--work-cap=", 0) == 0)
       opt.work_cap = parse_int(arg.substr(11).c_str(), &ok);
+    else if (arg == "--axis-filter") opt.axis_filter = true;
     else if (arg.rfind("--max-depth=", 0) == 0)
       opt.max_depth = parse_int(arg.substr(12).c_str(), &ok);
     else if (arg.rfind("--min-supports=", 0) == 0)

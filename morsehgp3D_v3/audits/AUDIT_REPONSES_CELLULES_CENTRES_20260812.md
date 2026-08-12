@@ -751,10 +751,13 @@ gateway, sous l'hypothèse explicite d'une table Source S complète.
 
 ## 12. Décision avant G4
 
-`NO-GO` pour un benchmark G4 de latence de cette ordonnance. Les raisons sont
-structurelles : plusieurs compteurs ont deux pentes rouges, environ 905
-millions de lifts sous la seule extrapolation linéaire à 50 k, absence de CUDA
-et absence de `BenchmarkOutputContract-v1`. Les rouges historiques de fixture,
+`NO-GO` pour **ouvrir maintenant** un benchmark G4 de cette ordonnance, mais
+aucun verdict de latence G4 n'est démontré. La rampe cellules courante ne donne
+qu'un intervalle `2 000--12 500`, pas les deux pentes
+`12 500/25 000/50 000`; son extrapolation de lifts n'est ni un compteur 50 k,
+ni un modèle CUDA. Les raisons suffisantes de différer G4 sont l'absence de
+source CUDA, de payload `BenchmarkOutputContract-v1` et de provenance
+reproductible pour les nouvelles mesures. Les rouges historiques de fixture,
 du shell fixe et du RLE post-census ont été réparés dans le successeur; ils ne
 doivent plus être présentés comme des défauts live.
 
@@ -776,7 +779,7 @@ pose trois questions de décision. Les réponses courtes sont :
 | --- | --- | --- |
 | conserver le filtre droite--cellule malgré son coût CPU | **oui comme prune exact optionnel, non comme défaut inconditionnel** | garder `off/on/adaptive`; défaut CPU `off`, défaut device seulement après une mesure A/B native et un seuil d'amortissement par nombre d'apex |
 | un régime volumique officiel peut-il donner une petite Source S | **linéaire en espérance, mais pas à petite constante connue** | `Poisson uniforme` et `8 amas équilibrés` restent bloquants; une surface ne peut pas les remplacer |
-| réduire environ 115 lifts par support ou changer de producteur | **réduire d'abord les occurrences avant lift** | radix/RLE `SupportKey` avant géométrie, puis `BallKey` avant census; un diagramme local d'ordre supérieur reste au plus un fallback terminal borné |
+| réduire environ 115 lifts par support ou changer de producteur | **réduire d'abord les occurrences avant lift** | radix/RLE `SupportKey` avant géométrie, puis `BallKey` avant census; un diagramme local d'ordre supérieur reste un oracle/proposer borné, jamais un fallback industriel sous le contrat courant |
 
 ### 13.1 La rampe annoncée n'est pas encore un reçu
 
@@ -789,10 +792,11 @@ un autre successeur. L'égalité du seul `supports_total` ne remplace pas une
 secondes » n'est pas publié. Ces nombres sont donc des diagnostics historiques
 utiles, pas la rampe contractuelle.
 
-Le verdict `NO-GO` ne dépend pas de cette extrapolation CPU vers G4. Il découle
-déjà de l'absence de producteur CUDA et de payload officiel, de la répétition
-des mêmes tuples dans de nombreuses cellules et de la comptabilité incomplète
-des primitives exactes. Sur le snapshot pincé `c07ce501...`, `terrain,n=500`,
+La décision de ne pas ouvrir G4 ne dépend pas de cette extrapolation CPU. Elle
+découle déjà de l'absence de producteur CUDA et de payload officiel, de la
+répétition des mêmes tuples dans de nombreuses cellules et de la comptabilité
+incomplète des primitives exactes. Elle ne prouve pas qu'une future
+implémentation CUDA échouera au SLO. Sur le snapshot pincé `c07ce501...`, `terrain,n=500`,
 `seed=11`, `smax=11`, `pair_cap=256`, le ledger affichait
 `lifts_built=2 980 691` et `axis_tests=1 575 265`. Chaque test d'axe construisait
 un second `TriangleLift`; le nombre physique était donc au moins `4 555 956`,
@@ -878,6 +882,39 @@ sur device vers les événements/facettes réellement consommés par H0, ou de
 représenter un plateau par son token Johnson, jamais de rapatrier un catalogue
 hôte de tous les supports.
 
+Il existe en outre un obstacle déterministe de sortie. Placer `m` sites
+distincts sur une même sphère, dans quatre petites calottes autour des directions
+d'un tétraèdre régulier, donne une fraction constante des quadruplets choisissant
+un site par calotte dont l'enveloppe convexe contient le centre. Chacun est un
+support q4 positif avec `p=0` et la même `GeometricBallKey`. Le contrat « publier
+tous les `SupportKey` » possède donc une sortie `Theta(m^4)` alors qu'un seul
+token de plateau et un seul census suffisent à représenter la boule. Aucun RLE
+par `BallKey` ne réduit la liste des supports si le payload exige encore chacun
+d'eux. Un chemin sous une seconde doit donc être autorisé à publier un quotient
+canonique de plateau pour H0, ou exiger un certificat d'entrée excluant cette
+cosphéricité; il ne peut promettre simultanément tous les supports et une latence
+universelle.
+
+Une notion falsifiable de famille favorable se déduit néanmoins du lemme de
+cellule. Soit `c0` dans le domaine actif `K`, `diam(K)<=delta`, et `rho` la
+distance au `(H+1)`-ième voisin de `c0` dans le pool. Alors
+`R_(H,P)(K)<=(rho+delta)^2` et
+`D_(H,P)(K) subseteq B(c0,rho+2 delta)`. En effet, les `H+1` voisins dans la
+boule de rayon `rho` ont tous `u_K<=(rho+delta)^2`; puis tout site conservé a
+une distance à `c0` au plus sa distance minimale à `K` plus `delta`.
+
+Si `delta<=alpha rho` et que le nuage fournit le certificat local d'expansion
+
+`|P intersection B(c0,(1+2 alpha)rho)| <= Lambda(H+1)`,
+
+alors la liste terminale a au plus `Lambda(H+1)` sites. C'est une condition
+mesurable qui peut justifier une warp et un bitset de taille au plus 64 lorsque
+`Lambda(H+1)<=64`. Sans ce certificat, la branche continue à se subdiviser,
+choisit une CSR ou termine en `resource_exhausted`; `max_depth` seul n'est
+jamais une preuve de parcimonie. La rampe doit publier la distribution de
+`alpha`, le facteur d'expansion observé et le nombre de branches qui satisfont
+ce certificat sur `uniform` et `eight_clusters`.
+
 Le reçu de volumétrie doit publier, séparément par `(q,p)`,
 `support_occurrences`, `unique_support_keys`, `unique_ball_keys`,
 `effective_h0_events`, octets avant/après fold et D2H. Le SLO ne peut être
@@ -900,7 +937,10 @@ autre feuille. La transformation suivante est exacte.
    centre. L'absence ou la multiplicité d'un owner est un échec d'invariant;
    l'occurrence owner fournit son `e0` et son `CensusContext`.
 5. Un second radix/RLE par `GeometricBallKey` agrège les supports d'une même
-   boule, puis exécute une seule promotion et un seul census fermé.
+   boule. Pour `H_run=smax-q_min`, il choisit atomiquement un contexte de
+   l'occurrence owner avec `b_cert>=H_run` et emploie son `e0`, ses buckets et
+   son arène; à défaut, il appelle un census global exact. Il exécute ensuite
+   une seule promotion et un seul census fermé.
 
 **Preuve.** La complétude cellulaire garantit que tout support pertinent
 survit dans sa feuille owner. Sa positivité, son centre et sa sphère dépendent
@@ -956,12 +996,26 @@ q3.
 Un diagramme de Voronoï/Delaunay local d'ordre au plus `k` n'est pas le prochain
 jalon. Répété dans des feuilles recouvrantes, il peut recréer la même
 duplication et matérialiser localement la mosaïque d'ordre supérieur interdite.
-Il reste admissible comme fallback **transitoire et borné** d'une feuille après
-préflight, sans atlas ni incidences persistantes, avec preuve de complétude et
-travail entièrement compté. On ne l'étudie qu'après la gate
+Le plan de tests exclut toute Delaunay ordinaire ou supérieure comme entrée,
+dépendance ou fallback industriel. Sans révision normative, cette piste reste
+un oracle borné ou un proposer dont le résiduel exact est couvert; le préflight,
+l'absence d'atlas et la destruction en fin de feuille ne suffisent pas à la
+rendre produit. On ne l'étudie qu'après la gate
 `SupportKey-before-lift`; si `occurrences/unique` devient proche de un mais que
 `unique/effective_h0_events` reste rouge, le verrou sera alors bien le
 producteur scientifique et non l'owner tardif.
+
+Le sweep ajouté dans le source live ne change pas cette décision. Pour des
+intervalles fermés triés par borne gauche, `a_i=i-|{j:u_j<l_i}|` donne bien
+exactement `sum_i C(a_i,q-1)` cliques du graphe d'intervalles par Helly en
+dimension un. Il ne donne qu'un majorant des cliques du graphe de bissecteurs
+3D, et le live le calcule sur le pool commun plutôt que sur les cuts distincts
+q2/q3/q4. Le score `E+3T+6Q` utilise des poids heuristiques : avec une clique
+complète de sept intervalles, il vaut déjà `21+3*35+6*35=336` et force un split
+au cap 256. Cette politique peut donc échanger quelques lifts contre un grand
+nombre de cellules. Elle doit employer des comptes lane-specific, des additions
+saturées, et comparer le coût prévu du terminal à celui des huit enfants; elle
+ne doit pas être appelée « critère de split exact ».
 
 ### 13.6 Ordre de travail corrigé
 
@@ -980,8 +1034,8 @@ producteur scientifique et non l'owner tardif.
    sparse, split ou `resource_exhausted`. Toute arène est SoA
    `count--scan--fill`, sans allocation par support.
 6. Mesurer les deux pentes de `12 500/25 000/50 000` sur `uniform` et
-   `eight_clusters`, puis seulement décider d'un kernel G4. Le payload officiel
-   et l'interface verticale restent installés dès le premier jalon avec statut
-   `incomplete`.
+   `eight_clusters`, puis caractériser les quatre autres régimes contractuels
+   avant de décider d'un kernel G4. Le payload officiel et l'interface
+   verticale restent installés dès le premier jalon avec statut `incomplete`.
 
 GCP non utilisé.

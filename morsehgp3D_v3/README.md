@@ -145,6 +145,20 @@ restructurée et le contre-audit pincé sont dans
 et
 [`AUDIT_REPONSES_CELLULES_CENTRES_20260812.md`](audits/AUDIT_REPONSES_CELLULES_CENTRES_20260812.md).
 
+La décision expérimentale par arité est explicite; elle ne constitue aucune
+admission produit :
+
+| tranche | voie activement explorée | comparateur ou voie suspendue |
+| --- | --- | --- |
+| `k=1` | Yao-1 exact puis EMST sparse | Borůvka point--LBVH borné |
+| q2 profond | cellules de centres, lane `D_9`, à comparer avant tout port | cascade Yao--banque affine--dual et self-join conservés comme diagnostics/falsificateurs |
+| q3/q4 | cellules de centres, lanes et budgets indépendants | exhaustif borné pour les identités; anciens fronts comme falsificateurs |
+| quotient H0 | fusion device vers activations, gateways et token Johnson | catalogue exhaustif exigé seulement par Gamma/verticales tant que leur reconstruction n'est pas prouvée |
+
+Le transcript Yao-1 de `k=1` n'est donc pas abandonné avec la cascade q2.
+Pour q2 profond, aucune des deux voies concurrentes n'est aujourd'hui une
+source produit admise.
+
 Sur un Poisson homogène continu sans bord, les formules publiées des mosaïques
 de Delaunay d'ordre k donnent environ `480,340886` supports positifs de Source S
 par point jusqu'à `smax=11`, soit environ **24,017 millions** en bulk à 50 000
@@ -152,6 +166,17 @@ points. Cette baseline ne vaut directement ni pour une boîte u16 finie ni pour
 du LiDAR, mais elle condamne un catalogue hôte de supports : la source doit
 compter son trafic et fusionner vers le fold sur device. Le calcul, ses
 hypothèses et ses références primaires sont dans l'audit cellules-centres.
+
+Une sortie exhaustive n'est même pas universellement linéaire : quatre amas
+de sites sur une même sphère peuvent porter `Theta(m^4)` supports q4 positifs
+ayant une seule clé de boule. Le RLE du census ne compresse pas ces
+`SupportKey`. Le chemin H0 sous une seconde exige donc soit un quotient de
+plateau reçu, soit un certificat de famille excluant cette sortie. Pour les
+cellules, un certificat local falsifiable borne la liste : si le diamètre du
+domaine vaut au plus `alpha*rho`, où `rho` est la distance au `(H+1)`-ième
+voisin, et si la boule dilatée contient au plus `Lambda*(H+1)` sites, alors la
+liste terminale en contient au plus autant. Sans ce certificat, choisir un
+bitset fixe ou atteindre `max_depth` ne prouve aucune parcimonie.
 
 `smax=11` borne une activation admise de rang fermé au plus onze sous le
 contrat `RelevantGP`; il ne borne ni une coquille fermée arbitraire, ni le
@@ -174,11 +199,12 @@ une baseline, pas un cap ni une garantie de temps. La preuve est dans
 ```text
 points u16 + LBVH exact résidents
   |-> k=1 : Yao-1 exact mutualisé -> EMST sparse
-  |-> q2 : Yao48 -> banque affine -> dual résiduel -> census fermé
-  `-> q3/q4 : cellules de centres + arités indépendantes
+  |-> q2 : lane cellules D_9 en comparaison avec Yao--affine--dual suspendu
+  `-> q3/q4 : cellules de centres + lanes/budgets indépendants
        -> scores affines à jauge fixe + pools CSR + promotion h
-       -> bitsets bissecteurs + carriers aigus q4, fail-open
-       -> clé primitive de sphère -> RLE -> census unique -> U_B
+       -> bitsets bissecteurs + axe de face q4, carriers aigus optionnels
+       -> RLE SupportKey -> une géométrie/owner
+       -> clé primitive de sphère -> second RLE -> census unique -> U_B
        -> gate régulière / plateau / inertie de haut rang
        -> facettes du cœur, gateways et resolver strict
        -> MSF de carriers ou fold direct par lots atomiques
@@ -206,7 +232,7 @@ les ex æquo canoniques sont certifiés; un budget épuisé ne prouve jamais une
 chambre vide. Le contrat est détaillé dans
 [`AUDIT_REEMPLOI_EMST_YAO48_LIGNE_ENREGISTREE_20260811.md`](audits/AUDIT_REEMPLOI_EMST_YAO48_LIGNE_ENREGISTREE_20260811.md).
 
-Le self-join q2 de diagnostic reste un oracle/falsificateur ou un second prune
+Le self-join q2 de diagnostic reste un falsificateur borné ou un second prune
 tant que ses compteurs complets ne battent pas la route Yao/LBVH. Son prune q2
 ne retire jamais une ancre q3/q4.
 
@@ -309,12 +335,13 @@ pincés sont dans
   transitoire de cellules de centres est autorisée seulement si son coût complet
   passe la gate.
 - Un oracle exhaustif borné falsifie ou recertifie le produit; il ne devient
-  jamais son architecture par défaut.
+  jamais son architecture par défaut. Le sujet cellules-centres, dont le juge
+  partage encore des primitives géométriques, n'est pas lui-même cet oracle.
 - Le chemin industriel exact n'a aucun budget configurable : il produit
   l'objet complet ou échoue sur une ressource physique réelle.
 - Count, fill et consommation portent la même identité. Une insuffisance de
   ressource refuse atomiquement; elle ne tronque aucune sortie.
-- Toute égalité géométrique reste dans la branche conservée. Pour l'oracle de
+- Toute égalité géométrique reste dans la branche conservée. Pour le sujet de
   cellules, la partition exacte est `beta>R_q(C)` contre `beta<=R_q(C)`.
 - La pertinence ne s'hérite jamais d'une arité à la suivante : une lane q3 ne
   dépend pas des q2 retenus, et une lane q4 ne dépend pas des q3 retenus.
@@ -374,11 +401,14 @@ préfixe comme objet complet.
 5. Sur les seules ancres admises, mesurer séparément cœur de Jung, Helly,
    composition cœur--profondeur et profondeur terminale. Le gain marginal doit
    payer collecte et tri; toute ambiguïté retombe fail-open.
-6. Construire q3/q4 support-first par arités indépendantes et budgets `h`, sans
-   parcourir le plein arrangement. Employer une partition terminale commune,
-   énumérer chaque support à son entrée `e0` immuable, puis faire le RLE par clé
-   primitive de sphère. Un représentant par boule promeut ensuite le curseur
-   `h` par nouveaux buckets et matérialise une seule fois `I_B/U_B`. Gamma
+6. Construire q2/q3/q4 support-first par lanes indépendantes et budgets `h`,
+   sans parcourir le plein arrangement et sans remplacer le transcript Yao-1
+   de `k=1`. Employer une partition terminale commune, émettre les occurrences
+   compactes puis faire un premier RLE par `SupportKey` **avant** tout lift.
+   Calculer une seule géométrie, retrouver son contexte owner, puis faire le
+   second RLE par clé primitive de sphère. Un représentant par boule promeut
+   ensuite le curseur `h` par nouveaux buckets et matérialise une seule fois
+   `I_B/U_B`. Gamma
    conserve les provenances nécessaires; le H0 normalisé emploie un support
    canonique et le token Johnson. Graver les contre-fixtures q3-sans-q2,
    q4-sans-q3, pool-relative, budgets indépendants et shell 30. Fermer le domaine
