@@ -35,6 +35,7 @@
 #include <vector>
 
 #include "prototype/anchor_envelope.hpp"
+#include "prototype/anchor_pipeline.hpp"
 #include "prototype/cloud_families.hpp"
 #include "prototype/morton_lbvh.hpp"
 
@@ -402,6 +403,7 @@ struct Workspace {
   bool store = true;
   Inject inject = Inject::kNone;
   int fixture = 0;
+  bool engine_pipeline = false;
   std::vector<int> partners;
   std::vector<SurvivingAnchor> survivors;        // b > a survivants
   std::vector<Neighbour> sites;     // sites tries par distance a `a`
@@ -832,6 +834,191 @@ RunResult produce(const std::vector<P3>& pts, int smax, int threads, bool exhaus
 }
 
 // ---------------------------------------------------------------------------
+// MOTEUR `pipeline` : exactement le code de `anchor_pipeline.hpp`, celui que
+// nvcc compilera. Il ne partage aucune structure STL avec le moteur de
+// reference : la comparaison des deux moteurs, elle-meme comparee a
+// l'exhaustif, forme la chaine de garde hote -> pipeline -> device.
+// ---------------------------------------------------------------------------
+struct VectorSink {
+  std::vector<Support>* out;
+  bool store;
+  void emit(const EmittedSupport& e) {
+    if (!store) return;
+    Support s{};
+    unsigned long long k = e.key;
+    int q = 0;
+    for (int i = 0; i < 4; ++i) {
+      const unsigned v = (unsigned)((k >> (16 * (3 - i))) & 0xFFFFULL);
+      if (v != 0xFFFFu) { s.id[i] = (int)v; ++q; }
+      else s.id[i] = -1;
+    }
+    s.q = q;
+    s.p = e.p;
+    s.shell_extra = e.extra;
+    out->push_back(s);
+  }
+};
+
+struct PipelineScratchOwner {
+  std::vector<int> partners, kept, lens, site_id;
+  std::vector<i64> site_d2, margin_g, margin_llow, margin_uhigh;
+  std::vector<unsigned char> acute;
+  Scratch view() {
+    partners.resize(kPartnerCap);
+    site_d2.resize(kSiteCap);
+    site_id.resize(kSiteCap);
+    margin_g.resize(kSiteCap);
+    margin_llow.resize(kSiteCap);
+    margin_uhigh.resize(kSiteCap);
+    kept.resize(kKeptCap);
+    lens.resize(kLensCap);
+    acute.resize(kLensCap);
+    Scratch sc{};
+    sc.partners = partners.data();
+    sc.site_d2 = site_d2.data();
+    sc.site_id = site_id.data();
+    sc.margin_g = margin_g.data();
+    sc.margin_llow = margin_llow.data();
+    sc.margin_uhigh = margin_uhigh.data();
+    sc.kept = kept.data();
+    sc.lens = lens.data();
+    sc.acute = acute.data();
+    return sc;
+  }
+};
+
+struct FlatTree {
+  std::vector<int> lo, hi, begin_, end_, left, right, order, px, py, pz;
+  TreeView view() const {
+    TreeView t{};
+    t.lo = lo.data();
+    t.hi = hi.data();
+    t.begin = begin_.data();
+    t.end = end_.data();
+    t.left = left.data();
+    t.right = right.data();
+    t.order = order.data();
+    t.px = px.data();
+    t.py = py.data();
+    t.pz = pz.data();
+    t.nodes = (int)begin_.size();
+    t.n = (int)px.size();
+    return t;
+  }
+};
+
+FlatTree flatten(const MortonLbvh& tree, const std::vector<P3>& pts) {
+  FlatTree f;
+  const int nn = (int)tree.nodes.size();
+  f.lo.resize(3 * (std::size_t)nn);
+  f.hi.resize(3 * (std::size_t)nn);
+  f.begin_.resize((std::size_t)nn);
+  f.end_.resize((std::size_t)nn);
+  f.left.resize((std::size_t)nn);
+  f.right.resize((std::size_t)nn);
+  for (int i = 0; i < nn; ++i) {
+    const LbvhNode& nd = tree.nodes[(std::size_t)i];
+    for (int d = 0; d < 3; ++d) {
+      f.lo[3 * (std::size_t)i + (std::size_t)d] = (int)nd.lo[d];
+      f.hi[3 * (std::size_t)i + (std::size_t)d] = (int)nd.hi[d];
+    }
+    f.begin_[(std::size_t)i] = nd.begin;
+    f.end_[(std::size_t)i] = nd.end;
+    f.left[(std::size_t)i] = nd.left;
+    f.right[(std::size_t)i] = nd.right;
+  }
+  f.order = tree.order;
+  const int n = (int)pts.size();
+  f.px.resize((std::size_t)n);
+  f.py.resize((std::size_t)n);
+  f.pz.resize((std::size_t)n);
+  for (int i = 0; i < n; ++i) {
+    f.px[(std::size_t)i] = (int)pts[(std::size_t)i].x;
+    f.py[(std::size_t)i] = (int)pts[(std::size_t)i].y;
+    f.pz[(std::size_t)i] = (int)pts[(std::size_t)i].z;
+  }
+  return f;
+}
+
+RunResult produce_pipeline(const std::vector<P3>& pts, int smax, int threads, bool store) {
+  RunResult res{};
+  MortonLbvh tree;
+  tree.build(pts, 8);
+  const FlatTree flat = flatten(tree, pts);
+  const TreeView tv = flat.view();
+  const int n = (int)pts.size();
+  const int nthreads = std::max(1, threads);
+  std::vector<WorkCounters> wc((std::size_t)nthreads);
+  std::vector<std::vector<Support>> outs((std::size_t)nthreads);
+  std::vector<unsigned> flags((std::size_t)nthreads, 0u);
+  const auto t0 = std::chrono::steady_clock::now();
+  {
+    std::vector<std::thread> pool;
+    std::atomic<int> cursor{0};
+    const int chunk = std::max(1, n / (nthreads * 64) + 1);
+    for (int t = 0; t < nthreads; ++t) {
+      pool.emplace_back([&, t]() {
+        PipelineScratchOwner owner;
+        Scratch sc = owner.view();
+        VectorSink sink{&outs[(std::size_t)t], store};
+        for (;;) {
+          const int lo = cursor.fetch_add(chunk);
+          if (lo >= n) break;
+          const int hi = std::min(n, lo + chunk);
+          for (int a = lo; a < hi; ++a)
+            run_anchor_point(tv, a, smax, sc, sink, &wc[(std::size_t)t],
+                             &flags[(std::size_t)t]);
+        }
+      });
+    }
+    for (auto& th : pool) th.join();
+  }
+  res.wall_extend_s =
+      std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count();
+  unsigned all = 0;
+  for (unsigned f : flags) all |= f;
+  if (all != 0) {
+    std::fprintf(stderr, "REFUS : capacite du pipeline depassee, drapeaux=%u\n", all);
+    std::exit(3);
+  }
+  for (int t = 0; t < nthreads; ++t) {
+    const WorkCounters& w = wc[(std::size_t)t];
+    res.ctr.front_node_visits += w.front_node_visits;
+    res.ctr.front_witness_calls += w.front_witness_calls;
+    res.ctr.front_witness_visits += w.front_witness_visits;
+    res.ctr.front_witness_prunes += w.front_witness_prunes;
+    res.ctr.lane_probe_visits += w.lane_probe_visits;
+    res.ctr.candidate_pairs += w.candidate_pairs;
+    res.ctr.anchors_opened += w.anchors_opened;
+    res.ctr.anchors_lane_dead += w.anchors_lane_dead;
+    res.ctr.anchors_extended += w.anchors_extended;
+    res.ctr.anchors_disk_dead += w.anchors_disk_dead;
+    res.ctr.site_gather_visits += w.site_gather_visits;
+    res.ctr.site_evaluations += w.site_evaluations;
+    res.ctr.kept_sites += w.kept_sites;
+    res.ctr.lens_carriers += w.lens_carriers;
+    res.ctr.q3_candidates += w.q3_candidates;
+    res.ctr.q4_candidates += w.q4_candidates;
+    res.ctr.interior_tests += w.interior_tests;
+    res.ctr.supports_q2 += w.supports_q2;
+    res.ctr.supports_q3 += w.supports_q3;
+    res.ctr.supports_q4 += w.supports_q4;
+    res.ctr.shell_extra_supports += w.shell_extra;
+    res.ctr.max_site_list = std::max(res.ctr.max_site_list, w.hw_sites);
+    res.ctr.max_kept = std::max(res.ctr.max_kept, w.hw_kept);
+    res.ctr.max_lens = std::max(res.ctr.max_lens, w.hw_lens);
+    res.supports.insert(res.supports.end(), outs[(std::size_t)t].begin(),
+                        outs[(std::size_t)t].end());
+    outs[(std::size_t)t].clear();
+    outs[(std::size_t)t].shrink_to_fit();
+  }
+  std::sort(res.supports.begin(), res.supports.end(), [](const Support& u, const Support& v) {
+    return support_key(u) < support_key(v);
+  });
+  return res;
+}
+
+// ---------------------------------------------------------------------------
 // CLI strict : aucun suffixe accepte, aucun argument excedentaire ignore.
 // ---------------------------------------------------------------------------
 bool parse_ll(const char* s, long long* out) {
@@ -863,6 +1050,7 @@ int main(int argc, char** argv) {
   bool no_store = false;
   Inject inject = Inject::kNone;
   int fixture = 0;
+  bool engine_pipeline = false;
   bool emit = false;
   long long min_supports = 0;
   long long min_anchors = 0;
@@ -885,6 +1073,11 @@ int main(int argc, char** argv) {
     else if (key == "--verify") { verify = true; }
     else if (key == "--no-filter") { no_filter = true; }
     else if (key == "--no-store") { no_store = true; }
+    else if (key == "--engine") {
+      if (val == "pipeline") engine_pipeline = true;
+      else if (val == "reference") engine_pipeline = false;
+      else refuse("--engine inconnu");
+    }
     else if (key == "--inject") {
       if (val == "front-no-ext") inject = Inject::kFrontNoExt;
       else if (val == "front-q4-only") inject = Inject::kFrontQ4Only;
@@ -899,6 +1092,7 @@ int main(int argc, char** argv) {
     else if (key == "--emit-supports") { emit = true; }
     else if (key == "--fixture") {
       if (val == "ties") fixture = 1;
+      else if (val == "q4only") fixture = 2;
       else refuse("--fixture inconnue");
     }
     else if (key == "--family") {
@@ -918,6 +1112,7 @@ int main(int argc, char** argv) {
   if (coord < 2 || coord > 65536) refuse("--coord hors bornes");
   if (verify && no_store) refuse("--verify exige le stockage des supports");
   if (inject != Inject::kNone && !verify) refuse("un mutant sans juge ne prouve rien");
+  if (inject != Inject::kNone && engine_pipeline) refuse("les mutants visent le moteur de reference");
 
   // FIXTURE GRAVEE `ties` : le tetraedre regulier (0,0,0),(2,2,0),(2,0,2),(0,2,2)
   // a ses SIX aretes de carre 8 et son circumcentre exact en (1,1,1), donc
@@ -929,13 +1124,25 @@ int main(int argc, char** argv) {
     pts = {P3{0, 0, 0},   P3{2, 2, 0},   P3{2, 0, 2},   P3{0, 2, 2},
            P3{40, 40, 40}, P3{0, 40, 1}, P3{40, 1, 0}, P3{1, 0, 40}};
     n = (long long)pts.size();
+  } else if (fixture == 2) {
+    // FIXTURE GRAVEE `q4only` : huit points serres exactement au milieu d'une
+    // longue paire. La boule temoin q4 les contient tous les huit, donc la
+    // lane q4 est morte ; mais la boule DIAMETRALE n'en contient que huit, et
+    // le seuil q2 est dix : le support q2 (a,b) reste pertinent avec p=8.
+    // Fermer un noeud sur la seule lane q4 le detruit.
+    pts = {P3{0, 0, 0},     P3{1000, 0, 0}, P3{500, 0, 0}, P3{501, 0, 0},
+           P3{500, 1, 0},   P3{500, 0, 1},  P3{501, 1, 0}, P3{501, 0, 1},
+           P3{500, 1, 1},   P3{501, 1, 1}};
+    n = (long long)pts.size();
   } else {
     pts = mhgp3v::make_family_cloud(family, (int)n, (int)coord, seed);
     if ((long long)pts.size() != n) refuse("la famille n'a pas rendu le cardinal demande");
   }
 
   const auto t_start = std::chrono::steady_clock::now();
-  RunResult res = produce(pts, (int)smax, (int)threads, false, !no_filter, !no_store, inject);
+  RunResult res = engine_pipeline
+                      ? produce_pipeline(pts, (int)smax, (int)threads, !no_store)
+                      : produce(pts, (int)smax, (int)threads, false, !no_filter, !no_store, inject);
   const double wall = std::chrono::duration<double>(std::chrono::steady_clock::now() - t_start).count();
 
   std::printf("AnchorSourceReceipt-v1\n");

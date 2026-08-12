@@ -106,16 +106,72 @@ coupure, à `n=2 000` elle en fait `2,6`, à `n=50 000` elle en fera `7,7`.
 Aucun temps n'est publié comme mesure : la machine de développement a deux
 cœurs et les campagnes se chevauchent.
 
-## 6. Ce que cette note ne dit pas
+## 6. Portes raccordées et mutants
 
-Elle ne reçoit aucune porte CMake : le sujet n'a pour l'instant ni fixtures
-gravées, ni mutants, ni planchers raccordés, ni juge indépendant. Elle ne
-publie aucun `warm_e2e`, ne construit ni `BallActivation`, ni gateways, ni
-resolver, ni fold H0, ni payload. Le domaine dégénéré n'est pas fermé : les
-positions dupliquées sont refusées en code 2, l'extra-shell est comptée mais
-pas routée, et le cas terminal `k=n` n'est pas produit.
+Le sujet porte désormais des portes CMake. Huit mutants cassent chacun **une**
+décision exacte ; le sujet muté est comparé à la référence exhaustive **non**
+mutée, donc toute différence tue le mutant en code 4. Un mutant sans juge est
+refusé en code 2.
 
-## 7. Objectif d'échelle inscrit
+| mutant | ce qu'il casse | ce qui le tue |
+| --- | --- | --- |
+| `theta-no-fail-open` | filtre d'enveloppe sur `Llow` au lieu de `Uhigh` | `uniform,n=500` |
+| `owner-min-edge` | ancre sur l'arête minimale | `uniform,n=500` |
+| `lens-strict` | lentille en `<` au lieu de `<=` | `uniform,n=500` |
+| `census-no-always-inside` | census ignorant les toujours-intérieurs | `uniform,n=500` |
+| `positivity-loose` | accepte un centre sur une face | `uniform,n=500` |
+| `owner-no-tiebreak` | toute arête maximale se croit owner | fixture `ties` |
+| `front-no-ext` | boule témoin sans la soustraction `ext/4` | `terrain` et `scanline_overlap_multiecho` |
+| `front-q4-only` | ferme un produit sur la seule lane q4 | fixture `q4only` |
+
+Deux enseignements de mutants sont durables :
+
+- `front-no-ext` **survit sur `uniform`**. Le terme `ext/4` ne se voit que sur
+  des boîtes allongées : les familles anisotropes sont donc la porte, pas un
+  choix de confort. Une campagne `uniform` seule aurait laissé passer une
+  boule témoin trop grande.
+- `front-q4-only` exige une fixture gravée. La fixture `q4only` place huit
+  points au milieu exact d'une longue paire : la lane q4 y meurt, alors que le
+  support q2 reste pertinent avec `p=8` puisque son seuil est dix. Fermer un
+  produit sur la seule lane q4 le détruit. Aucune famille aléatoire testée ne
+  produit ce motif.
+
+La fixture `ties` est le tétraèdre régulier `(0,0,0),(2,2,0),(2,0,2),(0,2,2)`,
+de côté carré huit, de circumcentre exact `(1,1,1)` : ses six arêtes sont
+maximales et ses quatre faces équilatérales. Sans règle canonique, il est émis
+plusieurs fois; le reçu le voit en `doublons=25`.
+
+## 7. Portage device
+
+`prototype/anchor_pipeline.hpp` contient l'intégralité du travail d'un point
+d'ancre, sans STL, sans allocation et sans récursion, en `MHGP_HD`.
+`prototype/anchor_source_kernel.cu` n'implémente **aucune** géométrie : il
+appelle `run_anchor_point`, exactement la fonction que l'hôte compile. La
+parité hôte/device n'est donc pas un accord à espérer entre deux
+implémentations, c'est la même fonction sur deux matériels; le différentiel
+sert à détecter une divergence de compilateur, d'arrondi entier ou de matériel.
+
+La chaîne de garde est : exhaustif ↔ moteur de référence ↔ moteur `pipeline`
+(portes CMake locales), puis `pipeline` hôte ↔ `pipeline` device (porte
+`mhgp3v_anchor_device_parite`, active seulement sous `MHGP3V_ENABLE_CUDA`).
+La porte device compare la liste triée des clés **avec** leur census
+`(p, extra)` **et** les vingt-cinq compteurs de travail, qui sont
+déterministes par point et donc indépendants du partitionnement.
+
+Toutes les capacités sont fixes et préflightées; un dépassement lève un
+drapeau et fait refuser la campagne en code 3, il ne tronque jamais une sortie.
+
+## 8. Ce que cette note ne dit pas
+
+Elle ne publie aucun `warm_e2e`, ne construit ni `BallActivation`, ni gateways,
+ni resolver, ni fold H0, ni payload. Aucune mesure device n'existe encore : le
+noyau est écrit et contrôlé syntaxiquement, il n'a jamais été exécuté. Le
+domaine dégénéré n'est pas fermé : les positions dupliquées sont refusées en
+code 2, l'extra-shell est comptée mais pas routée, et le cas terminal `k=n`
+n'est pas produit. Il n'existe toujours aucun juge **indépendant** : le
+différentiel exhaustif partage les primitives du sujet.
+
+## 9. Objectif d'échelle inscrit
 
 L'utilisateur a fixé l'objectif suivant, **après** le contrat `50 000/1 s` :
 traiter sur la même G4 des nuages de **dizaines de millions de points**. Deux
@@ -132,7 +188,7 @@ Le producteur par ancre est compatible avec ces deux contraintes : son travail
 est local par point d'ancre et sa sortie est exacte-une-fois, donc streamable
 sans déduplication globale. C'est un argument de conception, pas un résultat.
 
-## 8. Questions à l'auditeur
+## 10. Questions à l'auditeur
 
 1. Le certificat de front de la section 3.3 est-il correct sur le point
    suivant : pour une requête **mono-arbre** (l'ancre est un point, pas un

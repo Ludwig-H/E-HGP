@@ -333,6 +333,35 @@ if(MHGP3V_ENABLE_CUDA)
   target_compile_options(mhgp3v_device_wavefront PRIVATE
     $<$<COMPILE_LANGUAGE:CUDA>:--fmad=false;--ftz=false;--prec-div=true;--prec-sqrt=true>)
   message(STATUS "mhgp3v : kernel de front d'onde active pour ${CMAKE_CUDA_ARCHITECTURES}")
+  # SOURCE PAR ANCRE MAXIMALE, PARITE HOTE/DEVICE.
+  # Le noyau n'implemente aucune geometrie : il appelle `run_anchor_point` de
+  # `prototype/anchor_pipeline.hpp`, exactement la fonction que l'hote compile.
+  add_executable(mhgp3v_anchor_device
+    prototype/anchor_source_device_qualification.cpp
+    prototype/anchor_source_kernel.cu)
+  target_include_directories(mhgp3v_anchor_device PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+  target_link_libraries(mhgp3v_anchor_device PRIVATE mhgp Threads::Threads)
+  target_compile_options(mhgp3v_anchor_device PRIVATE
+    $<$<COMPILE_LANGUAGE:CXX>:-Wall;-Wextra;-Werror>)
+  set_target_properties(mhgp3v_anchor_device PROPERTIES
+    CUDA_ARCHITECTURES "${CMAKE_CUDA_ARCHITECTURES}"
+    CUDA_STANDARD 20
+    CUDA_STANDARD_REQUIRED ON
+    CUDA_EXTENSIONS OFF
+    CUDA_SEPARABLE_COMPILATION OFF)
+  # Le chemin est entier : la discipline flottante ne sert qu'a garder
+  # l'estimation initiale de la racine entiere reproductible d'un hote a l'autre.
+  target_compile_options(mhgp3v_anchor_device PRIVATE
+    $<$<COMPILE_LANGUAGE:CUDA>:--fmad=false;--ftz=false;--prec-div=true;--prec-sqrt=true>)
+  add_test(NAME mhgp3v_anchor_device_parite COMMAND mhgp3v_anchor_device
+           --points=4000 --family=uniform --seed=1 --threads=4 --slots=8192)
+  set_tests_properties(mhgp3v_anchor_device_parite PROPERTIES
+    PASS_REGULAR_EXPRESSION "parite supports=OUI compteurs=OUI")
+  add_test(NAME mhgp3v_anchor_device_parite_terrain COMMAND mhgp3v_anchor_device
+           --points=4000 --family=terrain --seed=3 --threads=4 --slots=8192)
+  set_tests_properties(mhgp3v_anchor_device_parite_terrain PROPERTIES
+    PASS_REGULAR_EXPRESSION "parite supports=OUI compteurs=OUI")
+  message(STATUS "mhgp3v : source par ancre device active pour ${CMAKE_CUDA_ARCHITECTURES}")
 endif()
 
 enable_testing()
@@ -2643,6 +2672,45 @@ mhgp3v_add_expected_code_test_for(mhgp3v_anchor_source
 mhgp3v_add_expected_code_test_for(mhgp3v_anchor_source
   mhgp3v_anchor_mutant_tiebreak "MUTANT TUE" 4
   --fixture=ties --verify --inject=owner-no-tiebreak)
+# Le terme `ext/4` ne se voit que sur des boites ALLONGEES : sur `uniform` les
+# noeuds sont presque cubiques et le mutant survit. Ces deux familles
+# anisotropes sont donc la porte, pas un choix de confort.
+mhgp3v_add_expected_code_test_for(mhgp3v_anchor_source
+  mhgp3v_anchor_mutant_front_ext "MUTANT TUE" 4
+  --points=300 --family=scanline_overlap_multiecho --seed=3 --verify
+  --inject=front-no-ext)
+mhgp3v_add_expected_code_test_for(mhgp3v_anchor_source
+  mhgp3v_anchor_mutant_front_ext_terrain "MUTANT TUE" 4
+  --points=300 --family=terrain --seed=3 --verify --inject=front-no-ext)
+# La fixture `q4only` place huit points au milieu exact d'une longue paire :
+# la lane q4 y meurt alors que le support q2 reste pertinent avec p=8. Fermer
+# un produit sur la seule lane q4 le detruit.
+mhgp3v_add_expected_code_test_for(mhgp3v_anchor_source
+  mhgp3v_anchor_mutant_front_q4_seule "MUTANT TUE" 4
+  --fixture=q4only --verify --inject=front-q4-only)
+add_test(NAME mhgp3v_anchor_fixture_q4only COMMAND mhgp3v_anchor_source
+         --fixture=q4only --verify --min-supports=55)
+set_tests_properties(mhgp3v_anchor_fixture_q4only PROPERTIES
+  PASS_REGULAR_EXPRESSION "accord=OUI")
+# Le moteur `pipeline` est EXACTEMENT le code que nvcc compile. Le comparer a
+# l'exhaustif ferme la chaine hote -> pipeline -> device.
+add_test(NAME mhgp3v_anchor_pipeline_uniform COMMAND mhgp3v_anchor_source
+         --points=140 --family=uniform --seed=2 --engine=pipeline --verify
+         --min-supports=25000)
+add_test(NAME mhgp3v_anchor_pipeline_terrain COMMAND mhgp3v_anchor_source
+         --points=140 --family=terrain --seed=5 --engine=pipeline --verify
+         --min-supports=5000)
+add_test(NAME mhgp3v_anchor_pipeline_multiecho COMMAND mhgp3v_anchor_source
+         --points=120 --family=scanline_overlap_multiecho --seed=2
+         --engine=pipeline --verify --min-supports=3000)
+add_test(NAME mhgp3v_anchor_pipeline_fixtures COMMAND mhgp3v_anchor_source
+         --fixture=ties --engine=pipeline --verify --min-supports=70)
+set_tests_properties(mhgp3v_anchor_pipeline_uniform mhgp3v_anchor_pipeline_terrain
+                     mhgp3v_anchor_pipeline_multiecho mhgp3v_anchor_pipeline_fixtures
+                     PROPERTIES PASS_REGULAR_EXPRESSION "accord=OUI")
+mhgp3v_add_expected_code_test_for(mhgp3v_anchor_source
+  mhgp3v_anchor_reject_mutant_pipeline "les mutants visent le moteur de reference" 2
+  --points=90 --verify --engine=pipeline --inject=lens-strict)
 
 # Refus contractuels, tous AVANT le moindre calcul.
 mhgp3v_add_expected_code_test_for(mhgp3v_anchor_source

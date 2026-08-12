@@ -31,6 +31,10 @@
 
 #include "mhgp/mhgp.hpp"
 
+// MHGP_HD vient de mhgp/exact.hpp : host seul en C++, host+device sous nvcc.
+// Tous les predicats ci-dessous sont donc compiles a l'identique des deux
+// cotes, ce qui rend le differentiel hote/device une porte et non un espoir.
+
 namespace mhgp3v {
 namespace anchor {
 
@@ -46,15 +50,15 @@ struct V3 {
   i128 x = 0, y = 0, z = 0;
 };
 
-inline i128 dot_i64(const P3& a, const P3& b) {
+MHGP_HD inline i128 dot_i64(const P3& a, const P3& b) {
   return i128(a.x) * b.x + i128(a.y) * b.y + i128(a.z) * b.z;
 }
-inline i128 norm2_i64(const P3& a) { return dot_i64(a, a); }
-inline P3 sub(const P3& a, const P3& b) { return P3{a.x - b.x, a.y - b.y, a.z - b.z}; }
-inline P3 cross_i64(const P3& a, const P3& b) {
+MHGP_HD inline i128 norm2_i64(const P3& a) { return dot_i64(a, a); }
+MHGP_HD inline P3 sub(const P3& a, const P3& b) { return P3{a.x - b.x, a.y - b.y, a.z - b.z}; }
+MHGP_HD inline P3 cross_i64(const P3& a, const P3& b) {
   return P3{a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x};
 }
-inline i128 dot_mixed(const P3& a, const V3& b) {
+MHGP_HD inline i128 dot_mixed(const P3& a, const V3& b) {
   return i128(a.x) * b.x + i128(a.y) * b.y + i128(a.z) * b.z;
 }
 
@@ -74,14 +78,14 @@ struct BallForm {
   bool valid = false;
 };
 
-inline i128 power_sign_value(const BallForm& ball, const P3& origin, const P3& z) {
+MHGP_HD inline i128 power_sign_value(const BallForm& ball, const P3& origin, const P3& z) {
   const P3 r = sub(z, origin);
   return ball.den * norm2_i64(r) - 2 * dot_mixed(r, ball.num);
 }
 
 // Circumcentre du triangle (a,b,x), exprime relativement a `a`.
 // c - a = ( |u|^2 (v x N) + |v|^2 (N x u) ) / (2 |N|^2), N = u x v.
-inline BallForm circum_q3(const P3& a, const P3& b, const P3& x) {
+MHGP_HD inline BallForm circum_q3(const P3& a, const P3& b, const P3& x) {
   BallForm out{};
   const P3 u = sub(b, a);
   const P3 v = sub(x, a);
@@ -102,7 +106,7 @@ inline BallForm circum_q3(const P3& a, const P3& b, const P3& x) {
 
 // Circumcentre du tetraedre (a,b,x,y), relatif a `a`. Le denominateur est
 // normalise strictement positif ; le centre est inchange.
-inline BallForm circum_q4(const P3& a, const P3& b, const P3& x, const P3& y) {
+MHGP_HD inline BallForm circum_q4(const P3& a, const P3& b, const P3& x, const P3& y) {
   BallForm out{};
   const P3 u = sub(b, a);
   const P3 v = sub(x, a);
@@ -137,7 +141,7 @@ inline BallForm circum_q4(const P3& a, const P3& b, const P3& x, const P3& y) {
 //      sont strictement aigus. Un angle droit place le centre sur une arete :
 //      la miniboule est alors la boule diametrale, le support propre est q2 et
 //      le troisieme point n'est qu'un membre de shell.
-inline bool positive_q3(const P3& a, const P3& b, const P3& x) {
+MHGP_HD inline bool positive_q3(const P3& a, const P3& b, const P3& x) {
   return dot_i64(sub(b, a), sub(x, a)) > 0 && dot_i64(sub(a, b), sub(x, b)) > 0 &&
          dot_i64(sub(a, x), sub(b, x)) > 0;
 }
@@ -145,7 +149,7 @@ inline bool positive_q3(const P3& a, const P3& b, const P3& x) {
 // q4 : le circumcentre est strictement du meme cote que le sommet oppose pour
 // les quatre faces. Avec c = a + Y/Delta et Delta > 0, le test sur la face
 // (p,q,r) de sommet oppose s s'ecrit sur Delta*(c - p) = Delta*(a - p) + Y.
-inline bool positive_q4(const P3& s0, const P3& s1, const P3& s2, const P3& s3,
+MHGP_HD inline bool positive_q4(const P3& s0, const P3& s1, const P3& s2, const P3& s3,
                         const BallForm& ball, const P3& origin, bool loose = false) {
   const P3* v[4] = {&s0, &s1, &s2, &s3};
   for (int f = 0; f < 4; ++f) {
@@ -198,9 +202,13 @@ struct Support {
   int shell_extra = 0;  // |U_B| - q
 };
 
-inline void sort_ids(int* v, int q) {
+MHGP_HD inline void sort_ids(int* v, int q) {
   for (int i = 1; i < q; ++i)
-    for (int j = i; j > 0 && v[j] < v[j - 1]; --j) std::swap(v[j], v[j - 1]);
+    for (int j = i; j > 0 && v[j] < v[j - 1]; --j) {
+      const int t = v[j];
+      v[j] = v[j - 1];
+      v[j - 1] = t;
+    }
 }
 
 // Cle canonique : quatre indices denses u16 tries croissants, du poids fort au
@@ -208,7 +216,7 @@ inline void sort_ids(int* v, int q) {
 // n <= 65535, cette sentinelle n'est jamais un identifiant valide et l'arite se
 // relit sans champ supplementaire. La cle n'est JAMAIS une autorite
 // geometrique : elle sert au tri, a la deduplication et aux digests.
-inline unsigned long long support_key(const Support& s) {
+MHGP_HD inline unsigned long long support_key(const Support& s) {
   unsigned long long k = 0;
   for (int i = 0; i < 4; ++i) {
     const unsigned long long v = (i < s.q) ? (unsigned long long)(unsigned)s.id[i] : 0xFFFFULL;
@@ -222,9 +230,13 @@ inline unsigned long long support_key(const Support& s) {
 // qu'un point de depart : les deux boucles de correction rendent le resultat
 // exact, et c'est lui seul qui decide.
 // ---------------------------------------------------------------------------
-inline i64 isqrt_i128(i128 v) {
+MHGP_HD inline i64 isqrt_i128(i128 v) {
   if (v <= 0) return 0;
+#if defined(__CUDA_ARCH__)
+  i64 r = (i64)sqrt((double)v);
+#else
   i64 r = (i64)__builtin_sqrt((double)v);
+#endif
   if (r < 0) r = 0;
   while (r > 0 && i128(r) * r > v) --r;
   while (i128(r + 1) * (r + 1) <= v) ++r;
@@ -254,7 +266,7 @@ struct SiteMargin {
   i64 uhigh = 0;
 };
 
-inline void site_margin(const P3& pa, const P3& pb, const P3& pz, i64 d2, SiteMargin* out) {
+MHGP_HD inline void site_margin(const P3& pa, const P3& pb, const P3& pz, i64 d2, SiteMargin* out) {
   const P3 d = sub(pb, pa);
   const P3 u = P3{2 * pz.x - pa.x - pb.x, 2 * pz.y - pa.y - pb.y, 2 * pz.z - pa.z - pb.z};
   const i128 uu = norm2_i64(u);

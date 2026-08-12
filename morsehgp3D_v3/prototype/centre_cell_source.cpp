@@ -684,6 +684,10 @@ struct Engine {
     std::vector<Cand> parent;
     i64 parent_work = -1;
     int stalls = 0;
+    // Le lot est decide par l'ANCETRE, a `batch_depth`. La recolte doit donc le
+    // transporter, sinon un sous-arbre execute par un worker perdrait son
+    // appartenance et la statistique par lot cesserait d'etre invariante.
+    i64 batch = 0;
   };
   int harvest_depth = -1;
   std::vector<Task>* harvest = nullptr;
@@ -717,7 +721,11 @@ struct Engine {
   bool track_multiplicity = false;
   // issue : 0 degenere, 1 sans owner, 2 non positif, 3 rang, 4 pertinent
   std::map<std::array<int, 4>, std::pair<i64, int>> occurrences;
-  std::map<std::array<int, 5>, i64> occurrences_batched;
+  // L'IDENTIFIANT DE LOT DOIT ETRE GLOBAL. Chaque moteur compte ses lots depuis
+  // zero; sous plusieurs workers, deux lots distincts porteraient le meme
+  // numero et la statistique par lot serait fausse par collision. Le champ est
+  // donc un `i64` prefixe par `batch_base`, unique par worker.
+  std::map<std::array<i64, 5>, i64> occurrences_batched;
 
   void note_occurrence(const int* ids, int q, int issue) {
     if (!track_multiplicity) return;
@@ -726,8 +734,51 @@ struct Engine {
     auto& slot = occurrences[key];
     ++slot.first;
     if (issue > slot.second) slot.second = issue;
-    std::array<int, 5> bkey{key[0], key[1], key[2], key[3], current_batch};
+    std::array<i64, 5> bkey{key[0], key[1], key[2], key[3], current_batch};
     ++occurrences_batched[bkey];
+  }
+
+  // ---------------------------------------------------------------------------
+  // INSTRUMENT DE LA GATE `SupportKey_unique`.
+  //
+  // La table `std::map` ci-dessus est un instrument de petit nuage : elle ne
+  // tient ni les huit cent millions d'occurrences du point `uniform,n=50 000`,
+  // ni le parallelisme. La gate demandee par l'audit de deblocage exige au
+  // contraire le nombre de CLES DISTINCTES a l'echelle, par arite.
+  //
+  // La mesure reproduit donc EXACTEMENT l'ordonnance device : chaque occurrence
+  // emise depose une cle compacte de 64 bits — quatre `DensePointIndex:u16`
+  // canoniquement tries, `0xFFFF` en remplissage — dans un tableau plat propre
+  // au worker; chaque worker trie le sien; le maitre fusionne en k voies et
+  // compte les longueurs de run. Aucune table associative, aucune allocation par
+  // occurrence, un seul octet-flux comparable a celui d'un `count/scan/fill`.
+  //
+  // Le remplissage `0xFFFF` est un sentinel SUR : un `DensePointIndex` vaut au
+  // plus `n-1 <= 65534` sous la garde `n <= 65535` verifiee a l'entree.
+  //
+  // La capacite est PREFLIGHTEE et le refus est ATOMIQUE : au-dela du plafond
+  // d'octets, la collecte s'arrete, le drapeau est leve et le binaire rend un
+  // code non nul. Il ne publie jamais un prefixe comme si c'etait la mesure.
+  bool collect_keys = false;
+  i64 keys_cap = 0;  // nombre maximal de cles par moteur, 0 = illimite
+  bool keys_overflow = false;
+  i64 keys_pushed = 0;
+  std::vector<unsigned long long> keys_q[5];
+
+  void push_key(const int* sorted_ids, int q) {
+    if (!collect_keys || keys_overflow) return;
+    if (keys_cap > 0 && keys_pushed >= keys_cap) {
+      keys_overflow = true;
+      return;
+    }
+    unsigned long long k = 0;
+    for (int i = 0; i < 4; ++i) {
+      const unsigned long long v =
+          i < q ? (unsigned long long)(unsigned)sorted_ids[i] : 0xFFFFull;
+      k |= v << (16 * i);
+    }
+    keys_q[q].push_back(k);
+    ++keys_pushed;
   }
 
   // `p` va de 0 a smax-2 pour l'arite deux : il faut donc `smax-1` seuils.
@@ -742,13 +793,16 @@ struct Engine {
   }
 
   int batch_depth = 3;
-  int batch_counter = 0;
-  int current_batch = 0;
+  i64 batch_counter = 0;
+  i64 current_batch = 0;
+  // Prefixe de lot propre au worker : sans lui, deux sous-arbres distincts
+  // numerotent leurs lots `1,2,3...` et la table par lot les confond.
+  i64 batch_base = 0;
 
   void descend(const CentreCell& cell, const std::vector<Cand>& parent,
                i64 parent_work = -1, int stalls = 0) {
     if (harvest && cell.depth == harvest_depth) {
-      harvest->push_back(Task{cell, parent, parent_work, stalls});
+      harvest->push_back(Task{cell, parent, parent_work, stalls, current_batch});
       return;
     }
     stats.max_depth_reached = std::max(stats.max_depth_reached, (i64)cell.depth);
@@ -1132,8 +1186,8 @@ struct Engine {
         }
       }
       ++stats.cells_created;
-      const int saved = current_batch;
-      if (child.depth == batch_depth) current_batch = ++batch_counter;
+      const i64 saved = current_batch;
+      if (child.depth == batch_depth) current_batch = batch_base + (++batch_counter);
       descend(child, mine, my_work, my_stalls);
       current_batch = saved;
     }
@@ -1576,6 +1630,7 @@ struct Engine {
     BatchRec r;
     std::memcpy(r.ids, raw, sizeof(int) * (std::size_t)q);
     std::sort(r.ids, r.ids + q);
+    push_key(r.ids, q);
     for (int i = q; i < 4; ++i) r.ids[i] = -1;
     r.q = q;
     r.e = e;
@@ -1592,6 +1647,10 @@ struct Engine {
     int ids[4];
     std::memcpy(ids, raw, sizeof(int) * (std::size_t)q);
     std::sort(ids, ids + q);
+    // En mode eager, l'occurrence emise EST ce tuple : c'est ici que la cle
+    // compacte du flux device est deposee. En mode differe, `record_tuple` l'a
+    // deja fait et `propose` n'est plus appele qu'une fois par cle du lot.
+    if (!deferred_lift) push_key(ids, q);
     i128 num[3] = {0, 0, 0};
     i128 den = 0;
     Lift lift;
@@ -1903,6 +1962,8 @@ struct Options {
   int smax = 11, leaf = 4, work_cap = 20000, max_depth = 22;
   bool axis_filter = false;
   bool multiplicity = false;
+  bool unique_keys = false;
+  i64 unique_keys_cap_mb = 49152;
   bool emit_identities = false;
   bool k1 = false;
   int threads = 1;
@@ -1924,6 +1985,14 @@ struct Options {
 
 int run_engine(const std::vector<mhgp::P3>& cloud, const Options& opt) {
   const int points = (int)cloud.size();
+  // GARDE DE LA CLE COMPACTE. Le sentinel `0xFFFF` n'est libre que si aucun
+  // `DensePointIndex` ne l'atteint. Le refus est ANTERIEUR au calcul.
+  if (opt.unique_keys && points > 65535) {
+    std::fprintf(stderr,
+                 "REFUS : la cle compacte 4x16 bits exige n<=65535, recu n=%d\n",
+                 points);
+    return 2;
+  }
   Engine engine;
   engine.pts = cloud.data();
   engine.n = points;
@@ -1944,6 +2013,13 @@ int run_engine(const std::vector<mhgp::P3>& cloud, const Options& opt) {
   engine.mutant = opt.mutant;
   engine.collect = opt.judge || (opt.emit_identities && !opt.k1);
   engine.collect_gabriel = opt.k1;
+  engine.collect_keys = opt.unique_keys;
+  // Le plafond d'octets est reparti entre les moteurs effectivement actifs :
+  // maitre plus workers. Il borne le high-water du flux, pas la sortie.
+  const int engines_max = opt.threads > 1 ? opt.threads + 1 : 1;
+  engine.keys_cap = opt.unique_keys_cap_mb > 0
+                        ? (opt.unique_keys_cap_mb * 1024 * 1024) / 8 / engines_max
+                        : 0;
 
   CentreCell root;
   root.depth = 0;
@@ -1963,6 +2039,11 @@ int run_engine(const std::vector<mhgp::P3>& cloud, const Options& opt) {
   seed.reserve(cloud.size());
   for (int i = 0; i < points; ++i) seed.push_back(Cand{0, 0, i, 0});
   ++engine.stats.cells_created;
+
+  // Flux de cles par arite : UN tableau par moteur, jamais concatene. La fusion
+  // k-voies compte les longueurs de run sans jamais doubler le pic memoire.
+  std::vector<std::vector<unsigned long long>> key_streams[5];
+  bool keys_overflow = false;
 
   if (opt.threads <= 1) {
     engine.run(root, seed);
@@ -2010,6 +2091,16 @@ int run_engine(const std::vector<mhgp::P3>& cloud, const Options& opt) {
       e.batch_rec_cap = engine.batch_rec_cap;
       e.no_normal = engine.no_normal;
       e.ablate = engine.ablate;
+      // DEFAUT REPARE (contre-audit `407d4d1`) : les workers n'heritaient ni de
+      // `track_multiplicity` ni de `batch_depth`, et leurs tables n'etaient pas
+      // fusionnees. La telemetrie devenait partielle en rendant zero. Le
+      // prefixe `batch_base` rend en outre les identifiants de lot globalement
+      // distincts, sans quoi la fusion confondrait deux lots homonymes.
+      e.track_multiplicity = engine.track_multiplicity;
+      e.batch_depth = engine.batch_depth;
+      e.batch_base = (i64)(w + 1) << 40;
+      e.collect_keys = engine.collect_keys;
+      e.keys_cap = engine.keys_cap;
       for (int d = 0; d < 3; ++d) e.root_hi[d] = engine.root_hi[d];
       e.level.assign((std::size_t)opt.max_depth + 2, {});
       workers.push_back(std::move(e));
@@ -2021,6 +2112,7 @@ int run_engine(const std::vector<mhgp::P3>& cloud, const Options& opt) {
         const std::size_t i = next.fetch_add(1);
         if (i >= tasks.size()) break;
         const Engine::Task& t = tasks[i];
+        e.current_batch = t.batch;
         e.descend(t.cell, t.parent, t.parent_work, t.stalls);
       }
       if (e.deferred_lift) e.flush_batch();
@@ -2034,6 +2126,19 @@ int run_engine(const std::vector<mhgp::P3>& cloud, const Options& opt) {
       if (engine.invariant_broken == 0) engine.invariant_broken = e.invariant_broken;
       engine.records.insert(engine.records.end(), e.records.begin(), e.records.end());
       engine.gabriel.insert(engine.gabriel.end(), e.gabriel.begin(), e.gabriel.end());
+      // Multiplicite : la somme des compteurs et le MAXIMUM des issues, comme
+      // dans `note_occurrence`. Le lot est deja globalement unique.
+      for (const auto& kv : e.occurrences) {
+        auto& slot = engine.occurrences[kv.first];
+        slot.first += kv.second.first;
+        if (kv.second.second > slot.second) slot.second = kv.second.second;
+      }
+      for (const auto& kv : e.occurrences_batched)
+        engine.occurrences_batched[kv.first] += kv.second;
+      engine.batch_counter += e.batch_counter;
+      if (e.keys_overflow) keys_overflow = true;
+      for (int q = 2; q <= 4; ++q)
+        if (!e.keys_q[q].empty()) key_streams[q].push_back(std::move(e.keys_q[q]));
     }
     // L'ORDRE DE CONCATENATION depend de l'ordonnancement; les identites, elles,
     // sont un ENSEMBLE. On le rend canonique avant toute comparaison.
@@ -2049,6 +2154,10 @@ int run_engine(const std::vector<mhgp::P3>& cloud, const Options& opt) {
                 return a.b < b.b;
               });
   }
+
+  if (engine.keys_overflow) keys_overflow = true;
+  for (int q = 2; q <= 4; ++q)
+    if (!engine.keys_q[q].empty()) key_streams[q].push_back(std::move(engine.keys_q[q]));
 
   const Stats& s = engine.stats;
   std::printf("CentreCellReceipt-v3\n");
@@ -2108,6 +2217,91 @@ int run_engine(const std::vector<mhgp::P3>& cloud, const Options& opt) {
     }
     std::printf("early_rank_groups=%lld\n", s.early_rank_groups);
   }
+  if (opt.unique_keys) {
+    // LA GATE `SupportKey_unique`, A L'ECHELLE ET EN PARALLELE.
+    //
+    // Chaque flux est trie dans son propre thread, puis une fusion k-voies
+    // parcourt l'union triee et mesure les longueurs de run. Aucun tableau
+    // concatene n'est materialise : le pic reste celui de la collecte.
+    //
+    // Le refus de capacite est ATOMIQUE : si un moteur a atteint son plafond,
+    // aucune ligne de mesure n'est publiee et le binaire rend un code non nul.
+    if (keys_overflow) {
+      std::fprintf(stderr,
+                   "REFUS_RESSOURCE : plafond `--unique-keys-cap-mb=%lld` atteint, "
+                   "aucune mesure de cles uniques publiee\n",
+                   (long long)opt.unique_keys_cap_mb);
+      return 3;
+    }
+    {
+      std::vector<std::thread> sorters;
+      for (int q = 2; q <= 4; ++q)
+        for (std::vector<unsigned long long>& v : key_streams[q])
+          sorters.emplace_back([&v] { std::sort(v.begin(), v.end()); });
+      for (std::thread& th : sorters) th.join();
+    }
+    std::printf("UniqueKeyReceipt-v1 cap_mb=%lld flux=%zu\n",
+                (long long)opt.unique_keys_cap_mb,
+                key_streams[2].size() + key_streams[3].size() + key_streams[4].size());
+    i64 occ_all = 0, uniq_all = 0;
+    for (int q = 2; q <= 4; ++q) {
+      // Fusion k-voies par tas binaire sur les tetes de flux.
+      std::vector<std::size_t> pos(key_streams[q].size(), 0);
+      std::vector<std::pair<unsigned long long, std::size_t>> heap;
+      heap.reserve(key_streams[q].size());
+      for (std::size_t k = 0; k < key_streams[q].size(); ++k)
+        if (!key_streams[q][k].empty()) heap.push_back({key_streams[q][k][0], k});
+      const auto cmp = [](const std::pair<unsigned long long, std::size_t>& a,
+                          const std::pair<unsigned long long, std::size_t>& b) {
+        return a.first > b.first;  // tas-min
+      };
+      std::make_heap(heap.begin(), heap.end(), cmp);
+      i64 occ = 0, uniq = 0, run = 0, run_max = 0;
+      unsigned long long cur = 0;
+      bool have = false;
+      std::vector<i64> runs;
+      while (!heap.empty()) {
+        std::pop_heap(heap.begin(), heap.end(), cmp);
+        const auto top = heap.back();
+        heap.pop_back();
+        const unsigned long long key = top.first;
+        const std::size_t k = top.second;
+        ++occ;
+        if (have && key == cur) {
+          ++run;
+        } else {
+          if (have) { runs.push_back(run); run_max = std::max(run_max, run); }
+          cur = key;
+          have = true;
+          run = 1;
+          ++uniq;
+        }
+        if (++pos[k] < key_streams[q][k].size()) {
+          heap.push_back({key_streams[q][k][pos[k]], k});
+          std::push_heap(heap.begin(), heap.end(), cmp);
+        }
+      }
+      if (have) { runs.push_back(run); run_max = std::max(run_max, run); }
+      std::sort(runs.begin(), runs.end());
+      const i64 p50 = runs.empty() ? 0 : runs[runs.size() / 2];
+      const i64 p95 = runs.empty() ? 0 : runs[std::min(runs.size() - 1, (runs.size() * 95) / 100)];
+      std::printf("unique_keys q%d occurrences=%lld uniques=%lld ratio=%.4f p50=%lld p95=%lld max=%lld octets_flux=%lld\n",
+                  q, occ, uniq, uniq ? (double)occ / (double)uniq : 0.0, p50, p95,
+                  run_max, occ * 8);
+      occ_all += occ;
+      uniq_all += uniq;
+    }
+    // L'IDENTITE DE FERMETURE : le flux mesure est exactement le flux emis.
+    std::printf("unique_keys_total occurrences=%lld uniques=%lld ratio=%.4f occurrences_recues=%lld ecart=%lld\n",
+                occ_all, uniq_all, uniq_all ? (double)occ_all / (double)uniq_all : 0.0,
+                s.occurrences_recorded, s.occurrences_recorded - occ_all);
+    if (s.occurrences_recorded != occ_all) {
+      std::fprintf(stderr,
+                   "INVARIANT viole : %lld cles collectees pour %lld occurrences emises\n",
+                   (long long)occ_all, (long long)s.occurrences_recorded);
+      return 3;
+    }
+  }
   if (opt.multiplicity) {
     // L'IDENTITE DOIT FERMER : la somme des multiplicites vaut le nombre
     // d'occurrences. Les issues sont separees pour distinguer la multiplicite
@@ -2141,7 +2335,7 @@ int run_engine(const std::vector<mhgp::P3>& cloud, const Options& opt) {
     // `batch_depth`. Si les occurrences d'un meme tuple tombent majoritairement
     // sous un meme ancetre, un RLE local suffit et aucune table globale n'est
     // necessaire; sinon la voie `SupportKey-before-lift` doit etre globale.
-    std::printf("dedup batch_depth=%d lots=%d cles_globales=%zu cles_par_lot=%zu facteur_global=%.3f facteur_lot=%.3f\n",
+    std::printf("dedup batch_depth=%d lots=%lld cles_globales=%zu cles_par_lot=%zu facteur_global=%.3f facteur_lot=%.3f\n",
                 engine.batch_depth, engine.batch_counter, engine.occurrences.size(),
                 engine.occurrences_batched.size(),
                 (double)total / (double)engine.occurrences.size(),
@@ -2587,6 +2781,9 @@ int main(int argc, char** argv) {
       opt.work_cap = parse_int(arg.substr(11).c_str(), &ok);
     else if (arg == "--axis-filter") opt.axis_filter = true;
     else if (arg == "--multiplicity") opt.multiplicity = true;
+    else if (arg == "--unique-keys") opt.unique_keys = true;
+    else if (arg.rfind("--unique-keys-cap-mb=", 0) == 0)
+      opt.unique_keys_cap_mb = parse_int(arg.substr(21).c_str(), &ok);
     else if (arg == "--emit-identities") opt.emit_identities = true;
     else if (arg == "--k1") opt.k1 = true;
     else if (arg.rfind("--threads=", 0) == 0)
