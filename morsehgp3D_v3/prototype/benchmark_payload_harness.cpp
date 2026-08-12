@@ -74,13 +74,16 @@ const Stage kStages[] = {
      "construction hote recursive avec std::sort; aucune residence device recue"},
     {"source_q2_q3_q4_cellules_centres", true, Status::kIncomplete,
      "prototype/centre_cell_source.cpp", "mhgp3v_centre_cell_uniform",
-     "exacte et jugee sur les identites, CPU seulement; pentes uniform vertes"},
+     "exacte, jugee par un oracle rationnel independant, CPU seulement; deux pentes "
+     "uniform vertes sur tous les compteurs a 12,5/25/50 k"},
     {"census_ferme_I_U_ballkey", true, Status::kIncomplete,
      "prototype/centre_cell_source.cpp", "mhgp3v_centre_cell_fixture_coquille",
-     "census stratifie par budget present; RLE par cle primitive de sphere absent"},
-    {"lane_k1_yao1_emst_sparse", true, Status::kIncomplete, "prototype/emst_boruvka.hpp",
-     "mhgp3v_emst_boruvka_uniform",
-     "Boruvka point--LBVH borne; le transcript Yao-1 exact n'est pas produit"},
+     "census stratifie par budget, juge sur les identites (support, I_B, U_B) par "
+     "elimination de Gauss rationnelle; RLE par cle primitive de sphere absent"},
+    {"lane_k1_gabriel_kruskal_sparse", true, Status::kIncomplete,
+     "prototype/centre_cell_source.cpp", "mhgp3v_centre_cell_k1_uniform",
+     "EMST exact par les supports q2 a zero interieur, juge par un Prim exhaustif "
+     "independant; il manque la politique de doublons et le raccord au fold"},
     {"ball_activation", true, Status::kAbsent, "", "",
      "aucun producteur; prerequis des facettes du coeur"},
     {"facettes_du_coeur", true, Status::kAbsent, "", "",

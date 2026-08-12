@@ -930,8 +930,11 @@ Les contre-fixtures et les six réponses sont dans
 ## 7. Cellules de centres : sujet CPU borné, source candidate transitoire
 
 Le prototype CPU actuel est un sujet/référence différentielle branch-and-bound,
-pas un oracle arithmétiquement indépendant : son juge partage encore des lifts
-et puissances. Un
+pas un oracle. Son juge interne partage encore lifts et puissances. Le juge
+externe ajouté au snapshot `90c06b0` emploie au contraire Gauss rationnel,
+barycentriques et distances multiprécision, mais reste un candidat borné : ses
+quatre accords `n=32,smax=7` sont utiles, tandis que sa porte mutant passe sur
+un refus code 2 sous `WILL_FAIL` au lieu d'un désaccord code 1. Un
 successeur device ne devient une source produit qu'après preuve de complétude,
 gate de travail et inclusion de tout son coût dans `warm_e2e`. Les CSR de
 cellules de centres sont alors transitoires; aucun atlas de cellules

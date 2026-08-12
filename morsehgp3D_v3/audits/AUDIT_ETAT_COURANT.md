@@ -11,61 +11,67 @@ Cadre : `phase=exploration_v3_hors_registre`,
 ## Fraîcheur
 
 `HEAD` observé au dernier contre-audit :
-`3ffff85dc1979cd0708196287eb057e41fe468d1`, commit
-`make the incidence bound an exact gate with a mutant that can actually break it`.
-Il versionne les comptes combinatoires par lane et le contrôle d'incidence
-exact; les claims de coût, la portée du mutant et le reçu encore ouvert restent
-contre-audités.
+`90c06b0c436950d29f7617dd6a6765ddf3a8b7fa`, commit
+`judge the source with arithmetic that shares nothing with it`. Il versionne le
+prototype à séparation adaptative, prune `rank_cell`, terminal de stagnation,
+squelette de payload, audit top-12 et nouveau juge rationnel borné. Le titre du
+commit sur-vend encore « rien » : le sujet et le juge partagent le générateur
+de nuages et le protocole texte, tandis que leur géométrie est désormais
+séparée. Le contre-audit du juge fixe sa portée ci-dessous.
 
-Le worktree n'est pas identique à ce `HEAD` : le prototype porte au dernier pin
-une ablation de mesure et une copie contiguë de coordonnées postérieures;
-`CMakeLists.txt` porte aussi des portes d'ablation non configurées. L'audit ne
-touche qu'aux textes autorisés. La campagne mixte
-antérieure a été supprimée du `HEAD` au lieu d'être conservée sous un nom
-`invalid_mixed`; l'objet Git `64cf6fe` n'en retient que 34 lignes, jusqu'au cas
-12 500, et la sortie 25 000 observée ensuite n'est plus archivée. La nouvelle
-campagne gelée est active. Son état initial commité était un manifeste ouvert de
-12 lignes; le cas terrain 12 500 a depuis fermé `rc=0` et le 25 000 est actif.
-Elle ne couvre que trois familles. Le 12 500 a chevauché les 202 secondes du
-CTest sur l'hôte deux-cœurs, puis la suite 30 a chevauché le 25 000; aucun de
-ces temps n'est qualifiable.
+Au pin, le worktree ne modifie plus le code; seul l'audit d'architecture en
+cours diffère du `HEAD`. La campagne gelée reste ouverte par un processus de
+Claude : les trois cas `terrain` sont clos, `uniform` 12 500 et 25 000 sont clos,
+et la commande `uniform` 50 000 est active. Le fichier peut donc encore changer
+après cette observation. Le driver ne couvre que trois familles, vit en `/tmp`
+et reste fail-open; ses temps chevauchent compilations et CTests. Les compteurs
+fermés sont diagnostiques, jamais une rampe contractuelle ni un benchmark.
 
 | objet courant | SHA-256 |
 | --- | --- |
-| `CMakeLists.txt` au `HEAD`, deux portes sonde/incidence incluses | `08e54fc1f7f87262d0a90b9fc3a51963185c06b4ca06f522775b38cce7144bce` |
-| source au `HEAD`, contrôle d'incidence exact et testé par la suite 30 | `d2039bab3e74ae1443aeefcac756152060566a38c7d87afbda245da612920b34` |
-| ELF Release correspondant, testé par la suite 30 | `fc2eb10cfbc91ad33c89cfcf2a3301f41ab1ff65e62b83d54c16623f9863b295` |
-| sortie de la suite ciblée 30/30, observée en `/tmp` mais non archivée | `f824326cd2399fbf70d417a8f2efee45f8040c598b8ee6b8c0d3329ce060bfc1` |
-| `LastTest.log` observé à la fermeture puis écrasé par un CTest ultérieur | `267fe1c383a909c13a39e72b23f28c489180efcd928f1f5d84f48ce732351fb9` |
-| source worktree d'ablation et `cell_pts`, sans CMake Release, CTest ni reçu | `fbf34dacdb6e87f351afb73954079f88e9fb100e2f105b82a5f7f1f8acec7f77` |
-| `CMakeLists.txt` worktree; bloc de cinq tests d'ablation dupliqué sous les mêmes noms | `38d4b146d189c3d4ff6922036f4834e6281237bc4730994f108e562516d8939d` |
-| source historique de la campagne gelée et des 28 CTests | `dbaa2e0128c5be30e2f7c75784e38758a45c7bb938fba5d8ab4a87c71d5ad764` |
-| `CMakeLists.txt` historique de la campagne gelée et des 28 CTests | `0f64c1c60afbf4af51339807b758e49ec0312d4be69f7dcda8303d251616c865` |
-| ELF Release gelé de cette campagne et des 28 CTests | `423797e9964538f42701660d8baaf492b302f801a4aeb4b0df1b183986a5a037` |
-| manifeste gelé ouvert observé avant toute sortie | `bac860dddf72a07c3ec944efa66900548a79c115c7a2cd074d9ac374a6a15487` |
-| transcript gelé après fermeture 12 500 et lancement 25 000, encore ouvert | `91398d9eeee10fc024499537c543e0d2b20f9ce603efb675622d17ea91ffe8ee` |
-| source de l'ancien `HEAD=64cf6fe`, instrumentation de lots non qualifiée par un transcript | `4d09080860ab949fda65d12f84e6249677e785b1e03db09807832393b7946720` |
-| ELF disque successeur observé à 15:17 UTC, non qualifié | `4f0ed7a984d9366c67b68ca8f36e228b3891d31c24cd11a3fa1bb97a7254ad9e` |
-| source worktree postérieur avec lot différé, non construit/non testé à 15:24 UTC | `64b7598358d27a1aaf5544437cf2824665ec9786e02014527b6c1c10941cb190` |
-| source de la gate différée bornée, historique | `d47ed7ebe39013f82f6bd6991ad39de56a52fffa312b32cd8cb3c7d601c6f804` |
-| ELF Release de cette gate, aussi chargé par le 50 000 tronqué | `8fdfc8af75639137ec3bd9974c6c5486d0d246b119ce9f59b41f74caccc46c32` |
-| `CMakeLists.txt` de la gate différée | `0f64c1c60afbf4af51339807b758e49ec0312d4be69f7dcda8303d251616c865` |
-| source worktree intermédiaire avec squelette d'adjacence réelle non raccordé | `b9b90cf589066e19bd31fde8d67c6015450c7d6017418021b9679ff125edd22a` |
-| source historique à sonde `E+9T`, réfutée comme cap | `fd043fe8627804a8500d59147474e92e0bb20e7fa665e533f075ab15ff23ce8e` |
-| source intermédiaire à cuts et K4 exacts, non construite | `e10638bd1b165a382724c9e13b457478ba942e3eb0c14f70859be7af78c6a14c` |
-Le registre configuré recense `490` CTests, dont `30` préfixés
-`mhgp3v_centre_cell_`. Les 30 passent sur le couple courant
-`d2039ba.../fc2eb10...` en `177,09 s`. La sortie et le log observé à la
-fermeture sont pincés dans la table. Le temps est contaminé par la campagne
-concurrente. Le vert fonctionnel est une observation bornée : sa sortie vit
-seulement en `/tmp` et le log brut a déjà été écrasé, donc ce n'est pas un reçu
-durable du dépôt. Les
-deux nouvelles portes imposent une sonde non vide et tuent empiriquement le
-mutant sur `terrain,n=200`; elles ne comparent ni les comptes `E2/T3/T4/Q4` à
-une vérité indépendante, ni les identités au juge. Elles ne gravent pas une
-clique saturée telle que `K_24`. En outre, le reçu public cumule `T3` sous
-`probe_triangles` alors que la garde emploie `T4`, qui n'est pas publié : cette
-garde n'est pas recalculable depuis la sortie.
+| `CMakeLists.txt` au `HEAD` | `1b05c17f42629f26dec82ddad555d731fafa1700e3e76c9520c75732c6618d17` |
+| source centre-cell au `HEAD` | `8d022ea0c4d5944ade1e870b0d48c0a2628bf5fbb9442462e077f358c81c3fc2` |
+| ELF Release centre-cell correspondant | `f3494e940917328742d1defda4c1c551e97109419e8c20ed1adfd47950f7b140` |
+| juge rationnel borné | `7eb7849c1aee148b69f25b89a3d64a739c2dfd750961fc6fb5c21fc48dbeec90` |
+| ELF Release du juge | `0d40c17e51d2e45d426953f85c914d26ce235abebf10713e4938fa391fe25266` |
+| checker Python sujet--juge | `24fd3eebe2d42bbf16d05d168ce1f00c7d3d8e0b525cf3c85960181fa33aeef5` |
+| sortie ciblée 48/48 observée en `/tmp`, non archivée | `23fc8d7a2445a4c4c05d2d3ddac8801048720e6dd08dd753aca8c969d765cb41` |
+| ELF historique immuable de la campagne gelée | `423797e9964538f42701660d8baaf492b302f801a4aeb4b0df1b183986a5a037` |
+| transcript gelé versionné après `uniform` 25 000, commande 50 000 ouverte | `7e2e65ce7089a18a2b675a935e2ee016c5769136bb3e8869dd8c734339627779` |
+
+Le registre configuré recense `508` CTests, dont `44` préfixés
+`mhgp3v_centre_cell_`; la sélection centre-cell plus payload contient `48`
+portes. Les `48/48` passent en `115,08 s` sur les objets du `HEAD`. La sortie
+brute est seulement observée en `/tmp`, donc le vert est fonctionnel et borné,
+pas un reçu durable. Les quatre différentiels du nouveau juge portent sur
+`n=32,smax=7` et quatre familles. Le nombre `777` à trente sites annoncé dans le
+message de commit n'est ni leur paramétrage ni reçu dans la sortie résumée. Plus
+grave, la porte mutant est vacueuse : le sujet refuse `--inject=rank-closed`
+sans `--judge`, le driver rend code 2, puis `WILL_FAIL` transforme ce refus en
+vert. Elle ne prouve aucun désaccord scientifique. Le juge reste un bon candidat
+rationnel borné : un rejeu direct de son stdout mutant donne `510` vérités,
+`504` identités et `6` manquantes, donc code 1. La porte doit conserver ce stdout
+et exiger exactement ce code ainsi que `DESACCORD` avant réception. Voir
+[`AUDIT_JUGE_CELLULES_INDEPENDANT_90C06B0_20260812.md`](AUDIT_JUGE_CELLULES_INDEPENDANT_90C06B0_20260812.md).
+
+Le premier doublement gelé volumique est vert : `uniform` 12 500 vers 25 000
+passe de `1 848 561` à `3 480 121` cellules, de `194 463 795` à `410 527 574`
+lifts et de `4 990 227` à `10 387 850` supports, soit des pentes respectives
+`0,913`, `1,078` et `1,058`. Il reste à fermer 50 000 pour obtenir deux pentes
+successives. Même si les pentes restent vertes, le premier point paie encore
+`38,969` géométries par support et `81,778 %` de rejets owner : le verrou GPU
+visé par le nouvel audit est l'amplification avant `SupportKey`, pas la sortie.
+
+Les défauts live non couverts par ce vert restent : description inexacte de la
+direction d'adjugée comme normale des moindres carrés hors rang deux; commentaire
+strict de `rank_cell` alors que seule la version non stricte est vraie; overflow
+signé possible avant la saturation de `work`; terminal stall sans hard-cap
+d'adjacence/K4; histogramme de profondeur faux en différé; paramètres stall et
+normale absents du reçu. Le théorème `rank_cell` lui-même est sûr sous
+`U subset mine`; le stall est sémantiquement sûr seulement si son exhaustif
+termine.
+
+### Pins historiques
 
 L'ancien registre recensait `488` CTests, dont `28` préfixés
 `mhgp3v_centre_cell_`. Ces 28 passent sur le couple historique

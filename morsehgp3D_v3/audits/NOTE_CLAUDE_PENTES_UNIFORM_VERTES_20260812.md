@@ -8,6 +8,11 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
+Statut : note d'observation de Claude, corrigée et remise en portée par
+[`AUDIT_DEBLOCAGE_GPU_SUPPORTKEY_TOP12_20260812.md`](AUDIT_DEBLOCAGE_GPU_SUPPORTKEY_TOP12_20260812.md).
+Ses mesures locales non pincées restent des hypothèses; le statut logiciel et
+les pins appartiennent à [`AUDIT_ETAT_COURANT.md`](AUDIT_ETAT_COURANT.md).
+
 ## 1. Le fait
 
 Sur `uniform`, le régime volumique que la section 14.5 du plan de tests rend
@@ -46,15 +51,17 @@ comme `coord`, donc comme `sqrt(n)`**. Le volume de la boîte croît alors comme
 `coord^3`, soit `n^{1,5}`, tandis que les sites croissent comme `n`. Le nuage
 devient de plus en plus creux en trois dimensions.
 
-L'octree subdivise l'espace des **centres**, qui est ce volume. Il paie donc
-`n^{1,5}` là où la sortie reste linéaire — supports `1,047`, census `1,106`.
+L'octree subdivise l'espace des **centres**, dont la boîte a ce volume. Cette
+géométrie explique une phase transitoire proche de `n^{1,5}` alors que la sortie
+reste quasi linéaire — supports `1,047`, census `1,106`; elle ne prouve pas une
+loi asymptotique des cellules.
 L'histogramme en profondeur le confirme : à `n=1 500`, la profondeur six rend
 `42 659` terminaux pour `78 584` supports, tandis que la profondeur sept en rend
 `61 978` pour seulement `15 784`.
 
-Un nuage LiDAR réel ne se comporte pas ainsi : un balayage plus grand couvre
-plus de sol à variation verticale comparable. La croissance verticale de
-`terrain` est un choix de modèle. Cela n'excuse pas la route : elle paie le
+Certains balayages LiDAR couvrent plus de sol à variation verticale comparable,
+mais ce n'est pas une propriété universelle d'un nuage réel. La croissance
+verticale de `terrain` est un choix de modèle. Cela n'excuse pas la route : elle paie le
 volume vide, et ce coût est réel sur tout nuage à grand volume vide. Cela situe
 seulement le problème.
 
@@ -64,15 +71,20 @@ seulement le problème.
 une cellule située hors du plan local : ses dix plus proches sites sont presque
 cosphériques vus de loin, tous leurs intervalles se recouvrent, et le critère de
 travail la découpe indéfiniment alors qu'aucun support positif ne peut y avoir
-son centre. La direction est choisie dans les données — normale du plan des
-moindres carrés, obtenue par l'adjugée de la covariance — mais **le test reste
-entier et exact**, donc le prune l'est. Sur `terrain, n=1 500` : cellules
+son centre. La direction est choisie dans les données par une colonne de
+l'adjugée de la covariance. Elle est une normale lorsque cette covariance est
+exactement de rang deux; en rang trois, ce n'est généralement pas la normale
+des moindres carrés. **Le test reste entier et exact pour toute direction
+choisie**, donc le prune l'est. Sur `terrain, n=1 500`, l'observation non pincée annonce : cellules
 `201 889` vers `142 917`, soit `-29 %`, terminaux `-36 %`, temps `3,848 s` vers
-`2,747 s`, soit `1,40x`, et sortie identique au support près.
+`2,747 s`, soit `1,40x`, et même cardinal de supports; elle ne constitue pas un
+reçu d'identités ni de performance.
 
 **Prune de rang au niveau cellule.** La positivité impose `c` dans
 `relint conv(U)` : pour toute direction, le support contient un point
-strictement de chaque côté. Donc `beta` majore les deux distances minimales, et
+de projection supérieure et un de projection inférieure à celle du centre,
+avec égalité possible lorsque la direction est orthogonale à `aff(U)`. Donc
+`beta` majore les deux distances minimales, et
 tout site vérifiant `u_C(x) < beta` est strictement intérieur. Si plus de
 `smax-2` sites le vérifient, la cellule ne peut posséder aucun support positif
 d'arité au moins deux. Le prune est exact et se propage à la descendance.
@@ -89,12 +101,13 @@ maximum et ne coupait rien ; c'est corrigé.
 pour `57 775 527` lifts et `1 452 688` supports, soit environ `40` lifts par
 support — contre `115` sur `terrain`.
 
-En prolongeant la pente mesurée, `50 000` points volumiques demanderaient de
-l'ordre de `400 s` sur ce cœur. Le contrat vise la seconde sur une G4. L'écart
-est donc d'un facteur voisin de quatre cents, à obtenir du parallélisme et de
-l'arithmétique : l'ablation attribue un tiers du coût au lift, où `i128` pénalise
-le plus un device, un tiers à l'énumération, purement bitset, et un cinquième à
-l'arbre, qui est un `count/scan/fill`.
+En prolongeant la pente mesurée, un dimensionnement non reçu place `50 000`
+points volumiques autour de `400 s` sur ce cœur. Le contrat vise la seconde sur
+une G4. Le rapport voisin de quatre cents mesure seulement l'écart entre ce
+prototype CPU et la cible; il ne se transpose pas en facteur d'accélération
+GPU. L'ablation non pincée attribue approximativement un tiers au bloc
+lift--centre--owner--positivité, un tiers à l'énumération et un cinquième à
+l'arbre; elle n'isole ni le lift ni le coût device.
 
 Ce n'est pas une prédiction de latence. C'est la distance mesurée, sur le régime
 qui bloque le contrat, avec une croissance dont les trois pentes sont vertes.
@@ -132,12 +145,80 @@ suivante est verte : **la porte n'est donc pas fermée**. La superlinéarité de
 cellules était transitoire — elle correspond au moment où l'arbre atteint la
 résolution du nuage — et non asymptotique.
 
-Ce binaire gelé est antérieur à la séparation par la normale locale : les
-chiffres ci-dessus sont ceux de l'ordonnance **sans** ce prune, donc une borne
-supérieure du coût de l'ordonnance courante.
+Ce binaire gelé est antérieur à la séparation adaptative : les chiffres
+ci-dessus décrivent l'ordonnance **sans** ce prune. Ils ne bornent pas le temps
+du successeur, qui paie le choix de direction et change aussi la politique de
+terminalisation; seuls certains comptes de sous-arbre peuvent être comparés
+sous un A/B reçu.
 
 Le premier point volumique tombe aussi : `uniform, n=12 500` rend
 `1 848 561` cellules — cinquante fois moins que `terrain` à la même taille — pour
 `4 990 227` supports, soit `399` par point, et `289 s` de mur contre `871`.
 Le régime volumique est donc à la fois plus productif et bien moins coûteux par
 support que le régime surfacique du générateur.
+
+## 7. La rampe gelée est complète : la porte de compteurs est franchie
+
+Trois familles, trois tailles contractuelles, un seul binaire gelé
+`423797e9...`, `identique=oui` avant et après chaque cas.
+
+### `uniform` — le régime volumique bloquant
+
+| `n` | cellules | lifts | supports | par point | `wall_s` |
+| ---: | ---: | ---: | ---: | ---: | ---: |
+| `12 500` | `1 848 561` | `194 463 795` | `4 990 227` | `399` | `289` |
+| `25 000` | `3 480 121` | `410 527 574` | `10 387 850` | `416` | `519` |
+| `50 000` | `7 773 329` | `839 582 666` | `21 395 212` | `428` | `934` |
+
+| pente | cellules | lifts | bornes | quadruplets | census | supports |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| `12 500 -> 25 000` | `0,913` | `1,078` | `0,963` | `1,104` | `1,117` | `1,058` |
+| `25 000 -> 50 000` | `1,159` | `1,032` | `1,129` | `1,010` | `1,034` | `1,042` |
+
+**Aucun compteur n'atteint `1,16`.** Deux pentes successives, toutes vertes, sur
+la famille que la section 14.5 rend bloquante. La gate de travail qui précède
+CUDA est donc franchie pour cette ordonnance.
+
+### `scanline_single_pass`
+
+`12 500 -> 25 000` : cellules `0,901`, lifts `1,050`, bornes `0,991`,
+quadruplets `1,063`, census `1,084`, supports `1,009`. Vert également.
+
+### `terrain`
+
+`1,713` puis `1,193` sur les cellules, `1,732` puis `1,198` sur les bornes. Une
+seule pente rouge, suivie d'une verte : la règle des deux pentes successives ne
+ferme pas l'ordonnance. La cause est le volume vide croissant du générateur,
+analysé en section 2.
+
+## 8. Ce que le point volumique à 50 000 dit du contrat
+
+`21 395 212` supports, soit `428` par point. La baseline Poisson--Delaunay de
+l'audit prédit `480,34` en volume infini et de l'ordre de `24,0` millions à cette
+taille : la mesure tombe à `11 %` en dessous, l'écart s'expliquant par les effets
+de bord d'une boîte finie. **La théorie de l'audit et la mesure se rejoignent sur
+la famille contractuelle, à la taille contractuelle.**
+
+Le coût mesuré est `839 582 666` lifts et `934 s` de mur sur un hôte partagé à
+deux cœurs, donc environ `39` lifts par support. Ce mur n'est pas qualifiable :
+il a été relevé pendant l'exécution concurrente des portes CTest. Il situe
+seulement l'ordre de grandeur de l'écart au seuil d'une seconde, qui reste à
+prendre au parallélisme et à l'arithmétique.
+
+## 9. La lane `k=1` sans Yao-1
+
+Un support q2 à zéro intérieur **est** une arête de Gabriel : sa boule
+diamétrale est vide. Tout EMST étant contenu dans le Gabriel, la lane `k=1` se
+lit directement dans cette source, sans transcript de chambres ni banque. Elle
+filtre, réduit par un Kruskal creux ordonné par
+`(||ab||^2, min PointId, max PointId)`, et groupe les niveaux égaux en lots
+atomiques — le tie-break sert la reproductibilité du choix, jamais l'ordre des
+lots.
+
+Le juge calcule l'EMST par un **Prim exhaustif** sur toutes les paires, en
+distances carrées entières, sans aucun prédicat du sujet. Le MST n'est pas unique
+en présence d'ex æquo, mais le multiensemble trié de ses poids l'est : c'est
+lui qui est comparé. L'accord, obtenu sur `uniform`, `terrain` et les deux
+familles scanline à `400` points, vérifie donc simultanément le théorème et la
+complétude de l'extraction. La connexité du graphe de Gabriel est un invariant
+vérifié à chaque exécution.

@@ -30,6 +30,7 @@ def main() -> int:
     parser.add_argument("--seed", type=int, default=11)
     parser.add_argument("--min-supports", type=int, default=1)
     parser.add_argument("--inject", default="")
+    parser.add_argument("--k1", action="store_true")
     args = parser.parse_args()
 
     for binary in (args.subject_binary, args.judge_binary):
@@ -45,6 +46,8 @@ def main() -> int:
         f"--seed={args.seed}",
         "--emit-identities",
     ]
+    if args.k1:
+        subject_cmd.append("--k1")
     if args.inject:
         subject_cmd.append(f"--inject={args.inject}")
 
@@ -64,9 +67,12 @@ def main() -> int:
             f"--smax={args.smax}",
             f"--family={args.family}",
             f"--seed={args.seed}",
-            f"--min-supports={args.min_supports}",
-            f"--subject={path}",
         ]
+        if args.k1:
+            judge_cmd.append(f"--k1-subject={path}")
+        else:
+            judge_cmd.append(f"--min-supports={args.min_supports}")
+            judge_cmd.append(f"--subject={path}")
         verdict = subprocess.run(judge_cmd, capture_output=True, text=True)
         sys.stdout.write(verdict.stdout)
         sys.stderr.write(verdict.stderr)

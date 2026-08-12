@@ -2513,3 +2513,36 @@ if(Python3_Interpreter_FOUND OR Python3_EXECUTABLE)
   set_tests_properties(mhgp3v_centre_cell_independant_voit_le_mutant
                        PROPERTIES WILL_FAIL TRUE)
 endif()
+
+# LA LANE `k=1` SANS YAO-1, ET SON JUGE EXHAUSTIF INDEPENDANT.
+#
+# Un support q2 a zero interieur EST une arete de Gabriel : sa boule diametrale
+# est vide. Tout EMST etant contenu dans le Gabriel, la lane `k=1` se lit
+# directement dans cette source — ni transcript de chambres, ni banque, ni
+# enumeration Yao. Elle filtre, deduplique par le Kruskal creux, et groupe les
+# niveaux egaux en lots atomiques.
+#
+# Le juge calcule l'EMST par un Prim EXHAUSTIF sur toutes les paires, en
+# distances carrees entieres. Il ne partage aucun predicat avec le sujet. Le MST
+# n'est pas unique en presence d'ex aequo, mais le multiensemble trie de ses
+# poids l'est : c'est lui qu'on compare. L'accord verifie simultanement le
+# theoreme et la completude de l'extraction.
+if(Python3_Interpreter_FOUND OR Python3_EXECUTABLE)
+  foreach(fam uniform terrain scanline_single_pass scanline_overlap_multiecho)
+    add_test(NAME mhgp3v_centre_cell_k1_${fam}
+             COMMAND ${Python3_EXECUTABLE}
+                     ${CMAKE_CURRENT_SOURCE_DIR}/audits/check_centre_cell_independent_judge.py
+                     --subject-binary $<TARGET_FILE:mhgp3v_centre_cell>
+                     --judge-binary $<TARGET_FILE:mhgp3v_centre_cell_judge>
+                     --points=400 --smax=11 --family=${fam} --seed=11 --k1)
+    set_tests_properties(mhgp3v_centre_cell_k1_${fam}
+                         PROPERTIES PASS_REGULAR_EXPRESSION "ACCORD JUGE INDEPENDANT k1")
+  endforeach()
+endif()
+# LE GRAPHE DE GABRIEL DOIT ETRE CONNEXE sur des sites distincts. Une composante
+# de plus signalerait une arete manquante, donc une source incomplete : c'est un
+# invariant de completude, verifie a chaque execution de la lane.
+add_test(NAME mhgp3v_centre_cell_k1_connexe COMMAND mhgp3v_centre_cell
+         --points=600 --smax=11 --family=terrain --seed=3 --k1)
+set_tests_properties(mhgp3v_centre_cell_k1_connexe
+                     PROPERTIES PASS_REGULAR_EXPRESSION "composantes=1")

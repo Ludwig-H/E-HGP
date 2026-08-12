@@ -76,6 +76,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <functional>
 #include <map>
 #include <string>
 #include <vector>
@@ -525,6 +526,24 @@ struct Engine {
   i64 root_hi[3] = {0, 0, 0};
   Stats stats;
   std::vector<Record> records;
+  // LA LANE `k=1` SANS YAO-1.
+  //
+  // Un support q2 a ZERO interieur est exactement une arete de GABRIEL : sa
+  // boule diametrale est vide. Le theoreme classique dit que tout EMST est
+  // contenu dans le graphe de Gabriel. Or cette source produit deja tous les
+  // supports q2 verifiant `p+2<=smax`, donc les aretes de Gabriel en sont le
+  // sous-ensemble `p=0`. La route `k=1` ne demande donc ni transcript Yao-1, ni
+  // banque de chambres : elle filtre, deduplique et reduit.
+  //
+  // Le niveau `k=1` d'une arete est le rayon carre de sa boule diametrale,
+  // `||ab||^2/4`. Ordonner par `||ab||^2` ordonne donc par niveau, et le tri se
+  // fait en entiers exacts.
+  bool collect_gabriel = false;
+  struct GabrielEdge {
+    i64 d2 = 0;
+    int a = 0, b = 0;
+  };
+  std::vector<GabrielEdge> gabriel;
   int invariant_broken = 0;
 
   std::vector<std::vector<Cand>> level;
@@ -1657,6 +1676,12 @@ struct Engine {
       rec.shell = shell_ids;
       rec.closed_rank_ok = (interior + shell) <= smax;
       if (rec.closed_rank_ok) ++stats.accepted_closed_rank; else ++stats.extra_shell;
+      if (collect_gabriel && p.q == 2 && interior == 0) {
+        const mhgp::P3& ga = pts[p.ids[0]];
+        const mhgp::P3& gb = pts[p.ids[1]];
+        const i64 dx = ga.x - gb.x, dy = ga.y - gb.y, dz = ga.z - gb.z;
+        gabriel.push_back(GabrielEdge{dx * dx + dy * dy + dz * dz, p.ids[0], p.ids[1]});
+      }
       cell_records.push_back(rec);
     }
   }
@@ -1766,6 +1791,7 @@ struct Options {
   bool axis_filter = false;
   bool multiplicity = false;
   bool emit_identities = false;
+  bool k1 = false;
   int batch_depth = 3;
   int batch_records = 1 << 20;
   bool deferred_lift = false;
@@ -1801,7 +1827,8 @@ int run_engine(const std::vector<mhgp::P3>& cloud, const Options& opt) {
   engine.no_normal = opt.no_normal;
   engine.max_depth = opt.max_depth;
   engine.mutant = opt.mutant;
-  engine.collect = opt.judge || opt.emit_identities;
+  engine.collect = opt.judge || (opt.emit_identities && !opt.k1);
+  engine.collect_gabriel = opt.k1;
 
   CentreCell root;
   root.depth = 0;
@@ -1933,6 +1960,73 @@ int run_engine(const std::vector<mhgp::P3>& cloud, const Options& opt) {
               s.shell_high_water);
   const long long total = s.supports[2] + s.supports[3] + s.supports[4];
   std::printf("supports_per_point=%.4f\n", (double)total / (double)points);
+
+  // LA LANE `k=1` : Kruskal creux sur les seules aretes de Gabriel.
+  //
+  // L'ordre total est `(||ab||^2, min PointId, max PointId)`, donc reproductible.
+  // La FILTRATION, elle, ne sequentialise jamais deux aretes de meme niveau :
+  // le tie-break sert la reproductibilite du choix, pas l'ordre des lots. Les
+  // lots de niveau egal sont donc publies groupes.
+  if (opt.k1) {
+    std::vector<Engine::GabrielEdge> edges = engine.gabriel;
+    std::sort(edges.begin(), edges.end(),
+              [](const Engine::GabrielEdge& x, const Engine::GabrielEdge& y) {
+                if (x.d2 != y.d2) return x.d2 < y.d2;
+                const int xa = std::min(x.a, x.b), xb = std::max(x.a, x.b);
+                const int ya = std::min(y.a, y.b), yb = std::max(y.a, y.b);
+                if (xa != ya) return xa < ya;
+                return xb < yb;
+              });
+    std::vector<int> parent((std::size_t)points);
+    for (int i = 0; i < points; ++i) parent[(std::size_t)i] = i;
+    std::function<int(int)> find = [&](int x) {
+      while (parent[(std::size_t)x] != x) {
+        parent[(std::size_t)x] = parent[(std::size_t)parent[(std::size_t)x]];
+        x = parent[(std::size_t)x];
+      }
+      return x;
+    };
+    std::vector<i64> levels;
+    levels.reserve((std::size_t)points);
+    for (const Engine::GabrielEdge& e : edges) {
+      const int ra = find(e.a), rb = find(e.b);
+      if (ra == rb) continue;
+      parent[(std::size_t)ra] = rb;
+      levels.push_back(e.d2);
+    }
+    int components = 0;
+    for (int i = 0; i < points; ++i)
+      if (find(i) == i) ++components;
+    // Les lots de niveau egal, groupes atomiquement.
+    i64 batches = 0, largest_batch = 0;
+    for (std::size_t i = 0; i < levels.size();) {
+      std::size_t j = i;
+      while (j < levels.size() && levels[j] == levels[i]) ++j;
+      ++batches;
+      largest_batch = std::max(largest_batch, (i64)(j - i));
+      i = j;
+    }
+    std::printf("K1Receipt-v1 gabriel_edges=%zu mst_edges=%zu composantes=%d lots=%lld lot_max=%lld\n",
+                engine.gabriel.size(), levels.size(), components, batches, largest_batch);
+    if (opt.emit_identities) {
+      for (i64 l : levels) std::printf("K1 %lld\n", (long long)l);
+      std::printf("K1_NIVEAUX=%zu\n", levels.size());
+    }
+    // Un nuage de sites distincts est connexe par son Gabriel : une composante
+    // supplementaire signalerait une arete manquante, donc une source
+    // incomplete.
+    if (components != 1) {
+      std::fprintf(stderr,
+                   "INVARIANT viole : le graphe de Gabriel doit etre connexe, %d composantes\n",
+                   components);
+      return 3;
+    }
+    if ((int)levels.size() != points - 1) {
+      std::fprintf(stderr, "INVARIANT viole : %zu aretes d'arbre pour %d sites\n",
+                   levels.size(), points);
+      return 3;
+    }
+  }
 
   // EMISSION DES IDENTITES pour le juge arithmetiquement independant. Le format
   // est deliberement plat et trie : le juge ne partage avec le sujet que le
@@ -2293,6 +2387,7 @@ int main(int argc, char** argv) {
     else if (arg == "--axis-filter") opt.axis_filter = true;
     else if (arg == "--multiplicity") opt.multiplicity = true;
     else if (arg == "--emit-identities") opt.emit_identities = true;
+    else if (arg == "--k1") opt.k1 = true;
     else if (arg.rfind("--batch-depth=", 0) == 0)
       opt.batch_depth = parse_int(arg.substr(14).c_str(), &ok);
     else if (arg.rfind("--batch-records=", 0) == 0)

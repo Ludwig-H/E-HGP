@@ -211,10 +211,10 @@ le théorème n'autorise donc pas à retarder le premier RLE.
 
 ## 6. Layout G4 pour vingt-quatre millions de supports
 
-Le type `g4-standard-48` documenté par Google porte une RTX PRO 6000 Blackwell
-Server Edition et 96 Go de mémoire GDDR7. La capacité mémoire n'est donc pas le
-premier obstacle du catalogue transitoire, à condition de rester device-only et
-SoA.
+Le type [`g4-standard-48` documenté par Google](https://docs.cloud.google.com/compute/docs/accelerator-optimized-machines)
+porte une RTX PRO 6000 Blackwell Server Edition et 96 Go de mémoire GDDR7. La
+capacité mémoire n'est donc pas le premier obstacle du catalogue transitoire, à
+condition de rester device-only et SoA.
 
 Pour `F=24 017 000` :
 
@@ -322,11 +322,16 @@ Les corrections obligatoires sont :
 8. Le mode `--no-normal-separation` calcule encore la covariance avant de sauter
    le test : il compare la sémantique, pas le coût complet de la normale.
 
-Le couple `HEAD=b3c8f75...`, source `a240c2f...`, CMake `70de0e2...` a rendu
-`38/38` CTests centre-cell en `110,79 s`; la sortie brute observée en `/tmp`
-porte le SHA-256 `8af0202f...` mais n'est pas archivée. Ce vert borné n'exerce
-ni overflow `78 000`, ni mutant `rank_cell`, ni cap dur du stall, ni HWM du
-terminal dense.
+Au pin initial de cet audit, le couple `HEAD=b3c8f75...`, source `a240c2f...`,
+CMake `70de0e2...` rendait `38/38` CTests centre-cell en `110,79 s`; la sortie
+brute observée en `/tmp` portait le SHA-256 `8af0202f...` mais n'était pas
+archivée. Le successeur `90c06b0...` ajoute un juge rationnel et rend `48/48`,
+mais sa porte mutant passe sur un refus code 2 et non sur un désaccord code 1;
+voir
+[`AUDIT_JUGE_CELLULES_INDEPENDANT_90C06B0_20260812.md`](AUDIT_JUGE_CELLULES_INDEPENDANT_90C06B0_20260812.md).
+Ces verts bornés n'exercent ni overflow `78 000`, ni mutant `rank_cell`, ni cap
+dur du stall, ni HWM du terminal dense. Le pin logiciel courant appartient à
+[`AUDIT_ETAT_COURANT.md`](AUDIT_ETAT_COURANT.md).
 
 ## 9. Portes avant CUDA
 

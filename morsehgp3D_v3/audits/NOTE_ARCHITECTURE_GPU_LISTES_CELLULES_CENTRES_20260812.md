@@ -251,6 +251,18 @@ posséder aucune arête q2 pertinente, et un q4 pertinent aucune facette q3
 pertinente. La stratégie combine donc des petites listes de profondeur et des
 filtres fail-open :
 
+Le bon objet relevé est en outre un minimum critique, pas toute face shallow.
+Avec `ell_x(c)=2<x,c>-||x||^2`, le flat d'égalité de `U` porte la fonction
+`Phi(c,lambda)=||c||^2-lambda`; son unique minimum est le circumcentre
+intrinsèque de `U`. Positivité équivaut à ce minimum dans `relint conv(U)`, et
+la profondeur y est le nombre de `ell_y(c)>lambda`. Pour q2/q3, une face de
+première génération peut être réalisée loin de ce minimum et porte alors un
+faux census; pour q4 affine-3, le lieu d'égalité est un point. La fixture
+`U={(-1,0,0),(1,0,0)}`, `y=(0,2,0)` grave cette différence : la sphère centrée
+en `y` est shallow avec `y` intérieur, mais la miniboule critique de `U` est
+centrée en zéro et n'a aucun intérieur. Un producteur par cutting doit donc
+tester le minimum `Phi` et conserver des listes de conflits complètes.
+
 1. **séparation convexe** : si `K_C` est strictement séparé de
    `conv(A_q(C))`, la cellule est vide de supports positifs;
 2. **cœur de Jung** : des témoins collectifs déjà prouvés éliminent les branches
@@ -340,6 +352,17 @@ tous les supports et contextes. Pour
   support, `relevant_by_min_support=(p+q<=smax)` de
   `accepted_closed_rank=(p+|U_B|<=smax)`;
 - envoyer une extra-shell pertinente au quotient saturé ou au refus fermé.
+
+Une variante terminale bornée remplace ce scan par top-12. Pour `n>=12`, soit
+`delta` la distance maximale de douze vrais plus proches voisins, avec
+certificat `delta<=min_non_retour`. Si `delta>beta`, toute la boule fermée est
+dans les douze retours; si `delta<beta`, douze intérieurs rejettent la fenêtre;
+si `delta=beta`, tous les intérieurs sont connus et `p+q<=11` prouve une
+extra-shell. Les ties peuvent être arbitraires. Pour `n<12`, scanner tout le
+nuage. Ce certificateur top-12 est minimal pour `smax=11`; il ne publie un
+plateau complet qu'après range-report. Le device doit comparer exactement
+`||D*x-C||^2` pour `c=C/D` et mesurer les visites/replis. Comparer cette voie au
+census CSR owner : le théorème ne présume pas laquelle est plus rapide.
 
 Une arène q4 filtrée ancestralement à `D_7` ne certifie pas rétroactivement un
 support q3 à `p=8`, même si elle matérialise un `D_8` terminal. Si q2 vient d'un

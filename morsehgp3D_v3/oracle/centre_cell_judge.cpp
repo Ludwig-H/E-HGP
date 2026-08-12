@@ -172,6 +172,50 @@ std::string format_line(const std::vector<int>& s, const std::vector<int>& i,
   return line;
 }
 
+// L'EMST EXHAUSTIF, PAR PRIM SUR TOUTES LES PAIRES.
+//
+// Les niveaux `k=1` sont des distances carrees ENTIERES : ce juge n'a besoin
+// d'aucun rationnel et d'aucun predicat du sujet. Il ne partage avec lui que le
+// generateur de nuages.
+//
+// Le MST n'est pas unique en presence d'ex aequo, mais le MULTIENSEMBLE TRIE de
+// ses poids l'est : c'est un invariant du graphe, et c'est donc lui qu'on
+// compare. Le sujet ne reduit que le sous-graphe de Gabriel; l'accord verifie
+// simultanement le theoreme « tout EMST est dans le Gabriel » et la completude
+// de l'extraction.
+std::vector<long long> exhaustive_emst_levels(const std::vector<mhgp::P3>& cloud) {
+  const int n = (int)cloud.size();
+  std::vector<char> in_tree((std::size_t)n, 0);
+  std::vector<long long> best((std::size_t)n, -1);
+  std::vector<long long> levels;
+  in_tree[0] = 1;
+  for (int i = 1; i < n; ++i) {
+    const long long dx = cloud[(std::size_t)i].x - cloud[0].x;
+    const long long dy = cloud[(std::size_t)i].y - cloud[0].y;
+    const long long dz = cloud[(std::size_t)i].z - cloud[0].z;
+    best[(std::size_t)i] = dx * dx + dy * dy + dz * dz;
+  }
+  for (int step = 1; step < n; ++step) {
+    int pick = -1;
+    for (int i = 0; i < n; ++i)
+      if (!in_tree[(std::size_t)i] &&
+          (pick < 0 || best[(std::size_t)i] < best[(std::size_t)pick]))
+        pick = i;
+    in_tree[(std::size_t)pick] = 1;
+    levels.push_back(best[(std::size_t)pick]);
+    for (int i = 0; i < n; ++i) {
+      if (in_tree[(std::size_t)i]) continue;
+      const long long dx = cloud[(std::size_t)i].x - cloud[(std::size_t)pick].x;
+      const long long dy = cloud[(std::size_t)i].y - cloud[(std::size_t)pick].y;
+      const long long dz = cloud[(std::size_t)i].z - cloud[(std::size_t)pick].z;
+      const long long d2 = dx * dx + dy * dy + dz * dz;
+      if (d2 < best[(std::size_t)i]) best[(std::size_t)i] = d2;
+    }
+  }
+  std::sort(levels.begin(), levels.end());
+  return levels;
+}
+
 int parse_int(const char* text, bool* ok) {
   char* end = nullptr;
   const long long value = std::strtoll(text, &end, 10);
@@ -188,6 +232,7 @@ int main(int argc, char** argv) {
   long long seed = 11;
   std::string family = "uniform";
   std::string subject;
+  bool k1 = false;
   int min_supports = 0;
 
   for (int i = 1; i < argc; ++i) {
@@ -199,6 +244,7 @@ int main(int argc, char** argv) {
     else if (arg.rfind("--seed=", 0) == 0) seed = parse_int(arg.substr(7).c_str(), &ok);
     else if (arg.rfind("--family=", 0) == 0) family = arg.substr(9);
     else if (arg.rfind("--subject=", 0) == 0) subject = arg.substr(10);
+    else if (arg.rfind("--k1-subject=", 0) == 0) { subject = arg.substr(13); k1 = true; }
     else if (arg.rfind("--min-supports=", 0) == 0)
       min_supports = parse_int(arg.substr(15).c_str(), &ok);
     else {
@@ -210,9 +256,12 @@ int main(int argc, char** argv) {
       return 2;
     }
   }
-  // LE COUT EST `Theta(n^5)` EN RATIONNELS. Ce juge est borne par construction.
-  if (points < 4 || points > 45) {
-    std::fprintf(stderr, "REFUS : juge rationnel borne a 45 points\n");
+  // LE COUT EST `Theta(n^5)` EN RATIONNELS pour les supports. La lane `k=1`,
+  // elle, n'emploie que des distances carrees entieres et un Prim quadratique :
+  // elle supporte des nuages bien plus grands.
+  const int cap = k1 ? 20000 : 45;
+  if (points < 4 || points > cap) {
+    std::fprintf(stderr, "REFUS : juge borne a %d points dans ce mode\n", cap);
     return 2;
   }
   if (smax < 4 || smax > 16) {
@@ -235,6 +284,44 @@ int main(int argc, char** argv) {
   if ((int)cloud.size() != points) {
     std::fprintf(stderr, "REFUS nuage incomplet\n");
     return 2;
+  }
+
+  if (k1) {
+    const std::vector<long long> truth_levels = exhaustive_emst_levels(cloud);
+    std::ifstream in(subject);
+    if (!in) {
+      std::fprintf(stderr, "REFUS : fichier sujet illisible\n");
+      return 2;
+    }
+    std::vector<long long> mine_levels;
+    std::string line;
+    bool closed = false;
+    std::size_t declared = 0;
+    while (std::getline(in, line)) {
+      if (line.rfind("K1 ", 0) == 0)
+        mine_levels.push_back(std::strtoll(line.c_str() + 3, nullptr, 10));
+      else if (line.rfind("K1_NIVEAUX=", 0) == 0) {
+        closed = true;
+        declared = (std::size_t)std::strtoull(line.c_str() + 11, nullptr, 10);
+      }
+    }
+    if (!closed || declared != mine_levels.size()) {
+      std::fprintf(stderr, "REFUS : le sujet n'a pas ferme sa liste de niveaux\n");
+      return 2;
+    }
+    std::sort(mine_levels.begin(), mine_levels.end());
+    std::printf("CentreCellIndependentJudge-v1 mode=k1\n");
+    std::printf("famille=%s points=%d coord=%d seed=%lld\n", family.c_str(), points, coord,
+                seed);
+    std::printf("methode=prim_exhaustif_sur_distances_carrees_entieres\n");
+    std::printf("niveaux_juge=%zu niveaux_sujet=%zu\n", truth_levels.size(),
+                mine_levels.size());
+    if (truth_levels != mine_levels) {
+      std::fprintf(stderr, "DESACCORD : le multiensemble de niveaux differe\n");
+      return 1;
+    }
+    std::printf("ACCORD JUGE INDEPENDANT k1 sur le multiensemble des niveaux\n");
+    return 0;
   }
 
   std::set<std::string> truth;
