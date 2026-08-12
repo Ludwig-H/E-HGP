@@ -2579,3 +2579,14 @@ if(Python3_Interpreter_FOUND OR Python3_EXECUTABLE)
   set_tests_properties(mhgp3v_centre_cell_workers_differe
                        PROPERTIES PASS_REGULAR_EXPRESSION "SEMANTIQUE IDENTIQUE")
 endif()
+
+# ---------------------------------------------------------------------------
+# SOURCE PAR ANCRE MAXIMALE ET ENVELOPPE MOBILE.
+# Specification : audits/NOTE_SOLUTION_SOURCE_ANCRE_MAXIMALE_ENVELOPPE_20260812.md
+# Ce sujet produit Source S en emettant chaque support depuis sa SEULE arete
+# maximale canonique. Les portes ci-dessous ne recoivent ni complexite, ni SLO.
+# ---------------------------------------------------------------------------
+add_executable(mhgp3v_anchor_source prototype/anchor_source.cpp)
+target_include_directories(mhgp3v_anchor_source PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(mhgp3v_anchor_source PRIVATE mhgp Threads::Threads)
+target_compile_options(mhgp3v_anchor_source PRIVATE -Wall -Wextra -Werror)
