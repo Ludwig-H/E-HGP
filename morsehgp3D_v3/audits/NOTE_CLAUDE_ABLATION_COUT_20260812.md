@@ -130,3 +130,41 @@ distinct et mesurer HWM/octets. Une ablation à sortie fausse reste toujours
 `slo_eligible=false`.
 
 GCP non utilisé.
+
+## 6. Premières pentes de la rampe gelée
+
+Deux points fermés sur le binaire gelé `423797e9...`, `identique=oui` avant et
+après chaque cas, famille `terrain`, `seed=11`, `work-cap=20000` :
+
+| compteur | `12 500` | `25 000` | pente |
+| --- | ---: | ---: | ---: |
+| supports | `906 078` | `1 872 528` | `1,047` |
+| census | — | — | `1,106` |
+| lifts | `92 531 928` | `220 298 378` | `1,251` |
+| cliques | `311 142 728` | `755 294 904` | `1,279` |
+| **cellules** | `14 262 497` | `46 745 417` | **`1,713`** |
+| **évaluations de bornes** | `775 573 302` | `2 577 214 842` | **`1,732`** |
+
+Le point `50 000` n'est pas terminé; ce n'est donc pas encore la porte à deux
+pentes, seulement sa première sécante.
+
+La lecture est nette et elle sépare deux choses. **Le travail lié à la sortie est
+quasi linéaire** — supports `1,047`, census `1,106`, lifts `1,251`, cliques
+`1,279`. **C'est l'arbre qui est superlinéaire** — cellules `1,713`, bornes
+`1,732`, et ces deux compteurs sont le même phénomène puisque les évaluations de
+bornes valent environ cinquante-cinq par cellule.
+
+Ce n'est donc pas un mur mathématique sur la Source S : c'est un défaut de la
+politique de subdivision. À `n=25 000`, la profondeur maximale atteint douze
+alors que la boîte fait `790` unités et le pas de surface environ cinq : l'arbre
+descend très au-dessous du pas d'échantillonnage. L'hypothèse à tester est la
+quasi-coplanarité locale de `terrain` — jitter vertical de zéro à deux pour un
+pas horizontal de cinq — qui rend le graphe d'ambiguïté dense à toute échelle le
+long de la normale, si bien que le critère de travail n'est jamais satisfait par
+la seule réduction de taille.
+
+Une mesure de contrôle sur `uniform`, régime volumique non dégénéré, est
+nécessaire avant toute conclusion. Elle donne déjà, à `n=2 000`,
+`669 978` supports pour `2 000` points, soit `335` par point : cohérent avec la
+baseline de Poisson de l'audit — `480` en volume infini — une fois les effets de
+bord retirés.
