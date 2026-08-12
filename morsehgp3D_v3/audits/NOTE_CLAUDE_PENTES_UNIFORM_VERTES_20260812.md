@@ -142,8 +142,8 @@ Le binaire gelé `423797e9...` a clos les trois tailles contractuelles sur
 La règle de la gate est que **deux pentes successives** au-dessus de `1,35`
 ferment l'ordonnance. Ici une seule pente est rouge, sur un seul compteur, et la
 suivante est verte : **la porte n'est donc pas fermée**. La superlinéarité des
-cellules était transitoire — elle correspond au moment où l'arbre atteint la
-résolution du nuage — et non asymptotique.
+cellules est transitoire sur les trois tailles observées; cela ne prouve aucune
+loi asymptotique de l'octree.
 
 Ce binaire gelé est antérieur à la séparation adaptative : les chiffres
 ci-dessus décrivent l'ordonnance **sans** ce prune. Ils ne bornent pas le temps
@@ -157,10 +157,13 @@ Le premier point volumique tombe aussi : `uniform, n=12 500` rend
 Le régime volumique est donc à la fois plus productif et bien moins coûteux par
 support que le régime surfacique du générateur.
 
-## 7. La rampe gelée est complète : la porte de compteurs est franchie
+## 7. La campagne gelée est complète : la porte uniforme de compteurs est verte
 
-Trois familles, trois tailles contractuelles, un seul binaire gelé
-`423797e9...`, `identique=oui` avant et après chaque cas.
+Trois familles diagnostiques, trois tailles du protocole, un seul binaire gelé
+`423797e9...`, `identique=oui` avant et après chaque cas. Le transcript possède
+neuf retours `rc=0` et un footer. Il n'inclut ni `eight_clusters`, ni digest
+d'identités, ni mémoire, et ses temps sont contaminés : ce n'est pas une rampe
+contractuelle ni une mesure de latence.
 
 ### `uniform` — le régime volumique bloquant
 
@@ -176,8 +179,9 @@ Trois familles, trois tailles contractuelles, un seul binaire gelé
 | `25 000 -> 50 000` | `1,159` | `1,032` | `1,129` | `1,010` | `1,034` | `1,042` |
 
 **Aucun compteur n'atteint `1,16`.** Deux pentes successives, toutes vertes, sur
-la famille que la section 14.5 rend bloquante. La gate de travail qui précède
-CUDA est donc franchie pour cette ordonnance.
+la famille que la section 14.5 rend bloquante. La gate de croissance
+`uniform` de cette ordonnance est donc verte; la gate complète avant CUDA exige
+encore `eight_clusters`, les octets/high-water et le producteur device.
 
 ### `scanline_single_pass`
 
@@ -205,20 +209,27 @@ il a été relevé pendant l'exécution concurrente des portes CTest. Il situe
 seulement l'ordre de grandeur de l'écart au seuil d'une seconde, qui reste à
 prendre au parallélisme et à l'arithmétique.
 
-## 9. La lane `k=1` sans Yao-1
+## 9. La lecture `k=1` est un diagnostic, pas le remplacement de Yao-1
 
-Un support q2 à zéro intérieur **est** une arête de Gabriel : sa boule
-diamétrale est vide. Tout EMST étant contenu dans le Gabriel, la lane `k=1` se
-lit directement dans cette source, sans transcript de chambres ni banque. Elle
-filtre, réduit par un Kruskal creux ordonné par
-`(||ab||^2, min PointId, max PointId)`, et groupe les niveaux égaux en lots
-atomiques — le tie-break sert la reproductibilité du choix, jamais l'ordre des
-lots.
+Une paire q2 à zéro intérieur a seulement sa boule diamétrale **ouverte** vide;
+un troisième site peut appartenir à sa coquille. Le live collecte donc un
+sur-graphe du Gabriel fermé. Tout EMST reste inclus dans ce sur-graphe, et le
+Kruskal donne bien les poids d'une MST. La fixture
+`u=(0,1,0),v=(2,1,0),w=(1,2,0)` sépare les notions : `uv` a zéro intérieur et
+`w` sur sa coquille, mais `uv` n'appartient à aucun MST.
 
-Le juge calcule l'EMST par un **Prim exhaustif** sur toutes les paires, en
-distances carrées entières, sans aucun prédicat du sujet. Le MST n'est pas unique
-en présence d'ex æquo, mais le multiensemble trié de ses poids l'est : c'est
-lui qui est comparé. L'accord, obtenu sur `uniform`, `terrain` et les deux
-familles scanline à `400` points, vérifie donc simultanément le théorème et la
-complétude de l'extraction. La connexité du graphe de Gabriel est un invariant
-vérifié à chaque exécution.
+Le juge Prim exhaustif compare correctement le multiensemble trié des poids,
+qui est invariant même lorsque la MST n'est pas unique. Les cinq portes k1
+passent. Elles ne reçoivent toutefois ni le catalogue Gabriel, ni les lots H0 :
+le sujet jette les endpoints et ne publie que `K1 d2`, où `d2=4 beta`; le juge
+trie ces scalaires et ne vérifie ni ordre, ni partitions strictes/fermées, ni
+multifusions. Un run de poids égaux n'est pas un lot atomique sans snapshot des
+racines pré-lot et composantes du graphe quotient.
+
+Surtout, `--k1` exécute d'abord toute la source cellules q2/q3/q4, ses lifts,
+owners et census. Sur `terrain,n=400`, il paie encore `1 768 790` lifts avant
+de réduire `832` arêtes en 399 poids. Il ne retire donc rien du chemin 50 000.
+Yao-1 à au plus `48n` reste la voie produit indépendante; cette lecture est un
+comparateur utile lorsque le catalogue complet a déjà été calculé. Le
+contre-audit détaillé appartient à
+[`AUDIT_JUGE_CELLULES_INDEPENDANT_90C06B0_20260812.md`](AUDIT_JUGE_CELLULES_INDEPENDANT_90C06B0_20260812.md).

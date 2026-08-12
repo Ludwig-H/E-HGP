@@ -720,6 +720,17 @@ indépendant des primitives du sujet; c'est une exigence d'admission. Une
 dépendance v2 commune peut servir de différentiel supplémentaire, jamais
 d'autorité unique.
 
+Sous un Poisson homogène tridimensionnel sans bord, la taille du front possède
+néanmoins une baseline exacte. Les spindles q4, q3 et la boule diamétrale q2
+sont imbriqués; un seul `PairId` porte donc un masque de lanes. Après
+coalescence des événements « moins de 8/9/10 témoins », l'intensité attendue est
+`141,183365 rho |Omega|`, soit environ `7,06` millions de paires à 50 000
+points. Cette valeur ne borne ni les visites nécessaires à la produire, ni les
+tiers q3, ni les apex q4. Les gates `W_front` et `W_extend` restent séparées;
+le dual-tree actuel sert de baseline réfutée, pas de producteur reçu. Le calcul
+et la cascade exacte par boule de milieu sont dans
+[`AUDIT_VERROU_MATHEMATIQUE_FRONT_JUNG_H0_GPU_20260812.md`](audits/AUDIT_VERROU_MATHEMATIQUE_FRONT_JUNG_H0_GPU_20260812.md).
+
 ### 6.4 Supports q3 : un centre par troisième point
 
 Pour un support triangulaire propre positif et son ancre reçue, le circumcentre
@@ -883,12 +894,29 @@ table n'est pas conservée ou si les arités n'ont pas une partition commune,
 chaque occurrence transporte à la place son `CensusContext` et le RLE choisit
 le contexte owner certifié.
 
-Le candidat owner produit alors
-`(cloud_epoch,GeometricBallKey,SupportKey,OwnerCellId)` sans census. Le second
-RLE par clé exacte de taille fixe conserve tous les supports d'une même boule.
-Il exécute soit une seule requête top-12, soit le census pool-relatif déjà
-prouvé. Pour `H_run=smax-q_min`, un contexte avec `b_cert>=H_run` effectue seul
-ce census terminal, ou le run appelle un census global : une première passe additionne en bloc
+Au profil contractuel `n=50 000`, les lanes séparées encodent exactement q2
+dans un `u32`, q3 dans les 48 bits utiles d'un `u64` et q4 dans un `u64`. Le
+reçu uniforme courant compte `96 241 855 / 352 786 093 / 390 554 718`
+occurrences : les clés nues occupent environ `6,33 Go`, ou `12,66 Go` en double
+buffer, sans `CellId`. Une point-location owner après RLE est donc aussi une
+décision de layout. Le nombre de clés uniques demeure une gate : un RLE retire
+la multiplicité spatiale, pas les candidats intrinsèquement distincts qui
+échoueront ensuite.
+
+Le candidat owner peut suivre deux ordonnances. L'ordonnance générale produit
+`(cloud_epoch,GeometricBallKey,SupportKey,OwnerCellId)` sans census, puis un
+second RLE conserve tous les supports d'une même boule. Le fast path
+`RelevantGP` lance plutôt top-12 par `SupportKey` et ne forme la clé de boule
+que pour sa side queue : si `delta>beta` et le shell global rendu est `E=U`,
+aucun autre support minimal distinct ne peut porter la même boule, car il
+serait un sous-ensemble propre de la base affinement indépendante `U`. Le
+record est donc publiable sans tri de sphères. `delta=beta` route vers
+range-report, quotient de plateau ou refus fermé. Une A/B décide si le second
+RLE global amortit mieux les rares boules multi-supports.
+
+Le backend choisi exécute soit top-12, soit le census pool-relatif déjà prouvé.
+Pour `H_run=smax-q_min`, un contexte avec `b_cert>=H_run` effectue seul ce
+census terminal, ou le run appelle un census global : une première passe additionne en bloc
 les nœuds strictement intérieurs et désactive chaque support dès son
 `(12-q)`-ième témoin; si au moins un support reste pertinent, une seconde passe
 matérialise `I_B/U_B` complet et attache `U_B` comme identité sémantique aval.
@@ -1207,7 +1235,7 @@ points u16 + LBVH exact résidents
        -> partition commune, D_h imbriquées, e0 fixe, promotion h
        -> filtres Jung--Helly--bissecteurs, génération q3/q4 directe
        -> RLE SupportKey -> une géométrie, zéro ou un owner
-       -> RLE GeometricBallKey -> top-12 ou census pool I/E unique -> U_B
+       -> top-12 régulier; side queue GeometricBallKey/plateau, ou second RLE A/B
        -> BallActivation/tombstones streamées + gate regular/plateau/high-rank
        -> facettes du cœur + gateway canonique de première incidence
        -> carriers stricts + resolver latent
@@ -1256,8 +1284,8 @@ Le manifeste engage au minimum :
 - tâches source prévues, remplies, consommées, scindées et refusées ;
 - produits dual-tree, ancres, arrangements, sommets shallow et faux positifs ;
 - activations, tombstones, supports par arité, profondeurs et coquilles ;
-- `SupportKey` avant le premier RLE, `GeometricBallKey` avant le second,
-  `U_B` après census et preuve des doublons ;
+- `SupportKey` avant le premier RLE, `GeometricBallKey` sur la side queue ou
+  avant le second RLE global, `U_B` après census et preuve des doublons ;
 - incidences fast/fallback, hits prévus/lus, resolver et ledger pré-DSU ;
 - octets de chaque arène, workspace, pile, high-water et marge ;
 - temps séparés build, source, census, resolver, fold, payload et
@@ -1309,9 +1337,11 @@ un refus de ressource sont trois statuts distincts.
    Comparer lots spatiaux de feuilles atomiques et shards radix par clé. Dans le premier cas, la feuille owner commune rend le
    second RLE par clé primitive de sphère local. Dans le second, redistribuer les
    pending owner par `GeometricBallKey/OwnerCellId` avant ce RLE : un owner
-   commun ne colocalise pas des shards `SupportKey` distincts. Choisir ensuite
-   un contexte `b_cert>=H_run` et faire un unique census par boule, ou lancer la
-   sentinelle top-12 exacte puis un range-report seulement sur plateau;
+   commun ne colocalise pas des shards `SupportKey` distincts. Comparer ce
+   second RLE global au fast path top-12 par clé : `E=U` publie directement la
+   branche régulière, tandis que l'égalité route seule vers la clé de boule et
+   le range-report. Pour le census pool, choisir un contexte
+   `b_cert>=H_run` et faire un unique census par boule;
    `U_B` est un certificat aval. Gamma
    conserve les `SupportKey` requis; le H0 normalisé
    emploie le token Johnson et un support canonique. Graver les fixtures

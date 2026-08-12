@@ -2238,8 +2238,9 @@ mhgp3v_add_expected_code_test_for(mhgp3v_flats_scale
 # de generation ET le certificat de census : aucun scan global apres la racine.
 # C'est ce qui la rend transposable en `count/scan/fill`.
 add_executable(mhgp3v_centre_cell prototype/centre_cell_source.cpp)
+find_package(Threads REQUIRED)
 target_include_directories(mhgp3v_centre_cell PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(mhgp3v_centre_cell PRIVATE mhgp)
+target_link_libraries(mhgp3v_centre_cell PRIVATE mhgp Threads::Threads)
 target_compile_options(mhgp3v_centre_cell PRIVATE -Wall -Wextra -Werror)
 
 # LES CINQ NUAGES, JUGES SUR LES IDENTITES DE SUPPORT, avec `I_B` et `U_B`.
@@ -2546,3 +2547,35 @@ add_test(NAME mhgp3v_centre_cell_k1_connexe COMMAND mhgp3v_centre_cell
          --points=600 --smax=11 --family=terrain --seed=3 --k1)
 set_tests_properties(mhgp3v_centre_cell_k1_connexe
                      PROPERTIES PASS_REGULAR_EXPRESSION "composantes=1")
+
+# L'INVARIANCE DU RECU AU NOMBRE DE WORKERS.
+#
+# Le parallelisme decoupe l'arbre en sous-arbres independants a une profondeur
+# de recolte. La propriete half-open garantit qu'un support n'est possede que
+# par une seule cellule, donc par une seule tache; les compteurs cumulatifs
+# s'additionnent, les compteurs de pic prennent le maximum. Le recu doit donc
+# etre IDENTIQUE ligne a ligne, la seule ligne exclue etant celle qui annonce le
+# nombre de workers. C'est la propriete qu'un portage device devra conserver, et
+# c'est ce que cette porte exige litteralement.
+if(Python3_Interpreter_FOUND OR Python3_EXECUTABLE)
+  foreach(fam uniform terrain scanline_overlap_multiecho)
+    add_test(NAME mhgp3v_centre_cell_workers_${fam}
+             COMMAND ${Python3_EXECUTABLE}
+                     ${CMAKE_CURRENT_SOURCE_DIR}/audits/check_centre_cell_thread_invariance.py
+                     --binary $<TARGET_FILE:mhgp3v_centre_cell>
+                     --points=600 --smax=11 --family=${fam} --seed=11
+                     --threads 1 2 5)
+    set_tests_properties(mhgp3v_centre_cell_workers_${fam}
+                         PROPERTIES PASS_REGULAR_EXPRESSION "RECU IDENTIQUE")
+  endforeach()
+  # LE LIFT DIFFERE change le calendrier des lots : son invariance doit etre
+  # verifiee separement, car ses vidanges dependent de l'ordre d'arrivee.
+  add_test(NAME mhgp3v_centre_cell_workers_differe
+           COMMAND ${Python3_EXECUTABLE}
+                   ${CMAKE_CURRENT_SOURCE_DIR}/audits/check_centre_cell_thread_invariance.py
+                   --binary $<TARGET_FILE:mhgp3v_centre_cell>
+                   --points=600 --smax=11 --family=uniform --seed=11
+                   --threads 1 3 --extra=--deferred-lift --semantic-only)
+  set_tests_properties(mhgp3v_centre_cell_workers_differe
+                       PROPERTIES PASS_REGULAR_EXPRESSION "SEMANTIQUE IDENTIQUE")
+endif()

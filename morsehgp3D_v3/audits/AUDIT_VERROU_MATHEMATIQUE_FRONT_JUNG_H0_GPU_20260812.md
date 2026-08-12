@@ -37,12 +37,14 @@ donne la version exacte forte. Le verrou plus profond n'est toutefois pas ce
 prune : c'est produire les supports q3/q4 sans payer le catalogue des cliques.
 La section 5 propose un front d'ancres dont la taille est linéaire en espérance
 sur le régime volumique Poisson et qui possède une couverture déterministe des
-supports pertinents. C'est la piste mathématique à tester avant une nouvelle
-micro-optimisation de l'octree.
+supports pertinents. Cette propriété de la sortie ne borne pas son producteur :
+le dual-tree d'ancres existant a déjà des pentes voisines de `2,3`. Le front est
+donc une expérience falsifiable, pas encore la voie produit. La rupture
+immédiate reste le flot plat `SupportKey` décrit par l'audit top-12.
 
 ## 2. Certificat directionnel exact de rayon positif
 
-Soient un domaine convexe compact `K`, un pool fini `P`, et une direction
+Soient un domaine convexe compact `K`, un pool fini fixé `P`, et une direction
 entière non nulle `d`. Pour une convention de côté `sigma` dans `{+1,-1}`,
 poser :
 
@@ -72,7 +74,8 @@ une égalité pour les deux membres.
 
 ### Corollaire 1 — prune par rang sans construire de support
 
-Pour la lane `q`, soit `R_q(K)` la `t_q`-ième plus petite valeur de `u_K`, avec
+Pour la lane `q`, supposer `U subset P_q`, `t_q<=|P_q|`, et soit `R_q(K)` la
+`t_q`-ième plus petite valeur de `u_K` dans ce pool fixé, avec
 `t_q=smax-q+1`. Si :
 
 $$R_q(K)<\Lambda_D(K,P_q),$$
@@ -92,7 +95,7 @@ itératif n'est requis.
 
 ### Corollaire 2 — monotonie et contraction
 
-Pour `K' subset K` et le même pool, les minima contraints ne peuvent
+Pour `K' subset K` et le même pool fixé, les minima contraints ne peuvent
 qu'augmenter et `u_K'(x)` ne peut que diminuer. Un certificat reste donc vrai
 dans tout descendant. En outre, tout centre pertinent appartient à
 `conv(A_q(K))`. Pour chaque `d`, le slab exact :
@@ -164,10 +167,11 @@ individuelle de niveau 64 ne contient une facette de chacune des deux racines
 strictes. Le temps de rencontre est donc un chemin minimax dans le graphe
 implicite, pas la valeur d'une unique miniboule bichromatique.
 
-Cette fixture doit tuer les mutants suivants : contact direct seulement,
-traitement séquentiel du lot 64, suppression de `AC/BD` lorsqu'elles sont
-isolées avant le lot, omission d'un co-minimiseur. Une porte complète compare
-toutes les permutations et attend une seule `GeometricBallKey` de shell
+Cette fixture doit tuer les mutants suivants : contact direct seulement et
+traitement séquentiel du lot 64. Une comparaison de `pi0` seule ne tue pas
+nécessairement la suppression de `AC/BD` ou l'omission d'un co-minimiseur, car
+des chemins redondants subsistent. La porte catalogue distincte compare toutes
+les permutations et attend une seule `GeometricBallKey` de shell
 `{A,B,C,D}` avec ses quatre cofaces de plateau.
 
 Conclusion : Boruvka/MSF compresse l'aval si un oracle exact fournit les
@@ -194,7 +198,7 @@ individuellement universels pour les centres de Jung q3 ou q4. Son volume est
 homogène de degré trois : `vol(W_q)=v_q D^3`. Les constantes exactes s'obtiennent
 par intégration du solide de révolution défini par les prédicats de Jung :
 
-$$v_3=\frac{\pi}{4}-\frac{\pi^2}{9\sqrt{3}}=0{,}1522627458681086,\qquad v_4=\frac{7\pi}{24}-\frac{3\pi}{8\sqrt{2}}\arctan\left(\sqrt{2}\right)=0{,}1204803754461729.$$
+$$v_3=\frac{\pi}{4}-\frac{\pi^2}{9\sqrt{3}}=0{,}1522627458681087,\qquad v_4=\frac{7\pi}{24}-\frac{3\pi}{8\sqrt{2}}\arctan\left(\sqrt{2}\right)=0{,}1204803754461729.$$
 
 Pour vérifier ces constantes, normaliser `D=1`, placer le milieu à l'origine,
 noter `z` la coordonnée axiale physique et `r` la distance à l'axe. Avec
@@ -202,8 +206,9 @@ noter `z` la coordonnée axiale physique et `r` la distance à l'axe. Avec
 
 $$r_q(z)=\frac{\sqrt{1+a_q^2-4z^2}-a_q}{2},\qquad -\frac{1}{2}\leq z\leq\frac{1}{2},\qquad v_q=\pi\int_{-1/2}^{1/2}r_q(z)^2\,dz.$$
 
-Le nombre attendu de paires non ordonnées ayant au plus `h-1` témoins dans un
-domaine `Omega`, hors termes de bord, vaut :
+Dans un PPP stationnaire infini, en localisant les **milieux** des paires dans
+un domaine `Omega`, le nombre attendu de paires non ordonnées ayant au plus
+`h-1` témoins vaut exactement :
 
 $$\mathbb{E}[N_{q,h}(\Omega)]=\frac{2\pi h}{3v_q}\rho\lvert\Omega\rvert.$$
 
@@ -218,16 +223,116 @@ Avec `h=9` pour q3 et `h=8` pour q4 :
 | lane | espérance bulk d'ancres survivantes |
 | --- | ---: |
 | q2, au plus neuf intérieurs diamétraux | `40 rho |Omega|` |
-| q3, moins de neuf témoins Jung universels | `123,796244 rho |Omega|` |
+| q3, moins de neuf témoins Jung universels | `123,796243 rho |Omega|` |
 | q4, moins de huit témoins Jung universels | `139,069627 rho |Omega|` |
 
-Le front combiné compte donc environ `302,866 n` paires avec doublons entre
-lanes, soit environ `15,15` millions d'enregistrements à 50 000 points dans
-l'approximation bulk sans bord. Toute ancre pertinente q3/q4 est dans la lane correspondante,
-par la preuve déterministe du cœur. Cette constante n'est ni une borne de pire
-cas, ni une identité pour une boîte u16, ni une preuve de débit du producteur.
-Elle transforme néanmoins la piste en hypothèse quantitative falsifiable sur
-les deux familles bloquantes.
+Les trois régions sont imbriquées : `W4 subset W3 subset W2`, où `W2` est la
+boule diamétrale et `v2=pi/6`. Il est donc inutile de matérialiser trois copies
+d'une paire : un seul `PairId` porte un masque de lanes. Pour
+`t=rho D^3`, les nombres de témoins dans les trois couronnes disjointes sont
+des Poisson indépendantes `Z4`, `Z34`, `Z23`, de paramètres respectifs
+`v4 t`, `(v3-v4)t`, `(v2-v3)t`. Avec `N4=Z4`, `N3=Z4+Z34` et
+`N2=Z4+Z34+Z23`, l'union des événements de survie se décompose exactement en :
+
+$$A=\lbrace N_4\leq7\rbrace\mathbin{\dot\cup}\lbrace Z_4=8,Z_{34}=0\rbrace\mathbin{\dot\cup}\lbrace Z_{23}=0,(Z_4,Z_{34})\in\lbrace (8,1),(9,0)\rbrace\rbrace.$$
+
+Après la même intégration de Campbell--Mecke, l'intensité physique coalescée
+est :
+
+$$C_{\mathrm{front}}=\frac{2\pi}{3}\left(\frac{8}{v_4}+\frac{v_4^8}{v_3^9}+\frac{v_4^8(9v_3-8v_4)}{v_2^{10}}\right)=141{,}183364803884.$$
+
+La décomposition numérique vaut `139,069626544` pour q4, seulement
+`2,113713855` de surcroît q3 et `0,000024405` de surcroît q2. Ainsi le front
+final attendu est d'environ `7,06` millions de `PairId+mask` à 50 000 points,
+et non `15,15` millions. La valeur `302,866 n` reste correcte comme somme des
+**occurrences de lanes avant coalescence**, pas comme taille physique du front.
+
+La couverture déterministe ne dépend pas du modèle Poisson : pour tout support
+minimal propre positif q3/q4 pertinent, chaque arête maximale a `D>0`, son
+centre appartient au disque de Jung, et tout `PointId` dans le spindle est
+strictement intérieur à sa boule. Son spindle contient donc au plus `p<=8`
+témoins en q3 et `p<=7` en q4; l'ancre survit bien le seuil correspondant.
+
+La loi moyenne demande en revanche des précautions. Pour un PPP tronqué à une
+boîte, un nuage uniforme conditionné à exactement `n`, `eight_clusters` ou la
+quantification u16, elle n'est qu'une baseline bulk avec correction de bord,
+pas une identité. Les spindles et boules témoins sont ouverts : leur frontière
+a mesure nulle sous PPP continu, mais doit rester traitée exactement en u16.
+Les comptes portent sur des `PointId` distincts, jamais sur des visites; deux
+identifiants de même position ne sont pas fusionnés. Une paire de longueur
+nulle reste fail-open. Les supports impropres ou non positifs appartiennent à
+leurs lanes de dégénérescence. Enfin, surfaces, cosphères et doublons peuvent
+encore rendre le front quadratique au pire. Cette constante n'est donc ni une
+borne déterministe, ni une preuve de débit du producteur; elle rend la piste
+quantitativement falsifiable sur les deux familles bloquantes.
+
+### Front intermédiaire par boule de milieu
+
+Le spindle complet n'est pas nécessaire au premier étage. Pour une paire
+`a,b` de longueur `D` et de milieu `m`, les inclusions suivantes découlent
+directement des prédicats norm-only déjà reçus :
+
+$$B\left(m,\frac{D}{\sqrt{12}}\right)\subset W_3(a,b),\qquad B\left(m,\frac{D}{\sqrt{15}}\right)\subset W_4(a,b),$$
+
+où les boules témoins sont lues ouvertes. La seconde borne est légèrement plus
+petite que le plus grand rayon radial du spindle q4 et reste donc strictement
+sûre. Neuf points dans la première boule ou huit dans la seconde éliminent la
+paire de la lane correspondante.
+
+Cette relaxation a elle aussi une intensité Poisson exacte. Ses coefficients de
+volume sont `pi/(18 sqrt(3))` et `4 pi/(45 sqrt(15))`; les fronts survivants
+valent donc respectivement :
+
+$$108\sqrt{3}\,\rho\lvert\Omega\rvert\simeq187{,}0615\,\rho\lvert\Omega\rvert,\qquad 60\sqrt{15}\,\rho\lvert\Omega\rvert\simeq232{,}3790\,\rho\lvert\Omega\rvert.$$
+
+Avec q2, la somme des occurrences de lanes vaut environ `459,44 n`. Comme les
+trois boules de milieu sont elles aussi imbriquées, la même coalescence donne
+seulement `233,807309 n` `PairId+mask`, soit `11,69` millions à 50 000 points
+en bulk avant le test de spindle complet. Ce front est plus large que le front
+final coalescé `141,183365 n`, mais sa primitive est seulement un range-count
+de boule de milieu. Il fournit donc une cascade concrète :
+
+```text
+univers implicite des paires
+  -> boule de milieu : seuil 10/9/8 par lane
+  -> spindle Jung complet ou certificat collectif
+  -> paires q2 et ancres q3/q4
+  -> extension indépendante q3/q4
+```
+
+Une réalisation exacte peut ordonner les produits de nœuds AABB par classes
+dyadiques de distance. Pour un bloc d'extrémités, calculer une boule ou une AABB
+témoin contenue dans **toutes** les boules de milieu du bloc; si son range-count
+contient le seuil de `PointId` distincts, tout le produit est pruné. Sinon le
+plus gros nœud est divisé, puis une microtuile finit par le prédicat ponctuel.
+La frontière se ferme par l'identité
+`pair_mass_pruned+pair_mass_microtiles=C(n,2)` pour chaque masque de lane, sans
+jamais matérialiser les paires prunées. Une borne flottante peut ordonner les
+tâches; containment et cardinal exacts restent entiers et fail-open.
+
+Cette ordonnance n'a pas encore une preuve de travail `O(n)` : l'espérance de
+la **sortie du front** ne suffit pas à borner les visites de produits AABB. Elle
+donne néanmoins un producteur précis à falsifier, plus simple que le
+center-cover de tout le disque et directement compatible avec un LBVH
+résident. Les compteurs de produits visités et de range-count sont donc une
+partie obligatoire de `W_front`.
+
+### Contre-mesure du producteur et de l'extension
+
+Le probe d'ancres déjà présent réfute son parcours actuel comme producteur : de
+`n=500` à `n=1 000`, les visites q3 passent d'environ `4,85` à `23,84`
+millions et les visites q4 de `5,06` à `25,44` millions, soit des pentes
+respectives proches de `2,30` et `2,33`. Entre `97 %` et `99 %` des paires
+atteignent encore les terminaux. Ce rouge ne réfute pas le théorème du front;
+il réfute le dual-tree courant qui tente de le produire.
+
+L'extension doit rester une porte séparée. Même sous Poisson bulk, étendre
+naïvement chaque ancre q3 par tous les tiers de la lentille compatibles donne
+environ `3 192,8 n` occurrences, soit `159,6` millions à 50 000 points. Une
+borne volontairement lâche qui apparie tous les carriers q4 de cette lentille
+atteint environ `11,64` milliards de paires avant les tests de diamètre et de
+positivité. Ces nombres ne sont pas des prédictions du producteur retenu; ils
+interdisent seulement de déduire `W_extend` de la taille linéaire du front.
 
 ### Conséquence d'implémentation GPU
 
@@ -279,21 +384,22 @@ La [fiche NVIDIA](https://www.nvidia.com/en-us/data-center/rtx-pro-6000-blackwel
 annonce 1 597 Go/s. La capacité n'est pas le verrou pour environ 24 millions
 de supports; le nombre de passes larges l'est.
 
-Un modèle de trafic volontairement simple donne environ :
+Un modèle de trafic volontairement simple, dont les multiplicités de bras,
+visites et rondes ne sont pas encore reçues, donne environ :
 
 - `24,6 Go` pour un radix 128 bits de 24 millions de records de 32 octets;
 - `20,8 Go` pour 81 millions de tokens de bras de 16 octets triés sur 64 bits;
 - `24,6 Go` pour trente-deux visites LBVH de 32 octets par support;
 - `35 Go` pour vingt-sept scans Boruvka de 81 millions de bras de 16 octets.
 
-Ce total d'environ `105 Go`, avant producteurs, écritures et payload, est
-compatible avec une seconde à une efficacité mémoire modeste. Il est déjà au
-voisinage de 66 ms au pic théorique et rend le seuil principal de 100 ms très
-improbable sans fusion de kernels, compression supplémentaire et évitement des
-scans Boruvka complets. Un tri global d'une `GeometricBallKey` de cinq `i128`
-ajouterait à lui seul plusieurs centaines de gigaoctets : router par fingerprint
-compact, puis comparer exactement dans chaque bucket/feuille owner. Le hash ne
-décide jamais l'égalité scientifique.
+Ce total d'environ `105 Go` est un plancher de modèle : il exclut précisément
+le producteur du front, son extension, les prédicats exacts et une partie des
+écritures. Les 66 ms obtenues en divisant par le pic théorique ne qualifient
+donc aucun temps end-to-end; elles montrent seulement que la bande passante
+n'interdit pas à elle seule la seconde. Un tri global d'une
+`GeometricBallKey` de cinq `i128` ajouterait un trafic important : router par
+fingerprint compact, puis comparer exactement dans chaque bucket ou feuille
+owner. Le hash ne décide jamais l'égalité scientifique.
 
 Le verdict honnête est donc : la seconde secondaire est physiquement plausible
 si le front et l'extension ferment leurs pentes; les 100 ms principaux ne le
@@ -332,7 +438,9 @@ Ordre de travail recommandé à Claude :
 3. conserver le RLE `SupportKey` avant lift et top-12 comme pipeline device de
    référence;
 4. construire un **ledger mass-only du front de Jung** q3/q4, sans lift ni
-   extension, et comparer les constantes empiriques à `123,80 n` et `139,07 n`;
+   extension, et comparer les constantes empiriques à `123,796243 n` et
+   `139,069627 n`; le dual-tree actuel est déjà rouge et ne sert que de
+   baseline réfutée;
 5. si ce front ferme `W_front`, mesurer séparément l'extension q3 et q4; sinon
    abandonner la source par ancres avant CUDA;
 6. seulement après ces deux portes, implémenter le pipeline plat GPU et mesurer

@@ -168,9 +168,9 @@ compter son trafic et fusionner vers le fold sur device. Le calcul, ses
 hypothèses et ses références primaires sont dans l'audit cellules-centres.
 
 Ces vingt-quatre millions de tâches utiles ne sont pas tenus pour le verrou
-GPU. Le premier point volumique gelé produit `4 990 227` supports mais
-`194 463 795` géométries, soit `38,969` occurrences par support, dont
-`81,778 %` meurent à l'owner. La réparation prioritaire est donc un
+GPU. Le point gelé `uniform,n=50 000` produit `21 395 212` supports mais
+`839 582 666` géométries, soit `39,242` occurrences par support, dont
+`81,555 %` meurent à l'owner. La réparation prioritaire est donc un
 `count/scan/fill` de clés compactes, un radix/RLE par `SupportKey` **avant** le
 lift, puis une point-location directe du centre dans la feuille owner et un
 rejeu du pool de cette feuille. Une face shallow arbitraire n'est pas une
@@ -178,14 +178,17 @@ source q2/q3 : il faut le minimum auto-centré de la fonction rayon sur son flat
 d'égalité. Le contre-exemple et la preuve sont dans
 [`AUDIT_DEBLOCAGE_GPU_SUPPORTKEY_TOP12_20260812.md`](audits/AUDIT_DEBLOCAGE_GPU_SUPPORTKEY_TOP12_20260812.md).
 
-Après le second RLE par clé géométrique de sphère, une primitive top-12 exacte
-peut remplacer le census variable sur la branche régulière. Si la distance du
+Une primitive top-12 exacte peut remplacer le census variable sur la branche
+régulière. Si la distance du
 douzième voisin est strictement au-dessus du rayon, la boule fermée entière est
 dans les douze retours; si elle est strictement dessous, douze intérieurs
 rejettent le candidat; si elle est égale, `p+q<=11` prouve une extra-shell. Les
 ex aequo peuvent être choisis arbitrairement. Le top-12 est le certificateur
 minimal pour `smax=11`, jamais un générateur; un plateau à publier exige encore
-un range-report complet ou un refus fermé.
+un range-report complet ou un refus fermé. Le fast path `E=U` publie sans tri
+de sphères; la side queue d'égalité emploie `GeometricBallKey`. Un second RLE
+global reste une variante A/B si les boules multi-supports amortissent son
+trafic.
 
 Dans le modèle continu, ou dans une famille de précision croissante, une sortie
 exhaustive n'est même pas universellement linéaire : quatre amas de sites sur
@@ -227,7 +230,7 @@ points u16 + LBVH exact résidents
        -> scores affines à jauge fixe + pools CSR + promotion h
        -> bitsets bissecteurs + axe de face q4, carriers aigus optionnels
        -> RLE SupportKey -> une géométrie/owner
-       -> clé primitive de sphère -> second RLE -> top-12 ou census pool unique -> U_B
+       -> top-12 régulier; side queue clé de sphère/plateau ou second RLE A/B
        -> gate régulière / plateau / inertie de haut rang
        -> facettes du cœur, gateways et resolver strict
        -> MSF de carriers ou fold direct par lots atomiques
@@ -442,11 +445,11 @@ préfixe comme objet complet.
    contexte owner certifie `b_cert>=H_run`. Des shards radix par `SupportKey`
    réunissent au contraire toutes les occurrences d'un support et peuvent ne
    payer qu'un lift par clé, mais deux supports de la même boule peuvent tomber
-   dans des shards différents. Après le lift, redistribuer donc les pending de
-   façon streamée par `(cloud_epoch,GeometricBallKey)` vers leur `OwnerCellId`
-   commun, ou vers un `BallOwner` canonique équivalent, avant le second RLE et
-   le census. L'owner est une destination exacte, pas une colocalisation
-   initiale. Un représentant par boule promeut
+   dans des shards différents. Comparer après le lift deux ordonnances exactes :
+   redistribuer les pending par `(cloud_epoch,GeometricBallKey)` vers leur
+   `OwnerCellId` avant un second RLE, ou lancer top-12 par clé et ne router que
+   l'égalité vers cette side queue. L'owner est une destination exacte, pas une
+   colocalisation initiale. Lorsqu'il existe, un représentant par boule promeut
    ensuite le curseur `h` par nouveaux buckets et matérialise une seule fois
    `I_B/U_B`. Gamma
    conserve les provenances nécessaires; le H0 normalisé emploie un support

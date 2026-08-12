@@ -76,8 +76,10 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <atomic>
 #include <functional>
 #include <map>
+#include <thread>
 #include <string>
 #include <vector>
 
@@ -177,6 +179,93 @@ struct Stats {
   i64 accepted_closed_rank = 0, extra_shell = 0;
   i64 balls = 0, balls_multi_support = 0;
   i64 shell_high_water = 0;
+
+  // FUSION DETERMINISTE. Les compteurs cumulatifs s'additionnent, les compteurs
+  // de pic prennent le maximum. Aucun n'est sensible a l'ordonnancement : la
+  // sortie d'un run a N workers est donc IDENTIQUE, compteur par compteur, a
+  // celle d'un run sequentiel. C'est la propriete qu'un port device devra
+  // conserver, et elle est verifiee par une porte.
+  void merge(const Stats& o) {
+    cells_created += o.cells_created;
+    cells_terminal += o.cells_terminal;
+    cells_pruned += o.cells_pruned;
+    cells_split += o.cells_split;
+    max_depth_reached = std::max(max_depth_reached, o.max_depth_reached);
+    parent_candidate_reads += o.parent_candidate_reads;
+    bound_evals += o.bound_evals;
+    candidate_ids += o.candidate_ids;
+    candidate_high_water = std::max(candidate_high_water, o.candidate_high_water);
+    separation_tests += o.separation_tests;
+    separation_pruned += o.separation_pruned;
+    child_separation_tests += o.child_separation_tests;
+    child_separation_pruned += o.child_separation_pruned;
+    normal_tests += o.normal_tests;
+    normal_pruned += o.normal_pruned;
+    rank_cell_tests += o.rank_cell_tests;
+    rank_cell_pruned += o.rank_cell_pruned;
+    overlap_pairs += o.overlap_pairs;
+    terminal_overlaps += o.terminal_overlaps;
+    max_terminal_overlaps = std::max(max_terminal_overlaps, o.max_terminal_overlaps);
+    potential_triples += o.potential_triples;
+    potential_quads += o.potential_quads;
+    clique_pairs += o.clique_pairs;
+    clique_triples += o.clique_triples;
+    clique_quads += o.clique_quads;
+    bisector_tests += o.bisector_tests;
+    bisector_pruned += o.bisector_pruned;
+    hull_tests += o.hull_tests;
+    hull_pruned += o.hull_pruned;
+    diameter_tests += o.diameter_tests;
+    diameter_pruned += o.diameter_pruned;
+    occurrences_recorded += o.occurrences_recorded;
+    occurrences_unowned += o.occurrences_unowned;
+    occurrences_nonpositive += o.occurrences_nonpositive;
+    occurrences_degenerate += o.occurrences_degenerate;
+    owner_tests += o.owner_tests;
+    owner_multiple += o.owner_multiple;
+    batches_flushed += o.batches_flushed;
+    axis_tests += o.axis_tests;
+    axis_pruned += o.axis_pruned;
+    axis_unusable += o.axis_unusable;
+    lifts_built += o.lifts_built;
+    degenerate_lifts += o.degenerate_lifts;
+    owner_rejected += o.owner_rejected;
+    self_centre_rejected += o.self_centre_rejected;
+    rank_rejected += o.rank_rejected;
+    ball_groups += o.ball_groups;
+    group_saved_scans += o.group_saved_scans;
+    census_scans += o.census_scans;
+    census_point_tests += o.census_point_tests;
+    census_promotions += o.census_promotions;
+    accepted_closed_rank += o.accepted_closed_rank;
+    extra_shell += o.extra_shell;
+    balls += o.balls;
+    balls_multi_support += o.balls_multi_support;
+    shell_high_water = std::max(shell_high_water, o.shell_high_water);
+    probe_tests += o.probe_tests;
+    probe_accepted += o.probe_accepted;
+    probe_edges += o.probe_edges;
+    probe_triangles += o.probe_triangles;
+    probe_quads += o.probe_quads;
+    incidence_checks += o.incidence_checks;
+    stall_levels_seen += o.stall_levels_seen;
+    stall_terminals += o.stall_terminals;
+    early_rank_groups += o.early_rank_groups;
+    for (int q = 0; q < 5; ++q) {
+      supports[q] += o.supports[q];
+      lifts_q[q] += o.lifts_q[q];
+      owner_rejected_q[q] += o.owner_rejected_q[q];
+      positive_rejected_q[q] += o.positive_rejected_q[q];
+      degenerate_q[q] += o.degenerate_q[q];
+      rank_rejected_q[q] += o.rank_rejected_q[q];
+      hull_pruned_q[q] += o.hull_pruned_q[q];
+      early_rank_supports_q[q] += o.early_rank_supports_q[q];
+    }
+    for (int d = 0; d < 32; ++d) {
+      terminal_by_depth[d] += o.terminal_by_depth[d];
+      supports_by_depth[d] += o.supports_by_depth[d];
+    }
+  }
 };
 
 // `l` et `u` a l'echelle 2^(2*depth) : le site est multiplie par 2^depth.
@@ -566,6 +655,7 @@ struct Engine {
   // deux fois et publierait deux fois ses supports.
   struct BatchCell {
     CentreCell cell;
+    int depth = 0;
     std::vector<Cand> cands;
     std::vector<int> bucket_end;
     bool have_thresholds = false;
@@ -583,6 +673,20 @@ struct Engine {
   int cur_slot = -1;
   int cur_depth = 0;
   bool no_normal = false;
+  // RECOLTE DES TACHES. Au-dessus de `harvest_depth` la descente est
+  // sequentielle; a cette profondeur elle DEPOSE la cellule et sa liste deja
+  // filtree, puis rend la main. Chaque tache est ensuite un sous-arbre
+  // INDEPENDANT : les cellules ne partagent aucun etat, et la propriete
+  // half-open garantit qu'un support n'est possede que par une seule d'entre
+  // elles, dans une seule tache.
+  struct Task {
+    CentreCell cell;
+    std::vector<Cand> parent;
+    i64 parent_work = -1;
+    int stalls = 0;
+  };
+  int harvest_depth = -1;
+  std::vector<Task>* harvest = nullptr;
   bool deferred_lift = false;
   // ABLATION A FLOT IDENTIQUE. Mode de MESURE uniquement : chaque niveau coupe
   // une phase en laissant intactes toutes celles qui la precedent. La sortie
@@ -643,6 +747,10 @@ struct Engine {
 
   void descend(const CentreCell& cell, const std::vector<Cand>& parent,
                i64 parent_work = -1, int stalls = 0) {
+    if (harvest && cell.depth == harvest_depth) {
+      harvest->push_back(Task{cell, parent, parent_work, stalls});
+      return;
+    }
     stats.max_depth_reached = std::max(stats.max_depth_reached, (i64)cell.depth);
     std::vector<Cand>& mine = level[(std::size_t)cell.depth];
     mine.clear();
@@ -1172,6 +1280,7 @@ struct Engine {
     if (deferred_lift) {
       BatchCell bc;
       bc.cell = cell;
+      bc.depth = cell.depth;
       bc.cands = cands;
       bc.bucket_end = bucket_end;
       bc.have_thresholds = have_thresholds;
@@ -1349,6 +1458,10 @@ struct Engine {
     }
     for (BatchCell& bc : batch_cells) {
       if (bc.pending.empty()) continue;
+      // L'ATTRIBUTION EN PROFONDEUR doit suivre la cellule PROPRIETAIRE, pas la
+      // derniere cellule visitee : en mode differe le census a lieu a la
+      // vidange, longtemps apres la descente.
+      cur_depth = bc.depth;
       pending.swap(bc.pending);
       bucket_end = bc.bucket_end;
       census_pending(bc.cands, bc.have_thresholds);
@@ -1792,6 +1905,8 @@ struct Options {
   bool multiplicity = false;
   bool emit_identities = false;
   bool k1 = false;
+  int threads = 1;
+  int harvest_depth = 3;
   int batch_depth = 3;
   int batch_records = 1 << 20;
   bool deferred_lift = false;
@@ -1848,13 +1963,99 @@ int run_engine(const std::vector<mhgp::P3>& cloud, const Options& opt) {
   seed.reserve(cloud.size());
   for (int i = 0; i < points; ++i) seed.push_back(Cand{0, 0, i, 0});
   ++engine.stats.cells_created;
-  engine.run(root, seed);
+
+  if (opt.threads <= 1) {
+    engine.run(root, seed);
+  } else {
+    // PARALLELISME PAR SOUS-ARBRES INDEPENDANTS.
+    //
+    // La descente sequentielle s'arrete a `harvest_depth` et depose ses
+    // cellules avec leur liste deja filtree. Chaque sous-arbre est alors
+    // independant : aucune cellule n'ecrit dans l'etat d'une autre, et la
+    // propriete half-open garantit qu'un support n'est possede que par une
+    // seule cellule, donc par une seule tache. La fusion additionne les
+    // compteurs cumulatifs et prend le maximum des pics; aucun n'est sensible
+    // a l'ordonnancement.
+    //
+    // C'est exactement la decomposition qu'un port device doit conserver, et la
+    // porte `identique quel que soit le nombre de workers` la protege.
+    std::vector<Engine::Task> tasks;
+    engine.level.assign((std::size_t)opt.max_depth + 2, {});
+    engine.harvest = &tasks;
+    engine.harvest_depth = opt.harvest_depth;
+    engine.descend(root, seed, -1, 0);
+    engine.harvest = nullptr;
+    if (engine.deferred_lift) engine.flush_batch();
+
+    const int worker_count = std::min((int)tasks.size(), opt.threads);
+    std::vector<Engine> workers;
+    workers.reserve((std::size_t)std::max(worker_count, 1));
+    for (int w = 0; w < worker_count; ++w) {
+      Engine e;
+      e.pts = cloud.data();
+      e.n = points;
+      e.smax = opt.smax;
+      e.leaf = opt.leaf;
+      e.work_cap = opt.work_cap;
+      e.probe_factor = engine.probe_factor;
+      e.probe_top_cap = engine.probe_top_cap;
+      e.stall_ratio = engine.stall_ratio;
+      e.stall_levels = engine.stall_levels;
+      e.max_depth = opt.max_depth;
+      e.mutant = opt.mutant;
+      e.collect = engine.collect;
+      e.collect_gabriel = engine.collect_gabriel;
+      e.axis_filter = engine.axis_filter;
+      e.deferred_lift = engine.deferred_lift;
+      e.batch_rec_cap = engine.batch_rec_cap;
+      e.no_normal = engine.no_normal;
+      e.ablate = engine.ablate;
+      for (int d = 0; d < 3; ++d) e.root_hi[d] = engine.root_hi[d];
+      e.level.assign((std::size_t)opt.max_depth + 2, {});
+      workers.push_back(std::move(e));
+    }
+    std::atomic<std::size_t> next{0};
+    auto run_worker = [&](int w) {
+      Engine& e = workers[(std::size_t)w];
+      for (;;) {
+        const std::size_t i = next.fetch_add(1);
+        if (i >= tasks.size()) break;
+        const Engine::Task& t = tasks[i];
+        e.descend(t.cell, t.parent, t.parent_work, t.stalls);
+      }
+      if (e.deferred_lift) e.flush_batch();
+    };
+    std::vector<std::thread> pool;
+    for (int w = 1; w < worker_count; ++w) pool.emplace_back(run_worker, w);
+    if (worker_count > 0) run_worker(0);
+    for (std::thread& th : pool) th.join();
+    for (Engine& e : workers) {
+      engine.stats.merge(e.stats);
+      if (engine.invariant_broken == 0) engine.invariant_broken = e.invariant_broken;
+      engine.records.insert(engine.records.end(), e.records.begin(), e.records.end());
+      engine.gabriel.insert(engine.gabriel.end(), e.gabriel.begin(), e.gabriel.end());
+    }
+    // L'ORDRE DE CONCATENATION depend de l'ordonnancement; les identites, elles,
+    // sont un ENSEMBLE. On le rend canonique avant toute comparaison.
+    std::sort(engine.records.begin(), engine.records.end(),
+              [](const Record& a, const Record& b) {
+                if (a.support != b.support) return a.support < b.support;
+                return a.interior < b.interior;
+              });
+    std::sort(engine.gabriel.begin(), engine.gabriel.end(),
+              [](const Engine::GabrielEdge& a, const Engine::GabrielEdge& b) {
+                if (a.d2 != b.d2) return a.d2 < b.d2;
+                if (a.a != b.a) return a.a < b.a;
+                return a.b < b.b;
+              });
+  }
 
   const Stats& s = engine.stats;
   std::printf("CentreCellReceipt-v3\n");
-  std::printf("cloud=%s points=%d smax=%d leaf=%d work_cap=%d max_depth=%d axis_filter=%d deferred_lift=%d inject=%s\n",
+  std::printf("cloud=%s points=%d smax=%d leaf=%d work_cap=%d max_depth=%d axis_filter=%d deferred_lift=%d threads=%d inject=%s\n",
               opt.label.c_str(), points, opt.smax, opt.leaf, opt.work_cap, opt.max_depth,
-              opt.axis_filter ? 1 : 0, opt.deferred_lift ? 1 : 0, mutant_name(opt.mutant));
+              opt.axis_filter ? 1 : 0, opt.deferred_lift ? 1 : 0, opt.threads,
+              mutant_name(opt.mutant));
   std::printf("cells_created=%lld split=%lld terminal=%lld pruned=%lld depth_max=%lld\n",
               s.cells_created, s.cells_split, s.cells_terminal, s.cells_pruned,
               s.max_depth_reached);
@@ -2388,6 +2589,10 @@ int main(int argc, char** argv) {
     else if (arg == "--multiplicity") opt.multiplicity = true;
     else if (arg == "--emit-identities") opt.emit_identities = true;
     else if (arg == "--k1") opt.k1 = true;
+    else if (arg.rfind("--threads=", 0) == 0)
+      opt.threads = parse_int(arg.substr(10).c_str(), &ok);
+    else if (arg.rfind("--harvest-depth=", 0) == 0)
+      opt.harvest_depth = parse_int(arg.substr(16).c_str(), &ok);
     else if (arg.rfind("--batch-depth=", 0) == 0)
       opt.batch_depth = parse_int(arg.substr(14).c_str(), &ok);
     else if (arg.rfind("--batch-records=", 0) == 0)
@@ -2430,7 +2635,9 @@ int main(int argc, char** argv) {
 
   if (opt.smax < 4 || opt.smax > 24 || opt.leaf < 4 || opt.work_cap < 1 ||
       opt.max_depth < 1 || opt.max_depth > 26 || opt.ablate < 0 || opt.ablate > 5 ||
-      opt.stall_ratio < 1 || opt.stall_ratio > 100 || opt.stall_levels < 1) {
+      opt.stall_ratio < 1 || opt.stall_ratio > 100 || opt.stall_levels < 1 ||
+      opt.threads < 1 || opt.threads > 256 || opt.harvest_depth < 1 ||
+      opt.harvest_depth > 12) {
     std::fprintf(stderr, "REFUS domaine\n");
     return 2;
   }

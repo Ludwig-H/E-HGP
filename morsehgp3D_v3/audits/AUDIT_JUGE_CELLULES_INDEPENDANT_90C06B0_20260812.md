@@ -47,8 +47,9 @@ rejet anticipé lorsque `p+q>smax` est sûr parce que ce support ne doit pas êt
 publié; aucun shell partiel n'est alors comparé.
 
 Les produits scalaires tiennent dans `long long` sous le profil u16. La CLI du
-juge accepte des coordonnées synthétiques plus larges via le générateur; toute
-extension au-delà de la borne actuelle exige de refaire la borne avant les
+juge n'impose pas elle-même `coord<=65 535`, contrairement au sujet. Les portes
+actuelles gardent les coordonnées par défaut dans le profil, mais toute
+extension exige une garde commune explicite et une nouvelle borne avant les
 multiplications natives.
 
 ## 2. Porte mutant vacueuse
@@ -110,6 +111,15 @@ Avant de qualifier l'oracle borné :
 - borner les subprocess par timeout et archiver commande, sources, ELF et
   sortie brute.
 
+Le driver ne compare pas de `cloud_digest`; il suppose que deux processus
+appelant `cloud_families.hpp` produisent le même nuage. Or
+`std::uniform_int_distribution` n'engage pas les mêmes octets entre toutes les
+implémentations de bibliothèque standard. Un reçu durable fixe donc la
+toolchain et la bibliothèque, ou remplace le sampler par une spécification
+entière stable, puis publie le digest des points et des identités. Le parseur
+texte reste aussi à durcir : fin de champ obligatoire, clôture unique et rejet
+des lignes surnuméraires.
+
 ## 4. Statut corrigé
 
 Le statut acceptable aujourd'hui est :
@@ -123,5 +133,58 @@ Il n'est pas encore :
 Cette correction ne retire rien aux quatre accords observés. Elle empêche
 seulement qu'un `WILL_FAIL` satisfait par un refus soit présenté comme une
 preuve de sensibilité scientifique.
+
+## 5. Successeur `e6f1ef3` — lecture `k=1`
+
+Le `HEAD=e6f1ef39e76a6bacf6861e84244d7a447ca92559` ajoute une lecture q2 à
+zéro intérieur, un Kruskal et un comparateur Prim exhaustif. Les cinq CTests
+`mhgp3v_centre_cell_k1_*` passent; un rejeu local les ferme `5/5` en `16,31 s`.
+Le théorème employé est juste, mais sa portée documentaire doit être réduite.
+
+Pour des positions distinctes, toute arête d'un EMST a sa boule diamétrale
+**fermée** sans troisième site : un troisième point de cette boule serait
+strictement plus proche de chaque extrémité que leur distance, et l'une de ces
+deux arêtes remplacerait l'arête MST sur sa coupe. Le live collecte plus
+largement toute paire à intérieur **ouvert** vide, sans exiger que son shell se
+réduise aux deux extrémités. La fixture minimale est
+`u=(0,1,0),v=(2,1,0),w=(1,2,0)` : `uv` a zéro intérieur mais `w` sur sa
+coquille; `uv` n'appartient à aucun MST. Ce sur-graphe contient néanmoins tout
+EMST, donc Kruskal reste exact pour les poids.
+
+Le multiensemble trié des poids d'une MST est invariant : à une valeur
+`lambda`, sa multiplicité vaut la différence du nombre de composantes avant et
+après le lot. Le juge Prim valide donc utilement les `n-1` poids. Les lignes
+`K1 d2` portent toutefois `d2=4 beta`; les appeler « niveaux » sans unité partage
+un facteur quatre implicite entre sujet et juge. Le contrat doit publier le
+rationnel `beta=d2/4` ou nommer explicitement le champ `four_beta`.
+
+Cette gate ne valide pas une hiérarchie H0 :
+
+- elle trie les scalaires reçus et ne vérifie ni leur ordre ni la contiguïté
+  des égalités;
+- elle ne reçoit ni endpoints, ni racines pré-lot, ni partitions strictes et
+  fermées, ni multifusions canoniques;
+- une arête Gabriel non nécessaire à la MST peut disparaître sans modifier le
+  verdict, donc la complétude du catalogue Gabriel n'est pas testée;
+- aucun mutant k1 ne corrompt poids, arête MST ou sérialisation du facteur
+  quatre.
+
+Sur une grille de 27 points, le diagnostic annonce un run de 26 poids égaux,
+pas la multifusion à 27 enfants exigée par le contrat. La correction
+conceptuelle conserve `(d2,a,b)`, gèle les racines avant chaque run, construit
+les composantes du graphe quotient avec un DSU temporaire, publie la
+multifusion, puis seulement mute le DSU global.
+
+Enfin `--k1` n'est pas une voie 50 000 sparse. Il exécute d'abord toute la
+source cellules q2/q3/q4, ses lifts, owners et census, puis filtre q2. Sur
+`terrain,n=400`, les variantes avec et sans `--k1` ont les mêmes `30 265`
+cellules, `1 768 790` lifts et `52 665` census; seulement ensuite `832` arêtes
+donnent 399 poids MST. Yao-1 demeure donc la voie produit indépendante à au
+plus `48n`; le live est un diagnostic de réutilisation lorsque le catalogue
+complet a déjà été payé.
+
+La porte mutante historique reste vacueuse au successeur : le rejeu CTest
+affiche encore `REFUS : le sujet rend 2`, puis obtient un vert par `WILL_FAIL`.
+Le commit ne la répare pas.
 
 GCP non utilisé.

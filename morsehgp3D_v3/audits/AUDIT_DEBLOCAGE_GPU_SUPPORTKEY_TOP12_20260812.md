@@ -17,12 +17,12 @@ contre-audite aussi
 
 ## 1. Verdict
 
-Le nombre attendu de supports n'est pas le verrou observé. Le premier point
-volumique gelé, `uniform,n=12 500`, publie `4 990 227` supports mais construit
-`194 463 795` géométries, soit `38,969` géométries par support; `81,778 %` de
-ces propositions finissent rejetées par l'owner. Sur `terrain,n=50 000`, les
-ratios valent `127,688` géométries par support et `93,387 %` de rejets owner.
-L'ordonnance CPU paie donc principalement **avant** de connaître la tâche utile.
+Le nombre attendu de supports n'est pas le verrou observé. Le point gelé
+`uniform,n=50 000` publie `21 395 212` supports mais construit `839 582 666`
+géométries, soit `39,242` géométries par support; `81,555 %` des propositions
+finissent rejetées par l'owner. Sur `terrain,n=50 000`, les ratios valent
+`127,688` géométries par support et `93,387 %` de rejets owner. L'ordonnance
+CPU paie donc principalement **avant** de connaître la tâche utile.
 
 La voie immédiate recommandée est :
 
@@ -32,14 +32,16 @@ cellules/lane q -> count/scan/fill SupportKey
                  -> une géométrie exacte par clé
                  -> point-location directe de la feuille owner
                  -> positivité + rejeu du contexte owner
-                 -> GeometricBallKey + second RLE
-                 -> une certification top-12 exacte par boule
+                 -> une certification top-12 exacte
+                 -> fast path régulier ou side queue GeometricBallKey/plateau
                  -> flux device vers activation/gateway/fold
 ```
 
 Ce pipeline ne promet pas encore la seconde. Il change toutefois le bon ordre
 de grandeur : la géométrie, l'owner et le census sont indexés par clés uniques,
-pas par occurrences spatiales.
+pas par occurrences spatiales. Il ne garantit pas qu'une clé unique soit un
+support final : le compteur `SupportKey_unique` à 50 000 manque encore et reste
+la première gate quantitative.
 
 Le second résultat est un théorème terminal nouveau et simple : pour
 `smax=11`, douze vrais plus proches voisins certifient exactement une boule
@@ -191,21 +193,32 @@ de la même boule peuvent appartenir à deux shards `SupportKey`. La clé chaude
 est l'équation primitive centre/rayon, pas `U_B`, qui n'est connu qu'après le
 census. Toute collision de hash est résolue par comparaison rationnelle exacte.
 
-## 5. Deuxième RLE et certification par boule
+## 5. Fast path régulier et side queue par boule
 
-Après géométrie, owner et positivité, former une `GeometricBallKey` primitive
-et faire un second RLE. Une requête top-12 est alors exécutée par boule, pas par
-occurrence. Tous les supports du run reçoivent le même `I_B/E_B`; le budget
-`p+q<=11` reste testé par support.
+Après géométrie, owner et positivité, deux ordonnances restent exactes. La
+première forme une `GeometricBallKey`, fait un second RLE, puis lance une seule
+requête top-12 par boule. La seconde lance top-12 directement par
+`SupportKey_unique` et ne route vers `GeometricBallKey` que les égalités ou
+plateaux. Cette seconde ordonnance évite un tri large dans le chemin régulier.
 
-Sous `RelevantGP`, presque toute boule Poisson porte un seul support minimal :
-ce second RLE ne promet donc pas une forte compression. Sa fonction est
-l'exactitude, la mutualisation des rares multi-supports et la gestion atomique
-des plateaux. Le premier RLE porte le gain principal mesuré.
+Elle est exacte sous `RelevantGP`. Si `delta>beta`, top-12 donne le shell global
+`E`. L'acceptation exige `E=U`. Un autre support minimal `V` de la même boule
+serait inclus dans `E=U`; comme `U` est affinement indépendant et son centre est
+dans `relint conv(U)`, aucun sous-ensemble propre de `U` ne peut porter ce même
+centre. Donc `V=U`. Le record régulier peut être publié immédiatement. Si
+`delta=beta`, la requête prouve une extra-shell ou un rang trop grand et envoie
+la boule dans la side queue pour range-report, quotient de plateau ou refus
+fermé. Aucun hash ne décide cette branche.
 
-Le census pool-relatif déjà prouvé reste un backend valide. Le top-12 offre un
-contrat alternatif à travail fixe et indépendant de la longueur d'une liste de
-cellule; il faudra comparer sur device `scan du pool owner` et `top-12 LBVH`.
+Le second RLE global reste utile si les boules multi-supports sont assez
+nombreuses pour amortir son trafic, ou si le contrat exige leur catalogue
+complet. Il n'est plus une obligation du fast path régulier. Les deux variantes
+doivent être comparées sur `top12_queries`, `BallKey` uniques, octets radix et
+side-queue high-water.
+
+Le census pool-relatif déjà prouvé reste un backend valide. Le top-12 offre une
+sortie de taille fixe, mais pas un nombre fixe de visites LBVH; il faudra
+comparer sur device `scan du pool owner` et `top-12 LBVH`.
 Le reçu CPU montre précisément que le census aval n'est pas le verrou actuel :
 le théorème n'autorise donc pas à retarder le premier RLE.
 
@@ -215,6 +228,18 @@ Le type [`g4-standard-48` documenté par Google](https://docs.cloud.google.com/c
 porte une RTX PRO 6000 Blackwell Server Edition et 96 Go de mémoire GDDR7. La
 capacité mémoire n'est donc pas le premier obstacle du catalogue transitoire, à
 condition de rester device-only et SoA.
+
+Le reçu `uniform,n=50 000` permet un dimensionnement plus direct. Les
+occurrences q2/q3/q4 avant le lift utile valent respectivement
+`96 241 855 / 352 786 093 / 390 554 718`. Avec des lanes séparées, q2 se
+stocke en `u32`, q3 dans les 48 bits utiles d'un `u64` et q4 dans un `u64` : le
+stream brut complet occupe environ `6,33 Go`, sans `CellId`. Un double buffer
+radix occupe `12,66 Go`, hors workspace. Dans un modèle à digits de huit bits,
+quatre, six et huit passes avec lecture plus écriture déplacent environ
+`86,94 Go`. C'est un modèle de trafic, pas une mesure CUB; il montre néanmoins
+que même les `839,6` millions d'occurrences compactes tiennent en mémoire sur
+la G4. Le verrou devient le débit des passes et le nombre de clés uniques, pas
+la capacité brute.
 
 Pour `F=24 017 000` :
 
@@ -228,22 +253,27 @@ Pour `F=24 017 000` :
 | double buffer de records 48 octets | `2,31 Go` |
 | niveau/clé exacte 32 à 48 octets | `0,77` à `1,15 Go` |
 
-Un pic de trois à six gigaoctets, hors listes de conflits et espace temporaire
-du radix, est plausible. Ce calcul prouve seulement que **24 millions de
-tâches utiles tiennent**. Il ne prouve aucun débit. À multiplicité brute 39
-transférée telle quelle, environ `936 millions` d'occurrences exigeraient déjà
-`18,7 Go` à vingt octets avant double-buffer; cette amplification doit être
-mesurée et, si nécessaire, réduite par RLE local puis sharding global.
+Un pic de trois à six gigaoctets pour les seuls records utiles, hors listes de
+conflits et espace temporaire du radix, est plausible. Le double buffer des
+occurrences brutes porte le plancher mesuré plus près de treize gigaoctets. Ces
+calculs prouvent seulement que **24 millions de tâches utiles et le stream
+compact observé tiennent**. Ils ne prouvent aucun débit. Ajouter un `CellId` à
+chaque occurrence ferait inutilement exploser ce flux; la point-location owner
+après RLE est précisément ce qui autorise les clés nues.
 
 Le plan de kernels est :
 
 1. points u16 SoA, LBVH et arbre terminal résidents;
 2. wavefront de cellules par arité, `count/scan/fill` de clés seulement;
 3. RLE local facultatif, histogramme de shards puis radix/RLE global;
-4. une lane pour q2 et sous-groupes/warps pour les déterminants q3/q4;
+4. une lane pour q2 et sous-groupes/warps pour les déterminants q3/q4; après le
+   tri q4, grouper le préfixe `(a,b,c)` et construire une seule fois son axe
+   circumcentrique, puis résoudre chaque apex `d` par une intersection scalaire
+   exacte avec le bissecteur `a/d`;
 5. point-location owner et rejeu contigu du pool;
-6. radix par `GeometricBallKey`;
-7. file persistante de requêtes top-12, exact fallback séparé;
+6. file persistante de requêtes top-12, exact fallback séparé;
+7. fast path `E=U`, et radix `GeometricBallKey` seulement pour la side queue de
+   plateau ou lorsque l'A/B reçoit le second RLE global;
 8. flux immédiat des activations vers gateway/fold, sans catalogue hôte;
 9. copie hôte du seul payload officiel.
 
@@ -278,16 +308,29 @@ pertinente. Les flats auxiliaires ou les listes de conflits complètes sont
 indispensables. La cutting est donc une branche de recherche q4 prioritaire,
 pas un remplacement reçu du premier RLE.
 
+Une seconde branche de recherche est le
+[`front canonique de Jung`](AUDIT_VERROU_MATHEMATIQUE_FRONT_JUNG_H0_GPU_20260812.md).
+La couverture déterministe est correcte : toute ancre maximale d'un q3/q4
+pertinent survit les seuils de témoins universels. Sous Poisson bulk, la
+coalescence des lanes imbriquées prédit environ `141,183365 n` paires physiques,
+soit `7,06` millions à 50 000 points. Cette petite sortie ne reçoit pas son
+producteur : le dual-tree existant a des pentes de visites proches de `2,3`, et
+l'extension naïve reste beaucoup plus grosse. Les gates séparées `W_front` et
+`W_extend` décident cette branche. Elles ne retardent pas le port du stream
+compact `SupportKey`, qui demeure la baseline device exacte.
+
 ## 8. Contre-audit de la note de Claude
 
 Les conclusions suivantes sont conservées :
 
-- la rampe locale uniforme annonce des pentes de compteurs sous `1,35`, mais
-  n'est pas un reçu tant que ses quatre points ne sont pas pincés;
-- le reçu gelé ferme bien `terrain` aux trois tailles et sa seconde pente de
-  cellules est verte; une seule pente rouge ne déclenche pas le NO-GO défini;
-- `uniform,n=12 500` confirme un régime très productif et l'amplification
-  d'environ 39 lifts par support;
+- le transcript gelé contient désormais neuf cas et un footer; `uniform` ferme
+  deux pentes de compteurs sous `1,16`, tandis que `terrain` n'a qu'une pente de
+  cellules rouge suivie d'une verte;
+- cette campagne à trois familles, sans `eight_clusters`, sans digest
+  d'identités et sous charge concurrente reste un diagnostic count-only, pas le
+  reçu contractuel ni une mesure de latence;
+- `uniform,n=50 000` confirme un régime très productif, `21,395` millions de
+  supports et l'amplification d'environ `39,24` lifts par support;
 - vingt à vingt-quatre millions de supports sont cohérents avec la baseline
   Poisson, sans être une identité pour la boîte u16.
 
