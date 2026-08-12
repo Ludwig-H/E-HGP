@@ -118,3 +118,30 @@ supports_per_point=399.2182
 rc=0 wall_s=289 elf_after=423797e9964538f42701660d8baaf492b302f801a4aeb4b0df1b183986a5a037 identique=oui
 === command=/tmp/claude-1000/-workspaces-E-HGP/c89485b8-1146-49da-98f3-1533fe5440ce/scratchpad/frozen_cc --points=25000 --family=uniform --smax=11 --seed=11 --work-cap=20000
 elf_before=423797e9964538f42701660d8baaf492b302f801a4aeb4b0df1b183986a5a037
+CentreCellReceipt-v3
+cloud=uniform points=25000 smax=11 leaf=4 work_cap=20000 max_depth=22 axis_filter=0 deferred_lift=0 inject=aucun
+cells_created=3480121 split=435015 terminal=3043288 pruned=1818 depth_max=9
+parent_candidate_reads=134510024 bound_evals=206897447 candidate_ids=72350543 high_water=25000
+separation_tests=17393965 separation_pruned=1818
+overlap_pairs=3704013441 potential_triples=14813090715056 potential_quads=69888968334725739
+terminal_overlaps=261066023 max_terminal_overlaps=207
+clique_pairs=45709157 clique_triples=269680274 clique_quads=227196834
+bisector_tests=261066023 bisector_pruned=77907115 hull_tests=680036016 hull_pruned=269508442
+diameter_tests=680036016 diameter_pruned=4951217
+occurrences=410527574 lifts_distincts=410527574 facteur_rle=1.000 owner_tests=0 owner_multiple=0 batches=0
+occ_unowned=0 occ_nonpositive=0 occ_degenerate=0
+probe_tests=0 probe_accepted=0 probe_edges=0 probe_triangles=0 probe_quads=0
+axis_tests=0 axis_pruned=0 axis_unusable=0
+ledger_q2 lifts=45709157 degenerate=0 owner_rejected=44191800 positive_rejected=0 accepted=920420 rank_final=0 rank_early=596937 somme=45709157 ecart=0 hull_pruned=137449751
+ledger_q3 lifts=171272225 degenerate=18 owner_rejected=153916542 positive_rejected=5316020 accepted=4751099 rank_final=1 rank_early=7288545 somme=171272225 ecart=0 hull_pruned=98408049
+ledger_q4 lifts=193546192 degenerate=75392 owner_rejected=135768299 positive_rejected=40841295 accepted=4716331 rank_final=15 rank_early=12144860 somme=193546192 ecart=0 hull_pruned=33650642
+early_rank_groups=20026597
+lifts_built=410527574 degenerate=75410
+owner_rejected=333876641 self_centre_rejected=46157315 rank_rejected=20026613
+ball_groups=30412285 group_saved_scans=5923 census_scans=30412285 census_point_tests=328957486 census_promotions=9664603
+supports_q2=920420 supports_q3=4751099 supports_q4=4716331 supports_total=10387850
+accepted_closed_rank=10377088 extra_shell=10762 balls=10385688 balls_multi_support=2127 shell_high_water=7
+supports_per_point=415.5140
+rc=0 wall_s=519 elf_after=423797e9964538f42701660d8baaf492b302f801a4aeb4b0df1b183986a5a037 identique=oui
+=== command=/tmp/claude-1000/-workspaces-E-HGP/c89485b8-1146-49da-98f3-1533fe5440ce/scratchpad/frozen_cc --points=50000 --family=uniform --smax=11 --seed=11 --work-cap=20000
+elf_before=423797e9964538f42701660d8baaf492b302f801a4aeb4b0df1b183986a5a037

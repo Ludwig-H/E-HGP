@@ -2431,3 +2431,39 @@ mhgp3v_add_expected_code_test_for(mhgp3v_centre_cell
 add_test(NAME mhgp3v_ball_front_fixtures COMMAND mhgp3v_ball_front --fixtures)
 set_tests_properties(mhgp3v_ball_front_fixtures
                      PROPERTIES PASS_REGULAR_EXPRESSION "ne conserve pas le niveau")
+
+# ---------------------------------------------------------------------------
+# SQUELETTE DU PAYLOAD OFFICIEL `BenchmarkOutputContract-v1`.
+#
+# Point un de l'ordre de travail de l'audit courant. La section 14.4 du plan de
+# tests chronometre `warm_e2e` jusqu'au retour hote du payload — dix forets,
+# verticales, lots et certificat minimal en memoire epinglee. Tant que ce
+# payload n'a pas de structure declaree, aucune mesure n'est comparable au seuil
+# et aucun audit ne peut verifier ce qui manque.
+#
+# Ce target ne calcule RIEN. Il declare l'inventaire des etages, leur statut,
+# leur producteur, leur porte et leur appartenance au chemin critique, puis
+# refuse l'eligibilite. C'est un instrument de comptabilite, pas un benchmark.
+add_executable(mhgp3v_payload_skeleton prototype/benchmark_payload_harness.cpp)
+target_compile_options(mhgp3v_payload_skeleton PRIVATE -Wall -Wextra -Werror)
+
+# L'INVENTAIRE DOIT DIRE NON. Zero etage du chemin critique n'est complet : le
+# squelette ne peut pas rendre le contrat eligible, et cette porte garde cette
+# verite visible tant qu'elle dure.
+add_test(NAME mhgp3v_payload_inventaire COMMAND mhgp3v_payload_skeleton --points=50000)
+set_tests_properties(mhgp3v_payload_inventaire
+                     PROPERTIES PASS_REGULAR_EXPRESSION "slo_eligible=non")
+
+# L'EXIGENCE DE COMPLETUDE echoue par construction aujourd'hui. Le jour ou elle
+# passera, le chemin critique sera reellement produit — et ce jour-la cette
+# porte devra etre inversee sciemment, pas silencieusement.
+mhgp3v_add_expected_code_test_for(mhgp3v_payload_skeleton
+  mhgp3v_payload_exigence "EXIGENCE non satisfaite" 3 --require-complete)
+
+# LE MUTANT DE FRAUDE : promouvoir tous les etages a `complete` sans producteur
+# ni porte. Le controle de coherence doit le voir.
+mhgp3v_add_expected_code_test_for(mhgp3v_payload_skeleton
+  mhgp3v_payload_kill_claim "MUTANT TUE" 4 --inject=claim-complete)
+
+mhgp3v_add_expected_code_test_for(mhgp3v_payload_skeleton
+  mhgp3v_payload_reject_unknown "argument inconnu" 2 --sujet-inexistant)
