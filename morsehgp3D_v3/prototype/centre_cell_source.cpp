@@ -104,7 +104,8 @@ enum class Mutant {
   kBisectorStrict,  // bissecteur tangent refuse (`<` au lieu de `<=`)
   kShrinkList,      // un candidat retire de chaque liste
   kArityCascade,    // q3 exige une arete q2 retenue, q4 une facette q3 retenue
-  kStrataStop       // census arrete au premier bucket, sans promotion
+  kStrataStop,      // census arrete au premier bucket, sans promotion
+  kIncidenceOffByOne  // un K4 compte une fois par face : la borne doit le voir
 };
 
 const char* mutant_name(Mutant m) {
@@ -118,6 +119,7 @@ const char* mutant_name(Mutant m) {
     case Mutant::kShrinkList: return "shrink-list";
     case Mutant::kArityCascade: return "arity-cascade";
     case Mutant::kStrataStop: return "strata-stop";
+    case Mutant::kIncidenceOffByOne: return "incidence-off-by-one";
   }
   return "?";
 }
@@ -135,6 +137,7 @@ struct Stats {
   i64 parent_candidate_reads = 0, bound_evals = 0;
   i64 candidate_ids = 0, candidate_high_water = 0;
   i64 separation_tests = 0, separation_pruned = 0;
+  i64 child_separation_tests = 0, child_separation_pruned = 0;
   i64 overlap_pairs = 0, terminal_overlaps = 0, max_terminal_overlaps = 0;
   i64 potential_triples = 0, potential_quads = 0;
   i64 clique_pairs = 0, clique_triples = 0, clique_quads = 0;
@@ -144,6 +147,7 @@ struct Stats {
   i64 occurrences_recorded = 0, occurrences_unowned = 0, occurrences_nonpositive = 0;
   i64 occurrences_degenerate = 0, owner_tests = 0, owner_multiple = 0, batches_flushed = 0;
   i64 probe_tests = 0, probe_accepted = 0, probe_edges = 0, probe_triangles = 0, probe_quads = 0;
+  i64 incidence_checks = 0;
   i64 axis_tests = 0, axis_pruned = 0, axis_unusable = 0;
   i64 lifts_built = 0, degenerate_lifts = 0;
   // LEDGER DES CAUSES, PAR ARITE. Sans lui, « les petites cellules causent le
@@ -490,6 +494,8 @@ struct Engine {
   std::vector<int> bucket_end;  // borne de prefixe de chaque `A_p` dans la liste
   std::vector<int> group;
   std::vector<int> interior_ids, shell_ids;
+  std::vector<unsigned long long> row_ij, row_ijk;
+  std::vector<char> group_done;
   // HISTOGRAMME DE MULTIPLICITE, exige par le contre-audit. Un meme tuple
   // geometrique est propose dans plusieurs cellules; seul son circumcentre en
   // designe une. On compte les occurrences par `SupportKey` et on separe les
@@ -727,11 +733,20 @@ struct Engine {
       stats.probe_edges += real_e;
       stats.probe_triangles += real_t3;
       stats.probe_quads += real_q4;
-      // Controle de la borne d'incidence : elle doit majorer le compte exact.
-      const i64 bound = m4p > 3 ? (i64)(m4p - 3) * real_t4 / 4 : 0;
-      if (real_q4 > bound + (m4p > 3 ? 1 : 0) && real_t4 > 0) {
-        std::fprintf(stderr, "INVARIANT viole : Q4=%lld > borne %lld (m4=%d, T4=%lld)\n",
-                     real_q4, bound, m4p, real_t4);
+      // CONTROLE DE LA BORNE D'INCIDENCE, sous sa forme EXACTE et sans division.
+      // Chaque `K4` fournit quatre triangles et un triangle possede au plus
+      // `m_4-3` apex, donc `4 Q_4 <= (m_4-3) T_4`. Aucune tolerance : une
+      // inegalite stricte est une faute de comptage.
+      // Le mutant emule la faute de comptage realiste : un `K4` compte une fois
+      // PAR FACE au lieu d'une seule, faute d'orientation des bitsets. Un mutant
+      // d'une seule unite ne testerait rien, la borne n'etant pas serree.
+      if (mutant == Mutant::kIncidenceOffByOne) real_q4 *= 4;
+      ++stats.incidence_checks;
+      if ((i128)4 * real_q4 > (i128)std::max(m4p - 3, 0) * real_t4) {
+        std::fprintf(stderr,
+                     "INVARIANT viole : 4*Q4=%lld > (m4-3)*T4=%lld (m4=%d, T4=%lld)\n",
+                     (long long)(4 * real_q4), (long long)((i64)(m4p - 3) * real_t4), m4p,
+                     (long long)real_t4);
         invariant_broken = 1;
       }
       if (real_e + 3 * real_t3 + 6 * real_q4 <= (i64)work_cap) {
@@ -775,6 +790,23 @@ struct Engine {
         if (child.lo[d] == child.hi[d] && child.hi[d] != root_hi[d] * scale_child)
           owns_nothing = true;
       if (owns_nothing) continue;
+      // SEPARATION AVANT LA LISTE. Le centre de tout support positif possede par
+      // l'enfant est dans `conv(A(parent))`, donc dans la boite resserree du
+      // parent. Un enfant disjoint de cette boite est vide de supports, et il
+      // est inutile de payer ses `|A(parent)|` evaluations de bornes pour le
+      // decouvrir ensuite. Le test coute six comparaisons.
+      {
+        bool disjoint = false;
+        for (int d = 0; d < 3 && !disjoint; ++d) {
+          if (child.hi[d] < tight.lo[d] * 2) disjoint = true;
+          if (child.lo[d] > tight.hi[d] * 2) disjoint = true;
+        }
+        ++stats.child_separation_tests;
+        if (disjoint) {
+          ++stats.child_separation_pruned;
+          continue;
+        }
+      }
       ++stats.cells_created;
       const int saved = current_batch;
       if (child.depth == batch_depth) current_batch = ++batch_counter;
@@ -929,7 +961,11 @@ struct Engine {
     }
     pending.clear();
     cell_records.clear();
-    std::vector<unsigned long long> row_ij((std::size_t)words), row_ijk((std::size_t)words);
+    // TAMPONS HOISTES. Ces deux lignes de bits etaient allouees a CHAQUE cellule
+    // terminale, soit deux allocations tas par cellule; a cent mille cellules
+    // c'est un cout comparable a celui des lifts qu'elles servent.
+    row_ij.assign((std::size_t)words, 0);
+    row_ijk.assign((std::size_t)words, 0);
     int ids[4];
     for (int i = 0; i < top; ++i) {
       const unsigned long long* ri = &adj[(std::size_t)i * (std::size_t)words];
@@ -1310,7 +1346,8 @@ struct Engine {
     while (i < pending.size()) {
       std::size_t j = i;
       while (j < pending.size() && pending[j].key == pending[i].key) ++j;
-      std::vector<char> done(j - i, 0);
+      group_done.assign(j - i, 0);
+      std::vector<char>& done = group_done;
       for (std::size_t a = i; a < j; ++a) {
         if (done[a - i]) continue;
         group.clear();
@@ -1533,7 +1570,7 @@ struct Options {
   int probe_factor = 1;
   Mutant mutant = Mutant::kNone;
   bool judge = false;
-  i64 min_supports = 0, min_cells = 0, min_quads = 0;
+  i64 min_supports = 0, min_cells = 0, min_quads = 0, min_probes = 0;
   std::string label;
 };
 
@@ -1586,8 +1623,9 @@ int run_engine(const std::vector<mhgp::P3>& cloud, const Options& opt) {
   std::printf("parent_candidate_reads=%lld bound_evals=%lld candidate_ids=%lld high_water=%lld\n",
               s.parent_candidate_reads, s.bound_evals, s.candidate_ids,
               s.candidate_high_water);
-  std::printf("separation_tests=%lld separation_pruned=%lld\n", s.separation_tests,
-              s.separation_pruned);
+  std::printf("separation_tests=%lld separation_pruned=%lld child_sep_tests=%lld child_sep_pruned=%lld\n",
+              s.separation_tests, s.separation_pruned, s.child_separation_tests,
+              s.child_separation_pruned);
   std::printf("overlap_pairs=%lld potential_triples=%lld potential_quads=%lld\n",
               s.overlap_pairs, s.potential_triples, s.potential_quads);
   std::printf("terminal_overlaps=%lld max_terminal_overlaps=%lld\n",
@@ -1607,6 +1645,7 @@ int run_engine(const std::vector<mhgp::P3>& cloud, const Options& opt) {
   std::printf("probe_tests=%lld probe_accepted=%lld probe_edges=%lld probe_triangles=%lld probe_quads=%lld\n",
               s.probe_tests, s.probe_accepted, s.probe_edges, s.probe_triangles,
               s.probe_quads);
+  std::printf("incidence_checks=%lld\n", s.incidence_checks);
   std::printf("axis_tests=%lld axis_pruned=%lld axis_unusable=%lld\n", s.axis_tests,
               s.axis_pruned, s.axis_unusable);
   {
@@ -1682,11 +1721,11 @@ int run_engine(const std::vector<mhgp::P3>& cloud, const Options& opt) {
     return 3;
   }
   if (total < opt.min_supports || s.cells_terminal < opt.min_cells ||
-      s.clique_quads < opt.min_quads) {
+      s.clique_quads < opt.min_quads || s.incidence_checks < opt.min_probes) {
     std::fprintf(stderr,
-                 "PLANCHER viole : supports=%lld<%lld cells=%lld<%lld quads=%lld<%lld\n",
+                 "PLANCHER viole : supports=%lld<%lld cells=%lld<%lld quads=%lld<%lld sondes=%lld<%lld\n",
                  total, opt.min_supports, s.cells_terminal, opt.min_cells, s.clique_quads,
-                 opt.min_quads);
+                 opt.min_quads, s.incidence_checks, opt.min_probes);
     return 3;
   }
   if (!opt.judge) {
@@ -2018,6 +2057,8 @@ int main(int argc, char** argv) {
       opt.min_cells = parse_int(arg.substr(12).c_str(), &ok);
     else if (arg.rfind("--min-quads=", 0) == 0)
       opt.min_quads = parse_int(arg.substr(12).c_str(), &ok);
+    else if (arg.rfind("--min-probes=", 0) == 0)
+      opt.min_probes = parse_int(arg.substr(13).c_str(), &ok);
     else if (arg.rfind("--family=", 0) == 0) family = arg.substr(9);
     else if (arg == "--judge") opt.judge = true;
     else if (arg == "--fixtures") fixtures = "toutes";
@@ -2048,6 +2089,7 @@ int main(int argc, char** argv) {
     else if (inject == "shrink-list") opt.mutant = Mutant::kShrinkList;
     else if (inject == "arity-cascade") opt.mutant = Mutant::kArityCascade;
     else if (inject == "strata-stop") opt.mutant = Mutant::kStrataStop;
+    else if (inject == "incidence-off-by-one") opt.mutant = Mutant::kIncidenceOffByOne;
     else {
       std::fprintf(stderr, "REFUS injection inconnue: %s\n", inject.c_str());
       return 2;

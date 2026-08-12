@@ -306,6 +306,15 @@ entrées/sorties, la liste des quatre fichiers dirty, les flags de build et la
 mémoire. Ce fichier doit rester la trace d'une campagne mixte réfutée, jamais
 être réécrit en reçu vert.
 
+Le commit `02e709bf` l'a finalement supprimé au lieu de le renommer. C'est une
+régression de provenance : l'objet `64cf6fe` ne conserve que 34 lignes arrêtées
+après le 12 500, et la sortie brute 25 000 observée ensuite n'est plus dans Git.
+Le nouveau `scale_counters_frozen.txt` a été commité ouvert à douze lignes,
+avant même la sortie 12 500. Son driver temporaire ne couvre que trois familles,
+reste fail-open et non archivé; il ne devient pas contractuel par le seul gel de
+l'ELF. Conserver tout échec sous un nom `invalid_*`, finaliser atomiquement le
+successeur, puis seulement indexer son hash terminal.
+
 Une future rampe utilise un ELF immuable adressé par contenu, un en-tête et des
 hashes avant/après **chaque** cas, la matrice contractuelle de six familles avec
 Poisson uniforme et mélange équilibré bloquants, un fichier
@@ -466,7 +475,7 @@ majorant prouvé lane-specific, les octets de l'adjacence et la réplication des
 enfants, puis refuser/splitter avant allocation si l'enveloppe est dépassée.
 
 La réfutation tient déjà au cap par défaut. Pour `K_24`, `E=276`, `T=2024` et
-`Q=10626`; le live accepte car `E+9T=18492<=20000`, alors que son ancien modèle
+`Q=10626`; ce snapshot acceptait car `E+9T=18492<=20000`, alors que son ancien modèle
 `E+3T+6Q` vaut `70104`. Vingt-quatre points entiers d'une même coquille dont le
 centre appartient à la cellule réalisent ce graphe bissecteur complet; la
 fixture `coquille` en possède déjà trente. La porte permanente doit imposer que
@@ -557,9 +566,9 @@ pourcentages ne sont pas directement comparables.
 
 ## 12. Le probe historique `E+9T` ne bornait ni les quadruplets ni la mémoire
 
-Le source live observé après le pin précédent ajoute une terminalisation sur le
-graphe réel de bissecteurs : il compte ses arêtes `E` et triangles `T`, puis
-accepte si `E+9T<=work_cap`. Cette quantité est un modèle heuristique, pas un
+Le snapshot historique `fd043fe...` ajoutait une terminalisation sur le graphe
+réel de bissecteurs : il comptait ses arêtes `E` et triangles `T`, puis
+acceptait si `E+9T<=work_cap`. Cette quantité est un modèle heuristique, pas un
 cap combinatoire, car elle ignore le nombre `Q` de cliques de taille quatre.
 Dans le graphe complet `K_24`, `E=276`, `T=2 024` et `Q=10 626` : pour un cap
 `20 000`, `E+9T=18 492` accepte tandis que la métrique pondérée déjà déclarée
@@ -583,8 +592,9 @@ millions de points n'est pas couvert par i64. La borne plus simple
 cap séparé sur les octets, le scratch et le temps.
 
 La représentation dense actuelle alloue
-`m*ceil(m/64)` mots u64 et intersecte une ligne complète par arête, soit
-`Theta(m^2/64)` mots et `Theta(E*m/64)` popcounts. Contre-correction de l'autre
+`m*ceil(m/64)` mots u64. Son compte exact emploie, pour
+`W=ceil(m/64)`, `Theta(E_3 W+T_4 W+E_2+T_3+Q_4)` opérations; le terme
+`T_4 W` atteint `Theta(m^4/64)` dans une clique. Contre-correction de l'autre
 audit : à `m=50 000`, cela représente `39 100 000` u64, donc `312 800 000`
 octets ou environ `298,3 MiB`, et non `2,5 GB`; le défaut reste matériel. Le
 layout sparse candidat est une CSR forward orientée par `(degre,PointId)` ou
@@ -594,14 +604,15 @@ borne de Kruskal--Katona sans énumérer `Q` avant la décision de terminalisati
 
 ## 13. Contre-audit du successeur à K4 exacts
 
-Le worktree `dbaa2e0128c5be30e2f7c75784e38758a45c7bb938fba5d8ab4a87c71d5ad764`
+Le snapshot `HEAD=02e709bf`, source
+`dbaa2e0128c5be30e2f7c75784e38758a45c7bb938fba5d8ab4a87c71d5ad764`,
 et son ELF Release
 `423797e9964538f42701660d8baaf492b302f801a4aeb4b0df1b183986a5a037`
 absorbent la réfutation précédente : la sonde est limitée à `top<=96`, compte
 exactement `E2` sur `D_9`, `T3` sur `D_8`, `T4/Q4` sur `D_7`, puis décide avec
 `E2+3T3+6Q4`. L'orientation supérieure des bitsets fait compter chaque triangle
-et chaque K4 une fois. Ce couple est construit mais non testé; aucun vert du
-snapshot antérieur ne lui est transféré.
+et chaque K4 une fois. Ce couple passe les 28 CTests `centre_cell`; la branche
+de sonde n'est toutefois pas exercée au facteur par défaut.
 
 Quatre réserves empêchent encore de parler de cap industriel :
 
@@ -614,10 +625,12 @@ Quatre réserves empêchent encore de parler de cap industriel :
    entière exacte est `Q4<=bound`, équivalente à `4Q4<=(m4-3)T4`; le `+1`
    masque précisément une erreur d'une unité;
 3. le plafond 96 borne la matrice de **la sonde**, pas celle de `generate()`.
-   Une cellule terminale parce que ses intervalles sont disjoints peut avoir un
-   grand `top` et `work` faible; une cellule forcée à `max_depth` le peut aussi.
-   Toutes deux allouent encore le bitset dense sans préflight. Le cap ne borne
-   pas davantage `BatchCell`, occurrences, enfants, pending ou scratch;
+   Sous `have_thresholds` et sans overflow, le partage du seuil `R_top` empêche
+   toutefois une liste arbitrairement longue d'avoir un potentiel quasi nul :
+   la vraie brèche restante est une cellule terminalisée par `max_depth`, par un
+   `leaf` CLI relevé, ou après overflow hors profil. Elle alloue encore le
+   bitset dense sans préflight. Le cap ne borne pas davantage `BatchCell`,
+   occurrences, enfants, pending ou scratch;
 4. les potentiels combinatoires et compteurs cumulés restent en i64 sans
    saturation sur le domaine CLI allant jusqu'à cent millions de points. Le
    reçu n'imprime ni `probe_factor`, ni `probe_top_cap`, ni `batch_records`.
@@ -628,5 +641,18 @@ unité et HWM total en octets. L'énumération exacte de `Q4` est acceptable sou
 le plafond 96; sur device, le majorant
 `sum C(popcount(N+(i) intersection N+(j)),2)` permet d'arrêter plus tôt dès le
 cap dépassé.
+
+Le worktree postérieur `d2039ba...` ajoute un prune enfant--`tight` exact, le
+réemploi de scratch vectors et le contrôle i128 exact de l'incidence. Son
+mutant `Q4*=4` est plus réaliste, mais `min_probes>0` ne garantit pas sa mort si
+la sonde ne voit aucun K4 ou si la borne a du slack; la fixture `K_24` saturée
+reste nécessaire. Seuls des smokes O2 éphémères existent; aucun CMake Release,
+CTest ou reçu ne le qualifie. Son statut
+et ses fixtures sont tenus dans `AUDIT_ETAT_COURANT.md`.
+
+Le smoke terrain tue empiriquement ce mutant, mais celui-ci modifie ensuite le
+score d'admission et donc le parcours, puis journalise chaque violation. La
+porte durable garde le compte réel pour toute décision, teste séparément la
+copie mutée et échoue vite avec un diagnostic propre à l'incidence.
 
 GCP non utilisé. Aucun fichier de code ou de reçu n'a été modifié.

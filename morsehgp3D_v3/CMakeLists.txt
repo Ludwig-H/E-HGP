@@ -2305,6 +2305,24 @@ set_tests_properties(mhgp3v_centre_cell_fixture_arite3
 set_tests_properties(mhgp3v_centre_cell_fixture_arite4
                      PROPERTIES PASS_REGULAR_EXPRESSION "TET=1 faces=0000")
 
+# LE SONDAGE DU VRAI GRAPHE ET SA BORNE D'INCIDENCE.
+#
+# Le critere de split employait le potentiel d'intervalles, majorant grossier
+# d'un SURGRAPHE. Les compteurs sont maintenant exacts, chacun sur sa coupe de
+# lane, et la borne d'incidence `4 Q4 <= (m4-3) T4` de l'auditeur les controle :
+# chaque K4 fournit quatre triangles, un triangle a au plus `m4-3` apex. Le
+# plancher `--min-probes` interdit le vert par vacuite; le mutant emule la faute
+# de comptage realiste — un K4 compte une fois par face — et la borne le voit.
+add_test(NAME mhgp3v_centre_cell_sonde_exacte COMMAND mhgp3v_centre_cell
+         --points=200 --smax=11 --family=terrain --seed=11 --probe-factor=64
+         --min-probes=1 --min-supports=1)
+set_tests_properties(mhgp3v_centre_cell_sonde_exacte
+                     PROPERTIES PASS_REGULAR_EXPRESSION "incidence_checks=[1-9]")
+mhgp3v_add_expected_code_test_for(mhgp3v_centre_cell
+  mhgp3v_centre_cell_kill_incidence "INVARIANT viole" 3
+  --points=200 --smax=11 --family=terrain --seed=11 --probe-factor=64
+  --min-probes=1 --inject=incidence-off-by-one)
+
 # LES MUTANTS. Code 4 = mutant tue. Chacun casse UNE decision.
 mhgp3v_add_expected_code_test_for(mhgp3v_centre_cell
   mhgp3v_centre_cell_kill_shrink_list "MUTANT TUE" 4

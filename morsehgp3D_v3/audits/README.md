@@ -45,6 +45,7 @@ et le registre des preuves sous `docs/` restent supérieurs.
 | [`AUDIT_REPONSES_ETAT_CELLULES_CENTRES_20260812.md`](AUDIT_REPONSES_ETAT_CELLULES_CENTRES_20260812.md) | renvoi historique vers l'audit fusionné; aucune autorité parallèle |
 | [`NOTE_CLAUDE_LEDGER_CAUSES_LIFTS_20260812.md`](NOTE_CLAUDE_LEDGER_CAUSES_LIFTS_20260812.md) | ledger `238cf12` établissant la domination de l'owner tardif, mais dont la partition par rang et les multiplicités annoncées sont corrigées par le contre-audit suivant |
 | [`NOTE_CLAUDE_MULTIPLICITE_SUPPORTKEY_20260812.md`](NOTE_CLAUDE_MULTIPLICITE_SUPPORTKEY_20260812.md) | première mesure de clés uniques, corrigée dans le contre-audit : classes par stade maximal, `263 825` clés non dégénérées pour le coût RLE et `52 693` seulement comme floor pending idéal, calibration cycles non reçue |
+| [`NOTE_CLAUDE_RETRACTATIONS_ET_COMPTES_EXACTS_20260812.md`](NOTE_CLAUDE_RETRACTATIONS_ET_COMPTES_EXACTS_20260812.md) | rétracte le facteur 42 et la parcimonie locale; contre-audit intégré : ancien transcript supprimé, nouvelle rampe encore ouverte/non contractuelle, attribution du coût lift retirée et contrôle d'incidence affaibli d'une unité |
 | [`AUDIT_LEDGER_CAUSES_LIFTS_238CF12_20260812.md`](AUDIT_LEDGER_CAUSES_LIFTS_238CF12_20260812.md) | contre-audit comptable canonique : ledger et multiplicité corrigés, rampe mono-ELF réfutée, RLE spatiale exacte mais gain pouvant tendre vers un, `BallOwner` local distingué des shards, cap différé non borné en octets et borne Kruskal--Katona proposée pour les K4 |
 | [`NOTE_SOLUTION_SOURCE_CELLULES_CENTRES_20260812.md`](NOTE_SOLUTION_SOURCE_CELLULES_CENTRES_20260812.md) | contrat et portes du prototype cellules-centres, corrigés par budget `h`, partition terminale commune, limites du contrôle runtime et des mesures; 22/22 ciblés sur le snapshot pincé, sans claim sparse/CUDA/SLO |
 | [`NOTE_IMPLEMENTATION_SPARSE_COMPLETE_GABRIEL_GATEWAYS_20260812.md`](NOTE_IMPLEMENTATION_SPARSE_COMPLETE_GABRIEL_GATEWAYS_20260812.md) | pipeline conditionnel source directe--facettes--gateways--resolver--MSF, records, repli des plateaux, coûts évités et portes avant CUDA; aucune implémentation reçue |
@@ -95,11 +96,15 @@ jamais comme portes v3 actuelles :
 
 Le dossier
 [`../receipts/centre_cell_scale_20260812/`](../receipts/centre_cell_scale_20260812/)
-contient un transcript tronqué après disparition de la campagne :
+contient la nouvelle campagne gelée encore ouverte. Le transcript mixte
+antérieur de 55 lignes, SHA-256 instantané `a5f81584...`, a été supprimé sans
+être archivé; seul son prédécesseur de 34 lignes, SHA-256 `0faceefb...`, reste
+récupérable dans le commit `64cf6fe` et ne contient que le bloc 12 500 :
 
 | fichier | portée |
 | --- | --- |
-| `scale_counters_raw.txt` | transcript mixte tronqué : `terrain,12 500/25 000` terminent sur l'ancien ELF `5b422644...`, puis seule la commande 50 000 apparaît pour `8fdfc8af...`, sans sortie, code ni marqueur final sous l'en-tête ancien; aucune rampe reçue |
+| `scale_counters_raw.txt` | fichier supprimé; les sorties 25 000 et la commande 50 000 observées par l'audit ne sont plus reproductibles depuis Git; aurait dû être conservé sous `invalid_mixed` |
+| `scale_counters_frozen.txt` | transcript ouvert commité avant résultat : 12 lignes au pin `bac860dd...`, seulement en-tête, commande terrain 12 500 et hash ELF amont; driver temporaire à trois familles, fail-open et non archivé; aucune rampe reçue |
 
 Les reçus G4 mass-only sont dans
 [`../receipts/g4_massonly_20260811/`](../receipts/g4_massonly_20260811/).

@@ -1057,7 +1057,7 @@ Le sweep ajouté dans le snapshot historique `fd043fe...` ne change pas cette d�
 intervalles fermés triés par borne gauche, `a_i=i-|{j:u_j<l_i}|` donne bien
 exactement `sum_i C(a_i,q-1)` cliques du graphe d'intervalles par Helly en
 dimension un. Il ne donne qu'un majorant des cliques du graphe de bissecteurs
-3D, et le live le calcule sur le pool commun plutôt que sur les cuts distincts
+3D, et ce snapshot le calculait sur le pool commun plutôt que sur les cuts distincts
 q2/q3/q4. Le score `E+3T+6Q` utilise des poids heuristiques : avec une clique
 complète de sept intervalles, il vaut déjà `21+3*35+6*35=336` et force un split
 au cap 256. Cette politique peut donc échanger quelques lifts contre un grand
@@ -1094,7 +1094,7 @@ d'un chrono.
 
 Le successeur `dbaa2e0...` applique déjà la correction principale : cuts par
 lane, compte exact `E2/T3/T4/Q4`, score `E2+3T3+6Q4` et plafond de sonde 96.
-Il est construit mais non testé. Son défaut `probe_factor=1` rend toutefois
+Il passe les 28 CTests, mais son défaut `probe_factor=1` rend toutefois
 cette sonde inatteignable sans option explicite, car elle n'est consultée
 qu'après `work>work_cap`; les CTests ne l'exercent donc pas. Le contrôle
 d'incidence tolère en outre une unité de trop, et le bitset dense employé par

@@ -10,3 +10,30 @@ host_cores=2
 note=binaire GELE hors de l arbre de build; empreinte revalidee avant et apres chaque cas
 === command=/tmp/claude-1000/-workspaces-E-HGP/c89485b8-1146-49da-98f3-1533fe5440ce/scratchpad/frozen_cc --points=12500 --family=terrain --smax=11 --seed=11 --work-cap=20000
 elf_before=423797e9964538f42701660d8baaf492b302f801a4aeb4b0df1b183986a5a037
+CentreCellReceipt-v3
+cloud=terrain points=12500 smax=11 leaf=4 work_cap=20000 max_depth=22 axis_filter=0 deferred_lift=0 inject=aucun
+cells_created=14262497 split=1782812 terminal=9711743 pruned=2767942 depth_max=11
+parent_candidate_reads=528461948 bound_evals=775573302 candidate_ids=246112402 high_water=12500
+separation_tests=63589457 separation_pruned=2767942
+overlap_pairs=3779264081 potential_triples=2745701715412 potential_quads=5244446447785583
+terminal_overlaps=756017485 max_terminal_overlaps=207
+clique_pairs=16115062 clique_triples=202283619 clique_quads=92744047
+bisector_tests=756017485 bisector_pruned=489645872 hull_tests=561399279 hull_pruned=468867351
+diameter_tests=561399279 diameter_pruned=1151672
+occurrences=92531928 lifts_distincts=92531928 facteur_rle=1.000 owner_tests=0 owner_multiple=0 batches=0
+occ_unowned=0 occ_nonpositive=0 occ_degenerate=0
+probe_tests=0 probe_accepted=0 probe_edges=0 probe_triangles=0 probe_quads=0
+axis_tests=0 axis_pruned=0 axis_unusable=0
+ledger_q2 lifts=16115062 degenerate=0 owner_rejected=15706998 positive_rejected=0 accepted=252764 rank_final=0 rank_early=155300 somme=16115062 ecart=0 hull_pruned=250256551
+ledger_q3 lifts=41832682 degenerate=265 owner_rejected=39277750 positive_rejected=1127040 accepted=587098 rank_final=7 rank_early=840522 somme=41832682 ecart=0 hull_pruned=160450937
+ledger_q4 lifts=34584184 degenerate=155546 owner_rejected=30812773 positive_rejected=3410733 accepted=66216 rank_final=17 rank_early=138899 somme=34584184 ecart=0 hull_pruned=58159863
+early_rank_groups=1134159
+lifts_built=92531928 degenerate=155811
+owner_rejected=85797521 self_centre_rejected=4537773 rank_rejected=1134183
+ball_groups=2039516 group_saved_scans=1307 census_scans=2039516 census_point_tests=23488633 census_promotions=835104
+supports_q2=252764 supports_q3=587098 supports_q4=66216 supports_total=906078
+accepted_closed_rank=901888 extra_shell=4190 balls=905357 balls_multi_support=697 shell_high_water=7
+supports_per_point=72.4862
+rc=0 wall_s=871 elf_after=423797e9964538f42701660d8baaf492b302f801a4aeb4b0df1b183986a5a037 identique=oui
+=== command=/tmp/claude-1000/-workspaces-E-HGP/c89485b8-1146-49da-98f3-1533fe5440ce/scratchpad/frozen_cc --points=25000 --family=terrain --smax=11 --seed=11 --work-cap=20000
+elf_before=423797e9964538f42701660d8baaf492b302f801a4aeb4b0df1b183986a5a037

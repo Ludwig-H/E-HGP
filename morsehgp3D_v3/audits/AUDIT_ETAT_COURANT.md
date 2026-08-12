@@ -11,27 +11,30 @@ Cadre : `phase=exploration_v3_hors_registre`,
 ## Fraîcheur
 
 `HEAD` observé au dernier contre-audit :
-`64cf6febafc4a80a48b4103667be0c69cf794e9d`, commit
-`measure whether the support-key dedup needs to be global, and it does not`.
-Ce titre est une hypothèse de travail, pas un verdict reçu : le commit ajoute
-l'instrumentation par sous-arbre mais aucun transcript ni preuve de pire cas.
+`02e709bfed8c879391496ae6cd335c41d1cdc584`, commit
+`retract the local dedup claim, freeze the ramp binary, count the graph exactly`.
+La rétractation du titre `64cf6fe` et les comptes combinatoires par lane sont
+justifiés; les claims de coût et le reçu encore ouvert restent contre-audités.
 
-Le worktree n'est pas identique à ce `HEAD`; Claude modifie encore
-`prototype/centre_cell_source.cpp` et `CMakeLists.txt` pendant que l'audit ne
-touche qu'aux textes autorisés. La campagne `centre_cell_scale_20260812` n'est
-plus active au dernier relevé, mais son transcript est tronqué : les points
-terrain 12 500 et 25 000 y terminent avec `rc=0`, puis la seule commande 50 000
-reste sans sortie, code ni marqueur terminal; les autres familles ne commencent
-pas. Elle a en outre changé d'ELF avant 50 000 sous un en-tête unique. Aucun
-digest global ne reçoit la rampe. Le couple **annoncé par cet en-tête** est
-distinct du source live :
+Le worktree n'est pas identique à ce `HEAD`; Claude modifie encore le prototype
+pendant que l'audit ne touche qu'aux textes autorisés. La campagne mixte
+antérieure a été supprimée du `HEAD` au lieu d'être conservée sous un nom
+`invalid_mixed`; l'objet Git `64cf6fe` n'en retient que 34 lignes, jusqu'au cas
+12 500, et la sortie 25 000 observée ensuite n'est plus archivée. La nouvelle
+campagne gelée est active. Son état initial commité était un manifeste ouvert de
+12 lignes; le cas terrain 12 500 a depuis fermé `rc=0` et le 25 000 est actif.
+Elle ne couvre que trois familles. Le 12 500 a chevauché les 202 secondes du
+CTest sur l'hôte deux-cœurs, puis la suite 30 chevauche le 25 000; aucun de ces
+temps n'est qualifiable.
 
 | objet courant | SHA-256 |
 | --- | --- |
-| `CMakeLists.txt` au `HEAD` et dans l'en-tête du transcript | `d0738d1e3bfc103ecebc0c8e6dae8149aae3727322c34af4c3a0dcd8c12d440e` |
-| source du transcript, commit `238cf12` | `4884b29388d9617917810a03cde221430b66bc43cc320e9f06ba56be6e540793` |
-| ELF Release du transcript `mhgp3v_centre_cell` | `5b422644b6b461b919202f6c0257e27dc0af811110ad49fd82eca18a224f2283` |
-| source `HEAD` avec instrumentation de lots, non qualifié par le transcript | `4d09080860ab949fda65d12f84e6249677e785b1e03db09807832393b7946720` |
+| `CMakeLists.txt` au `HEAD` | `0f64c1c60afbf4af51339807b758e49ec0312d4be69f7dcda8303d251616c865` |
+| source au `HEAD`, pincé par la nouvelle campagne et les 28 CTests | `dbaa2e0128c5be30e2f7c75784e38758a45c7bb938fba5d8ab4a87c71d5ad764` |
+| ELF Release gelé de cette campagne et des 28 CTests | `423797e9964538f42701660d8baaf492b302f801a4aeb4b0df1b183986a5a037` |
+| manifeste gelé ouvert observé avant toute sortie | `bac860dddf72a07c3ec944efa66900548a79c115c7a2cd074d9ac374a6a15487` |
+| transcript gelé après fermeture 12 500 et lancement 25 000, encore ouvert | `91398d9eeee10fc024499537c543e0d2b20f9ce603efb675622d17ea91ffe8ee` |
+| source de l'ancien `HEAD=64cf6fe`, instrumentation de lots non qualifiée par un transcript | `4d09080860ab949fda65d12f84e6249677e785b1e03db09807832393b7946720` |
 | ELF disque successeur observé à 15:17 UTC, non qualifié | `4f0ed7a984d9366c67b68ca8f36e228b3891d31c24cd11a3fa1bb97a7254ad9e` |
 | source worktree postérieur avec lot différé, non construit/non testé à 15:24 UTC | `64b7598358d27a1aaf5544437cf2824665ec9786e02014527b6c1c10941cb190` |
 | source de la gate différée bornée, historique | `d47ed7ebe39013f82f6bd6991ad39de56a52fffa312b32cd8cb3c7d601c6f804` |
@@ -40,18 +43,28 @@ distinct du source live :
 | source worktree intermédiaire avec squelette d'adjacence réelle non raccordé | `b9b90cf589066e19bd31fde8d67c6015450c7d6017418021b9679ff125edd22a` |
 | source historique à sonde `E+9T`, réfutée comme cap | `fd043fe8627804a8500d59147474e92e0bb20e7fa665e533f075ab15ff23ce8e` |
 | source intermédiaire à cuts et K4 exacts, non construite | `e10638bd1b165a382724c9e13b457478ba942e3eb0c14f70859be7af78c6a14c` |
-| source worktree observé à 15:58 UTC, compte `E2/T3/T4/Q4` et sonde désactivée par défaut, non testée | `dbaa2e0128c5be30e2f7c75784e38758a45c7bb938fba5d8ab4a87c71d5ad764` |
-| ELF Release construit depuis le source précédent, couple courant non testé | `423797e9964538f42701660d8baaf492b302f801a4aeb4b0df1b183986a5a037` |
+| source worktree postérieur, prune enfant--`tight`, scratch hoistés et contrôle d'incidence corrigé; CMake Release construit, suite 30 active | `d2039bab3e74ae1443aeefcac756152060566a38c7d87afbda245da612920b34` |
+| `CMakeLists.txt` worktree avec deux portes sonde/incidence en plus | `08e54fc1f7f87262d0a90b9fc3a51963185c06b4ca06f522775b38cce7144bce` |
+| ELF Release worktree correspondant, suite 30 en cours et non reçue | `fc2eb10cfbc91ad33c89cfcf2a3301f41ab1ff65e62b83d54c16623f9863b295` |
 
-Le registre configuré recense désormais `488` CTests, dont `28` préfixés
-`mhgp3v_centre_cell_`. Les quatre nouvelles portes différées passent `4/4` sur
-le couple historique `d47ed7e.../8fdfc8a...`; un recheck sur le même ELF et le
-CMake `0f64c1c...` a pris `50,11 s` et produit un `LastTest.log` de SHA-256
-`e0c140085046eaf81e50560616468d1aef50f7cd29316b32c47a13748c22a8a3`
-avant écrasement concurrent. Cette gate ne qualifie pas le source courant
-`dbaa2e0...` et n'inclut encore ni mutant différé, ni `owner_multiple`
-fail-close, ni borne d'octets. L'ancien inventaire `484/24` reste historique.
+Le registre configuré recense `488` CTests, dont `28` préfixés
+`mhgp3v_centre_cell_`. Les 28 passent sur le couple
+`dbaa2e0.../423797e...` en `202,12 s`; sortie SHA-256
+`ac8063615912a8272c1e781f3b1baf8381ecc056180abbb2cd9c266d7861cd58`,
+`LastTest.log`
+`ac5774d57f40e1e785f62baf666f477a34388b0ac1723f1cb35c1c8c6e61e750`.
+Le temps est contaminé par la campagne concurrente, mais le résultat fonctionnel
+est reçu dans sa portée bornée. Il n'inclut ni mutant différé sémantique, ni
+`owner_multiple` fail-close, ni HWM d'octets, ni le source worktree
+`d2039ba...`. L'ancien inventaire `484/24` reste historique.
 Les pins ci-dessous restent les observations historiques antérieures.
+
+Après reconfiguration du worktree, le registre contient `490` CTests, dont
+`30` `centre_cell`; la suite complète est en cours et ne constitue pas encore
+un résultat. Les deux nouvelles portes imposent une sonde non vide et tuent le
+mutant sur `terrain,n=200`, mais ne comparent pas les identités au juge et ne
+graveront pas à elles seules l'égalité saturée `K_24`. Leur exécution chevauche
+le cas gelé 25 000; son temps sera lui aussi non qualifiable.
 
 | objet | SHA-256 |
 | --- | --- |
@@ -523,6 +536,15 @@ n'est ni la variante de l'ancienne note (`8 338 753` cellules et
 mais la campagne a changé d'ELF avant le 50 000 : aucune pente mono-binaire
 n'est donc publiable.
 
+Le nouveau transcript gelé reproduit ensuite ce point 12 500 sur
+`dbaa2e0.../423797e...` : mêmes `14 262 497` cellules, `92 531 928` lifts et
+`906 078` supports, ELF identique avant/après et ledger par arité désormais à
+`ecart=0`, avec `rank_early=155 300/840 522/138 899`. C'est un diagnostic
+count-only reproductible; sans `--judge`, digest d'identités, mémoire ou
+pipeline, il ne reçoit pas l'exactitude générale ni le SLO. `probe_tests=0`
+confirme aussi que les comptes `E2/T3/T4/Q4` ne sont pas exercés au défaut. Son
+`wall_s=871` est contaminé et non qualifiable.
+
 Le successeur `005b786` ferme ensuite la partition par arité sur l'observation
 `n=1 500` : `130 033` occurrences de rang anticipé et `3` finales. Son
 histogramme `n=400`, encore sans transcript/pins autonomes, contient `263 825`
@@ -571,17 +593,45 @@ Kruskal--Katona `Q<=Q_KK(T)`, puis la gate
 remplace la matrice dense `Theta(m^2/64)` mots. Aucun test n'est transféré à ce
 successeur.
 
-Le successeur courant `dbaa2e0...` corrige les deux défauts combinatoires de
-ce snapshot : cuts `D_9/D_8/D_7`, compte exact `E2/T3/T4/Q4`, admission
-`E2+3T3+6Q4`, et sonde bornée à `top<=96`. Il n'est pas reçu. En outre,
+Le snapshot `dbaa2e0...` corrige les deux défauts combinatoires de
+ce snapshot : à `smax=11`, cuts `D_9/D_8/D_7`, compte exact `E2/T3/T4/Q4`, admission
+`E2+3T3+6Q4`, et sonde bornée à `top<=96`. Le `28/28` reçoit le chemin par
+défaut, mais pas cette sonde. En effet,
 `probe_factor=1` rend sa branche de sonde inatteignable par défaut, puisque
 `!terminal` implique déjà `work>work_cap`; aucune porte CTest ne passe un
 facteur supérieur. Le contrôle d'incidence autorise à tort `Q=bound+1` au lieu
 de tester directement `4Q<=(m4-3)T4`. Hors sonde, `generate()` conserve son
-bitset dense sans préflight pour un terminal peu ambigu mais très long ou forcé
-à `max_depth`; le cap ne borne toujours ni contextes, ni enfants, ni scratch.
+bitset dense sans préflight. Sous `have_thresholds` et sans overflow, le partage
+de `R_top` empêche une liste arbitrairement longue d'avoir un potentiel quasi
+nul; les brèches restantes sont une terminalisation forcée par `max_depth`, par
+un `leaf` CLI relevé, ou un overflow hors profil. Le cap ne borne toujours ni
+contextes, ni enfants, ni scratch.
 Les potentiels i64 ne sont pas saturés sur tout le domaine CLI, et l'en-tête
 n'imprime ni `probe_factor`, ni `probe_top_cap`, ni `batch_records`.
+
+Le worktree `d2039ba...` ajoute un rejet des enfants dont la fermeture est
+strictement disjointe du `tight` parent, puis réemploie des scratch vectors.
+Le prune est mathématiquement sûr : pour un support positif, `c_B` appartient
+à `relint conv(U)`, donc à `bbox(mine_parent) intersection cell=tight`; les
+comparaisons à l'échelle enfant sont exactement `child` contre `2*tight`, et
+les inégalités strictes conservent la tangence. Le réemploi est sémantiquement
+neutre dans cet Engine mono-thread. Il corrige aussi le contrôle d'incidence par
+produits i128 exacts, ajoute `min_probes` et un mutant multipliant `Q4` par
+quatre. Des smokes O2 éphémères ont été observés et une suite CTest est en
+cours; aucun résultat achevé ou reçu ne qualifie encore ce delta.
+`min_probes>0` ne garantit pas la mort du mutant si
+`Q4=0` ou si l'inégalité a du slack : la porte exige une clique complète
+saturant `4Q4=(m4-3)T4`, par exemple `K_24`, ou un plancher q4 dédié. Il
+exige fixtures centre sur plan de split et face haute racine, mutants `<` vers
+`<=` et `>` vers `>=`, prune strict non vide, et compteur des lectures
+candidates évitées.
+
+Un smoke `terrain,n=200,probe_factor=64` exerce `1 706` sondes; le mutant rend
+le code 3, mais continue après la première faute, imprime plus de mille lignes
+et emploie le `Q4` muté dans l'admission, modifiant le parcours (`1 785`
+sondes). Pour une porte causale, conserver `Q4_real` dans la décision, tester
+une copie mutée, échouer vite ou n'imprimer qu'une fois, et séparer le flag
+d'incidence du message final actuellement libellé « lemme de profondeur ».
 
 La campagne de taille ne peut plus devenir un reçu mono-binaire : le 25 000 a
 terminé sur l'ancien inode supprimé `5b422644...`, puis le 50 000 a démarré sur

@@ -466,11 +466,11 @@ Il n'est pas nécessaire d'énumérer les K4 pour obtenir un majorant exact. Soi
 `T` le nombre de triangles du graphe q4 et écrire son unique développement
 3-canonique, termes nuls omis :
 
-$$T=inom{a_3}{3}+inom{a_2}{2}+inom{a_1}{1},qquad a_3>a_2>a_1geq 1.$$
+$$T=\binom{a_3}{3}+\binom{a_2}{2}+\binom{a_1}{1},\qquad a_3>a_2>a_1\geq 1.$$
 
 La forme duale clique-count/upper-shadow de Kruskal--Katona donne alors :
 
-$$Qleq Q_{mathrm{KK}}(T)=inom{a_3}{4}+inom{a_2}{3}+inom{a_1}{2}.$$
+$$Q\leq Q_{\mathrm{KK}}(T)=\binom{a_3}{4}+\binom{a_2}{3}+\binom{a_1}{2}.$$
 
 Pour `T=0`, poser `Q_KK=0`. Le développement se calcule gloutonnement : plus
 grand `a3` tel que `C(a3,3)<=T`, puis plus grand `a2<a3` tenant dans le reste,
