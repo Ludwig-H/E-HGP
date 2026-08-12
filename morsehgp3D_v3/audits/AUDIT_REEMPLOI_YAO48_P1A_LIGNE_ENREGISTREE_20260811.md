@@ -118,7 +118,9 @@ chambre `c`, une banque peut être une antichaîne de nœuds LBVH `W_i` telle qu
 - leurs plages de feuilles sont disjointes et excluent l'ancre;
 - chaque feuille créditée vérifie `0<||w-p||^2<=D_c`;
 - chaque boîte est entièrement certifiée dans la chambre;
-- la somme des masses atteint dix.
+- la somme des masses atteint onze pour un réservoir arbitraire
+  cible-indépendant; une antichaîne déjà certifiée disjointe de la cible ou de
+  sa boîte peut se limiter à dix.
 
 Le preflight v3 de positions 3D distinctes fournit la stricte positivité. Une
 extension qui autoriserait plusieurs `PointId` colocalisés devrait descendre et
@@ -128,9 +130,11 @@ Le majorant exact est :
 
 $$D_c=\max_i\max_{x\in\mathrm{box}(W_i)}\left\Vert x-p\right\Vert^2.$$
 
-Dix feuilles canoniques de l'union fournissent alors dix vrais témoins. Dans la
-chambre canonique, l'échec d'au moins une coupe Yao implique
-`||q-p||^2<=3D_c`. Une boîte cible est donc prunable par l'enveloppe radiale si
+Onze feuilles canoniques de l'union fournissent le réservoir arbitraire; le
+reçu exclut la cible et engage dix candidats distincts. La coupe directionnelle
+les transforme en vrais témoins. Dans la chambre canonique, l'échec d'au moins
+une coupe Yao implique `||q-p||^2<=3D_c`. Une boîte cible est donc prunable par
+l'enveloppe radiale si
 son ensemble conservateur non vide de chambres possibles `S` possède des
 banques pleines et si :
 
@@ -138,6 +142,12 @@ $$\mathrm{dist}^2(p,\mathrm{box})>3\max_{c\in S}D_c.$$
 
 Toute égalité descend. Le reçu engage `S`, la version et le digest de chaque
 banque; omettre une chambre possible doit mourir sur une fixture dédiée.
+
+Pour ce reçu de boîte, les dix candidats engagés doivent être disjoints de tous
+les `PointId` de la boîte. Un réservoir de onze ne fournit un masque commun que
+si la boîte rencontre la banque en au plus un identifiant; avec deux
+intersections il faut scinder, choisir une banque disjointe ou échouer ouvert.
+Cette précondition vaut aussi pour l'enveloppe radiale multi-chambre.
 
 Cette proposition ne justifie pas une table globale `n*48*10`. Une banque des
 dix plus proches certifiés reste à `K=10` : si la cible appartient au top-10,

@@ -12,7 +12,7 @@ Cadre : `phase=exploration_v3_hors_registre`,
 > Snapshot conservé parce que `prototype/order_k_flats.hpp` cite ses
 > contre-fixtures. Il ne décrit pas l'implémentation courante.
 
-## Descente de rayon réfutée
+## 2. Descente de rayon réfutée
 
 | identifiant | coordonnées |
 | --- | --- |
@@ -35,5 +35,16 @@ prouvée, ou une recherche exhaustive bornée, puis tester les permutations.
 Le plafond historique `q*q+8` n'avait pas de preuve de complétude et
 débordait un `int` signé dès `q>=46341`. Toute borne analogue doit être
 justifiée et évaluée dans un type assez large.
+
+## 3.4 Coordonnées dupliquées
+
+La fixture affine-3 `(0,0,0)`, `(0,0,0)`, `(2,0,0)`, `(0,2,0)`,
+`(0,0,2)` rendait historiquement `status=ok`. Échanger les deux observations
+coïncidentes conservait onze records mais changeait quatre supports ramenés aux
+identifiants d'origine : le singleton et les trois paires incidentes
+choisissaient l'autre doublon. La décision durable est donc de refuser
+explicitement les coordonnées dupliquées tant qu'aucune sémantique quotientée
+n'est reçue. Le statut d'une implémentation appartient à l'audit live. Cette
+fixture protège le domaine; elle ne prouve aucune future politique d'agrégation.
 
 GCP non utilisé.

@@ -15,7 +15,7 @@ niveau de navigation `|B(v)|`, le rang fermé `|B(v)|+|S(v)|` et le support
 HGP canonique sont des objets distincts. Le rang fermé filtre une
 publication; il ne doit pas couper la navigation.
 
-## Théorème de propriétaire
+## 6. Théorème de propriétaire
 
 Soit `U` un support affinement indépendant de taille `q`, avec `1<=q<=4`, et
 soit `x_U` sa sphère minimale. Posons `B_U={i:L_i(x_U)<0}`. Si le nuage a

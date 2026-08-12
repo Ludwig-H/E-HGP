@@ -1,4 +1,4 @@
-# Note de solution — localité certifiée par inversion : la source par ancre
+# Spécification mathématique — localité certifiée par inversion
 
 Date : 12 août 2026 UTC.
 
@@ -8,262 +8,178 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-Cette note est une **spécification de solution**. Elle ne certifie rien, ne
-revendique aucune complexité et ne qualifie aucune mesure 50 k. Le verdict live
-reste [`AUDIT_ETAT_COURANT.md`](AUDIT_ETAT_COURANT.md). Les réponses de
-l'auditeur qui la corrigent sont dans
-[`AUDIT_REPONSES_LOCALITE_INVERSION_20260812.md`](AUDIT_REPONSES_LOCALITE_INVERSION_20260812.md).
+Cette note conserve uniquement le lemme durable et l'architecture candidate.
+Elle ne reçoit aucun snapshot, test, chrono, tableau de masse ou claim de
+complexité. Le verdict logiciel est dans
+[`AUDIT_ETAT_COURANT.md`](AUDIT_ETAT_COURANT.md) et le contre-audit pincé du
+probe dans
+[`AUDIT_PROBE_LOCALITE_8C00AB0_20260812.md`](AUDIT_PROBE_LOCALITE_8C00AB0_20260812.md).
 
-## 1. Ce que la coupe de Yao48 laisse sur la table
+## 1. Lemme de l'antipode
 
-Une première version de cette note attribuait un facteur 384 à la coupe Yao48.
-**C'était faux et l'audit l'a réfuté** : le facteur huit y était compté deux
-fois. Le calcul correct, sous un modèle homogène isotrope :
-
-- la région d'intérêt exacte d'une cible à distance `D` est la boule diamétrale,
-  de volume `pi D^3/6` — elle vaut déjà un huitième de la boule de rayon `D`
-  centrée sur l'ancre ;
-- la région Yao simplifiée « la chambre de la cible, rayon `D/2` » est un
-  secteur de solide angle `4 pi/48` de cette même boule de rayon `D/2`, donc
-  exactement **un quarante-huitième de la boule diamétrale**.
-
-Le rapport modélisé est donc **48**, pas 384. Et ce 48 est une intuition de
-volume sous homogénéité : ce n'est ni une borne sur les visites LBVH, ni une
-explication des familles anisotropes, ni une preuve de cause racine. En
-particulier la traversée duale du dossier utilise **toutes** les directions :
-ses pentes rouges ne peuvent pas lui être imputées. Cette section motive une
-expérience, elle ne réfute aucune route.
-
-## 2. Le théorème
-
-Soit `P` le nuage u16 à positions deux à deux distinctes, `x` une ancre,
-`K = 10`.
-
-**Lemme de l'antipode.** Toute boule non dégénérée `B` de centre `c` et de rayon
-`R` dont `x` appartient à la sphère possède l'antipode unique `x + D u`, avec
-`D = 2R` et `u = (c-x)/R`. Elle est donc la boule de diamètre `[x, x + D u]`,
-même quand l'antipode n'est pas une observation. Pour `s = z - x`,
-`d = ||s||`, `v = s/d` :
+Soit `P` un nuage à positions distinctes, `x` une ancre et `B` une boule non
+dégénérée de centre `c` et de rayon `R` dont `x` appartient au bord. Posons
+`D=2R` et `u=(c-x)/R`. La boule est celle de diamètre
+`[x,x+D u]`, même si l'antipode n'est pas une observation. Pour `z!=x`, poser
+`s=z-x`, `d=||s||` et `v=s/d`. Alors
 
 $$z\in\mathrm{int}(B)\iff\left\Vert s\right\Vert^{2}<D\,(u\mathbin{\cdot}s)\iff d<D\cos\angle(u,v).$$
 
-Le rayon nul et les positions colocalisées ne sont pas couverts : le probe les
-refuse explicitement avant toute géométrie.
+Par inversion `zeta(z)=s/||s||^2`, cette condition devient l'inégalité affine
+`u dot zeta(z)>1/D`. À ancre fixée, les boules passant par `x` et possédant au
+plus `K-1` intérieurs correspondent donc au niveau inférieur à `K` du nuage
+inversé local. Cette lecture motive une recherche output-sensitive; elle ne
+fournit pas à elle seule un algorithme borné.
 
-**Lecture par inversion.** En posant $\zeta(z)=s/\left\Vert s\right\Vert^{2}$,
-la condition devient l'inégalité **linéaire**
-$u\mathbin{\cdot}\zeta(z)>1/D$. Les boules passant par `x` sont exactement les
-demi-espaces de l'espace inversé, et leurs intérieurs exactement les points
-inversés au-delà du plan. À ancre fixée, le catalogue des boules à au plus
-`K-1` intérieurs est donc le `<=(K-1)`-niveau du nuage inversé local.
+Le rayon nul et les `PointId` colocalisés exigent une politique séparée. Une
+implémentation générique doit les conserver fail-open ou retourner
+`unsupported_degeneracy`; elle ne peut pas omettre le vecteur nul.
 
-**Lecture par calotte.** Le point `z` interdit exactement les directions
+## 2. Certificat par calottes
 
-$$C_z(D)=\left\lbrace u\in S^{2}\ :\ u\mathbin{\cdot}v>d/D\right\rbrace,$$
+Pour un point `z`, la direction de l'antipode est interdite à diamètre `D` dans
+la calotte
 
-calotte sphérique centrée en `v`, de rayon angulaire `arccos(d/D)`, qui
-**croît** avec `D`. D'où :
+$$C_z(D)=\left\lbrace u\in S^{2}:u\mathbin{\cdot}v>d/D\right\rbrace.$$
 
-> **Théorème (localité certifiée).** Soit `r > 0`. Si toute direction de la
-> sphère appartient à au moins `K` calottes `C_z(r)`, alors toute boule `B`
-> ayant `x` sur son bord et au plus `K-1` points intérieurs vérifie
-> `diam(B) <= r`.
+Ces calottes croissent avec `D`.
 
-*Preuve.* Les calottes croissent avec `D`. Si `D > r`, la profondeur de `u` dans
-la famille `C_z(D)` majore sa profondeur dans `C_z(r)`, donc au moins `K` points
-sont strictement intérieurs. Contraposée. ∎
+**Théorème de localité.** Si, pour un rayon `r>0`, toute direction appartient
+à au moins `K` calottes strictes `C_z(r)`, alors toute boule passant par `x` et
+possédant au plus `K-1` intérieurs vérifie `diam(B)<r`.
 
-**Le seuil dix est sûr pour les trois arités, sans être optimal.** Dix
-intérieurs donnent `p + q >= 12` pour toute arité `q >= 2`. Lorsque l'arité du
-support propre positif est déjà certifiée, les seuils exacts d'inertie H0 sont
-`10 / 9 / 8` ; une banque directionnelle peut les conserver dans le même ordre
-statistique sans confondre les décisions des trois lanes.
+**Preuve.** Si `D>=r`, chacun des `K` points qui couvre la direction à `r`
+reste strictement intérieur à diamètre `D`, contradiction. Fin de preuve.
 
-## 3. Le raffinement directionnel
+Pour `K_eff=10`, dix intérieurs rendent tout support propre positif d'arité au
+moins deux H0-inerte dans la fenêtre demandée. Lorsque l'arité est déjà
+certifiée, les seuils minimaux sont dix, neuf et huit pour q2, q3 et q4. Une
+banque commune peut conserver simultanément les statistiques d'ordre 10, 9 et
+8; elle ne doit pas confondre leurs verdicts.
 
-Un rayon **global** par ancre est correct mais inutilisable au bord : une
-direction ouverte le rend infini et emporte toute l'ancre. Le théorème est
-pourtant directionnel. Pour une cellule `c` et un point `z`, la calotte `C_z(r)`
-contient `c` dès que `r > rho(c,z)`, avec
+Une couverture de toute la sphère est impossible aux ancres extrêmes de
+l'enveloppe convexe et, dans une direction normale, sur un nuage coplanaire.
+Le certificat global sert donc de succès partiel avec fallback, jamais de
+condition `toutes les ancres certifiées` pour une source générale.
 
-$$\rho(c,z)=\max_{g\in c}\ \frac{\left\Vert g\right\Vert\left\Vert s\right\Vert^{2}}{g\mathbin{\cdot}s},$$
+## 3. Seuil par cellule directionnelle
 
-le maximum portant sur les trois sommets `g`, et `rho = +infini` dès qu'un
-sommet vérifie `g . s <= 0`. En posant `r_c` la `K`-ième plus petite valeur de
-`rho(c, .)` : toute boule dont l'antipode pointe dans `c` vérifie
-`diam(B) <= r_c`, ou possède au moins `K` intérieurs stricts.
+Discrétiser la sphère par les triangles géodésiques d'une subdivision de
+l'octaèdre. Leurs sommets sont des vecteurs entiers `g` vérifiant
+`|g_x|+|g_y|+|g_z|=m`. Pour une cellule `C` et `s=z-x`, définir
 
-L'inégalité est **large des deux côtés**, et c'est le bon côté fail-open : au
-seuil `D = r_c` un témoin peut être *sur* la sphère et ne pas compter comme
-intérieur, donc une activation vérifie seulement `D <= r_c`. Le filtre de
-candidats emploie `d_y^2 <= r_c^2`, comparé exactement par
-`d_y^2 * den <= num`.
+$$\rho_C(z)=\max_{g\in C}\frac{\left\Vert g\right\Vert\left\Vert s\right\Vert^{2}}{g\mathbin{\cdot}s},$$
 
-Le localisateur de cellule doit inclure **toutes** les cellules réellement
-incidentes à une direction : en oublier une au bord du réseau produirait une
-omission fausse. Le mutant `locate-drop-boundary` grave ce cas.
+avec `rho=+infini` si un sommet vérifie `g dot s<=0`. Une calotte stricte de
+rayon angulaire inférieur à 90 degrés est géodésiquement convexe : si ses
+trois sommets satisfont l'inégalité, toute la cellule la satisfait.
 
-## 4. Le prédicat, en entiers u16 exacts
-
-Les directions sont discrétisées par la subdivision de l'octaèdre : sommets =
-vecteurs **entiers** `g` avec `|g_x| + |g_y| + |g_z| = m`, `8 m^2` triangles
-géodésiques, `4 m^2 + 2` sommets.
-
-Une calotte stricte de rayon inférieur à 90 degrés s'écrit `a . u > t` avec
-`t > 0` ; si ses trois sommets la vérifient, toute combinaison sphérique courte
-la vérifie aussi, le numérateur dépassant strictement `t sum(lambda)` alors que
-le dénominateur vaut au plus `sum(lambda)`. La couverture d'une cellule se
-teste donc exactement sur trois sommets entiers :
+Si `r_C` est la K-ième valeur de `rho_C`, tout diamètre strictement supérieur à
+`r_C` possède au moins K intérieurs pour une direction dans `C`. À l'égalité,
+le K-ième témoin peut rester sur le shell; le filtre candidat doit donc garder
+`D<=r_C`. Le test exact sur un sommet est
 
 $$g\mathbin{\cdot}s>0\quad\text{et}\quad(g\mathbin{\cdot}s)^{2}r^{2}>\left\Vert g\right\Vert^{2}\left(\left\Vert s\right\Vert^{2}\right)^{2}.$$
 
-Aucune garde `||s|| < r` séparée n'est nécessaire : par Cauchy--Schwarz,
-`||s|| >= r` fait échouer l'inégalité quadratique complète. Le seul test
-`g . s > 0` ne suffirait pas.
+Sur u16, ces décisions tiennent dans `i128` pour les subdivisions bornées
+utilisées ici. Les comparaisons de deux seuils se font par produits croisés;
+aucun flottant ni racine n'est une autorité.
 
-Aucun flottant, aucun rationnel, aucune racine n'entre dans une décision. Les
-amplitudes tiennent dans `__int128` : `||s||^2 < 2^34`, `||g||^2 <= m^2`, et la
-comparaison croisée de deux `rho` reste sous `2^118`.
+Le localisateur doit rendre toutes les cellules incidentes à une direction de
+bord. Une cellule sans cible ne demande aucune couverture. Une cellule
+sous-pleine ou ouverte reste au résiduel exact; elle ne force pas le refus de
+toute l'ancre.
 
-## 5. Jung borne le diamètre ; il ne localise pas le support
+## 4. Parcours LBVH candidat
 
-Soit une activation de support propre positif `S` contenant `x`. Le centre est
-dans l'intérieur relatif de `conv(S)`, donc `B` est la miniboule de `S`. Par le
-théorème de Jung en dimension trois,
+Le scan `cellules * points` n'est qu'un oracle borné. Pour un nœud témoin `W`
+et une cellule `C`, poser `d2_min=dist^2(x,AABB(W))` et, pour chaque sommet
+`g`, `dot_max(g,W)=max_{z in W} g dot (z-x)`. Si un `dot_max<=0`, aucun point
+du nœud ne couvre toute la cellule. Sinon le minorant
 
-$$R\leq\mathrm{diam}(S)\sqrt{\tfrac{3}{8}},\qquad\text{donc}\qquad D^{2}\leq\tfrac{3}{2}\,\mathrm{diam}(S)^{2}.$$
+$$LB_C(W)=\max_{g\in C}\frac{\left\Vert g\right\Vert^{2}d2_{min}^{2}}{dot_{max}(g,W)^{2}}$$
 
-Cette borne est **exacte, entière et utile** : elle arrête le balayage
-d'intériorité d'un support candidat dès que `2 d_z^2 > 3 diam(S)^2`, sans
-calculer aucun circumcentre.
+borne inférieurement la meilleure clé `rho_C^2` du nœud. Un parcours best-first
+sur `(W,cell_mask)` peut couper le nœud lorsque ce minorant ne bat plus la
+K-ième clé courante; l'égalité descend pour conserver le tie-break canonique.
+Les masques des cellules encore sous-pleines ou améliorables évitent de
+repartir indépendamment pour chaque cellule.
 
-### La rétractation
+Cette borne est exacte. Elle ne prouve aucune complexité sous-linéaire : un
+cône peut contenir tout le nuage et une requête peut visiter tout le LBVH. Le
+reçu doit compter visites de nœuds, feuilles, tests de plans et de points,
+opérations de heap, allocations, octets et high-water.
 
-Une version antérieure de cette note en déduisait que « toute arête de support
-d'une activation d'arité quelconque est une activation q2 », donc que les
-supports q3/q4 se lisaient dans le voisinage q2. **C'est faux, et la mesure l'a
-réfuté avant l'audit** : la génération locale rendait `q3 = 857` contre `884` au
-juge exhaustif, et `q4 = 193` contre `202`, à `n = 70`.
+## 5. Jung ferme l'intériorité, pas les supports
 
-L'erreur est que **la boule diamétrale d'une corde n'est pas incluse dans la
-boule**. Pour une corde de demi-longueur `t` dans une boule de rayon `R`, la
-distance du centre au milieu de la corde vaut `sqrt(R^2-t^2)`, et la portée de
-la boule diamétrale depuis le centre vaut `t + sqrt(R^2-t^2)`, qui dépasse `R`
-pour tout `t > 0`, jusqu'à `R\sqrt{2}`.
+Pour un support propre positif `S`, sa boule circonscrite est sa miniboule. En
+dimension trois, Jung donne
 
-**Contre-fixture permanente**, en coordonnées entières exactes : le triangle
-`(0,0,0)`, `(120,0,0)`, `(60,100,0)` a un support propre positif, un
-circumcentre `(60,32,0)` et `R^2 = 4624`, donc `R = 68`. La boule diamétrale de
-sa première arête a pour rayon carré `3 600` et son centre est à `1 024` au
-carré du circumcentre : sa portée carrée depuis le circumcentre vaut `8 464`,
-soit `92`, c'est-à-dire **36 % au-delà du rayon circonscrit**. Dix points placés
-dans ce croissant tombstonent l'arête en q2 sans toucher le triangle en q3.
+$$R\leq\mathrm{diam}(S)\sqrt{\frac{3}{8}},\qquad D^{2}\leq\frac{3}{2}\mathrm{diam}(S)^{2}.$$
 
-Le support d'une activation est donc une arête du graphe de Delaunay d'ordre au
-plus neuf, pas du graphe de Gabriel d'ordre au plus neuf ; le second est
-strictement inclus dans le premier. **La localité des arités supérieures n'est
-pas fermée par la lane q2** : elle demande une fenêtre de support explicite,
-dont la saturation doit être mesurée et non supposée. Le probe la publie
-(`--support-window`) et refuse toute mesure dont la fenêtre n'a pas saturé.
+Cette borne ferme un balayage d'intériorité : au-delà de
+`2 d_z^2>3 diam(S)^2`, aucun nouveau point ne peut être intérieur. Elle ne
+borne pas l'univers des partenaires de support. En particulier, la boule
+diamétrale d'une corde n'est généralement pas incluse dans la boule
+circonscrite qui contient cette corde.
 
-## 6. Mesures obtenues
+La contre-fixture u16 complète à graver est :
 
-Sujet : [`prototype/certified_locality_probe.cpp`](../prototype/certified_locality_probe.cpp).
-Machine de mesure : codespace 2 vCPU, 7 Gio. **Ces secondes ne sont pas un
-benchmark.**
+- `A=(100,100,100)`, `B=(200,100,100)`, `C=(150,180,100)` ;
+- `W_j=(80,140,96+j)` pour `0<=j<=9`.
 
-### 6.1 Juges indépendants
+Le triangle `ABC` est aigu, de centre `(150,995/8,100)` et de rayon carré
+`198025/64`. Chaque `W_j` est strictement extérieur, avec un excès de distance
+carrée `2050+(j-4)^2`. En revanche
 
-L'arithmétique du juge est écrite séparément : déterminants entiers et Cramer
-explicite, aucune calotte, aucune inversion.
+$$(W_j-A)\mathbin{\cdot}(W_j-C)=-200+(j-4)^{2}<0.$$
 
-- **Juge du census** — le census directionnel doit égaler l'énumération
-  exhaustive de `C(n,2)`. `terrain n = 900` : `17 023 = 17 023`, écart nul. Ce
-  juge tue quatre mutants du chemin par cellule (`rho-min-corner`,
-  `rho-first-corner`, `rho-kth-short`, `locate-drop-boundary`) au code 4.
-- **Juge A** — pour toute ancre certifiée au rayon `r` et tout point à distance
-  au moins `r`, la boule diamétrale doit contenir `K` intérieurs stricts.
-  `uniform n = 2 000`, `K = 10` : 1 639 064 paires lointaines, 0 violation.
-- **Juge B** — énumération exhaustive des trois arités à support propre positif.
-  `uniform n = 70`, `K = 4` : `q2 = 681`, `q3 = 884`, `q4 = 202`, 187
-  vérifications de support, 0 violation.
+Les dix témoins sont donc strictement intérieurs à la boule diamétrale de
+`AC`, qui est rejetée en q2, tandis que `ABC` reste une activation q3 sans
+intérieur. Une fenêtre q3/q4 ne se déduit jamais de la lane q2. Tant que cette
+fixture n'est pas exécutée par une porte nommée, elle reste une obligation,
+pas une fixture logicielle reçue.
 
-### 6.2 Contradiction devenue fixture permanente
+## 6. De la mesure à une source directe
 
-Le déterminant InSphere développé sur la colonne des normes est de signe
-**opposé** à `orient3d` pour un point strictement intérieur. La règle `==` a
-été livrée une fois : elle faisait tomber `q4` de 202 à 3 activations à
-`n = 70`. Le contre-exemple minimal — tétraèdre de circumcentre l'origine, son
-centre intérieur, un point lointain extérieur — est gravé, exercé à chaque
-exécution, et tue son mutant `insphere-sign-flip` au code 4. Un plancher
-`--min-q4` double la garde.
+Un compteur de supports n'est pas une source. Pour qu'un support `U` devienne
+une coface directe `Q=U union I`, le producteur doit publier et faire rejouer :
 
-### 6.3 Masse de travail et taille de sortie
+- le support minimal propre positif et sa provenance ;
+- tous les intérieurs stricts `I`, avec fermeture terminale ;
+- le shell global complet et la politique d'extra-shell ;
+- la `BallKey` canonique et le niveau exact ;
+- un owner exact-once indépendant du scheduling ;
+- le statut de fenêtre certifiée ou résiduelle.
 
-Grille `m = 4`, `K = 10`, census complet, localisation de cellule exacte.
+Un juge de cardinalité ne suffit pas : l'oracle compare les identités de
+`BallKey`, supports, intérieurs et shell. Des supports multiples nommant la
+même boule sont dédupliqués par `BallKey`, puis leur plateau est quotienté
+atomiquement ou refusé dans la fenêtre pertinente.
 
-| famille | n | candidats par ancre | p50 | p95 | census q2 | activations/point |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| terrain | 2 000 | 56,97 | 59 | 70 | 38 831 | 19,4155 |
-| terrain | 4 000 | 58,89 | 60 | 71 | 79 264 | 19,8160 |
-| terrain | 8 000 | 61,29 | 61 | 72 | 160 566 | 20,0708 |
-| terrain | 16 000 | 68,13 | 61 | 73 | 325 071 | 20,3169 |
-| scanline_single_pass | 16 000 | 81,11 | 60 | 79 | 324 041 | 20,2526 |
-| scanline_overlap_multiecho | 8 000 | 98,63 | 75 | 238 | 187 526 | 23,4408 |
+La fermeture d'une facette `F` pour la requête `J_F` exige un nouveau
+certificat sur sa propre miniboule. L'inégalité `beta(F)<beta(Q)` entre deux
+boules de centres différents n'implique aucune inclusion et ne ferme pas
+`J_F` dans le voisinage de la coface parente.
 
-Le census q2 est **invariant** sous la finesse de grille (`m = 3, 4, 6, 8`) et
-sous la fenêtre de voisinage (64, 256, 512, complète) : le filtre est
-conservateur et la lane est close. À `terrain n = 2 000`, 68 % des paires
-candidates sont de vraies activations.
+## 7. Portes industrielles
 
-Ces densités reproduisent, par une route entièrement différente, celles des
-reçus `2e49dcf` : 20,58 activations par point pour `terrain` à 50 k, 20,61 pour
-`scanline_single_pass`, 24,56 pour `scanline_overlap_multiecho`, 37,48 pour
-`uniform`. C'est une concordance, pas une admission.
+Avant tout port G4 de cette voie :
 
-## 7. Ce qui n'est pas prouvé et ce qui manque
+1. exécuter la contre-fixture q3 ci-dessus et les cas colocalisé, cellule de
+   bord, cellule ouverte, égalité de seuil et support multiple ;
+2. comparer les records complets à un oracle rationnel indépendant, avec
+   mutants omission, doublon, shell perdu et owner dupliqué ;
+3. rendre toute fenêtre non certifiée `incomplete`, jamais succès avec simple
+   avertissement ;
+4. mesurer les compteurs de travail et la mémoire à `12 500/25 000/50 000`
+   sur les quatre familles, avec deux pentes successives ;
+5. composer seulement le résidu avec les autres certificats q2/q3/q4, le
+   resolver et le fold atomique ;
+6. produire le payload contractuel complet avant toute mesure du SLO.
 
-1. **La linéarité n'est pas prouvée.** La médiane des candidats est constante
-   (59 à 61 sur un facteur huit en `n`), mais la queue croît : p99 de 125 à 554
-   et maximum de 157 à 4 856 sur `scanline_single_pass`. Ces ancres sont celles
-   dont des cellules restent ouvertes. `sum_x work(x)`, la mémoire et le
-   high-water ne sont pas encore publiés.
-2. **Le balayage d'univers complet par ancre n'est pas une architecture.** Il
-   ferme la lane dans le probe de mesure ; le chemin produit doit employer le
-   minorant de nœud proposé par l'audit,
-   `LB_C(W) = max_g ||g||^2 d2_min^2 / dot_max(g,W)^2`, dans un best-first
-   `LBVH x masque de cellules`, en comptant visites, tests, octets et
-   high-water. Le calcul doit en outre être **cible-aware** : une cellule sans
-   cible ne demande aucune couverture.
-3. **L'énumérateur local des trois arités n'est pas écrit.** La bijection exacte
-   entre plans inversés, supports propres positifs, niveaux stricts et fermés et
-   `BallKey` reste à établir, avec coplanarités, coquilles multiples,
-   orientation et owner exact-once. Le pinceau de
-   [`order_k_bfs.hpp`](../prototype/order_k_bfs.hpp) **ne s'applique pas tel
-   quel** : ses trois énoncés sont faux hors position simple et son germe est
-   réfuté par une fixture gravée. C'est
-   [`order_k_flats.hpp`](../prototype/order_k_flats.hpp) — théorème de
-   propriétaire, connexité de l'ensemble des niveaux au plus `k`, flats fermés
-   de rang trois — qui porte la complétude, comme oracle borné et instrument de
-   mesure, jamais comme backend.
-4. **La taille de sortie q3/q4 est presque inconnue.** Le seul instrument du
-   dépôt qui la fende par arité est `prototype/scale_profile.cpp`, qu'aucun
-   CTest n'exerce. À `n = 200`, profil nappe, `smax = 11`, il publie
-   `1,00 / 23,66 / 99,99 / 86,13` enregistrements par point pour les arités
-   1/2/3/4 : q3 vaut environ `4,2` fois q2 et q4 environ `3,6` fois q2. La
-   sortie totale a 50 k serait donc de l ordre de `1e7` a `2e7`
-   enregistrements. Un budget d une seconde sur 48 coeurs laisse alors environ
-   `2,4` microsecondes de temps-coeur par enregistrement emis : **la taille de
-   sortie ne contredit pas la cible**, seul le travail par unite de sortie le
-   peut. Ce chiffre est une extrapolation depuis `n = 200`, pas une mesure
-   d echelle.
-5. **Aucun port CUDA**, aucun census q3/q4, aucun resolver, aucun fold, aucun
-   payload officiel.
+La voie évite par construction toute mosaïque de Delaunay d'ordre supérieur et
+tout catalogue global de paires, cellules, cofaces ou incidences. Elle ne
+prouve pas encore que son état intermédiaire reste compatible avec 50 k.
 
-## 8. Portes tenues aujourd'hui
-
-Vingt-deux CTests `mhgp3v_locality_*` : trois juges, invariance de grille et de
-fenêtre, six mutants au code 4, cinq refus de CLI ou d'injection hors mode au
-code 2, trois planchers au code 3.
-
-GCP non utilisé pour cette note.
+GCP non utilisé.

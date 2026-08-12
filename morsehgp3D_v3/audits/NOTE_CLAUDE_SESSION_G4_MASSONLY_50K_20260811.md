@@ -50,8 +50,10 @@ Aucun tuple n'a été formé et aucun compte d'octets, de fill, de certification
 ou de consommation n'a été mesuré. Après prune, q2 porte encore
 4,65e8--2,86e9 tuples, q3
 1,47e10--1,32e11 et q4 3,30e11--9,97e12 selon la famille et le pas. q2 est
-seulement la lane la moins rouge. Toute route qui énumère ces masses est
-incompatible avec `warm_e2e < 1 s`; le pas 10 ne change pas ce verdict.
+seulement la lane la moins rouge. L'ordonnance combinadique/materialisante
+mesurée n'est pas admise pour `warm_e2e < 1 s`; faute de borne minimale par
+tuple, ce reçu ne prouve pas l'impossibilité de toute représentation implicite.
+Le pas 10 ne change pas le verdict sur cette ordonnance.
 
 ## 2. Masque hybrid-fast à l'échelle (catalogues parallèles 48 threads)
 
@@ -71,8 +73,9 @@ k=2. Le préflight `predicted == hits` est exact partout. Deux verrous restent
 visibles dans ces mêmes chiffres :
 
 1. **k=1** : 26--64 % de requêtes — les `q > k+1` des lots multiples au
-   fallback (théorème 2 reçu en solo seulement). La décision courante route
-   k=1 par l'EMST exact au contrat normalisé — `k=1 == single-linkage` est
+   fallback (théorème 2 reçu en solo seulement). Au snapshot de cette session,
+   k=1 est routé par l'EMST exact au contrat normalisé —
+   `k=1 == single-linkage` est
    déjà prouvé et gravé par partitions, les d² tiennent en entiers < 2^35,
    sans étendre le théorème 2.
 2. **le catalogue lui-même** : 675 s à n=6250 sur 48 threads (récolte
@@ -85,8 +88,9 @@ son absence est un trou de mesure, pas un refus.
 ## 3. Ce que cette session ne dit pas
 
 Aucun kernel n'a tourné et aucun fold n'a été rejoué à 50 k. Les nombres
-ci-dessus sont des autorités de réfutation : ils disent où l'enveloppe de
-travail et de latence observée devient incompatible avec la cible. Cette note
+ci-dessus sont des autorités de réfutation de l'ordonnance mesurée : ils disent
+où son enveloppe de travail et sa latence observée deviennent incompatibles
+avec la cible. Cette note
 datée ne prescrit aucun ordre de travail et ne décrit aucun successeur; le
 verdict vivant est uniquement
 [`AUDIT_ETAT_COURANT.md`](AUDIT_ETAT_COURANT.md).

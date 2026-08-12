@@ -28,7 +28,7 @@ ne qualifie aucun SLO.
 
 | objet | valeur |
 | --- | --- |
-| `HEAD` | `b312638c19e1a56ccf11cf72065c8f398f4abc7a`, commit `deliver the P1a center-cover mass falsifier (q4, seuil huit)` |
+| snapshot audité | `b312638c19e1a56ccf11cf72065c8f398f4abc7a`, commit `deliver the P1a center-cover mass falsifier (q4, seuil huit)` |
 | `CMakeLists.txt` | `34538222a1e48bfd9109c448fa3adb07f2a8ea3d383b0bd4f55d7cd7b81b8090` |
 | `prototype/center_cover_mass_probe.cpp` | `fc4001b3a198ae9c095c0c563cc9500357b9b5e2fe20a8678f88a117225aada9` |
 | binaire Release | `9c130163a92a243c30f25157f5a817fa734b7b66fa47ec84d477bbe54155fbab` |

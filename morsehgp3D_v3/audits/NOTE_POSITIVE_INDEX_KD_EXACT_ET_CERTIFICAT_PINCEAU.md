@@ -8,7 +8,7 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-## Boîte contre boule rationnelle
+## 1.3 Boîte contre boule rationnelle
 
 Pour un centre `C/d`, une boîte entière et un numérateur de rayon carré `N`,
 la distance minimale exacte s'obtient axe par axe en prenant l'écart nul si

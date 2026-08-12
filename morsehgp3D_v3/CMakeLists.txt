@@ -2086,3 +2086,248 @@ mhgp3v_add_expected_code_test_for(mhgp3v_certified_locality_probe
   mhgp3v_locality_arites_juge_borne "borne a 400 points" 2
   --mode=arity --points=500 --family=terrain --grid=4 --seed=3 --kmin=10
   --judge-census=1)
+
+# LE JUGE INDEPENDANT DU CENSUS. Le juge interne du probe partage les
+# constructeurs de sphere et les predicats du sujet : il compare des
+# cardinalites obtenues par la meme arithmetique, ce que l'audit du 12 aout a
+# refuse comme reception. Celui-ci recalcule le meme census en rationnels
+# multiprecision, elimination de Gauss et centre explicite. Seul le generateur
+# de nuages est partage.
+add_executable(mhgp3v_locality_census_judge oracle/locality_census_judge.cpp)
+target_include_directories(mhgp3v_locality_census_judge PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(mhgp3v_locality_census_judge PRIVATE mhgp)
+target_compile_options(mhgp3v_locality_census_judge PRIVATE -Wall -Wextra -Werror)
+
+# LES VALEURS GRAVEES DU JUGE RATIONNEL. Produites hors bande par
+# `mhgp3v_locality_census_judge` — rationnels multiprecision, elimination de
+# Gauss, centre explicite — elles ne dependent d'aucun predicat du sujet. Le
+# juge est relance ici a n=50, et le sujet doit les reproduire a n=50 et n=70.
+add_test(NAME mhgp3v_locality_juge_rationnel COMMAND mhgp3v_locality_census_judge
+         --points=50 --family=uniform --seed=1 --kmin=4
+         --expect-q2=456 --expect-q3=592 --expect-q4=137)
+add_test(NAME mhgp3v_locality_arites_gravees_50 COMMAND mhgp3v_certified_locality_probe
+         --mode=arity --points=50 --family=uniform --grid=4 --seed=1 --kmin=4
+         --max-neighbours=49 --support-window=30
+         --expect-q2=456 --expect-q3=592 --expect-q4=137)
+add_test(NAME mhgp3v_locality_arites_gravees_70 COMMAND mhgp3v_certified_locality_probe
+         --mode=arity --points=70 --family=uniform --grid=4 --seed=1 --kmin=4
+         --max-neighbours=69 --support-window=40
+         --expect-q2=681 --expect-q3=884 --expect-q4=202)
+mhgp3v_add_expected_code_test_for(mhgp3v_certified_locality_probe
+  mhgp3v_locality_gravees_mutant_signe "mutant tue par les valeurs gravees" 4
+  --mode=arity --points=70 --family=uniform --grid=4 --seed=1 --kmin=4
+  --max-neighbours=69 --support-window=40
+  --expect-q2=681 --expect-q3=884 --expect-q4=202 --inject=insphere-sign-flip)
+mhgp3v_add_expected_code_test_for(mhgp3v_certified_locality_probe
+  mhgp3v_locality_gravees_fenetre_courte "desaccord avec le juge rationnel independant" 1
+  --mode=arity --points=70 --family=uniform --grid=4 --seed=1 --kmin=4
+  --max-neighbours=69 --support-window=20
+  --expect-q2=681 --expect-q3=884 --expect-q4=202)
+mhgp3v_add_expected_code_test_for(mhgp3v_locality_census_judge
+  mhgp3v_locality_juge_rationnel_borne "borne a 400 points" 2 --points=500)
+
+# ---------------------------------------------------------------------------
+# FRONT DE BOULES VIDES : le SECOND TEMOIN de l'arrangement shallow.
+#
+# `order_k_flats.hpp` reste le sujet mathematique de reference — transitions par
+# lots, reverse search, theoreme de proprietaire. Ce temoin ne le remplace pas :
+# il enumere les MEMES sommets avec une autre representation (forme liftee
+# separable, elagage de boite exact par parabole entiere) et d'autres
+# transitions, puis se juge contre un oracle exhaustif ecrit dans le meme
+# fichier mais sur un determinant 5x5 developpe. Deux defauts communs ne se
+# compensent donc pas.
+#
+# PORTEE DECLAREE : univers a shell d'au moins quatre points. Les supports q2 et
+# q3 a shell de deux ou trois elements vivent sur les faces et les aretes de
+# l'arrangement; ils sont hors de ce temoin ET hors de son juge, donc
+# `incomplete`, jamais absents.
+add_executable(mhgp3v_ball_front prototype/ball_front_probe.cpp)
+target_include_directories(mhgp3v_ball_front PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(mhgp3v_ball_front PRIVATE mhgp)
+target_compile_options(mhgp3v_ball_front PRIVATE -Wall -Wextra -Werror)
+
+# LES QUATRE FAMILLES, JUGEES SUR LES IDENTITES. Le juge compare shell par shell
+# et interieur par interieur, pas des cardinalites : une omission compensee par
+# un doublon ne peut pas rester verte.
+add_test(NAME mhgp3v_ball_front_uniform COMMAND mhgp3v_ball_front
+         --points=70 --k=3 --family=uniform --seed=3 --judge)
+add_test(NAME mhgp3v_ball_front_terrain COMMAND mhgp3v_ball_front
+         --points=70 --k=3 --family=terrain --seed=3 --judge)
+add_test(NAME mhgp3v_ball_front_scanline COMMAND mhgp3v_ball_front
+         --points=70 --k=3 --family=scanline_single_pass --seed=3 --judge)
+# LE REGIME QUANTIFIE MULTI-ECHO est celui qui porte les cospheries : c'est la
+# ou un parcours qui suppose un shell de quatre points exactement se casse.
+add_test(NAME mhgp3v_ball_front_multiecho COMMAND mhgp3v_ball_front
+         --points=70 --k=3 --family=scanline_overlap_multiecho --seed=3 --judge)
+set_tests_properties(mhgp3v_ball_front_uniform mhgp3v_ball_front_terrain
+                     mhgp3v_ball_front_scanline mhgp3v_ball_front_multiecho
+                     PROPERTIES PASS_REGULAR_EXPRESSION "ACCORD juge")
+
+# LES DEUX SENS DE L'ARETE SONT NECESSAIRES. Couper l'un des deux laisse un
+# parcours qui trouve encore la grande majorite des sommets : seul un juge par
+# identites le tue. Code 4 = mutant tue.
+mhgp3v_add_expected_code_test_for(mhgp3v_ball_front
+  mhgp3v_ball_front_kill_drop_entering "MUTANT TUE" 4
+  --points=70 --k=2 --family=terrain --seed=3 --judge --inject=drop-entering)
+mhgp3v_add_expected_code_test_for(mhgp3v_ball_front
+  mhgp3v_ball_front_kill_drop_leaving "MUTANT TUE" 4
+  --points=70 --k=2 --family=terrain --seed=3 --judge --inject=drop-leaving)
+
+# REFUS AVANT CALCUL : code 2.
+mhgp3v_add_expected_code_test_for(mhgp3v_ball_front
+  mhgp3v_ball_front_reject_unknown_argument "argument inconnu" 2 --sujet-inexistant)
+mhgp3v_add_expected_code_test_for(mhgp3v_ball_front
+  mhgp3v_ball_front_reject_bad_family "famille inconnue" 2 --family=inexistante)
+mhgp3v_add_expected_code_test_for(mhgp3v_ball_front
+  mhgp3v_ball_front_reject_judge_too_large "juge exhaustif" 2
+  --points=500 --k=1 --judge)
+
+# ---------------------------------------------------------------------------
+# SONDE D'ECHELLE de l'arrangement shallow : le VOLUME, que le differentiel
+# exhaustif ne peut pas mesurer. Elle instrumente `reverse_search_stream` sur
+# des nuages realistes et publie sommets, densite, rang ferme, high-water de la
+# pile et travail d'index. Elle ne juge rien et ne mesure aucun SLO.
+add_executable(mhgp3v_flats_scale prototype/flats_scale_probe.cpp)
+target_include_directories(mhgp3v_flats_scale PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(mhgp3v_flats_scale PRIVATE mhgp)
+target_compile_options(mhgp3v_flats_scale PRIVATE -Wall -Wextra -Werror)
+
+# PLANCHER CONTRE LE VERT PAR VACUITE : une sonde qui n'enumere rien passerait
+# sans lui. La valeur est tenue tres en dessous de la mesure observee pour ne
+# pas graver une densite qui n'est pas un theoreme.
+add_test(NAME mhgp3v_flats_scale_uniform COMMAND mhgp3v_flats_scale
+         --points=120 --smax=6 --family=uniform --seed=101 --min-vertices=5000)
+add_test(NAME mhgp3v_flats_scale_multiecho COMMAND mhgp3v_flats_scale
+         --points=120 --smax=6 --family=scanline_overlap_multiecho --seed=101
+         --min-vertices=2000)
+mhgp3v_add_expected_code_test_for(mhgp3v_flats_scale
+  mhgp3v_flats_scale_reject_unknown_argument "argument inconnu" 2 --sujet-inexistant)
+mhgp3v_add_expected_code_test_for(mhgp3v_flats_scale
+  mhgp3v_flats_scale_reject_floor "PLANCHER non atteint" 3
+  --points=40 --smax=4 --min-vertices=100000000)
+
+# ---------------------------------------------------------------------------
+# SOURCE PAR LISTES IMBRIQUEES DE CELLULES DE CENTRES.
+#
+# Architecture proposee par l'auditeur dans
+# `audits/NOTE_ARCHITECTURE_GPU_LISTES_CELLULES_CENTRES_20260812.md`. Elle
+# subdivise l'espace des CENTRES au lieu de parcourir les sommets de
+# l'arrangement, dont la mesure montre qu'ils sont majoritairement des transits.
+#
+# La propriete decisive est que la liste d'une cellule est a la fois le domaine
+# de generation ET le certificat de census : aucun scan global apres la racine.
+# C'est ce qui la rend transposable en `count/scan/fill`.
+add_executable(mhgp3v_centre_cell prototype/centre_cell_source.cpp)
+target_include_directories(mhgp3v_centre_cell PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(mhgp3v_centre_cell PRIVATE mhgp)
+target_compile_options(mhgp3v_centre_cell PRIVATE -Wall -Wextra -Werror)
+
+# LES CINQ NUAGES, JUGES SUR LES IDENTITES DE SUPPORT, avec `I_B` et `U_B`.
+# Le juge exhaustif enumere tous les sous-ensembles et fait son census sur TOUT
+# le nuage : une omission compensee par un doublon ne peut pas rester verte.
+add_test(NAME mhgp3v_centre_cell_uniform COMMAND mhgp3v_centre_cell
+         --points=60 --smax=6 --family=uniform --seed=3 --judge --min-supports=1)
+add_test(NAME mhgp3v_centre_cell_terrain COMMAND mhgp3v_centre_cell
+         --points=60 --smax=6 --family=terrain --seed=3 --judge --min-supports=1)
+add_test(NAME mhgp3v_centre_cell_scanline COMMAND mhgp3v_centre_cell
+         --points=60 --smax=6 --family=scanline_single_pass --seed=3 --judge
+         --min-supports=1)
+add_test(NAME mhgp3v_centre_cell_multiecho COMMAND mhgp3v_centre_cell
+         --points=60 --smax=6 --family=scanline_overlap_multiecho --seed=3 --judge
+         --min-supports=1)
+# LA GRILLE GRAVEE porte les egalites entieres `l_C(x) == R_p(C)` que AUCUN nuage
+# aleatoire ne produit. C'est le seul nuage qui exerce la decision « conserver
+# l'egalite », et le seul qui tue le mutant `drop-ties`.
+add_test(NAME mhgp3v_centre_cell_grille_gravee COMMAND mhgp3v_centre_cell
+         --points=125 --smax=11 --family=grave_grid --judge --min-supports=1)
+set_tests_properties(mhgp3v_centre_cell_uniform mhgp3v_centre_cell_terrain
+                     mhgp3v_centre_cell_scanline mhgp3v_centre_cell_multiecho
+                     mhgp3v_centre_cell_grille_gravee
+                     PROPERTIES PASS_REGULAR_EXPRESSION "ACCORD juge")
+
+# LES QUATRE FIXTURES GRAVEES.
+#
+# `egalite` : un nuage aleatoire ne trouve PAS l'egalite `beta == R_p(C)`; sans
+# elle le mutant `drop-ties` survit partout.
+# `proprietaire` : la face partagee de deux cellules soeurs appartient a UNE
+# seule d'entre elles; le pave ferme casse l'exact-once.
+# `arite3` et `arite4` : les deux contre-fixtures de l'auditeur, section 4 de
+# `audits/AUDIT_REPONSES_CELLULES_CENTRES_20260812.md`. Elles REFUTENT la
+# cascade d'arites : un support q3 pertinent peut n'avoir aucune arete q2
+# pertinente, et un q4 pertinent aucune facette q3 pertinente. Les lanes doivent
+# donc etre generativement independantes.
+add_test(NAME mhgp3v_centre_cell_fixtures COMMAND mhgp3v_centre_cell --fixtures=toutes)
+set_tests_properties(mhgp3v_centre_cell_fixtures
+                     PROPERTIES PASS_REGULAR_EXPRESSION "FIXTURE arite4")
+add_test(NAME mhgp3v_centre_cell_fixture_equality COMMAND mhgp3v_centre_cell
+         --fixtures=egalite)
+set_tests_properties(mhgp3v_centre_cell_fixture_equality
+                     PROPERTIES PASS_REGULAR_EXPRESSION "FIXTURE egalite")
+add_test(NAME mhgp3v_centre_cell_fixture_arite3 COMMAND mhgp3v_centre_cell
+         --fixtures=arite3)
+add_test(NAME mhgp3v_centre_cell_fixture_arite4 COMMAND mhgp3v_centre_cell
+         --fixtures=arite4)
+# LA COQUILLE NON BORNEE. Trente points de rayon cinq autour de (10,10,10) :
+# six permutations signees de (5,0,0) et vingt-quatre de (4,3,0). La paire
+# antipodale a `p=0, q=2`, donc elle est PERTINENTE, et `|U_B|=30`. Tout cap de
+# coquille la tronque. La stratification par profondeur ne sauve rien : `A_0`
+# contient deja les trente egalites.
+add_test(NAME mhgp3v_centre_cell_fixture_coquille COMMAND mhgp3v_centre_cell
+         --fixtures=coquille)
+set_tests_properties(mhgp3v_centre_cell_fixture_coquille
+                     PROPERTIES PASS_REGULAR_EXPRESSION "shell_high_water=30")
+set_tests_properties(mhgp3v_centre_cell_fixture_arite3
+                     PROPERTIES PASS_REGULAR_EXPRESSION "ABC=1 AB=0 AC=0 BC=0")
+set_tests_properties(mhgp3v_centre_cell_fixture_arite4
+                     PROPERTIES PASS_REGULAR_EXPRESSION "TET=1 faces=0000")
+
+# LES MUTANTS. Code 4 = mutant tue. Chacun casse UNE decision.
+mhgp3v_add_expected_code_test_for(mhgp3v_centre_cell
+  mhgp3v_centre_cell_kill_shrink_list "MUTANT TUE" 4
+  --points=60 --smax=6 --family=terrain --seed=3 --judge --inject=shrink-list)
+mhgp3v_add_expected_code_test_for(mhgp3v_centre_cell
+  mhgp3v_centre_cell_kill_drop_ties "MUTANT TUE" 4
+  --points=125 --smax=11 --family=grave_grid --judge --inject=drop-ties)
+mhgp3v_add_expected_code_test_for(mhgp3v_centre_cell
+  mhgp3v_centre_cell_kill_owner_closed "MUTANT TUE" 4
+  --points=125 --smax=11 --family=grave_grid --judge --inject=owner-closed)
+mhgp3v_add_expected_code_test_for(mhgp3v_centre_cell
+  mhgp3v_centre_cell_kill_rank_closed "MUTANT TUE" 4
+  --points=125 --smax=11 --family=grave_grid --judge --inject=rank-closed)
+mhgp3v_add_expected_code_test_for(mhgp3v_centre_cell
+  mhgp3v_centre_cell_kill_tight_threshold "MUTANT TUE" 4
+  --points=60 --smax=6 --family=terrain --seed=3 --judge --inject=tight-threshold)
+mhgp3v_add_expected_code_test_for(mhgp3v_centre_cell
+  mhgp3v_centre_cell_kill_bisector_strict "MUTANT TUE" 4
+  --points=125 --smax=11 --family=grave_grid --judge --inject=bisector-strict)
+# LE MUTANT DE CASCADE D'ARITES : il conditionne la lane q3 au succes de la lane
+# q2 et la lane q4 au succes de q3. Seule la contre-fixture d'arite trois le tue,
+# et c'est exactement la faute que l'auditeur a exigee de graver.
+mhgp3v_add_expected_code_test_for(mhgp3v_centre_cell
+  mhgp3v_centre_cell_kill_arity_cascade "MUTANT TUE" 4
+  --fixtures=arite3 --inject=arity-cascade)
+
+# REFUS AVANT CALCUL : code 2.
+mhgp3v_add_expected_code_test_for(mhgp3v_centre_cell
+  mhgp3v_centre_cell_reject_unknown_argument "argument inconnu" 2 --sujet-inexistant)
+mhgp3v_add_expected_code_test_for(mhgp3v_centre_cell
+  mhgp3v_centre_cell_reject_suffix "valeur invalide" 2 --points=60junk)
+mhgp3v_add_expected_code_test_for(mhgp3v_centre_cell
+  mhgp3v_centre_cell_reject_judge_too_large "juge exhaustif" 2
+  --points=300 --smax=6 --judge)
+# LES GENERATEURS DU DEPOT DEDUPLIQUENT : aucune famille n'exerce ce refus. Ce
+# nuage grave le fait, avec un unique site repete.
+mhgp3v_add_expected_code_test_for(mhgp3v_centre_cell
+  mhgp3v_centre_cell_reject_doublons "unsupported_degeneracy" 2
+  --points=64 --smax=11 --family=grave_doublon)
+# PLANCHER DE COUVERTURE : contre le vert-par-vacuite.
+mhgp3v_add_expected_code_test_for(mhgp3v_centre_cell
+  mhgp3v_centre_cell_reject_floor "PLANCHER viole" 3
+  --points=60 --smax=6 --family=terrain --seed=3 --min-supports=100000000)
+
+# LES FIXTURES DE PROJECTION du front : la projection q2/q3 depuis le shell d'un
+# sommet ne conserve PAS son niveau. Elles gravent la refutation de la regle que
+# j'avais proposee et que l'auditeur a cassee.
+add_test(NAME mhgp3v_ball_front_fixtures COMMAND mhgp3v_ball_front --fixtures)
+set_tests_properties(mhgp3v_ball_front_fixtures
+                     PROPERTIES PASS_REGULAR_EXPRESSION "ne conserve pas le niveau")

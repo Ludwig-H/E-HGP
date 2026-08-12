@@ -104,8 +104,11 @@ impossible; `t=0` ne porte aucune cible. La table factorisée des onze candidats
 est immuable. Le reçu engage un masque de onze bits dont exactement dix sont
 levés; une enveloppe radiale engage un couple `(bank_index,mask)` distinct pour
 chaque chambre. La sélection ne peut pas être un état mutable de la banque.
-Pour une boîte de cibles, préférer une antichaîne témoin disjointe de la boîte
-à une banque de taille `K+|Q|`.
+Pour une boîte de cibles, un masque commun de dix pris dans onze candidats
+n'existe que si la boîte contient au plus un identifiant de la banque. Avec
+deux intersections ou davantage, il faut scinder, choisir une banque disjointe
+ou échouer ouvert; cette condition vaut aussi pour le reçu radial. Préférer une
+antichaîne témoin disjointe de la boîte à une banque de taille `K+|Q|`.
 
 ### Banque compressée par antichaîne
 
@@ -113,15 +116,20 @@ La recherche des dix plus proches n'est pas une obligation mathématique. Une
 banque peut être certifiée par une antichaîne de nœuds LBVH dont les plages de
 feuilles sont disjointes, excluent l'ancre, sont entièrement contenues dans la
 même chambre, ne contiennent que des témoins de distance strictement positive
-à l'ancre et ont une masse totale au moins dix. Le preflight de positions 3D
-distinctes garantit seulement la positivité des distances; l'antichaîne et
-son reçu doivent certifier séparément une masse totale au moins dix. Toute
-extension aux sites pondérés devra recertifier ces deux obligations. Poser :
+à l'ancre et ont une masse totale au moins onze pour un réservoir arbitraire
+cible-indépendant. Le reçu en engage dix après exclusion de la cible. Une
+antichaîne déjà certifiée disjointe de la cible ou de sa boîte peut se limiter à
+une masse dix. Le preflight de positions 3D distinctes garantit seulement la
+positivité des distances; l'antichaîne et son reçu doivent certifier séparément
+la masse requise et la disjonction revendiquée. Toute extension aux sites
+pondérés devra recertifier ces obligations. Poser :
 
 $$D_c=\max_i\max_{x\in\mathrm{box}(W_i)}\left\Vert x-p\right\Vert^{2}.$$
 
-Dix feuilles canoniques distinctes de leur union sont alors de vrais témoins
-de distance carrée au plus `D_c`. Le reçu chaud conserve plages, masses et
+Onze feuilles canoniques distinctes de leur union forment alors le réservoir
+arbitraire; après exclusion de la cible, dix candidats distincts restent de
+distance carrée au plus `D_c`. La coupe directionnelle stricte les transforme
+en vrais témoins. Le reçu chaud conserve plages, masses, masque d'engagement et
 majorant; le juge borné les développe en `PointId`. Raffiner une banque pour
 réduire `D_c` est une optimisation guidée par la masse cible, pas une condition
 d'exactitude.
@@ -157,6 +165,26 @@ nœud entier est prunable. Un masque 48 bits propagé sous raffinement, les
 versions de banques et les bornes entières forment le reçu; toute égalité
 descend. Aucun solveur flottant ni 48 résolutions génériques par enfant n'est
 nécessaire.
+
+### Certificat affine d'une banque ponctuelle
+
+Avant le dual-tree, une banque chaude peut employer directement ses dix
+témoins ponctuels immuables. Pour chaque `w`, poser
+`h_w(q)=(q-p) dot (w-p)-||w-p||^2`. Cette fonction est affine en `q`; son
+minimum exact sur une boîte choisit, coordonnée par coordonnée, la borne basse
+si le coefficient `w-p` est positif et la borne haute s'il est négatif.
+
+Dix minima strictement positifs certifient toute la boîte. Pour la même banque
+engagée, ce test domine la coupe Yao, qui n'utilise que trois inégalités
+suffisantes. Les dix `PointId` doivent être distincts, différents de `p` et
+disjoints de tous les identifiants de la boîte cible. Le reçu référence version
+et masque, puis sérialise les minima; un échec ne classe rien et passe au
+dual-tree.
+
+Une exploration naïve des 48 banques paierait jusqu'à 480 tests affines par
+boîte. Le masque de chambres, l'ordre des banques et le court-circuit au
+premier échec font donc partie des compteurs à recevoir. La couverture de ce
+certificat n'est pas prouvée par son exactitude locale.
 
 ### Certificat collectif boîte cible--nœud témoin
 
@@ -213,9 +241,24 @@ deviennent admissibles pour `Q_L`, et réciproquement. La frontière ambiguë du
 parent doit donc garder les domaines qui chevauchent `Q`; chaque enfant les
 hérite et les reclassifie. Une insertion séparée du sibling n'est nécessaire
 que si l'implémentation l'avait retiré, et exige alors une déduplication des
-plages. Les nœuds dont un majorant exact donne `A<=0` restent éliminés; les
+plages. Les nœuds dont un majorant conservateur donne `A<=0` restent éliminés; les
 nœuds ambigus persistent ou se raffinent. Une arène immuable avec partage
 structurel évite les copies sans perdre ni doubler ces nouveaux témoins.
+
+Une feuille partiellement créditée conserve trois masques disjoints : points
+acceptés, rejetés et ambigus. Seul le masque ambigu est raffiné et hérité; la
+feuille entière ne disparaît jamais après un crédit partiel. Pour rejeter un
+nœud témoin, le maximum entier exact de `u*v-v^2` s'obtient, pour chacune des
+deux extrémités `u` de la boîte cible, en évaluant les deux bords témoins et les
+deux entiers bornés voisins de `u/2`. Le maximum sur ces candidats, sommé sur
+les trois axes, remplace l'arrondi continu `ceil(u^2/4)`, trop haut d'une unité
+pour `u` impair.
+
+L'arène utilise partage structurel ou rollback par watermark. Elle ne copie
+aucun suffixe après le dixième crédit et restaure le checkpoint d'une feuille
+cible sans descendant. Un microtile de cibles contre un nœud témoin produit
+trois bitmasks accepté/rejeté/ambigu et ne splitte le témoin qu'une fois pour
+toutes les lanes actives.
 
 ### Certificat aux deux extrémités
 
@@ -232,9 +275,10 @@ Cette symétrisation est exacte même si l'autre extrémité appartient à la
 banque : alors `D` majore `||u-v||^2`, tandis que la première coupe exige
 `x^2>D` avec `x^2<=||u-v||^2`; le certificat échoue donc automatiquement. La
 banque ponctuelle chaude conserve l'enveloppe `O(B*48*K)` pour le top-nearest
-ou `O(B*48*(K+1))` pour un réservoir arbitraire de `B` ancres actives; toute
-table globale correspondante est interdite. À titre de diagnostic seulement,
-une table de onze candidats à 50 k occuperait 105 600 000
+ou `O(B*48*(K+1))` pour un réservoir arbitraire de `B` ancres actives. Une
+table globale n'est pas l'architecture par défaut; elle ne peut être admise que
+si son trafic et sa mémoire battent la tuile sous une gate reçue. Une table de
+onze candidats à 50 k occuperait déjà 105 600 000
 octets si les identifiants sont des positions Morton `u32` avec mapping
 authentifié, mais 211 200 000 octets avec les `PointId u64` de la ligne
 enregistrée, hors `D_c`, masques et offsets. Une porte optionnelle compare les
@@ -279,10 +323,11 @@ recopient pas leurs onze identifiants. Chaque reçu référence en plus son masq
 d'engagement propre; le juge en recalcule les dix `PointId`, `D`, l'exclusion de
 la plage cible et les inégalités strictes.
 
-Aucun tableau global de paires ni de banques ponctuelles `n*48*K` ou
-`n*48*(K+1)` n'est matérialisé : les
-survivantes du mode mesure sont comptées et hashées, pas stockées; le mode
-oracle borné (`n<=256`) tient les sorts par paire pour le juge.
+Aucun tableau global de paires n'est matérialisé. Les banques ponctuelles sont
+par défaut tuilées; toute variante globale doit publier ses octets, son trafic
+et son gain. Les survivantes du mode mesure sont comptées et hashées, pas
+stockées; le mode oracle borné (`n<=256`) tient les sorts par paire pour le
+juge.
 
 ## 6. Juge indépendant et différentiel
 

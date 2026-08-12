@@ -1021,6 +1021,7 @@ int main(int argc, char** argv) {
   mhgp3v::CloudFamily family = mhgp3v::CloudFamily::kTerrain;
   Injections inject;
   i64 min_anchors = 0, min_activations = 0, min_uncertified_report = -1, min_far_pairs = 0;
+  i64 expect_q2 = -1, expect_q3 = -1, expect_q4 = -1;
   int judge_arity = 4, judge_census = 0, support_window = 48, closure_cone = 0;
   i64 min_q4 = 0;
 
@@ -1066,6 +1067,15 @@ int main(int argc, char** argv) {
     } else if (const char* sw = suffix("--support-window=")) {
       if (!integer(sw, &v) || v < 2 || v > 4096) return 2;
       support_window = (int)v;
+    } else if (const char* e2 = suffix("--expect-q2=")) {
+      if (!integer(e2, &v)) return 2;
+      expect_q2 = v;
+    } else if (const char* e3 = suffix("--expect-q3=")) {
+      if (!integer(e3, &v)) return 2;
+      expect_q3 = v;
+    } else if (const char* e4 = suffix("--expect-q4=")) {
+      if (!integer(e4, &v)) return 2;
+      expect_q4 = v;
     } else if (const char* sq = suffix("--min-q4=")) {
       if (!integer(sq, &v)) return 2;
       min_q4 = v;
@@ -1875,9 +1885,12 @@ int main(int argc, char** argv) {
             if (inside < kmin) {
               act.push_back(nb);
               if (nb.id > a) {
-                // COQUILLE DEGENEREE : un point hors support exactement sur la
-                // sphere rend le support minimal NON UNIQUE. C'est precisement
-                // ce que la porte reguliere de la reparation exclut.
+                // EXTRA-SHELL par rapport au SUPPORT CHOISI : un point hors du
+                // support est exactement sur la sphere. Cela prouve seulement
+                // `E \ U != vide` pour ce support ; cela n'implique NI un
+                // support maximal distinct, NI plusieurs supports minimaux. La
+                // premiere redaction de ce compteur affirmait la non-unicite du
+                // support minimal : l'audit l'a refute.
                 for (const Neighbour& nz : nbrs) {
                   if (nz.id == nb.id) continue;
                   if (nz.d2 > nb.d2) break;
@@ -1999,8 +2012,9 @@ int main(int argc, char** argv) {
                 e2, e3, e4, (double)e2 / n, (double)e3 / n, (double)e4 / n,
                 (double)(e2 + e3 + e4) / n);
     const i64 d2v = (i64)deg2.load(), d3v = (i64)deg3.load(), d4v = (i64)deg4.load();
-    std::printf("coquilles DEGENEREES (un point hors support exactement sur la sphere,"
-                " donc support minimal non unique) : q2=%lld (%.3f %%) q3=%lld (%.3f %%)"
+    std::printf("EXTRA-SHELL par rapport au support choisi (un point hors support"
+                " exactement sur la sphere ; ne prouve PAS un support minimal multiple)"
+                " : q2=%lld (%.3f %%) q3=%lld (%.3f %%)"
                 " q4=%lld (%.3f %%) ; total %.3f %% des enregistrements\n",
                 d2v, e2 ? 100.0 * (double)d2v / (double)e2 : 0.0, d3v,
                 e3 ? 100.0 * (double)d3v / (double)e3 : 0.0, d4v,
@@ -2103,6 +2117,28 @@ int main(int argc, char** argv) {
     if (min_q4 > 0 && e4 < min_q4) {
       std::printf("ECHEC : plancher q4 %lld non atteint (%lld)\n", min_q4, e4);
       return 3;
+    }
+    // VALEURS GRAVEES, produites hors bande par `mhgp3v_locality_census_judge`
+    // en arithmetique rationnelle independante. Elles ne dependent d'aucun
+    // predicat de ce fichier.
+    if (expect_q2 >= 0 || expect_q3 >= 0 || expect_q4 >= 0) {
+      const bool mutated = inject.rho_min_corner || inject.rho_first_corner ||
+                           inject.rho_kth_short || inject.locate_drop_boundary ||
+                           inject.insphere_sign_flip;
+      const bool bad = (expect_q2 >= 0 && e2 != expect_q2) ||
+                       (expect_q3 >= 0 && e3 != expect_q3) || (expect_q4 >= 0 && e4 != expect_q4);
+      if (bad) {
+        std::printf("%s : gravees q2=%lld q3=%lld q4=%lld ; obtenues q2=%lld q3=%lld q4=%lld\n",
+                    mutated ? "OK : mutant tue par les valeurs gravees"
+                            : "ECHEC : desaccord avec le juge rationnel independant",
+                    expect_q2, expect_q3, expect_q4, e2, e3, e4);
+        return mutated ? 4 : 1;
+      }
+      if (mutated) {
+        std::printf("ECHEC : MUTANT SURVIVANT — les valeurs gravees sont inchangees\n");
+        return 3;
+      }
+      std::printf("OK : accord avec les valeurs gravees du juge rationnel independant\n");
     }
     return 0;
   }
