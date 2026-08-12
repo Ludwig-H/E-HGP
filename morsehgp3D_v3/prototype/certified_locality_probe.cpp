@@ -121,6 +121,7 @@
 #include <cstdio>
 #include <cstring>
 #include <functional>
+#include <iterator>
 #include <map>
 #include <string>
 #include <thread>
@@ -158,6 +159,7 @@ struct DirGrid {
   std::vector<std::array<int, 3>> vertices;
   std::vector<i64> vertex_norm2;
   std::vector<std::array<int, 3>> cells;  // indices de sommets
+  std::vector<std::array<i64, 9>> cell_normals;  // trois normales interieures
   std::vector<int> cell_slot;             // octant*(m+1)^2 + i*(m+1) + j
   std::vector<std::vector<int>> cells_at; // slot -> cellules qui y commencent
   int subdivision = 0;
@@ -177,6 +179,7 @@ DirGrid make_dir_grid(int m) {
     return id;
   };
   grid.cells_at.assign((std::size_t)8 * (std::size_t)(m + 1) * (std::size_t)(m + 1), {});
+  (void)0;
   for (int sx = -1; sx <= 1; sx += 2)
     for (int sy = -1; sy <= 1; sy += 2)
       for (int sz = -1; sz <= 1; sz += 2) {
@@ -199,6 +202,27 @@ DirGrid make_dir_grid(int m) {
               emit(i, j, {corner(i + 1, j), corner(i, j + 1), corner(i + 1, j + 1)});
           }
       }
+  // Les trois normales INTERIEURES du cone simplicial de chaque cellule :
+  // n_ab = g_a x g_b, orientee vers le troisieme sommet. Une direction est dans
+  // le cone ferme si et seulement si les trois produits sont positifs ou nuls.
+  grid.cell_normals.resize(grid.cells.size());
+  for (std::size_t c = 0; c < grid.cells.size(); ++c) {
+    const std::array<int, 3>& tri = grid.cells[c];
+    std::array<i64, 9> out{};
+    for (int k = 0; k < 3; ++k) {
+      const std::array<int, 3>& a = grid.vertices[(std::size_t)tri[k]];
+      const std::array<int, 3>& b = grid.vertices[(std::size_t)tri[(k + 1) % 3]];
+      const std::array<int, 3>& t = grid.vertices[(std::size_t)tri[(k + 2) % 3]];
+      i64 nx = (i64)a[1] * b[2] - (i64)a[2] * b[1];
+      i64 ny = (i64)a[2] * b[0] - (i64)a[0] * b[2];
+      i64 nz = (i64)a[0] * b[1] - (i64)a[1] * b[0];
+      if (nx * t[0] + ny * t[1] + nz * t[2] < 0) { nx = -nx; ny = -ny; nz = -nz; }
+      out[(std::size_t)(3 * k + 0)] = nx;
+      out[(std::size_t)(3 * k + 1)] = ny;
+      out[(std::size_t)(3 * k + 2)] = nz;
+    }
+    grid.cell_normals[c] = out;
+  }
   return grid;
 }
 
@@ -395,6 +419,219 @@ std::size_t certified_take(const mhgp::P3& anchor, const std::vector<Neighbour>&
     if (ok(mid)) hi = mid; else lo = mid + 1;
   }
   return lo;
+}
+
+// ---------------------------------------------------------------------------
+// LA FERMETURE PAR CONE — ce qui remplace le balayage d'univers.
+//
+// Une cellule dont le rayon depasse la fenetre kNN, ou qui reste ouverte, ne
+// peut pas etre fermee par un cap : il faut interroger son cone. Le minorant de
+// noeud propose par l'audit le rend borne par la geometrie reelle. Pour un
+// noeud AABB `W` et une cellule `C` de sommets `g` :
+//
+//   dot_max(g,W) = max sur la boite de g . (w - x)   — coin par axe, exact ;
+//   si un dot_max <= 0, aucun point de W ne couvre C ;
+//   sinon  LB_C(W) = max_g ||g||^2 d2_min(W)^2 / dot_max(g,W)^2 <= min_w rho_C(w)^2.
+//
+// Un DFS qui coupe `W` des que `LB_C(W)` ne bat plus la K-ieme cle courante
+// visite donc un travail proportionnel au contenu du cone, jamais au nuage.
+// Les visites et les tests sont comptes : une requete de cone n'est pas
+// gratuite parce qu'elle est « output-sensitive ».
+// ---------------------------------------------------------------------------
+struct ConeCounters {
+  i64 visits = 0;
+  i64 node_tests = 0;
+  i64 point_tests = 0;
+};
+
+inline i64 box_min_d2(const mhgp3v::LbvhNode& node, const mhgp::P3& x) {
+  const i64 c[3] = {x.x, x.y, x.z};
+  i64 acc = 0;
+  for (int d = 0; d < 3; ++d) {
+    const i64 gap = c[d] < node.lo[d] ? node.lo[d] - c[d] : (c[d] > node.hi[d] ? c[d] - node.hi[d] : 0);
+    acc += gap * gap;
+  }
+  return acc;
+}
+
+// max de g . (w - x) sur la boite : coin par axe selon le signe de g.
+inline i64 box_dot_max(const std::array<int, 3>& g, const mhgp3v::LbvhNode& node,
+                       const mhgp::P3& x) {
+  const i64 c[3] = {x.x, x.y, x.z};
+  i64 acc = 0;
+  for (int d = 0; d < 3; ++d) {
+    const i64 pick = g[d] > 0 ? node.hi[d] : node.lo[d];
+    acc += (i64)g[d] * (pick - c[d]);
+  }
+  return acc;
+}
+
+// Ferme UNE cellule par parcours du LBVH. `heap` est le tas des K plus petits
+// rho^2 deja connus ; il est complete sur place. Rend le nombre de points lus.
+void close_cell_by_cone(const mhgp::P3& anchor, int anchor_id, const mhgp3v::MortonLbvh& tree,
+                        const std::vector<mhgp::P3>& pts, const DirGrid& grid, std::size_t cell,
+                        int need, std::vector<Rho2>* heap, ConeCounters* counters) {
+  const std::array<int, 3>& tri = grid.cells[cell];
+  std::vector<int> stack;
+  stack.reserve(64);
+  stack.push_back(0);
+  while (!stack.empty()) {
+    const int id = stack.back();
+    stack.pop_back();
+    const mhgp3v::LbvhNode& node = tree.nodes[(std::size_t)id];
+    ++counters->visits;
+    // 1. le noeud peut-il couvrir la cellule ? Il faut dot_max > 0 aux trois
+    //    sommets, sinon aucun de ses points n'a la cellule dans sa calotte.
+    Rho2 bound{};
+    bool reachable = true;
+    const i64 d2min = box_min_d2(node, anchor);
+    for (int k = 0; k < 3 && reachable; ++k) {
+      ++counters->node_tests;
+      const std::array<int, 3>& g = grid.vertices[(std::size_t)tri[k]];
+      const i64 dm = box_dot_max(g, node, anchor);
+      if (dm <= 0) { reachable = false; break; }
+      const Rho2 cand{grid.vertex_norm2[(std::size_t)tri[k]] * ((i128)d2min * (i128)d2min),
+                      (i128)dm * (i128)dm};
+      if (bound.den == 0 || rho_less(bound, cand)) bound = cand;
+    }
+    if (!reachable) continue;
+    // 2. le minorant bat-il la K-ieme cle courante ?
+    if ((int)heap->size() >= need && !rho_less(bound, heap->front())) continue;
+    if (node.left < 0) {
+      for (int t = node.begin; t < node.end; ++t) {
+        const int q = tree.order[(std::size_t)t];
+        if (q == anchor_id) continue;
+        ++counters->point_tests;
+        const mhgp::P3& p = pts[(std::size_t)q];
+        const i64 sv[3] = {p.x - anchor.x, p.y - anchor.y, p.z - anchor.z};
+        const i64 ls2 = sv[0] * sv[0] + sv[1] * sv[1] + sv[2] * sv[2];
+        const i128 ls4 = (i128)ls2 * (i128)ls2;
+        Rho2 worst{};
+        bool ok = true;
+        for (int k = 0; k < 3; ++k) {
+          const std::array<int, 3>& g = grid.vertices[(std::size_t)tri[k]];
+          const i64 dv = (i64)g[0] * sv[0] + (i64)g[1] * sv[1] + (i64)g[2] * sv[2];
+          if (dv <= 0) { ok = false; break; }
+          const Rho2 cand{grid.vertex_norm2[(std::size_t)tri[k]] * ls4, (i128)dv * (i128)dv};
+          if (worst.den == 0 || rho_less(worst, cand)) worst = cand;
+        }
+        if (!ok) continue;
+        if ((int)heap->size() < need) {
+          heap->push_back(worst);
+          std::push_heap(heap->begin(), heap->end(), rho_less);
+        } else if (rho_less(worst, heap->front())) {
+          std::pop_heap(heap->begin(), heap->end(), rho_less);
+          heap->back() = worst;
+          std::push_heap(heap->begin(), heap->end(), rho_less);
+        }
+      }
+      continue;
+    }
+    stack.push_back(node.left);
+    stack.push_back(node.right);
+  }
+}
+
+// L'INTERIORITE d'une paire, par le LBVH, avec sortie anticipee.
+// Un point `w` est strictement dans la boule de diametre `[x,y]` si et
+// seulement si `||2w - x - y||^2 < ||x - y||^2`, ce qui evite toute fraction.
+// Le meme critere borne une boite : le minimum de `||2w - x - y||^2` sur la
+// boite est la somme des ecarts carres axe par axe.
+int count_interior_ball(const mhgp::P3& x, const mhgp::P3& y, int xid, int yid,
+                        const mhgp3v::MortonLbvh& tree, const std::vector<mhgp::P3>& pts,
+                        int limit, ConeCounters* counters) {
+  const i64 c[3] = {x.x + y.x, x.y + y.y, x.z + y.z};
+  const i64 dx = x.x - y.x, dy = x.y - y.y, dz = x.z - y.z;
+  const i64 d2 = dx * dx + dy * dy + dz * dz;
+  int found = 0;
+  std::vector<int> stack;
+  stack.reserve(64);
+  stack.push_back(0);
+  while (!stack.empty() && found < limit) {
+    const int id = stack.back();
+    stack.pop_back();
+    const mhgp3v::LbvhNode& node = tree.nodes[(std::size_t)id];
+    ++counters->visits;
+    i64 acc = 0;
+    for (int d = 0; d < 3; ++d) {
+      const i64 lo = 2 * node.lo[d], hi = 2 * node.hi[d];
+      const i64 gap = c[d] < lo ? lo - c[d] : (c[d] > hi ? c[d] - hi : 0);
+      acc += gap * gap;
+    }
+    if (acc >= d2) continue;
+    if (node.left < 0) {
+      for (int t = node.begin; t < node.end && found < limit; ++t) {
+        const int q = tree.order[(std::size_t)t];
+        if (q == xid || q == yid) continue;
+        ++counters->point_tests;
+        const mhgp::P3& w = pts[(std::size_t)q];
+        const i64 ex = 2 * w.x - c[0], ey = 2 * w.y - c[1], ez = 2 * w.z - c[2];
+        if (ex * ex + ey * ey + ez * ez < d2) ++found;
+      }
+      continue;
+    }
+    stack.push_back(node.left);
+    stack.push_back(node.right);
+  }
+  return found;
+}
+
+// Les CANDIDATS d'une cellule : les points dont la direction tombe dans le cone
+// simplicial et dont la distance carree ne depasse pas `r_c^2`. Deux tests de
+// noeud exacts et entiers : la boite doit atteindre le cote interieur des trois
+// plans du cone, et sa distance minimale doit tenir sous le rayon.
+void collect_cone_candidates(const mhgp::P3& anchor, int anchor_id,
+                             const mhgp3v::MortonLbvh& tree, const std::vector<mhgp::P3>& pts,
+                             const DirGrid& grid, std::size_t cell, const Rho2& radius,
+                             std::vector<int>* out, ConeCounters* counters) {
+  const std::array<i64, 9>& nrm = grid.cell_normals[cell];
+  std::vector<int> stack;
+  stack.reserve(64);
+  stack.push_back(0);
+  while (!stack.empty()) {
+    const int id = stack.back();
+    stack.pop_back();
+    const mhgp3v::LbvhNode& node = tree.nodes[(std::size_t)id];
+    ++counters->visits;
+    if (radius.den != 0 && !within_rho(box_min_d2(node, anchor), radius)) continue;
+    bool reachable = true;
+    for (int k = 0; k < 3 && reachable; ++k) {
+      ++counters->node_tests;
+      const std::array<int, 3> g{(int)0, (int)0, (int)0};
+      (void)g;
+      const i64 c[3] = {anchor.x, anchor.y, anchor.z};
+      i64 acc = 0;
+      for (int d = 0; d < 3; ++d) {
+        const i64 comp = nrm[(std::size_t)(3 * k + d)];
+        const i64 pick = comp > 0 ? node.hi[d] : node.lo[d];
+        acc += comp * (pick - c[d]);
+      }
+      if (acc < 0) reachable = false;
+    }
+    if (!reachable) continue;
+    if (node.left < 0) {
+      for (int t = node.begin; t < node.end; ++t) {
+        const int q = tree.order[(std::size_t)t];
+        if (q == anchor_id) continue;
+        ++counters->point_tests;
+        const mhgp::P3& p = pts[(std::size_t)q];
+        const i64 sv[3] = {p.x - anchor.x, p.y - anchor.y, p.z - anchor.z};
+        const i64 d2 = sv[0] * sv[0] + sv[1] * sv[1] + sv[2] * sv[2];
+        if (radius.den != 0 && !within_rho(d2, radius)) continue;
+        bool inside = true;
+        for (int k = 0; k < 3 && inside; ++k) {
+          const i64 dv = nrm[(std::size_t)(3 * k + 0)] * sv[0] +
+                         nrm[(std::size_t)(3 * k + 1)] * sv[1] +
+                         nrm[(std::size_t)(3 * k + 2)] * sv[2];
+          if (dv < 0) inside = false;
+        }
+        if (inside) out->push_back(q);
+      }
+      continue;
+    }
+    stack.push_back(node.left);
+    stack.push_back(node.right);
+  }
 }
 
 // Les K plus petits rho par cellule. `radii[c]` recoit r_c^2 (den == 0 si la
@@ -667,7 +904,7 @@ int main(int argc, char** argv) {
   mhgp3v::CloudFamily family = mhgp3v::CloudFamily::kTerrain;
   Injections inject;
   i64 min_anchors = 0, min_activations = 0, min_uncertified_report = -1, min_far_pairs = 0;
-  int judge_arity = 4, judge_census = 0, support_window = 48;
+  int judge_arity = 4, judge_census = 0, support_window = 48, closure_cone = 0;
   i64 min_q4 = 0;
 
   auto integer = [](const char* text, i64* value) {
@@ -704,6 +941,11 @@ int main(int argc, char** argv) {
     } else if (const char* sb = suffix("--min-far-pairs=")) {
       if (!integer(sb, &v)) return 2;
       min_far_pairs = v;
+    } else if (const char* scl = suffix("--closure=")) {
+      const std::string what = scl;
+      if (what == "cone") closure_cone = 1;
+      else if (what == "scan") closure_cone = 0;
+      else return 2;
     } else if (const char* sw = suffix("--support-window=")) {
       if (!integer(sw, &v) || v < 2 || v > 4096) return 2;
       support_window = (int)v;
@@ -746,6 +988,14 @@ int main(int argc, char** argv) {
   }
   if (n < 5 || grid_m < 1 || grid_m > 24 || kmin < 1 || max_neighbours < kmin) {
     std::printf("REFUS : parametres hors domaine\n");
+    return 2;
+  }
+  if (judge_census && n > 400 && mode == "arity") {
+    std::printf("REFUS : le juge exhaustif des arites est borne a 400 points\n");
+    return 2;
+  }
+  if (judge_census && n > 4000 && (mode == "directional" || mode == "census")) {
+    std::printf("REFUS : le juge exhaustif du census est borne a 4000 points\n");
     return 2;
   }
   if (mode != "fixture" && mode != "profile" && mode != "census" && mode != "directional" && mode != "arity") {
@@ -1162,17 +1412,20 @@ int main(int argc, char** argv) {
   // -------------------------------------------------------------------------
   if (mode == "directional") {
     std::atomic<i64> scanned{0}, cell_tests{0}, candidates{0}, open_cells{0},
-        anchors_with_open{0}, emitted{0}, tombs{0}, interior_tests{0}, unbounded{0}, full_scans{0};
+        anchors_with_open{0}, emitted{0}, tombs{0}, interior_tests{0}, unbounded{0}, full_scans{0}, cone_visits{0}, cone_node_tests{0}, cone_point_tests{0};
     std::atomic<int> cursor{0};
     std::vector<int> cand_of((std::size_t)n, 0);
+    std::vector<std::vector<i64>> emitted_pairs((std::size_t)threads);
     const auto t0 = std::chrono::steady_clock::now();
     std::vector<std::thread> pool;
     for (int t = 0; t < threads; ++t)
-      pool.emplace_back([&]() {
+      pool.emplace_back([&, t]() {
+        std::vector<i64>& mine = emitted_pairs[(std::size_t)t];
         std::vector<Neighbour> nbrs;
         std::vector<Rho2> radii;
         std::vector<std::vector<Rho2>> heaps;
         std::vector<int> hit;
+        ConeCounters cones{};
         i64 lsc = 0, lct = 0, lca = 0, lop = 0, lawo = 0, lem = 0, ltb = 0, lit = 0, lub = 0, lfs = 0;
         for (;;) {
           const int a = cursor.fetch_add(1);
@@ -1188,20 +1441,74 @@ int main(int argc, char** argv) {
           // La fenetre kNN ne ferme la lane que si TOUT rayon de cellule y
           // tient. Une cellule ouverte n'a aucune borne ; une cellule fermee
           // au-dela du dernier voisin lu perdrait des candidats sans le dire.
-          // Dans les deux cas on bascule sur l'univers complet : le cout est
-          // celui du cone reel, jamais un cap.
+          //
+          // Deux fermetures possibles. `--closure=scan` bascule sur l'univers
+          // complet : correct, mesurable, mais quadratique — c'est un etalon,
+          // pas une architecture. `--closure=cone` interroge le CONE de chaque
+          // cellule concernee sur le LBVH, avec le minorant de noeud : le cout
+          // suit le contenu du cone. Les deux doivent rendre le MEME census.
+          // `within_rho(d2, r)` teste `d2 <= r^2`. La fenetre contient tous les
+          // points a `d^2 < window_d2` ; une cellule deborde donc exactement
+          // quand `r_c^2 >= window_d2`, c'est-a-dire quand `within_rho` est
+          // VRAI. La condition avait ete ecrite a l'envers : elle etait masquee
+          // par le balayage complet, et se voyait a trois activations pres des
+          // qu'une fenetre courte etait employee.
           bool beyond_window = anchor_open > 0;
           if (!nbrs.empty())
             for (const Rho2& r : radii)
-              if (r.den != 0 && !within_rho(nbrs.back().d2, r)) { beyond_window = true; break; }
-          const bool full_scan = beyond_window && (int)nbrs.size() < n - 1;
+              if (r.den != 0 && within_rho(nbrs.back().d2, r)) { beyond_window = true; break; }
+          std::vector<int> cone_extra;
+          if (beyond_window && closure_cone) {
+            const i64 window_d2 = nbrs.empty() ? 0 : nbrs.back().d2;
+            for (std::size_t c = 0; c < radii.size(); ++c) {
+              const bool unclosed = radii[c].den == 0;
+              const bool outside = !unclosed && within_rho(window_d2, radii[c]);
+              if (!unclosed && !outside) continue;
+              if (outside) {
+                // Le tas doit repartir VIDE : le parcours relit les points deja
+                // vus par la fenetre, et une reinsertion ferait descendre la
+                // K-ieme cle sous sa vraie valeur — le rayon retrecirait a tort
+                // et des activations disparaitraient. Mesure du defaut : 5 870
+                // activations perdues sur 23 021 a terrain n=1200.
+                heaps[c].clear();
+                close_cell_by_cone(px, a, tree, pts, grid, c, kmin, &heaps[c], &cones);
+                radii[c] = (int)heaps[c].size() >= kmin ? heaps[c].front() : Rho2{};
+              }
+              // Une cellule OUVERTE ne se ferme pas : son tas ne se remplira
+              // jamais, donc le minorant ne coupe rien et le parcours degenere
+              // en balayage (mesure : n^1,55). On ne le tente plus. La cellule
+              // garde un rayon infini et ses candidats sont classes un par un
+              // par requete de boule — cout borne par le contenu du cone, qui
+              // est vide pour les cellules polaires d'une nappe.
+              collect_cone_candidates(px, a, tree, pts, grid, c, radii[c], &cone_extra, &cones);
+            }
+            std::sort(cone_extra.begin(), cone_extra.end());
+            cone_extra.erase(std::unique(cone_extra.begin(), cone_extra.end()), cone_extra.end());
+            // Le cone recouvre la fenetre : sans cette difference, une paire
+            // serait comptee deux fois et une interiorite doublee.
+            std::vector<int> in_window;
+            in_window.reserve(nbrs.size());
+            for (const Neighbour& nb : nbrs) in_window.push_back(nb.id);
+            std::sort(in_window.begin(), in_window.end());
+            std::vector<int> only_extra;
+            only_extra.reserve(cone_extra.size());
+            std::set_difference(cone_extra.begin(), cone_extra.end(), in_window.begin(),
+                                in_window.end(), std::back_inserter(only_extra));
+            cone_extra.swap(only_extra);
+          }
+          const bool full_scan = beyond_window && !closure_cone && (int)nbrs.size() < n - 1;
           if (anchor_open > 0) ++lawo;
           if (full_scan) ++lfs;
-          const int universe = full_scan ? n : (int)nbrs.size();
-          auto uid = [&](int t) { return full_scan ? t : nbrs[(std::size_t)t].id; };
+          const int universe =
+              full_scan ? n : (int)nbrs.size() + (closure_cone ? (int)cone_extra.size() : 0);
+          auto uid = [&](int t) {
+            if (full_scan) return t;
+            return t < (int)nbrs.size() ? nbrs[(std::size_t)t].id
+                                        : cone_extra[(std::size_t)t - nbrs.size()];
+          };
           auto ud2 = [&](int t) {
-            if (!full_scan) return nbrs[(std::size_t)t].d2;
-            const mhgp::P3& q = pts[(std::size_t)t];
+            if (!full_scan && t < (int)nbrs.size()) return nbrs[(std::size_t)t].d2;
+            const mhgp::P3& q = pts[(std::size_t)uid(t)];
             const i64 dx = q.x - px.x, dy = q.y - px.y, dz = q.z - px.z;
             return dx * dx + dy * dy + dz * dz;
           };
@@ -1224,16 +1531,25 @@ int main(int argc, char** argv) {
             // Classification exacte : tous les interieurs de la boule de
             // diametre [x,y] sont a distance < d_y. L'univers balaye les
             // contient tous des que la lane est close.
-            if (!full_scan && dy2 > nbrs.back().d2) { ++lub; continue; }
+            if (!full_scan && !closure_cone && dy2 > nbrs.back().d2) { ++lub; continue; }
+            if (closure_cone && dy2 > nbrs.back().d2) {
+              // La boule diametrale deborde la fenetre : on la classe par une
+              // requete de boule sur le LBVH, avec sortie anticipee a K.
+              const int inside = count_interior_ball(px, py, a, yid, tree, pts, kmin, &cones);
+              if (inside < kmin) { ++lem; mine.push_back((i64)a * (i64)n + (i64)yid); }
+              else ++ltb;
+              continue;
+            }
             int inside = 0;
             for (int u = 0; u < universe && inside < kmin; ++u) {
               const int zid = uid(u);
               if (zid == a || zid == yid) continue;
-              if (ud2(u) >= dy2) { if (!full_scan) break; else continue; }
+              if (ud2(u) >= dy2) { if (!full_scan && !closure_cone) break; else continue; }
               ++lit;
               if (judge::inside_q2(px, py, pts[(std::size_t)zid])) ++inside;
             }
-            if (inside < kmin) ++lem; else ++ltb;
+            if (inside < kmin) { ++lem; mine.push_back((i64)a * (i64)n + (i64)yid); }
+            else ++ltb;
           }
           cand_of[(std::size_t)a] = (int)local_cand;
           lca += local_cand;
@@ -1248,6 +1564,9 @@ int main(int argc, char** argv) {
         interior_tests.fetch_add(lit);
         unbounded.fetch_add(lub);
         full_scans.fetch_add(lfs);
+        cone_visits.fetch_add(cones.visits);
+        cone_node_tests.fetch_add(cones.node_tests);
+        cone_point_tests.fetch_add(cones.point_tests);
       });
     for (std::thread& th : pool) th.join();
     const double sec =
@@ -1268,6 +1587,10 @@ int main(int argc, char** argv) {
                 percentile_of(cands, 0.50), percentile_of(cands, 0.95),
                 percentile_of(cands, 0.99), percentile_of(cands, 1.00), all_pairs,
                 (double)candidates.load() / (2.0 * (double)all_pairs));
+    if (closure_cone)
+      std::printf("cones : %lld visites de noeud, %lld tests de plan, %lld tests de point\n",
+                  (i64)cone_visits.load(), (i64)cone_node_tests.load(),
+                  (i64)cone_point_tests.load());
     std::printf("census q2 : %lld activations (p<=%d), %lld tombstones,"
                 " %lld tests d'interiorite, %lld ancres en balayage complet"
                 " (cellule ouverte), %lld ancres a lane NON CLOSE\n",
@@ -1295,12 +1618,14 @@ int main(int argc, char** argv) {
         std::printf("REFUS : le juge exhaustif du census est borne a 4000 points\n");
         return 2;
       }
-      std::atomic<i64> ref{0};
+      // LE JUGE COMPARE LES IDENTITES. Un cardinal laisse une omission et un
+      // doublon se compenser ; la liste canonique des paires ne le permet pas.
+      std::vector<std::vector<i64>> jshards((std::size_t)threads);
       std::atomic<int> jc{0};
       std::vector<std::thread> jpool;
       for (int t = 0; t < threads; ++t)
-        jpool.emplace_back([&]() {
-          i64 local = 0;
+        jpool.emplace_back([&, t]() {
+          std::vector<i64>& out = jshards[(std::size_t)t];
           for (;;) {
             const int i = jc.fetch_add(1);
             if (i >= n) break;
@@ -1312,26 +1637,50 @@ int main(int argc, char** argv) {
                                      pts[(std::size_t)z]))
                   ++inside;
               }
-              if (inside < kmin) ++local;
+              if (inside < kmin) out.push_back((i64)i * (i64)n + (i64)j);
             }
           }
-          ref.fetch_add(local);
         });
       for (std::thread& th : jpool) th.join();
-      const i64 reference = (i64)ref.load(), got = (i64)emitted.load();
-      std::printf("juge du census : exhaustif=%lld directionnel=%lld ecart=%lld\n", reference,
-                  got, got - reference);
+      std::vector<i64> ref_pairs;
+      for (std::vector<i64>& v : jshards)
+        ref_pairs.insert(ref_pairs.end(), v.begin(), v.end());
+      std::sort(ref_pairs.begin(), ref_pairs.end());
+      std::vector<i64> got_pairs;
+      for (std::vector<i64>& v : emitted_pairs)
+        got_pairs.insert(got_pairs.end(), v.begin(), v.end());
+      std::sort(got_pairs.begin(), got_pairs.end());
+      const bool duplicated =
+          std::adjacent_find(got_pairs.begin(), got_pairs.end()) != got_pairs.end();
+      std::vector<i64> missing, extra;
+      std::set_difference(ref_pairs.begin(), ref_pairs.end(), got_pairs.begin(),
+                          got_pairs.end(), std::back_inserter(missing));
+      std::set_difference(got_pairs.begin(), got_pairs.end(), ref_pairs.begin(),
+                          ref_pairs.end(), std::back_inserter(extra));
+      const i64 reference = (i64)ref_pairs.size(), got = (i64)got_pairs.size();
+      std::printf("juge du census : exhaustif=%lld directionnel=%lld ; %zu paires"
+                  " manquantes, %zu paires en trop, doublons=%d\n",
+                  reference, got, missing.size(), extra.size(), (int)duplicated);
+      if (!missing.empty())
+        std::printf("  premiere paire manquante : (%lld,%lld)\n", missing[0] / n,
+                    missing[0] % n);
+      if (!extra.empty())
+        std::printf("  premiere paire en trop : (%lld,%lld)\n", extra[0] / n, extra[0] % n);
+      if (!missing.empty() || !extra.empty() || duplicated) {
+        if (mutated_dir) {
+          std::printf("OK : mutant tue — les identites de paires different\n");
+          return 4;
+        }
+        std::printf("ECHEC : le census directionnel ne reproduit pas les IDENTITES du"
+                    " juge exhaustif\n");
+        return 1;
+      }
       if (reference == 0) {
         std::printf("ECHEC : juge vide (vert par vacuite)\n");
         return 3;
       }
       if (got != reference) {
-        if (mutated_dir) {
-          std::printf("OK : mutant tue — le census directionnel differe de %lld\n",
-                      got - reference);
-          return 4;
-        }
-        std::printf("ECHEC : le census directionnel ne reproduit pas le juge exhaustif\n");
+        std::printf("ECHEC : cardinaux differents apres egalite des identites\n");
         return 1;
       }
       if (mutated_dir) {
