@@ -584,7 +584,8 @@ gloutonnement `a3`, puis `a2`, et poser `a1` exactement égal au dernier reste.
 Alors tout graphe ayant `T` triangles et `Q` copies de `K4` vérifie
 `Q<=C(a3,4)+C(a2,3)+C(a1,2)`; pour `T=0`, poser `Q_KK=0`. Une admission sûre
 pour la même métrique déclarée est donc
-`E+3*T+6*Q_KK(T)<=work_cap`, idéalement avec les triangles du préfixe q4. La
+`E2+3*T3+6*Q_KK(T4)<=work_cap`, avec les triangles du préfixe q4. Une version
+calculée entièrement sur le surgraphe q2 reste sûre mais plus lâche. La
 recherche et les binomiales emploient u128 et saturent à `cap+1`; sous
 `m<=50 000`, le score maximal reste inférieur à `2^61`, mais le CLI à cent
 millions de points n'est pas couvert par i64. La borne plus simple
@@ -593,7 +594,8 @@ cap séparé sur les octets, le scratch et le temps.
 
 La représentation dense actuelle alloue
 `m*ceil(m/64)` mots u64. Son compte exact emploie, pour
-`W=ceil(m/64)`, `Theta(E_3 W+T_4 W+E_2+T_3+Q_4)` opérations; le terme
+`W=ceil(m/64)`, au moins
+`Theta(c_2 W+E_2+E_3 W+T_3+T_4 W+Q_4)` opérations; le terme
 `T_4 W` atteint `Theta(m^4/64)` dans une clique. Contre-correction de l'autre
 audit : à `m=50 000`, cela représente `39 100 000` u64, donc `312 800 000`
 octets ou environ `298,3 MiB`, et non `2,5 GB`; le défaut reste matériel. Le
@@ -602,17 +604,34 @@ par dégénérescence, avec intersections merge/galloping; réserver les bitsets
 tuilés aux seuls sommets de fort degré sous cap exact. `T` alimente alors la
 borne de Kruskal--Katona sans énumérer `Q` avant la décision de terminalisation.
 
+Une enveloppe exacte plus précoce vient des degrés forward. Dans toute
+orientation donnée par un ordre total, chaque triangle ou K4 a un unique plus
+petit sommet. Si `d_q^+(v)` est le degré forward du cut q, alors
+`T3<=sum_v C(d_3^+(v),2)` et `Q4<=sum_v C(d_4^+(v),3)`. Le `count` CSR sature
+ces sommes à `cap+1` sans intersection. Une orientation de dégénérescence
+garantit `max d^+<=d` et donc les bornes `n*C(d,2)` et `n*C(d,3)`; elle n'est
+pas prétendue meilleure que tout autre ordre sur chaque graphe. Le pipeline GPU
+essaie donc enveloppe de degrés, `T3/T4` exacts avec
+`Q_KK(T4)`, puis `Q4` exact sous petite largeur et préflight. Cela ne borne pas
+encore le temps ni la mémoire totale.
+
 ## 13. Contre-audit du successeur à K4 exacts
 
-Le snapshot `HEAD=02e709bf`, source
+Le snapshot historique `HEAD=02e709bf`, source
 `dbaa2e0128c5be30e2f7c75784e38758a45c7bb938fba5d8ab4a87c71d5ad764`,
 et son ELF Release
 `423797e9964538f42701660d8baaf492b302f801a4aeb4b0df1b183986a5a037`
 absorbent la réfutation précédente : la sonde est limitée à `top<=96`, compte
-exactement `E2` sur `D_9`, `T3` sur `D_8`, `T4/Q4` sur `D_7`, puis décide avec
+exactement `E2` sur `D_(smax-2)`, `T3` sur `D_(smax-3)` et `T4/Q4` sur
+`D_(smax-4)` — donc `D_9/D_8/D_7` à `smax=11` — puis décide avec
 `E2+3T3+6Q4`. L'orientation supérieure des bitsets fait compter chaque triangle
 et chaque K4 une fois. Ce couple passe les 28 CTests `centre_cell`; la branche
 de sonde n'est toutefois pas exercée au facteur par défaut.
+
+Cette identité de cuts suppose `have_thresholds`. Quand le pool commun contient
+moins de `smax-1` sites, le code pose `c2=c3=c4=|P|`; le compte reste exact sur
+les lanes réellement parcourues, mais celles-ci sont des supersets fail-open et
+ne sont plus littéralement `D_(smax-q)`.
 
 Quatre réserves empêchent encore de parler de cap industriel :
 
@@ -642,17 +661,35 @@ le plafond 96; sur device, le majorant
 `sum C(popcount(N+(i) intersection N+(j)),2)` permet d'arrêter plus tôt dès le
 cap dépassé.
 
-Le worktree postérieur `d2039ba...` ajoute un prune enfant--`tight` exact, le
-réemploi de scratch vectors et le contrôle i128 exact de l'incidence. Son
-mutant `Q4*=4` est plus réaliste, mais `min_probes>0` ne garantit pas sa mort si
-la sonde ne voit aucun K4 ou si la borne a du slack; la fixture `K_24` saturée
-reste nécessaire. Seuls des smokes O2 éphémères existent; aucun CMake Release,
-CTest ou reçu ne le qualifie. Son statut
-et ses fixtures sont tenus dans `AUDIT_ETAT_COURANT.md`.
+Le successeur `HEAD=3ffff85`, source `d2039ba...`, ajoute un prune
+enfant--`tight` exact, le réemploi de scratch vectors et le contrôle i128 exact
+de l'incidence. La suite ciblée 30/30 observée sur son ELF Release exerce deux
+portes de sonde; elle n'est pas archivée comme reçu durable et la porte saine
+n'emploie ni `--judge`, ni vérité indépendante pour `E2/T3/T4/Q4`. Le stdout
+publie `T3` sous `probe_triangles`, mais la garde utilise le `T4` caché : le
+lecteur ne peut pas recalculer `4Q4<=(m4-3)T4` depuis le reçu. Publier
+`probe_triangles_q4` et les deux membres maximaux de la garde est obligatoire.
+
+Son mutant `Q4*=4`, malgré son nom `incidence-off-by-one`, teste la sensibilité
+de la garde et non l'orientation de l'énumérateur. `min_probes>0` ne garantit
+pas à lui seul sa mort si la sonde ne voit aucun K4 ou si la borne a du slack;
+la fixture `K_24` saturée reste nécessaire. Un vrai mutant `Q4+1` serait au
+contraire tué sur toute clique complète, puisque la borne d'incidence y est une
+égalité; le défaut du test terrain est l'absence de cette fixture, pas une borne
+intrinsèquement non serrée.
 
 Le smoke terrain tue empiriquement ce mutant, mais celui-ci modifie ensuite le
 score d'admission et donc le parcours, puis journalise chaque violation. La
 porte durable garde le compte réel pour toute décision, teste séparément la
 copie mutée et échoue vite avec un diagnostic propre à l'incidence.
+
+Le worktree postérieur `1b6ca68...` ajoute une ablation et `cell_pts`, non reçus.
+Il accepte encore les planchers malgré son commentaire; en différé,
+`ablate=2` exécute encore les lifts et `ablate=3` peut accumuler les contextes
+sans flush; la sonde calcule des cliques avant certains retours; `cell_pts`
+ajoute une copie `Theta(top)` non préflightée. Une sortie volontairement fausse
+peut encore employer le schéma exact et le code zéro. Le CMake worktree
+`c9a7386...` duplique les trois noms de tests d'ablation. Il faut un contrat
+diagnostic distinct et des portes dédupliquées avant toute mesure de coût.
 
 GCP non utilisé. Aucun fichier de code ou de reçu n'a été modifié.

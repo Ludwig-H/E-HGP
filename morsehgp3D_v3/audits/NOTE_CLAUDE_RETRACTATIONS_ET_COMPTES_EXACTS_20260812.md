@@ -28,9 +28,11 @@ l'empreinte de l'ELF revalidée **avant et après chaque cas** et un champ
 `identique=oui|NON` par cas. Le nouveau reçu est
 `scale_counters_frozen.txt`, contrat `CentreCellScaleReceipt-v2`.
 
-Au pin de cette note, ce fichier ne contient encore que douze lignes : en-tête,
-commande 12 500 et `elf_before`. Il est **ouvert**, sans stdout, code, hash aval
-ni footer, et a été commité avant la fin. Le driver temporaire n'exerce que
+Au pin initial `02e709b` de cette note, ce fichier ne contenait encore que douze
+lignes : en-tête, commande 12 500 et `elf_before`. Au `HEAD=3ffff85`, il contient
+39 lignes : le seul bloc fermé est `terrain,n=12 500,rc=0`, le 25 000 n'a encore
+que sa commande et son hash ELF amont, et aucun footer n'existe. Le driver
+temporaire n'exerce que
 `terrain`, `uniform` et `scanline_single_pass`; il omet notamment
 `eight_clusters` et n'est donc pas une rampe contractuelle. Il utilise `>>`,
 n'a ni mode shell fail-closed, ni trap `ABORTED`, ni timeout, ni arrêt sur
@@ -99,18 +101,33 @@ dans `mine` triée, pas par `PointId`; cet ordre total suffit pour que
 `popcount(N+(i) inter N+(j))` compte chaque triangle une fois et
 `popcount(N+(i) inter N+(j) inter N+(k))` chaque `K4` une fois. Le plafond de
 sonde `top<=96` donne seulement une borne diagnostique finie. Avec
-`W=ceil(top/64)`, le compte dense coûte notamment
-`Theta(E_3 W+T_4 W+E_2+T_3+Q_4)`; l'admission
+`W=ceil(top/64)`, le compte dense coûte au moins
+`Theta(c_2 W+E_2+E_3 W+T_3+T_4 W+Q_4)`; l'admission
 `E_2+3T_3+6Q_4` conserve des poids de coût heuristiques et ne borne ni temps,
 ni contextes, ni octets, census, owner, groupement ou tri.
 
-La borne d'incidence de l'audit, `4 Q_4 <= (m_4-3) T_4`, n'est pas encore
-implémentée exactement comme contrôle : le code calcule
-`floor((m_4-3)T_4/4)` puis tolère `Q_4=borne+1`. Le test correct est directement
-`4Q_4>(m_4-3)T_4`, en largeur vérifiée et sans exclure `T_4=0`. Le code trois
-emploie aussi le libellé inadapté « lemme de profondeur » pour une éventuelle
-violation d'incidence. L'affirmation « jamais violée » n'a pas de transcript et
-est retirée jusqu'à une porte non vide avec mutant d'une unité.
+La description par `D_(smax-q)` suppose `have_thresholds`, donc un pool commun
+d'au moins `smax-1` sites. Sinon le code pose les trois cuts égaux au pool
+entier. Le compte reste exact sur les lanes réellement parcourues et fail-open
+pour les supports, mais ces lanes sont des supersets et non les `D_h` exacts;
+les receipts doivent distinguer ces deux cas.
+
+Le snapshot `dbaa2e0...` contrôlait mal la borne d'incidence
+`4 Q_4 <= (m_4-3) T_4` : il calculait `floor((m_4-3)T_4/4)` puis tolérait
+`Q_4=borne+1`. Le successeur commité `3ffff85...`, source `d2039ba...`, emploie
+désormais le produit i128 direct et une sonde non vide. Sa porte reste plus
+grossière que le défaut historique qu'elle prétend couvrir : multiplier `Q_4`
+par quatre modifie aussi le score d'admission et le parcours. Sur la clique
+complète `K_m`, l'égalité d'incidence est saturée; une fixture `K_24` avec copie
+de contrôle `Q_test=Q_real+1`, décision conservant `Q_real`, chiffres `E/T/Q`
+attendus et regex ciblée `4*Q4` tue précisément l'ancienne erreur d'une unité.
+Le libellé final « lemme de profondeur » reste inadapté à une faute d'incidence.
+La porte saine n'emploie ni `--judge`, ni vérité indépendante pour les comptes;
+le mutant vérifie la sensibilité de la garde, pas l'exactitude de l'orientation.
+Le stdout cumule en outre `T3` sous `probe_triangles`, alors que la garde emploie
+le `T4` non publié : le reçu ne permet pas de recalculer l'inégalité. Il doit
+publier `probe_triangles_q4` et, au minimum, les maxima des deux membres de la
+garde.
 
 ## 5. Ce que le sondage change, et ce qu'il ne change pas
 
@@ -150,5 +167,24 @@ postérieure au pin. Surtout, les quinze sorties normales du log impriment toute
 `probe_tests=0` : les vingt-huit verts ne reçoivent pas le nouveau compte
 `E2/T3/T4/Q4`. Il faut une commande `--probe-factor>1`, des planchers
 `probe_tests/probe_accepted`, une fixture K4 et un mutant d'incidence.
+
+Le successeur `3ffff85...`, source `d2039ba...`, CMake `08e54fc...` et ELF
+Release CPU `fc2eb10...`, passe ensuite `30/30` en `177,09 s`; le transcript
+éphémère observé avait le SHA-256 `f824326c...`. Le temps chevauche le run gelé
+25 000 et ne qualifie aucun débit. Les deux nouvelles portes exercent la sonde
+et le mutant grossier sans `--judge`; elles ne ferment ni la fixture saturée
+`K_24`, ni HWM/octets, ni CUDA/G4, et ne se transfèrent pas au source d'ablation
+dirty postérieur. La sortie reste dans `/tmp` et le `LastTest.log` pincé à la
+fermeture a déjà été écrasé : il s'agit d'une observation fonctionnelle bornée,
+pas d'un reçu durable.
+
+Le worktree postérieur ajoute `--ablate=0..5`, sans CMake Release ni CTest. Le
+mode accepte encore les planchers contrairement à son commentaire; avec une
+sonde opt-in, `real_counts` peut compter adjacence et cliques avant certains
+retours; enfin une sortie volontairement fausse conserve le schéma exact et
+peut rendre le code zéro. Il faut un contrat diagnostic distinct, refuser toute
+porte et neutraliser ou nommer la sonde avant d'attribuer un coût. Une différence
+de préfixes reste un coût marginal sous état de cache modifié, pas une causalité
+absolue.
 
 GCP non utilisé.

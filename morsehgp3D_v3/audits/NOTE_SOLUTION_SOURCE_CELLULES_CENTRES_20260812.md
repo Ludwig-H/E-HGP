@@ -219,13 +219,16 @@ Plancher de couverture à code 3.
    `sum_i C(a_i,q-1)`. Il compte
    exactement les cliques du graphe d'intervalles scalaires, pas celles du
    graphe 3D de bissecteurs; sa pondération reste un modèle de coût. Le
-   snapshot `HEAD=02e709b`, source `dbaa2e0...`, implémente les vrais
+   snapshot historique `HEAD=02e709b`, source `dbaa2e0...`, implémente les vrais
    `E2/T3/T4/Q4` avec cuts par
    lane et plafond 96, mais les désactive de fait au défaut
    `probe_factor=1`. Il passe `28/28`, mais ces portes n'exercent donc pas la
-   sonde; aucun résultat de split ne se transfère au pin historique
-   `34371880...` ni au worktree `d2039ba...`. Son statut détaillé appartient à
-   l'audit courant.
+   sonde. Le successeur `HEAD=3ffff85`, source `d2039ba...`, corrige la garde
+   d'incidence et a été observé à `30/30`, dont deux portes de sonde; celles-ci
+   n'apportent toutefois ni vérité indépendante `E/T/Q`, ni fixture saturée,
+   ni reçu durable. Aucun résultat ne se transfère au pin historique
+   `34371880...` ou au worktree d'ablation postérieur. Son statut détaillé
+   appartient à l'audit courant.
 4. La jauge dyadique commune `s_x(c)` n'est pas implémentée. Elle rendrait les
    bornes affines et réduirait la largeur; la borne actuelle est
    `l,u<=3(65535\cdot 2^{d})^{2}<2^{34+2d}`, sous `i128` jusqu'à `d<=26` mais

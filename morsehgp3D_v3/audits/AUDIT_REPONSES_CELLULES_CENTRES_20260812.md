@@ -1097,7 +1097,7 @@ lane, compte exact `E2/T3/T4/Q4`, score `E2+3T3+6Q4` et plafond de sonde 96.
 Il passe les 28 CTests, mais son défaut `probe_factor=1` rend toutefois
 cette sonde inatteignable sans option explicite, car elle n'est consultée
 qu'après `work>work_cap`; les CTests ne l'exercent donc pas. Le contrôle
-d'incidence tolère en outre une unité de trop, et le bitset dense employé par
+d'incidence de ce snapshot tolère en outre une unité de trop, et le bitset dense employé par
 `generate()` reste non borné hors de la sonde. Recevoir ce delta exige
 `probe_tests>0`, la fixture `K_24`, un mutant d'incidence, une égalité de payload
 et le HWM complet en octets.

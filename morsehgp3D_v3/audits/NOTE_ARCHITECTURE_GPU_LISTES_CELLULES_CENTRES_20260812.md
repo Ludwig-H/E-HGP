@@ -490,8 +490,25 @@ merge/galloping; réserver les bitsets tuilés aux sommets de fort degré sous u
 cap exact. Kruskal--Katona borne ensuite les K4 depuis les triangles sans
 allouer la matrice dense ni énumérer les quadruplets avant le split.
 
+Une enveloppe encore moins chère se lit directement dans les degrés forward.
+Fixer n'importe quel ordre total et noter `d_q^+(v)` le nombre de voisins de
+`v` situés après lui dans le graphe induit par la lane q. Chaque clique possède
+un unique plus petit sommet; par conséquent :
+
+$$T_3\leq\sum_{v\in D_{smax-3}}\binom{d_3^+(v)}{2},\qquad Q_4\leq\sum_{v\in D_{smax-4}}\binom{d_4^+(v)}{3}.$$
+
+Ces sommes se calculent pendant le `count/scan/fill` de la CSR, se saturent à
+`work_cap+1` et ne demandent aucune intersection. Une orientation de
+dégénérescence de valeur `d` garantit `max d^+<=d`, donc les bornes globales
+`n*C(d,2)` et `n*C(d,3)`; elle n'est pas prétendue meilleure que tout autre
+ordre pour chaque graphe. Un ordre parallèle plus simple garde la sûreté. La
+cascade GPU recommandée est donc
+degrés forward, puis triangles exacts avec `Q_KK(T4)`, puis K4 exacts seulement
+dans la bande résiduelle et sous préflight d'octets. Cette admission borne les
+visites de cliques, pas le temps total, le census, les tris ou les contextes.
+
 Il existe une gate q4 sûre sans lift. Dans le graphe bissecteur induit par les
-`m_4=|D_7|` sites de la lane q4, noter `T_4` le nombre de triangles et `Q_4` le
+`m_4=|D_(smax-4)|` sites de la lane q4, noter `T_4` le nombre de triangles et `Q_4` le
 nombre de K4. Compter les incidences entre un K4 et ses quatre faces donne
 
 $$4Q_4\leq (m_4-3)T_4.$$
@@ -500,11 +517,15 @@ En effet, chaque K4 fournit quatre triangles, tandis qu'un triangle possède au
 plus `m_4-3` apex. Le majorant entier
 `floor((m_4-3)T_4/4)` remplace donc tout coefficient empirique constant; ses
 produits et la somme de coût sont saturés. Si le compte exact est préférable,
-orienter les bitsets par identifiant puis, pour chaque triangle `i<j<k`, ajouter
+orienter les bitsets par un ordre total puis, pour chaque triangle `i<j<k`, ajouter
 `popcount(N+(i) intersection N+(j) intersection N+(k))` : chaque K4 est alors
 compté exactement une fois, sans centre ni lift. Construire l'adjacence jusqu'à
-`D_9` reste mutualisable, mais les compteurs doivent employer leurs cuts propres
-`E_2` sur `D_9`, `T_3` sur `D_8` et `T_4/Q_4` sur `D_7`.
+`D_(smax-2)` reste mutualisable, mais les compteurs doivent employer leurs cuts
+propres `E_2` sur `D_(smax-2)`, `T_3` sur `D_(smax-3)` et `T_4/Q_4` sur
+`D_(smax-4)`; ils deviennent `D_9/D_8/D_7` au défaut `smax=11`.
+Si le pool ne contient pas assez de sites pour la statistique d'ordre commune,
+chaque cut concerné devient explicitement le pool entier : c'est un superset
+fail-open à comptabiliser comme tel, pas un `D_h` exact.
 
 Une option intermédiaire réutilise le compte des triangles. Pour chaque arête
 orientée `i<j`, soit `c_ij=popcount(N+(i) intersection N+(j))`; alors

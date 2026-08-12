@@ -2173,6 +2173,26 @@ mhgp3v_add_expected_code_test_for(mhgp3v_ball_front
   mhgp3v_ball_front_kill_drop_leaving "MUTANT TUE" 4
   --points=70 --k=2 --family=terrain --seed=3 --judge --inject=drop-leaving)
 
+# L'ABLATION EST UN MODE DE MESURE, PAS UN MODE DE SORTIE. Elle produit une
+# sortie fausse par construction : elle doit donc etre refusee des qu'un juge ou
+# un mutant l'accompagne, et s'annoncer en clair.
+mhgp3v_add_expected_code_test_for(mhgp3v_centre_cell
+  mhgp3v_centre_cell_reject_ablation_jugee "l'ablation ne peut ni etre jugee" 2
+  --points=60 --smax=6 --family=terrain --seed=3 --judge --ablate=2)
+mhgp3v_add_expected_code_test_for(mhgp3v_centre_cell
+  mhgp3v_centre_cell_reject_ablation_mutant "l'ablation ne peut ni etre jugee" 2
+  --points=60 --smax=6 --family=terrain --seed=3 --ablate=2 --inject=drop-ties)
+mhgp3v_add_expected_code_test_for(mhgp3v_centre_cell
+  mhgp3v_centre_cell_reject_ablation_differee "ne partagent pas le meme flot" 2
+  --points=60 --smax=6 --family=terrain --seed=3 --ablate=2 --deferred-lift)
+mhgp3v_add_expected_code_test_for(mhgp3v_centre_cell
+  mhgp3v_centre_cell_reject_ablation_plancher "aucun plancher sur une sortie ablatee" 2
+  --points=60 --smax=6 --family=terrain --seed=3 --ablate=2 --min-supports=1)
+add_test(NAME mhgp3v_centre_cell_ablation_annoncee COMMAND mhgp3v_centre_cell
+         --points=200 --smax=11 --family=terrain --seed=11 --ablate=3)
+set_tests_properties(mhgp3v_centre_cell_ablation_annoncee
+                     PROPERTIES PASS_REGULAR_EXPRESSION "SORTIE FAUSSE PAR CONSTRUCTION")
+
 # REFUS AVANT CALCUL : code 2.
 mhgp3v_add_expected_code_test_for(mhgp3v_ball_front
   mhgp3v_ball_front_reject_unknown_argument "argument inconnu" 2 --sujet-inexistant)

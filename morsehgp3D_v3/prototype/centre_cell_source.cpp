@@ -490,11 +490,24 @@ struct Engine {
   int batch_rec_cap = 1 << 20;
   int cur_slot = -1;
   bool deferred_lift = false;
+  // ABLATION A FLOT IDENTIQUE. Mode de MESURE uniquement : chaque niveau coupe
+  // une phase en laissant intactes toutes celles qui la precedent. La sortie
+  // devient fausse par construction, donc le mode est incompatible avec le juge
+  // et avec les mutants. C'est la seule facon d'attribuer le cout a une
+  // primitive sans compteur materiel.
+  // 0 aucune, 1 sans census, 2 sans lift, 3 sans cliques, 4 sans adjacence,
+  // 5 arbre seul.
+  int ablate = 0;
   std::vector<Record> cell_records;
   std::vector<int> bucket_end;  // borne de prefixe de chaque `A_p` dans la liste
   std::vector<int> group;
   std::vector<int> interior_ids, shell_ids;
   std::vector<unsigned long long> row_ij, row_ijk;
+  // COORDONNEES CONTIGUES DE LA CELLULE. L'enumeration lisait `pts[cands[i].id]`,
+  // soit une indirection et un acces aleatoire au nuage entier a chaque visite
+  // de clique. Recopier les coordonnees de la liste — quelques dizaines de
+  // triplets — les rend sequentielles pour toute la cellule.
+  std::vector<mhgp::P3> cell_pts;
   std::vector<char> group_done;
   // HISTOGRAMME DE MULTIPLICITE, exige par le contre-audit. Un meme tuple
   // geometrique est propose dans plusieurs cellules; seul son circumcentre en
@@ -761,7 +774,7 @@ struct Engine {
       ++stats.cells_terminal;
       stats.terminal_overlaps += overlaps;
       stats.max_terminal_overlaps = std::max(stats.max_terminal_overlaps, overlaps);
-      generate(cell, tight, mine, have_thresholds);
+      if (ablate < 5) generate(cell, tight, mine, have_thresholds);
       return;
     }
 
@@ -946,6 +959,9 @@ struct Engine {
 
     const i128 scale4 = (i128)1 << (2 * tight.depth);
     const int words = (top + 63) / 64;
+    if (ablate >= 4) return;
+    cell_pts.resize((std::size_t)top);
+    for (int i = 0; i < top; ++i) cell_pts[(std::size_t)i] = pts[cands[(std::size_t)i].id];
     if (!adj_ready || adj_top != top) build_adjacency(tight, cands, top);
     adj_ready = false;
 
@@ -959,6 +975,7 @@ struct Engine {
       batch_cells.push_back(std::move(bc));
       cur_slot = (int)batch_cells.size() - 1;
     }
+    if (ablate >= 3) return;
     pending.clear();
     cell_records.clear();
     // TAMPONS HOISTES. Ces deux lignes de bits etaient allouees a CHAQUE cellule
@@ -976,11 +993,10 @@ struct Engine {
           const int j = (wj << 6) + __builtin_ctzll(bits);
           bits &= bits - 1;
           HullBox hi_box, hij, hijk, hijkt;
-          hull_seed(pts[cands[(std::size_t)i].id], &hi_box);
-          hull_add(pts[cands[(std::size_t)j].id], hi_box, &hij);
+          hull_seed(cell_pts[(std::size_t)i], &hi_box);
+          hull_add(cell_pts[(std::size_t)j], hi_box, &hij);
           const i128 u_ij = std::min(u_i, cands[(std::size_t)j].u);
-          const i128 d2_ij = dist2_of(pts[cands[(std::size_t)i].id],
-                                      pts[cands[(std::size_t)j].id]);
+          const i128 d2_ij = dist2_of(cell_pts[(std::size_t)i], cell_pts[(std::size_t)j]);
           ++stats.diameter_tests;
           if (d2_ij * scale4 > 4 * u_ij) ++stats.diameter_pruned;
           ++stats.hull_tests;
@@ -1011,13 +1027,11 @@ struct Engine {
               const i128 u_ijk = std::min(u_ij, cands[(std::size_t)k].u);
               const i128 d2_ijk =
                   std::max(d2_ij,
-                           std::max(dist2_of(pts[cands[(std::size_t)i].id],
-                                             pts[cands[(std::size_t)k].id]),
-                                    dist2_of(pts[cands[(std::size_t)j].id],
-                                             pts[cands[(std::size_t)k].id])));
+                           std::max(dist2_of(cell_pts[(std::size_t)i], cell_pts[(std::size_t)k]),
+                                    dist2_of(cell_pts[(std::size_t)j], cell_pts[(std::size_t)k])));
               ++stats.diameter_tests;
               if (d2_ijk * scale4 > 4 * u_ijk) ++stats.diameter_pruned;
-              hull_add(pts[cands[(std::size_t)k].id], hij, &hijk);
+              hull_add(cell_pts[(std::size_t)k], hij, &hijk);
               ++stats.hull_tests;
               const bool hull_ijk = hull_meets_cell(hijk, tight);
               if (!hull_ijk) { ++stats.hull_pruned; ++stats.hull_pruned_q[3]; }
@@ -1070,15 +1084,15 @@ struct Engine {
                   if (t >= c4) { stop_t = true; break; }
                   ++stats.clique_quads;
                   const i128 u_all = std::min(u_ijk, cands[(std::size_t)t].u);
-                  const mhgp::P3& pt_t = pts[cands[(std::size_t)t].id];
+                  const mhgp::P3& pt_t = cell_pts[(std::size_t)t];
                   const i128 d2_all =
                       std::max(d2_ijk,
-                               std::max(dist2_of(pts[cands[(std::size_t)i].id], pt_t),
-                                        std::max(dist2_of(pts[cands[(std::size_t)j].id], pt_t),
-                                                 dist2_of(pts[cands[(std::size_t)k].id], pt_t))));
+                               std::max(dist2_of(cell_pts[(std::size_t)i], pt_t),
+                                        std::max(dist2_of(cell_pts[(std::size_t)j], pt_t),
+                                                 dist2_of(cell_pts[(std::size_t)k], pt_t))));
                   ++stats.diameter_tests;
                   if (d2_all * scale4 > 4 * u_all) ++stats.diameter_pruned;
-                  hull_add(pts[cands[(std::size_t)t].id], hijk, &hijkt);
+                  hull_add(cell_pts[(std::size_t)t], hijk, &hijkt);
                   ++stats.hull_tests;
                   if (!hull_meets_cell(hijkt, tight)) {
                     ++stats.hull_pruned;
@@ -1269,6 +1283,7 @@ struct Engine {
     ++stats.lifts_built;
     ++stats.lifts_q[q];
     ++stats.occurrences_recorded;
+    if (ablate >= 2) return false;
     const mhgp::P3& a = pts[ids[0]];
     if (q == 2) {
       const mhgp::P3& b = pts[ids[1]];
@@ -1383,6 +1398,7 @@ struct Engine {
       if (p >= (int)bucket_end.size()) return m;
       return bucket_end[(std::size_t)p];
     };
+    if (ablate >= 1) return;
     ++stats.census_scans;
     interior_ids.clear();
     shell_ids.clear();
@@ -1568,6 +1584,7 @@ struct Options {
   int batch_records = 1 << 20;
   bool deferred_lift = false;
   int probe_factor = 1;
+  int ablate = 0;
   Mutant mutant = Mutant::kNone;
   bool judge = false;
   i64 min_supports = 0, min_cells = 0, min_quads = 0, min_probes = 0;
@@ -1588,6 +1605,7 @@ int run_engine(const std::vector<mhgp::P3>& cloud, const Options& opt) {
   engine.batch_rec_cap = opt.batch_records < 1024 ? 1024 : opt.batch_records;
   engine.deferred_lift = opt.deferred_lift;
   engine.probe_factor = opt.probe_factor < 1 ? 1 : opt.probe_factor;
+  engine.ablate = opt.ablate;
   engine.max_depth = opt.max_depth;
   engine.mutant = opt.mutant;
   engine.collect = opt.judge;
@@ -2049,6 +2067,7 @@ int main(int argc, char** argv) {
     else if (arg == "--deferred-lift") opt.deferred_lift = true;
     else if (arg.rfind("--probe-factor=", 0) == 0)
       opt.probe_factor = parse_int(arg.substr(15).c_str(), &ok);
+    else if (arg.rfind("--ablate=", 0) == 0) opt.ablate = parse_int(arg.substr(9).c_str(), &ok);
     else if (arg.rfind("--max-depth=", 0) == 0)
       opt.max_depth = parse_int(arg.substr(12).c_str(), &ok);
     else if (arg.rfind("--min-supports=", 0) == 0)
@@ -2075,9 +2094,34 @@ int main(int argc, char** argv) {
   }
 
   if (opt.smax < 4 || opt.smax > 24 || opt.leaf < 4 || opt.work_cap < 1 ||
-      opt.max_depth < 1 || opt.max_depth > 26) {
+      opt.max_depth < 1 || opt.max_depth > 26 || opt.ablate < 0 || opt.ablate > 5) {
     std::fprintf(stderr, "REFUS domaine\n");
     return 2;
+  }
+  // L'ABLATION PRODUIT UNE SORTIE FAUSSE PAR CONSTRUCTION. Elle est donc
+  // incompatible avec le juge, avec les mutants et avec tout plancher, et elle
+  // s'annonce en clair dans le recu.
+  if (opt.ablate != 0) {
+    if (opt.judge || !inject.empty()) {
+      std::fprintf(stderr, "REFUS : l'ablation ne peut ni etre jugee ni porter un mutant\n");
+      return 2;
+    }
+    // Le chemin differe ne respecte PAS la propriete de flot amont : a
+    // `ablate=2` il passerait quand meme par les lifts de `solve_tuple`, et a
+    // `ablate=3` il accumulerait des contextes sans jamais vider le lot. Les
+    // deux modes sont donc exclusifs.
+    if (opt.deferred_lift) {
+      std::fprintf(stderr,
+                   "REFUS : l'ablation et le lift differe ne partagent pas le meme flot\n");
+      return 2;
+    }
+    // Un plancher sur une sortie volontairement fausse n'a aucun sens.
+    if (opt.min_supports || opt.min_cells || opt.min_quads || opt.min_probes) {
+      std::fprintf(stderr, "REFUS : aucun plancher sur une sortie ablatee\n");
+      return 2;
+    }
+    std::printf("ABLATION=%d SORTIE FAUSSE PAR CONSTRUCTION, MESURE SEULEMENT\n",
+                opt.ablate);
   }
 
   if (!inject.empty()) {

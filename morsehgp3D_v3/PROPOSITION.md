@@ -1057,11 +1057,26 @@ alors `4Q_4<=(m_4-3)T_4`, par comptage des quatre faces de chaque K4. Cette
 borne remplace tout coefficient empirique constant. Sur bitsets orientés,
 sommer pour chaque triangle `i<j<k` le popcount de
 `N+(i) intersection N+(j) intersection N+(k)` compte même `Q_4` exactement une
-fois. La gate emploie séparément `E_2` sur `D_9`, `T_3` sur `D_8` et `T_4/Q_4`
-sur `D_7`, avec sommes saturées et préflight du bitset ou de la CSR.
+fois. La gate emploie séparément `E_2` sur `D_(smax-2)`, `T_3` sur
+`D_(smax-3)` et `T_4/Q_4` sur `D_(smax-4)` — `D_9/D_8/D_7` au défaut
+`smax=11` — avec sommes saturées et préflight du bitset ou de la CSR.
+Si la statistique d'ordre commune n'existe pas dans le pool courant, la lane
+emploie explicitement le pool entier comme superset fail-open et le receipt ne
+doit pas le nommer `D_h` exact.
 Le majorant intermédiaire `Q_4<=sum C(c_ij,2)`, où
 `c_ij=popcount(N+(i) intersection N+(j))`, réutilise le sweep de triangles et
 peut s'arrêter dès que le cap est dépassé.
+
+Avant toute intersection, une CSR forward fournit une première enveloppe
+exacte. Pour un ordre total quelconque, chaque clique a un unique plus petit
+sommet, d'où `T_3<=sum_v C(d_3^+(v),2)` et
+`Q_4<=sum_v C(d_4^+(v),3)`. Ces sommes sont saturées pendant le
+`count/scan/fill`; une orientation de dégénérescence de valeur `d` garantit
+`max d^+<=d` et donc les bornes globales `n*C(d,2)` et `n*C(d,3)`, sans être
+requise pour la sûreté. L'ordre d'admission est : enveloppe de degrés,
+triangles exacts avec Kruskal--Katona, puis K4 exacts seulement pour une petite
+bande résiduelle préflightée. Un budget distinct couvre octets, contextes,
+census, tris et launches.
 
 ## 8. Resolver des blocs silencieux
 
