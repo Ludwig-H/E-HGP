@@ -2467,3 +2467,49 @@ mhgp3v_add_expected_code_test_for(mhgp3v_payload_skeleton
 
 mhgp3v_add_expected_code_test_for(mhgp3v_payload_skeleton
   mhgp3v_payload_reject_unknown "argument inconnu" 2 --sujet-inexistant)
+
+# ---------------------------------------------------------------------------
+# LE JUGE ARITHMETIQUEMENT INDEPENDANT DE LA SOURCE PAR CELLULES.
+#
+# L'audit refusait le juge interne du probe : il partage `ball_front.hpp`, ses
+# lifts et sa forme de puissance avec le sujet, si bien que deux fautes communes
+# s'y compenseraient. Celui-ci ne partage que le generateur de nuages et une
+# ligne de texte.
+#
+# Le sujet decide par determinants entiers `i128`. Le juge n'emploie AUCUN
+# determinant : il resout le centre par elimination de Gauss en rationnels
+# multiprecision, teste la positivite par les coordonnees barycentriques du meme
+# systeme, et fait son census par comparaisons de rationnels. Son cout est
+# `Theta(n^5)` en multiprecision, donc il est borne a quarante-cinq points et ne
+# peut jamais devenir un backend.
+add_executable(mhgp3v_centre_cell_judge oracle/centre_cell_judge.cpp)
+target_include_directories(mhgp3v_centre_cell_judge PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(mhgp3v_centre_cell_judge PRIVATE mhgp)
+target_compile_options(mhgp3v_centre_cell_judge PRIVATE -Wall -Wextra -Werror)
+
+mhgp3v_add_expected_code_test_for(mhgp3v_centre_cell_judge
+  mhgp3v_centre_cell_judge_borne "borne a 45 points" 2 --points=200)
+
+if(Python3_Interpreter_FOUND OR Python3_EXECUTABLE)
+  set(MHGP3V_CC_JUDGE_DRIVER
+      ${CMAKE_CURRENT_SOURCE_DIR}/audits/check_centre_cell_independent_judge.py)
+  foreach(fam uniform terrain scanline_single_pass scanline_overlap_multiecho)
+    add_test(NAME mhgp3v_centre_cell_independant_${fam}
+             COMMAND ${Python3_EXECUTABLE} ${MHGP3V_CC_JUDGE_DRIVER}
+                     --subject-binary $<TARGET_FILE:mhgp3v_centre_cell>
+                     --judge-binary $<TARGET_FILE:mhgp3v_centre_cell_judge>
+                     --points=32 --smax=7 --family=${fam} --seed=5 --min-supports=1)
+    set_tests_properties(mhgp3v_centre_cell_independant_${fam}
+                         PROPERTIES PASS_REGULAR_EXPRESSION "ACCORD JUGE INDEPENDANT")
+  endforeach()
+  # LE JUGE DOIT VOIR UN SUJET FAUX. Sans cette porte, l'accord ne prouverait que
+  # la capacite du juge a etre d'accord.
+  add_test(NAME mhgp3v_centre_cell_independant_voit_le_mutant
+           COMMAND ${Python3_EXECUTABLE} ${MHGP3V_CC_JUDGE_DRIVER}
+                   --subject-binary $<TARGET_FILE:mhgp3v_centre_cell>
+                   --judge-binary $<TARGET_FILE:mhgp3v_centre_cell_judge>
+                   --points=32 --smax=7 --family=terrain --seed=5
+                   --inject=rank-closed)
+  set_tests_properties(mhgp3v_centre_cell_independant_voit_le_mutant
+                       PROPERTIES WILL_FAIL TRUE)
+endif()

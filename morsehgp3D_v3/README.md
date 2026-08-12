@@ -167,6 +167,26 @@ du LiDAR, mais elle condamne un catalogue hôte de supports : la source doit
 compter son trafic et fusionner vers le fold sur device. Le calcul, ses
 hypothèses et ses références primaires sont dans l'audit cellules-centres.
 
+Ces vingt-quatre millions de tâches utiles ne sont pas tenus pour le verrou
+GPU. Le premier point volumique gelé produit `4 990 227` supports mais
+`194 463 795` géométries, soit `38,969` occurrences par support, dont
+`81,778 %` meurent à l'owner. La réparation prioritaire est donc un
+`count/scan/fill` de clés compactes, un radix/RLE par `SupportKey` **avant** le
+lift, puis une point-location directe du centre dans la feuille owner et un
+rejeu du pool de cette feuille. Une face shallow arbitraire n'est pas une
+source q2/q3 : il faut le minimum auto-centré de la fonction rayon sur son flat
+d'égalité. Le contre-exemple et la preuve sont dans
+[`AUDIT_DEBLOCAGE_GPU_SUPPORTKEY_TOP12_20260812.md`](audits/AUDIT_DEBLOCAGE_GPU_SUPPORTKEY_TOP12_20260812.md).
+
+Après le second RLE par clé géométrique de sphère, une primitive top-12 exacte
+peut remplacer le census variable sur la branche régulière. Si la distance du
+douzième voisin est strictement au-dessus du rayon, la boule fermée entière est
+dans les douze retours; si elle est strictement dessous, douze intérieurs
+rejettent le candidat; si elle est égale, `p+q<=11` prouve une extra-shell. Les
+ex aequo peuvent être choisis arbitrairement. Le top-12 est le certificateur
+minimal pour `smax=11`, jamais un générateur; un plateau à publier exige encore
+un range-report complet ou un refus fermé.
+
 Dans le modèle continu, ou dans une famille de précision croissante, une sortie
 exhaustive n'est même pas universellement linéaire : quatre amas de sites sur
 une même sphère peuvent porter `Theta(m^4)` supports q4 positifs ayant une
@@ -207,7 +227,7 @@ points u16 + LBVH exact résidents
        -> scores affines à jauge fixe + pools CSR + promotion h
        -> bitsets bissecteurs + axe de face q4, carriers aigus optionnels
        -> RLE SupportKey -> une géométrie/owner
-       -> clé primitive de sphère -> second RLE -> census unique -> U_B
+       -> clé primitive de sphère -> second RLE -> top-12 ou census pool unique -> U_B
        -> gate régulière / plateau / inertie de haut rang
        -> facettes du cœur, gateways et resolver strict
        -> MSF de carriers ou fold direct par lots atomiques

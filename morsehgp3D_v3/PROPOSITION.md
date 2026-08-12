@@ -809,6 +809,42 @@ Elle impose un ledger de débit et une fusion device vers le fold, pas un
 catalogue hôte. Ce n'est ni une identité pour une boîte u16 finie, ni un
 minorant sur tout algorithme H0, ni une borne sur le travail de découverte.
 
+#### 6.6.1 Minimum auto-centré sur le flat relevé
+
+Poser `ell_x(c)=2<x,c>-||x||^2`. Pour un support affinement indépendant `U`,
+son flat relevé est défini par `lambda=ell_u(c)` pour tout `u in U`, et la
+fonction rayon y vaut `Phi(c,lambda)=||c||^2-lambda`. Sa restriction possède un
+minimum unique : le circumcentre intrinsèque `c_U`, de valeur `beta_U`. Le
+support est positif exactement lorsque `c_U in relint conv(U)`; à ce point,
+`ell_y(c_U)>lambda_U` équivaut à `y` strictement intérieur.
+
+Cette caractérisation corrige une fausse bijection. Une face de première
+génération d'un niveau shallow n'est pas nécessairement une source q2/q3 : son
+point courant peut ne pas minimiser `Phi` sur le plan ou la droite d'égalité.
+Par exemple, `U={(-1,0,0),(1,0,0)}` et `y=(0,2,0)` réalisent une sphère shallow
+centrée en `y`, tandis que la miniboule critique de `U` est centrée en zéro et
+n'a pas `y` pour intérieur. Pour q4 affine-3, le lieu d'égalité est un point :
+le sommet shallow donne alors le centre, mais positivité, owner et rang restent
+à vérifier. Les mosaïques d'ordre supérieur restent donc des oracles; une
+shallow cutting à listes de conflits complètes est seulement une recherche q4.
+
+#### 6.6.2 Sentinelle top-12
+
+Pour un candidat de centre `c`, rayon `beta` et `n>=12`, recevoir douze vrais
+plus proches voisins avec certificat que la distance maximale retournée
+`delta` ne dépasse aucune distance omise; les ex aequo peuvent être arbitraires.
+
+- `delta>beta` implique que toute la boule fermée est dans les douze retours;
+- `delta<beta` fournit douze intérieurs et rejette toute fenêtre `smax=11`;
+- `delta=beta` rend le nombre d'intérieurs exact; si `p+q<=11`, douze points
+  fermés prouvent au moins une extra-shell hors du support.
+
+Pour `n<12`, scanner tout `X`. Top-11 est insuffisant, car il ne distingue pas
+un rang fermé onze d'un douzième contact omis dans un tie. Le top-12 certifie la
+branche régulière; un plateau dont le diagnostic doit être publié appelle un
+range-report complet ou échoue fermé. Avec `c=C/D`, comparer exactement
+`||D*x-C||^2` et ne pruner le LBVH que sur une borne entière certifiée.
+
 Cette espérance ne donne pas de borne déterministe sur la sortie exhaustive.
 Dans le modèle continu, ou lorsque la précision croît avec `m`, quatre petites
 calottes autour des directions d'un tétraèdre régulier, toutes sur une même
@@ -835,16 +871,24 @@ séparée s'arrête à sept. Ce sont des plafonds de complétude, pas une obliga
 d'énumérer tous les sommets qui les respectent.
 
 Chaque feuille produit d'abord une occurrence compacte
-`(cloud_epoch,SupportKey,CensusContext)` après les seuls filtres sûrs qui ne
-demandent pas la géométrie complète. Un premier radix/RLE par `SupportKey`
-calcule centre, positivité et owner une seule fois, puis sélectionne l'unique
-contexte de la feuille half-open propriétaire s'il existe. Zéro owner rejette
-un tuple arbitraire; la complétude garantit l'existence pour tout support
-pertinent. Plusieurs owners signalent un invariant rompu. Le candidat owner produit alors
-`(cloud_epoch,GeometricBallKey,SupportKey,CensusContext)` sans census. Le second
-RLE par clé exacte de taille fixe conserve tous les supports et contextes d'une
-même boule. Pour `H_run=smax-q_min`, un contexte avec `b_cert>=H_run` effectue
-alors seul le census terminal, ou le run appelle un census global : une première passe additionne en bloc
+`(cloud_epoch,SupportKey)` après les seuls filtres sûrs qui ne demandent pas la
+géométrie complète; `CellId` reste un diagnostic facultatif. Un premier
+radix/RLE par `SupportKey` calcule centre et positivité une seule fois, descend
+ce centre dans la partition half-open et retrouve sa feuille owner. La table
+terminale transitoire conserve pool, seuils et buckets : le run rejoue
+`U subset D_{11-q}(C_owner)` et les filtres de la lane. Zéro owner ou membre
+manquant rejette un tuple arbitraire; la complétude garantit le rejeu pour tout
+support pertinent. Plusieurs owners signalent un invariant rompu. Si cette
+table n'est pas conservée ou si les arités n'ont pas une partition commune,
+chaque occurrence transporte à la place son `CensusContext` et le RLE choisit
+le contexte owner certifié.
+
+Le candidat owner produit alors
+`(cloud_epoch,GeometricBallKey,SupportKey,OwnerCellId)` sans census. Le second
+RLE par clé exacte de taille fixe conserve tous les supports d'une même boule.
+Il exécute soit une seule requête top-12, soit le census pool-relatif déjà
+prouvé. Pour `H_run=smax-q_min`, un contexte avec `b_cert>=H_run` effectue seul
+ce census terminal, ou le run appelle un census global : une première passe additionne en bloc
 les nœuds strictement intérieurs et désactive chaque support dès son
 `(12-q)`-ième témoin; si au moins un support reste pertinent, une seconde passe
 matérialise `I_B/U_B` complet et attache `U_B` comme identité sémantique aval.
@@ -1160,7 +1204,7 @@ points u16 + LBVH exact résidents
        -> partition commune, D_h imbriquées, e0 fixe, promotion h
        -> filtres Jung--Helly--bissecteurs, génération q3/q4 directe
        -> RLE SupportKey -> une géométrie, zéro ou un owner
-       -> RLE GeometricBallKey -> strict-count/census I/E unique -> U_B
+       -> RLE GeometricBallKey -> top-12 ou census pool I/E unique -> U_B
        -> BallActivation/tombstones streamées + gate regular/plateau/high-rank
        -> facettes du cœur + gateway canonique de première incidence
        -> carriers stricts + resolver latent
@@ -1257,12 +1301,14 @@ un refus de ressource sont trois statuts distincts.
    terminale commune, `e0` immuable et promotion, sans dépendre des supports
    inférieurs retenus et sans supprimer le transcript Yao-1 de `k=1`. Émettre
    les occurrences compactes, faire le RLE `SupportKey` avant le lift, chercher
-   au plus un contexte owner; comparer lots spatiaux de feuilles atomiques et
-   shards radix par clé. Dans le premier cas, la feuille owner commune rend le
+   directement la feuille owner et rejouer son pool; transporter les contextes
+   seulement si la partition terminale n'est pas directement adressable.
+   Comparer lots spatiaux de feuilles atomiques et shards radix par clé. Dans le premier cas, la feuille owner commune rend le
    second RLE par clé primitive de sphère local. Dans le second, redistribuer les
    pending owner par `GeometricBallKey/OwnerCellId` avant ce RLE : un owner
    commun ne colocalise pas des shards `SupportKey` distincts. Choisir ensuite
-   un contexte `b_cert>=H_run` et faire un unique strict-count/census par boule;
+   un contexte `b_cert>=H_run` et faire un unique census par boule, ou lancer la
+   sentinelle top-12 exacte puis un range-report seulement sur plateau;
    `U_B` est un certificat aval. Gamma
    conserve les `SupportKey` requis; le H0 normalisé
    emploie le token Johnson et un support canonique. Graver les fixtures

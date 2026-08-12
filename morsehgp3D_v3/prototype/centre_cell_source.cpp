@@ -1765,6 +1765,7 @@ struct Options {
   int smax = 11, leaf = 4, work_cap = 20000, max_depth = 22;
   bool axis_filter = false;
   bool multiplicity = false;
+  bool emit_identities = false;
   int batch_depth = 3;
   int batch_records = 1 << 20;
   bool deferred_lift = false;
@@ -1800,7 +1801,7 @@ int run_engine(const std::vector<mhgp::P3>& cloud, const Options& opt) {
   engine.no_normal = opt.no_normal;
   engine.max_depth = opt.max_depth;
   engine.mutant = opt.mutant;
-  engine.collect = opt.judge;
+  engine.collect = opt.judge || opt.emit_identities;
 
   CentreCell root;
   root.depth = 0;
@@ -1932,6 +1933,35 @@ int run_engine(const std::vector<mhgp::P3>& cloud, const Options& opt) {
               s.shell_high_water);
   const long long total = s.supports[2] + s.supports[3] + s.supports[4];
   std::printf("supports_per_point=%.4f\n", (double)total / (double)points);
+
+  // EMISSION DES IDENTITES pour le juge arithmetiquement independant. Le format
+  // est deliberement plat et trie : le juge ne partage avec le sujet que le
+  // generateur de nuages et cette ligne de texte.
+  if (opt.emit_identities) {
+    std::vector<std::string> lines;
+    lines.reserve(engine.records.size());
+    for (const Record& r : engine.records) {
+      std::string line = "ID S=";
+      for (std::size_t i = 0; i < r.support.size(); ++i) {
+        if (i) line += ",";
+        line += std::to_string(r.support[i]);
+      }
+      line += " I=";
+      for (std::size_t i = 0; i < r.interior.size(); ++i) {
+        if (i) line += ",";
+        line += std::to_string(r.interior[i]);
+      }
+      line += " U=";
+      for (std::size_t i = 0; i < r.shell.size(); ++i) {
+        if (i) line += ",";
+        line += std::to_string(r.shell[i]);
+      }
+      lines.push_back(line);
+    }
+    std::sort(lines.begin(), lines.end());
+    for (const std::string& l : lines) std::printf("%s\n", l.c_str());
+    std::printf("IDENTITES=%zu\n", lines.size());
+  }
 
   if (engine.invariant_broken) {
     std::fprintf(stderr, "INVARIANT du lemme de profondeur viole\n");
@@ -2262,6 +2292,7 @@ int main(int argc, char** argv) {
       opt.work_cap = parse_int(arg.substr(11).c_str(), &ok);
     else if (arg == "--axis-filter") opt.axis_filter = true;
     else if (arg == "--multiplicity") opt.multiplicity = true;
+    else if (arg == "--emit-identities") opt.emit_identities = true;
     else if (arg.rfind("--batch-depth=", 0) == 0)
       opt.batch_depth = parse_int(arg.substr(14).c_str(), &ok);
     else if (arg.rfind("--batch-records=", 0) == 0)
