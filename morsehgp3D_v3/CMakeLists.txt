@@ -2590,3 +2590,77 @@ add_executable(mhgp3v_anchor_source prototype/anchor_source.cpp)
 target_include_directories(mhgp3v_anchor_source PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(mhgp3v_anchor_source PRIVATE mhgp Threads::Threads)
 target_compile_options(mhgp3v_anchor_source PRIVATE -Wall -Wextra -Werror)
+
+# ---- Portes du producteur par ancre maximale -------------------------------
+# Le differentiel `--verify` rejoue l'extension sur TOUTES les paires sans le
+# moindre certificat, puis compare cle par cle et p par p. Il recoit donc d'un
+# seul coup le certificat de front, les boules de milieu, le disque de Jung et
+# l'enveloppe mobile : n'importe lequel qui couperait a tort ferait chuter le
+# compte. Les planchers interdisent le vert par vacuite.
+add_test(NAME mhgp3v_anchor_uniform COMMAND mhgp3v_anchor_source
+         --points=120 --family=uniform --seed=1 --verify --min-supports=20000
+         --min-anchors=7000)
+add_test(NAME mhgp3v_anchor_terrain COMMAND mhgp3v_anchor_source
+         --points=120 --family=terrain --seed=5 --verify --min-supports=5000
+         --min-anchors=7000)
+add_test(NAME mhgp3v_anchor_scanline COMMAND mhgp3v_anchor_source
+         --points=110 --family=scanline_single_pass --seed=2 --verify
+         --min-supports=4000 --min-anchors=5000)
+add_test(NAME mhgp3v_anchor_multiecho COMMAND mhgp3v_anchor_source
+         --points=110 --family=scanline_overlap_multiecho --seed=2 --verify
+         --min-supports=3000 --min-anchors=5000)
+# A cette taille le certificat de front coupe reellement : le plancher de
+# prunes empeche que le differentiel passe sur un certificat jamais exerce.
+add_test(NAME mhgp3v_anchor_front_exerce COMMAND mhgp3v_anchor_source
+         --points=500 --family=uniform --seed=4 --verify --min-prunes=1000
+         --min-supports=100000)
+# La fixture gravee `ties` est un tetraedre regulier de cote carre huit, dont
+# les six aretes sont maximales et dont les quatre faces sont equilaterales :
+# c'est le cas ou la regle canonique de tie-break decide seule de l'unicite.
+add_test(NAME mhgp3v_anchor_fixture_ties COMMAND mhgp3v_anchor_source
+         --fixture=ties --verify --min-supports=70)
+set_tests_properties(mhgp3v_anchor_uniform mhgp3v_anchor_terrain
+                     mhgp3v_anchor_scanline mhgp3v_anchor_multiecho
+                     mhgp3v_anchor_front_exerce mhgp3v_anchor_fixture_ties
+                     PROPERTIES PASS_REGULAR_EXPRESSION "accord=OUI")
+
+# Mutants : chacun casse UNE decision exacte et doit sortir en code 4.
+mhgp3v_add_expected_code_test_for(mhgp3v_anchor_source
+  mhgp3v_anchor_mutant_theta "MUTANT TUE" 4
+  --points=500 --seed=4 --verify --inject=theta-no-fail-open)
+mhgp3v_add_expected_code_test_for(mhgp3v_anchor_source
+  mhgp3v_anchor_mutant_arete_min "MUTANT TUE" 4
+  --points=500 --seed=4 --verify --inject=owner-min-edge)
+mhgp3v_add_expected_code_test_for(mhgp3v_anchor_source
+  mhgp3v_anchor_mutant_lentille "MUTANT TUE" 4
+  --points=500 --seed=4 --verify --inject=lens-strict)
+mhgp3v_add_expected_code_test_for(mhgp3v_anchor_source
+  mhgp3v_anchor_mutant_census "MUTANT TUE" 4
+  --points=500 --seed=4 --verify --inject=census-no-always-inside)
+mhgp3v_add_expected_code_test_for(mhgp3v_anchor_source
+  mhgp3v_anchor_mutant_positivite "MUTANT TUE" 4
+  --points=500 --seed=4 --verify --inject=positivity-loose)
+mhgp3v_add_expected_code_test_for(mhgp3v_anchor_source
+  mhgp3v_anchor_mutant_tiebreak "MUTANT TUE" 4
+  --fixture=ties --verify --inject=owner-no-tiebreak)
+
+# Refus contractuels, tous AVANT le moindre calcul.
+mhgp3v_add_expected_code_test_for(mhgp3v_anchor_source
+  mhgp3v_anchor_reject_mutant_sans_juge "un mutant sans juge ne prouve rien" 2
+  --points=90 --inject=lens-strict)
+mhgp3v_add_expected_code_test_for(mhgp3v_anchor_source
+  mhgp3v_anchor_reject_suffixe "--points invalide" 2 --points=90junk)
+mhgp3v_add_expected_code_test_for(mhgp3v_anchor_source
+  mhgp3v_anchor_reject_inconnu "argument inconnu" 2 --points=90 --turbo)
+mhgp3v_add_expected_code_test_for(mhgp3v_anchor_source
+  mhgp3v_anchor_reject_hors_profil "hors du profil dense u16" 2 --points=70000)
+mhgp3v_add_expected_code_test_for(mhgp3v_anchor_source
+  mhgp3v_anchor_reject_verify_sans_stockage "--verify exige le stockage" 2
+  --points=90 --verify --no-store)
+# Planchers : un plancher non atteint est un code 3, jamais un vert silencieux.
+mhgp3v_add_expected_code_test_for(mhgp3v_anchor_source
+  mhgp3v_anchor_plancher_supports "plancher de supports" 3
+  --points=90 --seed=1 --min-supports=100000000)
+mhgp3v_add_expected_code_test_for(mhgp3v_anchor_source
+  mhgp3v_anchor_plancher_prunes "plancher de prunes" 3
+  --points=90 --seed=1 --min-prunes=100000000)

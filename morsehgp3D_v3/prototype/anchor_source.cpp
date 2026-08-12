@@ -49,6 +49,39 @@ using mhgp3v::MortonLbvh;
 using namespace mhgp3v::anchor;
 
 // ---------------------------------------------------------------------------
+// MUTANTS. Chacun casse UNE decision exacte. Le sujet mute est compare a la
+// reference exhaustive NON mutee : toute difference tue le mutant (code 4).
+// Un mutant sans juge ne prouve rien : `--inject` exige `--verify`.
+// ---------------------------------------------------------------------------
+enum class Inject {
+  kNone,
+  kFrontNoExt,        // boule temoin sans la soustraction ext/4 : coupe a tort
+  kFrontQ4Only,       // ferme le produit des que la seule lane q4 est morte
+  kThetaNoFailOpen,   // filtre d'enveloppe sur Llow au lieu de Uhigh
+  kOwnerMinEdge,      // ancre sur l'arete minimale au lieu de la maximale
+  kOwnerNoTiebreak,   // pas de tie-break entre aretes de longueur maximale
+  kLensStrict,        // lentille en < D au lieu de <= D : perd les ex aequo
+  kCensusNoAlways,    // census ignorant les toujours-interieurs
+  kPositivityLoose,   // accepte un centre sur une face du tetraedre
+};
+
+const char* inject_name(Inject m) {
+  switch (m) {
+    case Inject::kNone: return "none";
+    case Inject::kFrontNoExt: return "front-no-ext";
+    case Inject::kFrontQ4Only: return "front-q4-only";
+    case Inject::kThetaNoFailOpen: return "theta-no-fail-open";
+    case Inject::kOwnerMinEdge: return "owner-min-edge";
+    case Inject::kOwnerNoTiebreak: return "owner-no-tiebreak";
+    case Inject::kLensStrict: return "lens-strict";
+    case Inject::kCensusNoAlways: return "census-no-always-inside";
+    case Inject::kPositivityLoose: return "positivity-loose";
+  }
+  return "?";
+}
+
+
+// ---------------------------------------------------------------------------
 // Compteurs de travail. Ils ferment les gates W_front et W_extend : aucun
 // n'est optionnel, aucun n'est estime.
 // ---------------------------------------------------------------------------
@@ -57,6 +90,7 @@ struct Counters {
   long long front_witness_calls = 0;    // boules temoins evaluees
   long long front_witness_visits = 0;   // noeuds visites par ces boules
   long long front_witness_prunes = 0;   // noeuds fermes par dix temoins
+  long long lane_probe_visits = 0;      // noeuds visites par les sondes de lane
   long long candidate_pairs = 0;        // paires (a,b) survivantes, b > a
   long long anchors_opened = 0;         // ancres candidates ouvertes
   long long anchors_lane_dead = 0;      // ancres tuees par les boules de milieu
@@ -70,6 +104,7 @@ struct Counters {
   long long q4_candidates = 0;
   long long interior_tests = 0;         // predicats de puissance evalues
   long long reject_positivity = 0;
+  long long reject_non_acute = 0;
   long long reject_owner = 0;
   long long reject_rank = 0;
   long long reject_degenerate = 0;
@@ -86,6 +121,7 @@ struct Counters {
     front_witness_calls += o.front_witness_calls;
     front_witness_visits += o.front_witness_visits;
     front_witness_prunes += o.front_witness_prunes;
+    lane_probe_visits += o.lane_probe_visits;
     candidate_pairs += o.candidate_pairs;
     anchors_opened += o.anchors_opened;
     anchors_lane_dead += o.anchors_lane_dead;
@@ -99,6 +135,7 @@ struct Counters {
     q4_candidates += o.q4_candidates;
     interior_tests += o.interior_tests;
     reject_positivity += o.reject_positivity;
+    reject_non_acute += o.reject_non_acute;
     reject_owner += o.reject_owner;
     reject_rank += o.reject_rank;
     reject_degenerate += o.reject_degenerate;
@@ -156,15 +193,44 @@ inline i64 aabb_extent2(const LbvhNode& nd) {
   return s;
 }
 
-// Compte, avec arret a `cap`, les PointId strictement dans la boule
-// { z : 15 * |4z - q0|^2 < 4G } ou q0 est le centre quadruple.
-// Bornes : |4z - q0| <= 262140, la somme des carres tient en i64.
+// Trois boules temoins communes, une par lane, autour du meme centre quadruple
+// q0 = 2a + lo + hi. Pour toute paire (a,b) du produit, le milieu m verifie
+// |m - z0| <= ext/4 ou ext est la diagonale de la boite. Donc, avec
+//   R_q = Dmin / c_q - ext/4,      c_2 = 2, c_3 = sqrt(12), c_4 = sqrt(15),
+// la boule { z : |4z - q0| < 4 R_q } est incluse, ouverte, dans la boule de
+// milieu de lane q de TOUTE paire du produit. Les seuils 10/9/8 s'appliquent
+// alors separement, et le produit n'est ferme que si les trois lanes le sont.
+//
+// Les rayons sont rendus ENTIERS par la racine entiere et une minoration
+// rationnelle stricte de 4/c_q : 2, 11547/10000 < 4/sqrt(12) et
+// 10327/10000 < 4/sqrt(15). Le rayon publie est donc toujours inferieur ou
+// egal au rayon vrai — le certificat ne peut jamais couper a tort.
 struct WitnessBall {
   i64 q0[3] = {0, 0, 0};
-  i64 four_g = 0;
+  i64 tau[3] = {0, 0, 0};  // rayons carres quadruples, lanes q2/q3/q4
+  bool usable = false;
 };
-inline bool witness_ball_covers(const LbvhNode& nd, const WitnessBall& wb) {
-  // Tout le noeud est-il dans la boule ? On teste le coin le plus eloigne.
+
+inline WitnessBall make_witness_ball(const LbvhNode& nd, const P3& pa, Inject inject) {
+  WitnessBall wb{};
+  for (int d = 0; d < 3; ++d) wb.q0[d] = 2 * pa.x * 0;  // initialise, rempli ci-dessous
+  const i64 c[3] = {pa.x, pa.y, pa.z};
+  for (int d = 0; d < 3; ++d) wb.q0[d] = 2 * c[d] + nd.lo[d] + nd.hi[d];
+  const i64 g = aabb_min_dist2(nd, pa);
+  if (g <= 0) return wb;
+  const i64 dmin = isqrt_i128(g);                 // <= Dmin
+  i64 ext = isqrt_i128(aabb_extent2(nd)) + 1;  // >= diagonale
+  if (inject == Inject::kFrontNoExt) ext = 0;
+  const i64 num[3] = {20000, 11547, 10327};       // 4/c_q * 10000, minore
+  for (int q = 0; q < 3; ++q) {
+    const i64 l = (num[q] * dmin) / 10000 - ext;  // <= 4 R_q
+    wb.tau[q] = (l > 0) ? l * l : 0;
+    if (l > 0) wb.usable = true;
+  }
+  return wb;
+}
+
+inline i64 witness_far2(const LbvhNode& nd, const WitnessBall& wb) {
   i64 s = 0;
   for (int d = 0; d < 3; ++d) {
     const i64 lo4 = 4 * nd.lo[d] - wb.q0[d];
@@ -172,9 +238,9 @@ inline bool witness_ball_covers(const LbvhNode& nd, const WitnessBall& wb) {
     const i64 far = std::max(lo4 < 0 ? -lo4 : lo4, hi4 < 0 ? -hi4 : hi4);
     s += far * far;
   }
-  return 15 * s < wb.four_g;
+  return s;
 }
-inline bool witness_ball_disjoint(const LbvhNode& nd, const WitnessBall& wb) {
+inline i64 witness_near2(const LbvhNode& nd, const WitnessBall& wb) {
   i64 s = 0;
   for (int d = 0; d < 3; ++d) {
     const i64 lo4 = 4 * nd.lo[d];
@@ -184,49 +250,137 @@ inline bool witness_ball_disjoint(const LbvhNode& nd, const WitnessBall& wb) {
     else if (wb.q0[d] > hi4) g = wb.q0[d] - hi4;
     s += g * g;
   }
-  return 15 * s >= wb.four_g;
+  return s;
 }
 
-int witness_count(const MortonLbvh& tree, const std::vector<P3>& pts, const WitnessBall& wb,
-                  int cap, Counters* ctr) {
-  int found = 0;
+// ---------------------------------------------------------------------------
+// SONDE DE LANES : les trois boules de milieu en une seule descente.
+//
+// Avec q0 = 2(a+b) et s = |4z - q0|^2 = 16 |z-m|^2, les trois temoins
+// universels du Lemme B s'ecrivent sans division :
+//   q2 (boule diametrale, rayon D/2)     :  4 s < 16 D2
+//   q3 (rayon D/sqrt(12))                : 12 s < 16 D2
+//   q4 (rayon D/sqrt(15))                : 15 s < 16 D2
+// La sortie anticipee tombe des que les TROIS lanes sont mortes. Le compte q2
+// strict est en outre le census exact du support q2, et l'egalite 4s = 16 D2
+// designe exactement son extra-shell.
+// Bornes : |4z - q0| <= 524280, donc s <= 8,3e11 et 15 s <= 1,3e13 en i64.
+// ---------------------------------------------------------------------------
+struct LaneProbe {
+  int p2 = 0, extra2 = 0, n3 = 0, n4 = 0;
+};
+
+void lane_probe(const MortonLbvh& tree, const std::vector<P3>& pts, int a, int b, i64 d2,
+                int budget2, int budget3, int budget4, LaneProbe* out, Counters* ctr) {
+  const P3& pa = pts[(std::size_t)a];
+  const P3& pb = pts[(std::size_t)b];
+  const i64 q0[3] = {2 * (pa.x + pb.x), 2 * (pa.y + pb.y), 2 * (pa.z + pb.z)};
+  const i64 lim = 16 * d2;
+  *out = LaneProbe{};
   int stack[64];
   int sp = 0;
   stack[sp++] = 0;
   while (sp > 0) {
     const int ni = stack[--sp];
     const LbvhNode& nd = tree.nodes[(std::size_t)ni];
-    ++ctr->front_witness_visits;
-    if (witness_ball_disjoint(nd, wb)) continue;
-    if (witness_ball_covers(nd, wb)) {
-      found += nd.end - nd.begin;
-      if (found >= cap) return found;
-      continue;
+    ++ctr->lane_probe_visits;
+    i64 smin = 0;
+    for (int d = 0; d < 3; ++d) {
+      const i64 lo4 = 4 * nd.lo[d];
+      const i64 hi4 = 4 * nd.hi[d];
+      i64 g = 0;
+      if (q0[d] < lo4) g = lo4 - q0[d];
+      else if (q0[d] > hi4) g = q0[d] - hi4;
+      smin += g * g;
     }
+    if (4 * smin > lim) continue;  // hors de la boule diametrale fermee
     if (nd.left < 0) {
       for (int t = nd.begin; t < nd.end; ++t) {
         const int id = tree.order[(std::size_t)t];
+        if (id == a || id == b) continue;
         const P3& z = pts[(std::size_t)id];
         i64 s = 0;
-        const i64 c[3] = {z.x, z.y, z.z};
         for (int d = 0; d < 3; ++d) {
-          const i64 g = 4 * c[d] - wb.q0[d];
+          const i64 g = 4 * (d == 0 ? z.x : (d == 1 ? z.y : z.z)) - q0[d];
           s += g * g;
         }
-        if (15 * s < wb.four_g) {
-          if (++found >= cap) return found;
+        const i64 s4 = 4 * s;
+        if (s4 > lim) continue;
+        if (s4 == lim) { ++out->extra2; continue; }
+        ++out->p2;
+        if (12 * s < lim) {
+          ++out->n3;
+          if (15 * s < lim) ++out->n4;
         }
+        if (out->p2 > budget2 && out->n3 > budget3 && out->n4 > budget4) return;
       }
       continue;
     }
     stack[sp++] = nd.left;
     stack[sp++] = nd.right;
-    if (sp > 60) {  // profondeur impossible sur un LBVH radix u16 equilibre
+    if (sp > 60) {
       std::fprintf(stderr, "REFUS : pile de parcours saturee\n");
       std::exit(3);
     }
   }
-  return found;
+}
+
+// Ferme-t-on le produit entier ? Le compte s'arrete des que les trois lanes
+// ont atteint leur seuil ; son cout est donc borne par les seuils, pas par la
+// population du voisinage.
+bool witness_closes(const MortonLbvh& tree, const std::vector<P3>& pts, const WitnessBall& wb,
+                    Inject inject, Counters* ctr) {
+  int cnt[3] = {0, 0, 0};
+  int need[3] = {kThresholdQ2, kThresholdQ3, kThresholdQ4};
+  if (inject == Inject::kFrontQ4Only) need[0] = need[1] = 0;
+  // Le masque porte les lanes qui ont encore besoin de ce sous-arbre. Une lane
+  // creditee d'un noeud entier en sort : aucun double comptage n'est possible.
+  struct Frame { int node; unsigned mask; };
+  Frame stack[64];
+  int sp = 0;
+  stack[sp++] = Frame{0, 7u};
+  while (sp > 0) {
+    const Frame fr = stack[--sp];
+    unsigned mask = fr.mask;
+    const LbvhNode& nd = tree.nodes[(std::size_t)fr.node];
+    ++ctr->front_witness_visits;
+    const i64 near2 = witness_near2(nd, wb);
+    const i64 far2 = witness_far2(nd, wb);
+    for (int q = 0; q < 3; ++q) {
+      if ((mask & (1u << q)) == 0) continue;
+      if (cnt[q] >= need[q]) { mask &= ~(1u << q); continue; }
+      if (near2 >= wb.tau[q]) { mask &= ~(1u << q); continue; }  // noeud hors boule
+      if (far2 < wb.tau[q]) {                                    // noeud entierement dedans
+        cnt[q] += nd.end - nd.begin;
+        mask &= ~(1u << q);
+      }
+    }
+    if (cnt[0] >= need[0] && cnt[1] >= need[1] && cnt[2] >= need[2]) return true;
+    if (mask == 0) continue;
+    if (nd.left < 0) {
+      for (int t = nd.begin; t < nd.end; ++t) {
+        const int id = tree.order[(std::size_t)t];
+        const P3& z = pts[(std::size_t)id];
+        const i64 c[3] = {z.x, z.y, z.z};
+        i64 s = 0;
+        for (int d = 0; d < 3; ++d) {
+          const i64 g = 4 * c[d] - wb.q0[d];
+          s += g * g;
+        }
+        for (int q = 0; q < 3; ++q)
+          if ((mask & (1u << q)) != 0 && s < wb.tau[q]) ++cnt[q];
+        if (cnt[0] >= need[0] && cnt[1] >= need[1] && cnt[2] >= need[2]) return true;
+      }
+      continue;
+    }
+    stack[sp++] = Frame{nd.left, mask};
+    stack[sp++] = Frame{nd.right, mask};
+    if (sp > 60) {
+      std::fprintf(stderr, "REFUS : pile de parcours saturee\n");
+      std::exit(3);
+    }
+  }
+  return cnt[0] >= need[0] && cnt[1] >= need[1] && cnt[2] >= need[2];
 }
 
 // ---------------------------------------------------------------------------
@@ -238,12 +392,23 @@ struct Neighbour {
   bool operator<(const Neighbour& o) const { return d2 < o.d2 || (d2 == o.d2 && id < o.id); }
 };
 
+struct SurvivingAnchor {
+  int b = 0;
+  i64 d2 = 0;
+  bool lane3 = false, lane4 = false;
+};
+
 struct Workspace {
-  std::vector<int> partners;        // b > a survivants
+  bool store = true;
+  Inject inject = Inject::kNone;
+  int fixture = 0;
+  std::vector<int> partners;
+  std::vector<SurvivingAnchor> survivors;        // b > a survivants
   std::vector<Neighbour> sites;     // sites tries par distance a `a`
   std::vector<SiteMargin> margins;  // marges affines sur le disque de Jung
   std::vector<int> kept;            // sites survivant au filtre d'enveloppe
   std::vector<int> lens;            // carriers : lentille ET enveloppe
+  std::vector<unsigned char> acute; // face abx positive, parallele a lens
   std::vector<Support> out;         // supports emis
   std::vector<int> shell_buf;
   std::vector<i64> select_buf;
@@ -262,23 +427,12 @@ void collect_partners(const MortonLbvh& tree, const std::vector<P3>& pts, int a,
     const int ni = stack[--sp];
     const LbvhNode& nd = tree.nodes[(std::size_t)ni];
     ++ws->ctr.front_node_visits;
-    const i64 g = aabb_min_dist2(nd, pa);
-    if (g > 0) {
-      const i64 ext2 = aabb_extent2(nd);
-      // 15 * ext2 <= 2 G : la boule temoin commune est non vide et ouverte.
-      if (15 * ext2 <= 2 * g) {
-        WitnessBall wb{};
-        for (int d = 0; d < 3; ++d) {
-          const i64 c[3] = {pa.x, pa.y, pa.z};
-          wb.q0[d] = 2 * c[d] + nd.lo[d] + nd.hi[d];
-        }
-        wb.four_g = 4 * g;
-        ++ws->ctr.front_witness_calls;
-        const int cnt = witness_count(tree, pts, wb, kThresholdQ2, &ws->ctr);
-        if (cnt >= kThresholdQ2) {
-          ++ws->ctr.front_witness_prunes;
-          continue;  // produit entier mort dans les trois lanes
-        }
+    const WitnessBall wb = make_witness_ball(nd, pa, ws->inject);
+    if (wb.usable) {
+      ++ws->ctr.front_witness_calls;
+      if (witness_closes(tree, pts, wb, ws->inject, &ws->ctr)) {
+        ++ws->ctr.front_witness_prunes;
+        continue;  // produit entier mort dans les trois lanes
       }
     }
     if (nd.left < 0) {
@@ -336,20 +490,30 @@ void gather_sites(const MortonLbvh& tree, const std::vector<P3>& pts, int a, i64
 // L'arete gagnante est la plus longue ; a egalite, le plus petit couple
 // (min PointId, max PointId) en ordre lexicographique.
 // ---------------------------------------------------------------------------
-bool owns_canonical_max_edge(const std::vector<P3>& pts, const int* ids, int q, int a, int b) {
-  i64 best2 = -1;
+bool owns_canonical_max_edge(const std::vector<P3>& pts, const int* ids, int q, int a, int b,
+                            Inject inject) {
+  const bool want_min = (inject == Inject::kOwnerMinEdge);
+  i64 best2 = want_min ? ((i64)1 << 62) : -1;
   int bi = -1, bj = -1;
   for (int i = 0; i < q; ++i)
     for (int j = i + 1; j < q; ++j) {
       const i64 d2 = (i64)norm2_i64(sub(pts[(std::size_t)ids[i]], pts[(std::size_t)ids[j]]));
       const int lo = std::min(ids[i], ids[j]);
       const int hi = std::max(ids[i], ids[j]);
-      if (d2 > best2 || (d2 == best2 && (lo < bi || (lo == bi && hi < bj)))) {
+      const bool better = want_min ? (d2 < best2) : (d2 > best2);
+      const bool tie = (d2 == best2) && (lo < bi || (lo == bi && hi < bj));
+      if (better || tie) {
         best2 = d2;
         bi = lo;
         bj = hi;
       }
     }
+  if (inject == Inject::kOwnerNoTiebreak) {
+    // Sans regle canonique, toute arete de longueur maximale se croit owner :
+    // un support a plusieurs aretes maximales est alors emis plusieurs fois.
+    const i64 dab = (i64)norm2_i64(sub(pts[(std::size_t)a], pts[(std::size_t)b]));
+    return dab == best2;
+  }
   return bi == std::min(a, b) && bj == std::max(a, b);
 }
 
@@ -358,12 +522,17 @@ bool owns_canonical_max_edge(const std::vector<P3>& pts, const int* ids, int q, 
 // collecte le shell. `budget` est le nombre maximal d'interieurs admissibles.
 // Retour : -1 si le budget est depasse, sinon p.
 // ---------------------------------------------------------------------------
-int census(const std::vector<P3>& pts, const std::vector<int>& kept, const BallForm& ball,
-           const P3& origin, const int* ids, int q, int budget, std::vector<int>* shell,
-           Counters* ctr) {
-  int p = 0;
+// `always_inside` sites (Llow > 0) sont strictement interieurs a TOUTE boule
+// du disque : ils sont comptes sans etre testes. Les sites `Uhigh < 0` sont
+// strictement exterieurs : ils ne sont jamais charges. Seuls les sites dont la
+// marge change de signe demandent le predicat exact.
+int census(const std::vector<P3>& pts, const std::vector<int>& crossing, int always_inside,
+           const BallForm& ball, const P3& origin, const int* ids, int q, int budget,
+           std::vector<int>* shell, Counters* ctr) {
+  int p = always_inside;
+  if (p > budget) return -1;
   shell->clear();
-  for (int id : kept) {
+  for (int id : crossing) {
     bool in_support = false;
     for (int i = 0; i < q; ++i)
       if (ids[i] == id) { in_support = true; break; }
@@ -382,10 +551,11 @@ int census(const std::vector<P3>& pts, const std::vector<int>& kept, const BallF
 // ---------------------------------------------------------------------------
 // Extension d'une ancre (a,b) : q2 direct, q3 par droite, q4 par paire.
 // ---------------------------------------------------------------------------
-void extend_anchor(const std::vector<P3>& pts, int a, int b, i64 d2, int smax, bool use_filter,
-                   Workspace* ws) {
+void extend_anchor(const std::vector<P3>& pts, int a, int b, i64 d2, int smax, bool lane3,
+                   bool lane4, bool use_filter, Workspace* ws) {
   const P3& pa = pts[(std::size_t)a];
   const P3& pb = pts[(std::size_t)b];
+  const int budget3 = smax - 3, budget4 = smax - 4;
   // Prefixe des sites utiles : |z-a|^2 <= 1,5 D^2. Tout interieur d'une boule
   // ancree par l'arete maximale (a,b) y est, puisque R <= D sqrt(3/8).
   int site_count = 0;
@@ -395,73 +565,8 @@ void extend_anchor(const std::vector<P3>& pts, int a, int b, i64 d2, int smax, b
   }
   ws->ctr.site_evaluations += site_count;
   if (site_count > ws->ctr.max_site_list) ws->ctr.max_site_list = site_count;
-
-  // ------------------------------------------- passe A : marges g seulement
-  // g = D2 - |2z-a-b|^2 est un i64 sans racine. Il suffit aux trois lanes et
-  // au census q2 : la racine entiere, seule operation chere, n'est payee que
-  // sur les ancres qui survivent.
   ws->margins.clear();
   ws->margins.resize((std::size_t)site_count);
-  {
-    const P3 ab{pa.x + pb.x, pa.y + pb.y, pa.z + pb.z};
-    for (int t = 0; t < site_count; ++t) {
-      SiteMargin& sm = ws->margins[(std::size_t)t];
-      const int id = ws->sites[(std::size_t)t].id;
-      const P3& pz = pts[(std::size_t)id];
-      const P3 u{2 * pz.x - ab.x, 2 * pz.y - ab.y, 2 * pz.z - ab.z};
-      sm.id = id;
-      sm.d2a = ws->sites[(std::size_t)t].d2;
-      sm.g = d2 - (i64)norm2_i64(u);
-    }
-  }
-
-  // --------------------------------------------- lanes par boule de milieu
-  // Les trois temoins universels du Lemme B sont exactement trois seuils sur
-  // la marge g deja calculee, avec u = 2z-a-b et |u|^2 = D2 - g :
-  //   q2 : |u|^2 < D2        <=>  g > 0            (boule diametrale)
-  //   q3 : 3|u|^2 < D2       <=>  3g > 2 D2        (rayon D/sqrt(12))
-  //   q4 : 15|u|^2 < 4 D2    <=>  15g > 11 D2      (rayon D/sqrt(15))
-  // Un tel temoin est strictement interieur a TOUTE boule admissible ancree
-  // par (a,b) ; il ne peut etre ni a, ni b, ni un carrier (qui est sur la
-  // sphere). Le census q2 est lu au meme passage.
-  int p2 = 0, extra2 = 0, n3 = 0, n4 = 0;
-  const int budget2 = smax - 2, budget3 = smax - 3, budget4 = smax - 4;
-  for (int t = 0; t < site_count; ++t) {
-    const SiteMargin& sm = ws->margins[(std::size_t)t];
-    if (sm.id == b) continue;
-    ++ws->ctr.interior_tests;
-    if (sm.g > 0) {
-      if (p2 <= budget2) ++p2;
-      if (3 * sm.g > 2 * d2) {
-        ++n3;
-        if (15 * sm.g > 11 * d2) ++n4;
-      }
-    } else if (sm.g == 0) {
-      ++extra2;
-    }
-  }
-  const bool lane3 = n3 <= budget3;
-  const bool lane4 = n4 <= budget4;
-
-  // ------------------------------------------------------------------ q2
-  if (p2 > budget2) {
-    ++ws->ctr.reject_rank;
-  } else {
-    Support sup{};
-    sup.id[0] = std::min(a, b);
-    sup.id[1] = std::max(a, b);
-    sup.q = 2;
-    sup.p = p2;
-    sup.shell_extra = extra2;
-    if (extra2 > 0) ++ws->ctr.shell_extra_supports;
-    ws->out.push_back(sup);
-    ++ws->ctr.supports_q2;
-  }
-  if (!lane3 && !lane4) {
-    ++ws->ctr.anchors_lane_dead;
-    return;
-  }
-  ++ws->ctr.anchors_extended;
 
   // ------------------------------ passe B : amplitude exacte et filtre theta
   // Sur le disque de Jung q4, l'amplitude de F_z vaut sqrt(2Q) avec
@@ -472,10 +577,14 @@ void extend_anchor(const std::vector<P3>& pts, int a, int b, i64 d2, int smax, b
     const P3 ab{pa.x + pb.x, pa.y + pb.y, pa.z + pb.z};
     for (int t = 0; t < site_count; ++t) {
       SiteMargin& sm = ws->margins[(std::size_t)t];
-      const P3& pz = pts[(std::size_t)sm.id];
+      const int id = ws->sites[(std::size_t)t].id;
+      const P3& pz = pts[(std::size_t)id];
       const P3 u{2 * pz.x - ab.x, 2 * pz.y - ab.y, 2 * pz.z - ab.z};
-      const i128 uu = i128(d2) - i128(sm.g);
+      const i128 uu = norm2_i64(u);
       const i128 ud = dot_i64(u, d);
+      sm.id = id;
+      sm.d2a = ws->sites[(std::size_t)t].d2;
+      sm.g = (i64)(i128(d2) - uu);
       const i64 s = isqrt_i128(2 * (uu * i128(d2) - ud * ud)) + 1;
       sm.llow = sm.g - s;
       sm.uhigh = sm.g + s;
@@ -502,12 +611,17 @@ void extend_anchor(const std::vector<P3>& pts, int a, int b, i64 d2, int smax, b
   int always_inside = 0;
   for (int t = 0; t < site_count; ++t) {
     const SiteMargin& sm = ws->margins[(std::size_t)t];
-    if (sm.id != b && sm.llow > 0) ++always_inside;
-    if (theta_active && sm.uhigh < theta) continue;  // Theoreme D : jamais interieur
+    if (sm.id == b) continue;
+    if (sm.llow > 0) { ++always_inside; continue; }   // interieur de toute boule
+    if (sm.uhigh < 0) continue;                       // exterieur a toute boule
+    const i64 probe = (ws->inject == Inject::kThetaNoFailOpen) ? sm.llow : sm.uhigh;
+    if (theta_active && probe < theta) continue;      // Theoreme D : jamais interieur
     ws->kept.push_back(sm.id);
   }
   ws->ctr.kept_sites += (long long)ws->kept.size();
   if ((long long)ws->kept.size() > ws->ctr.max_kept) ws->ctr.max_kept = (long long)ws->kept.size();
+  const int effective_always =
+      (ws->inject == Inject::kCensusNoAlways) ? 0 : always_inside;
   const bool disk3 = lane3 && always_inside <= budget3;
   const bool disk4 = lane4 && always_inside <= budget4;
   if (!disk3 && !disk4) {
@@ -521,30 +635,35 @@ void extend_anchor(const std::vector<P3>& pts, int a, int b, i64 d2, int smax, b
   // sa marge doit changer de signe sur le disque : Llow <= 0 <= Uhigh. Enfin
   // il survit au filtre theta (Theoreme E : un carrier n'est jamais ecarte).
   ws->lens.clear();
-  for (int t = 0; t < site_count; ++t) {
-    const SiteMargin& sm = ws->margins[(std::size_t)t];
-    if (sm.id == b) continue;
-    if (theta_active && sm.uhigh < theta) continue;   // hors enveloppe mobile
-    if (sm.llow > 0 || sm.uhigh < 0) continue;        // la droite ne coupe pas le disque
-    if (sm.d2a > d2) continue;                        // |x-a| <= D
-    if ((i64)norm2_i64(sub(pts[(std::size_t)sm.id], pb)) > d2) continue;  // |x-b| <= D
-    ws->lens.push_back(sm.id);
+  for (int id : ws->kept) {
+    const P3& px = pts[(std::size_t)id];
+    const i64 lim = (ws->inject == Inject::kLensStrict) ? d2 - 1 : d2;
+    if ((i64)norm2_i64(sub(px, pa)) > lim) continue;  // |x-a| <= D
+    if ((i64)norm2_i64(sub(px, pb)) > lim) continue;  // |x-b| <= D
+    ws->lens.push_back(id);
   }
   ws->ctr.lens_carriers += (long long)ws->lens.size();
   if ((long long)ws->lens.size() > ws->ctr.max_lens) ws->ctr.max_lens = (long long)ws->lens.size();
 
   // ------------------------------------------------------------------ q3
+  // La face `abx` positive est marquee : le Theoreme 5 garantit qu'un q4
+  // positif d'arete maximale (a,b) possede AU MOINS UNE face positive parmi
+  // `abx` et `aby`. La boucle q4 s'y restreint sans perdre un support.
   const int nl = (int)ws->lens.size();
+  ws->acute.assign((std::size_t)nl, 0);
+  for (int i = 0; i < nl; ++i)
+    ws->acute[(std::size_t)i] = positive_q3(pa, pb, pts[(std::size_t)ws->lens[(std::size_t)i]]) ? 1 : 0;
   for (int i = 0; disk3 && i < nl; ++i) {
     const int x = ws->lens[(std::size_t)i];
     ++ws->ctr.q3_candidates;
-    if (!positive_q3(pa, pb, pts[(std::size_t)x])) { ++ws->ctr.reject_positivity; continue; }
+    if (ws->acute[(std::size_t)i] == 0) { ++ws->ctr.reject_positivity; continue; }
     int ids[4] = {a, b, x, -1};
     sort_ids(ids, 3);
-    if (!owns_canonical_max_edge(pts, ids, 3, a, b)) { ++ws->ctr.reject_owner; continue; }
+    if (!owns_canonical_max_edge(pts, ids, 3, a, b, ws->inject)) { ++ws->ctr.reject_owner; continue; }
     const BallForm ball = circum_q3(pa, pb, pts[(std::size_t)x]);
     if (!ball.valid) { ++ws->ctr.reject_degenerate; continue; }
-    const int p = census(pts, ws->kept, ball, pa, ids, 3, smax - 3, &ws->shell_buf, &ws->ctr);
+    const int p = census(pts, ws->kept, effective_always, ball, pa, ids, 3, budget3,
+                         &ws->shell_buf, &ws->ctr);
     if (p < 0) { ++ws->ctr.reject_rank; continue; }
     Support sup{};
     for (int k = 0; k < 3; ++k) sup.id[k] = ids[k];
@@ -552,7 +671,7 @@ void extend_anchor(const std::vector<P3>& pts, int a, int b, i64 d2, int smax, b
     sup.p = p;
     sup.shell_extra = (int)ws->shell_buf.size();
     if (sup.shell_extra > 0) ++ws->ctr.shell_extra_supports;
-    ws->out.push_back(sup);
+    if (ws->store) ws->out.push_back(sup);
     ++ws->ctr.supports_q3;
   }
 
@@ -562,6 +681,10 @@ void extend_anchor(const std::vector<P3>& pts, int a, int b, i64 d2, int smax, b
     const P3& px = pts[(std::size_t)x];
     for (int j = i + 1; j < nl; ++j) {
       const int y = ws->lens[(std::size_t)j];
+      if (ws->acute[(std::size_t)i] == 0 && ws->acute[(std::size_t)j] == 0) {
+        ++ws->ctr.reject_non_acute;
+        continue;
+      }
       const P3& py = pts[(std::size_t)y];
       ++ws->ctr.q4_candidates;
       // L'arete maximale doit rester (a,b) : seule |x-y| reste a verifier,
@@ -570,11 +693,15 @@ void extend_anchor(const std::vector<P3>& pts, int a, int b, i64 d2, int smax, b
       if (dxy > d2) { ++ws->ctr.reject_owner; continue; }
       const BallForm ball = circum_q4(pa, pb, px, py);
       if (!ball.valid) { ++ws->ctr.reject_degenerate; continue; }
-      if (!positive_q4(pa, pb, px, py, ball, pa)) { ++ws->ctr.reject_positivity; continue; }
+      if (!positive_q4(pa, pb, px, py, ball, pa, ws->inject == Inject::kPositivityLoose)) {
+        ++ws->ctr.reject_positivity;
+        continue;
+      }
       int ids[4] = {a, b, x, y};
       sort_ids(ids, 4);
-      if (!owns_canonical_max_edge(pts, ids, 4, a, b)) { ++ws->ctr.reject_owner; continue; }
-      const int p = census(pts, ws->kept, ball, pa, ids, 4, smax - 4, &ws->shell_buf, &ws->ctr);
+      if (!owns_canonical_max_edge(pts, ids, 4, a, b, ws->inject)) { ++ws->ctr.reject_owner; continue; }
+      const int p = census(pts, ws->kept, effective_always, ball, pa, ids, 4, budget4,
+                            &ws->shell_buf, &ws->ctr);
       if (p < 0) { ++ws->ctr.reject_rank; continue; }
       Support sup{};
       for (int k = 0; k < 4; ++k) sup.id[k] = ids[k];
@@ -582,7 +709,7 @@ void extend_anchor(const std::vector<P3>& pts, int a, int b, i64 d2, int smax, b
       sup.p = p;
       sup.shell_extra = (int)ws->shell_buf.size();
       if (sup.shell_extra > 0) ++ws->ctr.shell_extra_supports;
-      ws->out.push_back(sup);
+      if (ws->store) ws->out.push_back(sup);
       ++ws->ctr.supports_q4;
     }
   }
@@ -600,6 +727,7 @@ struct RunResult {
 
 void run_range(const MortonLbvh& tree, const std::vector<P3>& pts, int lo, int hi, int smax,
                bool exhaustive_front, bool use_filter, Workspace* ws) {
+  // `ws->inject` porte le mutant : il n'est jamais actif sur la reference.
   const int n = (int)pts.size();
   for (int a = lo; a < hi; ++a) {
     if (exhaustive_front) {
@@ -610,19 +738,15 @@ void run_range(const MortonLbvh& tree, const std::vector<P3>& pts, int lo, int h
     }
     if (ws->partners.empty()) continue;
     ws->ctr.candidate_pairs += (long long)ws->partners.size();
-    // Rayon de la liste de sites : 1,5 * max D^2.
-    i64 dmax2 = 0;
-    for (int b : ws->partners)
-      dmax2 = std::max(dmax2, (i64)norm2_i64(sub(pts[(std::size_t)b], pts[(std::size_t)a])));
-    const i64 r2 = (3 * dmax2 + 1) / 2;
-    gather_sites(tree, pts, a, r2, ws);
-    // Les partenaires sont traites par distance croissante : le prefixe de
-    // sites utile est alors monotone et la liste est relue en sequence.
-    std::sort(ws->partners.begin(), ws->partners.end(), [&](int u, int v) {
-      const i64 du = (i64)norm2_i64(sub(pts[(std::size_t)u], pts[(std::size_t)a]));
-      const i64 dv = (i64)norm2_i64(sub(pts[(std::size_t)v], pts[(std::size_t)a]));
-      return du < dv || (du == dv && u < v);
-    });
+    const int budget2 = smax - 2, budget3 = smax - 3, budget4 = smax - 4;
+
+    // ---- Sonde de lanes : elle decide q2 exactement et filtre q3/q4. Elle
+    // ne lit AUCUNE liste de sites : sa descente s'arrete des que les trois
+    // lanes sont mortes, ce qui borne son cout par le seuil et non par le
+    // voisinage. C'est ce qui empeche les ancres a grand D de payer un
+    // prefixe proportionnel au nuage.
+    ws->survivors.clear();
+    i64 dmax_surv2 = 0;
     for (int b : ws->partners) {
       const i64 d2 = (i64)norm2_i64(sub(pts[(std::size_t)b], pts[(std::size_t)a]));
       if (d2 == 0) {
@@ -630,19 +754,51 @@ void run_range(const MortonLbvh& tree, const std::vector<P3>& pts, int lo, int h
         std::exit(2);
       }
       ++ws->ctr.anchors_opened;
-      extend_anchor(pts, a, b, d2, smax, use_filter, ws);
+      LaneProbe lp{};
+      lane_probe(tree, pts, a, b, d2, budget2, budget3, budget4, &lp, &ws->ctr);
+      if (lp.p2 <= budget2) {
+        Support sup{};
+        sup.id[0] = std::min(a, b);
+        sup.id[1] = std::max(a, b);
+        sup.q = 2;
+        sup.p = lp.p2;
+        sup.shell_extra = lp.extra2;
+        if (lp.extra2 > 0) ++ws->ctr.shell_extra_supports;
+        if (ws->store) ws->out.push_back(sup);
+        ++ws->ctr.supports_q2;
+      } else {
+        ++ws->ctr.reject_rank;
+      }
+      const bool lane3 = lp.n3 <= budget3;
+      const bool lane4 = lp.n4 <= budget4;
+      if (!lane3 && !lane4) { ++ws->ctr.anchors_lane_dead; continue; }
+      ++ws->ctr.anchors_extended;
+      ws->survivors.push_back(SurvivingAnchor{b, d2, lane3, lane4});
+      dmax_surv2 = std::max(dmax_surv2, d2);
     }
+    if (ws->survivors.empty()) continue;
+
+    // ---- Une seule liste de sites par point d'ancre, dimensionnee sur les
+    // SEULES ancres survivantes : rayon carre 1,5 * max D^2.
+    gather_sites(tree, pts, a, (3 * dmax_surv2 + 1) / 2, ws);
+    std::sort(ws->survivors.begin(), ws->survivors.end(),
+              [](const SurvivingAnchor& u, const SurvivingAnchor& v) {
+                return u.d2 < v.d2 || (u.d2 == v.d2 && u.b < v.b);
+              });
+    for (const SurvivingAnchor& sa : ws->survivors)
+      extend_anchor(pts, a, sa.b, sa.d2, smax, sa.lane3, sa.lane4, use_filter, ws);
   }
 }
 
 RunResult produce(const std::vector<P3>& pts, int smax, int threads, bool exhaustive_front,
-                  bool use_filter) {
+                  bool use_filter, bool store, Inject inject) {
   RunResult res{};
   MortonLbvh tree;
   tree.build(pts, 8);
   const int n = (int)pts.size();
   const int nthreads = std::max(1, threads);
   std::vector<Workspace> spaces((std::size_t)nthreads);
+  for (auto& w : spaces) { w.store = store; w.inject = inject; }
   const auto t0 = std::chrono::steady_clock::now();
   {
     std::vector<std::thread> pool;
@@ -704,6 +860,9 @@ int main(int argc, char** argv) {
   CloudFamily family = CloudFamily::kUniform;
   bool verify = false;
   bool no_filter = false;
+  bool no_store = false;
+  Inject inject = Inject::kNone;
+  int fixture = 0;
   bool emit = false;
   long long min_supports = 0;
   long long min_anchors = 0;
@@ -725,7 +884,23 @@ int main(int argc, char** argv) {
     else if (key == "--min-prunes") { if (!parse_ll(val.c_str(), &parsed)) refuse("--min-prunes invalide"); min_prunes = parsed; }
     else if (key == "--verify") { verify = true; }
     else if (key == "--no-filter") { no_filter = true; }
+    else if (key == "--no-store") { no_store = true; }
+    else if (key == "--inject") {
+      if (val == "front-no-ext") inject = Inject::kFrontNoExt;
+      else if (val == "front-q4-only") inject = Inject::kFrontQ4Only;
+      else if (val == "theta-no-fail-open") inject = Inject::kThetaNoFailOpen;
+      else if (val == "owner-min-edge") inject = Inject::kOwnerMinEdge;
+      else if (val == "owner-no-tiebreak") inject = Inject::kOwnerNoTiebreak;
+      else if (val == "lens-strict") inject = Inject::kLensStrict;
+      else if (val == "census-no-always-inside") inject = Inject::kCensusNoAlways;
+      else if (val == "positivity-loose") inject = Inject::kPositivityLoose;
+      else refuse("--inject inconnu");
+    }
     else if (key == "--emit-supports") { emit = true; }
+    else if (key == "--fixture") {
+      if (val == "ties") fixture = 1;
+      else refuse("--fixture inconnue");
+    }
     else if (key == "--family") {
       if (val == "uniform") family = CloudFamily::kUniform;
       else if (val == "terrain") family = CloudFamily::kTerrain;
@@ -741,33 +916,50 @@ int main(int argc, char** argv) {
   if (threads < 1 || threads > 256) refuse("--threads hors bornes");
   if (coord < 0) coord = mhgp3v::cloud_family_default_coord(family, (int)n);
   if (coord < 2 || coord > 65536) refuse("--coord hors bornes");
+  if (verify && no_store) refuse("--verify exige le stockage des supports");
+  if (inject != Inject::kNone && !verify) refuse("un mutant sans juge ne prouve rien");
 
-  const std::vector<P3> pts = mhgp3v::make_family_cloud(family, (int)n, (int)coord, seed);
-  if ((long long)pts.size() != n) refuse("la famille n'a pas rendu le cardinal demande");
+  // FIXTURE GRAVEE `ties` : le tetraedre regulier (0,0,0),(2,2,0),(2,0,2),(0,2,2)
+  // a ses SIX aretes de carre 8 et son circumcentre exact en (1,1,1), donc
+  // strictement interieur. Ses quatre faces sont equilaterales : chacune a
+  // TROIS aretes maximales. C'est le cas ou la regle canonique de tie-break
+  // decide seule de l'unicite de l'emission.
+  std::vector<P3> pts;
+  if (fixture == 1) {
+    pts = {P3{0, 0, 0},   P3{2, 2, 0},   P3{2, 0, 2},   P3{0, 2, 2},
+           P3{40, 40, 40}, P3{0, 40, 1}, P3{40, 1, 0}, P3{1, 0, 40}};
+    n = (long long)pts.size();
+  } else {
+    pts = mhgp3v::make_family_cloud(family, (int)n, (int)coord, seed);
+    if ((long long)pts.size() != n) refuse("la famille n'a pas rendu le cardinal demande");
+  }
 
   const auto t_start = std::chrono::steady_clock::now();
-  RunResult res = produce(pts, (int)smax, (int)threads, false, !no_filter);
+  RunResult res = produce(pts, (int)smax, (int)threads, false, !no_filter, !no_store, inject);
   const double wall = std::chrono::duration<double>(std::chrono::steady_clock::now() - t_start).count();
 
   std::printf("AnchorSourceReceipt-v1\n");
   std::printf("cadre phase=exploration_v3_hors_registre backend=cpu_reference"
               " profile=quantized_u16_input_only mode=proposition_math_non_recue"
               " public_status=not_claimed\n");
-  std::printf("cloud family=%s n=%lld coord=%lld seed=%lld smax=%lld threads=%lld\n",
-              mhgp3v::cloud_family_name(family), n, coord, seed, smax, threads);
+  std::printf("cloud family=%s n=%lld coord=%lld seed=%lld smax=%lld threads=%lld inject=%s\n",
+              mhgp3v::cloud_family_name(family), n, coord, seed, smax, threads,
+              inject_name(inject));
   const Counters& c = res.ctr;
   std::printf("front node_visits=%lld witness_calls=%lld witness_visits=%lld prunes=%lld"
+              " lane_visits=%lld"
               " candidate_pairs=%lld anchors=%lld lane_dead=%lld etendues=%lld"
               " disk_dead=%lld\n",
               c.front_node_visits, c.front_witness_calls, c.front_witness_visits,
-              c.front_witness_prunes, c.candidate_pairs, c.anchors_opened,
+              c.front_witness_prunes, c.lane_probe_visits, c.candidate_pairs, c.anchors_opened,
               c.anchors_lane_dead, c.anchors_extended, c.anchors_disk_dead);
   std::printf("extend gather_visits=%lld site_evaluations=%lld kept_sites=%lld lens_carriers=%lld"
               " q3_candidates=%lld q4_candidates=%lld interior_tests=%lld\n",
               c.site_gather_visits, c.site_evaluations, c.kept_sites, c.lens_carriers,
               c.q3_candidates, c.q4_candidates, c.interior_tests);
-  std::printf("rejets positivite=%lld owner=%lld rang=%lld degenere=%lld\n",
-              c.reject_positivity, c.reject_owner, c.reject_rank, c.reject_degenerate);
+  std::printf("rejets positivite=%lld non_aigu=%lld owner=%lld rang=%lld degenere=%lld\n",
+              c.reject_positivity, c.reject_non_acute, c.reject_owner, c.reject_rank,
+              c.reject_degenerate);
   std::printf("supports q2=%lld q3=%lld q4=%lld total=%lld extra_shell=%lld\n",
               c.supports_q2, c.supports_q3, c.supports_q4,
               c.supports_q2 + c.supports_q3 + c.supports_q4, c.shell_extra_supports);
@@ -779,9 +971,16 @@ int main(int argc, char** argv) {
   long long duplicates = 0;
   for (std::size_t i = 1; i < res.supports.size(); ++i)
     if (support_key(res.supports[i - 1]) == support_key(res.supports[i])) ++duplicates;
-  std::printf("identite occurrences=%zu cles_uniques=%zu doublons=%lld\n", res.supports.size(),
-              res.supports.size() - (std::size_t)duplicates, duplicates);
+  if (no_store) std::printf("identite non_verifiee=no-store\n");
+  else
+    std::printf("identite occurrences=%zu cles_uniques=%zu doublons=%lld\n", res.supports.size(),
+                res.supports.size() - (std::size_t)duplicates, duplicates);
   if (duplicates != 0) {
+    if (inject != Inject::kNone) {
+      std::fprintf(stderr, "MUTANT TUE : %s casse l'emission exacte-une-fois\n",
+                   inject_name(inject));
+      return 4;
+    }
     std::fprintf(stderr, "REFUS : l'emission exacte-une-fois est violee\n");
     return 3;
   }
@@ -795,7 +994,7 @@ int main(int argc, char** argv) {
   }
 
   if (verify) {
-    RunResult ref = produce(pts, (int)smax, 1, true, false);
+    RunResult ref = produce(pts, (int)smax, 1, true, false, true, Inject::kNone);
     bool same = ref.supports.size() == res.supports.size();
     if (same)
       for (std::size_t i = 0; i < ref.supports.size(); ++i)
@@ -804,8 +1003,17 @@ int main(int argc, char** argv) {
     std::printf("verify exhaustif=%zu produit=%zu accord=%s\n", ref.supports.size(),
                 res.supports.size(), same ? "OUI" : "NON");
     if (!same) {
-      std::fprintf(stderr, "DESACCORD : le certificat de front a supprime des supports\n");
+      if (inject != Inject::kNone) {
+        std::fprintf(stderr, "MUTANT TUE : %s casse l'identite de Source S\n",
+                     inject_name(inject));
+        return 4;
+      }
+      std::fprintf(stderr, "DESACCORD : un certificat a supprime ou invente des supports\n");
       return 1;
+    }
+    if (inject != Inject::kNone) {
+      std::fprintf(stderr, "MUTANT SURVIVANT : %s n'a rien change\n", inject_name(inject));
+      return 3;
     }
   }
 

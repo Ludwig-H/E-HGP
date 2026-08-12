@@ -146,7 +146,7 @@ inline bool positive_q3(const P3& a, const P3& b, const P3& x) {
 // les quatre faces. Avec c = a + Y/Delta et Delta > 0, le test sur la face
 // (p,q,r) de sommet oppose s s'ecrit sur Delta*(c - p) = Delta*(a - p) + Y.
 inline bool positive_q4(const P3& s0, const P3& s1, const P3& s2, const P3& s3,
-                        const BallForm& ball, const P3& origin) {
+                        const BallForm& ball, const P3& origin, bool loose = false) {
   const P3* v[4] = {&s0, &s1, &s2, &s3};
   for (int f = 0; f < 4; ++f) {
     const P3& p = *v[(f + 1) & 3];
@@ -165,7 +165,7 @@ inline bool positive_q4(const P3& s0, const P3& s1, const P3& s2, const P3& s3,
     const i128 cy = ball.den * ap.y + ball.num.y;
     const i128 cz = ball.den * ap.z + ball.num.z;
     const i128 side_center = i128(nrm.x) * cx + i128(nrm.y) * cy + i128(nrm.z) * cz;
-    if (side_center == 0) return false;                       // centre sur la face
+    if (side_center == 0) { if (!loose) return false; continue; }  // centre sur la face
     if ((side_center > 0) != (side_vertex > 0)) return false;  // mauvais cote
   }
   return true;
