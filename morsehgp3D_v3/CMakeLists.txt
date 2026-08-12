@@ -2778,6 +2778,87 @@ mhgp3v_add_expected_code_test_for(mhgp3v_anchor_source
   mhgp3v_anchor_reject_mutant_pipeline "les mutants visent le moteur de reference" 2
   --points=90 --verify --engine=pipeline --inject=lens-strict)
 
+# ---- PARITE DES LEDGERS ENTRE LES DEUX MOTEURS ------------------------------
+# `--verify` ne compare que des SUPPORTS, et cela a laissé passer deux défauts
+# réels : le moteur `pipeline` — celui que nvcc compile — n'avait AUCUN
+# compteur de rejet et publiait `rejets ... = 0` là où la référence en comptait
+# `1 169 095`; et sa garde de densité n'existait pas côté référence, de sorte
+# que les deux ledgers de front n'étaient pas comparables. Un compteur absent
+# n'est pas un compteur nul. Ces portes comparent les TRENTE-SIX compteurs
+# nommément, dans les deux états de la garde. Le nombre `compteurs=36` est dans
+# le regex : une liste de comparaison silencieusement raccourcie serait rouge.
+add_test(NAME mhgp3v_anchor_parite_ledger_uniform COMMAND mhgp3v_anchor_source
+         --points=100 --family=uniform --seed=3 --compare-engines --min-supports=15000)
+add_test(NAME mhgp3v_anchor_parite_ledger_terrain COMMAND mhgp3v_anchor_source
+         --points=100 --family=terrain --seed=3 --compare-engines --min-supports=4000)
+add_test(NAME mhgp3v_anchor_parite_ledger_clusters COMMAND mhgp3v_anchor_source
+         --points=100 --family=eight_clusters --seed=3 --compare-engines --min-supports=9000)
+add_test(NAME mhgp3v_anchor_parite_ledger_multiecho COMMAND mhgp3v_anchor_source
+         --points=100 --family=scanline_overlap_multiecho --seed=3 --compare-engines
+         --min-supports=4000)
+add_test(NAME mhgp3v_anchor_parite_ledger_garde COMMAND mhgp3v_anchor_source
+         --points=100 --family=terrain --seed=3 --compare-engines --density-guard
+         --min-supports=4000)
+add_test(NAME mhgp3v_anchor_parite_ledger_theta COMMAND mhgp3v_anchor_source
+         --points=100 --family=uniform --seed=3 --compare-engines --theta-audit
+         --min-theta-active=2000 --min-supports=15000)
+set_tests_properties(mhgp3v_anchor_parite_ledger_uniform mhgp3v_anchor_parite_ledger_terrain
+                     mhgp3v_anchor_parite_ledger_clusters mhgp3v_anchor_parite_ledger_multiecho
+                     mhgp3v_anchor_parite_ledger_garde mhgp3v_anchor_parite_ledger_theta
+                     PROPERTIES
+  PASS_REGULAR_EXPRESSION "parite_moteurs compteurs=36 ecarts_compteurs=0[^\n]*accord=OUI")
+mhgp3v_add_expected_code_test_for(mhgp3v_anchor_source
+  mhgp3v_anchor_reject_compare_engines_pipeline
+  "--compare-engines lance lui-meme les deux moteurs" 2
+  --points=90 --compare-engines --engine=pipeline)
+mhgp3v_add_expected_code_test_for(mhgp3v_anchor_source
+  mhgp3v_anchor_reject_compare_engines_mutant
+  "--compare-engines compare deux moteurs sains" 2
+  --points=90 --compare-engines --verify --inject=lens-strict)
+
+# ---- MORT PAR BUDGET, AU PLUS TOT -------------------------------------------
+# `Llow>0` certifie qu'un site est strictement intérieur à TOUTE boule
+# admissible de l'ancre; un sous-ensemble de tels sites est donc un minorant
+# exact de `p`. Dès qu'il dépasse le budget de la dernière lane vivante,
+# l'ancre est morte et la décision ne peut plus changer. La boucle de marges
+# s'arrête là. La sortie est identique — c'est la MEME décision, prise plus
+# tôt : à `eight_clusters n=500`, `q4_paires_parcourues=191 538 784` et
+# `interior_tests=334 430 649` sont inchangés au chiffre près, tandis que
+# `site_evaluations` tombe de `33 870 356` à `13 983 250` et le mur de
+# `92,46` à `33,53` s. Ces portes exigent l'accord ET un plancher de morts
+# anticipées : sans le plancher, un chemin jamais emprunté passerait aussi.
+add_test(NAME mhgp3v_anchor_budget_precoce_uniform COMMAND mhgp3v_anchor_source
+         --points=120 --family=uniform --seed=3 --verify --min-budget-early=700
+         --min-supports=15000)
+add_test(NAME mhgp3v_anchor_budget_precoce_clusters COMMAND mhgp3v_anchor_source
+         --points=120 --family=eight_clusters --seed=3 --verify
+         --min-budget-early=1000 --min-supports=9000)
+add_test(NAME mhgp3v_anchor_budget_precoce_pipeline COMMAND mhgp3v_anchor_source
+         --points=120 --family=terrain --seed=3 --engine=pipeline --verify
+         --min-budget-early=1000 --min-supports=4000)
+set_tests_properties(mhgp3v_anchor_budget_precoce_uniform
+                     mhgp3v_anchor_budget_precoce_clusters
+                     mhgp3v_anchor_budget_precoce_pipeline PROPERTIES
+  PASS_REGULAR_EXPRESSION "accord=OUI")
+mhgp3v_add_expected_code_test_for(mhgp3v_anchor_source
+  mhgp3v_anchor_budget_precoce_plancher "plancher de morts anticipees" 3
+  --points=120 --family=uniform --seed=3 --min-budget-early=100000000)
+
+# GARDE DE DENSITE : HEURISTIQUE ABLATEE, PAS UN CERTIFICAT. Elle estime la
+# population de la boule témoin par la densité du nœud partenaire, qui ne borne
+# pas cette population ailleurs. L'ablation du 12 août 2026 à `n=1 000`,
+# moteur `pipeline`, la réfute : elle ne gagne AUCUN prune — `47 382` sur
+# `uniform`, `14 231` sur `eight_clusters`, `53 401` sur `terrain`, identiques
+# armée ou non — retire `17 %` de visites témoins, et coûte plus de temps
+# qu'elle n'en économise (`19,60` contre `25,76` s sur `uniform`). Elle reste
+# donc désarmée par défaut. Cette porte reçoit son exactitude quand elle est
+# armée : sauter une tentative ne doit jamais changer Source S.
+add_test(NAME mhgp3v_anchor_garde_densite_exacte COMMAND mhgp3v_anchor_source
+         --points=140 --family=terrain --seed=5 --verify --density-guard
+         --min-supports=5000)
+set_tests_properties(mhgp3v_anchor_garde_densite_exacte PROPERTIES
+  PASS_REGULAR_EXPRESSION "accord=OUI")
+
 # DOMAINE `smax`. Les seuils 10/9/8 et l'enveloppe au neuvieme rang ne sont
 # ceux que de `smax=11`. Le contre-exemple recu de l'auditeur publiait 53
 # supports faux a `smax=24`; ces portes le gravent aux deux bouts du domaine.

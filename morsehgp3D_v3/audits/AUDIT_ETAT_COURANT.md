@@ -8,16 +8,18 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-## Observation live postérieure — `HEAD=9bcd137`
+## Observation live postérieure — `HEAD=59d098b`, worktree en édition
 
 Au 12 août 2026 pendant la reprise d'audit, le `HEAD` est
-`9bcd137087cc5bb2ed873f3a78238883fd83e030`, commit
-`stop searching for witnesses where they cannot be found, and build the
-adversarial family the audits keep naming`. Les successeurs de `760469d`
-paramètrent `smax`, remplacent les tris historiques, ajoutent le script G4
-gardé, une garde de densité du front et la famille `eight_clusters`. La boucle
-q4 locale forme encore les couples de la lentille. Aucune session GCP n'a été
-lancée pour ce producteur depuis ce pin et aucun résultat device n'est reçu.
+`59d098bd1b027a55a381e91499bc3432cc50f192`, commit
+`prove the filter changes nothing, then stop paying for it — and measure the
+wall the clusters build`. Il reçoit le retrait de `theta` sur le chemin par
+défaut, ses portes causales et la première rampe `eight_clusters`. Les
+successeurs de `760469d` paramètrent aussi `smax`, remplacent les tris
+historiques, ajoutent le script G4 gardé et une garde de densité du front. La
+boucle q4 locale forme encore les couples de la lentille. Aucune session GCP
+n'a été lancée pour ce producteur depuis ce pin et aucun résultat device n'est
+reçu.
 
 La garde de densité est fail-open et ne menace pas l'exactitude : elle saute
 seulement une tentative de prune. Sa constante `2177/100` estime toutefois la
@@ -25,28 +27,32 @@ population depuis la densité du nœud partenaire, qui ne borne pas la populatio
 de la boule témoin ailleurs. C'est donc un ordonnanceur heuristique à ablater,
 pas un certificat « témoin impossible ». Ses compteurs
 `front_witness_skipped/front_mass_closed` existent dans le pipeline device mais
-ne sont pas encore remontés ni imprimés par le reçu CPU. La nouvelle famille
-`eight_clusters` est versionnée, mais aucun CTest ni reçu de scale ne l'exerce
-encore **au pin `9bcd137`**.
+ne sont pas encore remontés ni imprimés par le reçu CPU. `front_mass_closed`
+compte en outre tous les points du nœud, pas seulement les `PairId b>a`; il ne
+ferme pas encore le ledger non ordonné.
 
-Le worktree postérieur à `9bcd137` est de nouveau en édition : Claude désarme
-désormais `theta` par défaut, ajoute `--theta-audit` et les compteurs
-`theta_only_prunes_on_live/theta_anchors_active`, puis propage cette option dans
-`anchor_device.hpp`, `anchor_pipeline.hpp`, `anchor_source.cpp`,
-`anchor_source_kernel.cu` et `anchor_source_device_qualification.cpp`. Ce delta
-n'est ni commité ni reçu par l'ELF stable ci-dessous. Une première observation
-était rouge parce que le CTest mutant n'ajoutait pas `--theta-audit`; Claude a
-ensuite raccordé ce flag, un plancher non-vide et des portes `eight_clusters`
-dans le même worktree. Après reconfiguration, l'ELF worktree SHA-256
-`114be24e...` passe les neuf portes ciblées
-`^mhgp3v_anchor_(theta|eight_clusters)` en `48,64 s`. Les deux moteurs donnent
-aussi, sur la sonde `n=120`, seed `1`, `5 176` ancres theta armées, zéro prune
-theta-only, `22 488` supports et `accord=OUI`. C'est une bonne réception locale
-du lemme. L'inventaire worktree est désormais `560` CTests, dont `43`
-`mhgp3v_anchor_`, contre `550/33` au pin stable. Ce n'est pas encore un pin :
-CMake et cinq sources restent modifiés, aucun rejeu de la totalité des 43
-portes ni aucune rampe 50 k n'est attaché à ces octets.
-Les modifications documentaires des auditeurs restent limitées au README, à la
+Le commit annonce `43/43` portes anchor en `244 s`. L'inventaire courant est
+bien `560` CTests, dont `43` `mhgp3v_anchor_`; le rejeu indépendant sur les
+octets du commit rend `43/43` en `141,39 s`. L'ELF Release SHA-256
+`114be24e4c87f1c03814a88e6ec34820ccbb57a473e414d76834819fd76c201f`
+porte les mêmes sources commitées. Les sondes non vides à `n=120`, seed `1`,
+donnent sur les deux moteurs `5 176` ancres theta armées, zéro prune theta-only,
+`22 488` supports et `accord=OUI`.
+
+La rampe amas du commit ne reçoit pas ses colonnes de front : au même ELF,
+`n=150/200/300` reproduit exactement ses compteurs q4 mais publie
+respectivement `1/2/40` prunes et `11 174/19 899/44 831` candidats, non
+`0` et `C(n,2)`. Une boule médiane centrée dans le vide peut atteindre des
+points lorsque son rayon croît ; surtout le spindle complet possède des témoins
+près des endpoints. Les pentes sont un NO-GO empirique de la boucle actuelle,
+pas une preuve de complexité cubique.
+
+Le worktree postérieur à `59d098b` est de nouveau en édition : Claude ajoute
+les compteurs front/rejets au pipeline et au reçu CPU, rend la garde de densité
+opt-in, puis ajoute `--compare-engines` et une parité de trente-cinq compteurs
+dans `anchor_pipeline.hpp` et `anchor_source.cpp`. L'ELF worktree SHA-256
+`fed7e39c...` n'est ni pincé ni rejoué par la campagne `43/43`. Les
+modifications documentaires des auditeurs restent limitées au README, à la
 proposition et à `audits/`.
 
 Le contre-audit courant répond aux cinq questions de Claude, sépare le bug
@@ -58,7 +64,7 @@ d'une ancre fixe. Le nombre de centres distincts à profondeur `k` y est
 ni les cosphères lourdes. Voir
 [`AUDIT_CONTRE_AUDIT_PRODUCTEUR_ANCRE_LENTILLE_AIGUE_20260812.md`](AUDIT_CONTRE_AUDIT_PRODUCTEUR_ANCRE_LENTILLE_AIGUE_20260812.md).
 
-La configuration du pin stable expose `550` CTests, dont `33` portes
+La configuration du pin historique `9bcd137` exposait `550` CTests, dont `33` portes
 `mhgp3v_anchor_`. Le premier rejeu local sur l'ELF Release SHA-256
 `59425e5708251fe890b57ea271887735fe8e9ab3a30f6cb0f9951e12c514e7f3`
 rend `32/33` en `503,57 s` : `mhgp3v_anchor_mutant_census` est tué par signal

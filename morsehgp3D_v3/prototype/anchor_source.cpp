@@ -98,12 +98,15 @@ struct Counters {
   long long front_witness_calls = 0;    // boules temoins evaluees
   long long front_witness_visits = 0;   // noeuds visites par ces boules
   long long front_witness_prunes = 0;   // noeuds fermes par dix temoins
+  long long front_witness_skipped = 0;  // tentatives evitees par la garde de densite
+  long long front_mass_closed = 0;      // points fermes par un noeud prune
   long long lane_probe_visits = 0;      // noeuds visites par les sondes de lane
   long long candidate_pairs = 0;        // paires (a,b) survivantes, b > a
   long long anchors_opened = 0;         // ancres candidates ouvertes
   long long anchors_lane_dead = 0;      // ancres tuees par les boules de milieu
   long long anchors_extended = 0;       // ancres passant les boules de milieu
   long long anchors_disk_dead = 0;      // ancres tuees par les toujours-interieurs
+  long long anchors_budget_early = 0;   // dont : tuees avant la fin des marges
   long long site_gather_visits = 0;     // noeuds visites par les listes de sites
   long long site_evaluations = 0;       // sites charges dans une enveloppe
   long long kept_sites = 0;             // sites survivant au filtre d'enveloppe
@@ -133,12 +136,15 @@ struct Counters {
     front_witness_calls += o.front_witness_calls;
     front_witness_visits += o.front_witness_visits;
     front_witness_prunes += o.front_witness_prunes;
+    front_witness_skipped += o.front_witness_skipped;
+    front_mass_closed += o.front_mass_closed;
     lane_probe_visits += o.lane_probe_visits;
     candidate_pairs += o.candidate_pairs;
     anchors_opened += o.anchors_opened;
     anchors_lane_dead += o.anchors_lane_dead;
     anchors_extended += o.anchors_extended;
     anchors_disk_dead += o.anchors_disk_dead;
+    anchors_budget_early += o.anchors_budget_early;
     site_gather_visits += o.site_gather_visits;
     site_evaluations += o.site_evaluations;
     kept_sites += o.kept_sites;
@@ -425,6 +431,7 @@ struct Workspace {
   Inject inject = Inject::kNone;
   int fixture = 0;
   bool engine_pipeline = false;
+  bool density_guard = false;
   std::vector<int> partners;
   std::vector<SurvivingAnchor> survivors;        // b > a survivants
   std::vector<Neighbour> sites;     // sites tries par distance a `a`
@@ -452,10 +459,31 @@ void collect_partners(const MortonLbvh& tree, const std::vector<P3>& pts, int a,
     ++ws->ctr.front_node_visits;
     const WitnessBall wb = make_witness_ball(nd, pa, ws->inject);
     if (wb.usable) {
-      ++ws->ctr.front_witness_calls;
-      if (witness_closes(tree, pts, wb, smax, ws->inject, &ws->ctr)) {
-        ++ws->ctr.front_witness_prunes;
-        continue;  // produit entier mort dans les trois lanes
+      // GARDE DE DENSITE — HEURISTIQUE OPT-IN, JAMAIS UN CERTIFICAT. Elle
+      // estime la population de la boule temoin par la densite du noeud
+      // partenaire, qui ne borne pas cette population ailleurs : sauter une
+      // tentative peut donc PERDRE un prune, jamais inventer ni supprimer un
+      // support. Elle est desarmee par defaut et identique dans les deux
+      // moteurs, sans quoi leur ledger de front ne peut pas etre compare.
+      bool engage = true;
+      if (ws->density_guard) {
+        const i128 r = (i128)isqrt_i128((i128)wb.tau[0]) / 4;
+        const i128 e = (i128)isqrt_i128(aabb_extent2(nd)) + 1;
+        const i128 mass = (i128)(nd.end - nd.begin);
+        const i128 lhs = 2177 * r * r * r * mass;
+        const i128 rhs = 100 * (i128)lane_death_threshold(smax, 2) * e * e * e;
+        if (lhs < rhs) {
+          engage = false;
+          ++ws->ctr.front_witness_skipped;
+        }
+      }
+      if (engage) {
+        ++ws->ctr.front_witness_calls;
+        if (witness_closes(tree, pts, wb, smax, ws->inject, &ws->ctr)) {
+          ++ws->ctr.front_witness_prunes;
+          ws->ctr.front_mass_closed += nd.end - nd.begin;
+          continue;  // produit entier mort dans les trois lanes
+        }
       }
     }
     if (nd.left < 0) {
@@ -586,7 +614,6 @@ void extend_anchor(const std::vector<P3>& pts, int a, int b, i64 d2, int smax, b
     const std::vector<Neighbour>& s = ws->sites;
     while (site_count < (int)s.size() && 2 * s[(std::size_t)site_count].d2 <= 3 * d2) ++site_count;
   }
-  ws->ctr.site_evaluations += site_count;
   if (site_count > ws->ctr.max_site_list) ws->ctr.max_site_list = site_count;
   ws->margins.clear();
   ws->margins.resize((std::size_t)site_count);
@@ -595,6 +622,25 @@ void extend_anchor(const std::vector<P3>& pts, int a, int b, i64 d2, int smax, b
   // Sur le disque de Jung q4, l'amplitude de F_z vaut sqrt(2Q) avec
   // Q = |U|^2 D2 - (U.d)^2. La racine entiere donne les bornes ENTIERES
   // Llow <= L et Uhigh >= U*, donc un filtre fail-open.
+  //
+  // MORT PAR BUDGET, AU PLUS TOT. `Llow>0` certifie que le site est
+  // strictement interieur a TOUTE boule admissible de l'ancre. Un
+  // SOUS-ENSEMBLE de tels sites est donc un minorant exact de `p` : des qu'il
+  // depasse le budget de la derniere lane vivante, l'ancre est morte et la
+  // decision ne peut plus changer, puisque le compte ne fait que croitre. La
+  // sortie est identique — c'est la MEME decision, prise plus tot.
+  //
+  // Elle est efficace parce que `sites` est trie par distance a `a` : avec
+  // `e=z-a`, `d=b-a`, `r=|e|` et `phi` l'angle de `e` a `d`, on a exactement
+  // `g = 4 e.d - 4r^2` et `Q = 4 r^2 D^2 sin^2(phi)`, donc `Llow>0` equivaut a
+  // `D (4 cos(phi) - 2 sqrt(2) sin(phi)) > 4r + 1/r`. Pour `D` grand devant
+  // `r`, la condition devient `tan(phi) < sqrt(2)`, soit
+  // `phi < 54,7356 degres` : sur une ancre LONGUE, tout voisin proche de `a`
+  // dans ce cone certifie. Les premiers sites lus sont donc precisement ceux
+  // qui tuent l'ancre.
+  const int death_budget = lane3 ? budget3 : budget4;
+  int certified_inside = 0;
+  int evaluated = 0;
   {
     const P3 d = sub(pb, pa);
     const P3 ab{pa.x + pb.x, pa.y + pb.y, pa.z + pb.z};
@@ -611,8 +657,16 @@ void extend_anchor(const std::vector<P3>& pts, int a, int b, i64 d2, int smax, b
       const i64 s = isqrt_i128(2 * (uu * i128(d2) - ud * ud)) + 1;
       sm.llow = sm.g - s;
       sm.uhigh = sm.g + s;
+      ++evaluated;
+      if (id != b && sm.llow > 0 && ++certified_inside > death_budget) {
+        ws->ctr.site_evaluations += evaluated;
+        ++ws->ctr.anchors_disk_dead;
+        ++ws->ctr.anchors_budget_early;
+        return;
+      }
     }
   }
+  ws->ctr.site_evaluations += evaluated;
   i64 theta = 0;
   bool theta_active = false;
   if (theta_audit) {
@@ -824,14 +878,14 @@ void run_range(const MortonLbvh& tree, const std::vector<P3>& pts, int lo, int h
 }
 
 RunResult produce(const std::vector<P3>& pts, int smax, int threads, bool exhaustive_front,
-                  bool theta_audit, bool store, Inject inject) {
+                  bool theta_audit, bool store, Inject inject, bool density_guard) {
   RunResult res{};
   MortonLbvh tree;
   tree.build(pts, g_leaf_size);
   const int n = (int)pts.size();
   const int nthreads = std::max(1, threads);
   std::vector<Workspace> spaces((std::size_t)nthreads);
-  for (auto& w : spaces) { w.store = store; w.inject = inject; }
+  for (auto& w : spaces) { w.store = store; w.inject = inject; w.density_guard = density_guard; }
   const auto t0 = std::chrono::steady_clock::now();
   {
     std::vector<std::thread> pool;
@@ -972,7 +1026,7 @@ FlatTree flatten(const MortonLbvh& tree, const std::vector<P3>& pts) {
 }
 
 RunResult produce_pipeline(const std::vector<P3>& pts, int smax, int threads, bool store,
-                           bool theta_audit) {
+                           bool theta_audit, bool density_guard) {
   RunResult res{};
   MortonLbvh tree;
   tree.build(pts, g_leaf_size);
@@ -999,7 +1053,7 @@ RunResult produce_pipeline(const std::vector<P3>& pts, int smax, int threads, bo
           const int hi = std::min(n, lo + chunk);
           for (int a = lo; a < hi; ++a)
             run_anchor_point(tv, a, smax, sc, sink, &wc[(std::size_t)t],
-                             &flags[(std::size_t)t], theta_audit);
+                             &flags[(std::size_t)t], theta_audit, density_guard);
         }
       });
     }
@@ -1019,12 +1073,15 @@ RunResult produce_pipeline(const std::vector<P3>& pts, int smax, int threads, bo
     res.ctr.front_witness_calls += w.front_witness_calls;
     res.ctr.front_witness_visits += w.front_witness_visits;
     res.ctr.front_witness_prunes += w.front_witness_prunes;
+    res.ctr.front_witness_skipped += w.front_witness_skipped;
+    res.ctr.front_mass_closed += w.front_mass_closed;
     res.ctr.lane_probe_visits += w.lane_probe_visits;
     res.ctr.candidate_pairs += w.candidate_pairs;
     res.ctr.anchors_opened += w.anchors_opened;
     res.ctr.anchors_lane_dead += w.anchors_lane_dead;
     res.ctr.anchors_extended += w.anchors_extended;
     res.ctr.anchors_disk_dead += w.anchors_disk_dead;
+    res.ctr.anchors_budget_early += w.anchors_budget_early;
     res.ctr.site_gather_visits += w.site_gather_visits;
     res.ctr.site_evaluations += w.site_evaluations;
     res.ctr.kept_sites += w.kept_sites;
@@ -1035,6 +1092,11 @@ RunResult produce_pipeline(const std::vector<P3>& pts, int smax, int threads, bo
     res.ctr.q4_pairs_walked += w.q4_pairs_walked;
     res.ctr.q4_candidates += w.q4_candidates;
     res.ctr.interior_tests += w.interior_tests;
+    res.ctr.reject_positivity += w.reject_positivity;
+    res.ctr.reject_non_acute += w.reject_non_acute;
+    res.ctr.reject_owner += w.reject_owner;
+    res.ctr.reject_rank += w.reject_rank;
+    res.ctr.reject_degenerate += w.reject_degenerate;
     res.ctr.supports_q2 += w.supports_q2;
     res.ctr.supports_q3 += w.supports_q3;
     res.ctr.supports_q4 += w.supports_q4;
@@ -1053,6 +1115,60 @@ RunResult produce_pipeline(const std::vector<P3>& pts, int smax, int threads, bo
   });
   return res;
 }
+
+// ---------------------------------------------------------------------------
+// PARITE DES DEUX MOTEURS SUR LE LEDGER COMPLET.
+//
+// Le differentiel `--verify` ne compare que des SUPPORTS. Il a laisse passer
+// un defaut reel : le moteur `pipeline` — celui que nvcc compile — n'avait
+// aucun compteur de rejet et le recu imprimait `rejets ... = 0` la ou le
+// moteur de reference en comptait 1 169 095. Un compteur absent n'est pas un
+// compteur nul. Cette porte compare donc les TRENTE compteurs, nommement, et
+// refuse en code 1 au premier ecart.
+// ---------------------------------------------------------------------------
+struct NamedCounter {
+  const char* name;
+  long long Counters::*field;
+};
+
+const NamedCounter kNamedCounters[] = {
+    {"front_node_visits", &Counters::front_node_visits},
+    {"front_witness_calls", &Counters::front_witness_calls},
+    {"front_witness_visits", &Counters::front_witness_visits},
+    {"front_witness_prunes", &Counters::front_witness_prunes},
+    {"front_witness_skipped", &Counters::front_witness_skipped},
+    {"front_mass_closed", &Counters::front_mass_closed},
+    {"lane_probe_visits", &Counters::lane_probe_visits},
+    {"candidate_pairs", &Counters::candidate_pairs},
+    {"anchors_opened", &Counters::anchors_opened},
+    {"anchors_lane_dead", &Counters::anchors_lane_dead},
+    {"anchors_extended", &Counters::anchors_extended},
+    {"anchors_disk_dead", &Counters::anchors_disk_dead},
+    {"anchors_budget_early", &Counters::anchors_budget_early},
+    {"site_gather_visits", &Counters::site_gather_visits},
+    {"site_evaluations", &Counters::site_evaluations},
+    {"kept_sites", &Counters::kept_sites},
+    {"theta_only_prunes_on_live", &Counters::theta_only_prunes_on_live},
+    {"theta_anchors_active", &Counters::theta_anchors_active},
+    {"lens_carriers", &Counters::lens_carriers},
+    {"q3_candidates", &Counters::q3_candidates},
+    {"q4_pairs_walked", &Counters::q4_pairs_walked},
+    {"q4_candidates", &Counters::q4_candidates},
+    {"interior_tests", &Counters::interior_tests},
+    {"reject_positivity", &Counters::reject_positivity},
+    {"reject_non_acute", &Counters::reject_non_acute},
+    {"reject_owner", &Counters::reject_owner},
+    {"reject_rank", &Counters::reject_rank},
+    {"reject_degenerate", &Counters::reject_degenerate},
+    {"supports_q2", &Counters::supports_q2},
+    {"supports_q3", &Counters::supports_q3},
+    {"supports_q4", &Counters::supports_q4},
+    {"shell_extra_supports", &Counters::shell_extra_supports},
+    {"max_partners", &Counters::max_partners},
+    {"max_site_list", &Counters::max_site_list},
+    {"max_kept", &Counters::max_kept},
+    {"max_lens", &Counters::max_lens},
+};
 
 // ---------------------------------------------------------------------------
 // CLI strict : aucun suffixe accepte, aucun argument excedentaire ignore.
@@ -1086,6 +1202,8 @@ int main(int argc, char** argv) {
   // sur le chemin par defaut. `--theta-audit` le rearme pour que le compteur
   // de redondance et le mutant `theta-no-fail-open` restent exercables.
   bool theta_audit = false;
+  bool compare_engines = false;
+  bool density_guard = false;
   bool no_store = false;
   long long leaf = 8;
   Inject inject = Inject::kNone;
@@ -1096,6 +1214,7 @@ int main(int argc, char** argv) {
   long long min_anchors = 0;
   long long min_prunes = 0;
   long long min_theta_active = 0;
+  long long min_budget_early = 0;
 
   for (int i = 1; i < argc; ++i) {
     const std::string arg = argv[i];
@@ -1112,8 +1231,11 @@ int main(int argc, char** argv) {
     else if (key == "--min-anchors") { if (!parse_ll(val.c_str(), &parsed)) refuse("--min-anchors invalide"); min_anchors = parsed; }
     else if (key == "--min-prunes") { if (!parse_ll(val.c_str(), &parsed)) refuse("--min-prunes invalide"); min_prunes = parsed; }
     else if (key == "--min-theta-active") { if (!parse_ll(val.c_str(), &parsed)) refuse("--min-theta-active invalide"); min_theta_active = parsed; }
+    else if (key == "--min-budget-early") { if (!parse_ll(val.c_str(), &parsed)) refuse("--min-budget-early invalide"); min_budget_early = parsed; }
     else if (key == "--verify") { verify = true; }
     else if (key == "--theta-audit") { theta_audit = true; }
+    else if (key == "--compare-engines") { compare_engines = true; }
+    else if (key == "--density-guard") { density_guard = true; }
     else if (key == "--leaf") { if (!parse_ll(val.c_str(), &parsed)) refuse("--leaf invalide"); leaf = parsed; }
     else if (key == "--no-store") { no_store = true; }
     else if (key == "--engine") {
@@ -1166,6 +1288,12 @@ int main(int argc, char** argv) {
     refuse("le mutant theta exige --theta-audit, sinon le filtre est desarme");
   if (min_theta_active > 0 && !theta_audit)
     refuse("--min-theta-active exige --theta-audit");
+  if (compare_engines && engine_pipeline)
+    refuse("--compare-engines lance lui-meme les deux moteurs");
+  if (compare_engines && inject != Inject::kNone)
+    refuse("--compare-engines compare deux moteurs sains, pas un mutant");
+  if (compare_engines && no_store)
+    refuse("--compare-engines exige le stockage des supports");
 
   // FIXTURE GRAVEE `ties` : le tetraedre regulier (0,0,0),(2,2,0),(2,0,2),(0,2,2)
   // a ses SIX aretes de carre 8 et son circumcentre exact en (1,1,1), donc
@@ -1193,9 +1321,11 @@ int main(int argc, char** argv) {
   }
 
   const auto t_start = std::chrono::steady_clock::now();
-  RunResult res = engine_pipeline
-                      ? produce_pipeline(pts, (int)smax, (int)threads, !no_store, theta_audit)
-                      : produce(pts, (int)smax, (int)threads, false, theta_audit, !no_store, inject);
+  RunResult res =
+      engine_pipeline
+          ? produce_pipeline(pts, (int)smax, (int)threads, !no_store, theta_audit, density_guard)
+          : produce(pts, (int)smax, (int)threads, false, theta_audit, !no_store, inject,
+                    density_guard);
   const double wall = std::chrono::duration<double>(std::chrono::steady_clock::now() - t_start).count();
 
   std::printf("AnchorSourceReceipt-v1\n");
@@ -1207,12 +1337,14 @@ int main(int argc, char** argv) {
               inject_name(inject));
   const Counters& c = res.ctr;
   std::printf("front node_visits=%lld witness_calls=%lld witness_visits=%lld prunes=%lld"
-              " lane_visits=%lld"
+              " witness_skipped=%lld mass_closed=%lld garde_densite=%s lane_visits=%lld"
               " candidate_pairs=%lld anchors=%lld lane_dead=%lld etendues=%lld"
-              " disk_dead=%lld\n",
+              " disk_dead=%lld budget_early=%lld\n",
               c.front_node_visits, c.front_witness_calls, c.front_witness_visits,
-              c.front_witness_prunes, c.lane_probe_visits, c.candidate_pairs, c.anchors_opened,
-              c.anchors_lane_dead, c.anchors_extended, c.anchors_disk_dead);
+              c.front_witness_prunes, c.front_witness_skipped, c.front_mass_closed,
+              density_guard ? "oui" : "non", c.lane_probe_visits, c.candidate_pairs,
+              c.anchors_opened, c.anchors_lane_dead, c.anchors_extended, c.anchors_disk_dead,
+              c.anchors_budget_early);
   std::printf("extend gather_visits=%lld site_evaluations=%lld kept_sites=%lld lens_carriers=%lld"
               " q3_candidates=%lld q4_paires_parcourues=%lld q4_candidates=%lld"
               " interior_tests=%lld\n",
@@ -1274,7 +1406,7 @@ int main(int argc, char** argv) {
   }
 
   if (verify) {
-    RunResult ref = produce(pts, (int)smax, 1, true, false, true, Inject::kNone);
+    RunResult ref = produce(pts, (int)smax, 1, true, false, true, Inject::kNone, false);
     bool same = ref.supports.size() == res.supports.size();
     if (same)
       for (std::size_t i = 0; i < ref.supports.size(); ++i)
@@ -1317,9 +1449,47 @@ int main(int argc, char** argv) {
                  c.front_witness_prunes);
     return 3;
   }
+  if (compare_engines) {
+    const RunResult other =
+        produce_pipeline(pts, (int)smax, (int)threads, true, theta_audit, density_guard);
+    long long ecarts = 0;
+    for (const NamedCounter& nc : kNamedCounters) {
+      const long long u = res.ctr.*(nc.field);
+      const long long v = other.ctr.*(nc.field);
+      if (u != v) {
+        std::printf("ECART %s reference=%lld pipeline=%lld\n", nc.name, u, v);
+        ++ecarts;
+      }
+    }
+    long long ecarts_supports = 0;
+    if (other.supports.size() != res.supports.size()) {
+      ++ecarts_supports;
+    } else {
+      for (std::size_t i = 0; i < res.supports.size(); ++i)
+        if (support_key(res.supports[i]) != support_key(other.supports[i]) ||
+            res.supports[i].p != other.supports[i].p ||
+            res.supports[i].shell_extra != other.supports[i].shell_extra)
+          ++ecarts_supports;
+    }
+    std::printf("parite_moteurs compteurs=%zu ecarts_compteurs=%lld"
+                " supports_reference=%zu supports_pipeline=%zu ecarts_supports=%lld accord=%s\n",
+                sizeof(kNamedCounters) / sizeof(kNamedCounters[0]), ecarts, res.supports.size(),
+                other.supports.size(), ecarts_supports,
+                (ecarts == 0 && ecarts_supports == 0) ? "OUI" : "NON");
+    if (ecarts != 0 || ecarts_supports != 0) {
+      std::fprintf(stderr, "DESACCORD : les deux moteurs ne publient pas le meme ledger\n");
+      return 1;
+    }
+  }
+
   if (c.theta_anchors_active < min_theta_active) {
     std::fprintf(stderr, "REFUS : plancher d'ancres theta %lld > %lld\n", min_theta_active,
                  c.theta_anchors_active);
+    return 3;
+  }
+  if (c.anchors_budget_early < min_budget_early) {
+    std::fprintf(stderr, "REFUS : plancher de morts anticipees %lld > %lld\n", min_budget_early,
+                 c.anchors_budget_early);
     return 3;
   }
   return 0;

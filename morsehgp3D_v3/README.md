@@ -41,6 +41,13 @@ La reprise la plus récente simplifie encore ce chemin : le filtre global
 locale peut tuer des patches ; les concurrences se traitent par bundles
 pondérés et dominance exacte avant toute microtuile. Voir
 [`AUDIT_REPONSES_CLAUDE_CHAMBRES_NIVEAUX_CUTTING_20260812.md`](audits/AUDIT_REPONSES_CLAUDE_CHAMBRES_NIVEAUX_CUTTING_20260812.md).
+La rampe amas suivante révèle deux murs conjoints, boucle q4 et census, mais
+ses colonnes de front ne sont pas reproductibles. La réparation mathématique
+proposée est un classifieur des huit coins AABB dans le spindle complet **avant
+la liste**, relevé ensuite par un certificat entier fail-open sur
+`A_endpoint times B_partner times C_witness`, puis le replay local des conflits
+de la cutting. Voir
+[`AUDIT_REPONSES_MUR_AMAS_CENSUS_SPINDLE_20260812.md`](audits/AUDIT_REPONSES_MUR_AMAS_CENSUS_SPINDLE_20260812.md).
 
 ## Contrat visé
 

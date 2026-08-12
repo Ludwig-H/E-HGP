@@ -627,6 +627,48 @@ partager ni univers ni sort avec q2. Aucun nombre fixe de banques
 directionnelles n'est affirmé complet : ce `Jung--Yao target range` est un
 certificat fail-open à mesurer.
 
+Avant toute `site_list`, une variante plus directe classe un nœud témoin AABB
+contre le spindle complet d'une ancre ponctuelle. Comme `W_3(a,b)` et
+`W_4(a,b)` sont convexes, une boîte fermée est incluse dans `W_q` si et
+seulement si ses huit coins satisfont strictement le prédicat correspondant.
+Un nœud `ALL-W4` crédite sa masse aux deux lanes ; un nœud `ALL-W3` crédite q3
+mais doit encore être descendu tant que q4 est vivante. Sa frame marque alors
+la plage déjà créditée q3, afin qu'un enfant `ALL-W4` ne crédite que q4. À
+`smax=11`, huit crédits tuent q4 et neuf tuent q3. Les nœuds crédités forment une antichaîne par lane,
+les endpoints sont exclus et toute égalité descend. Si les deux lanes meurent,
+la machine ne construit ni `site_list`, ni `kept`, ni `lens`. Cette route vise
+les témoins proches des endpoints que la seule boule médiane ignore ; elle doit
+être reçue contre un scan ponctuel et profilée sur `eight_clusters`.
+
+Cette DFS ponctuelle est un oracle, pas encore la route 50 k. Le producteur
+relève ensuite le certificat sur `A_endpoint times B_partner times C_witness`
+avant tout `PairId` : une même antichaîne témoin doit être `ALL-W3/W4` pour
+toutes les paires du bloc sous bornes dirigées, et `UNKNOWN` subdivise. Une DFS
+ou une liste par partenaire réintroduirait le front quadratique sous un autre
+nom. Le ledger porte masse de blocs/paires, visites, pentes et cap absolu.
+
+Un lift de bloc entièrement entier rend cette route falsifiable. Pour
+`a in A`, `b in B`, `z in C`, poser `H=(b-z) dot (z-a)` et
+`R=||(b-a) cross (z-a)||^2`. Le minimum `Hmin` est atteint sur les coins : `H`
+est affine en `a,b`, concave en `z` et séparable par coordonnée, si bien que
+trois groupes de huit évaluations scalaires suffisent. Le maximum `Rmax` est
+également atteint parmi les `8^3` triples de coins, par convexité séparée de la
+norme carrée d'une application affine. Le bloc est donc `ALL-W3` sous
+`Hmin>0 && 3*Hmin^2>Rmax`, et `ALL-W4` sous
+`Hmin>0 && 2*Hmin^2>Rmax`. Ces tests sont des certificats suffisants calculés
+exactement, pas des décisions `iff` : les deux extrema peuvent provenir de
+triples différents et un échec reste `UNKNOWN`.
+
+Le self-join `A times B` est canonique et partage une frontière `C` persistante.
+Scinder `A/B` partitionne la masse de paires ; scinder `C` partitionne seulement
+la recherche des témoins et ne recrédite jamais cette masse. Les reçus de plages
+sont séparés par lane, hérités sans retour à la racine, et toute intersection
+de `C` avec les identifiants de `A/B` force la descente jusqu'à exclusion des
+endpoints. La broad phase emploie `Hmin` puis des bornes d'intervalles de `R` ;
+les `512` triples restent oracle/fallback exact, jamais coût silencieux par
+état. Sous u16 et `n<=50 000`, `H` tient dans `i64`, mais `R` et les carrés
+comparés exigent une promotion avant multiplication vers au moins `u128`.
+
 Pour un produit général de boîtes d'extrémités et de témoins, une borne plus
 orientée utilise `g_min=D2_min-U2_max` et une majoration entière `Q_max` de
 `||d cross U||^2` par intervalles. Le bloc est universel sous `g_min>0` puis

@@ -138,7 +138,92 @@ census.** Le contre-audit avait raison de placer la reprise sur
 supprime précisément ce balayage, puisque chaque patch hérite ses
 `always_inside` par identité et ne recense plus que sa liste de conflits `C_K`.
 
-## 4. Ce que cette note ne dit pas
+## 4. Deux défauts trouvés par une porte que le différentiel ne pouvait pas voir
+
+Le différentiel `--verify` ne compare que des **supports**. Un mode
+`--compare-engines` a été ajouté : il exécute les deux moteurs sur le même
+nuage et compare **trente-cinq compteurs nommément**, plus les supports. Il a
+trouvé deux défauts réels au premier essai.
+
+### 4.1 Le moteur `pipeline` ne comptait aucun rejet
+
+`prototype/anchor_pipeline.hpp` — le fichier que nvcc compile, celui qui
+tournera sur la G4 — n'avait pas de champ de rejet dans `WorkCounters`, et
+`produce_pipeline` n'en fusionnait aucun. Sur
+`uniform n=120 seed=1`, les deux moteurs publiaient :
+
+| moteur | positivité | non aigu | owner | rang | dégénéré |
+| --- | --- | --- | --- | --- | --- |
+| `reference` | `1 169 095` | `352 312` | `272 207` | `297 896` | `221` |
+| `pipeline` (avant) | `0` | `0` | `0` | `0` | `0` |
+
+La ligne `rejets ... = 0` du reçu était donc **fausse**, pas vide. Un compteur
+absent n'est pas un compteur nul. Les cinq compteurs sont maintenant dans
+`WorkCounters`, incrémentés aux mêmes points et dans le même ordre que la
+référence, et les deux moteurs s'accordent exactement. Le compteur
+`reject_non_acute` est celui qui mesure l'économie du Théorème 5 : il était
+inobservable sur le chemin device.
+
+### 4.2 La garde de densité est réfutée par ablation
+
+La garde n'existait que dans le pipeline. Elle est maintenant identique dans
+les deux moteurs, **désarmée par défaut**, armable par `--density-guard`, et
+ses deux compteurs `witness_skipped` et `mass_closed` sont au reçu.
+
+Ablation à `n=1 000`, moteur `pipeline` :
+
+| famille | prunes garde armée | prunes garde désarmée | visites témoins | `wall_s` désarmée | `wall_s` armée |
+| --- | --- | --- | --- | --- | --- |
+| `uniform` | `47 382` | `47 382` | `13 511 169` contre `16 341 758` | `19,60` | `25,76` |
+| `eight_clusters` | `14 231` | `14 231` | `15 753 784` contre `16 493 074` | `195,19` | `190,22` |
+| `terrain` | `53 401` | `53 401` | `5 679 933` contre `6 459 446` | `1,75` | `2,08` |
+
+La garde ne gagne **aucun** prune sur les trois familles. Elle retire `17 %`
+des visites témoins et paie deux racines carrées entières par nœud visité pour
+les éviter : le solde est négatif sur `uniform` et `terrain`. Les temps sont
+contaminés par une machine à deux cœurs, mais le nombre de prunes, lui, est
+exact et identique. Une heuristique d'ordonnancement qui ne change aucune
+décision et n'économise rien n'a pas à rester sur le chemin. Elle reste
+armable et gardée par une porte d'exactitude.
+
+## 5. Mort par budget au plus tôt : la même décision, prise plus tôt
+
+La dérivation de la question 6 ci-dessous a une conséquence immédiate qui ne
+demande aucune structure nouvelle. La liste de sites est **déjà triée par
+distance à `a`**, et sur une ancre longue ce sont précisément les voisins
+proches de `a` qui certifient `Llow>0`. La boucle de marges s'arrête donc dès
+que le compte d'intérieurs certifiés dépasse le budget de la dernière lane
+vivante, `smax-3` si q3 vit encore, `smax-4` sinon.
+
+C'est exact et non pas approché : le compte ne fait que croître, donc la
+décision `!disk3 && !disk4` est déjà acquise et ne peut plus s'inverser. La
+sortie est identique.
+
+| mesure | avant | après |
+| --- | --- | --- |
+| `eight_clusters n=500`, `site_evaluations` | `33 870 356` | `13 983 250` |
+| `eight_clusters n=500`, `q4_paires_parcourues` | `191 538 784` | `191 538 784` |
+| `eight_clusters n=500`, `interior_tests` | `334 430 649` | `334 430 649` |
+| `eight_clusters n=500`, `wall_s` | `92,458` | `33,531` |
+| `eight_clusters n=1 000`, `wall_s` | `195,190` | `119,658` |
+| `uniform n=1 000`, `wall_s` | `19,603` | `13,714` |
+
+Les deux compteurs de sortie sont **inchangés au chiffre près** : c'est la
+preuve empirique que rien n'a été supprimé. À `eight_clusters n=500`,
+`anchors_budget_early` vaut `65 832` et `anchors_disk_dead` vaut `65 832` :
+**toutes** les morts par disque sont désormais anticipées, aucune n'attend la
+fin de la boucle.
+
+Ce gain est un facteur constant, entre `1,4` et `2,8` selon la famille. Il ne
+change **pas** la pente : `eight_clusters` reste cubique, puisque le travail
+q4 est identique. Il ne faut donc pas le lire comme une réponse au mur de la
+section 2.
+
+Trois portes reçoivent ce chemin avec plancher `--min-budget-early`, et la
+suite complète passe `56/56` en `82,7` s, contre `244` s au début de la
+session pour `43` portes.
+
+## 6. Ce que cette note ne dit pas
 
 Elle ne publie aucun `warm_e2e`, ne construit ni `BallActivation`, ni gateways,
 ni resolver, ni fold, ni payload. Aucune mesure device n'existe : le noyau
@@ -146,7 +231,7 @@ n'a toujours jamais été exécuté. Le point `uniform n=4 000` n'est pas encore
 clos. Aucun juge indépendant n'existe encore : l'ordre 2 du contre-audit n'est
 pas exécuté, et `--verify` partage toujours les primitives du sujet.
 
-## 5. Questions à l'auditeur
+## 7. Questions à l'auditeur
 
 1. **Priorité.** L'attribution ci-dessus déplace la cible du `C(nlens,2)` vers
    le census. Faut-il malgré tout exécuter l'ordre 2 (juge indépendant
@@ -173,5 +258,38 @@ pas exécuté, et `--verify` partage toujours les primitives du sujet.
    un défaut au lieu d'une propriété. Est-ce la forme que l'auditeur veut, ou
    faut-il un compteur dédié et un plancher nommé plutôt qu'un refus détourné
    du plancher de prunes ?
+5. **Garde de densité.** Son ablation la réfute sur les trois familles
+   mesurées. Faut-il la retirer entièrement du code, ou la conserver désarmée
+   comme comparateur suspendu, ce que j'ai fait ? Elle deviendrait utile si le
+   parcours témoin cessait de repartir de la racine.
+6. **Certificat de cône entrant.** La dérivation ci-dessous me paraît exacte et
+   je demande sa réfutation. Avec `e=z-a`, `d=b-a`, `r=|e|`, `D^2=|d|^2` et
+   `phi` l'angle de `e` a `d`, on a exactement `g=4 e.d - 4r^2` et
+   `Q=4(r^2 D^2 - (e.d)^2)=4 r^2 D^2 sin^2(phi)`, donc
+   `Llow = g - isqrt(2Q) - 1 > 0` équivaut à
+   `D(4 cos(phi) - 2 sqrt(2) sin(phi)) > 4r + 1/r`. Pour `D` grand devant `r`,
+   la condition devient `tan(phi) < sqrt(2)`, soit
+   `phi < arctan(sqrt(2)) = 54,7356 degres`. Autrement dit, **tout voisin de
+   `a` situé dans un cône de demi-angle `54,74` degrés autour de la direction
+   `d` est certifié intérieur à toute boule admissible de l'ancre `(a,b)`**, et
+   un sous-ensemble de sites certifiés intérieurs est un minorant exact de `p`.
+   Une sonde exhaustive sur `eight_clusters` mesure le taux de mort obtenu en
+   n'examinant que les `M` plus proches voisins de `a` :
+
+   | `n` | `M=48` | `M=96` | `M=192` |
+   | --- | --- | --- | --- |
+   | `200` | `21,58 %` | `29,03 %` | `39,81 %` |
+   | `500` | `37,44 %` | `51,85 %` | `57,07 %` |
+   | `1 000` | `44,82 %` | `58,17 %` | `71,22 %` |
+
+   Le taux **croît avec `n`**, ce qui est la bonne direction : le certificat se
+   renforce quand le nuage grossit. Le code actuel calcule déjà exactement ce
+   compte, mais **après** la liste de sites et la boucle de marges, donc trop
+   tard : `site_evaluations` vaut `33 870 356` à `n=500` sur `eight_clusters`
+   pour `65 832` ancres finalement tuées par ce même budget sur `103 957`
+   étendues. La question est de savoir si l'auditeur voit une faute dans
+   l'ordonnance proposée : noyau des `M` plus proches voisins de `a`, tri par
+   distance déjà disponible, mort par budget avant toute liste complète, liste
+   complète dimensionnée sur les seules ancres survivantes.
 
 GCP non utilisé pour cette note.

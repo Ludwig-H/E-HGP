@@ -76,6 +76,8 @@ struct WorkCounters {
   long long anchors_lane_dead = 0;
   long long anchors_extended = 0;
   long long anchors_disk_dead = 0;
+  // Ancres tuees par le budget AVANT la fin de la boucle de marges.
+  long long anchors_budget_early = 0;
   long long site_gather_visits = 0;
   long long site_evaluations = 0;
   long long kept_sites = 0;
@@ -94,6 +96,15 @@ struct WorkCounters {
   long long q4_pairs_walked = 0;   // paires de lentille parcourues, non aigues comprises
   long long q4_candidates = 0;
   long long interior_tests = 0;
+  // LEDGER DES REJETS. Il manquait entierement a ce pipeline : le recu
+  // imprimait `rejets ... = 0` alors que le moteur de reference en comptait
+  // des millions sur la meme commande. Un compteur absent n'est pas un
+  // compteur nul, et c'est ce pipeline que nvcc compile.
+  long long reject_positivity = 0;
+  long long reject_non_acute = 0;
+  long long reject_owner = 0;
+  long long reject_rank = 0;
+  long long reject_degenerate = 0;
   long long supports_q2 = 0;
   long long supports_q3 = 0;
   long long supports_q4 = 0;
@@ -399,7 +410,8 @@ MHGP_HD inline int census(const TreeView& t, const int* crossing, int ncross, in
 // mode audit existe pour que le compteur et le mutant restent exercables.
 template <typename Sink>
 MHGP_HD inline void run_anchor_point(const TreeView& t, int a, int smax, Scratch sc, Sink& sink,
-                                     WorkCounters* ctr, unsigned* flags, bool theta_audit) {
+                                     WorkCounters* ctr, unsigned* flags, bool theta_audit,
+                                     bool density_guard) {
   const P3 pa = tree_point(t, a);
   const int budget2 = smax - 2, budget3 = smax - 3, budget4 = smax - 4;
 
@@ -415,19 +427,22 @@ MHGP_HD inline void run_anchor_point(const TreeView& t, int a, int smax, Scratch
       ++ctr->front_node_visits;
       const WitnessBall wb = witness_ball_of(t, ni, pa);
       if (wb.usable) {
-        // GARDE DE DENSITE. Le parcours temoin repart de la racine : son cout
-        // n'est PAS borne par les seuils, seulement les credits acceptes le
-        // sont. On n'engage donc la recherche que la ou elle peut aboutir,
-        // en estimant la population de la boule temoin par la densite du
-        // noeud lui-meme. Sauter une tentative ne peut jamais supprimer un
-        // support : c'est une decision d'ORDONNANCEMENT, le prune reste
-        // decide par le compte entier exact.
+        // GARDE DE DENSITE — HEURISTIQUE OPT-IN, JAMAIS UN CERTIFICAT.
+        // Le parcours temoin repart de la racine : son cout n'est PAS borne
+        // par les seuils, seulement les credits acceptes le sont. La garde
+        // n'engage donc la recherche que la ou elle peut aboutir, en estimant
+        // la population de la boule temoin par la densite du noeud lui-meme.
+        // Cette estimation ne BORNE pas la population reelle ailleurs : ce
+        // n'est pas un certificat « temoin impossible ». Sauter une tentative
+        // ne peut jamais supprimer un support — le prune reste decide par le
+        // compte entier exact — mais elle peut en perdre un. Elle est donc
+        // desarmee par defaut et ablatee par `--density-guard`.
         const i128 r = (i128)isqrt_i128((i128)wb.tau[0]) / 4;
         const i128 e = (i128)isqrt_i128(node_extent2(t, ni)) + 1;
         const i128 mass = (i128)(t.end[ni] - t.begin[ni]);
         const i128 lhs = 2177 * r * r * r * mass;
         const i128 rhs = 100 * (i128)lane_death_threshold(smax, 2) * e * e * e;
-        if (lhs < rhs) {
+        if (density_guard && lhs < rhs) {
           ++ctr->front_witness_skipped;
         } else {
           ++ctr->front_witness_calls;
@@ -476,6 +491,8 @@ MHGP_HD inline void run_anchor_point(const TreeView& t, int a, int smax, Scratch
       sink.emit(e);
       ++ctr->supports_q2;
       if (lp.extra2 > 0) ++ctr->shell_extra;
+    } else {
+      ++ctr->reject_rank;
     }
     const bool lane3 = lp.n3 <= budget3;
     const bool lane4 = lp.n4 <= budget4;
@@ -577,7 +594,20 @@ MHGP_HD inline void run_anchor_point(const TreeView& t, int a, int smax, Scratch
       }
       site_count = lo;
     }
-    ctr->site_evaluations += site_count;
+    // MORT PAR BUDGET, AU PLUS TOT. `Llow>0` certifie que le site est
+    // strictement interieur a TOUTE boule admissible de l'ancre. Un
+    // SOUS-ENSEMBLE de tels sites est donc un minorant exact de `p` : des
+    // qu'il depasse le budget de la derniere lane vivante, l'ancre est morte
+    // et la decision ne peut plus changer, puisque le compte ne fait que
+    // croitre. La sortie est identique — c'est la MEME decision, prise plus
+    // tot. Elle est efficace parce que la liste de sites est triee par
+    // distance a `a` : sur une ancre longue, tout voisin proche de `a` dans un
+    // cone de demi-angle `arctan(sqrt(2)) = 54,7356 degres` autour de `b-a`
+    // certifie, et ces voisins sont lus les premiers.
+    const int death_budget = lane3 ? budget3 : budget4;
+    int certified_inside = 0;
+    int evaluated = 0;
+    bool budget_dead = false;
 
     const P3 dvec = sub(pb, pa);
     const P3 ab{pa.x + pb.x, pa.y + pb.y, pa.z + pb.z};
@@ -591,6 +621,17 @@ MHGP_HD inline void run_anchor_point(const TreeView& t, int a, int smax, Scratch
       sc.margin_g[k] = g;
       sc.margin_llow[k] = g - s;
       sc.margin_uhigh[k] = g + s;
+      ++evaluated;
+      if (sc.site_id[k] != b && sc.margin_llow[k] > 0 && ++certified_inside > death_budget) {
+        budget_dead = true;
+        break;
+      }
+    }
+    ctr->site_evaluations += evaluated;
+    if (budget_dead) {
+      ++ctr->anchors_disk_dead;
+      ++ctr->anchors_budget_early;
+      continue;
     }
 
     // theta : neuvieme plus grande borne inferieure Llow sur X \ {a,b}.
@@ -667,16 +708,16 @@ MHGP_HD inline void run_anchor_point(const TreeView& t, int a, int smax, Scratch
     for (int i = 0; disk3 && i < nl; ++i) {
       const int x = sc.lens[i];
       ++ctr->q3_candidates;
-      if (sc.acute[i] == 0) continue;
+      if (sc.acute[i] == 0) { ++ctr->reject_positivity; continue; }
       int ids[4] = {a, b, x, -1};
       sort_ids(ids, 3);
-      if (!owns_canonical_max_edge(t, ids, 3, a, b)) continue;
+      if (!owns_canonical_max_edge(t, ids, 3, a, b)) { ++ctr->reject_owner; continue; }
       const BallForm ball = circum_q3(pa, pb, tree_point(t, x));
-      if (!ball.valid) continue;
+      if (!ball.valid) { ++ctr->reject_degenerate; continue; }
       int extra = 0;
       const int p = census(t, sc.kept, nkept, always_inside, ball, pa, ids, 3, budget3, &extra,
                            ctr);
-      if (p < 0) continue;
+      if (p < 0) { ++ctr->reject_rank; continue; }
       EmittedSupport e{};
       e.key = ((unsigned long long)(unsigned)ids[0] << 48) |
               ((unsigned long long)(unsigned)ids[1] << 32) |
@@ -695,21 +736,21 @@ MHGP_HD inline void run_anchor_point(const TreeView& t, int a, int smax, Scratch
       const P3 px = tree_point(t, x);
       for (int j = i + 1; j < nl; ++j) {
         ++ctr->q4_pairs_walked;
-        if (sc.acute[i] == 0 && sc.acute[j] == 0) continue;
+        if (sc.acute[i] == 0 && sc.acute[j] == 0) { ++ctr->reject_non_acute; continue; }
         const int y = sc.lens[j];
         const P3 py = tree_point(t, y);
         ++ctr->q4_candidates;
-        if ((i64)norm2_i64(sub(px, py)) > d2) continue;
+        if ((i64)norm2_i64(sub(px, py)) > d2) { ++ctr->reject_owner; continue; }
         const BallForm ball = circum_q4(pa, pb, px, py);
-        if (!ball.valid) continue;
-        if (!positive_q4(pa, pb, px, py, ball, pa)) continue;
+        if (!ball.valid) { ++ctr->reject_degenerate; continue; }
+        if (!positive_q4(pa, pb, px, py, ball, pa)) { ++ctr->reject_positivity; continue; }
         int ids[4] = {a, b, x, y};
         sort_ids(ids, 4);
-        if (!owns_canonical_max_edge(t, ids, 4, a, b)) continue;
+        if (!owns_canonical_max_edge(t, ids, 4, a, b)) { ++ctr->reject_owner; continue; }
         int extra = 0;
         const int p = census(t, sc.kept, nkept, always_inside, ball, pa, ids, 4, budget4, &extra,
                              ctr);
-        if (p < 0) continue;
+        if (p < 0) { ++ctr->reject_rank; continue; }
         EmittedSupport e{};
         e.key = ((unsigned long long)(unsigned)ids[0] << 48) |
                 ((unsigned long long)(unsigned)ids[1] << 32) |
