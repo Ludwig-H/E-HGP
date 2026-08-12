@@ -1,4 +1,4 @@
-# Audit de déblocage GPU — dédupliquer avant la géométrie, certifier par top-12
+# Audit de déblocage GPU — dédupliquer avant la géométrie, sentinelle hors support
 
 Date : 12 août 2026 UTC.
 
@@ -27,13 +27,13 @@ CPU paie donc principalement **avant** de connaître la tâche utile.
 La voie immédiate recommandée est :
 
 ```text
-cellules/lane q -> count/scan/fill SupportKey
-                 -> radix shardé + RLE SupportKey
+front/lane q -> owner génératif exact-once, sinon count/scan/fill SupportKey
+                 -> radix shardé + RLE SupportKey de vérification
                  -> une géométrie exacte par clé
                  -> point-location directe de la feuille owner
                  -> positivité + rejeu du contexte owner
-                 -> une certification top-12 exacte
-                 -> fast path régulier ou side queue GeometricBallKey/plateau
+                 -> census producteur ou top-(12-q) hors U en fallback
+                 -> fast path E=U ou side queue H!=empty/plateau
                  -> flux device vers activation/gateway/fold
 ```
 
@@ -43,10 +43,10 @@ pas par occurrences spatiales. Il ne garantit pas qu'une clé unique soit un
 support final : le compteur `SupportKey_unique` à 50 000 manque encore et reste
 la première gate quantitative.
 
-Le second résultat est un théorème terminal nouveau et simple : pour
-`smax=11`, douze vrais plus proches voisins certifient exactement une boule
-candidate régulière, son intérieur et l'absence d'extra-shell. Le top-12 est un
-**certificateur**, jamais un générateur.
+Le second résultat est un théorème terminal nouveau et simple, corrigé par le
+contre-audit : pour `smax=11` et un support connu d'arité `q`, les `12-q` vrais
+plus proches voisins **hors support** certifient la branche. Le top-12 global
+reste un certificateur sûr, jamais un générateur, mais n'est pas minimal.
 
 Enfin, la piste séduisante « toute face de première génération d'un niveau
 shallow est une source critique » est fausse pour q2 et q3. Les mosaïques
@@ -96,38 +96,36 @@ sommet de quatre hyperplans shallow donne directement le centre, sous réserve
 de positivité et des égalités exactes. Cette différence justifie une
 expérience de cutting q4 séparée, pas une bijection générale.
 
-## 3. Théorème top-12
+## 3. Théorème top-`(12-q)` hors support
 
 Soit `U` un support proposé de cardinal `q`, avec centre exact `c`, rayon carré
-`beta` et `p` points strictement intérieurs. Pour `n>=12`, une primitive renvoie
-douze `PointId` distincts formant un vrai ensemble de douze plus proches
-voisins `R`, les ex aequo pouvant être choisis arbitrairement, et certifie que
-la distance maximale retournée ne dépasse aucune distance non retournée. Noter
-`delta` cette distance maximale.
+`beta` et `p` points strictement intérieurs. Poser `t=12-q`. Une primitive
+renvoie les `t` vrais plus proches `PointId` de `X minus U`, les ex aequo pouvant
+être choisis arbitrairement, et certifie que leur distance maximale `delta` ne
+dépasse aucune distance omise. Si moins de `t` identifiants restent, elle
+scanne tout `X minus U`.
 
 ### Théorème
 
-- Si `delta>beta`, toute la boule fermée est contenue dans `R`. Le census
-  `I={x:d(x,c)^2<beta}` et le shell `E={x:d(x,c)^2=beta}` obtenus dans `R` sont
-  globaux et complets.
-- Si `delta<beta`, les douze points retournés sont strictement intérieurs. Le
-  support est hors fenêtre `p+q<=11`.
-- Si `delta=beta`, tous les points strictement intérieurs sont dans `R`, donc
-  `p` est exact. Si `p+q<=11`, les douze points fermés de `R` ne peuvent pas
-  tous appartenir à `I union U`, de cardinal au plus onze : une extra-shell est
-  prouvée. La branche régulière échoue fermée sans range-report.
-- Pour `n<12`, la primitive retourne tout le nuage.
+- Si `delta>beta`, tous les points hors `U` de la boule fermée sont retournés.
+  Le census intérieur `I` et l'extra-shell `H=E minus U` sont globaux et
+  complets. Le fast path publie seulement si `H` est vide, donc `E=U`.
+- Si `delta<beta`, les `t` retours sont intérieurs. Alors `p>=12-q`, donc
+  `p+q>=12`; le support est hors fenêtre.
+- Si `delta=beta`, tous les intérieurs sont retournés et au moins un retour est
+  un contact hors `U`. De plus `p<=t-1`, donc `p+q<=11`; la boule pertinente
+  rejoint le range-report, le quotient de plateau ou un refus fermé.
 
-Le choix arbitraire dans un tie ne fragilise pas la preuve. Dans le troisième
-cas, un intérieur omis aurait une distance strictement inférieure à `delta`, en
-contradiction avec le certificat des douze voisins. Certains membres de `U`
-peuvent être omis au cutoff, mais cela renforce seulement l'existence d'un
-contact hors de `I union U`.
+Le choix arbitraire dans un tie ne fragilise pas la preuve : un intérieur omis
+aurait une distance strictement inférieure à `delta`. L'exclusion se fait par
+`PointId`, jamais par coordonnées; deux identifiants colocalisés restent deux
+sites distincts.
 
-Un top-11 ne suffit pas. Une boule régulière de rang fermé onze et la même
-boule après ajout d'un douzième point cosphérique peuvent retourner exactement
-les mêmes onze identifiants. Le top-12 est donc la sentinelle fixe minimale
-pour `smax=11`.
+La profondeur est minimale parmi les sentinelles fixes qui connaissent `U`.
+Top-`(t-1)` ne distingue pas les mêmes premiers retours d'une boule régulière
+avec `p=t-1`, de la même boule avec un `t`-ième intérieur, ni de la même boule
+avec un contact extra-shell. Le top-12 global reste sûr, mais son ancien claim
+de minimalité est faux.
 
 ### Portée exacte
 
@@ -197,49 +195,57 @@ census. Toute collision de hash est résolue par comparaison rationnelle exacte.
 
 Après géométrie, owner et positivité, deux ordonnances restent exactes. La
 première forme une `GeometricBallKey`, fait un second RLE, puis lance une seule
-requête top-12 par boule. La seconde lance top-12 directement par
-`SupportKey_unique` et ne route vers `GeometricBallKey` que les égalités ou
-plateaux. Cette seconde ordonnance évite un tri large dans le chemin régulier.
+requête par boule si son producteur n'a pas déjà livré le census. Elle choisit
+un support canonique `U_star` d'arité minimale `q_min` et interroge
+top-`(12-q_min)` dans `X minus U_star`. Choisir `q_max` peut rejeter une boule
+encore pertinente par son support minimal; exclure l'union des supports peut
+masquer un contact. La seconde ordonnance emploie le census producteur ou
+top-`(12-q)` directement par `SupportKey_unique`. Elle évite un tri large dans
+le chemin régulier.
 
-Elle est exacte sous `RelevantGP`. Si `delta>beta`, top-12 donne le shell global
+Elle est exacte sous `RelevantGP`. Si `delta>beta`, la sentinelle donne le shell global
 `E`. L'acceptation exige `E=U`. Un autre support minimal `V` de la même boule
 serait inclus dans `E=U`; comme `U` est affinement indépendant et son centre est
 dans `relint conv(U)`, aucun sous-ensemble propre de `U` ne peut porter ce même
 centre. Donc `V=U`. Le record régulier peut être publié immédiatement. Si
-`delta=beta`, la requête prouve une extra-shell ou un rang trop grand et envoie
-la boule dans la side queue pour range-report, quotient de plateau ou refus
-fermé. Aucun hash ne décide cette branche.
+`H=E minus U` n'est pas vide, y compris avec `delta>beta`, la boule rejoint la
+side queue pour range-report, quotient de plateau ou refus fermé. Le cas
+`delta=beta` prouve nécessairement un tel contact. Aucun hash ne décide cette
+branche.
 
 Le second RLE global reste utile si les boules multi-supports sont assez
 nombreuses pour amortir son trafic, ou si le contrat exige leur catalogue
 complet. Il n'est plus une obligation du fast path régulier. Les deux variantes
-doivent être comparées sur `top12_queries`, `BallKey` uniques, octets radix et
+doivent être comparées sur les requêtes par arité, `BallKey` uniques, octets radix et
 side-queue high-water.
 
-Le census pool-relatif déjà prouvé reste un backend valide. Le top-12 offre une
-sortie de taille fixe, mais pas un nombre fixe de visites LBVH; il faudra
-comparer sur device `scan du pool owner` et `top-12 LBVH`.
+Le census pool-relatif déjà prouvé reste un backend valide. La sentinelle hors
+support offre une sortie de taille fixe, mais pas un nombre fixe de visites
+LBVH; il faut comparer sur device `census producteur`, `scan du pool owner` et
+`top-(12-q) LBVH`.
 Le reçu CPU montre précisément que le census aval n'est pas le verrou actuel :
 le théorème n'autorise donc pas à retarder le premier RLE.
 
 ## 6. Layout G4 pour vingt-quatre millions de supports
 
 Le type [`g4-standard-48` documenté par Google](https://docs.cloud.google.com/compute/docs/accelerator-optimized-machines)
-porte une RTX PRO 6000 Blackwell Server Edition et 96 Go de mémoire GDDR7. La
-capacité mémoire n'est donc pas le premier obstacle du catalogue transitoire, à
-condition de rester device-only et SoA.
+porte une RTX PRO 6000 Blackwell Server Edition et 96 Go de mémoire GDDR7. Cela
+borne la capacité physique; le high-water complet du pipeline reste à recevoir.
 
 Le reçu `uniform,n=50 000` permet un dimensionnement plus direct. Les
 occurrences q2/q3/q4 avant le lift utile valent respectivement
 `96 241 855 / 352 786 093 / 390 554 718`. Avec des lanes séparées, q2 se
-stocke en `u32`, q3 dans les 48 bits utiles d'un `u64` et q4 dans un `u64` : le
-stream brut complet occupe environ `6,33 Go`, sans `CellId`. Un double buffer
-radix occupe `12,66 Go`, hors workspace. Dans un modèle à digits de huit bits,
+stocke en `u32`, q3 dans les 48 bits utiles d'un `u64` et q4 dans un `u64`
+uniquement si chaque identifiant chaud est un `DensePointIndex:u16`. Une
+bijection immuable liée à `cloud_epoch` doit le relier aux `PointId` durables;
+l'ordre canonique se décide après remap. Le stream brut complet occupe alors
+environ `6,33 Go`, sans `CellId`, table de remap, listes, sorties ni workspace.
+Un double buffer radix occupe `12,66 Go`, toujours hors workspace. Dans un modèle à digits de huit bits,
 quatre, six et huit passes avec lecture plus écriture déplacent environ
 `86,94 Go`. C'est un modèle de trafic, pas une mesure CUB; il montre néanmoins
-que même les `839,6` millions d'occurrences compactes tiennent en mémoire sur
-la G4. Le verrou devient le débit des passes et le nombre de clés uniques, pas
-la capacité brute.
+que ces seules clés tiennent en mémoire sur la G4. Le débit des passes, le
+nombre de clés uniques et le high-water de toutes les autres arènes restent des
+verrous.
 
 Pour `F=24 017 000` :
 
@@ -264,16 +270,18 @@ après RLE est précisément ce qui autorise les clés nues.
 Le plan de kernels est :
 
 1. points u16 SoA, LBVH et arbre terminal résidents;
-2. wavefront de cellules par arité, `count/scan/fill` de clés seulement;
-3. RLE local facultatif, histogramme de shards puis radix/RLE global;
+2. front/enveloppe par arité avec owner génératif, ou wavefront cellulaire de
+   référence et `count/scan/fill` de clés seulement;
+3. vérification `occurrences=unique` ou radix/RLE global;
 4. une lane pour q2 et sous-groupes/warps pour les déterminants q3/q4; après le
    tri q4, grouper le préfixe `(a,b,c)` et construire une seule fois son axe
    circumcentrique, puis résoudre chaque apex `d` par une intersection scalaire
    exacte avec le bissecteur `a/d`;
 5. point-location owner et rejeu contigu du pool;
-6. file persistante de requêtes top-12, exact fallback séparé;
-7. fast path `E=U`, et radix `GeometricBallKey` seulement pour la side queue de
-   plateau ou lorsque l'A/B reçoit le second RLE global;
+6. census reçu du producteur; file persistante top-10/top-9/top-8 seulement en
+   fallback exact;
+7. fast path `delta>beta` avec `E=U`, et radix `GeometricBallKey` pour toute
+   extra-shell, tout plateau ou lorsque l'A/B reçoit le second RLE global;
 8. flux immédiat des activations vers gateway/fold, sans catalogue hôte;
 9. copie hôte du seul payload officiel.
 
@@ -293,11 +301,12 @@ relevé `(c,lambda)`, construire une shallow cutting dont chaque cellule porte :
 
 Si la liste de conflits contient `m` sites sous un cap, énumérer séparément les
 q2, q3 et q4 locaux, calculer leur minimum `Phi`, vérifier positivité, owner et
-top-12. Sinon, subdiviser/rééchantillonner ou échouer sur ressource. Le hasard
+sentinelle hors support si le census n'est pas déjà reçu. Sinon,
+subdiviser/rééchantillonner ou échouer sur ressource. Le hasard
 peut modifier le travail, jamais la couverture.
 
 Le travail à publier est
-`W_cut+sum_C [C(m_C,2)+C(m_C,3)+C(m_C,4)]+W_top12`. Aucun théorème universel ne
+`W_cut+sum_C [C(m_C,2)+C(m_C,3)+C(m_C,4)]+W_cert`. Aucun théorème universel ne
 le borne par la sortie. Les premiers niveaux en dimension relevée peuvent être
 quadratiques, et la famille u16 à deux droites du dépôt sépare déjà des
 milliards de transits d'une Source S linéaire.
@@ -382,15 +391,23 @@ dur du stall, ni HWM du terminal dense. Le pin logiciel courant appartient à
 
 - fixture permanente du faux first-generation q2 ci-dessus;
 - q3 pertinent sans q2 pertinent et q4 pertinent sans q3 pertinent;
-- top-12 : `delta>beta`, `delta<beta`, `delta=beta`, ties arbitraires, `n<12`;
-- top-11 mutant qui accepte le douzième contact;
+- top-10/top-9/top-8 hors support : `delta>beta`, `delta<beta`, `delta=beta`,
+  ties arbitraires et moins de `12-q` sites hors support;
+- mutants top-`(11-q)`, support compté dans le heap, exclusion par coordonnées
+  et égalité acceptée directement;
+- enveloppe top-9 dans `X minus {a,b}`, avec tous les ex aequo du neuvième
+  niveau et mutant qui compte `a/b`;
 - `rank_cell` : direction orthogonale, égalité `u=lambda`, cardinal frontière;
 - plateau : range-report ou refus atomique, jamais shell tronqué.
 
 ### Identités
 
 - comparaison exacte de tous les `(SupportKey,I_B,E_B)` à l'oracle borné;
+- identité `census_from_envelope` contre sentinelle et oracle, ledger
+  `envelope_certified + knn_fallback + plateau = supports`;
 - digest eager contre `SupportKey-RLE` sur les quatre familles;
+- owner d'arête maximale et patch half-open, avec
+  `occurrences=SupportKey_unique` avant plateaux;
 - zéro/multiple owner fail-close;
 - même boule depuis supports et shards distincts;
 - fermeture des ledgers occurrences, uniques, géométries, boules et supports.
@@ -399,24 +416,26 @@ dur du stall, ni HWM du terminal dense. Le pin logiciel courant appartient à
 
 - `occurrences/SupportKey_unique` et `SupportKey_unique/BallKey_unique`;
 - octets et high-water de chaque arène, radix et LBVH;
-- visites top-12 moyenne/p95/max et exact fallbacks;
+- visites de sentinelle par arité moyenne/p95/max et exact fallbacks;
 - aucun heap, `std::vector`, allocation ou copie hôte par support;
 - trois tailles `12 500/25 000/50 000` sur `uniform` et `eight_clusters`;
 - seulement après ces portes, session G4 gardée et `warm_e2e` officiel complet.
 
 ## 10. Décision proposée à Claude
 
-1. Ne pas chercher à réduire les vingt-quatre millions de sorties régulières.
-2. Faire de `SupportKey` le premier objet CUDA et déplacer tout lift après son
-   RLE.
-3. Rejouer l'owner par point-location au lieu de transporter une copie de tous
-   les contextes.
-4. Ajouter le top-12 comme certificateur terminal commun et comparer son coût
-   au scan pool-relatif.
-5. Garder la source cellulaire comme producteur de clés tant que la cutting
-   critique n'est pas reçue.
-6. Expérimenter la cutting d'abord sur q4; ne jamais appeler les faces shallow
-   q2/q3 des sources sans le test du minimum `Phi`.
+1. Viser une émission exacte-once par support depuis le front canonique, sans
+   réduire ni tronquer le catalogue mathématique requis.
+2. Garder `SupportKey` comme premier objet compact et son RLE comme vérificateur
+   tant que l'owner génératif n'est pas reçu.
+3. Réutiliser le census de l'enveloppe lorsqu'il est certifié; comparer la
+   sentinelle top-`(12-q)` hors support comme oracle/fallback au scan
+   pool-relatif.
+4. Rejouer l'owner par point-location pour la baseline cellulaire au lieu de
+   transporter une copie de tous les contextes.
+5. Graver les gates exact-once, census et `eight_clusters` avant CUDA; la source
+   cellulaire reste le comparateur qui mesure le gain structurel.
+6. Ne jamais appeler les faces shallow q2/q3 des sources sans le test du
+   minimum `Phi`.
 7. Ne lancer un benchmark G4 de latence qu'avec ce pipeline plat, ses capacités
    préflightées et le payload officiel branché.
 

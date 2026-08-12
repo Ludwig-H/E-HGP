@@ -265,6 +265,13 @@ industrielle : il répète les requêtes géométriques à chaque ronde. Le prio
 sa preuve et le rejet de son prototype CPU à 50 k sont dans
 [`AUDIT_REEMPLOI_EMST_YAO48_LIGNE_ENREGISTREE_20260811.md`](audits/AUDIT_REEMPLOI_EMST_YAO48_LIGNE_ENREGISTREE_20260811.md).
 
+Le read-off q2 du snapshot `e6f1ef3` est un second diagnostic, pas un
+remplacement de Yao-1. Il collecte les paires à intérieur diamétral ouvert vide,
+qui forment un sur-graphe du Gabriel fermé contenant l'EMST, puis compare les
+poids à Prim. Il exécute auparavant toute la source q2/q3/q4 et ne publie que
+`d^2=4 beta`, sans endpoints ni multifusions. Son vert reçoit un multiensemble
+de poids borné, jamais un producteur H0 ou un coût 50 k.
+
 La réception compare, après chaque coupe stricte et fermée, les partitions
 canoniques de `PointId` à l'oracle EMST CPU. Elle couvre les ex æquo, plusieurs
 EMST valides et une mutation qui reconnecte les mauvaises composantes aux
@@ -839,22 +846,37 @@ le sommet shallow donne alors le centre, mais positivité, owner et rang restent
 à vérifier. Les mosaïques d'ordre supérieur restent donc des oracles; une
 shallow cutting à listes de conflits complètes est seulement une recherche q4.
 
-#### 6.6.2 Sentinelle top-12
+#### 6.6.2 Sentinelle top-`(smax-q+1)` hors support
 
-Pour un candidat de centre `c`, rayon `beta` et `n>=12`, recevoir douze vrais
-plus proches voisins avec certificat que la distance maximale retournée
-`delta` ne dépasse aucune distance omise; les ex aequo peuvent être arbitraires.
+Pour un support validé `U` d'arité `q`, poser `t=12-q`. La primitive reçoit les
+`t` vrais plus proches `PointId` de `X minus U`, ex aequo arbitraires, avec le
+certificat que la distance maximale retournée `delta` ne dépasse aucune
+distance omise. Si moins de `t` points restent hors de `U`, elle scanne tout
+`X minus U`.
 
-- `delta>beta` implique que toute la boule fermée est dans les douze retours;
-- `delta<beta` fournit douze intérieurs et rejette toute fenêtre `smax=11`;
-- `delta=beta` rend le nombre d'intérieurs exact; si `p+q<=11`, douze points
-  fermés prouvent au moins une extra-shell hors du support.
+- `delta>beta` implique que tous les intérieurs et contacts hors `U` sont dans
+  les retours. Le fast path direct exige que l'extra-shell `H=E minus U` soit
+  vide, donc `E=U`;
+- `delta<beta` fournit `12-q` intérieurs, donc `p+q>=12`, et rejette la fenêtre
+  `smax=11`;
+- `delta=beta` contient tous les intérieurs et au moins un contact hors `U`.
+  Comme `p<=t-1`, on a automatiquement `p+q<=11`; la boule pertinente rejoint
+  le range-report, le quotient de plateau ou un refus fermé.
 
-Pour `n<12`, scanner tout `X`. Top-11 est insuffisant, car il ne distingue pas
-un rang fermé onze d'un douzième contact omis dans un tie. Le top-12 certifie la
-branche régulière; un plateau dont le diagnostic doit être publié appelle un
-range-report complet ou échoue fermé. Avec `c=C/D`, comparer exactement
-`||D*x-C||^2` et ne pruner le LBVH que sur une borne entière certifiée.
+Cette profondeur est minimale parmi les sentinelles fixes une fois `U` connu.
+Top-`(11-q)` ne distingue pas les mêmes premiers retours d'une version qui
+ajoute le dernier intérieur faisant passer à `p+q=12`, ni d'une version qui
+ajoute un contact hors support. Le top-12 global reste sûr, mais sa minimalité
+est rétractée. L'exclusion se fait par identité, jamais par coordonnées. Avec
+`c=C/D`, comparer exactement `||D*x-C||^2` et ne pruner le LBVH que sur une
+borne entière certifiée.
+
+Si le producteur livre déjà un census certifié, la sentinelle devient un oracle
+différentiel ou un fallback. En particulier, l'enveloppe top-9 q3/q4 connaît au
+centre les `always_inside`, toutes les fonctions strictement positives et
+toutes celles égales à zéro; ses omises portent une preuve négative. Elle rend
+donc directement `(I,E)`. Son neuvième ordre statistique est pris dans
+`X minus {a,b}` et tous les ex aequo du cutoff restent actifs.
 
 Cette espérance ne donne pas de borne déterministe sur la sortie exhaustive.
 Dans le modèle continu, ou lorsque la précision croît avec `m`, quatre petites
@@ -895,26 +917,61 @@ chaque occurrence transporte à la place son `CensusContext` et le RLE choisit
 le contexte owner certifié.
 
 Au profil contractuel `n=50 000`, les lanes séparées encodent exactement q2
-dans un `u32`, q3 dans les 48 bits utiles d'un `u64` et q4 dans un `u64`. Le
-reçu uniforme courant compte `96 241 855 / 352 786 093 / 390 554 718`
-occurrences : les clés nues occupent environ `6,33 Go`, ou `12,66 Go` en double
-buffer, sans `CellId`. Une point-location owner après RLE est donc aussi une
-décision de layout. Le nombre de clés uniques demeure une gate : un RLE retire
-la multiplicité spatiale, pas les candidats intrinsèquement distincts qui
-échoueront ensuite.
+dans un `u32`, q3 dans les 48 bits utiles d'un `u64` et q4 dans un `u64`
+seulement avec un `DensePointIndex:u16`. Une bijection immuable, liée à
+`cloud_epoch`, le relie aux `PointId` durables; la sortie canonique remappe puis
+ordonne les vrais identifiants. Le reçu uniforme courant compte
+`96 241 855 / 352 786 093 / 390 554 718` occurrences : les clés nues occupent
+environ `6,33 Go`, ou `12,66 Go` en double buffer, sans `CellId`, table de
+remap, workspace, listes ni sorties. Une point-location owner après RLE est
+donc aussi une décision de layout. Le nombre de clés uniques et le high-water
+complet demeurent des gates : un RLE retire la multiplicité spatiale, pas les
+candidats intrinsèquement distincts qui échoueront ensuite.
+
+Le collecteur CPU non commité `UniqueKeyReceipt-v1` ne reçoit pas ce layout :
+il stocke q2/q3/q4 sur huit octets, empaquette les identifiants croissants dans
+les bits de poids croissant et trie donc q4 par `(d,c,b,a)`. Il mesure un nombre
+de clés, pas la contiguïté lexicographique des faces ni le trafic
+`u32/u64/u64`. Son quota divisé entre workers peut alterner succès et refus sous
+une commande identique et ignore les capacités, le tableau des longueurs de
+run et les temporaires. Avant de devenir une autorité de dimensionnement, il
+doit fermer les occurrences par arité, lier bijection/époque/digest, borner le
+HWM global et recevoir un résultat indépendant du scheduling.
+
+L'ordre lexicographique q4 groupe naturellement le préfixe de face `(a,b,c)`.
+Un warp construit une fois la normale et l'axe circumcentrique de cette face;
+chaque lane apex `d` intersecte cet axe avec le seul bissecteur `a/d`, puis
+teste owner et barycentriques en arithmétique exacte. Cette factorisation ne
+dépend jamais de l'admission q3 de la face. Les q3 rejettent d'abord les
+triangles non strictement aigus par trois produits scalaires i64, avant leur
+solve rationnel.
+
+Pour la route par front de Jung, cette factorisation admet un owner génératif
+exact-once. Q3 n'émet qu'avec la plus petite `PairId` parmi ses arêtes de
+longueur maximale; q4 applique la même règle aux six arêtes et traite les deux
+carriers comme un ensemble non ordonné. Le centre appartient ensuite à un seul
+patch half-open. Sous complétude du front et de cette partition,
+`occurrences=SupportKey_unique` avant plateaux; sans canonicalisation, les caps
+sont trois en q3 et six en q4. Cette égalité reste une gate d'identités, pas une
+hypothèse de dimensionnement.
 
 Le candidat owner peut suivre deux ordonnances. L'ordonnance générale produit
 `(cloud_epoch,GeometricBallKey,SupportKey,OwnerCellId)` sans census, puis un
-second RLE conserve tous les supports d'une même boule. Le fast path
-`RelevantGP` lance plutôt top-12 par `SupportKey` et ne forme la clé de boule
-que pour sa side queue : si `delta>beta` et le shell global rendu est `E=U`,
+second RLE conserve tous les supports d'une même boule. Elle choisit un support
+canonique `U_star` d'arité minimale `q_min` et, si aucun census producteur n'est
+reçu, interroge top-`(12-q_min)` dans `X minus U_star`. Employer `q_max` ou
+exclure l'union des supports peut masquer une boule pertinente. Le fast path
+`RelevantGP` emploie plutôt le census reçu ou top-`(12-q)` par `SupportKey` et
+ne forme la clé de boule que pour sa side queue : si `delta>beta` et le shell global rendu est `E=U`,
 aucun autre support minimal distinct ne peut porter la même boule, car il
 serait un sous-ensemble propre de la base affinement indépendante `U`. Le
-record est donc publiable sans tri de sphères. `delta=beta` route vers
-range-report, quotient de plateau ou refus fermé. Une A/B décide si le second
-RLE global amortit mieux les rares boules multi-supports.
+record est donc publiable sans tri de sphères. Toute extra-shell, y compris
+connue avec `delta>beta`, et toute égalité route vers range-report, quotient de
+plateau ou refus fermé. Une A/B décide si le second RLE global amortit mieux les
+rares boules multi-supports.
 
-Le backend choisi exécute soit top-12, soit le census pool-relatif déjà prouvé.
+Le backend choisi exécute soit le census producteur, soit la sentinelle hors
+support, soit le census pool-relatif déjà prouvé.
 Pour `H_run=smax-q_min`, un contexte avec `b_cert>=H_run` effectue seul ce
 census terminal, ou le run appelle un census global : une première passe additionne en bloc
 les nœuds strictement intérieurs et désactive chaque support dès son
@@ -1080,14 +1137,16 @@ aiguë canonique.
 
 Le premier RLE chaud reçoit
 `(cloud_epoch,SupportKey,CensusContext)` avant toute géométrie. Après calcul
-unique du lift et choix du contexte owner, chaque survivant produit
-`(cloud_epoch,GeometricBallKey,SupportKey,CensusContext)` et le second RLE emploie cette clé
-géométrique exacte de taille fixe. Si la forme est
+unique du lift et choix du contexte owner, la variante BallKey-first produit
+`(cloud_epoch,GeometricBallKey,SupportKey,CensusContext)` et son second RLE
+emploie cette clé géométrique exacte de taille fixe. La variante
+SupportKey-first emploie le census du producteur ou la sentinelle hors support,
+puis ne construit cette clé que pour la side queue. Si la forme est
 `D||y-a||^2+C dot (y-a)=0`, le 5-uplet homogène
 `(D,C-2Da,D||a||^2-C dot a)`, normalisé par signe puis pgcd, est une clé
-primitive de sphère disponible avant census. Le contexte lie
+primitive de sphère disponible avant census. Dans BallKey-first, le contexte lie
 cellule, digests de pool/domaine, arène ou backend, `e0` et budget certifié
-`b_cert`. Le RLE conserve tous les supports et contextes. Pour
+`b_cert`. Ce RLE conserve tous les supports et contextes. Pour
 `H_run=smax-q_min`, il choisit atomiquement un contexte avec
 `b_cert>=H_run`, puis emploie son `e0` et ses buckets pour une seule promotion
 et un seul census par boule; sans tel contexte, il appelle le census global.
@@ -1231,11 +1290,12 @@ durable; ils sont tenus dans
 points u16 + LBVH exact résidents
   |-> k=1 : Yao-1 exact mutualisé -> EMST sparse
   |-> q2 : lane cellules D_9 comparée à Yao--affine--dual suspendu
-  `-> q3/q4 : cellules + arités/budgets indépendants, ledger fail-open
-       -> partition commune, D_h imbriquées, e0 fixe, promotion h
-       -> filtres Jung--Helly--bissecteurs, génération q3/q4 directe
-       -> RLE SupportKey -> une géométrie, zéro ou un owner
-       -> top-12 régulier; side queue GeometricBallKey/plateau, ou second RLE A/B
+  `-> q3/q4 : front Jung coalescé + enveloppe top-9 hors ancre
+       -> center-cover collectif + patches half-open, ledger fail-open
+       -> q3 intrinsèque + sweep q4; cellules D_h comme comparateur
+       -> owner génératif exact-once ou RLE SupportKey -> une géométrie/owner
+       -> census producteur ou top-(12-q) hors U en fallback
+       -> side queue H!=empty/plateau, ou second RLE BallKey A/B
        -> BallActivation/tombstones streamées + gate regular/plateau/high-rank
        -> facettes du cœur + gateway canonique de première incidence
        -> carriers stricts + resolver latent
@@ -1328,19 +1388,24 @@ un refus de ressource sont trois statuts distincts.
 5. Sur les seules ancres admises, recevoir séparément Jung--Yao, la borne AABB
    `g_min/Q_max`, Helly, la composition cœur--profondeur et la profondeur
    terminale. Mesurer le gain marginal de chacun contre son coût exact.
-6. Construire q2/q3/q4 par lanes indépendantes et budgets `h`, avec partition
-   terminale commune, `e0` immuable et promotion, sans dépendre des supports
-   inférieurs retenus et sans supprimer le transcript Yao-1 de `k=1`. Émettre
-   les occurrences compactes, faire le RLE `SupportKey` avant le lift, chercher
-   directement la feuille owner et rejouer son pool; transporter les contextes
-   seulement si la partition terminale n'est pas directement adressable.
+6. Garder q2/q3/q4 par lanes indépendantes et budgets `h` comme comparateur,
+   avec partition terminale commune, `e0` immuable et promotion, sans dépendre
+   des supports inférieurs retenus et sans supprimer le transcript Yao-1 de
+   `k=1`. Pour la route front, recevoir l'arête maximale canonique, le patch
+   half-open et `occurrences=SupportKey_unique`; son RLE devient vérificateur.
+   Pour la baseline cellulaire, émettre les occurrences compactes, faire le RLE
+   `SupportKey` avant le lift, chercher directement la feuille owner et rejouer
+   son pool; transporter les contextes seulement si la partition terminale
+   n'est pas directement adressable.
    Comparer lots spatiaux de feuilles atomiques et shards radix par clé. Dans le premier cas, la feuille owner commune rend le
    second RLE par clé primitive de sphère local. Dans le second, redistribuer les
    pending owner par `GeometricBallKey/OwnerCellId` avant ce RLE : un owner
    commun ne colocalise pas des shards `SupportKey` distincts. Comparer ce
-   second RLE global au fast path top-12 par clé : `E=U` publie directement la
-   branche régulière, tandis que l'égalité route seule vers la clé de boule et
-   le range-report. Pour le census pool, choisir un contexte
+   second RLE global au fast path par clé : employer d'abord le census reçu du
+   producteur, sinon top-`(12-q)` hors `U`. Seuls `delta>beta` et `E=U`
+   publient directement la branche régulière; toute extra-shell, toute égalité
+   et toute demande Gamma route vers la clé de boule et le range-report. Pour
+   le census pool, choisir un contexte
    `b_cert>=H_run` et faire un unique census par boule;
    `U_B` est un certificat aval. Gamma
    conserve les `SupportKey` requis; le H0 normalisé

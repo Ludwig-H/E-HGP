@@ -10,64 +10,115 @@ Cadre : `phase=exploration_v3_hors_registre`,
 
 ## Fraîcheur
 
-`HEAD` observé au dernier contre-audit :
-`90c06b0c436950d29f7617dd6a6765ddf3a8b7fa`, commit
-`judge the source with arithmetic that shares nothing with it`. Il versionne le
-prototype à séparation adaptative, prune `rank_cell`, terminal de stagnation,
-squelette de payload, audit top-12 et nouveau juge rationnel borné. Le titre du
-commit sur-vend encore « rien » : le sujet et le juge partagent le générateur
-de nuages et le protocole texte, tandis que leur géométrie est désormais
-séparée. Le contre-audit du juge fixe sa portée ci-dessous.
-
-Au pin, le worktree ne modifie plus le code; seul l'audit d'architecture en
-cours diffère du `HEAD`. La campagne gelée reste ouverte par un processus de
-Claude : les trois cas `terrain` sont clos, `uniform` 12 500 et 25 000 sont clos,
-et la commande `uniform` 50 000 est active. Le fichier peut donc encore changer
-après cette observation. Le driver ne couvre que trois familles, vit en `/tmp`
-et reste fail-open; ses temps chevauchent compilations et CTests. Les compteurs
-fermés sont diagnostiques, jamais une rampe contractuelle ni un benchmark.
+`HEAD` contre-audité :
+`407d4d1b2745f03a7237080a75daba1c7122ea0a`, commit
+`parallelise by independent subtrees and require the receipt to be identical`.
+Il ajoute des workers CPU par sous-arbres et quatre portes associées. Il ne
+contient ni kernel CUDA, ni producteur du payload officiel, ni mesure G4/50 k.
+Le facteur `1,44` de son message de commit n'est attaché à aucun transcript
+versionné. Le worktree observé pendant ce contre-audit contient ensuite un
+delta de Claude dans `prototype/centre_cell_source.cpp`, en plus de
+`README.md`, `PROPOSITION.md` et des audits. Aucun code n'a été touché par les
+auditeurs.
 
 | objet courant | SHA-256 |
 | --- | --- |
-| `CMakeLists.txt` au `HEAD` | `1b05c17f42629f26dec82ddad555d731fafa1700e3e76c9520c75732c6618d17` |
-| source centre-cell au `HEAD` | `8d022ea0c4d5944ade1e870b0d48c0a2628bf5fbb9442462e077f358c81c3fc2` |
-| ELF Release centre-cell correspondant | `f3494e940917328742d1defda4c1c551e97109419e8c20ed1adfd47950f7b140` |
-| juge rationnel borné | `7eb7849c1aee148b69f25b89a3d64a739c2dfd750961fc6fb5c21fc48dbeec90` |
-| ELF Release du juge | `0d40c17e51d2e45d426953f85c914d26ce235abebf10713e4938fa391fe25266` |
-| checker Python sujet--juge | `24fd3eebe2d42bbf16d05d168ce1f00c7d3d8e0b525cf3c85960181fa33aeef5` |
-| sortie ciblée 48/48 observée en `/tmp`, non archivée | `23fc8d7a2445a4c4c05d2d3ddac8801048720e6dd08dd753aca8c969d765cb41` |
+| `CMakeLists.txt` au `HEAD` | `3cb2d3ac4ef3e407607283e588c18682604852456029d91673f2dd928e14b87c` |
+| source centre-cell au `HEAD` | `323a08489ffa4f05d9726c2515dc528483b69386e7347e21605fe9a71f81e6f0` |
+| ELF Release centre-cell correspondant | `7ed9fcfcedbbce3226388fac9d1088006873b81e14a3cc3fdd315a3af4bbb608` |
+| juge rationnel borné au `HEAD` | `b39d8d295f5c2edde75d6f88cb2bbf8bffb75440267b69ea677b5d93288d8658` |
+| ELF Release du juge correspondant | `cfa11f3f4875b5be91b87beebce9eff7117f915aec8399fff829e5915fbe92da` |
+| checker Python sujet--juge | `3671b7ab53c73f845524aca402f2779a949fc28d1a800a9214d59cef3c4912f6` |
+| checker invariance workers | `86f4840a2221833558481127298aab383ad89982715737c7e31200c8cdc96fc1` |
 | ELF historique immuable de la campagne gelée | `423797e9964538f42701660d8baaf492b302f801a4aeb4b0df1b183986a5a037` |
-| transcript gelé versionné après `uniform` 25 000, commande 50 000 ouverte | `7e2e65ce7089a18a2b675a935e2ee016c5769136bb3e8869dd8c734339627779` |
+| transcript gelé complet, 254 lignes et footer | `f02b7c4c2793ef0ffbb2ac879c274ff4298bcec90ff5ea64fba3d64352e7ea59` |
 
-Le registre configuré recense `508` CTests, dont `44` préfixés
-`mhgp3v_centre_cell_`; la sélection centre-cell plus payload contient `48`
-portes. Les `48/48` passent en `115,08 s` sur les objets du `HEAD`. La sortie
-brute est seulement observée en `/tmp`, donc le vert est fonctionnel et borné,
-pas un reçu durable. Les quatre différentiels du nouveau juge portent sur
-`n=32,smax=7` et quatre familles. Le nombre `777` à trente sites annoncé dans le
-message de commit n'est ni leur paramétrage ni reçu dans la sortie résumée. Plus
-grave, la porte mutant est vacueuse : le sujet refuse `--inject=rank-closed`
-sans `--judge`, le driver rend code 2, puis `WILL_FAIL` transforme ce refus en
-vert. Elle ne prouve aucun désaccord scientifique. Le juge reste un bon candidat
-rationnel borné : un rejeu direct de son stdout mutant donne `510` vérités,
-`504` identités et `6` manquantes, donc code 1. La porte doit conserver ce stdout
-et exiger exactement ce code ainsi que `DESACCORD` avant réception. Voir
+La configuration Release recense `517` CTests, dont `53` préfixés
+`mhgp3v_centre_cell_`; quatre portes payload sont séparées. Sur les objets du
+`HEAD`, le contre-audit rend `53/53` en `238,06 s` et `4/4` payload en
+`0,45 s`. Ces sorties sont observées localement et non archivées; la suite
+globale `517/517` n'a pas été rejouée. Le résultat du delta non commité est
+rapporté séparément ci-dessous.
+
+Les trois portes workers normales comparent le stdout hors ligne `cloud=` entre
+1/2/5 workers; la porte différée compare seulement quelques lignes agrégées.
+Elles n'exigent ni `--judge`, ni identités complètes, ni plancher de tâches ou
+de workers actifs. Le reçu omet `harvest_depth`, tâches récoltées, workers
+actifs, octets copiés et high-water par worker. L'histogramme de profondeur
+différé n'est plus un défaut live : `407d4d1` transporte et restaure la
+profondeur, mais aucune porte dédiée ne reçoit encore cet histogramme.
+
+Au `HEAD`, un défaut grave est reproductible : `--multiplicity --threads>1`
+publie un histogramme partiel avec code zéro. Sur
+`--points=40 --smax=4 --family=uniform --seed=11`, un worker rend
+`multiplicite_total_occurrences=22535` pour `lifts_built=22543`, tandis que deux
+workers rendent `7012` pour les mêmes `22543` lifts. Les moteurs workers ne
+reçoivent pas la configuration et leurs maps ne sont pas fusionnées. Le delta
+non commité tente cette réparation : l'eager devient invariant entre
+1/2/5 workers, mais les dégénérés restent absents, les rejets de rang sont
+classés trop tôt comme pertinents et le mode différé rend zéro occurrence,
+`-nan` et code zéro. La combinaison n'est donc pas reçue.
+
+### Delta live non commité de Claude
+
+| objet | valeur |
+| --- | --- |
+| source centre-cell | `72e490932e5553796de0f3322f8d43d2ddfb7c5d720e04e4a0d5c81578aa862e` |
+| diff contre le `HEAD` | `+205/-8` |
+| ELF Release correspondant | `772069ff1891fb0f36a2aa2d4851c42d22e41cbdd1b19b5295c0d5a269c16dc8` |
+| inventaire CTest | `517`, aucune nouvelle porte `unique-keys`/multiplicité |
+
+`UniqueKeyReceipt-v1` ferme correctement le nombre d'occurrences collectées
+sur les petits cas rejoués et donne à `terrain,n=400` : `1 768 790`
+occurrences, `246 263` clés uniques, facteur `7,1825`. Il reste un diagnostic
+CPU : toutes les arités sont stockées sur huit octets, le tri q4 est colex et
+non préfixé par face, le cap par moteur peut alterner code 0/3 sous la même
+commande selon le scheduling, ne borne pas le HWM réel et `cap=0` est illimité.
+Le champ reçu `flux` varie aussi entre runs identiques. Aucun résultat 50 k,
+CUDA ou G4 n'est attaché à ce delta.
+
+Après reconstruction de ce delta, les `53/53` CTests centre-cell passent en
+`271,21 s`; les quatre workers passent aussi isolément en `70,93 s`. Aucun de
+ces tests n'invoque `--unique-keys` ni `--multiplicity`, donc ce vert ne couvre
+aucun des défauts ci-dessus. Les commandes bornées avec `--judge` restent
+d'accord en eager/différé et avec 1/5 workers.
+
+Le détail des reproductions, de la correction top-`(12-q)` et des gates G4 est
+dans
+[`AUDIT_CONTRE_AUDIT_407D4D1_SENTINELLE_HORS_SUPPORT_20260812.md`](AUDIT_CONTRE_AUDIT_407D4D1_SENTINELLE_HORS_SUPPORT_20260812.md).
+
+La porte `mhgp3v_centre_cell_independant_voit_le_mutant` reste vacueuse : le
+sujet refuse `--inject=rank-closed` sans `--judge`, le driver rend code 2, puis
+`WILL_FAIL` transforme ce refus en vert. Le rejeu courant affiche exactement
+`REFUS : le sujet rend 2` et `REFUS : un mutant sans juge ne prouve rien`. Le
+juge lui-même est sensible : alimenté directement par le stdout mutant, il rend
+code 1 avec `510` vérités, `504` identités et `6` q2 manquantes. La porte doit
+exiger ce code et `DESACCORD`, tandis qu'un refus code 2 reste rouge. Voir
 [`AUDIT_JUGE_CELLULES_INDEPENDANT_90C06B0_20260812.md`](AUDIT_JUGE_CELLULES_INDEPENDANT_90C06B0_20260812.md).
 
-Le premier doublement gelé volumique est vert : `uniform` 12 500 vers 25 000
-passe de `1 848 561` à `3 480 121` cellules, de `194 463 795` à `410 527 574`
-lifts et de `4 990 227` à `10 387 850` supports, soit des pentes respectives
-`0,913`, `1,078` et `1,058`. Il reste à fermer 50 000 pour obtenir deux pentes
-successives. Même si les pentes restent vertes, le premier point paie encore
-`38,969` géométries par support et `81,778 %` de rejets owner : le verrou GPU
-visé par le nouvel audit est l'amplification avant `SupportKey`, pas la sortie.
+Le transcript historique du commit `e6f1ef3` contient neuf commandes, neuf `rc=0`, un ELF identique
+avant/après chaque cas et `RAMPE TERMINEE`. Il ne couvre que `terrain`,
+`uniform` et `scanline_single_pass`; son driver temporaire n'est pas archivé,
+l'en-tête associe `git_commit=64cf6fe` à la source postérieure `dbaa2e0`, et les
+temps ont subi de la charge concurrente. Il s'agit donc d'un diagnostic
+count-only fermé, pas d'une rampe contractuelle ni d'un benchmark.
+
+Sur `uniform`, les deux pentes de cellules/lifts/supports valent
+`0,913/1,078/1,058`, puis `1,159/1,032/1,042`. À 50 000 points, le diagnostic
+publie `21 395 212` supports pour `839 582 666` lifts, soit `39,242` géométries
+par support; `684 722 232` propositions, soit `81,555 %`, meurent à l'owner.
+Le verrou GPU visé est l'amplification avant `SupportKey`, pas la sortie. Les
+lanes q2/q3/q4 contiennent `96 241 855 / 352 786 093 / 390 554 718`
+occurrences : elles occupent environ `6,33 Go` en `u32/u64/u64` seulement avec
+un `DensePointIndex:u16` lié par `cloud_epoch` aux `PointId` durables. La table
+de remap, le workspace, les listes et les sorties sont hors compte. Le nombre
+de `SupportKey` uniques et le high-water complet ne sont pas mesurés.
 
 Les défauts live non couverts par ce vert restent : description inexacte de la
 direction d'adjugée comme normale des moindres carrés hors rang deux; commentaire
 strict de `rank_cell` alors que seule la version non stricte est vraie; overflow
 signé possible avant la saturation de `work`; terminal stall sans hard-cap
-d'adjacence/K4; histogramme de profondeur faux en différé; paramètres stall et
-normale absents du reçu. Le théorème `rank_cell` lui-même est sûr sous
+d'adjacence/K4; paramètres stall et normale absents du reçu. Le théorème `rank_cell` lui-même est sûr sous
 `U subset mine`; le stall est sémantiquement sûr seulement si son exhaustif
 termine.
 
@@ -323,6 +374,23 @@ incomplète. Les secondes étaient contaminées et sont exclues. Voir
 
 ## Lane `k=1` et diagnostic horizontal
 
+Le commit `e6f1ef3` a introduit un read-off k1 depuis les supports q2 à zéro intérieur.
+Il est exact pour le multiensemble des poids MST, mais son vocabulaire et sa
+portée sont trop forts. Zéro intérieur signifie boule diamétrale ouverte vide;
+une extra-shell peut subsister. Les lignes `K1 d2` publient `d2=4 beta`, pas le
+niveau rationnel nommé. Le Kruskal mute son DSU séquentiellement puis jette les
+endpoints; le RLE des poids ne publie ni racines pré-lot, ni composantes
+quotient, ni multifusions. Le juge trie les scalaires et ne peut donc valider
+leur ordre, les lots ou le catalogue Gabriel complet.
+
+Cette lecture ne réduit surtout pas le chemin source. Sur `terrain,n=400`, elle
+paie les mêmes `30 265` cellules, `1 768 790` lifts et `52 665` census que la
+source normale, puis filtre `832` arêtes vers 399 poids. Les cinq verts k1 sont
+des différentiels bornés de poids MST, pas une source sparse 50 000. Yao-1
+reste un candidat architectural sparse indépendant. Les preuves, la fixture d'extra-shell et
+la reconstruction correcte des multifusions sont dans
+[`AUDIT_JUGE_CELLULES_INDEPENDANT_90C06B0_20260812.md`](AUDIT_JUGE_CELLULES_INDEPENDANT_90C06B0_20260812.md).
+
 Le Borůvka CPU courant reste un oracle borné : son parcours dit best-first est
 en réalité un DFS near-first et son API cœur publie les arêtes dans l'ordre des
 rondes, pas dans l'ordre final `(distance_squared,min_PointId,max_PointId)`.
@@ -555,14 +623,14 @@ n'est ni la variante de l'ancienne note (`8 338 753` cellules et
 mais la campagne a changé d'ELF avant le 50 000 : aucune pente mono-binaire
 n'est donc publiable.
 
-Le nouveau transcript gelé reproduit ensuite ce point 12 500 sur
-`dbaa2e0.../423797e...` : mêmes `14 262 497` cellules, `92 531 928` lifts et
-`906 078` supports, ELF identique avant/après et ledger par arité désormais à
-`ecart=0`, avec `rank_early=155 300/840 522/138 899`. C'est un diagnostic
-count-only reproductible; sans `--judge`, digest d'identités, mémoire ou
-pipeline, il ne reçoit pas l'exactitude générale ni le SLO. `probe_tests=0`
-confirme aussi que les comptes `E2/T3/T4/Q4` ne sont pas exercés au défaut. Son
-`wall_s=871` est contaminé et non qualifiable.
+Le transcript gelé `dbaa2e0.../423797e...` est maintenant clos sur neuf cas et
+un footer. Les ledgers par arité rendent tous `ecart=0`; l'ELF est identique
+avant/après chaque cas. `uniform,n=50 000` ferme notamment `7 773 329`
+cellules, `839 582 666` lifts et `21 395 212` supports. C'est un diagnostic
+count-only reproductible de ces compteurs; sans `--judge`, digest d'identités,
+mémoire, `eight_clusters` ou pipeline, il ne reçoit pas l'exactitude générale
+ni le SLO. `probe_tests=0` confirme aussi que les comptes `E2/T3/T4/Q4` ne sont
+pas exercés au défaut. Tous les `wall_s` sont contaminés et non qualifiables.
 
 Le successeur `005b786` ferme ensuite la partition par arité sur l'observation
 `n=1 500` : `130 033` occurrences de rang anticipé et `3` finales. Son
@@ -738,22 +806,33 @@ le fold ne peut donc pas être déclaré complet.
    cellules `D_9` le justifie; elle exige alors masque régional,
    `frontier-clear`, états immuables, `DualReceipt`, maximum entier, fusion,
    télémétrie et rampe `12 500/25 000/50 000`.
-5. Garder P1a actuel comme falsificateur; construire cœur Jung puis wavefront
-   témoin persistante et suivre son protocole natif direct.
-6. Construire q2/q3/q4 par lanes `D_9/D_8/D_7` et budgets `h`, avec partition
-   terminale commune, `e0` immuable et promotion, sans transits d'arrangement
-   ni dépendance envers un support inférieur retenu. Après génération locale,
-   faire un premier RLE `SupportKey` avant lift, choisir le contexte owner,
-   puis un second RLE par clé primitive de sphère et un strict-count/census
-   fermé unique par boule; `U_B` est un certificat aval. Pour Gamma, garder
+5. Garder P1a actuel comme falsificateur; construire le front de Jung coalescé,
+   puis l'enveloppe top-9 dans `X minus {a,b}`. Recevoir l'arête maximale
+   canonique et le patch half-open avec `occurrences=SupportKey_unique`, ainsi
+   que le census `(I,E)` fourni directement par l'enveloppe.
+6. Garder les lanes cellulaires `D_9/D_8/D_7` comme comparateur exact, avec
+   partition terminale commune, `e0` immuable et promotion. Après génération,
+   faire un premier RLE `SupportKey` avant lift et choisir le contexte owner.
+   Comparer deux ordonnances : BallKey-first choisit le support d'arité minimale
+   et top-`(12-q_min)` dans `X minus U_star`; SupportKey-first emploie d'abord
+   le census producteur puis top-`(12-q)` hors `U` en fallback. Seuls
+   `delta>beta` et `E=U` publient directement; toute extra-shell, toute égalité
+   et toute demande Gamma rejoint la side queue `GeometricBallKey`. Le census
+   pool reste l'autre backend exact et `U_B` un certificat aval. Pour Gamma, garder
    la provenance requise; pour le H0 normalisé, employer un support canonique
    et le token de fermeture Johnson au lieu d'énumérer tous les supports d'une
    cosphère. Graver les deux contre-fixtures inter-arités, l'invariant
    pool-relative, les arbres de budgets indépendants et le shell 30. Deux
    pentes rouges de candidats, listes, census, postings ou octets ferment cette
-   route avant CUDA.
+   route avant CUDA. En parallèle, le front de Jung coalescé n'entre en
+   extension que si `W_front` ferme ses visites; le dual-tree actuel, de pente
+   proche de `2,3`, est une baseline réfutée.
 7. Fermer le terminal `k=n`, `BallActivation`, premières incidences, gateways,
    resolver, MSF/fold, dix forêts, verticales et payload hôte. Seul ce pipeline
    complet peut mesurer le SLO.
 
-GCP non utilisé.
+GCP utilisé uniquement pour la fermeture demandée :
+`devpod-gpu-exploration/europe-west4-a/ehgp-blackwell-spot`, génération
+`2026-08-12T11:50:53.892-07:00`, a été arrêtée par le script gardé
+`stop_and_verify.sh --yes` et certifiée `TERMINATED`. Aucun benchmark GPU n'a
+été lancé par ce contre-audit.

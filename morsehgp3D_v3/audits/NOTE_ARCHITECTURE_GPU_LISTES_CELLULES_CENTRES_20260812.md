@@ -335,11 +335,13 @@ external sort ou `resource_exhausted`. Les deux variantes exigent
 count/scan/fill, préflight d'octets et refus transactionnel; une profondeur
 d'arbre fixe n'est pas un cap mémoire.
 
-Le candidat positif owner émet ensuite
+Après le premier RLE, deux ordonnances exactes sont comparées; le second RLE
+n'est pas simultanément obligatoire et évité. Dans la variante
+**BallKey-first**, le candidat positif owner émet
 `(cloud_epoch,GeometricBallKey,SupportKey,CensusContext)`. Le second radix/RLE
-par `(cloud_epoch,GeometricBallKey)` arrive **avant** la promotion et conserve
-tous les supports et contextes. Pour
-`H_run=smax-q_min`, il sélectionne atomiquement un contexte avec
+par `(cloud_epoch,GeometricBallKey)` arrive avant la promotion et conserve tous
+les supports et contextes. Pour `H_run=smax-q_min`, il sélectionne atomiquement
+un support canonique `U_star` d'arité minimale `q_min` et un contexte avec
 `b_cert>=H_run`; ce contexte seul effectue la promotion et le census fermé :
 
 - partir de **son** `e0` immuable et de **ses** buckets avec un curseur `h`
@@ -353,16 +355,33 @@ tous les supports et contextes. Pour
   `accepted_closed_rank=(p+|U_B|<=smax)`;
 - envoyer une extra-shell pertinente au quotient saturé ou au refus fermé.
 
-Une variante terminale bornée remplace ce scan par top-12. Pour `n>=12`, soit
-`delta` la distance maximale de douze vrais plus proches voisins, avec
-certificat `delta<=min_non_retour`. Si `delta>beta`, toute la boule fermée est
-dans les douze retours; si `delta<beta`, douze intérieurs rejettent la fenêtre;
-si `delta=beta`, tous les intérieurs sont connus et `p+q<=11` prouve une
-extra-shell. Les ties peuvent être arbitraires. Pour `n<12`, scanner tout le
-nuage. Ce certificateur top-12 est minimal pour `smax=11`; il ne publie un
-plateau complet qu'après range-report. Le device doit comparer exactement
-`||D*x-C||^2` pour `c=C/D` et mesurer les visites/replis. Comparer cette voie au
-census CSR owner : le théorème ne présume pas laquelle est plus rapide.
+Une variante terminale bornée remplace ce scan par la sentinelle
+top-`(12-q_min)` dans `X minus U_star`. Employer `q_max` ou exclure l'union des
+supports est faux : cela peut masquer le support minimal pertinent ou un
+contact. Pour un support propre `U` quelconque d'arité `q`, poser `t=12-q` et
+retourner les `t` vrais plus proches `PointId` de `X minus U`, avec certificat
+`delta<=min_non_retour`. Si `delta>beta`, tous les intérieurs et contacts hors
+`U` sont complets; si `delta<beta`, `t` intérieurs donnent `p+q>=12`; si
+`delta=beta`, tous les intérieurs et au moins un contact hors `U` sont connus,
+avec `p+q<=11`. Si moins de `t` sites restent, scanner `X minus U`. Le
+top-`(12-q)` hors support est minimal; le top-12 global reste seulement un
+certificateur sûr. Le device exclut par identité, compare exactement
+`||D*x-C||^2` pour `c=C/D` et mesure les visites/replis.
+
+Dans la variante **SupportKey-first**, employer d'abord le census reçu du
+producteur, sinon cette sentinelle avec le propre `(q,U)` de la clé. Seuls
+`delta>beta` et `E=U` publient directement : aucun support minimal distinct ne
+peut alors porter la même boule, car il serait un sous-ensemble propre de la
+base affinement indépendante `U`. Toute extra-shell, y compris déjà complète
+avec `delta>beta`, toute égalité ou demande de catalogue rejoint la side queue
+`GeometricBallKey`. Une A/B mesure cette ordonnance contre BallKey-first.
+
+Une enveloppe affine top-9 reçue peut fournir directement `(I,E)` pour q3/q4 :
+son neuvième ordre est pris dans `X minus {a,b}`, tous les ex aequo du cutoff
+restent conflits, et chaque ligne omise porte une preuve strictement négative
+au centre. Le reçu doit alors lier `(q_query,U_star_digest,t)` ou le digest du
+census producteur, et fermer
+`envelope_certified + knn_fallback + plateau = supports`.
 
 Une arène q4 filtrée ancestralement à `D_7` ne certifie pas rétroactivement un
 support q3 à `p=8`, même si elle matérialise un `D_8` terminal. Si q2 vient d'un

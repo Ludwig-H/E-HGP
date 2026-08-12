@@ -131,9 +131,10 @@ global par tuple. Il ne prouve pas une source sparse : les cliques
 d'intervalles peuvent rester `Theta(m^4)` et une subdivision peut répéter plus
 de quadruplets que l'exhaustif global. La génération corrigée utilise des
 arités q3/q4 indépendantes, une partition terminale commune à leurs budgets
-d'intérieurs, un indice d'entrée immuable et une promotion par buckets. Le RLE
-par clé géométrique précède l'unique census par boule; `U_B` reste un certificat
-post-census. Après resserrement `tight`, la preuve exacte est une conservation
+d'intérieurs, un indice d'entrée immuable et une promotion par buckets. Dans
+la variante BallKey-first, le RLE par clé géométrique précède l'unique census
+par boule; dans SupportKey-first, il ne porte que la side queue. `U_B` reste un
+certificat post-census. Après resserrement `tight`, la preuve exacte est une conservation
 relative au pool hérité de `I_B union U_B`, pas l'identité avec les listes
 globales d'un rescan. Un snapshot CPU historique reste `NO-GO` pour son
 ordonnance mesurée : quatre compteurs avaient deux pentes successives
@@ -152,12 +153,18 @@ admission produit :
 | --- | --- | --- |
 | `k=1` | Yao-1 exact puis EMST sparse | Borůvka point--LBVH borné |
 | q2 profond | cellules de centres, lane `D_9`, à comparer avant tout port | cascade Yao--banque affine--dual et self-join conservés comme diagnostics/falsificateurs |
-| q3/q4 | cellules de centres, lanes et budgets indépendants | exhaustif borné pour les identités; anciens fronts comme falsificateurs |
+| q3/q4 | front de Jung coalescé puis enveloppe top-9 exacte, en exploration | cellules de centres et exhaustif borné comme comparateurs d'identités/coût |
 | quotient H0 | fusion device vers activations, gateways et token Johnson | catalogue exhaustif exigé seulement par Gamma/verticales tant que leur reconstruction n'est pas prouvée |
 
 Le transcript Yao-1 de `k=1` n'est donc pas abandonné avec la cascade q2.
 Pour q2 profond, aucune des deux voies concurrentes n'est aujourd'hui une
 source produit admise.
+
+Le read-off k1 ajouté au snapshot `e6f1ef3` ne change pas cette matrice : il
+calcule d'abord toute la source cellules q2/q3/q4, puis compare seulement les
+poids d'une MST. Il ne publie ni endpoints ni multifusions et n'est pas une
+voie sparse 50 k; son contre-audit appartient à
+[`AUDIT_JUGE_CELLULES_INDEPENDANT_90C06B0_20260812.md`](audits/AUDIT_JUGE_CELLULES_INDEPENDANT_90C06B0_20260812.md).
 
 Sur un Poisson homogène continu sans bord, les formules publiées des mosaïques
 de Delaunay d'ordre k donnent environ `480,340886` supports positifs de Source S
@@ -178,17 +185,35 @@ source q2/q3 : il faut le minimum auto-centré de la fonction rayon sur son flat
 d'égalité. Le contre-exemple et la preuve sont dans
 [`AUDIT_DEBLOCAGE_GPU_SUPPORTKEY_TOP12_20260812.md`](audits/AUDIT_DEBLOCAGE_GPU_SUPPORTKEY_TOP12_20260812.md).
 
-Une primitive top-12 exacte peut remplacer le census variable sur la branche
-régulière. Si la distance du
-douzième voisin est strictement au-dessus du rayon, la boule fermée entière est
-dans les douze retours; si elle est strictement dessous, douze intérieurs
-rejettent le candidat; si elle est égale, `p+q<=11` prouve une extra-shell. Les
-ex aequo peuvent être choisis arbitrairement. Le top-12 est le certificateur
-minimal pour `smax=11`, jamais un générateur; un plateau à publier exige encore
-un range-report complet ou un refus fermé. Le fast path `E=U` publie sans tri
-de sphères; la side queue d'égalité emploie `GeometricBallKey`. Un second RLE
-global reste une variante A/B si les boules multi-supports amortissent son
-trafic.
+À cette taille, les occurrences q2/q3/q4 occupent exactement `6,33 Go`, ou
+`12,66 Go` en double buffer radix, **si** leurs identifiants chauds sont des
+`DensePointIndex:u16`. Ce layout `u32/u64/u64` exige une bijection immuable,
+liée à `cloud_epoch`, vers les `PointId` durables; il n'encode pas directement
+des `PointId` ABI arbitraires. La table de remap, les listes, le workspace et
+les sorties restent hors de ce compte. La capacité et le high-water complet,
+le nombre de clés uniques et le trafic mesuré restent donc tous des portes. Le
+collecteur CPU non commité `UniqueKeyReceipt-v1` compte toutes les arités dans
+des `u64`, trie q4 en colex, et son cap par worker ne borne pas ce high-water;
+il diagnostique les uniques mais ne reçoit pas encore ce layout ni le SLO.
+
+Pour un support validé `U` d'arité `q`, la sentinelle fixe minimale pour
+`smax=11` retourne les `12-q` vrais plus proches `PointId` de `X minus U`, soit
+top-10/top-9/top-8 pour q2/q3/q4. Si leur distance maximale `delta` est
+strictement au-dessus du rayon `beta`, l'intérieur et l'extra-shell sont
+complets; seul `E=U` publie directement. Si `delta<beta`, alors `p+q>=12` et le
+support est rejeté. Si `delta=beta`, tous les intérieurs et au moins un contact
+hors `U` sont connus : range-report, quotient ou refus fermé. Pour moins de
+douze points, scanner `X minus U`. Le top-12 global reste sûr, mais n'est pas
+minimal une fois `U` connu; top-`(11-q)` ne distingue pas le dernier intérieur
+ou contact caché.
+
+Un producteur reçu peut éviter cette requête terminale. L'enveloppe affine
+top-9 q3/q4, prise dans `X minus {a,b}` et conservant tous les ex aequo du
+neuvième niveau, connaît déjà exactement `I/E` au centre. Avec l'arête maximale
+canonique et un patch half-open owner, elle vise en outre une émission exacte
+par `SupportKey` avant RLE. Ces deux propriétés restent des gates à comparer à
+la sentinelle hors support et à l'oracle borné; elles ne sont pas encore un
+résultat produit.
 
 Dans le modèle continu, ou dans une famille de précision croissante, une sortie
 exhaustive n'est même pas universellement linéaire : quatre amas de sites sur
@@ -226,11 +251,12 @@ une baseline, pas un cap ni une garantie de temps. La preuve est dans
 points u16 + LBVH exact résidents
   |-> k=1 : Yao-1 exact mutualisé -> EMST sparse
   |-> q2 : lane cellules D_9 en comparaison avec Yao--affine--dual suspendu
-  `-> q3/q4 : cellules de centres + lanes/budgets indépendants
-       -> scores affines à jauge fixe + pools CSR + promotion h
-       -> bitsets bissecteurs + axe de face q4, carriers aigus optionnels
-       -> RLE SupportKey -> une géométrie/owner
-       -> top-12 régulier; side queue clé de sphère/plateau ou second RLE A/B
+  `-> q3/q4 : front de Jung coalescé + enveloppe top-9 hors ancre
+       -> center-cover avant émission + patches half-open exacts
+       -> q3 intrinsèque + sweep de face q4; cellules comme comparateur
+       -> owner génératif exact-once ou RLE SupportKey -> une géométrie/owner
+       -> census producteur ou top-(12-q) hors U en fallback
+       -> side queue H!=empty/plateau ou second RLE BallKey A/B
        -> gate régulière / plateau / inertie de haut rang
        -> facettes du cœur, gateways et resolver strict
        -> MSF de carriers ou fold direct par lots atomiques
@@ -431,9 +457,12 @@ préfixe comme objet complet.
 5. Sur les seules ancres admises, mesurer séparément cœur de Jung, Helly,
    composition cœur--profondeur et profondeur terminale. Le gain marginal doit
    payer collecte et tri; toute ambiguïté retombe fail-open.
-6. Construire q2/q3/q4 support-first par lanes indépendantes et budgets `h`,
-   sans parcourir le plein arrangement et sans remplacer le transcript Yao-1
-   de `k=1`. Employer une partition terminale commune, émettre les occurrences
+6. Construire le front de Jung coalescé et son enveloppe top-9 q3/q4 sans
+   parcourir le plein arrangement ni remplacer le transcript Yao-1 de `k=1`.
+   Recevoir l'arête maximale canonique et le patch half-open avec
+   `occurrences=SupportKey_unique`; réutiliser leur census `(I,E)`. Garder les
+   lanes q2/q3/q4 et budgets `h` comme comparateur support-first. Pour cette
+   baseline, employer une partition terminale commune, émettre les occurrences
    compactes puis faire un premier RLE par `SupportKey` **avant** tout lift.
    Calculer une seule géométrie et chercher au plus un contexte owner : zéro
    rejette le tuple, la complétude garantit l'existence pour tout support
@@ -447,8 +476,11 @@ préfixe comme objet complet.
    payer qu'un lift par clé, mais deux supports de la même boule peuvent tomber
    dans des shards différents. Comparer après le lift deux ordonnances exactes :
    redistribuer les pending par `(cloud_epoch,GeometricBallKey)` vers leur
-   `OwnerCellId` avant un second RLE, ou lancer top-12 par clé et ne router que
-   l'égalité vers cette side queue. L'owner est une destination exacte, pas une
+   `OwnerCellId` avant un second RLE, ou employer le census reçu du producteur
+   puis top-`(12-q)` hors `U` en fallback. Dans ce second cas, seuls
+   `delta>beta` et `E=U` publient directement; toute extra-shell, toute égalité
+   et toute demande Gamma rejoignent la side queue. L'owner est une destination
+   exacte, pas une
    colocalisation initiale. Lorsqu'il existe, un représentant par boule promeut
    ensuite le curseur `h` par nouveaux buckets et matérialise une seule fois
    `I_B/U_B`. Gamma
