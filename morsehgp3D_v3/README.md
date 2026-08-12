@@ -167,9 +167,12 @@ du LiDAR, mais elle condamne un catalogue hôte de supports : la source doit
 compter son trafic et fusionner vers le fold sur device. Le calcul, ses
 hypothèses et ses références primaires sont dans l'audit cellules-centres.
 
-Une sortie exhaustive n'est même pas universellement linéaire : quatre amas
-de sites sur une même sphère peuvent porter `Theta(m^4)` supports q4 positifs
-ayant une seule clé de boule. Le RLE du census ne compresse pas ces
+Dans le modèle continu, ou dans une famille de précision croissante, une sortie
+exhaustive n'est même pas universellement linéaire : quatre amas de sites sur
+une même sphère peuvent porter `Theta(m^4)` supports q4 positifs ayant une
+seule clé de boule. Le profil u16 fixé est fini : cette construction y motive
+une gate de plateau, mais n'y constitue ni une asymptotique ni une borne sans
+fixture finie dédiée. Le RLE du census ne compresse pas ces
 `SupportKey`. Le chemin H0 sous une seconde exige donc soit un quotient de
 plateau reçu, soit un certificat de famille excluant cette sortie. Pour les
 cellules, un certificat local falsifiable borne la liste : si le diamètre du
@@ -372,7 +375,7 @@ préfixe comme objet complet.
    pendant le parcours q2, avec reçu `candidate` ou `empty` complet; dédupliquer
    au plus `48n` arêtes, réduire ce graphe sparse et trier les `n-1` arêtes par
    niveau avant les lots atomiques.
-3. Réemployer les motifs de lease, ledger et `count--scan` de la ligne
+3. Seulement si la comparaison q2 rouvre la voie suspendue, réemployer les motifs de lease, ledger et `count--scan` de la ligne
    enregistrée, sans copier ses layouts binary64 ni ses décisions de rang
    fermé. Garder `K=10` pour une banque certifiée des plus proches; réserver
    `K+1=11` aux réservoirs arbitraires qui doivent exclure au plus un membre de
@@ -405,7 +408,9 @@ préfixe comme objet complet.
    sans parcourir le plein arrangement et sans remplacer le transcript Yao-1
    de `k=1`. Employer une partition terminale commune, émettre les occurrences
    compactes puis faire un premier RLE par `SupportKey` **avant** tout lift.
-   Calculer une seule géométrie, retrouver son contexte owner, puis faire le
+   Calculer une seule géométrie et chercher au plus un contexte owner : zéro
+   rejette le tuple, la complétude garantit l'existence pour tout support
+   pertinent et plusieurs signalent un invariant rompu. Faire ensuite le
    second RLE par clé primitive de sphère. Un représentant par boule promeut
    ensuite le curseur `h` par nouveaux buckets et matérialise une seule fois
    `I_B/U_B`. Gamma

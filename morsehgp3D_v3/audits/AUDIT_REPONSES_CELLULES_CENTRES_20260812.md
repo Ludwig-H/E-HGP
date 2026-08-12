@@ -889,18 +889,19 @@ sur device vers les événements/facettes réellement consommés par H0, ou de
 représenter un plateau par son token Johnson, jamais de rapatrier un catalogue
 hôte de tous les supports.
 
-Il existe en outre un obstacle déterministe de sortie. Placer `m` sites
-distincts sur une même sphère, dans quatre petites calottes autour des directions
-d'un tétraèdre régulier, donne une fraction constante des quadruplets choisissant
-un site par calotte dont l'enveloppe convexe contient le centre. Chacun est un
-support q4 positif avec `p=0` et la même `GeometricBallKey`. Le contrat « publier
-tous les `SupportKey` » possède donc une sortie `Theta(m^4)` alors qu'un seul
-token de plateau et un seul census suffisent à représenter la boule. Aucun RLE
-par `BallKey` ne réduit la liste des supports si le payload exige encore chacun
-d'eux. Un chemin sous une seconde doit donc être autorisé à publier un quotient
-canonique de plateau pour H0, ou exiger un certificat d'entrée excluant cette
-cosphéricité; il ne peut promettre simultanément tous les supports et une latence
-universelle.
+Il existe en outre un obstacle déterministe de sortie dans le modèle continu,
+ou dans une famille dont la précision croît. Placer `m` sites distincts sur une
+même sphère, dans quatre petites calottes autour des directions d'un tétraèdre
+régulier, donne une fraction constante des quadruplets choisissant un site par
+calotte dont l'enveloppe convexe contient le centre. Chacun est un support q4
+positif avec `p=0` et la même `GeometricBallKey`; publier tous les
+`SupportKey` coûte alors `Theta(m^4)` alors qu'un token de plateau suffit pour
+H0. Cette construction n'est **pas** une famille asymptotique prouvée sous le
+domaine u16 fixe, qui ne contient qu'un nombre fini de sites. Sous le profil
+u16, elle motive la gate plateau mais ne remplace pas une fixture finie ni une
+borne propre à ce domaine. Aucun RLE par `BallKey` ne réduit la liste si le
+payload exige encore chaque support; la possibilité d'un quotient canonique
+reste dépendante de la sortie H0/Gamma/verticales demandée.
 
 Une notion falsifiable de famille favorable se déduit néanmoins du lemme de
 cellule. Soit `c0` dans le domaine actif `K`, `diam(K)<=delta`, et `rho` la
@@ -936,13 +937,17 @@ géométrie d'un tuple, puis découvre tardivement que le centre appartient à u
 autre feuille. La transformation suivante est exacte.
 
 1. Chaque feuille émet après les seuls filtres sûrs intervalle--bissecteur--hull
-   une occurrence compacte `(SupportKey,CellId,e0)`, sans lift q3/q4.
+   une occurrence compacte
+   `(cloud_epoch,SupportKey,CensusContext)`, sans lift q3/q4. Le contexte garde
+   `CellId`, `e0`, `b_cert`, digests pool/domaine et arène/buckets vivants.
 2. Un radix stable groupe les occurrences par `SupportKey`, c'est-à-dire les
    identifiants triés et l'arité.
 3. Un seul lane du run calcule centre, positivité et clé homogène de sphère.
-4. Le run sélectionne l'unique occurrence dont la cellule half-open possède le
-   centre. L'absence ou la multiplicité d'un owner est un échec d'invariant;
-   l'occurrence owner fournit son `e0` et son `CensusContext`.
+4. Le run cherche l'occurrence dont la cellule half-open possède le centre. Une
+   multiplicité est un échec d'invariant. Zéro owner rejette ce tuple : ce cas
+   est normal pour un tuple non positif ou hors fenêtre; l'oracle de
+   complétude doit séparément prouver qu'aucun support pertinent n'est ainsi
+   perdu. L'occurrence owner, lorsqu'elle existe, fournit son contexte entier.
 5. Un second radix/RLE par `GeometricBallKey` agrège les supports d'une même
    boule. Pour `H_run=smax-q_min`, il choisit atomiquement un contexte de
    l'occurrence owner avec `b_cert>=H_run` et emploie son `e0`, ses buckets et
@@ -951,13 +956,15 @@ autre feuille. La transformation suivante est exacte.
 
 **Preuve.** La complétude cellulaire garantit que tout support pertinent
 survit dans sa feuille owner. Sa positivité, son centre et sa sphère dépendent
-uniquement du tuple `U`, pas de la cellule qui l'a proposé. Supprimer les autres
-occurrences du même `SupportKey` ne peut donc supprimer ni changer le candidat
-owner. Après calcul du centre, la partition half-open choisit exactement une
-occurrence; le rejeu `U subseteq D_(smax-q)(C_owner)` et le contexte de cette
-occurrence recertifient l'hypothèse de liste. Les tuples non positifs ou sans
-owner sont rejetés une seule fois. Le RLE suivant conserve tous les supports
-distincts d'une même boule et ne mutualise que son census.
+uniquement du tuple `U`, pas de la cellule qui l'a proposé. Pour un support
+pertinent, la complétude garantit que son occurrence owner est dans le run;
+supprimer les autres occurrences du même `SupportKey` ne peut donc le perdre.
+Pour un tuple arbitraire, l'existence d'un owner dans le run n'est pas garantie.
+Après calcul du centre, la partition half-open en choisit au plus un; le rejeu
+`U subseteq D_(smax-q)(C_owner)` et le contexte de cette occurrence
+recertifient l'hypothèse de liste. Les tuples non positifs ou sans owner sont
+rejetés une seule fois. Le RLE suivant conserve tous les supports distincts
+d'une même boule et ne mutualise que son census.
 
 Cette transformation attaque directement les 93,48 % de rejets owner du
 snapshot pincé. Elle n'est pas gratuitement sparse : l'arène d'occurrences et
@@ -986,10 +993,15 @@ fixé. Pour une cellule, définir séparément `L_x^F=min F_x`, `U_x^F=max F_x`,
 le niveau affine de la boule; il ne faut pas affirmer que `R_h^F` est
 numériquement le même que le seuil de distance.
 
-Sous `x in [0,65535]^3` et `d<=26`, `|F_x|<9*2^58<2^62` et
+Sous `x in [0,65535]^3`, `d<=26` et une cellule contenue dans la racine u16,
+on a `0<=z_j<=65535*S`, puis `|F_x|<9*2^58<2^62` et
 `|F_x-F_y|<18*2^58<2^63`. Extrema, top-9, égalités et bissecteurs tiennent donc
 exactement en `int64` signé, sans l'hypothèse empirique « le rayon local vaut
-quelques dizaines ». La géométrie des survivants garde ses limbs exacts.
+quelques dizaines ». Cette borne ne couvre ni cellule extrapolée/signée hors
+racine, ni lift, centre ou clé q3/q4. Entre deux profondeurs, `S` et `z`
+changent et le score se rescale; la réutilisation des buckets doit être prouvée
+via le score physique commun ou une covariance explicite, jamais par égalité
+brute des entiers `F_x`. La géométrie des survivants garde ses limbs exacts.
 
 La seconde partage un carrier q3 entre tous ses apex q4. Si le circumcentre du
 triangle est `N/G`, sa normale est `n`, `v=d-a` et
@@ -1063,5 +1075,20 @@ census compris; un cap dense route vers un fallback exact préflighté ou
    `eight_clusters`, puis caractériser les quatre autres régimes contractuels
    avant de décider d'un kernel G4. Le payload officiel et l'interface
    verticale restent installés dès le premier jalon avec statut `incomplete`.
+
+## 14. Contre-audit du ledger des causes de lifts
+
+Le ledger de Claude confirme que l'owner tardif est le premier sort immédiat
+des lifts, mais ses lignes laissaient `130 033` occurrences sans attribution :
+les rejets anticipés de groupe n'étaient pas ventilés par arité. Les ratios
+`42/55/510` mélangeaient donc duplication, profondeur et acceptation; ils ne
+mesuraient pas une multiplicité de `SupportKey`.
+
+Le calcul complet, les corrections des prunes `beta`/owner, le ledger exact à
+exiger et l'audit du successeur live sont centralisés dans
+[`AUDIT_LEDGER_CAUSES_LIFTS_238CF12_20260812.md`](AUDIT_LEDGER_CAUSES_LIFTS_238CF12_20260812.md).
+La conclusion d'architecture reste le premier RLE `SupportKey` avant lift,
+avec q2 midpoint-before-lift comme ablation et constructions physiques
+séparées pour toute variante d'axe.
 
 GCP non utilisé.

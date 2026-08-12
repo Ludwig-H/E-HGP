@@ -18,8 +18,8 @@ décrit le prototype et ses invariants conditionnels.
 ## 1. Réorientation assumée
 
 Je suspends comme sources générales le parcours d'arrangement `order_k_flats`
-et la cascade duale q2 profonde Yao48/LBVH. Ils restent des oracles et
-falsificateurs. Cette décision expérimentale ne supprime pas le transcript
+et la cascade duale q2 profonde Yao48/LBVH. Ils restent des diagnostics et
+falsificateurs bornés, pas des autorités. Cette décision expérimentale ne supprime pas le transcript
 Yao-1 exact ni l'EMST sparse de la route `k=1`. Pour q2 profond, q3 et q4, la
 voie examinée est la subdivision de l'espace des **centres**, parce qu'elle
 possède un théorème de complétude local conditionnel et qu'elle est transposable
@@ -83,7 +83,7 @@ travail vers un test sans division, mais son intérêt device est une hypothèse
 non mesurée. Il n'est reçu ni comme accélération CPU, ni comme accélération
 CUDA, et la politique par défaut est tranchée dans la réponse d'audit.
 
-### Rampe contractuelle, premier point
+### Rampe de taille diagnostique, premier point
 
 `terrain`, `n=12 500`, `smax=11`, `pair_cap=256`, binaire avec filtre
 d'enveloppe :
@@ -170,6 +170,8 @@ configuration, tandis que le nombre de cellules croît quand elle rétrécit.
    descendre à un facteur constant petit ?
 
 Les réponses et corrections de l'audit sont dans
-[`AUDIT_REPONSES_ETAT_CELLULES_CENTRES_20260812.md`](AUDIT_REPONSES_ETAT_CELLULES_CENTRES_20260812.md).
+[`AUDIT_REPONSES_CELLULES_CENTRES_20260812.md`](AUDIT_REPONSES_CELLULES_CENTRES_20260812.md),
+section 13. L'ancien fichier `AUDIT_REPONSES_ETAT_*` n'est plus qu'un renvoi
+historique afin d'éviter deux verdicts concurrents.
 
 GCP non utilisé.

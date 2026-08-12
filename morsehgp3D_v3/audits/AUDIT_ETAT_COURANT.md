@@ -10,21 +10,29 @@ Cadre : `phase=exploration_v3_hors_registre`,
 
 ## Fraîcheur
 
-`HEAD` observé à la consolidation :
-`b79dd12f1ed947fb82118f8bb0902b36da65c8cd`, commit
-`subdivide the centre space and judge the source on identities`.
+`HEAD` observé au dernier contre-audit :
+`abcd488695c85409667d976234c3558ed8ac4d7c`, commit
+`pin the contractual ramp with its full provenance`.
 
-Le worktree n'est pas identique à ce `HEAD`. Dans le delta de code pertinent
-observé le 12 août, `CMakeLists.txt` et
-`prototype/certified_locality_probe.cpp` sont modifiés;
-`oracle/locality_census_judge.cpp`, `prototype/ball_front.hpp`,
-`prototype/ball_front_probe.cpp` et `prototype/flats_scale_probe.cpp` sont
-nouveaux et non suivis. `prototype/centre_cell_source.cpp` est aussi nouveau,
-non suivi et raccordé à CMake. Le front q4 et la sonde d'échelle sont désormais
-raccordés à CMake. L'audit n'a modifié aucun de ces fichiers de code. Le source
-`centre_cell` changeait encore pendant l'audit; ses mesures sont donc pincées
-séparément. Le dernier snapshot ci-dessous est resté stable pendant sa
-configuration, sa reconstruction et toute sa porte ciblée.
+Le worktree n'est pas identique à ce `HEAD`; Claude modifie encore
+`prototype/centre_cell_source.cpp` pendant que l'audit ne touche qu'aux textes
+autorisés. Le fichier versionné de rampe `centre_cell_scale_20260812` est aussi
+un transcript en cours d'écriture : le point 12 500 y a terminé avec `rc=0`,
+mais les points 25 000/50 000 et les autres familles ne sont pas fermés. Son
+SHA change jusqu'au marqueur terminal et aucun digest intermédiaire ne reçoit
+la rampe. Le couple **pincé par ce transcript** est distinct du source live :
+
+| objet courant | SHA-256 |
+| --- | --- |
+| `CMakeLists.txt` | `d0738d1e3bfc103ecebc0c8e6dae8149aae3727322c34af4c3a0dcd8c12d440e` |
+| source du transcript, commit `238cf12` | `4884b29388d9617917810a03cde221430b66bc43cc320e9f06ba56be6e540793` |
+| ELF Release du transcript `mhgp3v_centre_cell` | `5b422644b6b461b919202f6c0257e27dc0af811110ad49fd82eca18a224f2283` |
+| source worktree successeur, non construit/non testé au dernier relevé | `6f1660c94484e80c8cc173fb225677856b27edca6551855bd1a91a315ba721d2` |
+
+Le registre configuré recense `484` CTests, dont `24` préfixés
+`mhgp3v_centre_cell_`. Cet inventaire a été relu par `ctest -N`; aucun passage
+`24/24` indépendant n'a été relancé pendant le diagnostic 12 500 concurrent.
+Les pins ci-dessous restent les observations historiques antérieures.
 
 | objet | SHA-256 |
 | --- | --- |
@@ -472,6 +480,29 @@ preuve asymptotique — donne environ 905 millions de lifts à 50 k. Cette
 ordonnance reste `NO-GO` avant G4; le source live postérieur doit être repincé
 avant tout nouveau verdict.
 
+Le ledger ajouté au commit `238cf12` confirme sur
+`terrain,n=1 500,work_cap=20 000` que `7 236 483` des `7 820 379` lifts, soit
+`92,53 %`, meurent à l'owner. Il justifie une décision `SupportKey` avant lift,
+mais sa partition de rang ne ferme pas : après dégénérescence, owner et
+positivité, `130 033` occurrences pending ne sont imputées ni aux acceptations
+ni à `rank_rejected_q`. La branche `interior>budget` retourne au niveau du
+groupe et n'incrémente que le compteur global. Ainsi « rang nul » et les
+multiplicités `42/55/510` ne sont pas reçus. Le prochain ledger doit compter
+`early_rank_rejected_supports_q`, fermer l'identité par arité et publier les
+runs uniques `SupportKey`. Voir
+[`AUDIT_LEDGER_CAUSES_LIFTS_238CF12_20260812.md`](AUDIT_LEDGER_CAUSES_LIFTS_238CF12_20260812.md).
+
+Le premier point du transcript de taille en cours, sur l'ancien couple pincé
+`4884b293.../5b422644...`, termine `terrain,n=12 500,work_cap=20 000` avec
+`rc=0`, `14 262 497` cellules, `92 531 928` lifts, `85 797 521` rejets owner et
+`906 078` supports, soit `102,124` lifts par support et `92,7221 %` de rejets
+owner. Son `wall_s=797` sous charge n'est pas qualifiable. Le
+ledger ancien ne ferme toujours pas ses rangs par arité : le global annonce
+`1 134 183` rejets de rang, les lignes q2/q3/q4 seulement `0/7/17`. Ce point
+n'est ni la variante de l'ancienne note (`8 338 753` cellules et
+`104 352 433` lifts), ni une famille SLO volumique. La commande 25 000 était
+encore active au dernier relevé; aucune pente n'est donc publiable.
+
 Les commentaires et sorties du code courant ne sont pas reçus lorsqu'ils
 annoncent `EXACT`, « cofaces directes », `O(sum M*)`, causalité du facteur 384
 ou travail proportionnel à la sortie. Le parseur du probe de localité accepte
@@ -511,17 +542,19 @@ le fold ne peut donc pas être déclaré complet.
    ses accords globaux et son `--harvest` sans juge ne reçoivent pas Source S.
 3. Produire le transcript Yao-1 exact et le Kruskal sparse; cette preuve retire
    q2 profond du chemin critique `k=1` sans énumérer Gabriel.
-4. Pour q2 supérieur, graver masque régional et `frontier-clear`, rendre les
-   états immuables, fermer `DualReceipt`, maximum entier, fusion et télémétrie,
-   puis mesurer la cascade Yao--affine--dual aux tailles
-   `12 500/25 000/50 000`.
+4. Pour q2 supérieur, garder la cascade Yao--affine--dual comme comparateur
+   suspendu. Ne rouvrir sa construction que si une comparaison avec la lane
+   cellules `D_9` le justifie; elle exige alors masque régional,
+   `frontier-clear`, états immuables, `DualReceipt`, maximum entier, fusion,
+   télémétrie et rampe `12 500/25 000/50 000`.
 5. Garder P1a actuel comme falsificateur; construire cœur Jung puis wavefront
    témoin persistante et suivre son protocole natif direct.
-6. Construire q3/q4 par arités indépendantes et budgets `h`, avec partition
+6. Construire q2/q3/q4 par lanes `D_9/D_8/D_7` et budgets `h`, avec partition
    terminale commune, `e0` immuable et promotion, sans transits d'arrangement
-   ni dépendance envers un support inférieur retenu. Après génération locale
-   directe : prédicats exacts, clé primitive de sphère, strict-count/census
-   fermé une fois par boule; `U_B` est un certificat aval. Pour Gamma, garder
+   ni dépendance envers un support inférieur retenu. Après génération locale,
+   faire un premier RLE `SupportKey` avant lift, choisir le contexte owner,
+   puis un second RLE par clé primitive de sphère et un strict-count/census
+   fermé unique par boule; `U_B` est un certificat aval. Pour Gamma, garder
    la provenance requise; pour le H0 normalisé, employer un support canonique
    et le token de fermeture Johnson au lieu d'énumérer tous les supports d'une
    cosphère. Graver les deux contre-fixtures inter-arités, l'invariant

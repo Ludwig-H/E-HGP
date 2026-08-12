@@ -810,9 +810,11 @@ catalogue hôte. Ce n'est ni une identité pour une boîte u16 finie, ni un
 minorant sur tout algorithme H0, ni une borne sur le travail de découverte.
 
 Cette espérance ne donne pas de borne déterministe sur la sortie exhaustive.
-Quatre petites calottes autour des directions d'un tétraèdre régulier, toutes
-sur une même sphère, fournissent `Theta(m^4)` supports q4 positifs ayant la
-même `GeometricBallKey`. Un RLE par boule mutualise le census, jamais les
+Dans le modèle continu, ou lorsque la précision croît avec `m`, quatre petites
+calottes autour des directions d'un tétraèdre régulier, toutes sur une même
+sphère, fournissent `Theta(m^4)` supports q4 positifs ayant la même
+`GeometricBallKey`. Le domaine u16 fixé est fini : ce motif y impose une gate
+de plateau et une fixture finie, pas un claim asymptotique. Un RLE par boule mutualise le census, jamais les
 `SupportKey` exigés par Gamma. Un SLO universel exige donc un quotient de
 plateau explicitement autorisé pour H0 ou une hypothèse d'entrée qui exclut
 cette sortie; `smax` seul ne la borne pas.
@@ -836,7 +838,9 @@ Chaque feuille produit d'abord une occurrence compacte
 `(cloud_epoch,SupportKey,CensusContext)` après les seuls filtres sûrs qui ne
 demandent pas la géométrie complète. Un premier radix/RLE par `SupportKey`
 calcule centre, positivité et owner une seule fois, puis sélectionne l'unique
-contexte de la feuille half-open propriétaire. Le candidat owner produit alors
+contexte de la feuille half-open propriétaire s'il existe. Zéro owner rejette
+un tuple arbitraire; la complétude garantit l'existence pour tout support
+pertinent. Plusieurs owners signalent un invariant rompu. Le candidat owner produit alors
 `(cloud_epoch,GeometricBallKey,SupportKey,CensusContext)` sans census. Le second
 RLE par clé exacte de taille fixe conserve tous les supports et contextes d'une
 même boule. Pour `H_run=smax-q_min`, un contexte avec `b_cert>=H_run` effectue
@@ -1111,7 +1115,7 @@ points u16 + LBVH exact résidents
   `-> q3/q4 : cellules + arités/budgets indépendants, ledger fail-open
        -> partition commune, D_h imbriquées, e0 fixe, promotion h
        -> filtres Jung--Helly--bissecteurs, génération q3/q4 directe
-       -> RLE SupportKey -> une géométrie et un owner
+       -> RLE SupportKey -> une géométrie, zéro ou un owner
        -> RLE GeometricBallKey -> strict-count/census I/E unique -> U_B
        -> BallActivation/tombstones streamées + gate regular/plateau/high-rank
        -> facettes du cœur + gateway canonique de première incidence
@@ -1183,7 +1187,8 @@ un refus de ressource sont trois statuts distincts.
    le transcript Yao-1 exact mutualisé avec q2 : fermeture des ex æquo et du
    vide par chambre, au plus `48n` candidats, réduction sparse puis tri des
    arêtes finales par niveau.
-3. Réemployer les motifs de lease, ledger et `count--scan` de la ligne
+3. Seulement si la comparaison q2 rouvre la voie suspendue, réemployer les
+   motifs de lease, ledger et `count--scan` de la ligne
    enregistrée, sans copier ses layouts binary64 ni ses décisions de rang
    fermé. Fermer q2 par top-`K` exact ou réservoir arbitraire `K+1`, puis
    cascade cône--boîte, banque affine et dual-tree résiduel avec maximum entier
@@ -1206,8 +1211,8 @@ un refus de ressource sont trois statuts distincts.
 6. Construire q2/q3/q4 par lanes indépendantes et budgets `h`, avec partition
    terminale commune, `e0` immuable et promotion, sans dépendre des supports
    inférieurs retenus et sans supprimer le transcript Yao-1 de `k=1`. Émettre
-   les occurrences compactes, faire le RLE `SupportKey` avant le lift, choisir
-   le contexte owner, puis faire le RLE par clé primitive de sphère et un
+   les occurrences compactes, faire le RLE `SupportKey` avant le lift, chercher
+   au plus un contexte owner, puis faire le RLE par clé primitive de sphère et un
    unique strict-count/census par boule; `U_B` est un certificat aval. Gamma
    conserve les `SupportKey` requis; le H0 normalisé
    emploie le token Johnson et un support canonique. Graver les fixtures

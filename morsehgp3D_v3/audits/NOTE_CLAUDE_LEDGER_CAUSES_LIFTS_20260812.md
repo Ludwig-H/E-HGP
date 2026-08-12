@@ -9,8 +9,13 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `public_status=not_claimed`.
 
 Cette note répond aux trois points de
-[`AUDIT_REPONSES_ETAT_CELLULES_CENTRES_20260812.md`](AUDIT_REPONSES_ETAT_CELLULES_CENTRES_20260812.md)
+[`AUDIT_REPONSES_CELLULES_CENTRES_20260812.md`](AUDIT_REPONSES_CELLULES_CENTRES_20260812.md)
 et publie le ledger de causes qu'il exigeait. Elle ne revendique rien.
+
+Le contre-audit de la section 14 du même fichier corrige l'interprétation de
+ce ledger : les compteurs par arité ne ferment pas les rejets de groupe et les
+rapports `lifts/accepted` ne mesurent pas encore une multiplicité de
+`SupportKey`.
 
 ## 1. Corrections de vocabulaire acceptées
 
@@ -43,27 +48,39 @@ d'axe. `cells_created=208 705`, `terminal=109 288`, `pruned=73 329`,
 | q3 | `3 479 927` | `23` | `3 189 508` | `128 767` | `0` | `4 558 676` | `63 804` |
 | q4 | `3 134 043` | `19 064` | `2 887 422` | `207 254` | `3` | `2 274 876` | `6 140` |
 
+Cette table ne ferme pas encore les issues : elle laisse respectivement
+`18 048`, `97 825` et `14 160` occurrences pending q2/q3/q4 sans attribution.
+La colonne « rejet rang » ne compte que le rejet final par support, pas les
+supports d'un groupe abandonné précocement. `prune enveloppe` est antérieur au
+lift et reste hors de la partition des lifts.
+
 ## 3. La cause dominante est identifiée, et ce n'est pas la positivité
 
 Le rejet **propriétaire** vaut `96,1 %` des lifts q2, `91,7 %` des q3 et
 `92,1 %` des q4. La positivité n'en explique que `3,7 %` et `6,6 %`, la
-dégénérescence `0,6 %`, et le rang **rien du tout**.
+dégénérescence q4 `0,6 %`. Le rang par arité n'est pas encore mesuré
+correctement : le rejet anticipé `interior>budget` abandonne un groupe entier
+en incrémentant seulement le compteur global.
 
-Le cas q2 en donne la lecture exacte. Le centre d'une paire est son milieu,
-donc il est possédé par exactement une cellule; `rank_rejected_q2` vaut zéro,
-donc toute paire proposée dans sa cellule propriétaire est acceptée. Le nombre
-de paires distinctes proposées et possédées vaut donc `28 808`, pour
-`1 206 409` propositions : **chaque paire est examinée dans environ quarante-deux
-cellules**. Les rapports q3 et q4 sont du même ordre, `55` et `510`.
+Le cas q2 donne néanmoins une piste forte. Le centre d'une paire est son
+milieu, donc il est possédé par exactement une cellule et peut être testé avant
+le lift de sphère. Mais `28 808` est le nombre de q2 pertinents acceptés, pas le
+nombre de tous les `SupportKey` proposés : `18 048` occurrences q2 pending
+appartiennent à des groupes rejetés tôt et ne sont pas attribuées. Les quotients
+`42`, `55` et `510` mélangent donc multiplicité intercellules, non-positifs et
+rangs profonds; ils ne sont pas des multiplicités reçues.
 
-La cause n'est donc pas « les petites cellules » en général : c'est la
+Le fait reçu est plus étroit : l'owner tardif domine les occurrences payées. La
 **multiplicité de proposition d'un même candidat géométrique entre cellules
-voisines**. Un candidat est proposé partout où ses bissecteurs et son enveloppe
-rencontrent la cellule, alors qu'un seul point de l'espace le possède.
+voisines** est l'explication principale à tester. Un candidat est proposé
+partout où ses bissecteurs et son enveloppe rencontrent la cellule, alors qu'un
+seul point de l'espace le possède; seul un radix par `SupportKey` donnera sa
+distribution exacte.
 
-Cela change la cible d'optimisation. Réduire le coût d'un lift — repli `i64`,
-clé primitive, bitsets — divise un facteur constant. Réduire la multiplicité
-attaque directement le facteur cent quinze.
+Cela change déjà la cible d'optimisation. Réduire le coût d'un lift — repli
+`i64`, clé primitive, bitsets — divise un facteur constant. Grouper avant lift
+attaque directement les occurrences non owner; le gain réel dépendra du coût
+et du volume du radix.
 
 ## 4. Pistes exactes contre la multiplicité, à instruire
 
@@ -91,5 +108,11 @@ recertifié.
 
 Je ne demande pas de session G4 : il n'existe aucun kernel, aucune source
 device et aucun payload officiel à mesurer.
+
+Le contre-audit du ledger est dans
+[`AUDIT_LEDGER_CAUSES_LIFTS_238CF12_20260812.md`](AUDIT_LEDGER_CAUSES_LIFTS_238CF12_20260812.md).
+Il confirme la domination de l'owner tardif, mais réfute le « rang nul » et les
+multiplicités `42/55/510` tant que les `130 033` occurrences pending sans
+attribution et les runs `SupportKey` uniques ne sont pas comptés.
 
 GCP non utilisé.

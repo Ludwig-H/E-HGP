@@ -39,8 +39,13 @@ et le registre des preuves sous `docs/` restent supérieurs.
 | [`AUDIT_REPONSES_ROUTE_SPARSE_GABRIEL_20260812.md`](AUDIT_REPONSES_ROUTE_SPARSE_GABRIEL_20260812.md) | réponses Q0--Q6 : supports proposés distincts des cofaces directes, extra-shell distincte d'un support multiple, niveaux fixes 384/256 bits selon la représentation, resolver, MSF et contrat horizontal normalisé |
 | [`AUDIT_REPONSES_SOURCE_FRONT_INVERSE_20260812.md`](AUDIT_REPONSES_SOURCE_FRONT_INVERSE_20260812.md) | réponses Q1--Q6 sur le front inverse : Source S générative mais non bijective, réfutation du graphe original limité aux sorties auto-centrées et à deux transitions, absence de coût sortie-sensible, quotient saturé exact et réduction Yao-1 de `k=1`; la connectivité shallow conditionnelle du vrai 1-squelette relevé avec transits n'est pas réfutée |
 | [`AUDIT_REPONSES_VOLUME_PINCEAU_PROJECTIONS_20260812.md`](AUDIT_REPONSES_VOLUME_PINCEAU_PROJECTIONS_20260812.md) | correction de l'audit de volume, famille u16 séparant exactement arrangement relevé quadratique et Source S linéaire, premier croisement exact à recevoir, plafonds propriétaires et fixtures montrant que la projection ne conserve pas le niveau |
-| [`NOTE_ARCHITECTURE_GPU_LISTES_CELLULES_CENTRES_20260812.md`](NOTE_ARCHITECTURE_GPU_LISTES_CELLULES_CENTRES_20260812.md) | théorème global et invariant pool-relative, budgets `h`, scores affines, arités q3/q4 indépendantes, carriers aigus et clé primitive; parcimonie non prouvée, gates avant G4 |
-| [`AUDIT_REPONSES_CELLULES_CENTRES_20260812.md`](AUDIT_REPONSES_CELLULES_CENTRES_20260812.md) | audit fusionné L1/L2/Q1--Q3, contre-fixtures, Poisson bulk, Johnson/gateway, snapshots successifs et NO-GO du port littéral courant |
+| [`NOTE_ARCHITECTURE_GPU_LISTES_CELLULES_CENTRES_20260812.md`](NOTE_ARCHITECTURE_GPU_LISTES_CELLULES_CENTRES_20260812.md) | théorème global et invariant pool-relative, budgets `h`, scores affines i64, deux RLE, axe q4 par face quelconque, carriers aigus optionnels et certificat local d'expansion; parcimonie non prouvée, gates avant G4 |
+| [`AUDIT_REPONSES_CELLULES_CENTRES_20260812.md`](AUDIT_REPONSES_CELLULES_CENTRES_20260812.md) | autorité fusionnée L1/L2 et réponses successives : contre-fixtures, Poisson bulk, sortie cosphérique, `SupportKey` avant lift, Johnson/gateway et snapshots; les ledgers successifs restent audités dans leurs fichiers pincés |
+| [`NOTE_CLAUDE_ETAT_CELLULES_CENTRES_20260812.md`](NOTE_CLAUDE_ETAT_CELLULES_CENTRES_20260812.md) | questions et observations historiques de Claude, sans hashes/transcripts suffisants pour un reçu; réponses Q1--Q3 dans la section 13 de l'audit fusionné |
+| [`AUDIT_REPONSES_ETAT_CELLULES_CENTRES_20260812.md`](AUDIT_REPONSES_ETAT_CELLULES_CENTRES_20260812.md) | renvoi historique vers l'audit fusionné; aucune autorité parallèle |
+| [`NOTE_CLAUDE_LEDGER_CAUSES_LIFTS_20260812.md`](NOTE_CLAUDE_LEDGER_CAUSES_LIFTS_20260812.md) | ledger `238cf12` établissant la domination de l'owner tardif, mais dont la partition par rang et les multiplicités annoncées sont corrigées par le contre-audit suivant |
+| [`NOTE_CLAUDE_MULTIPLICITE_SUPPORTKEY_20260812.md`](NOTE_CLAUDE_MULTIPLICITE_SUPPORTKEY_20260812.md) | première mesure de clés uniques, corrigée dans le contre-audit : classes non orthogonales, `263 825` clés plutôt que borne `52 693`, calibration cycles non reçue |
+| [`AUDIT_LEDGER_CAUSES_LIFTS_238CF12_20260812.md`](AUDIT_LEDGER_CAUSES_LIFTS_238CF12_20260812.md) | contre-audit comptable canonique des ledgers : `130 033` occurrences pending non attribuées au pin, multiplicités et histogramme corrigés, rampe mono-ELF réfutée, prune diamètre mesuré mais désactivé, porte `SupportKey` exacte à instrumenter |
 | [`NOTE_SOLUTION_SOURCE_CELLULES_CENTRES_20260812.md`](NOTE_SOLUTION_SOURCE_CELLULES_CENTRES_20260812.md) | contrat et portes du prototype cellules-centres, corrigés par budget `h`, partition terminale commune, limites du contrôle runtime et des mesures; 22/22 ciblés sur le snapshot pincé, sans claim sparse/CUDA/SLO |
 | [`NOTE_IMPLEMENTATION_SPARSE_COMPLETE_GABRIEL_GATEWAYS_20260812.md`](NOTE_IMPLEMENTATION_SPARSE_COMPLETE_GABRIEL_GATEWAYS_20260812.md) | pipeline conditionnel source directe--facettes--gateways--resolver--MSF, records, repli des plateaux, coûts évités et portes avant CUDA; aucune implémentation reçue |
 | [`NOTE_CLAUDE_MESURE_PORTE_REGULIERE_20260812.md`](NOTE_CLAUDE_MESURE_PORTE_REGULIERE_20260812.md) | diagnostic borné corrigé : fractions de records émis portant une extra-shell, jamais fractions de boules, cofaces ou supports minimaux multiples; aucune extrapolation 50 k |
@@ -87,6 +92,14 @@ jamais comme portes v3 actuelles :
 | --- | --- | --- |
 | [`census_tukey_shallow_20260808.json`](../receipts/census_tukey_shallow_20260808.json) | `aba8abc5e479a8900a2c83aa0cc5618a3e0a05bc9a59963572c140738a5ea128` | minorant heuristique par 4 096 directions aléatoires; `git_commit=unavailable`, aucune complétude exacte |
 | [`oracle_campaign_20260808.json`](../receipts/oracle_campaign_20260808.json) | `2579cd5a8eee14bc6e3d7e6ef83bdf052faacbcf90d2636e37e5c29c0c755bca` | différentiel exhaustif borné du sujet v2 à `n=8/11`; ne reçoit aucun worktree v3 |
+
+Le dossier
+[`../receipts/centre_cell_scale_20260812/`](../receipts/centre_cell_scale_20260812/)
+contient un transcript encore ouvert par la campagne :
+
+| fichier | portée |
+| --- | --- |
+| `scale_counters_raw.txt` | source `4884b293...`, ELF `5b422644...`; `terrain,12 500` termine `rc=0`, mais les points suivants étaient encore actifs au dernier relevé. Aucun SHA n'est publiable avant fermeture; ancien ledger de rang non réconcilié, aucune rampe reçue |
 
 Les reçus G4 mass-only sont dans
 [`../receipts/g4_massonly_20260811/`](../receipts/g4_massonly_20260811/).

@@ -140,6 +140,7 @@ struct Stats {
   i64 clique_pairs = 0, clique_triples = 0, clique_quads = 0;
   i64 bisector_tests = 0, bisector_pruned = 0;
   i64 hull_tests = 0, hull_pruned = 0;
+  i64 diameter_tests = 0, diameter_pruned = 0;
   i64 axis_tests = 0, axis_pruned = 0, axis_unusable = 0;
   i64 lifts_built = 0, degenerate_lifts = 0;
   // LEDGER DES CAUSES, PAR ARITE. Sans lui, « les petites cellules causent le
@@ -150,6 +151,8 @@ struct Stats {
   i64 degenerate_q[5] = {0, 0, 0, 0, 0};
   i64 rank_rejected_q[5] = {0, 0, 0, 0, 0};
   i64 hull_pruned_q[5] = {0, 0, 0, 0, 0};
+  i64 early_rank_supports_q[5] = {0, 0, 0, 0, 0};
+  i64 early_rank_groups = 0;
   i64 owner_rejected = 0, self_centre_rejected = 0, rank_rejected = 0;
   i64 ball_groups = 0, group_saved_scans = 0;
   i64 census_scans = 0, census_point_tests = 0, census_promotions = 0;
@@ -370,6 +373,35 @@ inline bool triangle_axis_meets_cell(const mhgp::P3& a, const V3& p1, const V3& 
   return true;
 }
 
+// ---------------------------------------------------------------------------
+// FILTRE DE DIAMETRE — un prune de SOUS-ARBRE, pas seulement de candidat.
+//
+// Tous les membres d'un support sont sur la sphere de centre `c` et de rayon
+// carre `beta`. Donc pour tous `x,y` du support, `||x-y||^2 <= 4 beta`. Or
+// `beta <= u_C(x)` pour tout membre, donc `beta <= Umin`, l'intersection
+// courante des bornes hautes. La condition necessaire exacte est
+//
+//     max_{x,y in U} ||x-y||^2  <=  4 * Umin(U).
+//
+// Elle est MONOTONE dans le bon sens : ajouter un point ne peut qu'augmenter le
+// diametre et diminuer `Umin`. Un sous-ensemble qui la viole ne peut donc etre
+// etendu en aucun support, et tout le sous-arbre serait coupe.
+//
+// MESURE : REFUTE COMME FILTRE UTILE. Sur `terrain`, `n=1 500`, il ne coupe que
+// `126 610` des `19 771 459` tests, soit `0,64 %`. La raison est structurelle :
+// la liste `A_p(C)` ne retient deja que des sites dont les distances a la
+// cellule sont comparables, donc `max||x-y||^2 <= 4 Umin` y est presque toujours
+// vrai. Le prune est donc DESACTIVE et seuls ses compteurs restent, pour que
+// cette refutation reste mesurable et ne soit pas reproposee.
+//
+// ARITHMETIQUE. `||x-y||^2 <= 3*65535^2 < 2^34` et `Umin` est a l'echelle
+// `4^depth`. Le produit reste sous `2^34 * 4^26 = 2^86`, donc dans `i128` sans
+// repere local.
+inline i128 dist2_of(const mhgp::P3& a, const mhgp::P3& b) {
+  const i64 dx = a.x - b.x, dy = a.y - b.y, dz = a.z - b.z;
+  return (i128)dx * dx + (i128)dy * dy + (i128)dz * dz;
+}
+
 // Un candidat de la liste d'une cellule, trie par `l` croissant.
 struct Cand {
   i128 l = 0, u = 0;
@@ -418,6 +450,24 @@ struct Engine {
   std::vector<int> bucket_end;  // borne de prefixe de chaque `A_p` dans la liste
   std::vector<int> group;
   std::vector<int> interior_ids, shell_ids;
+  // HISTOGRAMME DE MULTIPLICITE, exige par le contre-audit. Un meme tuple
+  // geometrique est propose dans plusieurs cellules; seul son circumcentre en
+  // designe une. On compte les occurrences par `SupportKey` et on separe les
+  // issues, pour ne pas confondre multiplicite intercellules et candidats
+  // jamais possedes nulle part. Reserve aux petits nuages : la table est un
+  // instrument de mesure, jamais une structure du chemin produit.
+  bool track_multiplicity = false;
+  // issue : 0 degenere, 1 sans owner, 2 non positif, 3 rang, 4 pertinent
+  std::map<std::array<int, 4>, std::pair<i64, int>> occurrences;
+
+  void note_occurrence(const int* ids, int q, int issue) {
+    if (!track_multiplicity) return;
+    std::array<int, 4> key{-1, -1, -1, -1};
+    for (int i = 0; i < q; ++i) key[(std::size_t)i] = ids[i];
+    auto& slot = occurrences[key];
+    ++slot.first;
+    if (issue > slot.second) slot.second = issue;
+  }
 
   // `p` va de 0 a smax-2 pour l'arite deux : il faut donc `smax-1` seuils.
   int tmax() const { return smax - 1; }
@@ -683,6 +733,7 @@ struct Engine {
       if (!frame.usable) ++stats.axis_unusable;
     }
 
+    const i128 scale4 = (i128)1 << (2 * tight.depth);
     const int words = (top + 63) / 64;
     adj.assign((std::size_t)top * (std::size_t)words, 0);
     for (int i = 0; i < top; ++i) {
@@ -707,6 +758,7 @@ struct Engine {
     int ids[4];
     for (int i = 0; i < top; ++i) {
       const unsigned long long* ri = &adj[(std::size_t)i * (std::size_t)words];
+      const i128 u_i = cands[(std::size_t)i].u;
       for (int wj = 0; wj < words; ++wj) {
         unsigned long long bits = ri[wj];
         while (bits) {
@@ -715,6 +767,11 @@ struct Engine {
           HullBox hi_box, hij, hijk, hijkt;
           hull_seed(pts[cands[(std::size_t)i].id], &hi_box);
           hull_add(pts[cands[(std::size_t)j].id], hi_box, &hij);
+          const i128 u_ij = std::min(u_i, cands[(std::size_t)j].u);
+          const i128 d2_ij = dist2_of(pts[cands[(std::size_t)i].id],
+                                      pts[cands[(std::size_t)j].id]);
+          ++stats.diameter_tests;
+          if (d2_ij * scale4 > 4 * u_ij) ++stats.diameter_pruned;
           ++stats.hull_tests;
           const bool hull_ij = hull_meets_cell(hij, tight);
           if (!hull_ij) { ++stats.hull_pruned; ++stats.hull_pruned_q[2]; }
@@ -740,6 +797,15 @@ struct Engine {
               bk &= bk - 1;
               if (k >= c3) { stop_k = true; break; }
               ++stats.clique_triples;
+              const i128 u_ijk = std::min(u_ij, cands[(std::size_t)k].u);
+              const i128 d2_ijk =
+                  std::max(d2_ij,
+                           std::max(dist2_of(pts[cands[(std::size_t)i].id],
+                                             pts[cands[(std::size_t)k].id]),
+                                    dist2_of(pts[cands[(std::size_t)j].id],
+                                             pts[cands[(std::size_t)k].id])));
+              ++stats.diameter_tests;
+              if (d2_ijk * scale4 > 4 * u_ijk) ++stats.diameter_pruned;
               hull_add(pts[cands[(std::size_t)k].id], hij, &hijk);
               ++stats.hull_tests;
               const bool hull_ijk = hull_meets_cell(hijk, tight);
@@ -789,6 +855,15 @@ struct Engine {
                   bt &= bt - 1;
                   if (t >= c4) { stop_t = true; break; }
                   ++stats.clique_quads;
+                  const i128 u_all = std::min(u_ijk, cands[(std::size_t)t].u);
+                  const mhgp::P3& pt_t = pts[cands[(std::size_t)t].id];
+                  const i128 d2_all =
+                      std::max(d2_ijk,
+                               std::max(dist2_of(pts[cands[(std::size_t)i].id], pt_t),
+                                        std::max(dist2_of(pts[cands[(std::size_t)j].id], pt_t),
+                                                 dist2_of(pts[cands[(std::size_t)k].id], pt_t))));
+                  ++stats.diameter_tests;
+                  if (d2_all * scale4 > 4 * u_all) ++stats.diameter_pruned;
                   hull_add(pts[cands[(std::size_t)t].id], hijk, &hijkt);
                   ++stats.hull_tests;
                   if (!hull_meets_cell(hijkt, tight)) {
@@ -869,11 +944,13 @@ struct Engine {
     if (!owns_centre(cell, num, den, root_hi, mutant == Mutant::kOwnerClosed)) {
       ++stats.owner_rejected;
       ++stats.owner_rejected_q[q];
+      note_occurrence(ids, q, 1);
       return false;
     }
     if (!positive) {
       ++stats.self_centre_rejected;
       ++stats.positive_rejected_q[q];
+      note_occurrence(ids, q, 2);
       return false;
     }
     Pending p;
@@ -882,6 +959,7 @@ struct Engine {
     std::memcpy(p.ids, ids, sizeof(int) * (std::size_t)q);
     p.q = q;
     p.e = e;
+    note_occurrence(ids, q, 4);
     pending.push_back(p);
     return true;
   }
@@ -951,8 +1029,15 @@ struct Engine {
           interior_ids.push_back(cands[(std::size_t)idx].id);
           ++interior;
           // ABANDON ANTICIPE : au-dela du budget, aucun support du groupe ne
-          // peut etre accepte. Aucun shell partiel n'est publie.
-          if (interior > budget) { ++stats.rank_rejected; return; }
+          // peut etre accepte. Aucun shell partiel n'est publie. Le ledger doit
+          // ATTRIBUER chaque occurrence du groupe, sinon la partition ne ferme
+          // pas — c'est le defaut exact releve par le contre-audit.
+          if (interior > budget) {
+            ++stats.rank_rejected;
+            ++stats.early_rank_groups;
+            for (int gi : group) ++stats.early_rank_supports_q[pending[(std::size_t)gi].q];
+            return;
+          }
         } else if (pw == 0) {
           shell_ids.push_back(cands[(std::size_t)idx].id);
         }
@@ -962,7 +1047,12 @@ struct Engine {
       if (mutant == Mutant::kStrataStop) break;
       ++stats.census_promotions;
       e = interior;
-      if (e > budget) { ++stats.rank_rejected; return; }
+      if (e > budget) {
+        ++stats.rank_rejected;
+        ++stats.early_rank_groups;
+        for (int gi : group) ++stats.early_rank_supports_q[pending[(std::size_t)gi].q];
+        return;
+      }
     }
     // INVARIANT DU LEMME, VERIFIE A LA FERMETURE. Le curseur `h` s'arrete quand
     // `r_h<=h`; le lemme impose alors l'EGALITE `r_h==h`, car un membre au moins
@@ -1103,6 +1193,7 @@ void ground_truth(const std::vector<mhgp::P3>& cloud, int smax,
 struct Options {
   int smax = 11, leaf = 4, work_cap = 20000, max_depth = 22;
   bool axis_filter = false;
+  bool multiplicity = false;
   Mutant mutant = Mutant::kNone;
   bool judge = false;
   i64 min_supports = 0, min_cells = 0, min_quads = 0;
@@ -1118,6 +1209,7 @@ int run_engine(const std::vector<mhgp::P3>& cloud, const Options& opt) {
   engine.leaf = opt.leaf;
   engine.work_cap = opt.work_cap;
   engine.axis_filter = opt.axis_filter;
+  engine.track_multiplicity = opt.multiplicity;
   engine.max_depth = opt.max_depth;
   engine.mutant = opt.mutant;
   engine.collect = opt.judge;
@@ -1163,13 +1255,54 @@ int run_engine(const std::vector<mhgp::P3>& cloud, const Options& opt) {
               s.clique_triples, s.clique_quads);
   std::printf("bisector_tests=%lld bisector_pruned=%lld hull_tests=%lld hull_pruned=%lld\n",
               s.bisector_tests, s.bisector_pruned, s.hull_tests, s.hull_pruned);
+  std::printf("diameter_tests=%lld diameter_pruned=%lld\n", s.diameter_tests,
+              s.diameter_pruned);
   std::printf("axis_tests=%lld axis_pruned=%lld axis_unusable=%lld\n", s.axis_tests,
               s.axis_pruned, s.axis_unusable);
-  for (int q = 2; q <= 4; ++q)
-    std::printf("ledger_q%d lifts=%lld degenerate=%lld owner_rejected=%lld positive_rejected=%lld rank_rejected=%lld hull_pruned=%lld accepted=%lld\n",
-                q, s.lifts_q[q], s.degenerate_q[q], s.owner_rejected_q[q],
-                s.positive_rejected_q[q], s.rank_rejected_q[q], s.hull_pruned_q[q],
-                s.supports[q]);
+  {
+    // LA PARTITION DOIT FERMER : pour chaque arite,
+    // lifts = degeneres + owner + positivite + acceptes + rang final + rang anticipe.
+    // Les prunes d'enveloppe sont AVANT le lift et restent hors de la partition.
+    for (int q = 2; q <= 4; ++q) {
+      const i64 sum = s.degenerate_q[q] + s.owner_rejected_q[q] + s.positive_rejected_q[q] +
+                      s.supports[q] + s.rank_rejected_q[q] + s.early_rank_supports_q[q];
+      std::printf("ledger_q%d lifts=%lld degenerate=%lld owner_rejected=%lld positive_rejected=%lld accepted=%lld rank_final=%lld rank_early=%lld somme=%lld ecart=%lld hull_pruned=%lld\n",
+                  q, s.lifts_q[q], s.degenerate_q[q], s.owner_rejected_q[q],
+                  s.positive_rejected_q[q], s.supports[q], s.rank_rejected_q[q],
+                  s.early_rank_supports_q[q], sum, s.lifts_q[q] - sum, s.hull_pruned_q[q]);
+    }
+    std::printf("early_rank_groups=%lld\n", s.early_rank_groups);
+  }
+  if (opt.multiplicity) {
+    // L'IDENTITE DOIT FERMER : la somme des multiplicites vaut le nombre
+    // d'occurrences. Les issues sont separees pour distinguer la multiplicite
+    // intercellules d'un tuple possede quelque part, de celle d'un tuple qui
+    // n'est possede nulle part.
+    i64 total = 0;
+    const char* names[5] = {"degenere", "sans_owner", "non_positif", "rang", "pertinent"};
+    for (int issue = 0; issue <= 4; ++issue) {
+      std::vector<i64> mult;
+      for (const auto& e : engine.occurrences)
+        if (e.second.second == issue) mult.push_back(e.second.first);
+      if (mult.empty()) {
+        std::printf("multiplicite issue=%s cles=0\n", names[issue]);
+        continue;
+      }
+      std::sort(mult.begin(), mult.end());
+      i64 sum = 0;
+      for (i64 v : mult) sum += v;
+      total += sum;
+      const std::size_t p50 = mult.size() / 2;
+      const std::size_t p95 = (mult.size() * 95) / 100 >= mult.size()
+                                  ? mult.size() - 1
+                                  : (mult.size() * 95) / 100;
+      std::printf("multiplicite issue=%s cles=%zu occurrences=%lld moyenne=%.3f p50=%lld p95=%lld max=%lld\n",
+                  names[issue], mult.size(), sum, (double)sum / (double)mult.size(),
+                  mult[p50], mult[p95], mult.back());
+    }
+    std::printf("multiplicite_total_occurrences=%lld lifts=%lld ecart=%lld\n", total,
+                s.lifts_built, s.lifts_built - total);
+  }
   std::printf("lifts_built=%lld degenerate=%lld\n", s.lifts_built, s.degenerate_lifts);
   std::printf("owner_rejected=%lld self_centre_rejected=%lld rank_rejected=%lld\n",
               s.owner_rejected, s.self_centre_rejected, s.rank_rejected);
@@ -1510,6 +1643,7 @@ int main(int argc, char** argv) {
     else if (arg.rfind("--work-cap=", 0) == 0)
       opt.work_cap = parse_int(arg.substr(11).c_str(), &ok);
     else if (arg == "--axis-filter") opt.axis_filter = true;
+    else if (arg == "--multiplicity") opt.multiplicity = true;
     else if (arg.rfind("--max-depth=", 0) == 0)
       opt.max_depth = parse_int(arg.substr(12).c_str(), &ok);
     else if (arg.rfind("--min-supports=", 0) == 0)

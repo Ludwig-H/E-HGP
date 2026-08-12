@@ -288,10 +288,25 @@ l'arité et les identifiants triés. Le contexte lie `cell_id`, digests du
 pool/domaine, backend ou arène encore vivante, `e0` et `b_cert`, budget maximal
 dont toute l'ascendance certifie l'invariant de pool. Un premier radix/RLE par
 `SupportKey` calcule la géométrie une seule fois, puis choisit dans le run
-l'unique contexte dont la cellule half-open possède le centre. La complétude
-garantit l'existence de cette occurrence pour tout support pertinent; zéro ou
-plusieurs owners est un échec d'invariant. Le contexte owner rejoue
+le contexte dont la cellule half-open possède le centre. La complétude garantit
+l'existence de cette occurrence pour tout support pertinent. Pour un tuple
+arbitraire non positif ou hors fenêtre, zéro owner dans le run est normal et le
+tuple est rejeté; l'oracle doit prouver qu'aucun support pertinent n'est ainsi
+perdu. Plusieurs owners restent un échec d'invariant. Le contexte owner rejoue
 `U subseteq D_(smax-q)` avant d'être engagé.
+
+Une variante device plus compacte existe lorsque q2/q3/q4 partagent le même
+arbre terminal et que sa table de feuilles/CSR reste résidente. La première
+arène n'émet alors que `SupportKey` — avec `CellId` seulement comme diagnostic.
+Après radix unique et calcul du centre, une descente half-open retrouve
+directement la feuille owner et son CSR `(pool,tau,buckets,b_cert)`; elle rejoue
+`U subseteq D_H(C_owner)` et recalcule `e0=max tau(U)`. Cela évite de transporter
+tous les `CensusContext` du run. La complétude garantit la feuille et les
+membres pour un support pertinent; leur absence rejette un tuple arbitraire et
+plus d'une feuille est impossible par partition. Si les arités ont des arbres
+ou durées de vie distincts, revenir aux contextes conservés ou au census
+global. Comparer octets d'occurrences, lookup owner et durée de vie de la table
+avant de choisir entre les deux layouts.
 
 Le candidat positif owner émet ensuite
 `(cloud_epoch,GeometricBallKey,SupportKey,CensusContext)`. Le second radix/RLE
@@ -352,6 +367,15 @@ canonique pour éviter les doublons intracellule. Ce théorème réduit les K4
 tentés; il ne donne aucune borne sparse sur le nombre de faces carriers. Il est
 incomplet de tester seulement si la face des trois plus petits `PointId` est
 aiguë : cette face peut être obtuse lorsque d'autres faces sont aiguës.
+
+La borne deux est optimale et fournit une fixture u16 : centre
+`C=(10,10,10)`, rayon carré `30`, sommets
+`P0=(5,8,9)`, `P1=(5,8,11)`, `P2=(9,12,5)`, `P3=(15,11,12)`. Les
+barycentriques de `C` sont `(5,6,5,12)/28`, toutes strictement positives. Les
+faces opposées à `P0` et `P1` sont aiguës; celles opposées à `P2` et `P3` sont
+obtuses. Une génération par carriers doit donc couvrir exactement le cas où
+seules deux faces sont admissibles et rester invariante sous permutation des
+`PointId`.
 
 Pour un carrier de circumcentre `N/G`, de normale `n`, et un apex `d`, poser
 `v=d-a` et `Delta=||d||^2-||a||^2`. Si `n dot v` est non nul, l'intersection
