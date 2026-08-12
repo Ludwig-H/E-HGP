@@ -1948,3 +1948,111 @@ mhgp3v_add_expected_code_test_for(mhgp3v_oracle mhgp3v_measure_receipt_rejected
   "measure-only ne prend encore ni --receipt ni --inject" 2
   --subject anchored --measure-only --regime exhaustive --points 4 --clouds 1
   --max-order 1 --receipt ignored.json)
+
+# ---------------------------------------------------------------------------
+# LA LOCALITE CERTIFIEE PAR INVERSION (note de solution du 12 aout 2026).
+#
+# Le sujet remplace l'enumeration de C(n,2) par une generation par ancre : la
+# calotte exacte C_z(D) = { u : u.v > d/D } au lieu de la chambre de Yao48, un
+# rayon PAR CELLULE de direction, et le prédicat entier a trois sommets. Deux
+# juges independants le tiennent : le juge A (toute paire lointaine d'une ancre
+# certifiee doit avoir K interieurs stricts) et le juge du census (le census
+# directionnel doit egaler l'enumeration exhaustive de C(n,2)).
+# ---------------------------------------------------------------------------
+add_executable(mhgp3v_certified_locality_probe prototype/certified_locality_probe.cpp)
+target_include_directories(mhgp3v_certified_locality_probe PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(mhgp3v_certified_locality_probe PRIVATE mhgp Threads::Threads)
+target_compile_options(mhgp3v_certified_locality_probe PRIVATE -Wall -Wextra -Werror)
+
+# Le theoreme sur les TROIS arites, juge exhaustif a support propre positif.
+add_test(NAME mhgp3v_locality_fixture_trois_arites COMMAND mhgp3v_certified_locality_probe
+         --mode=fixture --points=70 --family=uniform --grid=4 --seed=1 --kmin=4
+         --judge-arity=4 --min-activations=1700 --min-q4=150)
+# Le juge A : 48 435 paires lointaines a cette graine, plancher arme a 40 000.
+add_test(NAME mhgp3v_locality_juge_paires_lointaines COMMAND mhgp3v_certified_locality_probe
+         --mode=fixture --points=600 --family=uniform --grid=4 --seed=1 --kmin=10
+         --judge-arity=1 --min-far-pairs=40000)
+# Le census directionnel EXACT contre l'enumeration exhaustive, deux familles.
+add_test(NAME mhgp3v_locality_census_exact_terrain COMMAND mhgp3v_certified_locality_probe
+         --mode=directional --points=900 --family=terrain --grid=4 --seed=3 --kmin=10
+         --judge-census=1 --min-activations=15000)
+add_test(NAME mhgp3v_locality_census_exact_scanline COMMAND mhgp3v_certified_locality_probe
+         --mode=directional --points=900 --family=scanline_overlap_multiecho --grid=4
+         --seed=3 --kmin=10 --judge-census=1 --min-activations=15000)
+# INVARIANCE DE GRILLE : le filtre etant conservateur, le census ne depend pas
+# de la finesse de la discretisation des directions. Deux grilles extremes.
+add_test(NAME mhgp3v_locality_census_grille_3 COMMAND mhgp3v_certified_locality_probe
+         --mode=directional --points=900 --family=terrain --grid=3 --seed=3 --kmin=10
+         --judge-census=1 --min-activations=15000)
+add_test(NAME mhgp3v_locality_census_grille_8 COMMAND mhgp3v_certified_locality_probe
+         --mode=directional --points=900 --family=terrain --grid=8 --seed=3 --kmin=10
+         --judge-census=1 --min-activations=15000)
+# INVARIANCE DE FENETRE : la lane close ne depend pas du nombre de voisins lus.
+add_test(NAME mhgp3v_locality_census_fenetre_courte COMMAND mhgp3v_certified_locality_probe
+         --mode=directional --points=900 --family=terrain --grid=4 --seed=3 --kmin=10
+         --max-neighbours=64 --judge-census=1 --min-activations=15000)
+
+# LES CINQ MUTANTS, au code contractuel 4.
+mhgp3v_add_expected_code_test_for(mhgp3v_certified_locality_probe
+  mhgp3v_locality_mutant_rho_min_corner "mutant tue" 4
+  --mode=directional --points=900 --family=terrain --grid=4 --seed=3 --kmin=10
+  --judge-census=1 --inject=rho-min-corner)
+mhgp3v_add_expected_code_test_for(mhgp3v_certified_locality_probe
+  mhgp3v_locality_mutant_rho_first_corner "mutant tue" 4
+  --mode=directional --points=900 --family=terrain --grid=4 --seed=3 --kmin=10
+  --judge-census=1 --inject=rho-first-corner)
+mhgp3v_add_expected_code_test_for(mhgp3v_certified_locality_probe
+  mhgp3v_locality_mutant_rho_kth_short "mutant tue" 4
+  --mode=directional --points=900 --family=terrain --grid=4 --seed=3 --kmin=10
+  --judge-census=1 --inject=rho-kth-short)
+mhgp3v_add_expected_code_test_for(mhgp3v_certified_locality_probe
+  mhgp3v_locality_mutant_locate_drop_boundary "mutant tue" 4
+  --mode=directional --points=900 --family=terrain --grid=4 --seed=3 --kmin=10
+  --judge-census=1 --inject=locate-drop-boundary)
+mhgp3v_add_expected_code_test_for(mhgp3v_certified_locality_probe
+  mhgp3v_locality_mutant_cap_corner_any "mutant tue" 4
+  --mode=fixture --points=80 --family=uniform --grid=4 --seed=1 --kmin=4
+  --inject=cap-corner-any)
+
+# CLI hostile et injections hors mode : code 2, avant tout calcul.
+# LE SIGNE InSphere q4. Livre une fois a l'envers : q4 tombait de 202 a 3
+# activations a n=70. La fixture gravee (tetraedre de circumcentre l'origine,
+# centre interieur, point lointain exterieur) est exercee a chaque execution et
+# tue son mutant au code 4 ; le plancher --min-q4 double la garde.
+mhgp3v_add_expected_code_test_for(mhgp3v_certified_locality_probe
+  mhgp3v_locality_mutant_insphere_sign "mutant tue par la fixture d'orientation q4" 4
+  --mode=fixture --points=70 --family=uniform --grid=4 --seed=1 --kmin=4
+  --inject=insphere-sign-flip)
+mhgp3v_add_expected_code_test_for(mhgp3v_certified_locality_probe
+  mhgp3v_locality_plancher_q4 "plancher q4" 3
+  --mode=fixture --points=70 --family=uniform --grid=4 --seed=1 --kmin=4
+  --judge-arity=4 --min-q4=999999999)
+mhgp3v_add_expected_code_test_for(mhgp3v_certified_locality_probe
+  mhgp3v_locality_cli_inconnu "argument inconnu" 2 --mode=directional --points=200 --bidon)
+mhgp3v_add_expected_code_test_for(mhgp3v_certified_locality_probe
+  mhgp3v_locality_cli_mode_inconnu "mode inconnu" 2 --mode=nimporte --points=200)
+mhgp3v_add_expected_code_test_for(mhgp3v_certified_locality_probe
+  mhgp3v_locality_injection_hors_mode_cap "sans effet en mode directionnel" 2
+  --mode=directional --points=600 --family=terrain --grid=4 --seed=3 --kmin=10
+  --judge-census=1 --inject=cap-nine)
+mhgp3v_add_expected_code_test_for(mhgp3v_certified_locality_probe
+  mhgp3v_locality_injection_hors_mode_rho "sans effet en mode fixture" 2
+  --mode=fixture --points=80 --family=uniform --grid=4 --seed=1 --kmin=4
+  --inject=rho-min-corner)
+mhgp3v_add_expected_code_test_for(mhgp3v_certified_locality_probe
+  mhgp3v_locality_juge_census_borne "borne a 4000 points" 2
+  --mode=directional --points=5000 --family=terrain --grid=4 --seed=3 --kmin=10
+  --judge-census=1)
+mhgp3v_add_expected_code_test_for(mhgp3v_certified_locality_probe
+  mhgp3v_locality_injection_sans_juge "exige --judge-census=1" 2
+  --mode=directional --points=600 --family=terrain --grid=4 --seed=3 --kmin=10
+  --inject=rho-min-corner)
+# Planchers de couverture : code 3, jamais un vert par vacuite.
+mhgp3v_add_expected_code_test_for(mhgp3v_certified_locality_probe
+  mhgp3v_locality_plancher_activations "plancher d'activations" 3
+  --mode=directional --points=900 --family=terrain --grid=4 --seed=3 --kmin=10
+  --min-activations=999999999)
+mhgp3v_add_expected_code_test_for(mhgp3v_certified_locality_probe
+  mhgp3v_locality_plancher_paires_lointaines "plancher de paires lointaines" 3
+  --mode=fixture --points=70 --family=uniform --grid=4 --seed=1 --kmin=4
+  --judge-arity=1 --min-far-pairs=999999999)
