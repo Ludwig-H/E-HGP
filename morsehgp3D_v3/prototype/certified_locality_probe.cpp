@@ -896,6 +896,109 @@ inline Q4Ball q4_ball(const mhgp::P3& a, const mhgp::P3& b, const mhgp::P3& c,
 
 }  // namespace judge
 
+
+// ---------------------------------------------------------------------------
+// LA MINIBOULE EXACTE d'un petit ensemble, pour les bras stricts.
+// Le support propre positif est le premier sous-ensemble de taille 2, 3 ou 4
+// qui soit positif ET dont la boule contienne tout l'ensemble. Aucune
+// comparaison de rayons entre arites n'est necessaire : la miniboule est
+// unique, et un sous-ensemble cospherique supplementaire designe la meme
+// boule.
+// ---------------------------------------------------------------------------
+struct MiniBall {
+  int arity = 0;                 // 2, 3 ou 4 ; 0 = non trouvee
+  std::array<int, 4> support{};  // PointId du support
+  judge::Q3Ball b3{};
+  judge::Q4Ball b4{};
+  int a3 = 0;                    // sommet de base pour inside_q3
+  std::array<int, 4> q4ids{};
+};
+
+inline bool ball_contains(const MiniBall& mb, const std::vector<mhgp::P3>& pts, int z) {
+  const mhgp::P3& p = pts[(std::size_t)z];
+  if (mb.arity == 1) return z == mb.support[0];
+  if (mb.arity == 2) {
+    const mhgp::P3& x = pts[(std::size_t)mb.support[0]];
+    const mhgp::P3& y = pts[(std::size_t)mb.support[1]];
+    const judge::V3 a = judge::sub(p, x), b = judge::sub(p, y);
+    return judge::dot(a, b) <= 0;
+  }
+  if (mb.arity == 3)
+    return judge::inside_q3(mb.b3, pts[(std::size_t)mb.a3], p) ||
+           judge::on_q3(mb.b3, pts[(std::size_t)mb.a3], p);
+  const i128 det = judge::det4_insphere(pts[(std::size_t)mb.q4ids[0]], pts[(std::size_t)mb.q4ids[1]],
+                                        pts[(std::size_t)mb.q4ids[2]], pts[(std::size_t)mb.q4ids[3]], p);
+  return det == 0 || ((det > 0) != (mb.b4.orient > 0));
+}
+
+inline bool ball_strictly_inside(const MiniBall& mb, const std::vector<mhgp::P3>& pts, int z) {
+  const mhgp::P3& p = pts[(std::size_t)z];
+  if (mb.arity == 1) return false;
+  if (mb.arity == 2)
+    return judge::inside_q2(pts[(std::size_t)mb.support[0]], pts[(std::size_t)mb.support[1]], p);
+  if (mb.arity == 3) return judge::inside_q3(mb.b3, pts[(std::size_t)mb.a3], p);
+  const i128 det = judge::det4_insphere(pts[(std::size_t)mb.q4ids[0]], pts[(std::size_t)mb.q4ids[1]],
+                                        pts[(std::size_t)mb.q4ids[2]], pts[(std::size_t)mb.q4ids[3]], p);
+  return det != 0 && ((det > 0) != (mb.b4.orient > 0));
+}
+
+MiniBall exact_miniball(const std::vector<int>& set, const std::vector<mhgp::P3>& pts) {
+  MiniBall out;
+  const int m = (int)set.size();
+  if (m == 1) {
+    // Facette SINGLETON : la miniboule est le point lui-meme, de rayon nul.
+    // C'est l'ordre zero, la naissance d'un PointId. Son interieur strict est
+    // vide, donc sa branche est toujours |J_F| = 0. L'omettre faisait echouer
+    // une facette par ancre.
+    out.arity = 1;
+    out.support = {set[0], -1, -1, -1};
+    return out;
+  }
+  auto covers = [&](const MiniBall& mb) {
+    for (int z : set)
+      if (!ball_contains(mb, pts, z)) return false;
+    return true;
+  };
+  for (int i = 0; i < m; ++i)
+    for (int j = i + 1; j < m; ++j) {
+      MiniBall mb;
+      mb.arity = 2;
+      mb.support = {set[(std::size_t)i], set[(std::size_t)j], -1, -1};
+      if (covers(mb)) return mb;
+    }
+  for (int i = 0; i < m; ++i)
+    for (int j = i + 1; j < m; ++j)
+      for (int k = j + 1; k < m; ++k) {
+        const judge::Q3Ball b = judge::q3_ball(pts[(std::size_t)set[(std::size_t)i]],
+                                               pts[(std::size_t)set[(std::size_t)j]],
+                                               pts[(std::size_t)set[(std::size_t)k]]);
+        if (!b.ok || !b.positive) continue;
+        MiniBall mb;
+        mb.arity = 3;
+        mb.b3 = b;
+        mb.a3 = set[(std::size_t)i];
+        mb.support = {set[(std::size_t)i], set[(std::size_t)j], set[(std::size_t)k], -1};
+        if (covers(mb)) return mb;
+      }
+  for (int i = 0; i < m; ++i)
+    for (int j = i + 1; j < m; ++j)
+      for (int k = j + 1; k < m; ++k)
+        for (int l = k + 1; l < m; ++l) {
+          const judge::Q4Ball b = judge::q4_ball(
+              pts[(std::size_t)set[(std::size_t)i]], pts[(std::size_t)set[(std::size_t)j]],
+              pts[(std::size_t)set[(std::size_t)k]], pts[(std::size_t)set[(std::size_t)l]]);
+          if (!b.ok || !b.positive) continue;
+          MiniBall mb;
+          mb.arity = 4;
+          mb.b4 = b;
+          mb.q4ids = {set[(std::size_t)i], set[(std::size_t)j], set[(std::size_t)k],
+                      set[(std::size_t)l]};
+          mb.support = mb.q4ids;
+          if (covers(mb)) return mb;
+        }
+  return out;
+}
+
 // ---------------------------------------------------------------------------
 // Utilitaires de sortie
 // ---------------------------------------------------------------------------
@@ -1012,7 +1115,7 @@ int main(int argc, char** argv) {
     std::printf("REFUS : le juge exhaustif du census est borne a 4000 points\n");
     return 2;
   }
-  if (mode != "fixture" && mode != "profile" && mode != "census" && mode != "directional" && mode != "arity") {
+  if (mode != "fixture" && mode != "profile" && mode != "census" && mode != "directional" && mode != "arity" && mode != "sparse") {
     std::printf("REFUS : mode inconnu %s\n", mode.c_str());
     return 2;
   }
@@ -1149,7 +1252,7 @@ int main(int argc, char** argv) {
     }
   }
   const double cert_s = std::chrono::duration<double>(t_cert - t_start).count();
-  if (mode != "directional" && mode != "arity")
+  if (mode != "directional" && mode != "arity" && mode != "sparse")
   std::printf("certificat : %lld ancres certifiees, %lld non certifiees (%.4f %%),"
               " M* moyen=%.2f p50=%.0f p95=%.0f p99=%.0f max=%lld,"
               " %lld tests de sommet, %.3f s (%d threads, machine de mesure)\n",
@@ -1999,6 +2102,191 @@ int main(int argc, char** argv) {
     }
     if (min_q4 > 0 && e4 < min_q4) {
       std::printf("ECHEC : plancher q4 %lld non atteint (%lld)\n", min_q4, e4);
+      return 3;
+    }
+    return 0;
+  }
+
+  // -------------------------------------------------------------------------
+  // Mode `sparse` : le DIMENSIONNEMENT de la route `directes + gateways`.
+  //
+  // Chaque coface directe `Q = U union I` propose au plus |U| <= 4 bras
+  // stricts `Q \ {u}` pour `u` dans le support ; retirer un label INTERIEUR
+  // laisse ce label comme unique intrus, cas que la coface traite deja. Les
+  // bras sont dedupliques globalement par leur liste triee de PointId, puis
+  // chaque facette unique recoit sa miniboule exacte et sa requete
+  // `J_F = interieur(B_F) prive de F`, classee en trois branches.
+  //
+  // Ce mode MESURE des volumes. Il ne construit ni gateway, ni fold, ni sortie.
+  // -------------------------------------------------------------------------
+  if (mode == "sparse") {
+    if (n > 4000) {
+      std::printf("REFUS : le dimensionnement sparse est borne a 4000 points\n");
+      return 2;
+    }
+    std::vector<std::vector<std::vector<int>>> arm_shards((std::size_t)threads);
+    std::atomic<i64> cofaces{0}, arms{0}, unclosed{0};
+    std::atomic<int> cursor{0};
+    const auto t0 = std::chrono::steady_clock::now();
+    std::vector<std::thread> pool;
+    for (int t = 0; t < threads; ++t)
+      pool.emplace_back([&, t]() {
+        std::vector<std::vector<int>>& mine = arm_shards[(std::size_t)t];
+        std::vector<Neighbour> nbrs;
+        std::vector<Rho2> radii;
+        std::vector<std::vector<Rho2>> heaps;
+        std::vector<int> hit, up, interior;
+        i64 lc = 0, la = 0, lu = 0;
+        for (;;) {
+          const int a = cursor.fetch_add(1);
+          if (a >= n) break;
+          knn(tree, pts, a, n - 1, &nbrs);
+          const mhgp::P3& px = pts[(std::size_t)a];
+          i64 dummy = 0;
+          compute_cell_radii(px, nbrs, grid, kmin, pts, &radii, &heaps, &dummy, &dummy, inject);
+          up.clear();
+          for (const Neighbour& nb : nbrs) {
+            if ((int)up.size() >= support_window) break;
+            if (nb.id > a) up.push_back(nb.id);
+          }
+          // Emettre un bras strict par element de support, avec la liste des
+          // interieurs — c'est la coface complete `Q = U union I`.
+          auto emit_arms = [&](const std::vector<int>& sup, const std::vector<int>& inter) {
+            ++lc;
+            for (std::size_t r = 0; r < sup.size(); ++r) {
+              std::vector<int> facet;
+              facet.reserve(sup.size() + inter.size());
+              for (std::size_t q = 0; q < sup.size(); ++q)
+                if (q != r) facet.push_back(sup[q]);
+              for (int z : inter) facet.push_back(z);
+              std::sort(facet.begin(), facet.end());
+              ++la;
+              mine.push_back(std::move(facet));
+            }
+          };
+          auto sweep = [&](const std::vector<int>& sup, int limit,
+                           const std::function<bool(const mhgp::P3&)>& in, std::vector<int>* out) {
+            i64 dmax2 = 0;
+            for (std::size_t i = 0; i + 1 < sup.size(); ++i)
+              for (std::size_t j = i + 1; j < sup.size(); ++j) {
+                const mhgp::P3& u = pts[(std::size_t)sup[i]];
+                const mhgp::P3& v = pts[(std::size_t)sup[j]];
+                const i64 dx = u.x - v.x, dy = u.y - v.y, dz = u.z - v.z;
+                const i64 d2 = dx * dx + dy * dy + dz * dz;
+                if (d2 > dmax2) dmax2 = d2;
+              }
+            out->clear();
+            for (const Neighbour& nz : nbrs) {
+              if (2 * nz.d2 > 3 * dmax2) return true;
+              bool is_sup = false;
+              for (int t2 : sup)
+                if (t2 == nz.id) { is_sup = true; break; }
+              if (is_sup) continue;
+              if (in(pts[(std::size_t)nz.id])) {
+                out->push_back(nz.id);
+                if ((int)out->size() >= limit) return true;
+              }
+            }
+            return true;
+          };
+          for (int y : up) {
+            const mhgp::P3& py = pts[(std::size_t)y];
+            const std::vector<int> sup{a, y};
+            if (!sweep(sup, kmin, [&](const mhgp::P3& z) { return judge::inside_q2(px, py, z); },
+                       &interior)) { ++lu; continue; }
+            if ((int)interior.size() >= kmin) continue;
+            emit_arms(sup, interior);
+          }
+          for (std::size_t i = 0; i + 1 < up.size(); ++i)
+            for (std::size_t j = i + 1; j < up.size(); ++j) {
+              const judge::Q3Ball ball =
+                  judge::q3_ball(px, pts[(std::size_t)up[i]], pts[(std::size_t)up[j]]);
+              if (!ball.ok || !ball.positive) continue;
+              const std::vector<int> sup{a, up[i], up[j]};
+              if (!sweep(sup, kmin - 1,
+                         [&](const mhgp::P3& z) { return judge::inside_q3(ball, px, z); },
+                         &interior)) { ++lu; continue; }
+              if ((int)interior.size() > kmin - 2) continue;
+              emit_arms(sup, interior);
+            }
+          for (std::size_t i = 0; i + 2 < up.size(); ++i)
+            for (std::size_t j = i + 1; j + 1 < up.size(); ++j)
+              for (std::size_t k = j + 1; k < up.size(); ++k) {
+                const judge::Q4Ball ball =
+                    judge::q4_ball(px, pts[(std::size_t)up[i]], pts[(std::size_t)up[j]],
+                                   pts[(std::size_t)up[k]]);
+                if (!ball.ok || !ball.positive) continue;
+                const std::vector<int> sup{a, up[i], up[j], up[k]};
+                if (!sweep(sup, kmin - 2,
+                           [&](const mhgp::P3& z) {
+                             const i128 det = judge::det4_insphere(
+                                 px, pts[(std::size_t)up[i]], pts[(std::size_t)up[j]],
+                                 pts[(std::size_t)up[k]], z);
+                             return det != 0 && ((det > 0) != (ball.orient > 0));
+                           },
+                           &interior)) { ++lu; continue; }
+                if ((int)interior.size() > kmin - 3) continue;
+                emit_arms(sup, interior);
+              }
+        }
+        cofaces.fetch_add(lc);
+        arms.fetch_add(la);
+        unclosed.fetch_add(lu);
+      });
+    for (std::thread& th : pool) th.join();
+    std::vector<std::vector<int>> all_arms;
+    for (std::vector<std::vector<int>>& v : arm_shards)
+      all_arms.insert(all_arms.end(), std::make_move_iterator(v.begin()),
+                      std::make_move_iterator(v.end()));
+    std::sort(all_arms.begin(), all_arms.end());
+    all_arms.erase(std::unique(all_arms.begin(), all_arms.end()), all_arms.end());
+    const double gen_s =
+        std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count();
+    // Chaque facette unique : miniboule exacte puis J_F.
+    std::atomic<i64> br0{0}, br1{0}, br2{0}, nomini{0};
+    std::atomic<int> fc{0};
+    std::vector<std::thread> fpool;
+    for (int t = 0; t < threads; ++t)
+      fpool.emplace_back([&]() {
+        i64 b0 = 0, b1 = 0, b2 = 0, nm = 0;
+        for (;;) {
+          const int f = fc.fetch_add(1);
+          if (f >= (int)all_arms.size()) break;
+          const std::vector<int>& facet = all_arms[(std::size_t)f];
+          const MiniBall mb = exact_miniball(facet, pts);
+          if (mb.arity == 0) { ++nm; continue; }
+          int j = 0;
+          for (int z = 0; z < n && j < 2; ++z) {
+            bool in_facet = false;
+            for (int w : facet)
+              if (w == z) { in_facet = true; break; }
+            if (in_facet) continue;
+            if (ball_strictly_inside(mb, pts, z)) ++j;
+          }
+          if (j == 0) ++b0; else if (j == 1) ++b1; else ++b2;
+        }
+        br0.fetch_add(b0);
+        br1.fetch_add(b1);
+        br2.fetch_add(b2);
+        nomini.fetch_add(nm);
+      });
+    for (std::thread& th : fpool) th.join();
+    const i64 nc = (i64)cofaces.load(), na = (i64)arms.load(), nf = (i64)all_arms.size();
+    std::printf("sparse : %lld cofaces directes (%.4f par point), %lld bras stricts"
+                " (%.3f par coface), %lld facettes uniques apres deduplication"
+                " (%.4f par point, facteur de partage %.3f)\n",
+                nc, (double)nc / n, na, nc ? (double)na / (double)nc : 0.0, nf, (double)nf / n,
+                nf ? (double)na / (double)nf : 0.0);
+    std::printf("branches |J_F| : %lld a zero (%.2f %%), %lld a un (%.2f %%),"
+                " %lld a deux ou plus (%.2f %%) ; %lld facettes sans miniboule positive\n",
+                (i64)br0.load(), nf ? 100.0 * (double)br0.load() / (double)nf : 0.0,
+                (i64)br1.load(), nf ? 100.0 * (double)br1.load() / (double)nf : 0.0,
+                (i64)br2.load(), nf ? 100.0 * (double)br2.load() / (double)nf : 0.0,
+                (i64)nomini.load());
+    std::printf("generation %.3f s (machine de mesure, %d threads) ;"
+                " %lld cofaces a fenetre non close\n", gen_s, threads, (i64)unclosed.load());
+    if ((i64)nomini.load() > 0) {
+      std::printf("ECHEC : une facette sans miniboule a support propre positif\n");
       return 3;
     }
     return 0;
