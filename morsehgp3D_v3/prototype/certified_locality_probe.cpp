@@ -778,6 +778,12 @@ inline bool inside_q2(const mhgp::P3& x, const mhgp::P3& y, const mhgp::P3& z) {
   return dot(a, b) < 0;
 }
 
+// z EXACTEMENT sur la sphere diametrale.
+inline bool on_q2(const mhgp::P3& x, const mhgp::P3& y, const mhgp::P3& z) {
+  const V3 a = sub(z, x), b = sub(z, y);
+  return dot(a, b) == 0;
+}
+
 // q3 : boule circonscrite au triangle, centre dans son plan.
 // centre = a + (Na u + Nb v)/D, D = 2(A C - B^2), A=u.u, B=u.v, C=v.v.
 struct Q3Ball {
@@ -808,6 +814,14 @@ inline bool inside_q3(const Q3Ball& ball, const mhgp::P3& a, const mhgp::P3& z) 
   const i128 lhs = ball.D * (i128)dot(w, w);
   const i128 rhs = 2 * (ball.Na * (i128)dot(w, ball.u) + ball.Nb * (i128)dot(w, ball.v));
   return lhs < rhs;
+}
+
+// z EXACTEMENT sur le cercle circonscrit : D ||w||^2 == 2 (Na (w.u) + Nb (w.v)).
+inline bool on_q3(const Q3Ball& ball, const mhgp::P3& a, const mhgp::P3& z) {
+  const V3 w = sub(z, a);
+  const i128 lhs = ball.D * (i128)dot(w, w);
+  const i128 rhs = 2 * (ball.Na * (i128)dot(w, ball.u) + ball.Nb * (i128)dot(w, ball.v));
+  return lhs == rhs;
 }
 
 // q4 : sphere circonscrite au tetraedre. Positivite par les quatre
@@ -1717,7 +1731,7 @@ int main(int argc, char** argv) {
   // -------------------------------------------------------------------------
   if (mode == "arity") {
     std::atomic<i64> a2{0}, a3{0}, a4{0}, cand3{0}, cand4{0}, tests{0}, unclosed{0},
-        support_max{0};
+        support_max{0}, deg2{0}, deg3{0}, deg4{0};
     std::atomic<int> cursor{0};
     const auto t0 = std::chrono::steady_clock::now();
     std::vector<std::thread> pool;
@@ -1729,6 +1743,7 @@ int main(int argc, char** argv) {
         std::vector<int> hit;
         std::vector<Neighbour> act;  // partenaires d'activation q2, tries
         i64 l2 = 0, l3 = 0, l4 = 0, c3 = 0, c4 = 0, lt = 0, lu = 0, sm = 0;
+        i64 ld2 = 0, ld3 = 0, ld4 = 0;
         for (;;) {
           const int a = cursor.fetch_add(1);
           if (a >= n) break;
@@ -1754,7 +1769,19 @@ int main(int argc, char** argv) {
               if (nz.id == nb.id) continue;
               if (judge::inside_q2(px, py, pts[(std::size_t)nz.id]) && ++inside >= kmin) break;
             }
-            if (inside < kmin) act.push_back(nb);
+            if (inside < kmin) {
+              act.push_back(nb);
+              if (nb.id > a) {
+                // COQUILLE DEGENEREE : un point hors support exactement sur la
+                // sphere rend le support minimal NON UNIQUE. C'est precisement
+                // ce que la porte reguliere de la reparation exclut.
+                for (const Neighbour& nz : nbrs) {
+                  if (nz.id == nb.id) continue;
+                  if (nz.d2 > nb.d2) break;
+                  if (judge::on_q2(px, py, pts[(std::size_t)nz.id])) { ++ld2; break; }
+                }
+              }
+            }
           }
           if ((i64)act.size() > sm) sm = (i64)act.size();
           for (const Neighbour& nb : act)
@@ -1811,7 +1838,13 @@ int main(int argc, char** argv) {
                 return judge::inside_q3(ball, px, z);
               });
               if (!r.second) { ++lu; continue; }
-              if (r.first <= kmin - 2) ++l3;
+              if (r.first > kmin - 2) continue;
+              ++l3;
+              for (const Neighbour& nz : nbrs) {
+                if (nz.id == up[i] || nz.id == up[j]) continue;
+                if (2 * nz.d2 > 3 * 0 + 3 * (i64)0) { /* garde neutralisee */ }
+                if (judge::on_q3(ball, px, pts[(std::size_t)nz.id])) { ++ld3; break; }
+              }
             }
           for (std::size_t i = 0; i + 2 < up.size(); ++i)
             for (std::size_t j = i + 1; j + 1 < up.size(); ++j)
@@ -1829,9 +1862,20 @@ int main(int argc, char** argv) {
                   return det != 0 && ((det > 0) != (ball.orient > 0));
                 });
                 if (!r.second) { ++lu; continue; }
-                if (r.first <= kmin - 3) ++l4;
+                if (r.first > kmin - 3) continue;
+                ++l4;
+                for (const Neighbour& nz : nbrs) {
+                  if (nz.id == up[i] || nz.id == up[j] || nz.id == up[k]) continue;
+                  const i128 det = judge::det4_insphere(px, pts[(std::size_t)up[i]],
+                                                        pts[(std::size_t)up[j]],
+                                                        pts[(std::size_t)up[k]], pts[(std::size_t)nz.id]);
+                  if (det == 0) { ++ld4; break; }
+                }
               }
         }
+        deg2.fetch_add(ld2);
+        deg3.fetch_add(ld3);
+        deg4.fetch_add(ld4);
         a2.fetch_add(l2);
         a3.fetch_add(l3);
         a4.fetch_add(l4);
@@ -1851,6 +1895,14 @@ int main(int argc, char** argv) {
                 " (%.4f / %.4f / %.4f par point), total %.4f par point\n",
                 e2, e3, e4, (double)e2 / n, (double)e3 / n, (double)e4 / n,
                 (double)(e2 + e3 + e4) / n);
+    const i64 d2v = (i64)deg2.load(), d3v = (i64)deg3.load(), d4v = (i64)deg4.load();
+    std::printf("coquilles DEGENEREES (un point hors support exactement sur la sphere,"
+                " donc support minimal non unique) : q2=%lld (%.3f %%) q3=%lld (%.3f %%)"
+                " q4=%lld (%.3f %%) ; total %.3f %% des enregistrements\n",
+                d2v, e2 ? 100.0 * (double)d2v / (double)e2 : 0.0, d3v,
+                e3 ? 100.0 * (double)d3v / (double)e3 : 0.0, d4v,
+                e4 ? 100.0 * (double)d4v / (double)e4 : 0.0,
+                (e2 + e3 + e4) ? 100.0 * (double)(d2v + d3v + d4v) / (double)(e2 + e3 + e4) : 0.0);
     std::printf("fenetre de support = %d voisins ; la mesure n'est recevable que si"
                 " elle sature quand cette fenetre croit\n", support_window);
     std::printf("travail : %lld supports q3 essayes, %lld supports q4 essayes,"
