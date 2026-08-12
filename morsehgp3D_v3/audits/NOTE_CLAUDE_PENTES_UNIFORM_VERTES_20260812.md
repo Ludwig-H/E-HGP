@@ -109,3 +109,35 @@ diminuent avec `n`. Prolongée à `50 000`, cette suite donne de l'ordre de ving
 théorie de l'audit et la mesure se rejoignent.
 
 GCP non utilisé.
+
+## 6. La rampe gelée ferme `terrain` : la porte n'est pas fermée
+
+Le binaire gelé `423797e9...` a clos les trois tailles contractuelles sur
+`terrain`, `identique=oui` avant et après chaque cas :
+
+| `n` | cellules | lifts | supports | `wall_s` |
+| ---: | ---: | ---: | ---: | ---: |
+| `12 500` | `14 262 497` | `92 531 928` | `906 078` | `871` |
+| `25 000` | `46 745 417` | `220 298 378` | `1 872 528` | `1 851` |
+| `50 000` | `106 894 617` | `486 206 523` | `3 807 762` | `3 223` |
+
+| pente | cellules | lifts | supports |
+| --- | ---: | ---: | ---: |
+| `12 500 -> 25 000` | `1,713` | `1,251` | `1,047` |
+| `25 000 -> 50 000` | **`1,193`** | `1,142` | `1,024` |
+
+La règle de la gate est que **deux pentes successives** au-dessus de `1,35`
+ferment l'ordonnance. Ici une seule pente est rouge, sur un seul compteur, et la
+suivante est verte : **la porte n'est donc pas fermée**. La superlinéarité des
+cellules était transitoire — elle correspond au moment où l'arbre atteint la
+résolution du nuage — et non asymptotique.
+
+Ce binaire gelé est antérieur à la séparation par la normale locale : les
+chiffres ci-dessus sont ceux de l'ordonnance **sans** ce prune, donc une borne
+supérieure du coût de l'ordonnance courante.
+
+Le premier point volumique tombe aussi : `uniform, n=12 500` rend
+`1 848 561` cellules — cinquante fois moins que `terrain` à la même taille — pour
+`4 990 227` supports, soit `399` par point, et `289 s` de mur contre `871`.
+Le régime volumique est donc à la fois plus productif et bien moins coûteux par
+support que le régime surfacique du générateur.
