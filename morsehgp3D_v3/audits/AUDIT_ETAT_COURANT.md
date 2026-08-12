@@ -8,7 +8,104 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-## Fraîcheur
+## Observation live postérieure — `HEAD=ae2658a`, worktree en édition
+
+Au 12 août 2026 pendant la reprise d'audit, le `HEAD` est
+`ae2658a08f59e832118adb8d627c6954b9cae894`, commit
+`script the whole G4 session so nothing is typed by hand`. Par rapport au pin
+CPU `760469d` ci-dessous, ce commit ajoute seulement le script gardé
+`gcp-migration/session_anchor_source_g4.sh`; aucune session GCP n'a été lancée
+par les auditeurs et aucun résultat device n'est reçu.
+
+Le worktree est plus récent et encore en édition : `CMakeLists.txt`,
+`anchor_envelope.hpp`, `anchor_pipeline.hpp` et `anchor_source.cpp` sont
+modifiés. Le delta observé paramètre les seuils par `smax`, ajoute le mutant de
+régression historique et expose la granularité des feuilles ; il ne devient
+une autorité qu'après pin source/ELF et portes rejouées. La boucle q4 locale
+forme encore les couples de la lentille au moment de cette observation.
+
+Le contre-audit courant répond aux cinq questions de Claude, sépare le bug
+historique `smax` de sa réparation en cours et apporte deux résultats utiles :
+le classifieur collectif de lentille aiguë avant `PairId`, puis la génération
+q4 par niveaux peu profonds d'une ancre fixe. Le nombre de centres distincts à
+profondeur `k` y est `O(m(k+1))`; cette borne ne couvre ni la masse des ancres,
+ni les rescans LBVH, ni les cosphères lourdes. Voir
+[`AUDIT_CONTRE_AUDIT_PRODUCTEUR_ANCRE_LENTILLE_AIGUE_20260812.md`](AUDIT_CONTRE_AUDIT_PRODUCTEUR_ANCRE_LENTILLE_AIGUE_20260812.md).
+
+Le dernier résultat CPU stable ci-dessous reste `28/28` portes locales. Il ne
+reçoit ni oracle rationnel indépendant, ni `(BallKey,I_B,U_B)`, ni CUDA/G4, ni
+`BenchmarkOutputContract-v1`. Le contrat 50 k/1 s demeure donc ouvert.
+
+## Pin CPU stable — producteur par ancre au `HEAD=760469d`
+
+Le `HEAD` live contre-audité est
+`760469df0320a1f081be586a0a352034b38c6a40`, commit
+`run the same function on the CPU and on the GPU, then difference it`. Le
+worktree était propre au pin final. Ce successeur ajoute un pipeline commun
+hôte/device et une cible CUDA opt-in ; aucune compilation CUDA, exécution G4
+ou mesure 50 k n'est encore reçue. Le détail pincé, les cinq réponses à Claude
+et les preuves nouvelles sont dans
+[`AUDIT_CONTRE_AUDIT_PRODUCTEUR_ANCRE_LENTILLE_AIGUE_20260812.md`](AUDIT_CONTRE_AUDIT_PRODUCTEUR_ANCRE_LENTILLE_AIGUE_20260812.md).
+
+Le propriétaire par plus petite arête maximale est mathématiquement exact
+pour tout support propre positif : il couvre chaque support et en choisit une
+unique occurrence. Les bornes mono-ancre `ext/4`, la face aiguë adjacente q4,
+le disque q4 mutualisé pour q3 et l'égalité de shell q2 sont également sûrs
+dans leur domaine. Ils ne reçoivent toutefois pas encore la source : le mode
+`--verify` partage solveurs, positivité, owner et census avec le sujet et ne
+compare que `SupportKey` et `p`, pas `extra`, `I_B` ni `U_B`.
+
+Un défaut P0 reproductible réfute le contrat CLI. Le sujet accepte
+`4<=smax<=24`, mais fixe son front à `10/9/8` et son enveloppe au neuvième
+niveau, constantes valides seulement pour `smax=11`. Sur l'ELF Release
+SHA-256 `83685f02a8c63e565177723c47efad53a7770cdc63e17f2d7241a1abfd284082` :
+
+```text
+mhgp3v_anchor_source --points=140 --family=terrain --seed=3 \
+  --smax=24 --engine=pipeline --verify
+```
+
+rend code `1`, `exhaustif=24633`, `produit=24686`, `accord=NON`. Il faut soit
+refuser `smax!=11`, soit employer les seuils dynamiques `smax-1`, `smax-2`,
+`smax-3` et le niveau commun `smax-2`.
+
+Les `28/28` CTests `mhgp3v_anchor_` passent localement en `229,97 s`. Ils
+exercent les quatre familles, deux fixtures, les mutants, le pipeline commun,
+les refus et les planchers ; ils ne couvrent ni le défaut `smax`, ni un oracle
+rationnel indépendant, ni CUDA/G4, ni le payload officiel. La note de Claude
+qui disait qu'aucune porte CMake n'existait est donc historiquement dépassée,
+mais son claim de validation de « tous les certificats » reste trop fort.
+
+Le modèle de coût de cette note oublie un facteur deux : `candidate_pairs` ne
+conserve que `b>a`. Une boule de rayon `4,8 rho^(-1/3)` donne environ `232`
+paires non ordonnées par point, pas `463`; la coalescence exacte des trois
+lanes de milieu vaut `233,807309n`. Les mesures `227/351/465` ne ferment donc
+pas une constante attendue. Le compteur omet aussi les paires q4 non aiguës
+mais parcourues, les tris, le census et tout l'aval.
+
+Le pipeline commun réserve `222 208` octets de scratch par slot, donc
+`3 640 655 872` octets (`3,39 GiB`) au défaut de 16 384 slots avant LBVH,
+sorties et workspace. Il effectue deux tris par insertion et jusqu'à
+`523 776` paires q4 par ancre. Le verrou G4 demeure la matérialisation locale
+quadratique `C(n_lens,2)`, pas la déduplication des supports.
+
+Le nouveau résultat utile est le certificat collectif de **lentille aiguë**.
+Pour une arête maximale `ab`, tout q3 positif a son carrier `x` dans
+`||x-a||^2<=D^2`, `||x-b||^2<=D^2` et
+`(x-a) dot (x-b)>0`; tout q4 positif en a au moins un. Des extrema AABB
+corrélés exacts classent un produit `A*B*C` en `NONE/ALL/UNKNOWN`. `NONE`
+ferme une masse d'ancres avant `PairId`; `ALL` doit rester factorisé. Ce prune
+ne ferme pas seul `eight_clusters`, car un carrier commun peut servir
+`Theta(n^2)` paires. La reprise prioritaire est
+`carrier block -> center/rank cover -> microtuile`, avec patches half-open et
+niveau top-`smax-2`, avant tout sweep q4.
+
+Le contrat industriel reste inchangé : la seconde porte `warm_e2e<1 s` inclut
+validation, transfert, index, source exacte, census, q3/q4, resolver, fold,
+dix forêts, verticales, lots, certificat minimal et retour hôte. Le nouveau
+kernel horizontal ne peut pas porter ce SLO isolément.
+
+## Snapshot `407d4d1` désormais historique
 
 `HEAD` contre-audité :
 `407d4d1b2745f03a7237080a75daba1c7122ea0a`, commit

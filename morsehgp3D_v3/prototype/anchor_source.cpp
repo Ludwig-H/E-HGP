@@ -41,6 +41,11 @@
 
 namespace {
 
+// Granularite des feuilles du LBVH. Elle decide la finesse du certificat de
+// front : une feuille plus fine donne une boite plus petite, donc un rayon
+// temoin plus grand et une coupure plus serree, au prix de plus de noeuds.
+int g_leaf_size = 8;
+
 using mhgp::i128;
 using mhgp::i64;
 using mhgp::P3;
@@ -64,6 +69,7 @@ enum class Inject {
   kLensStrict,        // lentille en < D au lieu de <= D : perd les ex aequo
   kCensusNoAlways,    // census ignorant les toujours-interieurs
   kPositivityLoose,   // accepte un centre sur une face du tetraedre
+  kSmaxFixedThresholds,  // fige les seuils 10/9/8 et l'enveloppe au rang neuf
 };
 
 const char* inject_name(Inject m) {
@@ -77,6 +83,7 @@ const char* inject_name(Inject m) {
     case Inject::kLensStrict: return "lens-strict";
     case Inject::kCensusNoAlways: return "census-no-always-inside";
     case Inject::kPositivityLoose: return "positivity-loose";
+    case Inject::kSmaxFixedThresholds: return "smax-fixed-thresholds";
   }
   return "?";
 }
@@ -102,6 +109,7 @@ struct Counters {
   long long kept_sites = 0;             // sites survivant au filtre d'enveloppe
   long long lens_carriers = 0;          // carriers retenus par la lentille
   long long q3_candidates = 0;
+  long long q4_pairs_walked = 0;
   long long q4_candidates = 0;
   long long interior_tests = 0;         // predicats de puissance evalues
   long long reject_positivity = 0;
@@ -114,6 +122,7 @@ struct Counters {
   long long supports_q4 = 0;
   long long shell_extra_supports = 0;   // supports dont U_B depasse S
   long long max_site_list = 0;
+  long long max_partners = 0;
   long long max_kept = 0;
   long long max_lens = 0;
 
@@ -133,6 +142,7 @@ struct Counters {
     kept_sites += o.kept_sites;
     lens_carriers += o.lens_carriers;
     q3_candidates += o.q3_candidates;
+    q4_pairs_walked += o.q4_pairs_walked;
     q4_candidates += o.q4_candidates;
     interior_tests += o.interior_tests;
     reject_positivity += o.reject_positivity;
@@ -145,6 +155,7 @@ struct Counters {
     supports_q4 += o.supports_q4;
     shell_extra_supports += o.shell_extra_supports;
     max_site_list = std::max(max_site_list, o.max_site_list);
+    max_partners = std::max(max_partners, o.max_partners);
     max_kept = std::max(max_kept, o.max_kept);
     max_lens = std::max(max_lens, o.max_lens);
   }
@@ -330,9 +341,15 @@ void lane_probe(const MortonLbvh& tree, const std::vector<P3>& pts, int a, int b
 // ont atteint leur seuil ; son cout est donc borne par les seuils, pas par la
 // population du voisinage.
 bool witness_closes(const MortonLbvh& tree, const std::vector<P3>& pts, const WitnessBall& wb,
-                    Inject inject, Counters* ctr) {
+                    int smax, Inject inject, Counters* ctr) {
   int cnt[3] = {0, 0, 0};
-  int need[3] = {kThresholdQ2, kThresholdQ3, kThresholdQ4};
+  int need[3] = {lane_death_threshold(smax, 2), lane_death_threshold(smax, 3),
+                 lane_death_threshold(smax, 4)};
+  if (inject == Inject::kSmaxFixedThresholds) {
+    need[0] = kThresholdQ2;
+    need[1] = kThresholdQ3;
+    need[2] = kThresholdQ4;
+  }
   if (inject == Inject::kFrontQ4Only) need[0] = need[1] = 0;
   // Le masque porte les lanes qui ont encore besoin de ce sous-arbre. Une lane
   // creditee d'un noeud entier en sort : aucun double comptage n'est possible.
@@ -418,7 +435,7 @@ struct Workspace {
 };
 
 // Parcours d'ancre : collecte les partenaires candidats de `a`.
-void collect_partners(const MortonLbvh& tree, const std::vector<P3>& pts, int a,
+void collect_partners(const MortonLbvh& tree, const std::vector<P3>& pts, int a, int smax,
                       Workspace* ws) {
   const P3& pa = pts[(std::size_t)a];
   ws->partners.clear();
@@ -432,7 +449,7 @@ void collect_partners(const MortonLbvh& tree, const std::vector<P3>& pts, int a,
     const WitnessBall wb = make_witness_ball(nd, pa, ws->inject);
     if (wb.usable) {
       ++ws->ctr.front_witness_calls;
-      if (witness_closes(tree, pts, wb, ws->inject, &ws->ctr)) {
+      if (witness_closes(tree, pts, wb, smax, ws->inject, &ws->ctr)) {
         ++ws->ctr.front_witness_prunes;
         continue;  // produit entier mort dans les trois lanes
       }
@@ -599,10 +616,12 @@ void extend_anchor(const std::vector<P3>& pts, int a, int b, i64 d2, int smax, b
     for (int t = 0; t < site_count; ++t)
       if (ws->margins[(std::size_t)t].id != b)
         ws->select_buf.push_back(ws->margins[(std::size_t)t].llow);
-    if ((int)ws->select_buf.size() >= kThresholdQ3) {
-      std::nth_element(ws->select_buf.begin(), ws->select_buf.begin() + (kThresholdQ3 - 1),
+    const int depth =
+        (ws->inject == Inject::kSmaxFixedThresholds) ? kThresholdQ3 : envelope_depth(smax);
+    if ((int)ws->select_buf.size() >= depth) {
+      std::nth_element(ws->select_buf.begin(), ws->select_buf.begin() + (depth - 1),
                        ws->select_buf.end(), std::greater<i64>());
-      theta = ws->select_buf[(std::size_t)(kThresholdQ3 - 1)];
+      theta = ws->select_buf[(std::size_t)(depth - 1)];
       theta_active = true;
     }
   }
@@ -682,6 +701,7 @@ void extend_anchor(const std::vector<P3>& pts, int a, int b, i64 d2, int smax, b
     const int x = ws->lens[(std::size_t)i];
     const P3& px = pts[(std::size_t)x];
     for (int j = i + 1; j < nl; ++j) {
+      ++ws->ctr.q4_pairs_walked;
       const int y = ws->lens[(std::size_t)j];
       if (ws->acute[(std::size_t)i] == 0 && ws->acute[(std::size_t)j] == 0) {
         ++ws->ctr.reject_non_acute;
@@ -736,10 +756,12 @@ void run_range(const MortonLbvh& tree, const std::vector<P3>& pts, int lo, int h
       ws->partners.clear();
       for (int b = a + 1; b < n; ++b) ws->partners.push_back(b);
     } else {
-      collect_partners(tree, pts, a, ws);
+      collect_partners(tree, pts, a, smax, ws);
     }
     if (ws->partners.empty()) continue;
     ws->ctr.candidate_pairs += (long long)ws->partners.size();
+    ws->ctr.max_partners =
+        std::max(ws->ctr.max_partners, (long long)ws->partners.size());
     const int budget2 = smax - 2, budget3 = smax - 3, budget4 = smax - 4;
 
     // ---- Sonde de lanes : elle decide q2 exactement et filtre q3/q4. Elle
@@ -796,7 +818,7 @@ RunResult produce(const std::vector<P3>& pts, int smax, int threads, bool exhaus
                   bool use_filter, bool store, Inject inject) {
   RunResult res{};
   MortonLbvh tree;
-  tree.build(pts, 8);
+  tree.build(pts, g_leaf_size);
   const int n = (int)pts.size();
   const int nthreads = std::max(1, threads);
   std::vector<Workspace> spaces((std::size_t)nthreads);
@@ -943,7 +965,7 @@ FlatTree flatten(const MortonLbvh& tree, const std::vector<P3>& pts) {
 RunResult produce_pipeline(const std::vector<P3>& pts, int smax, int threads, bool store) {
   RunResult res{};
   MortonLbvh tree;
-  tree.build(pts, 8);
+  tree.build(pts, g_leaf_size);
   const FlatTree flat = flatten(tree, pts);
   const TreeView tv = flat.view();
   const int n = (int)pts.size();
@@ -998,6 +1020,7 @@ RunResult produce_pipeline(const std::vector<P3>& pts, int smax, int threads, bo
     res.ctr.kept_sites += w.kept_sites;
     res.ctr.lens_carriers += w.lens_carriers;
     res.ctr.q3_candidates += w.q3_candidates;
+    res.ctr.q4_pairs_walked += w.q4_pairs_walked;
     res.ctr.q4_candidates += w.q4_candidates;
     res.ctr.interior_tests += w.interior_tests;
     res.ctr.supports_q2 += w.supports_q2;
@@ -1005,6 +1028,7 @@ RunResult produce_pipeline(const std::vector<P3>& pts, int smax, int threads, bo
     res.ctr.supports_q4 += w.supports_q4;
     res.ctr.shell_extra_supports += w.shell_extra;
     res.ctr.max_site_list = std::max(res.ctr.max_site_list, w.hw_sites);
+    res.ctr.max_partners = std::max(res.ctr.max_partners, w.hw_partners);
     res.ctr.max_kept = std::max(res.ctr.max_kept, w.hw_kept);
     res.ctr.max_lens = std::max(res.ctr.max_lens, w.hw_lens);
     res.supports.insert(res.supports.end(), outs[(std::size_t)t].begin(),
@@ -1048,6 +1072,7 @@ int main(int argc, char** argv) {
   bool verify = false;
   bool no_filter = false;
   bool no_store = false;
+  long long leaf = 8;
   Inject inject = Inject::kNone;
   int fixture = 0;
   bool engine_pipeline = false;
@@ -1072,6 +1097,7 @@ int main(int argc, char** argv) {
     else if (key == "--min-prunes") { if (!parse_ll(val.c_str(), &parsed)) refuse("--min-prunes invalide"); min_prunes = parsed; }
     else if (key == "--verify") { verify = true; }
     else if (key == "--no-filter") { no_filter = true; }
+    else if (key == "--leaf") { if (!parse_ll(val.c_str(), &parsed)) refuse("--leaf invalide"); leaf = parsed; }
     else if (key == "--no-store") { no_store = true; }
     else if (key == "--engine") {
       if (val == "pipeline") engine_pipeline = true;
@@ -1087,6 +1113,7 @@ int main(int argc, char** argv) {
       else if (val == "lens-strict") inject = Inject::kLensStrict;
       else if (val == "census-no-always-inside") inject = Inject::kCensusNoAlways;
       else if (val == "positivity-loose") inject = Inject::kPositivityLoose;
+      else if (val == "smax-fixed-thresholds") inject = Inject::kSmaxFixedThresholds;
       else refuse("--inject inconnu");
     }
     else if (key == "--emit-supports") { emit = true; }
@@ -1106,10 +1133,12 @@ int main(int argc, char** argv) {
     }
   }
   if (n < 2 || n > 65535) refuse("--points hors du profil dense u16 [2, 65535]");
-  if (smax < 4 || smax > 24) refuse("--smax hors bornes");
+  if (smax < 4 || smax > 2 + kMaxEnvelopeDepth) refuse("--smax hors bornes");
   if (threads < 1 || threads > 256) refuse("--threads hors bornes");
   if (coord < 0) coord = mhgp3v::cloud_family_default_coord(family, (int)n);
   if (coord < 2 || coord > 65536) refuse("--coord hors bornes");
+  if (leaf < 1 || leaf > 256) refuse("--leaf hors bornes");
+  g_leaf_size = (int)leaf;
   if (verify && no_store) refuse("--verify exige le stockage des supports");
   if (inject != Inject::kNone && !verify) refuse("un mutant sans juge ne prouve rien");
   if (inject != Inject::kNone && engine_pipeline) refuse("les mutants visent le moteur de reference");
@@ -1161,17 +1190,21 @@ int main(int argc, char** argv) {
               c.front_witness_prunes, c.lane_probe_visits, c.candidate_pairs, c.anchors_opened,
               c.anchors_lane_dead, c.anchors_extended, c.anchors_disk_dead);
   std::printf("extend gather_visits=%lld site_evaluations=%lld kept_sites=%lld lens_carriers=%lld"
-              " q3_candidates=%lld q4_candidates=%lld interior_tests=%lld\n",
+              " q3_candidates=%lld q4_paires_parcourues=%lld q4_candidates=%lld"
+              " interior_tests=%lld\n",
               c.site_gather_visits, c.site_evaluations, c.kept_sites, c.lens_carriers,
-              c.q3_candidates, c.q4_candidates, c.interior_tests);
+              c.q3_candidates, c.q4_pairs_walked, c.q4_candidates, c.interior_tests);
   std::printf("rejets positivite=%lld non_aigu=%lld owner=%lld rang=%lld degenere=%lld\n",
               c.reject_positivity, c.reject_non_acute, c.reject_owner, c.reject_rank,
               c.reject_degenerate);
   std::printf("supports q2=%lld q3=%lld q4=%lld total=%lld extra_shell=%lld\n",
               c.supports_q2, c.supports_q3, c.supports_q4,
               c.supports_q2 + c.supports_q3 + c.supports_q4, c.shell_extra_supports);
-  std::printf("high_water site_list=%lld kept=%lld lens=%lld\n", c.max_site_list, c.max_kept,
-              c.max_lens);
+  std::printf("high_water partners=%lld site_list=%lld kept=%lld lens=%lld\n",
+              c.max_partners, c.max_site_list, c.max_kept, c.max_lens);
+  std::printf("moteur %s caps partners=%d sites=%d kept=%d lens=%d\n",
+              engine_pipeline ? "pipeline" : "reference", kPartnerCap, kSiteCap, kKeptCap,
+              kLensCap);
   std::printf("temps wall_s=%.6f\n", wall);
 
   // Identite exacte-une-fois : aucune cle ne doit apparaitre deux fois.
@@ -1206,7 +1239,13 @@ int main(int argc, char** argv) {
     if (same)
       for (std::size_t i = 0; i < ref.supports.size(); ++i)
         if (support_key(ref.supports[i]) != support_key(res.supports[i]) ||
-            ref.supports[i].p != res.supports[i].p) { same = false; break; }
+            ref.supports[i].p != res.supports[i].p ||
+            ref.supports[i].shell_extra != res.supports[i].shell_extra) {
+          // `extra` est compare : un filtre qui perdrait un membre de coquille
+          // laisserait `p` intact et passerait sans cette colonne.
+          same = false;
+          break;
+        }
     std::printf("verify exhaustif=%zu produit=%zu accord=%s\n", ref.supports.size(),
                 res.supports.size(), same ? "OUI" : "NON");
     if (!same) {

@@ -764,21 +764,63 @@ permanente est dans
 [`AUDIT_JUNG_ANCHOR_389A742.md`](audits/AUDIT_JUNG_ANCHOR_389A742.md); le
 statut du prototype correspondant appartient à l'audit live.
 
-Un q4 pertinent est une intersection de deux droites dont la profondeur
-stricte est au plus `K-3=7`. Cette caractérisation fournit un oracle de
-couverture et des filtres locaux; elle n'admet pas la construction des premiers
-niveaux du plein arrangement comme route produit. La famille de séparation de
-la section suivante montre que même ces niveaux peuvent être quadratiques alors
-que Source S reste linéaire. Tout candidat produit autrement valide ensuite
-indépendance affine, positivité, diamètre et owner canoniques, census et clé.
+Fixer l'ancre et compter `c` sites strictement intérieurs sur tout le disque.
+Pour q4, poser `k=smax-4-c`, soit `k=7-c` à `smax=11`. Construire l'arrangement
+seulement sur l'ensemble `E` des lignes qui peuvent porter un carrier est une
+génération superset exacte : au centre d'un vrai support, ses deux lignes sont
+incidentes et le nombre de lignes de `E` strictement positives est au plus le
+census global privé des `c` témoins permanents, donc au plus `k`. Retirer les
+formes non-carriers ne peut qu'abaisser cette profondeur. Le rang de cet
+sous-arrangement n'est toutefois jamais publié comme `p`; le census final
+rejoue tous les sites nécessaires à `I_B` et `U_B`, y compris un site filtré
+par l'enveloppe qui peut encore être shell.
 
-Les parallèles, droites confondues, intersections multiples, points de
-frontière et grandes coquilles sont groupés en lots exacts. Le sweep doit les
-traiter ou refuser la route avant toute sortie. La borne locale shallow ne
-prouve ni que la somme des points rapportés par ancre est linéaire, ni que le
-range-report l'est; ces masses restent des obligations d'admission.
+Cette structure mono-ancre ne doit pas être confondue avec le plein arrangement
+relevé de la section suivante. Si `m=|E|`, le nombre de centres géométriques
+distincts de profondeur au plus `k` est inférieur à `e(k+1)m` pour `k>=1`, et
+au plus `m` pour `k=0`. La preuve échantillonne chaque ligne avec probabilité
+`1/(k+1)` et injecte tout sommet retenu dans un sommet de l'intersection convexe
+des demi-plans négatifs échantillonnés. Cette borne n'affirme ni que la somme
+des `m` sur toutes les ancres est linéaire, ni qu'une concurrence ne porte pas
+quadratiquement beaucoup de `SupportKey`.
+
+Une ordonnance exacte concrète choisit un chart entier du plan médiateur et
+une cisaille unimodulaire sans ligne verticale, puis sépare les formes `P`
+positives au-dessus de leur ligne et `N` positives au-dessous. Hors shell :
+
+$$p_E(x,y)=\#\left\lbrace i\in P:l_i(x)<y\right\rbrace+\#\left\lbrace i\in N:l_i(x)>y\right\rbrace.$$
+
+Construire les `k+1` niveaux inférieurs `0..k` de `P` et supérieurs de `N`
+suffit. Les candidats sont les sommets `P-P` dont le rang opposé ferme le
+budget, les sommets `N-N` symétriques et les overlays des **segments actifs**
+des niveaux `r,s` avec `r+s<=k`. Les droites porteuses entières ne sont jamais
+croisées deux à deux. Une construction conservatrice vise
+`O(m log m+m*k^2+V+H)`, où `V` compte les centres shallow uniques et `H` les
+supports réellement développés aux concurrences. Tout candidat valide ensuite
+Jung, indépendance affine, positivité, les six distances, owner, census et clé.
+
+Les parallèles distinctes ne créent aucun événement. Les droites confondues
+sont des bundles avec identifiants et orientations ; les intersections
+multiples sont groupées par centre rationnel et traitées atomiquement, toutes
+les lignes incidentes étant exclues du rang strict. Une perturbation
+séquentielle n'est pas exacte. Une grande cosphère est quotientée par une
+branche de plateau reçue, développée selon le contrat, ou refusée explicitement.
+
+Pour un layout device, une shallow cutting certifiée emploie des cellules
+half-open, un `base_inside` exact et des listes de conflits complètes. Sous un
+cap terminal `tau`, elle doit fermer
+`sum_C C(|X_C|,2)<=((tau-1)/2)*sum_C |X_C|`; toute cellule lourde est raffinée,
+routée vers le moteur de niveaux ou refusée, jamais tronquée. La preuve, la
+borne, les dégénérescences et les gates sont détaillées dans
+[`AUDIT_CONTRE_AUDIT_PRODUCTEUR_ANCRE_LENTILLE_AIGUE_20260812.md`](audits/AUDIT_CONTRE_AUDIT_PRODUCTEUR_ANCRE_LENTILLE_AIGUE_20260812.md).
 
 ### 6.6 Catalogue de supports et vrai arrangement
+
+Cette section traite l'arrangement **global relevé** et ses transits. Sa famille
+quadratique interdit de matérialiser cet objet ; elle ne contredit pas la borne
+de la section 6.5 sur les centres shallow distincts d'une ancre déjà admise.
+Le coût global de la route mono-ancre reste néanmoins conditionné par la masse
+des ancres, `sum |E_ab|`, les censuses et les plateaux.
 
 Le catalogue abstrait des supports propres positifs `S`, de tailles deux à
 quatre, satisfaisant `|I_B|+|S|<=11` est une source **générative** de toutes les
@@ -1290,11 +1332,11 @@ durable; ils sont tenus dans
 points u16 + LBVH exact résidents
   |-> k=1 : Yao-1 exact mutualisé -> EMST sparse
   |-> q2 : lane cellules D_9 comparée à Yao--affine--dual suspendu
-  `-> q3/q4 : front Jung coalescé + enveloppe top-9 hors ancre
-       -> center-cover collectif + patches half-open, ledger fail-open
-       -> q3 intrinsèque + sweep q4; cellules D_h comme comparateur
+  `-> q3/q4 : front Jung coalescé + lentille aiguë factorisée
+       -> center-cover persistant + enveloppe top-(smax-2), ledger fail-open
+       -> q3 intrinsèque + niveaux q4 P/P, N/N, P/N ou shallow cutting certifiée
        -> owner génératif exact-once ou RLE SupportKey -> une géométrie/owner
-       -> census producteur ou top-(12-q) hors U en fallback
+       -> census I/U complet, y compris shell retiré par theta
        -> side queue H!=empty/plateau, ou second RLE BallKey A/B
        -> BallActivation/tombstones streamées + gate regular/plateau/high-rank
        -> facettes du cœur + gateway canonique de première incidence
@@ -1385,14 +1427,21 @@ un refus de ressource sont trois statuts distincts.
    native et `n=32` sous Compute Sanitizer, puis va directement au profil 50 k.
    Une masse majoritairement terminale, un rescan par bloc ou une queue lourde
    arrêtent la route avant son extension à P1.
-5. Sur les seules ancres admises, recevoir séparément Jung--Yao, la borne AABB
-   `g_min/Q_max`, Helly, la composition cœur--profondeur et la profondeur
-   terminale. Mesurer le gain marginal de chacun contre son coût exact.
+5. Sur les seuls blocs encore admis, mesurer d'abord le classifieur collectif
+   `NONE/ALL/UNKNOWN` de lentille aiguë ; `NONE` ferme la masse avant `PairId`,
+   `ALL` reste factorisé et `UNKNOWN` se subdivise. Recevoir séparément
+   Jung--Yao, la borne AABB `g_min/Q_max`, Helly, la composition
+   cœur--profondeur et la profondeur terminale. Mesurer le gain marginal de
+   chacun contre son coût exact ; aucun rescan racine n'est admis comme route.
 6. Garder q2/q3/q4 par lanes indépendantes et budgets `h` comme comparateur,
    avec partition terminale commune, `e0` immuable et promotion, sans dépendre
    des supports inférieurs retenus et sans supprimer le transcript Yao-1 de
-   `k=1`. Pour la route front, recevoir l'arête maximale canonique, le patch
-   half-open et `occurrences=SupportKey_unique`; son RLE devient vérificateur.
+   `k=1`. Pour la route front, recevoir l'arête maximale canonique, puis
+   remplacer `C(nlens,2)` par les niveaux mono-ancre `P-P/N-N/P-N` sur leurs
+   segments actifs ou par une shallow cutting certifiée. Le rang restreint
+   génère seulement des centres ; un census complet décide `p,I_B,U_B`.
+   Recevoir le patch half-open et `occurrences=SupportKey_unique`; son RLE
+   devient vérificateur.
    Pour la baseline cellulaire, émettre les occurrences compactes, faire le RLE
    `SupportKey` avant le lift, chercher directement la feuille owner et rejouer
    son pool; transporter les contextes seulement si la partition terminale

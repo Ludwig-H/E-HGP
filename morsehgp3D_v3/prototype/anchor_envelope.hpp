@@ -183,7 +183,24 @@ MHGP_HD inline bool positive_q4(const P3& s0, const P3& s1, const P3& s2, const 
 //   q4 : 15 (u.u) < 4 D2   (rayon D/sqrt(15))
 // Bornes i64 : u.u <= 5,2e10 ; 4*D2*15 <= 7,8e11.
 // ---------------------------------------------------------------------------
-inline constexpr int kThresholdQ2 = 10;  // dix interieurs tuent la lane q2
+// SEUILS PARAMETRES PAR `smax`. Les valeurs 10/9/8 et l'enveloppe au neuvieme
+// rang ne sont celles que de `smax=11` ; les figer refute le domaine CLI
+// annonce. Contre-exemple recu : `terrain,n=140,seed=3,smax=24` publiait 53
+// supports faux (24 686 contre 24 633).
+//
+// Un support d'arite q est pertinent tant que p <= smax-q. La lane q meurt
+// donc au (smax-q+1)-ieme temoin universel.
+MHGP_HD inline int lane_death_threshold(int smax, int q) { return smax - q + 1; }
+
+// L'enveloppe mobile doit garder les `smax-2` plus grandes bornes inferieures :
+// c'est la profondeur commune qui couvre q3 (mort a smax-2) et q4 (mort a
+// smax-3). A `smax=11` cela redonne exactement neuf.
+MHGP_HD inline int envelope_depth(int smax) { return smax - 2; }
+
+// Borne dure du tampon de selection ; elle borne aussi le domaine `smax`.
+inline constexpr int kMaxEnvelopeDepth = 32;
+
+inline constexpr int kThresholdQ2 = 10;  // valeurs de reference a smax=11
 inline constexpr int kThresholdQ3 = 9;
 inline constexpr int kThresholdQ4 = 8;
 

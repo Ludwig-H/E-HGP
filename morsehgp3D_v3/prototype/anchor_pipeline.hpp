@@ -79,6 +79,7 @@ struct WorkCounters {
   long long kept_sites = 0;
   long long lens_carriers = 0;
   long long q3_candidates = 0;
+  long long q4_pairs_walked = 0;   // paires de lentille parcourues, non aigues comprises
   long long q4_candidates = 0;
   long long interior_tests = 0;
   long long supports_q2 = 0;
@@ -204,10 +205,11 @@ MHGP_HD inline i64 witness_near2(const TreeView& t, int ni, const WitnessBall& w
   return s;
 }
 
-MHGP_HD inline bool witness_closes(const TreeView& t, const WitnessBall& wb, WorkCounters* ctr,
-                                   unsigned* flags) {
+MHGP_HD inline bool witness_closes(const TreeView& t, const WitnessBall& wb, int smax,
+                                   WorkCounters* ctr, unsigned* flags) {
   int cnt[3] = {0, 0, 0};
-  const int need[3] = {kThresholdQ2, kThresholdQ3, kThresholdQ4};
+  const int need[3] = {lane_death_threshold(smax, 2), lane_death_threshold(smax, 3),
+                       lane_death_threshold(smax, 4)};
   int stack_node[64];
   unsigned stack_mask[64];
   int sp = 0;
@@ -395,7 +397,7 @@ MHGP_HD inline void run_anchor_point(const TreeView& t, int a, int smax, Scratch
       const WitnessBall wb = witness_ball_of(t, ni, pa);
       if (wb.usable) {
         ++ctr->front_witness_calls;
-        if (witness_closes(t, wb, ctr, flags)) {
+        if (witness_closes(t, wb, smax, ctr, flags)) {
           ++ctr->front_witness_prunes;
           continue;
         }
@@ -482,37 +484,39 @@ MHGP_HD inline void run_anchor_point(const TreeView& t, int a, int smax, Scratch
     }
   }
   if (nsites > ctr->hw_sites) ctr->hw_sites = nsites;
-  // Tri par insertion binaire sur (d2, id) : la liste est petite et le tri
-  // doit etre le MEME des deux cotes, donc pas de std::sort ici.
-  for (int i = 1; i < nsites; ++i) {
-    const i64 kd = sc.site_d2[i];
-    const int ki = sc.site_id[i];
-    int j = i - 1;
-    while (j >= 0 && (sc.site_d2[j] > kd || (sc.site_d2[j] == kd && sc.site_id[j] > ki))) {
-      sc.site_d2[j + 1] = sc.site_d2[j];
-      sc.site_id[j + 1] = sc.site_id[j];
-      --j;
-    }
-    sc.site_d2[j + 1] = kd;
-    sc.site_id[j + 1] = ki;
-  }
-  // Les ancres survivantes sont traitees par distance croissante.
-  for (int i = 1; i < nsurv; ++i) {
-    const int kv = sc.partners[i];
-    const int kb = kv & 0x1FFFFFFF;
-    const i64 kd = (i64)norm2_i64(sub(tree_point(t, kb), pa));
-    int j = i - 1;
-    while (j >= 0) {
-      const int vb = sc.partners[j] & 0x1FFFFFFF;
-      const i64 vd = (i64)norm2_i64(sub(tree_point(t, vb), pa));
-      if (vd > kd || (vd == kd && vb > kb)) {
-        sc.partners[j + 1] = sc.partners[j];
-        --j;
-      } else {
-        break;
+  // Tri par TAS sur (d2, id) : en place, O(n log n), sans recursion et sans
+  // memoire auxiliaire. Le tri par insertion precedent coutait jusqu'a
+  // 13,1 millions de deplacements par fil au cap des sites (audit du
+  // 12 aout) ; ce tas coute au plus 5120*13 comparaisons.
+  {
+    auto swap_at = [&](int i, int j) {
+      const i64 d = sc.site_d2[i];
+      sc.site_d2[i] = sc.site_d2[j];
+      sc.site_d2[j] = d;
+      const int v = sc.site_id[i];
+      sc.site_id[i] = sc.site_id[j];
+      sc.site_id[j] = v;
+    };
+    auto less_at = [&](int i, int j) {
+      return sc.site_d2[i] < sc.site_d2[j] ||
+             (sc.site_d2[i] == sc.site_d2[j] && sc.site_id[i] < sc.site_id[j]);
+    };
+    auto sift = [&](int root, int count) {
+      for (;;) {
+        int big = root;
+        const int l = 2 * root + 1, r = l + 1;
+        if (l < count && less_at(big, l)) big = l;
+        if (r < count && less_at(big, r)) big = r;
+        if (big == root) return;
+        swap_at(root, big);
+        root = big;
       }
+    };
+    for (int i = nsites / 2 - 1; i >= 0; --i) sift(i, nsites);
+    for (int i = nsites - 1; i > 0; --i) {
+      swap_at(0, i);
+      sift(0, i);
     }
-    sc.partners[j + 1] = kv;
   }
 
   // ---- 4. Extension par ancre.
@@ -524,8 +528,19 @@ MHGP_HD inline void run_anchor_point(const TreeView& t, int a, int smax, Scratch
     const P3 pb = tree_point(t, b);
     const i64 d2 = (i64)norm2_i64(sub(pb, pa));
 
+    // Prefixe utile par dichotomie sur la liste triee : |z-a|^2 <= 1,5 D^2.
+    // Aucun tri des partenaires n'est necessaire, et aucun invariant ne le
+    // rendait exact : le prefixe se relit en O(log) a chaque ancre.
     int site_count = 0;
-    while (site_count < nsites && 2 * sc.site_d2[site_count] <= 3 * d2) ++site_count;
+    {
+      int lo = 0, hi = nsites;
+      while (lo < hi) {
+        const int mid = lo + (hi - lo) / 2;
+        if (2 * sc.site_d2[mid] <= 3 * d2) lo = mid + 1;
+        else hi = mid;
+      }
+      site_count = lo;
+    }
     ctr->site_evaluations += site_count;
 
     const P3 dvec = sub(pb, pa);
@@ -549,29 +564,30 @@ MHGP_HD inline void run_anchor_point(const TreeView& t, int a, int smax, Scratch
       int m = 0;
       for (int k = 0; k < site_count; ++k)
         if (sc.site_id[k] != b) ++m;
-      if (m >= kThresholdQ3) {
+      const int depth = envelope_depth(smax);
+      if (m >= depth) {
         // Selection partielle des neuf plus grands : tri par insertion sur un
         // tampon de neuf, deterministe et identique des deux cotes.
         // Insertion des neuf plus grandes valeurs de Llow, en un seul passage
         // sur la liste et sans tampon auxiliaire : deterministe, identique des
         // deux cotes.
-        i64 top[kThresholdQ3];
+        i64 top[kMaxEnvelopeDepth];
         int filled = 0;
         for (int k = 0; k < site_count; ++k) {
           if (sc.site_id[k] == b) continue;
           const i64 v = sc.margin_llow[k];
-          if (filled < kThresholdQ3) {
+          if (filled < depth) {
             int j = filled - 1;
             while (j >= 0 && top[j] < v) { top[j + 1] = top[j]; --j; }
             top[j + 1] = v;
             ++filled;
-          } else if (v > top[kThresholdQ3 - 1]) {
-            int j = kThresholdQ3 - 2;
+          } else if (v > top[depth - 1]) {
+            int j = depth - 2;
             while (j >= 0 && top[j] < v) { top[j + 1] = top[j]; --j; }
             top[j + 1] = v;
           }
         }
-        theta = top[kThresholdQ3 - 1];
+        theta = top[depth - 1];
         theta_active = true;
       }
     }
@@ -637,6 +653,7 @@ MHGP_HD inline void run_anchor_point(const TreeView& t, int a, int smax, Scratch
       const int x = sc.lens[i];
       const P3 px = tree_point(t, x);
       for (int j = i + 1; j < nl; ++j) {
+        ++ctr->q4_pairs_walked;
         if (sc.acute[i] == 0 && sc.acute[j] == 0) continue;
         const int y = sc.lens[j];
         const P3 py = tree_point(t, y);

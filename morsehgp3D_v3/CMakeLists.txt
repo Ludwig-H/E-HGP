@@ -2712,6 +2712,32 @@ mhgp3v_add_expected_code_test_for(mhgp3v_anchor_source
   mhgp3v_anchor_reject_mutant_pipeline "les mutants visent le moteur de reference" 2
   --points=90 --verify --engine=pipeline --inject=lens-strict)
 
+# DOMAINE `smax`. Les seuils 10/9/8 et l'enveloppe au neuvieme rang ne sont
+# ceux que de `smax=11`. Le contre-exemple recu de l'auditeur publiait 53
+# supports faux a `smax=24`; ces portes le gravent aux deux bouts du domaine.
+add_test(NAME mhgp3v_anchor_smax24 COMMAND mhgp3v_anchor_source
+         --points=140 --family=terrain --seed=3 --smax=24 --verify
+         --min-supports=24000)
+add_test(NAME mhgp3v_anchor_smax24_pipeline COMMAND mhgp3v_anchor_source
+         --points=140 --family=terrain --seed=3 --smax=24 --engine=pipeline
+         --verify --min-supports=24000)
+add_test(NAME mhgp3v_anchor_smax20 COMMAND mhgp3v_anchor_source
+         --points=140 --family=terrain --seed=3 --smax=20 --verify
+         --min-supports=15000)
+add_test(NAME mhgp3v_anchor_smax_bas COMMAND mhgp3v_anchor_source
+         --points=200 --family=uniform --seed=6 --smax=5 --verify
+         --min-supports=500)
+set_tests_properties(mhgp3v_anchor_smax24 mhgp3v_anchor_smax24_pipeline
+                     mhgp3v_anchor_smax20 mhgp3v_anchor_smax_bas
+                     PROPERTIES PASS_REGULAR_EXPRESSION "accord=OUI")
+# Le mutant qui fige les seuils a leurs valeurs de `smax=11` doit mourir hors
+# de ce point, et il SURVIT legitimement a `smax=11` : la porte le tue la ou
+# le figement est faux.
+mhgp3v_add_expected_code_test_for(mhgp3v_anchor_source
+  mhgp3v_anchor_mutant_smax_fige "MUTANT TUE" 4
+  --points=140 --family=terrain --seed=3 --smax=24 --verify
+  --inject=smax-fixed-thresholds)
+
 # Refus contractuels, tous AVANT le moindre calcul.
 mhgp3v_add_expected_code_test_for(mhgp3v_anchor_source
   mhgp3v_anchor_reject_mutant_sans_juge "un mutant sans juge ne prouve rien" 2

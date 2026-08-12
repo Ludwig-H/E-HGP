@@ -27,6 +27,16 @@ Le verdict lié au `HEAD` et au worktree est tenu uniquement dans
 [`AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md). Ne déduire aucun état
 live d'une note datée, d'un message de commit ou du seul passage d'un CTest.
 
+Le producteur expérimental par arête maximale apporte quatre lemmes exacts :
+borne mono-ancre `ext/4`, face positive adjacente d'un q4 positif, disque q4
+mutualisable pour le filtre q3 et identité entière du shell diamétral q2. Son
+owner choisit exactement une occurrence de chaque support propre, mais pas une
+activation unique par `BallKey`. Il n'est pas reçu : son différentiel partage
+la géométrie du sujet, son ABI ne transporte pas encore `I_B/U_B`, et sa boucle
+q4 forme toujours toutes les paires de la lentille. Le contre-audit et la route
+de remplacement par niveaux mono-ancre sont dans
+[`AUDIT_CONTRE_AUDIT_PRODUCTEUR_ANCRE_LENTILLE_AIGUE_20260812.md`](audits/AUDIT_CONTRE_AUDIT_PRODUCTEUR_ANCRE_LENTILLE_AIGUE_20260812.md).
+
 ## Contrat visé
 
 Deux sorties sont distinctes :
@@ -65,6 +75,11 @@ même sous une seconde, elle ne ferme pas ce SLO.
   sans fusion ni nouveau `PointId`.
 - À `K=10`, les seuils de témoins des supports q2/q3/q4 sont `10/9/8`. Cette
   preuve autorise seulement une tombstone horizontale avec resolver latent.
+- Pour une ancre q4 admise et `c` témoins toujours intérieurs, les centres
+  géométriques distincts du sous-arrangement de `m` lignes carriers à profondeur
+  au plus `k=7-c` sont en nombre `O(m(k+1))`, avec la borne explicite
+  `<e(k+1)m` pour `k>=1`. Cette borne fixe la boucle locale q4, pas la masse des
+  ancres, le census, ni le développement d'une cosphère lourde.
 - `q_min` est la plus petite arité de provenance Morse prouvée. `q_cert` est le
   maximum des arités effectivement exhibées et rejouées pour la même boule,
   sans preuve d'absence d'un support plus grand.
@@ -112,9 +127,11 @@ du premier contact et refuse encore de vrais nuages affines-3. Sa récolte q2/q3
 n'a ni juge de complétude, ni owner/BallRecord complet et filtre encore par rang
 fermé. Le pivot itératif historique montrait en outre que la baisse du rayon
 n'ordonne pas le nombre d'intérieurs; il ne décrit pas le comparateur du pinceau
-courant. Un vrai arrangement shallow reste une voie conditionnelle, sans borne
-sortie-sensible et sans droit de matérialiser une mosaïque d'ordre supérieur sous
-un autre nom. Les preuves et fixtures sont dans
+courant. Le plein arrangement relevé reste interdit et sans borne
+sortie-sensible. Les niveaux peu profonds d'une **ancre fixe** ont en revanche
+une borne linéaire à profondeur fixée ; ils restent conditionnels au coût du
+front et du census et ne donnent aucun droit de matérialiser une mosaïque
+d'ordre supérieur sous un autre nom. Les preuves et fixtures sont dans
 [`AUDIT_REPONSES_SOURCE_FRONT_INVERSE_20260812.md`](audits/AUDIT_REPONSES_SOURCE_FRONT_INVERSE_20260812.md)
 et l'audit courant du volume/pinceau est dans
 [`AUDIT_REPONSES_VOLUME_PINCEAU_PROJECTIONS_20260812.md`](audits/AUDIT_REPONSES_VOLUME_PINCEAU_PROJECTIONS_20260812.md).
@@ -125,7 +142,9 @@ jusqu'au niveau neuf, tous transits non positifs, mais seulement `499 945`
 supports q2--q4 de Source S.
 Les supports utiles doivent donc être produits avant les transits. Le théorème de
 propriétaire donne alors les plafonds distincts `q2/q3/q4=9/8/7`; ces plafonds
-préservent `K_max=10` et ne rendent pas le sweep sortie-sensible.
+préservent `K_max=10` et ne rendent pas le sweep **global** sortie-sensible. Ils
+bornent en revanche les centres shallow distincts d'une ancre fixe, ce qui
+autorise le producteur local décrit dans le contre-audit de la lentille aiguë.
 Le théorème GPU par listes imbriquées de cellules de centres évite le census
 global par tuple. Il ne prouve pas une source sparse : les cliques
 d'intervalles peuvent rester `Theta(m^4)` et une subdivision peut répéter plus
@@ -153,7 +172,7 @@ admission produit :
 | --- | --- | --- |
 | `k=1` | Yao-1 exact puis EMST sparse | Borůvka point--LBVH borné |
 | q2 profond | cellules de centres, lane `D_9`, à comparer avant tout port | cascade Yao--banque affine--dual et self-join conservés comme diagnostics/falsificateurs |
-| q3/q4 | front de Jung coalescé puis enveloppe top-9 exacte, en exploration | cellules de centres et exhaustif borné comme comparateurs d'identités/coût |
+| q3/q4 | front de Jung coalescé, lentille aiguë et niveaux mono-ancre exacts, en exploration | cellules de centres et exhaustif borné comme comparateurs d'identités/coût |
 | quotient H0 | fusion device vers activations, gateways et token Johnson | catalogue exhaustif exigé seulement par Gamma/verticales tant que leur reconstruction n'est pas prouvée |
 
 Le transcript Yao-1 de `k=1` n'est donc pas abandonné avec la cascade q2.
@@ -251,11 +270,11 @@ une baseline, pas un cap ni une garantie de temps. La preuve est dans
 points u16 + LBVH exact résidents
   |-> k=1 : Yao-1 exact mutualisé -> EMST sparse
   |-> q2 : lane cellules D_9 en comparaison avec Yao--affine--dual suspendu
-  `-> q3/q4 : front de Jung coalescé + enveloppe top-9 hors ancre
-       -> center-cover avant émission + patches half-open exacts
-       -> q3 intrinsèque + sweep de face q4; cellules comme comparateur
+  `-> q3/q4 : front de Jung coalescé + lentille aiguë factorisée
+       -> center-cover persistant + enveloppe top-(smax-2) half-open
+       -> q3 intrinsèque + niveaux q4 P/P, N/N, P/N ou cutting certifiée
        -> owner génératif exact-once ou RLE SupportKey -> une géométrie/owner
-       -> census producteur ou top-(12-q) hors U en fallback
+       -> census I/U complet, y compris shell retiré par theta
        -> side queue H!=empty/plateau ou second RLE BallKey A/B
        -> gate régulière / plateau / inertie de haut rang
        -> facettes du cœur, gateways et resolver strict
@@ -454,13 +473,20 @@ préfixe comme objet complet.
    tranche n'émet aucune ancre et ne prouve pas la complétude de P1; elle est
    spécifiée dans
    [`NOTE_SOLUTION_P1A_CENTER_COVER_MASSONLY_20260811.md`](audits/NOTE_SOLUTION_P1A_CENTER_COVER_MASSONLY_20260811.md).
-5. Sur les seules ancres admises, mesurer séparément cœur de Jung, Helly,
-   composition cœur--profondeur et profondeur terminale. Le gain marginal doit
-   payer collecte et tri; toute ambiguïté retombe fail-open.
-6. Construire le front de Jung coalescé et son enveloppe top-9 q3/q4 sans
-   parcourir le plein arrangement ni remplacer le transcript Yao-1 de `k=1`.
-   Recevoir l'arête maximale canonique et le patch half-open avec
-   `occurrences=SupportKey_unique`; réutiliser leur census `(I,E)`. Garder les
+5. Sur les seuls blocs encore admis, mesurer d'abord la lentille aiguë
+   `NONE/ALL/UNKNOWN` : `NONE` ferme une masse avant `PairId`, `ALL` reste
+   factorisé et `UNKNOWN` se subdivise. Mesurer ensuite séparément cœur de
+   Jung, Helly, composition cœur--profondeur et profondeur terminale. Le gain
+   marginal doit payer collecte et tri ; toute ambiguïté retombe fail-open et
+   aucun rescan racine n'est admis comme route.
+6. Construire le front de Jung coalescé et son enveloppe top-`(smax-2)` q3/q4
+   sans parcourir le plein arrangement ni remplacer le transcript Yao-1 de
+   `k=1`. Recevoir l'arête maximale canonique, puis remplacer la boucle
+   `C(nlens,2)` par les niveaux mono-ancre `P-P/N-N/P-N` sur leurs segments
+   actifs ou par une shallow cutting certifiée. Le rang restreint génère des
+   centres, jamais le census publié. Recevoir le patch half-open avec
+   `occurrences=SupportKey_unique`; rejouer un census complet `(I_B,U_B)`, y
+   compris le shell qu'un filtre `theta` peut retirer du set intérieur. Garder les
    lanes q2/q3/q4 et budgets `h` comme comparateur support-first. Pour cette
    baseline, employer une partition terminale commune, émettre les occurrences
    compactes puis faire un premier RLE par `SupportKey` **avant** tout lift.
