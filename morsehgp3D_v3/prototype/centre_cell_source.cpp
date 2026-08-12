@@ -141,6 +141,9 @@ struct Stats {
   i64 bisector_tests = 0, bisector_pruned = 0;
   i64 hull_tests = 0, hull_pruned = 0;
   i64 diameter_tests = 0, diameter_pruned = 0;
+  i64 occurrences_recorded = 0, occurrences_unowned = 0, occurrences_nonpositive = 0;
+  i64 occurrences_degenerate = 0, owner_tests = 0, owner_multiple = 0, batches_flushed = 0;
+  i64 probe_tests = 0, probe_accepted = 0, probe_edges = 0, probe_triangles = 0, probe_quads = 0;
   i64 axis_tests = 0, axis_pruned = 0, axis_unusable = 0;
   i64 lifts_built = 0, degenerate_lifts = 0;
   // LEDGER DES CAUSES, PAR ARITE. Sans lui, « les petites cellules causent le
@@ -432,6 +435,12 @@ struct Engine {
   int smax = 11;
   int leaf = 4;
   int work_cap = 20000;
+  // SONDAGE DU VRAI GRAPHE : desactive par defaut. Il divise les cellules par
+  // trois mais multiplie les lifts par un facteur et demi sur ce backend CPU.
+  // Le bon reglage est une propriete du BACKEND, pas de la geometrie : un A/B
+  // device doit le recalibrer avant tout defaut different.
+  int probe_factor = 1;
+  int probe_top_cap = 96;
   int max_depth = 22;
   bool axis_filter = false;
   Mutant mutant = Mutant::kNone;
@@ -444,8 +453,39 @@ struct Engine {
   std::vector<std::vector<Cand>> level;
   std::vector<i128> scratch_u;
   std::vector<i128> thresholds;  // R_0 .. R_{tmax-1}
-  std::vector<unsigned long long> adj;
   std::vector<Pending> pending;
+
+  // ---------------------------------------------------------------------------
+  // LIFT DIFFERE PAR LOT — le RLE `SupportKey` AVANT lift.
+  //
+  // Un meme tuple geometrique est propose par plusieurs cellules voisines, mais
+  // un seul point de l'espace le possede. La mesure de multiplicite montre que
+  // ces cellules sont sous un ancetre PROCHE : un lot borne en octets, vide
+  // quand il deborde, capte donc l'essentiel de la deduplication sans aucune
+  // table globale d'occurrences. Le parcours en profondeur rend un lot a taille
+  // plafonnee spatialement coherent par construction.
+  //
+  // Le lot ne peut etre vide qu'entre deux cellules terminales : si les
+  // enregistrements d'une meme cellule etaient coupes, son census tournerait
+  // deux fois et publierait deux fois ses supports.
+  struct BatchCell {
+    CentreCell cell;
+    std::vector<Cand> cands;
+    std::vector<int> bucket_end;
+    bool have_thresholds = false;
+    std::vector<Pending> pending;
+  };
+  struct BatchRec {
+    int ids[4] = {0, 0, 0, 0};
+    int q = 0;
+    int e = 0;
+    int slot = 0;
+  };
+  std::vector<BatchCell> batch_cells;
+  std::vector<BatchRec> batch_recs;
+  int batch_rec_cap = 1 << 20;
+  int cur_slot = -1;
+  bool deferred_lift = false;
   std::vector<Record> cell_records;
   std::vector<int> bucket_end;  // borne de prefixe de chaque `A_p` dans la liste
   std::vector<int> group;
@@ -480,6 +520,7 @@ struct Engine {
     current_batch = 0;
     batch_counter = 0;
     descend(root, seed);
+    if (deferred_lift) flush_batch();
   }
 
   int batch_depth = 3;
@@ -660,8 +701,46 @@ struct Engine {
     // Poids de travail : un triplet paie un `lift_triangle`, un quadruplet un
     // `lift_of` et son auto-centrage, donc environ trois et six fois une paire.
     const i64 work = pot_e + 3 * pot_t + 6 * pot_q;
-    const bool terminal =
-        work <= (i64)work_cap || (int)mine.size() <= leaf || cell.depth >= max_depth;
+    // CRITERE A DEUX ETAGES (auditeur). Le potentiel d'intervalles est un
+    // MAJORANT grossier : le graphe d'intervalles est un surgraphe du graphe de
+    // bissecteurs 3D. Pres de la racine il explose et force a decouper la ou le
+    // vrai graphe est creux — c'est ce qui rendait la pente des cellules rouge.
+    // On sonde donc le VRAI graphe dans une bande d'indecision, une seule fois,
+    // et on reutilise l'adjacence si la cellule devient terminale.
+    adj_ready = false;
+    bool terminal = work <= (i64)work_cap || (int)mine.size() <= leaf ||
+                    cell.depth >= max_depth;
+    if (!terminal && work <= (i64)work_cap * (i64)probe_factor &&
+        (int)mine.size() <= probe_top_cap) {
+      int m3p = (int)mine.size(), m4p = (int)mine.size();
+      if (have_thresholds) {
+        const int p3 = smax - 3, p4 = smax - 4;
+        if (p3 >= 0 && p3 < (int)bucket_end.size()) m3p = bucket_end[(std::size_t)p3];
+        if (p4 >= 0 && p4 < (int)bucket_end.size()) m4p = bucket_end[(std::size_t)p4];
+      }
+      const int c2p = (int)mine.size();
+      const int topp = std::max(c2p, std::max(m3p, m4p));
+      build_adjacency(tight, mine, topp);
+      i64 real_e = 0, real_t3 = 0, real_t4 = 0, real_q4 = 0;
+      real_counts(topp, c2p, m3p, m4p, &real_e, &real_t3, &real_t4, &real_q4);
+      ++stats.probe_tests;
+      stats.probe_edges += real_e;
+      stats.probe_triangles += real_t3;
+      stats.probe_quads += real_q4;
+      // Controle de la borne d'incidence : elle doit majorer le compte exact.
+      const i64 bound = m4p > 3 ? (i64)(m4p - 3) * real_t4 / 4 : 0;
+      if (real_q4 > bound + (m4p > 3 ? 1 : 0) && real_t4 > 0) {
+        std::fprintf(stderr, "INVARIANT viole : Q4=%lld > borne %lld (m4=%d, T4=%lld)\n",
+                     real_q4, bound, m4p, real_t4);
+        invariant_broken = 1;
+      }
+      if (real_e + 3 * real_t3 + 6 * real_q4 <= (i64)work_cap) {
+        terminal = true;
+        ++stats.probe_accepted;
+      } else {
+        adj_ready = false;
+      }
+    }
     const i64 overlaps = pot_e;
     if (terminal) {
       ++stats.cells_terminal;
@@ -702,6 +781,94 @@ struct Engine {
       descend(child, mine);
       current_batch = saved;
     }
+  }
+
+  // LE GRAPHE DES PAIRES ADMISSIBLES : intervalles compatibles ET bissecteur
+  // rencontrant la cellule. Construit une seule fois, puis reutilise soit pour
+  // decider le split, soit pour enumerer.
+  std::vector<unsigned long long> adj;
+  bool adj_ready = false;
+  int adj_top = 0;
+
+  void build_adjacency(const CentreCell& tight, const std::vector<Cand>& cands, int top) {
+    const int words = (top + 63) / 64;
+    adj.assign((std::size_t)top * (std::size_t)words, 0);
+    for (int i = 0; i < top; ++i) {
+      const i128 u_i = cands[(std::size_t)i].u;
+      const mhgp::P3& pi = pts[cands[(std::size_t)i].id];
+      for (int j = i + 1; j < top; ++j) {
+        if (cands[(std::size_t)j].l > u_i) break;
+        ++stats.bisector_tests;
+        if (!bisector_meets_cell(pi, pts[cands[(std::size_t)j].id], tight,
+                                 mutant == Mutant::kBisectorStrict)) {
+          ++stats.bisector_pruned;
+          continue;
+        }
+        adj[(std::size_t)i * (std::size_t)words + (std::size_t)(j >> 6)] |=
+            (unsigned long long)1 << (j & 63);
+      }
+    }
+    adj_top = top;
+    adj_ready = true;
+  }
+
+  // LES VRAIS `E`, `T` ET `Q` DU GRAPHE DE BISSECTEURS, PAR POPCOUNT, ET SANS
+  // AUCUN LIFT (auditeur).
+  //
+  // Chaque compteur emploie SA propre coupe de lane : `E_2` sur `D_9`, `T_3` sur
+  // `D_8`, `T_4` et `Q_4` sur `D_7`. Les bitsets etant orientes par identifiant,
+  // `popcount(N+(i) inter N+(j))` compte chaque triangle une fois et
+  // `popcount(N+(i) inter N+(j) inter N+(k))` compte chaque K4 une fois. Comme
+  // `D_7` est la plus courte des trois listes, le comptage exact des K4 y est
+  // bon marche : il remplace tout coefficient empirique.
+  //
+  // La borne d'incidence de l'auditeur, `4 Q_4 <= (m_4-3) T_4`, reste publiee
+  // comme controle : chaque K4 fournit quatre triangles et un triangle a au plus
+  // `m_4-3` apex.
+  void real_counts(int top, int c2, int c3, int c4, i64* edges, i64* tri3, i64* tri4,
+                   i64* quads) {
+    const int words = (top + 63) / 64;
+    i64 e = 0, t3 = 0, t4 = 0, q4 = 0;
+    std::vector<unsigned long long> inter((std::size_t)words);
+    for (int i = 0; i < c2; ++i) {
+      const unsigned long long* ri = &adj[(std::size_t)i * (std::size_t)words];
+      for (int wj = 0; wj < words; ++wj) {
+        unsigned long long bits = ri[wj];
+        while (bits) {
+          const int j = (wj << 6) + __builtin_ctzll(bits);
+          bits &= bits - 1;
+          if (j >= c2) continue;
+          ++e;
+          if (j >= c3) continue;
+          const unsigned long long* rj = &adj[(std::size_t)j * (std::size_t)words];
+          for (int w = 0; w < words; ++w) inter[(std::size_t)w] = ri[w] & rj[w];
+          for (int w = 0; w < words; ++w) {
+            unsigned long long bk = inter[(std::size_t)w];
+            while (bk) {
+              const int k = (w << 6) + __builtin_ctzll(bk);
+              bk &= bk - 1;
+              if (k >= c3) continue;
+              ++t3;
+              if (k >= c4 || j >= c4 || i >= c4) continue;
+              ++t4;
+              const unsigned long long* rk = &adj[(std::size_t)k * (std::size_t)words];
+              for (int w2 = 0; w2 < words; ++w2) {
+                unsigned long long bt = inter[(std::size_t)w2] & rk[w2];
+                while (bt) {
+                  const int t = (w2 << 6) + __builtin_ctzll(bt);
+                  bt &= bt - 1;
+                  if (t < c4) ++q4;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    *edges = e;
+    *tri3 = t3;
+    *tri4 = t4;
+    *quads = q4;
   }
 
   void generate(const CentreCell& cell, const CentreCell& tight,
@@ -747,23 +914,19 @@ struct Engine {
 
     const i128 scale4 = (i128)1 << (2 * tight.depth);
     const int words = (top + 63) / 64;
-    adj.assign((std::size_t)top * (std::size_t)words, 0);
-    for (int i = 0; i < top; ++i) {
-      const i128 u_i = cands[(std::size_t)i].u;
-      const mhgp::P3& pi = pts[cands[(std::size_t)i].id];
-      for (int j = i + 1; j < top; ++j) {
-        if (cands[(std::size_t)j].l > u_i) break;
-        ++stats.bisector_tests;
-        if (!bisector_meets_cell(pi, pts[cands[(std::size_t)j].id], tight,
-                                 mutant == Mutant::kBisectorStrict)) {
-          ++stats.bisector_pruned;
-          continue;
-        }
-        adj[(std::size_t)i * (std::size_t)words + (std::size_t)(j >> 6)] |=
-            (unsigned long long)1 << (j & 63);
-      }
-    }
+    if (!adj_ready || adj_top != top) build_adjacency(tight, cands, top);
+    adj_ready = false;
 
+    // Ouvrir le slot de cette cellule terminale dans le lot courant.
+    if (deferred_lift) {
+      BatchCell bc;
+      bc.cell = cell;
+      bc.cands = cands;
+      bc.bucket_end = bucket_end;
+      bc.have_thresholds = have_thresholds;
+      batch_cells.push_back(std::move(bc));
+      cur_slot = (int)batch_cells.size() - 1;
+    }
     pending.clear();
     cell_records.clear();
     std::vector<unsigned long long> row_ij((std::size_t)words), row_ijk((std::size_t)words);
@@ -792,9 +955,9 @@ struct Engine {
             ++stats.clique_pairs;
             ids[0] = cands[(std::size_t)i].id;
             ids[1] = cands[(std::size_t)j].id;
-            pair_kept = propose(cell, ids, 2,
-                                std::max(cands[(std::size_t)i].tau,
-                                         cands[(std::size_t)j].tau));
+            const int e2 = std::max(cands[(std::size_t)i].tau, cands[(std::size_t)j].tau);
+            pair_kept = deferred_lift ? record_tuple(ids, 2, e2)
+                                      : propose(cell, ids, 2, e2);
           }
           // LANE INDEPENDANTE : le passage a q3 ne consulte JAMAIS `pair_kept`.
           if (mutant == Mutant::kArityCascade && !pair_kept) continue;
@@ -828,7 +991,10 @@ struct Engine {
               const int e3 = std::max(cands[(std::size_t)k].tau,
                                       std::max(cands[(std::size_t)i].tau,
                                                cands[(std::size_t)j].tau));
-              const bool tri_kept = hull_ijk ? propose(cell, ids, 3, e3) : false;
+              const bool tri_kept =
+                  hull_ijk ? (deferred_lift ? record_tuple(ids, 3, e3)
+                                            : propose(cell, ids, 3, e3))
+                           : false;
               if (mutant == Mutant::kArityCascade && !tri_kept) continue;
               if (k >= c4) continue;
               const unsigned long long* rk = &adj[(std::size_t)k * (std::size_t)words];
@@ -887,7 +1053,9 @@ struct Engine {
                   ids[1] = cands[(std::size_t)j].id;
                   ids[2] = cands[(std::size_t)k].id;
                   ids[3] = cands[(std::size_t)t].id;
-                  propose(cell, ids, 4, std::max(e3, cands[(std::size_t)t].tau));
+                  const int e4 = std::max(e3, cands[(std::size_t)t].tau);
+                  if (deferred_lift) record_tuple(ids, 4, e4);
+                  else propose(cell, ids, 4, e4);
                 }
               }
             }
@@ -895,12 +1063,164 @@ struct Engine {
         }
       }
     }
-    census_pending(cands, have_thresholds);
-    close_cell();
+    if (!deferred_lift) {
+      census_pending(cands, have_thresholds);
+      close_cell();
+      return;
+    }
+    // La cellule terminale est copiee dans le lot; son census attendra la
+    // vidange. Le lot ne se vide qu'ICI, entre deux cellules terminales.
+    if (batch_recs.size() >= (std::size_t)batch_rec_cap) flush_batch();
   }
 
-  // UN SEUL LIFT PAR CANDIDAT : centre rationnel, auto-centrage et forme de
-  // puissance proviennent du meme calcul.
+  // Vidange du lot : un lift par tuple DISTINCT, puis choix du proprietaire
+  // parmi les cellules qui l'ont propose, puis census par cellule.
+  void flush_batch() {
+    if (!batch_recs.empty()) {
+      std::sort(batch_recs.begin(), batch_recs.end(),
+                [](const BatchRec& a, const BatchRec& b) {
+                  for (int i = 0; i < 4; ++i)
+                    if (a.ids[i] != b.ids[i]) return a.ids[i] < b.ids[i];
+                  return a.q < b.q;
+                });
+      std::size_t i = 0;
+      while (i < batch_recs.size()) {
+        std::size_t j = i;
+        while (j < batch_recs.size() && std::equal(batch_recs[i].ids, batch_recs[i].ids + 4,
+                                                   batch_recs[j].ids))
+          ++j;
+        solve_tuple(i, j);
+        i = j;
+      }
+      batch_recs.clear();
+    }
+    for (BatchCell& bc : batch_cells) {
+      if (bc.pending.empty()) continue;
+      pending.swap(bc.pending);
+      bucket_end = bc.bucket_end;
+      census_pending(bc.cands, bc.have_thresholds);
+      close_cell();
+      pending.clear();
+    }
+    batch_cells.clear();
+    ++stats.batches_flushed;
+  }
+
+  // Un tuple, un lift. Le proprietaire est cherche dans TOUT le run, jamais
+  // choisi comme premier enregistrement.
+  void solve_tuple(std::size_t begin, std::size_t end) {
+    const BatchRec& lead = batch_recs[begin];
+    const int q = lead.q;
+    int ids[4] = {0, 0, 0, 0};
+    for (int i = 0; i < q; ++i) ids[i] = lead.ids[i];
+    i128 num[3] = {0, 0, 0};
+    i128 den = 0;
+    Lift lift;
+    bool positive = false;
+    ++stats.lifts_built;
+    ++stats.lifts_q[q];
+    if (!solve_geometry(ids, q, num, &den, &lift, &positive)) {
+      ++stats.degenerate_lifts;
+      ++stats.degenerate_q[q];
+      stats.occurrences_degenerate += (i64)(end - begin);
+      return;
+    }
+    if (!positive) {
+      ++stats.self_centre_rejected;
+      ++stats.positive_rejected_q[q];
+      stats.occurrences_nonpositive += (i64)(end - begin);
+      return;
+    }
+    int winner = -1;
+    for (std::size_t r = begin; r < end; ++r) {
+      const BatchRec& rec = batch_recs[r];
+      BatchCell& bc = batch_cells[(std::size_t)rec.slot];
+      ++stats.owner_tests;
+      if (owns_centre(bc.cell, num, den, root_hi, mutant == Mutant::kOwnerClosed)) {
+        Pending p;
+        p.key = reduce_centre(num, den);
+        p.lift = lift;
+        std::memcpy(p.ids, ids, sizeof(int) * (std::size_t)q);
+        p.q = q;
+        p.e = rec.e;
+        bc.pending.push_back(p);
+        if (winner < 0) winner = (int)r; else ++stats.owner_multiple;
+      }
+    }
+    if (winner < 0) {
+      ++stats.owner_rejected;
+      ++stats.owner_rejected_q[q];
+      stats.occurrences_unowned += (i64)(end - begin);
+    }
+  }
+
+  // Geometrie exacte d'un tuple : centre rationnel, positivite et forme liftee.
+  bool solve_geometry(const int* ids, int q, i128 num[3], i128* den_out, Lift* lift_out,
+                      bool* positive) {
+    const mhgp::P3& a = pts[ids[0]];
+    i128 den = 0;
+    if (q == 2) {
+      const mhgp::P3& b = pts[ids[1]];
+      *lift_out = mhgp3v::ballfront::lift_pair(a, b);
+      if (!lift_out->ok) return false;
+      num[0] = (i128)(a.x + b.x);
+      num[1] = (i128)(a.y + b.y);
+      num[2] = (i128)(a.z + b.z);
+      den = 2;
+      *positive = true;
+    } else if (q == 3) {
+      const TriangleLift tri = mhgp3v::ballfront::lift_triangle(a, pts[ids[1]], pts[ids[2]]);
+      if (!tri.lift.ok || tri.gg <= 0) return false;
+      *lift_out = tri.lift;
+      const V3 p1 = sub(pts[ids[1]], a);
+      const V3 p2 = sub(pts[ids[2]], a);
+      num[0] = (i128)a.x * tri.gg + tri.galpha * p1.x + tri.gbeta * p2.x;
+      num[1] = (i128)a.y * tri.gg + tri.galpha * p1.y + tri.gbeta * p2.y;
+      num[2] = (i128)a.z * tri.gg + tri.galpha * p1.z + tri.gbeta * p2.z;
+      den = tri.gg;
+      *positive = tri.galpha > 0 && tri.gbeta > 0 && (tri.galpha + tri.gbeta) < tri.gg;
+    } else {
+      const Lift lift =
+          mhgp3v::ballfront::lift_of(a, pts[ids[1]], pts[ids[2]], pts[ids[3]]);
+      if (!lift.ok) return false;
+      *lift_out = lift;
+      den = 2 * lift.dd;
+      i128 cx = -lift.cx, cy = -lift.cy, cz = -lift.cz;
+      if (den < 0) { den = -den; cx = -cx; cy = -cy; cz = -cz; }
+      num[0] = (i128)a.x * den + cx;
+      num[1] = (i128)a.y * den + cy;
+      num[2] = (i128)a.z * den + cz;
+      const V3 p1 = sub(pts[ids[1]], a), p2 = sub(pts[ids[2]], a), p3 = sub(pts[ids[3]], a);
+      const i128 lx = lift.cx, ly = lift.cy, lz = lift.cz;
+      auto det_c = [&](const V3& u, const V3& v) -> i128 {
+        return lx * ((i128)u.y * v.z - (i128)u.z * v.y) -
+               ly * ((i128)u.x * v.z - (i128)u.z * v.x) +
+               lz * ((i128)u.x * v.y - (i128)u.y * v.x);
+      };
+      const i128 na = -det_c(p2, p3), nb = det_c(p1, p3), nc = -det_c(p1, p2);
+      *positive = na > 0 && nb > 0 && nc > 0 && (na + nb + nc) < 2 * lift.dd * lift.dd;
+    }
+    *den_out = den;
+    return true;
+  }
+
+  // ENREGISTREMENT SANS LIFT. Le tuple est seulement note avec sa cellule; la
+  // geometrie est calculee une fois par tuple distinct a la vidange du lot.
+  bool record_tuple(const int* raw, int q, int e) {
+    BatchRec r;
+    std::memcpy(r.ids, raw, sizeof(int) * (std::size_t)q);
+    std::sort(r.ids, r.ids + q);
+    for (int i = q; i < 4; ++i) r.ids[i] = -1;
+    r.q = q;
+    r.e = e;
+    r.slot = cur_slot;
+    batch_recs.push_back(r);
+    ++stats.occurrences_recorded;
+    return true;
+  }
+
+  // UN SEUL LIFT PAR TUPLE DISTINCT DU LOT : centre rationnel, auto-centrage et
+  // forme de puissance proviennent du meme calcul.
   bool propose(const CentreCell& cell, const int* raw, int q, int e,
                const TriangleLift* tri_in = nullptr) {
     int ids[4];
@@ -912,6 +1232,7 @@ struct Engine {
     bool positive = false;
     ++stats.lifts_built;
     ++stats.lifts_q[q];
+    ++stats.occurrences_recorded;
     const mhgp::P3& a = pts[ids[0]];
     if (q == 2) {
       const mhgp::P3& b = pts[ids[1]];
@@ -1207,6 +1528,9 @@ struct Options {
   bool axis_filter = false;
   bool multiplicity = false;
   int batch_depth = 3;
+  int batch_records = 1 << 20;
+  bool deferred_lift = false;
+  int probe_factor = 1;
   Mutant mutant = Mutant::kNone;
   bool judge = false;
   i64 min_supports = 0, min_cells = 0, min_quads = 0;
@@ -1224,6 +1548,9 @@ int run_engine(const std::vector<mhgp::P3>& cloud, const Options& opt) {
   engine.axis_filter = opt.axis_filter;
   engine.track_multiplicity = opt.multiplicity;
   engine.batch_depth = opt.batch_depth;
+  engine.batch_rec_cap = opt.batch_records < 1024 ? 1024 : opt.batch_records;
+  engine.deferred_lift = opt.deferred_lift;
+  engine.probe_factor = opt.probe_factor < 1 ? 1 : opt.probe_factor;
   engine.max_depth = opt.max_depth;
   engine.mutant = opt.mutant;
   engine.collect = opt.judge;
@@ -1250,9 +1577,9 @@ int run_engine(const std::vector<mhgp::P3>& cloud, const Options& opt) {
 
   const Stats& s = engine.stats;
   std::printf("CentreCellReceipt-v3\n");
-  std::printf("cloud=%s points=%d smax=%d leaf=%d work_cap=%d max_depth=%d axis_filter=%d inject=%s\n",
+  std::printf("cloud=%s points=%d smax=%d leaf=%d work_cap=%d max_depth=%d axis_filter=%d deferred_lift=%d inject=%s\n",
               opt.label.c_str(), points, opt.smax, opt.leaf, opt.work_cap, opt.max_depth,
-              opt.axis_filter ? 1 : 0, mutant_name(opt.mutant));
+              opt.axis_filter ? 1 : 0, opt.deferred_lift ? 1 : 0, mutant_name(opt.mutant));
   std::printf("cells_created=%lld split=%lld terminal=%lld pruned=%lld depth_max=%lld\n",
               s.cells_created, s.cells_split, s.cells_terminal, s.cells_pruned,
               s.max_depth_reached);
@@ -1271,6 +1598,15 @@ int run_engine(const std::vector<mhgp::P3>& cloud, const Options& opt) {
               s.bisector_tests, s.bisector_pruned, s.hull_tests, s.hull_pruned);
   std::printf("diameter_tests=%lld diameter_pruned=%lld\n", s.diameter_tests,
               s.diameter_pruned);
+  std::printf("occurrences=%lld lifts_distincts=%lld facteur_rle=%.3f owner_tests=%lld owner_multiple=%lld batches=%lld\n",
+              s.occurrences_recorded, s.lifts_built,
+              s.lifts_built ? (double)s.occurrences_recorded / (double)s.lifts_built : 0.0,
+              s.owner_tests, s.owner_multiple, s.batches_flushed);
+  std::printf("occ_unowned=%lld occ_nonpositive=%lld occ_degenerate=%lld\n",
+              s.occurrences_unowned, s.occurrences_nonpositive, s.occurrences_degenerate);
+  std::printf("probe_tests=%lld probe_accepted=%lld probe_edges=%lld probe_triangles=%lld probe_quads=%lld\n",
+              s.probe_tests, s.probe_accepted, s.probe_edges, s.probe_triangles,
+              s.probe_quads);
   std::printf("axis_tests=%lld axis_pruned=%lld axis_unusable=%lld\n", s.axis_tests,
               s.axis_pruned, s.axis_unusable);
   {
@@ -1669,6 +2005,11 @@ int main(int argc, char** argv) {
     else if (arg == "--multiplicity") opt.multiplicity = true;
     else if (arg.rfind("--batch-depth=", 0) == 0)
       opt.batch_depth = parse_int(arg.substr(14).c_str(), &ok);
+    else if (arg.rfind("--batch-records=", 0) == 0)
+      opt.batch_records = parse_int(arg.substr(16).c_str(), &ok);
+    else if (arg == "--deferred-lift") opt.deferred_lift = true;
+    else if (arg.rfind("--probe-factor=", 0) == 0)
+      opt.probe_factor = parse_int(arg.substr(15).c_str(), &ok);
     else if (arg.rfind("--max-depth=", 0) == 0)
       opt.max_depth = parse_int(arg.substr(12).c_str(), &ok);
     else if (arg.rfind("--min-supports=", 0) == 0)

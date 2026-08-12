@@ -333,10 +333,14 @@ pincés sont dans
 
 ## Invariants industriels
 
-- Aucun atlas global ou persistant de paires, tuples, cellules d'arrangement,
-  faces, cofaces ou incidences n'est construit dans le chemin produit. Une CSR
-  transitoire de cellules de centres est autorisée seulement si son coût complet
-  passe la gate.
+- Aucun atlas global **persistant** de paires, tuples, cellules d'arrangement,
+  faces, cofaces ou incidences n'est construit dans le chemin produit. Une
+  frontière transitoire `count--scan--radix`, éventuellement logique sur toutes
+  les clés mais segmentée et streamée, n'est pas un atlas si elle ne matérialise
+  ni cellules/cofaces/incidences, si ses octets et son high-water sont
+  préflightés et si elle est évincée après réduction. Une CSR transitoire de
+  cellules de centres reste autorisée seulement si son coût complet passe la
+  gate.
 - Un oracle exhaustif borné falsifie ou recertifie le produit; il ne devient
   jamais son architecture par défaut. Le sujet cellules-centres, dont le juge
   partage encore des primitives géométriques, n'est pas lui-même cet oracle.
@@ -410,8 +414,19 @@ préfixe comme objet complet.
    compactes puis faire un premier RLE par `SupportKey` **avant** tout lift.
    Calculer une seule géométrie et chercher au plus un contexte owner : zéro
    rejette le tuple, la complétude garantit l'existence pour tout support
-   pertinent et plusieurs signalent un invariant rompu. Faire ensuite le
-   second RLE par clé primitive de sphère. Un représentant par boule promeut
+   pertinent et plusieurs signalent un invariant rompu. Deux layouts restent
+   à comparer. Des lots spatiaux de feuilles terminales atomiques paient au plus
+   un lift par `(SupportKey,lot)`; sous arbre et epoch communs, tous les supports
+   d'une même boule ont leur occurrence owner dans la même feuille et le même
+   lot. Un RLE local par clé primitive de sphère est alors exact-once si le
+   contexte owner certifie `b_cert>=H_run`. Des shards radix par `SupportKey`
+   réunissent au contraire toutes les occurrences d'un support et peuvent ne
+   payer qu'un lift par clé, mais deux supports de la même boule peuvent tomber
+   dans des shards différents. Après le lift, redistribuer donc les pending de
+   façon streamée par `(cloud_epoch,GeometricBallKey)` vers leur `OwnerCellId`
+   commun, ou vers un `BallOwner` canonique équivalent, avant le second RLE et
+   le census. L'owner est une destination exacte, pas une colocalisation
+   initiale. Un représentant par boule promeut
    ensuite le curseur `h` par nouveaux buckets et matérialise une seule fois
    `I_B/U_B`. Gamma
    conserve les provenances nécessaires; le H0 normalisé emploie un support

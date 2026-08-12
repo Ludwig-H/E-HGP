@@ -232,8 +232,6 @@ sans réincrémenter. Les deux fermetures indépendantes sont
 allocation au-delà d'un cap explicite, pas seulement annoncer « petits
 nuages » dans un commentaire.
 
-GCP non utilisé. Aucun fichier de code ou de reçu n'a été modifié.
-
 ## 7. Contre-audit de la note de multiplicité
 
 La note
@@ -250,12 +248,15 @@ dégénérés ne sont pas enregistrés du tout. Il faut des flags par clé
 `valid`, `intrinsic_positive`, `owner_seen`, `rank_closed` et `relevant`, plus
 une occurrence comptée une fois à l'entrée.
 
-Deuxièmement, `52 693` n'est ni une borne inférieure de cette architecture ni
-le nombre de géométries après le premier RLE. Le tableau contient
-`144 235+66 897+52 693=263 825` clés distinctes non dégénérées. Une géométrie
-par `SupportKey` ramènerait les `2 215 217` occurrences enregistrées à au plus
-`263 825` solves, soit un facteur diagnostique `8,40`, pas `42`. Atteindre
-`52 693` suppose en plus des prunes parfaits pour les `211 132` autres clés.
+Deuxièmement, `52 693` est un minorant trivial du sous-ensemble pending de ce
+pipeline figé, mais ni le nombre de géométries après le premier RLE ni une borne
+universelle pour Source S ou H0. Le tableau contient
+`144 235+66 897+52 693=263 825` clés distinctes non dégénérées. Les `4 807`
+occurrences dégénérées manquantes représentent entre une et `4 807` clés
+supplémentaires. Une géométrie par `SupportKey` ramènerait donc `2 220 024`
+occurrences à `263 826..268 632` solves, soit un facteur diagnostique
+`8,26..8,41`, pas `42`. Atteindre `52 693` suppose en plus un oracle parfait
+pour owner et positivité sur toutes les autres clés.
 Le RLE réduit précisément toutes les classes; il est faux d'affirmer que les
 tuples possédés demandent seulement un test moins cher « pas moins nombreux ».
 
@@ -288,17 +289,26 @@ groupe et support ne sont pas la même unité. `rc=0` ne contrôle pas cette
 partition. Les `102,124` lifts/support et `92,7221 %` d'issues owner sont des
 diagnostics, pas un digest d'identité : la commande n'a pas `--judge`.
 
-La campagne complète est **irrecevable comme rampe mono-binaire**. Pendant que
-le cas 25 000 continuait sur l'image supprimée `/proc/.../exe=5b422644...`, le
-fichier exécutable sur disque a été remplacé par `49c8a508...`; les lancements
-suivants peuvent donc changer de binaire sous un en-tête unique. Le script
+Le second bloc `terrain,n=25 000` termine ensuite `rc=0`, `wall_s=2 191` sur le
+même ancien inode `5b422644...`. Il annonce `46 745 417` cellules,
+`2 561 898 157` tests bissecteurs, `220 298 378` lifts et `1 872 528` supports :
+`117,648` lifts/support et `92,874 %` de rejets owner. Les occurrences de rang
+anticipé omises valent q2/q3/q4 `332 617/1 848 421/335 606`, soit `2 516 644`;
+le compteur global compte des groupes et reste d'une autre unité. Ce point
+renforce le NO-GO du port eager, sans identité juge ni temps qualifiable.
+
+La campagne complète est **irrecevable comme rampe mono-binaire**. Le cas
+25 000 a fini sur l'image supprimée `/proc/.../exe=5b422644...`, puis le cas
+50 000 a effectivement démarré sur l'ELF différent `8fdfc8af...`, toujours sous
+l'en-tête unique qui annonce `5b422644...`. Le script
 temporaire n'est pas archivé, emploie `>>`, omet `multiecho`, le digest des
 entrées/sorties, la liste des quatre fichiers dirty, les flags de build et la
 mémoire. Ce fichier doit rester la trace d'une campagne mixte réfutée, jamais
 être réécrit en reçu vert.
 
 Une future rampe utilise un ELF immuable adressé par contenu, un en-tête et des
-hashes avant/après **chaque** cas, les quatre familles prévues, un fichier
+hashes avant/après **chaque** cas, la matrice contractuelle de six familles avec
+Poisson uniforme et mélange équilibré bloquants, un fichier
 temporaire finalisé atomiquement, RSS/workspaces, digests d'entrée et de
 supports, puis refuse tout `ecart!=0` ou code non nul.
 
@@ -319,3 +329,304 @@ fixture d'égalité `D2*S2=4*U` conservée, le mutant `>` vers `>=`, un plancher
 non vide, un accord des identités et les bornes u16/profondeur 26. Son coût
 inclut plusieurs distances par triangle/q4 et doit être comparé aux lifts
 réellement évités.
+
+## 10. Le RLE par sous-arbre n'abolit pas encore le besoin d'une frontière de lots
+
+Le commit `64cf6febafc4a80a48b4103667be0c69cf794e9d`, source SHA-256
+`4d09080860ab949fda65d12f84e6249677e785b1e03db09807832393b7946720`,
+ajoute une instrumentation `(SupportKey,batch_depth)`. Son titre conclut que le
+RLE n'a pas besoin d'être global, mais le commit ne contient ni transcript, ni
+reçu, ni borne. Des exécutions éphémères ont été observées sur un ELF ensuite
+remplacé; leurs sorties ne sont pas auditables.
+
+Pour une antichaîne **fixée** de sous-arbres, le RLE local reste exact : le lot
+qui contient la feuille owner conserve le support pertinent; les autres lots
+peuvent recalculer la même clé puis constater zéro owner. Mais exactitude ne
+signifie pas parcimonie. La somme des clés distinctes par lot mesure bien les
+solves non dégénérés d'un tel RLE; elle ne prouve aucune borne uniforme et peut
+redevenir le nombre d'occurrences si une clé traverse de nombreux lots.
+
+Les exécutions éphémères qui ont motivé le titre donnent seulement un point de
+laboratoire non reçu. Sur `terrain,n=400`, elles annonçaient `N=2 215 217`
+occurrences et `U=263 825` clés non dégénérées. Aux profondeurs de lot
+`1/2/3`, les sommes locales étaient `311 158/410 803/604 962`, soit une
+inflation `1,179/1,557/2,293` par rapport au RLE global et des gains locaux
+`7,119/5,392/3,662`. Ces sorties n'ont ni transcript archivé ni ELF encore
+disponible : elles illustrent les métriques, elles ne qualifient aucun chemin.
+
+Il n'existe pas de petite borne géométrique cachée. Avec cinq sites u16, un
+support diamétral joignant deux coins opposés a pour bissecteur un plan qui
+traverse un nombre quadratique de cubes par niveau dyadique; lorsque
+`n<smax-1`, les listes ne le retirent pas. Une exécution différentielle
+historique `uniform,n=5,leaf=4,work_cap=1,max_depth=4` donnait `900`
+occurrences, `19` clés globales et `894` couples clé--lot à la profondeur quatre,
+soit un gain local `1,007`, avec accord juge `15/15`. Une autre, sur
+`uniform,n=25,seed=11,leaf=4,work_cap=20000`, donnait un gain global `3,960`
+mais seulement `2,276/1,575/1,130` aux profondeurs `1/2/3`. Elles sont elles
+aussi historiques et non archivées, mais réfutent toute extrapolation de
+localité depuis le seul terrain `n=400`.
+
+L'instrument courant a cinq limites matérielles :
+
+1. il omet encore les `4 807` occurrences dégénérées de l'exemple `n=400`;
+2. `batch_depth` définit un sous-arbre de profondeur fixe, pas un lot borné en
+   octets; aucune masse maximale, p95, RSS ou workspace par lot n'est publiée;
+3. le lot implicite zéro absorbe les terminaux situés au-dessus de la profondeur
+   choisie; `depth=0` ou une profondeur trop grande peut donc reproduire
+   artificiellement le RLE global tout en annonçant `lots=0`;
+4. `batch_counter` compte les racines créées, pas les lots non vides, et le CLI
+   ne borne pas la profondeur relativement à `max_depth`;
+5. les deux `std::map` sont des instruments CPU globaux; ils ne donnent aucun
+   layout, trafic, radix, scratch, occupation ou HWM GPU.
+
+La porte industrielle doit construire une antichaîne adaptative par `count`
+exact : subdiviser jusqu'à `bytes<=B`, empaqueter les petits sous-arbres sans
+couper une cellule terminale, et router un terminal trop gros vers split,
+fallback exact ou `resource_exhausted`. Un run global de `SupportKey` peut
+traverser plusieurs lots sans perte d'exactitude, mais paie alors un solve par
+lot. Pour chaque cap `B`, publier par arité les occurrences
+`O`, uniques globales `U`, somme locale `sum U_b`, réplication interlots
+`sum U_b/U`, gain `O/(sum U_b)`, lots non vides, max/p50/p95
+occurrences--uniques--octets--scratch, puis les digests d'identité. Poisson
+uniforme et huit amas équilibrés sont les deux familles bloquantes; terrain
+seul ne reçoit pas la décision.
+
+Au point historique 12 500, les `92 531 928` occurrences représentent déjà
+`1 480 510 848` octets pour quatre identifiants u32 seuls, avant cellule, `e0`,
+contexte, count/fill et scratch radix. Le lot local peut borner le workspace,
+mais ne réduit pas ce trafic d'émission; la gate doit compter les deux.
+
+## 11. Audit précoce du prototype de lot différé vivant
+
+Après `64cf6fe`, Claude a commencé un producteur borné par
+`batch_rec_cap`. Cette revue est statique sur un worktree mouvant, complétée
+par de petites portes épinglées qui ne transfèrent aucun résultat au source
+live postérieur.
+
+Le successeur suivant place cette voie derrière `--deferred-lift` et conserve
+le chemin eager par défaut. Cela protège provisoirement les anciennes portes,
+mais les vingt-quatre CTests antérieurs n'exerçaient pas le producteur différé.
+Sur le couple source
+`d47ed7ebe39013f82f6bd6991ad39de56a52fffa312b32cd8cb3c7d601c6f804`,
+ELF Release
+`8fdfc8af75639137ec3bd9974c6c5486d0d246b119ce9f59b41f74caccc46c32`,
+les quatre nouveaux CTests différés ont passé `4/4` en `32,70 s`. Un recheck
+sur le même ELF et le CMake
+`0f64c1c60afbf4af51339807b758e49ec0312d4be69f7dcda8303d251616c865`
+a repassé `4/4` en `50,11 s`; son `LastTest.log` avait le SHA-256
+`e0c140085046eaf81e50560616468d1aef50f7cd29316b32c47a13748c22a8a3`
+avant d'être écrasé par une exécution concurrente. Les temps sous charge ne
+sont pas des mesures de performance. Les tests couvrent trois familles bornées
+et un cap `1024`, mais ni mutant différé, ni frontière owner multi-support et
+inter-arités, ni `--multiplicity`, ni HWM. Le cas grille exerce toutefois
+`2 556` boules multi-supports, et sa variante cap `1024` garde le même payload
+sur `1 879` flushes; il manque encore la distribution multi-arité dans une même
+boule pour recevoir `qmin/H_run`. Le source live a changé après ces runs. Le
+commentaire CMake annonçant un facteur cinq et un surcoût de treize pour cent
+reste une observation sans
+source--ELF--commande--transcript propre, pas un reçu.
+
+Sur le même couple pincé, la commande bornée
+`terrain,n=100,seed=11,smax=11,work_cap=20000,--judge` ferme exactement
+`4 693/4 693` supports avec zéro absent, parasite, mismatch ou doublon en eager
+et en différé aux caps `1024/4096/1048576`. Les lifts sont respectivement
+`366 907/260 188/181 621/42 084`, les gains RLE
+`1,000/1,410/2,020/8,718` et les lots `0/327/88/1`. C'est une petite gate de
+correction et une courbe cap--réplication; elle ne mesure ni octets, ni HWM, ni
+temps qualifiable et ne soutient pas qu'un petit lot capte l'essentiel.
+
+Le snapshot intermédiaire `b9b90cf...` ajoutait `real_edges_triangles()` et un
+état `adj_ready` sans les appeler. Le successeur historique `fd043fe...` les raccorde
+bien : dans une bande `work<=work_cap*probe_factor`, il construit le graphe de
+bissecteurs, compte ses vrais `E/T`, puis réutilise l'adjacence si la cellule
+devient terminale. L'ancien constat « non raccordé » est donc historique.
+
+Cette seconde étape n'est cependant pas encore une enveloppe de travail :
+
+- `topp=max(mine.size(),m3p,m4p)` vaut toujours `mine.size()`, puisque les deux
+  derniers termes sont des préfixes de `mine`; la sonde compte ainsi triangles
+  et arêtes sur le pool q2 `D_9`, pas sur les cuts q3 `D_8` et q4 `D_7`;
+- le verdict `E+9T<=work_cap` ne compte aucun K4. Dans une clique de taille
+  `m`, `Q/T=(m-3)/4`; aucune constante neuf ne borne donc les quadruplets quand
+  `m` croît. Le commentaire « rapport voisin de l'unité observé » est une
+  heuristique de famille, pas un certificat de cap;
+- la matrice dense réserve `top*ceil(top/64)` mots de 64 bits avant tout
+  préflight d'octets. La bande multiplicative peut donc elle-même déclencher un
+  gros workspace; il faut bitset seulement sous borne reçue, CSR sparse sinon;
+- les sommes combinatoires et `E+9T` sont des `i64` non saturés, alors que le
+  CLI accepte jusqu'à cent millions de points. Elles sont sûres au seul profil
+  nominal 50 000, pas sur le domaine déclaré du binaire;
+- `terminal_overlaps` continue de recevoir le potentiel d'intervalles `pot_e`,
+  même lorsque la décision terminale vient de `real_e`; le nom du compteur ne
+  décrit donc plus le travail effectivement accepté.
+
+Cette sonde est un choix adaptatif fail-open pour l'exactitude scientifique,
+pas un `work_cap` industriel. Il faut compter au minimum les vrais K4 ou un
+majorant prouvé lane-specific, les octets de l'adjacence et la réplication des
+enfants, puis refuser/splitter avant allocation si l'enveloppe est dépassée.
+
+La réfutation tient déjà au cap par défaut. Pour `K_24`, `E=276`, `T=2024` et
+`Q=10626`; le live accepte car `E+9T=18492<=20000`, alors que son ancien modèle
+`E+3T+6Q` vaut `70104`. Vingt-quatre points entiers d'une même coquille dont le
+centre appartient à la cellule réalisent ce graphe bissecteur complet; la
+fixture `coquille` en possède déjà trente. La porte permanente doit imposer que
+ce cas ne soit jamais qualifié « sous cap » et tuer le mutant `Q_upper=T`.
+
+Un majorant GPU peu coûteux évite d'énumérer les K4. Pour chaque arête orientée
+`i<j`, poser `c_ij=popcount(N+(i) intersection N+(j))`. Alors
+`T=sum c_ij` et `Q<=sum C(c_ij,2)`: tout K4 est compté par l'arête formée de ses
+deux plus petits sommets; une paire de voisins communs non adjacents ne fait que
+surcompter. Masquer le cut q4 resserre cette borne. Les sommes sont saturées à
+`work_cap+1`; si `adj_bytes=8*top*ceil(top/64)` ou le budget de popcounts est
+dépassé avant allocation, la branche subdivise ou rend `resource_exhausted`.
+À `top=50000`, la matrice dense seule vaut environ `313` Mo.
+
+Le schéma `occurrence compacte -> tri SupportKey -> un solve -> recherche owner`
+est le bon ordre. Une régression de porte est certaine dans les octets observés :
+
+- `record_tuple()` retourne toujours `true`. Le mutant `arity-cascade` consulte
+  donc `pair_kept/tri_kept` avant owner, positivité et rang; il ne simule plus
+  « engendrer q3/q4 seulement depuis un support inférieur retenu ». Une fixture
+  peut encore le tuer par un filtre hull ou par la coupure de lane, mais ce vert
+  ne reçoit plus l'ancienne mutation d'admission. Il faut conserver une voie
+  mutante sémantique ou une fixture dédiée `--deferred-lift` qui l'exerce après
+  décision; les portes eager et les quatre accords différés sans mutant ne
+  suffisent pas.
+
+Le census cellule par cellule n'est pas, à lui seul, une faute du snapshot :
+avec un arbre terminal commun, deux supports de la même sphère ont le même
+centre et donc la même feuille half-open owner; comme une cellule terminale
+n'est jamais coupée entre lots spatiaux, leurs pending owner sont co-localisés
+dans le même `BatchCell`. Cette cellule est déjà un `BallOwner` exact et le RLE
+par boule peut rester local exact-once. C'est la correction matérielle du
+diagnostic antérieur qui exigeait à tort un second RLE global dans ce layout.
+La propriété doit être exercée par une cosphère multi-supports et disparaît si
+une feuille est coupée ou si arités, backends ou epochs ont des partitions
+distinctes.
+
+Elle ne se transfère pas non plus automatiquement aux shards hashés par
+`SupportKey` : deux supports distincts de la même boule atteignent généralement
+deux shards. Le `BallOwner` fournit alors la destination exacte, mais il faut
+router les pending par `(owner_cell,GeometricBallKey)` avant le census, ou
+accepter des census répétés puis une réduction aval reçue. `b_cert>=H_run` et le
+contexte owner entier restent obligatoires dans les deux layouts.
+
+Autres portes avant réception : le cap porte sur le nombre d'occurrences et est
+testé seulement **après** une cellule terminale, donc le HWM peut dépasser le cap
+de toute la production d'une cellule. `BatchCell` est en outre créé avant de
+savoir si la cellule émettra un seul record et copie chaque CSR `cands` et
+`bucket_end`, dont les octets ne sont pas comptés. Une suite de feuilles à zéro
+ou peu de records peut donc accumuler des contextes sans approcher
+`batch_rec_cap`; plusieurs occurrences owner
+du même tuple dans une même feuille doivent être RLE sur leur contexte ou
+signalées, pas injectées plusieurs fois. Or `owner_multiple` est seulement
+compté : chaque occurrence owner reçoit encore un pending et aucune erreur
+d'invariant n'est levée. Le vieux `propose()` duplique la géométrie dans le
+source, créant une dette de parité entre les deux voies. Dans le seul mode
+différé, `--multiplicity` ne remplit plus ses tables et ses facteurs peuvent
+diviser `0/0`, car `record_tuple()` n'appelle pas `note_occurrence()`.
+`batch_records` n'est ni préflighté ni imprimé dans l'en-tête; le flush
+final vide gonfle aussi le nombre de lots. Les fixtures reconstruisent leurs
+`Options` et n'héritent pas nécessairement `--deferred-lift` ou
+`--batch-records`; une porte fixture doit donc vérifier le cap effectif dans son
+propre reçu.
+
+L'égalité finale `interior==h` est vraie, même sans assertion dédiée. Au départ,
+le membre de support de rang d'entrée maximal donne `r_(e0)>=e0`; après une
+promotion `h'=r_h`, le nesting donne `r_(h')>=r_h=h'`; au premier arrêt la
+condition de boucle donne `r_h<=h`, donc `r_h=h`. Seule la justification du
+commentaire par un membre toujours absent de `D_(h-1)` cesse de valoir après la
+première promotion. La vraie porte manquante est un mutant `strata-stop` reçu,
+avec éventuellement une assertion redondante au point fixe.
+
+Sur le couple `d47ed.../8fdf...`, combiner `--deferred-lift`, cap `1024` et
+`--multiplicity` imprime cinq classes vides, `total=0` contre `260 188` lifts,
+puis deux facteurs `NaN`, tout en rendant le code zéro. Tant que l'instrument
+n'est pas recâblé au flot différé, cette combinaison doit refuser explicitement
+ou rester hors des reçus.
+
+Exiger au minimum `owner_multiple=0` comme assertion fail-closed, identité
+séparée occurrences/solves/issues par arité, parité du payload avec le snapshot
+juge, mutants tous tués, cap transactionnel et HWM total en octets avant toute
+mesure de gain. L'axe q4 conserve un `TriangleLift` physique par occurrence
+hors de `lifts_distincts`; son coût doit rester dans un ledger séparé. Le
+libellé `lifts_distincts` doit aussi être conditionné : en mode eager il compte
+les occurrences, pas des clés distinctes. Enfin, l'ordre des causes diffère —
+owner avant positivité en eager, positivité avant owner en différé — donc leurs
+pourcentages ne sont pas directement comparables.
+
+## 12. Le probe historique `E+9T` ne bornait ni les quadruplets ni la mémoire
+
+Le source live observé après le pin précédent ajoute une terminalisation sur le
+graphe réel de bissecteurs : il compte ses arêtes `E` et triangles `T`, puis
+accepte si `E+9T<=work_cap`. Cette quantité est un modèle heuristique, pas un
+cap combinatoire, car elle ignore le nombre `Q` de cliques de taille quatre.
+Dans le graphe complet `K_24`, `E=276`, `T=2 024` et `Q=10 626` : pour un cap
+`20 000`, `E+9T=18 492` accepte tandis que la métrique pondérée déjà déclarée
+par le prototype vaut `E+3T+6Q=70 104`. Plus généralement,
+`Q/T=(m-3)/4` dans `K_m`; le facteur `probe_factor` borne seulement la bande où
+la sonde est appelée, pas cette sous-estimation. L'exactitude de la sortie reste
+fail-open, mais le contrat de ressource ne ferme pas.
+
+La forme duale clique-count/upper-shadow de Kruskal--Katona fournit ici une
+borne entière GPU-friendly. Pour `T>0`, écrire l'unique développement canonique
+`T=C(a3,3)+C(a2,2)+C(a1,1)`, avec `a3>a2>a1>=1` et termes nuls omis : choisir
+gloutonnement `a3`, puis `a2`, et poser `a1` exactement égal au dernier reste.
+Alors tout graphe ayant `T` triangles et `Q` copies de `K4` vérifie
+`Q<=C(a3,4)+C(a2,3)+C(a1,2)`; pour `T=0`, poser `Q_KK=0`. Une admission sûre
+pour la même métrique déclarée est donc
+`E+3*T+6*Q_KK(T)<=work_cap`, idéalement avec les triangles du préfixe q4. La
+recherche et les binomiales emploient u128 et saturent à `cap+1`; sous
+`m<=50 000`, le score maximal reste inférieur à `2^61`, mais le CLI à cent
+millions de points n'est pas couvert par i64. La borne plus simple
+`4Q<=T(m-3)` est aussi sûre mais plus lâche. Ni l'une ni l'autre ne remplace un
+cap séparé sur les octets, le scratch et le temps.
+
+La représentation dense actuelle alloue
+`m*ceil(m/64)` mots u64 et intersecte une ligne complète par arête, soit
+`Theta(m^2/64)` mots et `Theta(E*m/64)` popcounts. Contre-correction de l'autre
+audit : à `m=50 000`, cela représente `39 100 000` u64, donc `312 800 000`
+octets ou environ `298,3 MiB`, et non `2,5 GB`; le défaut reste matériel. Le
+layout sparse candidat est une CSR forward orientée par `(degre,PointId)` ou
+par dégénérescence, avec intersections merge/galloping; réserver les bitsets
+tuilés aux seuls sommets de fort degré sous cap exact. `T` alimente alors la
+borne de Kruskal--Katona sans énumérer `Q` avant la décision de terminalisation.
+
+## 13. Contre-audit du successeur à K4 exacts
+
+Le worktree `dbaa2e0128c5be30e2f7c75784e38758a45c7bb938fba5d8ab4a87c71d5ad764`
+et son ELF Release
+`423797e9964538f42701660d8baaf492b302f801a4aeb4b0df1b183986a5a037`
+absorbent la réfutation précédente : la sonde est limitée à `top<=96`, compte
+exactement `E2` sur `D_9`, `T3` sur `D_8`, `T4/Q4` sur `D_7`, puis décide avec
+`E2+3T3+6Q4`. L'orientation supérieure des bitsets fait compter chaque triangle
+et chaque K4 une fois. Ce couple est construit mais non testé; aucun vert du
+snapshot antérieur ne lui est transféré.
+
+Quatre réserves empêchent encore de parler de cap industriel :
+
+1. le défaut `probe_factor=1` désactive algébriquement la sonde : elle exige
+   simultanément `!terminal`, donc `work>work_cap`, et
+   `work<=work_cap*probe_factor`. Les CTests enregistrés ne passent pas
+   `--probe-factor>1`; le nouveau flot `E2/T3/T4/Q4` n'est donc pas exercé;
+2. le diagnostic d'incidence calcule bien
+   `bound=floor((m4-3)T4/4)`, mais échoue seulement pour `Q4>bound+1`. L'inégalité
+   entière exacte est `Q4<=bound`, équivalente à `4Q4<=(m4-3)T4`; le `+1`
+   masque précisément une erreur d'une unité;
+3. le plafond 96 borne la matrice de **la sonde**, pas celle de `generate()`.
+   Une cellule terminale parce que ses intervalles sont disjoints peut avoir un
+   grand `top` et `work` faible; une cellule forcée à `max_depth` le peut aussi.
+   Toutes deux allouent encore le bitset dense sans préflight. Le cap ne borne
+   pas davantage `BatchCell`, occurrences, enfants, pending ou scratch;
+4. les potentiels combinatoires et compteurs cumulés restent en i64 sans
+   saturation sur le domaine CLI allant jusqu'à cent millions de points. Le
+   reçu n'imprime ni `probe_factor`, ni `probe_top_cap`, ni `batch_records`.
+
+La gate minimale ajoute un test A/B explicite avec facteur supérieur à un,
+`probe_tests>0`, identité de payload, fixture `K_24`, mutant d'incidence d'une
+unité et HWM total en octets. L'énumération exacte de `Q4` est acceptable sous
+le plafond 96; sur device, le majorant
+`sum C(popcount(N+(i) intersection N+(j)),2)` permet d'arrêter plus tôt dès le
+cap dépassé.
+
+GCP non utilisé. Aucun fichier de code ou de reçu n'a été modifié.

@@ -308,6 +308,21 @@ ou durées de vie distincts, revenir aux contextes conservés ou au census
 global. Comparer octets d'occurrences, lookup owner et durée de vie de la table
 avant de choisir entre les deux layouts.
 
+Deux politiques de mémoire exactes sont possibles pour ce premier RLE, avec un
+coût différent. Une **RLE spatiale locale** traite un lot de feuilles entier :
+elle peut couper un run global de `SupportKey`, car chaque lot recalcule alors
+la géométrie et seul celui qui contient la feuille half-open owner publie. Elle
+paie au plus un lift par `(SupportKey,lot)`, pas un lift global par clé, et doit
+conserver ou retrouver le contexte owner et son `e0`. Une **RLE logiquement
+globale mais streamée** route toutes les occurrences d'une clé vers le même
+shard radix déterministe. Elle évite une table de hachage globale résidente tout
+en calculant une seule géométrie par `SupportKey`. Un shard trop gros peut être
+repartitionné par davantage de bits seulement entre clés distinctes; un run
+chaud indivisible exige réduction streaming avec marque de continuation,
+external sort ou `resource_exhausted`. Les deux variantes exigent
+count/scan/fill, préflight d'octets et refus transactionnel; une profondeur
+d'arbre fixe n'est pas un cap mémoire.
+
 Le candidat positif owner émet ensuite
 `(cloud_epoch,GeometricBallKey,SupportKey,CensusContext)`. Le second radix/RLE
 par `(cloud_epoch,GeometricBallKey)` arrive **avant** la promotion et conserve
@@ -336,9 +351,17 @@ Construire la géométrie avant le premier RLE la répéterait dans chaque cellu
 promouvoir avant le second répéterait le census pour chaque support incident à
 la même boule. Inversement, le rejet d'un support de grande arité ne permet pas
 de supprimer la boule entière si un support plus petit du même run reste
-pertinent. Les deux arènes sont comptées et segmentées par clés entières sans
-couper un run; un flot de tuples trop grand termine en `resource_exhausted`, pas
-en troncature.
+pertinent. Le premier run peut être coupé seulement par la variante spatiale qui
+accepte explicitement de recalculer la clé dans plusieurs lots. Dans cette
+variante, une feuille terminale n'est jamais coupée : tous les supports d'une
+même sphère ont le même centre, donc le même `BatchCell` owner; le RLE
+`GeometricBallKey` reste local si `b_cert>=H_run`. Dans la variante shardée par
+`SupportKey`, ce même owner fournit seulement l'adresse de destination : des
+supports différents de la boule peuvent résider dans des shards différents et
+exigent un reshuffle `GeometricBallKey/OwnerCellId` avant census. Pour des
+partitions productrices distinctes, définir un `BallOwner` canonique commun ou
+retomber sur le census global exact. Toutes les arènes sont comptées; un flot
+trop grand termine en `resource_exhausted`, pas en troncature.
 
 Cette génération est une proposition d'implémentation, pas encore un théorème
 de complexité. Son admission dépend des masses mesurées de cellules, listes,
@@ -431,13 +454,64 @@ Un sweep `O(m log m)` calcule donc exactement les cliques du **graphe
 d'intervalles scalaires** sans les énumérer. Ce graphe est seulement un
 préfiltre/surgraphe : le fait que `[L_x,U_x]` et `[L_y,U_y]` se croisent ne
 garantit pas que la fonction corrélée `s_x-s_y` s'annule dans la cellule 3D.
-Après construction du bitset de vrais plans bissecteurs, `E/T/Q` doivent être
-comptés séparément. Le split compare une somme pondérée de ce majorant peu cher,
-des `E/T/Q` exacts si disponibles, de la réplication dans les enfants, des
-octets CSR et du coût maximal de census. `|A|`, le nombre de paires seul ou une
+Après construction du graphe de vrais plans bissecteurs, `E/T/Q` doivent être
+bornés séparément. Le split compare une somme pondérée de ce majorant peu cher,
+des `E/T/Q` exacts ou certifiés, de la réplication dans les enfants, des octets
+CSR et du coût maximal de census. `|A|`, le nombre de paires seul ou une
 profondeur maximale ne sont pas des gates de travail. Si le potentiel reste
 hors budget à la profondeur physique maximale, le statut est
 `resource_exhausted`.
+
+Il n'est pas nécessaire d'énumérer les K4 pour obtenir un majorant exact. Soit
+`T` le nombre de triangles du graphe q4 et écrire son unique développement
+3-canonique, termes nuls omis :
+
+$$T=inom{a_3}{3}+inom{a_2}{2}+inom{a_1}{1},qquad a_3>a_2>a_1geq 1.$$
+
+La forme duale clique-count/upper-shadow de Kruskal--Katona donne alors :
+
+$$Qleq Q_{mathrm{KK}}(T)=inom{a_3}{4}+inom{a_2}{3}+inom{a_1}{2}.$$
+
+Pour `T=0`, poser `Q_KK=0`. Le développement se calcule gloutonnement : plus
+grand `a3` tel que `C(a3,3)<=T`, puis plus grand `a2<a3` tenant dans le reste,
+et `a1` égal au dernier reste. Une recherche binaire et des binomiales u128
+saturées à `cap+1` évitent tout flottant et tout overflow. La gate sûre pour le
+coût déclaré par le prototype devient
+`E2+3*T3+6*Q_KK(T4)<=work_cap`, avec les préfixes propres aux trois lanes; les
+comptes du graphe q2 entier donnent une version plus lâche mais encore sûre. À
+50 000 candidats, le score maximal reste inférieur à `2^61`; cette borne i64 ne
+couvre pas le CLI général à cent millions de points.
+
+Le bitset dense `m*ceil(m/64)` n'est pas sparse : à `m=50 000`, il occupe
+`39 100 000` u64, soit environ `298,3 MiB`, et une intersection de ligne par
+arête coûte `Theta(E*m/64)` popcounts. Orienter une CSR forward par
+`(degre,PointId)` ou par dégénérescence permet des intersections
+merge/galloping; réserver les bitsets tuilés aux sommets de fort degré sous un
+cap exact. Kruskal--Katona borne ensuite les K4 depuis les triangles sans
+allouer la matrice dense ni énumérer les quadruplets avant le split.
+
+Il existe une gate q4 sûre sans lift. Dans le graphe bissecteur induit par les
+`m_4=|D_7|` sites de la lane q4, noter `T_4` le nombre de triangles et `Q_4` le
+nombre de K4. Compter les incidences entre un K4 et ses quatre faces donne
+
+$$4Q_4\leq (m_4-3)T_4.$$
+
+En effet, chaque K4 fournit quatre triangles, tandis qu'un triangle possède au
+plus `m_4-3` apex. Le majorant entier
+`floor((m_4-3)T_4/4)` remplace donc tout coefficient empirique constant; ses
+produits et la somme de coût sont saturés. Si le compte exact est préférable,
+orienter les bitsets par identifiant puis, pour chaque triangle `i<j<k`, ajouter
+`popcount(N+(i) intersection N+(j) intersection N+(k))` : chaque K4 est alors
+compté exactement une fois, sans centre ni lift. Construire l'adjacence jusqu'à
+`D_9` reste mutualisable, mais les compteurs doivent employer leurs cuts propres
+`E_2` sur `D_9`, `T_3` sur `D_8` et `T_4/Q_4` sur `D_7`.
+
+Une option intermédiaire réutilise le compte des triangles. Pour chaque arête
+orientée `i<j`, soit `c_ij=popcount(N+(i) intersection N+(j))`; alors
+`T=sum c_ij` et `Q<=sum C(c_ij,2)`. Chaque K4 contribue au terme de l'arête de
+ses deux plus petits sommets, tandis que les voisins communs non adjacents ne
+font que surmajorer. Ce calcul est particulièrement adapté à un seuil : chaque
+lane sature dès `work_cap+1`, sans terminer le sweep inutilement.
 
 La coquille triée `U_B` identifie sémantiquement une boule munie d'un support
 minimal positif dans un cloud/epoch fixé. Elle n'existe cependant qu'après le

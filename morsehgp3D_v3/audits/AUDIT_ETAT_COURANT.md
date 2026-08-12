@@ -11,27 +11,46 @@ Cadre : `phase=exploration_v3_hors_registre`,
 ## Fraîcheur
 
 `HEAD` observé au dernier contre-audit :
-`abcd488695c85409667d976234c3558ed8ac4d7c`, commit
-`pin the contractual ramp with its full provenance`.
+`64cf6febafc4a80a48b4103667be0c69cf794e9d`, commit
+`measure whether the support-key dedup needs to be global, and it does not`.
+Ce titre est une hypothèse de travail, pas un verdict reçu : le commit ajoute
+l'instrumentation par sous-arbre mais aucun transcript ni preuve de pire cas.
 
 Le worktree n'est pas identique à ce `HEAD`; Claude modifie encore
-`prototype/centre_cell_source.cpp` pendant que l'audit ne touche qu'aux textes
-autorisés. Le fichier versionné de rampe `centre_cell_scale_20260812` est aussi
-un transcript en cours d'écriture : le point 12 500 y a terminé avec `rc=0`,
-mais les points 25 000/50 000 et les autres familles ne sont pas fermés. Son
-SHA change jusqu'au marqueur terminal et aucun digest intermédiaire ne reçoit
-la rampe. Le couple **pincé par ce transcript** est distinct du source live :
+`prototype/centre_cell_source.cpp` et `CMakeLists.txt` pendant que l'audit ne
+touche qu'aux textes autorisés. La campagne `centre_cell_scale_20260812` n'est
+plus active au dernier relevé, mais son transcript est tronqué : les points
+terrain 12 500 et 25 000 y terminent avec `rc=0`, puis la seule commande 50 000
+reste sans sortie, code ni marqueur terminal; les autres familles ne commencent
+pas. Elle a en outre changé d'ELF avant 50 000 sous un en-tête unique. Aucun
+digest global ne reçoit la rampe. Le couple **annoncé par cet en-tête** est
+distinct du source live :
 
 | objet courant | SHA-256 |
 | --- | --- |
-| `CMakeLists.txt` | `d0738d1e3bfc103ecebc0c8e6dae8149aae3727322c34af4c3a0dcd8c12d440e` |
+| `CMakeLists.txt` au `HEAD` et dans l'en-tête du transcript | `d0738d1e3bfc103ecebc0c8e6dae8149aae3727322c34af4c3a0dcd8c12d440e` |
 | source du transcript, commit `238cf12` | `4884b29388d9617917810a03cde221430b66bc43cc320e9f06ba56be6e540793` |
 | ELF Release du transcript `mhgp3v_centre_cell` | `5b422644b6b461b919202f6c0257e27dc0af811110ad49fd82eca18a224f2283` |
-| source worktree successeur, non construit/non testé au dernier relevé | `6f1660c94484e80c8cc173fb225677856b27edca6551855bd1a91a315ba721d2` |
+| source `HEAD` avec instrumentation de lots, non qualifié par le transcript | `4d09080860ab949fda65d12f84e6249677e785b1e03db09807832393b7946720` |
+| ELF disque successeur observé à 15:17 UTC, non qualifié | `4f0ed7a984d9366c67b68ca8f36e228b3891d31c24cd11a3fa1bb97a7254ad9e` |
+| source worktree postérieur avec lot différé, non construit/non testé à 15:24 UTC | `64b7598358d27a1aaf5544437cf2824665ec9786e02014527b6c1c10941cb190` |
+| source de la gate différée bornée, historique | `d47ed7ebe39013f82f6bd6991ad39de56a52fffa312b32cd8cb3c7d601c6f804` |
+| ELF Release de cette gate, aussi chargé par le 50 000 tronqué | `8fdfc8af75639137ec3bd9974c6c5486d0d246b119ce9f59b41f74caccc46c32` |
+| `CMakeLists.txt` de la gate différée | `0f64c1c60afbf4af51339807b758e49ec0312d4be69f7dcda8303d251616c865` |
+| source worktree intermédiaire avec squelette d'adjacence réelle non raccordé | `b9b90cf589066e19bd31fde8d67c6015450c7d6017418021b9679ff125edd22a` |
+| source historique à sonde `E+9T`, réfutée comme cap | `fd043fe8627804a8500d59147474e92e0bb20e7fa665e533f075ab15ff23ce8e` |
+| source intermédiaire à cuts et K4 exacts, non construite | `e10638bd1b165a382724c9e13b457478ba942e3eb0c14f70859be7af78c6a14c` |
+| source worktree observé à 15:58 UTC, compte `E2/T3/T4/Q4` et sonde désactivée par défaut, non testée | `dbaa2e0128c5be30e2f7c75784e38758a45c7bb938fba5d8ab4a87c71d5ad764` |
+| ELF Release construit depuis le source précédent, couple courant non testé | `423797e9964538f42701660d8baaf492b302f801a4aeb4b0df1b183986a5a037` |
 
-Le registre configuré recense `484` CTests, dont `24` préfixés
-`mhgp3v_centre_cell_`. Cet inventaire a été relu par `ctest -N`; aucun passage
-`24/24` indépendant n'a été relancé pendant le diagnostic 12 500 concurrent.
+Le registre configuré recense désormais `488` CTests, dont `28` préfixés
+`mhgp3v_centre_cell_`. Les quatre nouvelles portes différées passent `4/4` sur
+le couple historique `d47ed7e.../8fdfc8a...`; un recheck sur le même ELF et le
+CMake `0f64c1c...` a pris `50,11 s` et produit un `LastTest.log` de SHA-256
+`e0c140085046eaf81e50560616468d1aef50f7cd29316b32c47a13748c22a8a3`
+avant écrasement concurrent. Cette gate ne qualifie pas le source courant
+`dbaa2e0...` et n'inclut encore ni mutant différé, ni `owner_multiple`
+fail-close, ni borne d'octets. L'ancien inventaire `484/24` reste historique.
 Les pins ci-dessous restent les observations historiques antérieures.
 
 | objet | SHA-256 |
@@ -500,8 +519,79 @@ owner. Son `wall_s=797` sous charge n'est pas qualifiable. Le
 ledger ancien ne ferme toujours pas ses rangs par arité : le global annonce
 `1 134 183` rejets de rang, les lignes q2/q3/q4 seulement `0/7/17`. Ce point
 n'est ni la variante de l'ancienne note (`8 338 753` cellules et
-`104 352 433` lifts), ni une famille SLO volumique. La commande 25 000 était
-encore active au dernier relevé; aucune pente n'est donc publiable.
+`104 352 433` lifts), ni une famille SLO volumique. Le 25 000 a depuis terminé,
+mais la campagne a changé d'ELF avant le 50 000 : aucune pente mono-binaire
+n'est donc publiable.
+
+Le successeur `005b786` ferme ensuite la partition par arité sur l'observation
+`n=1 500` : `130 033` occurrences de rang anticipé et `3` finales. Son
+histogramme `n=400`, encore sans transcript/pins autonomes, contient `263 825`
+clés non dégénérées pour `2 215 217` occurrences et omet `4 807`
+occurrences dégénérées. Un RLE seul implique donc `263 826..268 632`
+géométries, facteur `8,26..8,41`, non `52 693` et facteur 42. Les classes sont
+des stades maximaux par clé; elles ne séparent pas encore rang et pertinence.
+
+Le commit `64cf6fe` mesure ensuite des clés par sous-arbre, sans transcript ni
+borne d'octets. Une RLE `SupportKey` locale est exacte grâce à l'unique feuille
+owner, mais paie un solve par clé et par lot; le titre du commit ne reçoit donc
+pas l'abandon d'une agrégation globale streamée. Le worktree postérieur tente
+un vrai lot différé. L'audit statique relève déjà un cap en records qui ne borne
+ni listes ni scratch, `owner_multiple` non fail-closed, l'instrument
+`--multiplicity` déconnecté en combinaison avec `--deferred-lift`, et le mutant
+`arity-cascade` affaibli parce que `record_tuple()` retourne toujours vrai dans
+cette voie. Le successeur la place derrière `--deferred-lift`. Les quatre
+accords différés passent sur le couple historique pincé, y compris le petit cap,
+mais ils ne couvrent pas ces invariants et ne qualifient aucun débit. Le cas
+`terrain,n=100` ferme `4 693/4 693` supports aux trois caps testés, tandis que
+le gain tombe de `8,718` à `1,410` lorsque le cap passe de `1 048 576` à
+`1 024`; il faut donc publier la courbe cap--réplication--octets, pas seulement
+un facteur favorable. La combinaison différé--multiplicité imprime des tables
+vides et des facteurs `NaN` avec code zéro. Les commentaires « lifts divisés
+par cinq » et « treize pour cent plus lent » n'ont toujours ni reçu autonome ni
+portée performance.
+
+Le contre-audit corrige ici l'autre auditeur : sous arbre/epoch communs et lots
+spatiaux de feuilles atomiques, tous les supports d'une même boule ont le même
+centre et donc la même feuille half-open owner. Cette feuille est un
+`BallOwner` exact; le second RLE/census par boule peut rester local avec un
+contexte `b_cert>=H_run`. Cela ne vaut pas automatiquement pour des shards
+hashés par `SupportKey` : des supports distincts d'une boule peuvent tomber
+dans des shards distincts et doivent être redistribués par
+`GeometricBallKey/OwnerCellId` avant le census.
+
+Le snapshot `fd043fe...` raccordait une sonde du vrai graphe bissecteur dans
+une bande autour du cap. La réutilisation de l'adjacence au terminal est réelle,
+mais `topp` vaut toujours la taille du pool q2, `E+9T` omet les K4 et la matrice
+dense n'a aucun préflight d'octets. Dans `K_24`, le critère accepte
+`E+9T=18 492` sous un cap `20 000`, alors que
+`E+3T+6Q=70 104`. Ce critère reste donc une heuristique de split, pas une borne
+de travail ou de mémoire. La correction exacte proposée est la borne duale de
+Kruskal--Katona `Q<=Q_KK(T)`, puis la gate
+`E+3T+6Q_KK(T)<=work_cap`, calculée en u128 saturé; une CSR forward sparse
+remplace la matrice dense `Theta(m^2/64)` mots. Aucun test n'est transféré à ce
+successeur.
+
+Le successeur courant `dbaa2e0...` corrige les deux défauts combinatoires de
+ce snapshot : cuts `D_9/D_8/D_7`, compte exact `E2/T3/T4/Q4`, admission
+`E2+3T3+6Q4`, et sonde bornée à `top<=96`. Il n'est pas reçu. En outre,
+`probe_factor=1` rend sa branche de sonde inatteignable par défaut, puisque
+`!terminal` implique déjà `work>work_cap`; aucune porte CTest ne passe un
+facteur supérieur. Le contrôle d'incidence autorise à tort `Q=bound+1` au lieu
+de tester directement `4Q<=(m4-3)T4`. Hors sonde, `generate()` conserve son
+bitset dense sans préflight pour un terminal peu ambigu mais très long ou forcé
+à `max_depth`; le cap ne borne toujours ni contextes, ni enfants, ni scratch.
+Les potentiels i64 ne sont pas saturés sur tout le domaine CLI, et l'en-tête
+n'imprime ni `probe_factor`, ni `probe_top_cap`, ni `batch_records`.
+
+La campagne de taille ne peut plus devenir un reçu mono-binaire : le 25 000 a
+terminé sur l'ancien inode supprimé `5b422644...`, puis le 50 000 a démarré sur
+l'ELF distinct `8fdfc8af...` sous le même en-tête. Le processus a disparu sans
+sortie ni code pour ce dernier cas et sans marqueur de fin. Le mélange et la
+troncature sont donc des faits observés. Le bloc 25 000 annonce `46 745 417` cellules,
+`220 298 378` lifts et `1 872 528` supports, soit `117,648` lifts/support et
+`92,874 %` de rejets owner; son `wall_s=2 191` sous charge n'est pas une mesure
+SLO. Voir le contre-audit du ledger pour la reprise par ELF immuable et
+enveloppe par cas.
 
 Les commentaires et sorties du code courant ne sont pas reçus lorsqu'ils
 annoncent `EXACT`, « cofaces directes », `O(sum M*)`, causalité du facteur 384

@@ -1,0 +1,12 @@
+CentreCellScaleReceipt-v2
+date_utc=2026-08-12T15:58:57Z
+git_commit=64cf6febafc4a80a48b4103667be0c69cf794e9d
+sha256_source=dbaa2e0128c5be30e2f7c75784e38758a45c7bb938fba5d8ab4a87c71d5ad764
+sha256_ball_front=221356332743af11481a5387d65f6d27e0ec2b0ce0e10e2118f3796bb763d490
+sha256_cloud_families=1a3e3027c2e0880e6ff381fc80b707b9ec88dbf573579aac535cfc80bb307b54
+sha256_elf_frozen=423797e9964538f42701660d8baaf492b302f801a4aeb4b0df1b183986a5a037
+compiler=g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+host_cores=2
+note=binaire GELE hors de l arbre de build; empreinte revalidee avant et apres chaque cas
+=== command=/tmp/claude-1000/-workspaces-E-HGP/c89485b8-1146-49da-98f3-1533fe5440ce/scratchpad/frozen_cc --points=12500 --family=terrain --smax=11 --seed=11 --work-cap=20000
+elf_before=423797e9964538f42701660d8baaf492b302f801a4aeb4b0df1b183986a5a037

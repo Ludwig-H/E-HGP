@@ -974,12 +974,29 @@ radix, runs segmentés, `owner_lookup_failures` et rapport
 `occurrences/unique`. Les segments sont une partition radix de la clé entière;
 ils ne coupent jamais un run.
 
+Une variante spatiale bornée peut volontairement couper le run global entre
+lots de feuilles. Elle reste exacte : chaque lot calcule au plus une géométrie
+par clé, et seul le lot contenant l'occurrence de la feuille half-open owner
+publie. Elle paie cependant une géométrie par `(SupportKey,lot)` et doit garder
+ou retrouver le contexte owner et son `e0`; garder le premier contexte est
+incorrect. Pour obtenir une géométrie globalement unique sans table résidente,
+on peut sharder déterministement par bits de `SupportKey`, à condition de fermer
+chaque run entier. Cette variante ne transfère pas sa colocalisation au second
+RLE : deux supports distincts d'une même sphère ont le même centre et le même
+`OwnerCellId`, mais peuvent hacher vers deux shards différents. Les pending
+positifs doivent donc être redistribués par
+`(cloud_epoch,GeometricBallKey,OwnerCellId)`, avec tous leurs contextes, avant
+de calculer `qmin`, `H_run`, census et token. À l'inverse, un lot spatial de
+feuilles atomiques contient déjà toutes les occurrences owner de cette boule;
+son second RLE est local. Si arités, backends ou epochs n'ont pas de partition
+commune, employer un `BallOwner` canonique ou un census global exact.
+
 Pour q2, le centre doublé est simplement `x+y`, entier u17 : l'owner peut être
 testé avant toute puissance. Il n'est donc pas rationnel d'élargir par défaut
 toutes les cellules q3/q4 jusqu'à `D_9` pour remplacer sans comparaison la
 route q2. La voie cellules reste aujourd'hui une référence différentielle q2;
-la cascade Yao--affine--résiduel reste une candidate produit séparée tant
-qu'aucune gate comparative complète ne les départage.
+la cascade Yao--affine--résiduel est un comparateur suspendu. Elle ne redevient
+candidate produit que si une gate comparative complète justifie sa réouverture.
 
 ### 13.5 Deux primitives device à essayer avant un Voronoï local
 
@@ -995,10 +1012,10 @@ numériquement le même que le seuil de distance.
 
 Sous `x in [0,65535]^3`, `d<=26` et une cellule contenue dans la racine u16,
 on a `0<=z_j<=65535*S`, puis `|F_x|<9*2^58<2^62` et
-`|F_x-F_y|<18*2^58<2^63`. Extrema, top-9, égalités et bissecteurs tiennent donc
+`|F_x-F_y|<18*2^58<2^63`. Extrema, top-9 pour q3/q4, égalités et bissecteurs tiennent donc
 exactement en `int64` signé, sans l'hypothèse empirique « le rayon local vaut
 quelques dizaines ». Cette borne ne couvre ni cellule extrapolée/signée hors
-racine, ni lift, centre ou clé q3/q4. Entre deux profondeurs, `S` et `z`
+racine, ni lift, centre ou clé q3/q4; une lane q2 `D_9` exige top-10. Entre deux profondeurs, `S` et `z`
 changent et le score se rescale; la réutilisation des buckets doit être prouvée
 via le score physique commun ou une covariance explicite, jamais par égalité
 brute des entiers `F_x`. La géométrie des survivants garde ses limbs exacts.
@@ -1036,7 +1053,7 @@ rendre produit. On ne l'étudie qu'après la gate
 `unique/effective_h0_events` reste rouge, le verrou sera alors bien le
 producteur scientifique et non l'owner tardif.
 
-Le sweep ajouté dans le source live ne change pas cette décision. Pour des
+Le sweep ajouté dans le snapshot historique `fd043fe...` ne change pas cette décision. Pour des
 intervalles fermés triés par borne gauche, `a_i=i-|{j:u_j<l_i}|` donne bien
 exactement `sum_i C(a_i,q-1)` cliques du graphe d'intervalles par Helly en
 dimension un. Il ne donne qu'un majorant des cliques du graphe de bissecteurs
@@ -1048,12 +1065,42 @@ nombre de cellules. Elle doit employer des comptes lane-specific, des additions
 saturées, et comparer le coût prévu du terminal à celui des huit enfants; elle
 ne doit pas être appelée « critère de split exact ».
 
-La décision à deux étages la plus propre emploie d'abord ce potentiel comme
-majorant saturé bon marché, puis, seulement près du seuil, construit une fois
-l'adjacence bissectrice et compte ses vrais `E/T/Q` par bitsets. Elle compare
-alors le coût terminal aux huit enfants, réplication, octets CSR, lancements et
-census compris; un cap dense route vers un fallback exact préflighté ou
+Le snapshot `fd043fe...` raccordait une première version de cette décision
+à deux étages : il réutilise bien l'adjacence après avoir compté les vrais
+`E/T`. Ce n'est pas encore la porte décrite ci-dessus. Son `topp` se réduit
+algébriquement à toute la liste q2, et `E+9T` omet les K4; or, dans une clique de
+taille `m`, le rapport `Q/T=(m-3)/4` n'est pas borné par une constante. La
+matrice dense est en outre allouée sans préflight d'octets et les comptes i64 ne
+sont pas saturés sur tout le domaine CLI. La décision reçue devra employer les
+cuts propres à chaque lane, compter `Q` ou un majorant prouvé, puis comparer le
+coût terminal aux huit enfants, réplication, octets CSR, lancements et census
+compris; un cap dense route vers un fallback exact préflighté ou
 `resource_exhausted`, jamais vers une sortie censurée.
+
+Le majorant prouvé le plus simple est immédiat : dans la lane q4 de taille
+`m_4`, chaque K4 possède quatre faces triangulaires et chaque triangle reçoit au
+plus `m_4-3` apex, donc `4Q_4<=(m_4-3)T_4`. Pour une gate encore plus nette, une
+warp additionne, sur chaque triangle orienté `i<j<k`, le popcount de
+`N+(i) intersection N+(j) intersection N+(k)`; cette somme vaut exactement
+`Q_4`, sans lift. Une seule adjacence peut ainsi fournir `E_2` sur le cut q2,
+`T_3` sur le cut q3 et `T_4/Q_4` sur le cut q4, avec arithmétique saturée.
+
+Entre les deux, le majorant `Q_4<=sum_(i,j) C(c_ij,2)`, avec
+`c_ij=popcount(N+(i) intersection N+(j))` sur les arêtes orientées du cut q4,
+réutilise exactement les intersections déjà nécessaires au compte de `T_4`.
+La clique `K_24` doit devenir fixture : `E+9T=18492` passe le cap `20000`, mais
+`Q=10626` et `E+3T+6Q=70104`. Elle réfute le coefficient neuf sans dépendre
+d'un chrono.
+
+Le successeur `dbaa2e0...` applique déjà la correction principale : cuts par
+lane, compte exact `E2/T3/T4/Q4`, score `E2+3T3+6Q4` et plafond de sonde 96.
+Il est construit mais non testé. Son défaut `probe_factor=1` rend toutefois
+cette sonde inatteignable sans option explicite, car elle n'est consultée
+qu'après `work>work_cap`; les CTests ne l'exercent donc pas. Le contrôle
+d'incidence tolère en outre une unité de trop, et le bitset dense employé par
+`generate()` reste non borné hors de la sonde. Recevoir ce delta exige
+`probe_tests>0`, la fixture `K_24`, un mutant d'incidence, une égalité de payload
+et le HWM complet en octets.
 
 ### 13.6 Ordre de travail corrigé
 

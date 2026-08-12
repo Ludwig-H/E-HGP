@@ -8,15 +8,18 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-Cette note ferme les deux trous relevés par
+Cette note ferme numériquement le premier trou et ouvre l'instrument demandé
+pour le second, relevés par
 [`AUDIT_LEDGER_CAUSES_LIFTS_238CF12_20260812.md`](AUDIT_LEDGER_CAUSES_LIFTS_238CF12_20260812.md).
 
-Le contre-audit de la section 7 du même fichier retire toutefois trois
+Le contre-audit des sections 7, 10 et 11 du même fichier retire toutefois trois
 surinterprétations : les issues ne sont pas des propriétés causales
 orthogonales, les `52 693` clés pending ne sont pas la borne après RLE (le
 tableau contient `263 825` clés non dégénérées), et les « 1 200 cycles » ne sont
-pas mesurés. Les nombres ci-dessous restent des observations historiques sans
-transcript complet.
+pas mesurés. Il ne reçoit pas davantage le titre du commit `64cf6fe` : une RLE
+spatiale locale est exacte, mais sa petite réplication n'est pas prouvée par un
+seul `terrain,n=400`; elle paie un solve par clé et par lot. Les nombres
+ci-dessous restent des observations historiques sans transcript complet.
 
 ## 1. La partition ferme désormais exactement
 
@@ -40,15 +43,17 @@ et l'écart est imprimé. Sur `terrain`, `n=1 500`, `smax=11`,
 comme non attribuées. Sa prédiction est donc confirmée au chiffre près.
 
 Je retire par conséquent l'affirmation « le rang n'explique rien » : le rang
-explique `130 033` occurrences sur `7 820 379`, soit `1,66 %`, et il le fait par
-la branche anticipée, jamais par la branche finale.
+explique `130 033` occurrences anticipées et `3` occurrences finales sur
+`7 820 379`, soit `1,663 %`. La branche anticipée domine, mais la branche finale
+n'est pas vide.
 
 ## 2. L'histogramme de multiplicité par `SupportKey`
 
 Ajouté sous `--multiplicity`, réservé aux petits nuages : c'est un instrument de
-mesure, jamais une structure du chemin produit. Chaque occurrence est notée avec
-son issue la plus avancée; l'identité `somme des multiplicités = occurrences`
-est publiée avec son écart.
+mesure, jamais une structure du chemin produit. Chaque `SupportKey` reçoit un
+compteur cumulé et le maximum des issues observées; chaque occurrence n'est donc
+pas classée séparément. L'identité
+`somme des multiplicités = occurrences` est publiée avec son écart.
 
 Relevé sur `terrain`, `n=400`, `smax=11`, `work-cap=20000` :
 
@@ -56,39 +61,54 @@ Relevé sur `terrain`, `n=400`, `smax=11`, `work-cap=20000` :
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
 | jamais possédé | `144 235` | `686 480` | `4,759` | `4` | `13` | `167` |
 | non positif | `66 897` | `676 132` | `10,107` | `8` | `25` | `68` |
-| possédé quelque part | `52 693` | `852 605` | `16,181` | `11` | `44` | `268` |
+| owner et positif au moins une fois, rang non classé | `52 693` | `852 605` | `16,181` | `11` | `44` | `268` |
 
 `multiplicite_total_occurrences=2 215 217` contre `lifts=2 220 024`, écart
-`4 807` : ce sont exactement les tuples dégénérés, dont l'instrument ne retient
-pas l'issue. Les acceptations valent `23 926` supports.
+`4 807` : ce sont exactement les occurrences dégénérées, dont l'instrument ne
+retient ni la clé ni l'issue. Les `23 926` acceptations ne forment pas une
+population de l'histogramme : une clé pending rejetée au rang reste dans la
+dernière ligne, car l'issue provisoire `4` domine l'issue rang `3`.
 
 ## 3. Ce que ces nombres disent, et ce qu'ils ne disent pas
 
 Mes ratios `42/55/510` sont **retirés**. Ils divisaient des occurrences de trois
 populations par les seules acceptations. La mesure honnête est :
 
-- un tuple qui atteint `pending` — positif et possédé quelque part — est examiné
-  **16,2 fois en moyenne**, médiane `11`, p95 `44`, maximum `268`;
-- un tuple jamais possédé nulle part coûte `4,76` occurrences;
-- un tuple non positif en coûte `10,1`.
+- une clé qui atteint `pending` au moins une fois possède **16,2 occurrences en
+  moyenne**, médiane `11`, p95 `44`, maximum `268`; ce total inclut ses rejets
+  owner dans les autres cellules;
+- une clé pour laquelle aucune occurrence émise n'est owner possède `4,76`
+  occurrences en moyenne; cette classe peut contenir des clés intrinsèquement
+  non positives, puisque ces occurrences n'atteignent pas toutes le test de
+  positivité;
+- une clé intrinsèquement non positive pour laquelle au moins une occurrence
+  owner est vue, et qui n'atteint donc jamais pending, possède `10,1`
+  occurrences en moyenne. La positivité est une propriété du `SupportKey`, pas
+  une issue qui varierait entre ses occurrences.
 
-Le nombre `52 693` compte seulement les clés ayant atteint pending. Il ne borne
-pas le coût après RLE : les trois lignes totalisent `263 825` clés distinctes
-non dégénérées, soit un facteur diagnostique
-`2 215 217/263 825=8,40` occurrences par clé. Atteindre `52 693` exigerait en
-plus des prunes parfaits pour toutes les autres clés.
+Le nombre `52 693` compte seulement les clés ayant atteint pending. C'est un
+floor trivial de ce sous-ensemble dans cette observation figée, mais ni le coût
+après RLE ni un minorant universel de Source S ou de H0 : les trois lignes
+totalisent `263 825` clés distinctes non dégénérées. Les `4 807` occurrences
+dégénérées représentent entre une et `4 807` clés supplémentaires. Une
+géométrie par clé demanderait donc entre `263 826` et `268 632` lifts, soit une
+compression comprise entre `8,26` et `8,41`. Atteindre `52 693`, facteur
+`42,13`, exigerait un oracle gratuit pour owner et positivité, pas le seul RLE.
 
-Les trois populations appellent trois traitements distincts, et c'est le
-résultat utile de cette mesure :
+Ces trois classes ne justifient pas trois traitements causaux distincts. Le
+résultat utile est seulement l'étagement suivant :
 
-1. les `852 605` occurrences de tuples ayant atteint pending sont justement
-   réduites par le RLE `SupportKey`; des tests owner spécialisés peuvent encore
-   en réduire le coût;
-2. les `676 132` occurrences non positives demandent un test de positivité
-   **plus précoce** que le centre complet;
-3. les `686 480` occurrences jamais possédées demandent un filtre géométrique
-   supplémentaire — le test de rayon `beta` dans l'intersection courante des
-   intervalles est la candidate naturelle, et elle n'exige pas le centre.
+1. le RLE `SupportKey` conserve les contextes compacts mais ne construit qu'une
+   géométrie par clé, puis recherche l'unique owner dans le run entier;
+2. l'acuité q3 et des bornes nécessaires q4 peuvent rejeter une partie des clés
+   intrinsèquement non positives avant le lift complet, mais leur gain causal
+   exige des flags orthogonaux `positive/owner/relevant`, pas la classe de stade
+   maximal;
+3. un prune amont owner peut être étudié séparément. Le diamètre fournit la
+   condition monotone `D2*S2<=4*Umin` sans centre; connaître `beta` exact pour
+   q3/q4 demande en revanche un solve déterminantal comparable au lift. La
+   classe « aucune occurrence owner » ne mesure pas à elle seule le gain de ce
+   prune.
 
 ## 4. Calibration de coût
 

@@ -856,6 +856,22 @@ pas la boule si un support plus petit du même run survit. Cette réduction évi
 les strict-count et census fermés répétés, sans revendiquer de borne
 sublinéaire.
 
+Le premier RLE admet deux réalisations exactes. Premièrement, un lot spatial
+contient des feuilles terminales entières. Il peut couper un run global et paie
+alors une géométrie par `(SupportKey,lot)`; seul le lot contenant la feuille
+owner publie. Sous partition et epoch communs, tous les supports d'une même
+boule ont le même centre, donc la même feuille owner et le même lot. Leur second
+RLE/census reste local exact-once dès qu'un contexte certifie
+`b_cert>=H_run`. Deuxièmement, un shard radix déterministe par `SupportKey`
+réunit toutes les occurrences égales et ne paie qu'une géométrie par support, à
+condition qu'aucune frontière ne coupe son run. Des `SupportKey` distinctes
+d'une même boule peuvent toutefois appartenir à des shards différents. Le flux
+positif owner subit donc une seconde redistribution streamée par
+`(cloud_epoch,GeometricBallKey)`, portant `OwnerCellId` et tous les contextes;
+un désaccord d'owner est un échec d'invariant. Si les producteurs n'emploient
+pas une partition commune, ils routent vers un `BallOwner` canonique et un
+contexte de census certifié, ou appellent le census global exact.
+
 Sur un plateau, le token exact est un générateur saturé
 `(BallKey,beta,S_B=X cap B)` qui représente implicitement le bloc de Johnson.
 En effet, toute union de deux k-sous-ensembles adjacents possède `k+1` labels
@@ -987,13 +1003,14 @@ test `acute` à cette seule face serait incomplet; pour exploiter le théorème 
 Crux, il faut énumérer toutes les faces aiguës puis choisir la plus petite face
 aiguë canonique.
 
-Le premier RLE chaud emploie `SupportKey` avant toute géométrie. Après calcul
-unique du lift et choix du contexte owner, le second RLE emploie une clé
+Le premier RLE chaud reçoit
+`(cloud_epoch,SupportKey,CensusContext)` avant toute géométrie. Après calcul
+unique du lift et choix du contexte owner, chaque survivant produit
+`(cloud_epoch,GeometricBallKey,SupportKey,CensusContext)` et le second RLE emploie cette clé
 géométrique exacte de taille fixe. Si la forme est
 `D||y-a||^2+C dot (y-a)=0`, le 5-uplet homogène
 `(D,C-2Da,D||a||^2-C dot a)`, normalisé par signe puis pgcd, est une clé
-primitive de sphère disponible avant census. Chaque proposition produit d'abord
-`(cloud_epoch,GeometricBallKey,SupportKey,CensusContext)`; le contexte lie
+primitive de sphère disponible avant census. Le contexte lie
 cellule, digests de pool/domaine, arène ou backend, `e0` et budget certifié
 `b_cert`. Le RLE conserve tous les supports et contextes. Pour
 `H_run=smax-q_min`, il choisit atomiquement un contexte avec
@@ -1020,7 +1037,7 @@ Cette complétude ne borne pas le travail. Une cosphère massive peut conserver
 `|A_q|=Theta(n)` à toute profondeur et provoquer `Theta(n^q)` vues pour une
 seule boule. Subdiviser jusqu'à stabilité peut aussi reconstruire implicitement
 les bisecteurs du diagramme de Voronoi d'ordre supérieur. La structure reste
-donc transitoire, sans atlas ni adjacences, et hors du chemin chaud tant
+donc transitoire, sans atlas ni adjacences persistantes/globales, et hors du chemin chaud tant
 qu'aucune borne d'admission n'existe.
 
 Une borne conditionnelle mesurable est toutefois disponible. Pour `c0` dans le
@@ -1033,6 +1050,18 @@ ce cardinal. Cette propriété, mesurée sur `uniform` et `eight_clusters`, peut
 autoriser un bitset warp `m<=64`; en son absence, la branche choisit CSR,
 subdivision ou `resource_exhausted`. `max_depth` seul n'est jamais un
 certificat sparse.
+
+Le graphe bissecteur terminal fournit aussi une enveloppe q4 exacte sans lift.
+Sur le cut q4 de taille `m_4`, si `T_4` et `Q_4` désignent ses triangles et K4,
+alors `4Q_4<=(m_4-3)T_4`, par comptage des quatre faces de chaque K4. Cette
+borne remplace tout coefficient empirique constant. Sur bitsets orientés,
+sommer pour chaque triangle `i<j<k` le popcount de
+`N+(i) intersection N+(j) intersection N+(k)` compte même `Q_4` exactement une
+fois. La gate emploie séparément `E_2` sur `D_9`, `T_3` sur `D_8` et `T_4/Q_4`
+sur `D_7`, avec sommes saturées et préflight du bitset ou de la CSR.
+Le majorant intermédiaire `Q_4<=sum C(c_ij,2)`, où
+`c_ij=popcount(N+(i) intersection N+(j))`, réutilise le sweep de triangles et
+peut s'arrêter dès que le cap est dépassé.
 
 ## 8. Resolver des blocs silencieux
 
@@ -1165,7 +1194,8 @@ Le manifeste engage au minimum :
 - tâches source prévues, remplies, consommées, scindées et refusées ;
 - produits dual-tree, ancres, arrangements, sommets shallow et faux positifs ;
 - activations, tombstones, supports par arité, profondeurs et coquilles ;
-- `GeometricBallKey` avant RLE, `U_B` après census et preuve des doublons ;
+- `SupportKey` avant le premier RLE, `GeometricBallKey` avant le second,
+  `U_B` après census et preuve des doublons ;
 - incidences fast/fallback, hits prévus/lus, resolver et ledger pré-DSU ;
 - octets de chaque arène, workspace, pile, high-water et marge ;
 - temps séparés build, source, census, resolver, fold, payload et
@@ -1212,8 +1242,13 @@ un refus de ressource sont trois statuts distincts.
    terminale commune, `e0` immuable et promotion, sans dépendre des supports
    inférieurs retenus et sans supprimer le transcript Yao-1 de `k=1`. Émettre
    les occurrences compactes, faire le RLE `SupportKey` avant le lift, chercher
-   au plus un contexte owner, puis faire le RLE par clé primitive de sphère et un
-   unique strict-count/census par boule; `U_B` est un certificat aval. Gamma
+   au plus un contexte owner; comparer lots spatiaux de feuilles atomiques et
+   shards radix par clé. Dans le premier cas, la feuille owner commune rend le
+   second RLE par clé primitive de sphère local. Dans le second, redistribuer les
+   pending owner par `GeometricBallKey/OwnerCellId` avant ce RLE : un owner
+   commun ne colocalise pas des shards `SupportKey` distincts. Choisir ensuite
+   un contexte `b_cert>=H_run` et faire un unique strict-count/census par boule;
+   `U_B` est un certificat aval. Gamma
    conserve les `SupportKey` requis; le H0 normalisé
    emploie le token Johnson et un support canonique. Graver les fixtures
    q3-sans-q2, q4-sans-q3, pool-relative, budgets indépendants et shell 30.

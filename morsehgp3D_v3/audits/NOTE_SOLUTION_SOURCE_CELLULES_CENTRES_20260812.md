@@ -8,8 +8,9 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-Cette note spécifie la machine implémentée dans
-`prototype/centre_cell_source.cpp` et ses portes. Elle consomme
+Cette note spécifie le snapshot historique `34371880...` et les invariants
+durables de la machine; elle ne décrit pas automatiquement chaque successeur de
+`prototype/centre_cell_source.cpp`. Elle consomme
 [`NOTE_ARCHITECTURE_GPU_LISTES_CELLULES_CENTRES_20260812.md`](NOTE_ARCHITECTURE_GPU_LISTES_CELLULES_CENTRES_20260812.md)
 et les corrections de
 [`AUDIT_REPONSES_CELLULES_CENTRES_20260812.md`](AUDIT_REPONSES_CELLULES_CENTRES_20260812.md).
@@ -31,9 +32,9 @@ Le snapshot source `34371880...`, CMake `f663ada0...`, ELF `f927e47b...` passe
 raccordés, pas encore la complétude générale de l'implémentation : le juge
 partage les lifts et `power_of`, et reste borné. Le théorème ci-dessous reçoit
 le schéma sous ses invariants; le statut live demeure celui de l'audit courant.
-Le source live a changé après ce pin, notamment par un filtre q4 supplémentaire;
-aucun résultat `22/22` ne lui est transféré sans reconstruction et nouvelle
-porte.
+Le source live a changé après ce pin; aucun résultat `22/22` ne lui est
+transféré sans reconstruction et nouvelle porte. Son statut appartient
+exclusivement à l'audit courant.
 
 Elle ne produit ni `BallActivation`, ni facettes du cœur, ni gateways, ni
 resolver, ni MSF, ni fold, ni verticales, ni `BenchmarkOutputContract-v1`. Elle
@@ -117,8 +118,9 @@ ensuite promue. Au premier tour, la garde `interior<e_start` vérifie la borne
 basse non structurelle; après chaque promotion, `h` prend l'ancien compte et le
 nouveau compte ne peut qu'augmenter. La sortie `interior<=h` implique donc bien
 `interior==h` par le flot nominal. Une assertion finale explicite serait
-redondante mais utile comme défense; le vrai trou de réception est que le mutant
-`strata-stop` n'est pas raccordé à CTest.
+redondante mais utile comme défense. Historiquement, `strata-stop` n'était pas
+raccordé à CTest sur ce snapshot; le CMake successeur l'enregistre désormais,
+sans que cette inscription transfère un résultat d'exécution.
 
 ## 5. Lanes d'arité indépendantes — l'invariant de complétude
 
@@ -161,7 +163,8 @@ les cliques.
 
 ## 7. Mesure historique du filtre d'enveloppe
 
-Sur `terrain`, `n=2000`, `smax=11`, `pair_cap=256`, même sortie
+Sur `terrain`, `n=2000`, `smax=11`, avec l'option historique
+`pair_cap=256` depuis renommée `work_cap`, même sortie
 `supports_total=134 300` avant et après :
 
 | version | lifts | temps CPU utilisateur |
@@ -207,17 +210,20 @@ Plancher de couverture à code 3.
 1. Le juge partage `ball_front.hpp`, les lifts et `power_of` avec le sujet.
    L'accord d'identités est utile, mais ce n'est pas un juge arithmétiquement
    indépendant. `oracle/locality_census_judge.cpp` doit être étendu.
-2. Le successeur live implémente un test **droite--cellule** q4 depuis une face
+2. Les successeurs postérieurs implémentent un test **droite--cellule** q4 depuis une face
    canonique non colinéaire. Sa sûreté vient du lieu équidistant de cette face;
    elle ne dépend ni de son acuité, ni de sa pertinence dans la lane q3. La
    variante a réduit les quadruplets et lifts sur un petit diagnostic, mais a
    ralenti le CPU; elle reste optionnelle et non reçue sur device.
-3. Le successeur live implémente le sweep `sum_i C(a_i,q-1)`. Il compte
+3. Le snapshot postérieur `fd043fe...` implémentait le sweep
+   `sum_i C(a_i,q-1)`. Il compte
    exactement les cliques du graphe d'intervalles scalaires, pas celles du
-   graphe 3D de bissecteurs; sa pondération `E+3T+6Q` reste un modèle de coût.
-   Après construction du bitset, les vrais `E/T/Q` doivent être comptés
-   séparément. Aucun résultat de split du source live ne se transfère au pin
-   historique `34371880...`.
+   graphe 3D de bissecteurs; sa pondération reste un modèle de coût. Le
+   worktree `dbaa2e0...` tente désormais les vrais `E2/T3/T4/Q4` avec cuts par
+   lane et plafond 96, mais les désactive de fait au défaut
+   `probe_factor=1`. Il est construit, non testé, et aucun résultat de split ne
+   se transfère au pin historique `34371880...`. Son statut détaillé appartient
+   à l'audit courant.
 4. La jauge dyadique commune `s_x(c)` n'est pas implémentée. Elle rendrait les
    bornes affines et réduirait la largeur; la borne actuelle est
    `l,u<=3(65535\cdot 2^{d})^{2}<2^{34+2d}`, sous `i128` jusqu'à `d<=26` mais
@@ -231,11 +237,21 @@ Plancher de couverture à code 3.
    quadratiquement les rayons concentriques et omet ces comparaisons exactes du
    ledger. La clé homogène primitive doit supprimer ce sous-produit avant toute
    qualification de débit.
+9. Les successeurs `005b786...` et `64cf6fe...` ajoutent un ledger fermé par
+   arité, un histogramme non causal et un diagnostic de déduplication par lots.
+   Le worktree postérieur tente un RLE `SupportKey` local avant lift. Aucun de
+   ces états n'est reçu par le `22/22` historique; leur contre-audit est
+   [`AUDIT_LEDGER_CAUSES_LIFTS_238CF12_20260812.md`](AUDIT_LEDGER_CAUSES_LIFTS_238CF12_20260812.md).
 
 ## 10. Non-claims
 
-La rampe contractuelle `12 500/25 000/50 000` est en cours et n'est pas encore
-publiée. Aucun compteur ne vaut GO. La baseline Poisson--Delaunay d'ordre `k`
+La campagne diagnostique de taille `12 500/25 000/50 000` sur `terrain` est
+mixte et irrecevable comme rampe mono-binaire; ses blocs 12 500 et 25 000 sont
+fermés sur `5b422644...`, tandis que 50 000 a démarré sur `8fdfc8af...` sous le
+même en-tête.
+Elle n'est pas une rampe contractuelle, car les familles bloquantes `uniform`
+et `eight_clusters` n'y sont pas reçues. Aucun compteur ne vaut GO. La baseline
+Poisson--Delaunay d'ordre `k`
 de l'audit — de l'ordre de `24` millions de supports pour un régime volumique
 uniforme à 50 000 points — indique que le régime volumique et le régime
 surfacique ne sont pas comparables et qu'aucune conclusion d'un régime ne

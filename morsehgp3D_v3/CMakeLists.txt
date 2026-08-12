@@ -2245,6 +2245,30 @@ set_tests_properties(mhgp3v_centre_cell_uniform mhgp3v_centre_cell_terrain
                      mhgp3v_centre_cell_grille_gravee
                      PROPERTIES PASS_REGULAR_EXPRESSION "ACCORD juge")
 
+# LA VARIANTE A/B DU LIFT DIFFERE. Le RLE `SupportKey` avant lift divise les
+# lifts par cinq, mais coute treize pour cent de plus sur ce CPU : le lift n'est
+# pas le goulot, l'enumeration l'est. La variante reste donc desactivee par
+# defaut et JUGEE, pour qu'un futur A/B device compare des identites, pas des
+# impressions.
+add_test(NAME mhgp3v_centre_cell_differe_uniform COMMAND mhgp3v_centre_cell
+         --points=60 --smax=6 --family=uniform --seed=3 --judge --deferred-lift
+         --min-supports=1)
+add_test(NAME mhgp3v_centre_cell_differe_terrain COMMAND mhgp3v_centre_cell
+         --points=60 --smax=6 --family=terrain --seed=3 --judge --deferred-lift
+         --min-supports=1)
+add_test(NAME mhgp3v_centre_cell_differe_grille COMMAND mhgp3v_centre_cell
+         --points=125 --smax=11 --family=grave_grid --judge --deferred-lift
+         --min-supports=1)
+# UN LOT MINUSCULE force de nombreuses vidanges : la sortie doit etre identique.
+add_test(NAME mhgp3v_centre_cell_differe_lot_minuscule COMMAND mhgp3v_centre_cell
+         --points=125 --smax=11 --family=grave_grid --judge --deferred-lift
+         --batch-records=1024 --min-supports=1)
+set_tests_properties(mhgp3v_centre_cell_differe_uniform
+                     mhgp3v_centre_cell_differe_terrain
+                     mhgp3v_centre_cell_differe_grille
+                     mhgp3v_centre_cell_differe_lot_minuscule
+                     PROPERTIES PASS_REGULAR_EXPRESSION "ACCORD juge")
+
 # LES QUATRE FIXTURES GRAVEES.
 #
 # `egalite` : un nuage aleatoire ne trouve PAS l'egalite `beta == R_p(C)`; sans
