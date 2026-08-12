@@ -459,6 +459,7 @@ struct Engine {
   bool track_multiplicity = false;
   // issue : 0 degenere, 1 sans owner, 2 non positif, 3 rang, 4 pertinent
   std::map<std::array<int, 4>, std::pair<i64, int>> occurrences;
+  std::map<std::array<int, 5>, i64> occurrences_batched;
 
   void note_occurrence(const int* ids, int q, int issue) {
     if (!track_multiplicity) return;
@@ -467,6 +468,8 @@ struct Engine {
     auto& slot = occurrences[key];
     ++slot.first;
     if (issue > slot.second) slot.second = issue;
+    std::array<int, 5> bkey{key[0], key[1], key[2], key[3], current_batch};
+    ++occurrences_batched[bkey];
   }
 
   // `p` va de 0 a smax-2 pour l'arite deux : il faut donc `smax-1` seuils.
@@ -474,8 +477,14 @@ struct Engine {
 
   void run(const CentreCell& root, const std::vector<Cand>& seed) {
     level.assign((std::size_t)max_depth + 2, {});
+    current_batch = 0;
+    batch_counter = 0;
     descend(root, seed);
   }
+
+  int batch_depth = 3;
+  int batch_counter = 0;
+  int current_batch = 0;
 
   void descend(const CentreCell& cell, const std::vector<Cand>& parent) {
     stats.max_depth_reached = std::max(stats.max_depth_reached, (i64)cell.depth);
@@ -688,7 +697,10 @@ struct Engine {
           owns_nothing = true;
       if (owns_nothing) continue;
       ++stats.cells_created;
+      const int saved = current_batch;
+      if (child.depth == batch_depth) current_batch = ++batch_counter;
       descend(child, mine);
+      current_batch = saved;
     }
   }
 
@@ -1194,6 +1206,7 @@ struct Options {
   int smax = 11, leaf = 4, work_cap = 20000, max_depth = 22;
   bool axis_filter = false;
   bool multiplicity = false;
+  int batch_depth = 3;
   Mutant mutant = Mutant::kNone;
   bool judge = false;
   i64 min_supports = 0, min_cells = 0, min_quads = 0;
@@ -1210,6 +1223,7 @@ int run_engine(const std::vector<mhgp::P3>& cloud, const Options& opt) {
   engine.work_cap = opt.work_cap;
   engine.axis_filter = opt.axis_filter;
   engine.track_multiplicity = opt.multiplicity;
+  engine.batch_depth = opt.batch_depth;
   engine.max_depth = opt.max_depth;
   engine.mutant = opt.mutant;
   engine.collect = opt.judge;
@@ -1302,6 +1316,15 @@ int run_engine(const std::vector<mhgp::P3>& cloud, const Options& opt) {
     }
     std::printf("multiplicite_total_occurrences=%lld lifts=%lld ecart=%lld\n", total,
                 s.lifts_built, s.lifts_built - total);
+    // RENDEMENT D'UNE DEDUPLICATION PAR LOT. Un lot est le sous-arbre enracine a
+    // `batch_depth`. Si les occurrences d'un meme tuple tombent majoritairement
+    // sous un meme ancetre, un RLE local suffit et aucune table globale n'est
+    // necessaire; sinon la voie `SupportKey-before-lift` doit etre globale.
+    std::printf("dedup batch_depth=%d lots=%d cles_globales=%zu cles_par_lot=%zu facteur_global=%.3f facteur_lot=%.3f\n",
+                engine.batch_depth, engine.batch_counter, engine.occurrences.size(),
+                engine.occurrences_batched.size(),
+                (double)total / (double)engine.occurrences.size(),
+                (double)total / (double)engine.occurrences_batched.size());
   }
   std::printf("lifts_built=%lld degenerate=%lld\n", s.lifts_built, s.degenerate_lifts);
   std::printf("owner_rejected=%lld self_centre_rejected=%lld rank_rejected=%lld\n",
@@ -1644,6 +1667,8 @@ int main(int argc, char** argv) {
       opt.work_cap = parse_int(arg.substr(11).c_str(), &ok);
     else if (arg == "--axis-filter") opt.axis_filter = true;
     else if (arg == "--multiplicity") opt.multiplicity = true;
+    else if (arg.rfind("--batch-depth=", 0) == 0)
+      opt.batch_depth = parse_int(arg.substr(14).c_str(), &ok);
     else if (arg.rfind("--max-depth=", 0) == 0)
       opt.max_depth = parse_int(arg.substr(12).c_str(), &ok);
     else if (arg.rfind("--min-supports=", 0) == 0)
