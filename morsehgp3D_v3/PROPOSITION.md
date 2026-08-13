@@ -1676,6 +1676,31 @@ mesures directes/radiales. `smax` doit piloter dynamiquement
 pentes au plus `1,35`. Voir
 [`AUDIT_CONTRE_DOMINANCE_432_5DDF4A3_20260813.md`](audits/AUDIT_CONTRE_DOMINANCE_432_5DDF4A3_20260813.md).
 
+La prochaine implémentation doit partir d'une partition canonique de rectangles
+LBVH, non des ancres : `(N,N)` se décompose en `(L,L),(L,R),(R,R)`. Sur chaque
+`A times B`, le cœur commun n'est qu'un fast path opportuniste, puis une cellule
+de différences et des témoins communs à toutes les ancres de `A` peuvent fermer
+le rectangle. Si `ell` est la hauteur, `zeta_h` le h-ième témoin absolu commun,
+`alpha=min_A ell` et `beta=min_B ell`, le pire rapport relatif vaut :
+
+$$r_{AB}=\frac{\beta-\alpha}{\zeta_h-\alpha}.$$
+
+Dans le domaine de fermeture `beta>zeta_h`, ce rapport croît avec `ell(a)` et
+`ell(b)` ; les minima `alpha,beta` sont donc bien le pire cas lorsque le
+dénominateur est écrit avec les hauteurs absolues communes. Le cutoff direct
+ferme alors tout le rectangle, et implique que les témoins crédités précèdent
+toutes les cibles. En cas d'échec, scinder `A/B`; ne créer `(a,CellId)` qu'à la
+feuille du résiduel. Les deux orientations sont évaluées sur le même `RectId` :
+fermeture par `OR`, résiduel par `AND`, sans join matériel de `PairId`.
+
+Les crédits coniques cellulaires viennent après cette dominance et, dans la
+première version, seulement pour une ancre feuille. Le pool dépend de
+`s=z-a` ; le réutiliser sur un bloc d'ancres sans extrema H2/coniques serait un
+faux partage. Le cœur commun reste présent seulement si sa borne et un minorant
+d'occupation viennent de la traversée déjà en cours. Les deux amas purs et leur
+cœur vide interdisent de construire une WSPD ou un index dédié à ce seul fast
+path.
+
 La fusion `OR/AND` des orientations ne doit pas matérialiser le résiduel dense.
 Les relations dirigées restent une partition canonique de rectangles ; leur
 intersection avec la transposée est évaluée paresseusement sur les blocs LCA ou

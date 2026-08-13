@@ -83,6 +83,24 @@ de travail remis à Claude sont dans
 Le statut live ne reçoit donc ni les mesures de dominance comme rampe, ni le
 prototype de groupe comme deuxième voie, ni CUDA/G4, ni le SLO. GCP non utilisé.
 
+### Delta postérieur — microprobe cœur commun non commis
+
+Claude a ensuite ouvert et raccordé dans le worktree le microprobe Q7
+`prototype/common_core_probe.cpp`, SHA-256
+`db9ef4e2cd2f98c6fcc69f3be2d808203464df711692792d8aeb831ed1a43950`,
+avec `CMakeLists.txt` SHA-256
+`d1b3cbbe20e7fa198c6132159e79705ac7677a70cac9eedbfd68dfa1fb2cf8bd`.
+Le rejeu Release/CUDA OFF rend `7/7` diagnostics en `0,67 s`.
+
+La partition dual-tree et le cœur conservateur sont recevables comme microgate,
+pas comme route. `smax` reste figé à `10/9/8`, deux occupants sont retranchés à
+tort alors que les endpoints sont hors du cœur, les mutants séparation-deux et
+count-only sont fail-open/sound, et `coeurs_vides` compte en réalité les cœurs
+q4 sous-pleins. Aucun ID/plage du cœur n'est authentifié ; le juge peut être
+sauvé par des témoins extérieurs. Le probe garde trois matrices `n*n`, rescane
+tous les points par bloc et redéveloppe chaque bloc en paires. Verdict complet :
+[`AUDIT_WORKTREE_COEUR_COMMUN_20260813.md`](AUDIT_WORKTREE_COEUR_COMMUN_20260813.md).
+
 ## Pin antérieur — `HEAD=ffe5b69`, fenêtre raccordée et rejouée
 
 Au 13 août 2026, le `HEAD` observé est

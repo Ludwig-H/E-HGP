@@ -408,10 +408,26 @@ MHGP_HD inline int census(const TreeView& t, const int* crossing, int ncross, in
 // `O(site_count * (smax-2))` par ancre. Le laisser arme paierait donc un
 // travail proportionnel a la liste de sites pour un resultat identique. Le
 // mode audit existe pour que le compteur et le mutant restent exercables.
+// LA GARDE DE DENSITE A ETE RETIREE DE CETTE FONCTION.
+//
+// Elle etait fail-open — sauter une tentative ne peut pas inventer un support —
+// mais sa densite locale ne BORNE pas la population de la boule temoin
+// ailleurs : ce n'etait donc pas un certificat, seulement un ordonnanceur. Son
+// ablation pincee ne gagne aucun prune sur les trois familles et degrade deux
+// temps sur trois ; l'audit demandait de la sortir du chemin produit.
+//
+// Elle etait de surcroit la cause d'une ABI CASSEE : cette fonction est la SEULE
+// que l'hote et le device partagent, et l'ajout du parametre `density_guard`
+// n'avait ete propage ni a `anchor_source_kernel.cu` ni a la qualification
+// device. La cible CUDA opt-in ne compilait donc plus. Retirer le parametre
+// repare la signature par SUPPRESSION, ce qui est plus sur que de propager une
+// capacite que l'audit veut voir disparaitre.
+//
+// Son harnais de diagnostic survit hors du chemin partage, dans le moteur CPU
+// `produce`, ou `--density-guard` reste explicite et desarme par defaut.
 template <typename Sink>
 MHGP_HD inline void run_anchor_point(const TreeView& t, int a, int smax, Scratch sc, Sink& sink,
-                                     WorkCounters* ctr, unsigned* flags, bool theta_audit,
-                                     bool density_guard) {
+                                     WorkCounters* ctr, unsigned* flags, bool theta_audit) {
   const P3 pa = tree_point(t, a);
   const int budget2 = smax - 2, budget3 = smax - 3, budget4 = smax - 4;
 
@@ -427,24 +443,7 @@ MHGP_HD inline void run_anchor_point(const TreeView& t, int a, int smax, Scratch
       ++ctr->front_node_visits;
       const WitnessBall wb = witness_ball_of(t, ni, pa);
       if (wb.usable) {
-        // GARDE DE DENSITE — HEURISTIQUE OPT-IN, JAMAIS UN CERTIFICAT.
-        // Le parcours temoin repart de la racine : son cout n'est PAS borne
-        // par les seuils, seulement les credits acceptes le sont. La garde
-        // n'engage donc la recherche que la ou elle peut aboutir, en estimant
-        // la population de la boule temoin par la densite du noeud lui-meme.
-        // Cette estimation ne BORNE pas la population reelle ailleurs : ce
-        // n'est pas un certificat « temoin impossible ». Sauter une tentative
-        // ne peut jamais supprimer un support — le prune reste decide par le
-        // compte entier exact — mais elle peut en perdre un. Elle est donc
-        // desarmee par defaut et ablatee par `--density-guard`.
-        const i128 r = (i128)isqrt_i128((i128)wb.tau[0]) / 4;
-        const i128 e = (i128)isqrt_i128(node_extent2(t, ni)) + 1;
-        const i128 mass = (i128)(t.end[ni] - t.begin[ni]);
-        const i128 lhs = 2177 * r * r * r * mass;
-        const i128 rhs = 100 * (i128)lane_death_threshold(smax, 2) * e * e * e;
-        if (density_guard && lhs < rhs) {
-          ++ctr->front_witness_skipped;
-        } else {
+        {
           ++ctr->front_witness_calls;
           if (witness_closes(t, wb, smax, ctr, flags)) {
             ++ctr->front_witness_prunes;

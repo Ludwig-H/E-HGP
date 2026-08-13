@@ -2868,11 +2868,27 @@ mhgp3v_add_expected_code_test_for(mhgp3v_anchor_source
 # qu'elle n'en économise (`19,60` contre `25,76` s sur `uniform`). Elle reste
 # donc désarmée par défaut. Cette porte reçoit son exactitude quand elle est
 # armée : sauter une tentative ne doit jamais changer Source S.
+# LA GARDE A QUITTE LE CHEMIN PARTAGE HOTE/DEVICE. `run_anchor_point` est la
+# SEULE fonction que l'hote et le device executent en commun, et l'ajout du
+# parametre `density_guard` n'avait ete propage ni a `anchor_source_kernel.cu`
+# ni a la qualification device : la cible CUDA opt-in ne compilait plus. La
+# reparation est une SUPPRESSION, plus sure qu'une propagation d'une capacite
+# que l'ablation pincee disqualifie deja — aucun prune gagne sur les trois
+# familles, deux temps sur trois degrades, et une densite locale qui ne borne
+# pas la population ailleurs.
+#
+# Le harnais de diagnostic survit dans le seul moteur CPU `reference`. Le
+# combiner au moteur `pipeline` en ferait une option SILENCIEUSEMENT INERTE,
+# ce qui est pire qu'une option absente : la porte suivante exige le refus.
 add_test(NAME mhgp3v_anchor_garde_densite_exacte COMMAND mhgp3v_anchor_source
          --points=140 --family=terrain --seed=5 --verify --density-guard
          --min-supports=5000)
 set_tests_properties(mhgp3v_anchor_garde_densite_exacte PROPERTIES
   PASS_REGULAR_EXPRESSION "accord=OUI")
+mhgp3v_add_expected_code_test_for(mhgp3v_anchor_source
+  mhgp3v_anchor_garde_densite_hors_pipeline
+  "n'existe plus dans le moteur pipeline" 2
+  --points=140 --family=terrain --seed=5 --engine=pipeline --density-guard)
 
 # DOMAINE `smax`. Les seuils 10/9/8 et l'enveloppe au neuvieme rang ne sont
 # ceux que de `smax=11`. Le contre-exemple recu de l'auditeur publiait 53

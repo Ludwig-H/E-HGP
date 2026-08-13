@@ -1026,7 +1026,7 @@ FlatTree flatten(const MortonLbvh& tree, const std::vector<P3>& pts) {
 }
 
 RunResult produce_pipeline(const std::vector<P3>& pts, int smax, int threads, bool store,
-                           bool theta_audit, bool density_guard) {
+                           bool theta_audit) {
   RunResult res{};
   MortonLbvh tree;
   tree.build(pts, g_leaf_size);
@@ -1053,7 +1053,7 @@ RunResult produce_pipeline(const std::vector<P3>& pts, int smax, int threads, bo
           const int hi = std::min(n, lo + chunk);
           for (int a = lo; a < hi; ++a)
             run_anchor_point(tv, a, smax, sc, sink, &wc[(std::size_t)t],
-                             &flags[(std::size_t)t], theta_audit, density_guard);
+                             &flags[(std::size_t)t], theta_audit);
         }
       });
     }
@@ -1235,6 +1235,8 @@ int main(int argc, char** argv) {
     else if (key == "--verify") { verify = true; }
     else if (key == "--theta-audit") { theta_audit = true; }
     else if (key == "--compare-engines") { compare_engines = true; }
+    // LA GARDE N'EXISTE PLUS QUE DANS LE MOTEUR CPU `produce`. La combiner au
+    // moteur pipeline serait une option SILENCIEUSEMENT INERTE : refus.
     else if (key == "--density-guard") { density_guard = true; }
     else if (key == "--leaf") { if (!parse_ll(val.c_str(), &parsed)) refuse("--leaf invalide"); leaf = parsed; }
     else if (key == "--no-store") { no_store = true; }
@@ -1282,6 +1284,12 @@ int main(int argc, char** argv) {
   if (verify && no_store) refuse("--verify exige le stockage des supports");
   if (inject != Inject::kNone && !verify) refuse("un mutant sans juge ne prouve rien");
   if (inject != Inject::kNone && engine_pipeline) refuse("les mutants visent le moteur de reference");
+  // LA GARDE DE DENSITE A QUITTE LE CHEMIN PARTAGE HOTE/DEVICE. Elle ne survit
+  // que dans le moteur CPU `reference`, comme harnais de diagnostic desarme.
+  // L'accepter en mode `pipeline` en ferait une option SILENCIEUSEMENT INERTE,
+  // ce qui est pire qu'une option absente : le refus est explicite.
+  if (density_guard && engine_pipeline)
+    refuse("--density-guard n'existe plus dans le moteur pipeline : elle a quitte le chemin partage hote/device");
   // Un mutant qui casse un filtre desarme ne prouve rien : il serait tue par
   // hasard ou survivrait par vacuite. Le refus est contractuel, avant calcul.
   if (inject == Inject::kThetaNoFailOpen && !theta_audit)
@@ -1323,7 +1331,7 @@ int main(int argc, char** argv) {
   const auto t_start = std::chrono::steady_clock::now();
   RunResult res =
       engine_pipeline
-          ? produce_pipeline(pts, (int)smax, (int)threads, !no_store, theta_audit, density_guard)
+          ? produce_pipeline(pts, (int)smax, (int)threads, !no_store, theta_audit)
           : produce(pts, (int)smax, (int)threads, false, theta_audit, !no_store, inject,
                     density_guard);
   const double wall = std::chrono::duration<double>(std::chrono::steady_clock::now() - t_start).count();
@@ -1451,7 +1459,7 @@ int main(int argc, char** argv) {
   }
   if (compare_engines) {
     const RunResult other =
-        produce_pipeline(pts, (int)smax, (int)threads, true, theta_audit, density_guard);
+        produce_pipeline(pts, (int)smax, (int)threads, true, theta_audit);
     long long ecarts = 0;
     for (const NamedCounter& nc : kNamedCounters) {
       const long long u = res.ctr.*(nc.field);

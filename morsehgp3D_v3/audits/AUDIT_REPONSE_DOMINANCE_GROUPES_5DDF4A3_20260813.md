@@ -411,6 +411,66 @@ fixe achète des blocs mieux séparés mais ne garantit ni occupation du cœur, 
 faible coût des range queries. La gate doit donc comparer LCA/dual-tree et WSPD,
 pas déclarer cette dernière préférable avant mesure.
 
+La réponse à la nouvelle question de Claude est : **disqualifié comme étage de
+couverture général, conservé comme fast path opportuniste presque gratuit dans
+la traversée de rectangles**. La mesure `eight_clusters` à zéro confirme qu'il
+ne traite pas son mur cible ; construire une WSPD ou un second index uniquement
+pour lui est NO-GO. En revanche, si le pipeline visite déjà un rectangle
+canonique `A times B`, le test `d_lb>3S_ub` coûte quelques bornes. On ne lance
+la range query du cœur que si un nœud LBVH fournit immédiatement un minorant
+d'occupation plausible ; sinon l'étage retourne `UNKNOWN` sans scan. Les régimes
+où il peut redevenir utile sont ceux avec un **troisième pont dense** dans le
+gap ou une densité volumique suffisante autour des milieux, pas deux amas purs.
+
+Le microprobe actuel ne teste pas cette ordonnance : il rescane tous les `n`
+points pour chaque cœur et matérialise un tableau `n times n`. Ses quatre
+mutants survivants imposent des fixtures frontière/occupation dédiées, pas
+l'abandon du théorème. Le cœur reste aussi un excellent falsificateur de
+l'identité de partition des rectangles.
+
+### 5.1 Ordonnance bloc d'abord, feuille en dernier
+
+La gate industrielle doit employer un seul arbre et une seule partition
+canonique des paires non ordonnées :
+
+```text
+(N,N) -> (L,L), (L,R), (R,R)
+```
+
+Chaque `RectId` couvre une masse disjointe. Sur le même rectangle `A times B`,
+évaluer d'abord le cœur opportuniste, puis les deux orientations de dominance.
+La paire est fermée si l'une des orientations est `ALL`; elle reste résiduelle
+seulement si les deux sont `UNKNOWN`. Aucune intersection de listes de
+`PairId` n'est nécessaire.
+
+Pour une cellule `j`, certifier par extrema de formes linéaires que toute
+différence `b-a`, `a in A,b in B`, appartient à sa cellule half-open. Pour
+chercher des témoins communs à toutes les ancres de `A`, un nœud `Z` est
+entièrement dans la même cellule relative si chaque facette satisfait
+`min_Z f >/>= max_A f` selon l'owner. Fusionner alors les top-`h` de la forme de
+hauteur sur ces nœuds. Si `zeta_h` est la h-ième valeur absolue commune, poser
+`alpha=min_A ell`, `beta=min_B ell`, `x=beta-alpha` et
+`y=zeta_h-alpha`. Le cutoff direct appliqué à `(x,y)` ferme tout le rectangle.
+
+La monotonie nécessaire est exacte. Pour un témoin absolu de hauteur `zeta`,
+le rapport relatif est `r=(ell(b)-ell(a))/(zeta-ell(a))`. Dans le domaine où le
+cutoff peut fermer, `ell(b)>zeta`; ainsi :
+
+$$\frac{\partial r}{\partial\ell(b)}=\frac{1}{\zeta-\ell(a)}>0,\qquad\frac{\partial r}{\partial\ell(a)}=\frac{\ell(b)-\zeta}{(\zeta-\ell(a))^2}>0.$$
+
+Le pire rapport sur `A times B` est donc obtenu aux deux minima `alpha,beta`.
+Le cutoff implique aussi `zeta_h<beta` : aucun ID commun crédité ne peut être
+une cible du nœud `B`. Si le certificat commun échoue, scinder `A` ou `B`; une
+requête par ancre n'apparaît qu'à la feuille du résiduel. C'est le changement
+d'ordonnance qui peut faire baisser les pentes : **bloc d'ancres d'abord,
+ancre individuelle en dernier**.
+
+Les groupes cellulaires s'appliquent ensuite seulement aux rectangles
+résiduels, d'abord à ancre feuille car `s=z-a` varie avec `a`. Une future
+extension à `A` non singleton devra recertifier H2 et l'inclusion conique pour
+toutes les ancres par extrema, jamais réutiliser silencieusement le pool d'une
+ancre représentative.
+
 ## 6. Ordre concret remis à Claude
 
 1. Fermer les quatre P0 dominance, figer `smax=11` dans ce probe et remplacer
