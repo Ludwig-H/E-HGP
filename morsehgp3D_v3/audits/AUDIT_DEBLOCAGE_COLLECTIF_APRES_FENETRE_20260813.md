@@ -223,6 +223,21 @@ canoniques ou de rectangles avec ledger de masse ; un record par relation est
 un NO-GO mémoire. Une ordonnance device candidate emploie formes entières
 fixes, radix, scans segmentés et streaming par lots d'ancres.
 
+Le futur `SymmetricAnd` possède ici un classifieur exact simple. Pour l'ancre
+`a`, la cellule half-open `j` et la lane `q`, pré-calculer le seuil absolu
+`F_q(a,j)=3*tau_j(z_h)-2*tau_j(a)`, ou `+infini` si la cellule est sous-pleine.
+Alors :
+
+$$R_q(a,b)\Longleftrightarrow\bigvee_j\left[b-a\in C_j^{\mathrm{ho}}\ \wedge\ \tau_j(b)<F_q(a,j)\right].$$
+
+Sur un bloc `A times B` certifié dans une même cellule `j`, l'orientation est
+`ALL_dir` si `max_{b in B} tau_j(b)<min_{a in A} F_q(a,j)` et `NONE_dir` si
+`min_{b in B} tau_j(b)>=max_{a in A} F_q(a,j)`. Deux `ALL_dir` opposés donnent
+`ALL` mutuel ; un seul `NONE_dir` donne `NONE` mutuel ; sinon le bloc est
+`MIXED`. La cohérence de cellule se prouve par les trois formes de facette et
+l'owner half-open, sinon le bloc se scinde. Mutants dédiés : confusion seuil
+absolu/relatif, `<` remplacé par `<=`, cellule voisine et transpose oubliée.
+
 Le ledger dirigé minimal par lane porte donc sur les candidatures d'ancre
 maximale, pas sur toutes les incidences d'une paire dans tous les supports :
 
@@ -235,16 +250,56 @@ fusionne par `OR` et l'incertitude par `AND` :
 
 $$\text{maxanchor\_closed\_PairId}_q+\text{uncertified\_by\_432\_PairId}_q=\binom{n}{2}.$$
 
-Le radix/RLE par `PairId` ne réalise cette fusion que lorsque les records sont
-matérialisables, notamment dans le juge à petit `n`. Si `R_dir` reste une union
-compacte de nœuds, étoiles ou rectangles, le chemin produit doit calculer
-exactement l'intersection factorisée `R_undir=R_dir intersect transpose(R_dir)`
-sans développer les paires. Il lui faut une décomposition canonique disjointe,
-un owner des intersections, un count et un digest bornés, plus un cap fail-open.
-Le ledger distingue alors `R_pair_mass`, masse sémantique potentiellement
+### 3.1 Fusion factorisée des deux orientations
+
+Le radix/RLE par `PairId` ne réalise la fusion que lorsque les records sont
+matérialisables, notamment dans le juge à petit `n`. À grand `n`, le résiduel
+dirigé doit d'abord être une **partition** canonique de relations, pas une simple
+couverture :
+
+$$R_q=\bigsqcup_{i\in I_q}A_i\mathbin{\times}B_i,\qquad A_i\cap B_i=\varnothing.$$
+
+Chaque couple dirigé possède un unique `RectId=i`. Pour deux rectangles `i,j`,
+poser `X_ij=A_i cap B_j` et `Y_ij=B_i cap A_j`. La fusion exacte est :
+
+$$R_q\cap R_q^{\mathsf{T}}=\bigsqcup_{i\neq j}\left(A_i\cap B_j\right)\mathbin{\times}\left(B_i\cap A_j\right).$$
+
+La disjonction vient de l'unicité des deux owners dirigés. Dans l'univers non
+orienté, garder seulement `i<j` donne l'owner `(i,j)` et la masse exacte :
+
+$$M_q=\sum_{i<j}\left|A_i\cap B_j\right|\left|B_i\cap A_j\right|,\qquad C_q=\binom{n}{2}-M_q.$$
+
+Ici `M_q` est la masse résiduelle non orientée et `C_q` la masse fermée par le
+cutoff considéré.
+
+Ce join reste output-sensitive : avec des étoiles, un résiduel dense recrée
+`Theta(n^2)` intersections. Le chemin 50k conserve donc un nœud paresseux
+`SymmetricAnd(R_q,Transpose(R_q))` et le pousse dans la partition canonique des
+paires fournie par les blocs LCA `L times R`, ou par une WSPD exacte. Sur un
+bloc disjoint `A times B`, il rend `ALL` seulement si les deux orientations sont
+incluses, `NONE` seulement si leur intersection est certifiée vide, sinon
+`MIXED` et scinde déterministement `A` ou `B`. Les blocs `ALL` forment une
+antichaîne et couvrent chaque `PairId` exactement une fois. Une limite atteinte
+rend `resource_exhausted` atomique ; `MIXED` n'est jamais promu en `NONE`.
+
+Le `BlockKey` contient digest d'arbre, chemins ordonnés, lane et masques
+d'identité. À petit `n`, le juge seul développe les blocs et vérifie bitset,
+masse, SHA-256 des `PairId` triés et invariance permutation/workers. À grand
+`n`, un digest structurel authentifie les `BlockKey` triées, cardinalités et
+hashes de sous-ensembles ; deux routes ne comparent ce digest que sous la même
+partition canonique. Si les facteurs proviennent d'arbres secondaires non
+laminaires, leurs intersections peuvent elles-mêmes exploser : elles restent
+mesurées et cappées, jamais supposées constantes.
+
+Le ledger distingue `R_pair_mass`, masse sémantique potentiellement
 `Theta(n^2)`, de `R_node_records`, volume physique soumis aux pentes et au
-high-water. Sans cette opération reçue, la fusion réintroduit le catalogue
-global précisément à l'étape qu'elle prétend éviter.
+high-water. Compteurs supplémentaires : `rectangle_join_candidates`,
+`set_intersections`, `intersection_pieces`, `symmetric_all/none/mixed`, splits
+`A/B`, cache d'intersection, `factorized_residual_blocks`, `block_bytes` et
+workspace. Mutants : couverture non disjointe, oubli de la transposée, `OR` au
+lieu de `AND`, diagonale non masquée, `MIXED` promu `NONE`, enfant omis/dupliqué
+et tie-break dépendant des workers. Sans cette opération reçue, la fusion
+réintroduit le catalogue global précisément à l'étape qu'elle prétend éviter.
 
 Compteurs obligatoires : `transform_bytes`, `sort_bytes`, espace de l'index,
 `dominance_queries`, `top_h_candidates`, `range_nodes`, `directed_records`,
@@ -257,8 +312,9 @@ identité de masse seule peut rester vraie malgré la faute.
 
 Il n'existe pas de claim sparse universel. Deux amas serrés séparés, sans assez
 de témoins dans les cellules orientées de l'un vers l'autre, peuvent laisser
-`Theta(|A||B|)` candidatures maximales résiduelles. La gate mesure donc
-`R_dir`; elle ne le remplace pas par le nombre de cellules fermées.
+`Theta(|A||B|)` candidatures maximales résiduelles. La gate mesure donc à la fois
+`R_pair_mass` et `R_node_records`; elle ne les remplace pas par le nombre de
+cellules fermées.
 
 Le raccord avec la fenêtre porte sur deux univers différents. La fenêtre
 certifie des `SupportKey`, tandis que la dominance classe des candidatures
@@ -431,7 +487,6 @@ Les décisions de boîte sont :
   `A times B times C`, jamais le maximum des coins, et un **minorant certifié**
   `R_lb`, jamais le minimum des coins : `H_ub<=0` ou
   `c*max(0,H_ub)^2<=R_lb`, avec `c=3` pour q3 et `c=2` pour q4 ;
-- toute égalité du test `NONE` reste `UNKNOWN` ;
 - l'échec de `ALL` n'est jamais assimilé à `NONE` ;
 - les identités `z=a` et `z=b` sont retirées par relations disjointes et
   microtuiles à masques, pas par descente systématique jusqu'aux singletons ;
@@ -447,7 +502,9 @@ fausse simplification : pour `a=(10,0,0)`, `b=(14,0,0)` et
 central donne `H=4,R=0`; pour `a=(10,10,0)`, `b=(14,10,0)` et
 `C={(12,8,0),(12,10,0),(12,12,0)}`, les extrêmes donnent `R=64,H=0` mais le
 point central `R=0,H=4`. Les constructions de `H_ub/R_lb` doivent donc être
-publiées et jugées séparément.
+publiées et jugées séparément. Le `<=` du test `NONE` est sûr, car le spindle
+est strict : même l'égalité exclut `cH^2>R`. En revanche, une égalité dans le
+test `ALL` reste `UNKNOWN`.
 
 Le vrai compteur du fallback est `corner_triple_evals`, pas son seul nombre
 d'appels. Un million de fallbacks pleins représente déjà `512` millions de
@@ -460,18 +517,27 @@ ni support, ni fold.
 ## 7. Gate commune avant toute nouvelle route G4
 
 Claude peut départager les voies sans implémenter le producteur complet. Trois
-sujets `counter-only` reçoivent le même nuage et rendent le même **schéma** de
-ledger et la même partition sémantique par lane ; leurs bitsets peuvent différer
-car leurs certificats n'ont pas la même force :
+sujets `counter-only` reçoivent le même nuage et rendent le même **univers** et
+le même **schéma** de ledger par lane. Chacun partitionne cet univers selon la
+force de ses propres certificats : les bitsets peuvent donc différer, mais toute
+fermeture reste sound et tout support non fermé conserve une arête maximale dans
+le résiduel :
 
 1. dominance 432 avec cutoff ponctuel ;
 2. dominance 432 enrichie des groupes coniques ;
 3. WSPD/cœur commun puis relation-tree sur son résiduel.
 
+La voie groupes enrichit la voie ponctuelle : à petit `n`, elle doit donc aussi
+vérifier `closed_432 subset closed_groups` et
+`residual_groups subset residual_432`. La voie WSPD utilise un certificat
+incomparable et n'est soumise à aucune inclusion artificielle.
+
 À petit `n`, chacun matérialise seulement pour le juge ses bitsets de
-candidatures maximales `closed_q2/q3/q4` et `residual_q2/q3/q4`. Chaque
+candidatures maximales `closed_q2/q3/q4` et
+`uncertified_by_432_q2/q3/q4`. Chaque
 fermeture est rejouée par un oracle ponctuel ou de groupe indépendant. Le
-digest du résiduel non orienté emploie `OR(closed)` et `AND(residual)` et reste
+digest de l'incertitude non orientée emploie `OR(closed)` et
+`AND(uncertified)` et reste
 invariant par permutation, nombre de workers, découpe et échange d'orientation.
 Le juge vérifie en plus que tout support absent de la sous-source fenêtre possède
 une arête maximale canonique dans le résiduel.
@@ -480,8 +546,10 @@ Le travail `W` d'une pente est une valeur physique brute, avec
 `e=log2(W(2n)/W(n))`. La masse sémantique couverte ou incertaine n'entre pas
 dans cette porte tant qu'elle reste factorisée ; tâches, visites, solves,
 records, octets et high-water y entrent toujours. Chaque sujet déclare avant le
-run ses caps absolus de tâches, records et bytes ; un cap mordu produit un
-résiduel avec reçu et ne peut être compté comme un vert.
+run ses caps absolus de tâches, records et bytes. Un cap de classifieur local
+peut transférer fail-open son bloc entier au résiduel avec reçu. Un cap rencontré
+pendant le count/fill du ledger exact rend au contraire `resource_exhausted`
+atomique : sans masse ni digest complets, il ne peut être compté comme un vert.
 
 Les rampes exploratoires peuvent commencer à `500/1 000/2 000`; une voie qui
 reste plausible passe ensuite directement à `12 500/25 000/50 000` sur un seul
@@ -510,7 +578,7 @@ Le G4 ne devient utile qu'après :
 ## 8. Ce que la littérature ferme, et rien de plus
 
 La recherche externe ne fournit pas le graphe Morse sparse demandé par Claude.
-Elle apporte seulement des garde-fous :
+Elle apporte des garde-fous et un algorithme local précis :
 
 - les mosaïques de Delaunay d'ordre supérieur construisent bien l'objet global
   que l'architecture v3 interdit de matérialiser ; la taille totale des premiers
@@ -519,30 +587,136 @@ Elle apporte seulement des garde-fous :
 - le Yao classique traite l'EMST des points, pas les facettes, carriers, lots et
   incidences silencieuses de MorseHGP3D
   ([Funke--Sanders](https://arxiv.org/abs/2303.07858)) ;
-- les algorithmes de niveaux et de range-report classiques justifient des
-  briques de requête, pas une source positive en dimension relevée quatre
-  ([Chan](https://doi.org/10.1137/S0097539798349188)).
+- les algorithmes de niveaux justifient la construction locale bornée de la
+  section suivante ; ils ne prouvent ni une source globale sparse, ni le fold
+  Morse ([Agarwal et al.](https://doi.org/10.1137/S0097539795281840)).
 
-La voie produit doit donc venir des certificats internes ci-dessus. Le plein
-arrangement et la mosaïque restent des oracles bornés ou des réfutations de
-complexité, jamais des plans d'implémentation.
+La voie produit doit donc composer les certificats internes ci-dessus. Le plein
+arrangement global et la mosaïque restent des oracles bornés ou des réfutations
+de complexité, jamais des plans d'implémentation.
 
-## 9. Ordre recommandé à Claude
+## 9. Déblocage du générateur local par niveau inversé
+
+### 9.1 Bijection exacte
+
+Fixer une ancre `a`, écrire `s_z=z-a` et inverser chaque autre site de la
+fenêtre par `y_z=s_z/||s_z||^2`. Une sphère passant par `a`, de centre `a+t` et
+de rayon `||t||`, vérifie exactement :
+
+$$z\in\mathrm{int}\,B(a+t,\left\lVert t\right\rVert)\iff2t\mathbin{\cdot}s_z>\left\lVert s_z\right\rVert^2\iff t\mathbin{\cdot}y_z>\frac{1}{2}.$$
+
+La sphère devient donc le plan orienté `P_t : t dot y=1/2` dans l'espace
+inversé. Ses intérieurs sont les points strictement d'un côté et son shell les
+points du plan. Dans une carte où `t_j!=0`, écrire `P_t` comme le graphe de la
+coordonnée `j`, puis appliquer la dualité point--plan standard. Le plan `P_t`
+devient un point `x_t`; chaque `y_z` devient un plan dual ; le nombre `p`
+d'intérieurs est exactement le niveau supérieur si `t_j>0`, inférieur si
+`t_j<0`.
+
+Six cartes `(j,signe)` couvrent tout `t!=0`. L'owner projectif choisit
+canoniquement le plus grand `|t_j|`, puis l'axe et le signe en départage exact ;
+une implémentation homogène peut éviter de construire six copies. Aucune
+division n'est nécessaire à l'autorité : `y_z` est stocké par les quatre
+entiers homogènes `(s_x,s_y,s_z,||s||^2)` et tous les signes sont des
+déterminants croisés.
+
+Un support contenant `a` et de cardinal `q` donne une cellule duale de dimension
+`4-q` : face pour q2, arête pour q3, sommet pour q4. Son niveau vaut `p`, le
+nombre d'intérieurs stricts. Source S demande donc les cellules critiques avec
+`p<=9`, puis applique les seuils propres `p<=9/8/7`, la positivité barycentrique
+et `p+q<=11`. Réciproquement, tout support global contenant `a` qui passe
+`4R^2<delta_out(a)^2` possède support, intérieurs et shell dans la fenêtre ; son
+point dual appartient nécessairement à ce complexe local. Cela donne la
+bijection de complétude qui manquait au simple énumérateur par tuples.
+
+### 9.2 Borne qui remplace le mur combinatoire
+
+Agarwal, de Berg, Matousek et Schwarzkopf prouvent que le complexe `<=k` d'un
+arrangement de `M` plans dans `R^3` a complexité maximale
+`Theta(M*k^2)` et donnent une construction incrémentale randomisée exacte en
+temps espéré :
+
+$$O\left(Mk^2+M\log^3M\right).$$
+
+La source primaire est
+[« Constructing Levels in Arrangements and Higher Order Voronoi Diagrams »](https://doi.org/10.1137/S0097539795281840).
+Ici `k=9` est fixe. La comparaison avec l'énumération ancrée brute est :
+
+| `M` | `M+C(M,2)+C(M,3)` | proxy structurel `81M` |
+| ---: | ---: | ---: |
+| 64 | `43 744` | `5 184` |
+| 128 | `349 632` | `10 368` |
+| 256 | `2 796 416` | `20 736` |
+
+Le proxy ne contient ni les constantes, ni `M log^3 M`, ni le census ; ce n'est
+pas un chrono. Il fournit toutefois une ordonnance exacte linéaire en `M` pour
+`k` fixé, au lieu du terme cubique que le premier probe paie. À `M=64` et
+`n=50 000`, `81Mn` vaut `259 200 000` unités combinatoires avant constantes :
+assez bas pour mériter un `counter-only`, pas assez bas pour revendiquer une
+seconde.
+
+### 9.3 Forme industrielle bornée
+
+Ce résultat n'autorise pas à reconstruire une mosaïque globale sous un autre
+nom. Le candidat admissible est :
+
+1. produire top-M et premier omis depuis l'index global exact, sans scan et tri
+   de tout le nuage par ancre ;
+2. construire dans la seule mémoire de la tuile active le complexe inversé
+   `<=9`, par incrémental paresseux ou shallow cutting de Las Vegas à listes de
+   conflits complètes ;
+3. extraire q2 directement des faces, le point circumcentrique q3 des arêtes et
+   q4 des sommets ; vérifier exactement cellule, profondeur, positivité,
+   `SupportKey`, `I_B`, `U_B` et `BallKey` ;
+4. appliquer le certificat strict de fenêtre, émettre les occurrences de toutes
+   les ancres certifiantes, puis attribuer owner et dédupliquer par RLE ;
+5. détruire le complexe avant la tuile suivante et envoyer toute ancre au-dessus
+   du cap physique `M_max`, toute coupe ambiguë et toute dégénérescence encore
+   non traitée vers le résiduel collectif.
+
+Le papier expose la position générale pour simplifier. Une perturbation
+symbolique ne peut pas devenir la sémantique scientifique du profil u16 : une
+cosphérie exacte porte un shell réel. La première version sûre route l'ancre
+dégénérée au résiduel. La version complète peut employer la perturbation
+uniquement pour la topologie, puis regrouper le cluster par `BallKey` exacte et
+reconstruire tout le shell avant décision. Aucun point de shell n'est compté
+comme intérieur et aucune égalité n'est certifiée par la fenêtre.
+
+Compteurs obligatoires : `dual_planes`, `level_cells_0/1/2/3`, simplices de la
+triangulation canonique, insertions, nettoyages, listes de conflits, maximum et
+histogramme des conflits, déterminants, cellules rejetées par profondeur,
+supports positifs, `BallKey` uniques, ancres dégénérées transférées, octets et
+high-water. Le juge reconstruit l'inversion et le niveau sans recevoir la
+fenêtre ni la coupure du sujet. Les mutants changent le côté du niveau, `9` en
+`8`, oublient une carte projective, acceptent une égalité, perdent une arête q3
+et séparent une cosphérie.
+
+Cette voie répond directement à la question de Claude : quitter la DFS par
+endpoint est justifié, mais la génération locale ne doit pas rester une boucle
+sur les tuples. Le niveau inversé borné est le générateur du fast path ; la
+dominance 432 et `A times B times C` restent les certificats du résiduel. Si le
+compteur du complexe ou son high-water garde deux pentes `>1,35`, il reste un
+oracle local et ne passe pas sur CUDA.
+
+## 10. Ordre recommandé à Claude
 
 1. Conserver le reçu local `39/39` du commit `519ddfb` comme gate P0 et ne
    transférer aucun `30/30` historique à un successeur logiciel.
-2. Écrire uniquement le probe `counter-only` de dominance 432, avec bitsets par
+2. Fermer d'abord le juge du worktree fenêtre, puis comparer sur les mêmes petits
+   nuages son énumération brute au complexe inversé `<=9` ; mêmes
+   `(BallKey,SupportKey,I_B,U_B)` ou refus.
+3. Écrire en parallèle le probe `counter-only` de dominance 432, avec bitsets par
    lane et oracle borné. Cette étape teste la factorisation sans Source S.
-3. Ajouter les groupes coniques derrière une ablation, d'abord sur la fixture
+4. Ajouter les groupes coniques derrière une ablation, d'abord sur la fixture
    minimale puis `eight_clusters` ; conserver le cutoff infini si le packing
    échoue.
-4. Mesurer la masse résiduelle pondérée par `PairId`, pas le pourcentage de
+5. Mesurer la masse résiduelle pondérée par `PairId`, pas le pourcentage de
    cellules. Si deux pentes restent rouges, ne pas porter ce chemin sur CUDA.
-5. Pour le résiduel encore lourd, comparer le cœur commun WSPD au relation-tree
+6. Pour le résiduel encore lourd, comparer le cœur commun WSPD au relation-tree
    plat `A times B times C`; ne jamais développer un bloc inter-amas.
-6. Seulement si cette gate ferme le front, raccorder la sous-source de fenêtre,
+7. Seulement si cette gate ferme le front, raccorder la sous-source de fenêtre,
    le générateur positivity-first, le census, les owners et le fold.
-7. Mesurer enfin le payload complet sur G4 gardée. Le front horizontal réduit
+8. Mesurer enfin le payload complet sur G4 gardée. Le front horizontal réduit
    ne qualifie ni la seconde, ni les 100 ms du contrat officiel.
 
 GCP non utilisé.

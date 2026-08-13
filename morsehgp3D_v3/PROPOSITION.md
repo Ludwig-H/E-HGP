@@ -1571,6 +1571,19 @@ top-M/premier omis, compare les ensembles `I_B/U_B` et la clé rationnelle de
 boule, impose la positivité au fast path Jung et retire tout overflow signé des
 mutants. Le contre-audit pincé est
 [`AUDIT_WORKTREE_WINDOW_SOURCE_20260813.md`](audits/AUDIT_WORKTREE_WINDOW_SOURCE_20260813.md).
+Le successeur `ffe5b69` raccorde ce probe et passe `21/21` portes : il reçoit les
+`SupportKey` certifiables et mesure les supports jamais proposés, pas encore les
+membres du census, la boule ni la provenance par ancre. Son audit de réception
+est
+[`AUDIT_SUCCESSEUR_WINDOW_SOURCE_FFE5B69_20260813.md`](audits/AUDIT_SUCCESSEUR_WINDOW_SOURCE_FFE5B69_20260813.md).
+
+La fusion `OR/AND` des orientations ne doit pas matérialiser le résiduel dense.
+Les relations dirigées restent une partition canonique de rectangles ; leur
+intersection avec la transposée est évaluée paresseusement sur les blocs LCA ou
+WSPD par `ALL/NONE/MIXED`, avec owner, masse, digest et caps. Le ledger distingue
+la masse sémantique `R_pair_mass`, potentiellement quadratique, du stockage
+physique `R_node_records` soumis aux pentes. Sans ce `SymmetricAnd` factorisé, un
+radix/RLE par `PairId` recréerait le catalogue global que la v3 doit éviter.
 
 ### 11.2 Tuilage spatial et fold
 

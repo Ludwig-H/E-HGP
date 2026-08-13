@@ -97,14 +97,19 @@ Le complément collectif évite de choisir prématurément entre fenêtre et
 entiers, puis top-h et report du seul résiduel deviennent des requêtes de
 dominance ; des groupes coniques de trois témoins ciblent le mur des amas. Une
 gate `counter-only` doit comparer cette voie à un cœur WSPD et au relation-tree
-sur les mêmes bitsets d'ancres maximales avant tout port CUDA. Voir
+sur le même univers et le même schéma de ledger avant tout port CUDA ; les
+bitsets peuvent différer selon la force des certificats. Voir
 [`AUDIT_DEBLOCAGE_COLLECTIF_APRES_FENETRE_20260813.md`](audits/AUDIT_DEBLOCAGE_COLLECTIF_APRES_FENETRE_20260813.md).
-Le premier worktree de fenêtre conserve un énumérateur volontairement borné ;
-son noyau exact est admis, mais son juge partage encore la fenêtre du sujet et
-ne compare ni les ensembles `I_B/U_B`, ni une vraie `BallKey`. Il reste une
-baseline/oracle non raccordée à CMake, jamais une mesure de la source produit.
-Voir
-[`AUDIT_WORKTREE_WINDOW_SOURCE_20260813.md`](audits/AUDIT_WORKTREE_WINDOW_SOURCE_20260813.md).
+Le successeur `ffe5b69` raccorde le probe de fenêtre et rend `21/21` portes
+ciblées. Il reçoit l'ensemble des `SupportKey` certifiables sur quatre petits
+nuages et mesure de nombreux supports globaux jamais proposés, mais pas encore
+les identités complètes : le juge partage le constructeur top-M/coupure, compare
+les comptes plutôt que les membres `I_B/U_B`, ne construit aucune `BallKey` et
+juge après déduplication des ancres. Il reste une baseline/oracle bornée, jamais
+une mesure de la source produit. Voir l'audit historique puis sa réception
+successeur :
+[`AUDIT_WORKTREE_WINDOW_SOURCE_20260813.md`](audits/AUDIT_WORKTREE_WINDOW_SOURCE_20260813.md) et
+[`AUDIT_SUCCESSEUR_WINDOW_SOURCE_FFE5B69_20260813.md`](audits/AUDIT_SUCCESSEUR_WINDOW_SOURCE_FFE5B69_20260813.md).
 
 Deux sorties sont distinctes :
 

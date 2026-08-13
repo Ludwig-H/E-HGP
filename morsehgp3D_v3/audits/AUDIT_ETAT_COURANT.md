@@ -8,9 +8,43 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-## Observation live — `HEAD=471715a`, réparation P0 spindle rejouée
+## Observation live — `HEAD=ffe5b69`, fenêtre raccordée et rejouée
 
 Au 13 août 2026, le `HEAD` observé est
+`ffe5b69f4174148e2391a1fb53c7ed2a82c097b6`, commit
+`generate the supports, then let an exhaustive judge say which ones the window
+owed you`. Le worktree est ensuite modifié uniquement par la consolidation de
+l'audit collectif et le présent addendum documentaire ; aucun fichier
+d'implémentation n'est modifié par l'auditeur.
+
+Ce commit raccorde `window_source` au CMake. Sur les sources pincées
+`CMakeLists=308b790e...`, `header=756d2da6...`, `probe=a8ad22d1...`, l'ELF
+Release SHA-256 `3a34ea9c6ec31bcb9c37911b16b8144da79e632f9dacc9e978e493696588331a`
+rend `21/21` CTests `mhgp3v_window_` en `10,03 s`, CUDA désactivé. Les quatre
+juges ont zéro faux positif, identité de compte fausse, sur-certification ou
+manque sur les `SupportKey` comparées. Ils établissent aussi `909/303/1 277/129`
+supports globaux jamais proposés respectivement sur
+`uniform/terrain/eight_clusters/multiecho` : les candidats locaux refusés ne
+sont donc effectivement pas le résiduel.
+
+Ce vert est borné. Le juge compare les comptes `|I_B|/|U_B|`, pas leurs membres,
+et ne construit aucune `BallKey`; top-M et coupure sont reconstruits par la même
+fonction que le sujet; la déduplication peut masquer une provenance fautive.
+Le mutant i64 garde en outre un overflow signé indéfini et la fixture d'égalité
+carrée ne perd aucun membre réel du shell. Le verdict successeur complet est
+[`AUDIT_SUCCESSEUR_WINDOW_SOURCE_FFE5B69_20260813.md`](AUDIT_SUCCESSEUR_WINDOW_SOURCE_FFE5B69_20260813.md).
+Le premier audit du worktree reste un pin historique, pas le statut live :
+[`AUDIT_WORKTREE_WINDOW_SOURCE_20260813.md`](AUDIT_WORKTREE_WINDOW_SOURCE_20260813.md).
+
+La fenêtre demeure un oracle borné et une sous-source conditionnelle. Elle forme
+`M+C(M,2)+C(M,3)` tuples par ancre et n'est pas la route 50k. La reprise produit
+est la gate collective dominance 432, groupes coniques et relation-tree, avec
+fusion factorisée des orientations :
+[`AUDIT_DEBLOCAGE_COLLECTIF_APRES_FENETRE_20260813.md`](AUDIT_DEBLOCAGE_COLLECTIF_APRES_FENETRE_20260813.md).
+
+## Pin antérieur — `HEAD=471715a`, réparation P0 spindle rejouée
+
+Au pin antérieur, le `HEAD` observé était
 `471715a68950afa9bba34edc2ac5db30724ff539`, commit documentaire
 `retract three claims the auditor refuted, and take the cut at the first omitted
 site`. Il répond au contre-audit de la fenêtre locale. Son parent logiciel
@@ -19,14 +53,14 @@ site`. Il répond au contre-audit de la fenêtre locale. Son parent logiciel
 dans une unité de traduction et ajoute les refus et portes P0. Le code est
 identique entre ces deux pins.
 
-Après ce pin, Claude a ouvert un nouveau successeur non commité :
+Après ce pin, Claude avait ouvert un nouveau successeur non commité :
 `prototype/window_source.hpp`, SHA-256
 `756d2da6fa3d0288739d121b490338ac74845a6eba7f83cb7b6768b092178060` lors
 de sa première lecture, et `prototype/window_source_probe.cpp`, dont les
-snapshots ont encore changé pendant la lecture. Ils implémentent les primitives
-et un sujet borné de fenêtre locale, mais restent en cours d'écriture. Aucun des
-deux n'est raccordé au CMake commité : ils ne sont ni construits, ni jugés, ni
-inclus dans le verdict `39/39` ci-dessous. Leur contre-audit live est
+snapshots avaient encore changé pendant la lecture. Ils implémentaient les
+primitives et un sujet borné de fenêtre locale, sans raccord au CMake de ce pin.
+Ils n'étaient donc ni construits, ni jugés, ni inclus dans le verdict `39/39`
+ci-dessous. Leur contre-audit historique est
 [`AUDIT_WORKTREE_WINDOW_SOURCE_20260813.md`](AUDIT_WORKTREE_WINDOW_SOURCE_20260813.md).
 
 Le snapshot rejoué est pincé par les SHA-256 suivants :
