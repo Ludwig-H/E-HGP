@@ -18,6 +18,13 @@ jamais réception.
 - [`AUDIT_ETAT_COURANT.md`](AUDIT_ETAT_COURANT.md) est l'unique verdict mutable :
   il distingue le `HEAD`, le delta éventuel du worktree, les empreintes utiles,
   les contre-exemples, les tests qualifiables et les portes ouvertes.
+- [`AUDIT_CONTRE_CHAINE_COMPLETE_ET_G4_736F5BC_20260813.md`](AUDIT_CONTRE_CHAINE_COMPLETE_ET_G4_736F5BC_20260813.md)
+  corrige le blocage live : `kept(a,b)` n'est pas une fenêtre projective,
+  l'ancien `sum_N` est orienté deux fois, et le moteur courant reste une boucle
+  q4 `C(n_lens,2)` sans `BallKey`, census partagé ni fold. Il donne le pont
+  output-bearing minimal, le reporter d'arêtes projectif, l'ordonnance shallow
+  exacte `P-P/N-N/P-N`, le fold streamé et le contre-audit bloquant du script
+  G4 CPU.
 - [`AUDIT_CONTRE_COMPTEUR_FENETRE_32589AD_20260813.md`](AUDIT_CONTRE_COMPTEUR_FENETRE_32589AD_20260813.md)
   réfute le faux `ProjectiveWindowCounter` du pin : `sum_N` vaut exactement
   deux fois la masse q2 résiduelle et sa pente n'est pas gatée. Il définit la

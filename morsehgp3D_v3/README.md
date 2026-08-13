@@ -27,6 +27,19 @@ Le verdict lié au `HEAD` et au worktree est tenu uniquement dans
 [`AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md). Ne déduire aucun état
 live d'une note datée, d'un message de commit ou du seul passage d'un CTest.
 
+Au pin `f02d5ed`, la « chaîne complète » annoncée est corrigée. Le producteur
+par arête est un falsificateur différentiel utile, mais il parcourt encore
+`C(n_lens,2)` en q4 et refait le census par support ; sur
+`eight_clusters,n=500`, le dépôt reçoit déjà `191538784` paires q4 et `33,53 s`
+après mort anticipée. Son `kept(a,b)` est un ensemble de sites ambigus par paire
+et un maximum, tandis que l'ancien `sum_N` vaut deux fois la masse q2 ouverte :
+les deux scalaires ne sont ni le même objet, ni une preuve `O(n)`. La directive
+est désormais : petit pont `BallForm -> BallKey -> RLE -> census I_B/U_B`, vrai
+reporter projectif des arêtes maximales, niveaux shallow locaux sur les seules
+arêtes ouvertes, puis fold streamé. Le script G4 CPU du pin reste impropre à une
+qualification produit. Contre-audit et ordre exact :
+[`AUDIT_CONTRE_CHAINE_COMPLETE_ET_G4_736F5BC_20260813.md`](audits/AUDIT_CONTRE_CHAINE_COMPLETE_ET_G4_736F5BC_20260813.md).
+
 Au pin `dba8961`, la fourche « source par record ou source par paire » est
 tranchée : aucune des deux descriptions n'est le contrat v3. La source doit
 être factorisée et sortie-sensible ; elle paie ses couples de nœuds visités,
@@ -72,15 +85,16 @@ est le partage par ancre/spans, pas une autre pile.
 
 Cette vague ne ferme toutefois que le préfixe central. La réponse source plus
 forte n'est pas un join développé de carriers : des groupes projectifs
-disjoints certifient, pour chaque ancre `a`, une fenêtre complète `N_q(a)` de
-co-sommets possibles. Le prochain falsificateur source est donc
-`ProjectiveWindowCounter-v0`, qui mesure `sum_a |N_q(a)|`, plans, octets et HWM
-avant d'écrire le shallow. Si cette fenêtre passe, la route devient arrangement
-shallow **local** par ancre, RLE des centres par `BallKey`, census global une
-fois par boule, puis expansion tardive des `SupportKey`. Les points hors
-fenêtre restent obligatoires au census. La masse dirigée de `N_q` ne devient un
-`PlaneTape` matérialisé qu'après cette porte ; une fenêtre dense arrête la route
-avant allocation. Cette ordonnance évite tout join
+disjoints ferment des paires entières. Pour se raccorder à l'owner déjà reçu,
+on oriente chaque paire `a<b` et note `E_q(a)` les seconds endpoints non fermés.
+L'invariant exact est que l'arête maximale canonique de tout vrai support reste
+dans cette fenêtre ; ses autres sommets sont générés ensuite par la lentille.
+Le prochain falsificateur source est donc
+`PWC0-A/MaxEdgeSuffixReporter-q4-v0`, qui mesure `sum_a |E_4(a)|`, tâches,
+octets et HWM avant d'écrire le shallow. S'il passe, la route devient
+arrangement shallow **par arête ouverte**, RLE des centres par `BallKey`, census
+global une fois par boule, puis expansion tardive des `SupportKey`. Tous les
+points restent obligatoires au census. Cette ordonnance évite tout join
 `PairId×carrier` et toute mosaïque globale d'ordre supérieur :
 [`AUDIT_REPONSE_FOURCHE_SOURCE_AF08B0E_20260813.md`](audits/AUDIT_REPONSE_FOURCHE_SOURCE_AF08B0E_20260813.md).
 
@@ -95,21 +109,25 @@ triple exact et les 432 sous-cellules. Directive et fixtures :
 
 Le parent `32589ad` n'est pas encore ce compteur : son `sum_N` vaut
 identiquement deux fois la masse PairId q2 centrale résiduelle, avec les deux
-orientations. Il n'a ni crédits projectifs, ni owner minimal, ni q3/q4 ; son
+orientations. Il n'a ni crédits projectifs, ni owner d'arête, ni q3/q4 ; son
 calcul est hors chrono et sa pente n'entre pas dans la gate. Les annonces
 « `s=2` refusé » et « `s=3` vert » sont donc rétractées. Le `HEAD=a5c8251`
 reçoit séparément les marges carrier : `ALL` exact sur le produit AABB,
-`NONE` sûr mais incomplet. Le vrai compteur, la définition de `N_q(a)` et la
+`NONE` sûr mais incomplet. Le vrai reporter, la définition de `E_q(a)` et la
 réponse 48/432 sont dans
 [`AUDIT_CONTRE_COMPTEUR_FENETRE_32589AD_20260813.md`](audits/AUDIT_CONTRE_COMPTEUR_FENETRE_32589AD_20260813.md).
 
-La directive d'implémentation est maintenant unique : écrire
-`AnchorSuffixReporter-q4-v0`, pas un nouveau scan de carriers. Il conserve les
-vrais `PointId`, l'owner minimal et les continuations, mesure les spans ouverts
-q4 sur 48 chambres, puis raffine uniquement chaque chambre ouverte dans ses
-neuf sous-cellules. Si `sum_a|N_4(a)|`, les tâches ou les octets ont deux pentes
-rouges, la route projective s'arrête avant le shallow. Un vert autorise q3/q2 ;
-il ne qualifie encore aucun SLO.
+La directive d'implémentation est maintenant unique : écrire d'abord
+`PWC0-A/MaxEdgeSuffixReporter-q4-v0`, pas un nouveau scan de carriers. Il
+conserve les vrais `PointId`, l'orientation canonique, les preuves et les
+continuations, mesure les spans ouverts q4 sur 48 chambres, puis raffine
+uniquement chaque chambre ouverte dans ses neuf sous-cellules. Une banque
+bornée reste propositionnelle : un résultat dense à `P=96` refuse cette
+configuration, pas tous les certificats. Si `sum_a|E_4(a)|`, les tâches ou les
+octets restent rouges après ablation de `P`, la route s'arrête avant le shallow.
+Si la fenêtre est sparse mais les `n` graines racine dominent, `PWC0-B`
+universalise sur `ANode×BNode`. Un vert autorise le shallow q4 puis q3/q2 ; il
+ne qualifie encore aucun SLO.
 
 Au pin `96be8e0`, le nouveau front apporte deux briques utiles sans changer ce
 verdict. L'intervalle entier de `H=(z-a) dot(b-z)` sur trois AABB certifie

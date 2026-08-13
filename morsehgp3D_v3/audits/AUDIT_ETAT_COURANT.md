@@ -8,223 +8,112 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-## Observation live — `HEAD=a5c8251`, le vrai compteur projectif reste à écrire
+## Observation live — `HEAD=f02d5ed`, oracle Source S présent, chemin produit absent
 
 Le pin observé est
-`a5c8251b5e3682dea82b97a9244d2547d49097ee`, commit
-`carrier margins, exact bounds, and their permanent fixture reproduced`. Le
-worktree était propre au relevé ; l'auditeur ne modifie aucun logiciel.
-Empreintes du pin :
+`f02d5edfb202f7d7c4ed9d3f45d43b9f739c1794`, commit
+`an apostrophe in a comment killed a session, so make it impossible`.
+L'auditeur ne modifie aucun logiciel et n'a pas utilisé GCP. Au dernier relevé,
+Claude avait un delta concurrent non committé dans
+`prototype/wspd_wavefront_probe.cpp` (SHA-256
+`0532466fe49c0568e72032e226fd159d78e8e764feea03844a021e983a704c6a` au
+dernier relevé)
+qui ajoute un fallback du masque central vers `rect_classify`. Les changements
+documentaires du présent audit sont distincts.
+
+Le verdict tient en quatre points.
+
+1. `mhgp3v_anchor_source` reste un **bon falsificateur différentiel borné** de
+   nombreuses décisions de `Source S`. Il partage cependant les prédicats de
+   circumboule, positivité et census entre sujet et référence ; il n'est pas un
+   oracle rationnel indépendant de `BallKey/I_B/U_B`. Sa sortie s'arrête à des `Support` triés ; elle
+   ne construit ni niveaux shallow produits, ni `BallKey`, ni fold, ni les dix
+   forêts du `BenchmarkOutputContract-v1`.
+2. Son `kept(a,b)` est une liste de sites ambigus propre à une paire et son
+   high-water est un maximum par paire. Ce n'est pas la fenêtre de seconds
+   endpoints non fermés par le reporter. La proximité numérique
+   `446/474` contre `478/482/529` ne prouve aucune égalité ni borne.
+3. La boucle q4 courante parcourt encore toutes les paires de la lentille puis
+   rappelle le census. Le dépôt l'a déjà réfutée sur `eight_clusters,n=500` :
+   `191538784` paires q4 et `33,53 s` après mort anticipée. Une rampe CPU à
+   `50000` n'est donc pas une expérience discriminante.
+4. Le script G4 courant a reçu les corrections build/quotes de
+   `d31aa0d/f02d5ed`, mais il exécute toujours ce moteur CPU, masque plusieurs
+   échecs, a un horizon de jobs plus long que son arrêt invité, ne pince pas
+   tar/ELF/reçu et relance le faux degré q2. Il reste `NO-RUN` pour la route
+   produit.
+
+Une session appartenant à Claude était active pendant ce relevé sur la cible
+`devpod-gpu-exploration/europe-west4-ai1a/ehgp-blackwell-spot-ai1a`, génération
+`2026-08-13T11:26:40.142-07:00`. L'auditeur ne l'a ni lancée, ni mutée, ni
+arrêtée. Son log local confirme : compilation CUDA seulement, `23/23` portes
+rect/WSPD, puis calcul scientifique par le CPU `anchor_source reference`. Le
+propriétaire doit certifier l'arrêt ciblé de cette génération. Cette session ne
+mesure ni le kernel source, ni `BallKey/I_B/U_B`, ni fold, ni payload officiel.
+
+Le diagnostic du parent `32589ad` demeure exactement
+`sum_N=2*residual_pair_mass`. Il ne porte ni groupe projectif, ni q4, ni owner,
+ni span. La nouvelle notation de raccord est `E_q(a)` : les `b>a` dont la paire
+`(a,b)` n'est pas fermée par `h_q=smax+1-q` crédits disjoints. Pour chaque vrai
+support, son unique arête maximale canonique doit rester dans cette fenêtre ;
+les autres sommets sont générés ensuite par les formes de lentille. Ceci aligne
+le reporter avec l'owner réellement employé par `anchor_source` et corrige
+l'ancien schéma ambigu `a=min PointId du support`.
+
+Le facteur deux détruit déjà le rapprochement scalaire annoncé : sous
+l'orientation `a<b`, les moyennes `477,6/481,6/528,6` du faux degré deviennent
+`238,8/240,8/264,3`, à comparer à rien dans `hw_kept=446/474`, qui est un
+maximum de sites `z` par paire. Un rejeu `uniform,n=1500,pipeline` rend en outre
+`143060130` paires q4 et `173256325` tests d'intérieur pour seulement `486948`
+supports. Le débit de supports n'est pas le travail dominant.
+
+La directive prioritaire à Claude est maintenant :
 
 ```text
-wspd_wavefront_probe.cpp 1e44101fe5e63fc7de2bdeb54f108b3eba73caf1fba3a9eba9faef48f1f03945
-wspd_wavefront.hpp       62ec3f4f23da4e67c67b6cef9855797f27cda839b0bbf119c87930d5780b973b
-rect_front.hpp           b10ae6d40c9c78251805ca78a77e7712a9964a16d55bff3b4d4e15f24e2e68a7
-rect_front_probe.cpp     3704d43214c20e75e87a3794e0117a6b2fb5c3cc1deb737c3ada978498215995
-CMakeLists.txt           58914d40a599ebd23371b3d39dc8af3412aeb22e4aee865fe2276eaff7911da9
+BallFormToBallEvent-v0 borné
+  -> BallKey primitive/RLE, census global I_B/U_B une fois par boule
+  -> autorité output-bearing pour comparer les remplacements
+PWC0-A / MaxEdgeSuffixReporter-q4-v0
+  -> vrais PointId, huit crédits disjoints
+  -> 48 chambres indépendantes, raffinement 9 des seuls OPEN
+  -> CLOSED_EDGE_SPAN / OPEN_EDGE_SPAN / PENDING_CONTINUATION
+  -> sum_a |E_4(a)|, tâches, octets, HWM
+  -> seulement si sparse : shallow P-P/N-N/P-N sur les arêtes ouvertes
+  -> BallKey-first, census unique, fold streamé
 ```
 
-Le parent `32589ad` n'implémente pas `ProjectiveWindowCounter-v0`. Son
-`sum_N` ajoute les deux orientations de chaque terminal q2 central ouvert et
-vérifie donc identiquement `sum_N=2*residual_pair_mass`. Il ne porte ni crédits
-projectifs, ni owner minimal, ni q3/q4, ni `OpenSpan`. Son calcul est hors du
-chrono, la gate imprime sa pente mais refuse encore sur la seule pente du
-front, et la rampe emploie `coord=65535` fixe au lieu des emprises canoniques.
-Les claims « `s=2` refusé », « `s=3` vert » et « décide autrement que la
-masse » sont rétractés ; `s=3` reste une ablation. Définition exacte de
-`N_q(a)`, réponse 48/432 et ledger attendu :
-[`AUDIT_CONTRE_COMPTEUR_FENETRE_32589AD_20260813.md`](AUDIT_CONTRE_COMPTEUR_FENETRE_32589AD_20260813.md).
+Le premier pont ne répare aucune pente et ne doit pas être rampé : il ferme les
+identités actuellement absentes. Sous `c=a+Y/Delta`, la clé primitive emploie
+`A=Delta`, `B=-2*(Delta*a+Y)` et
+`C=Delta*||a||^2+2*a dot Y`, puis pgcd et signe `A>0`. La fixture cocirculaire
+de six points exige plusieurs `SupportKey` pour un seul `BallKey` et un seul
+census shell.
 
-Le `HEAD` ajoute en revanche un bon classifieur carrier. Les marges
-`M0=E+X-D`, `M1=D-E`, `M2=D-X` donnent un `ALL` nécessaire et suffisant sur le
-produit AABB lorsque leurs trois minima passent ; `NONE` par maximum impossible
-est sûr mais incomplet à cause des incompatibilités conjointes. Les formules
-affines/séparables et la fixture permanente sont correctes. Nuance de porte :
-le différentiel `30000` boîtes vérifie la **sûreté** de `ALL` et de `NONE`, pas
-la complétude annoncée de `ALL`, car il ne refuse pas le cas
-`porteurs==total && verdict!=ALL`. La preuve reçoit la complétude ; ajouter ce
-mutant/compteur rendrait le CTest conforme au commentaire.
+`PWC0-A` peut honnêtement avoir `anchor_root_seeds=n` : il est le plus petit
+falsificateur sémantiquement correct. Si sa fenêtre est sparse mais ses graines
+racine dominent, `PWC0-B` universalise les crédits sur `ANode` et vise une
+jointure `ANode×BNode` à graine unique. La banque `P<=96` est seulement
+propositionnelle : son sous-remplissage agrandit `E_4`, jamais ne ferme à tort.
+Une mesure dense à un seul `P` réfute cette configuration, pas tous les
+certificats ; publier l'ablation monotone `P=48/96/192` et le taux
+`UNDERFULL`.
 
-Ce classifieur ne débloque pas seul la source. Il doit rester un prune ou un
-fallback factorisé : le scanner par rectangle recréerait le produit déjà rouge.
-La tranche immédiatement demandée à Claude est
-`AnchorSuffixReporter-q4-v0`. Elle réutilise l'activation et l'enveloppe Andrew,
-mais committe de vrais `PointId` transactionnellement, dirige les cibles par
-`a=min PointId`, émet des `OpenSpan` au cap et mesure `sum_a|N_4(a)|`. Elle
-commence par 48 chambres ; seules les chambres ouvertes sont raffinées dans
-leurs neuf sous-cellules. Le probe `cell_credits` actuel ne suffit pas : indices
-locaux, compteurs de rang non transactionnels, `pool<=48` sous le pire besoin
-q4 de `72` IDs et rebouclage final `O(n^2)`. Détails :
-[`AUDIT_CONTRE_COMPTEUR_FENETRE_32589AD_20260813.md`](AUDIT_CONTRE_COMPTEUR_FENETRE_32589AD_20260813.md).
+Le delta `--fallback` live reste une ablation centrale. La disjonction de deux
+certificats `ALL` sûrs reste sûre, mais elle ne produit encore aucun `proof_id`,
+résiduel, continuation ou owner et rappelle un classifieur large à chaque nœud
+central `MIXED`. Elle ne doit pas retarder `PWC0-A` ; elle ne devient utile que
+si son gain d'arêtes ouvertes par unité de travail bat le reporter sur le même
+ledger.
 
-Rejeu local frais de l'auditeur au pin, sans modification logicielle :
-
-```text
-cmake --build build/v3 --target mhgp3v_rect_front_probe mhgp3v_wspd_wavefront_probe --parallel
-ctest --test-dir build/v3 --output-on-failure -R '^mhgp3v_(rect_front|wspd_wavefront)_'
-18/18 PASS, 22,00 s
-```
-
-Ce vert reçoit les portes CPU bornées existantes. Il ne reçoit ni banque
-projective persistante, ni reporter, ni pentes de fenêtre, ni CUDA, ni SLO.
-
-Le parent `af08b0e` répare correctement la confusion records/masse q2. Sous la
-partition PairId déjà jugée, sommer `|A||B|` sur les terminaux fermés donne la
-vraie masse fermée. L'échantillonnage pondéré choisit ensuite un PairId uniforme
-dans la masse q2 déléguée. Il estime une fraction de paires diamétrales encore
-pertinentes, pas des témoins universels du rectangle et pas un temps source.
-Les chiffres `279/230/258 k` restent trois estimations Monte-Carlo sur un seul
-uniforme ; ils ne reçoivent ni q3/q4, ni la source, ni le census.
-
-Le parent `044dd45` reçoit une formule utile. Pour un rectangle `A×B`, le score
-singleton `S=Vhi(A,B,{z})` admet des extrema exacts sur un nœud `C`. Le rejeu
-indépendant de `rect_s_interval` sur `40000` petites AABB est vert. Les verdicts
-
-```text
-q2 ALL Smax<D,        CENTRAL_DEAD Smin>=D
-q3 ALL 3*Smax<D,      CENTRAL_DEAD 3*Smin>=D
-q4 ALL 209*Smax<=56D, CENTRAL_DEAD 209*Smin>56D
-```
-
-sont sûrs pour le **certificat central**. Les extrema sont exacts sur l'AABB
-entière, pas sur la population clairsemée du nœud : `ALL/CENTRAL_DEAD` ne sont
-pas nécessaires à un nœud interne et le commentaire code « verdict exact » est
-trop fort. La vague sans cap devient complète pour ce certificat en poursuivant
-tous les `MIXED` jusqu'aux feuilles. `CENTRAL_DEAD` ne signifie jamais
-`GEOMETRIC_NONE` et doit être reclassifié après un split `A/B`.
-
-Le premier worktree `Central-VWave` avait un faux crédit : un masque global
-laissait une lane `ALL` redescendre dans les enfants lorsqu'une autre lane
-était `MIXED`. Le même PointId pouvait être compté au parent puis aux enfants.
-`dfa9e1b` corrige le principe en portant `(CNode,lane_mask)` et en transmettant
-seulement les bits `MIXED`. La mesure de Claude passe q2 de `121884` à `104237`
-records fermés et q3 de `4378` à `2455` à `uniform,n=8000,s=2,budget=256` :
-le mutant était matériel et la correction est indispensable. `7b58fc3` ajoute
-un balayage direct du masque singleton et un mutant `masque-global` qui sort
-avec le code contractuel `4` ; la branche fautive est désormais exercée.
-
-Le correctif n'est pas encore reçu industriellement :
-
-- le juge balaie les PointIds mais rappelle `rect_central_mask_dlo`. Il est
-  indépendant de l'intervalle de nœud et détecte la fausse fermeture du mutant,
-  mais ne rejoue ni `H/E/X`, ni l'identité des IDs effectivement crédités ;
-- son plancher `juges>=1000` est global : q2 peut masquer une vacuité q3/q4.
-  Il faut `juges[3]`, `faux[3]` et un plancher par lane ;
-- la pile pleine ou le quantum épuisé incrémente seulement `tronques`. Aucune
-  tâche, aucun masque et aucun curseur ne sont sérialisés. `tronques` est
-  maintenant visible, mais aucune masse déléguée par lane n'est produite ;
-- aucun `proof_id`, `RectResult`, owner-shard, tableau résiduel ou compactage
-  stable n'existe ;
-- le probe reste CPU, matérialise tous les `terms`, réalloue les buffers par
-  vague et n'a ni kernel CUDA, ni p95 résident, ni octets/HWM device.
-
-Le grand-parent `75f16db` et son `--climb` ne permettent pas encore de conclure que le partage entre
-rectangles est le seul facteur restant. Le calcul `leaf_parent` est bien
-préconstruit en `O(n)` et la remontée coûte la hauteur de l'arbre, mais les
-sous-arbres frères de la chaîne vers la racine couvrent seulement
-`X\{pos0}` : la feuille localisée `pos0` n'est jamais ajoutée aux tâches. À
-quantum non saturé, `uniform,n=8000,s=2` passe ainsi de `104237/2455/1288`
-fermetures root q2/q3/q4 à `97822/1989/1010` avec climb. Le gain annoncé de
-`9 %` mélange donc travail évité et crédits perdus. En outre les frères sont
-empilés du plus proche au plus grossier puis dépilés en LIFO : le frère racine,
-le plus grossier, est traité en premier, contrairement au but annoncé.
-
-L'ablation exacte empile les frères dans l'ordre inverse et la feuille choisie
-en dernier, afin de consommer `pos0`, son frère immédiat, puis les frères vers
-la racine. Pour chaque feuille, l'expansion de ces racines initiales doit
-couvrir les `n` PointIds avec multiplicité un. Sans cap, root et climb doivent
-produire la même union d'IDs et le même masque fermé. Des fixtures où `pos0`
-est précisément le dixième, neuvième ou huitième crédit tuent son omission.
-Le pin ne contient aucun CTest `--climb` ; son juge actuel ne cherche que les
-fausses fermetures et laisse donc passer cette perte de complétude.
-L'ajout de `parent` après les AABB fait en outre passer `sizeof(WfNode)` de
-`120` à `128` octets par alignement ; le placer dans le trou après `level`
-conserve `120`. Avec `leaf_parent`, le surcoût courant est environ `12n`
-octets. C'est modeste à `50000`, mais `120 MB` à dix millions de points et doit
-entrer dans le HWM au lieu d'être caché.
-
-Une fixture unique rend les trois seuils déterministes : `A={(0,0,0)}`,
-`B={(20,0,0)}`, feuille localisée `z0=(10,0,0)`. Les candidats axiaux
-`x=5,...,14`, `x=6,...,14` et `x=7,...,14` donnent exactement `10`, `9` et `8`
-crédits q2/q3/q4. Avec `D=400` et `S(x)=(2x-20)^2`, les trois gardes centrales
-sont directes. Omettre `z0` laisse chaque lane à son seuil moins un.
-
-Le mutant permanent minimal prend `A={0}`, `B={10}` et un `CNode` axial dont la
-population est `{1,...,6}`. Son parent est `ALL` q2 avec six crédits et `MIXED`
-q3 ; un masque global recrédite les six enfants et ferme faussement q2 à douze.
-La tâche masquée ne ferme pas. Une seconde fixture prend `A={0}`, `B={30}` et
-`CNode={7,...,11}` : elle est `ALL` q3 avec cinq crédits et `MIXED` q4, donc
-tue le même double compte en q3. Enfin `z=a` ou `z=b` donne `S=D` et doit rester
-non crédité ; le mutant de frontière `<` vers `<=` doit mourir.
-
-Le petit oracle requis développe chaque nœud `ALL` en PointIds et exige, pour
-chaque `(RectId,lane)`, multiplicité `0/1`, cardinal du crédit égal à l'union,
-antichaîne et prédicat géométrique ponctuel indépendant. Au cap, le résultat
-porte les tâches restantes `(RectId,CNodeKey,lane_mask)` ; après consommation
-de ces continuations, le digest final est invariant au quantum.
-
-Rejeu local de l'auditeur, sans modification logicielle :
-
-```text
-cmake -S morsehgp3D_v3 -B build/v3 -DCMAKE_BUILD_TYPE=Release
-cmake --build build/v3 --target mhgp3v_rect_front_probe mhgp3v_wspd_wavefront_probe --parallel
-ctest --test-dir build/v3 --output-on-failure -R '^mhgp3v_(rect_front|wspd_wavefront)_'
-18/18 PASS, 26,48 s
-```
-
-Un diagnostic direct `uniform,n=800,tight,s=2,--vwave,window=256` rend
-`24745` terminaux, `1381935` classifications du score et `125,2 ms` CPU pour
-la vague. Il falsifie toute extrapolation CPU immédiate, mais n'est ni un temps
-device, ni un p95, ni un chemin complet.
-
-La branche cap est matériellement ouverte mais non reçue. Sur ce même nuage,
-`window=2` tronque les `24745` terminaux et ne ferme aucune lane ; `window=64`
-en tronque `8440` et ferme `1867/8/0` records q2/q3/q4 ; `window=1024` ne
-tronque rien et ferme `4297/72/38`. Ces différences sont fail-open au niveau du
-compteur, mais aucune continuation ne permet encore d'achever le même calcul.
-La prochaine implémentation utile n'est donc pas un nouveau score : c'est un
-double buffer SoA de tâches, `count--scan--fill`, avec
-`tasks_created=tasks_consumed+tasks_pending`, crédits par antichaîne et sortie
-`DELEGATED_RESIDUAL` réellement consommable.
-
-La réponse à la fourche de Claude est durable : la source n'est ni par paire,
-ni à coût fixe par record. La masse PairId reste un ledger ; le coût bloquant
-porte sur tâches de join, blocs, événements shallow, BallKeys, census et vraies
-sorties. Aucune séparation n'est figée. `s=1`, `3/2`, `2` et `3` doivent être
-comparés sur les trois lanes et le vrai reporter projectif ; la réécriture
-orientée de la masse q2 du pin `32589ad` ne départage rien.
-
-La prochaine ordonnance recommandée est : WSPD corrigée, préfixe central borné,
-puis `ProjectiveWindowCounter-v0`. Le lemme des groupes projectifs est correct pour
-une cible ponctuelle : des groupes d'IDs disjoints fournissent des intérieurs
-distincts à toute sphère passant par l'ancre et la cible. Pour fermer un
-`BNode`, un triple plein rang admet désormais une caractérisation exacte :
-trois formes coniques faibles et
-`F(d)=|Delta|*||d||^2-p dot d>0`, avec minimum entier séparable. Le fast path
-H2 à six formes est sûr mais incomplet ; il tient en `i64`, tandis que `F`
-demande environ 87 bits sous u16. Le P0 commence par les suffixes `i64` des 48
-chambres ; triple exact et 432 sous-cellules sont des ablations de rappel.
-La construction de la banque, les spans, `sum_a |N_q(a)|`, formes, octets/HWM
-et pentes doivent être reçus avant le shallow local. Les points hors fenêtre
-restent toujours dans le census global. La masse dirigée de `N_q` peut devenir
-le `PlaneTape` physique seulement après cette porte ; développer directement
-la masse brute du WSPD reste interdit. Détails et contre-audit :
-[`AUDIT_REPONSE_FOURCHE_SOURCE_CENTRAL_VWAVE_DBA8961_20260813.md`](AUDIT_REPONSE_FOURCHE_SOURCE_CENTRAL_VWAVE_DBA8961_20260813.md).
-La directive mathématique et ses fixtures sont dans
+Contre-audit complet, correction de l'owner, architecture en deux paliers et
+audit du script :
+[`AUDIT_CONTRE_CHAINE_COMPLETE_ET_G4_736F5BC_20260813.md`](AUDIT_CONTRE_CHAINE_COMPLETE_ET_G4_736F5BC_20260813.md).
+La preuve exacte du triple et les fixtures restent dans
 [`AUDIT_DIRECTIVE_BNODE_PROJECTIF_ET_ARRET_CLIMB_75F16DB_20260813.md`](AUDIT_DIRECTIVE_BNODE_PROJECTIF_ET_ARRET_CLIMB_75F16DB_20260813.md).
 
-Le header WSPD reste incohérent avec le nouveau verdict : son SHA ci-dessus
-contient encore `2 log2 n`, la cellule tronque les préfixes partiels et le mode
-tight choisit aussi le côté à scinder. La borne correcte du Patricia u16 porte
-sur quarante-huit bits utiles ; la cellule de préfixe conserve les bits
-partiels ; la politique split reste cellulaire et l'arrêt devient
-`sep_cell || sep_tight`. L'identité `tests=2T-(n-1)` est une comptabilité, pas
-une preuve `T=O(n)`.
-
 Il n'existe toujours aucun chemin exact benchmarkable de WSPD à payload, aucun
-`BenchmarkOutputContract-v1` et aucun contrat `50000/1s` rempli. Le script G4
-historique ne construit pas `Central-VWave` device et reste `NO-RUN`. GCP non
-utilisé par cet audit.
+producteur complet de `BenchmarkOutputContract-v1` et aucun contrat `50000/1s`
+rempli. GCP non utilisé par cet audit.
 
 ## Observation historique — `HEAD=6feb5df`, carrier reçu comme diagnostic, P0/source non reçus
 

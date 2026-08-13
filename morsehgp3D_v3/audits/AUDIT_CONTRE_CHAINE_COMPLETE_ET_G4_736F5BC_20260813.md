@@ -14,7 +14,7 @@ relevé. Empreintes :
 ```text
 prototype/anchor_pipeline.hpp              d17e8136138aeed808f31bdefeeccf8694ef5842642040ffd641881b31657671
 prototype/anchor_source.cpp                5c10eb425629dd465f422dba94ac773afd0c0211560ce0e1fc2ef9832bbd6c8a
-gcp-migration/session_chaine_complete_g4.sh b0f53029138ded271ccf2bfcfb9cd79e66710b4db539bdcbab04648ad499e4c3
+gcp-migration/session_chaine_complete_g4.sh b3a6370e5bf36853c3fc632c6d16523e4f592e6bd0d5c1af77434bca03f0ac61
 CMakeLists.txt                              58914d40a599ebd23371b3d39dc8af3412aeb22e4aee865fe2276eaff7911da9
 ```
 
@@ -24,9 +24,10 @@ GCP non utilisé par l'auditeur.
 
 Trois décisions sont séparées.
 
-1. **GO oracle borné** pour `mhgp3v_anchor_source`. Ses portes différentielles,
-   ses mutants et la parité des deux moteurs en font une bonne autorité locale
-   de `Source S` aux petites tailles.
+1. **GO falsificateur différentiel borné** pour `mhgp3v_anchor_source`. Ses
+   portes, mutants et la parité des deux moteurs reçoivent de nombreuses
+   décisions locales. Ils ne constituent pas encore un oracle rationnel
+   indépendant de `BallKey`, `I_B/U_B` et des plateaux.
 2. **NO-GO architecture** pour appeler ce code `LocalShallowBall`, pour
    identifier son high-water `kept` à une fenêtre projective `N_q(a)`, ou pour
    extrapoler son producteur actuel à `50 000`.
@@ -37,12 +38,12 @@ Trois décisions sont séparées.
 
 La bonne solution n'est donc ni « remplacer `kept` par le compteur WSPD », ni
 « exiger que les deux coïncident ». Il faut conserver le producteur actuel
-comme oracle, recevoir un vrai reporter projectif, puis alimenter un véritable
+comme baseline différentielle, recevoir un vrai reporter projectif, puis alimenter un véritable
 producteur de **centres shallow** et un fold streamé. L'égalité à demander est
 celle de la sortie exacte bornée, jamais celle de deux intermédiaires de sens
 différent.
 
-## 2. `kept_{a,b}` et `N_q(a)` ne sont pas le même objet
+## 2. `kept_{a,b}` et la fenêtre d'arêtes ne sont pas le même objet
 
 Dans `anchor_pipeline.hpp:671-683`, `kept` est construit après fixation des deux
 extrémités `a,b`. C'est l'ensemble des sites dont la marge sur le disque de Jung
@@ -53,17 +54,17 @@ extérieure. Le compteur publié est :
 hw_kept = max sur les paires (a,b) du cardinal de kept(a,b)
 ```
 
-Dans la route projective, `N_q(a)` est au contraire l'ensemble des **cibles
-co-sommets `b`** qui n'ont pas été fermées par `h_q=smax+1-q` groupes projectifs
-disjoints pour une ancre `a`. Le compteur de décision attendu est :
+Pour raccorder le reporter au producteur existant, la fenêtre utile est au
+contraire l'ensemble `E_q(a)` des **seconds endpoints `b>a`** dont la paire
+orientée n'a pas été fermée par `h_q=smax+1-q` groupes projectifs disjoints :
 
 ```text
-sum_N_q = somme sur les ancres a du cardinal de N_q(a)
+sum_E_q = somme sur les endpoints a du cardinal de E_q(a)
 ```
 
 La note de Claude compare donc :
 
-- un ensemble de sites `z` qui dépend de `(a,b)` à un ensemble de cibles `b`
+- un ensemble de sites `z` qui dépend de `(a,b)` à un ensemble d'endpoints `b`
   qui dépend de `a` ;
 - un **maximum** par paire à une **moyenne** par point ;
 - les lanes q3/q4 consommées par `kept` au compteur historique q2 central ;
@@ -75,9 +76,28 @@ contient aucun crédit projectif. Son identité exacte est
 [`AUDIT_CONTRE_COMPTEUR_FENETRE_32589AD_20260813.md`](AUDIT_CONTRE_COMPTEUR_FENETRE_32589AD_20260813.md).
 Il ne peut donc recouper ni confirmer `kept`.
 
+La discordance comporte même un facteur deux avant toute géométrie : ce
+`sum_N` additionne les deux degrés de chaque paire non ordonnée, tandis que
+`E_q(a)` conserve seulement l'orientation canonique `a<b`. Sous cette seule
+correction, les moyennes annoncées `477,6 / 481,6 / 528,6` deviendraient
+`238,8 / 240,8 / 264,3` endpoints par owner, toujours sans devenir une fenêtre
+projective. Elles ne recoupent donc pas `hw_kept=446/474`, même comme simple
+scalaire.
+
 La proximité numérique `446/474` contre `478/482/529` est une coïncidence de
 scalaires. Elle ne prouve ni égalité d'ensembles, ni inclusion, ni pente, ni
 borne `O(n)`.
+
+Cette notation corrige aussi une ambiguïté de nos directives antérieures.
+`N_q(a)` y désignait une fenêtre de **tous les co-sommets** sous l'owner
+`a=min PointId du support`. Ce schéma est mathématiquement possible, mais il ne
+se branche pas sur `anchor_source`, dont l'owner est l'arête de longueur
+maximale, avec tie-break lexicographique. La route choisie emploie donc
+`E_q(a)` : pour tout support vrai `S`, si son arête maximale canonique est
+`(u,v)` avec `u<v`, alors `v` doit appartenir à `E_q(u)`. Les autres sommets de
+`S` sont générés ensuite par les formes de lentille. Un certificat projectif
+peut fermer `(u,v)` sans savoir si cette paire sera finalement owner, puisqu'il
+tue toute sphère passant par les deux endpoints.
 
 ## 3. Le moteur courant est `AnchorLensPairSource`, pas `LocalShallowBall`
 
@@ -117,9 +137,67 @@ reste `33,53 s` et le nombre de paires q4 est inchangé
 (`CMakeLists.txt:2831-2840`). Une campagne `50 000` de ce chemin n'est plus une
 expérience discriminante : le mur est déjà reçu à `500`.
 
-## 4. Le remplacement immédiat de la boucle q4
+Un rejeu frais du moteur pipeline à `uniform,n=1500,seed=1`, sans stockage,
+rend `486 948` supports mais parcourt `143 060 130` paires q4, retient
+`124 247 586` candidats q4 et effectue `173 256 325` tests d'intérieur en
+`26,54 s`. Il paie environ `294` paires q4 et `356` tests de census par support
+émis. `hw_kept=446` est un maximum ; la moyenne sur les ancres étendues est
+environ `82,5`. Cela réfute directement son interprétation comme moyenne d'une
+fenêtre par ancre.
 
-Claude n'a pas à inventer une nouvelle géométrie. La construction exacte est
+### 3.1 Le plus petit pont output-bearing précède la réécriture
+
+La baseline ne sait aujourd'hui comparer que `(SupportKey,p,extra)` à un moteur
+qui partage ses prédicats de circumboule, positivité et census. Avant de demander
+au shallow futur l'identité `(BallKey,SupportKey,I_B,U_B,owner)`, il faut donc un
+adaptateur sémantique borné `BallFormToBallEvent-v0` sur le chemin actuel :
+
+```text
+BallForm accepté + SupportKey
+  -> BallKey primitive
+  -> radix/RLE par BallKey
+  -> un census global exact par BallKey, avec les vrais IDs I_B et U_B
+  -> tous les SupportKey incidents
+  -> BallActivation régulière ou PlateauRecord/side queue
+```
+
+Si `BallForm` représente `c=a+Y/Delta`, avec `Delta>0`, la sphère est la forme
+primitive obtenue depuis les cinq coefficients :
+
+```text
+A=Delta
+B=-2*(Delta*a+Y)
+C=Delta*||a||^2+2*a dot Y
+```
+
+Diviser `A,Bx,By,Bz,C` par leur pgcd commun et imposer `A>0`. Les bornes u16
+déjà écrites dans `anchor_envelope.hpp:65-73` placent ces coefficients et leur
+évaluation en `i128`. q2 possède directement
+`A=1`, `B=-(a+b)`, `C=a dot b`.
+
+Ce pont ne répare aucune pente : il reste alimenté par `C(nlens,2)`. Son rôle est
+de fournir le premier objet exact consommable et l'autorité différentielle à
+laquelle comparer reporter, shallow et fold. Deux fixtures permanentes le
+séparent des owners actuels :
+
+- IDs `x=0:(5,3,0)`, `a=1:(0,0,0)`, `b=2:(10,0,0)` : le triangle aigu est émis
+  depuis son arête maximale `(1,2)`, pas depuis son plus petit `PointId` ;
+- les six points cocirculaires de centre `(5,5,5)` et rayon `5`,
+  `(10,5,5),(8,9,5),(2,9,5),(0,5,5),(2,1,5),(8,1,5)`, portent au moins les deux
+  triangles aigus alternés sur la même boule. Ils exigent
+  `SupportKey_unique>BallKey_unique`, un seul census `I_B/U_B` et un shell de six
+  IDs.
+
+## 4. L'oracle shallow existe, le chemin produit reste à écrire
+
+Claude n'a pas à inventer une nouvelle géométrie. `prototype/edge_shallow.hpp`
+porte déjà l'algèbre entière, le clipping de Jung, le dictionnaire de profondeur
+et un balayage de référence. Il reste toutefois un **oracle**, car son catalogue
+parcourt toutes les arêtes, charge tous les points par arête, matérialise les
+croisements et rescane le nuage pour chaque sortie. Il ne remplace donc pas la
+boucle rouge par simple branchement.
+
+La construction produit visée est
 déjà spécifiée et prouvée dans
 [`AUDIT_CONTRE_AUDIT_PRODUCTEUR_ANCRE_LENTILLE_AIGUE_20260812.md`](AUDIT_CONTRE_AUDIT_PRODUCTEUR_ANCRE_LENTILLE_AIGUE_20260812.md),
 sections « Borne sur les centres distincts » et « Ordonnance exacte concrète ».
@@ -169,22 +247,26 @@ comparer l'ensemble des `(BallKey,SupportKey,I_B,U_B,owner)` aux deux boucles
 actuelles. Les mutants omettent successivement `P-P`, `N-N`, `P-N`, le niveau
 `k`, le batch des concurrences et l'exclusion des lignes shell du rang strict.
 
-Ce jalon est le moyen le plus direct de transformer le code actuel en vrai
-`LocalShallowBall`. Il ne prouve pas encore que la somme sur toutes les arêtes
-est sparse ; il supprime d'abord le verrou `C(nlens,2)` déjà mesuré rouge.
+Ce jalon transforme le code actuel en vrai `LocalShallowBall`, mais seulement
+sur les arêtes que le reporter lui remet. L'ordre économique est donc de
+recevoir d'abord le compteur de fenêtre d'arêtes : écrire le moteur shallow sur
+toutes les `C(n,2)` arêtes avant de savoir si le reporter les compresse
+financerait l'aval d'une route peut-être déjà morte.
 
 ## 5. Le chaînon qui supprime ensuite les paires d'ancres denses
 
-Le remplacement shallow seul laisse encore un producteur par arête `ab`. Le
-second étage est le vrai `AnchorSuffixReporter-q4-v0` déjà ordonné dans
+Le premier étage produit est le vrai `MaxEdgeSuffixReporter-q4-v0`, anciennement
+nommé `AnchorSuffixReporter-q4-v0`, déjà ordonné dans
 [`AUDIT_DIRECTIVE_BNODE_PROJECTIF_ET_ARRET_CLIMB_75F16DB_20260813.md`](AUDIT_DIRECTIVE_BNODE_PROJECTIF_ET_ARRET_CLIMB_75F16DB_20260813.md).
 
 Un groupe projectif `G` de membres `s_i=z_i-a` certifie
 `d=b-a` dans leur cône et `d dot s_i>||s_i||^2` pour chaque membre. Il force au
 moins un intérieur dans toute sphère passant par `a,b`. Huit groupes aux unions
 de `PointId` disjointes ferment donc q4 à `smax=11`. Cette propriété est
-indépendante de l'arête maximale et donne une vraie fenêtre complète de
-co-sommets.
+indépendante de l'arête maximale et donne une vraie fenêtre conservatrice de
+paires candidates. L'owner maximal n'est appliqué qu'après génération du
+support ; le reporter garantit seulement de ne jamais retirer son unique arête
+owner vraie.
 
 Ordre demandé :
 
@@ -192,21 +274,47 @@ Ordre demandé :
 ProjectiveCreditBank avec vrais PointId
   -> 48 chambres coarse
   -> raffinement des seules chambres ouvertes en 9 sous-cellules
-  -> OpenSpan q4 dirigé et continuation fail-open
-  -> AnchorWindow N_4(a)
-  -> source shallow locale
+  -> OpenEdgeSpan q4 dirigé et continuation fail-open
+  -> EdgeWindow E_4(a)
+  -> source shallow par arête survivante
 ```
 
-Le premier compteur doit publier `sum_a|N_4(a)|`, `max|N_4(a)|`, spans,
+Le premier compteur doit publier `sum_a|E_4(a)|`, `max|E_4(a)|`, spans,
 tâches, activations, tests Andrew, octets et HWM. Deux pentes physiques rouges
 arrêtent cette route avant CUDA. Un vert q4 autorise q3/q2 ; il ne qualifie pas
 encore le contrat.
 
 Ne pas brancher l'ancien `sum_N` WSPD au moteur. Ne pas imposer
-`kept(a,b)=N_q(a)`. La porte d'intégration correcte est : tout support exact de
-l'oracle, pris sous son owner de génération, est retrouvé par la nouvelle
-fenêtre et le shallow ; après census et owner, aucune sortie supplémentaire ne
-survit.
+`kept(a,b)=E_q(a)`. La porte d'intégration correcte est : l'arête maximale
+canonique de tout support exact de l'oracle reste dans un `OpenEdgeSpan`, puis
+le shallow retrouve ce support ; après census et owner, aucune sortie
+supplémentaire ne survit.
+
+### 5.1 Deux paliers, sans cacher `n` recherches racine
+
+Le plus petit falsificateur s'appelle `PWC0-A`. Il travaille par endpoint
+feuille `a`, garde la banque `P<=96` transitoire par tuile, partage ce pool entre
+les 48 chambres, puis traverse des tâches `(AnchorId,BNodeKey,chamber_mask)`.
+Il publie honnêtement `anchor_root_seeds=n`. Les sorties sont seulement
+`CLOSED_EDGE_SPAN`, `OPEN_EDGE_SPAN` et `PENDING_CONTINUATION`; un pool
+`UNDERFULL`, un cap de proposition ou un overflow ouvre le span.
+
+Si `PWC0-A` produit une fenêtre sparse mais que ses lancements racine ou ses
+tâches dominent, `PWC0-B` universalise les mêmes crédits sur un `ANode` et fait
+une jointure `ANode x BNode` à graine unique. Pour un carrier de rang trois,
+le signe du déterminant et les numérateurs de Cramer sont affines en l'ancre et
+se vérifient aux huit coins ; l'activation emploie le minimum de marge et le
+maximum de norme sur ces coins. Les rangs un/deux ou un signe non uniforme
+restent ouverts au P0. `PWC0-B` vise `anchor_root_seeds=1` ; il ne doit pas être
+une précondition qui retarde le falsificateur feuille.
+
+La banque bornée est propositionnelle. Une fenêtre dense à `P=96` réfute cette
+configuration, pas tout certificat projectif imaginable. Le reçu publie donc
+`UNDERFULL` par valeur de `P`, la fermeture monotone pour au moins
+`P=48/96/192`, et distingue : résolution 48 refusée, raffinement adaptatif
+`48->9` refusé, proposer sous-plein, ou reporter réellement dense. Un `NO-GO`
+global exige soit de figer explicitement l'enveloppe industrielle
+`P<=96/arena<=128 MiB`, soit d'observer la stabilisation de cette ablation.
 
 ## 6. `17,8 M supports/s` n'est pas le contrat produit
 
@@ -214,6 +322,13 @@ Les `486 948` et `1 065 800` supports annoncés à `n=1500/3000` sont deux
 mesures d'une famille et d'une graine. Leur absence de doublons prouve seulement
 que le producteur n'émet pas deux fois la même `SupportKey` dans ce run. Elle ne
 reçoit ni extrapolation à `17,8 M`, ni temps linéaire, ni payload officiel.
+
+Même l'extrapolation arithmétique est ambiguë. Figer le dernier ratio
+`355,3 supports/point` donne `17,8 M`, mais les deux comptes observés ont une
+pente `log2(1 065 800/486 948)=1,130`. Prolonger cette pente de `3000` à
+`50000`, sans lui donner pour autant valeur prédictive, donnerait environ
+`25,6 M`. Aucun des deux nombres n'est reçu ; leur écart interdit d'employer
+`17,8 M` comme dimensionnement contractuel.
 
 Surtout, `BenchmarkOutputContract-v1` demande les dix forêts, verticales, lots,
 coverage et certificat minimal. Il ne demande pas un retour hôte du catalogue
@@ -308,10 +423,12 @@ l'auditeur ne touche pas au script.
 
 ### Remplacer ou comparer `kept` et la fenêtre ?
 
-Ni l'un ni l'autre. Garder `anchor_source` comme oracle borné. Construire le
-vrai reporter projectif et le vrai shallow. Comparer, à petit `n`, leurs
-**sorties finales** `(BallKey,SupportKey,I_B,U_B,owner)` et le payload foldé à
-l'oracle. Deux intermédiaires différents n'ont aucune raison de coïncider.
+Ni l'un ni l'autre. Garder `anchor_source` comme baseline bornée, l'enrichir par
+`BallFormToBallEvent-v0`, puis construire le vrai reporter projectif et le vrai
+shallow. Comparer, à petit `n`, leurs **sorties finales**
+`(BallKey,SupportKey,I_B,U_B,owner)` à un oracle rationnel indépendant et le
+payload foldé à l'autorité bornée correspondante. Deux intermédiaires différents
+n'ont aucune raison de coïncider.
 
 ### Quelle rampe minimale ?
 
@@ -332,16 +449,19 @@ jamais suffisante : le cap absolu et le p95 comptent aussi.
 
 ## 9. Ordre d'implémentation remis à Claude
 
-1. Ne pas lancer `session_chaine_complete_g4.sh` au pin `736f5bc`.
-2. Conserver `mhgp3v_anchor_source` comme oracle et baseline rouge.
-3. Remplacer la boucle q4 `C(nlens,2)` par le probe CPU des niveaux shallow
-   `P-P/N-N/P-N`, puis comparer les identités complètes.
-4. Grouper immédiatement les centres en `BallKey` et faire un seul census par
+1. Ne pas lancer `session_chaine_complete_g4.sh` pour mesurer la route produit.
+2. Conserver `mhgp3v_anchor_source` comme baseline différentielle rouge.
+3. Ajouter le petit adaptateur `BallFormToBallEvent-v0`, le census global
+   `I_B/U_B` une fois par `BallKey` et les deux fixtures owner/cosphère. Il donne
+   une identité de comparaison ; il n'autorise aucune rampe du chemin rouge.
+4. Implémenter `PWC0-A/MaxEdgeSuffixReporter-q4-v0` et mesurer
+   `sum|E_4|`, tâches, octets et HWM ; n'écrire `PWC0-B` que si le partage des
+   racines devient le terme dominant.
+5. Sur les seules arêtes ouvertes, remplacer la boucle q4 `C(nlens,2)` par le
+   probe CPU des niveaux shallow `P-P/N-N/P-N`, puis comparer les identités
+   complètes à `anchor_source` et `edge_shallow`.
+6. Grouper immédiatement les centres en `BallKey` et faire un seul census par
    boule ; publier les concurrences et extra-shell sans expansion implicite.
-5. Implémenter `AnchorSuffixReporter-q4-v0` avec vrais `PointId`, 48 chambres,
-   raffinement 9 seulement sur les spans ouverts et continuation fail-open.
-6. Mesurer `sum|N_4|`, puis seulement raccorder la fenêtre au shallow ; ne pas
-   développer un join `PairId×carrier`.
 7. Ajouter `AnchorOutputFoldCounter-v0` et recevoir le run streamé contre les
    dix forêts/payload de l'oracle borné.
 8. Porter sur CUDA uniquement la première tranche dont l'oracle, les pentes,
@@ -350,3 +470,45 @@ jamais suffisante : le cap absolu et le p95 comptent aussi.
 Cette route allège bien `HGP-old` : elle ne construit aucune mosaïque globale
 d'ordre supérieur. Ses seuls objets géométriques complexes sont des niveaux
 shallow locaux et éphémères, détruits après émission des `BallEvent`.
+
+## 10. Suivi du script aux successeurs `d31aa0d/f02d5ed`
+
+Claude a corrigé deux défauts réels pendant le contre-audit : `d31aa0d` construit
+désormais les quatre binaires visés par la regex CTest et `f02d5ed` ajoute un
+contrôle statique interdisant les apostrophes qui ferment prématurément les
+blocs SSH entre quotes simples. Le script courant a pour SHA-256 :
+
+```text
+session_chaine_complete_g4.sh 24db23cb186156a6fad27430cab6cfcc1b234fcb4f7c1a78bcb492053a6e2a36
+```
+
+Ces réparations retirent deux causes de session perdue ; elles ne changent pas
+le verdict scientifique. Au pin `f02d5ed`, la campagne exécute encore le
+producteur CPU `reference`, le faux degré q2 à la place de `E_4`, quatre
+familles seulement, une exécution par taille et aucun payload/fold. Les
+`wait || true` et le `CUDA_COMPILE=ECHEC` converti en succès restent présents ;
+les quatre timeouts séquentiels de `900 s` restent incompatibles avec l'arrêt
+invité à `45 min`. Aucun reçu versionné ne pince tar, HEAD, ELF et sorties.
+
+Le statut demeure donc `NO-RUN` pour la question produit. Une compilation ou
+un diagnostic borné distinct peut être recevable après réparation de ses codes
+de sortie, mais il ne doit pas consommer une session destinée à falsifier
+`PWC0-A`, le shallow streamé ou le payload.
+
+## 11. Rejeu local de l'auditeur
+
+Sans modifier le logiciel ancre :
+
+```text
+cmake --build build/v3 --target mhgp3v_anchor_source --parallel
+ctest --test-dir build/v3 --output-on-failure -R '^mhgp3v_anchor_(pipeline_|fixture_q4only$|mutant_arete_min$|mutant_census$|mutant_positivite$|mutant_tiebreak$)'
+9/9 PASS, 38,76 s
+
+python tools/check_docs.py
+Validated 106 active Markdown files.
+```
+
+Ce vert reçoit la parité des pipelines et tue les mutants ciblés d'owner,
+census, positivité et tie-break. Il ne reçoit toujours aucune identité
+`BallKey/I_B/U_B`, fixture de cosphère, fenêtre projective, shallow produit,
+fold ou mesure G4.

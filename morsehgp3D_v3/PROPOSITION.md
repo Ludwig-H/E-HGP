@@ -2294,45 +2294,44 @@ Au moins un membre de `G` est donc intérieur à toute telle sphère. Avec
 sphère passant par `a,b` possède au moins `h_q` intérieurs distincts ; aucun
 support pertinent d'arité `q` ne peut contenir les deux points.
 
-Pour chaque ancre, `N_q(a)` est l'union factorisée des cibles que les suffixes
-projectifs ne ferment pas, ainsi que toutes les cellules `MIXED`, capées,
-tronquées ou non reçues. Le générateur choisit `a=min PointId` comme owner. Si
-un vrai support pertinent owner `a` contenait un sommet hors de `N_q(a)`, le
-crédit précédent imposerait `p+q>smax` à sa propre sphère, contradiction. Tous
-ses autres sommets sont donc dans `N_q(a)`.
-
-La définition calculable, à ne pas confondre avec l'ensemble inconnu des vrais
-co-sommets, est :
+Le certificat ferme une **paire**, indépendamment du fait qu'elle devienne ou
+non l'owner d'un support futur. Pour raccorder cette propriété au générateur
+déjà reçu, chaque paire non ordonnée est orientée une seule fois par `a<b` et la
+fenêtre calculable est :
 
 ```text
-N_q(a) = { b : PointId(b)>PointId(a)
+E_q(a) = { b : PointId(b)>PointId(a)
                et aucun suffixe projectif reçu ne ferme (a,b)
                avec h_q crédits disjoints et rejouables }.
 ```
 
-Un état `OPEN`, `MIXED`, `UNDERFULL`, capé ou sans continuation reçue appartient
-donc toujours à `N_q(a)`. L'invariant de complétude porte dans l'autre sens :
-les co-sommets de tout support vrai owner `a` sont inclus dans cette
-sur-approximation. Les points exclus de la fenêtre de génération ne sont jamais
-exclus du census global.
+Tout état `OPEN`, `MIXED`, `UNDERFULL`, capé, dégénéré ou sans continuation
+reçue appartient à `E_q(a)`. Ce n'est ni l'ensemble des vrais co-sommets, ni un
+owner attaché à une paire nue. L'invariant exact porte sur le support complet :
+si son arête de longueur maximale canonique est `(u,v)`, avec tie-break par
+`PairId` et `u<v`, alors `v` appartient à `E_q(u)`. Sinon les crédits de la
+paire imposeraient trop d'intérieurs à la sphère même de ce support. Ses autres
+sommets sont générés par la lentille de cette arête. Ils n'ont pas à appartenir
+à une fenêtre par owner minimal.
 
-Le pipeline source candidat est :
+Le pipeline source candidat est donc :
 
 ```text
-ProjectiveCreditBank
-  -> AnchorWindow N_q(a) en NodeSpans
-  -> arrangement inversé shallow local sur N_q(a)
+ProjectiveCreditBank propositionnelle
+  -> MaxEdgeSuffixReporter et EdgeWindow E_q(a) en OpenEdgeSpans
+  -> formes de lentille et niveaux shallow locaux par arête ouverte
   -> ShallowEvent et bundle incident
   -> BallKey canonique/RLE
   -> census global une fois par BallKey
-  -> SupportKey, positivité et owner seulement après census
+  -> SupportKey, positivité et owner maximal canonique
+  -> fold streamé
 ```
 
-Les points hors `N_q(a)` sont retirés seulement du générateur de sommets. Ils
-restent tous dans le census : les omettre du niveau local ne peut qu'abaisser
-la profondeur et créer des faux positifs, rejetés ensuite, jamais perdre un
-vrai support. L'arrangement est local à une ancre, shallow et éphémère ; aucune
-mosaïque de Delaunay d'ordre supérieur n'est matérialisée.
+La fenêtre retire seulement des **arêtes de génération** certifiées mortes.
+Tous les `PointId`, y compris ceux absents d'un pool projectif ou d'une
+lentille locale, restent dans le census global. Les niveaux shallow sont locaux
+à une arête et éphémères ; aucune mosaïque de Delaunay d'ordre supérieur n'est
+matérialisée.
 
 Le `BallKey` est l'équation primitive entière normalisée de la sphère. Le
 census compte d'abord les intérieurs jusqu'au seuil et tue l'événement avant
@@ -2340,21 +2339,39 @@ toute expansion. Seules les boules survivantes matérialisent leur petit
 intérieur, puis leur shell. Une cosphère lourde reste un `PlateauRecord` ou un
 refus atomique reçu, jamais une expansion précoce de toutes ses incidences.
 
-Le premier jalon est `ProjectiveWindowCounter-v0`, sans support ni CUDA. Il
-publie `sum_a |N_q(a)|`, maximum par ancre, crédits/IDs disjoints, cellules
-ouvertes, plans logiques, octets/HWM et deux pentes. L'oracle petit `n` exige
-que tous les co-sommets de chaque vrai support appartiennent à la fenêtre de
-son plus petit `PointId`. Deux pentes supérieures à `1,35` sur `uniform` ou
-`eight_clusters`, ou une fenêtre quasi quadratique, rendent cette route
-`NO-GO` avant le shallow.
+Le premier jalon est `PWC0-A/MaxEdgeSuffixReporter-q4-v0`, sans support ni
+CUDA. Il travaille par endpoint feuille `a`, garde un pool transitoire borné par
+tuile, traverse des tâches `(AnchorId,BNodeKey,chamber_mask)` et publie
+`sum_a|E_4(a)|`, maximum, crédits/IDs disjoints, spans ouverts, tâches, octets,
+HWM et `anchor_root_seeds=n`. Ses seules sorties sont
+`CLOSED_EDGE_SPAN`, `OPEN_EDGE_SPAN` et `PENDING_CONTINUATION`. L'oracle petit
+`n` exige que l'arête maximale canonique de chaque vrai support q4 reste dans
+un span ouvert, puis que le shallow retrouve exactement ce support.
 
-Son premier falsificateur est q4 seul, sous le nom
-`AnchorSuffixReporter-q4-v0`. Il reçoit huit crédits, les vrais `PointId` et un
-owner dirigé. Il commence par 48 chambres grossières indépendantes ; seule une
-chambre `OPEN/MIXED` est raffinée dans ses neuf sous-cellules. Le mode 432 fixe
-est l'ablation de rappel complet. Une fenêtre dense aux 48 chambres refuse donc
-cette résolution, pas encore la route adaptative `48 -> 9`. q3 et q2 ne sont
-ajoutés avec masque partagé qu'après un signal q4 positif.
+Le reporter reçoit huit crédits et les vrais `PointId`. Il commence par 48
+chambres grossières indépendantes ; seule une chambre `OPEN/MIXED` est raffinée
+dans ses neuf sous-cellules. Le mode 432 fixe est une ablation séparée. Une
+fenêtre dense aux 48 chambres refuse donc cette résolution, pas encore la route
+adaptative `48 -> 9`. q3 et q2 ne sont ajoutés avec masque partagé qu'après un
+signal q4 positif.
+
+Une banque de proposition bornée est fail-open : candidat manqué, pool
+`UNDERFULL`, overflow ou cap agrandit `E_4`, jamais ne ferme un span. Une mesure
+dense à `P=96` réfute seulement cette configuration. Le reçu publie au moins
+`P=48/96/192`, la fermeture monotone et `UNDERFULL`; un `NO-GO` global exige
+soit une enveloppe industrielle explicitement figée, soit la stabilisation de
+cette ablation.
+
+Si `PWC0-A` reçoit une fenêtre sparse mais que ses `n` graines racine ou ses
+tâches dominent, `PWC0-B` universalise les mêmes preuves sur un `ANode` et
+traverse `ANode×BNode` depuis une graine unique. Les carriers de rang trois
+rejouent le signe du déterminant et les numérateurs de Cramer aux huit coins de
+l'`ANode`; les rangs inférieurs ou signes non uniformes restent ouverts. Ce
+partage est le jalon suivant, pas une précondition du falsificateur feuille.
+
+Deux pentes supérieures à `1,35` sur une métrique physique bloquante, une HWM
+hors enveloppe ou une fenêtre quasi quadratique rendent la configuration
+`NO-GO` avant le shallow. La masse logique seule n'est jamais un temps.
 
 Le compteur du pin `32589ad` ne satisfait pas cette définition. Pour chaque
 terminal q2 central ouvert `A×B`, il ajoute les deux orientations et vérifie
@@ -2364,12 +2381,12 @@ pas dans sa gate. Il ne choisit donc aucune séparation WSPD. Le contre-audit et
 la boucle exacte du reporter sont dans
 [`AUDIT_CONTRE_COMPTEUR_FENETRE_32589AD_20260813.md`](audits/AUDIT_CONTRE_COMPTEUR_FENETRE_32589AD_20260813.md).
 
-La masse dirigée de `N_q` est le futur `PlaneTape` logique. Elle n'est
+La masse dirigée de `E_q` est le futur `PlaneTape` logique. Elle n'est
 matérialisée par `count--scan--fill` qu'après ce compteur, si sa pente, ses
 octets et son HWM passent. Cette expansion tardive d'une fenêtre certifiée
 sparse est distincte d'un fallback qui développerait la masse brute du WSPD.
 Chaque incidence `(a,b)` de la fenêtre devient alors une seule forme locale et
-est facturée explicitement ; si `sum_a |N_q(a)|` reste dense, la route s'arrête
+est facturée explicitement ; si `sum_a |E_q(a)|` reste dense, la route s'arrête
 avant allocation.
 
 Une banque par distance n'est pas un cutoff projectif. Dans la chambre de
@@ -2397,10 +2414,17 @@ ordre sont pincés dans
 [`AUDIT_DIRECTIVE_BNODE_PROJECTIF_ET_ARRET_CLIMB_75F16DB_20260813.md`](audits/AUDIT_DIRECTIVE_BNODE_PROJECTIF_ET_ARRET_CLIMB_75F16DB_20260813.md).
 
 La construction de `ProjectiveCreditBank` reste elle-même à factoriser. Un cap
-conserve les cellules non classées dans `N_q(a)` ; aucune recherche partielle ne
+conserve les cellules non classées dans `E_q(a)` ; aucune recherche partielle ne
 ferme un suffixe. Le premier reçu publie tâches de banque, produits,
 répétitions `(CreditKey,PointId)`, continuations et digests, pas seulement la
 taille finale des fenêtres.
+
+Avant de remplacer la baseline, un petit adaptateur borné
+`BallFormToBallEvent-v0` fournit l'autorité de comparaison qui lui manque : clé
+primitive de sphère, RLE, un census `I_B/U_B` par `BallKey` et liste des
+`SupportKey` incidents. Il ne répare aucune pente et ne doit pas être rampé ;
+il permet seulement de comparer reporter, shallow et fold sur une identité
+output-bearing commune.
 
 La preuve, l'ABI, les contre-fixtures et l'ordre d'implémentation sont détaillés
 dans
@@ -2567,5 +2591,104 @@ Le backend G4 devient candidat uniquement si :
   de ces deux seuils officiels.
 
 Jusque-là : `public_status=not_claimed`.
+
+## 15. Déblocage de la source au pin `f02d5ed`
+
+Le producteur par arête courant reste une excellente baseline différentielle,
+mais son ordonnance n'est pas le `LocalShallowBall` produit. Après fixation de
+`(a,b)`, `kept(a,b)` contient les sites dont la marge varie sur le disque de
+Jung ; q4 parcourt ensuite explicitement `C(n_lens,2)` et rappelle le census par
+support. `hw_kept` est un maximum par paire. Il n'est pas comparable à l'ancien
+`sum_N`, qui vaut exactement deux fois la masse q2 ouverte et ne porte aucun
+crédit projectif.
+
+Le déblocage est une chaîne de quatre objets, chacun falsifiable séparément.
+
+### 15.1 `BallFormToBallEvent-v0` : premier objet consommable
+
+Avant toute optimisation, enrichir la baseline bornée. Pour une boule
+`c=a+Y/Delta`, former la clé primitive entière :
+
+```text
+A=Delta
+B=-2*(Delta*a+Y)
+C=Delta*||a||^2+2*a dot Y
+```
+
+Réduire les cinq coefficients par leur pgcd commun et imposer `A>0`. Faire un
+RLE par `BallKey`, puis un unique census global par boule qui conserve les vrais
+ensembles `I_B` et `U_B`, pas seulement leurs cardinalités. Joindre tous les
+`SupportKey` incidents. `U_B=S` donne la branche régulière ; `U_B!=S` va vers
+un `PlateauRecord` lossless, un quotient reçu ou un refus explicite. Ce pont
+reste lent et borné : il fournit l'identité output-bearing à laquelle comparer
+les remplacements, pas une route à ramper.
+
+La fixture permanente de cosphère prend les six points
+`(10,5,5),(8,9,5),(2,9,5),(0,5,5),(2,1,5),(8,1,5)`. Les deux triangles alternés
+sont aigus et portent la même boule de centre `(5,5,5)` et rayon `5`. La porte
+exige donc plusieurs `SupportKey`, un seul `BallKey`, un seul census et les six
+IDs de shell.
+
+### 15.2 `MaxEdgeSuffixReporter-q4-v0` : tuer les arêtes avant la source
+
+Pour chaque premier endpoint `a`, définir `E_q(a)` comme les seconds endpoints
+`b>a` non fermés par `h_q=smax+1-q` crédits projectifs aux unions de `PointId`
+disjointes. Tout support vrai conserve nécessairement son unique arête maximale
+canonique dans cette fenêtre, car un crédit projectif tue toute sphère passant
+par ses deux endpoints, indépendamment de l'owner futur.
+
+Le P0 feuille `PWC0-A` construit une banque transactionnelle de vrais
+`PointId`, essaie les 48 chambres, puis raffine seulement chaque chambre ouverte
+dans ses neuf sous-cellules. Il émet des `OPEN_EDGE_SPAN`, des
+`CLOSED_EDGE_SPAN` ou une continuation fail-open. Il publie
+`sum_a|E_4(a)|`, le maximum, tâches, activations, tests Andrew, octets et HWM.
+Le sous-remplissage de la banque ouvre, jamais ne ferme. Comparer au moins
+`P=48/96/192`. Si les `n` graines racine deviennent le verrou après une fenêtre
+sparse, seulement alors universaliser les mêmes preuves sur `ANode×BNode` dans
+`PWC0-B`.
+
+### 15.3 Vrai `LocalShallowBall` sur les seules arêtes ouvertes
+
+Pour les formes `F_i(x,y)=A_i*x+B_i*y+C_i` du plan médiateur, séparer les côtés
+positifs au-dessus `P` et au-dessous `N`. À q4, avec
+`k=7-always_inside`, streamer les `k+1` niveaux inférieurs de `P` et supérieurs
+de `N`. Générer uniquement les sommets `P-P`, `N-N` et les intersections des
+segments actifs `P-N` dont les rangs satisfont `r+s<=k`. Grouper atomiquement
+les concurrences par centre rationnel avant rang strict, Jung, positivité,
+owner et census.
+
+Cette ordonnance remplace `C(n_lens,2)` par les centres shallow distincts. Elle
+ne construit aucun arrangement global : les niveaux sont locaux à une arête,
+éphémères et détruits après les `BallEvent`. Le probe CPU compare exactement
+`(BallKey,SupportKey,I_B,U_B,owner)` à `BallFormToBallEvent-v0`. Les mutants
+omettent séparément `P-P`, `N-N`, `P-N`, le niveau terminal, le batch des
+concurrences et l'exclusion du shell du rang strict.
+
+### 15.4 Fold streamé au lieu du catalogue de supports
+
+Le payload officiel ne demande pas le retour hôte de tous les supports. Après
+census régulier, former un `RegularDirectRecord` compact portant niveau exact,
+`BallKey`, `Q=I_B union S` avec `|Q|<=11` et masque de support. Les records et
+gateways deviennent des runs triés par `(k,beta_exacte,cle)`. Pour chaque lot de
+niveau égal, geler les racines avant incidences, réduire la connectivité du
+graphe quotient par une étoile ou une MSF temporaire, committer atomiquement,
+émettre forêt/coverage et jeter le lot.
+
+La conservation exacte des composantes par MSF est standard ; la complétude de
+la rétraction `directes+gateways`, ses verticales et son quotient de plateau ne
+sont **pas encore reçus**. `AnchorOutputFoldCounter-v0` doit comparer les dix
+forêts, lots, verticales et coverage à Gamma exhaustif sur petit `n`, puis
+comparer run matérialisé, streamé, permuté et tuilé. Aucun catalogue global de
+supports, Gamma ou mosaïque d'ordre supérieur n'entre dans le chemin candidat.
+
+### 15.5 Porte de coût
+
+Le chemin actuel est déjà réfuté par `eight_clusters,n=500` et ne mérite aucune
+rampe `50000`. Chaque nouvel objet passe d'abord fixtures/petit oracle, puis
+`1500/3000/6000`. Seulement si ses compteurs physiques restent admis, exécuter
+`12500/25000/50000` sur `uniform` et `eight_clusters`, avec deux pentes
+consécutives sur tâches, centres, `BallKey`, census, octets et HWM. Le premier
+kernel G4 vient après ce vert ; le p95 contractuel demande ensuite trente
+répétitions chaudes à `50000` du même `BenchmarkOutputContract-v1` complet.
 
 GCP non utilisé pour cette proposition.

@@ -23,6 +23,7 @@
 
 namespace {
 
+using mhgp3v::RectLane;
 using mhgp3v::RectVerdict;
 using mhgp3v::WfNode;
 
@@ -38,6 +39,14 @@ long long arg_ll(const char* s, long long lo, long long hi, const char* name) {
   if (errno != 0 || end == s || *end != '\0') refuse(name);
   if (v < lo || v > hi) refuse(name);
   return v;
+}
+
+// LES SEUILS SONT DERIVES DE `smax`, JAMAIS FIGES. `h_q = smax + 1 - q` : c'est
+// ce qui permet de MESURER la dependance de `s` en `K`, au lieu de la deduire
+// d'un modele volumique que l'audit a refute.
+int g_need[3] = {10, 9, 8};
+inline void set_smax(long long smax) {
+  for (int q = 0; q < 3; ++q) g_need[q] = (int)(smax + 1 - (q + 2));
 }
 
 struct Pair { int a, b; };
@@ -74,6 +83,9 @@ long long box_dist2_to(const WfNode& v, const long long m4[3], bool tight) {
 
 // Cellule de Morton (porte la borne) ou boite serree (front bien plus petit).
 bool g_tight = false;
+// Le masque central est suffisant, jamais complet ; le repli est un SECOND
+// certificat suffisant, non comparable. Leur disjonction reste suffisante.
+bool g_fallback = false;
 bool g_bank = false;
 long long g_win = 32, g_bankl = 16;
 long long g_warms = 0;
@@ -138,6 +150,8 @@ int main(int argc, char** argv) {
     else if (a == "--inject=masque-global") { g_bank = true; g_vwave = true; g_inject_global = true; g_judge_vwave = true; }
     else if (a == "--judge-vwave") { g_bank = true; g_vwave = true; g_judge_vwave = true; }
     else if (a == "--climb") { g_bank = true; g_vwave = true; g_climb = true; }
+    else if (a.rfind("--smax=", 0) == 0) set_smax(arg_ll(val("--smax=").c_str(), 4, 34, "smax"));
+    else if (a == "--fallback") g_fallback = true;
     else if (a == "--vwave") { g_bank = true; g_vwave = true; }
     else if (a == "--descent") { g_bank = true; g_descent = true; }
     else if (a.rfind("--window=", 0) == 0) { g_win = arg_ll(val("--window=").c_str(), 2, 1024, "window"); g_bank = true; }
@@ -296,7 +310,7 @@ int main(int argc, char** argv) {
               }
               long long exp = 0;
               bool abandonne = false;
-              const int need[3] = {10, 9, 8};
+              const int* need = g_need;
               while (sn > 0 && exp < g_win) {
                 const Task tk = st[--sn];
                 // MUTANT `masque-global` : rendre au parent un masque complet
@@ -326,7 +340,19 @@ int main(int argc, char** argv) {
                 bool eut_all = false, eut_none = false;
                 for (int lane = 0; lane < 3; ++lane) {
                   if (!(m & (1u << lane))) continue;
-                  const RectVerdict v = mhgp3v::rect_central_verdict(dlo, smn, smx, lane);
+                  RectVerdict v = mhgp3v::rect_central_verdict(dlo, smn, smx, lane);
+                  // Le masque central est SUFFISANT, jamais complet. Sous
+                  // `--fallback`, un `MIXED` central est repris par le
+                  // classifieur complet — `Hmin` et les deux maxima de
+                  // distance —, qui n'est pas comparable et peut mordre la ou
+                  // le central renonce. La disjonction de deux certificats
+                  // suffisants reste suffisante.
+                  if (v == RectVerdict::kMixed && g_fallback) {
+                    long long mxk = 0;
+                    const RectVerdict w =
+                        mhgp3v::rect_classify(qa, qb, cb2, (RectLane)lane, &mxk);
+                    if (w == RectVerdict::kAll) v = RectVerdict::kAll;
+                  }
                   if (v == RectVerdict::kAll) { cred[lane] += pop; eut_all = true; }
                   else if (v == RectVerdict::kMixed) mixed |= 1u << lane;
                   else eut_none = true;
@@ -395,7 +421,7 @@ int main(int argc, char** argv) {
                   if (got & (1u << lane)) ++cred[lane];
               }
             }
-            const int need[3] = {10, 9, 8};
+            const int* need = g_need;
             for (int lane = 0; lane < 3; ++lane)
               if (cred[lane] >= need[lane]) ++bank.closed[lane];
             // JUGE DE LA VAGUE. Toute fermeture affirme qu'il existe `need`
@@ -579,7 +605,7 @@ int main(int argc, char** argv) {
                 " | banque lectures=%lld recert=%lld ferme q2=%lld q3=%lld q4=%lld"
                 " | masse fermee q2=%.2f%% records fermes q2=%.2f%% tronques=%lld"
                 " juges=%lld faux=%lld | verdicts ALL=%lld NONE=%lld descente_pure=%lld"
-                " | fenetre somme_N=%lld max_N=%lld moyen_N=%.1f"
+                " | seuils=%d/%d/%d fenetre somme_N=%lld max_N=%lld moyen_N=%.1f"
                 " | partenaires max=%lld moyen=%.2f"
                 " | residuel : %lld paires tirees DANS LA MASSE ouverte,"
                 " temoins_moyen=%.1f max=%lld, deja >=10 temoins : %lld (%.1f%%)"
@@ -591,7 +617,7 @@ int main(int argc, char** argv) {
                 100.0 * (double)mass_closed_q2 / (double)total,
                 100.0 * (double)bank.closed[0] / (double)std::max<size_t>(1, terms.size()),
                 bank.tronques, bank.juges, bank.faux, bank.v_all, bank.v_none, bank.v_descente,
-                nsum, nmax, (double)nsum / (double)m,
+                g_need[0], g_need[1], g_need[2], nsum, nmax, (double)nsum / (double)m,
                 dmax, (double)dsum / (double)std::max(1LL, dnz),
                 ech, (double)som_temoins / (double)std::max(1LL, ech), max_temoins,
                 faux_resid, 100.0 * (double)faux_resid / (double)std::max(1LL, ech),
