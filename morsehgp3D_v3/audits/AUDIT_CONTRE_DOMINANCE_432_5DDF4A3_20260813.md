@@ -54,9 +54,13 @@ $$\frac{x}{y}>T_c(u,v)=\frac{V}{A-\sqrt{\frac{Q}{c}}}.$$
 
 Pour `lambda>0`, la fonction
 `F_lambda=A-sqrt(Q/c)-lambda*V` est concave en `u` à `v` fixé, puis concave
-en `v` à `u` fixé. Avec `lambda` choisi comme l'inverse du maximum des neuf
-seuils aux paires de sommets, les minima successifs sont donc atteints aux
-sommets et `F_lambda>=0` sur le produit des triangles. L'énumération exacte
+en `v` à `u` fixé. Avec `lambda` choisi comme le maximum des neuf
+seuils aux paires de sommets, prendre un minimiseur global, remplacer d'abord
+son `u` par un sommet qui ne hausse pas `F_lambda`, puis son `v` de la même
+façon : `F_lambda>=0` sur le produit des triangles. La borne angulaire
+`A^2/(UV)>=9/11` donne en outre `Q<=2UV/11`; pour `c>=2`,
+`sqrt(Q/c)<A`, donc aucun changement de signe n'est caché lors des produits et
+du carré. L'énumération exacte
 des neuf paires place le pire cas aux deux rayons extrêmes de chaque cellule.
 Après élimination de la racine, le code reçoit exactement la condition :
 

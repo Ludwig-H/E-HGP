@@ -8,15 +8,14 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-## Observation live — `HEAD=5ddf4a3`, dominance 432 diagnostique
+### Parent logiciel — `HEAD=5ddf4a3`, dominance 432 diagnostique
 
 Au 13 août 2026, le `HEAD` observé est
 `5ddf4a3f163d505cb140c5dba9b9481bfc48b8d4`, commit
 `a boundary mutant that picks the same order as the reference is not a gate`.
 Il raccorde le premier probe de dominance 432 et les réponses Q1--Q7 de
-Claude. Le worktree contient ensuite le contre-audit documentaire de ce
-successeur et une microprimitive Claude de groupes coniques encore non
-raccordée ; aucun code n'a été modifié par l'auditeur.
+Claude. Le successeur live `2270077`, décrit dans la section suivante, raccorde
+ensuite les groupes coniques ; aucun code n'a été modifié par l'auditeur.
 
 Les sept réponses sont dans
 [`AUDIT_REPONSES_CLAUDE_GEOMETRIE_3D_20260813.md`](AUDIT_REPONSES_CLAUDE_GEOMETRIE_3D_20260813.md).
@@ -46,11 +45,45 @@ aucune rampe. Verdict complet et reproducteur :
 
 La note de mesures de Claude reste une observation non reçue :
 [`NOTE_CLAUDE_DOMINANCE_432_MESURES_20260813.md`](NOTE_CLAUDE_DOMINANCE_432_MESURES_20260813.md).
-Le probe groupes ouvert après ce pin ne couvre encore ni génération, ni packing
-disjoint, ni caps, ni ledger et n'est pas une deuxième route counter-only.
-GCP non utilisé.
+Le facteur deux est une ablation conservatrice, pas un mutant d'exactitude ; la
+cellule voisine possède une contre-fixture q4 déterministe. Les positions
+colocalisées sont seulement comptées et omises, alors que le profil exige leur
+rejet. Enfin, un owner de frontière alternatif peut rester spindle-sûr : sa
+porte relève de la canonicité engagée et non d'un faux prune attendu.
 
-## Observation live — `HEAD=ffe5b69`, fenêtre raccordée et rejouée
+## Observation live — `HEAD=2270077`, microprobe de groupes commis
+
+Au 13 août 2026, le `HEAD` observé est
+`22700778af0d14bd4e25c614bf901ccf427946f2`, commit
+`three witnesses cover what none of them covers alone`. Le worktree contient
+ensuite seulement les contre-audits documentaires en cours ; aucun fichier
+d'implémentation n'est modifié par l'auditeur.
+
+Ce successeur raccorde un microprobe de groupes coniques. Son théorème scalaire
+est correct : un groupe fourni, de cône positif contenant la direction cible et
+dont chaque membre a une puissance strictement intérieure au milieu, garantit
+au moins un intérieur pour toute sphère admissible. Le rejeu Release pincé dans
+[`AUDIT_CONTRE_GROUPES_CONIQUES_2270077_20260813.md`](AUDIT_CONTRE_GROUPES_CONIQUES_2270077_20260813.md)
+rend `11/11` portes ciblées. Le probe reste néanmoins `O(n^3 log n)`, ignore
+`smax` dans ses seuils, partage H2 avec son juge, ne reçoit ni packing maximal,
+ni IDs crédités, ni résiduel factorisé, ni caps/octets/pentes. C'est un
+microprobe mathématique borné, **NO-GO 50 k/G4**.
+
+La proposition d'implémentation donnée à Claude évite d'énumérer les triples :
+à direction représentative fixée, projeter les candidats dans le plan transverse
+réduit `d in cone(G)` à la présence de l'origine dans l'enveloppe convexe d'au
+plus trois directions. Un tri angulaire et un balayage trouvent singleton,
+paire ou triple. Chaque groupe définit ensuite une région polyédrique de cibles
+par formes de Cramer linéaires et puissances strictes ; huit à dix groupes
+disjoints ferment des nœuds LBVH entiers. Cette construction complète le
+contre-audit du microprobe sans le recevoir. Le détail, les fixtures et l'ordre
+de travail remis à Claude sont dans
+[`AUDIT_REPONSE_DOMINANCE_GROUPES_5DDF4A3_20260813.md`](AUDIT_REPONSE_DOMINANCE_GROUPES_5DDF4A3_20260813.md).
+
+Le statut live ne reçoit donc ni les mesures de dominance comme rampe, ni le
+prototype de groupe comme deuxième voie, ni CUDA/G4, ni le SLO. GCP non utilisé.
+
+## Pin antérieur — `HEAD=ffe5b69`, fenêtre raccordée et rejouée
 
 Au 13 août 2026, le `HEAD` observé est
 `ffe5b69f4174148e2391a1fb53c7ed2a82c097b6`, commit

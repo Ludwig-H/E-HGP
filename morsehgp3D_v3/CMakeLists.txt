@@ -3525,3 +3525,64 @@ mhgp3v_add_expected_code_test_for(mhgp3v_conic_groups_probe
 mhgp3v_add_expected_code_test_for(mhgp3v_conic_groups_probe
   mhgp3v_groupes_plancher_seuls "plancher de fermetures par groupes seuls" 3
   --points=100 --family=terrain --seed=3 --min-groupes-seuls=100000000)
+
+# ---------------------------------------------------------------------------
+# COEUR COMMUN DE JUNG PAR BLOCS : LA TROISIEME VOIE, ET SON VERDICT.
+#
+# Specification : audits/AUDIT_DEBLOCAGE_COLLECTIF_APRES_FENETRE_20260813.md
+# section 5, corrigee par la reponse Q7 de
+# audits/AUDIT_REPONSES_CLAUDE_GEOMETRIE_3D_20260813.md.
+#
+# `d > 3S` construit un coeur commun a toutes les paires d'un bloc. Il ne
+# fournit AUCUN temoin : le bloc n'est ferme que si le coeur contient `h`
+# PointId distincts. Q7 l'annonce et la mesure le confirme sans ambiguite —
+# `eight_clusters n=600` emet `2 306` blocs bien separes dont `2 306` ont un
+# coeur VIDE, et ferme exactement zero paire. Deux amas serres ont un coeur
+# parfaitement defini et parfaitement vide.
+#
+# Sur `uniform` et `terrain` la fermeture existe mais reste marginale : `126` et
+# `784` paires dirigees sur environ `359 000`. Les quatre mutants SURVIVENT, et
+# c'est le meme fait vu autrement : le certificat est si loin de sa propre
+# frontiere qu'aucune perturbation ne l'atteint. Cette voie n'est donc pas
+# competitive comme certificat de couverture, et ce verdict est mesure.
+#
+# CE QUI RESTE UNE VRAIE PORTE est l'identite de couverture. Une premiere
+# decomposition traitait `A x A` en poussant `(gauche,A)` et `(droite,A)` : les
+# blocs etaient IMBRIQUES, la decomposition ne partitionnait plus les paires, et
+# le ledger divergeait sans qu'aucun invariant ne l'annonce. La recursion
+# correcte traite `A x A` par `(A_g,A_g)`, `(A_d,A_d)` et `(A_g,A_d)`. La porte
+# exige desormais `paires_couvertes == C(n,2)` exactement.
+# ---------------------------------------------------------------------------
+add_executable(mhgp3v_common_core_probe
+  prototype/common_core_probe.cpp
+  prototype/spindle_cone_oracle.cpp)
+target_include_directories(mhgp3v_common_core_probe PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(mhgp3v_common_core_probe PRIVATE mhgp)
+target_compile_options(mhgp3v_common_core_probe PRIVATE -Wall -Wextra -Werror)
+
+add_test(NAME mhgp3v_coeur_uniform COMMAND mhgp3v_common_core_probe
+         --points=600 --family=uniform --seed=3 --leaf=8 --judge
+         --min-blocs=1000 --min-closed-q4=100 --min-coeurs-vides=1000
+         --min-residuel=300000)
+add_test(NAME mhgp3v_coeur_terrain COMMAND mhgp3v_common_core_probe
+         --points=600 --family=terrain --seed=3 --leaf=8 --judge
+         --min-blocs=1500 --min-closed-q4=500 --min-coeurs-vides=1500
+         --min-residuel=300000)
+# LA PORTE QUI COMPTE POUR LES AMAS : elle exige que le certificat ECHOUE, et
+# que cet echec soit total. Q7 le predit, la mesure le confirme, et sans cette
+# porte la prediction resterait une phrase.
+add_test(NAME mhgp3v_coeur_amas_tous_vides COMMAND mhgp3v_common_core_probe
+         --points=600 --family=eight_clusters --seed=3 --leaf=8 --judge
+         --min-blocs=2000 --min-coeurs-vides=2000 --min-residuel=359400)
+
+mhgp3v_add_expected_code_test_for(mhgp3v_common_core_probe
+  mhgp3v_coeur_reject_mutant_sans_juge "un mutant sans juge ne prouve rien" 2
+  --points=200 --inject=coeur-separation-deux)
+mhgp3v_add_expected_code_test_for(mhgp3v_common_core_probe
+  mhgp3v_coeur_reject_smax "--smax hors du domaine d'enveloppe" 2
+  --points=200 --smax=9223372036854775807)
+mhgp3v_add_expected_code_test_for(mhgp3v_common_core_probe
+  mhgp3v_coeur_reject_inconnu "argument inconnu" 2 --points=200 --turbo)
+mhgp3v_add_expected_code_test_for(mhgp3v_common_core_probe
+  mhgp3v_coeur_plancher_ferme "plancher de fermeture q4" 3
+  --points=600 --family=eight_clusters --seed=3 --leaf=8 --min-closed-q4=1)

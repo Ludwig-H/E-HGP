@@ -1600,6 +1600,59 @@ minorant indépendant des produits scalaires. Après top-`h` par
 prochaine ordonnance doit donc faire count--scan/range-report sur ces suffixes,
 pas les recompter par une boucle sur `A times B`.
 
+Les groupes coniques doivent subir la même factorisation. Le théorème vaut pour
+un crédit `G` de taille quelconque : Carathéodory garantit seulement qu'un
+sous-groupe de taille au plus trois existe pour une direction fixée, pas qu'il
+faille l'énumérer. Pour une cellule `C=cone(r0,r1,r2)` à hauteur de section
+`T`, poser `m_C(s)=min_j r_j dot s`. Le témoin `s` satisfait H2 uniformément
+sur le suffixe de hauteur `x` dès :
+
+$$x\,m_C(s)>T\left\lVert s\right\rVert^2.$$
+
+Trier les événements d'activation exacts
+`X_s=floor(T||s||^2/m_C(s))+1`. Dans le pool actif, couper les directions par
+le plan positif de normale `w=r0+r1+r2` et construire leur enveloppe convexe
+2D sans division. La cellule est contenue dans `cone(G)` exactement lorsque
+les trois rayons normalisés appartiennent à cette enveloppe. Une triangulation
+canonique extrait pour chacun un carrier de taille un à trois ; leur union
+forme un crédit de taille au plus neuf. Retirer ses IDs et recommencer donne
+`h<=10` crédits disjoints ou échoue fail-open. Cela remplace le catalogue
+`C(m,3)` et le 3-set-packing par des enveloppes 2D et produit directement un
+suffixe de cibles factorisé.
+
+Pour une direction ponctuelle ou un raffinement d'une cellule, chaque candidat
+peut aussi être projeté dans le plan transverse par :
+
+$$V_s=\left\lVert d_0\right\rVert^2s-(d_0\mathbin{\cdot}s)d_0.$$
+
+Un tri angulaire exact y trouve singleton, paire antipodale ou triangle
+encerclant l'origine. Ce chemin sert d'oracle et d'ablation de rappel ; un
+packing glouton raté ne prouve jamais l'absence d'un packing de taille `h`.
+
+Un groupe plein rang ne doit ensuite pas rester attaché à une seule cible. Il
+définit la région :
+
+$$P_G=\left\lbrace d:d\in\mathrm{cone}(G),\ d\mathbin{\cdot}s>\left\lVert s\right\rVert^2\ \text{pour tout }s\in G\right\rbrace.$$
+
+Les trois numérateurs de Cramer de `d in cone(G)` sont linéaires en `d`, comme
+les inégalités de puissance. `P_G` est donc un polyèdre convexe à au plus six
+formes exactes. L'intersection des régions de `h<=10` groupes disjoints ferme
+un nœud de cibles entier lorsque les extrema AABB de toutes les formes passent ;
+une forme impossible donne `NONE`, une frontière ou un mélange donne `MIXED`.
+Les cas singleton/paire vivent sur leurs strates exactes et ne sont jamais
+promus par une boîte volumique. Cette ordonnance transforme le certificat de
+groupe en `ALL/NONE/MIXED` factorisé et évite à la fois le catalogue de triples
+et le bitset global de `PairId`.
+
+La gate publie événements d'activation, rebuilds/updates d'enveloppe, carriers
+de rayons, tailles des crédits, conflits de `PointId`, formes produites, nœuds cibles
+`ALL/NONE/MIXED`, masse fermée, blocs résiduels, bytes et HWM. Elle compare le
+bitset développé seulement chez le juge borné. Le microprobe ponctuel du pin
+`2270077` ne reçoit pas cette ordonnance ; le théorème, ses P0 et la construction
+sont séparés dans
+[`AUDIT_CONTRE_GROUPES_CONIQUES_2270077_20260813.md`](audits/AUDIT_CONTRE_GROUPES_CONIQUES_2270077_20260813.md) et
+[`AUDIT_REPONSE_DOMINANCE_GROUPES_5DDF4A3_20260813.md`](audits/AUDIT_REPONSE_DOMINANCE_GROUPES_5DDF4A3_20260813.md).
+
 Le groupe octaédrique partage les neuf tables et le kernel, mais la chambre
 dépend de `x-a` : `canon(x-a)` ne se déduit pas de
 `canon(x)-canon(a)`. Les 48 ordres relatifs ne disparaissent pas par un tri

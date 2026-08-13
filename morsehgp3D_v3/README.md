@@ -131,6 +131,21 @@ pas la route 50 k/G4. Voir la note Claude et son contre-audit :
 [`NOTE_CLAUDE_DOMINANCE_432_MESURES_20260813.md`](audits/NOTE_CLAUDE_DOMINANCE_432_MESURES_20260813.md) et
 [`AUDIT_CONTRE_DOMINANCE_432_5DDF4A3_20260813.md`](audits/AUDIT_CONTRE_DOMINANCE_432_5DDF4A3_20260813.md).
 
+Le successeur `2270077` raccorde le microprobe de groupes coniques et rend
+`11/11` portes ciblées. Il reçoit le théorème pour un triple fourni, pas la
+seconde voie collective : `smax` est ignoré, le juge partage H2 et ne suit pas
+les seuls IDs crédités, le packing est incomplet et le probe reste
+`O(n^3 log n)`. La proposition de déblocage exploite la dimension trois sans
+`C(m,3)` : un crédit peut avoir plus de trois membres. Par cellule, les témoins
+s'activent à un seuil entier de hauteur ; leur enveloppe convexe projective 2D
+fournit un crédit de taille au plus neuf couvrant la cellule entière. Huit à dix
+crédits disjoints ferment alors directement un suffixe de nœuds cibles. Le tri
+angulaire transverse et les régions polyédriques restent un raffinement lorsque
+la cellule entière échoue. Tout échec est fail-open et factorisé. Voir le
+contre-audit et la construction remise à Claude :
+[`AUDIT_CONTRE_GROUPES_CONIQUES_2270077_20260813.md`](audits/AUDIT_CONTRE_GROUPES_CONIQUES_2270077_20260813.md) et
+[`AUDIT_REPONSE_DOMINANCE_GROUPES_5DDF4A3_20260813.md`](audits/AUDIT_REPONSE_DOMINANCE_GROUPES_5DDF4A3_20260813.md).
+
 Deux sorties sont distinctes :
 
 | sortie | contenu | portée actuelle |

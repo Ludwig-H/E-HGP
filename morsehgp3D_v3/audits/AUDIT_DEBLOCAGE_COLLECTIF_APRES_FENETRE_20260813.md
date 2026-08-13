@@ -597,7 +597,7 @@ de complexité, jamais des plans d'implémentation.
 
 ## 9. Inversion locale : identité reçue, générateur encore conditionnel
 
-### 9.1 Bijection exacte
+### 9.1 Identité exacte et flats auto-centrés
 
 Fixer une ancre `a`, écrire `s_z=z-a` et inverser chaque autre site de la
 fenêtre par `y_z=s_z/||s_z||^2`. Une sphère passant par `a`, de centre `a+t` et
@@ -639,27 +639,49 @@ tout support local certifiable fournit bien un tel minimum de flat de profondeur
 dont ce minimum est shallow**, y compris ceux dont l'intérieur relatif traverse
 plusieurs cellules de profondeur.
 
-### 9.2 Borne qui remplace le mur combinatoire
+### 9.2 Borne shallow et walk canonique en position simple
 
-Agarwal, de Berg, Matousek et Schwarzkopf prouvent que le complexe `<=k` d'un
-arrangement de `M` plans dans `R^3` a complexité maximale
-`Theta(M*k^2)` et donnent, sous les conventions de niveaux et de position
-générale du papier, une construction incrémentale randomisée en temps espéré :
+Agarwal, de Berg, Matousek et Schwarzkopf donnent, sous leurs conventions de
+niveaux et de position générale, une construction incrémentale randomisée en
+temps espéré :
 
 $$O\left(Mk^2+M\log^3M\right).$$
 
 La source primaire est
 [« Constructing Levels in Arrangements and Higher Order Voronoi Diagrams »](https://doi.org/10.1137/S0097539795281840).
-Les plans inversés ont une orientation cohérente : le demi-espace intérieur
-est `2t dot s_z>||s_z||^2` et le centre `t=0` appartient strictement au côté
-opposé de chaque plan. Une carte affine n'est donc pas requise pour définir le
-niveau. En revanche, le théorème borne les **cellules** du complexe shallow ; il
-ne prouve pas encore que le nombre des minima de tous les flats q2/q3 incidents
-à ces cellules, ni leur extraction avec multiplicités de shell, est borné par
-le même `Theta(M*k^2)`. Cette extension doit être prouvée ou comptée contre
-l'oracle avant de remplacer le mur combinatoire. Le papier suppose en outre la
-position générale pour son exposé ; la quantification u16 produit précisément
-plans concurrents, intersections de rang déficient et cosphères.
+Le transfert à notre orientation possède une preuve autonome en position
+simple. Dans l'espace des centres, poser
+`H_i(t)=2s_i dot t-||s_i||^2` et
+`D_K={t:#{i:H_i(t)>0}<=K}`. Cet ensemble est étoilé par rapport à zéro : le long
+du segment `[0,t]`, un plan négatif en `t` ne devient jamais positif. Toute
+cellule shallow pointée rejoint donc la cellule de zéro ; son 1-squelette est
+atteignable depuis une graine de profondeur zéro.
+
+Un argument de Clarkson--Shor borne les sommets. Un vertex défini par trois
+plans et portant au plus `K` conflits du côté opposé à zéro survit sur
+l'enveloppe de la cellule de zéro d'un échantillon de taille
+`r` proportionnelle à `M/(K+1)` avec probabilité de l'ordre de `(r/M)^3`.
+Cette cellule convexe a `O(r)` sommets ; on obtient donc
+`O(M(K+1)^2)` vertices, puis le même ordre pour arêtes et faces en arrangement
+simple. Cette preuve reçoit l'orientation radiale ; elle ne reçoit ni les
+dégénérescences u16, ni les constantes et le temps optimal de l'algorithme du
+papier.
+
+Un walk CPU immédiatement falsifiable est alors : construire exactement les
+facettes de la cellule de zéro ; enfiler leurs `VertexKey=(i,j,k)` ; pour chaque
+`LineKey=(i,j)`, trouver par scan exact l'événement précédent et suivant du
+pinceau, transporter la profondeur de l'arête ouverte et n'enfiler le voisin
+que sous le seuil. Dédoublonner `PlaneKey/LineKey`, projeter zéro sur chacun de
+ces flats, puis rescanner profondeur, shell et positivité. Son coût simple est
+`O(M^2(K+1)^2)`, pas le temps optimal du papier. À `M<=128`, il devient un
+probe différentiel sans `C(M,3)` ; il ne constitue toujours pas une route 50 k.
+
+Avant ce walk, brancher sur le rang de `span{s_i}`. Au rang un, seuls les q2
+directs subsistent. Au rang deux, q4 est impossible et q2/q3 demandent au pire
+`M+C(M,2)` propositions, soit `8 256` à `M=128`, ou un arrangement 2D shallow.
+Le walk 3D exige le rang trois et la position simple. Une concurrence de plus de
+trois plans, une cosphère shallow ou une arête à événements multiples passe au
+bundle exact/résiduel ; elle n'autorise aucune perturbation scientifique.
 
 Avec `k=9` fixe, la comparaison suivante n'est donc plus qu'un **budget de
 complexe conditionnel**, pas un proxy des supports garantis :
@@ -682,9 +704,10 @@ nom. Le candidat admissible est :
 
 1. produire top-M et premier omis depuis l'index global exact, sans scan et tri
    de tout le nuage par ancre ;
-2. pour `M<=128`, construire dans la seule mémoire d'une ancre le complexe
-   inversé `<=9` par l'algorithme incrémental exact du papier, avec ordre aléatoire
-   engagé et listes de conflits complètes ;
+2. pour `M<=128`, brancher par rang puis construire dans la seule mémoire d'une
+   ancre le shallow-facet-walk exact en position simple ; garder l'incrémental
+   optimal du papier comme successeur conditionnel, pas comme dépendance de la
+   première gate ;
 3. inventorier tous les flats q2/q3 incidents, calculer leur minimum de norme
    exact et tester sa profondeur ; extraire q4 des sommets ; vérifier exactement
    cellule, profondeur, positivité,
@@ -713,10 +736,11 @@ fenêtre ni la coupure du sujet. Les mutants changent le côté du niveau, `9` e
 et séparent une cosphérie.
 
 Cette voie répond partiellement à la question de Claude : quitter la DFS par
-endpoint est justifié, mais le niveau inversé reste un **candidat d'oracle local
-borné** tant que le lemme d'extraction des minima de flats n'est pas prouvé et
-jugé. La dominance 432 et `A times B times C` restent les certificats du
-résiduel. Si le compteur du complexe, celui des flats ou leur high-water garde
+endpoint est justifié, et la complétude du walk simple vient de l'étoile radiale
+et du 1-squelette shallow. Il reste un **candidat d'oracle local borné** : les
+dégénérescences, le coût optimal et tout support absent de la fenêtre restent
+au résiduel. La dominance 432 et `A times B times C` demeurent les certificats
+globaux. Si le compteur du complexe, celui des flats ou leur high-water garde
 deux pentes `>1,35`, il ne passe pas sur CUDA.
 
 ## 10. Ordre recommandé à Claude
