@@ -58,6 +58,7 @@
 #pragma once
 
 #include <algorithm>
+#include <cmath>
 #include <cstdint>
 
 namespace mhgp3v {
@@ -75,6 +76,9 @@ enum class RectFrontInject {
   kSommetNonEcrete,  // sommet utilise SANS ecretage a la boite de C : le
                      // maximum devient ((b-a)/2)^2 meme quand le sommet est
                      // hors de C, donc surestime — NONE ne se declenche plus.
+  kCoeurTropGrand,   // rayon du coeur commun double : `2(d2 - 2 s2)` au lieu de
+                     // `d2 - 2 s2`. C'est la faute que j'avais ecrite, et le
+                     // juge du coeur l'a prise en flagrant delit.
 };
 
 // Intervalle EXACT de `H` sur `A x B x C`.
@@ -138,6 +142,99 @@ inline long long rect_minsq(const RectBox& p, const RectBox& q) {
     s += d * d;
   }
   return s;
+}
+
+// ---- COEUR COMMUN (audit `96be8e0`, section 9.1). Un seul test de sphere
+// ENTIERE, au lieu d'une descente. Avec `S = r_A + r_B`, `d = ||c_B - c_A||` et
+// `m_0 = (c_A + c_B)/2`, tout milieu de paire est a distance au plus `S/2` de
+// `m_0` et toute longueur `||b-a||` vaut au moins `d - S`. Donc
+//
+//     d > 2S  =>  B(m_0, (d-2S)/2)  incluse dans TOUTE boule diametrale.
+//
+// Dix `PointId` distincts dans ce coeur ferment q2 sans qu'aucun noeud ne soit
+// classe. Tout est entier : coordonnees quadruplees pour `m_0`, racines
+// entieres ARRONDIES DANS LE SENS CONSERVATEUR pour les rayons — jamais un
+// coeur trop grand, donc jamais un faux temoin.
+inline long long rect_isqrt_floor(long long v) {
+  if (v <= 0) return 0;
+  long long r = (long long)std::sqrt((double)v);
+  while (r > 0 && r * r > v) --r;
+  while ((r + 1) * (r + 1) <= v) ++r;
+  return r;
+}
+inline long long rect_isqrt_ceil(long long v) {
+  const long long r = rect_isqrt_floor(v);
+  return (r * r == v) ? r : r + 1;
+}
+
+struct RectCore {
+  bool valid;
+  long long m4[3];      // quadruple du centre : (A.lo+A.hi) + (B.lo+B.hi)
+  long long r4;         // minorant entier de quatre fois le rayon du coeur
+};
+
+// `mult` = 2 pour q2 (boule diametrale), 3 pour q3/q4 (circumboule admissible,
+// sous precondition d'arete maximale owner). Le rayon du coeur vaut alors
+// `(d - mult*S)/2` pour q2 et `(d - 3S)/4` pour q3/q4.
+//
+// AVERTISSEMENT. Le coeur q3/q4 porte sur les CIRCUMBOULES ADMISSIBLES DU
+// SUPPORT, tandis que le predicat de temoin universel implemente ici porte sur
+// le SPINDLE — l'intersection des boules passant par `a` et `b`. Ce ne sont pas
+// le meme objet, et le juge du coeur le montre : `352 666` desaccords sur
+// `446 224` en q4. Le fast path est donc RESTREINT A q2 tant que l'audit n'a
+// pas tranche la correspondance.
+inline RectCore rect_common_core(const RectBox& a, const RectBox& b, int mult,
+                                RectFrontInject inject = RectFrontInject::kNone) {
+  RectCore c{};
+  c.valid = false;
+  long long wa2 = 0, wb2 = 0, d2x4 = 0;
+  for (int i = 0; i < 3; ++i) {
+    const long long da = a.hi[i] - a.lo[i], db = b.hi[i] - b.lo[i];
+    wa2 += da * da;
+    wb2 += db * db;
+    const long long u = (b.lo[i] + b.hi[i]) - (a.lo[i] + a.hi[i]);   // 2*(c_B-c_A)
+    d2x4 += u * u;
+    c.m4[i] = (a.lo[i] + a.hi[i]) + (b.lo[i] + b.hi[i]);             // 4*m_0
+  }
+  const long long wa = rect_isqrt_ceil(wa2);   // majorant de 2 r_A
+  const long long wb = rect_isqrt_ceil(wb2);
+  const long long d2 = rect_isqrt_floor(d2x4); // minorant de 2 d
+  // 2S <= wa + wb, donc `d > mult*S` est implique par `2d > mult*(wa+wb)`.
+  const long long s2 = wa + wb;
+  if (d2 <= mult * s2) return c;
+  // q2 : `4 rho = 2d - 4S`. Avec `d2 <= 2d` et `2 s2 >= 4S`, le minorant est
+  // `d2 - 2 s2` — et NON `2(d2 - 2 s2)`, qui etait deux fois trop grand et que
+  // le juge du coeur a pris en flagrant delit (`30 862` points hors de la
+  // region ALL exacte sur `terrain`).
+  // q3/q4 : `4 rho = d - 3S >= (d2 - 3 s2)/2`.
+  c.r4 = (mult == 2) ? (d2 - 2 * s2) : ((d2 - 3 * s2) / 2);
+  if (inject == RectFrontInject::kCoeurTropGrand) c.r4 *= 2;
+  if (c.r4 <= 0) return c;
+  c.valid = true;
+  return c;
+}
+
+// `z` (coordonnees simples) est-il STRICTEMENT dans le coeur ?
+inline bool rect_core_contains(const RectCore& c, const long long z[3]) {
+  __int128 s = 0;
+  for (int i = 0; i < 3; ++i) {
+    const __int128 u = (__int128)4 * z[i] - c.m4[i];
+    s += u * u;
+  }
+  return s < (__int128)c.r4 * c.r4;
+}
+
+// La boite entiere est-elle DISJOINTE du coeur ? Sert a elaguer la descente.
+inline bool rect_core_misses_box(const RectCore& c, const RectBox& p) {
+  __int128 s = 0;
+  for (int i = 0; i < 3; ++i) {
+    const long long lo4 = 4 * p.lo[i], hi4 = 4 * p.hi[i];
+    long long d = 0;
+    if (c.m4[i] < lo4) d = lo4 - c.m4[i];
+    else if (c.m4[i] > hi4) d = c.m4[i] - hi4;
+    s += (__int128)d * d;
+  }
+  return s >= (__int128)c.r4 * c.r4;
 }
 
 enum class RectVerdict { kNone, kAll, kMixed };

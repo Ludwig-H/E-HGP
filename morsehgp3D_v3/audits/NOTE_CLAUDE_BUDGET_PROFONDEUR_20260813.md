@@ -118,3 +118,43 @@ Aucun octet, aucun high-water, aucune pente de source, aucune sortie produite.
 Les pentes publiées ici sont celles d'un budget sous-dimensionné : elles ne
 réfutent pas le certificat, elles mesurent une ressource insuffisante. Le
 contrat `50 000` reste entièrement ouvert et G4 reste NO-GO.
+
+## 7. Addendum — votre cœur commun, et le défaut que son juge a trouvé chez moi
+
+J'ai implémenté votre section 9.1 en entier, coordonnées quadruplées et racines
+entières arrondies dans le sens conservateur. Le gain est net, `eight_clusters`
+à `n=12 500`, budget-profondeur `4` :
+
+| | fermé | front/pt | classifications `Lambda` |
+| --- | ---: | ---: | ---: |
+| sans cœur | `92,11 %` | `22,60` | `22 867 104` |
+| avec cœur | **`96,24 %`** | **`14,48`** | `11 441 099` |
+
+`88 163` des `91 399` fermetures viennent du cœur seul : la descente `Lambda`
+devient le repli, pas le chemin principal.
+
+**Mais j'ai d'abord écrit le rayon deux fois trop grand**, et c'est le juge du
+cœur qui l'a pris. Le rayon exact est `4\rho = 2d - 4S`, minoré par
+`d_2 - 2s_2` ; j'avais écrit `2(d_2 - 2s_2)`. Sur `terrain`, `30 862` points du
+cœur sur `137 253` tombaient hors de la région `ALL` exacte — un **faux témoin**,
+donc une fausse fermeture. Corrigé, trois familles donnent `desaccords=0`.
+
+Le juge est gravé comme porte, et la faute comme mutant : `--inject=coeur-trop-grand`
+doit rendre code 1. Le juge est une **autre écriture** — boîte dégénérée `{z}`
+et intervalle exact — et non la sphère qui vient de décider.
+
+## 8. Addendum — pourquoi je n'emploie PAS votre cœur en q3/q4
+
+Le même juge refuse massivement le cœur q3/q4 : `352 666` désaccords sur
+`446 224` en q4, `193 144` sur `515 891` en q3. Ce n'est pas un défaut de
+constante.
+
+Votre cœur q3/q4 porte sur les **circumboules admissibles du support** — la
+boule de rayon `\lVert b-a\rVert/4` autour du milieu, sous précondition que
+`ab` soit l'arête maximale owner. Le prédicat que ce sujet décide est le
+**spindle**, c'est-à-dire l'intersection des boules passant par `a` et `b`. Ce
+ne sont pas le même objet, et rien ne m'autorise à substituer l'un à l'autre.
+
+J'ai donc **restreint le fast path à q2** et je vous pose la question au lieu de
+la trancher : la précondition d'arête maximale owner suffit-elle à faire du
+cœur `(d-3S)/4` un minorant du spindle q3/q4, ou faut-il un troisième objet ?

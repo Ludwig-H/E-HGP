@@ -3834,6 +3834,21 @@ mhgp3v_add_expected_code_test_for(mhgp3v_rect_front_probe
   mhgp3v_rect_front_mutant_sommet_non_ecrete "mutant_killed=1" 4
   --family=uniform --points=2000 --selftest=20000 --inject=sommet-non-ecrete)
 
+# LE COEUR COMMUN EST JUGE POINT PAR POINT. Chaque point compte dans le coeur
+# doit satisfaire le predicat EXACT du rectangle, teste par une autre ecriture
+# — boite degeneree et intervalle exact — et non par la sphere qui vient de
+# decider. Plancher de mille points juges contre le vert-par-vacuite.
+add_test(NAME mhgp3v_rect_front_coeur_juge
+  COMMAND mhgp3v_rect_front_probe --family=terrain --points=4000
+          --budget-depth=4 --selftest=0 --verify-core)
+set_tests_properties(mhgp3v_rect_front_coeur_juge PROPERTIES
+  PASS_REGULAR_EXPRESSION "desaccords=0")
+
+# Le rayon double — la faute que j'avais ecrite — doit mourir devant ce juge.
+mhgp3v_add_expected_code_test_for(mhgp3v_rect_front_probe
+  mhgp3v_rect_front_mutant_coeur_trop_grand "DESACCORD DU JUGE" 1
+  --family=terrain --points=4000 --budget-depth=4 --selftest=0 --inject=coeur-trop-grand)
+
 # Une campagne aux parametres hors domaine est refusee AVANT tout calcul.
 mhgp3v_add_expected_code_test_for(mhgp3v_rect_front_probe
   mhgp3v_rect_front_refus_domaine "REFUS: lane" 2

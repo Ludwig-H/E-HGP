@@ -87,6 +87,7 @@ int build(Tree* t, int b, int e, int leaf) {
 struct Counters {
   long long rect_visited = 0, rect_closed = 0, rect_residual = 0, rect_capped = 0;
   long long rect_positive = 0, rect_keep_anchor = 0;
+  long long core_tests = 0, core_closed = 0, core_judged = 0, core_disagree = 0;
   long long evals = 0, mass_closed = 0, mass_residual = 0, mass_positive = 0, mass_keep_anchor = 0, w_high = 0;
   long long all_hits = 0, none_hits = 0, mixed_hits = 0;
 };
@@ -110,6 +111,59 @@ const int kNeed[3] = {10, 9, 8};
 // colineaire en est le contre-exemple decisif. On la nomme donc `kKeepAnchor`
 // hors q2, et elle n'annonce aucun support.
 enum class RectOutcomeKind { kClosed, kPositiveQ2, kKeepAnchor, kResidual };
+
+// FAST PATH DU COEUR COMMUN : une seule sphere entiere, un comptage borne, et
+// la lane se ferme sans qu'aucun noeud ne soit classe. Le comptage s'arrete des
+// que le seuil est atteint ; l'echec ne conclut RIEN et retombe sur la
+// descente. Aucun faux temoin possible : le coeur est un MINORANT, tout point
+// qu'il contient est interieur a toute boule admissible du rectangle.
+bool g_verify_core = false;
+
+bool core_closes(const Tree& t, int ia, int ib, RectLane lane, Counters* c,
+                 RectFrontInject inject) {
+  // RESTREINT A q2. Le coeur q3/q4 de l'audit porte sur les circumboules du
+  // support, pas sur le spindle que ce sujet decide ; le juge du coeur le
+  // refute massivement. On ne l'emploie pas avant clarification.
+  if (lane != RectLane::kQ2) return false;
+  const int mult = 2;
+  const mhgp3v::RectCore core =
+      mhgp3v::rect_common_core(t.nodes[ia].box, t.nodes[ib].box, mult, inject);
+  if (!core.valid) return false;
+  long long cnt = 0;
+  int stack[128];
+  int sp = 0;
+  stack[sp++] = 0;
+  while (sp > 0) {
+    const Node& C = t.nodes[stack[--sp]];
+    ++c->core_tests;
+    if (mhgp3v::rect_core_misses_box(core, C.box)) continue;
+    if (C.left >= 0) {
+      if (sp + 2 <= 128) { stack[sp++] = C.left; stack[sp++] = C.right; }
+      else return false;
+      continue;
+    }
+    for (int k = C.begin; k < C.end; ++k) {
+      const long long z[3] = {t.pts[k][0], t.pts[k][1], t.pts[k][2]};
+      if (mhgp3v::rect_core_contains(core, z)) {
+        // JUGE DU COEUR. Tout point du coeur doit satisfaire le predicat EXACT
+        // du rectangle : le coeur est un MINORANT de la region ALL, jamais un
+        // majorant. Le juge est une autre ecriture — boite degeneree {z} et
+        // intervalle exact — et non la sphere qui vient de decider.
+        if (g_verify_core) {
+          const RectBox zb{{z[0], z[1], z[2]}, {z[0], z[1], z[2]}};
+          long long dummy = 0;
+          if (mhgp3v::rect_classify(t.nodes[ia].box, t.nodes[ib].box, zb, lane, &dummy) !=
+              RectVerdict::kAll) {
+            ++c->core_disagree;
+          }
+          ++c->core_judged;
+        }
+        if (++cnt >= kNeed[(int)lane]) { ++c->core_closed; return true; }
+      }
+    }
+  }
+  return false;
+}
 
 RectOutcome witness_outcome(const Tree& t, int ia, int ib, RectLane lane, long long budget,
                             RectFrontInject inject, Counters* c) {
@@ -178,7 +232,7 @@ bool well_separated(const Tree& t, int ia, int ib, double s) {
 }
 
 void solve(const Tree& t, int ia, int ib, RectLane lane, long long budget,
-           RectFrontInject inject, Counters* c, double stop_wsp) {
+           RectFrontInject inject, Counters* c, double stop_wsp, bool use_core = false) {
   const Node& A = t.nodes[ia];
   const Node& B = t.nodes[ib];
   const long long ka = A.end - A.begin, kb = B.end - B.begin;
@@ -187,10 +241,13 @@ void solve(const Tree& t, int ia, int ib, RectLane lane, long long budget,
   ++c->rect_visited;
   if (ia == ib) {
     if (A.left < 0) { ++c->rect_residual; c->mass_residual += mass; return; }
-    solve(t, A.left, A.left, lane, budget, inject, c, stop_wsp);
-    solve(t, A.right, A.right, lane, budget, inject, c, stop_wsp);
-    solve(t, A.left, A.right, lane, budget, inject, c, stop_wsp);
+    solve(t, A.left, A.left, lane, budget, inject, c, stop_wsp, use_core);
+    solve(t, A.right, A.right, lane, budget, inject, c, stop_wsp, use_core);
+    solve(t, A.left, A.right, lane, budget, inject, c, stop_wsp, use_core);
     return;
+  }
+  if (use_core && core_closes(t, ia, ib, lane, c, inject)) {
+    ++c->rect_closed; c->mass_closed += mass; return;
   }
   const RectOutcome oc = witness_outcome(t, ia, ib, lane, budget, inject, c);
   if (oc == RectOutcome::kClosed) { ++c->rect_closed; c->mass_closed += mass; return; }
@@ -206,11 +263,11 @@ void solve(const Tree& t, int ia, int ib, RectLane lane, long long budget,
     ++c->rect_residual; c->mass_residual += mass; return;
   }
   if (A.left >= 0 && (B.left < 0 || A.rad >= B.rad)) {
-    solve(t, A.left, ib, lane, budget, inject, c, stop_wsp);
-    solve(t, A.right, ib, lane, budget, inject, c, stop_wsp);
+    solve(t, A.left, ib, lane, budget, inject, c, stop_wsp, use_core);
+    solve(t, A.right, ib, lane, budget, inject, c, stop_wsp, use_core);
   } else {
-    solve(t, ia, B.left, lane, budget, inject, c, stop_wsp);
-    solve(t, ia, B.right, lane, budget, inject, c, stop_wsp);
+    solve(t, ia, B.left, lane, budget, inject, c, stop_wsp, use_core);
+    solve(t, ia, B.right, lane, budget, inject, c, stop_wsp, use_core);
   }
 }
 
@@ -300,7 +357,7 @@ int run_fixtures() {
   build(&t, 0, (int)t.pts.size(), 1);
   for (int ln = 1; ln <= 2; ++ln) {
     Counters c{};
-    solve(t, 0, 0, (RectLane)ln, 64, RectFrontInject::kNone, &c, 0.0);
+    solve(t, 0, 0, (RectLane)ln, 64, RectFrontInject::kNone, &c, 0.0, false);
     std::printf("colineaire lane=q%d positifs_q2=%lld keep_anchor=%lld fermes=%lld\n",
                 ln + 2, c.rect_positive, c.rect_keep_anchor, c.rect_closed);
     if (c.rect_positive != 0) {
@@ -339,6 +396,7 @@ int main(int argc, char** argv) {
   double max_slope = 1.35;
   long long min_closed_pct = 0, min_all = 0, min_none = 0, min_mixed = 0;
   double stop_wsp = 0.0;
+  bool use_core = false;
   RectFrontInject inject = RectFrontInject::kNone;
   bool expect_mutant = false;
 
@@ -370,6 +428,8 @@ int main(int argc, char** argv) {
       stop_wsp = std::atof(val("--stop-wsp=").c_str());
       if (!(stop_wsp >= 0.0 && stop_wsp <= 64.0)) refuse("stop-wsp");
     }
+    else if (a == "--core") use_core = true;
+    else if (a == "--verify-core") { use_core = true; g_verify_core = true; }
     else if (a.rfind("--max-slope=", 0) == 0) max_slope = std::atof(val("--max-slope=").c_str());
     else if (a.rfind("--min-closed-pct=", 0) == 0) min_closed_pct = arg_ll(val("--min-closed-pct=").c_str(), 0, 100, "min-closed-pct");
     else if (a.rfind("--min-all=", 0) == 0) min_all = arg_ll(val("--min-all=").c_str(), 0, (1LL << 50), "min-all");
@@ -377,6 +437,7 @@ int main(int argc, char** argv) {
     else if (a.rfind("--min-mixed=", 0) == 0) min_mixed = arg_ll(val("--min-mixed=").c_str(), 0, (1LL << 50), "min-mixed");
     else if (a == "--inject=max-par-coins") { inject = RectFrontInject::kMaxParCoins; expect_mutant = true; }
     else if (a == "--inject=sommet-non-ecrete") { inject = RectFrontInject::kSommetNonEcrete; expect_mutant = true; }
+    else if (a == "--inject=coeur-trop-grand") { inject = RectFrontInject::kCoeurTropGrand; use_core = true; g_verify_core = true; }
     else refuse("option inconnue");
   }
   if (ns.empty()) ns = {2000, 8000, 32000};
@@ -386,7 +447,7 @@ int main(int argc, char** argv) {
     const SelfTest st = run_selftest((int)selftest, inject);
     std::printf("selftest tests=%lld desaccords_min=%lld desaccords_max=%lld\n",
                 st.tests, st.disagree_min, st.disagree_max);
-    if (expect_mutant) {
+    if (expect_mutant && inject != RectFrontInject::kCoeurTropGrand) {
       if (st.disagree_min == 0 && st.disagree_max == 0) {
         std::fprintf(stderr, "MUTANT SURVIVANT: l'injection ne contredit pas le juge\n");
         return 3;
@@ -433,7 +494,7 @@ int main(int argc, char** argv) {
       eff_budget = budget_depth * depth;
     }
     const RectLane lane = (RectLane)lane_raw;
-    solve(t, 0, 0, lane, eff_budget, inject, &c, stop_wsp);
+    solve(t, 0, 0, lane, eff_budget, inject, &c, stop_wsp, use_core);
     const long long m = (long long)t.pts.size();
     const long long tot = m * (m - 1) / 2;
     if (c.mass_closed + c.mass_positive + c.mass_keep_anchor + c.mass_residual != tot) {
@@ -445,18 +506,30 @@ int main(int argc, char** argv) {
                 " | visites=%lld fermes=%lld positifs_q2=%lld keep_anchor=%lld residuels=%lld capes=%lld"
                 " | masse_fermee=%lld masse_positive=%lld masse_keep_anchor=%lld masse_residuelle=%lld"
                 " budget=%lld pct_ferme=%.2f pct_decide=%.2f"
-                " | eval=%lld ALL=%lld NONE=%lld MIXED=%lld Wmax=%lld front/pt=%.3f\n",
+                " | eval=%lld ALL=%lld NONE=%lld MIXED=%lld Wmax=%lld coeur=%lld/%lld front/pt=%.3f\n",
                 m, family.c_str(), lane_raw + 2, digest,
                 c.rect_visited, c.rect_closed, c.rect_positive, c.rect_keep_anchor, c.rect_residual, c.rect_capped,
                 c.mass_closed, c.mass_positive, c.mass_keep_anchor, c.mass_residual, eff_budget,
                 100.0 * (double)c.mass_closed / (double)tot,
                 100.0 * (double)(c.mass_closed + c.mass_positive) / (double)tot,
-                c.evals, c.all_hits, c.none_hits, c.mixed_hits, c.w_high,
+                c.evals, c.all_hits, c.none_hits, c.mixed_hits, c.w_high, c.core_closed, c.core_tests,
                 (double)(c.rect_closed + c.rect_positive + c.rect_keep_anchor + c.rect_residual) / (double)m);
     resid_mass.push_back((double)c.mass_residual);
     visited_per_n.push_back((double)c.rect_visited);
     agg.all_hits += c.all_hits; agg.none_hits += c.none_hits; agg.mixed_hits += c.mixed_hits;
     agg.mass_closed += c.mass_closed;
+    if (g_verify_core) {
+      std::printf("juge_coeur points=%lld desaccords=%lld\n", c.core_judged, c.core_disagree);
+      if (c.core_judged < 1000) {
+        std::fprintf(stderr, "PLANCHER JUGE COEUR: %lld points juges\n", c.core_judged);
+        return 3;
+      }
+      if (c.core_disagree != 0) {
+        std::fprintf(stderr, "DESACCORD DU JUGE: %lld points du coeur hors de la region ALL exacte\n",
+                     c.core_disagree);
+        return 1;
+      }
+    }
     if (c.evals > eff_budget * c.rect_visited) {
       std::fprintf(stderr, "INVARIANT VIOLE: %lld classifications pour %lld rectangles a budget %lld\n",
                    c.evals, c.rect_visited, eff_budget);
