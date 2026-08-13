@@ -81,9 +81,10 @@ Le matériel, les versions CUDA/PyTorch, la précision numérique et les kernels
 - PTv3 SemanticKITTI-only comme portage Transformer ambitieux après reproduction, son dépôt officiel ne fournissant pas actuellement un paquet SemanticKITTI complet config+poids+score ;
 - PTv3+PPT, dans le track préentraînement ;
 - LSK3DNet, concurrent sparse LiDAR fort ;
-- SP2T, concurrent Transformer LiDAR mono-trame à proxies sparse ;
-- RAPiD-Seg, concurrent range-aware et descripteur ;
+- SP2T, concurrent Transformer LiDAR mono-trame à proxies sparse, dont le score publié 75,4 emploie des augmentations au test ;
+- RAPiD-Seg, concurrent range-aware et descripteur à deux inférences séquentielles ;
 - SphereFormer, attention conçue pour la densité dépendante de la portée ;
+- LitePT comme contrôle architectural « convolutions tôt, attention tard », même sans score SemanticKITTI publié ;
 - MinkUNet ou Cylinder3D, baseline sparse simple et largement reproductible.
 
 ### Hiérarchies
@@ -114,12 +115,18 @@ Le matériel, les versions CUDA/PyTorch, la précision numérique et les kernels
 - support normalisé ;
 - support normalisé + taille/position ;
 - support de la réalisation géométrique du $K$-polyèdre, qui doit coïncider numériquement avec le support de ses sommets ;
+- rayon extérieur depuis un centre déclaré, avec masques `center_in_realization` et `center_in_kernel` ;
+- intersections multi-segments ou occupations coniques, bande passante explicitement ablatée ;
 - distributions de centres/formes/niveaux des simplexes du $K$-polyèdre ;
+- ECT/WECT à directions et seuils finis comme baseline topologique antérieure ;
+- sketch de Fourier ou embedding de mesure par noyau caractéristique, plus distance à une mesure pour le contrôle robuste ;
 - support + densité/persistance HGP ;
 - CDF/histogrammes de projections à bins fixes + max ;
 - pile de quantiles + max ;
-- moments/covariance/radial ;
-- mini-PointNet/Deep Sets à dimension comparable.
+- moments/covariance/histogrammes radiaux ;
+- mini-PointNet/Deep Sets à dimension, bits, paramètres, FLOPs et latence comparables.
+
+Les comparaisons support/rayon/ECT utilisent les mêmes conventions de centre, échelle et directions lorsque cela a un sens. Elles rapportent collisions, fraction de nœuds étoilés, rayons vides, nombre de composantes radiales par rayon, sensibilité au thinning et temps de prétraitement. Un canal plus large n'est pas crédité à la géométrie si son avantage disparaît à capacité appariée.
 
 ## Matrice d'expériences
 
@@ -129,7 +136,7 @@ La matrice complète est factorielle et trop coûteuse. Elle est déroulée séq
 |---|---|---|---|
 | E0 | granularité/coupe | labels GT, aucun réseau | composition des nœuds et diagnostic d'une sortie dure token-constante |
 | E1 | hiérarchie | backbone + agrégateur simple | valeur de HGP |
-| E2 | descripteur | HGP + backbone + budget | valeur du support |
+| E2 | descripteur | HGP + backbone + budget | information du descripteur |
 | E3 | opérateur | HGP + descripteur + budget | HSA contre QC-HSA et agrégateurs |
 | E4 | placement/nombre de blocs | meilleure configuration E1–E3 | architecture finale |
 | E5 | backbone | module HGP gelé | généralité |
@@ -139,6 +146,8 @@ La matrice complète est factorielle et trop coûteuse. Elle est déroulée séq
 Chaque étape conserve l'identifiant de la configuration parente et ne change qu'un facteur principal. Les interactions jugées importantes sont testées ensuite, jamais absorbées dans une unique expérience finale.
 
 Pour E3, de petits scans ou sous-échantillons où l'attention plate est calculable rapportent aussi le reverse-KL total et par feuille de HSA et `QC-HSA`, la fraction de feuilles dont la classe plate à marge fixée est préservée, et l'écart de sortie. Ce test utilise une même cible plate $P$ gelée, les mêmes features, scores et masque diagonal pour flat/HSA/QC-HSA ; comparer les KL de modèles entraînés séparément ne testerait pas la proposition. Ces diagnostics vérifient le résultat technique ; ils ne remplacent pas le mIoU contre la vérité terrain.
+
+La fidélité HSA est testée sur arbres équilibré, étoile, chaîne/peigne, singleton et degré un. Les mutants couvrent indices positionnels, signe de normalisation, facteur de cardinalité, masque diagonal et ordre des feuilles. Deux scans concaténés restent explicitement block-diagonaux ; l'ajout, la suppression ou la perturbation du second scan ne doit pas modifier la sortie du premier.
 
 ## Seeds et incertitude
 
@@ -161,6 +170,8 @@ Les gains de quelques dixièmes sans intervalle ne sont pas considérés établi
 - suppression de bandes d'élévation simulant des beams manquants ;
 - même objet ou patch déplacé synthétiquement à plusieurs distances, avec règle de rééchantillonnage déclarée ;
 - métrique HGP brute contre correction de portée/densité.
+
+Une homothétie des coordonnées relatives est seulement un test algébrique du canal normalisé. Elle ne remplace pas le transport avec rééchantillonnage, car voir un objet plus loin modifie densité angulaire, occultation et nombre de retours plutôt que sa seule échelle métrique.
 
 ### Bruit et points extrêmes
 

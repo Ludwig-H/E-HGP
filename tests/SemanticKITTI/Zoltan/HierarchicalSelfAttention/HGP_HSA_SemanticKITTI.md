@@ -20,6 +20,12 @@ L'hypothèse crédible n'est donc pas « le support suffit », mais :
 
 > Un sketch directionnel de masse, combinant CDF/histogrammes projetés, quantiles robustes et canal de support maximal, apporte une information de forme complémentaire lorsque le modèle conserve explicitement l'échelle, la densité, la portée, la persistance HGP et la géométrie relative des branches.
 
+## Fonction radiale : correction de l'idée initiale
+
+La quantité obtenue en cherchant, sur le rayon $c_v+ru$, la plus grande norme admissible est la fonction radiale extérieure $\rho_{P,c_v}(u)=\sup\left(\left\lbrace r\geq0:c_v+ru\in P\right\rbrace\cup\left\lbrace0\right\rbrace\right)$, et non une fonction support. Un masque distingue les directions sans intersection. Elle dépend du centre et reconstruit exactement $P$ seulement si $P$ est étoilé par rapport à ce centre. Dans le cas général, relier $c_v$ à chaque point radial extrême remplit les intervalles absents et perd précisément les trous, les composantes et certaines concavités recherchées.
+
+Conserver toutes les intersections le long de chaque rayon est plus informatif, mais donne une sortie variable et de nombreux rayons vides pour des réalisations de faible dimension. ECT/WECT ou des distributions d'attributs simpliciaux sont des contrôles topologiques plus sérieux ; leurs résultats d'injectivité et leurs variantes apprises sont toutefois des antériorités. Les définitions, contre-exemples et fixtures sont centralisés dans [GEOMETRIC_DESCRIPTOR_AUDIT.md](GEOMETRIC_DESCRIPTOR_AUDIT.md).
+
 ## Sémantique d'un cluster
 
 Un cluster ne reçoit jamais un label unique. En excluant les labels ignorés, sa cible est l'histogramme normalisé $\pi_v\in\Delta^{18}$. À l'inférence, les feuilles prédisent $p_i\in\Delta^{18}$ puis le nœud déduit sans masque GT $\widehat\pi_v^{\mathrm{all}}=n_v^{-1}\sum_{i\in C_v}p_i$. Dans une hiérarchie laminaire, cette distribution est exactement la moyenne des distributions enfants pondérée par leurs masses ; aucune tête indépendante n'est requise. Une version restreinte aux labels valides sert seulement à la loss et au diagnostic, jamais au forward de validation/test.
@@ -28,13 +34,13 @@ Les proportions ne localisent pas les classes au sein d'un cluster mixte. La sor
 
 ## Complément géométrique prioritaire au support
 
-La réalisation géométrique $|P_v|$ du $K$-polyèdre est l'union des réalisations de ses simplexes. Si $X_v$ est l'union de leurs sommets, alors $h_{|P_v|}(u)=h_{X_v}(u)$ dans toute direction : une forme linéaire atteint son maximum sur un sommet de chaque simplexe. Le support de la réalisation est donc exactement le descripteur initial du nuage du cluster. Il est HGP-friendly et fusionnable par maximum, mais il efface précisément l'ordre $K$, les incidences, les multiplicités et les niveaux de filtration ; seul, il est insuffisant pour viser le SOTA.
+La réalisation géométrique $|P_v|$ du $K$-polyèdre est l'union des réalisations de ses simplexes **si ces simplexes et leurs niveaux ont été sérialisés**. La définition HGP par ensemble maximal de sommets ne suffit pas à les reconstruire, et des objets d'ordre $K\geq2$ peuvent se chevaucher. Si $X_v$ est l'union des sommets explicitement inclus, alors $h_{|P_v|}(u)=h_{X_v}(u)$ dans toute direction : une forme linéaire atteint son maximum sur un sommet de chaque simplexe. Le support de la réalisation est donc exactement celui des sommets sérialisés, et celui du nuage du cluster seulement si ce nuage est exactement $X_v$. Il est HGP-friendly et fusionnable par maximum, mais il efface précisément l'ordre $K$, les incidences, les multiplicités et les niveaux de filtration ; seul, il est insuffisant pour viser le SOTA.
 
 Pour exploiter réellement la réalisation HGP, définir plutôt une mesure sur ses simplexes et agréger leurs centres, aires/volumes ou longueurs, formes, niveaux $\beta(\sigma)$ et multiplicités. Les CDF projetées ou moments de ces attributs sont le candidat HGP-spécifique ; le support reste leur canal d'extrêmes.
 
 Le support maximal ne conserve que l'extrémité de la distribution projetée. Le complément naturel est un sketch des CDF $F_v(u,t)$ des projections normalisées, échantillonné sur les mêmes directions et sur des seuils fixes. La collection continue de toutes les distributions projetées détermine la mesure du cluster par Cramér–Wold, alors que le support continu ne détermine que son enveloppe convexe. Une grille finie de directions et de bins n'est évidemment qu'une approximation.
 
-Le premier descripteur à tester est donc `max support + projected CDF/histograms + radial occupancy + covariance`, complété par échelle, centre relatif, cardinalité, rémission et attributs HGP de naissance/mort/persistance. Les histogrammes à bins fixes sont préférables comme état fusionnable ; les quantiles sont robustes mais ne se composent pas exactement sans conserver un sketch plus riche.
+La première échelle d'ablation est donc `moments/HGP`, puis `max support + projected CDF/histograms + covariance`, complétés par échelle, centre relatif, cardinalité, rémission et naissance/mort/persistance. Rayon extérieur, intersections multi-segments, attributs simpliciaux et ECT/WECT sont ajoutés séparément et comparés à un mini-PointNet/Deep Sets de même budget. Les histogrammes à bins fixes sont préférables comme état fusionnable ; les quantiles sont robustes mais ne se composent pas exactement sans conserver un sketch plus riche.
 
 ## Trois hypothèses causales
 
@@ -42,13 +48,13 @@ Le premier descripteur à tester est donc `max support + projected CDF/histogram
 
 À opérateur et descripteur constants, HGP d'ordre $K=2,3$ améliore le mIoU et la robustesse à longue portée par rapport à RSL/HDBSCAN, octree, hiérarchie de voxels, superpoints et arbres aléatoires contrôlés. Le cas $K=1$, égal au single-linkage, sert de fixture de cohérence et non de baseline indépendante.
 
-### H2 — valeur du support
+### H2 — valeur de la représentation
 
-À arbre, dimension et budget constants, le sketch directionnel de masse — CDF/histogrammes projetés, quantiles et canal de support maximal — ajoute une information utile au-delà des moments, de la covariance, d'un mini-PointNet ou d'un simple pooling des features de feuilles.
+À arbre, dimension et budget constants, un sketch directionnel ou topologique clairement défini ajoute une information utile au-delà des moments, de la covariance, d'un mini-PointNet ou d'un simple pooling des features de feuilles. Support, rayon, CDF, attributs simpliciaux et ECT/WECT sont des candidats concurrents, pas une combinaison gagnante fixée d'avance.
 
 ### H3 — valeur de l'opérateur hiérarchique
 
-À arbre et features constants, HSA ou sa relaxation `QC-HSA` exploite mieux les interactions entre échelles qu'un passage bottom-up/top-down par MLP ou qu'un message passing parent–enfant/frères. `QC-HSA` doit en outre battre HSA aux frontières à coût réel documenté.
+À arbre et features constants, HSA ou un raffinement conditionné par la requête exploite mieux les interactions entre échelles qu'un passage bottom-up/top-down par MLP ou qu'un message passing parent–enfant/frères. `QC-HSA` doit en outre battre HSA aux frontières à coût réel documenté ; sinon elle reste un diagnostic technique.
 
 Une expérience finale ne permet pas d'identifier ces trois effets. Chacun exige son ablation orthogonale.
 

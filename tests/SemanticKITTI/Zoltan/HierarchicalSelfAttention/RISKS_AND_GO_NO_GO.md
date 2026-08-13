@@ -19,6 +19,8 @@ Cette appréciation est volontairement sévère : le papier HSA n'a aucune expé
 
 La densité d'un LiDAR décroît avec la portée et dépend de l'angle, de l'occultation et de la surface. HGP peut séparer le même objet à longue distance et fusionner le sol proche, même si son modèle de densité est mathématiquement fondé.
 
+Une observation plus lointaine n'est pas une homothétie du nuage métrique : l'échantillonnage angulaire s'amincit, des retours disparaissent et les occultations changent. L'invariance d'échelle du descripteur ne réfute donc pas ce risque.
+
 ### Test de réfutation
 
 - comparer statistiques HGP et pureté par distance ;
@@ -35,6 +37,8 @@ Si la variation intra-objet due à la portée est du même ordre que la séparat
 
 **Cas $K$-polyèdre.** Le support de la réalisation géométrique d'une union de simplexes est exactement celui de l'union de ses sommets. Il ne constitue donc pas une représentation HGP plus riche. Test permanent : comparer les deux vecteurs direction par direction ; toute différence hors tolérance révèle un défaut d'implémentation. Un claim de suffisance est abandonné si les distributions d'attributs simpliciaux, les CDF de masse ou un encodeur local de même budget améliorent systématiquement le mIoU.
 
+**Cas radial.** Le maximum de la norme sur un rayon est la fonction radiale extérieure. Elle est exacte seulement pour un ensemble étoilé autour du centre choisi ; sinon elle remplit les intervalles radiaux absents. Un cube plein et sa frontière ont le même support et le même rayon depuis leur centre. Mesurer la fraction de nœuds étoilés, les rayons vides et les intersections multiples avant d'en faire un canal principal.
+
 ### Mécanisme
 
 Le support ne voit que l'enveloppe convexe. Des distributions intérieures et des topologies différentes ont exactement le même support. La grille finie ajoute des collisions. Le max est dominé par quelques points extrêmes.
@@ -45,11 +49,12 @@ Le support ne voit que l'enveloppe convexe. Des distributions intérieures et de
 - suppression des points non extrêmes à centre/rayon fixés ;
 - taux de collisions sur nœuds réels et divergence de labels/composition ;
 - comparaison max, CDF/histogrammes projetés, quantiles, moments, radial et mini-PointNet ;
+- comparaison ECT/WECT finie comme antériorité topologique, avec coût et stabilité appariés ;
 - outliers et suppression ciblée des extrêmes.
 
 ### No-go
 
-Le support seul cesse d'être une hypothèse centrale si un descripteur de coût voisin gagne régulièrement environ 1 point de mIoU, si ses collisions contradictoires sont fréquentes ou si son stress test est nettement pire. Il peut rester un canal géométrique interprétable.
+Le support seul cesse d'être une hypothèse centrale si un descripteur de coût voisin gagne régulièrement environ 1 point de mIoU, si ses collisions contradictoires sont fréquentes ou si son stress test est nettement pire. Le rayon extérieur ne le « répare » pas si les objets ne sont pas étoilés ou si support+rayon conserve les collisions centrales. ECT/WECT est une baseline antérieure, pas un claim automatique. Chacun peut rester un canal interprétable.
 
 ## R3 — La normalisation supprime une information sémantique utile
 
@@ -211,7 +216,7 @@ Un gain sur 08 qui disparaît entre seeds, blocs temporels ou second dataset n'e
 
 ### Mécanisme
 
-SPT, SP2T, EZ-SP, SPCNet, Sequoia, OctFormer et SSTNet occupent déjà l'espace hiérarchie + attention/proxies/superpoints. Fast Multipole Attention, H-Transformer, MRA et HKT occupent l'attention hiérarchique/multi-résolution et son analyse. La fonction support et les projections KL sont classiques.
+SPT, SP2T, EZ-SP, SPCNet, Sequoia, OctFormer et SSTNet occupent déjà l'espace hiérarchie + attention/proxies/superpoints. LitePT formalise déjà le motif convolutions précoces puis attention tardive. Fast Multipole Attention, H-Transformer, MRA et HKT occupent l'attention hiérarchique/multi-résolution et son analyse. Fonction support, ECT/WECT et projections KL sont classiques.
 
 ### Test de réfutation
 
@@ -227,7 +232,7 @@ Si le seul résultat est un assemblage HGP + HSA avec un petit gain SemanticKITT
 |---|---|---|---|
 | G0 contrat | forêt déterministe, sans fuite, round-trip exact | projection laminaire documentée | cycle, perte/duplication non expliquée |
 | G1 structure | HGP bat les contrôles ou apporte robustesse claire | points feuilles, correction range-aware | aucune valeur contre arbres simples |
-| G2 descripteur | support + masse projetée + side channels utile | support canal secondaire | sketch directionnel dominé et instable |
+| G2 descripteur | canal défini, informatif et stable à budget égal | support/rayon canal secondaire | tous les sketches dominés ou instables |
 | G3 opérateur | HSA ou QC-HSA gagne en qualité ou Pareto | agrégateur simple | opérateurs hiérarchiques dominés partout |
 | G4 validation | gain apparié, multi-seeds, classes/distance expliquées | retravailler frontières/recette | effet non reproductible |
 | G5 système | coût complet soutenable et honnête | claim précision seulement | ni précision ni coût compétitif |

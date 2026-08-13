@@ -62,11 +62,11 @@ Une optimisation multiclasses exacte ou bornée sur de petites fixtures peut com
 
 ## WP2 — Audit des descripteurs
 
-Ajouter une porte analytique avant apprentissage : vérifier sur chaque $K$-polyèdre que le support de sa réalisation simpliciale coïncide avec celui de ses sommets. Cette identité interdit de compter la réalisation comme un descripteur distinct. Tester ensuite, à budget égal, une mesure d'attributs simpliciaux — centres, forme, niveau de naissance et incidence — contre support, CDF des points, moments et mini-PointNet.
+Ajouter une porte analytique avant apprentissage : vérifier sur chaque $K$-polyèdre que le support de sa réalisation simpliciale coïncide avec celui de ses sommets. Cette identité interdit de compter la réalisation comme un descripteur distinct. Vérifier ensuite que le rayon extérieur reconstruit seulement l'enveloppe étoilée depuis le centre et mesurer quand cette hypothèse échoue. Tester enfin, à budget égal, une mesure d'attributs simpliciaux ou ECT/WECT contre support, rayon, CDF des points, moments et mini-PointNet.
 
 ### Travail
 
-Construire d'abord des contre-exemples à enveloppe convexe identique : sommets seuls, intérieur dense, coquille, forme concave et deux amas reliés par un pont intérieur. À centre et rayon fixés, le support maximal doit être identique alors que la densité et la topologie changent.
+Construire d'abord des contre-exemples à enveloppe convexe identique : sommets seuls, intérieur dense, coquille, forme concave et deux amas reliés par un pont intérieur. À centre et rayon fixés, le support maximal doit être identique alors que la densité et la topologie changent. La fixture centrale compare un cube plein tétraédralisé à sa frontière triangulée : mêmes support et rayon extérieur depuis le centre, mais intérieur et homologie différents. Ajouter centres hors forme/noyau, rayons vides et mêmes sommets avec incidences différentes.
 
 Sur les nœuds réels, comparer à dimension et budget proches :
 
@@ -74,7 +74,10 @@ Sur les nœuds réels, comparer à dimension et budget proches :
 - support maximal normalisé ;
 - support + échelle/position/cardinalité ;
 - support + attributs HGP ;
+- rayon extérieur, puis intersections multi-segments ou occupations coniques ;
 - CDF/histogrammes directionnels à bins fixes + max ;
+- ECT/WECT à directions et seuils finis, comme baseline topologique et non claim de nouveauté ;
+- sketch de Fourier/kernel mean et distance à une mesure comme antériorités fusionnable et robuste ;
 - pile de quantiles directionnels + max ;
 - moments/covariance/histogrammes radiaux ;
 - mini-PointNet ou Deep Sets ;
@@ -82,7 +85,7 @@ Sur les nœuds réels, comparer à dimension et budget proches :
 
 Orthogonalement, ablater le contenu transmis : géométrie seule, proportions sémantiques déduites des descendants seules, puis combinaison avec entropie moyenne et désaccord. Aucune proportion GT n'entre dans cette comparaison à l'inférence.
 
-Faire varier le nombre et la grille de directions ainsi que le nombre de bins. Mesurer le rayon de couverture de la sphère, l'erreur contre une référence dense, les collisions de features, la mémoire et la latence. Tester explicitement la fusion des histogrammes dans un repère commun et l'erreur introduite par le transport centre/échelle entre enfants et parent.
+Faire varier le nombre et la grille de directions ainsi que le nombre de bins. Mesurer le rayon de couverture de la sphère, l'erreur contre une référence dense, les collisions de features, la fraction de formes étoilées, les rayons vides, les composantes radiales par rayon, la mémoire et la latence. Tester explicitement la fusion des histogrammes dans un repère commun et l'erreur introduite par le transport centre/échelle entre enfants et parent. Pour ECT/WECT, vérifier si les simplexes forment un complexe plongé conforme ; sinon séparer résultat abstrait et union géométrique.
 
 Séparer deux stress tests : arbre figé pour isoler le descripteur, puis arbre recalculé pour mesurer le pipeline. Injecter outliers, thinning dépendant de la portée et suppression de points extrêmes.
 
@@ -91,11 +94,12 @@ Séparer deux stress tests : arbre figé pour isoler le descripteur, puis arbre 
 - benchmark de prédiction/retrieval de composition sémantique avec KL/JS, Brier et erreur sur les 19 proportions ;
 - courbes directions–erreur–coût ;
 - rapport de sensibilité par portée et dimension intrinsèque ;
-- décision explicite sur centre, rayon et canaux robustes.
+- décision explicite sur centre, rayon, topologie et canaux robustes ;
+- registre des collisions synthétiques et réelles, conservé comme fixtures.
 
 ### Porte
 
-Le support seul est rejeté comme représentation principale si une augmentation légère gagne de façon répétée environ 1 point de mIoU à budget égal, si les collisions sémantiquement contradictoires sont fréquentes, ou s'il est nettement moins stable que les contrôles. Il peut rester un canal complémentaire.
+Le support seul est rejeté comme représentation principale si une augmentation légère gagne de façon répétée environ 1 point de mIoU à budget égal, si les collisions sémantiquement contradictoires sont fréquentes, ou s'il est nettement moins stable que les contrôles. Le rayon extérieur n'est pas présenté comme représentation non convexe si la non-étoiléité est fréquente ou si les collisions support+rayon persistent. ECT/WECT n'est retenue que si sa version finie bat les contrôles en information utile et stabilité pour un coût compatible. Tout canal peut rester un complément sans devenir une contribution.
 
 ## WP3 — Effet arbre avec agrégateur simple
 
@@ -136,6 +140,8 @@ Implémenter d'abord le mapping fidèle : Q/K/V aux feuilles, descripteurs HGP c
 - Sequoia/attention hiérarchique locale si adaptable ;
 - HSA ;
 - `QC-HSA`, projection conditionnée par la feuille décrite dans [THEOREM_PROGRAM.md](THEOREM_PROGRAM.md) ;
+- raffinement adaptatif d'antichaînes par requête, seulement après validation de `QC-HSA` fixe ;
+- contrôle de type Fast Multipole Attention si une adaptation fidèle est possible ;
 - attention locale du backbone supplémentaire à paramètres égaux ;
 - attention plate sur scans/sous-ensembles compatibles avec la mémoire.
 
@@ -152,13 +158,17 @@ Le travail théorique associé doit :
 - séparer le résultat fini HGP à $K$ fixe d'une éventuelle borne populationnelle en régime $K_n$, et conserver la distorsion de fusion comme diagnostic si aucune convergence n'est prouvée ;
 - vérifier le certificat par oscillation des scores et le corollaire de marge ;
 - chercher une borne d'oscillation calculable depuis les résumés géométriques sans attention dense ;
+- définir une règle de raffinement monotone qui converge vers l'attention dense et garantit une tolérance KL ou sortie à coût mesuré ;
+- étudier une sélection de coupe sous budget seulement si son objectif et son coût GPU sont explicitement additifs, les DP génériques d'élagage étant antérieures ;
 - auditer l'antériorité face à Fast Multipole Attention, H-Transformer, MRA, HKT et aux projections de Bregman.
 
 ### Livrables
 
 - test unitaire par comparaison à l'attention HSA directe sur petits arbres ;
 - test de `QC-HSA` contre une optimisation convexe et une attention dense explicite sur petits arbres, y compris cas d'égalité et d'inégalité stricte avec HSA ;
-- mutants d'indices de profondeur, normalisation des familles et ordre des feuilles ;
+- mutants d'indices de profondeur/position, signe de normalisation, facteur de cardinalité, normalisation des familles et ordre des feuilles ;
+- arbres équilibré, étoile, chaîne/peigne, singleton et degré un, avec égalités de plaques HSA vérifiées entre lignes et colonnes ;
+- test de racine factice et de batch block-diagonal : aucun autre scan ne modifie une sortie ;
 - tableau opérateur × arbre avec mêmes seeds ;
 - profil GPU et end-to-end.
 
@@ -175,7 +185,7 @@ Si ni HSA ni `QC-HSA` n'améliorent l'agrégateur simple ou son Pareto précisio
 - tester pertes de frontière et rares classes après verrouillage de l'architecture ;
 - lancer les stress tests complets par portée, thinning, outliers et densité ;
 - vérifier le scaling en points, nœuds, profondeur et batch ;
-- comparer RAPiD-Seg, LSK3DNet, SP2T, SphereFormer, PTv3 et SPT/EZ-SP adapté.
+- comparer RAPiD-Seg, LSK3DNet, SP2T, SphereFormer, PTv3, LitePT et SPT/EZ-SP adapté, en séparant strictement les régimes TTA, multi-pass et préentraînement.
 
 ### Livrables
 

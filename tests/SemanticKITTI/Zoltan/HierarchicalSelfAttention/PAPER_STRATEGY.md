@@ -16,7 +16,7 @@ Cette histoire reste valide si le meilleur opérateur n'est finalement pas HSA. 
 2. ablation causale arbre / représentation / opérateur ;
 3. gains SemanticKITTI appariés et robustesse par portée ;
 4. coût complet, y compris construction de la hiérarchie ;
-5. comparaison SPT/EZ-SP, PTv3, SP2T, LSK3DNet, SphereFormer et RAPiD-Seg.
+5. comparaison SPT/EZ-SP, PTv3, SP2T, LSK3DNet, SphereFormer et RAPiD-Seg, avec LitePT comme contrôle architectural même sans score SemanticKITTI publié.
 
 ## Contribution attendue pour ICML/NeurIPS
 
@@ -24,7 +24,7 @@ En plus du niveau précédent, obtenir au moins une contribution générale :
 
 - **optimalité conditionnelle** : `QC-HSA`, projection reverse-KL conditionnée par la feuille, avec certificat d'oscillation ; ce résultat technique ne devient central qu'avec un certificat HGP non vacu ou un résultat fidélité–coût réellement nouveau ;
 - **stabilité** : analyse et correction de la hiérarchie sous échantillonnage range-dependent ;
-- **représentation** : sketch de masse projetée, fusionnable, avec borne d'approximation ou de sensibilité ;
+- **représentation** : sketch HGP non convexe, marqué et fusionnable, avec borne d'approximation ou de sensibilité et comparaison ECT/KME/Deep Sets ;
 - **attention** : opérateur hiérarchique avec voie de correction dont l'effet et le coût sont analysés ;
 - **statistique** : lien vérifiable entre qualité d'un cluster tree et erreur de propagation sémantique ;
 - **généralisation** : résultat cohérent sur au moins deux capteurs/datasets.
@@ -36,7 +36,7 @@ Un seul nouveau score SemanticKITTI, même premier, est trop fragile pour porter
 | Claim potentiel | Preuve minimale |
 |---|---|
 | HGP est un meilleur prior | arbres échangés à budget constant, seeds appariées, IC excluant zéro |
-| le sketch support + masse projetée apporte de la géométrie utile | baselines de même dimension, collisions et stress tests inclus |
+| le descripteur HGP apporte de la géométrie utile | support/rayon/ECT/KME/Deep Sets à capacité égale, collisions et stress tests inclus |
 | HSA exploite mieux HGP | même arbre/features contre pooling et message passing |
 | QC-HSA est la projection optimale annoncée | preuve complète, solveur dense sur petits arbres, inclusion HSA et facteur de cardinalité vérifiés |
 | QC-HSA préserve mieux les points | reverse-KL et erreurs de frontière inférieurs à HSA, coût $C_T$ et latence inclus |
@@ -49,6 +49,8 @@ Ne pas revendiquer :
 
 - invariance rotationnelle d'un vecteur sur directions fixes ;
 - préservation complète de la géométrie par fonction support ;
+- préservation de la non-convexité par seul rayon extérieur hors cas étoilé ;
+- nouveauté par la seule utilisation d'ECT/WECT, de Fourier ou d'un kernel mean ;
 - complexité linéaire sans bornes de degré et mesure réelle ;
 - optimalité sémantique ou approximation d'une attention arbitraire à partir du théorème KL très borné de HSA ;
 - certificat mIoU à partir de Pinsker ou d'une marge point-wise ;
@@ -75,7 +77,7 @@ Ce résumé ne doit recevoir aucun chiffre avant que les expériences soient ter
 3. **Diagnostic de compression dure** : vote majoritaire réalisable et union par classe optimiste, distincts du modèle à proportions et de sa sortie point-wise.
 4. **Ablation causale** : arbre × opérateur, montrant où naît le gain.
 5. **Stabilité capteur** : variation de hiérarchie et mIoU selon portée/thinning.
-6. **Support et collisions** : mêmes enveloppes, distributions différentes, puis correction par quantiles/side channels.
+6. **Descripteurs et collisions** : cube plein/frontière, forme concave/remplissage radial et mêmes sommets/incidences distinctes, puis contrôles CDF/ECT/KME/Deep Sets.
 7. **Pareto système** : mIoU contre latence/VRAM, coût HGP inclus.
 8. **Analyse d'erreurs** : frontière sémantique traversée par une branche et rôle du gate résiduel.
 
@@ -83,7 +85,7 @@ Ce résumé ne doit recevoir aucun chiffre avant que les expériences soient ter
 
 - comparaison track A strict, avec colonnes modality, temporal, external data, TTA, ensemble ;
 - ablation HGP $K=1$/SL comme fixture, puis HGP $K=2,3$ vs RSL/octree/superpoints/random ;
-- support vs CDF projetées/quantiles/moments/PointNet à budget égal ;
+- support/rayon vs CDF projetées/ECT/KME/moments/PointNet à budget égal ;
 - HSA vs pooling/message passing/local attention ;
 - QC-HSA vs HSA : KL, sortie, frontière, mIoU, $C_T$, VRAM et latence ;
 - IoU par classe et distance ;

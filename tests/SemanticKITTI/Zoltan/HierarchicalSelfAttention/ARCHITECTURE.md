@@ -14,6 +14,7 @@ On suppose que chaque scan fournit :
 - une forêt enracinée laminaire ;
 - `parent`, `first_child`/`children`, profondeur et ordre topologique ;
 - le mapping point–feuille et, si possible, des intervalles contigus de feuilles par nœud ;
+- si une géométrie $K$-simpliciale est utilisée, la liste canonique des simplexes actifs, leur orientation/convention, leurs niveaux de filtration et leur mapping vers les nœuds ;
 - cardinalité, centre, rayon et statistiques HGP par nœud ;
 - niveau de naissance, niveau de mort et persistance/stabilité lorsqu'ils sont définis ;
 - l'ordre HGP $K$, la distance géométrique $d_{\mathrm{geo}}$, les paramètres de reconstruction et la version du reconstructeur ;
@@ -21,7 +22,7 @@ On suppose que chaque scan fournit :
 
 Les labels SemanticKITTI ne participent jamais à la construction. Une hiérarchie par classe prédite serait une expérience aval différente et n'est pas admise dans l'encodeur sémantique principal.
 
-HSA a besoin d'un arbre. Si les objets HGP d'ordre supérieur ont des appartenances ponctuelles chevauchantes, le producteur doit fournir soit une projection laminaire auditée, soit une structure DAG explicitement prise en charge. Dupliquer silencieusement les points ou arbitrer l'appartenance par ordre d'itération rendrait le résultat non interprétable.
+HSA a besoin d'un arbre. Si les objets HGP d'ordre supérieur ont des appartenances ponctuelles chevauchantes, le producteur doit fournir soit une projection laminaire auditée, soit une structure DAG explicitement prise en charge. Dupliquer silencieusement les points ou arbitrer l'appartenance par ordre d'itération rendrait le résultat non interprétable. Un ensemble de sommets HGP ne doit pas être présenté comme une réalisation géométrique complète si les simplexes et niveaux correspondants n'ont pas été sérialisés.
 
 ## Représentation des feuilles
 
@@ -58,9 +59,19 @@ Le support maximal est stable vis-à-vis de petites perturbations de l'enveloppe
 
 ### Audit de la réalisation géométrique du K-polyèdre
 
-Soit $|P_v|=\bigcup_{\sigma\in\mathcal{C}_v}\mathrm{conv}(\sigma)$ la réalisation géométrique de la composante de simplexes HGP et $X_v$ l'union de ses sommets. Pour toute direction $u$, $h_{|P_v|}(u)=\max_{\sigma\in\mathcal{C}_v}\max_{x\in\mathrm{conv}(\sigma)}\langle u,x\rangle=\max_{x\in X_v}\langle u,x\rangle=h_{X_v}(u)$. Le maximum d'une forme linéaire sur un simplexe étant atteint sur un sommet, ce descripteur est **exactement identique** au support du nuage du cluster. Il est calculable par `max` et très HGP-friendly, mais il ne voit ni l'ordre $K$, ni les incidences, ni le nombre ou la forme des simplexes, ni les recouvrements, ni les niveaux de filtration. Il ne peut donc pas être le descripteur suffisant revendiqué.
+Soit $|P_v|=\bigcup_{\sigma\in\mathcal{C}_v}\mathrm{conv}(\sigma)$ la réalisation géométrique de la composante de simplexes HGP et $X_v$ l'union de ses sommets. Pour toute direction $u$, $h_{|P_v|}(u)=\max_{\sigma\in\mathcal{C}_v}\max_{x\in\mathrm{conv}(\sigma)}\langle u,x\rangle=\max_{x\in X_v}\langle u,x\rangle=h_{X_v}(u)$. Le maximum d'une forme linéaire sur un simplexe étant atteint sur un sommet, ce descripteur est **exactement identique** au support des sommets sérialisés. Il coïncide avec celui du nuage du cluster seulement si ce nuage est exactement $X_v$. Il est calculable par `max` et très HGP-friendly, mais il ne voit ni l'ordre $K$, ni les incidences, ni le nombre ou la forme des simplexes, ni les recouvrements, ni les niveaux de filtration. Il ne peut donc pas être le descripteur suffisant revendiqué.
 
-La variante qui exploite réellement HGP doit agréger une **mesure sur les simplexes** : centres, volumes ou aires, spectres de longueurs, niveaux de naissance $\beta(\sigma)$ et multiplicités d'incidence. Des CDF projetées ou moments de ces attributs sont fusionnables par sommes/comptes et distinguent certaines réalisations ayant les mêmes sommets extrêmes. Le support de la réalisation reste un canal d'extrêmes et le contrôle `support des sommets`, auquel il doit être numériquement identique.
+La variante qui exploite réellement HGP doit agréger une **mesure sur les simplexes** : centres, volumes ou aires, spectres de longueurs, niveaux de naissance $\beta(\sigma)$ et multiplicités d'incidence. Des CDF projetées ou moments de ces attributs sont fusionnables par sommes/comptes et distinguent certaines réalisations ayant les mêmes sommets extrêmes. Le support de la réalisation reste un canal d'extrêmes et le contrôle `support des sommets`, auquel il doit être numériquement identique. Distinguer la mesure de l'union géométrique, sans multiplicité, de la mesure sur enregistrements simpliciaux, où les multiplicités sont intentionnelles. Pour $K\geq2$, les recouvrements doivent être résolus ou pondérés avant d'interpréter une somme comme masse géométrique.
+
+### Canal radial et intersections de rayons
+
+Pour un centre $c_v$, le rayon extérieur de la réalisation est $\rho_{v}(u)=\sup\left(\left\lbrace r\geq0:c_v+ru\in|P_v|\right\rbrace\cup\left\lbrace0\right\rbrace\right)$. Ce n'est pas une fonction support. Si $c_v\in|P_v|$, la fonction continue reconstruit exactement la réalisation si et seulement si celle-ci est étoilée autour de $c_v$ ; tout échantillonnage fini reste un sketch. Le noyau étoilé est l'ensemble des centres $c\in|P_v|$ tels que le segment $[c,x]$ soit inclus dans $|P_v|$ pour tout $x\in|P_v|$. Le prototype stocke `center_in_realization`, `center_in_kernel` et un masque directionnel `ray_hit`, car $\rho=0$ ne distingue pas un rayon vide d'une intersection réduite au centre ; il mesure aussi le nombre de composantes d'intersection par rayon, points isolés inclus.
+
+Une variante multi-segments encode les extrémités ou une occupation binaire le long du rayon. Pour une réalisation de dimension intrinsèque inférieure à trois, préférer des cônes angulaires ou un épaississement explicite et ablater leur bande passante : un rayon exact générique peut manquer une arête ou une surface. Le cube plein et sa frontière, de mêmes support et rayon extérieur depuis le centre, forment une fixture permanente.
+
+### Contrôle topologique ECT/WECT
+
+Une ECT à directions et seuils finis, éventuellement augmentée par masse, rémission ou niveau HGP, sert de contrôle pour les incidences et trous. Elle n'est pas annoncée comme nouvelle : injectivité de la transformée complète, variantes pondérées et versions différentiables sont déjà publiées. Les garanties WECT citées ne sont transférées à aucun poids réel de rémission ou niveau HGP sans vérifier leurs hypothèses d'admissibilité. Si les simplexes HGP se recouvrent sans former un complexe géométrique conforme, distinguer l'ECT du complexe abstrait de celle de l'union plongée et ne transférer aucun théorème entre les deux sans preuve.
 
 ### Canal robuste directionnel
 
@@ -72,7 +83,7 @@ La correction la plus directe au support consiste à conserver la **distribution
 
 Pour le prototype, préférer des histogrammes/CDF à bins fixes, éventuellement complétés par quelques quantiles robustes et par le max exact. Les comptes d'histogramme sont additifs dans un repère commun, contrairement à une liste de quantiles qui ne se fusionne pas exactement. Une normalisation indépendante par nœud exige cependant de transporter le déplacement et le ratio d'échelle, puis de rééchantillonner les bins ; sinon le canal est calculé directement depuis les points lors du prétraitement.
 
-Le descripteur minimal à tester est donc : support maximal + CDF projetées + moments/covariance + histogramme radial, auxquels s'ajoutent séparément centre/échelle, cardinalité, attributs HGP et rémission. Les CDF décrivent la masse, le support les extrêmes, et les canaux HGP la position du nœud dans la filtration de densité.
+Le premier descripteur à tester est donc : moments/covariance + attributs HGP + side channels métriques, puis support maximal + CDF projetées. Rayon extérieur, multi-segments, mesure simpliciale et ECT/WECT sont ajoutés une variable à la fois et comparés à Deep Sets de même budget. Les CDF décrivent la masse, le support les extrêmes, et les canaux HGP la position du nœud dans la filtration de densité.
 
 ### Convention dégénérée
 
@@ -111,6 +122,8 @@ La concaténation entre scans est **block-diagonal et masquée**. Un éventuel d
 ### Interaction entre enfants
 
 Pour chaque famille, HSA calcule une interaction entre sous-arbres frères avec des coefficients partagés par blocs. Le coût structurel de l'algorithme et de l'énergie HSA spécifiques est mieux décrit par $\mathcal{O}\left(\sum_{v} d_v^{2}\right)$, où $d_v$ est le nombre d'enfants, que par le seul slogan linéaire. La borne $\mathcal{O}(M b^{2})$ n'est favorable que si le degré maximal $b$ reste borné et si le nombre de familles $M$ est linéaire. Ces expressions omettent dimension des têtes, projections, descripteurs, transferts et batching ; elles ne s'étendent pas automatiquement aux scores pairwise libres.
+
+La reproduction fidèle ré-établit les équations depuis la définition de la projection au lieu de recopier le pseudo-code : signes de normalisation, indices positionnels et facteurs de cardinalité font l'objet de mutants. Le théorème HSA ne couvre que les poids sous Q/K post-LayerNormés, énergie, température, rescaling et masque exacts ; il ne couvre pas automatiquement V, le gate, le MLP ni la qualité de l'arbre.
 
 Les nœuds de degré élevé, les chaînes profondes et les arbres déséquilibrés sont mesurés. La binarisation ou le rééquilibrage ne sont pas gratuits : ils introduisent une structure artificielle et doivent être ablatés contre l'arbre natif.
 

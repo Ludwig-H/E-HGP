@@ -14,7 +14,7 @@ Conséquences :
 
 - l'ancien maximum serveur visible est **76,5 mIoU**, partagé par `SimpleSeg` et `TASeg` ; `SimpleSeg` n'a pas de méthode publiquement identifiable ;
 - TASeg est le meilleur résultat publié identifiable à **76,5**, mais son modèle utilise historique LiDAR et images ;
-- RAPiD-Seg à **76,1** est le comparateur publié le plus fort vérifié en LiDAR mono-trame ;
+- RAPiD-Seg à **76,1** est le comparateur publié le plus fort vérifié en LiDAR mono-trame, mais son absence de TTA/ensemble n'est pas explicitement certifiée et son inférence comporte deux passes apprises ;
 - le JSON officiel des papiers place LSK3DNet en tête à **75,6**, mais omet notamment TASeg et RAPiD-Seg ;
 - le nouveau CodaBench affiche le compte pseudonyme `kadir_yilmaz` à 75,2 au jour de la veille, sans méthode ni fiche renseignée ; il ne remplace pas l'historique.
 
@@ -22,31 +22,34 @@ Sources : [ancien classement officiel](https://codalab.lisn.upsaclay.fr/competit
 
 ## Méthodes sémantiques à battre ou expliquer
 
-`NR` signifie que le point n'est pas explicitement rapporté dans la source primaire auditée ; il ne signifie pas « non utilisé ».
+Les tracks A–D sont définis dans [EXPERIMENTAL_PROTOCOL.md](EXPERIMENTAL_PROTOCOL.md#régimes-de-comparaison). `NR` signifie que le point n'est pas explicitement rapporté dans la source primaire auditée ; il ne signifie pas « non utilisé ».
 
 | Méthode | Val / test mIoU | Entrée à l'inférence | Ressources d'entraînement | TTA | Inférences/étages | Statut de comparaison |
 |---|---:|---|---|---|---|---|
 | TASeg, CVPR 2024 | 72,7 / **76,5** | LiDAR temporel + images historiques | régime temporel/multimodal | NR | NR | track C, non strict |
 | RAPiD-Seg, ECCV 2024 | 73,0 / **76,1** | LiDAR mono-trame | pipeline class-aware appris | NR | 2 inférences séquentielles | plus proche ; recette stricte à auditer |
-| LSK3DNet, CVPR 2024 | 70,2 / **75,6** | LiDAR mono-trame | instance CutMix, entraînement test prolongé | oui | multi-forward TTA | track D, pas le claim strict |
+| LSK3DNet, CVPR 2024 | 70,2 / **75,6** | LiDAR mono-trame | instance CutMix, davantage d'époques pour la recette test | oui | NR | track D, pas le claim strict |
 | PTv3 + PPT, CVPR 2024 | 72,3 / **75,5** | LiDAR mono-trame | préentraînement multi-datasets | NR | NR | track B |
-| SP2T, ICCV 2025 | 71,7 / **75,4** | LiDAR mono-trame | SemanticKITTI | NR | NR | concurrent conceptuel proche ; recette stricte à auditer |
+| SP2T, ICCV 2025 | 71,7 / **75,4** | LiDAR mono-trame | SemanticKITTI | oui | NR | track D ; concurrent conceptuel proche |
 | M3Net, CVPR 2024 | 72,0 / **75,1** | LiDAR mono-trame | entraînement multi-datasets | NR | NR | track B |
 | UniSeg, ICCV 2023 | 71,3 / **75,2** | RGB + point/voxel/range | multimodal | NR | NR | track C |
 | SphereFormer, CVPR 2023 | 67,8 / **74,8** | LiDAR mono-trame | SemanticKITTI | NR | NR | contrôle géométrique proche |
 | DITR, 3DV 2026 | 69,0 / **74,4** | LiDAR + image DINOv2 | préentraînement externe DINOv2 | NR | NR | tracks B+C ; image requise |
 | PTv3 seul, CVPR 2024 | 70,8 / **74,2** | LiDAR mono-trame | SemanticKITTI | NR | NR | cible de portage, pas baseline WP0 prête |
-| ProtoSEG, NeurIPS 2023 | NR / **74,2** | LiDAR | segmentation unifiée | NR | NR | contrôle semantic/panoptic |
+| ProtoSEG, NeurIPS 2023 | **74,2** / NR | LiDAR | segmentation unifiée | NR | NR | contrôle semantic/panoptic, validation seulement |
+| VaViT, arXiv 2026 | 68,0 / NR | LiDAR mono-trame | SemanticKITTI | non | NR | résultat validation strict, pas de test caché |
 
-Les scores val et test ne sont jamais interchangeables. Par exemple, RWAFormer appelle parfois la séquence 08 « test » et rapporte 75,3 ; il s'agit du split public de validation, pas du serveur 11–21.
+Les scores val et test ne sont jamais interchangeables. Par exemple, RWAFormer appelle parfois la séquence 08 « test » et rapporte 75,3 ; il s'agit du split public de validation, pas du serveur 11–21. Sa taxonomie/reporting doit en outre être reproduite avec le YAML officiel avant comparaison.
 
 ### Leçons pour HGP-HSA
 
 - **RAPiD-Seg** montre qu'un descripteur géométrique doit intégrer la variation de densité avec la portée et la rémission. Il constitue un contrôle plus direct de la fonction support que les seuls Transformers, mais son coût complet comprend deux passes apprises.
 - **SphereFormer** encode déjà la géométrie sphérique du capteur. Un gain HGP limité aux longues distances doit être comparé à ce biais, pas à un modèle cartésien naïf.
 - **LSK3DNet** rappelle qu'une attention sophistiquée doit battre un CNN sparse adaptatif en précision ou sur un axe Pareto clair ; son score test 75,6 ne doit toutefois pas être rangé dans le track sans TTA.
-- **SP2T** est un concurrent direct : son double flux et ses proxies locaux réduisent l'attention point–point tout en conservant du contexte sparse. Le gain HGP doit donc être isolé d'un simple effet de tokens proxy.
+- **SP2T** est un concurrent direct : son double flux et ses proxies locaux réduisent l'attention point–point tout en conservant du contexte sparse. Son supplément applique rotation, scaling, flip et jitter au test ; son 75,4 reste donc hors track A. Le gain HGP doit être isolé d'un simple effet de tokens proxy.
 - **PTv3** simplifie l'attention par sérialisation et grands patches locaux. HGP doit apporter un contexte complémentaire, pas reproduire une partition spatiale plus coûteuse. Le dépôt public ne fournit pas une recette SemanticKITTI complète config+poids+score ; WP0 doit donc commencer par une baseline réellement épinglable.
+- **VaViT** fournit en 2026 une baseline ViT globale publique avec tokenisation BEV par piliers, stricte sans TTA mais limitée à 68,0 sur validation ; elle est utile pour la reproductibilité, pas comme seuil SOTA.
+- **FLARES** rappelle que la portée est déjà un axe architectural et système explicite ; certaines recettes rapportées utilisent TTA et/ou données CARLA et doivent rester dans des tracks séparés.
 - **TASeg, UniSeg, DITR et M3Net** prouvent la valeur des ressources supplémentaires. Ils restent dans des colonnes distinctes pour ne pas diluer le claim LiDAR mono-trame.
 
 ## Concurrents conceptuels : hiérarchie et attention
@@ -66,6 +69,10 @@ Le calcul est bottom-up puis top-down, en $\mathcal{O}(M b^{2})$ pour $M$ famill
 ### HKT, prépublication 2026
 
 [Hierarchical Kernel Transformer](https://arxiv.org/abs/2604.08829) étudie une attention multi-résolution pour séquences avec noyau hiérarchique, décomposition de l'erreur d'approximation et résultats informationnels. Il s'agit d'une prépublication soumise à Neurocomputing, sans point clouds ni arbre de densité, mais elle occupe déjà le terrain « attention hiérarchique + théorème d'approximation ». Une contribution théorique HGP-HSA doit donc porter sur une famille de contraintes, une stabilité ou une garantie sémantique réellement différente.
+
+### LitePT, CVPR 2026
+
+[LitePT](https://openaccess.thecvf.com/content/CVPR2026/html/Yue_LitePT_Lighter_Yet_Stronger_Point_Transformer_CVPR_2026_paper.html) rend explicite le motif convolutions efficaces dans les premiers étages puis attention dans les étages tardifs, avec PointROPE. Il ne rapporte pas SemanticKITTI, mais menace directement la nouveauté architecturale « backbone local + quelques attentions tardives ». HGP-HSA doit montrer que la structure de densité et son certificat ajoutent autre chose à ce motif déjà publié.
 
 ### Précédents directs de QC-HSA
 
@@ -119,6 +126,10 @@ La fonction support est un objet classique de géométrie convexe. Pour tout ens
 - différentes densités ou rémissions.
 
 Avec un nombre fini de directions, des enveloppes distinctes peuvent également produire le même vecteur. Le taux d'erreur dépend de la couverture de la sphère et du conditionnement de la forme. Le max est sensible à un outlier et à la disparition d'un point exposé.
+
+Le maximum de la norme sur un rayon est une **fonction radiale extérieure**, pas un support. Elle identifie une forme depuis son centre seulement lorsque celle-ci est étoilée ; sinon elle reconstruit son remplissage radial. Un cube plein et sa frontière ont par exemple mêmes support et rayon depuis le centre. Les intersections multi-segments conservent davantage d'information, mais une grille finie reste non injective et les rayons génériques manquent souvent les complexes de faible dimension.
+
+Les transformées ECT/PHT complètes ont déjà des résultats d'injectivité pour des classes de complexes et formes constructibles. WECT et l'ECT différentiable sont également publiées. Une représentation topologique directionnelle peut donc être une baseline ou un composant HGP-spécifique, mais ni « ECT sur les simplexes » ni sa discrétisation finie ne constitue seule une nouveauté.
 
 La contribution ne peut donc pas être « invention de la fonction support ». Elle peut être :
 

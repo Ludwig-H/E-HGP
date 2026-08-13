@@ -10,6 +10,19 @@ Cette cible est pertinente pour la segmentation dense : HSA impose la même inte
 
 L'énoncé ci-dessous est un **résultat technique à démontrer et à auditer**, pas encore le théorème central du papier. Sa preuve élémentaire paraît solide, mais Fast Multipole Attention et l'appendice du papier HSA rendent sa nouveauté probablement insuffisante seul. Il ne deviendra central qu'avec un certificat HGP spécifique, non vacu et calculable.
 
+## Priorités théoriques révisées
+
+L'idée géométrique impose d'abord deux résultats négatifs. Pour une union simpliciale, le support est celui des sommets ; pour un centre donné, le rayon extérieur reconstruit exactement seulement les ensembles étoilés. Ces propositions et leurs contre-exemples sont nécessaires à la correction du papier, mais trop classiques pour en être la nouveauté. ECT/PHT possèdent déjà des résultats d'injectivité ; les employer ne crée pas non plus un théorème central.
+
+Les cibles réellement susceptibles de porter une soumission sont, par ordre de faisabilité :
+
+1. **Certificat adaptatif d'attention.** Construire, depuis les résumés d'un nœud et la requête, une borne calculable $U_{iB}$ sur l'oscillation des scores du bloc $B$. Raffiner les blocs dont $U_{iB}$ dépasse une tolérance, prouver monotonie, puis convergence vers l'attention dense lorsque tous les blocs atteignent les singletons avec les mêmes scores et masques, et enfin une borne sur KL puis sortie. La complexité doit être output-sensitive et mesurée, pas seulement annoncée sous degré borné.
+2. **Sélection fidélité–coût.** Pour une requête ou une famille de requêtes, choisir une antichaîne sous budget avec optimum exact dans le cas additif, ou garantie d'approximation dans le cas partagé. La nouveauté doit dépasser l'élagage d'arbre classique et inclure le vrai coût des kernels.
+3. **Stabilité HGP corrigée de la portée.** Sous un modèle explicite de thinning LiDAR $p(r,\theta)$, borner la merge distortion entre l'arbre estimé et un arbre latent, puis composer cette borne avec le certificat d'attention. Une asymptotique populationnelle doit utiliser un régime $K_n$ déclaré ; les seuls ordres fixes $K\in\left\lbrace1,2,3\right\rbrace$ ne l'établissent pas.
+4. **Extension recouvrante.** Si les $K$-polyèdres d'ordre supérieur restent un DAG, définir des poids d'incidence formant une partition de l'unité, puis construire et prouver séparément conservation de masse, stochasticité de l'attention, absence de double comptage et réduction exacte au cas laminaire ; la partition de l'unité seule ne suffit pas.
+
+Le candidat 1 est le meilleur compromis actuel. Le candidat 3 serait le plus fort pour ICML/NeurIPS, mais aussi le plus risqué. Aucune priorité n'autorise un énoncé « HGP est sémantiquement optimal » : cela demanderait un modèle joint réaliste des labels et du capteur.
+
 ## Partition canonique vue par une feuille
 
 Soit $T$ un arbre fini laminaire enraciné dont les feuilles sont $N\geq2$ points ou micro-tokens. Une forêt doit soit être traitée composante par composante, soit recevoir une famille racine explicite si l'attention plate globale entre composantes fait partie de la cible. Le résultat porte sur cet arbre laminaire livré : il ne s'applique pas directement aux unions de $K$-polyèdres chevauchantes pour $K\geq2$, sauf après une projection laminaire déterministe et auditée. Pour une feuille requête $i$, suivre le chemin de $i$ à la racine. À chaque ancêtre, collecter les sous-arbres frères de la branche qui contient $i$. Leurs ensembles de feuilles forment une partition disjointe $\Pi_T(i)$ du domaine $\Omega_i=\left\lbrace1,\ldots,N\right\rbrace\setminus\left\lbrace i\right\rbrace$.

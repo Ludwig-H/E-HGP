@@ -16,21 +16,21 @@ Le contrat v3 associé demeure hors registre :
 - `mode=audit_independant_math_and_architecture`
 - `public_status=not_claimed`
 
-L'audit v3 consulté après synchronisation n'est pas frais par rapport au dépôt : son observation live documente `HEAD=96156f6a1dd569c1c7e0371b0599e3b9ff08afd4`, alors que des commits ultérieurs étaient déjà présents pendant cette revue. Ce constat interdit de transformer la disponibilité supposée de la hiérarchie en claim produit ou GPU sur MorseHGP3D.
+Après synchronisation distante, l'audit v3 consulté n'est toujours pas frais : son observation live épingle `HEAD=33df59d451dc1c534a1fd5f1572e938472744fef`, tandis que `origin/main` était déjà à `81d24d05142219aa0c5e9b00d129b72b03f0e85e` avant ce commit documentaire. Ce constat interdit de transformer la disponibilité supposée de la hiérarchie en claim produit ou GPU sur MorseHGP3D.
 
 ## Verdict honnête
 
 Chaque cluster doit porter un **vecteur de proportions sur les 19 classes**, et non un label unique. La cible d'un nœud est la distribution empirique de ses points ; les feuilles point sont le cas one-hot. La version minimale « fonction support normalisée seule + proportions de cluster comme seul décodeur » a néanmoins peu de chances d'atteindre l'état de l'art : la fonction support perd concavités, densité et intérieur, tandis que les proportions conservent la masse des classes mais pas leur localisation à l'intérieur d'un cluster mixte.
 
-La réalisation géométrique du $K$-polyèdre ne résout pas cette perte : si elle est l'union des simplexes de la composante, sa fonction support est exactement celle de l'union de leurs sommets. Une forme linéaire atteint son maximum sur un sommet ; le support ne voit donc ni $K$, ni les incidences, ni les niveaux de naissance. Cette égalité devient une fixture obligatoire, pas un nouveau claim.
+La réalisation géométrique du $K$-polyèdre ne résout pas cette perte par un second maximum. Si elle est l'union des simplexes de la composante, sa fonction support est exactement celle de l'union de leurs sommets. Le « maximum de la norme dans une direction » est plutôt une **fonction radiale extérieure** : elle reconstruit exactement seulement une forme étoilée autour du centre et remplit sinon les trous radiaux. Un cube plein et sa frontière ont ainsi chacun le même support et la même fonction radiale extérieure que l'autre. Ces faits deviennent des fixtures obligatoires, pas de nouveaux claims.
 
 La piste élargie reste crédible et potentiellement forte :
 
 1. un backbone local point/voxel conserve le détail et produit les features de feuilles ;
 2. la hiérarchie HGP fournit une structure exogène multi-échelle ;
-3. une mesure sur les simplexes — centres, formes, niveaux de naissance et incidences — ainsi qu'un sketch de masse projetée complètent le support maximal ;
+3. des sketches de masse ou de topologie et une mesure sur les simplexes — centres, formes, niveaux de naissance et incidences — complètent les canaux support/radial ;
 4. les feuilles prédisent leurs distributions et chaque nœud déduit exactement ses proportions par moyenne massique de ses descendants ;
-5. quelques blocs hiérarchiques tardifs propagent le contexte ; HSA sert de baseline fidèle et `QC-HSA`, si sa proposition est validée, conserve une requête distincte par feuille ;
+5. un ou deux blocs hiérarchiques tardifs propagent le contexte ; HSA sert de baseline fidèle et un raffinement conditionné par la requête n'est retenu que s'il apporte un certificat fidélité–coût calculable ;
 6. un décodeur point-fin et un chemin résiduel localisent les classes et préservent les frontières.
 
 La probabilité d'un SOTA par la seule idée initiale est faible. Une contribution de haut niveau reste plausible si les expériences démontrent causalement que l'arbre HGP apporte plus qu'un octree, des superpoints, RSL/HDBSCAN ou un arbre aléatoire, et que l'opérateur hiérarchique apporte plus qu'un simple pooling sur le même arbre.
@@ -53,13 +53,13 @@ Un gain global sans cette décomposition ne suffira pas pour une soumission ICML
 
 La piste principale est strictement comparable : un scan, LiDAR uniquement, entrées `(x, y, z, remission)`, entraînement SemanticKITTI uniquement, sans TTA ni ensemble. La métrique primaire est le mIoU sur la séquence 08, puis sur le test caché 11–21 après verrouillage.
 
-Au moment de la veille :
+Au moment de la veille, aucun nombre unique ne certifie le SOTA strict mono-scan, mono-modèle, sans TTA ni données externes : le leaderboard mélange les régimes et ses premières lignes sont souvent anonymes. Les repères audités sont :
 
-- RAPiD-Seg rapporte **76,1 mIoU** avec un pipeline appris LiDAR mono-trame en deux passes ; c'est le concurrent publié le plus proche, mais sa recette et l'usage éventuel de TTA doivent encore être audités pour une comparaison stricte ;
-- LSK3DNet rapporte **75,6 mIoU** avec une architecture sparse point-voxel, instance CutMix, TTA et un entraînement test prolongé ; il relève donc du track TTA ;
-- SP2T rapporte **75,4 mIoU** avec une attention sparse à proxies en double flux LiDAR mono-trame ; son statut TTA outdoor n'étant pas rapporté, la comparabilité stricte reste à auditer ;
+- RAPiD-Seg rapporte **76,1 mIoU** avec un pipeline appris LiDAR mono-trame en deux inférences séquentielles ; c'est le concurrent publié le plus proche, mais l'absence de TTA ou d'ensemble n'est pas explicitement documentée ;
+- LSK3DNet rapporte **75,6 mIoU** avec une architecture sparse point-voxel, instance CutMix, TTA et davantage d'époques dans sa recette de soumission au test ; il relève donc du track TTA ;
+- SP2T rapporte **75,4 mIoU** avec une attention sparse à proxies en double flux LiDAR mono-trame, mais son supplément applique rotation, échelle, flip et jitter au test ; il relève donc du track TTA ;
 - TASeg atteint **76,5 mIoU**, mais utilise de l'historique LiDAR et image et appartient donc à un régime de ressources distinct ;
-- l'ancien leaderboard officiel contient aussi la soumission `SimpleSeg` à 76,5, sans méthode ni papier publiquement attribuable.
+- l'ancien leaderboard officiel contient aussi la soumission `SimpleSeg` à 76,5, sans méthode ni papier publiquement attribuable ; le CodaBench courant affiche 75,2 pour un compte pseudonyme sans fiche méthode exploitable.
 
 Ces chiffres sont des instantanés, pas des seuils éternels. La concurrence devra être réauditée avant soumission. Le premier objectif n'est pas de dépasser un nombre isolé, mais d'obtenir un gain HGP reproductible sur validation, puis une position Pareto compétitive en précision, mémoire et latence.
 
@@ -69,12 +69,13 @@ Le prototype de référence utilisera les **points ou micro-voxels comme feuille
 
 Les feuilles produisent $p_i\in\Delta^{18}$ et un nœud calcule $\widehat\pi_v^{\mathrm{all}}=n_v^{-1}\sum_{i\in C_v}p_i$, ou récursivement la moyenne de ses enfants pondérée par leurs cardinalités. Les proportions GT sur les seuls labels valides restent exclusivement des cibles d'entraînement et ne participent jamais au forward de validation/test ni à la construction HGP. La prédiction officielle demeure une distribution par point ; les proportions internes apportent un état multiscale cohérent, pas un label diffusé uniformément.
 
-La fonction support est conservée comme canal de forme convexe et non comme identité complète du nœud. Le descripteur candidat combine :
+La fonction support est conservée comme canal de forme convexe et non comme identité complète du nœud. Le rayon extérieur, les intersections multi-segments et ECT/WECT sont des variantes contrôlées par [l'audit géométrique](GEOMETRIC_DESCRIPTOR_AUDIT.md), non des ajouts supposés gagnants. Le descripteur candidat combine d'abord :
 
 - support maximal et CDF/histogrammes de projections directionnelles, avec quantiles robustes en complément ;
-- centre, `log(rayon)`, cardinalité et géométrie relative parent–enfant ;
+- centre, `log(rayon d'échelle)`, cardinalité et géométrie relative parent–enfant ;
 - niveau de densité, naissance, mort et persistance HGP ;
-- anisotropie/covariance, occupation radiale, portée, hauteur et statistiques de rémission.
+- anisotropie/covariance, portée, hauteur et statistiques de rémission ;
+- attributs simpliciaux ou topologiques seulement s'ils battent CDF, moments et Deep Sets à budget égal.
 
 ## Portes avant entraînement lourd
 
@@ -82,7 +83,7 @@ Le projet ne passe au modèle complet que si les diagnostics suivants sont satis
 
 - l'arbre HGP présente un alignement sémantique supérieur aux arbres de contrôle à compression égale ;
 - une tokenisation éventuelle conserve assez d'information pour prédire les proportions **et** relocaliser les classes au niveau point ; sinon les points restent feuilles ;
-- les collisions de fonction support et sa fragilité aux outliers sont mesurées, pas ignorées ;
+- les collisions du support, du rayon extérieur et des transformées finies sont mesurées, avec la fraction de nœuds étoilés et de rayons vides ;
 - l'effet de portée du capteur ne domine pas les niveaux de densité ;
 - la profondeur, les degrés et la mémoire de la hiérarchie sont compatibles avec des batches GPU utiles.
 
@@ -91,6 +92,8 @@ Les critères chiffrés et les règles d'arrêt sont dans [RISKS_AND_GO_NO_GO.md
 ## Contenu du dossier
 
 - [HGP_HSA_SemanticKITTI.md](HGP_HSA_SemanticKITTI.md) : hypothèse scientifique révisée et variantes.
+- [REVIEWER_VERDICT.md](REVIEWER_VERDICT.md) : décision honnête, questions de reviewer et barre de preuve par venue.
+- [GEOMETRIC_DESCRIPTOR_AUDIT.md](GEOMETRIC_DESCRIPTOR_AUDIT.md) : support, rayon, topologie, contre-exemples et théorèmes candidats.
 - [THEOREM_PROGRAM.md](THEOREM_PROGRAM.md) : proposition technique, esquisse de preuve et pont conditionnel vers les niveaux de fusion.
 - [ARCHITECTURE.md](ARCHITECTURE.md) : contrat d'entrée, descripteurs et modèle hybride proposé.
 - [RESEARCH_PLAN.md](RESEARCH_PLAN.md) : lots de travail, ordre des décisions et livrables.
