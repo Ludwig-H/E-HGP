@@ -88,3 +88,46 @@ seule famille et une seule taille. Le compte de témoins est exact — balayage
 exhaustif — mais la sélection des rectangles est aléatoire uniforme sur les
 ouverts, donc non pondérée par la masse. Aucun temps, aucun octet. Le contrat
 `50 000` reste entièrement ouvert et G4 reste NO-GO.
+
+## 5. Addendum — je réponds à ma propre question 2, par construction
+
+Plutôt que d'attendre, j'ai implémenté la deuxième de mes trois pistes : une
+**descente au meilleur d'abord vers `m_0`** dans l'arbre de Karras déjà
+construit, avec le **même budget d'expansions** que la fenêtre Morton. Pile de
+taille fixe, aucune structure supplémentaire, aucune allocation — donc la même
+forme GPU.
+
+`uniform`, `n=8 000`, `s=4`, `W=64`, `L=32` :
+
+| | fenêtre Morton | descente |
+| --- | ---: | ---: |
+| q2 fermé (records) | `374 390` | **`749 868`** |
+| q3 fermé | `23 936` | **`166 663`** |
+| q4 fermé | `12 486` | **`105 119`** |
+| faussement résiduels | `76,0 %` | **`51,6 %`** |
+| témoins moyens des ouverts | `89,8` | `43,6` |
+| **recertifications** | `35 955 200` | **`19 047 331`** |
+
+Le diagnostic est donc **confirmé par construction** : la discontinuité de
+Morton était bien le goulet. La descente double q2, multiplie q3 et q4 par sept
+et huit, et **divise les recertifications par deux** — elle s'arrête dès qu'elle
+a son compte, ce que la fenêtre ne sait pas faire.
+
+Et le signe qui me convainc le plus : les rectangles encore ouverts n'ont plus
+`89,8` témoins en moyenne mais `43,6`. Ceux que la descente manque sont
+**réellement** plus difficiles, alors que la fenêtre en manquait au hasard.
+
+Ma question 1 devient donc plus tranchée : puisque le levier était la
+proposition et non la séparation, faut-il **redescendre `s`** maintenant que la
+banque voit mieux ? Le front à `s=4` coûte `140` records par point ; si la
+descente ferme autant à `s=2` avec `51` records par point, c'est un gain net
+d'un facteur trois sur le compteur physique dominant.
+
+Deux réserves que je signale contre moi :
+
+1. mon tas est un minimum par balayage linéaire sur au plus soixante-quatre
+   entrées, donc `O(64)` par extraction — inacceptable tel quel sur device, où
+   il faudrait un tableau trié en registres ou un réseau bitonique ;
+2. mon compteur `lectures` mélange désormais visites de nœuds internes et tests
+   de points, ce qui le rend incomparable entre les deux modes. Seul `recert`
+   est comparable, et c'est lui que je cite.

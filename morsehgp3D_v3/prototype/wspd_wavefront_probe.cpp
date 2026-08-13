@@ -48,12 +48,36 @@ struct Pair { int a, b; };
 // kernel vise.
 struct BankStat { long long reads = 0, recerts = 0, closed[3] = {0, 0, 0}; };
 
+// ---- PROPOSITION PAR DESCENTE, alternative a la fenetre Morton.
+//
+// La fenetre Morton souffre de la DISCONTINUITE de la courbe : deux points
+// spatialement voisins peuvent avoir des cles tres eloignees, si bien qu'aucun
+// bon temoin n'entre dans la fenetre. Une descente au meilleur d'abord dans
+// l'arbre DEJA CONSTRUIT n'a pas ce defaut : elle coute `O(log n + L)`, ne
+// demande aucune structure supplementaire, et reste bornee.
+//
+// Sur GPU c'est une pile de taille fixe en registres — pas de file dynamique,
+// pas d'allocation. Le budget d'expansions est le meme que celui de la fenetre.
+long long box_dist2_to(const WfNode& v, const long long m4[3], bool tight) {
+  long long s = 0;
+  for (int i = 0; i < 3; ++i) {
+    const long long lo4 = 4 * (tight ? v.tlo[i] : v.lo[i]);
+    const long long hi4 = 4 * (tight ? v.thi[i] : v.hi[i]);
+    long long d = 0;
+    if (m4[i] < lo4) d = lo4 - m4[i];
+    else if (m4[i] > hi4) d = m4[i] - hi4;
+    s += d * d;
+  }
+  return s;
+}
+
 // Cellule de Morton (porte la borne) ou boite serree (front bien plus petit).
 bool g_tight = false;
 bool g_bank = false;
 long long g_win = 32, g_bankl = 16;
 long long g_warms = 0;
 long long g_inflation = 0;
+bool g_descent = false;
 
 // Cellule d'un identifiant de nœud : negatif = feuille (le point lui-meme).
 mhgp3v::WspdBox cell_of(const std::vector<WfNode>& nodes,
@@ -106,6 +130,7 @@ int main(int argc, char** argv) {
     else if (a == "--oracle") oracle = true;
     else if (a == "--tight") g_tight = true;
     else if (a == "--bank") g_bank = true;
+    else if (a == "--descent") { g_bank = true; g_descent = true; }
     else if (a.rfind("--window=", 0) == 0) { g_win = arg_ll(val("--window=").c_str(), 2, 1024, "window"); g_bank = true; }
     else if (a.rfind("--bank-l=", 0) == 0) { g_bankl = arg_ll(val("--bank-l=").c_str(), 1, 64, "bank-l"); g_bank = true; }
     else if (a.rfind("--inflation=", 0) == 0) g_inflation = arg_ll(val("--inflation=").c_str(), 1, 20000, "inflation");
@@ -208,21 +233,51 @@ int main(int argc, char** argv) {
               m4[d] = ba.lo[d] + ba.hi[d] + bb.lo[d] + bb.hi[d];
             }
             const long long dlo = mhgp3v::rect_minsq(qa, qb);   // UNE fois
-            const unsigned long long qk =
-                mhgp3v::wf_morton48(m4[0] / 4, m4[1] / 4, m4[2] / 4);
-            size_t pos = (size_t)(std::lower_bound(keys.begin(), keys.end(), qk) - keys.begin());
-            const size_t beg = (pos > (size_t)(g_win / 2)) ? pos - g_win / 2 : 0;
-            const size_t end = std::min(keys.size(), beg + (size_t)g_win);
             long long cred[3] = {0, 0, 0};
             long long taken = 0;
-            for (size_t r = beg; r < end && taken < g_bankl; ++r) {
-              ++bank.reads;
-              mhgp3v::RectBox zb{};
-              for (int d = 0; d < 3; ++d) { zb.lo[d] = sp[r][d]; zb.hi[d] = sp[r][d]; }
-              ++taken; ++bank.recerts;
-              const unsigned got = mhgp3v::rect_central_mask_dlo(dlo, qa, qb, zb);
-              for (int lane = 0; lane < 3; ++lane)
-                if (got & (1u << lane)) ++cred[lane];
+            if (g_descent) {
+              // Descente au meilleur d'abord vers `m_0`, pile bornee.
+              std::pair<long long, int> heap[64];
+              int hn = 0;
+              heap[hn++] = {0, 0};
+              long long exp = 0;
+              while (hn > 0 && taken < g_bankl && exp < g_win) {
+                int best = 0;
+                for (int u = 1; u < hn; ++u) if (heap[u].first < heap[best].first) best = u;
+                const int id = heap[best].second;
+                heap[best] = heap[--hn];
+                ++exp; ++bank.reads;
+                if (id < 0) {
+                  const int r = -1 - id;
+                  mhgp3v::RectBox zb{};
+                  for (int d = 0; d < 3; ++d) { zb.lo[d] = sp[r][d]; zb.hi[d] = sp[r][d]; }
+                  ++taken; ++bank.recerts;
+                  const unsigned got = mhgp3v::rect_central_mask_dlo(dlo, qa, qb, zb);
+                  for (int lane = 0; lane < 3; ++lane) if (got & (1u << lane)) ++cred[lane];
+                  continue;
+                }
+                for (int side = 0; side < 2; ++side) {
+                  const int ch = side ? nodes[id].right : nodes[id].left;
+                  if (hn >= 62) break;
+                  const long long dd = (ch < 0) ? 0 : box_dist2_to(nodes[ch], m4, g_tight);
+                  heap[hn++] = {dd, ch};
+                }
+              }
+            } else {
+              const unsigned long long qk =
+                  mhgp3v::wf_morton48(m4[0] / 4, m4[1] / 4, m4[2] / 4);
+              size_t pos = (size_t)(std::lower_bound(keys.begin(), keys.end(), qk) - keys.begin());
+              const size_t beg = (pos > (size_t)(g_win / 2)) ? pos - g_win / 2 : 0;
+              const size_t end = std::min(keys.size(), beg + (size_t)g_win);
+              for (size_t r = beg; r < end && taken < g_bankl; ++r) {
+                ++bank.reads;
+                mhgp3v::RectBox zb{};
+                for (int d = 0; d < 3; ++d) { zb.lo[d] = sp[r][d]; zb.hi[d] = sp[r][d]; }
+                ++taken; ++bank.recerts;
+                const unsigned got = mhgp3v::rect_central_mask_dlo(dlo, qa, qb, zb);
+                for (int lane = 0; lane < 3; ++lane)
+                  if (got & (1u << lane)) ++cred[lane];
+              }
             }
             const int need[3] = {10, 9, 8};
             for (int lane = 0; lane < 3; ++lane)
