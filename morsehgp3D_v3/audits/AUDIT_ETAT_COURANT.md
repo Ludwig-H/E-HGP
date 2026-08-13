@@ -8,6 +8,68 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
+## Observation live du successeur — `HEAD=b96751c`, worktree concurrent non figé
+
+Cette observation du 13 août 2026, snapshot `20:51:52 UTC`, supersède le pin
+`590683c` de la section historique ci-dessous. Le `HEAD` est
+`b96751c3d2342c2ca62b3005c3d3cd3e6e2988b3`, après les deux commits
+documentaires `d34993b` et `b96751c`. Le worktree logiciel observé n'est pas
+propre : Claude modifie `morsehgp3D_v3/CMakeLists.txt` et
+`prototype/wspd_wavefront_probe.cpp`, avec empreintes respectives
+`065f9f32af2da97467e410d04cbfc94853861366803eea8041d0241a5465c241` et
+`2d4a4bfb46313b18973dc714fd4e4b1a3fa8a96dd6558fc34f8cbc2173ec62a7`.
+Il ajoute aussi `NOTE_CLAUDE_SEUIL_EXACT_DE_SEPARATION_20260813.md` et
+`receipts/fenetre_e4_20260813/`. Les modifications documentaires d'audit sont
+séparées de ce delta logiciel. Aucun verdict du worktree ne peut être promu au
+statut du `HEAD` avant pin propre et reçu reproductible.
+
+Le successeur rétracte correctement le faux « plafond q4 `84 %` » : ce chiffre
+portait sur q2. Il découvre un plancher de non-vacuité du certificat central,
+mais la quantité `rho` est seulement le rayon minoré d'une boule inscrite. Son
+échec ne prouve pas que le cœur commun réel soit vide ; une fixture à `s=3`
+ferme même q4 avec huit crédits alors que `rho<0`. Pour le test q4
+rationnel effectivement codé, le seuil garanti est
+`s>sqrt(209/14)`, légèrement supérieur au seuil algébrique idéal
+`sqrt(6)+sqrt(2)`. Le taux de petite boule centrale vide ne borne ni le cœur de
+Jung anisotrope ni les cages à témoin variable. Les réponses aux trois
+questions et les preuves sont dans
+[`AUDIT_REPONSE_SEUIL_SEPARATION_RAFFINEMENT_LOCAL_B96751C_20260813.md`](AUDIT_REPONSE_SEUIL_SEPARATION_RAFFINEMENT_LOCAL_B96751C_20260813.md).
+
+Le noyau `EdgeWindowRangeAdd-v0` est combinatoirement exact relativement aux
+fates qu'il reçoit. Le delta corrige le masquage des pentes, publie un ledger
+massique exclusif, ajoute un oracle non trivial avec banque et grave les
+fixtures spindle et cutoff de rang. Au snapshot antérieur, dix portes
+fenêtre/spindle passaient en `136,42 s`; au snapshot courant, build et huit
+portes courtes, dont la nouvelle fixture rang, passent en `0,24 s`. Le bilan
+historique `7/8` est rétracté.
+
+Ces verts ne reçoivent toutefois pas une fenêtre finale. Le nominal avec banque
+à `window=256` sort `0` tout en imprimant `fenetre_finale=NON` et une masse
+pending q4 de `18`; son oracle compare le surensemble. `mass_open/sum_E4`
+incluent encore les pending. En mode `descent`, un heap abandonné sous
+`window=2` publie au contraire `pending=0` et `fenetre_finale=OUI` : la
+finalité n'est pas raccordée hors VWave. Le nominal de pente ne verrouille en
+outre qu'une regex, pas deux pentes, un code `0` et un sentinel post-gates. La
+fenêtre mesurée reste celle du certificateur central sous owner maximal, pas
+encore `PWC0-A/CanonicalEdgeWindowReporter-q4-v0` jugé par les vrais supports.
+
+La sortie `sum_E4` sparse ne rend pas son producteur industriel : sur le rejeu
+`uniform,n=4000,s=8`, environ `171,67 M` recertifications prennent `70,27 s` de
+vague, contre `28,11 M` et `9,20 s` à `s=3`. La séparation échange donc aval
+plus petit contre source beaucoup plus chère ; la gate doit porter sur le coût
+composé, la HWM et l'E2E.
+
+Le nouveau dossier de reçu reste non recevable : `uniform_s8.txt` est vide,
+les autres logs ne proviennent pas du source/binaire que le manifeste leur
+attribue, le manifeste s'auto-hashe avec une empreinte fausse, et le script
+masque les codes de sortie. Il faut regénérer après gel mono-source/mono-ELF.
+
+Une coupure kNN reste formellement réfutée : un q4 u16 positif de profondeur
+zéro et d'arête maximale unique peut conserver son partenaire au-delà du rang
+`4380`. Le remplacement exact proposé est un reporter de cages/fleurs sur
+`BNode`, sans `PairId`; voir
+[`AUDIT_REPONSE_DEUX_PERTES_CAGES_FLEURS_B96751C_20260813.md`](AUDIT_REPONSE_DEUX_PERTES_CAGES_FLEURS_B96751C_20260813.md).
+
 ## Observation live — `HEAD=590683c`, géométrie shallow reconnue, chemin produit absent
 
 Le pin observé est

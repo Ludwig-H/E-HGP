@@ -2808,7 +2808,8 @@ Cette ordonnance remplace `C(n_lens,2)` pour les centres shallow distincts. À
 inférieur à `e*(k+1)*m_ab` et les incidences à
 `2e*(k+1)*m_ab`. Cette borne ne contrôle ni les couples de segments visités, ni
 les `SupportKey` incidents à une concurrence lourde ; ces deux sorties restent
-mesurées. Sous les hypothèses du constructeur reçu, la cible par arête est
+mesurées. Sous les hypothèses d'un constructeur pondéré encore non reçu, la
+cible par arête est
 `O(m_ab*k^2 + m_ab*alpha(m_ab)*log(m_ab) + |V_ab| + J_ab + H_ab)` ; les
 opérations de segments et la HWM sont des compteurs bloquants séparés. Aucun
 arrangement global n'est construit : les niveaux sont locaux à
@@ -2915,3 +2916,124 @@ tout `MIXED`; elle ne précède pas `PWC0-A` et ne retarde pas le pont BallKey.
 
 La démonstration et les réponses directes sont dans
 [`AUDIT_REPONSE_TRIPLETS_AIGUS_4CE3618_20260813.md`](audits/AUDIT_REPONSE_TRIPLETS_AIGUS_4CE3618_20260813.md).
+
+## 17. Décision q3 au pin `b96751c` : cages, pieds et range-count avant WSSD aiguë
+
+Une WSSD d'arité trois est admise comme représentation de broad phase, jamais
+comme preuve de source sparse. À dimension, arité et précision fixes, un nombre
+linéaire de tuples de cellules peut couvrir les triplets ; un tuple
+`ALL_ACUTE(A,B,C)` représente néanmoins `|A|*|B|*|C|` triplets logiques. La
+frontière angle droit peut forcer le raffinement des `MIXED`, et l'acuité ne
+décide ni profondeur, ni `BallKey`, ni shell, ni multiplicité de supports.
+
+La contre-famille de trois petits amas autour d'un triangle équilatéral porte
+`Theta(n^3)` triplets aigus tout en admettant une représentation constante par
+blocs. La fixture u16
+`x^2+y^2=826408505`, translatée autour de `(32768,32768,32768)`, contient `384`
+points cocycliques et `2 322 560` triples aigus pour une seule `BallKey`. Toute
+route générale doit donc conserver la masse symbolique, quotienter le plateau
+selon un contrat reçu ou refuser explicitement la dégénérescence.
+
+### 17.1 `CertifiedCageWindow-v0`
+
+Le remplacement d'un cutoff kNN est une fenêtre géométrique certifiée. Pour une
+ancre `a`, une cage de quatre témoins contient `a` strictement dans son
+enveloppe. Sa cellule de Voronoï locale possède quatre sommets rationnels
+`t_v=p_v/(2r_v)`, `r_v>0`. La cible `d=b-a` est fermée par cette cage lorsque,
+pour les quatre sommets :
+
+$$F_v(d)=r_v\left\Vert d\right\Vert^2-p_v\cdot d>0.$$
+
+Le résiduel `F_v<=0` est la boule de centre `t_v` et de rayon `||t_v||`, donc il
+est inclus dans `r_v^2||d||^2<=||p_v||^2`. Le maximum rationnel
+`Rbank2=max_v ||p_v||^2/r_v^2` fournit un tier radial : tout `BNode` avec
+`Dmin>Rbank2` est fermé, égalité ouverte. Le tier directionnel rejoue ensuite
+les quatre formes de chaque cage sur le résiduel proche.
+
+Huit cages à unions d'IDs disjointes ferment q4 ; neuf ferment q3. Pour une
+arête maximale `ab` qui survit depuis `a`, tous les carriers vérifient
+`||x-a||<=||b-a||`; la même fenêtre radiale contient donc le support entier.
+Les deux endpoints sont testés avant délégation. Seules les paires
+`UNDERFULL×UNDERFULL` passent à PWC0-A.
+
+Le constructeur de cages est un proposer borné suivi d'une validation exacte :
+déterminant non nul, coefficients barycentriques stricts, IDs disjoints,
+sommets et formes rejouables. Un échec, une égalité, un cap ou un overflow
+délègue. Le counter-only publie `FULL8/FULL9`, causes `UNDERFULL`, masses des
+fenêtres radiales, masse `UNDERFULL×UNDERFULL`, essais de groupes, formes,
+splits, tâches, octets et HWM. Aucun de ces objets n'est encore reçu.
+
+### 17.2 `Q3FootPowerRange-v0`
+
+Après admission de l'arête maximale `ab`, chaque carrier aigu `x` fournit un
+seul pied. Avec `d=b-a`, `u=x-a` :
+
+$$D=d\cdot d,\quad E=u\cdot u,\quad F=d\cdot u,\quad G=DE-F^2,\quad W=E(D-F)d+D(E-F)u.$$
+
+Pour `G>0`, le circumcentre vaut `a+W/(2G)`. Pour `v=z-a`, la puissance entière
+mise à l'échelle est :
+
+$$P_x(z)=G\left\Vert v\right\Vert^2-v\cdot W.$$
+
+`P_x<0` signifie intérieur strict et `P_x=0` shell. Sur une AABB entière, le
+minimum de chaque terme convexe `Gv_i^2-W_iv_i` se trouve aux deux entiers
+voisins de `W_i/(2G)` clipés, et le maximum aux extrémités. Un parcours LBVH
+peut créditer une population, élaguer ou scinder, puis saturer à neuf intérieurs
+pour rejeter q3 sous `smax=11`.
+
+L'ordre est `BallKey` avant census : former les clés de pieds, radix/RLE, faire
+un seul range-count saturé par boule, puis un seul census complet `I_B/U_B` par
+boule survivante. Sous u16, l'évaluation demande environ `105` bits ; le device
+emploie une ABI signée à deux limbs. Les caps sérialisent une continuation.
+
+Cette ordonnance est le premier falsificateur q3. Les bas niveaux du
+`LineFormTape` ne deviennent une optimisation q3 que si les visites LBVH sont
+rouges. Ils restent le moteur q4 conditionnel après les portes `E_4`,
+`M=sum m_ab` et `J/H`.
+
+### 17.3 Rectangle du spindle : intervalle exact, certificat incomplet
+
+Avec `d=b-a`, `v=2z-a-b`, le terme directionnel est :
+
+$$T=d\cdot v=\left\Vert z-a\right\Vert^2-\left\Vert z-b\right\Vert^2.$$
+
+Son intervalle sur `A×B×C` est calculable exactement et séparablement par axe.
+Pour `z` fixé, le minimum unidimensionnel vaut
+`dist(z,A)^2-far(z,B)^2`, le maximum
+`far(z,A)^2-dist(z,B)^2`; un ensemble constant de ruptures et de milieux
+entiers suffit. Les seuls coins sont incomplets : pour
+`A=[0,1],B=[0,3],C=[0,2]`, le maximum `4` est intérieur en `b=2`, tandis que les
+coins rendent au plus `3`.
+
+Si `T2lo` est le minimum de `T^2` sur cet intervalle, donc zéro lorsque
+l'intervalle traverse zéro, un `ALL` q4 sûr exige :
+
+```text
+D2lo > V2hi
+(D2lo-V2hi)^2 > 2*(D2hi*V2hi-T2lo)
+```
+
+q3 emploie `3*(D2lo-V2hi)^2 > 4*(D2hi*V2hi-T2lo)`. Avec le `Hlo` exact de
+`rect_h_interval`, poser `Qhi=D2hi*V2hi-T2lo` donne les versions plus fortes
+`8*Hlo^2>Qhi` en q4 et `12*Hlo^2>Qhi` en q3, toujours sous `Hlo>0`.
+Le membre droit emploie `D2hi`, jamais `D2lo`; les égalités restent ouvertes
+et tous les produits sont promus en `i128`. Cette combinaison perd la
+corrélation entre `D2`, `V2` et `T` : l'intervalle de `T` est exact, mais le
+classifieur composé est seulement sûr et fail-open, pas nécessaire et suffisant
+sur le rectangle. Tout échec est raffiné ou délégué.
+
+### 17.4 Portes
+
+Le ledger q3 publie au minimum `carrier_blocks ALL/NONE/MIXED`,
+`carrier_mass`, `foot_queries`, `unique_BallKeys`, visites LBVH, populations
+créditées, tests feuille, `rejects_at_9`, survivants, shell, opérations larges,
+octets/HWM et pending. L'identité output-bearing reste
+`(BallKey,SupportKey,I_B,U_B,owner)` contre une autorité rationnelle bornée.
+
+Une WSSD aiguë ou `AcuteCarrierCellFront-v0` ne peut être comparée qu'en
+ablation sur ce même travail transitif jusqu'au `BallKey` et au fold. Le nombre
+de blocs seul, un taux de fermeture ou une pente de fenêtre centrale ne reçoit
+aucune compatibilité avec la seconde G4.
+
+Preuves, contre-fixtures et directive complète :
+[`AUDIT_REPONSE_WSSD_Q3_ET_FENETRE_CERTIFIEE_B96751C_20260813.md`](audits/AUDIT_REPONSE_WSSD_Q3_ET_FENETRE_CERTIFIEE_B96751C_20260813.md).

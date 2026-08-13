@@ -1,0 +1,3 @@
+n=3000   coeur q4 par paire (lane echantillonnee 2) : moyen=22.63, vide : 608 (15.2%), au moins 8 temoins : 2500 (62.5%) | coeur EXACT : moyen=123.48, vide : 52 (1.3%), au moins 8 temoins : 3692 (92.3%)
+n=6000   coeur q4 par paire (lane echantillonnee 2) : moyen=43.46, vide : 552 (13.8%), au moins 8 temoins : 2852 (71.3%) | coeur EXACT : moyen=245.18, vide : 35 (0.9%), au moins 8 temoins : 3801 (95.0%)
+n=12000  coeur q4 par paire (lane echantillonnee 2) : moyen=85.91, vide : 506 (12.7%), au moins 8 temoins : 3122 (78.0%) | coeur EXACT : moyen=505.71, vide : 20 (0.5%), au moins 8 temoins : 3888 (97.2%)

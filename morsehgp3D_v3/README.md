@@ -181,6 +181,43 @@ compteur commence donc par les suffixes `i64` des 48 chambres, puis compare le
 triple exact et les 432 sous-cellules. Directive et fixtures :
 [`AUDIT_DIRECTIVE_BNODE_PROJECTIF_ET_ARRET_CLIMB_75F16DB_20260813.md`](audits/AUDIT_DIRECTIVE_BNODE_PROJECTIF_ET_ARRET_CLIMB_75F16DB_20260813.md).
 
+Au successeur documentaire `b96751c`, le taux central `84 %` est rétracté : il
+portait sur q2 et ne prouvait aucun plafond q4. Une coupure kNN reste interdite :
+une fixture u16 conserve un q4 positif de profondeur zéro avec l'arête maximale
+unique au-delà du rang `4380`. Le remplacement proposé est géométrique et
+factorisé : huit cages de Voronoï à IDs disjoints ferment q4 hors de leurs
+fleurs, unions constantes de boules rationnelles classifiables sur un `BNode`.
+Preuve, fixtures et coût honnête :
+[`AUDIT_REPONSE_DEUX_PERTES_CAGES_FLEURS_B96751C_20260813.md`](audits/AUDIT_REPONSE_DEUX_PERTES_CAGES_FLEURS_B96751C_20260813.md).
+
+La nouvelle analyse des seuils de séparation fournit un plancher utile, mais
+pas un fate : `rho` est le rayon minoré d'une boule inscrite, et `rho<=0` ne
+prouve pas que le cœur réel soit vide ; une fixture ferme même q4 à `s=3` avec
+`rho<0`. L'intervalle de `P=(b-a) dot (2z-a-b)` est calculable exactement en
+temps constant par axe, mais le verdict qui décorrèle ses extrema de `D2/V2`
+reste seulement suffisant et fail-open. Raffiner localement est recevable
+jusqu'à huit crédits distincts ou une continuation, jamais seulement jusqu'à
+`rho>0`. La boule centrale rationnelle, le spindle de Jung anisotrope et les
+cages sont trois certificats distincts. Une traversée `lane_mask` peut partager
+les trois résolutions, mais « juste au-dessus du seuil » n'est pas un optimum de
+coût. Le successeur corrige le masquage initial des pentes, mais son nominal
+avec banque reste vert avec `fenetre_finale=NON`, la finalité manque hors VWave
+et le reçu n'est pas causal.
+Réponse complète :
+[`AUDIT_REPONSE_SEUIL_SEPARATION_RAFFINEMENT_LOCAL_B96751C_20260813.md`](audits/AUDIT_REPONSE_SEUIL_SEPARATION_RAFFINEMENT_LOCAL_B96751C_20260813.md).
+
+La réponse à la question WSPD/triplets est négative dans sa version forte : une
+WSSD aiguë peut compresser un broad phase, mais un bloc linéaire peut cacher une
+masse cubique et une seule `BallKey` u16 porte déjà `2 322 560` supports q3
+aigus sur une fixture cosphérique. Le prochain jalon q3 est
+`Q3FootPowerRange-v0` : une clé de pied par carrier, RLE `BallKey`, puis un
+range-count LBVH exact saturé à neuf et un seul census par boule. Il est précédé
+par `CertifiedCageWindow-v0`, cutoff radial certifié à huit/neuf cages qui
+remplace le rang kNN ; PWC0-A ne traite ensuite que le sous-univers sous-rempli.
+La même réponse donne l'intervalle rectangle exact du terme directionnel et
+réfute son calcul par les seuls coins :
+[`AUDIT_REPONSE_WSSD_Q3_ET_FENETRE_CERTIFIEE_B96751C_20260813.md`](audits/AUDIT_REPONSE_WSSD_Q3_ET_FENETRE_CERTIFIEE_B96751C_20260813.md).
+
 Le parent `32589ad` n'est pas encore ce compteur : son `sum_N` vaut
 identiquement deux fois la masse PairId q2 centrale résiduelle, avec les deux
 orientations. Il n'a ni crédits projectifs, ni owner d'arête, ni q3/q4 ; son
@@ -191,20 +228,21 @@ reçoit séparément les marges carrier : `ALL` exact sur le produit AABB,
 réponse 48/432 sont dans
 [`AUDIT_CONTRE_COMPTEUR_FENETRE_32589AD_20260813.md`](audits/AUDIT_CONTRE_COMPTEUR_FENETRE_32589AD_20260813.md).
 
-La directive d'implémentation est maintenant unique : écrire d'abord
-`PWC0-A/CanonicalEdgeWindowReporter-q4-v0`, pas un nouveau scan de carriers. Il
-conserve les vrais `PointId`, l'orientation canonique, les preuves et les
-continuations, mesure les spans ouverts q4 sur 48 chambres, puis raffine
-uniquement chaque chambre ouverte dans ses neuf sous-cellules. Une banque
-bornée reste propositionnelle : un résultat dense à `P=96` refuse cette
-configuration, pas tous les certificats. Si `sum_a|E_4(a)|`, les tâches ou les
-octets restent rouges après ablation de `P`, la route s'arrête. Le reporter ne
-sait pas encore quelles paires deviendront owners ; l'arête maximale intervient
-uniquement dans la gate de complétude. Si `E_4` passe,
-`EdgeActiveFormCounter-v0` doit encore recevoir `M=sum m_ab` avant le shallow.
-Si la fenêtre est sparse mais les `n` graines racine dominent, `PWC0-B`
-universalise sur `ANode×BNode`. Seuls les deux verts `E_4` et `M` autorisent le
-shallow q4 puis q3/q2 ; ils ne qualifient encore aucun SLO.
+La directive d'implémentation actuelle est désormais : recevoir d'abord
+l'autorité `BallFormToBallEvent-v0`, puis mesurer
+`CertifiedCageWindow-v0`. Une ancre munie de huit/neuf cages obtient une fenêtre
+radiale certifiée ; tester les deux endpoints laisse seulement le sous-univers
+`UNDERFULL×UNDERFULL` à
+`PWC0-A/CanonicalEdgeWindowReporter-q4-v0`. PWC conserve alors les vrais
+`PointId`, l'orientation canonique, les preuves et les continuations, mesure ses
+spans ouverts sur 48 chambres, puis raffine uniquement chaque chambre ouverte
+dans ses neuf sous-cellules. Une banque bornée reste propositionnelle : un
+résultat dense à `P=96` refuse cette configuration, pas tous les certificats.
+Si `sum_a|E_4(a)|`, les tâches ou les octets restent rouges, la route s'arrête.
+Si `E_4` passe, `EdgeActiveFormCounter-v0` doit encore recevoir
+`M=sum m_ab` avant le shallow. Si la fenêtre est sparse mais les graines racine
+dominent, `PWC0-B` universalise sur `ANode×BNode`. Seuls les deux verts `E_4`
+et `M` autorisent q3-foot/q4-shallow ; ils ne qualifient encore aucun SLO.
 
 Au pin `96be8e0`, le nouveau front apporte deux briques utiles sans changer ce
 verdict. L'intervalle entier de `H=(z-a) dot(b-z)` sur trois AABB certifie

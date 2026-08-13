@@ -201,11 +201,13 @@ Le bit `acute(z)` est une propriété du carrier relatif à `ab`. Un candidat q4
 n'est proposé que si au moins un bundle incident porte ce bit. Il faut conserver
 les cas à une seule face aiguë ; exiger deux bits perd des supports.
 
-## 6. Le code existant est l'oracle, pas le chemin produit
+## 6. Le code existant est un comparateur différentiel, pas l'autorité ni le chemin produit
 
 `prototype/edge_shallow.hpp` contient déjà la forme entière, les disques de
-Jung, le point q2, les points q3 et les sommets q4. Il confirme que Claude n'a
-pas à inventer une nouvelle géométrie. Il reste impropre au contrat :
+Jung, le point q2, les points q3 et les sommets q4. Il constitue un comparateur
+différentiel utile, mais il partage des structures et des primitives avec le
+sujet et n'est donc pas une autorité indépendante. Il reste impropre au
+contrat :
 
 - il lance toutes les `C(n,2)` arêtes ;
 - il charge tous les points pour chaque arête ;
@@ -214,8 +216,10 @@ pas à inventer une nouvelle géométrie. Il reste impropre au contrat :
 - il matérialise un catalogue et déduplique après génération.
 
 Le nouveau moteur ne doit pas être une translittération GPU de ce fichier.
-Celui-ci devient l'autorité bornée qui compare les ensembles
-`(BallKey,SupportKey,I_B,U_B,owner)` du producteur de niveaux.
+Celui-ci compare différentiellement les ensembles
+`(BallKey,SupportKey,I_B,U_B,owner)` du producteur de niveaux. L'autorité bornée
+reste à recevoir dans un juge rationnel séparé qui reconstruit ces cinq objets
+sans réutiliser les bundles, extrema ou clés du sujet.
 
 ## 7. Micro-jalon concret remis à Claude
 
@@ -231,9 +235,14 @@ Deux travaux peuvent avancer sans confusion :
    `edge_shallow.hpp`. Ce vert reçoit la preuve/ordonnance, pas sa parcimonie
    globale.
 
-L'ABI minimale porte `LineBundle(normalized_form,mu_plus,mu_minus,PointIdSpan)`,
-`LevelSegment`, `CenterEvent(center_key,incident_bundles,strict_depth)` et
-`BallEvent(BallKey,lane_mask)`. Les gates minimales sont :
+L'ABI minimale porte
+`LineBundle(normalized_form,plus_ids_offset,plus_ids_count,minus_ids_offset,minus_ids_count)`,
+deux listes exactes de `LineMember(PointId,acute,provenance)`, `LevelSegment`,
+`CenterEvent(center_key,incident_bundles,strict_depth)` et
+`BallEvent(BallKey,lane_mask)`. Des multiplicités `mu_plus/mu_minus` seules ou
+un intervalle de rang ne suffisent pas : les IDs géométriquement confondus ne
+sont pas nécessairement contigus et le shell/owner exige chaque membre. Les
+gates minimales sont :
 
 - q2 à `t=0`, q3 au pied de droite et q4 au sommet comparés séparément ;
 - `P-P`, `N-N`, `P-N`, niveaux `0` et `k` tous non vides ;
@@ -253,8 +262,10 @@ device streame les curseurs ou emploie une shallow cutting certifiée ; elle ne
 matérialise jamais l'arrangement complet.
 
 La réponse synthétique est donc : **oui au même objet géométrique, non à une
-dépendance q2 -> q3 -> q4**. La propriété trouvée est la bonne solution au mur
-quadratique, à condition de construire les niveaux shallow et non toutes les
-intersections.
+dépendance q2 -> q3 -> q4**. La propriété trouvée donne un bon moteur local
+conditionnel pour supprimer `C(m_ab,2)` après admission d'une arête ; elle ne
+borne ni `|E_4|`, ni `M=sum m_ab`, ni `J/H`. Elle n'entre dans le hot path
+qu'après ces portes, et construit alors les niveaux shallow plutôt que toutes
+les intersections.
 
 GCP non utilisé par l'auditeur.

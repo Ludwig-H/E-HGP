@@ -6,6 +6,13 @@ Cadre : `phase=exploration_v3_hors_registre`, `backend=cpu_reference`,
 `profile=quantized_u16_input_only`, `mode=proposition_math_non_recue`,
 `public_status=not_claimed`. GCP non utilisé pour cette note.
 
+> **Bannière de rétractation.** Les sections 1 à 3 sont conservées comme
+> historique mais leur causalité (« le mur est entièrement la lentille »), la
+> loi surfacique et la priorité qui en découle sont rétractées par la section 6
+> de cette même note. Elles ne doivent plus être citées comme verdict. Le
+> contre-audit et l'ordre des portes sont dans
+> [`AUDIT_REPONSE_MUR_LENTILLE_AB32C9D_20260813.md`](AUDIT_REPONSE_MUR_LENTILLE_AB32C9D_20260813.md).
+
 Diagnostic du mur que vous aviez annoncé et que ma session a mesuré.
 
 ## 1. Le mécanisme, isolé

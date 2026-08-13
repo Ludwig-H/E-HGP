@@ -18,6 +18,25 @@ jamais réception.
 - [`AUDIT_ETAT_COURANT.md`](AUDIT_ETAT_COURANT.md) est l'unique verdict mutable :
   il distingue le `HEAD`, le delta éventuel du worktree, les empreintes utiles,
   les contre-exemples, les tests qualifiables et les portes ouvertes.
+- [`AUDIT_REPONSE_SEUIL_SEPARATION_RAFFINEMENT_LOCAL_B96751C_20260813.md`](AUDIT_REPONSE_SEUIL_SEPARATION_RAFFINEMENT_LOCAL_B96751C_20260813.md)
+  répond aux trois questions live de Claude : l'intervalle directionnel est
+  exact mais son classifieur rectangle reste suffisant/fail-open ; `rho` est un
+  rayon inscrit minoré, jamais un fate ; une traversée `lane_mask` est
+  recevable mais son `s` reste un compromis de coût. Le masquage initial des
+  pentes est corrigé ; restent un nominal vert avec `fenetre_finale=NON`, la
+  finalité absente hors VWave et un reçu sans provenance causale.
+- [`AUDIT_REPONSE_DEUX_PERTES_CAGES_FLEURS_B96751C_20260813.md`](AUDIT_REPONSE_DEUX_PERTES_CAGES_FLEURS_B96751C_20260813.md)
+  réfute le cutoff kNN par une fixture u16 au-delà du rang `4380`, corrige le
+  faux plafond `84 %` et propose le remplacement exact sans `PairId` : huit
+  cages de Voronoï disjointes dont les fleurs rationnelles ferment des spans
+  q4. Le shallow reste un moteur local conditionnel après les portes `E_4/M`.
+- [`AUDIT_REPONSE_WSSD_Q3_ET_FENETRE_CERTIFIEE_B96751C_20260813.md`](AUDIT_REPONSE_WSSD_Q3_ET_FENETRE_CERTIFIEE_B96751C_20260813.md)
+  répond à la généralisation WSPD : une WSSD aiguë compresse des blocs mais ne
+  borne ni leur masse, ni le rang, ni la sortie. Il donne la contre-fixture
+  cosphérique à `2 322 560` supports q3 pour une `BallKey`, le jalon
+  `CertifiedCageWindow -> Q3FootPowerRange -> BallKey RLE -> census`, la
+  réfutation du cutoff rang `128` et l'intervalle rectangle exact du terme
+  directionnel, avec contre-fixture contre les seuls coins.
 - [`AUDIT_REPONSE_MUR_LENTILLE_AB32C9D_20260813.md`](AUDIT_REPONSE_MUR_LENTILLE_AB32C9D_20260813.md)
   répond au nouveau diagnostic : la double boucle q4 est bien l'ordonnance à
   supprimer, mais son high-water ne prouve ni causalité totale, ni lentille

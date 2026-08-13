@@ -90,11 +90,37 @@ bool g_bank = false;
 long long g_win = 32, g_bankl = 16;
 long long g_warms = 0;
 long long g_inflation = 0;
+int g_infl_lane = 0;   // lane dont on echantillonne les terminaux OUVERTS
 bool g_descent = false;
 bool g_vwave = false;
 bool g_inject_global = false;
 bool g_climb = false;
 bool g_judge_vwave = false;
+
+// ---- `EdgeWindowRangeAdd-v0` : la fenetre d'aretes, EXACTE et en `O(F+n)`.
+//
+// J'avais ecrit que le maximum de `E_q(a)` exigeait de developper `|A||B|` par
+// terminal, donc la masse. C'est faux, et le contre-audit `ab32c9d` donne la
+// raison : chaque nœud du radix tree porte une plage CONTIGUE de
+// `GenerationRank`, les terminaux sont des produits de plages DISJOINTES, donc
+// tout terminal `A x B` verifie exactement l'un des deux ordres totaux
+// `last(A) < first(B)` ou `last(B) < first(A)`. Sous l'orientation canonique
+// `b > a`, le terminal credite alors une plage CONTIGUE d'ancres d'une valeur
+// CONSTANTE : c'est un range-add, deux ecritures, suivi d'un scan prefixe.
+//
+// Ce n'est pas une optimisation de confort. `sum_a E_4(a)` est le nombre exact
+// d'aretes candidates que `LocalShallowBall` devrait traiter, et `max_a E_4(a)`
+// le pire fan-out par ancre. Ces deux nombres decident si le moteur shallow est
+// finançable ou non ; les mesurer sans les developper est la seule facon de les
+// connaitre a `n = 50 000`.
+bool g_window = false;
+bool g_inject_orient = false;
+bool g_inject_cote = false;
+long long g_oracle_window = 0;
+long long g_min_open = 0;
+long long g_min_orient = 0;
+long long g_min_closed = 0;
+double g_max_slope_e4 = 0.0;
 
 // Cellule d'un identifiant de nœud : negatif = feuille (le point lui-meme).
 mhgp3v::WspdBox cell_of(const std::vector<WfNode>& nodes,
@@ -115,7 +141,430 @@ long long count_of(const std::vector<WfNode>& nodes, int id) {
   return (id < 0) ? 1 : (nodes[id].last - nodes[id].first + 1);
 }
 
+// ---- `JungSpindleSingleton-v0` : le cœur anisotrope, et son juge independant.
+//
+// Le certificat en production teste `209 V2 <= 56 D2`. C'est la BOULE INSCRITE :
+// le pire cas directionnel de la vraie condition, obtenu en supprimant le terme
+// favorable `-4 (d.v)^2`. La condition exacte sur le disque de Jung est
+//
+//     L2 > V2   et   (L2-V2)^2 > 2 (V2 L2 - P^2),   P = d . v,
+//
+// qui redonne `V2/L2 < 2-sqrt(3)` sur le plan mediateur et la boule diametrale
+// entiere sur l'axe de `ab`.
+//
+// PORTEE EXACTE, telle que l'audit l'exige : ce certificat est exact SUR LE
+// DISQUE DE JUNG et SOUS OWNER MAXIMAL. Il n'est pas « exact pour toute sphere
+// passant par la paire » : le domaine reel des centres peut etre plus petit, ce
+// qui le rend suffisant, jamais complet.
+struct SpindleTriple { long long a[3], b[3], z[3]; };
+
+inline bool spindle_inside(const long long a[3], const long long b[3], const long long z[3]) {
+  long long l2 = 0, v2 = 0, p = 0;
+  for (int i = 0; i < 3; ++i) {
+    const long long d = b[i] - a[i];
+    const long long v = 2 * z[i] - a[i] - b[i];
+    l2 += d * d; v2 += v * v; p += d * v;
+  }
+  if (l2 <= v2) return false;
+  const __int128 g = (__int128)(l2 - v2) * (l2 - v2);
+  return g > 2 * ((__int128)v2 * l2 - (__int128)p * p);
+}
+
+inline bool inscribed_inside(const long long a[3], const long long b[3], const long long z[3]) {
+  long long l2 = 0, v2 = 0;
+  for (int i = 0; i < 3; ++i) {
+    const long long d = b[i] - a[i];
+    const long long v = 2 * z[i] - a[i] - b[i];
+    l2 += d * d; v2 += v * v;
+  }
+  return (__int128)209 * v2 <= (__int128)56 * l2;
+}
+
+// JUGE INDEPENDANT. Il n'emploie AUCUNE des deux algebres ci-dessus : il balaie
+// des centres `c = m + t` du disque de Jung sur une grille entiere et teste
+// directement `|z-c|^2 < L2/4 + |t|^2`. S'il trouve un centre qui EXCLUT `z`,
+// tout certificat qui aurait credite `z` est refute. Un balayage ne peut que
+// falsifier, jamais prouver l'appartenance — c'est le bon sens pour un juge.
+// Rend `true` si un centre excluant a ete trouve.
+inline bool jung_sweep_excludes(const long long a[3], const long long b[3],
+                                const long long z[3], long long grid) {
+  long long d[3], l2 = 0;
+  for (int i = 0; i < 3; ++i) { d[i] = b[i] - a[i]; l2 += d[i] * d[i]; }
+  // Base entiere de `d^perp`, comme `edge_shallow.hpp` : deux produits croises
+  // avec les axes autres que la composante dominante de `d`.
+  const long long ax = d[0] < 0 ? -d[0] : d[0];
+  const long long ay = d[1] < 0 ? -d[1] : d[1];
+  const long long az = d[2] < 0 ? -d[2] : d[2];
+  int e1, e2;
+  if (ax >= ay && ax >= az) { e1 = 1; e2 = 2; }
+  else if (ay >= az) { e1 = 0; e2 = 2; }
+  else { e1 = 0; e2 = 1; }
+  auto cross = [&](int axis, long long out[3]) {
+    long long u[3] = {0, 0, 0};
+    u[axis] = 1;
+    out[0] = d[1] * u[2] - d[2] * u[1];
+    out[1] = d[2] * u[0] - d[0] * u[2];
+    out[2] = d[0] * u[1] - d[1] * u[0];
+  };
+  long long q1[3], q2v[3];
+  cross(e1, q1);
+  cross(e2, q2v);
+  // `t = (alpha q1 + beta q2)/K`. Tout est multiplie par `K` puis par `4` pour
+  // absorber le demi du milieu ; aucun flottant, aucune division.
+  const long long K = grid;
+  for (long long alpha = -K; alpha <= K; ++alpha)
+    for (long long beta = -K; beta <= K; ++beta) {
+      long long w[3], t2 = 0;
+      for (int i = 0; i < 3; ++i) w[i] = alpha * q1[i] + beta * q2v[i];
+      for (int i = 0; i < 3; ++i) t2 += w[i] * w[i];
+      // `|t|^2 = |w|^2/K^2 <= L2/8`, admissibilite du disque de Jung q4.
+      if ((__int128)8 * t2 > (__int128)l2 * K * K) continue;
+      // `|z - m - t|^2 < L2/4 + |t|^2`, tout multiplie par `(2K)^2`.
+      __int128 lhs = 0;
+      for (int i = 0; i < 3; ++i) {
+        const __int128 e = (__int128)K * (2 * z[i] - a[i] - b[i]) - 2 * (__int128)w[i];
+        lhs += e * e;
+      }
+      const __int128 rhs = (__int128)l2 * K * K + 4 * (__int128)t2;
+      if (lhs >= rhs) return true;             // ce centre EXCLUT `z`
+    }
+  return false;
+}
+
 }  // namespace
+
+// Les deux fixtures GRAVEES du spindle, aux coordonnees exactes.
+//
+// A — SURETE, fixture de l'audit `b96751c` §1.2. Dix points strictement dans la
+// boule diametrale de `ab` et strictement HORS de la circumsphere q4 de
+// `{a,b,x,y}`. Aucun certificat q4 ne doit les crediter : « dix temoins q2 »
+// n'est pas un certificat q4, et c'est precisement la confusion que je faisais.
+//
+// B — NON-VACUITE. Un point de l'AXE, que la boule inscrite rejette et que le
+// spindle credite. Sans lui, un spindle qui n'accepterait jamais rien passerait
+// la fixture A sans rien prouver.
+int spindle_fixtures() {
+  const long long a[3] = {100, 100, 100}, b[3] = {200, 100, 100};
+  const long long x[3] = {150, 30, 120}, y[3] = {150, 30, 80};
+  int fautes = 0, credites_spindle = 0, rejetes_avec_temoin = 0;
+
+  // L'arete `ab` doit etre l'unique arete maximale du tetraedre.
+  {
+    auto d2 = [](const long long u[3], const long long v[3]) {
+      long long s = 0;
+      for (int i = 0; i < 3; ++i) { const long long w = u[i] - v[i]; s += w * w; }
+      return s;
+    };
+    const long long ab = d2(a, b);
+    const long long autres[5] = {d2(a, x), d2(a, y), d2(b, x), d2(b, y), d2(x, y)};
+    for (int i = 0; i < 5; ++i)
+      if (autres[i] >= ab) {
+        std::fprintf(stderr, "FIXTURE: `ab`=%lld n'est pas l'unique arete maximale (%lld)\n",
+                     ab, autres[i]);
+        ++fautes;
+      }
+    if (ab != 10000) { std::fprintf(stderr, "FIXTURE: ab^2=%lld attendu 10000\n", ab); ++fautes; }
+  }
+
+  // A — les dix satellites.
+  for (long long i = -4; i <= 5; ++i) {
+    const long long z[3] = {150 + i, 140, 100};
+    long long v2 = 0;
+    for (int k = 0; k < 3; ++k) { const long long v = 2 * z[k] - a[k] - b[k]; v2 += v * v; }
+    if (v2 >= 10000) {                       // doit etre DANS la boule diametrale
+      std::fprintf(stderr, "FIXTURE A: z_%lld hors boule diametrale (V2=%lld)\n", i, v2);
+      ++fautes;
+    }
+    // hors de la circumsphere `c=(150,80,100)`, `R^2=2900`
+    long long dc = 0;
+    const long long c[3] = {150, 80, 100};
+    for (int k = 0; k < 3; ++k) { const long long w = z[k] - c[k]; dc += w * w; }
+    if (dc <= 2900) {
+      std::fprintf(stderr, "FIXTURE A: z_%lld dans la circumsphere (d2=%lld)\n", i, dc);
+      ++fautes;
+    }
+    if (inscribed_inside(a, b, z)) {
+      std::fprintf(stderr, "FIXTURE A: la boule inscrite credite z_%lld\n", i);
+      ++fautes;
+    }
+    if (spindle_inside(a, b, z)) {
+      std::fprintf(stderr, "FIXTURE A: le spindle credite z_%lld, refute par la"
+                           " circumsphere q4\n", i);
+      ++fautes;
+    }
+    if (jung_sweep_excludes(a, b, z, 24)) ++rejetes_avec_temoin;
+  }
+
+  // B — le point de l'axe.
+  {
+    const long long z[3] = {110, 100, 100};
+    if (inscribed_inside(a, b, z)) {
+      std::fprintf(stderr, "FIXTURE B: la boule inscrite credite deja l'axe, la"
+                           " fixture ne prouve plus rien\n");
+      ++fautes;
+    }
+    if (!spindle_inside(a, b, z)) {
+      std::fprintf(stderr, "FIXTURE B: le spindle ne credite pas l'axe\n");
+      ++fautes;
+    } else {
+      ++credites_spindle;
+      if (jung_sweep_excludes(a, b, z, 24)) {
+        std::fprintf(stderr, "DESACCORD DU JUGE: le balayage de Jung exclut un point"
+                             " credite par le spindle\n");
+        ++fautes;
+      }
+    }
+  }
+
+  // PLANCHERS : sans eux, un spindle qui n'accepte rien passerait la fixture A.
+  if (credites_spindle < 1) {
+    std::fprintf(stderr, "PLANCHER: aucun point credite par le spindle\n");
+    return 3;
+  }
+  if (rejetes_avec_temoin < 10) {
+    std::fprintf(stderr, "PLANCHER: %d rejets sur 10 justifies par un centre excluant\n",
+                 rejetes_avec_temoin);
+    return 3;
+  }
+  if (fautes) {
+    std::fprintf(stderr, "DESACCORD DU JUGE: %d fautes de fixture\n", fautes);
+    return 1;
+  }
+  std::printf("fixtures_spindle accord=OUI credites=%d rejets_justifies=%d\n",
+              credites_spindle, rejetes_avec_temoin);
+  return 0;
+}
+
+// FIXTURE GRAVEE — toute coupure de partenaires par RANG est refutee.
+//
+// C'est ma propre proposition que cette fixture ferme. J'avais demande si borner
+// la liste de partenaires par un rang supprimerait le `|lens|^2` sans rien
+// changer au front. L'audit `b96751c` §2 rend un contre-exemple u16 exact : un
+// support q4 POSITIF, de profondeur ZERO, d'arete maximale UNIQUE, dont le
+// second endpoint est au-dela du rang `4381`. Aucune coupure de rang ne peut
+// donc etre exacte, quel que soit le seuil choisi.
+int rang_fixture() {
+  const long long c[3] = {30000, 30000, 30000};
+  const long long a[3] = {5000, 40000, 30000}, b[3] = {55000, 40000, 30000};
+  const long long x[3] = {30000, 5000, 40000}, y[3] = {30000, 5000, 20000};
+  const long long R2 = 725000000LL;
+  const long long kSat = 4381;
+  int fautes = 0;
+  auto d2 = [](const long long u[3], const long long v[3]) {
+    long long s = 0;
+    for (int i = 0; i < 3; ++i) { const long long w = u[i] - v[i]; s += w * w; }
+    return s;
+  };
+
+  // Les quatre sommets sont EXACTEMENT sur la sphere.
+  const long long* q[4] = {a, b, x, y};
+  const char* nom[4] = {"a", "b", "x", "y"};
+  for (int i = 0; i < 4; ++i)
+    if (d2(q[i], c) != R2) {
+      std::fprintf(stderr, "FIXTURE RANG: %s hors sphere (%lld != %lld)\n",
+                   nom[i], d2(q[i], c), R2);
+      ++fautes;
+    }
+
+  // `ab` est l'UNIQUE arete maximale : aucun tie-break d'owner n'est en jeu.
+  const long long ab = d2(a, b);
+  if (ab != 2500000000LL) {
+    std::fprintf(stderr, "FIXTURE RANG: ab^2=%lld attendu 2500000000\n", ab);
+    ++fautes;
+  }
+  const long long autres[5] = {d2(a, x), d2(a, y), d2(b, x), d2(b, y), d2(x, y)};
+  for (int i = 0; i < 5; ++i)
+    if (autres[i] >= ab) {
+      std::fprintf(stderr, "FIXTURE RANG: arete %lld >= ab %lld\n", autres[i], ab);
+      ++fautes;
+    }
+
+  // Les satellites sont STRICTEMENT hors de la circumsphere — le support est
+  // donc de profondeur zero — et STRICTEMENT plus proches de `a` que `b`.
+  long long plus_proches = 0;
+  for (long long j = 1; j <= kSat; ++j) {
+    const long long z[3] = {5000, 40000 + j, 30000};
+    if (z[1] > 65535) {
+      std::fprintf(stderr, "FIXTURE RANG: satellite hors u16\n");
+      ++fautes;
+      break;
+    }
+    if (d2(z, c) <= R2) {
+      std::fprintf(stderr, "FIXTURE RANG: satellite j=%lld dans la circumsphere\n", j);
+      ++fautes;
+    }
+    if (d2(a, z) < ab) ++plus_proches;
+  }
+  if (plus_proches != kSat) {
+    std::fprintf(stderr, "FIXTURE RANG: %lld satellites plus proches de `a` que `b`,"
+                         " %lld attendus\n", plus_proches, kSat);
+    ++fautes;
+  }
+  if (fautes) {
+    std::fprintf(stderr, "DESACCORD DU JUGE: %d fautes de fixture de rang\n", fautes);
+    return 1;
+  }
+  // LE RANG DE `b` VU DE `a`. `plus_proches` voisins le precedent strictement,
+  // donc toute coupure au rang `plus_proches` ou en deca perd ce support.
+  std::printf("fixtures_rang accord=OUI rang_du_partenaire=%lld profondeur=0"
+              " arete_maximale_unique=OUI\n", plus_proches + 1);
+  return 0;
+}
+
+// ---- LE TERME DIRECTIONNEL SUR UN RECTANGLE, EXACT.
+//
+// C'est la reponse de l'audit `b96751c` §6 a la question qui me bloquait :
+// comment minorer `(d.v)^2` sur `A x B x C` alors que `d` et `v` dependent tous
+// deux de `a` et `b`. L'identite qui debloque tout est
+//
+//     T = d . v = ||z-a||^2 - ||z-b||^2,
+//
+// car elle est SEPARABLE PAR AXE : `a`, `b` et `z` choisissent leurs
+// coordonnees independamment dans des boites alignees, donc l'intervalle exact
+// de la somme est la somme des intervalles exacts par axe.
+//
+// Par axe, `min_z [dist(z,A)^2 - far(z,B)^2]` et `max_z [far(z,A)^2 -
+// dist(z,B)^2]`. Sur chaque morceau ces fonctions sont LINEAIRES — les termes
+// en `z^2` s'annulent — sauf quand `z` est dans l'intervalle de la distance,
+// ou elles deviennent concaves. Les candidats sont donc en nombre CONSTANT :
+// les bornes de `C`, les ruptures de la distance, et les deux entiers voisins
+// du milieu qui separe les deux endpoints les plus lointains.
+//
+// TESTER LES SEULS COINS EST FAUX, et l'audit en donne le contre-exemple : sur
+// `A=[0,1]`, `B=[0,3]`, `C=[0,2]`, le maximum exact vaut `4` en `(0,2,2)` alors
+// que les huit choix d'extremites ne donnent que `3`. C'est une fixture.
+inline long long axe_dist2(long long z, long long lo, long long hi) {
+  if (z < lo) return (lo - z) * (lo - z);
+  if (z > hi) return (z - hi) * (z - hi);
+  return 0;
+}
+inline long long axe_far2(long long z, long long lo, long long hi) {
+  const long long a = (z - lo) * (z - lo), b = (z - hi) * (z - hi);
+  return a > b ? a : b;
+}
+
+inline void t_interval_axe(long long alo, long long ahi, long long blo, long long bhi,
+                           long long clo, long long chi, long long* lo, long long* hi) {
+  long long cand[6];
+  int nc = 0;
+  auto add = [&](long long z) {
+    if (z < clo) z = clo;
+    if (z > chi) z = chi;
+    for (int i = 0; i < nc; ++i) if (cand[i] == z) return;
+    cand[nc++] = z;
+  };
+  // MINIMUM : ruptures de `dist(.,A)` et milieu de `B`.
+  add(clo); add(chi); add(alo); add(ahi);
+  const long long mb = blo + bhi;                 // milieu double, sans division
+  add(mb >= 0 ? mb / 2 : (mb - 1) / 2);
+  add(mb >= 0 ? (mb + 1) / 2 : mb / 2);
+  *lo = axe_dist2(cand[0], alo, ahi) - axe_far2(cand[0], blo, bhi);
+  for (int i = 1; i < nc; ++i) {
+    const long long v = axe_dist2(cand[i], alo, ahi) - axe_far2(cand[i], blo, bhi);
+    if (v < *lo) *lo = v;
+  }
+  // MAXIMUM : le role de `A` et `B` s'echange.
+  nc = 0;
+  add(clo); add(chi); add(blo); add(bhi);
+  const long long ma = alo + ahi;
+  add(ma >= 0 ? ma / 2 : (ma - 1) / 2);
+  add(ma >= 0 ? (ma + 1) / 2 : ma / 2);
+  *hi = axe_far2(cand[0], alo, ahi) - axe_dist2(cand[0], blo, bhi);
+  for (int i = 1; i < nc; ++i) {
+    const long long v = axe_far2(cand[i], alo, ahi) - axe_dist2(cand[i], blo, bhi);
+    if (v > *hi) *hi = v;
+  }
+}
+
+// FIXTURE ET AUDIT DE L'AUDIT. La prescription ci-dessus est ce sur quoi le
+// moteur va reposer ; je ne la recois pas sur parole. Elle est donc comparee a
+// une enumeration EXHAUSTIVE de tous les `(a,b,z)` sur des boites petites, et
+// le contre-exemple des coins est verifie separement.
+int terme_t_fixtures() {
+  int fautes = 0;
+  // (1) Le contre-exemple de l'audit, en une dimension.
+  {
+    long long lo = 0, hi = 0;
+    t_interval_axe(0, 1, 0, 3, 0, 2, &lo, &hi);
+    long long vrai_lo = 1LL << 60, vrai_hi = -(1LL << 60), coins = -(1LL << 60);
+    for (long long a = 0; a <= 1; ++a)
+      for (long long b = 0; b <= 3; ++b)
+        for (long long z = 0; z <= 2; ++z) {
+          const long long t = (z - a) * (z - a) - (z - b) * (z - b);
+          if (t < vrai_lo) vrai_lo = t;
+          if (t > vrai_hi) vrai_hi = t;
+          if ((a == 0 || a == 1) && (b == 0 || b == 3) && (z == 0 || z == 2))
+            if (t > coins) coins = t;
+        }
+    if (lo != vrai_lo || hi != vrai_hi) {
+      std::fprintf(stderr, "FIXTURE T: intervalle [%lld,%lld] != exact [%lld,%lld]\n",
+                   lo, hi, vrai_lo, vrai_hi);
+      ++fautes;
+    }
+    if (vrai_hi != 4 || coins != 3) {
+      std::fprintf(stderr, "FIXTURE T: le contre-exemple des coins ne se reproduit pas"
+                           " (exact=%lld coins=%lld, attendus 4 et 3)\n", vrai_hi, coins);
+      ++fautes;
+    }
+  }
+  // (2) Audit exhaustif en trois dimensions, sur des boites tirees.
+  unsigned long long rng = 0xD1B54A32D192ED03ull;
+  auto next = [&](long long mod) {
+    rng = rng * 6364136223846793005ull + 1442695040888963407ull;
+    return (long long)((rng >> 33) % (unsigned long long)mod);
+  };
+  long long cas = 0, serres = 0;
+  for (int essai = 0; essai < 3000; ++essai) {
+    long long al[3], ah[3], bl[3], bh[3], cl[3], ch[3];
+    for (int i = 0; i < 3; ++i) {
+      al[i] = next(9) - 4; ah[i] = al[i] + next(4);
+      bl[i] = next(9) - 4; bh[i] = bl[i] + next(4);
+      cl[i] = next(9) - 4; ch[i] = cl[i] + next(4);
+    }
+    long long lo = 0, hi = 0;
+    for (int i = 0; i < 3; ++i) {
+      long long l = 0, h = 0;
+      t_interval_axe(al[i], ah[i], bl[i], bh[i], cl[i], ch[i], &l, &h);
+      lo += l; hi += h;
+    }
+    // Verite : enumeration complete de `A x B x C`.
+    long long vlo = 1LL << 60, vhi = -(1LL << 60);
+    for (long long ax = al[0]; ax <= ah[0]; ++ax)
+     for (long long ay = al[1]; ay <= ah[1]; ++ay)
+      for (long long az = al[2]; az <= ah[2]; ++az)
+       for (long long bx = bl[0]; bx <= bh[0]; ++bx)
+        for (long long by = bl[1]; by <= bh[1]; ++by)
+         for (long long bz = bl[2]; bz <= bh[2]; ++bz)
+          for (long long zx = cl[0]; zx <= ch[0]; ++zx)
+           for (long long zy = cl[1]; zy <= ch[1]; ++zy)
+            for (long long zz = cl[2]; zz <= ch[2]; ++zz) {
+              const long long d[3] = {bx - ax, by - ay, bz - az};
+              const long long v[3] = {2 * zx - ax - bx, 2 * zy - ay - by, 2 * zz - az - bz};
+              const long long t = d[0] * v[0] + d[1] * v[1] + d[2] * v[2];
+              if (t < vlo) vlo = t;
+              if (t > vhi) vhi = t;
+            }
+    ++cas;
+    if (lo != vlo || hi != vhi) {
+      std::fprintf(stderr, "DESACCORD DU JUGE: intervalle T [%lld,%lld] != exhaustif"
+                           " [%lld,%lld]\n", lo, hi, vlo, vhi);
+      if (++fautes > 5) break;
+    }
+    if (lo == vlo && hi == vhi && vlo != vhi) ++serres;
+  }
+  // PLANCHER : sans lui, des boites toutes degenerees rendraient l'accord vide.
+  if (cas < 3000 || serres < 2500) {
+    std::fprintf(stderr, "PLANCHER: %lld cas, %lld intervalles non triviaux\n", cas, serres);
+    return 3;
+  }
+  if (fautes) {
+    std::fprintf(stderr, "DESACCORD DU JUGE: %d fautes sur le terme directionnel\n", fautes);
+    return 1;
+  }
+  std::printf("fixtures_terme_t accord=OUI cas=%lld non_triviaux=%lld"
+              " contre_exemple_coins=OUI\n", cas, serres);
+  return 0;
+}
 
 int main(int argc, char** argv) {
   std::string family = "uniform";
@@ -157,7 +606,22 @@ int main(int argc, char** argv) {
     else if (a.rfind("--window=", 0) == 0) { g_win = arg_ll(val("--window=").c_str(), 2, 1024, "window"); g_bank = true; }
     else if (a.rfind("--bank-l=", 0) == 0) { g_bankl = arg_ll(val("--bank-l=").c_str(), 1, 64, "bank-l"); g_bank = true; }
     else if (a.rfind("--inflation=", 0) == 0) g_inflation = arg_ll(val("--inflation=").c_str(), 1, 20000, "inflation");
+    else if (a.rfind("--inflation-lane=", 0) == 0) g_infl_lane = (int)arg_ll(val("--inflation-lane=").c_str(), 0, 2, "inflation-lane");
     else if (a.rfind("--warms=", 0) == 0) g_warms = arg_ll(val("--warms=").c_str(), 1, 200, "warms");
+    else if (a == "--fixtures-spindle") return spindle_fixtures();
+    else if (a == "--fixtures-rang") return rang_fixture();
+    else if (a == "--fixtures-terme-t") return terme_t_fixtures();
+    else if (a == "--window-ledger") g_window = true;
+    else if (a == "--inject=orientation-pointid") { g_window = true; g_inject_orient = true; }
+    else if (a == "--inject=orientation-cote") { g_window = true; g_inject_cote = true; }
+    else if (a.rfind("--oracle-window=", 0) == 0) {
+      g_window = true;
+      g_oracle_window = arg_ll(val("--oracle-window=").c_str(), 8, 8000, "oracle-window");
+    }
+    else if (a.rfind("--min-ouverts=", 0) == 0) g_min_open = arg_ll(val("--min-ouverts=").c_str(), 1, (1LL << 40), "min-ouverts");
+    else if (a.rfind("--min-orientations=", 0) == 0) g_min_orient = arg_ll(val("--min-orientations=").c_str(), 1, (1LL << 40), "min-orientations");
+    else if (a.rfind("--min-fermes=", 0) == 0) g_min_closed = arg_ll(val("--min-fermes=").c_str(), 1, (1LL << 40), "min-fermes");
+    else if (a.rfind("--max-slope-e4=", 0) == 0) g_max_slope_e4 = std::atof(val("--max-slope-e4=").c_str());
     else refuse("option inconnue");
   }
   if (ns.empty()) ns = {4000, 16000};
@@ -171,7 +635,7 @@ int main(int argc, char** argv) {
   else refuse("famille inconnue");
   if (oracle && ns.back() > 64) refuse("l'oracle exige n <= 64");
 
-  std::vector<double> fronts, fenetres;
+  std::vector<double> fronts, fenetres, e4_sums, e4_maxs;
   for (size_t k = 0; k < ns.size(); ++k) {
     const std::vector<mhgp::P3> cloud = mhgp3v::make_family_cloud(fam, (int)ns[k], (int)coord, seed);
     std::vector<std::array<long long, 3>> pts;
@@ -231,7 +695,14 @@ int main(int argc, char** argv) {
     // ---- VAGUES : `count -> scan -> fill`, aucune pile.
     std::vector<Pair> terms;
     BankStat bank;
-    std::vector<char> closed_q2;   // par terminal : la banque a-t-elle ferme q2 ?
+    // PAR TERMINAL, UN SORT PAR LANE — pas un seul bit q2. Le contre-audit le
+    // demande explicitement : sans `closed_mask` par lane, q3 et q4 ne sont que
+    // des agregats et leur fenetre ne peut pas etre calculee. `pend` marque les
+    // terminaux dont la certification a ete TRONQUEE : leur lane reste ouverte
+    // par surete, mais la fenetre publiee n'est alors qu'un SURENSEMBLE.
+    std::vector<unsigned char> fate;   // bit `lane` : la banque a-t-elle ferme cette lane ?
+    std::vector<unsigned char> pend;   // bit `lane` : certification tronquee, sort inconnu
+    long long pending_lane[3] = {0, 0, 0};
     // LA FRACTION DE RECORDS N'EST PAS LA FRACTION DE MASSE, et j'ai publie
     // l'une pour l'autre. On compte donc la masse fermee explicitement.
     long long mass_closed_q2 = 0;
@@ -255,7 +726,7 @@ int main(int argc, char** argv) {
       for (size_t i = 0; i < wave.size(); ++i) {
         if (cnt[i] == 0) {
           terms.push_back(wave[i]);
-          if (!g_bank) closed_q2.push_back(0);
+          if (!g_bank) { fate.push_back(0); pend.push_back(0); }
           if (g_bank) {
             const mhgp3v::WspdBox ba = cell_of(nodes, sp, wave[i].a);
             const mhgp3v::WspdBox bb = cell_of(nodes, sp, wave[i].b);
@@ -269,6 +740,7 @@ int main(int argc, char** argv) {
             const long long dlo = mhgp3v::rect_minsq(qa, qb);   // UNE fois
             long long cred[3] = {0, 0, 0};
             long long taken = 0;
+            bool tronque = false;
             if (g_vwave) {
               // `Central-VWave`. LA TACHE EST `(CNode, lane_mask)`, jamais un
               // nœud seul avec un masque global : sinon un parent `ALL` en q2
@@ -375,12 +847,13 @@ int main(int argc, char** argv) {
               // la continuation reste a faire, et l'audit `dfa9e1b` a raison de
               // refuser le mot. Les credits deja acquis restent valides ; seule
               // la COMPLETUDE est perdue, jamais la surete.
-              if (abandonne || (sn > 0 && exp >= g_win)) ++bank.tronques;
+              if (abandonne || (sn > 0 && exp >= g_win)) { ++bank.tronques; tronque = true; }
               taken = exp;
             } else if (g_descent) {
               // Descente au meilleur d'abord vers `m_0`, pile bornee.
               std::pair<long long, int> heap[64];
               int hn = 0;
+              bool deborde = false;
               heap[hn++] = {0, 0};
               long long exp = 0;
               while (hn > 0 && taken < g_bankl && exp < g_win) {
@@ -400,18 +873,23 @@ int main(int argc, char** argv) {
                 }
                 for (int side = 0; side < 2; ++side) {
                   const int ch = side ? nodes[id].right : nodes[id].left;
-                  if (hn >= 62) break;
+                  if (hn >= 62) { deborde = true; break; }
                   const long long dd = (ch < 0) ? 0 : box_dist2_to(nodes[ch], m4, g_tight);
                   heap[hn++] = {dd, ch};
                 }
               }
+              // UN TAS NON VIDE, UN DEBORDEMENT OU UN CAP SONT DES ABANDONS.
+              // Le contre-audit releve que ces branches annonçaient
+              // `fenetre_finale=OUI` apres avoir abandonne.
+              if (hn > 0 || deborde) { ++bank.tronques; tronque = true; }
             } else {
               const unsigned long long qk =
                   mhgp3v::wf_morton48(m4[0] / 4, m4[1] / 4, m4[2] / 4);
               size_t pos = (size_t)(std::lower_bound(keys.begin(), keys.end(), qk) - keys.begin());
               const size_t beg = (pos > (size_t)(g_win / 2)) ? pos - g_win / 2 : 0;
               const size_t end = std::min(keys.size(), beg + (size_t)g_win);
-              for (size_t r = beg; r < end && taken < g_bankl; ++r) {
+              size_t r = beg;
+              for (; r < end && taken < g_bankl; ++r) {
                 ++bank.reads;
                 mhgp3v::RectBox zb{};
                 for (int d = 0; d < 3; ++d) { zb.lo[d] = sp[r][d]; zb.hi[d] = sp[r][d]; }
@@ -420,6 +898,12 @@ int main(int argc, char** argv) {
                 for (int lane = 0; lane < 3; ++lane)
                   if (got & (1u << lane)) ++cred[lane];
               }
+              // LA FENETRE MORTON N'EXAMINE JAMAIS TOUT LE NUAGE : c'est une
+              // PROPOSITION bornee autour d'une cle, jamais une preuve
+              // d'absence. Elle n'est complete que si elle a couvert l'ordre
+              // entier sans buter sur son cap — cas qui n'arrive qu'a tres
+              // petit `n`. Sinon le sort de chaque lane non fermee est INCONNU.
+              if (beg != 0 || end != keys.size() || r < end) { ++bank.tronques; tronque = true; }
             }
             const int* need = g_need;
             for (int lane = 0; lane < 3; ++lane)
@@ -442,8 +926,18 @@ int main(int argc, char** argv) {
               }
             }
             const long long msz = count_of(nodes, wave[i].a) * count_of(nodes, wave[i].b);
-            if (cred[0] >= need[0]) { closed_q2.push_back(1); mass_closed_q2 += msz; }
-            else closed_q2.push_back(0);
+            unsigned char f = 0, pn = 0;
+            for (int lane = 0; lane < 3; ++lane) {
+              if (cred[lane] >= need[lane]) { f |= (unsigned char)(1u << lane); continue; }
+              // UNE LANE NON FERMEE APRES TRONCATURE N'EST PAS UNE LANE OUVERTE :
+              // c'est une lane dont le sort est INCONNU. On la compte ouverte —
+              // fail-open, donc sur — mais on le DIT, et la fenetre publiee est
+              // alors un surensemble, jamais la fenetre finale.
+              if (tronque) { pn |= (unsigned char)(1u << lane); ++pending_lane[lane]; }
+            }
+            fate.push_back(f);
+            pend.push_back(pn);
+            if (f & 1u) mass_closed_q2 += msz;
           }
           continue;
         }
@@ -489,9 +983,10 @@ int main(int argc, char** argv) {
     // moyenne. Les rapprocher etait une coincidence de scalaires — leur rejeu
     // donne une moyenne de 82,5 la ou je citais 446 — et je ne le fais plus.
     std::vector<long long> deg_res(sp.size(), 0);
+    std::vector<long long> diff_sym(sp.size() + 1, 0);
     long long masse_res = 0;
     for (size_t i = 0; i < terms.size(); ++i) {
-      if (i < closed_q2.size() && closed_q2[i]) continue;
+      if (i < fate.size() && (fate[i] & 1u)) continue;
       const Pair& t = terms[i];
       const int fa = (t.a < 0) ? (-1 - t.a) : nodes[t.a].first;
       const int la = (t.a < 0) ? (-1 - t.a) : nodes[t.a].last;
@@ -499,11 +994,241 @@ int main(int argc, char** argv) {
       const int lb = (t.b < 0) ? (-1 - t.b) : nodes[t.b].last;
       const long long ka = la - fa + 1, kb = lb - fb + 1;
       masse_res += ka * kb;
-      for (int u = fa; u <= la; ++u) deg_res[u] += kb;
-      for (int v = fb; v <= lb; ++v) deg_res[v] += ka;
+      // CE COMPTEUR AUSSI EST UN RANGE-ADD, et il ne l'etait pas. Le
+      // contre-audit releve que le degre symetrique parcourait encore ses deux
+      // plages, donc que le wall du probe n'etait pas `O(F+n)` malgre le
+      // nouveau ledger. Les deux boucles deviennent quatre ecritures : le
+      // degre symetrique est la SOMME des deux orientations, donc exactement
+      // deux range-adds au lieu d'un.
+      diff_sym[(size_t)fa] += kb; diff_sym[(size_t)(la + 1)] -= kb;
+      diff_sym[(size_t)fb] += ka; diff_sym[(size_t)(lb + 1)] -= ka;
     }
     long long nsum = 0, nmax = 0;
-    for (long long d : deg_res) { nsum += d; nmax = std::max(nmax, d); }
+    {
+      long long run = 0;
+      for (size_t r = 0; r < sp.size(); ++r) {
+        run += diff_sym[r];
+        deg_res[r] = run;
+        nsum += run;
+        nmax = std::max(nmax, run);
+      }
+    }
+
+    // ---- `EdgeWindowRangeAdd-v0` — LA FENETRE D'ARETES, EXACTE, EN `O(F+n)`.
+    //
+    // Ce que j'ai ecrit et qui etait faux : « le maximum de `E_q(a)` exige de
+    // developper `|A||B|` par terminal, donc la masse ». Le contre-audit donne
+    // la raison exacte du contraire. Chaque nœud du radix tree porte une plage
+    // CONTIGUE de `GenerationRank`. Les graines sont des plages sœurs
+    // disjointes, les splits les remplacent par des sous-plages, donc tout
+    // terminal `A x B` satisfait exactement l'un des deux ordres TOTAUX
+    // `last(A) < first(B)` ou `last(B) < first(A)`.
+    //
+    // Sous l'orientation canonique « second endpoint `b > a` », un terminal
+    // credite alors la plage INFERIEURE toute entiere d'une valeur CONSTANTE,
+    // le cardinal de la plage superieure. Deux ecritures dans un tableau de
+    // differences signe, un scan prefixe, et tous les `E_q(a)` sont exacts.
+    //
+    // Les deux nombres que cela rend sont ceux qui decident l'architecture :
+    // `sum_a E_4(a)` est le nombre d'aretes candidates que `LocalShallowBall`
+    // devrait traiter, et `max_a E_4(a)` le pire fan-out par ancre. Aucun
+    // `PairId` n'est developpe pour les obtenir.
+    long long win_sum[3] = {0, 0, 0}, win_max[3] = {0, 0, 0};
+    long long open_terms[3] = {0, 0, 0}, mass_open[3] = {0, 0, 0};
+    long long mass_closed[3] = {0, 0, 0}, mass_pending[3] = {0, 0, 0};
+    long long mass_strict_open[3] = {0, 0, 0}, closed_terms[3] = {0, 0, 0};
+    long long win_p50[3] = {0, 0, 0}, win_p95[3] = {0, 0, 0}, win_p99[3] = {0, 0, 0};
+    long long orient_ab = 0, orient_ba = 0;
+    long long oracle_pairs = 0, oracle_desaccords = 0;
+    // Portes MORDUES par le mutant, comptees separement : domaine des degres,
+    // identite de somme, oracle exhaustif. Trois juges independants, et le recu
+    // dit lequel a vu quoi.
+    long long mut_domaine = 0, mut_somme = 0;
+    if (g_window) {
+      const long long total_pairs = m * (m - 1) / 2;
+      // ---- LEDGER MASSIQUE EXCLUSIF : `entree = ferme + ouvert + pendant`.
+      //
+      // Le contre-audit le demande explicitement : `mass_open` incluait les
+      // pendants, `pend` n'etait pas consomme, et trois etats se recouvraient.
+      // Un terminal dont la certification a ete tronquee n'est ni ferme ni
+      // ouvert : son sort est INCONNU. Il est traite comme ouvert par surete —
+      // la fenetre reste un surensemble — mais il est COMPTE a part, et
+      // l'identite des trois masses est gatee.
+      for (int lane = 0; lane < 3; ++lane) {
+        for (size_t i = 0; i < terms.size(); ++i) {
+          const Pair& t = terms[i];
+          const long long ka = count_of(nodes, t.a), kb = count_of(nodes, t.b);
+          const long long msz = ka * kb;
+          const bool ferme = (i < fate.size()) && (fate[i] & (1u << lane));
+          const bool pendant = (i < pend.size()) && (pend[i] & (1u << lane));
+          if (ferme) { mass_closed[lane] += msz; ++closed_terms[lane]; }
+          else if (pendant) { mass_pending[lane] += msz; }
+          else { mass_strict_open[lane] += msz; }
+        }
+        if (mass_closed[lane] + mass_pending[lane] + mass_strict_open[lane] != total_pairs) {
+          std::fprintf(stderr, "INVARIANT VIOLE: ledger q%d non exclusif :"
+                               " ferme %lld + pendant %lld + ouvert %lld != C(n,2)=%lld\n",
+                       lane + 2, mass_closed[lane], mass_pending[lane],
+                       mass_strict_open[lane], total_pairs);
+          return 3;
+        }
+      }
+      // EQUIVARIANCE PAR ECHANGE DES COTES. Le producteur emet structurellement
+      // la plage basse en premier : mesure faite, `A<B` vaut `17 444` et `B<A`
+      // vaut ZERO. La seconde branche de l'ordre total serait donc du code mort,
+      // et un ledger vert ne dirait rien d'elle. On calcule donc CHAQUE fenetre
+      // DEUX fois, la seconde sur les terminaux dont les deux cotes sont
+      // echanges : la fenetre ne depend pas de l'ordre de stockage, donc les
+      // deux vecteurs doivent etre IDENTIQUES, et la branche `B<A` est exercee
+      // a chaque mesure au lieu de rester vacante.
+      auto range_add = [&](int lane, bool swap, std::vector<long long>* deg_out) -> int {
+        std::vector<long long> diff((size_t)m + 1, 0);
+        for (size_t i = 0; i < terms.size(); ++i) {
+          if (i < fate.size() && (fate[i] & (1u << lane))) continue;
+          const int ta = swap ? terms[i].b : terms[i].a;
+          const int tb = swap ? terms[i].a : terms[i].b;
+          const long long fa = (ta < 0) ? (-1 - ta) : nodes[ta].first;
+          const long long la = (ta < 0) ? (-1 - ta) : nodes[ta].last;
+          const long long fb = (tb < 0) ? (-1 - tb) : nodes[tb].first;
+          const long long lb = (tb < 0) ? (-1 - tb) : nodes[tb].last;
+          // PLAGES VALIDES. Une plage vide ou inversee rendrait le range-add
+          // silencieusement faux ; on la refuse au lieu de la subir.
+          if (fa > la || fb > lb || fa < 0 || fb < 0 || la >= m || lb >= m) {
+            std::fprintf(stderr, "INVARIANT VIOLE: plage de terminal invalide"
+                                 " [%lld,%lld]x[%lld,%lld] n=%lld\n", fa, la, fb, lb, m);
+            return 3;
+          }
+          const long long ka = la - fa + 1, kb = lb - fb + 1;
+          if (!swap) { ++open_terms[lane]; mass_open[lane] += ka * kb; }
+          // MUTANT `orientation-pointid`. Le contre-audit autorise un SCATTER
+          // par `spid[rank]` APRES le scan, si le consommateur indexe par
+          // `PointId`. Il n'autorise pas le range-add sur des intervalles de
+          // `PointId` : ceux-la ne sont pas contigus, et la plage ecrite n'a
+          // alors ni la bonne longueur ni meme forcement une longueur positive.
+          const long long ia = g_inject_orient ? spid[fa] : fa;
+          const long long ja = g_inject_orient ? spid[la] : la;
+          const long long ib = g_inject_orient ? spid[fb] : fb;
+          const long long jb = g_inject_orient ? spid[lb] : lb;
+          // MUTANT `orientation-cote`. Crediter TOUJOURS le cote stocke en
+          // premier, sans tester lequel des deux est reellement inferieur.
+          // L'identite de somme y survit intacte — les deux plages ont la meme
+          // masse —, et l'oracle ne le voit que si l'orientation canonique est
+          // deja fixee. Seule l'equivariance par echange des cotes le mord.
+          if (g_inject_cote || la < fb) {
+            diff[(size_t)ia] += kb; diff[(size_t)(ja + 1)] -= kb;
+            if (lane == 2) ++orient_ab;
+          } else if (lb < fa) {
+            diff[(size_t)ib] += ka; diff[(size_t)(jb + 1)] -= ka;
+            if (lane == 2) ++orient_ba;
+          } else {
+            // PLAGES NON DISJOINTES : l'ordre total suppose par le range-add
+            // n'existe pas. C'est une refutation de la structure, pas un cas
+            // a arrondir.
+            std::fprintf(stderr, "INVARIANT VIOLE: plages de terminal non totalement"
+                                 " ordonnees [%lld,%lld] et [%lld,%lld]\n", fa, la, fb, lb);
+            return 3;
+          }
+        }
+        deg_out->assign((size_t)m, 0);
+        long long run = 0;
+        for (long long r = 0; r < m; ++r) { run += diff[(size_t)r]; (*deg_out)[(size_t)r] = run; }
+        return 0;
+      };
+      for (int lane = 0; lane < 3; ++lane) {
+        std::vector<long long> deg, deg_swap;
+        if (int rc = range_add(lane, false, &deg)) return rc;
+        if (int rc = range_add(lane, true, &deg_swap)) return rc;
+        if (deg != deg_swap) {
+          std::fprintf(stderr, "INVARIANT VIOLE: la fenetre q%d depend de l'ordre de"
+                               " stockage des cotes du terminal\n", lane + 2);
+          return 3;
+        }
+        for (long long r = 0; r < m; ++r) {
+          const long long d = deg[(size_t)r];
+          if (d < 0 || d > m - 1) {
+            // SOUS INJECTION, ON NE SORT PAS ICI. Un mutant tue par la premiere
+            // porte ne dit pas si les autres l'auraient vu ; on le laisse donc
+            // traverser tout le juge et on compte CHAQUE porte qui le mord.
+            if (!g_inject_orient) {
+              std::fprintf(stderr, "INVARIANT VIOLE: E_%d(rang %lld)=%lld hors [0,%lld]\n",
+                           lane + 2, r, d, m - 1);
+              return 3;
+            }
+            ++mut_domaine;
+          }
+          win_sum[lane] += d;
+          win_max[lane] = std::max(win_max[lane], d);
+        }
+        // L'IDENTITE QUI JUGE LE LEDGER : la somme des degres ORIENTES vaut
+        // exactement la masse ouverte, SANS facteur deux. Si elle est fausse,
+        // le range-add ne represente pas la relation.
+        if (win_sum[lane] != mass_open[lane]) {
+          if (!g_inject_orient) {
+            std::fprintf(stderr, "INVARIANT VIOLE: sum E_%d=%lld != masse ouverte %lld\n",
+                         lane + 2, win_sum[lane], mass_open[lane]);
+            return 3;
+          }
+          ++mut_somme;
+        }
+        if (mass_open[lane] > total_pairs) {
+          std::fprintf(stderr, "INVARIANT VIOLE: masse ouverte %lld > C(n,2)=%lld\n",
+                       mass_open[lane], total_pairs);
+          return 3;
+        }
+        std::vector<long long> srt = deg;
+        std::sort(srt.begin(), srt.end());
+        auto qtl = [&](double f) { return srt[std::min(srt.size() - 1, (size_t)(f * (double)srt.size()))]; };
+        win_p50[lane] = qtl(0.50); win_p95[lane] = qtl(0.95); win_p99[lane] = qtl(0.99);
+
+        // ORACLE : developper CHAQUE `PairId` du residuel EXACTEMENT UNE FOIS,
+        // orienter par `GenerationRank` et comparer TOUT le vecteur de degres.
+        // C'est le seul juge qui tue le mutant d'orientation : l'identite de
+        // somme, elle, peut survivre a une plage de mauvaise longueur.
+        if (g_oracle_window > 0 && m <= g_oracle_window) {
+          std::vector<long long> oracle_deg((size_t)m, 0);
+          std::vector<unsigned char> vu((size_t)(m * (m - 1) / 2), 0);
+          for (size_t i = 0; i < terms.size(); ++i) {
+            if (i < fate.size() && (fate[i] & (1u << lane))) continue;
+            const Pair& t = terms[i];
+            const long long fa = (t.a < 0) ? (-1 - t.a) : nodes[t.a].first;
+            const long long la = (t.a < 0) ? (-1 - t.a) : nodes[t.a].last;
+            const long long fb = (t.b < 0) ? (-1 - t.b) : nodes[t.b].first;
+            const long long lb = (t.b < 0) ? (-1 - t.b) : nodes[t.b].last;
+            for (long long u = fa; u <= la; ++u)
+              for (long long v = fb; v <= lb; ++v) {
+                if (u == v) {
+                  std::fprintf(stderr, "INVARIANT VIOLE: paire diagonale au rang %lld\n", u);
+                  return 3;
+                }
+                const long long lo = std::min(u, v), hi = std::max(u, v);
+                const long long idx = lo * (2 * m - lo - 1) / 2 + (hi - lo - 1);
+                if (vu[(size_t)idx]) {
+                  std::fprintf(stderr, "INVARIANT VIOLE: PairId (%lld,%lld) developpe deux fois\n",
+                               lo, hi);
+                  return 3;
+                }
+                vu[(size_t)idx] = 1;
+                ++oracle_deg[(size_t)lo];       // orientation canonique : `b > a`
+                if (lane == 2) ++oracle_pairs;
+              }
+          }
+          for (long long r = 0; r < m; ++r)
+            if (oracle_deg[(size_t)r] != deg[(size_t)r]) ++oracle_desaccords;
+        }
+      }
+      // COHERENCE AVEC LE COMPTEUR SYMETRIQUE DEJA PUBLIE. Le degre residuel q2
+      // additionne les DEUX endpoints de chaque paire ; la fenetre orientee n'en
+      // additionne qu'un. Leur rapport doit valoir exactement deux. Deux
+      // compteurs ecrits separement qui se recoupent valent mieux qu'un seul.
+      if (win_sum[0] != masse_res || nsum != 2 * masse_res) {
+        if (!g_inject_orient) {
+          std::fprintf(stderr, "INVARIANT VIOLE: fenetre q2 %lld, masse residuelle %lld,"
+                               " degre symetrique %lld\n", win_sum[0], masse_res, nsum);
+          return 3;
+        }
+        ++mut_somme;
+      }
+    }
 
     // ---- L'ARGUMENT D'EMPILEMENT, MESURE PLUTOT QU'ESPERE.
     //
@@ -531,7 +1256,40 @@ int main(int argc, char** argv) {
     // On echantillonne donc des rectangles NON fermes, on y prend une paire, et
     // on compte ses VRAIS temoins universels q2 par balayage exhaustif du nuage.
     // Une paire faussement residuelle est une paire qui en a deja `K`.
+    // ---- LE CŒUR CENTRAL, MESURE PAR PAIRE — sans aucun jeu de rectangle.
+    //
+    // Il faut separer deux causes que j'avais confondues. Ou bien la paire
+    // possede bien ses temoins universels et c'est la FACTORISATION qui les
+    // perd — le cœur commun a `A x B` est plus petit que celui de la paire —,
+    // ou bien la paire n'en a AUCUN et alors aucun certificat central, factorise
+    // ou non, ne pourra jamais la fermer.
+    //
+    // Le cœur universel q4 d'une paire est la boule de rayon
+    // `sqrt(2-sqrt(3)) D / 2 = 0,2588 D` autour du milieu ; les deux extremites,
+    // elles, sont a `D/2`. Un cœur q4 vide est donc le signe qu'il n'y a rien
+    // entre `a` et `b` — et c'est une propriete de la PAIRE, pas du certificat.
     long long ech = 0, faux_resid = 0, som_temoins = 0, max_temoins = 0;
+    long long som_coeur4 = 0, coeur4_vide = 0, coeur4_suffisant = 0;
+    // ---- LE CŒUR UNIVERSEL EXACT, contre la boule INSCRITE qu'on teste.
+    //
+    // Le test `209 V^2 <= 56 D^2` vient d'une reduction qui SUPPRIME le terme
+    // `-4 (d.v)^2` — le commentaire de `rect_front.hpp` le dit explicitement.
+    // Or ce terme est favorable, et il est maximal SUR L'AXE de l'arete.
+    //
+    // Le cœur universel exact se derive directement. Avec `u = z-m`, le site est
+    // interieur a TOUTE sphere admissible ssi, pour tout `t` du disque de Jung
+    // de rayon `D/(2 sqrt 2)` orthogonal a `d`, `||u-t||^2 < D^2/4 + ||t||^2`,
+    // c'est-a-dire `||u||^2 + (D/sqrt 2) ||u_perp|| < D^2/4`. En elevant au
+    // carre et avec `4H = D^2 - V^2` :
+    //
+    //     (D2 - V2)^2 > 2 (V2 D2 - (d.v)^2)   et   D2 > V2.
+    //
+    // A `d.v = 0` cela redonne EXACTEMENT `V2/D2 < 2 - sqrt(3)` : le test
+    // implemente est le pire cas directionnel, donc la boule inscrite. Sur
+    // l'axe, au contraire, `(d.v)^2 = V2 D2` et la condition redevient `H > 0` :
+    // le vrai cœur atteint la boule diametrale entiere. C'est precisement la
+    // region ou vivent les temoins d'une paire inter-amas.
+    long long som_exact4 = 0, exact4_vide = 0, exact4_suffisant = 0;
     if (g_inflation > 0) {
       unsigned long long rng = 0x9E3779B97F4A7C15ull;
       // On n'echantillonne QUE les rectangles laisses OUVERTS par la banque :
@@ -547,7 +1305,7 @@ int main(int argc, char** argv) {
       std::vector<long long> cum;
       long long acc = 0;
       for (size_t i = 0; i < terms.size(); ++i)
-        if (i >= closed_q2.size() || !closed_q2[i]) {
+        if (i >= fate.size() || !(fate[i] & (1u << g_infl_lane))) {
           ouverts.push_back(i);
           acc += count_of(nodes, terms[i].a) * count_of(nodes, terms[i].b);
           cum.push_back(acc);
@@ -567,14 +1325,38 @@ int main(int argc, char** argv) {
         rng = rng * 6364136223846793005ull + 1442695040888963407ull;
         const int bi = fb + (int)((rng >> 33) % (unsigned long long)(lb - fb + 1));
         if (ai == bi) continue;
-        long long cnt = 0;
+        long long d2 = 0;
+        for (int d = 0; d < 3; ++d) {
+          const long long u = sp[bi][d] - sp[ai][d];
+          d2 += u * u;
+        }
+        long long cnt = 0, cnt4 = 0, cntE = 0;
         for (size_t z = 0; z < sp.size(); ++z) {
           if ((int)z == ai || (int)z == bi) continue;
-          long long h = 0;
-          for (int d = 0; d < 3; ++d) h += (sp[z][d] - sp[ai][d]) * (sp[bi][d] - sp[z][d]);
-          if (h > 0) ++cnt;
+          long long h = 0, v2 = 0;
+          for (int d = 0; d < 3; ++d) {
+            h += (sp[z][d] - sp[ai][d]) * (sp[bi][d] - sp[z][d]);
+            const long long w = 2 * sp[z][d] - sp[ai][d] - sp[bi][d];
+            v2 += w * w;
+          }
+          if (h > 0) ++cnt;                                   // cœur q2 : `V2 < D2`
+          if ((__int128)209 * v2 <= (__int128)56 * d2) ++cnt4;  // boule INSCRITE
+          if (v2 < d2) {                                        // cœur EXACT
+            long long dv = 0;
+            for (int d = 0; d < 3; ++d)
+              dv += (sp[bi][d] - sp[ai][d]) * (2 * sp[z][d] - sp[ai][d] - sp[bi][d]);
+            const __int128 g = (__int128)(d2 - v2) * (d2 - v2);
+            const __int128 rhs = 2 * ((__int128)v2 * d2 - (__int128)dv * dv);
+            if (g > rhs) ++cntE;
+          }
         }
         ++ech; som_temoins += cnt; max_temoins = std::max(max_temoins, cnt);
+        som_coeur4 += cnt4;
+        if (cnt4 == 0) ++coeur4_vide;
+        if (cnt4 >= g_need[2]) ++coeur4_suffisant;
+        som_exact4 += cntE;
+        if (cntE == 0) ++exact4_vide;
+        if (cntE >= g_need[2]) ++exact4_suffisant;
         if (cnt >= 10) ++faux_resid;
       }
     }
@@ -620,7 +1402,11 @@ int main(int argc, char** argv) {
                 " | partenaires max=%lld moyen=%.2f"
                 " | residuel : %lld paires tirees DANS LA MASSE ouverte,"
                 " temoins_moyen=%.1f max=%lld, deja >=10 temoins : %lld (%.1f%%)"
-                " donc supports q2 estimes %.1f%% du residuel\n",
+                " donc supports q2 estimes %.1f%% du residuel"
+                " | coeur q4 par paire (lane echantillonnee %d) : moyen=%.2f,"
+                " vide : %lld (%.1f%%), au moins %d temoins : %lld (%.1f%%)"
+                " | coeur EXACT : moyen=%.2f, vide : %lld (%.1f%%),"
+                " au moins %d temoins : %lld (%.1f%%)\n",
                 m, family.c_str(), g_tight ? "serree" : "cellule", p, q, terms.size(), (double)terms.size() / (double)m,
                 levels, tests, (double)tests / (double)terms.size(), wave_hwm, mass, total,
                 pct(t_tree, 0.5), pct(t_tree, 0.95), t_wave.back(),
@@ -632,7 +1418,89 @@ int main(int argc, char** argv) {
                 dmax, (double)dsum / (double)std::max(1LL, dnz),
                 ech, (double)som_temoins / (double)std::max(1LL, ech), max_temoins,
                 faux_resid, 100.0 * (double)faux_resid / (double)std::max(1LL, ech),
-                100.0 * (double)(ech - faux_resid) / (double)std::max(1LL, ech));
+                100.0 * (double)(ech - faux_resid) / (double)std::max(1LL, ech),
+                g_infl_lane, (double)som_coeur4 / (double)std::max(1LL, ech),
+                coeur4_vide, 100.0 * (double)coeur4_vide / (double)std::max(1LL, ech),
+                g_need[2], coeur4_suffisant,
+                100.0 * (double)coeur4_suffisant / (double)std::max(1LL, ech),
+                (double)som_exact4 / (double)std::max(1LL, ech),
+                exact4_vide, 100.0 * (double)exact4_vide / (double)std::max(1LL, ech),
+                g_need[2], exact4_suffisant,
+                100.0 * (double)exact4_suffisant / (double)std::max(1LL, ech));
+    if (g_window) {
+      for (int lane = 0; lane < 3; ++lane)
+        std::printf("fenetre q%d : terminaux_ouverts=%lld masse_ouverte=%lld (%.3f%% de C(n,2))"
+                    " sum_E=%lld max_E=%lld p50=%lld p95=%lld p99=%lld moyen=%.2f"
+                    " | masses : fermee=%lld pendante=%lld ouverte=%lld"
+                    " terminaux fermes=%lld | pending=%lld%s\n",
+                    lane + 2, open_terms[lane], mass_open[lane],
+                    100.0 * (double)mass_open[lane] / (double)(m * (m - 1) / 2),
+                    win_sum[lane], win_max[lane], win_p50[lane], win_p95[lane], win_p99[lane],
+                    (double)win_sum[lane] / (double)m,
+                    mass_closed[lane], mass_pending[lane], mass_strict_open[lane],
+                    closed_terms[lane], pending_lane[lane],
+                    pending_lane[lane] ? " SURENSEMBLE" : "");
+      std::printf("orientations q4 : A<B=%lld B<A=%lld | oracle paires=%lld desaccords=%lld\n",
+                  orient_ab, orient_ba, oracle_pairs, oracle_desaccords);
+
+      // PLANCHERS DE COUVERTURE. Sans eux, un ledger vert ne dit rien : zero
+      // terminal ouvert ou une seule orientation exercee rendraient le
+      // range-add trivialement correct et le mutant invisible.
+      if (g_min_open > 0 && open_terms[2] < g_min_open) {
+        std::fprintf(stderr, "PLANCHER: %lld terminaux ouverts en q4, %lld exiges\n",
+                     open_terms[2], g_min_open);
+        return 3;
+      }
+      // PLANCHER DE FERMETURE. Sans banque, tous les terminaux sont ouverts et
+      // l'oracle ne compare le range-add qu'a la relation triviale `C(n,2)`. Un
+      // nominal utile exige des sorts FERMES ET OUVERTS non vides en q4.
+      if (g_min_closed > 0 && closed_terms[2] < g_min_closed) {
+        std::fprintf(stderr, "PLANCHER: %lld terminaux fermes en q4, %lld exiges\n",
+                     closed_terms[2], g_min_closed);
+        return 3;
+      }
+      if (g_min_orient > 0 && (orient_ab < g_min_orient || orient_ba < g_min_orient)) {
+        std::fprintf(stderr, "PLANCHER: orientations A<B=%lld B<A=%lld, %lld exigees de chaque\n",
+                     orient_ab, orient_ba, g_min_orient);
+        return 3;
+      }
+      if (g_oracle_window > 0 && m <= g_oracle_window) {
+        if (g_inject_orient) {
+          // LE MUTANT DOIT MOURIR SOUS L'ORACLE, pas seulement sous une porte
+          // arithmetique. Un signe negatif est un accident heureux ; le juge
+          // exhaustif, lui, est la raison pour laquelle on peut croire le
+          // ledger a `n = 50 000` ou aucun oracle ne tourne.
+          if (oracle_desaccords == 0) {
+            std::fprintf(stderr, "MUTANT SURVIVANT: le range-add par PointId rend le meme"
+                                 " vecteur de degres que l'oracle (domaine=%lld somme=%lld)\n",
+                         mut_domaine, mut_somme);
+            return 3;
+          }
+          std::printf("mutant_killed=1 raison=orientation_pointid desaccords=%lld"
+                      " portes_mordues : domaine=%lld somme=%lld oracle=1\n",
+                      oracle_desaccords, mut_domaine, mut_somme);
+          return 4;
+        }
+        if (oracle_desaccords != 0) {
+          std::fprintf(stderr, "DESACCORD DU JUGE: %lld rangs ou la fenetre range-add"
+                               " differe du developpement exact\n", oracle_desaccords);
+          return 1;
+        }
+        std::printf("oracle_fenetre accord=OUI paires=%lld\n", oracle_pairs);
+      } else if (g_inject_orient) {
+        refuse("le mutant d'orientation exige --oracle-window couvrant la taille");
+      }
+      // LA FENETRE FINALE N'EXISTE QUE SI RIEN N'EST PENDANT. Une certification
+      // tronquee laisse un sort inconnu ; ce qui est publie est alors un
+      // surensemble fail-open, et le dire est la seule facon de ne pas le
+      // confondre plus tard avec la fenetre.
+      if (pending_lane[0] || pending_lane[1] || pending_lane[2])
+        std::printf("fenetre_finale=NON raison=continuations_pendantes\n");
+      else
+        std::printf("fenetre_finale=OUI\n");
+      e4_sums.push_back((double)win_sum[2]);
+      e4_maxs.push_back((double)std::max(1LL, win_max[2]));
+    }
     if (g_judge_vwave) {
       if (bank.juges < 1000) {
         std::fprintf(stderr, "PLANCHER JUGE VAGUE: %lld fermetures jugees\n", bank.juges);
@@ -668,7 +1536,16 @@ int main(int argc, char** argv) {
   // `eight_clusters` alors que les trois pentes du degre residuel etaient
   // rouges : elle ne refusait que sur `front_records`. Publier une pente sans
   // la juger, c'est publier une decoration.
-  int bad_front = 0, bad_deg = 0;
+  // TOUTES LES MESURES SONT PUBLIEES AVANT TOUT VERDICT.
+  //
+  // Le contre-audit a rejoue mes deux portes de pente et montre que la porte
+  // `sum_E4` n'etait jamais atteinte : l'ancienne porte `front_records` rendait
+  // `3` AVANT l'impression, et le CTest `pente_mord` pouvait etre satisfait par
+  // cette porte-la au lieu de la sienne. Une porte rouge ne doit pas masquer
+  // celle que le test pretend exercer. On imprime donc tout, puis on refuse, et
+  // chaque refus porte un motif DISTINCT que le CTest doit nommer.
+  int bad_front = 0, bad_deg = 0, bad_e4 = 0;
+  int refus_front = 0, refus_deg = 0, refus_e4 = 0;
   for (size_t k = 1; k < fronts.size(); ++k) {
     const double sf = std::log2(fronts[k] / fronts[k - 1]) /
                       std::log2((double)ns[k] / (double)ns[k - 1]);
@@ -678,15 +1555,39 @@ int main(int argc, char** argv) {
                 sf, sd, ns[k - 1], ns[k]);
     bad_front = (sf >= max_slope) ? bad_front + 1 : 0;
     bad_deg = (sd >= max_slope) ? bad_deg + 1 : 0;
-    if (bad_front >= 2) {
-      std::fprintf(stderr, "REFUS DE PENTE: deux pentes front_records >= %.2f\n", max_slope);
-      return 3;
-    }
-    if (bad_deg >= 2) {
-      std::fprintf(stderr, "REFUS DE PENTE: deux pentes degre_residuel >= %.2f\n", max_slope);
-      return 3;
+    if (bad_front >= 2 && !refus_front) refus_front = 1;
+    if (bad_deg >= 2 && !refus_deg) refus_deg = 1;
+  }
+  for (size_t k = 1; k < e4_sums.size(); ++k) {
+    const double ss = std::log2(std::max(1.0, e4_sums[k]) / std::max(1.0, e4_sums[k - 1])) /
+                      std::log2((double)ns[k] / (double)ns[k - 1]);
+    const double sm = std::log2(e4_maxs[k] / e4_maxs[k - 1]) /
+                      std::log2((double)ns[k] / (double)ns[k - 1]);
+    std::printf("pente sum_E4=%.3f pente max_E4=%.3f (%lld->%lld)\n", ss, sm, ns[k - 1], ns[k]);
+    if (g_max_slope_e4 > 0.0) {
+      bad_e4 = (ss >= g_max_slope_e4) ? bad_e4 + 1 : 0;
+      if (bad_e4 >= 2 && !refus_e4) refus_e4 = 1;
     }
   }
+  // ORDRE DES VERDICTS : le plus specifique d'abord, pour qu'un test qui
+  // desarme les portes anterieures obtienne bien le motif qu'il nomme.
+  if (refus_e4) {
+    std::fprintf(stderr, "REFUS DE PENTE sum_E4: deux pentes sum_E4 >= %.2f\n", g_max_slope_e4);
+    return 3;
+  }
+  if (refus_front) {
+    std::fprintf(stderr, "REFUS DE PENTE front_records: deux pentes >= %.2f\n", max_slope);
+    return 3;
+  }
+  if (refus_deg) {
+    std::fprintf(stderr, "REFUS DE PENTE degre_residuel: deux pentes >= %.2f\n", max_slope);
+    return 3;
+  }
+  // LA PENTE QUI DECIDE REELLEMENT L'ARCHITECTURE. `sum_a E_4(a)` est le nombre
+  // d'aretes candidates que le moteur shallow devrait traiter. Si elle croit
+  // comme `n^2`, aucun cout par arete, si petit soit-il, ne tient le contrat ;
+  // si elle croit comme `n`, `LocalShallowBall` devient finançable. Cette pente
+  // est donc une porte, pas une decoration — la lecon de `0eb65f1`.
   std::printf("OK famille=%s sep=%lld/%lld\n", family.c_str(), p, q);
   return 0;
 }

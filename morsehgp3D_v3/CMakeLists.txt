@@ -3976,3 +3976,154 @@ add_test(NAME mhgp3v_wspd_wavefront_travail
   COMMAND mhgp3v_wspd_wavefront_probe --family=uniform --points=8000 --sep-euclid=2/1 --tight)
 set_tests_properties(mhgp3v_wspd_wavefront_travail PROPERTIES
   PASS_REGULAR_EXPRESSION "tests/front=1\\.9[0-9]")
+
+# --- `EdgeWindowRangeAdd-v0` : LA FENETRE D'ARETES, EXACTE, EN `O(F+n)`.
+#
+# J'avais ecrit que le maximum de `E_q(a)` exigeait de developper `|A||B|` par
+# terminal. C'est faux : les nœuds du radix tree sont des intervalles DISJOINTS
+# de `GenerationRank`, donc tout terminal satisfait un ordre TOTAL entre ses
+# deux plages, et l'orientation canonique en fait un range-add — deux ecritures
+# et un scan prefixe. Ce ledger rend `sum_a E_4(a)`, le nombre exact d'aretes
+# candidates que le moteur shallow devrait traiter, sans jamais developper un
+# `PairId`.
+
+# L'ORACLE DEVELOPPE CHAQUE `PairId` EXACTEMENT UNE FOIS et compare TOUT le
+# vecteur de degres. Une identite de somme ne suffit pas : une plage de mauvaise
+# longueur peut la satisfaire. Les planchers interdisent le vert par vacuite.
+add_test(NAME mhgp3v_wspd_wavefront_fenetre_oracle
+  COMMAND mhgp3v_wspd_wavefront_probe --family=uniform --points=600
+          --sep-euclid=2/1 --tight --window-ledger --oracle-window=800
+          --min-ouverts=10000 --min-orientations=10000)
+set_tests_properties(mhgp3v_wspd_wavefront_fenetre_oracle PROPERTIES
+  PASS_REGULAR_EXPRESSION "oracle_fenetre accord=OUI")
+
+# LE MEME ORACLE SUR UNE FAMILLE STRUCTUREE : `uniform` seule ne prouve pas que
+# le range-add survit a des plages tres desequilibrees.
+add_test(NAME mhgp3v_wspd_wavefront_fenetre_oracle_amas
+  COMMAND mhgp3v_wspd_wavefront_probe --family=eight_clusters --points=500
+          --sep-euclid=2/1 --tight --window-ledger --oracle-window=800
+          --min-ouverts=5000 --min-orientations=5000)
+set_tests_properties(mhgp3v_wspd_wavefront_fenetre_oracle_amas PROPERTIES
+  PASS_REGULAR_EXPRESSION "oracle_fenetre accord=OUI")
+
+# MUTANT `orientation-pointid` : le range-add sur des intervalles de `PointId`.
+# Le contre-audit autorise un SCATTER par `spid[rang]` APRES le scan ; il
+# n'autorise pas le range-add sur des plages de `PointId`, qui ne sont pas
+# contigues. Trois portes independantes doivent le mordre — domaine des degres,
+# identite de somme, oracle exhaustif — et le recu dit laquelle a vu quoi.
+mhgp3v_add_expected_code_test_for(mhgp3v_wspd_wavefront_probe
+  mhgp3v_wspd_wavefront_fenetre_mutant_orientation "mutant_killed=1" 4
+  --family=uniform --points=600 --sep-euclid=2/1 --tight
+  --inject=orientation-pointid --oracle-window=800)
+
+# MUTANT `orientation-cote` : crediter toujours le cote stocke en premier sans
+# tester lequel est reellement inferieur. L'identite de somme y SURVIT — les
+# deux plages ont la meme masse — et c'est precisement pourquoi l'equivariance
+# par echange des cotes est une porte separee, non un doublon.
+mhgp3v_add_expected_code_test_for(mhgp3v_wspd_wavefront_probe
+  mhgp3v_wspd_wavefront_fenetre_mutant_cote "ordre de stockage" 3
+  --family=uniform --points=600 --sep-euclid=2/1 --tight
+  --inject=orientation-cote)
+
+# LE PLANCHER DOIT MORDRE. Sans cette porte, `--min-ouverts` pourrait etre une
+# option decorative que personne n'a jamais vue refuser.
+mhgp3v_add_expected_code_test_for(mhgp3v_wspd_wavefront_probe
+  mhgp3v_wspd_wavefront_fenetre_plancher_mord "PLANCHER" 3
+  --family=uniform --points=600 --sep-euclid=2/1 --tight --window-ledger
+  --min-ouverts=999999999)
+
+# UN MUTANT SANS SON JUGE EST UN MUTANT NON JUGE. Le refus est AVANT calcul.
+mhgp3v_add_expected_code_test_for(mhgp3v_wspd_wavefront_probe
+  mhgp3v_wspd_wavefront_fenetre_refus_mutant_sans_oracle "REFUS" 2
+  --family=uniform --points=600 --sep-euclid=2/1 --tight
+  --inject=orientation-pointid)
+
+# L'ORACLE SUR UNE RELATION NON TRIVIALE. Sans banque, tous les terminaux sont
+# ouverts et l'oracle ne compare le range-add qu'a la relation complete
+# `C(n,2)` : il ne juge alors aucune selection par fate. Ce nominal exige des
+# sorts FERMES ET OUVERTS non vides en q4, sur les deux orientations.
+add_test(NAME mhgp3v_wspd_wavefront_fenetre_oracle_banque
+  COMMAND mhgp3v_wspd_wavefront_probe --family=uniform --points=1200
+          --sep-euclid=6/1 --tight --vwave --window=256 --window-ledger
+          --oracle-window=1500 --min-fermes=10000 --min-ouverts=10000
+          --min-orientations=10000)
+set_tests_properties(mhgp3v_wspd_wavefront_fenetre_oracle_banque PROPERTIES
+  PASS_REGULAR_EXPRESSION "oracle_fenetre accord=OUI")
+
+# LA PENTE DE `sum_E4` EST UNE PORTE, PAS UNE DECORATION — la lecon de
+# `0eb65f1`. Le contre-audit a montre que cette porte n'etait jamais ATTEINTE :
+# l'ancienne porte `front_records` rendait `3` avant l'impression. Les deux
+# tests desarment donc explicitement les portes anterieures par `--max-slope=9`,
+# et le refus porte desormais un motif DISTINCT que le test doit nommer.
+add_test(NAME mhgp3v_wspd_wavefront_fenetre_pente_uniform
+  COMMAND mhgp3v_wspd_wavefront_probe --family=uniform --points=1000,2000,4000
+          --sep-euclid=8/1 --tight --vwave --window=512 --window-ledger
+          --max-slope=9 --max-slope-e4=1.45
+          --min-fermes=10000 --min-ouverts=10000 --min-orientations=10000)
+set_tests_properties(mhgp3v_wspd_wavefront_fenetre_pente_uniform PROPERTIES
+  PASS_REGULAR_EXPRESSION "pente sum_E4=1\\.[0-3]")
+
+# LA MEME PORTE DOIT REFUSER LA OU LE RESIDUEL N'EST PAS LINEAIRE. A `s=3`, la
+# separation seule ne garantit plus aucune boule inscrite de rayon positif en
+# q4 — il faut `s > sqrt(209/14) = 3,86375` pour le certificat CODE — donc la
+# banque ne ferme presque rien et `sum_E4` reste quadratique. Le motif attendu
+# est celui de la porte `sum_E4`, pas le generique `REFUS DE PENTE`.
+mhgp3v_add_expected_code_test_for(mhgp3v_wspd_wavefront_probe
+  mhgp3v_wspd_wavefront_fenetre_pente_mord "REFUS DE PENTE sum_E4" 3
+  --family=uniform --points=1000,2000,4000 --sep-euclid=3/1 --tight --vwave
+  --window=512 --window-ledger --max-slope=9 --max-slope-e4=1.45)
+
+# --- `JungSpindleSingleton-v0` : le cœur ANISOTROPE et ses deux fixtures.
+#
+# Le certificat en production teste la BOULE INSCRITE `209 V2 <= 56 D2`, qui est
+# le pire cas directionnel du vrai cœur. La fixture A est celle de l'audit
+# `b96751c` §1.2 : dix points strictement dans la boule diametrale et
+# strictement HORS de la circumsphere q4, qu'aucun certificat ne doit crediter.
+# La fixture B est un point de l'AXE, que la boule inscrite rejette et que le
+# spindle credite — sans elle, un spindle qui n'accepte jamais rien passerait A.
+# Le juge du balayage de Jung n'emploie aucune des deux algebres.
+add_test(NAME mhgp3v_wspd_wavefront_fixtures_spindle
+  COMMAND mhgp3v_wspd_wavefront_probe --fixtures-spindle)
+set_tests_properties(mhgp3v_wspd_wavefront_fixtures_spindle PROPERTIES
+  PASS_REGULAR_EXPRESSION "fixtures_spindle accord=OUI")
+
+# LA COUPURE PAR RANG EST REFUTEE, DEFINITIVEMENT. C'est ma propre proposition
+# que cette fixture ferme : l'audit `b96751c` §2 rend un support q4 POSITIF, de
+# profondeur ZERO et d'arete maximale UNIQUE, dont le second endpoint est
+# au-dela du rang `4381`. Aucun seuil de rang ne peut donc etre exact.
+add_test(NAME mhgp3v_wspd_wavefront_fixtures_rang
+  COMMAND mhgp3v_wspd_wavefront_probe --fixtures-rang)
+set_tests_properties(mhgp3v_wspd_wavefront_fixtures_rang PROPERTIES
+  PASS_REGULAR_EXPRESSION "fixtures_rang accord=OUI rang_du_partenaire=4382")
+
+# LE TERME DIRECTIONNEL SUR UN RECTANGLE, ET L'AUDIT DE SA PRESCRIPTION.
+#
+# L'audit `b96751c` §6 debloque le passage du spindle au rectangle par
+# l'identite `T = d.v = ||z-a||^2 - ||z-b||^2`, separable par axe. Je ne la
+# recois pas sur parole : la fixture compare l'intervalle prescrit a une
+# enumeration EXHAUSTIVE de tout `A x B x C` sur trois mille boites tirees, et
+# reproduit le contre-exemple qui montre que tester les seuls coins est faux.
+add_test(NAME mhgp3v_wspd_wavefront_fixtures_terme_t
+  COMMAND mhgp3v_wspd_wavefront_probe --fixtures-terme-t)
+set_tests_properties(mhgp3v_wspd_wavefront_fixtures_terme_t PROPERTIES
+  PASS_REGULAR_EXPRESSION "fixtures_terme_t accord=OUI cas=3000")
+
+# LA FINALITE DE LA FENETRE DOIT ETRE JUGEE, PAS SEULEMENT IMPRIMEE.
+#
+# Le contre-audit live releve que les modes non-VWave annonçaient
+# `fenetre_finale=OUI` APRES un abandon. La fenetre Morton, en particulier,
+# n'examine jamais tout le nuage : c'est une proposition bornee autour d'une
+# cle, jamais une preuve d'absence. Les deux portes ci-dessous exigent le bon
+# verdict dans les deux sens, sinon le drapeau ne juge rien.
+add_test(NAME mhgp3v_wspd_wavefront_fenetre_finale_non
+  COMMAND mhgp3v_wspd_wavefront_probe --family=uniform --points=1200
+          --sep-euclid=6/1 --tight --bank --window=256 --window-ledger)
+set_tests_properties(mhgp3v_wspd_wavefront_fenetre_finale_non PROPERTIES
+  PASS_REGULAR_EXPRESSION "fenetre_finale=NON raison=continuations_pendantes")
+
+add_test(NAME mhgp3v_wspd_wavefront_fenetre_finale_oui
+  COMMAND mhgp3v_wspd_wavefront_probe --family=uniform --points=1200
+          --sep-euclid=6/1 --tight --vwave --window=512 --window-ledger
+          --min-fermes=10000 --min-ouverts=10000)
+set_tests_properties(mhgp3v_wspd_wavefront_fenetre_finale_oui PROPERTIES
+  PASS_REGULAR_EXPRESSION "fenetre_finale=OUI")
