@@ -1,0 +1,5 @@
+rectangle COMPLET A x B : temoins L_z>0 = 0 sur 25000
+tranches de  1 valeurs de y : 125 rectangles, fermees=620000000 residuelles=5000000 (0.80%)
+tranches de  4 valeurs de y : 32 rectangles, fermees=620000000 residuelles=5000000 (0.80%)
+tranches de 16 valeurs de y : 8 rectangles, fermees=560000000 residuelles=65000000 (10.40%)
+tranches de 64 valeurs de y : 2 rectangles, fermees=320000000 residuelles=305000000 (48.80%)

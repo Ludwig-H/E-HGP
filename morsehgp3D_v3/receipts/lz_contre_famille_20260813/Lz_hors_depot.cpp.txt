@@ -1,0 +1,64 @@
+// L_z(A,B) sur la contre-famille a deux plans de l'auditeur.
+//
+//   z strictement interieur a la boule diametrale de (a,b)
+//     <=> (z-a).(z-b) < 0  <=>  somme_i (z_i-a_i)(b_i-z_i) > 0.
+// Les boites etant des PRODUITS, le minimum sur A x B de cette somme est la
+// SOMME DES MINIMA par coordonnee. L_z est donc le minimum EXACT, pas une
+// borne : L_z > 0 equivaut a « z est interieur a TOUTE paire du rectangle ».
+#include <cstdio>
+#include <algorithm>
+#include <vector>
+#include <array>
+using i64 = long long;
+
+struct Box { i64 lo[3], hi[3]; };
+
+i64 Lz(const Box& A, const Box& B, const i64 z[3]) {
+  i64 s = 0;
+  for (int i = 0; i < 3; ++i) {
+    // min sur a_i dans [A.lo,A.hi] et b_i dans [B.lo,B.hi] de (z-a)(b-z)
+    const i64 ua[2] = {z[i] - A.lo[i], z[i] - A.hi[i]};
+    const i64 vb[2] = {B.lo[i] - z[i], B.hi[i] - z[i]};
+    i64 m = ua[0] * vb[0];
+    for (int p = 0; p < 2; ++p)
+      for (int q = 0; q < 2; ++q) m = std::min(m, ua[p] * vb[q]);
+    s += m;
+  }
+  return s;
+}
+
+int main() {
+  const int m = 25000;
+  std::vector<std::array<i64,3>> A(m), B(m);
+  for (int i = 0; i < m; ++i) {
+    const i64 u = i / 200, v = i % 200;
+    A[i] = {0, u, v};
+    B[i] = {60000, 10000 + u, 1000 + v};
+  }
+  // Le rectangle ADVERSE complet : tout A contre tout B.
+  Box FA{{0,0,0},{0,124,199}}, FB{{60000,10000,1000},{60000,10124,1199}};
+  int full = 0;
+  for (int i = 0; i < m; ++i) { i64 z[3]={A[i][0],A[i][1],A[i][2]}; if (Lz(FA,FB,z) > 0) ++full; }
+  printf("rectangle COMPLET A x B : temoins L_z>0 = %d sur %d\n", full, m);
+
+  // Sous-rectangles : on coupe A en tranches de `k` valeurs de y.
+  for (int k : {1, 4, 16, 64}) {
+    long long closed_pairs = 0, rects = 0, resid = 0;
+    for (i64 y0 = 0; y0 <= 124; y0 += k) {
+      const i64 y1 = std::min<i64>(124, y0 + k - 1);
+      Box SA{{0,y0,0},{0,y1,199}};
+      int wit = 0;
+      for (int i = 0; i < m && wit < 10; ++i) {
+        i64 z[3]={A[i][0],A[i][1],A[i][2]};
+        if (z[1] >= y0 && z[1] <= y1) continue;      // exclut la tranche elle-meme
+        if (Lz(SA,FB,z) > 0) ++wit;
+      }
+      const long long mass = (y1 - y0 + 1) * 200LL * (long long)m;
+      ++rects;
+      if (wit >= 10) closed_pairs += mass; else resid += mass;
+    }
+    printf("tranches de %2d valeurs de y : %lld rectangles, fermees=%lld residuelles=%lld (%.2f%%)\n",
+           k, rects, closed_pairs, resid, 100.0*resid/(closed_pairs+resid));
+  }
+  return 0;
+}
