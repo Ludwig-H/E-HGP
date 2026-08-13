@@ -1,0 +1,101 @@
+# PROVENANCE DU FRONT MIDBALL SUR eight_clusters — RECU BRUT, NON RECONSTRUIT
+#
+# Ce fichier grave l'ordre 1 du contre-audit
+# audits/AUDIT_REPONSES_MUR_AMAS_CENSUS_SPINDLE_20260812.md section 1.
+# La NOTE_CLAUDE_MUR_CUBIQUE_AMAS_ET_COUT_CENSUS_20260812.md publiait
+# candidate_pairs = C(n,2) EXACTEMENT et prunes = 0 EXACTEMENT a chaque
+# taille. Le rejeu de l'auditeur donnait 1/2/40 prunes a n=150/200/300.
+# Le rejeu ci-dessous, sur l'ELF pince du commit 2a205f3, CONFIRME
+# l'auditeur et REFUTE la note : aucune colonne ne doit etre reconstruite
+# depuis C(n,2), et le zero n'etait vrai qu'a n=100.
+#
+# commit      : 2a205f3508abc7a20ea564eef55ed8e1f0f6f67d
+# binaire     : build/v3/mhgp3v_anchor_source
+# ELF sha256  : f699f8d1ff17557626325b2844d77748c649e306cd0e25b324d62c7d49442d73
+# date UTC    : 2026-08-13T06:25:02Z
+# GCP         : non utilise
+
+## commande : ./build/v3/mhgp3v_anchor_source --points=100 --family=eight_clusters --seed=3 --no-store
+AnchorSourceReceipt-v1
+cadre phase=exploration_v3_hors_registre backend=cpu_reference profile=quantized_u16_input_only mode=proposition_math_non_recue public_status=not_claimed
+cloud family=eight_clusters n=100 coord=92 seed=3 smax=11 threads=1 inject=none
+front node_visits=4300 witness_calls=2751 witness_visits=54573 prunes=0 witness_skipped=0 mass_closed=0 garde_densite=non lane_visits=143110 candidate_pairs=4950 anchors=4950 lane_dead=2 etendues=4948 disk_dead=583 budget_early=583
+extend gather_visits=251 site_evaluations=300768 kept_sites=185908 lens_carriers=114240 q3_candidates=114240 q4_paires_parcourues=2446467 q4_candidates=1890455 interior_tests=3797765
+rejets positivite=1330058 non_aigu=556012 owner=349072 rang=321357 degenere=79
+supports q2=1756 q3=4763 q4=2560 total=9079 extra_shell=63
+high_water partners=99 site_list=99 kept=94 lens=88
+theta arme=non ancres_vivantes_armees=0 prunes_en_plus_sur_ancre_vivante=0
+moteur reference caps partners=6144 sites=5120 kept=2048 lens=1024
+temps wall_s=0.198556
+identite non_verifiee=no-store
+
+## commande : ./build/v3/mhgp3v_anchor_source --points=150 --family=eight_clusters --seed=3 --no-store
+AnchorSourceReceipt-v1
+cadre phase=exploration_v3_hors_registre backend=cpu_reference profile=quantized_u16_input_only mode=proposition_math_non_recue public_status=not_claimed
+cloud family=eight_clusters n=150 coord=106 seed=3 smax=11 threads=1 inject=none
+front node_visits=10050 witness_calls=8433 witness_visits=160079 prunes=1 witness_skipped=0 mass_closed=1 garde_densite=non lane_visits=363164 candidate_pairs=11174 anchors=11174 lane_dead=48 etendues=11126 disk_dead=3035 budget_early=3035
+extend gather_visits=269 site_evaluations=869720 kept_sites=468949 lens_carriers=284358 q3_candidates=284358 q4_paires_parcourues=8370933 q4_candidates=6740660 interior_tests=13077276
+rejets positivite=4534917 non_aigu=1630273 owner=1362367 rang=1123126 degenere=249
+supports q2=2660 q3=8054 q4=4819 total=15533 extra_shell=110
+high_water partners=149 site_list=149 kept=144 lens=132
+theta arme=non ancres_vivantes_armees=0 prunes_en_plus_sur_ancre_vivante=0
+moteur reference caps partners=6144 sites=5120 kept=2048 lens=1024
+temps wall_s=0.733611
+identite non_verifiee=no-store
+
+## commande : ./build/v3/mhgp3v_anchor_source --points=200 --family=eight_clusters --seed=3 --no-store
+AnchorSourceReceipt-v1
+cadre phase=exploration_v3_hors_registre backend=cpu_reference profile=quantized_u16_input_only mode=proposition_math_non_recue public_status=not_claimed
+cloud family=eight_clusters n=200 coord=116 seed=3 smax=11 threads=1 inject=none
+front node_visits=16200 witness_calls=13763 witness_visits=286627 prunes=2 witness_skipped=0 mass_closed=2 garde_densite=non lane_visits=749904 candidate_pairs=19899 anchors=19899 lane_dead=297 etendues=19602 disk_dead=7636 budget_early=7636
+extend gather_visits=341 site_evaluations=1772471 kept_sites=831521 lens_carriers=497466 q3_candidates=496834 q4_paires_parcourues=17892952 q4_candidates=14949143 interior_tests=27515787
+rejets positivite=9677795 non_aigu=2943809 owner=3254955 rang=2508343 degenere=473
+supports q2=3761 q3=12268 q4=8281 total=24310 extra_shell=185
+high_water partners=199 site_list=199 kept=191 lens=176
+theta arme=non ancres_vivantes_armees=0 prunes_en_plus_sur_ancre_vivante=0
+moteur reference caps partners=6144 sites=5120 kept=2048 lens=1024
+temps wall_s=1.407239
+identite non_verifiee=no-store
+
+## commande : ./build/v3/mhgp3v_anchor_source --points=300 --family=eight_clusters --seed=3 --no-store
+AnchorSourceReceipt-v1
+cadre phase=exploration_v3_hors_registre backend=cpu_reference profile=quantized_u16_input_only mode=proposition_math_non_recue public_status=not_claimed
+cloud family=eight_clusters n=300 coord=133 seed=3 smax=11 threads=1 inject=none
+front node_visits=35100 witness_calls=30824 witness_visits=734922 prunes=40 witness_skipped=0 mass_closed=56 garde_densite=non lane_visits=2229448 candidate_pairs=44831 anchors=44831 lane_dead=2154 etendues=42677 disk_dead=22475 budget_early=22475
+extend gather_visits=469 site_evaluations=4610718 kept_sites=1809636 lens_carriers=1085876 q3_candidates=1083947 q4_paires_parcourues=55220207 q4_candidates=47900305 interior_tests=90381632
+rejets positivite=29400218 non_aigu=7319902 owner=11375783 rang=8209632 degenere=1153
+supports q2=6039 q3=21216 q4=15042 total=42297 extra_shell=312
+high_water partners=299 site_list=299 kept=290 lens=259
+theta arme=non ancres_vivantes_armees=0 prunes_en_plus_sur_ancre_vivante=0
+moteur reference caps partners=6144 sites=5120 kept=2048 lens=1024
+temps wall_s=4.488757
+identite non_verifiee=no-store
+
+## commande : ./build/v3/mhgp3v_anchor_source --points=400 --family=eight_clusters --seed=3 --no-store
+AnchorSourceReceipt-v1
+cadre phase=exploration_v3_hors_registre backend=cpu_reference profile=quantized_u16_input_only mode=proposition_math_non_recue public_status=not_claimed
+cloud family=eight_clusters n=400 coord=147 seed=3 smax=11 threads=1 inject=none
+front node_visits=66800 witness_calls=57636 witness_visits=2111910 prunes=504 witness_skipped=0 mass_closed=591 garde_densite=non lane_visits=5691711 candidate_pairs=79526 anchors=79526 lane_dead=8920 etendues=70606 disk_dead=41948 budget_early=41948
+extend gather_visits=833 site_evaluations=8524233 kept_sites=2912064 lens_carriers=1714305 q3_candidates=1711183 q4_paires_parcourues=101314513 q4_candidates=90115613 interior_tests=163917080
+rejets positivite=53271569 non_aigu=11198900 owner=23095317 rang=15473125 degenere=1531
+supports q2=8675 q3=32163 q4=23942 total=64780 extra_shell=470
+high_water partners=397 site_list=399 kept=386 lens=332
+theta arme=non ancres_vivantes_armees=0 prunes_en_plus_sur_ancre_vivante=0
+moteur reference caps partners=6144 sites=5120 kept=2048 lens=1024
+temps wall_s=8.226637
+identite non_verifiee=no-store
+
+## commande : ./build/v3/mhgp3v_anchor_source --points=500 --family=eight_clusters --seed=3 --no-store
+AnchorSourceReceipt-v1
+cadre phase=exploration_v3_hors_registre backend=cpu_reference profile=quantized_u16_input_only mode=proposition_math_non_recue public_status=not_claimed
+cloud family=eight_clusters n=500 coord=158 seed=3 smax=11 threads=1 inject=none
+front node_visits=95492 witness_calls=82620 witness_visits=3161531 prunes=502 witness_skipped=0 mass_closed=1328 garde_densite=non lane_visits=9785060 candidate_pairs=124007 anchors=124007 lane_dead=20050 etendues=103957 disk_dead=65832 budget_early=65832
+extend gather_visits=901 site_evaluations=13983250 kept_sites=4462188 lens_carriers=2623565 q3_candidates=2617112 q4_paires_parcourues=191538784 q4_candidates=172452879 interior_tests=334430649
+rejets positivite=99690649 non_aigu=19085905 owner=45362837 rang=30051812 degenere=2584
+supports q2=11278 q3=42558 q4=32280 total=86116 extra_shell=770
+high_water partners=497 site_list=499 kept=483 lens=421
+theta arme=non ancres_vivantes_armees=0 prunes_en_plus_sur_ancre_vivante=0
+moteur reference caps partners=6144 sites=5120 kept=2048 lens=1024
+temps wall_s=15.933148
+identite non_verifiee=no-store
+

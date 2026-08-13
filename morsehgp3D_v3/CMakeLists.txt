@@ -2905,3 +2905,209 @@ mhgp3v_add_expected_code_test_for(mhgp3v_anchor_source
 mhgp3v_add_expected_code_test_for(mhgp3v_anchor_source
   mhgp3v_anchor_plancher_prunes "plancher de prunes" 3
   --points=90 --seed=1 --min-prunes=100000000)
+
+# ---------------------------------------------------------------------------
+# CONE CIBLE EXACT : FERMETURE D'ANCRES AVANT `PairId`.
+# Specification : audits/AUDIT_REPONSES_MUR_AMAS_CENSUS_SPINDLE_20260812.md
+# sections 3 et 7. Ce sujet REPARE le mur que la porte `midball_legacy` grave :
+# le front historique cherche ses temoins dans des boules concentriques au
+# milieu, alors que le spindle exact en contient aussi pres des extremites.
+# Aucune de ces portes ne recoit une complexite ni un SLO.
+# ---------------------------------------------------------------------------
+add_executable(mhgp3v_spindle_cone_probe prototype/spindle_cone_probe.cpp)
+target_include_directories(mhgp3v_spindle_cone_probe PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(mhgp3v_spindle_cone_probe PRIVATE mhgp)
+target_compile_options(mhgp3v_spindle_cone_probe PRIVATE -Wall -Wextra -Werror)
+
+# Les fixtures sont gravees aux coordonnees exactes. Deux d'entre elles sont
+# des FRONTIERES (egalite stricte) et deux sont des MUTANTS DETERMINISTES : le
+# centre de la boite credite une lane que ses coins refusent, et le produit
+# `E2 X2` deborde i64 la ou `4H^2` ne deborde pas.
+add_test(NAME mhgp3v_cone_fixtures COMMAND mhgp3v_spindle_cone_probe --fixtures)
+set_tests_properties(mhgp3v_cone_fixtures PROPERTIES
+  PASS_REGULAR_EXPRESSION "fixtures accord=OUI refutees=0")
+# Le selftest juge le juge : les TROIS ecritures (H,E2X2), (H,R) et (g,Q) sont
+# comparees sur 400 000 triples, en petites coordonnees puis en pleine largeur
+# u16. La porte `ALL` par huit coins est en outre confrontee a l'enumeration du
+# RESEAU ENTIER de chaque boite : c'est une equivalence, pas une suffisance.
+add_test(NAME mhgp3v_cone_selftest COMMAND mhgp3v_spindle_cone_probe --selftest --seed=1)
+set_tests_properties(mhgp3v_cone_selftest PROPERTIES
+  PASS_REGULAR_EXPRESSION "selftest accord=OUI")
+
+# Le juge ponctuel enumere toutes les paires ORDONNEES et tous les temoins avec
+# la representation (g,Q), qui ne partage aucune quantite intermediaire avec le
+# chemin produit. Les planchers interdisent le vert par vacuite : sans eux, un
+# certificat qui ne ferme jamais rien passerait.
+#
+# CES PORTES SONT DES TESTS A CODE, PAS DES REGEX. Un CTest a
+# `PASS_REGULAR_EXPRESSION` IGNORE le code de sortie : la porte reste verte
+# meme quand le binaire rend 3. Ces quatre portes portaient
+# `PASS_REGULAR_EXPRESSION "accord=OUI"`, et leurs cinq planchers etaient donc
+# INOPERANTS — la ligne `accord=OUI` du juge est imprimee AVANT que les
+# planchers ne soient evalues. L'anti-vacuite que le regex tenait (« le juge
+# a-t-il seulement tourne ? ») est desormais dans `--min-accord-juge`, qui
+# REFUSE en code 2 si `--verify` est absent.
+add_test(NAME mhgp3v_cone_juge_uniform COMMAND mhgp3v_spindle_cone_probe
+         --points=300 --family=uniform --seed=3 --bank=48 --verify
+         --min-prunes=1200 --min-mass-closed=8000 --min-bank=48
+         --min-none-q4=200000 --min-credits-herites=100000 --min-accord-juge=8000)
+add_test(NAME mhgp3v_cone_juge_clusters COMMAND mhgp3v_spindle_cone_probe
+         --points=300 --family=eight_clusters --seed=3 --bank=48 --verify
+         --min-prunes=1500 --min-mass-closed=18000 --min-accord-juge=18000)
+add_test(NAME mhgp3v_cone_juge_terrain COMMAND mhgp3v_spindle_cone_probe
+         --points=300 --family=terrain --seed=5 --bank=48 --verify
+         --min-prunes=3000 --min-mass-closed=40000 --min-accord-juge=40000)
+add_test(NAME mhgp3v_cone_juge_multiecho COMMAND mhgp3v_spindle_cone_probe
+         --points=300 --family=scanline_overlap_multiecho --seed=2 --bank=48
+         --verify --min-prunes=2500 --min-mass-closed=50000 --min-accord-juge=50000)
+# Le plancher de verdict sans son verdict est refuse AVANT tout calcul.
+mhgp3v_add_expected_code_test_for(mhgp3v_spindle_cone_probe
+  mhgp3v_cone_reject_plancher_juge_sans_juge "plancher d'accord du juge exige --verify" 2
+  --points=200 --min-accord-juge=1)
+
+# EQUIVARIANCE PAR PERMUTATION, sur l'ENSEMBLE DES PAIRES FERMEES et non sur un
+# compteur. Elle a effectivement refute une premiere banque ordonnee par
+# (d2, PointId) : 60 paires divergentes sur `uniform`, 19 sur `terrain`. La
+# banque est desormais ordonnee par (d2, cle Morton), donc fonction du seul
+# nuage. Ne pas affaiblir cette porte en un test de compteurs.
+# Meme remarque : le code de sortie fait foi. Le binaire rend 1 des qu'une
+# paire fermee depend de la numerotation ; `--min-accord-permutation` exige en
+# plus qu'une MASSE de paires ait effectivement ete comparee des deux cotes, et
+# refuse en code 2 si `--permute` est absent.
+add_test(NAME mhgp3v_cone_permutation_uniform COMMAND mhgp3v_spindle_cone_probe
+         --points=400 --family=uniform --seed=3 --bank=64 --permute
+         --min-prunes=3000 --min-accord-permutation=25000)
+add_test(NAME mhgp3v_cone_permutation_terrain COMMAND mhgp3v_spindle_cone_probe
+         --points=400 --family=terrain --seed=3 --bank=64 --permute
+         --min-prunes=5000 --min-accord-permutation=100000)
+add_test(NAME mhgp3v_cone_permutation_multiecho COMMAND mhgp3v_spindle_cone_probe
+         --points=400 --family=scanline_overlap_multiecho --seed=3 --bank=64
+         --permute --min-prunes=4000 --min-accord-permutation=100000)
+mhgp3v_add_expected_code_test_for(mhgp3v_spindle_cone_probe
+  mhgp3v_cone_reject_plancher_permutation "plancher d'accord de permutation exige --permute" 2
+  --points=200 --min-accord-permutation=1)
+
+# LE MUR AMAS, VU DE L'AUTRE COTE. La porte `midball_legacy` ci-dessus exige
+# que le certificat historique ne ferme RIEN sur `eight_clusters`. Celle-ci
+# exige que le cone exact y ferme beaucoup, sur la meme famille et la meme
+# graine. Les deux ensemble sont la mesure du gain ; aucune des deux seule ne
+# l'est.
+#
+# CETTE PORTE ETAIT MORTE. Elle exigeait `PASS_REGULAR_EXPRESSION
+# "prunes=2[0-9]{4}"`, or le moteur de regex de CMake N'IMPLEMENTE PAS le
+# quantificateur `{n}` : les trois caracteres `{`, `4`, `}` y sont litteraux.
+# La porte ne pouvait donc JAMAIS passer, quelle que soit la valeur mesuree
+# (`prunes=23803` au pin). Elle imposait de surcroit une borne SUPERIEURE, que
+# toute amelioration du certificat aurait cassee. Les deux planchers ci-dessous
+# disent la meme chose dans le bon sens, et le code de sortie les fait respecter.
+add_test(NAME mhgp3v_cone_mur_amas_ferme COMMAND mhgp3v_spindle_cone_probe
+         --points=500 --family=eight_clusters --seed=3 --bank=96 --leaf=2
+         --min-prunes=20000 --min-mass-closed=120000)
+
+# Mutants : chacun casse UNE decision exacte. Un mutant qui ne change RIEN est
+# refuse en code 3 — une porte vacueuse ne prouve pas plus qu'un mutant absent.
+mhgp3v_add_expected_code_test_for(mhgp3v_spindle_cone_probe
+  mhgp3v_cone_mutant_positivite "MUTANT TUE .juge." 4
+  --points=300 --family=uniform --seed=3 --bank=48 --verify
+  --inject=cone-no-positivity)
+mhgp3v_add_expected_code_test_for(mhgp3v_spindle_cone_probe
+  mhgp3v_cone_mutant_coefficients "MUTANT TUE .juge." 4
+  --points=300 --family=uniform --seed=3 --bank=48 --verify
+  --inject=cone-swap-coeff)
+mhgp3v_add_expected_code_test_for(mhgp3v_spindle_cone_probe
+  mhgp3v_cone_mutant_centre_seul "MUTANT TUE .juge." 4
+  --points=300 --family=uniform --seed=3 --bank=48 --verify
+  --inject=cone-center-only)
+mhgp3v_add_expected_code_test_for(mhgp3v_spindle_cone_probe
+  mhgp3v_cone_mutant_slot_double "MUTANT TUE .juge." 4
+  --points=300 --family=uniform --seed=3 --bank=48 --verify
+  --inject=cone-duplicate-slot)
+# L'egalite ne se rencontre pas dans un nuage generique : elle exige les
+# coplanarites massives de `terrain`. C'est la famille qui est la porte.
+mhgp3v_add_expected_code_test_for(mhgp3v_spindle_cone_probe
+  mhgp3v_cone_mutant_egalite "MUTANT TUE .juge." 4
+  --points=400 --family=terrain --seed=5 --bank=48 --verify
+  --inject=cone-accept-equality)
+mhgp3v_add_expected_code_test_for(mhgp3v_spindle_cone_probe
+  mhgp3v_cone_mutant_coin_omis "MUTANT TUE .juge." 4
+  --points=400 --family=scanline_overlap_multiecho --seed=5 --bank=48 --verify
+  --inject=cone-seven-corners)
+# La largeur ne se voit qu'a pleine echelle u16 : `E2 X2` ne depasse 2^63 que
+# si les distances approchent 65535. Le mutant SURVIT legitimement a petites
+# coordonnees, et la porte suivante exige ce refus en code 3.
+mhgp3v_add_expected_code_test_for(mhgp3v_spindle_cone_probe
+  mhgp3v_cone_mutant_largeur_i64 "MUTANT TUE" 4
+  --points=400 --coord=65535 --family=uniform --seed=7 --bank=48 --verify
+  --inject=cone-narrow-i64)
+mhgp3v_add_expected_code_test_for(mhgp3v_spindle_cone_probe
+  mhgp3v_cone_mutant_vacueux "MUTANT SURVIVANT" 3
+  --points=300 --family=uniform --seed=3 --bank=48 --verify
+  --inject=cone-narrow-i64)
+# La refutation NONE est fail-open : un MAJORANT de R a la place du minorant ne
+# ferme jamais une paire vivante, il PERD du travail utile. Le juge ne peut
+# donc pas le tuer — seul le ledger le peut, et c'est la forme correcte de
+# cette porte.
+mhgp3v_add_expected_code_test_for(mhgp3v_spindle_cone_probe
+  mhgp3v_cone_mutant_none_majorant "MUTANT TUE .ledger." 4
+  --points=300 --family=uniform --seed=3 --bank=48 --verify
+  --inject=cone-none-uses-rmax)
+
+# Refus contractuels, tous AVANT le moindre calcul.
+mhgp3v_add_expected_code_test_for(mhgp3v_spindle_cone_probe
+  mhgp3v_cone_reject_mutant_sans_juge "un mutant sans juge ne prouve rien" 2
+  --points=200 --inject=cone-center-only)
+mhgp3v_add_expected_code_test_for(mhgp3v_spindle_cone_probe
+  mhgp3v_cone_reject_inconnu "argument inconnu" 2 --points=200 --turbo)
+mhgp3v_add_expected_code_test_for(mhgp3v_spindle_cone_probe
+  mhgp3v_cone_reject_banque "--bank hors bornes" 2 --points=200 --bank=300)
+mhgp3v_add_expected_code_test_for(mhgp3v_spindle_cone_probe
+  mhgp3v_cone_reject_juge_non_borne "le juge ponctuel est borne" 2
+  --points=800 --verify)
+mhgp3v_add_expected_code_test_for(mhgp3v_spindle_cone_probe
+  mhgp3v_cone_reject_suffixe "--points invalide" 2 --points=200junk)
+# Planchers : un plancher non atteint est un code 3, jamais un vert silencieux.
+mhgp3v_add_expected_code_test_for(mhgp3v_spindle_cone_probe
+  mhgp3v_cone_plancher_prunes "plancher de prunes" 3
+  --points=200 --family=uniform --seed=1 --min-prunes=100000000)
+mhgp3v_add_expected_code_test_for(mhgp3v_spindle_cone_probe
+  mhgp3v_cone_plancher_masse "plancher de masse fermee" 3
+  --points=200 --family=uniform --seed=1 --min-mass-closed=100000000)
+mhgp3v_add_expected_code_test_for(mhgp3v_spindle_cone_probe
+  mhgp3v_cone_plancher_credits "plancher de credits herites" 3
+  --points=200 --family=uniform --seed=1 --min-credits-herites=100000000)
+mhgp3v_add_expected_code_test_for(mhgp3v_spindle_cone_probe
+  mhgp3v_cone_plancher_refutations "plancher de refutations q4" 3
+  --points=200 --family=uniform --seed=1 --min-none-q4=100000000)
+
+# ---------------------------------------------------------------------------
+# GARDE-FOU DE CONFIGURATION : PAS DE QUANTIFICATEUR `{n}` DANS UNE REGEX CTEST.
+#
+# Le moteur de regex de CMake (`cmsys::RegularExpression`) implemente `^ $ . []
+# * + ? | ()` et RIEN D'AUTRE. Les accolades y sont des caracteres litteraux.
+# Une porte ecrite `PASS_REGULAR_EXPRESSION "prunes=2[0-9]{4}"` ne peut donc
+# JAMAIS passer : elle cherche litteralement la chaine `{4}`. Le defaut est
+# muet — la porte existe, elle est comptee dans l'inventaire des CTests, et
+# elle echoue pour une raison qui n'a aucun rapport avec la mesure.
+#
+# Cette contradiction est desormais une fixture permanente : elle est refusee a
+# la CONFIGURATION, avant qu'un seul test ne soit enregistre.
+file(READ "${CMAKE_CURRENT_LIST_FILE}" _mhgp3v_self)
+string(REGEX MATCHALL "[^\n]*_REGULAR_EXPRESSION[^\n]*" _mhgp3v_regex_lines "${_mhgp3v_self}")
+set(_mhgp3v_bad_regex "")
+foreach(_line IN LISTS _mhgp3v_regex_lines)
+  string(STRIP "${_line}" _line)
+  # Les lignes de commentaire sont exclues : ce bloc-ci cite le motif fautif.
+  if(NOT _line MATCHES "^#" AND _line MATCHES "{[0-9]")
+    list(APPEND _mhgp3v_bad_regex "${_line}")
+  endif()
+endforeach()
+if(_mhgp3v_bad_regex)
+  string(REPLACE ";" "\n  " _mhgp3v_bad_regex_txt "${_mhgp3v_bad_regex}")
+  message(FATAL_ERROR
+    "quantificateur `{n}` dans une regex CTest : CMake le lit LITTERALEMENT et "
+    "la porte ne peut jamais passer. Developper la repetition, ou porter la "
+    "mesure dans un plancher `--min-*` du binaire.\n  ${_mhgp3v_bad_regex_txt}")
+endif()
+unset(_mhgp3v_self)
+unset(_mhgp3v_regex_lines)
+unset(_mhgp3v_bad_regex)

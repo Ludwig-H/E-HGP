@@ -45,9 +45,19 @@ La rampe amas suivante révèle deux murs conjoints, boucle q4 et census, mais
 ses colonnes de front ne sont pas reproductibles. La réparation mathématique
 proposée est un classifieur des huit coins AABB dans le spindle complet **avant
 la liste**, relevé ensuite par un certificat entier fail-open sur
-`A_endpoint times B_partner times C_witness`, puis le replay local des conflits
-de la cutting. Voir
+`A_endpoint times B_partner times C_witness`. À endpoint/témoin fixes, le
+domaine partenaire est exactement un cône convexe : huit coins suffisent sans
+trigonométrie. Vient ensuite le replay local des conflits de la cutting. Voir
 [`AUDIT_REPONSES_MUR_AMAS_CENSUS_SPINDLE_20260812.md`](audits/AUDIT_REPONSES_MUR_AMAS_CENSUS_SPINDLE_20260812.md).
+
+Le successeur worktree implémente cette primitive ponctuelle et passe ses
+`30/30` portes ciblées, mais il n'est pas reçu : un `smax` hors largeur ferme
+faussement toute la masse avec l'accord du juge, les décisions q2/q3/q4 ne sont
+pas jugées séparément et les rampes banques 48/96 gardent deux pentes rouges.
+La DFS par endpoint reste donc un oracle borné ; le prochain front industriel
+est le self-join collectif `A_endpoint times B_partner times C_witness`, avant
+toute mesure G4. Voir
+[`AUDIT_CONTRE_AUDIT_SPINDLE_CONE_WORKTREE_20260813.md`](audits/AUDIT_CONTRE_AUDIT_SPINDLE_CONE_WORKTREE_20260813.md).
 
 ## Contrat visé
 

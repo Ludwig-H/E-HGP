@@ -8,17 +8,22 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-Ce document répond aux quatre questions de
+Ce document répond aux six questions, dont deux ajoutées dans le worktree après
+le pin, de
 [`NOTE_CLAUDE_MUR_CUBIQUE_AMAS_ET_COUT_CENSUS_20260812.md`](NOTE_CLAUDE_MUR_CUBIQUE_AMAS_ET_COUT_CENSUS_20260812.md).
-Le pin reçu pendant le contre-audit est
+Le pin de la note initialement contre-auditée est
 `59d098bd1b027a55a381e91499bc3432cc50f192`, commit
 `prove the filter changes nothing, then stop paying for it — and measure the
 wall the clusters build`. L'ELF Release observé a le SHA-256
 `114be24e4c87f1c03814a88e6ec34820ccbb57a473e414d76834819fd76c201f`.
-Un delta postérieur non pincé ajoute les compteurs front/rejets, rend la garde
-de densité opt-in, propage `--compare-engines` et compare trente-cinq compteurs
-des deux moteurs. Son ELF SHA-256 `fed7e39c...` n'est pas une autorité de ce
-document. GCP non utilisé.
+Le successeur désormais pincé est
+`2a205f3508abc7a20ea564eef55ed8e1f0f6f67d`. Il ajoute les compteurs
+front/rejets et de mort par budget, rend la garde de densité opt-in, propage
+`--compare-engines`, compare trente-six compteurs des deux moteurs et ajoute
+ses CTests. Il complète aussi la note par Q5/Q6. Son ELF SHA-256 est
+`f699f8d1ff17557626325b2844d77748c649e306cd0e25b324d62c7d49442d73` ;
+les mesures des sections 1--5 restent explicitement celles du premier pin.
+GCP non utilisé.
 
 ## Verdict
 
@@ -289,12 +294,133 @@ pas mélanger des univers différents. De même, `front_mass_closed` compte
 actuellement tous les points d'un nœud, y compris les identifiants `<=a`; ce
 n'est pas la masse de `PairId` non ordonnés et il doit être renommé ou corrigé.
 
-## 6. Ordre de reprise vers 50 k
+## 6. Réponse Q5 — sortir la garde de densité du chemin produit
+
+L'ablation répond à la question : la garde ne gagne aucun prune sur les trois
+familles mesurées, réduit certaines visites mais ajoute assez d'arithmétique
+pour dégrader deux temps sur trois. Surtout, sa densité locale ne borne pas la
+population de la boule ailleurs. Elle est fail-open pour Source S parce qu'elle
+ne fait que renoncer à un prune, mais elle peut perdre arbitrairement du travail
+utile et ne devient jamais un certificat.
+
+Il n'y a donc aucune raison de conserver cette branche dans le chemin device
+destiné au SLO. Pincer une dernière ablation `ON/OFF`, avec sorties, prunes,
+visites et temps, puis la retirer du producteur est la route la plus simple.
+Si sa valeur différentielle reste jugée utile, elle appartient à un harness
+`density-guard-diagnostic` explicitement hors produit et désarmé, pas à une
+capacité silencieuse du noyau. Une porte d'accord des supports reçoit seulement
+son innocuité, jamais son utilité. Le remplacement utile est le certificat
+spindle exact : il évite un parcours parce qu'il ferme une masse, non parce
+qu'une estimation prédit que le parcours échouera.
+
+## 7. Réponse Q6 — dérivation correcte, ordonnance par banque à relever
+
+Pour `e=z-a`, `d=b-a`, `r=||e||>0` et l'angle `phi` entre `e` et `d`, les
+identités de la note sont correctes : `g=4*e dot d-4*r^2` et
+`Q=4*r^2*D^2*sin(phi)^2`. Avec le buffer entier du code, `Llow>0` équivaut à
+
+$$D\left(4\cos(\phi)-2\sqrt{2}\sin(\phi)\right)>4r+\frac{1}{r}.$$
+
+La division exige `r>0`; un `PointId` colocalisé avec `a` est shell et relève
+du préflight de duplicats, pas du cône. La limite angulaire
+`tan(phi)<sqrt(2)` est seulement la condition pour que le coefficient de `D`
+soit positif. Le texte en gras « tout voisin dans le cône de 54,74 degrés est
+certifié » est faux à distance finie : il faut encore la borne radiale affichée.
+Même sur l'axe, un point placé au-delà de `b` ne devient pas intérieur. Aucune
+trigonométrie ni valeur décimale ne doit donc décider ; les tests entiers
+`H>0`, `3*H^2>R` et `2*H^2>R` sont l'autorité.
+
+Le noyau des `M` voisins les plus proches est néanmoins un certificat fail-open
+exact : tester un sous-ensemble de `PointId` distincts ne peut qu'omettre une
+mort. Un `M` fixe ne prouve aucune complétude et ne doit jamais tronquer le
+chemin résiduel. Q3 et q4 gardent leurs tests séparés ; le filtre q4 seul est
+plus fort et peut manquer des témoins valides uniquement pour q3.
+
+Un changement d'origine donne surtout un classifieur cible **exact**, sans
+racine ni borne radiale. Poser `t=b-z`. Alors
+
+$$H=t\mathbin{\cdot}e,\qquad R=\left\lVert t\mathbin{\times}e\right\rVert^2.$$
+
+En écrivant `t=alpha*u+v`, avec `u=e/||e||` et `v` orthogonal à `u`, les
+domaines cibles sont
+
+$$C_3(a,z)=\left\lbrace b:\alpha>0,\ \left\lVert v\right\rVert<\sqrt{3}\alpha\right\rbrace,\qquad C_4(a,z)=\left\lbrace b:\alpha>0,\ \left\lVert v\right\rVert<\sqrt{2}\alpha\right\rbrace.$$
+
+Ce sont les intérieurs de cônes de Lorentz convexes, d'apex `z`, d'axe
+`z-a`, et de demi-angles respectifs `60` degrés et
+`arctan(sqrt(2))`. Le `54,74` degrés de Claude devient donc exact lorsqu'il
+est mesuré **depuis `z` vers la cible `b`**, non depuis `a` vers `z` ; la forme
+entière `H>0 && c*H^2>R` évite tout arrondi trigonométrique.
+En posant `E2=||e||^2` et `X2=||t||^2`, l'identité
+`R=E2*X2-H^2` donne les formes moins coûteuses
+`H>0 && 4*H^2>E2*X2` en q3 et
+`H>0 && 3*H^2>E2*X2` en q4.
+
+L'ordonnance décisive est de ne **jamais** balayer ces `M` voisins pour chaque
+`PairId`. Construire une banque `Z_a` une fois par endpoint `a`, puis traverser
+des nœuds partenaires `B`. Comme chaque `C_q(a,z)` est convexe ouvert et que
+la boîte fermée est l'enveloppe convexe de ses coins, `B` est contenue dans le
+cône si et seulement si ses huit coins satisfont strictement le prédicat
+ponctuel. Cette porte `iff` est plus serrée que découpler `Hmin` et `Rmax`, qui
+peuvent venir de deux cibles différentes. `z=a`, l'apex `b=z` et toute égalité
+restent `UNKNOWN` ; tester seulement le centre du nœud est interdit.
+
+Le défaut symétrique serait de descendre chaque boîte extérieure jusqu'aux
+feuilles, car l'échec des huit coins ne prouve pas la disjonction. Une porte
+`NONE` suffisante se calcule sans racine. `Hmax=max_{b in B} H` est exact par
+intervalles. Pour chacune des trois composantes linéaires de
+`(b-z) cross (z-a)`, prendre son intervalle exact et la distance de zéro à cet
+intervalle ; la somme de leurs carrés est un minorant `Rlb` malgré les
+corrélations. Alors
+
+$$H_{\max}\leq0\quad\text{ou}\quad c\max(H_{\max},0)^2\leq R_{\mathrm{lb}}$$
+
+certifie `NONE`, avec `c=3` en q3 et `c=2` en q4. L'égalité reste hors du cône
+ouvert, donc sûre pour ce rejet. Le minorant peut répondre `UNKNOWN` à tort,
+jamais `NONE` à tort.
+
+Huit témoins distincts dont les cônes q4 couvrent `B` ferment q4, neuf cônes q3
+ferment q3 à `smax=11`, pour toute la masse partenaire du nœud. Si la banque ne
+suffit pas sur le parent, `B` se divise et réemploie les crédits hérités ; il ne
+repart ni de la racine témoin ni d'une liste par partenaire. Un témoin déjà
+crédité q3 sur le parent puis crédité q4 sur un enfant n'est pas recrédité q3.
+Cette route `a times Z_a times B_partner` est le cas à endpoint ponctuel du
+lift `A times B times C` de la section 3 ; le caractère `iff` ne s'étend pas
+lorsque `a` ou `z` varient eux-mêmes dans des boîtes.
+
+La subdivision possède un budget de profondeur, de visites et d'octets. Au
+premier cap, un `UNKNOWN` entier est transféré au flux résiduel avec son reçu ;
+il n'est ni supprimé, ni transformé en toutes ses feuilles. Les compteurs
+`none3/none4`, `unknown_to_residual`, `target_leaf_pair_tests` et
+`bank_restarts` montrent où passe la masse. Les deux derniers restent nuls ou
+strictement capés ; sinon la banque a seulement renommé un coût `n*M*n`.
+
+La banque doit venir d'une requête k-NN exacte et bornée par endpoint, pas du
+tri d'une liste complète que l'on voulait justement éviter. Ses pourcentages de
+mort croissants sont encourageants mais ne qualifient ni le coût de cette
+requête ni celui du target-range. La porte publie `knn_node_visits`, taille et
+HWM de banque, `target_node_visits`, tests témoin--nœud, crédits hérités,
+masse de paires fermée et résiduelle, séparément q3/q4. Elle impose un oracle
+ponctuel, `PairId_before_terminal=0`, aucun cap silencieux, deux pentes
+`<=1,35` et des caps absolus sur `eight_clusters`, puis `uniform`. Si cette
+banque reste rouge, le lift collectif `A times B times C` demeure la reprise ;
+scanner `M*C(n,2)` n'est jamais une option.
+
+Les fixtures permanentes incluent les frontières q4
+`a=(10,10,10),z=(11,10,10),b=(12,11,11)` et q3
+`a=(10,10,10),z=(11,9,10),b=(11,8,11)`, ainsi qu'un mutant centre-seul avec
+`a=(10,10,10)`, `z=(11,10,10)` et
+`B={12} times [8,12] times {10}`. Le centre est axial, mais les coins sortent
+des deux cônes. Les mutants qui omettent `H>0`, acceptent l'égalité, dupliquent
+un slot témoin ou confondent les coefficients `2/3` doivent mourir.
+
+## 8. Ordre de reprise vers 50 k
 
 1. graver la divergence des colonnes de la note comme fixture de provenance ;
 2. construire le juge indépendant borné `(S,I_B,U_B,owner)` ;
 3. recevoir `spindle-node-only` comme oracle sur petites ancres contre un scan
-   ponctuel, puis relever le certificat sur `A times B times C` avant PairId ;
+   ponctuel, tester la banque `a times Z_a times B`, puis relever si nécessaire
+   le certificat sur `A times B times C`, toujours avant PairId ;
 4. lancer `front-only` sur `eight_clusters`, puis `uniform`, avec ledger de
    masse et pentes/caps ;
 5. seulement si le front pré-liste est vert, recevoir la cutting signée et les
@@ -306,7 +432,7 @@ n'est pas la masse de `PairId` non ordonnés et il doit être renommé ou corrig
 Le résultat `theta` retire un coût inutile ; il ne change pas ce séquencement.
 Le contrat `50 000/1 s` reste entièrement ouvert.
 
-## 7. Rejeu des portes au pin
+## 9. Rejeu des portes au pin
 
 La configuration Release inventorie `560` CTests, dont `43` préfixés
 `mhgp3v_anchor_`. Sur l'ELF `114be24e...` attaché aux sources du commit, la
@@ -316,4 +442,23 @@ commande
 theta et les petits `eight_clusters`; il ne reçoit ni l'oracle indépendant, ni
 le classifieur spindle proposé ici, ni CUDA/G4, ni le payload officiel.
 
+Au successeur `2a205f3`, la configuration inventorie `573` CTests, dont `56`
+`mhgp3v_anchor_`. Le rejeu indépendant sur l'ELF `f699f8d1...` rend `56/56`
+en `75,50 s`. Il reçoit la parité des compteurs et la mort précoce existante,
+mais toujours aucun des nouveaux producteurs spindle/cône/lift proposés ici.
+
 GCP non utilisé.
+
+## 10. Successeur worktree du 13 août 2026
+
+La phrase précédente reste vraie pour les deux pins de cette réponse. Claude a
+depuis ajouté un producteur ponctuel spindle/cône non commité et ses portes ;
+il constitue un nouveau snapshot, pas une validation rétroactive de Q6. Le
+contre-audit
+[`AUDIT_CONTRE_AUDIT_SPINDLE_CONE_WORKTREE_20260813.md`](AUDIT_CONTRE_AUDIT_SPINDLE_CONE_WORKTREE_20260813.md)
+admet le lemme des cônes, mais refuse encore le producteur pour une conversion
+`smax` créant un faux prune, un juge incomplet par lane, un résiduel non
+rejouable et deux pentes de travail rouges. Il remplace donc, pour ce successeur
+seulement, l'affirmation historique « aucun producteur » ; le statut
+`not_claimed`, le NO-GO avant G4 et la priorité au lift collectif `A×B×C`
+demeurent.

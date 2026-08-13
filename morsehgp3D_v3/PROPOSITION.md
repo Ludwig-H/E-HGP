@@ -618,14 +618,62 @@ Pour une ancre `p`, un témoin `w`, une cible `q`, poser `s=w-p`, `d=q-p` et
 
 $$\text{q3: }A>0\ \text{ et }\ 3A^2>\lVert d\mathbin{\times}s\rVert^2,\qquad\text{q4: }A>0\ \text{ et }\ 2A^2>\lVert d\mathbin{\times}s\rVert^2.$$
 
-Pour `p,w` fixes et un nœud AABB de cibles, `A_min` s'obtient exactement par
-choix d'extrémités. La fonction convexe `||d cross s||^2` atteint son maximum
-sur l'un des huit sommets. Les mêmes comparaisons avec ces deux bornes peuvent
-donc créditer le témoin pour tout le nœud; une égalité ou une boîte indécise
-descend. Une banque de neuf ou huit `PointId` distincts certifie le nœud sans
-partager ni univers ni sort avec q2. Aucun nombre fixe de banques
-directionnelles n'est affirmé complet : ce `Jung--Yao target range` est un
-certificat fail-open à mesurer.
+Pour `p,w` fixes, écrire plus naturellement `t=q-w`. Alors
+`A=t dot s` et `d cross s=t cross s`. En décomposant `t=alpha*u+v`, où
+`u=s/||s||` et `v` est orthogonal à `u`, le domaine cible q3/q4 devient
+respectivement `alpha>0, ||v||<sqrt(3)*alpha` et
+`alpha>0, ||v||<sqrt(2)*alpha`. Ce sont les intérieurs de cônes de Lorentz
+convexes d'apex `w`, d'axe `w-p` et de demi-angles exacts `60` degrés et
+`arctan(sqrt(2))`. Par conséquent, un nœud AABB de cibles est **entièrement**
+couvert si et seulement si ses huit coins satisfont strictement le prédicat
+entier ponctuel. Cette porte `iff` est plus serrée que comparer séparément
+`A_min` et un maximum de produit vectoriel. Toute égalité, `w=p` ou boîte
+indécise descend.
+
+Le test par coin peut éviter le produit vectoriel : avec
+`E2=||w-p||^2`, `X2=||q-w||^2` et `H=(q-w) dot (w-p)`, q3 exige
+`H>0 && 4*H^2>E2*X2`, tandis que q4 exige
+`H>0 && 3*H^2>E2*X2`. `E2` est précalculé par entrée de banque ; les carrés et
+produits sont promus avant multiplication vers au moins `u128`.
+
+Une porte `NONE` fail-open évite de descendre tout l'extérieur du cône. Sur la
+boîte cible, calculer exactement `Hmax`, puis un minorant `Rlb` de
+`||(q-w) cross (w-p)||^2` : chaque composante du produit vectoriel est une
+forme linéaire dont l'intervalle est exact, et `Rlb` somme les distances
+carrées de zéro à ces trois intervalles. Le nœud est `NONE-q3` si
+`Hmax<=0 || 3*max(Hmax,0)^2<=Rlb`, et `NONE-q4` en remplaçant `3` par `2`.
+Ce rejet peut être incomplet à cause des corrélations entre composantes, jamais
+faux. Dans le seul diagnostic borné, `UNKNOWN` peut rejoindre au cap un
+résiduel muni de son état de reprise, sans émission de `PairId`. Le profil
+produit qui prétend au SLO n'accepte aucun budget configuré, même non atteint :
+il poursuit exactement ou échoue sur une ressource réelle. Un compteur de
+candidats qui omet la masse résiduelle ne ferme aucune identité.
+
+Une banque de neuf ou huit `PointId` distincts dont les cônes couvrent le nœud
+certifie celui-ci sans partager ni univers ni sort avec q2. Aucun nombre fixe de
+banques directionnelles n'est affirmé complet : ce `Jung--Yao target range` est
+un certificat fail-open à mesurer.
+
+Une spécialisation concrète construit par requête k-NN exacte une banque bornée
+`Z_a` des voisins les plus proches de chaque endpoint, puis classe des nœuds
+partenaires entiers par les huit coins de ces cônes. Elle ne balaie jamais `Z_a` par
+`PairId`. Huit témoins ferment q4 et neuf ferment q3 à `smax=11`; un échec de
+la banque conserve le nœud ou le divise sous ce budget et finit en bloc sur le
+chemin complet. Le
+demi-angle mesuré depuis l'endpoint n'est qu'asymptotique et garde une condition
+radiale ; le cône exact ci-dessus est mesuré depuis le témoin. Seuls ses
+prédicats entiers sans racine font autorité. Le ledger sépare visites k-NN,
+tests témoin--nœud, crédits hérités, masse de paires fermée et résiduelle. Un
+coût `M*C(n,2)` est interdit.
+
+Le contre-audit du premier producteur ponctuel confirme le lemme mais refuse
+son ordonnance industrielle. Sur une rampe mono-ELF
+`n=500/1 000/2 000`, banques 48 et 96, aucune des séries `uniform` ou
+`eight_clusters` ne ferme deux pentes de travail `<=1,35`; les dernières
+pentes de tests de coins valent encore `1,452` et `1,438` à banque 96. Le
+chemin fait une requête k-NN et une DFS cible pour chacun des `n` endpoints :
+une baisse de la seule masse candidate, même avec banque 256, ne reçoit pas son
+coût. La primitive reste oracle/classifieur terminal jusqu'au lift collectif.
 
 Avant toute `site_list`, une variante plus directe classe un nœud témoin AABB
 contre le spindle complet d'une ancre ponctuelle. Comme `W_3(a,b)` et
@@ -668,6 +716,14 @@ endpoints. La broad phase emploie `Hmin` puis des bornes d'intervalles de `R` ;
 les `512` triples restent oracle/fallback exact, jamais coût silencieux par
 état. Sous u16 et `n<=50 000`, `H` tient dans `i64`, mais `R` et les carrés
 comparés exigent une promotion avant multiplication vers au moins `u128`.
+
+Sur CUDA, cette promotion doit être un prédicat explicite à deux limbs, pas un
+`__int128` hôte annoté : multiplication 64 fois 64, mot haut, petit coefficient
+3 ou 4, puis comparaison lexicographique. Une porte CPU/device aux frontières
+reçoit les 68--70 bits. Le ledger du lift publie séparément masse fermée,
+terminale et résiduelle par lane, tests `NONE`, triples de coins, allocations,
+octets copiés et high-water de frontière ; aucun résultat G4 ne précède deux
+pentes vertes et ces caps absolus.
 
 Pour un produit général de boîtes d'extrémités et de témoins, une borne plus
 orientée utilise `g_min=D2_min-U2_max` et une majoration entière `Q_max` de

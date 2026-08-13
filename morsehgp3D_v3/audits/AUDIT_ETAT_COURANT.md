@@ -1,6 +1,6 @@
 # Audit courant de MorseHGP3D v3
 
-Date : 12 août 2026 UTC.
+Date : 13 août 2026 UTC.
 
 Cadre : `phase=exploration_v3_hors_registre`,
 `backend=cpu_reference_bounded_oracles_and_g4_diagnostic`,
@@ -8,52 +8,92 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-## Observation live postérieure — `HEAD=59d098b`, worktree en édition
+## Observation live — `HEAD=2a205f3`, delta spindle/cône non commité
 
-Au 12 août 2026 pendant la reprise d'audit, le `HEAD` est
-`59d098bd1b027a55a381e91499bc3432cc50f192`, commit
-`prove the filter changes nothing, then stop paying for it — and measure the
-wall the clusters build`. Il reçoit le retrait de `theta` sur le chemin par
-défaut, ses portes causales et la première rampe `eight_clusters`. Les
-successeurs de `760469d` paramètrent aussi `smax`, remplacent les tris
-historiques, ajoutent le script G4 gardé et une garde de densité du front. La
-boucle q4 locale forme encore les couples de la lentille. Aucune session GCP
-n'a été lancée pour ce producteur depuis ce pin et aucun résultat device n'est
+Au 13 août 2026, le `HEAD` reste
+`2a205f3508abc7a20ea564eef55ed8e1f0f6f67d`, mais le worktree n'est plus
+propre : `CMakeLists.txt` est modifié, `prototype/spindle_cone.hpp` et
+`prototype/spindle_cone_probe.cpp` sont non suivis, et Claude ajoute leurs
+portes et un transcript de provenance. Le snapshot indépendamment rejoué est
+pincé par les SHA-256 `78037fc1...` pour le header, `bf646632...` pour le
+probe, `4f4733bc...` pour CMake et `abbc57c5...` pour l'ELF Release. Tout
+octet postérieur constitue un nouveau successeur.
+
+Le cône cible ponctuel est mathématiquement admis : ses comparaisons entières
+q3/q4, la porte `ALL` par huit coins et le rejet `NONE` sont exacts ou
+fail-open dans le profil u16. Deux rejeux ciblés courants rendent `30/30`
+CTests `mhgp3v_cone_` en `5,97 s` puis `9,41 s` sous des charges différentes.
+Ce vert ne reçoit cependant pas le producteur :
+
+- `smax=9223372036854775807` ferme faussement `380/380` paires sans test,
+  avec code zéro, parce que le sujet et le juge partagent le cast vers `int` ;
+- le juge compare seulement la conjonction des morts q2/q3/q4, et ne voit pas
+  une fausse fermeture isolée d'une lane ;
+- aucun CTest ne fait mordre les caps et les deux scalaires résiduels ne sont
+  ni une partition par identité, ni un reçu rejouable ;
+- les rampes mono-ELF banques 48/96 gardent deux pentes rouges sur toutes les
+  familles et tous les compteurs : les dernières pentes de tests de coins
+  restent `1,452` sur `uniform/96` et `1,438` sur
+  `eight_clusters/96`, au-dessus de `1,35`.
+
+Le port littéral de cette DFS par endpoint est donc **NO-GO avant G4**. La
+primitive reste un oracle borné utile ; la route industrielle proposée relève
+le certificat sur `A_endpoint × B_partner × C_witness`, puis exige une
+partition résiduelle authentifiée en diagnostic, un profil produit sans budget
+configuré, deux pentes vertes, des caps d'octets et le payload officiel. Le
+contre-audit complet et l'ordre de reprise remis à Claude sont dans
+[`AUDIT_CONTRE_AUDIT_SPINDLE_CONE_WORKTREE_20260813.md`](AUDIT_CONTRE_AUDIT_SPINDLE_CONE_WORKTREE_20260813.md).
+
+Aucune session GCP n'a été lancée pour ce delta et aucun résultat device n'est
 reçu.
 
-La garde de densité est fail-open et ne menace pas l'exactitude : elle saute
-seulement une tentative de prune. Sa constante `2177/100` estime toutefois la
-population depuis la densité du nœud partenaire, qui ne borne pas la population
-de la boule témoin ailleurs. C'est donc un ordonnanceur heuristique à ablater,
-pas un certificat « témoin impossible ». Ses compteurs
-`front_witness_skipped/front_mass_closed` existent dans le pipeline device mais
-ne sont pas encore remontés ni imprimés par le reçu CPU. `front_mass_closed`
-compte en outre tous les points du nœud, pas seulement les `PairId b>a`; il ne
-ferme pas encore le ledger non ordonné.
+## Pin commité antérieur au delta spindle — `HEAD=2a205f3`
 
-Le commit annonce `43/43` portes anchor en `244 s`. L'inventaire courant est
-bien `560` CTests, dont `43` `mhgp3v_anchor_`; le rejeu indépendant sur les
-octets du commit rend `43/43` en `141,39 s`. L'ELF Release SHA-256
-`114be24e4c87f1c03814a88e6ec34820ccbb57a473e414d76834819fd76c201f`
-porte les mêmes sources commitées. Les sondes non vides à `n=120`, seed `1`,
-donnent sur les deux moteurs `5 176` ancres theta armées, zéro prune theta-only,
-`22 488` supports et `accord=OUI`.
+Au 12 août 2026 pendant la reprise d'audit, le pin commité est
+`2a205f3508abc7a20ea564eef55ed8e1f0f6f67d`, commit
+`compare the two ledgers, not just the supports — and kill the anchor the
+moment its budget is gone`. Avant le delta spindle/cône décrit ci-dessus, le
+code et le CMake du worktree étaient propres ; les seuls deltas alors observés
+étaient les réponses des auditeurs dans `README.md`, `PROPOSITION.md` et
+`audits/`.
 
-La rampe amas du commit ne reçoit pas ses colonnes de front : au même ELF,
-`n=150/200/300` reproduit exactement ses compteurs q4 mais publie
+Le commit reçoit le retrait de `theta` du chemin par défaut, paramètre `smax`,
+compare les deux moteurs sur trente-six compteurs, rend la garde de densité
+opt-in et prend la mort par budget dès que suffisamment de `Llow>0` ont été lus.
+L'inventaire Release est `573` CTests, dont `56` `mhgp3v_anchor_`. Sur l'ELF
+SHA-256 `f699f8d1ff17557626325b2844d77748c649e306cd0e25b324d62c7d49442d73`,
+le rejeu indépendant
+`ctest --test-dir build/v3 --output-on-failure -R '^mhgp3v_anchor_'` rend
+`56/56` en `75,50 s`.
+
+La garde de densité reste seulement fail-open pour Source S : elle renonce à
+des tentatives de prune sans inventer de support, mais sa densité locale ne
+borne pas la population ailleurs. Son ablation ne gagne aucun prune sur les
+trois familles et dégrade deux temps sur trois ; l'audit recommande donc de la
+sortir du chemin produit après un dernier reçu pincé. `front_mass_closed`
+compte en outre tous les points d'un nœud, pas seulement les `PairId b>a`; il
+ne ferme pas encore le ledger non ordonné.
+
+La mort précoce par budget est exacte et réduit `site_evaluations`, mais elle
+intervient encore après `gather_sites`. Sur `eight_clusters n=500`, les nombres
+de paires q4 et de tests census restent inchangés : c'est un facteur utile, pas
+la fermeture du verrou. La reprise mathématique proposée construit une banque
+k-NN une fois par endpoint, puis couvre des nœuds partenaires entiers par des
+cônes cibles exacts à huit coins. Elle doit opérer avant `PairId`; les
+`UNKNOWN` sont envoyés par blocs au résiduel sous caps, jamais descendus
+systématiquement jusqu'aux paires.
+
+La note amas conserve par ailleurs une provenance incohérente : au même ELF du
+pin précédent, `n=150/200/300` reproduit ses compteurs q4 mais publie
 respectivement `1/2/40` prunes et `11 174/19 899/44 831` candidats, non
-`0` et `C(n,2)`. Une boule médiane centrée dans le vide peut atteindre des
-points lorsque son rayon croît ; surtout le spindle complet possède des témoins
-près des endpoints. Les pentes sont un NO-GO empirique de la boucle actuelle,
-pas une preuve de complexité cubique.
+`0` et `C(n,2)`. Une boule médiane centrée dans le vide n'implique pas un
+spindle universel vide. Les pentes prouvent un NO-GO empirique de la boucle
+actuelle, pas une complexité cubique asymptotique.
 
-Le worktree postérieur à `59d098b` est de nouveau en édition : Claude ajoute
-les compteurs front/rejets au pipeline et au reçu CPU, rend la garde de densité
-opt-in, puis ajoute `--compare-engines` et une parité de trente-cinq compteurs
-dans `anchor_pipeline.hpp` et `anchor_source.cpp`. L'ELF worktree SHA-256
-`fed7e39c...` n'est ni pincé ni rejoué par la campagne `43/43`. Les
-modifications documentaires des auditeurs restent limitées au README, à la
-proposition et à `audits/`.
+Le nouvel
+[`AUDIT_REPONSES_MUR_AMAS_CENSUS_SPINDLE_20260812.md`](AUDIT_REPONSES_MUR_AMAS_CENSUS_SPINDLE_20260812.md)
+répond désormais aux six questions de Claude et fixe le classifieur spindle,
+le lift bloc `A×B×C`, le cône cible exact et leurs ledgers/gates.
 
 Le contre-audit courant répond aux cinq questions de Claude, sépare le bug
 historique `smax` de sa réparation et apporte deux résultats utiles : le
