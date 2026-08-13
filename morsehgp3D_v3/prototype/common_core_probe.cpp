@@ -88,8 +88,11 @@ constexpr int kNeed[3] = {10, 9, 8};
 
 enum class CoreMutant {
   kNone,
-  kSeparationTwo,   // teste d > 2S au lieu de d > 3S
-  kCountOnly,       // compte les points sans exiger leur distinction stricte
+  // `separation-deux` et `compte-sans-distinction` ont ete RETIRES : le
+  // contre-audit montre qu'ils restent SOUND. Le premier arrete plus tot en
+  // gardant le numerateur `d-3S`, donc il perd des descendants sans jamais
+  // fermer a tort ; le second retirait la soustraction de deux, qui etait
+  // elle-meme injustifiee. Un mutant sound n'est pas un mutant.
   kBoundaryInside,  // accepte l'egalite : le bord du coeur devient interieur
   kFloorRadius,     // arrondit le rayon du coeur vers le HAUT
 };
@@ -97,8 +100,6 @@ enum class CoreMutant {
 const char* core_mutant_name(CoreMutant m) {
   switch (m) {
     case CoreMutant::kNone: return "none";
-    case CoreMutant::kSeparationTwo: return "coeur-separation-deux";
-    case CoreMutant::kCountOnly: return "coeur-compte-sans-distinction";
     case CoreMutant::kBoundaryInside: return "coeur-bord-interieur";
     case CoreMutant::kFloorRadius: return "coeur-rayon-arrondi-haut";
   }
@@ -124,13 +125,22 @@ struct Ledger {
   long long blocks_split = 0;
   long long core_queries = 0;
   long long core_point_tests = 0;
-  long long cores_empty = 0;         // separes mais coeur sans assez de temoins
+  // TROIS COMPTEURS DISTINCTS, PAS UN SEUL.
+  //
+  // Une premiere version incrementait `cores_empty` des que `occupants-2 < 8`.
+  // Elle comptait donc des coeurs SOUS-PLEINS sous une soustraction de deux
+  // injustifiee, et le chiffre `2 306/2 306` ne prouvait aucun vide central. Le
+  // contre-audit l'a refuse a juste titre : le vide et la sous-plenitude sont
+  // deux faits differents et doivent etre publies separement.
+  long long occupancy_zero = 0;       // coeur reellement VIDE
+  long long underfull[3] = {0, 0, 0}; // coeur non vide mais sous le seuil de lane
   long long closed_directed[3] = {0, 0, 0};
   long long residual_directed[3] = {0, 0, 0};
   long long block_mass_closed[3] = {0, 0, 0};
   long long core_occupancy_hwm = 0;
   long long block_mass_hwm = 0;
-  long long pair_mass_covered = 0;  // doit valoir exactement C(n,2)
+  long long pair_mass_covered = 0;   // doit valoir exactement C(n,2)
+  long long pair_multiplicity_bad = 0;  // paires vues != 1 fois
 };
 
 struct Options {
@@ -208,9 +218,7 @@ int main(int argc, char** argv) {
       else if (val == "scanline_overlap_multiecho") opt.family = CloudFamily::kScanlineOverlapMultiecho;
       else refuse("--family inconnue");
     } else if (key == "--inject") {
-      if (val == "coeur-separation-deux") opt.mutant = CoreMutant::kSeparationTwo;
-      else if (val == "coeur-compte-sans-distinction") opt.mutant = CoreMutant::kCountOnly;
-      else if (val == "coeur-bord-interieur") opt.mutant = CoreMutant::kBoundaryInside;
+      if (val == "coeur-bord-interieur") opt.mutant = CoreMutant::kBoundaryInside;
       else if (val == "coeur-rayon-arrondi-haut") opt.mutant = CoreMutant::kFloorRadius;
       else refuse("--inject inconnu");
     } else {
@@ -242,6 +250,21 @@ int main(int argc, char** argv) {
 
   // Decomposition en blocs : recursion sur les couples de noeuds, avec split du
   // plus gros tant que la separation n'est pas certifiee.
+  // MULTIPLICITE PAR `PairId`. L'identite scalaire `somme = C(n,2)` est
+  // NECESSAIRE mais pas suffisante : une omission peut etre compensee par un
+  // doublon et le total resterait juste. Le compteur par paire tranche.
+  std::vector<unsigned char> seen((std::size_t)n * (std::size_t)n, 0);
+  auto mark_block = [&](const LbvhNode& na2, const LbvhNode& nb2, bool same) {
+    for (int ta = na2.begin; ta < na2.end; ++ta)
+      for (int tb = (same ? ta + 1 : nb2.begin); tb < nb2.end; ++tb) {
+        const int u = tree.order[(std::size_t)ta], v = tree.order[(std::size_t)tb];
+        if (u == v) continue;
+        const std::size_t k = (std::size_t)std::min(u, v) * (std::size_t)n + (std::size_t)std::max(u, v);
+        if (seen[k] != 0) ++led.pair_multiplicity_bad;
+        seen[k] = 1;
+      }
+  };
+
   std::vector<std::pair<int, int>> stack;
   stack.push_back({0, 0});
   while (!stack.empty()) {
@@ -261,8 +284,7 @@ int main(int argc, char** argv) {
     }
     const i64 d_lb = isqrt_floor(d2x4) / 2;  // minorant entier de d
     const i64 S = ba.r + bb.r;
-    const i64 factor = (opt.mutant == CoreMutant::kSeparationTwo) ? 2 : 3;
-    const bool separated = (ia != ib) && (d_lb > factor * S);
+    const bool separated = (ia != ib) && (d_lb > 3 * S);
 
     const long long block_pairs = (ia == ib) ? (ma * (ma - 1) / 2) : (ma * mb);
     if (!separated) {
@@ -277,14 +299,18 @@ int main(int argc, char** argv) {
       // par `(A_g,A_g)`, `(A_d,A_d)` et `(A_g,A_d)`, ce qui couvre chaque paire
       // non ordonnee EXACTEMENT une fois.
       if (ia == ib) {
-        if (a_leaf) { led.pair_mass_covered += block_pairs; continue; }
+        if (a_leaf) { led.pair_mass_covered += block_pairs; mark_block(na, na, true); continue; }
         ++led.blocks_split;
         stack.push_back({na.left, na.left});
         stack.push_back({na.right, na.right});
         stack.push_back({na.left, na.right});
         continue;
       }
-      if (a_leaf && b_leaf) { led.pair_mass_covered += block_pairs; continue; }
+      if (a_leaf && b_leaf) {
+        led.pair_mass_covered += block_pairs;
+        mark_block(na, nb, false);
+        continue;
+      }
       ++led.blocks_split;
       if (!a_leaf && (b_leaf || ma >= mb)) {
         stack.push_back({na.left, ib});
@@ -298,12 +324,13 @@ int main(int argc, char** argv) {
 
     ++led.blocks_emitted;
     led.pair_mass_covered += block_pairs;
+    mark_block(na, nb, ia == ib);
     if (ma * mb > led.block_mass_hwm) led.block_mass_hwm = ma * mb;
 
     // Rayon du coeur, arrondi vers le BAS pour rester conservateur : le mutant
     // l'arrondit vers le haut et fait entrer des points qui n'y sont pas.
     const i64 num = d_lb - 3 * S;
-    if (num <= 0) { ++led.cores_empty; continue; }
+    if (num <= 0) { ++led.occupancy_zero; continue; }
     const i64 r_core = (opt.mutant == CoreMutant::kFloorRadius) ? ((num + 3) / 4) : (num / 4);
     const i64 two_r = 2 * r_core;
     const i64 lim = two_r * two_r;
@@ -332,14 +359,16 @@ int main(int argc, char** argv) {
     }
     if (occupants > led.core_occupancy_hwm) led.core_occupancy_hwm = occupants;
 
+    if (occupants == 0) ++led.occupancy_zero;
     for (int q = 0; q < 3; ++q) {
-      // Chaque occupant du coeur est interieur a TOUTE circumboule admissible du
-      // bloc. Il faut `kNeed[q]` occupants DISTINCTS, et deux endpoints du bloc
-      // pourraient figurer parmi eux : la marge de deux est retiree, sauf sous
-      // le mutant qui compte sans distinguer.
-      const long long usable =
-          (opt.mutant == CoreMutant::kCountOnly) ? occupants : (occupants - 2);
-      if (usable < kNeed[q]) continue;
+      // LES ENDPOINTS SONT STRICTEMENT HORS DU COEUR, ET C'EST DEMONTRABLE :
+      // pour `a` dans `A`, la distance de `a` a `m_0` vaut au moins
+      // `d/2 - R_A >= d/2 - S`, tandis que le rayon du coeur vaut
+      // `(d-3S)/4`. Or `d/2 - S - (d-3S)/4 = (d-S)/4 > 0` des que `d > 3S`.
+      // La soustraction de deux d'une premiere version etait donc injustifiee
+      // et retiree : elle ne protegeait de rien et faussait le compte.
+      const long long usable = occupants;
+      if (usable < kNeed[q]) { ++led.underfull[(std::size_t)q]; continue; }
       led.block_mass_closed[(std::size_t)q] += ma * mb;
       for (int ta = na.begin; ta < na.end; ++ta)
         for (int tb = nb.begin; tb < nb.end; ++tb) {
@@ -349,7 +378,6 @@ int main(int argc, char** argv) {
           closed[(std::size_t)q][(std::size_t)b * (std::size_t)n + (std::size_t)a] = 1;
         }
     }
-    if (occupants - 2 < kNeed[2]) ++led.cores_empty;
   }
 
   // IDENTITE DE COUVERTURE. La decomposition doit visiter chaque paire non
@@ -358,6 +386,15 @@ int main(int argc, char** argv) {
   // deux fois et personne ne le verrait.
   if (led.pair_mass_covered != (long long)n * ((long long)n - 1) / 2)
     violate("la decomposition ne partitionne pas les paires non ordonnees");
+  if (led.pair_multiplicity_bad != 0)
+    violate("une paire non ordonnee est couverte plus d'une fois");
+  {
+    long long unseen = 0;
+    for (int u = 0; u < n; ++u)
+      for (int v = u + 1; v < n; ++v)
+        if (seen[(std::size_t)u * (std::size_t)n + (std::size_t)v] == 0) ++unseen;
+    if (unseen != 0) violate("une paire non ordonnee n'est couverte par aucun bloc");
+  }
 
   for (int q = 0; q < 3; ++q) {
     long long c = 0;
@@ -379,8 +416,10 @@ int main(int argc, char** argv) {
   std::printf("blocs visites=%lld emis=%lld splits=%lld masse_hwm=%lld paires_couvertes=%lld/%lld\n",
               led.node_pairs_visited, led.blocks_emitted, led.blocks_split, led.block_mass_hwm,
               led.pair_mass_covered, (long long)n * ((long long)n - 1) / 2);
-  std::printf("coeur requetes=%lld tests_points=%lld vides=%lld occupation_hwm=%lld\n",
-              led.core_queries, led.core_point_tests, led.cores_empty, led.core_occupancy_hwm);
+  std::printf("coeur requetes=%lld tests_points=%lld vides=%lld sous_pleins_q2=%lld "
+              "sous_pleins_q3=%lld sous_pleins_q4=%lld occupation_hwm=%lld\n",
+              led.core_queries, led.core_point_tests, led.occupancy_zero,
+              led.underfull[0], led.underfull[1], led.underfull[2], led.core_occupancy_hwm);
   for (int q = 0; q < 3; ++q)
     std::printf("lane q%d ferme=%lld residuel=%lld masse_bloc_fermee=%lld\n", q + 2,
                 led.closed_directed[(std::size_t)q], led.residual_directed[(std::size_t)q],
@@ -437,9 +476,9 @@ int main(int argc, char** argv) {
   }
   // LE COEUR VIDE EST UNE MESURE, PAS UN ECHEC. Q7 impose de le compter : deux
   // amas separes ont un coeur parfaitement defini et parfaitement vide.
-  if (led.cores_empty < opt.min_cores_empty) {
-    std::fprintf(stderr, "REFUS : plancher de coeurs vides (%lld < %lld)\n", led.cores_empty,
-                 opt.min_cores_empty);
+  if (led.underfull[2] < opt.min_cores_empty) {
+    std::fprintf(stderr, "REFUS : plancher de coeurs sous-pleins q4 (%lld < %lld)\n",
+                 led.underfull[2], opt.min_cores_empty);
     return 3;
   }
   if (led.residual_directed[2] < opt.min_residuel) {

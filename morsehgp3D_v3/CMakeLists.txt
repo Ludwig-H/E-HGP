@@ -3551,16 +3551,32 @@ mhgp3v_add_expected_code_test_for(mhgp3v_conic_groups_probe
 #
 # `d > 3S` construit un coeur commun a toutes les paires d'un bloc. Il ne
 # fournit AUCUN temoin : le bloc n'est ferme que si le coeur contient `h`
-# PointId distincts. Q7 l'annonce et la mesure le confirme sans ambiguite —
-# `eight_clusters n=600` emet `2 306` blocs bien separes dont `2 306` ont un
-# coeur VIDE, et ferme exactement zero paire. Deux amas serres ont un coeur
-# parfaitement defini et parfaitement vide.
+# PointId distincts.
 #
-# Sur `uniform` et `terrain` la fermeture existe mais reste marginale : `126` et
-# `784` paires dirigees sur environ `359 000`. Les quatre mutants SURVIVENT, et
-# c'est le meme fait vu autrement : le certificat est si loin de sa propre
-# frontiere qu'aucune perturbation ne l'atteint. Cette voie n'est donc pas
-# competitive comme certificat de couverture, et ce verdict est mesure.
+# TROIS CORRECTIONS DU CONTRE-AUDIT SONT INTEGREES ICI.
+#
+# 1. `coeurs_vides` comptait `occupants-2 < 8`, donc des coeurs SOUS-PLEINS sous
+#    une soustraction de deux INJUSTIFIEE. Les endpoints sont strictement hors
+#    du coeur, et cela se demontre : pour `a` dans `A`, sa distance a `m_0` vaut
+#    au moins `d/2 - S`, contre un rayon de coeur `(d-3S)/4`, et
+#    `d/2 - S - (d-3S)/4 = (d-S)/4 > 0` des que `d > 3S`. La soustraction ne
+#    protegeait de rien et COUTAIT des fermetures : `terrain` passe de `784` a
+#    `2 240` paires dirigees. Le vide et la sous-plenitude sont desormais deux
+#    compteurs distincts.
+# 2. L'identite scalaire `paires_couvertes = C(n,2)` est NECESSAIRE mais pas
+#    suffisante : une omission peut etre compensee par un doublon. La porte
+#    verifie donc une multiplicite EXACTEMENT UN par `PairId`, et qu'aucune
+#    paire n'est laissee sans bloc.
+# 3. Deux mutants sont RETIRES parce qu'ils sont SOUND. `separation-deux`
+#    arrete plus tot en gardant le numerateur `d-3S` : il perd des descendants
+#    sans jamais fermer a tort. `compte-sans-distinction` retirait la
+#    soustraction de deux, qui etait elle-meme injustifiee. Un mutant sound
+#    n'est pas un mutant.
+#
+# Verdict conserve : cette voie n'est PAS un certificat de couverture. Sur
+# `eight_clusters n=600` elle emet `2 306` blocs dont `2 277` ont un coeur
+# reellement VIDE, et ferme zero paire. Elle reste un fast path POSITIF
+# opportuniste — un echec n'y refute jamais rien, il est fail-open.
 #
 # CE QUI RESTE UNE VRAIE PORTE est l'identite de couverture. Une premiere
 # decomposition traitait `A x A` en poussant `(gauche,A)` et `(droite,A)` : les
@@ -3578,11 +3594,11 @@ target_compile_options(mhgp3v_common_core_probe PRIVATE -Wall -Wextra -Werror)
 
 add_test(NAME mhgp3v_coeur_uniform COMMAND mhgp3v_common_core_probe
          --points=600 --family=uniform --seed=3 --leaf=8 --judge
-         --min-blocs=1000 --min-closed-q4=100 --min-coeurs-vides=1000
+         --min-blocs=1000 --min-closed-q4=200 --min-coeurs-vides=1500
          --min-residuel=300000)
 add_test(NAME mhgp3v_coeur_terrain COMMAND mhgp3v_common_core_probe
          --points=600 --family=terrain --seed=3 --leaf=8 --judge
-         --min-blocs=1500 --min-closed-q4=500 --min-coeurs-vides=1500
+         --min-blocs=1500 --min-closed-q4=2000 --min-coeurs-vides=2000
          --min-residuel=300000)
 # LA PORTE QUI COMPTE POUR LES AMAS : elle exige que le certificat ECHOUE, et
 # que cet echec soit total. Q7 le predit, la mesure le confirme, et sans cette
@@ -3593,7 +3609,7 @@ add_test(NAME mhgp3v_coeur_amas_tous_vides COMMAND mhgp3v_common_core_probe
 
 mhgp3v_add_expected_code_test_for(mhgp3v_common_core_probe
   mhgp3v_coeur_reject_mutant_sans_juge "un mutant sans juge ne prouve rien" 2
-  --points=200 --inject=coeur-separation-deux)
+  --points=200 --inject=coeur-bord-interieur)
 mhgp3v_add_expected_code_test_for(mhgp3v_common_core_probe
   mhgp3v_coeur_reject_smax "--smax hors du domaine d'enveloppe" 2
   --points=200 --smax=9223372036854775807)

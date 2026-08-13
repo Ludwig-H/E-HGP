@@ -8,6 +8,30 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
+## Observation live — `HEAD=ec2fbab`, trois microvoies commises
+
+Le `HEAD` courant est
+`ec2fbab71dad5dbdfcb92e9f405b9b7e869f9e94`, commit
+`run the third road, and let the measurement retire it`. Il commet sans en
+faire une réception la note de comparaison des trois microvoies et le probe de
+cœur commun. Le worktree porte ensuite des deltas concurrents dans CMake et le
+pipeline d'ancre, ainsi que les seuls audits/propositions autorisés à
+l'auditeur ; ces deltas d'implémentation ne sont ni attribués à l'auditeur, ni
+modifiés par lui.
+
+Le tableau dominance/groupes/cœur juxtapose `n=12 500/150/600`, des univers et
+des ordonnances différents. Il oriente le travail mais ne départage pas une
+gate commune. Le cœur est disqualifié comme étage général de couverture et
+conservé comme fast path positif opportuniste dans une traversée de rectangles
+déjà nécessaire. La priorité mathématique devient le crédit conique cellulaire
+par événements d'activation et enveloppe projective 2D : il évite
+`C(m,3)`, produit un suffixe factorisé de cibles et échoue fail-open. Réponse
+complète à Claude :
+[`AUDIT_REPONSE_GATE_TROIS_VOIES_20260813.md`](AUDIT_REPONSE_GATE_TROIS_VOIES_20260813.md).
+
+Ce statut ne reçoit toujours ni pente physique, ni résiduel consommable, ni
+CUDA/G4, ni `BenchmarkOutputContract-v1`. GCP non utilisé.
+
 ### Parent logiciel — `HEAD=5ddf4a3`, dominance 432 diagnostique
 
 Au 13 août 2026, le `HEAD` observé est
@@ -51,7 +75,7 @@ colocalisées sont seulement comptées et omises, alors que le profil exige leur
 rejet. Enfin, un owner de frontière alternatif peut rester spindle-sûr : sa
 porte relève de la canonicité engagée et non d'un faux prune attendu.
 
-## Observation live — `HEAD=2270077`, microprobe de groupes commis
+## Pin historique — `HEAD=2270077`, microprobe de groupes commis
 
 Au 13 août 2026, le `HEAD` observé est
 `22700778af0d14bd4e25c614bf901ccf427946f2`, commit
@@ -83,12 +107,13 @@ de travail remis à Claude sont dans
 Le statut live ne reçoit donc ni les mesures de dominance comme rampe, ni le
 prototype de groupe comme deuxième voie, ni CUDA/G4, ni le SLO. GCP non utilisé.
 
-### Delta postérieur — microprobe cœur commun non commis
+### Successeur désormais commis dans `ec2fbab` — microprobe cœur commun
 
-Claude a ensuite ouvert et raccordé dans le worktree le microprobe Q7
+Claude a ensuite ouvert et raccordé, puis le commit `ec2fbab` a figé, le
+microprobe Q7
 `prototype/common_core_probe.cpp`, SHA-256
 `db9ef4e2cd2f98c6fcc69f3be2d808203464df711692792d8aeb831ed1a43950`,
-avec `CMakeLists.txt` SHA-256
+avec le `CMakeLists.txt` du worktree alors observé, SHA-256
 `d1b3cbbe20e7fa198c6132159e79705ac7677a70cac9eedbfd68dfa1fb2cf8bd`.
 Le rejeu Release/CUDA OFF rend `7/7` diagnostics en `0,67 s`.
 

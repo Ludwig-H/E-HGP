@@ -1685,10 +1685,10 @@ le rectangle. Si `ell` est la hauteur, `zeta_h` le h-ième témoin absolu commun
 
 $$r_{AB}=\frac{\beta-\alpha}{\zeta_h-\alpha}.$$
 
-Dans le domaine de fermeture `beta>zeta_h`, ce rapport croît avec `ell(a)` et
-`ell(b)` ; les minima `alpha,beta` sont donc bien le pire cas lorsque le
-dénominateur est écrit avec les hauteurs absolues communes. Le cutoff direct
-ferme alors tout le rectangle, et implique que les témoins crédités précèdent
+Sous les gardes explicites `zeta_h>max_A ell` et `beta>zeta_h`, ce rapport
+croît avec `ell(a)` et `ell(b)` ; les minima `alpha,beta` sont donc bien le pire
+cas lorsque le dénominateur est écrit avec les hauteurs absolues communes. Le
+cutoff direct ferme alors tout le rectangle, et les témoins crédités précèdent
 toutes les cibles. En cas d'échec, scinder `A/B`; ne créer `(a,CellId)` qu'à la
 feuille du résiduel. Les deux orientations sont évaluées sur le même `RectId` :
 fermeture par `OR`, résiduel par `AND`, sans join matériel de `PairId`.

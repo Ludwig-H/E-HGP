@@ -146,6 +146,16 @@ contre-audit et la construction remise à Claude :
 [`AUDIT_CONTRE_GROUPES_CONIQUES_2270077_20260813.md`](audits/AUDIT_CONTRE_GROUPES_CONIQUES_2270077_20260813.md) et
 [`AUDIT_REPONSE_DOMINANCE_GROUPES_5DDF4A3_20260813.md`](audits/AUDIT_REPONSE_DOMINANCE_GROUPES_5DDF4A3_20260813.md).
 
+Le successeur `ec2fbab` commet aussi le microprobe de cœur commun et la note
+Claude qui compare les trois voies. Cette comparaison reste diagnostique : les
+tailles `12 500/150/600` et les univers diffèrent, aucune pente physique n'est
+publiée. Le cœur n'est pas abandonné mathématiquement, mais rétrogradé en fast
+path positif optionnel d'un rectangle déjà visité ; il ne justifie ni WSPD ni
+index propre. Le prochain jalon recommandé est la dominance bloc d'abord puis
+les crédits coniques cellulaires par enveloppes 2D, avec le cœur seulement si
+une occupation plausible est disponible sans scan supplémentaire. Voir
+[`AUDIT_REPONSE_GATE_TROIS_VOIES_20260813.md`](audits/AUDIT_REPONSE_GATE_TROIS_VOIES_20260813.md).
+
 Deux sorties sont distinctes :
 
 | sortie | contenu | portée actuelle |
