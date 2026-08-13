@@ -8,9 +8,74 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-## Observation live — `HEAD=88eb36d`, successeur Andrew positif non committé
+## Observation live — `HEAD=1483172`, parcimonie `PairId` réfutée
 
 Le `HEAD` courant est
+`1483172239af5047c8f784a4b8fd848bcd446867`, commit
+`ask for the family that would kill this route, before writing the producer`.
+La question de Claude est pincée par
+`QUESTIONS_CLAUDE_TUER_LA_VOIE_20260813.md=24ff81bf...`. Elle reconnaît
+correctement qu'aucun des trois probes dominance/groupes/cœur ne mesure encore
+une ordonnance factorisée ni un aval produit. Les observations Andrew des
+sections suivantes restent des pins historiques ; elles ne décrivent plus le
+`HEAD` documentaire courant.
+
+Le code Andrew courant est commis par le parent `090f752` :
+`cell_credits.hpp=f9d4981d...`, `cell_credits_probe.cpp=a8c4e9ad...` et
+`CMakeLists.txt=676331c0...`. Aucun delta de code MorseHGP3D n'était présent
+lors de cette observation. Le worktree contenait les seuls deltas documentaires
+de l'auditeur et un script GCP non suivi sous `gcp-migration/`, propriété de la
+session Claude et non reçu ici. Cet audit ne l'a ni exécuté ni modifié.
+
+La contre-famille demandée existe en u16. Pour `n=2m<=50 000`, deux grilles de
+`m` points aux plans `x=0/60000`, décalées transversalement, placent toutes les
+relations croisées dans `U00`. Les seuils cible/témoin sont tous `60000`, donc
+le premier garde direct est `9*60000-11*60000<0` dans les deux orientations.
+Les trois lanes laissent exactement `m^2=n^2/4` paires croisées au résiduel ; à
+`50 k`, cela vaut `625 000 000`. Le crédit cellulaire uniforme a lui aussi des
+événements `X_s>=60001` et ne ferme aucune de ces cibles. Cette preuve refuse
+dès maintenant le claim `residual_PairId=o(n^2)` et le rôle de sparsifieur
+terminal de ces certificats ; aucune exécution pairwise `50 k` n'est requise
+pour redécouvrir ce compte.
+
+Ce verdict ne refuse pas le front relationnel : la même masse tient dans le
+rectangle `A x B`. La gate est corrigée en conséquence. La masse sémantique
+peut être quadratique ; les deux pentes `<=1,35` portent sur les visites,
+records, octets, copies, high-water, construction des banques et travail du
+consommateur. Le premier jalon positif est un walking skeleton : ABI mince,
+`CellSuffixReporter` à une DFS cible par ancre et toute la table `X[432][3]`,
+lift `StarKey -> RectKey`, puis raccord dans le même jalon à une tranche q4
+régulière `SupportKey -> BallKey -> census -> fold`. Le juge borné seul
+développe les rectangles ; aucune rampe du filtre isolé ne vaut admission.
+
+Une borne plus forte existe dans `R^3` : le lemme 5.1 de Chazelle et al.
+construit `m^2` vraies arêtes Gabriel parmi `2m` points, chacune avec une boule
+diamétrale vide. Aucun certificat sound d'intérieurs universels ne peut les
+fermer. La construction réelle n'a toutefois pas encore de réalisation
+`50 k` u16 reçue et ne borne pas automatiquement le quotient H0 normalisé.
+
+Une famille u16 distincte sépare en outre l'impuissance du certificat de la
+vraie sortie. Pour `A_i=(i,0,0)`, `B_j=(0,j,65535)` et
+`1<=i,j<=m<=25000`, chaque paire croisée possède dans les disques de Jung q3 et
+q4 une sphère strictement vide. Le plancher `U_3,U_4` des routes universelles
+vaut donc au moins `m^2`, alors qu'il n'existe aucun support positif q3/q4 et
+que Source S vaut seulement `20m-55=499 945` à `smax=11`. Le plancher du
+catalogue littéral est `L_q`, nombre de `PairId` owners d'un support positif
+pertinent : `L_q<=U_q`, mais l'inverse est faux. Une borne u16
+`L_q=Theta(n^2)` reste ouverte ; si elle existe, la sortie de tous les supports
+est dense et exige un chemin output-sensitive ou `resource_exhausted`, pas
+seulement une source dite générative. Elle ne borne pas sans preuve distincte
+un calcul direct du quotient H0 normalisé.
+
+Réponse complète, coordonnées, preuve et ordre des jalons :
+[`AUDIT_REPONSE_CLAUDE_TUER_LA_VOIE_20260813.md`](AUDIT_REPONSE_CLAUDE_TUER_LA_VOIE_20260813.md).
+La route reste `NO-GO` G4 : un front compact, une source générative du résiduel
+et la tranche owner--RLE--census--fold manquent encore. GCP non utilisé par cet
+audit.
+
+## Observation historique — `HEAD=88eb36d`, successeur Andrew alors non committé
+
+Le `HEAD` observé était
 `88eb36d20b84da76248e7588badc997fc561f42c`, commit documentaire
 `write down what the gates caught, including the defect no judge could see`.
 Son parent logiciel est `01a3a3f26f5f0e7bc3c8f23fdd1a6917e1ca543b`,
@@ -36,7 +101,7 @@ le juge pour toute la CLI. Un exhaustif indépendant avait trouvé `51` faux
 positifs et `294` faux négatifs. Ces réfutations restent le pin historique qui
 justifie le correctif, pas le verdict du worktree courant.
 
-Le successeur Claude est maintenant stable mais non committé :
+Le successeur Claude était alors stable mais non committé :
 `cell_credits.hpp=f9d4981d...`, `cell_credits_probe.cpp=a8c4e9ad...`,
 `CMakeLists.txt=012c2690...`. Il emploie Andrew exact, fusionne les directions
 projectives égales, refuse les hulls de dimension inférieure à deux, dérive
@@ -46,6 +111,14 @@ rend `selftest|fixtures_mutants` à `2/2` en `0,84 s`. Le selftest publie
 `37 752/37 752` accords, `471` couvertures et quatre fixtures. Les trois
 injections rendent chacune `t.d=0`, zéro intérieur, `reference=UNKNOWN`,
 `injection=CREDIT`, puis le code attendu `4`.
+
+La suite `^mhgp3v_credits_` complète rend `12/12` en `49,81 s`. Andrew réduit
+les tests coniques du couple `pool=16/32` de
+`43 956 521/350 267 629` à `6 608 738/20 365 901`, soit `6,65x/17,20x` ; c'est
+un vrai gain local. Ces trois campagnes `n=60` ferment encore zéro relation dans
+chaque lane. Les nouveaux planchers de rang ne reçoivent pas encore les
+carriers consommés : les compteurs sont incrémentés avant le succès des trois
+rayons et incluent des tentatives partielles.
 
 Un checker indépendant supplémentaire, source `d434c83c...`, rend sur `1 533`
 cas `fp=0`, `fn=0`, `bad_carrier=0`, `bad_id=0`, y compris avec direction

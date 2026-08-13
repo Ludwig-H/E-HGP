@@ -1,0 +1,19 @@
+coeurs=48
+CUDA_COMPILE=OK
+93% tests passed, 7 tests failed out of 105
+uniform n=12500 residuel=34556198 ferme=43562552
+uniform n=25000 residuel=84744304 ferme=227743196
+uniform n=50000 residuel=197456334 ferme=1052518666
+eight_clusters n=12500 residuel=47330683 ferme=30788067
+eight_clusters n=25000 residuel=138139560 ferme=174347940
+eight_clusters n=50000 residuel=382687920 ferme=867287080
+terrain n=12500 residuel=12475686 ferme=65643064
+terrain n=25000 residuel=34024195 ferme=278463305
+terrain n=50000 residuel=94469037 ferme=1155505963
+scanline_overlap_multiecho n=12500 residuel=19365990 ferme=58752760
+scanline_overlap_multiecho n=25000 residuel=58982111 ferme=253505389
+scanline_overlap_multiecho n=50000 residuel=174824688 ferme=1075150312
+uniform                          residuels=[34556198, 84744304, 197456334] pentes=[1.294, 1.22] -> VERT
+eight_clusters                   residuels=[47330683, 138139560, 382687920] pentes=[1.545, 1.47] -> REFUSE
+terrain                          residuels=[12475686, 34024195, 94469037] pentes=[1.447, 1.473] -> REFUSE
+scanline_overlap_multiecho       residuels=[19365990, 58982111, 174824688] pentes=[1.607, 1.568] -> REFUSE

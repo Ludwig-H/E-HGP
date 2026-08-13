@@ -1694,7 +1694,7 @@ Avec `e` orthogonal à `w` et `f=w cross e`, trier exactement
 `((e dot s)/(w dot s),(f dot s)/(w dot s))` évite aussi le tie-break live de
 degré quatre, dont une fixture u16 fait déborder `i64` et inverse le signe.
 
-Le successeur non committé implémente maintenant Andrew et le seuil dynamique.
+Le successeur commis `090f752` implémente Andrew et le seuil dynamique.
 Le build Release/CUDA OFF passe `37 752/37 752` accords, `471` couvertures et
 trois contradictions exactes ; un checker indépendant ajoute `1 533` cas avec
 `fp=fn=bad_carrier=bad_id=0`. Ce résultat reçoit le correctif local sur son
@@ -1755,6 +1755,74 @@ mesures directes/radiales. `smax` doit piloter dynamiquement
 `residual_pair_mass` de `residual_node_records`, publie bytes/HWM et exige deux
 pentes au plus `1,35`. Voir
 [`AUDIT_CONTRE_DOMINANCE_432_5DDF4A3_20260813.md`](audits/AUDIT_CONTRE_DOMINANCE_432_5DDF4A3_20260813.md).
+
+Cette séparation masse/stockage est désormais nécessaire, pas seulement
+prudente. Pour `n=2m<=50 000`, deux grilles u16 parallèles peuvent être placées
+à `x=0` et `x=60000`, avec un décalage transverse tel que toutes les directions
+croisées appartiennent à `U00`. Tout témoin du plan opposé a alors la même
+hauteur que la cible, tout témoin du plan source est hors de sa chambre, et le
+garde direct vaut `9 tau_d-11 tau_h<0`. Les deux orientations laissent donc les
+trois lanes ouvertes sur exactement :
+
+$$R_{\mathrm{pair}}=m^2=\frac{n^2}{4}.$$
+
+Le crédit cellulaire uniforme échoue aussi : pour tout site croisé, son
+événement strict vérifie `X_s>=60001` alors que la cible a hauteur `60000`.
+Cette famille ferme le claim d'un résiduel `PairId` sparse pour dominance et
+crédits cellulaires. Elle ne ferme pas le front factorisé, puisque la relation
+croisée se décrit par le rectangle unique `A times B`. Les pentes s'appliquent
+donc à `node_visits`, `front_records`, octets, copies, high-water et travail du
+consommateur ; jamais au champ de masse d'un `RectKey`.
+
+Le plancher est indépendant de ces deux certificats en précision croissante.
+Le lemme 5.1 de Chazelle et al. construit `2m` points réels dont `m^2` boules
+diamétrales croisées sont vides, donc `m^2` vraies arêtes Gabriel. Aucun
+certificat sound exigeant au moins un intérieur universel ne peut les fermer.
+Ce résultat interdit un théorème distribution-indépendant de catalogue Gabriel
+littéral sparse, mais sa réalisation `50 k` u16 n'est pas reçue et il ne borne
+pas le quotient H0 normalisé.
+
+Deux planchers distincts deviennent des objets du ledger. `U_q` compte les
+paires pour lesquelles le disque de Jung contient une sphère avec moins de
+`h_q=smax+1-q` intérieurs ; il borne les routes dont l'autorité couvre tout ce
+disque. `L_q` compte les `PairId` distincts qui sont owners d'au moins un
+support propre, positif et pertinent ; il borne toute ordonnance qui doit
+produire le catalogue de supports littéraux. Il ne borne pas un calcul direct
+du quotient H0 sans catalogue, dont la complétude demande une preuve séparée.
+On a `L_q<=U_q`, jamais l'égalité en général.
+
+La séparation est déjà u16. Pour `A_i=(i,0,0)`, `B_j=(0,j,65535)` et
+`1<=i,j<=m<=25000`, une sphère strictement vide de centre
+`(i,j,(65535^2+i^2-j^2)/(2*65535))` appartient aux disques q3 et q4 de chaque
+paire croisée. Ainsi `U_3,U_4>=m^2`. Pourtant aucun support q3/q4 n'est positif
+et, à `smax=11`, Source S vaut exactement `20m-55`, soit `499 945` à
+`50 k`. Une route exclusivement universelle est donc refusée, mais la
+positivité et la source générative restent capables de sauter cette masse. Si
+`L_q` lui-même est quadratique, la sortie littérale est dense : son contrat
+devient output-sensitive ou retourne `resource_exhausted` atomiquement ;
+changer de générateur ne rend pas ce catalogue sparse.
+
+Coordonnées contractuelles, preuve, limite de précision et ordre des jalons :
+[`AUDIT_REPONSE_CLAUDE_TUER_LA_VOIE_20260813.md`](audits/AUDIT_REPONSE_CLAUDE_TUER_LA_VOIE_20260813.md).
+
+Le prochain jalon est un walking skeleton, pas une nouvelle rampe isolée. Il
+fige `RectKey`, `SupportKey` et `BallKey`, construit le front factorisé, puis
+raccorde dans le même jalon une tranche q4 régulière :
+`RectTree -> SymmetricAnd -> terminal q4 -> RLE SupportKey ->
+lift/positivité -> owner -> RLE BallKey -> census I_B/U_B -> lot gelé -> fold`.
+Le premier RLE précède le lift ; le second précède l'unique census. Cette
+sortie diagnostique reste `incomplete` relativement à
+`BenchmarkOutputContract-v1`. Si un choix binaire est imposé, les rectangles
+viennent d'abord, mais aucune admission ne précède le raccord jusqu'au fold.
+
+Le reporter de suffixes doit en outre recevoir les 432 cellules et trois lanes
+dans **une seule DFS par ancre**, sous la forme conceptuelle
+`report(anchor,root,X[432][3],banks)`. Un appel par seuil réintroduirait jusqu'à
+`1296` reprises de racine. Les AABB dont les huit coins ont le même `CellId`
+sont homogènes par convexité de la cellule half-open ; les autres restent
+`MIXED`. Le ledger impose `root_entries=n`, compte séparément la construction
+des banques, émet les nœuds `ALL` maximaux et conserve les fronts
+`BELOW_SUFFIX/NO_BANK/CELL_MIXED/HEIGHT_MIXED/RESOURCE_CAP` sans les aplatir.
 
 La prochaine implémentation doit partir d'une partition canonique de rectangles
 LBVH, non des ancres : `(N,N)` se décompose en `(L,L),(L,R),(R,R)`. Sur chaque

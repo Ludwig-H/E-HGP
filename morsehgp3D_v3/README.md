@@ -178,8 +178,8 @@ réparation sont dans
 Le pin logiciel `01a3a3f`, inchangé par le successeur documentaire `88eb36d`,
 remplace les triples par Jarvis mais reste P0 rouge : `h=2`, duplicats, cycle de
 pivot et tie-break débordant permettent notamment huit faux crédits q4 face à
-une sphère sans intérieur. Le successeur Andrew non committé corrige maintenant
-ce noyau : `37 752/37 752` accords, `471` couvertures, quatre fixtures et trois
+une sphère sans intérieur. Le successeur `090f752` commet Andrew et corrige ce
+noyau sur son domaine borné : `37 752/37 752` accords, `471` couvertures, quatre fixtures et trois
 contradictions tueuses ; un checker indépendant ajoute `1 533` cas avec
 `fp=fn=bad_carrier=bad_id=0`. `smax` pilote aussi enfin `h=smax+1-q`. Ce vert
 local reste à rendre transactionnel sur `false` — union et compteurs de rang ne
@@ -208,6 +208,42 @@ Chaque ID proposé peut ensuite classifier exactement un rectangle par
 est donc Andrew à la feuille, ce reporter de suffixes, puis sorties
 `RectKey/BankKey/CreditKey` et ce test H2 bloc — pas une nouvelle boucle de
 mesure `n(n-1)`.
+
+Claude a demandé la famille capable de réfuter la parcimonie de cette voie ;
+elle existe en u16. Deux grilles parallèles de `m` points, à `x=0` et
+`x=60000` avec un décalage transverse borné, placent toutes les relations
+croisées dans `U00` aux hauteurs égales `tau_d=tau_h=60000`. Le garde direct
+vaut alors `9 tau_d-11 tau_h<0` dans les deux orientations : les trois lanes
+laissent exactement `m^2=n^2/4` `PairId` croisés au résiduel. Le même argument
+d'activation donne `X_s>=60001`, donc aucun crédit uniforme n'est actif à la
+hauteur de ces cibles. La dominance et les crédits cellulaires ne peuvent plus
+être présentés comme sparsifieur terminal distribution-indépendant.
+
+Cette réfutation ne condamne pas le front factorisé : la masse quadratique est
+la relation unique `A x B`. La gate distingue désormais la masse sémantique,
+qui peut rester quadratique, des compteurs physiques `node_visits`,
+`front_records`, octets, copies et high-water, dont deux pentes doivent rester
+au plus `1,35`. Le prochain reporter reçoit tous les seuils `X[432][3]` dans
+une seule DFS par ancre, sans reprise de racine par cellule, puis lève les
+`StarKey` en `RectKey`. Un juge borné seul développe les rectangles. Ce front
+est raccordé dans le même jalon à une tranche q4 régulière
+`SupportKey -> BallKey -> census -> fold` ; ni le filtre seul, ni tout l'aval
+sur des stubs ne constitue le prochain jalon.
+
+Le résultat classique de Chazelle donne en outre `Omega(n^2)` vraies arêtes
+Gabriel dans `R^3`, mais sa réalisation `50 k` u16 n'est pas reçue. Une famille
+u16 à deux droites montre la distinction nécessaire : le résiduel des
+certificats universels q3/q4 vaut au moins `n^2/4`, alors qu'il n'existe aucun
+support positif q3/q4 et que Source S vaut `499 945` à `50 k`. `U_q` mesure
+donc l'impuissance de cette classe de certificats ; le plancher littéral `L_q`
+compte les `PairId` owners d'un support positif pertinent. Une borne
+quadratique sur `L_q` signifie catalogue de supports dense, donc traitement
+output-sensitive ou `resource_exhausted`, pas victoire automatique d'une
+source générative. Elle ne borne pas sans preuve séparée un quotient H0 direct.
+Verdict, coordonnées et ordre des jalons :
+[`AUDIT_REPONSE_CLAUDE_TUER_LA_VOIE_20260813.md`](audits/AUDIT_REPONSE_CLAUDE_TUER_LA_VOIE_20260813.md),
+en réponse à
+[`QUESTIONS_CLAUDE_TUER_LA_VOIE_20260813.md`](audits/QUESTIONS_CLAUDE_TUER_LA_VOIE_20260813.md).
 
 Deux sorties sont distinctes :
 
