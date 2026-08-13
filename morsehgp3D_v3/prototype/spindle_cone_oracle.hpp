@@ -48,5 +48,16 @@ long long selftest_against_bigint(long long draws, long long span, unsigned long
 // Sert aux planchers d'anti-vacuite.
 long long last_witness_evaluations();
 
+// COMPTE DES TEMOINS UNIVERSELS D'UNE SEULE PAIRE ORDONNEE.
+//
+// Le juge exhaustif est en O(n^3) : il ne peut pas atteindre les tailles ou un
+// certificat directionnel commence a mordre. Cette primitive verifie UNE paire
+// en O(n), ce qui permet a un sujet de faire controler un ECHANTILLON de ses
+// fermetures a n'importe quelle taille. Un echantillon n'est pas une preuve de
+// complétude ; c'est un falsificateur, et il doit etre annonce comme tel.
+//
+// Rend dans `c` les comptes q2, q3 et q4. Les seuils restent a l'appelant.
+void count_witnesses(const std::vector<int>& xyz, int n, int a, int b, long long c[3]);
+
 }  // namespace cone_oracle
 }  // namespace mhgp3v

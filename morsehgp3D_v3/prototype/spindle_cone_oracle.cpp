@@ -205,6 +205,26 @@ LaneTruth judge(const std::vector<int>& xyz, int n, long long smax) {
   return t;
 }
 
+void count_witnesses(const std::vector<int>& xyz, int n, int a, int b, long long c[3]) {
+  c[0] = c[1] = c[2] = 0;
+  if (n < 3 || (long long)xyz.size() != 3LL * (long long)n) return;
+  if (a == b || a < 0 || b < 0 || a >= n || b >= n) return;
+  long long pa[3], pb[3], pz[3];
+  for (int i = 0; i < 3; ++i) {
+    pa[i] = (long long)xyz[(std::size_t)a * 3 + (std::size_t)i];
+    pb[i] = (long long)xyz[(std::size_t)b * 3 + (std::size_t)i];
+  }
+  for (int z = 0; z < n; ++z) {
+    if (z == a || z == b) continue;
+    for (int i = 0; i < 3; ++i) pz[i] = (long long)xyz[(std::size_t)z * 3 + (std::size_t)i];
+    const int lane = lane_of(pa, pb, pz);
+    ++g_witness_evaluations;
+    if (lane >= 2) ++c[0];
+    if (lane >= 3) ++c[1];
+    if (lane >= 4) ++c[2];
+  }
+}
+
 // ---------------------------------------------------------------------------
 // JUGER LE JUGE : la meme decision, recalculee avec `mhgp3v::BigInt`.
 // ---------------------------------------------------------------------------
