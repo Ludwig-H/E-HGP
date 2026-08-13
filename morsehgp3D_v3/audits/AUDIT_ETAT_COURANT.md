@@ -8,16 +8,33 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-## Observation live — `HEAD=21a7a63`, banque CPU reçue, Morton48 réfuté
+## Observation live — `HEAD=33df59d`, cardinal WSPD G4 reçu, coût non reçu
 
 Le `HEAD` observé est
-`21a7a6305e39866e3d72c1bc47f1ce3a51196bb7`, commit
-`repair a script my own edits had silently broken`. Le logiciel de la banque
-CPU et de son comparateur `--bank-strong` reste pincé par le parent
-`360ea7c70e0a8875be611a10ae179d43d3f4bf1b`; `21a7a63` corrige deux arguments
-du script et ajoute les réponses documentaires. Le worktree observé ne contient
-que les mises à jour documentaires autorisées du présent audit ; l'auditeur ne
-modifie aucun code.
+`33df59d451dc1c534a1fd5f1572e938472744fef`, commit
+`fourteen of fifteen configurations hold the two-slope rule on the WSPD
+front`. Le logiciel de la banque CPU et de son comparateur `--bank-strong`
+reste pincé par `360ea7c70e0a8875be611a10ae179d43d3f4bf1b`; le parent
+`21a7a63` corrige le script, puis `33df59d` ajoute le reçu G4 et des documents.
+Le worktree observé ne contient que les mises à jour documentaires autorisées
+du présent audit ; l'auditeur ne modifie aucun code.
+
+Le transcript G4 confirme la gate `front_records` sur quatorze des quinze
+couples de cinq familles et trois séparations, entre `12500` et `100000`.
+Correction au reçu : la configuration rouge est
+`scanline_single_pass,s=4` avec `0,982/1,435/1,586`, non
+`eight_clusters,s=4`, qui passe avec `1,215/1,225/1,182`. L'intervalle annoncé
+`0,97..1,23` est également incomplet : un cas vert atteint `1,349`. Le fait
+reçu est le cardinal terminal sur cette rampe, cohérent avec la borne WSPD à
+séparation fixe ; ce n'est pas encore un coût dominant.
+
+La même gate appliquée à `eval` ne passe que douze configurations : les trois
+séparations de `scanline_single_pass` ont deux dernières pentes au moins
+`1,35`. À `uniform,s=4,n=100000`, `11109031` terminaux provoquent
+`699699553` dépilages, avec jusqu'à trois appels `rect_classify` par dépilage.
+Il n'y a toujours aucun temps, octet ou HWM de phase. Contre-audit, facteurs
+`s=2 -> s=4`, provenance et décision :
+[`AUDIT_CONTRE_RECU_WSPD_G4_33DF59D_20260813.md`](AUDIT_CONTRE_RECU_WSPD_G4_33DF59D_20260813.md).
 
 Le certificat `Dlo/Vhi` est sûr : `Vhi<Dlo` certifie q2, `3Vhi<Dlo` certifie
 q3 et, sous `Dlo>0`, `209Vhi<=56Dlo` certifie q4. La dernière frontière est
@@ -47,7 +64,8 @@ SoA, ni compactage/consommation du résiduel. Le test `leaf>1` manque : le rejeu
 terminaux et `2434938` dépilages C, ferme `0 %` en q3/q4 et prend `2,607 s`
 muraux. Cette file CPU n'est pas `RF-GPU-P0`.
 
-Le script du `HEAD=21a7a63` est encore `NO-RUN` pour recevoir `RF-GPU-P0`.
+Le script hérité du `HEAD=21a7a63` est encore `NO-RUN` pour recevoir
+`RF-GPU-P0`.
 Claude a bien réparé la rampe principale afin qu'elle passe désormais
 `--budget-depth=4 --core`; cela corrige l'intention publiée, pas la qualification.
 L'étape WSPD lance quinze runs CPU jusqu'à `100000` points et masque encore

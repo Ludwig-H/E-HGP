@@ -297,6 +297,23 @@ inline long long rect_v_max(const RectBox& a, const RectBox& b, const RectBox& c
   return s;
 }
 
+// LES TROIS LANES EN UN SEUL CALCUL. `Dlo` et `Vhi` ne dependent pas de la
+// lane : les calculer une fois puis comparer trois seuils remplace trois appels
+// au classifieur. Le contre-audit `33df59d` releve que `rect_classify` etait
+// appele une fois par bit de lane ouvert, si bien que le nombre d'appels
+// arithmetiques reels approchait le TRIPLE du compteur publie.
+// Bit 0 = q2, bit 1 = q3, bit 2 = q4.
+inline unsigned rect_central_mask(const RectBox& a, const RectBox& b, const RectBox& c) {
+  const __int128 dlo = (__int128)rect_minsq(a, b);
+  if (dlo <= 0) return 0;
+  const __int128 vhi = (__int128)rect_v_max(a, b, c);
+  unsigned m = 0;
+  if (vhi < dlo) m |= 1u;
+  if (3 * vhi < dlo) m |= 2u;
+  if (209 * vhi <= 56 * dlo) m |= 4u;
+  return m;
+}
+
 // `ALL` par le coeur central. Ce sont des IMPLICATIONS fail-open, jamais des
 // equivalences : un echec rend `UNKNOWN`, jamais `NONE`. `56/209 < 2-sqrt(3)`
 // est exact — `362^2 - 3 x 209^2 = 1` —, donc l'egalite rationnelle reste
@@ -312,6 +329,14 @@ inline bool rect_central_all(const RectBox& a, const RectBox& b, const RectBox& 
   if (lane == RectLane::kQ2) return vhi < dlo;
   if (lane == RectLane::kQ3) return 3 * vhi < dlo;
   return 209 * vhi <= 56 * dlo;
+}
+
+// Coherence exigee : le masque et le helper par lane doivent coincider.
+inline bool rect_central_mask_agrees(const RectBox& a, const RectBox& b, const RectBox& c) {
+  const unsigned m = rect_central_mask(a, b, c);
+  for (int q = 0; q < 3; ++q)
+    if (((m >> q) & 1u) != (rect_central_all(a, b, c, (RectLane)q) ? 1u : 0u)) return false;
+  return true;
 }
 
 

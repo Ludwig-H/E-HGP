@@ -49,19 +49,23 @@ struct Tree {
   std::vector<int> morder;                // indices tries par (Morton, PointId)
 };
 
-// Entrelacement 16 bits par axe -> 48 bits.
-inline unsigned long long morton_spread(unsigned long long v) {
+// ENTRELACEMENT 3D, 16 bits par axe -> 48 bits. La premiere version employait
+// le masque `0x5555...`, qui est le pas DEUX de l'entrelacement PLAN : applique
+// a trois axes, ses bits se CHEVAUCHENT et la cle n'est pas une courbe de
+// Morton 3D. Le pas correct est TROIS, masque `0x1249...` (contre-audit
+// `33df59d`).
+inline unsigned long long morton_spread3(unsigned long long v) {
   v &= 0xFFFFull;
-  v = (v | (v << 16)) & 0x0000FFFF0000FFFFull;
-  v = (v | (v << 8))  & 0x00FF00FF00FF00FFull;
-  v = (v | (v << 4))  & 0x0F0F0F0F0F0F0F0Full;
-  v = (v | (v << 2))  & 0x3333333333333333ull;
-  v = (v | (v << 1))  & 0x5555555555555555ull;
+  v = (v | (v << 32)) & 0x001F00000000FFFFull;
+  v = (v | (v << 16)) & 0x001F0000FF0000FFull;
+  v = (v | (v << 8))  & 0x100F00F00F00F00Full;
+  v = (v | (v << 4))  & 0x10C30C30C30C30C3ull;
+  v = (v | (v << 2))  & 0x1249249249249249ull;
   return v;
 }
 inline unsigned long long morton48(long long x, long long y, long long z) {
-  return morton_spread((unsigned long long)x) | (morton_spread((unsigned long long)y) << 1) |
-         (morton_spread((unsigned long long)z) << 2);
+  return morton_spread3((unsigned long long)x) | (morton_spread3((unsigned long long)y) << 1) |
+         (morton_spread3((unsigned long long)z) << 2);
 }
 
 WspdBox to_wspd(const RectBox& b) {
@@ -96,7 +100,7 @@ int build(Tree* t, int b, int e, int leaf) {
       const bool lu = t->pts[u][ax] <= mid, lv = t->pts[v][ax] <= mid;
       if (lu != lv) return lu;
       if (t->pts[u][ax] != t->pts[v][ax]) return t->pts[u][ax] < t->pts[v][ax];
-      return t->pid[u] < t->pid[v];                       // tie-break par PointId
+      return t->pid[u] < t->pid[v];
     });
     std::vector<std::array<long long, 3>> pb(e - b);
     std::vector<int> ib(e - b);
@@ -242,10 +246,14 @@ unsigned bank_rect(const Tree& t, int ia, int ib, int W, int L, Counters* c) {
     // masque central : les deux sont suffisants et non comparables, leur
     // disjonction est strictement plus couvrante. Le P0 de l'audit ne prend
     // que le masque central ; la difference est mesuree, pas supposee.
+    // UN SEUL calcul de `Dlo`/`Vhi` pour les trois seuils.
+    unsigned got = mhgp3v::rect_central_mask(qa, qb, zb);
+    if (g_bank_strong)
+      for (int q = 0; q < 3; ++q)
+        if (mhgp3v::rect_classify(qa, qb, zb, (RectLane)q, &g_scratch) == RectVerdict::kAll)
+          got |= 1u << q;
     for (int q = 0; q < 3; ++q)
-      if (g_bank_strong
-              ? (mhgp3v::rect_classify(qa, qb, zb, (RectLane)q, &g_scratch) == RectVerdict::kAll)
-              : mhgp3v::rect_central_all(qa, qb, zb, (RectLane)q)) {
+      if (got & (1u << q)) {
         ++cred[q];
         if (cred[q] >= kNeed[q]) mask |= 1u << q;
       }

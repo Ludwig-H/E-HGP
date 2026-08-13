@@ -60,6 +60,19 @@ d'appels arithmétiques réels peut donc approcher trois fois cette colonne. La
 WSPD borne le nombre de terminaux ; elle ne borne pas cette reprise à
 `C=root`, la source carrier, le census ou le fold.
 
+Si la même règle des deux pentes est appliquée à `eval`, seulement douze des
+quinze configurations passent. Les trois séparations de
+`scanline_single_pass` deviennent rouges :
+
+```text
+s=1 : 1.052 / 1.479 / 1.356
+s=2 : 1.041 / 1.453 / 1.472
+s=4 : 1.054 / 1.648 / 1.777
+```
+
+Le programme ne gate que `front_records`. Ce différentiel est précisément la
+preuve expérimentale que la DFS cappée ne doit pas être portée sur device.
+
 Les pourcentages q2/q3/q4 du reçu proviennent de cette DFS capée à 64, pas de
 la banque `W=32/L=16`, ni du futur helper q2 léger. Ils ne permettent donc pas
 de choisir la séparation du kernel P0. Ils sont des diagnostics de couverture
