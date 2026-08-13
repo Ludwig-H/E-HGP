@@ -20,8 +20,9 @@ Cadre : `phase=exploration_v3_hors_registre`, `backend=cpu_reference`,
 
 Cette note fait trois choses : elle rétracte le chiffre central de ma note
 précédente, elle livre le compteur `EdgeWindowRangeAdd-v0` que l'audit avait mis
-en tête de la directive, et elle donne la raison — exacte, close, vérifiable —
-pour laquelle le moteur ne fermait rien en q3 ni en q4.
+en tête de la directive, et elle identifie un plancher suffisant qui explique
+une partie de la faible fermeture q3/q4. Ce plancher n'est ni une cause unique,
+ni un seuil nécessaire.
 
 ## 1. Rétractation : mon plafond de `84 %` portait sur la mauvaise lane
 
@@ -52,9 +53,10 @@ rapport, et je note `tau_q` la racine du seuil :
 | q3 | `3 V^2 < D^2` | `1/\sqrt{3}` |
 | q4 | `V^2/D^2 < 2-\sqrt{3}` | `\sqrt{2-\sqrt{3}}` |
 
-Le cœur universel d'une **paire** est donc la boule de centre `m=(a+b)/2` et de
-rayon `tau_q D/2`. Pour q4 ce rayon vaut `0,2588 D`, alors que `a` et `b` sont
-à `D/2`.
+Le certificat isotrope d'une **paire** est donc la boule de centre
+`m=(a+b)/2` et de rayon `tau_q D/2`. Pour q4 ce rayon vaut `0,2588 D`, alors
+que `a` et `b` sont à `D/2`. Le cœur universel maximal q3/q4 est le spindle
+anisotrope du §5 bis, pas cette boule.
 
 **Proposition (minoration, corrigée par l'audit).** Soit un rectangle `A x B`
 de rayons circonscrits `r_A, r_B` et de distance entre centres `d`. Le cœur
@@ -182,8 +184,11 @@ cinq portes antérieures que le refactor des sorts aurait pu casser.
   `(55000,40000,30000)`, `(30000,5000,40000)` et `(30000,5000,20000)` est
   positif, de profondeur **zéro**, d'arête maximale **unique**, et ses `4 381`
   satellites `(5000,40000+j,30000)` sont tous strictement plus proches de `a`
-  que ne l'est `b`. Le second endpoint est donc au **rang 4 382**, et la fixture
-  le vérifie aux coordonnées exactes. Aucun seuil de rang ne peut être exact.
+  que ne l'est `b`. Les deux autres sommets `x` et `y` sont eux aussi plus
+  proches de `a` que `b` (`1950000000<2500000000`) : le second endpoint est
+  donc au **rang 4 384**, pas `4 382`. La fixture live compte seulement les
+  satellites et son attendu `4382` doit être corrigé. La réfutation de tout
+  seuil fixe reste valide, et devient même légèrement plus forte.
 
 Le ledger est aussi devenu **massiquement exclusif** : `fermée + pendante +
 ouverte = C(n,2)` par lane, gaté. Ma version précédente comptait les pendants
@@ -240,10 +245,11 @@ quatre lignes `fenetre q4` sont dans le reçu, mais ces trois pentes sont
 **calculées à la main** depuis ces quatre valeurs, non imprimées par le binaire.
 Le reçu le dit aussi.
 
-Trois régimes nets. `uniform` rend un résiduel **linéaire** et un `max E_4`
-**borné** : c'est exactement la propriété dont `LocalShallowBall` a besoin, et
-elle est mesurée, pas supposée. `terrain` monte. `eight_clusters` est
-**quadratique**, `1,90` sur les trois transitions.
+Trois régimes empiriques apparaissent sur cette plage mono-seed. `uniform`
+montre des pentes proches de un et un `max E_4` presque stable ; cela ne prouve
+ni linéarité asymptotique, ni borne uniforme, et ne suffit pas à financer
+`LocalShallowBall` sans `M=sum m_ab`, tâches, HWM et temps E2E. `terrain` monte.
+`eight_clusters` montre des pentes proches de `1,90` sur les trois transitions.
 
 Sur `terrain`, monter à `s=16` améliore sans réparer : pentes `sum E_4`
 `1,158 / 1,235` sur `3 000 -> 6 000 -> 12 000`.
@@ -255,7 +261,7 @@ possède ses témoins universels et c'est la **factorisation** qui les perd ; ou
 bien elle n'en a aucun, et alors aucun certificat central ne la fermera jamais.
 
 J'échantillonne donc dans la masse ouverte **en lane q4**, et je compte
-exactement, par balayage du nuage, les sites du cœur q4 de la **paire**
+exactement, par balayage du nuage, les sites de la boule certifiée q4 de la **paire**
 (`209 V^2 \le 56 D^2`, aucune boîte, aucun rectangle). `n=6 000`, `s=8`,
 `4 000` tirages :
 
@@ -406,19 +412,24 @@ Mes trois questions ont reçu réponse dans
 avant que je ne publie cette version. Je les enregistre ici plutôt que de les
 reposer :
 
-1. **Oui** au raffinement local des seuls terminaux ouverts, **non** à
+1. **Oui** à l'intervalle exact de `T=d dot v` par axe ; **non** au mot
+   « exact » pour le classifieur qui combine ensuite les extrema décorrélés
+   `D2/V2/T`. Ce classifieur est suffisant et fail-open. Il doit prolonger
+   `rect_classify` et employer `D2hi` dans son membre droit.
+2. **Oui** au raffinement local des seuls terminaux ouverts, **non** à
    `rho_{lb}>0` comme critère d'arrêt : c'est une minoration, pas une décision.
    L'arrêt exact est `credit_4 \ge 8` ; un cap donne `PENDING_CONTINUATION` et
    jamais `OPEN` final. `rho_{lb}` peut prioriser une tâche, jamais décider un
    sort.
-2. Les `13,9 %` ne sont **pas** un résiduel irréductible : ils portent sur la
-   petite boule rationnelle. Le spindle de Jung est plus grand — je le mesure
-   au §5 bis, `0,9 %` — et même son vide n'exclut pas les **cages**, où le
-   témoin varie avec le centre.
 3. **Oui** à une tâche partagée `(ANode,BNode,lane\_mask)` avec critères locaux
    par lane, **non** au choix automatique « juste au-dessus du seuil » : les
    seuils éliminent les valeurs structurellement peu informatives, ils ne
    choisissent pas l'optimum d'un coût composé.
+
+Complément non numéroté : les `13,9 %` ne sont **pas** un résiduel
+irréductible. Ils portent sur la petite boule rationnelle ; le spindle est plus
+grand et même son vide n'exclut pas les cages, où le témoin varie avec le
+centre.
 
 ## 7 bis. Audit de l'auditeur : j'ai vérifié, ils ont raison
 
@@ -447,22 +458,25 @@ Porte `fixtures_terme_t`.
 `\binom{384}{3}=9 363 584` triples se répartissent en `6 967 680` obtus,
 `73 344` rectangles et `2 322 560` aigus. **Les cinq nombres sont exacts.**
 
-**La fixture de rang** (`§2`). Vérifiée aux coordonnées : les quatre sommets
-sont exactement sur la sphère de `R^2=725000000`, `ab^2=2\,500\,000\,000` est
-l'unique maximum, les `4 381` satellites sont tous strictement hors de la
-circumsphère et strictement plus proches de `a` que ne l'est `b`. Le partenaire
-est au rang `4 382`. Porte `fixtures_rang`.
+**La fixture de rang** (`§2`). Les quatre sommets sont exactement sur la
+sphère de `R^2=725000000`, `ab^2=2\,500\,000\,000` est l'unique maximum, et
+les `4 381` satellites sont tous strictement hors de la circumsphère et plus
+proches de `a` que `b`. Mon premier audit de la fixture a toutefois oublié que
+`x` et `y` précèdent aussi `b`. Il y a donc `4 383` voisins strictement plus
+proches et le rang 1-indexé attendu est `4 384`. La porte `fixtures_rang`
+attendant `4382` est rouge mathématiquement même si son auto-attendu passe.
 
 Je n'ai trouvé aucune erreur dans ces trois blocs.
 
 Ce qui reste ouvert de mon côté :
 
 - le passage du spindle au rectangle est **débloqué** par leur `§6` mais pas
-  encore implémenté dans le moteur : le test sûr est `Dlo > Vhi` et
-  `(Dlo-Vhi)^2 > 2(Dhi\,Vhi - Tabs^2)`, avec `Tabs=0` si l'intervalle de `T`
-  traverse zéro. Ils notent eux-mêmes qu'il est fail-open et non sans perte,
-  parce que `D`, `V` et `T` sont corrélés et que leurs extrema séparés perdent
-  du rappel ;
+  encore implémenté dans le moteur : si `T2lo` est le minimum de `T^2`, le
+  test sûr emploie `D2lo>V2hi` et
+  `(D2lo-V2hi)^2>2(D2hi*V2hi-T2lo)`. Avec `Hlo`, q4 emploie
+  `8*Hlo^2>D2hi*V2hi-T2lo`. Le membre droit exige `D2hi`, jamais `D2lo`.
+  L'intervalle de `T` est exact mais le classifieur est fail-open et non sans
+  perte, parce que `D2`, `V2` et `T` sont corrélés ;
 - le ledger reste un compteur d'arêtes candidates sous hypothèse d'arête
   maximale : aucun oracle n'établit encore que l'arête maximale canonique de
   chaque vrai q4 tombe dans la fenêtre centrale. L'oracle actuel juge le ledger,

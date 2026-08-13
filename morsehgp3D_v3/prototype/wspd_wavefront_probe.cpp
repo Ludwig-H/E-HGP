@@ -116,6 +116,44 @@ bool g_judge_vwave = false;
 bool g_window = false;
 bool g_inject_orient = false;
 bool g_inject_cote = false;
+
+// ---- `Q3AcuteCarrierWave-v0` : LE SECOND NIVEAU, SUR LES PORTEURS.
+//
+// q3 n'est PAS une relation ternaire. Canonicalise par son arete maximale, un
+// support q3 est une relation BINAIRE `(arete ab) x (porteur x)`. Deux faits,
+// verifies sans contre-exemple, la rendent presque gratuite :
+//
+//  1. si `ab` est l'arete maximale, le triangle est aigu SSI l'angle en `x`
+//     l'est — les deux autres angles sont automatiques ;
+//  2. et cet angle est deja calcule : aigu SSI `V^2 > D^2`, avec
+//     `V = ||2x-a-b||`. C'est EXACTEMENT le test du cœur q2 au signe pres, sur
+//     la meme quantite entiere. Aucune algebre nouvelle.
+//
+// Le porteur vit donc dans `lentille(ab)` PRIVEE de la boule diametrale, region
+// de diametre `sqrt(3) D`. Avec des cellules porteuses de cote `D/s`, il y en a
+// `O(s^3)` par arete, donc `O(s^6 n)` blocs au total.
+//
+// TROIS CHOIX FONT LA BORNE.
+//
+//  (a) La separation de niveau deux n'est pas de meme nature que celle de la
+//      WSPD : ce n'est pas « deux cellules eloignees » mais « la cellule
+//      porteuse est petite devant la LONGUEUR D'ARETE », `diam(C) <= Dmin/s`.
+//
+//  (b) L'ACUITE NE SERT QUE DE PRUNE, jamais de certificat. C'est ce qui sauve
+//      la borne : l'audit `4ce3618` note que `O(s^6 n)` ne vaut que « sans
+//      raffinement des MIXED », et justement la frontiere aigu/obtus n'a jamais
+//      besoin d'etre raffinee. Un bloc MIXED en acuite est conserve. Proposer
+//      un triplet obtus est fail-open : son enveloppe minimale est la boule
+//      diametrale de sa plus longue arete, donc c'est un support q2 et il meurt
+//      au test de positivite exact en aval. Le prune est STRICT, `V^2_max <
+//      D^2_min`, ce qui preserve aussi les angles droits pour la coquille q2.
+//
+//  (c) Ce qui FERME un bloc n'est pas l'acuite mais le rang, au niveau un, sur
+//      la paire. Ce niveau-ci ne ferme rien : il enumere.
+bool g_q3carriers = false;
+long long g_q3s = 4;
+long long g_q3oracle = 0;
+long long g_min_blocs = 0;
 long long g_oracle_window = 0;
 long long g_min_open = 0;
 long long g_min_orient = 0;
@@ -611,6 +649,10 @@ int main(int argc, char** argv) {
     else if (a == "--fixtures-spindle") return spindle_fixtures();
     else if (a == "--fixtures-rang") return rang_fixture();
     else if (a == "--fixtures-terme-t") return terme_t_fixtures();
+    else if (a == "--q3-carriers") g_q3carriers = true;
+    else if (a.rfind("--q3-sep=", 0) == 0) { g_q3carriers = true; g_q3s = arg_ll(val("--q3-sep=").c_str(), 1, 64, "q3-sep"); }
+    else if (a.rfind("--q3-oracle=", 0) == 0) { g_q3carriers = true; g_q3oracle = arg_ll(val("--q3-oracle=").c_str(), 8, 400, "q3-oracle"); }
+    else if (a.rfind("--min-blocs=", 0) == 0) g_min_blocs = arg_ll(val("--min-blocs=").c_str(), 1, (1LL << 40), "min-blocs");
     else if (a == "--window-ledger") g_window = true;
     else if (a == "--inject=orientation-pointid") { g_window = true; g_inject_orient = true; }
     else if (a == "--inject=orientation-cote") { g_window = true; g_inject_cote = true; }
@@ -1500,6 +1542,127 @@ int main(int argc, char** argv) {
         std::printf("fenetre_finale=OUI\n");
       e4_sums.push_back((double)win_sum[2]);
       e4_maxs.push_back((double)std::max(1LL, win_max[2]));
+    }
+    // ---- `Q3AcuteCarrierWave-v0` : la vague de niveau DEUX.
+    if (g_q3carriers) {
+      long long blocs = 0, masse_bloc = 0, prune_obtus = 0, prune_nonmax = 0;
+      long long splits = 0, visites = 0, hwm = 0, feuilles = 0;
+      // Couverture par porteur, pour l'oracle : `couv[x]` compte les blocs
+      // emis qui contiennent `x` pour le terminal courant.
+      std::vector<int> couv;
+      std::vector<long long> manques_par_cause(2, 0);
+      long long triples_aigus = 0, manques = 0, doublons = 0;
+      const bool fait_oracle = (g_q3oracle > 0 && m <= g_q3oracle);
+      if (fait_oracle) couv.assign(sp.size(), 0);
+      for (size_t i = 0; i < terms.size(); ++i) {
+        if (i < fate.size() && (fate[i] & 2u)) continue;      // lane q3 deja fermee
+        const mhgp3v::WspdBox ba = cell_of(nodes, sp, terms[i].a);
+        const mhgp3v::WspdBox bb = cell_of(nodes, sp, terms[i].b);
+        mhgp3v::RectBox qa{}, qb{};
+        for (int d = 0; d < 3; ++d) {
+          qa.lo[d] = ba.lo[d]; qa.hi[d] = ba.hi[d];
+          qb.lo[d] = bb.lo[d]; qb.hi[d] = bb.hi[d];
+        }
+        const long long dmin = mhgp3v::rect_minsq(qa, qb);
+        const long long dmax = mhgp3v::rect_maxsq(qa, qb);
+        const long long ka = count_of(nodes, terms[i].a), kb = count_of(nodes, terms[i].b);
+        if (fait_oracle) std::fill(couv.begin(), couv.end(), 0);
+        std::vector<int> emis;
+        int st[256];
+        int sn = 0;
+        st[sn++] = 0;                                          // racine
+        while (sn > 0) {
+          const int cid = st[--sn];
+          ++visites;
+          const mhgp3v::WspdBox bc = cell_of(nodes, sp, cid);
+          mhgp3v::RectBox qc{};
+          for (int d = 0; d < 3; ++d) { qc.lo[d] = bc.lo[d]; qc.hi[d] = bc.hi[d]; }
+          // PRUNE 1 — `ab` ne peut pas etre l'arete maximale.
+          if (mhgp3v::rect_minsq(qa, qc) > dmax || mhgp3v::rect_minsq(qb, qc) > dmax) {
+            ++prune_nonmax;
+            continue;
+          }
+          long long smn = 0, smx = 0;
+          mhgp3v::rect_s_interval(qa, qb, qc, &smn, &smx);
+          // PRUNE 2 — TOUT le bloc est STRICTEMENT obtus, donc aucun q3 positif
+          // et aucun angle droit. Strict par construction : `<`, pas `<=`.
+          if (smx < dmin) { ++prune_obtus; continue; }
+          // ARRET — la cellule porteuse est petite devant la LONGUEUR d'arete.
+          const long long w2 = mhgp3v::wspd_w2(bc);
+          const bool feuille = (cid < 0);
+          if (feuille || (__int128)g_q3s * g_q3s * w2 <= (__int128)dmin) {
+            ++blocs;
+            if (feuille) ++feuilles;
+            const long long kc = count_of(nodes, cid);
+            masse_bloc += ka * kb * kc;
+            if (fait_oracle) emis.push_back(cid);
+            continue;
+          }
+          if (sn + 2 > 256) {
+            std::fprintf(stderr, "INVARIANT VIOLE: pile de porteurs saturee\n");
+            return 3;
+          }
+          ++splits;
+          st[sn++] = nodes[cid].left;
+          st[sn++] = nodes[cid].right;
+          if (sn > hwm) hwm = sn;
+        }
+        if (!fait_oracle) continue;
+        // ORACLE : chaque triple AIGU dont `ab` est l'arete maximale doit tomber
+        // dans EXACTEMENT UN bloc emis. Un prune qui en mange un est refute.
+        for (int cid : emis) {
+          const int f = (cid < 0) ? (-1 - cid) : nodes[cid].first;
+          const int l = (cid < 0) ? (-1 - cid) : nodes[cid].last;
+          for (int r = f; r <= l; ++r) ++couv[(size_t)r];
+        }
+        const int fa = (terms[i].a < 0) ? (-1 - terms[i].a) : nodes[terms[i].a].first;
+        const int la = (terms[i].a < 0) ? (-1 - terms[i].a) : nodes[terms[i].a].last;
+        const int fb = (terms[i].b < 0) ? (-1 - terms[i].b) : nodes[terms[i].b].first;
+        const int lb = (terms[i].b < 0) ? (-1 - terms[i].b) : nodes[terms[i].b].last;
+        for (int u = fa; u <= la; ++u)
+          for (int v = fb; v <= lb; ++v) {
+            long long D = 0;
+            for (int d = 0; d < 3; ++d) { const long long w = sp[v][d] - sp[u][d]; D += w * w; }
+            for (size_t x = 0; x < sp.size(); ++x) {
+              if ((int)x == u || (int)x == v) continue;
+              long long E = 0, X = 0, V = 0;
+              for (int d = 0; d < 3; ++d) {
+                const long long e = sp[x][d] - sp[u][d], g = sp[x][d] - sp[v][d];
+                const long long w = 2 * sp[x][d] - sp[u][d] - sp[v][d];
+                E += e * e; X += g * g; V += w * w;
+              }
+              if (E > D || X > D) continue;          // `ab` n'est pas maximale
+              if (V <= D) continue;                  // pas strictement aigu en `x`
+              ++triples_aigus;
+              if (couv[x] == 0) { ++manques; ++manques_par_cause[0]; }
+              else if (couv[x] > 1) ++doublons;
+            }
+          }
+      }
+      std::printf("q3_porteurs s=%lld : blocs=%lld masse=%lld feuilles=%lld"
+                  " | prunes obtus=%lld non_maximale=%lld | splits=%lld visites=%lld"
+                  " pile_max=%lld | blocs/pt=%.3f\n",
+                  g_q3s, blocs, masse_bloc, feuilles, prune_obtus, prune_nonmax,
+                  splits, visites, hwm, (double)blocs / (double)m);
+      if (fait_oracle) {
+        std::printf("q3_oracle triples_aigus=%lld manques=%lld doublons=%lld\n",
+                    triples_aigus, manques, doublons);
+        if (triples_aigus < 100) {
+          std::fprintf(stderr, "PLANCHER: %lld triples aigus canoniques seulement\n",
+                       triples_aigus);
+          return 3;
+        }
+        if (manques || doublons) {
+          std::fprintf(stderr, "DESACCORD DU JUGE: %lld triples aigus hors de tout bloc,"
+                               " %lld dans plusieurs\n", manques, doublons);
+          return 1;
+        }
+        std::printf("q3_oracle accord=OUI\n");
+      }
+      if (g_min_blocs > 0 && blocs < g_min_blocs) {
+        std::fprintf(stderr, "PLANCHER: %lld blocs porteurs, %lld exiges\n", blocs, g_min_blocs);
+        return 3;
+      }
     }
     if (g_judge_vwave) {
       if (bank.juges < 1000) {

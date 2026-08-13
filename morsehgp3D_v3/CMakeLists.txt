@@ -4127,3 +4127,42 @@ add_test(NAME mhgp3v_wspd_wavefront_fenetre_finale_oui
           --min-fermes=10000 --min-ouverts=10000)
 set_tests_properties(mhgp3v_wspd_wavefront_fenetre_finale_oui PROPERTIES
   PASS_REGULAR_EXPRESSION "fenetre_finale=OUI")
+
+# --- `Q3AcuteCarrierWave-v0` : LE SECOND NIVEAU, SUR LES PORTEURS.
+#
+# q3 n'est pas ternaire. Canonicalise par son arete maximale, un support q3 est
+# la relation BINAIRE `(arete) x (porteur)`, et l'acuite s'y reduit au signe
+# oppose du test du cœur q2 sur la MEME quantite entiere. La vague de niveau
+# deux enumere les blocs porteurs ; elle ne ferme rien.
+#
+# LA MULTIPLICITE EST LA PREMIERE PORTE, comme pour la WSPD de paires. L'oracle
+# enumere tous les triples, retient ceux dont `ab` est l'arete maximale ET dont
+# l'angle en `x` est strictement aigu, puis exige que chacun tombe dans
+# EXACTEMENT UN bloc emis. Un prune qui en mange un est refute.
+add_test(NAME mhgp3v_wspd_wavefront_q3_multiplicite
+  COMMAND mhgp3v_wspd_wavefront_probe --family=uniform --points=120 --coord=512
+          --sep-euclid=2/1 --tight --q3-sep=4 --q3-oracle=200 --min-blocs=10000)
+set_tests_properties(mhgp3v_wspd_wavefront_q3_multiplicite PROPERTIES
+  PASS_REGULAR_EXPRESSION "q3_oracle accord=OUI")
+
+# LA MEME PORTE A UNE AUTRE SEPARATION : si le prune dependait de `s`, une seule
+# valeur ne le verrait pas.
+add_test(NAME mhgp3v_wspd_wavefront_q3_multiplicite_serree
+  COMMAND mhgp3v_wspd_wavefront_probe --family=uniform --points=120 --coord=512
+          --sep-euclid=2/1 --tight --q3-sep=8 --q3-oracle=200 --min-blocs=10000)
+set_tests_properties(mhgp3v_wspd_wavefront_q3_multiplicite_serree PROPERTIES
+  PASS_REGULAR_EXPRESSION "q3_oracle accord=OUI")
+
+# ET SUR UNE FAMILLE STRUCTUREE, ou la lentille et la boule diametrale sont
+# tres inegalement peuplees.
+add_test(NAME mhgp3v_wspd_wavefront_q3_multiplicite_amas
+  COMMAND mhgp3v_wspd_wavefront_probe --family=eight_clusters --points=120 --coord=512
+          --sep-euclid=2/1 --tight --q3-sep=4 --q3-oracle=200 --min-blocs=5000)
+set_tests_properties(mhgp3v_wspd_wavefront_q3_multiplicite_amas PROPERTIES
+  PASS_REGULAR_EXPRESSION "q3_oracle accord=OUI")
+
+# LE PLANCHER DE BLOCS DOIT MORDRE.
+mhgp3v_add_expected_code_test_for(mhgp3v_wspd_wavefront_probe
+  mhgp3v_wspd_wavefront_q3_plancher_mord "PLANCHER" 3
+  --family=uniform --points=120 --coord=512 --sep-euclid=2/1 --tight
+  --q3-sep=4 --min-blocs=999999999)
