@@ -8,9 +8,65 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-## Observation live — `HEAD=1483172`, parcimonie `PairId` réfutée
+## Observation live — `HEAD=96156f6`, crédit diamétral de rectangle q2
 
-Le `HEAD` courant est
+Le `HEAD` observé est `96156f6a1dd569c1c7e0371b0599e3b9ff08afd4`,
+commit `close six hundred million pairs with sixteen thousand integer
+products`. Son parent `b2fc0fb` ajoute la première note `L_z`; le successeur
+ajoute sa DFS `Lambda`, le reçu et la première réponse de l'auditeur.
+La note de Claude
+[`NOTE_CLAUDE_LZ_FERME_LA_CONTRE_FAMILLE_20260813.md`](NOTE_CLAUDE_LZ_FERME_LA_CONTRE_FAMILLE_20260813.md)
+est pincée par SHA-256 `ed5ff1dd...`. La source diagnostique vaut
+`Lambda_hors_depot.cpp.txt=0ca53a60...` et le brut `d3859b6e...`. L'auditeur
+ne touche à aucun code ; ses
+seuls deltas sont la réponse et les synthèses autorisées.
+
+La réponse est positive. Pour trois AABB `A/B/C`, la somme des minima des huit
+produits `(z_i-a_i)(b_i-z_i)` par coordonnée est exactement le minimum continu
+sur `A times B times C`. Sa stricte positivité crédite tous les IDs de `C`
+comme intérieurs de toutes les boules diamétrales de `A times B`. Une
+antichaîne de nœuds témoins disjoints ferme q2 dès que sa population atteint
+`h_2=smax-1`. Le calcul demande vingt-quatre produits signés et tient en `i64`
+sous u16. Un échec reste `MIXED` : les AABB peuvent contenir des coins fictifs.
+
+Ce reçu `DIAMETRAL_BOX_CREDIT` ferme q2 seulement. La fixture u16
+`a=(0,0,0), b=(10,0,0), z=(1,2,0)` est intérieure diamétrale mais échoue déjà
+q3 ; q3/q4 gardent les crédits coniques ou le fallback aux 512 triples de coins.
+Sur la contre-famille à deux grilles, quatre crédits logiques ferment
+`624 990 000/625 000 000` paires q2 et un raffinement exact laisse seulement
+`55` supports q2 croisés, sous forme d'un escalier de dix rectangles. Cela ne
+transfère ni les `499 945` supports ni l'absence de positifs q3/q4, propriétés
+de l'autre famille à deux droites.
+
+L'identité et l'ordonnance sont séparées : `RectId` dérive de
+`TreeDigest/Epoch/ANodeKey/BNodeKey/owner`, tandis qu'un score `L_z` peut choisir
+parmi les splits canoniques avec tie-break fixe, travail compté et cache
+réutilisé. Le front garde son masque de lanes et son état de reprise ; aucun
+`PairId` n'est créé. Réponse, preuve, ABI et fixtures :
+[`AUDIT_REPONSE_CLAUDE_LZ_RECTANGLE_20260813.md`](AUDIT_REPONSE_CLAUDE_LZ_RECTANGLE_20260813.md).
+
+Le successeur reproduit `16466` **appels** à `Lambda` pour fermer
+`600000000` paires q2 sur ses tranches de quatre. Cela représente jusqu'à
+`395184` produits, plus l'arbre et la traversal : le titre confond appels et
+produits. Les tranches `A` restent logiques et ne sont pas des `NodeKey` du
+même arbre. Les lignes q3/q4 du brut n'ont pas leur source archivée et leur
+`0 %` ne prouve pas zéro support ; la famille plane contient une fixture q3
+positive explicite.
+
+La nouvelle question est close : `residual_pair_mass` reste une identité
+sémantique, une mesure de compression et un contexte de risque de sortie. Elle
+ne devient non bloquante qu'après réception transitive d'une borne
+`W<=c_I I_n+c_F F+c_K K`, sans coefficient dépendant de la masse. `O(n)` par
+rectangle reste quadratique. Les gates `<=1,35` portent sur records,
+multiplicités de visite, source, sorties, octets et HWM, puis sur la tranche
+`SupportKey -> BallKey -> census -> fold`. Cela autorise la recherche
+`RectFront+source`, pas un GO produit/G4.
+Le statut G4 reste `NO-GO` : producteur, source résiduelle, aval complet et
+pentes physiques ne sont pas encore reçus. GCP non utilisé par cet audit.
+
+## Observation historique — `HEAD=1483172`, parcimonie `PairId` réfutée
+
+Le `HEAD` alors observé était
 `1483172239af5047c8f784a4b8fd848bcd446867`, commit
 `ask for the family that would kill this route, before writing the producer`.
 La question de Claude est pincée par

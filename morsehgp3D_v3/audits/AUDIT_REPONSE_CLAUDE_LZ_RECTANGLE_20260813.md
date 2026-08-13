@@ -15,6 +15,11 @@ SHA-256 `5c794c9a...`. Le reçu associé porte
 `mesure_brute.txt=422f8c43...`. C'est un diagnostic CPU sans claim de travail,
 de pente ou de produit.
 
+Successeur relu : `HEAD=96156f6a1dd569c1c7e0371b0599e3b9ff08afd4`,
+note `ed5ff1dd...`, source `Lambda_hors_depot.cpp.txt=0ca53a60...` et
+brut `mesure_brute.txt=d3859b6e...`. Il ajoute une DFS de nœuds témoins et
+la question de la place de `residual_pair_mass` dans la gate.
+
 ## Réponse courte
 
 1. **Oui**, pour un point `z` fixé, `L_z(A,B)` est exactement le minimum de la
@@ -219,6 +224,15 @@ que le terme `z` peut valoir `-238 601`; `L_z` reste négatif. Le seuil dépend
 donc des deux coordonnées ou du choix du témoin. Les quatre crédits ci-dessus
 emploient des orthants coordonnés et évitent ce surclaim.
 
+La table « tranches de quatre » reste néanmoins explicable sans mesure
+flottante. Pour chacune des `31` tranches finissant en `u_1<=123`, les dix
+témoins `(0,u_1+1,v)` avec `190<=v<=199` ont tous `L_z>0`. La dernière
+tranche `u=124` reste entièrement résiduelle, d'où
+`31*800*25000=620000000` fermetures et `200*25000=5000000` résidus. Ce sont
+`32` rectangles **logiques**, pas trente-deux opérations physiques : le
+programme hors dépôt effectue environ `403000` appels à `L_z` dans ce cas,
+et rien ne prouve que ces tranches coïncident avec `32` `NodeKey` du LBVH.
+
 ## 6. Identité canonique, ordonnance adaptative
 
 Il n'est pas nécessaire de choisir entre les deux options de Claude.
@@ -242,8 +256,11 @@ Parmi les raffinements canoniques légaux, l'ordonnance peut choisir de scinder
 l'exactitude. L'antichaîne de feuilles effectivement produite peut différer :
 son digest structurel n'est comparable entre deux politiques que si leur arbre
 et leur `SplitPolicyId` sont identiques. La vérité développée, sa masse et le
-payload aval doivent en revanche rester identiques. Une version immédiatement
-testable est :
+payload aval final doivent en revanche rester identiques lorsque le calcul
+termine sans cap. Sous un cap fail-open, les masses fermées intermédiaires
+peuvent différer ; chaque politique doit seulement conserver
+`closed+residual=total` et zéro faux prune. Une version immédiatement testable
+est :
 
 1. effectuer pour chacun des deux splits possibles une requête `C` cappée à
    `h_2`, et mettre ses résultats en cache ;
@@ -275,9 +292,11 @@ Ajouter un reçu de fermeture, pas une nouvelle sorte de front :
 - `PairRectKey {TreeDigest, Epoch, ANodeKey, BNodeKey, owner}` ;
 - `lane_closed_mask`, avec q2 seulement pour ce certificat ;
 - `closure_reason=DIAMETRAL_BOX_CREDIT` ;
-- une antichaîne `WitnessNodeKey[]`, ses comptes et `sum_count>=h_2` ;
-- pour chaque nœud, les trois minima coordonnés et `Lambda>0` ;
-- `parent_rect`, `split_side`, `resume_key` et budget consommé ;
+- un `CreditStateKey`, le compte q2 saturé à `h_2` et un `CResumeKey` ;
+- dans le ledger persistant pointé par cette clé, l'antichaîne
+  `WitnessNodeKey[]`, ses comptes, ses minima coordonnés et `Lambda>0` ;
+- `parent_rect`, `split_side`, `SplitPolicyId`, `resume_key` et budget
+  consommé ;
 - le front inchangé pour les lanes restantes.
 
 Une fermeture q2 n'émet ni PointId de paire, ni IDs témoins individuels. Le
@@ -303,11 +322,12 @@ l'index 2D compte dans la fenêtre de travail.
 - contre-famille `125 times 200` : masses exactes des quatre rectangles,
   résiduel `10 000`, puis oracle pointwise `<=278` ;
 - permutation des PointId, échange `A/B`, nombre de workers et split
-  canonique/adaptatif : même vérité q2 et même somme de masse ;
+  canonique/adaptatif : `closed+residual=C(n,2)` et même vérité finale ; les
+  masses certifiées intermédiaires peuvent différer sous caps ;
 - extrema u16 et mutant `i32` ;
 - cap au milieu de la requête `C` : aucun crédit partiel et front reprenable.
 
-## 9. Trois rectifications aux notes avant implémentation
+## 9. Rectifications aux notes avant implémentation
 
 1. La famille qui ferme le moins dans le reçu est `eight_clusters`, tandis que
    la meilleure pente est `uniform`. Le niveau de couverture ne détermine pas
@@ -321,7 +341,10 @@ l'index 2D compte dans la fenêtre de travail.
    à la famille **à deux droites** `A_i=(i,0,0)`,
    `B_j=(0,j,65535)`. Ils ne sont pas prouvés pour la famille **à deux
    grilles planes** utilisée par le reçu `L_z`. Les deux exemples ne doivent
-   pas être fusionnés.
+   pas être fusionnés. La famille plane possède même un q3 positif de rang
+   fermé sept : le support `(0,0,0),(0,2,0),(0,1,2)` a pour centre
+   `(0,1,3/4)`, pour poids barycentriques `5/16,5/16,3/8`, et quatre
+   intérieurs `(0,0,1),(0,1,0),(0,1,1),(0,2,1)`.
 4. La preuve symbolique rend inutile une exécution pairwise de **cette
    contre-famille** pour réfuter un claim universel. Elle ne rend pas
    superflues les douze mesures sur quatre distributions différentes, qui
@@ -333,6 +356,188 @@ l'index 2D compte dans la fenêtre de travail.
    rectangle complet en une décision, car tout `z` devient endpoint de
    certaines paires. Le certificat devient puissant après split, comme le
    montrent les quatre décisions logiques, mais n'abolit pas le front.
+6. Les deux notes Claude emploient `backend=cpu_reference` et
+   `mode=proposition_math_non_recue`. Leur portée exploratoire est honnête,
+   mais le cadre v3 canonique reste celui annoncé en tête du présent audit.
+
+## 10. Audit de l'addendum `Lambda`
+
+Le programme archivé se recompile en C++20 et reproduit exactement les trois
+lignes `17021/16466/7503` appels à `Lambda`, avec `125/30/7` nœuds crédités.
+La preuve de `Lambda` rend chacune de ces fermetures q2 sound. C'est un progrès
+positif : la masse q2 portée est quadratique, tandis que cette exécution compte
+`16466=1,6466*10^4` appels de classifieur. Sans rampe en `n`, ce nombre ne
+reçoit encore aucune classe asymptotique.
+
+Deux unités doivent toutefois rester distinctes. `16466` est le nombre
+d'**appels** à `Lambda`, non le nombre de produits entiers. Chaque appel
+exécute exactement vingt-quatre produits, soit `395184` produits pour cette
+ligne, sans compter construction de l'arbre, `nth_element`, pile et branches.
+Le ratio reçu vaut donc environ `36439` paires par appel au classifieur, ou
+`1518` par produit scalaire, jamais « `16466` produits ». Le ledger publie les
+deux compteurs.
+
+Les `32` tranches sont encore des boîtes logiques créées par la boucle externe,
+pas une partition extraite du même arbre binaire. Le programme construit un
+arbre seulement pour les témoins `C`; il ne mesure ni canonical cover des
+tranches `A`, ni `RectId`, ni `SymmetricAnd`, ni front bytes/HWM. Cette mesure
+reçoit donc la primitive et un ROI de fixture, pas encore `RectFront-v1`.
+De plus, son `nth_element` ne départage que la coordonnée de split, alors que la
+fixture contient beaucoup d'égalités. Le nombre `16466` est celui de cette
+source et de cette exécution, pas une vérité canonique de la famille ; la gate
+produit impose une clé totale par coordonnées puis `PointId`. `evals` ne compte
+pas non plus les nœuds dépilés puis rejetés par la plage. Il manque donc une
+rampe, les visites totales, octets et HWM.
+
+Les trois lignes q3/q4 du brut ne sont pas reproductibles par la source
+archivée, qui ne contient que la lane q2. Leur valeur `0 %` peut rester une
+observation de Claude, pas un reçu. La portée de `Rmax` doit aussi rester
+précise : le maximum continu exact est atteint parmi les `512` triples de
+coins par convexification successive ; sommer les maxima d'intervalles des
+trois composantes fournit seulement un majorant à cause des corrélations.
+Enfin, l'absence de fermeture par `Hmin/Rmax` ne prouve aucune absence de
+support positif. La fixture q3 de la section 9 réfute explicitement le claim
+« aucun q3/q4 positif dans cette famille ».
+
+## 11. Réponse à la nouvelle question : la masse reste sémantique, pas physique
+
+Oui, `residual_pair_mass` garde trois rôles indispensables :
+
+1. **Conservation.** Par front et par lane,
+   `closed_pair_mass+residual_pair_mass=input_pair_mass`; seulement à la
+   racine globale `input_pair_mass=C(n,2)`. L'expansion bornée du front doit
+   donner exactement le bitset de l'oracle.
+   Sans cette masse, une omission de rectangle peut ressembler à une
+   optimisation.
+2. **Compression.** Le rapport
+   `residual_pair_mass/residual_node_records` mesure ce que chaque record porte
+   et explique le passage d'une masse quadratique à un stockage compact.
+3. **Risque de sortie.** La masse borne l'univers des owners possibles et
+   contextualise les `SupportOccurrence`, mais ne borne ni leur nombre ni leur
+   coût. Les planchers pertinents restent `L_q`, les supports uniques et les
+   incidences aval effectivement produits.
+
+Elle peut perdre son seuil de pente `<=1,35`, mais pas encore par simple
+déclaration. Une masse factorisée peut avoir une pente deux sans coûter
+quadratiquement ; aujourd'hui, toutefois, aucun consommateur complet n'a reçu
+cette indépendance. La gate de performance candidate porte sur les quantités
+matérielles :
+
+- `rect_visits/splits`, `residual_node_records`, appels et produits `Lambda` ;
+- `source_tasks`, `source_point_visits`, visites d'index et travail terminal ;
+- `SupportOccurrence`, `SupportKey` uniques, lifts, census et incidences fold ;
+- octets lus/écrits, copies, spills, workspace, high-water et temps par étage.
+
+La phrase « source générative dont le coût est par point » est une
+**précondition à recevoir**, pas une raison de retirer la masse. Noter `F_q`
+le nombre de records du front et `K_q` le vecteur des objets réellement
+matérialisés : occurrences puis clés `SupportKey`, occurrences puis clés
+`BallKey`, actions de lots/fold et payload. Il faut prouver ou mesurer une
+borne globale du type :
+
+$$W_{\mathrm{source},q}\le c_I I_n+c_FF_q+\sum_j c_jK_{q,j},$$
+
+où `I_n` est le coût d'indexation des `n` points et aucun coefficient ne dépend
+de `residual_pair_mass`. Pour un catalogue littéral, le terme `K_q` est
+inévitable : lire les points et matérialiser la sortie impose déjà
+`Omega(n+sum_j K_{q,j})` en end-to-end. Les garanties sont :
+
+- aucun rescan racine ou parcours de tous les points par `RectId` ;
+- chaque rectangle résiduel consommé exactement une fois, sans expansion de
+  `PairId` ;
+- chaque support pertinent dont l'owner maximal reste au front émis exactement
+  une fois, ou `resource_exhausted` atomique ;
+- premier RLE `SupportKey`, owner, `BallKey`, census et fold comptés dans le
+  même jalon.
+
+Un coût `O(n)` **par rectangle** vaut `O(nF_q)` et reste rouge. L'adversaire
+minimal est l'union disjointe de `m` étoiles `{a_i} times B` : `F_q=m` et la
+masse vaut `m^2`, mais relancer une DFS des `n` points pour chaque étoile coûte
+encore quadratiquement, même si `K_q=0`. Publier la multiplicité de visite de
+chaque point/nœud et partager le front témoin entre descendants est donc
+obligatoire. Quand `A=A_0 union A_1` est scindé, le front de l'enfant
+`A_0 times B` hérite celui du parent et ajoute `A_1` comme delta de témoins
+nouvellement admissibles ; oublier ce sibling est incomplet, repartir de la
+racine est coûteux.
+
+Une source linéaire **par appel** peut encore être quadratique si elle est
+appelée sur chaque rectangle. Publier donc
+`point_rectangle_incidences=sum_R(|A_R|+|B_R|)`, sa multiplicité maximale par
+PointId, `source_point_visits` et `pair_touches`. Le contrat positif vise la
+borne globale ci-dessus avec `pair_touches=0`, pas une complexité locale
+répétée ; `F_q` garde toujours le sens « records du front » et `K_{q,j}` celui
+des sorties à l'étage `j`.
+
+Le ledger relationnel ferme en parallèle :
+
+$$M_{\mathrm{in}}=M_{\mathrm{complete\ receipt}}+M_{\mathrm{resume}}.$$
+
+Un split `A/B` partitionne exactement la masse du parent ; un split de la
+recherche `C` ne crée aucune masse de paire. Côté sortie,
+`K_occ=sum_R K(R)=K_unique+K_duplicate_excess` et chaque `SupportKey` possède
+un owner final de multiplicité un.
+
+La gate rend l'amplification observable : écrire
+`W_point=n*a_p`, `W_rect=F_q*a_r` et `W_out=K*a_o`, puis publier leurs pentes
+séparées. Pour que `W_point` reste sous `1,35`, le facteur
+`a_p(2n)/a_p(n)` ne peut dépasser `2^0.35`, soit environ `1,27456`.
+
+Deux architectures honnêtes sont alors possibles. Si la source **consomme le
+`RectFront`**, son ledger doit prouver qu'un point n'est pas rescanné par
+chaque rectangle et que le coût est borné par records plus points globaux plus
+sortie. Si une source directe est **indépendante et complète** sur tout
+l'univers, le front résiduel devient un diagnostic : il ne doit même plus être
+construit sur le chemin produit. Une architecture qui calcule les deux puis
+ignore le front cumule seulement deux coûts.
+
+La gate décisive sur la famille plane est donc volontairement dissociée :
+`residual_pair_mass=Theta(n^2)` peut rester rouge sémantiquement, tandis que
+`residual_node_records`, index, visites de points/nœuds, sorties à chaque
+étage, octets et aval doivent chacun garder deux pentes `<=1,35` et leurs caps
+absolus. Mesurer séparément `W_point`, `W_rect` et `W_out` évite qu'une somme
+ou une moyenne cache un étage rouge. Si ces compteurs sont verts et la
+complétude reçue, la masse devient **diagnostique non bloquante**. Tant qu'un
+fallback, un census ou un consumer peut encore la développer, elle reste
+bloquante. S'ils suivent le nombre de rectangles ou rescannent les points, le
+mot « par point » masquait seulement un produit relationnel.
+
+Le verdict est donc à deux niveaux : **GO de recherche** pour construire et
+tester `RectFront+source` malgré une pente deux de la masse ; **NO-GO produit/G4**
+tant que la source complète, le raccord aval, les caps, les pentes physiques et
+`BenchmarkOutputContract-v1` ne sont pas reçus. Une famille `K=0` ne suffit pas
+à elle seule : il faut en parallèle une fixture `output-bearing` où
+`SupportKey`, `BallKey`, census et fold sont non vacants.
+
+Enfin, la prémisse particulière « cette famille produit zéro q3/q4 » est
+fausse. La source ne peut donc pas être déclarée linéaire et vide sur la base
+du `0 %` du certificat. Elle doit passer la gate de complétude sur les positifs
+q3/q4, dont la fixture explicite de la section 9, avant toute rampe.
+Cette fixture se translate et se réfléchit dans chaque grille : sans même
+chercher un compte optimal, elle donne au moins
+`4*123*198*2=194832` supports q3 distincts dans le nuage à `50 k`. Le
+qualificatif « zéro » est donc quantitativement faux, pas seulement une
+imprécision logique. Ces supports sont internes à un plan : ils ne prouvent
+pas que l'owner maximal appartient au rectangle croisé `A times B`. La
+proposition plus étroite « zéro sortie pertinente de ce seul rectangle » reste
+non prouvée, et exige un théorème d'owner ou un census borné.
+
+La nullité des **témoins universels ponctuels** du nuage sur les paires
+croisées peut, elle, être prouvée sans le reçu manquant. La composante axiale
+du déplacement vaut `D=60000` et sa composante transverse a une norme
+`M<10200`. Pour un site `z` de l'un des deux plans, soit `s` sa différence
+transverse non nulle à l'endpoint de ce plan. Alors
+si `H<=0`, le témoin est immédiatement rejeté. Sinon
+`0<H<=M||s||` et `R>=D^2||s||^2`, d'où
+`3H^2<R`, et a fortiori `2H^2<R`; un endpoint donne `H=0`. Cela explique le
+`0 %` spindle sans prouver zéro support q3/q4. Ce sont deux propositions
+différentes.
+
+La campagne d'adversaires doit séparer les axes que la masse mélange : deux
+droites u16 pour `M` dense et sortie q3/q4 nulle ; petites fixtures Chazelle q2
+pour une sortie dense, sans en faire un claim `50 k` u16 ; ordre
+Morton/checkerboard qui fragmente `F_q` ; nœuds `C` `MIXED` jusqu'aux feuilles ;
+`SymmetricAnd` à nombreuses intersections ; étoile à rescans ; cap juste après
+split puis reprise. Une fixture `K=0` ne reçoit jamais seule la voie.
 
 La session G4 de Claude est extérieure à cette réponse et son arrêt ciblé a
 été corroboré séparément. Cet audit n'a démarré ni muté aucune ressource GCP.

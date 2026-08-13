@@ -229,6 +229,20 @@ une note appartiennent à l'autre famille, à deux droites, et ne se transfèren
 pas. Preuve, ABI, fixtures et politique de split :
 [`AUDIT_REPONSE_CLAUDE_LZ_RECTANGLE_20260813.md`](audits/AUDIT_REPONSE_CLAUDE_LZ_RECTANGLE_20260813.md).
 
+Le diagnostic nœud--nœud suivant confirme le levier mais pas encore le front :
+`16 466` appels à `Lambda`, soit jusqu'à `395 184` produits entiers, ferment
+`600 M` paires q2 sur trente-deux tranches logiques. Ces tranches ne sont pas
+encore des `NodeKey` du même arbre, et les lignes q3/q4 n'ont pas de source
+reproductible dans le reçu. La masse résiduelle reste publiée pour la
+conservation et le taux de compression. Elle ne devient non bloquante qu'après
+réception transitive d'une source et d'un aval dont le coût ne dépend pas de
+cette masse. La cible est `W<=c_I I_n+c_F F+c_K K`, avec `F` records et `K`
+sorties réellement matérialisées ; `O(n)` par rectangle reste quadratique. Les
+gates physiques portent sur records, multiplicité de visite des points/nœuds,
+travail réel de la source, sorties, octets et HWM, puis sur le raccord
+`SupportKey -> BallKey -> census -> fold`. Aujourd'hui cette indépendance n'est
+pas reçue : GO pour construire le walking skeleton, NO-GO produit/G4.
+
 Claude a demandé la famille capable de réfuter la parcimonie de cette voie ;
 elle existe en u16. Deux grilles parallèles de `m` points, à `x=0` et
 `x=60000` avec un décalage transverse borné, placent toutes les relations

@@ -1908,6 +1908,21 @@ supports q2 croisés, de profondeurs `0:1,1:2,...,9:10`, représentables par dix
 rectangles. Cette fermeture ne dit rien des supports positifs q3/q4. Voir
 [`AUDIT_REPONSE_CLAUDE_LZ_RECTANGLE_20260813.md`](audits/AUDIT_REPONSE_CLAUDE_LZ_RECTANGLE_20260813.md).
 
+La masse portée par le front n'est pas nécessairement un compteur de travail.
+Elle reste obligatoire pour l'identité
+`closed_pair_mass+residual_pair_mass=C(n,2)`, le digest borné et le rapport de
+compression `residual_pair_mass/residual_node_records`. Sa pente devient
+diagnostique non bloquante seulement après réception d'une borne globale
+`W_source<=c_I I_n+c_F F+c_K K`, où `F` compte les records et `K` toutes les
+sorties matérialisées ; aucun coefficient ne dépend de la masse. La gate
+`<=1,35` porte sur `rect_visits`, records, appels et produits des
+classifieurs, `source_tasks/source_point_visits`, occurrences et clés uniques,
+census/fold, octets et high-water. Une source dite « par point » ne peut être
+`O(n)` par rectangle : aucun rescan racine, aucune expansion de `PairId`, owner
+complet et raccord aval dans le même jalon. Tant que ce contrat transitif
+manque, la masse reste un risque bloquant ; elle n'interdit toutefois plus la
+tranche de recherche du walking skeleton.
+
 La fusion `OR/AND` des orientations ne doit pas matérialiser le résiduel dense.
 Les relations dirigées restent une partition canonique de rectangles ; leur
 intersection avec la transposée est évaluée paresseusement sur les blocs LCA ou
