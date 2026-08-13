@@ -8,7 +8,54 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-## Observation live — `HEAD=c77227c`, front WSPD et borne témoin bidirectionnelle
+## Observation live — `HEAD=e63b7eb`, cœur central puis préfixe WSPD/carriers
+
+Le `HEAD` observé est
+`e63b7eb29151799ea5b84021a42c47d506316994`, commit
+`implement their common core, then let its judge catch my radius twice too
+large`. Le
+worktree observé contient les réponses logicielles de Claude dans
+`prototype/rect_front.hpp` et `prototype/rect_front_probe.cpp`; l'auditeur ne
+les modifie pas.
+
+Le cœur q2 reçu au `HEAD` est un progrès réel : son juge a tué un rayon deux
+fois trop grand et la mesure `eight_clusters/12,5 k` annonce environ deux fois
+moins de classifications. Sa désactivation q3/q4 n'est toutefois pas justifiée
+par le juge employé. `rect_classify(A,B,{z},q3/q4)` est un certificat ALL
+suffisant fondé sur des maxima indépendants ; son résultat `MIXED` ne réfute
+pas un point. La preuve directe établit que la boule de rayon `||b-a||/4`
+autour du milieu est dans le spindle q4, donc q3. Le cœur bloc
+`(d-3S)/4` est ainsi universel sur les trois lanes. Le juge correct énumère les
+vraies paires ponctuelles et évalue directement `H`, `E2`, `X2`. Le worktree
+ajoute déjà la version `Dlo/Vhi`; sa branche q4 doit imposer `Dlo>0` pour ne pas
+accepter le cas `0<=0`.
+
+La question du budget de profondeur est close. Une formule `Theta(log n)` peut
+être une règle versionnée de scheduling ou de handoff. Elle n'est jamais un cap
+sémantique : son épuisement rend un record `DELEGATED` que la source exacte
+consomme dans le même `warm_e2e`. Changer ce quantum ne peut changer que la
+répartition fast/fallback, jamais la sortie finale. La porte requise est un HWM
+par rectangle, pas l'inégalité agrégée `evals<=budget*rect_visits`.
+
+Le reçu G4 transmis mesure l'ancienne ordonnance CPU : pas d'arrêt WSPD,
+lanes séparées, reprise à `C=root`, aucune source ni aval. Son balayage montre
+qu'un budget 48 ferme davantage de masse q2 que 24 ; il ne mesure ni la route
+candidate, ni un débit GPU, ni un SLO. Il sert à arrêter l'optimisation de cette
+file, pas à la prolonger.
+
+Le jalon remis à Claude est `WspdFrontLowerBound-v1` : construire d'abord une
+WSPD entière/canonique à `s=2`, classifier seulement ses terminaux avec un
+masque commun, appliquer le cœur entier `Dlo/Vhi` puis un corridor d'ordre
+unimodulaire, et sérialiser tout échec en front de carriers. q3 recherche les
+points `H<0` dans la lentille d'arête maximale. q4 conserve toute la lentille :
+un seul des deux porteurs doit être aigu, puis viennent rang, positivité,
+owner, niveaux shallow et census. Preuves, ABI, fixtures et porte physique :
+[`AUDIT_DEBLOCAGE_WSPD_PREFIX_CARRIERS_20260813.md`](AUDIT_DEBLOCAGE_WSPD_PREFIX_CARRIERS_20260813.md).
+
+Le statut G4 reste `NO-GO` : aucun `WspdFrontLowerBound-v1` device, aucun p95,
+aucun HWM et aucun raccord reçu jusqu'au fold. GCP non utilisé par cet audit.
+
+## Observation historique — `HEAD=c77227c`, front WSPD et borne témoin bidirectionnelle
 
 Le `HEAD` observé est
 `c77227c74d4926257909e66b1d6f139b23330945`, commit

@@ -18,6 +18,11 @@ jamais réception.
 - [`AUDIT_ETAT_COURANT.md`](AUDIT_ETAT_COURANT.md) est l'unique verdict mutable :
   il distingue le `HEAD`, le delta éventuel du worktree, les empreintes utiles,
   les contre-exemples, les tests qualifiables et les portes ouvertes.
+- [`AUDIT_DEBLOCAGE_WSPD_PREFIX_CARRIERS_20260813.md`](AUDIT_DEBLOCAGE_WSPD_PREFIX_CARRIERS_20260813.md)
+  remet à Claude le prochain jalon falsifiable : WSPD entière/canonique,
+  classification des seuls terminaux par masque de lanes, cœur central et
+  corridor d'ordre, puis vrai raccord q3/q4 par carriers. Il tranche le budget
+  de profondeur comme quantum de scheduling, jamais comme cap sémantique.
 
 Le résumé est [`../README.md`](../README.md) et l'architecture durable est
 [`../PROPOSITION.md`](../PROPOSITION.md). Ils peuvent conserver un résultat

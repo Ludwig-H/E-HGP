@@ -3844,6 +3844,22 @@ add_test(NAME mhgp3v_rect_front_coeur_juge
 set_tests_properties(mhgp3v_rect_front_coeur_juge PROPERTIES
   PASS_REGULAR_EXPRESSION "desaccords=0")
 
+# LES VERDICTS `ALL` SONT JUGES PAR ECHANTILLONNAGE DE TRIPLES REELS. Un noeud
+# declare ALL affirme que TOUT z de C est temoin universel de TOUTE paire de
+# A x B ; le juge tire des triples de points EXISTANTS et evalue le predicat
+# ponctuel exact, sans emprunter ni Lambda, ni le coeur central, ni les bornes
+# de boites. Les trois lanes sont exercees.
+add_test(NAME mhgp3v_rect_front_all_juge_q2
+  COMMAND mhgp3v_rect_front_probe --family=terrain --points=8000 --lane=0
+          --budget-depth=4 --selftest=0 --verify-all)
+set_tests_properties(mhgp3v_rect_front_all_juge_q2 PROPERTIES
+  PASS_REGULAR_EXPRESSION "juge_all triples=[0-9]+ desaccords=0")
+add_test(NAME mhgp3v_rect_front_all_juge_q4
+  COMMAND mhgp3v_rect_front_probe --family=terrain --points=8000 --lane=2
+          --budget-depth=4 --selftest=0 --verify-all)
+set_tests_properties(mhgp3v_rect_front_all_juge_q4 PROPERTIES
+  PASS_REGULAR_EXPRESSION "juge_all triples=[0-9]+ desaccords=0")
+
 # Le rayon double — la faute que j'avais ecrite — doit mourir devant ce juge.
 mhgp3v_add_expected_code_test_for(mhgp3v_rect_front_probe
   mhgp3v_rect_front_mutant_coeur_trop_grand "DESACCORD DU JUGE" 1

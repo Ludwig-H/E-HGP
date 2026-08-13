@@ -237,6 +237,53 @@ inline bool rect_core_misses_box(const RectCore& c, const RectBox& p) {
   return s >= (__int128)c.r4 * c.r4;
 }
 
+// ---- COEUR CENTRAL ENTIER, PARTAGE PAR LES TROIS LANES
+// (audit `AUDIT_DEBLOCAGE_WSPD_PREFIX_CARRIERS`, section 5).
+//
+// Avec `d = b-a`, `v = 2z-a-b`, `D2 = ||d||^2`, `V2 = ||v||^2`, les identites
+// exactes sont
+//
+//     4H = D2 - V2      et      16 E2 X2 = (D2+V2)^2 - 4 (d.v)^2.
+//
+// En SUPPRIMANT le terme negatif `-4(d.v)^2`, la condition universelle
+// `c H^2 > E2 X2` se reduit a une comparaison du seul rapport `V2/D2` :
+//
+//     q2 : V2 < D2                 (c'est exactement `H > 0`)
+//     q3 : 3 V2 < D2               (car 4H^2 > E2X2 <=> 2(D2-V2) > D2+V2)
+//     q4 : 209 V2 <= 56 D2         (il faut V2/D2 < 2 - sqrt(3) = 0,2679491...,
+//                                   et 56/209 = 0,2679425... est dessous)
+//
+// Le dernier test est donc STRICTEMENT interieur a la vraie frontiere : il perd
+// une frange infime et ne peut jamais la franchir. Tous les bits sont imbriques
+// et se calculent en UNE classification, sans produit vectoriel et sans
+// `Lambda`, pour les trois lanes a la fois. Un echec reste `UNKNOWN` : ces
+// tests ne rendent JAMAIS `NONE` ni un support positif.
+//
+// `Dlo` est le minimum exact de `||b-a||^2` entre les AABB `A` et `B`.
+// `Vhi` est le maximum exact de `||2z-a-b||^2` : par axe, `2z-a-b` parcourt
+// `[2 Clo - Ahi - Bhi, 2 Chi - Alo - Blo]`, et le carre y culmine a l'extremite
+// de plus grande valeur absolue.
+inline long long rect_v_max(const RectBox& a, const RectBox& b, const RectBox& c) {
+  long long s = 0;
+  for (int i = 0; i < 3; ++i) {
+    const long long lo = 2 * c.lo[i] - a.hi[i] - b.hi[i];
+    const long long hi = 2 * c.hi[i] - a.lo[i] - b.lo[i];
+    const long long m = std::max(lo < 0 ? -lo : lo, hi < 0 ? -hi : hi);
+    s += m * m;
+  }
+  return s;
+}
+
+// `ALL` par le coeur central, pour la lane demandee. Suffisant, jamais complet.
+inline bool rect_central_all(const RectBox& a, const RectBox& b, const RectBox& c,
+                             int lane) {
+  const __int128 vhi = (__int128)rect_v_max(a, b, c);
+  const __int128 dlo = (__int128)rect_minsq(a, b);
+  if (lane == 0) return vhi < dlo;
+  if (lane == 1) return 3 * vhi < dlo;
+  return 209 * vhi <= 56 * dlo;
+}
+
 enum class RectVerdict { kNone, kAll, kMixed };
 
 // ENUM FERME. L'ABI n'accepte plus un `int` quelconque : toute valeur autre que
@@ -261,8 +308,14 @@ inline RectVerdict rect_classify(const RectBox& a, const RectBox& b, const RectB
     const __int128 kn = (lane == RectLane::kQ3) ? 4 : 3;
     if (kn * u * u <= le * lx) return RectVerdict::kNone;
   }
+  // COEUR CENTRAL D'ABORD : il decide les trois lanes en une comparaison de
+  // rapport et ne demande ni `Lambda` ni produit vectoriel.
+  if (rect_central_all(a, b, c, (int)lane)) return RectVerdict::kAll;
   if (mn <= 0) return RectVerdict::kMixed;
   if (lane == RectLane::kQ2) return RectVerdict::kAll;
+  // Repli : le certificat par `Hmin` et les deux maxima de distance. Il est
+  // moins couvrant que le coeur central sur les rectangles centres, mais peut
+  // mordre ailleurs ; les deux sont suffisants, jamais complets.
   const __int128 hh = (__int128)mn * mn;
   const __int128 ex = (__int128)rect_maxsq(c, a) * (__int128)rect_maxsq(b, c);
   const __int128 k = (lane == RectLane::kQ3) ? 4 : 3;

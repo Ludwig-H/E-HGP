@@ -1996,6 +1996,54 @@ s'héritent par monotonie, seuls les `Mixed` sont reclassifiés. Un quantum rend
 `RESOURCE_EXHAUSTED` atomiquement. Aucun cap ne change la vérité et aucun enfant
 ne recommence depuis `C-root`.
 
+### 11.1.3 Préfixe WSPD mesurable et raccord exact aux carriers
+
+Le jalon de décision est `WspdFrontLowerBound-v1`. Il construit d'abord une
+WSPD canonique entière à faible séparation, puis classifie une seule fois ses
+terminaux avec un masque q2/q3/q4. Il applique le cœur central et les corridors
+d'ordre, fait `count--scan--fill` de toutes les issues et rend un reçu après
+synchronisation. Aucun `PairId` n'est développé. Toute ambiguïté devient
+`CARRIER_FRONT/DELEGATED`, jamais une conclusion scientifique.
+
+Le cœur central partagé emploie `D2=||b-a||^2` et
+`V2=||2z-a-b||^2`. Sur trois AABB, `Dlo` minore `D2` et `Vhi` majore `V2`.
+Sous `Dlo>0`, `Vhi<Dlo` certifie q2, `3Vhi<Dlo` certifie q3 et
+`209Vhi<=56Dlo` certifie q4. La dernière fraction est strictement sous
+`2-sqrt(3)`. Ces tests sont seulement `ALL` fail-open. Le cœur sphérique plus
+simple de rayon `||b-a||/4` autour du milieu est lui aussi inclus dans le
+spindle q4 : avec `A=||b-a||^2` et `B=||z-m||^2<=A/16`, la marge
+`3H^2-E2X2` reste strictement positive. Un juge AABB qui rend `MIXED` ne réfute
+pas ce lemme ; le juge indépendant énumère les paires ponctuelles et évalue les
+trois prédicats directs.
+
+Le corridor d'ordre emploie la transformée unimodulaire
+`T3(x,y,z)=(x-y,y-z,z)`. Pour `L_i=max_A T3_i(a)` et
+`U_i=min_B T3_i(b)`, tout `PointId` de la boîte transformée `L<=T3(z)<=U`, hors
+endpoints, est témoin universel q2/q3 de `A×B`. Il est aussi q4 si
+`L_2<U_2`; sinon q4 reste délégué ou passe par les deux sous-cônes exacts. Les
+IDs de plusieurs transformées sont dédupliqués par `(RectId,PointId,lane)`.
+
+Le front q3 ne cherche plus des témoins universels mais des carriers. Pour une
+arête owner `ab`, `x` est un carrier aigu exactement si
+`H=(x-a) dot(b-x)<0`, `||x-a||^2<=||b-a||^2` et
+`||b-x||^2<=||b-a||^2`. Cette relation doit être vide sur tout le produit avant
+d'annoncer `SOURCE_EMPTY`; un cap ou une recherche partielle reste
+`CARRIER_FRONT`.
+
+Pour q4, deux points de la lentille fermée sont appariés, mais un seul doit
+être aigu : `acute(x) || acute(y)`. Le sujet vérifie ensuite
+`||x-y||^2<=||b-a||^2`, rang affine trois, positivité stricte et owner. Le
+moteur shallow conserve tous les points pour le census ; la lentille filtre les
+porteurs, jamais les témoins intérieurs. Bundles, concurrences et shell restent
+exactement rejoués au résiduel.
+
+Le quantum de profondeur est une règle versionnée de scheduling. Son
+épuisement transfère un état consommable par la source exacte dans le même
+`warm_e2e`; il ne change aucune sortie. La porte publie `rect_eval_hwm`, tous
+les records et masses délégués, octets/HWM et deux pentes de travail. Le plan,
+les fixtures et l'ABI sont détaillés dans
+[`AUDIT_DEBLOCAGE_WSPD_PREFIX_CARRIERS_20260813.md`](audits/AUDIT_DEBLOCAGE_WSPD_PREFIX_CARRIERS_20260813.md).
+
 ### 11.2 Tuilage spatial et fold
 
 À dix millions de points, les listes de voisins et les supports sont calculés

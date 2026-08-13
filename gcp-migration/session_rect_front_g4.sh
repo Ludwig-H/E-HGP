@@ -165,7 +165,7 @@ gcloud compute scp "${TAR}" "${GCP_INSTANCE_NAME}:/tmp/v3.tgz" \
       ( $P --family=$fam --lane=$lane --points=$RAMPE --budget=24 --leaf=8            --selftest=20000 --min-all=1000 --min-none=1000 --min-mixed=1000            > out/${fam}_q$((lane+2)).txt 2>&1; echo "code=$?" >> out/${fam}_q$((lane+2)).txt ) &
     done
   done
-  wait
+  wait || true   # un REFUS de porte (code 3) est un RESULTAT, pas une erreur
   echo "=== RESULTATS ==="
   for f in out/*.txt; do echo "--- $f"; cat "$f"; done
 ' 2>&1 | tee -a "${LOG}"
@@ -179,7 +179,7 @@ gcloud compute scp "${TAR}" "${GCP_INSTANCE_NAME}:/tmp/v3.tgz" \
   for b in 8 16 24 48 96 192; do
     ( $P --family=eight_clusters --lane=0 --points=12500,25000,50000 --budget=$b          --leaf=8 --selftest=0 > out/budget_$b.txt 2>&1; echo "code=$?" >> out/budget_$b.txt ) &
   done
-  wait
+  wait || true   # idem : le balayage doit survivre a un refus de pente
   echo "=== BALAYAGE DE BUDGET-PROFONDEUR (eight_clusters, q2) ==="
   for b in 2 3 4 5 6 8; do echo "--- budget-depth=$b"; cat out/budget_$b.txt; done
 ' 2>&1 | tee -a "${LOG}"
@@ -192,7 +192,7 @@ gcloud compute scp "${TAR}" "${GCP_INSTANCE_NAME}:/tmp/v3.tgz" \
   for lf in 4 8 16 32 64; do
     ( $P --family=uniform --lane=0 --points=12500,25000,50000 --budget=24          --leaf=$lf --selftest=0 > out/leaf_$lf.txt 2>&1; echo "code=$?" >> out/leaf_$lf.txt ) &
   done
-  wait
+  wait || true   # idem : le balayage doit survivre a un refus de pente
   echo "=== BALAYAGE DE FEUILLE (uniform, q2, budget-depth 4) ==="
   for lf in 4 8 16 32 64; do echo "--- leaf=$lf"; cat out/leaf_$lf.txt; done
 ' 2>&1 | tee -a "${LOG}"

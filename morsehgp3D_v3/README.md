@@ -48,10 +48,22 @@ recertifie chaque `PointId` exactement, puis conserve une continuation
 persistante pour les seuls résidus. Preuves, mesures et gates :
 [`AUDIT_REPONSE_WSPD_DESCENTE_JOINTE_96BE8E0_20260813.md`](audits/AUDIT_REPONSE_WSPD_DESCENTE_JOINTE_96BE8E0_20260813.md).
 
-Le premier worktree suivant applique déjà `KEEP_ANCHOR`, le `NONE` propre à
-chaque lane, un enum fermé et le budget exact. Il reste diagnostique et son état
-observé ne compile pas encore (`mass_keep_anchor` non déclaré) ; ces réparations
-ne changent donc pas le statut live avant rejeu et oracle par lane.
+Les successeurs appliquent déjà `KEEP_ANCHOR`, le `NONE` propre à chaque lane,
+un enum fermé et le budget exact. Le worktree observé compile et ses fixtures
+ciblées passent, mais il reste diagnostique : aucun oracle q3/q4 par identité,
+aucun `RectKey` canonique et aucun consommateur exact de `KEEP_ANCHOR` ne sont
+encore reçus.
+
+Le déblocage suivant ne prolonge plus cette file diagnostique. Il construit
+d'abord une WSPD entière/canonique à faible séparation, puis classifie une seule
+fois ses terminaux avec un masque commun. Deux fast paths entiers — cœur central
+`Dlo/Vhi` et corridor d'ordre unimodulaire — ferment les rectangles denses ;
+tout le reste devient un vrai front de carriers. Le raccord q3 est caractérisé
+par `H<0` et les deux inégalités d'arête maximale ; q4 conserve toute la
+lentille car un seul de ses deux porteurs doit être aigu. Le jalon
+`WspdFrontLowerBound-v1` peut ainsi réfuter la seconde avant d'écrire census et
+fold, sans jamais transformer un cap en résultat :
+[`AUDIT_DEBLOCAGE_WSPD_PREFIX_CARRIERS_20260813.md`](audits/AUDIT_DEBLOCAGE_WSPD_PREFIX_CARRIERS_20260813.md).
 
 Le producteur expérimental par arête maximale apporte quatre lemmes exacts :
 borne mono-ancre `ext/4`, face positive adjacente d'un q4 positif, disque q4

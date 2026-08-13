@@ -88,6 +88,7 @@ struct Counters {
   long long rect_visited = 0, rect_closed = 0, rect_residual = 0, rect_capped = 0;
   long long rect_positive = 0, rect_keep_anchor = 0;
   long long core_tests = 0, core_closed = 0, core_judged = 0, core_disagree = 0;
+  long long all_judged = 0, all_disagree = 0;
   long long evals = 0, mass_closed = 0, mass_residual = 0, mass_positive = 0, mass_keep_anchor = 0, w_high = 0;
   long long all_hits = 0, none_hits = 0, mixed_hits = 0;
 };
@@ -118,6 +119,8 @@ enum class RectOutcomeKind { kClosed, kPositiveQ2, kKeepAnchor, kResidual };
 // descente. Aucun faux temoin possible : le coeur est un MINORANT, tout point
 // qu'il contient est interieur a toute boule admissible du rectangle.
 bool g_verify_core = false;
+bool g_verify_all = false;
+unsigned long long g_rng = 0x243F6A8885A308D3ull;
 
 bool core_closes(const Tree& t, int ia, int ib, RectLane lane, Counters* c,
                  RectFrontInject inject) {
@@ -184,6 +187,30 @@ RectOutcome witness_outcome(const Tree& t, int ia, int ib, RectLane lane, long l
     ++c->evals;
     long long mx = 0;
     const RectVerdict v = mhgp3v::rect_classify(A.box, B.box, C.box, lane, &mx, inject);
+    // JUGE DES VERDICTS `ALL`, par ECHANTILLONNAGE DE TRIPLES REELS. Un noeud
+    // declare `ALL` affirme que TOUT `z` de `C` est temoin universel de TOUTE
+    // paire de `A x B`. On tire donc des triples de points EXISTANTS et on
+    // evalue le predicat ponctuel exact — H > 0 et c H^2 > E2 X2 — dans une
+    // ecriture qui n'emprunte ni `Lambda`, ni le coeur central, ni les bornes
+    // de boites.
+    if (g_verify_all && v == RectVerdict::kAll) {
+      for (int s = 0; s < 4; ++s) {
+        const int ai = A.begin + (int)((g_rng = g_rng * 6364136223846793005ull + 1) >> 33) % (A.end - A.begin);
+        const int bi = B.begin + (int)((g_rng = g_rng * 6364136223846793005ull + 1) >> 33) % (B.end - B.begin);
+        const int zi = C.begin + (int)((g_rng = g_rng * 6364136223846793005ull + 1) >> 33) % (C.end - C.begin);
+        __int128 h = 0, e2 = 0, x2 = 0;
+        for (int d = 0; d < 3; ++d) {
+          const long long ea = t.pts[zi][d] - t.pts[ai][d];
+          const long long tb = t.pts[bi][d] - t.pts[zi][d];
+          h += (__int128)ea * tb; e2 += (__int128)ea * ea; x2 += (__int128)tb * tb;
+        }
+        bool ok = (h > 0);
+        if (ok && lane == RectLane::kQ3) ok = (4 * h * h > e2 * x2);
+        if (ok && lane == RectLane::kQ4) ok = (3 * h * h > e2 * x2);
+        ++c->all_judged;
+        if (!ok) ++c->all_disagree;
+      }
+    }
     if (v == RectVerdict::kNone) { ++c->none_hits; return false; }
     if (v == RectVerdict::kAll) { ++c->all_hits; cred += k; return true; }
     ++c->mixed_hits;
@@ -430,6 +457,7 @@ int main(int argc, char** argv) {
     }
     else if (a == "--core") use_core = true;
     else if (a == "--verify-core") { use_core = true; g_verify_core = true; }
+    else if (a == "--verify-all") g_verify_all = true;
     else if (a.rfind("--max-slope=", 0) == 0) max_slope = std::atof(val("--max-slope=").c_str());
     else if (a.rfind("--min-closed-pct=", 0) == 0) min_closed_pct = arg_ll(val("--min-closed-pct=").c_str(), 0, 100, "min-closed-pct");
     else if (a.rfind("--min-all=", 0) == 0) min_all = arg_ll(val("--min-all=").c_str(), 0, (1LL << 50), "min-all");
@@ -518,6 +546,30 @@ int main(int argc, char** argv) {
     visited_per_n.push_back((double)c.rect_visited);
     agg.all_hits += c.all_hits; agg.none_hits += c.none_hits; agg.mixed_hits += c.mixed_hits;
     agg.mass_closed += c.mass_closed;
+    if (g_verify_all) {
+      std::printf("juge_all triples=%lld desaccords=%lld\n", c.all_judged, c.all_disagree);
+      if (c.all_judged < 1000) {
+        std::fprintf(stderr, "PLANCHER JUGE ALL: %lld triples juges\n", c.all_judged);
+        return 3;
+      }
+      if (c.all_disagree != 0) {
+        std::fprintf(stderr, "DESACCORD DU JUGE: %lld triples ALL refutes par le predicat ponctuel\n",
+                     c.all_disagree);
+        return 1;
+      }
+    }
+    if (g_verify_all) {
+      std::printf("juge_all triples=%lld desaccords=%lld\n", c.all_judged, c.all_disagree);
+      if (c.all_judged < 1000) {
+        std::fprintf(stderr, "PLANCHER JUGE ALL: %lld triples juges\n", c.all_judged);
+        return 3;
+      }
+      if (c.all_disagree != 0) {
+        std::fprintf(stderr, "DESACCORD DU JUGE: %lld triples ALL refutes par le predicat ponctuel\n",
+                     c.all_disagree);
+        return 1;
+      }
+    }
     if (g_verify_core) {
       std::printf("juge_coeur points=%lld desaccords=%lld\n", c.core_judged, c.core_disagree);
       if (c.core_judged < 1000) {
