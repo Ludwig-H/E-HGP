@@ -8,12 +8,17 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-## Observation live — `HEAD=96be8e0`, front WSPD et borne témoin bidirectionnelle
+## Observation live — `HEAD=c77227c`, front WSPD et borne témoin bidirectionnelle
 
 Le `HEAD` observé est
-`96be8e0a7f3d49eef8d0406e77609cab61101730`, commit
-`the queue carries an upper bound too, so the same Lambda proves supports`.
-Le worktree était propre avant les seuls deltas documentaires du présent audit.
+`c77227c74d4926257909e66b1d6f139b23330945`, commit
+`give the negative gates the diagnostic they were missing, and make the floor
+bite`. Le pin logiciel géométrique reste son ancêtre `96be8e0`; le successeur
+courant répare le câblage CMake et ajoute un plancher de non-vacuité. Le
+worktree observé ensuite contient les deltas documentaires autorisés du présent
+audit, plus la réponse logicielle de Claude dans `rect_front.hpp` SHA-256
+`2a6d12ee...` et `rect_front_probe.cpp` SHA-256 `77ead893...`; l'auditeur n'a
+modifié aucun de ces deux fichiers logiciels.
 La chaîne récente sépare la note WSPD `29b7fa7`, la correction du faux `NONE`
 `7ff40e4`, le premier probe `eac8027`, le script de session `e2323d7`, l'arrêt
 WSPD `3926d74` et la borne supérieure témoin du pin live.
@@ -45,6 +50,16 @@ positivité. Un nuage collinéaire tue le claim « chaque paire est un support �
 L'issue doit devenir `KEEP_ANCHOR/DELEGATED_TO_SOURCE`, pas
 `POSITIVE_SUPPORT`.
 
+Le worktree répond correctement à cette réfutation : il introduit
+`KEEP_ANCHOR` hors q2, un enum fermé de lanes et le `NONE` spécifique q3/q4 par
+bornes de distance. `KEEP_ANCHOR` reste séparé de la masse dite résiduelle ; il
+devra être inclus dans la masse et le travail délégués à la source. Le premier
+delta ne compilait pas faute de `mass_keep_anchor`; le successeur observé
+répare ce champ et compile. Sa nouvelle suite rend `5/6` : le cas collinéaire
+confirme zéro `positifs_q2` en q3/q4, mais la fixture extrême attend un maximum
+faux. Pour trois axes `32767*32768`, minimum et maximum valent tous deux
+`3 221 127 168`, pas `3 221 225 472`.
+
 Le probe n'est toujours pas une descente jointe persistante : chaque rectangle
 recrée une file et repart de `C=root`. `budget=24` peut en outre exécuter
 vingt-cinq classifications. Le rejeu Release ciblé sur l'ELF SHA-256
@@ -54,12 +69,17 @@ sur ce cas. Le premier gain de constante demandé est donc un front commun à
 masque de lanes, puis une banque top-`L` de témoins proposée en lot et
 recertifiée exactement, avant un fallback persistant.
 
-Les portes ciblées rendent `1/4`. Les deux mutants et le refus de domaine
-rendent bien `4/4/2`, mais trois appels du helper CMake ont omis le regex et
-traitent `--family=uniform` comme code contractuel. La seule gate de pente
-imprime les visites mais ne juge que la masse résiduelle ; avec deux tailles,
-elle ne peut jamais exercer sa condition de deux pentes. Aucun juge par
-`PairId`, aucune lane q3/q4 et aucune issue positive ne sont reçus.
+Le worktree change la boucle en `budget>=2` après la racine et ajoute
+`evals<=budget*rect_visits`; cette réparation vise bien l'off-by-one et compile,
+mais le seul échec de fixture empêche encore une suite ciblée entièrement verte.
+
+Au pin `96be8e0`, les portes ciblées rendaient `1/4` parce que trois appels du
+helper CMake omettaient le regex. `c77227c` les corrige et ajoute un rejet de
+plancher ; un rejeu Release frais rend `5/5` en `13,34 s`. Ce vert reçoit le
+harnais local et l'intervalle q2, pas le producteur : la gate de pente imprime
+les visites mais ne juge que la masse résiduelle et, avec deux tailles, ne peut
+jamais exercer sa condition de deux pentes. Aucun juge par `PairId`, aucune
+lane q3/q4 et aucune issue positive ne sont reçus.
 
 Le script G4 commis est une orchestration non exécutée, pas un reçu. Il mesure
 le CPU de la G4, omet `--stop-wsp`, compile une autre cible CUDA, peut masquer

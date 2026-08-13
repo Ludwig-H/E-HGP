@@ -39,13 +39,19 @@ La nouvelle conclusion `cred+pending<h_q` est reçue comme support pour q2 sous
 endpoints distincts. Pour q3/q4, elle signifie seulement
 `KEEP_ANCHOR/DELEGATED_TO_SOURCE` : un nuage collinéaire peut satisfaire ce
 majorant sans contenir aucun triangle ou tétraèdre propre. Le probe repart
-encore de la racine témoin pour chaque rectangle, ses CTests ciblés rendent
-`1/4`, et ni les portes ni le script G4 n'activent le mode WSPD. Le prochain
-jalon recommandé partage un seul front et un masque de lanes, propose en lot
-une petite banque de points proches du milieu de chaque rectangle, recertifie
-chaque `PointId` exactement, puis conserve une continuation persistante pour
-les seuls résidus. Preuves, mesures et gates :
+encore de la racine témoin pour chaque rectangle. Les CTests du pin rendaient
+`1/4`; le successeur `c77227c` répare leur câblage et un rejeu frais rend
+`5/5`, mais ni la gate de pente ni le script G4 n'activent le mode WSPD. Le
+prochain jalon recommandé partage un seul front et un masque de lanes, propose
+en lot une petite banque de points proches du milieu de chaque rectangle,
+recertifie chaque `PointId` exactement, puis conserve une continuation
+persistante pour les seuls résidus. Preuves, mesures et gates :
 [`AUDIT_REPONSE_WSPD_DESCENTE_JOINTE_96BE8E0_20260813.md`](audits/AUDIT_REPONSE_WSPD_DESCENTE_JOINTE_96BE8E0_20260813.md).
+
+Le premier worktree suivant applique déjà `KEEP_ANCHOR`, le `NONE` propre à
+chaque lane, un enum fermé et le budget exact. Il reste diagnostique et son état
+observé ne compile pas encore (`mass_keep_anchor` non déclaré) ; ces réparations
+ne changent donc pas le statut live avant rejeu et oracle par lane.
 
 Le producteur expérimental par arête maximale apporte quatre lemmes exacts :
 borne mono-ancre `ext/4`, face positive adjacente d'un q4 positif, disque q4

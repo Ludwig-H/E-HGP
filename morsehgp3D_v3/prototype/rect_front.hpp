@@ -16,14 +16,30 @@
 //                                        d'aucune paire ; retirer DEFINITIVEMENT.
 //     sinon                      MIXED : raffiner.
 //
-// ASYMETRIE DES DEUX BORNES — c'est le piege, et il a produit un faux NONE :
-//   - en `z_i`, la parabole `(z-a)(b-z)` est CONCAVE. Son MINIMUM sur un
-//     intervalle est donc a une extremite. Son MAXIMUM est au sommet
-//     `z = (a+b)/2`, a l'INTERIEUR : n'evaluer que les extremites SOUS-ESTIME
-//     le maximum et fait prononcer NONE la ou des temoins existent.
-//   - en `(a,b)`, `min_z` est un minimum de fonctions bilineaires donc concave,
-//     et `max_z` un maximum de fonctions bilineaires donc convexe : les deux
-//     sont bien atteints a un COIN de `A_i x B_i`.
+// PREUVE (rectifiee par l'audit `AUDIT_REPONSE_WSPD_DESCENTE_JOINTE_96BE8E0`).
+// Sur une coordonnee, `f(a,b,z) = (z-a)(b-z)` est AFFINE en `a` a `b` fixe, et
+// AFFINE en `b` a `a` fixe. On peut donc remplacer successivement `a` puis `b`
+// par une extremite de son intervalle sans perdre ni le minimum ni le maximum.
+// Puis, `a` et `b` etant fixes, `f` est une parabole CONCAVE en `z` :
+//   - son MINIMUM sur un intervalle est a une extremite ;
+//   - son MAXIMUM sur le RESEAU ENTIER est atteint en un entier voisin de
+//     `(a+b)/2`, ECRETE a `C`.
+// Les trois axes sont independants et les AABB sont des produits cartesiens :
+// les trois extrema scalaires s'additionnent.
+//
+// L'argument « minimum de bilineaires concave, maximum convexe » que j'avais
+// d'abord ecrit est FAUX s'il est lu conjointement en `(a,b)` : a `z=0` la
+// forme vaut `-ab`, dont la hessienne est indefinie. La conclusion etait bonne,
+// la preuve ne l'etait pas. C'est l'affinite SEPAREE qui vaut.
+//
+// PORTEE EXACTE DE `Lambda_max` : c'est l'enveloppe du RESEAU ENTIER, nommee
+// `integer_lattice_u16_aabb_envelope`, et NON l'enveloppe continue. Fixture :
+// `A={0}`, `B={1}`, `C=[0,1]` donne un maximum entier NUL et un maximum continu
+// egal a `1/4`. `Lambda_min`, lui, coincide avec le minimum continu, puisque le
+// minimum en `z` reste aux extremites.
+//
+// N'evaluer que les extremites en `z` SOUS-ESTIME le maximum et fait prononcer
+// NONE la ou des temoins existent : c'est le faux NONE que j'avais ecrit.
 //
 // ALL n'a besoin d'AUCUN test d'exclusion de `a` et `b` : un point strictement
 // interieur a sa propre boule diametrale n'existe pas, donc `Lambda_min > 0`
@@ -111,21 +127,48 @@ inline long long rect_maxsq(const RectBox& p, const RectBox& q) {
   return s;
 }
 
+// Minimum EXACT de `||p - q||^2` sur deux boites : separable par coordonnee.
+// Nul des que les projections se recouvrent sur l'axe.
+inline long long rect_minsq(const RectBox& p, const RectBox& q) {
+  long long s = 0;
+  for (int i = 0; i < 3; ++i) {
+    long long d = 0;
+    if (p.lo[i] > q.hi[i]) d = p.lo[i] - q.hi[i];
+    else if (q.lo[i] > p.hi[i]) d = q.lo[i] - p.hi[i];
+    s += d * d;
+  }
+  return s;
+}
+
 enum class RectVerdict { kNone, kAll, kMixed };
 
-// `lane` : 0 = q2, 1 = q3, 2 = q4.
+// ENUM FERME. L'ABI n'accepte plus un `int` quelconque : toute valeur autre que
+// zero, un ou deux etait auparavant traitee silencieusement comme q4.
+enum class RectLane { kQ2 = 0, kQ3 = 1, kQ4 = 2 };
+
 inline RectVerdict rect_classify(const RectBox& a, const RectBox& b, const RectBox& c,
-                                 int lane, long long* out_max,
+                                 RectLane lane, long long* out_max,
                                  RectFrontInject inject = RectFrontInject::kNone) {
   long long mn = 0, mx = 0;
   rect_h_interval(a, b, c, &mn, &mx, inject);
   *out_max = mx;
-  if (mx <= 0) return RectVerdict::kNone;
+  if (mx <= 0) return RectVerdict::kNone;   // NONE q2, donc NONE de toute lane
+  if (lane != RectLane::kQ2) {
+    // NONE SPECIFIQUE DE LANE (audit `96be8e0`, section 3). Avec `U = max(Hmax,0)`
+    // et `LE`, `LX` les minima exacts des distances carrees `A-C` et `B-C`, la
+    // condition universelle `c' H^2 > E2 X2` ne peut etre satisfaite nulle part
+    // si `c' U^2 <= LE LX`. L'egalite rend bien NONE : les spindles sont ouverts.
+    const __int128 u = (__int128)std::max(mx, 0LL);
+    const __int128 le = (__int128)rect_minsq(a, c);
+    const __int128 lx = (__int128)rect_minsq(b, c);
+    const __int128 kn = (lane == RectLane::kQ3) ? 4 : 3;
+    if (kn * u * u <= le * lx) return RectVerdict::kNone;
+  }
   if (mn <= 0) return RectVerdict::kMixed;
-  if (lane == 0) return RectVerdict::kAll;
+  if (lane == RectLane::kQ2) return RectVerdict::kAll;
   const __int128 hh = (__int128)mn * mn;
   const __int128 ex = (__int128)rect_maxsq(c, a) * (__int128)rect_maxsq(b, c);
-  const __int128 k = (lane == 1) ? 4 : 3;
+  const __int128 k = (lane == RectLane::kQ3) ? 4 : 3;
   return (k * hh > ex) ? RectVerdict::kAll : RectVerdict::kMixed;
 }
 

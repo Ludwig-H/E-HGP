@@ -1890,10 +1890,13 @@ comptes jusqu'à `h_2=smax-1`. Égalité, cap ou échec restent au front ; aucun
 population partielle n'est publiée. Sous u16, vingt-quatre produits et deux
 additions tiennent dans `i64`.
 
-Ce reçu ne ferme pas q3/q4 : `a=(0,0,0)`, `b=(10,0,0)`, `z=(1,2,0)` est
-intérieur diamétral mais échoue déjà le prédicat universel q3. Ces lanes gardent
-leurs `CreditKey` coniques ou, en fallback, le classifieur exact aux `512`
-triples de coins en arithmétique large.
+`Lambda>0` seul ne ferme pas q3/q4 : `a=(0,0,0)`, `b=(10,0,0)`,
+`z=(1,2,0)` est intérieur diamétral mais échoue déjà le prédicat universel q3.
+Une extension suffisante évite toutefois les `512` triples dans une partie des
+cas. Si `E2max` et `X2max` majorent exactement `||z-a||^2` et `||b-z||^2` sur
+les boîtes, `Lambda>0 && 4*Lambda^2>E2max*X2max` certifie `ALL-q3`, et le
+coefficient `3` certifie `ALL-q4`. L'échec reste `MIXED`; les crédits coniques
+et le classifieur exact large restent les étages suivants.
 
 Le `RectId` ne dépend jamais du score de split. Il dérive de
 `TreeDigest/Epoch/ANodeKey/BNodeKey/owner`; seuls ses enfants canoniques sont
@@ -1930,6 +1933,68 @@ WSPD par `ALL/NONE/MIXED`, avec owner, masse, digest et caps. Le ledger distingu
 la masse sémantique `R_pair_mass`, potentiellement quadratique, du stockage
 physique `R_node_records` soumis aux pentes. Sans ce `SymmetricAnd` factorisé, un
 radix/RLE par `PairId` recréerait le catalogue global que la v3 doit éviter.
+
+### 11.1.2 Front WSPD, borne supérieure et banque bornée de témoins
+
+Le front `A×B` peut employer une WSPD comme **partition canonique des
+relations**, jamais comme approximation d'une décision. Pour une séparation
+rationnelle fixe `s`, un fair-split tree canonique en dimension trois donne
+`O(s^3 n)` records. Cette borne suppose une politique reçue pour les positions
+dupliquées et les nœuds de rayon nul, un tie-break terminal par `PointId` et un
+prédicat de séparation entier. La seule identité des masses ne prouve pas
+l'unicité : le juge borné développe les records et exige une multiplicité un
+pour chaque `PairId`.
+
+Le front WSPD borne seulement `front_records` et les nœuds internes de sa
+construction à un facteur constant. Il ne borne ni la somme des populations
+des blocs, ni un rescan témoin par record, ni la source du résiduel. Les gates
+continuent donc de porter sur `rect_visits`, classifications uniques, pushes et
+pops, `source_tasks`, sorties, octets et HWM, puis sur le consommateur complet.
+
+L'intervalle bidirectionnel de `H` est interprété sur le réseau entier u16. Son
+minimum emploie les extrémités en `z`; son maximum emploie le sommet entier de
+la parabole, écrêté à la boîte. La preuve vient de l'affinité séparée en `a` et
+`b`, pas d'une convexité jointe. Le maximum continu peut différer du maximum
+entier. Sous u16, `H` tient dans `i64`, tandis que les carrés q3/q4 exigent deux
+limbes.
+
+Un `NONE` propre aux lanes étroites évite des raffinements. Avec
+`U=max(Hmax,0)` et `LE,LX` les minima exacts des distances carrées entre
+`A,C` et `B,C` :
+
+$$4U^2\leq LE\,LX\Longrightarrow NONE_{q3},\qquad 3U^2\leq LE\,LX\Longrightarrow NONE_{q4}.$$
+
+Les nœuds `ALL`, `NONE` et `MIXED` doivent former une antichaîne qui partitionne
+la racine témoin. `cred+pending` est alors un majorant du nombre de témoins
+universels possible pour chaque paire. Sous endpoints distincts, être sous dix
+prouve un support q2 de rang pertinent. Être sous neuf ou huit ne prouve pas un
+support q3/q4 : cela conserve seulement une arête maximale candidate. La sortie
+est `KEEP_ANCHOR/DELEGATED_TO_SOURCE`; un nuage collinéaire interdit de la
+renommer `POSITIVE_SUPPORT`.
+
+La première réduction de constante ne doit pas être une file dynamique par
+rectangle. Les seuils `10/9/8` autorisent une banque partagée de taille fixe.
+Pour un rectangle, le milieu des centres de `A,B` définit une requête
+bichromatique top-`L`; chaque `PointId` proposé est ensuite recertifié
+exactement sur tout `A×B`, avec un masque commun q2/q3/q4. Une banque
+incomplète peut perdre une fermeture mais ne peut créer un faux crédit.
+
+Un cœur commun fournit une gate plus forte. Si `A,B` sont contenus dans des
+boules de rayons `r_A,r_B`, poser `S=r_A+r_B`, `d` la distance de leurs centres
+et `m_0` leur milieu. Pour q2, `d>2S` donne un cœur ouvert de rayon
+`(d-2S)/2` autour de `m_0`. Pour q3/q4, sous owner d'arête maximale, `d>3S`
+donne un cœur ouvert de rayon `(d-3S)/4`. Dix, neuf ou huit IDs distincts dans
+le cœur ferment la lane correspondante. Les rayons et frontières sont décidés
+en carrés entiers ; aucune hausse globale de `s` n'est nécessaire.
+
+Le résiduel seul reçoit une continuation persistante. Pour chaque
+`RectKey/lane`, `Credit ⊔ None ⊔ Mixed` partitionne `C-root`; raffiner remplace
+un nœud par ses enfants. Lors d'une scission `A/B`, `Credit` et `None`
+s'héritent par monotonie, seuls les `Mixed` sont reclassifiés. Un quantum rend
+`PENDING_CONTINUATION`; un arrêt de ce certificateur rend
+`DELEGATED_RESIDUAL`; une ressource réellement épuisée rend
+`RESOURCE_EXHAUSTED` atomiquement. Aucun cap ne change la vérité et aucun enfant
+ne recommence depuis `C-root`.
 
 ### 11.2 Tuilage spatial et fold
 

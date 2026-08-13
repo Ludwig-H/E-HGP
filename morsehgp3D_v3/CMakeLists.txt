@@ -3818,6 +3818,14 @@ add_test(NAME mhgp3v_rect_front_intervalle
           --budget=24 --selftest=20000 --min-all=1000 --min-none=1000 --min-mixed=1000
           --min-closed-pct=70)
 
+# FIXTURES GRAVEES aux coordonnees exactes : sommet interieur, sommet hors
+# boite, reseau entier contre continu, milieu impair, extremes u16. Et le
+# MUTANT COLINEAIRE : un nuage porte par une droite n'a aucun support q3/q4,
+# donc aucune issue ne peut y etre etiquetee POSITIVE hors q2.
+add_test(NAME mhgp3v_rect_front_fixtures COMMAND mhgp3v_rect_front_probe --fixtures)
+set_tests_properties(mhgp3v_rect_front_fixtures PROPERTIES
+  PASS_REGULAR_EXPRESSION "fixtures accord=OUI")
+
 # Les deux fautes que j'ai reellement ecrites doivent mourir devant le juge.
 mhgp3v_add_expected_code_test_for(mhgp3v_rect_front_probe
   mhgp3v_rect_front_mutant_max_coins "mutant_killed=1" 4

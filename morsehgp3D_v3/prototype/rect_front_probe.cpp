@@ -28,6 +28,7 @@ namespace {
 
 using mhgp3v::RectBox;
 using mhgp3v::RectFrontInject;
+using mhgp3v::RectLane;
 using mhgp3v::RectVerdict;
 
 struct Node {
@@ -85,8 +86,8 @@ int build(Tree* t, int b, int e, int leaf) {
 
 struct Counters {
   long long rect_visited = 0, rect_closed = 0, rect_residual = 0, rect_capped = 0;
-  long long rect_positive = 0;
-  long long evals = 0, mass_closed = 0, mass_residual = 0, mass_positive = 0, w_high = 0;
+  long long rect_positive = 0, rect_keep_anchor = 0;
+  long long evals = 0, mass_closed = 0, mass_residual = 0, mass_positive = 0, mass_keep_anchor = 0, w_high = 0;
   long long all_hits = 0, none_hits = 0, mixed_hits = 0;
 };
 
@@ -102,7 +103,15 @@ enum class RectOutcome { kClosed, kPositive, kResidual };
 
 const int kNeed[3] = {10, 9, 8};
 
-RectOutcome witness_outcome(const Tree& t, int ia, int ib, int lane, long long budget,
+// L'ISSUE POSITIVE N'EXISTE QU'EN q2, et l'audit `96be8e0` a raison de le
+// refuter ailleurs : `cred + pend < h` prouve seulement que la paire n'est pas
+// ELIMINEE par le certificat universel. En q3/q4 elle ne fabrique ni troisieme
+// site affine independant, ni support bien centre, ni owner — un nuage
+// colineaire en est le contre-exemple decisif. On la nomme donc `kKeepAnchor`
+// hors q2, et elle n'annonce aucun support.
+enum class RectOutcomeKind { kClosed, kPositiveQ2, kKeepAnchor, kResidual };
+
+RectOutcome witness_outcome(const Tree& t, int ia, int ib, RectLane lane, long long budget,
                             RectFrontInject inject, Counters* c) {
   const Node& A = t.nodes[ia];
   const Node& B = t.nodes[ib];
@@ -131,11 +140,16 @@ RectOutcome witness_outcome(const Tree& t, int ia, int ib, int lane, long long b
     return false;
   };
 
+  // BUDGET EXACT. L'audit releve un off-by-one : une iteration pouvait demarrer
+  // avec une unite restante puis classer DEUX enfants, si bien que `budget=24`
+  // autorisait vingt-cinq classifications. Le budget compte desormais des
+  // CLASSIFICATIONS, et la porte verifie `evals <= budget * rect_visites`.
+  if (budget <= 0) return RectOutcome::kResidual;
   --budget;
   admit(0);
-  if (cred >= kNeed[lane]) return RectOutcome::kClosed;
-  if (cred + queued + stuck < kNeed[lane]) return RectOutcome::kPositive;
-  while (!pq.empty() && budget > 0) {
+  if (cred >= kNeed[(int)lane]) return RectOutcome::kClosed;
+  if (cred + queued + stuck < kNeed[(int)lane]) return RectOutcome::kPositive;
+  while (!pq.empty() && budget >= 2) {
     const int ic = pq.top().second;
     pq.pop();
     const Node& C = t.nodes[ic];
@@ -143,8 +157,8 @@ RectOutcome witness_outcome(const Tree& t, int ia, int ib, int lane, long long b
     budget -= 2;
     admit(C.left);
     admit(C.right);
-    if (cred >= kNeed[lane]) return RectOutcome::kClosed;
-    if (cred + queued + stuck < kNeed[lane]) return RectOutcome::kPositive;
+    if (cred >= kNeed[(int)lane]) return RectOutcome::kClosed;
+    if (cred + queued + stuck < kNeed[(int)lane]) return RectOutcome::kPositive;
   }
   if (!pq.empty()) ++c->rect_capped;
   return RectOutcome::kResidual;
@@ -163,7 +177,7 @@ bool well_separated(const Tree& t, int ia, int ib, double s) {
   return std::sqrt(d2) - A.rad - B.rad >= s * std::max(A.rad, B.rad);
 }
 
-void solve(const Tree& t, int ia, int ib, int lane, long long budget,
+void solve(const Tree& t, int ia, int ib, RectLane lane, long long budget,
            RectFrontInject inject, Counters* c, double stop_wsp) {
   const Node& A = t.nodes[ia];
   const Node& B = t.nodes[ib];
@@ -180,7 +194,13 @@ void solve(const Tree& t, int ia, int ib, int lane, long long budget,
   }
   const RectOutcome oc = witness_outcome(t, ia, ib, lane, budget, inject, c);
   if (oc == RectOutcome::kClosed) { ++c->rect_closed; c->mass_closed += mass; return; }
-  if (oc == RectOutcome::kPositive) { ++c->rect_positive; c->mass_positive += mass; return; }
+  if (oc == RectOutcome::kPositive) {
+    // En q2 c'est un support certifie ; hors q2 c'est un KEEP_ANCHOR qui ne
+    // conclut rien et part a la source. Les deux comptent separement.
+    if (lane == RectLane::kQ2) { ++c->rect_positive; c->mass_positive += mass; }
+    else { ++c->rect_keep_anchor; c->mass_keep_anchor += mass; }
+    return;
+  }
   if ((A.left < 0 && B.left < 0) ||
       (stop_wsp > 0.0 && well_separated(t, ia, ib, stop_wsp))) {
     ++c->rect_residual; c->mass_residual += mass; return;
@@ -241,6 +261,59 @@ SelfTest run_selftest(int iters, RectFrontInject inject) {
   return st;
 }
 
+// ---- FIXTURES GRAVEES, coordonnees exactes, exigees par l'audit `96be8e0`.
+struct Fixture { const char* nom; RectBox a, b, c; long long mn, mx; };
+
+int run_fixtures() {
+  const Fixture fx[] = {
+    // Le sommet est INTERIEUR : les extremites donnent zero, `z=1` donne un.
+    {"sommet_interieur", {{0,0,0},{0,0,0}}, {{2,0,0},{2,0,0}}, {{0,0,0},{2,0,0}}, 0, 1},
+    // Le sommet est HORS de C : l'ecretage est obligatoire, sinon surestimation.
+    {"sommet_hors_boite", {{0,0,0},{0,0,0}}, {{2,0,0},{2,0,0}}, {{10,0,0},{10,0,0}}, -80, -80},
+    // RESEAU ENTIER contre CONTINU : maximum entier nul, maximum continu 1/4.
+    {"reseau_contre_continu", {{0,0,0},{0,0,0}}, {{1,0,0},{1,0,0}}, {{0,0,0},{1,0,0}}, 0, 0},
+    // Milieu IMPAIR : (a+b)/2 = 3/2, les deux entiers voisins valent 2.
+    {"milieu_impair", {{0,0,0},{0,0,0}}, {{3,0,0},{3,0,0}}, {{0,0,0},{3,0,0}}, 0, 2},
+    // Extremes u16 : H tient dans i64 (3 x 65535^2 < 2^34). Le sommet continu
+    // est en 32767,5 ; les deux entiers voisins donnent la MEME valeur, et le
+    // maximum ENTIER 3 221 127 168 est strictement sous le maximum CONTINU
+    // 3 221 127 168,75. C'est la fixture de l'ecart reseau/continu a l'extreme.
+    {"extremes_u16", {{0,0,0},{0,0,0}}, {{65535,65535,65535},{65535,65535,65535}},
+     {{32767,32767,32767},{32768,32768,32768}}, 3221127168LL, 3221127168LL},
+  };
+  int bad = 0;
+  for (const Fixture& f : fx) {
+    long long mn = 0, mx = 0;
+    mhgp3v::rect_h_interval(f.a, f.b, f.c, &mn, &mx);
+    const bool ok = (mn == f.mn && mx == f.mx);
+    std::printf("fixture %-24s min=%lld/%lld max=%lld/%lld %s\n", f.nom, mn, f.mn, mx, f.mx,
+                ok ? "OK" : "DESACCORD");
+    if (!ok) ++bad;
+  }
+  // MUTANT COLINEAIRE (audit `96be8e0`, section 4) : un nuage porte par une
+  // droite ne contient AUCUN triangle ni tetraedre propre, donc aucun support
+  // q3/q4 ne peut exister. Toute issue etiquetee POSITIVE hors q2 serait un
+  // faux support ; on exige `positifs_q2 == 0` sur les lanes q3 et q4.
+  Tree t;
+  for (int i = 0; i < 256; ++i) t.pts.push_back({(long long)(7 * i), 0, 0});
+  t.nodes.reserve(4 * t.pts.size());
+  build(&t, 0, (int)t.pts.size(), 1);
+  for (int ln = 1; ln <= 2; ++ln) {
+    Counters c{};
+    solve(t, 0, 0, (RectLane)ln, 64, RectFrontInject::kNone, &c, 0.0);
+    std::printf("colineaire lane=q%d positifs_q2=%lld keep_anchor=%lld fermes=%lld\n",
+                ln + 2, c.rect_positive, c.rect_keep_anchor, c.rect_closed);
+    if (c.rect_positive != 0) {
+      std::fprintf(stderr, "FAUX SUPPORT: lane q%d annonce %lld positifs sur un nuage colineaire\n",
+                   ln + 2, c.rect_positive);
+      ++bad;
+    }
+  }
+  if (bad) { std::fprintf(stderr, "FIXTURES: %d desaccords\n", bad); return 3; }
+  std::printf("fixtures accord=OUI\n");
+  return 0;
+}
+
 [[noreturn]] void refuse(const char* why) {
   std::fprintf(stderr, "REFUS: %s\n", why);
   std::exit(2);
@@ -261,7 +334,7 @@ int main(int argc, char** argv) {
   std::string family = "uniform";
   std::vector<long long> ns;
   long long coord = 65535, budget = 24, leaf = 8, seed = 12345, selftest = 20000;
-  int lane = 0;
+  int lane_raw = 0;
   double max_slope = 1.35;
   long long min_closed_pct = 0, min_all = 0, min_none = 0, min_mixed = 0;
   double stop_wsp = 0.0;
@@ -270,6 +343,7 @@ int main(int argc, char** argv) {
 
   for (int i = 1; i < argc; ++i) {
     const std::string a = argv[i];
+    if (a == "--fixtures") return run_fixtures();
     auto val = [&](const char* p) { return a.substr(std::strlen(p)); };
     if (a.rfind("--family=", 0) == 0) family = val("--family=");
     else if (a.rfind("--points=", 0) == 0) {
@@ -281,7 +355,7 @@ int main(int argc, char** argv) {
     else if (a.rfind("--coord=", 0) == 0) coord = arg_ll(val("--coord=").c_str(), 16, 65535, "coord");
     else if (a.rfind("--budget=", 0) == 0) budget = arg_ll(val("--budget=").c_str(), 1, 1000000, "budget");
     else if (a.rfind("--leaf=", 0) == 0) leaf = arg_ll(val("--leaf=").c_str(), 1, 4096, "leaf");
-    else if (a.rfind("--lane=", 0) == 0) lane = (int)arg_ll(val("--lane=").c_str(), 0, 2, "lane");
+    else if (a.rfind("--lane=", 0) == 0) lane_raw = (int)arg_ll(val("--lane=").c_str(), 0, 2, "lane");
     else if (a.rfind("--seed=", 0) == 0) seed = arg_ll(val("--seed=").c_str(), 0, (1LL << 40), "seed");
     else if (a.rfind("--selftest=", 0) == 0) selftest = arg_ll(val("--selftest=").c_str(), 0, 1000000, "selftest");
     else if (a.rfind("--stop-wsp=", 0) == 0) {
@@ -343,30 +417,36 @@ int main(int argc, char** argv) {
     t.nodes.reserve(4 * t.pts.size());
     build(&t, 0, (int)t.pts.size(), (int)leaf);
     Counters c{};
+    const RectLane lane = (RectLane)lane_raw;
     solve(t, 0, 0, lane, budget, inject, &c, stop_wsp);
     const long long m = (long long)t.pts.size();
     const long long tot = m * (m - 1) / 2;
-    if (c.mass_closed + c.mass_positive + c.mass_residual != tot) {
-      std::fprintf(stderr, "INVARIANT VIOLE: partition des paires %lld + %lld + %lld != %lld\n",
-                   c.mass_closed, c.mass_positive, c.mass_residual, tot);
+    if (c.mass_closed + c.mass_positive + c.mass_keep_anchor + c.mass_residual != tot) {
+      std::fprintf(stderr, "INVARIANT VIOLE: partition des paires %lld + %lld + %lld + %lld != %lld\n",
+                   c.mass_closed, c.mass_positive, c.mass_keep_anchor, c.mass_residual, tot);
       return 3;
     }
     std::printf("n=%lld famille=%s lane=q%d digest=%016llx"
-                " | visites=%lld fermes=%lld positifs=%lld residuels=%lld capes=%lld"
-                " | masse_fermee=%lld masse_positive=%lld masse_residuelle=%lld"
+                " | visites=%lld fermes=%lld positifs_q2=%lld keep_anchor=%lld residuels=%lld capes=%lld"
+                " | masse_fermee=%lld masse_positive=%lld masse_keep_anchor=%lld masse_residuelle=%lld"
                 " pct_ferme=%.2f pct_decide=%.2f"
                 " | eval=%lld ALL=%lld NONE=%lld MIXED=%lld Wmax=%lld front/pt=%.3f\n",
-                m, family.c_str(), lane + 2, digest,
-                c.rect_visited, c.rect_closed, c.rect_positive, c.rect_residual, c.rect_capped,
-                c.mass_closed, c.mass_positive, c.mass_residual,
+                m, family.c_str(), lane_raw + 2, digest,
+                c.rect_visited, c.rect_closed, c.rect_positive, c.rect_keep_anchor, c.rect_residual, c.rect_capped,
+                c.mass_closed, c.mass_positive, c.mass_keep_anchor, c.mass_residual,
                 100.0 * (double)c.mass_closed / (double)tot,
                 100.0 * (double)(c.mass_closed + c.mass_positive) / (double)tot,
                 c.evals, c.all_hits, c.none_hits, c.mixed_hits, c.w_high,
-                (double)(c.rect_closed + c.rect_positive + c.rect_residual) / (double)m);
+                (double)(c.rect_closed + c.rect_positive + c.rect_keep_anchor + c.rect_residual) / (double)m);
     resid_mass.push_back((double)c.mass_residual);
     visited_per_n.push_back((double)c.rect_visited);
     agg.all_hits += c.all_hits; agg.none_hits += c.none_hits; agg.mixed_hits += c.mixed_hits;
     agg.mass_closed += c.mass_closed;
+    if (c.evals > budget * c.rect_visited) {
+      std::fprintf(stderr, "INVARIANT VIOLE: %lld classifications pour %lld rectangles a budget %lld\n",
+                   c.evals, c.rect_visited, budget);
+      return 3;
+    }
     if (k + 1 == ns.size() && min_closed_pct > 0 &&
         100.0 * (double)c.mass_closed / (double)tot < (double)min_closed_pct) {
       std::fprintf(stderr, "PLANCHER: fermeture %.2f%% < %lld%%\n",
@@ -390,6 +470,6 @@ int main(int argc, char** argv) {
   if (agg.none_hits < min_none) { std::fprintf(stderr, "PLANCHER NONE: %lld < %lld\n", agg.none_hits, min_none); return 3; }
   if (agg.mixed_hits < min_mixed) { std::fprintf(stderr, "PLANCHER MIXED: %lld < %lld\n", agg.mixed_hits, min_mixed); return 3; }
   std::printf("OK famille=%s lane=q%d budget=%lld leaf=%lld ALL=%lld NONE=%lld MIXED=%lld\n",
-              family.c_str(), lane + 2, budget, leaf, agg.all_hits, agg.none_hits, agg.mixed_hits);
+              family.c_str(), lane_raw + 2, budget, leaf, agg.all_hits, agg.none_hits, agg.mixed_hits);
   return 0;
 }
