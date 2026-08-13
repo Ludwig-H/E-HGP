@@ -2776,6 +2776,25 @@ donc proposer des blocs dans `EdgeActiveFormCounter-v0`; tout `MIXED`, changemen
 d'échelle et cap reste ouvert, et les blocs, raffinements, tâches, octets et HWM
 sont gatés. Elle n'est ni un théorème de coût du contrat, ni le moteur shallow.
 
+L'objet géométrique commun est désormais nommé `LineFormTape`. Pour
+`c=(a+b)/2+t`, `t dot (b-a)=0`, chaque site donne la forme affine exacte
+`F_z(t)=H_z+2*t dot (z-(a+b)/2)` et il est intérieur si `F_z>0`. q2 interroge
+ce tape à `t=0`. q3 interroge, pour chaque carrier, le point de sa droite
+`F_z=0` de norme minimale ; la droite entière est un pinceau, pas une sortie
+q3. q4 interroge les sommets shallow définis par deux directions non parallèles.
+Les coefficients, bundles et comparateurs peuvent être communs, mais les
+lanes, disques, budgets et fates restent indépendants : aucune sortie q2/q3 ne
+génère une sortie q4.
+
+Pour q4 positif et `ab` maximale de longueur `D`, la borne correcte est
+`R^2<=3D^2/8`, donc `||t||^2<=D^2/8` et le disque de `t` a rayon
+`D/(2sqrt(2))`. La formule `R<=D/sqrt(2)` est fausse. Ce disque reste seulement
+nécessaire : lentille des deux carriers, distance `xy`, indépendance,
+positivité, owner et census sont rejoués. La position générale n'est pas une
+hypothèse : lignes confondues en bundles pondérés, parallèles distinctes sans
+événement et concurrences atomiques conservent la borne sur les **centres
+distincts**. Elles ne bornent ni `J`, ni les `SupportKey H` incidents.
+
 Pour les formes `F_i(x,y)=A_i*x+B_i*y+C_i` du plan médiateur, séparer les côtés
 positifs au-dessus `P` et au-dessous `N`. À q4, avec
 `k=7-always_inside`, streamer les `k+1` niveaux inférieurs de `P` et supérieurs
@@ -2797,6 +2816,14 @@ une arête, éphémères et détruits après les `BallEvent`. Le probe CPU compa
 `(BallKey,SupportKey,I_B,U_B,owner)` à `BallFormToBallEvent-v0`. Les mutants
 omettent séparément `P-P`, `N-N`, `P-N`, le niveau terminal, le batch des
 concurrences et l'exclusion du shell du rang strict.
+
+`prototype/edge_shallow.hpp` reste l'oracle borné de cette identité, jamais le
+chemin à porter : il lance toutes les arêtes, charge tous les points par arête,
+trie les croisements de chaque droite, rescane chaque sortie et déduplique après
+génération. Le premier constructeur nouveau est un
+`LocalShallowLevelsOracle-v0` sur une arête explicite et petit `m`, comparé à
+cette double boucle. Son intégration produit attend toujours
+`CanonicalEdgeWindowReporter` et `EdgeActiveFormCounter` verts.
 
 ### 15.4 Fold streamé au lieu du catalogue de supports
 

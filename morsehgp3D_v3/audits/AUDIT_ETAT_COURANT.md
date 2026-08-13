@@ -8,17 +8,41 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-## Observation live — `HEAD=0eb65f1`, lentille ciblée mais chemin produit absent
+## Observation live — `HEAD=590683c`, géométrie shallow reconnue, chemin produit absent
 
 Le pin observé est
-`0eb65f1a68bc8ac6c0b11982c6f75ee33786fcf0`, commit
-`gate the slope I was only printing, and stop saying uniform holds`. Il archive
+`590683c75844fac953df9e3eba9d54e69f0d40c7`, commit
+`propose the arrangement property that would generate q4 from q2 and q3`. Ce
+pin est documentaire et ne crée aucun générateur. Son parent `0eb65f1` archive
 le transcript complet, retire le claim « uniform tient » et gate désormais les
 pentes du front **et** du degré résiduel. Le degré reste cependant le complément
 q2 symétrique, calculé après le chrono de vague ; ce n'est ni une métrique
 physique chronométrée, ni `E_3/E_4`, ni un reporter projectif. Deux pentes rouges
 peuvent réfuter l'hypothèse que ce degré serait un aval explicite, jamais la
 factorisation du futur chemin produit.
+
+La nouvelle identité est correcte : pour une arête `ab`, chaque site induit
+une forme affine entière dans le plan médiateur des centres. Le même
+`LineFormTape` supporte trois requêtes distinctes : q2 à `t=0`, q3 au point de
+norme minimale de chaque droite carrier, q4 aux sommets de profondeur faible.
+Il ne faut pas dire que les **sorties** q2/q3 engendrent q4 : les lanes restent
+indépendantes et un q4 peut ne posséder aucune face q3 pertinente.
+
+La borne `<e*(k+1)*m` reste valable sans position générale pour les centres
+géométriques distincts, sous bundles pondérés et batch atomique des
+concurrences. Elle ne borne ni les paires de copies incidentes `J`, ni les
+`SupportKey H` d'une cosphère lourde. La note doit aussi corriger son domaine :
+q4 donne `R^2<=3D^2/8` et `||t||^2<=D^2/8`; le disque de rayon
+`D/(2sqrt(2))` est juste, mais `R<=D/sqrt(2)` est faux. Owner et arête maximale
+exigent encore lentille, `xy<=D`, positivité et tie-break ; ils ne sont pas une
+simple contrainte sur `t`.
+
+La bonne ordonnance est déjà celle de `LocalShallowBall` : niveaux inférieurs
+de `P`, supérieurs de `N`, puis événements `P-P/N-N/P-N`, jamais arrangement
+complet. À `k=7`, les seize curseurs et trente-six canaux de rang sont des états
+simultanés, pas des bornes de sortie. `prototype/edge_shallow.hpp` reste
+l'oracle borné : il balaie actuellement toutes les arêtes, tous les sites, les
+croisements et rescane chaque sortie ; il ne doit pas être porté sur GPU.
 
 Le parent `ab32c9d` localise correctement une ordonnance suspecte :
 `AnchorLensPairSource` parcourt littéralement `C(n_lens,2)` en q4. Son
@@ -98,6 +122,7 @@ Ni une nouvelle rampe de la boucle `C(n_lens,2)`, ni le certificat par distance
 maximale au hull ne sont autorisés. Le détail, les compteurs et les fixtures
 sont dans `AUDIT_RECU_CHAINE_G4_5DC65C7_20260813.md`,
 `AUDIT_REPONSE_MUR_LENTILLE_AB32C9D_20260813.md`,
+`AUDIT_REPONSE_GENERATEUR_Q4_590683C_20260813.md`,
 `AUDIT_REPONSE_TRIPLETS_AIGUS_4CE3618_20260813.md` et
 `AUDIT_CORRECTION_FOLD_STREAM_REGULIER_4CE3618_20260813.md`.
 
