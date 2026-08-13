@@ -178,8 +178,7 @@ consommables.
 
 ## 5. Provenance et arrêt ciblé
 
-Le seul fichier suivi par Git dans le dossier du reçu est `README.md`. Le
-`session.log` local est ignoré. Sa copie dans le worktree a le SHA-256 :
+La première copie `session.log`, ignorée par Git, avait le SHA-256 :
 
 ```text
 beda44c4fb76d3490f6ad300289b5dc390b613a3edcbb409f88a346e56c6164e
@@ -203,9 +202,12 @@ Son SHA-256 final est :
 
 L'arrêt réel de la cible
 `devpod-gpu-exploration/europe-west4-ai1a/ehgp-blackwell-spot-ai1a`, génération
-`2026-08-13T11:26:40.142-07:00`, est donc maintenant constaté. Pour rendre le
-reçu autoportant, Claude doit archiver et hacher le transcript final plutôt que
-la copie prématurée. Aucune action GCP supplémentaire n'est requise.
+`2026-08-13T11:26:40.142-07:00`, est donc constaté. Le successeur `0eb65f1`
+archive maintenant le transcript terminal sous
+`receipts/chaine_complete_g4_20260813/transcript.txt`, SHA-256
+`8844c2a6...`. Il contient la certification `TERMINATED` et l'inventaire final :
+le reçu est désormais autoportant pour le journal et l'arrêt. Aucune action GCP
+supplémentaire n'est requise.
 
 Le snapshot scientifique reste non reproductible : le script archive le
 worktree vivant sans exiger un arbre propre, sans commit/diff/manifest, puis
@@ -286,5 +288,35 @@ arrêtent la route avant CUDA.
 Cette séquence évite toute mosaïque globale d'ordre supérieur : les fenêtres
 sont des spans, les arrangements sont locaux et éphémères, les boules sont
 RLE, et le fold consomme des runs scellés.
+
+## 8. Addendum `ab32c9d/0eb65f1` : lentille et compteur orienté
+
+Le high-water de lentille renforce le NO-GO sur `C(n_lens,2)`, sans recevoir le
+claim « mur entièrement dans la lentille ». `hw_lens` est calculé lorsqu'au
+moins q3 ou q4 est vivant ; le maximum `7811` n'est donc pas nécessairement
+celui d'une arête q4. Un maximum ne remplace pas non plus
+`q4_pairs_walked=sum_e C(lens_e,2)`, sa distribution, les censuses et les temps
+par phase. Le script a justement retranché ces compteurs avec son `tail`.
+
+La loi `O(s^2)` sur une nappe exige une constante de covering locale, une
+épaisseur et une multiplicité de plis bornées. Sans ces hypothèses, seul le
+packing tridimensionnel `O(s^3)` de cellules canoniques à échelle comparable
+est inconditionnel. Le certificat aigu par hull reste identiquement vide et un
+bloc q3 ne supprime pas le second site de q4. La réparation est
+`EdgeActiveFormCounter -> LocalShallowBall`, avec cellules seulement comme
+ablation factorisée et fail-open.
+
+Le maximum de la vraie fenêtre orientée possède en revanche une réduction
+exacte absente du pin. Comme tout terminal WSPD est le produit de deux plages
+disjointes et totalement ordonnées de `GenerationRank`, une mise à jour de
+plage ajoute `|B|` à tous les rangs de `A` si `A<B`, ou `|A|` à `B` sinon. Un
+scan préfixe donne `sum/max E_q` en `O(F_open+n)`, sans PairId. Le détail, le
+certificat q3 central de remplacement et les mutants sont dans
+`AUDIT_REPONSE_MUR_LENTILLE_AB32C9D_20260813.md`.
+
+`0eb65f1` gate maintenant le degré q2 symétrique qu'il imprimait seulement.
+C'est une correction de falsification. Ce degré reste hors chrono, logique et
+distinct de `E_3/E_4`; il ne devient pas une métrique physique du futur chemin
+factorisé.
 
 GCP non utilisé par l'auditeur.

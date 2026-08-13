@@ -8,16 +8,44 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-## Observation live — `HEAD=7617eb9`, reçu G4 réfutant la source par paire
+## Observation live — `HEAD=0eb65f1`, lentille ciblée mais chemin produit absent
 
 Le pin observé est
-`7617eb970d9c6924b76254c1055e05118d065135`, commit
-`apply their three corrections: the counter, the cross-check, and the engine name`.
-Il renomme correctement l'ancien `sum_N` en degré résiduel, imprime l'identité
-`somme=2*masse_res`, retire le rapprochement sans objet avec `kept` et nomme le
-producteur courant `AnchorLensPairSource`. Ces corrections sont reçues comme
-vocabulaire et comptabilité ; elles ne créent ni reporter projectif, ni source
-shallow, ni chemin produit.
+`0eb65f1a68bc8ac6c0b11982c6f75ee33786fcf0`, commit
+`gate the slope I was only printing, and stop saying uniform holds`. Il archive
+le transcript complet, retire le claim « uniform tient » et gate désormais les
+pentes du front **et** du degré résiduel. Le degré reste cependant le complément
+q2 symétrique, calculé après le chrono de vague ; ce n'est ni une métrique
+physique chronométrée, ni `E_3/E_4`, ni un reporter projectif. Deux pentes rouges
+peuvent réfuter l'hypothèse que ce degré serait un aval explicite, jamais la
+factorisation du futur chemin produit.
+
+Le parent `ab32c9d` localise correctement une ordonnance suspecte :
+`AnchorLensPairSource` parcourt littéralement `C(n_lens,2)` en q4. Son
+high-water commun q3/q4 ne reçoit toutefois ni la causalité « entièrement dans
+la lentille », ni une lentille `uniform` asymptotiquement bornée, ni le packing
+`O(s^2)` sur toute nappe. Le vrai compteur est
+`sum_e C(lens_e,2)=q4_pairs_walked`, avec distribution et census ; le script du
+reçu a retranché cette ligne. `eight_clusters` est volumétrique mais son maximum
+croît déjà, ce qui réfute une explication par la seule dimension intrinsèque.
+
+Le diagnostic remonte donc la priorité du **vrai moteur shallow**, pas celle du
+certificat aigu soumis. Un bloc q3 décide un porteur `x`; q4 conserve encore le
+join factorisé `x in Acute, y in Lens`. Le certificat par hull est identiquement
+vide. Son remplacement q3 sûr emploie
+`D=||b-a||^2`, `Phi=||2z-a-b||^2` : avec extrema AABB entiers,
+`L=Dlo-Phi_hi>0 && 3*L^2>4*Phi_hi*Dhi` donne `ALL`, et
+`Phi_lo>=3*Dhi` donne un `NONE` sûr. Les produits croisés sont larges ; ce test
+ne génère aucun q4.
+
+Enfin, la note du parent prétend à tort que le maximum orienté de `E_q(a)`
+coûterait la masse. Les nœuds du radix tree sont des intervalles disjoints de
+`GenerationRank`. Pour chaque terminal ouvert `A×B`, ajouter `|B|` sur tout
+l'intervalle inférieur `A`, ou symétriquement `|A|` sur `B`, par tableau de
+différences. Un scan préfixe rend exactement tous les degrés, leur somme et
+leur maximum en `O(F_open+n)`, environ `400 kB` de compteurs `i64` à `50 000`.
+Le code live conserve seulement un fate q2 ; q3/q4 exigent un `closed_mask` par
+terminal et `pending=0` avant publication finale.
 
 Le reçu G4 du parent `5dc65c7` est un diagnostic CPU utile, mais son titre est
 trop fort. Le moteur `reference` finit `uniform,50 000` en `78,841184 s` : ses
@@ -31,16 +59,18 @@ officiel n'est produit.
 L'égalité `occurrences=cles_uniques` reçoit seulement l'unicité des
 `SupportKey`, jamais un census unique par boule. Le bloc alors appelé fenêtre
 vaut exactement `sum_N=2*residual_pair_mass_q2`. Sur `eight_clusters`, il
-imprime les trois pentes rouges `1,858/1,887/1,931`, puis `OK` parce que la gate
-teste `front_records`. Ses `tronques` n'ont aucune continuation sérialisée.
+imprimait historiquement les trois pentes rouges `1,858/1,887/1,931`, puis
+`OK` parce que la gate testait seulement `front_records`. `0eb65f1` corrige ce
+défaut de gate, sans changer la nature q2/logique du compteur. Ses `tronques`
+n'ont toujours aucune continuation sérialisée.
 
-La copie brute locale du reçu, SHA-256 `beda44c4...`, est ignorée par Git et
-s'arrête avant la certification finale. Le journal original a ensuite reçu
-`[OK] ... état GCE TERMINATED`, SHA-256 final `7df1cf02...`, pour la cible
+Le transcript complet est désormais suivi sous
+`receipts/chaine_complete_g4_20260813/transcript.txt`, SHA-256
+`8844c2a6...`, et contient bien `[OK] ... état GCE TERMINATED` pour la cible
 `devpod-gpu-exploration/europe-west4-ai1a/ehgp-blackwell-spot-ai1a`, génération
-`2026-08-13T11:26:40.142-07:00`. L'arrêt réel est donc constaté sans nouvelle
-mutation GCP ; Claude doit archiver ce transcript final pour rendre le reçu
-autoportant.
+`2026-08-13T11:26:40.142-07:00`. Le reçu est autoportant pour le transcript et
+l'arrêt. Il ne pince toujours ni commit source, ni diff/tar, ni ELF : la
+provenance scientifique bit-à-bit reste insuffisante.
 
 Réponses aux questions du successeur : conserver `AnchorLensPairSource`
 seulement comme falsificateur différentiel borné, jamais comme baseline de
@@ -53,14 +83,16 @@ La directive prioritaire devient :
 
 ```text
 BallFormToBallEvent-v0 borné, pour l'autorité BallKey/I_B/U_B
-  -> PWC0-A / MaxEdgeSuffixReporter-q4-v0 orienté GenerationRank
+  -> PWC0-A / CanonicalEdgeWindowReporter-q4-v0
+  -> EdgeWindowRangeAdd-v0 en O(F+n), sans développement PairId
   -> EdgeActiveFormCounter-v0, M=sum m_ab
-  -> seulement si E4 et M passent : shallow local puis fold streamé
+  -> seulement si E4 et M passent : LocalShallowBall puis fold streamé
 ```
 
 Ni une nouvelle rampe de la boucle `C(n_lens,2)`, ni le certificat par distance
 maximale au hull ne sont autorisés. Le détail, les compteurs et les fixtures
 sont dans `AUDIT_RECU_CHAINE_G4_5DC65C7_20260813.md`,
+`AUDIT_REPONSE_MUR_LENTILLE_AB32C9D_20260813.md`,
 `AUDIT_REPONSE_TRIPLETS_AIGUS_4CE3618_20260813.md` et
 `AUDIT_CORRECTION_FOLD_STREAM_REGULIER_4CE3618_20260813.md`.
 

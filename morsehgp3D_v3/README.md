@@ -27,6 +27,26 @@ Le verdict lié au `HEAD` et au worktree est tenu uniquement dans
 [`AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md). Ne déduire aucun état
 live d'une note datée, d'un message de commit ou du seul passage d'un CTest.
 
+Au pin `ab32c9d`, le high-water de lentille confirme que la double boucle q4
+`C(n_lens,2)` est la première ordonnance à supprimer. Il ne prouve toutefois
+pas que tout le temps vient de ce seul terme : le transcript a omis
+`q4_pairs_walked`, la distribution des lentilles et les compteurs de census.
+Quatre maxima ne prouvent ni une lentille `uniform` bornée, ni une loi
+intrinsèque `O(s^2)` ; `eight_clusters` est volumétrique et croît pourtant.
+Le front de triplets q3 ne remplace pas le join q4 `Acute×Lens`, et son
+certificat par hull reste vide. La bonne réparation est la relation factorisée
+arête×forme, puis les niveaux shallow locaux et le replay `BallKey`.
+
+Deux déblocages exacts sont remis à Claude. D'abord, le maximum de la vraie
+fenêtre orientée ne demande aucun développement de PairId : chaque terminal
+WSPD est le produit de deux intervalles disjoints de `GenerationRank`; deux
+range-adds par terminal ouvert puis un scan donnent tous les degrés en
+`O(F+n)`. Ensuite, la lane q3 reçoit un certificat central strict fondé sur
+`D=||b-a||^2` et `Phi=||2z-a-b||^2`, en arithmétique large, qui remplace le
+certificat aigu vide sans prétendre résoudre q4. Réponse, preuve, gates et
+micro-jalons :
+[`AUDIT_REPONSE_MUR_LENTILLE_AB32C9D_20260813.md`](audits/AUDIT_REPONSE_MUR_LENTILLE_AB32C9D_20260813.md).
+
 Au pin `4ce3618`, la nouvelle décomposition q3 contient une bonne
 caractérisation des triangles aigus mais un certificat sans rappel : comme le
 hull testé contient les deux endpoints les plus proches, sa distance maximale

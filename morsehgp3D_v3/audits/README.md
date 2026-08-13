@@ -18,6 +18,13 @@ jamais réception.
 - [`AUDIT_ETAT_COURANT.md`](AUDIT_ETAT_COURANT.md) est l'unique verdict mutable :
   il distingue le `HEAD`, le delta éventuel du worktree, les empreintes utiles,
   les contre-exemples, les tests qualifiables et les portes ouvertes.
+- [`AUDIT_REPONSE_MUR_LENTILLE_AB32C9D_20260813.md`](AUDIT_REPONSE_MUR_LENTILLE_AB32C9D_20260813.md)
+  répond au nouveau diagnostic : la double boucle q4 est bien l'ordonnance à
+  supprimer, mais son high-water ne prouve ni causalité totale, ni lentille
+  bornée, ni packing `O(s^2)`. Le certificat aigu par hull reste vide. L'audit
+  donne le vrai raccord `EdgeActiveFormCounter -> LocalShallowBall`, un
+  certificat central q3 sûr qui remplace le hull, et le calcul exact de
+  `max_a |E_q(a)|` en `O(F+n)` par range-add sur `GenerationRank`.
 - [`AUDIT_RECU_CHAINE_G4_5DC65C7_20260813.md`](AUDIT_RECU_CHAINE_G4_5DC65C7_20260813.md)
   reçoit le dernier diagnostic G4 comme réfutation de la source par paire :
   `uniform` passe seulement la gate de pente mais reste à `78,84 s`, trois

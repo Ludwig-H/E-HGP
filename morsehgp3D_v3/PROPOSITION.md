@@ -2703,6 +2703,20 @@ son unique arête maximale canonique dans cette fenêtre, car un crédit project
 tue toute sphère passant par ses deux endpoints, indépendamment du sens de
 génération et de l'owner futur.
 
+Le ledger orienté n'exige jamais de développer les PairIds d'un terminal WSPD.
+Chaque `ANode/BNode` est une plage contiguë de
+`GenerationRank=(Morton48,PointId)` ; les deux plages d'un terminal sont
+disjointes et totalement ordonnées. Pour tout terminal ouvert `A×B`, si
+`last(A)<first(B)`, une différence de plage ajoute `|B|` à
+`[first(A),last(A)]`; sinon elle ajoute `|A|` à la plage de `B`. Un scan
+préfixe donne exactement tout le vecteur `|E_q(a)|`, sa somme et son maximum en
+`O(F_open+n)` et `O(n)` mémoire. La somme doit égaler
+`sum_R |A_R||B_R|`. Cette réduction `EdgeWindowRangeAdd-v0` exige un fate par
+terminal/lane et `pending=0` pour publier une fenêtre finale ; avec des tâches
+pendantes elle ne publie qu'un superset fail-open. Un oracle petit `n` compare
+le vecteur entier à l'expansion PairId et tue l'orientation par le seul
+`PointId`.
+
 Le P0 feuille `PWC0-A` construit une banque transactionnelle de vrais
 `PointId`, essaie les 48 chambres, puis raffine seulement chaque chambre ouverte
 dans ses neuf sous-cellules. Il émet des `OPEN_EDGE_SPAN`, des
@@ -2745,6 +2759,22 @@ du complément q2. `s=2` reste une ablation du tape jusqu'à mesure du vrai
 reporter q4 et du coût composé.
 
 ### 15.3 Vrai `LocalShallowBall` sur les seules arêtes ouvertes
+
+Le reçu `5dc65c7` rend prioritaire la suppression de la double boucle q4 : le
+maximum de lentille croît fortement sur les familles structurées tandis que les
+sorties achevées restent presque linéaires. Ce high-water n'est toutefois pas
+le coût total. L'autorité physique est
+`q4_pairs_walked=sum_e C(lens_e,2)`, avec histogramme de `lens_e`, censuses et
+temps par phase. Le maximum courant est partagé par les lanes q3/q4 et ne prouve
+pas que l'arête qui le réalise exécute q4.
+
+Une couverture par cellules ne reçoit `O(s^2)` sur une nappe que sous une
+hypothèse locale explicite de covering surfacique, d'épaisseur et de
+multiplicité de plis bornées. Sans elle, le packing inconditionnel à échelle
+`D/s` reste `O(s^3)` en dimension trois. Une `CarrierCellFront-Ablation` peut
+donc proposer des blocs dans `EdgeActiveFormCounter-v0`; tout `MIXED`, changement
+d'échelle et cap reste ouvert, et les blocs, raffinements, tâches, octets et HWM
+sont gatés. Elle n'est ni un théorème de coût du contrat, ni le moteur shallow.
 
 Pour les formes `F_i(x,y)=A_i*x+B_i*y+C_i` du plan médiateur, séparer les côtés
 positifs au-dessus `P` et au-dessous `N`. À q4, avec
@@ -2828,6 +2858,25 @@ Les deux endpoints appartiennent au hull des trois boîtes. La condition
 un `CERTIFICATE_MISS`, jamais un `NONE`. La fixture
 `a=(0,0,0),b=(4,0,0),x=(2,3,0),z=(2,1,0)` porte même un vrai témoin intérieur
 que ce test manque.
+
+L'acuité fournit en revanche un certificat central q3 non vide. Poser
+`D=||b-a||^2` et `Phi=||2z-a-b||^2`. Pour toute circumboule q3 positive dont
+`ab` est maximale faible, le circumcentre `o` vérifie
+`||o-(a+b)/2||^2<=D/12`. Sur `A×B×C`, calculer `Dlo/Dhi` et les extrema entiers
+`Phi_lo/Phi_hi`. Avec `L=Dlo-Phi_hi`, le verdict suivant est `ALL` sûr :
+
+```text
+L > 0 && 3*L*L > 4*Phi_hi*Dhi.
+```
+
+Le verdict `Phi_lo>=3*Dhi` est un `NONE` sûr, égalité comprise, car tout point
+strictement intérieur impose `Phi<3D`. `Phi_lo` respecte la parité du réseau
+u16 ; un minimum continu ne suffit pas. Les produits croisés sont évalués en
+`i128` ou deux limbs. La fixture équilatérale
+`a=(0,0,0),b=(6,6,0),x=(0,6,-6),z=(4,2,2)` a
+`D=72,Phi=24=D/3` et place `z` sur la coquille : elle tue toute égalité dans
+`ALL`. Ce certificat crédite/élague seulement des témoins q3 ; il ne génère
+aucun porteur et ne remplace jamais le join q4 `Acute×Lens`.
 
 Ne pas implémenter ce prune. La borne d'empilement `O(s^6 n)` peut seulement
 décrire un front grossier de cellules dyadiques canoniques de taille comparable,
