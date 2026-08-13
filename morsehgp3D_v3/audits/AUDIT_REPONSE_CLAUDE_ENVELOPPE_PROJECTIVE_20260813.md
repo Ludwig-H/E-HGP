@@ -199,6 +199,13 @@ sur `U00` : `fp=0`, `fn=0`, `bad_carrier=0`, `bad_id=0`. Il reçoit aussi le
 nominal avec direction dupliquée. C'est un progrès substantiel : les deux P0
 `h==2` et duplicats sont réparés sur ce domaine borné.
 
+La suite `^mhgp3v_credits_` complète rend `12/12` en `49,81 s`. Andrew abaisse
+les tests coniques de `43 956 521` à `6 608 738` pour `pool=16`, et de
+`350 267 629` à `20 365 901` pour `pool=32`, soit des facteurs `6,65` et
+`17,20`. Les trois petits runs restent néanmoins à zéro fermeture dans chaque
+lane ; ils mesurent la suppression du mur local, pas encore la puissance ni le
+front 50 k.
+
 Deux petites gates rendent ce résultat durable : le selftest permanent doit
 rejouer que l'union rendue couvre réellement chacun des trois rayons, et une
 fixture positive `m=4` doit exercer une direction dupliquée sans être rejetée

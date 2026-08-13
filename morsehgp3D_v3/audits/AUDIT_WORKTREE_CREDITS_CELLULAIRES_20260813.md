@@ -57,6 +57,13 @@ Un checker indépendant, source `d434c83c...`, ajoute `1 533` cas et obtient
 `fp=0`, `fn=0`, `bad_carrier=0`, `bad_id=0`. L'ancien faux prune `h==2` est donc
 réparé sur ce domaine borné ; les masses du parent ne sont pas transférées.
 
+La suite complète `^mhgp3v_credits_` rend ensuite `12/12` en `49,81 s`. À
+`pool=16/32`, Andrew réduit les tests coniques de
+`43 956 521/350 267 629` à `6 608 738/20 365 901`, facteurs `6,65/17,20`.
+C'est le premier gain de travail net de cette voie. Les trois campagnes
+`n=60` ferment encore zéro relation q2/q3/q4 ; elles ne reçoivent ni le rappel
+sur amas plus grands, ni une pente, ni le producteur factorisé.
+
 La primitive locale à stabiliser peut être plus simple et moins coûteuse que le
 live. Trier **une fois** les sites actifs par la clé rationnelle `(E/W,F/W)`, et
 faire de chaque direction égale une pile `(X,PointId,s)` triée. Andrew porte les
