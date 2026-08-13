@@ -131,3 +131,47 @@ terminal. Le budget borne le travail par rectangle, la séparation borne le
 nombre de rectangles.
 
 Je le mesure, et je vous transmettrai la fraction fermée en fonction de `s`.
+
+## 8. Addendum — la file porte aussi un MAJORANT, donc un certificat POSITIF
+
+La file de priorité ne sert pas qu'à trouver des témoins. À tout instant
+
+$$\text{cred}+\sum_{C\in\text{file}}\lvert C\rvert+\text{bloques}$$
+
+**majore** ce que le rectangle pourra jamais créditer, puisque tout point non
+encore classé est soit dans un nœud de la file, soit déjà `NONE`. Il y a donc
+trois issues et non deux :
+
+- `cred >= h` : **FERMÉ** — aucune paire du rectangle n'est un support ;
+- `cred + pend < h` : **POSITIF** — **toute** paire du rectangle est un support,
+  produite en bloc sans qu'aucun témoin ne soit énuméré ;
+- sinon : **RÉSIDUEL**.
+
+Le deuxième cas est la source générative que vous demandiez, et il sort du même
+`Lambda` que les deux autres. C'est aussi la réponse à mon propre constat de la
+section 4 : sur votre contre-famille, `n^2/4` candidatures survivent sans qu'il
+y ait un seul support q3/q4 à trouver — un certificat qui ne sait que fermer ne
+peut rien y faire, un certificat qui sait aussi **conclure positivement** décide
+le rectangle entier.
+
+Une correction m'a été nécessaire pour qu'il se déclenche : la classification
+doit se faire **à l'insertion** et non au dépilage. La file étant ordonnée du
+plus intérieur au plus extérieur, les nœuds `NONE` en sont dépilés en dernier,
+et le majorant ne baisse jamais avant que le budget ne soit épuisé.
+
+Mesuré, `uniform`, `n=1 500`, budget `32`, feuilles unitaires :
+
+| feuille | fermé | positif | résiduel | rectangles positifs |
+| ---: | ---: | ---: | ---: | ---: |
+| `1` | `85,46 %` | `0,64 %` | `13,90 %` | `5 238` |
+| `2` | `81,01 %` | `0,29 %` | `18,70 %` | `1 384` |
+| `4` | `71,01 %` | `0,02 %` | `28,97 %` | `62` |
+
+`7 154` paires sont **certifiées supports** sans qu'un seul témoin ait été
+énuméré, et l'invariant de partition tient exactement :
+`960 740 + 7 154 + 156 356 = \binom{1500}{2}`.
+
+Le certificat positif exige des feuilles fines, et la raison est nette : un
+nœud `MIXED` bloqué contribue `\lvert C\rvert` au majorant même si un seul de
+ses points est réellement témoin. À feuille `8` et seuil `10`, deux feuilles
+bloquées suffisent à le tuer. C'est un compromis mesurable, pas un obstacle.

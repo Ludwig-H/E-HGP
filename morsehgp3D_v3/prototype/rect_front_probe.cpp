@@ -85,39 +85,69 @@ int build(Tree* t, int b, int e, int leaf) {
 
 struct Counters {
   long long rect_visited = 0, rect_closed = 0, rect_residual = 0, rect_capped = 0;
-  long long evals = 0, mass_closed = 0, mass_residual = 0, w_high = 0;
+  long long rect_positive = 0;
+  long long evals = 0, mass_closed = 0, mass_residual = 0, mass_positive = 0, w_high = 0;
   long long all_hits = 0, none_hits = 0, mixed_hits = 0;
 };
 
+// Trois issues, et non deux. La file de priorite porte aussi un MAJORANT du
+// nombre de temoins : a tout instant `cred + somme des |C| encore en file`
+// majore ce que le rectangle pourra jamais crediter, puisque tout point non
+// encore classe est soit dans un noeud de la file, soit deja NONE.
+//   cred        >= h  -> FERME   : aucune paire du rectangle n'est un support.
+//   cred + pend <  h  -> POSITIF : TOUTE paire du rectangle est un support,
+//                                  produite en bloc sans enumerer de temoins.
+//   sinon             -> RESIDUEL.
+enum class RectOutcome { kClosed, kPositive, kResidual };
+
 const int kNeed[3] = {10, 9, 8};
 
-bool witness_enough(const Tree& t, int ia, int ib, int lane, long long budget,
-                    RectFrontInject inject, Counters* c) {
+RectOutcome witness_outcome(const Tree& t, int ia, int ib, int lane, long long budget,
+                            RectFrontInject inject, Counters* c) {
   const Node& A = t.nodes[ia];
   const Node& B = t.nodes[ib];
+  long long cred = 0;     // points certifies temoins (noeuds ALL)
+  long long queued = 0;   // points des noeuds MIXED encore en file
+  long long stuck = 0;    // points des feuilles MIXED, indecidables sans descendre
   std::priority_queue<std::pair<long long, int>> pq;
-  pq.push({(long long)1 << 62, 0});
-  long long cred = 0;
-  while (!pq.empty() && budget-- > 0) {
-    const int ic = pq.top().second;
-    pq.pop();
+
+  // La classification se fait A L'INSERTION, jamais au depilage : la file est
+  // ordonnee du plus interieur au plus exterieur, donc les noeuds NONE en
+  // seraient depiles en DERNIER et le majorant ne baisserait jamais avant que
+  // le budget ne soit epuise.
+  auto admit = [&](int ic) -> bool {
     const Node& C = t.nodes[ic];
+    const long long k = C.end - C.begin;
     ++c->evals;
     long long mx = 0;
     const RectVerdict v = mhgp3v::rect_classify(A.box, B.box, C.box, lane, &mx, inject);
-    if (v == RectVerdict::kNone) { ++c->none_hits; continue; }
-    if (v == RectVerdict::kAll) {
-      ++c->all_hits;
-      cred += C.end - C.begin;
-      if (cred >= kNeed[lane]) return true;
-      continue;
-    }
+    if (v == RectVerdict::kNone) { ++c->none_hits; return false; }
+    if (v == RectVerdict::kAll) { ++c->all_hits; cred += k; return true; }
     ++c->mixed_hits;
-    if (C.left >= 0) { pq.push({mx, C.left}); pq.push({mx, C.right}); }
+    if (C.left < 0) { stuck += k; return false; }
+    queued += k;
+    pq.push({mx, ic});
     if ((long long)pq.size() > c->w_high) c->w_high = (long long)pq.size();
+    return false;
+  };
+
+  --budget;
+  admit(0);
+  if (cred >= kNeed[lane]) return RectOutcome::kClosed;
+  if (cred + queued + stuck < kNeed[lane]) return RectOutcome::kPositive;
+  while (!pq.empty() && budget > 0) {
+    const int ic = pq.top().second;
+    pq.pop();
+    const Node& C = t.nodes[ic];
+    queued -= C.end - C.begin;
+    budget -= 2;
+    admit(C.left);
+    admit(C.right);
+    if (cred >= kNeed[lane]) return RectOutcome::kClosed;
+    if (cred + queued + stuck < kNeed[lane]) return RectOutcome::kPositive;
   }
   if (!pq.empty()) ++c->rect_capped;
-  return false;
+  return RectOutcome::kResidual;
 }
 
 // ARRET A « BIEN SEPARE », ET NON A « FERME ». C'est ce qui rend le cardinal du
@@ -148,9 +178,9 @@ void solve(const Tree& t, int ia, int ib, int lane, long long budget,
     solve(t, A.left, A.right, lane, budget, inject, c, stop_wsp);
     return;
   }
-  if (witness_enough(t, ia, ib, lane, budget, inject, c)) {
-    ++c->rect_closed; c->mass_closed += mass; return;
-  }
+  const RectOutcome oc = witness_outcome(t, ia, ib, lane, budget, inject, c);
+  if (oc == RectOutcome::kClosed) { ++c->rect_closed; c->mass_closed += mass; return; }
+  if (oc == RectOutcome::kPositive) { ++c->rect_positive; c->mass_positive += mass; return; }
   if ((A.left < 0 && B.left < 0) ||
       (stop_wsp > 0.0 && well_separated(t, ia, ib, stop_wsp))) {
     ++c->rect_residual; c->mass_residual += mass; return;
@@ -316,18 +346,23 @@ int main(int argc, char** argv) {
     solve(t, 0, 0, lane, budget, inject, &c, stop_wsp);
     const long long m = (long long)t.pts.size();
     const long long tot = m * (m - 1) / 2;
-    if (c.mass_closed + c.mass_residual != tot) {
-      std::fprintf(stderr, "INVARIANT VIOLE: partition des paires %lld + %lld != %lld\n",
-                   c.mass_closed, c.mass_residual, tot);
+    if (c.mass_closed + c.mass_positive + c.mass_residual != tot) {
+      std::fprintf(stderr, "INVARIANT VIOLE: partition des paires %lld + %lld + %lld != %lld\n",
+                   c.mass_closed, c.mass_positive, c.mass_residual, tot);
       return 3;
     }
-    std::printf("n=%lld famille=%s lane=q%d digest=%016llx | visites=%lld fermes=%lld residuels=%lld capes=%lld"
-                " | masse_fermee=%lld masse_residuelle=%lld pct_ferme=%.2f"
+    std::printf("n=%lld famille=%s lane=q%d digest=%016llx"
+                " | visites=%lld fermes=%lld positifs=%lld residuels=%lld capes=%lld"
+                " | masse_fermee=%lld masse_positive=%lld masse_residuelle=%lld"
+                " pct_ferme=%.2f pct_decide=%.2f"
                 " | eval=%lld ALL=%lld NONE=%lld MIXED=%lld Wmax=%lld front/pt=%.3f\n",
-                m, family.c_str(), lane + 2, digest, c.rect_visited, c.rect_closed, c.rect_residual,
-                c.rect_capped, c.mass_closed, c.mass_residual, 100.0 * (double)c.mass_closed / (double)tot,
+                m, family.c_str(), lane + 2, digest,
+                c.rect_visited, c.rect_closed, c.rect_positive, c.rect_residual, c.rect_capped,
+                c.mass_closed, c.mass_positive, c.mass_residual,
+                100.0 * (double)c.mass_closed / (double)tot,
+                100.0 * (double)(c.mass_closed + c.mass_positive) / (double)tot,
                 c.evals, c.all_hits, c.none_hits, c.mixed_hits, c.w_high,
-                (double)(c.rect_closed + c.rect_residual) / (double)m);
+                (double)(c.rect_closed + c.rect_positive + c.rect_residual) / (double)m);
     resid_mass.push_back((double)c.mass_residual);
     visited_per_n.push_back((double)c.rect_visited);
     agg.all_hits += c.all_hits; agg.none_hits += c.none_hits; agg.mixed_hits += c.mixed_hits;
