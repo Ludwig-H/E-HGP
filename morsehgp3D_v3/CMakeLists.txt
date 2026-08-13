@@ -3820,13 +3820,19 @@ add_test(NAME mhgp3v_rect_front_intervalle
 
 # Les deux fautes que j'ai reellement ecrites doivent mourir devant le juge.
 mhgp3v_add_expected_code_test_for(mhgp3v_rect_front_probe
-  mhgp3v_rect_front_mutant_max_coins 4
+  mhgp3v_rect_front_mutant_max_coins "mutant_killed=1" 4
   --family=uniform --points=2000 --selftest=20000 --inject=max-par-coins)
 mhgp3v_add_expected_code_test_for(mhgp3v_rect_front_probe
-  mhgp3v_rect_front_mutant_sommet_non_ecrete 4
+  mhgp3v_rect_front_mutant_sommet_non_ecrete "mutant_killed=1" 4
   --family=uniform --points=2000 --selftest=20000 --inject=sommet-non-ecrete)
 
 # Une campagne aux parametres hors domaine est refusee AVANT tout calcul.
 mhgp3v_add_expected_code_test_for(mhgp3v_rect_front_probe
-  mhgp3v_rect_front_refus_domaine 2
+  mhgp3v_rect_front_refus_domaine "REFUS: lane" 2
   --family=uniform --points=2000 --lane=9)
+
+# Le PLANCHER doit mordre : une campagne qui ne ferme pas assez est refusee en
+# code 3, sinon la porte serait verte par vacuite.
+mhgp3v_add_expected_code_test_for(mhgp3v_rect_front_probe
+  mhgp3v_rect_front_plancher_mord "PLANCHER" 3
+  --family=uniform --points=2000 --lane=0 --budget=1 --selftest=0 --min-closed-pct=90)

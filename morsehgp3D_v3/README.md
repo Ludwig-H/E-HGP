@@ -27,6 +27,26 @@ Le verdict lié au `HEAD` et au worktree est tenu uniquement dans
 [`AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md). Ne déduire aucun état
 live d'une note datée, d'un message de commit ou du seul passage d'un CTest.
 
+Au pin `96be8e0`, le nouveau front apporte deux briques utiles sans changer ce
+verdict. L'intervalle entier de `H=(z-a) dot(b-z)` sur trois AABB certifie
+`ALL/NONE/MIXED` pour q2 et des `ALL` suffisants pour q3/q4. Arrêter la
+récursion `A×B` dès la bonne séparation peut en outre produire un front WSPD de
+cardinal `O(s^3 n)` à séparation fixe, sous split-tree canonique et politique
+des doublons. Cette borne porte sur les records du front, pas sur la descente
+témoin, la source résiduelle ni l'aval.
+
+La nouvelle conclusion `cred+pending<h_q` est reçue comme support pour q2 sous
+endpoints distincts. Pour q3/q4, elle signifie seulement
+`KEEP_ANCHOR/DELEGATED_TO_SOURCE` : un nuage collinéaire peut satisfaire ce
+majorant sans contenir aucun triangle ou tétraèdre propre. Le probe repart
+encore de la racine témoin pour chaque rectangle, ses CTests ciblés rendent
+`1/4`, et ni les portes ni le script G4 n'activent le mode WSPD. Le prochain
+jalon recommandé partage un seul front et un masque de lanes, propose en lot
+une petite banque de points proches du milieu de chaque rectangle, recertifie
+chaque `PointId` exactement, puis conserve une continuation persistante pour
+les seuls résidus. Preuves, mesures et gates :
+[`AUDIT_REPONSE_WSPD_DESCENTE_JOINTE_96BE8E0_20260813.md`](audits/AUDIT_REPONSE_WSPD_DESCENTE_JOINTE_96BE8E0_20260813.md).
+
 Le producteur expérimental par arête maximale apporte quatre lemmes exacts :
 borne mono-ancre `ext/4`, face positive adjacente d'un q4 positif, disque q4
 mutualisable pour le filtre q3 et identité entière du shell diamétral q2. Son

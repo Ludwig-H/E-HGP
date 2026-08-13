@@ -8,7 +8,72 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-## Observation live — `HEAD=96156f6`, crédit diamétral de rectangle q2
+## Observation live — `HEAD=96be8e0`, front WSPD et borne témoin bidirectionnelle
+
+Le `HEAD` observé est
+`96be8e0a7f3d49eef8d0406e77609cab61101730`, commit
+`the queue carries an upper bound too, so the same Lambda proves supports`.
+Le worktree était propre avant les seuls deltas documentaires du présent audit.
+La chaîne récente sépare la note WSPD `29b7fa7`, la correction du faux `NONE`
+`7ff40e4`, le premier probe `eac8027`, le script de session `e2323d7`, l'arrêt
+WSPD `3926d74` et la borne supérieure témoin du pin live.
+
+Le progrès mathématique est réel mais local. L'intervalle de
+`H=(z-a) dot(b-z)` est exact sur le réseau entier de trois AABB u16 : le minimum
+en `z` est aux extrémités et le maximum entier près du milieu écrêté. Les tests
+`ALL` q3/q4 par `4Hmin^2>E2max*X2max` et
+`3Hmin^2>E2max*X2max` sont sûrs et fail-open. La preuve écrite par concavité ou
+convexité jointe en `(a,b)` est remplacée par l'affinité séparée ; le maximum
+n'est pas une enveloppe continue. Le juge courant ne couvre encore que
+`Hmin/Hmax`, jamais les verdicts q3/q4.
+
+L'arrêt à une séparation fixe transforme bien la récursion `A×B` en front
+WSPD-style. Sous fair-split tree canonique, dimension et `s` fixes, politique
+des doublons reçue et séparation exacte, le nombre de rectangles terminaux est
+`O(s^3 n)`. Cette borne porte sur la partition de relations, pas sur le join
+témoin, la source générative, les sorties ou l'aval. Dans le logiciel live,
+`stop_wsp=0` reste le défaut ; ni CTest ni le script G4 ne l'activent, et la
+séparation qui déterminerait les `RectId` emploie encore `double/sqrt`.
+
+Le majorant `cred+queued+stuck` est sound pour le nombre possible de témoins
+universels. Son interprétation est toutefois réfutée sur deux lanes. En q2,
+sous endpoints distincts, être sous dix prouve bien que chaque paire est un
+support diamétral de rang pertinent. En q3/q4, être sous neuf ou huit prouve
+seulement que l'arête candidate survit à ce prune universel : cela ne fabrique
+ni triangle/tétraèdre affine indépendant, ni support bien centré, ni
+positivité. Un nuage collinéaire tue le claim « chaque paire est un support ».
+L'issue doit devenir `KEEP_ANCHOR/DELEGATED_TO_SOURCE`, pas
+`POSITIVE_SUPPORT`.
+
+Le probe n'est toujours pas une descente jointe persistante : chaque rectangle
+recrée une file et repart de `C=root`. `budget=24` peut en outre exécuter
+vingt-cinq classifications. Le rejeu Release ciblé sur l'ELF SHA-256
+`a59ff256...` donne, à `n=8 000`, `20 323 895` classifications pour les trois
+lanes séparées, soit environ `2 540` par point ; q3/q4 ne ferment aucune masse
+sur ce cas. Le premier gain de constante demandé est donc un front commun à
+masque de lanes, puis une banque top-`L` de témoins proposée en lot et
+recertifiée exactement, avant un fallback persistant.
+
+Les portes ciblées rendent `1/4`. Les deux mutants et le refus de domaine
+rendent bien `4/4/2`, mais trois appels du helper CMake ont omis le regex et
+traitent `--family=uniform` comme code contractuel. La seule gate de pente
+imprime les visites mais ne juge que la masse résiduelle ; avec deux tailles,
+elle ne peut jamais exercer sa condition de deux pentes. Aucun juge par
+`PairId`, aucune lane q3/q4 et aucune issue positive ne sont reçus.
+
+Le script G4 commis est une orchestration non exécutée, pas un reçu. Il mesure
+le CPU de la G4, omet `--stop-wsp`, compile une autre cible CUDA, peut masquer
+des échecs derrière `tail` et avale un échec de l'arrêt ciblé par `|| true`. Il
+ne doit pas être lancé avant réparation fail-closed. Cet audit n'a utilisé
+aucune ressource GCP.
+
+Preuves, rejeux, correction de l'avis concurrent, ABI persistante, certificat
+`NONE` propre à chaque lane et proposition `common-core + top-L` :
+[`AUDIT_REPONSE_WSPD_DESCENTE_JOINTE_96BE8E0_20260813.md`](AUDIT_REPONSE_WSPD_DESCENTE_JOINTE_96BE8E0_20260813.md).
+Le statut G4 reste `NO-GO` : aucun producteur device, aucun p95, aucun
+octet/HWM et aucun raccord reçu jusqu'au fold.
+
+## Observation historique — `HEAD=96156f6`, crédit diamétral de rectangle q2
 
 Le `HEAD` observé est `96156f6a1dd569c1c7e0371b0599e3b9ff08afd4`,
 commit `close six hundred million pairs with sixteen thousand integer
