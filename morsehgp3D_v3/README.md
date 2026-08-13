@@ -94,11 +94,16 @@ produits `i64`. Il conserve le rappel q2 annoncé (`31,37 %` à `s=2`) sans les
 trois classifieurs ni les carrés larges ; q3/q4 restent centraux. `s=8` n'est
 pas retenu globalement : il multiplie le front mesuré par `11,8`. Le choix
 reste `s=2` plus raffinement local, jugé sur `P0 + source + aval`, pas sur la
-seule masse fermée.
+seule masse fermée. La réponse complète, y compris `Vbest`, l'héritage des
+preuves et le traitement des endpoints relatifs, est dans
+[`AUDIT_REPONSE_BANQUE_MORTON_360EA7C_20260813.md`](audits/AUDIT_REPONSE_BANQUE_MORTON_360EA7C_20260813.md).
 
-Le script G4 du `HEAD=90aa941` ne doit pas être lancé en l'état. Sa nouvelle
-étape mesure quinze gros runs du probe CPU, pas le kernel P0, masque leurs codes
-par `wait || true` et ne publie ni temps, ni octets, ni HWM. La cible CUDA
+Le script G4 du `HEAD=21a7a63` ne doit pas être lancé pour qualifier cette
+tranche. Sa rampe principale passe maintenant correctement
+`--budget-depth=4 --core`, mais son étape WSPD mesure quinze gros runs du probe
+CPU, pas le kernel P0, masque leurs codes par `wait || true` et ne publie ni
+temps, ni octets, ni HWM. Son sweep budget lit des fichiers différents de ceux
+qu'il écrit et le sweep feuille emploie encore `--budget=24`; la cible CUDA
 construite reste une autre qualification. Ce script ne peut donc ni recevoir
 la banque, ni répondre au contrat d'une seconde.
 

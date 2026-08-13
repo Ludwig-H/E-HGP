@@ -29,6 +29,16 @@ jamais réception.
   recertification commune et compactage du résiduel avant corridors/carriers.
   Il contre-audite aussi le pin `a7f061b` et son worktree WSPD sans toucher au
   logiciel.
+- [`AUDIT_REPONSE_BANQUE_MORTON_360EA7C_20260813.md`](AUDIT_REPONSE_BANQUE_MORTON_360EA7C_20260813.md)
+  répond aux dernières questions de Claude : repli q2 exact
+  `Hmin_singleton>0` en douze produits `i64`, refus de `s=8` global,
+  raffinement local guidé par `Vbest`, héritage des preuves et réexamen des
+  endpoints relatifs. Il réfute aussi l'encodeur Morton 2D du pin.
+- [`AUDIT_DIRECTIVE_JOIN_PERSISTANT_WSPD_90AA941_20260813.md`](AUDIT_DIRECTIVE_JOIN_PERSISTANT_WSPD_90AA941_20260813.md)
+  spécifie le join persistant après le tape WSPD : masque central partagé,
+  proposition Morton puis range-report batché, split local `A/B`, arène SoA et
+  handoff exact. C'est une directive d'implémentation hors claim, pas une
+  réception logicielle.
 
 Le résumé est [`../README.md`](../README.md) et l'architecture durable est
 [`../PROPOSITION.md`](../PROPOSITION.md). Ils peuvent conserver un résultat

@@ -123,6 +123,37 @@ raffinement : `base_front + child_records + witness_reads + delegated_work`.
 Le seul taux de masse fermée ou le seul cardinal initial ne choisit pas le bon
 point de Pareto.
 
+### 3.1 Pourquoi q3/q4 apparaissent seulement vers `s=4`
+
+Le phénomène de la table a une explication géométrique, utile au scheduler.
+Pour des nœuds contenus dans deux boules de rayons `rA,rB`, poser
+`S=rA+rB`, `d=||cB-cA||`. Si le cœur ponctuel d'une lane a pour rayon
+`alpha*||b-a||`, le cœur commun autour du milieu des nœuds a le rayon sûr :
+
+```text
+rho = alpha*(d-S)-S/2
+```
+
+Les constantes sont `alpha2=1/2`, `alpha3=1/(2*sqrt(3))` et
+`alpha4=sqrt(2-sqrt(3))/2`. Un cœur non vide demande donc :
+
+```text
+q2 : d/S > 2
+q3 : d/S > 1+sqrt(3) = 2,732...
+q4 : d/S > 1+sqrt(2+sqrt(3)) = 2,932...
+```
+
+Dans le modèle explicatif de deux rayons égaux `r`, une séparation sphérique
+`d-2r>=s*r` donne `d/S>=(s+2)/2`. Il faut alors `s>2`,
+`s>2*sqrt(3)=3,464...` et `s>2*sqrt(2+sqrt(3))=3,864...`. Il est donc normal
+que `s=2` ferme presque zéro q3/q4 et que `s=4` commence seulement à mordre.
+
+Ce calcul n'identifie pas la séparation L-infini du front à une boule
+euclidienne ; le scheduler emploie les vrais `d,S` ou, mieux, `Vbest`. Il
+montre pourquoi augmenter **globalement** `s` est le mauvais levier. Le bon
+équivalent est d'affiner localement `A/B` jusqu'à rendre positive la lane
+encore ouverte, tandis que les lanes déjà fermées cessent de payer.
+
 ## 4. Scheduler exact guidé par `Vbest`
 
 L'audit

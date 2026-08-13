@@ -3849,6 +3849,16 @@ set_tests_properties(mhgp3v_rect_front_coeur_juge_q4 PROPERTIES
 set_tests_properties(mhgp3v_rect_front_coeur_juge PROPERTIES
   PASS_REGULAR_EXPRESSION "desaccords=0")
 
+# ORACLE EXHAUSTIF DES VERDICTS `ALL`. Un echantillonnage peut FALSIFIER une
+# faute frequente ; il ne prouve jamais un universel. Sur un petit nuage, TOUS
+# les couples de nœuds disjoints sont classes et la TOTALITE des triples de
+# chaque verdict `ALL` est enumeree, dans une ecriture qui n'emprunte ni
+# `Lambda`, ni le coeur central, ni les bornes de boites.
+add_test(NAME mhgp3v_rect_front_oracle_all COMMAND mhgp3v_rect_front_probe --oracle-all=320)
+set_tests_properties(mhgp3v_rect_front_oracle_all PROPERTIES
+  PASS_REGULAR_EXPRESSION "oracle_all accord=OUI")
+
+# L'echantillonnage RESTE, mais comme diagnostic de grande taille seulement.
 # LES VERDICTS `ALL` SONT JUGES PAR ECHANTILLONNAGE DE TRIPLES REELS. Un noeud
 # declare ALL affirme que TOUT z de C est temoin universel de TOUTE paire de
 # A x B ; le juge tire des triples de points EXISTANTS et evalue le predicat

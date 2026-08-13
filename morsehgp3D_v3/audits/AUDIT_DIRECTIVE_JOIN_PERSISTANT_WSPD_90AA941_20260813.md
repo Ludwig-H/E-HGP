@@ -145,7 +145,16 @@ Les propriétés monotones donnent la reprise exacte :
   restriction de `A/B` ;
 - seuls les nœuds `MIXED` sont reclassifiés ;
 - les `proof_ids` restent valides, distincts et hérités ;
-- une scission de `A` ou `B` ne réintroduit jamais `C=root`.
+- une scission de `A` ou `B` ne réintroduit jamais la racine du front
+  géométrique déjà classifié.
+
+Cette dernière propriété ne permet pas de jeter les endpoints relatifs. Après
+`A=A0∪A1`, un ID de `A1`, interdit comme endpoint pour le parent, peut devenir
+un témoin valide de `A0×B`. Le state conserve donc les propositions rejetées
+pour ce seul motif dans un sidecar `endpoint_blocked`, à filtrer de nouveau
+pour chaque enfant, ou rejoue le producteur borné sur l'enfant. Cette reprise
+n'invalide aucun crédit positif et ne redémarre pas la classification
+géométrique complète depuis `C=root`.
 
 Le scheduler compare en entier les marges des enfants :
 

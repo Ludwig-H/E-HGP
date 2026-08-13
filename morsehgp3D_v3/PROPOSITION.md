@@ -2113,8 +2113,13 @@ propositionnels ; il ne porte pas une fenêtre sans signal sur CUDA.
 La séparation de départ reste `s=2`. Monter globalement à `s=8` peut gonfler
 le front et tous les coûts `W*F/L*F` d'un ordre de grandeur ; une hausse du
 pourcentage de masse fermée ne suffit pas. Le choix de `s` minimise le temps
-mesuré `P0 + source complète + aval` et les octets/HWM. Les rectangles difficiles
-se raffinent localement sans reconstruire globalement un grand front.
+mesuré `P0 + source complète + aval` et les octets/HWM. Les rectangles
+difficiles se raffinent localement sans reconstruire globalement un grand
+front. Les `proof_ids` positifs d'un parent restent valides dans ses enfants.
+En revanche, un ID écarté parce qu'il appartenait à `A∪B` peut devenir témoin
+après `A=A0∪A1`; le raffinement conserve donc un sidecar
+`endpoint_blocked` à réexaminer, ou rejoue le producteur borné sur l'enfant.
+Il ne jette jamais définitivement les endpoints relatifs du parent.
 
 L'oracle petit `n` développe chaque terminal et exige une multiplicité un de
 chaque `PairId`; il rejoue aussi chaque preuve, l'owner, la disjonction des IDs

@@ -8,12 +8,14 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-## Observation live — `HEAD=360ea7c`, banque CPU reçue, Morton48 réfuté
+## Observation live — `HEAD=21a7a63`, banque CPU reçue, Morton48 réfuté
 
 Le `HEAD` observé est
-`360ea7c70e0a8875be611a10ae179d43d3f4bf1b`, commit
-`measure their Morton bank, and owe them the recall it costs`. Il reçoit la
-banque CPU et son comparateur `--bank-strong`. Le worktree observé ne contient
+`21a7a6305e39866e3d72c1bc47f1ce3a51196bb7`, commit
+`repair a script my own edits had silently broken`. Le logiciel de la banque
+CPU et de son comparateur `--bank-strong` reste pincé par le parent
+`360ea7c70e0a8875be611a10ae179d43d3f4bf1b`; `21a7a63` corrige deux arguments
+du script et ajoute les réponses documentaires. Le worktree observé ne contient
 que les mises à jour documentaires autorisées du présent audit ; l'auditeur ne
 modifie aucun code.
 
@@ -45,22 +47,27 @@ SoA, ni compactage/consommation du résiduel. Le test `leaf>1` manque : le rejeu
 terminaux et `2434938` dépilages C, ferme `0 %` en q3/q4 et prend `2,607 s`
 muraux. Cette file CPU n'est pas `RF-GPU-P0`.
 
-Le script hérité de `90aa941` est `NO-RUN`. Sa nouvelle étape WSPD lance quinze runs CPU
-jusqu'à `100000` points et masque indistinctement refus, désaccord, crash ou OOM
-par `wait || true`. Elle ne mesure aucun temps, octet, HWM ou kernel P0. La
-cible CUDA construite reste `mhgp3v_anchor_device`. Les anciens sweeps écrivent
-toujours `budget_{8,16,24,48,96,192}` puis lisent
-`budget_{2,3,4,5,6,8}`, et le sweep feuille annonce `budget-depth=4` tout en
-passant `--budget=24`. Une campagne G4 de ce script ne répondrait donc ni au
-p95 résident, ni au SLO.
+Le script du `HEAD=21a7a63` est encore `NO-RUN` pour recevoir `RF-GPU-P0`.
+Claude a bien réparé la rampe principale afin qu'elle passe désormais
+`--budget-depth=4 --core`; cela corrige l'intention publiée, pas la qualification.
+L'étape WSPD lance quinze runs CPU jusqu'à `100000` points et masque encore
+indistinctement refus, désaccord, crash ou OOM par `wait || true`. Elle ne mesure
+aucun temps, octet, HWM ou kernel P0. La cible CUDA construite reste
+`mhgp3v_anchor_device`. Le sweep budget écrit toujours
+`budget_{8,16,24,48,96,192}` puis lit `budget_{2,3,4,5,6,8}`, et le sweep
+feuille annonce `budget-depth=4` tout en passant `--budget=24`. Une campagne G4
+de ce script ne répondrait donc ni au p95 résident, ni au SLO.
 
-Le prochain micro-jalon reste `RF-GPU-P0` : tape WSPD reçu/résident, fenêtre
-Morton propositionnelle `W=32`, au plus `L=16` IDs distincts, un `Dlo` par
-rectangle, tests `Vhi` u64 avec masque commun, puis compactage stable de tout
-échec en `DELEGATED_RESIDUAL`. La porte exige `wide_products=0` et
-`p95<=200 ms` sur trente warms. Corridor et carriers restent hors P0. Réponse
-aux questions, preuve, fixture, ABI, enveloppe mémoire et portes :
-[`AUDIT_REPONSE_CLAUDE_DOUBLE_COEUR_RF_GPU_P0_A7F061B_20260813.md`](AUDIT_REPONSE_CLAUDE_DOUBLE_COEUR_RF_GPU_P0_A7F061B_20260813.md).
+Le prochain micro-jalon reste `RF-GPU-P0` : tape WSPD reçu/résident à `s=2`,
+fenêtre Morton propositionnelle `W=32`, au plus `L=16` IDs distincts, un `Dlo`
+par rectangle et un `Vhi` par ID. Si q2 reste ouvert, le test exact
+`Hmin_singleton>0` ajoute seulement douze produits `i64`; il remplace les trois
+appels de `--bank-strong` et garde `wide_products=0`. q3/q4 restent au masque
+central tant qu'une ablation après raffinement local ne justifie pas leur
+fallback large. Tout échec est compacté stablement en `DELEGATED_RESIDUAL`.
+La porte exige `p95<=200 ms` sur trente warms. Corridor et carriers restent
+hors P0. Réponse directe aux questions de Claude et ordonnance de raffinement :
+[`AUDIT_REPONSE_BANQUE_MORTON_360EA7C_20260813.md`](AUDIT_REPONSE_BANQUE_MORTON_360EA7C_20260813.md).
 
 Le statut G4 reste `NO-GO` : aucun kernel rect-front, aucun p95/HWM, aucun
 handoff exact et aucun raccord jusqu'au fold. GCP non utilisé par cet audit.

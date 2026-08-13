@@ -445,6 +445,82 @@ int run_fixtures() {
   return 0;
 }
 
+// ---- ORACLE EXHAUSTIF DES VERDICTS `ALL` (audit `a7f061b`, section 4).
+// Un echantillonnage a quatre triples par nœud peut FALSIFIER une faute
+// frequente ; il ne prouve JAMAIS un universel. Sur un petit nuage, on enumere
+// donc la TOTALITE des triples `(a,b,z)` de chaque nœud declare `ALL`, dans une
+// ecriture qui n'emprunte ni `Lambda`, ni le coeur central, ni les bornes de
+// boites — seulement le predicat ponctuel exact.
+struct AllOracle { long long verdicts = 0, triples = 0, disagree = 0; };
+
+void oracle_all_rect(const Tree& t, int ia, int ib, RectLane lane, AllOracle* o) {
+  const Node& A = t.nodes[ia];
+  const Node& B = t.nodes[ib];
+  std::vector<int> st{0};
+  while (!st.empty()) {
+    const int ic = st.back(); st.pop_back();
+    const Node& C = t.nodes[ic];
+    long long mx = 0;
+    const RectVerdict v = mhgp3v::rect_classify(A.box, B.box, C.box, lane, &mx);
+    if (v == RectVerdict::kAll) {
+      ++o->verdicts;
+      for (int ai = A.begin; ai < A.end; ++ai)
+        for (int bi = B.begin; bi < B.end; ++bi)
+          for (int zi = C.begin; zi < C.end; ++zi) {
+            __int128 h = 0, e2 = 0, x2 = 0;
+            for (int d = 0; d < 3; ++d) {
+              const long long ea = t.pts[zi][d] - t.pts[ai][d];
+              const long long tb = t.pts[bi][d] - t.pts[zi][d];
+              h += (__int128)ea * tb; e2 += (__int128)ea * ea; x2 += (__int128)tb * tb;
+            }
+            bool ok = (h > 0);
+            if (ok && lane == RectLane::kQ3) ok = (4 * h * h > e2 * x2);
+            if (ok && lane == RectLane::kQ4) ok = (3 * h * h > e2 * x2);
+            ++o->triples;
+            if (!ok) ++o->disagree;
+          }
+      continue;                      // un nœud ALL n'a pas besoin d'etre raffine
+    }
+    if (v == RectVerdict::kMixed && C.left >= 0) { st.push_back(C.left); st.push_back(C.right); }
+  }
+}
+
+int run_oracle_all(int n, int coord, long long seed, long long min_triples) {
+  // PLANCHERS PAR LANE. Les verdicts `ALL` q3/q4 sont intrinsequement plus
+  // rares que q2 — le spindle q4 est strictement inclus dans le q3, lui-meme
+  // dans la boule diametrale —, donc un plancher unique serait soit vide de
+  // sens en q2, soit inatteignable en q4.
+  const long long floors[3] = {min_triples, min_triples / 100, min_triples / 200};
+  const std::vector<mhgp::P3> cloud =
+      mhgp3v::make_family_cloud(mhgp3v::CloudFamily::kUniform, n, coord, seed);
+  Tree t;
+  for (const mhgp::P3& p : cloud) t.pts.push_back({p.x, p.y, p.z});
+  t.nodes.reserve(4 * t.pts.size());
+  build(&t, 0, (int)t.pts.size(), 4);
+  int bad = 0;
+  for (int ln = 0; ln < 3; ++ln) {
+    AllOracle o{};
+    // TOUS les couples de nœuds disjoints de l'arbre, pas un echantillon.
+    for (size_t ia = 0; ia < t.nodes.size(); ++ia)
+      for (size_t ib = ia + 1; ib < t.nodes.size(); ++ib) {
+        if (!(t.nodes[ib].begin >= t.nodes[ia].end || t.nodes[ia].begin >= t.nodes[ib].end))
+          continue;
+        oracle_all_rect(t, (int)ia, (int)ib, (RectLane)ln, &o);
+      }
+    std::printf("oracle_all lane=q%d verdicts=%lld triples=%lld desaccords=%lld\n",
+                ln + 2, o.verdicts, o.triples, o.disagree);
+    if (o.triples < floors[ln]) {
+      std::fprintf(stderr, "PLANCHER ORACLE: lane q%d seulement %lld triples (< %lld)\n",
+                   ln + 2, o.triples, floors[ln]);
+      return 3;
+    }
+    if (o.disagree != 0) ++bad;
+  }
+  if (bad) { std::fprintf(stderr, "DESACCORD DU JUGE: %d lanes refutees exhaustivement\n", bad); return 1; }
+  std::printf("oracle_all accord=OUI\n");
+  return 0;
+}
+
 [[noreturn]] void refuse(const char* why) {
   std::fprintf(stderr, "REFUS: %s\n", why);
   std::exit(2);
@@ -477,6 +553,8 @@ int main(int argc, char** argv) {
   for (int i = 1; i < argc; ++i) {
     const std::string a = argv[i];
     if (a == "--fixtures") return run_fixtures();
+    if (a.rfind("--oracle-all=", 0) == 0)
+      return run_oracle_all((int)arg_ll(a.substr(13).c_str(), 16, 400, "oracle-all"), 4096, 7777, 100000);
     auto val = [&](const char* p) { return a.substr(std::strlen(p)); };
     if (a.rfind("--family=", 0) == 0) family = val("--family=");
     else if (a.rfind("--points=", 0) == 0) {
