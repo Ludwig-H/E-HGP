@@ -247,6 +247,21 @@ int main(int argc, char** argv) {
       std::sort(v.begin(), v.end());
       return v[std::min(v.size() - 1, (size_t)(f * (double)v.size()))];
     };
+    // ---- L'ARGUMENT D'EMPILEMENT, MESURE PLUTOT QU'ESPERE.
+    //
+    // La borne `O(s^3 n)` repose sur un argument de PACKING : un nœud donne ne
+    // peut avoir qu'un nombre BORNE de partenaires, parce que ceux-ci sont des
+    // boites disjointes de taille comparable dans une region bornee. Ma crainte
+    // etait que la compression de l'octree — qui saute les niveaux vides — le
+    // viole. C'est une affirmation directement testable : si le nombre maximal
+    // de partenaires par nœud reste borne quand `n` croit, l'empilement tient.
+    // S'il croit avec `n`, la borne est fausse et il faut le savoir.
+    std::vector<int> deg(nodes.size() + sp.size(), 0);
+    auto slot = [&](int id) { return (id < 0) ? (int)nodes.size() + (-1 - id) : id; };
+    for (const Pair& t : terms) { ++deg[slot(t.a)]; ++deg[slot(t.b)]; }
+    long long dmax = 0, dsum = 0, dnz = 0;
+    for (int d : deg) { dmax = std::max(dmax, (long long)d); dsum += d; if (d) ++dnz; }
+
     long long mass = 0;
     for (const Pair& t : terms) mass += count_of(nodes, t.a) * count_of(nodes, t.b);
     const long long total = m * (m - 1) / 2;
@@ -281,11 +296,13 @@ int main(int argc, char** argv) {
     std::printf("n=%lld famille=%s boite=%s sep=%lld/%lld | front=%zu (%.3f/pt) | vagues=%lld"
                 " tests=%lld tests/front=%.2f vague_max=%lld | masse=%lld/%lld"
                 " | arbre_med=%.1f ms arbre_p95=%.1f ms vague=%.1f ms"
-                " | banque lectures=%lld recert=%lld ferme q2=%lld q3=%lld q4=%lld\n",
+                " | banque lectures=%lld recert=%lld ferme q2=%lld q3=%lld q4=%lld"
+                " | partenaires max=%lld moyen=%.2f\n",
                 m, family.c_str(), g_tight ? "serree" : "cellule", p, q, terms.size(), (double)terms.size() / (double)m,
                 levels, tests, (double)tests / (double)terms.size(), wave_hwm, mass, total,
                 pct(t_tree, 0.5), pct(t_tree, 0.95), t_wave.back(),
-                bank.reads, bank.recerts, bank.closed[0], bank.closed[1], bank.closed[2]);
+                bank.reads, bank.recerts, bank.closed[0], bank.closed[1], bank.closed[2],
+                dmax, (double)dsum / (double)std::max(1LL, dnz));
     if (mass != total) {
       std::fprintf(stderr, "INVARIANT VIOLE: masse %lld != %lld\n", mass, total);
       return 3;

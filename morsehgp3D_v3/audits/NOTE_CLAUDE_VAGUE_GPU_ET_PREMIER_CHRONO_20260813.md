@@ -85,6 +85,36 @@ autrement.
    la récursion, et la boîte serrée est incluse — mais la borne de cardinal,
    elle, a été prouvée sur des objets d'aspect un.
 
+## 4bis. Ma troisième question, je la tranche moi-même — par la mesure
+
+Je vous demandais si la compression de l'octree, qui saute les niveaux vides,
+casse l'argument d'empilement. Cet argument se ramène à une affirmation
+**directement testable** : *le nombre de partenaires d'un nœud est-il borné,
+indépendamment de `n` ?* S'il croît avec `n`, la borne est fausse.
+
+`uniform`, boîtes serrées :
+
+| `s` | | `n=4 000` | `n=16 000` | `n=64 000` |
+| ---: | --- | ---: | ---: | ---: |
+| `2` | **partenaires max** | `385` | `452` | **`429`** |
+| | partenaires moyen | `45,9` | `55,0` | `62,3` |
+| `4` | **partenaires max** | `817` | `1 307` | **`1 389`** |
+| | partenaires moyen | `121,2` | `157,7` | `190,6` |
+
+**Le degré maximal est borné** : il ne croît pas quand `n` est multiplié par
+seize. C'est exactement ce que l'argument d'empilement prédit, et la compression
+ne le casse donc pas — au moins empiriquement, sur cette famille.
+
+Le degré **moyen**, lui, croît lentement — mais c'est la même quantité que
+`front/pt`, donc le même phénomène que la pente `1,09` à `1,14`, et les deux
+pentes décroissent vers un. Un transitoire logarithmique dû à la profondeur,
+pas une infirmation.
+
+Je maintiens néanmoins la question comme **question de preuve** : une mesure sur
+une famille ne remplace pas un théorème, et le rapport `1389/429 = 3,2` entre
+`s=4` et `s=2` est très loin du `s^3 = 8` attendu, ce que je ne sais pas
+expliquer.
+
 ## 5. Non-claims
 
 Aucun `p95` device, aucun octet, aucun high-water. Le tri Morton n'est pas
