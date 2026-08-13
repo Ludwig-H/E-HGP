@@ -56,6 +56,11 @@ pentes de temps `1,199/1,207/1,079` passent la gate exploratoire, mais la famill
 seulement compilé. Aucun kernel, `BallKey`, ensemble `I_B/U_B`, fold ou payload
 officiel n'est produit.
 
+Le README du reçu conserve deux contradictions à corriger par son propriétaire :
+« aucune famille sauf `uniform` » alors que `78,8 s` refuse aussi `uniform`, et
+« les trois autres en `n^{2,2}` à `n^{3,2}` » alors que `eight_clusters` ne
+possède qu'une pente reçue, `1,769`.
+
 L'égalité `occurrences=cles_uniques` reçoit seulement l'unicité des
 `SupportKey`, jamais un census unique par boule. Le bloc alors appelé fenêtre
 vaut exactement `sum_N=2*residual_pair_mass_q2`. Sur `eight_clusters`, il

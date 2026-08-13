@@ -84,3 +84,62 @@ receviez comme une « troisième voie » possiblement à écarter. Si le mur est
 la lentille, et si la structure de blocs est ce qui s'adapte à la dimension
 intrinsèque, alors ce n'est plus une variante mais **la** réparation de
 l'ordonnance que vous réfutez — et sa place dans votre ordre remonte.
+
+## 6. CORRECTION — la lentille est le symptôme, pas la cause
+
+J'ai intitulé cette note « le mur est la lentille ». C'est faux, et ma propre
+mesure le montre.
+
+D'abord, la **linéarité** que je proposais est vérifiée : `1 199 967` triples
+`(a,b,z)` avec un `t` perpendiculaire tiré au hasard, comparés à la définition
+brute `\lVert z-c\rVert^2<\lVert a-c\rVert^2`, **zéro désaccord**. Chaque site
+donne bien un demi-plan de l'espace des paramètres.
+
+Ensuite, j'ai mesuré la lentille et le `\le 7`-niveau **en fonction du rang du
+voisin**, sur une nappe de `6 000` points — `a` tiré au hasard, `b` son `k`-ième
+plus proche voisin :
+
+| rang de `b` | lentille | sommets de niveau `\le 7` |
+| ---: | ---: | ---: |
+| `1` – `2` | `\approx 1` | `0` |
+| `4` | `2` | `28` |
+| `8` | `3` | `125` |
+| `32` | `13` | **`1 883`** |
+| `128` | `56` | `448` |
+| `512` | `251` | **`0`** |
+
+Deux faits, et ils renversent le diagnostic :
+
+1. **Pour les paires qui produisent des supports, la lentille vaut `2` à `56`,
+   jamais `7 811`.** Le high-water `lens=7811` mesuré sur `terrain` provient
+   donc de paires **bien au-delà** du rang où quoi que ce soit existe.
+2. **Les supports disparaissent avant que la lentille ne grossisse.** Le
+   `\le 7`-niveau culmine au rang `32` et vaut **zéro** au rang `512`, où la
+   lentille vaut déjà `251` — soit `31\,500` couples parcourus pour **aucune**
+   sortie.
+
+Le mur n'est donc pas `\lvert lens\rvert^2` : c'est que le moteur **traite des
+paires qui ne peuvent rien produire**. Sa liste de partenaires monte à `4 380`
+sur `terrain` à `n=25\,000`, alors que tout se joue sous le rang `\approx 128`.
+
+## 7. Ce que cela change à la réparation
+
+Ma proposition de triplets aigus, et même l'arrangement de la section
+précédente, réparent le **mauvais étage**. Ils rendraient moins cher un travail
+qui ne devrait pas avoir lieu.
+
+La réparation est **en amont** : fermer ces paires, ou ne pas les proposer. Or
+c'est exactement l'office du certificat de front — et le fait que `terrain`,
+`scanline` et `eight_clusters` murent dit que le front **n'y ferme pas assez**,
+pas que la lentille y soit intrinsèquement grosse.
+
+Cela recoupe une mesure que j'avais déjà et dont je n'avais pas tiré cette
+conséquence : à `s=3`, les pentes du degré résiduel valent `1,858 / 1,887 /
+1,931` sur `eight_clusters`. Le front y laisse passer une masse quasi
+quadratique de paires, et le moteur la paie au carré.
+
+**La question à vous poser n'est donc plus « comment accélérer la lentille »
+mais « pourquoi le front ne ferme-t-il pas les paires longues sur les nuages
+structurés ».** Je retire la conclusion de ma section 3, qui désignait la
+décomposition en blocs comme la réparation : elle en était une pour un mur qui
+n'est pas le bon.

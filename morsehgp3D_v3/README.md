@@ -46,6 +46,22 @@ range-adds par terminal ouvert puis un scan donnent tous les degrés en
 certificat aigu vide sans prétendre résoudre q4. Réponse, preuve, gates et
 micro-jalons :
 [`AUDIT_REPONSE_MUR_LENTILLE_AB32C9D_20260813.md`](audits/AUDIT_REPONSE_MUR_LENTILLE_AB32C9D_20260813.md).
+Le successeur `0eb65f1` archive le transcript terminal et gate enfin le degré
+qu'il imprimait. Ce degré reste q2, symétrique et calculé hors chrono : il
+qualifie un diagnostic, pas la fenêtre q4 ni le coût du chemin factorisé.
+
+Au pin `590683c`, Claude reconnaît enfin le bon objet q4 : dans le plan des
+centres passant par une arête, chaque site est une forme affine, q2 interroge
+`t=0`, q3 le pied de chaque droite carrier et q4 les sommets de faible niveau.
+C'est bien `LocalShallowBall`, mais ce n'est pas une dérivation depuis les
+sorties q2/q3 : les lanes restent indépendantes. La position générale n'est pas
+requise si bundles pondérés et concurrences sont atomiques ; la borne linéaire
+porte sur les centres distincts, jamais sur tous les `SupportKey` incidents.
+Le produit n'est pas un arrangement complet : il streame les niveaux
+`P-P/N-N/P-N` et rejoue Jung, distance `xy`, positivité, owner, census et
+`BallKey`. Preuve, correction du rayon de Jung, portée des dégénérescences et
+jalon borné :
+[`AUDIT_REPONSE_GENERATEUR_Q4_590683C_20260813.md`](audits/AUDIT_REPONSE_GENERATEUR_Q4_590683C_20260813.md).
 
 Au pin `4ce3618`, la nouvelle décomposition q3 contient une bonne
 caractérisation des triangles aigus mais un certificat sans rappel : comme le

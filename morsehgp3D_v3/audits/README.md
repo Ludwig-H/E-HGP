@@ -25,6 +25,12 @@ jamais réception.
   donne le vrai raccord `EdgeActiveFormCounter -> LocalShallowBall`, un
   certificat central q3 sûr qui remplace le hull, et le calcul exact de
   `max_a |E_q(a)|` en `O(F+n)` par range-add sur `GenerationRank`.
+- [`AUDIT_REPONSE_GENERATEUR_Q4_590683C_20260813.md`](AUDIT_REPONSE_GENERATEUR_Q4_590683C_20260813.md)
+  reçoit l'identité du plan médiateur et répond aux trois questions : q2 est
+  une requête au point zéro, q3 au pied d'une droite et q4 aux sommets shallow
+  du même tape de formes, sans dépendance entre sorties. Il corrige le disque
+  de Jung, étend la borne aux bundles/concurrences avec sa portée exacte et
+  fixe l'ordonnance `P-P/N-N/P-N`, l'oracle existant et le prochain micro-jalon.
 - [`AUDIT_RECU_CHAINE_G4_5DC65C7_20260813.md`](AUDIT_RECU_CHAINE_G4_5DC65C7_20260813.md)
   reçoit le dernier diagnostic G4 comme réfutation de la source par paire :
   `uniform` passe seulement la gate de pente mais reste à `78,84 s`, trois

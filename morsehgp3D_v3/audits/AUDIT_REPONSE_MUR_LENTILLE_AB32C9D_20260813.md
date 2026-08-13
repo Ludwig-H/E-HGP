@@ -15,9 +15,15 @@ celui du parent `7617eb9`. Au relevé initial, le worktree portait seulement des
 compléments documentaires concurrents dans les chemins autorisés. Aucun code
 n'a été modifié par l'auditeur et GCP n'a pas été utilisé.
 
+Pendant l'audit, le successeur `0eb65f1a68bc8ac6c0b11982c6f75ee33786fcf0`
+a archivé le transcript complet, retiré « uniform tient » et ajouté une gate au
+degré q2 résiduel. Ce progrès ne modifie pas les conclusions ci-dessous : ce
+degré est symétrique, hors chrono et distinct de `E_3/E_4`.
+
 ## Verdict direct
 
-Le diagnostic **change la priorité, pas le verdict sur le front de triplets**.
+Le diagnostic **renforce la priorité du shallow déjà fixée, sans changer
+l'ordre des portes ni le verdict sur le front de triplets**.
 
 1. Oui : la boucle q4 `for i in lens; for j>i` doit sortir immédiatement du
    chemin candidat. Le high-water croissant sur les familles structurées et la
@@ -78,6 +84,20 @@ L'égalité empirique de pentes sur `terrain` est suggestive, mais l'identité
 que la distribution entière se dilate comme son maximum et que les censuses ne
 changent pas de régime. Aucun de ces trois faits ne suit du high-water.
 
+Les autres transitions réfutent l'usage de cette égalité comme modèle causal :
+le maximum prédit des exposants `2,174`, `3,106/2,406` et `2,479` sur le premier
+segment `terrain`, `scanline` et `eight_clusters`, tandis que les temps rendent
+respectivement `3,188`, `2,458/2,242` et `1,769`. Une seule transition
+`terrain` coïncide.
+
+Une gate exacte de l'ancienne ordonnance existe déjà : deux pentes
+consécutives de `q4_pairs_walked`. Le reçu historique `eight_clusters` donne
+`2 446 467`, `17 892 952` puis `101 314 513` parcours à
+`n=100/200/400`, soit environ `2,87` puis `2,50`. Cela suffit au NO-GO de la
+double boucle ; cela n'attribue pas tout le temps à cette phase. Une ablation
+historique diminue fortement `site_evaluations` et le temps sans changer les
+parcours q4, preuve supplémentaire que plusieurs coûts étaient mêlés.
+
 Le reçu prouve néanmoins assez pour arrêter l'architecture actuelle : les
 sorties achevées croissent près de linéairement tandis que le temps explose, et
 le code contient explicitement la double boucle. Il n'est pas nécessaire de
@@ -112,6 +132,13 @@ packing estimée et la constante observée. La gate industrielle demeure
 inconditionnelle sur les cinq familles et plusieurs graines. Les cellules de
 packing sont les cellules canoniques ; des boîtes serrées ou un raffinement
 `MIXED` non borné n'héritent pas automatiquement de la borne.
+
+Même sous une vraie borne de `B=O(s^2)` cellules sur une nappe, q4 porte deux
+sites : il reste jusqu'à `O(B^2)=O(s^4)` couples de cellules. Deux cellules de
+`m` IDs ne représentent que deux blocs mais encore `m^2` couples ponctuels. Le
+reporter doit donc publier aussi `block_pair_mass`, la masse `MIXED`, les
+continuations et les formes distinctes ; le seul nombre de cellules n'est
+jamais une gate de travail.
 
 ## 3. Pourquoi un triplet aigu ne remplace pas q4
 
@@ -177,6 +204,24 @@ Ce certificat peut remplacer le hull vide dans la lane q3 de la wavefront. Il
 certifie des témoins intérieurs de toutes les circumboules q3 owner du bloc ;
 il ne génère aucun triangle et ne remplace jamais la relation q4 `P×L`.
 
+Si ce cœur central manque et si `M_3` devient réellement dominant, une version
+exacte conditionnée par un carrier ponctuel existe. Poser :
+
+```text
+d=b-a, u=x-a, v=z-a
+D=d dot d, E=u dot u, F=d dot u, G=D*E-F*F > 0
+W=E*(D-F)*d + D*(E-F)*u
+power_num=G*(v dot v) - v dot W
+```
+
+Le centre du cercle minimal est `a+W/(2G)` et `z` est strictement intérieur si
+et seulement si `power_num<0`. Les trois marges carrier sont
+`E+||d-u||^2-D>0`, `D-E>=0` et `D-||d-u||^2>=0`. Une borne d'intervalle ou de
+Bernstein reçue sur un bloc peut donc rendre `ALL_WITNESS` si son maximum est
+strictement négatif, `TRUE_NONE_WITNESS` si son minimum est positif ou nul, et
+`MIXED` sinon. Neuf unions d'IDs distinctes ferment un bloc q3 à `smax=11`.
+Cette P1 factorise le résiduel q3 ; elle ne décide toujours aucune boule q4.
+
 ## 5. Le vrai maximum de fenêtre coûte `O(F+n)`, pas la masse
 
 La note du parent `7617eb9` affirme que le maximum de `E_q(a)` exigerait de
@@ -226,11 +271,13 @@ donne à Claude le vrai `sum/max E_4` sans réintroduire le produit PairId.
 
 Ordre recommandé, avec arrêt immédiat sur métrique rouge :
 
-1. Ajouter les fates par lane et `EdgeWindowRangeAdd-v0`; recevoir son oracle
-   exact sans développer la masse dans le chemin candidat.
-2. Garder `BallFormToBallEvent-v0` comme oracle output-bearing borné. Il fixe
+1. Recevoir en parallèle les deux P0 indépendants :
+   `BallFormToBallEvent-v0` comme autorité output-bearing bornée, et les fates
+   par lane avec `EdgeWindowRangeAdd-v0` comme ledger exact sans PairId.
+   Le premier fixe
    `BallKey`, `I_B/U_B`, owner et l'identité que le shallow doit reproduire.
-3. Recevoir `PWC0-A` puis `EdgeActiveFormCounter-v0`. Le second publie
+2. Recevoir `PWC0-A` puis recalculer la fenêtre orientée sur ses fates finales.
+3. Recevoir `EdgeActiveFormCounter-v0`. Il publie
    `M=sum_e m_e`, tâches du dual-tree, blocs, hits, octets/HWM et
    continuations ; `M` seul ne borne pas les tâches.
 4. Implémenter `LocalShallowBall-v0` par bundles de droites confondues et

@@ -2878,7 +2878,7 @@ u16 ; un minimum continu ne suffit pas. Les produits croisés sont évalués en
 `ALL`. Ce certificat crédite/élague seulement des témoins q3 ; il ne génère
 aucun porteur et ne remplace jamais le join q4 `Acute×Lens`.
 
-Ne pas implémenter ce prune. La borne d'empilement `O(s^6 n)` peut seulement
+Ne pas implémenter le prune par hull. La borne d'empilement `O(s^6 n)` peut seulement
 décrire un front grossier de cellules dyadiques canoniques de taille comparable,
 sans raffinement non borné des `MIXED`. Elle ne vaut pas pour des boîtes serrées
 arbitraires et ne borne ni la masse relationnelle ni la sortie. Une future
