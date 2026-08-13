@@ -8,7 +8,82 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-## Observation live du successeur — `HEAD=b96751c`, worktree concurrent non figé
+## Observation live q3 — `HEAD=92d0c0f`, delta d'audit seulement
+
+Cette observation du 13 août 2026, snapshot `21:25:01 UTC`, supersède les
+observations historiques ci-dessous. Le `HEAD` est
+`92d0c0f0f6fcf3956608bbd406eefe770cb6f892`, commit
+`q3 is a binary relation, and the Callahan wave generalizes in two levels`.
+Le worktree était propre avant l'écriture du présent delta, qui reste limité à
+`README.md`, `PROPOSITION.md` et `audits/`. GCP non utilisé.
+
+Le source `prototype/wspd_wavefront_probe.cpp` a pour SHA-256
+`3ada9a78d544e58c1969cd41faa25020484937ca029f6855dff354ed69a0ef90`,
+`CMakeLists.txt`
+`349ee8560932044c343e72517cec738bbe6f21ae9c800974264e341acabb00a8`,
+et la note de Claude
+`de91bf08775030bd3f2a3f9fbc747616c47e087e88df3d13023cc300492915bd`.
+
+Le déblocage q3 est réel. Sous une arête maximale `ab`, la positivité
+géométrique du support de cardinal trois équivaut exactement à
+`||2x-a-b||^2>||b-a||^2`. La source candidate n'est donc pas une WSSD
+ternaire développée, mais la relation canonique
+`EdgeKey(ab) × PointId(x)`, suivie du pied unique et de son rang.
+
+Le rejeu local :
+
+```text
+cmake -S morsehgp3D_v3 -B build/v3 -DCMAKE_BUILD_TYPE=Release
+cmake --build build/v3 --parallel --target mhgp3v_wspd_wavefront_probe
+ctest --test-dir build/v3 --output-on-failure -R '^mhgp3v_wspd_wavefront_q3_'
+```
+
+rend `4/4` tests verts en `0,12 s`. Ces tests reçoivent les prunes et la
+couverture d'un porteur relativement à une incidence d'arête. Ils ne reçoivent
+pas l'exact-once global : le compteur est réinitialisé par terminal et une
+égalité de longueurs peut donner deux ou trois arêtes maximales. L'owner doit
+trancher par la plus petite `EdgeKey` après maximisation de la longueur.
+
+La pente plate des blocs par arête n'est pas encore un théorème. Les commandes
+emploient `--tight` et l'arrêt porte sur les AABB serrées ; celles-ci peuvent
+être arbitrairement petites et ne fournissent aucun packing volumique.
+`Q3CarrierPrefixRange-v0` répare la preuve : niveau Morton aligné fixé par
+`Dlo`, rapport `Dhi/Dlo` certifié, énumération directe des préfixes non
+vides, AABB serrée réservée aux prunes. Cela supprime aussi la redescente depuis
+la racine, déjà à `65 M` visites pour `n=2000`.
+
+Le chemin constructif remis à Claude est :
+
+```text
+fenêtre E3 finale
+  -> préfixes porteurs + owner + compteur M3
+  -> PrimitiveSphereKey et RLE des supports
+  -> Q3FootPowerRange LBVH, arrêt au neuvième intérieur
+  -> un census par sphère survivante
+  -> fold streamé
+```
+
+`PrimitiveSphereKey`, indépendante du shell, remplace la formule circulaire
+« BallKey avant census ». Les bas niveaux du `LineFormTape` restent un
+successeur si les visites LBVH sont rouges, pas le premier microkernel.
+
+La source est conditionnellement sparse et output-sensitive. Une construction
+réelle d'Edelsbrunner–Pach porte un nombre quadratique de q3 aigus vides
+distincts ; elle ne prouve pas ce pire cas à `50 000` sur la grille u16 fixe,
+mais interdit un claim universel de catalogue linéaire. La fixture u16
+cosphérique à `2 322 560` supports sur une sphère rappelle aussi que RLE
+économise le census, jamais les `SupportKey`.
+
+La fixture de rang live conserve enfin une attente erronée : `4 381`
+satellites plus les deux autres sommets donnent `4 383` voisins strictement
+plus proches, donc le rang 1-indexé attendu est `4 384`, pas `4 382`.
+
+Verdict, ABI, preuves et fixtures :
+[`AUDIT_REPONSE_Q3_RELATION_BINAIRE_92D0C0F_20260813.md`](AUDIT_REPONSE_Q3_RELATION_BINAIRE_92D0C0F_20260813.md).
+Le contrat G4 reste entièrement ouvert : aucun kernel, p95 ni
+`BenchmarkOutputContract-v1` complet n'est reçu.
+
+## Observation précédente — `HEAD=b96751c`, worktree concurrent non figé
 
 Cette observation du 13 août 2026, snapshot `20:51:52 UTC`, supersède le pin
 `590683c` de la section historique ci-dessous. Le `HEAD` est

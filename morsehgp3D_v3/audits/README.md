@@ -18,6 +18,13 @@ jamais réception.
 - [`AUDIT_ETAT_COURANT.md`](AUDIT_ETAT_COURANT.md) est l'unique verdict mutable :
   il distingue le `HEAD`, le delta éventuel du worktree, les empreintes utiles,
   les contre-exemples, les tests qualifiables et les portes ouvertes.
+- [AUDIT_REPONSE_Q3_RELATION_BINAIRE_92D0C0F_20260813.md](AUDIT_REPONSE_Q3_RELATION_BINAIRE_92D0C0F_20260813.md)
+  reçoit la réduction owner-edge × porteur et répond positivement à la question
+  du générateur q3. Il corrige l'oracle exact-once sur les égalités, remplace le
+  faux packing des boîtes tight par des préfixes Morton alignés, définit
+  PrimitiveSphereKey et Q3FootPowerRange-v0, puis réserve les niveaux shallow à
+  une ablation guidée par les visites. Les quatre verts live restent des portes
+  de couverture par incidence, pas une réception de M3, du census ou du SLO.
 - [`AUDIT_REPONSE_SEUIL_SEPARATION_RAFFINEMENT_LOCAL_B96751C_20260813.md`](AUDIT_REPONSE_SEUIL_SEPARATION_RAFFINEMENT_LOCAL_B96751C_20260813.md)
   répond aux trois questions live de Claude : l'intervalle directionnel est
   exact mais son classifieur rectangle reste suffisant/fail-open ; `rho` est un

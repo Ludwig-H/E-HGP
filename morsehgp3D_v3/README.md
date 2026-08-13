@@ -27,6 +27,24 @@ Le verdict lié au `HEAD` et au worktree est tenu uniquement dans
 [`AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md). Ne déduire aucun état
 live d'une note datée, d'un message de commit ou du seul passage d'un CTest.
 
+Au pin 92d0c0f, la seconde vague q3 confirme un déblocage positif : sous une
+arête maximale, l'acuité du triangle se réduit exactement au signe de
+$\left\Vert 2x-a-b\right\Vert^2-\left\Vert b-a\right\Vert^2$. La bonne source
+est donc owner-edge × porteur, puis un pied et une requête de rang, pas une WSSD
+ternaire développée. Les quatre CTests live reçoivent la couverture des
+porteurs par incidence d'arête, mais pas encore l'owner global en cas
+d'égalité, le packing O(s³), la masse M3 ni le census.
+
+La réparation produit proposée fixe un niveau Morton aligné par échelle
+d'arête, énumère les préfixes porteurs sans redescendre depuis la racine,
+préflight M3, forme et RLE une PrimitiveSphereKey indépendante du shell, puis
+effectue un range-count LBVH saturé au neuvième intérieur et un seul census par
+sphère survivante. Les niveaux shallow q3 ne viennent qu'en ablation si les
+visites LBVH sont rouges. Cette voie est exacte et GPU-factorisable sur les
+familles sparse ; elle reste output-sensitive parce que des nuages réels
+possèdent un nombre quadratique de q3 vides. Détails, preuve et fixtures :
+[AUDIT_REPONSE_Q3_RELATION_BINAIRE_92D0C0F_20260813.md](audits/AUDIT_REPONSE_Q3_RELATION_BINAIRE_92D0C0F_20260813.md).
+
 Au pin `ab32c9d`, le high-water de lentille confirme que la double boucle q4
 `C(n_lens,2)` est la première ordonnance à supprimer. Il ne prouve toutefois
 pas que tout le temps vient de ce seul terme : le transcript a omis

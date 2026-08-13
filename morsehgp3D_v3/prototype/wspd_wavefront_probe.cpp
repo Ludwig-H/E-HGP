@@ -419,7 +419,16 @@ int rang_fixture() {
 
   // Les satellites sont STRICTEMENT hors de la circumsphere — le support est
   // donc de profondeur zero — et STRICTEMENT plus proches de `a` que `b`.
+  //
+  // CORRECTION de l'audit `92d0c0f` : ma premiere version ne comptait que les
+  // satellites et affirmait le rang `4382`. Or `x` et `y` sont EUX AUSSI plus
+  // proches de `a` que ne l'est `b` — `1,95e9` contre `2,5e9`. Le rang
+  // 1-indexe de `b` vaut donc `4384`. J'avais oublie les deux autres sommets du
+  // support lui-meme.
   long long plus_proches = 0;
+  if (d2(a, x) < ab) ++plus_proches;
+  if (d2(a, y) < ab) ++plus_proches;
+  const long long attendus_hors_satellites = plus_proches;
   for (long long j = 1; j <= kSat; ++j) {
     const long long z[3] = {5000, 40000 + j, 30000};
     if (z[1] > 65535) {
@@ -433,9 +442,13 @@ int rang_fixture() {
     }
     if (d2(a, z) < ab) ++plus_proches;
   }
-  if (plus_proches != kSat) {
-    std::fprintf(stderr, "FIXTURE RANG: %lld satellites plus proches de `a` que `b`,"
-                         " %lld attendus\n", plus_proches, kSat);
+  if (plus_proches != kSat + attendus_hors_satellites) {
+    std::fprintf(stderr, "FIXTURE RANG: %lld voisins plus proches de `a` que `b`,"
+                         " %lld attendus\n", plus_proches, kSat + attendus_hors_satellites);
+    ++fautes;
+  }
+  if (attendus_hors_satellites != 2) {
+    std::fprintf(stderr, "FIXTURE RANG: `x` et `y` devraient tous deux preceder `b`\n");
     ++fautes;
   }
   if (fautes) {
@@ -604,6 +617,102 @@ int terme_t_fixtures() {
   return 0;
 }
 
+// ---- L'OWNER DOIT ETRE GLOBAL, SURTOUT SUR LES EGALITES.
+//
+// Choisir « une arete maximale faible » ne rend pas l'emission unique : un
+// triangle isocele en a deux, un equilateral trois. L'owner exact est
+// (1) maximiser la longueur carree, (2) a egalite, la plus petite `EdgeKey`
+// formee des deux `PointId` tries.
+//
+// Mon oracle de niveau deux remettait son compteur de couverture a zero pour
+// CHAQUE terminal WSPD. Il recevait donc l'unicite d'un porteur relativement a
+// une incidence d'arete, jamais l'unicite d'un `SupportKey` a travers les
+// terminaux. L'audit `92d0c0f` §2 a raison, et la fixture est son equilateral.
+inline bool owner_edge(const std::vector<std::array<long long, 3>>& p,
+                       int u, int v, int w) {
+  // `uv` est-elle l'arete owner du triangle `{u,v,w}` ?
+  auto d2 = [&](int i, int j) {
+    long long s = 0;
+    for (int k = 0; k < 3; ++k) { const long long d = p[i][k] - p[j][k]; s += d * d; }
+    return s;
+  };
+  const int e[3][2] = {{u, v}, {u, w}, {v, w}};
+  long long best = -1;
+  int bi = -1, bj = -1;
+  for (int i = 0; i < 3; ++i) {
+    const long long d = d2(e[i][0], e[i][1]);
+    const int lo = std::min(e[i][0], e[i][1]), hi = std::max(e[i][0], e[i][1]);
+    if (d > best || (d == best && (lo < bi || (lo == bi && hi < bj)))) {
+      best = d; bi = lo; bj = hi;
+    }
+  }
+  return bi == std::min(u, v) && bj == std::max(u, v);
+}
+
+int owner_fixtures() {
+  // Equilateral ENTIER de `Z^3` : les trois aretes carrees valent deux.
+  std::vector<std::array<long long, 3>> p = {{100, 100, 100}, {101, 101, 100}, {101, 100, 101}};
+  int fautes = 0;
+  auto d2 = [&](int i, int j) {
+    long long s = 0;
+    for (int k = 0; k < 3; ++k) { const long long d = p[i][k] - p[j][k]; s += d * d; }
+    return s;
+  };
+  if (d2(0, 1) != 2 || d2(0, 2) != 2 || d2(1, 2) != 2) {
+    std::fprintf(stderr, "FIXTURE OWNER: le triangle n'est pas equilateral\n");
+    ++fautes;
+  }
+  // TROIS incidences admissibles — chaque arete est maximale faible.
+  int admissibles = 0;
+  const int e[3][2] = {{0, 1}, {0, 2}, {1, 2}};
+  for (int i = 0; i < 3; ++i) {
+    const int w = 3 - e[i][0] - e[i][1];
+    if (d2(e[i][0], w) <= d2(e[i][0], e[i][1]) && d2(e[i][1], w) <= d2(e[i][0], e[i][1]))
+      ++admissibles;
+  }
+  if (admissibles != 3) {
+    std::fprintf(stderr, "FIXTURE OWNER: %d incidences admissibles, trois attendues\n",
+                 admissibles);
+    ++fautes;
+  }
+  // ET EXACTEMENT UN OWNER.
+  int owners = 0;
+  for (int i = 0; i < 3; ++i) {
+    const int w = 3 - e[i][0] - e[i][1];
+    if (owner_edge(p, e[i][0], e[i][1], w)) ++owners;
+  }
+  if (owners != 1) {
+    std::fprintf(stderr, "FIXTURE OWNER: %d owners pour un equilateral, un attendu\n", owners);
+    ++fautes;
+  }
+  // ISOCELE : deux aretes maximales, un seul owner.
+  std::vector<std::array<long long, 3>> q = {{0, 0, 0}, {4, 0, 0}, {2, 4, 0}};
+  int adm2 = 0, own2 = 0;
+  for (int i = 0; i < 3; ++i) {
+    const int w = 3 - e[i][0] - e[i][1];
+    auto r2 = [&](int a2, int b2) {
+      long long s = 0;
+      for (int k = 0; k < 3; ++k) { const long long d = q[a2][k] - q[b2][k]; s += d * d; }
+      return s;
+    };
+    const long long D = r2(e[i][0], e[i][1]);
+    if (r2(e[i][0], w) <= D && r2(e[i][1], w) <= D) ++adm2;
+    if (owner_edge(q, e[i][0], e[i][1], w)) ++own2;
+  }
+  if (adm2 != 2 || own2 != 1) {
+    std::fprintf(stderr, "FIXTURE OWNER: isocele rend %d admissibles et %d owners,"
+                         " deux et un attendus\n", adm2, own2);
+    ++fautes;
+  }
+  if (fautes) {
+    std::fprintf(stderr, "DESACCORD DU JUGE: %d fautes d'owner\n", fautes);
+    return 1;
+  }
+  std::printf("fixtures_owner accord=OUI equilateral admissibles=3 owners=1"
+              " isocele admissibles=2 owners=1\n");
+  return 0;
+}
+
 int main(int argc, char** argv) {
   std::string family = "uniform";
   std::vector<long long> ns;
@@ -648,6 +757,7 @@ int main(int argc, char** argv) {
     else if (a.rfind("--warms=", 0) == 0) g_warms = arg_ll(val("--warms=").c_str(), 1, 200, "warms");
     else if (a == "--fixtures-spindle") return spindle_fixtures();
     else if (a == "--fixtures-rang") return rang_fixture();
+    else if (a == "--fixtures-owner") return owner_fixtures();
     else if (a == "--fixtures-terme-t") return terme_t_fixtures();
     else if (a == "--q3-carriers") g_q3carriers = true;
     else if (a.rfind("--q3-sep=", 0) == 0) { g_q3carriers = true; g_q3s = arg_ll(val("--q3-sep=").c_str(), 1, 64, "q3-sep"); }
@@ -1545,15 +1655,15 @@ int main(int argc, char** argv) {
     }
     // ---- `Q3AcuteCarrierWave-v0` : la vague de niveau DEUX.
     if (g_q3carriers) {
-      long long blocs = 0, masse_bloc = 0, prune_obtus = 0, prune_nonmax = 0;
+      long long blocs = 0, prune_obtus = 0, prune_nonmax = 0;
+      __int128 masse_bloc = 0;
       long long splits = 0, visites = 0, hwm = 0, feuilles = 0;
       // Couverture par porteur, pour l'oracle : `couv[x]` compte les blocs
       // emis qui contiennent `x` pour le terminal courant.
-      std::vector<int> couv;
-      std::vector<long long> manques_par_cause(2, 0);
+      std::vector<unsigned char> couv;
       long long triples_aigus = 0, manques = 0, doublons = 0;
       const bool fait_oracle = (g_q3oracle > 0 && m <= g_q3oracle);
-      if (fait_oracle) couv.assign(sp.size(), 0);
+      if (fait_oracle) couv.assign((size_t)m * (size_t)m * (size_t)m, 0);
       for (size_t i = 0; i < terms.size(); ++i) {
         if (i < fate.size() && (fate[i] & 2u)) continue;      // lane q3 deja fermee
         const mhgp3v::WspdBox ba = cell_of(nodes, sp, terms[i].a);
@@ -1566,7 +1676,6 @@ int main(int argc, char** argv) {
         const long long dmin = mhgp3v::rect_minsq(qa, qb);
         const long long dmax = mhgp3v::rect_maxsq(qa, qb);
         const long long ka = count_of(nodes, terms[i].a), kb = count_of(nodes, terms[i].b);
-        if (fait_oracle) std::fill(couv.begin(), couv.end(), 0);
         std::vector<int> emis;
         int st[256];
         int sn = 0;
@@ -1594,7 +1703,14 @@ int main(int argc, char** argv) {
             ++blocs;
             if (feuille) ++feuilles;
             const long long kc = count_of(nodes, cid);
-            masse_bloc += ka * kb * kc;
+            // UN WRAP NE PEUT JAMAIS RENDRE UNE GATE VERTE (audit `92d0c0f` §5).
+            // Le produit `ka*kb*kc` deborde un `i64` bien avant les tailles
+            // visees ; on accumule en `i128` et on sature explicitement.
+            masse_bloc += (__int128)ka * kb * kc;
+            if (masse_bloc > (__int128)1 << 100) {
+              std::fprintf(stderr, "INVARIANT VIOLE: masse de blocs saturee\n");
+              return 3;
+            }
             if (fait_oracle) emis.push_back(cid);
             continue;
           }
@@ -1608,41 +1724,66 @@ int main(int argc, char** argv) {
           if (sn > hwm) hwm = sn;
         }
         if (!fait_oracle) continue;
-        // ORACLE : chaque triple AIGU dont `ab` est l'arete maximale doit tomber
-        // dans EXACTEMENT UN bloc emis. Un prune qui en mange un est refute.
+        // ORACLE GLOBAL, EXACT-ONCE SUR LE SUPPORT — pas seulement sur le
+        // porteur d'une incidence. L'audit `92d0c0f` §2 releve que je remettais
+        // la couverture a zero par terminal : je recevais l'unicite d'un porteur
+        // dans la partition d'une arete, jamais l'unicite d'un `SupportKey` a
+        // travers les terminaux. Un isocele a deux aretes maximales, un
+        // equilateral trois ; seul l'owner global tranche.
         for (int cid : emis) {
-          const int f = (cid < 0) ? (-1 - cid) : nodes[cid].first;
-          const int l = (cid < 0) ? (-1 - cid) : nodes[cid].last;
-          for (int r = f; r <= l; ++r) ++couv[(size_t)r];
-        }
-        const int fa = (terms[i].a < 0) ? (-1 - terms[i].a) : nodes[terms[i].a].first;
-        const int la = (terms[i].a < 0) ? (-1 - terms[i].a) : nodes[terms[i].a].last;
-        const int fb = (terms[i].b < 0) ? (-1 - terms[i].b) : nodes[terms[i].b].first;
-        const int lb = (terms[i].b < 0) ? (-1 - terms[i].b) : nodes[terms[i].b].last;
-        for (int u = fa; u <= la; ++u)
-          for (int v = fb; v <= lb; ++v) {
-            long long D = 0;
-            for (int d = 0; d < 3; ++d) { const long long w = sp[v][d] - sp[u][d]; D += w * w; }
-            for (size_t x = 0; x < sp.size(); ++x) {
-              if ((int)x == u || (int)x == v) continue;
-              long long E = 0, X = 0, V = 0;
-              for (int d = 0; d < 3; ++d) {
-                const long long e = sp[x][d] - sp[u][d], g = sp[x][d] - sp[v][d];
-                const long long w = 2 * sp[x][d] - sp[u][d] - sp[v][d];
-                E += e * e; X += g * g; V += w * w;
+          const int cf = (cid < 0) ? (-1 - cid) : nodes[cid].first;
+          const int cl = (cid < 0) ? (-1 - cid) : nodes[cid].last;
+          const int fa2 = (terms[i].a < 0) ? (-1 - terms[i].a) : nodes[terms[i].a].first;
+          const int la2 = (terms[i].a < 0) ? (-1 - terms[i].a) : nodes[terms[i].a].last;
+          const int fb2 = (terms[i].b < 0) ? (-1 - terms[i].b) : nodes[terms[i].b].first;
+          const int lb2 = (terms[i].b < 0) ? (-1 - terms[i].b) : nodes[terms[i].b].last;
+          for (int u = fa2; u <= la2; ++u)
+            for (int v = fb2; v <= lb2; ++v)
+              for (int x = cf; x <= cl; ++x) {
+                if (x == u || x == v) continue;
+                if (!owner_edge(sp, u, v, x)) continue;      // OWNER GLOBAL
+                long long D = 0, V = 0;
+                for (int d = 0; d < 3; ++d) {
+                  const long long w = sp[v][d] - sp[u][d];
+                  const long long z = 2 * sp[x][d] - sp[u][d] - sp[v][d];
+                  D += w * w; V += z * z;
+                }
+                if (V <= D) continue;                        // pas strictement aigu
+                int t[3] = {u, v, x};
+                std::sort(t, t + 3);
+                const long long key = ((long long)t[0] * m + t[1]) * m + t[2];
+                if (couv[(size_t)key] < 255) ++couv[(size_t)key];
               }
-              if (E > D || X > D) continue;          // `ab` n'est pas maximale
-              if (V <= D) continue;                  // pas strictement aigu en `x`
-              ++triples_aigus;
-              if (couv[x] == 0) { ++manques; ++manques_par_cause[0]; }
-              else if (couv[x] > 1) ++doublons;
-            }
-          }
+        }
       }
-      std::printf("q3_porteurs s=%lld : blocs=%lld masse=%lld feuilles=%lld"
+      if (fait_oracle) {
+        // Verite : tout triple AIGU, vu depuis son OWNER, doit avoir ete emis
+        // EXACTEMENT UNE FOIS sur l'ensemble des terminaux.
+        for (int u = 0; u < (int)m; ++u)
+          for (int v = u + 1; v < (int)m; ++v)
+            for (int x = v + 1; x < (int)m; ++x) {
+              // arete owner du triple, puis acuite relativement a elle
+              int oa = u, ob = v, ox = x;
+              if (owner_edge(sp, u, x, v)) { oa = u; ob = x; ox = v; }
+              else if (owner_edge(sp, v, x, u)) { oa = v; ob = x; ox = u; }
+              long long D = 0, V = 0;
+              for (int d = 0; d < 3; ++d) {
+                const long long w = sp[ob][d] - sp[oa][d];
+                const long long z = 2 * sp[ox][d] - sp[oa][d] - sp[ob][d];
+                D += w * w; V += z * z;
+              }
+              if (V <= D) continue;                          // pas un q3 positif
+              ++triples_aigus;
+              const long long key = ((long long)u * m + v) * m + x;
+              const int c = couv[(size_t)key];
+              if (c == 0) ++manques;
+              else if (c > 1) ++doublons;
+            }
+      }
+      std::printf("q3_porteurs s=%lld : blocs=%lld masse=%.6g feuilles=%lld"
                   " | prunes obtus=%lld non_maximale=%lld | splits=%lld visites=%lld"
                   " pile_max=%lld | blocs/pt=%.3f\n",
-                  g_q3s, blocs, masse_bloc, feuilles, prune_obtus, prune_nonmax,
+                  g_q3s, blocs, (double)masse_bloc, feuilles, prune_obtus, prune_nonmax,
                   splits, visites, hwm, (double)blocs / (double)m);
       if (fait_oracle) {
         std::printf("q3_oracle triples_aigus=%lld manques=%lld doublons=%lld\n",

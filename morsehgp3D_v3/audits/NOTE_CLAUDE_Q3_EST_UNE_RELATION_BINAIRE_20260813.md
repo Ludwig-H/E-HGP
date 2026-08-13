@@ -26,8 +26,15 @@ c'est **exactement le test du cœur q2, au signe près**, sur la même quantité
 entière que `rect_front.hpp` calcule déjà. Aucune algèbre nouvelle, aucune
 nouvelle largeur.
 
-Vérifiés par tirage sur `66 581` triples dont `ab` est maximale : **zéro
-contre-exemple** aux deux énoncés.
+**Correction de méthode, audit `92d0c0f` §1.** J'ai vérifié ces deux énoncés
+par tirage sur `66 581` triples. C'était inutile : l'identité
+`V\cdot V - D = 2(E+X-D) = 4(E-F)` les **prouve**, avec
+`E=\lVert x-a\rVert^2`, `F=(b-a)\cdot(x-a)`. Un tirage ne reçoit pas ce qu'une
+identité démontre, et j'aurais dû la chercher d'abord.
+
+Il faut aussi distinguer deux sens du mot binaire : le support porte toujours
+**trois** `PointId` ; c'est la **relation de calcul** qui est binaire,
+`EdgeKey(ab) x PointId(x)`. Cette réduction ne fusionne pas les lanes.
 
 Conséquence : le porteur vit dans `lentille(ab)` **privée** de la boule
 diamétrale, région de diamètre `\sqrt{3} D`. Il n'y a donc pas de WSSD de
@@ -62,6 +69,26 @@ tout obtus   : max V^2 < min D^2                    (strict)
 arret        : s^2 diam^2(C) <= min D^2             ou C feuille
 ```
 
+## 2 bis. Rétractation : le packing `O(s^3)` ne suit pas de boîtes serrées
+
+L'audit `92d0c0f` §3 réfute ma borne, et il a raison. Toutes mes commandes
+nominales passent `--tight`, donc `cell_of` rend `tlo/thi`. **Une boîte serrée
+certifie les extrema, elle n'est pas une cellule dyadique de volume
+comparable** : des sous-arbres disjoints en `PointId` peuvent avoir des AABB
+serrées qui se chevauchent et des diamètres arbitrairement plus petits que le
+seuil. Un nombre non borné de feuilles de diamètre nul tient dans la même
+région. Le premier nœud serré satisfaisant une simple borne supérieure de
+diamètre ne fournit donc **aucun** argument d'empilement.
+
+Les `23,6` à `32,4` blocs par arête restent un signal encourageant, jamais une
+preuve. La réparation qu'ils donnent est `Q3CarrierPrefixRange-v0` : fixer un
+niveau dyadique `h` par `s_3^2 w_2(h) \le D_{lo}`, énumérer les **préfixes
+Morton alignés** qui rencontrent l'intersection des deux voisinages
+nécessaires, et n'employer la boîte serrée que pour les prunes. La cellule
+alignée porte l'arrêt et la preuve ; deux recherches binaires donnent
+l'intervalle. Cela remplace aussi mes descentes depuis la racine, qui font déjà
+`65` millions de visites à `n=2 000` et ne doivent pas être transcrites en CUDA.
+
 ## 3. La première porte est la multiplicité, pas une mesure
 
 Comme pour la WSPD de paires. L'oracle énumère tous les triples, retient ceux
@@ -77,8 +104,19 @@ mange un est réfuté ; un bloc qui en compte deux aussi.
 | `4` | `50 906` | `38 475` | `3 526` | `28 413` | `126 779` | `0` | `0` |
 | `8` | `60 289` | `57 742` | `4 327` | `30 324` | `126 779` | `0` | `0` |
 
-Quatre portes ajoutées : la multiplicité à deux séparations, la même sur
-`eight_clusters`, et le plancher de blocs prouvé mordant.
+**L'oracle a été refait après l'audit `92d0c0f` §2.** Il remettait sa
+couverture à zéro par terminal : il recevait donc l'unicité d'un porteur dans la
+partition d'une **incidence d'arête**, jamais l'unicité d'un `SupportKey` à
+travers les terminaux. Un isocèle a deux arêtes maximales, un équilatéral trois.
+L'oracle applique désormais l'**owner global** — longueur carrée maximale, puis
+plus petite `EdgeKey` de `PointId` triés — et compte les émissions par triple sur
+toute la course : `126 776` triples aigus, `0` manque, `0` doublon, aux trois
+séparations et sur `eight_clusters` (`130 111`). La fixture de l'owner est
+l'équilatéral entier de `Z^3` de l'audit, plus un isocèle : trois incidences
+admissibles et un seul owner, deux et un.
+
+Cinq portes ajoutées : la multiplicité globale à deux séparations, la même sur
+`eight_clusters`, le plancher de blocs prouvé mordant, et l'owner.
 
 ## 4. La mesure, et une auto-correction
 
@@ -101,6 +139,18 @@ de la conception, et il tient sur cette plage. Le total ne suit alors que le
 front de la WSPD, dont la linéarité est une question déjà connue et séparée — il
 est encore à `240/pt` et en régime transitoire à `n=2 000`.
 
+## 4 bis. Deux défauts de mon code, corrigés
+
+La masse des blocs s'accumulait dans un `long long` signé par le produit
+`k_A k_B k_C` : **un wrap ne peut jamais rendre une gate verte**, et
+l'accumulation est passée en `i128` avec saturation explicite refusée.
+
+Ma fixture de rang affirmait `4382`. Elle est fausse : `x` et `y` sont
+**eux-mêmes** plus proches de `a` que ne l'est `b` — `1,95\cdot 10^{9}` contre
+`2,5\cdot 10^{9}` —, donc le rang 1-indexé du partenaire vaut `4384`. J'avais
+oublié les deux autres sommets du support lui-même. Corrigé, et la porte le
+vérifie maintenant explicitement.
+
 ## 5. Ce que cela ne prouve pas
 
 Votre objection principale reste entière et je ne la conteste pas : **le nombre
@@ -116,6 +166,14 @@ famille précise, la circumboule contient environ `3m/2` points, donc le
 certificat de rang ferme la paire au **niveau un** et le bloc n'est jamais émis.
 La contre-famille attaque l'acuité seule, pas le schéma composé — ce qui ne
 transforme aucune des deux en borne.
+
+Il y a de plus une obstruction **régulière**, et pas seulement cosphérique, que
+l'audit apporte : Edelsbrunner et Pach construisent `N=2n+2` points de `R^3`
+portant `2n(n+1)` triangles de Delaunay critiques, aigus, de profondeur nulle et
+à sphères vides **distinctes**. Tout catalogue explicite de `SupportKey` ou de
+sphères q3 a donc un **pire cas quadratique**. Cela n'interdit pas un générateur
+exact sortie-sensible rapide sur les familles du contrat, mais cela oblige à
+publier les compteurs de sortie et à refuser proprement par ressource.
 
 Ni `BallKey`, ni census, ni multiplicité de `SupportKey`, ni rang ne sont
 décidés ici. Ce niveau est un énumérateur de blocs, et sa sortie est destinée à

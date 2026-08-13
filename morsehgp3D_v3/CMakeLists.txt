@@ -4090,11 +4090,15 @@ set_tests_properties(mhgp3v_wspd_wavefront_fixtures_spindle PROPERTIES
 # LA COUPURE PAR RANG EST REFUTEE, DEFINITIVEMENT. C'est ma propre proposition
 # que cette fixture ferme : l'audit `b96751c` §2 rend un support q4 POSITIF, de
 # profondeur ZERO et d'arete maximale UNIQUE, dont le second endpoint est
-# au-dela du rang `4381`. Aucun seuil de rang ne peut donc etre exact.
+# au-dela du rang `4383`. Aucun seuil de rang ne peut donc etre exact.
+#
+# CORRECTION `92d0c0f` : `x` et `y` sont EUX AUSSI plus proches de `a` que ne
+# l est `b`, donc le rang 1-indexe du partenaire vaut `4384` et non `4382`.
+# J avais oublie les deux autres sommets du support lui-meme.
 add_test(NAME mhgp3v_wspd_wavefront_fixtures_rang
   COMMAND mhgp3v_wspd_wavefront_probe --fixtures-rang)
 set_tests_properties(mhgp3v_wspd_wavefront_fixtures_rang PROPERTIES
-  PASS_REGULAR_EXPRESSION "fixtures_rang accord=OUI rang_du_partenaire=4382")
+  PASS_REGULAR_EXPRESSION "fixtures_rang accord=OUI rang_du_partenaire=4384")
 
 # LE TERME DIRECTIONNEL SUR UN RECTANGLE, ET L'AUDIT DE SA PRESCRIPTION.
 #
@@ -4166,3 +4170,13 @@ mhgp3v_add_expected_code_test_for(mhgp3v_wspd_wavefront_probe
   mhgp3v_wspd_wavefront_q3_plancher_mord "PLANCHER" 3
   --family=uniform --points=120 --coord=512 --sep-euclid=2/1 --tight
   --q3-sep=4 --min-blocs=999999999)
+
+# L'OWNER DOIT ETRE GLOBAL, SURTOUT SUR LES EGALITES. Choisir « une arete
+# maximale faible » ne rend pas l'emission unique : un isocele en a deux, un
+# equilateral trois. L'owner exact maximise la longueur carree puis, a egalite,
+# prend la plus petite `EdgeKey` de `PointId` tries. La fixture est
+# l'equilateral ENTIER de `Z^3` de l'audit `92d0c0f` §2.
+add_test(NAME mhgp3v_wspd_wavefront_fixtures_owner
+  COMMAND mhgp3v_wspd_wavefront_probe --fixtures-owner)
+set_tests_properties(mhgp3v_wspd_wavefront_fixtures_owner PROPERTIES
+  PASS_REGULAR_EXPRESSION "equilateral admissibles=3 owners=1 isocele admissibles=2 owners=1")

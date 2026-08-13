@@ -3040,3 +3040,122 @@ aucune compatibilité avec la seconde G4.
 
 Preuves, contre-fixtures et directive complète :
 [`AUDIT_REPONSE_WSSD_Q3_ET_FENETRE_CERTIFIEE_B96751C_20260813.md`](audits/AUDIT_REPONSE_WSSD_Q3_ET_FENETRE_CERTIFIEE_B96751C_20260813.md).
+
+## 18. Source q3 positive au pin 92d0c0f : owner-edge, préfixes et pieds
+
+La vague q3 du pin confirme le bon changement de variable. Un q3 n'est pas
+énuméré comme un triplet libre : il est généré comme une incidence entre son
+arête maximale canonique et un porteur. Cette relation ne devient une source
+produit qu'après correction de l'owner, du packing et de l'aval de rang.
+
+### 18.1 Identité reçue et owner exact
+
+Pour $d=b-a$, $u=x-a$, $D=d\cdot d$, $E=u\cdot u$,
+$F=d\cdot u$ et $X=D+E-2F$, supposer $D\geq E$ et $D\geq X$.
+Les deux angles adjacents à l'arête maximale sont alors strictement aigus, et
+l'acuité du triangle équivaut à celle de l'angle en x :
+
+$$\left\Vert 2x-a-b\right\Vert^2-D=2(E+X-D).$$
+
+La positivité géométrique q3 est donc le test strict
+$\left\Vert 2x-a-b\right\Vert^2>D$. L'égalité reste hors q3. L'owner est
+l'arête de longueur carrée maximale, puis la plus petite EdgeKey triée en cas
+d'égalité. Un oracle par terminal ne reçoit pas cet exact-once global :
+l'équilatéral entier
+$(100,100,100),(101,101,100),(101,100,101)$ possède trois incidences faibles
+mais un seul owner.
+
+### 18.2 Q3CarrierPrefixRange-v0
+
+L'arrêt sur la boîte serrée du nœud porteur ne prouve aucun O(s³) : des boîtes
+serrées disjointes en identités peuvent être arbitrairement petites et se
+chevaucher. Le niveau deux emploie donc des cellules Morton virtuelles alignées.
+
+Pour chaque terminal A×B, recevoir $Dlo>0$, $Dhi$ et
+$Dhi/Dlo\leq\kappa(s_1)$. Choisir le niveau h dont la diagonale w2 vérifie
+$s_3^2w2\leq Dlo$ alors que le parent échoue. Énumérer les préfixes h qui
+rencontrent l'intersection des deux voisinages nécessaires
+$\mathrm{dist}(x,A)^2\leq Dhi$ et
+$\mathrm{dist}(x,B)^2\leq Dhi$. Les cellules sont disjointes et comparables ;
+à paramètres fixes, leur nombre est O(s³). Deux recherches dans les codes
+Morton triés rendent l'intervalle de points de chaque préfixe. L'AABB serrée de
+l'intervalle sert aux prunes exactes, jamais à l'argument de packing.
+
+Cette ordonnance évite la redescente depuis la racine pour chaque terminal.
+Une vague persistante équivalente est admissible si elle conserve le niveau
+canonique et sérialise ses continuations.
+
+Le résultat reste un front symbolique. EdgeActiveCarrierCounter-q3 classe les
+marges $D-E\geq 0$, $D-X\geq 0$ et $E+X-D>0$, raffine les MIXED et publie
+$M_3=\sum_e m_e$. Count précède fill ; une masse ou une allocation impossible
+produit un refus atomique de ressource, jamais une troncature.
+
+### 18.3 PrimitiveSphereKey puis Q3FootPowerRange-v0
+
+Pour chaque incidence owner, poser $G=DE-F^2>0$ et
+$W=E(D-F)d+D(E-F)u$. Son unique centre vaut
+$c=a+\frac{W}{2G}$ et son prédicat de puissance entier est :
+
+$$P_x(z)=G\left\Vert z-a\right\Vert^2-(z-a)\cdot W.$$
+
+Intérieur strict signifie $P_x(z)<0$ ; shell signifie $P_x(z)=0$. Avant tout
+census, former la PrimitiveSphereKey du polynôme absolu :
+
+$$A=G,\qquad B=-(2Ga+W),\qquad C=G\left\Vert a\right\Vert^2+a\cdot W.$$
+
+Réduire les cinq coefficients par leur pgcd, imposer $A>0$, radix/RLE et garder
+la side-list des SupportKey. Cette clé ne dépend pas du shell. La BallKey
+sémantique, I_B et U_B viennent après census.
+
+Le premier backend est une vague LBVH persistante par run de sphère. Sur une
+AABB entière, chaque terme $Gv_i^2-W_iv_i$ a son minimum aux deux entiers
+voisins de $W_i/(2G)$ clipés et son maximum à une extrémité. Une borne
+maximale négative crédite la population ; une borne minimale non négative
+élague ; le reste se scinde. Le neuvième intérieur strict rejette q3 sous
+smax=11. Chaque run survivant paie un seul census complet. Sous u16, prévoir
+environ 105 bits signés et une ABI device à deux limbs.
+
+### 18.4 Niveaux q3 seulement en successeur
+
+Si les visites LBVH sont rouges, Q3FootLevelLocate-v1 construit localement les
+$k+1$ niveaux bas des formes P et hauts des formes N, avec
+$k=8-c_{\mathrm{inside}}$, puis localise tous les pieds. Pour k fixé, la
+complexité combinatoire des premiers niveaux est O(mk), ce qui suggère une
+cible locale O(m log m+mk+H). Cette cible n'est pas encore reçue pour les
+bundles pondérés, concurrences et lignes incidentes ; v0 reste son oracle.
+
+### 18.5 Portée produit
+
+Le chemin candidat complet devient :
+
+    CertifiedCageWindow/PWC et pending consommés
+      -> fenêtre E3
+      -> Q3CarrierPrefixRange
+      -> owner et compteur M3
+      -> PrimitiveSphereKey RLE
+      -> Q3FootPowerRange capé à neuf
+      -> census unique
+      -> fold streamé
+
+Il ne construit ni Delaunay global, ni mosaïque d'ordre supérieur, ni
+arrangement global. Une WSSD aiguë reste une ablation possible du front de
+porteurs, comparée sur le travail transitif jusqu'au fold.
+
+La source est output-sensitive, pas linéaire au pire. La construction
+d'Edelsbrunner–Pach porte $2n(n+1)$ triangles Delaunay critiques sur
+$N=2n+2$ points réels de dimension trois : autant de q3 aigus vides distincts.
+Elle ne donne pas directement un pire cas 50 000 sur la grille u16 fixe, mais
+interdit toute promesse générale de catalogue sous-quadratique. Le contrat
+reste compatible : les familles favorables sparse visent le SLO, les sorties
+lourdes sont préflightées et refusées exactement si aucun quotient reçu ne les
+absorbe.
+
+Ledger bloquant : E3, blocs ALL/NONE/MIXED, cellules de préfixe, M3, pieds,
+PrimitiveSphereKey brutes et uniques, tâches et visites LBVH, populations
+créditées, rejets au neuvième, survivants, census, shell, opérations larges,
+octets/HWM, pending et temps par phase. La réception compare
+(BallKey,SupportKey,I_B,U_B,owner) à BallFormToBallEvent-v0 sous permutations,
+tilings, égalités et continuations.
+
+Audit et fixtures :
+[AUDIT_REPONSE_Q3_RELATION_BINAIRE_92D0C0F_20260813.md](audits/AUDIT_REPONSE_Q3_RELATION_BINAIRE_92D0C0F_20260813.md).
