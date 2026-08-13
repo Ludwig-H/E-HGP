@@ -16,33 +16,37 @@ Le contrat v3 associé demeure hors registre :
 - `mode=audit_independant_math_and_architecture`
 - `public_status=not_claimed`
 
-Après synchronisation distante, l'audit v3 consulté n'est toujours pas frais : son observation live épingle `HEAD=33df59d451dc1c534a1fd5f1572e938472744fef`, tandis que `origin/main` était déjà à `81d24d05142219aa0c5e9b00d129b72b03f0e85e` avant ce commit documentaire. Ce constat interdit de transformer la disponibilité supposée de la hiérarchie en claim produit ou GPU sur MorseHGP3D.
+Au dernier fetch avant livraison, l'audit versionné épinglait `HEAD=dfa9e1b2950a11ef67f7a57463770c5be68059fb`, tandis que `origin/main=75f16db686ca48c87c277742ec3b069ca9c49767` contenait déjà des commits ultérieurs. Il n'était donc pas frais. Ce contrôle doit être refait au runtime après toute synchronisation ; tant que le pin, le `HEAD` et le worktree ne coïncident pas, la disponibilité supposée de la hiérarchie ne devient ni un claim produit ni un claim GPU sur MorseHGP3D.
 
 ## Verdict honnête
 
-Chaque cluster doit porter un **vecteur de proportions sur les 19 classes**, et non un label unique. La cible d'un nœud est la distribution empirique de ses points ; les feuilles point sont le cas one-hot. La version minimale « fonction support normalisée seule + proportions de cluster comme seul décodeur » a néanmoins peu de chances d'atteindre l'état de l'art : la fonction support perd concavités, densité et intérieur, tandis que les proportions conservent la masse des classes mais pas leur localisation à l'intérieur d'un cluster mixte.
+Chaque cluster doit porter un **vecteur de proportions sur les 19 classes**, et non un label unique. La cible d'un nœud est la distribution empirique de ses points ; les feuilles point sont le cas one-hot. Une représentation qui se limiterait à la fonction support normalisée et à ces proportions aurait peu de chances d'atteindre l'état de l'art : le support perd la non-convexité, tandis que les proportions conservent la masse des classes mais pas leur localisation à l'intérieur d'un cluster mixte.
 
-La réalisation géométrique du $K$-polyèdre ne résout pas cette perte par un second maximum. Si elle est l'union des simplexes de la composante, sa fonction support est exactement celle de l'union de leurs sommets. Le « maximum de la norme dans une direction » est plutôt une **fonction radiale extérieure** : elle reconstruit exactement seulement une forme étoilée autour du centre et remplit sinon les trous radiaux. Un cube plein et sa frontière ont ainsi chacun le même support et la même fonction radiale extérieure que l'autre. Ces faits deviennent des fixtures obligatoires, pas de nouveaux claims.
+La proposition étudiée est plus forte : elle couple le support normalisé à un **objet HGP marqué complet relativement à un profil déclaré**, de taille variable, dont le carrier géométrique peut être non convexe. Ce second canal conserve les points, les $(K-1)$-facettes actives, les cofaces de connexion, les incidences, les coordonnées et les niveaux de filtration requis par ce profil. Il n'est ni une seconde fonction support, ni un seul maximum radial, ni un histogramme de cellules. Une fonction radiale extérieure n'est qu'une ablation compressée et lossy ; ses contre-exemples ne réfutent pas le canal polyédral complet.
+
+La définition HGP exige toutefois de distinguer trois objets. À un niveau $a=r^2$, le $K$-polyèdre source est l'union $V_v=C_v$ des observations d'une composante du graphe des $(K-1)$-facettes. Le porteur PL $P_v^{\mathrm{PL}}=\bigcup_F\mathrm{conv}(F)$ est non convexe mais son support égale celui de $V_v$. En revanche, le porteur canonique de multicoverture $W_v(a)=\bigcup_F\bigcap_{x\in F}\overline{B}(x,\sqrt{a})$, composante du niveau de densité correspondant, n'a pas en général le support de $V_v$. L'identité support–sommets ne réfute donc ni le complexe complet ni $W_v(a)$ ; elle interdit seulement de faire du support du porteur PL un second canal informatif.
+
+Le canal complet sérialise les facettes, cofaces de connexion, incidences, coordonnées et niveaux de façon suffisante pour reconstruire le carrier choisi. Comme une composante persistante évolue entre sa naissance et sa fusion, chaque readout doit aussi fixer une politique de coupe, son niveau, son côté ouvert ou fermé et ses deltas ; la baseline recommandée lit chaque branche juste avant sa fusion au parent. La v3 actuelle ne livre pas encore ce payload : son chemin réduit vise les composantes H0, leurs niveaux et unions de `PointId`, tandis que les facettes, cofaces et incidences exhaustives restent un oracle borné. Leur disponibilité demeure une dépendance de recherche, sous `public_status=not_claimed`.
 
 La piste élargie reste crédible et potentiellement forte :
 
 1. un backbone local point/voxel conserve le détail et produit les features de feuilles ;
 2. la hiérarchie HGP fournit une structure exogène multi-échelle ;
-3. des sketches de masse ou de topologie et une mesure sur les simplexes — centres, formes, niveaux de naissance et incidences — complètent les canaux support/radial ;
+3. un encodeur d'incidences traite l'objet HGP marqué sans réduire immédiatement ses facettes et cofaces à une moyenne ; le support fournit en parallèle un raccourci global de dimension fixe ;
 4. les feuilles prédisent leurs distributions et chaque nœud déduit exactement ses proportions par moyenne massique de ses descendants ;
 5. un ou deux blocs hiérarchiques tardifs propagent le contexte ; HSA sert de baseline fidèle et un raffinement conditionné par la requête n'est retenu que s'il apporte un certificat fidélité–coût calculable ;
 6. un décodeur point-fin et un chemin résiduel localisent les classes et préservent les frontières.
 
-La probabilité d'un SOTA par la seule idée initiale est faible. Une contribution de haut niveau reste plausible si les expériences démontrent causalement que l'arbre HGP apporte plus qu'un octree, des superpoints, RSL/HDBSCAN ou un arbre aléatoire, et que l'opérateur hiérarchique apporte plus qu'un simple pooling sur le même arbre.
+Cette représentation corrigée traite réellement la convexification et constitue une hypothèse de papier cohérente. Elle ne rend pas le SOTA probable à elle seule : une contribution de haut niveau reste plausible seulement si les expériences démontrent causalement que le complexe et l'arbre HGP apportent plus qu'un octree, des superpoints, RSL/HDBSCAN ou des complexes contrôles, et que l'opérateur hiérarchique apporte plus qu'un simple pooling ou message passing au même budget.
 
 ## Question scientifique centrale
 
-> À backbone, budget, features et protocole constants, une hiérarchie de niveaux de densité HGP améliore-t-elle la segmentation sémantique LiDAR, notamment pour les classes rares et lointaines, par rapport aux structures hiérarchiques géométriques ou apprises existantes ?
+> À backbone, budget, features et protocole constants, un objet HGP marqué, son carrier déclaré et sa hiérarchie de niveaux de densité améliorent-ils la segmentation sémantique LiDAR, notamment pour les classes rares et lointaines, par rapport aux structures géométriques, simpliciales ou apprises existantes ?
 
 Cette question est séparée en trois effets identifiables :
 
 - **effet arbre** : HGP contre les autres structures, avec le même opérateur ;
-- **effet représentation** : support et attributs HGP contre des descripteurs de même dimension ;
+- **effet représentation** : objet HGP seul et support + même objet contre des encodeurs de points, graphes et complexes à budget apparié ;
 - **effet opérateur** : HSA contre pooling, message passing et attention locale, avec le même arbre.
 
 Le [programme du résultat théorique](THEOREM_PROGRAM.md) propose une famille `QC-HSA` : chaque feuille voit les cibles par sous-arbres frères successifs, sans partager sa ligne d'attention avec les autres feuilles de sa branche. Sa projection reverse-KL possède une forme fermée et optimise une famille plus large que HSA sur le même arbre, au prix d'environ $N\log_2N$ interactions sur un arbre binaire équilibré contre un coût structurel linéaire pour HSA. Elle est exacte pour des scores constants sur chaque couple de branches de fusion. Ce résultat reste technique ; il ne peut devenir central qu'avec un certificat HGP non vacu, un audit d'antériorité favorable et un coût réel compétitif.
@@ -69,13 +73,15 @@ Le prototype de référence utilisera les **points ou micro-voxels comme feuille
 
 Les feuilles produisent $p_i\in\Delta^{18}$ et un nœud calcule $\widehat\pi_v^{\mathrm{all}}=n_v^{-1}\sum_{i\in C_v}p_i$, ou récursivement la moyenne de ses enfants pondérée par leurs cardinalités. Les proportions GT sur les seuls labels valides restent exclusivement des cibles d'entraînement et ne participent jamais au forward de validation/test ni à la construction HGP. La prédiction officielle demeure une distribution par point ; les proportions internes apportent un état multiscale cohérent, pas un label diffusé uniformément.
 
-La fonction support est conservée comme canal de forme convexe et non comme identité complète du nœud. Le rayon extérieur, les intersections multi-segments et ECT/WECT sont des variantes contrôlées par [l'audit géométrique](GEOMETRIC_DESCRIPTOR_AUDIT.md), non des ajouts supposés gagnants. Le descripteur candidat combine d'abord :
+Le nœud reçoit deux branches géométriques explicites. La branche courte échantillonne le support normalisé des observations, canal de forme convexe global. La branche structurelle encode l'objet HGP marqué, avec tokens de points/facettes/cofaces, arêtes d'incidence et résumés des régions témoins de $W_v(a)$, avant un readout invariant au réindexage. Comme le payload marqué contient déjà les observations, leur support ne prétend pas ajouter de l'information au carrier source ou PL ; il doit justifier son rôle de raccourci calculatoire dans l'ablation `objet complet seul` contre `support + objet complet`. Cette redondance ne s'étend pas au support propre de $W_v(a)$.
 
-- support maximal et CDF/histogrammes de projections directionnelles, avec quantiles robustes en complément ;
+Le descripteur candidat conserve aussi :
+
 - centre, `log(rayon d'échelle)`, cardinalité et géométrie relative parent–enfant ;
-- niveau de densité, naissance, mort et persistance HGP ;
+- niveau de densité, naissance, mort, persistance HGP et plateaux de filtration ;
+- géométrie normalisée des cellules, incidences et cofaces de fusion ;
 - anisotropie/covariance, portée, hauteur et statistiques de rémission ;
-- attributs simpliciaux ou topologiques seulement s'ils battent CDF, moments et Deep Sets à budget égal.
+- CDF, Deep Sets, ECT/WECT et rayon extérieur comme contrôles ou ablations, pas comme substituts implicites du complexe complet.
 
 ## Portes avant entraînement lourd
 
@@ -83,7 +89,8 @@ Le projet ne passe au modèle complet que si les diagnostics suivants sont satis
 
 - l'arbre HGP présente un alignement sémantique supérieur aux arbres de contrôle à compression égale ;
 - une tokenisation éventuelle conserve assez d'information pour prédire les proportions **et** relocaliser les classes au niveau point ; sinon les points restent feuilles ;
-- les collisions du support, du rayon extérieur et des transformées finies sont mesurées, avec la fraction de nœuds étoilés et de rayons vides ;
+- le round-trip de l'objet marqué est exact à réindexage près, reconstruit le porteur déclaré et l'encodeur distingue des objets ayant mêmes points et même support mais des incidences ou régions témoins différentes ;
+- toute condensation mesure les collisions qu'elle introduit ; le rayon extérieur conserve séparément ses diagnostics de forme étoilée comme simple ablation ;
 - l'effet de portée du capteur ne domine pas les niveaux de densité ;
 - la profondeur, les degrés et la mémoire de la hiérarchie sont compatibles avec des batches GPU utiles.
 
@@ -93,7 +100,8 @@ Les critères chiffrés et les règles d'arrêt sont dans [RISKS_AND_GO_NO_GO.md
 
 - [HGP_HSA_SemanticKITTI.md](HGP_HSA_SemanticKITTI.md) : hypothèse scientifique révisée et variantes.
 - [REVIEWER_VERDICT.md](REVIEWER_VERDICT.md) : décision honnête, questions de reviewer et barre de preuve par venue.
-- [GEOMETRIC_DESCRIPTOR_AUDIT.md](GEOMETRIC_DESCRIPTOR_AUDIT.md) : support, rayon, topologie, contre-exemples et théorèmes candidats.
+- [POLYHEDRAL_COMPLEX_BRANCH.md](POLYHEDRAL_COMPLEX_BRANCH.md) : contrat du complexe HGP complet, architecture d'incidence et théorèmes candidats.
+- [GEOMETRIC_DESCRIPTOR_AUDIT.md](GEOMETRIC_DESCRIPTOR_AUDIT.md) : audit des compressions directionnelles, dont support et rayon, et contrôles topologiques.
 - [THEOREM_PROGRAM.md](THEOREM_PROGRAM.md) : proposition technique, esquisse de preuve et pont conditionnel vers les niveaux de fusion.
 - [ARCHITECTURE.md](ARCHITECTURE.md) : contrat d'entrée, descripteurs et modèle hybride proposé.
 - [RESEARCH_PLAN.md](RESEARCH_PLAN.md) : lots de travail, ordre des décisions et livrables.

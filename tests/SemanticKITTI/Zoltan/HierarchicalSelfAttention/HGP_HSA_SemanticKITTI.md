@@ -8,6 +8,12 @@ Soit un scan LiDAR $X=\left\lbrace x_i \in \mathbb{R}^{3}\right\rbrace_{i=1}^{N}
 
 HSA requiert une forêt enracinée et laminaire. Le contrat d'entrée doit donc livrer une relation parent–enfant sans ambiguïté et un mapping stable des points vers les feuilles. Si une construction HGP d'ordre supérieur produit des appartenances ponctuelles qui se chevauchent, une projection laminaire ou un modèle DAG devra être déclaré comme tel ; elle ne pourra pas être appelée silencieusement « arbre HGP exact ».
 
+## Couple de représentations central
+
+L'hypothèse proposée est le couple $\mathcal{R}_v=(s_v,\mathcal{P}_v)$. Le premier canal $s_v$ est la fonction support normalisée des observations du cluster, résumé global de leur enveloppe convexe. Le second canal $\mathcal{P}_v$ est un **objet HGP marqué complet relativement au contrat**, fini et de taille variable : points, facettes de cardinal $K$, cofaces élémentaires de cardinal $K+1$, incidences, géométrie et niveaux de filtration. Le payload n'est pas lui-même qualifié de non convexe ; son `carrier_kind` déclare une réalisation qui peut l'être. Il est traité comme un hypergraphe typé avant toute réduction et, sous l'autorité requise, permet de reconstruire le carrier déclaré.
+
+L'objet complet contient ses observations et détermine donc leur support. Le couple n'est pas plus injectif que $\mathcal{P}_v$ seul ; le rôle possible du support est computationnel, en exposant immédiatement les directions extrêmes dans un vecteur fixe. Cela ne signifie pas que le support du porteur continu HGP soit celui des observations. L'ablation centrale est ainsi `objet HGP complet seul` contre `support + objet HGP complet`, et non `support` contre `support + rayon`.
+
 ## Descripteur de support
 
 Pour un nœud non dégénéré $v$, de centre $c_v$, de rayon $R_v>0$ et pour une direction $u_j$, le canal de support maximal est défini par $s_v(j)=\max_{x\in C_v}\left\langle u_j,\frac{x-c_v}{R_v}\right\rangle$. Si $R_v=0$, le contrat fixe le vecteur à zéro, active un masque `degenerate` et encode le log-rayon par une valeur plancher masquée ; aucune invariance exacte n'est revendiquée pour ce cas numérique particulier.
@@ -18,13 +24,13 @@ La normalisation indépendante des nœuds détruit également la composition hi�
 
 L'hypothèse crédible n'est donc pas « le support suffit », mais :
 
-> Un sketch directionnel de masse, combinant CDF/histogrammes projetés, quantiles robustes et canal de support maximal, apporte une information de forme complémentaire lorsque le modèle conserve explicitement l'échelle, la densité, la portée, la persistance HGP et la géométrie relative des branches.
+> Le support normalisé fournit un raccourci convexe global, tandis que l'encodeur de l'objet HGP marqué conserve les incidences et les données nécessaires au carrier déclaré, potentiellement non convexe, pour représenter structures minces, recollements, cavités et frontières.
 
-## Fonction radiale : correction de l'idée initiale
+## Fonction radiale : ablation lossy, pas second canal
 
 La quantité obtenue en cherchant, sur le rayon $c_v+ru$, la plus grande norme admissible est la fonction radiale extérieure $\rho_{P,c_v}(u)=\sup\left(\left\lbrace r\geq0:c_v+ru\in P\right\rbrace\cup\left\lbrace0\right\rbrace\right)$, et non une fonction support. Un masque distingue les directions sans intersection. Elle dépend du centre et reconstruit exactement $P$ seulement si $P$ est étoilé par rapport à ce centre. Dans le cas général, relier $c_v$ à chaque point radial extrême remplit les intervalles absents et perd précisément les trous, les composantes et certaines concavités recherchées.
 
-Conserver toutes les intersections le long de chaque rayon est plus informatif, mais donne une sortie variable et de nombreux rayons vides pour des réalisations de faible dimension. ECT/WECT ou des distributions d'attributs simpliciaux sont des contrôles topologiques plus sérieux ; leurs résultats d'injectivité et leurs variantes apprises sont toutefois des antériorités. Les définitions, contre-exemples et fixtures sont centralisés dans [GEOMETRIC_DESCRIPTOR_AUDIT.md](GEOMETRIC_DESCRIPTOR_AUDIT.md).
+Conserver toutes les intersections le long de chaque rayon est plus informatif, mais donne une sortie variable et de nombreux rayons vides pour certaines réalisations. Ces limites concernent une compression de $\mathcal{P}_v$ ou de son porteur, pas l'objet marqué complet lui-même. Rayon, ECT/WECT, distributions d'attributs et CDF sont des contrôles de readout à comparer à l'encodeur d'incidence complet. Les définitions et contre-exemples des compressions sont centralisés dans [GEOMETRIC_DESCRIPTOR_AUDIT.md](GEOMETRIC_DESCRIPTOR_AUDIT.md).
 
 ## Sémantique d'un cluster
 
@@ -32,15 +38,28 @@ Un cluster ne reçoit jamais un label unique. En excluant les labels ignorés, s
 
 Les proportions ne localisent pas les classes au sein d'un cluster mixte. La sortie officielle demeure point-wise, à partir des features de feuille et du contexte top-down. Le vecteur du cluster est un résumé sémantique multiscale et une cible auxiliaire, pas une prédiction uniforme diffusée aux points.
 
-## Complément géométrique prioritaire au support
+## Deux graphes et quatre carriers à ne pas confondre
 
-La réalisation géométrique $|P_v|$ du $K$-polyèdre est l'union des réalisations de ses simplexes **si ces simplexes et leurs niveaux ont été sérialisés**. La définition HGP par ensemble maximal de sommets ne suffit pas à les reconstruire, et des objets d'ordre $K\geq2$ peuvent se chevaucher. Si $X_v$ est l'union des sommets explicitement inclus, alors $h_{|P_v|}(u)=h_{X_v}(u)$ dans toute direction : une forme linéaire atteint son maximum sur un sommet de chaque simplexe. Le support de la réalisation est donc exactement celui des sommets sérialisés, et celui du nuage du cluster seulement si ce nuage est exactement $X_v$. Il est HGP-friendly et fusionnable par maximum, mais il efface précisément l'ordre $K$, les incidences, les multiplicités et les niveaux de filtration ; seul, il est insuffisant pour viser le SOTA.
+À un niveau $a=r^2$, les sommets de $\Gamma_K^{\mathrm{full}}(a)$ sont les facettes actives $F$ de cardinal $K$, avec une arête $F\sim F'$ si $\beta(F\cup F')\leq a$. Le sous-graphe $\Gamma_K^{\mathrm{elem}}(a)$ impose en plus $|F\cup F'|=K+1$ ; ses arêtes sont encodées par les cofaces élémentaires $\mathcal{Q}^{\mathrm{elem}}$. Une arête complète se remplace par une chaîne d'échanges d'un sommet parmi les $K$-sous-ensembles du simplexe actif $F\cup F'$. Ainsi $\Gamma_K^{\mathrm{full}}$ et $\Gamma_K^{\mathrm{elem}}$ ont les mêmes composantes $H_0$, mais ni les mêmes arêtes ni la même géométrie. Les seules cofaces élémentaires ne reconstruisent pas l'adjacence complète.
 
-Pour exploiter réellement la réalisation HGP, définir plutôt une mesure sur ses simplexes et agréger leurs centres, aires/volumes ou longueurs, formes, niveaux $\beta(\sigma)$ et multiplicités. Les CDF projetées ou moments de ces attributs sont le candidat HGP-spécifique ; le support reste leur canal d'extrêmes.
+Soit $\mathcal{A}_v(a)$ une de ces composantes communes et $V_v=C_v=\bigcup_{F\in\mathcal{A}_v(a)}F$. Quatre carriers distincts en découlent.
 
-Le support maximal ne conserve que l'extrémité de la distribution projetée. Le complément naturel est un sketch des CDF $F_v(u,t)$ des projections normalisées, échantillonné sur les mêmes directions et sur des seuils fixes. La collection continue de toutes les distributions projetées détermine la mesure du cluster par Cramér–Wold, alors que le support continu ne détermine que son enveloppe convexe. Une grille finie de directions et de bins n'est évidemment qu'une approximation.
+1. Le **$K$-polyèdre source** est $V_v$, l'union finie des observations apparaissant dans la composante.
+2. Le **carrier PL des facettes** est $C_v^{F}(a)=\bigcup_{F\in\mathcal{A}_v(a)}\mathrm{conv}(F)$. Il peut être non convexe, mais sa fonction support est exactement celle de $V_v$ ; cette identité réfute seulement l'emploi du support de $C_v^{F}$ comme second canal.
+3. Le **carrier PL des cofaces** est $C_v^{Q}(a)=\bigcup_{Q\in\mathcal{Q}_v^{\mathrm{elem}}(a)}\mathrm{conv}(Q)$, avec ajout des facettes isolées uniquement si le profil le déclare. Lorsqu'il n'est pas vide, son support exact est $h_{C_v^{Q}}(u)=\max_{Q\in\mathcal{Q}_v^{\mathrm{elem}}}\max_{x\in Q}\langle u,x\rangle$ ; il égale $h_{V_v}(u)$ lorsque les cofaces conservées couvrent $V_v$. Le cas vide est encodé séparément.
+4. L'**union témoin** est $W_v(a)=\bigcup_{F\in\mathcal{A}_v(a)}\bigcap_{x\in F}\overline{B}(x,\sqrt{a})$. Le graphe d'intersection des témoins est exactement $\Gamma_K^{\mathrm{full}}(a)$ ; les composantes égales de $\Gamma_K^{\mathrm{elem}}(a)$ donnent donc le même découpage $H_0$. Sous le contrat de toutes les facettes actives de la composante, $W_v(a)$ est la composante canonique de $L_K(a)$ associée à $V_v$. Il est généralement curviligne plutôt que polyédral, et son support n'est pas en général celui de $V_v$.
 
-La première échelle d'ablation est donc `moments/HGP`, puis `max support + projected CDF/histograms + covariance`, complétés par échelle, centre relatif, cardinalité, rémission et naissance/mort/persistance. Rayon extérieur, intersections multi-segments, attributs simpliciaux et ECT/WECT sont ajoutés séparément et comparés à un mini-PointNet/Deep Sets de même budget. Les histogrammes à bins fixes sont préférables comme état fusionnable ; les quantiles sont robustes mais ne se composent pas exactement sans conserver un sketch plus riche.
+L'« équivalent polyédral complet » voulu doit donc préciser le carrier. Le schéma commun fixe `payload_kind=marked_incidence`, `carrier_kind=source_points|facet_pl|coface_pl|witness_union` et `authority=incidence_complete|pl_complete|witness_exact|witness_approx|h0_only`. `witness_exact` certifie toutes les facettes, coordonnées et la coupe nécessaires ; `witness_approx` versionne la méthode et $\varepsilon_W$ ; `h0_only` ne satisfait pas le loader du canal marqué. Le certificat fini conserve incidences point–facette, cofaces élémentaires, coordonnées, niveaux, naissances et plateaux. Il suffit à reconstruire $W_v(a)$ seulement si l'autorité `witness_exact` est établie ; un simple squelette de fusion ne l'implique pas.
+
+La géométrie d'une composante persistante évolue entre naissance et mort. La baseline définit donc le readout par arête $p\leftarrow v$ avec `cut_policy=pre_parent`, `cut_level=a_p` et `cut_side=strict`, soit les événements $\beta<a_p$ juste avant le lot de fusion du parent. Une racine utilise `cut_policy=explicit` au dernier niveau fini sérialisé et `cut_side=closed`. Naissance, mort, deltas ordonnés, traitement des égalités et version de politique entrent dans le hash ; un état strict vide ou de persistance nulle est représenté explicitement ou rejeté.
+
+Pour $K\geq2$, des composantes distinctes peuvent partager des points. Cette multiplicité est une information d'ordre supérieur à conserver dans $\mathcal{P}_v$. HSA reste d'abord sur $K=1$ ou une laminarisation documentée. Une projection recouvrante ne devient admissible qu'après définition d'un ownership $w_{iv}$ sur un domaine explicite, avec $w_{iv}\geq0$, $\sum_{v\in\mathcal{A}(i)}w_{iv}=1$, conservation de masse, absence de double comptage et invariance à l'ordre ; une partition de l'unité annoncée sans ces tests n'est pas une implémentation.
+
+Le contrat amont n'est pas encore satisfait par MorseHGP3D v3. Le chemin réduit documenté produit des composantes horizontales, niveaux et unions de `PointId`, sans payload facetté de Gamma ; la sortie exhaustive facettes/cofaces/incidences demeure un oracle borné et non une route produit. Le prototype doit donc soit attendre une sérialisation sparse certifiée, soit employer un reconstructeur de recherche séparé en déclarant son coût et son statut. Aucun de ces choix ne change `public_status=not_claimed`.
+
+L'encodeur initial est un hypergraphe typé point–facette–coface élémentaire. Il construit les tokens à partir des features de leurs points, de leur géométrie normalisée, de leur filtration et, pour `carrier_kind=witness_union`, de résumés des régions témoins. Ce payload saute des rangs pour certains $K$ : aucune variante Hodge/cochaîne n'est valide sans exporter tous les rangs de $0$ à $K$ et vérifier $\partial_{r-1}\partial_r=0$. Les tokens ne sont pas remplacés dès l'entrée par leur moyenne. Un readout invariant au réindexage fournit le contexte de branche, tandis que les incidences permettent de le renvoyer aux points. Toute condensation doit déclarer les cellules et incidences supprimées et mesurer les collisions induites. Les coûts rapportent $N_W$, nombre de requêtes ou éléments témoins évalués, et $\varepsilon_W$, erreur contre l'oracle ou le carrier selon une métrique versionnée.
+
+Le support maximal reste un chemin global court. CDF, moments, distributions d'attributs cellulaires, ECT/WECT, rayon et mini-PointNet/Deep Sets sont des contrôles de compression à budget égal. Les comparaisons prioritaires sont `points seuls`, $\Gamma_K^{\mathrm{elem}}$ seul, $\Gamma_K^{\mathrm{full}}$ lorsqu'il est disponible, `objet d'incidence complet`, puis `support + objet complet`.
 
 ## Trois hypothèses causales
 
@@ -50,7 +69,7 @@ La première échelle d'ablation est donc `moments/HGP`, puis `max support + pro
 
 ### H2 — valeur de la représentation
 
-À arbre, dimension et budget constants, un sketch directionnel ou topologique clairement défini ajoute une information utile au-delà des moments, de la covariance, d'un mini-PointNet ou d'un simple pooling des features de feuilles. Support, rayon, CDF, attributs simpliciaux et ECT/WECT sont des candidats concurrents, pas une combinaison gagnante fixée d'avance.
+À arbre et budget constants, l'encodeur de $\mathcal{P}_v$ et du carrier déclaré apporte une information utile au-delà des mêmes points, de $\Gamma_K^{\mathrm{elem}}$ seul, de $\Gamma_K^{\mathrm{full}}$ lorsqu'il est disponible, d'un mini-PointNet et de contrôles de complexes appariés. Il doit distinguer des objets ayant mêmes points et même support mais des incidences ou régions témoins différentes. Le support n'est conservé en complément que si son raccourci améliore le Pareto qualité–coût.
 
 ### H3 — valeur de l'opérateur hiérarchique
 
@@ -64,7 +83,7 @@ Une expérience finale ne permet pas d'identifier ces trois effets. Chacun exige
 
 - points ou micro-voxels comme feuilles ;
 - features locales fortes Q/K/V aux feuilles ;
-- descripteurs HGP/support transformés en un embedding pour chaque enfant dans le domaine de son parent ;
+- support et readout du complexe HGP marqué transformés en un embedding pour chaque enfant dans le domaine de son parent ;
 - proportions aux nœuds déduites récursivement des distributions de feuilles ;
 - sorties point par point ;
 - blocs HSA dans les couches moyennes ou tardives seulement.
@@ -86,7 +105,7 @@ Cette variante est un nouveau Tree Transformer. Elle peut être plus expressive,
 ## Architecture sémantique minimale
 
 1. un encodeur local point/voxel calcule des features haute résolution ;
-2. une agrégation bottom-up construit les statistiques des nœuds ;
+2. un encodeur d'hypergraphe typé point–facette–coface élémentaire construit les états de l'objet HGP, puis une agrégation bottom-up construit les statistiques des nœuds ;
 3. un bloc hiérarchique initial, éventuellement deux, propage le contexte ; un sweep séparé teste 0/1/2/4 blocs ;
 4. une passe top-down renvoie le contexte aux feuilles ;
 5. un décodeur point-fin combine ce contexte avec un skip local ;
@@ -100,4 +119,4 @@ L'instance n'est pas un objectif de la phase actuelle. L'interface conserve tout
 
 ## Critère de réussite scientifique
 
-Le succès n'est pas seulement un mIoU élevé. Il faut montrer un gain apparié et reproductible de l'arbre HGP, une explication des classes/distances qui en bénéficient, une robustesse à l'amincissement LiDAR, et un coût complet compatible avec l'usage. Si un agrégateur plus simple égale HSA, ou si une hiérarchie géométrique conventionnelle égale HGP, le claim doit être réduit en conséquence.
+Le succès n'est pas seulement un mIoU élevé. Il faut montrer un gain apparié et reproductible du complexe et de l'arbre HGP, une explication des classes/distances qui en bénéficient, une robustesse à l'amincissement LiDAR, et un coût complet compatible avec l'usage. Si le complexe n'apporte rien au-delà des points ou d'un graphe de contrôle, si le support est redondant en pratique, si un agrégateur plus simple égale HSA, ou si une hiérarchie géométrique conventionnelle égale HGP, le claim doit être réduit en conséquence.

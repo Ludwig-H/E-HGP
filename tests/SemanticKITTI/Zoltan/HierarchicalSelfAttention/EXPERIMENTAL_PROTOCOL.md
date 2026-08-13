@@ -67,8 +67,11 @@ Utiliser l'évaluateur officiel par distance lorsqu'il s'applique, et documenter
 - batch size maximal et effectif ;
 - latence P50/P95, débit et warm-up ;
 - temps de construction $K$-NN/HGP, descripteurs, forward réseau et reprojection, séparément ;
+- temps d'export du complexe HGP, initialisation des cellules, passages d'incidence et readout, séparément ;
 - latence end-to-end, incluant toutes les étapes ;
-- distribution des nœuds, degrés, profondeurs et $\sum_v d_v^2$.
+- distribution des nœuds, degrés, profondeurs et $\sum_v d_v^2$ ;
+- nombres uniques $N_V$, $N_F$, $N_Q$, $N_I$ et $N_A$ de sommets, facettes, cofaces de connexion, incidences et appartenances cellule–nœud, plus le taux de réutilisation des cellules entre niveaux ;
+- pour `carrier_kind=witness_union`, nombre total $N_W$ d'opérations géométriques, ventilé en requêtes d'appartenance ou de distance, patches de frontière et échantillons, ainsi que l'erreur $\varepsilon_W$ contre l'oracle borné, le temps et les pics RAM/VRAM propres à cette voie ;
 - nombre d'interactions point–sous-arbre $C_T=\sum_i|\Pi_T(i)|$ pour `QC-HSA`.
 
 Le matériel, les versions CUDA/PyTorch, la précision numérique et les kernels utilisés sont enregistrés. Les chiffres de publications mesurés sur un autre GPU ne sont pas comparés comme s'ils provenaient du même banc.
@@ -83,7 +86,7 @@ Le matériel, les versions CUDA/PyTorch, la précision numérique et les kernels
 - LSK3DNet, concurrent sparse LiDAR fort ;
 - SP2T, concurrent Transformer LiDAR mono-trame à proxies sparse, dont le score publié 75,4 emploie des augmentations au test ;
 - RAPiD-Seg, concurrent range-aware et descripteur à deux inférences séquentielles ;
-- SphereFormer, attention conçue pour la densité dépendante de la portée ;
+- SphereFormer, attention conçue pour la densité dépendante de la portée, dont la TTA n'est pas rapportée dans la source primaire auditée ;
 - LitePT comme contrôle architectural « convolutions tôt, attention tard », même sans score SemanticKITTI publié ;
 - MinkUNet ou Cylinder3D, baseline sparse simple et largement reproductible.
 
@@ -111,13 +114,17 @@ Le matériel, les versions CUDA/PyTorch, la précision numérique et les kernels
 ### Représentations de nœuds
 
 - aucune géométrie, seulement pooling des features ;
-- support maximal ;
-- support normalisé ;
-- support normalisé + taille/position ;
-- support de la réalisation géométrique du $K$-polyèdre, qui doit coïncider numériquement avec le support de ses sommets ;
+- support maximal du $K$-polyèdre source ;
+- support source normalisé, puis support normalisé + taille/position ;
+- support du carrier PL, qui doit coïncider numériquement avec le support source, et support de multicoverture séparé, auquel cette identité n'est pas attribuée ;
+- complexe HGP marqué complet relativement au contrat : sommets, facettes, cofaces de connexion, incidences, niveaux, multiplicités, coupe $a_v$ et carrier déclaré ;
+- encodeur d'incidences du complexe seul, puis support source + même encodeur complet ;
+- accès à $\Gamma_K^{\mathrm{elem}}$ avec les mêmes tokens de facettes précalculés, mais sans identifiants/coordonnées bruts, requêtes témoins ni messages point–facette ;
+- sac invariant des mêmes tokens de cellules précalculés, sans appartenances, identifiants bruts, arêtes ni messages ;
+- null test `incidence-shuffled` à comptes et degrés par rang appariés autant que possible ; s'il ne respecte plus les axiomes du complexe, il passe par un loader diagnostique distinct et ne peut pas être présenté comme une sortie HGP valide ;
 - rayon extérieur depuis un centre déclaré, avec masques `center_in_realization` et `center_in_kernel` ;
 - intersections multi-segments ou occupations coniques, bande passante explicitement ablatée ;
-- distributions de centres/formes/niveaux des simplexes du $K$-polyèdre ;
+- distributions de centres, formes et niveaux des facettes/cofaces du payload marqué ;
 - ECT/WECT à directions et seuils finis comme baseline topologique antérieure ;
 - sketch de Fourier ou embedding de mesure par noyau caractéristique, plus distance à une mesure pour le contrôle robuste ;
 - support + densité/persistance HGP ;
@@ -126,7 +133,9 @@ Le matériel, les versions CUDA/PyTorch, la précision numérique et les kernels
 - moments/covariance/histogrammes radiaux ;
 - mini-PointNet/Deep Sets à dimension, bits, paramètres, FLOPs et latence comparables.
 
-Les comparaisons support/rayon/ECT utilisent les mêmes conventions de centre, échelle et directions lorsque cela a un sens. Elles rapportent collisions, fraction de nœuds étoilés, rayons vides, nombre de composantes radiales par rayon, sensibilité au thinning et temps de prétraitement. Un canal plus large n'est pas crédité à la géométrie si son avantage disparaît à capacité appariée.
+Chaque configuration fixe trois axes indépendants : `payload_kind=marked_incidence`, `carrier_kind` parmi `source_points`, `facet_pl`, `coface_pl`, `witness_union`, et `authority` parmi `incidence_complete`, `pl_complete`, `witness_exact`, `witness_approx`, `h0_only`. `witness_approx` exige une définition et une mesure de $\varepsilon_W$ ; `h0_only` est un contrôle refusé par la branche géométrique complète. Le support source est reconstructible depuis les sommets d'un payload `source_points`, `facet_pl` ou `coface_pl` qui les conserve ; cela n'établit aucune identité ni redondance avec le support de `witness_union`. Aucun run ne change l'un de ces axes en conservant le même nom de configuration.
+
+La coupe est également contractuelle. `cut_policy` appartient à `pre_parent`, `post_birth` ou `explicit`. Pour une arête hiérarchique enfant–parent, la référence emploie `cut_policy=pre_parent`, `cut_level` égal au niveau de fusion du parent et `cut_side=strict`, donc seulement les cellules de niveau strictement inférieur ; la racine emploie une coupe terminale fermée explicitement enregistrée. Les événements de même niveau sont traités par lots atomiques : un cas où la coupe stricte ne définit pas l'objet demandé est sérialisé comme lot d'événement ou marqué `invalid`, jamais remplacé silencieusement par une coupe postérieure. Le champ `deltas` conserve les ajouts de cellules et de marques entre coupes. Les comparaisons support/rayon/ECT utilisent les mêmes conventions de centre, échelle et directions lorsque cela a un sens. Elles rapportent collisions, fraction de nœuds étoilés, rayons vides, nombre de composantes radiales par rayon, sensibilité au thinning et temps de prétraitement. Un canal plus large n'est pas crédité à la géométrie si son avantage disparaît à capacité appariée.
 
 ## Matrice d'expériences
 
@@ -145,9 +154,39 @@ La matrice complète est factorielle et trop coûteuse. Elle est déroulée séq
 
 Chaque étape conserve l'identifiant de la configuration parente et ne change qu'un facteur principal. Les interactions jugées importantes sont testées ensuite, jamais absorbées dans une unique expérience finale.
 
+### Décomposition causale du canal polyédral
+
+E2 suit l'ordre ci-dessous avec même backbone, arbre, opérateur, largeur cachée, pertes, seeds et budget de paramètres. Les coûts bruts de structure ne peuvent pas être rendus artificiellement égaux : ils sont rapportés et une seconde comparaison Pareto apparie latence ou VRAM.
+
+| Variante | Information disponible | Question isolée |
+|---|---|---|
+| P0 | features de points poolées | contrôle sans géométrie de nœud |
+| P1 | support source normalisé + side channels | valeur du raccourci convexe |
+| P2 | `marked_incidence`, carrier et autorité déclarés, sans support explicite | valeur de l'accès au carrier et aux incidences |
+| P3 | P2 + support source calculé depuis les mêmes sommets | gain d'optimisation du shortcut |
+| P4 | tokens de facettes précalculés + $\Gamma_K^{\mathrm{elem}}$ | effet de restreindre l'accès au graphe élémentaire |
+| P5 | sac invariant des mêmes tokens de cellules précalculés | effet de retirer tous les messages et arêtes |
+| P6 | incidences réassignées sous contrôle diagnostique | mutant invalide, jamais sortie HGP |
+| P7 | support + rayon extérieur, sans complexe | coût de la compression radiale |
+
+P2 et P3 sont exécutés avec les mêmes `payload_kind`, `carrier_kind`, `authority` et coupe ; ce choix n'est ni une seed ni un hyperparamètre caché. Pour les carriers source/PL dont P2 conserve les sommets, P3 ne reçoit aucune donnée absente de P2 : son gain mesure un biais d'optimisation. Cette conclusion ne vaut ni pour le support propre de `witness_union`, ni pour une approximation qui ne permet pas de le reconstruire.
+
+P4 reçoit les mêmes tokens de facettes précalculés et l'adjacence de $\Gamma_K^{\mathrm{elem}}$, mais masque identifiants et coordonnées bruts, requêtes témoins et messages point–facette. P5 reçoit les mêmes tokens précalculés par cellule, masque appartenances et identifiants bruts, et interdit toute arête ou message ; son readout est invariant à l'ordre. Ces variantes restreignent l'accès calculatoire : elles ne prétendent pas effacer une information qu'un token précalculé pourrait déjà encoder. P6 passe exclusivement par le loader diagnostique et porte toujours le statut `invalid`.
+
 Pour E3, de petits scans ou sous-échantillons où l'attention plate est calculable rapportent aussi le reverse-KL total et par feuille de HSA et `QC-HSA`, la fraction de feuilles dont la classe plate à marge fixée est préservée, et l'écart de sortie. Ce test utilise une même cible plate $P$ gelée, les mêmes features, scores et masque diagonal pour flat/HSA/QC-HSA ; comparer les KL de modèles entraînés séparément ne testerait pas la proposition. Ces diagnostics vérifient le résultat technique ; ils ne remplacent pas le mIoU contre la vérité terrain.
 
 La fidélité HSA est testée sur arbres équilibré, étoile, chaîne/peigne, singleton et degré un. Les mutants couvrent indices positionnels, signe de normalisation, facteur de cardinalité, masque diagonal et ordre des feuilles. Deux scans concaténés restent explicitement block-diagonaux ; l'ajout, la suppression ou la perturbation du second scan ne doit pas modifier la sortie du premier.
+
+Le canal polyédral possède en plus les fixtures obligatoires suivantes :
+
+- round-trip exact des identifiants de points, facettes, cofaces, incidences, niveaux, multiplicités, $a_v$, `payload_kind`, `carrier_kind`, `authority`, `cut_policy`, `cut_level`, `cut_side` et `deltas` ;
+- même support source/PL mais incidences différentes : l'oracle de sérialisation et le hash canonique doivent distinguer la paire, tandis que P1 doit collisionner ; le taux de collisions du learned encoder est mesuré, sans lui attribuer cette garantie avant preuve de T2 ;
+- identité `support(source) == support(PL)` direction par direction, sans assertion correspondante pour $W_v(a_v)$ ;
+- invariance de la sortie à une réindexation canonique des sommets et cellules ;
+- mutation d'une incidence, d'un niveau ou d'une coface détectée par le hash canonique ; la sensibilité et les collisions de l'encodeur sont rapportées sur une fixture non symétrique ;
+- recouvrement $K\geq2$ : tant qu'une application déterministe $w_{iv}$ avec domaine explicite, $\sum_v w_{iv}=1$ et tests de conservation n'est pas spécifiée, le chemin HSA reste limité à $K=1$ ou à une laminarisation auditée ; les fixtures DAG sont conditionnelles à la fermeture de cette obligation ;
+- rejet par le loader de production d'une incidence shuffled invalide, même si le loader diagnostique l'accepte comme null test ;
+- compteurs attestant que le modèle consomme l'export sparse contractuel sans reconstruire un Čech ou Delaunay global.
 
 ## Seeds et incertitude
 

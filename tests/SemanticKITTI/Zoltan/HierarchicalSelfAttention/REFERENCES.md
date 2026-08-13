@@ -15,7 +15,7 @@ Veille effectuée le 13 août 2026. Les liens privilégient les pages officielle
 
 ## HGP, cluster trees et hiérarchies de densité
 
-- Hauseux, Avrachenkov et Zerubia, *Generalization of single-linkage with higher-order interactions*, Applied Network Science, 2026. [Article éditeur](https://link.springer.com/article/10.1007/s41109-025-00756-1), [PDF](https://link.springer.com/content/pdf/10.1007/s41109-025-00756-1.pdf).
+- Hauseux, Avrachenkov et Zerubia, *Generalization of single-linkage with higher-order interactions*, Applied Network Science, 2026. [Article éditeur](https://link.springer.com/article/10.1007/s41109-025-00756-1), [PDF](https://link.springer.com/content/pdf/10.1007/s41109-025-00756-1.pdf). La définition source fait du $K$-polyèdre l'union des points portés par une composante de $\Gamma^{K}$ ; conserver facettes, cofaces de connexion et niveaux est un contrat enrichi du présent projet, pas un solide déjà fourni par la définition.
 - Chaudhuri et Dasgupta, *Rates of Convergence for the Cluster Tree*, NeurIPS 2010. [Actes NeurIPS](https://proceedings.neurips.cc/paper_files/paper/2010/hash/b534ba68236ba543ae44b22bd110a1d6-Abstract.html). Fondement de Robust Single Linkage et de la consistance Hartigan.
 - Campello, Moulavi et Sander, *Density-Based Clustering Based on Hierarchical Density Estimates*, PAKDD 2013. [DOI](https://doi.org/10.1007/978-3-642-37456-2_14). Source primaire de HDBSCAN et de sa sélection de clusters par stabilité.
 - Balakrishnan et al., *Cluster Trees on Manifolds*, NeurIPS 2013. [PDF NeurIPS](https://papers.neurips.cc/paper/4984-cluster-trees-on-manifolds.pdf).
@@ -35,6 +35,16 @@ Veille effectuée le 13 août 2026. Les liens privilégient les pages officielle
 - Fedotov, Harremoës et Topsøe, *Refinements of Pinsker's Inequality*, IEEE Transactions on Information Theory, 2003. [DOI](https://doi.org/10.1109/TIT.2003.813506). Référence pour le passage KL–variation totale.
 - Chou, Lookabaugh et Gray, *Optimal Pruning with Applications to Tree-Structured Source Coding and Modeling*, IEEE Transactions on Information Theory, 1989. [DOI](https://doi.org/10.1109/18.32124). Antériorité pour l'élagage débit–distorsion d'un arbre.
 - Lin, Storer et Cohn, *Optimal Pruning for Tree-Structured Vector Quantization*, Information Processing & Management, 1992. [DOI](https://doi.org/10.1016/0306-4573(92)90064-7). Complexité de l'élagage optimal sous différents budgets.
+
+## Réseaux simpliciaux et topologiques
+
+- Bodnar et al., *Weisfeiler and Lehman Go Topological: Message Passing Simplicial Networks*, ICML 2021. [PMLR](https://proceedings.mlr.press/v139/bodnar21a.html). Introduit MPSN et Simplicial Weisfeiler–Lehman ; antériorité directe pour le message passing et l'expressivité sur complexes simpliciaux.
+- Bodnar et al., *Weisfeiler and Lehman Go Cellular: CW Networks*, NeurIPS 2021. [Page officielle](https://proceedings.neurips.cc/paper_files/paper/2021/hash/157792e4abb490f99dbd738483e0d2d4-Abstract.html). Étend le message passing à des complexes cellulaires réguliers ; antériorité pertinente si le carrier HGP est présenté avec des cellules non simpliciales.
+- Roddenberry, Glaze et Segarra, *Principled Simplicial Neural Networks for Trajectory Prediction*, ICML 2021. [PMLR](https://proceedings.mlr.press/v139/roddenberry21a.html). Formalise équivariance aux permutations, aux orientations et conscience simpliciale, propriétés minimales à tester pour la branche HGP.
+- Eijkelboom, Hesselink et Bekkers, *E$(n)$ Equivariant Message Passing Simplicial Networks*, ICML 2023. [PMLR](https://proceedings.mlr.press/v202/eijkelboom23a.html). Combine géométrie équivariante et interactions simpliciales sur graphes géométriques et nuages de points.
+- Goh, Bodnar et Liò, *Simplicial Attention Networks*, GTRL 2022. [OpenReview](https://openreview.net/forum?id=ScfRNWkpec). Antériorité pour une attention entre simplexes voisins et sa variante orientation-équivariante ; atelier, pas validation LiDAR.
+- Verma, Souza et Garg, *Topological Neural Networks go Persistent, Equivariant, and Continuous*, ICML 2024. [PMLR](https://proceedings.mlr.press/v235/verma24a.html). TopNets combine message passing d'ordre supérieur et descripteurs persistants, avec extensions continues et $\mathrm{E}(n)$-équivariantes.
+- Grande et Schaub, *Topological Point Cloud Clustering*, ICML 2023. [PMLR](https://proceedings.mlr.press/v202/grande23a.html). Exploite les spectres d'une famille de Laplaciens de Hodge d'un complexe construit sur le nuage ; contrôle conceptuel pour attribuer un gain aux interactions topologiques plutôt qu'au seul clustering.
 
 ## Segmentation sémantique LiDAR forte
 

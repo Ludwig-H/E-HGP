@@ -5,6 +5,7 @@
 | Proposition | Évaluation actuelle |
 |---|---|
 | Support normalisé seul + proportions sans décodeur point-wise atteint le SOTA | probabilité faible |
+| Support + composante HGP complète incidence-aware est une hypothèse cohérente | oui, gain et coût non démontrés |
 | HGP apporte un signal utile à un backbone local fort | plausible, non démontré |
 | HSA ou QC-HSA est le meilleur opérateur sur HGP | ouvert, preuve 3D absente |
 | Un modèle hybride HGP + local peut être compétitif | crédible mais à haut risque |
@@ -33,28 +34,32 @@ Une observation plus lointaine n'est pas une homothétie du nuage métrique : l'
 
 Si la variation intra-objet due à la portée est du même ordre que la séparation interclasse et qu'une correction simple ne la réduit pas, ne pas défendre HGP comme hiérarchie sémantique universelle. Pivoter vers une hiérarchie conditionnée par le capteur ou vers HGP comme régulariseur secondaire.
 
-## R2 — La fonction support n'identifie pas le cluster
+## R2 — Le canal complet est ambigu, coûteux ou mal sérialisé
 
-**Cas $K$-polyèdre.** Le support de la réalisation géométrique d'une union de simplexes est exactement celui de l'union de ses sommets. Il ne constitue donc pas une représentation HGP plus riche. Test permanent : comparer les deux vecteurs direction par direction ; toute différence hors tolérance révèle un défaut d'implémentation. Un claim de suffisance est abandonné si les distributions d'attributs simpliciaux, les CDF de masse ou un encodeur local de même budget améliorent systématiquement le mIoU.
-
-**Cas radial.** Le maximum de la norme sur un rayon est la fonction radiale extérieure. Elle est exacte seulement pour un ensemble étoilé autour du centre choisi ; sinon elle remplit les intervalles radiaux absents. Un cube plein et sa frontière ont le même support et le même rayon depuis leur centre. Mesurer la fraction de nœuds étoilés, les rayons vides et les intersections multiples avant d'en faire un canal principal.
+La convexification du support ne réfute pas `support + objet HGP complet`. Le second canal peut conserver les incidences et la non-convexité que le premier perd. Le risque réel est de nommer « polyèdre » plusieurs objets incompatibles : le $K$-polyèdre discret $V_v$, le carrier des facettes $C_v^{F}$, le carrier des cofaces $C_v^{Q}$ ou l'union témoin $W_v$, composante exacte du niveau de multicoverture.
 
 ### Mécanisme
 
-Le support ne voit que l'enveloppe convexe. Des distributions intérieures et des topologies différentes ont exactement le même support. La grille finie ajoute des collisions. Le max est dominé par quelques points extrêmes.
+Le support de $C_v^{F}$ est exactement celui de ses sommets, mais le carrier complet conserve encore ses cellules et incidences. Cette redondance concerne les données source/PL qui conservent ces sommets, jamais le support de $W_v$, qui n'est en général pas celui des observations. Confondre ces identités invaliderait l'interprétation des ablations. Un graphe $\Gamma_K^{\mathrm{elem}}$ seul perd les incidences point--facette ; une liste de cellules sans cofaces perd les connexions marquées ; un certificat seulement $H_0$ ne reconstruit aucun de ces carriers.
+
+La fonction radiale extérieure reste une compression distincte. Elle remplit les lacunes si la forme n'est pas étoilée et ne doit jamais remplacer silencieusement le canal complet.
 
 ### Test de réfutation
 
-- fixtures synthétiques à enveloppe identique ;
-- suppression des points non extrêmes à centre/rayon fixés ;
-- taux de collisions sur nœuds réels et divergence de labels/composition ;
-- comparaison max, CDF/histogrammes projetés, quantiles, moments, radial et mini-PointNet ;
-- comparaison ECT/WECT finie comme antériorité topologique, avec coût et stabilité appariés ;
-- outliers et suppression ciblée des extrêmes.
+- fixer `payload_kind=marked_incidence`, `carrier_kind` parmi `source_points`, `facet_pl`, `coface_pl`, `witness_union`, et `authority` parmi `incidence_complete`, `pl_complete`, `witness_exact`, `witness_approx`, `h0_only` ;
+- sérialiser et rejouer `cut_policy`, `cut_level`, `cut_side` et les `deltas` sans ambiguïté aux événements de même niveau ;
+- mêmes points, support et marques, mais incidences différentes ;
+- carrier des facettes contre carrier des cofaces contre $W_v$ ;
+- objet complet seul contre support + objet complet ;
+- points seuls, accès à $\Gamma_K^{\mathrm{elem}}$ avec tokens précalculés, sac des mêmes tokens sans messages et incidence complète ; ces contrôles restreignent l'accès calculatoire et ne prétendent pas effacer une information reconstruisible depuis les tokens ;
+- deux exports sparse équivalents, puis un mutant `h0_only` qui doit être refusé ;
+- appariement strict de RAM, VRAM, paramètres, prétraitement et latence ;
+- pour `witness_union`, $N_W$ ventilé par requêtes, patches et échantillons, $\varepsilon_W$, temps et mémoire ;
+- rayon extérieur seulement comme ablation lossy.
 
 ### No-go
 
-Le support seul cesse d'être une hypothèse centrale si un descripteur de coût voisin gagne régulièrement environ 1 point de mIoU, si ses collisions contradictoires sont fréquentes ou si son stress test est nettement pire. Le rayon extérieur ne le « répare » pas si les objets ne sont pas étoilés ou si support+rayon conserve les collisions centrales. ECT/WECT est une baseline antérieure, pas un claim automatique. Chacun peut rester un canal interprétable.
+Refuser le résultat si le payload ne permet pas de reconstruire le carrier annoncé, si son contenu dépend de l'ordre des records, si sa coupe change au round-trip ou si une équivalence seulement $H_0$ est présentée comme géométrique. `witness_approx` sans $\varepsilon_W$ est également refusé. Retirer le raccourci de support source si `complexe seul` l'égale ; ne jamais conclure de cette redondance à une identité avec le support de `witness_union`. Retirer la branche complète si points/Deep Sets de même budget l'égalent avec un meilleur coût. Une branche valide mais dominée reste un résultat négatif, pas une réfutation mathématique de l'idée.
 
 ## R3 — La normalisation supprime une information sémantique utile
 
@@ -78,18 +83,20 @@ Si réinjecter l'échelle produit un gain clair, le claim « la normalisation tu
 
 ### Mécanisme
 
-Le support d'une union est le max des supports seulement dans un repère commun. Deux enfants renormalisés indépendamment ne décrivent ni leur écart ni leur échelle relative.
+Le support d'une union est le max des supports seulement dans un repère commun. Deux enfants renormalisés indépendamment ne décrivent ni leur écart ni leur échelle relative. Pour le canal complet, fusionner des listes sans dédupliquer les identifiants peut dupliquer points et cellules ; fusionner seulement les embeddings peut perdre les cofaces nouvelles qui réalisent la fusion.
 
 ### Test de réfutation
 
 - reconstruire le support parent direct à partir des enfants ;
 - comparer sans géométrie relative, avec déplacement relatif, puis déplacement + ratio d'échelle ;
+- rejouer l'union canonique des tables de points, facettes, cofaces et incidences dans plusieurs ordres ;
+- ajouter séparément les cellules du lot de fusion et vérifier les carriers reconstruits ;
 - mesurer erreur de reconstruction et mIoU ;
 - conserver une fixture de deux enfants identiques déplacés différemment.
 
 ### No-go
 
-Si les transformations relatives sont nécessaires, elles deviennent contractuelles. Une architecture de seuls vecteurs normalisés indépendants est éliminée.
+Si les transformations relatives sont nécessaires, elles deviennent contractuelles. Une architecture de seuls vecteurs normalisés indépendants est éliminée. Aucun résumé de taille fixe n'est déclaré lossless sans théorème de composition sur la classe considérée.
 
 ## R5 — Les proportions ne localisent pas les classes
 
@@ -163,16 +170,18 @@ Si les voies de correction doivent devenir aussi coûteuses qu'une attention loc
 
 Pour $K>1$, les composantes facettées peuvent induire des unions de points qui se chevauchent. HSA standard suppose une partition imbriquée.
 
+La projection par « partition de l'unité » n'est pas encore une méthode définie. Le chemin de référence reste donc $K=1$ ou une laminarisation déterministe auditée tant qu'une application $w_{iv}$, son domaine et sa règle de construction ne sont pas spécifiés.
+
 ### Test de réfutation
 
 - validation de laminarité ;
 - comptage des multi-appartenances ;
-- comparaison arbre natif disponible, projection laminaire auditée et modèle multi-arbre/DAG ;
+- comparaison arbre natif disponible et projection laminaire auditée ; le modèle multi-arbre/DAG n'entre qu'après définition de $w_{iv}$ ;
 - conservation des masses et absence de double comptage.
 
 ### No-go
 
-Refuser tout résultat dont la projection dépend de l'ordre d'itération ou n'est pas reproductible. Si une projection perd l'avantage HGP, le modèle HSA standard n'est pas adapté ; traiter le DAG explicitement ou revenir à $K=1$.
+Refuser tout résultat dont la projection dépend de l'ordre d'itération, n'est pas reproductible ou ne vérifie pas $\sum_v w_{iv}=1$ sur un domaine déclaré. Tant que ces poids ne sont pas définis, aucune propriété de conservation ou de stochasticité n'est revendiquée pour le DAG. Si une projection perd l'avantage HGP, le modèle HSA standard n'est pas adapté ; ouvrir une nouvelle voie DAG avec ses propres preuves ou revenir à $K=1$.
 
 ## R10 — Le coût théorique ne devient pas un gain GPU
 
@@ -216,23 +225,42 @@ Un gain sur 08 qui disparaît entre seeds, blocs temporels ou second dataset n'e
 
 ### Mécanisme
 
-SPT, SP2T, EZ-SP, SPCNet, Sequoia, OctFormer et SSTNet occupent déjà l'espace hiérarchie + attention/proxies/superpoints. LitePT formalise déjà le motif convolutions précoces puis attention tardive. Fast Multipole Attention, H-Transformer, MRA et HKT occupent l'attention hiérarchique/multi-résolution et son analyse. Fonction support, ECT/WECT et projections KL sont classiques.
+SPT, SP2T, EZ-SP, SPCNet, Sequoia, OctFormer et SSTNet occupent déjà l'espace hiérarchie + attention/proxies/superpoints. Les réseaux simpliciaux, cellulaires, Hodge et incidence-aware occupent déjà l'encodage de complexes. LitePT formalise le motif convolutions précoces puis attention tardive. Fast Multipole Attention, H-Transformer, MRA et HKT occupent l'attention hiérarchique/multi-résolution. Fonction support, ECT/WECT et projections KL sont classiques.
 
 ### Test de réfutation
 
-Avant rédaction, auditer spécifiquement la proposition `QC-HSA` contre ces précédents. Identifier une proposition générale testable : certificat HGP non vacu, projection conditionnée par la feuille réellement nouvelle, stabilité range-aware, sketch fusionnable robuste, analyse HGP–attention, ou opérateur hiérarchique avec correction certifiée. Tester sur au moins deux datasets/capteurs.
+Avant rédaction, auditer l'encodeur du carrier contre les réseaux simpliciaux/cellulaires et `QC-HSA` contre les attentions multi-échelles. Identifier une proposition générale testable parmi T3--T6 : stabilité filtrée et range-aware, composition sparse certifiée, raffinement piloté par le carrier ou opérateur sur recouvrements. Tester sur au moins deux datasets/capteurs.
 
 ### No-go
 
-Si le seul résultat est un assemblage HGP + HSA avec un petit gain SemanticKITTI, viser une venue 3D/appliquée ou publier une étude négative solide, pas sur-vendre une contribution ML générale.
+Si le seul résultat est `réseau simplicial existant + HGP + HSA` avec un petit gain SemanticKITTI, viser une venue 3D/appliquée ou publier une étude négative solide, pas sur-vendre une contribution ML générale.
+
+## R13 — Le payload complet n'existe pas encore dans la voie v3
+
+### Mécanisme
+
+Le cadre v3 courant reste `public_status=not_claimed`, son audit live est antérieur au `HEAD`, et sa voie produit ne persiste pas un payload composante-local complet de facettes, cofaces et incidences. Une forêt réduite et une union de points ne suffisent pas à reconstruire le carrier complet. L'oracle Gamma exhaustif borné ne peut pas devenir l'architecture d'entraînement.
+
+### Test de réfutation
+
+- spécifier les trois axes exacts : `payload_kind=marked_incidence`, `carrier_kind` parmi `source_points`, `facet_pl`, `coface_pl`, `witness_union`, et `authority` parmi `incidence_complete`, `pl_complete`, `witness_exact`, `witness_approx`, `h0_only` ;
+- pour `witness_approx`, borner $\varepsilon_W$ et compter $N_W$ par requêtes, patches et échantillons ;
+- produire un export composante-local avec identifiants partagés, marques et hash canonique ;
+- comparer deux producteurs ou deux présentations sparse certifiées du même objet ;
+- mesurer taille, temps de construction et réutilisation des cellules entre ancêtres ;
+- vérifier qu'aucune arène n'est dimensionnée par le complexe de Čech ambiant.
+
+### No-go
+
+Ne pas entraîner ni publier la branche complète si son entrée provient d'une reconstruction heuristique non déclarée depuis la forêt. Si aucun exporteur sparse certifié n'est viable, limiter l'étude à un oracle borné ou revenir à un canal de points explicitement approximatif.
 
 ## Tableau de décision global
 
 | Porte | Go | Revise | Stop/Pivot |
 |---|---|---|---|
-| G0 contrat | forêt déterministe, sans fuite, round-trip exact | projection laminaire documentée | cycle, perte/duplication non expliquée |
+| G0 contrat | forêt déterministe et carrier marqué reconstructible, sans fuite | projection laminaire et complétude relative documentées | payload `h0_only` présenté comme complexe complet |
 | G1 structure | HGP bat les contrôles ou apporte robustesse claire | points feuilles, correction range-aware | aucune valeur contre arbres simples |
-| G2 descripteur | canal défini, informatif et stable à budget égal | support/rayon canal secondaire | tous les sketches dominés ou instables |
+| G2 descripteur | objet complet incidence-aware informatif à budget égal | support shortcut retiré ou carrier changé | objet complet dominé, ambigu ou non reconstructible |
 | G3 opérateur | HSA ou QC-HSA gagne en qualité ou Pareto | agrégateur simple | opérateurs hiérarchiques dominés partout |
 | G4 validation | gain apparié, multi-seeds, classes/distance expliquées | retravailler frontières/recette | effet non reproductible |
 | G5 système | coût complet soutenable et honnête | claim précision seulement | ni précision ni coût compétitif |
@@ -241,7 +269,9 @@ Si le seul résultat est un assemblage HGP + HSA avec un petit gain SemanticKITT
 ## Pivots scientifiquement valables
 
 - **HGP utile, HSA inutile** : publier une étude de priors hiérarchiques avec agrégateur simple.
-- **Support inutile, HGP utile** : remplacer le support par pooling appris ; conserver le résultat négatif formel sur l'enveloppe convexe.
+- **Objet marqué utile, support source redondant** : retirer le shortcut si le payload source/PL conserve déjà les sommets ; ne pas transférer ce constat au support propre de `witness_union`.
+- **Support utile, complexe dominé** : garder le résumé convexe et documenter le résultat négatif incidence-aware.
+- **Union témoin trop coûteuse** : tester le carrier PL déclaré, sans lui transférer l'identité avec $L_K(a)$.
 - **HGP brut sensible à la portée** : développer une hiérarchie ou métrique range-aware et en analyser la stabilité.
 - **Arbre trop contraignant** : passer à un mélange de plusieurs arbres ou un DAG, en assumant une nouvelle théorie.
 - **Accuracy neutre, robustesse positive** : recentrer sur thinning, longue distance et changement de capteur.

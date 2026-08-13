@@ -2,21 +2,24 @@
 
 ## Histoire de papier recommandée
 
-Le papier ne doit pas être vendu comme l'addition mécanique de HGP et HSA. Les précédents hiérarchie + Transformer sont nombreux, et la fonction support est classique.
+Le papier ne doit pas être vendu comme l'addition mécanique de HGP et HSA. Les précédents hiérarchie + Transformer sont nombreux, la fonction support est classique et les réseaux simpliciaux savent déjà propager ou pondérer des messages entre cellules.
 
 L'histoire la plus défendable est :
 
-> Les partitions spatiales usuelles des Transformers 3D sont souvent optimisées d'abord pour le calcul et ne modélisent pas explicitement les niveaux de l'estimateur de densité $K$-NN. Nous étudions une hiérarchie HGP exogène comme prior structurel, séparons sa valeur de celle du descripteur et de l'opérateur d'attention, puis construisons une propagation hiérarchique robuste à l'échantillonnage LiDAR.
+> Les partitions spatiales usuelles des Transformers 3D sont souvent optimisées d'abord pour le calcul et ne modélisent pas explicitement les niveaux de l'estimateur de densité $K$-NN. Nous conservons un payload `marked_incidence` — facettes, cofaces de connexion, incidences et niveaux — avec carrier et autorité déclarés, utilisons le support source comme raccourci global, puis séparons causalement la valeur de cette représentation, de la hiérarchie et de l'opérateur d'attention sous échantillonnage LiDAR.
 
 Cette histoire reste valide si le meilleur opérateur n'est finalement pas HSA. Elle ne reste pas valide si HGP n'est pas meilleur qu'un arbre simple.
+
+Les tableaux conservent les noms contractuels exacts : `payload_kind=marked_incidence`, `carrier_kind` parmi `source_points`, `facet_pl`, `coface_pl`, `witness_union`, et `authority` parmi `incidence_complete`, `pl_complete`, `witness_exact`, `witness_approx`, `h0_only`. Ils enregistrent aussi `cut_policy`, `cut_level`, `cut_side` et `deltas` ; changer l'un de ces champs crée une configuration distincte.
 
 ## Contribution minimale pour une venue 3D forte
 
 1. intégration reproductible d'une hiérarchie HGP dans un backbone LiDAR fort ;
-2. ablation causale arbre / représentation / opérateur ;
-3. gains SemanticKITTI appariés et robustesse par portée ;
-4. coût complet, y compris construction de la hiérarchie ;
-5. comparaison SPT/EZ-SP, PTv3, SP2T, LSK3DNet, SphereFormer et RAPiD-Seg, avec LitePT comme contrôle architectural même sans score SemanticKITTI publié.
+2. contrat reproductible du complexe HGP marqué, sans construction exhaustive du complexe ambiant ;
+3. ablation causale arbre / représentation / opérateur ;
+4. gains SemanticKITTI appariés et robustesse par portée ;
+5. coût complet, y compris extraction des incidences, construction de la hiérarchie et, pour `witness_union`, $N_W$, $\varepsilon_W$, requêtes, patches et échantillons ;
+6. comparaison SPT/EZ-SP, PTv3, SP2T, LSK3DNet, SphereFormer et RAPiD-Seg, avec LitePT comme contrôle architectural même sans score SemanticKITTI publié et le statut TTA de SphereFormer conservé à `NR`.
 
 ## Contribution attendue pour ICML/NeurIPS
 
@@ -24,7 +27,7 @@ En plus du niveau précédent, obtenir au moins une contribution générale :
 
 - **optimalité conditionnelle** : `QC-HSA`, projection reverse-KL conditionnée par la feuille, avec certificat d'oscillation ; ce résultat technique ne devient central qu'avec un certificat HGP non vacu ou un résultat fidélité–coût réellement nouveau ;
 - **stabilité** : analyse et correction de la hiérarchie sous échantillonnage range-dependent ;
-- **représentation** : sketch HGP non convexe, marqué et fusionnable, avec borne d'approximation ou de sensibilité et comparaison ECT/KME/Deep Sets ;
+- **représentation** : encodeur du complexe HGP marqué, invariant aux identifiants et aux certificats sparse équivalents, avec expressivité ou stabilité établie face à MPSN/CWN/EMPSN/SAT/TopNets ;
 - **attention** : opérateur hiérarchique avec voie de correction dont l'effet et le coût sont analysés ;
 - **statistique** : lien vérifiable entre qualité d'un cluster tree et erreur de propagation sémantique ;
 - **généralisation** : résultat cohérent sur au moins deux capteurs/datasets.
@@ -36,7 +39,8 @@ Un seul nouveau score SemanticKITTI, même premier, est trop fragile pour porter
 | Claim potentiel | Preuve minimale |
 |---|---|
 | HGP est un meilleur prior | arbres échangés à budget constant, seeds appariées, IC excluant zéro |
-| le descripteur HGP apporte de la géométrie utile | support/rayon/ECT/KME/Deep Sets à capacité égale, collisions et stress tests inclus |
+| le complexe HGP apporte de la géométrie utile | points, accès à $\Gamma_K^{\mathrm{elem}}$, sac de tokens sans messages, incidences du contrat, mutant invalide, MPSN/CWN/EMPSN/SAT et Deep Sets à capacité égale |
+| le support source aide le complexe source/PL | complexe seul contre support source + complexe, mêmes `payload_kind`, `carrier_kind`, `authority`, coupe, cellules, capacité et recette ; aucun transfert au support de `witness_union` |
 | HSA exploite mieux HGP | même arbre/features contre pooling et message passing |
 | QC-HSA est la projection optimale annoncée | preuve complète, solveur dense sur petits arbres, inclusion HSA et facteur de cardinalité vérifiés |
 | QC-HSA préserve mieux les points | reverse-KL et erreurs de frontière inférieurs à HSA, coût $C_T$ et latence inclus |
@@ -50,6 +54,9 @@ Ne pas revendiquer :
 - invariance rotationnelle d'un vecteur sur directions fixes ;
 - préservation complète de la géométrie par fonction support ;
 - préservation de la non-convexité par seul rayon extérieur hors cas étoilé ;
+- nouveauté par le seul usage d'un réseau ou d'une attention simpliciale ;
+- « complexe complet » sans préciser le contrat reconstruit et les cellules omises ;
+- opérateur DAG conservatif tant que les poids $w_{iv}$, leur domaine et la contrainte $\sum_v w_{iv}=1$ ne sont pas définis et testés ;
 - nouveauté par la seule utilisation d'ECT/WECT, de Fourier ou d'un kernel mean ;
 - complexité linéaire sans bornes de degré et mesure réelle ;
 - optimalité sémantique ou approximation d'une attention arbitraire à partir du théorème KL très borné de HSA ;
@@ -66,36 +73,39 @@ Titres possibles, à choisir après les résultats :
 
 Résumé de travail :
 
-> Les Transformers LiDAR efficaces structurent généralement les interactions par voxels, fenêtres ou superpoints. Nous évaluons une autre hypothèse : une hiérarchie de niveaux de densité $K$-NN, indépendante des labels, peut organiser le contexte multi-échelle. Notre modèle combine un encodeur local, des relations géométriques décrivant extrêmes et masse intérieure, des proportions sémantiques déduites des descendants et une propagation hiérarchique vers les points. Une étude factorisée isole la valeur de l'arbre, du sketch distributionnel et de l'attention, et analyse stabilité à la portée, frontières, mémoire et latence. Les résultats sur SemanticKITTI et un second capteur déterminent si ce prior améliore réellement les partitions spatiales conventionnelles.
+> Les Transformers LiDAR efficaces structurent généralement les interactions par voxels, fenêtres ou superpoints. Nous évaluons une autre hypothèse : un complexe HGP marqué, indépendant des labels, peut conserver les interactions d'ordre supérieur et organiser le contexte multi-échelle. Notre modèle combine un encodeur local, une branche point–facette consciente des incidences, un raccourci de support normalisé et une propagation hiérarchique tardive vers les points. Une étude factorisée isole la valeur du complexe, du raccourci convexe, de la hiérarchie et de l'attention, puis analyse stabilité à la portée, frontières, mémoire et latence. Les résultats sur SemanticKITTI et un second capteur déterminent si ce prior améliore réellement les partitions spatiales conventionnelles.
 
 Ce résumé ne doit recevoir aucun chiffre avant que les expériences soient terminées.
 
 ## Figures décisives
 
-1. **Schéma d'architecture** : backbone local, arbre HGP, descripteurs relationnels, HSA tardif, décodeur point-fin.
+1. **Schéma d'architecture** : backbone local, graphe d'incidence point–facette, hiérarchie HGP, support global, HSA tardif et décodeur point-fin.
 2. **Résultat QC-HSA** : rectangles HSA contre partitions feuille–sous-arbre, projection fermée, coût supplémentaire et pont conditionnel vers les hauteurs de fusion.
 3. **Diagnostic de compression dure** : vote majoritaire réalisable et union par classe optimiste, distincts du modèle à proportions et de sa sortie point-wise.
 4. **Ablation causale** : arbre × opérateur, montrant où naît le gain.
 5. **Stabilité capteur** : variation de hiérarchie et mIoU selon portée/thinning.
-6. **Descripteurs et collisions** : cube plein/frontière, forme concave/remplissage radial et mêmes sommets/incidences distinctes, puis contrôles CDF/ECT/KME/Deep Sets.
-7. **Pareto système** : mIoU contre latence/VRAM, coût HGP inclus.
+6. **Représentations et collisions** : mêmes sommets/support mais incidences distinctes, certificats sparse équivalents et perturbations de filtration ; le hash canonique les sépare, tandis que les collisions du learned encoder sont mesurées jusqu'à preuve d'expressivité.
+7. **Pareto système** : mIoU contre latence/VRAM, coût HGP inclus, avec $N_W$ et $\varepsilon_W$ pour l'union témoin.
 8. **Analyse d'erreurs** : frontière sémantique traversée par une branche et rôle du gate résiduel.
 
 ## Tables décisives
 
 - comparaison track A strict, avec colonnes modality, temporal, external data, TTA, ensemble ;
 - ablation HGP $K=1$/SL comme fixture, puis HGP $K=2,3$ vs RSL/octree/superpoints/random ;
-- support/rayon vs CDF projetées/ECT/KME/moments/PointNet à budget égal ;
+- points seuls, $\Gamma_K^{\mathrm{elem}}$ avec tokens précalculés, sac des mêmes tokens sans messages, complexe d'incidence, complexe + support source et mutant d'incidences invalide, à budget égal ;
+- encodeur proposé vs MPSN/CWN/EMPSN/SAT/TopNets et Deep Sets ;
 - HSA vs pooling/message passing/local attention ;
 - QC-HSA vs HSA : KL, sortie, frontière, mIoU, $C_T$, VRAM et latence ;
 - IoU par classe et distance ;
-- temps construction/arbre/descripteur/réseau/reprojection ;
+- temps construction/arbre/extraction des incidences/encodeur/réseau/reprojection ;
 - second dataset et changement de capteur.
 
 ## Expériences qui doivent pouvoir être négatives
 
 - $K=2$ n'est pas forcément meilleur pour la sémantique malgré son résultat instance avec masques GT ;
-- support maximal peut être dominé par un mini-PointNet ;
+- le complexe contractuel peut être redondant avec un backbone local fort ;
+- le support peut ne rien ajouter au complexe seul ;
+- un MPSN standard peut dominer l'encodeur proposé ;
 - HSA peut être dominé par un simple passage top-down ;
 - HGP brut peut être moins stable qu'un octree à longue portée ;
 - une projection laminaire peut perdre l'intérêt des chevauchements d'ordre supérieur.
@@ -116,9 +126,9 @@ Papier sur les hiérarchies de densité comme prior ; agrégateur simple ; contr
 
 Papier robustness/domain shift : arbre ou métrique corrigée de la portée, évaluation capteurs multiples.
 
-### Résultat D — support échoue, arbre réussit
+### Résultat D — le support échoue, le complexe réussit
 
-Résultat négatif formel sur support + remplacement par pooling appris. La contribution devient structurelle.
+Le support ne donne aucun gain conditionnel, mais les incidences HGP en donnent un face aux graphes mélangés et aux encodeurs appariés. Le support sort alors du modèle et la contribution devient structurelle.
 
 ### Résultat E — aucune valeur face aux contrôles
 

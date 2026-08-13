@@ -44,7 +44,7 @@ Les scores val et test ne sont jamais interchangeables. Par exemple, RWAFormer a
 ### Leçons pour HGP-HSA
 
 - **RAPiD-Seg** montre qu'un descripteur géométrique doit intégrer la variation de densité avec la portée et la rémission. Il constitue un contrôle plus direct de la fonction support que les seuls Transformers, mais son coût complet comprend deux passes apprises.
-- **SphereFormer** encode déjà la géométrie sphérique du capteur. Un gain HGP limité aux longues distances doit être comparé à ce biais, pas à un modèle cartésien naïf.
+- **SphereFormer** encode déjà la géométrie sphérique du capteur. Un gain HGP limité aux longues distances doit être comparé à ce biais, pas à un modèle cartésien naïf ; la source primaire auditée ne rapporte pas le statut TTA, qui reste donc `NR` plutôt que « non ».
 - **LSK3DNet** rappelle qu'une attention sophistiquée doit battre un CNN sparse adaptatif en précision ou sur un axe Pareto clair ; son score test 75,6 ne doit toutefois pas être rangé dans le track sans TTA.
 - **SP2T** est un concurrent direct : son double flux et ses proxies locaux réduisent l'attention point–point tout en conservant du contexte sparse. Son supplément applique rotation, scaling, flip et jitter au test ; son 75,4 reste donc hors track A. Le gain HGP doit être isolé d'un simple effet de tokens proxy.
 - **PTv3** simplifie l'attention par sérialisation et grands patches locaux. HGP doit apporter un contexte complémentaire, pas reproduire une partition spatiale plus coûteuse. Le dépôt public ne fournit pas une recette SemanticKITTI complète config+poids+score ; WP0 doit donc commencer par une baseline réellement épinglable.
@@ -113,9 +113,17 @@ Son expérience SemanticKITTI ne mesure toutefois pas la segmentation sémantiqu
 
 Cela soutient l'exploration de $K=2$ et réfute l'idée « un ordre plus grand est toujours meilleur ». Cela ne démontre pas qu'HGP aide à prédire les classes. Le papier indique aussi que des clusters d'ordre supérieur peuvent partager des points et qu'une attribution dure perd cette structure.
 
-L'apport potentiel au projet est donc une **hiérarchie exogène fondée sur les niveaux de l'estimateur $K$-NN/HGP**, donnée à HSA. La contribution doit être mesurée contre des arbres beaucoup plus simples.
+L'apport potentiel au projet n'est pas seulement une hiérarchie donnée à HSA. La proposition conserve aussi un **complexe HGP marqué** : facettes d'une composante du graphe complet $\Gamma_K^{\mathrm{full}}$, cofaces élémentaires qui certifient une sous-adjacence $\Gamma_K^{\mathrm{elem}}$ de mêmes composantes $H_0$, incidences, coordonnées et niveaux de filtration. Ce payload est plus riche que le $K$-polyèdre défini dans la source comme ensemble de points. Son schéma fixe `payload_kind=marked_incidence`, un `carrier_kind` parmi `source_points`, `facet_pl`, `coface_pl`, `witness_union`, et une `authority` parmi `incidence_complete`, `pl_complete`, `witness_exact`, `witness_approx`, `h0_only`. Ces réalisations et autorités ne doivent pas être confondues. Le payload n'est pas actuellement une sortie certifiée de MorseHGP3D v3. Sa construction sparse, sans matérialiser le complexe de Čech ambiant, fait donc partie de la question scientifique et système.
 
-## Fonction support : nouveauté limitée et information perdue
+## Antériorités pour encoder le canal non convexe
+
+[MPSN](https://proceedings.mlr.press/v139/bodnar21a.html) apprend déjà sur les incidences d'un complexe simplicial et relie son expressivité à Simplicial Weisfeiler–Lehman ; [CW Networks](https://proceedings.neurips.cc/paper_files/paper/2021/hash/157792e4abb490f99dbd738483e0d2d4-Abstract.html) étend déjà cette idée aux complexes cellulaires réguliers. Les [réseaux simpliciaux principiels](https://proceedings.mlr.press/v139/roddenberry21a.html) formalisent équivariance aux permutations, équivariance aux orientations et dépendance à toutes les dimensions du complexe. [EMPSN](https://proceedings.mlr.press/v202/eijkelboom23a.html) ajoute une géométrie $\mathrm{E}(n)$-équivariante et vise explicitement graphes géométriques et nuages de points. [Simplicial Attention Networks](https://openreview.net/forum?id=ScfRNWkpec) pondère déjà les interactions entre simplexes voisins, tandis que [TopNets](https://proceedings.mlr.press/v235/verma24a.html) combine message passing topologique, persistance, continuité et équivariance. [Topological Point Cloud Clustering](https://proceedings.mlr.press/v202/grande23a.html) exploite déjà plusieurs Laplaciens de Hodge d'un complexe pour caractériser et regrouper des points.
+
+Ces travaux invalident le claim générique « première attention sur un polyèdre non convexe ». La nouveauté défendable doit être spécifique au contrat HGP : extraction sparse des facettes/cofaces et niveaux, invariance à des certificats sparse équivalents, traitement des recouvrements, composition le long de la hiérarchie, stabilité au capteur ou certificat fidélité–coût. MPSN, CWN, EMPSN, SAT et TopNets deviennent des baselines de la branche non convexe, pas seulement des citations.
+
+## Complexe HGP et fonction support : rôles distincts
+
+Le complexe marqué conserve les incidences et peut représenter un objet non convexe. La critique ci-dessous ne le réfute pas. Elle réfute seulement le remplacement de ce canal variable par un unique maximum directionnel. Un payload source ou PL qui conserve ses sommets détermine déjà le support de ces sommets, et le carrier de facettes PL partage ce support ; l'ajouter explicitement n'augmente alors pas l'information théorique, mais peut fournir un raccourci global utile à l'optimisation. Cette redondance ne vaut jamais comme identité entre le support des observations et celui de `witness_union`. L'ablation obligatoire est donc `complexe seul` contre `support source + complexe`, avec le carrier et l'autorité inchangés.
 
 La fonction support est un objet classique de géométrie convexe. Pour tout ensemble borné, elle est identique à celle de la fermeture de son enveloppe convexe. Même avec une infinité de directions, elle ne distingue donc pas :
 
@@ -131,13 +139,13 @@ Le maximum de la norme sur un rayon est une **fonction radiale extérieure**, pa
 
 Les transformées ECT/PHT complètes ont déjà des résultats d'injectivité pour des classes de complexes et formes constructibles. WECT et l'ECT différentiable sont également publiées. Une représentation topologique directionnelle peut donc être une baseline ou un composant HGP-spécifique, mais ni « ECT sur les simplexes » ni sa discrétisation finie ne constitue seule une nouveauté.
 
-La contribution ne peut donc pas être « invention de la fonction support ». Elle peut être :
+Le rayon extérieur reste une compression facultative et lossy, pas le second canal proposé. La contribution ne peut donc être ni « invention de la fonction support » ni « support + rayon ». Elle peut être :
 
-- un sketch des distributions projetées : contrairement au seul maximum, la collection continue de toutes les projections détermine la mesure par Cramér–Wold ; la version finie doit être auditée ;
-- des CDF/histogrammes fusionnables à bins fixes, avec quantiles robustes et support maximal comme canaux complémentaires ;
-- une décomposition contrôlée forme normalisée / échelle / densité / position ;
-- une analyse de stabilité sous échantillonnage LiDAR ;
-- l'usage de cette géométrie comme relation HSA plutôt que comme token suffisant.
+- un encodeur qui, après preuve d'expressivité, distingue à budget borné des complexes aux mêmes sommets et au même support mais aux incidences différentes ; avant cette preuve, seul l'oracle ou le hash canonique doit les séparer et les collisions apprises sont mesurées ;
+- une représentation indépendante des identifiants et du certificat sparse particulier choisi pour la même composante HGP ;
+- une composition du complexe marqué le long des fusions, avec coût proportionnel aux incidences actives et erreur de condensation certifiée ;
+- une analyse de stabilité sous échantillonnage LiDAR et changement de filtration ;
+- un couplage entre contexte simplicial local et attention hiérarchique, contrôlé contre MPSN/EMPSN/SAT et message passing simple.
 
 ## Concurrence instance future
 
@@ -151,6 +159,6 @@ Le papier potentiel ne doit pas raconter « tous les clusters ont un vecteur de 
 
 Le positionnement le plus solide est :
 
-> Une hiérarchie HGP inspirée du modèle des arbres de clusters de Hartigan fournit-elle un prior structurel stable, efficace et vérifiable pour la propagation de contexte sémantique dans les scènes LiDAR irrégulièrement échantillonnées ?
+> Un complexe HGP marqué et sa hiérarchie fournissent-ils un prior d'interactions d'ordre supérieur stable, efficace et vérifiable pour la propagation de contexte sémantique dans les scènes LiDAR irrégulièrement échantillonnées ?
 
 Pour mériter ICML/NeurIPS, la réponse doit inclure une contribution générale — stabilité, analyse, opérateur ou descripteur fusionnable — et une validation au-delà de SemanticKITTI.

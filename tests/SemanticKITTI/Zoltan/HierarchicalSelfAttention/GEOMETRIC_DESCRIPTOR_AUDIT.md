@@ -1,81 +1,108 @@
 # Audit du descripteur géométrique
 
-## Conclusion
+## Conclusion corrigée
 
-Le maximum directionnel proposé doit être scindé en objets mathématiques différents. La **fonction support** convexifie toujours. La **fonction radiale extérieure** conserve une forme exactement seulement si elle est étoilée autour du centre choisi. Ni l'une ni l'autre ne représente en général la non-convexité d'un $K$-polyèdre HGP. Elles restent des canaux utiles, mais pas une identité de forme.
+La proposition `support normalisé + payload HGP marqué d'un carrier non convexe` n'est pas réfutée par la convexification de la fonction support. Le premier canal décrit volontairement l'enveloppe convexe ; le second conserve les cellules, incidences, coordonnées et niveaux qui reconstruisent le carrier choisi. Le payload fini n'est lui-même ni convexe ni non convexe. Le rayon extérieur n'est pas ce second canal : il devient seulement une ablation compressée et lossy.
 
-Avant tout apprentissage, le pipeline doit aussi préciser ce qu'il appelle « réalisation géométrique ». Dans la source HGP, les sommets du graphe $\Gamma^{K}(X,r)$ sont les $(K-1)$-simplexes du complexe de Čech ; deux sont adjacents lorsque leur union est encore un simplexe, et un $K$-polyèdre est l'ensemble des points de $X$ apparaissant dans une composante connexe de ce graphe. Ce n'est donc pas, par définition, un solide géométrique canonique. Pour $K\geq2$, ces ensembles peuvent en outre se chevaucher. Le seul ensemble de points et un arbre parent–enfant ne déterminent ni quels simplexes réaliser, ni leurs niveaux, ni une réalisation laminaire.
+L'évaluation doit toutefois déclarer quel objet HGP est encodé. Le [contrat de la branche complète](POLYHEDRAL_COMPLEX_BRANCH.md) distingue le $K$-polyèdre discret du manuscrit, deux carriers PL et l'union témoin canonique. Les identités de support ne se transfèrent pas de l'un à l'autre.
 
-## Quatre représentations à ne pas confondre
+## Objet source HGP
 
-### Support : enveloppe convexe seulement
+À l'ordre $K$ et au niveau carré $a$, les sommets de $\Gamma_{K}^{\mathrm{full}}(a)$ sont les facettes $F\subseteq X$ de cardinal $K$ telles que $\beta(F)\leq a$, et $F,F'$ sont adjacentes si $\beta(F\cup F')\leq a$. Le sous-graphe $\Gamma_{K}^{\mathrm{elem}}(a)$ ne garde que $|F\cup F'|=K+1$ et représente ces arêtes par des cofaces élémentaires. Il est strictement moins informatif en général, mais possède les mêmes composantes connexes par une chaîne de remplacements d'un sommet. Pour une composante commune $v$, le $K$-polyèdre défini dans le manuscrit est seulement l'union discrète $V_v=\bigcup_{F\in\mathcal{F}_v}F$ des observations qui apparaissent dans ses facettes.
 
-Pour un ensemble compact $P\subset\mathbb{R}^{3}$, $h_P(u)=\sup_{x\in P}\langle u,x\rangle$. On a, pour toute direction, $h_P(u)=h_{\mathrm{conv}(P)}(u)$. Si $P$ est une union de simplexes de sommets $V$, alors $h_P(u)=\max_{v\in V}\langle u,v\rangle$. Les incidences, trous, composantes, dimensions des simplexes et niveaux HGP sont invisibles.
+Une branche incidence-aware doit recevoir au minimum les points, facettes, cofaces élémentaires de connexion, relations point--facette--coface, coordonnées et niveaux exacts. Ces cofaces reconstruisent $\Gamma_{K}^{\mathrm{elem}}$, pas l'adjacence full ; celle-ci demande ses propres arêtes ou un oracle certifié. Pour $K\geq2$, plusieurs composantes peuvent partager des observations. Cette multiplicité fait partie de l'objet ; une laminarisation la modifie.
 
-Ce résultat est une fixture de correction : `support(realisation) == support(vertices)`. Une différence numérique ne constitue pas un gain d'information ; elle révèle un désaccord de conventions ou un défaut d'implémentation.
+La branche persistante évolue avec $a$. Le schéma versionne donc `cut_policy`, `cut_level`, `cut_side` et les deltas d'événements. La baseline est attachée à l'arête $p\leftarrow v$ et utilise `cut_policy=pre_parent`, `cut_side=strict` à $a_p$, avant le lot de fusion ; une racine utilise `cut_policy=explicit`, `cut_side=closed` au dernier niveau fini. Une politique parmi `pre_parent|post_birth|explicit` avec d'autres niveau ou côté est une autre expérience, pas une variation silencieuse du même nœud.
 
-### Rayon extérieur : enveloppe étoilée
+## Carriers à ne pas confondre
 
-Pour un compact non vide $P$, un centre candidat $c\in\mathbb{R}^{3}$ et une direction unitaire $u$, définir l'ensemble des intersections radiales $I_{P,c}(u)=\left\lbrace r\geq0:c+ru\in P\right\rbrace$ et $\rho_{P,c}(u)=\sup\left(I_{P,c}(u)\cup\left\lbrace0\right\rbrace\right)$. La quantité « norme maximale dans une direction » est $\rho$, pas $h$. Un masque `ray_hit` distingue un rayon vide d'une intersection à $r=0$.
+### Carrier PL des facettes
 
-La reconstruction induite est $R_c(P)=\left\lbrace c+ru:u\in\mathbb{S}^{2},\ 0\leq r\leq\rho_{P,c}(u)\right\rbrace$. On a $R_c(P)=P$ si et seulement si $P$ est étoilé par rapport à $c$, propriété qui implique $c\in P$. Sinon, elle remplit les intervalles radiaux absents et peut supprimer trous, concavités ou disconnexions. Elle dépend fortement du choix de $c$ ; si `center_in_realization=false`, aucune reconstruction exacte n'est possible.
+Définir $C_v^{F}(a)=\bigcup_{F\in\mathcal{F}_v(a)}\mathrm{conv}(F)$. Cet ensemble peut être non convexe, mais ses cellules droites ne forment pas nécessairement un complexe géométrique conforme dans $\mathbb{R}^{3}$. On a exactement $h_{C_v^{F}}(u)=h_{V_v}(u)$ : le support du carrier PL est celui de ses sommets.
 
-Contre-exemple permanent : un cube plein tétraédralisé et sa seule frontière triangulée ont le même support et le même rayon extérieur depuis le centre, mais des intérieurs, homologies et volumes différents.
+Cette égalité signifie que le **canal support** est dérivable du carrier complet, pas que le carrier est équivalent à son support. Deux carriers construits sur les mêmes sommets peuvent avoir supports identiques et incidences différentes.
 
-### Intersections multi-segments : plus fidèles, mais fragiles
+### Carrier PL des cofaces
 
-Conserver toutes les composantes de $I_{P,c}(u)$ — intervalles éventuellement dégénérés en points — distingue les trous le long des rayons échantillonnés. Cette représentation a une longueur variable et n'est pas injective avec un nombre fini de directions. Pour un complexe de dimension un ou deux plongé dans $\mathbb{R}^{3}$, un rayon générique peut ne rencontrer aucune arête ou face. Des cônes angulaires ou un épaississement corrigent ce défaut au prix d'un nouveau paramètre de bande passante.
+Définir $C_v^{Q}(a)=\bigcup_{Q\in\mathcal{Q}_v^{\mathrm{elem}}(a)}\mathrm{conv}(Q)$ et $U_v^{Q}=\bigcup_{Q\in\mathcal{Q}_v^{\mathrm{elem}}}Q$. Il représente les cellules qui connectent les facettes et peut différer de $C_v^{F}$. Une facette isolée n'apparaît dans aucune coface ; la variante qui la réinjecte doit être nommée explicitement. Hors cas vide, $h_{C_v^{Q}}=h_{U_v^{Q}}$ et l'identité avec $h_{V_v}$ vaut exactement lorsque $\mathrm{conv}(U_v^{Q})=\mathrm{conv}(V_v)$. La couverture $U_v^{Q}=V_v$ est suffisante, pas nécessaire.
 
-### Transformées de masse et de topologie
+### Union témoin canonique
 
-Les CDF de projections de la mesure ponctuelle conservent la masse intérieure. La collection continue sur toutes les directions détermine cette mesure par Cramér–Wold, mais elle ne détermine pas les incidences simpliciales ; une grille finie reste un sketch.
+La région témoin d'une facette est $T_a(F)=\bigcap_{x\in F}\overline{B}\left(x,\sqrt{a}\right)$ et l'union de la composante est $W_v(a)=\bigcup_{F\in\mathcal{F}_v(a)}T_a(F)$. Puisque $T_a(F)\cap T_a(F')=T_a(F\cup F')$, $\Gamma_{K}^{\mathrm{full}}(a)$ est littéralement le graphe d'intersection des régions. Son sous-graphe élémentaire a seulement les mêmes composantes, par la chaîne de remplacements. En posant $L_K^{X}(a)=\left\lbrace y:\left|X\cap\overline{B}(y,\sqrt{a})\right|\geq K\right\rbrace$, on a $L_K^{X}(a)=\bigcup_FT_a(F)$ et $W_v(a)$ est exactement la composante correspondante.
 
-Pour un complexe géométrique $P$, l'Euler Characteristic Transform peut être définie par $\mathrm{ECT}_P(u,t)=\chi\left(P\cap\left\lbrace x:\langle u,x\rangle\leq t\right\rbrace\right)$. Les transformées ECT/PHT complètes possèdent déjà des résultats d'injectivité sur des classes de formes constructibles ou complexes PL. Les variantes pondérées et différentiables sont également antérieures : ECT/WECT doivent donc être des oracles bornés et des baselines, pas une nouveauté revendiquée.
+$W_v$ est un objet curviligne dans l'espace des centres de boules, pas un polytope ni une surface LiDAR reconstruite. Son support n'est en général **pas** celui de $V_v$. La fixture `support(realisation) == support(vertices)` s'applique donc à $C_v^{F}$, jamais à $W_v$.
 
-Leur emploi exige un vrai complexe plongé. Si des simplexes HGP se recouvrent sans former un complexe simplicial conforme, il faut prouver une subdivision cohérente ou distinguer explicitement l'ECT du complexe abstrait de celle de l'union géométrique.
+## Rôle correct du support
 
-Une autre baseline fusionnable est un embedding de mesure par fréquences de Fourier ou noyau caractéristique. La fonction caractéristique continue admet une composition exacte sous déplacement, ratio d'échelle et mélange pondéré ; un ensemble fini de fréquences n'est en général pas fermé sous le changement d'échelle et demande interpolation ou borne de discrétisation. Fonctions caractéristiques et kernel mean embeddings sont par ailleurs classiques. Une contribution devrait porter sur un sketch HGP multi-résolution, sa discrétisation et sa stabilité. Pour une topologie robuste aux outliers, la distance à une mesure fournit également un contrôle antérieur à ne pas réinventer.
+Pour un compact $P\subset\mathbb{R}^{3}$, $h_P(u)=\sup_{x\in P}\langle u,x\rangle$ et $h_P=h_{\mathrm{conv}(P)}$. Le support normalisé est un résumé global interprétable, stable en distance de Hausdorff et peu coûteux. Il ne voit seul ni incidences, trous, densité intérieure ni niveaux HGP.
 
-## L'invariance d'échelle ne modélise pas la portée LiDAR
+Dans le couple $(\widetilde h_v,\mathcal{P}_v)$, il joue un rôle de **shortcut** : le chemin complet pourrait théoriquement le recalculer, mais le réseau n'a pas à redécouvrir les directions extrêmes par plusieurs couches de message passing. L'ablation correcte est donc `objet complet seul` contre `support + objet complet`, et non `support` contre `rayon`.
 
-Une homothétie métrique d'un objet et son observation plus lointaine par un LiDAR sont deux opérations différentes. La portée modifie l'espacement angulaire, le nombre de retours, l'occultation, l'incidence et parfois la rémission ; elle ne multiplie pas simplement toutes les coordonnées relatives par un scalaire. La normalisation peut aider au partage de forme, mais elle ne justifie aucun claim de robustesse à longue portée.
+## Fonction radiale : ablation seulement
 
-Le modèle doit garder séparément taille métrique, portée, cardinalité, direction de vue et densité. Le stress test correct transporte un patch, le rééchantillonne selon un modèle capteur déclaré, puis compare arbre, descripteur et prédiction. Une simple commande `scale(points)` ne suffit pas.
+Pour un compact $P$, un centre $c$ et une direction unitaire $u$, poser $I_{P,c}(u)=\left\lbrace r\geq0:c+ru\in P\right\rbrace$ et $\rho_{P,c}(u)=\sup\left(I_{P,c}(u)\cup\left\lbrace0\right\rbrace\right)$. La reconstruction par segments radiaux est exacte si et seulement si $P$ est étoilé autour de $c$. Sinon elle remplit des intervalles absents.
 
-## Décision de représentation
+Un cube plein et sa frontière ont le même support et le même rayon extérieur depuis leur centre. Ce contre-exemple invalide `support + rayon` comme représentation complète ; il ne concerne pas `support + incidences/cellules complètes`. Rayon extérieur, intersections multi-segments et occupation conique restent des baselines de compression du carrier déclaré.
 
-Comparer à dimension, bits, FLOPs et latence proches :
+## Transformées de masse et de topologie
 
-1. moments, covariance et statistiques HGP ;
-2. support maximal et quantiles/CDF de points ;
-3. rayon extérieur, puis intersections multi-segments ou occupation conique ;
-4. distributions pondérées d'attributs simpliciaux ;
-5. ECT/WECT et distance à une mesure comme contrôles topologiques ;
-6. sketch de Fourier ou embedding par noyau caractéristique ;
-7. Deep Sets ou mini-PointNet de même budget.
+Les CDF de projections de la mesure ponctuelle conservent la masse mais pas les incidences. Leur collection continue détermine la mesure par Cramér--Wold ; une grille finie reste un sketch.
 
-Le support est conservé comme canal d'extrêmes. Le rayon extérieur n'est promu que si la fraction de nœuds étoilés est élevée ou si son gain subsiste face aux contrôles. Une ECT finie n'est promue que si son coût et sa stabilité au thinning sont compétitifs. Le backbone local et le chemin résiduel point-wise restent obligatoires dans tous les cas.
+Pour un complexe PL conforme $P$, $\mathrm{ECT}_P(u,t)=\chi\left(P\cap\left\lbrace x:\langle u,x\rangle\leq t\right\rbrace\right)$ peut conserver de l'information topologique. ECT/PHT, WECT et leurs variantes différentiables sont des antériorités. Elles sont des contrôles, pas la définition du canal HGP complet. Aucun théorème ECT n'est transféré à un carrier aux intersections non conformes ou à $W_v$ sans vérifier ses hypothèses.
+
+## Invariance et portée LiDAR
+
+Sous une similitude $x\mapsto\lambda Rx+t$ avec $\lambda>0$ et $R\in\mathrm{O}(3)$, et $a\mapsto\lambda^2a$, les facettes actives, leurs incidences, les points source et les trois carriers dérivés se transforment de façon équivariante. Une normalisation cohérente fournit donc une invariance de forme à translation et échelle, et une équivariance à rotation si l'encodeur la respecte.
+
+Voir le même objet plus loin n'est toutefois pas une homothétie métrique : thinning angulaire, occultation, incidence et rémission changent. Le modèle conserve taille, portée, cardinalité, direction de vue et densité comme side channels. Le stress test transporte puis rééchantillonne un patch selon un modèle capteur déclaré.
+
+## Complétude et certificats sparse
+
+Deux sérialisations ne sont équivalentes pour l'encodeur que si elles reconstruisent le même carrier marqué après canonicalisation. Un certificat `h0_only`, qui préserve seulement la composante et son union de points, ne prouve ni l'égalité des incidences, ni celle des carriers PL, ni celle de $W_v$.
+
+Le contrat enregistre trois axes indépendants : `payload_kind=marked_incidence`, `carrier_kind=source_points|facet_pl|coface_pl|witness_union` et `authority=incidence_complete|pl_complete|witness_exact|witness_approx|h0_only`. Une approximation de $W_v$ est toujours `witness_approx` avec erreur $\varepsilon_W$ ; elle n'est jamais rangée sous `witness_exact`. Une variante Hodge/cochaîne exige en plus tous les rangs de $0$ à $K$, des orientations contractuelles et $d_{j+1}d_j=0$ ; le payload point--facette--coface seul est un hypergraphe typé, pas une chaîne complète.
+
+Le produit v3 courant ne persiste pas encore ce payload composante-local complet. L'étude doit créer un exporteur sparse certifié ou rester sur un oracle borné ; elle ne peut pas déduire le canal 2 de la seule forêt réduite et ne doit pas matérialiser le complexe de Čech ambiant.
+
+## Décision expérimentale
+
+Comparer à budget et backbone identiques :
+
+1. statistiques de points et support seul ;
+2. multiensemble de facettes sans incidences ;
+3. graphe $\Gamma_{K}^{\mathrm{elem}}$ seul, puis adjacence full explicite comme contrôle distinct ;
+4. composante marquée complète `point ↔ facette ↔ coface` ;
+5. carrier des facettes, carrier des cofaces et union témoin ;
+6. objet complet seul contre support + objet complet ;
+7. CDF, ECT/WECT, Deep Sets et encodeurs simpliciaux comme contrôles ;
+8. rayon extérieur uniquement comme compression ablatée.
+
+Apparier dimension, paramètres, FLOPs, bits, prétraitement et latence. Rapporter les collisions entre objets de labels différents, la sensibilité au thinning et le coût par nombre de cellules/incidences. Pour `witness_union`, ajouter $N_W$, nombre de requêtes ou patches effectivement consommés, $\varepsilon_W$, temps et mémoire ; l'appartenance à une composante teste $D_{K,v}(y)=\min_{F\in\mathcal{F}_v}\max_{x\in F}\left\Vert y-x\right\Vert\leq\sqrt{a}$, pas seulement le $K$-ième voisin global.
 
 ## Théorèmes et certificats prioritaires
 
-| Priorité | Énoncé candidat | Valeur scientifique | Condition de survie |
-|---|---|---|---|
-| T0 | support simplicial = support des sommets ; reconstruction radiale exacte ssi forme étoilée | hygiène mathématique, pas nouveauté | tests exhaustifs sur fixtures |
-| T1 | sketch HGP fusionnable, stable au thinning dépendant de la portée, avec erreur finie directions/bins | contribution possible | borne non vacue et gain sur ECT/CDF/Deep Sets |
-| T2 | raffinement adaptatif de l'attention avec borne calculable sur KL ou sortie et coût contrôlé | candidat central | certificat sous-quadratique et Pareto réel contre HSA/FMA |
-| T3 | stabilité ou merge distortion de l'arbre HGP sous un modèle d'observation LiDAR corrigé | contribution forte, très difficile | hypothèses réalistes, régime de $K$ explicite et second capteur |
+| Priorité | Énoncé | Rôle |
+|---|---|---|
+| T0 | $\Gamma^{\mathrm{full}}$ intersection des témoins, $\Gamma^{\mathrm{elem}}$ même $\pi_0$, polyèdre discret--union témoin et support PL | correction |
+| T1 | invariance à toute présentation sparse certifiée du même carrier marqué | reproductibilité |
+| T2 | séparation de carriers ayant mêmes points/support mais incidences différentes | expressivité |
+| T3 | similitude équivariante et stabilité filtrée sous perturbation, avec marge aux événements | contribution possible |
+| T4 | union canonique et condensation fusionnable exacte ou à erreur bornée | contribution possible |
+| T5 | raffinement d'attention piloté par un certificat calculable issu du carrier | candidat central |
+| T6 | opérateur sur recouvrements conservant masse et stochasticité | candidat central difficile |
 
-Il n'est pas légitime de viser un théorème « HGP est sémantiquement optimal » sans modèle joint précis de géométrie, échantillonnage et labels. Une meilleure approximation d'un arbre de densité n'implique pas, seule, un meilleur mIoU.
+## Fixtures permanentes
 
-## Fixtures de falsification
+- mêmes observations et même support, incidences différentes ;
+- singleton $K=1$ à $a>0$ : $C_v^{F}=\left\lbrace x\right\rbrace$ mais $W_v(a)=\overline{B}(x,\sqrt{a})$, donc supports différents ;
+- carrier des facettes contre carrier des cofaces ;
+- carrier PL contre $W_v$, avec supports différents ;
+- coface absente, facette isolée et politique d'augmentation ;
+- même composante $H_0$ mais couvertures témoins différentes ;
+- deux certificats sparse équivalents contre un certificat seulement `h0_only` ;
+- replay `cut_policy=pre_parent`, `cut_side=strict` des deltas, racine explicite fermée et plateaux à égalité ;
+- cube plein contre frontière pour l'ablation radiale ;
+- recouvrements $K\geq2$ avant et après laminarisation ;
+- même patch sous homothétie, puis sous transport et rééchantillonnage LiDAR.
 
-- cube plein contre frontière, mêmes $h$ et $\rho$ ;
-- forme concave contre son remplissage radial ;
-- mêmes sommets, incidences simpliciales différentes ;
-- centre hors forme ou hors noyau étoilé ;
-- complexe $K=1$ ou surface $K=2$ avec majorité de rayons vides ;
-- même objet métrique sous thinning uniforme, range-aware et occultation ;
-- permutation ou duplication de simplexes sans changement du support ;
-- recouvrements $K\geq2$ avant et après projection laminaire.
-
-Toute collision qui invalide un claim devient une fixture permanente ; elle n'est pas retirée lorsque le descripteur change.
+Toute collision qui invalide un claim devient une fixture permanente ; elle n'est pas retirée lorsque l'encodeur change.

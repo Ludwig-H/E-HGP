@@ -2,28 +2,69 @@
 
 ## Décision
 
-Le résultat candidat porte sur une **attention hiérarchique conditionnée par la requête**, notée provisoirement `QC-HSA`. Il ne cherche pas à prouver que HGP est sémantiquement optimal. Il caractérise l'attention qui minimise la reverse-KL par rapport à une attention Softmax plate, parmi toutes celles qui respectent les partitions cibles imposées par l'arbre tout en conservant une requête distincte pour chaque feuille.
+Le programme central porte désormais sur le couple **support normalisé + payload HGP marqué d'un carrier non convexe**, et non sur `support + fonction radiale`. Le second canal conserve une composante marquée avec points, facettes, cofaces, incidences, géométrie et niveaux. Le payload combinatoire n'est lui-même ni convexe ni non convexe ; il choisit explicitement entre points source, carrier PL des facettes, carrier PL des cofaces et union témoin canonique $W_v(a)$. Ces objets sont définis dans [POLYHEDRAL_COMPLEX_BRANCH.md](POLYHEDRAL_COMPLEX_BRANCH.md).
 
-Le nom `QC-HSA` est provisoire : cet opérateur relâche la famille de contraintes de HSA et n'est pas un cas automatiquement couvert par le théorème HSA.
+`QC-HSA` reste un module théorique utile pour exploiter ensuite cette structure. Sa projection reverse-KL est trop élémentaire et trop proche des précédents multi-échelles pour porter seule le papier. Elle peut devenir une partie du résultat T5 si les résumés du canal complet produisent un certificat de raffinement calculable.
 
-Cette cible est pertinente pour la segmentation dense : HSA impose la même interaction à tous les couples de feuilles appartenant à deux branches sœurs. Deux points d'une même branche, dont l'un est près d'une frontière sémantique, peuvent pourtant devoir interroger différemment une branche distante. `QC-HSA` retire ce couplage côté requête sans abandonner la compression hiérarchique côté clés/valeurs.
+Le programme ne cherche toujours pas à prouver que HGP est sémantiquement optimal. Il doit d'abord établir ce qui est conservé, ce qui est invariant aux présentations sparse et comment l'information non convexe contrôle l'approximation d'attention.
 
-L'énoncé ci-dessous est un **résultat technique à démontrer et à auditer**, pas encore le théorème central du papier. Sa preuve élémentaire paraît solide, mais Fast Multipole Attention et l'appendice du papier HSA rendent sa nouveauté probablement insuffisante seul. Il ne deviendra central qu'avec un certificat HGP spécifique, non vacu et calculable.
+## Programme T0--T6
 
-## Priorités théoriques révisées
+### T0 — Sémantique exacte des objets
 
-L'idée géométrique impose d'abord deux résultats négatifs. Pour une union simpliciale, le support est celui des sommets ; pour un centre donné, le rayon extérieur reconstruit exactement seulement les ensembles étoilés. Ces propositions et leurs contre-exemples sont nécessaires à la correction du papier, mais trop classiques pour en être la nouveauté. ECT/PHT possèdent déjà des résultats d'injectivité ; les employer ne crée pas non plus un théorème central.
+Soient $X\subset\mathbb{R}^{3}$ fini non vide, $1\leq K\leq|X|$ et $a\geq0$. Pour tout $S\subseteq X$ non vide, poser $\beta(S)=\min_{y\in\mathbb{R}^{3}}\max_{x\in S}\left\Vert y-x\right\Vert^{2}$, puis $\mathcal{F}_K(a)=\left\lbrace F\subseteq X:|F|=K,\ \beta(F)\leq a\right\rbrace$. Le graphe $\Gamma_{K}^{\mathrm{full}}(a)$ a pour sommets $\mathcal{F}_K(a)$ et une arête $F\sim F'$ si $F\neq F'$ et $\beta(F\cup F')\leq a$. Son sous-graphe $\Gamma_{K}^{\mathrm{elem}}(a)$ garde seulement $|F\cup F'|=K+1$. Définir $T_a(F)=\bigcap_{x\in F}\overline{B}(x,\sqrt{a})$ et $L_K^{X}(a)=\left\lbrace y\in\mathbb{R}^{3}:\left|X\cap\overline{B}(y,\sqrt{a})\right|\geq K\right\rbrace$.
 
-Les cibles réellement susceptibles de porter une soumission sont, par ordre de faisabilité :
+Prouver et tester : $T_a(F)\cap T_a(F')=T_a(F\cup F')$, donc $\Gamma_{K}^{\mathrm{full}}$ est exactement le graphe d'intersection des témoins ; $\Gamma_{K}^{\mathrm{elem}}\subseteq\Gamma_{K}^{\mathrm{full}}$ et l'application identique sur les facettes induit une bijection sur $\pi_0$, mais pas une égalité d'arêtes ; enfin $L_K^{X}(a)=\bigcup_{F\in\mathcal{F}_K(a)}T_a(F)$. Pour une composante commune $v$, la convexité des témoins et le lemme du graphe d'intersection donnent exactement la composante continue $W_v(a)=\bigcup_{F\in\mathcal{F}_v(a)}T_a(F)$, tandis que le $K$-polyèdre source reste l'ensemble discret $V_v(a)=\bigcup_{F\in\mathcal{F}_v(a)}F$.
 
-1. **Certificat adaptatif d'attention.** Construire, depuis les résumés d'un nœud et la requête, une borne calculable $U_{iB}$ sur l'oscillation des scores du bloc $B$. Raffiner les blocs dont $U_{iB}$ dépasse une tolérance, prouver monotonie, puis convergence vers l'attention dense lorsque tous les blocs atteignent les singletons avec les mêmes scores et masques, et enfin une borne sur KL puis sortie. La complexité doit être output-sensitive et mesurée, pas seulement annoncée sous degré borné.
-2. **Sélection fidélité–coût.** Pour une requête ou une famille de requêtes, choisir une antichaîne sous budget avec optimum exact dans le cas additif, ou garantie d'approximation dans le cas partagé. La nouveauté doit dépasser l'élagage d'arbre classique et inclure le vrai coût des kernels.
-3. **Stabilité HGP corrigée de la portée.** Sous un modèle explicite de thinning LiDAR $p(r,\theta)$, borner la merge distortion entre l'arbre estimé et un arbre latent, puis composer cette borne avec le certificat d'attention. Une asymptotique populationnelle doit utiliser un régime $K_n$ déclaré ; les seuls ordres fixes $K\in\left\lbrace1,2,3\right\rbrace$ ne l'établissent pas.
-4. **Extension recouvrante.** Si les $K$-polyèdres d'ordre supérieur restent un DAG, définir des poids d'incidence formant une partition de l'unité, puis construire et prouver séparément conservation de masse, stochasticité de l'attention, absence de double comptage et réduction exacte au cas laminaire ; la partition de l'unité seule ne suffit pas.
+Séparer $W_v$ des carriers PL $C_v^{F}=\bigcup_{F\in\mathcal{F}_v}\mathrm{conv}(F)$ et $C_v^{Q}=\bigcup_{Q\in\mathcal{Q}_v^{\mathrm{elem}}}\mathrm{conv}(Q)$. On a $h_{C_v^{F}}=h_{V_v}$. En posant $U_v^{Q}=\bigcup_{Q\in\mathcal{Q}_v^{\mathrm{elem}}}Q$, on a hors cas vide $h_{C_v^{Q}}=h_{U_v^{Q}}$, puis $h_{C_v^{Q}}=h_{V_v}$ si et seulement si $\mathrm{conv}(U_v^{Q})=\mathrm{conv}(V_v)$ ; $U_v^{Q}=V_v$ est une condition suffisante, pas nécessaire. Aucune identité analogue n'est attribuée à $W_v$. La fonction radiale est une ablation lossy et n'entre pas dans la définition du canal complet.
 
-Le candidat 1 est le meilleur compromis actuel. Le candidat 3 serait le plus fort pour ICML/NeurIPS, mais aussi le plus risqué. Aucune priorité n'autorise un énoncé « HGP est sémantiquement optimal » : cela demanderait un modèle joint réaliste des labels et du capteur.
+### T1 — Invariance aux certificats sparse équivalents
 
-## Partition canonique vue par une feuille
+Soit $S$ un export de preuve et $\kappa(S)$ sa projection scientifique canonique, qui oublie l'ordre des records, les doublons de preuve, les témoins auxiliaires et la disposition mémoire. Le contrat fixe séparément `payload_kind=marked_incidence`, `carrier_kind=source_points|facet_pl|coface_pl|witness_union` et `authority=incidence_complete|pl_complete|witness_exact|witness_approx|h0_only`. L'encodeur doit factoriser par $\kappa$ : si deux exports certifiés $S_1,S_2$ reconstruisent le même objet marqué sous le même triplet contractuel et la même politique de coupe, alors $\kappa(S_1)=\kappa(S_2)$ implique $E(S_1)=E(S_2)$.
+
+Les cinq autorités restent distinctes. `h0_only` préserve seulement une composante et son union d'observations ; il ne peut jamais déclencher l'invariance géométrique. `witness_approx` sérialise une erreur $\varepsilon_W$ et ne peut pas être présenté comme `witness_exact`. Une présentation sparse qui remplace une couverture par une sous-couverture doit certifier l'égalité de $W_v$, ou fournir cette borne explicite, et pas seulement une rétraction $H_0$.
+
+Un nœud persistant évolue entre sa naissance et sa fusion. Le schéma versionne donc `cut_policy`, `cut_level`, `cut_side` et les deltas de cellules. Pour l'arête $p\leftarrow v$, la baseline `cut_policy=pre_parent`, `cut_side=strict` lit $\beta<a_p$ juste avant le lot de fusion et produit un embedding conditionné par cette arête ; une racine emploie `cut_policy=explicit`, `cut_side=closed` au dernier niveau fini. T1 exige que le replay des deltas reproduise exactement cette coupe et qu'un changement de politique, niveau ou côté modifie le hash du run.
+
+Ce résultat autorise des producteurs sparse composante-locaux sans matérialiser le complexe de Čech, $\Gamma_{K}^{\mathrm{full}}$ ou la mosaïque d'ordre supérieur ambiante. Il ne dispense pas de prouver la complétude relative du payload consommé. En particulier, les cofaces élémentaires reconstruisent $\Gamma_{K}^{\mathrm{elem}}$ et son $\pi_0$, jamais les arêtes full.
+
+### T2 — Expressivité incidente bornée
+
+Sur une classe de cardinalité, degré et précision bornés, construire un encodeur invariant au réindexage qui sépare au minimum deux objets ayant mêmes observations, même support et mêmes multisets de marques, mais des incidences non isomorphes. Un code canonique injectif fournit un oracle ; un réseau de message passing ordinaire peut être strictement moins expressif et doit être caractérisé par un analogue de Weisfeiler--Lehman ou par ses collisions.
+
+L'injectivité d'une sérialisation canonique est une correction, pas une nouveauté ML. Le résultat devient intéressant seulement si une famille compacte d'encodeurs atteint une séparation utile avec un coût et une stabilité contrôlés.
+
+Le payload point--facette--coface définit d'abord un hypergraphe typé. Une variante Hodge ou cochaîne ne reçoit ce nom que si tous les rangs de $0$ à $K$ sont exportés avec orientations contractuelles et si ses cobords vérifient $d_{j+1}d_j=0$. Sinon, aucun théorème de Laplacien de Hodge n'est invoqué.
+
+### T3 — Similitudes et stabilité filtrée
+
+Sous $x\mapsto\lambda Rx+t$ avec $\lambda>0$ et $R\in\mathrm{O}(3)$, et $a\mapsto\lambda^{2}a$, prouver l'équivariance de $G_v^{\mathrm{inc}}$, $C_v^{F}$, $C_v^{Q}$ et $W_v$, puis l'invariance de leur forme normalisée. Une grille directionnelle fixe ne donne pas une invariance à rotation ; il faut transformer les directions ou employer un encodeur équivariant.
+
+Plus précisément, supposer une bijection point-wise $\varphi:X\to X'$ telle que $\max_{x\in X}\left\Vert\varphi(x)-x\right\Vert\leq\varepsilon$. Au niveau carré, prouver les inclusions $L_K^{X}(a)\subseteq L_K^{X'}((\sqrt{a}+\varepsilon)^2)$ et $L_K^{X'}(a)\subseteq L_K^{X}((\sqrt{a}+\varepsilon)^2)$. Une correspondance stable de composantes exige une marge de séparation aux événements critiques ; exactement sur une naissance ou fusion, la combinatoire peut changer brutalement. Sans bijection, il faut annoncer une autre distance entre mesures ou ensembles et un terme de variation de cardinalité.
+
+Cette stabilité métrique ne modélise pas à elle seule le transport LiDAR, qui change aussi cardinalité et occultation. Une version range-aware demande un modèle de thinning séparé.
+
+### T4 — Composition et condensation
+
+Définir une union canonique des tables de points, facettes, cofaces et incidences par identifiants stables. Prouver qu'elle est associative, commutative et idempotente, que les marques d'activation sont conservées et que le replay des deltas reconstruit la coupe versionnée quel que soit l'ordre des lots compatibles avec leurs niveaux.
+
+Un résumé appris est exactement fusionnable seulement s'il factorise cette union par un homomorphisme déclaré. Sinon, le théorème doit borner l'erreur après condensation. Les nouvelles cellules et incidences sont des deltas composante-locaux ; aucun énoncé ne peut exiger l'énumération du complexe ambiant exhaustif.
+
+### T5 — Attention certifiée par le carrier
+
+Construire, depuis la requête et les résumés incidence-aware d'un bloc $B$, une borne calculable $U_{iB}$ sur l'oscillation des scores ou des valeurs. Raffiner les blocs dont $U_{iB}$ dépasse une tolérance, prouver monotonie et convergence vers la cible dense sous les mêmes scores et masques, puis borner KL, sortie et décision locale.
+
+La projection `QC-HSA` ci-dessous fournit la solution optimale pour une partition cible fixée. Elle ne résout pas le calcul de $U_{iB}$ ni le choix partagé des raffinements. Le résultat central possible est donc `carrier complet → certificat → raffinement fidélité--coût`, et non la seule formule reverse-KL.
+
+### T6 — Recouvrements et DAG
+
+Pour $K\geq2$, définir un opérateur qui accepte les multi-appartenances sans laminarisation silencieuse. Avec des poids point--composante, prouver séparément conservation de masse, stochasticité de l'attention, équivariance au réindexage, absence de double comptage et réduction exacte au cas laminaire. Une partition de l'unité seule ne prouve pas toutes ces propriétés.
+
+T0 et T1 sont obligatoires mais principalement contractuels. T3 est mathématiquement accessible ; T5 offre le meilleur compromis pour une contribution centrale ; T6 serait plus distinctif mais plus risqué. T2 ou T4 ne suffisent que si leur résultat dépasse clairement les encodeurs de complexes et les monoids de pooling existants.
+
+Le produit v3 courant ne fournit pas encore le payload facettes--cofaces--incidences complet requis par T1. Son audit étant antérieur au `HEAD` et son statut `not_claimed`, les théorèmes restent conditionnels à un exporteur composante-local certifié.
+
+## Module T5 — partition canonique vue par une feuille
 
 Soit $T$ un arbre fini laminaire enraciné dont les feuilles sont $N\geq2$ points ou micro-tokens. Une forêt doit soit être traitée composante par composante, soit recevoir une famille racine explicite si l'attention plate globale entre composantes fait partie de la cible. Le résultat porte sur cet arbre laminaire livré : il ne s'applique pas directement aux unions de $K$-polyèdres chevauchantes pour $K\geq2$, sauf après une projection laminaire déterministe et auditée. Pour une feuille requête $i$, suivre le chemin de $i$ à la racine. À chaque ancêtre, collecter les sous-arbres frères de la branche qui contient $i$. Leurs ensembles de feuilles forment une partition disjointe $\Pi_T(i)$ du domaine $\Omega_i=\left\lbrace1,\ldots,N\right\rbrace\setminus\left\lbrace i\right\rbrace$.
 
@@ -117,6 +158,9 @@ Pour le pont Hartigan, la Lipschitzianité donne $|\widehat S_{ij}-S^f_{ij}|\leq
 
 ## Pourquoi les autres théorèmes envisagés sont écartés
 
+- **« Support plus complexe est informationnellement plus riche que le complexe complet »** : faux si le carrier complet conserve déjà ses coordonnées ; le support est alors un raccourci calculatoire dont l'utilité doit être ablatée.
+- **« Même $H_0$ implique même géométrie non convexe »** : faux ; une rétraction de composantes peut modifier incidences, carriers PL et couverture témoin.
+- **« Le carrier des sommets reconstruit la composante continue HGP »** : faux en général ; l'objet continu exact est $W_v$, pas $C_v^{F}$.
 - **« HGP est l'arbre optimal »** : aucune distribution sémantique ni fonction de risque ne permet aujourd'hui un tel énoncé.
 - **« Un score ultramétrique donne une attention HSA exacte »** : faux en général, car la normalisation Softmax par ligne peut rompre les égalités entre lignes d'un même rectangle.
 - **« Merge distortion HGP borne l'erreur sémantique »** : faux sans contrôler aussi la géométrie, les décorations, Q/K/V et les changements combinatoires de l'arbre. La merge distortion seule ne voit pas ces quantités.
@@ -125,11 +169,15 @@ Pour le pont Hartigan, la Lipschitzianité donne $|\widehat S_{ij}-S^f_{ij}|\leq
 
 ## Conditions pour en faire un résultat central du papier
 
-1. formaliser complètement l'énoncé avec masque diagonal, forêts et arbres multifurqués ;
-2. vérifier par brute force sur petits arbres la projection, la sortie groupée et le cas d'inégalité stricte ;
-3. mener une recherche d'antériorité ciblée, notamment HSA, Fast Multipole Attention, H-Transformer, MRA, HKT et projections KL/Bregman ;
-4. démontrer sur SemanticKITTI que la relaxation côté requête réduit effectivement les erreurs de frontière ou augmente le mIoU par rapport à HSA au même arbre ;
-5. montrer un Pareto utile entre distorsion, mIoU, $C_T$, VRAM et latence ;
-6. obtenir une borne ou un estimateur calculable de $D_i^{\star}$ sans attention dense si le papier revendique un certificat pratique.
+1. fixer le triplet `payload_kind`, `carrier_kind`, `authority`, la `cut_policy` et un exporteur composante-local sans complexe ambiant exhaustif ;
+2. vérifier T0 sur des oracles bornés et tuer tout transfert erroné de l'identité de support vers $W_v$ ;
+3. produire deux présentations sparse indépendantes du même objet et vérifier T1, plus un mutant `h0_only` qui doit être refusé ;
+4. démontrer une séparation T2 non triviale à coût comparable aux encodeurs de points et de complexes existants ;
+5. prouver T3 ou T4 avec hypothèses, marges et erreur de discrétisation explicites ;
+6. formaliser T5 avec masque diagonal, forêts, arbres multifurqués et une borne $U_{iB}$ calculable sans attention dense ;
+7. vérifier par brute force la projection QC-HSA, la sortie groupée et le cas d'inégalité stricte ;
+8. auditer HSA, Fast Multipole Attention, H-Transformer, MRA, HKT, réseaux simpliciaux et projections de Bregman ;
+9. montrer sur SemanticKITTI puis un second capteur un Pareto utile entre mIoU, frontières, fidélité, cellules parcourues, VRAM et latence ;
+10. si les recouvrements sont conservés, fermer T6 avant tout claim d'opérateur DAG.
 
-L'audit actuel conclut déjà que la projection QC-HSA seule est trop élémentaire et trop proche de Fast Multipole Attention pour porter le papier. Elle ne redeviendra centrale que si le pont HGP produit un certificat calculable, non vacu et validé, ou si un résultat fidélité–coût réellement nouveau est démontré. Sinon, elle reste une proposition technique et l'architecture est jugée empiriquement.
+La projection QC-HSA seule reste insuffisante. Le candidat central le plus cohérent est l'enchaînement `T1 + T3/T4 + T5` : un payload HGP marqué présenté de façon sparse mais certifiée, stable ou composable, qui reconstruit le carrier annoncé et fournit un certificat adaptatif d'attention non vacu. Si ce pont échoue, le canal structurel et HSA doivent être jugés séparément de façon empirique.
