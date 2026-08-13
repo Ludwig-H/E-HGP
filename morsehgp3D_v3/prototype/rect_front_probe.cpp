@@ -421,6 +421,44 @@ int run_fixtures() {
     }
   }
 
+  // JUGE EXHAUSTIF DE L'INTERVALLE DU SCORE `S`. Le `NONE` du certificat
+  // central en depend entierement : un `Smin` surestime prononcerait un faux
+  // `NONE`. On compare donc aux minimum et maximum EXHAUSTIFS sur les points
+  // entiers de la boite temoin, en representation brute.
+  {
+    unsigned long long r = 0xDEADBEEF12345678ull;
+    auto rnd = [&r](long long hi) { r ^= r << 13; r ^= r >> 7; r ^= r << 17;
+                                    return (long long)(r % (unsigned long long)hi); };
+    long long tests = 0, dis = 0;
+    for (int it = 0; it < 40000; ++it) {
+      RectBox bx[3];
+      for (int qq = 0; qq < 3; ++qq)
+        for (int i = 0; i < 3; ++i) { const long long lo = rnd(21) - 10;
+          bx[qq].lo[i] = lo; bx[qq].hi[i] = lo + rnd(6); }
+      long long smn = 0, smx = 0;
+      mhgp3v::rect_s_interval(bx[0], bx[1], bx[2], &smn, &smx);
+      long long emn = 0, emx = 0; bool first = true;
+      for (long long zx = bx[2].lo[0]; zx <= bx[2].hi[0]; ++zx)
+      for (long long zy = bx[2].lo[1]; zy <= bx[2].hi[1]; ++zy)
+      for (long long zz = bx[2].lo[2]; zz <= bx[2].hi[2]; ++zz) {
+        const long long z[3] = {zx, zy, zz};
+        long long s = 0;
+        for (int i = 0; i < 3; ++i) {
+          const long long pp = 2 * z[i] - bx[0].lo[i] - bx[1].lo[i];
+          const long long qq2 = 2 * z[i] - bx[0].hi[i] - bx[1].hi[i];
+          const long long m = std::max(pp < 0 ? -pp : pp, qq2 < 0 ? -qq2 : qq2);
+          s += m * m;
+        }
+        if (first) { emn = emx = s; first = false; }
+        else { emn = std::min(emn, s); emx = std::max(emx, s); }
+      }
+      ++tests;
+      if (emn != smn || emx != smx) ++dis;
+    }
+    std::printf("juge_score tests=%lld desaccords=%lld\n", tests, dis);
+    if (dis) { std::fprintf(stderr, "DESACCORD: l'intervalle du score n'est pas exact\n"); ++bad; }
+  }
+
   // FIXTURE DES PORTEURS (audit `AUDIT_DEBLOCAGE`, § 7). `a=(0,0,0)`,
   // `b=(4,0,0)`, `x=(2,3,0)` : `D2=16`, `E2=X2=13`, `H=-5`. Le triangle `abx`
   // est AIGU et porte par l'arete maximale, alors que `x` est strictement HORS

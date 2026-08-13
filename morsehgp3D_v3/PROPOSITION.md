@@ -1964,6 +1964,22 @@ des blocs, ni un rescan témoin par record, ni la source du résiduel. Les gates
 continuent donc de porter sur `rect_visits`, classifications uniques, pushes et
 pops, `source_tasks`, sorties, octets et HWM, puis sur le consommateur complet.
 
+Une implémentation Patricia/Karras ne reçoit pas automatiquement la preuve de
+l'octree. Un préfixe utile de longueur `3*l+r`, avec `r=0/1/2`, conserve les
+`r` bits partiels : sa cellule est un pavé aligné d'aspect au plus deux, pas le
+cube obtenu en tronquant `r`. Les frères ont alors des intérieurs disjoints et
+la fibre au-dessus d'une cellule octree est explicitement bornable. Le choix du
+côté à scinder emploie cette cellule de préfixe. Une boîte serrée peut seulement
+ajouter un arrêt `sep_cell || sep_tight` : son centre déplacé interdit de dire
+que le prédicat centre/rayon devient monotone par simple inclusion.
+
+Avec `n-1` graines, `T` terminaux et des expansions binaires, l'identité
+comptable est `tests=2*T-(n-1)`. Elle remplace toute regex approchée, mais ne
+prouve pas `T=O(n)`. La profondeur Patricia est bornée par les quarante-huit
+bits Morton utiles, non par `2*log2(n)`. Une preuve de packing porte sur ces
+cellules et cette politique exactes ; un degré maximal observé sur trois tailles
+uniformes reste seulement un falsificateur.
+
 Une rampe de familles conserve la densité et la géométrie du générateur : pour
 chaque taille, elle emploie `cloud_family_default_coord(family,n)`, exige la
 cardinalité exacte `m==n` et pince `coord`, graine, bbox, lignes occupées,
@@ -2068,104 +2084,79 @@ les records et masses délégués, octets/HWM et deux pentes de travail. Le plan
 les fixtures et l'ABI sont détaillés dans
 [`AUDIT_DEBLOCAGE_WSPD_PREFIX_CARRIERS_20260813.md`](audits/AUDIT_DEBLOCAGE_WSPD_PREFIX_CARRIERS_20260813.md).
 
-### 11.1.4 `RF-GPU-P0` : banque propositionnelle avant corridors et carriers
+### 11.1.4 `RF-GPU-P0-A` : `Central-VWave`, banque seulement en ablation
 
-Le plus petit jalon device ne reçoit ni top-`L` exact, ni range-report
-exhaustif, ni carrier. Il prend les terminaux WSPD canoniques et un ordre
-`(Morton48,PointId)`. Pour chaque `RectId`, il inspecte une fenêtre déterministe
-`W=32` autour de la clé du milieu des deux nœuds, rejette les endpoints et
-recertifie les singletons sur tout `A×B`. La première ablation compare les
-trente-deux tests en ballots warp au maintien des seize meilleurs scores : le
-premier évite tout tri, le second réduit l'arithmétique. Aucun n'est présumé
-gagnant avant mesure device. Les coordonnées sont contiguës dans l'ordre
-Morton, tandis que `relation_rank[PointId]` teste l'appartenance aux plages
-`A/B` de l'arbre canonique ; les deux ordres ne sont jamais confondus.
+Le premier jalon device recherche exactement les crédits du masque central,
+sans top-`L`, fenêtre Morton ni heap par rectangle. Pour un terminal `R=A×B`,
+poser `D=Dlo(A,B)` et, pour un PointId `z`,
 
-L'encodeur Morton3D entrelace les bits aux positions `3b/3b+1/3b+2`. Un
-encodeur à masque est reçu seulement contre l'oracle boucle 16 bits ; les
-masques 2D terminant par `0x5555555555555555` sont interdits, car ils font par
-exemple collisionner `(2,0,0)` et `(0,0,1)`. La fenêtre est recadrée en fin de
-tableau pour lire exactement `min(W,n)` positions.
+$$S_R(z)=\sum_{i=1}^{3}\max\left(\left|2z_i-A_i^{lo}-B_i^{lo}\right|,\left|2z_i-A_i^{hi}-B_i^{hi}\right|\right)^2.$$
 
-La banque est strictement propositionnelle. Une discontinuité Morton, une
-fenêtre vide, un cap ou un sous-seuil rendent `DELEGATED_RESIDUAL`; ils ne
-prouvent jamais absence, `POSITIVE`, `KEEP` ou `SOURCE_EMPTY`. Un top-`L` exact
-n'est requis que pour une garantie de rappel ou une preuve d'occupation
-négative, pas pour la sûreté d'un crédit positif.
+Ce score est exactement `Vhi(A,B,{z})`. Les bits centraux sont q2 si `S<D`,
+q3 si `3*S<D`, et q4 si `D>0` et `209*S<=56*D`. Ils vérifient
+`q4=>q3=>q2`, tiennent en `u64` sous u16 et saturent à `8/9/10` PointIds
+distincts.
 
-Le P0 calcule `Dlo` une fois par rectangle, puis `Vhi` pour chaque ID, et rend
-le seul masque central suffisant. Il n'appelle ni l'intervalle de `H`, ni
-`Lambda`, ni le fallback par carrés. Les bits `ALL` satisfont `q4=>q3=>q2` ;
-les comptes distincts saturent à `10/9/8`. q2 rend `CLOSED_PAIR_SHARD`. Pour
-q3/q4, définir l'owner d'un support propre comme son arête de longueur carrée
-maximale, ties par plus petit `PairId`. La WSPD partitionne ces PairIds : chaque
-rectangle indexe donc, sans les développer, tous les supports qui ont leur
-owner dans son shard. Une saturation rend `PRUNED_OWNER_SHARD`; elle ne prétend
-jamais que chaque paire du rectangle est owner. La source exacte ne génère que
-les shards délégués et vérifie les trois ou six distances sur leurs tuples. Le
-replay impose `proof_ids` disjoints des `SupportIds`. Le résultat conserve
-jusqu'à dix `proof_ids` rejouables, la version de la règle d'owner et la clé
-injective du shard.
+Pour un nœud témoin `C`, `Smax` est `rect_v_max(A,B,C)`. `Smin` est aussi
+exact sur l'AABB entière : par axe, avec `u=Alo+Blo` et `v=Ahi+Bhi`, minimiser
+`max(|2z-u|,|2z-v|)^2` aux entiers voisins de `(u+v)/4`, écrêtés à `C`, puis
+sommer. Le classifieur de vague est :
 
-Une extension P0 autorisée récupère q2 sans produit large. Si le bit q2 central
-manque pour un singleton `z`, calculer les quatre produits d'extrémités
-`(z_i-a_i)(b_i-z_i)` par axe et sommer leurs trois minima. Ce
-`Hmin_singleton` est exact sur le produit cartésien des AABB entières ; sa
-stricte positivité est équivalente à q2-ALL sur cette enveloppe et coûte douze
-produits `i64`. Elle est seulement suffisante sur les populations corrélées
-des nœuds. Comme `4H=D2-V2`, le bit central q2 est inclus dans
-`Hmin_singleton>0` : après le masque commun, le repli q2 se réduit à ce test.
-Il remplace `--bank-strong`, qui rappelle trois classifieurs et réintroduit
-inutilement q3/q4 larges. q3/q4 restent au masque central tant qu'une ablation
-n'établit pas un gain justifiant deux limbes.
+```text
+q2 : ALL si Smax<D;        NONE si Smin>=D
+q3 : ALL si 3*Smax<D;      NONE si 3*Smin>=D
+q4 : ALL si D>0 et 209*Smax<=56*D;
+     NONE si D==0 ou 209*Smin>56*D
+```
 
-Deux kernels suffisent à cette tranche : K1 traite un warp par rectangle sans
-allocation ni file dynamique ; K2 scanne et compacte stablement les ordinals
-résiduels. Les buffers sont préalloués et résidents et la tranche ne
-synchronise qu'au terminal. Sous u16, `209*Vhi<2^44` et le score de sélection
-est inférieur à `2^38` : `u64` suffit, la porte exige `wide_products=0` et les
-deux limbes restent un P1. Avec `F` rectangles, l'enveloppe est `W*F` lectures
-et `T*F` tests `Vhi`, avec `T=W` pour les ballots directs ou `T=L` après
-sélection, et un seul `Dlo` par rectangle. Une ABI de `16 B` par travail,
-`64 B` par résultat et `4 B` par ordinal résiduel donne `84F+86n` octets avec
-arbre, clés, coordonnées, ordre et rang, avant les workspaces explicitement
-comptés.
+Une tâche porte `(RectOrdinal,CNodeOrdinal,open_mask)`. `ALL` crédite une
+antichaîne disjointe et retire les bits saturés ; `NONE` retire seulement les
+bits du certificat central ; `MIXED` remplace le nœud par ses enfants. Un cap
+sérialise la tâche comme `DELEGATED_RESIDUAL`. Aucune issue ne relance
+silencieusement `C=root`. Un nœud `ALL` ne peut contenir un endpoint de `A/B`,
+mais le replay conserve tout de même jusqu'à dix `proof_ids` et vérifie leur
+identité, leur disjonction et chaque bit.
 
-La porte de falsification reçoit un tape terminal WSPD hôte déjà reçu et
-résident. Son p95 doit rester au plus `200 ms` sur trente warms à `n=50000`,
-avec bytes/HWM, lectures, tests `Vhi`, `wide_products=0`, closed/residual par
-lane et compactage. Cette porte ne qualifie pas le `warm_e2e`, qui réintégrera
-construction WSPD, transfert, source et fold ; elle décide seulement s'il reste
-assez de budget. Le corridor d'ordre vient ensuite par ablation si son gain marginal
-sur les records délégués justifie son coût. Les carriers q3/q4 ne sont raccordés
-qu'après ce verdict.
+Cette `Central-VWave` est complète pour les crédits du certificat central ;
+elle ne prétend pas être complète pour tous les témoins géométriques. Son
+compteur directeur est `J`, nombre de tâches `Rect×CNode` consommées. Le pire
+cas peut rester `Theta(Fn)` : deux pentes de `J`, les octets, HWM, rounds et
+spills sont bloquants avant tout claim GPU.
 
-La vitesse seule ne reçoit pas la banque. Une ablation `W=16/32/64` compare
-records et masse fermés à un ordre Morton brouillé. Si la fenêtre correcte ne
-réduit presque aucun résiduel q3/q4, le P0 suivant emploie quelques
-préfixes/cellules Morton adaptés au rayon du cœur, toujours bornés et
-propositionnels ; il ne porte pas une fenêtre sans signal sur CUDA.
+La fenêtre `(Morton48,PointId)` `W=32/L=16` reste une ablation propositionnelle
+positive. Elle recadre ses bornes, rejette les endpoints, déduplique et
+recertifie chaque ID ; fenêtre vide, cap et sous-seuil rendent toujours
+`DELEGATED_RESIDUAL`. L'encodeur entrelace les bits aux positions
+`3b/3b+1/3b+2` et est jugé contre une boucle 16 bits ; le masque 2D
+`0x5555555555555555` est interdit. Sa vitesse ou son pourcentage fermé ne
+remplace jamais le ledger de `Central-VWave`.
 
-La séparation de départ reste `s_inf=2`. Monter globalement à `s_inf=8` peut gonfler
-le front et tous les coûts `W*F/L*F` d'un ordre de grandeur ; une hausse du
-pourcentage de masse fermée ne suffit pas. Le choix de `s` minimise le temps
-mesuré `P0 + source complète + aval` et les octets/HWM. Les rectangles
-difficiles se raffinent localement sans reconstruire globalement un grand
-front. Les `proof_ids` positifs d'un parent restent valides dans ses enfants.
-En revanche, seul un vrai `GEOMETRIC_NONE` s'hérite négativement. Fenêtre vide,
-cap, candidat non retenu, `CENTRAL_DEAD`, `Vbest` impossible et tout `UNKNOWN`
-se reclassifient sur les enfants. Un ID écarté parce qu'il appartenait à
-`A∪B` peut aussi devenir témoin après `A=A0∪A1`; le raffinement conserve un
-sidecar `endpoint_blocked` ou rejoue le producteur borné. Il ne transforme
-jamais un échec du fast path parent en vérité sur l'enfant.
+Une extension q2 calcule `Hmin_singleton` en douze produits `i64`. Sa stricte
+positivité est exacte sur le produit des AABB entières et seulement suffisante
+sur leurs populations corrélées. Elle vient en ablation après la vague
+centrale ; q3/q4 restent au masque commun jusqu'à mesure justifiant les carrés
+larges.
 
-L'oracle petit `n` développe chaque terminal et exige une multiplicité un de
-chaque `PairId`; il rejoue aussi chaque preuve, l'owner, la disjonction des IDs
-et la partition `closed_mask ⊔ residual_mask = input_mask`. La sortie finale et
-son digest sont invariants à la fenêtre, au quantum, au tuilage et au nombre de
-threads ; seule la répartition fast/fallback peut varier. Le détail des
-fixtures, de l'ABI et des défauts du pin `a7f061b` est dans
-[`AUDIT_REPONSE_CLAUDE_DOUBLE_COEUR_RF_GPU_P0_A7F061B_20260813.md`](audits/AUDIT_REPONSE_CLAUDE_DOUBLE_COEUR_RF_GPU_P0_A7F061B_20260813.md).
+q2 rend `CLOSED_PAIR_SHARD`. q3/q4 rendent `PRUNED_OWNER_SHARD` pour les
+supports dont l'arête maximale canonique appartient au shard ; une paire nue ne
+porte pas le bit owner. Le résultat conserve règle/version d'owner,
+`proof_ids`, `closed_mask`, `residual_mask`, masses et digests. L'oracle petit
+`n` développe chaque record, rejoue les preuves et exige
+`closed_mask ⊔ residual_mask = input_mask` ainsi que chaque PairId exactement
+une fois.
+
+Les buffers de vagues sont préalloués, résidents et traités par
+`count--scan--fill`, avec compactage stable terminal. La porte publie `F`, `J`,
+ALL/NONE/MIXED, splits, rounds, preuves, octets/HWM, kernels, syncs et masses
+par fate. Elle compare `s=1`, `3/2` et `2` sur les trois lanes. `s=2` reste le
+contrôle reçu ; `s=1` est un candidat de coût. `s=4` n'est pas promu par une
+masse PairId, puisque la source ne la développe pas. Le choix final minimise
+`WSPD + Central-VWave + source + shallow + census + fold` sur trente warms,
+jamais un pourcentage isolé.
+
+Les détails de preuve, la réponse à la fourche de coût et les fixtures sont
+dans
+[`AUDIT_REPONSE_FOURCHE_SOURCE_CENTRAL_VWAVE_DBA8961_20260813.md`](audits/AUDIT_REPONSE_FOURCHE_SOURCE_CENTRAL_VWAVE_DBA8961_20260813.md).
 
 ### 11.1.5 Wavefront commune `D,V,T` et relations de carriers
 
@@ -2178,20 +2169,57 @@ wavefront ; seuls les shards délégués y entrent. Pour `d=b-a`, `v=2z-a-b`, po
 centraux `D>V`, les carriers aigus `D<V` dans la lentille et tous les points de
 lentille nécessaires à q4.
 
-`DVT-CWave-v0` initialise exactement une tâche `(RectId,C=root)`, porte des
-masks indépendants witness/lentille/aigu et itère par count--scan--fill. `ALL`
-émet ou crédite une antichaîne, un vrai `NONE` retire le mask et `UNKNOWN`
-seul descend. Un quantum épuisé sérialise une continuation exacte. Les preuves
-de P0 initialisent les crédits et sont dédupliquées avant toute nouvelle
-saturation. Les gates exigent `root_entries=F`, `restarted_roots=0`, tâches et
-octets à deux pentes, et développement petit `n` de toutes les relations.
+`DVT-CWave-v0` porte des masks indépendants witness/lentille/aigu et itère par
+`count--scan--fill`. `ALL` émet ou crédite une antichaîne, un vrai `NONE`
+retire le mask et `UNKNOWN` seul descend. Un quantum épuisé sérialise une
+continuation exacte. Les preuves de P0 initialisent les crédits et sont
+dédupliquées avant toute nouvelle saturation. La baseline de correction admet
+`F` tâches `(RectId,C=root)`, mais aucun rectangle ne peut être reseedé après
+un split ou un quantum.
+
+La route industrielle factorise aussi ces requêtes. Un `QueryTree` canonique
+ordonne les RectIds par `(A-path,B-path,RectOrdinal)` et joint ses nœuds au
+`PointTree`. Une seule graine `(Qroot,Croot)` est lancée ; `ALL` émet un bloc
+`(QSpan,CNode)`, `NONE` retire et `UNKNOWN` scinde `Q` ou `C` avec tie-break de
+clé. À feuille `Q`, un warp traite un petit span de RectIds contre le même
+`CNode`. Le coût honnête est `O(R+n+J+B+P+H_out)` ; `J` peut encore être
+`Theta(Rn)` et aucune boîte agrégée trop lâche ne conclut autrement que
+`UNKNOWN`. Les gates exigent `join_root_seeds=1`,
+`scalar_rect_root_launches=0`, `tasks_created=tasks_consumed`, octets/HWM et
+développement petit `n` de chaque couple `(PairId,PointId)` avec multiplicité
+un.
+
+La relation carrier se classe plus finement par marges couplées. Pour
+`E=||x-a||^2` et `X=||b-x||^2`, poser `M0=E+X-D=-2H`, `M1=D-E` et `M2=D-X`.
+Un carrier vérifie exactement `M0>0`, `M1>=0`, `M2>=0`. Pour un axe, avec
+`near(u,I)` la distance carrée à l'intervalle et `far(u,I)` la plus grande
+distance carrée à ses extrémités :
+
+```text
+M1min = somme min sur a in {Alo,Ahi} de near(a,B)-far(a,C)
+M1max = somme max sur a in {Alo,Ahi} de far(a,B)-near(a,C)
+M2min = somme min sur b in {Blo,Bhi} de near(b,A)-far(b,C)
+M2max = somme max sur b in {Blo,Bhi} de far(b,A)-near(b,C)
+M0min = -2*Hmax; M0max = -2*Hmin
+```
+
+`ALL` est exact sur l'AABB si `M0min>0`, `M1min>=0`, `M2min>=0`. `NONE` est
+sûr si `M0max<=0` ou `M1max<0` ou `M2max<0`, mais reste incomplet lorsque des
+contraintes incompatibles échouent sur des points différents. Ces marges
+tiennent en `i64`. La source produit `P=AcuteLens` si q3 ou q4 reste ouvert et
+`L=Lens` si q4 reste ouvert ; une feuille `MIXED` est
+`POSSIBLE_OR_PRESENT`, jamais présence prouvée.
 
 Pour q4, noter `L` la relation lentille et `P` la sous-relation aiguë. Les
 couples admissibles sont factorisés par `x∈P,y∈L`, avec owner PointId sur
-`P×P`; ils ne sont jamais construits par `C(n_lens,2)`. Le join vérifie ensuite
-distance `xy`, rang, positivité, owner de support, census et shell. Les classes
-historiques `P/N` du shallow désignent l'orientation des demi-plans et restent
-distinctes du bit d'acuité.
+`P×P`; ils ne sont jamais construits par `C(n_lens,2)`. Les formes affines de
+`L` alimentent le moteur mono-ancre shallow, avec un bit `acute` pour `P` ; il
+n'émet que les sommets de profondeur au plus `7-credit4` incidents à une forme
+aiguë. Le replay vérifie distance `xy`, rang, positivité, owner de support,
+`BallKey`, census et shell. Concurrences, bundles et dégénérescences sont des
+sorties comptées à `H_out`, pas du travail caché. Les classes historiques
+`P/N` du shallow désignent l'orientation des demi-plans et restent distinctes
+du bit d'acuité.
 
 Sous split `A/B`, seuls une preuve `ALL` et un vrai `GEOMETRIC_NONE`
 s'héritent. `Vbest` impossible, `CENTRAL_DEAD`, fenêtre vide/capée, endpoint

@@ -3822,6 +3822,9 @@ add_test(NAME mhgp3v_rect_front_intervalle
 # boite, reseau entier contre continu, milieu impair, extremes u16. Et le
 # MUTANT COLINEAIRE : un nuage porte par une droite n'a aucun support q3/q4,
 # donc aucune issue ne peut y etre etiquetee POSITIVE hors q2.
+# Les fixtures portent aussi le JUGE EXHAUSTIF DE L'INTERVALLE DU SCORE `S`, dont
+# depend entierement le `NONE` du certificat central : un `Smin` surestime
+# prononcerait un faux `NONE`.
 add_test(NAME mhgp3v_rect_front_fixtures COMMAND mhgp3v_rect_front_probe --fixtures)
 set_tests_properties(mhgp3v_rect_front_fixtures PROPERTIES
   PASS_REGULAR_EXPRESSION "fixtures accord=OUI")

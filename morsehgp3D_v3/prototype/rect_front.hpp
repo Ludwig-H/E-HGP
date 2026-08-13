@@ -293,6 +293,78 @@ inline RectCarrier rect_carrier_verdict(const RectBox& a, const RectBox& b,
 
 enum class RectVerdict { kNone, kAll, kMixed };
 
+// ---- `Central-VWave` : LE SCORE DU CERTIFICAT CENTRAL, ET SON INTERVALLE EXACT
+// (audit `AUDIT_REPONSE_FOURCHE_SOURCE_CENTRAL_VWAVE_DBA8961`, § 4).
+//
+// Pour un terminal `R = A x B` et un point `z`, le score est
+//
+//     S_R(z) = somme_i max(|2z_i - Alo_i - Blo_i|, |2z_i - Ahi_i - Bhi_i|)^2,
+//
+// qui vaut EXACTEMENT `Vhi(A,B,{z})`. Le masque central s'ecrit alors
+// `q2 : S < D`, `q3 : 3S < D`, `q4 : D > 0 et 209 S <= 56 D`, avec `D = Dlo(A,B)`.
+//
+// L'APPORT DECISIF est que ce score admet un intervalle EXACT sur un nœud
+// temoin, donc un `NONE`. Le masque central seul n'en avait pas — il concluait
+// `ALL` ou `UNKNOWN` — et c'est pourquoi il ne pouvait pas piloter une descente.
+// En classifiant le score du certificat plutot que la geometrie sous-jacente, on
+// recupere l'elagage.
+//
+// Par axe, avec `u = Alo + Blo`, `v = Ahi + Bhi` et `f(z) = max(|2z-u|,|2z-v|)^2` :
+//   - `f` est un maximum de deux fonctions convexes, donc CONVEXE : son maximum
+//     sur un intervalle est a une EXTREMITE ;
+//   - son minimum est atteint la ou `|2z-u| = |2z-v|`, c'est-a-dire en
+//     `z = (u+v)/4`, ECRETE a l'intervalle — donc en l'un des deux entiers
+//     voisins.
+// Les axes etant independants, les trois minima et maxima s'additionnent.
+inline void rect_s_interval(const RectBox& a, const RectBox& b, const RectBox& c,
+                            long long* out_min, long long* out_max) {
+  long long smin = 0, smax = 0;
+  for (int i = 0; i < 3; ++i) {
+    const long long u = a.lo[i] + b.lo[i], v = a.hi[i] + b.hi[i];
+    auto f = [&](long long z) {
+      const long long p = 2 * z - u, q = 2 * z - v;
+      const long long m = std::max(p < 0 ? -p : p, q < 0 ? -q : q);
+      return m * m;
+    };
+    const long long fl = f(c.lo[i]), fh = f(c.hi[i]);
+    smax += std::max(fl, fh);
+    long long mn = std::min(fl, fh);
+    // `4 z* = u + v`. La division entiere de C++ TRONQUE VERS ZERO, donc
+    // `(u+v)/4` n'est pas le plancher des que la somme est negative — le juge
+    // exhaustif a pris cette faute en flagrant delit, 848 desaccords sur 40 000.
+    // On prend donc le vrai plancher, puis les DEUX entiers voisins.
+    const long long s4 = u + v;
+    const long long zf = (s4 >= 0) ? (s4 / 4) : -(((-s4) + 3) / 4);
+    for (int t = 0; t < 2; ++t) {
+      long long z = zf + t;
+      z = std::max(c.lo[i], std::min(c.hi[i], z));
+      mn = std::min(mn, f(z));
+    }
+    smin += mn;
+  }
+  *out_min = smin;
+  *out_max = smax;
+}
+
+// Verdict de lane a partir de l'intervalle du score. `ALL` et `NONE` sont tous
+// deux EXACTS pour le certificat central — c'est ce qui rend la vague possible.
+inline RectVerdict rect_central_verdict(long long dlo, long long smin, long long smax,
+                                        int lane) {
+  const __int128 d = (__int128)dlo, lo = (__int128)smin, hi = (__int128)smax;
+  if (lane == 0) {
+    if (hi < d) return RectVerdict::kAll;
+    if (lo >= d) return RectVerdict::kNone;
+  } else if (lane == 1) {
+    if (3 * hi < d) return RectVerdict::kAll;
+    if (3 * lo >= d) return RectVerdict::kNone;
+  } else {
+    if (dlo <= 0) return RectVerdict::kNone;
+    if (209 * hi <= 56 * d) return RectVerdict::kAll;
+    if (209 * lo > 56 * d) return RectVerdict::kNone;
+  }
+  return RectVerdict::kMixed;
+}
+
 // ENUM FERME. L'ABI n'accepte plus un `int` quelconque : toute valeur autre que
 // zero, un ou deux etait auparavant traitee silencieusement comme q4.
 enum class RectLane { kQ2 = 0, kQ3 = 1, kQ4 = 2 };

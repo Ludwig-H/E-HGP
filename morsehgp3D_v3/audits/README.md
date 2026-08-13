@@ -18,6 +18,14 @@ jamais réception.
 - [`AUDIT_ETAT_COURANT.md`](AUDIT_ETAT_COURANT.md) est l'unique verdict mutable :
   il distingue le `HEAD`, le delta éventuel du worktree, les empreintes utiles,
   les contre-exemples, les tests qualifiables et les portes ouvertes.
+- [`AUDIT_REPONSE_FOURCHE_SOURCE_CENTRAL_VWAVE_DBA8961_20260813.md`](AUDIT_REPONSE_FOURCHE_SOURCE_CENTRAL_VWAVE_DBA8961_20260813.md)
+  répond à la question décisive de Claude : la source est factorisée et
+  sortie-sensible, jamais par PairId. Il corrige la fausse colonne de masse,
+  réfute la loi d'inflation discrète et remplace fenêtre/heap par
+  `Central-VWave`, complète pour le masque central. Il fournit aussi le
+  classifieur carrier par marges exactes, le join global `QueryTree×PointTree`,
+  le raccord shallow q4 et les conditions manquantes à la preuve du WSPD
+  Patricia.
 - [`AUDIT_DEBLOCAGE_WSPD_PREFIX_CARRIERS_20260813.md`](AUDIT_DEBLOCAGE_WSPD_PREFIX_CARRIERS_20260813.md)
   remet à Claude le prochain jalon falsifiable : WSPD entière/canonique,
   classification des seuls terminaux par masque de lanes, cœur central et

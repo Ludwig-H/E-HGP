@@ -27,6 +27,28 @@ Le verdict lié au `HEAD` et au worktree est tenu uniquement dans
 [`AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md). Ne déduire aucun état
 live d'une note datée, d'un message de commit ou du seul passage d'un CTest.
 
+Au pin `dba8961`, la fourche « source par record ou source par paire » est
+tranchée : aucune des deux descriptions n'est le contrat v3. La source doit
+être factorisée et sortie-sensible ; elle paie ses couples de nœuds visités,
+ses blocs et ses vraies sorties, jamais tous les PairIds d'un bloc. La colonne
+alors appelée « masse résiduelle » était seulement le complément du taux de
+records q2 fermés. Un delta live calcule désormais la vraie masse q2, mais
+cette masse reste un ledger et non un temps aval. Les données physiques
+disponibles dominent `s=4`; `s=1` est une ablation prometteuse et `s=2` le
+contrôle reçu, à départager seulement sur les trois lanes et le consommateur
+complet.
+
+Le prochain micro-jalon recommandé est `Central-VWave`. Pour chaque terminal,
+il classifie l'arbre témoin par les extrema exacts du score
+`S=Vhi(singleton)` : `S<Dlo`, `3S<Dlo` et
+`209S<=56Dlo`. `ALL` crédite une antichaîne, `NONE` élague seulement ce
+certificat et `MIXED` descend en vagues `count--scan--fill`. Cette construction
+est complète pour les crédits du masque central et supprime fenêtre Morton,
+top-`L` et heap par rectangle. Son travail `J` peut encore être dense : il est
+mesuré avant le join global `QueryTree×PointTree`, les carriers par marges et
+les niveaux shallow q4. Réponse, formules, fixtures et ordre d'implémentation :
+[`AUDIT_REPONSE_FOURCHE_SOURCE_CENTRAL_VWAVE_DBA8961_20260813.md`](audits/AUDIT_REPONSE_FOURCHE_SOURCE_CENTRAL_VWAVE_DBA8961_20260813.md).
+
 Au pin `96be8e0`, le nouveau front apporte deux briques utiles sans changer ce
 verdict. L'intervalle entier de `H=(z-a) dot(b-z)` sur trois AABB certifie
 `ALL/NONE/MIXED` pour q2 et des `ALL` suffisants pour q3/q4. Arrêter la
@@ -69,16 +91,14 @@ lentille car un seul de ses deux porteurs doit être aigu. Le jalon
 fold, sans jamais transformer un cap en résultat :
 [`AUDIT_DEBLOCAGE_WSPD_PREFIX_CARRIERS_20260813.md`](audits/AUDIT_DEBLOCAGE_WSPD_PREFIX_CARRIERS_20260813.md).
 
-Le prochain micro-jalon est plus petit. `RF-GPU-P0` reçoit d'abord les
-terminaux WSPD, inspecte une fenêtre Morton déterministe `W=32`, garde au plus
-`L=16` `PointId` distincts, recertifie chacun avec un masque entier commun et
-compacte tout échec en `DELEGATED_RESIDUAL`. Aucun top-`L` exact n'est requis :
-une banque incomplète perd seulement du rappel. Cette tranche supprime la DFS
-depuis `C=root`, borne le travail à `W*F` lectures et `L*F` tests `Vhi`, avec
-un seul `Dlo` par rectangle. Elle tient en `u64`, exige `wide_products=0` et
-doit être falsifiée à `p95<=200 ms` sur un tape WSPD déjà résident avant
-d'ajouter corridors ou carriers. Réponse aux questions de Claude, preuve du
-double cœur, fixture et ABI :
+La fenêtre Morton initialement proposée pour `RF-GPU-P0` reste une ablation
+positive bornée, pas le prochain chemin produit. Elle inspecte `W=32`, garde au
+plus `L=16` `PointId` distincts et délègue tout échec. Aucun top-`L` exact
+n'était requis pour sa sûreté, mais les mesures et la descente qui lui a
+succédé ne reçoivent ni son rappel ni un coût device. `Central-VWave` la
+remplace comme baseline scientifique ; la fenêtre peut encore comparer son
+temps et sa couverture au même compactage. La preuve historique du double
+cœur, les fixtures et l'ABI positive restent dans :
 [`AUDIT_REPONSE_CLAUDE_DOUBLE_COEUR_RF_GPU_P0_A7F061B_20260813.md`](audits/AUDIT_REPONSE_CLAUDE_DOUBLE_COEUR_RF_GPU_P0_A7F061B_20260813.md).
 
 La première banque du pin `360ea7c` confirmait la baisse de constante à
@@ -97,18 +117,18 @@ commun, ce repli remplace la disjonction générale en q2. Il conserve le rappel
 q2 annoncé (`31,37 %` à `s=2`) sans
 les trois classifieurs ni les carrés larges ; q3/q4 restent centraux. `s=8`
 n'est pas retenu globalement : il multiplie le front mesuré par `11,8`. Le
-choix reste `s=2` plus raffinement local, jugé sur `P0 + source + aval`, pas
-sur la seule masse fermée. La réponse complète, y compris `Vbest`, l'héritage
+choix ne monte pas globalement au-delà de `s=2`; `s=1`, `3/2` et `2` sont
+comparés sur `P0 + source + aval`, pas sur la seule masse fermée. La réponse
+complète, y compris `Vbest`, l'héritage
 des preuves et le traitement des endpoints relatifs, est dans
 [`AUDIT_REPONSE_BANQUE_MORTON_360EA7C_20260813.md`](audits/AUDIT_REPONSE_BANQUE_MORTON_360EA7C_20260813.md).
 
-Le pin `4f4b463` répare l'entrelacement Morton3D, mais P0 reste à recevoir :
-`Dlo` est encore recalculé par ID, les seuils centraux emploient une largeur
-inutile et leurs oracles ne sont pas encore une porte au pin. La suite ne doit
-pas recréer une source indépendante. Avec `D=||b-a||^2`,
+Le pin `4f4b463` réparait l'entrelacement Morton3D, mais sa banque P0 n'a pas
+été reçue. La suite ne doit pas recréer une source indépendante. Avec
+`D=||b-a||^2`,
 `V=||2z-a-b||^2` et `T=(b-a) dot(2z-a-b)`, un même calcul classe les témoins
-centraux, la lentille et les carriers aigus. Le jalon recommandé est donc P0
-sans file, puis `DVT-CWave-v0` avec une unique entrée `C=root` par rectangle.
+centraux, la lentille et les carriers aigus. Le jalon recommandé est désormais
+`Central-VWave`, puis une `DVT-CWave` factorisée, sans redémarrage racine.
 q4 consomme la relation factorisée `Acute×Lens`, jamais toutes les paires de
 la lentille. ABI, bornes et fixtures :
 [`AUDIT_DIRECTIVE_DVT_CWAVE_4F4B463_20260813.md`](audits/AUDIT_DIRECTIVE_DVT_CWAVE_4F4B463_20260813.md).

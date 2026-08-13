@@ -23,6 +23,7 @@
 
 namespace {
 
+using mhgp3v::RectVerdict;
 using mhgp3v::WfNode;
 
 [[noreturn]] void refuse(const char* why) {
@@ -78,6 +79,7 @@ long long g_win = 32, g_bankl = 16;
 long long g_warms = 0;
 long long g_inflation = 0;
 bool g_descent = false;
+bool g_vwave = false;
 
 // Cellule d'un identifiant de nœud : negatif = feuille (le point lui-meme).
 mhgp3v::WspdBox cell_of(const std::vector<WfNode>& nodes,
@@ -130,6 +132,7 @@ int main(int argc, char** argv) {
     else if (a == "--oracle") oracle = true;
     else if (a == "--tight") g_tight = true;
     else if (a == "--bank") g_bank = true;
+    else if (a == "--vwave") { g_bank = true; g_vwave = true; }
     else if (a == "--descent") { g_bank = true; g_descent = true; }
     else if (a.rfind("--window=", 0) == 0) { g_win = arg_ll(val("--window=").c_str(), 2, 1024, "window"); g_bank = true; }
     else if (a.rfind("--bank-l=", 0) == 0) { g_bankl = arg_ll(val("--bank-l=").c_str(), 1, 64, "bank-l"); g_bank = true; }
@@ -238,7 +241,55 @@ int main(int argc, char** argv) {
             const long long dlo = mhgp3v::rect_minsq(qa, qb);   // UNE fois
             long long cred[3] = {0, 0, 0};
             long long taken = 0;
-            if (g_descent) {
+            if (g_vwave) {
+              // `Central-VWave` : on classe le SCORE du certificat, pas la
+              // geometrie. `ALL` credite la population du nœud et retire le
+              // bit ; `NONE` retire le bit sans crediter ; `MIXED` remplace le
+              // nœud par ses enfants. Ni fenetre, ni top-L, ni tas — et un
+              // elagage reel, que le masque central seul n'avait pas.
+              int st[64];
+              int sn = 0;
+              st[sn++] = 0;
+              unsigned open = 7u;
+              long long exp = 0;
+              const int need[3] = {10, 9, 8};
+              while (sn > 0 && open && exp < g_win) {
+                const int id = st[--sn];
+                ++exp; ++bank.reads;
+                mhgp3v::RectBox cb2{};
+                long long pop = 1;
+                if (id < 0) {
+                  const int r = -1 - id;
+                  for (int d = 0; d < 3; ++d) { cb2.lo[d] = sp[r][d]; cb2.hi[d] = sp[r][d]; }
+                } else {
+                  pop = nodes[id].last - nodes[id].first + 1;
+                  for (int d = 0; d < 3; ++d) {
+                    cb2.lo[d] = g_tight ? nodes[id].tlo[d] : nodes[id].lo[d];
+                    cb2.hi[d] = g_tight ? nodes[id].thi[d] : nodes[id].hi[d];
+                  }
+                }
+                long long smn = 0, smx = 0;
+                mhgp3v::rect_s_interval(qa, qb, cb2, &smn, &smx);
+                ++bank.recerts;
+                unsigned mixed = 0;
+                for (int lane = 0; lane < 3; ++lane) {
+                  if (!(open & (1u << lane))) continue;
+                  const RectVerdict v =
+                      mhgp3v::rect_central_verdict(dlo, smn, smx, lane);
+                  if (v == RectVerdict::kAll) {
+                    cred[lane] += pop;
+                    if (cred[lane] >= need[lane]) open &= ~(1u << lane);
+                  } else if (v == RectVerdict::kMixed) {
+                    mixed |= 1u << lane;
+                  }
+                }
+                if (mixed && id >= 0 && sn + 2 <= 64) {
+                  st[sn++] = nodes[id].left;
+                  st[sn++] = nodes[id].right;
+                }
+              }
+              taken = exp;
+            } else if (g_descent) {
               // Descente au meilleur d'abord vers `m_0`, pile bornee.
               std::pair<long long, int> heap[64];
               int hn = 0;
