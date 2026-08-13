@@ -3444,18 +3444,36 @@ set_tests_properties(mhgp3v_dominance_juge_exhaustif PROPERTIES
 mhgp3v_add_expected_code_test_for(mhgp3v_directional_dominance_probe
   mhgp3v_dominance_mutant_seuil "MUTANT TUE" 4
   --cloud-seuil --judge --inject=dom-h-moins-un)
-# La cible comptee comme temoin. Le differentiel `mutant ferme, reference non`
-# est le seul ensemble ou une injection peut etre fausse ; un tirage uniforme
-# sur des millions de fermetures ne le rencontre jamais.
+# LE MUTANT `cible-temoin` EST RETIRE, ET C'EST UNE RETRACTATION.
+#
+# Il paraissait tuer — 189 desaccords sur un differentiel cible. Le contre-audit
+# a montre qu'il lisait une case HORS du prefixe top-h, laissee par une ancre
+# precedente : il modelisait un temoin gratuit de hauteur arbitraire, pas la
+# cible. Ses desaccords venaient de la memoire, pas de la faute visee.
+#
+# Correctement modelise — en INSERANT `tau_d` dans la liste triee — il survit,
+# et c'est demontrable : la fermeture exige `tau_d >= c tau_h` avec `c >= 3/2`,
+# donc si `tau_d` etait le `h`-ieme il faudrait `tau_d >= c tau_d`. La cible ne
+# peut jamais etre creditee. La faute est SAINE, et un mutant sain n'est pas un
+# mutant.
+#
+# C'est la quatrieme fois dans ce chantier qu'une porte de mutant visait un
+# non-defaut. Un mutant qui meurt pour la mauvaise raison est pire qu'un mutant
+# absent : il donne une confiance sans objet.
+
+# LE DOMAINE `smax` EST DERIVE, PLUS FIGE. La CLI accepte `4 <= smax <= 34`
+# alors que le sujet employait `{10,9,8}`, qui ne vaut qu'a `smax=11` : a
+# `smax=34` le juge refute une fermeture que le sujet prononce. Le seuil vaut
+# desormais `h = smax+1-q`, et un `smax` exigeant plus que le tampon top-h
+# REFUSE au lieu de tronquer.
 mhgp3v_add_expected_code_test_for(mhgp3v_directional_dominance_probe
-  mhgp3v_dominance_mutant_cible_temoin "MUTANT TUE" 4
-  --points=3000 --family=terrain --seed=3 --judge-echantillon=1500
-  --inject=dom-cible-temoin)
+  mhgp3v_dominance_reject_smax_hors_tampon "top-h superieur au tampon" 2
+  --points=200 --smax=34)
 
 # Refus contractuels.
 mhgp3v_add_expected_code_test_for(mhgp3v_directional_dominance_probe
   mhgp3v_dominance_reject_mutant_sans_juge "un mutant sans juge ne prouve rien" 2
-  --points=200 --inject=dom-cible-temoin)
+  --points=200 --inject=dom-h-moins-un)
 mhgp3v_add_expected_code_test_for(mhgp3v_directional_dominance_probe
   mhgp3v_dominance_reject_juge_non_borne "le juge ponctuel exhaustif est borne" 2
   --points=1000 --judge)

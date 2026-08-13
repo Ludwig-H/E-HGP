@@ -72,7 +72,20 @@ inline constexpr int kMaxNeed = 10;
 enum class DomMutant {
   kNone,
   kHMinusOne,      // seuil a h-1 temoins : ferme sans en avoir assez
-  kTargetAsWitness,  // compte la cible elle-meme comme temoin
+  // `kTargetAsWitness` A ETE RETIRE : LA FAUTE EST SAINE, C'EST DEMONTRABLE.
+  //
+  // Compter la cible parmi les temoins revient a inserer `tau_d` dans la liste
+  // triee des hauteurs. Or la fermeture exige `tau_d >= c tau_h` avec
+  // `c >= 3/2`; si `tau_d` etait le `h`-ieme, il faudrait `tau_d >= c tau_d`,
+  // impossible. La cible ne peut donc JAMAIS etre creditee, et l'injection ne
+  // ferme rien de plus que la reference.
+  //
+  // La version precedente de ce mutant paraissait tuer : elle incrementait le
+  // seul COMPTE et lisait `tau[need-1]`, une case hors du prefixe valide,
+  // laissee par une ancre precedente. Elle modelisait donc un temoin gratuit de
+  // hauteur arbitraire, et ses desaccords venaient de la memoire, pas de la
+  // faute visee. Un mutant qui meurt pour la mauvaise raison est pire qu'un
+  // mutant absent : il donne une confiance sans objet.
   kBoundaryClosed,   // attribution de frontiere fermee au lieu de half-open
   kNeighbourCell,    // emploie le seuil de la cellule voisine
   kFactorTwo,        // remplace le facteur trois du cutoff par deux
@@ -82,7 +95,6 @@ inline const char* dom_mutant_name(DomMutant m) {
   switch (m) {
     case DomMutant::kNone: return "none";
     case DomMutant::kHMinusOne: return "dom-h-moins-un";
-    case DomMutant::kTargetAsWitness: return "dom-cible-temoin";
     case DomMutant::kBoundaryClosed: return "dom-frontiere-fermee";
     case DomMutant::kNeighbourCell: return "dom-cellule-voisine";
     case DomMutant::kFactorTwo: return "dom-facteur-deux";

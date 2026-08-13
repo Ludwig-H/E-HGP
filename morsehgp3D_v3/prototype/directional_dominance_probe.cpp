@@ -54,6 +54,15 @@ using mhgp3v::dominance::DomMutant;
 
 namespace dom = mhgp3v::dominance;
 
+// LE SEUIL DERIVE DE `smax`, IL N'EST PLUS FIGE.
+//
+// La CLI accepte `4 <= smax <= 34` mais le sujet employait `{10,9,8}`, qui ne
+// vaut qu'a `smax=11`. Le contre-audit le rapporte comme P0 : a `smax=34` le
+// juge refute une fermeture q4 que le sujet prononce, parce que le sujet exige
+// huit temoins la ou la lane en demande trente et un. Le sujet ET le juge
+// emploient donc `h = smax + 1 - q`.
+inline int need_of(long long smax, int lane) { return (int)(smax + 1 - (lane + 2)); }
+
 [[noreturn]] void refuse(const char* why) {
   std::fprintf(stderr, "REFUS : %s\n", why);
   std::exit(2);
@@ -162,7 +171,6 @@ int main(int argc, char** argv) {
       else refuse("--family inconnue");
     } else if (key == "--inject") {
       if (val == "dom-h-moins-un") opt.mutant = DomMutant::kHMinusOne;
-      else if (val == "dom-cible-temoin") opt.mutant = DomMutant::kTargetAsWitness;
       else if (val == "dom-frontiere-fermee") opt.mutant = DomMutant::kBoundaryClosed;
       else if (val == "dom-cellule-voisine") opt.mutant = DomMutant::kNeighbourCell;
       else if (val == "dom-facteur-deux") opt.mutant = DomMutant::kFactorTwo;
@@ -259,6 +267,11 @@ int main(int argc, char** argv) {
   }
 
   if (opt.smax < 4 || opt.smax > 34) refuse("--smax hors du domaine d'enveloppe [4, 34]");
+  // Le tampon top-h est dimensionne pour `smax=11`. Un `smax` plus grand exige
+  // un besoin plus grand que le tampon ne peut porter : REFUS, jamais une
+  // troncature silencieuse qui fermerait a huit ce que la lane veut a trente.
+  if (need_of(opt.smax, 0) > dom::kMaxNeed)
+    refuse("--smax exige un top-h superieur au tampon : refus plutot que troncature");
   if (opt.n < 4 || opt.n > 60000) refuse("--points hors bornes [4, 60000]");
   if (opt.judge && opt.n > 400) refuse("le juge ponctuel exhaustif est borne a --points <= 400");
   if (opt.mutant != DomMutant::kNone && !opt.judge && opt.judge_sample <= 0)
@@ -391,7 +404,7 @@ int main(int argc, char** argv) {
                                     (i64)pts[(std::size_t)b].y - (i64)pts[(std::size_t)a].y,
                                     (i64)pts[(std::size_t)b].z - (i64)pts[(std::size_t)a].z);
       for (int q = 0; q < 3; ++q) {
-        int need = dom::kNeed[q];
+        int need = need_of(opt.smax, q);
         // MUTANT : un temoin de moins suffit. Le seuil devient plus petit, donc
         // plus de cibles sont fermees, avec moins de temoins que la lane exige.
         if (opt.mutant == DomMutant::kHMinusOne) --need;
@@ -402,9 +415,7 @@ int main(int argc, char** argv) {
           use_cell = (use_cell + 1) % dom::kCells;
         i64 tau_h = -1;
         if (use_cell >= 0) {
-          int have = top->count[use_cell];
-          // MUTANT : la cible se compte elle-meme comme temoin.
-          if (opt.mutant == DomMutant::kTargetAsWitness) ++have;
+          const int have = top->count[use_cell];
           if (have >= need) tau_h = top->tau[use_cell][need - 1];
         }
         if (tau_h < 0 && cell >= 0) ++led.cells_underfull[(std::size_t)q];
@@ -417,8 +428,8 @@ int main(int argc, char** argv) {
         bool ref_closes = true;
         if (opt.mutant != DomMutant::kNone) {
           i64 tau_h_ref = -1;
-          if (cell_ref >= 0 && top_ref->count[cell_ref] >= dom::kNeed[q])
-            tau_h_ref = top_ref->tau[cell_ref][dom::kNeed[q] - 1];
+          if (cell_ref >= 0 && top_ref->count[cell_ref] >= need_of(opt.smax, q))
+            tau_h_ref = top_ref->tau[cell_ref][need_of(opt.smax, q) - 1];
           ref_closes = dom::cutoff_closes(cell_ref, q, tau_d, tau_h_ref, DomMutant::kNone,
                                          !opt.radial_ablation);
         }
@@ -504,7 +515,7 @@ int main(int argc, char** argv) {
     for (const auto& cd : sample) {
       long long c[3];
       mhgp3v::cone_oracle::count_witnesses(xyz, n, cd.a, cd.b, c);
-      const long long need = (long long)dom::kNeed[cd.lane];
+      const long long need = (long long)need_of(opt.smax, cd.lane);
       if (cd.margin > marge_max) marge_max = cd.margin;
       if (c[cd.lane] < need) {
         ++wrong;
