@@ -52,6 +52,7 @@
 // CODES DE SORTIE : 1 desaccords du juge, 2 campagne refusee avant calcul,
 // 3 plancher ou invariant viole, 4 mutant tue.
 #include <algorithm>
+#include <cerrno>
 #include <chrono>
 #include <cstdio>
 #include <cstdlib>
@@ -63,6 +64,7 @@
 #include "prototype/cloud_families.hpp"
 #include "prototype/morton_lbvh.hpp"
 #include "prototype/spindle_cone.hpp"
+#include "prototype/spindle_cone_oracle.hpp"
 
 namespace {
 
@@ -126,6 +128,7 @@ struct Ledger {
   // ATTENTION AU VOCABULAIRE. Ces deux compteurs disent « ce TEMOIN ne peut
   // rien crediter dans ce sous-arbre ». Ils ne ferment AUCUNE masse de paires
   // et ne sont jamais un prune : la fermeture est `cone_node_prunes`.
+  long long none_classifier_calls = 0;  // appels au classifieur NONE, succes ou non
   long long witness_none_q3 = 0;
   long long witness_none_q4 = 0;
   long long witness_dropped = 0;      // temoins retires du sous-arbre (NONE q2)
@@ -156,6 +159,7 @@ struct Ledger {
     corner_evals += o.corner_evals;
     credits_new += o.credits_new;
     credits_inherited += o.credits_inherited;
+    none_classifier_calls += o.none_classifier_calls;
     witness_none_q3 += o.witness_none_q3;
     witness_none_q4 += o.witness_none_q4;
     witness_dropped += o.witness_dropped;
@@ -331,6 +335,12 @@ struct Options {
   // avant tout calcul, et il ne peut donc plus passer sans juge.
   long long min_judge_accord = 0;
   long long min_permutation_accord = 0;
+  // UN PLANCHER PAR LANE. La conjonction ne les remplace pas : elle est vide
+  // des qu'une seule des trois lanes ne ferme rien, et la porte redeviendrait
+  // vacueuse pour les deux autres.
+  long long min_accord_q2 = 0;
+  long long min_accord_q3 = 0;
+  long long min_accord_q4 = 0;
 };
 
 // Bitset des paires ORDONNEES fermees. Il ne sert qu'au juge et a la mesure
@@ -353,9 +363,20 @@ struct ClosedBits {
   }
 };
 
+// LES TROIS LANES SONT ENREGISTREES SEPAREMENT. Le contre-audit du 13 aout a
+// refuse la version anterieure, qui n'enregistrait une paire que lorsque q2, q3
+// et q4 etaient toutes mortes : une fermeture q3 seule, ou q4 seule, pouvait
+// etre fausse sans qu'aucun juge ne la voie, alors que l'aval consomme les
+// lanes separement.
+struct ClosedSet {
+  ClosedBits all, q2, q3, q4;
+  void reset(long long n) { all.reset(n); q2.reset(n); q3.reset(n); q4.reset(n); }
+  bool empty() const { return all.empty(); }
+};
+
 struct Run {
   Ledger led;
-  ClosedBits closed;      // vide hors `--verify` / `--symmetric`
+  ClosedSet closed;       // vide hors `--verify` / `--symmetric` / `--permute`
   long long candidate_pairs_symmetric = 0;
   double wall_s = 0.0;
 };
@@ -378,9 +399,20 @@ void account_alive(const LbvhNode& nd, int rank_a, unsigned lane_dead, Ledger* l
   led->mass_surviving += mass;
 }
 
+// Marque toute la plage d'un nœud comme fermée pour `a`, dans un bitset de
+// lane. Chaque paire ordonnée y entre une seule fois : la lane ne bascule qu'à
+// un seul nœud d'une branche, et les descendants héritent du bit.
+inline void mark_node(ClosedBits* bits, const MortonLbvh& tree, const LbvhNode& nd, int a) {
+  if (bits == nullptr || bits->empty()) return;
+  for (int t = nd.begin; t < nd.end; ++t) {
+    const int id = tree.order[(std::size_t)t];
+    if (id != a) bits->set(a, id);
+  }
+}
+
 void run_endpoint(const MortonLbvh& tree, int a, int rank_a,
                   const std::vector<Witness>& bank, const Options& opt, Ledger* led,
-                  ClosedBits* closed) {
+                  ClosedSet* closed) {
   const int nb = (int)bank.size();
   if (nb == 0) return;
   const int need2 = mhgp3v::anchor::lane_death_threshold((int)opt.smax, 2);
@@ -432,8 +464,6 @@ void run_endpoint(const MortonLbvh& tree, int a, int rank_a,
       else if (!mask_test(fr.m3, j)) want = cone::kLaneQ3;
       else if (!mask_test(fr.m4, j)) want = cone::kLaneQ4;
       else continue;
-      if (want >= cone::kLaneQ4 && mask_test(fr.nq4, j)) continue;
-      if (want >= cone::kLaneQ3 && mask_test(fr.nq3, j)) continue;
 
       // `floor` est la plus petite lane >= want dont le seuil n'est pas encore
       // atteint : sous ce plancher, le test ne peut rien apporter au noeud.
@@ -442,6 +472,15 @@ void run_endpoint(const MortonLbvh& tree, int a, int rank_a,
       else if (want <= cone::kLaneQ3 && c3 < need3) floor = cone::kLaneQ3;
       else if (c4 < need4) floor = cone::kLaneQ4;
       if (floor == 0) continue;
+
+      // LES REFUTATIONS SE CONSULTENT SELON `floor`, PAS SELON `want`. Une
+      // version anterieure testait `nq3`/`nq4` a partir de `want` : quand une
+      // lane inferieure avait deja atteint son seuil, `floor` valait q3 ou q4
+      // alors que `want` valait encore q2, la refutation heritee de la lane
+      // reellement utile etait ignoree, et le classifieur etait repaye dans
+      // tous les descendants.
+      if (floor >= cone::kLaneQ4 && mask_test(fr.nq4, j)) continue;
+      if (floor >= cone::kLaneQ3 && mask_test(fr.nq3, j)) continue;
 
       ++led->witness_node_tests;
       const int lane =
@@ -456,27 +495,50 @@ void run_endpoint(const MortonLbvh& tree, int a, int rank_a,
         continue;
       }
       if (lane != cone::kLaneNone) continue;  // le cone rencontre la boite : rien a refuter
+      // Le classifieur NONE calcule Hmax, trois intervalles de produit
+      // vectoriel et plusieurs carres larges. Son cout n'apparaissait dans
+      // aucun compteur : `corner_evals` ne le voit pas.
+      ++led->none_classifier_calls;
       const unsigned nm = cone::none_mask_of_box(bank[(std::size_t)j], box, opt.mutant);
-      if ((nm & cone::kNoneQ3) != 0u) { mask_set(&fr.nq3, j); ++led->witness_none_q3; }
-      if ((nm & cone::kNoneQ4) != 0u) { mask_set(&fr.nq4, j); ++led->witness_none_q4; }
-      if ((nm & cone::kNoneQ2) != 0u) { mask_set(&fr.dead, j); ++led->witness_dropped; }
+      // TRANSITIONS SEULEMENT. Compter les hits recomptait la meme refutation a
+      // chaque visite du sous-arbre et pouvait franchir un plancher sans
+      // qu'aucune refutation nouvelle n'ait eu lieu.
+      if ((nm & cone::kNoneQ3) != 0u && !mask_test(fr.nq3, j)) {
+        mask_set(&fr.nq3, j);
+        ++led->witness_none_q3;
+      }
+      if ((nm & cone::kNoneQ4) != 0u && !mask_test(fr.nq4, j)) {
+        mask_set(&fr.nq4, j);
+        ++led->witness_none_q4;
+      }
+      if ((nm & cone::kNoneQ2) != 0u && !mask_test(fr.dead, j)) {
+        mask_set(&fr.dead, j);
+        ++led->witness_dropped;
+      }
     }
 
     // Fermeture par lane, comptee UNE SEULE FOIS a l'endroit ou elle tombe.
     unsigned lane_dead = fr.lane_dead;
-    if ((lane_dead & 4u) == 0u && c2 >= need2) { lane_dead |= 4u; led->mass_closed_q2 += mass; }
-    if ((lane_dead & 8u) == 0u && c3 >= need3) { lane_dead |= 8u; led->mass_closed_q3 += mass; }
-    if ((lane_dead & 16u) == 0u && c4 >= need4) { lane_dead |= 16u; led->mass_closed_q4 += mass; }
+    if ((lane_dead & 4u) == 0u && c2 >= need2) {
+      lane_dead |= 4u;
+      led->mass_closed_q2 += mass;
+      if (closed != nullptr) mark_node(&closed->q2, tree, nd, a);
+    }
+    if ((lane_dead & 8u) == 0u && c3 >= need3) {
+      lane_dead |= 8u;
+      led->mass_closed_q3 += mass;
+      if (closed != nullptr) mark_node(&closed->q3, tree, nd, a);
+    }
+    if ((lane_dead & 16u) == 0u && c4 >= need4) {
+      lane_dead |= 16u;
+      led->mass_closed_q4 += mass;
+      if (closed != nullptr) mark_node(&closed->q4, tree, nd, a);
+    }
 
     if ((lane_dead & 28u) == 28u) {
       ++led->cone_node_prunes;
       led->mass_closed += mass;
-      if (closed != nullptr) {
-        for (int t = nd.begin; t < nd.end; ++t) {
-          const int id = tree.order[(std::size_t)t];
-          if (id != a) closed->set(a, id);
-        }
-      }
+      if (closed != nullptr) mark_node(&closed->all, tree, nd, a);
       continue;  // AUCUN `PairId` n'est forme : le noeud entier est mort
     }
 
@@ -518,44 +580,22 @@ void run_endpoint(const MortonLbvh& tree, int a, int rank_a,
 }
 
 // ---------------------------------------------------------------------------
-// JUGE PONCTUEL BORNE. Il enumere toutes les paires ordonnees et tous les
-// temoins avec la representation HISTORIQUE (g,Q), qui ne partage aucune
-// quantite intermediaire avec le chemin produit : ni H, ni E2, ni X2. Un
-// defaut commun ne peut donc pas se compenser.
+// LE JUGE N'EST PLUS ICI. Il vit dans `spindle_cone_oracle.cpp`, une unite de
+// traduction qui n'inclut ni ce fichier, ni `spindle_cone.hpp`, ni
+// `anchor_envelope.hpp`. Elle redefinit le seuil de mort de lane en `long long`
+// et reecrit son arithmetique 128 bits sur deux limbes.
+//
+// La version anterieure appelait `anchor::lane_death_threshold` des deux cotes.
+// Un `smax` hors largeur `int` y rendait des seuils negatifs partages, sujet et
+// juge fermaient ensemble les 380/380 paires sans un seul temoin, et l'accord
+// etait total. Un juge n'est independant que si un defaut du sujet ne peut pas
+// s'y reproduire a l'identique.
 // ---------------------------------------------------------------------------
-struct Judge {
-  std::vector<unsigned char> truly_dead;  // paire ordonnee fermable au pointwise
-  long long closable = 0;
-};
-
-Judge judge_pairs(const std::vector<P3>& pts, int smax) {
-  const int n = (int)pts.size();
-  Judge jj{};
-  jj.truly_dead.assign((std::size_t)n * (std::size_t)n, 0);
-  const int need2 = mhgp3v::anchor::lane_death_threshold(smax, 2);
-  const int need3 = mhgp3v::anchor::lane_death_threshold(smax, 3);
-  const int need4 = mhgp3v::anchor::lane_death_threshold(smax, 4);
-  for (int a = 0; a < n; ++a) {
-    for (int b = 0; b < n; ++b) {
-      if (b == a) continue;
-      int p2 = 0, p3 = 0, p4 = 0;
-      for (int z = 0; z < n; ++z) {
-        if (z == a || z == b) continue;
-        const int lane = cone::lane_of_target_gq(
-            (i64)pts[(std::size_t)a].x, (i64)pts[(std::size_t)a].y, (i64)pts[(std::size_t)a].z,
-            (i64)pts[(std::size_t)z].x, (i64)pts[(std::size_t)z].y, (i64)pts[(std::size_t)z].z,
-            (i64)pts[(std::size_t)b].x, (i64)pts[(std::size_t)b].y, (i64)pts[(std::size_t)b].z);
-        if (lane >= cone::kLaneQ2) ++p2;
-        if (lane >= cone::kLaneQ3) ++p3;
-        if (lane >= cone::kLaneQ4) ++p4;
-      }
-      if (p2 >= need2 && p3 >= need3 && p4 >= need4) {
-        jj.truly_dead[(std::size_t)a * (std::size_t)n + (std::size_t)b] = 1;
-        ++jj.closable;
-      }
-    }
-  }
-  return jj;
+std::vector<int> flatten(const std::vector<P3>& pts) {
+  std::vector<int> xyz;
+  xyz.reserve(pts.size() * 3);
+  for (const P3& p : pts) { xyz.push_back((int)p.x); xyz.push_back((int)p.y); xyz.push_back((int)p.z); }
+  return xyz;
 }
 
 // ---------------------------------------------------------------------------
@@ -563,10 +603,13 @@ Judge judge_pairs(const std::vector<P3>& pts, int smax) {
 // (H, E2 X2) est le chemin produit, (H, R) sert la porte NONE, (g, Q) est la
 // representation historique du lemme du noeud spindle.
 // ---------------------------------------------------------------------------
-long long g_rng = 0;
+// LCG EN ARITHMETIQUE NON SIGNEE. La version anterieure multipliait un
+// `long long` : le debordement signe est un comportement indefini, et UBSan le
+// signale a juste titre. Le non signe a un enroulement DEFINI par le standard.
+unsigned long long g_rng = 0;
 i64 next_rand(i64 lo, i64 hi) {
-  g_rng = g_rng * 6364136223846793005LL + 1442695040888963407LL;
-  const unsigned long long v = (unsigned long long)g_rng >> 17;
+  g_rng = g_rng * 6364136223846793005ULL + 1442695040888963407ULL;
+  const unsigned long long v = g_rng >> 17;
   return lo + (i64)(v % (unsigned long long)(hi - lo + 1));
 }
 
@@ -835,13 +878,38 @@ int run_fixtures(bool verbose) {
 }
 
 // ---------------------------------------------------------------------------
+// `strtoll` sature silencieusement a LLONG_MIN/LLONG_MAX et signale par
+// `errno`. Sans ce test, `--points=99999999999999999999` devient LLONG_MAX et
+// passe ensuite les bornes de domaine par le seul hasard de la saturation.
 bool parse_ll(const char* s, long long* out) {
   if (s == nullptr || *s == '\0') return false;
+  errno = 0;
   char* end = nullptr;
   const long long v = std::strtoll(s, &end, 10);
   if (end == nullptr || *end != '\0') return false;
+  if (errno == ERANGE) return false;
   *out = v;
   return true;
+}
+
+// Empreinte du nuage effectivement genere. Elle rend le reçu falsifiable :
+// deux campagnes qui annoncent la meme famille et la meme graine mais dont les
+// digests different n'ont pas juge le meme univers.
+unsigned long long cloud_digest(const std::vector<P3>& pts) {
+  unsigned long long h = 1469598103934665603ULL;  // FNV-1a 64
+  auto mix = [&h](unsigned long long v) {
+    for (int b = 0; b < 8; ++b) {
+      h ^= (v >> (8 * b)) & 0xFFULL;
+      h *= 1099511628211ULL;
+    }
+  };
+  mix((unsigned long long)pts.size());
+  for (const P3& p : pts) {
+    mix((unsigned long long)(unsigned)p.x);
+    mix((unsigned long long)(unsigned)p.y);
+    mix((unsigned long long)(unsigned)p.z);
+  }
+  return h;
 }
 
 Run execute(const std::vector<P3>& pts, const Options& opt, bool want_closed) {
@@ -870,7 +938,7 @@ Run execute(const std::vector<P3>& pts, const Options& opt, bool want_closed) {
   if (want_closed) {
     for (int a = 0; a < n; ++a)
       for (int b = a + 1; b < n; ++b)
-        if (!run.closed.test(a, b) && !run.closed.test(b, a)) ++run.candidate_pairs_symmetric;
+        if (!run.closed.all.test(a, b) && !run.closed.all.test(b, a)) ++run.candidate_pairs_symmetric;
   }
   return run;
 }
@@ -883,10 +951,10 @@ void print_ledger(const Options& opt, const std::vector<P3>& pts, const Run& run
       "cadre phase=exploration_v3_hors_registre backend=cpu_reference "
       "profile=quantized_u16_input_only mode=proposition_math_non_recue "
       "public_status=not_claimed\n");
-  std::printf("cloud family=%s n=%lld coord=%lld seed=%lld smax=%lld leaf=%lld bank=%lld inject=%s\n",
+  std::printf("cloud family=%s n=%lld coord=%lld seed=%lld smax=%lld leaf=%lld bank=%lld inject=%s digest=%016llx\n",
               opt.fixture.empty() ? mhgp3v::cloud_family_name(opt.family) : opt.fixture.c_str(),
               n, opt.coord, opt.seed, opt.smax, opt.leaf, opt.bank_cap,
-              cone::cone_mutant_name(opt.mutant));
+              cone::cone_mutant_name(opt.mutant), cloud_digest(pts));
   std::printf("banque knn_calls=%lld knn_node_visits=%lld taille_moyenne=%lld hwm=%lld restarts=%lld\n",
               c.knn_calls, c.knn_node_visits, c.knn_calls > 0 ? c.bank_sum / c.knn_calls : 0,
               c.bank_hwm, c.bank_restarts);
@@ -895,8 +963,8 @@ void print_ledger(const Options& opt, const std::vector<P3>& pts, const Run& run
       "credits_herites=%lld profondeur_hwm=%lld\n",
       c.target_node_visits, c.witness_node_tests, c.corner_evals, c.credits_new,
       c.credits_inherited, c.depth_hwm);
-  std::printf("refutation_temoin none_q3=%lld none_q4=%lld retires_q2=%lld\n",
-              c.witness_none_q3, c.witness_none_q4, c.witness_dropped);
+  std::printf("refutation_temoin appels=%lld none_q3=%lld none_q4=%lld retires_q2=%lld\n",
+              c.none_classifier_calls, c.witness_none_q3, c.witness_none_q4, c.witness_dropped);
   std::printf(
       "masse_ordonnee entree=%lld fermee=%lld survivante=%lld prunes=%lld "
       "candidate_pairs=%lld\n",
@@ -941,6 +1009,9 @@ int main(int argc, char** argv) {
     else if (key == "--min-bank") { if (!parse_ll(val.c_str(), &parsed)) refuse("--min-bank invalide"); opt.min_bank = parsed; }
     else if (key == "--min-none-q4") { if (!parse_ll(val.c_str(), &parsed)) refuse("--min-none-q4 invalide"); opt.min_none_q4 = parsed; }
     else if (key == "--min-credits-herites") { if (!parse_ll(val.c_str(), &parsed)) refuse("--min-credits-herites invalide"); opt.min_credits_inherited = parsed; }
+    else if (key == "--min-accord-q2") { if (!parse_ll(val.c_str(), &parsed)) refuse("--min-accord-q2 invalide"); opt.min_accord_q2 = parsed; }
+    else if (key == "--min-accord-q3") { if (!parse_ll(val.c_str(), &parsed)) refuse("--min-accord-q3 invalide"); opt.min_accord_q3 = parsed; }
+    else if (key == "--min-accord-q4") { if (!parse_ll(val.c_str(), &parsed)) refuse("--min-accord-q4 invalide"); opt.min_accord_q4 = parsed; }
     else if (key == "--min-accord-juge") { if (!parse_ll(val.c_str(), &parsed)) refuse("--min-accord-juge invalide"); opt.min_judge_accord = parsed; }
     else if (key == "--min-accord-permutation") { if (!parse_ll(val.c_str(), &parsed)) refuse("--min-accord-permutation invalide"); opt.min_permutation_accord = parsed; }
     else if (key == "--verify") { opt.verify = true; }
@@ -971,6 +1042,16 @@ int main(int argc, char** argv) {
     }
   }
 
+  // LE DOMAINE `smax` EST VERIFIE ICI, AVANT TOUT CAST ET AVANT TOUT MODE.
+  // `anchor::envelope_depth(smax)=smax-2` doit tenir dans `kMaxEnvelopeDepth`,
+  // ce qui borne `smax` a 34. La version anterieure ne testait que `smax>=4`,
+  // stockait la valeur en `long long`, puis la castait en `int` dans le sujet
+  // ET dans le juge : `--smax=9223372036854775807` rendait des seuils negatifs
+  // partages, fermait 380/380 paires sans un seul temoin, et l'accord etait
+  // total. Le cast ne doit jamais decider.
+  if (opt.smax < 4 || opt.smax > (long long)mhgp3v::anchor::kMaxEnvelopeDepth + 2)
+    refuse("--smax hors du domaine d'enveloppe [4, 34]");
+
   if (fixtures_only) {
     const int bad = run_fixtures(true);
     if (bad != 0) {
@@ -982,7 +1063,7 @@ int main(int argc, char** argv) {
   }
 
   if (opt.selftest) {
-    g_rng = opt.seed * 2654435761LL + 12345LL;
+    g_rng = (unsigned long long)opt.seed * 2654435761ULL + 12345ULL;
     const int bad = run_fixtures(false);
     if (bad != 0) {
       std::fprintf(stderr, "REFUS : %d fixture(s) gravee(s) refutee(s)\n", bad);
@@ -1003,15 +1084,27 @@ int main(int argc, char** argv) {
                    all_hits, none_hits, boxes);
       return 3;
     }
+    // JUGER LE JUGE. L'arithmetique deux limbes ecrite dans l'unite oracle est
+    // confrontee a `mhgp3v::BigInt`, signe et magnitude sur 32 bits — une
+    // TROISIEME representation, qui ne partage rien avec les deux autres.
+    const long long oracle_small = mhgp3v::cone_oracle::selftest_against_bigint(20000, 12, 7);
+    const long long oracle_wide = mhgp3v::cone_oracle::selftest_against_bigint(20000, 65535, 11);
+    if (oracle_small != 0 || oracle_wide != 0) {
+      std::fprintf(stderr,
+                   "DESACCORD : l'arithmetique deux limbes du juge diverge de BigInt "
+                   "(%lld petits, %lld u16)\n",
+                   oracle_small, oracle_wide);
+      return 1;
+    }
     std::printf("selftest accord=OUI triples_petits=%d triples_u16=%d isometries=120000 "
-                "boites=%lld inclusions=%lld refutations=%lld fixtures_refutees=0\n",
+                "boites=%lld inclusions=%lld refutations=%lld juge_vs_bigint=40000 "
+                "fixtures_refutees=0\n",
                 small, wide, boxes, all_hits, none_hits);
     return 0;
   }
 
   if (opt.n < 2 || opt.n > 65535) refuse("--points hors du profil dense u16 [2, 65535]");
-  if (opt.smax < 4) refuse("--smax hors bornes");
-  if (opt.bank_cap < 1 || opt.bank_cap > kMaxBank) refuse("--bank hors bornes [1, 64]");
+  if (opt.bank_cap < 1 || opt.bank_cap > kMaxBank) refuse("--bank hors bornes [1, 256]");
   if (opt.leaf < 1 || opt.leaf > 256) refuse("--leaf hors bornes");
   if (opt.mutant != ConeMutant::kNone && !opt.verify)
     refuse("un mutant sans juge ne prouve rien : --inject exige --verify");
@@ -1021,6 +1114,8 @@ int main(int argc, char** argv) {
     refuse("un plancher d'accord du juge exige --verify");
   if (opt.min_permutation_accord > 0 && !opt.permute)
     refuse("un plancher d'accord de permutation exige --permute");
+  if ((opt.min_accord_q2 > 0 || opt.min_accord_q3 > 0 || opt.min_accord_q4 > 0) && !opt.verify)
+    refuse("un plancher d'accord par lane exige --verify");
   if (opt.verify && opt.n > 700)
     refuse("le juge ponctuel est borne : --verify exige --points <= 700");
   if (opt.coord < 0) opt.coord = mhgp3v::cloud_family_default_coord(opt.family, (int)opt.n);
@@ -1028,6 +1123,11 @@ int main(int argc, char** argv) {
 
   const std::vector<P3> pts =
       mhgp3v::make_family_cloud(opt.family, (int)opt.n, (int)opt.coord, opt.seed);
+  // LA CARDINALITE DEMANDEE N'EST PAS GARANTIE. `--points=100 --coord=2` rendait
+  // un nuage de huit points, code zero, et toutes les identites etaient alors
+  // verifiees sur le mauvais univers. Le refus precede le LBVH.
+  if ((long long)pts.size() != opt.n)
+    refuse("le generateur n'a pas rendu la cardinalite demandee");
   const int n = (int)pts.size();
 
   if ((opt.symmetric || opt.permute) && opt.n > 20000)
@@ -1053,33 +1153,62 @@ int main(int argc, char** argv) {
   int disagreements = 0;
   long long judge_agreed = -1;        // -1 : le juge n'a pas tourne
   long long permutation_accord = -1;  // -1 : la permutation n'a pas tourne
+  long long lane_accord[3] = {-1, -1, -1};  // q2, q3, q4
   if (opt.verify) {
-    const Judge jj = judge_pairs(pts, (int)opt.smax);
-    long long wrong = 0;
-    long long agreed = 0;
-    for (int a = 0; a < n && wrong < 8; ++a) {
-      for (int b = 0; b < n; ++b) {
-        if (b == a) continue;
-        const std::size_t k = (std::size_t)a * (std::size_t)n + (std::size_t)b;
-        if (!run.closed.test(a, b)) continue;
-        if (jj.truly_dead[k] == 0) {
-          if (wrong < 8)
-            std::fprintf(stderr,
-                         "DESACCORD : la paire ordonnee (%d,%d) est fermee par le certificat "
-                         "mais reste vivante au juge ponctuel\n",
-                         a, b);
-          ++wrong;
-        } else {
-          ++agreed;
+    const mhgp3v::cone_oracle::LaneTruth jj =
+        mhgp3v::cone_oracle::judge(flatten(pts), n, opt.smax);
+    if (jj.refused) {
+      std::fprintf(stderr, "REFUS : le juge independant refuse le domaine — %s\n", jj.refusal);
+      return 2;
+    }
+    // LES TROIS INCLUSIONS, SEPAREMENT : `closed_q subset dead_q` pour chaque
+    // lane. Une fermeture q3 fausse ne peut plus se cacher derriere une
+    // conjonction correcte, alors que l'aval consomme les lanes separement.
+    long long wrong[3] = {0, 0, 0};
+    long long agreed[3] = {0, 0, 0};
+    const ClosedBits* sujet[3] = {&run.closed.q2, &run.closed.q3, &run.closed.q4};
+    const std::vector<unsigned char>* verite[3] = {&jj.dead_q2, &jj.dead_q3, &jj.dead_q4};
+    const char* nom[3] = {"q2", "q3", "q4"};
+    long long printed = 0;
+    for (int lane = 0; lane < 3; ++lane) {
+      for (int a = 0; a < n; ++a) {
+        for (int b = 0; b < n; ++b) {
+          if (b == a) continue;
+          if (!sujet[lane]->test(a, b)) continue;
+          const std::size_t k = (std::size_t)a * (std::size_t)n + (std::size_t)b;
+          if ((*verite[lane])[k] == 0) {
+            if (printed < 8) {
+              std::fprintf(stderr,
+                           "DESACCORD %s : la paire ordonnee (%d,%d) est fermee par le "
+                           "certificat mais sa lane reste vivante au juge independant\n",
+                           nom[lane], a, b);
+              ++printed;
+            }
+            ++wrong[lane];
+          } else {
+            ++agreed[lane];
+          }
         }
       }
     }
-    const double taux = jj.closable > 0 ? 100.0 * (double)c.mass_closed / (double)jj.closable : 0.0;
+    const double taux =
+        jj.closable_all > 0 ? 100.0 * (double)c.mass_closed / (double)jj.closable_all : 0.0;
+    std::printf(
+        "juge_lane q2=%lld/%lld q3=%lld/%lld q4=%lld/%lld desaccords=%lld/%lld/%lld "
+        "temoins_evalues=%lld\n",
+        agreed[0], jj.closable_q2, agreed[1], jj.closable_q3, agreed[2], jj.closable_q4,
+        wrong[0], wrong[1], wrong[2], mhgp3v::cone_oracle::last_witness_evaluations());
+    long long conj = 0;
+    for (int a = 0; a < n; ++a)
+      for (int b = 0; b < n; ++b)
+        if (b != a && run.closed.all.test(a, b)) ++conj;
     std::printf("juge fermees=%lld accord=%lld desaccords=%lld fermables_pointwise=%lld "
                 "parcimonie=%.2f%% accord=%s\n",
-                c.mass_closed, agreed, wrong, jj.closable, taux, wrong == 0 ? "OUI" : "NON");
-    disagreements = (int)wrong;
-    judge_agreed = agreed;
+                c.mass_closed, conj, wrong[0] + wrong[1] + wrong[2], jj.closable_all, taux,
+                (wrong[0] + wrong[1] + wrong[2]) == 0 ? "OUI" : "NON");
+    disagreements = (int)(wrong[0] + wrong[1] + wrong[2]);
+    for (int lane = 0; lane < 3; ++lane) lane_accord[lane] = agreed[lane];
+    judge_agreed = conj;
   }
 
   // ---- Equivariance par permutation -------------------------------------
@@ -1096,7 +1225,7 @@ int main(int argc, char** argv) {
   if (opt.permute) {
     std::vector<int> perm((std::size_t)n);
     for (int i = 0; i < n; ++i) perm[(std::size_t)i] = i;
-    g_rng = opt.seed * 1099511628211LL + 7LL;
+    g_rng = (unsigned long long)opt.seed * 1099511628211ULL + 7ULL;
     for (int i = n - 1; i > 0; --i) {
       const int j = (int)next_rand(0, i);
       std::swap(perm[(std::size_t)i], perm[(std::size_t)j]);
@@ -1109,8 +1238,8 @@ int main(int argc, char** argv) {
     for (int a = 0; a < n; ++a)
       for (int b = 0; b < n; ++b) {
         if (b == a) continue;
-        const bool here = run.closed.test(a, b);
-        const bool there = other.closed.test(perm[(std::size_t)a], perm[(std::size_t)b]);
+        const bool here = run.closed.all.test(a, b);
+        const bool there = other.closed.all.test(perm[(std::size_t)a], perm[(std::size_t)b]);
         if (here != there) ++differ;
         else if (here) ++same_closed;
       }
@@ -1201,6 +1330,15 @@ int main(int argc, char** argv) {
     std::fprintf(stderr, "REFUS : plancher d'accord du juge non atteint (%lld < %lld)\n",
                  judge_agreed, opt.min_judge_accord);
     return 3;
+  }
+  const long long lane_floor[3] = {opt.min_accord_q2, opt.min_accord_q3, opt.min_accord_q4};
+  const char* lane_name[3] = {"q2", "q3", "q4"};
+  for (int lane = 0; lane < 3; ++lane) {
+    if (lane_floor[lane] > 0 && lane_accord[lane] < lane_floor[lane]) {
+      std::fprintf(stderr, "REFUS : plancher d'accord %s non atteint (%lld < %lld)\n",
+                   lane_name[lane], lane_accord[lane], lane_floor[lane]);
+      return 3;
+    }
   }
   if (opt.min_permutation_accord > 0 && permutation_accord < opt.min_permutation_accord) {
     std::fprintf(stderr, "REFUS : plancher d'accord de permutation non atteint (%lld < %lld)\n",

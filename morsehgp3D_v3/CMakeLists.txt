@@ -2914,7 +2914,13 @@ mhgp3v_add_expected_code_test_for(mhgp3v_anchor_source
 # milieu, alors que le spindle exact en contient aussi pres des extremites.
 # Aucune de ces portes ne recoit une complexite ni un SLO.
 # ---------------------------------------------------------------------------
-add_executable(mhgp3v_spindle_cone_probe prototype/spindle_cone_probe.cpp)
+# Le juge est une UNITE DE TRADUCTION SEPAREE. Elle n'inclut ni
+# `spindle_cone.hpp` ni `anchor_envelope.hpp` : le compilateur garantit ainsi
+# qu'aucune ligne du sujet ne s'execute dans le juge. C'est la reparation du
+# faux vert `smax`, ou les deux chemins partageaient la meme conversion fautive.
+add_executable(mhgp3v_spindle_cone_probe
+  prototype/spindle_cone_probe.cpp
+  prototype/spindle_cone_oracle.cpp)
 target_include_directories(mhgp3v_spindle_cone_probe PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(mhgp3v_spindle_cone_probe PRIVATE mhgp)
 target_compile_options(mhgp3v_spindle_cone_probe PRIVATE -Wall -Wextra -Werror)
@@ -2947,23 +2953,87 @@ set_tests_properties(mhgp3v_cone_selftest PROPERTIES
 # planchers ne soient evalues. L'anti-vacuite que le regex tenait (« le juge
 # a-t-il seulement tourne ? ») est desormais dans `--min-accord-juge`, qui
 # REFUSE en code 2 si `--verify` est absent.
+#
+# LES TROIS LANES SONT JUGEES SEPAREMENT. Le sujet ne remplissait qu'un seul
+# bitset, et seulement quand q2, q3 ET q4 etaient toutes mortes ; le juge
+# faisait le meme ET. Une fermeture q3 seule ou q4 seule pouvait donc etre
+# fausse sans etre observee, alors que l'aval consomme les lanes separement.
+# Chaque porte porte desormais un plancher NON NUL par lane : la conjonction ne
+# les remplace pas, puisqu'elle est vide des qu'une seule lane ne ferme rien.
 add_test(NAME mhgp3v_cone_juge_uniform COMMAND mhgp3v_spindle_cone_probe
          --points=300 --family=uniform --seed=3 --bank=48 --verify
+         # `--min-none-q4` valait 200 000 quand `witness_none_q4` comptait les
+         # HITS : la meme refutation etait recomptee a chaque visite du
+         # sous-arbre, et le plancher pouvait etre franchi sans qu'une seule
+         # refutation NOUVELLE ait eu lieu. En transitions la mesure vaut
+         # 170 160 ; le plancher descend donc a 150 000, qui est un vrai
+         # plancher et non la mesure elle-meme.
          --min-prunes=1200 --min-mass-closed=8000 --min-bank=48
-         --min-none-q4=200000 --min-credits-herites=100000 --min-accord-juge=8000)
+         --min-none-q4=150000 --min-credits-herites=100000 --min-accord-juge=8000
+         --min-accord-q2=40000 --min-accord-q3=10000 --min-accord-q4=8000)
 add_test(NAME mhgp3v_cone_juge_clusters COMMAND mhgp3v_spindle_cone_probe
          --points=300 --family=eight_clusters --seed=3 --bank=48 --verify
-         --min-prunes=1500 --min-mass-closed=18000 --min-accord-juge=18000)
+         --min-prunes=1500 --min-mass-closed=18000 --min-accord-juge=18000
+         --min-accord-q2=50000 --min-accord-q3=20000 --min-accord-q4=18000)
 add_test(NAME mhgp3v_cone_juge_terrain COMMAND mhgp3v_spindle_cone_probe
          --points=300 --family=terrain --seed=5 --bank=48 --verify
-         --min-prunes=3000 --min-mass-closed=40000 --min-accord-juge=40000)
+         --min-prunes=3000 --min-mass-closed=40000 --min-accord-juge=40000
+         --min-accord-q2=60000 --min-accord-q3=45000 --min-accord-q4=40000)
 add_test(NAME mhgp3v_cone_juge_multiecho COMMAND mhgp3v_spindle_cone_probe
          --points=300 --family=scanline_overlap_multiecho --seed=2 --bank=48
-         --verify --min-prunes=2500 --min-mass-closed=50000 --min-accord-juge=50000)
+         --verify --min-prunes=2500 --min-mass-closed=50000 --min-accord-juge=50000
+         --min-accord-q2=65000 --min-accord-q3=55000 --min-accord-q4=50000)
 # Le plancher de verdict sans son verdict est refuse AVANT tout calcul.
 mhgp3v_add_expected_code_test_for(mhgp3v_spindle_cone_probe
   mhgp3v_cone_reject_plancher_juge_sans_juge "plancher d'accord du juge exige --verify" 2
   --points=200 --min-accord-juge=1)
+mhgp3v_add_expected_code_test_for(mhgp3v_spindle_cone_probe
+  mhgp3v_cone_reject_plancher_lane_sans_juge "plancher d'accord par lane exige --verify" 2
+  --points=200 --min-accord-q3=1)
+mhgp3v_add_expected_code_test_for(mhgp3v_spindle_cone_probe
+  mhgp3v_cone_plancher_lane_q4 "plancher d'accord q4" 3
+  --points=300 --family=uniform --seed=3 --bank=48 --verify --min-accord-q4=100000000)
+
+#
+# LE DOMAINE `smax` EST FERME AVANT TOUT CAST.
+#
+# `--smax=9223372036854775807` fermait `380/380` paires ordonnees sans un seul
+# test temoin, avec code zero et `accord=OUI` du juge comme de la permutation :
+# le sujet ET le juge castaient la valeur en `int`, les seuils devenaient
+# negatifs des deux cotes, et l'accord etait donc parfait sur une contradiction.
+# C'etait une contradiction mathematique exacte, pas une question de coût.
+#
+# Deux reparations independantes sont gravees ici. D'abord ces cinq refus, tous
+# anterieurs au moindre calcul. Ensuite, et surtout, le juge a change d'unite de
+# traduction : il n'inclut plus `anchor_envelope.hpp` et recalcule ses seuils en
+# `long long`. Un defaut de conversion du sujet ne peut donc plus s'y produire a
+# l'identique.
+mhgp3v_add_expected_code_test_for(mhgp3v_spindle_cone_probe
+  mhgp3v_cone_reject_smax_llong_max "--smax hors du domaine d'enveloppe" 2
+  --points=20 --family=uniform --seed=3 --bank=4 --verify --smax=9223372036854775807)
+mhgp3v_add_expected_code_test_for(mhgp3v_spindle_cone_probe
+  mhgp3v_cone_reject_smax_int_max_plus_un "--smax hors du domaine d'enveloppe" 2
+  --points=20 --smax=2147483648)
+mhgp3v_add_expected_code_test_for(mhgp3v_spindle_cone_probe
+  mhgp3v_cone_reject_smax_borne_plus_un "--smax hors du domaine d'enveloppe" 2
+  --points=20 --smax=35)
+mhgp3v_add_expected_code_test_for(mhgp3v_spindle_cone_probe
+  mhgp3v_cone_reject_smax_trois "--smax hors du domaine d'enveloppe" 2
+  --points=20 --smax=3)
+# `strtoll` SATURE a LLONG_MAX et ne signale que par `errno`. Sans ce test, une
+# valeur a vingt chiffres serait devenue LLONG_MAX, puis aurait pu franchir une
+# borne par le seul hasard de la saturation.
+mhgp3v_add_expected_code_test_for(mhgp3v_spindle_cone_probe
+  mhgp3v_cone_reject_smax_erange "--smax invalide" 2
+  --points=20 --smax=99999999999999999999)
+
+# LA CARDINALITE DEMANDEE N'ETAIT PAS GARANTIE. `--points=100 --coord=2` rendait
+# huit points et code zero : toutes les identites etaient alors verifiees sur le
+# mauvais univers, et le reçu annoncait `n=8` sans que rien ne le refuse. Le
+# reçu publie desormais aussi un digest du nuage.
+mhgp3v_add_expected_code_test_for(mhgp3v_spindle_cone_probe
+  mhgp3v_cone_reject_cardinalite "cardinalite demandee" 2
+  --points=100 --coord=2 --verify)
 
 # EQUIVARIANCE PAR PERMUTATION, sur l'ENSEMBLE DES PAIRES FERMEES et non sur un
 # compteur. Elle a effectivement refute une premiere banque ordonnee par
@@ -3051,6 +3121,14 @@ mhgp3v_add_expected_code_test_for(mhgp3v_spindle_cone_probe
   mhgp3v_cone_mutant_none_majorant "MUTANT TUE .ledger." 4
   --points=300 --family=uniform --seed=3 --bank=48 --verify
   --inject=cone-none-uses-rmax)
+# L'HERITAGE SANS RECREDIT EST L'INVARIANT CENTRAL DU PARCOURS : un cone qui
+# contient la boite du parent contient celle de tous ses enfants, donc un credit
+# ne se reteste ni ne se recompte jamais. Le mutant existait et tuait, mais
+# aucune porte ne l'exercait — un mutant sans porte ne prouve rien.
+mhgp3v_add_expected_code_test_for(mhgp3v_spindle_cone_probe
+  mhgp3v_cone_mutant_heritage "MUTANT TUE .juge." 4
+  --points=300 --family=uniform --seed=3 --bank=48 --verify
+  --inject=cone-ignore-inherited)
 
 # Refus contractuels, tous AVANT le moindre calcul.
 mhgp3v_add_expected_code_test_for(mhgp3v_spindle_cone_probe
