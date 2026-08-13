@@ -2981,10 +2981,13 @@ voisins de `W_i/(2G)` clipés, et le maximum aux extrémités. Un parcours LBVH
 peut créditer une population, élaguer ou scinder, puis saturer à neuf intérieurs
 pour rejeter q3 sous `smax=11`.
 
-L'ordre est `BallKey` avant census : former les clés de pieds, radix/RLE, faire
-un seul range-count saturé par boule, puis un seul census complet `I_B/U_B` par
-boule survivante. Sous u16, l'évaluation demande environ `105` bits ; le device
-emploie une ABI signée à deux limbs. Les caps sérialisent une continuation.
+L'ordre est `PrimitiveSphereKey` avant census : former la clé primitive du
+polynôme de sphère, radix/RLE avec une side-list de `SupportKey`, faire un seul
+range-count saturé par sphère, puis un seul census complet `I_B/U_B` par
+sphère survivante. La `BallKey` sémantique qui dépend du shell n'est dérivée
+qu'après ce census ; l'utiliser avant serait circulaire. Sous u16, l'évaluation
+demande environ `105` bits ; le device emploie une ABI signée à deux limbs.
+Les caps sérialisent une continuation.
 
 Cette ordonnance est le premier falsificateur q3. Les bas niveaux du
 `LineFormTape` ne deviennent une optimisation q3 que si les visites LBVH sont
@@ -3025,7 +3028,7 @@ sur le rectangle. Tout échec est raffiné ou délégué.
 ### 17.4 Portes
 
 Le ledger q3 publie au minimum `carrier_blocks ALL/NONE/MIXED`,
-`carrier_mass`, `foot_queries`, `unique_BallKeys`, visites LBVH, populations
+`carrier_mass`, `foot_queries`, `unique_PrimitiveSphereKeys`, visites LBVH, populations
 créditées, tests feuille, `rejects_at_9`, survivants, shell, opérations larges,
 octets/HWM et pending. L'identité output-bearing reste
 `(BallKey,SupportKey,I_B,U_B,owner)` contre une autorité rationnelle bornée.
