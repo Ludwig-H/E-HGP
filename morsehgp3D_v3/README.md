@@ -56,8 +56,9 @@ ponctuelle et passe ses
 faussement toute la masse avec l'accord du juge, les décisions q2/q3/q4 ne sont
 pas jugées séparément, la cardinalité demandée peut être réduite silencieusement
 et les rampes banques 48/96 gardent deux pentes rouges. Le résiduel sous cap
-n'est pas rejouable et l'ABI CUDA anchor est actuellement incohérente avec
-`density_guard`.
+n'est pas rejouable. À ce pin, l'ABI CUDA anchor était incohérente avec
+`density_guard`; `24cc1a2` a depuis supprimé cette garde du chemin partagé,
+sans pour autant recevoir un producteur device ou le SLO.
 Le successeur logiciel `519ddfb` ferme ces quatre dettes locales : son nouvel
 ELF Release, CUDA désactivé, rend `39/39` portes ; `smax` et cardinalité sont
 refusés avant calcul, les lanes sont jugées séparément et le mutant d'héritage
@@ -169,9 +170,17 @@ Claude a ensuite ouvert le premier probe de crédits cellulaires. Son événemen
 H2 et le certificat par les trois rayons sont admis, mais le snapshot initial
 est vacueux : un pool de `16` IDs ne peut contenir huit crédits 3D disjoints,
 qui exigent au moins `24` IDs. `smax` reste figé, le « juge » ne juge que les
-témoins ponctuels et le ledger reboucle sur toutes les paires. Le contre-audit
-et l'ordre de réparation sont dans
+témoins ponctuels et le ledger reboucle sur toutes les paires. Le premier raccord
+rend `8/8` portes, toutes sans fermeture ; doubler le pool de `16` à `32` multiplie les tests coniques
+de `43,96 M` à `350,27 M` sans fermer une q4. Le contre-audit et l'ordre de
+réparation sont dans
 [`AUDIT_WORKTREE_CREDITS_CELLULAIRES_20260813.md`](audits/AUDIT_WORKTREE_CREDITS_CELLULAIRES_20260813.md).
+Le successeur live remplace depuis les triples par une enveloppe projective,
+mais reste P0 rouge : son selftest trouve une omission et son cas `h=2`
+confond la droite projective avec le segment, ce qui produit une fausse
+inclusion explicite dans `U00`. Son autre désaccord vient d'un pivot Jarvis au
+milieu d'une arête : la marche cycle puis son cap fabrique un faux hull. Le tri
+projectif total et les chaînes monotones sont la baseline proposée.
 Pour éviter de retomber à une tâche par ancre, une ancre de bloc peut proposer
 un carrier d'au plus neuf IDs, puis les huit coins de l'AABB le recertifient :
 les déterminants coniques sont affines en l'ancre et la marge H2 est concave.

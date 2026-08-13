@@ -11,15 +11,17 @@ Cadre : `phase=exploration_v3_hors_registre`,
 ## Pin, portée et verdict
 
 Le parent observé est
-`HEAD=d3329fea4b595b7bbd283e509b0fa1955fcc3b06`. Le nouveau fichier non suivi
+`HEAD=d3329fea4b595b7bbd283e509b0fa1955fcc3b06`. Le header initial non suivi
 `prototype/cell_credits.hpp` porte le SHA-256
 `5309870d8c22ef245daf0660ae0520c5690fafa49ce5610a486235bfa48cd948`.
-Il n'est inclus par aucune cible, aucun probe et aucune porte CMake : aucun test
-existant ne compile ces octets.
+Il n'était d'abord inclus par aucune cible. Le probe et son raccord CMake sont
+apparus ensuite dans le même worktree ; leur pin et leur rejeu sont séparés
+ci-dessous.
 
 Verdict : **le théorème, les trois rayons et l'événement d'activation sont une
-base mathématique recevable ; le fichier ne contient encore ni générateur de
-crédits, ni enveloppe, ni ledger, ni ordonnance factorisée.** C'est néanmoins
+base mathématique recevable ; le premier probe raccordé est vert `8/8` mais ne
+ferme aucune q4 dans ses portes positives, confirme le mur cubique et ne porte
+ni juge du certificat, ni enveloppe, ni ordonnance factorisée.** C'est néanmoins
 la piste la plus directe pour transformer le complément conique mesuré sur les
 amas en suffixes de cibles, sans `C(m,3)`.
 
@@ -109,22 +111,24 @@ changer le header. Pins observés :
 | --- | --- |
 | `prototype/cell_credits.hpp` | `5309870d8c22ef245daf0660ae0520c5690fafa49ce5610a486235bfa48cd948` |
 | `prototype/cell_credits_probe.cpp` | `ad3fe1b236dae713a2ac5583bc5c1ace123b3bcb2e443e737b3799209b3cff31` |
-| `CMakeLists.txt` | `836d5bbe969ef9e3ea24669184cdcb35384caa229ca03235ec0ac6e052d7ff2c` |
-| ELF Release | `1fa1ba72...` |
+| `CMakeLists.txt` | `edf046d969244f05da629e015db74ba3325d7981122388bd52479ff63b804b79` |
+| ELF Release | `1fa1ba728f416da93ee78264e947705a6dd32e17161d8350fe11d68ee034b337` |
 
-Le Build ID de l'ELF est `6224ae10...`. En Release/CUDA OFF, les huit CTests
-`mhgp3v_credits_` rendent **`7/8`** en environ `78,4 s`. La porte
-`mhgp3v_credits_rangs` est rouge : `6 985` crédits émis sous le plancher
-`10 000`, malgré `68 289` succès de carriers de rang deux. Ce compteur de rang
-compte les recherches intermédiaires répétées, pas des crédits distincts ; il
-ne peut donc pas recevoir une sortie scientifique.
+Le Build ID de l'ELF est
+`6224ae10e3608f0909c1a0ced39205f128b3275d`. Un snapshot intermédiaire rendait
+`7/8` parce que `mhgp3v_credits_rangs` exigeait `10 000` crédits malgré les
+`6 985` émis. Le commit final abaisse ce plancher à `5 000`; son rejeu
+Release/CUDA OFF rend donc **`8/8`** en `68,78 s`. Ce passage au vert ne change
+aucun résultat scientifique. Le compteur publie `68 289` succès de recherche
+de carriers de rang deux, pas des crédits distincts, et les trois runs positifs
+ferment zéro relation dans chaque lane.
 
 Les ablations exposent surtout le coût du catalogue de carriers :
 
 | pool | tests coniques | crédits émis | `credits_hwm` | fermetures q4 | temps |
 | ---: | ---: | ---: | ---: | ---: | ---: |
-| 16 | 43 956 521 | 19 932 | 5 | 0 | 4,80 s |
-| 32 | 350 267 629 | 29 705 | 10 | 0 | 39,75 s |
+| 16 | 43 956 521 | 19 932 | 5 | 0 | 6,86 s |
+| 32 | 350 267 629 | 29 705 | 10 | 0 | 33,94 s |
 
 Le doublement du pool multiplie ici les tests par `7,97`, signature du mur
 cubique `C(m,3)`. La porte `pool=32` exige explicitement
@@ -137,9 +141,164 @@ neuf IDs.
 Aucun des huit CTests n'exécute un mutant ou `--judge-echantillon`; il y a un
 selftest, trois mesures et quatre refus/planchers. Le selftest couvre les 432
 milieux de cellule, mais sa vérification d'activation bornée porte uniquement
-sur la cellule zéro. Le successeur est donc **rouge et non reçu**. Ces mesures
+sur la cellule zéro. Le successeur est donc **vert diagnostique mais non reçu**. Ces mesures
 confirment que l'enveloppe projective/output-sensitive est un préalable, pas une
 optimisation postérieure.
+
+### Delta postérieur : enveloppe projective rouge
+
+Après ce pin, Claude a commencé l'enveloppe projective directement dans le
+worktree. Le snapshot audité porte
+`cell_credits.hpp=a43235431f7d7bde0f742b830023850076b57eff76765bb77cd921a2f5bbc1eb`
+et `cell_credits_probe.cpp=a03f8661de44174100075694c66f0ccdebe871542b8bc52f08734fcbd856adc6`.
+Le CMake reste `edf046d9...`. Le rebuild Release donne l'ELF
+`7575377f22c89a824502269e983d571484cd5fc9ff41547e606cde0c7d10aad9`,
+mais son `--selftest` est rouge : `cellule 348`, rayon zéro, enveloppe `0`
+contre brute `1`, sur un pool de cinq membres. Le `8/8` du pin commité ne se
+transfère donc pas à ces octets.
+
+Il existe en outre une **fausse inclusion déterministe de rang deux**,
+indépendante de ce désaccord aléatoire. Dans la cellule `U00`, prendre
+`r0=(3,0,0)`, `r1=(3,1,0)`, `r2=(3,1,1)` et le pool actif
+`G={(3,1,0),(3,2,0)}`. Les deux marges cellulaires valent `9` et les trois
+vecteurs `G0,G1,r0` sont coplanaires. Le chemin live de `ray_in_hull`, lorsque
+`h=2`, accepte pourtant `r0` après les seuls déterminants nuls. Or l'unique
+écriture dans le plan est `r0=2 G0-G1` : `r0` n'appartient pas au cône positif
+de `G`.
+
+La réparation mathématique du rang deux est petite et exacte. Pour
+`n=G0 cross G1` non nul, si `r=alpha G0+beta G1`, alors
+`det(n,G0,r)=beta ||n||^2` et `det(n,r,G1)=alpha ||n||^2`. Il faut donc exiger
+les deux signes faibles cohérents, et pas seulement la coplanarité. Si `n=0`,
+les deux directions projectives sont identiques : elles forment un rang un
+avec une pile canonique de `PointId`, pas un segment. Cette fixture doit être
+permanente et tuer l'ancienne branche `h==2`.
+
+Pour le générateur de **cellule pleine**, une garde immédiate encore plus
+simple est `dimension_du_hull<2 => UNKNOWN` : les trois rayons de la cellule
+sont affinement indépendants, donc aucun segment projectif ne peut contenir
+leur triangle. Le test de segment reste nécessaire pour l'API réutilisable et
+pour extraire les carriers de bord à l'intérieur d'un hull 2D.
+
+Le cas `n=0` possède sa propre contre-fixture minimale dans la même cellule :
+`G={(1,0,0),(2,0,0)}` et `r=(3,1,0)`. Les deux membres de `G` sont le même
+point projectif et leur cône est le seul rayon des `x` positifs. Le live les
+rend pourtant comme une enveloppe de taille deux et accepte `r`. Il faut donc
+dédupliquer **la géométrie** avant la marche par `s_i cross s_j=0`, tout en
+conservant tous les IDs dans une pile ordonnée : retirer un carrier dépile un
+ID, et le sommet géométrique ne disparaît que lorsque sa pile devient vide.
+
+Ce cas atteint une fermeture nominale. Poser `a=(100,100,100)`, les seize sites
+`z_u=a+(u,0,0)`, `1<=u<=16`, et `b=a+(18,1,1)`. La branche `h==2` groupe les
+directions dupliquées deux par deux, émet huit faux crédits aux seuils
+`3,5,7,9,11,13,15,17` et ferme q4 à hauteur `18`. Pourtant l'offset de centre
+`t=(-37,0,666)` vérifie `t dot(b-a)=0` et donne les puissances
+`-57,-116,-177,-240,-305,-372,-441,-512,-585,-660,-737,-816,-897,-980,-1065,-1152` :
+il n'y a aucun intérieur strict. La faute produit donc un faux prune dans le
+chemin sain, pas seulement une divergence de primitive ou de mutant.
+
+Le désaccord de cinq membres montre séparément que le tie-break colinéaire de
+Jarvis n'est pas encore reçu. Plutôt que multiplier les cas locaux, la baseline
+G4 proposée plus bas — tri rationnel canonique puis deux chaînes monotones —
+doit servir d'autorité candidate, différentielle contre Carathéodory sur tous
+les pools bornés, avec fixtures colinéaires et directions projectives
+dupliquées. Jusqu'à zéro désaccord, l'enveloppe reste **P0 rouge** et aucune
+mesure de fermeture ou de pente ne lui est attribuable.
+
+Le faux négatif aléatoire possède lui aussi une fixture exacte dans `U00`.
+Avec `w=(9,2,1)`, poser `B=(300,0,0)`, `e=(2,-9,0)` et `f=(9,2,-85)`, puis
+prendre, dans cet ordre, `B-e`, `B-e-f`, `B+e`, `B-e+f`, `B`. Tous ont
+`w dot s=2700` et une marge cellulaire positive ; `B` est colinéaire positif à
+`r0=(3,0,0)`, donc l'oracle accepte ce rayon. Le pivot live choisit pourtant
+`B-e`, situé au milieu d'une arête projective. La marche produit les indices
+`0,1,2,3,1`, ne revient jamais au pivot, puis la garde `count>=m` transforme ce
+cycle en faux hull et rejette `r0`. Une garde de capacité ne doit jamais
+authentifier un polygone : non-retour au pivot, répétition de sommet ou
+orientation incohérente donnent `UNKNOWN`/refus. Le pivot doit être extrême
+selon un ordre projectif total, pas seulement minimal sur une coordonnée sans
+tie-break transversal.
+
+Le tie-break live emploie en outre `n=a cross i` puis `det(n,a,next)`. C'est un
+prédicat de degré quatre dans les coordonnées des sites, que la borne u16
+annoncée pour un déterminant de degré trois ne couvre pas. Avec `M=65535`,
+`a=(M,M,M)`, `i=(M,-M,-M)` et `next=(M,0,0)`, `next` est strictement entre les
+deux autres directions dans la carte. Les deux déterminants mathématiques sont
+positifs, de l'ordre de `7,38e19`, tandis que le calcul `i64` live déborde et
+rend `-4503496549203964`. Ce n'est donc pas qu'une borne documentaire : le
+verdict du tie-break est inversé sous le profil contractuel.
+
+La construction robuste recommandée est Andrew exact. Choisir `e` orthogonal
+à `w`, puis `f=w cross e`. Pour chaque site, stocker `W=w dot s>0`, `E=e dot s`
+et `F=f dot s`, puis trier les rationnels `(E/W,F/W)` par produits croisés.
+L'égalité des deux coordonnées donne une direction projective dupliquée et
+conserve une pile `(X,PointId)`. Comme `det(e,f,w)>0`, le signe d'orientation
+2D est celui de `det(si,sj,sk)`. Les deux chaînes suppriment les colinéaires
+intérieurs ; un unique donne un point, tous colinéaires deux extrémités, sinon
+un cycle strictement convexe.
+
+Le test de segment reste lui aussi de degré deux. Pour `g=e` puis, si besoin,
+`g=f`, poser
+`Delta_g(u,v)=(g dot v)(w dot u)-(g dot u)(w dot v)`. Une fois la coplanarité
+établie, `r` est dans le segment projectif `[a,b]` lorsque `Delta(a,r)` et
+`Delta(r,b)` ont le même signe faible que `Delta(a,b)`. Si ni `e` ni `f` ne
+sépare `a,b`, ils sont la même direction et relèvent du rang un. Les produits
+restent sous environ `5,7e13` en `i64`.
+
+Trois dettes orthogonales restent ouvertes. `kNeed={10,9,8}` demeure constant
+alors que la CLI accepte `4<=smax<=34` : l'autorité doit employer
+`h=smax+1-q` dans le sujet **et** le juge, ou refuser tout `smax!=11`.
+Le cap prend ensuite les sites les plus proches avant de comparer leurs
+activations. Distance et activation n'ont pas le même ordre : dans `U00`,
+`s=(1,-2,0)` a `||s||^2=5`, `m_C(s)=1`, `X_s=16`, tandis que
+`s'=(3,0,0)` a `||s'||^2=9`, `m_C(s')=9`, `X_s'=4`. Cette sélection reste
+fail-open, mais elle doit publier la troncature et ne peut être appelée
+top-activation exact. Enfin, le nouveau falsificateur ne sonde que deux axes du
+plan et neuf magnitudes ; il est utile pour tuer une fixture, pas pour prouver
+le quantificateur sur toutes les sphères ni rejouer les `CreditKey` et leurs
+IDs. Aucune porte CMake n'exécute encore un mutant sur ce delta.
+
+Une fixture nominale sépare aussi `smax` de tout mutant. Dans `U00`, avec
+`r0=(3,0,0)`, `r1=(3,1,0)`, `r2=(3,1,1)`, prendre les vingt-quatre sites
+`lambda r_j`, `1<=lambda<=8`, et la cible `d=(100,20,10)`. Carathéodory et le
+hull exact donnent huit crédits aux seuils `4,8,12,15,19,23,26,30`. Ils ferment
+justement pour `smax=11`, mais restent inconnus pour `smax=12` (`h=9`) et
+`smax=34` (`h=31`) ; le sujet figé à huit fermerait les trois. Sur dix-sept
+sphères admissibles, le minimum d'intérieurs vaut huit : le juge figé annonce
+zéro défaut, tandis que le vrai seuil trouve sept défauts à `smax=12` et dix-sept
+à `smax=34`.
+
+Une ordonnance simple évite aussi de reconstruire Jarvis à chaque préfixe
+d'activation. La baseline sûre prend tous les sites positifs du pool, trie une
+fois leurs coordonnées projectives rationnelles par produits croisés, construit
+les deux chaînes monotones après filtrage des IDs déjà pris, extrait les trois
+carriers, fixe `X_G=max_{s in G} X_s`, retire leurs IDs et répète. Elle est
+incomplète et peut choisir un seuil plus haut, mais chaque crédit reste exact ;
+son coût est un tri puis `h` scans linéaires. Un tier de rappel cherche, pour
+chaque crédit, le premier seuil parmi les activations restantes par recherche
+binaire et reconstruit le hull : coût `O(h M log M)` après le tri, toujours sans
+triples. Cette séparation permet de mesurer explicitement le prix du seuil
+minimal au lieu de le cacher dans une reconstruction par préfixe.
+
+La baseline de sûreté la plus courte n'a même pas besoin de trianguler des
+carriers : si le triangle des trois rayons est inclus dans le hull, prendre un
+ID canonique de **chaque sommet géométrique du bord** donne directement un
+groupe dont le hull contient la cellule. Retirer un ID par sommet et
+reconstruire produit des couches disjointes exactes ; les piles de directions
+dupliquées permettent au même sommet géométrique de survivre à la couche
+suivante. Cette variante consomme plus d'IDs et peut relever `X_G`, mais elle
+constitue une référence simple. Le carrier d'au plus neuf IDs vient ensuite
+comme optimisation de rappel, différentielle contre ces couches et contre
+l'oracle Carathéodory.
+
+Le delta `cell_credits.hpp=69b02684...` ajoute correctement la suppression
+d'un poids de Cramer nul : lorsque le hull est valide, le carrier rang deux
+ainsi rendu est sûr et économise un ID. Il ne corrige toutefois ni le segment
+`h=2`, ni les duplicats, ni le pivot cyclique, ni l'overflow de degré quatre.
+Son scan rang un ne parcourt en outre que les **sommets du hull** ; une direction
+présente à l'intérieur, comme `B` dans la fixture à cinq membres, reste invisible.
+Pour récupérer réellement les carriers rang un, scanner tout `avail` ou tenir
+trois tables de directions des rayons avant le hull. Cette dette affecte le
+rappel/packing, pas la sûreté une fois le hull corrigé.
 
 ## Extension nouvelle : crédit commun à un bloc d'ancres
 
@@ -220,8 +379,8 @@ au plus, pour dix crédits de neuf IDs, `960` déterminants coniques et `2 160`
 marges de coins, bien moins qu'un hull 3D à 720 IDs. Mesurer rappel et splits
 contre le tier complet avant tout choix device.
 
-Il existe un classifieur H2 de rectangle encore plus direct, qui doit servir de
-gate de référence. L'identité exacte est :
+Il existe un minorant H2 de boîte encore plus direct, qui doit servir de gate de
+référence conservatrice. L'identité exacte est :
 
 $$\left(b-a\right)\mathbin{\cdot}\left(z-a\right)-\left\lVert z-a\right\rVert^2=\left(z-a\right)\mathbin{\cdot}\left(b-z\right).$$
 
@@ -230,9 +389,11 @@ coordonnée et chacun des quatre couples d'endpoints doit être essayé :
 
 $$L_z(A,B)=\sum_{i=0}^{2}\min_{a_i\in\left\lbrace A_i^-,A_i^+\right\rbrace,\ b_i\in\left\lbrace B_i^-,B_i^+\right\rbrace}\left(z_i-a_i\right)\left(b_i-z_i\right).$$
 
-Ainsi `L_z(A,B)>0` pour chaque membre du crédit est un H2-`ALL` exact sur le
-rectangle, en douze produits par ID, sans hauteur, racine ni `PairId`.
-L'égalité reste `MIXED`. Le seuil cellulaire `X_G` est le fast path comprimé ;
+Ainsi `L_z(A,B)>0` pour chaque membre du crédit est un H2-`ALL` sûr sur tous les
+points du rectangle, en douze produits par ID, sans hauteur, racine ni
+`PairId`. `L_z` est le minimum exact sur les AABB continues, pas nécessairement
+sur les ensembles finis portés par les nœuds : `L_z<=0` reste donc
+`MIXED/UNKNOWN`, jamais `NONE`. Le seuil cellulaire `X_G` est le fast path comprimé ;
 ce test bilinéaire traite son résiduel avant tout split et évite les ambiguïtés
 d'extrema décorrélés.
 
@@ -261,6 +422,19 @@ records de suffixe. Comparer au moins deux variantes : enveloppe reconstruite
 après chaque crédit et couches convexes qui prennent tout le bord comme crédit
 plus gros. La seconde perd du rappel mais simplifie la baseline exacte.
 
+La baseline device évite Jarvis répété. Pour `M<=128`, elle bitonic-trie une
+fois les coordonnées projectives rationnelles par produits croisés entiers et
+`PointId`, puis reconstruit les deux chaînes monotones en `O(M)` après chaque
+retrait. Les directions projectives dupliquées restent des piles d'IDs : les
+dédupliquer définitivement détruirait des crédits disjoints ultérieurs. Le coût
+visé est `O(M log^2 M+hM)`, pas `O(C(M,3))` ni `O(hMH)`.
+
+Caps initiaux de falsification, à mesurer et non à promouvoir comme contrat :
+`RectTask` de 32 octets, deux fronts de `2^22` records soit `256 MiB`, requêtes
+dominance shardées par `2^20`, pool groupe `M=128`, au plus 64 vagues. Tout cap
+atteint émet un front résiduel authentifié ou refuse atomiquement ; il ne
+tronque jamais un crédit ni ne repart silencieusement de la racine.
+
 ## Gates et compteurs
 
 - oracle petit pool : toutes les fermetures cellulaires incluses dans le juge
@@ -268,7 +442,8 @@ plus gros. La seconde perd du rappel mais simplifie la baseline exacte.
   seulement comme mesure de rappel ;
 - fixtures singleton, paire antipodale, triangle, rayon sur bord, directions
   projectives dupliquées, H2 égale, `h-1/h`, ID réutilisé et groupe qui contient
-  le barycentre mais omet un rayon extrême ;
+  le barycentre mais omet un rayon extrême ; la paire projective
+  `{(3,1,0),(3,2,0)}` doit notamment refuser le rayon `(3,0,0)` ;
 - bloc d'ancres : huit coins dont un seul rate l'ombre `K-cone(r)`, `t=0`, rang
   deux positif, H2 qui échoue seulement à un coin/rayon, égalité `L_z=0`, boîte
   large à scinder ;

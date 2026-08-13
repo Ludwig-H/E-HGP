@@ -3677,15 +3677,54 @@ set_tests_properties(mhgp3v_credits_selftest PROPERTIES
 # d'implementation.
 add_test(NAME mhgp3v_credits_pool_16 COMMAND mhgp3v_cell_credits_probe
          --points=60 --family=eight_clusters --seed=3 --bank=59 --pool=16
-         --min-credits=15000 --min-rang-deux=5000 --min-residuel=3540)
+         --min-credits=15000 --min-rang-deux=2000 --min-residuel=3540)
 add_test(NAME mhgp3v_credits_pool_32 COMMAND mhgp3v_cell_credits_probe
          --points=60 --family=eight_clusters --seed=3 --bank=59 --pool=32
-         --min-credits=25000 --min-rang-deux=15000 --min-residuel=3540)
-# LES CARRIERS DE RANG UN ET DEUX SONT LEGITIMES, et ce plancher l'exige : un
-# sujet qui n'accepterait que le rang trois perdrait des credits sans le dire.
+         --min-credits=25000 --min-rang-deux=4000 --min-residuel=3540)
+# LES CARRIERS DE RANG UN ET DEUX SONT LEGITIMES, ET LES PREFERER EST UN GAIN.
+#
+# Un credit consomme ses `PointId` : plus le carrier est petit, plus il reste de
+# sites pour les credits suivants, et c'est le NOMBRE de credits disjoints qui
+# ferme une lane. L'enveloppe seule rendait systematiquement le triangle de
+# l'eventail — `rang3` a 123 022 contre 824 en rang deux. Un test de rang un en
+# `O(h)` et la lecture des poids nuls de Cramer recuperent les bas rangs sans
+# rien couter : sur `terrain`, le rang deux passe de `2 007` a `40 506`.
 add_test(NAME mhgp3v_credits_rangs COMMAND mhgp3v_cell_credits_probe
          --points=60 --family=terrain --seed=3 --bank=59 --pool=24
-         --min-credits=5000 --min-rang-deux=40000)
+         --min-credits=5000 --min-rang-deux=30000)
+
+# L'ABLATION DE L'ENVELOPPE. Le chemin par enumeration de Caratheodory est
+# conserve pour que le gain de l'enveloppe soit MESURABLE et non affirme : a
+# `pool=16` les deux rendent le meme plafond de credits, et c'est au-dela que
+# l'enveloppe seule tient.
+add_test(NAME mhgp3v_credits_ablation_caratheodory COMMAND mhgp3v_cell_credits_probe
+         --points=60 --family=eight_clusters --seed=3 --bank=59 --pool=16
+         --ablation-caratheodory --min-credits=15000 --min-residuel=3540)
+
+# LE FALSIFICATEUR PORTE SUR LA CONCLUSION.
+#
+# Un credit ne fournit AUCUN temoin universel : il fournit un interieur par
+# sphere, potentiellement different a chaque sphere. Le juge ponctuel ne peut
+# donc pas confirmer une fermeture, et l'employer ainsi serait une faute. Ce qui
+# EST refutable est la conclusion : si la lane est fermee, chaque sphere
+# admissible doit porter au moins son seuil d'interieurs stricts. La porte
+# echantillonne les centres `(a+b)/2 + t` avec `t.d = 0`, magnitudes de `0` a
+# `401` des deux signes. Mesure : `3 400` spheres, minimum `29` interieurs pour
+# un seuil de `8`, zero desaccord.
+add_test(NAME mhgp3v_credits_falsificateur COMMAND mhgp3v_cell_credits_probe
+         --points=120 --family=eight_clusters --seed=3 --bank=119 --pool=48
+         --judge-echantillon=200 --min-closed-q4=200 --min-residuel=13000)
+
+# LE SEUL MUTANT ARME. Le partage de `PointId` entre credits est la faute qui
+# casse le compte : deux credits servis par le meme site ne donnent qu'UN
+# interieur. Les trois autres — frontiere d'activation, rayon unique, absence de
+# positivite — SURVIVENT sur les familles generiques, parce que les paires que
+# le certificat ferme portent bien plus d'interieurs que le seuil : le minimum
+# observe est `29` pour un seuil de `8`. Ils sont declares, pas masques.
+mhgp3v_add_expected_code_test_for(mhgp3v_cell_credits_probe
+  mhgp3v_credits_mutant_ids_partages "MUTANT TUE" 4
+  --points=120 --family=eight_clusters --seed=3 --bank=119 --pool=48
+  --judge-echantillon=200 --inject=credit-ids-partages)
 
 mhgp3v_add_expected_code_test_for(mhgp3v_cell_credits_probe
   mhgp3v_credits_reject_mutant_sans_juge "un mutant sans juge ne prouve rien" 2

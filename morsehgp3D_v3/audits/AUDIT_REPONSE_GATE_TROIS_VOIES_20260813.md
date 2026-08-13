@@ -164,6 +164,27 @@ ne créer une tâche `(a,CellId)` qu'au résiduel feuille. Les deux orientations
 sont évaluées sur le même `RectId` : fermeture par `OR`, résiduel par `AND`,
 sans joindre des listes de paires.
 
+Le contrat complet de cette fermeture commune est : `A,B` disjoints et portés
+par un `RectId` canonique ; toutes les différences `b-a` dans la même cellule ;
+`h=smax+1-q` IDs distincts ; chaque `z-a` dans cette cellule pour **tout**
+`a in A` ; `max_A ell<ell(z)<=zeta_h<min_B ell` ; positions distinctes ; cutoff
+strict. Sous ces gardes, pour `p=ell(a)`, `q=ell(b)`, `r=ell(z)` :
+
+$$\frac{q-p}{r-p}\geq\frac{\beta-p}{\zeta_h-p}\geq\frac{\beta-\alpha}{\zeta_h-\alpha}.$$
+
+Une implémentation factorisée peut pré-calculer, pour chaque
+`(CellType,lane,y)`, le plus petit entier `X_min(y)` qui satisfait le cutoff
+direct. La banque commune `(AnchorNode,CellId,h)` fournit `zeta_h`; le seuil
+absolu des cibles devient `alpha+X_min(zeta_h-alpha)`. Un range-report émet une
+antichaîne de `BNodeKey` au-dessus de ce seuil. Cache et reçu portent
+`(TreeDigest,AnchorPath,CellId,h,BankKey)`, jamais un bitset de paires.
+
+Ne jamais déduire l'orientation inverse par un simple antipode de cellule. Sur
+les faces coordonnées, l'owner half-open et le zéro signé positif font que
+`A vers B` cohérent dans `C` n'implique pas un unique owner `B vers A` dans
+`-C`. Les deux états sont classifiés et recertifiés séparément sur le même
+`RectId` ; seule leur masse est combinée par `OR/AND`.
+
 Le cœur intervient avant ces splits seulement si ses bornes et un minorant
 d'occupation viennent de la traversée déjà en cours. Il ne reçoit ni WSPD ni
 index dédié tant que son ratio masse fermée/travail n'est pas vert.

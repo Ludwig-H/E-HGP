@@ -1654,12 +1654,31 @@ sont séparés dans
 [`AUDIT_REPONSE_DOMINANCE_GROUPES_5DDF4A3_20260813.md`](audits/AUDIT_REPONSE_DOMINANCE_GROUPES_5DDF4A3_20260813.md).
 
 Le premier code de crédit cellulaire ne reçoit pas encore cette proposition.
-Son événement H2 est correct, mais `kPoolCap=16` interdit structurellement les
+Son événement H2 est correct, mais le défaut `pool=16` interdit structurellement les
 huit crédits q4 disjoints : une cellule 3D pleine exige au moins trois IDs par
 crédit, donc au moins `24` au total. Il sélectionne en outre seize sites par
 distance avant de trier leurs activations, fixe `smax` à `10/9/8`, ne rejoue pas
-les carriers avec un juge indépendant et recompte `n(n-1)` cibles. Pin et gates :
+les carriers avec un juge indépendant et recompte `n(n-1)` cibles. Le premier
+raccord rend `8/8` sans fermeture ; à `n=60`, `pool=16/32` paie `43,96 M/350,27 M` tests
+coniques pour zéro fermeture q4. Pin et gates :
 [`AUDIT_WORKTREE_CREDITS_CELLULAIRES_20260813.md`](audits/AUDIT_WORKTREE_CREDITS_CELLULAIRES_20260813.md).
+
+Le delta live qui substitue une enveloppe projective à `C(m,3)` confirme la
+bonne direction algorithmique, mais pas encore l'implémentation : le selftest
+différentiel est rouge et la branche de rang deux accepte toute la droite
+projective au lieu du segment positif. Dans `U00`, le pool
+`{(3,1,0),(3,2,0)}` ne contient pas `(3,0,0)` dans son cône, bien que le chemin
+live l'accepte. Le rang deux doit recevoir les signes des deux coefficients
+coniques ; les directions projectives identiques restent des piles de
+`PointId` de rang un.
+
+Le faux négatif du même delta vient d'un pivot Jarvis situé au milieu d'une
+arête en cas d'ex aequo : la marche cycle, puis son cap fabrique un hull. La
+route proposée est donc un ordre projectif rationnel total et deux chaînes
+monotones ; tout cycle/non-retour reste `UNKNOWN`, jamais un polygone tronqué.
+Avec `e` orthogonal à `w` et `f=w cross e`, trier exactement
+`((e dot s)/(w dot s),(f dot s)/(w dot s))` évite aussi le tie-break live de
+degré quatre, dont une fixture u16 fait déborder `i64` et inverse le signe.
 
 Le groupe octaédrique partage les neuf tables et le kernel, mais la chambre
 dépend de `x-a` : `canon(x-a)` ne se déduit pas de
@@ -1708,6 +1727,8 @@ cutoff direct ferme alors tout le rectangle, et les témoins crédités précèd
 toutes les cibles. En cas d'échec, scinder `A/B`; ne créer `(a,CellId)` qu'à la
 feuille du résiduel. Les deux orientations sont évaluées sur le même `RectId` :
 fermeture par `OR`, résiduel par `AND`, sans join matériel de `PairId`.
+L'orientation inverse conserve son propre état de cellule : sur une frontière
+half-open, elle ne se déduit pas par un simple antipode de la cellule directe.
 
 Les crédits coniques cellulaires viennent après cette dominance et, dans la
 première version, seulement pour une ancre feuille. Le pool dépend de
@@ -1726,6 +1747,19 @@ une autorité exacte sur la boîte. L'échec scinde le bloc. La construction
 complète par les 24 intersections coin--rayon reste un oracle ou tier de
 secours, car elle peut consommer jusqu'à 72 IDs par crédit. Voir
 [`AUDIT_WORKTREE_CREDITS_CELLULAIRES_20260813.md`](audits/AUDIT_WORKTREE_CREDITS_CELLULAIRES_20260813.md).
+
+Sur un rectangle fixé, H2 possède en outre un minorant exact sur les AABB, qui
+ne dépend plus du cutoff de hauteur :
+
+$$L_z(A,B)=\sum_{i=0}^{2}\min_{a_i\in\left\lbrace A_i^-,A_i^+\right\rbrace,\ b_i\in\left\lbrace B_i^-,B_i^+\right\rbrace}\left(z_i-a_i\right)\left(b_i-z_i\right).$$
+
+Cette formule vient de
+`(b-a) dot(z-a)-||z-a||^2=(z-a) dot(b-z)`. Un crédit est H2-`ALL` si
+`L_z(A,B)>0` pour chacun de ses IDs. Le minimum est exact sur les boîtes
+continues, mais peut employer un coin absent des ensembles de PointId :
+`L_z<=0` reste donc `MIXED/UNKNOWN`, jamais `NONE`. Le seuil cellulaire sert de
+fast path comprimé, puis ce test bilinéaire conservateur traite son résiduel
+avant de scinder.
 
 La fusion `OR/AND` des orientations ne doit pas matérialiser le résiduel dense.
 Les relations dirigées restent une partition canonique de rectangles ; leur

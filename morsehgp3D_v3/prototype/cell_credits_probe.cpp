@@ -151,6 +151,7 @@ struct Options {
   long long smax = 11;
   long long bank = 64;
   long long pool_cap = 16;
+  bool hull = true;
   long long judge_sample = 0;
   CloudFamily family = CloudFamily::kEightClusters;
   CreditMutant mutant = CreditMutant::kNone;
@@ -188,6 +189,7 @@ int main(int argc, char** argv) {
     else if (key == "--smax") { if (!parse_ll(val.c_str(), &p)) refuse("--smax invalide"); opt.smax = p; }
     else if (key == "--bank") { if (!parse_ll(val.c_str(), &p)) refuse("--bank invalide"); opt.bank = p; }
     else if (key == "--pool") { if (!parse_ll(val.c_str(), &p)) refuse("--pool invalide"); opt.pool_cap = p; }
+    else if (key == "--ablation-caratheodory") { opt.hull = false; }
     else if (key == "--judge-echantillon") { if (!parse_ll(val.c_str(), &p)) refuse("--judge-echantillon invalide"); opt.judge_sample = p; }
     else if (key == "--min-credits") { if (!parse_ll(val.c_str(), &p)) refuse("--min-credits invalide"); opt.min_credits = p; }
     else if (key == "--min-closed-q4") { if (!parse_ll(val.c_str(), &p)) refuse("--min-closed-q4 invalide"); opt.min_closed_q4 = p; }
@@ -277,8 +279,66 @@ int main(int argc, char** argv) {
           }
           ++checked;
         }
-    std::printf("selftest accord=OUI cellules=%d rayons_valides=%d activations_verifiees=%lld\n",
-                dom::kCells, dom::kCells * 3, checked);
+    // EQUIVALENCE ENVELOPPE / CARATHEODORY. La marche de Jarvis remplace une
+    // enumeration exacte : elle doit rendre EXACTEMENT les memes verdicts. Le
+    // test tire des pools entiers, verifie que chaque membre est bien dans le
+    // demi-espace `w > 0`, puis compare les deux chemins rayon par rayon.
+    unsigned long long rng = 0x9E3779B97F4A7C15ULL;
+    auto nxt = [&rng](i64 lo, i64 hi) {
+      rng = rng * 6364136223846793005ULL + 1442695040888963407ULL;
+      return lo + (i64)((rng >> 17) % (unsigned long long)(hi - lo + 1));
+    };
+    long long pools = 0, agree = 0, inside = 0;
+    Ledger sink{};
+    for (int it = 0; it < 4000; ++it) {
+      const int c = (int)nxt(0, dom::kCells - 1);
+      i64 rr[3][3];
+      cr::cell_rays(c, rr);
+      const i64 wsum[3] = {rr[0][0] + rr[1][0] + rr[2][0], rr[0][1] + rr[1][1] + rr[2][1],
+                           rr[0][2] + rr[1][2] + rr[2][2]};
+      const int m = (int)nxt(1, 12);
+      std::vector<std::array<i64, 3>> pl;
+      std::vector<i64> fl;
+      std::vector<int> av;
+      for (int i = 0; i < m; ++i) {
+        i64 sv[3];
+        for (int k = 0; k < 3; ++k) sv[k] = nxt(-40, 40);
+        if (cr::cell_margin(rr, sv) <= 0) continue;  // hors du pool actif
+        av.push_back((int)pl.size());
+        pl.push_back({sv[0], sv[1], sv[2]});
+        fl.push_back(sv[0]); fl.push_back(sv[1]); fl.push_back(sv[2]);
+      }
+      if (av.empty()) continue;
+      ++pools;
+      std::vector<int> hl((std::size_t)av.size() + 2, 0);
+      long long tests = 0;
+      const int hs = cr::projective_hull(fl.data(), av.data(), (int)av.size(), wsum, hl.data(),
+                                         &tests);
+      for (int j = 0; j < 3; ++j) {
+        int cbuf[3], csz = 0;
+        const bool by_hull =
+            cr::ray_in_hull(fl.data(), av.data(), hl.data(), hs, rr[j], cbuf, &csz, &tests);
+        std::vector<int> car;
+        const bool by_brute = ray_in_cone(pl, av, rr[j], &car, &sink);
+        if (by_hull != by_brute) {
+          std::fprintf(stderr,
+                       "DESACCORD ENVELOPPE : cellule %d rayon %d, enveloppe=%d brute=%d, "
+                       "pool de %zu membres\n",
+                       c, j, (int)by_hull, (int)by_brute, av.size());
+          return 1;
+        }
+        ++agree;
+        if (by_hull) ++inside;
+      }
+    }
+    if (inside < 200) {
+      std::fprintf(stderr, "REFUS : porte vide — seulement %lld inclusions sur %lld\n", inside,
+                   agree);
+      return 3;
+    }
+    std::printf("selftest accord=OUI cellules=%d rayons_valides=%d activations_verifiees=%lld "
+                "pools=%lld accords_enveloppe=%lld inclusions=%lld\n",
+                dom::kCells, dom::kCells * 3, checked, pools, agree, inside);
     return 0;
   }
 
@@ -360,6 +420,13 @@ int main(int argc, char** argv) {
       avail.clear();
       used_ids.clear();
       std::vector<i64> credit_X;
+      std::vector<i64> flat;
+      flat.reserve(pool.size() * 3);
+      for (const auto& v : pool) { flat.push_back(v[0]); flat.push_back(v[1]); flat.push_back(v[2]); }
+      const i64 wsum[3] = {rays[0][0] + rays[1][0] + rays[2][0],
+                           rays[0][1] + rays[1][1] + rays[2][1],
+                           rays[0][2] + rays[1][2] + rays[2][2]};
+      std::vector<int> hull((std::size_t)opt.pool_cap + 2, 0);
       for (std::size_t k = 0; k < order.size() && (int)credit_X.size() < kNeed[0]; ++k) {
         avail.push_back(order[k].second);
         std::vector<int> union_ids;
@@ -368,8 +435,21 @@ int main(int argc, char** argv) {
         // ne contient qu'une direction representative ne certifie jamais toute
         // la cellule.
         const int rays_to_check = (opt.mutant == CreditMutant::kOneRayOnly) ? 1 : 3;
+        int hsize = 0;
+        if (opt.hull)
+          hsize = cr::projective_hull(flat.data(), avail.data(), (int)avail.size(), wsum,
+                                      hull.data(), &led.cone_tests);
         for (int j = 0; j < rays_to_check && all; ++j) {
-          if (!ray_in_cone(pool, avail, rays[j], &carrier, &led)) { all = false; break; }
+          if (opt.hull) {
+            int cbuf[3], csz = 0;
+            if (!cr::ray_in_hull(flat.data(), avail.data(), hull.data(), hsize, rays[j], cbuf,
+                                 &csz, &led.cone_tests)) { all = false; break; }
+            ++led.carrier_rank[csz];
+            carrier.assign(cbuf, cbuf + csz);
+          } else if (!ray_in_cone(pool, avail, rays[j], &carrier, &led)) {
+            all = false;
+            break;
+          }
           for (int id : carrier)
             if (std::find(union_ids.begin(), union_ids.end(), id) == union_ids.end())
               union_ids.push_back(id);
@@ -440,8 +520,70 @@ int main(int argc, char** argv) {
       violate("identite de masse dirigee violee");
   }
 
+  // ---- LE FALSIFICATEUR DU CERTIFICAT -----------------------------------
+  //
+  // Un credit ne fournit AUCUN temoin universel : il fournit un interieur par
+  // sphere, potentiellement different a chaque sphere. Le juge ponctuel ne peut
+  // donc pas confirmer une fermeture, et l'utiliser comme tel serait une faute.
+  //
+  // Ce qui EST refutable, c'est la conclusion : si la lane `q` est fermee pour
+  // `(a,b)`, alors CHAQUE sphere admissible doit porter au moins `kNeed[q]`
+  // interieurs stricts. Les centres admissibles sont `(a+b)/2 + t` avec
+  // `t.d = 0`; on en echantillonne le long d'une base entiere du plan, avec des
+  // magnitudes couvrant plusieurs ordres et les deux signes. Une seule sphere
+  // deficitaire refute le certificat.
   int disagreements = 0;
   if (opt.judge_sample > 0) {
+    static const int kMag[] = {0, 1, -1, 5, -5, 37, -37, 401, -401};
+    long long spheres = 0, wrong = 0, printed = 0, worst = -1;
+    for (const auto& s3 : sample) {
+      const int a = s3[0], b = s3[1], lane = s3[2];
+      const i64 d[3] = {(i64)pts[(std::size_t)b].x - (i64)pts[(std::size_t)a].x,
+                        (i64)pts[(std::size_t)b].y - (i64)pts[(std::size_t)a].y,
+                        (i64)pts[(std::size_t)b].z - (i64)pts[(std::size_t)a].z};
+      int axis = 0;
+      for (int k = 1; k < 3; ++k)
+        if ((d[k] < 0 ? -d[k] : d[k]) < (d[axis] < 0 ? -d[axis] : d[axis])) axis = k;
+      i64 ax[3] = {0, 0, 0};
+      ax[axis] = 1;
+      const i64 e1[3] = {d[1] * ax[2] - d[2] * ax[1], d[2] * ax[0] - d[0] * ax[2],
+                         d[0] * ax[1] - d[1] * ax[0]};
+      const i64 e2[3] = {d[1] * e1[2] - d[2] * e1[1], d[2] * e1[0] - d[0] * e1[2],
+                         d[0] * e1[1] - d[1] * e1[0]};
+      for (int base = 0; base < 2; ++base) {
+        const i64* ee = (base == 0) ? e1 : e2;
+        for (int mi = 0; mi < (int)(sizeof(kMag) / sizeof(kMag[0])); ++mi) {
+          if (base == 1 && kMag[mi] == 0) continue;
+          const i64 t[3] = {ee[0] * kMag[mi], ee[1] * kMag[mi], ee[2] * kMag[mi]};
+          long long interior = 0;
+          for (int z = 0; z < n; ++z) {
+            if (z == a || z == b) continue;
+            const i64 sz[3] = {(i64)pts[(std::size_t)z].x - (i64)pts[(std::size_t)a].x,
+                               (i64)pts[(std::size_t)z].y - (i64)pts[(std::size_t)a].y,
+                               (i64)pts[(std::size_t)z].z - (i64)pts[(std::size_t)a].z};
+            const mhgp::i128 power = (mhgp::i128)cr::dot3(sz, sz) - (mhgp::i128)cr::dot3(d, sz) -
+                                     2 * (mhgp::i128)cr::dot3(sz, t);
+            if (power < 0) ++interior;
+          }
+          ++spheres;
+          if (worst < 0 || interior < worst) worst = interior;
+          if (interior < (long long)kNeed[lane]) {
+            ++wrong;
+            if (printed++ < 8)
+              std::fprintf(stderr,
+                           "DESACCORD q%d : (%d,%d) est ferme, mais une sphere admissible n'a "
+                           "que %lld interieurs stricts pour un seuil de %d\n",
+                           lane + 2, a, b, interior, kNeed[lane]);
+          }
+        }
+      }
+    }
+    std::printf("falsificateur paires_tirees=%zu spheres=%lld interieurs_min=%lld desaccords=%lld "
+                "accord=%s\n",
+                sample.size(), spheres, worst, wrong, wrong == 0 ? "OUI" : "NON");
+    disagreements = (int)wrong;
+  }
+  if (false) {
     std::vector<int> xyz;
     xyz.reserve((std::size_t)n * 3);
     for (const P3& p : pts) { xyz.push_back((int)p.x); xyz.push_back((int)p.y); xyz.push_back((int)p.z); }
@@ -467,20 +609,17 @@ int main(int argc, char** argv) {
                 "temoins_evalues=%lld\n",
                 sample.size(), closed_seen, wrong,
                 mhgp3v::cone_oracle::last_witness_evaluations());
-    // `wrong` n'est PAS un desaccord : c'est la mesure de ce que les credits
-    // apportent au-dela du ponctuel. Le mutant est donc juge autrement.
-    disagreements = 0;
-    (void)disagreements;
   }
 
   if (opt.mutant != CreditMutant::kNone) {
-    // Les mutants de ce sujet se jugent par le LEDGER : un certificat plus
-    // permissif ferme strictement plus, et cette difference est mesuree contre
-    // la reference par la porte CMake, pas ici.
-    std::printf("mutant %s ferme_q4=%lld\n", cr::credit_mutant_name(opt.mutant),
-                led.closed_directed[2]);
-    return 0;
+    if (disagreements > 0) {
+      std::fprintf(stderr, "MUTANT TUE (falsificateur) : %s\n",
+                   cr::credit_mutant_name(opt.mutant));
+      return 4;
+    }
+    violate("MUTANT SURVIVANT : la porte est vacueuse pour cette injection");
   }
+  if (disagreements > 0) return 1;
 
   if (led.credits_emitted < opt.min_credits) {
     std::fprintf(stderr, "REFUS : plancher de credits (%lld < %lld)\n", led.credits_emitted,

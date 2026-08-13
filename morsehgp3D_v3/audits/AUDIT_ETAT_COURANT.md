@@ -8,18 +8,36 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-## Observation live — `HEAD=d3329fe`, cœur partiellement réparé
+## Observation live — `HEAD=c46d658`, premier probe de crédits cellulaires
 
 Le `HEAD` courant est
-`d3329fea4b595b7bbd283e509b0fa1955fcc3b06`, commit
-`a mutant that stays sound is not a mutant, and a scalar identity is not a
-partition`. Son parent `24cc1a2` retire l'ancienne garde de densité de l'ABI
-hôte/device cassée ; cette suppression ne reçoit ni producteur CUDA, ni lowering
-G4, ni SLO. Le worktree observé après `d3329fe` porte les présents deltas
-documentaires autorisés à l'auditeur et deux sources Claude non suivies :
-`prototype/cell_credits.hpp`, SHA-256 `5309870d8c22...`, et
-`prototype/cell_credits_probe.cpp`, SHA-256 `a5b1884c7b81...`. Elles ne sont pas
-raccordées au CMake ; aucun code n'est modifié par l'auditeur.
+`c46d6587cf7459a18709e4e68ca2551d025690da`, commit
+`drop the triples entirely, then discover the pool cap was the real wall`. Il
+commet `cell_credits.hpp`, son premier probe et huit portes. Les octets sont
+`cell_credits.hpp=5309870d...`, `cell_credits_probe.cpp=ad3fe1b2...`,
+`CMakeLists.txt=edf046d9...` et ELF Release `1fa1ba72...`, Build ID
+`6224ae10...`. Le worktree porte ensuite les deltas documentaires autorisés à
+l'auditeur ainsi qu'un successeur Claude non commité de l'enveloppe
+projective ; aucun code n'est modifié par l'auditeur.
+
+Le rejeu ciblé des octets committés rend `8/8` en `68,78 s`. Le huitième vert
+vient de l'abaissement du plancher `credits` de `10 000` à `5 000`, sans changer
+les `6 985` crédits mesurés. Ce vert n'est pas une réception : les
+trois portes positives ferment zéro q2/q3/q4, aucun mutant n'est exécuté, le
+contrôle ponctuel déclare qu'il ne juge pas le certificat, et le ledger reboucle
+sur `n(n-1)` cibles. Le passage du pool `16` au pool `32` porte les tests
+coniques de `43 956 521` à `350 267 629`, soit `x7,97` ; il isole le mur cubique
+que l'enveloppe 2D doit supprimer.
+
+Le delta live de cette enveloppe est lui-même rouge au pin
+`cell_credits.hpp=a4323543...`, `cell_credits_probe.cpp=a03f8661...`, ELF
+`7575377f...`. Son selftest différentiel trouve une omission sur la cellule
+`348`, et sa branche dégénérée `h=2` accepte faussement, dans `U00`, le rayon
+`(3,0,0)` depuis le pool `{(3,1,0),(3,2,0)}`. Il faut tester l'appartenance au
+segment projectif, pas seulement sa droite porteuse. Les trois rayons
+indépendants empêchent cette seule dégénérescence de fermer une cellule saine,
+mais l'équivalence hull--Carathéodory est déjà réfutée. Aucun résultat du pin
+commité n'est transféré à ce worktree.
 
 Le successeur cœur est pincé par `common_core_probe.cpp=4660fe37...` et
 `CMakeLists.txt=a667047d...`. Il intègre quatre corrections fondées : suppression
@@ -50,7 +68,9 @@ puis les crédits coniques cellulaires par événements d'activation et envelopp
 projective 2D, sans catalogue `C(m,3)`. Le premier probe de cette réponse admet
 la primitive H2, mais son pool de `16` IDs ne peut contenir huit crédits 3D
 disjoints, qui en exigent au moins `24`; il fixe encore `smax`, n'a aucun juge du
-certificat et recompte les paires. Verdict :
+certificat et recompte les paires. Le rejeu final rend `8/8`, mais passer
+de `pool=16` à `32` multiplie les tests coniques de `43,96 M` à `350,27 M` et
+ferme encore zéro q4. Verdict :
 [`AUDIT_WORKTREE_CREDITS_CELLULAIRES_20260813.md`](AUDIT_WORKTREE_CREDITS_CELLULAIRES_20260813.md).
 Ce statut ne reçoit toujours ni pente physique, ni résiduel consommable, ni CUDA/G4, ni
 `BenchmarkOutputContract-v1`. GCP non utilisé.
@@ -266,10 +286,11 @@ groupes coniques et relation-tree/WSPD sur un même ledger avant CUDA :
 [`AUDIT_DEBLOCAGE_COLLECTIF_APRES_FENETRE_20260813.md`](AUDIT_DEBLOCAGE_COLLECTIF_APRES_FENETRE_20260813.md).
 
 Plusieurs portes `anchor` à planchers restent contournables par
-`PASS_REGULAR_EXPRESSION`. La source CUDA anchor omet en outre le
-nouvel argument `density_guard` dans ses appels et son ABI ; elle
-n'est pas compilable telle quelle. Aucune session GCP n'a été lancée pour ce
-delta et aucun résultat device n'est reçu.
+`PASS_REGULAR_EXPRESSION`. À ce pin historique, la source CUDA anchor omettait
+le nouvel argument `density_guard` dans ses appels et son ABI et n'était pas
+compilable telle quelle. Le successeur `24cc1a2` a supprimé cet argument du
+chemin partagé ; il referme l'incohérence statique, sans recevoir de résultat
+device. Aucune session GCP n'a été lancée pour ce delta.
 
 ## Pin commité antérieur au delta spindle — `HEAD=2a205f3`
 
