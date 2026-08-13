@@ -49,7 +49,7 @@ inline void set_smax(long long smax) {
   for (int q = 0; q < 3; ++q) g_need[q] = (int)(smax + 1 - (q + 2));
 }
 
-struct Pair { int a, b; };
+struct Pair { int a, b; int r = 0; };   // `r` : profondeur de RAFFINEMENT local
 
 // Banque Morton bornee, fusionnee a l'emission : des qu'une paire est declaree
 // terminale, le MEME thread calcule son `Dlo`, lit sa fenetre Morton et
@@ -87,6 +87,16 @@ bool g_tight = false;
 // certificat suffisant, non comparable. Leur disjonction reste suffisante.
 bool g_fallback = false;
 bool g_spindle = false;
+// ---- RAFFINEMENT LOCAL : la seule voie qui reste vers le cœur exact.
+//
+// Le spindle sur rectangle est refute — son gain mesure est nul, parce que
+// `Tabs` est le MINIMUM de `|T|` sur le bloc alors que le gain par paire vient
+// des sites ou `|T|` est MAXIMAL. La seule facon de recuperer le cœur exact est
+// donc de RETRECIR les boites jusqu'a ce que l'intervalle cesse d'etre domine
+// par sa propre largeur. On certifie d'abord, on scinde ensuite, et seulement
+// les terminaux que la lane cible laisse OUVERTS.
+long long g_raffine = 0;
+int g_raffine_lane = 2;
 bool g_bank = false;
 long long g_win = 32, g_bankl = 16;
 long long g_warms = 0;
@@ -779,6 +789,8 @@ int main(int argc, char** argv) {
     else if (a.rfind("--smax=", 0) == 0) set_smax(arg_ll(val("--smax=").c_str(), 4, 34, "smax"));
     else if (a == "--fallback") g_fallback = true;
     else if (a == "--spindle") g_spindle = true;
+    else if (a.rfind("--raffine=", 0) == 0) g_raffine = arg_ll(val("--raffine=").c_str(), 1, 12, "raffine");
+    else if (a.rfind("--raffine-lane=", 0) == 0) g_raffine_lane = (int)arg_ll(val("--raffine-lane=").c_str(), 0, 2, "raffine-lane");
     else if (a == "--vwave") { g_bank = true; g_vwave = true; }
     else if (a == "--descent") { g_bank = true; g_descent = true; }
     else if (a.rfind("--window=", 0) == 0) { g_win = arg_ll(val("--window=").c_str(), 2, 1024, "window"); g_bank = true; }
@@ -874,7 +886,7 @@ int main(int argc, char** argv) {
     // ---- GRAINES : le cas diagonal DEROULE. Un thread par nœud interne.
     std::vector<Pair> wave;
     wave.reserve(nodes.size());
-    for (size_t i = 0; i < nodes.size(); ++i) wave.push_back({nodes[i].left, nodes[i].right});
+    for (size_t i = 0; i < nodes.size(); ++i) wave.push_back({nodes[i].left, nodes[i].right, 0});
 
     // ---- VAGUES : `count -> scan -> fill`, aucune pile.
     std::vector<Pair> terms;
@@ -890,18 +902,262 @@ int main(int argc, char** argv) {
     // LA FRACTION DE RECORDS N'EST PAS LA FRACTION DE MASSE, et j'ai publie
     // l'une pour l'autre. On compte donc la masse fermee explicitement.
     long long mass_closed_q2 = 0;
+    long long raffines = 0;
     long long tests = 0, levels = 0, wave_hwm = (long long)wave.size();
+    // ---- LA CERTIFICATION, EXTRAITE. Elle etait inline dans la phase de
+    // remplissage, donc un terminal etait decide AVANT d'etre certifie. Le
+    // raffinement local exige l'inverse : certifier, puis decider si l'on
+    // scinde. C'est le levier qui reste apres la refutation du spindle sur
+    // rectangle, et il ne peut pas s'ecrire sans cette extraction.
+      auto certifier = [&](int wa, int wb, unsigned char* out_f, unsigned char* out_p) {
+        const mhgp3v::WspdBox ba = cell_of(nodes, sp, wa);
+        const mhgp3v::WspdBox bb = cell_of(nodes, sp, wb);
+        mhgp3v::RectBox qa{}, qb{};
+        long long m4[3];
+        for (int d = 0; d < 3; ++d) {
+          qa.lo[d] = ba.lo[d]; qa.hi[d] = ba.hi[d];
+          qb.lo[d] = bb.lo[d]; qb.hi[d] = bb.hi[d];
+          m4[d] = ba.lo[d] + ba.hi[d] + bb.lo[d] + bb.hi[d];
+        }
+        const long long dlo = mhgp3v::rect_minsq(qa, qb);   // UNE fois
+        long long cred[3] = {0, 0, 0};
+        long long taken = 0;
+        bool tronque = false;
+        if (g_vwave) {
+          // `Central-VWave`. LA TACHE EST `(CNode, lane_mask)`, jamais un
+          // nœud seul avec un masque global : sinon un parent `ALL` en q2
+          // mais `MIXED` en q3 pousse ses enfants, dont la population est
+          // CREDITEE UNE SECONDE FOIS en q2 — une fausse fermeture. Seuls
+          // les bits `MIXED` du parent passent aux enfants ; les bits
+          // `ALL`/`NONE` y sont consommes exactement une fois.
+          struct Task { int node; unsigned mask; };
+          Task st[96];
+          int sn = 0;
+          // REPERAGE PUIS REMONTEE. Descendre depuis la RACINE pour chaque
+          // rectangle depense 42,7 % du travail en descente pure — des
+          // nœuds qui ne creditent rien et n'elaguent rien, et n'existent
+          // que pour atteindre la region utile. Or les nœuds crediteurs
+          // sont tous autour de `m_0`. On repere donc la feuille de `m_0`
+          // par la cle de Morton, puis on REMONTE : a chaque ancetre, le
+          // sous-arbre FRERE est un candidat, et on s'arrete des que les
+          // seuils sont atteints. Ni les 51,7 % de `NONE` lointains, ni la
+          // descente initiale ne sont alors payes.
+          if (g_climb) {
+            const unsigned long long qk0 =
+                mhgp3v::wf_morton48(m4[0] / 4, m4[1] / 4, m4[2] / 4);
+            size_t pos0 =
+                (size_t)(std::lower_bound(keys.begin(), keys.end(), qk0) - keys.begin());
+            if (pos0 >= keys.size()) pos0 = keys.size() - 1;
+            // Remonter depuis la feuille `pos0` : trouver le nœud interne
+            // dont elle est un enfant, puis empiler les freres successifs.
+            int cur = -1 - (int)pos0;
+            for (size_t up = 0; up < nodes.size() && sn + 2 <= 96; ++up) {
+              const int par = (cur < 0) ? leaf_parent[-1 - cur] : nodes[cur].parent;
+              if (par < 0) break;
+              const int frere = (nodes[par].left == cur) ? nodes[par].right : nodes[par].left;
+              st[sn++] = {frere, 7u};
+              cur = par;
+            }
+            if (sn == 0) st[sn++] = {0, 7u};
+          } else {
+            st[sn++] = {0, 7u};
+          }
+          long long exp = 0;
+          bool abandonne = false;
+          const int* need = g_need;
+          while (sn > 0 && exp < g_win) {
+            const Task tk = st[--sn];
+            // MUTANT `masque-global` : rendre au parent un masque complet
+            // fait redescendre une lane deja `ALL` dans les enfants, dont
+            // la population est alors creditee DEUX fois. C'est la faute
+            // que j'avais ecrite, et le juge doit la tuer.
+            unsigned m = g_inject_global ? 7u : tk.mask;
+            for (int lane = 0; lane < 3; ++lane)
+              if (cred[lane] >= need[lane]) m &= ~(1u << lane);   // lane saturee
+            if (!m) continue;
+            ++exp; ++bank.reads; ++bank.recerts;
+            mhgp3v::RectBox cb2{};
+            long long pop = 1;
+            if (tk.node < 0) {
+              const int r = -1 - tk.node;
+              for (int d = 0; d < 3; ++d) { cb2.lo[d] = sp[r][d]; cb2.hi[d] = sp[r][d]; }
+            } else {
+              pop = nodes[tk.node].last - nodes[tk.node].first + 1;
+              for (int d = 0; d < 3; ++d) {
+                cb2.lo[d] = g_tight ? nodes[tk.node].tlo[d] : nodes[tk.node].lo[d];
+                cb2.hi[d] = g_tight ? nodes[tk.node].thi[d] : nodes[tk.node].hi[d];
+              }
+            }
+            long long smn = 0, smx = 0;
+            mhgp3v::rect_s_interval(qa, qb, cb2, &smn, &smx);
+            unsigned mixed = 0;
+            bool eut_all = false, eut_none = false;
+            for (int lane = 0; lane < 3; ++lane) {
+              if (!(m & (1u << lane))) continue;
+              RectVerdict v = mhgp3v::rect_central_verdict(dlo, smn, smx, lane);
+              // Le masque central est SUFFISANT, jamais complet. Sous
+              // `--fallback`, un `MIXED` central est repris par le
+              // classifieur complet — `Hmin` et les deux maxima de
+              // distance —, qui n'est pas comparable et peut mordre la ou
+              // le central renonce. La disjonction de deux certificats
+              // suffisants reste suffisante.
+              // `JungSpindleRect-v0` en DISJONCTION. Deux certificats
+              // suffisants et non comparables restent suffisants. Le central
+              // teste la boule INSCRITE ; le spindle rend le terme
+              // directionnel que la reduction jetait.
+              if (v == RectVerdict::kMixed && g_spindle) {
+                const long long dhi = mhgp3v::rect_maxsq(qa, qb);
+                const long long tabs = mhgp3v::rect_t_abs(qa, qb, cb2);
+                ++bank.spindle_essais;
+                if (tabs > 0) ++bank.spindle_tabs;
+                if (mhgp3v::rect_spindle_all(dlo, dhi, smx, tabs, lane)) {
+                  v = RectVerdict::kAll;
+                  ++bank.spindle_all;
+                }
+              }
+              if (v == RectVerdict::kMixed && g_fallback) {
+                long long mxk = 0;
+                const RectVerdict w =
+                    mhgp3v::rect_classify(qa, qb, cb2, (RectLane)lane, &mxk);
+                if (w == RectVerdict::kAll) v = RectVerdict::kAll;
+              }
+              if (v == RectVerdict::kAll) { cred[lane] += pop; eut_all = true; }
+              else if (v == RectVerdict::kMixed) mixed |= 1u << lane;
+              else eut_none = true;
+            }
+            // OU PASSE LE TRAVAIL ? Un `MIXED` pur est une descente pure :
+            // il ne credite rien, n'elague rien, et ne sert qu'a atteindre
+            // les nœuds utiles. C'est la part compressible.
+            if (eut_all) ++bank.v_all;
+            else if (mixed && !eut_none) ++bank.v_descente;
+            else ++bank.v_none;
+            if (mixed && tk.node >= 0) {
+              if (sn + 2 > 96) { abandonne = true; break; }       // jamais en silence
+              st[sn++] = {nodes[tk.node].left, mixed};
+              st[sn++] = {nodes[tk.node].right, mixed};
+            }
+          }
+          // Une pile pleine ou un quantum epuise laisse des taches VIVANTES.
+          // ATTENTION : ce compteur les DENOMBRE, il ne les SERIALISE pas.
+          // Aucune tache, aucun masque, aucun curseur n'est encore ecrit —
+          // la continuation reste a faire, et l'audit `dfa9e1b` a raison de
+          // refuser le mot. Les credits deja acquis restent valides ; seule
+          // la COMPLETUDE est perdue, jamais la surete.
+          if (abandonne || (sn > 0 && exp >= g_win)) { ++bank.tronques; tronque = true; }
+          taken = exp;
+        } else if (g_descent) {
+          // Descente au meilleur d'abord vers `m_0`, pile bornee.
+          std::pair<long long, int> heap[64];
+          int hn = 0;
+          bool deborde = false;
+          heap[hn++] = {0, 0};
+          long long exp = 0;
+          while (hn > 0 && taken < g_bankl && exp < g_win) {
+            int best = 0;
+            for (int u = 1; u < hn; ++u) if (heap[u].first < heap[best].first) best = u;
+            const int id = heap[best].second;
+            heap[best] = heap[--hn];
+            ++exp; ++bank.reads;
+            if (id < 0) {
+              const int r = -1 - id;
+              mhgp3v::RectBox zb{};
+              for (int d = 0; d < 3; ++d) { zb.lo[d] = sp[r][d]; zb.hi[d] = sp[r][d]; }
+              ++taken; ++bank.recerts;
+              const unsigned got = mhgp3v::rect_central_mask_dlo(dlo, qa, qb, zb);
+              for (int lane = 0; lane < 3; ++lane) if (got & (1u << lane)) ++cred[lane];
+              continue;
+            }
+            for (int side = 0; side < 2; ++side) {
+              const int ch = side ? nodes[id].right : nodes[id].left;
+              if (hn >= 62) { deborde = true; break; }
+              const long long dd = (ch < 0) ? 0 : box_dist2_to(nodes[ch], m4, g_tight);
+              heap[hn++] = {dd, ch};
+            }
+          }
+          // UN TAS NON VIDE, UN DEBORDEMENT OU UN CAP SONT DES ABANDONS.
+          // Le contre-audit releve que ces branches annonçaient
+          // `fenetre_finale=OUI` apres avoir abandonne.
+          if (hn > 0 || deborde) { ++bank.tronques; tronque = true; }
+        } else {
+          const unsigned long long qk =
+              mhgp3v::wf_morton48(m4[0] / 4, m4[1] / 4, m4[2] / 4);
+          size_t pos = (size_t)(std::lower_bound(keys.begin(), keys.end(), qk) - keys.begin());
+          const size_t beg = (pos > (size_t)(g_win / 2)) ? pos - g_win / 2 : 0;
+          const size_t end = std::min(keys.size(), beg + (size_t)g_win);
+          size_t r = beg;
+          for (; r < end && taken < g_bankl; ++r) {
+            ++bank.reads;
+            mhgp3v::RectBox zb{};
+            for (int d = 0; d < 3; ++d) { zb.lo[d] = sp[r][d]; zb.hi[d] = sp[r][d]; }
+            ++taken; ++bank.recerts;
+            const unsigned got = mhgp3v::rect_central_mask_dlo(dlo, qa, qb, zb);
+            for (int lane = 0; lane < 3; ++lane)
+              if (got & (1u << lane)) ++cred[lane];
+          }
+          // LA FENETRE MORTON N'EXAMINE JAMAIS TOUT LE NUAGE : c'est une
+          // PROPOSITION bornee autour d'une cle, jamais une preuve
+          // d'absence. Elle n'est complete que si elle a couvert l'ordre
+          // entier sans buter sur son cap — cas qui n'arrive qu'a tres
+          // petit `n`. Sinon le sort de chaque lane non fermee est INCONNU.
+          if (beg != 0 || end != keys.size() || r < end) { ++bank.tronques; tronque = true; }
+        }
+        const int* need = g_need;
+        for (int lane = 0; lane < 3; ++lane)
+          if (cred[lane] >= need[lane]) ++bank.closed[lane];
+        // JUGE DE LA VAGUE. Toute fermeture affirme qu'il existe `need`
+        // `PointId` DISTINCTS satisfaisant le masque central sur tout
+        // `A x B`. On le verifie par balayage exhaustif du nuage, dans une
+        // ecriture qui n'emprunte ni l'intervalle du score, ni l'antichaine.
+        if (g_judge_vwave) {
+          for (int lane = 0; lane < 3; ++lane) {
+            if (cred[lane] < need[lane]) continue;
+            long long vrai = 0;
+            for (size_t z = 0; z < sp.size(); ++z) {
+              mhgp3v::RectBox zb{};
+              for (int d = 0; d < 3; ++d) { zb.lo[d] = sp[z][d]; zb.hi[d] = sp[z][d]; }
+              if (mhgp3v::rect_central_mask_dlo(dlo, qa, qb, zb) & (1u << lane)) ++vrai;
+            }
+            ++bank.juges;
+            if (vrai < need[lane]) ++bank.faux;
+          }
+        }
+        const long long msz = count_of(nodes, wa) * count_of(nodes, wb);
+        unsigned char f = 0, pn = 0;
+        for (int lane = 0; lane < 3; ++lane) {
+          if (cred[lane] >= need[lane]) { f |= (unsigned char)(1u << lane); continue; }
+          // UNE LANE NON FERMEE APRES TRONCATURE N'EST PAS UNE LANE OUVERTE :
+          // c'est une lane dont le sort est INCONNU. On la compte ouverte —
+          // fail-open, donc sur — mais on le DIT, et la fenetre publiee est
+          // alors un surensemble, jamais la fenetre finale.
+          if (tronque) { pn |= (unsigned char)(1u << lane); ++pending_lane[lane]; }
+        }
+        *out_f = f;
+        *out_p = pn;
+        if (f & 1u) mass_closed_q2 += msz;
+      };
     while (!wave.empty()) {
       ++levels;
       std::vector<int> cnt(wave.size());
       std::vector<char> sep(wave.size());
+      std::vector<unsigned char> fpre(wave.size(), 0), ppre(wave.size(), 0), done(wave.size(), 0);
       for (size_t i = 0; i < wave.size(); ++i) {
         ++tests;
         const mhgp3v::WspdBox ca = cell_of(nodes, sp, wave[i].a);
         const mhgp3v::WspdBox cb = cell_of(nodes, sp, wave[i].b);
         sep[i] = mhgp3v::wspd_separated_euclid(ca, cb, p, q) ? 1 : 0;
-        if (sep[i]) { cnt[i] = 0; continue; }
         const bool la = wave[i].a < 0, lb = wave[i].b < 0;
+        if (sep[i]) {
+          if (!g_bank || g_raffine == 0) { cnt[i] = 0; continue; }
+          // RAFFINEMENT LOCAL : certifier AVANT de decider. Un terminal dont la
+          // lane cible reste ouverte est scinde, tant qu'il reste du budget et
+          // qu'il n'est pas deja une paire de feuilles.
+          certifier(wave[i].a, wave[i].b, &fpre[i], &ppre[i]);
+          done[i] = 1;
+          const bool ferme = (fpre[i] & (unsigned char)(1u << g_raffine_lane)) != 0;
+          if (ferme || wave[i].r >= g_raffine || (la && lb)) { cnt[i] = 0; continue; }
+          cnt[i] = 2; ++raffines;
+          continue;
+        }
         cnt[i] = (la && lb) ? 0 : 2;    // deux feuilles non separables : terminal force
       }
       std::vector<int> off(wave.size() + 1, 0);
@@ -912,230 +1168,11 @@ int main(int argc, char** argv) {
           terms.push_back(wave[i]);
           if (!g_bank) { fate.push_back(0); pend.push_back(0); }
           if (g_bank) {
-            const mhgp3v::WspdBox ba = cell_of(nodes, sp, wave[i].a);
-            const mhgp3v::WspdBox bb = cell_of(nodes, sp, wave[i].b);
-            mhgp3v::RectBox qa{}, qb{};
-            long long m4[3];
-            for (int d = 0; d < 3; ++d) {
-              qa.lo[d] = ba.lo[d]; qa.hi[d] = ba.hi[d];
-              qb.lo[d] = bb.lo[d]; qb.hi[d] = bb.hi[d];
-              m4[d] = ba.lo[d] + ba.hi[d] + bb.lo[d] + bb.hi[d];
-            }
-            const long long dlo = mhgp3v::rect_minsq(qa, qb);   // UNE fois
-            long long cred[3] = {0, 0, 0};
-            long long taken = 0;
-            bool tronque = false;
-            if (g_vwave) {
-              // `Central-VWave`. LA TACHE EST `(CNode, lane_mask)`, jamais un
-              // nœud seul avec un masque global : sinon un parent `ALL` en q2
-              // mais `MIXED` en q3 pousse ses enfants, dont la population est
-              // CREDITEE UNE SECONDE FOIS en q2 — une fausse fermeture. Seuls
-              // les bits `MIXED` du parent passent aux enfants ; les bits
-              // `ALL`/`NONE` y sont consommes exactement une fois.
-              struct Task { int node; unsigned mask; };
-              Task st[96];
-              int sn = 0;
-              // REPERAGE PUIS REMONTEE. Descendre depuis la RACINE pour chaque
-              // rectangle depense 42,7 % du travail en descente pure — des
-              // nœuds qui ne creditent rien et n'elaguent rien, et n'existent
-              // que pour atteindre la region utile. Or les nœuds crediteurs
-              // sont tous autour de `m_0`. On repere donc la feuille de `m_0`
-              // par la cle de Morton, puis on REMONTE : a chaque ancetre, le
-              // sous-arbre FRERE est un candidat, et on s'arrete des que les
-              // seuils sont atteints. Ni les 51,7 % de `NONE` lointains, ni la
-              // descente initiale ne sont alors payes.
-              if (g_climb) {
-                const unsigned long long qk0 =
-                    mhgp3v::wf_morton48(m4[0] / 4, m4[1] / 4, m4[2] / 4);
-                size_t pos0 =
-                    (size_t)(std::lower_bound(keys.begin(), keys.end(), qk0) - keys.begin());
-                if (pos0 >= keys.size()) pos0 = keys.size() - 1;
-                // Remonter depuis la feuille `pos0` : trouver le nœud interne
-                // dont elle est un enfant, puis empiler les freres successifs.
-                int cur = -1 - (int)pos0;
-                for (size_t up = 0; up < nodes.size() && sn + 2 <= 96; ++up) {
-                  const int par = (cur < 0) ? leaf_parent[-1 - cur] : nodes[cur].parent;
-                  if (par < 0) break;
-                  const int frere = (nodes[par].left == cur) ? nodes[par].right : nodes[par].left;
-                  st[sn++] = {frere, 7u};
-                  cur = par;
-                }
-                if (sn == 0) st[sn++] = {0, 7u};
-              } else {
-                st[sn++] = {0, 7u};
-              }
-              long long exp = 0;
-              bool abandonne = false;
-              const int* need = g_need;
-              while (sn > 0 && exp < g_win) {
-                const Task tk = st[--sn];
-                // MUTANT `masque-global` : rendre au parent un masque complet
-                // fait redescendre une lane deja `ALL` dans les enfants, dont
-                // la population est alors creditee DEUX fois. C'est la faute
-                // que j'avais ecrite, et le juge doit la tuer.
-                unsigned m = g_inject_global ? 7u : tk.mask;
-                for (int lane = 0; lane < 3; ++lane)
-                  if (cred[lane] >= need[lane]) m &= ~(1u << lane);   // lane saturee
-                if (!m) continue;
-                ++exp; ++bank.reads; ++bank.recerts;
-                mhgp3v::RectBox cb2{};
-                long long pop = 1;
-                if (tk.node < 0) {
-                  const int r = -1 - tk.node;
-                  for (int d = 0; d < 3; ++d) { cb2.lo[d] = sp[r][d]; cb2.hi[d] = sp[r][d]; }
-                } else {
-                  pop = nodes[tk.node].last - nodes[tk.node].first + 1;
-                  for (int d = 0; d < 3; ++d) {
-                    cb2.lo[d] = g_tight ? nodes[tk.node].tlo[d] : nodes[tk.node].lo[d];
-                    cb2.hi[d] = g_tight ? nodes[tk.node].thi[d] : nodes[tk.node].hi[d];
-                  }
-                }
-                long long smn = 0, smx = 0;
-                mhgp3v::rect_s_interval(qa, qb, cb2, &smn, &smx);
-                unsigned mixed = 0;
-                bool eut_all = false, eut_none = false;
-                for (int lane = 0; lane < 3; ++lane) {
-                  if (!(m & (1u << lane))) continue;
-                  RectVerdict v = mhgp3v::rect_central_verdict(dlo, smn, smx, lane);
-                  // Le masque central est SUFFISANT, jamais complet. Sous
-                  // `--fallback`, un `MIXED` central est repris par le
-                  // classifieur complet — `Hmin` et les deux maxima de
-                  // distance —, qui n'est pas comparable et peut mordre la ou
-                  // le central renonce. La disjonction de deux certificats
-                  // suffisants reste suffisante.
-                  // `JungSpindleRect-v0` en DISJONCTION. Deux certificats
-                  // suffisants et non comparables restent suffisants. Le central
-                  // teste la boule INSCRITE ; le spindle rend le terme
-                  // directionnel que la reduction jetait.
-                  if (v == RectVerdict::kMixed && g_spindle) {
-                    const long long dhi = mhgp3v::rect_maxsq(qa, qb);
-                    const long long tabs = mhgp3v::rect_t_abs(qa, qb, cb2);
-                    ++bank.spindle_essais;
-                    if (tabs > 0) ++bank.spindle_tabs;
-                    if (mhgp3v::rect_spindle_all(dlo, dhi, smx, tabs, lane)) {
-                      v = RectVerdict::kAll;
-                      ++bank.spindle_all;
-                    }
-                  }
-                  if (v == RectVerdict::kMixed && g_fallback) {
-                    long long mxk = 0;
-                    const RectVerdict w =
-                        mhgp3v::rect_classify(qa, qb, cb2, (RectLane)lane, &mxk);
-                    if (w == RectVerdict::kAll) v = RectVerdict::kAll;
-                  }
-                  if (v == RectVerdict::kAll) { cred[lane] += pop; eut_all = true; }
-                  else if (v == RectVerdict::kMixed) mixed |= 1u << lane;
-                  else eut_none = true;
-                }
-                // OU PASSE LE TRAVAIL ? Un `MIXED` pur est une descente pure :
-                // il ne credite rien, n'elague rien, et ne sert qu'a atteindre
-                // les nœuds utiles. C'est la part compressible.
-                if (eut_all) ++bank.v_all;
-                else if (mixed && !eut_none) ++bank.v_descente;
-                else ++bank.v_none;
-                if (mixed && tk.node >= 0) {
-                  if (sn + 2 > 96) { abandonne = true; break; }       // jamais en silence
-                  st[sn++] = {nodes[tk.node].left, mixed};
-                  st[sn++] = {nodes[tk.node].right, mixed};
-                }
-              }
-              // Une pile pleine ou un quantum epuise laisse des taches VIVANTES.
-              // ATTENTION : ce compteur les DENOMBRE, il ne les SERIALISE pas.
-              // Aucune tache, aucun masque, aucun curseur n'est encore ecrit —
-              // la continuation reste a faire, et l'audit `dfa9e1b` a raison de
-              // refuser le mot. Les credits deja acquis restent valides ; seule
-              // la COMPLETUDE est perdue, jamais la surete.
-              if (abandonne || (sn > 0 && exp >= g_win)) { ++bank.tronques; tronque = true; }
-              taken = exp;
-            } else if (g_descent) {
-              // Descente au meilleur d'abord vers `m_0`, pile bornee.
-              std::pair<long long, int> heap[64];
-              int hn = 0;
-              bool deborde = false;
-              heap[hn++] = {0, 0};
-              long long exp = 0;
-              while (hn > 0 && taken < g_bankl && exp < g_win) {
-                int best = 0;
-                for (int u = 1; u < hn; ++u) if (heap[u].first < heap[best].first) best = u;
-                const int id = heap[best].second;
-                heap[best] = heap[--hn];
-                ++exp; ++bank.reads;
-                if (id < 0) {
-                  const int r = -1 - id;
-                  mhgp3v::RectBox zb{};
-                  for (int d = 0; d < 3; ++d) { zb.lo[d] = sp[r][d]; zb.hi[d] = sp[r][d]; }
-                  ++taken; ++bank.recerts;
-                  const unsigned got = mhgp3v::rect_central_mask_dlo(dlo, qa, qb, zb);
-                  for (int lane = 0; lane < 3; ++lane) if (got & (1u << lane)) ++cred[lane];
-                  continue;
-                }
-                for (int side = 0; side < 2; ++side) {
-                  const int ch = side ? nodes[id].right : nodes[id].left;
-                  if (hn >= 62) { deborde = true; break; }
-                  const long long dd = (ch < 0) ? 0 : box_dist2_to(nodes[ch], m4, g_tight);
-                  heap[hn++] = {dd, ch};
-                }
-              }
-              // UN TAS NON VIDE, UN DEBORDEMENT OU UN CAP SONT DES ABANDONS.
-              // Le contre-audit releve que ces branches annonçaient
-              // `fenetre_finale=OUI` apres avoir abandonne.
-              if (hn > 0 || deborde) { ++bank.tronques; tronque = true; }
-            } else {
-              const unsigned long long qk =
-                  mhgp3v::wf_morton48(m4[0] / 4, m4[1] / 4, m4[2] / 4);
-              size_t pos = (size_t)(std::lower_bound(keys.begin(), keys.end(), qk) - keys.begin());
-              const size_t beg = (pos > (size_t)(g_win / 2)) ? pos - g_win / 2 : 0;
-              const size_t end = std::min(keys.size(), beg + (size_t)g_win);
-              size_t r = beg;
-              for (; r < end && taken < g_bankl; ++r) {
-                ++bank.reads;
-                mhgp3v::RectBox zb{};
-                for (int d = 0; d < 3; ++d) { zb.lo[d] = sp[r][d]; zb.hi[d] = sp[r][d]; }
-                ++taken; ++bank.recerts;
-                const unsigned got = mhgp3v::rect_central_mask_dlo(dlo, qa, qb, zb);
-                for (int lane = 0; lane < 3; ++lane)
-                  if (got & (1u << lane)) ++cred[lane];
-              }
-              // LA FENETRE MORTON N'EXAMINE JAMAIS TOUT LE NUAGE : c'est une
-              // PROPOSITION bornee autour d'une cle, jamais une preuve
-              // d'absence. Elle n'est complete que si elle a couvert l'ordre
-              // entier sans buter sur son cap — cas qui n'arrive qu'a tres
-              // petit `n`. Sinon le sort de chaque lane non fermee est INCONNU.
-              if (beg != 0 || end != keys.size() || r < end) { ++bank.tronques; tronque = true; }
-            }
-            const int* need = g_need;
-            for (int lane = 0; lane < 3; ++lane)
-              if (cred[lane] >= need[lane]) ++bank.closed[lane];
-            // JUGE DE LA VAGUE. Toute fermeture affirme qu'il existe `need`
-            // `PointId` DISTINCTS satisfaisant le masque central sur tout
-            // `A x B`. On le verifie par balayage exhaustif du nuage, dans une
-            // ecriture qui n'emprunte ni l'intervalle du score, ni l'antichaine.
-            if (g_judge_vwave) {
-              for (int lane = 0; lane < 3; ++lane) {
-                if (cred[lane] < need[lane]) continue;
-                long long vrai = 0;
-                for (size_t z = 0; z < sp.size(); ++z) {
-                  mhgp3v::RectBox zb{};
-                  for (int d = 0; d < 3; ++d) { zb.lo[d] = sp[z][d]; zb.hi[d] = sp[z][d]; }
-                  if (mhgp3v::rect_central_mask_dlo(dlo, qa, qb, zb) & (1u << lane)) ++vrai;
-                }
-                ++bank.juges;
-                if (vrai < need[lane]) ++bank.faux;
-              }
-            }
-            const long long msz = count_of(nodes, wave[i].a) * count_of(nodes, wave[i].b);
             unsigned char f = 0, pn = 0;
-            for (int lane = 0; lane < 3; ++lane) {
-              if (cred[lane] >= need[lane]) { f |= (unsigned char)(1u << lane); continue; }
-              // UNE LANE NON FERMEE APRES TRONCATURE N'EST PAS UNE LANE OUVERTE :
-              // c'est une lane dont le sort est INCONNU. On la compte ouverte —
-              // fail-open, donc sur — mais on le DIT, et la fenetre publiee est
-              // alors un surensemble, jamais la fenetre finale.
-              if (tronque) { pn |= (unsigned char)(1u << lane); ++pending_lane[lane]; }
-            }
+            if (done[i]) { f = fpre[i]; pn = ppre[i]; }     // deja certifie
+            else certifier(wave[i].a, wave[i].b, &f, &pn);
             fate.push_back(f);
             pend.push_back(pn);
-            if (f & 1u) mass_closed_q2 += msz;
           }
           continue;
         }
@@ -1143,12 +1180,13 @@ int main(int argc, char** argv) {
         const long long ra = (ia < 0) ? 0 : mhgp3v::wspd_w2(cell_of(nodes, sp, ia));
         const long long rb = (ib < 0) ? 0 : mhgp3v::wspd_w2(cell_of(nodes, sp, ib));
         int o = off[i];
+        const int rr = wave[i].r + (sep[i] ? 1 : 0);   // scission de RAFFINEMENT
         if (ia >= 0 && (ib < 0 || ra >= rb)) {
-          next[o++] = {nodes[ia].left, ib};
-          next[o++] = {nodes[ia].right, ib};
+          next[o++] = {nodes[ia].left, ib, rr};
+          next[o++] = {nodes[ia].right, ib, rr};
         } else {
-          next[o++] = {ia, nodes[ib].left};
-          next[o++] = {ia, nodes[ib].right};
+          next[o++] = {ia, nodes[ib].left, rr};
+          next[o++] = {ia, nodes[ib].right, rr};
         }
       }
       wave.swap(next);
@@ -1596,7 +1634,7 @@ int main(int argc, char** argv) {
                 " | banque lectures=%lld recert=%lld ferme q2=%lld q3=%lld q4=%lld"
                 " | masse fermee q2=%.2f%% records fermes q2=%.2f%% tronques=%lld"
                 " juges=%lld faux=%lld | verdicts ALL=%lld NONE=%lld descente_pure=%lld spindle_ALL=%lld essais=%lld tabs_non_nul=%lld"
-                " | seuils=%d/%d/%d degre_residuel somme=%lld (= 2 x masse_res %lld) max=%lld moyen=%.1f"
+                " raffinements=%lld | seuils=%d/%d/%d degre_residuel somme=%lld (= 2 x masse_res %lld) max=%lld moyen=%.1f"
                 " | partenaires max=%lld moyen=%.2f"
                 " | residuel : %lld paires tirees DANS LA MASSE ouverte,"
                 " temoins_moyen=%.1f max=%lld, deja >=10 temoins : %lld (%.1f%%)"
@@ -1611,7 +1649,7 @@ int main(int argc, char** argv) {
                 bank.reads, bank.recerts, bank.closed[0], bank.closed[1], bank.closed[2],
                 100.0 * (double)mass_closed_q2 / (double)total,
                 100.0 * (double)bank.closed[0] / (double)std::max<size_t>(1, terms.size()),
-                bank.tronques, bank.juges, bank.faux, bank.v_all, bank.v_none, bank.v_descente, bank.spindle_all, bank.spindle_essais, bank.spindle_tabs,
+                bank.tronques, bank.juges, bank.faux, bank.v_all, bank.v_none, bank.v_descente, bank.spindle_all, bank.spindle_essais, bank.spindle_tabs, raffines,
                 g_need[0], g_need[1], g_need[2], nsum, masse_res, nmax, (double)nsum / (double)m,
                 dmax, (double)dsum / (double)std::max(1LL, dnz),
                 ech, (double)som_temoins / (double)std::max(1LL, ech), max_temoins,
