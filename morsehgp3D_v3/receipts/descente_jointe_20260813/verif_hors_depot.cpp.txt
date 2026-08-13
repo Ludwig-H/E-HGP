@@ -1,0 +1,25 @@
+// juge par force brute : Lminmax coincide-t-il avec le min/max exhaustifs ?
+#include <cstdio>
+#include <algorithm>
+using i64=long long;
+struct Box{ i64 lo[3],hi[3]; };
+#include "lmm.inc"
+int main(){
+  unsigned long long r=12345;
+  auto rn=[&](i64 h){ r^=r<<13;r^=r>>7;r^=r<<17; return (i64)(r%(unsigned long long)h); };
+  long long bad=0,tests=0;
+  for(int it=0;it<20000;++it){
+    Box A,B,C;
+    for(Box*P:{&A,&B,&C}) for(int i=0;i<3;++i){ const i64 a=rn(11)-5; const i64 b=a+rn(3); P->lo[i]=std::min(a,b); P->hi[i]=std::max(a,b); }
+    i64 mn,mx; Lminmax(A,B,C,mn,mx);
+    i64 emn=0,emx=0; bool f=true;
+    for(i64 ax=A.lo[0];ax<=A.hi[0];++ax)for(i64 ay=A.lo[1];ay<=A.hi[1];++ay)for(i64 az=A.lo[2];az<=A.hi[2];++az)
+    for(i64 bx=B.lo[0];bx<=B.hi[0];++bx)for(i64 by=B.lo[1];by<=B.hi[1];++by)for(i64 bz=B.lo[2];bz<=B.hi[2];++bz)
+    for(i64 cx=C.lo[0];cx<=C.hi[0];++cx)for(i64 cy=C.lo[1];cy<=C.hi[1];++cy)for(i64 cz=C.lo[2];cz<=C.hi[2];++cz){
+      const i64 v=(cx-ax)*(bx-cx)+(cy-ay)*(by-cy)+(cz-az)*(bz-cz);
+      if(f){emn=emx=v;f=false;} else {emn=std::min(emn,v);emx=std::max(emx,v);} }
+    ++tests; if(emn!=mn||emx!=mx){ if(++bad<4) printf("DESACCORD mn %lld/%lld mx %lld/%lld\n",mn,emn,mx,emx); }
+  }
+  printf("tests=%lld desaccords=%lld\n",tests,bad);
+  return bad?1:0;
+}

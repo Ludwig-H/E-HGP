@@ -1,0 +1,139 @@
+// DESCENTE JOINTE. Un seul parcours (A,B,W) ou W est la liste des noeuds temoins
+// encore indecis. Le meme Lambda separable rend les trois verdicts :
+//   Lambda_min(A,B,C) >  0  -> ALL   : crediter |C|, retirer de W
+//   Lambda_max(A,B,C) <= 0  -> NONE  : retirer de W
+//   sinon                      MIXED : garder, raffiner quand C est trop gros
+// Les credits sont monotones en descendant : ce qui est ALL pour A x B l'est
+// pour tout sous-rectangle. On les propage donc sans les recalculer.
+#include <cstdio>
+#include <cstdlib>
+#include <cmath>
+#include <algorithm>
+#include <array>
+#include <string>
+#include <vector>
+using i64 = long long; using i128 = __int128;
+struct Box { i64 lo[3], hi[3]; };
+// renvoie {min, max} exacts de sum_i (z_i-a_i)(b_i-z_i) sur A x B x C
+// mn : min de sum_i (z_i-a_i)(b_i-z_i) sur A x B x C. EXACT — la parabole est
+//      concave en z (min a une extremite) et le min sur (a,b) d'un min de
+//      fonctions bilineaires est concave, donc atteint a un coin.
+// mx : max de la meme somme. EXACT AUSSI, mais le max en z est au SOMMET
+//      (a+b)/2 ECRETE a la boite, jamais a une extremite ; le max sur (a,b)
+//      d'un max de fonctions bilineaires est convexe, donc atteint a un coin.
+//      Evaluer seulement les coins en z donnerait un faux NONE.
+static void Lminmax(const Box&A,const Box&B,const Box&C,i64&mn,i64&mx){
+  mn=0; mx=0;
+  for(int i=0;i<3;++i){
+    i64 lo=0,hi=0; bool f=true;
+    for(int ea=0;ea<2;++ea) for(int eb=0;eb<2;++eb){
+      const i64 a=ea?A.hi[i]:A.lo[i], b=eb?B.hi[i]:B.lo[i];
+      for(int g=0;g<2;++g){ const i64 z=g?C.hi[i]:C.lo[i];
+        const i64 v=(z-a)*(b-z); if(f){lo=hi=v;f=false;} else {lo=std::min(lo,v);hi=std::max(hi,v);} }
+      const i64 s=a+b;                       // sommet 2z=a+b, entiers encadrants
+      for(int t=0;t<2;++t){ i64 z=(s+t)/2; if((s+t)%2) continue;
+        z=std::max(C.lo[i],std::min(C.hi[i],z));
+        const i64 v=(z-a)*(b-z); hi=std::max(hi,v); }
+      { i64 z=s/2; z=std::max(C.lo[i],std::min(C.hi[i],z)); i64 v=(z-a)*(b-z); hi=std::max(hi,v);
+        z=(s+1)/2; z=std::max(C.lo[i],std::min(C.hi[i],z)); v=(z-a)*(b-z); hi=std::max(hi,v); } }
+    mn+=lo; mx+=hi; }
+}
+static i64 maxsq(const Box&P,const Box&Q){
+  i64 s=0;
+  for(int i=0;i<3;++i){ i64 m=0;
+    for(int p=0;p<2;++p) for(int q=0;q<2;++q){
+      const i64 d=(p?P.hi[i]:P.lo[i])-(q?Q.hi[i]:Q.lo[i]); m=std::max(m,d*d); }
+    s+=m; }
+  return s;
+}
+struct Node{ Box box; int begin,end,left,right; double c[3],rad; };
+static int build(std::vector<Node>&nd,std::vector<std::array<i64,3>>&p,int b,int e,int leaf){
+  Node n{}; n.begin=b;n.end=e;n.left=n.right=-1;
+  for(int i=0;i<3;++i){n.box.lo[i]=p[b][i];n.box.hi[i]=p[b][i];}
+  for(int t=b;t<e;++t)for(int i=0;i<3;++i){n.box.lo[i]=std::min(n.box.lo[i],p[t][i]);n.box.hi[i]=std::max(n.box.hi[i],p[t][i]);}
+  double r2=0; for(int i=0;i<3;++i){ n.c[i]=0.5*(double)(n.box.lo[i]+n.box.hi[i]);
+    const double h=0.5*(double)(n.box.hi[i]-n.box.lo[i]); r2+=h*h; }
+  n.rad=std::sqrt(r2);
+  const int id=(int)nd.size(); nd.push_back(n);
+  if(e-b>leaf){ int ax=0;i64 best=-1;
+    for(int i=0;i<3;++i){const i64 w=nd[id].box.hi[i]-nd[id].box.lo[i]; if(w>best){best=w;ax=i;}}
+    const i64 mid=(nd[id].box.lo[ax]+nd[id].box.hi[ax])/2;
+    auto it=std::partition(p.begin()+b,p.begin()+e,[ax,mid](const std::array<i64,3>&x){return x[ax]<=mid;});
+    int m=(int)(it-p.begin());
+    if(m==b||m==e){ m=(b+e)/2; std::nth_element(p.begin()+b,p.begin()+m,p.begin()+e,
+        [ax](const std::array<i64,3>&x,const std::array<i64,3>&y){return x[ax]<y[ax];}); }
+    nd[id].left=build(nd,p,b,m,leaf); nd[id].right=build(nd,p,m,e,leaf); }
+  return id;
+}
+static std::vector<Node> T;
+static long long evals=0, rects_closed=0, rects_resid=0, mass_closed[3]={0,0,0}, mass_resid=0;
+static long long w_high=0, refines=0, capped=0;
+static const int need[3]={10,9,8};
+static const size_t WCAP=4096;
+static long long BUDGET=1000000000LL;   // evaluations par rectangle : raison de front RESOURCE_CAP
+
+static int LANE=0;
+// Recherche de temoins AU MEILLEUR D'ABORD : la file de priorite est ordonnee
+// par Lambda_max decroissant, c'est-a-dire du noeud le plus interieur vers la
+// frontiere. On ne raffine jamais un noeud NONE ni un noeud ALL ; le budget
+// borne le nombre d'evaluations et donne la raison de front RESOURCE_CAP.
+#include <queue>
+static bool witness_enough(int ia,int ib,long long budget){
+  const Node&A=T[ia]; const Node&B=T[ib];
+  std::priority_queue<std::pair<i64,int>> pq; pq.push({(i64)1<<62,0});
+  long long cred=0;
+  while(!pq.empty()&&budget-->0){
+    const int ic=pq.top().second; pq.pop(); const Node&C=T[ic];
+    ++evals; i64 mn,mx; Lminmax(A.box,B.box,C.box,mn,mx);
+    if(mx<=0) continue;                                   // NONE
+    bool all=(mn>0);
+    if(all&&LANE){ const i128 LL=(i128)mn*mn;
+      const i128 EX=(i128)maxsq(C.box,A.box)*(i128)maxsq(B.box,C.box);
+      all=(LANE==1)?(4*LL>EX):(3*LL>EX); }
+    if(all){ cred+=C.end-C.begin; if(cred>=need[LANE]) return true; continue; }
+    if(C.left>=0){ pq.push({mx,C.left}); pq.push({mx,C.right}); }
+    if((long long)pq.size()>w_high) w_high=(long long)pq.size();
+  }
+  if(!pq.empty()) ++capped;
+  return false;
+}
+static void solve(int ia,int ib,long long budget){
+  const Node&A=T[ia]; const Node&B=T[ib];
+  const long long ka=A.end-A.begin, kb=B.end-B.begin;
+  const long long mass=(ia==ib)? ka*(ka-1)/2 : ka*kb;
+  if(mass<=0) return;
+  if(ia==ib){ if(A.left<0){ ++rects_resid; mass_resid+=mass; return; }
+    solve(A.left,A.left,budget); solve(A.right,A.right,budget); solve(A.left,A.right,budget); return; }
+  if(witness_enough(ia,ib,budget)){ ++rects_closed; mass_closed[LANE]+=mass; return; }
+  if(A.left<0&&B.left<0){ ++rects_resid; mass_resid+=mass; return; }
+  if(A.left>=0 && (B.left<0 || A.rad>=B.rad)){ solve(A.left,ib,budget); solve(A.right,ib,budget); }
+  else { solve(ia,B.left,budget); solve(ia,B.right,budget); }
+}
+int main(int argc,char**argv){
+  int n = argc>1?atoi(argv[1]):4000;
+  const int coord = argc>2?atoi(argv[2]):65535;
+  const int leaf = argc>3?atoi(argv[3]):16;
+  unsigned long long r=88172645463325252ULL;
+  auto rnd=[&](i64 hi){ r^=r<<13;r^=r>>7;r^=r<<17; return (i64)(r%(unsigned long long)hi); };
+  std::vector<std::array<i64,3>> P(n);
+  const char*fam=getenv("FAM");
+  if(fam&&std::string(fam)=="deuxplans"){ const int m=n/2; P.resize(2*m);
+    for(int i=0;i<m;++i){ const i64 u=i/200,v=i%200; P[i]={0,u,v}; P[m+i]={60000,10000+u,1000+v}; }
+    n=(int)P.size(); }
+  else for(int i=0;i<n;++i) P[i]={rnd(coord),rnd(coord),rnd(coord)};
+  T.clear(); T.reserve(8*n); build(T,P,0,n,leaf);
+  const long long tot=(long long)n*(n-1)/2;
+  if(getenv("BUDGET")) BUDGET=atoll(getenv("BUDGET"));
+  const char*lo=getenv("LANEONLY"); const int L0=lo?atoi(lo):0, L1=lo?atoi(lo)+1:3;
+  for(LANE=L0;LANE<L1;++LANE){
+    evals=rects_closed=rects_resid=mass_resid=w_high=refines=capped=0;
+    solve(0,0,BUDGET);
+    printf("n=%6d lane q%d | fermes=%8lld residuels=%8lld (%6.3f/pt) | masse fermee %6.2f%% residuelle %6.2f%% | eval=%10lld eval/n=%8.1f | Wmax=%lld cap=%lld\n",
+      n,LANE+2,rects_closed,rects_resid,(double)rects_resid/n,
+      100.0*mass_closed[LANE]/tot,100.0*mass_resid/tot,evals,(double)evals/n,w_high,capped);
+  }
+  {
+  const long long tot=(long long)n*(n-1)/2;
+  }
+  return 0;
+}
