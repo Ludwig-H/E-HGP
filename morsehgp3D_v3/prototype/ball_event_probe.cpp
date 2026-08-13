@@ -22,6 +22,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <functional>
 #include <map>
 #include <set>
 #include <string>
@@ -278,6 +279,93 @@ int main(int argc, char** argv) {
     if (r.supports.size() > 1) { ++cospheres; multi += (long long)r.supports.size(); }
   }
 
+  // ---- ETAPE 0B : LE FOLD, ET SON JUGE INDEPENDANT.
+  //
+  // Le fold consomme les `SphereRun` par NIVEAU CROISSANT et fusionne leurs
+  // membres : c'est la foret de fusion H0. Il ne consomme jamais la
+  // representation arithmetique — il n'emploie que `be_level_cmp`, qui compare
+  // sans jamais FORMER le niveau. C'est la couture `SphereIdentity` que l'audit
+  // `1aa487d` §3 demande de preparer maintenant pour qu'un profil `binary64`
+  // futur ne force pas a reecrire le fold.
+  //
+  // LE JUGE EST UNE AUTRE ALGORITHMIQUE. Le sujet trie puis unit — Kruskal. Le
+  // juge construit la matrice des niveaux d'arete directe, puis ferme par
+  // FLOYD-WARSHALL en min-max. Les deux doivent rendre le meme niveau de
+  // goulot pour CHAQUE paire de points ; c'est la seule propriete que le fold
+  // doit preserver, et elle ne depend d'aucune representation.
+  long long fold_desaccords = 0, fusions = 0, paires_connectees = 0;
+  bool fold_domaine = true;
+  {
+    // Ordre exact des niveaux, sans jamais former un rayon.
+    std::vector<const SphereRun*> ord;
+    for (const auto& kv : runs)
+      if (kv.second.disposition == Disposition::kRegular) ord.push_back(&kv.second);
+    std::stable_sort(ord.begin(), ord.end(), [&](const SphereRun* x, const SphereRun* y) {
+      int c = 0;
+      if (!mhgp3v::be_level_cmp(x->key, y->key, &c)) { fold_domaine = false; return false; }
+      return c < 0;
+    });
+    // Rang de niveau : les niveaux EGAUX partagent leur rang.
+    std::vector<int> rang(ord.size(), 0);
+    for (size_t i = 1; i < ord.size(); ++i) {
+      int c = 0;
+      if (!mhgp3v::be_level_cmp(ord[i - 1]->key, ord[i]->key, &c)) fold_domaine = false;
+      rang[i] = rang[i - 1] + (c != 0 ? 1 : 0);
+    }
+    const int INF = 1 << 29;
+    // SUJET : Kruskal streame. Aucun catalogue global n'est materialise — on ne
+    // garde que la foret et les evenements de fusion.
+    std::vector<int> par((size_t)n);
+    for (int i = 0; i < (int)n; ++i) par[(size_t)i] = i;
+    std::function<int(int)> find = [&](int x) { while (par[(size_t)x] != x) { par[(size_t)x] = par[(size_t)par[(size_t)x]]; x = par[(size_t)x]; } return x; };
+    std::vector<std::vector<int>> bott((size_t)n, std::vector<int>((size_t)n, INF));
+    for (size_t i = 0; i < ord.size(); ++i) {
+      std::vector<int> mem = ord[i]->interior;
+      mem.insert(mem.end(), ord[i]->shell.begin(), ord[i]->shell.end());
+      for (size_t j = 1; j < mem.size(); ++j) {
+        const int ra = find(mem[0]), rb = find(mem[j]);
+        if (ra == rb) continue;
+        // La fusion connecte DEUX composantes : le goulot de toutes leurs
+        // paires croisees vaut ce niveau.
+        std::vector<int> ca, cb;
+        for (int t = 0; t < (int)n; ++t) { if (find(t) == ra) ca.push_back(t); else if (find(t) == rb) cb.push_back(t); }
+        for (int u : ca) for (int v : cb) { bott[(size_t)u][(size_t)v] = rang[i]; bott[(size_t)v][(size_t)u] = rang[i]; }
+        par[(size_t)ra] = rb;
+        ++fusions;
+      }
+    }
+    // JUGE : matrice directe puis fermeture min-max de Floyd-Warshall.
+    std::vector<std::vector<int>> jm((size_t)n, std::vector<int>((size_t)n, INF));
+    for (size_t i = 0; i < ord.size(); ++i) {
+      std::vector<int> mem = ord[i]->interior;
+      mem.insert(mem.end(), ord[i]->shell.begin(), ord[i]->shell.end());
+      for (size_t a2 = 0; a2 < mem.size(); ++a2)
+        for (size_t b2 = a2 + 1; b2 < mem.size(); ++b2) {
+          const int u = mem[a2], v = mem[b2];
+          if (rang[i] < jm[(size_t)u][(size_t)v]) { jm[(size_t)u][(size_t)v] = rang[i]; jm[(size_t)v][(size_t)u] = rang[i]; }
+        }
+    }
+    for (int k = 0; k < (int)n; ++k)
+      for (int u = 0; u < (int)n; ++u)
+        for (int v = 0; v < (int)n; ++v) {
+          const int w = std::max(jm[(size_t)u][(size_t)k], jm[(size_t)k][(size_t)v]);
+          if (w < jm[(size_t)u][(size_t)v]) jm[(size_t)u][(size_t)v] = w;
+        }
+    for (int u = 0; u < (int)n; ++u)
+      for (int v = u + 1; v < (int)n; ++v) {
+        if (jm[(size_t)u][(size_t)v] < INF) ++paires_connectees;
+        if (bott[(size_t)u][(size_t)v] != jm[(size_t)u][(size_t)v]) ++fold_desaccords;
+      }
+  }
+  std::printf("fold fusions=%lld paires_connectees=%lld desaccords=%lld domaine=%s\n",
+              fusions, paires_connectees, fold_desaccords, fold_domaine ? "OK" : "DEBORDE");
+  if (!fold_domaine) { std::fprintf(stderr, "REFUS: niveau exact hors domaine i128\n"); return 2; }
+  if (fold_desaccords != 0) {
+    std::fprintf(stderr, "DESACCORD DU JUGE: %lld goulots differents entre Kruskal"
+                         " streame et la fermeture min-max\n", fold_desaccords);
+    return 1;
+  }
+
   std::printf("ball_event n=%lld famille=%s coord=%lld | formes=%lld degenerees=%lld"
               " non_positives=%lld | supports=%lld (arite2=%lld arite3=%lld arite4=%lld)"
               " | spheres_uniques=%zu regulieres=%lld refus_domaine=%lld"
@@ -333,6 +421,6 @@ int main(int argc, char** argv) {
                          " et le centre rationnel\n", desaccords);
     return 1;
   }
-  std::printf("ball_event accord=OUI\n");
+  std::printf("ball_event accord=OUI fold=OUI\n");
   return 0;
 }

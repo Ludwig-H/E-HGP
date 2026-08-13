@@ -4220,7 +4220,25 @@ add_test(NAME mhgp3v_ball_event_juge
   COMMAND mhgp3v_ball_event_probe --family=uniform --points=14 --coord=32
           --min-runs=200 --min-supports=300 --min-arite4=50)
 set_tests_properties(mhgp3v_ball_event_juge PROPERTIES
-  PASS_REGULAR_EXPRESSION "ball_event accord=OUI")
+  PASS_REGULAR_EXPRESSION "ball_event accord=OUI fold=OUI")
+
+# ETAPE 0B : LE FOLD. Il consomme les `SphereRun` par niveau croissant sans
+# jamais FORMER un niveau — `be_level_cmp` compare par produit croise. C'est la
+# couture `SphereIdentity` que l'audit `1aa487d` §3 demande de preparer
+# maintenant, pour qu'un profil `binary64` futur ne force pas a reecrire le fold.
+#
+# LE JUGE EST UNE AUTRE ALGORITHMIQUE : le sujet trie puis unit — Kruskal — et
+# le juge ferme la matrice des niveaux d'arete par FLOYD-WARSHALL en min-max.
+# Les deux doivent rendre le meme niveau de goulot pour CHAQUE paire.
+add_test(NAME mhgp3v_ball_event_fold_grid
+  COMMAND mhgp3v_ball_event_probe --family=grid --points=16 --coord=32 --min-supports=200)
+set_tests_properties(mhgp3v_ball_event_fold_grid PROPERTIES
+  PASS_REGULAR_EXPRESSION "fold fusions=[0-9]+ paires_connectees=[0-9]+ desaccords=0")
+
+add_test(NAME mhgp3v_ball_event_fold_amas
+  COMMAND mhgp3v_ball_event_probe --family=clusters --points=16 --coord=32 --min-supports=100)
+set_tests_properties(mhgp3v_ball_event_fold_amas PROPERTIES
+  PASS_REGULAR_EXPRESSION "desaccords=0 domaine=OK")
 
 # LA FAMILLE `grid` EST LE REGIME DUR : elle porte des cospheres, des formes
 # degenerees et des refus de domaine, que `uniform` n'exerce presque pas.

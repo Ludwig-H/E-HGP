@@ -257,6 +257,43 @@ inline EdgeKey be_owner(const std::vector<Pt3>& pts, const std::vector<int>& S) 
 // Le record reste LOSSLESS pour que ce refus ne fige pas l'avenir.
 enum class Disposition { kRegular, kPlateauPending, kUnsupported };
 
+// ---- LE NIVEAU EXACT, COMPARE SANS JAMAIS ETRE FORME.
+//
+// L'audit `1aa487d` §3 exige que le fold ne consomme plus la representation
+// arithmetique native mais une IDENTITE : comparaison exacte, niveau exact,
+// serialisation versionnee. C'est la couture `ExactKernel / SphereIdentity`,
+// et elle se prepare MAINTENANT pour que le passage a un profil `binary64` ne
+// force pas a reecrire le fold.
+//
+// Le rayon carre d'une sphere `A||z||^2 + B.z + C = 0` vaut
+// `R^2 = (||B||^2 - 4 A C) / (4 A^2)`. On ne le forme jamais : on compare deux
+// niveaux par produit croise, `(||B1||^2-4A1C1) A2^2` contre
+// `(||B2||^2-4A2C2) A1^2`. Rend `-1`, `0` ou `+1`, et `false` si le domaine
+// deborde — un juge borne refuse, il ne tronque pas.
+inline bool be_level_num(const PrimitiveSphereKey& k, i128* num, i128* den2) {
+  i128 b2 = 0;
+  for (int i = 0; i < 3; ++i) {
+    const i128 t = k.b[i] * k.b[i];
+    if (k.b[i] != 0 && t / k.b[i] != k.b[i]) return false;
+    b2 += t;
+  }
+  const i128 ac = 4 * k.a * k.c;
+  *num = b2 - ac;
+  *den2 = k.a;
+  return true;
+}
+
+inline bool be_level_cmp(const PrimitiveSphereKey& x, const PrimitiveSphereKey& y, int* out) {
+  i128 nx = 0, ax = 0, ny = 0, ay = 0;
+  if (!be_level_num(x, &nx, &ax) || !be_level_num(y, &ny, &ay)) return false;
+  // `nx / (4 ax^2)` contre `ny / (4 ay^2)` : produit croise sur `ax^2 ay^2 > 0`.
+  const i128 l = nx * ay * ay, r = ny * ax * ax;
+  if (ay != 0 && (nx != 0) && (l / (ay * ay)) != nx) return false;   // debordement
+  if (ax != 0 && (ny != 0) && (r / (ax * ax)) != ny) return false;
+  *out = (l < r) ? -1 : (l > r ? 1 : 0);
+  return true;
+}
+
 struct SphereRun {
   PrimitiveSphereKey key;
   std::vector<std::vector<int>> supports;   // `SupportKey`, `PointId` tries
