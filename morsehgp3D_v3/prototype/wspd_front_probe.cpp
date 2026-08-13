@@ -115,6 +115,25 @@ int build(Tree* t, int b, int e, int leaf) {
   return id;
 }
 
+// IDENTITES CANONIQUES. Un indice de vecteur n'est pas une identite
+// persistante. La cle d'un nœud est le condensat de son epoque et de sa plage
+// de `PointId` TRIES ; le `RectId` est le condensat de l'epoque et des deux
+// cles ORDONNEES, jamais du chemin de split ni de l'ordre d'insertion.
+inline unsigned long long fnv(unsigned long long h, unsigned long long v) {
+  h ^= v; h *= 1099511628211ull; return h;
+}
+inline unsigned long long node_key(const Tree& t, int id, unsigned long long epoch) {
+  unsigned long long h = fnv(1469598103934665603ull, epoch);
+  std::vector<int> ids(t.pid.begin() + t.nodes[id].begin, t.pid.begin() + t.nodes[id].end);
+  std::sort(ids.begin(), ids.end());
+  for (int v : ids) h = fnv(h, (unsigned long long)v);
+  return h;
+}
+inline unsigned long long rect_id(unsigned long long epoch, unsigned long long ka,
+                                  unsigned long long kb) {
+  return fnv(fnv(fnv(1469598103934665603ull, epoch), std::min(ka, kb)), std::max(ka, kb));
+}
+
 struct Counters {
   long long bank_reads = 0, recerts = 0, bank_empty = 0, dup_rejected = 0, endpoint_rejected = 0;
   long long terminals = 0, self_blocks = 0, classified = 0, evals = 0;
@@ -125,6 +144,12 @@ struct Counters {
 };
 
 const int kNeed[3] = {10, 9, 8};
+
+// Le repli `Hmin / E2max X2max` est plus couvrant mais bien plus cher ; le
+// masque central seul est le chemin `P0`. Le choix est explicite, pas implicite.
+bool g_fallback = false;
+int g_inject = 0;
+long long g_injected = 0;
 
 // UNE SEULE descente, un MASQUE DE LANES PAR NŒUD — l'antichaine que l'audit
 // specifie. Un nœud porte les lanes pour lesquelles il n'est pas encore
@@ -150,20 +175,38 @@ unsigned classify_rect(const Tree& t, int ia, int ib, long long quantum, Counter
     unsigned child = 0;
     long long mx_keep = 0;
     bool any_all = false;
+    // MASQUE CENTRAL : `Dlo` et `Vhi` calcules UNE fois, trois seuils imbriques
+    // `q4 => q3 => q2`. Cette passe n'appelle ni `rect_h_interval`, ni le repli
+    // `E2max X2max`, ni aucun produit vectoriel.
+    const unsigned central = mhgp3v::rect_central_mask(A.box, B.box, C.box);
     for (int q = 0; q < 3; ++q) {
       if (!(it.mask & open & (1u << q))) continue;
-      long long mx = 0;
-      const RectVerdict v = mhgp3v::rect_classify(A.box, B.box, C.box, (RectLane)q, &mx);
-      if (v == RectVerdict::kAll) {
+      if (central & (1u << q)) {
         any_all = true;
         cred[q] += k;
         if (cred[q] >= kNeed[q]) { closed_mask |= 1u << q; open &= ~(1u << q); }
-      } else if (v == RectVerdict::kMixed) {
-        child |= 1u << q;
-        mx_keep = std::max(mx_keep, mx);
-      } else {
-        ++c->none_hits;
+        continue;
       }
+      // Repli SEULEMENT si demande : il est plus couvrant mais bien plus cher.
+      if (g_fallback) {
+        long long mx = 0;
+        const RectVerdict v = mhgp3v::rect_classify(A.box, B.box, C.box, (RectLane)q, &mx);
+        if (v == RectVerdict::kAll) {
+          any_all = true;
+          cred[q] += k;
+          if (cred[q] >= kNeed[q]) { closed_mask |= 1u << q; open &= ~(1u << q); }
+          continue;
+        }
+        if (v == RectVerdict::kNone) { ++c->none_hits; continue; }
+        child |= 1u << q; mx_keep = std::max(mx_keep, mx);
+        continue;
+      }
+      child |= 1u << q;
+    }
+    if (!g_fallback && child) {
+      // Priorite sans `Lambda` : le rectangle le plus « central » d'abord,
+      // c'est-a-dire le plus petit `Vhi`.
+      mx_keep = -mhgp3v::rect_v_max(A.box, B.box, C.box);
     }
     if (any_all) ++c->central_all;
     if (child) {
@@ -306,6 +349,9 @@ int main(int argc, char** argv) {
     else if (a.rfind("--max-slope=", 0) == 0) max_slope = std::atof(val("--max-slope=").c_str());
     else if (a == "--oracle") oracle = true;
     else if (a == "--bank") use_bank = true;
+    else if (a == "--fallback") g_fallback = true;
+    else if (a == "--inject=omission") g_inject = 1;
+    else if (a == "--inject=doublon") g_inject = 2;
     else if (a == "--bank-strong") { use_bank = true; g_bank_strong = true; }
     else if (a.rfind("--window=", 0) == 0) { win = arg_ll(val("--window=").c_str(), 1, 4096, "window"); use_bank = true; }
     else if (a.rfind("--bank-l=", 0) == 0) { bankL = arg_ll(val("--bank-l=").c_str(), 1, 64, "bank-l"); use_bank = true; }
@@ -322,6 +368,11 @@ int main(int argc, char** argv) {
   else refuse("famille inconnue");
 
   if (oracle && ns.back() > 64) refuse("l'oracle de multiplicite exige n <= 64");
+  // DOMAINE FERME. A `leaf > 1`, un self-bloc feuille de taille superieure a un
+  // n'est PAS developpe : ses paires intra-feuille manquent au front. Accepter
+  // le parametre puis compter sur le ledger final pour echouer n'est pas un
+  // contrat — on refuse AVANT tout calcul (directive `90aa941`).
+  if (leaf != 1) refuse("leaf doit valoir 1 : les self-blocs feuille ne sont pas developpes");
 
   std::vector<double> front, tot_mass;
   Counters agg{};
@@ -374,6 +425,11 @@ int main(int argc, char** argv) {
         continue;
       }
       if (mhgp3v::wspd_separated(to_wspd(A.box), to_wspd(B.box), sep)) {
+        // MUTANTS D'IDENTITE. Une omission et un doublon de masses egales se
+        // COMPENSENT dans toute somme ; seuls le cardinal des cles et leur
+        // multiplicite les distinguent. Les deux doivent mourir separement.
+        if (g_inject == 1 && terms.size() == 7) { ++g_injected; continue; }        // omission
+        if (g_inject == 2 && terms.size() == 7) { terms.push_back({ia, ib}); ++g_injected; }  // doublon
         terms.push_back({ia, ib});
         continue;
       }
@@ -390,25 +446,46 @@ int main(int argc, char** argv) {
     // omission et un doublon de meme masse se compensent. On developpe donc
     // tous les records et on exige multiplicite EXACTEMENT UN par `PairId`.
     if (oracle) {
+      // ORACLE D'IDENTITE. La somme des masses ne prouve rien ; on exige le
+      // DOMAINE (aucune cle diagonale, aucune cle hors domaine), le CARDINAL
+      // (exactement C(n,2) cles) et la MULTIPLICITE (exactement un).
       std::map<std::pair<int, int>, int> mult;
+      long long diag = 0, hors = 0;
       for (const auto& [ia, ib] : terms)
         for (int u = t.nodes[ia].begin; u < t.nodes[ia].end; ++u)
           for (int v = t.nodes[ib].begin; v < t.nodes[ib].end; ++v) {
-            const int p = std::min(t.pid[u], t.pid[v]), q = std::max(t.pid[u], t.pid[v]);
-            ++mult[{p, q}];
+            const int x = t.pid[u], y = t.pid[v];
+            if (x == y) { ++diag; continue; }
+            if (x < 0 || y < 0 || x >= m || y >= m) { ++hors; continue; }
+            ++mult[{std::min(x, y), std::max(x, y)}];
           }
-      long long bad = 0;
-      for (int p = 0; p < m; ++p)
-        for (int q = p + 1; q < m; ++q) {
-          auto it = mult.find({p, q});
-          if (it == mult.end() || it->second != 1) ++bad;
-        }
-      std::printf("oracle n=%lld paires=%lld couvertes=%zu multiplicite_fautive=%lld\n",
-                  m, total, mult.size(), bad);
-      if (bad != 0) {
-        std::fprintf(stderr, "INVARIANT VIOLE: %lld PairId de multiplicite differente de un\n", bad);
+      long long bad = 0, dup = 0, miss = 0;
+      for (const auto& [key, cnt] : mult) if (cnt != 1) { ++dup; ++bad; }
+      for (int x = 0; x < m; ++x)
+        for (int y = x + 1; y < m; ++y)
+          if (mult.find({x, y}) == mult.end()) { ++miss; ++bad; }
+      const long long attendu = m * (m - 1) / 2;
+      std::printf("oracle n=%lld attendu=%lld cles=%zu diagonales=%lld hors_domaine=%lld"
+                  " doublons=%lld manquantes=%lld\n",
+                  m, attendu, mult.size(), diag, hors, dup, miss);
+      if (diag || hors || (long long)mult.size() != attendu || bad) {
+        std::fprintf(stderr, "INVARIANT VIOLE: domaine, cardinal ou multiplicite du front"
+                             " (injection=%d, %lld records touches)\n", g_inject, g_injected);
         return 3;
       }
+      if (g_inject != 0) {
+        std::fprintf(stderr, "MUTANT SURVIVANT: l'injection %d n'a pas ete detectee\n", g_inject);
+        return 3;
+      }
+      // INVARIANCE PAR PERMUTATION : les vrais `PointId` etant conserves, le
+      // multiensemble des cles ne doit pas dependre de l'ordre d'entree.
+      unsigned long long digest = 1469598103934665603ull;
+      for (const auto& [key, cnt] : mult) {
+        digest = fnv(digest, (unsigned long long)key.first);
+        digest = fnv(digest, (unsigned long long)key.second);
+      }
+      std::printf("oracle digest_cles=%016llx epoque=%016llx\n", digest,
+                  node_key(t, 0, (unsigned long long)m));
       continue;
     }
 

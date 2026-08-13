@@ -3912,6 +3912,21 @@ add_test(NAME mhgp3v_wspd_front_multiplicite
 set_tests_properties(mhgp3v_wspd_front_multiplicite PROPERTIES
   PASS_REGULAR_EXPRESSION "oracle accord=OUI")
 
+# UNE OMISSION ET UN DOUBLON DE MASSES EGALES SE COMPENSENT dans toute somme ;
+# seuls le cardinal des cles et leur multiplicite les distinguent. Les deux
+# doivent mourir SEPAREMENT.
+mhgp3v_add_expected_code_test_for(mhgp3v_wspd_front_probe
+  mhgp3v_wspd_front_mutant_omission "INVARIANT VIOLE" 3
+  --family=uniform --points=64 --coord=512 --oracle --inject=omission)
+mhgp3v_add_expected_code_test_for(mhgp3v_wspd_front_probe
+  mhgp3v_wspd_front_mutant_doublon "INVARIANT VIOLE" 3
+  --family=uniform --points=64 --coord=512 --oracle --inject=doublon)
+
+# `leaf > 1` omet les self-blocs feuille : refuse AVANT tout calcul.
+mhgp3v_add_expected_code_test_for(mhgp3v_wspd_front_probe
+  mhgp3v_wspd_front_refus_leaf "leaf doit valoir 1" 2
+  --family=uniform --points=2000 --leaf=4)
+
 mhgp3v_add_expected_code_test_for(mhgp3v_wspd_front_probe
   mhgp3v_wspd_front_refus_oracle_trop_grand "l'oracle de multiplicite exige" 2
   --family=uniform --points=4000 --oracle)
