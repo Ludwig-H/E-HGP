@@ -8,6 +8,48 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
+## Observation live — `HEAD=5ddf4a3`, dominance 432 diagnostique
+
+Au 13 août 2026, le `HEAD` observé est
+`5ddf4a3f163d505cb140c5dba9b9481bfc48b8d4`, commit
+`a boundary mutant that picks the same order as the reference is not a gate`.
+Il raccorde le premier probe de dominance 432 et les réponses Q1--Q7 de
+Claude. Le worktree contient ensuite le contre-audit documentaire de ce
+successeur et une microprimitive Claude de groupes coniques encore non
+raccordée ; aucun code n'a été modifié par l'auditeur.
+
+Les sept réponses sont dans
+[`AUDIT_REPONSES_CLAUDE_GEOMETRIE_3D_20260813.md`](AUDIT_REPONSES_CLAUDE_GEOMETRIE_3D_20260813.md).
+Elles gravent notamment une fixture u16 de `13` q2 propres dans une chambre,
+sans plateau ni cosphère à cinq sites ; elles admettent un filtre FP seulement
+avec borne et repli exact ; elles refusent le quotient d'un index de dominance
+par un tri absolu ; elles bornent le lift 4D à un backend de requête ; enfin
+elles rappellent que `d>3S` crée un cœur mais ne ferme aucun bloc sans y compter
+`8/9` IDs uniques.
+
+Le certificat direct du probe dominance a une preuve par concavité qui réduit
+le pire seuil aux neuf paires de rayons de chaque cellule. La primitive ferme un
+intervalle de hauteurs après un top-`h`, ce qui peut alimenter une future vraie
+requête de dominance. Le binaire actuel reste un probe de masse quadratique :
+il parcourt explicitement toutes les paires et trois lanes, et ses trois bitsets
+`C(n,2)` réserveraient environ `468,75 MB` à `50 000`.
+
+Le rejeu Release/CUDA OFF du pin logiciel rend `15/15` CTests
+`mhgp3v_dominance_` en `22,65 s`; cela ne constitue ni une pente ni une
+réception scientifique. Deux P0 sont ouverts : la CLI accepte `smax=34` tout en
+figeant les besoins `10/9/8`, et le juge réfute alors une fermeture q4 ; le
+mutant cible--témoin lit une case hors du préfixe top-`h`, zéro-initialisée, et
+modélise donc un témoin gratuit de hauteur zéro plutôt que la cible.
+Les séries publiées mêlent en outre cutoff direct et radial, donc ne forment
+aucune rampe. Verdict complet et reproducteur :
+[`AUDIT_CONTRE_DOMINANCE_432_5DDF4A3_20260813.md`](AUDIT_CONTRE_DOMINANCE_432_5DDF4A3_20260813.md).
+
+La note de mesures de Claude reste une observation non reçue :
+[`NOTE_CLAUDE_DOMINANCE_432_MESURES_20260813.md`](NOTE_CLAUDE_DOMINANCE_432_MESURES_20260813.md).
+Le probe groupes ouvert après ce pin ne couvre encore ni génération, ni packing
+disjoint, ni caps, ni ledger et n'est pas une deuxième route counter-only.
+GCP non utilisé.
+
 ## Observation live — `HEAD=ffe5b69`, fenêtre raccordée et rejouée
 
 Au 13 août 2026, le `HEAD` observé est

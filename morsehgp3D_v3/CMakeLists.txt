@@ -3447,3 +3447,81 @@ mhgp3v_add_expected_code_test_for(mhgp3v_directional_dominance_probe
 mhgp3v_add_expected_code_test_for(mhgp3v_directional_dominance_probe
   mhgp3v_dominance_plancher_ferme "plancher de fermeture q4" 3
   --points=200 --family=uniform --seed=3 --min-closed-q4=1)
+
+# ---------------------------------------------------------------------------
+# GROUPES CONIQUES : CE QU'AUCUN TEMOIN SEUL NE VOIT.
+#
+# Specification : audits/AUDIT_DEBLOCAGE_COLLECTIF_APRES_FENETRE_20260813.md
+# section 4 — deuxieme des trois voies mises en concurrence.
+#
+# Un temoin PONCTUEL doit etre interieur a toute sphere admissible. Sur une
+# ancre inter-amas, le milieu est vide et aucun site ne tient seul cette
+# contrainte. Un GROUPE de trois peut couvrir tout le pinceau, chaque sphere
+# etant servie par un membre different, et huit groupes DEUX A DEUX DISJOINTS
+# donnent alors huit interieurs distincts dans chaque sphere : la lane q4 meurt.
+#
+# LA MESURE QUI DECIDE est `groupes_seuls` — les candidatures fermees par des
+# groupes et par AUCUN temoin ponctuel. A `n=150`, `eight_clusters` : `1 919` en
+# q4 et `1 282` en q3. Sur `terrain` elle tombe a `9` : les deux certificats
+# sont COMPLEMENTAIRES, la dominance 432 etant la plus forte precisement la ou
+# les groupes ne servent pas.
+# ---------------------------------------------------------------------------
+add_executable(mhgp3v_conic_groups_probe
+  prototype/conic_groups_probe.cpp
+  prototype/spindle_cone_oracle.cpp)
+target_include_directories(mhgp3v_conic_groups_probe PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(mhgp3v_conic_groups_probe PRIVATE mhgp)
+target_compile_options(mhgp3v_conic_groups_probe PRIVATE -Wall -Wextra -Werror)
+
+# La fixture gravee du contre-audit : a=(100,100,100), b=(120,100,100),
+# s1=(2,3,0), s2=(2,-3,3), s3=(2,-3,-3). Le barycentre pondere (1/2,1/4,1/4) est
+# parallele a `d`, donc le groupe couvre ; et AUCUN des trois n'est temoin
+# universel q4. C'est exactement le cas que le certificat ponctuel manque.
+add_test(NAME mhgp3v_groupes_fixture COMMAND mhgp3v_conic_groups_probe --fixture)
+set_tests_properties(mhgp3v_groupes_fixture PROPERTIES
+  PASS_REGULAR_EXPRESSION "fixtures accord=OUI refutees=0")
+
+# LE FALSIFICATEUR PORTE SUR LA CONCLUSION, PAS SUR L'HYPOTHESE. Verifier
+# Cramer ne teste que `d` dans le cone positif. Le theoreme affirme davantage :
+# `G` groupes disjoints donnent `G` interieurs distincts dans CHAQUE sphere
+# admissible. Les centres admissibles sont `(a+b)/2 + t` avec `t.d=0` ; la porte
+# en echantillonne le long de la base entiere du plan, magnitudes de `0` a
+# `1009` et signes des deux cotes, et compte les interieurs stricts. Une seule
+# sphere portant moins de `G` interieurs refuterait le theoreme.
+add_test(NAME mhgp3v_groupes_amas COMMAND mhgp3v_conic_groups_probe
+         --points=120 --family=eight_clusters --seed=3 --judge
+         --min-groupes-seuls=900 --min-triples=30000 --min-ponctuel-seul=900)
+add_test(NAME mhgp3v_groupes_uniform COMMAND mhgp3v_conic_groups_probe
+         --points=120 --family=uniform --seed=3 --judge
+         --min-groupes-seuls=500 --min-triples=30000)
+# Sur `terrain` les groupes n'apportent presque rien : le plancher est ici sur
+# le certificat PONCTUEL, pour que la complementarite soit une porte et non une
+# phrase.
+add_test(NAME mhgp3v_groupes_terrain COMMAND mhgp3v_conic_groups_probe
+         --points=120 --family=terrain --seed=3 --judge
+         --min-triples=20000 --min-ponctuel-seul=3000)
+
+# MUTANTS ARMES. Chacun casse une hypothese du theoreme et le falsificateur des
+# spheres le voit.
+mhgp3v_add_expected_code_test_for(mhgp3v_conic_groups_probe
+  mhgp3v_groupes_mutant_espace_lineaire "MUTANT TUE" 4
+  --points=100 --family=eight_clusters --seed=3 --judge --inject=groupe-espace-lineaire)
+mhgp3v_add_expected_code_test_for(mhgp3v_conic_groups_probe
+  mhgp3v_groupes_mutant_axe_seul "MUTANT TUE" 4
+  --points=100 --family=eight_clusters --seed=3 --judge --inject=groupe-axe-seul)
+mhgp3v_add_expected_code_test_for(mhgp3v_conic_groups_probe
+  mhgp3v_groupes_mutant_determinant_nul "MUTANT TUE" 4
+  --points=100 --family=eight_clusters --seed=3 --judge --inject=groupe-determinant-nul)
+
+# Refus contractuels.
+mhgp3v_add_expected_code_test_for(mhgp3v_conic_groups_probe
+  mhgp3v_groupes_reject_mutant_sans_juge "un mutant sans juge ne prouve rien" 2
+  --points=100 --inject=groupe-axe-seul)
+mhgp3v_add_expected_code_test_for(mhgp3v_conic_groups_probe
+  mhgp3v_groupes_reject_smax "--smax hors du domaine d'enveloppe" 2
+  --points=100 --smax=9223372036854775807)
+mhgp3v_add_expected_code_test_for(mhgp3v_conic_groups_probe
+  mhgp3v_groupes_reject_inconnu "argument inconnu" 2 --points=100 --turbo)
+mhgp3v_add_expected_code_test_for(mhgp3v_conic_groups_probe
+  mhgp3v_groupes_plancher_seuls "plancher de fermetures par groupes seuls" 3
+  --points=100 --family=terrain --seed=3 --min-groupes-seuls=100000000)

@@ -1577,6 +1577,52 @@ membres du census, la boule ni la provenance par ancre. Son audit de réception
 est
 [`AUDIT_SUCCESSEUR_WINDOW_SOURCE_FFE5B69_20260813.md`](audits/AUDIT_SUCCESSEUR_WINDOW_SOURCE_FFE5B69_20260813.md).
 
+### 11.1.1 Ce que la dimension trois autorise sans raccourci combinatoire
+
+La chambre directionnelle ne borne pas le degré q2 par une petite constante :
+une fixture u16 porte treize partenaires propres de rang fermé deux dans une
+chambre, avec normes distinctes et sans cinq sites cosphériques. La finitude de
+la grille donne seulement un plafond combinatoire astronomique. Ni un cap `12`,
+ni une exception de mesure nulle, ni un quotient de PointId par les 48
+symétries ne peut donc servir d'invariant produit.
+
+L'apport exploitable est ailleurs. Dans chacun des neuf triangles canoniques,
+le pire seuil spindle uniforme d'une lane est atteint sur une des neuf paires
+de rayons sommets. Si `x` et `y` sont les hauteurs cible et témoin, et si la
+table de la cellule porte `B,P,C`, le certificat direct est :
+
+$$xP-yB>0\quad\text{et}\quad c(xP-yB)^2>Cx^2,$$
+
+avec `c=2` en q4 et `c=3` en q3. La preuve vient de la concavité séparée du
+prédicat norme--angle sur le produit des deux triangles ; `P` n'est pas un
+minorant indépendant des produits scalaires. Après top-`h` par
+`(ancre,cellule,lane)`, ce certificat ferme un suffixe entier de hauteurs. La
+prochaine ordonnance doit donc faire count--scan/range-report sur ces suffixes,
+pas les recompter par une boucle sur `A times B`.
+
+Le groupe octaédrique partage les neuf tables et le kernel, mais la chambre
+dépend de `x-a` : `canon(x-a)` ne se déduit pas de
+`canon(x)-canon(a)`. Les 48 ordres relatifs ne disparaissent pas par un tri
+absolu. Un lift de `n` points vers `(p,||p||^2)` est autorisé comme index de
+requête linéaire, mais un AABB 4D perd la corrélation quadratique ; il ne remplace
+le LBVH3D à extrema séparables qu'après une ablation visites/bytes/HWM.
+
+Enfin, pour deux blocs séparés, `d>3S` ne fait que construire un cœur commun.
+La fermeture q4/q3 exige encore d'y recevoir respectivement huit/neuf IDs
+uniques strictement intérieurs. Tester d'abord deux fixtures identiques à cœur
+vide puis occupé ; ne promouvoir une WSPD que si le range-count du cœur ferme
+une masse observée. Détails, Q1--Q7 et gates :
+[`AUDIT_REPONSES_CLAUDE_GEOMETRIE_3D_20260813.md`](audits/AUDIT_REPONSES_CLAUDE_GEOMETRIE_3D_20260813.md).
+
+Le premier probe dominance ne reçoit pas encore cette architecture. Il
+énumère toutes les paires, conserve trois bitsets `C(n,2)` et mélange des
+mesures directes/radiales. `smax` doit piloter dynamiquement
+`h=smax+1-q` ou être refusé hors `11` ; le pin actuel ferme à tort sous
+`smax=34`. La gate suivante construit réellement les index, distingue
+`residual_pair_mass` de `residual_node_records`, publie bytes/HWM et exige deux
+pentes au plus `1,35`. Voir
+[`AUDIT_CONTRE_DOMINANCE_432_5DDF4A3_20260813.md`](audits/AUDIT_CONTRE_DOMINANCE_432_5DDF4A3_20260813.md).
+
 La fusion `OR/AND` des orientations ne doit pas matérialiser le résiduel dense.
 Les relations dirigées restent une partition canonique de rectangles ; leur
 intersection avec la transposée est évaluée paresseusement sur les blocs LCA ou

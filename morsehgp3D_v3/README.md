@@ -111,6 +111,26 @@ successeur :
 [`AUDIT_WORKTREE_WINDOW_SOURCE_20260813.md`](audits/AUDIT_WORKTREE_WINDOW_SOURCE_20260813.md) et
 [`AUDIT_SUCCESSEUR_WINDOW_SOURCE_FFE5B69_20260813.md`](audits/AUDIT_SUCCESSEUR_WINDOW_SOURCE_FFE5B69_20260813.md).
 
+Claude a ensuite demandé quelles propriétés propres à la dimension trois
+pouvaient réellement débloquer cette gate. Les réponses ferment sept raccourcis :
+une chambre peut déjà porter treize q2 propres sans plateau, le groupe
+octaédrique partage le code mais pas un tri absolu, le lift 4D reste seulement
+un backend de requête, et un cœur entre amas ne ferme un bloc qu'après le compte
+strict de huit ou neuf IDs. En revanche, le cutoff par sous-cône se réduit
+exactement à neuf paires de rayons et peut fermer un intervalle de hauteurs.
+Voir
+[`AUDIT_REPONSES_CLAUDE_GEOMETRIE_3D_20260813.md`](audits/AUDIT_REPONSES_CLAUDE_GEOMETRIE_3D_20260813.md).
+
+Le premier probe dominance 432 confirme que cette primitive mord, mais pas
+encore avec une ordonnance admissible : il balaie toujours toutes les paires,
+matérialise trois bitsets quadratiques et ses séries mêlent deux cutoffs. Son
+rejeu ciblé rend `15/15`, mais `smax=34` produit un faux prune parce que les
+seuils `10/9/8` restent figés ; le mutant cible--témoin ajoute en réalité une
+hauteur zéro hors du préfixe valide. Ce probe demeure un diagnostic CPU borné,
+pas la route 50 k/G4. Voir la note Claude et son contre-audit :
+[`NOTE_CLAUDE_DOMINANCE_432_MESURES_20260813.md`](audits/NOTE_CLAUDE_DOMINANCE_432_MESURES_20260813.md) et
+[`AUDIT_CONTRE_DOMINANCE_432_5DDF4A3_20260813.md`](audits/AUDIT_CONTRE_DOMINANCE_432_5DDF4A3_20260813.md).
+
 Deux sorties sont distinctes :
 
 | sortie | contenu | portée actuelle |
