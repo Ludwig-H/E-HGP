@@ -457,8 +457,10 @@ il constitue un nouveau snapshot, pas une validation rétroactive de Q6. Le
 contre-audit
 [`AUDIT_CONTRE_AUDIT_SPINDLE_CONE_WORKTREE_20260813.md`](AUDIT_CONTRE_AUDIT_SPINDLE_CONE_WORKTREE_20260813.md)
 admet le lemme des cônes, mais refuse encore le producteur pour une conversion
-`smax` créant un faux prune, un juge incomplet par lane, un résiduel non
-rejouable et deux pentes de travail rouges. Il remplace donc, pour ce successeur
-seulement, l'affirmation historique « aucun producteur » ; le statut
+`smax` créant un faux prune, une cardinalité silencieusement réduite,
+un juge incomplet par lane, un résiduel non rejouable, des portes anchor
+contournables, une ABI CUDA cassée et trois pentes de travail rouges. Il
+remplace donc, pour ce successeur seulement, l'affirmation historique « aucun
+producteur » ; le statut
 `not_claimed`, le NO-GO avant G4 et la priorité au lift collectif `A×B×C`
 demeurent.

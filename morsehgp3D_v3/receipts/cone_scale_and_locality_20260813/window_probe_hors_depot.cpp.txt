@@ -1,0 +1,183 @@
+// MESURE EXPLORATOIRE (hors dépôt) : taille de la fenêtre de localité certifiée.
+//
+// Théorème de localité (NOTE_SOLUTION_LOCALITE_CERTIFIEE_INVERSION, §2) :
+// si toute direction u de S^2 appartient à au moins K calottes strictes
+// C_z(r) = { u : u.v_z > d_z/r }, alors toute boule passant par x et ayant au
+// plus K-1 intérieurs vérifie diam(B) < r.
+//
+// Donc la fenêtre W(x) = { z : |z-x| < r*(x) } contient TOUT support de Source S
+// contenant x, ainsi que tous les intérieurs de leurs boules.
+//
+// r*(x) = max_{cellule C} (K-ieme plus petite valeur de rho_C(z)),
+// rho_C(z) = max_{g sommet de C} |g| |s|^2 / (g.s),  s = z-x, +inf si g.s <= 0.
+//
+// Ce programme MESURE |W(x)| ; il ne certifie rien et n'entre pas dans le dépôt.
+#include <algorithm>
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <string>
+#include <vector>
+
+#include "prototype/cloud_families.hpp"
+
+using mhgp::P3;
+using mhgp3v::CloudFamily;
+
+struct Cell { double g[3][3]; };
+
+// Subdivision de l'octaèdre au niveau m : sommets entiers |gx|+|gy|+|gz| = m.
+static std::vector<Cell> build_cells(int m) {
+  std::vector<Cell> cells;
+  // Une face de l'octaèdre : (sx*i, sy*j, sz*k) avec i+j+k = m.
+  // Triangles de la subdivision barycentrique de cette face.
+  for (int sx = -1; sx <= 1; sx += 2)
+    for (int sy = -1; sy <= 1; sy += 2)
+      for (int sz = -1; sz <= 1; sz += 2) {
+        auto V = [&](int i, int j) {
+          // sommet (i, j, m-i-j) sur la face
+          Cell c{};
+          (void)c;
+          double v[3] = {(double)sx * i, (double)sy * j, (double)sz * (m - i - j)};
+          return std::vector<double>{v[0], v[1], v[2]};
+        };
+        for (int i = 0; i < m; ++i)
+          for (int j = 0; j < m - i; ++j) {
+            // triangle "up"
+            {
+              Cell c{};
+              auto a = V(i, j), b = V(i + 1, j), d = V(i, j + 1);
+              for (int t = 0; t < 3; ++t) { c.g[0][t] = a[t]; c.g[1][t] = b[t]; c.g[2][t] = d[t]; }
+              cells.push_back(c);
+            }
+            // triangle "down"
+            if (j + i + 1 < m) {
+              Cell c{};
+              auto a = V(i + 1, j), b = V(i, j + 1), d = V(i + 1, j + 1);
+              for (int t = 0; t < 3; ++t) { c.g[0][t] = a[t]; c.g[1][t] = b[t]; c.g[2][t] = d[t]; }
+              cells.push_back(c);
+            }
+          }
+      }
+  return cells;
+}
+
+int main(int argc, char** argv) {
+  int n = 4000, m = 4, K = 10, M = 256, seed = 3;
+  std::string fam = "uniform";
+  for (int i = 1; i < argc; ++i) {
+    std::string a = argv[i];
+    auto val = [&](const char* p) -> const char* {
+      return a.rfind(p, 0) == 0 ? a.c_str() + std::strlen(p) : nullptr;
+    };
+    if (const char* s = val("--points=")) n = atoi(s);
+    else if (const char* s2 = val("--grid=")) m = atoi(s2);
+    else if (const char* s3 = val("--K=")) K = atoi(s3);
+    else if (const char* s4 = val("--bank=")) M = atoi(s4);
+    else if (const char* s5 = val("--seed=")) seed = atoi(s5);
+    else if (const char* s6 = val("--family=")) fam = s6;
+  }
+  CloudFamily f = CloudFamily::kUniform;
+  if (fam == "terrain") f = CloudFamily::kTerrain;
+  else if (fam == "eight_clusters") f = CloudFamily::kEightClusters;
+  else if (fam == "scanline_overlap_multiecho") f = CloudFamily::kScanlineOverlapMultiecho;
+  const int coord = mhgp3v::cloud_family_default_coord(f, n);
+  const std::vector<P3> pts = mhgp3v::make_family_cloud(f, n, coord, seed);
+
+  const std::vector<Cell> cells = build_cells(m);
+  std::vector<double> gn((std::size_t)cells.size() * 3);
+  for (std::size_t c = 0; c < cells.size(); ++c)
+    for (int t = 0; t < 3; ++t) {
+      const double* g = cells[c].g[t];
+      gn[c * 3 + (std::size_t)t] = std::sqrt(g[0] * g[0] + g[1] * g[1] + g[2] * g[2]);
+    }
+
+  std::vector<std::pair<double, int>> d2(n);
+  std::vector<double> rho;
+  std::vector<long long> windows;
+  long long uncertified = 0, window_sum = 0, window_max = 0;
+  long long open_sum = 0;
+  std::vector<long long> hist, open_hist, wclosed;
+
+  for (int x = 0; x < n; ++x) {
+    for (int z = 0; z < n; ++z) {
+      const double dx = (double)pts[z].x - pts[x].x;
+      const double dy = (double)pts[z].y - pts[x].y;
+      const double dz = (double)pts[z].z - pts[x].z;
+      d2[z] = {dx * dx + dy * dy + dz * dz, z};
+    }
+    const int mm = std::min(M + 1, n);
+    std::partial_sort(d2.begin(), d2.begin() + mm, d2.end());
+    // d2[0] est x lui-meme (distance 0)
+    const double d_bank = std::sqrt(d2[(std::size_t)mm - 1].first);  // rayon de la banque
+
+    double rstar = 0.0;
+    bool exact = true;
+    long long open_cells = 0;   // cellules jamais couvertes par K calottes
+    double rstar_closed = 0.0;  // r* restreint aux cellules couvertes
+    for (std::size_t c = 0; c < cells.size(); ++c) {
+      rho.clear();
+      for (int t = 1; t < mm; ++t) {
+        const int z = d2[(std::size_t)t].second;
+        const double s[3] = {(double)pts[z].x - pts[x].x, (double)pts[z].y - pts[x].y,
+                             (double)pts[z].z - pts[x].z};
+        const double s2 = d2[(std::size_t)t].first;
+        double worst = 0.0;
+        bool ok = true;
+        for (int v = 0; v < 3; ++v) {
+          const double* g = cells[c].g[v];
+          const double gs = g[0] * s[0] + g[1] * s[1] + g[2] * s[2];
+          if (gs <= 0.0) { ok = false; break; }
+          const double r = gn[c * 3 + (std::size_t)v] * s2 / gs;
+          if (r > worst) worst = r;
+        }
+        if (ok) rho.push_back(worst);
+      }
+      if ((int)rho.size() < K) { exact = false; ++open_cells; continue; }
+      std::nth_element(rho.begin(), rho.begin() + (K - 1), rho.end());
+      const double rc = rho[(std::size_t)K - 1];
+      if (rc > d_bank) { ++open_cells; continue; }  // non tranchee par la banque
+      if (rc > rstar_closed) rstar_closed = rc;
+      if (rc > rstar) rstar = rc;
+    }
+    open_sum += open_cells;
+    if (open_cells > 0) open_hist.push_back(open_cells);
+    rstar = rstar_closed;
+    exact = (open_cells == 0);
+    // La banque ne certifie r* que si r* <= d_bank : au-dela, un point hors
+    // banque pourrait abaisser la K-ieme valeur. Sinon la mesure est refusee.
+    if (!exact) ++uncertified;
+    const double r2 = rstar * rstar;
+    long long w = 0;
+    for (int z = 0; z < n; ++z) {
+      const double dx = (double)pts[z].x - pts[x].x;
+      const double dy = (double)pts[z].y - pts[x].y;
+      const double dz = (double)pts[z].z - pts[x].z;
+      if (dx * dx + dy * dy + dz * dz <= r2) ++w;
+    }
+    windows.push_back(w);
+    window_sum += w;
+    window_max = std::max(window_max, w);
+    wclosed.push_back(w);
+    if (exact) hist.push_back(w);
+  }
+  std::sort(hist.begin(), hist.end());
+  std::sort(open_hist.begin(), open_hist.end());
+  std::sort(wclosed.begin(), wclosed.end());
+  auto qq = [](const std::vector<long long>& v, double p) -> long long {
+    if (v.empty()) return -1;
+    return v[(std::size_t)(p * (double)(v.size() - 1))];
+  };
+  std::printf(
+      "famille=%-26s n=%5d K=%d cellules=%4zu banque=%3d | ancres_totalement_fermees=%.1f%% "
+      "| cellules_ouvertes/ancre moy=%.1f p50=%lld p90=%lld max=%lld "
+      "| fenetre_des_directions_fermees p50=%lld p90=%lld p99=%lld max=%lld\n",
+      fam.c_str(), n, K, cells.size(), M,
+      100.0 * (double)(n - uncertified) / (double)n, (double)open_sum / (double)n,
+      qq(open_hist, 0.50), qq(open_hist, 0.90), open_hist.empty() ? 0 : open_hist.back(),
+      qq(wclosed, 0.50), qq(wclosed, 0.90), qq(wclosed, 0.99),
+      wclosed.empty() ? 0 : wclosed.back());
+  (void)window_sum; (void)window_max;
+  return 0;
+}

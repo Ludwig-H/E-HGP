@@ -657,7 +657,8 @@ un certificat fail-open à mesurer.
 Une spécialisation concrète construit par requête k-NN exacte une banque bornée
 `Z_a` des voisins les plus proches de chaque endpoint, puis classe des nœuds
 partenaires entiers par les huit coins de ces cônes. Elle ne balaie jamais `Z_a` par
-`PairId`. Huit témoins ferment q4 et neuf ferment q3 à `smax=11`; un échec de
+`PairId`. Huit témoins ferment q4 et neuf ferment q3 à `smax=11`;
+un prune simultané des trois lanes exige en plus dix témoins q2. Un échec de
 la banque conserve le nœud ou le divise sous ce budget et finit en bloc sur le
 chemin complet. Le
 demi-angle mesuré depuis l'endpoint n'est qu'asymptotique et garde une condition
@@ -668,9 +669,12 @@ coût `M*C(n,2)` est interdit.
 
 Le contre-audit du premier producteur ponctuel confirme le lemme mais refuse
 son ordonnance industrielle. Sur une rampe mono-ELF
-`n=500/1 000/2 000`, banques 48 et 96, aucune des séries `uniform` ou
-`eight_clusters` ne ferme deux pentes de travail `<=1,35`; les dernières
-pentes de tests de coins valent encore `1,452` et `1,438` à banque 96. Le
+`n=500/1 000/2 000/4 000`, banques 48 et 96, aucune des séries
+`uniform` ou `eight_clusters` ne ferme deux pentes de travail
+`<=1,35`; à banque 96, les troisièmes pentes restent
+`1,591/1,600` pour les visites cible,
+`1,524/1,625` pour les tests témoin--nœud et
+`1,419/1,602` pour les candidats. Le
 chemin fait une requête k-NN et une DFS cible pour chacun des `n` endpoints :
 une baisse de la seule masse candidate, même avec banque 256, ne reçoit pas son
 coût. La primitive reste oracle/classifieur terminal jusqu'au lift collectif.
@@ -707,15 +711,30 @@ norme carrée d'une application affine. Le bloc est donc `ALL-W3` sous
 exactement, pas des décisions `iff` : les deux extrema peuvent provenir de
 triples différents et un échec reste `UNKNOWN`.
 
+Un fallback plus serré est en revanche un `iff ALL`. À `a,z`
+fixes, la fibre admissible en `b` est le cône cible convexe ; à
+`b,z` fixes, la symétrie donne le même cône en `a` ; à
+`a,b` fixes, la fibre en `z` est le spindle convexe. Le
+prédicat est donc convexe séparément dans les trois variables. Si les
+`8^3` triples de coins sont strictement admis, interpoler
+successivement `C`, `B` puis `A` admet tout le
+produit ; la réciproque est immédiate. L'échec de ces 512 tests signifie
+« pas ALL », jamais `NONE`.
+
 Le self-join `A times B` est canonique et partage une frontière `C` persistante.
 Scinder `A/B` partitionne la masse de paires ; scinder `C` partitionne seulement
 la recherche des témoins et ne recrédite jamais cette masse. Les reçus de plages
 sont séparés par lane, hérités sans retour à la racine, et toute intersection
 de `C` avec les identifiants de `A/B` force la descente jusqu'à exclusion des
 endpoints. La broad phase emploie `Hmin` puis des bornes d'intervalles de `R` ;
-les `512` triples restent oracle/fallback exact, jamais coût silencieux par
-état. Sous u16 et `n<=50 000`, `H` tient dans `i64`, mais `R` et les carrés
+le test direct des `512` triples reste un fallback `ALL` exact
+et compté, jamais un coût silencieux par état. Sous u16 et
+`n<=50 000`, `H` tient dans `i64`, mais `R` et les carrés
 comparés exigent une promotion avant multiplication vers au moins `u128`.
+L'orientation du self-join est géométrique et canonique ; l'union dédupliquée
+des banques des deux endpoints ordonne la recherche sans dépendre du
+`PointId`. La lane q2 garde sa cascade Yao/affine/dual séparée et ne
+retarde pas les morts q3/q4.
 
 Sur CUDA, cette promotion doit être un prédicat explicite à deux limbs, pas un
 `__int128` hôte annoté : multiplication 64 fois 64, mot haut, petit coefficient

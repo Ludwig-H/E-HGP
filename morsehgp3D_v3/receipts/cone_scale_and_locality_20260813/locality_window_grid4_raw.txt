@@ -1,0 +1,14 @@
+famille=uniform n=1000 coord=100 K=10 cellules=128 banque=256 | certifies=100 non_certifies=900 (90.00%) | fenetre moy=232.7 p50=236 p90=252 p99=255 max=255
+famille=uniform n=2000 coord=125 K=10 cellules=128 banque=256 | certifies=173 non_certifies=1827 (91.35%) | fenetre moy=233.6 p50=238 p90=253 p99=255 max=256
+famille=uniform n=4000 coord=158 K=10 cellules=128 banque=256 | certifies=401 non_certifies=3599 (89.97%) | fenetre moy=237.2 p50=240 p90=254 p99=256 max=256
+famille=eight_clusters n=1000 coord=200 K=10 cellules=128 banque=256 | certifies=75 non_certifies=925 (92.50%) | fenetre moy=144.5 p50=125 p90=187 p99=243 max=245
+famille=eight_clusters n=2000 coord=251 K=10 cellules=128 banque=256 | certifies=311 non_certifies=1689 (84.45%) | fenetre moy=231.1 p50=239 p90=250 p99=251 max=253
+famille=eight_clusters n=4000 coord=317 K=10 cellules=128 banque=256 | certifies=309 non_certifies=3691 (92.28%) | fenetre moy=229.8 p50=233 p90=253 p99=256 max=256
+famille=terrain n=1000 coord=158 K=10 cellules=128 banque=256 | certifies=0 non_certifies=1000 (100.00%) | fenetre moy=0.0 p50=-1 p90=-1 p99=-1 max=0
+famille=terrain n=2000 coord=223 K=10 cellules=128 banque=256 | certifies=0 non_certifies=2000 (100.00%) | fenetre moy=0.0 p50=-1 p90=-1 p99=-1 max=0
+famille=terrain n=4000 coord=316 K=10 cellules=128 banque=256 | certifies=0 non_certifies=4000 (100.00%) | fenetre moy=0.0 p50=-1 p90=-1 p99=-1 max=0
+famille=scanline_overlap_multiecho n=1000 coord=200 K=10 cellules=128 banque=256 | certifies=0 non_certifies=1000 (100.00%) | fenetre moy=0.0 p50=-1 p90=-1 p99=-1 max=0
+famille=scanline_overlap_multiecho n=2000 coord=282 K=10 cellules=128 banque=256 | certifies=1 non_certifies=1999 (99.95%) | fenetre moy=237.0 p50=237 p90=237 p99=237 max=237
+famille=scanline_overlap_multiecho n=4000 coord=400 K=10 cellules=128 banque=256 | certifies=0 non_certifies=4000 (100.00%) | fenetre moy=0.0 p50=-1 p90=-1 p99=-1 max=0
+
+[exited with code 0]

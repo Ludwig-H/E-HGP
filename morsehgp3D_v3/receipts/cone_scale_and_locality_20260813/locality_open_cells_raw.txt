@@ -1,0 +1,7 @@
+build=0
+famille=uniform                    n= 2000 K=10 cellules= 512 banque=512 | ancres_totalement_fermees=47.1% | cellules_ouvertes/ancre moy=43.3 p50=78 p90=157 max=247 | fenetre_des_directions_fermees p50=473 p90=509 p99=512 max=512
+famille=eight_clusters             n= 2000 K=10 cellules= 512 banque=512 | ancres_totalement_fermees=30.6% | cellules_ouvertes/ancre moy=42.6 p50=57 p90=120 max=209 | fenetre_des_directions_fermees p50=487 p90=510 p99=512 max=512
+famille=terrain                    n= 2000 K=10 cellules= 512 banque=512 | ancres_totalement_fermees=0.0% | cellules_ouvertes/ancre moy=63.8 p50=52 p90=132 max=262 | fenetre_des_directions_fermees p50=504 p90=511 p99=512 max=513
+famille=scanline_overlap_multiecho n= 2000 K=10 cellules= 512 banque=512 | ancres_totalement_fermees=2.6% | cellules_ouvertes/ancre moy=57.0 p50=34 p90=138 max=335 | fenetre_des_directions_fermees p50=502 p90=511 p99=512 max=513
+
+[exited with code 0]

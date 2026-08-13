@@ -53,13 +53,28 @@ trigonométrie. Vient ensuite le replay local des conflits de la cutting. Voir
 Le successeur worktree implémente cette primitive ponctuelle et passe ses
 `30/30` portes ciblées, mais il n'est pas reçu : un `smax` hors largeur ferme
 faussement toute la masse avec l'accord du juge, les décisions q2/q3/q4 ne sont
-pas jugées séparément et les rampes banques 48/96 gardent deux pentes rouges.
+pas jugées séparément, la cardinalité demandée peut être réduite silencieusement
+et les rampes banques 48/96 gardent deux pentes rouges. Le résiduel sous cap
+n'est pas rejouable et l'ABI CUDA anchor est actuellement incohérente avec
+`density_guard`.
 La DFS par endpoint reste donc un oracle borné ; le prochain front industriel
 est le self-join collectif `A_endpoint times B_partner times C_witness`, avant
 toute mesure G4. Voir
 [`AUDIT_CONTRE_AUDIT_SPINDLE_CONE_WORKTREE_20260813.md`](audits/AUDIT_CONTRE_AUDIT_SPINDLE_CONE_WORKTREE_20260813.md).
 
 ## Contrat visé
+
+Le contrat courant est `n=50 000`. L'objectif industriel qui le suit est de
+traiter sur G4 des nuages de **dizaines de millions de points**. Ce second
+horizon n'est pas une extrapolation du premier : il élimine dès aujourd'hui des
+routes qui sembleraient acceptables à 50 000. Une ordonnance en `n^{1,8}` y est
+absurde de plusieurs ordres de grandeur, et toute structure résidente
+proportionnelle à la sortie totale — environ `480` supports par point, donc
+quelques milliards à `10^7` — y devient impossible. Le `DensePointIndex:u16`
+est de même une limite d'implémentation, pas de mathématiques, et doit être
+nommée comme telle. Les décisions d'architecture se jugent donc aux deux
+horizons ; la route proposée et son séquencement sont dans
+[`NOTE_CLAUDE_ROUTE_G4_50K_PUIS_10M_20260813.md`](audits/NOTE_CLAUDE_ROUTE_G4_50K_PUIS_10M_20260813.md).
 
 Deux sorties sont distinctes :
 

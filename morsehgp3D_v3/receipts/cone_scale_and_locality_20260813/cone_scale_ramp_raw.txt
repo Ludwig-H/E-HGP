@@ -1,0 +1,12 @@
+uniform n=1000 code=0 wall=1.863695 surv=766330 fermee=232670 cand_pairs=380939 target_visits=95368 wtests=9118007 corners=22903448 knn_visits=95368
+uniform n=2000 code=0 wall=1.796744 surv=2735924 fermee=1262076 cand_pairs=1369645 target_visits=203486 wtests=29143814 corners=70496422 knn_visits=203486
+uniform n=4000 code=0 wall=8.251141 surv=9824615 fermee=6171385 cand_pairs=4920845 target_visits=473676 wtests=99552271 corners=232074723 knn_visits=473676
+uniform n=8000 code=0 wall=26.677900 surv=35482772 fermee=28509228 cand_pairs=17831971 target_visits=1029602 wtests=349231295 corners=775515430 knn_visits=1029602
+uniform n=16000 code=0 wall=70.760899 surv=125530393 fermee=130453607 cand_pairs=63149448 target_visits=2114312 wtests=1147205897 corners=2395210838 knn_visits=2114312
+eight_clusters n=1000 code=0 wall=0.404560 surv=624325 fermee=374675 cand_pairs=311008 target_visits=61114 wtests=6505165 corners=15177427 knn_visits=61114
+eight_clusters n=2000 code=0 wall=1.245143 surv=2158463 fermee=1839537 cand_pairs=1069943 target_visits=150810 wtests=20641781 corners=45552676 knn_visits=150810
+eight_clusters n=4000 code=0 wall=4.792301 surv=7849688 fermee=8146312 cand_pairs=3900545 target_visits=401094 wtests=69819004 corners=149718107 knn_visits=401094
+eight_clusters n=8000 code=0 wall=14.694566 surv=28612440 fermee=35379560 cand_pairs=14278579 target_visits=954896 wtests=250201255 corners=522788745 knn_visits=954896
+eight_clusters n=16000 code=0 wall=48.193305 surv=102128735 fermee=153855265 cand_pairs=51032119 target_visits=1849538 wtests=791015396 corners=1506366478 knn_visits=1849538
+
+[exited with code 0]

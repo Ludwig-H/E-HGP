@@ -23,10 +23,14 @@ Le cône cible ponctuel est mathématiquement admis : ses comparaisons entières
 q3/q4, la porte `ALL` par huit coins et le rejet `NONE` sont exacts ou
 fail-open dans le profil u16. Deux rejeux ciblés courants rendent `30/30`
 CTests `mhgp3v_cone_` en `5,97 s` puis `9,41 s` sous des charges différentes.
+La configuration live inventorie `603` CTests ; ces temps ciblés ne
+qualifient aucune performance.
 Ce vert ne reçoit cependant pas le producteur :
 
 - `smax=9223372036854775807` ferme faussement `380/380` paires sans test,
   avec code zéro, parce que le sujet et le juge partagent le cast vers `int` ;
+- `--points=100 --coord=2` retourne code zéro tout en jugeant seulement
+  huit points ;
 - le juge compare seulement la conjonction des morts q2/q3/q4, et ne voit pas
   une fausse fermeture isolée d'une lane ;
 - aucun CTest ne fait mordre les caps et les deux scalaires résiduels ne sont
@@ -44,8 +48,11 @@ configuré, deux pentes vertes, des caps d'octets et le payload officiel. Le
 contre-audit complet et l'ordre de reprise remis à Claude sont dans
 [`AUDIT_CONTRE_AUDIT_SPINDLE_CONE_WORKTREE_20260813.md`](AUDIT_CONTRE_AUDIT_SPINDLE_CONE_WORKTREE_20260813.md).
 
-Aucune session GCP n'a été lancée pour ce delta et aucun résultat device n'est
-reçu.
+Plusieurs portes `anchor` à planchers restent contournables par
+`PASS_REGULAR_EXPRESSION`. La source CUDA anchor omet en outre le
+nouvel argument `density_guard` dans ses appels et son ABI ; elle
+n'est pas compilable telle quelle. Aucune session GCP n'a été lancée pour ce
+delta et aucun résultat device n'est reçu.
 
 ## Pin commité antérieur au delta spindle — `HEAD=2a205f3`
 
