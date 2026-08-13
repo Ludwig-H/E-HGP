@@ -18,6 +18,17 @@ jamais réception.
 - [`AUDIT_ETAT_COURANT.md`](AUDIT_ETAT_COURANT.md) est l'unique verdict mutable :
   il distingue le `HEAD`, le delta éventuel du worktree, les empreintes utiles,
   les contre-exemples, les tests qualifiables et les portes ouvertes.
+- [`AUDIT_REPONSE_TRIPLETS_AIGUS_4CE3618_20260813.md`](AUDIT_REPONSE_TRIPLETS_AIGUS_4CE3618_20260813.md)
+  répond aux trois questions live de Claude : la caractérisation aiguë est
+  correcte, mais le certificat par distance maximale au hull est identiquement
+  vide puisque le hull contient les deux endpoints. L'empilement `O(s^6 n)` ne
+  vaut conditionnellement que sur des cellules dyadiques sans raffinement des
+  `MIXED`; aucune implémentation de ce prune n'est autorisée.
+- [`AUDIT_CORRECTION_FOLD_STREAM_REGULIER_4CE3618_20260813.md`](AUDIT_CORRECTION_FOLD_STREAM_REGULIER_4CE3618_20260813.md)
+  corrige le sink output-bearing : un record régulier porte naissance et coface
+  selon `r=|I_B union S|`, le census conserve les IDs intérieurs, les runs sont
+  scellés avant tout commit et une MSF ne remplace ni coverage, gateways,
+  verticales ni complétude de source.
 - [`AUDIT_REPONSE_RETRACTATION_S2_K_5113FF2_20260813.md`](AUDIT_REPONSE_RETRACTATION_S2_K_5113FF2_20260813.md)
   répond aux deux questions live de Claude : l'OR de deux `ALL` sûrs est reçu
   sans double comptage, mais son juge ne couvre pas encore le fallback ; deux

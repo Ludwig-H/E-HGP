@@ -27,6 +27,15 @@ Le verdict lié au `HEAD` et au worktree est tenu uniquement dans
 [`AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md). Ne déduire aucun état
 live d'une note datée, d'un message de commit ou du seul passage d'un CTest.
 
+Au pin `4ce3618`, la nouvelle décomposition q3 contient une bonne
+caractérisation des triangles aigus mais un certificat sans rappel : comme le
+hull testé contient les deux endpoints les plus proches, sa distance maximale
+à tout `z` est toujours au moins `Dmin/2`. La stricte annoncée ne peut donc
+jamais passer et son échec ne vaut jamais `NONE`. Ne pas l'implémenter. Une
+partition par cellules dyadiques peut seulement rester une ablation du futur
+`EdgeActiveFormCounter-v0`. Preuve et fixture :
+[`AUDIT_REPONSE_TRIPLETS_AIGUS_4CE3618_20260813.md`](audits/AUDIT_REPONSE_TRIPLETS_AIGUS_4CE3618_20260813.md).
+
 Au pin `5113ff2`, la disjonction du masque central et du fallback est
 mathématiquement sûre parce que le second remplace seulement un verdict
 `MIXED`; leurs populations ne doivent jamais être additionnées. Le juge live

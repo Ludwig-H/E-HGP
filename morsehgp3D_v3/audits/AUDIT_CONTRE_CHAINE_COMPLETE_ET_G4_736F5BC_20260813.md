@@ -55,8 +55,9 @@ hw_kept = max sur les paires (a,b) du cardinal de kept(a,b)
 ```
 
 Pour raccorder le reporter au producteur existant, la fenêtre utile est au
-contraire l'ensemble `E_q(a)` des **seconds endpoints `b>a`** dont la paire
-orientée n'a pas été fermée par `h_q=smax+1-q` groupes projectifs disjoints :
+contraire l'ensemble `E_q(a)` des seconds endpoints de
+`GenerationRank=(Morton48,PointId)` supérieur dont la paire n'a pas été fermée
+par `h_q=smax+1-q` groupes projectifs disjoints :
 
 ```text
 sum_E_q = somme sur les endpoints a du cardinal de E_q(a)
@@ -78,7 +79,7 @@ Il ne peut donc recouper ni confirmer `kept`.
 
 La discordance comporte même un facteur deux avant toute géométrie : ce
 `sum_N` additionne les deux degrés de chaque paire non ordonnée, tandis que
-`E_q(a)` conserve seulement l'orientation canonique `a<b`. Sous cette seule
+`E_q(a)` conserve seulement une orientation canonique. Sous cette seule
 correction, les moyennes annoncées `477,6 / 481,6 / 528,6` deviendraient
 `238,8 / 240,8 / 264,3` endpoints par owner, toujours sans devenir une fenêtre
 projective. Elles ne recoupent donc pas `hw_kept=446/474`, même comme simple
@@ -94,10 +95,12 @@ Cette notation corrige aussi une ambiguïté de nos directives antérieures.
 se branche pas sur `anchor_source`, dont l'owner est l'arête de longueur
 maximale, avec tie-break lexicographique. La route choisie emploie donc
 `E_q(a)` : pour tout support vrai `S`, si son arête maximale canonique est
-`(u,v)` avec `u<v`, alors `v` doit appartenir à `E_q(u)`. Les autres sommets de
-`S` sont générés ensuite par les formes de lentille. Un certificat projectif
-peut fermer `(u,v)` sans savoir si cette paire sera finalement owner, puisqu'il
-tue toute sphère passant par les deux endpoints.
+`{u,v}`, son endpoint de plus grand `GenerationRank` doit appartenir à la
+fenêtre de l'autre. Les autres sommets de `S` sont générés ensuite par les
+formes de lentille. `PairKey` et le tie-break owner restent fondés sur les
+`PointId` non orientés. Un certificat projectif peut fermer `{u,v}` sans savoir
+si cette paire sera finalement owner, puisqu'il tue toute sphère passant par
+les deux endpoints.
 
 ## 3. Le moteur courant est `AnchorLensPairSource`, pas `LocalShallowBall`
 
@@ -260,6 +263,12 @@ Elle ne borne ni les couples cross-bundle réellement visités `J`, ni les
 `C(t,2)` supports. Les concurrences restent donc une sortie réelle à regrouper,
 jamais à développer silencieusement.
 
+Sous les hypothèses du constructeur de niveaux reçu, la cible de travail par
+arête reste
+`O(m*k^2 + m*alpha(m)*log(m) + |V| + J + H)`, puis se somme sur les arêtes
+ouvertes. C'est cette décomposition, les opérations de segments et la HWM qui
+sont gatées ; les bornes de cardinal de `V/I` ne sont pas un temps déterministe.
+
 ABI minimale du remplacement :
 
 ```text
@@ -315,6 +324,7 @@ ProjectiveCreditBank avec vrais PointId
   -> raffinement des seules chambres ouvertes en 9 sous-cellules
   -> OpenEdgeSpan q4 dirigé et continuation fail-open
   -> EdgeWindow E_4(a)
+  -> EdgeActiveFormCounter dual-tree et M=sum m_ab
   -> source shallow par arête survivante
 ```
 
@@ -322,8 +332,10 @@ Le premier compteur doit publier `sum_a|E_4(a)|`, `max|E_4(a)|`, spans,
 tâches, activations, tests Andrew, octets et HWM. Ce vert est nécessaire mais
 pas suffisant pour le shallow : chaque arête ouverte possède encore `m_ab`
 formes actives. Le compteur suivant publie
-`M=sum_(a,b in E_4)m_ab`, tâches de la relation arête×site, maximum par arête,
-octets et HWM, sans développer `E_4×PointId`. Deux pentes physiques rouges dans
+`M=sum_(a,b in E_4)m_ab`, tests de nœuds, blocs factorisés, hits ponctuels,
+tâches de la relation arête×site, maximum par arête, octets et HWM. L'absence de
+produit `E_4×PointId` est l'objectif d'un dual-tree exact `(EdgeSpan,CNode)`, pas
+un fait acquis avant sa porte. Deux pentes physiques rouges dans
 l'un ou l'autre compteur arrêtent cette route avant CUDA. Un vert q4 autorise le
 shallow q4, puis q3/q2 ; il ne qualifie pas encore le contrat.
 
@@ -347,15 +359,17 @@ final ; un quantum ou overflow sérialisable produit une continuation.
 
 Si `PWC0-A` produit une fenêtre sparse mais que ses lancements racine ou ses
 tâches dominent, `PWC0-B` universalise les mêmes crédits sur un `ANode` et fait
-une jointure `ANode x BNode` à graine unique. Pour un carrier de rang trois,
-le signe du déterminant et les numérateurs de Cramer sont affines en l'ancre et
-se vérifient aux huit coins ; l'activation emploie le minimum de marge et le
-maximum de norme sur ces coins. Les mêmes witness IDs, leur disjonction, la
-cellule half-open commune à toutes les différences `B-A`, les H2 uniformes et la
-hauteur minimale font partie de la preuve. Les rangs un/deux ou un signe non
-uniforme restent ouverts au P0. `PWC0-B` vise `anchor_root_seeds=1` au moyen
-d'une récursion root×root canonique ; il ne doit pas être une précondition qui
-retarde le falsificateur feuille.
+une jointure `ANode x BNode` à graine unique. Comme l'ancre **et** la cible
+varient, huit coins de `ANode` seuls ne suffisent pas. Un vérificateur
+rectangulaire exact classe tout `A×B` : jusqu'à `8×8` couples de coins seulement
+pour les formes dont la multi-affinité est prouvée, et des extrema dédiés pour
+les autres. Les mêmes witness IDs, leur disjonction, la cellule half-open commune
+à toutes les différences `B-A`, le cône, les H2 et la hauteur minimale font
+partie de la preuve. Les rangs un/deux, un signe non uniforme ou une borne non
+reçue restent ouverts au P0. `PWC0-B` vise `anchor_root_seeds=1` au moyen d'une
+récursion root×root canonique ; `rect_tasks`, splits `A/B` et prédicats larges
+restent bloquants. Il ne doit pas être une précondition qui retarde le
+falsificateur feuille.
 
 La banque bornée est propositionnelle. Une fenêtre dense à `P=96` réfute cette
 configuration, pas tout certificat projectif imaginable. Le reçu publie donc
@@ -491,12 +505,17 @@ Pour le code actuel, aucune rampe longue : `eight_clusters n=100/200/500` le
 réfute déjà. Pour un nouveau jalon :
 
 1. fixtures et oracle exhaustif sur petits `n` ;
-2. ablation CPU `1500/3000/6000` pour détecter immédiatement une croissance
-   dense et recevoir le fold streamé ;
-3. seulement si tous les compteurs physiques restent admis, rampe
-   `12500/25000/50000` sur `uniform` et `eight_clusters`, avec deux pentes
-   consécutives sur tâches, événements, `BallKey`, census, octets et HWM ;
-4. seulement après ce vert, kernel G4 puis trente répétitions chaudes à `50000`
+2. falsification `1000/2000/4000` avec arrêt sur plafond physique pour le
+   reporter feuille, puisqu'il part de `n` graines racine ;
+3. gate objet par objet : reporter sur `E_4`, banque, visites de cibles,
+   classifications, splits, continuations et HWM ; relation active sur `M`,
+   tests de nœuds, blocs, hits et HWM ; shallow sur `V,J,H`, opérations de
+   segments et HWM. Chaque objet possède son cap absolu et son p95, sans exiger
+   prématurément le fold des étages suivants ;
+4. seulement si chaque objet reste admis, rampe `12500/25000/50000` sur les
+   cinq familles et plusieurs graines, avec deux pentes consécutives pour
+   chaque métrique dominante ;
+5. seulement après ce vert, kernel G4 puis trente répétitions chaudes à `50000`
    du même payload officiel, avec p50/p95/max/MAD.
 
 Une pente sur deux points ne reçoit rien. Une pente `<=1,35` est nécessaire,
@@ -595,3 +614,10 @@ donc pas les nouvelles fermetures du fallback. Ce ratio réfute son intégration
 comme prochain levier source.
 Conserver le helper comme ablation ou fast path futur ; ne pas le porter sur
 CUDA et ne pas retarder `BallFormToBallEvent-v0`/`PWC0-A`.
+
+La porte confirme ce décalage : les cinq CTests WSPD sans fallback passent en
+`1,18 s`, tandis que leur commande de juge enrichie de `--fallback` rend
+`exit=1` et `2864` désaccords à `n=1200`. Le juge recompte uniquement les
+`PointId` centraux ; ce rouge ne réfute donc pas la sûreté du classifieur
+complet, mais prouve que le CTest vert n'exerce pas la nouvelle route et que le
+replay n'est plus celui du sujet.

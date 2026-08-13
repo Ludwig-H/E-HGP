@@ -2295,12 +2295,14 @@ sphère passant par `a,b` possède au moins `h_q` intérieurs distincts ; aucun
 support pertinent d'arité `q` ne peut contenir les deux points.
 
 Le certificat ferme une **paire**, indépendamment du fait qu'elle devienne ou
-non l'owner d'un support futur. Pour raccorder cette propriété au générateur
-déjà reçu, chaque paire non ordonnée est orientée une seule fois par `a<b` et la
-fenêtre calculable est :
+non l'owner d'un support futur. L'orientation d'énumération est donc libre. La
+choisir par `GenerationRank=(Morton48,PointId)`, et non par le seul `PointId`,
+rend toutes les cibles de rang supérieur contiguës dans le `PointTree`. Pour une
+paire non ordonnée, poser `a=argmin GenerationRank` et
+`b=argmax GenerationRank`, puis :
 
 ```text
-E_q(a) = { b : PointId(b)>PointId(a)
+E_q(a) = { b : GenerationRank(b)>GenerationRank(a)
                et aucun suffixe projectif reçu ne ferme (a,b)
                avec h_q crédits disjoints et rejouables }.
 ```
@@ -2308,9 +2310,11 @@ E_q(a) = { b : PointId(b)>PointId(a)
 Tout état `OPEN`, `MIXED`, `UNDERFULL`, capé, dégénéré ou sans continuation
 reçue appartient à `E_q(a)`. Ce n'est ni l'ensemble des vrais co-sommets, ni un
 owner attaché à une paire nue. L'invariant exact porte sur le support complet :
-si son arête de longueur maximale canonique est `(u,v)`, avec tie-break par
-`PairId` et `u<v`, alors `v` appartient à `E_q(u)`. Sinon les crédits de la
-paire imposeraient trop d'intérieurs à la sphère même de ce support. Ses autres
+si son arête de longueur maximale canonique est l'ensemble `{u,v}`, alors son
+endpoint de plus grand `GenerationRank` appartient à la fenêtre ancrée sur
+l'autre endpoint. `PairKey=(min PointId,max PointId)` et le tie-break de l'owner
+scientifique restent inchangés et non orientés. Sinon les crédits de la paire
+imposeraient trop d'intérieurs à la sphère même de ce support. Ses autres
 sommets sont générés par la lentille de cette arête. Ils n'ont pas à appartenir
 à une fenêtre par owner minimal.
 
@@ -2319,6 +2323,7 @@ Le pipeline source candidat est donc :
 ```text
 ProjectiveCreditBank propositionnelle
   -> CanonicalEdgeWindowReporter et EdgeWindow E_q(a) en OpenEdgeSpans
+  -> EdgeActiveFormCounter dual-tree, M=sum m_ab
   -> formes de lentille et niveaux shallow locaux par arête ouverte
   -> ShallowEvent et bundle incident
   -> BallKey canonique/RLE
@@ -2372,13 +2377,16 @@ restent deux descripteurs distincts.
 
 Si `PWC0-A` reçoit une fenêtre sparse mais que ses `n` graines racine ou ses
 tâches dominent, `PWC0-B` universalise les mêmes preuves sur un `ANode` et
-traverse `ANode×BNode` depuis une graine unique. Les carriers de rang trois
-rejouent les mêmes witness IDs, leur disjonction, le signe du déterminant, les
-numérateurs de Cramer et les H2 uniformes aux huit coins de l'`ANode`; toutes les
-différences `B-A` restent dans la même cellule half-open et la hauteur minimale
-est uniforme. Les rangs inférieurs ou signes non uniformes restent ouverts. Ce
-partage exige une récursion root×root canonique ; il est le jalon suivant, pas
-une précondition du falsificateur feuille.
+traverse `ANode×BNode` depuis une graine unique. Comme les deux nœuds varient,
+huit coins de l'`ANode` ne suffisent pas. Un vérificateur rectangulaire exact
+rejoue les mêmes witness IDs et leur disjonction sur tout `A×B`; il emploie les
+`8×8` couples de coins seulement pour les quantités prouvées multi-affines et
+des extrema dédiés pour les autres. Toutes les différences `B-A` restent dans
+la même cellule half-open ; cône, H2 et hauteur minimale sont uniformes. Les
+rangs inférieurs, signes non uniformes ou bornes non reçues restent ouverts. Ce
+partage exige une récursion root×root canonique et publie `rect_tasks`, splits
+`A/B` et prédicats larges ; il est le jalon suivant, pas une précondition du
+falsificateur feuille.
 
 Deux pentes supérieures à `1,35` sur une métrique physique bloquante, une HWM
 hors enveloppe ou une fenêtre quasi quadratique rendent la configuration
@@ -2678,10 +2686,11 @@ la boule concentrique de rayon `1` vaut `(1,-10,-10,-10,74)` et ne doit jamais
 ### 15.2 `CanonicalEdgeWindowReporter-q4-v0` : tuer les paires avant la source
 
 Pour chaque premier endpoint `a`, définir `E_q(a)` comme les seconds endpoints
-`b>a` non fermés par `h_q=smax+1-q` crédits projectifs aux unions de `PointId`
-disjointes. Tout support vrai conserve nécessairement son unique arête maximale
-canonique dans cette fenêtre, car un crédit projectif tue toute sphère passant
-par ses deux endpoints, indépendamment de l'owner futur.
+de `GenerationRank` supérieur non fermés par `h_q=smax+1-q` crédits projectifs
+aux unions de `PointId` disjointes. Tout support vrai conserve nécessairement
+son unique arête maximale canonique dans cette fenêtre, car un crédit projectif
+tue toute sphère passant par ses deux endpoints, indépendamment du sens de
+génération et de l'owner futur.
 
 Le P0 feuille `PWC0-A` construit une banque transactionnelle de vrais
 `PointId`, essaie les 48 chambres, puis raffine seulement chaque chambre ouverte
@@ -2696,6 +2705,15 @@ crédits déjà commis. Si les `n` graines racine deviennent le verrou après un
 fenêtre sparse, seulement alors universaliser les mêmes preuves sur
 `ANode×BNode` dans `PWC0-B`.
 
+Le raffinement `48 -> 9` porte sur les **spans de cibles** encore ouverts dans
+la chambre half-open, pas sur un bit global de chambre. Pour une cible, le
+verdict sûr est `coarse_certificate OR fine_certificate`. Les deux preuves sont
+alternatives : on ne somme jamais des crédits issus de sous-cellules différentes
+et aucune disjonction globale d'IDs n'est exigée entre chambres ou résolutions.
+Seuls les huit groupes de la preuve effectivement consommée sont disjoints. Un
+`BNode` traversant une frontière est scindé ou laissé ouvert ; une feuille est
+classée dans son unique cellule half-open.
+
 Une fenêtre d'arêtes sparse n'autorise pas encore les niveaux. Le jalon
 `EdgeActiveFormCounter-v0` traverse un dual-tree `(EdgeSpan,CNode)` avec bornes
 exactes de lentille/marge et mesure
@@ -2705,6 +2723,10 @@ arrête la route même si `|E_4|` est linéaire.
 
 Deux certificateurs `ALL` suffisants peuvent être réunis par OR, sous masque de
 lane et antichaîne sans double crédit. Cette sûreté ne donne aucune loi de coût.
+Le juge du pin ne reçoit pas encore cet OR : il recompte uniquement les crédits
+centraux et la commande avec `--fallback` rend `exit=1`, `2864` désaccords à
+`n=1200`, alors que les cinq CTests sans fallback passent. Un replay par
+`ProofSpan` et prédicat ponctuel indépendant est requis.
 Si `c(a,b)` est le nombre de crédits reçus, la fenêtre au seuil `h` vaut
 `{(a,b):c(a,b)<h}` et peut sauter presque instantanément de vide à quadratique.
 Ne revendiquer ni `Theta(Kn)`, ni indépendance de `s` et `K` depuis deux seuils
@@ -2726,7 +2748,10 @@ Cette ordonnance remplace `C(n_lens,2)` pour les centres shallow distincts. À
 inférieur à `e*(k+1)*m_ab` et les incidences à
 `2e*(k+1)*m_ab`. Cette borne ne contrôle ni les couples de segments visités, ni
 les `SupportKey` incidents à une concurrence lourde ; ces deux sorties restent
-mesurées. Aucun arrangement global n'est construit : les niveaux sont locaux à
+mesurées. Sous les hypothèses du constructeur reçu, la cible par arête est
+`O(m_ab*k^2 + m_ab*alpha(m_ab)*log(m_ab) + |V_ab| + J_ab + H_ab)` ; les
+opérations de segments et la HWM sont des compteurs bloquants séparés. Aucun
+arrangement global n'est construit : les niveaux sont locaux à
 une arête, éphémères et détruits après les `BallEvent`. Le probe CPU compare exactement
 `(BallKey,SupportKey,I_B,U_B,owner)` à `BallFormToBallEvent-v0`. Les mutants
 omettent séparément `P-P`, `N-N`, `P-N`, le niveau terminal, le batch des
@@ -2736,18 +2761,31 @@ concurrences et l'exclusion du shell du rang strict.
 
 Le payload officiel ne demande pas le retour hôte de tous les supports. Après
 census régulier, former un `RegularDirectRecord` compact portant niveau exact,
-`BallKey`, `Q=I_B union S` avec `|Q|<=11` et masque de support. Les records et
-gateways deviennent des runs triés par `(k,beta_exacte,cle)`. Pour chaque lot de
-niveau égal, geler les racines avant incidences, réduire la connectivité du
-graphe quotient par une étoile ou une MSF temporaire, committer atomiquement,
-émettre forêt/coverage et jeter le lot.
+`BallKey`, `Q=I_B union S` avec `|Q|<=11` et masque de support. Le census doit
+conserver les IDs de `I_B`, y compris `always_inside`; `(p,extra)` ne suffit
+pas. Si `r=|Q|`, ce record porte logiquement une naissance à `k=r` et une
+coface directe à `k=r-1`, dans leurs fenêtres respectives. Il n'est pas
+dupliqué : les runs sont triés par `(beta_exacte,event_key)`, puis le macro-lot
+dérive les deux rôles sur un même snapshot pré-lot gelé.
 
-La conservation exacte des composantes par MSF est standard ; la complétude de
-la rétraction `directes+gateways`, ses verticales et son quotient de plateau ne
-sont **pas encore reçus**. `AnchorOutputFoldCounter-v0` doit comparer les dix
+L'émission par ancre n'a aucun watermark monotone : un événement à
+`beta(Q)` peut révéler un bras ou une gateway de niveau strictement inférieur.
+Il faut spooler les directs, RLE les `FacetKey`, résoudre les gateways, sceller
+le manifeste de source, puis seulement merger les niveaux et committer le
+fold. Le streaming supprime le catalogue résident ; il ne permet pas un commit
+au fil de l'émission.
+
+La conservation exacte des composantes par MSF est standard sur un graphe déjà
+complet. Elle ne remplace ni naissances, facettes égales, `coverage_delta`,
+gateways, verticales, ni complétude de source. La rétraction
+`directes+gateways`, ses verticales et son quotient de plateau ne sont **pas
+encore reçus**. `AnchorOutputFoldCounter-v0` doit comparer les dix
 forêts, lots, verticales et coverage à Gamma exhaustif sur petit `n`, puis
 comparer run matérialisé, streamé, permuté et tuilé. Aucun catalogue global de
 supports, Gamma ou mosaïque d'ordre supérieur n'entre dans le chemin candidat.
+
+La porte complète est détaillée dans
+[`AUDIT_CORRECTION_FOLD_STREAM_REGULIER_4CE3618_20260813.md`](audits/AUDIT_CORRECTION_FOLD_STREAM_REGULIER_4CE3618_20260813.md).
 
 ### 15.5 Porte de coût
 
@@ -2760,3 +2798,33 @@ kernel G4 vient après ce vert ; le p95 contractuel demande ensuite trente
 répétitions chaudes à `50000` du même `BenchmarkOutputContract-v1` complet.
 
 GCP non utilisé pour cette proposition.
+
+## 16. Réponse au front de triplets aigus du pin `4ce3618`
+
+La caractérisation q3 proposée est correcte : sous rang affine deux,
+`ab` maximale faible et angle en `x` strictement aigu équivalent à un triangle
+aigu dont `ab` est une arête maximale. Elle ne sauve pas le certificat par
+hull.
+
+Si `a0,b0` réalisent `Dmin`, alors pour tout `z` :
+
+```text
+max(||z-a0||,||z-b0||) >= Dmin/2.
+```
+
+Les deux endpoints appartiennent au hull des trois boîtes. La condition
+`max_(c in hull)||z-c||^2<Dmin^2/4` est donc identiquement fausse. Son échec est
+un `CERTIFICATE_MISS`, jamais un `NONE`. La fixture
+`a=(0,0,0),b=(4,0,0),x=(2,3,0),z=(2,1,0)` porte même un vrai témoin intérieur
+que ce test manque.
+
+Ne pas implémenter ce prune. La borne d'empilement `O(s^6 n)` peut seulement
+décrire un front grossier de cellules dyadiques canoniques de taille comparable,
+sans raffinement non borné des `MIXED`. Elle ne vaut pas pour des boîtes serrées
+arbitraires et ne borne ni la masse relationnelle ni la sortie. Une future
+ablation `AcuteCarrierCellFront-v0` se place dans
+`EdgeActiveFormCounter-v0`, emploie le classifieur carrier par marges et transmet
+tout `MIXED`; elle ne précède pas `PWC0-A` et ne retarde pas le pont BallKey.
+
+La démonstration et les réponses directes sont dans
+[`AUDIT_REPONSE_TRIPLETS_AIGUS_4CE3618_20260813.md`](audits/AUDIT_REPONSE_TRIPLETS_AIGUS_4CE3618_20260813.md).

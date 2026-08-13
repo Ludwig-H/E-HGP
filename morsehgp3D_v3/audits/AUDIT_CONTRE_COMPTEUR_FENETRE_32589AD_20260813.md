@@ -93,11 +93,12 @@ ablation prometteuse à porter au vrai reporter, pas une configuration reçue.
 ## 3. Définition non ambiguë de la fenêtre d'arêtes `E_q(a)`
 
 Le certificat projectif ferme une paire entière ; il ne prouve pas qu'une paire
-nue est owner. Pour raccorder le reporter à la source existante, orienter chaque
-paire non ordonnée une seule fois par `a<b` et poser :
+nue est owner. Son sens d'énumération peut donc suivre le stockage : poser
+`GenerationRank=(Morton48,PointId)`, orienter chaque paire une seule fois du
+plus petit vers le plus grand rang, et définir :
 
 ```text
-E_q(a) = { b : PointId(b)>PointId(a) et le reporter projectif
+E_q(a) = { b : GenerationRank(b)>GenerationRank(a) et le reporter projectif
                  n'a pas fermé (a,b) avec h_q=smax+1-q
                  GroupCredits disjoints et rejouables }.
 ```
@@ -105,10 +106,11 @@ E_q(a) = { b : PointId(b)>PointId(a) et le reporter projectif
 Tous les états `OPEN`, `MIXED`, `UNDERFULL`, capés, non reçus ou dégénérés
 appartiennent à la fenêtre. Il s'agit d'une sur-approximation d'arêtes candidates,
 pas de l'ensemble inconnu des vrais co-sommets. Son invariant sémantique est :
-pour tout support pertinent `S`, si son arête maximale canonique est `(u,v)`
-avec `u<v`, alors `v` appartient à `E_q(u)`. Les autres sommets sont produits
-ensuite par la lentille et le shallow de cette arête. C'est cet invariant que
-l'oracle petit `n` juge.
+pour tout support pertinent `S`, si son arête maximale canonique est `{u,v}`,
+alors l'endpoint de plus grand `GenerationRank` appartient à la fenêtre de
+l'autre endpoint. `PairKey=(min PointId,max PointId)` et le tie-break de l'owner
+restent non orientés. Les autres sommets sont produits ensuite par la lentille
+et le shallow de cette arête. C'est cet invariant que l'oracle petit `n` juge.
 
 Les deux lectures à ne plus confondre sont donc :
 
@@ -121,7 +123,8 @@ Les survivants du **certificat central q2** forment une autre fenêtre d'arêtes
 `E_2^central`. Elle peut rester une ablation q2, mais ne remplace pas
 `E_3/E_4` : le prune central q2 concerne la boule diamétrale de la paire, pas
 toutes les sphères q3/q4 passant par elle. Le code du pin ajoute en outre les
-deux orientations, tandis que `E_q` conserve seulement l'orientation `a<b`.
+deux orientations, tandis que `E_q` conserve seulement l'orientation par
+`GenerationRank`.
 
 ## 4. Réponse à la question 48 contre 432
 
@@ -165,7 +168,7 @@ Pour chaque lane q3/q4 et chaque ancre :
    dans un `OpenEdgeSpan` de `E_q(a)` ;
 5. au cap, émettre le span entier ouvert et une continuation authentifiée ;
 6. calculer `sum_a|E_q(a)|` comme la somme des populations des spans ouverts,
-   avec orientation unique `a<b`, et non depuis la masse d'un front q2
+   avec orientation unique par `GenerationRank`, et non depuis la masse d'un front q2
    indépendant.
 
 Le ledger exige, par lane :
@@ -240,20 +243,29 @@ chaque chambre reçue. Le reporter traverse ensuite l'arbre des cibles avec des
 tâches `(AnchorId,BNodeKey,chamber_mask,state)` :
 
 ```text
-max_PointId(BNode) <= AnchorId         -> DROP_ORDER
-min_PointId(BNode) <= AnchorId         -> SPLIT_ORDER
+last_GenerationRank(BNode) <= rank(a)  -> DROP_ORDER
+first_GenerationRank(BNode) <= rank(a) -> SPLIT_ORDER
 direction et hauteur toutes fermees    -> CLOSED_SPAN
 direction ou seuil tous ouverts        -> OPEN_SPAN
 frontiere/melange                       -> SPLIT_TARGET
 quantum/cap atteint                     -> OPEN_SPAN + ContinuationKey
 ```
 
-Les `OPEN_SPAN` partitionnent exactement les cibles `PointId(b)>PointId(a)` non
+Les `OPEN_SPAN` partitionnent exactement le suffixe de cibles
+`GenerationRank(b)>GenerationRank(a)` non
 fermées par la banque reçue. Le compteur logique est la somme de leurs
 populations ; aucun `PairId` n'est développé sur le chemin produit. Le juge
 `n<=64` les développe seulement pour exiger l'égalité avec le classement
 ponctuel du **même** bank, puis vérifie que l'arête maximale canonique de chaque
 support q4 exhaustif appartient à la fenêtre orientée correspondante.
+
+Cette orientation rend le domaine cible contigu dans l'ordre Morton et borne
+le filtre d'ordre à la seule frontière du suffixe. Garder `a<b` par `PointId`
+serait encore exact, mais des IDs quasi aléatoires dans chaque `BNode`
+forceraient des splits d'ordre potentiellement linéaires par ancre. La fixture
+`id0=(10,13,10), id1=(10,10,10), id2=(12,11,11), id3=(10,10,11)` grave la
+distinction : l'arête owner unique est `PairKey=(0,3)`, tandis que son sens de
+génération Morton est `id3 -> id0`.
 
 Les mutants indispensables partagent un ID entre deux crédits, confondent
 index local et `PointId`, omettent une chambre, changent la stricte
