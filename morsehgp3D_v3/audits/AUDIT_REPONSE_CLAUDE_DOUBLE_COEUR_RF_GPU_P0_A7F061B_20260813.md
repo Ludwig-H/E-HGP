@@ -370,13 +370,19 @@ annonce `budget-depth=4` mais passe `--budget=24`, et la cible CUDA compilée es
 Le contrat `50000` sous une seconde reste `NO-GO`. GCP non utilisé par cet
 audit.
 
-## 9. Observation urgente du worktree `wspd_front` suivant le pin
+## 9. Observation du successeur logiciel `62cea17`
 
-Après le pin, Claude a commencé `prototype/wspd_front.hpp` et
-`prototype/wspd_front_probe.cpp`. L'auditeur ne les modifie pas. La version
-observée construit bien la partition avant la géométrie, conserve les
+Après le pin, Claude a reçu `prototype/wspd_front.hpp` et
+`prototype/wspd_front_probe.cpp` dans `62cea171e283607e3a8ecd42333e5e2fbb112264`.
+L'auditeur ne les modifie pas. La version observée construit bien la partition
+avant la géométrie, conserve les
 `PointId`, emploie une séparation entière et possède un oracle de multiplicité
 à `n<=64`. C'est la bonne direction pour l'étape 3.
+
+Le même commit répond déjà à quatre points du contre-audit : garde `Dlo>0`,
+helper typé `RectLane`, cœur étroit q3/q4 réactivé et fixture directe du faux
+juge. Build Release et suite ciblée au `HEAD=90aa941`, incluant WSPD :
+`14/14 PASS` en `28,44 s`.
 
 Elle n'est toutefois pas encore `RF-GPU-P0` et ne doit pas être mesurée sur G4
 avant les corrections suivantes :
@@ -404,7 +410,43 @@ La mutation transitoire qui sautait un niveau de l'arbre C n'est plus présente
 dans la version relue : le nœud dépilé est classé avant que ses enfants soient
 poussés. Il ne faut pas conserver cette alerte historique comme défaut live.
 
-Le bon prochain delta sur ce worktree est donc petit : recevoir la partition
+Le bon prochain delta est donc petit : recevoir la partition
 et son identité, émettre les terminaux SoA, puis remplacer entièrement la file
 C par la banque bornée de la section 6. Ajouter corridors ou carriers avant ce
 remplacement recréerait le verrou de constante sous un autre nom.
+
+Le défaut `leaf>1` est reproduit sur ce commit :
+
+```text
+mhgp3v_wspd_front_probe --family=uniform --points=48 --coord=512 --oracle --leaf=8
+oracle n=48 paires=1128 couvertes=1019 multiplicite_fautive=109
+exit_code=3
+```
+
+Ce refus est sain ; il doit devenir une CTest permanente, puis la route produit
+doit développer les self-blocs ou fixer et valider `leaf=1` dans son ABI.
+
+Un autre rejeu local illustre la constante de la file actuelle :
+
+```text
+mhgp3v_wspd_front_probe --family=uniform --sep=2 --points=2000 --quantum=64
+front=41073, eval=2434938, q3=0,00 %, q4=0,00 %, elapsed=2,607 s
+```
+
+Cette mesure locale est diagnostique, pas un SLO. Elle suffit néanmoins à
+interdire de confondre ce parcours CPU avec la banque bornée P0.
+
+## 10. Contre-audit du script `HEAD=90aa941`
+
+Le script ajoute une rampe WSPD, mais ne doit pas être exécuté en l'état. Il
+lance quinze probes CPU jusqu'à `n=100000` et `quantum=64`, puis `wait || true`
+masque tout code non nul, y compris désaccord mathématique, crash ou OOM. Le
+programme ne publie ni temps, ni octets, ni HWM et le script compile toujours
+`mhgp3v_anchor_device`, pas un kernel rect-front.
+
+Les sweeps historiques restent incohérents : les fichiers écrits pour les
+budgets `8/16/24/48/96/192` sont relus sous les noms `2/3/4/5/6/8`, et le
+sweep feuille annonce `budget-depth=4` tout en passant `--budget=24`. Avant une
+session facturable, chaque job doit capturer son code, autoriser explicitement
+les seuls refus attendus, échouer sur code 1/crash/OOM, et la campagne doit
+viser K1/K2 `RF-GPU-P0` avec événements CUDA, HWM et trente warms.

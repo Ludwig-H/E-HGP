@@ -8,67 +8,87 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-## Observation live — `HEAD=a7f061b`, double cœur reçu puis worktree WSPD
+## Observation live — `HEAD=90aa941`, WSPD CPU reçue, `RF-GPU-P0` absent
 
 Le `HEAD` observé est
-`a7f061b58c79a6d2eeaf04acd8d3a5585f34bcb5`, commit
-`their central core unlocks q3/q4 from zero to eighty-seven percent`. Le pin
-ajoute le certificat entier `Dlo/Vhi` commun aux trois lanes. La preuve est
-sûre : `Vhi<Dlo` certifie q2, `3Vhi<Dlo` certifie q3 et, sous `Dlo>0`,
-`209Vhi<=56Dlo` certifie q4. La dernière frontière est strictement intérieure
-car `362^2-3*209^2=1`. Ce sont des implications fail-open, pas des
-équivalences.
+`90aa941b46bab4927c36947f1faecab761773236`, commit
+`put both probes on the machine, and measure the front that is actually
+candidate`. Son parent logiciel `62cea171e283607e3a8ecd42333e5e2fbb112264`
+reçoit le double cœur, la partition WSPD entière et les probes CPU. Le worktree
+observé contient les mises à jour documentaires autorisées du présent audit et
+la banque Morton en cours de Claude dans `prototype/wspd_front_probe.cpp`
+(SHA-256 observé `77a11903...`) ; l'auditeur ne modifie aucun code.
 
-Le diagnostic `terrain/8k` annonce `87,27 %` de masse fermée q3 et `83,93 %`
-q4, contre environ zéro auparavant. C'est un gain de couverture important,
-pas une mesure produit : le probe traite encore le CPU, repart de `C=root`, ne
-consomme aucun résiduel et ne chronomètre aucun aval.
+Le certificat `Dlo/Vhi` est sûr : `Vhi<Dlo` certifie q2, `3Vhi<Dlo` certifie
+q3 et, sous `Dlo>0`, `209Vhi<=56Dlo` certifie q4. La dernière frontière est
+strictement intérieure car `362^2-3*209^2=1`. Le parent `62cea17` corrige la
+garde dégénérée, type le helper par `RectLane`, grave la fixture du faux juge
+et réactive le cœur étroit q3/q4. Aucun troisième objet géométrique n'est
+requis : le cœur `(d-3S)/4` est universel q2/q3/q4 ; l'owner est seulement la
+précondition qui transforme q3/q4 en `PRUNED_MAX_EDGE_ANCHOR`.
 
-Le rejeu Release local suivant a été exécuté sur le pin :
+Le WSPD reçu progresse sur l'identité : fair-split déterministe, séparation
+entière, `PointId` conservé et oracle borné de multiplicité. Le rejeu Release
+local courant donne :
 
 ```text
 cmake -S morsehgp3D_v3 -B build/v3 -DCMAKE_BUILD_TYPE=Release
-cmake --build build/v3 --target mhgp3v_rect_front_probe --parallel
-ctest --test-dir build/v3 --output-on-failure -R '^mhgp3v_rect_front_'
-10/10 PASS, 19,92 s
+cmake --build build/v3 --target mhgp3v_rect_front_probe mhgp3v_wspd_front_probe --parallel
+ctest --test-dir build/v3 --output-on-failure -R '^mhgp3v_(rect|wspd)_front_'
+14/14 PASS, 28,44 s
 ```
 
-Ce vert ne reçoit pas l'universalité. `--verify-all` tire quatre triplets par
-nœud, donc peut falsifier mais jamais certifier un `ALL`; CMake exerce q2 et q4,
-pas q3, malgré son commentaire. Le bloc de contrôle est dupliqué. Le helper
-central accepte encore une lane entière arbitraire et sa branche q4 directe
-omet `Dlo>0`; le commentaire q3 emploie à tort une équivalence après avoir
-supprimé un terme favorable. L'oracle requis reste exhaustif et indépendant
-sur petits nœuds/boîtes.
+Ce vert ne reçoit pas encore le chemin candidat. Chaque terminal WSPD recrée
+une `priority_queue`, repart de `C=root` et appelle `rect_classify` jusqu'à
+trois fois en comptant une seule `eval`. Il n'existe ni `RectId/owner`, ni arène
+SoA, ni compactage/consommation du résiduel. Le test `leaf>1` manque : le rejeu
+`uniform,n=48,leaf=8` refuse avec `109/1128` `PairId` manquants. Avec le défaut
+`leaf=1`, un run local `uniform,n=2000,s=2,quantum=64` produit `41073`
+terminaux et `2434938` dépilages C, ferme `0 %` en q3/q4 et prend `2,607 s`
+muraux. Cette file CPU n'est pas `RF-GPU-P0`.
 
-La seconde question de Claude est close : aucun troisième objet géométrique
-n'est requis. La boule de rayon `||b-a||/4` autour du milieu est strictement
-incluse dans le spindle q4, puis q3/q2. Pour les nœuds, le cœur
-`(d-3S)/4` est donc commun. L'owner n'est pas une hypothèse de cette inclusion ;
-il est une précondition sémantique pour consommer une fermeture q3/q4 comme
-`PRUNED_MAX_EDGE_ANCHOR`. Le juge AABB `MIXED` qui avait motivé la désactivation
-q3/q4 était seulement incomplet.
+Le script du `HEAD` est `NO-RUN`. Sa nouvelle étape WSPD lance quinze runs CPU
+jusqu'à `100000` points et masque indistinctement refus, désaccord, crash ou OOM
+par `wait || true`. Elle ne mesure aucun temps, octet, HWM ou kernel P0. La
+cible CUDA construite reste `mhgp3v_anchor_device`. Les anciens sweeps écrivent
+toujours `budget_{8,16,24,48,96,192}` puis lisent
+`budget_{2,3,4,5,6,8}`, et le sweep feuille annonce `budget-depth=4` tout en
+passant `--budget=24`. Une campagne G4 de ce script ne répondrait donc ni au
+p95 résident, ni au SLO.
 
-Le worktree suivant le pin ajoute `prototype/wspd_front.hpp`,
-`prototype/wspd_front_probe.cpp` et leur CMake. La direction est bonne :
-fair-split déterministe, séparation entière, `PointId` conservé et oracle de
-multiplicité borné. La version relue repart toutefois encore de `C=root` pour
-chaque terminal, appelle le classifieur jusqu'à trois fois tout en comptant une
-seule `eval`, n'a ni `RectId/owner`, ni arène SoA, ni consommation du résiduel.
-Un self-bloc feuille de taille supérieure à un est omis. Ce worktree n'est pas
-un reçu et ne doit pas déclencher une session G4.
-
-Le prochain micro-jalon est `RF-GPU-P0` : terminaux WSPD canoniques, fenêtre
-Morton propositionnelle `W=32`, au plus `L=16` IDs distincts, recertification
-entière avec masque commun, puis compactage stable de tout échec en
-`DELEGATED_RESIDUAL`. Une banque incomplète ne conclut jamais absence,
-`POSITIVE` ou `KEEP`. Le corridor et les carriers restent des extensions
-ultérieures, seulement si leur gain marginal devient nécessaire. Réponse aux
-deux questions, preuve, fixture, ABI, enveloppe mémoire et portes :
+Le prochain micro-jalon reste `RF-GPU-P0` : tape WSPD reçu/résident, fenêtre
+Morton propositionnelle `W=32`, au plus `L=16` IDs distincts, un `Dlo` par
+rectangle, tests `Vhi` u64 avec masque commun, puis compactage stable de tout
+échec en `DELEGATED_RESIDUAL`. La porte exige `wide_products=0` et
+`p95<=200 ms` sur trente warms. Corridor et carriers restent hors P0. Réponse
+aux questions, preuve, fixture, ABI, enveloppe mémoire et portes :
 [`AUDIT_REPONSE_CLAUDE_DOUBLE_COEUR_RF_GPU_P0_A7F061B_20260813.md`](AUDIT_REPONSE_CLAUDE_DOUBLE_COEUR_RF_GPU_P0_A7F061B_20260813.md).
 
 Le statut G4 reste `NO-GO` : aucun kernel rect-front, aucun p95/HWM, aucun
 handoff exact et aucun raccord jusqu'au fold. GCP non utilisé par cet audit.
+
+### Delta concurrent — première banque Morton, pas encore reçue
+
+Le delta de Claude implémente déjà `--bank --window=32 --bank-l=16`. Sur
+`uniform,n=2000,s=2`, le rejeu local tombe de `2,607 s` pour la file à
+`0,109 s` pour la banque et borne bien les compteurs à `1314036` lectures et
+`657119` tests, mais ne ferme que `0,90 %` de masse q2 et environ zéro en
+q3/q4. C'est une réduction de constante nette, pas encore un déblocage de la
+source.
+
+Le Morton du delta est faux : son `morton_spread` insère un zéro entre bits,
+forme 2D, puis décale trois axes. Ainsi `Morton(2,0,0)=4` et
+`Morton(0,0,1)=4`. La banque reste fail-open, mais son ordre et sa couverture
+ne sont pas ceux revendiqués. La porte doit comparer l'encodeur optimisé à un
+oracle boucle 16 bits et tuer cette collision.
+
+Le delta recalcule en outre `rect_central_all` trois fois par ID : `Dlo` et
+`Vhi` ne sont donc pas mutualisés malgré le compteur `recerts`. Il alloue et
+trie un `std::vector` par terminal, ne conserve aucun `proof_id/RectResult`, ne
+porte aucun owner q3/q4 et sous-remplit la fenêtre près de la fin de l'ordre.
+Avant toute session, il faut un helper `central_mask` qui calcule `Dlo` une fois
+par rectangle et `Vhi` une fois par ID, un buffer fixe, un replay de preuve et
+les mutants Morton/endpoint/doublon/owner/résiduel.
 
 ## Observation historique — `HEAD=e63b7eb`, cœur central puis préfixe WSPD/carriers
 

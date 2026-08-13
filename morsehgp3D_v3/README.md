@@ -51,10 +51,12 @@ persistante pour les seuls résidus. Preuves, mesures et gates :
 Les successeurs appliquent déjà `KEEP_ANCHOR`, le `NONE` propre à chaque lane,
 un enum de CLI fermé et le budget exact. Au pin `a7f061b`, le cœur entier
 `Dlo/Vhi` partagé fait passer la couverture diagnostique `terrain/8k` à
-`87,27 %` en q3 et `83,93 %` en q4. Un rejeu Release local rend `10/10` CTests
-ciblés en `19,92 s`. Ce vert reste diagnostique : le juge `ALL` échantillonne
-quatre triplets, n'exerce pas q3 dans CMake, et aucun `RectKey`, owner ou
-consommateur exact du résiduel n'est reçu.
+`87,27 %` en q3 et `83,93 %` en q4. Le parent logiciel `62cea17` corrige le
+faux juge du cœur et reçoit une première partition WSPD CPU ; un rejeu Release
+au `HEAD=90aa941` rend `14/14` CTests ciblés en `28,44 s`. Ce vert reste
+diagnostique : le juge `ALL` échantillonne quatre triplets par nœud, le WSPD
+repart de `C=root` par terminal, et aucun `RectKey`, owner ou consommateur exact
+du résiduel n'est reçu.
 
 La route longue proposée ne prolonge plus cette file diagnostique. Elle construit
 d'abord une WSPD entière/canonique à faible séparation, puis classifie une seule
@@ -72,11 +74,18 @@ terminaux WSPD, inspecte une fenêtre Morton déterministe `W=32`, garde au plus
 `L=16` `PointId` distincts, recertifie chacun avec un masque entier commun et
 compacte tout échec en `DELEGATED_RESIDUAL`. Aucun top-`L` exact n'est requis :
 une banque incomplète perd seulement du rappel. Cette tranche supprime la DFS
-depuis `C=root`, borne le travail à `W*F` lectures et `L*F` recertifications et
-doit être falsifiée à `p95<=200 ms` déjà résidente avant d'ajouter corridors ou
-carriers. Réponse aux questions de Claude, preuve du double cœur, fixture et
-ABI :
+depuis `C=root`, borne le travail à `W*F` lectures et `L*F` tests `Vhi`, avec
+un seul `Dlo` par rectangle. Elle tient en `u64`, exige `wide_products=0` et
+doit être falsifiée à `p95<=200 ms` sur un tape WSPD déjà résident avant
+d'ajouter corridors ou carriers. Réponse aux questions de Claude, preuve du
+double cœur, fixture et ABI :
 [`AUDIT_REPONSE_CLAUDE_DOUBLE_COEUR_RF_GPU_P0_A7F061B_20260813.md`](audits/AUDIT_REPONSE_CLAUDE_DOUBLE_COEUR_RF_GPU_P0_A7F061B_20260813.md).
+
+Le script G4 du `HEAD=90aa941` ne doit pas être lancé en l'état. Sa nouvelle
+étape mesure quinze gros runs du probe CPU, pas le kernel P0, masque leurs codes
+par `wait || true` et ne publie ni temps, ni octets, ni HWM. La cible CUDA
+construite reste une autre qualification. Ce script ne peut donc ni recevoir
+la banque, ni répondre au contrat d'une seconde.
 
 Le producteur expérimental par arête maximale apporte quatre lemmes exacts :
 borne mono-ancre `ext/4`, face positive adjacente d'un q4 positif, disque q4

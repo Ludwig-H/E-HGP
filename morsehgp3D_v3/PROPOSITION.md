@@ -2061,27 +2061,31 @@ prouvent jamais absence, `POSITIVE`, `KEEP` ou `SOURCE_EMPTY`. Un top-`L` exact
 n'est requis que pour une garantie de rappel ou une preuve d'occupation
 négative, pas pour la sûreté d'un crédit positif.
 
-Une recertification partage `Dlo`, `Vhi`, l'intervalle de `H` et les bornes de
-distance, puis rend un masque. Les bits `ALL` satisfont `q4=>q3=>q2`; les
-comptes distincts saturent à `10/9/8`. q2 rend `CLOSED_Q2`. q3/q4 ne rendent
-`PRUNED_MAX_EDGE_ANCHOR` que si le record authentifie l'owner canonique ; sinon
-leur masque reste délégué. Le résultat conserve jusqu'à dix `proof_ids`
-rejouables.
+Le P0 calcule `Dlo` une fois par rectangle, puis `Vhi` pour chaque ID, et rend
+le seul masque central suffisant. Il n'appelle ni l'intervalle de `H`, ni
+`Lambda`, ni le fallback par carrés. Les bits `ALL` satisfont `q4=>q3=>q2` ;
+les comptes distincts saturent à `10/9/8`. q2 rend `CLOSED_Q2`. q3/q4 ne
+rendent `PRUNED_MAX_EDGE_ANCHOR` que si le record authentifie l'owner canonique
+; sinon leur masque reste délégué. Le résultat conserve jusqu'à dix
+`proof_ids` rejouables.
 
 Deux kernels suffisent à cette tranche : K1 traite un warp par rectangle sans
 allocation ni file dynamique ; K2 scanne et compacte stablement les ordinals
-résiduels. Les buffers sont préalloués et résidents, les produits larges
-emploient deux limbes et la tranche ne synchronise qu'au terminal. Avec `F`
-rectangles, son enveloppe est `W*F` lectures et `L*F` recertifications. Une ABI
+résiduels. Les buffers sont préalloués et résidents et la tranche ne
+synchronise qu'au terminal. Sous u16, `209*Vhi<2^44` et le score de sélection
+est inférieur à `2^38` : `u64` suffit, la porte exige `wide_products=0` et les
+deux limbes restent un P1. Avec `F` rectangles, l'enveloppe est `W*F` lectures
+et `L*F` tests `Vhi`, avec un seul `Dlo` par rectangle. Une ABI
 de `16 B` par travail, `64 B` par résultat et `4 B` par ordinal résiduel donne
 `84F+86n` octets avec arbre, clés, coordonnées, ordre et rang, avant les
 workspaces explicitement comptés.
 
-La porte de falsification résidente est un p95 d'au plus `200 ms` sur trente
-warms à `n=50000`, avec bytes/HWM, lectures, recertifications, produits larges,
-closed/residual par lane et compactage. Cette porte ne qualifie pas le
-`warm_e2e`; elle décide seulement s'il reste assez de budget pour la source et
-le fold. Le corridor d'ordre vient ensuite par ablation si son gain marginal
+La porte de falsification reçoit un tape terminal WSPD hôte déjà reçu et
+résident. Son p95 doit rester au plus `200 ms` sur trente warms à `n=50000`,
+avec bytes/HWM, lectures, tests `Vhi`, `wide_products=0`, closed/residual par
+lane et compactage. Cette porte ne qualifie pas le `warm_e2e`, qui réintégrera
+construction WSPD, transfert, source et fold ; elle décide seulement s'il reste
+assez de budget. Le corridor d'ordre vient ensuite par ablation si son gain marginal
 sur les records délégués justifie son coût. Les carriers q3/q4 ne sont raccordés
 qu'après ce verdict.
 
