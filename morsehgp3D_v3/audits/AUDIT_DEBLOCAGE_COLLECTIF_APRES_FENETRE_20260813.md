@@ -595,7 +595,7 @@ La voie produit doit donc composer les certificats internes ci-dessus. Le plein
 arrangement global et la mosaïque restent des oracles bornés ou des réfutations
 de complexité, jamais des plans d'implémentation.
 
-## 9. Déblocage du générateur local par niveau inversé
+## 9. Inversion locale : identité reçue, générateur encore conditionnel
 
 ### 9.1 Bijection exacte
 
@@ -620,27 +620,49 @@ division n'est nécessaire à l'autorité : `y_z` est stocké par les quatre
 entiers homogènes `(s_x,s_y,s_z,||s||^2)` et tous les signes sont des
 déterminants croisés.
 
-Un support contenant `a` et de cardinal `q` donne une cellule duale de dimension
-`4-q` : face pour q2, arête pour q3, sommet pour q4. Son niveau vaut `p`, le
-nombre d'intérieurs stricts. Source S demande donc les cellules critiques avec
-`p<=9`, puis applique les seuils propres `p<=9/8/7`, la positivité barycentrique
-et `p+q<=11`. Réciproquement, tout support global contenant `a` qui passe
-`4R^2<delta_out(a)^2` possède support, intérieurs et shell dans la fenêtre ; son
-point dual appartient nécessairement à ce complexe local. Cela donne la
-bijection de complétude qui manquait au simple énumérateur par tuples.
+Un support contenant `a` et de cardinal `q` impose `q-1` plans parmi
+`P_z : t dot y_z=1/2`. Dans l'espace des centres `t`, son lieu est donc une face
+de dimension deux pour q2, une droite pour q3 et un point pour q4, sous
+indépendance affine. Son niveau vaut `p`, le nombre d'intérieurs stricts.
+Source S demande les flats incidents de profondeurs propres `p<=9/8/7`, puis
+applique indépendance, positivité barycentrique et `p+q<=11`.
+
+Cette correspondance est une **injection nécessaire**, pas encore la bijection
+annoncée dans une première version de cet audit. Une face q2 porte une infinité
+de centres, dont un seul est le milieu de la paire ; une droite q3 en porte une
+infinité, dont un seul est le circumcentre du triangle. Il faut donc extraire le
+point de norme minimale sur le flat, puis vérifier qu'il appartient encore à la
+cellule shallow considérée. Pour q4, l'intersection est déjà ponctuelle. Aucun
+théorème d'arrangement ne remplace ensuite le test de positivité. Réciproquement,
+tout support local certifiable fournit bien un tel minimum de flat de profondeur
+`p`, mais la complétude algorithmique exige de visiter **chaque flat incident
+dont ce minimum est shallow**, y compris ceux dont l'intérieur relatif traverse
+plusieurs cellules de profondeur.
 
 ### 9.2 Borne qui remplace le mur combinatoire
 
 Agarwal, de Berg, Matousek et Schwarzkopf prouvent que le complexe `<=k` d'un
 arrangement de `M` plans dans `R^3` a complexité maximale
-`Theta(M*k^2)` et donnent une construction incrémentale randomisée exacte en
-temps espéré :
+`Theta(M*k^2)` et donnent, sous les conventions de niveaux et de position
+générale du papier, une construction incrémentale randomisée en temps espéré :
 
 $$O\left(Mk^2+M\log^3M\right).$$
 
 La source primaire est
 [« Constructing Levels in Arrangements and Higher Order Voronoi Diagrams »](https://doi.org/10.1137/S0097539795281840).
-Ici `k=9` est fixe. La comparaison avec l'énumération ancrée brute est :
+Les plans inversés ont une orientation cohérente : le demi-espace intérieur
+est `2t dot s_z>||s_z||^2` et le centre `t=0` appartient strictement au côté
+opposé de chaque plan. Une carte affine n'est donc pas requise pour définir le
+niveau. En revanche, le théorème borne les **cellules** du complexe shallow ; il
+ne prouve pas encore que le nombre des minima de tous les flats q2/q3 incidents
+à ces cellules, ni leur extraction avec multiplicités de shell, est borné par
+le même `Theta(M*k^2)`. Cette extension doit être prouvée ou comptée contre
+l'oracle avant de remplacer le mur combinatoire. Le papier suppose en outre la
+position générale pour son exposé ; la quantification u16 produit précisément
+plans concurrents, intersections de rang déficient et cosphères.
+
+Avec `k=9` fixe, la comparaison suivante n'est donc plus qu'un **budget de
+complexe conditionnel**, pas un proxy des supports garantis :
 
 | `M` | `M+C(M,2)+C(M,3)` | proxy structurel `81M` |
 | ---: | ---: | ---: |
@@ -648,12 +670,10 @@ Ici `k=9` est fixe. La comparaison avec l'énumération ancrée brute est :
 | 128 | `349 632` | `10 368` |
 | 256 | `2 796 416` | `20 736` |
 
-Le proxy ne contient ni les constantes, ni `M log^3 M`, ni le census ; ce n'est
-pas un chrono. Il fournit toutefois une ordonnance exacte linéaire en `M` pour
-`k` fixé, au lieu du terme cubique que le premier probe paie. À `M=64` et
-`n=50 000`, `81Mn` vaut `259 200 000` unités combinatoires avant constantes :
-assez bas pour mériter un `counter-only`, pas assez bas pour revendiquer une
-seconde.
+Le proxy ne contient ni les constantes, ni `M log^3 M`, ni l'extraction des
+minima de flats, ni le census. À `M=64` et `n=50 000`, `81Mn` vaut
+`259 200 000` unités combinatoires avant constantes : assez bas pour mériter un
+oracle `counter-only`, pas assez bas pour revendiquer une seconde ni une source.
 
 ### 9.3 Forme industrielle bornée
 
@@ -662,17 +682,18 @@ nom. Le candidat admissible est :
 
 1. produire top-M et premier omis depuis l'index global exact, sans scan et tri
    de tout le nuage par ancre ;
-2. construire dans la seule mémoire de la tuile active le complexe inversé
-   `<=9`, par incrémental paresseux ou shallow cutting de Las Vegas à listes de
-   conflits complètes ;
-3. extraire q2 directement des faces, le point circumcentrique q3 des arêtes et
-   q4 des sommets ; vérifier exactement cellule, profondeur, positivité,
+2. pour `M<=128`, construire dans la seule mémoire d'une ancre le complexe
+   inversé `<=9` par l'algorithme incrémental exact du papier, avec ordre aléatoire
+   engagé et listes de conflits complètes ;
+3. inventorier tous les flats q2/q3 incidents, calculer leur minimum de norme
+   exact et tester sa profondeur ; extraire q4 des sommets ; vérifier exactement
+   cellule, profondeur, positivité,
    `SupportKey`, `I_B`, `U_B` et `BallKey` ;
 4. appliquer le certificat strict de fenêtre, émettre les occurrences de toutes
    les ancres certifiantes, puis attribuer owner et dédupliquer par RLE ;
-5. détruire le complexe avant la tuile suivante et envoyer toute ancre au-dessus
-   du cap physique `M_max`, toute coupe ambiguë et toute dégénérescence encore
-   non traitée vers le résiduel collectif.
+5. détruire le complexe avant l'ancre suivante et envoyer toute ancre au-dessus
+   de `M=128`, toute coupe ambiguë et toute dégénérescence encore non traitée
+   vers le résiduel collectif.
 
 Le papier expose la position générale pour simplifier. Une perturbation
 symbolique ne peut pas devenir la sémantique scientifique du profil u16 : une
@@ -691,12 +712,12 @@ fenêtre ni la coupure du sujet. Les mutants changent le côté du niveau, `9` e
 `8`, oublient une carte projective, acceptent une égalité, perdent une arête q3
 et séparent une cosphérie.
 
-Cette voie répond directement à la question de Claude : quitter la DFS par
-endpoint est justifié, mais la génération locale ne doit pas rester une boucle
-sur les tuples. Le niveau inversé borné est le générateur du fast path ; la
-dominance 432 et `A times B times C` restent les certificats du résiduel. Si le
-compteur du complexe ou son high-water garde deux pentes `>1,35`, il reste un
-oracle local et ne passe pas sur CUDA.
+Cette voie répond partiellement à la question de Claude : quitter la DFS par
+endpoint est justifié, mais le niveau inversé reste un **candidat d'oracle local
+borné** tant que le lemme d'extraction des minima de flats n'est pas prouvé et
+jugé. La dominance 432 et `A times B times C` restent les certificats du
+résiduel. Si le compteur du complexe, celui des flats ou leur high-water garde
+deux pentes `>1,35`, il ne passe pas sur CUDA.
 
 ## 10. Ordre recommandé à Claude
 

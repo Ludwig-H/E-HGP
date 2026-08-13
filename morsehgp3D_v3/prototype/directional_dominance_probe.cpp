@@ -108,6 +108,7 @@ struct Options {
   long long smax = 11;
   bool judge = false;
   bool cloud_seuil = false;
+  bool radial_ablation = false;
   long long judge_sample = 0;
   CloudFamily family = CloudFamily::kUniform;
   DomMutant mutant = DomMutant::kNone;
@@ -149,6 +150,7 @@ int main(int argc, char** argv) {
     else if (key == "--min-cellules") { if (!parse_ll(val.c_str(), &p)) refuse("--min-cellules invalide"); opt.min_cells_occupied = p; }
     else if (key == "--judge") { opt.judge = true; }
     else if (key == "--cloud-seuil") { opt.cloud_seuil = true; }
+    else if (key == "--ablation-radiale") { opt.radial_ablation = true; }
     else if (key == "--judge-echantillon") { if (!parse_ll(val.c_str(), &p)) refuse("--judge-echantillon invalide"); opt.judge_sample = p; }
     else if (key == "--selftest") { selftest = true; }
     else if (key == "--family") {
@@ -229,8 +231,29 @@ int main(int argc, char** argv) {
                    (long long)(dom::kCells - non_vides), dom::kCells, span);
       return 3;
     }
+    // FIXTURE DE STRICTE INEGALITE, gravee par le contre-audit Q2.
+    //   a=(100,100,100), z=a+6*(3,1,1), b=a+11*(3,0,0)
+    // donne tau(s)=18, tau(d)=33, donc un rapport de hauteur exactement 11/6 sur
+    // le type de cellule `U00`. Le predicat spindle exact y rend
+    // H=198 et R=2*198^2 : `2H^2 > R` est FAUX de justesse, et `z` n'est donc
+    // PAS temoin universel q4. Le certificat direct doit rendre une marge
+    // EXACTEMENT NULLE et refuser. Un `>=` la creditrait.
+    const mhgp::i128 marge = dom::cutoff_margin(0, 2, 33, 18);
+    const bool ferme = dom::cutoff_closes(0, 2, 33, 18);
+    if (marge != 0 || ferme) {
+      std::fprintf(stderr,
+                   "FIXTURE STRICTE REFUTEE : marge=%lld (attendu 0), ferme=%d (attendu 0)\n",
+                   (long long)marge, (int)ferme);
+      return 3;
+    }
+    // Le meme point, une unite de hauteur plus loin, doit fermer : sans cela la
+    // fixture ne prouverait que l'inertie du predicat.
+    if (!dom::cutoff_closes(0, 2, 34, 18)) {
+      std::fprintf(stderr, "FIXTURE STRICTE REFUTEE : x=34 devrait fermer\n");
+      return 3;
+    }
     std::printf("selftest accord=OUI directions=%lld cellules=%d toutes_non_vides=OUI "
-                "cos2_min>=9/11=OUI\n",
+                "cos2_min>=9/11=OUI frontiere_stricte_marge=0\n",
                 tested, dom::kCells);
     return 0;
   }
@@ -396,9 +419,10 @@ int main(int argc, char** argv) {
           i64 tau_h_ref = -1;
           if (cell_ref >= 0 && top_ref->count[cell_ref] >= dom::kNeed[q])
             tau_h_ref = top_ref->tau[cell_ref][dom::kNeed[q] - 1];
-          ref_closes = dom::cutoff_closes(cell_ref, q, tau_d, tau_h_ref, DomMutant::kNone);
+          ref_closes = dom::cutoff_closes(cell_ref, q, tau_d, tau_h_ref, DomMutant::kNone,
+                                         !opt.radial_ablation);
         }
-        if (dom::cutoff_closes(cell, q, tau_d, tau_h, opt.mutant)) {
+        if (dom::cutoff_closes(cell, q, tau_d, tau_h, opt.mutant, !opt.radial_ablation)) {
           ++led.closed_directed[(std::size_t)q];
           pair_set(q, a, b);
           if (opt.judge)
@@ -409,7 +433,7 @@ int main(int argc, char** argv) {
           // fermait deja, et le juge y donnerait toujours raison.
           if (opt.judge_sample > 0 && (opt.mutant == DomMutant::kNone || !ref_closes)) {
             ++closed_seen;
-            sample_push(dom::cutoff_margin(use_cell, q, tau_d, tau_h), a, b, q);
+            sample_push(dom::cutoff_margin(use_cell, q, tau_d, tau_h, !opt.radial_ablation), a, b, q);
           }
         } else {
           ++led.residual_directed[(std::size_t)q];
@@ -445,6 +469,7 @@ int main(int argc, char** argv) {
   std::printf("cloud family=%s n=%d coord=%lld seed=%lld smax=%lld cellules=%d inject=%s\n",
               mhgp3v::cloud_family_name(opt.family), n, opt.coord, opt.seed, opt.smax,
               dom::kCells, dom::dom_mutant_name(opt.mutant));
+  std::printf("cutoff forme=%s\n", opt.radial_ablation ? "radiale_tabulee_ablation" : "directe_spindle");
   std::printf("travail classifications=%lld insertions_topk=%lld cellules_occupees=%lld "
               "directions_nulles=%lld\n",
               led.classifications, led.topk_insertions, led.cells_occupied, led.zero_direction);

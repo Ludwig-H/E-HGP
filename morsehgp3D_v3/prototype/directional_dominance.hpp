@@ -216,26 +216,85 @@ inline int cell_of(const P3& from, const P3& to, DomMutant mu = DomMutant::kNone
 //   8 : U22 (3,2,2)(3,3,2)(3,3,3)  -> max(17,22,27)  = 27
 inline constexpr int kKappaNum[kSubcones] = {11, 14, 14, 17, 19, 19, 22, 22, 27};
 
+// ---------------------------------------------------------------------------
+// CERTIFICAT DIRECT — LA FRONTIERE DU SPINDLE, PAS UN DETOUR PAR `r/D`
+//
+// Le cutoff tabule ci-dessus compose DEUX relaxations : d'abord `||s|| <= kappa
+// tau(s)` et `||d|| >= tau(d)`, ensuite le cutoff radial `r/D <= 3/5`. Le
+// contre-audit fournit une derivation directe, sensiblement plus forte.
+//
+// Pour chaque type de cellule, prendre ses deux rayons EXTREMES `r_-` et `r_+`
+// et tabuler `L=||r_-||^2`, `B=||r_+||^2`, `P=r_- . r_+` et `C=LB-P^2`. Avec
+// `x=tau(d)` et `y=tau(s)`, le certificat q4 entier est
+//
+//     xP - yB > 0    et    2 (xP - yB)^2 > C x^2,
+//
+// et q3 remplace le `2` par `3`. Le seuil de hauteur reel descend alors de
+// `11/6` sur `U00` a `3/2` sur `U22`, contre pres de trois pour la relaxation
+// radiale : sur les cellules larges c'est un facteur deux en rayon, donc huit
+// en volume de cibles certifiees.
+//
+// CETTE FOIS LA FRONTIERE EST CELLE DU SPINDLE, et l'inegalite doit rester
+// STRICTE. La fixture `a=(100,100,100)`, `z=a+6*(3,1,1)`, `b=a+11*(3,0,0)`
+// donne `H=198` et `R=2*198^2` : le rapport `11/6` y est exactement incertain
+// et tue tout `>=`.
+//
+// Largeurs : `x,y <= 65535`, `P <= 21`, `B <= 27`, `C <= 22`, donc
+// `|xP-yB| <= 1,8e6`, son carre `3,2e12`, et `C x^2 <= 9,5e10`. Tout tient
+// largement dans `i64`.
+struct CellForm { int L, B, P, C; };
+inline constexpr CellForm kForm[kSubcones] = {
+    {9, 11, 9, 18},    // U00
+    {10, 14, 11, 19},  // U10
+    {10, 14, 11, 19},  // D10
+    {11, 17, 13, 18},  // U11
+    {13, 19, 15, 22},  // U20
+    {13, 19, 15, 22},  // D20
+    {14, 22, 17, 19},  // U21
+    {14, 22, 17, 19},  // D21
+    {17, 27, 21, 18},  // U22
+};
+
 // Lane 0 = q2 et lane 2 = q4 emploient le cutoff q4, plus fort ; lane 1 = q3
 // emploie le sien, plus permissif. Les seuils de temoins restent 10/9/8.
 // Marge du certificat, en unites de son propre test. Elle vaut zero exactement
 // a la frontiere. Le controle echantillonne tire les fermetures de PLUS PETITE
 // marge : ce sont les seules ou un mutant peut differer, et un tirage uniforme
 // sur des dizaines de millions de fermetures ne les rencontre jamais.
-inline mhgp::i128 cutoff_margin(int cell, int lane, i64 tau_d, i64 tau_h) {
+inline mhgp::i128 cutoff_margin(int cell, int lane, i64 tau_d, i64 tau_h,
+                                bool direct = true) {
   if (tau_h < 0 || cell < 0) return -1;
-  const int kappa = kKappaNum[cell % kSubcones];
+  const int sub = cell % kSubcones;
+  if (direct) {
+    const CellForm f = kForm[sub];
+    const i64 g = tau_d * (i64)f.P - tau_h * (i64)f.B;
+    if (g <= 0) return -1;
+    return (mhgp::i128)g * (mhgp::i128)g * (mhgp::i128)(lane == 1 ? 3 : 2) -
+           (mhgp::i128)f.C * (mhgp::i128)tau_d * (mhgp::i128)tau_d;
+  }
+  const int kappa = kKappaNum[sub];
   const mhgp::i128 lhs = (mhgp::i128)tau_d * (mhgp::i128)tau_d;
   const mhgp::i128 rhs = (mhgp::i128)tau_h * (mhgp::i128)tau_h * (mhgp::i128)kappa;
   return (lane == 1) ? (225 * lhs - 64 * rhs) : (81 * lhs - 25 * rhs);
 }
 
+// `direct=false` retablit la relaxation radiale tabulee : c'est l'ABLATION que
+// l'audit demande de conserver pour mesurer le gain propre de la table directe.
 inline bool cutoff_closes(int cell, int lane, i64 tau_d, i64 tau_h,
-                          DomMutant mu = DomMutant::kNone) {
+                          DomMutant mu = DomMutant::kNone, bool direct = true) {
   if (tau_h < 0 || cell < 0) return false;  // cellule sous-pleine : seuil infini
-  const int kappa = kKappaNum[cell % kSubcones];
-  // MUTANT : le facteur universel deux, qui ne derive d'aucun cutoff radial.
+  const int sub = cell % kSubcones;
+  // MUTANT : le facteur universel deux, qui ne derive d'aucun cutoff.
   if (mu == DomMutant::kFactorTwo) return tau_d >= 2 * tau_h;
+  if (direct) {
+    const CellForm f = kForm[sub];
+    const i64 g = tau_d * (i64)f.P - tau_h * (i64)f.B;
+    if (g <= 0) return false;
+    const mhgp::i128 lhs = (mhgp::i128)g * (mhgp::i128)g * (mhgp::i128)(lane == 1 ? 3 : 2);
+    const mhgp::i128 rhs = (mhgp::i128)f.C * (mhgp::i128)tau_d * (mhgp::i128)tau_d;
+    return lhs > rhs;  // STRICT : la frontiere est celle du spindle
+  }
+  const int kappa = kKappaNum[sub];
   const mhgp::i128 lhs = (mhgp::i128)tau_d * (mhgp::i128)tau_d;
   const mhgp::i128 rhs = (mhgp::i128)tau_h * (mhgp::i128)tau_h * (mhgp::i128)kappa;
   return (lane == 1) ? (225 * lhs >= 64 * rhs) : (81 * lhs >= 25 * rhs);

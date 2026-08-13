@@ -3377,9 +3377,23 @@ set_tests_properties(mhgp3v_dominance_selftest PROPERTIES
 # sur 432. L'echantillon tire les fermetures de PLUS PETITE MARGE, les seules ou
 # une faute peut se loger, et chacune est rejouee en O(n) par l'unite oracle
 # independante. UN ECHANTILLON NE PROUVE AUCUNE COMPLETUDE : il refute.
+#
+# LE CERTIFICAT DIRECT REMPLACE LA RELAXATION RADIALE, ET L'ABLATION MESURE LE
+# GAIN. Le cutoff tabule composait deux relaxations : `||s|| <= kappa tau(s)`
+# puis `r/D <= 3/5`. Le certificat direct emploie les deux rayons extremes de la
+# cellule et sa frontiere EST celle du spindle. Le seuil de hauteur descend de
+# pres de trois a `11/6` sur `U00` et a `3/2` sur `U22`. Mesure a `n=4 000`,
+# fermetures q4 dirigees, radiale contre directe : `uniform` 450 066 -> 2 036 954
+# (x4,53), `terrain` 7 700 953 -> 9 033 186 (x1,17), `multiecho` x1,11,
+# `eight_clusters` x1,01. Zero desaccord du juge echantillonne.
 add_test(NAME mhgp3v_dominance_uniform COMMAND mhgp3v_directional_dominance_probe
          --points=2000 --family=uniform --seed=3 --judge-echantillon=800
          --min-closed-q4=6000 --min-residuel=3000000 --min-cellules=300000)
+# ABLATION : la forme radiale tabulee, conservee pour que le gain de la table
+# directe soit mesurable et non affirme.
+add_test(NAME mhgp3v_dominance_ablation_radiale COMMAND mhgp3v_directional_dominance_probe
+         --points=2000 --family=uniform --seed=3 --ablation-radiale
+         --judge-echantillon=400 --min-closed-q4=6000 --min-residuel=3000000)
 add_test(NAME mhgp3v_dominance_clusters COMMAND mhgp3v_directional_dominance_probe
          --points=2000 --family=eight_clusters --seed=3 --judge-echantillon=800
          --min-closed-q4=8000 --min-residuel=3000000)

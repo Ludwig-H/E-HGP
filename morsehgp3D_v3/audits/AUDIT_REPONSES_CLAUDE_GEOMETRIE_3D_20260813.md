@@ -116,9 +116,47 @@ relaxations. L'audit collectif possède déjà des seuils lane-spécifiques dire
 et l'optimisation du polynôme spindle sur chaque cellule peut être plus forte
 que ce simple détour par `r/D`.
 
-Gates : table générée puis comparée à une table figée, trois rayons et points de
-faces, égalité, `k_j-1`, confusion q3/q4, owner half-open et accord bit à bit
-avec le cutoff radial exact à petit domaine.
+Une version directe, sensiblement plus forte, est disponible. Pour chaque type
+de cellule, choisir les deux rayons extrêmes `r_-`,`r_+` et tabuler
+`L=||r_-||^2`, `B=||r_+||^2`, `P=r_- dot r_+` et `C=LB-P^2` :
+
+| cellules | `L` | `B` | `P` | `C` |
+| --- | ---: | ---: | ---: | ---: |
+| `U00` | `9` | `11` | `9` | `18` |
+| `U10`, `D10` | `10` | `14` | `11` | `19` |
+| `U11` | `11` | `17` | `13` | `18` |
+| `U20`, `D20` | `13` | `19` | `15` | `22` |
+| `U21`, `D21` | `14` | `22` | `17` | `19` |
+| `U22` | `17` | `27` | `21` | `18` |
+
+Sur la section `tau=3`, bilinéarité et convexité donnent pour tous `d,s` de la
+cellule les bornes simultanées utilisées ci-dessous. Si `x=tau(d)` et
+`y=tau(s)`, le certificat q4 entier est :
+
+$$xP-yB>0\quad\text{et}\quad2(xP-yB)^2>Cx^2.$$
+
+Pour q3, remplacer `2` par `3`. Le seuil réel q4 correspondant est
+`x/y>B/(P-sqrt(C/2))`; il descend de `11/6` sur `U00` jusqu'à `3/2` sur `U22`,
+contre presque trois pour la relaxation radiale. Aucune racine ne doit être
+évaluée sur device : les deux inégalités entières sont l'autorité.
+
+Cette fois la frontière est réellement la frontière du spindle et l'inégalité
+doit rester **stricte**. Fixture q4 `U00` :
+
+```text
+a=(100,100,100), z=a+6*(3,1,1), b=a+11*(3,0,0)
+```
+
+Elle donne `H=198` et `R=2*198^2`; le rapport de hauteur `11/6` reste donc
+incertain et tue un `>=`. Pour une sélection par hauteur entière, tabuler plutôt
+le plus petit `x` qui satisfait le prédicat pour chaque `(type,y,lane)` ; six
+fois `65 535` seuils suffisent et sont partagés par les 48 symétries.
+
+Gates : tables générées puis comparées aux tables figées, trois rayons et points
+de faces, fixture stricte ci-dessus, confusion q3/q4, owner half-open et accord
+bit à bit avec le spindle exact sur toutes les petites hauteurs. Conserver le
+cutoff radial simple comme ablation permet de mesurer le gain propre de la table
+directe.
 
 ## Q3 — le filtre FP certifié est recevable
 
