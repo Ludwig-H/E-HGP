@@ -3618,3 +3618,83 @@ mhgp3v_add_expected_code_test_for(mhgp3v_common_core_probe
 mhgp3v_add_expected_code_test_for(mhgp3v_common_core_probe
   mhgp3v_coeur_plancher_ferme "plancher de fermeture q4" 3
   --points=600 --family=eight_clusters --seed=3 --leaf=8 --min-closed-q4=1)
+
+# ---------------------------------------------------------------------------
+# CREDITS CELLULAIRES : LE GROUPE SANS ENUMERATION DE TRIPLES PAR PAIRE.
+#
+# Specification : audits/AUDIT_REPONSE_GATE_TROIS_VOIES_20260813.md, section
+# « Deblocage mathematique prioritaire ».
+#
+# Le theoreme de groupe vaut pour un ensemble fini de taille QUELCONQUE.
+# Caratheodory borne a trois un sous-groupe pour une direction FIXEE ; il
+# n'impose pas d'enumerer ces sous-groupes pour couvrir une cellule. Ce sujet
+# calcule donc, par cellule, l'evenement d'activation entier
+# `X_s = floor(T ||s||^2 / m_C(s)) + 1` avec `m_C(s) = min_j r_j . s`, empile
+# les credits disjoints par activation croissante, et lit le `h`-ieme seuil :
+# toute cible de la cellule dont la hauteur l'atteint est fermee sans etre
+# examinee. La decision porte sur un INTERVALLE, comme le cutoff de dominance.
+#
+# CE QUE LA MESURE DIT, ET QUI N'ETAIT PAS PREVU.
+#
+# Le certificat emet des credits en abondance — `140 243` sur `eight_clusters`
+# a `n=300` — mais `credits_hwm` plafonne a `5`, la ou q4 en exige `8`. Le cap
+# de pool est la contrainte LIANTE, et l'ablation le chiffre exactement : a
+# `n=60`, `pool=16/24/32` donne `hwm=5/8/10`. Un credit consomme un a trois
+# `PointId` ; un pool de seize n'en produit donc jamais plus de cinq disjoints.
+#
+# Et meme a `hwm=10`, la fermeture reste nulle : atteindre huit credits dans UNE
+# MEME cellule est rare, et la cible doit encore depasser le huitieme seuil. Le
+# test d'inclusion conique par enumeration de Caratheodory coute `O(m^3)` et
+# interdit le pool de trente ou plus qu'il faudrait pour mesurer autre chose que
+# zero. La version projective par enveloppe de Jarvis — sans division,
+# orientations par `det(s_i,s_j,s_k)` — n'est donc PAS une optimisation : c'est
+# le prealable a toute mesure de ce certificat.
+# ---------------------------------------------------------------------------
+add_executable(mhgp3v_cell_credits_probe
+  prototype/cell_credits_probe.cpp
+  prototype/spindle_cone_oracle.cpp)
+target_include_directories(mhgp3v_cell_credits_probe PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(mhgp3v_cell_credits_probe PRIVATE mhgp)
+target_compile_options(mhgp3v_cell_credits_probe PRIVATE -Wall -Wextra -Werror)
+
+# LE SELFTEST LIE LA TABLE DE RAYONS A LA CLASSIFICATION.
+#
+# « Chaque rayon appartient a sa propre cellule » serait FAUX, et je l'avais
+# d'abord ecrit : les rayons sont des SOMMETS PARTAGES entre cellules
+# adjacentes, et la convention half-open en attribue chacun a une seule —
+# `(3,1,1)` est un sommet de `U00`, `D10` et `U11`, et revient a `U11`. La
+# propriete correcte porte sur l'INTERIEUR : la somme des trois rayons y est
+# strictement, donc elle doit se classer dans sa propre cellule. La porte
+# verifie cela sur les 432 cellules, plus la fermeture conique de chaque rayon,
+# l'independance affine des triples, et surtout que `X_s` est bien le PREMIER
+# entier satisfaisant (H2) — verifie sur 6 760 sites.
+add_test(NAME mhgp3v_credits_selftest COMMAND mhgp3v_cell_credits_probe --selftest)
+set_tests_properties(mhgp3v_credits_selftest PROPERTIES
+  PASS_REGULAR_EXPRESSION "selftest accord=OUI")
+
+# LA PORTE D'ABLATION DU POOL. Elle grave la contrainte liante : sans elle, le
+# `ferme=0` serait lu comme un echec du theoreme alors qu'il mesure un cap
+# d'implementation.
+add_test(NAME mhgp3v_credits_pool_16 COMMAND mhgp3v_cell_credits_probe
+         --points=60 --family=eight_clusters --seed=3 --bank=59 --pool=16
+         --min-credits=15000 --min-rang-deux=5000 --min-residuel=3540)
+add_test(NAME mhgp3v_credits_pool_32 COMMAND mhgp3v_cell_credits_probe
+         --points=60 --family=eight_clusters --seed=3 --bank=59 --pool=32
+         --min-credits=25000 --min-rang-deux=15000 --min-residuel=3540)
+# LES CARRIERS DE RANG UN ET DEUX SONT LEGITIMES, et ce plancher l'exige : un
+# sujet qui n'accepterait que le rang trois perdrait des credits sans le dire.
+add_test(NAME mhgp3v_credits_rangs COMMAND mhgp3v_cell_credits_probe
+         --points=60 --family=terrain --seed=3 --bank=59 --pool=24
+         --min-credits=5000 --min-rang-deux=40000)
+
+mhgp3v_add_expected_code_test_for(mhgp3v_cell_credits_probe
+  mhgp3v_credits_reject_mutant_sans_juge "un mutant sans juge ne prouve rien" 2
+  --points=60 --inject=credit-un-seul-rayon)
+mhgp3v_add_expected_code_test_for(mhgp3v_cell_credits_probe
+  mhgp3v_credits_reject_pool "--pool hors bornes" 2 --points=60 --pool=2)
+mhgp3v_add_expected_code_test_for(mhgp3v_cell_credits_probe
+  mhgp3v_credits_reject_smax "--smax hors du domaine d'enveloppe" 2
+  --points=60 --smax=9223372036854775807)
+mhgp3v_add_expected_code_test_for(mhgp3v_cell_credits_probe
+  mhgp3v_credits_plancher_credits "plancher de credits" 3
+  --points=60 --family=eight_clusters --seed=3 --pool=16 --min-credits=100000000)

@@ -8,29 +8,52 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-## Observation live — `HEAD=ec2fbab`, trois microvoies commises
+## Observation live — `HEAD=d3329fe`, cœur partiellement réparé
 
 Le `HEAD` courant est
-`ec2fbab71dad5dbdfcb92e9f405b9b7e869f9e94`, commit
-`run the third road, and let the measurement retire it`. Il commet sans en
-faire une réception la note de comparaison des trois microvoies et le probe de
-cœur commun. Le worktree porte ensuite des deltas concurrents dans CMake et le
-pipeline d'ancre, ainsi que les seuls audits/propositions autorisés à
-l'auditeur ; ces deltas d'implémentation ne sont ni attribués à l'auditeur, ni
-modifiés par lui.
+`d3329fea4b595b7bbd283e509b0fa1955fcc3b06`, commit
+`a mutant that stays sound is not a mutant, and a scalar identity is not a
+partition`. Son parent `24cc1a2` retire l'ancienne garde de densité de l'ABI
+hôte/device cassée ; cette suppression ne reçoit ni producteur CUDA, ni lowering
+G4, ni SLO. Le worktree observé après `d3329fe` porte les présents deltas
+documentaires autorisés à l'auditeur et deux sources Claude non suivies :
+`prototype/cell_credits.hpp`, SHA-256 `5309870d8c22...`, et
+`prototype/cell_credits_probe.cpp`, SHA-256 `a5b1884c7b81...`. Elles ne sont pas
+raccordées au CMake ; aucun code n'est modifié par l'auditeur.
 
-Le tableau dominance/groupes/cœur juxtapose `n=12 500/150/600`, des univers et
-des ordonnances différents. Il oriente le travail mais ne départage pas une
-gate commune. Le cœur est disqualifié comme étage général de couverture et
-conservé comme fast path positif opportuniste dans une traversée de rectangles
-déjà nécessaire. La priorité mathématique devient le crédit conique cellulaire
-par événements d'activation et enveloppe projective 2D : il évite
-`C(m,3)`, produit un suffixe factorisé de cibles et échoue fail-open. Réponse
-complète à Claude :
-[`AUDIT_REPONSE_GATE_TROIS_VOIES_20260813.md`](AUDIT_REPONSE_GATE_TROIS_VOIES_20260813.md).
+Le successeur cœur est pincé par `common_core_probe.cpp=4660fe37...` et
+`CMakeLists.txt=a667047d...`. Il intègre quatre corrections fondées : suppression
+du retrait arbitraire de deux occupants, compteurs vide/sous-plein séparés,
+retrait de deux injections sound/fail-open et multiplicité exactement une par
+`PairId`. Reconfiguré Release/CUDA OFF, il rend `7/7` diagnostics en `1,20 s`
+sur l'ELF `e32075e3...`; aucune de ces sept portes n'exécute toutefois un mutant.
 
-Ce statut ne reçoit toujours ni pente physique, ni résiduel consommable, ni
-CUDA/G4, ni `BenchmarkOutputContract-v1`. GCP non utilisé.
+Le P0 `smax` reste ouvert et partagé avec le juge : sur `terrain n=400,
+smax=34`, le sujet ferme `452` relations q4 avec `accord=452`, alors que
+`occupation_hwm=16<31`. Le bord inclus au rayon exact `D/4` est mathématiquement
+sound, donc la dernière injection de bord ne peut pas être une porte de faux
+prune. L'arrondi supérieur est réellement unsafe mais n'a pas encore sa fixture.
+Le probe conserve ses matrices et rescans quadratiques et ne produit ni IDs du
+cœur, ni résiduel factorisé, ni caps/octet/pentes.
+
+La question de Claude est close architecturalement : ne pas abandonner le
+théorème, mais figer cette implémentation comme voie de couverture. Le cœur reste
+un certificateur positif opportuniste d'un rectangle déjà visité, jamais un
+préfiltre négatif. Les occupations partielles peuvent compléter dominance et
+groupes sous ledger de `PointId` disjoints. Réponse et contre-audit :
+[`AUDIT_REPONSE_GATE_TROIS_VOIES_20260813.md`](AUDIT_REPONSE_GATE_TROIS_VOIES_20260813.md) et
+[`AUDIT_WORKTREE_COEUR_COMMUN_20260813.md`](AUDIT_WORKTREE_COEUR_COMMUN_20260813.md).
+
+Le tableau dominance/groupes/cœur reste non comparable : `n=12 500/150/600`,
+univers et ordonnances différents. La priorité est la dominance par rectangles,
+puis les crédits coniques cellulaires par événements d'activation et enveloppe
+projective 2D, sans catalogue `C(m,3)`. Le premier probe de cette réponse admet
+la primitive H2, mais son pool de `16` IDs ne peut contenir huit crédits 3D
+disjoints, qui en exigent au moins `24`; il fixe encore `smax`, n'a aucun juge du
+certificat et recompte les paires. Verdict :
+[`AUDIT_WORKTREE_CREDITS_CELLULAIRES_20260813.md`](AUDIT_WORKTREE_CREDITS_CELLULAIRES_20260813.md).
+Ce statut ne reçoit toujours ni pente physique, ni résiduel consommable, ni CUDA/G4, ni
+`BenchmarkOutputContract-v1`. GCP non utilisé.
 
 ### Parent logiciel — `HEAD=5ddf4a3`, dominance 432 diagnostique
 

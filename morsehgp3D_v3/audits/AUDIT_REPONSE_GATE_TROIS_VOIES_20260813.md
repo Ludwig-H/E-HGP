@@ -62,6 +62,11 @@ sous-pleins sous une soustraction de deux injustifiée, pas `occupants==0`. Le
 nombre `2 306/2 306` ne prouve donc aucun vide central. Publier séparément
 `occupancy_zero`, `underfull_q2/q3/q4`, masse de blocs et quantiles.
 
+Le successeur `d3329fe` sépare ces compteurs et mesure `2 277/2 306` cœurs
+réellement vides sur `eight_clusters`, soit environ `98,74 %`, pas « plus de
+99 % ». Cette mesure rend le fast path peu prometteur sur cette famille, mais
+ne transforme toujours pas son échec en certificat négatif.
+
 Le probe actuel rescane tous les `n` points pour chaque bloc. Il n'implémente
 pas encore la requête peu coûteuse invoquée par la question. Le claim de coût
 est donc aussi ouvert.
@@ -75,7 +80,15 @@ frontière :
   éventuellement des descendants et reste fail-open ;
 - `count-only` retire la soustraction artificielle de deux ; comme les
   endpoints sont strictement hors cœur, il reste sound ;
-- bord inclus et rayon arrondi manquent de fixtures exactes.
+- le bord inclus au rayon exact `D/4` reste lui aussi sound : avec
+  `u=z-(a+b)/2`, `||u||=D/4` donne `H=3D^2/16` et
+  `Q<=D^4/16<2H^2`; ce n'est pas un mutant ;
+- seul l'arrondi du rayon vers le haut est unsafe. Pour `a=(100,100,100)` et
+  `b=(105,100,100)`, les dix déplacements
+  `(1,1,0),(1,-1,0),(1,0,1),(1,0,-1)`,
+  `(2,1,1),(2,1,-1),(2,-1,1),(2,-1,-1)` et
+  `(3,-1,1),(3,-1,-1)` entrent sous le ceil `2` mais échouent tous q4. Cette
+  fixture doit tuer l'injection restante.
 
 L'identité scalaire `paires_couvertes=C(n,2)` est nécessaire, pas suffisante :
 une omission peut être compensée par un doublon. Le juge borné doit exiger une
@@ -155,6 +168,13 @@ Le cœur intervient avant ces splits seulement si ses bornes et un minorant
 d'occupation viennent de la traversée déjà en cours. Il ne reçoit ni WSPD ni
 index dédié tant que son ratio masse fermée/travail n'est pas vert.
 
+Un cœur sous-plein peut néanmoins produire des **crédits partiels** : chacun de
+ses occupants est un témoin individuel commun à toutes les paires du bloc. Ces
+crédits peuvent compléter dominance et groupes coniques si le ledger conserve
+les `PointId` et impose la disjonction des ensembles membres. Il faut donc
+publier l'histogramme `0,1,...,>=h` et les IDs, pas seulement jeter les classes
+`1..h-1`.
+
 ## Ordre recommandé
 
 1. Corriger `smax`, les IDs/reçus et les portes des probes dominance/groupes.
@@ -173,5 +193,11 @@ index dédié tant que son ratio masse fermée/travail n'est pas vert.
 Le cœur est donc un **fast path positif opportuniste**, jamais une couverture,
 un préfiltre négatif ou une priorité avant la factorisation dominance+groupes.
 G4 reste NO-GO.
+
+Le commit `d3329fea4b595b7bbd283e509b0fa1955fcc3b06` répond déjà à une partie de
+cet audit : retrait des deux faux mutants séparation/count, suppression du
+`-2`, compteurs vide/sous-plein distincts et multiplicité exacte des `PairId`.
+Le P0 `smax`, le faux mutant de bord, la fixture ceil, les IDs du cœur et la
+range query factorisée restent ouverts.
 
 GCP non utilisé.

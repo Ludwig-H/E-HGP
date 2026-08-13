@@ -153,8 +153,29 @@ publiée. Le cœur n'est pas abandonné mathématiquement, mais rétrogradé en 
 path positif optionnel d'un rectangle déjà visité ; il ne justifie ni WSPD ni
 index propre. Le prochain jalon recommandé est la dominance bloc d'abord puis
 les crédits coniques cellulaires par enveloppes 2D, avec le cœur seulement si
-une occupation plausible est disponible sans scan supplémentaire. Voir
+une occupation plausible est disponible sans scan supplémentaire. La note, le
+contre-audit du probe et la réponse sont :
+[`NOTE_CLAUDE_GATE_TROIS_VOIES_20260813.md`](audits/NOTE_CLAUDE_GATE_TROIS_VOIES_20260813.md),
+[`AUDIT_WORKTREE_COEUR_COMMUN_20260813.md`](audits/AUDIT_WORKTREE_COEUR_COMMUN_20260813.md) et
 [`AUDIT_REPONSE_GATE_TROIS_VOIES_20260813.md`](audits/AUDIT_REPONSE_GATE_TROIS_VOIES_20260813.md).
+
+Le successeur `d3329fe` retire correctement deux faux mutants, le retrait de
+deux occupants et l'identité scalaire insuffisante. Il reste un diagnostic :
+`smax=34` ferme encore avec un seuil q4 figé à huit et l'accord du juge, le bord
+inclus est une transformation sound, l'arrondi supérieur unsafe n'a pas sa
+fixture et quatre matrices byte `n*n` resteraient environ `10 GB` à 50 k.
+
+Claude a ensuite ouvert le premier probe de crédits cellulaires. Son événement
+H2 et le certificat par les trois rayons sont admis, mais le snapshot initial
+est vacueux : un pool de `16` IDs ne peut contenir huit crédits 3D disjoints,
+qui exigent au moins `24` IDs. `smax` reste figé, le « juge » ne juge que les
+témoins ponctuels et le ledger reboucle sur toutes les paires. Le contre-audit
+et l'ordre de réparation sont dans
+[`AUDIT_WORKTREE_CREDITS_CELLULAIRES_20260813.md`](audits/AUDIT_WORKTREE_CREDITS_CELLULAIRES_20260813.md).
+Pour éviter de retomber à une tâche par ancre, une ancre de bloc peut proposer
+un carrier d'au plus neuf IDs, puis les huit coins de l'AABB le recertifient :
+les déterminants coniques sont affines en l'ancre et la marge H2 est concave.
+Le représentant propose, les coins font autorité ; l'échec scinde le bloc.
 
 Deux sorties sont distinctes :
 

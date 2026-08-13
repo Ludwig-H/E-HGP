@@ -1653,6 +1653,14 @@ sont séparés dans
 [`AUDIT_CONTRE_GROUPES_CONIQUES_2270077_20260813.md`](audits/AUDIT_CONTRE_GROUPES_CONIQUES_2270077_20260813.md) et
 [`AUDIT_REPONSE_DOMINANCE_GROUPES_5DDF4A3_20260813.md`](audits/AUDIT_REPONSE_DOMINANCE_GROUPES_5DDF4A3_20260813.md).
 
+Le premier code de crédit cellulaire ne reçoit pas encore cette proposition.
+Son événement H2 est correct, mais `kPoolCap=16` interdit structurellement les
+huit crédits q4 disjoints : une cellule 3D pleine exige au moins trois IDs par
+crédit, donc au moins `24` au total. Il sélectionne en outre seize sites par
+distance avant de trier leurs activations, fixe `smax` à `10/9/8`, ne rejoue pas
+les carriers avec un juge indépendant et recompte `n(n-1)` cibles. Pin et gates :
+[`AUDIT_WORKTREE_CREDITS_CELLULAIRES_20260813.md`](audits/AUDIT_WORKTREE_CREDITS_CELLULAIRES_20260813.md).
+
 Le groupe octaédrique partage les neuf tables et le kernel, mais la chambre
 dépend de `x-a` : `canon(x-a)` ne se déduit pas de
 `canon(x)-canon(a)`. Les 48 ordres relatifs ne disparaissent pas par un tri
@@ -1666,6 +1674,11 @@ uniques strictement intérieurs. Tester d'abord deux fixtures identiques à cœu
 vide puis occupé ; ne promouvoir une WSPD que si le range-count du cœur ferme
 une masse observée. Détails, Q1--Q7 et gates :
 [`AUDIT_REPONSES_CLAUDE_GEOMETRIE_3D_20260813.md`](audits/AUDIT_REPONSES_CLAUDE_GEOMETRIE_3D_20260813.md).
+La troisième voie est désormais bornée par la note, son contre-audit et la
+réponse :
+[`NOTE_CLAUDE_GATE_TROIS_VOIES_20260813.md`](audits/NOTE_CLAUDE_GATE_TROIS_VOIES_20260813.md),
+[`AUDIT_WORKTREE_COEUR_COMMUN_20260813.md`](audits/AUDIT_WORKTREE_COEUR_COMMUN_20260813.md) et
+[`AUDIT_REPONSE_GATE_TROIS_VOIES_20260813.md`](audits/AUDIT_REPONSE_GATE_TROIS_VOIES_20260813.md).
 
 Le premier probe dominance ne reçoit pas encore cette architecture. Il
 énumère toutes les paires, conserve trois bitsets `C(n,2)` et mélange des
@@ -1685,7 +1698,10 @@ le rectangle. Si `ell` est la hauteur, `zeta_h` le h-ième témoin absolu commun
 
 $$r_{AB}=\frac{\beta-\alpha}{\zeta_h-\alpha}.$$
 
-Sous les gardes explicites `zeta_h>max_A ell` et `beta>zeta_h`, ce rapport
+« Commun » signifie ici que, pour chaque témoin sélectionné `z` et tout
+`a in A`, les extrema exacts des formes de facette placent `z-a` dans la même
+cellule half-open ; les `PointId` sont distincts. Sous les gardes explicites
+`zeta_h>max_A ell` et `beta>zeta_h`, ce rapport
 croît avec `ell(a)` et `ell(b)` ; les minima `alpha,beta` sont donc bien le pire
 cas lorsque le dénominateur est écrit avec les hauteurs absolues communes. Le
 cutoff direct ferme alors tout le rectangle, et les témoins crédités précèdent
@@ -1700,6 +1716,16 @@ faux partage. Le cœur commun reste présent seulement si sa borne et un minoran
 d'occupation viennent de la traversée déjà en cours. Les deux amas purs et leur
 cœur vide interdisent de construire une WSPD ou un index dédié à ce seul fast
 path.
+
+Une extension reçue peut cependant garder le même rectangle sans descendre
+toutes les ancres. Une ancre canonique propose au plus trois IDs par rayon ; le
+même carrier est ensuite recertifié sur les huit coins de l'AABB d'ancres. Les
+déterminants et numérateurs de Cramer sont affines en l'ancre, tandis que, pour
+une hauteur cible minimale fixée, la marge H2 est concave ; les coins sont donc
+une autorité exacte sur la boîte. L'échec scinde le bloc. La construction
+complète par les 24 intersections coin--rayon reste un oracle ou tier de
+secours, car elle peut consommer jusqu'à 72 IDs par crédit. Voir
+[`AUDIT_WORKTREE_CREDITS_CELLULAIRES_20260813.md`](audits/AUDIT_WORKTREE_CREDITS_CELLULAIRES_20260813.md).
 
 La fusion `OR/AND` des orientations ne doit pas matérialiser le résiduel dense.
 Les relations dirigées restent une partition canonique de rectangles ; leur
