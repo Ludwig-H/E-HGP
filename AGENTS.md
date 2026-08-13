@@ -14,6 +14,7 @@ Par défaut, tout nouveau travail MorseHGP3D cible **`morsehgp3D_v3/`**, sauf t�
 - `morsehgp3D_v3/prototype/` : candidats CPU/CUDA, probes et portes différentielles.
 - `morsehgp3D_v3/audits/` et `morsehgp3D_v3/receipts/` : autorité d'audit, réfutations, mesures et reçus reproductibles.
 - `docs/` : spécification, preuves, roadmap, plan de tests et registre formel; `tests/` : contrats et fixtures transverses.
+- `tests/SemanticKITTI/Zoltan/HierarchicalSelfAttention/` : programme de recherche documentaire HGP-HSA pour SemanticKITTI; malgré son emplacement sous `tests/`, ce dossier n'est pas encore une suite de tests exécutable et ne contient actuellement ni code, ni configuration, ni manifeste de dépendances, ni runner.
 - `gcp-migration/` : seuls scripts autorisés pour les sessions GPU GCP.
 - `build/v3/` : artefacts générés; ne pas les éditer ni les versionner.
 
@@ -28,6 +29,20 @@ ctest --test-dir build/v3 --output-on-failure
 ```
 
 Filtrer pendant l'itération, par exemple avec `ctest --test-dir build/v3 --output-on-failure -R '^mhgp3v_flats_'`, puis exécuter la suite pertinente complète avant livraison. La CI GitHub actuelle ne construit pas la v3 : les résultats CTest locaux doivent donc être rapportés explicitement. Python 3 est requis pour une validation complète, car son absence retire des portes F0 de CTest. CUDA est opt-in avec `-DMHGP3V_ENABLE_CUDA=ON`; toute exécution sur une VM GCP applique les garde-fous ci-dessous. Pour la documentation et le registre, exécuter respectivement `python tools/check_docs.py` et `python tools/check_implementation_status.py`.
+
+## Recherche SemanticKITTI / HierarchicalSelfAttention
+
+Avant tout travail dans `tests/SemanticKITTI/Zoltan/HierarchicalSelfAttention/`, lire au minimum `README.md`, `ARCHITECTURE.md`, `EXPERIMENTAL_PROTOCOL.md`, `RESEARCH_PLAN.md`, `RISKS_AND_GO_NO_GO.md`, `THEOREM_PROGRAM.md` et `REFERENCES.md`. Le dossier décrit une phase de conception et de falsification, sans expérience apprise rapportée. Il reprend le cadre v3 hors registre déclaré plus haut et ne constitue ni une validation de MorseHGP3D, ni un claim produit ou GPU. Vérifier d'abord la fraîcheur de `morsehgp3D_v3/audits/AUDIT_ETAT_COURANT.md`; un pin antérieur au `HEAD` interdit de transformer la hiérarchie supposée disponible en résultat certifié.
+
+La cible primaire est la segmentation sémantique SemanticKITTI mono-scan à 19 classes, avec `(x, y, z, remission)`: entraînement sur `00–07, 09, 10`, validation sur `08`, test caché sur `11–21`. Le track principal exclut RGB, historique LiDAR, données annotées ou pseudo-labels externes, TTA et ensemble. Ne pas ouvrir la phase instance avant validation de la phase sémantique et ne jamais régler un hyperparamètre à partir du serveur test.
+
+Toute implémentation doit préserver l'ordre original des points, produire 19 logits par point dans l'ordre du `.bin`, isoler les scans d'un batch et interdire toute fuite des labels dans la construction HGP ou le forward de validation/test. La hiérarchie doit être déterministe et laminaire; cycles, parents invalides, feuilles perdues, appartenances dupliquées ou recouvrements silencieux sont rejetés. Si l'objet est un DAG ou exige une projection laminaire, le contrat et l'arbitrage doivent être explicites. Distinguer toujours `K` (ordre HGP), `d_geo` (distance géométrique) et `k_local` (voisinage du backbone).
+
+Séparer causalement l'effet de l'arbre, de la représentation et de l'opérateur en gardant backbone, budget, features et seeds appariés. Les fixtures minimales comprennent le round-trip point–feuille, les rejets structurels, `HGP K=1 == single-linkage`, l'égalité entre le support de la réalisation simpliciale et celui de ses sommets, l'isolation inter-scan, ainsi que HSA/QC-HSA contre une référence dense sur de petits arbres. Toute contradiction mathématique ou défaillance structurelle devient une fixture permanente; conserver aussi les résultats négatifs et les runs en échec.
+
+Épingler l'API SemanticKITTI et son YAML à un commit exact. Chaque run conserve le commit et l'état du worktree, la configuration, les dépendances et la commande, les hashes du manifeste et des hiérarchies, les seeds Python/NumPy/PyTorch/CUDA, les métriques brutes par scan et classe, les coûts RAM/VRAM/latence, le checkpoint et un statut `completed`, `failed` ou `invalid`. Utiliser au moins trois seeds pour une exploration retenue et recalculer le mIoU depuis les matrices de confusion agrégées, jamais depuis une moyenne de mIoU par scan. `python tools/check_docs.py` exclut actuellement `tests/**`; son succès ne valide donc pas ce corpus.
+
+Conserver les sources primaires, dater toute veille ou valeur de leaderboard et mesurer le coût de bout en bout, construction HGP et reprojection incluses. Les termes « exact », « temps réel », « GPU-friendly » et « état de l'art » restent interdits comme résultats sans le certificat ou protocole correspondant.
 
 ## Style et conventions de test
 
