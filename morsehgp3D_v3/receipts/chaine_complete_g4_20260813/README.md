@@ -1,4 +1,16 @@
-# Reçu G4 du 13 août 2026 — la chaîne complète tient sur `uniform`, et sur elle seule
+# Reçu G4 du 13 août 2026 — réfutation physique de la source par paire
+
+**ÉTIQUETTE DE CALCUL** (contre-audit `5dc65c7`) :
+
+```text
+compute=CPU_REFERENCE_CONCURRENT   quatre processus, douze threads chacun
+GPU_COMPILE=YES                    GPU_RUN=NO
+PRODUCT_OUTPUT=NO                  ni BallKey, ni census partage, ni fold
+```
+
+Le script omet `--engine=pipeline` : le moteur exécuté est donc `reference`, et
+les quatre familles tournent **concurremment** sur la même machine. Les temps
+publiés sont ceux d'une machine chargée.
 
 Cadre : `phase=exploration_v3_hors_registre`, `backend=cpu_reference`,
 `profile=quantized_u16_input_only`, `mode=proposition_math_non_recue`,
@@ -25,12 +37,16 @@ correspondance de génération. Ses chiffres sont donc publiés comme
 | `scanline_overlap_multiecho` | `21,2` s | `116,7` s | `551,9` s | — | `2,46 / 2,24` |
 | `terrain` | `9,1` s | `82,7` s | `533,5` s | — | **`3,19 / 2,69`** |
 
-**`uniform` tient** : `50 000` points en `78,8` secondes à douze threads, avec
-des pentes de temps `1,20 / 1,21 / 1,08`, toutes sous le seuil.
+**`uniform` passe la gate exploratoire de PENTE, et rien de plus.** Ses trois
+pentes de temps valent `1,20 / 1,21 / 1,08`, toutes sous le seuil. Mais
+`78,8` secondes valent **environ soixante-dix-neuf fois** le budget d'une
+seconde. Écrire « `uniform` tient » était faux, et je l'avais écrit.
 
 **Les trois autres familles murent** : `n^{2,2}` à `n^{3,2}`. Aucune n'atteint
-`50 000` dans le budget. C'est la réfutation du producteur, et elle est
-mesurée ici — pas seulement prédite.
+`50 000`, et leur dernier run ne publie **ni résultat ni code de sortie** — le
+`wait || true` du script masque cet échec et poursuit. C'est un défaut du
+script, pas une absence de mesure, et il rend ces lignes incomplètes plutôt que
+négatives.
 
 ## 2. La sortie, et son identité
 
@@ -41,9 +57,10 @@ mesurée ici — pas seulement prédite.
 | `terrain` `25 000` | `1 873 843` | `0` doublon |
 | `eight_clusters` `12 500` | `4 370 704` | `0` doublon |
 
-**L'identité tient partout** : à chaque taille et chaque famille, le nombre
-d'occurrences émises égale le nombre de clés distinctes. Le census ne produit
-aucun doublon.
+L'identité `occurrences = clés uniques` tient à chaque taille et chaque
+famille. **Elle ne juge que l'unicité de `SupportKey`** : ni `BallKey`, ni le
+partage d'un census entre supports cosphériques, ni les ensembles `I_B/U_B`, ni
+le payload des dix forêts. Ce n'est donc pas une identité de sortie produit.
 
 Sur `uniform`, la sortie croît en `n^{1,05}` — `2,39` puis `5,01`, `10,37` et
 `21,41` millions — donc **quasi linéairement**.
@@ -70,7 +87,15 @@ que la loi se casse ». La prédiction est confirmée, et la loi
 Il **décide** que le producteur actuel n'atteint le contrat sur aucune famille
 sauf `uniform`, et que l'obstacle est la pente, non la constante.
 
-Il **ne décide pas** le contrat : `78,8` secondes à douze threads sur `uniform`
+Il **ne décide pas** le contrat, ni même sa faisabilité sur `uniform` : `78,8` secondes à douze threads sur `uniform`
 ne sont pas une seconde, aucun kernel n'est mesuré, aucun octet ni high-water
 n'est publié, et le fold vers les dix forêts n'est pas dans le chrono. G4 reste
 NO-GO.
+
+
+## 5. Provenance
+
+Transcript complet versionné dans
+[`transcript.txt`](transcript.txt) — l'extension `.txt` et non `.log`, la
+seconde étant ignorée par Git, ce qui rendait la première version de ce reçu
+**non autoportante**.

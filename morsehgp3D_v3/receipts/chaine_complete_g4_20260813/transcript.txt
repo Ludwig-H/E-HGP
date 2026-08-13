@@ -1,0 +1,305 @@
+session dans /tmp/ehgp-chaine-session.7kt3V7eN
+Updated property [core/project].
+[GARDE pre-mutation] cible=devpod-gpu-exploration/europe-west4-ai1a/ehgp-blackwell-spot-ai1a état=TERMINATED machine=g4-standard-48 provisioning=SPOT action=STOP maxRunDuration=3600s.
+[SET-SCHEDULING] Reconfiguration protégée demandée :
+  compte              : louis.hauseux@gmail.com
+  projet              : devpod-gpu-exploration
+  zone                : europe-west4-ai1a
+  instance            : ehgp-blackwell-spot-ai1a
+  état certifié       : TERMINATED
+  maxRunDuration cible: 3600 s
+  action              : STOP
+Updated [https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/europe-west4-ai1a/instances/ehgp-blackwell-spot-ai1a].
+[GARDE post-mutation] cible=devpod-gpu-exploration/europe-west4-ai1a/ehgp-blackwell-spot-ai1a état=TERMINATED machine=g4-standard-48 provisioning=SPOT action=STOP maxRunDuration=3600s.
+[OK] maxRunDuration=3600s recertifié sur la cible TERMINATED devpod-gpu-exploration/europe-west4-ai1a/ehgp-blackwell-spot-ai1a; aucune VM démarrée ou arrêtée.
+[GARDE SSH] Clé de session ssh-ed25519 utilisable sans interaction (SHA256:silKyj+r0C4Rr5kj0OKnPWL+xp9q7OeNS6mtdInHlzA).
+[GARDE SSH] Clé OS Login unique, expiration fixe=2026-08-13T19:36:07.475934Z, durée restante=4179s.
+[START] Démarrage protégé demandé :
+  compte                 : louis.hauseux@gmail.com
+  projet                 : devpod-gpu-exploration
+  instance               : ehgp-blackwell-spot-ai1a
+  zone                   : europe-west4-ai1a
+  machine/provisioning   : g4-standard-48 / SPOT
+  maxRunDuration GCE     : 3600 s
+  arrêt invité secondaire : 45 min
+Starting instance(s) ehgp-blackwell-spot-ai1a...
+..............................................done.
+Updated [https://compute.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/europe-west4-ai1a/instances/ehgp-blackwell-spot-ai1a].
+Instance internal IP is 10.164.0.7
+Instance external IP is 34.141.251.175
+[GARDE-FOU GCE] action=STOP, maxRunDuration=3600s, échéance calculée=1786649200, échéance sûre=1786648900, terminationTimestamp non exposé; échéance calculée certifiée
+[GARDE-FOU INVITÉ] Armement de shutdown -P +45 via SSH.
+Shutdown scheduled for Thu 2026-08-13 19:12:32 UTC, use 'shutdown -c' to cancel.
+MODE=poweroff
+USEC=1786648352663845
+
+[GARDE-FOU GCE] action=STOP, maxRunDuration=3600s, échéance calculée=1786649200, échéance sûre=1786648900, terminationTimestamp non exposé; échéance calculée certifiée
+[SUCCÈS] VM démarrée avec deux coupe-circuits vérifiés. Fermez la session avec stop_and_verify.sh.
+generation verrouillee : 2026-08-13T11:26:40.142-07:00
+coeurs=48
+cmake version 4.4.2
+Cuda compilation tools, release 12.9, V12.9.41
+Build cuda_12.9.r12.9/compiler.35813241_0
+-- The CXX compiler identification is GNU 11.4.0
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE
+CMake Warning at CMakeLists.txt:37 (message):
+  mhgp3v : GMP absent, la validation arithmetique perd son temoin large
+
+
+-- Found Python3: /usr/bin/python3.10 (found version "3.10.12") found components: Interpreter
+-- Configuring done (0.5s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/louis_hauseux_gmail_com/chaine/build
+[  0%] Building CXX object morsehgp3D_v2_build/CMakeFiles/mhgp.dir/src/catalogue.cpp.o
+[ 40%] Building CXX object morsehgp3D_v2_build/CMakeFiles/mhgp.dir/src/forest.cpp.o
+[ 40%] Building CXX object morsehgp3D_v2_build/CMakeFiles/mhgp.dir/src/run.cpp.o
+In file included from /home/louis_hauseux_gmail_com/chaine/morsehgp3D_v2/include/mhgp/mhgp.hpp:8,
+                 from /home/louis_hauseux_gmail_com/chaine/morsehgp3D_v2/src/run.cpp:9:
+/home/louis_hauseux_gmail_com/chaine/morsehgp3D_v2/include/mhgp/exact.hpp:25:14: warning: ISO C++ does not support ‘__int128’ for ‘type name’ [-Wpedantic]
+   25 | using i128 = __int128;
+      |              ^~~~~~~~
+/home/louis_hauseux_gmail_com/chaine/morsehgp3D_v2/include/mhgp/exact.hpp:26:23: warning: ISO C++ does not support ‘__int128’ for ‘type name’ [-Wpedantic]
+   26 | using u128 = unsigned __int128;
+      |                       ^~~~~~~~
+In file included from /home/louis_hauseux_gmail_com/chaine/morsehgp3D_v2/include/mhgp/mhgp.hpp:8,
+                 from /home/louis_hauseux_gmail_com/chaine/morsehgp3D_v2/src/forest.cpp:9:
+/home/louis_hauseux_gmail_com/chaine/morsehgp3D_v2/include/mhgp/exact.hpp:25:14: warning: ISO C++ does not support ‘__int128’ for ‘type name’ [-Wpedantic]
+   25 | using i128 = __int128;
+      |              ^~~~~~~~
+/home/louis_hauseux_gmail_com/chaine/morsehgp3D_v2/include/mhgp/exact.hpp:26:23: warning: ISO C++ does not support ‘__int128’ for ‘type name’ [-Wpedantic]
+   26 | using u128 = unsigned __int128;
+      |                       ^~~~~~~~
+In file included from /home/louis_hauseux_gmail_com/chaine/morsehgp3D_v2/include/mhgp/mhgp.hpp:8,
+                 from /home/louis_hauseux_gmail_com/chaine/morsehgp3D_v2/src/catalogue.cpp:22:
+/home/louis_hauseux_gmail_com/chaine/morsehgp3D_v2/include/mhgp/exact.hpp:25:14: warning: ISO C++ does not support ‘__int128’ for ‘type name’ [-Wpedantic]
+   25 | using i128 = __int128;
+      |              ^~~~~~~~
+/home/louis_hauseux_gmail_com/chaine/morsehgp3D_v2/include/mhgp/exact.hpp:26:23: warning: ISO C++ does not support ‘__int128’ for ‘type name’ [-Wpedantic]
+   26 | using u128 = unsigned __int128;
+      |                       ^~~~~~~~
+[ 60%] Linking CXX static library libmhgp.a
+[ 60%] Built target mhgp
+[ 80%] Building CXX object CMakeFiles/mhgp3v_anchor_source.dir/prototype/anchor_source.cpp.o
+[100%] Linking CXX executable mhgp3v_anchor_source
+[100%] Built target mhgp3v_anchor_source
+[ 75%] Built target mhgp
+[100%] Building CXX object CMakeFiles/mhgp3v_wspd_wavefront_probe.dir/prototype/wspd_wavefront_probe.cpp.o
+[100%] Linking CXX executable mhgp3v_wspd_wavefront_probe
+[100%] Built target mhgp3v_wspd_wavefront_probe
+[ 60%] Built target mhgp
+[ 80%] Building CXX object CMakeFiles/mhgp3v_wspd_front_probe.dir/prototype/wspd_front_probe.cpp.o
+[100%] Linking CXX executable mhgp3v_wspd_front_probe
+[100%] Built target mhgp3v_wspd_front_probe
+[ 60%] Built target mhgp
+[ 80%] Building CXX object CMakeFiles/mhgp3v_rect_front_probe.dir/prototype/rect_front_probe.cpp.o
+[100%] Linking CXX executable mhgp3v_rect_front_probe
+[100%] Built target mhgp3v_rect_front_probe
+=== compilation CUDA opt-in ===
+-- mhgp3v : source par ancre device active pour 120-real
+-- Found Python3: /usr/bin/python3.10 (found version "3.10.12") found components: Interpreter
+-- Configuring done (3.3s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/louis_hauseux_gmail_com/chaine/build-cuda
+/home/louis_hauseux_gmail_com/chaine/morsehgp3D_v2/include/mhgp/exact.hpp:25:14: warning: ISO C++ does not support ‘__int128’ for ‘type name’ [-Wpedantic]
+   25 | using i128 = __int128;
+      |              ^~~~~~~~
+/home/louis_hauseux_gmail_com/chaine/morsehgp3D_v2/include/mhgp/exact.hpp:26:23: warning: ISO C++ does not support ‘__int128’ for ‘type name’ [-Wpedantic]
+   26 | using u128 = unsigned __int128;
+      |                       ^~~~~~~~
+In file included from /home/louis_hauseux_gmail_com/chaine/morsehgp3D_v2/include/mhgp/mhgp.hpp:8,
+                 from /home/louis_hauseux_gmail_com/chaine/morsehgp3D_v2/src/catalogue.cpp:22:
+/home/louis_hauseux_gmail_com/chaine/morsehgp3D_v2/include/mhgp/exact.hpp:25:14: warning: ISO C++ does not support ‘__int128’ for ‘type name’ [-Wpedantic]
+   25 | using i128 = __int128;
+      |              ^~~~~~~~
+/home/louis_hauseux_gmail_com/chaine/morsehgp3D_v2/include/mhgp/exact.hpp:26:23: warning: ISO C++ does not support ‘__int128’ for ‘type name’ [-Wpedantic]
+   26 | using u128 = unsigned __int128;
+      |                       ^~~~~~~~
+[ 60%] Linking CXX static library libmhgp.a
+[ 60%] Built target mhgp
+[ 80%] Building CXX object CMakeFiles/mhgp3v_anchor_device.dir/prototype/anchor_source_device_qualification.cpp.o
+[100%] Building CUDA object CMakeFiles/mhgp3v_anchor_device.dir/prototype/anchor_source_kernel.cu.o
+[100%] Linking CXX executable mhgp3v_anchor_device
+[100%] Built target mhgp3v_anchor_device
+CUDA_COMPILE=OK
+      Start 696: mhgp3v_wspd_wavefront_juge_vague
+      Start 697: mhgp3v_wspd_wavefront_mutant_masque_global
+      Start 698: mhgp3v_wspd_wavefront_travail
+ 1/23 Test #687: mhgp3v_rect_front_refus_domaine ..............   Passed    0.00 sec
+ 2/23 Test #689: mhgp3v_wspd_front_multiplicite ...............   Passed    0.00 sec
+ 3/23 Test #690: mhgp3v_wspd_front_mutant_omission ............   Passed    0.00 sec
+ 4/23 Test #694: mhgp3v_wspd_wavefront_multiplicite ...........   Passed    0.00 sec
+ 5/23 Test #695: mhgp3v_wspd_wavefront_multiplicite_serree ....   Passed    0.00 sec
+ 6/23 Test #691: mhgp3v_wspd_front_mutant_doublon .............   Passed    0.00 sec
+ 7/23 Test #692: mhgp3v_wspd_front_refus_leaf .................   Passed    0.00 sec
+ 8/23 Test #693: mhgp3v_wspd_front_refus_oracle_trop_grand ....   Passed    0.00 sec
+ 9/23 Test #688: mhgp3v_rect_front_plancher_mord ..............   Passed    0.01 sec
+10/23 Test #678: mhgp3v_rect_front_mutant_max_coins ...........   Passed    0.02 sec
+11/23 Test #679: mhgp3v_rect_front_mutant_sommet_non_ecrete ...   Passed    0.02 sec
+12/23 Test #698: mhgp3v_wspd_wavefront_travail ................   Passed    0.03 sec
+13/23 Test #677: mhgp3v_rect_front_fixtures ...................   Passed    0.06 sec
+14/23 Test #696: mhgp3v_wspd_wavefront_juge_vague .............   Passed    0.12 sec
+15/23 Test #697: mhgp3v_wspd_wavefront_mutant_masque_global ...   Passed    0.13 sec
+16/23 Test #680: mhgp3v_rect_front_coeur_juge .................   Passed    0.15 sec
+17/23 Test #686: mhgp3v_rect_front_mutant_coeur_trop_grand ....   Passed    0.17 sec
+18/23 Test #683: mhgp3v_rect_front_all_juge_q2 ................   Passed    0.27 sec
+19/23 Test #682: mhgp3v_rect_front_oracle_all .................   Passed    0.49 sec
+20/23 Test #681: mhgp3v_rect_front_coeur_juge_q4 ..............   Passed    0.66 sec
+21/23 Test #676: mhgp3v_rect_front_intervalle .................   Passed    0.99 sec
+22/23 Test #684: mhgp3v_rect_front_all_juge_q3 ................   Passed    1.26 sec
+23/23 Test #685: mhgp3v_rect_front_all_juge_q4 ................   Passed    1.53 sec
+
+100% tests passed out of 23
+
+Total Test time (real) =   1.54 sec
+=== CHAINE COMPLETE ===
+--- out/chaine_eight_clusters.txt
+=== eight_clusters n=6250
+supports q2=197720 q3=935504 q4=866615 total=1999839 extra_shell=14245
+high_water partners=4554 site_list=6249 kept=5411 lens=3373
+theta arme=non ancres_vivantes_armees=0 prunes_en_plus_sur_ancre_vivante=0
+moteur reference caps partners=6144 sites=5120 kept=2048 lens=1024
+temps wall_s=147.732572
+identite occurrences=1999839 cles_uniques=1999839 doublons=0
+=== eight_clusters n=12500
+supports q2=415484 q3=2028759 q4=1926461 total=4370704 extra_shell=31408
+high_water partners=7794 site_list=12499 kept=9940 lens=5631
+theta arme=non ancres_vivantes_armees=0 prunes_en_plus_sur_ancre_vivante=0
+moteur reference caps partners=6144 sites=5120 kept=2048 lens=1024
+temps wall_s=503.451187
+identite occurrences=4370704 cles_uniques=4370704 doublons=0
+=== eight_clusters n=25000
+--- out/chaine_scanline_overlap_multiecho.txt
+=== scanline_overlap_multiecho n=6250
+supports q2=148993 q3=409343 q4=208367 total=766703 extra_shell=86376
+high_water partners=1608 site_list=6249 kept=2804 lens=1596
+theta arme=non ancres_vivantes_armees=0 prunes_en_plus_sur_ancre_vivante=0
+moteur reference caps partners=6144 sites=5120 kept=2048 lens=1024
+temps wall_s=21.231529
+identite occurrences=766703 cles_uniques=766703 doublons=0
+=== scanline_overlap_multiecho n=12500
+supports q2=301461 q3=838686 q4=433898 total=1574045 extra_shell=169413
+high_water partners=1909 site_list=12355 kept=5234 lens=3311
+theta arme=non ancres_vivantes_armees=0 prunes_en_plus_sur_ancre_vivante=0
+moteur reference caps partners=6144 sites=5120 kept=2048 lens=1024
+temps wall_s=116.684622
+identite occurrences=1574045 cles_uniques=1574045 doublons=0
+=== scanline_overlap_multiecho n=25000
+supports q2=611167 q3=1733356 q4=916837 total=3261360 extra_shell=325240
+high_water partners=2998 site_list=24694 kept=9758 lens=5389
+theta arme=non ancres_vivantes_armees=0 prunes_en_plus_sur_ancre_vivante=0
+moteur reference caps partners=6144 sites=5120 kept=2048 lens=1024
+temps wall_s=551.903192
+identite occurrences=3261360 cles_uniques=3261360 doublons=0
+=== scanline_overlap_multiecho n=50000
+--- out/chaine_terrain.txt
+=== terrain n=6250
+supports q2=125064 q3=289052 q4=33357 total=447473 extra_shell=17992
+high_water partners=1549 site_list=6194 kept=4635 lens=2895
+theta arme=non ancres_vivantes_armees=0 prunes_en_plus_sur_ancre_vivante=0
+moteur reference caps partners=6144 sites=5120 kept=2048 lens=1024
+temps wall_s=9.072983
+identite occurrences=447473 cles_uniques=447473 doublons=0
+=== terrain n=12500
+supports q2=253142 q3=589790 q4=70132 total=913064 extra_shell=35175
+high_water partners=2446 site_list=12150 kept=7569 lens=4349
+theta arme=non ancres_vivantes_armees=0 prunes_en_plus_sur_ancre_vivante=0
+moteur reference caps partners=6144 sites=5120 kept=2048 lens=1024
+temps wall_s=82.680535
+identite occurrences=913064 cles_uniques=913064 doublons=0
+=== terrain n=25000
+supports q2=511696 q3=1203748 q4=158399 total=1873843 extra_shell=71342
+high_water partners=4380 site_list=24961 kept=12478 lens=7811
+theta arme=non ancres_vivantes_armees=0 prunes_en_plus_sur_ancre_vivante=0
+moteur reference caps partners=6144 sites=5120 kept=2048 lens=1024
+temps wall_s=533.520938
+identite occurrences=1873843 cles_uniques=1873843 doublons=0
+=== terrain n=50000
+--- out/chaine_uniform.txt
+=== uniform n=6250
+supports q2=217830 q3=1097127 q4=1072552 total=2387509 extra_shell=17829
+high_water partners=2254 site_list=2214 kept=533 lens=256
+theta arme=non ancres_vivantes_armees=0 prunes_en_plus_sur_ancre_vivante=0
+moteur reference caps partners=6144 sites=5120 kept=2048 lens=1024
+temps wall_s=7.040660
+identite occurrences=2387509 cles_uniques=2387509 doublons=0
+=== uniform n=12500
+supports q2=449864 q3=2298074 q4=2266637 total=5014575 extra_shell=37711
+high_water partners=2384 site_list=2566 kept=535 lens=254
+theta arme=non ancres_vivantes_armees=0 prunes_en_plus_sur_ancre_vivante=0
+moteur reference caps partners=6144 sites=5120 kept=2048 lens=1024
+temps wall_s=16.162868
+identite occurrences=5014575 cles_uniques=5014575 doublons=0
+=== uniform n=25000
+supports q2=919567 q3=4745192 q4=4704961 total=10369720 extra_shell=77512
+high_water partners=2427 site_list=2847 kept=622 lens=306
+theta arme=non ancres_vivantes_armees=0 prunes_en_plus_sur_ancre_vivante=0
+moteur reference caps partners=6144 sites=5120 kept=2048 lens=1024
+temps wall_s=37.322996
+identite occurrences=10369720 cles_uniques=10369720 doublons=0
+=== uniform n=50000
+supports q2=1873994 q3=9770306 q4=9768840 total=21413140 extra_shell=157981
+high_water partners=2473 site_list=3015 kept=711 lens=318
+theta arme=non ancres_vivantes_armees=0 prunes_en_plus_sur_ancre_vivante=0
+moteur reference caps partners=6144 sites=5120 kept=2048 lens=1024
+temps wall_s=78.841184
+identite occurrences=21413140 cles_uniques=21413140 doublons=0
+code=0
+=== FENETRE PAR ANCRE ===
+--- out/fenetre_eight_clusters.txt
+n=6250 famille=eight_clusters boite=serree sep=3/1 | front=315100 (50.416/pt) | vagues=22 tests=623951 tests/front=1.98 vague_max=66832 | masse=19528125/19528125 | arbre_med=0.5 ms arbre_p95=0.5 ms vague=721.7 ms | banque lectures=24017514 recert=24017514 ferme q2=133897 q3=8341 q4=4669 | masse fermee q2=48.92% records fermes q2=42.49% tronques=1 juges=0 faux=0 | verdicts ALL=1848212 NONE=12326364 descente_pure=9842938 | fenetre somme_N=19948356 max_N=4443 moyen_N=3191.7 | partenaires max=317 moyen=50.79 | residuel : 0 paires tirees DANS LA MASSE ouverte, temoins_moyen=0.0 max=0, deja >=10 temoins : 0 (0.0%) donc supports q2 estimes 0.0% du residuel
+n=12500 famille=eight_clusters boite=serree sep=3/1 | front=776826 (62.146/pt) | vagues=24 tests=1541153 tests/front=1.98 vague_max=159678 | masse=78118750/78118750 | arbre_med=0.8 ms arbre_p95=0.8 ms vague=1968.3 ms | banque lectures=66005336 recert=66005336 ferme q2=364266 q3=23440 q4=12620 | masse fermee q2=53.70% records fermes q2=46.89% tronques=7 juges=0 faux=0 | verdicts ALL=4866690 NONE=33674621 descente_pure=27464025 | fenetre somme_N=72333390 max_N=8158 moyen_N=5786.7 | partenaires max=475 moyen=62.46 | residuel : 0 paires tirees DANS LA MASSE ouverte, temoins_moyen=0.0 max=0, deja >=10 temoins : 0 (0.0%) donc supports q2 estimes 0.0% du residuel
+n=25000 famille=eight_clusters boite=serree sep=3/1 | front=1840449 (73.618/pt) | vagues=27 tests=3655899 tests/front=1.99 vague_max=356132 | masse=312487500/312487500 | arbre_med=1.8 ms arbre_p95=1.8 ms vague=5059.6 ms | banque lectures=170234106 recert=170234106 ferme q2=937143 q3=55959 q4=26912 | masse fermee q2=57.19% records fermes q2=50.92% tronques=100 juges=0 faux=0 | verdicts ALL=12141790 NONE=86432521 descente_pure=71659795 | fenetre somme_N=267577364 max_N=15041 moyen_N=10703.1 | partenaires max=640 moyen=73.83 | residuel : 0 paires tirees DANS LA MASSE ouverte, temoins_moyen=0.0 max=0, deja >=10 temoins : 0 (0.0%) donc supports q2 estimes 0.0% du residuel
+n=50000 famille=eight_clusters boite=serree sep=3/1 | front=4297674 (85.953/pt) | vagues=30 tests=8545349 tests/front=1.99 vague_max=789246 | masse=1249975000/1249975000 | arbre_med=3.5 ms arbre_p95=3.5 ms vague=12799.3 ms | banque lectures=430666842 recert=430666842 ferme q2=2414191 q3=180383 q4=87171 | masse fermee q2=59.20% records fermes q2=56.17% tronques=1805 juges=0 faux=0 | verdicts ALL=30088874 NONE=217364720 descente_pure=183213248 | fenetre somme_N=1020030902 max_N=29262 moyen_N=20400.6 | partenaires max=634 moyen=86.08 | residuel : 0 paires tirees DANS LA MASSE ouverte, temoins_moyen=0.0 max=0, deja >=10 temoins : 0 (0.0%) donc supports q2 estimes 0.0% du residuel
+pente front_records=1.302 pente somme_N=1.858 (6250->12500)
+pente front_records=1.244 pente somme_N=1.887 (12500->25000)
+pente front_records=1.223 pente somme_N=1.931 (25000->50000)
+OK famille=eight_clusters sep=3/1
+code=0
+--- out/fenetre_scanline_overlap_multiecho.txt
+n=6250 famille=scanline_overlap_multiecho boite=serree sep=3/1 | front=49160 (7.866/pt) | vagues=32 tests=92071 tests/front=1.87 vague_max=9978 | masse=19528125/19528125 | arbre_med=0.5 ms arbre_p95=0.5 ms vague=63.6 ms | banque lectures=2104590 recert=2104590 ferme q2=12091 q3=3810 q4=3278 | masse fermee q2=97.48% records fermes q2=24.60% tronques=0 juges=0 faux=0 | verdicts ALL=159158 NONE=1015008 descente_pure=930424 | fenetre somme_N=982434 max_N=2221 moyen_N=157.2 | partenaires max=97 moyen=8.04 | residuel : 0 paires tirees DANS LA MASSE ouverte, temoins_moyen=0.0 max=0, deja >=10 temoins : 0 (0.0%) donc supports q2 estimes 0.0% du residuel
+n=12500 famille=scanline_overlap_multiecho boite=serree sep=3/1 | front=100692 (8.055/pt) | vagues=33 tests=188885 tests/front=1.88 vague_max=19936 | masse=78118750/78118750 | arbre_med=0.9 ms arbre_p95=0.9 ms vague=135.6 ms | banque lectures=4499647 recert=4499647 ferme q2=24433 q3=7366 q4=6216 | masse fermee q2=98.74% records fermes q2=24.27% tronques=0 juges=0 faux=0 | verdicts ALL=328899 NONE=2173432 descente_pure=1997316 | fenetre somme_N=1975428 max_N=2606 moyen_N=158.0 | partenaires max=101 moyen=8.21 | residuel : 0 paires tirees DANS LA MASSE ouverte, temoins_moyen=0.0 max=0, deja >=10 temoins : 0 (0.0%) donc supports q2 estimes 0.0% du residuel
+n=25000 famille=scanline_overlap_multiecho boite=serree sep=3/1 | front=206705 (8.268/pt) | vagues=38 tests=388411 tests/front=1.88 vague_max=40024 | masse=312487500/312487500 | arbre_med=1.8 ms arbre_p95=1.8 ms vague=291.0 ms | banque lectures=9726992 recert=9726992 ferme q2=50886 q3=14364 q4=12042 | masse fermee q2=99.36% records fermes q2=24.62% tronques=0 juges=0 faux=0 | verdicts ALL=675417 NONE=4715656 descente_pure=4335919 | fenetre somme_N=4000612 max_N=2536 moyen_N=160.0 | partenaires max=107 moyen=8.43 | residuel : 0 paires tirees DANS LA MASSE ouverte, temoins_moyen=0.0 max=0, deja >=10 temoins : 0 (0.0%) donc supports q2 estimes 0.0% du residuel
+n=50000 famille=scanline_overlap_multiecho boite=serree sep=3/1 | front=402687 (8.054/pt) | vagues=41 tests=755375 tests/front=1.88 vague_max=81642 | masse=1249975000/1249975000 | arbre_med=3.4 ms arbre_p95=3.4 ms vague=590.3 ms | banque lectures=19881084 recert=19881084 ferme q2=96779 q3=24990 q4=20799 | masse fermee q2=99.66% records fermes q2=24.03% tronques=0 juges=0 faux=0 | verdicts ALL=1269467 NONE=9688456 descente_pure=8923161 | fenetre somme_N=8548010 max_N=2917 moyen_N=171.0 | partenaires max=115 moyen=8.19 | residuel : 0 paires tirees DANS LA MASSE ouverte, temoins_moyen=0.0 max=0, deja >=10 temoins : 0 (0.0%) donc supports q2 estimes 0.0% du residuel
+pente front_records=1.034 pente somme_N=1.008 (6250->12500)
+pente front_records=1.038 pente somme_N=1.018 (12500->25000)
+pente front_records=0.962 pente somme_N=1.095 (25000->50000)
+OK famille=scanline_overlap_multiecho sep=3/1
+code=0
+--- out/fenetre_terrain.txt
+n=6250 famille=terrain boite=serree sep=3/1 | front=145496 (23.279/pt) | vagues=32 tests=284743 tests/front=1.96 vague_max=19650 | masse=19528125/19528125 | arbre_med=0.5 ms arbre_p95=0.5 ms vague=271.0 ms | banque lectures=8977667 recert=8977667 ferme q2=66388 q3=13757 q4=9350 | masse fermee q2=96.89% records fermes q2=45.63% tronques=0 juges=0 faux=0 | verdicts ALL=804929 NONE=4323443 descente_pure=3849295 | fenetre somme_N=1215782 max_N=773 moyen_N=194.5 | partenaires max=293 moyen=23.45 | residuel : 0 paires tirees DANS LA MASSE ouverte, temoins_moyen=0.0 max=0, deja >=10 temoins : 0 (0.0%) donc supports q2 estimes 0.0% du residuel
+n=12500 famille=terrain boite=serree sep=3/1 | front=295748 (23.660/pt) | vagues=36 tests=578997 tests/front=1.96 vague_max=38716 | masse=78118750/78118750 | arbre_med=0.9 ms arbre_p95=0.9 ms vague=577.5 ms | banque lectures=19264942 recert=19264942 ferme q2=138297 q3=30020 q4=20375 | masse fermee q2=98.27% records fermes q2=46.76% tronques=5 juges=0 faux=0 | verdicts ALL=1656256 NONE=9263419 descente_pure=8345267 | fenetre somme_N=2699258 max_N=1392 moyen_N=215.9 | partenaires max=349 moyen=23.79 | residuel : 0 paires tirees DANS LA MASSE ouverte, temoins_moyen=0.0 max=0, deja >=10 temoins : 0 (0.0%) donc supports q2 estimes 0.0% du residuel
+n=25000 famille=terrain boite=serree sep=3/1 | front=607227 (24.289/pt) | vagues=39 tests=1189455 tests/front=1.96 vague_max=77554 | masse=312487500/312487500 | arbre_med=1.8 ms arbre_p95=1.8 ms vague=1252.6 ms | banque lectures=41745745 recert=41745745 ferme q2=287485 q3=64979 q4=44429 | masse fermee q2=98.97% records fermes q2=47.34% tronques=33 juges=0 faux=0 | verdicts ALL=3453578 NONE=20039905 descente_pure=18252262 | fenetre somme_N=6468048 max_N=3627 moyen_N=258.7 | partenaires max=414 moyen=24.41 | residuel : 0 paires tirees DANS LA MASSE ouverte, temoins_moyen=0.0 max=0, deja >=10 temoins : 0 (0.0%) donc supports q2 estimes 0.0% du residuel
+n=50000 famille=terrain boite=serree sep=3/1 | front=1248433 (24.969/pt) | vagues=42 tests=2446867 tests/front=1.96 vague_max=156036 | masse=1249975000/1249975000 | arbre_med=3.6 ms arbre_p95=3.6 ms vague=2731.3 ms | banque lectures=90740275 recert=90740275 ferme q2=600732 q3=140316 q4=96239 | masse fermee q2=99.31% records fermes q2=48.12% tronques=210 juges=0 faux=0 | verdicts ALL=7224653 NONE=43547223 descente_pure=39968399 | fenetre somme_N=17293842 max_N=9037 moyen_N=345.9 | partenaires max=490 moyen=25.08 | residuel : 0 paires tirees DANS LA MASSE ouverte, temoins_moyen=0.0 max=0, deja >=10 temoins : 0 (0.0%) donc supports q2 estimes 0.0% du residuel
+pente front_records=1.023 pente somme_N=1.151 (6250->12500)
+pente front_records=1.038 pente somme_N=1.261 (12500->25000)
+pente front_records=1.040 pente somme_N=1.419 (25000->50000)
+OK famille=terrain sep=3/1
+code=0
+--- out/fenetre_uniform.txt
+n=6250 famille=uniform boite=serree sep=3/1 | front=536482 (85.837/pt) | vagues=28 tests=1066715 tests/front=1.99 vague_max=98700 | masse=19528125/19528125 | arbre_med=0.5 ms arbre_p95=0.5 ms vague=1503.7 ms | banque lectures=50513963 recert=50513963 ferme q2=300954 q3=21945 q4=10483 | masse fermee q2=92.22% records fermes q2=56.10% tronques=142 juges=0 faux=0 | verdicts ALL=3755619 NONE=25521928 descente_pure=21236416 | fenetre somme_N=3039290 max_N=1202 moyen_N=486.3 | partenaires max=640 moyen=86.54 | residuel : 0 paires tirees DANS LA MASSE ouverte, temoins_moyen=0.0 max=0, deja >=10 temoins : 0 (0.0%) donc supports q2 estimes 0.0% du residuel
+n=12500 famille=uniform boite=serree sep=3/1 | front=1200525 (96.042/pt) | vagues=31 tests=2388551 tests/front=1.99 vague_max=203728 | masse=78118750/78118750 | arbre_med=0.7 ms arbre_p95=0.7 ms vague=3580.9 ms | banque lectures=120389966 recert=120389966 ferme q2=699820 q3=55876 q4=26686 | masse fermee q2=96.02% records fermes q2=58.29% tronques=904 juges=0 faux=0 | verdicts ALL=8615198 NONE=60547254 descente_pure=51227514 | fenetre somme_N=6211684 max_N=1025 moyen_N=496.9 | partenaires max=764 moyen=96.45 | residuel : 0 paires tirees DANS LA MASSE ouverte, temoins_moyen=0.0 max=0, deja >=10 temoins : 0 (0.0%) donc supports q2 estimes 0.0% du residuel
+n=25000 famille=uniform boite=serree sep=3/1 | front=2610793 (104.432/pt) | vagues=33 tests=5196587 tests/front=1.99 vague_max=413436 | masse=312487500/312487500 | arbre_med=1.4 ms arbre_p95=1.4 ms vague=8198.2 ms | banque lectures=275469416 recert=275469416 ferme q2=1549437 q3=113841 q4=49339 | masse fermee q2=97.57% records fermes q2=59.35% tronques=3685 juges=0 faux=0 | verdicts ALL=19047153 NONE=138310467 descente_pure=118111796 | fenetre somme_N=15174684 max_N=1158 moyen_N=607.0 | partenaires max=835 moyen=104.69 | residuel : 0 paires tirees DANS LA MASSE ouverte, temoins_moyen=0.0 max=0, deja >=10 temoins : 0 (0.0%) donc supports q2 estimes 0.0% du residuel
+n=50000 famille=uniform boite=serree sep=3/1 | front=5636705 (112.734/pt) | vagues=36 tests=11223411 tests/front=1.99 vague_max=844304 | masse=1249975000/1249975000 | arbre_med=3.5 ms arbre_p95=3.5 ms vague=18437.3 ms | banque lectures=624377753 recert=624377753 ferme q2=3514900 q3=297528 q4=129785 | masse fermee q2=98.74% records fermes q2=62.36% tronques=16649 juges=0 faux=0 | verdicts ALL=42376525 NONE=312405363 descente_pure=269595865 | fenetre somme_N=31455322 max_N=1216 moyen_N=629.1 | partenaires max=944 moyen=112.89 | residuel : 0 paires tirees DANS LA MASSE ouverte, temoins_moyen=0.0 max=0, deja >=10 temoins : 0 (0.0%) donc supports q2 estimes 0.0% du residuel
+pente front_records=1.162 pente somme_N=1.031 (6250->12500)
+pente front_records=1.121 pente somme_N=1.289 (12500->25000)
+pente front_records=1.110 pente somme_N=1.052 (25000->50000)
+OK famille=uniform sep=3/1
+code=0
+session terminee ; l arret certifie est declenche par le trap
+--- arret certifie (rc=0) ---
+[STOP] État actuel de ehgp-blackwell-spot-ai1a : RUNNING.
+Stopping instance(s) ehgp-blackwell-spot-ai1a...
+...................................................................................................................................................................................................................................................................................................................................................done.
+Updated [https://compute.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/europe-west4-ai1a/instances/ehgp-blackwell-spot-ai1a].
+[ATTENTION] Lecture GCE transitoirement impossible ; nouvel essai dans 5 s.
+[OK] Cible ehgp-blackwell-spot-ai1a arrêtée et vérifiée (état GCE TERMINATED).
+[INFO] Aucune autre VM project=e-hgp active détectée.
+journal complet : /tmp/ehgp-chaine-session.7kt3V7eN/session.log
+SESSION_TERMINEE rc=0

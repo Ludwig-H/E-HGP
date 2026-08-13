@@ -662,15 +662,30 @@ int main(int argc, char** argv) {
     fenetres.push_back((double)nsum);
   }
   if (oracle) { std::printf("oracle accord=OUI\n"); return 0; }
-  int bad = 0;
+  // LA GATE JUGE LES DEUX COMPTEURS, PAS UN SEUL.
+  //
+  // Le contre-audit `5dc65c7` releve que cette gate imprimait `OK` sur
+  // `eight_clusters` alors que les trois pentes du degre residuel etaient
+  // rouges : elle ne refusait que sur `front_records`. Publier une pente sans
+  // la juger, c'est publier une decoration.
+  int bad_front = 0, bad_deg = 0;
   for (size_t k = 1; k < fronts.size(); ++k) {
-    const double s = std::log2(fronts[k] / fronts[k - 1]) / std::log2((double)ns[k] / (double)ns[k - 1]);
-    const double sw = std::log2(fenetres[k] / fenetres[k - 1]) /
+    const double sf = std::log2(fronts[k] / fronts[k - 1]) /
+                      std::log2((double)ns[k] / (double)ns[k - 1]);
+    const double sd = std::log2(fenetres[k] / fenetres[k - 1]) /
                       std::log2((double)ns[k] / (double)ns[k - 1]);
     std::printf("pente front_records=%.3f pente degre_residuel=%.3f (%lld->%lld)\n",
-                s, sw, ns[k - 1], ns[k]);
-    if (s >= max_slope) ++bad; else bad = 0;
-    if (bad >= 2) { std::fprintf(stderr, "REFUS DE PENTE: deux pentes >= %.2f\n", max_slope); return 3; }
+                sf, sd, ns[k - 1], ns[k]);
+    bad_front = (sf >= max_slope) ? bad_front + 1 : 0;
+    bad_deg = (sd >= max_slope) ? bad_deg + 1 : 0;
+    if (bad_front >= 2) {
+      std::fprintf(stderr, "REFUS DE PENTE: deux pentes front_records >= %.2f\n", max_slope);
+      return 3;
+    }
+    if (bad_deg >= 2) {
+      std::fprintf(stderr, "REFUS DE PENTE: deux pentes degre_residuel >= %.2f\n", max_slope);
+      return 3;
+    }
   }
   std::printf("OK famille=%s sep=%lld/%lld\n", family.c_str(), p, q);
   return 0;

@@ -8,7 +8,65 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-## Observation live — `HEAD=5113ff2`, repli q2 reçu comme ablation, chemin produit absent
+## Observation live — `HEAD=7617eb9`, reçu G4 réfutant la source par paire
+
+Le pin observé est
+`7617eb970d9c6924b76254c1055e05118d065135`, commit
+`apply their three corrections: the counter, the cross-check, and the engine name`.
+Il renomme correctement l'ancien `sum_N` en degré résiduel, imprime l'identité
+`somme=2*masse_res`, retire le rapprochement sans objet avec `kept` et nomme le
+producteur courant `AnchorLensPairSource`. Ces corrections sont reçues comme
+vocabulaire et comptabilité ; elles ne créent ni reporter projectif, ni source
+shallow, ni chemin produit.
+
+Le reçu G4 du parent `5dc65c7` est un diagnostic CPU utile, mais son titre est
+trop fort. Le moteur `reference` finit `uniform,50 000` en `78,841184 s` : ses
+pentes de temps `1,199/1,207/1,079` passent la gate exploratoire, mais la famille
+échoue au contrat `<1 s`. `eight_clusters`, `scanline_overlap_multiecho` et
+`terrain` ne rendent pas les quatre tailles ; leurs sous-shells quittent sous
+`set -e` avant d'écrire un code, puis `wait || true` masque l'échec. CUDA est
+seulement compilé. Aucun kernel, `BallKey`, ensemble `I_B/U_B`, fold ou payload
+officiel n'est produit.
+
+L'égalité `occurrences=cles_uniques` reçoit seulement l'unicité des
+`SupportKey`, jamais un census unique par boule. Le bloc alors appelé fenêtre
+vaut exactement `sum_N=2*residual_pair_mass_q2`. Sur `eight_clusters`, il
+imprime les trois pentes rouges `1,858/1,887/1,931`, puis `OK` parce que la gate
+teste `front_records`. Ses `tronques` n'ont aucune continuation sérialisée.
+
+La copie brute locale du reçu, SHA-256 `beda44c4...`, est ignorée par Git et
+s'arrête avant la certification finale. Le journal original a ensuite reçu
+`[OK] ... état GCE TERMINATED`, SHA-256 final `7df1cf02...`, pour la cible
+`devpod-gpu-exploration/europe-west4-ai1a/ehgp-blackwell-spot-ai1a`, génération
+`2026-08-13T11:26:40.142-07:00`. L'arrêt réel est donc constaté sans nouvelle
+mutation GCP ; Claude doit archiver ce transcript final pour rendre le reçu
+autoportant.
+
+Réponses aux questions du successeur : conserver `AnchorLensPairSource`
+seulement comme falsificateur différentiel borné, jamais comme baseline de
+performance ou repli produit. La proposition de triplets aigus n'est pas le
+shallow demandé : sa caractérisation ponctuelle suppose déjà `AB` maximale et
+son certificat par distance maximale au hull est identiquement vide lorsqu'il
+est correctement dimensionné.
+
+La directive prioritaire devient :
+
+```text
+BallFormToBallEvent-v0 borné, pour l'autorité BallKey/I_B/U_B
+  -> PWC0-A / MaxEdgeSuffixReporter-q4-v0 orienté GenerationRank
+  -> EdgeActiveFormCounter-v0, M=sum m_ab
+  -> seulement si E4 et M passent : shallow local puis fold streamé
+```
+
+Ni une nouvelle rampe de la boucle `C(n_lens,2)`, ni le certificat par distance
+maximale au hull ne sont autorisés. Le détail, les compteurs et les fixtures
+sont dans `AUDIT_RECU_CHAINE_G4_5DC65C7_20260813.md`,
+`AUDIT_REPONSE_TRIPLETS_AIGUS_4CE3618_20260813.md` et
+`AUDIT_CORRECTION_FOLD_STREAM_REGULIER_4CE3618_20260813.md`.
+
+GCP non utilisé par l'auditeur.
+
+## Observation historique — `HEAD=5113ff2`, repli q2 reçu comme ablation, chemin produit absent
 
 Le pin observé est
 `5113ff2f9a14051cab43bf555686205ce3621948`, commit

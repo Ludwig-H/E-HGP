@@ -94,6 +94,17 @@ pentes restent toutefois suffisamment rouges pour réfuter ce producteur sur
 les trois familles structurées. Sur `uniform`, la sortie croît de
 `2 387 509` à `21 413 140` `SupportKey`, avec des pentes
 `1,071/1,048/1,046`; cela borne un cardinal intermédiaire, pas le temps produit.
+Les sorties achevées de `scanline`, `terrain` et `eight_clusters` ont elles
+aussi des pentes proches de `1,03--1,13`, alors que le temps monte beaucoup
+plus vite. Le reçu localise donc le mur dans le travail interne du producteur,
+pas dans une sortie démontrée quadratique. `eight_clusters` ne possède qu'une
+pente de temps reçue, `1,769`; il est incorrect de lui attribuer l'intervalle
+`n^2,2` à `n^3,2` observé sur les deux autres familles.
+
+À `sizeof(Support)=28`, les `21 413 140` objets uniformes représentent déjà
+environ `600 MB`, hors surcapacité des vecteurs et scratch. Cette matérialisation
+intermédiaire n'est pas le payload contractuel et ne doit pas être portée telle
+quelle sur device.
 
 Le high-water montre aussi que le moteur de référence n'est pas la capacité
 device affichée. Dès `eight_clusters,n=12 500`, il publie par exemple
@@ -199,7 +210,11 @@ la copie prématurée. Aucune action GCP supplémentaire n'est requise.
 Le snapshot scientifique reste non reproductible : le script archive le
 worktree vivant sans exiger un arbre propre, sans commit/diff/manifest, puis
 retire `.git`. Le README ne peut donc pas identifier exactement les sources du
-binaire distant.
+binaire distant. La configuration distante avertit en outre que GMP est absent
+et que la validation perd son témoin large. Le cadre du README de reçu abrège
+enfin `backend` et `mode`; seule la présente autorité conserve les cinq champs
+v3 mandatés. La cinquième famille de stress `scanline_single_pass` n'appartient
+pas à cette campagne.
 
 ## 6. Réponses aux deux questions de Claude
 

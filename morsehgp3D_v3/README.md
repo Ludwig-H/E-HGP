@@ -62,6 +62,21 @@ streamé. Le script G4 CPU du pin reste impropre à une
 qualification produit. Contre-audit et ordre exact :
 [`AUDIT_CONTRE_CHAINE_COMPLETE_ET_G4_736F5BC_20260813.md`](audits/AUDIT_CONTRE_CHAINE_COMPLETE_ET_G4_736F5BC_20260813.md).
 
+Le reçu G4 du pin `5dc65c7` confirme ce NO-GO. `uniform,50 000` finit en
+`78,84 s` : seules ses pentes exploratoires passent, jamais le contrat d'une
+seconde. Trois familles s'arrêtent avant la dernière taille sans code de sortie
+conservé. Le run exécute quatre moteurs CPU `reference` concurrents ; CUDA est
+seulement compilé. Les `21 413 140` `SupportKey` uniformes occupent déjà environ
+`600 MB` au seul `sizeof(Support)=28`, sans produire `BallKey/I_B/U_B` ni fold.
+Les sorties structurées achevées restent presque linéaires alors que leurs temps
+explosent : le verrou est bien l'amplification interne, pas une sortie reçue
+comme dense. Le faux compteur WSPD est maintenant correctement renommé degré
+résiduel par `7617eb9`; sa campagne `eight_clusters` imprimait néanmoins
+`OK` tout en portant les pentes `1,858/1,887/1,931`, car elle gatait le front et
+non ce degré. Contre-audit, statut d'arrêt et réponses aux deux questions de
+Claude :
+[`AUDIT_RECU_CHAINE_G4_5DC65C7_20260813.md`](audits/AUDIT_RECU_CHAINE_G4_5DC65C7_20260813.md).
+
 Au pin `dba8961`, la fourche « source par record ou source par paire » est
 tranchée : aucune des deux descriptions n'est le contrat v3. La source doit
 être factorisée et sortie-sensible ; elle paie ses couples de nœuds visités,
