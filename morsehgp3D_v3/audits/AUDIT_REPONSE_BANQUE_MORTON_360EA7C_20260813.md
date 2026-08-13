@@ -110,6 +110,14 @@ Un enfant d'un rectangle WSPD reste bien séparé. Raffiner localement ne casse
 donc ni la partition ni l'ordonnance ; il évite seulement de payer partout la
 constante d'un grand `s`.
 
+Attention aux endpoints relatifs. Après `A=A0 union A1`, un `PointId` de `A1`
+qui était interdit pour le parent peut devenir un témoin licite de `A0×B`.
+Une reprise qui ne relance pas la racine doit donc soit conserver les IDs
+proposés puis rejetés dans un petit sidecar `endpoint_blocked`, et les
+réexaminer pour chaque enfant, soit rejouer le producteur borné sur l'enfant.
+Jeter définitivement tout `A union B` du parent perd du rappel précisément au
+raffinement. Les preuves déjà créditées, elles, restent valides sans replay.
+
 La comparaison `s=1` contre `s=2` doit porter sur le travail **après** ce
 raffinement : `base_front + child_records + witness_reads + delegated_work`.
 Le seul taux de masse fermée ou le seul cardinal initial ne choisit pas le bon

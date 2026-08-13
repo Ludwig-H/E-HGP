@@ -523,3 +523,66 @@ ne réduit toujours presque aucun résiduel q3/q4 sur `uniform`, ne pas porter
 cette fenêtre unique sur CUDA : passer à quelques préfixes ou cellules Morton
 adaptés au rayon du cœur, toujours bornés et propositionnels. Aucun score de
 vitesse ne compense une banque vide de signal spatial.
+
+## 12. Réponse aux deux questions du `HEAD=360ea7c`
+
+### 12.1 Oui à un repli q2, non à `--bank-strong`
+
+Le facteur `12,6` de rappel q2 mérite d'être conservé, mais le mode fort n'est
+pas le bon calcul. `rect_classify` exécute déjà le cœur puis le fallback ; ce
+n'est donc pas la disjonction de deux certificateurs indépendants. L'appeler
+trois fois recalcule le cœur, déclenche les branches q3/q4 larges et réintroduit
+inutilement les produits d'environ 70 bits.
+
+Pour `C={z}` et la seule lane q2, le fallback est beaucoup plus simple. Par
+axe, évaluer les quatre produits :
+
+```text
+(z_i-Alo_i)*(Blo_i-z_i)
+(z_i-Alo_i)*(Bhi_i-z_i)
+(z_i-Ahi_i)*(Blo_i-z_i)
+(z_i-Ahi_i)*(Bhi_i-z_i)
+```
+
+La somme des trois minima est exactement `Hmin(A,B,{z})`, parce que `H` est
+séparable par axe et affine séparément en `a_i` et `b_i`. Ainsi :
+
+```text
+Hmin_singleton > 0  <=>  z est q2-ALL sur tout A x B
+```
+
+Le calcul demande douze produits signés `i64`, sans `Hmax`, `NONE`, distance,
+carré large ou `U128`. Le masque P0 rentable devient :
+
+1. calculer une fois `Dlo` par rectangle ;
+2. calculer une fois `Vhi` par ID ;
+3. attribuer q3/q4 par le cœur central ;
+4. attribuer q2 par le cœur, puis, seulement s'il manque, par
+   `Hmin_singleton>0`.
+
+Cela doit reproduire exactement le rappel q2 de `--bank-strong` sur les mêmes
+IDs, avec `wide_products=0`. q3/q4 restent au masque central : la note ne
+mesure aucun gain utile de leur fallback. Un différentiel permanent compare les
+bits q2 du helper léger à `rect_classify` sur petites boîtes et aux extrêmes
+u16.
+
+### 12.2 Garder `s=2` pour P0 ; ne pas acheter le rappel par `s=8`
+
+Dans la note Claude, passer de `s=2` à `s=8` fait monter le front de `24,69` à
+`291,28` records par point, soit un facteur `11,8`. Toutes les lectures `W*F`,
+les recertifications `L*F`, la mémoire de résultats et le compactage suivent ce
+facteur avant même la source. La fermeture q2 à `85,27 %` ne constitue donc
+pas une victoire de coût.
+
+À `s=2`, le repli q2 léger obtient déjà `31,37 %` au même `F`, contre `2,48 %`
+pour le cœur seul. Le choix initial reste donc `s=2`, avec ablation éventuelle
+`s=1/2/4` après correction du Morton. Le verdict se prend sur :
+
+```text
+temps(P0) + temps(source de tous les résidus) + temps(aval)
+```
+
+et sur les records résiduels, octets/HWM et pentes physiques, jamais sur le
+seul pourcentage de masse fermée. Si le résiduel reste prohibitif, raffiner
+localement les seuls rectangles ouverts ou ajouter un proposer batché ; ne pas
+multiplier globalement toute la WSPD.

@@ -88,6 +88,14 @@ q3/q4. Son encodeur emploie en outre une dilation Morton 2D : `(2,0,0)` et
 `Dlo/Vhi`, puis comparer `W=16/32/64` à des clés brouillées précède tout port
 CUDA. Une banque rapide sans signal spatial ne débloque pas la source.
 
+La réponse à la mesure `--bank-strong` est un repli q2 ciblé : pour chaque ID,
+`Hmin_singleton>0` est le test q2-ALL exact sur `A×B` et ne coûte que douze
+produits `i64`. Il conserve le rappel q2 annoncé (`31,37 %` à `s=2`) sans les
+trois classifieurs ni les carrés larges ; q3/q4 restent centraux. `s=8` n'est
+pas retenu globalement : il multiplie le front mesuré par `11,8`. Le choix
+reste `s=2` plus raffinement local, jugé sur `P0 + source + aval`, pas sur la
+seule masse fermée.
+
 Le script G4 du `HEAD=90aa941` ne doit pas être lancé en l'état. Sa nouvelle
 étape mesure quinze gros runs du probe CPU, pas le kernel P0, masque leurs codes
 par `wait || true` et ne publie ni temps, ni octets, ni HWM. La cible CUDA

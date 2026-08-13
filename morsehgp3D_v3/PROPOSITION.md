@@ -2075,6 +2075,15 @@ rendent `PRUNED_MAX_EDGE_ANCHOR` que si le record authentifie l'owner canonique
 ; sinon leur masque reste délégué. Le résultat conserve jusqu'à dix
 `proof_ids` rejouables.
 
+Une extension P0 autorisée récupère q2 sans produit large. Si le bit q2 central
+manque pour un singleton `z`, calculer les quatre produits d'extrémités
+`(z_i-a_i)(b_i-z_i)` par axe et sommer leurs trois minima. Ce
+`Hmin_singleton` est exact sur `A×B`; sa stricte positivité est équivalente à
+q2-ALL et coûte douze produits `i64`. Il remplace `--bank-strong`, qui rappelle
+trois classifieurs et réintroduit inutilement q3/q4 larges. q3/q4 restent au
+masque central tant qu'une ablation n'établit pas un gain justifiant deux
+limbes.
+
 Deux kernels suffisent à cette tranche : K1 traite un warp par rectangle sans
 allocation ni file dynamique ; K2 scanne et compacte stablement les ordinals
 résiduels. Les buffers sont préalloués et résidents et la tranche ne
@@ -2100,6 +2109,12 @@ records et masse fermés à un ordre Morton brouillé. Si la fenêtre correcte n
 réduit presque aucun résiduel q3/q4, le P0 suivant emploie quelques
 préfixes/cellules Morton adaptés au rayon du cœur, toujours bornés et
 propositionnels ; il ne porte pas une fenêtre sans signal sur CUDA.
+
+La séparation de départ reste `s=2`. Monter globalement à `s=8` peut gonfler
+le front et tous les coûts `W*F/L*F` d'un ordre de grandeur ; une hausse du
+pourcentage de masse fermée ne suffit pas. Le choix de `s` minimise le temps
+mesuré `P0 + source complète + aval` et les octets/HWM. Les rectangles difficiles
+se raffinent localement sans reconstruire globalement un grand front.
 
 L'oracle petit `n` développe chaque terminal et exige une multiplicité un de
 chaque `PairId`; il rejoue aussi chaque preuve, l'owner, la disjonction des IDs
