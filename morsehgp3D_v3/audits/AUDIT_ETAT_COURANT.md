@@ -8,18 +8,17 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-## Observation live — `HEAD=f02d5ed`, oracle Source S présent, chemin produit absent
+## Observation live — `HEAD=5113ff2`, repli q2 reçu comme ablation, chemin produit absent
 
 Le pin observé est
-`f02d5edfb202f7d7c4ed9d3f45d43b9f739c1794`, commit
-`an apostrophe in a comment killed a session, so make it impossible`.
-L'auditeur ne modifie aucun logiciel et n'a pas utilisé GCP. Au dernier relevé,
-Claude avait un delta concurrent non committé dans
-`prototype/wspd_wavefront_probe.cpp` (SHA-256
-`0532466fe49c0568e72032e226fd159d78e8e764feea03844a021e983a704c6a` au
-dernier relevé)
-qui ajoute un fallback du masque central vers `rect_classify`. Les changements
-documentaires du présent audit sont distincts.
+`5113ff2f9a14051cab43bf555686205ce3621948`, commit
+`my cross-check was an order of magnitude, not an agreement — say so`.
+Son parent `3d07be1` ajoute un fallback du masque central vers `rect_classify`
+et dérive les seuils de `smax`; le fichier logiciel a pour SHA-256
+`0532466fe49c0568e72032e226fd159d78e8e764feea03844a021e983a704c6a`.
+Au dernier relevé, le worktree ne portait que les compléments documentaires de
+l'auditeur dans les chemins autorisés. L'auditeur ne modifie aucun logiciel et
+n'a pas utilisé GCP.
 
 Le verdict tient en quatre points.
 
@@ -78,7 +77,8 @@ PWC0-A / MaxEdgeSuffixReporter-q4-v0
   -> 48 chambres indépendantes, raffinement 9 des seuls OPEN
   -> CLOSED_EDGE_SPAN / OPEN_EDGE_SPAN / PENDING_CONTINUATION
   -> sum_a |E_4(a)|, tâches, octets, HWM
-  -> seulement si sparse : shallow P-P/N-N/P-N sur les arêtes ouvertes
+  -> seulement si sparse : EdgeActiveFormCounter-v0, M=sum m_ab
+  -> seulement si E_4 et M passent : shallow P-P/N-N/P-N
   -> BallKey-first, census unique, fold streamé
 ```
 
@@ -95,15 +95,25 @@ racine dominent, `PWC0-B` universalise les crédits sur `ANode` et vise une
 jointure `ANode×BNode` à graine unique. La banque `P<=96` est seulement
 propositionnelle : son sous-remplissage agrandit `E_4`, jamais ne ferme à tort.
 Une mesure dense à un seul `P` réfute cette configuration, pas tous les
-certificats ; publier l'ablation monotone `P=48/96/192` et le taux
-`UNDERFULL`.
+certificats ; publier `P=48/96/192` et le taux `UNDERFULL`. La fermeture n'est
+exigée monotone que si les banques sont des préfixes emboîtés et conservent les
+crédits déjà commis.
 
-Le delta `--fallback` live reste une ablation centrale. La disjonction de deux
+Le `--fallback` du parent reste une ablation centrale. La disjonction de deux
 certificats `ALL` sûrs reste sûre, mais elle ne produit encore aucun `proof_id`,
 résiduel, continuation ou owner et rappelle un classifieur large à chaque nœud
 central `MIXED`. Elle ne doit pas retarder `PWC0-A` ; elle ne devient utile que
 si son gain d'arêtes ouvertes par unité de travail bat le reporter sur le même
 ledger.
+
+La réponse aux deux questions du pin est maintenant explicite. L'OR des deux
+certificateurs est reçu parce que le fallback remplace un `MIXED`, sans cumuler
+deux populations ; le juge courant ne rejoue toutefois que le masque central.
+La grille publiée mesure encore `sum_N=2*residual_pair_mass_q2`. Deux seuils sur
+`uniform` ne prouvent ni `Theta(K)`, ni `Theta(Kn)`, ni l'indépendance de `s`.
+Enfin `|E_4|` sparse ne suffit pas : le shallow doit encore passer le ledger
+`M=sum_(a,b in E_4)m_ab` de la relation arête ouverte × site actif. Détails :
+[`AUDIT_REPONSE_RETRACTATION_S2_K_5113FF2_20260813.md`](AUDIT_REPONSE_RETRACTATION_S2_K_5113FF2_20260813.md).
 
 Le rejeu local tranche déjà son rendement sur `uniform,sep=2/1,tight,window=256`.
 À `n=2000`, la vague passe de `517,1` à `1732,2 ms` pour faire passer les
@@ -111,6 +121,24 @@ fermetures q3/q4 de `263/130` à `277/132`. À `n=4000`, elle passe de `1566,8` 
 `4374,8 ms` pour `569/241` vers `598/271`. Le gain q2 est réel, mais la source
 limitante q3/q4 ne rembourse pas le facteur `2,8..3,4` CPU. Le fallback reste
 donc hors du prochain chemin candidat.
+
+Le `HEAD=3d07be1` rétracte sainement le refus de `s=2`, mais sa conclusion
+`Theta(Kn)` reste non reçue. Le compteur est toujours le complément q2 orienté
+deux fois et non le reporter projectif q4. Pour un nombre de crédits `c(a,b)`,
+la fenêtre au seuil `h` est `{(a,b):c(a,b)<h}` : une fonction en escalier qui
+peut passer de presque vide à quadratique lorsque `h` augmente d'un seul cran.
+Deux seuils sur `uniform` ne donnent donc ni linéarité en `K`, ni indépendance
+de `s` et `K`. `s=2` est une ablation non réfutée, pas une baseline reçue.
+Réponse complète :
+[`AUDIT_REPONSE_RETRACTATION_S2_K_3D07BE1_20260813.md`](AUDIT_REPONSE_RETRACTATION_S2_K_3D07BE1_20260813.md).
+
+Le successeur `5113ff2` corrige honnêtement le faux rapprochement entre
+`hw_kept` et la colonne q2. Il ne reçoit toujours pas une loi de source : même
+si le vrai reporter rendait `|E_4|=O(n)`, le shallow devrait encore payer
+`M=sum_(a,b in E_4)m_ab`, où chaque site actif fournit une forme propre à
+l'arête. `EdgeActiveFormCounter-v0` doit donc rester entre `PWC0-A` et les
+niveaux. Réponse directe :
+[`AUDIT_REPONSE_RETRACTATION_S2_K_5113FF2_20260813.md`](AUDIT_REPONSE_RETRACTATION_S2_K_5113FF2_20260813.md).
 
 Contre-audit complet, correction de l'owner, architecture en deux paliers et
 audit du script :

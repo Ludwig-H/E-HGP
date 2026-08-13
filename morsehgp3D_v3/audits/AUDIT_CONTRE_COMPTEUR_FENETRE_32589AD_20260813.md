@@ -264,6 +264,10 @@ propositions, activations, tests d'enveloppe, crédits commis, cellules
 population logique, octets lus/écrits, HWM et temps. `tasks_created` doit valoir
 `tasks_consumed+tasks_pending`.
 
+Les fates de spans sont exclusifs et vérifient
+`input_mass=closed_mass+open_mass+pending_mass` par lane. Tant que
+`pending_mass>0`, `sum_a|E_q(a)|` n'est pas une fenêtre finale.
+
 Le P0 feuille publie explicitement `anchor_root_seeds=n`. Il ne prétend pas
 avoir supprimé les recherches par ancre ; il falsifie d'abord la densité de la
 fenêtre avec le plus petit objet sémantiquement exact. Si la fenêtre est sparse
@@ -273,9 +277,17 @@ jointure `ANode×BNode` à graine unique.
 
 La banque bornée reste propositionnelle. Une fenêtre dense à `P=96` refuse ce
 proposer, pas tout certificat projectif. La porte publie donc `P=48/96/192`, le
-taux `UNDERFULL`, la fermeture monotone et la cause précise de chaque span
-ouvert. Un `NO-GO` global suppose soit l'enveloppe industrielle `P<=96` et
-l'arène figées, soit une ablation stabilisée.
+taux `UNDERFULL` et la cause précise de chaque span ouvert. La fermeture n'est
+monotone que si ces banques sont des préfixes emboîtés et conservent les crédits
+déjà commis. Un `NO-GO` global suppose soit un cap produit et une arène dérivés
+d'un layout/preflight, soit une ablation stabilisée.
+
+Un vert de `E_4` reste nécessaire mais non suffisant. Pour chaque arête ouverte,
+chaque site actif fournit une forme : le second ledger est
+`M=sum_(a,b in E_4)m_ab`. `EdgeActiveFormCounter-v0` doit le calculer par un
+dual-tree exact `(EdgeSpan,CNode)` et publier tests, blocs factorisés, hits,
+tâches, maximum par arête, octets/HWM et continuations. Même `|E_4|=O(n)` ne
+permet pas de financer le shallow si `M` est dense.
 
 ## 6. Décision immédiate
 
@@ -287,7 +299,8 @@ l'arène figées, soit une ablation stabilisée.
 - implémenter `PWC0-A/MaxEdgeSuffixReporter-q4-v0` : 48 chambres indépendantes,
   puis raffinement adaptatif des seules chambres ouvertes dans leurs neuf
   sous-cellules ;
-- ne lancer ni G4, ni shallow, ni join générique avant ce compteur ; écrire
+- ne lancer ni G4, ni shallow, ni join générique avant ce compteur et le second
+  ledger `EdgeActiveFormCounter-v0` ; écrire
   `PWC0-B` seulement si `PWC0-A` reçoit une fenêtre sparse mais un coût de
   graines/tâches rouge.
 

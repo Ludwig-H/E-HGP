@@ -170,23 +170,53 @@ B=-2*(Delta*a+Y)
 C=Delta*||a||^2+2*a dot Y
 ```
 
-Diviser `A,Bx,By,Bz,C` par leur pgcd commun et imposer `A>0`. Les bornes u16
-déjà écrites dans `anchor_envelope.hpp:65-73` placent ces coefficients et leur
-évaluation en `i128`. q2 possède directement
+Diviser `A,Bx,By,Bz,C` par leur pgcd commun et imposer `A>0`. Sous les bornes
+u16 du chemin courant, les coefficients non réduits et l'évaluation directe
+`P(z)` restent sous `2^106` et tiennent en `i128`. Cette borne n'autorise pas un
+autre comparateur à introduire des produits croisés non bornés : réutiliser
+`ExactCenterKey/same_exact_ball` ou prouver une largeur `BigInt<4>`. La clé
+géométrique primitive `(A,Bx,By,Bz,C)` encode centre **et rayon** ; son record
+porte aussi schéma, `CloudDigest` et `Epoch`. `q`, owner et `p` restent des
+champs d'activation séparés. q2 possède directement
 `A=1`, `B=-(a+b)`, `C=a dot b`.
+
+Le census n'appelle pas le census local de chaque support. Une fois par clé
+primitive, il évalue sur tout `PointId z` :
+
+```text
+P(z)=A*||z||^2+Bx*z.x+By*z.y+Bz*z.z+C.
+```
+
+`P<0`, `P=0` et `P>0` produisent les listes triées `I_B`, `U_B` et
+l'extérieur. Chaque `SupportKey` incident doit être inclus dans `U_B`, conserver
+son propre owner et appliquer `p+q<=smax` séparément. Une occurrence du même
+support vue deux fois est une violation d'exact-once, jamais une déduplication
+silencieuse. L'ABI persistante encode chaque entier signé par deux limbs `u64` ;
+elle ne sérialise pas un `struct` de cinq `__int128` et ne le compare pas par
+`memcmp`.
 
 Ce pont ne répare aucune pente : il reste alimenté par `C(nlens,2)`. Son rôle est
 de fournir le premier objet exact consommable et l'autorité différentielle à
 laquelle comparer reporter, shallow et fold. Deux fixtures permanentes le
 séparent des owners actuels :
 
-- IDs `x=0:(5,3,0)`, `a=1:(0,0,0)`, `b=2:(10,0,0)` : le triangle aigu est émis
-  depuis son arête maximale `(1,2)`, pas depuis son plus petit `PointId` ;
-- les six points cocirculaires de centre `(5,5,5)` et rayon `5`,
+- IDs `x=0:(5,6,0)`, `a=1:(0,0,0)`, `b=2:(10,0,0)` : le triangle aigu est émis
+  depuis son arête maximale `(1,2)`, pas depuis son plus petit `PointId`. Sa
+  clé primitive attendue est `(A,Bx,By,Bz,C)=(6,-60,-11,0,0)` ;
+- les six points cosphériques, et cocycliques dans `z=5`, de centre
+  `(5,5,5)` et rayon `5`,
   `(10,5,5),(8,9,5),(2,9,5),(0,5,5),(2,1,5),(8,1,5)`, portent au moins les deux
   triangles aigus alternés sur la même boule. Ils exigent
   `SupportKey_unique>BallKey_unique`, un seul census `I_B/U_B` et un shell de six
   IDs.
+
+Deux micro-fixtures complètent cette porte. Ajouter aux six points cocirculaires
+le centre `(5,5,5)` et `(6,5,5),(4,5,5)` : la boule de rayon `5` attend
+`BallKey=(1,-10,-10,-10,50)`, trois intérieurs et six IDs de shell, tandis que
+la boule concentrique de rayon `1` attend `(1,-10,-10,-10,74)`. Enfin, le
+tétraèdre
+`(0,0,0),(65535,65535,0),(65535,0,65535),(0,65535,65535)` attend
+`(1,-65535,-65535,-65535,0)` et tue un intermédiaire `i64`.
 
 ## 4. L'oracle shallow existe, le chemin produit reste à écrire
 
@@ -202,9 +232,9 @@ déjà spécifiée et prouvée dans
 [`AUDIT_CONTRE_AUDIT_PRODUCTEUR_ANCRE_LENTILLE_AIGUE_20260812.md`](AUDIT_CONTRE_AUDIT_PRODUCTEUR_ANCRE_LENTILLE_AIGUE_20260812.md),
 sections « Borne sur les centres distincts » et « Ordonnance exacte concrète ».
 
-Pour une arête `ab` et ses `m` formes conservées dans le plan médiateur
-`d^perp`, écrire chaque forme comme `F_i(x,y)=A_i*x+B_i*y+C_i`, après chart et
-cisaille entiers exacts. Séparer :
+Pour une arête `ab` et ses `m` copies de formes orientées conservées dans le
+plan médiateur `d^perp`, écrire chaque forme comme
+`F_i(x,y)=A_i*x+B_i*y+C_i`, après chart et cisaille entiers exacts. Séparer :
 
 - `P`, où `F_i>0` est le côté au-dessus ;
 - `N`, où `F_i>0` est le côté au-dessous.
@@ -220,17 +250,21 @@ inférieurs de `P` et les `k+1` niveaux supérieurs de `N`. Les seuls événemen
 
 Tous les événements de même centre rationnel sont traités atomiquement. Les
 formes incidentes sont retirées avant le rang strict ; puis les tests actuels
-`Jung/xy/rang/positivité/owner` sont rejoués. Cela remplace
-`C(nl,2)` par une génération sortie-sensible des centres shallow. La borne
-reçue sur les centres distincts est `|V_{<=k}|<e*(k+1)*m`; celle des incidences
-shell est également linéaire en `m` à `k` fixé. Les concurrences lourdes restent
-une sortie réelle à regrouper, pas à développer silencieusement.
+`Jung/xy/rang/positivité/owner` sont rejoués. Cela remplace l'énumération
+`C(nl,2)` pour les **centres géométriques distincts**, pas nécessairement pour
+les supports incidents. La borne reçue est
+`|V_{<=k}|<e*(k+1)*m` et celle des incidences shell est
+`I_{<=k}<2e*(k+1)*m` pour `k>=1` ; à `k=0`, elles valent au plus `m` et `2m`.
+Elle ne borne ni les couples cross-bundle réellement visités `J`, ni les
+`SupportKey` `H` : une concurrence de `t` bundles peut porter jusqu'à
+`C(t,2)` supports. Les concurrences restent donc une sortie réelle à regrouper,
+jamais à développer silencieusement.
 
 ABI minimale du remplacement :
 
 ```text
-LineForm { AnchorPairKey, PointId, A, B, C, orientation, acute }
-LevelSegment { level, x0, x1, line_bundle, generation }
+LineBundle { AnchorPairKey, normalized_form, mu_plus, mu_minus, PointIdSpans }
+LevelSegment { weighted_level, x0, x1, line_bundle, generation }
 CenterEvent { center_key, incident_bundle_spans, restricted_depth }
 BallEvent { BallKey, q_mask, incident_bundle_spans }
 CensusRecord { BallKey, I_span, U_span, p }
@@ -238,9 +272,12 @@ CensusRecord { BallKey, I_span, U_span, p }
 
 La version CPU peut matérialiser les chaînes pour fermer l'oracle. La version
 device doit streamer au plus `2*(k+1)=16` curseurs et au plus
-`(k+1)*(k+2)/2=36` couples `P-N` à `smax=11`. Les comparateurs exacts utilisent
-un fast path borné puis un fallback 256 bits ; `double` ne décide jamais les
-égalités.
+`(k+1)*(k+2)/2=36` **canaux de rang** `P-N` simultanés à `smax=11`. Ce ne sont
+pas 36 intersections au total : chaque canal traverse plusieurs segments. Les
+droites confondues deviennent des bundles pondérés `(mu_plus,mu_minus)` ; tous
+les incidents d'un même centre sont retirés atomiquement du rang strict. Les
+comparateurs exacts utilisent un fast path borné puis un fallback 256 bits ;
+`double` ne décide jamais les égalités.
 
 Porte obligatoire avant intégration : pour une ancre explicite à petit `m`,
 comparer l'ensemble des `(BallKey,SupportKey,I_B,U_B,owner)` aux deux boucles
@@ -280,9 +317,13 @@ ProjectiveCreditBank avec vrais PointId
 ```
 
 Le premier compteur doit publier `sum_a|E_4(a)|`, `max|E_4(a)|`, spans,
-tâches, activations, tests Andrew, octets et HWM. Deux pentes physiques rouges
-arrêtent cette route avant CUDA. Un vert q4 autorise q3/q2 ; il ne qualifie pas
-encore le contrat.
+tâches, activations, tests Andrew, octets et HWM. Ce vert est nécessaire mais
+pas suffisant pour le shallow : chaque arête ouverte possède encore `m_ab`
+formes actives. Le compteur suivant publie
+`M=sum_(a,b in E_4)m_ab`, tâches de la relation arête×site, maximum par arête,
+octets et HWM, sans développer `E_4×PointId`. Deux pentes physiques rouges dans
+l'un ou l'autre compteur arrêtent cette route avant CUDA. Un vert q4 autorise le
+shallow q4, puis q3/q2 ; il ne qualifie pas encore le contrat.
 
 Ne pas brancher l'ancien `sum_N` WSPD au moteur. Ne pas imposer
 `kept(a,b)=E_q(a)`. La porte d'intégration correcte est : l'arête maximale
@@ -293,28 +334,40 @@ supplémentaire ne survit.
 ### 5.1 Deux paliers, sans cacher `n` recherches racine
 
 Le plus petit falsificateur s'appelle `PWC0-A`. Il travaille par endpoint
-feuille `a`, garde la banque `P<=96` transitoire par tuile, partage ce pool entre
+feuille `a`, garde une banque `P_cap` transitoire et préflightée par tuile,
+partage ce pool entre
 les 48 chambres, puis traverse des tâches `(AnchorId,BNodeKey,chamber_mask)`.
-Il publie honnêtement `anchor_root_seeds=n`. Les sorties sont seulement
-`CLOSED_EDGE_SPAN`, `OPEN_EDGE_SPAN` et `PENDING_CONTINUATION`; un pool
-`UNDERFULL`, un cap de proposition ou un overflow ouvre le span.
+Il publie honnêtement `anchor_root_seeds=n`, `bank_build_tasks`, visites de
+cibles, classifications, splits et continuations. Les sorties sont exclusivement
+`CLOSED_EDGE_SPAN`, `OPEN_EDGE_SPAN` **ou** `PENDING_CONTINUATION`; un span en
+attente n'est pas aussi compté ouvert. Un pool `UNDERFULL` produit un ouvert
+final ; un quantum ou overflow sérialisable produit une continuation.
 
 Si `PWC0-A` produit une fenêtre sparse mais que ses lancements racine ou ses
 tâches dominent, `PWC0-B` universalise les mêmes crédits sur un `ANode` et fait
 une jointure `ANode x BNode` à graine unique. Pour un carrier de rang trois,
 le signe du déterminant et les numérateurs de Cramer sont affines en l'ancre et
 se vérifient aux huit coins ; l'activation emploie le minimum de marge et le
-maximum de norme sur ces coins. Les rangs un/deux ou un signe non uniforme
-restent ouverts au P0. `PWC0-B` vise `anchor_root_seeds=1` ; il ne doit pas être
-une précondition qui retarde le falsificateur feuille.
+maximum de norme sur ces coins. Les mêmes witness IDs, leur disjonction, la
+cellule half-open commune à toutes les différences `B-A`, les H2 uniformes et la
+hauteur minimale font partie de la preuve. Les rangs un/deux ou un signe non
+uniforme restent ouverts au P0. `PWC0-B` vise `anchor_root_seeds=1` au moyen
+d'une récursion root×root canonique ; il ne doit pas être une précondition qui
+retarde le falsificateur feuille.
 
 La banque bornée est propositionnelle. Une fenêtre dense à `P=96` réfute cette
 configuration, pas tout certificat projectif imaginable. Le reçu publie donc
-`UNDERFULL` par valeur de `P`, la fermeture monotone pour au moins
-`P=48/96/192`, et distingue : résolution 48 refusée, raffinement adaptatif
+`UNDERFULL` par valeur de `P` et au moins `P=48/96/192`. Ces valeurs sont une
+ablation ; le reçu distingue un éventuel cap industriel `96` du cap diagnostic
+`192`. La fermeture n'est
+monotone que si les banques sont des préfixes emboîtés et conservent les crédits
+déjà commis ; un greedy recalculé n'offre pas cette garantie. Le reçu distingue :
+résolution 48 refusée, raffinement adaptatif
 `48->9` refusé, proposer sous-plein, ou reporter réellement dense. Un `NO-GO`
-global exige soit de figer explicitement l'enveloppe industrielle
-`P<=96/arena<=128 MiB`, soit d'observer la stabilisation de cette ablation.
+global exige soit de figer explicitement l'enveloppe industrielle avec son
+layout et son calcul de capacité, soit d'observer la stabilisation de cette
+ablation. `128 MiB` reste une enveloppe proposée tant que ce preflight n'est pas
+reçu.
 
 ## 6. `17,8 M supports/s` n'est pas le contrat produit
 
@@ -457,14 +510,18 @@ jamais suffisante : le cap absolu et le p95 comptent aussi.
 4. Implémenter `PWC0-A/MaxEdgeSuffixReporter-q4-v0` et mesurer
    `sum|E_4|`, tâches, octets et HWM ; n'écrire `PWC0-B` que si le partage des
    racines devient le terme dominant.
-5. Sur les seules arêtes ouvertes, remplacer la boucle q4 `C(nlens,2)` par le
+5. Mesurer `EdgeActiveFormCounter-v0` sur les spans, donc
+   `M=sum m_ab`, tâches de join arête×site, maximum par arête, octets et HWM,
+   sans produit explicite. Une fenêtre d'arêtes sparse ne dispense pas de cette
+   porte.
+6. Sur les seules arêtes ouvertes et après ce second vert, remplacer la boucle q4 `C(nlens,2)` par le
    probe CPU des niveaux shallow `P-P/N-N/P-N`, puis comparer les identités
    complètes à `anchor_source` et `edge_shallow`.
-6. Grouper immédiatement les centres en `BallKey` et faire un seul census par
+7. Grouper immédiatement les centres en `BallKey` et faire un seul census par
    boule ; publier les concurrences et extra-shell sans expansion implicite.
-7. Ajouter `AnchorOutputFoldCounter-v0` et recevoir le run streamé contre les
+8. Ajouter `AnchorOutputFoldCounter-v0` et recevoir le run streamé contre les
    dix forêts/payload de l'oracle borné.
-8. Porter sur CUDA uniquement la première tranche dont l'oracle, les pentes,
+9. Porter sur CUDA uniquement la première tranche dont l'oracle, les pentes,
    les octets et le cap absolu sont tous verts.
 
 Cette route allège bien `HGP-old` : elle ne construit aucune mosaïque globale
@@ -531,6 +588,8 @@ rendement. Rejeu local `uniform`, séparation euclidienne `2/1`, boîtes serrée
 Le fallback multiplie ici le temps de vague par `3,35` puis `2,79`. Il achète
 beaucoup de masse q2, mais seulement `14/2` puis `29/30` fermetures q3/q4. Il
 ne compte en outre ni le nombre réel d'appels au classifieur complet, ni ses
-produits larges. Ce ratio réfute son intégration comme prochain levier source.
+produits larges. Le juge live rejoue seulement le masque central et ne vérifie
+donc pas les nouvelles fermetures du fallback. Ce ratio réfute son intégration
+comme prochain levier source.
 Conserver le helper comme ablation ou fast path futur ; ne pas le porter sur
 CUDA et ne pas retarder `BallFormToBallEvent-v0`/`PWC0-A`.

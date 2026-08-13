@@ -2343,10 +2343,13 @@ Le premier jalon est `PWC0-A/MaxEdgeSuffixReporter-q4-v0`, sans support ni
 CUDA. Il travaille par endpoint feuille `a`, garde un pool transitoire borné par
 tuile, traverse des tâches `(AnchorId,BNodeKey,chamber_mask)` et publie
 `sum_a|E_4(a)|`, maximum, crédits/IDs disjoints, spans ouverts, tâches, octets,
-HWM et `anchor_root_seeds=n`. Ses seules sorties sont
-`CLOSED_EDGE_SPAN`, `OPEN_EDGE_SPAN` et `PENDING_CONTINUATION`. L'oracle petit
+HWM et `anchor_root_seeds=n`. Ses fates exclusifs sont
+`CLOSED_EDGE_SPAN`, `OPEN_EDGE_SPAN` ou `PENDING_CONTINUATION` ; un span en
+attente n'est pas aussi compté ouvert. L'oracle petit
 `n` exige que l'arête maximale canonique de chaque vrai support q4 reste dans
 un span ouvert, puis que le shallow retrouve exactement ce support.
+Par lane, `input_span_mass=closed_mass+open_mass+pending_mass`; la fenêtre
+finale n'est publiée qu'avec `pending_mass=0`.
 
 Le reporter reçoit huit crédits et les vrais `PointId`. Il commence par 48
 chambres grossières indépendantes ; seule une chambre `OPEN/MIXED` est raffinée
@@ -2358,16 +2361,22 @@ signal q4 positif.
 Une banque de proposition bornée est fail-open : candidat manqué, pool
 `UNDERFULL`, overflow ou cap agrandit `E_4`, jamais ne ferme un span. Une mesure
 dense à `P=96` réfute seulement cette configuration. Le reçu publie au moins
-`P=48/96/192`, la fermeture monotone et `UNDERFULL`; un `NO-GO` global exige
-soit une enveloppe industrielle explicitement figée, soit la stabilisation de
-cette ablation.
+`P=48/96/192` et `UNDERFULL`. La fermeture n'est exigée monotone que si ces
+banques sont des préfixes emboîtés et conservent les crédits déjà commis ; un
+greedy recalculé peut perdre du rappel. Un `NO-GO` global exige soit une
+enveloppe industrielle explicitement figée avec layout et preflight, soit la
+stabilisation de cette ablation. Un cap diagnostic `192` et un cap produit `96`
+restent deux descripteurs distincts.
 
 Si `PWC0-A` reçoit une fenêtre sparse mais que ses `n` graines racine ou ses
 tâches dominent, `PWC0-B` universalise les mêmes preuves sur un `ANode` et
 traverse `ANode×BNode` depuis une graine unique. Les carriers de rang trois
-rejouent le signe du déterminant et les numérateurs de Cramer aux huit coins de
-l'`ANode`; les rangs inférieurs ou signes non uniformes restent ouverts. Ce
-partage est le jalon suivant, pas une précondition du falsificateur feuille.
+rejouent les mêmes witness IDs, leur disjonction, le signe du déterminant, les
+numérateurs de Cramer et les H2 uniformes aux huit coins de l'`ANode`; toutes les
+différences `B-A` restent dans la même cellule half-open et la hauteur minimale
+est uniforme. Les rangs inférieurs ou signes non uniformes restent ouverts. Ce
+partage exige une récursion root×root canonique ; il est le jalon suivant, pas
+une précondition du falsificateur feuille.
 
 Deux pentes supérieures à `1,35` sur une métrique physique bloquante, une HWM
 hors enveloppe ou une fenêtre quasi quadratique rendent la configuration
@@ -2381,13 +2390,24 @@ pas dans sa gate. Il ne choisit donc aucune séparation WSPD. Le contre-audit et
 la boucle exacte du reporter sont dans
 [`AUDIT_CONTRE_COMPTEUR_FENETRE_32589AD_20260813.md`](audits/AUDIT_CONTRE_COMPTEUR_FENETRE_32589AD_20260813.md).
 
-La masse dirigée de `E_q` est le futur `PlaneTape` logique. Elle n'est
-matérialisée par `count--scan--fill` qu'après ce compteur, si sa pente, ses
-octets et son HWM passent. Cette expansion tardive d'une fenêtre certifiée
-sparse est distincte d'un fallback qui développerait la masse brute du WSPD.
-Chaque incidence `(a,b)` de la fenêtre devient alors une seule forme locale et
-est facturée explicitement ; si `sum_a |E_q(a)|` reste dense, la route s'arrête
-avant allocation.
+La masse dirigée de `E_q` n'est qu'un ledger d'arêtes. Une incidence ouverte
+`(a,b)` n'est pas une forme : chaque site actif `z` fournit sa propre
+`LineForm`. Avant tout `PlaneTape`, un `EdgeActiveFormCounter-v0` doit mesurer
+factoriellement :
+
+```text
+M = sum_(a,b in E_q) m_ab,
+```
+
+où `m_ab` est le nombre de copies de formes actives de l'arête. Même
+`|E_q|=O(n)` avec `m_ab=Theta(n)` reste quadratique. Le compteur publie tâches
+arête×site, tests de nœuds, blocs factorisés, hits ponctuels, `M`, maximum par
+arête, octets/HWM et continuations. Il utilise un dual-tree exact
+`(EdgeSpan,CNode)` avec verdicts AABB et ne peut revendiquer l'absence de
+produit avant que cette factorisation soit reçue. Le `PlaneTape` n'est
+matérialisé par `count--scan--fill` qu'après
+les deux portes `E_q` et `M`. Cette expansion tardive est distincte d'un
+fallback qui développerait la masse brute du WSPD.
 
 Une banque par distance n'est pas un cutoff projectif. Dans la chambre de
 rayons `(3,0,0),(3,1,0),(3,1,1)`, `s_near=(1,-2,0)` a norme carrée `5` mais
@@ -2618,16 +2638,40 @@ C=Delta*||a||^2+2*a dot Y
 Réduire les cinq coefficients par leur pgcd commun et imposer `A>0`. Faire un
 RLE par `BallKey`, puis un unique census global par boule qui conserve les vrais
 ensembles `I_B` et `U_B`, pas seulement leurs cardinalités. Joindre tous les
-`SupportKey` incidents. `U_B=S` donne la branche régulière ; `U_B!=S` va vers
-un `PlateauRecord` lossless, un quotient reçu ou un refus explicite. Ce pont
-reste lent et borné : il fournit l'identité output-bearing à laquelle comparer
-les remplacements, pas une route à ramper.
+`SupportKey` incidents. La clé logique est
+`(CloudEpoch,A,Bx,By,Bz,C)` : elle ne contient ni `q`, ni owner, ni `p`. Pour
+chaque `PointId z`, le census évalue directement
+`A*||z||^2+Bx*z.x+By*z.y+Bz*z.z+C`; les signes négatif, nul et positif donnent
+respectivement `I_B`, `U_B` et l'extérieur. Chaque support incident doit être
+inclus dans `U_B`, conserver son owner et appliquer séparément `p+q<=smax`.
+Une même boule peut donc être admise dans une lane et refusée dans une autre.
+`U_B=S` donne la branche régulière ; `U_B!=S` va vers un `PlateauRecord`
+lossless, un quotient reçu ou un refus explicite. Ce pont reste lent et borné :
+il fournit l'identité output-bearing à laquelle comparer les remplacements,
+pas une route à ramper.
 
-La fixture permanente de cosphère prend les six points
+Sous u16, les coefficients non réduits et l'évaluation directe restent en
+signé 128 bits : la borne la plus large du chemin q3 est inférieure à `2^106`.
+Cette borne n'autorise pas des produits croisés supplémentaires non bornés.
+Réutiliser `ExactCenterKey/same_exact_ball` ou un `BigInt<4>` reçu pour tout
+autre comparateur. La version device/persistante encode chaque entier signé en
+deux limbs `u64`; elle ne sérialise pas la représentation native de `__int128`
+et ne compare jamais la clé par `memcmp`. Les coefficients primitifs encodent
+centre et rayon ; le record ajoute schéma, `CloudDigest` et `Epoch`, tandis que
+lane, niveau, owner et `p` restent des champs d'activation séparés.
+
+La fixture permanente de cosphère, cocyclique dans `z=5`, prend les six points
 `(10,5,5),(8,9,5),(2,9,5),(0,5,5),(2,1,5),(8,1,5)`. Les deux triangles alternés
 sont aigus et portent la même boule de centre `(5,5,5)` et rayon `5`. La porte
 exige donc plusieurs `SupportKey`, un seul `BallKey`, un seul census et les six
-IDs de shell.
+IDs de shell. En ajoutant le centre et `(6,5,5),(4,5,5)`, la clé de rayon `5`
+vaut `(1,-10,-10,-10,50)`, avec trois IDs intérieurs et six sur la coquille ;
+la boule concentrique de rayon `1` vaut `(1,-10,-10,-10,74)` et ne doit jamais
+être fusionnée avec elle. La fixture owner q3
+`x=0:(5,6,0),a=1:(0,0,0),b=2:(10,0,0)` attend la clé
+`(6,-60,-11,0,0)` et l'arête owner `(1,2)`. Enfin, le tétraèdre u16
+`(0,0,0),(65535,65535,0),(65535,0,65535),(0,65535,65535)` attend
+`(1,-65535,-65535,-65535,0)` et tue tout intermédiaire rétréci en `i64`.
 
 ### 15.2 `MaxEdgeSuffixReporter-q4-v0` : tuer les arêtes avant la source
 
@@ -2640,12 +2684,30 @@ par ses deux endpoints, indépendamment de l'owner futur.
 Le P0 feuille `PWC0-A` construit une banque transactionnelle de vrais
 `PointId`, essaie les 48 chambres, puis raffine seulement chaque chambre ouverte
 dans ses neuf sous-cellules. Il émet des `OPEN_EDGE_SPAN`, des
-`CLOSED_EDGE_SPAN` ou une continuation fail-open. Il publie
+`CLOSED_EDGE_SPAN` ou une continuation fail-open comme fates exclusifs. Il publie
 `sum_a|E_4(a)|`, le maximum, tâches, activations, tests Andrew, octets et HWM.
+Le ledger `input=closed+open+pending` est exact et la fenêtre finale exige
+`pending=0`.
 Le sous-remplissage de la banque ouvre, jamais ne ferme. Comparer au moins
-`P=48/96/192`. Si les `n` graines racine deviennent le verrou après une fenêtre
-sparse, seulement alors universaliser les mêmes preuves sur `ANode×BNode` dans
-`PWC0-B`.
+`P=48/96/192`; la monotonie exige des banques préfixes et la conservation des
+crédits déjà commis. Si les `n` graines racine deviennent le verrou après une
+fenêtre sparse, seulement alors universaliser les mêmes preuves sur
+`ANode×BNode` dans `PWC0-B`.
+
+Une fenêtre d'arêtes sparse n'autorise pas encore les niveaux. Le jalon
+`EdgeActiveFormCounter-v0` traverse un dual-tree `(EdgeSpan,CNode)` avec bornes
+exactes de lentille/marge et mesure
+`M=sum_(a,b in E_4)m_ab`, tests de nœuds, blocs factorisés, hits ponctuels,
+tâches, maximum par arête, octets et HWM. Une pente rouge de `M` ou des tâches
+arrête la route même si `|E_4|` est linéaire.
+
+Deux certificateurs `ALL` suffisants peuvent être réunis par OR, sous masque de
+lane et antichaîne sans double crédit. Cette sûreté ne donne aucune loi de coût.
+Si `c(a,b)` est le nombre de crédits reçus, la fenêtre au seuil `h` vaut
+`{(a,b):c(a,b)<h}` et peut sauter presque instantanément de vide à quadratique.
+Ne revendiquer ni `Theta(Kn)`, ni indépendance de `s` et `K` depuis deux seuils
+du complément q2. `s=2` reste une ablation du tape jusqu'à mesure du vrai
+reporter q4 et du coût composé.
 
 ### 15.3 Vrai `LocalShallowBall` sur les seules arêtes ouvertes
 
@@ -2657,9 +2719,13 @@ segments actifs `P-N` dont les rangs satisfont `r+s<=k`. Grouper atomiquement
 les concurrences par centre rationnel avant rang strict, Jung, positivité,
 owner et census.
 
-Cette ordonnance remplace `C(n_lens,2)` par les centres shallow distincts. Elle
-ne construit aucun arrangement global : les niveaux sont locaux à une arête,
-éphémères et détruits après les `BallEvent`. Le probe CPU compare exactement
+Cette ordonnance remplace `C(n_lens,2)` pour les centres shallow distincts. À
+`m_ab` copies de formes et profondeur stricte `k`, le nombre de centres est
+inférieur à `e*(k+1)*m_ab` et les incidences à
+`2e*(k+1)*m_ab`. Cette borne ne contrôle ni les couples de segments visités, ni
+les `SupportKey` incidents à une concurrence lourde ; ces deux sorties restent
+mesurées. Aucun arrangement global n'est construit : les niveaux sont locaux à
+une arête, éphémères et détruits après les `BallEvent`. Le probe CPU compare exactement
 `(BallKey,SupportKey,I_B,U_B,owner)` à `BallFormToBallEvent-v0`. Les mutants
 omettent séparément `P-P`, `N-N`, `P-N`, le niveau terminal, le batch des
 concurrences et l'exclusion du shell du rang strict.

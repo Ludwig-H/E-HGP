@@ -300,15 +300,17 @@ ProjectiveTargetTask = {
   AnchorId, BNodeKey, open_lane_mask, possible_cell_mask, credit_span
 }
 ProjectiveTargetResult = {
-  AnchorId, BNodeKey, closed_mask, open_mask, proof_spans, reason
+  AnchorId, BNodeKey, closed_mask, open_mask, pending_mask,
+  proof_spans, ContinuationKey, reason
 }
 ```
 
 Pour chaque `(AnchorId,BNodeKey,lane)`, les `h_q` crédits consommés ont des
 unions d'IDs disjointes. Un même crédit peut servir à plusieurs `BNode`, mais
-jamais deux fois dans une même fermeture. `closed_mask` et `open_mask`
-partitionnent le masque d'entrée ; capacité insuffisante ou classification
-partielle produit `OPEN_SPAN`, jamais fermeture implicite.
+jamais deux fois dans une même fermeture. `closed_mask`, `open_mask` et
+`pending_mask` partitionnent le masque d'entrée ; une continuation n'est pas
+aussi comptée ouverte. Sous-remplissage final produit `OPEN_SPAN`, tandis qu'un
+quantum reprenable produit `PENDING_CONTINUATION`, jamais fermeture implicite.
 
 `classifier_kind=H2_SUFFICIENT` rejoue les six formes `i64`.
 `classifier_kind=EXACT_TRIPLE` rejoue l'ordre de base, les trois cônes faibles,
@@ -336,9 +338,13 @@ Ordre recommandé :
    familles ;
 5. si la fenêtre est sparse mais `anchor_root_seeds=n` ou les tâches dominent,
    ajouter `PWC0-B`, qui universalise sur `ANode×BNode` à graine unique ;
-6. seulement si ces portes passent, matérialiser le `PlaneTape`, puis écrire
+6. mesurer ensuite `EdgeActiveFormCounter-v0` par dual-tree
+   `(EdgeSpan,CNode)` : tests de nœuds, blocs factorisés, hits, tâches,
+   `M=sum m_ab`, maximum par arête, octets/HWM et continuations ;
+7. seulement si `E_q` et `M` passent, matérialiser le `PlaneTape`, puis écrire
    `LocalShallowBall-v0`, `BallKey` et census global ;
-7. si la fenêtre reste dense après ablation de la banque et du raffinement,
+8. si la fenêtre ou la relation arête×site reste dense après ablation de la
+   banque et du raffinement,
    arrêter cette route sans jamais développer `PairId×PointId`.
 
 Cette tranche évite la mosaïque de Delaunay d'ordre supérieur, les recherches

@@ -18,6 +18,11 @@ jamais réception.
 - [`AUDIT_ETAT_COURANT.md`](AUDIT_ETAT_COURANT.md) est l'unique verdict mutable :
   il distingue le `HEAD`, le delta éventuel du worktree, les empreintes utiles,
   les contre-exemples, les tests qualifiables et les portes ouvertes.
+- [`AUDIT_REPONSE_RETRACTATION_S2_K_5113FF2_20260813.md`](AUDIT_REPONSE_RETRACTATION_S2_K_5113FF2_20260813.md)
+  répond aux deux questions live de Claude : l'OR de deux `ALL` sûrs est reçu
+  sans double comptage, mais son juge ne couvre pas encore le fallback ; deux
+  seuils q2 ne prouvent ni `Theta(K)` ni l'indépendance de `s`. Il ajoute le
+  ledger indispensable `M=sum m_ab` entre fenêtre d'arêtes et shallow.
 - [`AUDIT_CONTRE_CHAINE_COMPLETE_ET_G4_736F5BC_20260813.md`](AUDIT_CONTRE_CHAINE_COMPLETE_ET_G4_736F5BC_20260813.md)
   corrige le blocage live : `kept(a,b)` n'est pas une fenêtre projective,
   l'ancien `sum_N` est orienté deux fois, et le moteur courant reste une boucle
@@ -25,10 +30,16 @@ jamais réception.
   output-bearing minimal, le reporter d'arêtes projectif, l'ordonnance shallow
   exacte `P-P/N-N/P-N`, le fold streamé et le contre-audit bloquant du script
   G4 CPU.
+- [`AUDIT_REPONSE_RETRACTATION_S2_K_3D07BE1_20260813.md`](AUDIT_REPONSE_RETRACTATION_S2_K_3D07BE1_20260813.md)
+  accepte la disjonction de certificats `ALL` mais réfute la nouvelle loi
+  `Theta(Kn)` : le compteur reste le complément q2 orienté deux fois, q3/q4 ne
+  remboursent pas le fallback et une fenêtre de crédits est une fonction en
+  escalier du seuil. `s=2` redevient une ablation non réfutée, pas une baseline
+  produit ; le choix attend le vrai reporter q4 et son coût composé.
 - [`AUDIT_CONTRE_COMPTEUR_FENETRE_32589AD_20260813.md`](AUDIT_CONTRE_COMPTEUR_FENETRE_32589AD_20260813.md)
   réfute le faux `ProjectiveWindowCounter` du pin : `sum_N` vaut exactement
   deux fois la masse q2 résiduelle et sa pente n'est pas gatée. Il définit la
-  vraie fenêtre owner-dirigée `N_q(a)`, répond à la question 48/432 et remet le
+  vraie fenêtre d'arêtes `E_q(a)`, répond à la question 48/432 et remet le
   reporter q4, son ledger et ses mesures physiques à Claude. Le P0 emploie 48
   chambres, puis raffine seulement les chambres ouvertes dans leurs neuf
   sous-cellules ; aucun `s` n'est encore choisi.

@@ -27,6 +27,17 @@ Le verdict lié au `HEAD` et au worktree est tenu uniquement dans
 [`AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md). Ne déduire aucun état
 live d'une note datée, d'un message de commit ou du seul passage d'un CTest.
 
+Au pin `5113ff2`, la disjonction du masque central et du fallback est
+mathématiquement sûre parce que le second remplace seulement un verdict
+`MIXED`; leurs populations ne doivent jamais être additionnées. Le juge live
+ne rejoue toutefois que le masque central. Surtout, la grille annoncée en `K`
+mesure toujours `sum_N=2*residual_pair_mass_q2`, non la fenêtre projective q4 :
+deux seuils sur une famille ne reçoivent ni `Theta(K)`, ni indépendance de `s`.
+Même une vraie fenêtre d'arêtes `E_4` linéaire ne borne pas le shallow : il faut
+encore mesurer `M=sum_(a,b in E_4)m_ab`, la relation factorisée arête ouverte ×
+site actif. Réponse directe et directive :
+[`AUDIT_REPONSE_RETRACTATION_S2_K_5113FF2_20260813.md`](audits/AUDIT_REPONSE_RETRACTATION_S2_K_5113FF2_20260813.md).
+
 Au pin `f02d5ed`, la « chaîne complète » annoncée est corrigée. Le producteur
 par arête est un falsificateur différentiel utile, mais il parcourt encore
 `C(n_lens,2)` en q4 et refait le census par support ; sur
@@ -39,6 +50,15 @@ reporter projectif des arêtes maximales, niveaux shallow locaux sur les seules
 arêtes ouvertes, puis fold streamé. Le script G4 CPU du pin reste impropre à une
 qualification produit. Contre-audit et ordre exact :
 [`AUDIT_CONTRE_CHAINE_COMPLETE_ET_G4_736F5BC_20260813.md`](audits/AUDIT_CONTRE_CHAINE_COMPLETE_ET_G4_736F5BC_20260813.md).
+
+Le successeur `3d07be1` rétracte correctement le refus prématuré de `s=2`, mais
+sa loi `Theta(Kn)` n'est pas reçue. L'OR de deux certificats `ALL` est sûr ; sa
+mesure reste pourtant `2*residual_pair_mass` q2, pas `E_4`, et le fallback
+multiplie le temps CPU par `2,8..3,4` pour quelques dizaines de fermetures q3/q4.
+La taille d'une fenêtre de crédits est une fonction en escalier du seuil et peut
+sauter jusqu'au quadratique sans hypothèse de distribution. `s=2` reste donc une
+ablation non réfutée. Réponse mathématique et directive :
+[`AUDIT_REPONSE_RETRACTATION_S2_K_3D07BE1_20260813.md`](audits/AUDIT_REPONSE_RETRACTATION_S2_K_3D07BE1_20260813.md).
 
 Au pin `dba8961`, la fourche « source par record ou source par paire » est
 tranchée : aucune des deux descriptions n'est le contrat v3. La source doit
@@ -91,8 +111,9 @@ L'invariant exact est que l'arête maximale canonique de tout vrai support reste
 dans cette fenêtre ; ses autres sommets sont générés ensuite par la lentille.
 Le prochain falsificateur source est donc
 `PWC0-A/MaxEdgeSuffixReporter-q4-v0`, qui mesure `sum_a |E_4(a)|`, tâches,
-octets et HWM avant d'écrire le shallow. S'il passe, la route devient
-arrangement shallow **par arête ouverte**, RLE des centres par `BallKey`, census
+octets et HWM. S'il passe, `EdgeActiveFormCounter-v0` mesure ensuite
+`M=sum m_ab`, tâches arête×site, octets et HWM sans développer le produit. Deux
+verts seulement autorisent l'arrangement shallow **par arête ouverte**, RLE des centres par `BallKey`, census
 global une fois par boule, puis expansion tardive des `SupportKey`. Tous les
 points restent obligatoires au census. Cette ordonnance évite tout join
 `PairId×carrier` et toute mosaïque globale d'ordre supérieur :
