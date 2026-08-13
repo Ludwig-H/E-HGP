@@ -117,7 +117,7 @@ et l'optimisation du polynôme spindle sur chaque cellule peut être plus forte
 que ce simple détour par `r/D`.
 
 Une version directe, sensiblement plus forte, est disponible. Pour chaque type
-de cellule, choisir les deux rayons extrêmes `r_-`,`r_+` et tabuler
+de cellule, choisir les deux rayons de diamètre angulaire `r_-`,`r_+` et tabuler
 `L=||r_-||^2`, `B=||r_+||^2`, `P=r_- dot r_+` et `C=LB-P^2` :
 
 | cellules | `L` | `B` | `P` | `C` |
@@ -129,19 +129,36 @@ de cellule, choisir les deux rayons extrêmes `r_-`,`r_+` et tabuler
 | `U21`, `D21` | `14` | `22` | `17` | `19` |
 | `U22` | `17` | `27` | `21` | `18` |
 
-Sur la section `tau=3`, bilinéarité et convexité donnent pour tous `d,s` de la
-cellule les bornes simultanées utilisées ci-dessous. Si `x=tau(d)` et
+Ces quatre nombres ne sont **pas** quatre bornes séparables : dans `U10`, par
+exemple, `u=(3,1,0)` satisfait `u dot u=10<P=11`. La preuve correcte est
+corrélée. Sur la section `tau=3`, pour des directions `u,v`, poser
+`A=u dot v`, `V=||v||^2` et `Q=||u cross v||^2`. Si `c=2` en q4 ou `c=3` en
+q3, le spindle à directions fixées équivaut à :
+
+$$\frac{x}{y}>T_c(u,v)=\frac{V}{A-\sqrt{\frac{Q}{c}}}.$$
+
+Pour `lambda>0`, la fonction
+`A-sqrt(Q/c)-lambda*V` est concave en `u` à `v` fixé, puis concave en `v` à
+`u` fixé. Son minimum sur les deux triangles est donc atteint aux sommets. Une
+vérification exacte des neuf paires de rayons de chaque cellule et pour les
+deux valeurs de `c` place le maximum de `T_c` sur `(r_-,r_+)`, avec
+`T_c=B/(P-sqrt(C/c))`. C'est cette réduction finie, et non le faux minorant
+`u dot v>=P`, qui doit être reçue par la gate.
+
+Après élimination de la racine sous la garde de signe, si `x=tau(d)` et
 `y=tau(s)`, le certificat q4 entier est :
 
 $$xP-yB>0\quad\text{et}\quad2(xP-yB)^2>Cx^2.$$
 
-Pour q3, remplacer `2` par `3`. Le seuil réel q4 correspondant est
+Pour q3, remplacer `2` par `3`. Le seuil uniforme q4 correspondant est
 `x/y>B/(P-sqrt(C/2))`; il descend de `11/6` sur `U00` jusqu'à `3/2` sur `U22`,
 contre presque trois pour la relaxation radiale. Aucune racine ne doit être
 évaluée sur device : les deux inégalités entières sont l'autorité.
 
-Cette fois la frontière est réellement la frontière du spindle et l'inégalité
-doit rester **stricte**. Fixture q4 `U00` :
+Il s'agit de la frontière **uniforme worst-case de la cellule**, pas du seuil
+exact de chaque paire de directions : pour `u=v`, le vrai seuil est seulement
+`x/y>1`. L'inégalité uniforme doit toutefois rester **stricte**. Fixture q4
+`U00` :
 
 ```text
 a=(100,100,100), z=a+6*(3,1,1), b=a+11*(3,0,0)
@@ -149,12 +166,15 @@ a=(100,100,100), z=a+6*(3,1,1), b=a+11*(3,0,0)
 
 Elle donne `H=198` et `R=2*198^2`; le rapport de hauteur `11/6` reste donc
 incertain et tue un `>=`. Pour une sélection par hauteur entière, tabuler plutôt
-le plus petit `x` qui satisfait le prédicat pour chaque `(type,y,lane)` ; six
-fois `65 535` seuils suffisent et sont partagés par les 48 symétries.
+le plus petit `x` qui satisfait le prédicat pour chaque `(type,y,lane)` ; q2
+peut réemployer la table q4 conservatrice, donc `12*65 536` seuils couvrent les
+six types et les deux tables q3/q4, partagées par les 48 symétries.
 
-Gates : tables générées puis comparées aux tables figées, trois rayons et points
-de faces, fixture stricte ci-dessus, confusion q3/q4, owner half-open et accord
-bit à bit avec le spindle exact sur toutes les petites hauteurs. Conserver le
+Gates : tables générées puis comparées aux tables figées, les neuf paires de
+rayons avec comparaison exacte de `T_c`, trois rayons et points de faces,
+fixture stricte ci-dessus, confusion q3/q4, owner half-open et **inclusion** de
+toutes les fermetures dans le spindle exact sur toutes les petites hauteurs.
+Les bitsets n'ont pas à être égaux : le cutoff reste suffisant. Conserver le
 cutoff radial simple comme ablation permet de mesurer le gain propre de la table
 directe.
 
@@ -169,8 +189,10 @@ spécification.
 Pour le prédicat spindle, garder `H<=0` en entier puis filtrer
 `F_c=cH^2-E2*X2`, avec `c=4` pour q3 et `c=3` pour q4. `H,E2,X2<2^34` sont
 exactement convertibles en binary64. Sous quatre opérations RN explicites,
-sans contraction, fast-math, FTZ ni DAZ, une borne uniforme conservatrice
-`B=2^19` couvre les deux lanes sur tout u16. Alors `f>B` certifie le signe
+sans contraction, fast-math, FTZ ni DAZ, les majorants absolus donnent des
+erreurs arrondies vers le haut de `368 618` en q3 et `294 895` en q4. La bande
+uniforme exactement représentable `B=2^19` couvre donc les deux lanes sur tout
+u16. Alors `f>B` certifie le signe
 positif, `f<-B` le négatif, et `|f|<=B` appelle le calcul 70 bits exact.
 
 Cette borne est une proposition de gate, pas encore un lowering reçu. Le taux
@@ -258,7 +280,7 @@ $$\binom{N-1}{1}+\binom{N-1}{2}+\binom{N-1}{3}.$$
 
 Elle est finie et calculable, mais inutilisable. Elle ne transforme pas
 `resource_exhausted` en événement de mesure nulle : le contrat ne porte aucune
-mesure probabiliste. La fixture Q1 donne déjà `29` supports q2 à la même ancre,
+mesure probabiliste. La fixture Q1 donne déjà `13` supports q2 à la même ancre,
 `p=0`, sans plateau radial, et le lemme rationnel donne une étoile de taille
 arbitraire lorsque la précision croît. Un dépassement est donc un régime nominal
 à gérer par streaming/résiduel/cap, pas une dégénérescence exceptionnelle.

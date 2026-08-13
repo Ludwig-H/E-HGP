@@ -124,16 +124,23 @@ inline int cell_of(i64 sx, i64 sy, i64 sz, DomMutant mu = DomMutant::kNone) {
   // Permutation qui trie les magnitudes en ordre DECROISSANT, ex aequo tranches
   // par l'indice croissant. Le mutant de frontiere inverse ce tie-break, ce qui
   // envoie les directions de bord dans la cellule voisine.
+  // OWNER DE FRONTIERE. Sur une egalite de magnitudes, plusieurs permutations
+  // trient correctement ; l'owner canonique est la PREMIERE dans l'ordre
+  // lexicographique des indices.
+  //
+  // Le mutant doit changer cet owner, sinon il est mecaniquement inerte : une
+  // premiere version testait `>=` au lieu du tie-break par indice, mais la
+  // premiere permutation valide restait la meme et le differentiel etait
+  // rigoureusement vide. Le mutant prend donc la DERNIERE permutation valide,
+  // ce qui deplace reellement les directions de frontiere dans une autre
+  // chambre.
   int pi = -1;
   for (int p = 0; p < 6; ++p) {
     const int* q = kPerm[p];
-    const bool ordered = (mu == DomMutant::kBoundaryClosed)
-                             ? (a[q[0]] >= a[q[1]] && a[q[1]] >= a[q[2]])
-                             : (a[q[0]] > a[q[1]] ||
-                                (a[q[0]] == a[q[1]] && q[0] < q[1])) &&
-                                   (a[q[1]] > a[q[2]] ||
-                                    (a[q[1]] == a[q[2]] && q[1] < q[2]));
-    if (ordered) { pi = p; break; }
+    if (a[q[0]] >= a[q[1]] && a[q[1]] >= a[q[2]]) {
+      pi = p;
+      if (mu != DomMutant::kBoundaryClosed) break;
+    }
   }
   if (pi < 0) pi = 0;
   const int* q = kPerm[pi];
