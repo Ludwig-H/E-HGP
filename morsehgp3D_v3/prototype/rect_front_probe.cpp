@@ -421,6 +421,37 @@ int run_fixtures() {
     }
   }
 
+  // FIXTURE DES PORTEURS (audit `AUDIT_DEBLOCAGE`, § 7). `a=(0,0,0)`,
+  // `b=(4,0,0)`, `x=(2,3,0)` : `D2=16`, `E2=X2=13`, `H=-5`. Le triangle `abx`
+  // est AIGU et porte par l'arete maximale, alors que `x` est strictement HORS
+  // de la boule diametrale — donc invisible a tout certificat de temoin. C'est
+  // la fixture qui montre que temoins et porteurs sont complementaires.
+  {
+    const RectBox ca{{0, 0, 0}, {0, 0, 0}};
+    const RectBox cb{{4, 0, 0}, {4, 0, 0}};
+    const RectBox cx{{2, 3, 0}, {2, 3, 0}};
+    long long mn = 0, mx = 0;
+    mhgp3v::rect_h_interval(ca, cb, cx, &mn, &mx);
+    const mhgp3v::RectCarrier v = mhgp3v::rect_carrier_verdict(ca, cb, cx);
+    const long long d2 = mhgp3v::rect_minsq(ca, cb);
+    const long long e2 = mhgp3v::rect_minsq(cx, ca), x2 = mhgp3v::rect_minsq(cb, cx);
+    std::printf("porteur D2=%lld E2=%lld X2=%lld H=%lld verdict=%s\n", d2, e2, x2, mn,
+                v == mhgp3v::RectCarrier::kAll ? "ALL"
+                    : (v == mhgp3v::RectCarrier::kNone ? "NONE" : "MIXED"));
+    if (!(d2 == 16 && e2 == 13 && x2 == 13 && mn == -5)) {
+      std::fprintf(stderr, "FIXTURE: les valeurs du porteur ne sont pas celles de l'audit\n");
+      ++bad;
+    }
+    if (v != mhgp3v::RectCarrier::kAll) {
+      std::fprintf(stderr, "FIXTURE: (2,3,0) doit etre un porteur q3 de [(0,0,0),(4,0,0)]\n");
+      ++bad;
+    }
+    if (mn >= 0) {
+      std::fprintf(stderr, "FIXTURE: un porteur doit etre HORS de la boule diametrale\n");
+      ++bad;
+    }
+  }
+
   // MUTANT COLINEAIRE (audit `96be8e0`, section 4) : un nuage porte par une
   // droite ne contient AUCUN triangle ni tetraedre propre, donc aucun support
   // q3/q4 ne peut exister. Toute issue etiquetee POSITIVE hors q2 serait un

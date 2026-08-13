@@ -8,14 +8,15 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-## Observation live — `HEAD=81d24d0`, identité renforcée, P0 et source non reçus
+## Observation live — `HEAD=653e2d6`, ablation euclidienne, P0 et source non reçus
 
 Le `HEAD` observé est
-`81d24d05142219aa0c5e9b00d129b72b03f0e85e`, commit
-`the central mask has no NONE, and that alone decides where it belongs`. Il
-hérite de la correction Morton3D et du masque central de `4f4b463`, puis ajoute
-les mutants d'identité et le refus `leaf>1`. Le worktree était propre avant les
-éditions documentaires concurrentes ; l'auditeur ne touche à aucun logiciel.
+`653e2d65bebd07b8288879740c3145eee0e2010b`, commit
+`make the separation Euclidean without giving up integer determinism`. Il
+intègre les directives documentaires, le prédicat euclidien conservateur et le
+script d'ablation ; le tape L-infini reste disponible. Le worktree contient le
+delta carrier concurrent de Claude et deux compléments d'audit ; l'auditeur ne
+touche à aucun logiciel.
 
 Le transcript G4 confirme la gate `front_records` sur quatorze des quinze
 couples de cinq familles et trois séparations, entre `12500` et `100000`.
@@ -101,6 +102,33 @@ borne avant calcul, ajouter frontière/une-unité-dessous et mutant, puis publie
 un `FrontDigest` distinct et l'ablation `Linf/Euclid` sur records, build,
 octets/HWM et temps total. Le tape P0 reste L-infini tant que cette ablation
 n'a pas gagné.
+
+Le build Release du delta passe et les deux commandes petit oracle
+`--sep-euclid=2/1` et `--sep-euclid=4/2` rendent chacune `2016/2016` PairIds,
+zéro doublon/manquant. Elles impriment toutefois le même
+`digest_cles=1dbe40cb68a081c3` parce que ce digest parcourt les PairIds développés :
+toute partition exacte du même domaine produit nécessairement la même valeur.
+Il ne distingue ni front, ni métrique, ni fraction, ni RectIds. Ce contrôle
+reste un `PairDomainDigest`; le `FrontDigest` demandé hash le schéma, la
+métrique, la fraction réduite et la suite canonique des rectangles/masses.
+
+Le worktree ajoute ensuite `rect_carrier_verdict` et un scan q3. Les bornes
+`NONE/ALL/MIXED` sont sémantiquement sûres : elles encadrent les trois
+contraintes `E2<=D2`, `X2<=D2`, `D2<E2+X2`, avec égalités faibles sur les deux
+longueurs et stricte sur l'acuité. Le build Release et les six portes
+fixtures/WSPD ciblées passent. Ce scan reste un diagnostic, pas la source : il
+crée un `vector` et repart de `C=root` pour chaque rectangle q3 résiduel, avec
+un budget `128` codé en dur.
+
+À `n=2000,s_inf=2,bank W32/L16`, il prouve `SOURCE_EMPTY` sur seulement
+`1911/41029=4,66 %` des records uniformes, `1531/14754=10,38 %` terrain et
+`1865/25642=7,27 %` huit-amas, pour respectivement `961726`, `311098` et
+`516719` tests carrier. La colonne `has` inclut une feuille `MIXED`; elle doit
+s'appeler `POSSIBLE_OR_PRESENT`, pas présence prouvée. Les statistiques sont
+globales et ne sont pas remises à zéro entre tailles, donc une rampe les
+cumulerait faussement ; elles omettent aussi la masse des shards vides. Garder
+ce helper et son oracle, mais fusionner ses masks dans `DVT-CWave` avec
+`root_entries=F,restarted_roots=0`, plutôt que porter ce second rescan sur GPU.
 
 Le script hérité du `HEAD=21a7a63` est encore `NO-RUN` pour recevoir
 `RF-GPU-P0`.

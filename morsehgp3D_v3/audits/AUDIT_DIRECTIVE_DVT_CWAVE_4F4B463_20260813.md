@@ -239,6 +239,16 @@ petit `n` développant les relations `Central/Lens/Acute/Mixed` avec
 multiplicité un. Une expansion proportionnelle à la masse d'un bloc est un
 refus d'architecture.
 
+Le premier `carrier_scan` concurrent valide le besoin mais pas l'ordonnance.
+À `n=2000,s_inf=2`, après la banque `W32/L16`, il ne prouve vide que
+`4,66 %` des records uniformes, `10,38 %` terrain et `7,27 %` huit-amas, tout
+en effectuant environ vingt à vingt-trois tests par record résiduel. Il repart
+de `C=root` et alloue une pile par rectangle. Ce code reste oracle/diagnostic :
+ses prédicats deviennent les masks source de la même CWave ; aucun second
+kernel ne recommence la racine. Une feuille `MIXED` signifie
+`POSSIBLE_OR_PRESENT`, jamais `HAS_CARRIER`, et la télémétrie publie records
+et masses par taille sans compteur global cumulatif.
+
 ## 6. q4 est `Acute × Lens`, pas toutes les paires de la lentille
 
 Noter `L` la relation complète des points de lentille et `P` sa sous-relation

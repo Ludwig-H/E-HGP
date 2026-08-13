@@ -251,6 +251,46 @@ inline bool rect_core_misses_box(const RectCore& c, const RectBox& p) {
   return s >= (__int128)c.r4 * c.r4;
 }
 
+// ---- PORTEURS q3 : LA MOITIE QUE LE CERTIFICAT DE TEMOINS NE VOIT PAS.
+//
+// Les auditeurs l'etablissent (`AUDIT_DEBLOCAGE_WSPD_PREFIX_CARRIERS`, § 8) :
+// compter des temoins ne prouve jamais l'ABSENCE d'un support. Un porteur q3
+// propre, pour une paire owner `ab` de longueur carree `D2`, est un `x` tel que
+//
+//     ||x-a||^2 <= D2,   ||b-x||^2 <= D2,   D2 < ||x-a||^2 + ||b-x||^2.
+//
+// Les deux premieres sont FAIBLES — elles conservent les ties d'arete maximale
+// —, la troisieme est STRICTE : c'est l'acuite du triangle. Or
+// `D2 < E2 + X2` equivaut a `H < 0` : le porteur est donc STRICTEMENT HORS de
+// la boule diametrale, la ou aucun temoin ne peut se trouver. Temoins et
+// porteurs vivent dans des regions COMPLEMENTAIRES, et c'est pourquoi un
+// certificat qui ne sait que fermer ne peut rien conclure sur l'existence.
+//
+// Releve au rectangle `A x B x C`, avec les bornes separables exactes :
+//
+//   ALL-porteur  : max||x-a||^2 <= min D2, max||b-x||^2 <= min D2,
+//                  et max D2 < min(||x-a||^2 + ||b-x||^2) ;
+//   NONE-porteur : min||x-a||^2 > max D2, OU min||b-x||^2 > max D2,
+//                  OU min D2 >= max(||x-a||^2 + ||b-x||^2).
+//
+// `SOURCE_EMPTY` n'est autorise qu'apres partition EXHAUSTIVE du domaine
+// temoin en nœuds `NONE-porteur` — jamais sur un echec de recherche.
+enum class RectCarrier { kNone, kAll, kMixed };
+
+inline RectCarrier rect_carrier_verdict(const RectBox& a, const RectBox& b,
+                                        const RectBox& c) {
+  const long long d2lo = rect_minsq(a, b), d2hi = rect_maxsq(a, b);
+  const long long e2lo = rect_minsq(c, a), e2hi = rect_maxsq(c, a);
+  const long long x2lo = rect_minsq(b, c), x2hi = rect_maxsq(b, c);
+  // NONE : l'une des trois contraintes est impossible partout.
+  if (e2lo > d2hi) return RectCarrier::kNone;
+  if (x2lo > d2hi) return RectCarrier::kNone;
+  if (d2lo >= e2hi + x2hi) return RectCarrier::kNone;   // aucun triangle aigu
+  // ALL : les trois sont satisfaites partout.
+  if (e2hi <= d2lo && x2hi <= d2lo && d2hi < e2lo + x2lo) return RectCarrier::kAll;
+  return RectCarrier::kMixed;
+}
+
 enum class RectVerdict { kNone, kAll, kMixed };
 
 // ENUM FERME. L'ABI n'accepte plus un `int` quelconque : toute valeur autre que

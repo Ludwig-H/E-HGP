@@ -306,6 +306,37 @@ unsigned bank_rect(const Tree& t, int ia, int ib, int W, int L, Counters* c) {
   return mask;
 }
 
+// ---- SOURCE_EMPTY : prouver l'ABSENCE de porteur, ce qu'aucun compteur de
+// temoins ne peut faire. On descend l'arbre avec le verdict de porteur ; si la
+// partition du domaine temoin est ENTIEREMENT `NONE-porteur`, le rectangle ne
+// peut contenir aucun support q3 et n'a rien a envoyer a la source. Un budget
+// epuise rend `UNKNOWN`, jamais `SOURCE_EMPTY`.
+struct CarrierStat { long long empty = 0, has = 0, unknown = 0, tests = 0, hwm = 0; };
+
+bool g_carriers = false;
+CarrierStat g_cs;
+
+void carrier_scan(const Tree& t, int ia, int ib, long long budget, CarrierStat* cs) {
+  const Node& A = t.nodes[ia];
+  const Node& B = t.nodes[ib];
+  std::vector<int> st{0};
+  long long used = 0;
+  bool found = false;
+  while (!st.empty()) {
+    if (used >= budget) { ++cs->unknown; if (used > cs->hwm) cs->hwm = used; return; }
+    const int ic = st.back(); st.pop_back();
+    ++used; ++cs->tests;
+    const mhgp3v::RectCarrier v =
+        mhgp3v::rect_carrier_verdict(A.box, B.box, t.nodes[ic].box);
+    if (v == mhgp3v::RectCarrier::kNone) continue;
+    if (v == mhgp3v::RectCarrier::kAll) { found = true; break; }
+    if (t.nodes[ic].left >= 0) { st.push_back(t.nodes[ic].left); st.push_back(t.nodes[ic].right); }
+    else { found = true; break; }        // feuille indecise : on ne conclut pas vide
+  }
+  if (used > cs->hwm) cs->hwm = used;
+  if (found) ++cs->has; else ++cs->empty;
+}
+
 [[noreturn]] void refuse(const char* why) {
   std::fprintf(stderr, "REFUS: %s\n", why);
   std::exit(2);
@@ -359,6 +390,7 @@ int main(int argc, char** argv) {
     else if (a.rfind("--min-carrier=", 0) == 0) min_carrier = arg_ll(val("--min-carrier=").c_str(), 0, (1LL << 50), "min-carrier");
     else if (a.rfind("--max-slope=", 0) == 0) max_slope = std::atof(val("--max-slope=").c_str());
     else if (a == "--oracle") oracle = true;
+    else if (a == "--carriers") g_carriers = true;
     else if (a == "--bank") use_bank = true;
     else if (a == "--fallback") g_fallback = true;
     else if (a == "--inject=omission") g_inject = 1;
@@ -517,6 +549,9 @@ int main(int argc, char** argv) {
         if (mask & (1u << q)) { ++c.closed[q]; c.mass_closed[q] += mass; }
         else { ++c.carrier[q]; c.mass_carrier[q] += mass; }
       }
+      // Le scan de porteurs ne porte que sur les rectangles q3 NON fermes :
+      // ceux qui partiraient a la source.
+      if (g_carriers && !(mask & 2u)) carrier_scan(t, ia, ib, 128, &g_cs);
     }
     c.terminals = (long long)terms.size();
     if (c.terminals == 0) refuse("front vide");
@@ -532,6 +567,11 @@ int main(int argc, char** argv) {
                 c.carrier[0], c.carrier[1], c.carrier[2],
                 c.evals, c.eval_hwm, c.over_quantum, c.central_all, c.none_hits, c.mixed_hits,
                 c.mass_total, total);
+    if (g_carriers)
+      std::printf("    porteurs q3 : SOURCE_EMPTY=%lld (%.2f%% du residuel) has=%lld inconnu=%lld"
+                  " | tests=%lld hwm=%lld\n",
+                  g_cs.empty, 100.0 * (double)g_cs.empty / (double)std::max(1LL, c.carrier[1]),
+                  g_cs.has, g_cs.unknown, g_cs.tests, g_cs.hwm);
     if (use_bank)
       std::printf("    banque W=%lld L=%lld lectures=%lld recertifications=%lld vides=%lld"
                   " endpoints_rejetes=%lld doublons=%lld | lectures/rect=%.1f recert/rect=%.1f\n",

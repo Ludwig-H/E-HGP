@@ -218,6 +218,13 @@ métrique et fraction réduite. La décision porte ensuite sur build, records,
 classifieurs, octets/HWM et temps du consommateur, pas seulement sur le nombre
 de terminaux.
 
+Rejeu local du delta : `--sep-euclid=2/1` et `4/2`, `uniform,n=64`, rendent
+tous deux `2016/2016` PairIds sans défaut. Le `digest_cles` identique ne prouve
+cependant pas l'identité du front : il hash les PairIds développés, qui sont
+par définition les mêmes pour toute partition exacte. Le manifeste doit
+séparer `PairDomainDigest` et `FrontDigest` ; ce dernier inclut métrique,
+fraction réduite et séquence canonique des RectIds/masses.
+
 ## 6. Portée du nouvel oracle et état du pin
 
 `--oracle-all=320` est un progrès : son prédicat ponctuel `__int128` n'emprunte
