@@ -343,6 +343,22 @@ inline long long rect_v_max(const RectBox& a, const RectBox& b, const RectBox& c
 // appele une fois par bit de lane ouvert, si bien que le nombre d'appels
 // arithmetiques reels approchait le TRIPLE du compteur publie.
 // Bit 0 = q2, bit 1 = q3, bit 2 = q4.
+// `Dlo` NE DEPEND PAS DU TEMOIN : il se calcule une fois par rectangle, et non
+// une fois par candidat. C'est la specification de l'audit, et c'est le seul
+// terme couteux — `rect_minsq` sur deux boites contre trois soustractions par
+// axe pour `Vhi`.
+inline unsigned rect_central_mask_dlo(long long dlo, const RectBox& a, const RectBox& b,
+                                      const RectBox& c) {
+  if (dlo <= 0) return 0;
+  const __int128 d = (__int128)dlo;
+  const __int128 vhi = (__int128)rect_v_max(a, b, c);
+  unsigned m = 0;
+  if (vhi < d) m |= 1u;
+  if (3 * vhi < d) m |= 2u;
+  if (209 * vhi <= 56 * d) m |= 4u;
+  return m;
+}
+
 inline unsigned rect_central_mask(const RectBox& a, const RectBox& b, const RectBox& c) {
   const __int128 dlo = (__int128)rect_minsq(a, b);
   if (dlo <= 0) return 0;
