@@ -92,11 +92,24 @@ convexe de `S`. Jung donne alors en dimension trois
 
 $$R\leq\mathrm{diam}(S)\sqrt{\frac{3}{8}},\qquad\text{donc}\qquad \mathrm{diam}(S)\geq R\sqrt{\frac{8}{3}}\ \text{ et }\ \mathrm{diam}(S)\leq2R.$$
 
-Comme `B` contient au plus `smax` points de rang fermé, **tout support propre
-positif tient dans une boule qui contient au plus onze points**, et deux de ses
-membres sont distants d'au plus `2R`. C'est exactement ce que le relevé
-d'arrangement n'a pas : un sommet du `<=k`-niveau peut relier quatre points
-arbitrairement éloignés par une sphère de centre extérieur au tétraèdre.
+Deux membres de `S` sont donc distants d'au plus `2R`, et `B` est contenue dans
+la boule de centre `a` et de rayon `2R` pour tout `a` de `S`. C'est exactement
+ce que le relevé d'arrangement n'a pas : un sommet du `<=k`-niveau peut relier
+quatre points arbitrairement éloignés par une sphère de centre extérieur au
+tétraèdre.
+
+**RETRACTATION.** Une première version de cette note ajoutait « tout support
+propre positif tient dans une boule qui contient au plus onze points ». C'est
+**faux**, et le contre-audit
+[`AUDIT_REPONSES_ROUTE_G4_50K_PUIS_10M_20260813.md`](AUDIT_REPONSES_ROUTE_G4_50K_PUIS_10M_20260813.md)
+le refuse à juste titre. La condition de Source S est `p+q<=smax` avec
+`p=|I_B|` et `q=|S|` : elle ne dit rien de `|U_B|`. Le shell global d'une boule
+pertinente peut porter `Theta(n)` labels, et le dépôt contient déjà un support
+q2 pertinent de rang fermé douze ainsi qu'une fixture à shell trente. Il en
+suit que « le nombre de supports par ancre est petit » ne découle pas de la
+pertinence, et que `M=128` ou `256` est un **choix diagnostique**, jamais une
+borne. Seule l'inclusion géométrique `B` dans `ball(a,2R)` est utilisée
+ci-dessous ; elle ne dépend d'aucun compte.
 
 **2.3 Le théorème de localité par calottes est démontré.** Section 2 de
 [`NOTE_SOLUTION_LOCALITE_CERTIFIEE_INVERSION_20260812.md`](NOTE_SOLUTION_LOCALITE_CERTIFIEE_INVERSION_20260812.md) :
@@ -148,47 +161,94 @@ une grille et une banque finies. Ils ne bornent rien. Ils suffisent en revanche
 
 Par point `a`, et seulement par point :
 
-1. une requête k-NN **exacte et bornée** construit la fenêtre `W(a)` des `M`
-   plus proches voisins, `M` de l'ordre de 128 à 256 ;
+1. une requête k-NN **exacte** lit `M+1` voisins, conserve les `M` premiers
+   comme fenêtre `W_M(a)` et garde le premier omis comme **coupure**
+
+$$\delta_{\mathrm{out}}(a)^{2}=\min_{x\notin\lbrace a\rbrace\cup W_{M}(a)}\left\lVert x-a\right\rVert^{2},$$
+
+   avec `+infini` publié explicitement lorsqu'un scan total n'omet rien ;
 2. tous les supports propres positifs `S` contenant `a` sont générés
-   **à l'intérieur de la fenêtre**, avec leur `I_B`, leur shell et leur
-   `BallKey` ;
-3. le certificat de fenêtre est **a posteriori, exact et entier** :
+   **à l'intérieur de la fenêtre**, avec leur `I_B`, leur shell fermé `U_B` et
+   leur `BallKey` ;
+3. le certificat de fenêtre est **exact** :
 
-$$4R^{2}<d_{M}(a)^{2}\Longrightarrow\text{le support est global},$$
+$$4R^{2}<\delta_{\mathrm{out}}(a)^{2}\Longrightarrow X\cap B\subseteq\lbrace a\rbrace\cup W_{M}(a).$$
 
-   où `d_M(a)` est la distance au `M`-ième voisin. Preuve : `S union I_B`
-   est contenu dans `B`, et pour `a` sur le bord de `B` tout point de `B` est
-   à distance au plus `2R` de `a` ; si `2R<d_M(a)` alors `B` est entièrement
-   dans la fenêtre, donc `I_B` y est exact et aucun partenaire n'a pu être
-   manqué. Réciproquement tout support global vérifiant cette inégalité est
-   trouvé par le calcul local. C'est une **équivalence sur son domaine**, pas
-   une heuristique.
+   Preuve : pour `a` sur le bord de `B(c,R)` et `y` dans `B`,
+   `|y-a| <= |y-c| + |c-a| <= 2R`. L'inclusion couvre donc `S`, `I_B` **et tout
+   le shell global `U_B`**. L'inégalité est **stricte** : à l'égalité, le
+   premier omis pourrait être sur la sphère, et le cas part au résiduel.
 
-Ce certificat ne coûte rien : il compare deux entiers déjà calculés. Il ne
-demande ni couverture de calottes à l'exécution, ni grille sphérique. Le
-théorème de localité sert à **dimensionner** `M`, pas à le payer.
+**La coupure est le premier OMIS, pas le `M`-ième inclus.** Avec `d_M(a)`, le
+`M`-ième site retenu ne peut lui-même appartenir à aucune boule ainsi
+certifiée : la comparaison reste sûre mais perd des supports sans raison. Le
+mutant `<=` doit mourir sur la fixture `a=(0,0,0)`, `b=(2,0,0)`, `c=(0,2,0)`,
+`M=1`, où `4R^2 = delta_out^2 = 4` et où le support `{a,b}` serait omis ou
+gardé selon le seul tie-break.
 
-Ce qui échoue le test — `4R^2>=d_M(a)^2` — n'est ni supprimé ni tronqué : il
-part au résiduel de la section 4.2 avec son reçu.
+`R` est rationnel : la comparaison n'est **pas** en général celle de deux
+entiers 64 bits. Il faut croiser numérateur et dénominateur en largeur prouvée,
+avec repli multiprécision. Un **chemin rapide entier** existe cependant, par
+Jung : `4R^2 <= (3/2) diam(S)^2`, donc
 
-### 4.2 Le cône ouvert — environ un dixième du travail
+$$3\,\mathrm{diam}(S)^{2}<2\,\delta_{\mathrm{out}}(a)^{2}\Longrightarrow4R^{2}<\delta_{\mathrm{out}}(a)^{2},$$
 
-Les supports manqués sont exactement ceux dont la miniboule déborde la fenêtre.
-Ils vivent dans les directions ouvertes mesurées à la section 3. Deux
-propriétés les rendent traitables :
+et ce test-là tient dans `i64` sur le profil u16. Il est seulement suffisant :
+son échec renvoie au test rationnel exact, jamais au résiduel directement.
 
-- leur nombre par ancre est petit, parce qu'une grande miniboule vide impose au
-  plus onze points de rang fermé ;
-- ils sont **directionnels** : à direction fixée, faire croître le diamètre
-  jusqu'au premier contact donne le support, sans énumérer aucune paire.
+**Statut exact de ce certificat.** Il prouve qu'un support local *déjà énuméré*
+et certifié est global. Il ne prouve ni la complétude de l'énumérateur local,
+ni celle du résiduel. La réciproque — tout support global vérifiant l'inégalité
+est retrouvé — n'est vraie que sous des prémisses qui restent à établir :
+requête top-`M` et coupure exactes, énumérateur produisant **tous** les q2, q3
+et q4 de la fenêtre indépendamment par arité et sans cap silencieux,
+indépendance affine, positivité, niveau et identités exacts, census
+reconstruisant l'ensemble fermé `I_B union U_B`, et politique explicite du
+rayon nul et des positions colocalisées. Le statut visé est donc
+`exact_window_certified_subsource`, **pas** `complete_global_source`.
 
-C'est la primitive du front inverse déjà présente au dépôt
-(`prototype/exact_ray_sweep.hpp`, `prototype/first_incidence_dichotomy.cpp`).
-Elle n'est aujourd'hui ni complète ni jugée ; elle devient ici un composant du
-chemin, pas une route concurrente. Son domaine est réduit d'un facteur dix par
-le noyau fermé, et surtout il est **nommé** : l'ensemble des cellules ouvertes
-d'une ancre est calculé, pas deviné.
+**L'owner ne filtre pas avant certification.** Avec `a=(0,0,0)`, `b=(10,0,0)`,
+`c=(0,1,0)` et `M=2`, le support `{a,b}` échoue le certificat vu de `a` et le
+passe vu de `b`. Un chemin où seul l'owner minimal propose perd ce record.
+Chaque endpoint certifiant émet donc une occurrence ; le RLE attribue l'owner
+canonique **après**, et agrège tous les `SupportKey` d'une même `BallKey`.
+
+### 4.2 Le résiduel — une couverture complète, pas une file de rebuts
+
+**Correction majeure.** La première version de cette note écrivait « les
+supports manqués sont exactement ceux dont la miniboule déborde la fenêtre, et
+ils vivent dans les directions ouvertes ». Cette phrase colle trois objets sans
+théorème de raccord : une boule globale encore inconnue, l'échec d'un
+certificat sur un candidat **déjà formé**, et une cellule directionnelle
+flottante issue d'un diagnostic échantillonné. Elle est retirée.
+
+Mettre en file les candidats locaux qui échouent le certificat ne couvre pas
+les supports globaux dont **aucun tuple n'a jamais été formé** dans une
+fenêtre. Le résiduel doit donc partitionner un **domaine de recherche**, avant
+les tuples : une tâche porte `(ancre, cellule directionnelle, intervalle de
+rayon, epoch)`, ou bien un bloc collectif `A times B times C`. Ses cellules
+doivent couvrir la sphère **exactement**, ses frontières être half-open, et
+chaque split conserver la masse. L'identité à faire tenir sur petit `n`, contre
+l'oracle exhaustif, porte sur les identités et non sur des comptes :
+
+$$\mathcal{S}_{\mathrm{globale}}=\mathcal{S}_{\mathrm{fenetre\ certifiee}}\mathbin{\dot\cup}\mathcal{S}_{\mathrm{residuelle}}.$$
+
+Le diagnostic à 512 directions de la section 3 sert à **ordonner** ce résiduel
+et à justifier la priorité du chemin rapide. Il ne le certifie pas.
+
+Les deux fichiers que je citais comme primitive directionnelle ne ferment pas
+ce trou : `exact_ray_sweep.hpp` part d'une paire déjà choisie et mesure la
+profondeur de ses sphères, `first_incidence_dichotomy.cpp` part d'une facette
+du cœur déjà connue et emploie un univers oracle. Aucun ne paramètre
+exhaustivement les directions d'une ancre pour générer son premier support.
+« Faire croître jusqu'au premier contact » reste à prouver : couverture des
+directions, owner, ordre des contacts, tangences et ex æquo.
+
+Une alternative recommandée par l'audit remplacerait avantageusement l'étape 3 :
+un oracle composante--domaine rendant le **minimum sortant exact** de chaque
+composante sur le domaine résiduel, avec toutes les égalités requises et un reçu
+de couverture des directions non sélectionnées. C'est une nouvelle
+implémentation du résiduel, pas sa suppression.
 
 ### 4.3 Le raccord
 
@@ -223,25 +283,64 @@ sphère quelconque.
 | sortie | non bornée | `~480` supports par point, **streamés** |
 | découpe | aucune | le nuage se tuile spatialement, chaque tuile est indépendante |
 
-Le point décisif pour `10^7` n'est pas le débit, c'est que **rien ne doit être
-résident à l'échelle du nuage entier sauf le nuage et le fold**. À `10^7`
-points en u16, le nuage occupe `60 Mo` ; la forêt de sortie est `O(nK)` ; les
-`4,8` milliards de supports attendus ne sont jamais matérialisés, ils sont
-réduits à la volée. Une tuile de `10^5` points avec son halo tient entièrement
-dans la mémoire d'une G4, et deux tuiles ne communiquent que par le fold.
+Le point décisif pour `10^7` n'est pas le débit : c'est que **les supports ne
+sont jamais résidents**. Les `4,8` milliards attendus sous Poisson sont réduits
+à la volée.
 
-À l'inverse, aucune route par paires ne se tuile : la paire `(a,b)` traverse
-les tuiles par construction, et son état est proportionnel au nombre de paires.
+**Correction : le nuage ne coûte pas 60 Mo.** Écrire « le nuage occupe 60 Mo,
+donc le nuage et le fold tiennent » était une erreur de comptabilité. Les
+planchers réels, à `n=10^7` :
 
-Deux réserves, écrites franchement :
+| objet | taille si matérialisé |
+| --- | ---: |
+| coordonnées seules, `3*u16` | `60 Mo` |
+| un `PointId:u32` par point | `40 Mo` |
+| une coupure carrée `u64` par point | `80 Mo` |
+| listes explicites `M=128`, indices u32 | `5,12 Go` |
+| listes explicites `M=256`, indices u32 | `10,24 Go` |
+
+Les listes `W_M(a)` ne doivent donc **jamais** être toutes résidentes : elles se
+calculent par tuile et vivent en registres ou en shared pour les seules ancres
+actives. Un LBVH binaire ajoute presque `2n` nœuds avec leurs boîtes, ranges et
+clés. Le fold porte des handles de facettes et de carriers — un DSU des seuls
+`PointId` est **incorrect** dès les ordres supérieurs.
+
+**Correction : les tuiles ne sont pas indépendantes.** `delta_out` est le
+résultat d'une requête **globale**, pas un halo connu d'avance ; une tuile ne
+peut déclarer son halo fermé que si l'index global prouve qu'aucune page omise
+ne contient un site plus proche. Et même alors, un support résiduel peut
+traverser plusieurs tuiles sans rayon local borné. Réduire chaque tuile à sa
+composante finale puis fusionner ces composantes perd les niveaux de connexion
+et les lots simultanés. Le protocole minimal exact est : halo en lecture seule
+et owner canonique indépendant du scheduling ; RLE global par `SupportKey` puis
+`BallKey`, y compris entre tuiles ; front global spillable pour les résiduels
+transfrontières ; flux de chaque tuile trié par `(ordre, niveau exact, clé
+canonique)` ; fusion multiway globale, gel de toutes les racines du niveau,
+construction de toutes les incidences, puis **commit unique du lot égal** ; DSU
+global ou contractions locales accompagnées d'un certificat de coupe. Aucune
+constante de résumé d'interface n'est prouvée : au pire, ce résumé est aussi
+gros que le flux d'événements.
+
+Le mot « tuile » ne doit pas emprunter une preuve par homonymie : les chunks
+déjà reçus dans l'architecture sont des suites de lots exacts complets, pas des
+sous-nuages spatiaux. La couture spatiale avec halo est une **nouvelle
+obligation de preuve**.
+
+À l'inverse, aucune route par paires ne se tuile même en principe : la paire
+`(a,b)` traverse les tuiles par construction, et son état est proportionnel au
+nombre de paires.
+
+Trois réserves, écrites franchement :
 
 - le degré de Gabriel n'est **pas** borné — deux constructions à treize voisins
-  réfutent déjà le cap 12 au dépôt. La fenêtre `M` n'a donc aucune borne
-  universelle. La route doit **refuser** (`unsupported_degeneracy` ou
-  insuffisance physique atomique), jamais tronquer. C'est précisément
-  l'invariant industriel déjà écrit à la spécification ;
-- le résiduel directionnel n'a aujourd'hui ni juge de complétude ni rampe. Tant
-  qu'il n'en a pas, la route n'est pas une route.
+  réfutent déjà le cap 12 au dépôt — et `smax` ne borne pas `|U_B|`. La fenêtre
+  `M` n'a donc aucune borne universelle ;
+- un échec de fenêtre sur une entrée régulière est un **résiduel normal**. Ce
+  n'est pas `unsupported_degeneracy`, qui n'appartient qu'à une vraie violation
+  du domaine mathématique, ni `resource_exhausted`, qui est atomique et
+  physique. Confondre les trois masquerait une incomplétude en dégénérescence ;
+- le résiduel n'a aujourd'hui ni domaine complet, ni juge, ni rampe. Tant qu'il
+  n'en a pas, la route n'est pas une route.
 
 ## 6. Séquencement
 
@@ -335,7 +434,37 @@ propre rampe. Aucune session GCP n'a été utilisée pour cette note. Le contrat
 `50 000 / 1 s`, a fortiori la cible principale `100 ms`, reste entièrement
 ouvert.
 
-## 8. Questions à l'auditeur
+## 8. Réponses reçues de l'auditeur
+
+[`AUDIT_REPONSES_ROUTE_G4_50K_PUIS_10M_20260813.md`](AUDIT_REPONSES_ROUTE_G4_50K_PUIS_10M_20260813.md)
+répond aux cinq questions ci-dessous. Les corrections qu'il impose sont
+intégrées aux sections 2.2, 4.1, 4.2 et 5 ; les questions restent affichées
+telles qu'elles ont été posées, avec leur réponse.
+
+- **Q1 — oui, mais.** Le certificat est suffisant, et équivalence seulement
+  **conditionnelle**, dans un sous-domaine complètement énuméré. Il faut la
+  coupure au premier omis. Statut : `exact_window_certified_subsource`.
+- **Q2 — oui pour la sémantique, non pour l'algorithme.** Sur la famille
+  `A_i/B_j`, tous les sommets q4 comptés sont bien non positifs, et le rapport
+  exact est `68 735,56…`, non `68 000`. Mais tester la positivité **après**
+  avoir formé les quatre points et calculé le centre paie tout de même le
+  facteur. L'étape 2 doit prouver qu'elle ne forme pas ces transits, avec
+  `q4_products_considered`, `lifts`, `positivity_tests`, `positive_candidates`
+  et `emitted_supports`.
+- **Q3 — non.** Aucun analogue de Yao à l'ordre `k` n'existe pour l'objet Morse
+  3D, ni au dépôt ni dans la recherche ciblée. Chazelle et al. montrent même
+  qu'un Gabriel ordinaire peut avoir `Omega(n^2)` arêtes en dimension trois, et
+  un corollaire d'audit ferme la variante littérale sur les facettes avec
+  `Omega(m^2)` arêtes dans une même composante. La route reste
+  **conditionnellement locale**, jamais inconditionnellement linéaire.
+- **Q4 — non.** Un support long peut être la première liaison entre deux amas
+  ou deux feuilles de surface. La direction normale ouverte n'est pas un
+  certificat d'absence de fusion. La fixture E5 le rend concret : une incidence
+  silencieuse ne fusionne pas immédiatement, mais installe une facette qui
+  porte une fusion ultérieure. L'étape 3 reste.
+- **Q5 — voir la section 5 corrigée.**
+
+## 9. Questions posées
 
 1. Le certificat de fenêtre `4R^2<d_M(a)^2` est-il accepté comme équivalence
    exacte sur son domaine, ou voyez-vous un cas où un support global vérifie

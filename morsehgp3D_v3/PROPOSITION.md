@@ -1,6 +1,6 @@
 # MorseHGP3D v3 — proposition d'architecture courante
 
-Date : 12 août 2026 UTC.
+Date : 13 août 2026 UTC.
 
 Cadre : `phase=exploration_v3_hors_registre`,
 `backend=cpu_reference_bounded_oracles_and_g4_diagnostic`,
@@ -1497,7 +1497,10 @@ durable; ils sont tenus dans
 points u16 + LBVH exact résidents
   |-> k=1 : Yao-1 exact mutualisé -> EMST sparse
   |-> q2 : lane cellules D_9 comparée à Yao--affine--dual suspendu
-  `-> q3/q4 : front Jung + lentille fermée factorisée, bit/certificat aigu
+  `-> q3/q4 : top-(M+1) exact -> fenêtre locale + coupure premier omis
+       |-> supports certifiés -> owner tardif -> RLE
+       `-> domaine résiduel complet A×B×C ou cellules directionnelles exactes
+       -> front Jung + lentille fermée factorisée, bit/certificat aigu
        -> center-cover persistant + cutting signée; top-k tue le patch
        -> q3 intrinsèque + niveaux q4 P/P, N/N, P/N ou shallow cutting certifiée
        -> owner génératif exact-once ou RLE SupportKey -> une géométrie/owner
@@ -1523,6 +1526,52 @@ produit. Ils recertifient des échantillons et des fixtures, puis comparent
 digests, masses et décisions à la source device. Un successeur device par
 cellules ne peut entrer dans le chrono qu'après la gate de travail; son coût de
 listes, subdivision et génération y est alors intégralement inclus.
+
+### 11.1 Sous-source certifiée par fenêtre
+
+Pour `W_M(a)` formé des `M` autres sites exacts et
+`delta_out(a)` égal à la distance du premier site omis, toute boule fermée de
+rayon `R` portant `a` vérifie
+
+$$4R^2<\delta_{\mathrm{out}}(a)^2\Longrightarrow X\cap B\subseteq\lbrace a\rbrace\cup W_M(a).$$
+
+La conséquence est exacte seulement si le générateur local énumère toutes les
+arités demandées et reconstruit `I_B/U_B` entier. Elle reçoit une sous-source,
+pas la route globale : un support jamais proposé doit appartenir à un domaine
+résiduel couvert avant les tuples. L'égalité est résiduelle. L'owner intervient
+après découverte, car un endpoint non owner peut être le seul à satisfaire la
+coupure.
+
+Source S borne `|I_B|+|S|`, jamais `|I_B|+|U_B|`. Une coquille peut donc être
+linéaire et `M` n'a aucune borne universelle. Une entrée régulière qui déborde
+la fenêtre rejoint le résiduel ; elle ne devient pas une dégénérescence. La
+preuve, les contre-fixtures et les réponses à Claude sont dans
+[`AUDIT_REPONSES_ROUTE_G4_50K_PUIS_10M_20260813.md`](audits/AUDIT_REPONSES_ROUTE_G4_50K_PUIS_10M_20260813.md).
+
+Avant d'ouvrir ce résiduel, la positivité donne un prune directionnel exact.
+Pour tout support positif contenant `a`, le vecteur du centre depuis `a`
+appartient au cône `cone(X-a)`. Une cellule qu'un demi-espace entier sépare de
+ce cône est vide de supports positifs, même à rayon arbitraire. Toute cellule
+qui l'intersecte reste fail-open : ce test ne remplace ni la coupure radiale,
+ni l'oracle de minimum sortant, ni le fold.
+
+### 11.2 Tuilage spatial et fold
+
+À dix millions de points, les listes de voisins et les supports sont calculés
+et streamés par tuiles, mais les tuiles ne sont pas des domaines topologiques
+indépendants. L'index ou l'annuaire global certifie la coupure k-NN ; le
+résiduel conserve les supports transfrontières ; les occurrences sont regroupées
+globalement par `SupportKey/BallKey` ; les flux sont fusionnés par ordre et
+niveau exact. Toutes les racines d'un lot égal sont gelées avant ses incidences,
+puis un unique commit global ferme le lot. Un DSU des seuls `PointId` ne
+remplace pas les handles de facettes et carriers aux ordres supérieurs.
+
+Le résident minimal candidat comprend points/identités, index global, état du
+fold, lot courant, fronts résiduels, deux buffers de travail, ancres verticales
+et manifestes. Il exclut toutes les banques par point, tous les supports, Gamma
+et toute mosaïque. Un ledger réel compte remaps, nœuds LBVH, workspaces de tri,
+files spillées, sorties et mémoire hôte épinglée ; les `60 MB` de coordonnées à
+`10^7` ne constituent pas une enveloppe mémoire.
 
 Pour le seul diagnostic horizontal `warm_e2e_h0_v3_diagnostic`, l'enveloppe de
 falsification provisoire est :
@@ -1583,7 +1632,12 @@ un refus de ressource sont trois statuts distincts.
    et le census fermé multi-ordre au résiduel; fermer reçu, mutants, télémétrie
    et deux pentes avant CUDA. Conserver le self-join comme oracle ou second
    prune selon les masses.
-4. Conserver les probes q4 mass-only comme falsificateurs, jamais comme sources.
+4. Évaluer d'abord la sous-source de fenêtre : top-`M+1` exact, coupure au
+   premier omis, génération indépendante q2/q3/q4, census fermé, owner tardif
+   et oracle par identités. Construire une vraie partition de domaine
+   `certifie/residuel` qui couvre aussi les supports jamais proposés ; mesurer
+   requêtes, propositions, positivité, census et tâches résiduelles. Conserver
+   ensuite les probes q4 mass-only comme falsificateurs, jamais comme sources.
    Appliquer le cœur universel de Jung avant une wavefront témoin persistante
    munie des bornes dirigées `L/U`; fermer le juge, puis recevoir partition
    triangulaire implicite, 64 patches, seuil huit, microtuiles terminales et
@@ -1648,6 +1702,8 @@ Le backend G4 devient candidat uniquement si :
 
 - les sources q2/q3/q4 ont une preuve de complétude sans atlas d'ordre
   supérieur caché ;
+- la sous-source locale et le résiduel forment une partition d'identités, et
+  le résultat est invariant entre une, deux et plusieurs tuiles ;
 - toutes les identités CPU/device sont vertes sur les mêmes entrées ;
 - les familles normales et dégénérées sont admises séparément ;
 - aucun cap, timeout ou buffer plein ne publie un préfixe ;

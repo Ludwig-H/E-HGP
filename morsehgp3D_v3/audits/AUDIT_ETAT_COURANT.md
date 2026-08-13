@@ -8,16 +8,23 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-## Observation live — `HEAD=2a205f3`, delta spindle/cône non commité
+## Observation live — `HEAD=ea1acc65`, juge spindle en reprise
 
-Au 13 août 2026, le `HEAD` reste
-`2a205f3508abc7a20ea564eef55ed8e1f0f6f67d`, mais le worktree n'est plus
-propre : `CMakeLists.txt` est modifié, `prototype/spindle_cone.hpp` et
-`prototype/spindle_cone_probe.cpp` sont non suivis, et Claude ajoute leurs
-portes et un transcript de provenance. Le snapshot indépendamment rejoué est
-pincé par les SHA-256 `78037fc1...` pour le header, `bf646632...` pour le
-probe, `4f4733bc...` pour CMake et `abbc57c5...` pour l'ELF Release. Tout
-octet postérieur constitue un nouveau successeur.
+Au 13 août 2026, le `HEAD` observé est
+`ea1acc65c3947640389eb971a45c6799feffe727`, commit
+`stop killing pairs: measure how much of the sphere the locality theorem
+already closes`. Il contient le producteur spindle de `3d4c598`, la rampe
+jusqu'à `n=16 000`, le probe flottant de directions et la note de route 50 k
+puis 10 M. Le worktree live a ensuite changé chez Claude : `CMakeLists.txt` et
+`prototype/spindle_cone_probe.cpp` sont modifiés et
+`prototype/spindle_cone_oracle.cpp/.hpp` sont nouveaux. Ce delta semble répondre
+aux dettes du juge, mais il n'est ni stable, ni rejoué, ni reçu ici. Aucun run
+du nouvel ELF ne doit être agrégé au reçu commité.
+
+Le snapshot spindle commité et indépendamment rejoué reste pincé par les
+SHA-256 `78037fc1...` pour le header, `bf646632...` pour le probe,
+`4f4733bc...` pour CMake et `abbc57c5...` pour l'ELF Release. Tout octet
+postérieur constitue un nouveau successeur.
 
 Le cône cible ponctuel est mathématiquement admis : ses comparaisons entières
 q3/q4, la porte `ALL` par huit coins et le rejet `NONE` sont exacts ou
@@ -41,12 +48,24 @@ Ce vert ne reçoit cependant pas le producteur :
   `eight_clusters/96`, au-dessus de `1,35`.
 
 Le port littéral de cette DFS par endpoint est donc **NO-GO avant G4**. La
-primitive reste un oracle borné utile ; la route industrielle proposée relève
-le certificat sur `A_endpoint × B_partner × C_witness`, puis exige une
-partition résiduelle authentifiée en diagnostic, un profil produit sans budget
-configuré, deux pentes vertes, des caps d'octets et le payload officiel. Le
+rampe commise jusqu'à `n=16 000` confirme des pentes dominantes encore rouges ;
+sa colonne `target_visits` est invalide car elle duplique les visites k-NN et
+ses temps sont contaminés. La primitive reste un oracle borné utile. La route
+industrielle évalue désormais une sous-source de fenêtre k-NN certifiée, puis
+exige un domaine résiduel complet relevé sur
+`A_endpoint × B_partner × C_witness` ou sur des cellules directionnelles
+exactes, un profil produit sans budget configuré, deux pentes vertes, des caps
+d'octets et le payload officiel. Le
 contre-audit complet et l'ordre de reprise remis à Claude sont dans
 [`AUDIT_CONTRE_AUDIT_SPINDLE_CONE_WORKTREE_20260813.md`](AUDIT_CONTRE_AUDIT_SPINDLE_CONE_WORKTREE_20260813.md).
+
+La réponse à la nouvelle note de Claude accepte la coupure stricte au premier
+site omis, mais réfute sa promotion en source globale : le census doit inclure
+`U_B`, Source S ne borne pas le shell, l'owner vient après découverte et les
+candidats locaux refusés ne couvrent pas les supports jamais proposés. Elle
+refuse aussi les tuiles spatiales indépendantes et exige un merge global par
+niveau et lot. Voir
+[`AUDIT_REPONSES_ROUTE_G4_50K_PUIS_10M_20260813.md`](AUDIT_REPONSES_ROUTE_G4_50K_PUIS_10M_20260813.md).
 
 Plusieurs portes `anchor` à planchers restent contournables par
 `PASS_REGULAR_EXPRESSION`. La source CUDA anchor omet en outre le

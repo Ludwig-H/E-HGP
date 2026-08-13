@@ -50,16 +50,19 @@ domaine partenaire est exactement un cône convexe : huit coins suffisent sans
 trigonométrie. Vient ensuite le replay local des conflits de la cutting. Voir
 [`AUDIT_REPONSES_MUR_AMAS_CENSUS_SPINDLE_20260812.md`](audits/AUDIT_REPONSES_MUR_AMAS_CENSUS_SPINDLE_20260812.md).
 
-Le successeur worktree implémente cette primitive ponctuelle et passe ses
+Le commit `3d4c598`, ancêtre du `HEAD` courant, implémente cette primitive
+ponctuelle et passe ses
 `30/30` portes ciblées, mais il n'est pas reçu : un `smax` hors largeur ferme
 faussement toute la masse avec l'accord du juge, les décisions q2/q3/q4 ne sont
 pas jugées séparément, la cardinalité demandée peut être réduite silencieusement
 et les rampes banques 48/96 gardent deux pentes rouges. Le résiduel sous cap
 n'est pas rejouable et l'ABI CUDA anchor est actuellement incohérente avec
 `density_guard`.
-La DFS par endpoint reste donc un oracle borné ; le prochain front industriel
-est le self-join collectif `A_endpoint times B_partner times C_witness`, avant
-toute mesure G4. Voir
+La DFS par endpoint reste donc un oracle borné. Deux reprises peuvent partager
+le résiduel : un fast path de fenêtre k-NN certifiée pour les supports locaux,
+puis un domaine collectif `A_endpoint times B_partner times C_witness` ou
+directionnel complet pour tout ce qui n'est pas certifié, avant toute mesure
+G4. Voir
 [`AUDIT_CONTRE_AUDIT_SPINDLE_CONE_WORKTREE_20260813.md`](audits/AUDIT_CONTRE_AUDIT_SPINDLE_CONE_WORKTREE_20260813.md).
 
 ## Contrat visé
@@ -75,6 +78,13 @@ est de même une limite d'implémentation, pas de mathématiques, et doit être
 nommée comme telle. Les décisions d'architecture se jugent donc aux deux
 horizons ; la route proposée et son séquencement sont dans
 [`NOTE_CLAUDE_ROUTE_G4_50K_PUIS_10M_20260813.md`](audits/NOTE_CLAUDE_ROUTE_G4_50K_PUIS_10M_20260813.md).
+Son contre-audit accepte `4R^2<delta_out^2` comme certificat suffisant d'une
+sous-source localement complète, mais refuse trois raccourcis : Source S ne
+borne pas `|U_B|`, les seuls candidats locaux refusés ne couvrent pas les
+supports jamais proposés, et un halo k-NN ne rend pas les sous-nuages
+indépendants. La réponse aux cinq questions, le protocole de fold global et le
+ledger mémoire sont dans
+[`AUDIT_REPONSES_ROUTE_G4_50K_PUIS_10M_20260813.md`](audits/AUDIT_REPONSES_ROUTE_G4_50K_PUIS_10M_20260813.md).
 
 Deux sorties sont distinctes :
 
@@ -501,7 +511,15 @@ préfixe comme objet complet.
    device. Seul le résiduel finit dans le census résident multi-ordre avec
    offsets 64 bits. Les bornes et reçus sont spécifiés dans
    [`NOTE_SOLUTION_SOURCE_Q2_YAO48_LBVH_U16_20260811.md`](audits/NOTE_SOLUTION_SOURCE_Q2_YAO48_LBVH_U16_20260811.md).
-4. Conserver le probe q4 mass-only `P15-HOCUDA-P1a` comme falsificateur : son
+4. Évaluer d'abord le fast path de fenêtre locale : top-`M+1` exact par ancre,
+   coupure au premier site omis, génération complète indépendante q2/q3/q4
+   dans la fenêtre, census `I_B/U_B`, owner après découverte et comparaison des
+   identités à l'oracle borné. L'égalité et toute fenêtre ouverte rejoignent un
+   domaine résiduel complet ; une file des seuls tuples refusés ne suffit pas.
+   Mesurer séparément k-NN, propositions, positivité, census, certifiés et
+   résiduels. Le shell n'est pas borné par `smax` et `M=128/256` n'est jamais
+   une borne universelle.
+5. Conserver le probe q4 mass-only `P15-HOCUDA-P1a` comme falsificateur : son
    port littéral à rescan racine est déjà refusé. Appliquer d'abord le cœur de
    Jung, puis remplacer le résiduel par une wavefront témoin persistante avec
    les bornes dirigées `L/U`; fermer les trous de bijection et de rejeu avant
@@ -513,13 +531,13 @@ préfixe comme objet complet.
    tranche n'émet aucune ancre et ne prouve pas la complétude de P1; elle est
    spécifiée dans
    [`NOTE_SOLUTION_P1A_CENTER_COVER_MASSONLY_20260811.md`](audits/NOTE_SOLUTION_P1A_CENTER_COVER_MASSONLY_20260811.md).
-5. Sur les seuls blocs encore admis, mesurer d'abord la lentille aiguë
+6. Sur les seuls blocs encore admis, mesurer d'abord la lentille aiguë
    `NONE/ALL/UNKNOWN` : `NONE` ferme une masse avant `PairId`, `ALL` reste
    factorisé et `UNKNOWN` se subdivise. Mesurer ensuite séparément cœur de
    Jung, Helly, composition cœur--profondeur et profondeur terminale. Le gain
    marginal doit payer collecte et tri ; toute ambiguïté retombe fail-open et
    aucun rescan racine n'est admis comme route.
-6. Construire le front de Jung coalescé et sa cutting signée q3/q4 sans
+7. Construire le front de Jung coalescé et sa cutting signée q3/q4 sans
    parcourir le plein arrangement ni remplacer le transcript Yao-1 de `k=1`.
    Graver `theta_only_prunes_on_live=0` et supprimer la sélection globale après
    ablation ; conserver le top-`(smax-2)` seulement comme certificat de mort
@@ -561,7 +579,7 @@ préfixe comme objet complet.
    contre Gamma exhaustif borné. Une extra-shell pertinente exige un générateur
    saturé avec join de postings reçu, sinon un refus fermé. Installer le harness
    du payload officiel avant toute qualification GPU.
-7. Pour P1a seulement, fermer le différentiel hôte à `n=32`, puis, dans la même
+8. Pour P1a seulement, fermer le différentiel hôte à `n=32`, puis, dans la même
    session G4 gardée, exécuter la parité native, `n=32` sous Compute Sanitizer
    et le profil 50 k direct, sans taille intermédiaire ni retry. Pour les autres
    routes de source, appliquer la gate de compteurs à

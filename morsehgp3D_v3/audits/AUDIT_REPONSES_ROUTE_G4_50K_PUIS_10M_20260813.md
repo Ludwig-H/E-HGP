@@ -236,6 +236,34 @@ Gabriel brut est faux pour le H0 exact à cause des incidences silencieuses de
 la fixture E5. Sa complétion `G_k+` est exacte sous porte régulière, mais sa
 construction littérale reste exhaustive en cofaces.
 
+La ligne enregistrée contient bien un Boruvka relatif :
+`relative_morse_boruvka.hpp` sparsifie un hypergraphe Morse **déjà complet**
+fourni par l'appelant. Il déclare justement non certifiées la complétude du
+catalogue et la couverture des incidences silencieuses. C'est un aval utile,
+pas un générateur géométrique `O(c(k)n)`. Les autres briques proches partent
+elles aussi de streams ou facettes déjà certifiés, sont bornées à petit `n`, ou
+ne portent que `k=1`.
+
+Un corollaire d'audit du lemme 5.1 de Chazelle et al. ferme même la variante
+**littérale** sur les facettes, dans le domaine réel. Leur construction fournit
+deux familles `A={a_i}` et `B={b_j}` telles que les `m^2` boules diamétrales
+`D_ij` soient strictement vides et possèdent un voisinage ouvert commun de
+l'origine. Pour un ordre fixe `K>=2`, ajouter `K-1` points génériques `R` dans
+ce voisinage. Chaque `Q_ij={a_i,b_j} union R` est alors une coface directe de
+rang fermé `K+1`. L'union des facettes de ces `m^2` cofaces comprend exactement
+`{a_i} union R`, `{b_j} union R` et,
+pour chaque `r` dans `R`, `{a_i,b_j} union (R minus {r})`. Il y a donc
+`V_0=(K-1)m^2+2m` facettes distinctes dans cette sous-famille connectée ; le
+graphe complet peut en contenir davantage. Toute forêt qui conserve **ces
+sommets-facettes littéraux** a au moins `V_0-1=Omega(m^2)` liens ordinaires, ou
+au moins `ceil((V_0-1)/K)` hyperarêtes de taille `K+1`. Pour `K=1`, les facettes
+quadratiques disparaissent, conformément au cas Yao/EMST.
+
+Ce corollaire est dérivé de conditions strictes ouvertes dans `R^3`; aucune
+famille asymptotique u16 n'est reçue ici. Surtout, il ne réfute pas un quotient
+H0 de carriers qui ne matérialise pas les facettes. Il interdit seulement de
+présenter le K-Gabriel littéral comme le graphe linéaire recherché.
+
 Ce constat ne prouve pas qu'un quotient de carriers `O(c(k)n)` est impossible.
 Il répond seulement : **aucun analogue utilisable n'est actuellement reçu**.
 Un futur énoncé devrait préserver, pour chaque coupe stricte et fermée, les
@@ -264,9 +292,41 @@ une nouvelle implémentation du résiduel, pas sa suppression. Les rondes
 Boruvka ne sont pas l'ordre de filtration : les événements de même niveau
 restent calculés sur un snapshot strict commun puis commis atomiquement.
 
+Il existe néanmoins un prune géométrique exact avant ce résiduel. Si un support
+positif `S` contient `a`, son centre `c` possède des poids barycentriques
+strictement positifs et
+
+$$c-a=\sum_{p\in S\setminus\lbrace a\rbrace}\lambda_p(p-a).$$
+
+La direction `c-a` appartient donc au cône tangent global
+`T_a=cone(X-a)`. Toute cellule directionnelle qu'un demi-espace entier sépare
+strictement de `T_a` ne contient aucun support positif, quelle que soit sa
+longueur. Ce prune peut retirer les directions normales d'un nuage coplanaire
+et doit être mesuré sur `terrain` avant de conclure qu'environ un dixième du
+travail reste. Il ne borne aucun rayon dès que la cellule rencontre `T_a`.
+Publier `open_cells`, `positive_feasible_open_cells` et le résiduel après leur
+intersection, puis vérifier zéro support omis contre l'oracle borné.
+
 Enfin, cette réduction vise seulement le H0 horizontal normalisé. Elle ne
 reconstruit pas à elle seule les incidences Gamma, les applications verticales
 ou le `BenchmarkOutputContract-v1`.
+
+La fixture E5 rend la prudence concrète : une incidence silencieuse ne fusionne
+pas immédiatement deux unions de `PointId`, mais installe la facette `AC` qui
+porte une fusion ultérieure. Un DSU de points et le critère « aucune fusion
+immédiate » la perdent. Pour omettre un événement après résolution H0, il faut
+donc résoudre tous ses bras sur le snapshot pré-lot, prouver leur racine commune
+et conserver encore l'ancre/provenance si le payload vertical ou de couverture
+la demande.
+
+Les deux fichiers cités comme primitive directionnelle ne ferment pas ce trou.
+`exact_ray_sweep.hpp` part d'une paire déjà choisie et mesure la profondeur de
+ses sphères ; `first_incidence_dichotomy.cpp` part d'une facette du cœur déjà
+connue et emploie un univers oracle. Aucun ne paramètre exhaustivement les
+directions d'une ancre pour générer son premier support. Il reste à prouver la
+couverture des directions, l'owner, l'ordre des contacts, les tangences et tous
+les ex aequo ; « faire croître jusqu'au premier contact » n'est pas encore une
+primitive reçue.
 
 ## 6. Q5 — résidence exacte à dix millions
 
@@ -276,17 +336,19 @@ ou le `BenchmarkOutputContract-v1`.
 les `PointId`, la permutation spatiale, l'index ni le fold. Quelques planchers
 illustrent l'obligation de ledger :
 
-| objet | plancher à `n=10^7` |
+| objet | taille si matérialisé à `n=10^7` |
 | --- | ---: |
 | coordonnées seules, `3*u16` | `60 MB` |
 | un `PointId:u32` par point | `40 MB` |
 | une coupure carrée `u64` par point | `80 MB` |
 | listes explicites `M=128`, indices u32 | `5,12 GB` |
 | listes explicites `M=256`, indices u32 | `10,24 GB` |
-| dix forêts de `n-1` arêtes, deux endpoints u32 seulement | environ `0,80 GB` |
+| dix forêts ayant chacune `n-1` arêtes, deux endpoints u32 seulement | environ `0,80 GB`, illustration conditionnelle |
 
-Le dernier plancher omet niveaux rationnels, nœuds internes, lots, verticales
-et certificat. Un LBVH binaire possède presque `2n` nœuds ; ses enfants, boîtes,
+La dernière ligne n'est pas une borne normative sur le nombre de records de la
+forêt ; elle illustre seulement pourquoi les 60 Mo ne suffisent pas. Elle omet
+niveaux rationnels, nœuds internes, lots, verticales et certificat. Un LBVH
+binaire possède presque `2n` nœuds ; ses enfants, boîtes,
 ranges, clés Morton et workspaces doivent être comptés selon le layout réel.
 La note ne peut donc pas conclure « le nuage et le fold tiennent » depuis les
 seuls 60 Mo.
@@ -298,11 +360,13 @@ Peuvent rester résidents, sous préflight exact :
 - coordonnées, `PointId`, permutation et index spatial global, ou un annuaire
   global authentifié de pages ;
 - coupures k-NN exactes si leur matérialisation gagne contre leur recalcul ;
-- état global du fold par ordre, snapshot strict du lot courant et handles
-  stables ;
+- état global du fold par ordre sur les handles de facettes/carriers, snapshot
+  strict du lot courant et handles stables ; un DSU des seuls `PointId` est
+  incorrect dès les ordres supérieurs ;
 - deux buffers de tuiles pour requêtes, candidats, RLE, census et événements ;
 - files résiduelles et inter-tuiles bornées, avec spill lossless et manifestes ;
-- buffers d'émission, digests, compteurs et high-water.
+- buffers d'émission, ancres verticales en attente, digests, compteurs,
+  manifestes et high-water.
 
 Ne doivent pas rester résidents : toutes les listes `W_M(a)`, tous les supports,
 les `4,8` milliards de supports Poisson attendus, une matrice de paires, Gamma
@@ -336,6 +400,13 @@ Réduire chaque tuile à sa composante finale puis fusionner ces composantes per
 les niveaux de connexion, les lots simultanés et potentiellement les verticales.
 Le résumé d'interface exact peut, au pire, être aussi grand que le stream
 d'événements : aucune constante d'interface n'est encore prouvée.
+
+Le mot « tuile » ne doit pas emprunter une preuve existante par homonymie. Les
+chunks reçus dans l'architecture actuelle sont des suites de **lots exacts
+complets** ou des lanes de travail partageant le même snapshot locator. Leur
+merge externe porte sur les identités canoniques des lots et actions, pas sur
+des sous-nuages spatiaux indépendants. La couture spatiale avec halo est donc
+une nouvelle obligation de preuve.
 
 Le plan de tests autorise déjà le streaming à `10^7` seulement si le catalogue
 reste sparse, avec un objectif distinct de `600 s`. Cette série ne change ni le
@@ -380,6 +451,12 @@ exactement le cône ouvert », « travail `O(n)M` » ou « tuiles indépendantes
 8. Pour `10^7`, fermer d'abord le schéma de stream, le ledger mémoire complet,
    les événements inter-tuiles et le fold global ; ne pas extrapoler les 60 Mo
    de coordonnées en capacité produit.
+
+Les portes minimales de cette dernière étape comparent une exécution à une,
+deux puis `N` tuiles : mêmes `SupportKey/BallKey`, mêmes lots, mêmes forêts,
+mêmes couvertures et mêmes verticales. Elles incluent un support trans-tuile,
+une même boule proposée par plusieurs halos, un shell distant, E5, un lot égal
+inter-tuile et une reprise après interruption juste avant le commit global.
 
 Le delta logiciel live du juge spindle observé pendant cette rédaction est en
 cours chez Claude. Il n'est pas inclus dans ce verdict et aucun fichier
