@@ -292,8 +292,9 @@ financerait l'aval d'une route peut-être déjà morte.
 
 ## 5. Le chaînon qui supprime ensuite les paires d'ancres denses
 
-Le premier étage produit est le vrai `MaxEdgeSuffixReporter-q4-v0`, anciennement
-nommé `AnchorSuffixReporter-q4-v0`, déjà ordonné dans
+Le premier étage produit est le vrai `CanonicalEdgeWindowReporter-q4-v0`,
+anciennement nommé `AnchorSuffixReporter-q4-v0` puis
+`MaxEdgeSuffixReporter-q4-v0`, déjà ordonné dans
 [`AUDIT_DIRECTIVE_BNODE_PROJECTIF_ET_ARRET_CLIMB_75F16DB_20260813.md`](AUDIT_DIRECTIVE_BNODE_PROJECTIF_ET_ARRET_CLIMB_75F16DB_20260813.md).
 
 Un groupe projectif `G` de membres `s_i=z_i-a` certifie
@@ -302,8 +303,9 @@ moins un intérieur dans toute sphère passant par `a,b`. Huit groupes aux union
 de `PointId` disjointes ferment donc q4 à `smax=11`. Cette propriété est
 indépendante de l'arête maximale et donne une vraie fenêtre conservatrice de
 paires candidates. L'owner maximal n'est appliqué qu'après génération du
-support ; le reporter garantit seulement de ne jamais retirer son unique arête
-owner vraie.
+support ; le reporter traite toutes les paires et garantit seulement de ne
+jamais retirer l'unique arête owner vraie. Le mot `CanonicalEdge` désigne
+l'orientation `a<b`, pas un owner connu avant génération.
 
 Ordre demandé :
 
@@ -507,7 +509,7 @@ jamais suffisante : le cap absolu et le p95 comptent aussi.
 3. Ajouter le petit adaptateur `BallFormToBallEvent-v0`, le census global
    `I_B/U_B` une fois par `BallKey` et les deux fixtures owner/cosphère. Il donne
    une identité de comparaison ; il n'autorise aucune rampe du chemin rouge.
-4. Implémenter `PWC0-A/MaxEdgeSuffixReporter-q4-v0` et mesurer
+4. Implémenter `PWC0-A/CanonicalEdgeWindowReporter-q4-v0` et mesurer
    `sum|E_4|`, tâches, octets et HWM ; n'écrire `PWC0-B` que si le partage des
    racines devient le terme dominant.
 5. Mesurer `EdgeActiveFormCounter-v0` sur les spans, donc

@@ -2318,7 +2318,7 @@ Le pipeline source candidat est donc :
 
 ```text
 ProjectiveCreditBank propositionnelle
-  -> MaxEdgeSuffixReporter et EdgeWindow E_q(a) en OpenEdgeSpans
+  -> CanonicalEdgeWindowReporter et EdgeWindow E_q(a) en OpenEdgeSpans
   -> formes de lentille et niveaux shallow locaux par arête ouverte
   -> ShallowEvent et bundle incident
   -> BallKey canonique/RLE
@@ -2339,7 +2339,7 @@ toute expansion. Seules les boules survivantes matérialisent leur petit
 intérieur, puis leur shell. Une cosphère lourde reste un `PlateauRecord` ou un
 refus atomique reçu, jamais une expansion précoce de toutes ses incidences.
 
-Le premier jalon est `PWC0-A/MaxEdgeSuffixReporter-q4-v0`, sans support ni
+Le premier jalon est `PWC0-A/CanonicalEdgeWindowReporter-q4-v0`, sans support ni
 CUDA. Il travaille par endpoint feuille `a`, garde un pool transitoire borné par
 tuile, traverse des tâches `(AnchorId,BNodeKey,chamber_mask)` et publie
 `sum_a|E_4(a)|`, maximum, crédits/IDs disjoints, spans ouverts, tâches, octets,
@@ -2350,6 +2350,8 @@ attente n'est pas aussi compté ouvert. L'oracle petit
 un span ouvert, puis que le shallow retrouve exactement ce support.
 Par lane, `input_span_mass=closed_mass+open_mass+pending_mass`; la fenêtre
 finale n'est publiée qu'avec `pending_mass=0`.
+Le reporter ferme des paires quelconques ; il ne connaît pas leur futur owner.
+L'arête maximale canonique intervient seulement dans cette gate de complétude.
 
 Le reporter reçoit huit crédits et les vrais `PointId`. Il commence par 48
 chambres grossières indépendantes ; seule une chambre `OPEN/MIXED` est raffinée
@@ -2673,7 +2675,7 @@ la boule concentrique de rayon `1` vaut `(1,-10,-10,-10,74)` et ne doit jamais
 `(0,0,0),(65535,65535,0),(65535,0,65535),(0,65535,65535)` attend
 `(1,-65535,-65535,-65535,0)` et tue tout intermédiaire rétréci en `i64`.
 
-### 15.2 `MaxEdgeSuffixReporter-q4-v0` : tuer les arêtes avant la source
+### 15.2 `CanonicalEdgeWindowReporter-q4-v0` : tuer les paires avant la source
 
 Pour chaque premier endpoint `a`, définir `E_q(a)` comme les seconds endpoints
 `b>a` non fermés par `h_q=smax+1-q` crédits projectifs aux unions de `PointId`

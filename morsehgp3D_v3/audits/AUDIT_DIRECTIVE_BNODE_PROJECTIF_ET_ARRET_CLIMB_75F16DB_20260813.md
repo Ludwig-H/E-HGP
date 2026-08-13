@@ -26,7 +26,7 @@ produit. Une autre ordonnance locale n'est pas mathématiquement exclue ; elle
 devrait battre le reporter partagé sur le même coût complet pour redevenir
 prioritaire.
 
-La prochaine tranche est `PWC0-A/MaxEdgeSuffixReporter-q4-v0`, avant CUDA et
+La prochaine tranche est `PWC0-A/CanonicalEdgeWindowReporter-q4-v0`, avant CUDA et
 avant le shallow. Elle travaille par endpoint feuille, construit des groupes
 d'IDs disjoints, ferme des **spans de seconds endpoints** par des formes exactes
 et mesure la fenêtre d'arêtes dirigée `E_4(a)`. L'invariant aval n'est pas
@@ -324,7 +324,7 @@ Ordre recommandé :
 
 1. réutiliser l'enveloppe projective et les activations entières déjà reçues,
    mais conserver la banque bornée comme proposer uniquement ;
-2. construire d'abord `PWC0-A/MaxEdgeSuffixReporter-q4-v0` sur 48 chambres,
+2. construire d'abord `PWC0-A/CanonicalEdgeWindowReporter-q4-v0` sur 48 chambres,
    avec reporter `Anchor×BNode`, suffixe de hauteur, orientation `a<b` et spans
    ouverts ;
    une chambre `OPEN/MIXED` seule est raffinée dans ses neuf sous-cellules,

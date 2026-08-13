@@ -45,20 +45,13 @@ par arête est un falsificateur différentiel utile, mais il parcourt encore
 après mort anticipée. Son `kept(a,b)` est un ensemble de sites ambigus par paire
 et un maximum, tandis que l'ancien `sum_N` vaut deux fois la masse q2 ouverte :
 les deux scalaires ne sont ni le même objet, ni une preuve `O(n)`. La directive
-est désormais : petit pont `BallForm -> BallKey -> RLE -> census I_B/U_B`, vrai
-reporter projectif des arêtes maximales, niveaux shallow locaux sur les seules
-arêtes ouvertes, puis fold streamé. Le script G4 CPU du pin reste impropre à une
+est désormais : petit pont oracle
+`BallForm -> BallKey -> RLE -> census I_B/U_B`, reporter projectif de paires
+dont la complétude est jugée sur l'arête maximale canonique, compteur des formes
+actives, niveaux shallow locaux sur les seules arêtes ouvertes, puis fold
+streamé. Le script G4 CPU du pin reste impropre à une
 qualification produit. Contre-audit et ordre exact :
 [`AUDIT_CONTRE_CHAINE_COMPLETE_ET_G4_736F5BC_20260813.md`](audits/AUDIT_CONTRE_CHAINE_COMPLETE_ET_G4_736F5BC_20260813.md).
-
-Le successeur `3d07be1` rétracte correctement le refus prématuré de `s=2`, mais
-sa loi `Theta(Kn)` n'est pas reçue. L'OR de deux certificats `ALL` est sûr ; sa
-mesure reste pourtant `2*residual_pair_mass` q2, pas `E_4`, et le fallback
-multiplie le temps CPU par `2,8..3,4` pour quelques dizaines de fermetures q3/q4.
-La taille d'une fenêtre de crédits est une fonction en escalier du seuil et peut
-sauter jusqu'au quadratique sans hypothèse de distribution. `s=2` reste donc une
-ablation non réfutée. Réponse mathématique et directive :
-[`AUDIT_REPONSE_RETRACTATION_S2_K_3D07BE1_20260813.md`](audits/AUDIT_REPONSE_RETRACTATION_S2_K_3D07BE1_20260813.md).
 
 Au pin `dba8961`, la fourche « source par record ou source par paire » est
 tranchée : aucune des deux descriptions n'est le contrat v3. La source doit
@@ -110,7 +103,7 @@ on oriente chaque paire `a<b` et note `E_q(a)` les seconds endpoints non fermés
 L'invariant exact est que l'arête maximale canonique de tout vrai support reste
 dans cette fenêtre ; ses autres sommets sont générés ensuite par la lentille.
 Le prochain falsificateur source est donc
-`PWC0-A/MaxEdgeSuffixReporter-q4-v0`, qui mesure `sum_a |E_4(a)|`, tâches,
+`PWC0-A/CanonicalEdgeWindowReporter-q4-v0`, qui mesure `sum_a |E_4(a)|`, tâches,
 octets et HWM. S'il passe, `EdgeActiveFormCounter-v0` mesure ensuite
 `M=sum m_ab`, tâches arête×site, octets et HWM sans développer le produit. Deux
 verts seulement autorisent l'arrangement shallow **par arête ouverte**, RLE des centres par `BallKey`, census
@@ -139,16 +132,19 @@ réponse 48/432 sont dans
 [`AUDIT_CONTRE_COMPTEUR_FENETRE_32589AD_20260813.md`](audits/AUDIT_CONTRE_COMPTEUR_FENETRE_32589AD_20260813.md).
 
 La directive d'implémentation est maintenant unique : écrire d'abord
-`PWC0-A/MaxEdgeSuffixReporter-q4-v0`, pas un nouveau scan de carriers. Il
+`PWC0-A/CanonicalEdgeWindowReporter-q4-v0`, pas un nouveau scan de carriers. Il
 conserve les vrais `PointId`, l'orientation canonique, les preuves et les
 continuations, mesure les spans ouverts q4 sur 48 chambres, puis raffine
 uniquement chaque chambre ouverte dans ses neuf sous-cellules. Une banque
 bornée reste propositionnelle : un résultat dense à `P=96` refuse cette
 configuration, pas tous les certificats. Si `sum_a|E_4(a)|`, les tâches ou les
-octets restent rouges après ablation de `P`, la route s'arrête avant le shallow.
+octets restent rouges après ablation de `P`, la route s'arrête. Le reporter ne
+sait pas encore quelles paires deviendront owners ; l'arête maximale intervient
+uniquement dans la gate de complétude. Si `E_4` passe,
+`EdgeActiveFormCounter-v0` doit encore recevoir `M=sum m_ab` avant le shallow.
 Si la fenêtre est sparse mais les `n` graines racine dominent, `PWC0-B`
-universalise sur `ANode×BNode`. Un vert autorise le shallow q4 puis q3/q2 ; il
-ne qualifie encore aucun SLO.
+universalise sur `ANode×BNode`. Seuls les deux verts `E_4` et `M` autorisent le
+shallow q4 puis q3/q2 ; ils ne qualifient encore aucun SLO.
 
 Au pin `96be8e0`, le nouveau front apporte deux briques utiles sans changer ce
 verdict. L'intervalle entier de `H=(z-a) dot(b-z)` sur trois AABB certifie

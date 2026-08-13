@@ -126,3 +126,50 @@ Ce qui reste vrai et utile : les deux saturent, et aucune des deux ne croît ave
 proportionnalité en `K` se vérifie aussi à `s=3` : `198,2` à `smax=7` prédit
 `331` à `smax=11`, et la mesure indépendante donne `354,5` — sept pour cent
 d'écart.
+
+## 8. La grille complète — `s` et `K` agissent indépendamment, et la loi est exacte
+
+`uniform`, disjonction des deux certificats, boîtes serrées. Fenêtre moyenne à
+`n=16 000`, et son rapport au seuil `h_2 = smax-1` :
+
+| `smax` | `h_2` | `s=2` | `N/h_2` | `s=3` | `N/h_2` | `s=4` | `N/h_2` |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| `7` | `6` | `602,3` | **`100,38`** | `198,2` | `33,03` | `103,3` | `17,22` |
+| `11` | `10` | `986,2` | **`98,62`** | `354,5` | `35,45` | `189,6` | `18,96` |
+| `15` | `14` | `1 382,5` | **`98,75`** | `499,1` | `35,65` | `286,9` | `20,49` |
+| `19` | `18` | `1 779,4` | **`98,86`** | `632,0` | `35,11` | `390,3` | `21,68` |
+| `25` | `24` | `2 371,4` | **`98,81`** | `820,8` | `34,20` | — | — |
+
+À `s=2`, le rapport vaut `98,6` à `100,4` sur un facteur **quatre** en `K`. À
+`s=3`, `33,0` à `35,7`, soit `\pm 4\%`. À `s=4` il dérive de `17,2` à `21,7`,
+soit `26\%` — la seule séparation où la proportionnalité se dégrade.
+
+$$\boxed{\;\lvert N_2(a)\rvert \;=\; c(s)\cdot K\;},\qquad c(2)\simeq 98{,}8,\quad c(3)\simeq 34{,}7,\quad c(4)\simeq 20$$
+
+**Les quatorze configurations passent la règle des deux pentes.** La plus mauvaise
+est `smax=25, s=2` avec `1,436 / 1,242` — une seule au-dessus du seuil, donc pas
+de refus.
+
+### Ce que cela répond
+
+`s` et `K` agissent **indépendamment et multiplicativement** :
+
+- `K` fixe la fenêtre **linéairement**, sans toucher l'exposant en `n` ;
+- `s` fixe la constante `c(s)`, qui décroît environ comme `s^{-2,4}` ;
+- et le front croît, lui, comme `s^{2,0}` à `s^{3,7}` selon la famille.
+
+Le produit `\text{front}\times\text{fenêtre}` est donc **presque invariant en
+`s`**, ce qui explique enfin pourquoi aucune séparation ne dominait dans mes
+mesures précédentes : elles déplaçaient du travail d'un compteur à l'autre sans
+en changer le total.
+
+**`s` n'a donc pas à dépendre de `K`.** Augmenter `smax` coûte linéairement en
+fenêtre, et le choix de `s` reste valable pour tous les profils.
+
+### Ce que je ne conclus pas
+
+Une seule famille, une seule taille pour le rapport, `s\in\lbrace 2,3,4\rbrace`.
+La dérive de `26\%` à `s=4` n'est pas expliquée : soit la proportionnalité y
+cesse, soit la fenêtre y devient trop petite pour que le rapport soit stable.
+`eight_clusters`, dont la densité est très inhomogène, n'est pas mesurée — et
+c'est là que je m'attends le plus à ce que la loi se casse.

@@ -152,7 +152,7 @@ Le test exact d'un triple plein rang
 de chambres ; il constitue une troisième ablation de rappel, pas une résidence
 obligatoire du P0.
 
-## 5. Le vrai `MaxEdgeSuffixReporter-q4-v0`
+## 5. Le vrai `CanonicalEdgeWindowReporter-q4-v0`
 
 Pour chaque lane q3/q4 et chaque ancre :
 
@@ -191,7 +191,7 @@ projective passe, seulement alors sa masse dirigée devient un `PlaneTape` par
 
 ### 5.1 Commencer par q4 et non par les trois lanes
 
-Le plus petit falsificateur est `PWC0-A/MaxEdgeSuffixReporter-q4-v0`. Il demande
+Le plus petit falsificateur est `PWC0-A/CanonicalEdgeWindowReporter-q4-v0`. Il demande
 `h_4=8` crédits, ferme donc au moins autant de cibles que les seuils `h_3=9` et
 `h_2=10` pour une même suite de crédits, et produit la fenêtre qui doit être la
 plus petite. Si `sum_a|E_4(a)|`, ses tâches ou ses octets restent denses, il est
@@ -296,7 +296,7 @@ permet pas de financer le shallow si `M` est dense.
   gate ;
 - retirer `ProjectiveWindowCounter-v0`, `REFUSÉ s=2`, `VERT s=3` et
   « décide autrement que la masse » de ses claims ;
-- implémenter `PWC0-A/MaxEdgeSuffixReporter-q4-v0` : 48 chambres indépendantes,
+- implémenter `PWC0-A/CanonicalEdgeWindowReporter-q4-v0` : 48 chambres indépendantes,
   puis raffinement adaptatif des seules chambres ouvertes dans leurs neuf
   sous-cellules ;
 - ne lancer ni G4, ni shallow, ni join générique avant ce compteur et le second

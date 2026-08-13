@@ -57,6 +57,26 @@ compteur `juges` peut publier une couverture trompeuse. La porte minimale
 développe les IDs réellement crédités et vérifie le prédicat ponctuel indépendant
 de la lane ; un mutant `fallback-faux-all` doit mourir.
 
+Le rejeu local le démontre sans ambiguïté :
+
+```text
+cmake --build build/v3 --target mhgp3v_wspd_wavefront_probe --parallel
+ctest --test-dir build/v3 --output-on-failure -R '^mhgp3v_wspd_wavefront_'
+5/5 PASS, 1,18 s
+
+./build/v3/mhgp3v_wspd_wavefront_probe --family=uniform --points=1200 \
+  --sep-euclid=2/1 --tight --judge-vwave --window=256 --fallback
+DESACCORD DU JUGE: 2864 fermetures sans 10 PointId distincts
+exit=1
+```
+
+Sans `--fallback`, la même commande rend `accord=OUI`. Le CTest nominal ne
+passe pas `--fallback`; son vert ne reçoit donc pas ce chemin. Les `2864`
+désaccords ne sont pas une réfutation géométrique du classifieur complet : ils
+comptent des fermetures fallback contre un oracle qui ne reconnaît que le masque
+central. Ils sont la preuve que gate et sujet ne décrivent plus le même
+certificateur.
+
 ## 2. Ce que la grille `smax` mesure réellement
 
 Le champ imprimé `sum_N` demeure exactement :
@@ -194,7 +214,7 @@ tandis que lane/niveau/owner restent des champs d'activation séparés.
 1. Garder `s=2` comme premier point d'ablation, sans le déclarer reçu.
 2. Ajouter le replay indépendant du fallback et arrêter la grille `sum_N` dès
    que ses claims q2 sont correctement bornés.
-3. Implémenter `PWC0-A` q4 et mesurer cinq familles, plusieurs graines,
+3. Implémenter `PWC0-A/CanonicalEdgeWindowReporter-q4-v0` q4 et mesurer cinq familles, plusieurs graines,
    `12500/25000/50000`, `P=48/96/192`, avec les fates exclusifs.
 4. Si `E_4` est sparse, mesurer `EdgeActiveFormCounter-v0`. Ne commencer les
    niveaux shallow que si `M`, tâches, octets et HWM passent aussi.

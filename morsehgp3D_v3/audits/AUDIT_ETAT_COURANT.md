@@ -72,7 +72,7 @@ La directive prioritaire à Claude est maintenant :
 BallFormToBallEvent-v0 borné
   -> BallKey primitive/RLE, census global I_B/U_B une fois par boule
   -> autorité output-bearing pour comparer les remplacements
-PWC0-A / MaxEdgeSuffixReporter-q4-v0
+PWC0-A / CanonicalEdgeWindowReporter-q4-v0
   -> vrais PointId, huit crédits disjoints
   -> 48 chambres indépendantes, raffinement 9 des seuls OPEN
   -> CLOSED_EDGE_SPAN / OPEN_EDGE_SPAN / PENDING_CONTINUATION
@@ -109,6 +109,11 @@ ledger.
 La réponse aux deux questions du pin est maintenant explicite. L'OR des deux
 certificateurs est reçu parce que le fallback remplace un `MIXED`, sans cumuler
 deux populations ; le juge courant ne rejoue toutefois que le masque central.
+Rejeu exact : les cinq CTests WSPD passent en `1,18 s`, mais leur commande avec
+`--fallback` supplémentaire rend `exit=1` et `2864` désaccords à `n=1200`.
+Ce n'est pas une réfutation du classifieur complet : c'est la preuve que le juge
+et le sujet ne portent plus le même prédicat, et que le CTest n'active pas la
+nouvelle route.
 La grille publiée mesure encore `sum_N=2*residual_pair_mass_q2`. Deux seuils sur
 `uniform` ne prouvent ni `Theta(K)`, ni `Theta(Kn)`, ni l'indépendance de `s`.
 Enfin `|E_4|` sparse ne suffit pas : le shallow doit encore passer le ledger
