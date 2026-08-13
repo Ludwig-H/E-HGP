@@ -2118,6 +2118,25 @@ silencieusement `C=root`. Un nœud `ALL` ne peut contenir un endpoint de `A/B`,
 mais le replay conserve tout de même jusqu'à dix `proof_ids` et vérifie leur
 identité, leur disjonction et chaque bit.
 
+La porte de parcours développe, à petit `n`, tous les nœuds crédités et exige
+la multiplicité `0/1` de chaque `(RectId,lane,PointId)`, le cardinal exact de
+l'union et un plancher non vide séparé pour q2/q3/q4. Elle juge ensuite chaque
+triplet par les prédicats géométriques ponctuels, pas seulement par un second
+appel au masque central. Pour tout quantum, la comptabilité est
+`tasks_created=tasks_consumed+tasks_pending`; consommer `tasks_pending` doit
+donner le même digest final qu'une vague sans cap. Un compteur de tâches
+abandonnées ne constitue jamais une continuation.
+
+Une ordonnance locale `locate-and-climb` est une ablation licite seulement si
+ses racines initiales partitionnent tout le `PointTree`. Pour une feuille
+localisée `z_0`, l'ensemble exact est `{z_0}` plus chacun des sous-arbres frères
+rencontrés jusqu'à la racine. Leur union vaut `X` avec multiplicité un. Si une
+pile LIFO vise l'ordre proche d'abord, elle empile les frères grossiers avant
+les frères proches, puis la feuille en dernier. À quantum illimité, cette
+ordonnance doit produire le même ledger de crédits que la graine `C=root` ; une
+baisse de fermeture signale du travail omis et interdit toute comparaison de
+coût.
+
 Cette `Central-VWave` est complète pour les crédits du certificat central ;
 elle ne prétend pas être complète pour tous les témoins géométriques. Son
 compteur directeur est `J`, nombre de tâches `Rect×CNode` consommées. Le pire

@@ -41,7 +41,7 @@ complet.
 Le prochain micro-jalon recommandé est `Central-VWave`. Pour chaque terminal,
 il classifie l'arbre témoin par les extrema exacts du score
 `S=Vhi(singleton)` : `S<Dlo`, `3S<Dlo` et
-`209S<=56Dlo`. `ALL` crédite une antichaîne, `NONE` élague seulement ce
+`209S<=56Dlo`. `ALL` crédite une antichaîne, `CENTRAL_DEAD` élague seulement ce
 certificat et `MIXED` descend en vagues `count--scan--fill`. Cette construction
 est complète pour les crédits du masque central et supprime fenêtre Morton,
 top-`L` et heap par rectangle. Son travail `J` peut encore être dense : il est
@@ -53,11 +53,21 @@ Le pin `dfa9e1b` corrige déjà un faux crédit découvert par l'audit : le masq
 des lanes appartient désormais à chaque `CNode`, si bien qu'un parent `ALL` ne
 peut plus être recompté dans ses enfants lorsque l'autre lane est `MIXED`.
 Cette réparation réduit de `17 %` les records q2 annoncés fermés sur le cas
-mesuré. `Central-VWave` reste néanmoins diagnostique : aucun CTest ne lance
-`--vwave`, `tronques` n'est ni publié ni une continuation sérialisée, et aucun
-`proof_id`, compactage résiduel, ABI ou kernel device n'existe. Le rejeu local
-ciblé rend `16/16` portes CPU en `23,72 s`; ce vert reçoit les formules, pas le
-parcours complet.
+mesuré. Le successeur `7b58fc3` ajoute un CTest nominal et tue le mutant du
+masque global ; le rejeu ciblé rend `18/18` portes CPU en `26,48 s`.
+`Central-VWave` reste néanmoins diagnostique : le juge ne certifie pas les IDs
+crédités, son plancher n'est pas séparé par lane, et un cap compte seulement
+`tronques` sans sérialiser les tâches restantes. Aucun `proof_id`, compactage
+résiduel, ABI ou kernel device n'existe. Le prochain jalon est donc le ledger
+d'antichaîne et la continuation `count--scan--fill`, pas un nouveau score.
+
+Le pin `75f16db` teste une remontée depuis la feuille Morton du milieu. Son
+parentage est désormais préconstruit, mais l'ablation omet précisément cette
+feuille et dépile d'abord le frère le plus grossier. La baisse de `9 %` des
+classifications s'accompagne d'une baisse des fermetures et ne prouve donc pas
+que seul `QueryTree×PointTree` peut fournir le facteur manquant. Avant toute
+conclusion, la décomposition climb doit partitionner tous les PointIds avec
+multiplicité un et reproduire exactement la vague racine sans cap.
 
 Cette vague ne ferme toutefois que le préfixe central. La réponse source plus
 forte n'est pas un join développé de carriers : des groupes projectifs

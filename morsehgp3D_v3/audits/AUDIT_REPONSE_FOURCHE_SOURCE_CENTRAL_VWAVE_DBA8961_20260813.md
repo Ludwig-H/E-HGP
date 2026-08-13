@@ -222,6 +222,83 @@ central. Elle ne prouve pas encore un coût linéaire : si `J` désigne les tâc
 `Rect×CNode` consommées, le pire cas reste `Theta(Fn)`. `J`, les octets et HWM
 sont donc des portes bloquantes, pas des détails de profilage.
 
+### 4.3.1 Réception partielle au pin `7b58fc3`
+
+Le pin `7b58fc3530bfa0e6907ddc562135f94889dbbccb` porte désormais le masque dans
+chaque tâche et tue le mutant `masque-global` avec le code contractuel `4`.
+Cette correction rend la comptabilité par population sûre : pour une lane
+donnée, les nœuds `ALL` consommés forment une antichaîne disjointe. Elle ne
+reçoit pas encore le ledger d'identité.
+
+Le juge live balaie tous les PointIds, mais réemploie le même masque central
+singleton. Il vérifie qu'une fermeture possède assez de candidats centraux ;
+il ne vérifie ni quels IDs ont été crédités, ni leur multiplicité, ni un
+prédicat `H/E/X` indépendant. Son plancher est global et peut être rempli par
+q2 lorsque q3/q4 sont vacants. La porte suivante doit donc publier et rejouer,
+par lane, les unions d'IDs des nœuds crédités.
+
+Deux fixtures axiales isolent la faute. Pour `A={0}`, `B={10}` et un `CNode`
+peuplé par `{1,...,6}`, le parent fournit six crédits q2 mais reste `MIXED` q3 ;
+un masque global recrédite ses enfants et ferme faussement q2. Pour `A={0}`,
+`B={30}`, `CNode={7,...,11}`, le même mécanisme double cinq crédits q3 pendant
+que q4 descend. La frontière endpoint `z=a` ou `z=b`, où `S=D`, tue en plus le
+mutant faible `<=` en q2/q3.
+
+Le cap reste seulement un compteur. À `uniform,n=800,s=2,tight`, `window=2`
+tronque les `24745` terminaux et ne ferme rien ; `window=64` en tronque `8440`
+et ferme `1867/8/0` records ; `window=1024` ne tronque rien et ferme
+`4297/72/38`. La sûreté fail-open est conservée, mais il n'existe aucun payload
+de reprise. L'ABI minimale suivante est bloquante :
+
+```text
+CentralTask      = RectId, CNodeKey, lane_mask
+CentralCredit    = RectId, CNodeKey, closed_mask, population, proof_span
+CentralPending   = RectId, CNodeKey, lane_mask
+CentralRectResult= RectId, closed_mask, residual_mask, credit_span, pending_span
+```
+
+Les tableaux sont SoA, préalloués et produits par `count--scan--fill`. La gate
+exige `tasks_created=tasks_consumed+tasks_pending`, multiplicité d'ID `0/1` par
+lane, `credit_count=|union(proof_ids)|`, planchers par lane et digest invariant
+après consommation complète de `CentralPending`. Tant que ce contrat n'existe
+pas, optimiser la proportion de `MIXED` dans la DFS scalaire ne rapproche pas
+le chemin warm GPU.
+
+### 4.3.2 Contre-audit de `locate-and-climb` au pin `75f16db`
+
+Préconstruire `leaf_parent` en `O(n)` est correct et supprime la recherche
+linéaire qui existait dans le premier delta concurrent. Mais les frères d'une
+feuille à la racine partitionnent seulement `X\{z_0}`. Le pin empile tous ces
+frères sans jamais empiler `z_0`. À `uniform,n=8000,s=2`, quantum non saturé,
+les classifications passent de `30422095` à `27645737`, mais les fermetures
+q2/q3/q4 passent simultanément de `104237/2455/1288` à
+`97822/1989/1010`. Les `9 %` ne sont donc pas une économie à résultat constant.
+
+L'ordre est également renversé : les frères sont ajoutés du voisinage de la
+feuille vers la racine, puis dépilés en LIFO, donc le plus grossier passe le
+premier. L'ordonnance exacte proche-d'abord est : empiler les frères dans
+l'ordre racine-vers-feuille, puis empiler la feuille `z_0`. Le premier pop est
+alors `z_0`, suivi du frère immédiat et des frères de plus en plus grossiers.
+
+Trois gates sont nécessaires avant de comparer le nombre de tâches :
+
+1. pour chaque feuille petit `n`, développer les racines initiales et exiger
+   tous les PointIds exactement une fois ;
+2. sans cap, exiger identité bit à bit de l'union créditée et du `closed_mask`
+   entre `C=root` et `climb` ;
+3. placer la feuille localisée comme dixième, neuvième et huitième crédit des
+   lanes q2/q3/q4, afin que son omission tue le test.
+
+Le pin ne contient aucun CTest `--climb`. Son juge de sûreté peut passer malgré
+une perte de complétude, puisqu'il demande seulement que toute fermeture
+annoncée possède assez de candidats. Il est donc prématuré d'inférer de cette
+ablation que le facteur manquant ne peut venir que de `QueryTree×PointTree`.
+Enfin, le champ `parent` ajouté après quatre AABB aligne `WfNode` à `128`
+octets, contre `120` auparavant. Le placer dans le trou après `level` conserve
+la taille ; `leaf_parent` ajoute encore environ `4n` octets. Le coût reste
+faible à `50k`, mais représente environ `120 MB` supplémentaires à dix
+millions de nœuds et appartient au ledger HWM.
+
 ### 4.4 Factoriser aussi les requêtes — ablation après la fenêtre projective
 
 Si les `F` graines `Rect×Croot` restent trop coûteuses, un join global

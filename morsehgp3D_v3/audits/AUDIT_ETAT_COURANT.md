@@ -8,16 +8,17 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-## Observation live — `HEAD=dfa9e1b`, `Central-VWave` corrigée mais encore diagnostique
+## Observation live — `HEAD=75f16db`, l'ablation `climb` omet une feuille
 
 Le pin observé est
-`dfa9e1b2950a11ef67f7a57463770c5be68059fb`, commit
-`a global open mask was double-crediting parents into children — a false
-closure`. Le worktree était propre au relevé. Empreintes principales :
+`75f16db981bcbce262cf940d68fd5550be986c2a`, commit
+`locate-and-climb gives nine percent, and that settles where the factor must
+come from`. Le worktree ne contient que les compléments documentaires du
+présent audit ; l'auditeur ne modifie aucun logiciel. Empreintes du pin :
 
 ```text
-wspd_wavefront_probe.cpp f12b4128fad79cb48ef6302da235ac3ac3344ef16b8921fb6625600dd7cb20d7
-wspd_wavefront.hpp       d7ea84fadcbdad076f72d8e7a4bd4ff7bbcd15fa8dffc331e33db6c54adcaa30
+wspd_wavefront_probe.cpp a732cb3b46c7cdd43a6d8065db90a7618749a417dad5b14c4fb15c79cf83efef
+wspd_wavefront.hpp       62ec3f4f23da4e67c67b6cef9855797f27cda839b0bbf119c87930d5780b973b
 rect_front.hpp           f4c3be616d79b1c5c256929db4570220a567c4a575aff81a851790fbab399487
 rect_front_probe.cpp     69ae4fda4cda9913facaec09b50a8d0722d9a881e94f06960fddcb3fae90a3ce
 ```
@@ -53,27 +54,63 @@ laissait une lane `ALL` redescendre dans les enfants lorsqu'une autre lane
 `dfa9e1b` corrige le principe en portant `(CNode,lane_mask)` et en transmettant
 seulement les bits `MIXED`. La mesure de Claude passe q2 de `121884` à `104237`
 records fermés et q3 de `4378` à `2455` à `uniform,n=8000,s=2,budget=256` :
-le mutant était matériel et la correction est indispensable.
+le mutant était matériel et la correction est indispensable. `7b58fc3` ajoute
+un balayage direct du masque singleton et un mutant `masque-global` qui sort
+avec le code contractuel `4` ; la branche fautive est désormais exercée.
 
 Le correctif n'est pas encore reçu industriellement :
 
-- aucun CTest n'appelle `--vwave` ; la suite teste l'intervalle du score, pas
-  l'antichaîne, les seuils ni le mutant de masque global ;
+- le juge balaie les PointIds mais rappelle `rect_central_mask_dlo`. Il est
+  indépendant de l'intervalle de nœud et détecte la fausse fermeture du mutant,
+  mais ne rejoue ni `H/E/X`, ni l'identité des IDs effectivement crédités ;
+- son plancher `juges>=1000` est global : q2 peut masquer une vacuité q3/q4.
+  Il faut `juges[3]`, `faux[3]` et un plancher par lane ;
 - la pile pleine ou le quantum épuisé incrémente seulement `tronques`. Aucune
-  tâche, aucun masque et aucun curseur ne sont sérialisés ; le commentaire
-  « sérialise une continuation » est donc faux au pin ;
-- `tronques` n'est pas imprimé dans la ligne de résultats et aucune masse
-  déléguée par lane n'est produite ;
+  tâche, aucun masque et aucun curseur ne sont sérialisés. `tronques` est
+  maintenant visible, mais aucune masse déléguée par lane n'est produite ;
 - aucun `proof_id`, `RectResult`, owner-shard, tableau résiduel ou compactage
   stable n'existe ;
 - le probe reste CPU, matérialise tous les `terms`, réalloue les buffers par
   vague et n'a ni kernel CUDA, ni p95 résident, ni octets/HWM device.
 
-Le mutant permanent minimal contient moins de dix points q2 centraux dans un
-nœud parent `ALL` et rend q3 `MIXED`. Le masque global ferme q2 en recomptant
-les enfants ; la tâche masquée ne ferme pas. Le juge rejoue les PointIds et
-exige une antichaîne disjointe. Un second mutant force la capacité : le digest
-final doit être identique après reprise de la continuation.
+Le nouveau `--climb` ne permet pas encore de conclure que le partage entre
+rectangles est le seul facteur restant. Le calcul `leaf_parent` est bien
+préconstruit en `O(n)` et la remontée coûte la hauteur de l'arbre, mais les
+sous-arbres frères de la chaîne vers la racine couvrent seulement
+`X\{pos0}` : la feuille localisée `pos0` n'est jamais ajoutée aux tâches. À
+quantum non saturé, `uniform,n=8000,s=2` passe ainsi de `104237/2455/1288`
+fermetures root q2/q3/q4 à `97822/1989/1010` avec climb. Le gain annoncé de
+`9 %` mélange donc travail évité et crédits perdus. En outre les frères sont
+empilés du plus proche au plus grossier puis dépilés en LIFO : le frère racine,
+le plus grossier, est traité en premier, contrairement au but annoncé.
+
+L'ablation exacte empile les frères dans l'ordre inverse et la feuille choisie
+en dernier, afin de consommer `pos0`, son frère immédiat, puis les frères vers
+la racine. Pour chaque feuille, l'expansion de ces racines initiales doit
+couvrir les `n` PointIds avec multiplicité un. Sans cap, root et climb doivent
+produire la même union d'IDs et le même masque fermé. Des fixtures où `pos0`
+est précisément le dixième, neuvième ou huitième crédit tuent son omission.
+Le pin ne contient aucun CTest `--climb` ; son juge actuel ne cherche que les
+fausses fermetures et laisse donc passer cette perte de complétude.
+L'ajout de `parent` après les AABB fait en outre passer `sizeof(WfNode)` de
+`120` à `128` octets par alignement ; le placer dans le trou après `level`
+conserve `120`. Avec `leaf_parent`, le surcoût courant est environ `12n`
+octets. C'est modeste à `50000`, mais `120 MB` à dix millions de points et doit
+entrer dans le HWM au lieu d'être caché.
+
+Le mutant permanent minimal prend `A={0}`, `B={10}` et un `CNode` axial dont la
+population est `{1,...,6}`. Son parent est `ALL` q2 avec six crédits et `MIXED`
+q3 ; un masque global recrédite les six enfants et ferme faussement q2 à douze.
+La tâche masquée ne ferme pas. Une seconde fixture prend `A={0}`, `B={30}` et
+`CNode={7,...,11}` : elle est `ALL` q3 avec cinq crédits et `MIXED` q4, donc
+tue le même double compte en q3. Enfin `z=a` ou `z=b` donne `S=D` et doit rester
+non crédité ; le mutant de frontière `<` vers `<=` doit mourir.
+
+Le petit oracle requis développe chaque nœud `ALL` en PointIds et exige, pour
+chaque `(RectId,lane)`, multiplicité `0/1`, cardinal du crédit égal à l'union,
+antichaîne et prédicat géométrique ponctuel indépendant. Au cap, le résultat
+porte les tâches restantes `(RectId,CNodeKey,lane_mask)` ; après consommation
+de ces continuations, le digest final est invariant au quantum.
 
 Rejeu local de l'auditeur, sans modification logicielle :
 
@@ -81,13 +118,23 @@ Rejeu local de l'auditeur, sans modification logicielle :
 cmake -S morsehgp3D_v3 -B build/v3 -DCMAKE_BUILD_TYPE=Release
 cmake --build build/v3 --target mhgp3v_rect_front_probe mhgp3v_wspd_wavefront_probe --parallel
 ctest --test-dir build/v3 --output-on-failure -R '^mhgp3v_(rect_front|wspd_wavefront)_'
-16/16 PASS, 23,72 s
+18/18 PASS, 26,48 s
 ```
 
 Un diagnostic direct `uniform,n=800,tight,s=2,--vwave,window=256` rend
 `24745` terminaux, `1381935` classifications du score et `125,2 ms` CPU pour
 la vague. Il falsifie toute extrapolation CPU immédiate, mais n'est ni un temps
 device, ni un p95, ni un chemin complet.
+
+La branche cap est matériellement ouverte mais non reçue. Sur ce même nuage,
+`window=2` tronque les `24745` terminaux et ne ferme aucune lane ; `window=64`
+en tronque `8440` et ferme `1867/8/0` records q2/q3/q4 ; `window=1024` ne
+tronque rien et ferme `4297/72/38`. Ces différences sont fail-open au niveau du
+compteur, mais aucune continuation ne permet encore d'achever le même calcul.
+La prochaine implémentation utile n'est donc pas un nouveau score : c'est un
+double buffer SoA de tâches, `count--scan--fill`, avec
+`tasks_created=tasks_consumed+tasks_pending`, crédits par antichaîne et sortie
+`DELEGATED_RESIDUAL` réellement consommable.
 
 La réponse à la fourche de Claude est durable : la source n'est ni par paire,
 ni à coût fixe par record. La masse PairId reste un ledger ; le coût bloquant
