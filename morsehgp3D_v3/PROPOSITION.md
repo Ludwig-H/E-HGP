@@ -2103,15 +2103,16 @@ exact sur l'AABB entière : par axe, avec `u=Alo+Blo` et `v=Ahi+Bhi`, minimiser
 sommer. Le classifieur de vague est :
 
 ```text
-q2 : ALL si Smax<D;        NONE si Smin>=D
-q3 : ALL si 3*Smax<D;      NONE si 3*Smin>=D
+q2 : ALL si Smax<D;        CENTRAL_DEAD si Smin>=D
+q3 : ALL si 3*Smax<D;      CENTRAL_DEAD si 3*Smin>=D
 q4 : ALL si D>0 et 209*Smax<=56*D;
-     NONE si D==0 ou 209*Smin>56*D
+     CENTRAL_DEAD si D==0 ou 209*Smin>56*D
 ```
 
 Une tâche porte `(RectOrdinal,CNodeOrdinal,open_mask)`. `ALL` crédite une
-antichaîne disjointe et retire les bits saturés ; `NONE` retire seulement les
-bits du certificat central ; `MIXED` remplace le nœud par ses enfants. Un cap
+antichaîne disjointe et retire les bits saturés ; `CENTRAL_DEAD` retire seulement
+les bits du certificat central, sans conclure `GEOMETRIC_NONE` ; `MIXED`
+remplace le nœud par ses enfants. Un cap
 sérialise la tâche comme `DELEGATED_RESIDUAL`. Aucune issue ne relance
 silencieusement `C=root`. Un nœud `ALL` ne peut contenir un endpoint de `A/B`,
 mais le replay conserve tout de même jusqu'à dix `proof_ids` et vérifie leur
@@ -2147,7 +2148,7 @@ une fois.
 
 Les buffers de vagues sont préalloués, résidents et traités par
 `count--scan--fill`, avec compactage stable terminal. La porte publie `F`, `J`,
-ALL/NONE/MIXED, splits, rounds, preuves, octets/HWM, kernels, syncs et masses
+ALL/CENTRAL_DEAD/MIXED, splits, rounds, preuves, octets/HWM, kernels, syncs et masses
 par fate. Elle compare `s=1`, `3/2` et `2` sur les trois lanes. `s=2` reste le
 contrôle reçu ; `s=1` est un candidat de coût. `s=4` n'est pas promu par une
 masse PairId, puisque la source ne la développe pas. Le choix final minimise
@@ -2159,6 +2160,12 @@ dans
 [`AUDIT_REPONSE_FOURCHE_SOURCE_CENTRAL_VWAVE_DBA8961_20260813.md`](audits/AUDIT_REPONSE_FOURCHE_SOURCE_CENTRAL_VWAVE_DBA8961_20260813.md).
 
 ### 11.1.5 Wavefront commune `D,V,T` et relations de carriers
+
+Cette wavefront reste un classifieur partagé et une source de tombstones ; elle
+ne doit plus être consommée par un développement de `Acute×Lens`. Le prochain
+falsificateur source est la fenêtre projective par ancre de la section 11.1.6.
+Le join de relations demeure une ablation/fallback borné si cette fenêtre
+échoue, jamais le chemin produit présumé.
 
 Après réception du microkernel P0, le résiduel ne repart pas dans une seconde
 source depuis `C=root`. Les `PRUNED_OWNER_SHARD` q3/q4 sont retirés avant cette
@@ -2229,6 +2236,74 @@ cap rend `DELEGATED_RESIDUAL`; la borne linéaire du WSPD de base ne s'étend pa
 automatiquement à ses enfants ni au join source. La directive, les bornes AABB
 et la fixture dead-parent/live-child sont dans
 [`AUDIT_DIRECTIVE_DVT_CWAVE_4F4B463_20260813.md`](audits/AUDIT_DIRECTIVE_DVT_CWAVE_4F4B463_20260813.md).
+
+### 11.1.6 Fenêtre projective, shallow local et census par `BallKey`
+
+La source exacte évite la fourche « une fois par rectangle ou une fois par
+paire ». Fixer une ancre `a`, une cible `b`, `d=b-a` et des vecteurs
+`s_i=z_i-a`. Un crédit projectif `G` porte des coefficients positifs tels que
+`d=sum_i lambda_i*s_i` et vérifie strictement
+`d dot s_i>||s_i||^2` pour chaque membre. Pour tout centre `t=c-a` d'une sphère
+passant par `a,b`, l'identité suivante est positive :
+
+```text
+sum_i lambda_i*(2*t dot s_i-||s_i||^2)
+  = ||d||^2-sum_i lambda_i*||s_i||^2 > 0
+```
+
+Au moins un membre de `G` est donc intérieur à toute telle sphère. Avec
+`h_q=smax+1-q` crédits dont les unions de `PointId` sont disjointes, toute
+sphère passant par `a,b` possède au moins `h_q` intérieurs distincts ; aucun
+support pertinent d'arité `q` ne peut contenir les deux points.
+
+Pour chaque ancre, `N_q(a)` est l'union factorisée des cibles que les suffixes
+projectifs ne ferment pas, ainsi que toutes les cellules `MIXED`, capées,
+tronquées ou non reçues. Le générateur choisit `a=min PointId` comme owner. Si
+un vrai support pertinent owner `a` contenait un sommet hors de `N_q(a)`, le
+crédit précédent imposerait `p+q>smax` à sa propre sphère, contradiction. Tous
+ses autres sommets sont donc dans `N_q(a)`.
+
+Le pipeline source candidat est :
+
+```text
+ProjectiveCreditBank
+  -> AnchorWindow N_q(a) en NodeSpans
+  -> arrangement inversé shallow local sur N_q(a)
+  -> ShallowEvent et bundle incident
+  -> BallKey canonique/RLE
+  -> census global une fois par BallKey
+  -> SupportKey, positivité et owner seulement après census
+```
+
+Les points hors `N_q(a)` sont retirés seulement du générateur de sommets. Ils
+restent tous dans le census : les omettre du niveau local ne peut qu'abaisser
+la profondeur et créer des faux positifs, rejetés ensuite, jamais perdre un
+vrai support. L'arrangement est local à une ancre, shallow et éphémère ; aucune
+mosaïque de Delaunay d'ordre supérieur n'est matérialisée.
+
+Le `BallKey` est l'équation primitive entière normalisée de la sphère. Le
+census compte d'abord les intérieurs jusqu'au seuil et tue l'événement avant
+toute expansion. Seules les boules survivantes matérialisent leur petit
+intérieur, puis leur shell. Une cosphère lourde reste un `PlateauRecord` ou un
+refus atomique reçu, jamais une expansion précoce de toutes ses incidences.
+
+Le premier jalon est `ProjectiveWindowCounter-v0`, sans support ni CUDA. Il
+publie `sum_a |N_q(a)|`, maximum par ancre, crédits/IDs disjoints, cellules
+ouvertes, plans logiques, octets/HWM et deux pentes. L'oracle petit `n` exige
+que tous les co-sommets de chaque vrai support appartiennent à la fenêtre de
+son plus petit `PointId`. Deux pentes supérieures à `1,35` sur `uniform` ou
+`eight_clusters`, ou une fenêtre quasi quadratique, rendent cette route
+`NO-GO` avant le shallow.
+
+Une banque par distance n'est pas un cutoff projectif. Dans la chambre de
+rayons `(3,0,0),(3,1,0),(3,1,1)`, `s_near=(1,-2,0)` a norme carrée `5` mais
+activation `16`, tandis que `s_far=(4,0,0)` a norme carrée `16` mais activation
+`5`. Les `CreditKey` conservent donc les vrais `PointId`, les trois preuves de
+rayons et un commit transactionnel ; une cellule incomplète reste ouverte.
+
+La preuve, l'ABI, les contre-fixtures et l'ordre d'implémentation sont détaillés
+dans
+[`AUDIT_REPONSE_FOURCHE_SOURCE_AF08B0E_20260813.md`](audits/AUDIT_REPONSE_FOURCHE_SOURCE_AF08B0E_20260813.md).
 
 ### 11.2 Tuilage spatial et fold
 

@@ -47,7 +47,7 @@ struct Pair { int a, b; };
 // applique le masque central. Le rectangle n'est jamais materialise en memoire ;
 // seuls les residuels sont compactes. C'est le gain de bande passante du
 // kernel vise.
-struct BankStat { long long reads = 0, recerts = 0, closed[3] = {0, 0, 0}; };
+struct BankStat { long long reads = 0, recerts = 0, tronques = 0, closed[3] = {0, 0, 0}; };
 
 // ---- PROPOSITION PAR DESCENTE, alternative a la fenetre Morton.
 //
@@ -242,52 +242,56 @@ int main(int argc, char** argv) {
             long long cred[3] = {0, 0, 0};
             long long taken = 0;
             if (g_vwave) {
-              // `Central-VWave` : on classe le SCORE du certificat, pas la
-              // geometrie. `ALL` credite la population du nœud et retire le
-              // bit ; `NONE` retire le bit sans crediter ; `MIXED` remplace le
-              // nœud par ses enfants. Ni fenetre, ni top-L, ni tas — et un
-              // elagage reel, que le masque central seul n'avait pas.
-              int st[64];
+              // `Central-VWave`. LA TACHE EST `(CNode, lane_mask)`, jamais un
+              // nœud seul avec un masque global : sinon un parent `ALL` en q2
+              // mais `MIXED` en q3 pousse ses enfants, dont la population est
+              // CREDITEE UNE SECONDE FOIS en q2 — une fausse fermeture. Seuls
+              // les bits `MIXED` du parent passent aux enfants ; les bits
+              // `ALL`/`NONE` y sont consommes exactement une fois.
+              struct Task { int node; unsigned mask; };
+              Task st[96];
               int sn = 0;
-              st[sn++] = 0;
-              unsigned open = 7u;
+              st[sn++] = {0, 7u};
               long long exp = 0;
+              bool abandonne = false;
               const int need[3] = {10, 9, 8};
-              while (sn > 0 && open && exp < g_win) {
-                const int id = st[--sn];
-                ++exp; ++bank.reads;
+              while (sn > 0 && exp < g_win) {
+                const Task tk = st[--sn];
+                unsigned m = tk.mask;
+                for (int lane = 0; lane < 3; ++lane)
+                  if (cred[lane] >= need[lane]) m &= ~(1u << lane);   // lane saturee
+                if (!m) continue;
+                ++exp; ++bank.reads; ++bank.recerts;
                 mhgp3v::RectBox cb2{};
                 long long pop = 1;
-                if (id < 0) {
-                  const int r = -1 - id;
+                if (tk.node < 0) {
+                  const int r = -1 - tk.node;
                   for (int d = 0; d < 3; ++d) { cb2.lo[d] = sp[r][d]; cb2.hi[d] = sp[r][d]; }
                 } else {
-                  pop = nodes[id].last - nodes[id].first + 1;
+                  pop = nodes[tk.node].last - nodes[tk.node].first + 1;
                   for (int d = 0; d < 3; ++d) {
-                    cb2.lo[d] = g_tight ? nodes[id].tlo[d] : nodes[id].lo[d];
-                    cb2.hi[d] = g_tight ? nodes[id].thi[d] : nodes[id].hi[d];
+                    cb2.lo[d] = g_tight ? nodes[tk.node].tlo[d] : nodes[tk.node].lo[d];
+                    cb2.hi[d] = g_tight ? nodes[tk.node].thi[d] : nodes[tk.node].hi[d];
                   }
                 }
                 long long smn = 0, smx = 0;
                 mhgp3v::rect_s_interval(qa, qb, cb2, &smn, &smx);
-                ++bank.recerts;
                 unsigned mixed = 0;
                 for (int lane = 0; lane < 3; ++lane) {
-                  if (!(open & (1u << lane))) continue;
-                  const RectVerdict v =
-                      mhgp3v::rect_central_verdict(dlo, smn, smx, lane);
-                  if (v == RectVerdict::kAll) {
-                    cred[lane] += pop;
-                    if (cred[lane] >= need[lane]) open &= ~(1u << lane);
-                  } else if (v == RectVerdict::kMixed) {
-                    mixed |= 1u << lane;
-                  }
+                  if (!(m & (1u << lane))) continue;
+                  const RectVerdict v = mhgp3v::rect_central_verdict(dlo, smn, smx, lane);
+                  if (v == RectVerdict::kAll) cred[lane] += pop;      // consomme ICI
+                  else if (v == RectVerdict::kMixed) mixed |= 1u << lane;
                 }
-                if (mixed && id >= 0 && sn + 2 <= 64) {
-                  st[sn++] = nodes[id].left;
-                  st[sn++] = nodes[id].right;
+                if (mixed && tk.node >= 0) {
+                  if (sn + 2 > 96) { abandonne = true; break; }       // jamais en silence
+                  st[sn++] = {nodes[tk.node].left, mixed};
+                  st[sn++] = {nodes[tk.node].right, mixed};
                 }
               }
+              // Une pile pleine ou un quantum epuise laisse des taches vivantes :
+              // le rectangle est DELEGUE, jamais ferme sur un travail tronque.
+              if (abandonne || (sn > 0 && exp >= g_win)) ++bank.tronques;
               taken = exp;
             } else if (g_descent) {
               // Descente au meilleur d'abord vers `m_0`, pile bornee.

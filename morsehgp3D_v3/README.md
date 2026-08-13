@@ -49,6 +49,18 @@ mesuré avant le join global `QueryTree×PointTree`, les carriers par marges et
 les niveaux shallow q4. Réponse, formules, fixtures et ordre d'implémentation :
 [`AUDIT_REPONSE_FOURCHE_SOURCE_CENTRAL_VWAVE_DBA8961_20260813.md`](audits/AUDIT_REPONSE_FOURCHE_SOURCE_CENTRAL_VWAVE_DBA8961_20260813.md).
 
+Cette vague ne ferme toutefois que le préfixe central. La réponse source plus
+forte n'est pas un join développé de carriers : des groupes projectifs
+disjoints certifient, pour chaque ancre `a`, une fenêtre complète `N_q(a)` de
+co-sommets possibles. Le prochain falsificateur source est donc
+`ProjectiveWindowCounter-v0`, qui mesure `sum_a |N_q(a)|`, plans, octets et HWM
+avant d'écrire le shallow. Si cette fenêtre passe, la route devient arrangement
+shallow **local** par ancre, RLE des centres par `BallKey`, census global une
+fois par boule, puis expansion tardive des `SupportKey`. Les points hors
+fenêtre restent obligatoires au census. Cette ordonnance évite tout join
+`PairId×carrier` et toute mosaïque globale d'ordre supérieur :
+[`AUDIT_REPONSE_FOURCHE_SOURCE_AF08B0E_20260813.md`](audits/AUDIT_REPONSE_FOURCHE_SOURCE_AF08B0E_20260813.md).
+
 Au pin `96be8e0`, le nouveau front apporte deux briques utiles sans changer ce
 verdict. L'intervalle entier de `H=(z-a) dot(b-z)` sur trois AABB certifie
 `ALL/NONE/MIXED` pour q2 et des `ALL` suffisants pour q3/q4. Arrêter la
