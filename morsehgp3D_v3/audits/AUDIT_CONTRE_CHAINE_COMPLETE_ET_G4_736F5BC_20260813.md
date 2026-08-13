@@ -512,3 +512,25 @@ Ce vert reçoit la parité des pipelines et tue les mutants ciblés d'owner,
 census, positivité et tie-break. Il ne reçoit toujours aucune identité
 `BallKey/I_B/U_B`, fixture de cosphère, fenêtre projective, shallow produit,
 fold ou mesure G4.
+
+## 12. Ablation du fallback central live : coût rouge pour q3/q4
+
+Claude a ajouté dans son worktree un `--fallback` qui rappelle
+`rect_classify` pour chaque lane encore `MIXED` au certificat central. La
+disjonction de deux `ALL` sûrs reste sûre ; la question est exclusivement son
+rendement. Rejeu local `uniform`, séparation euclidienne `2/1`, boîtes serrées,
+`window=256`, zéro troncature :
+
+| `n` | fallback | vague CPU | fermés q2 | fermés q3 | fermés q4 | lectures |
+| ---: | :---: | ---: | ---: | ---: | ---: | ---: |
+| `2000` | non | `517,1 ms` | `16313` | `263` | `130` | `4973753` |
+| `2000` | oui | `1732,2 ms` | `22384` | `277` | `132` | `4535004` |
+| `4000` | non | `1566,8 ms` | `41235` | `569` | `241` | `12569738` |
+| `4000` | oui | `4374,8 ms` | `54949` | `598` | `271` | `11369217` |
+
+Le fallback multiplie ici le temps de vague par `3,35` puis `2,79`. Il achète
+beaucoup de masse q2, mais seulement `14/2` puis `29/30` fermetures q3/q4. Il
+ne compte en outre ni le nombre réel d'appels au classifieur complet, ni ses
+produits larges. Ce ratio réfute son intégration comme prochain levier source.
+Conserver le helper comme ablation ou fast path futur ; ne pas le porter sur
+CUDA et ne pas retarder `BallFormToBallEvent-v0`/`PWC0-A`.

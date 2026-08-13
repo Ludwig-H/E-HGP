@@ -26,13 +26,16 @@ produit. Une autre ordonnance locale n'est pas mathématiquement exclue ; elle
 devrait battre le reporter partagé sur le même coût complet pour redevenir
 prioritaire.
 
-La prochaine tranche est `ProjectiveWindowCounter-v0`, avant CUDA et avant le
-shallow. Elle travaille par ancre, construit des groupes d'IDs disjoints,
-ferme des **spans de cibles** par des formes affines exactes et mesure la vraie
-fenêtre dirigée `N_q(a)`. La première implémentation doit employer les suffixes
-des 48 chambres ; les 432 sous-cellules et le classifieur direct par triple
-sont des ablations de rappel. Si la fenêtre reste dense, cette route est
-`NO-GO` avant toute matérialisation de `PlaneTape`.
+La prochaine tranche est `PWC0-A/MaxEdgeSuffixReporter-q4-v0`, avant CUDA et
+avant le shallow. Elle travaille par endpoint feuille, construit des groupes
+d'IDs disjoints, ferme des **spans de seconds endpoints** par des formes exactes
+et mesure la fenêtre d'arêtes dirigée `E_4(a)`. L'invariant aval n'est pas
+« owner minimal » : l'arête maximale canonique de chaque vrai support doit
+rester dans un span ouvert. La première implémentation emploie les suffixes des
+48 chambres ; les neuf sous-cellules des seules chambres ouvertes et le
+classifieur direct par triple sont des ablations de rappel. Si la fenêtre reste
+dense sous l'enveloppe de banque reçue, cette configuration est `NO-GO` avant
+toute matérialisation de `PlaneTape`.
 
 `QueryTree×PointTree` reste le fallback factorisé pour les résidus que la
 fenêtre projective ne compresse pas. Il ne doit pas précéder le compteur de
@@ -201,29 +204,42 @@ cast `i64` intermédiaire n'est admissible. Pour cette raison, le suffixe
 cellulaire et le fast path H2 restent le P0 `i64`; `F` est l'ablation exacte de
 rappel tant que son coût device n'est pas mesuré.
 
-## 5. Groupes arbitraires : correction de l'autre audit
+## 5. Groupes arbitraires : polyèdre pondéré, pas hull projectif ordinaire
 
 La phrase « au plus six formes affines » n'est vraie que pour le certificat
-suffisant H2 d'un triple plein rang. La caractérisation exacte du même triple
-emploie trois formes affines et une quadratique séparable. Un groupe arbitraire
-peut porter jusqu'à une forme H2 par membre et autant de
-facettes coniques que de rayons extrêmes ; son enveloppe peut donc demander
-jusqu'à environ `2|G|` formes en dimension trois. De même, `6h<=60` suppose
-`smax<=11` ; le domaine CLI historique monte à `34`, donc `h` peut atteindre
-`33`.
+suffisant H2 d'un triple plein rang. Pour un groupe général, poser
+`q_i=||s_i||^2` et le polyèdre pondéré :
 
-Une alternative fixe, sûre et plus simple à rejouer évite de construire cette
-H-représentation. Pour chacun des huit coins de `D_B`, trouver par
-Carathéodory un carrier conique exact de taille un à trois dans le groupe.
-Prendre l'union canonique de ces carriers, soit au plus 24 IDs, puis exiger la
-stricte H2 uniforme pour chacun d'eux. Toute direction de la boîte est une
-combinaison convexe de ses coins et donc une combinaison conique de cette
-union. Ce chemin est un bon oracle et un fallback CPU ; le suffixe cellulaire
-reste le premier reporter GPU, car ses formes sont fixes.
+```text
+Q_G = { y : y dot s_i <= q_i pour tout i }
+phi_G(d) = max_{y dans Q_G} y dot d.
+```
 
-Les rangs un et deux vivent sur leurs strates exactes. Un déterminant nul ne
-doit jamais être promu en triple plein rang ; il est traité par les carriers de
-rang inférieur déjà reçus ou reste ouvert.
+Le groupe couvre toutes les sphères passant par `0,d` si et seulement si
+`d in cone(G)` et `phi_G(d)<||d||^2`. C'est le dual exact de Farkas. Le hull
+projectif ordinaire des directions ne suffit pas : deux rayons colinéaires de
+normes différentes définissent des plans pondérés différents.
+
+En plein rang, le normal fan de `Q_G` possède une complexité linéaire en
+`|G|` en dimension trois. Chaque sommet rationnel `y_v=p_v/r_v` fournit une
+quadratique `F_v(d)=r_v||d||^2-p_v dot d`. L'ALL exact d'un `BNode` exige les
+facettes coniques faibles et `min F_v>=1` pour chaque sommet pertinent. Les
+rangs, la récession et les faces non bornées sont traités explicitement ; un
+déterminant nul n'est jamais promu en triple plein rang. Cette généralisation
+est une ablation CPU P1, pas le reporter P0.
+
+Une alternative fixe, sûre et plus simple à rejouer évite de construire ce
+polyèdre. Pour chacun des huit coins de `D_B`, trouver par Carathéodory un
+carrier conique exact de taille un à trois dans le groupe. Prendre l'union
+canonique de ces carriers, soit au plus 24 IDs, puis exiger la stricte H2
+uniforme pour chacun d'eux. Toute direction de la boîte est une combinaison
+convexe de ses coins et donc une combinaison conique de cette union. Ce chemin
+reste un fallback CPU suffisant ; le suffixe cellulaire est le premier reporter
+GPU, car ses formes sont fixes.
+
+De même, `6h<=60` suppose `smax<=11` ; le domaine CLI historique monte à `34`,
+donc `h` peut atteindre `33`. Le profil et ses seuils appartiennent au schéma de
+preuve.
 
 ## 6. Fixtures et mutants permanents
 
@@ -261,9 +277,11 @@ Les fixtures suivantes doivent précéder toute mesure de fenêtre :
    pour deux crédits ; changement de lane, `smax`, `Epoch` ou digest invalide
    le replay.
 
-L'oracle borné développe toutes les cibles du `BNode`, toutes les sphères
-admissibles de sa fixture rationnelle et compare la conclusion, pas seulement
-un second appel aux six formes.
+L'oracle borné développe toutes les cibles du `BNode` et résout indépendamment
+le système rationnel de Farkas, ou rejoue le déterminant lifté 4×4 pour un
+triple. Sur un rejet, il sérialise un mauvais centre rationnel `y` vérifiant
+`y dot d=||d||^2` et `y dot s_i<=||s_i||^2`. Le pinceau de sphères est infini :
+un échantillonnage de centres n'est qu'un stress, jamais l'oracle exhaustif.
 
 ## 7. ABI et ordre d'implémentation remis à Claude
 
@@ -304,20 +322,24 @@ Ordre recommandé :
 
 1. réutiliser l'enveloppe projective et les activations entières déjà reçues,
    mais conserver la banque bornée comme proposer uniquement ;
-2. construire d'abord `AnchorSuffixReporter-q4-v0` sur 48 chambres, avec
-   reporter `Anchor×BNode`, suffixe de hauteur, owner minimal et spans ouverts ;
+2. construire d'abord `PWC0-A/MaxEdgeSuffixReporter-q4-v0` sur 48 chambres,
+   avec reporter `Anchor×BNode`, suffixe de hauteur, orientation `a<b` et spans
+   ouverts ;
    une chambre `OPEN/MIXED` seule est raffinée dans ses neuf sous-cellules,
    tandis que 432 cellules fixes restent une ablation de rappel ;
 3. ajouter le fast path H2 à six formes `i64`, puis le test exact
    `trois cônes + F` pour les triples plein rang comme ablation large de
    fermeture inter-cellules ;
-4. publier `sum_a|N_q(a)|`, `max_a|N_q(a)|`, tâches, formes, IDs distincts,
+4. publier `sum_a|E_q(a)|`, `max_a|E_q(a)|`, `anchor_root_seeds`, tâches,
+   formes, IDs distincts,
    continuations, octets/HWM et pentes à `12500/25000/50000` sur toutes les
    familles ;
-5. seulement si ces portes passent, matérialiser le `PlaneTape`, puis écrire
+5. si la fenêtre est sparse mais `anchor_root_seeds=n` ou les tâches dominent,
+   ajouter `PWC0-B`, qui universalise sur `ANode×BNode` à graine unique ;
+6. seulement si ces portes passent, matérialiser le `PlaneTape`, puis écrire
    `LocalShallowBall-v0`, `BallKey` et census global ;
-6. si la fenêtre est dense, arrêter cette route et mesurer le fallback
-   `QueryTree×PointTree`, sans jamais développer `PairId×PointId`.
+7. si la fenêtre reste dense après ablation de la banque et du raffinement,
+   arrêter cette route sans jamais développer `PairId×PointId`.
 
 Cette tranche évite la mosaïque de Delaunay d'ordre supérieur, les recherches
 `C=root` par rectangle et toute expansion précoce de supports. Elle ne reçoit

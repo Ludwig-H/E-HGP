@@ -105,6 +105,13 @@ central `MIXED`. Elle ne doit pas retarder `PWC0-A` ; elle ne devient utile que
 si son gain d'arêtes ouvertes par unité de travail bat le reporter sur le même
 ledger.
 
+Le rejeu local tranche déjà son rendement sur `uniform,sep=2/1,tight,window=256`.
+À `n=2000`, la vague passe de `517,1` à `1732,2 ms` pour faire passer les
+fermetures q3/q4 de `263/130` à `277/132`. À `n=4000`, elle passe de `1566,8` à
+`4374,8 ms` pour `569/241` vers `598/271`. Le gain q2 est réel, mais la source
+limitante q3/q4 ne rembourse pas le facteur `2,8..3,4` CPU. Le fallback reste
+donc hors du prochain chemin candidat.
+
 Contre-audit complet, correction de l'owner, architecture en deux paliers et
 audit du script :
 [`AUDIT_CONTRE_CHAINE_COMPLETE_ET_G4_736F5BC_20260813.md`](AUDIT_CONTRE_CHAINE_COMPLETE_ET_G4_736F5BC_20260813.md).

@@ -90,35 +90,38 @@ l'identité `sum_N=2*residual_pair_mass`, ne couvre toujours ni q3/q4 ni les
 crédits projectifs, et ne qualifie aucun temps produit. `s=3` est donc une
 ablation prometteuse à porter au vrai reporter, pas une configuration reçue.
 
-## 3. Définition non ambiguë de `N_q(a)`
+## 3. Définition non ambiguë de la fenêtre d'arêtes `E_q(a)`
 
-Pour la route projective, fixer l'owner de génération
-`a=min PointId du support`. La fenêtre certifiée est :
+Le certificat projectif ferme une paire entière ; il ne prouve pas qu'une paire
+nue est owner. Pour raccorder le reporter à la source existante, orienter chaque
+paire non ordonnée une seule fois par `a<b` et poser :
 
 ```text
-N_q(a) = { b : PointId(b)>PointId(a) et le reporter projectif
+E_q(a) = { b : PointId(b)>PointId(a) et le reporter projectif
                  n'a pas fermé (a,b) avec h_q=smax+1-q
                  GroupCredits disjoints et rejouables }.
 ```
 
-Tous les états `OPEN`, `MIXED`, capés, non reçus ou dégénérés appartiennent à
-la fenêtre. Il s'agit d'une sur-approximation induite par un certificat, pas de
-l'ensemble inconnu des vrais co-sommets. Son invariant sémantique est : pour
-tout support pertinent `S` dont l'owner est `a`, `S\{a}` est inclus dans
-`N_q(a)`. C'est cet invariant que l'oracle petit `n` juge.
+Tous les états `OPEN`, `MIXED`, `UNDERFULL`, capés, non reçus ou dégénérés
+appartiennent à la fenêtre. Il s'agit d'une sur-approximation d'arêtes candidates,
+pas de l'ensemble inconnu des vrais co-sommets. Son invariant sémantique est :
+pour tout support pertinent `S`, si son arête maximale canonique est `(u,v)`
+avec `u<v`, alors `v` appartient à `E_q(u)`. Les autres sommets sont produits
+ensuite par la lentille et le shallow de cette arête. C'est cet invariant que
+l'oracle petit `n` juge.
 
-Les deux lectures proposées par Claude ne sont donc pas concurrentes :
+Les deux lectures à ne plus confondre sont donc :
 
-- « survivants des crédits projectifs » est la définition calculable ;
-- « sommets admissibles d'un vrai support » est le sous-ensemble de vérité qui
-  doit obligatoirement y être inclus.
+- « survivants des crédits projectifs » est la définition calculable de
+  `E_q(a)` ;
+- « arêtes maximales canoniques de vrais supports » est le sous-ensemble de
+  vérité qui doit obligatoirement rester ouvert.
 
-Les survivants du **certificat central q2** forment une autre fenêtre,
-`N_2^central`. Elle peut rester une ablation q2, mais ne remplace pas
-`N_3/N_4` : le prune central q2 concerne la boule diamétrale de la paire, pas
+Les survivants du **certificat central q2** forment une autre fenêtre d'arêtes,
+`E_2^central`. Elle peut rester une ablation q2, mais ne remplace pas
+`E_3/E_4` : le prune central q2 concerne la boule diamétrale de la paire, pas
 toutes les sphères q3/q4 passant par elle. Le code du pin ajoute en outre les
-deux orientations, alors que la source projective n'en conserve qu'une,
-déterminée par le plus petit `PointId`.
+deux orientations, tandis que `E_q` conserve seulement l'orientation `a<b`.
 
 ## 4. Réponse à la question 48 contre 432
 
@@ -149,7 +152,7 @@ Le test exact d'un triple plein rang
 de chambres ; il constitue une troisième ablation de rappel, pas une résidence
 obligatoire du P0.
 
-## 5. Le vrai `ProjectiveWindowCounter-v0`
+## 5. Le vrai `MaxEdgeSuffixReporter-q4-v0`
 
 Pour chaque lane q3/q4 et chaque ancre :
 
@@ -159,16 +162,17 @@ Pour chaque lane q3/q4 et chaque ancre :
 3. traverser le `PointTree` avec des tâches
    `(AnchorId,BNodeKey,possible_cell_mask,open_lane_mask)` ;
 4. émettre chaque cible exactement une fois soit dans un suffixe fermé, soit
-   dans un `OpenSpan` de `N_q(a)` ;
+   dans un `OpenEdgeSpan` de `E_q(a)` ;
 5. au cap, émettre le span entier ouvert et une continuation authentifiée ;
-6. calculer `sum_a|N_q(a)|` comme la somme des populations des spans ouverts,
-   avec owner unique, et non depuis la masse d'un front q2 indépendant.
+6. calculer `sum_a|E_q(a)|` comme la somme des populations des spans ouverts,
+   avec orientation unique `a<b`, et non depuis la masse d'un front q2
+   indépendant.
 
 Le ledger exige, par lane :
 
 ```text
 closed_target_mass + open_target_mass = n*(n-1)/2
-support covertices truth subset of OpenSpans
+canonical max-edge of every true support is in OpenEdgeSpans
 credit PointId multiplicity in {0,1}
 tasks_created = tasks_consumed + tasks_pending
 ```
@@ -187,10 +191,10 @@ projective passe, seulement alors sa masse dirigée devient un `PlaneTape` par
 
 ### 5.1 Commencer par q4 et non par les trois lanes
 
-Le plus petit falsificateur est `AnchorSuffixReporter-q4-v0`. Il demande
+Le plus petit falsificateur est `PWC0-A/MaxEdgeSuffixReporter-q4-v0`. Il demande
 `h_4=8` crédits, ferme donc au moins autant de cibles que les seuils `h_3=9` et
 `h_2=10` pour une même suite de crédits, et produit la fenêtre qui doit être la
-plus petite. Si `sum_a|N_4(a)|`, ses tâches ou ses octets restent denses, il est
+plus petite. Si `sum_a|E_4(a)|`, ses tâches ou ses octets restent denses, il est
 inutile d'écrire le shallow q4 ou de dupliquer d'abord le reporter pour les
 autres lanes. Un vert q4 ne reçoit pas q3/q2 ; il autorise seulement leur ajout
 avec masque partagé.
@@ -226,7 +230,7 @@ pas une banque reçue :
 La transaction correcte construit le crédit dans un temporaire, convertit
 chaque index local en vrai `PointId`, rejoue les trois carriers, vérifie la
 disjonction avec les crédits déjà commis, puis seulement fusionne compteurs et
-digest. Une proposition manquée agrandit `N_4(a)` ; elle ne peut jamais fermer
+digest. Une proposition manquée agrandit `E_4(a)` ; elle ne peut jamais fermer
 sur le premier candidat omis.
 
 ### 5.3 Boucle minimale du reporter
@@ -236,8 +240,8 @@ chaque chambre reçue. Le reporter traverse ensuite l'arbre des cibles avec des
 tâches `(AnchorId,BNodeKey,chamber_mask,state)` :
 
 ```text
-max_PointId(BNode) <= AnchorId         -> SKIP_OWNER
-min_PointId(BNode) <= AnchorId         -> SPLIT_OWNER
+max_PointId(BNode) <= AnchorId         -> DROP_ORDER
+min_PointId(BNode) <= AnchorId         -> SPLIT_ORDER
 direction et hauteur toutes fermees    -> CLOSED_SPAN
 direction ou seuil tous ouverts        -> OPEN_SPAN
 frontiere/melange                       -> SPLIT_TARGET
@@ -248,8 +252,8 @@ Les `OPEN_SPAN` partitionnent exactement les cibles `PointId(b)>PointId(a)` non
 fermées par la banque reçue. Le compteur logique est la somme de leurs
 populations ; aucun `PairId` n'est développé sur le chemin produit. Le juge
 `n<=64` les développe seulement pour exiger l'égalité avec le classement
-ponctuel du **même** bank, puis vérifie que chaque co-sommet de chaque support
-q4 exhaustif appartient à la fenêtre de son owner minimal.
+ponctuel du **même** bank, puis vérifie que l'arête maximale canonique de chaque
+support q4 exhaustif appartient à la fenêtre orientée correspondante.
 
 Les mutants indispensables partagent un ID entre deux crédits, confondent
 index local et `PointId`, omettent une chambre, changent la stricte
@@ -260,6 +264,19 @@ propositions, activations, tests d'enveloppe, crédits commis, cellules
 population logique, octets lus/écrits, HWM et temps. `tasks_created` doit valoir
 `tasks_consumed+tasks_pending`.
 
+Le P0 feuille publie explicitement `anchor_root_seeds=n`. Il ne prétend pas
+avoir supprimé les recherches par ancre ; il falsifie d'abord la densité de la
+fenêtre avec le plus petit objet sémantiquement exact. Si la fenêtre est sparse
+mais ce compteur de graines ou les tâches domine, le palier `PWC0-B`
+universalise les crédits sur un `ANode` et remplace les `n` graines par une
+jointure `ANode×BNode` à graine unique.
+
+La banque bornée reste propositionnelle. Une fenêtre dense à `P=96` refuse ce
+proposer, pas tout certificat projectif. La porte publie donc `P=48/96/192`, le
+taux `UNDERFULL`, la fermeture monotone et la cause précise de chaque span
+ouvert. Un `NO-GO` global suppose soit l'enveloppe industrielle `P<=96` et
+l'arène figées, soit une ablation stabilisée.
+
 ## 6. Décision immédiate
 
 - conserver le compteur de degré du pin sous le nom
@@ -267,9 +284,11 @@ population logique, octets lus/écrits, HWM et temps. `tasks_created` doit valoi
   gate ;
 - retirer `ProjectiveWindowCounter-v0`, `REFUSÉ s=2`, `VERT s=3` et
   « décide autrement que la masse » de ses claims ;
-- implémenter `AnchorSuffixReporter-q4-v0` : 48 chambres indépendantes, puis
-  raffinement adaptatif des seules chambres ouvertes dans leurs neuf
+- implémenter `PWC0-A/MaxEdgeSuffixReporter-q4-v0` : 48 chambres indépendantes,
+  puis raffinement adaptatif des seules chambres ouvertes dans leurs neuf
   sous-cellules ;
-- ne lancer ni G4, ni shallow, ni join générique avant ce compteur.
+- ne lancer ni G4, ni shallow, ni join générique avant ce compteur ; écrire
+  `PWC0-B` seulement si `PWC0-A` reçoit une fenêtre sparse mais un coût de
+  graines/tâches rouge.
 
 Le contrat `50000/1s` reste ouvert.

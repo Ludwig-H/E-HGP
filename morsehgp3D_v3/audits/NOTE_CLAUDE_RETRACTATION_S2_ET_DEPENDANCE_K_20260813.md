@@ -84,3 +84,45 @@ Le contrat fixe `smax=11`. Si la fenêtre est `\Theta(K)`, alors :
 Aucun temps, aucun octet. La grille `s \times smax` est partielle. Le résultat
 `\Theta(K)` est une lecture de deux points et n'est pas une loi. Le contrat
 `50 000` reste entièrement ouvert et G4 reste NO-GO.
+
+## 6. Correction — mon « recoupement » avec le `kept` du moteur était trop affirmatif
+
+J'ai écrit que le `kept` du moteur — `446` puis `474` — et ma fenêtre WSPD
+« concordent », et que c'était « la vérification croisée qui me manquait ».
+C'était trop fort, et la grille le montre.
+
+Ma fenêtre dépend de **deux** paramètres que je n'avais pas fixés en annonçant
+la concordance :
+
+| configuration | fenêtre asymptotique |
+| --- | ---: |
+| `s=3`, masque central seul | `528,6` |
+| `s=3`, disjonction | `354,5` |
+| `s=2`, disjonction | `986,2` |
+| `kept` du moteur (sa propre construction) | `446` à `474` |
+
+Le `kept` du moteur tombe **entre** mes valeurs à `s=2` et `s=3`, et le chiffre
+que j'avais cité — `477,6 / 481,6` — était celui d'une configuration précise
+que je n'avais pas nommée. Le bon énoncé est donc : **les deux quantités sont
+du même ordre de grandeur**, ce qui est déjà instructif puisqu'elles viennent de
+deux constructions sans primitive commune ; ce n'est **pas** une concordance
+numérique, et je n'aurais pas dû l'appeler ainsi.
+
+Ce qui reste vrai et utile : les deux saturent, et aucune des deux ne croît avec
+`n`. C'est cela qui fait passer votre critère, pas leur égalité.
+
+## 7. La grille, en cours
+
+`uniform`, disjonction, fenêtre moyenne à `n = 4 000 / 8 000 / 16 000` :
+
+| `smax` | `s` | moyennes | pentes |
+| ---: | ---: | --- | :---: |
+| `7` | `2` | `534,1 / 589,9 / 602,3` | `1,143 / 1,030` |
+| `7` | `3` | `157,2 / 171,9 / 198,2` | `1,129 / 1,206` |
+| `7` | `4` | `93,8 / 103,0 / 103,3` | `1,135 / 1,004` |
+| `11` | `2` | `813,8 / 982,4 / 986,2` | `1,272 / 1,006` |
+
+**Aucune pente ne refuse, et la fenêtre sature dans les six cas.** La
+proportionnalité en `K` se vérifie aussi à `s=3` : `198,2` à `smax=7` prédit
+`331` à `smax=11`, et la mesure indépendante donne `354,5` — sept pour cent
+d'écart.
