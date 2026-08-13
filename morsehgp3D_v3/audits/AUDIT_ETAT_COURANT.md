@@ -8,16 +8,14 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-## Observation live — `HEAD=33df59d`, cardinal WSPD G4 reçu, coût non reçu
+## Observation live — `HEAD=81d24d0`, identité renforcée, P0 et source non reçus
 
 Le `HEAD` observé est
-`33df59d451dc1c534a1fd5f1572e938472744fef`, commit
-`fourteen of fifteen configurations hold the two-slope rule on the WSPD
-front`. Le logiciel de la banque CPU et de son comparateur `--bank-strong`
-reste pincé par `360ea7c70e0a8875be611a10ae179d43d3f4bf1b`; le parent
-`21a7a63` corrige le script, puis `33df59d` ajoute le reçu G4 et des documents.
-Le worktree observé ne contient que les mises à jour documentaires autorisées
-du présent audit ; l'auditeur ne modifie aucun code.
+`81d24d05142219aa0c5e9b00d129b72b03f0e85e`, commit
+`the central mask has no NONE, and that alone decides where it belongs`. Il
+hérite de la correction Morton3D et du masque central de `4f4b463`, puis ajoute
+les mutants d'identité et le refus `leaf>1`. Le worktree était propre avant les
+éditions documentaires concurrentes ; l'auditeur ne touche à aucun logiciel.
 
 Le transcript G4 confirme la gate `front_records` sur quatorze des quinze
 couples de cinq familles et trois séparations, entre `12500` et `100000`.
@@ -32,9 +30,17 @@ La même gate appliquée à `eval` ne passe que douze configurations : les trois
 séparations de `scanline_single_pass` ont deux dernières pentes au moins
 `1,35`. À `uniform,s=4,n=100000`, `11109031` terminaux provoquent
 `699699553` dépilages, avec jusqu'à trois appels `rect_classify` par dépilage.
-Il n'y a toujours aucun temps, octet ou HWM de phase. Contre-audit, facteurs
+Il n'y a toujours aucun temps, octet ou HWM mémoire de phase ; le seul
+`eval_hwm=64` publié est le quantum de la DFS. Contre-audit, facteurs
 `s=2 -> s=4`, provenance et décision :
 [`AUDIT_CONTRE_RECU_WSPD_G4_33DF59D_20260813.md`](AUDIT_CONTRE_RECU_WSPD_G4_33DF59D_20260813.md).
+
+La rampe scanline emploie toutefois `coord=65535` aux quatre tailles, alors que
+le générateur prescrit une emprise `sqrt(40n)`. Il émet un préfixe de lignes
+jusqu'à `n`; les tailles ne sont donc pas homothétiques à densité fixée. Le
+refus fini reste réel, mais il ne distingue ni transition de lignes, ni effet
+du split-tree, ni limite WSPD. Le rejeu exige une emprise canonique par taille,
+`m==n`, plusieurs graines et les compteurs lignes/bbox/profondeur/splits.
 
 Le certificat `Dlo/Vhi` est sûr : `Vhi<Dlo` certifie q2, `3Vhi<Dlo` certifie
 q3 et, sous `Dlo>0`, `209Vhi<=56Dlo` certifie q4. La dernière frontière est
@@ -44,6 +50,13 @@ et réactive le cœur étroit q3/q4. Aucun troisième objet géométrique n'est
 requis : le cœur `(d-3S)/4` est universel q2/q3/q4 ; l'owner est seulement la
 précondition qui transforme q3/q4 en `PRUNED_MAX_EDGE_ANCHOR`.
 
+Le pin répare la collision Morton `(2,0,0)/(0,0,1)` et remplace les trois
+tests centraux par un masque. P0 n'est toutefois pas reçu : le helper recalcule
+encore `Dlo` pour chaque ID, emploie `__int128` alors que ses coefficients
+tiennent en `u64`, et les oracles Morton/masque ne sont pas encore branchés à
+une porte au pin. L'API attendue est `central_mask_from(dlo,vhi)`, avec `Dlo`
+hoisté hors de la fenêtre.
+
 Le WSPD reçu progresse sur l'identité : fair-split déterministe, séparation
 entière, `PointId` conservé et oracle borné de multiplicité. Le rejeu Release
 local courant donne :
@@ -52,17 +65,42 @@ local courant donne :
 cmake -S morsehgp3D_v3 -B build/v3 -DCMAKE_BUILD_TYPE=Release
 cmake --build build/v3 --target mhgp3v_rect_front_probe mhgp3v_wspd_front_probe --parallel
 ctest --test-dir build/v3 --output-on-failure -R '^mhgp3v_(rect|wspd)_front_'
-14/14 PASS, 28,44 s
+18/18 PASS, 12,36 s
 ```
 
-Ce vert ne reçoit pas encore le chemin candidat. Chaque terminal WSPD recrée
-une `priority_queue`, repart de `C=root` et appelle `rect_classify` jusqu'à
-trois fois en comptant une seule `eval`. Il n'existe ni `RectId/owner`, ni arène
-SoA, ni compactage/consommation du résiduel. Le test `leaf>1` manque : le rejeu
-`uniform,n=48,leaf=8` refuse avec `109/1128` `PairId` manquants. Avec le défaut
-`leaf=1`, un run local `uniform,n=2000,s=2,quantum=64` produit `41073`
-terminaux et `2434938` dépilages C, ferme `0 %` en q3/q4 et prend `2,607 s`
-muraux. Cette file CPU n'est pas `RF-GPU-P0`.
+Ce vert reçoit le refus pré-calcul de `leaf>1`, le domaine, le cardinal et la
+multiplicité `PairId`, plus deux mutants omission/doublon. Il ne reçoit pas le
+chemin candidat. Chaque terminal WSPD recrée une `priority_queue` et repart de
+`C=root`. Il n'existe ni arène SoA, ni compactage/consommation du résiduel.
+Avec `leaf=1`, le diagnostic historique `uniform,n=2000,s=2,quantum=64`
+produit `41073` terminaux et `2434938` dépilages C. Cette file CPU n'est pas
+`RF-GPU-P0`.
+
+Les nouvelles « identités canoniques » restent mal typées : FNV-64 est un
+digest, pas une identité injective. `NodeKey` doit être une clé explicite comme
+`(RelationTreeDigest,Epoch,NodeOrdinal)` et `RectId` la paire ordonnée de deux
+clés ; le hash reste seulement un contrôle de replay. L'impression d'un digest
+sur une seule entrée ne prouve pas l'invariance par permutation.
+
+Le nouvel `--oracle-all=320` emploie bien un prédicat ponctuel `__int128`
+indépendant des bornes et rend respectivement
+`41461/2341117`, `907/15903`, `411/6158` verdicts/triples q2/q3/q4, zéro
+désaccord. Il est exhaustif sur les nœuds `ALL` maximaux atteints d'un unique
+nuage uniforme fixé ; il s'arrête au premier `ALL` et élague `NONE`. Ce n'est
+donc ni une preuve universelle sur les AABB u16, ni une couverture de la WSPD,
+de la banque, des seuils ou de l'owner. Il manque des mutants faux-`ALL` et un
+digest attendu de la couverture.
+
+Le delta logiciel concurrent ajoute `--sep-euclid=p/q`. Sa comparaison
+`q^2 D2 >= (p+2q)^2 max(W2A,W2B)` est un arrêt euclidien sûr : elle implique
+la séparation demandée en majorant `rA+rB` par deux fois le plus grand rayon.
+Elle peut manquer des terminaux quand les rayons diffèrent ; ce n'est donc pas
+le prédicat exact à rayons inégaux. Avant intégration : nommer ce caractère
+conservateur, réduire `p/q` par pgcd pour l'identité, refuser les produits hors
+borne avant calcul, ajouter frontière/une-unité-dessous et mutant, puis publier
+un `FrontDigest` distinct et l'ablation `Linf/Euclid` sur records, build,
+octets/HWM et temps total. Le tape P0 reste L-infini tant que cette ablation
+n'a pas gagné.
 
 Le script hérité du `HEAD=21a7a63` est encore `NO-RUN` pour recevoir
 `RF-GPU-P0`.
@@ -76,30 +114,51 @@ aucun temps, octet, HWM ou kernel P0. La cible CUDA construite reste
 feuille annonce `budget-depth=4` tout en passant `--budget=24`. Une campagne G4
 de ce script ne répondrait donc ni au p95 résident, ni au SLO.
 
-Le prochain micro-jalon reste `RF-GPU-P0` : tape WSPD reçu/résident à `s=2`,
-fenêtre Morton propositionnelle `W=32`, au plus `L=16` IDs distincts, un `Dlo`
-par rectangle et un `Vhi` par ID. Si q2 reste ouvert, le test exact
-`Hmin_singleton>0` ajoute seulement douze produits `i64`; il remplace les trois
-appels de `--bank-strong` et garde `wide_products=0`. q3/q4 restent au masque
-central tant qu'une ablation après raffinement local ne justifie pas leur
-fallback large. Tout échec est compacté stablement en `DELEGATED_RESIDUAL`.
-La porte exige `p95<=200 ms` sur trente warms. Corridor et carriers restent
-hors P0. Réponse directe aux questions de Claude et ordonnance de raffinement :
-[`AUDIT_REPONSE_BANQUE_MORTON_360EA7C_20260813.md`](AUDIT_REPONSE_BANQUE_MORTON_360EA7C_20260813.md).
+Le prochain micro-jalon reste `RF-GPU-P0` : tape WSPD reçu/résident à `s=1/2`,
+un warp par terminal, trente-deux lectures Morton contiguës, `Dlo` une
+fois, `Vhi` une fois par ID, ballots imbriqués, puis `Hmin_singleton` q2
+conditionnel. `Hmin` est exact sur les produits d'AABB et sûr pour les points,
+mais incomplet sur leurs corrélations. Tout échec est compacté stablement en
+`DELEGATED_RESIDUAL`. La porte exige `p95<=200 ms` sur trente warms.
+
+La précondition owner q3/q4 ne peut pas être portée par une paire nue : elle
+dépend des autres arêtes du support. P0 doit émettre un
+`PRUNED_OWNER_SHARD` conditionnel, indexant tous les supports dont l'arête
+maximale canonique appartient au `PairId`-shard du rectangle. La WSPD et le
+tie-break d'owner rendent ces shards disjoints et couvrants ; la source exacte
+ultérieure saute les shards tués sans développer leurs supports. q2 rend
+directement `CLOSED_PAIR_SHARD`. Preuve, ABI et exemple minimal :
+[`AUDIT_REPONSE_OWNER_SHARD_P0_81D24D0_20260813.md`](AUDIT_REPONSE_OWNER_SHARD_P0_81D24D0_20260813.md).
+
+La WSPD conserve pour P0 sa métrique L-infini, explicitement nommée `s_inf` :
+aucun verdict scientifique n'en dépend. Une variante euclidienne entière peut
+être ablatée sous un autre `sep_metric` et un autre `FrontDigest`. Elle ne doit
+pas remplacer silencieusement le tape mesuré. Dans la convention du gap
+normalisé par le plus grand des deux rayons propres et `s_inf>=2`, le minorant euclidien est
+`(s_inf+2)/sqrt(3)-2`, pas `s_inf/sqrt(3)`.
+
+Si P0 laisse du budget, le raccord utile est `DVT-CWave-v0`, pas une nouvelle
+DFS. Avec `D=||b-a||^2`, `V=||2z-a-b||^2` et
+`T=(b-a) dot(2z-a-b)`, une seule wavefront persistante classe témoins
+centraux, lentille et carriers aigus. q4 devient la relation factorisée
+`Acute×Lens`, jamais `C(n_lens,2)`. Seuls un vrai `ALL` et un vrai
+`GEOMETRIC_NONE` s'héritent sous split ; tout échec du certificateur est
+rejoué. Directive complète :
+[`AUDIT_DIRECTIVE_DVT_CWAVE_4F4B463_20260813.md`](AUDIT_DIRECTIVE_DVT_CWAVE_4F4B463_20260813.md).
 
 Le statut G4 reste `NO-GO` : aucun kernel rect-front, aucun p95/HWM, aucun
 handoff exact et aucun raccord jusqu'au fold. GCP non utilisé par cet audit.
 
-### Première banque Morton reçue, mais son ordre est réfuté
+### Observation historique — banque Morton du pin `360ea7c`, ordre alors réfuté
 
-Le `HEAD` implémente `--bank --window=32 --bank-l=16`. Sur
+Le pin `360ea7c` implémentait `--bank --window=32 --bank-l=16`. Sur
 `uniform,n=2000,s=2`, le rejeu local tombe de `2,607 s` pour la file à
 `0,109 s` pour la banque et borne bien les compteurs à `1314036` lectures et
 `657119` tests, mais ne ferme que `0,90 %` de masse q2 et environ zéro en
 q3/q4. C'est une réduction de constante nette, pas encore un déblocage de la
 source.
 
-Le Morton reçu est faux : son `morton_spread` insère un zéro entre bits,
+Le Morton de ce pin est faux : son `morton_spread` insère un zéro entre bits,
 forme 2D, puis décale trois axes. Ainsi `Morton(2,0,0)=4` et
 `Morton(0,0,1)=4`. La banque reste fail-open, mais son ordre et sa couverture
 ne sont pas ceux revendiqués. La porte doit comparer l'encodeur optimisé à un
@@ -121,6 +180,10 @@ le mode fort est le sur-ensemble `central OR fallback`. Son gain q2 doit être
 comparé à son coût physique après correction Morton, jamais promu dans P0. Il
 réintroduit les carrés larges et vaut environ `2,4x` le temps CPU du masque
 central sur le petit diagnostic local.
+
+Le successeur `4f4b463` corrige cette dilation. Cette section conserve
+seulement la provenance du diagnostic ; le verdict live reste celui de la
+section supérieure.
 
 ## Observation historique — `HEAD=e63b7eb`, cœur central puis préfixe WSPD/carriers
 

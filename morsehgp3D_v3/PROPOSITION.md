@@ -1898,9 +1898,12 @@ les boîtes, `Lambda>0 && 4*Lambda^2>E2max*X2max` certifie `ALL-q3`, et le
 coefficient `3` certifie `ALL-q4`. L'échec reste `MIXED`; les crédits coniques
 et le classifieur exact large restent les étages suivants.
 
-Le `RectId` ne dépend jamais du score de split. Il dérive de
-`TreeDigest/Epoch/ANodeKey/BNodeKey/owner`; seuls ses enfants canoniques sont
-admissibles. Une politique `Lambda-guided` peut choisir de scinder `A` ou `B`
+Le `RectId` ne dépend jamais du score de split. Dans un arbre pincé,
+`NodeKey=(RelationTreeDigest,Epoch,NodeOrdinal)` ou une clé structurelle
+injective équivalente ; `RectId` est la paire ordonnée de deux `NodeKey`.
+Un FNV-64 peut authentifier un replay, mais ne décide jamais l'égalité de deux
+nœuds ou rectangles. Seuls les enfants canoniques sont admissibles. Une
+politique `Lambda-guided` peut choisir de scinder `A` ou `B`
 selon la masse q2 prouvée par un lookahead cappé, puis tie-break fixe, à
 condition de compter et réutiliser ce travail. Elle est comparée à la politique
 canonique pure ; un timeout mural ne décide jamais la topologie du front.
@@ -1937,19 +1940,35 @@ radix/RLE par `PairId` recréerait le catalogue global que la v3 doit éviter.
 ### 11.1.2 Front WSPD, borne supérieure et banque bornée de témoins
 
 Le front `A×B` peut employer une WSPD comme **partition canonique des
-relations**, jamais comme approximation d'une décision. Pour une séparation
-rationnelle fixe `s`, un fair-split tree canonique en dimension trois donne
-`O(s^3 n)` records. Cette borne suppose une politique reçue pour les positions
-dupliquées et les nœuds de rayon nul, un tie-break terminal par `PointId` et un
-prédicat de séparation entier. La seule identité des masses ne prouve pas
-l'unicité : le juge borné développe les records et exige une multiplicité un
-pour chaque `PairId`.
+relations**, jamais comme approximation d'une décision. Le tape P0 emploie une
+séparation entière en norme L-infini, nommée `s_inf`. Pour `s_inf` fixé, un
+fair-split tree canonique en dimension trois donne `O(s_inf^3 n)` records.
+Cette borne suppose une politique reçue pour les positions dupliquées et les
+nœuds de rayon nul, un tie-break terminal par `PointId` et le prédicat pincé.
+La seule identité des masses ne prouve pas l'unicité : le juge borné développe
+les records et exige une multiplicité un pour chaque `PairId`.
+
+Cette norme ne porte aucune vérité géométrique : les certificats recalculent
+leurs bornes euclidiennes. Une variante à boules euclidiennes égales est une
+ablation distincte, avec `D2=sum((cA2-cB2)^2)`,
+`R2=max(sum(widthA^2),sum(widthB^2))` et le test entier
+`D2 >= (s_e+2)^2*R2`. Elle porte un autre `sep_metric` et un autre
+`FrontDigest`. Pour le gap normalisé par le plus grand des deux rayons propres
+et `s_inf>=2`, le seul minorant déduit de L-infini est
+`(s_inf+2)/sqrt(3)-2`, pas
+`s_inf/sqrt(3)`.
 
 Le front WSPD borne seulement `front_records` et les nœuds internes de sa
 construction à un facteur constant. Il ne borne ni la somme des populations
 des blocs, ni un rescan témoin par record, ni la source du résiduel. Les gates
 continuent donc de porter sur `rect_visits`, classifications uniques, pushes et
 pops, `source_tasks`, sorties, octets et HWM, puis sur le consommateur complet.
+
+Une rampe de familles conserve la densité et la géométrie du générateur : pour
+chaque taille, elle emploie `cloud_family_default_coord(family,n)`, exige la
+cardinalité exacte `m==n` et pince `coord`, graine, bbox, lignes occupées,
+profondeurs et splits. Un `coord=65535` commun aux préfixes scanline n'est pas
+une rampe homothétique et ne permet pas d'attribuer une inflexion au WSPD.
 
 L'intervalle bidirectionnel de `H` est interprété sur le réseau entier u16. Son
 minimum emploie les extrémités en `z`; son maximum emploie le sommet entier de
@@ -1984,15 +2003,18 @@ boules de rayons `r_A,r_B`, poser `S=r_A+r_B`, `d` la distance de leurs centres
 et `m_0` leur milieu. Pour q2, `d>2S` donne un cœur ouvert de rayon
 `(d-2S)/2` autour de `m_0`. Pour q3/q4, `d>3S` donne géométriquement un cœur
 ouvert de rayon `(d-3S)/4`, sans hypothèse d'owner. Dix, neuf ou huit IDs
-distincts dans le cœur ferment le certificat de la lane ; consommer q3/q4
-comme prune de support exige ensuite `owner=max_edge_canonical` et rend
-`PRUNED_MAX_EDGE_ANCHOR`. Les rayons et frontières sont décidés en carrés
-entiers ; aucune hausse globale de `s` n'est nécessaire.
+distincts dans le cœur ferment le certificat de la lane. q2 rend
+`CLOSED_PAIR_SHARD`. En q3/q4, le rectangle ne peut pas authentifier l'owner
+d'un support encore inconnu : il rend un `PRUNED_OWNER_SHARD` conditionnel,
+qui supprime tous les supports dont l'arête maximale canonique appartient au
+`PairId`-shard du rectangle. Les rayons et frontières sont décidés en carrés
+entiers ; aucune hausse globale de `s_inf` n'est nécessaire.
 
 Le résiduel seul reçoit une continuation persistante. Pour chaque
 `RectKey/lane`, `Credit ⊔ None ⊔ Mixed` partitionne `C-root`; raffiner remplace
 un nœud par ses enfants. Lors d'une scission `A/B`, `Credit` et `None`
-s'héritent par monotonie, seuls les `Mixed` sont reclassifiés. Un quantum rend
+s'héritent par monotonie seulement quand `None` est un vrai
+`GEOMETRIC_NONE`; un échec de certificateur est `Mixed` et se reclassifie. Un quantum rend
 `PENDING_CONTINUATION`; un arrêt de ce certificateur rend
 `DELEGATED_RESIDUAL`; une ressource réellement épuisée rend
 `RESOURCE_EXHAUSTED` atomiquement. Aucun cap ne change la vérité et aucun enfant
@@ -2051,9 +2073,13 @@ les fixtures et l'ABI sont détaillés dans
 Le plus petit jalon device ne reçoit ni top-`L` exact, ni range-report
 exhaustif, ni carrier. Il prend les terminaux WSPD canoniques et un ordre
 `(Morton48,PointId)`. Pour chaque `RectId`, il inspecte une fenêtre déterministe
-`W=32` autour de la clé du milieu des deux nœuds, conserve au plus `L=16` IDs
-distincts selon distance entière puis `PointId`, rejette les endpoints et
-recertifie les singletons sur tout `A×B`.
+`W=32` autour de la clé du milieu des deux nœuds, rejette les endpoints et
+recertifie les singletons sur tout `A×B`. La première ablation compare les
+trente-deux tests en ballots warp au maintien des seize meilleurs scores : le
+premier évite tout tri, le second réduit l'arithmétique. Aucun n'est présumé
+gagnant avant mesure device. Les coordonnées sont contiguës dans l'ordre
+Morton, tandis que `relation_rank[PointId]` teste l'appartenance aux plages
+`A/B` de l'arbre canonique ; les deux ordres ne sont jamais confondus.
 
 L'encodeur Morton3D entrelace les bits aux positions `3b/3b+1/3b+2`. Un
 encodeur à masque est reçu seulement contre l'oracle boucle 16 bits ; les
@@ -2070,19 +2096,28 @@ négative, pas pour la sûreté d'un crédit positif.
 Le P0 calcule `Dlo` une fois par rectangle, puis `Vhi` pour chaque ID, et rend
 le seul masque central suffisant. Il n'appelle ni l'intervalle de `H`, ni
 `Lambda`, ni le fallback par carrés. Les bits `ALL` satisfont `q4=>q3=>q2` ;
-les comptes distincts saturent à `10/9/8`. q2 rend `CLOSED_Q2`. q3/q4 ne
-rendent `PRUNED_MAX_EDGE_ANCHOR` que si le record authentifie l'owner canonique
-; sinon leur masque reste délégué. Le résultat conserve jusqu'à dix
-`proof_ids` rejouables.
+les comptes distincts saturent à `10/9/8`. q2 rend `CLOSED_PAIR_SHARD`. Pour
+q3/q4, définir l'owner d'un support propre comme son arête de longueur carrée
+maximale, ties par plus petit `PairId`. La WSPD partitionne ces PairIds : chaque
+rectangle indexe donc, sans les développer, tous les supports qui ont leur
+owner dans son shard. Une saturation rend `PRUNED_OWNER_SHARD`; elle ne prétend
+jamais que chaque paire du rectangle est owner. La source exacte ne génère que
+les shards délégués et vérifie les trois ou six distances sur leurs tuples. Le
+replay impose `proof_ids` disjoints des `SupportIds`. Le résultat conserve
+jusqu'à dix `proof_ids` rejouables, la version de la règle d'owner et la clé
+injective du shard.
 
 Une extension P0 autorisée récupère q2 sans produit large. Si le bit q2 central
 manque pour un singleton `z`, calculer les quatre produits d'extrémités
 `(z_i-a_i)(b_i-z_i)` par axe et sommer leurs trois minima. Ce
-`Hmin_singleton` est exact sur `A×B`; sa stricte positivité est équivalente à
-q2-ALL et coûte douze produits `i64`. Il remplace `--bank-strong`, qui rappelle
-trois classifieurs et réintroduit inutilement q3/q4 larges. q3/q4 restent au
-masque central tant qu'une ablation n'établit pas un gain justifiant deux
-limbes.
+`Hmin_singleton` est exact sur le produit cartésien des AABB entières ; sa
+stricte positivité est équivalente à q2-ALL sur cette enveloppe et coûte douze
+produits `i64`. Elle est seulement suffisante sur les populations corrélées
+des nœuds. Comme `4H=D2-V2`, le bit central q2 est inclus dans
+`Hmin_singleton>0` : après le masque commun, le repli q2 se réduit à ce test.
+Il remplace `--bank-strong`, qui rappelle trois classifieurs et réintroduit
+inutilement q3/q4 larges. q3/q4 restent au masque central tant qu'une ablation
+n'établit pas un gain justifiant deux limbes.
 
 Deux kernels suffisent à cette tranche : K1 traite un warp par rectangle sans
 allocation ni file dynamique ; K2 scanne et compacte stablement les ordinals
@@ -2090,10 +2125,11 @@ résiduels. Les buffers sont préalloués et résidents et la tranche ne
 synchronise qu'au terminal. Sous u16, `209*Vhi<2^44` et le score de sélection
 est inférieur à `2^38` : `u64` suffit, la porte exige `wide_products=0` et les
 deux limbes restent un P1. Avec `F` rectangles, l'enveloppe est `W*F` lectures
-et `L*F` tests `Vhi`, avec un seul `Dlo` par rectangle. Une ABI
-de `16 B` par travail, `64 B` par résultat et `4 B` par ordinal résiduel donne
-`84F+86n` octets avec arbre, clés, coordonnées, ordre et rang, avant les
-workspaces explicitement comptés.
+et `T*F` tests `Vhi`, avec `T=W` pour les ballots directs ou `T=L` après
+sélection, et un seul `Dlo` par rectangle. Une ABI de `16 B` par travail,
+`64 B` par résultat et `4 B` par ordinal résiduel donne `84F+86n` octets avec
+arbre, clés, coordonnées, ordre et rang, avant les workspaces explicitement
+comptés.
 
 La porte de falsification reçoit un tape terminal WSPD hôte déjà reçu et
 résident. Son p95 doit rester au plus `200 ms` sur trente warms à `n=50000`,
@@ -2110,16 +2146,18 @@ réduit presque aucun résiduel q3/q4, le P0 suivant emploie quelques
 préfixes/cellules Morton adaptés au rayon du cœur, toujours bornés et
 propositionnels ; il ne porte pas une fenêtre sans signal sur CUDA.
 
-La séparation de départ reste `s=2`. Monter globalement à `s=8` peut gonfler
+La séparation de départ reste `s_inf=2`. Monter globalement à `s_inf=8` peut gonfler
 le front et tous les coûts `W*F/L*F` d'un ordre de grandeur ; une hausse du
 pourcentage de masse fermée ne suffit pas. Le choix de `s` minimise le temps
 mesuré `P0 + source complète + aval` et les octets/HWM. Les rectangles
 difficiles se raffinent localement sans reconstruire globalement un grand
 front. Les `proof_ids` positifs d'un parent restent valides dans ses enfants.
-En revanche, un ID écarté parce qu'il appartenait à `A∪B` peut devenir témoin
-après `A=A0∪A1`; le raffinement conserve donc un sidecar
-`endpoint_blocked` à réexaminer, ou rejoue le producteur borné sur l'enfant.
-Il ne jette jamais définitivement les endpoints relatifs du parent.
+En revanche, seul un vrai `GEOMETRIC_NONE` s'hérite négativement. Fenêtre vide,
+cap, candidat non retenu, `CENTRAL_DEAD`, `Vbest` impossible et tout `UNKNOWN`
+se reclassifient sur les enfants. Un ID écarté parce qu'il appartenait à
+`A∪B` peut aussi devenir témoin après `A=A0∪A1`; le raffinement conserve un
+sidecar `endpoint_blocked` ou rejoue le producteur borné. Il ne transforme
+jamais un échec du fast path parent en vérité sur l'enfant.
 
 L'oracle petit `n` développe chaque terminal et exige une multiplicité un de
 chaque `PairId`; il rejoue aussi chaque preuve, l'owner, la disjonction des IDs
@@ -2128,6 +2166,41 @@ son digest sont invariants à la fenêtre, au quantum, au tuilage et au nombre d
 threads ; seule la répartition fast/fallback peut varier. Le détail des
 fixtures, de l'ABI et des défauts du pin `a7f061b` est dans
 [`AUDIT_REPONSE_CLAUDE_DOUBLE_COEUR_RF_GPU_P0_A7F061B_20260813.md`](audits/AUDIT_REPONSE_CLAUDE_DOUBLE_COEUR_RF_GPU_P0_A7F061B_20260813.md).
+
+### 11.1.5 Wavefront commune `D,V,T` et relations de carriers
+
+Après réception du microkernel P0, le résiduel ne repart pas dans une seconde
+source depuis `C=root`. Les `PRUNED_OWNER_SHARD` q3/q4 sont retirés avant cette
+wavefront ; seuls les shards délégués y entrent. Pour `d=b-a`, `v=2z-a-b`, poser
+`D=||d||^2`, `V=||v||^2` et `T=d dot v`. Les identités exactes sont
+`4H=D-V`, `16E2X2=(D+V)^2-4T^2` et l'appartenance à la lentille faible est
+équivalente à `V+2*abs(T)<=3D`. Ainsi le même classifieur alimente les témoins
+centraux `D>V`, les carriers aigus `D<V` dans la lentille et tous les points de
+lentille nécessaires à q4.
+
+`DVT-CWave-v0` initialise exactement une tâche `(RectId,C=root)`, porte des
+masks indépendants witness/lentille/aigu et itère par count--scan--fill. `ALL`
+émet ou crédite une antichaîne, un vrai `NONE` retire le mask et `UNKNOWN`
+seul descend. Un quantum épuisé sérialise une continuation exacte. Les preuves
+de P0 initialisent les crédits et sont dédupliquées avant toute nouvelle
+saturation. Les gates exigent `root_entries=F`, `restarted_roots=0`, tâches et
+octets à deux pentes, et développement petit `n` de toutes les relations.
+
+Pour q4, noter `L` la relation lentille et `P` la sous-relation aiguë. Les
+couples admissibles sont factorisés par `x∈P,y∈L`, avec owner PointId sur
+`P×P`; ils ne sont jamais construits par `C(n_lens,2)`. Le join vérifie ensuite
+distance `xy`, rang, positivité, owner de support, census et shell. Les classes
+historiques `P/N` du shallow désignent l'orientation des demi-plans et restent
+distinctes du bit d'acuité.
+
+Sous split `A/B`, seuls une preuve `ALL` et un vrai `GEOMETRIC_NONE`
+s'héritent. `Vbest` impossible, `CENTRAL_DEAD`, fenêtre vide/capée, endpoint
+relatif et tout `UNKNOWN` sont reclassifiés : une restriction des boîtes peut
+rendre le certificat possible. Le split adaptatif est capé en rondes et chaque
+cap rend `DELEGATED_RESIDUAL`; la borne linéaire du WSPD de base ne s'étend pas
+automatiquement à ses enfants ni au join source. La directive, les bornes AABB
+et la fixture dead-parent/live-child sont dans
+[`AUDIT_DIRECTIVE_DVT_CWAVE_4F4B463_20260813.md`](audits/AUDIT_DIRECTIVE_DVT_CWAVE_4F4B463_20260813.md).
 
 ### 11.2 Tuilage spatial et fold
 

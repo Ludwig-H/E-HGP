@@ -99,8 +99,10 @@ g_i(z) = max(abs(2*z-slo), abs(2*z-shi))^2
 
 Alors `Vhi(z)=g_0(z_0)+g_1(z_1)+g_2(z_2)`. Chaque `g_i` est convexe sur les
 entiers. Son minimum u16 est atteint parmi les entiers floor/ceil voisins de
-`(slo+shi)/4`, écrêtés au domaine. Huit combinaisons suffisent donc pour
-obtenir exactement `Vbest=min_z Vhi(z)`.
+`(slo+shi)/4`, écrêtés au domaine. Les axes sont séparables : choisir le
+meilleur entier sur chaque axe puis sommer donne exactement
+`Vbest=min_z Vhi(z)` ; il n'est pas nécessaire d'énumérer les huit produits
+cartésiens.
 
 Conséquences exactes :
 
@@ -141,12 +143,20 @@ RelationState {
 Les propriétés monotones donnent la reprise exacte :
 
 - un nœud `C` qui était `ALL` pour `A×B` reste `ALL` pour tout sous-rectangle ;
-- un nœud `C` réellement `NONE` pour tout le produit reste `NONE` après
-  restriction de `A/B` ;
+- un nœud `C` réellement `GEOMETRIC_NONE` pour tout le produit reste `NONE`
+  après restriction de `A/B` ;
 - seuls les nœuds `MIXED` sont reclassifiés ;
 - les `proof_ids` restent valides, distincts et hérités ;
 - une scission de `A` ou `B` ne réintroduit jamais la racine du front
   géométrique déjà classifié.
+
+La troisième ligne ne concerne que le partitionnement d'un prédicat déjà
+reçu. Un échec du certificat central n'est PAS un vrai `NONE` : `Vbest`
+impossible, `CENTRAL_DEAD`, banque vide ou capée, ID non retenu et tout
+`UNKNOWN` doivent être reclassifiés sur les enfants. Le certificat peut devenir
+vrai quand `A/B` se resserre. Le sidecar d'endpoints ci-dessous ne suffit donc
+pas à lui seul ; il traite seulement une cause supplémentaire de perte de
+rappel.
 
 Cette dernière propriété ne permet pas de jeter les endpoints relatifs. Après
 `A=A0∪A1`, un ID de `A1`, interdit comme endpoint pour le parent, peut devenir
@@ -155,6 +165,13 @@ pour ce seul motif dans un sidecar `endpoint_blocked`, à filtrer de nouveau
 pour chaque enfant, ou rejoue le producteur borné sur l'enfant. Cette reprise
 n'invalide aucun crédit positif et ne redémarre pas la classification
 géométrique complète depuis `C=root`.
+
+Fixture qui tue l'héritage abusif : `A=[0,100]^3`,
+`B={(200,50,50)}` est WSPD-séparé à `s=2`. Le parent a
+`Dlo=10000,Vbest=7500`, donc q3/q4 centraux impossibles. L'enfant
+`A0=[0,50]×[0,100]^2` a `Dlo=22500,Vbest=5676`, donc les deux lanes deviennent
+possibles ; `z=(112,50,50)` n'est pas un endpoint. Il faut rejouer tout
+`CERTIFIER_MISS`, pas seulement `endpoint_blocked`.
 
 Le scheduler compare en entier les marges des enfants :
 

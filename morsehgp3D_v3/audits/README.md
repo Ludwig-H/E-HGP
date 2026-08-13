@@ -39,6 +39,18 @@ jamais réception.
   proposition Morton puis range-report batché, split local `A/B`, arène SoA et
   handoff exact. C'est une directive d'implémentation hors claim, pas une
   réception logicielle.
+- [`AUDIT_DIRECTIVE_DVT_CWAVE_4F4B463_20260813.md`](AUDIT_DIRECTIVE_DVT_CWAVE_4F4B463_20260813.md)
+  ferme l'ordonnance remise à Claude : microkernel P0 sans file, puis une seule
+  wavefront `C` fondée sur `D,V,T` qui produit témoins centraux, lentille et
+  carriers aigus. Il corrige l'héritage des échecs de certificateur et réduit
+  q4 à la relation factorisée `Acute×Lens`, sans boucle sur toutes les paires.
+- [`AUDIT_REPONSE_OWNER_SHARD_P0_81D24D0_20260813.md`](AUDIT_REPONSE_OWNER_SHARD_P0_81D24D0_20260813.md)
+  répond aux quatre questions live de Claude : impossibilité d'un owner porté
+  par une paire nue, owner-shard intensionnel et join tardif, repli q2
+  `Hmin_singleton` sans produits larges, requalification de la rampe scanline à
+  emprise canonique et maintien explicite d'une WSPD L-infini. Il contre-audite
+  aussi les digests FNV présentés comme identités et borne le nouvel oracle
+  exhaustif à sa route réellement parcourue.
 
 Le résumé est [`../README.md`](../README.md) et l'architecture durable est
 [`../PROPOSITION.md`](../PROPOSITION.md). Ils peuvent conserver un résultat

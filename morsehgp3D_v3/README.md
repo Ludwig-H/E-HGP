@@ -81,22 +81,59 @@ d'ajouter corridors ou carriers. Réponse aux questions de Claude, preuve du
 double cœur, fixture et ABI :
 [`AUDIT_REPONSE_CLAUDE_DOUBLE_COEUR_RF_GPU_P0_A7F061B_20260813.md`](audits/AUDIT_REPONSE_CLAUDE_DOUBLE_COEUR_RF_GPU_P0_A7F061B_20260813.md).
 
-La première banque concurrente confirme la baisse de constante à `n=2000`
-(`2,607 s` vers `0,109 s` local), mais ne ferme que `0,90 %` q2 et environ zéro
-q3/q4. Son encodeur emploie en outre une dilation Morton 2D : `(2,0,0)` et
-`(0,0,1)` collisionnent. Corriger et juger Morton3D, mutualiser réellement
-`Dlo/Vhi`, puis comparer `W=16/32/64` à des clés brouillées précède tout port
-CUDA. Une banque rapide sans signal spatial ne débloque pas la source.
+La première banque du pin `360ea7c` confirmait la baisse de constante à
+`n=2000` (`2,607 s` vers `0,109 s` local), mais son encodeur 2D faisait
+collisionner `(2,0,0)` et `(0,0,1)`. Le successeur `4f4b463` répare Morton3D.
+Restent à recevoir : une porte dédiée contre l'oracle bit à bit, la fenêtre
+haute recadrée, zéro allocation par rectangle, la mutualisation réelle de
+`Dlo/Vhi`, les preuves sérialisées et le compactage. Une banque rapide sans
+signal spatial ne débloque pas la source.
 
 La réponse à la mesure `--bank-strong` est un repli q2 ciblé : pour chaque ID,
-`Hmin_singleton>0` est le test q2-ALL exact sur `A×B` et ne coûte que douze
-produits `i64`. Il conserve le rappel q2 annoncé (`31,37 %` à `s=2`) sans les
-trois classifieurs ni les carrés larges ; q3/q4 restent centraux. `s=8` n'est
-pas retenu globalement : il multiplie le front mesuré par `11,8`. Le choix
-reste `s=2` plus raffinement local, jugé sur `P0 + source + aval`, pas sur la
-seule masse fermée. La réponse complète, y compris `Vbest`, l'héritage des
-preuves et le traitement des endpoints relatifs, est dans
+`Hmin_singleton>0` est le test q2-ALL exact sur `box(A)×box(B)` et ne coûte que
+douze produits `i64`. C'est un certificat sûr, mais incomplet sur les ensembles
+de points corrélés. Le bit central q2 est inclus dans `Hmin>0` : après le masque
+commun, ce repli remplace la disjonction générale en q2. Il conserve le rappel
+q2 annoncé (`31,37 %` à `s=2`) sans
+les trois classifieurs ni les carrés larges ; q3/q4 restent centraux. `s=8`
+n'est pas retenu globalement : il multiplie le front mesuré par `11,8`. Le
+choix reste `s=2` plus raffinement local, jugé sur `P0 + source + aval`, pas
+sur la seule masse fermée. La réponse complète, y compris `Vbest`, l'héritage
+des preuves et le traitement des endpoints relatifs, est dans
 [`AUDIT_REPONSE_BANQUE_MORTON_360EA7C_20260813.md`](audits/AUDIT_REPONSE_BANQUE_MORTON_360EA7C_20260813.md).
+
+Le pin `4f4b463` répare l'entrelacement Morton3D, mais P0 reste à recevoir :
+`Dlo` est encore recalculé par ID, les seuils centraux emploient une largeur
+inutile et leurs oracles ne sont pas encore une porte au pin. La suite ne doit
+pas recréer une source indépendante. Avec `D=||b-a||^2`,
+`V=||2z-a-b||^2` et `T=(b-a) dot(2z-a-b)`, un même calcul classe les témoins
+centraux, la lentille et les carriers aigus. Le jalon recommandé est donc P0
+sans file, puis `DVT-CWave-v0` avec une unique entrée `C=root` par rectangle.
+q4 consomme la relation factorisée `Acute×Lens`, jamais toutes les paires de
+la lentille. ABI, bornes et fixtures :
+[`AUDIT_DIRECTIVE_DVT_CWAVE_4F4B463_20260813.md`](audits/AUDIT_DIRECTIVE_DVT_CWAVE_4F4B463_20260813.md).
+
+Au pin live `81d24d0`, les mutants omission/doublon et le refus `leaf>1`
+renforcent le ledger, mais FNV-64 reste un digest et ne peut servir d'identité
+scientifique. `NodeKey` doit être injectif dans un arbre pincé et `RectId` la
+paire ordonnée de deux telles clés. Surtout, aucune paire nue ne peut établir
+`owner=max_edge_canonical` : cette propriété dépend des autres arêtes du
+support. P0 émet donc `CLOSED_PAIR_SHARD` en q2 et un
+`PRUNED_OWNER_SHARD` conditionnel en q3/q4 ; la source exacte partitionnée par
+owner saute ensuite ce shard sans développer ses supports. La preuve et l'ABI
+sont dans
+[`AUDIT_REPONSE_OWNER_SHARD_P0_81D24D0_20260813.md`](audits/AUDIT_REPONSE_OWNER_SHARD_P0_81D24D0_20260813.md).
+Le rejeu Release ciblé frais rend `18/18` CTests en `12,36 s`; ce vert reçoit
+les portes CPU bornées, pas le microkernel ni le handoff owner-shard.
+
+La seule rampe WSPD rouge est `scanline_single_pass,s=4`, pas la famille
+d'amas. Elle a été générée à `coord=65535` fixe, alors que l'emprise canonique
+scanline varie comme `sqrt(40n)` ; chaque taille est un préfixe de lignes, pas
+une scène homothétique. Le refus fini reste valable, mais sa cause ne l'est
+pas. Le rejeu doit pincer une emprise par taille, `m==n`, plusieurs graines,
+bbox/lignes/profondeur/splits, temps et HWM. Le tape garde une séparation
+L-infini explicitement nommée `s_inf`; une séparation euclidienne entière est
+une ablation distincte, pas une substitution silencieuse.
 
 Le script G4 du `HEAD=21a7a63` ne doit pas être lancé pour qualifier cette
 tranche. Sa rampe principale passe maintenant correctement

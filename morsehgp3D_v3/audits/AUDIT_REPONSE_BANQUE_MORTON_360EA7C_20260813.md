@@ -44,7 +44,7 @@ La disjonction de deux certificats `ALL` suffisants reste exacte. Le facteur de
 rappel q2 annoncé justifie de conserver le repli. Il ne faut pas pour autant
 rappeler trois fois `rect_classify`.
 
-Pour un singleton témoin `z`, calculer une seule fois :
+Pour un singleton témoin `z`, calculer une seule fois sur les boîtes :
 
 ```text
 Hmin = min over A×B of (z-a) dot (b-z)
@@ -52,8 +52,10 @@ Emax = max over A of ||z-a||^2
 Xmax = max over B of ||b-z||^2
 ```
 
-Le minimum de `H` demande exactement quatre produits par axe, donc douze
-produits. Chaque maximum de distance demande un choix d'extrémité et trois
+Le minimum de `H` sur `box(A)×box(B)` demande exactement quatre produits par
+axe, donc douze produits. Il est un certificat suffisant pour les points, mais
+peut être plus faible lorsque les coins des AABB ne sont pas des couples de
+points réels. Chaque maximum de distance demande un choix d'extrémité et trois
 carrés. Un seul produit large `Emax*Xmax` et un seul carré `Hmin^2` suffisent
 ensuite pour les deux lanes supérieures.
 
@@ -117,6 +119,14 @@ proposés puis rejetés dans un petit sidecar `endpoint_blocked`, et les
 réexaminer pour chaque enfant, soit rejouer le producteur borné sur l'enfant.
 Jeter définitivement tout `A union B` du parent perd du rappel précisément au
 raffinement. Les preuves déjà créditées, elles, restent valides sans replay.
+
+Cette correction doit être étendue à toutes les causes d'échec, pas seulement
+aux endpoints. `Vbest` impossible, `CENTRAL_DEAD`, banque vide/capée, candidat
+non retenu et `UNKNOWN` ne s'héritent pas après un split `A/B` : les boîtes
+plus fines peuvent rendre le certificat vrai. Seuls un `ALL` reçu et un vrai
+`GEOMETRIC_NONE` s'héritent. La fixture non-endpoint et l'ABI corrigée sont
+données dans
+[`AUDIT_DIRECTIVE_DVT_CWAVE_4F4B463_20260813.md`](AUDIT_DIRECTIVE_DVT_CWAVE_4F4B463_20260813.md).
 
 La comparaison `s=1` contre `s=2` doit porter sur le travail **après** ce
 raffinement : `base_front + child_records + witness_reads + delegated_work`.

@@ -149,6 +149,8 @@ const int kNeed[3] = {10, 9, 8};
 // masque central seul est le chemin `P0`. Le choix est explicite, pas implicite.
 bool g_fallback = false;
 int g_inject = 0;
+bool g_euclid = false;
+long long sep_p = 2, sep_q = 1;
 long long g_injected = 0;
 
 // UNE SEULE descente, un MASQUE DE LANES PAR NŒUD — l'antichaine que l'audit
@@ -341,6 +343,15 @@ int main(int argc, char** argv) {
     }
     else if (a.rfind("--coord=", 0) == 0) coord = arg_ll(val("--coord=").c_str(), 8, 65535, "coord");
     else if (a.rfind("--sep=", 0) == 0) sep = arg_ll(val("--sep=").c_str(), 1, 32, "sep");
+    // `--sep-euclid=p/q` : separation EUCLIDIENNE rationnelle, en carres entiers.
+    else if (a.rfind("--sep-euclid=", 0) == 0) {
+      const std::string v = val("--sep-euclid=");
+      const size_t sl = v.find('/');
+      if (sl == std::string::npos) refuse("sep-euclid attend p/q");
+      sep_p = arg_ll(v.substr(0, sl).c_str(), 1, 64, "sep-euclid p");
+      sep_q = arg_ll(v.substr(sl + 1).c_str(), 1, 16, "sep-euclid q");
+      g_euclid = true;
+    }
     else if (a.rfind("--leaf=", 0) == 0) leaf = arg_ll(val("--leaf=").c_str(), 1, 4096, "leaf");
     else if (a.rfind("--quantum=", 0) == 0) quantum = arg_ll(val("--quantum=").c_str(), 2, 1000000, "quantum");
     else if (a.rfind("--seed=", 0) == 0) seed = arg_ll(val("--seed=").c_str(), 0, (1LL << 40), "seed");
@@ -424,7 +435,10 @@ int main(int argc, char** argv) {
         st.push_back({A.left, A.right});
         continue;
       }
-      if (mhgp3v::wspd_separated(to_wspd(A.box), to_wspd(B.box), sep)) {
+      const bool sepok = g_euclid
+          ? mhgp3v::wspd_separated_euclid(to_wspd(A.box), to_wspd(B.box), sep_p, sep_q)
+          : mhgp3v::wspd_separated(to_wspd(A.box), to_wspd(B.box), sep);
+      if (sepok) {
         // MUTANTS D'IDENTITE. Une omission et un doublon de masses egales se
         // COMPENSENT dans toute somme ; seuls le cardinal des cles et leur
         // multiplicite les distinguent. Les deux doivent mourir separement.
@@ -433,7 +447,8 @@ int main(int argc, char** argv) {
         terms.push_back({ia, ib});
         continue;
       }
-      const long long ra = mhgp3v::wspd_r2(to_wspd(A.box)), rb = mhgp3v::wspd_r2(to_wspd(B.box));
+      const long long ra = g_euclid ? mhgp3v::wspd_w2(to_wspd(A.box)) : mhgp3v::wspd_r2(to_wspd(A.box));
+      const long long rb = g_euclid ? mhgp3v::wspd_w2(to_wspd(B.box)) : mhgp3v::wspd_r2(to_wspd(B.box));
       if (A.left < 0 && B.left < 0) { terms.push_back({ia, ib}); continue; }
       if (A.left >= 0 && (B.left < 0 || ra >= rb)) {
         st.push_back({A.left, ib}); st.push_back({A.right, ib});
@@ -505,10 +520,11 @@ int main(int argc, char** argv) {
     }
     c.terminals = (long long)terms.size();
     if (c.terminals == 0) refuse("front vide");
-    std::printf("n=%lld famille=%s sep=%lld quantum=%lld | front=%lld (%.3f/pt) self=%lld"
+    std::printf("n=%lld famille=%s sep=%s%lld/%lld quantum=%lld | front=%lld (%.3f/pt) self=%lld"
                 " | q2 %.2f%% q3 %.2f%% q4 %.2f%% | carrier q2=%lld q3=%lld q4=%lld"
                 " | eval=%lld hwm=%lld over=%lld ALL=%lld NONE=%lld MIXED=%lld masse=%lld/%lld\n",
-                m, family.c_str(), sep, quantum, c.terminals, (double)c.terminals / (double)m,
+                m, family.c_str(), g_euclid ? "E" : "Linf", g_euclid ? sep_p : sep,
+                g_euclid ? sep_q : 1, quantum, c.terminals, (double)c.terminals / (double)m,
                 agg.self_blocks,
                 100.0 * (double)c.mass_closed[0] / (double)total,
                 100.0 * (double)c.mass_closed[1] / (double)total,

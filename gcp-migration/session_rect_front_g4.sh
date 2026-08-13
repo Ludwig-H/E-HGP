@@ -170,17 +170,22 @@ gcloud compute scp "${TAR}" "${GCP_INSTANCE_NAME}:/tmp/v3.tgz" \
   for f in out/*.txt; do echo "--- $f"; cat "$f"; done
 ' 2>&1 | tee -a "${LOG}"
 
-# ---- 7bis. WspdFrontLowerBound-v1 : l'ordonnance REELLEMENT candidate. On
-# mesure le cardinal du front WSPD, qui doit etre lineaire par theoreme, et la
-# fraction fermee par la classification unique a masque de lanes.
+# ---- 7bis. WspdFrontLowerBound-v1 avec SEPARATION EUCLIDIENNE RATIONNELLE et
+# BANQUE MORTON. C'est le chemin `RF-GPU-P0` : aucune DFS, aucune `Lambda`,
+# aucune file par rectangle — une fenetre Morton bornee et le masque central.
+#
+# La question mesuree n'est plus la fraction fermee mais le NOMBRE
+# D'ENREGISTREMENTS RESIDUELS par point, celui qui part a la source. En local il
+# SATURE vers 58 pour q2 pendant que la masse residuelle s'effondre d'un facteur
+# quarante entre s=2 et s=8. La rampe doit dire si cette saturation tient.
 "${SSH[@]}" 'set -euo pipefail
   export PATH=$HOME/.local/bin:$PATH
   cd ~/rectfront
   W=./build/mhgp3v_wspd_front_probe
   mkdir -p out
   for fam in uniform terrain eight_clusters scanline_overlap_multiecho scanline_single_pass; do
-    for s in 1 2 4; do
-      ( $W --family=$fam --sep=$s --points=12500,25000,50000,100000 --quantum=64            > out/wspd_${fam}_s$s.txt 2>&1; echo "code=$?" >> out/wspd_${fam}_s$s.txt ) &
+    for s in 2/1 3/1 4/1 6/1 8/1; do
+      ( $W --family=$fam --sep-euclid=$s --points=12500,25000,50000,100000 --bank --window=64 --bank-l=32 > out/wspd_${fam}_s${s//\//_}.txt 2>&1; echo "code=$?" >> out/wspd_${fam}_s${s//\//_}.txt ) &
     done
   done
   wait || true
