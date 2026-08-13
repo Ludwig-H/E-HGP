@@ -4,7 +4,7 @@
 
 | Proposition | Évaluation actuelle |
 |---|---|
-| Support normalisé seul + label uniforme par cluster atteint le SOTA | probabilité faible |
+| Support normalisé seul + proportions sans décodeur point-wise atteint le SOTA | probabilité faible |
 | HGP apporte un signal utile à un backbone local fort | plausible, non démontré |
 | HSA ou QC-HSA est le meilleur opérateur sur HGP | ouvert, preuve 3D absente |
 | Un modèle hybride HGP + local peut être compétitif | crédible mais à haut risque |
@@ -33,6 +33,8 @@ Si la variation intra-objet due à la portée est du même ordre que la séparat
 
 ## R2 — La fonction support n'identifie pas le cluster
 
+**Cas $K$-polyèdre.** Le support de la réalisation géométrique d'une union de simplexes est exactement celui de l'union de ses sommets. Il ne constitue donc pas une représentation HGP plus riche. Test permanent : comparer les deux vecteurs direction par direction ; toute différence hors tolérance révèle un défaut d'implémentation. Un claim de suffisance est abandonné si les distributions d'attributs simpliciaux, les CDF de masse ou un encodeur local de même budget améliorent systématiquement le mIoU.
+
 ### Mécanisme
 
 Le support ne voit que l'enveloppe convexe. Des distributions intérieures et des topologies différentes ont exactement le même support. La grille finie ajoute des collisions. Le max est dominé par quelques points extrêmes.
@@ -42,7 +44,7 @@ Le support ne voit que l'enveloppe convexe. Des distributions intérieures et de
 - fixtures synthétiques à enveloppe identique ;
 - suppression des points non extrêmes à centre/rayon fixés ;
 - taux de collisions sur nœuds réels et divergence de labels/composition ;
-- comparaison max, quantiles, moments, radial et mini-PointNet ;
+- comparaison max, CDF/histogrammes projetés, quantiles, moments, radial et mini-PointNet ;
 - outliers et suppression ciblée des extrêmes.
 
 ### No-go
@@ -84,23 +86,25 @@ Le support d'une union est le max des supports seulement dans un repère commun.
 
 Si les transformations relatives sont nécessaires, elles deviennent contractuelles. Une architecture de seuls vecteurs normalisés indépendants est éliminée.
 
-## R5 — Une coupe ou des tokens terminaux imposent un plafond
+## R5 — Les proportions ne localisent pas les classes
 
 ### Mécanisme
 
-Un cluster traversant une frontière ne peut recevoir qu'un label uniforme. La condensation peut gagner en coût mais perdre définitivement les petites classes.
+Un cluster peut et doit représenter exactement son mélange par un vecteur de proportions. Toutefois, ce vecteur est invariant à toute permutation des labels entre les points du cluster : il conserve les masses mais pas leur localisation. Une condensation sans features ni décodeur point-wise peut donc perdre définitivement les frontières et les petites structures.
 
 ### Test de réfutation
 
-- baseline réalisable du label majoritaire mIoU/compression ;
-- borne supérieure relaxée par classe par union de tokens ;
+- erreur des proportions prédites, entropie des cibles et cohérence massique parent–enfants ;
+- capacité d'un décodeur point-wise à relocaliser les classes depuis une même proportion de cluster ;
+- baseline majoritaire uniquement comme contrôle artificiel d'une sortie dure cluster-constante ;
+- borne supérieure relaxée par classe par union de tokens, uniquement comme diagnostic de localisation ;
 - détail par classes rares, portée et frontières ;
 - comparaison points feuilles, micro-voxels et clusters terminaux ;
 - décodeur point-fin avec et sans skip.
 
 ### No-go
 
-Une perte de plus de 1 à 2 points sur la baseline majoritaire est un signal pratique pour garder les points comme feuilles, mais pas une preuve d'impossibilité en mIoU. Le no-go formel pour une sortie cluster-constante exige que la borne supérieure relaxée, ou une optimisation multiclasses exacte/bornée, reste sous la cible nécessaire. Ce no-go n'élimine pas la hiérarchie comme contexte.
+Si les proportions sont bien estimées mais que le décodeur ne relocalise pas les classes, garder les points comme feuilles ou renforcer le chemin local. Le vote majoritaire ne constitue ni le modèle proposé ni un plafond mIoU. Ce no-go n'élimine pas la hiérarchie ou ses distributions comme contexte.
 
 ## R6 — HGP n'est pas meilleur qu'un arbre simple
 
@@ -223,7 +227,7 @@ Si le seul résultat est un assemblage HGP + HSA avec un petit gain SemanticKITT
 |---|---|---|---|
 | G0 contrat | forêt déterministe, sans fuite, round-trip exact | projection laminaire documentée | cycle, perte/duplication non expliquée |
 | G1 structure | HGP bat les contrôles ou apporte robustesse claire | points feuilles, correction range-aware | aucune valeur contre arbres simples |
-| G2 descripteur | hybride support + side channels utile | support canal secondaire | support dominé et instable |
+| G2 descripteur | support + masse projetée + side channels utile | support canal secondaire | sketch directionnel dominé et instable |
 | G3 opérateur | HSA ou QC-HSA gagne en qualité ou Pareto | agrégateur simple | opérateurs hiérarchiques dominés partout |
 | G4 validation | gain apparié, multi-seeds, classes/distance expliquées | retravailler frontières/recette | effet non reproductible |
 | G5 système | coût complet soutenable et honnête | claim précision seulement | ni précision ni coût compétitif |

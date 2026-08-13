@@ -20,15 +20,18 @@ L'audit v3 consulté après synchronisation n'est pas frais par rapport au dép�
 
 ## Verdict honnête
 
-La version minimale « fonction support normalisée seule, un label par cluster » a **peu de chances** d'atteindre l'état de l'art. Même connue dans toutes les directions, une fonction support décrit l'enveloppe convexe, pas les concavités, la densité, la distribution intérieure ni les parties occultées. Sa normalisation supprime aussi une taille métrique utile pour distinguer, par exemple, voiture et camion. Enfin, une prédiction uniforme par cluster crée un plafond irréversible aux frontières.
+Chaque cluster doit porter un **vecteur de proportions sur les 19 classes**, et non un label unique. La cible d'un nœud est la distribution empirique de ses points ; les feuilles point sont le cas one-hot. La version minimale « fonction support normalisée seule + proportions de cluster comme seul décodeur » a néanmoins peu de chances d'atteindre l'état de l'art : la fonction support perd concavités, densité et intérieur, tandis que les proportions conservent la masse des classes mais pas leur localisation à l'intérieur d'un cluster mixte.
+
+La réalisation géométrique du $K$-polyèdre ne résout pas cette perte : si elle est l'union des simplexes de la composante, sa fonction support est exactement celle de l'union de leurs sommets. Une forme linéaire atteint son maximum sur un sommet ; le support ne voit donc ni $K$, ni les incidences, ni les niveaux de naissance. Cette égalité devient une fixture obligatoire, pas un nouveau claim.
 
 La piste élargie reste crédible et potentiellement forte :
 
 1. un backbone local point/voxel conserve le détail et produit les features de feuilles ;
 2. la hiérarchie HGP fournit une structure exogène multi-échelle ;
-3. un sketch directionnel robuste — quantiles et canal de support maximal — contribue aux relations hiérarchiques, avec échelle, portée, densité et persistance comme canaux séparés ;
-4. quelques blocs hiérarchiques tardifs propagent le contexte ; HSA sert de baseline fidèle et `QC-HSA`, si sa proposition est validée, conserve une requête distincte par feuille ;
-5. un décodeur point-fin et un chemin résiduel préservent les frontières.
+3. une mesure sur les simplexes — centres, formes, niveaux de naissance et incidences — ainsi qu'un sketch de masse projetée complètent le support maximal ;
+4. les feuilles prédisent leurs distributions et chaque nœud déduit exactement ses proportions par moyenne massique de ses descendants ;
+5. quelques blocs hiérarchiques tardifs propagent le contexte ; HSA sert de baseline fidèle et `QC-HSA`, si sa proposition est validée, conserve une requête distincte par feuille ;
+6. un décodeur point-fin et un chemin résiduel localisent les classes et préservent les frontières.
 
 La probabilité d'un SOTA par la seule idée initiale est faible. Une contribution de haut niveau reste plausible si les expériences démontrent causalement que l'arbre HGP apporte plus qu'un octree, des superpoints, RSL/HDBSCAN ou un arbre aléatoire, et que l'opérateur hiérarchique apporte plus qu'un simple pooling sur le même arbre.
 
@@ -64,19 +67,21 @@ Ces chiffres sont des instantanés, pas des seuils éternels. La concurrence dev
 
 Le prototype de référence utilisera les **points ou micro-voxels comme feuilles** et les descripteurs des nœuds HGP pour construire un embedding par enfant dans le domaine de son parent. HSA fidèle sera d'abord reproduit. `QC-HSA` sera ensuite testé comme opérateur principal candidat, car il retire les égalités entre requêtes susceptibles de propager les erreurs aux frontières. Faire de chaque nœud interne un token appris restera une variante distincte ; aucun théorème de projection ne lui sera attribué sans nouvelle démonstration.
 
+Les feuilles produisent $p_i\in\Delta^{18}$ et un nœud calcule $\widehat\pi_v^{\mathrm{all}}=n_v^{-1}\sum_{i\in C_v}p_i$, ou récursivement la moyenne de ses enfants pondérée par leurs cardinalités. Les proportions GT sur les seuls labels valides restent exclusivement des cibles d'entraînement et ne participent jamais au forward de validation/test ni à la construction HGP. La prédiction officielle demeure une distribution par point ; les proportions internes apportent un état multiscale cohérent, pas un label diffusé uniformément.
+
 La fonction support est conservée comme canal de forme convexe et non comme identité complète du nœud. Le descripteur candidat combine :
 
-- support maximal et quantiles directionnels ;
+- support maximal et CDF/histogrammes de projections directionnelles, avec quantiles robustes en complément ;
 - centre, `log(rayon)`, cardinalité et géométrie relative parent–enfant ;
 - niveau de densité, naissance, mort et persistance HGP ;
-- anisotropie/covariance, portée, hauteur et statistiques de rémission.
+- anisotropie/covariance, occupation radiale, portée, hauteur et statistiques de rémission.
 
 ## Portes avant entraînement lourd
 
 Le projet ne passe au modèle complet que si les diagnostics suivants sont satisfaits :
 
 - l'arbre HGP présente un alignement sémantique supérieur aux arbres de contrôle à compression égale ;
-- une tokenisation éventuelle conserve une borne optimiste mIoU très supérieure à la cible, sinon les points restent feuilles ;
+- une tokenisation éventuelle conserve assez d'information pour prédire les proportions **et** relocaliser les classes au niveau point ; sinon les points restent feuilles ;
 - les collisions de fonction support et sa fragilité aux outliers sont mesurées, pas ignorées ;
 - l'effet de portée du capteur ne domine pas les niveaux de densité ;
 - la profondeur, les degrés et la mémoire de la hiérarchie sont compatibles avec des batches GPU utiles.
@@ -98,7 +103,7 @@ Les critères chiffrés et les règles d'arrêt sont dans [RISKS_AND_GO_NO_GO.md
 
 ## Hors périmètre immédiat
 
-La segmentation panoptique, la segmentation d'instance open-world, le multi-scan et la fusion RGB ne font pas partie de la première phase. Le modèle conservera seulement une interface future : logits et features par point, mapping point–feuille–ancêtres, topologie HGP et descripteurs de nœuds. Quand la sémantique sera validée, ALPINE deviendra une baseline aval obligatoire avec **exactement les mêmes logits sémantiques gelés**.
+La segmentation panoptique, la segmentation d'instance open-world, le multi-scan et la fusion RGB ne font pas partie de la première phase. Le modèle conservera seulement une interface future : logits et features par point, proportions sémantiques prédites par nœud, mapping point–feuille–ancêtres, topologie HGP et descripteurs de nœuds. Quand la sémantique sera validée, ALPINE deviendra une baseline aval obligatoire avec **exactement les mêmes logits sémantiques gelés**.
 
 ## Règle de claim
 

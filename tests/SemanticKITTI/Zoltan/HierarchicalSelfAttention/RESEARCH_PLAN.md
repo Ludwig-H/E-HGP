@@ -37,11 +37,11 @@ Pour $K=1,2,3$, calculer sur train et validation. Vérifier d'abord par fixture 
 - nombre de nœuds, feuilles, profondeur, degrés et coût $\sum_v d_v^2$ ;
 - distribution des tailles, niveaux de naissance/mort et persistance ;
 - stabilité sous thinning aléatoire, suppression structurée en élévation, jitter et outliers ;
-- pureté de classe de chaque nœud, entropie et séparation aux ancêtres communs ;
-- courbe compression–pureté–mIoU pour différentes coupes/condensations ;
+- histogramme normalisé des 19 classes de chaque nœud, puis pureté, entropie et séparation dérivées aux ancêtres communs ;
+- courbe compression–composition–localisation–mIoU pour différentes coupes/condensations ;
 - mêmes mesures pour RSL/HDBSCAN, octree/voxel tree et arbre aléatoire contrôlé.
 
-Deux courbes de diagnostic sont distinguées :
+Deux courbes diagnostiques d'une **sortie dure token-constante**, qui n'est pas le modèle principal, sont distinguées :
 
 1. baseline réalisable du label majoritaire par token, optimale pour l'accuracy token-constante mais pas pour le mIoU ;
 2. borne supérieure relaxée par classe, où chaque masque de classe choisit indépendamment une union de tokens, non nécessairement réalisable comme partition multiclasses.
@@ -51,16 +51,18 @@ Une optimisation multiclasses exacte ou bornée sur de petites fixtures peut com
 ### Livrables
 
 - rapport `hierarchy_audit` par scan, classe, portée et $K$ ;
-- figures des courbes majoritaire/optimiste mIoU–compression et stabilité–portée ;
+- figures des courbes de sortie dure majoritaire/optimiste mIoU–compression et stabilité–portée ;
 - fixtures minimales des échecs de laminarité, chaining et frontières traversées.
 
 ### Porte
 
 - si HGP ne bat pas le meilleur contrôle structurel à coût apparié, le claim « meilleur arbre » est suspendu ; l'appariement porte sur compression, nombre de nœuds internes, paramètres, arêtes, profondeur/degrés, $\sum_v d_v^2$, latence et VRAM, pas sur le seul nombre de feuilles qui reste identique lorsque les points sont feuilles ;
-- si la baseline majoritaire perd plus de 1 à 2 points au taux de compression utile, les points restent feuilles par prudence tant qu'une optimisation multiclasses ne l'infirme pas ; la tokenisation dure est définitivement rejetée si la borne supérieure relaxée, ou une borne multiclasses rigoureuse, reste sous la cible nécessaire ;
+- si la baseline majoritaire perd plus de 1 à 2 points au taux de compression utile, seule la tête dure cluster-constante est rejetée ; une feuille micro-token reste admissible si un décodeur point-wise relocalise les classes et si les proportions restent bien estimées ;
 - si la profondeur ou les degrés rendent HSA impraticable, tester une condensation documentée avant tout modèle complet.
 
 ## WP2 — Audit des descripteurs
+
+Ajouter une porte analytique avant apprentissage : vérifier sur chaque $K$-polyèdre que le support de sa réalisation simpliciale coïncide avec celui de ses sommets. Cette identité interdit de compter la réalisation comme un descripteur distinct. Tester ensuite, à budget égal, une mesure d'attributs simpliciaux — centres, forme, niveau de naissance et incidence — contre support, CDF des points, moments et mini-PointNet.
 
 ### Travail
 
@@ -72,18 +74,21 @@ Sur les nœuds réels, comparer à dimension et budget proches :
 - support maximal normalisé ;
 - support + échelle/position/cardinalité ;
 - support + attributs HGP ;
+- CDF/histogrammes directionnels à bins fixes + max ;
 - pile de quantiles directionnels + max ;
 - moments/covariance/histogrammes radiaux ;
 - mini-PointNet ou Deep Sets ;
 - occupations multi-coquilles ou encodeur équivariant léger comme contrôle ambitieux.
 
-Faire varier le nombre et la grille de directions. Mesurer le rayon de couverture de la sphère, l'erreur contre une référence dense, les collisions de features, la mémoire et la latence.
+Orthogonalement, ablater le contenu transmis : géométrie seule, proportions sémantiques déduites des descendants seules, puis combinaison avec entropie moyenne et désaccord. Aucune proportion GT n'entre dans cette comparaison à l'inférence.
+
+Faire varier le nombre et la grille de directions ainsi que le nombre de bins. Mesurer le rayon de couverture de la sphère, l'erreur contre une référence dense, les collisions de features, la mémoire et la latence. Tester explicitement la fusion des histogrammes dans un repère commun et l'erreur introduite par le transport centre/échelle entre enfants et parent.
 
 Séparer deux stress tests : arbre figé pour isoler le descripteur, puis arbre recalculé pour mesurer le pipeline. Injecter outliers, thinning dépendant de la portée et suppression de points extrêmes.
 
 ### Livrables
 
-- benchmark descriptif linéaire/MLP et retrieval de classe ;
+- benchmark de prédiction/retrieval de composition sémantique avec KL/JS, Brier et erreur sur les 19 proportions ;
 - courbes directions–erreur–coût ;
 - rapport de sensibilité par portée et dimension intrinsèque ;
 - décision explicite sur centre, rayon et canaux robustes.

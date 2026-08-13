@@ -46,7 +46,8 @@ Toute augmentation au test, fusion de checkpoints ou ensemble est isolé. Le ré
 - accuracy globale, seulement comme métrique secondaire ;
 - matrice de confusion ;
 - F-score de frontière diagnostique sur un graphe $G_{\mathrm{diag}}$ symétrique 16-NN en XYZ, dont les arêtes supérieures à 1 m sont retirées : les ensembles de frontières GT et prédites sont construits avec la même règle, un point valide étant frontière si un voisin valide porte une autre classe ; la précision est la fraction des frontières prédites situées à au plus 0,2 m d'une frontière GT, le rappel la fraction des frontières GT situées à au plus 0,2 m d'une frontière prédite, et le F-score leur moyenne harmonique ; les labels ignorés sont exclus ;
-- expected calibration error et NLL pour vérifier les gates/incertitudes.
+- expected calibration error et NLL pour vérifier les gates/incertitudes ;
+- KL/JS, Brier et erreur absolue de $\widehat\pi_v^{\mathrm{lab}}$ contre $\pi_v$, calculés hors forward sur les seuls points valides, par profondeur, masse, classe et portée ; ces diagnostics de nœuds ne remplacent jamais le mIoU point-wise.
 
 ### Stratification LiDAR
 
@@ -54,7 +55,7 @@ Toute augmentation au test, fusion de checkpoints ou ensemble est isolé. Le ré
 - cardinalité de l'instance GT pour les classes thing et, pour stuff, de la composante de même classe dans $G_{\mathrm{diag}}$ ; ces identifiants GT ne servent qu'au diagnostic ;
 - densité locale et élévation ;
 - classes rares et classes thing séparément ;
-- profondeur et pureté GT des ancêtres HGP sollicités, rapportées séparément par bloc et par tête ; si un gate existe, une profondeur effective pondérée par ce gate est ajoutée, sans inventer un unique « premier ancêtre ».
+- profondeur et distribution GT $\pi_v$ des ancêtres HGP sollicités, avec pureté définie par $\max_c\pi_v(c)$, rapportées séparément par bloc et par tête ; si un gate existe, une profondeur effective pondérée par ce gate est ajoutée, sans inventer un unique « premier ancêtre ».
 
 Utiliser l'évaluateur officiel par distance lorsqu'il s'applique, et documenter toute extension au-delà de 50 m.
 
@@ -112,7 +113,10 @@ Le matériel, les versions CUDA/PyTorch, la précision numérique et les kernels
 - support maximal ;
 - support normalisé ;
 - support normalisé + taille/position ;
+- support de la réalisation géométrique du $K$-polyèdre, qui doit coïncider numériquement avec le support de ses sommets ;
+- distributions de centres/formes/niveaux des simplexes du $K$-polyèdre ;
 - support + densité/persistance HGP ;
+- CDF/histogrammes de projections à bins fixes + max ;
 - pile de quantiles + max ;
 - moments/covariance/radial ;
 - mini-PointNet/Deep Sets à dimension comparable.
@@ -123,7 +127,7 @@ La matrice complète est factorielle et trop coûteuse. Elle est déroulée séq
 
 | Étape | Variable changée | Variables gelées | Décision |
 |---|---|---|---|
-| E0 | granularité/coupe | labels GT, aucun réseau | baseline majoritaire et borne optimiste de tokenisation |
+| E0 | granularité/coupe | labels GT, aucun réseau | composition des nœuds et diagnostic d'une sortie dure token-constante |
 | E1 | hiérarchie | backbone + agrégateur simple | valeur de HGP |
 | E2 | descripteur | HGP + backbone + budget | valeur du support |
 | E3 | opérateur | HGP + descripteur + budget | HSA contre QC-HSA et agrégateurs |
@@ -187,6 +191,7 @@ Chaque run sauvegarde :
 - hash du dataset manifest et des hiérarchies ;
 - seed Python/NumPy/PyTorch/CUDA et mode déterministe ;
 - métriques brutes par scan et par classe ;
+- distributions point-wise et proportions de nœuds nécessaires aux diagnostics de composition, sans employer les proportions GT comme features ;
 - logs de latence/mémoire ;
 - checkpoint final et critère de sélection ;
 - statut `completed`, `failed` ou `invalid`, sans suppression des échecs.

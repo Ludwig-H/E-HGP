@@ -24,7 +24,7 @@ En plus du niveau précédent, obtenir au moins une contribution générale :
 
 - **optimalité conditionnelle** : `QC-HSA`, projection reverse-KL conditionnée par la feuille, avec certificat d'oscillation ; ce résultat technique ne devient central qu'avec un certificat HGP non vacu ou un résultat fidélité–coût réellement nouveau ;
 - **stabilité** : analyse et correction de la hiérarchie sous échantillonnage range-dependent ;
-- **représentation** : sketch directionnel robuste, fusionnable, avec borne d'approximation ou de sensibilité ;
+- **représentation** : sketch de masse projetée, fusionnable, avec borne d'approximation ou de sensibilité ;
 - **attention** : opérateur hiérarchique avec voie de correction dont l'effet et le coût sont analysés ;
 - **statistique** : lien vérifiable entre qualité d'un cluster tree et erreur de propagation sémantique ;
 - **généralisation** : résultat cohérent sur au moins deux capteurs/datasets.
@@ -36,7 +36,7 @@ Un seul nouveau score SemanticKITTI, même premier, est trop fragile pour porter
 | Claim potentiel | Preuve minimale |
 |---|---|
 | HGP est un meilleur prior | arbres échangés à budget constant, seeds appariées, IC excluant zéro |
-| le support apporte de la géométrie utile | baselines de même dimension, collisions et stress tests inclus |
+| le sketch support + masse projetée apporte de la géométrie utile | baselines de même dimension, collisions et stress tests inclus |
 | HSA exploite mieux HGP | même arbre/features contre pooling et message passing |
 | QC-HSA est la projection optimale annoncée | preuve complète, solveur dense sur petits arbres, inclusion HSA et facteur de cardinalité vérifiés |
 | QC-HSA préserve mieux les points | reverse-KL et erreurs de frontière inférieurs à HSA, coût $C_T$ et latence inclus |
@@ -64,7 +64,7 @@ Titres possibles, à choisir après les résultats :
 
 Résumé de travail :
 
-> Les Transformers LiDAR efficaces structurent généralement les interactions par voxels, fenêtres ou superpoints. Nous évaluons une autre hypothèse : une hiérarchie de niveaux de densité $K$-NN, indépendante des labels, peut organiser le contexte multi-échelle. Notre modèle combine un encodeur local, des relations géométriques robustes sur l'arbre HGP et une propagation hiérarchique vers les points. Une étude factorisée isole la valeur de l'arbre, du sketch directionnel et de l'attention, et analyse stabilité à la portée, frontières, mémoire et latence. Les résultats sur SemanticKITTI et un second capteur déterminent si ce prior améliore réellement les partitions spatiales conventionnelles.
+> Les Transformers LiDAR efficaces structurent généralement les interactions par voxels, fenêtres ou superpoints. Nous évaluons une autre hypothèse : une hiérarchie de niveaux de densité $K$-NN, indépendante des labels, peut organiser le contexte multi-échelle. Notre modèle combine un encodeur local, des relations géométriques décrivant extrêmes et masse intérieure, des proportions sémantiques déduites des descendants et une propagation hiérarchique vers les points. Une étude factorisée isole la valeur de l'arbre, du sketch distributionnel et de l'attention, et analyse stabilité à la portée, frontières, mémoire et latence. Les résultats sur SemanticKITTI et un second capteur déterminent si ce prior améliore réellement les partitions spatiales conventionnelles.
 
 Ce résumé ne doit recevoir aucun chiffre avant que les expériences soient terminées.
 
@@ -72,7 +72,7 @@ Ce résumé ne doit recevoir aucun chiffre avant que les expériences soient ter
 
 1. **Schéma d'architecture** : backbone local, arbre HGP, descripteurs relationnels, HSA tardif, décodeur point-fin.
 2. **Résultat QC-HSA** : rectangles HSA contre partitions feuille–sous-arbre, projection fermée, coût supplémentaire et pont conditionnel vers les hauteurs de fusion.
-3. **Courbes de tokenisation** : vote majoritaire réalisable et union par classe optimiste contre compression pour chaque hiérarchie.
+3. **Diagnostic de compression dure** : vote majoritaire réalisable et union par classe optimiste, distincts du modèle à proportions et de sa sortie point-wise.
 4. **Ablation causale** : arbre × opérateur, montrant où naît le gain.
 5. **Stabilité capteur** : variation de hiérarchie et mIoU selon portée/thinning.
 6. **Support et collisions** : mêmes enveloppes, distributions différentes, puis correction par quantiles/side channels.
@@ -83,7 +83,7 @@ Ce résumé ne doit recevoir aucun chiffre avant que les expériences soient ter
 
 - comparaison track A strict, avec colonnes modality, temporal, external data, TTA, ensemble ;
 - ablation HGP $K=1$/SL comme fixture, puis HGP $K=2,3$ vs RSL/octree/superpoints/random ;
-- support vs quantiles/moments/PointNet à budget égal ;
+- support vs CDF projetées/quantiles/moments/PointNet à budget égal ;
 - HSA vs pooling/message passing/local attention ;
 - QC-HSA vs HSA : KL, sortie, frontière, mIoU, $C_T$, VRAM et latence ;
 - IoU par classe et distance ;

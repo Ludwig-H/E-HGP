@@ -18,7 +18,23 @@ La normalisation indépendante des nœuds détruit également la composition hi�
 
 L'hypothèse crédible n'est donc pas « le support suffit », mais :
 
-> Un sketch directionnel robuste, combinant quantiles de projection et canal de support maximal, apporte une information de forme complémentaire lorsque le modèle conserve explicitement l'échelle, la densité, la portée, la persistance HGP et la géométrie relative des branches.
+> Un sketch directionnel de masse, combinant CDF/histogrammes projetés, quantiles robustes et canal de support maximal, apporte une information de forme complémentaire lorsque le modèle conserve explicitement l'échelle, la densité, la portée, la persistance HGP et la géométrie relative des branches.
+
+## Sémantique d'un cluster
+
+Un cluster ne reçoit jamais un label unique. En excluant les labels ignorés, sa cible est l'histogramme normalisé $\pi_v\in\Delta^{18}$. À l'inférence, les feuilles prédisent $p_i\in\Delta^{18}$ puis le nœud déduit sans masque GT $\widehat\pi_v^{\mathrm{all}}=n_v^{-1}\sum_{i\in C_v}p_i$. Dans une hiérarchie laminaire, cette distribution est exactement la moyenne des distributions enfants pondérée par leurs masses ; aucune tête indépendante n'est requise. Une version restreinte aux labels valides sert seulement à la loss et au diagnostic, jamais au forward de validation/test.
+
+Les proportions ne localisent pas les classes au sein d'un cluster mixte. La sortie officielle demeure point-wise, à partir des features de feuille et du contexte top-down. Le vecteur du cluster est un résumé sémantique multiscale et une cible auxiliaire, pas une prédiction uniforme diffusée aux points.
+
+## Complément géométrique prioritaire au support
+
+La réalisation géométrique $|P_v|$ du $K$-polyèdre est l'union des réalisations de ses simplexes. Si $X_v$ est l'union de leurs sommets, alors $h_{|P_v|}(u)=h_{X_v}(u)$ dans toute direction : une forme linéaire atteint son maximum sur un sommet de chaque simplexe. Le support de la réalisation est donc exactement le descripteur initial du nuage du cluster. Il est HGP-friendly et fusionnable par maximum, mais il efface précisément l'ordre $K$, les incidences, les multiplicités et les niveaux de filtration ; seul, il est insuffisant pour viser le SOTA.
+
+Pour exploiter réellement la réalisation HGP, définir plutôt une mesure sur ses simplexes et agréger leurs centres, aires/volumes ou longueurs, formes, niveaux $\beta(\sigma)$ et multiplicités. Les CDF projetées ou moments de ces attributs sont le candidat HGP-spécifique ; le support reste leur canal d'extrêmes.
+
+Le support maximal ne conserve que l'extrémité de la distribution projetée. Le complément naturel est un sketch des CDF $F_v(u,t)$ des projections normalisées, échantillonné sur les mêmes directions et sur des seuils fixes. La collection continue de toutes les distributions projetées détermine la mesure du cluster par Cramér–Wold, alors que le support continu ne détermine que son enveloppe convexe. Une grille finie de directions et de bins n'est évidemment qu'une approximation.
+
+Le premier descripteur à tester est donc `max support + projected CDF/histograms + radial occupancy + covariance`, complété par échelle, centre relatif, cardinalité, rémission et attributs HGP de naissance/mort/persistance. Les histogrammes à bins fixes sont préférables comme état fusionnable ; les quantiles sont robustes mais ne se composent pas exactement sans conserver un sketch plus riche.
 
 ## Trois hypothèses causales
 
@@ -28,7 +44,7 @@ L'hypothèse crédible n'est donc pas « le support suffit », mais :
 
 ### H2 — valeur du support
 
-À arbre, dimension et budget constants, le sketch directionnel robuste — quantiles plus canal de support maximal — ajoute une information utile au-delà des moments, de la covariance, d'un mini-PointNet ou d'un simple pooling des features de feuilles.
+À arbre, dimension et budget constants, le sketch directionnel de masse — CDF/histogrammes projetés, quantiles et canal de support maximal — ajoute une information utile au-delà des moments, de la covariance, d'un mini-PointNet ou d'un simple pooling des features de feuilles.
 
 ### H3 — valeur de l'opérateur hiérarchique
 
@@ -43,6 +59,7 @@ Une expérience finale ne permet pas d'identifier ces trois effets. Chacun exige
 - points ou micro-voxels comme feuilles ;
 - features locales fortes Q/K/V aux feuilles ;
 - descripteurs HGP/support transformés en un embedding pour chaque enfant dans le domaine de son parent ;
+- proportions aux nœuds déduites récursivement des distributions de feuilles ;
 - sorties point par point ;
 - blocs HSA dans les couches moyennes ou tardives seulement.
 
@@ -69,7 +86,7 @@ Cette variante est un nouveau Tree Transformer. Elle peut être plus expressive,
 5. un décodeur point-fin combine ce contexte avec un skip local ;
 6. une tête produit 19 logits par point.
 
-L'objectif d'entraînement principal est **exactement celui de la baseline reproduite** pour toutes les variantes appariées, y compris CE+Lovász si cette recette en contient déjà. Toute loss additionnelle de frontière ou de cohérence hiérarchique ne sera ouverte qu'après l'ablation de la structure, afin de ne pas confondre gain architectural et recette d'entraînement.
+L'objectif d'entraînement principal est **exactement celui de la baseline reproduite** pour toutes les variantes appariées, y compris CE+Lovász si cette recette en contient déjà. Une loss auxiliaire de proportions peut ensuite comparer $\pi_v$ à l'agrégat restreint aux points valides et imposer la cohérence massique parent–enfants, avec une pondération empêchant le surcomptage des mêmes points aux différentes profondeurs. Toute loss additionnelle ne sera ouverte qu'après l'ablation de la structure, afin de ne pas confondre gain architectural et recette d'entraînement.
 
 ## Extension instance différée
 

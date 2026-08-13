@@ -65,6 +65,7 @@ Veille effectuée le 13 août 2026. Les liens privilégient les pages officielle
 
 ## Fonction support, robustesse et descripteurs 3D
 
+- Cramér et Wold, *Some Theorems on Distribution Functions*, Journal of the London Mathematical Society, 1936. [DOI](https://doi.org/10.1112/jlms/s1-11.4.290). La totalité des distributions projetées en une dimension détermine une mesure de probabilité ; une grille finie de directions et de bins reste seulement un sketch.
 - Schneider, *Convex Bodies: The Brunn–Minkowski Theory*, Cambridge University Press. [DOI](https://doi.org/10.1017/CBO9780511526282). Référence pour support, reconstruction convexe et distance de Hausdorff.
 - Bronshtein et Ivanov, *The Approximation of Convex Sets by Polyhedra*, Siberian Mathematical Journal, 1975. [Math-Net](https://www.mathnet.ru/eng/smj4199), [DOI](https://doi.org/10.1007/BF00967115). Les taux optimaux adaptatifs ne sont pas une garantie directe pour une grille arbitraire de directions fixes.
 - Brauchart et al., *Covering of Spheres by Spherical Caps and Worst-Case Error for Equal Weight Cubature in Sobolev Spaces*, JMAA 2015. [arXiv](https://arxiv.org/abs/1407.8311), [DOI](https://doi.org/10.1016/j.jmaa.2015.05.079).

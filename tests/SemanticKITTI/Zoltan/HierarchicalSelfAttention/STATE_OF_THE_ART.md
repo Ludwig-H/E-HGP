@@ -122,7 +122,8 @@ Avec un nombre fini de directions, des enveloppes distinctes peuvent également 
 
 La contribution ne peut donc pas être « invention de la fonction support ». Elle peut être :
 
-- un sketch directionnel robuste, fusionnable dans la hiérarchie ;
+- un sketch des distributions projetées : contrairement au seul maximum, la collection continue de toutes les projections détermine la mesure par Cramér–Wold ; la version finie doit être auditée ;
+- des CDF/histogrammes fusionnables à bins fixes, avec quantiles robustes et support maximal comme canaux complémentaires ;
 - une décomposition contrôlée forme normalisée / échelle / densité / position ;
 - une analyse de stabilité sous échantillonnage LiDAR ;
 - l'usage de cette géométrie comme relation HSA plutôt que comme token suffisant.

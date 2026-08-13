@@ -25,14 +25,28 @@ HSA a besoin d'un arbre. Si les objets HGP d'ordre supérieur ont des appartenan
 
 ## Représentation des feuilles
 
-Deux granularités seront comparées :
+Deux granularités seront comparées avec, dans les deux cas, une sortie finale par point :
 
-1. **points comme feuilles**, solution de référence scientifique, sans plafond de pureté dû à la tokenisation ;
-2. **micro-voxels ou micro-clusters comme feuilles**, seulement si les courbes majoritaire et optimiste mIoU–compression valident cette réduction.
+1. **points comme feuilles**, solution de référence scientifique qui conserve directement la localisation point-wise ;
+2. **micro-voxels ou micro-clusters comme feuilles**, seulement si les diagnostics de composition et le décodeur point-wise valident cette réduction ; la baseline majoritaire dure n'est pas à elle seule une porte sur cette granularité.
 
 Le premier prototype doit partir d'une recette SemanticKITTI réellement reproductible et épinglable, par exemple MinkUNet/Cylinder3D ou une recette publique SphereFormer auditée. PTv3 reste le porteur Transformer ambitieux, mais son dépôt officiel ne fournit pas à ce jour une recette SemanticKITTI complète avec config, poids et résultat reproductible ; il ne doit donc pas bloquer WP0. Un second backbone fort devra vérifier que l'effet HGP n'est pas propre au porteur choisi. Le backbone reçoit exactement les mêmes entrées et la même recette dans toutes les comparaisons appariées.
 
 Pour chaque feuille $i$, le backbone produit $f_i^{0}\in\mathbb{R}^{d}$. Les projections Q/K/V et les normalisations suivent la définition de la baseline HSA testée. Les coordonnées absolues ou cylindriques ne sont pas supprimées : le repère ego et la gravité sont sémantiquement utiles.
+
+## État sémantique multiscale
+
+Chaque nœud $v$ porte une **distribution de proportions sémantiques**, jamais un label dur. Soient $V_v$ ses points dont le label n'est pas ignoré, $n_v^{\mathrm{lab}}=|V_v|$ et $n_{v,c}=\sum_{i\in V_v}\mathbf{1}\left\lbrace y_i=c\right\rbrace$. Sa cible est $\pi_v(c)=n_{v,c}/n_v^{\mathrm{lab}}$ pour $c\in\left\lbrace1,\ldots,19\right\rbrace$. Une feuille point valide a donc une cible one-hot, tandis qu'un cluster traversant une frontière conserve explicitement son mélange de classes. Un nœud sans label valide est masqué pour cette supervision.
+
+À l'inférence, aucune tête indépendante n'est nécessaire dans l'architecture minimale. Les distributions point-wise sont agrégées sans label par $\widehat\pi_v^{\mathrm{all}}=n_v^{-1}\sum_{i\in C_v}p_i$, donc $\widehat\pi_p^{\mathrm{all}}=\sum_{v\in\mathrm{children}(p)}\frac{n_v}{n_p}\widehat\pi_v^{\mathrm{all}}$. Pour la loss seulement, $\widehat\pi_v^{\mathrm{lab}}=(n_v^{\mathrm{lab}})^{-1}\sum_{i\in V_v}p_i$ est comparé à $\pi_v$ ; ce masque GT n'entre jamais dans le forward de validation ou de test. Le backbone local fournit les $p_i^{(0)}$ initiaux ; après chaque bloc, les agrégats peuvent être recalculés. Un readout appris depuis l'état du nœud n'est qu'une ablation auxiliaire. Cet agrégat ne transforme pas silencieusement le nœud en token HSA.
+
+Lorsque les enfants forment une partition laminaire exacte du parent et $n_p^{\mathrm{lab}}>0$, les cibles vérifient $\pi_p=\sum_{v:n_v^{\mathrm{lab}}>0}\frac{n_v^{\mathrm{lab}}}{n_p^{\mathrm{lab}}}\pi_v$, tandis que les agrégats prédits utilisent les cardinalités géométriques $n_v/n_p$. Pour des $K$-polyèdres chevauchants, une moyenne naïve double-compte les points : la laminarisation ou des poids d'incidence formant une partition de l'unité doivent être définis avant toute loss. Si une feuille représente plusieurs points, les agrégats emploient leurs sorties point-wise originales, ou pondèrent explicitement sa distribution par sa masse.
+
+Une distribution de proportions préserve la masse de chaque classe dans un cluster, mais pas la localisation des classes à l'intérieur. La sortie principale reste donc point-wise et conditionnée par les features de feuille ; aucun broadcast uniforme du vecteur de nœud n'est utilisé comme prédiction finale. En particulier, comparer seulement $\pi_v$ à la moyenne des $p_i$ est invariant à une permutation des prédictions entre points et ne remplace pas la supervision point-wise.
+
+Conserver aussi la cardinalité et deux incertitudes distinctes : l'entropie moyenne $n_v^{-1}\sum_iH(p_i)$ mesure l'incertitude des feuilles, tandis que $H(\widehat\pi_v^{\mathrm{all}})-n_v^{-1}\sum_iH(p_i)$ mesure leur désaccord. Une même proportion `50/50` n'a ainsi pas le même état si toutes les feuilles sont incertaines ou si deux sous-populations sont chacune confiantes.
+
+Le triplet `proportions + entropie moyenne + désaccord`, accompagné de $\log n_v$, est projeté comme **contenu sémantique** dans la passe top-down et le décodeur. Dans la variante HSA fidèle, il ne remplace pas l'embedding positionnel $\epsilon_p(v)$. L'ablation obligatoire compare géométrie seule, proportions seules et combinaison des deux, toujours à partir de proportions prédites.
 
 ## Descripteur des nœuds
 
@@ -42,9 +56,23 @@ Pour un nœud non dégénéré $v$, $s_v(u)=\max_{x\in C_v}\left\langle u,\frac{
 
 Le support maximal est stable vis-à-vis de petites perturbations de l'enveloppe convexe au sens de Hausdorff, mais statistiquement fragile à un point aberrant. Il ne reçoit des gradients que par les points extrêmes des directions. Il reste donc un canal parmi plusieurs.
 
+### Audit de la réalisation géométrique du K-polyèdre
+
+Soit $|P_v|=\bigcup_{\sigma\in\mathcal{C}_v}\mathrm{conv}(\sigma)$ la réalisation géométrique de la composante de simplexes HGP et $X_v$ l'union de ses sommets. Pour toute direction $u$, $h_{|P_v|}(u)=\max_{\sigma\in\mathcal{C}_v}\max_{x\in\mathrm{conv}(\sigma)}\langle u,x\rangle=\max_{x\in X_v}\langle u,x\rangle=h_{X_v}(u)$. Le maximum d'une forme linéaire sur un simplexe étant atteint sur un sommet, ce descripteur est **exactement identique** au support du nuage du cluster. Il est calculable par `max` et très HGP-friendly, mais il ne voit ni l'ordre $K$, ni les incidences, ni le nombre ou la forme des simplexes, ni les recouvrements, ni les niveaux de filtration. Il ne peut donc pas être le descripteur suffisant revendiqué.
+
+La variante qui exploite réellement HGP doit agréger une **mesure sur les simplexes** : centres, volumes ou aires, spectres de longueurs, niveaux de naissance $\beta(\sigma)$ et multiplicités d'incidence. Des CDF projetées ou moments de ces attributs sont fusionnables par sommes/comptes et distinguent certaines réalisations ayant les mêmes sommets extrêmes. Le support de la réalisation reste un canal d'extrêmes et le contrôle `support des sommets`, auquel il doit être numériquement identique.
+
 ### Canal robuste directionnel
 
 Pour chaque direction, calculer une petite pile de quantiles des projections normalisées $\left\langle u,\frac{x-c_v}{R_v}\right\rangle$, par exemple `q50`, `q90`, `q95`, `q99` et `max`. Les quantiles ne sont pas des fonctions support convexes au sens strict ; ils sont utilisés comme features de distribution. Une variante log-mean-exp multi-température doit être testée pour distribuer les gradients, sans la présenter comme robuste aux outliers.
+
+### Canal de masse projetée, ajout prioritaire
+
+La correction la plus directe au support consiste à conserver la **distribution** de chaque projection, pas seulement son maximum. Pour $R_v>0$ et des seuils fixes $t_b$, définir $F_v(u_j,t_b)=n_v^{-1}\sum_{x\in C_v}\mathbf{1}\left\lbrace\left\langle u_j,(x-c_v)/R_v\right\rangle\leq t_b\right\rbrace$. Ce tenseur direction × seuil a une dimension fixe et peut distinguer certains clusters ayant la même enveloppe mais des masses intérieures différentes. Avec toutes les directions et toute la CDF projetée, la mesure normalisée est déterminée par le théorème de Cramér–Wold ; avec une grille finie, il s'agit seulement d'un sketch à auditer. Le cas $R_v=0$ est la masse de Dirac dégénérée traitée par le masque ci-dessous.
+
+Pour le prototype, préférer des histogrammes/CDF à bins fixes, éventuellement complétés par quelques quantiles robustes et par le max exact. Les comptes d'histogramme sont additifs dans un repère commun, contrairement à une liste de quantiles qui ne se fusionne pas exactement. Une normalisation indépendante par nœud exige cependant de transporter le déplacement et le ratio d'échelle, puis de rééchantillonner les bins ; sinon le canal est calculé directement depuis les points lors du prétraitement.
+
+Le descripteur minimal à tester est donc : support maximal + CDF projetées + moments/covariance + histogramme radial, auxquels s'ajoutent séparément centre/échelle, cardinalité, attributs HGP et rémission. Les CDF décrivent la masse, le support les extrêmes, et les canaux HGP la position du nœud dans la filtration de densité.
 
 ### Convention dégénérée
 
@@ -76,7 +104,7 @@ S'ajoutent la différence de niveau HGP, le ratio de cardinalité et l'orientati
 
 ### Passe bottom-up
 
-Chaque nœud agrège les statistiques suffisantes Q/K/V de ses feuilles descendantes. Son descripteur géométrique produit les embeddings par enfant décrits ci-dessus ; il n'est pas transformé silencieusement en token interne. Les réductions sont groupées par profondeur et concaténées entre scans d'un batch.
+Chaque nœud agrège les statistiques suffisantes Q/K/V de ses feuilles descendantes et déduit son agrégat $\widehat\pi_v^{\mathrm{all}}$. Son descripteur géométrique produit les embeddings par enfant décrits ci-dessus ; ni cet agrégat sémantique ni le descripteur ne le transforme silencieusement en token Q/K/V interne. Les réductions sont groupées par profondeur et concaténées entre scans d'un batch.
 
 La concaténation entre scans est **block-diagonal et masquée**. Un éventuel dummy root ne sert qu'à l'ordonnancement des kernels et sa famille est exclue du calcul d'attention : aucun scan ne peut influencer un autre. Une forêt à l'intérieur d'un scan reçoit un root synthétique propre au scan ; l'interaction entre ses composantes racines est un choix de modèle explicite et ablaté. Test obligatoire : la sortie d'un scan reste bit-identique, ou égale dans la tolérance numérique déclarée, quels que soient les autres scans du batch.
 
@@ -126,14 +154,16 @@ Le modèle final ne doit pas cacher un Transformer plat complet sous le nom HSA.
 
 La tête produit 19 logits pour chaque point original. Le chemin feuille–point doit conserver l'ordre exact des points du fichier `.bin`.
 
-Le protocole minimal réutilise l'objectif exact de la baseline reproduite. Les ajouts possibles, testés seulement ensuite, sont :
+Le protocole minimal réutilise l'objectif point-wise exact de la baseline reproduite. Les ajouts possibles, testés seulement ensuite, sont :
 
-- loss auxiliaire aux feuilles ou à certains nœuds purs ;
-- cohérence parent–enfant pondérée par la pureté prédite ;
+- loss propre sur les proportions de tout nœud supervisé, par exemple cross-entropy molle ou $D_{\mathrm{KL}}\left(\pi_v\,\Vert\,\widehat\pi_v^{\mathrm{lab}}\right)$ ;
+- cohérence massique parent–enfants entre proportions prédites ;
 - loss de frontière ;
 - calibration ou pondération des classes rares.
 
-Ces pertes ne sont ouvertes qu'après preuve de l'effet de l'arbre avec une recette identique. Une supervision majoritaire forcée aux nœuds impurs est exclue au départ.
+Ces pertes ne sont ouvertes qu'après preuve de l'effet de l'arbre avec une recette identique. Leur pondération par profondeur/taille doit empêcher qu'un point soit surcompté une fois par ancêtre. Une supervision majoritaire forcée est exclue : les nœuds mixtes sont supervisés par leurs proportions exactes.
+
+Pour l'ablation artificielle où une même distribution $p_v$ est diffusée à tous les points valides du cluster, l'identité exacte est $\sum_{i\in V_v}\mathrm{CE}(e_{y_i},p_v)=n_v^{\mathrm{lab}}\mathrm{CE}(\pi_v,p_v)=n_v^{\mathrm{lab}}\left[H(\pi_v)+D_{\mathrm{KL}}\left(\pi_v\,\Vert\,p_v\right)\right]$. Le coût irréductible $n_v^{\mathrm{lab}}H(\pi_v)$ mesure le mélange du cluster, mais ne concerne pas le décodeur point-wise proposé. Sommer cette loss sur tous les ancêtres répète chaque label ; c'est un régularisateur assumé, sauf si des poids d'incidence $\alpha_{iv}$ vérifient $\sum_{v:i\in C_v}\alpha_{iv}=1$.
 
 ## Baselines architecturales appariées
 
@@ -165,6 +195,6 @@ Le modèle sauvegarde :
 - logits et features finales par point ;
 - mapping stable point–feuille–ancêtres ;
 - topologie et attributs HGP ;
-- scores de pureté/incertitude éventuels par nœud.
+- distributions de proportions prédites $\widehat\pi_v^{\mathrm{all}}$ par nœud, avec pureté, entropie et incertitude dérivées.
 
 Cela permettra plus tard de comparer ALPINE, une coupe HGP fixe et une coupe HGP apprise avec les mêmes prédictions sémantiques. Aucun objectif PQ n'entre dans la décision de la phase sémantique.
