@@ -201,6 +201,9 @@ int main(int argc, char** argv) {
     std::vector<Pair> terms;
     BankStat bank;
     std::vector<char> closed_q2;   // par terminal : la banque a-t-elle ferme q2 ?
+    // LA FRACTION DE RECORDS N'EST PAS LA FRACTION DE MASSE, et j'ai publie
+    // l'une pour l'autre. On compte donc la masse fermee explicitement.
+    long long mass_closed_q2 = 0;
     long long tests = 0, levels = 0, wave_hwm = (long long)wave.size();
     while (!wave.empty()) {
       ++levels;
@@ -282,7 +285,9 @@ int main(int argc, char** argv) {
             const int need[3] = {10, 9, 8};
             for (int lane = 0; lane < 3; ++lane)
               if (cred[lane] >= need[lane]) ++bank.closed[lane];
-            if (cred[0] >= need[0]) closed_q2.push_back(1); else closed_q2.push_back(0);
+            const long long msz = count_of(nodes, wave[i].a) * count_of(nodes, wave[i].b);
+            if (cred[0] >= need[0]) { closed_q2.push_back(1); mass_closed_q2 += msz; }
+            else closed_q2.push_back(0);
           }
           continue;
         }
@@ -339,14 +344,36 @@ int main(int argc, char** argv) {
       // On n'echantillonne QUE les rectangles laisses OUVERTS par la banque :
       // ce sont eux qui partiraient a la source, et eux seuls dont il faut
       // savoir s'ils sont FAUSSEMENT residuels.
+      // ECHANTILLONNAGE PONDERE PAR LA MASSE, et paire TIREE AU HASARD dans le
+      // rectangle. Ma premiere version tirait un rectangle uniformement puis en
+      // prenait la PREMIERE paire : elle sur-representait les petits rectangles
+      // et prenait une paire arbitraire dans les grands. Pour estimer la
+      // densite de supports du RESIDUEL, il faut tirer une PAIRE uniformement
+      // dans la masse residuelle.
       std::vector<size_t> ouverts;
+      std::vector<long long> cum;
+      long long acc = 0;
       for (size_t i = 0; i < terms.size(); ++i)
-        if (i >= closed_q2.size() || !closed_q2[i]) ouverts.push_back(i);
+        if (i >= closed_q2.size() || !closed_q2[i]) {
+          ouverts.push_back(i);
+          acc += count_of(nodes, terms[i].a) * count_of(nodes, terms[i].b);
+          cum.push_back(acc);
+        }
       for (long long e = 0; e < g_inflation && !ouverts.empty(); ++e) {
         rng = rng * 6364136223846793005ull + 1442695040888963407ull;
-        const Pair& t = terms[ouverts[(rng >> 33) % ouverts.size()]];
-        const int ai = (t.a < 0) ? (-1 - t.a) : nodes[t.a].first;
-        const int bi = (t.b < 0) ? (-1 - t.b) : nodes[t.b].first;
+        const long long pick = (long long)((rng >> 11) % (unsigned long long)acc);
+        const size_t idx =
+            (size_t)(std::upper_bound(cum.begin(), cum.end(), pick) - cum.begin());
+        const Pair& t = terms[ouverts[idx]];
+        const int fa = (t.a < 0) ? (-1 - t.a) : nodes[t.a].first;
+        const int la = (t.a < 0) ? (-1 - t.a) : nodes[t.a].last;
+        const int fb = (t.b < 0) ? (-1 - t.b) : nodes[t.b].first;
+        const int lb = (t.b < 0) ? (-1 - t.b) : nodes[t.b].last;
+        rng = rng * 6364136223846793005ull + 1442695040888963407ull;
+        const int ai = fa + (int)((rng >> 33) % (unsigned long long)(la - fa + 1));
+        rng = rng * 6364136223846793005ull + 1442695040888963407ull;
+        const int bi = fb + (int)((rng >> 33) % (unsigned long long)(lb - fb + 1));
+        if (ai == bi) continue;
         long long cnt = 0;
         for (size_t z = 0; z < sp.size(); ++z) {
           if ((int)z == ai || (int)z == bi) continue;
@@ -394,16 +421,21 @@ int main(int argc, char** argv) {
                 " tests=%lld tests/front=%.2f vague_max=%lld | masse=%lld/%lld"
                 " | arbre_med=%.1f ms arbre_p95=%.1f ms vague=%.1f ms"
                 " | banque lectures=%lld recert=%lld ferme q2=%lld q3=%lld q4=%lld"
+                " | masse fermee q2=%.2f%% records fermes q2=%.2f%%"
                 " | partenaires max=%lld moyen=%.2f"
-                " | inflation : %lld rectangles OUVERTS echantillonnes,"
-                " temoins_moyen=%.1f max=%lld, faussement residuels %lld (%.1f%%)\n",
+                " | residuel : %lld paires tirees DANS LA MASSE ouverte,"
+                " temoins_moyen=%.1f max=%lld, deja >=10 temoins : %lld (%.1f%%)"
+                " donc supports q2 estimes %.1f%% du residuel\n",
                 m, family.c_str(), g_tight ? "serree" : "cellule", p, q, terms.size(), (double)terms.size() / (double)m,
                 levels, tests, (double)tests / (double)terms.size(), wave_hwm, mass, total,
                 pct(t_tree, 0.5), pct(t_tree, 0.95), t_wave.back(),
                 bank.reads, bank.recerts, bank.closed[0], bank.closed[1], bank.closed[2],
+                100.0 * (double)mass_closed_q2 / (double)total,
+                100.0 * (double)bank.closed[0] / (double)std::max<size_t>(1, terms.size()),
                 dmax, (double)dsum / (double)std::max(1LL, dnz),
                 ech, (double)som_temoins / (double)std::max(1LL, ech), max_temoins,
-                faux_resid, 100.0 * (double)faux_resid / (double)std::max(1LL, ech));
+                faux_resid, 100.0 * (double)faux_resid / (double)std::max(1LL, ech),
+                100.0 * (double)(ech - faux_resid) / (double)std::max(1LL, ech));
     if (mass != total) {
       std::fprintf(stderr, "INVARIANT VIOLE: masse %lld != %lld\n", mass, total);
       return 3;

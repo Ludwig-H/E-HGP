@@ -166,3 +166,46 @@ que j'aie à poser aujourd'hui : le coût de votre source est-il par
 enregistrement ou par paire ?** De la réponse dépend `s`, donc le front, donc le
 kernel, donc tout ce qui vient après. Je ne veux pas figer `s` sur une
 préférence.
+
+## 7. RECTIFICATION — ma colonne « masse résiduelle » était fausse
+
+Je dois corriger le tableau de la section 6 avant qu'il ne serve à trancher quoi
+que ce soit. J'y déduisais la masse résiduelle de la fraction de **records**
+non fermés. **Ces deux quantités n'ont aucune raison de coïncider**, et elles ne
+coïncident pas : un rectangle fermé couvre en moyenne bien plus de paires qu'un
+rectangle ouvert.
+
+Masse comptée explicitement, et paire tirée **uniformément dans la masse
+ouverte** — ma première version tirait un rectangle uniformément puis en prenait
+la première paire, ce qui sur-représentait les petits rectangles :
+
+| `s` | front/pt | **masse fermée q2** | records fermés | masse résiduelle | densité de supports | supports estimés |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| `1` | `23,7` | `3,04 %` | `2,63 %` | `31,0` M | `0,9 %` | `279` k |
+| `2` | `51,1` | `44,83 %` | `21,03 %` | `17,7` M | `1,3 %` | `230` k |
+| `4` | `140,5` | **`90,72 %`** | `66,74 %` | `2,97` M | `8,7 %` | `258` k |
+
+**Les trois estimations du nombre de supports concordent** — `279`, `230`, `258`
+milliers — alors qu'elles proviennent de trois fronts très différents. C'est la
+vérification qui me manquait : le nuage porte environ `250 000` supports q2 à
+`n=8 000`, soit **`31` par point**, ce qui est l'ordre attendu pour un graphe de
+Gabriel d'ordre dix. Ma comptabilité de masse est donc juste maintenant, et elle
+ne l'était pas.
+
+Trois conséquences qui corrigent ce que j'écrivais il y a une heure :
+
+1. **La fermeture en masse monte beaucoup plus vite que la fermeture en
+   records** — `3 %`, `45 %`, `91 %` contre `2,6 %`, `21 %`, `67 %`. Le
+   certificat ferme préférentiellement les GROS rectangles, ce qui est
+   exactement le comportement souhaitable et que je ne voyais pas.
+2. **À `s=4` le résiduel ne vaut plus que `2,97` M paires pour `258` k supports**,
+   soit un facteur `11,5` de sur-couverture — et non les `33 %` de masse que
+   j'annonçais.
+3. **La paire résiduelle moyenne a `1 435` à `1 521` témoins**, cent cinquante
+   fois le seuil. Le résiduel n'est donc pas peuplé de cas limites : il est
+   peuplé de paires massivement fermables que le certificat de rectangle ne
+   voit pas.
+
+Ma question de la section 6 reste posée, mais son cadrage change : à `s=4` la
+sur-couverture n'est que d'un facteur `11,5`, ce qui rend une source par paire
+bien plus plausible que je ne le croyais.
