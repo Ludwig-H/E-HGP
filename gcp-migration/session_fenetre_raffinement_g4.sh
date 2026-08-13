@@ -118,8 +118,17 @@ gcloud compute scp "${TAR}" "${GCP_INSTANCE_NAME}:/tmp/v3.tgz" \
   tar xzf /tmp/v3.tgz
   echo "coeurs=$(nproc)"; cmake --version | head -1; g++ --version | head -1
   cmake -S morsehgp3D_v3 -B build -DCMAKE_BUILD_TYPE=Release >/dev/null
-  cmake --build build --target mhgp3v_wspd_wavefront_probe mhgp3v_ball_event_probe -j48
-  sha256sum build/mhgp3v_wspd_wavefront_probe build/mhgp3v_ball_event_probe
+  # LA CIBLE DE LA RAMPE EST BLOQUANTE ; la tranche verticale est AUXILIAIRE et
+  # son echec est RAPPORTE sans tuer la mesure. Le compilateur de la VM est plus
+  # strict que celui du poste — il a deja refuse un tableau non initialise que
+  # `gcc 13` acceptait — et cela ne doit pas couter une session.
+  cmake --build build --target mhgp3v_wspd_wavefront_probe -j48
+  sha256sum build/mhgp3v_wspd_wavefront_probe
+  if cmake --build build --target mhgp3v_ball_event_probe -j48 > /tmp/be.log 2>&1; then
+    echo "BALL_EVENT_BUILD=OK"; sha256sum build/mhgp3v_ball_event_probe
+  else
+    echo "BALL_EVENT_BUILD=ECHEC"; tail -20 /tmp/be.log
+  fi
 ' 2>&1 | tee -a "${LOG}"
 
 # ---- 2. Rejeu INDEPENDANT de toutes les portes, sur la VM.
@@ -127,7 +136,9 @@ gcloud compute scp "${TAR}" "${GCP_INSTANCE_NAME}:/tmp/v3.tgz" \
   export PATH=$HOME/.local/bin:$PATH
   cd ~/fen
   ctest --test-dir build --output-on-failure -j24 \
-    -R "^mhgp3v_(wspd_wavefront|ball_event)" 2>&1 | tail -12
+    -R "^mhgp3v_wspd_wavefront" 2>&1 | tail -12
+  ctest --test-dir build --output-on-failure -j24 -R "^mhgp3v_ball_event" 2>&1 | tail -6 \
+    || echo "BALL_EVENT_CTEST=ECHEC (auxiliaire, non bloquant)"
 ' 2>&1 | tee -a "${LOG}"
 
 # ---- 3. LA RAMPE. Cinq familles, deux profondeurs de raffinement, quatre

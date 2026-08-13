@@ -112,7 +112,7 @@ inline bool be_sphere2(const Pt3& a, const Pt3& b, long long N[3], i128* den) {
 // triangle. `G = D E - F^2 > 0` est exactement l'independance affine.
 inline bool be_sphere3(const Pt3& a, const Pt3& b, const Pt3& x,
                        long long N[3], i128* den) {
-  long long d[3], u[3];
+  long long d[3] = {0,0,0}, u[3] = {0,0,0};
   for (int i = 0; i < 3; ++i) { d[i] = b.x[i] - a.x[i]; u[i] = x.x[i] - a.x[i]; }
   long long D = 0, E = 0, F = 0;
   for (int i = 0; i < 3; ++i) { D += d[i] * d[i]; E += u[i] * u[i]; F += d[i] * u[i]; }
@@ -131,7 +131,7 @@ inline bool be_sphere3(const Pt3& a, const Pt3& b, const Pt3& x,
 // Arite quatre : Cramer sur `2 (p_i - p_0) . y = ||p_i - p_0||^2`.
 inline bool be_sphere4(const Pt3& p0, const Pt3& p1, const Pt3& p2, const Pt3& p3,
                        long long N[3], i128* den) {
-  long long M[3][3], r[3];
+  long long M[3][3] = {{0,0,0},{0,0,0},{0,0,0}}, r[3] = {0,0,0};
   const Pt3* q[3] = {&p1, &p2, &p3};
   for (int i = 0; i < 3; ++i) {
     r[i] = 0;
@@ -147,7 +147,7 @@ inline bool be_sphere4(const Pt3& p0, const Pt3& p1, const Pt3& p2, const Pt3& p
       (i128)M[0][2] * ((i128)M[1][0] * M[2][1] - (i128)M[1][1] * M[2][0]);
   if (det == 0) return false;                     // coplanaire
   for (int col = 0; col < 3; ++col) {
-    i128 mc[3][3];
+    i128 mc[3][3] = {{0,0,0},{0,0,0},{0,0,0}};
     for (int i = 0; i < 3; ++i)
       for (int j = 0; j < 3; ++j) mc[i][j] = (j == col) ? (i128)r[i] : (i128)M[i][j];
     const i128 dc = mc[0][0] * (mc[1][1] * mc[2][2] - mc[1][2] * mc[2][1]) -
@@ -172,10 +172,10 @@ inline bool be_positive(const std::vector<Pt3>& pts, const std::vector<int>& S,
   if (k == 2) return true;
   const Pt3& p0 = pts[(size_t)S[0]];
   // `y = c - p0 = N/den - p0`, en numerateurs sur `den`.
-  i128 y[3];
+  i128 y[3] = {0, 0, 0};
   for (int i = 0; i < 3; ++i) y[i] = (i128)N[i] - den * (i128)p0.x[i];
   if (k == 3) {
-    long long d[3], u[3];
+    long long d[3] = {0,0,0}, u[3] = {0,0,0};
     for (int i = 0; i < 3; ++i) {
       d[i] = pts[(size_t)S[1]].x[i] - p0.x[i];
       u[i] = pts[(size_t)S[2]].x[i] - p0.x[i];
@@ -195,16 +195,16 @@ inline bool be_positive(const std::vector<Pt3>& pts, const std::vector<int>& S,
     return b2 > 0 && g2 > 0 && (b2 + g2) < g * da;
   }
   // arite quatre : Cramer dans la base des trois aretes issues de `p0`
-  i128 A[3][3];
+  i128 A[3][3] = {{0,0,0},{0,0,0},{0,0,0}};
   for (int j = 0; j < 3; ++j)
     for (int i = 0; i < 3; ++i) A[i][j] = (i128)(pts[(size_t)S[j + 1]].x[i] - p0.x[i]);
   const i128 dt = A[0][0] * (A[1][1] * A[2][2] - A[1][2] * A[2][1]) -
                   A[0][1] * (A[1][0] * A[2][2] - A[1][2] * A[2][0]) +
                   A[0][2] * (A[1][0] * A[2][1] - A[1][1] * A[2][0]);
   if (dt == 0) return false;
-  i128 lam[3];
+  i128 lam[3] = {0, 0, 0};
   for (int col = 0; col < 3; ++col) {
-    i128 mc[3][3];
+    i128 mc[3][3] = {{0,0,0},{0,0,0},{0,0,0}};
     for (int i = 0; i < 3; ++i)
       for (int j = 0; j < 3; ++j) mc[i][j] = (j == col) ? y[i] : A[i][j];
     lam[col] = mc[0][0] * (mc[1][1] * mc[2][2] - mc[1][2] * mc[2][1]) -

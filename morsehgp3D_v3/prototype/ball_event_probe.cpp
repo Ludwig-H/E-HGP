@@ -64,12 +64,12 @@ bool g_inject_key = false;          // cle non reduite par le pgcd
 bool judge_sphere(const std::vector<Pt3>& p, const std::vector<int>& S,
                   i128 cnum[3], i128* cden, i128* r2num) {
   const int k = (int)S.size() - 1;             // nombre d'aretes issues de S[0]
-  i128 v[3][3];
+  i128 v[3][3] = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
   for (int j = 0; j < k; ++j)
     for (int i = 0; i < 3; ++i)
       v[j][i] = (i128)p[(size_t)S[(size_t)j + 1]].x[i] - p[(size_t)S[0]].x[i];
   // `2 G lambda = w`, avec `G_{ji} = v_i . v_j` et `w_j = ||v_j||^2`.
-  i128 M[3][3], w[3];
+  i128 M[3][3] = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}}, w[3] = {0, 0, 0};
   for (int j = 0; j < k; ++j) {
     w[j] = 0;
     for (int i = 0; i < 3; ++i) w[j] += v[j][i] * v[j][i];
@@ -88,9 +88,9 @@ bool judge_sphere(const std::vector<Pt3>& p, const std::vector<int>& S,
   };
   const i128 d0 = det(M, k);
   if (d0 == 0) return false;
-  i128 lam[3];
+  i128 lam[3] = {0, 0, 0};
   for (int col = 0; col < k; ++col) {
-    i128 A[3][3];
+    i128 A[3][3] = {{0,0,0},{0,0,0},{0,0,0}};
     for (int r = 0; r < k; ++r)
       for (int c2 = 0; c2 < k; ++c2) A[r][c2] = (c2 == col) ? w[r] : M[r][c2];
     lam[col] = det(A, k);
@@ -187,7 +187,7 @@ int main(int argc, char** argv) {
   std::vector<int> S;
   auto traite = [&](const std::vector<int>& sup) {
     ++formes;
-    long long N[3];
+    long long N[3] = {0, 0, 0};
     i128 den = 0;
     bool ok = false;
     if (sup.size() == 2) ok = mhgp3v::be_sphere2(pts[(size_t)sup[0]], pts[(size_t)sup[1]], N, &den);
@@ -279,6 +279,8 @@ int main(int argc, char** argv) {
     if (r.supports.size() > 1) { ++cospheres; multi += (long long)r.supports.size(); }
   }
 
+  const bool mutant = g_inject_owner_pos || g_inject_shell || g_inject_key;
+
   // ---- ETAPE 0B : LE FOLD, ET SON JUGE INDEPENDANT.
   //
   // Le fold consomme les `SphereRun` par NIVEAU CROISSANT et fusionne leurs
@@ -359,11 +361,17 @@ int main(int argc, char** argv) {
   }
   std::printf("fold fusions=%lld paires_connectees=%lld desaccords=%lld domaine=%s\n",
               fusions, paires_connectees, fold_desaccords, fold_domaine ? "OK" : "DEBORDE");
-  if (!fold_domaine) { std::fprintf(stderr, "REFUS: niveau exact hors domaine i128\n"); return 2; }
-  if (fold_desaccords != 0) {
-    std::fprintf(stderr, "DESACCORD DU JUGE: %lld goulots differents entre Kruskal"
-                         " streame et la fermeture min-max\n", fold_desaccords);
-    return 1;
+  // SOUS INJECTION, LE FOLD NE REFUSE PAS : ses fautes comptent pour le mutant.
+  // La cle non reduite casse aussi le fold — deux ecritures du meme cercle
+  // donnent deux niveaux — et c'est une information, pas une raison de sortir
+  // avant le verdict du mutant.
+  if (!mutant) {
+    if (!fold_domaine) { std::fprintf(stderr, "REFUS: niveau exact hors domaine i128\n"); return 2; }
+    if (fold_desaccords != 0) {
+      std::fprintf(stderr, "DESACCORD DU JUGE: %lld goulots differents entre Kruskal"
+                           " streame et la fermeture min-max\n", fold_desaccords);
+      return 1;
+    }
   }
 
   std::printf("ball_event n=%lld famille=%s coord=%lld | formes=%lld degenerees=%lld"
@@ -393,10 +401,9 @@ int main(int argc, char** argv) {
     return 3;
   }
 
-  const bool mutant = g_inject_owner_pos || g_inject_shell || g_inject_key;
   if (mutant) {
     // Un mutant se juge sur une PROPRIETE, pas sur le seul desaccord de signe.
-    long long fautes = desaccords;
+    long long fautes = desaccords + fold_desaccords + (fold_domaine ? 0 : 1);
     if (g_inject_key) {
       // Une cle non reduite eclate les cospheres : deux ecritures du meme
       // cercle donnent deux cles. On le mesure par le nombre de spheres.
