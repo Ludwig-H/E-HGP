@@ -8,41 +8,68 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-## Observation live — `HEAD=c46d658`, premier probe de crédits cellulaires
+## Observation live — `HEAD=88eb36d`, successeur Andrew positif non committé
 
 Le `HEAD` courant est
-`c46d6587cf7459a18709e4e68ca2551d025690da`, commit
-`drop the triples entirely, then discover the pool cap was the real wall`. Il
-commet `cell_credits.hpp`, son premier probe et huit portes. Les octets sont
-`cell_credits.hpp=5309870d...`, `cell_credits_probe.cpp=ad3fe1b2...`,
-`CMakeLists.txt=edf046d9...` et ELF Release `1fa1ba72...`, Build ID
-`6224ae10...`. Le worktree porte ensuite les deltas documentaires autorisés à
-l'auditeur ainsi qu'un successeur Claude non commité de l'enveloppe
-projective ; aucun code n'est modifié par l'auditeur.
+`88eb36d20b84da76248e7588badc997fc561f42c`, commit documentaire
+`write down what the gates caught, including the defect no judge could see`.
+Son parent logiciel est `01a3a3f26f5f0e7bc3c8f23fdd1a6917e1ca543b`,
+commit
+`wrap the pool like a gift instead of trying every triple, then let the
+equivalence gate find the bug`. Il commet le hull projectif, son falsificateur
+et onze portes. Ses octets sont `cell_credits.hpp=69b02684...`,
+`cell_credits_probe.cpp=a03f8661...`, `CMakeLists.txt=464d8049...`; l'ELF
+Release pincé est `c8ea233a...`, Build ID `c7f573b...`. Un rejeu propre des
+trois portes `selftest|falsificateur|mutant_ids_partages` rendait `3/3` : le
+falsificateur voyait `3 400` sphères, un minimum de `29` intérieurs et zéro
+désaccord, et le partage d'IDs mourait code `4`. Ces verts ne mordaient ni les
+dégénérescences déterministes ni le `smax` co-fautif.
+Le parent `c46d658` avait rendu `8/8` en `68,78 s`, mais ce vert venait notamment
+de l'abaissement du plancher `credits` de `10 000` à `5 000` sans changer les
+`6 985` crédits ; ses trois campagnes fermaient zéro relation. Ces résultats
+historiques ne reçoivent pas le successeur.
 
-Le rejeu ciblé des octets committés rend `8/8` en `68,78 s`. Le huitième vert
-vient de l'abaissement du plancher `credits` de `10 000` à `5 000`, sans changer
-les `6 985` crédits mesurés. Ce vert n'est pas une réception : les
-trois portes positives ferment zéro q2/q3/q4, aucun mutant n'est exécuté, le
-contrôle ponctuel déclare qu'il ne juge pas le certificat, et le ledger reboucle
-sur `n(n-1)` cibles. Le passage du pool `16` au pool `32` porte les tests
-coniques de `43 956 521` à `350 267 629`, soit `x7,97` ; il isole le mur cubique
-que l'enveloppe 2D doit supprimer.
+Le parent reste P0 rouge : sa branche `h=2` confondait droite et segment
+projectifs, les directions dupliquées pouvaient produire huit faux crédits puis
+fermer q4 face à une sphère sans intérieur, et `kNeed=10/9/8` était partagé avec
+le juge pour toute la CLI. Un exhaustif indépendant avait trouvé `51` faux
+positifs et `294` faux négatifs. Ces réfutations restent le pin historique qui
+justifie le correctif, pas le verdict du worktree courant.
 
-Le delta live de cette enveloppe est lui-même rouge au pin
-`cell_credits.hpp=a4323543...`, `cell_credits_probe.cpp=a03f8661...`, ELF
-`7575377f...`. Son selftest différentiel trouve une omission sur la cellule
-`348`, et sa branche dégénérée `h=2` accepte faussement, dans `U00`, le rayon
-`(3,0,0)` depuis le pool `{(3,1,0),(3,2,0)}`. Il faut tester l'appartenance au
-segment projectif, pas seulement sa droite porteuse. Les trois rayons
-indépendants empêchent cette seule dégénérescence de fermer une cellule saine,
-mais l'équivalence hull--Carathéodory est déjà réfutée. Aucun résultat du pin
-commité n'est transféré à ce worktree.
+Le successeur Claude est maintenant stable mais non committé :
+`cell_credits.hpp=f9d4981d...`, `cell_credits_probe.cpp=a8c4e9ad...`,
+`CMakeLists.txt=012c2690...`. Il emploie Andrew exact, fusionne les directions
+projectives égales, refuse les hulls de dimension inférieure à deux, dérive
+`h=smax+1-q`, rend les IDs des carriers et ajoute trois contradictions exactes.
+Le build Release/CUDA OFF réussit ; l'ELF `c097fc06...`, Build ID `cbe73485...`,
+rend `selftest|fixtures_mutants` à `2/2` en `0,84 s`. Le selftest publie
+`37 752/37 752` accords, `471` couvertures et quatre fixtures. Les trois
+injections rendent chacune `t.d=0`, zéro intérieur, `reference=UNKNOWN`,
+`injection=CREDIT`, puis le code attendu `4`.
 
-Le header a ensuite avancé à `69b02684...` en ajoutant les rangs un et deux,
-sans canonicaliser les directions projectives dupliquées ni réparer `h==2`.
-Un exhaustif borné conserve `51` faux positifs et `294` faux négatifs ; un
-selftest aléatoire vert ne les reçoit donc pas.
+Un checker indépendant supplémentaire, source `d434c83c...`, rend sur `1 533`
+cas `fp=0`, `fn=0`, `bad_carrier=0`, `bad_id=0`, y compris avec direction
+dupliquée. C'est une réparation locale positive. Restent quatre petites dettes
+avant commit : graver dans le selftest la couverture effective des trois rayons
+par l'union rendue ; ajouter un nominal dupliqué avec `m=4` ; aligner la
+transformation « un seul rayon » entre la fixture et la boucle principale ;
+graver le verdict nominal `smax=11/12/34`.
+
+Le verrou de coût n'est pas encore levé : `cell_covered` retrie par insertion à
+chaque préfixe, donc garde un pire cas cubique. Partager l'ordre projectif et
+chercher le premier préfixe couvrant fournit une baseline `O(hm log m)`. Le
+ledger reste quadratique et aucun résiduel factorisé n'est produit : le jalon
+suivant doit émettre des `StarKey/RectKey` et recertifier les carriers aux huit
+coins avec `L_z(A,B)>0`, pas relancer une campagne pairwise. Le statut demeure
+NO-GO 50 k/G4 malgré le progrès exact local.
+
+La nouvelle question de Claude sur les trois mutants survivants est répondue :
+conserver la convention forte et graver une sphère fautive par mutant ; la marge
+différentielle reste une ablation/mesure de non-vacuité. Quatre fixtures exactes,
+la gate nominale `smax` et l'ordre de réparation sont dans
+[`AUDIT_REPONSE_CLAUDE_ENVELOPPE_PROJECTIVE_20260813.md`](AUDIT_REPONSE_CLAUDE_ENVELOPPE_PROJECTIVE_20260813.md),
+en réponse à
+[`NOTE_CLAUDE_ENVELOPPE_PROJECTIVE_20260813.md`](NOTE_CLAUDE_ENVELOPPE_PROJECTIVE_20260813.md).
 
 Le successeur cœur est pincé par `common_core_probe.cpp=4660fe37...` et
 `CMakeLists.txt=a667047d...`. Il intègre quatre corrections fondées : suppression
@@ -77,8 +104,10 @@ certificat et recompte les paires. Le rejeu final rend `8/8`, mais passer
 de `pool=16` à `32` multiplie les tests coniques de `43,96 M` à `350,27 M` et
 ferme encore zéro q4. Verdict :
 [`AUDIT_WORKTREE_CREDITS_CELLULAIRES_20260813.md`](AUDIT_WORKTREE_CREDITS_CELLULAIRES_20260813.md).
-Ce statut ne reçoit toujours ni pente physique, ni résiduel consommable, ni CUDA/G4, ni
-`BenchmarkOutputContract-v1`. GCP non utilisé.
+Le delta Andrew corrige depuis la primitive locale et les seuils, mais pas
+l'ordonnance : son tri/rebuild par préfixe et son ledger de cibles restent le
+prochain verrou. Ce statut ne reçoit toujours ni pente physique, ni résiduel
+consommable, ni CUDA/G4, ni `BenchmarkOutputContract-v1`. GCP non utilisé.
 
 ### Parent logiciel — `HEAD=5ddf4a3`, dominance 432 diagnostique
 

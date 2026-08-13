@@ -2811,15 +2811,12 @@ add_test(NAME mhgp3v_anchor_parite_ledger_clusters COMMAND mhgp3v_anchor_source
 add_test(NAME mhgp3v_anchor_parite_ledger_multiecho COMMAND mhgp3v_anchor_source
          --points=100 --family=scanline_overlap_multiecho --seed=3 --compare-engines
          --min-supports=4000)
-add_test(NAME mhgp3v_anchor_parite_ledger_garde COMMAND mhgp3v_anchor_source
-         --points=100 --family=terrain --seed=3 --compare-engines --density-guard
-         --min-supports=4000)
 add_test(NAME mhgp3v_anchor_parite_ledger_theta COMMAND mhgp3v_anchor_source
          --points=100 --family=uniform --seed=3 --compare-engines --theta-audit
          --min-theta-active=2000 --min-supports=15000)
 set_tests_properties(mhgp3v_anchor_parite_ledger_uniform mhgp3v_anchor_parite_ledger_terrain
                      mhgp3v_anchor_parite_ledger_clusters mhgp3v_anchor_parite_ledger_multiecho
-                     mhgp3v_anchor_parite_ledger_garde mhgp3v_anchor_parite_ledger_theta
+                     mhgp3v_anchor_parite_ledger_theta
                      PROPERTIES
   PASS_REGULAR_EXPRESSION "parite_moteurs compteurs=36 ecarts_compteurs=0[^\n]*accord=OUI")
 mhgp3v_add_expected_code_test_for(mhgp3v_anchor_source
@@ -2885,6 +2882,17 @@ add_test(NAME mhgp3v_anchor_garde_densite_exacte COMMAND mhgp3v_anchor_source
          --min-supports=5000)
 set_tests_properties(mhgp3v_anchor_garde_densite_exacte PROPERTIES
   PASS_REGULAR_EXPRESSION "accord=OUI")
+# LA PARITE AVEC LA GARDE ARMEE N'A PLUS D'OBJET, ET SON REFUS PREND SA PLACE.
+#
+# La garde ayant quitte le chemin partage hote/device, seul le moteur de
+# reference la porte. Comparer les trente-six compteurs des deux moteurs avec
+# elle armee produirait un ecart LEGITIME — ni un accord, ni un defaut, donc le
+# pire des deux mondes. L'ancienne porte `mhgp3v_anchor_parite_ledger_garde`
+# echouait exactement ainsi : `witness_skipped=1150` d'un cote, zero de l'autre.
+mhgp3v_add_expected_code_test_for(mhgp3v_anchor_source
+  mhgp3v_anchor_garde_densite_hors_parite
+  "incompatibles : la garde n'existe plus" 2
+  --points=100 --family=terrain --seed=3 --compare-engines --density-guard)
 mhgp3v_add_expected_code_test_for(mhgp3v_anchor_source
   mhgp3v_anchor_garde_densite_hors_pipeline
   "n'existe plus dans le moteur pipeline" 2
@@ -3672,15 +3680,53 @@ add_test(NAME mhgp3v_credits_selftest COMMAND mhgp3v_cell_credits_probe --selfte
 set_tests_properties(mhgp3v_credits_selftest PROPERTIES
   PASS_REGULAR_EXPRESSION "selftest accord=OUI")
 
+# LA MARCHE DE JARVIS EST RETIREE ET REMPLACEE PAR ANDREW EXACT.
+#
+# Le contre-audit l'a refutee sur quatre points, tous par fixtures
+# deterministes, et le plus grave produisait une FAUSSE FERMETURE DANS LE CHEMIN
+# SAIN. Son departage de colineaires employait `det(a x i, a, next)`, un
+# predicat de DEGRE QUATRE : a `M=65535` les determinants valent environ
+# `7,38e19` et le calcul `i64` deborde en rendant `-4503496549203964`, donc le
+# verdict est INVERSE sous le profil contractuel. Sa branche `h==2` acceptait la
+# seule coplanarite, sa marche pouvait ne jamais revenir au pivot, et une garde
+# de capacite authentifiait alors un faux polygone.
+#
+# Mon selftest aleatoire de 4 000 pools passait ; l'exhaustif borne de l'audit
+# trouvait `51` faux positifs et `294` faux negatifs. Le differentiel est donc
+# desormais EXHAUSTIF — `37 752` pools enumeres contre l'oracle de Caratheodory,
+# zero desaccord — et quatre contre-fixtures deterministes sont gravees :
+# inclusion de rang deux sur la seule coplanarite, directions projectives
+# dupliquees prises pour un segment, couverture legitime par les rayons, et la
+# fausse fermeture nominale a seize directions identiques.
+
+# LA CONVENTION DU MUTANT EST CONSERVEE, ET C'EST L'AUDITEUR QUI TRANCHE.
+#
+# J'avais propose de juger un mutant par sa MARGE, faute de pouvoir l'armer sur
+# des familles generiques. L'auditeur refuse, avec une raison que je n'avais pas
+# vue : une variation de marge prouve seulement `mutant_reached`. Une
+# transformation SURE peut changer la marge, et un mutant unsafe peut rester du
+# cote sur sur une famille donnee. Une injection n'est `mutant_killed` que si la
+# reference passe ET si l'injection contredit un oracle independant.
+#
+# Il n'y a donc pas besoin de familles realistes : une fixture de contradiction
+# est ALGEBRIQUE. Les trois ci-dessous sont les siennes. Chacune rejoue
+# l'orthogonalite du centre, exige zero interieur strict sur la sphere
+# admissible, exige que la reference rende UNKNOWN et que l'injection emette
+# exactement un credit, et publie `mutant_reached` et `mutant_killed`
+# SEPAREMENT.
+mhgp3v_add_expected_code_test_for(mhgp3v_cell_credits_probe
+  mhgp3v_credits_fixtures_mutants "MUTANT TUE : trois contradictions exactes" 4
+  --fixtures-mutants)
+
 # LA PORTE D'ABLATION DU POOL. Elle grave la contrainte liante : sans elle, le
 # `ferme=0` serait lu comme un echec du theoreme alors qu'il mesure un cap
 # d'implementation.
 add_test(NAME mhgp3v_credits_pool_16 COMMAND mhgp3v_cell_credits_probe
          --points=60 --family=eight_clusters --seed=3 --bank=59 --pool=16
-         --min-credits=15000 --min-rang-deux=2000 --min-residuel=3540)
+         --min-credits=15000 --min-rang-deux=2000 --min-rang-un=1000 --min-residuel=3540)
 add_test(NAME mhgp3v_credits_pool_32 COMMAND mhgp3v_cell_credits_probe
          --points=60 --family=eight_clusters --seed=3 --bank=59 --pool=32
-         --min-credits=25000 --min-rang-deux=4000 --min-residuel=3540)
+         --min-credits=25000 --min-rang-deux=4000 --min-rang-un=2000 --min-residuel=3540)
 # LES CARRIERS DE RANG UN ET DEUX SONT LEGITIMES, ET LES PREFERER EST UN GAIN.
 #
 # Un credit consomme ses `PointId` : plus le carrier est petit, plus il reste de
@@ -3691,7 +3737,7 @@ add_test(NAME mhgp3v_credits_pool_32 COMMAND mhgp3v_cell_credits_probe
 # rien couter : sur `terrain`, le rang deux passe de `2 007` a `40 506`.
 add_test(NAME mhgp3v_credits_rangs COMMAND mhgp3v_cell_credits_probe
          --points=60 --family=terrain --seed=3 --bank=59 --pool=24
-         --min-credits=5000 --min-rang-deux=30000)
+         --min-credits=5000 --min-rang-deux=30000 --min-rang-un=3000)
 
 # L'ABLATION DE L'ENVELOPPE. Le chemin par enumeration de Caratheodory est
 # conserve pour que le gain de l'enveloppe soit MESURABLE et non affirme : a

@@ -175,18 +175,39 @@ rend `8/8` portes, toutes sans fermeture ; doubler le pool de `16` à `32` multi
 de `43,96 M` à `350,27 M` sans fermer une q4. Le contre-audit et l'ordre de
 réparation sont dans
 [`AUDIT_WORKTREE_CREDITS_CELLULAIRES_20260813.md`](audits/AUDIT_WORKTREE_CREDITS_CELLULAIRES_20260813.md).
-Le successeur live remplace depuis les triples par une enveloppe projective,
-mais reste P0 rouge : son selftest trouve une omission et son cas `h=2`
-confond la droite projective avec le segment, ce qui produit une fausse
-inclusion explicite dans `U00`. Son autre désaccord vient d'un pivot Jarvis au
-milieu d'une arête : la marche cycle puis son cap fabrique un faux hull. Le tri
-projectif total et les chaînes monotones sont la baseline proposée. L'ajout
-ultérieur des carriers rang un/deux ne canonicalise toujours pas les directions
-dupliquées : un exhaustif borné conserve faux positifs et faux négatifs.
+Le pin logiciel `01a3a3f`, inchangé par le successeur documentaire `88eb36d`,
+remplace les triples par Jarvis mais reste P0 rouge : `h=2`, duplicats, cycle de
+pivot et tie-break débordant permettent notamment huit faux crédits q4 face à
+une sphère sans intérieur. Le successeur Andrew non committé corrige maintenant
+ce noyau : `37 752/37 752` accords, `471` couvertures, quatre fixtures et trois
+contradictions tueuses ; un checker indépendant ajoute `1 533` cas avec
+`fp=fn=bad_carrier=bad_id=0`. `smax` pilote aussi enfin `h=smax+1-q`. Ce vert
+local reste à rendre transactionnel sur `false` — union et compteurs de rang ne
+doivent être fusionnés qu'après couverture des trois rayons — et à raccorder : la fixture
+« un seul rayon » live bifurque encore vers l'ancien oracle au lieu d'exercer
+`cell_covered(rays_one)`, et les anciens planchers de rang deux ne décrivent
+plus le ledger d'un crédit cellulaire complet.
+La question de Claude sur les trois mutants survivants est close : une
+différence de marge seule est une ablation, pas un mutant tué. Quatre fixtures
+entières et leurs sphères fautives sont données dans
+[`AUDIT_REPONSE_CLAUDE_ENVELOPPE_PROJECTIVE_20260813.md`](audits/AUDIT_REPONSE_CLAUDE_ENVELOPPE_PROJECTIVE_20260813.md),
+en réponse à
+[`NOTE_CLAUDE_ENVELOPPE_PROJECTIVE_20260813.md`](audits/NOTE_CLAUDE_ENVELOPPE_PROJECTIVE_20260813.md).
+Le progrès local ne suffit pas encore pour 50 k : le live retrie le hull à
+chaque préfixe et conserve un pire cas cubique, puis reboucle sur toutes les
+cibles. La prochaine primitive partage l'ordre projectif, conserve les
+duplicats en piles `(X,PointId)`, rend des `CreditKey` rejouables et confie le
+suffixe à un `CellSuffixReporter` ancre-feuille × LBVH cible. Celui-ci émet les
+nœuds `ALL` maximaux et garde un front `MIXED` authentifié, sans `PairId`.
 Pour éviter de retomber à une tâche par ancre, une ancre de bloc peut proposer
 un carrier d'au plus neuf IDs, puis les huit coins de l'AABB le recertifient :
 les déterminants coniques sont affines en l'ancre et la marge H2 est concave.
 Le représentant propose, les coins font autorité ; l'échec scinde le bloc.
+Chaque ID proposé peut ensuite classifier exactement un rectangle par
+`L_z(A,B)=sum_i min_{a_i,b_i}(z_i-a_i)(b_i-z_i)>0`. Le prochain jalon positif
+est donc Andrew à la feuille, ce reporter de suffixes, puis sorties
+`RectKey/BankKey/CreditKey` et ce test H2 bloc — pas une nouvelle boucle de
+mesure `n(n-1)`.
 
 Deux sorties sont distinctes :
 

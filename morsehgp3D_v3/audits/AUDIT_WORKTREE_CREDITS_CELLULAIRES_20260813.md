@@ -18,12 +18,88 @@ Il n'était d'abord inclus par aucune cible. Le probe et son raccord CMake sont
 apparus ensuite dans le même worktree ; leur pin et leur rejeu sont séparés
 ci-dessous.
 
+Le pin logiciel audité est `01a3a3f26f5f0e7bc3c8f23fdd1a6917e1ca543b` ;
+le successeur documentaire `HEAD=88eb36d20b84da76248e7588badc997fc561f42c`
+ne change pas ses octets. Il porte
+`cell_credits.hpp=69b02684...`, `cell_credits_probe.cpp=a03f8661...` et
+`CMakeLists.txt=464d8049...`. Il commet l'enveloppe, le falsificateur et onze
+portes. L'ELF Release `c8ea233a...`, Build ID `c7f573b...`, rend son selftest
+aléatoire vert ; cela ne mord pas les fixtures exactes ci-dessous.
+
+Le rejeu propre des portes `selftest|falsificateur|mutant_ids_partages` rend
+`3/3` en `0,10/33,51/18,31 s`. Le falsificateur publie `3 400` sphères,
+`min_interiors=29`, zéro désaccord ; le partage d'IDs meurt code `4`. Ces trois
+verts ne testent ni les duplicats projectifs, ni le segment `h==2`, ni le seuil
+nominal `smax`.
+
 Verdict : **le théorème, les trois rayons et l'événement d'activation sont une
-base mathématique recevable ; le premier probe raccordé est vert `8/8` mais ne
-ferme aucune q4 dans ses portes positives, confirme le mur cubique et ne porte
-ni juge du certificat, ni enveloppe, ni ordonnance factorisée.** C'est néanmoins
-la piste la plus directe pour transformer le complément conique mesuré sur les
-amas en suffixes de cibles, sans `C(m,3)`.
+base mathématique recevable ; le hull committé produit encore faux positifs et
+faux négatifs, et les directions projectives dupliquées causent un faux prune
+q4 nominal.** `smax` reste figé, le falsificateur partage la faute et le probe
+reboucle sur `n(n-1)`. L'enveloppe reste néanmoins la piste algorithmique la
+plus directe pour transformer le complément conique mesuré sur les amas en
+suffixes de cibles, sans `C(m,3)` ; cette implémentation n'est pas reçue.
+
+### Addendum positif — Andrew live et recette locale
+
+Le successeur non committé au-dessus de `HEAD=88eb36d` porte maintenant
+`cell_credits.hpp=f9d4981d...`, `cell_credits_probe.cpp=a8c4e9ad...` et
+`CMakeLists.txt=012c2690...`. Andrew rationnel remplace Jarvis, les directions
+projectives égales sont fusionnées, les hulls de dimension inférieure à deux
+restent `UNKNOWN`, `need_of(smax,lane)` remplace le seuil figé, et l'API rend
+l'union des carriers des trois rayons.
+
+Le build Release/CUDA OFF réussit. L'ELF `c097fc06...`, Build ID `cbe73485...`,
+rend `selftest|fixtures_mutants` à `2/2` en `0,84 s` : `37 752/37 752` accords,
+`471` couvertures, quatre fixtures, puis trois contradictions avec `t.d=0`,
+zéro intérieur, référence `UNKNOWN`, injection `CREDIT` et code attendu `4`.
+Un checker indépendant, source `d434c83c...`, ajoute `1 533` cas et obtient
+`fp=0`, `fn=0`, `bad_carrier=0`, `bad_id=0`. L'ancien faux prune `h==2` est donc
+réparé sur ce domaine borné ; les masses du parent ne sont pas transférées.
+
+La primitive locale à stabiliser peut être plus simple et moins coûteuse que le
+live. Trier **une fois** les sites actifs par la clé rationnelle `(E/W,F/W)`, et
+faire de chaque direction égale une pile `(X,PointId,s)` triée. Andrew porte les
+seules piles non vides. Pour chaque rayon, chercher d'abord le rang un sur toutes
+les directions, puis un couple opposé de rang deux, et seulement ensuite un
+triangle du fan. Un crédit unit simultanément les trois carriers, fixe
+`X_G=max X_id`, dépile atomiquement ses IDs distincts, puis reconstruit le hull
+seulement lorsqu'une pile devient vide. Le glouton peut perdre du rappel, mais
+chaque crédit reste sound et tout échec retourne au résiduel.
+
+Cette ordonnance vise `O(m log m+c u)` pour `m` IDs, `u` directions et `c`
+crédits, au lieu du live qui relance un tri par insertion `O(m^2)` à chaque
+préfixe et reste donc cubique au pire. Les invariants reçus sont : partition de
+tous les IDs actifs en piles, ordre rationnel strict, hull sans sommet répété,
+carrier rejoué par rayon, union de trois à neuf IDs, unions de crédits deux à
+deux disjointes, `+1` strict, même `h_q=smax+1-q` dans producteur/juge/reçu et
+cap atomique. Si `pool<3h_q`, publier `capacity_impossible` et conserver la lane
+entièrement résiduelle.
+
+Le reçu local minimal porte `InputDigest`, pins source/ELF, `AnchorPointId`,
+`CellId`, `BankKey`, `smax`, lane et `h_q`, puis pour chaque crédit `X_G`, les
+trois carriers d'au plus trois IDs et leur union triée. Publier séparément les
+rangs **par rayon** et l'histogramme `credit_union_size[3..9]` : le commentaire
+« un à trois IDs par crédit » est faux pour l'union cellulaire. Le selftest doit
+rejouer que cette union couvre réellement les trois rayons, pas seulement que
+ses IDs appartiennent au pool.
+
+Les rangs doivent être versés transactionnellement. Le live incrémente
+`rank_counts` après chaque rayon, même si un rayon suivant fait finalement
+échouer `cell_covered`. Le pool
+`{(3,0,0),(3,1,-1),(3,-1,0)}` compte ainsi un rang un pour `r0`, puis ne produit
+aucun crédit de cellule. Les planchers `min-rang-un/deux` ajoutés au CMake ne
+reçoivent donc pas encore les carriers **consommés**. Accumuler les trois rangs
+localement et ne les publier qu'au retour vrai, ou séparer explicitement
+tentatives et crédits acceptés.
+
+La fixture « un seul rayon » appelle actuellement l'appartenance directe de
+`r0`, tandis que la boucle principale passe trois copies de `r0` à
+`cell_covered`. Factoriser un unique chemin mutant, ou utiliser dans la gate un
+pool bidimensionnel qui mord le second chemin, est requis pour que
+`mutant_killed` porte sur les octets réellement injectés. Ajouter aussi un
+nominal dupliqué `m=4`, les carriers positifs de rang deux/trois et la fixture
+`smax=11/12/34` avant commit.
 
 ## Théorème admis
 
@@ -151,11 +227,9 @@ Après ce pin, Claude a commencé l'enveloppe projective directement dans le
 worktree. Le snapshot du premier défaut porte
 `cell_credits.hpp=a43235431f7d7bde0f742b830023850076b57eff76765bb77cd921a2f5bbc1eb`
 et `cell_credits_probe.cpp=a03f8661de44174100075694c66f0ccdebe871542b8bc52f08734fcbd856adc6`.
-Le CMake reste `edf046d9...`. Le rebuild Release donne l'ELF
-`7575377f22c89a824502269e983d571484cd5fc9ff41547e606cde0c7d10aad9`,
-mais son `--selftest` est rouge : `cellule 348`, rayon zéro, enveloppe `0`
-contre brute `1`, sur un pool de cinq membres. Le `8/8` du pin commité ne se
-transfère donc pas à ces octets.
+Le CMake était encore `edf046d9...`. Aucun résultat du pin `c46d658` ne se
+transfère à ces octets ; les fixtures ci-dessous ont été repincées sur le
+successeur committé.
 
 Le successeur courant
 `cell_credits.hpp=69b02684ee733e11b3063a86635610582e9c576a9884d14e525729cdf5784954`
@@ -201,7 +275,7 @@ Ce cas atteint une fermeture nominale. Poser `a=(100,100,100)`, les seize sites
 `z_u=a+(u,0,0)`, `1<=u<=16`, et `b=a+(18,1,1)`. La branche `h==2` groupe les
 directions dupliquées deux par deux, émet huit faux crédits aux seuils
 `3,5,7,9,11,13,15,17` et ferme q4 à hauteur `18`. Pourtant l'offset de centre
-`t=(-37,0,666)` vérifie `t dot(b-a)=0` et donne les puissances
+`t=(-37,0,666)` vérifie `t dot(b-a)=0` et donne les marges intérieures
 `-57,-116,-177,-240,-305,-372,-441,-512,-585,-660,-737,-816,-897,-980,-1065,-1152` :
 il n'y a aucun intérieur strict. La faute produit donc un faux prune dans le
 chemin sain, pas seulement une divergence de primitive ou de mutant.
@@ -264,7 +338,9 @@ fail-open, mais elle doit publier la troncature et ne peut être appelée
 top-activation exact. Enfin, le nouveau falsificateur ne sonde que deux axes du
 plan et neuf magnitudes ; il est utile pour tuer une fixture, pas pour prouver
 le quantificateur sur toutes les sphères ni rejouer les `CreditKey` et leurs
-IDs. Aucune porte CMake n'exécute encore un mutant sur ce delta.
+IDs. Le CMake committé exécute désormais le seul mutant `credit-ids-partages` ;
+oubli du `+1`, rayon unique et positivité ignorée restent déclarés mais sans
+fixture/porte tueuse.
 
 Une fixture nominale sépare aussi `smax` de tout mutant. Dans `U00`, avec
 `r0=(3,0,0)`, `r1=(3,1,0)`, `r2=(3,1,1)`, prendre les vingt-quatre sites
@@ -406,6 +482,17 @@ sur les ensembles finis portés par les nœuds : `L_z<=0` reste donc
 ce test bilinéaire traite son résiduel avant tout split et évite les ambiguïtés
 d'extrema décorrélés.
 
+Une gate positive de raccord tient déjà en quatre paires. Après translation par
+`o=(100,100,100)`, prendre `A={o,o+(1,0,0)}`,
+`B={o+(100,20,10),o+(110,20,10)}` et, pour `1<=lambda<=8`, les crédits communs
+`G_lambda={o+lambda r0,o+lambda r1,o+lambda r2}`. Les huit coins recertifient
+les trois rayons et chaque membre vérifie `L_z(A,B)>0`. Un unique `RectKey`
+ferme donc les quatre couples dirigés q4 à `smax=11` et reste résiduel à
+`smax=12`. Au petit n, son expansion doit donner multiplicité exactement une,
+masse quatre et digest invariant sous permutation. Cette fixture est le jalon
+constructif entre le solveur leaf et la rampe, sans aucun `PairId` au chemin
+produit.
+
 ## Ordonnance CPU puis G4 proposée
 
 1. Partir des `RectId` disjoints du dual-tree et certifier la cellule de toutes
@@ -415,7 +502,8 @@ d'extrema décorrélés.
 3. Extraire d'abord un crédit proposé de taille au plus neuf et le recertifier
    par formes affines/concaves aux huit coins ; employer le crédit complet de
    taille au plus 72 par les 24 intersections seulement en tier de secours ou
-   oracle. Retirer les IDs et répéter au plus `h<=10` fois.
+   oracle. Retirer les IDs et répéter au plus `h<=33` fois sur le domaine CLI,
+   ou dix fois à `smax=11`.
 4. Fermer par seuil des nœuds cibles entiers, puis appliquer `L_z(A,B)>0` sur le
    résiduel du seuil. En cas de cap, dégénérescence non traitée ou crédit
    manquant, conserver le rectangle dans le front ; ne jamais repartir de la

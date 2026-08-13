@@ -167,186 +167,251 @@ inline i64 activation_height(const i64 rays[3][3], const i64 s[3],
 }
 
 // ---------------------------------------------------------------------------
-// ENVELOPPE PROJECTIVE, SANS DIVISION NI FLOTTANT.
+// ENVELOPPE PROJECTIVE EXACTE — ANDREW, PAS JARVIS.
 //
-// Le test `r appartient a cone(G)` par enumeration de Caratheodory coute
-// `O(m^3)` et interdit en pratique le pool de trente ou plus qu'il faut pour
-// atteindre huit credits disjoints. La formulation projective l'evite.
+// Ma premiere version employait une marche de Jarvis. Le contre-audit
+// `AUDIT_WORKTREE_CREDITS_CELLULAIRES_20260813.md` l'a refutee sur quatre
+// points, tous reproduits par des fixtures deterministes, et le plus grave
+// produisait une FAUSSE FERMETURE DANS LE CHEMIN SAIN — pas une divergence de
+// mutant :
 //
-// Tous les membres du pool verifient `m_C(s) > 0`, donc `w . s > 0` avec
-// `w = r_0+r_1+r_2` : ils vivent tous dans le demi-espace ouvert `w > 0` et se
-// projettent sur la carte `w . u = 1`. Dans cette carte, `r` appartient au cone
-// du pool si et seulement si son projete est dans l'ENVELOPPE CONVEXE des
-// projetes du pool.
+//  1. son departage de colineaires employait `det(a x i, a, next)`, un predicat
+//     de DEGRE QUATRE dans les coordonnees des sites. A `M=65535`, avec
+//     `a=(M,M,M)`, `i=(M,-M,-M)`, `next=(M,0,0)`, les deux determinants
+//     mathematiques valent environ `7,38e19` et le calcul `i64` deborde en
+//     rendant `-4503496549203964` : le verdict est INVERSE sous le profil
+//     contractuel ;
+//  2. la branche `h==2` acceptait `r` sur la seule coplanarite. Dans `U00`, le
+//     pool `G={(3,1,0),(3,2,0)}` accepte ainsi `r0=(3,0,0)`, alors que
+//     l'unique ecriture plane est `r0 = 2 G0 - G1` : `r0` n'est pas dans le
+//     cone positif ;
+//  3. deux sites de MEME direction projective, comme `(1,0,0)` et `(2,0,0)`,
+//     formaient une enveloppe de taille deux au lieu d'un unique sommet ;
+//  4. le pivot n'etait extreme que sur une coordonnee, sans depart transversal.
+//     La marche pouvait ne jamais revenir au pivot, et la garde `count>=m`
+//     transformait alors le cycle en faux polygone. UNE GARDE DE CAPACITE NE
+//     DOIT JAMAIS AUTHENTIFIER UN POLYGONE.
 //
-// Les denominateurs `w . s` etant strictement positifs, l'orientation
-// projective de trois vecteurs a le SIGNE de `det(a,b,c)`. La marche de Jarvis
-// n'a besoin que de ce predicat entier — aucune division, aucune racine, aucun
-// flottant — et coute `O(m h)`.
+// La construction recue est Andrew exact. Choisir `e` orthogonal a `w`, puis
+// `f = w x e`. Pour chaque site, stocker `W = w.s > 0`, `E = e.s` et `F = f.s`,
+// puis trier les rationnels `(E/W, F/W)` par produits croises. Comme
+// `det(e,f,w) = |e|^2 |w|^2 > 0`, le signe de l'orientation plane est celui de
+// `det(s_i,s_j,s_k)` — un predicat de degre TROIS, couvert par la borne u16.
 //
-// Largeurs u16 : `|det(s_i,s_j,s_k)| <= 6*65535^3 = 1,7e15`, et le comparateur
-// de pivot croise `(s.e)(w.s')` avec `|s.e| <= 3,2e7` et `|w.s| <= 1,8e6`, soit
-// `5,7e13`. Tout tient dans `i64`.
+// Largeurs, `w` de composantes au plus `9` : `|e| <= 18`, `|f| <= 324`, donc
+// `|E| <= 3,5e6`, `|F| <= 6,4e7`, `|W| <= 1,8e6`. Les produits croises du tri
+// valent au plus `1,1e14`, et `|det(s_i,s_j,s_k)| <= 1,7e15`. Tout tient dans
+// `i64`, et aucun produit de degre quatre n'est forme.
 // ---------------------------------------------------------------------------
 
-// Enveloppe convexe projective du pool, rendue dans l'ordre cyclique. `hull`
-// recoit des indices de `avail`. Rend la taille de l'enveloppe.
-inline int projective_hull(const i64* pool /*3 par membre*/, const int* avail, int m,
-                           const i64 w[3], int* hull, long long* orient_tests) {
-  if (m <= 0) return 0;
-  // Une direction du plan `w`, pour choisir un pivot extreme de facon exacte.
+// Coordonnee projective d'un site, avec son identifiant.
+struct Proj {
+  i64 W = 0, E = 0, F = 0;
+  int id = 0;
+};
+
+// Base entiere du plan orthogonal a `w`, orientee de sorte que `det(e,f,w)>0`.
+inline void plane_basis(const i64 w[3], i64 e[3], i64 f[3]) {
   int axis = 0;
   for (int k = 1; k < 3; ++k)
     if ((w[k] < 0 ? -w[k] : w[k]) < (w[axis] < 0 ? -w[axis] : w[axis])) axis = k;
   i64 ax[3] = {0, 0, 0};
   ax[axis] = 1;
-  const i64 e[3] = {w[1] * ax[2] - w[2] * ax[1], w[2] * ax[0] - w[0] * ax[2],
-                    w[0] * ax[1] - w[1] * ax[0]};
-
-  auto sptr = [&](int i) { return pool + (std::size_t)avail[i] * 3; };
-  int pivot = 0;
-  for (int i = 1; i < m; ++i) {
-    const i64* a = sptr(pivot);
-    const i64* b = sptr(i);
-    // Comparer `(a.e)/(w.a)` a `(b.e)/(w.b)`, denominateurs positifs.
-    const i64 lhs = dot3(b, e) * dot3(w, a);
-    const i64 rhs = dot3(a, e) * dot3(w, b);
-    if (lhs < rhs) pivot = i;
-  }
-
-  int count = 0;
-  int cur = pivot;
-  for (;;) {
-    hull[count++] = cur;
-    int next = (cur + 1) % m;
-    for (int i = 0; i < m; ++i) {
-      if (i == cur) continue;
-      ++*orient_tests;
-      const i64 d = det3(sptr(cur), sptr(next), sptr(i));
-      if (d < 0) {
-        next = i;
-      } else if (d == 0) {
-        // COLINEAIRES DANS LA CARTE. Il faut garder le plus ELOIGNE de `cur` le
-        // long de l'arete, sinon la marche saute un sommet et l'enveloppe
-        // exclut une region : la porte d'equivalence l'a effectivement refute,
-        // `enveloppe=0` contre `brute=1` sur un pool de cinq membres.
-        //
-        // Une premiere version comparait la coordonnee `e` de la carte, ce qui
-        // n'est correct que si l'arete n'est pas parallele a l'autre axe. Le
-        // test exact est CONIQUE et sans division : `i` est plus loin que
-        // `next` si et seulement si `next` appartient au cone de `cur` et `i`.
-        // Dans le plan de normale `n = cur x i`, cela s'ecrit avec deux
-        // determinants.
-        const i64* pc = sptr(cur);
-        const i64* pi = sptr(i);
-        const i64 nrm[3] = {pc[1] * pi[2] - pc[2] * pi[1], pc[2] * pi[0] - pc[0] * pi[2],
-                            pc[0] * pi[1] - pc[1] * pi[0]};
-        if (nrm[0] != 0 || nrm[1] != 0 || nrm[2] != 0) {
-          const i64 b1 = det3(nrm, pc, sptr(next));
-          const i64 b2 = det3(nrm, sptr(next), pi);
-          if (b1 >= 0 && b2 >= 0) next = i;  // `next` est entre `cur` et `i`
-        }
-      }
-    }
-    cur = next;
-    if (cur == pivot || count >= m) break;
-  }
-  return count;
+  e[0] = w[1] * ax[2] - w[2] * ax[1];
+  e[1] = w[2] * ax[0] - w[0] * ax[2];
+  e[2] = w[0] * ax[1] - w[1] * ax[0];
+  f[0] = w[1] * e[2] - w[2] * e[1];
+  f[1] = w[2] * e[0] - w[0] * e[2];
+  f[2] = w[0] * e[1] - w[1] * e[0];
 }
 
-// `r` est-il dans l'enveloppe ? Rend un carrier de rang un, deux ou trois.
-inline bool ray_in_hull(const i64* pool, const int* avail, const int* hull, int h,
-                        const i64 r[3], int* carrier, int* carrier_size,
-                        long long* orient_tests) {
-  auto sptr = [&](int i) { return pool + (std::size_t)avail[hull[i]] * 3; };
-  *carrier_size = 0;
-  if (h <= 0) return false;
-  if (h == 1) {
-    const i64* s = sptr(0);
-    const i64 cx = s[1] * r[2] - s[2] * r[1];
-    const i64 cy = s[2] * r[0] - s[0] * r[2];
-    const i64 cz = s[0] * r[1] - s[1] * r[0];
-    if (cx == 0 && cy == 0 && cz == 0 && dot3(s, r) > 0) {
-      carrier[0] = avail[hull[0]];
-      *carrier_size = 1;
-      return true;
-    }
-    return false;
+inline Proj project(const i64 s[3], const i64 w[3], const i64 e[3], const i64 f[3], int id) {
+  Proj p;
+  p.W = dot3(w, s);
+  p.E = dot3(e, s);
+  p.F = dot3(f, s);
+  p.id = id;
+  return p;
+}
+
+// Ordre lexicographique sur `(E/W, F/W)`, par produits croises. `W>0` partout.
+inline int proj_cmp(const Proj& a, const Proj& b) {
+  const i64 x = a.E * b.W - b.E * a.W;
+  if (x != 0) return x < 0 ? -1 : 1;
+  const i64 y = a.F * b.W - b.F * a.W;
+  if (y != 0) return y < 0 ? -1 : 1;
+  return 0;
+}
+
+// SEGMENT PROJECTIF, PREDICAT DE DEGRE DEUX. Une fois la coplanarite etablie,
+// `r` est dans `[u,v]` lorsque `Delta(u,r)` et `Delta(r,v)` ont le meme signe
+// FAIBLE que `Delta(u,v)`, pour `g = e` ou, s'il ne separe pas, `g = f`. Si
+// aucun des deux ne separe, `u` et `v` sont la meme direction : rang un.
+inline bool projective_between(const i64 u[3], const i64 v[3], const i64 r[3], const i64 w[3],
+                               const i64 e[3], const i64 f[3]) {
+  for (int pass = 0; pass < 2; ++pass) {
+    const i64* g = (pass == 0) ? e : f;
+    const i64 duv = dot3(g, v) * dot3(w, u) - dot3(g, u) * dot3(w, v);
+    if (duv == 0) continue;  // `g` ne separe pas : essayer l'autre
+    const i64 dur = dot3(g, r) * dot3(w, u) - dot3(g, u) * dot3(w, r);
+    const i64 drv = dot3(g, v) * dot3(w, r) - dot3(g, r) * dot3(w, v);
+    if (duv > 0) return dur >= 0 && drv >= 0;
+    return dur <= 0 && drv <= 0;
   }
-  // CARRIER DE RANG UN D'ABORD, ET CE N'EST PAS UN DETAIL.
-  //
-  // Un credit consomme ses `PointId`, donc plus le carrier est petit, plus il
-  // reste de sites pour les credits suivants — et c'est le NOMBRE de credits
-  // disjoints qui ferme une lane. L'enveloppe seule rend systematiquement le
-  // triangle de l'eventail, donc trois identifiants : la mesure montrait
-  // `rang3` a 123 022 contre 824 en rang deux, la ou l'enumeration exhaustive
-  // trouvait 7 885 carriers de rang deux. Ce test en `O(h)` recupere le rang un
-  // sans rien couter.
-  for (int i = 0; i < h; ++i) {
-    const i64* s = sptr(i);
-    const i64 cx = s[1] * r[2] - s[2] * r[1];
-    const i64 cy = s[2] * r[0] - s[0] * r[2];
-    const i64 cz = s[0] * r[1] - s[1] * r[0];
-    if (cx == 0 && cy == 0 && cz == 0 && dot3(s, r) > 0) {
-      carrier[0] = avail[hull[i]];
-      *carrier_size = 1;
-      return true;
-    }
+  return false;  // meme direction projective : le rang un a deja repondu
+}
+
+// ENVELOPPE PAR DEUX CHAINES MONOTONES. `pts` porte les projections DEDUPLIQUEES
+// par direction ; `out` recoit les indices dans l'ordre cyclique. Rend la taille.
+// Aucune garde de capacite n'authentifie ici quoi que ce soit : la construction
+// est deterministe et se termine par construction.
+inline int monotone_hull(const Proj* pts, const i64* sites, int m, int* out,
+                         long long* orient_tests) {
+  if (m <= 2) {
+    for (int i = 0; i < m; ++i) out[i] = i;
+    return m;
   }
-  // Toutes les aretes orientees doivent laisser `r` a gauche ou dessus.
-  for (int i = 0; i < h; ++i) {
+  auto orient = [&](int a, int b, int c) {
     ++*orient_tests;
-    if (det3(sptr(i), sptr((i + 1) % h), r) < 0) return false;
+    return det3(sites + (std::size_t)pts[a].id * 3, sites + (std::size_t)pts[b].id * 3,
+                sites + (std::size_t)pts[c].id * 3);
+  };
+  int k = 0;
+  for (int i = 0; i < m; ++i) {
+    while (k >= 2 && orient(out[k - 2], out[k - 1], i) <= 0) --k;
+    out[k++] = i;
   }
-  // Eventail depuis le premier sommet : le premier triangle qui contient `r`
-  // donne le carrier. Le rang deux apparait quand un determinant s'annule, et
-  // il est LEGITIME.
-  for (int i = 1; i + 1 < h; ++i) {
-    const i64* a = sptr(0);
-    const i64* b = sptr(i);
-    const i64* c = sptr(i + 1);
-    ++*orient_tests;
-    const i64 det = det3(a, b, c);
-    if (det == 0) continue;
-    const i64 d1 = det3(r, b, c), d2 = det3(a, r, c), d3 = det3(a, b, r);
-    const bool ok = (det > 0) ? (d1 >= 0 && d2 >= 0 && d3 >= 0)
-                              : (d1 <= 0 && d2 <= 0 && d3 <= 0);
-    if (!ok) continue;
-    // RANG DEUX QUAND UN POIDS EST NUL. Un `d_k` nul signifie que `r` est sur
-    // une face du triangle : deux membres suffisent, et le troisieme reste
-    // disponible pour un autre credit.
-    if (d1 == 0) {
-      carrier[0] = avail[hull[i]];
-      carrier[1] = avail[hull[i + 1]];
-      *carrier_size = 2;
-      return true;
-    }
-    if (d2 == 0) {
-      carrier[0] = avail[hull[0]];
-      carrier[1] = avail[hull[i + 1]];
-      *carrier_size = 2;
-      return true;
-    }
-    if (d3 == 0) {
-      carrier[0] = avail[hull[0]];
-      carrier[1] = avail[hull[i]];
-      *carrier_size = 2;
-      return true;
-    }
-    carrier[0] = avail[hull[0]];
-    carrier[1] = avail[hull[i]];
-    carrier[2] = avail[hull[i + 1]];
-    *carrier_size = 3;
-    return true;
+  const int lower = k + 1;
+  for (int i = m - 2; i >= 0; --i) {
+    while (k >= lower && orient(out[k - 2], out[k - 1], i) <= 0) --k;
+    out[k++] = i;
   }
-  // Enveloppe degeneree en segment : carrier de rang deux.
-  if (h == 2) {
-    carrier[0] = avail[hull[0]];
-    carrier[1] = avail[hull[1]];
-    *carrier_size = 2;
-    return true;
+  return k - 1;  // le dernier point repete le premier
+}
+
+// ---------------------------------------------------------------------------
+// COUVERTURE D'UNE CELLULE PAR UN POOL — L'API QUE LE SUJET APPELLE.
+//
+// Rend vrai lorsque les TROIS rayons de la cellule appartiennent au cone
+// positif du pool, et remplit alors `union_ids` avec au plus neuf identifiants
+// — un carrier de rang un, deux ou trois par rayon.
+//
+// Deux gardes tiennent l'exactitude :
+//
+//  - les directions projectives DUPLIQUEES sont fusionnees avant la marche.
+//    Deux sites de meme direction, comme `(1,0,0)` et `(2,0,0)`, ne forment pas
+//    un segment : ils sont un unique sommet geometrique. La contre-fixture
+//    `G={(1,0,0),(2,0,0)}` avec `r=(3,1,0)` etait acceptee a tort ;
+//  - une enveloppe de dimension inferieure a deux rend UNKNOWN. Les trois
+//    rayons d'une cellule sont affinement independants, donc aucun segment
+//    projectif ne peut contenir leur triangle. C'est la garde qui tue la
+//    branche `h==2` inconditionnelle, laquelle produisait une FAUSSE FERMETURE
+//    dans le chemin sain.
+// ---------------------------------------------------------------------------
+// `rank_counts` recoit le rang du carrier de CHAQUE rayon — un, deux ou trois.
+// Compter la taille de l'UNION serait un contresens : elle vaut presque toujours
+// trois ou plus, et l'information utile est qu'un rayon a ete porte par un seul
+// site, donc qu'il en reste pour les credits suivants.
+inline bool cell_covered(const i64* sites, const int* avail, int m, const i64 rays[3][3],
+                         int* union_ids, int* union_size, long long* orient_tests,
+                         Proj* scratch, int* hull, long long* rank_counts = nullptr) {
+  *union_size = 0;
+  if (m < 3) return false;
+  const i64 w[3] = {rays[0][0] + rays[1][0] + rays[2][0], rays[0][1] + rays[1][1] + rays[2][1],
+                    rays[0][2] + rays[1][2] + rays[2][2]};
+  i64 e[3], f[3];
+  plane_basis(w, e, f);
+
+  int cnt = 0;
+  for (int i = 0; i < m; ++i) {
+    const i64* s = sites + (std::size_t)avail[i] * 3;
+    if (dot3(w, s) <= 0) continue;  // hors de la carte : le pool actif l'exclut
+    scratch[cnt++] = project(s, w, e, f, avail[i]);
   }
-  return false;
+  if (cnt < 3) return false;
+  // Tri par coordonnee projective, puis FUSION des directions dupliquees. Le
+  // representant canonique d'un sommet geometrique est le plus petit `PointId`.
+  for (int i = 1; i < cnt; ++i) {
+    const Proj key = scratch[i];
+    int j = i - 1;
+    while (j >= 0 && (proj_cmp(scratch[j], key) > 0 ||
+                      (proj_cmp(scratch[j], key) == 0 && scratch[j].id > key.id))) {
+      scratch[j + 1] = scratch[j];
+      --j;
+    }
+    scratch[j + 1] = key;
+  }
+  int uniq = 0;
+  for (int i = 0; i < cnt; ++i) {
+    if (uniq > 0 && proj_cmp(scratch[uniq - 1], scratch[i]) == 0) continue;
+    scratch[uniq++] = scratch[i];
+  }
+  if (uniq < 3) return false;  // dimension du hull < 2 : UNKNOWN
+
+  const int h = monotone_hull(scratch, sites, uniq, hull, orient_tests);
+  if (h < 3) return false;  // segment ou point : ne peut contenir un triangle
+
+  auto sptr = [&](int i) { return sites + (std::size_t)scratch[hull[i]].id * 3; };
+  auto add = [&](int id) {
+    for (int k = 0; k < *union_size; ++k)
+      if (union_ids[k] == id) return;
+    union_ids[(*union_size)++] = id;
+  };
+
+  for (int j = 0; j < 3; ++j) {
+    const i64* r = rays[j];
+    // Rang un : un sommet geometrique colineaire positif au rayon.
+    int found = -1;
+    for (int i = 0; i < h && found < 0; ++i) {
+      const i64* s = sptr(i);
+      if (s[1] * r[2] - s[2] * r[1] == 0 && s[2] * r[0] - s[0] * r[2] == 0 &&
+          s[0] * r[1] - s[1] * r[0] == 0 && dot3(s, r) > 0)
+        found = i;
+    }
+    if (found >= 0) {
+      add(scratch[hull[found]].id);
+      if (rank_counts != nullptr) ++rank_counts[1];
+      continue;
+    }
+    // Appartenance : toutes les aretes orientees laissent `r` a gauche ou dessus.
+    bool inside = true;
+    for (int i = 0; i < h && inside; ++i) {
+      ++*orient_tests;
+      if (det3(sptr(i), sptr((i + 1) % h), r) < 0) inside = false;
+    }
+    if (!inside) return false;
+    // Carrier par l'eventail, en preferant le rang deux quand un poids de
+    // Cramer s'annule : un credit CONSOMME ses identifiants.
+    bool got = false;
+    for (int i = 1; i + 1 < h && !got; ++i) {
+      const i64* a = sptr(0);
+      const i64* b = sptr(i);
+      const i64* c = sptr(i + 1);
+      ++*orient_tests;
+      const i64 det = det3(a, b, c);
+      if (det == 0) continue;
+      const i64 d1 = det3(r, b, c), d2 = det3(a, r, c), d3 = det3(a, b, r);
+      const bool ok = (det > 0) ? (d1 >= 0 && d2 >= 0 && d3 >= 0)
+                                : (d1 <= 0 && d2 <= 0 && d3 <= 0);
+      if (!ok) continue;
+      if (d1 == 0) {
+        add(scratch[hull[i]].id); add(scratch[hull[i + 1]].id);
+        if (rank_counts != nullptr) ++rank_counts[2];
+      } else if (d2 == 0) {
+        add(scratch[hull[0]].id); add(scratch[hull[i + 1]].id);
+        if (rank_counts != nullptr) ++rank_counts[2];
+      } else if (d3 == 0) {
+        add(scratch[hull[0]].id); add(scratch[hull[i]].id);
+        if (rank_counts != nullptr) ++rank_counts[2];
+      } else {
+        add(scratch[hull[0]].id); add(scratch[hull[i]].id); add(scratch[hull[i + 1]].id);
+        if (rank_counts != nullptr) ++rank_counts[3];
+      }
+      got = true;
+    }
+    if (!got) return false;  // `r` est dans le hull mais aucun triangle ne le porte
+  }
+  return true;
 }
 
 }  // namespace credits

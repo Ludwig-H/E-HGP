@@ -1290,6 +1290,12 @@ int main(int argc, char** argv) {
   // ce qui est pire qu'une option absente : le refus est explicite.
   if (density_guard && engine_pipeline)
     refuse("--density-guard n'existe plus dans le moteur pipeline : elle a quitte le chemin partage hote/device");
+  // COMPARER DEUX MOTEURS DONT UN SEUL PORTE LA GARDE N'A PLUS D'OBJET. La
+  // parite des trente-six compteurs serait fausse pour une raison legitime, ce
+  // qui est le pire des deux mondes : ni un accord, ni un defaut. Le refus est
+  // explicite.
+  if (density_guard && compare_engines)
+    refuse("--density-guard et --compare-engines sont incompatibles : la garde n'existe plus que dans le moteur de reference");
   // Un mutant qui casse un filtre desarme ne prouve rien : il serait tue par
   // hasard ou survivrait par vacuite. Le refus est contractuel, avant calcul.
   if (inject == Inject::kThetaNoFailOpen && !theta_audit)

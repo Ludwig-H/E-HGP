@@ -1663,14 +1663,28 @@ raccord rend `8/8` sans fermeture ; à `n=60`, `pool=16/32` paie `43,96 M/350,27
 coniques pour zéro fermeture q4. Pin et gates :
 [`AUDIT_WORKTREE_CREDITS_CELLULAIRES_20260813.md`](audits/AUDIT_WORKTREE_CREDITS_CELLULAIRES_20260813.md).
 
-Le delta live qui substitue une enveloppe projective à `C(m,3)` confirme la
+Le pin logiciel `01a3a3f`, inchangé par le successeur documentaire `88eb36d`,
+substitue une enveloppe projective à `C(m,3)` et confirme la
 bonne direction algorithmique, mais pas encore l'implémentation : le selftest
-différentiel est rouge et la branche de rang deux accepte toute la droite
+aléatoire committé est vert, tandis qu'un exhaustif borné trouve encore faux
+positifs et faux négatifs. La branche de rang deux accepte toute la droite
 projective au lieu du segment positif. Dans `U00`, le pool
 `{(3,1,0),(3,2,0)}` ne contient pas `(3,0,0)` dans son cône, bien que le chemin
 live l'accepte. Le rang deux doit recevoir les signes des deux coefficients
 coniques ; les directions projectives identiques restent des piles de
 `PointId` de rang un.
+
+Ce n'est pas qu'un défaut d'API : seize sites colinéaires de même direction
+projective sont groupés deux par deux en huit faux crédits et ferment q4 pour
+`d=(18,1,1)`, alors que l'offset de centre `t=(-37,0,666)` rend les seize
+puissances strictement négatives. La fixture doit précéder toute nouvelle
+mesure de fermeture.
+La porte conserve la convention forte : une divergence de marge sans sphère
+fautive est une ablation, jamais un mutant tué. Les fixtures exactes pour le
+`+1`, le rayon unique, le partage d'IDs et la positivité sont dans
+[`AUDIT_REPONSE_CLAUDE_ENVELOPPE_PROJECTIVE_20260813.md`](audits/AUDIT_REPONSE_CLAUDE_ENVELOPPE_PROJECTIVE_20260813.md),
+qui répond à
+[`NOTE_CLAUDE_ENVELOPPE_PROJECTIVE_20260813.md`](audits/NOTE_CLAUDE_ENVELOPPE_PROJECTIVE_20260813.md).
 
 Le faux négatif du même delta vient d'un pivot Jarvis situé au milieu d'une
 arête en cas d'ex aequo : la marche cycle, puis son cap fabrique un hull. La
@@ -1679,6 +1693,40 @@ monotones ; tout cycle/non-retour reste `UNKNOWN`, jamais un polygone tronqué.
 Avec `e` orthogonal à `w` et `f=w cross e`, trier exactement
 `((e dot s)/(w dot s),(f dot s)/(w dot s))` évite aussi le tie-break live de
 degré quatre, dont une fixture u16 fait déborder `i64` et inverse le signe.
+
+Le successeur non committé implémente maintenant Andrew et le seuil dynamique.
+Le build Release/CUDA OFF passe `37 752/37 752` accords, `471` couvertures et
+trois contradictions exactes ; un checker indépendant ajoute `1 533` cas avec
+`fp=fn=bad_carrier=bad_id=0`. Ce résultat reçoit le correctif local sur son
+domaine borné, pas les anciennes masses ni l'ordonnance. La sortie doit encore
+être transactionnelle (`union_size=0` et aucun `rank_counts` fusionné sur
+`false`) et ses carriers doivent être rejoués. Sinon les planchers de rang
+peuvent être servis par des tentatives sans crédit. La fixture singleton « un
+seul rayon » tue le théorème mutant via
+l'ancien oracle, pas l'injection nominale `cell_covered(rays_one)` ; le hull
+plein `G={(6,1,0),(6,-1,0),(6,0,1)}`, `d=(9,2,1)`, `t=(-4,12,12)` exerce cette
+route et donne les puissances `-5,-57,-6`.
+
+L'étape positive suivante est elle aussi bornée : trier une fois, conserver les
+directions dupliquées en piles `(X,PointId)`, extraire jusqu'à
+`h=smax+1-q<=33` carriers rejouables, puis confier le suffixe à un
+`CellSuffixReporter` ancre-feuille × LBVH cible. Il classe les AABB par extrema
+des facettes half-open et de hauteur, émet les nœuds `ALL` maximaux et conserve
+le front `MIXED`. Le live retrie actuellement par insertion à chaque préfixe et
+reste cubique au pire ; le partage de l'ordre projectif vise `O(hm log m)`.
+Une ancre représentative propose ensuite le même carrier sur un bloc et les
+huit coins le recertifient.
+Chaque ID classe le rectangle par le minorant exact
+`L_z(A,B)=sum_i min_{a_i,b_i}(z_i-a_i)(b_i-z_i)`. Le front publie des
+`RectKey/BankKey/CreditKey`, jamais des `PairId`; c'est lui, et non le probe
+quadratique, qui passe aux rampes 12,5/25/50 k.
+
+Gate de raccord positive : après translation par `o=(100,100,100)`, prendre
+`A={o,o+(1,0,0)}`, `B={o+(100,20,10),o+(110,20,10)}` et les huit crédits
+`G_lambda={o+lambda r0,o+lambda r1,o+lambda r2}`. Un unique `RectKey` doit
+fermer exactement les quatre couples dirigés q4 à `smax=11`, rester résiduel à
+`smax=12`, et développer multiplicité un/digest invariant chez le seul juge
+borné.
 
 Le groupe octaédrique partage les neuf tables et le kernel, mais la chambre
 dépend de `x-a` : `canon(x-a)` ne se déduit pas de
