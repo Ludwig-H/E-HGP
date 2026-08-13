@@ -116,7 +116,7 @@ gcloud compute scp "${TAR}" "${GCP_INSTANCE_NAME}:/tmp/v3.tgz" \
   echo "coeurs=$(nproc)"; cmake --version | head -1; nvcc --version | tail -2
   cmake -S morsehgp3D_v3 -B build -DCMAKE_BUILD_TYPE=Release
   # TOUTES les cibles dont les portes sont rejouees, sinon ctest rend `Not Run`
-  # et `set -e` coupe la session AVANT la mesure — c'est ce qui s'est passe.
+  # et `set -e` coupe la session AVANT la mesure.
   cmake --build build --target mhgp3v_anchor_source mhgp3v_wspd_wavefront_probe \
         mhgp3v_wspd_front_probe mhgp3v_rect_front_probe -j48
 ' 2>&1 | tee -a "${LOG}"
