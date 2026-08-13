@@ -8,64 +8,87 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-## Observation live — `HEAD=ea1acc65`, juge spindle en reprise
+## Observation live — `HEAD=471715a`, réparation P0 spindle rejouée
 
 Au 13 août 2026, le `HEAD` observé est
-`ea1acc65c3947640389eb971a45c6799feffe727`, commit
-`stop killing pairs: measure how much of the sphere the locality theorem
-already closes`. Il contient le producteur spindle de `3d4c598`, la rampe
-jusqu'à `n=16 000`, le probe flottant de directions et la note de route 50 k
-puis 10 M. Le worktree live a ensuite changé chez Claude : `CMakeLists.txt` et
-`prototype/spindle_cone_probe.cpp` sont modifiés et
-`prototype/spindle_cone_oracle.cpp/.hpp` sont nouveaux. Ce delta semble répondre
-aux dettes du juge, mais il n'est ni stable, ni rejoué, ni reçu ici. Aucun run
-du nouvel ELF ne doit être agrégé au reçu commité.
+`471715a68950afa9bba34edc2ac5db30724ff539`, commit documentaire
+`retract three claims the auditor refuted, and take the cut at the first omitted
+site`. Il répond au contre-audit de la fenêtre locale. Son parent logiciel
+`519ddfbaee60007e927bb148b9fb83451d7af7bc`, commit
+`a judge that shares the subject's cast is not a judge`, sépare le juge spindle
+dans une unité de traduction et ajoute les refus et portes P0. Le code est
+identique entre ces deux pins.
 
-Le snapshot spindle commité et indépendamment rejoué reste pincé par les
-SHA-256 `78037fc1...` pour le header, `bf646632...` pour le probe,
-`4f4733bc...` pour CMake et `abbc57c5...` pour l'ELF Release. Tout octet
-postérieur constitue un nouveau successeur.
+Après ce pin, Claude a ouvert un nouveau successeur non commité :
+`prototype/window_source.hpp`, SHA-256
+`756d2da6fa3d0288739d121b490338ac74845a6eba7f83cb7b6768b092178060` lors
+de sa première lecture, et `prototype/window_source_probe.cpp`, dont les
+snapshots ont encore changé pendant la lecture. Ils implémentent les primitives
+et un sujet borné de fenêtre locale, mais restent en cours d'écriture. Aucun des
+deux n'est raccordé au CMake commité : ils ne sont ni construits, ni jugés, ni
+inclus dans le verdict `39/39` ci-dessous. Leur contre-audit live est
+[`AUDIT_WORKTREE_WINDOW_SOURCE_20260813.md`](AUDIT_WORKTREE_WINDOW_SOURCE_20260813.md).
 
-Le cône cible ponctuel est mathématiquement admis : ses comparaisons entières
-q3/q4, la porte `ALL` par huit coins et le rejet `NONE` sont exacts ou
-fail-open dans le profil u16. Deux rejeux ciblés courants rendent `30/30`
-CTests `mhgp3v_cone_` en `5,97 s` puis `9,41 s` sous des charges différentes.
-La configuration live inventorie `603` CTests ; ces temps ciblés ne
-qualifient aucune performance.
-Ce vert ne reçoit cependant pas le producteur :
+Le snapshot rejoué est pincé par les SHA-256 suivants :
 
-- `smax=9223372036854775807` ferme faussement `380/380` paires sans test,
-  avec code zéro, parce que le sujet et le juge partagent le cast vers `int` ;
-- `--points=100 --coord=2` retourne code zéro tout en jugeant seulement
-  huit points ;
-- le juge compare seulement la conjonction des morts q2/q3/q4, et ne voit pas
-  une fausse fermeture isolée d'une lane ;
+| objet | SHA-256 |
+| --- | --- |
+| `CMakeLists.txt` | `39530b9444cd58655ffdf14097ea0fdb0d74ac62fac1c98b64a89091f9e1f2bd` |
+| `prototype/spindle_cone.hpp` | `78037fc19d0f2dae63b28745ee8741e10bd7821a8da3278032ad2dae76db0a85` |
+| `prototype/spindle_cone_probe.cpp` | `36ccfd2abdf26a4eeb821122755a85335c00793bd7b414b8ce61c8fe5b91afc3` |
+| `prototype/spindle_cone_oracle.cpp` | `e6dba54e1825beab7f97f131911c829e692b08fb588cac6ccb1770f196deeca8` |
+| `prototype/spindle_cone_oracle.hpp` | `f049768a45061d121f3dc9baf5beb57c2fe540d139894c82ce0e1c19ecde4d29` |
+| ELF Release | `e05a2065b630475361325b22677a29db30067800a1c99f37af39dedf53a12ccd` |
+
+La configuration est Release `-O3 -DNDEBUG`, GCC `13.3.0`, CUDA désactivé.
+Après reconfiguration et construction de la seule cible, l'inventaire rend
+`39` CTests `mhgp3v_cone_`. Le rejeu indépendant :
+
+```text
+ctest --test-dir build/v3 --output-on-failure -R '^mhgp3v_cone_'
+```
+
+rend `39/39` en `31,42 s`. Un rejeu ciblé des quatre nouvelles obligations
+rend `4/4` en `3,65 s` : `LLONG_MAX` est refusé en code `2`, la cardinalité
+réduite est refusée en code `2`, les trois lanes ont zéro désaccord et le
+mutant `cone-ignore-inherited` est tué par le juge en code `4`. Ces temps CPU
+sous charge ne qualifient aucune performance.
+
+Cette campagne reçoit localement les quatre réparations P0 suivantes : domaine
+`smax` fermé avant cast, cardinalité demandée, décisions q2/q3/q4 jugées
+séparément et porte permanente du mutant d'héritage. L'oracle redérive ses
+seuils et son arithmétique dans une unité distincte ; son selftest compare les
+deux limbes à `BigInt`. Le faux vert historique `380/380` est donc clos sur ce
+pin.
+
+Ce vert ne reçoit toujours pas le producteur industriel :
+
 - aucun CTest ne fait mordre les caps et les deux scalaires résiduels ne sont
   ni une partition par identité, ni un reçu rejouable ;
 - les rampes mono-ELF banques 48/96 gardent deux pentes rouges sur toutes les
   familles et tous les compteurs : les dernières pentes de tests de coins
   restent `1,452` sur `uniform/96` et `1,438` sur
-  `eight_clusters/96`, au-dessus de `1,35`.
+  `eight_clusters/96`, au-dessus de `1,35` ;
+- la rampe commise jusqu'à `n=16 000` confirme des pentes dominantes rouges ;
+  sa colonne `target_visits` duplique les visites k-NN et ses temps sont
+  contaminés ;
+- le probe reste CPU/front-only, hors payload officiel, sans producteur CUDA
+  raccordé ni mesure `warm_e2e`.
 
-Le port littéral de cette DFS par endpoint est donc **NO-GO avant G4**. La
-rampe commise jusqu'à `n=16 000` confirme des pentes dominantes encore rouges ;
-sa colonne `target_visits` est invalide car elle duplique les visites k-NN et
-ses temps sont contaminés. La primitive reste un oracle borné utile. La route
-industrielle évalue désormais une sous-source de fenêtre k-NN certifiée, puis
-exige un domaine résiduel complet relevé sur
-`A_endpoint × B_partner × C_witness` ou sur des cellules directionnelles
-exactes, un profil produit sans budget configuré, deux pentes vertes, des caps
-d'octets et le payload officiel. Le
-contre-audit complet et l'ordre de reprise remis à Claude sont dans
+Le port littéral de cette DFS par endpoint reste donc **NO-GO avant G4**. La
+primitive ponctuelle devient un oracle borné reçu, pas la route 50 k. Le
+contre-audit logiciel complet est
 [`AUDIT_CONTRE_AUDIT_SPINDLE_CONE_WORKTREE_20260813.md`](AUDIT_CONTRE_AUDIT_SPINDLE_CONE_WORKTREE_20260813.md).
 
-La réponse à la nouvelle note de Claude accepte la coupure stricte au premier
-site omis, mais réfute sa promotion en source globale : le census doit inclure
-`U_B`, Source S ne borne pas le shell, l'owner vient après découverte et les
-candidats locaux refusés ne couvrent pas les supports jamais proposés. Elle
-refuse aussi les tuiles spatiales indépendantes et exige un merge global par
-niveau et lot. Voir
+La réponse à la note de Claude accepte la coupure stricte au premier site omis,
+mais refuse sa promotion en source globale : le census inclut `U_B`, Source S
+ne borne pas le shell, l'owner vient après découverte et les candidats locaux
+refusés ne couvrent pas les supports jamais proposés. Elle exige aussi un merge
+global par niveau et lot :
 [`AUDIT_REPONSES_ROUTE_G4_50K_PUIS_10M_20260813.md`](AUDIT_REPONSES_ROUTE_G4_50K_PUIS_10M_20260813.md).
+Le candidat suivant met en concurrence dominance dans les 432 sous-cônes,
+groupes coniques et relation-tree/WSPD sur un même ledger avant CUDA :
+[`AUDIT_DEBLOCAGE_COLLECTIF_APRES_FENETRE_20260813.md`](AUDIT_DEBLOCAGE_COLLECTIF_APRES_FENETRE_20260813.md).
 
 Plusieurs portes `anchor` à planchers restent contournables par
 `PASS_REGULAR_EXPRESSION`. La source CUDA anchor omet en outre le

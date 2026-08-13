@@ -2142,11 +2142,26 @@ add_test(NAME mhgp3v_locality_arites_gravees_70 COMMAND mhgp3v_certified_localit
          --mode=arity --points=70 --family=uniform --grid=4 --seed=1 --kmin=4
          --max-neighbours=69 --support-window=40
          --expect-q2=681 --expect-q3=884 --expect-q4=202)
+# CETTE PORTE ETAIT MORTE, ET SON DEFAUT EST DE LA MEME CLASSE QUE LA REGEX
+# `{n}` : elle exigeait le diagnostic « mutant tue par les valeurs gravees »
+# pour l'injection `insphere-sign-flip`, alors que ce mutant est tue BIEN PLUS
+# TOT, par la fixture d'orientation q4, qui rend le code 4 avec un tout autre
+# message. Le diagnostic attendu etait donc inatteignable, quelle que soit la
+# qualite du sujet. L'injection `insphere-sign-flip` possede par ailleurs deja
+# sa propre porte sur la fixture d'orientation : celle-ci n'en etait qu'un
+# doublon mal nomme.
+#
+# `rho-kth-short` traverse au contraire tout le mode `arity` et meurt bien sur
+# les valeurs gravees `681/884/202`, avec le diagnostic exact. Trois autres
+# injections — `census-drop-ties`, `cap-nine`, `cap-drop-strictness` — SURVIVENT
+# a ce chemin : elles ne changent aucun des trois comptes sur cette fixture, et
+# elles ont leurs portes ailleurs. La couverture des valeurs gravees repose donc
+# sur cette injection-ci et sur `locate-drop-boundary`.
 mhgp3v_add_expected_code_test_for(mhgp3v_certified_locality_probe
-  mhgp3v_locality_gravees_mutant_signe "mutant tue par les valeurs gravees" 4
+  mhgp3v_locality_gravees_mutant_rho "mutant tue par les valeurs gravees" 4
   --mode=arity --points=70 --family=uniform --grid=4 --seed=1 --kmin=4
   --max-neighbours=69 --support-window=40
-  --expect-q2=681 --expect-q3=884 --expect-q4=202 --inject=insphere-sign-flip)
+  --expect-q2=681 --expect-q3=884 --expect-q4=202 --inject=rho-kth-short)
 mhgp3v_add_expected_code_test_for(mhgp3v_certified_locality_probe
   mhgp3v_locality_gravees_fenetre_courte "desaccord avec le juge rationnel independant" 1
   --mode=arity --points=70 --family=uniform --grid=4 --seed=1 --kmin=4
@@ -3189,3 +3204,129 @@ endif()
 unset(_mhgp3v_self)
 unset(_mhgp3v_regex_lines)
 unset(_mhgp3v_bad_regex)
+
+# ---------------------------------------------------------------------------
+# FENETRE k-NN CERTIFIEE : LE CERTIFICAT, ET SEULEMENT LUI.
+#
+# Specification : audits/NOTE_CLAUDE_ROUTE_G4_50K_PUIS_10M_20260813.md section
+# 4.1, corrigee par audits/AUDIT_REPONSES_ROUTE_G4_50K_PUIS_10M_20260813.md
+# section 1, et ordre de reprise section 8 points 2 a 4.
+#
+# CE SUJET N'EST PAS UN PRODUCTEUR. Son enumerateur local forme tous les
+# sous-ensembles de taille 2, 3 et 4 de la fenetre, soit M + C(M,2) + C(M,3)
+# propositions par ancre — 349 632 a M=128, donc plus de dix-sept milliards a
+# 50 000 points. L'audit du deblocage collectif chiffre exactement ce mur. Aucun
+# temps, aucune pente et aucun compteur de travail ne sont donc revendiques ici.
+#
+# CE QUI EST REVENDIQUE EST UNE IDENTITE, verifiee dans LES DEUX SENS contre un
+# juge rationnel exhaustif, sur les identites completes et non sur des comptes :
+#
+#   { S certifie par une fenetre }  ==  { S global tel que 4R^2 < delta_out(a)^2 }
+#
+# Le juge emploie l'elimination de Gauss rationnelle de `oracle/exact_geometry.hpp`;
+# le sujet emploie des determinants entiers de Cramer et `mhgp::BigInt<4>`. Les
+# deux representations ne partagent aucune quantite intermediaire.
+# ---------------------------------------------------------------------------
+add_executable(mhgp3v_window_source_probe prototype/window_source_probe.cpp)
+target_include_directories(mhgp3v_window_source_probe PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(mhgp3v_window_source_probe PRIVATE mhgp)
+target_compile_options(mhgp3v_window_source_probe PRIVATE -Wall -Wextra -Werror)
+
+add_test(NAME mhgp3v_window_fixtures COMMAND mhgp3v_window_source_probe --fixtures)
+set_tests_properties(mhgp3v_window_fixtures PROPERTIES
+  PASS_REGULAR_EXPRESSION "fixtures accord=OUI refutees=0")
+
+# LES QUATRE FAMILLES CONTRACTUELLES. Les planchers `--min-jamais-proposes`
+# sont les plus importants : ils exigent que le juge trouve des supports globaux
+# qu'AUCUNE fenetre n'a jamais proposes. Sans eux, la porte laisserait croire que
+# « residuel = candidats refuses », ce que l'audit refuse explicitement. Sur
+# `eight_clusters` le rapport est ecrasant — 1 277 jamais proposes contre 156
+# certifiables — et c'est precisement le mur des amas, vu du bon cote.
+add_test(NAME mhgp3v_window_juge_uniform COMMAND mhgp3v_window_source_probe
+         --points=24 --window=8 --family=uniform --seed=3 --judge
+         --min-certifies=300 --min-non-certifies=30 --min-jamais-proposes=700
+         --min-shell=3 --min-jung=150 --min-chemin-exact=200)
+add_test(NAME mhgp3v_window_juge_terrain COMMAND mhgp3v_window_source_probe
+         --points=24 --window=8 --family=terrain --seed=3 --judge
+         --min-certifies=300 --min-jamais-proposes=250 --min-shell=3 --min-jung=150)
+add_test(NAME mhgp3v_window_juge_clusters COMMAND mhgp3v_window_source_probe
+         --points=24 --window=8 --family=eight_clusters --seed=3 --judge
+         --min-certifies=200 --min-jamais-proposes=1000 --min-chemin-exact=200)
+add_test(NAME mhgp3v_window_juge_multiecho COMMAND mhgp3v_window_source_probe
+         --points=24 --window=8 --family=scanline_overlap_multiecho --seed=3 --judge
+         --min-certifies=250 --min-shell=5 --min-jamais-proposes=100 --min-jung=200)
+
+# MUTANTS. Chacun casse UNE decision exacte et doit perdre une identite.
+#
+# `window-accept-equality` a EFFECTIVEMENT trouve un trou dans une premiere
+# version de ce juge : il certifiait quatre supports au lieu d'un, tous
+# globalement valides, donc sans aucun faux positif ni identite fausse. Le juge
+# ne comparait alors que deux inclusions sur trois. La troisieme —
+# `certifie inclus dans certifiable` — a ete ajoutee pour lui : sans elle, une
+# SUR-certification passe inapercue des que le census tombe juste par hasard, et
+# c'est le cas le plus dangereux, puisque rien ne prouve alors que la fenetre
+# contenait la boule.
+#
+# L'egalite `4R^2 = delta_out^2` est de mesure nulle sur un nuage generique : le
+# mutant y survit legitimement. Le nuage grave `--cloud-egalite` la force aux
+# DEUX endpoints a la fois, sans quoi l'autre endpoint certifierait le support et
+# la divergence disparaitrait.
+mhgp3v_add_expected_code_test_for(mhgp3v_window_source_probe
+  mhgp3v_window_mutant_egalite "MUTANT TUE" 4
+  --cloud-egalite --window=1 --judge --inject=window-accept-equality)
+mhgp3v_add_expected_code_test_for(mhgp3v_window_source_probe
+  mhgp3v_window_mutant_coupure_incluse "MUTANT TUE" 4
+  --points=20 --window=8 --family=uniform --seed=3 --judge
+  --inject=window-cut-at-included)
+mhgp3v_add_expected_code_test_for(mhgp3v_window_source_probe
+  mhgp3v_window_mutant_positivite "MUTANT TUE" 4
+  --points=20 --window=8 --family=uniform --seed=3 --judge
+  --inject=window-skip-positivity)
+mhgp3v_add_expected_code_test_for(mhgp3v_window_source_probe
+  mhgp3v_window_mutant_shell_interieur "MUTANT TUE" 4
+  --points=20 --window=8 --family=uniform --seed=3 --judge
+  --inject=window-shell-as-interior)
+mhgp3v_add_expected_code_test_for(mhgp3v_window_source_probe
+  mhgp3v_window_mutant_jung_seul "MUTANT TUE" 4
+  --points=20 --window=8 --family=uniform --seed=3 --judge
+  --inject=window-jung-only)
+# LA LARGEUR NE SE VOIT QU'A PLEINE ECHELLE u16. A `coord=27` le mutant i64
+# survit legitimement : rien ne deborde. La porte exige donc `--coord=65535`.
+mhgp3v_add_expected_code_test_for(mhgp3v_window_source_probe
+  mhgp3v_window_mutant_largeur_i64 "MUTANT TUE" 4
+  --points=20 --window=8 --family=uniform --coord=65535 --seed=3 --judge
+  --inject=window-narrow-i64)
+mhgp3v_add_expected_code_test_for(mhgp3v_window_source_probe
+  mhgp3v_window_mutant_vacueux "MUTANT SURVIVANT" 3
+  --points=20 --window=8 --family=uniform --seed=3 --judge
+  --inject=window-narrow-i64)
+
+# Refus contractuels, tous AVANT le moindre calcul.
+mhgp3v_add_expected_code_test_for(mhgp3v_window_source_probe
+  mhgp3v_window_reject_mutant_sans_juge "un mutant sans juge ne prouve rien" 2
+  --points=20 --window=8 --inject=window-skip-positivity)
+mhgp3v_add_expected_code_test_for(mhgp3v_window_source_probe
+  mhgp3v_window_reject_juge_non_borne "le juge rationnel exhaustif est borne" 2
+  --points=60 --window=8 --judge)
+mhgp3v_add_expected_code_test_for(mhgp3v_window_source_probe
+  mhgp3v_window_reject_smax "--smax hors du domaine d'enveloppe" 2
+  --points=20 --window=8 --smax=9223372036854775807)
+mhgp3v_add_expected_code_test_for(mhgp3v_window_source_probe
+  mhgp3v_window_reject_fenetre "--window hors bornes" 2 --points=20 --window=0)
+mhgp3v_add_expected_code_test_for(mhgp3v_window_source_probe
+  mhgp3v_window_reject_inconnu "argument inconnu" 2 --points=20 --turbo)
+mhgp3v_add_expected_code_test_for(mhgp3v_window_source_probe
+  mhgp3v_window_reject_cardinalite "cardinalite demandee" 2 --points=100 --coord=2 --window=8)
+# Le plancher de supports jamais proposes sans juge est refuse : c'est le juge
+# seul qui les voit.
+mhgp3v_add_expected_code_test_for(mhgp3v_window_source_probe
+  mhgp3v_window_reject_plancher_sans_juge "supports jamais proposes exige --judge" 2
+  --points=20 --window=8 --min-jamais-proposes=1)
+# Planchers : un plancher non atteint est un code 3, jamais un vert silencieux.
+mhgp3v_add_expected_code_test_for(mhgp3v_window_source_probe
+  mhgp3v_window_plancher_certifies "plancher de supports certifies" 3
+  --points=20 --window=8 --family=uniform --seed=3 --min-certifies=100000000)
+mhgp3v_add_expected_code_test_for(mhgp3v_window_source_probe
+  mhgp3v_window_plancher_jamais_proposes "plancher de supports jamais proposes" 3
+  --points=20 --window=8 --family=uniform --seed=3 --judge
+  --min-jamais-proposes=100000000)

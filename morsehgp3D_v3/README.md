@@ -58,6 +58,13 @@ pas jugées séparément, la cardinalité demandée peut être réduite silencie
 et les rampes banques 48/96 gardent deux pentes rouges. Le résiduel sous cap
 n'est pas rejouable et l'ABI CUDA anchor est actuellement incohérente avec
 `density_guard`.
+Le successeur logiciel `519ddfb` ferme ces quatre dettes locales : son nouvel
+ELF Release, CUDA désactivé, rend `39/39` portes ; `smax` et cardinalité sont
+refusés avant calcul, les lanes sont jugées séparément et le mutant d'héritage
+est porté. Cela reçoit le juge ponctuel, pas la DFS industrielle : caps,
+résiduel, pentes, CUDA et payload restent ouverts. Le pin et le transcript local
+sont tenus dans
+[`AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md).
 La DFS par endpoint reste donc un oracle borné. Deux reprises peuvent partager
 le résiduel : un fast path de fenêtre k-NN certifiée pour les supports locaux,
 puis un domaine collectif `A_endpoint times B_partner times C_witness` ou
@@ -85,6 +92,19 @@ supports jamais proposés, et un halo k-NN ne rend pas les sous-nuages
 indépendants. La réponse aux cinq questions, le protocole de fold global et le
 ledger mémoire sont dans
 [`AUDIT_REPONSES_ROUTE_G4_50K_PUIS_10M_20260813.md`](audits/AUDIT_REPONSES_ROUTE_G4_50K_PUIS_10M_20260813.md).
+Le complément collectif évite de choisir prématurément entre fenêtre et
+`A×B×C` : les 432 sous-cônes rationnels donnent des cutoffs q4/q3 décidables en
+entiers, puis top-h et report du seul résiduel deviennent des requêtes de
+dominance ; des groupes coniques de trois témoins ciblent le mur des amas. Une
+gate `counter-only` doit comparer cette voie à un cœur WSPD et au relation-tree
+sur les mêmes bitsets d'ancres maximales avant tout port CUDA. Voir
+[`AUDIT_DEBLOCAGE_COLLECTIF_APRES_FENETRE_20260813.md`](audits/AUDIT_DEBLOCAGE_COLLECTIF_APRES_FENETRE_20260813.md).
+Le premier worktree de fenêtre conserve un énumérateur volontairement borné ;
+son noyau exact est admis, mais son juge partage encore la fenêtre du sujet et
+ne compare ni les ensembles `I_B/U_B`, ni une vraie `BallKey`. Il reste une
+baseline/oracle non raccordée à CMake, jamais une mesure de la source produit.
+Voir
+[`AUDIT_WORKTREE_WINDOW_SOURCE_20260813.md`](audits/AUDIT_WORKTREE_WINDOW_SOURCE_20260813.md).
 
 Deux sorties sont distinctes :
 

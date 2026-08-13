@@ -265,27 +265,31 @@ catalogue global n'est matérialisé : un support est produit, consommé, oubli�
 | catalogue hôte de supports | `24` millions à 50 k, `6,33 Go` d'occurrences |
 | tronquer sous budget | interdit par la spécification : l'objet complet ou un échec sur ressource réelle |
 
-La différence entre la navigation d'arrangement et la génération locale est
-**la positivité**. L'arrangement compte toutes les sphères par quatre points ;
-la Source S ne retient que celles dont le centre est dans l'enveloppe convexe
-du support. La famille contre-exemple ci-dessus est faite d'un rapport
-`68 000` entre les deux. Générer par fenêtre locale ne produit jamais un
-transit non positif, parce que la positivité est testée avant l'émission et que
-la fenêtre est choisie par la géométrie de la miniboule, pas par celle d'une
-sphère quelconque.
+La positivité explique la différence **sémantique** entre les deux objets :
+l'arrangement compte toutes les sphères par quatre points, tandis que Source S
+ne retient que les centres appartenant à l'enveloppe convexe du support. Sur la
+famille ci-dessus, le quotient exact vaut environ `68 735,56`, mais il compare
+des sommets q4 à toutes les sorties q2--q4 et ne constitue pas un taux de rejet
+homogène. Ce constat ne donne aucune économie de travail automatique. Tester la
+positivité avant l'émission évite de stocker un transit non positif ; si ses
+quatre points ont déjà été formés et son centre calculé, son coût de proposition
+est payé. La génération locale doit donc publier et faire passer la pente de
+`q2/q3/q4_products_considered`, pas seulement celle des émissions.
 
-## 5. Pourquoi cette route franchit `10^7`, et pourquoi les autres non
+## 5. Ce qu'il faudrait recevoir avant de viser `10^7`
 
 | ressource | route par paires | route par fenêtre locale |
 | --- | --- | --- |
-| travail | `n^{1,8}` mesuré : `~10^{13}` tests à `10^7` | `O(n)` fois une constante explicite `M` |
-| état vivant | frontières et masques par paire | `M` indices par point, en registres/shared |
-| sortie | non bornée | `~480` supports par point, **streamés** |
-| découpe | aucune | le nuage se tuile spatialement, chaque tuile est indépendante |
+| travail | `n^{1,8}` mesuré : `~10^{13}` tests à `10^7` | inconnu ; l'énumération naïve vaut `M+C(M,2)+C(M,3)` propositions par ancre |
+| état vivant | frontières et masques par paire si matérialisés | fenêtres des seules ancres actives, index global et résiduel borné ou spillable |
+| sortie | non bornée | espérance Poisson `~480` par point, sans borne au pire cas ; stream obligatoire |
+| découpe | les relations peuvent être tuilées, sans devenir sparse pour autant | sous-nuages non indépendants ; RLE, niveaux, lots et fold exigent une ordonnance globale |
 
-Le point décisif pour `10^7` n'est pas le débit : c'est que **les supports ne
-sont jamais résidents**. Les `4,8` milliards attendus sous Poisson sont réduits
-à la volée.
+Le point décisif pour `10^7` n'est pas le seul débit : les supports ne peuvent
+pas tous rester résidents. Les `4,8` milliards attendus sous Poisson doivent
+être streamés ou réduits à la volée, tout en conservant une ordonnance globale
+exacte. Cette espérance n'est ni une borne de sortie, ni une preuve que la
+réduction est possible avec un état borné.
 
 **Correction : le nuage ne coûte pas 60 Mo.** Écrire « le nuage occupe 60 Mo,
 donc le nuage et le fold tiennent » était une erreur de comptabilité. Les
@@ -294,16 +298,20 @@ planchers réels, à `n=10^7` :
 | objet | taille si matérialisé |
 | --- | ---: |
 | coordonnées seules, `3*u16` | `60 Mo` |
-| un `PointId:u32` par point | `40 Mo` |
+| un index dense `u32` par point | `40 Mo` |
+| un `PointId:u64` durable par point | `80 Mo` |
 | une coupure carrée `u64` par point | `80 Mo` |
 | listes explicites `M=128`, indices u32 | `5,12 Go` |
 | listes explicites `M=256`, indices u32 | `10,24 Go` |
+| snapshot de traversée reçu, `192n-80` octets | `1 919 999 920` octets, environ `1,79 Gio` |
 
-Les listes `W_M(a)` ne doivent donc **jamais** être toutes résidentes : elles se
-calculent par tuile et vivent en registres ou en shared pour les seules ancres
-actives. Un LBVH binaire ajoute presque `2n` nœuds avec leurs boîtes, ranges et
-clés. Le fold porte des handles de facettes et de carriers — un DSU des seuls
-`PointId` est **incorrect** dès les ordres supérieurs.
+La ligne enregistrée emploie un `PointId:u64`; un `DensePointIndex:u32` est une
+identité locale distincte et exige une bijection durable. Les listes `W_M(a)`
+ne doivent donc **jamais** être toutes résidentes : elles se calculent par tuile
+et vivent dans les mémoires rapides pour les seules ancres actives. Le layout
+de traversée reçu inclut déjà coordonnées, `PointId` en ordre Morton et
+`2n-1` nœuds de 80 octets. Le fold porte des handles de facettes et de carriers
+— un DSU des seuls `PointId` est **incorrect** dès les ordres supérieurs.
 
 **Correction : les tuiles ne sont pas indépendantes.** `delta_out` est le
 résultat d'une requête **globale**, pas un halo connu d'avance ; une tuile ne
@@ -326,9 +334,10 @@ déjà reçus dans l'architecture sont des suites de lots exacts complets, pas d
 sous-nuages spatiaux. La couture spatiale avec halo est une **nouvelle
 obligation de preuve**.
 
-À l'inverse, aucune route par paires ne se tuile même en principe : la paire
-`(a,b)` traverse les tuiles par construction, et son état est proportionnel au
-nombre de paires.
+Une relation de paires peut être partitionnée en tuiles `A times B`; ce
+découpage ne la rend toutefois ni sparse, ni indépendante. Une paire
+transfrontière reste à couvrir et un état explicite proportionnel au nombre de
+paires reste interdit.
 
 Trois réserves, écrites franchement :
 
@@ -346,8 +355,10 @@ Trois réserves, écrites franchement :
 
 ### Étape 0 — dette d'exactitude ouverte par les audits du 13 août
 
-À solder avant toute nouvelle géométrie. Aucune de ces entrées n'est une
-optimisation.
+Le commit `519ddfb` ferme les entrées 1 à 5 et une partie de 7 ci-dessous ; le
+rejeu indépendant est rapporté dans `AUDIT_ETAT_COURANT.md`. Les autres restent
+à solder avant de promouvoir une nouvelle géométrie. Aucune de ces entrées
+n'est une optimisation.
 
 1. `smax` : vérifier `errno` après `strtoll`, borner **avant** tout cast en
    `int`, graver `LLONG_MAX`, `INT_MAX+1`, `3`, `borne+1` et suffixe. Le faux
@@ -380,7 +391,7 @@ Un sujet minimal qui, par point, construit `W(a)`, énumère les supports
 positifs locaux et publie la partition exacte
 `certifie + residuel = total`, avec le juge par identités `(BallKey, S, I_B,
 U_B)` d'un oracle rationnel indépendant sur petit `n`. Mutants obligatoires :
-fenêtre tronquée, positivité omise, certificat `2R<d_M` inversé, `I_B` compté
+fenêtre tronquée, positivité omise, certificat `4R^2<delta_out^2` inversé, `I_B` compté
 hors fenêtre, owner dupliqué. La porte échoue si le résiduel est vide — un
 certificat qui ne renonce jamais est faux.
 
@@ -389,14 +400,17 @@ certificat qui ne renonce jamais est faux.
 C'est le vrai travail algorithmique et il n'est pas encore écrit. Contrainte :
 ne jamais former `C(M,4)`. La piste est la construction locale par arités
 croissantes avec transport du niveau, restreinte à la fenêtre et filtrée par
-positivité avant émission. Elle doit publier son propre coût par point et
-mourir si celui-ci n'est pas plat en `n`.
+positivité avant émission. Elle doit publier son propre coût et échouer si deux
+pentes successives d'un compteur dominant dépassent `1,35`, sans confondre ce
+seuil avec une preuve linéaire.
 
 ### Étape 3 — le résiduel directionnel
 
-Les cellules ouvertes d'une ancre sont calculées, pas devinées. Le balayage
-exact par direction reprend `exact_ray_sweep` et lui donne enfin un juge de
-complétude et une rampe.
+Les cellules ouvertes d'une ancre sont calculées, pas devinées. Le résiduel met
+en concurrence un front directionnel exact, le lift collectif
+`A_endpoint times B_partner times C_witness` et les certificats collectifs de
+[`AUDIT_DEBLOCAGE_COLLECTIF_APRES_FENETRE_20260813.md`](AUDIT_DEBLOCAGE_COLLECTIF_APRES_FENETRE_20260813.md).
+`exact_ray_sweep` reste un juge à paire déjà fournie, pas le générateur complet.
 
 ### Étape 4 — raccord owner/RLE/census/fold, puis `BenchmarkOutputContract-v1`
 
@@ -417,10 +431,12 @@ preuve. Session gardée `gcp-migration/`, VM SPOT, double coupe-circuit,
 
 ### Étape 7 — l'horizon `10^7`
 
-Tuilage spatial avec halo dimensionné par `d_M`, fold inter-tuiles par
-composantes, index `u32` au-delà de `65 535` points — le `DensePointIndex:u16`
-actuel est une limite d'implémentation, pas de mathématiques, et il doit être
-nommé comme telle dès maintenant. Sortie streamée, jamais résidente.
+Index ou annuaire global certifiant les requêtes k-NN, fenêtres par tuiles de
+travail, résiduel trans-tuile, runs triés et merge multiway global des niveaux
+et lots. Le fold porte des handles de facettes/carriers et aucune contraction
+locale n'est commise sans certificat de coupe. Un index dense `u32` au-delà de
+`65 535` points reste distinct du `PointId:u64` durable. Sortie streamée, mais
+lot égal et verticales fermés globalement avant tout checkpoint scientifique.
 
 ## 7. Non-claims
 
@@ -451,15 +467,17 @@ telles qu'elles ont été posées, avec leur réponse.
   facteur. L'étape 2 doit prouver qu'elle ne forme pas ces transits, avec
   `q4_products_considered`, `lifts`, `positivity_tests`, `positive_candidates`
   et `emitted_supports`.
-- **Q3 — non.** Aucun analogue de Yao à l'ordre `k` n'existe pour l'objet Morse
-  3D, ni au dépôt ni dans la recherche ciblée. Chazelle et al. montrent même
+- **Q3 — aucun analogue reçu.** Aucun analogue de Yao applicable à l'ordre `k`
+  n'a été trouvé pour l'objet Morse 3D, ni au dépôt ni dans la recherche ciblée.
+  Chazelle et al. montrent même
   qu'un Gabriel ordinaire peut avoir `Omega(n^2)` arêtes en dimension trois, et
   un corollaire d'audit ferme la variante littérale sur les facettes avec
   `Omega(m^2)` arêtes dans une même composante. La route reste
   **conditionnellement locale**, jamais inconditionnellement linéaire.
 - **Q4 — non.** Un support long peut être la première liaison entre deux amas
-  ou deux feuilles de surface. La direction normale ouverte n'est pas un
-  certificat d'absence de fusion. La fixture E5 le rend concret : une incidence
+  ou deux feuilles de surface. Une cellule ouverte qui rencontre encore le cône
+  tangent positif n'est pas un certificat d'absence de fusion. La fixture E5 le
+  rend concret : une incidence
   silencieuse ne fusionne pas immédiatement, mais installe une facette qui
   porte une fusion ultérieure. L'étape 3 reste.
 - **Q5 — voir la section 5 corrigée.**

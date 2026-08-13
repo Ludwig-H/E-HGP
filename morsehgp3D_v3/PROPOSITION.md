@@ -1555,6 +1555,23 @@ ce cône est vide de supports positifs, même à rayon arbitraire. Toute cellule
 qui l'intersecte reste fail-open : ce test ne remplace ni la coupure radiale,
 ni l'oracle de minimum sortant, ni le fold.
 
+Le résiduel ne doit pas commencer par une nouvelle boucle sur les paires. Dans
+les 432 sous-cônes rationnels déjà reçus, `25r^2<=9D^2` certifie q4 et
+`64r^2<=25D^2` certifie q3 pour une candidature d'arête maximale. Le top-8,
+top-9 et top-10 par hauteur de cône, puis le report des seules cibles sous le
+cutoff, se factorisent en requêtes de dominance. Les fermetures dirigées se
+fusionnent par `OR`, les résiduels par `AND`. Des groupes coniques de trois
+témoins et un cœur commun WSPD sont deux étages exacts supplémentaires ; leur
+échec reste factorisé dans un relation-tree `A×B×C`. La preuve, les fixtures et
+la gate commune sont dans
+[`AUDIT_DEBLOCAGE_COLLECTIF_APRES_FENETRE_20260813.md`](audits/AUDIT_DEBLOCAGE_COLLECTIF_APRES_FENETRE_20260813.md).
+Le premier prototype de fenêtre sert uniquement à recevoir ce lemme et son
+census sur petit `n`. Avant toute réutilisation, son juge reconstruit son propre
+top-M/premier omis, compare les ensembles `I_B/U_B` et la clé rationnelle de
+boule, impose la positivité au fast path Jung et retire tout overflow signé des
+mutants. Le contre-audit pincé est
+[`AUDIT_WORKTREE_WINDOW_SOURCE_20260813.md`](audits/AUDIT_WORKTREE_WINDOW_SOURCE_20260813.md).
+
 ### 11.2 Tuilage spatial et fold
 
 À dix millions de points, les listes de voisins et les supports sont calculés

@@ -14,6 +14,15 @@ blob Git `fcc9dec50173878673f9497e0f654e15f0de436e`, SHA-256
 `c603be69c7b5801b98894bebcee6fd98c5e0de55ba3f167e028ce8c313092c42`,
 au `HEAD=ea1acc65c3947640389eb971a45c6799feffe727`.
 
+Depuis ce pin, Claude a intégré les trois rétractations principales et la
+coupure au premier site omis au commit documentaire
+`471715a68950afa9bba34edc2ac5db30724ff539`. La version relue après cohérence
+porte le SHA-256
+`3115744d008ca89339a5a246a2b9a5fae7bd358f54487ecb7beddbe5562593e0`.
+Le commit logiciel parent `519ddfbaee60007e927bb148b9fb83451d7af7bc`
+répare séparément le juge cône ; son rejeu est traité en section 9 et dans
+[`AUDIT_ETAT_COURANT.md`](AUDIT_ETAT_COURANT.md).
+
 ## Verdict exécutif
 
 La fenêtre k-NN ouvre un **fast path exact a posteriori**, mais pas encore une
@@ -273,8 +282,9 @@ composantes, les naissances et les lots égaux du H0 normalisé, pas seulement
 ## 5. Q4 — les directions ouvertes ne sont pas H0-inertes par nature
 
 Un support long peut être la première liaison entre deux amas ou deux feuilles
-de surface dont tous les événements plus courts sont internes. La direction
-normale ouverte n'est donc pas un certificat d'absence de fusion.
+de surface dont tous les événements plus courts sont internes. Une cellule
+ouverte qui rencontre encore le cône tangent positif n'est donc pas un
+certificat d'absence de fusion.
 
 La propriété de coupe de Boruvka s'applique après avoir défini un graphe pondéré
 complet, ou si un oracle implicite renvoie exactement un minimum sortant pour
@@ -339,19 +349,27 @@ illustrent l'obligation de ledger :
 | objet | taille si matérialisé à `n=10^7` |
 | --- | ---: |
 | coordonnées seules, `3*u16` | `60 MB` |
-| un `PointId:u32` par point | `40 MB` |
+| un index dense `u32` par point | `40 MB` |
+| un `PointId:u64` durable par point | `80 MB` |
 | une coupure carrée `u64` par point | `80 MB` |
 | listes explicites `M=128`, indices u32 | `5,12 GB` |
 | listes explicites `M=256`, indices u32 | `10,24 GB` |
-| dix forêts ayant chacune `n-1` arêtes, deux endpoints u32 seulement | environ `0,80 GB`, illustration conditionnelle |
+| snapshot de traversée reçu, `192n-80` octets | `1 919 999 920` octets, environ `1,79 GiB` |
+| DSU illustratif de `10^7` handles, parent+rang u32 | `80 MB` par ordre ; cardinal réel des handles inconnu |
+| naissances+nœuds singleton du reducer actuel, `160n+144n` | `3,04 GB` pour un seul ordre, sans locator ni payload |
 
-La dernière ligne n'est pas une borne normative sur le nombre de records de la
-forêt ; elle illustre seulement pourquoi les 60 Mo ne suffisent pas. Elle omet
-niveaux rationnels, nœuds internes, lots, verticales et certificat. Un LBVH
-binaire possède presque `2n` nœuds ; ses enfants, boîtes,
-ranges, clés Morton et workspaces doivent être comptés selon le layout réel.
-La note ne peut donc pas conclure « le nuage et le fold tiennent » depuis les
-seuls 60 Mo.
+La ligne enregistrée définit `PointId` en `u64`; un index dense `u32` est une
+identité locale différente, dont la bijection durable et l'index inverse se
+comptent séparément. Le snapshot de référence contient les trois coordonnées,
+les `PointId` en ordre Morton et `2n-1` nœuds de 80 octets ; le LBVH seul
+approche `1,6 GB`. Les chiffres DSU ne sont que des illustrations : aux ordres
+supérieurs les handles sont des facettes/carriers en cardinal inconnu et un DSU
+de points est faux. Le layout structurel actuel coûte déjà 160 octets par
+naissance et 144 par nœud ; le diagnostic `births-only` à un million de points
+publie `654 492 KiB` de RSS, mais le plan de tests interdit de l'extrapoler.
+Niveaux rationnels, lots, verticales, locator, workspaces et certificat restent
+en sus. La note ne peut donc pas conclure « le nuage et le fold tiennent »
+depuis les seuls 60 Mo.
 
 ### 6.2 Ensemble résident candidat
 
@@ -395,6 +413,22 @@ Le protocole exact minimal est :
    prouvant qu'aucun événement inter-tuile de niveau inférieur ou égal n'a été
    omis ;
 7. raccord global des verticales et du certificat final.
+
+Le point 4 doit s'accompagner soit d'un front global monotone muni d'un
+watermark exact, soit de runs triés externalisés puis d'un merge multiway
+global. La seconde option économise la VRAM, mais paie un stockage et des I/O
+proportionnels au stream : elle n'est pas « sans catalogue » au sens physique.
+Un lot égal peut être spillé ou traité en plusieurs passes, mais aucun
+checkpoint scientifique n'est commis avant sa fermeture complète.
+
+Les verticales ne ciblent pas le `MergeNode` figé à sa naissance : elles
+consultent le dernier état post-lot fermé de l'ordre inférieur au niveau de la
+flèche. La fixture
+`tests/fixtures/regressions/vertical_q1_growth_target.json` prouve qu'une
+croissance q1 dans une autre tuile peut rendre une ancre locale prématurée
+fausse. Il faut donc conserver ou joindre extérieurement
+`(event_id,source_order,ExactLevel)` jusqu'à la fermeture globale du lot
+inférieur, puis vérifier totalité et naturalité.
 
 Réduire chaque tuile à sa composante finale puis fusionner ces composantes perd
 les niveaux de connexion, les lots simultanés et potentiellement les verticales.
@@ -458,8 +492,40 @@ mêmes couvertures et mêmes verticales. Elles incluent un support trans-tuile,
 une même boule proposée par plusieurs halos, un shell distant, E5, un lot égal
 inter-tuile et une reprise après interruption juste avant le commit global.
 
-Le delta logiciel live du juge spindle observé pendant cette rédaction est en
-cours chez Claude. Il n'est pas inclus dans ce verdict et aucun fichier
-d'implémentation n'a été modifié par l'auditeur.
+## 9. Réponse à la note P0 et décision sur le virage
+
+La note
+[`NOTE_CLAUDE_REPARATIONS_P0_CONE_20260813.md`](NOTE_CLAUDE_REPARATIONS_P0_CONE_20260813.md)
+est recevable dans sa portée bornée. Sur les octets du commit `519ddfb`, la
+configuration Release et le build complet réussissent, l'inventaire contient
+`612` CTests dont `39` cône, et le rejeu
+`ctest --test-dir build/v3 --output-on-failure -R '^mhgp3v_cone_'` rend `39/39`
+en `34,96 s`. `LLONG_MAX` et la cardinalité tronquée sont refusés en code 2 ;
+les trois lanes donnent zéro désaccord et le mutant d'héritage est tué.
+
+Cette réparation reste partielle. Un build temporaire UBSan avec
+`-fno-sanitize-recover` échoue encore dans `spindle_cone.hpp` sur le mutant
+`narrow-i64`, exécuté par les fixtures ; les réflexions annoncées ne couvrent
+que six permutations sur les 48 permutations signées ; banque exhaustive,
+caps mordants, ledgers non vacués, résiduel consommable, portes regex et ABI
+CUDA restent ouverts comme Claude l'écrit lui-même. Le vert `39/39` reçoit donc
+le juge ponctuel réparé, pas un producteur industriel.
+
+Réponse à sa question 9 : **le virage vers la génération locale n'est pas
+prématuré comme fast path expérimental**, car les pentes de la DFS par endpoint
+ont déjà déclenché le NO-GO. En revanche, **quitter entièrement le lift
+collectif est prématuré**. La fenêtre certifie seulement une sous-source ; tant
+qu'un résiduel complet n'a pas son domaine, son oracle et sa rampe, le lift
+`A_endpoint times B_partner times C_witness` reste le contrôle exact et l'un
+des candidats naturels pour ce résiduel. Il ne faut pas porter littéralement
+la DFS ponctuelle sur CUDA. Il faut finir la fenêtre comme baseline/oracle borné
+distinct, puis comparer sur le même univers trois fronts collectifs : dominance,
+dominance enrichie des groupes coniques, et WSPD/cœur commun suivi d'un
+relation-tree. Leurs fermetures n'ont pas à être identiques ; chacune doit être
+rejouée sans faux prune et publier des métriques comparables. La voie retenue
+ferme ses identités et deux pentes `<=1,35`. La gate est spécifiée dans
+[`AUDIT_DEBLOCAGE_COLLECTIF_APRES_FENETRE_20260813.md`](AUDIT_DEBLOCAGE_COLLECTIF_APRES_FENETRE_20260813.md).
+
+Aucun fichier d'implémentation n'a été modifié par l'auditeur.
 
 GCP non utilisé.
