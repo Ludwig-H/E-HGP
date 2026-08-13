@@ -334,6 +334,7 @@ int main(int argc, char** argv) {
   std::string family = "uniform";
   std::vector<long long> ns;
   long long coord = 65535, budget = 24, leaf = 8, seed = 12345, selftest = 20000;
+  long long budget_depth = 0;   // si > 0 : budget = budget_depth * ceil(log2(n/leaf))
   int lane_raw = 0;
   double max_slope = 1.35;
   long long min_closed_pct = 0, min_all = 0, min_none = 0, min_mixed = 0;
@@ -354,6 +355,13 @@ int main(int argc, char** argv) {
     }
     else if (a.rfind("--coord=", 0) == 0) coord = arg_ll(val("--coord=").c_str(), 16, 65535, "coord");
     else if (a.rfind("--budget=", 0) == 0) budget = arg_ll(val("--budget=").c_str(), 1, 1000000, "budget");
+    // BUDGET PROPORTIONNEL A LA PROFONDEUR. Atteindre un noeud temoin au niveau
+    // des feuilles coute environ `2 log2(n/leaf)` classifications ; un budget
+    // CONSTANT est donc sous le seuil des que l'arbre grandit, et fabrique une
+    // pente superieure a un qui ne doit rien a la geometrie (reçu G4 du
+    // 13 aout : budget 24 refuse partout, budget 48 passe).
+    else if (a.rfind("--budget-depth=", 0) == 0)
+      budget_depth = arg_ll(val("--budget-depth=").c_str(), 1, 64, "budget-depth");
     else if (a.rfind("--leaf=", 0) == 0) leaf = arg_ll(val("--leaf=").c_str(), 1, 4096, "leaf");
     else if (a.rfind("--lane=", 0) == 0) lane_raw = (int)arg_ll(val("--lane=").c_str(), 0, 2, "lane");
     else if (a.rfind("--seed=", 0) == 0) seed = arg_ll(val("--seed=").c_str(), 0, (1LL << 40), "seed");
@@ -417,8 +425,15 @@ int main(int argc, char** argv) {
     t.nodes.reserve(4 * t.pts.size());
     build(&t, 0, (int)t.pts.size(), (int)leaf);
     Counters c{};
+    long long eff_budget = budget;
+    if (budget_depth > 0) {
+      long long depth = 0;
+      for (long long q = (long long)t.pts.size() / std::max<long long>(leaf, 1); q > 1; q >>= 1) ++depth;
+      ++depth;
+      eff_budget = budget_depth * depth;
+    }
     const RectLane lane = (RectLane)lane_raw;
-    solve(t, 0, 0, lane, budget, inject, &c, stop_wsp);
+    solve(t, 0, 0, lane, eff_budget, inject, &c, stop_wsp);
     const long long m = (long long)t.pts.size();
     const long long tot = m * (m - 1) / 2;
     if (c.mass_closed + c.mass_positive + c.mass_keep_anchor + c.mass_residual != tot) {
@@ -429,11 +444,11 @@ int main(int argc, char** argv) {
     std::printf("n=%lld famille=%s lane=q%d digest=%016llx"
                 " | visites=%lld fermes=%lld positifs_q2=%lld keep_anchor=%lld residuels=%lld capes=%lld"
                 " | masse_fermee=%lld masse_positive=%lld masse_keep_anchor=%lld masse_residuelle=%lld"
-                " pct_ferme=%.2f pct_decide=%.2f"
+                " budget=%lld pct_ferme=%.2f pct_decide=%.2f"
                 " | eval=%lld ALL=%lld NONE=%lld MIXED=%lld Wmax=%lld front/pt=%.3f\n",
                 m, family.c_str(), lane_raw + 2, digest,
                 c.rect_visited, c.rect_closed, c.rect_positive, c.rect_keep_anchor, c.rect_residual, c.rect_capped,
-                c.mass_closed, c.mass_positive, c.mass_keep_anchor, c.mass_residual,
+                c.mass_closed, c.mass_positive, c.mass_keep_anchor, c.mass_residual, eff_budget,
                 100.0 * (double)c.mass_closed / (double)tot,
                 100.0 * (double)(c.mass_closed + c.mass_positive) / (double)tot,
                 c.evals, c.all_hits, c.none_hits, c.mixed_hits, c.w_high,
@@ -442,9 +457,9 @@ int main(int argc, char** argv) {
     visited_per_n.push_back((double)c.rect_visited);
     agg.all_hits += c.all_hits; agg.none_hits += c.none_hits; agg.mixed_hits += c.mixed_hits;
     agg.mass_closed += c.mass_closed;
-    if (c.evals > budget * c.rect_visited) {
+    if (c.evals > eff_budget * c.rect_visited) {
       std::fprintf(stderr, "INVARIANT VIOLE: %lld classifications pour %lld rectangles a budget %lld\n",
-                   c.evals, c.rect_visited, budget);
+                   c.evals, c.rect_visited, eff_budget);
       return 3;
     }
     if (k + 1 == ns.size() && min_closed_pct > 0 &&

@@ -22,9 +22,16 @@
 #
 # LA QUESTION MESUREE est celle de la note `NOTE_CLAUDE_DESCENTE_JOINTE` :
 #
-#     a budget BORNE par rectangle, la masse residuelle du front de rectangles
-#     reste-t-elle sous les deux pentes contractuelles sur les QUATRE familles,
-#     et le nombre de rectangles VISITES devient-il lineaire ?
+#     a budget PROPORTIONNEL A LA PROFONDEUR — `c log2(n/leaf)` classifications
+#     par rectangle —, les deux pentes contractuelles tiennent-elles sur les
+#     QUATRE familles et les trois lanes ?
+#
+# La session precedente a mesure un budget CONSTANT de 24 et refuse partout.
+# Sa cause est etablie par son propre balayage : atteindre un noeud temoin au
+# niveau des feuilles coute environ `2 log2(n/leaf)` classifications, soit 25 a
+# 50 000 et 27 a 100 000, si bien qu'un budget de 24 etait SOUS le seuil et que
+# la pente mesuree ne devait rien a la geometrie. A budget 48 la meme famille
+# passe : 97,41 % ferme, pentes 1,190 / 1,301.
 #
 # Le cardinal du FRONT est `O(n)` par theoreme (Callahan-Kosaraju) ; ce qui
 # n'est pas acquis est le nombre de rectangles INTERMEDIAIRES que la recursion
@@ -82,9 +89,16 @@ echo "generation verrouillee : ${GENERATION}" | tee -a "${LOG}"
 cleanup() {
   local rc=$?
   echo "--- arret certifie (rc=${rc}) ---" | tee -a "${LOG}"
+  # FAIL-CLOSED (audit `96be8e0`, section 10). Un arret cible illisible doit
+  # BLOQUER, jamais etre avale par `|| true` : c'est le passage de relais.
+  local stop_rc=0
   ./gcp-migration/stop_and_verify.sh --yes \
-    --expected-last-start-timestamp "${GENERATION}" 2>&1 | tee -a "${LOG}" || true
+    --expected-last-start-timestamp "${GENERATION}" 2>&1 | tee -a "${LOG}" || stop_rc=$?
   echo "journal complet : ${LOG}"
+  if [ "${stop_rc}" -ne 0 ]; then
+    echo "[ARRET NON CERTIFIE] stop_and_verify a rendu ${stop_rc} — echec bloquant" | tee -a "${LOG}"
+    exit 70
+  fi
   exit "${rc}"
 }
 trap cleanup EXIT
@@ -102,7 +116,7 @@ gcloud compute scp "${TAR}" "${GCP_INSTANCE_NAME}:/tmp/v3.tgz" \
   --ssh-key-expiration="${GCP_SSH_KEY_EXPIRATION_UTC}" 2>&1 | tee -a "${LOG}"
 
 # ---- 5. Build CPU, puis VERIFICATION DE COMPILATION CUDA.
-"${SSH[@]}" 'set -e
+"${SSH[@]}" 'set -euo pipefail
   export PATH=$HOME/.local/bin:/usr/local/cuda/bin:$PATH
   python3 -m pip install --user --quiet --upgrade cmake >/dev/null 2>&1 || true
   export PATH=$HOME/.local/bin:$PATH
@@ -115,7 +129,7 @@ gcloud compute scp "${TAR}" "${GCP_INSTANCE_NAME}:/tmp/v3.tgz" \
 
 # La cible CUDA exige un worktree propre cote produit ; ici seule la
 # compilation de v3 nous interesse. Un echec est RAPPORTE, pas masque.
-"${SSH[@]}" 'set -e
+"${SSH[@]}" 'set -euo pipefail
   export PATH=$HOME/.local/bin:/usr/local/cuda/bin:$PATH
   cd ~/rectfront
   echo "=== compilation CUDA opt-in ==="
@@ -127,7 +141,7 @@ gcloud compute scp "${TAR}" "${GCP_INSTANCE_NAME}:/tmp/v3.tgz" \
 ' 2>&1 | tee -a "${LOG}"
 
 # ---- 6. Portes locales, reconstruites sur la VM. Rejeu independant.
-"${SSH[@]}" 'set -e
+"${SSH[@]}" 'set -euo pipefail
   export PATH=$HOME/.local/bin:$PATH
   cd ~/rectfront
   ctest --test-dir build --output-on-failure -j24 \
@@ -140,7 +154,7 @@ gcloud compute scp "${TAR}" "${GCP_INSTANCE_NAME}:/tmp/v3.tgz" \
 # simultanement, pas un run plus vite. Chaque ligne publie le condensat du
 # nuage, la masse fermee ET residuelle, les rectangles VISITES, et les trois
 # compteurs de verdict — planchers contre le vert-par-vacuite.
-"${SSH[@]}" 'set -e
+"${SSH[@]}" 'set -euo pipefail
   export PATH=$HOME/.local/bin:$PATH
   cd ~/rectfront
   P=./build/mhgp3v_rect_front_probe
@@ -158,7 +172,7 @@ gcloud compute scp "${TAR}" "${GCP_INSTANCE_NAME}:/tmp/v3.tgz" \
 
 # ---- 8. Balayage de budget sur la famille la plus dure, pour situer le
 # compromis couverture / borne. Le budget est la raison de front RESOURCE_CAP.
-"${SSH[@]}" 'set -e
+"${SSH[@]}" 'set -euo pipefail
   export PATH=$HOME/.local/bin:$PATH
   cd ~/rectfront
   P=./build/mhgp3v_rect_front_probe
@@ -166,12 +180,12 @@ gcloud compute scp "${TAR}" "${GCP_INSTANCE_NAME}:/tmp/v3.tgz" \
     ( $P --family=eight_clusters --lane=0 --points=12500,25000,50000 --budget=$b          --leaf=8 --selftest=0 > out/budget_$b.txt 2>&1; echo "code=$?" >> out/budget_$b.txt ) &
   done
   wait
-  echo "=== BALAYAGE DE BUDGET (eight_clusters, q2) ==="
-  for b in 8 16 24 48 96 192; do echo "--- budget=$b"; cat out/budget_$b.txt; done
+  echo "=== BALAYAGE DE BUDGET-PROFONDEUR (eight_clusters, q2) ==="
+  for b in 2 3 4 5 6 8; do echo "--- budget-depth=$b"; cat out/budget_$b.txt; done
 ' 2>&1 | tee -a "${LOG}"
 
 # ---- 9. Balayage de la taille de feuille : le grain du front.
-"${SSH[@]}" 'set -e
+"${SSH[@]}" 'set -euo pipefail
   export PATH=$HOME/.local/bin:$PATH
   cd ~/rectfront
   P=./build/mhgp3v_rect_front_probe
@@ -179,7 +193,7 @@ gcloud compute scp "${TAR}" "${GCP_INSTANCE_NAME}:/tmp/v3.tgz" \
     ( $P --family=uniform --lane=0 --points=12500,25000,50000 --budget=24          --leaf=$lf --selftest=0 > out/leaf_$lf.txt 2>&1; echo "code=$?" >> out/leaf_$lf.txt ) &
   done
   wait
-  echo "=== BALAYAGE DE FEUILLE (uniform, q2, budget 24) ==="
+  echo "=== BALAYAGE DE FEUILLE (uniform, q2, budget-depth 4) ==="
   for lf in 4 8 16 32 64; do echo "--- leaf=$lf"; cat out/leaf_$lf.txt; done
 ' 2>&1 | tee -a "${LOG}"
 
