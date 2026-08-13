@@ -180,7 +180,9 @@ mais reste P0 rouge : son selftest trouve une omission et son cas `h=2`
 confond la droite projective avec le segment, ce qui produit une fausse
 inclusion explicite dans `U00`. Son autre désaccord vient d'un pivot Jarvis au
 milieu d'une arête : la marche cycle puis son cap fabrique un faux hull. Le tri
-projectif total et les chaînes monotones sont la baseline proposée.
+projectif total et les chaînes monotones sont la baseline proposée. L'ajout
+ultérieur des carriers rang un/deux ne canonicalise toujours pas les directions
+dupliquées : un exhaustif borné conserve faux positifs et faux négatifs.
 Pour éviter de retomber à une tâche par ancre, une ancre de bloc peut proposer
 un carrier d'au plus neuf IDs, puis les huit coins de l'AABB le recertifient :
 les déterminants coniques sont affines en l'ancre et la marge H2 est concave.

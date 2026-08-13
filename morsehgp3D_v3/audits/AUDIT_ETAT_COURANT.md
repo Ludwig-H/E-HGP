@@ -39,6 +39,11 @@ indépendants empêchent cette seule dégénérescence de fermer une cellule sai
 mais l'équivalence hull--Carathéodory est déjà réfutée. Aucun résultat du pin
 commité n'est transféré à ce worktree.
 
+Le header a ensuite avancé à `69b02684...` en ajoutant les rangs un et deux,
+sans canonicaliser les directions projectives dupliquées ni réparer `h==2`.
+Un exhaustif borné conserve `51` faux positifs et `294` faux négatifs ; un
+selftest aléatoire vert ne les reçoit donc pas.
+
 Le successeur cœur est pincé par `common_core_probe.cpp=4660fe37...` et
 `CMakeLists.txt=a667047d...`. Il intègre quatre corrections fondées : suppression
 du retrait arbitraire de deux occupants, compteurs vide/sous-plein séparés,

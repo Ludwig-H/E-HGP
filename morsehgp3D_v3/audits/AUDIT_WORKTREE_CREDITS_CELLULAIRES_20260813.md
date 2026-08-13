@@ -148,7 +148,7 @@ optimisation postérieure.
 ### Delta postérieur : enveloppe projective rouge
 
 Après ce pin, Claude a commencé l'enveloppe projective directement dans le
-worktree. Le snapshot audité porte
+worktree. Le snapshot du premier défaut porte
 `cell_credits.hpp=a43235431f7d7bde0f742b830023850076b57eff76765bb77cd921a2f5bbc1eb`
 et `cell_credits_probe.cpp=a03f8661de44174100075694c66f0ccdebe871542b8bc52f08734fcbd856adc6`.
 Le CMake reste `edf046d9...`. Le rebuild Release donne l'ELF
@@ -156,6 +156,15 @@ Le CMake reste `edf046d9...`. Le rebuild Release donne l'ELF
 mais son `--selftest` est rouge : `cellule 348`, rayon zéro, enveloppe `0`
 contre brute `1`, sur un pool de cinq membres. Le `8/8` du pin commité ne se
 transfère donc pas à ces octets.
+
+Le successeur courant
+`cell_credits.hpp=69b02684ee733e11b3063a86635610582e9c576a9884d14e525729cdf5784954`
+ajoute des carriers rang un et restitue deux IDs lorsqu'un poids de Cramer est
+nul. Il ne canonicalise toujours pas les directions projectives dupliquées et
+la branche dégénérée `h==2` reste inconditionnelle. Un exhaustif borné de
+`44 676` pools et `134 028` requêtes trouve encore `51` faux positifs, `294`
+faux négatifs, `513` hulls avec duplicats et `51` carriers faux. Le statut P0
+persiste, même si son selftest aléatoire courant peut passer.
 
 Il existe en outre une **fausse inclusion déterministe de rang deux**,
 indépendante de ce désaccord aléatoire. Dans la cellule `U00`, prendre
