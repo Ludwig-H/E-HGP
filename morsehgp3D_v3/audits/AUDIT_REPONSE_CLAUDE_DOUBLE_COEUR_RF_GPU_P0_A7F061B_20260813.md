@@ -239,17 +239,20 @@ Pour chaque rectangle :
    `(sum_i(4*z_i-m4_i)^2,PointId)` ;
 6. rejeter les IDs appartenant aux plages de `A` ou `B` via
    `relation_rank[PointId]` ;
-7. recertifier chaque singleton `C={z}` avec le classifieur entier commun.
+7. calculer `Dlo` une fois par rectangle puis `Vhi` pour chaque singleton et
+   rendre uniquement le masque central suffisant.
 
 La discontinuité de Morton peut faire manquer tous les bons témoins. C'est une
 perte de rappel admise, jamais une faute d'exactitude.
 
 ### 6.2 Masque commun et résultats
 
-Une recertification calcule une fois `Dlo`, `Vhi`, `Hmin/Hmax`, les bornes de
-distance et rend un masque `ALL_q2/ALL_q3/ALL_q4`. Les implications reçues
+Le P0 ne calcule ni `Hmin/Hmax`, ni `Lambda`, ni le fallback
+`Hmin^2/E2max*X2max`. Il calcule `Dlo` une fois par rectangle et `Vhi` par ID,
+puis rend le masque central `ALL_q2/ALL_q3/ALL_q4`. Les implications reçues
 sont `ALL_q4=>ALL_q3=>ALL_q2`. Un même `PointId` peut créditer plusieurs lanes,
-mais une seule fois par lane.
+mais une seule fois par lane. Tout échec de ce certificat étroit est délégué,
+même si le classifieur plus coûteux aurait pu fermer.
 
 Les compteurs saturent à `10/9/8`. Les seules issues P0 sont :
 
@@ -284,16 +287,18 @@ recertification en registres/shared, sans allocation ni `priority_queue`.
 Kernel K2 : scan et compactage stable des ordinals résiduels. Les buffers sont
 préalloués et résidents ; une seule synchronisation terminale mesure la tranche.
 
-Les produits q3/q4 atteignent environ 70 bits. CUDA doit employer deux limbes
-`U128{lo,hi}`, multiplication `64x64` avec high limb et comparaison stricte,
-avec parité hôte/device.
+Ce P0 tient entièrement en `u64`. Sous u16,
+`Dlo<=12884508675`, `Vhi<=51538034700`,
+`209*Vhi<=10771449252300<2^44` et le score de sélection est inférieur à
+`2^38`. La porte exige `wide_products=0`. Les deux limbes ne deviennent
+nécessaires qu'au P1 si le fallback par carrés de `H` et `E2*X2` est ajouté.
 
 ### 6.4 Enveloppe falsifiable
 
-Avec `F` rectangles, le travail est borné par `W*F` lectures et `L*F`
-recertifications. À `W=32`, `L=16` et `F=2,5 M`, cela donne 80 millions de
-lectures et 40 millions de recertifications. C'est une enveloppe d'ingénierie,
-pas un théorème sur `F`.
+Avec `F` rectangles, le travail est borné par `W*F` lectures et `L*F` tests
+`Vhi`, avec un seul `Dlo` par rectangle. À `W=32`, `L=16` et `F=2,5 M`, cela
+donne 80 millions de lectures et 40 millions de tests. C'est une enveloppe
+d'ingénierie, pas un théorème sur `F`.
 
 Une ABI `16 B` travail, `64 B` résultat et `4 B` ordinal résiduel demande
 `84F` octets. En ajoutant un fair-split tree `Node32`, clés Morton,
@@ -302,14 +307,18 @@ coordonnées, ordre et rang, une estimation est `84F+86n` octets : environ
 `F=2,5 M,n=50000`. Tout workspace de scan/tri et toute copie doivent encore
 être comptés dans le HWM.
 
-La porte de falsification, sur données déjà résidentes, est :
+La porte de falsification reçoit comme précondition un tape terminal WSPD hôte
+déjà reçu, transféré et résident. Elle ne mesure volontairement ni sa
+construction, ni la source :
 
 ```text
-p95(bank + recertification + compactage + handoff) <= 200 ms
+p95(bank + masque Dlo/Vhi + compactage + handoff) <= 200 ms
 ```
 
 sur 30 warms à 50 000 points. Dépasser 200 ms rend cette tranche `NO-GO` ;
-passer ne qualifie ni le `warm_e2e`, ni le SLO d'une seconde.
+passer ne qualifie ni le `warm_e2e`, ni le SLO d'une seconde. Le futur
+`warm_e2e` doit bien sûr réintégrer construction WSPD, transfert, source et
+fold.
 
 ## 7. Gates avant toute nouvelle session G4
 
@@ -324,7 +333,7 @@ Oracle exact petit `n` :
 - permutation, warp, block, nombre de threads et quantum ne changent pas le
   digest final.
 
-Mutants obligatoires : produit étroit i64, coefficients 3/4 inversés,
+Mutants obligatoires : produit étroit u32, coefficients 3/4 inversés,
 `>` remplacé par `>=`, garde `Dlo>0` omise, lane invalide, endpoint crédité,
 PointId dupliqué, parent et enfant comptés, résiduel perdu et fermeture q3/q4
 sans owner.
@@ -333,7 +342,7 @@ Rampe `12500/25000/50000`, au moins `uniform` et `eight_clusters` :
 
 - `front_records`, bytes et HWM ;
 - positions Morton lues, IDs bruts/distincts/dupliqués/endpoints ;
-- recertifications, produits larges et fermetures par lane ;
+- tests `Vhi`, `Dlo`, `wide_products=0` et fermetures par lane ;
 - records et masse résiduels, y compris tout ancien `KEEP_ANCHOR` ;
 - kernels, synchronisations, H2D/D2H et temps p50/p95 ;
 - deux pentes consécutives au plus `1,35` sur chaque compteur physique ; la

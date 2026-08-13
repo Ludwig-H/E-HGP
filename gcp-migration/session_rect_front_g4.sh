@@ -124,7 +124,7 @@ gcloud compute scp "${TAR}" "${GCP_INSTANCE_NAME}:/tmp/v3.tgz" \
   tar xzf /tmp/v3.tgz
   echo "coeurs=$(nproc)"; cmake --version | head -1; nvcc --version | tail -2
   cmake -S morsehgp3D_v3 -B build -DCMAKE_BUILD_TYPE=Release
-  cmake --build build --target mhgp3v_rect_front_probe -j48
+  cmake --build build --target mhgp3v_rect_front_probe mhgp3v_wspd_front_probe -j48
 ' 2>&1 | tee -a "${LOG}"
 
 # La cible CUDA exige un worktree propre cote produit ; ici seule la
@@ -145,7 +145,7 @@ gcloud compute scp "${TAR}" "${GCP_INSTANCE_NAME}:/tmp/v3.tgz" \
   export PATH=$HOME/.local/bin:$PATH
   cd ~/rectfront
   ctest --test-dir build --output-on-failure -j24 \
-    -R "^mhgp3v_rect_front_" 2>&1 | tail -25
+    -R "^mhgp3v_(rect|wspd)_front_" 2>&1 | tail -25
 ' 2>&1 | tee -a "${LOG}"
 
 # ---- 7. LA MESURE. Cinq familles x trois lanes en parallele, rampe longue.
@@ -168,6 +168,24 @@ gcloud compute scp "${TAR}" "${GCP_INSTANCE_NAME}:/tmp/v3.tgz" \
   wait || true   # un REFUS de porte (code 3) est un RESULTAT, pas une erreur
   echo "=== RESULTATS ==="
   for f in out/*.txt; do echo "--- $f"; cat "$f"; done
+' 2>&1 | tee -a "${LOG}"
+
+# ---- 7bis. WspdFrontLowerBound-v1 : l'ordonnance REELLEMENT candidate. On
+# mesure le cardinal du front WSPD, qui doit etre lineaire par theoreme, et la
+# fraction fermee par la classification unique a masque de lanes.
+"${SSH[@]}" 'set -euo pipefail
+  export PATH=$HOME/.local/bin:$PATH
+  cd ~/rectfront
+  W=./build/mhgp3v_wspd_front_probe
+  mkdir -p out
+  for fam in uniform terrain eight_clusters scanline_overlap_multiecho scanline_single_pass; do
+    for s in 1 2 4; do
+      ( $W --family=$fam --sep=$s --points=12500,25000,50000,100000 --quantum=64            > out/wspd_${fam}_s$s.txt 2>&1; echo "code=$?" >> out/wspd_${fam}_s$s.txt ) &
+    done
+  done
+  wait || true
+  echo "=== FRONT WSPD ==="
+  for f in out/wspd_*.txt; do echo "--- $f"; cat "$f"; done
 ' 2>&1 | tee -a "${LOG}"
 
 # ---- 8. Balayage de budget sur la famille la plus dure, pour situer le
