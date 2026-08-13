@@ -2295,6 +2295,14 @@ son plus petit `PointId`. Deux pentes supérieures à `1,35` sur `uniform` ou
 `eight_clusters`, ou une fenêtre quasi quadratique, rendent cette route
 `NO-GO` avant le shallow.
 
+La masse dirigée de `N_q` est le futur `PlaneTape` logique. Elle n'est
+matérialisée par `count--scan--fill` qu'après ce compteur, si sa pente, ses
+octets et son HWM passent. Cette expansion tardive d'une fenêtre certifiée
+sparse est distincte d'un fallback qui développerait la masse brute du WSPD.
+Chaque incidence `(a,b)` de la fenêtre devient alors une seule forme locale et
+est facturée explicitement ; si `sum_a |N_q(a)|` reste dense, la route s'arrête
+avant allocation.
+
 Une banque par distance n'est pas un cutoff projectif. Dans la chambre de
 rayons `(3,0,0),(3,1,0),(3,1,1)`, `s_near=(1,-2,0)` a norme carrée `5` mais
 activation `16`, tandis que `s_far=(4,0,0)` a norme carrée `16` mais activation

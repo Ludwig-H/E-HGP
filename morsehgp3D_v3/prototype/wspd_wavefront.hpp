@@ -56,6 +56,7 @@ struct WfNode {
   int level;              // nombre d'axes-bits complets fixes : cote = 2^(16-level)
   long long lo[3], hi[3]; // CELLULE de Morton, alignee
   long long tlo[3], thi[3]; // BOITE SERREE du contenu, incluse dans la cellule
+  int parent;               // pour la remontee ; -1 a la racine
 };
 
 // Longueur du prefixe commun de deux cles, avec depart par indice si egales.
@@ -127,6 +128,7 @@ inline std::vector<WfNode> wf_build(const std::vector<unsigned long long>& keys)
 inline void wf_tight_boxes(std::vector<WfNode>* nodes,
                            const std::vector<std::array<long long, 3>>& pts) {
   const int n = (int)nodes->size();
+  for (int i = 0; i < n; ++i) (*nodes)[i].parent = -1;
   std::vector<int> parent(n, -1);
   std::vector<int> order;
   order.reserve(n);
@@ -136,8 +138,10 @@ inline void wf_tight_boxes(std::vector<WfNode>* nodes,
   while (!st.empty()) {
     const int i = st.back(); st.pop_back();
     order.push_back(i);
-    if ((*nodes)[i].left >= 0) { parent[(*nodes)[i].left] = i; st.push_back((*nodes)[i].left); }
-    if ((*nodes)[i].right >= 0) { parent[(*nodes)[i].right] = i; st.push_back((*nodes)[i].right); }
+    if ((*nodes)[i].left >= 0) { parent[(*nodes)[i].left] = i; (*nodes)[(*nodes)[i].left].parent = i;
+                                 st.push_back((*nodes)[i].left); }
+    if ((*nodes)[i].right >= 0) { parent[(*nodes)[i].right] = i; (*nodes)[(*nodes)[i].right].parent = i;
+                                  st.push_back((*nodes)[i].right); }
   }
   for (auto it = order.rbegin(); it != order.rend(); ++it) {
     WfNode& v = (*nodes)[*it];

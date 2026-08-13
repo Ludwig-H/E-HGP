@@ -72,6 +72,9 @@ La conclusion doit toutefois rester bornée :
 - `279 k`, `230 k`, `258 k` sont trois estimations Monte-Carlo sur une seule
   famille et une seule taille, sans intervalle de confiance ni répétitions de
   graines ; leur proximité donne un contrôle de cohérence, pas un census reçu ;
+- si `E` désigne ce nombre de paires q2, `E/n` est un nombre d'arêtes par point
+  compté une fois ; le degré moyen du graphe vaut `2E/n`. Il ne faut donc pas
+  appeler `31` le degré moyen ;
 - le scan compte les témoins d'une **paire concrète tirée dans le rectangle**,
   pas les témoins communs à toutes les paires de `A×B` ; il ne localise donc pas
   à lui seul la perte entre géométrie du bloc, relaxation AABB et proposer ;
@@ -101,6 +104,26 @@ sur toutes les paires du bloc, calculable seulement sur petits blocs ;
 `N_hmin_aabb` et `N_central_all_cloud` isolent les pertes des deux certificats ;
 les deux derniers isolent la proposition. Sans ce ledger, « la discontinuité
 Morton est le goulet » reste trop fort.
+
+Fixture u16 permanente de la perte par coalescence, avant toute banque : après
+translation en coordonnées positives, prendre
+`A={(0,0,1),(0,6,1)}`, `B={(10,0,1),(10,6,1)}`. Les neuf points
+
+```text
+(4,3,0),(4,3,1),(4,3,2),
+(5,3,0),(5,3,1),(5,3,2),
+(6,3,0),(6,3,1),(6,3,2)
+```
+
+sont témoins q2 stricts de toutes les paires de `A×B`. Ajouter
+`z0=(5,0,1)` et `z1=(5,6,1)`. Chaque paire concrète possède au moins dix
+témoins stricts : les paires horizontales reçoivent respectivement `z0` ou
+`z1`, et les paires croisées reçoivent les deux. Mais `z0` échoue pour la paire
+horizontale haute et `z1` pour la paire horizontale basse ; l'intersection
+commune reste exactement les neuf premiers points. Ainsi `N_pair>=10` pour
+toutes les paires et `N_discrete_universal=9`. Aucun meilleur proposer ne peut
+fermer ce rectangle sans raffiner `A/B` ; confondre cet écart avec une perte de
+rappel est mathématiquement faux.
 
 ## 3. Deux corrections mathématiques à la note d'inflation
 
@@ -340,6 +363,44 @@ quasi quadratique, cette route est `NO-GO` avant d'écrire le kernel shallow.
 Si elle passe, le jalon suivant est `LocalShallowBall-v0`, puis census par
 `BallKey`. Ce n'est qu'après ces deux reçus que le choix final de `s` et une
 session G4 complète deviennent rationnels.
+
+### 8.1 Ordonnance bornée directement implémentable
+
+La banque de proposition n'a pas besoin d'être complète pour que la fenêtre le
+soit au sens requis : tout crédit effectivement émis est rejoué ; un candidat
+omis fait seulement perdre une fermeture et agrandir `N_q(a)`. En particulier,
+un bank k-NN borné est licite comme **proposer**, à condition de ne jamais
+interpréter son premier omis comme une borne d'activation.
+
+Le compteur v0 peut donc suivre cette ordonnance :
+
+1. pour chaque ancre `a`, obtenir au plus `K_bank` candidats par l'index spatial
+   reçu ;
+2. commencer par les `48` chambres de permutations signées, chacune décrite
+   par trois rayons entiers ; `432` cellules devient une ablation de rappel ;
+3. pour chaque candidat et chambre, calculer l'activation stricte exacte, trier
+   par `(activation,PointId)` et proposer des crédits disjoints ;
+4. publier `cutoff_q[CellId]` seulement après commit transactionnel de `h_q`
+   crédits rejouables ; sinon marquer la cellule ouverte ;
+5. parcourir un `PointTree` par ancre avec des tâches
+   `(AnchorId,CNodeKey,possible_cell_mask,lane_mask)` : un nœud entièrement
+   sous un suffixe reçu est `CLOSED`, un nœud entièrement sous le cutoff ou
+   dans une cellule ouverte est un span de `N_q(a)`, et tout mélange descend ;
+6. au quantum, émettre le `CNode` restant en span **ouvert** de `N_q(a)`. Le cap
+   agrandit la fenêtre mais ne perd jamais de co-sommet.
+
+Pour la chambre canonique `x>=y>=z>=0`, les tests de cellule et de hauteur sont
+des formes linéaires `x-y`, `y-z`, `z` et `x`. Leurs extrema sur l'AABB du
+nœud se calculent en temps constant. Les 48 symétries partagent donc le même
+classifieur ; une frontière ambiguë descend ou emploie un owner half-open au
+leaf, jamais un verdict optimiste.
+
+Cette forme évite le scan `n×n` : le coût déclaré est
+`bank_candidates + cell_activation_tests + reporter_node_tasks + output_spans`.
+Elle ne promet pas qu'il soit linéaire ; la gate le mesure. Un cap produit un
+span large, dont la masse logique entre dans `sum_a |N_q(a)|`, tandis que son
+coût physique reste un record. Le shallow n'est ouvert que si **les deux** —
+masse logique de la fenêtre et records/visites physiques — passent.
 
 ## 9. Rejeu local au pin
 

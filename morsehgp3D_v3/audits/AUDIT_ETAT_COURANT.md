@@ -102,7 +102,9 @@ distincts à toute sphère passant par l'ancre et la cible. Pour fermer un
 `BNode`, il faut encore authentifier ce certificat pour **toutes** ses cibles.
 La construction de la banque, les spans, `sum_a |N_q(a)|`, formes, octets/HWM
 et pentes doivent être reçus avant le shallow local. Les points hors fenêtre
-restent toujours dans le census global. Détails et contre-audit :
+restent toujours dans le census global. La masse dirigée de `N_q` peut devenir
+le `PlaneTape` physique seulement après cette porte ; développer directement
+la masse brute du WSPD reste interdit. Détails et contre-audit :
 [`AUDIT_REPONSE_FOURCHE_SOURCE_CENTRAL_VWAVE_DBA8961_20260813.md`](AUDIT_REPONSE_FOURCHE_SOURCE_CENTRAL_VWAVE_DBA8961_20260813.md).
 
 Le header WSPD reste incohérent avec le nouveau verdict : son SHA ci-dessus

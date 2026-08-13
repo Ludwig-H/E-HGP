@@ -67,7 +67,9 @@ co-sommets possibles. Le prochain falsificateur source est donc
 avant d'écrire le shallow. Si cette fenêtre passe, la route devient arrangement
 shallow **local** par ancre, RLE des centres par `BallKey`, census global une
 fois par boule, puis expansion tardive des `SupportKey`. Les points hors
-fenêtre restent obligatoires au census. Cette ordonnance évite tout join
+fenêtre restent obligatoires au census. La masse dirigée de `N_q` ne devient un
+`PlaneTape` matérialisé qu'après cette porte ; une fenêtre dense arrête la route
+avant allocation. Cette ordonnance évite tout join
 `PairId×carrier` et toute mosaïque globale d'ordre supérieur :
 [`AUDIT_REPONSE_FOURCHE_SOURCE_AF08B0E_20260813.md`](audits/AUDIT_REPONSE_FOURCHE_SOURCE_AF08B0E_20260813.md).
 

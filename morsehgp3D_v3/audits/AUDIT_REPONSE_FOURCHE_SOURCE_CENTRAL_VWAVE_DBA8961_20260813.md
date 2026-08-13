@@ -77,6 +77,13 @@ choix de `s` minimise donc le vecteur mesuré
 
 et non une colonne isolée de masse ou de pourcentage fermé.
 
+Une expansion tardive reste autorisée après une nouvelle réduction certifiée :
+si les crédits projectifs produisent une fenêtre dirigée `N_q(a)` dont
+`sum_a |N_q(a)|` passe les pentes et l'enveloppe mémoire, cette quantité devient
+le `PlaneTape` physique du shallow local. Chaque incidence y est payée une fois.
+Ce n'est pas le développement aveugle de la masse WSPD ; une fenêtre dense
+refuse la route avant son allocation.
+
 Les mesures déjà disponibles éliminent `s=4` comme baseline : sur la vague
 courante à `n=8000`, `s=2` donne environ `408429` terminaux et des résiduels
 q2/q3/q4 de `40,32/50,80/50,91` records par point ; `s=4` donne environ

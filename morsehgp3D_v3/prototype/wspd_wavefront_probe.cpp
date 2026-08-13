@@ -47,7 +47,7 @@ struct Pair { int a, b; };
 // applique le masque central. Le rectangle n'est jamais materialise en memoire ;
 // seuls les residuels sont compactes. C'est le gain de bande passante du
 // kernel vise.
-struct BankStat { long long reads = 0, recerts = 0, tronques = 0, juges = 0, faux = 0, closed[3] = {0, 0, 0}; };
+struct BankStat { long long reads = 0, recerts = 0, tronques = 0, juges = 0, faux = 0, v_all = 0, v_none = 0, v_descente = 0, closed[3] = {0, 0, 0}; };
 
 // ---- PROPOSITION PAR DESCENTE, alternative a la fenetre Morton.
 //
@@ -81,6 +81,7 @@ long long g_inflation = 0;
 bool g_descent = false;
 bool g_vwave = false;
 bool g_inject_global = false;
+bool g_climb = false;
 bool g_judge_vwave = false;
 
 // Cellule d'un identifiant de nœud : negatif = feuille (le point lui-meme).
@@ -136,6 +137,7 @@ int main(int argc, char** argv) {
     else if (a == "--bank") g_bank = true;
     else if (a == "--inject=masque-global") { g_bank = true; g_vwave = true; g_inject_global = true; g_judge_vwave = true; }
     else if (a == "--judge-vwave") { g_bank = true; g_vwave = true; g_judge_vwave = true; }
+    else if (a == "--climb") { g_bank = true; g_vwave = true; g_climb = true; }
     else if (a == "--vwave") { g_bank = true; g_vwave = true; }
     else if (a == "--descent") { g_bank = true; g_descent = true; }
     else if (a.rfind("--window=", 0) == 0) { g_win = arg_ll(val("--window=").c_str(), 2, 1024, "window"); g_bank = true; }
@@ -199,6 +201,14 @@ int main(int argc, char** argv) {
     const auto w0 = clk::now();
     const long long m = (long long)sp.size();
 
+    // Parent de chaque feuille, calcule UNE fois : la remontee ne peut pas se
+    // permettre une recherche lineaire par rectangle.
+    std::vector<int> leaf_parent(sp.size(), -1);
+    for (size_t i = 0; i < nodes.size(); ++i) {
+      if (nodes[i].left < 0) leaf_parent[-1 - nodes[i].left] = (int)i;
+      if (nodes[i].right < 0) leaf_parent[-1 - nodes[i].right] = (int)i;
+    }
+
     // ---- GRAINES : le cas diagonal DEROULE. Un thread par nœud interne.
     std::vector<Pair> wave;
     wave.reserve(nodes.size());
@@ -255,7 +265,35 @@ int main(int argc, char** argv) {
               struct Task { int node; unsigned mask; };
               Task st[96];
               int sn = 0;
-              st[sn++] = {0, 7u};
+              // REPERAGE PUIS REMONTEE. Descendre depuis la RACINE pour chaque
+              // rectangle depense 42,7 % du travail en descente pure — des
+              // nœuds qui ne creditent rien et n'elaguent rien, et n'existent
+              // que pour atteindre la region utile. Or les nœuds crediteurs
+              // sont tous autour de `m_0`. On repere donc la feuille de `m_0`
+              // par la cle de Morton, puis on REMONTE : a chaque ancetre, le
+              // sous-arbre FRERE est un candidat, et on s'arrete des que les
+              // seuils sont atteints. Ni les 51,7 % de `NONE` lointains, ni la
+              // descente initiale ne sont alors payes.
+              if (g_climb) {
+                const unsigned long long qk0 =
+                    mhgp3v::wf_morton48(m4[0] / 4, m4[1] / 4, m4[2] / 4);
+                size_t pos0 =
+                    (size_t)(std::lower_bound(keys.begin(), keys.end(), qk0) - keys.begin());
+                if (pos0 >= keys.size()) pos0 = keys.size() - 1;
+                // Remonter depuis la feuille `pos0` : trouver le nœud interne
+                // dont elle est un enfant, puis empiler les freres successifs.
+                int cur = -1 - (int)pos0;
+                for (size_t up = 0; up < nodes.size() && sn + 2 <= 96; ++up) {
+                  const int par = (cur < 0) ? leaf_parent[-1 - cur] : nodes[cur].parent;
+                  if (par < 0) break;
+                  const int frere = (nodes[par].left == cur) ? nodes[par].right : nodes[par].left;
+                  st[sn++] = {frere, 7u};
+                  cur = par;
+                }
+                if (sn == 0) st[sn++] = {0, 7u};
+              } else {
+                st[sn++] = {0, 7u};
+              }
               long long exp = 0;
               bool abandonne = false;
               const int need[3] = {10, 9, 8};
@@ -285,12 +323,20 @@ int main(int argc, char** argv) {
                 long long smn = 0, smx = 0;
                 mhgp3v::rect_s_interval(qa, qb, cb2, &smn, &smx);
                 unsigned mixed = 0;
+                bool eut_all = false, eut_none = false;
                 for (int lane = 0; lane < 3; ++lane) {
                   if (!(m & (1u << lane))) continue;
                   const RectVerdict v = mhgp3v::rect_central_verdict(dlo, smn, smx, lane);
-                  if (v == RectVerdict::kAll) cred[lane] += pop;      // consomme ICI
+                  if (v == RectVerdict::kAll) { cred[lane] += pop; eut_all = true; }
                   else if (v == RectVerdict::kMixed) mixed |= 1u << lane;
+                  else eut_none = true;
                 }
+                // OU PASSE LE TRAVAIL ? Un `MIXED` pur est une descente pure :
+                // il ne credite rien, n'elague rien, et ne sert qu'a atteindre
+                // les nœuds utiles. C'est la part compressible.
+                if (eut_all) ++bank.v_all;
+                else if (mixed && !eut_none) ++bank.v_descente;
+                else ++bank.v_none;
                 if (mixed && tk.node >= 0) {
                   if (sn + 2 > 96) { abandonne = true; break; }       // jamais en silence
                   st[sn++] = {nodes[tk.node].left, mixed};
@@ -506,7 +552,7 @@ int main(int argc, char** argv) {
                 " | arbre_med=%.1f ms arbre_p95=%.1f ms vague=%.1f ms"
                 " | banque lectures=%lld recert=%lld ferme q2=%lld q3=%lld q4=%lld"
                 " | masse fermee q2=%.2f%% records fermes q2=%.2f%% tronques=%lld"
-                " juges=%lld faux=%lld"
+                " juges=%lld faux=%lld | verdicts ALL=%lld NONE=%lld descente_pure=%lld"
                 " | partenaires max=%lld moyen=%.2f"
                 " | residuel : %lld paires tirees DANS LA MASSE ouverte,"
                 " temoins_moyen=%.1f max=%lld, deja >=10 temoins : %lld (%.1f%%)"
@@ -517,7 +563,7 @@ int main(int argc, char** argv) {
                 bank.reads, bank.recerts, bank.closed[0], bank.closed[1], bank.closed[2],
                 100.0 * (double)mass_closed_q2 / (double)total,
                 100.0 * (double)bank.closed[0] / (double)std::max<size_t>(1, terms.size()),
-                bank.tronques, bank.juges, bank.faux,
+                bank.tronques, bank.juges, bank.faux, bank.v_all, bank.v_none, bank.v_descente,
                 dmax, (double)dsum / (double)std::max(1LL, dnz),
                 ech, (double)som_temoins / (double)std::max(1LL, ech), max_temoins,
                 faux_resid, 100.0 * (double)faux_resid / (double)std::max(1LL, ech),
