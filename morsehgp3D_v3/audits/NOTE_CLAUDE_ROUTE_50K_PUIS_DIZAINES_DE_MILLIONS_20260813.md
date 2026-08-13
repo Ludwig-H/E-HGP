@@ -43,6 +43,38 @@ C'est un constat encourageant et exigeant : **le combat est sur les constantes,
 pas sur l'asymptotique** — à condition que le résiduel soit linéaire. Les
 `790 \times` viennent de l'ordonnance CPU par paire, pas d'une impossibilité.
 
+## 2 bis. Ordre corrigé par l'audit, et état
+
+L'audit `1aa487d` confirme l'ordre et le corrige sur trois points : la tranche
+verticale doit être **complète et bornée**, alimentée par l'oracle exhaustif ;
+le changement de profil numérique n'est **pas** une étape quatre de la
+qualification v3 mais un successeur formel ; et la couture
+`ExactKernel / SphereIdentity` doit être préparée maintenant sans implémenter
+`binary64`.
+
+```text
+0A  BallForm -> BallEvent exact et politique de degenerescence     [FAIT]
+0B  oracle exhaustif borne -> fold -> payload complet
+1   remplacer SEULEMENT la source par E3/E4, mesurer E/M/BallRuns
+2   Q3 owner-edge + PrimitiveSphereKey + range-count, shallow q4
+3   portage device apres parite de TOUTE la tranche
+4   changement de profil numerique, phase separee
+```
+
+**Étape 0A close.** `prototype/ball_event.hpp` et sa sonde produisent
+`PrimitiveSphereKey`, `SupportKey`, `I_B`, `U_B`, owner et disposition sur un
+petit nuage. Le juge est indépendant par sa route — Gram dans la base du
+support, centre et rayon rationnels, comparaison par produit croisé — là où le
+sujet emploie la forme close `W` et un Cramer en coordonnées sans jamais former
+de centre. Zéro désaccord sur trois familles ; `grid` porte `15` cosphères sur
+`33` supports, `86` formes dégénérées et `58` refus de domaine. Huit portes,
+dont trois mutants — owner par index, coquille comptée intérieure, clé non
+réduite — et un refus de domaine du juge au-delà de `coord=64`.
+
+Un de mes trois mutants a d'abord survécu, et c'était ma faute : j'avais
+désactivé sous injection la comparaison même censée le tuer. Le juge n'est plus
+jamais désarmé par une injection.
+
 ## 3. Les cinq étapes, avec leurs portes et leurs critères de mort
 
 ### Étape 0 — le squelette qui produit l'objet (le verrou jamais franchi)
