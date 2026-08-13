@@ -3801,3 +3801,32 @@ mhgp3v_add_expected_code_test_for(mhgp3v_cell_credits_probe
 mhgp3v_add_expected_code_test_for(mhgp3v_cell_credits_probe
   mhgp3v_credits_plancher_credits "plancher de credits" 3
   --points=60 --family=eight_clusters --seed=3 --pool=16 --min-credits=100000000)
+
+# --- Front de rectangles : intervalle exact de H, verdicts ALL/NONE/MIXED,
+# recherche de temoins au meilleur d'abord a budget borne.
+add_executable(mhgp3v_rect_front_probe
+  prototype/rect_front_probe.cpp
+)
+target_include_directories(mhgp3v_rect_front_probe PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(mhgp3v_rect_front_probe PRIVATE mhgp)
+target_compile_options(mhgp3v_rect_front_probe PRIVATE -Wall -Wextra -Werror)
+
+# Le juge exhaustif doit valider l'intervalle, et la campagne doit exercer les
+# trois verdicts : planchers contre le vert-par-vacuite.
+add_test(NAME mhgp3v_rect_front_intervalle
+  COMMAND mhgp3v_rect_front_probe --family=uniform --points=2000,8000 --lane=0
+          --budget=24 --selftest=20000 --min-all=1000 --min-none=1000 --min-mixed=1000
+          --min-closed-pct=70)
+
+# Les deux fautes que j'ai reellement ecrites doivent mourir devant le juge.
+mhgp3v_add_expected_code_test_for(mhgp3v_rect_front_probe
+  mhgp3v_rect_front_mutant_max_coins 4
+  --family=uniform --points=2000 --selftest=20000 --inject=max-par-coins)
+mhgp3v_add_expected_code_test_for(mhgp3v_rect_front_probe
+  mhgp3v_rect_front_mutant_sommet_non_ecrete 4
+  --family=uniform --points=2000 --selftest=20000 --inject=sommet-non-ecrete)
+
+# Une campagne aux parametres hors domaine est refusee AVANT tout calcul.
+mhgp3v_add_expected_code_test_for(mhgp3v_rect_front_probe
+  mhgp3v_rect_front_refus_domaine 2
+  --family=uniform --points=2000 --lane=9)
