@@ -3952,6 +3952,24 @@ add_test(NAME mhgp3v_wspd_wavefront_multiplicite_serree
 set_tests_properties(mhgp3v_wspd_wavefront_multiplicite_serree PROPERTIES
   PASS_REGULAR_EXPRESSION "oracle accord=OUI")
 
+# LA VAGUE CENTRALE EST JUGEE PAR BALAYAGE EXHAUSTIF. Toute fermeture affirme
+# qu'il existe dix `PointId` DISTINCTS satisfaisant le masque central sur tout
+# `A x B` ; le juge le verifie sur le nuage entier, sans emprunter l'intervalle
+# du score ni l'antichaine.
+add_test(NAME mhgp3v_wspd_wavefront_juge_vague
+  COMMAND mhgp3v_wspd_wavefront_probe --family=uniform --points=1200
+          --sep-euclid=2/1 --tight --judge-vwave --window=256)
+set_tests_properties(mhgp3v_wspd_wavefront_juge_vague PROPERTIES
+  PASS_REGULAR_EXPRESSION "juge_vague accord=OUI")
+
+# LE MASQUE GLOBAL est la faute que j'avais ecrite : une lane deja `ALL`
+# redescend dans les enfants et sa population est creditee DEUX fois. Le juge
+# doit la tuer.
+mhgp3v_add_expected_code_test_for(mhgp3v_wspd_wavefront_probe
+  mhgp3v_wspd_wavefront_mutant_masque_global "mutant_killed=1" 4
+  --family=uniform --points=1200 --sep-euclid=2/1 --tight
+  --inject=masque-global --window=256)
+
 # Le travail doit valoir DEUX fois la sortie : chaque terminal a exactement un
 # ancetre non separe. C'est la propriete qui rend la vague GPU-viable.
 add_test(NAME mhgp3v_wspd_wavefront_travail

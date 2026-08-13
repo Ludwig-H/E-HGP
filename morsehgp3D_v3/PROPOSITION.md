@@ -2301,6 +2301,19 @@ activation `16`, tandis que `s_far=(4,0,0)` a norme carrée `16` mais activation
 `5`. Les `CreditKey` conservent donc les vrais `PointId`, les trois preuves de
 rayons et un commit transactionnel ; une cellule incomplète reste ouverte.
 
+Le lemme est ponctuel en `b`. Fermer un `BNode` exige une preuve uniforme : la
+représentation conique et toutes les strictes valent pour chaque cible du span,
+avec coefficients/certificats rejouables ou une réduction AABB reçue. Un crédit
+obtenu pour un représentant ne s'étend jamais à sa cellule. La réplication d'un
+groupe ne permet pas non plus de réutiliser ses PointIds deux fois dans le même
+certificat de paire.
+
+La construction de `ProjectiveCreditBank` reste elle-même à factoriser. Un cap
+conserve les cellules non classées dans `N_q(a)` ; aucune recherche partielle ne
+ferme un suffixe. Le premier reçu publie tâches de banque, produits,
+répétitions `(CreditKey,PointId)`, continuations et digests, pas seulement la
+taille finale des fenêtres.
+
 La preuve, l'ABI, les contre-fixtures et l'ordre d'implémentation sont détaillés
 dans
 [`AUDIT_REPONSE_FOURCHE_SOURCE_AF08B0E_20260813.md`](audits/AUDIT_REPONSE_FOURCHE_SOURCE_AF08B0E_20260813.md).

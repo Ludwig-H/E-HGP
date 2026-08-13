@@ -8,7 +8,117 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-## Observation live — `HEAD=6feb5df`, carrier reçu comme diagnostic, P0/source non reçus
+## Observation live — `HEAD=dfa9e1b`, `Central-VWave` corrigée mais encore diagnostique
+
+Le pin observé est
+`dfa9e1b2950a11ef67f7a57463770c5be68059fb`, commit
+`a global open mask was double-crediting parents into children — a false
+closure`. Le worktree était propre au relevé. Empreintes principales :
+
+```text
+wspd_wavefront_probe.cpp f12b4128fad79cb48ef6302da235ac3ac3344ef16b8921fb6625600dd7cb20d7
+wspd_wavefront.hpp       d7ea84fadcbdad076f72d8e7a4bd4ff7bbcd15fa8dffc331e33db6c54adcaa30
+rect_front.hpp           f4c3be616d79b1c5c256929db4570220a567c4a575aff81a851790fbab399487
+rect_front_probe.cpp     69ae4fda4cda9913facaec09b50a8d0722d9a881e94f06960fddcb3fae90a3ce
+```
+
+Le parent `af08b0e` répare correctement la confusion records/masse q2. Sous la
+partition PairId déjà jugée, sommer `|A||B|` sur les terminaux fermés donne la
+vraie masse fermée. L'échantillonnage pondéré choisit ensuite un PairId uniforme
+dans la masse q2 déléguée. Il estime une fraction de paires diamétrales encore
+pertinentes, pas des témoins universels du rectangle et pas un temps source.
+Les chiffres `279/230/258 k` restent trois estimations Monte-Carlo sur un seul
+uniforme ; ils ne reçoivent ni q3/q4, ni la source, ni le census.
+
+Le parent `044dd45` reçoit une formule utile. Pour un rectangle `A×B`, le score
+singleton `S=Vhi(A,B,{z})` admet des extrema exacts sur un nœud `C`. Le rejeu
+indépendant de `rect_s_interval` sur `40000` petites AABB est vert. Les verdicts
+
+```text
+q2 ALL Smax<D,        CENTRAL_DEAD Smin>=D
+q3 ALL 3*Smax<D,      CENTRAL_DEAD 3*Smin>=D
+q4 ALL 209*Smax<=56D, CENTRAL_DEAD 209*Smin>56D
+```
+
+sont sûrs pour le **certificat central**. Les extrema sont exacts sur l'AABB
+entière, pas sur la population clairsemée du nœud : `ALL/CENTRAL_DEAD` ne sont
+pas nécessaires à un nœud interne et le commentaire code « verdict exact » est
+trop fort. La vague sans cap devient complète pour ce certificat en poursuivant
+tous les `MIXED` jusqu'aux feuilles. `CENTRAL_DEAD` ne signifie jamais
+`GEOMETRIC_NONE` et doit être reclassifié après un split `A/B`.
+
+Le premier worktree `Central-VWave` avait un faux crédit : un masque global
+laissait une lane `ALL` redescendre dans les enfants lorsqu'une autre lane
+était `MIXED`. Le même PointId pouvait être compté au parent puis aux enfants.
+`dfa9e1b` corrige le principe en portant `(CNode,lane_mask)` et en transmettant
+seulement les bits `MIXED`. La mesure de Claude passe q2 de `121884` à `104237`
+records fermés et q3 de `4378` à `2455` à `uniform,n=8000,s=2,budget=256` :
+le mutant était matériel et la correction est indispensable.
+
+Le correctif n'est pas encore reçu industriellement :
+
+- aucun CTest n'appelle `--vwave` ; la suite teste l'intervalle du score, pas
+  l'antichaîne, les seuils ni le mutant de masque global ;
+- la pile pleine ou le quantum épuisé incrémente seulement `tronques`. Aucune
+  tâche, aucun masque et aucun curseur ne sont sérialisés ; le commentaire
+  « sérialise une continuation » est donc faux au pin ;
+- `tronques` n'est pas imprimé dans la ligne de résultats et aucune masse
+  déléguée par lane n'est produite ;
+- aucun `proof_id`, `RectResult`, owner-shard, tableau résiduel ou compactage
+  stable n'existe ;
+- le probe reste CPU, matérialise tous les `terms`, réalloue les buffers par
+  vague et n'a ni kernel CUDA, ni p95 résident, ni octets/HWM device.
+
+Le mutant permanent minimal contient moins de dix points q2 centraux dans un
+nœud parent `ALL` et rend q3 `MIXED`. Le masque global ferme q2 en recomptant
+les enfants ; la tâche masquée ne ferme pas. Le juge rejoue les PointIds et
+exige une antichaîne disjointe. Un second mutant force la capacité : le digest
+final doit être identique après reprise de la continuation.
+
+Rejeu local de l'auditeur, sans modification logicielle :
+
+```text
+cmake -S morsehgp3D_v3 -B build/v3 -DCMAKE_BUILD_TYPE=Release
+cmake --build build/v3 --target mhgp3v_rect_front_probe mhgp3v_wspd_wavefront_probe --parallel
+ctest --test-dir build/v3 --output-on-failure -R '^mhgp3v_(rect_front|wspd_wavefront)_'
+16/16 PASS, 23,72 s
+```
+
+Un diagnostic direct `uniform,n=800,tight,s=2,--vwave,window=256` rend
+`24745` terminaux, `1381935` classifications du score et `125,2 ms` CPU pour
+la vague. Il falsifie toute extrapolation CPU immédiate, mais n'est ni un temps
+device, ni un p95, ni un chemin complet.
+
+La réponse à la fourche de Claude est durable : la source n'est ni par paire,
+ni à coût fixe par record. La masse PairId reste un ledger ; le coût bloquant
+porte sur tâches de join, blocs, événements shallow, BallKeys, census et vraies
+sorties. `s=4` n'est pas retenu globalement. `s=1`, `3/2` et `2` doivent être
+comparés sur les trois lanes et le consommateur complet.
+
+La prochaine ordonnance recommandée est : WSPD corrigée, `Central-VWave`, puis
+`ProjectiveWindowCounter-v0`. Le lemme des groupes projectifs est correct pour
+une cible ponctuelle : des groupes d'IDs disjoints fournissent des intérieurs
+distincts à toute sphère passant par l'ancre et la cible. Pour fermer un
+`BNode`, il faut encore authentifier ce certificat pour **toutes** ses cibles.
+La construction de la banque, les spans, `sum_a |N_q(a)|`, formes, octets/HWM
+et pentes doivent être reçus avant le shallow local. Les points hors fenêtre
+restent toujours dans le census global. Détails et contre-audit :
+[`AUDIT_REPONSE_FOURCHE_SOURCE_CENTRAL_VWAVE_DBA8961_20260813.md`](AUDIT_REPONSE_FOURCHE_SOURCE_CENTRAL_VWAVE_DBA8961_20260813.md).
+
+Le header WSPD reste incohérent avec le nouveau verdict : son SHA ci-dessus
+contient encore `2 log2 n`, la cellule tronque les préfixes partiels et le mode
+tight choisit aussi le côté à scinder. La borne correcte du Patricia u16 porte
+sur quarante-huit bits utiles ; la cellule de préfixe conserve les bits
+partiels ; la politique split reste cellulaire et l'arrêt devient
+`sep_cell || sep_tight`. L'identité `tests=2T-(n-1)` est une comptabilité, pas
+une preuve `T=O(n)`.
+
+Il n'existe toujours aucun chemin exact benchmarkable de WSPD à payload, aucun
+`BenchmarkOutputContract-v1` et aucun contrat `50000/1s` rempli. Le script G4
+historique ne construit pas `Central-VWave` device et reste `NO-RUN`. GCP non
+utilisé par cet audit.
+
+## Observation historique — `HEAD=6feb5df`, carrier reçu comme diagnostic, P0/source non reçus
 
 Le `HEAD` observé est
 `6feb5dfc5ebef4b8e78dcbdc89d6bcc7069d6e13`, commit

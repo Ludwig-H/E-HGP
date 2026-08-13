@@ -47,7 +47,7 @@ struct Pair { int a, b; };
 // applique le masque central. Le rectangle n'est jamais materialise en memoire ;
 // seuls les residuels sont compactes. C'est le gain de bande passante du
 // kernel vise.
-struct BankStat { long long reads = 0, recerts = 0, tronques = 0, closed[3] = {0, 0, 0}; };
+struct BankStat { long long reads = 0, recerts = 0, tronques = 0, juges = 0, faux = 0, closed[3] = {0, 0, 0}; };
 
 // ---- PROPOSITION PAR DESCENTE, alternative a la fenetre Morton.
 //
@@ -80,6 +80,8 @@ long long g_warms = 0;
 long long g_inflation = 0;
 bool g_descent = false;
 bool g_vwave = false;
+bool g_inject_global = false;
+bool g_judge_vwave = false;
 
 // Cellule d'un identifiant de nœud : negatif = feuille (le point lui-meme).
 mhgp3v::WspdBox cell_of(const std::vector<WfNode>& nodes,
@@ -132,6 +134,8 @@ int main(int argc, char** argv) {
     else if (a == "--oracle") oracle = true;
     else if (a == "--tight") g_tight = true;
     else if (a == "--bank") g_bank = true;
+    else if (a == "--inject=masque-global") { g_bank = true; g_vwave = true; g_inject_global = true; g_judge_vwave = true; }
+    else if (a == "--judge-vwave") { g_bank = true; g_vwave = true; g_judge_vwave = true; }
     else if (a == "--vwave") { g_bank = true; g_vwave = true; }
     else if (a == "--descent") { g_bank = true; g_descent = true; }
     else if (a.rfind("--window=", 0) == 0) { g_win = arg_ll(val("--window=").c_str(), 2, 1024, "window"); g_bank = true; }
@@ -257,7 +261,11 @@ int main(int argc, char** argv) {
               const int need[3] = {10, 9, 8};
               while (sn > 0 && exp < g_win) {
                 const Task tk = st[--sn];
-                unsigned m = tk.mask;
+                // MUTANT `masque-global` : rendre au parent un masque complet
+                // fait redescendre une lane deja `ALL` dans les enfants, dont
+                // la population est alors creditee DEUX fois. C'est la faute
+                // que j'avais ecrite, et le juge doit la tuer.
+                unsigned m = g_inject_global ? 7u : tk.mask;
                 for (int lane = 0; lane < 3; ++lane)
                   if (cred[lane] >= need[lane]) m &= ~(1u << lane);   // lane saturee
                 if (!m) continue;
@@ -289,8 +297,12 @@ int main(int argc, char** argv) {
                   st[sn++] = {nodes[tk.node].right, mixed};
                 }
               }
-              // Une pile pleine ou un quantum epuise laisse des taches vivantes :
-              // le rectangle est DELEGUE, jamais ferme sur un travail tronque.
+              // Une pile pleine ou un quantum epuise laisse des taches VIVANTES.
+              // ATTENTION : ce compteur les DENOMBRE, il ne les SERIALISE pas.
+              // Aucune tache, aucun masque, aucun curseur n'est encore ecrit —
+              // la continuation reste a faire, et l'audit `dfa9e1b` a raison de
+              // refuser le mot. Les credits deja acquis restent valides ; seule
+              // la COMPLETUDE est perdue, jamais la surete.
               if (abandonne || (sn > 0 && exp >= g_win)) ++bank.tronques;
               taken = exp;
             } else if (g_descent) {
@@ -340,6 +352,23 @@ int main(int argc, char** argv) {
             const int need[3] = {10, 9, 8};
             for (int lane = 0; lane < 3; ++lane)
               if (cred[lane] >= need[lane]) ++bank.closed[lane];
+            // JUGE DE LA VAGUE. Toute fermeture affirme qu'il existe `need`
+            // `PointId` DISTINCTS satisfaisant le masque central sur tout
+            // `A x B`. On le verifie par balayage exhaustif du nuage, dans une
+            // ecriture qui n'emprunte ni l'intervalle du score, ni l'antichaine.
+            if (g_judge_vwave) {
+              for (int lane = 0; lane < 3; ++lane) {
+                if (cred[lane] < need[lane]) continue;
+                long long vrai = 0;
+                for (size_t z = 0; z < sp.size(); ++z) {
+                  mhgp3v::RectBox zb{};
+                  for (int d = 0; d < 3; ++d) { zb.lo[d] = sp[z][d]; zb.hi[d] = sp[z][d]; }
+                  if (mhgp3v::rect_central_mask_dlo(dlo, qa, qb, zb) & (1u << lane)) ++vrai;
+                }
+                ++bank.juges;
+                if (vrai < need[lane]) ++bank.faux;
+              }
+            }
             const long long msz = count_of(nodes, wave[i].a) * count_of(nodes, wave[i].b);
             if (cred[0] >= need[0]) { closed_q2.push_back(1); mass_closed_q2 += msz; }
             else closed_q2.push_back(0);
@@ -476,7 +505,8 @@ int main(int argc, char** argv) {
                 " tests=%lld tests/front=%.2f vague_max=%lld | masse=%lld/%lld"
                 " | arbre_med=%.1f ms arbre_p95=%.1f ms vague=%.1f ms"
                 " | banque lectures=%lld recert=%lld ferme q2=%lld q3=%lld q4=%lld"
-                " | masse fermee q2=%.2f%% records fermes q2=%.2f%%"
+                " | masse fermee q2=%.2f%% records fermes q2=%.2f%% tronques=%lld"
+                " juges=%lld faux=%lld"
                 " | partenaires max=%lld moyen=%.2f"
                 " | residuel : %lld paires tirees DANS LA MASSE ouverte,"
                 " temoins_moyen=%.1f max=%lld, deja >=10 temoins : %lld (%.1f%%)"
@@ -487,10 +517,32 @@ int main(int argc, char** argv) {
                 bank.reads, bank.recerts, bank.closed[0], bank.closed[1], bank.closed[2],
                 100.0 * (double)mass_closed_q2 / (double)total,
                 100.0 * (double)bank.closed[0] / (double)std::max<size_t>(1, terms.size()),
+                bank.tronques, bank.juges, bank.faux,
                 dmax, (double)dsum / (double)std::max(1LL, dnz),
                 ech, (double)som_temoins / (double)std::max(1LL, ech), max_temoins,
                 faux_resid, 100.0 * (double)faux_resid / (double)std::max(1LL, ech),
                 100.0 * (double)(ech - faux_resid) / (double)std::max(1LL, ech));
+    if (g_judge_vwave) {
+      if (bank.juges < 1000) {
+        std::fprintf(stderr, "PLANCHER JUGE VAGUE: %lld fermetures jugees\n", bank.juges);
+        return 3;
+      }
+      if (g_inject_global) {
+        if (bank.faux == 0) {
+          std::fprintf(stderr, "MUTANT SURVIVANT: le masque global n'a produit aucune"
+                               " fausse fermeture\n");
+          return 3;
+        }
+        std::printf("mutant_killed=1 raison=juge_vague faux=%lld\n", bank.faux);
+        return 4;
+      }
+      if (bank.faux != 0) {
+        std::fprintf(stderr, "DESACCORD DU JUGE: %lld fermetures sans %d PointId distincts\n",
+                     bank.faux, 10);
+        return 1;
+      }
+      std::printf("juge_vague accord=OUI jugees=%lld\n", bank.juges);
+    }
     if (mass != total) {
       std::fprintf(stderr, "INVARIANT VIOLE: masse %lld != %lld\n", mass, total);
       return 3;

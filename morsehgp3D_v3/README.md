@@ -32,7 +32,7 @@ tranchée : aucune des deux descriptions n'est le contrat v3. La source doit
 être factorisée et sortie-sensible ; elle paie ses couples de nœuds visités,
 ses blocs et ses vraies sorties, jamais tous les PairIds d'un bloc. La colonne
 alors appelée « masse résiduelle » était seulement le complément du taux de
-records q2 fermés. Un delta live calcule désormais la vraie masse q2, mais
+records q2 fermés. Le successeur `af08b0e` calcule désormais la vraie masse q2, mais
 cette masse reste un ledger et non un temps aval. Les données physiques
 disponibles dominent `s=4`; `s=1` est une ablation prometteuse et `s=2` le
 contrôle reçu, à départager seulement sur les trois lanes et le consommateur
@@ -48,6 +48,16 @@ top-`L` et heap par rectangle. Son travail `J` peut encore être dense : il est
 mesuré avant le join global `QueryTree×PointTree`, les carriers par marges et
 les niveaux shallow q4. Réponse, formules, fixtures et ordre d'implémentation :
 [`AUDIT_REPONSE_FOURCHE_SOURCE_CENTRAL_VWAVE_DBA8961_20260813.md`](audits/AUDIT_REPONSE_FOURCHE_SOURCE_CENTRAL_VWAVE_DBA8961_20260813.md).
+
+Le pin `dfa9e1b` corrige déjà un faux crédit découvert par l'audit : le masque
+des lanes appartient désormais à chaque `CNode`, si bien qu'un parent `ALL` ne
+peut plus être recompté dans ses enfants lorsque l'autre lane est `MIXED`.
+Cette réparation réduit de `17 %` les records q2 annoncés fermés sur le cas
+mesuré. `Central-VWave` reste néanmoins diagnostique : aucun CTest ne lance
+`--vwave`, `tronques` n'est ni publié ni une continuation sérialisée, et aucun
+`proof_id`, compactage résiduel, ABI ou kernel device n'existe. Le rejeu local
+ciblé rend `16/16` portes CPU en `23,72 s`; ce vert reçoit les formules, pas le
+parcours complet.
 
 Cette vague ne ferme toutefois que le préfixe central. La réponse source plus
 forte n'est pas un join développé de carriers : des groupes projectifs

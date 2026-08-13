@@ -24,8 +24,15 @@ jamais réception.
   réfute la loi d'inflation discrète et remplace fenêtre/heap par
   `Central-VWave`, complète pour le masque central. Il fournit aussi le
   classifieur carrier par marges exactes, le join global `QueryTree×PointTree`,
-  le raccord shallow q4 et les conditions manquantes à la preuve du WSPD
-  Patricia.
+  le contre-audit de la fenêtre projective, le raccord shallow q4 et les
+  conditions manquantes à la preuve du WSPD Patricia.
+- [`AUDIT_REPONSE_FOURCHE_SOURCE_AF08B0E_20260813.md`](AUDIT_REPONSE_FOURCHE_SOURCE_AF08B0E_20260813.md)
+  propose la vraie source après le certificat central : groupes projectifs,
+  fenêtre complète de co-sommets par ancre, shallow local éphémère, RLE par
+  `BallKey` puis census global. Son lemme ponctuel est admis ; la fermeture
+  d'un span entier, la construction factorisée des crédits et les pentes de
+  `ProjectiveWindowCounter-v0` restent à recevoir conformément au contre-audit
+  précédent.
 - [`AUDIT_DEBLOCAGE_WSPD_PREFIX_CARRIERS_20260813.md`](AUDIT_DEBLOCAGE_WSPD_PREFIX_CARRIERS_20260813.md)
   remet à Claude le prochain jalon falsifiable : WSPD entière/canonique,
   classification des seuls terminaux par masque de lanes, cœur central et
