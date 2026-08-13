@@ -87,11 +87,13 @@ bornée, jamais fold en ligne sur une source encore ouverte.
 
 ### 3.1 Statut de `BallFormToBallEvent-v0`
 
-Le pin `2b89ea1` fournit un candidat borné `coord<=64`. Il n'est pas reçu pour
-le profil u16 :
+Le pin historique `2b89ea1` fournit un candidat borné `coord<=64`. Il n'est pas
+reçu pour le profil u16 :
 
 - des numérateurs q3/q4 de 67 à 81 bits sont rabattus vers `int64` ;
 - des carrés jusqu'à environ 162 bits sont formés en `i128` avant le pgcd ;
+- le juge de Gram forme lui-même un numérateur de rayon d'environ 167 bits sur
+  un triangle u16 valide ;
 - la positivité n'est pas jugée indépendamment ;
 - l'owner ne sépare pas index dense et `PointId` ;
 - le mutant de clé s'auto-déclare fautif sans clé de référence ;
@@ -99,7 +101,9 @@ le profil u16 :
 - `kUnsupported` est compté, mais le diagnostic publie encore `accord=OUI` et
   sort zéro ;
 - aucun `BallEvent` versionné, niveau exact, lane ou manifeste transactionnel
-  n'est construit.
+  n'est construit ;
+- le générateur `clusters --points=5 --coord=4` peut boucler sans fin faute de
+  preflight de sa capacité.
 
 L'autorité reçue localement se limite à deux constructions rationnelles du
 centre et au signe de puissance sur les supports conservés par le sujet.
@@ -117,8 +121,10 @@ C = 2*N dot p - den*||p||^2
 
 Pour q3, la forme compacte de § 5.3 évite entièrement le centre gonflé. Pour
 q3 et q4, la positivité se décide sur les numérateurs barycentriques
-Gram--Cramer, avec une preuve de largeur sur tout le cube u16. Toute conversion
-rétrécissante est précédée d'un preflight exact ou supprimée.
+Gram--Cramer. Le juge u16 emploie BigInt/rationnels ou un codec homogène dont
+toutes les largeurs sont prouvées ; le `i128` du sujet et celui du juge ne se
+recertifient pas mutuellement. Toute conversion rétrécissante est précédée
+d'un preflight exact ou supprimée.
 
 ### 3.3 Ordre RLE/census obligatoire
 
@@ -134,6 +140,25 @@ formes positives
 La porte exige `census_calls=unique_BallKeys`, deux supports pour une clé et un
 mutant `census-par-support`. L'oracle juge séparément dépendance affine,
 positivité, clé primitive, niveau, owner, `I_B/U_B` et activation de lane.
+
+### 3.4 Statut du probe nommé stage 0B
+
+Le successeur `91aa287`, encore présent au `HEAD=3c11bc8`, ne ferme pas 0B. Il
+trie les runs réguliers, unionne les membres `I_B union U_B` dans une seule DSU
+de `PointId`, puis compare ses goulots à Floyd--Warshall sur les mêmes runs,
+membres, dispositions et niveaux.
+
+Ce probe reçoit au plus la fermeture de cet hypergraphe fourni. Il est faux
+pour la sémantique HGP dès `k=2` : les générateurs `S={0,1,2}` et
+`T={0,3,4}` ont une intersection de taille un, donc restent distincts à
+l'ordre deux, tandis que la DSU de points les fusionne par `0`.
+
+Il manque toujours `q_min`, lanes, naissances, facettes, macro-lots, coverage,
+dix forêts, verticales et payload. Son comparateur lit les limbs i128 de la
+clé et vérifie les overflows **après** des multiplications signées : il n'est
+ni total, ni sûr, ni opaque au profil. La réparation réutilise
+`saturated_fold.hpp`, `gamma_forest_judge.cpp` et les fixtures Gate D par
+ordre, au lieu d'étendre la DSU de points.
 
 ## 4. Fenêtre d'arêtes certifiée
 
@@ -160,6 +185,35 @@ M4 = sum over open q4 edges of active forms
 ```
 
 Une fenêtre d'arêtes sparse ne borne ni `M3`, ni `M4`, ni les sphères uniques.
+
+### 4.1 Raffinement local porteur de preuves
+
+Le raffinement des terminaux q4 ouverts est sûr : une fermeture universelle du
+parent reste vraie sur les enfants, tandis qu'un parent inconclusif peut devenir
+certifiable après restriction. À `n=3000,s=8`, profondeur quatre, il réduit
+`E4` de `4 045 644` à `2 597 699` sur `eight_clusters` et de `1 027 538` à
+`464 599` sur `uniform`.
+
+Ce gain ne reçoit pas encore le coût. Les recertifications passent
+respectivement de `31 538 327` à `199 169 436` et de `108 858 186` à
+`193 020 841`. Les compteurs de tête double-comptent aussi les parents jetés et
+impriment jusqu'à `380,15 %` de masse q2 fermée ; seul le ledger terminal est
+exclusif.
+
+`ProofCarryingLocalRefinement-v0` transporte donc avec chaque split :
+
+```text
+credit_spans ALL disjoints + PointId/digest
+none_spans définitivement élagués
+frontier de tâches MIXED ou non visitées
+credit_count et continuation persistante
+```
+
+Les enfants héritent `ALL/NONE` et ne rejouent que `MIXED`. Les statistiques de
+tentatives restent distinctes des fates terminaux. Le gate compare les mêmes
+`E_q` au parcours depuis racine, mesure les lectures évitées et poursuit
+jusqu'à `M4`, BallRuns, census et fold. Une baisse de `E4` seule ne décide pas
+la rentabilité.
 
 ## 5. Générateur q3 recommandé
 
@@ -387,11 +441,13 @@ coverage, dix forêts et verticales contre Gamma exhaustif. Si le contrat exige
 chaque `SupportKey`, ni quotient non reçu, ni streaming ne supprime la borne de
 sortie.
 
-Le fold consomme des références exactes opaques, pas les coordonnées ni les
-limbs natifs. Dix millions de points n'imposent pas binary64 : la grille u16 3D
-contient `2^48` sites. Le codec d'index dense peut devenir u32 séparément. Un
-futur profil binary64 exact est une phase distincte derrière `ExactKernel` et
-une sérialisation BigInt/dyadique variable.
+Le fold contractuel consomme des références exactes opaques, pas les
+coordonnées ni les limbs natifs. Le probe `91aa287` ne respecte pas encore ce
+contrat : il lit directement `PrimitiveSphereKey`. Dix millions de points
+n'imposent pas binary64 : la grille u16 3D contient `2^48` sites. Le codec
+d'index dense peut devenir u32 séparément. Un futur profil binary64 exact est
+une phase distincte derrière `ExactKernel` et une sérialisation BigInt/dyadique
+variable.
 
 ## 9. Ordre de réalisation vers le G4
 
@@ -408,6 +464,15 @@ une sérialisation BigInt/dyadique variable.
 7. Exécuter des microgates `1500/3000/6000`, puis
    `12500/25000/50000` uniquement si tâches, octets, HWM et sorties passent.
 8. Qualifier trente répétitions chaudes à `50000` avec le payload officiel.
+
+La session CPU sur VM G4 committée au pin `3c11bc8` n'est pas encore une porte
+exécutable : quatre tailles sont quatre processus, donc aucune pente n'est
+calculée ; `fenetre_finale` n'est ni conservé ni gaté ; les temps et
+recertifications sont supprimés du log ; les statuts non nuls peuvent mourir
+avant leur publication ; et le trap de session est installé après le retour du
+démarrage puis le parsing du handoff. Réparer ces points, exiger tous les codes
+zéro et archiver aussi les échecs avant toute mutation GCP. Même réparée, cette
+campagne reste CPU et ne reçoit aucun débit GPU.
 
 La porte composée publie au minimum :
 
@@ -429,12 +494,16 @@ bande passante ne qualifie aucun SLO.
 - q3 aigu, droit, obtus, `G=0`, `P=-1/0/+1`, seuil huit/neuf ;
 - triangle et tétraèdre u16 maximaux, clés et barycentriques attendus ;
 - deux supports pour une `BallKey`, un census, deux `SupportRecord` ;
+- juge BigInt sur triangle u16 maximal et générateur capacité plus un ;
 - cosphère 384 sans troncature et extra-shell pertinent fail-closed ;
 - partenaire q3 au-delà d'un cutoff de rang 128 ;
 - `SOC64` succès axial et faux-échec du produit relaxé ;
 - `CORNER512` coin omis, égalité, axe dégénéré et largeur 70 bits ;
 - LP rang un/deux/trois, égalité `kappa=D`, pool capé et IDs supprimés ;
 - cage octaédrique six-sites, tétra-only, reuse d'ID et rayon mal arrondi ;
+- fold `k=2` avec générateurs partageant un point mais moins de deux IDs ;
+- raffinement profondeur zéro à quatre, héritage de preuves et zéro double
+  comptage terminal ;
 - caps exacts puis moins un, continuation, permutation, tuilage et reprise ;
 - comparaison lot par lot des dix forêts, coverage et verticales.
 

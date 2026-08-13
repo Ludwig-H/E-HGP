@@ -173,6 +173,35 @@ zéro, mais il doit alors se nommer `diagnostic_classify`. Une porte d'admission
 doit, elle, rendre le statut contractuel attendu et prouver qu'aucun payload
 partiel n'a été engagé.
 
+### 3.6 Le juge de Gram n'est pas une autorité u16
+
+Le dépassement de largeur ne concerne pas seulement le sujet. Pour
+`M=65535` et le triangle
+`(M,0,0),(0,M,0),(0,0,M)`, le numérateur de rayon carré construit par le juge
+vaut `96*M^10`, soit environ 167 bits. Les carrés du juge q4 montent encore
+plus haut. `i128` ne couvre donc pas le profil `quantized_u16_input_only`, même
+après suppression des casts `long long` du sujet.
+
+La réparation 0A exige une autorité BigInt/rationnelle ou des formes
+homogènes dont chaque largeur est prouvée. Un oracle qui déborde avec le sujet
+ne peut pas recertifier son domaine public. Cette fixture doit comparer clé,
+positivité et census attendus, puis tuer un backend i128 sans preflight.
+
+### 3.7 Le générateur de fixture peut ne jamais terminer
+
+La commande admise suivante ne termine pas :
+
+```text
+timeout 2 ./build/v3/mhgp3v_ball_event_probe \
+  --family=clusters --points=5 --coord=4
+```
+
+Elle rend `124`, car la famille n'offre que quatre positions distinctes et la
+boucle de rejet attend un cinquième point sans budget. Chaque famille doit
+publier sa capacité exacte ou conservative, refuser `invalid_input` avant
+tirage et borner ses essais. La porte exerce capacité, capacité plus un et une
+graine hostile.
+
 ## 4. Réparation minimale remise à Claude
 
 Ne pas jeter ce noyau. Le fermer verticalement en six pas bornés :

@@ -1,0 +1,28 @@
+=== scanline_overlap_multiecho raffine=4 n=6250
+n=6250 famille=scanline_overlap_multiecho boite=serree sep=8/1 | front=238506 (38.161/pt) | vagues=39 tests=470763 tests/front=1.97 vague_max=35472 | masse=19528125/19528125
+fenetre q2 : terminaux_ouverts=72975 masse_ouverte=83500 (0.428% de C(n,2)) sum_E=83500 max_E=142 p50=12 p95=21 p99=29 moyen=13.36 | masses : fermee=19444625 pendante=0 ouverte=83500 terminaux fermes=165531 | pending=0
+fenetre q3 : terminaux_ouverts=158176 masse_ouverte=342081 (1.752% de C(n,2)) sum_E=342081 max_E=1007 p50=44 p95=70 p99=468 moyen=54.73 | masses : fermee=19186044 pendante=0 ouverte=342081 terminaux fermes=80330 | pending=0
+fenetre q4 : terminaux_ouverts=163705 masse_ouverte=354780 (1.817% de C(n,2)) sum_E=354780 max_E=1038 p50=46 p95=74 p99=510 moyen=56.76 | masses : fermee=19173345 pendante=0 ouverte=354780 terminaux fermes=74801 | pending=0
+OK famille=scanline_overlap_multiecho sep=8/1
+code=0
+=== scanline_overlap_multiecho raffine=4 n=12500
+n=12500 famille=scanline_overlap_multiecho boite=serree sep=8/1 | front=491254 (39.300/pt) | vagues=39 tests=970009 tests/front=1.97 vague_max=71470 | masse=78118750/78118750
+fenetre q2 : terminaux_ouverts=146576 masse_ouverte=162962 (0.209% de C(n,2)) sum_E=162962 max_E=212 p50=12 p95=21 p99=27 moyen=13.04 | masses : fermee=77955788 pendante=0 ouverte=162962 terminaux fermes=344678 | pending=0
+fenetre q3 : terminaux_ouverts=318792 masse_ouverte=675514 (0.865% de C(n,2)) sum_E=675514 max_E=999 p50=46 p95=71 p99=401 moyen=54.04 | masses : fermee=77443236 pendante=0 ouverte=675514 terminaux fermes=172462 | pending=0
+fenetre q4 : terminaux_ouverts=329005 masse_ouverte=707698 (0.906% de C(n,2)) sum_E=707698 max_E=1107 p50=47 p95=74 p99=462 moyen=56.62 | masses : fermee=77411052 pendante=0 ouverte=707698 terminaux fermes=162249 | pending=0
+OK famille=scanline_overlap_multiecho sep=8/1
+code=0
+=== scanline_overlap_multiecho raffine=4 n=25000
+n=25000 famille=scanline_overlap_multiecho boite=serree sep=8/1 | front=1014496 (40.580/pt) | vagues=40 tests=2003993 tests/front=1.98 vague_max=150198 | masse=312487500/312487500
+fenetre q2 : terminaux_ouverts=295023 masse_ouverte=324624 (0.104% de C(n,2)) sum_E=324624 max_E=291 p50=12 p95=22 p99=27 moyen=12.98 | masses : fermee=312162876 pendante=0 ouverte=324624 terminaux fermes=719473 | pending=0
+fenetre q3 : terminaux_ouverts=648298 masse_ouverte=1390556 (0.445% de C(n,2)) sum_E=1390556 max_E=1195 p50=50 p95=74 p99=275 moyen=55.62 | masses : fermee=311096944 pendante=0 ouverte=1390556 terminaux fermes=366198 | pending=0
+fenetre q4 : terminaux_ouverts=671619 masse_ouverte=5800843 (1.856% de C(n,2)) sum_E=5800843 max_E=2581 p50=54 p95=1669 p99=1842 moyen=232.03 | masses : fermee=306686657 pendante=0 ouverte=5800843 terminaux fermes=342877 | pending=0
+OK famille=scanline_overlap_multiecho sep=8/1
+code=0
+=== scanline_overlap_multiecho raffine=4 n=50000
+n=50000 famille=scanline_overlap_multiecho boite=serree sep=8/1 | front=2021399 (40.428/pt) | vagues=43 tests=3992799 tests/front=1.98 vague_max=313548 | masse=1249975000/1249975000
+fenetre q2 : terminaux_ouverts=592451 masse_ouverte=633842 (0.051% de C(n,2)) sum_E=633842 max_E=327 p50=12 p95=22 p99=27 moyen=12.68 | masses : fermee=1249341158 pendante=0 ouverte=633842 terminaux fermes=1428948 | pending=0
+fenetre q3 : terminaux_ouverts=1296850 masse_ouverte=2775321 (0.222% de C(n,2)) sum_E=2775321 max_E=1040 p50=50 p95=72 p99=280 moyen=55.51 | masses : fermee=1247199679 pendante=0 ouverte=2775321 terminaux fermes=724549 | pending=0
+fenetre q4 : terminaux_ouverts=1340908 masse_ouverte=11315883 (0.905% de C(n,2)) sum_E=11315883 max_E=4257 p50=51 p95=1784 p99=3601 moyen=226.32 | masses : fermee=1238659117 pendante=0 ouverte=11315883 terminaux fermes=680491 | pending=0
+OK famille=scanline_overlap_multiecho sep=8/1
+code=0

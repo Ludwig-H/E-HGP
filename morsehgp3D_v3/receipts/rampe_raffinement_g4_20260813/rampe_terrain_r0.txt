@@ -1,0 +1,28 @@
+=== terrain raffine=0 n=6250
+n=6250 famille=terrain boite=serree sep=8/1 | front=520799 (83.328/pt) | vagues=33 tests=1035349 tests/front=1.99 vague_max=77084 | masse=19528125/19528125
+fenetre q2 : terminaux_ouverts=98383 masse_ouverte=168441 (0.863% de C(n,2)) sum_E=168441 max_E=76 p50=26 p95=43 p99=51 moyen=26.95 | masses : fermee=19359684 pendante=0 ouverte=168441 terminaux fermes=422416 | pending=0
+fenetre q3 : terminaux_ouverts=221688 masse_ouverte=921280 (4.718% de C(n,2)) sum_E=921280 max_E=1077 p50=120 p95=354 p99=480 moyen=147.40 | masses : fermee=18606845 pendante=0 ouverte=921280 terminaux fermes=299111 | pending=0
+fenetre q4 : terminaux_ouverts=248049 masse_ouverte=1505700 (7.710% de C(n,2)) sum_E=1505700 max_E=1822 p50=171 p95=685 p99=820 moyen=240.91 | masses : fermee=18022425 pendante=0 ouverte=1505700 terminaux fermes=272750 | pending=0
+OK famille=terrain sep=8/1
+code=0
+=== terrain raffine=0 n=12500
+n=12500 famille=terrain boite=serree sep=8/1 | front=1102835 (88.227/pt) | vagues=36 tests=2193171 tests/front=1.99 vague_max=146576 | masse=78118750/78118750
+fenetre q2 : terminaux_ouverts=198723 masse_ouverte=346338 (0.443% de C(n,2)) sum_E=346338 max_E=175 p50=27 p95=44 p99=52 moyen=27.71 | masses : fermee=77772412 pendante=0 ouverte=346338 terminaux fermes=904112 | pending=0
+fenetre q3 : terminaux_ouverts=452394 masse_ouverte=2270648 (2.907% de C(n,2)) sum_E=2270648 max_E=2931 p50=131 p95=514 p99=733 moyen=181.65 | masses : fermee=75848102 pendante=0 ouverte=2270648 terminaux fermes=650441 | pending=0
+fenetre q4 : terminaux_ouverts=501008 masse_ouverte=3979127 (5.094% de C(n,2)) sum_E=3979127 max_E=3890 p50=182 p95=1091 p99=1326 moyen=318.33 | masses : fermee=74139623 pendante=0 ouverte=3979127 terminaux fermes=601827 | pending=0
+OK famille=terrain sep=8/1
+code=0
+=== terrain raffine=0 n=25000
+n=25000 famille=terrain boite=serree sep=8/1 | front=2335642 (93.426/pt) | vagues=39 tests=4646285 tests/front=1.99 vague_max=289214 | masse=312487500/312487500
+fenetre q2 : terminaux_ouverts=400786 masse_ouverte=717281 (0.230% de C(n,2)) sum_E=717281 max_E=339 p50=28 p95=45 p99=55 moyen=28.69 | masses : fermee=311770219 pendante=0 ouverte=717281 terminaux fermes=1934856 | pending=0
+fenetre q3 : terminaux_ouverts=916714 masse_ouverte=5900091 (1.888% de C(n,2)) sum_E=5900091 max_E=5892 p50=138 p95=836 p99=1285 moyen=236.00 | masses : fermee=306587409 pendante=0 ouverte=5900091 terminaux fermes=1418928 | pending=0
+fenetre q4 : terminaux_ouverts=1017109 masse_ouverte=11530514 (3.690% de C(n,2)) sum_E=11530514 max_E=7625 p50=197 p95=1887 p99=2350 moyen=461.22 | masses : fermee=300956986 pendante=0 ouverte=11530514 terminaux fermes=1318533 | pending=0
+OK famille=terrain sep=8/1
+code=0
+=== terrain raffine=0 n=50000
+n=50000 famille=terrain boite=serree sep=8/1 | front=4925966 (98.519/pt) | vagues=43 tests=9801933 tests/front=1.99 vague_max=588874 | masse=1249975000/1249975000
+fenetre q2 : terminaux_ouverts=812275 masse_ouverte=1502989 (0.120% de C(n,2)) sum_E=1502989 max_E=701 p50=29 p95=46 p99=57 moyen=30.06 | masses : fermee=1248472011 pendante=0 ouverte=1502989 terminaux fermes=4113691 | pending=0
+fenetre q3 : terminaux_ouverts=1894915 masse_ouverte=16228290 (1.298% de C(n,2)) sum_E=16228290 max_E=7322 p50=158 p95=1335 p99=2025 moyen=324.57 | masses : fermee=1233746710 pendante=0 ouverte=16228290 terminaux fermes=3031051 | pending=0
+fenetre q4 : terminaux_ouverts=2093047 masse_ouverte=35358170 (2.829% de C(n,2)) sum_E=35358170 max_E=10130 p50=228 p95=3278 p99=4310 moyen=707.16 | masses : fermee=1214616830 pendante=22723 ouverte=35335447 terminaux fermes=2832919 | pending=2 SURENSEMBLE
+OK famille=terrain sep=8/1
+code=0

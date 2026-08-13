@@ -2,9 +2,17 @@
 
 Date : 13 août 2026 UTC.
 
-Cadre : `phase=exploration_v3_hors_registre`, `backend=cpu_reference`,
-`profile=quantized_u16_input_only`, `mode=proposition_math_non_recue`,
+Cadre : `phase=exploration_v3_hors_registre`,
+`backend=cpu_reference_bounded_oracles_and_g4_diagnostic`,
+`profile=quantized_u16_input_only`,
+`mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`. GCP non utilisé.
+
+> **Bannière de statut révisé.** Cette note conserve les questions de Claude,
+> mais ses claims live sont historiques. Le contre-audit au pin `3c11bc8`
+> maintient `0A` ouvert sur u16 et montre que le probe Kruskal/Floyd reçoit au
+> mieux une primitive de goulot `K=1`, pas le stage `0B`. Le verdict autoritaire
+> est `AUDIT_ETAT_COURANT.md`.
 
 Ceci est un recul, pas un résultat. Je le soumets pour être réfuté sur l'ordre,
 pas seulement sur les chiffres.
@@ -53,7 +61,7 @@ qualification v3 mais un successeur formel ; et la couture
 `binary64`.
 
 ```text
-0A  BallForm -> BallEvent exact et politique de degenerescence     [FAIT]
+0A  BallForm -> BallEvent exact et politique de degenerescence     [PARTIEL, NON RECU U16]
 0B  oracle exhaustif borne -> fold -> payload complet
 1   remplacer SEULEMENT la source par E3/E4, mesurer E/M/BallRuns
 2   Q3 owner-edge + PrimitiveSphereKey + range-count, shallow q4
@@ -61,7 +69,7 @@ qualification v3 mais un successeur formel ; et la couture
 4   changement de profil numerique, phase separee
 ```
 
-**Étape 0A close.** `prototype/ball_event.hpp` et sa sonde produisent
+**Claim « étape 0A close » rétracté.** `prototype/ball_event.hpp` et sa sonde produisent
 `PrimitiveSphereKey`, `SupportKey`, `I_B`, `U_B`, owner et disposition sur un
 petit nuage. Le juge est indépendant par sa route — Gram dans la base du
 support, centre et rayon rationnels, comparaison par produit croisé — là où le
@@ -71,9 +79,10 @@ de centre. Zéro désaccord sur trois familles ; `grid` porte `15` cosphères su
 dont trois mutants — owner par index, coquille comptée intérieure, clé non
 réduite — et un refus de domaine du juge au-delà de `coord=64`.
 
-Un de mes trois mutants a d'abord survécu, et c'était ma faute : j'avais
-désactivé sous injection la comparaison même censée le tuer. Le juge n'est plus
-jamais désarmé par une injection.
+Un de mes trois mutants a d'abord survécu. Au pin `3c11bc8`, le correctif reste
+non causal : toute injection désarme encore les refus du fold, et le mutant de
+clé ajoute `runs.size()` à ses fautes sans vérité indépendante. Une faute
+numérique peut ainsi être transformée en « mutant tué ».
 
 ## 3. Les cinq étapes, avec leurs portes et leurs critères de mort
 

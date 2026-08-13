@@ -1,0 +1,28 @@
+=== scanline_single_pass raffine=4 n=6250
+n=6250 famille=scanline_single_pass boite=serree sep=8/1 | front=125523 (20.084/pt) | vagues=30 tests=244797 tests/front=1.95 vague_max=26848 | masse=19528125/19528125
+fenetre q2 : terminaux_ouverts=61930 masse_ouverte=62884 (0.322% de C(n,2)) sum_E=62884 max_E=20 p50=10 p95=12 p99=16 moyen=10.06 | masses : fermee=19465241 pendante=0 ouverte=62884 terminaux fermes=63593 | pending=0
+fenetre q3 : terminaux_ouverts=94518 masse_ouverte=111155 (0.569% de C(n,2)) sum_E=111155 max_E=59 p50=16 p95=28 p99=43 moyen=17.78 | masses : fermee=19416970 pendante=0 ouverte=111155 terminaux fermes=31005 | pending=0
+fenetre q4 : terminaux_ouverts=92125 masse_ouverte=102543 (0.525% de C(n,2)) sum_E=102543 max_E=59 p50=14 p95=29 p99=40 moyen=16.41 | masses : fermee=19425582 pendante=0 ouverte=102543 terminaux fermes=33398 | pending=0
+OK famille=scanline_single_pass sep=8/1
+code=0
+=== scanline_single_pass raffine=4 n=12500
+n=12500 famille=scanline_single_pass boite=serree sep=8/1 | front=250086 (20.007/pt) | vagues=32 tests=487673 tests/front=1.95 vague_max=56072 | masse=78118750/78118750
+fenetre q2 : terminaux_ouverts=124038 masse_ouverte=125610 (0.161% de C(n,2)) sum_E=125610 max_E=21 p50=10 p95=17 p99=20 moyen=10.05 | masses : fermee=77993140 pendante=0 ouverte=125610 terminaux fermes=126048 | pending=0
+fenetre q3 : terminaux_ouverts=189038 masse_ouverte=220600 (0.282% de C(n,2)) sum_E=220600 max_E=59 p50=17 p95=31 p99=42 moyen=17.65 | masses : fermee=77898150 pendante=0 ouverte=220600 terminaux fermes=61048 | pending=0
+fenetre q4 : terminaux_ouverts=184122 masse_ouverte=1460485 (1.870% de C(n,2)) sum_E=1460485 max_E=1859 p50=15 p95=667 p99=1830 moyen=116.84 | masses : fermee=76658265 pendante=0 ouverte=1460485 terminaux fermes=65964 | pending=0
+OK famille=scanline_single_pass sep=8/1
+code=0
+=== scanline_single_pass raffine=4 n=25000
+n=25000 famille=scanline_single_pass boite=serree sep=8/1 | front=495389 (19.816/pt) | vagues=32 tests=965779 tests/front=1.95 vague_max=132490 | masse=312487500/312487500
+fenetre q2 : terminaux_ouverts=248488 masse_ouverte=250971 (0.080% de C(n,2)) sum_E=250971 max_E=21 p50=10 p95=14 p99=19 moyen=10.04 | masses : fermee=312236529 pendante=0 ouverte=250971 terminaux fermes=246901 | pending=0
+fenetre q3 : terminaux_ouverts=381535 masse_ouverte=444005 (0.142% de C(n,2)) sum_E=444005 max_E=59 p50=17 p95=29 p99=39 moyen=17.76 | masses : fermee=312043495 pendante=0 ouverte=444005 terminaux fermes=113854 | pending=0
+fenetre q4 : terminaux_ouverts=369534 masse_ouverte=1659056 (0.531% de C(n,2)) sum_E=1659056 max_E=1859 p50=14 p95=463 p99=1828 moyen=66.36 | masses : fermee=310828444 pendante=0 ouverte=1659056 terminaux fermes=125855 | pending=0
+OK famille=scanline_single_pass sep=8/1
+code=0
+=== scanline_single_pass raffine=4 n=50000
+n=50000 famille=scanline_single_pass boite=serree sep=8/1 | front=1423761 (28.475/pt) | vagues=34 tests=2797523 tests/front=1.96 vague_max=363914 | masse=1249975000/1249975000
+fenetre q2 : terminaux_ouverts=607178 masse_ouverte=607708 (0.049% de C(n,2)) sum_E=607708 max_E=27 p50=11 p95=19 p99=22 moyen=12.15 | masses : fermee=1249367292 pendante=0 ouverte=607708 terminaux fermes=816583 | pending=0
+fenetre q3 : terminaux_ouverts=1019684 masse_ouverte=1081328 (0.087% de C(n,2)) sum_E=1081328 max_E=63 p50=21 p95=32 p99=39 moyen=21.63 | masses : fermee=1248893672 pendante=0 ouverte=1081328 terminaux fermes=404077 | pending=0
+fenetre q4 : terminaux_ouverts=1058529 masse_ouverte=6382740 (0.511% de C(n,2)) sum_E=6382740 max_E=3660 p50=22 p95=889 p99=3653 moyen=127.65 | masses : fermee=1243592260 pendante=0 ouverte=6382740 terminaux fermes=365232 | pending=0
+OK famille=scanline_single_pass sep=8/1
+code=0

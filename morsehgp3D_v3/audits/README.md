@@ -18,6 +18,15 @@ les dépendances historiques encore citées par le logiciel ou un reçu.
 - [`AUDIT_BALL_EVENT_V0_2B89EA1_20260813.md`](AUDIT_BALL_EVENT_V0_2B89EA1_20260813.md) :
   contre-audit de la tranche `0A`; overflows u16, indépendance du juge, ABI,
   `RelevantGP`, caps et fixtures.
+- [`AUDIT_CONTRE_RECEPTION_BALL_EVENT_2B89EA1_20260813.md`](AUDIT_CONTRE_RECEPTION_BALL_EVENT_2B89EA1_20260813.md) :
+  rejeu indépendant de 0A ; RLE avant census, Gram au-delà d'i128, vrais
+  `PointId`, statut transactionnel et générateur pouvant ne pas terminer.
+- [`AUDIT_CONTRE_RECEPTION_STAGE_0B_3C11BC8_20260813.md`](AUDIT_CONTRE_RECEPTION_STAGE_0B_3C11BC8_20260813.md) :
+  réfutation du claim 0B ; DSU de points contre générateurs par ordre,
+  comparateur exact, lots, dix forêts, coverage et verticales manquants.
+- [`AUDIT_CONTRE_RAFFINEMENT_LOCAL_ET_SESSION_G4_3C11BC8_20260813.md`](AUDIT_CONTRE_RAFFINEMENT_LOCAL_ET_SESSION_G4_3C11BC8_20260813.md) :
+  mesure du gain `E4` et de son coût, double comptage des tentatives,
+  `ProofCarryingLocalRefinement` et blocages de la recette G4 avant exécution.
 - [`AUDIT_REPONSE_PLAN_VERTICAL_SOC64_LP_1AA487D_20260813.md`](AUDIT_REPONSE_PLAN_VERTICAL_SOC64_LP_1AA487D_20260813.md) :
   réponse mathématique consolidée, contre-audit de l'autre auditeur,
   `SOC64/CORNER512`, LP projectif et cages quatre--six sites.

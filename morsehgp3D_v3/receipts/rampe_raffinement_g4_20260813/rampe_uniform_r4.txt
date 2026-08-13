@@ -1,0 +1,28 @@
+=== uniform raffine=4 n=6250
+n=6250 famille=uniform boite=serree sep=8/1 | front=3321957 (531.513/pt) | vagues=31 tests=6637665 tests/front=2.00 vague_max=682762 | masse=19528125/19528125
+fenetre q2 : terminaux_ouverts=217253 masse_ouverte=217253 (1.113% de C(n,2)) sum_E=217253 max_E=76 p50=34 p95=57 p99=65 moyen=34.76 | masses : fermee=19310872 pendante=0 ouverte=217253 terminaux fermes=3104704 | pending=0
+fenetre q3 : terminaux_ouverts=886173 masse_ouverte=895599 (4.586% de C(n,2)) sum_E=895599 max_E=371 p50=138 p95=248 p99=290 moyen=143.30 | masses : fermee=18632526 pendante=0 ouverte=895599 terminaux fermes=2435784 | pending=0
+fenetre q4 : terminaux_ouverts=1060565 masse_ouverte=1061813 (5.437% de C(n,2)) sum_E=1061813 max_E=446 p50=163 p95=297 p99=349 moyen=169.89 | masses : fermee=18466312 pendante=0 ouverte=1061813 terminaux fermes=2261392 | pending=0
+OK famille=uniform sep=8/1
+code=0
+=== uniform raffine=4 n=12500
+n=12500 famille=uniform boite=serree sep=8/1 | front=8005591 (640.447/pt) | vagues=33 tests=15998683 tests/front=2.00 vague_max=1570030 | masse=78118750/78118750
+fenetre q2 : terminaux_ouverts=447129 masse_ouverte=447129 (0.572% de C(n,2)) sum_E=447129 max_E=81 p50=35 p95=58 p99=66 moyen=35.77 | masses : fermee=77671621 pendante=0 ouverte=447129 terminaux fermes=7558462 | pending=0
+fenetre q3 : terminaux_ouverts=1887607 masse_ouverte=1907126 (2.441% de C(n,2)) sum_E=1907126 max_E=357 p50=147 p95=258 p99=297 moyen=152.57 | masses : fermee=76211624 pendante=0 ouverte=1907126 terminaux fermes=6117984 | pending=0
+fenetre q4 : terminaux_ouverts=2271532 masse_ouverte=2273971 (2.911% de C(n,2)) sum_E=2273971 max_E=427 p50=175 p95=310 p99=360 moyen=181.92 | masses : fermee=75844779 pendante=0 ouverte=2273971 terminaux fermes=5734059 | pending=0
+OK famille=uniform sep=8/1
+code=0
+=== uniform raffine=4 n=25000
+n=25000 famille=uniform boite=serree sep=8/1 | front=18564254 (742.570/pt) | vagues=35 tests=37103509 tests/front=2.00 vague_max=3394328 | masse=312487500/312487500
+fenetre q2 : terminaux_ouverts=915637 masse_ouverte=915639 (0.293% de C(n,2)) sum_E=915639 max_E=84 p50=36 p95=59 p99=67 moyen=36.63 | masses : fermee=311571861 pendante=0 ouverte=915639 terminaux fermes=17648617 | pending=0
+fenetre q3 : terminaux_ouverts=3956152 masse_ouverte=3996743 (1.279% de C(n,2)) sum_E=3996743 max_E=369 p50=154 p95=266 p99=298 moyen=159.87 | masses : fermee=308490757 pendante=0 ouverte=3996743 terminaux fermes=14608102 | pending=0
+fenetre q4 : terminaux_ouverts=4783874 masse_ouverte=4790377 (1.533% de C(n,2)) sum_E=4790377 max_E=434 p50=185 p95=320 p99=360 moyen=191.62 | masses : fermee=307697123 pendante=0 ouverte=4790377 terminaux fermes=13780380 | pending=0
+OK famille=uniform sep=8/1
+code=0
+=== uniform raffine=4 n=50000
+n=50000 famille=uniform boite=serree sep=8/1 | front=42679147 (853.583/pt) | vagues=37 tests=85308295 tests/front=2.00 vague_max=7239774 | masse=1249975000/1249975000
+fenetre q2 : terminaux_ouverts=1864603 masse_ouverte=1864606 (0.149% de C(n,2)) sum_E=1864606 max_E=85 p50=36 p95=59 p99=66 moyen=37.29 | masses : fermee=1248110394 pendante=0 ouverte=1864606 terminaux fermes=40814544 | pending=0
+fenetre q3 : terminaux_ouverts=8208057 masse_ouverte=8301296 (0.664% de C(n,2)) sum_E=8301296 max_E=373 p50=161 p95=272 p99=305 moyen=166.03 | masses : fermee=1241673704 pendante=0 ouverte=8301296 terminaux fermes=34471090 | pending=0
+fenetre q4 : terminaux_ouverts=9960275 masse_ouverte=9976128 (0.798% de C(n,2)) sum_E=9976128 max_E=449 p50=193 p95=328 p99=368 moyen=199.52 | masses : fermee=1239998872 pendante=0 ouverte=9976128 terminaux fermes=32718872 | pending=0
+OK famille=uniform sep=8/1
+code=0

@@ -24,18 +24,27 @@ est `p95 warm_e2e<100 ms` et la cible secondaire `p95 warm_e2e<1 s` sur un G4,
 sortie complète et synchronisation comprises. Aucun échantillon qualifiable ne
 reçoit l'une ou l'autre.
 
-Le pin `2b89ea1` introduit enfin une première tranche
+Le pin historique `2b89ea1` introduit enfin une première tranche
 `BallForm -> PrimitiveSphereKey -> census I_B/U_B -> SphereRun`. C'est le bon
 ordre architectural, mais **l'étape 0A n'est pas reçue pour u16** : les
 constructeurs q3/q4 rabattent des numérateurs de 67 à 81 bits vers `int64`, puis
 créent des carrés jusqu'à environ 162 bits dans `i128` avant réduction. Les
-huit CTests verts ne couvrent que `coord<=64`; leur juge ne recertifie ni la
-positivité ni la clé primitive, et le mutant de clé s'auto-déclare tué.
+huit CTests du pin, puis les dix du successeur, ne couvrent que `coord<=64` ;
+leur juge de Gram dépasse lui-même 128 bits sur des fixtures u16, ne recertifie
+ni la positivité ni la clé primitive, et le mutant de clé reste corrélé.
 
-Le verdict live, y compris le worktree concurrent, est dans
+Le `HEAD=3c11bc8` ajoute un probe nommé stage 0B. Il ne ferme pas 0B : il
+compare Kruskal à Floyd--Warshall sur le même hypergraphe de `PointId`, dans
+une unique DSU. Il n'émet ni dix forêts par ordre, ni lots, coverage,
+verticales ou payload. Cette DSU est structurellement fausse dès `k=2` lorsque
+deux générateurs distincts partagent un point mais moins de `k` identités.
+
+Le verdict live est dans
 [`audits/AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md). L'audit ciblé de
 la tranche est
 [`audits/AUDIT_BALL_EVENT_V0_2B89EA1_20260813.md`](audits/AUDIT_BALL_EVENT_V0_2B89EA1_20260813.md).
+Le contre-rejeu du faux 0B est
+[`audits/AUDIT_CONTRE_RECEPTION_STAGE_0B_3C11BC8_20260813.md`](audits/AUDIT_CONTRE_RECEPTION_STAGE_0B_3C11BC8_20260813.md).
 
 ## Route active
 
@@ -69,26 +78,30 @@ Les couches restent distinctes :
 - `BallEvent` : `BallKey`, supports, owners, niveau exact, `I_B/U_B`, lanes,
   provenance, complétude du census et disposition transactionnelle.
 
-Le fold ne dépend ni de `__int128` natif, ni du nombre de limbs du profil. Un
-futur profil binary64 certifié peut donc changer `ExactKernel` et le codec sans
-réécrire le fold. La cardinalité seule ne motive pas binary64 : la grille u16
-3D contient $2^{48}$ sites distincts ; l'index dense et le `PointId` sont des
-codecs séparés.
+Le fold contractuel ne doit dépendre ni de `__int128` natif, ni du nombre de
+limbs du profil. Le probe courant viole encore cette frontière : son
+comparateur lit directement `PrimitiveSphereKey` et effectue ses contrôles
+après des multiplications signées susceptibles de déborder. Une fois la
+frontière reçue, un futur profil binary64 pourra changer `ExactKernel` et le
+codec sans réécrire le fold. La cardinalité seule ne motive pas binary64 : la
+grille u16 3D contient $2^{48}$ sites distincts ; l'index dense et le `PointId`
+sont des codecs séparés.
 
 ## Prochaines réparations P0
 
 Avant d'appeler `0A` fermé :
 
 1. construire directement les polynômes q3/q4 sans centre rabattu en `int64`
-   et prouver les largeurs sur tout `[0,65535]^3` ;
+   et employer une autorité BigInt/rationnelle sur tout `[0,65535]^3` ;
 2. juger indépendamment dépendance affine, positivité, clé primitive, niveau,
    census et owner sur des `PointId` non denses ;
 3. ajouter epoch/profile/schema, statuts typés, marqueurs de complétude et
    `SupportRecord` atomique ;
 4. appliquer `count -> preflight -> fill -> validate -> publish`, avec zéro
    payload sur cap moins un, erreur numérique ou dégénérescence non admise ;
-5. différencier toute la sortie de `0A`, puis fermer `0B` jusqu'au
-   `BenchmarkOutputContract-v1`.
+5. borner les générateurs de fixtures et refuser leur capacité plus un ;
+6. différencier toute la sortie de `0A`, puis fermer `0B` par générateurs et
+   ordres jusqu'au `BenchmarkOutputContract-v1`.
 
 ## Générateur q3 retenu
 
@@ -137,6 +150,12 @@ environ trois centièmes de point seulement. Cela réfute cette combinaison sur
 les boîtes grossières mesurées, pas les deux théorèmes corrélés, qui restent à
 implémenter et à mesurer.
 
+La prochaine ablation recommandée est `SOC64-shadow-q4` sur un échantillon
+déterministe de tâches `central-MIXED`, avec cap propre, early exits, masse
+créditable et aucun changement de fate. Si le signal est positif, le brancher
+**avant** le raffinement local : un certificat corrélé évite une scission,
+alors qu'un certificat rejoué après la scission paie déjà son front.
+
 ### LP projectif
 
 Pour `s_i=z_i-a`, `d=b-a`, `D=||d||^2`, `q_i=||s_i||^2`, poser :
@@ -161,6 +180,29 @@ fleur.
 
 Les preuves, limites de largeur et contre-fixtures sont consolidées dans
 [`audits/AUDIT_REPONSE_PLAN_VERTICAL_SOC64_LP_1AA487D_20260813.md`](audits/AUDIT_REPONSE_PLAN_VERTICAL_SOC64_LP_1AA487D_20260813.md).
+
+## Raffinement local : signal utile, coût non reçu
+
+Le raffinement des seuls terminaux q4 non fermés réduit réellement `E4` à
+`n=3000`, `s=8` : `eight_clusters` passe de `4 045 644` à `2 597 699` arêtes
+résiduelles et `uniform` de `1 027 538` à `464 599`. Mais à profondeur quatre,
+les recertifications passent respectivement de `31 538 327` à `199 169 436`
+et de `108 858 186` à `193 020 841`. Sans `M4`, BallKeys, census et fold, il
+est faux de conclure que le levier « paie ».
+
+La télémétrie de tête double-compte les parents ensuite scindés et imprime
+jusqu'à `380,15 %` de masse q2 fermée. Le ledger terminal
+`CLOSED/OPEN/PENDING` reste cohérent ; les compteurs de tentatives doivent être
+séparés de l'objet final.
+
+La réparation algorithmique proposée est `ProofCarryingLocalRefinement` : un
+enfant hérite des CNodes témoins déjà `ALL`, des `NONE` et de leurs IDs ; seuls
+les `MIXED` sont rejoués. Cela évite de repartir de la racine à chaque split et
+se prête à `count--scan--fill` avec continuations persistantes. La recette G4
+committée n'a pas été exécutée : elle ne calcule aucune pente entre ses quatre
+processus, ne gate pas `fenetre_finale`, masque les métriques physiques et doit
+être réparée avant usage. Détails et commandes :
+[`audits/AUDIT_CONTRE_RAFFINEMENT_LOCAL_ET_SESSION_G4_3C11BC8_20260813.md`](audits/AUDIT_CONTRE_RAFFINEMENT_LOCAL_ET_SESSION_G4_3C11BC8_20260813.md).
 
 ## Dégénérescences et sortie lourde
 
@@ -190,6 +232,14 @@ Les diagnostics CPU existants ne sont pas des modèles G4. Aucun cutoff kNN
 n'est exact : des supports positifs gardent un partenaire arbitrairement loin
 en rang. Aucun arrangement global, aucune mosaïque Delaunay d'ordre supérieur
 et aucun catalogue exhaustif ne deviennent le chemin produit.
+
+Le raffinement local réduit effectivement `E4`, mais ses parents et enfants
+sont encore mélangés dans plusieurs compteurs de tentative. Son coût doit être
+jugé après séparation `AttemptStats/TerminalLedger` et avec héritage des preuves
+`ALL/NONE`. La recette G4 actuelle ne calcule pas la pente inter-tailles, coupe
+des métriques décisives et lance des diagnostics CPU concurrents ; elle n'est
+pas une campagne de qualification. Voir
+[`audits/AUDIT_CONTRE_RAFFINEMENT_LOCAL_ET_SESSION_G4_3C11BC8_20260813.md`](audits/AUDIT_CONTRE_RAFFINEMENT_LOCAL_ET_SESSION_G4_3C11BC8_20260813.md).
 
 ## Construire et tester
 
