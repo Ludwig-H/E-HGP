@@ -3930,3 +3930,28 @@ mhgp3v_add_expected_code_test_for(mhgp3v_wspd_front_probe
 mhgp3v_add_expected_code_test_for(mhgp3v_wspd_front_probe
   mhgp3v_wspd_front_refus_oracle_trop_grand "l'oracle de multiplicite exige" 2
   --family=uniform --points=4000 --oracle)
+
+# --- WSPD par vagues sur octree comprime de Morton : le prototype dont le
+# kernel GPU sera la transcription directe. Aucune recursion, aucune pile.
+add_executable(mhgp3v_wspd_wavefront_probe prototype/wspd_wavefront_probe.cpp)
+target_include_directories(mhgp3v_wspd_wavefront_probe PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(mhgp3v_wspd_wavefront_probe PRIVATE mhgp)
+target_compile_options(mhgp3v_wspd_wavefront_probe PRIVATE -Wall -Wextra -Werror)
+
+# La vague doit PARTITIONNER les paires exactement comme la recursion, avec la
+# cellule de Morton COMME avec la boite serree.
+add_test(NAME mhgp3v_wspd_wavefront_multiplicite
+  COMMAND mhgp3v_wspd_wavefront_probe --family=uniform --points=48,64 --coord=512 --oracle)
+set_tests_properties(mhgp3v_wspd_wavefront_multiplicite PROPERTIES
+  PASS_REGULAR_EXPRESSION "oracle accord=OUI")
+add_test(NAME mhgp3v_wspd_wavefront_multiplicite_serree
+  COMMAND mhgp3v_wspd_wavefront_probe --family=uniform --points=48,64 --coord=512 --oracle --tight)
+set_tests_properties(mhgp3v_wspd_wavefront_multiplicite_serree PROPERTIES
+  PASS_REGULAR_EXPRESSION "oracle accord=OUI")
+
+# Le travail doit valoir DEUX fois la sortie : chaque terminal a exactement un
+# ancetre non separe. C'est la propriete qui rend la vague GPU-viable.
+add_test(NAME mhgp3v_wspd_wavefront_travail
+  COMMAND mhgp3v_wspd_wavefront_probe --family=uniform --points=8000 --sep-euclid=2/1 --tight)
+set_tests_properties(mhgp3v_wspd_wavefront_travail PROPERTIES
+  PASS_REGULAR_EXPRESSION "tests/front=1\\.9[0-9]")

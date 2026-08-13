@@ -239,6 +239,15 @@ petit `n` développant les relations `Central/Lens/Acute/Mixed` avec
 multiplicité un. Une expansion proportionnelle à la masse d'un bloc est un
 refus d'architecture.
 
+Le juge carrier reçoit au minimum : frontière droite
+`a=(0,0,0),b=(2,0,0),x=(1,1,0)` qui doit être `NONE` car
+`D=E2+X2`; tie d'arête admis
+`a=(0,0,0),b=(5,0,0),x=(3,4,0)` qui doit être `ALL` avec
+`E2=D=25`; boîte mêlant ces cas qui doit être `MIXED`; mutants `< / <=` sur
+les deux contraintes de lentille et sur l'acuité ; puis oracle exhaustif de
+petites AABB contre tous les triplets ponctuels. Une fixture positive unique ne
+reçoit ni `NONE`, ni `MIXED`, ni les frontières.
+
 Le premier `carrier_scan` concurrent valide le besoin mais pas l'ordonnance.
 À `n=2000,s_inf=2`, après la banque `W32/L16`, il ne prouve vide que
 `4,66 %` des records uniformes, `10,38 %` terrain et `7,27 %` huit-amas, tout

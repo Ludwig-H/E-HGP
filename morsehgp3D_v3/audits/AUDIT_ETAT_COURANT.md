@@ -8,15 +8,15 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-## Observation live — `HEAD=653e2d6`, ablation euclidienne, P0 et source non reçus
+## Observation live — `HEAD=6feb5df`, carrier reçu comme diagnostic, P0/source non reçus
 
 Le `HEAD` observé est
-`653e2d65bebd07b8288879740c3145eee0e2010b`, commit
-`make the separation Euclidean without giving up integer determinism`. Il
-intègre les directives documentaires, le prédicat euclidien conservateur et le
-script d'ablation ; le tape L-infini reste disponible. Le worktree contient le
-delta carrier concurrent de Claude et deux compléments d'audit ; l'auditeur ne
-touche à aucun logiciel.
+`6feb5dfc5ebef4b8e78dcbdc89d6bcc7069d6e13`, commit
+`implement the carrier predicate, and find that it generates rather than
+filters`. Son parent intègre les directives documentaires, le prédicat
+euclidien conservateur et le script d'ablation ; le pin ajoute le classifieur
+carrier et son scan diagnostique. Le worktree ne contient que les compléments
+documentaires du présent audit ; l'auditeur ne touche à aucun logiciel.
 
 Le transcript G4 confirme la gate `front_records` sur quatorze des quinze
 couples de cinq familles et trois séparations, entre `12500` et `100000`.
@@ -66,7 +66,7 @@ local courant donne :
 cmake -S morsehgp3D_v3 -B build/v3 -DCMAKE_BUILD_TYPE=Release
 cmake --build build/v3 --target mhgp3v_rect_front_probe mhgp3v_wspd_front_probe --parallel
 ctest --test-dir build/v3 --output-on-failure -R '^mhgp3v_(rect|wspd)_front_'
-18/18 PASS, 12,36 s
+18/18 PASS, 55,36 s
 ```
 
 Ce vert reçoit le refus pré-calcul de `leaf>1`, le domaine, le cardinal et la
@@ -92,7 +92,7 @@ donc ni une preuve universelle sur les AABB u16, ni une couverture de la WSPD,
 de la banque, des seuils ou de l'owner. Il manque des mutants faux-`ALL` et un
 digest attendu de la couverture.
 
-Le delta logiciel concurrent ajoute `--sep-euclid=p/q`. Sa comparaison
+Le `HEAD` ajoute `--sep-euclid=p/q`. Sa comparaison
 `q^2 D2 >= (p+2q)^2 max(W2A,W2B)` est un arrêt euclidien sûr : elle implique
 la séparation demandée en majorant `rA+rB` par deux fois le plus grand rayon.
 Elle peut manquer des terminaux quand les rayons diffèrent ; ce n'est donc pas
@@ -112,7 +112,7 @@ Il ne distingue ni front, ni métrique, ni fraction, ni RectIds. Ce contrôle
 reste un `PairDomainDigest`; le `FrontDigest` demandé hash le schéma, la
 métrique, la fraction réduite et la suite canonique des rectangles/masses.
 
-Le worktree ajoute ensuite `rect_carrier_verdict` et un scan q3. Les bornes
+Le pin ajoute ensuite `rect_carrier_verdict` et un scan q3. Les bornes
 `NONE/ALL/MIXED` sont sémantiquement sûres : elles encadrent les trois
 contraintes `E2<=D2`, `X2<=D2`, `D2<E2+X2`, avec égalités faibles sur les deux
 longueurs et stricte sur l'acuité. Le build Release et les six portes
@@ -129,6 +129,9 @@ globales et ne sont pas remises à zéro entre tailles, donc une rampe les
 cumulerait faussement ; elles omettent aussi la masse des shards vides. Garder
 ce helper et son oracle, mais fusionner ses masks dans `DVT-CWave` avec
 `root_entries=F,restarted_roots=0`, plutôt que porter ce second rescan sur GPU.
+La seule fixture carrier est positive. Il manque encore frontière droite
+`D=E2+X2`, tie d'arête faible `E2=D`, cas `NONE/MIXED`, mutants de stricte et
+oracle exhaustif sur petites AABB.
 
 Le script hérité du `HEAD=21a7a63` est encore `NO-RUN` pour recevoir
 `RF-GPU-P0`.
