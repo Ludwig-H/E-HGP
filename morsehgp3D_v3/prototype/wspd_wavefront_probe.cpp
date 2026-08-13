@@ -468,18 +468,28 @@ int main(int argc, char** argv) {
       std::sort(v.begin(), v.end());
       return v[std::min(v.size() - 1, (size_t)(f * (double)v.size()))];
     };
-    // ---- `ProjectiveWindowCounter-v0`, LECTURE « SURVIVANTS ».
+    // ---- DEGRE RESIDUEL PAR POINT — nomme correctement cette fois.
     //
-    // `N_q(a)` est ici l'ensemble des `b` tels que la paire `(a,b)` survit au
-    // certificat. C'est la lecture dont l'audit fait un critere de mort : si la
-    // fenetre reste quasi quadratique, la route est NO-GO. L'autre lecture —
-    // les sommets admissibles d'un support ancre en `a` — est une question
-    // ouverte que je ne tranche pas, et ce compteur ne pretend pas la couvrir.
+    // CORRECTION (contre-audit `736f5bc`). Ce compteur ne contient AUCUN credit
+    // projectif : l'appeler `ProjectiveWindowCounter` etait un abus, et son
+    // identite exacte est `somme_a deg(a) = 2 x masse residuelle`, parce qu'il
+    // additionne les DEUX degres de chaque paire non ordonnee. Le facteur deux
+    // est desormais IMPRIME plutot que cache.
     //
-    // On accumule le degre residuel par `PointId` : pour chaque terminal
-    // OUVERT, chaque point de `A` gagne `|B|` et reciproquement. Le cout est
-    // en somme des cardinaux, jamais en masse.
+    // La quantite qui se brancherait sur `anchor_source` est `E_q(a)`, les
+    // seconds endpoints `b > a` sous orientation canonique, dont la somme vaut
+    // la masse residuelle SANS facteur deux. Je ne la calcule pas ici : son
+    // parcours coute `O(|A| |B|)` par rectangle, donc la masse elle-meme. Sa
+    // SOMME est en revanche gratuite — c'est exactement `masse_residuelle` —,
+    // et seul son maximum demanderait le parcours.
+    //
+    // CE QUE CE COMPTEUR N'EST PAS. Ce n'est pas le `kept` du moteur. `kept`
+    // est un ensemble de SITES `z` dependant de `(a,b)`, publie en MAXIMUM par
+    // paire ; le degre residuel est un nombre d'ENDPOINTS par point, publie en
+    // moyenne. Les rapprocher etait une coincidence de scalaires — leur rejeu
+    // donne une moyenne de 82,5 la ou je citais 446 — et je ne le fais plus.
     std::vector<long long> deg_res(sp.size(), 0);
+    long long masse_res = 0;
     for (size_t i = 0; i < terms.size(); ++i) {
       if (i < closed_q2.size() && closed_q2[i]) continue;
       const Pair& t = terms[i];
@@ -488,6 +498,7 @@ int main(int argc, char** argv) {
       const int fb = (t.b < 0) ? (-1 - t.b) : nodes[t.b].first;
       const int lb = (t.b < 0) ? (-1 - t.b) : nodes[t.b].last;
       const long long ka = la - fa + 1, kb = lb - fb + 1;
+      masse_res += ka * kb;
       for (int u = fa; u <= la; ++u) deg_res[u] += kb;
       for (int v = fb; v <= lb; ++v) deg_res[v] += ka;
     }
@@ -605,7 +616,7 @@ int main(int argc, char** argv) {
                 " | banque lectures=%lld recert=%lld ferme q2=%lld q3=%lld q4=%lld"
                 " | masse fermee q2=%.2f%% records fermes q2=%.2f%% tronques=%lld"
                 " juges=%lld faux=%lld | verdicts ALL=%lld NONE=%lld descente_pure=%lld"
-                " | seuils=%d/%d/%d fenetre somme_N=%lld max_N=%lld moyen_N=%.1f"
+                " | seuils=%d/%d/%d degre_residuel somme=%lld (= 2 x masse_res %lld) max=%lld moyen=%.1f"
                 " | partenaires max=%lld moyen=%.2f"
                 " | residuel : %lld paires tirees DANS LA MASSE ouverte,"
                 " temoins_moyen=%.1f max=%lld, deja >=10 temoins : %lld (%.1f%%)"
@@ -617,7 +628,7 @@ int main(int argc, char** argv) {
                 100.0 * (double)mass_closed_q2 / (double)total,
                 100.0 * (double)bank.closed[0] / (double)std::max<size_t>(1, terms.size()),
                 bank.tronques, bank.juges, bank.faux, bank.v_all, bank.v_none, bank.v_descente,
-                g_need[0], g_need[1], g_need[2], nsum, nmax, (double)nsum / (double)m,
+                g_need[0], g_need[1], g_need[2], nsum, masse_res, nmax, (double)nsum / (double)m,
                 dmax, (double)dsum / (double)std::max(1LL, dnz),
                 ech, (double)som_temoins / (double)std::max(1LL, ech), max_temoins,
                 faux_resid, 100.0 * (double)faux_resid / (double)std::max(1LL, ech),
@@ -656,7 +667,7 @@ int main(int argc, char** argv) {
     const double s = std::log2(fronts[k] / fronts[k - 1]) / std::log2((double)ns[k] / (double)ns[k - 1]);
     const double sw = std::log2(fenetres[k] / fenetres[k - 1]) /
                       std::log2((double)ns[k] / (double)ns[k - 1]);
-    std::printf("pente front_records=%.3f pente somme_N=%.3f (%lld->%lld)\n",
+    std::printf("pente front_records=%.3f pente degre_residuel=%.3f (%lld->%lld)\n",
                 s, sw, ns[k - 1], ns[k]);
     if (s >= max_slope) ++bad; else bad = 0;
     if (bad >= 2) { std::fprintf(stderr, "REFUS DE PENTE: deux pentes >= %.2f\n", max_slope); return 3; }

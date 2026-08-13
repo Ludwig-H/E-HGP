@@ -236,6 +236,17 @@ disjonction avec les crédits déjà commis, puis seulement fusionne compteurs e
 digest. Une proposition manquée agrandit `E_4(a)` ; elle ne peut jamais fermer
 sur le premier candidat omis.
 
+Le suffixe `GenerationRank` concerne uniquement les seconds endpoints. Les
+candidats témoins de la banque peuvent avoir n'importe quel rang, hors ancre ;
+les restreindre au suffixe resterait fail-open mais réduirait inutilement le
+rappel. Une cellule 3D pleine demande au moins trois IDs par groupe et q4 huit
+groupes disjoints : `active_pool<24` est donc un
+`STRUCTURAL_UNDERFULL` immédiat. Publier `active_pool` par cellule et son
+histogramme, pas seulement le cap global partagé entre 48 chambres. Les mêmes
+IDs peuvent servir à des preuves alternatives d'autres cellules ; ils ne
+peuvent pas apparaître dans deux des huit groupes de la preuve finalement
+consommée pour une cible.
+
 ### 5.3 Boucle minimale du reporter
 
 Pour chaque ancre `a`, la banque calcule le cutoff du huitième crédit dans
@@ -291,7 +302,9 @@ La banque bornée reste propositionnelle. Une fenêtre dense à `P=96` refuse ce
 proposer, pas tout certificat projectif. La porte publie donc `P=48/96/192`, le
 taux `UNDERFULL` et la cause précise de chaque span ouvert. La fermeture n'est
 monotone que si ces banques sont des préfixes emboîtés et conservent les crédits
-déjà commis. Un `NO-GO` global suppose soit un cap produit et une arène dérivés
+déjà commis. Concrètement, chaque preuve huit-disjointe reçue au cap précédent
+reste candidate et le cutoff final est le meilleur des preuves alternatives ;
+un repacking glouton ne peut pas effacer l'ancienne. Un `NO-GO` global suppose soit un cap produit et une arène dérivés
 d'un layout/preflight, soit une ablation stabilisée.
 
 Un vert de `E_4` reste nécessaire mais non suffisant. Pour chaque arête ouverte,

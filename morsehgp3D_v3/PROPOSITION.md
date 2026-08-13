@@ -2375,6 +2375,17 @@ enveloppe industrielle explicitement figée avec layout et preflight, soit la
 stabilisation de cette ablation. Un cap diagnostic `192` et un cap produit `96`
 restent deux descripteurs distincts.
 
+Seul l'univers des **cibles** est le suffixe de `GenerationRank`. La banque de
+témoins reste libre de proposer tout `PointId` sauf l'ancre ; la limiter au
+suffixe serait sûr mais détruirait du rappel. Dans une cellule 3D pleine, un
+groupe couvrant les trois rayons consomme au moins trois IDs. Une fermeture q4
+à huit groupes exige donc au moins vingt-quatre IDs actifs distincts dans la
+cellule ; `active_pool<24` produit immédiatement `STRUCTURAL_UNDERFULL`. Le reçu
+publie l'histogramme du pool actif par cellule, distinct du cap global `P`.
+Pour rendre l'ablation `48/96/192` monotone, conserver chaque preuve huit-
+disjointe déjà reçue et prendre le meilleur cutoff parmi les preuves
+alternatives ; ne jamais repacker puis jeter l'ancien certificat.
+
 Si `PWC0-A` reçoit une fenêtre sparse mais que ses `n` graines racine ou ses
 tâches dominent, `PWC0-B` universalise les mêmes preuves sur un `ANode` et
 traverse `ANode×BNode` depuis une graine unique. Comme les deux nœuds varient,
