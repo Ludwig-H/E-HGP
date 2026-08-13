@@ -80,6 +80,16 @@ la masse centrale fermée et la moyenne quasi constante à `s=3` peuvent être u
 effet de cette densification. La note ne pince ni commandes exactes, ni
 transcript, ni hash d'ELF, et ne couvre qu'une famille et q2.
 
+Un rejeu local avec les emprises canoniques conserve néanmoins un signal utile
+pour l'ablation `s=3` : `sum_N=1 754 188/3 809 732/8 485 770` à
+`n=4000/8000/16000`, soit des pentes `1,119/1,155`, des moyennes
+`438,5/476,2/530,4` et des maxima `946/1018/1085`. Il comporte
+`23/893/1356` rectangles tronqués et prend `7,35/12,80/20,92 s` CPU. Ce
+diagnostic réfute l'explication par la seule densification ; il ne change pas
+l'identité `sum_N=2*residual_pair_mass`, ne couvre toujours ni q3/q4 ni les
+crédits projectifs, et ne qualifie aucun temps produit. `s=3` est donc une
+ablation prometteuse à porter au vrai reporter, pas une configuration reçue.
+
 ## 3. Définition non ambiguë de `N_q(a)`
 
 Pour la route projective, fixer l'owner de génération
@@ -175,6 +185,81 @@ configuration ; aucune valeur de `s` n'est figée avant ce reçu. Si la fenêtre
 projective passe, seulement alors sa masse dirigée devient un `PlaneTape` par
 `count--scan--fill`; sinon la route s'arrête avant allocation.
 
+### 5.1 Commencer par q4 et non par les trois lanes
+
+Le plus petit falsificateur est `AnchorSuffixReporter-q4-v0`. Il demande
+`h_4=8` crédits, ferme donc au moins autant de cibles que les seuils `h_3=9` et
+`h_2=10` pour une même suite de crédits, et produit la fenêtre qui doit être la
+plus petite. Si `sum_a|N_4(a)|`, ses tâches ou ses octets restent denses, il est
+inutile d'écrire le shallow q4 ou de dupliquer d'abord le reporter pour les
+autres lanes. Un vert q4 ne reçoit pas q3/q2 ; il autorise seulement leur ajout
+avec masque partagé.
+
+Le P0 prend les 48 chambres signées/permutées avec leurs propres rayons
+extrêmes, leur convention half-open et leurs propres `CreditKey`. Une chambre
+`OPEN/MIXED` est ensuite la seule à être raffinée dans ses neuf sous-cellules.
+Le mode 432 fixe reste l'ablation de rappel maximal. Une mauvaise fenêtre aux
+48 chambres ne réfute donc pas encore la route projective ; elle refuse cette
+résolution grossière, puis déclenche le raffinement `48 -> 9` uniquement sur
+les chambres ouvertes.
+
+### 5.2 Ce qui est réutilisable dans `cell_credits`, et ce qui ne l'est pas
+
+`activation_height`, les 432 tables de rayons et l'enveloppe Andrew entière
+sont de bonnes primitives propositionnelles. Le probe courant n'est toutefois
+pas une banque reçue :
+
+- ses identifiants d'union sont des indices locaux du pool, pas les vrais
+  `PointId` persistants ;
+- `rank_counts` est incrémenté rayon par rayon avant de savoir si les trois
+  rayons passent : un échec tardif laisse donc une télémétrie non
+  transactionnelle ;
+- le commentaire « plus petite activation, donc plus proche » est faux. Dans
+  `U00`, `s_near=(1,-2,0)` a norme carrée `5` et activation `16`, tandis que
+  `s_far=(4,0,0)` a norme carrée `16` et activation `5` ;
+- `pool<=48` ne peut pas contenir le pire reçu q4 de huit crédits de neuf IDs,
+  soit jusqu'à `72` IDs. Un pool plus petit reste licite seulement s'il publie
+  `UNDERFULL/OPEN` ;
+- le ledger final rebalaie toutes les cibles en `O(n^2)` et ne produit ni
+  `BNodeKey`, ni span, ni continuation.
+
+La transaction correcte construit le crédit dans un temporaire, convertit
+chaque index local en vrai `PointId`, rejoue les trois carriers, vérifie la
+disjonction avec les crédits déjà commis, puis seulement fusionne compteurs et
+digest. Une proposition manquée agrandit `N_4(a)` ; elle ne peut jamais fermer
+sur le premier candidat omis.
+
+### 5.3 Boucle minimale du reporter
+
+Pour chaque ancre `a`, la banque calcule le cutoff du huitième crédit dans
+chaque chambre reçue. Le reporter traverse ensuite l'arbre des cibles avec des
+tâches `(AnchorId,BNodeKey,chamber_mask,state)` :
+
+```text
+max_PointId(BNode) <= AnchorId         -> SKIP_OWNER
+min_PointId(BNode) <= AnchorId         -> SPLIT_OWNER
+direction et hauteur toutes fermees    -> CLOSED_SPAN
+direction ou seuil tous ouverts        -> OPEN_SPAN
+frontiere/melange                       -> SPLIT_TARGET
+quantum/cap atteint                     -> OPEN_SPAN + ContinuationKey
+```
+
+Les `OPEN_SPAN` partitionnent exactement les cibles `PointId(b)>PointId(a)` non
+fermées par la banque reçue. Le compteur logique est la somme de leurs
+populations ; aucun `PairId` n'est développé sur le chemin produit. Le juge
+`n<=64` les développe seulement pour exiger l'égalité avec le classement
+ponctuel du **même** bank, puis vérifie que chaque co-sommet de chaque support
+q4 exhaustif appartient à la fenêtre de son owner minimal.
+
+Les mutants indispensables partagent un ID entre deux crédits, confondent
+index local et `PointId`, omettent une chambre, changent la stricte
+d'activation, traitent un cap comme `CLOSED`, inversent l'owner et emploient le
+premier omis par distance comme cutoff. Les compteurs bloquants sont séparés :
+propositions, activations, tests d'enveloppe, crédits commis, cellules
+`UNDERFULL`, tâches créées/consommées/en attente, spans ouverts/fermés,
+population logique, octets lus/écrits, HWM et temps. `tasks_created` doit valoir
+`tasks_consumed+tasks_pending`.
+
 ## 6. Décision immédiate
 
 - conserver le compteur de degré du pin sous le nom
@@ -182,9 +267,9 @@ projective passe, seulement alors sa masse dirigée devient un `PlaneTape` par
   gate ;
 - retirer `ProjectiveWindowCounter-v0`, `REFUSÉ s=2`, `VERT s=3` et
   « décide autrement que la masse » de ses claims ;
-- implémenter ensuite les 48 chambres indépendantes et le reporter owner-dirigé
-  décrit ci-dessus ;
+- implémenter `AnchorSuffixReporter-q4-v0` : 48 chambres indépendantes, puis
+  raffinement adaptatif des seules chambres ouvertes dans leurs neuf
+  sous-cellules ;
 - ne lancer ni G4, ni shallow, ni join générique avant ce compteur.
 
 Le contrat `50000/1s` reste ouvert.
-

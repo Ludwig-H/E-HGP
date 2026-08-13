@@ -16,12 +16,15 @@ GCP.
 
 ## 1. Verdict utile à Claude
 
-Le résultat du pin est une bonne décision négative : optimiser encore une
-recherche `C=root` indépendante pour chacun des `F` rectangles ne peut pas
-fournir le facteur manquant. Le compteur `climb` enlève environ `9,1 %` des
-classifications sur l'unique diagnostic `uniform,n=8000,s=2`, mais il ferme
-moins de records et ne donne pas de gain CPU robuste. Il doit rester une
-ablation positive fail-open, pas devenir le chemin produit.
+Le résultat du pin est une décision de priorité, pas un théorème d'impossibilité.
+Cette ablation n'établit pas qu'une recherche `C=root` indépendante pour chacun
+des `F` rectangles fournisse le facteur manquant : le compteur `climb` enlève
+environ `9,1 %` des classifications sur l'unique diagnostic
+`uniform,n=8000,s=2`, mais il ferme moins de records et ne donne pas de gain CPU
+robuste. Il doit rester une ablation positive fail-open, pas devenir le chemin
+produit. Une autre ordonnance locale n'est pas mathématiquement exclue ; elle
+devrait battre le reporter partagé sur le même coût complet pour redevenir
+prioritaire.
 
 La prochaine tranche est `ProjectiveWindowCounter-v0`, avant CUDA et avant le
 shallow. Elle travaille par ancre, construit des groupes d'IDs disjoints,
@@ -242,13 +245,19 @@ Les fixtures suivantes doivent précéder toute mesure de fenêtre :
    `F=6>0`, mais deux strictes H2 individuelles échouent à égalité. Le chemin
    H2 reste ouvert et le chemin exact ferme ; les deux verdicts ne doivent pas
    être exigés égaux ;
-5. **minimum intérieur et division signée** : des fixtures scalaires placent
-   le sommet de `r*x^2-p*x` strictement dans l'intervalle, puis autour d'un
-   demi-entier négatif. Un mutant qui ne teste que les extrémités ou emploie la
-   troncature C++ doit être tué ;
-6. **huit coins** : chaque coin passe avec un carrier reçu, puis un mutant en
+5. **minimum intérieur** : prendre l'ancre `a=(4,4,6)`, les trois sites
+   `(8,8,2),(9,1,3),(0,2,1)` et les cibles `(9,y,0)`, `y=0,...,9`. En relatif,
+   `r=272`, `p=(556,-132,-2840)` et le cône passe. `F` vaut `596/4232` aux
+   deux extrémités de l'intervalle en `y`, mais `-3228` en `d=(5,0,-6)` : un
+   mutant qui ne teste que les coins ferme faussement ;
+6. **division signée** : avec `a=(5,10,6)`, sites
+   `(7,2,0),(0,4,8),(5,4,7)` et cibles `(1,0,5),(2,0,5)`, on obtient
+   `r=208`, `p=(-1560,-1612,-1976)` et `p_x/(2r)=-3,75`. Les deux valeurs
+   sont `F(-4,-10,-1)=0` et `F(-3,-10,-1)=104`. La troncature C++ vers `-3`
+   manquerait l'égalité et fermerait faussement ;
+7. **huit coins** : chaque coin passe avec un carrier reçu, puis un mutant en
    omet un. Le replay développe la boîte et trouve une direction non couverte ;
-7. **identités** : deux groupes partageant un `PointId` ne comptent jamais
+8. **identités** : deux groupes partageant un `PointId` ne comptent jamais
    pour deux crédits ; changement de lane, `smax`, `Epoch` ou digest invalide
    le replay.
 
@@ -264,7 +273,10 @@ Le record de preuve minimal est typé :
 ProjectiveGroupCredit = {
   schema, CloudDigest, PointTreeDigest, Epoch,
   AnchorId, CreditId, rank, member_PointIds, member_count,
-  cone_forms, h2_forms, activation_or_region_key, proof_digest
+  classifier_kind, ordered_basis_PointIds,
+  cone_forms, h2_forms,
+  exact_r, exact_p[3], exact_integer_width, strictness_schema,
+  activation_or_region_key, proof_digest
 }
 ProjectiveTargetTask = {
   AnchorId, BNodeKey, open_lane_mask, possible_cell_mask, credit_span
@@ -280,12 +292,22 @@ jamais deux fois dans une même fermeture. `closed_mask` et `open_mask`
 partitionnent le masque d'entrée ; capacité insuffisante ou classification
 partielle produit `OPEN_SPAN`, jamais fermeture implicite.
 
+`classifier_kind=H2_SUFFICIENT` rejoue les six formes `i64`.
+`classifier_kind=EXACT_TRIPLE` rejoue l'ordre de base, les trois cônes faibles,
+`r`, `p[3]` et `F>=1` en signé 128 bits/deux limbs. La convention de signe et
+de permutation fait partie du schéma ; un record qui ne porte que H2 ne peut
+jamais être relu comme exact. L'oracle indépendant peut employer le déterminant
+lifté 4×4 de `(s_i,||s_i||^2)` et `(d,||d||^2)`, avec convention lignes/colonnes
+pincée, plutôt que rappeler la même formule `p`.
+
 Ordre recommandé :
 
 1. réutiliser l'enveloppe projective et les activations entières déjà reçues,
    mais conserver la banque bornée comme proposer uniquement ;
-2. construire `ProjectiveWindowCounter-v0` sur 48 chambres, avec reporter
-   `Anchor×BNode`, suffixe de hauteur et spans ouverts ;
+2. construire d'abord `AnchorSuffixReporter-q4-v0` sur 48 chambres, avec
+   reporter `Anchor×BNode`, suffixe de hauteur, owner minimal et spans ouverts ;
+   une chambre `OPEN/MIXED` seule est raffinée dans ses neuf sous-cellules,
+   tandis que 432 cellules fixes restent une ablation de rappel ;
 3. ajouter le fast path H2 à six formes `i64`, puis le test exact
    `trois cônes + F` pour les triples plein rang comme ablation large de
    fermeture inter-cellules ;

@@ -18,6 +18,18 @@ jamais réception.
 - [`AUDIT_ETAT_COURANT.md`](AUDIT_ETAT_COURANT.md) est l'unique verdict mutable :
   il distingue le `HEAD`, le delta éventuel du worktree, les empreintes utiles,
   les contre-exemples, les tests qualifiables et les portes ouvertes.
+- [`AUDIT_CONTRE_COMPTEUR_FENETRE_32589AD_20260813.md`](AUDIT_CONTRE_COMPTEUR_FENETRE_32589AD_20260813.md)
+  réfute le faux `ProjectiveWindowCounter` du pin : `sum_N` vaut exactement
+  deux fois la masse q2 résiduelle et sa pente n'est pas gatée. Il définit la
+  vraie fenêtre owner-dirigée `N_q(a)`, répond à la question 48/432 et remet le
+  reporter q4, son ledger et ses mesures physiques à Claude. Le P0 emploie 48
+  chambres, puis raffine seulement les chambres ouvertes dans leurs neuf
+  sous-cellules ; aucun `s` n'est encore choisi.
+- [`AUDIT_DIRECTIVE_BNODE_PROJECTIF_ET_ARRET_CLIMB_75F16DB_20260813.md`](AUDIT_DIRECTIVE_BNODE_PROJECTIF_ET_ARRET_CLIMB_75F16DB_20260813.md)
+  clôt l'ablation `climb`, qui omet sa feuille localisée, puis donne le
+  classifieur uniforme exact d'un triple projectif sur un `BNode` : trois
+  formes coniques et la quadratique séparable de Farkas. Il borne les largeurs,
+  corrige le claim « six formes » et fixe ABI, fixtures et ordre du compteur.
 - [`AUDIT_REPONSE_FOURCHE_SOURCE_CENTRAL_VWAVE_DBA8961_20260813.md`](AUDIT_REPONSE_FOURCHE_SOURCE_CENTRAL_VWAVE_DBA8961_20260813.md)
   répond à la question décisive de Claude : la source est factorisée et
   sortie-sensible, jamais par PairId. Il corrige la fausse colonne de masse,

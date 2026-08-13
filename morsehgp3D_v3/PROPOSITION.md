@@ -2301,6 +2301,21 @@ un vrai support pertinent owner `a` contenait un sommet hors de `N_q(a)`, le
 crédit précédent imposerait `p+q>smax` à sa propre sphère, contradiction. Tous
 ses autres sommets sont donc dans `N_q(a)`.
 
+La définition calculable, à ne pas confondre avec l'ensemble inconnu des vrais
+co-sommets, est :
+
+```text
+N_q(a) = { b : PointId(b)>PointId(a)
+               et aucun suffixe projectif reçu ne ferme (a,b)
+               avec h_q crédits disjoints et rejouables }.
+```
+
+Un état `OPEN`, `MIXED`, `UNDERFULL`, capé ou sans continuation reçue appartient
+donc toujours à `N_q(a)`. L'invariant de complétude porte dans l'autre sens :
+les co-sommets de tout support vrai owner `a` sont inclus dans cette
+sur-approximation. Les points exclus de la fenêtre de génération ne sont jamais
+exclus du census global.
+
 Le pipeline source candidat est :
 
 ```text
@@ -2332,6 +2347,22 @@ que tous les co-sommets de chaque vrai support appartiennent à la fenêtre de
 son plus petit `PointId`. Deux pentes supérieures à `1,35` sur `uniform` ou
 `eight_clusters`, ou une fenêtre quasi quadratique, rendent cette route
 `NO-GO` avant le shallow.
+
+Son premier falsificateur est q4 seul, sous le nom
+`AnchorSuffixReporter-q4-v0`. Il reçoit huit crédits, les vrais `PointId` et un
+owner dirigé. Il commence par 48 chambres grossières indépendantes ; seule une
+chambre `OPEN/MIXED` est raffinée dans ses neuf sous-cellules. Le mode 432 fixe
+est l'ablation de rappel complet. Une fenêtre dense aux 48 chambres refuse donc
+cette résolution, pas encore la route adaptative `48 -> 9`. q3 et q2 ne sont
+ajoutés avec masque partagé qu'après un signal q4 positif.
+
+Le compteur du pin `32589ad` ne satisfait pas cette définition. Pour chaque
+terminal q2 central ouvert `A×B`, il ajoute les deux orientations et vérifie
+identiquement `sum_N=2*sum |A||B|`. C'est un degré résiduel central redondant
+avec la masse, sans crédit projectif, owner, q3/q4 ni span ; sa pente n'entre
+pas dans sa gate. Il ne choisit donc aucune séparation WSPD. Le contre-audit et
+la boucle exacte du reporter sont dans
+[`AUDIT_CONTRE_COMPTEUR_FENETRE_32589AD_20260813.md`](audits/AUDIT_CONTRE_COMPTEUR_FENETRE_32589AD_20260813.md).
 
 La masse dirigée de `N_q` est le futur `PlaneTape` logique. Elle n'est
 matérialisée par `count--scan--fill` qu'après ce compteur, si sa pente, ses

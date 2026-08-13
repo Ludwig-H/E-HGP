@@ -8,20 +8,65 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-## Observation live — `HEAD=75f16db`, l'ablation `climb` omet une feuille
+## Observation live — `HEAD=a5c8251`, le vrai compteur projectif reste à écrire
 
 Le pin observé est
-`75f16db981bcbce262cf940d68fd5550be986c2a`, commit
-`locate-and-climb gives nine percent, and that settles where the factor must
-come from`. Le worktree ne contient que les compléments documentaires du
-présent audit ; l'auditeur ne modifie aucun logiciel. Empreintes du pin :
+`a5c8251b5e3682dea82b97a9244d2547d49097ee`, commit
+`carrier margins, exact bounds, and their permanent fixture reproduced`. Le
+worktree était propre au relevé ; l'auditeur ne modifie aucun logiciel.
+Empreintes du pin :
 
 ```text
-wspd_wavefront_probe.cpp a732cb3b46c7cdd43a6d8065db90a7618749a417dad5b14c4fb15c79cf83efef
+wspd_wavefront_probe.cpp 1e44101fe5e63fc7de2bdeb54f108b3eba73caf1fba3a9eba9faef48f1f03945
 wspd_wavefront.hpp       62ec3f4f23da4e67c67b6cef9855797f27cda839b0bbf119c87930d5780b973b
-rect_front.hpp           f4c3be616d79b1c5c256929db4570220a567c4a575aff81a851790fbab399487
-rect_front_probe.cpp     69ae4fda4cda9913facaec09b50a8d0722d9a881e94f06960fddcb3fae90a3ce
+rect_front.hpp           b10ae6d40c9c78251805ca78a77e7712a9964a16d55bff3b4d4e15f24e2e68a7
+rect_front_probe.cpp     3704d43214c20e75e87a3794e0117a6b2fb5c3cc1deb737c3ada978498215995
+CMakeLists.txt           58914d40a599ebd23371b3d39dc8af3412aeb22e4aee865fe2276eaff7911da9
 ```
+
+Le parent `32589ad` n'implémente pas `ProjectiveWindowCounter-v0`. Son
+`sum_N` ajoute les deux orientations de chaque terminal q2 central ouvert et
+vérifie donc identiquement `sum_N=2*residual_pair_mass`. Il ne porte ni crédits
+projectifs, ni owner minimal, ni q3/q4, ni `OpenSpan`. Son calcul est hors du
+chrono, la gate imprime sa pente mais refuse encore sur la seule pente du
+front, et la rampe emploie `coord=65535` fixe au lieu des emprises canoniques.
+Les claims « `s=2` refusé », « `s=3` vert » et « décide autrement que la
+masse » sont rétractés ; `s=3` reste une ablation. Définition exacte de
+`N_q(a)`, réponse 48/432 et ledger attendu :
+[`AUDIT_CONTRE_COMPTEUR_FENETRE_32589AD_20260813.md`](AUDIT_CONTRE_COMPTEUR_FENETRE_32589AD_20260813.md).
+
+Le `HEAD` ajoute en revanche un bon classifieur carrier. Les marges
+`M0=E+X-D`, `M1=D-E`, `M2=D-X` donnent un `ALL` nécessaire et suffisant sur le
+produit AABB lorsque leurs trois minima passent ; `NONE` par maximum impossible
+est sûr mais incomplet à cause des incompatibilités conjointes. Les formules
+affines/séparables et la fixture permanente sont correctes. Nuance de porte :
+le différentiel `30000` boîtes vérifie la **sûreté** de `ALL` et de `NONE`, pas
+la complétude annoncée de `ALL`, car il ne refuse pas le cas
+`porteurs==total && verdict!=ALL`. La preuve reçoit la complétude ; ajouter ce
+mutant/compteur rendrait le CTest conforme au commentaire.
+
+Ce classifieur ne débloque pas seul la source. Il doit rester un prune ou un
+fallback factorisé : le scanner par rectangle recréerait le produit déjà rouge.
+La tranche immédiatement demandée à Claude est
+`AnchorSuffixReporter-q4-v0`. Elle réutilise l'activation et l'enveloppe Andrew,
+mais committe de vrais `PointId` transactionnellement, dirige les cibles par
+`a=min PointId`, émet des `OpenSpan` au cap et mesure `sum_a|N_4(a)|`. Elle
+commence par 48 chambres ; seules les chambres ouvertes sont raffinées dans
+leurs neuf sous-cellules. Le probe `cell_credits` actuel ne suffit pas : indices
+locaux, compteurs de rang non transactionnels, `pool<=48` sous le pire besoin
+q4 de `72` IDs et rebouclage final `O(n^2)`. Détails :
+[`AUDIT_CONTRE_COMPTEUR_FENETRE_32589AD_20260813.md`](AUDIT_CONTRE_COMPTEUR_FENETRE_32589AD_20260813.md).
+
+Rejeu local frais de l'auditeur au pin, sans modification logicielle :
+
+```text
+cmake --build build/v3 --target mhgp3v_rect_front_probe mhgp3v_wspd_wavefront_probe --parallel
+ctest --test-dir build/v3 --output-on-failure -R '^mhgp3v_(rect_front|wspd_wavefront)_'
+18/18 PASS, 22,00 s
+```
+
+Ce vert reçoit les portes CPU bornées existantes. Il ne reçoit ni banque
+projective persistante, ni reporter, ni pentes de fenêtre, ni CUDA, ni SLO.
 
 Le parent `af08b0e` répare correctement la confusion records/masse q2. Sous la
 partition PairId déjà jugée, sommer `|A||B|` sur les terminaux fermés donne la
@@ -73,7 +118,7 @@ Le correctif n'est pas encore reçu industriellement :
 - le probe reste CPU, matérialise tous les `terms`, réalloue les buffers par
   vague et n'a ni kernel CUDA, ni p95 résident, ni octets/HWM device.
 
-Le nouveau `--climb` ne permet pas encore de conclure que le partage entre
+Le grand-parent `75f16db` et son `--climb` ne permettent pas encore de conclure que le partage entre
 rectangles est le seul facteur restant. Le calcul `leaf_parent` est bien
 préconstruit en `O(n)` et la remontée coûte la hauteur de l'arbre, mais les
 sous-arbres frères de la chaîne vers la racine couvrent seulement
@@ -145,20 +190,28 @@ double buffer SoA de tâches, `count--scan--fill`, avec
 La réponse à la fourche de Claude est durable : la source n'est ni par paire,
 ni à coût fixe par record. La masse PairId reste un ledger ; le coût bloquant
 porte sur tâches de join, blocs, événements shallow, BallKeys, census et vraies
-sorties. `s=4` n'est pas retenu globalement. `s=1`, `3/2` et `2` doivent être
-comparés sur les trois lanes et le consommateur complet.
+sorties. Aucune séparation n'est figée. `s=1`, `3/2`, `2` et `3` doivent être
+comparés sur les trois lanes et le vrai reporter projectif ; la réécriture
+orientée de la masse q2 du pin `32589ad` ne départage rien.
 
-La prochaine ordonnance recommandée est : WSPD corrigée, `Central-VWave`, puis
-`ProjectiveWindowCounter-v0`. Le lemme des groupes projectifs est correct pour
+La prochaine ordonnance recommandée est : WSPD corrigée, préfixe central borné,
+puis `ProjectiveWindowCounter-v0`. Le lemme des groupes projectifs est correct pour
 une cible ponctuelle : des groupes d'IDs disjoints fournissent des intérieurs
 distincts à toute sphère passant par l'ancre et la cible. Pour fermer un
-`BNode`, il faut encore authentifier ce certificat pour **toutes** ses cibles.
+`BNode`, un triple plein rang admet désormais une caractérisation exacte :
+trois formes coniques faibles et
+`F(d)=|Delta|*||d||^2-p dot d>0`, avec minimum entier séparable. Le fast path
+H2 à six formes est sûr mais incomplet ; il tient en `i64`, tandis que `F`
+demande environ 87 bits sous u16. Le P0 commence par les suffixes `i64` des 48
+chambres ; triple exact et 432 sous-cellules sont des ablations de rappel.
 La construction de la banque, les spans, `sum_a |N_q(a)|`, formes, octets/HWM
 et pentes doivent être reçus avant le shallow local. Les points hors fenêtre
 restent toujours dans le census global. La masse dirigée de `N_q` peut devenir
 le `PlaneTape` physique seulement après cette porte ; développer directement
 la masse brute du WSPD reste interdit. Détails et contre-audit :
 [`AUDIT_REPONSE_FOURCHE_SOURCE_CENTRAL_VWAVE_DBA8961_20260813.md`](AUDIT_REPONSE_FOURCHE_SOURCE_CENTRAL_VWAVE_DBA8961_20260813.md).
+La directive mathématique et ses fixtures sont dans
+[`AUDIT_DIRECTIVE_BNODE_PROJECTIF_ET_ARRET_CLIMB_75F16DB_20260813.md`](AUDIT_DIRECTIVE_BNODE_PROJECTIF_ET_ARRET_CLIMB_75F16DB_20260813.md).
 
 Le header WSPD reste incohérent avec le nouveau verdict : son SHA ci-dessus
 contient encore `2 log2 n`, la cellule tronque les préfixes partiels et le mode
