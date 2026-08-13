@@ -286,8 +286,9 @@ Ordre recommandé :
    mais conserver la banque bornée comme proposer uniquement ;
 2. construire `ProjectiveWindowCounter-v0` sur 48 chambres, avec reporter
    `Anchor×BNode`, suffixe de hauteur et spans ouverts ;
-3. ajouter le test direct à six formes pour les triples plein rang comme
-   ablation de fermeture inter-cellules ;
+3. ajouter le fast path H2 à six formes `i64`, puis le test exact
+   `trois cônes + F` pour les triples plein rang comme ablation large de
+   fermeture inter-cellules ;
 4. publier `sum_a|N_q(a)|`, `max_a|N_q(a)|`, tâches, formes, IDs distincts,
    continuations, octets/HWM et pentes à `12500/25000/50000` sur toutes les
    familles ;

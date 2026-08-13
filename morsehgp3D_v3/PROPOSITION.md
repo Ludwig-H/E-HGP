@@ -1629,20 +1629,33 @@ Un tri angulaire exact y trouve singleton, paire antipodale ou triangle
 encerclant l'origine. Ce chemin sert d'oracle et d'ablation de rappel ; un
 packing glouton raté ne prouve jamais l'absence d'un packing de taille `h`.
 
-Un groupe plein rang ne doit ensuite pas rester attaché à une seule cible. Il
-définit la région :
+Un groupe plein rang ne doit ensuite pas rester attaché à une seule cible. Pour
+un triple `G={s1,s2,s3}`, poser `Delta=det(s1,s2,s3)`, `r=|Delta|`,
+`n1=sign(Delta)(s2 cross s3)` et cycliquement, `qi=||si||^2`, puis
+`p=sum_i qi*ni`. Le groupe couvre **toute** sphère passant par l'ancre et la
+cible `d` si et seulement si :
 
-$$P_G=\left\lbrace d:d\in\mathrm{cone}(G),\ d\mathbin{\cdot}s>\left\lVert s\right\rVert^2\ \text{pour tout }s\in G\right\rbrace.$$
+```text
+ni dot d >= 0 pour i=1,2,3
+F(d)=r*||d||^2-p dot d > 0.
+```
 
-Les trois numérateurs de Cramer de `d in cone(G)` sont linéaires en `d`, comme
-les inégalités de puissance. `P_G` est donc un polyèdre convexe à au plus six
-formes exactes. L'intersection des régions de `h<=10` groupes disjoints ferme
-un nœud de cibles entier lorsque les extrema AABB de toutes les formes passent ;
-une forme impossible donne `NONE`, une frontière ou un mélange donne `MIXED`.
-Les cas singleton/paire vivent sur leurs strates exactes et ne sont jamais
-promus par une boîte volumique. Cette ordonnance transforme le certificat de
-groupe en `ALL/NONE/MIXED` factorisé et évite à la fois le catalogue de triples
-et le bitset global de `PairId`.
+La première ligne est Cramer ; la seconde est l'alternative exacte de Farkas.
+Sur un `BNode`, les minima coniques sont affines aux extrémités et le minimum
+entier de `F` est séparable, aux deux entiers voisins de `p_k/(2r)` clipés sur
+chaque axe. Trois H2 individuelles strictes donnent encore un préfiltre sûr à
+six formes `i64`, mais il est incomplet : pour `G={e1,e2,e3}` et
+`d=(3,1,1)`, `F=6>0` alors que deux H2 sont à égalité. Le test exact demande
+un entier signé d'environ 87 bits sous u16 ; le P0 cellulaire reste `i64` et
+ce test devient l'ablation large de rappel.
+
+Pour un groupe arbitraire, « six formes » est faux : l'enveloppe peut porter
+jusqu'à environ `2|G|` facettes et strictes. L'alternative bornée prend, pour
+chacun des huit coins du `BNode`, un carrier exact de taille au plus trois,
+puis rejoue leur union de taille au plus 24. Les cas singleton/paire vivent sur
+leurs strates exactes et ne sont jamais promus par une boîte volumique. Cette
+ordonnance transforme le certificat de groupe en `ALL/OPEN` factorisé et évite
+à la fois le catalogue global de triples et le bitset de `PairId`.
 
 La gate publie événements d'activation, rebuilds/updates d'enveloppe, carriers
 de rayons, tailles des crédits, conflits de `PointId`, formes produites, nœuds cibles
@@ -2340,6 +2353,17 @@ avec coefficients/certificats rejouables ou une réduction AABB reçue. Un créd
 obtenu pour un représentant ne s'étend jamais à sa cellule. La réplication d'un
 groupe ne permet pas non plus de réutiliser ses PointIds deux fois dans le même
 certificat de paire.
+
+Pour un triple plein rang, cette universalisation ne demande pas de tester un
+représentant. Les trois minima coniques et le minimum entier séparable de
+`F(d)=|Delta|*||d||^2-p dot d` donnent un `ALL` nécessaire et suffisant sur la
+boîte de différences du `BNode`. Le fast path à trois H2 strictes reste sûr
+mais incomplet et tient en `i64`; le test `F` exige environ 87 bits sous u16.
+Le reporter v0 commence néanmoins par les suffixes `i64` des 48 chambres : le
+triple exact large est une ablation de rappel et les 432 sous-cellules une
+ablation de résolution, jamais trois résidences obligatoires. Fixtures, ABI et
+ordre sont pincés dans
+[`AUDIT_DIRECTIVE_BNODE_PROJECTIF_ET_ARRET_CLIMB_75F16DB_20260813.md`](audits/AUDIT_DIRECTIVE_BNODE_PROJECTIF_ET_ARRET_CLIMB_75F16DB_20260813.md).
 
 La construction de `ProjectiveCreditBank` reste elle-même à factoriser. Un cap
 conserve les cellules non classées dans `N_q(a)` ; aucune recherche partielle ne

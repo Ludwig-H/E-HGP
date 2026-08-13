@@ -490,6 +490,85 @@ int run_fixtures() {
     }
   }
 
+  // JUGE EXHAUSTIF DES MARGES. `ALL` doit etre COMPLET sur le produit AABB —
+  // tout triple y est alors porteur — et `NONE` doit etre SUR : aucun triple
+  // porteur ne doit s'y cacher. `NONE` a le droit d'etre incomplet, jamais
+  // faux.
+  {
+    unsigned long long r = 0x5DEECE66Dull;
+    auto rnd = [&r](long long hi) { r ^= r << 13; r ^= r >> 7; r ^= r << 17;
+                                    return (long long)(r % (unsigned long long)hi); };
+    long long tests = 0, faux_all = 0, faux_none = 0;
+    for (int it = 0; it < 30000; ++it) {
+      RectBox bx[3];
+      for (int qq = 0; qq < 3; ++qq)
+        for (int i = 0; i < 3; ++i) { const long long lo = rnd(13) - 6;
+          bx[qq].lo[i] = lo; bx[qq].hi[i] = lo + rnd(3); }
+      const mhgp3v::RectCarrier v =
+          mhgp3v::rect_carrier_by_margins(bx[0], bx[1], bx[2]);
+      long long porteurs = 0, total = 0;
+      for (long long ax = bx[0].lo[0]; ax <= bx[0].hi[0]; ++ax)
+      for (long long ay = bx[0].lo[1]; ay <= bx[0].hi[1]; ++ay)
+      for (long long az = bx[0].lo[2]; az <= bx[0].hi[2]; ++az)
+      for (long long bxx = bx[1].lo[0]; bxx <= bx[1].hi[0]; ++bxx)
+      for (long long by = bx[1].lo[1]; by <= bx[1].hi[1]; ++by)
+      for (long long bz = bx[1].lo[2]; bz <= bx[1].hi[2]; ++bz)
+      for (long long cx = bx[2].lo[0]; cx <= bx[2].hi[0]; ++cx)
+      for (long long cy = bx[2].lo[1]; cy <= bx[2].hi[1]; ++cy)
+      for (long long cz = bx[2].lo[2]; cz <= bx[2].hi[2]; ++cz) {
+        const long long A[3] = {ax, ay, az}, B[3] = {bxx, by, bz}, C[3] = {cx, cy, cz};
+        long long D = 0, E = 0, X = 0;
+        for (int i = 0; i < 3; ++i) {
+          D += (B[i] - A[i]) * (B[i] - A[i]);
+          E += (C[i] - A[i]) * (C[i] - A[i]);
+          X += (B[i] - C[i]) * (B[i] - C[i]);
+        }
+        ++total;
+        if (E + X - D > 0 && D - E >= 0 && D - X >= 0) ++porteurs;
+      }
+      ++tests;
+      if (v == mhgp3v::RectCarrier::kAll && porteurs != total) ++faux_all;
+      if (v == mhgp3v::RectCarrier::kNone && porteurs != 0) ++faux_none;
+    }
+    std::printf("juge_marges tests=%lld ALL_faux=%lld NONE_faux=%lld\n",
+                tests, faux_all, faux_none);
+    if (faux_all || faux_none) {
+      std::fprintf(stderr, "DESACCORD: les marges rendent un verdict faux\n"); ++bad;
+    }
+  }
+
+  // FIXTURE PERMANENTE DES MARGES (audit `dba8961`, § 5). `a=(0,0,0)`,
+  // `b=(0,1,0)`, `C = {(1,0,0),(1,1,0)}` : les deux points donnent
+  // `(M0,M1,M2) = (2,0,-1)` et `(2,-1,0)`. AUCUN n'est porteur, mais aucune
+  // marge n'est impossible partout — le verdict doit donc etre `MIXED`, et
+  // surtout PAS `NONE`. C'est la fixture qui distingue « incomplet » de
+  // « faux ».
+  {
+    const RectBox ma{{0, 0, 0}, {0, 0, 0}};
+    const RectBox mb{{0, 1, 0}, {0, 1, 0}};
+    const RectBox mc{{1, 0, 0}, {1, 1, 0}};
+    const mhgp3v::RectMargins mm = mhgp3v::rect_carrier_margins(ma, mb, mc);
+    const mhgp3v::RectCarrier mv = mhgp3v::rect_carrier_by_margins(ma, mb, mc);
+    std::printf("marges M0=[%lld,%lld] M1=[%lld,%lld] M2=[%lld,%lld] verdict=%s\n",
+                mm.m0lo, mm.m0hi, mm.m1lo, mm.m1hi, mm.m2lo, mm.m2hi,
+                mv == mhgp3v::RectCarrier::kAll ? "ALL"
+                    : (mv == mhgp3v::RectCarrier::kNone ? "NONE" : "MIXED"));
+    if (mv != mhgp3v::RectCarrier::kMixed) {
+      std::fprintf(stderr, "FIXTURE: les marges doivent rendre MIXED, jamais NONE\n");
+      ++bad;
+    }
+    // Les deux points, verifies un a un par le predicat ponctuel exact.
+    for (int k = 0; k < 2; ++k) {
+      const long long x[3] = {1, (long long)k, 0};
+      const long long D = 1, E = 1 + (long long)k * k, X = 1 + (1 - (long long)k) * (1 - (long long)k);
+      const long long M0 = E + X - D, M1 = D - E, M2 = D - X;
+      const bool porteur = (M0 > 0 && M1 >= 0 && M2 >= 0);
+      std::printf("  point (%lld,%lld,%lld) M0=%lld M1=%lld M2=%lld porteur=%d\n",
+                  x[0], x[1], x[2], M0, M1, M2, porteur ? 1 : 0);
+      if (porteur) { std::fprintf(stderr, "FIXTURE: aucun des deux points n'est porteur\n"); ++bad; }
+    }
+  }
+
   // MUTANT COLINEAIRE (audit `96be8e0`, section 4) : un nuage porte par une
   // droite ne contient AUCUN triangle ni tetraedre propre, donc aucun support
   // q3/q4 ne peut exister. Toute issue etiquetee POSITIVE hors q2 serait un

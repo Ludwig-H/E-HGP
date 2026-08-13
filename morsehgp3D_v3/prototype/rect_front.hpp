@@ -277,6 +277,77 @@ inline bool rect_core_misses_box(const RectCore& c, const RectBox& p) {
 // temoin en nœuds `NONE-porteur` — jamais sur un echec de recherche.
 enum class RectCarrier { kNone, kAll, kMixed };
 
+// ---- LES MARGES, ET NON TROIS DISTANCES SEPAREES
+// (audit `dba8961`, § 5). Avec `D = ||b-a||^2`, `E = ||x-a||^2`, `X = ||b-x||^2` :
+//
+//     M0 = E + X - D = -2H,    M1 = D - E,    M2 = D - X.
+//
+// Un porteur verifie EXACTEMENT `M0 > 0`, `M1 >= 0`, `M2 >= 0` — les deux
+// inegalites de longueur faibles pour conserver les ties d'arete maximale, la
+// premiere stricte parce que c'est l'acuite.
+//
+// L'apport est que `M1` est AFFINE en `a` et `M2` affine en `b` : leurs extrema
+// sur les boites s'obtiennent donc en fixant l'extremite, puis en separant les
+// variables restantes. Avec `near(u,I)` la distance carree de `u` a l'intervalle
+// entier `I` — nulle si `u` y est — et `far(u,I)` la plus grande distance carree
+// a ses deux extremites :
+//
+//     M1min_axe = min sur a dans {Alo,Ahi} de near(a,B) - far(a,C)
+//     M1max_axe = max sur a dans {Alo,Ahi} de far(a,B)  - near(a,C)
+//     M2min_axe = min sur b dans {Blo,Bhi} de near(b,A) - far(b,C)
+//     M2max_axe = max sur b dans {Blo,Bhi} de far(b,A)  - near(b,C)
+//
+// Les extrema de `M0` sont `-2 Hmax` et `-2 Hmin`, deja disponibles.
+//
+// `ALL` est COMPLET sur le produit AABB ; `NONE` reste INCOMPLET, car deux
+// contraintes peuvent echouer sur des points differents.
+inline long long rect_near1(long long u, long long lo, long long hi) {
+  const long long d = (u < lo) ? (lo - u) : ((u > hi) ? (u - hi) : 0);
+  return d * d;
+}
+inline long long rect_far1(long long u, long long lo, long long hi) {
+  const long long a = u - lo, b = u - hi;
+  return std::max(a * a, b * b);
+}
+
+struct RectMargins { long long m0lo, m0hi, m1lo, m1hi, m2lo, m2hi; };
+
+inline RectMargins rect_carrier_margins(const RectBox& a, const RectBox& b,
+                                        const RectBox& c) {
+  RectMargins r{};
+  long long hmn = 0, hmx = 0;
+  rect_h_interval(a, b, c, &hmn, &hmx);
+  r.m0lo = -2 * hmx;
+  r.m0hi = -2 * hmn;
+  r.m1lo = 0; r.m1hi = 0; r.m2lo = 0; r.m2hi = 0;
+  for (int i = 0; i < 3; ++i) {
+    long long lo1 = 0, hi1 = 0, lo2 = 0, hi2 = 0;
+    bool f1 = true, f2 = true;
+    for (int e = 0; e < 2; ++e) {
+      const long long av = e ? a.hi[i] : a.lo[i];
+      const long long v1 = rect_near1(av, b.lo[i], b.hi[i]) - rect_far1(av, c.lo[i], c.hi[i]);
+      const long long w1 = rect_far1(av, b.lo[i], b.hi[i]) - rect_near1(av, c.lo[i], c.hi[i]);
+      if (f1) { lo1 = v1; hi1 = w1; f1 = false; }
+      else { lo1 = std::min(lo1, v1); hi1 = std::max(hi1, w1); }
+      const long long bv = e ? b.hi[i] : b.lo[i];
+      const long long v2 = rect_near1(bv, a.lo[i], a.hi[i]) - rect_far1(bv, c.lo[i], c.hi[i]);
+      const long long w2 = rect_far1(bv, a.lo[i], a.hi[i]) - rect_near1(bv, c.lo[i], c.hi[i]);
+      if (f2) { lo2 = v2; hi2 = w2; f2 = false; }
+      else { lo2 = std::min(lo2, v2); hi2 = std::max(hi2, w2); }
+    }
+    r.m1lo += lo1; r.m1hi += hi1; r.m2lo += lo2; r.m2hi += hi2;
+  }
+  return r;
+}
+
+inline RectCarrier rect_carrier_by_margins(const RectBox& a, const RectBox& b,
+                                           const RectBox& c) {
+  const RectMargins m = rect_carrier_margins(a, b, c);
+  if (m.m0hi <= 0 || m.m1hi < 0 || m.m2hi < 0) return RectCarrier::kNone;
+  if (m.m0lo > 0 && m.m1lo >= 0 && m.m2lo >= 0) return RectCarrier::kAll;
+  return RectCarrier::kMixed;
+}
+
 inline RectCarrier rect_carrier_verdict(const RectBox& a, const RectBox& b,
                                         const RectBox& c) {
   const long long d2lo = rect_minsq(a, b), d2hi = rect_maxsq(a, b);

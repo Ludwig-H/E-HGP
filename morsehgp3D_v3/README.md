@@ -38,7 +38,7 @@ disponibles dominent `s=4`; `s=1` est une ablation prometteuse et `s=2` le
 contrôle reçu, à départager seulement sur les trois lanes et le consommateur
 complet.
 
-Le prochain micro-jalon recommandé est `Central-VWave`. Pour chaque terminal,
+Le micro-jalon central actuel est `Central-VWave`. Pour chaque terminal,
 il classifie l'arbre témoin par les extrema exacts du score
 `S=Vhi(singleton)` : `S<Dlo`, `3S<Dlo` et
 `209S<=56Dlo`. `ALL` crédite une antichaîne, `CENTRAL_DEAD` élague seulement ce
@@ -61,6 +61,15 @@ crédités, son plancher n'est pas séparé par lane, et un cap compte seulement
 résiduel, ABI ou kernel device n'existe. Le prochain jalon est donc le ledger
 d'antichaîne et la continuation `count--scan--fill`, pas un nouveau score.
 
+Le pin live `75f16db` clôt l'ablation locale. Son mode `--climb` réduit les
+classifications de `30,42 M` à `27,65 M` sur
+`uniform,n=8000,s=2`, mais il omet la feuille Morton localisée, traite d'abord
+les gros frères proches de la racine et ferme moins de masse q2
+(`65,22 %` contre `66,43 %`). Trois runs CPU bruités ne donnent qu'environ
+`1,1 %` de gain médian. Le mode reste un proposer fail-open ; il ne justifie
+plus d'optimiser une recherche indépendante par rectangle. Le prochain levier
+est le partage par ancre/spans, pas une autre pile.
+
 Le pin `75f16db` teste une remontée depuis la feuille Morton du milieu. Son
 parentage est désormais préconstruit, mais l'ablation omet précisément cette
 feuille et dépile d'abord le frère le plus grossier. La baisse de `9 %` des
@@ -82,6 +91,15 @@ fenêtre restent obligatoires au census. La masse dirigée de `N_q` ne devient u
 avant allocation. Cette ordonnance évite tout join
 `PairId×carrier` et toute mosaïque globale d'ordre supérieur :
 [`AUDIT_REPONSE_FOURCHE_SOURCE_AF08B0E_20260813.md`](audits/AUDIT_REPONSE_FOURCHE_SOURCE_AF08B0E_20260813.md).
+
+Un triple projectif plein rang ferme désormais un `BNode` par un test uniforme
+exact : trois formes coniques faibles et
+`F(d)=|Delta|*||d||^2-p dot d>0`, dont le minimum entier est séparable sur la
+boîte. Les trois H2 membre par membre restent un fast path `i64` sûr mais
+incomplet ; `F` demande environ 87 bits et reste l'ablation large. Le P0 du
+compteur commence donc par les suffixes `i64` des 48 chambres, puis compare le
+triple exact et les 432 sous-cellules. Directive et fixtures :
+[`AUDIT_DIRECTIVE_BNODE_PROJECTIF_ET_ARRET_CLIMB_75F16DB_20260813.md`](audits/AUDIT_DIRECTIVE_BNODE_PROJECTIF_ET_ARRET_CLIMB_75F16DB_20260813.md).
 
 Au pin `96be8e0`, le nouveau front apporte deux briques utiles sans changer ce
 verdict. L'intervalle entier de `H=(z-a) dot(b-z)` sur trois AABB certifie
