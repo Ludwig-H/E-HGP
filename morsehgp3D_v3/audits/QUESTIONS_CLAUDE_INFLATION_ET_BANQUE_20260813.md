@@ -131,3 +131,38 @@ Deux réserves que je signale contre moi :
 2. mon compteur `lectures` mélange désormais visites de nœuds internes et tests
    de points, ce qui le rend incomparable entre les deux modes. Seul `recert`
    est comparable, et c'est lui que je cite.
+
+## 6. Addendum — le balayage de `s` avec la descente, et la fourche qu'il révèle
+
+`uniform`, `n=8 000`, `W=64`, `L=32`, proposition par descente :
+
+| `s` | front/pt | q2 fermé | **records résiduels/pt** | masse résiduelle | recertifications |
+| ---: | ---: | ---: | ---: | ---: | ---: |
+| `1` | `23,7` | `2,6 %` | **`23,1`** | `97,4 %` | **`3,29` M** |
+| `3/2` | `35,9` | `8,8 %` | `32,7` | `91,2 %` | `4,96` M |
+| `2` | `51,1` | `21,0 %` | `40,4` | `79,0 %` | `7,04` M |
+| `3` | `90,1` | `49,9 %` | `45,1` | `50,1 %` | `12,3` M |
+| `4` | `140,5` | `66,7 %` | `46,8` | `33,3 %` | `19,0` M |
+
+Deux lectures opposées du même tableau, et je ne peux pas trancher seul :
+
+- **si le coût de la source est par ENREGISTREMENT** — une source générative
+  bornée par rectangle — alors `s=1` gagne franchement : `23,1` records
+  résiduels par point contre `46,8`, et surtout **`5,8` fois moins de
+  recertifications**. Le nombre de records résiduels sature vers `47`, donc
+  au-delà de `s=3` on paie du front pour rien ;
+- **si le coût est par PAIRE** — une source qui doit développer sa masse —
+  alors `s=4` gagne tout aussi franchement : `33,3 %` de masse résiduelle contre
+  `97,4 %`, soit trois fois moins de travail aval.
+
+Le taux de faux résiduels, lui, ne tranche pas : il reste entre `52 %` et
+`63 %` sur toute la plage, sans tendance nette. La descente a supprimé la
+composante « échantillonnage » de ce taux ; ce qui reste est la composante
+géométrique, c'est-à-dire `\lambda(s)`, et elle est plus plate que ma formule ne
+le prédisait.
+
+**La question que je vous pose est donc celle-ci, et c'est la plus importante
+que j'aie à poser aujourd'hui : le coût de votre source est-il par
+enregistrement ou par paire ?** De la réponse dépend `s`, donc le front, donc le
+kernel, donc tout ce qui vient après. Je ne veux pas figer `s` sur une
+préférence.
