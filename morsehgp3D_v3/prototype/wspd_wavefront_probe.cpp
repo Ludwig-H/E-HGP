@@ -53,6 +53,7 @@ bool g_tight = false;
 bool g_bank = false;
 long long g_win = 32, g_bankl = 16;
 long long g_warms = 0;
+long long g_inflation = 0;
 
 // Cellule d'un identifiant de nœud : negatif = feuille (le point lui-meme).
 mhgp3v::WspdBox cell_of(const std::vector<WfNode>& nodes,
@@ -107,6 +108,7 @@ int main(int argc, char** argv) {
     else if (a == "--bank") g_bank = true;
     else if (a.rfind("--window=", 0) == 0) { g_win = arg_ll(val("--window=").c_str(), 2, 1024, "window"); g_bank = true; }
     else if (a.rfind("--bank-l=", 0) == 0) { g_bankl = arg_ll(val("--bank-l=").c_str(), 1, 64, "bank-l"); g_bank = true; }
+    else if (a.rfind("--inflation=", 0) == 0) g_inflation = arg_ll(val("--inflation=").c_str(), 1, 20000, "inflation");
     else if (a.rfind("--warms=", 0) == 0) g_warms = arg_ll(val("--warms=").c_str(), 1, 200, "warms");
     else refuse("option inconnue");
   }
@@ -173,6 +175,7 @@ int main(int argc, char** argv) {
     // ---- VAGUES : `count -> scan -> fill`, aucune pile.
     std::vector<Pair> terms;
     BankStat bank;
+    std::vector<char> closed_q2;   // par terminal : la banque a-t-elle ferme q2 ?
     long long tests = 0, levels = 0, wave_hwm = (long long)wave.size();
     while (!wave.empty()) {
       ++levels;
@@ -193,6 +196,7 @@ int main(int argc, char** argv) {
       for (size_t i = 0; i < wave.size(); ++i) {
         if (cnt[i] == 0) {
           terms.push_back(wave[i]);
+          if (!g_bank) closed_q2.push_back(0);
           if (g_bank) {
             const mhgp3v::WspdBox ba = cell_of(nodes, sp, wave[i].a);
             const mhgp3v::WspdBox bb = cell_of(nodes, sp, wave[i].b);
@@ -223,6 +227,7 @@ int main(int argc, char** argv) {
             const int need[3] = {10, 9, 8};
             for (int lane = 0; lane < 3; ++lane)
               if (cred[lane] >= need[lane]) ++bank.closed[lane];
+            if (cred[0] >= need[0]) closed_q2.push_back(1); else closed_q2.push_back(0);
           }
           continue;
         }
@@ -262,6 +267,43 @@ int main(int argc, char** argv) {
     long long dmax = 0, dsum = 0, dnz = 0;
     for (int d : deg) { dmax = std::max(dmax, (long long)d); dsum += d; if (d) ++dnz; }
 
+    // ---- L'INFLATION DU SEUIL, MESUREE.
+    //
+    // Le certificat de rectangle ne ferme une paire que si elle possede
+    // `K lambda(s)` temoins, non `K` : le cœur commun a toutes les paires du
+    // rectangle est plus petit que la boule d'une paire donnee, d'un facteur de
+    // volume `lambda(s) = ((1+u)/(1-2u))^3` avec `u = 2/(s+2)`. Les paires dont
+    // le compte tombe entre `K` et `K lambda` sont FAUSSEMENT residuelles.
+    //
+    // On echantillonne donc des rectangles NON fermes, on y prend une paire, et
+    // on compte ses VRAIS temoins universels q2 par balayage exhaustif du nuage.
+    // Une paire faussement residuelle est une paire qui en a deja `K`.
+    long long ech = 0, faux_resid = 0, som_temoins = 0, max_temoins = 0;
+    if (g_inflation > 0) {
+      unsigned long long rng = 0x9E3779B97F4A7C15ull;
+      // On n'echantillonne QUE les rectangles laisses OUVERTS par la banque :
+      // ce sont eux qui partiraient a la source, et eux seuls dont il faut
+      // savoir s'ils sont FAUSSEMENT residuels.
+      std::vector<size_t> ouverts;
+      for (size_t i = 0; i < terms.size(); ++i)
+        if (i >= closed_q2.size() || !closed_q2[i]) ouverts.push_back(i);
+      for (long long e = 0; e < g_inflation && !ouverts.empty(); ++e) {
+        rng = rng * 6364136223846793005ull + 1442695040888963407ull;
+        const Pair& t = terms[ouverts[(rng >> 33) % ouverts.size()]];
+        const int ai = (t.a < 0) ? (-1 - t.a) : nodes[t.a].first;
+        const int bi = (t.b < 0) ? (-1 - t.b) : nodes[t.b].first;
+        long long cnt = 0;
+        for (size_t z = 0; z < sp.size(); ++z) {
+          if ((int)z == ai || (int)z == bi) continue;
+          long long h = 0;
+          for (int d = 0; d < 3; ++d) h += (sp[z][d] - sp[ai][d]) * (sp[bi][d] - sp[z][d]);
+          if (h > 0) ++cnt;
+        }
+        ++ech; som_temoins += cnt; max_temoins = std::max(max_temoins, cnt);
+        if (cnt >= 10) ++faux_resid;
+      }
+    }
+
     long long mass = 0;
     for (const Pair& t : terms) mass += count_of(nodes, t.a) * count_of(nodes, t.b);
     const long long total = m * (m - 1) / 2;
@@ -297,12 +339,16 @@ int main(int argc, char** argv) {
                 " tests=%lld tests/front=%.2f vague_max=%lld | masse=%lld/%lld"
                 " | arbre_med=%.1f ms arbre_p95=%.1f ms vague=%.1f ms"
                 " | banque lectures=%lld recert=%lld ferme q2=%lld q3=%lld q4=%lld"
-                " | partenaires max=%lld moyen=%.2f\n",
+                " | partenaires max=%lld moyen=%.2f"
+                " | inflation : %lld rectangles OUVERTS echantillonnes,"
+                " temoins_moyen=%.1f max=%lld, faussement residuels %lld (%.1f%%)\n",
                 m, family.c_str(), g_tight ? "serree" : "cellule", p, q, terms.size(), (double)terms.size() / (double)m,
                 levels, tests, (double)tests / (double)terms.size(), wave_hwm, mass, total,
                 pct(t_tree, 0.5), pct(t_tree, 0.95), t_wave.back(),
                 bank.reads, bank.recerts, bank.closed[0], bank.closed[1], bank.closed[2],
-                dmax, (double)dsum / (double)std::max(1LL, dnz));
+                dmax, (double)dsum / (double)std::max(1LL, dnz),
+                ech, (double)som_temoins / (double)std::max(1LL, ech), max_temoins,
+                faux_resid, 100.0 * (double)faux_resid / (double)std::max(1LL, ech));
     if (mass != total) {
       std::fprintf(stderr, "INVARIANT VIOLE: masse %lld != %lld\n", mass, total);
       return 3;
