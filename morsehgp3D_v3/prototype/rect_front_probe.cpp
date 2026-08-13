@@ -34,6 +34,7 @@ struct Node {
   RectBox box;
   int begin, end, left, right;
   double rad;
+  double c[3];
 };
 
 struct Tree {
@@ -52,6 +53,7 @@ int build(Tree* t, int b, int e, int leaf) {
     }
   double r2 = 0;
   for (int i = 0; i < 3; ++i) {
+    n.c[i] = 0.5 * (double)(n.box.lo[i] + n.box.hi[i]);
     const double h = 0.5 * (double)(n.box.hi[i] - n.box.lo[i]);
     r2 += h * h;
   }
@@ -118,8 +120,21 @@ bool witness_enough(const Tree& t, int ia, int ib, int lane, long long budget,
   return false;
 }
 
+// ARRET A « BIEN SEPARE », ET NON A « FERME ». C'est ce qui rend le cardinal du
+// front `O(n)` par Callahan-Kosaraju : une recursion qui scinde jusqu'a ce que
+// le certificat ferme descend jusqu'aux feuilles sur le residuel, et son front
+// croit alors en `n^1,4`. Un rectangle bien separe qui n'a pas ferme sort
+// TERMINAL et part a la source generative.
+bool well_separated(const Tree& t, int ia, int ib, double s) {
+  const Node& A = t.nodes[ia];
+  const Node& B = t.nodes[ib];
+  double d2 = 0;
+  for (int i = 0; i < 3; ++i) { const double u = A.c[i] - B.c[i]; d2 += u * u; }
+  return std::sqrt(d2) - A.rad - B.rad >= s * std::max(A.rad, B.rad);
+}
+
 void solve(const Tree& t, int ia, int ib, int lane, long long budget,
-           RectFrontInject inject, Counters* c) {
+           RectFrontInject inject, Counters* c, double stop_wsp) {
   const Node& A = t.nodes[ia];
   const Node& B = t.nodes[ib];
   const long long ka = A.end - A.begin, kb = B.end - B.begin;
@@ -128,21 +143,24 @@ void solve(const Tree& t, int ia, int ib, int lane, long long budget,
   ++c->rect_visited;
   if (ia == ib) {
     if (A.left < 0) { ++c->rect_residual; c->mass_residual += mass; return; }
-    solve(t, A.left, A.left, lane, budget, inject, c);
-    solve(t, A.right, A.right, lane, budget, inject, c);
-    solve(t, A.left, A.right, lane, budget, inject, c);
+    solve(t, A.left, A.left, lane, budget, inject, c, stop_wsp);
+    solve(t, A.right, A.right, lane, budget, inject, c, stop_wsp);
+    solve(t, A.left, A.right, lane, budget, inject, c, stop_wsp);
     return;
   }
   if (witness_enough(t, ia, ib, lane, budget, inject, c)) {
     ++c->rect_closed; c->mass_closed += mass; return;
   }
-  if (A.left < 0 && B.left < 0) { ++c->rect_residual; c->mass_residual += mass; return; }
+  if ((A.left < 0 && B.left < 0) ||
+      (stop_wsp > 0.0 && well_separated(t, ia, ib, stop_wsp))) {
+    ++c->rect_residual; c->mass_residual += mass; return;
+  }
   if (A.left >= 0 && (B.left < 0 || A.rad >= B.rad)) {
-    solve(t, A.left, ib, lane, budget, inject, c);
-    solve(t, A.right, ib, lane, budget, inject, c);
+    solve(t, A.left, ib, lane, budget, inject, c, stop_wsp);
+    solve(t, A.right, ib, lane, budget, inject, c, stop_wsp);
   } else {
-    solve(t, ia, B.left, lane, budget, inject, c);
-    solve(t, ia, B.right, lane, budget, inject, c);
+    solve(t, ia, B.left, lane, budget, inject, c, stop_wsp);
+    solve(t, ia, B.right, lane, budget, inject, c, stop_wsp);
   }
 }
 
@@ -216,6 +234,7 @@ int main(int argc, char** argv) {
   int lane = 0;
   double max_slope = 1.35;
   long long min_closed_pct = 0, min_all = 0, min_none = 0, min_mixed = 0;
+  double stop_wsp = 0.0;
   RectFrontInject inject = RectFrontInject::kNone;
   bool expect_mutant = false;
 
@@ -235,6 +254,10 @@ int main(int argc, char** argv) {
     else if (a.rfind("--lane=", 0) == 0) lane = (int)arg_ll(val("--lane=").c_str(), 0, 2, "lane");
     else if (a.rfind("--seed=", 0) == 0) seed = arg_ll(val("--seed=").c_str(), 0, (1LL << 40), "seed");
     else if (a.rfind("--selftest=", 0) == 0) selftest = arg_ll(val("--selftest=").c_str(), 0, 1000000, "selftest");
+    else if (a.rfind("--stop-wsp=", 0) == 0) {
+      stop_wsp = std::atof(val("--stop-wsp=").c_str());
+      if (!(stop_wsp >= 0.0 && stop_wsp <= 64.0)) refuse("stop-wsp");
+    }
     else if (a.rfind("--max-slope=", 0) == 0) max_slope = std::atof(val("--max-slope=").c_str());
     else if (a.rfind("--min-closed-pct=", 0) == 0) min_closed_pct = arg_ll(val("--min-closed-pct=").c_str(), 0, 100, "min-closed-pct");
     else if (a.rfind("--min-all=", 0) == 0) min_all = arg_ll(val("--min-all=").c_str(), 0, (1LL << 50), "min-all");
@@ -290,7 +313,7 @@ int main(int argc, char** argv) {
     t.nodes.reserve(4 * t.pts.size());
     build(&t, 0, (int)t.pts.size(), (int)leaf);
     Counters c{};
-    solve(t, 0, 0, lane, budget, inject, &c);
+    solve(t, 0, 0, lane, budget, inject, &c, stop_wsp);
     const long long m = (long long)t.pts.size();
     const long long tot = m * (m - 1) / 2;
     if (c.mass_closed + c.mass_residual != tot) {
@@ -300,10 +323,11 @@ int main(int argc, char** argv) {
     }
     std::printf("n=%lld famille=%s lane=q%d digest=%016llx | visites=%lld fermes=%lld residuels=%lld capes=%lld"
                 " | masse_fermee=%lld masse_residuelle=%lld pct_ferme=%.2f"
-                " | eval=%lld ALL=%lld NONE=%lld MIXED=%lld Wmax=%lld\n",
+                " | eval=%lld ALL=%lld NONE=%lld MIXED=%lld Wmax=%lld front/pt=%.3f\n",
                 m, family.c_str(), lane + 2, digest, c.rect_visited, c.rect_closed, c.rect_residual,
                 c.rect_capped, c.mass_closed, c.mass_residual, 100.0 * (double)c.mass_closed / (double)tot,
-                c.evals, c.all_hits, c.none_hits, c.mixed_hits, c.w_high);
+                c.evals, c.all_hits, c.none_hits, c.mixed_hits, c.w_high,
+                (double)(c.rect_closed + c.rect_residual) / (double)m);
     resid_mass.push_back((double)c.mass_residual);
     visited_per_n.push_back((double)c.rect_visited);
     agg.all_hits += c.all_hits; agg.none_hits += c.none_hits; agg.mixed_hits += c.mixed_hits;

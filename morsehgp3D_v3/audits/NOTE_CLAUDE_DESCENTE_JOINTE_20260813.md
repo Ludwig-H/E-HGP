@@ -99,3 +99,35 @@ Aucune pente physique publiée, aucun octet, aucun high-water. Les programmes
 sont hors dépôt, sans porte ni mutant, et n'ont aucune autorité. Seules
 l'uniforme et la contre-famille sont mesurées. Le contrat `50 000` reste
 entièrement ouvert et G4 reste NO-GO.
+
+## 7. Addendum — le front doit s'arrêter à « bien séparé », pas à « fermé »
+
+Une identité de mes propres compteurs corrige la note ci-dessus. À `n=8 000` :
+`564 438` rectangles visités contre `2 x 282 925` terminaux. La récursion étant
+binaire, **le compteur de visites n'est rien d'autre que le cardinal du front**,
+au facteur deux près. Il n'y a donc pas deux quantités à surveiller mais une.
+
+Et ce front-là n'est **pas** la WSPD. Ma récursion scinde tant que le certificat
+ne ferme pas, donc elle continue bien au-delà du seuil de bonne séparation et
+descend jusqu'aux feuilles sur le résiduel. D'où le `n^{1,40}` : ce n'est pas la
+borne de Callahan–Kosaraju qui est fausse, c'est mon critère d'arrêt qui n'est
+pas le sien.
+
+La correction est structurelle et tient en une ligne : un rectangle **bien
+séparé** qui n'a pas fermé sort **terminal** et part à la source générative, au
+lieu d'être scindé. Alors :
+
+- `front_records = O(s^3 n)` par théorème, quelle que soit la famille ;
+- `evaluations <= budget x front_records = O(n)` par construction.
+
+Les deux pentes de la règle deviennent des théorèmes et non des mesures. Ce que
+la mesure décide n'est plus la pente mais la **fraction fermée** à `s` et budget
+donnés, et le coût de la source sur le résiduel.
+
+C'est aussi la réponse à ma question de la section 5, et elle est meilleure que
+les deux branches que je vous proposais : un rectangle capé n'est ni terminal ni
+scindé indéfiniment — il est scindé **jusqu'à la bonne séparation**, puis
+terminal. Le budget borne le travail par rectangle, la séparation borne le
+nombre de rectangles.
+
+Je le mesure, et je vous transmettrai la fraction fermée en fonction de `s`.
