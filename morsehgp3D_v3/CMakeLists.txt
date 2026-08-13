@@ -4179,4 +4179,24 @@ mhgp3v_add_expected_code_test_for(mhgp3v_wspd_wavefront_probe
 add_test(NAME mhgp3v_wspd_wavefront_fixtures_owner
   COMMAND mhgp3v_wspd_wavefront_probe --fixtures-owner)
 set_tests_properties(mhgp3v_wspd_wavefront_fixtures_owner PROPERTIES
-  PASS_REGULAR_EXPRESSION "equilateral admissibles=3 owners=1 isocele admissibles=2 owners=1")
+  PASS_REGULAR_EXPRESSION "relabelings=3 owner_pointid=\\(0,1\\)")
+
+# L'OWNER SE DECIDE SUR LES `PointId`, JAMAIS SUR LES POSITIONS MORTON. L'audit
+# `1aa487d` prend le defaut en flagrant delit : mon comparateur recevait des
+# positions dans `sp`, et surtout le SUJET et la VERITE appelaient la meme
+# fonction, donc pouvaient s'accorder sur le meme mauvais tie-break. Le juge
+# compare desormais l'ARETE qui possede, pas seulement la multiplicite — une
+# multiplicite de un survit a un tie-break faux, puisque les trois aretes d'un
+# equilateral sont toutes emises.
+mhgp3v_add_expected_code_test_for(mhgp3v_wspd_wavefront_probe
+  mhgp3v_wspd_wavefront_q3_mutant_owner_rang "mutant_killed=1" 4
+  --family=uniform --points=100 --coord=16 --sep-euclid=2/1 --tight
+  --q3-sep=4 --q3-oracle=200 --inject=owner-generationrank)
+
+# ET LE NOMINAL SUR LE MEME NUAGE RICHE EN EGALITES : sans lui, le mutant
+# pourrait mourir d'autre chose que de son tie-break.
+add_test(NAME mhgp3v_wspd_wavefront_q3_owner_egalites
+  COMMAND mhgp3v_wspd_wavefront_probe --family=uniform --points=100 --coord=16
+          --sep-euclid=2/1 --tight --q3-sep=4 --q3-oracle=200)
+set_tests_properties(mhgp3v_wspd_wavefront_q3_owner_egalites PROPERTIES
+  PASS_REGULAR_EXPRESSION "owners_faux=0")

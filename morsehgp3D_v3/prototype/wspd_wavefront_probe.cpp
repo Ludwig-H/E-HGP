@@ -628,9 +628,19 @@ int terme_t_fixtures() {
 // CHAQUE terminal WSPD. Il recevait donc l'unicite d'un porteur relativement a
 // une incidence d'arete, jamais l'unicite d'un `SupportKey` a travers les
 // terminaux. L'audit `92d0c0f` §2 a raison, et la fixture est son equilateral.
+// L'OWNER SE DECIDE SUR LES `PointId`, JAMAIS SUR LES POSITIONS MORTON.
+//
+// Ma premiere version comparait `u, v, w`, qui sont des positions dans `sp`,
+// donc des `GenerationRank`. Le tableau `spid`, qui porte les vrais `PointId`,
+// n'etait jamais transmis. La fixture passait parce que son ordre de vecteur
+// coincide avec son ordre de labels — et surtout parce que le sujet ET la
+// verite appelaient la MEME fonction, donc s'accordaient sur le meme mauvais
+// tie-break. L'audit `1aa487d` le prend en flagrant delit.
+//
+// `lab` traduit une position en `PointId`. Le tie-break emploie l'`EdgeKey`
+// formee des deux labels tries.
 inline bool owner_edge(const std::vector<std::array<long long, 3>>& p,
-                       int u, int v, int w) {
-  // `uv` est-elle l'arete owner du triangle `{u,v,w}` ?
+                       const std::vector<int>& lab, int u, int v, int w) {
   auto d2 = [&](int i, int j) {
     long long s = 0;
     for (int k = 0; k < 3; ++k) { const long long d = p[i][k] - p[j][k]; s += d * d; }
@@ -641,74 +651,136 @@ inline bool owner_edge(const std::vector<std::array<long long, 3>>& p,
   int bi = -1, bj = -1;
   for (int i = 0; i < 3; ++i) {
     const long long d = d2(e[i][0], e[i][1]);
-    const int lo = std::min(e[i][0], e[i][1]), hi = std::max(e[i][0], e[i][1]);
+    const int la = lab[(size_t)e[i][0]], lb = lab[(size_t)e[i][1]];
+    const int lo = std::min(la, lb), hi = std::max(la, lb);
     if (d > best || (d == best && (lo < bi || (lo == bi && hi < bj)))) {
       best = d; bi = lo; bj = hi;
     }
   }
-  return bi == std::min(u, v) && bj == std::max(u, v);
+  const int lu = lab[(size_t)u], lv = lab[(size_t)v];
+  return bi == std::min(lu, lv) && bj == std::max(lu, lv);
+}
+
+// MUTANT : decider l'owner sur les positions Morton au lieu des `PointId`.
+bool g_inject_owner_rank = false;
+inline bool owner_edge_id(const std::vector<std::array<long long, 3>>& p,
+                          const std::vector<int>& lab, int u, int v, int w) {
+  if (!g_inject_owner_rank) return owner_edge(p, lab, u, v, w);
+  std::vector<int> pos(lab.size());
+  for (size_t i = 0; i < lab.size(); ++i) pos[i] = (int)i;
+  return owner_edge(p, pos, u, v, w);
 }
 
 int owner_fixtures() {
-  // Equilateral ENTIER de `Z^3` : les trois aretes carrees valent deux.
-  std::vector<std::array<long long, 3>> p = {{100, 100, 100}, {101, 101, 100}, {101, 100, 101}};
   int fautes = 0;
-  auto d2 = [&](int i, int j) {
+  auto d2 = [](const std::vector<std::array<long long, 3>>& p, int i, int j) {
     long long s = 0;
     for (int k = 0; k < 3; ++k) { const long long d = p[i][k] - p[j][k]; s += d * d; }
     return s;
   };
-  if (d2(0, 1) != 2 || d2(0, 2) != 2 || d2(1, 2) != 2) {
-    std::fprintf(stderr, "FIXTURE OWNER: le triangle n'est pas equilateral\n");
-    ++fautes;
-  }
-  // TROIS incidences admissibles — chaque arete est maximale faible.
-  int admissibles = 0;
   const int e[3][2] = {{0, 1}, {0, 2}, {1, 2}};
-  for (int i = 0; i < 3; ++i) {
-    const int w = 3 - e[i][0] - e[i][1];
-    if (d2(e[i][0], w) <= d2(e[i][0], e[i][1]) && d2(e[i][1], w) <= d2(e[i][0], e[i][1]))
-      ++admissibles;
+
+  // --- EQUILATERAL ENTIER DE `Z^3`, avec RELABELING.
+  //
+  // La contre-fixture de l'audit `1aa487d` : memes coordonnees, labels permutes.
+  // L'ordre Morton devient `1,2,0`. L'owner SCIENTIFIQUE par `PointId` est
+  // l'arete `(0,1)`, alors qu'un code qui deciderait sur les positions
+  // choisirait les deux premieres, donc `(1,2)`.
+  const std::array<long long, 3> P0 = {101, 100, 101};   // PointId 0
+  const std::array<long long, 3> P1 = {100, 100, 100};   // PointId 1
+  const std::array<long long, 3> P2 = {101, 101, 100};   // PointId 2
+  // Trois relabelings : l'owner par `PointId` doit etre INVARIANT.
+  const int perms[3][3] = {{0, 1, 2}, {1, 2, 0}, {2, 0, 1}};
+  for (int pi = 0; pi < 3; ++pi) {
+    std::vector<std::array<long long, 3>> p(3);
+    std::vector<int> lab(3);
+    for (int i = 0; i < 3; ++i) {
+      const int id = perms[pi][i];                       // position `i` porte ce `PointId`
+      p[(size_t)i] = (id == 0) ? P0 : (id == 1) ? P1 : P2;
+      lab[(size_t)i] = id;
+    }
+    if (d2(p, 0, 1) != 2 || d2(p, 0, 2) != 2 || d2(p, 1, 2) != 2) {
+      std::fprintf(stderr, "FIXTURE OWNER: le triangle n'est pas equilateral\n");
+      ++fautes;
+    }
+    int admissibles = 0, owners = 0, owner_lo = -1, owner_hi = -1;
+    for (int i = 0; i < 3; ++i) {
+      const int w = 3 - e[i][0] - e[i][1];
+      const long long D = d2(p, e[i][0], e[i][1]);
+      if (d2(p, e[i][0], w) <= D && d2(p, e[i][1], w) <= D) ++admissibles;
+      if (owner_edge(p, lab, e[i][0], e[i][1], w)) {
+        ++owners;
+        owner_lo = std::min(lab[(size_t)e[i][0]], lab[(size_t)e[i][1]]);
+        owner_hi = std::max(lab[(size_t)e[i][0]], lab[(size_t)e[i][1]]);
+      }
+    }
+    if (admissibles != 3) {
+      std::fprintf(stderr, "FIXTURE OWNER: %d incidences admissibles, trois attendues\n",
+                   admissibles);
+      ++fautes;
+    }
+    // L'OWNER PAR `PointId` EST `(0,1)`, quelle que soit la permutation.
+    if (owners != 1 || owner_lo != 0 || owner_hi != 1) {
+      std::fprintf(stderr, "FIXTURE OWNER: relabeling %d rend %d owners, arete (%d,%d),"
+                           " un seul et (0,1) attendus\n", pi, owners, owner_lo, owner_hi);
+      ++fautes;
+    }
   }
-  if (admissibles != 3) {
-    std::fprintf(stderr, "FIXTURE OWNER: %d incidences admissibles, trois attendues\n",
-                 admissibles);
-    ++fautes;
+
+  // --- ISOCELE : deux aretes maximales, un seul owner.
+  {
+    std::vector<std::array<long long, 3>> q = {{0, 0, 0}, {4, 0, 0}, {2, 4, 0}};
+    std::vector<int> lab = {0, 1, 2};
+    int adm = 0, own = 0;
+    for (int i = 0; i < 3; ++i) {
+      const int w = 3 - e[i][0] - e[i][1];
+      const long long D = d2(q, e[i][0], e[i][1]);
+      if (d2(q, e[i][0], w) <= D && d2(q, e[i][1], w) <= D) ++adm;
+      if (owner_edge(q, lab, e[i][0], e[i][1], w)) ++own;
+    }
+    if (adm != 2 || own != 1) {
+      std::fprintf(stderr, "FIXTURE OWNER: isocele rend %d admissibles et %d owners,"
+                           " deux et un attendus\n", adm, own);
+      ++fautes;
+    }
   }
-  // ET EXACTEMENT UN OWNER.
-  int owners = 0;
-  for (int i = 0; i < 3; ++i) {
-    const int w = 3 - e[i][0] - e[i][1];
-    if (owner_edge(p, e[i][0], e[i][1], w)) ++owners;
+
+  // --- LE MUTANT DOIT MORDRE : decider sur les positions choisit `(1,2)`.
+  {
+    std::vector<std::array<long long, 3>> p = {P1, P2, P0};   // ordre Morton
+    std::vector<int> lab = {1, 2, 0};
+    std::vector<int> pos = {0, 1, 2};
+    int lo_id = -1, hi_id = -1, lo_pos = -1, hi_pos = -1;
+    for (int i = 0; i < 3; ++i) {
+      const int w = 3 - e[i][0] - e[i][1];
+      if (owner_edge(p, lab, e[i][0], e[i][1], w)) {
+        lo_id = std::min(lab[(size_t)e[i][0]], lab[(size_t)e[i][1]]);
+        hi_id = std::max(lab[(size_t)e[i][0]], lab[(size_t)e[i][1]]);
+      }
+      if (owner_edge(p, pos, e[i][0], e[i][1], w)) {
+        lo_pos = std::min(lab[(size_t)e[i][0]], lab[(size_t)e[i][1]]);
+        hi_pos = std::max(lab[(size_t)e[i][0]], lab[(size_t)e[i][1]]);
+      }
+    }
+    if (lo_id != 0 || hi_id != 1) {
+      std::fprintf(stderr, "FIXTURE OWNER: owner par PointId = (%d,%d), (0,1) attendu\n",
+                   lo_id, hi_id);
+      ++fautes;
+    }
+    if (lo_pos == lo_id && hi_pos == hi_id) {
+      std::fprintf(stderr, "MUTANT SURVIVANT: decider sur les positions Morton rend le"
+                           " meme owner que sur les PointId\n");
+      return 3;
+    }
+    std::printf("mutant_owner_positions arete=(%d,%d) au lieu de (%d,%d)\n",
+                lo_pos, hi_pos, lo_id, hi_id);
   }
-  if (owners != 1) {
-    std::fprintf(stderr, "FIXTURE OWNER: %d owners pour un equilateral, un attendu\n", owners);
-    ++fautes;
-  }
-  // ISOCELE : deux aretes maximales, un seul owner.
-  std::vector<std::array<long long, 3>> q = {{0, 0, 0}, {4, 0, 0}, {2, 4, 0}};
-  int adm2 = 0, own2 = 0;
-  for (int i = 0; i < 3; ++i) {
-    const int w = 3 - e[i][0] - e[i][1];
-    auto r2 = [&](int a2, int b2) {
-      long long s = 0;
-      for (int k = 0; k < 3; ++k) { const long long d = q[a2][k] - q[b2][k]; s += d * d; }
-      return s;
-    };
-    const long long D = r2(e[i][0], e[i][1]);
-    if (r2(e[i][0], w) <= D && r2(e[i][1], w) <= D) ++adm2;
-    if (owner_edge(q, e[i][0], e[i][1], w)) ++own2;
-  }
-  if (adm2 != 2 || own2 != 1) {
-    std::fprintf(stderr, "FIXTURE OWNER: isocele rend %d admissibles et %d owners,"
-                         " deux et un attendus\n", adm2, own2);
-    ++fautes;
-  }
+
   if (fautes) {
     std::fprintf(stderr, "DESACCORD DU JUGE: %d fautes d'owner\n", fautes);
     return 1;
   }
-  std::printf("fixtures_owner accord=OUI equilateral admissibles=3 owners=1"
+  std::printf("fixtures_owner accord=OUI relabelings=3 owner_pointid=(0,1)"
               " isocele admissibles=2 owners=1\n");
   return 0;
 }
@@ -758,6 +830,7 @@ int main(int argc, char** argv) {
     else if (a == "--fixtures-spindle") return spindle_fixtures();
     else if (a == "--fixtures-rang") return rang_fixture();
     else if (a == "--fixtures-owner") return owner_fixtures();
+    else if (a == "--inject=owner-generationrank") { g_inject_owner_rank = true; g_q3carriers = true; }
     else if (a == "--fixtures-terme-t") return terme_t_fixtures();
     else if (a == "--q3-carriers") g_q3carriers = true;
     else if (a.rfind("--q3-sep=", 0) == 0) { g_q3carriers = true; g_q3s = arg_ll(val("--q3-sep=").c_str(), 1, 64, "q3-sep"); }
@@ -1661,9 +1734,14 @@ int main(int argc, char** argv) {
       // Couverture par porteur, pour l'oracle : `couv[x]` compte les blocs
       // emis qui contiennent `x` pour le terminal courant.
       std::vector<unsigned char> couv;
+      std::vector<long long> ownk;
+      long long owners_faux = 0;
       long long triples_aigus = 0, manques = 0, doublons = 0;
       const bool fait_oracle = (g_q3oracle > 0 && m <= g_q3oracle);
-      if (fait_oracle) couv.assign((size_t)m * (size_t)m * (size_t)m, 0);
+      if (fait_oracle) {
+        couv.assign((size_t)m * (size_t)m * (size_t)m, 0);
+        ownk.assign((size_t)m * (size_t)m * (size_t)m, -1);
+      }
       for (size_t i = 0; i < terms.size(); ++i) {
         if (i < fate.size() && (fate[i] & 2u)) continue;      // lane q3 deja fermee
         const mhgp3v::WspdBox ba = cell_of(nodes, sp, terms[i].a);
@@ -1741,7 +1819,7 @@ int main(int argc, char** argv) {
             for (int v = fb2; v <= lb2; ++v)
               for (int x = cf; x <= cl; ++x) {
                 if (x == u || x == v) continue;
-                if (!owner_edge(sp, u, v, x)) continue;      // OWNER GLOBAL
+                if (!owner_edge_id(sp, spid, u, v, x)) continue;   // OWNER sur `PointId`
                 long long D = 0, V = 0;
                 for (int d = 0; d < 3; ++d) {
                   const long long w = sp[v][d] - sp[u][d];
@@ -1749,10 +1827,17 @@ int main(int argc, char** argv) {
                   D += w * w; V += z * z;
                 }
                 if (V <= D) continue;                        // pas strictement aigu
-                int t[3] = {u, v, x};
+                int t[3] = {spid[u], spid[v], spid[x]};   // `PointId`, pas positions
                 std::sort(t, t + 3);
                 const long long key = ((long long)t[0] * m + t[1]) * m + t[2];
                 if (couv[(size_t)key] < 255) ++couv[(size_t)key];
+                // ET L'IDENTITE DE L'ARETE QUI POSSEDE, pas seulement le compte.
+                // Un oracle qui ne verifie que la multiplicite ne voit pas un
+                // tie-break faux : les trois aretes d'un equilateral sont toutes
+                // emises, donc le compte vaut un quelle que soit celle qu'on
+                // declare owner. Il faut comparer l'ARETE.
+                ownk[(size_t)key] = ((long long)std::min(spid[u], spid[v]) << 32)
+                                  | (long long)std::max(spid[u], spid[v]);
               }
         }
       }
@@ -1764,8 +1849,13 @@ int main(int argc, char** argv) {
             for (int x = v + 1; x < (int)m; ++x) {
               // arete owner du triple, puis acuite relativement a elle
               int oa = u, ob = v, ox = x;
-              if (owner_edge(sp, u, x, v)) { oa = u; ob = x; ox = v; }
-              else if (owner_edge(sp, v, x, u)) { oa = v; ob = x; ox = u; }
+              // LA VERITE N'EST JAMAIS MUTEE. Le sujet emploie `owner_edge_id`,
+              // qui peut etre injecte ; la verite emploie toujours l'owner par
+              // `PointId`. Sans cette separation, sujet et juge s'accordent sur
+              // le meme mauvais tie-break — c'est le defaut que l'audit
+              // `1aa487d` a pris en flagrant delit.
+              if (owner_edge(sp, spid, u, x, v)) { oa = u; ob = x; ox = v; }
+              else if (owner_edge(sp, spid, v, x, u)) { oa = v; ob = x; ox = u; }
               long long D = 0, V = 0;
               for (int d = 0; d < 3; ++d) {
                 const long long w = sp[ob][d] - sp[oa][d];
@@ -1774,10 +1864,15 @@ int main(int argc, char** argv) {
               }
               if (V <= D) continue;                          // pas un q3 positif
               ++triples_aigus;
-              const long long key = ((long long)u * m + v) * m + x;
+              int tk[3] = {spid[u], spid[v], spid[x]};
+              std::sort(tk, tk + 3);
+              const long long key = ((long long)tk[0] * m + tk[1]) * m + tk[2];
               const int c = couv[(size_t)key];
-              if (c == 0) ++manques;
-              else if (c > 1) ++doublons;
+              if (c == 0) { ++manques; continue; }
+              if (c > 1) ++doublons;
+              const long long attendu = ((long long)std::min(spid[oa], spid[ob]) << 32)
+                                      | (long long)std::max(spid[oa], spid[ob]);
+              if (ownk[(size_t)key] != attendu) ++owners_faux;
             }
       }
       std::printf("q3_porteurs s=%lld : blocs=%lld masse=%.6g feuilles=%lld"
@@ -1786,16 +1881,26 @@ int main(int argc, char** argv) {
                   g_q3s, blocs, (double)masse_bloc, feuilles, prune_obtus, prune_nonmax,
                   splits, visites, hwm, (double)blocs / (double)m);
       if (fait_oracle) {
-        std::printf("q3_oracle triples_aigus=%lld manques=%lld doublons=%lld\n",
-                    triples_aigus, manques, doublons);
+        std::printf("q3_oracle triples_aigus=%lld manques=%lld doublons=%lld"
+                    " owners_faux=%lld\n", triples_aigus, manques, doublons, owners_faux);
         if (triples_aigus < 100) {
           std::fprintf(stderr, "PLANCHER: %lld triples aigus canoniques seulement\n",
                        triples_aigus);
           return 3;
         }
-        if (manques || doublons) {
-          std::fprintf(stderr, "DESACCORD DU JUGE: %lld triples aigus hors de tout bloc,"
-                               " %lld dans plusieurs\n", manques, doublons);
+        if (g_inject_owner_rank) {
+          if (owners_faux == 0) {
+            std::fprintf(stderr, "MUTANT SURVIVANT: decider l'owner sur les positions"
+                                 " Morton rend les memes aretes que sur les PointId\n");
+            return 3;
+          }
+          std::printf("mutant_killed=1 raison=owner_generationrank owners_faux=%lld\n",
+                      owners_faux);
+          return 4;
+        }
+        if (manques || doublons || owners_faux) {
+          std::fprintf(stderr, "DESACCORD DU JUGE: %lld triples hors bloc, %lld en double,"
+                               " %lld owners faux\n", manques, doublons, owners_faux);
           return 1;
         }
         std::printf("q3_oracle accord=OUI\n");

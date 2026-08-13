@@ -18,6 +18,13 @@ jamais réception.
 - [`AUDIT_ETAT_COURANT.md`](AUDIT_ETAT_COURANT.md) est l'unique verdict mutable :
   il distingue le `HEAD`, le delta éventuel du worktree, les empreintes utiles,
   les contre-exemples, les tests qualifiables et les portes ouvertes.
+- [AUDIT_REPONSE_ROUTE_VERTICAL_SLICE_1AA487D_20260813.md](AUDIT_REPONSE_ROUTE_VERTICAL_SLICE_1AA487D_20260813.md)
+  répond aux trois questions de route : walking skeleton complet borné avant
+  parcimonie, couture ExactKernel–SphereIdentity sans élargir le profil u16, et
+  SphereRun réversible avec refus exact des plateaux tant que le quotient
+  saturé/vertical n'est pas reçu. Il corrige le budget 100 ms, le faux lien
+  10 M→binary64 et l'owner live GenerationRank, puis contre-audite explicitement
+  les cages, préfixes, niveaux q3 et générateurs saturés de l'autre auditeur.
 - [AUDIT_REPONSE_Q3_RELATION_BINAIRE_92D0C0F_20260813.md](AUDIT_REPONSE_Q3_RELATION_BINAIRE_92D0C0F_20260813.md)
   reçoit la réduction owner-edge × porteur et répond positivement à la question
   du générateur q3. Il corrige l'oracle exact-once sur les égalités, remplace le

@@ -3159,3 +3159,122 @@ tilings, égalités et continuations.
 
 Audit et fixtures :
 [AUDIT_REPONSE_Q3_RELATION_BINAIRE_92D0C0F_20260813.md](audits/AUDIT_REPONSE_Q3_RELATION_BINAIRE_92D0C0F_20260813.md).
+
+## 19. Route de réception : tranche verticale, ABI numérique et plateaux
+
+Le pin 8595fd4 identifie correctement le verrou de méthode : aucune optimisation
+de source n'est causalement reçue tant qu'elle ne produit pas l'objet. La
+réparation n'est pas de construire tout le fold scalable avant la source, mais
+de fermer d'abord une tranche verticale bornée.
+
+### 19.1 Tranche output-bearing bornée
+
+Sur petit n, l'oracle exhaustif fournit toutes les BallForm. Le même pipeline
+qui accueillera la source sparse produit ensuite :
+
+    BallFormToBallEvent
+      -> PrimitiveSphereKey et census I_B/U_B
+      -> RegularDirectRecord ou PlateauDisposition
+      -> spool, manifeste scellé et tri/merge global
+      -> lots, gateways, coverage et verticales
+      -> dix forêts
+      -> BenchmarkOutputContract-v1
+
+Les trois complétudes source_complete, ball_events_complete et fold_complete
+sont séparées. Un producteur incomplet peut être différencié dans ce sink, mais
+ne publie aucun succès officiel. La matérialisation lente du petit oracle est
+autorisée ; elle ne devient pas le layout produit.
+
+L'émission par ancre n'a aucun watermark monotone. Le produit peut borner sa
+mémoire par des runs spillables, mais il doit sceller toute la source, merger
+les niveaux exacts et former les macro-lots avant le premier commit. Streaming
+ne signifie jamais fold online.
+
+Après ce vert seulement, substituer la source par la fenêtre E3/E4 et comparer
+les membres de sortie, jamais seulement les comptes. Une fenêtre rouge change
+la source, pas BallEvent ni le fold.
+
+### 19.2 L'owner live doit recevoir les PointId
+
+owner_edge du pin 1aa487d compare encore ses indices u, v et w. Dans la vague,
+ce sont des GenerationRank, alors que le tie-break scientifique porte sur
+PairKey=(min PointId,max PointId). Le tableau spid n'est pas transmis et le
+SupportKey du juge est trié par positions. Sujet et vérité partagent donc le
+même mauvais owner.
+
+La fixture équilatérale relabellée est :
+
+- PointId 0 = (101,100,101), Morton 2064837 ;
+- PointId 1 = (100,100,100), Morton 2064832 ;
+- PointId 2 = (101,101,100), Morton 2064835.
+
+L'ordre Morton 1,2,0 ferait choisir (1,2) au code live ; l'owner PointId est
+(0,1). Le comparateur reçoit les labels, la clé globale emploie spid triés et
+une porte de relabeling tue owner-generationrank.
+
+### 19.3 Couture numérique stable
+
+Le profil courant reste quantized_u16_input_only. L'ABI se sépare néanmoins en
+trois couches :
+
+1. ExactKernel propre au profil calcule les décisions et la clé canonique ;
+2. SphereIdentity porte encodage versionné, comparaison exacte, niveau et
+   projection complète derrière tout digest ;
+3. BallEvent et le fold ne consomment que SphereIdentity, PointId, I_B/U_B,
+   owners, dispositions et preuves.
+
+Le hot path u16 conserve ses deux limbs. Il ne sérialise jamais __int128 natif.
+Un futur ExactKernel binary64 pourra employer dyadiques, filtres et repli
+multiprécision sans changer le fold. Cette couture est préparée maintenant ;
+le backend binary64, ses largeurs et le claim 10 M attendent une phase formelle
+distincte.
+
+Dix millions de points n'imposent pas binary64 : trois coordonnées u16 offrent
+$2^{48}$ sites distincts. L'index dense local doit en revanche passer de u16 à
+u32 au-delà de 65 535. coordinate_encoding, dense_index_codec et PointId_codec
+restent trois champs indépendants du manifeste.
+
+### 19.4 Cosphère lourde : refus actuel sans layout irréversible
+
+Le domaine exact régulier courant impose U_B=S pour les événements utiles.
+Lorsque le census trouve U_B différent de S, la transaction retourne
+unsupported_degeneracy tant que le quotient n'est pas reçu. La cosphère u16 à
+384 points peut donc être refusée après une seule sphère et son census, sans
+développer 2 322 560 combinaisons.
+
+L'objet interne reste un SphereRun réversible :
+
+    SphereIdentity, I_B, U_B ou handle streamé
+    SupportRun régulier éventuel
+    disposition regular_direct | plateau_lossless | explicit_support_stream
+                | saturated_h0 | unsupported
+    degeneracy_policy_id, preuve et manifeste
+
+plateau_lossless conserve niveau, I_B/U_B, q_min, masque d'ordres et provenance
+sans prétendre que toutes les combinaisons du shell sont des supports positifs.
+Le profil courant transforme cette disposition en refus atomique. Un futur
+PlateauQuotient pourra consommer le même run après réception. La voie des
+générateurs saturés est le candidat mathématique : elle agrège
+$\mathrm{Sat}(B)=I_B\cup U_B$ et ses intersections, mais doit encore recevoir
+le join $\left\lvert S_B\cap S_C\right\rvert\geq k$, généalogie, lots,
+coverage_delta et verticales.
+
+unsupported_degeneracy reste une décision de domaine stable ;
+resource_exhausted reste une incapacité physique sur une entrée admise. Aucun
+seuil de mémoire ne transforme l'un en l'autre.
+
+### 19.5 La porte de coût est composée
+
+L'extrapolation 2,6 milliards de recertifications en 100 ms demanderait 26
+milliards de tâches par seconde. À 32 octets par tâche, le trafic utile seul
+vaut 0,832 To/s ; à 64 ou 128 octets, il vaut 1,66 ou 3,33 To/s. Il ne reste
+aucune marge pour prédicats larges, radix, output et synchronisation. Cette
+mesure appelle une agrégation structurelle avant une optimisation de constantes.
+
+La porte publie E3/E4, M3/M4, tâches, SphereRun uniques, census, shell,
+SupportKey, H, octets/HWM et temps par phase. Une pente superlinéaire ne réfute
+le SLO que sur une famille déclarée output-sparse ; une sortie quadratique
+réelle appelle output sensitivity, quotient reçu ou resource_exhausted.
+
+Réponse complète et contre-fixture owner :
+[AUDIT_REPONSE_ROUTE_VERTICAL_SLICE_1AA487D_20260813.md](audits/AUDIT_REPONSE_ROUTE_VERTICAL_SLICE_1AA487D_20260813.md).
