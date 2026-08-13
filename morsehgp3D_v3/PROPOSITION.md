@@ -2137,6 +2137,12 @@ ordonnance doit produire le même ledger de crédits que la graine `C=root` ; un
 baisse de fermeture signale du travail omis et interdit toute comparaison de
 coût.
 
+La fixture `A={(0,0,0)}`, `B={(20,0,0)}`, `z_0=(10,0,0)` rend cette porte
+non vacante. Les ensembles axiaux `x=5,...,14`, `x=6,...,14` et
+`x=7,...,14` contiennent exactement `10`, `9` et `8` crédits centraux q2/q3/q4.
+Comme `D=400` et `S(x)=(2x-20)^2`, leur appartenance se rejoue sans oracle de
+nœud. Toute ablation qui omet `z_0` reste à `h_q-1` et doit échouer.
+
 Cette `Central-VWave` est complète pour les crédits du certificat central ;
 elle ne prétend pas être complète pour tous les témoins géométriques. Son
 compteur directeur est `J`, nombre de tâches `Rect×CNode` consommées. Le pire

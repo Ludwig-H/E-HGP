@@ -289,6 +289,12 @@ Trois gates sont nécessaires avant de comparer le nombre de tâches :
 3. placer la feuille localisée comme dixième, neuvième et huitième crédit des
    lanes q2/q3/q4, afin que son omission tue le test.
 
+Une seule fixture axiale réalise ces trois seuils : `A={(0,0,0)}`,
+`B={(20,0,0)}`, `z_0=(10,0,0)`, puis respectivement les ensembles
+`x=5,...,14`, `x=6,...,14` et `x=7,...,14`. Ici `D=400` et
+`S(x)=(2x-20)^2`; chaque ensemble ferme exactement sa lane, tandis que la
+suppression de `z_0` laisse `h_q-1` crédits.
+
 Le pin ne contient aucun CTest `--climb`. Son juge de sûreté peut passer malgré
 une perte de complétude, puisqu'il demande seulement que toute fermeture
 annoncée possède assez de candidats. Il est donc prématuré d'inférer de cette

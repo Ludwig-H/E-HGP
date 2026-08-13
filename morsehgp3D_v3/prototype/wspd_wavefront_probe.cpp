@@ -157,7 +157,7 @@ int main(int argc, char** argv) {
   else refuse("famille inconnue");
   if (oracle && ns.back() > 64) refuse("l'oracle exige n <= 64");
 
-  std::vector<double> fronts;
+  std::vector<double> fronts, fenetres;
   for (size_t k = 0; k < ns.size(); ++k) {
     const std::vector<mhgp::P3> cloud = mhgp3v::make_family_cloud(fam, (int)ns[k], (int)coord, seed);
     std::vector<std::array<long long, 3>> pts;
@@ -442,6 +442,32 @@ int main(int argc, char** argv) {
       std::sort(v.begin(), v.end());
       return v[std::min(v.size() - 1, (size_t)(f * (double)v.size()))];
     };
+    // ---- `ProjectiveWindowCounter-v0`, LECTURE « SURVIVANTS ».
+    //
+    // `N_q(a)` est ici l'ensemble des `b` tels que la paire `(a,b)` survit au
+    // certificat. C'est la lecture dont l'audit fait un critere de mort : si la
+    // fenetre reste quasi quadratique, la route est NO-GO. L'autre lecture —
+    // les sommets admissibles d'un support ancre en `a` — est une question
+    // ouverte que je ne tranche pas, et ce compteur ne pretend pas la couvrir.
+    //
+    // On accumule le degre residuel par `PointId` : pour chaque terminal
+    // OUVERT, chaque point de `A` gagne `|B|` et reciproquement. Le cout est
+    // en somme des cardinaux, jamais en masse.
+    std::vector<long long> deg_res(sp.size(), 0);
+    for (size_t i = 0; i < terms.size(); ++i) {
+      if (i < closed_q2.size() && closed_q2[i]) continue;
+      const Pair& t = terms[i];
+      const int fa = (t.a < 0) ? (-1 - t.a) : nodes[t.a].first;
+      const int la = (t.a < 0) ? (-1 - t.a) : nodes[t.a].last;
+      const int fb = (t.b < 0) ? (-1 - t.b) : nodes[t.b].first;
+      const int lb = (t.b < 0) ? (-1 - t.b) : nodes[t.b].last;
+      const long long ka = la - fa + 1, kb = lb - fb + 1;
+      for (int u = fa; u <= la; ++u) deg_res[u] += kb;
+      for (int v = fb; v <= lb; ++v) deg_res[v] += ka;
+    }
+    long long nsum = 0, nmax = 0;
+    for (long long d : deg_res) { nsum += d; nmax = std::max(nmax, d); }
+
     // ---- L'ARGUMENT D'EMPILEMENT, MESURE PLUTOT QU'ESPERE.
     //
     // La borne `O(s^3 n)` repose sur un argument de PACKING : un nœud donne ne
@@ -553,6 +579,7 @@ int main(int argc, char** argv) {
                 " | banque lectures=%lld recert=%lld ferme q2=%lld q3=%lld q4=%lld"
                 " | masse fermee q2=%.2f%% records fermes q2=%.2f%% tronques=%lld"
                 " juges=%lld faux=%lld | verdicts ALL=%lld NONE=%lld descente_pure=%lld"
+                " | fenetre somme_N=%lld max_N=%lld moyen_N=%.1f"
                 " | partenaires max=%lld moyen=%.2f"
                 " | residuel : %lld paires tirees DANS LA MASSE ouverte,"
                 " temoins_moyen=%.1f max=%lld, deja >=10 temoins : %lld (%.1f%%)"
@@ -564,6 +591,7 @@ int main(int argc, char** argv) {
                 100.0 * (double)mass_closed_q2 / (double)total,
                 100.0 * (double)bank.closed[0] / (double)std::max<size_t>(1, terms.size()),
                 bank.tronques, bank.juges, bank.faux, bank.v_all, bank.v_none, bank.v_descente,
+                nsum, nmax, (double)nsum / (double)m,
                 dmax, (double)dsum / (double)std::max(1LL, dnz),
                 ech, (double)som_temoins / (double)std::max(1LL, ech), max_temoins,
                 faux_resid, 100.0 * (double)faux_resid / (double)std::max(1LL, ech),
@@ -594,12 +622,16 @@ int main(int argc, char** argv) {
       return 3;
     }
     fronts.push_back((double)terms.size());
+    fenetres.push_back((double)nsum);
   }
   if (oracle) { std::printf("oracle accord=OUI\n"); return 0; }
   int bad = 0;
   for (size_t k = 1; k < fronts.size(); ++k) {
     const double s = std::log2(fronts[k] / fronts[k - 1]) / std::log2((double)ns[k] / (double)ns[k - 1]);
-    std::printf("pente front_records=%.3f (%lld->%lld)\n", s, ns[k - 1], ns[k]);
+    const double sw = std::log2(fenetres[k] / fenetres[k - 1]) /
+                      std::log2((double)ns[k] / (double)ns[k - 1]);
+    std::printf("pente front_records=%.3f pente somme_N=%.3f (%lld->%lld)\n",
+                s, sw, ns[k - 1], ns[k]);
     if (s >= max_slope) ++bad; else bad = 0;
     if (bad >= 2) { std::fprintf(stderr, "REFUS DE PENTE: deux pentes >= %.2f\n", max_slope); return 3; }
   }

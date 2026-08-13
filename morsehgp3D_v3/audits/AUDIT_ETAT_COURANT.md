@@ -98,6 +98,12 @@ conserve `120`. Avec `leaf_parent`, le surcoût courant est environ `12n`
 octets. C'est modeste à `50000`, mais `120 MB` à dix millions de points et doit
 entrer dans le HWM au lieu d'être caché.
 
+Une fixture unique rend les trois seuils déterministes : `A={(0,0,0)}`,
+`B={(20,0,0)}`, feuille localisée `z0=(10,0,0)`. Les candidats axiaux
+`x=5,...,14`, `x=6,...,14` et `x=7,...,14` donnent exactement `10`, `9` et `8`
+crédits q2/q3/q4. Avec `D=400` et `S(x)=(2x-20)^2`, les trois gardes centrales
+sont directes. Omettre `z0` laisse chaque lane à son seuil moins un.
+
 Le mutant permanent minimal prend `A={0}`, `B={10}` et un `CNode` axial dont la
 population est `{1,...,6}`. Son parent est `ALL` q2 avec six crédits et `MIXED`
 q3 ; un masque global recrédite les six enfants et ferme faussement q2 à douze.

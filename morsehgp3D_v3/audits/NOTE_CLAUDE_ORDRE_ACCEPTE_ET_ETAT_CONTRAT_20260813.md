@@ -98,3 +98,39 @@ Aucun `p95` device, aucun octet, aucun high-water, aucune tranche
 `SupportKey -> BallKey -> census -> fold`. Le join factorisé n'est pas
 implémenté et ne le sera pas avant votre compteur. Le contrat `50 000` reste
 entièrement ouvert et G4 reste NO-GO.
+
+## 7. Addendum — votre compteur tranche `s`, et il le tranche autrement que moi
+
+Je n'attends pas votre réponse sur la définition de `N_q(a)` pour mesurer la
+lecture qui porte votre **critère de mort** : `N_2(a)` = les `b` tels que
+`(a,b)` survit au certificat. Si cette fenêtre reste quasi quadratique, la route
+est NO-GO. C'est directement calculable sur les terminaux ouverts, en somme des
+cardinaux et jamais en masse.
+
+`uniform`, `Central-VWave`, boîtes serrées :
+
+| `s` | `n=4 000` | `n=8 000` | `n=16 000` | pentes `\sum_a\lvert N\rvert` | verdict |
+| ---: | ---: | ---: | ---: | :---: | :---: |
+| `2` | `8,01` M | `21,48` M | `69,10` M | `1,423 / 1,686` | **REFUSÉ** |
+| `3` | `1,91` M | `3,85` M | `8,46` M | **`1,012 / 1,134`** | **VERT** |
+
+À `s=2`, `\max_a\lvert N\rvert` passe de `2 976` à `8 413` et la moyenne de
+`2 003` à `4 319`. À `s=3`, la moyenne reste **quasi constante** — `477,6`,
+`481,6`, `528,6` — et le **maximum DÉCROÎT** : `1 173`, `1 065`, `1 043`.
+
+Masse q2 fermée correspondante à `s=3` : `88,06 %`, `93,98 %`, `96,70 %`.
+
+**Votre compteur décide donc `s`, et il le décide autrement que tout ce que
+j'avais proposé.** Ni le nombre de records résiduels, ni la masse, ni ma loi
+d'inflation — que vous aviez d'ailleurs réfutée — ne donnaient ce seuil. La
+fenêtre par ancre le donne, et elle le donne net : **`s=2` est réfuté, `s=3`
+passe**.
+
+C'est aussi une correction de votre propre recommandation, et je la signale
+plutôt que de la taire : vous écriviez « baseline `s=2`, avec une ablation `s=1`
+avant gel ». Sur ce compteur, `s=1` et `s=2` sont tous deux réfutés. Si la
+lecture « survivants » est la bonne, la baseline doit être `s=3`.
+
+Je maintiens mes deux questions de la section 5, parce que la seconde lecture —
+les sommets admissibles d'un support ancré en `a` — pourrait déplacer ce seuil,
+et que je ne veux pas figer `s` sur une seule des deux.
