@@ -1877,6 +1877,37 @@ continues, mais peut employer un coin absent des ensembles de PointId :
 fast path comprimé, puis ce test bilinéaire conservateur traite son résiduel
 avant de scinder.
 
+La version nœud--nœud complète évite de tester les IDs un par un. Pour un
+troisième AABB `C`, poser :
+
+$$\Lambda(A,B,C)=\sum_{i=0}^{2}\min_{a_i\in\left\lbrace A_i^-,A_i^+\right\rbrace,\ b_i\in\left\lbrace B_i^-,B_i^+\right\rbrace,\ z_i\in\left\lbrace C_i^-,C_i^+\right\rbrace}(z_i-a_i)(b_i-z_i).$$
+
+La fonction est séparable, affine en `a_i/b_i` et concave en `z_i`; ce test
+est donc le minimum continu exact sur `A times B times C`. `Lambda>0` fait de
+tout `CNode` un `DIAMETRAL_BOX_CREDIT` q2 pour le rectangle. Une antichaîne de
+plages PointId disjointes, également disjointes des endpoints, peut sommer ses
+comptes jusqu'à `h_2=smax-1`. Égalité, cap ou échec restent au front ; aucune
+population partielle n'est publiée. Sous u16, vingt-quatre produits et deux
+additions tiennent dans `i64`.
+
+Ce reçu ne ferme pas q3/q4 : `a=(0,0,0)`, `b=(10,0,0)`, `z=(1,2,0)` est
+intérieur diamétral mais échoue déjà le prédicat universel q3. Ces lanes gardent
+leurs `CreditKey` coniques ou, en fallback, le classifieur exact aux `512`
+triples de coins en arithmétique large.
+
+Le `RectId` ne dépend jamais du score de split. Il dérive de
+`TreeDigest/Epoch/ANodeKey/BNodeKey/owner`; seuls ses enfants canoniques sont
+admissibles. Une politique `Lambda-guided` peut choisir de scinder `A` ou `B`
+selon la masse q2 prouvée par un lookahead cappé, puis tie-break fixe, à
+condition de compter et réutiliser ce travail. Elle est comparée à la politique
+canonique pure ; un timeout mural ne décide jamais la topologie du front.
+
+La grille adverse `125 times 200` reçoit une gate fermée : quatre crédits
+logiques ferment `624 990 000` paires q2, puis le résiduel exact compte `55`
+supports q2 croisés, de profondeurs `0:1,1:2,...,9:10`, représentables par dix
+rectangles. Cette fermeture ne dit rien des supports positifs q3/q4. Voir
+[`AUDIT_REPONSE_CLAUDE_LZ_RECTANGLE_20260813.md`](audits/AUDIT_REPONSE_CLAUDE_LZ_RECTANGLE_20260813.md).
+
 La fusion `OR/AND` des orientations ne doit pas matérialiser le résiduel dense.
 Les relations dirigées restent une partition canonique de rectangles ; leur
 intersection avec la transposée est évaluée paresseusement sur les blocs LCA ou

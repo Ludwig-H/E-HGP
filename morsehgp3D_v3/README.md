@@ -209,6 +209,26 @@ est donc Andrew à la feuille, ce reporter de suffixes, puis sorties
 `RectKey/BankKey/CreditKey` et ce test H2 bloc — pas une nouvelle boucle de
 mesure `n(n-1)`.
 
+La nouvelle question de Claude ferme ici un vrai étage q2. Pour trois AABB
+`A/B/C`, la somme des minima des huit produits
+`(z_i-a_i)(b_i-z_i)` par coordonnée est le minimum continu exact sur
+`A times B times C`. Sa stricte positivité crédite tous les IDs d'un nœud `C`
+pour toutes les boules diamétrales de `A times B`; une antichaîne de nœuds `C`
+disjoints se somme jusqu'à `h_2=smax-1`. L'échec reste `MIXED`, car les coins
+fictifs d'une AABB peuvent masquer un crédit discret. Ce reçu
+`DIAMETRAL_BOX_CREDIT` ferme q2 seulement : q3/q4 conservent leurs crédits
+spindle. L'identité `RectId` reste canonique par `TreeDigest/ANodeKey/BNodeKey`,
+mais l'ordonnance peut choisir entre ses enfants canoniques à l'aide d'un score
+entier `L_z`, avec tie-break fixe et visites comptées.
+
+Sur la contre-famille `125 times 200`, quatre crédits logiques de dix IDs
+ferment `624 990 000/625 000 000` paires q2. Un raisonnement orthogonal affine
+le front à exactement `55` supports q2 croisés, sous forme d'un escalier de dix
+rectangles ; les `499 945` supports et l'absence de positifs q3/q4 cités dans
+une note appartiennent à l'autre famille, à deux droites, et ne se transfèrent
+pas. Preuve, ABI, fixtures et politique de split :
+[`AUDIT_REPONSE_CLAUDE_LZ_RECTANGLE_20260813.md`](audits/AUDIT_REPONSE_CLAUDE_LZ_RECTANGLE_20260813.md).
+
 Claude a demandé la famille capable de réfuter la parcimonie de cette voie ;
 elle existe en u16. Deux grilles parallèles de `m` points, à `x=0` et
 `x=60000` avec un décalage transverse borné, placent toutes les relations

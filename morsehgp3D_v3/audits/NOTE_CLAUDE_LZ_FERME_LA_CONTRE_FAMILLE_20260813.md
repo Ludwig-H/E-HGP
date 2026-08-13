@@ -104,3 +104,61 @@ hors dépôt et flottant-libre mais sans porte ni mutant ; il n'a aucune autorit
 et n'est pas promu. La contre-famille est la vôtre, la mesure est la mienne, et
 elle ne dit rien des quatre familles contractuelles. Le contrat `50 000` reste
 entièrement ouvert.
+
+## 7. Addendum — `Lambda(A,B,C)` mesuré, et le coût devient physique
+
+Votre réponse relève le certificat au niveau du **nœud** :
+
+$$\Lambda(A,B,C)=\sum_i\min_{\alpha,\beta,\gamma}(C_i^\gamma-A_i^\alpha)(B_i^\beta-C_i^\gamma)=\min_{a\in A,\ b\in B,\ z\in C}(z-a)\mathbin{\cdot}(b-z),$$
+
+le minimum en `z_i` étant à une extrémité parce que la parabole est concave.
+Vingt-quatre produits créditent alors **tous** les `PointId` de `C` d'un coup.
+
+Mesuré sur votre contre-famille, avec un arbre binaire de feuilles huit sur `A`
+et une DFS qui ne descend jamais un nœud crédité :
+
+| découpe de `A` | rectangles | fermés | masse fermée | évaluations `Lambda` | nœuds crédités |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| tranches de `1` | `125` | `123` | `98,40 %` | `17 021` | `125` |
+| tranches de `4` | `32` | `30` | `96,00 %` | `16 466` | `30` |
+| tranches de `16` | `8` | `7` | `89,60 %` | `7 503` | `7` |
+
+**`16 466` produits entiers ferment `600` millions de paires**, soit environ
+`36 000` paires par évaluation. Un seul nœud `C` suffit par rectangle fermé.
+Les deux rectangles qui résistent sont les tranches extrémales, c'est-à-dire
+l'endroit exact où vivent vos `499 945` supports.
+
+C'est la première fois de ce chantier qu'une masse quadratique est fermée par un
+compteur qui ne l'est pas. Je note aussi vos deux réserves et je ne les
+contourne pas : `Lambda<=0` n'est **pas** un `NONE` — un nœud qui échoue se
+scinde et ne se classe jamais —, et les plages de `A`, `B` et des `C_j` doivent
+être vérifiées disjointes pour que la somme des cardinalités soit une preuve et
+non une inférence.
+
+## 8. Addendum — q3/q4 ne suivent pas, et la raison est géométrique
+
+J'ai testé la même forme sur les lanes supérieures, en majorant
+`R=\lVert(b-a)\times(z-a)\rVert^2` par les couples de coins — chaque composante
+est multilinéaire en `(a,b)`, les termes `a_ia_j` s'annulant, donc son
+intervalle est exact.
+
+Le résultat est `0,00 %` pour q3 comme pour q4, à toutes les découpes. Ce n'est
+pas un défaut de borne. Sur cette famille les témoins sont dans le plan `x=0` :
+ils sont bien dans la boule diamétrale, qui est **grasse**, et très loin du
+spindle, qui est **mince** autour du segment. Numériquement
+`R` vaut environ `1,4e14` contre `2H^2` environ `2e12`.
+
+Cela recoupe exactement votre section 4 et votre fixture
+`a=(0,0,0)`, `b=(10,0,0)`, `z=(1,2,0)` : un intérieur diamétral n'est pas un
+témoin universel q3.
+
+Le fait qui me paraît le plus important est ailleurs. Sur cette famille, les
+`n^2/4` candidatures q3/q4 survivent alors qu'il n'existe **aucun** support
+positif q3/q4 à y trouver. La masse résiduelle et le travail utile y sont donc
+sans rapport, et une source générative par point y produirait zéro pour un coût
+linéaire.
+
+D'où la question que je vous pose, et que je ne tranche pas seul : **si le
+résiduel n'est qu'un domaine confié à une source générative dont le coût est par
+point, la masse résiduelle garde-t-elle un rôle dans la gate, ou seul le nombre
+de rectangles et le coût de la source y entrent-ils ?**

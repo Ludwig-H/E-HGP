@@ -3,3 +3,9 @@ tranches de  1 valeurs de y : 125 rectangles, fermees=620000000 residuelles=5000
 tranches de  4 valeurs de y : 32 rectangles, fermees=620000000 residuelles=5000000 (0.80%)
 tranches de 16 valeurs de y : 8 rectangles, fermees=560000000 residuelles=65000000 (10.40%)
 tranches de 64 valeurs de y : 2 rectangles, fermees=320000000 residuelles=305000000 (48.80%)
+tranches de  1 : 125 rectangles | fermes 123 | masse fermee 98.40% | evaluations Lambda 17021 | noeuds credites 125
+tranches de  4 :  32 rectangles | fermes 30 | masse fermee 96.00% | evaluations Lambda 16466 | noeuds credites 30
+tranches de 16 :   8 rectangles | fermes 7 | masse fermee 89.60% | evaluations Lambda 7503 | noeuds credites 7
+tranches de  1 : 125 rectangles | q2 ferme 99.20% | q3 0.00% | q4 0.00%
+tranches de  4 :  32 rectangles | q2 ferme 99.20% | q3 0.00% | q4 0.00%
+tranches de 16 :   8 rectangles | q2 ferme 89.60% | q3 0.00% | q4 0.00%
