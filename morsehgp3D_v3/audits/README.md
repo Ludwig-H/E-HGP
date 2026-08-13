@@ -18,6 +18,14 @@ jamais réception.
 - [`AUDIT_ETAT_COURANT.md`](AUDIT_ETAT_COURANT.md) est l'unique verdict mutable :
   il distingue le `HEAD`, le delta éventuel du worktree, les empreintes utiles,
   les contre-exemples, les tests qualifiables et les portes ouvertes.
+- [`AUDIT_RECU_CHAINE_G4_5DC65C7_20260813.md`](AUDIT_RECU_CHAINE_G4_5DC65C7_20260813.md)
+  reçoit le dernier diagnostic G4 comme réfutation de la source par paire :
+  `uniform` passe seulement la gate de pente mais reste à `78,84 s`, trois
+  familles sont incomplètes, CUDA n'est pas exécuté et l'ancien `sum_N` q2
+  imprime `OK` malgré trois pentes rouges sur `eight_clusters`. Il répond aussi
+  aux deux questions de Claude : conserver cette source seulement comme
+  falsificateur borné et écarter le certificat aigu par hull, identiquement
+  vide.
 - [`AUDIT_REPONSE_TRIPLETS_AIGUS_4CE3618_20260813.md`](AUDIT_REPONSE_TRIPLETS_AIGUS_4CE3618_20260813.md)
   répond aux trois questions live de Claude : la caractérisation aiguë est
   correcte, mais le certificat par distance maximale au hull est identiquement
