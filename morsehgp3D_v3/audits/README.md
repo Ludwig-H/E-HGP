@@ -23,6 +23,12 @@ jamais réception.
   classification des seuls terminaux par masque de lanes, cœur central et
   corridor d'ordre, puis vrai raccord q3/q4 par carriers. Il tranche le budget
   de profondeur comme quantum de scheduling, jamais comme cap sémantique.
+- [`AUDIT_REPONSE_CLAUDE_DOUBLE_COEUR_RF_GPU_P0_A7F061B_20260813.md`](AUDIT_REPONSE_CLAUDE_DOUBLE_COEUR_RF_GPU_P0_A7F061B_20260813.md)
+  répond aux deux questions de Claude, corrige le faux juge AABB du cœur q3/q4
+  et réduit la prochaine implémentation à `RF-GPU-P0` : banque Morton bornée,
+  recertification commune et compactage du résiduel avant corridors/carriers.
+  Il contre-audite aussi le pin `a7f061b` et son worktree WSPD sans toucher au
+  logiciel.
 
 Le résumé est [`../README.md`](../README.md) et l'architecture durable est
 [`../PROPOSITION.md`](../PROPOSITION.md). Ils peuvent conserver un résultat

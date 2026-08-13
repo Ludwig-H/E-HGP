@@ -8,7 +8,69 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-## Observation live — `HEAD=e63b7eb`, cœur central puis préfixe WSPD/carriers
+## Observation live — `HEAD=a7f061b`, double cœur reçu puis worktree WSPD
+
+Le `HEAD` observé est
+`a7f061b58c79a6d2eeaf04acd8d3a5585f34bcb5`, commit
+`their central core unlocks q3/q4 from zero to eighty-seven percent`. Le pin
+ajoute le certificat entier `Dlo/Vhi` commun aux trois lanes. La preuve est
+sûre : `Vhi<Dlo` certifie q2, `3Vhi<Dlo` certifie q3 et, sous `Dlo>0`,
+`209Vhi<=56Dlo` certifie q4. La dernière frontière est strictement intérieure
+car `362^2-3*209^2=1`. Ce sont des implications fail-open, pas des
+équivalences.
+
+Le diagnostic `terrain/8k` annonce `87,27 %` de masse fermée q3 et `83,93 %`
+q4, contre environ zéro auparavant. C'est un gain de couverture important,
+pas une mesure produit : le probe traite encore le CPU, repart de `C=root`, ne
+consomme aucun résiduel et ne chronomètre aucun aval.
+
+Le rejeu Release local suivant a été exécuté sur le pin :
+
+```text
+cmake -S morsehgp3D_v3 -B build/v3 -DCMAKE_BUILD_TYPE=Release
+cmake --build build/v3 --target mhgp3v_rect_front_probe --parallel
+ctest --test-dir build/v3 --output-on-failure -R '^mhgp3v_rect_front_'
+10/10 PASS, 19,92 s
+```
+
+Ce vert ne reçoit pas l'universalité. `--verify-all` tire quatre triplets par
+nœud, donc peut falsifier mais jamais certifier un `ALL`; CMake exerce q2 et q4,
+pas q3, malgré son commentaire. Le bloc de contrôle est dupliqué. Le helper
+central accepte encore une lane entière arbitraire et sa branche q4 directe
+omet `Dlo>0`; le commentaire q3 emploie à tort une équivalence après avoir
+supprimé un terme favorable. L'oracle requis reste exhaustif et indépendant
+sur petits nœuds/boîtes.
+
+La seconde question de Claude est close : aucun troisième objet géométrique
+n'est requis. La boule de rayon `||b-a||/4` autour du milieu est strictement
+incluse dans le spindle q4, puis q3/q2. Pour les nœuds, le cœur
+`(d-3S)/4` est donc commun. L'owner n'est pas une hypothèse de cette inclusion ;
+il est une précondition sémantique pour consommer une fermeture q3/q4 comme
+`PRUNED_MAX_EDGE_ANCHOR`. Le juge AABB `MIXED` qui avait motivé la désactivation
+q3/q4 était seulement incomplet.
+
+Le worktree suivant le pin ajoute `prototype/wspd_front.hpp`,
+`prototype/wspd_front_probe.cpp` et leur CMake. La direction est bonne :
+fair-split déterministe, séparation entière, `PointId` conservé et oracle de
+multiplicité borné. La version relue repart toutefois encore de `C=root` pour
+chaque terminal, appelle le classifieur jusqu'à trois fois tout en comptant une
+seule `eval`, n'a ni `RectId/owner`, ni arène SoA, ni consommation du résiduel.
+Un self-bloc feuille de taille supérieure à un est omis. Ce worktree n'est pas
+un reçu et ne doit pas déclencher une session G4.
+
+Le prochain micro-jalon est `RF-GPU-P0` : terminaux WSPD canoniques, fenêtre
+Morton propositionnelle `W=32`, au plus `L=16` IDs distincts, recertification
+entière avec masque commun, puis compactage stable de tout échec en
+`DELEGATED_RESIDUAL`. Une banque incomplète ne conclut jamais absence,
+`POSITIVE` ou `KEEP`. Le corridor et les carriers restent des extensions
+ultérieures, seulement si leur gain marginal devient nécessaire. Réponse aux
+deux questions, preuve, fixture, ABI, enveloppe mémoire et portes :
+[`AUDIT_REPONSE_CLAUDE_DOUBLE_COEUR_RF_GPU_P0_A7F061B_20260813.md`](AUDIT_REPONSE_CLAUDE_DOUBLE_COEUR_RF_GPU_P0_A7F061B_20260813.md).
+
+Le statut G4 reste `NO-GO` : aucun kernel rect-front, aucun p95/HWM, aucun
+handoff exact et aucun raccord jusqu'au fold. GCP non utilisé par cet audit.
+
+## Observation historique — `HEAD=e63b7eb`, cœur central puis préfixe WSPD/carriers
 
 Le `HEAD` observé est
 `e63b7eb29151799ea5b84021a42c47d506316994`, commit

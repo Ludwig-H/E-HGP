@@ -1982,10 +1982,12 @@ incomplète peut perdre une fermeture mais ne peut créer un faux crédit.
 Un cœur commun fournit une gate plus forte. Si `A,B` sont contenus dans des
 boules de rayons `r_A,r_B`, poser `S=r_A+r_B`, `d` la distance de leurs centres
 et `m_0` leur milieu. Pour q2, `d>2S` donne un cœur ouvert de rayon
-`(d-2S)/2` autour de `m_0`. Pour q3/q4, sous owner d'arête maximale, `d>3S`
-donne un cœur ouvert de rayon `(d-3S)/4`. Dix, neuf ou huit IDs distincts dans
-le cœur ferment la lane correspondante. Les rayons et frontières sont décidés
-en carrés entiers ; aucune hausse globale de `s` n'est nécessaire.
+`(d-2S)/2` autour de `m_0`. Pour q3/q4, `d>3S` donne géométriquement un cœur
+ouvert de rayon `(d-3S)/4`, sans hypothèse d'owner. Dix, neuf ou huit IDs
+distincts dans le cœur ferment le certificat de la lane ; consommer q3/q4
+comme prune de support exige ensuite `owner=max_edge_canonical` et rend
+`PRUNED_MAX_EDGE_ANCHOR`. Les rayons et frontières sont décidés en carrés
+entiers ; aucune hausse globale de `s` n'est nécessaire.
 
 Le résiduel seul reçoit une continuation persistante. Pour chaque
 `RectKey/lane`, `Credit ⊔ None ⊔ Mixed` partitionne `C-root`; raffiner remplace
@@ -2043,6 +2045,53 @@ Le quantum de profondeur est une règle versionnée de scheduling. Son
 les records et masses délégués, octets/HWM et deux pentes de travail. Le plan,
 les fixtures et l'ABI sont détaillés dans
 [`AUDIT_DEBLOCAGE_WSPD_PREFIX_CARRIERS_20260813.md`](audits/AUDIT_DEBLOCAGE_WSPD_PREFIX_CARRIERS_20260813.md).
+
+### 11.1.4 `RF-GPU-P0` : banque propositionnelle avant corridors et carriers
+
+Le plus petit jalon device ne reçoit ni top-`L` exact, ni range-report
+exhaustif, ni carrier. Il prend les terminaux WSPD canoniques et un ordre
+`(Morton48,PointId)`. Pour chaque `RectId`, il inspecte une fenêtre déterministe
+`W=32` autour de la clé du milieu des deux nœuds, conserve au plus `L=16` IDs
+distincts selon distance entière puis `PointId`, rejette les endpoints et
+recertifie les singletons sur tout `A×B`.
+
+La banque est strictement propositionnelle. Une discontinuité Morton, une
+fenêtre vide, un cap ou un sous-seuil rendent `DELEGATED_RESIDUAL`; ils ne
+prouvent jamais absence, `POSITIVE`, `KEEP` ou `SOURCE_EMPTY`. Un top-`L` exact
+n'est requis que pour une garantie de rappel ou une preuve d'occupation
+négative, pas pour la sûreté d'un crédit positif.
+
+Une recertification partage `Dlo`, `Vhi`, l'intervalle de `H` et les bornes de
+distance, puis rend un masque. Les bits `ALL` satisfont `q4=>q3=>q2`; les
+comptes distincts saturent à `10/9/8`. q2 rend `CLOSED_Q2`. q3/q4 ne rendent
+`PRUNED_MAX_EDGE_ANCHOR` que si le record authentifie l'owner canonique ; sinon
+leur masque reste délégué. Le résultat conserve jusqu'à dix `proof_ids`
+rejouables.
+
+Deux kernels suffisent à cette tranche : K1 traite un warp par rectangle sans
+allocation ni file dynamique ; K2 scanne et compacte stablement les ordinals
+résiduels. Les buffers sont préalloués et résidents, les produits larges
+emploient deux limbes et la tranche ne synchronise qu'au terminal. Avec `F`
+rectangles, son enveloppe est `W*F` lectures et `L*F` recertifications. Une ABI
+de `16 B` par travail, `64 B` par résultat et `4 B` par ordinal résiduel donne
+`84F+86n` octets avec arbre, clés, coordonnées, ordre et rang, avant les
+workspaces explicitement comptés.
+
+La porte de falsification résidente est un p95 d'au plus `200 ms` sur trente
+warms à `n=50000`, avec bytes/HWM, lectures, recertifications, produits larges,
+closed/residual par lane et compactage. Cette porte ne qualifie pas le
+`warm_e2e`; elle décide seulement s'il reste assez de budget pour la source et
+le fold. Le corridor d'ordre vient ensuite par ablation si son gain marginal
+sur les records délégués justifie son coût. Les carriers q3/q4 ne sont raccordés
+qu'après ce verdict.
+
+L'oracle petit `n` développe chaque terminal et exige une multiplicité un de
+chaque `PairId`; il rejoue aussi chaque preuve, l'owner, la disjonction des IDs
+et la partition `closed_mask ⊔ residual_mask = input_mask`. La sortie finale et
+son digest sont invariants à la fenêtre, au quantum, au tuilage et au nombre de
+threads ; seule la répartition fast/fallback peut varier. Le détail des
+fixtures, de l'ABI et des défauts du pin `a7f061b` est dans
+[`AUDIT_REPONSE_CLAUDE_DOUBLE_COEUR_RF_GPU_P0_A7F061B_20260813.md`](audits/AUDIT_REPONSE_CLAUDE_DOUBLE_COEUR_RF_GPU_P0_A7F061B_20260813.md).
 
 ### 11.2 Tuilage spatial et fold
 

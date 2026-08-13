@@ -177,12 +177,26 @@ struct RectCore {
 // sous precondition d'arete maximale owner). Le rayon du coeur vaut alors
 // `(d - mult*S)/2` pour q2 et `(d - 3S)/4` pour q3/q4.
 //
-// AVERTISSEMENT. Le coeur q3/q4 porte sur les CIRCUMBOULES ADMISSIBLES DU
-// SUPPORT, tandis que le predicat de temoin universel implemente ici porte sur
-// le SPINDLE — l'intersection des boules passant par `a` et `b`. Ce ne sont pas
-// le meme objet, et le juge du coeur le montre : `352 666` desaccords sur
-// `446 224` en q4. Le fast path est donc RESTREINT A q2 tant que l'audit n'a
-// pas tranche la correspondance.
+// DEUX COEURS IMBRIQUES, tous deux universels — la restriction a q2 que j'avais
+// posee etait fondee sur un FAUX JUGE et l'audit `a7f061b` la leve :
+//
+//   - coeur LARGE, q2 seul  : rayon `(d-2S)/2` sous `d > 2S` ;
+//   - coeur ETROIT, q2/q3/q4: rayon `(d-3S)/4` sous `d > 3S`.
+//
+// Preuve du coeur etroit, sans aucun owner. Avec `m` le milieu de `(a,b)`,
+// `u = z-m`, `A = ||b-a||^2` et `B = ||u||^2`, on a `H = A/4 - B` et
+// `E2 X2 = (A/4 + B)^2 - (d.u)^2`. Si `B <= A/16`, alors meme en SUPPRIMANT le
+// terme favorable `(d.u)^2`, la marge q4 au bord vaut
+//
+//     3 (1/4 - 1/16)^2 - (1/4 + 1/16)^2 = 27/256 - 25/256 = 1/128 > 0.
+//
+// Le coeur est donc STRICTEMENT dans le spindle q4, donc q3, donc q2. Et pour
+// des noeuds, `||z-m0|| < (d-3S)/4` implique `||z-m|| < (d-S)/4 <= ||b-a||/4`.
+//
+// L'owner reste obligatoire pour la CONSOMMATION : neuf ou huit temoins de
+// spindle eliminent une candidature q3 ou q4 seulement sous
+// `owner = max_edge_canonical`, et l'issue s'appelle alors
+// `PRUNED_MAX_EDGE_ANCHOR` — jamais « aucune sphere ne contient la paire ».
 inline RectCore rect_common_core(const RectBox& a, const RectBox& b, int mult,
                                 RectFrontInject inject = RectFrontInject::kNone) {
   RectCore c{};
@@ -237,6 +251,12 @@ inline bool rect_core_misses_box(const RectCore& c, const RectBox& p) {
   return s >= (__int128)c.r4 * c.r4;
 }
 
+enum class RectVerdict { kNone, kAll, kMixed };
+
+// ENUM FERME. L'ABI n'accepte plus un `int` quelconque : toute valeur autre que
+// zero, un ou deux etait auparavant traitee silencieusement comme q4.
+enum class RectLane { kQ2 = 0, kQ3 = 1, kQ4 = 2 };
+
 // ---- COEUR CENTRAL ENTIER, PARTAGE PAR LES TROIS LANES
 // (audit `AUDIT_DEBLOCAGE_WSPD_PREFIX_CARRIERS`, section 5).
 //
@@ -249,7 +269,10 @@ inline bool rect_core_misses_box(const RectCore& c, const RectBox& p) {
 // `c H^2 > E2 X2` se reduit a une comparaison du seul rapport `V2/D2` :
 //
 //     q2 : V2 < D2                 (c'est exactement `H > 0`)
-//     q3 : 3 V2 < D2               (car 4H^2 > E2X2 <=> 2(D2-V2) > D2+V2)
+//     q3 : 3 V2 < D2               (car apres SUPPRESSION du terme favorable,
+//                                   4H^2 > E2X2 est IMPLIQUE par
+//                                   2(D2-V2) > D2+V2 — une implication, pas
+//                                   une equivalence)
 //     q4 : 209 V2 <= 56 D2         (il faut V2/D2 < 2 - sqrt(3) = 0,2679491...,
 //                                   et 56/209 = 0,2679425... est dessous)
 //
@@ -274,21 +297,23 @@ inline long long rect_v_max(const RectBox& a, const RectBox& b, const RectBox& c
   return s;
 }
 
-// `ALL` par le coeur central, pour la lane demandee. Suffisant, jamais complet.
+// `ALL` par le coeur central. Ce sont des IMPLICATIONS fail-open, jamais des
+// equivalences : un echec rend `UNKNOWN`, jamais `NONE`. `56/209 < 2-sqrt(3)`
+// est exact — `362^2 - 3 x 209^2 = 1` —, donc l'egalite rationnelle reste
+// strictement a l'interieur de la vraie frontiere.
+//
+// LE GARDE `dlo > 0` EST OBLIGATOIRE EN q4 : sans lui, `A=B=C={0}` donne
+// `209 x 0 <= 56 x 0` et le helper accepte un rectangle degenere.
 inline bool rect_central_all(const RectBox& a, const RectBox& b, const RectBox& c,
-                             int lane) {
+                             RectLane lane) {
   const __int128 vhi = (__int128)rect_v_max(a, b, c);
   const __int128 dlo = (__int128)rect_minsq(a, b);
-  if (lane == 0) return vhi < dlo;
-  if (lane == 1) return 3 * vhi < dlo;
+  if (dlo <= 0) return false;
+  if (lane == RectLane::kQ2) return vhi < dlo;
+  if (lane == RectLane::kQ3) return 3 * vhi < dlo;
   return 209 * vhi <= 56 * dlo;
 }
 
-enum class RectVerdict { kNone, kAll, kMixed };
-
-// ENUM FERME. L'ABI n'accepte plus un `int` quelconque : toute valeur autre que
-// zero, un ou deux etait auparavant traitee silencieusement comme q4.
-enum class RectLane { kQ2 = 0, kQ3 = 1, kQ4 = 2 };
 
 inline RectVerdict rect_classify(const RectBox& a, const RectBox& b, const RectBox& c,
                                  RectLane lane, long long* out_max,
@@ -310,7 +335,7 @@ inline RectVerdict rect_classify(const RectBox& a, const RectBox& b, const RectB
   }
   // COEUR CENTRAL D'ABORD : il decide les trois lanes en une comparaison de
   // rapport et ne demande ni `Lambda` ni produit vectoriel.
-  if (rect_central_all(a, b, c, (int)lane)) return RectVerdict::kAll;
+  if (rect_central_all(a, b, c, lane)) return RectVerdict::kAll;
   if (mn <= 0) return RectVerdict::kMixed;
   if (lane == RectLane::kQ2) return RectVerdict::kAll;
   // Repli : le certificat par `Hmin` et les deux maxima de distance. Il est

@@ -124,11 +124,11 @@ unsigned long long g_rng = 0x243F6A8885A308D3ull;
 
 bool core_closes(const Tree& t, int ia, int ib, RectLane lane, Counters* c,
                  RectFrontInject inject) {
-  // RESTREINT A q2. Le coeur q3/q4 de l'audit porte sur les circumboules du
-  // support, pas sur le spindle que ce sujet decide ; le juge du coeur le
-  // refute massivement. On ne l'emploie pas avant clarification.
-  if (lane != RectLane::kQ2) return false;
-  const int mult = 2;
+  // LES TROIS LANES. La restriction a q2 reposait sur un FAUX JUGE — appeler
+  // le classifieur AABB pour juger le coeur n'est pas un oracle independant,
+  // puisque `MIXED` n'y refute rien. Coeur large `(d-2S)/2` en q2, coeur
+  // etroit `(d-3S)/4` en q3/q4.
+  const int mult = (lane == RectLane::kQ2) ? 2 : 3;
   const mhgp3v::RectCore core =
       mhgp3v::rect_common_core(t.nodes[ia].box, t.nodes[ib].box, mult, inject);
   if (!core.valid) return false;
@@ -153,13 +153,27 @@ bool core_closes(const Tree& t, int ia, int ib, RectLane lane, Counters* c,
         // majorant. Le juge est une autre ecriture — boite degeneree {z} et
         // intervalle exact — et non la sphere qui vient de decider.
         if (g_verify_core) {
-          const RectBox zb{{z[0], z[1], z[2]}, {z[0], z[1], z[2]}};
-          long long dummy = 0;
-          if (mhgp3v::rect_classify(t.nodes[ia].box, t.nodes[ib].box, zb, lane, &dummy) !=
-              RectVerdict::kAll) {
-            ++c->core_disagree;
-          }
-          ++c->core_judged;
+          // JUGE PAR TRIPLES REELS. Rappeler le classifieur AABB ne serait PAS
+          // un oracle independant : son `MIXED` ne refute rien, `Hmin`,
+          // `E2max` et `X2max` pouvant provenir de paires differentes. On
+          // enumere donc des couples de points EXISTANTS de `A` et `B` et on
+          // evalue le predicat ponctuel exact.
+          const Node& AA = t.nodes[ia];
+          const Node& BB = t.nodes[ib];
+          for (int ai = AA.begin; ai < AA.end; ++ai)
+            for (int bi = BB.begin; bi < BB.end; ++bi) {
+              __int128 h = 0, e2 = 0, x2 = 0;
+              for (int d = 0; d < 3; ++d) {
+                const long long ea = z[d] - t.pts[ai][d];
+                const long long tb = t.pts[bi][d] - z[d];
+                h += (__int128)ea * tb; e2 += (__int128)ea * ea; x2 += (__int128)tb * tb;
+              }
+              bool ok = (h > 0);
+              if (ok && lane == RectLane::kQ3) ok = (4 * h * h > e2 * x2);
+              if (ok && lane == RectLane::kQ4) ok = (3 * h * h > e2 * x2);
+              ++c->core_judged;
+              if (!ok) ++c->core_disagree;
+            }
         }
         if (++cnt >= kNeed[(int)lane]) { ++c->core_closed; return true; }
       }
@@ -374,6 +388,39 @@ int run_fixtures() {
                 ok ? "OK" : "DESACCORD");
     if (!ok) ++bad;
   }
+  // FIXTURE DU FAUX JUGE (audit `a7f061b`, section 3). Sur une droite
+  // embarquee, `A=[0,2]x{0}x{0}`, `B=[10,12]x{0}x{0}`, `z=(6,0,0)` : les NEUF
+  // paires entieres placent `z` strictement entre `a` et `b`, donc
+  // `E2 X2 = H^2` et q4 est VRAIE partout. Pourtant l'enveloppe AABB donne
+  // `Hmin=16`, `E2max=X2max=36`, et `3 x 16^2 = 768 < 1296`. Le classifieur
+  // rend donc legitimement `MIXED`, et s'en servir comme juge du coeur etait
+  // une faute de methode — la mienne.
+  {
+    const RectBox fa{{0, 0, 0}, {2, 0, 0}};
+    const RectBox fb{{10, 0, 0}, {12, 0, 0}};
+    const RectBox fz{{6, 0, 0}, {6, 0, 0}};
+    long long mn = 0, mx = 0;
+    mhgp3v::rect_h_interval(fa, fb, fz, &mn, &mx);
+    const long long e2m = mhgp3v::rect_maxsq(fz, fa), x2m = mhgp3v::rect_maxsq(fb, fz);
+    long long faux = 0, vrais = 0;
+    for (long long ax = 0; ax <= 2; ++ax)
+      for (long long bx = 10; bx <= 12; ++bx) {
+        const long long h = (6 - ax) * (bx - 6);
+        const long long e2 = (6 - ax) * (6 - ax), x2 = (bx - 6) * (bx - 6);
+        if (h > 0 && 3 * h * h > e2 * x2) ++vrais; else ++faux;
+      }
+    long long dummy = 0;
+    const bool aabb_all =
+        mhgp3v::rect_classify(fa, fb, fz, RectLane::kQ4, &dummy) == RectVerdict::kAll;
+    std::printf("faux_juge Hmin=%lld E2max=%lld X2max=%lld 3Hmin2=%lld E2X2=%lld"
+                " triplets_vrais=%lld/%lld aabb_all=%d\n",
+                mn, e2m, x2m, 3 * mn * mn, e2m * x2m, vrais, vrais + faux, aabb_all ? 1 : 0);
+    if (vrais != 9 || faux != 0) {
+      std::fprintf(stderr, "FIXTURE: les neuf triplets devaient etre vrais en q4\n");
+      ++bad;
+    }
+  }
+
   // MUTANT COLINEAIRE (audit `96be8e0`, section 4) : un nuage porte par une
   // droite ne contient AUCUN triangle ni tetraedre propre, donc aucun support
   // q3/q4 ne peut exister. Toute issue etiquetee POSITIVE hors q2 serait un

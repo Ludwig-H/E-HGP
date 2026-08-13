@@ -3841,6 +3841,11 @@ mhgp3v_add_expected_code_test_for(mhgp3v_rect_front_probe
 add_test(NAME mhgp3v_rect_front_coeur_juge
   COMMAND mhgp3v_rect_front_probe --family=terrain --points=4000
           --budget-depth=4 --selftest=0 --verify-core)
+add_test(NAME mhgp3v_rect_front_coeur_juge_q4
+  COMMAND mhgp3v_rect_front_probe --family=terrain --points=4000 --lane=2
+          --budget-depth=4 --selftest=0 --verify-core)
+set_tests_properties(mhgp3v_rect_front_coeur_juge_q4 PROPERTIES
+  PASS_REGULAR_EXPRESSION "desaccords=0")
 set_tests_properties(mhgp3v_rect_front_coeur_juge PROPERTIES
   PASS_REGULAR_EXPRESSION "desaccords=0")
 
@@ -3853,6 +3858,11 @@ add_test(NAME mhgp3v_rect_front_all_juge_q2
   COMMAND mhgp3v_rect_front_probe --family=terrain --points=8000 --lane=0
           --budget-depth=4 --selftest=0 --verify-all)
 set_tests_properties(mhgp3v_rect_front_all_juge_q2 PROPERTIES
+  PASS_REGULAR_EXPRESSION "juge_all triples=[0-9]+ desaccords=0")
+add_test(NAME mhgp3v_rect_front_all_juge_q3
+  COMMAND mhgp3v_rect_front_probe --family=terrain --points=8000 --lane=1
+          --budget-depth=4 --selftest=0 --verify-all)
+set_tests_properties(mhgp3v_rect_front_all_juge_q3 PROPERTIES
   PASS_REGULAR_EXPRESSION "juge_all triples=[0-9]+ desaccords=0")
 add_test(NAME mhgp3v_rect_front_all_juge_q4
   COMMAND mhgp3v_rect_front_probe --family=terrain --points=8000 --lane=2
@@ -3875,3 +3885,23 @@ mhgp3v_add_expected_code_test_for(mhgp3v_rect_front_probe
 mhgp3v_add_expected_code_test_for(mhgp3v_rect_front_probe
   mhgp3v_rect_front_plancher_mord "PLANCHER" 3
   --family=uniform --points=2000 --lane=0 --budget=1 --selftest=0 --min-closed-pct=90)
+
+# --- WspdFrontLowerBound-v1 : la partition entiere construite AVANT toute
+# geometrie, puis une seule classification par RectId terminal avec un masque
+# de lanes commun aux trois seuils.
+add_executable(mhgp3v_wspd_front_probe prototype/wspd_front_probe.cpp)
+target_include_directories(mhgp3v_wspd_front_probe PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(mhgp3v_wspd_front_probe PRIVATE mhgp)
+target_compile_options(mhgp3v_wspd_front_probe PRIVATE -Wall -Wextra -Werror)
+
+# LA MULTIPLICITE EST LA PREMIERE PORTE. La somme des masses ne prouve rien —
+# une omission et un doublon de meme masse se compensent. L'oracle developpe
+# tous les records a n <= 64 et exige multiplicite EXACTEMENT UN par PairId.
+add_test(NAME mhgp3v_wspd_front_multiplicite
+  COMMAND mhgp3v_wspd_front_probe --family=uniform --points=48,64 --coord=512 --oracle)
+set_tests_properties(mhgp3v_wspd_front_multiplicite PROPERTIES
+  PASS_REGULAR_EXPRESSION "oracle accord=OUI")
+
+mhgp3v_add_expected_code_test_for(mhgp3v_wspd_front_probe
+  mhgp3v_wspd_front_refus_oracle_trop_grand "l'oracle de multiplicite exige" 2
+  --family=uniform --points=4000 --oracle)

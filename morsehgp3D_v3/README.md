@@ -49,12 +49,14 @@ persistante pour les seuls résidus. Preuves, mesures et gates :
 [`AUDIT_REPONSE_WSPD_DESCENTE_JOINTE_96BE8E0_20260813.md`](audits/AUDIT_REPONSE_WSPD_DESCENTE_JOINTE_96BE8E0_20260813.md).
 
 Les successeurs appliquent déjà `KEEP_ANCHOR`, le `NONE` propre à chaque lane,
-un enum fermé et le budget exact. Le worktree observé compile et ses fixtures
-ciblées passent, mais il reste diagnostique : aucun oracle q3/q4 par identité,
-aucun `RectKey` canonique et aucun consommateur exact de `KEEP_ANCHOR` ne sont
-encore reçus.
+un enum de CLI fermé et le budget exact. Au pin `a7f061b`, le cœur entier
+`Dlo/Vhi` partagé fait passer la couverture diagnostique `terrain/8k` à
+`87,27 %` en q3 et `83,93 %` en q4. Un rejeu Release local rend `10/10` CTests
+ciblés en `19,92 s`. Ce vert reste diagnostique : le juge `ALL` échantillonne
+quatre triplets, n'exerce pas q3 dans CMake, et aucun `RectKey`, owner ou
+consommateur exact du résiduel n'est reçu.
 
-Le déblocage suivant ne prolonge plus cette file diagnostique. Il construit
+La route longue proposée ne prolonge plus cette file diagnostique. Elle construit
 d'abord une WSPD entière/canonique à faible séparation, puis classifie une seule
 fois ses terminaux avec un masque commun. Deux fast paths entiers — cœur central
 `Dlo/Vhi` et corridor d'ordre unimodulaire — ferment les rectangles denses ;
@@ -64,6 +66,17 @@ lentille car un seul de ses deux porteurs doit être aigu. Le jalon
 `WspdFrontLowerBound-v1` peut ainsi réfuter la seconde avant d'écrire census et
 fold, sans jamais transformer un cap en résultat :
 [`AUDIT_DEBLOCAGE_WSPD_PREFIX_CARRIERS_20260813.md`](audits/AUDIT_DEBLOCAGE_WSPD_PREFIX_CARRIERS_20260813.md).
+
+Le prochain micro-jalon est plus petit. `RF-GPU-P0` reçoit d'abord les
+terminaux WSPD, inspecte une fenêtre Morton déterministe `W=32`, garde au plus
+`L=16` `PointId` distincts, recertifie chacun avec un masque entier commun et
+compacte tout échec en `DELEGATED_RESIDUAL`. Aucun top-`L` exact n'est requis :
+une banque incomplète perd seulement du rappel. Cette tranche supprime la DFS
+depuis `C=root`, borne le travail à `W*F` lectures et `L*F` recertifications et
+doit être falsifiée à `p95<=200 ms` déjà résidente avant d'ajouter corridors ou
+carriers. Réponse aux questions de Claude, preuve du double cœur, fixture et
+ABI :
+[`AUDIT_REPONSE_CLAUDE_DOUBLE_COEUR_RF_GPU_P0_A7F061B_20260813.md`](audits/AUDIT_REPONSE_CLAUDE_DOUBLE_COEUR_RF_GPU_P0_A7F061B_20260813.md).
 
 Le producteur expérimental par arête maximale apporte quatre lemmes exacts :
 borne mono-ancre `ext/4`, face positive adjacente d'un q4 positif, disque q4
