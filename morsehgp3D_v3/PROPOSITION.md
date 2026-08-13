@@ -2055,6 +2055,12 @@ exhaustif, ni carrier. Il prend les terminaux WSPD canoniques et un ordre
 distincts selon distance entière puis `PointId`, rejette les endpoints et
 recertifie les singletons sur tout `A×B`.
 
+L'encodeur Morton3D entrelace les bits aux positions `3b/3b+1/3b+2`. Un
+encodeur à masque est reçu seulement contre l'oracle boucle 16 bits ; les
+masques 2D terminant par `0x5555555555555555` sont interdits, car ils font par
+exemple collisionner `(2,0,0)` et `(0,0,1)`. La fenêtre est recadrée en fin de
+tableau pour lire exactement `min(W,n)` positions.
+
 La banque est strictement propositionnelle. Une discontinuité Morton, une
 fenêtre vide, un cap ou un sous-seuil rendent `DELEGATED_RESIDUAL`; ils ne
 prouvent jamais absence, `POSITIVE`, `KEEP` ou `SOURCE_EMPTY`. Un top-`L` exact
@@ -2088,6 +2094,12 @@ construction WSPD, transfert, source et fold ; elle décide seulement s'il reste
 assez de budget. Le corridor d'ordre vient ensuite par ablation si son gain marginal
 sur les records délégués justifie son coût. Les carriers q3/q4 ne sont raccordés
 qu'après ce verdict.
+
+La vitesse seule ne reçoit pas la banque. Une ablation `W=16/32/64` compare
+records et masse fermés à un ordre Morton brouillé. Si la fenêtre correcte ne
+réduit presque aucun résiduel q3/q4, le P0 suivant emploie quelques
+préfixes/cellules Morton adaptés au rayon du cœur, toujours bornés et
+propositionnels ; il ne porte pas une fenêtre sans signal sur CUDA.
 
 L'oracle petit `n` développe chaque terminal et exige une multiplicité un de
 chaque `PairId`; il rejoue aussi chaque preuve, l'owner, la disjonction des IDs

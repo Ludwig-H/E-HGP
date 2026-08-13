@@ -8,16 +8,14 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-## Observation live — `HEAD=90aa941`, WSPD CPU reçue, `RF-GPU-P0` absent
+## Observation live — `HEAD=360ea7c`, banque CPU reçue, Morton48 réfuté
 
 Le `HEAD` observé est
-`90aa941b46bab4927c36947f1faecab761773236`, commit
-`put both probes on the machine, and measure the front that is actually
-candidate`. Son parent logiciel `62cea171e283607e3a8ecd42333e5e2fbb112264`
-reçoit le double cœur, la partition WSPD entière et les probes CPU. Le worktree
-observé contient les mises à jour documentaires autorisées du présent audit et
-la banque Morton en cours de Claude dans `prototype/wspd_front_probe.cpp`
-(SHA-256 observé `77a11903...`) ; l'auditeur ne modifie aucun code.
+`360ea7c70e0a8875be611a10ae179d43d3f4bf1b`, commit
+`measure their Morton bank, and owe them the recall it costs`. Il reçoit la
+banque CPU et son comparateur `--bank-strong`. Le worktree observé ne contient
+que les mises à jour documentaires autorisées du présent audit ; l'auditeur ne
+modifie aucun code.
 
 Le certificat `Dlo/Vhi` est sûr : `Vhi<Dlo` certifie q2, `3Vhi<Dlo` certifie
 q3 et, sous `Dlo>0`, `209Vhi<=56Dlo` certifie q4. La dernière frontière est
@@ -47,7 +45,7 @@ SoA, ni compactage/consommation du résiduel. Le test `leaf>1` manque : le rejeu
 terminaux et `2434938` dépilages C, ferme `0 %` en q3/q4 et prend `2,607 s`
 muraux. Cette file CPU n'est pas `RF-GPU-P0`.
 
-Le script du `HEAD` est `NO-RUN`. Sa nouvelle étape WSPD lance quinze runs CPU
+Le script hérité de `90aa941` est `NO-RUN`. Sa nouvelle étape WSPD lance quinze runs CPU
 jusqu'à `100000` points et masque indistinctement refus, désaccord, crash ou OOM
 par `wait || true`. Elle ne mesure aucun temps, octet, HWM ou kernel P0. La
 cible CUDA construite reste `mhgp3v_anchor_device`. Les anciens sweeps écrivent
@@ -67,28 +65,37 @@ aux questions, preuve, fixture, ABI, enveloppe mémoire et portes :
 Le statut G4 reste `NO-GO` : aucun kernel rect-front, aucun p95/HWM, aucun
 handoff exact et aucun raccord jusqu'au fold. GCP non utilisé par cet audit.
 
-### Delta concurrent — première banque Morton, pas encore reçue
+### Première banque Morton reçue, mais son ordre est réfuté
 
-Le delta de Claude implémente déjà `--bank --window=32 --bank-l=16`. Sur
+Le `HEAD` implémente `--bank --window=32 --bank-l=16`. Sur
 `uniform,n=2000,s=2`, le rejeu local tombe de `2,607 s` pour la file à
 `0,109 s` pour la banque et borne bien les compteurs à `1314036` lectures et
 `657119` tests, mais ne ferme que `0,90 %` de masse q2 et environ zéro en
 q3/q4. C'est une réduction de constante nette, pas encore un déblocage de la
 source.
 
-Le Morton du delta est faux : son `morton_spread` insère un zéro entre bits,
+Le Morton reçu est faux : son `morton_spread` insère un zéro entre bits,
 forme 2D, puis décale trois axes. Ainsi `Morton(2,0,0)=4` et
 `Morton(0,0,1)=4`. La banque reste fail-open, mais son ordre et sa couverture
 ne sont pas ceux revendiqués. La porte doit comparer l'encodeur optimisé à un
 oracle boucle 16 bits et tuer cette collision.
 
-Le delta recalcule en outre `rect_central_all` trois fois par ID : `Dlo` et
+Le code recalcule en outre `rect_central_all` trois fois par ID : `Dlo` et
 `Vhi` ne sont donc pas mutualisés malgré le compteur `recerts`. Il alloue et
 trie un `std::vector` par terminal, ne conserve aucun `proof_id/RectResult`, ne
 porte aucun owner q3/q4 et sous-remplit la fenêtre près de la fin de l'ordre.
 Avant toute session, il faut un helper `central_mask` qui calcule `Dlo` une fois
 par rectangle et `Vhi` une fois par ID, un buffer fixe, un replay de preuve et
 les mutants Morton/endpoint/doublon/owner/résiduel.
+
+Les chiffres de la note Claude ne sont donc pas interprétables comme une
+mesure de la spécification Morton48 : l'ordre collisionne et la fenêtre haute
+est sous-remplie. `--bank-strong` n'est pas la disjonction de deux certificats
+non comparables : `rect_classify` appelle déjà le cœur avant son fallback, donc
+le mode fort est le sur-ensemble `central OR fallback`. Son gain q2 doit être
+comparé à son coût physique après correction Morton, jamais promu dans P0. Il
+réintroduit les carrés larges et vaut environ `2,4x` le temps CPU du masque
+central sur le petit diagnostic local.
 
 ## Observation historique — `HEAD=e63b7eb`, cœur central puis préfixe WSPD/carriers
 

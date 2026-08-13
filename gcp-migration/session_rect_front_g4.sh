@@ -162,7 +162,7 @@ gcloud compute scp "${TAR}" "${GCP_INSTANCE_NAME}:/tmp/v3.tgz" \
   mkdir -p out
   for fam in uniform terrain eight_clusters scanline_overlap_multiecho scanline_single_pass; do
     for lane in 0 1 2; do
-      ( $P --family=$fam --lane=$lane --points=$RAMPE --budget=24 --leaf=8            --selftest=20000 --min-all=1000 --min-none=1000 --min-mixed=1000            > out/${fam}_q$((lane+2)).txt 2>&1; echo "code=$?" >> out/${fam}_q$((lane+2)).txt ) &
+      ( $P --family=$fam --lane=$lane --points=$RAMPE --budget-depth=4 --leaf=8 --core --selftest=20000 --min-all=1000 --min-none=1000 --min-mixed=1000 > out/${fam}_q$((lane+2)).txt 2>&1; echo "code=$?" >> out/${fam}_q$((lane+2)).txt ) &
     done
   done
   wait || true   # un REFUS de porte (code 3) est un RESULTAT, pas une erreur
@@ -195,7 +195,7 @@ gcloud compute scp "${TAR}" "${GCP_INSTANCE_NAME}:/tmp/v3.tgz" \
   cd ~/rectfront
   P=./build/mhgp3v_rect_front_probe
   for b in 8 16 24 48 96 192; do
-    ( $P --family=eight_clusters --lane=0 --points=12500,25000,50000 --budget=$b          --leaf=8 --selftest=0 > out/budget_$b.txt 2>&1; echo "code=$?" >> out/budget_$b.txt ) &
+    ( $P --family=eight_clusters --lane=0 --points=12500,25000,50000,100000 --budget-depth=$b --leaf=8 --core --selftest=0 > out/budget_$b.txt 2>&1; echo "code=$?" >> out/budget_$b.txt ) &
   done
   wait || true   # idem : le balayage doit survivre a un refus de pente
   echo "=== BALAYAGE DE BUDGET-PROFONDEUR (eight_clusters, q2) ==="

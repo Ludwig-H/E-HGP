@@ -450,3 +450,76 @@ sweep feuille annonce `budget-depth=4` tout en passant `--budget=24`. Avant une
 session facturable, chaque job doit capturer son code, autoriser explicitement
 les seuls refus attendus, échouer sur code 1/crash/OOM, et la campagne doit
 viser K1/K2 `RF-GPU-P0` avec événements CUDA, HWM et trente warms.
+
+## 11. Contre-audit de la première banque du worktree
+
+Le worktree suivant `90aa941` implémente la banque dans
+`wspd_front_probe.cpp` (SHA-256 observé `77a11903...`). Le premier résultat est
+encourageant sur la constante et insuffisant sur le rappel :
+
+```text
+uniform, n=2000, s=2, W=32, L=16
+front=41073
+lectures=1314036, tests=657119
+q2 fermé=0,90 %, q3=0,00 %, q4=0,00 %
+elapsed=0,109 s local
+```
+
+Le parcours antérieur prenait `2,607 s` sur le même nuage. La banque borne donc
+bien le travail, mais elle ne réduit presque pas la source sur cette fixture.
+Il faut corriger son ordre spatial avant d'interpréter ce taux.
+
+### 11.1 Le prétendu Morton48 est un entrelacement 2D collisionnant
+
+`morton_spread` emploie les masques qui insèrent un seul zéro entre les bits.
+Décaler ensuite trois axes fait chevaucher leurs supports :
+
+```text
+morton48(2,0,0) = 4
+morton48(0,0,1) = 4
+```
+
+Le proposer reste scientifiquement fail-open, mais l'ordre n'est pas Morton3D
+et la mesure de rappel est invalide. L'oracle de référence doit entrelacer par
+boucle les seize bits aux positions `3b`, `3b+1`, `3b+2`. L'optimisation peut
+ensuite employer la dilation 3D standard terminant par le masque
+`0x1249249249249249`, avec gate exhaustive ou différentielle contre cette
+boucle. Mutants : réintroduire `0x5555555555555555`, permuter deux axes et
+omettre le bit 15.
+
+### 11.2 Le masque commun est encore calculé trois fois
+
+Pour chaque ID sélectionné, le delta appelle `rect_central_all` en q2, q3 et
+q4. Chaque appel recalcule `Dlo` et `Vhi`, alors que `recerts` n'est incrémenté
+qu'une fois. Le compteur sous-estime donc le coût par un facteur proche de
+trois.
+
+Le helper P0 doit recevoir `Dlo` précalculé et rendre directement trois bits à
+partir d'un seul `Vhi` : q2 sous `Vhi<Dlo`, q3 sous `3Vhi<Dlo`, q4 sous
+`Dlo>0 && 209Vhi<=56Dlo`. Aucun intervalle `H`, carré large ou appel par lane
+n'est nécessaire.
+
+### 11.3 Les derniers écarts au kernel P0
+
+- `std::vector` et `std::sort` sont recréés par terminal ; K1 exige un tableau
+  fixe de 32 entrées et une sélection top-16 en registres/shared ;
+- près de la fin du tableau Morton, le calcul de `beg` ne se recale pas sur
+  `n-W` et peut lire seulement `W/2` positions ;
+- l'endpoint est filtré par l'index courant de l'arbre de relations, ce qui est
+  correct tant que l'index témoin référence exactement le même tableau, mais
+  l'ABI device doit employer explicitement `relation_rank[PointId]` ;
+- aucun `proof_id` n'est émis, donc aucune fermeture n'est rejouable ;
+- q3/q4 sont comptés `CLOSED` sans owner authentifié ; au P0 ils restent
+  `DELEGATED` ou deviennent `PRUNED_MAX_EDGE_ANCHOR` sous owner ;
+- `quantum`, `eval` et `hwm` sont encore imprimés en mode banque alors qu'ils
+  n'en mesurent rien ; publier à la place lectures, sélection, tests `Vhi`,
+  `Dlo`, octets et HWM ;
+- aucune CTest n'exerce `--bank`, la banque vide, le sous-seuil, les endpoints,
+  le résiduel intégral ou le replay des seuils `10/9/8`.
+
+Après correction Morton, une ablation `W=16/32/64` doit comparer fermeture en
+records et masse à un ordre de clés volontairement brouillé. Si l'ordre spatial
+ne réduit toujours presque aucun résiduel q3/q4 sur `uniform`, ne pas porter
+cette fenêtre unique sur CUDA : passer à quelques préfixes ou cellules Morton
+adaptés au rayon du cœur, toujours bornés et propositionnels. Aucun score de
+vitesse ne compense une banque vide de signal spatial.

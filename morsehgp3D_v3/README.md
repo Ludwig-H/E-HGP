@@ -81,6 +81,13 @@ d'ajouter corridors ou carriers. Réponse aux questions de Claude, preuve du
 double cœur, fixture et ABI :
 [`AUDIT_REPONSE_CLAUDE_DOUBLE_COEUR_RF_GPU_P0_A7F061B_20260813.md`](audits/AUDIT_REPONSE_CLAUDE_DOUBLE_COEUR_RF_GPU_P0_A7F061B_20260813.md).
 
+La première banque concurrente confirme la baisse de constante à `n=2000`
+(`2,607 s` vers `0,109 s` local), mais ne ferme que `0,90 %` q2 et environ zéro
+q3/q4. Son encodeur emploie en outre une dilation Morton 2D : `(2,0,0)` et
+`(0,0,1)` collisionnent. Corriger et juger Morton3D, mutualiser réellement
+`Dlo/Vhi`, puis comparer `W=16/32/64` à des clés brouillées précède tout port
+CUDA. Une banque rapide sans signal spatial ne débloque pas la source.
+
 Le script G4 du `HEAD=90aa941` ne doit pas être lancé en l'état. Sa nouvelle
 étape mesure quinze gros runs du probe CPU, pas le kernel P0, masque leurs codes
 par `wait || true` et ne publie ni temps, ni octets, ni HWM. La cible CUDA
