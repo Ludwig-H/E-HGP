@@ -90,6 +90,30 @@ Avant d'appeler `0A` fermé :
 5. différencier toute la sortie de `0A`, puis fermer `0B` jusqu'au
    `BenchmarkOutputContract-v1`.
 
+## Générateur q3 retenu
+
+Les triangles aigus suffisent à caractériser la positivité q3, mais pas à
+garantir une source sparse. La factorisation retenue est néanmoins forte :
+choisir l'arête maximale canonique transforme chaque q3 en une incidence
+`owner EdgeKey × carrier PointId`; le carrier détermine un unique centre, donc
+une seule `BallKey` et une requête de profondeur.
+
+```text
+fenêtre E3 finale
+  -> blocs owner-edge × carrier aigu et preflight M3
+  -> BallKey géométrique + RLE
+  -> Q3FootPowerRange LBVH, arrêt au neuvième intérieur
+  -> un census par BallKey survivante
+  -> BallEvent puis fold
+```
+
+Une WSPD/WSSD aiguë peut compresser ou proposer les blocs, mais ne borne ni
+leur masse, ni le rang, ni le nombre de sphères ou de supports. Les niveaux
+shallow q3 ne viennent qu'en ablation si les visites LBVH sont rouges. La route
+est conditionnellement sparse et output-sensitive, jamais linéaire au pire.
+Formules, bornes et fixtures sont consolidées dans
+[`PROPOSITION.md`](PROPOSITION.md).
+
 ## Déblocages mathématiques prêts après `0A`
 
 Trois pistes sont assez précises pour être implémentées dans les composants
@@ -107,6 +131,12 @@ Pour `e=z-a`, `t=b-z`, `H=e dot t`, `E=||e||^2`, `X=||t||^2`, q3 exige
   l'enveloppe AABB continue. Un coin fictif échouant ne vaut pas `NONE` pour les
   seuls `PointId` stockés.
 
+Le `JungSpindleRect-v0` actuellement branché n'est pas `SOC64/CORNER512` : il
+combine des extrema séparés de `D,V,T`. Son diagnostic `n=6000,s=8` gagne
+environ trois centièmes de point seulement. Cela réfute cette combinaison sur
+les boîtes grossières mesurées, pas les deux théorèmes corrélés, qui restent à
+implémenter et à mesurer.
+
 ### LP projectif
 
 Pour `s_i=z_i-a`, `d=b-a`, `D=||d||^2`, `q_i=||s_i||^2`, poser :
@@ -116,8 +146,10 @@ $$\kappa_G(d)=\min\left\lbrace \sum_i\alpha_iq_i:\sum_i\alpha_is_i=d,\ \alpha_i\
 `G` crédite un intérieur sur toute sphère par `a,b` si et seulement si
 `d` appartient au cône positif de `G` et `kappa_G(d)<D`. Un optimum basique
 emploie au plus trois IDs. Huit extractions disjointes donnent un fast path q4;
-un arbre de suppressions fournit un oracle pairwise complet relativement au
-pool, jusqu'à 3280 LP pour q4. Ce dernier n'est pas un hot path.
+un arbre de suppressions fournit un oracle complet de profondeur universelle
+relativement au pool, jusqu'à 3280 appels LP pour q4. Cette propriété porte sur
+toutes les sphères par la paire, pas seulement les supports Morse; un échec
+reste fail-open pour la source. Ce dernier n'est pas un hot path.
 
 ### Cages de quatre à six sites
 

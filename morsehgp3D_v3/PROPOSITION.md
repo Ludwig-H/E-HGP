@@ -1,4 +1,4 @@
-# Proposition consolidée — MorseHGP3D v3
+# Proposition consolidée MorseHGP3D v3
 
 Date : 13 août 2026 UTC.
 
@@ -8,374 +8,446 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-Ce document remplace la chronologie des propositions abandonnées. Il ne décrit
-que l'architecture candidate actuelle, les lemmes encore valides, leurs
-préconditions et les portes qui peuvent les réfuter. Le verdict live appartient
-à [`audits/AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md).
+Ce document fixe la route candidate actuelle. Il ne promeut aucune phase et ne
+remplace ni les spécifications sous `docs/`, ni le verdict mutable
+[`audits/AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md). Une brique est
+« reçue » seulement lorsque son autorité indépendante, ses mutants, sa
+complétude, ses statuts d'échec et ses ressources sont exercés.
 
-## 1. Objectif et invariants
+## 1. Objectif et interdits d'architecture
 
-Construire exactement la hiérarchie Morse/HGP 3D utile pour `K_max=10`, sur
-nuages u16, sans matérialiser de mosaïque Delaunay d'ordre supérieur. La cible
-est `p95 warm_e2e<100 ms` à `n=50000` sur un G4 ; `1 s` est secondaire.
+La cible secondaire est `p95 warm_e2e<1 s` pour `n=50000`, `K_max=10`, sur un
+seul G4; la cible principale reste `100 ms`. Le chronomètre officiel couvre
+entrée, construction, source, census, fold, dix forêts, verticales, payload,
+synchronisation et sortie exigée par `BenchmarkOutputContract-v1`.
 
-Invariants :
+Le chemin produit ne construit jamais :
 
-- aucune structure persistante indexée par l'univers des facettes, cofaces,
-  cellules top-m ou supports potentiels ;
-- un oracle exhaustif reste borné et ne devient jamais le producteur ;
-- toute source incomplète est fail-open et ne publie aucun résultat officiel ;
-- égalités traitées en lots atomiques sur les racines pré-lot gelées ;
-- aucune troncature : continuation explicite, refus de ressource atomique ou
-  refus de domaine typé ;
-- les `PointId` scientifiques sont distincts des indices denses, positions
-  Morton et rangs de génération ;
-- le temps G4 couvre la sortie complète et la synchronisation, pas un probe.
+- mosaïque de Delaunay d'ordre supérieur ;
+- arrangement global de plans ou de droites ;
+- matrice globale de cofaces ;
+- catalogue résident de tous les supports ;
+- tableau indexé par toutes les paires, triplets ou quadruplets.
 
-## 2. Route de réception
+Un oracle exhaustif à petit `n` est obligatoire pour juger le chemin produit,
+mais il ne devient jamais son ordonnance.
 
-```text
-0A  BallForm -> BallKey -> census -> BallEvent exact
-0B  BallEvent -> lots -> dix forêts -> verticales -> payload borné
-1   oracle exhaustif remplacé seulement par la source sparse E3/E4
-2   compte M3/M4 puis moteurs locaux q3/q4
-3   même chaîne portée sur device, parité puis warm_e2e
-4   tout nouveau profil numérique dans une phase distincte
-```
+## 2. Identités et statuts avant toute optimisation
 
-Les états `source_complete`, `ball_events_complete` et `fold_complete` sont
-séparés. Une source candidate peut alimenter le sink différentiel sans être
-complète. Aucun commit de lot ne précède le scellement, le tri/merge global des
-niveaux exacts et le manifeste de source.
+### 2.1 Identités
 
-Le pin `2b89ea1` implémente une première version de `0A` sur `coord<=64`, mais
-elle n'est pas reçue u16 à cause des overflows et défauts ABI détaillés dans
-[`audits/AUDIT_BALL_EVENT_V0_2B89EA1_20260813.md`](audits/AUDIT_BALL_EVENT_V0_2B89EA1_20260813.md).
+- `PointId` est une identité stable, distincte de l'index dense, de Morton et
+  de `GenerationRank`.
+- `SupportKey` est le tuple trié des vrais `PointId` du support.
+- L'owner d'un support maximise la longueur carrée de ses arêtes puis choisit,
+  en cas d'égalité, la plus petite `EdgeKey=(min PointId,max PointId)`.
+- La `BallKey` géométrique est formée **avant** le census. Elle contient
+  l'identité du nuage, le profil, le schéma et les cinq coefficients primitifs
+  de `A||z||^2+B dot z+C`, normalisés par pgcd et signe `A>0`.
+- `I_B` et `U_B` appartiennent au `BallEvent` ou au `SphereRun`; ils ne créent
+  pas une seconde clé post-census.
+- `PrimitiveSphereKey` peut nommer un codec interne des cinq coefficients. Il
+  ne remplace ni l'epoch du nuage, ni le schéma de la `BallKey` persistante.
 
-## 3. Identités et événements
+Le code historique où une clé contient `shell_min` n'est pas l'ABI produit :
+une donnée issue du census rendrait le RLE pré-census circulaire.
 
-### 3.1 Clé primitive
+### 2.2 Statuts transactionnels
 
-Une sphère est représentée par :
-
-$$A\left\Vert z\right\Vert^2+B\mathbin{\cdot}z+C=0,$$
-
-avec cinq coefficients entiers primitifs, `A>0`. Le signe est négatif à
-l'intérieur, nul sur le shell et positif à l'extérieur.
-
-Pour un centre `N/den` et un point `p` de la sphère, construire avant toute
-élévation inutile de degré :
+Chaque exécution termine dans un état typé :
 
 ```text
-A=den
-B=-2*N
-C=2*N dot p-den*||p||^2
+complete_regular
+unsupported_degeneracy
+resource_exhausted
+numeric_failure
+incomplete_continuation
+invalid_input
 ```
 
-puis normaliser le signe et le pgcd. Ne jamais construire `den^2` et `N^2`
-avant réduction lorsque les bornes dépassent le type.
+Un cap, une allocation refusée, un overflow ou une continuation non consommée
+ne publie jamais un préfixe de payload. La séquence est
+`count -> preflight -> fill -> validate -> publish` et les identités
+`planned=filled=consumed`, `pending=0` sont bloquantes.
 
-### 3.2 ABI logique
+## 3. Étape zéro : recevoir l'objet avant la parcimonie
+
+La chaîne de réception est :
 
 ```text
-PrimitiveSphereKey = coefficients primitifs de la sphère
-BallKey = CloudEpoch/CloudDigest + GeometryProfileId + ExactKeySchemaId
-          + PrimitiveSphereKey
-SupportKey = PointId triés
-SupportRecord = SupportKey + owner + lane + positivité + provenance
-BallEvent = BallKey + ExactLevelToken + SupportRecords
-            + I_B + U_B + census_complete + disposition + preuve
+0A  BallForm exhaustive -> BallKey/RLE -> census -> BallEvent exact
+0B  BallEvent -> spool scellé -> tri/merge exact -> lots -> fold
+    -> dix forêts -> verticales -> BenchmarkOutputContract-v1
 ```
 
-Le fold consomme l'ABI logique et un comparateur exact de niveau. Il ne lit ni
-les coordonnées, ni `__int128` natif, ni le nombre de limbs. Le codec persistant
-est versionné et indépendant de l'endianness.
+L'émission par ancre n'a aucun watermark monotone. Le chemin peut écrire des
+runs spillables, mais il scelle la source et merge globalement les niveaux
+avant le premier commit d'un lot. « Streamé » signifie mémoire résidente
+bornée, jamais fold en ligne sur une source encore ouverte.
 
-### 3.3 Construction transactionnelle
+### 3.1 Statut de `BallFormToBallEvent-v0`
 
-Chaque stade suit :
+Le pin `2b89ea1` fournit un candidat borné `coord<=64`. Il n'est pas reçu pour
+le profil u16 :
+
+- des numérateurs q3/q4 de 67 à 81 bits sont rabattus vers `int64` ;
+- des carrés jusqu'à environ 162 bits sont formés en `i128` avant le pgcd ;
+- la positivité n'est pas jugée indépendamment ;
+- l'owner ne sépare pas index dense et `PointId` ;
+- le mutant de clé s'auto-déclare fautif sans clé de référence ;
+- le census est exécuté par support avant le groupement par sphère ;
+- `kUnsupported` est compté, mais le diagnostic publie encore `accord=OUI` et
+  sort zéro ;
+- aucun `BallEvent` versionné, niveau exact, lane ou manifeste transactionnel
+  n'est construit.
+
+L'autorité reçue localement se limite à deux constructions rationnelles du
+centre et au signe de puissance sur les supports conservés par le sujet.
+
+### 3.2 Réparation arithmétique
+
+Pour un centre rationnel `N/den` et un point `p` de la sphère, ne pas former
+`den^2` et `N^2` avant réduction. Employer directement :
 
 ```text
-count -> preflight -> fill -> validate -> seal -> publish
+A = den
+B = -2*N
+C = 2*N dot p - den*||p||^2
 ```
 
-Les caps portent séparément sur runs, supports, `I_B`, `U_B`, tâches, octets et
-sortie. Un cap moins un produit zéro payload et un statut précis. Le statut
-initial est `pending/unclassified`, jamais `regular`.
+Pour q3, la forme compacte de § 5.3 évite entièrement le centre gonflé. Pour
+q3 et q4, la positivité se décide sur les numérateurs barycentriques
+Gram--Cramer, avec une preuve de largeur sur tout le cube u16. Toute conversion
+rétrécissante est précédée d'un preflight exact ou supprimée.
 
-## 4. Source exhaustive bornée et juge de `0A`
-
-L'oracle petit `n` énumère les supports de cardinalités deux à quatre, puis
-recertifie indépendamment :
-
-1. dépendance affine ;
-2. centre/miniboule et positivité relative ;
-3. clé primitive canonique ;
-4. niveau exact ;
-5. partition globale `I_B/U_B/exterior` ;
-6. owner par `PointId` ;
-7. lane `p+q<=smax` et disposition.
-
-Le juge emploie une route rationnelle/multiprécision distincte. Comparer
-seulement les signes du census ne juge ni la positivité ni la clé. Les fixtures
-u16 maximales, IDs non denses, cosphères, égalités, permutations et caps sont
-obligatoires.
-
-## 5. Owner q3 et réduction binaire
-
-Pour un support q3 `S={a,b,x}`, choisir d'abord les arêtes de longueur maximale,
-puis la plus petite `EdgeKey=(min PointId,max PointId)`. L'acuité sous cette
-arête owner est :
-
-$$\left\Vert 2x-a-b\right\Vert^2>\left\Vert b-a\right\Vert^2.$$
-
-Le support q3 devient donc la relation binaire
-`OwnerEdgeKey × CarrierPointId`, suivie de son pied de sphère unique. Le commit
-`f516198` reçoit le tie-break borné avec trois relabelings et un mutant
-`owner-generationrank`; il ne reçoit ni le compteur `M3`, ni le census, ni le
-fold.
-
-La génération candidate utilise des préfixes Morton alignés par échelle
-d'arête, puis un range-count LBVH au pied, saturé au neuvième intérieur pour la
-lane q3. Les boîtes serrées ne prouvent aucun packing ; tout claim de pente
-reste empirique jusqu'au compteur transitif.
-
-## 6. Fenêtre canonique d'arêtes
-
-Pour chaque ancre `a` et lane `q`, `E_q(a)` contient les endpoints `b` que les
-certificats disponibles n'ont pas prouvé morts. L'invariant scientifique est :
+### 3.3 Ordre RLE/census obligatoire
 
 ```text
-l'arête maximale canonique de tout support vrai reste dans E_q
+formes positives
+  -> BallKey + SupportRecord
+  -> count/sort/RLE BallKey
+  -> range-count saturé par BallKey unique
+  -> census complet par BallKey survivante
+  -> joindre I_B/U_B à tous les supports incidents
 ```
 
-Un reporter factorisé publie des spans, jamais tous les `PairId` d'un bloc.
-Ses fates sont exclusifs :
+La porte exige `census_calls=unique_BallKeys`, deux supports pour une clé et un
+mutant `census-par-support`. L'oracle juge séparément dépendance affine,
+positivité, clé primitive, niveau, owner, `I_B/U_B` et activation de lane.
+
+## 4. Fenêtre d'arêtes certifiée
+
+Pour chaque lane, `E_q(a)` contient les seconds endpoints dont la paire n'est
+pas fermée par assez de crédits universels à IDs disjoints. Une vraie arête
+maximale canonique de support doit rester dans cette fenêtre. Le reporter porte
+des spans de `GenerationRank`, jamais une table de `PairId`.
+
+Les fates sont exclusifs :
 
 ```text
 input_mass = closed_mass + open_mass + pending_mass
 ```
 
-Une fenêtre finale exige `pending_mass=0`. Les pending ne comptent ni dans la
-masse strictement ouverte, ni dans une gate finale.
+`pending_mass=0` est nécessaire à une fenêtre finale. Deux range-adds par span
+ouvert puis un scan calculent les degrés orientés et leur somme sans expansion
+des paires. Une égalité avec l'expansion PairId est exigée sur petit `n`.
 
-Aucun cutoff kNN n'est recevable. Des satellites arbitrairement nombreux près
-d'une extrémité peuvent repousser l'autre extrémité en rang tout en restant hors
-de la sphère support. La coupure doit être géométrique et certifiée.
+Après la fenêtre, `EdgeActiveCarrierCounter` mesure avant tout fill :
 
-## 7. Classifieur rectangle corrélé
+```text
+M3 = sum over open q3 edges of active q3 carriers
+M4 = sum over open q4 edges of active forms
+```
 
-Pour `e=z-a`, `t=b-z`, poser `H=e dot t`, `E=||e||^2`, `X=||t||^2` :
+Une fenêtre d'arêtes sparse ne borne ni `M3`, ni `M4`, ni les sphères uniques.
+
+## 5. Générateur q3 recommandé
+
+### 5.1 Réduction exacte arête-owner × porteur
+
+Pour `d=b-a`, `u=x-a`, poser :
+
+```text
+D = d dot d
+E = u dot u
+F = d dot u
+X = D+E-2F
+V = 2u-d
+```
+
+Si `ab` est maximale faible, donc `D>=E` et `D>=X`, les deux angles adjacents
+à `ab` sont strictement aigus. La positivité q3 équivaut alors à :
+
+```text
+V dot V > D
+```
+
+car `V dot V-D=2(E+X-D)`. L'égalité est un triangle droit. Chaque q3 est donc
+une incidence canonique `owner EdgeKey(ab) × PointId(x)`, pas un triplet libre.
+
+### 5.2 Rôle d'une WSPD/WSSD aiguë
+
+Une WSPD/WSSD ternaire peut proposer des blocs `ALL/NONE/MIXED` ou compresser
+le broad phase. Elle n'est pas l'autorité de la source :
+
+- un bloc `ALL_ACUTE(A,B,C)` peut représenter une masse cubique ;
+- la frontière droite peut raffiner jusqu'aux points ;
+- l'acuité ne décide ni profondeur, ni shell, ni owner, ni `BallKey` ;
+- une représentation linéaire ne borne pas l'expansion ni la sortie.
+
+Le bon usage est une ablation sur le même ledger transitif `E3, M3, BallKeys,
+census, supports, fold`, jamais une conclusion depuis le nombre de cellules.
+
+### 5.3 Pied unique et puissance exacte
+
+Pour un carrier owner, poser :
+
+```text
+G = D*E-F^2
+W = E*(D-F)*d + D*(E-F)*u
+```
+
+`G>0` est l'indépendance affine. Le centre q3 vaut `a+W/(2G)`. Pour
+`v=z-a`, le prédicat de puissance mis à l'échelle est :
+
+```text
+P_x(z) = G*||v||^2-v dot W
+```
+
+`P_x(z)<0` signifie intérieur strict et `P_x(z)=0` coquille. Les cinq
+coefficients pré-census sont :
+
+```text
+A = G
+B = -(2G*a+W)
+C = G*||a||^2+a dot W
+```
+
+Ils sont réduits par pgcd/signe puis intégrés à la `BallKey`. Sous u16, les
+évaluations exigent environ 105 bits signés; le chemin device emploie des limbs
+explicites, jamais un `i64` implicite.
+
+### 5.4 `Q3FootPowerRange-v0`
+
+Après RLE, une wavefront LBVH traite `(BallRun,NodeKey,count<=9)`. Sur une AABB
+entière, `P_x` est somme de trois quadratiques convexes. Par axe, le minimum
+entier se trouve aux deux entiers voisins de `W_i/(2G)` clipés et le maximum à
+une extrémité.
+
+- `max P<0` crédite toute la population du nœud ;
+- `min P>=0` élague le nœud pour le rang strict ;
+- sinon la tâche se scinde ;
+- le neuvième intérieur rejette q3 sous `smax=11` ;
+- une survivante paie un seul census complet.
+
+Ce backend est le v0 parce qu'il est simple à juger, pas parce qu'il domine
+asymptotiquement tous les cas. Le ledger publie tâches run×nœud, populations
+créditées, feuilles, rejets au neuvième, opérations larges, octets et HWM.
+
+### 5.5 Préfixes Morton et niveaux shallow
+
+Une AABB serrée ne donne aucun packing. Pour un terminal reçu avec `Dlo>0` et
+`kappa=Dhi/Dlo` borné, choisir un niveau Morton dyadique commun dont la maille
+est comparable à `sqrt(Dlo)/s3`. Le nombre de cellules alignées rencontrant la
+région carrier est conditionnellement :
+
+```text
+O(s3^3 * kappa^(3/2)) par terminal
+```
+
+Cette borne ne contrôle ni le nombre de terminaux, ni leur population, ni
+`M3`. Les cellules half-open, limites de profondeur et cas `Dlo=0` sont
+explicitement délégués.
+
+Si les visites LBVH sont rouges, `Q3FootLevelLocate-v1` construit seulement les
+`k+1` bas niveaux des formes P et hauts niveaux des formes N. La complexité
+combinatoire des niveaux est `O(mk)`, mais le coût conserve les point-locations
+des `f` pieds, les bundles pondérés et les concurrences. Sans sweep reçu, une
+cible honnête inclut `f log m`.
+
+### 5.6 Limite de sortie
+
+Des configurations réelles en dimension trois possèdent un nombre quadratique
+de triangles Delaunay critiques, aigus et vides. Cette obstruction interdit une
+promesse universelle de catalogue q3 sous-quadratique; elle ne donne pas encore
+un pire cas `50000` sur grille u16 fixe. Une fixture u16 cocyclique de 384
+points porte déjà `2322560` supports aigus pour une seule sphère. Le RLE sauve
+le census, jamais une provenance de supports explicitement exigée.
+
+Le contrat q3 est donc output- et resource-sensitive. Sur les familles sparse,
+la route ci-dessus peut être rapide; sur une sortie lourde, elle fournit un
+preflight exact, un quotient reçu ou `resource_exhausted`.
+
+## 6. Crédits universels : LP, rectangles et cages
+
+### 6.1 Théorème LP projectif
+
+Translater l'ancre en zéro. Pour `s_i=z_i-a`, `q_i=||s_i||^2`, `d=b-a` et
+`D=||d||^2`, définir :
+
+$$\kappa_P(d)=\min\left\lbrace \sum_i\alpha_iq_i:\sum_i\alpha_is_i=d,\ \alpha_i\geq0\right\rbrace.$$
+
+Le pool `P` place au moins un intérieur dans toute sphère passant par `a,b` si
+et seulement si `d` appartient au cône positif de `P` et `kappa_P(d)<D`.
+L'égalité reste ouverte. Un optimum basique emploie au plus trois IDs.
+
+Ce théorème décide `UniversalSphereDepth-1`, propriété plus forte que les
+seules sphères Morse. Sur un pool capé, le succès est sûr et l'échec fail-open.
+La complétude exige le pool mondial authentifié.
+
+Si un groupe `G` crédite une fois, la profondeur universelle vérifie exactement :
+
+```text
+C_0(P,d) = true
+C_h(P,d) iff, for every z in G, C_(h-1)(P without z,d)
+```
+
+Avec des bases de taille au plus trois, q4 demande au plus 3280 appels LP,
+q3 9841 et q2 29524. Ce sont des nombres d'appels d'oracle borné, pas une borne
+du reporter ni un hot path par paire. Rangs un/deux, stricte, shell, suppressions
+par `PointId` et coût du solveur exact restent explicites.
+
+### 6.2 `SOC64` et `CORNER512`
+
+Pour `e=z-a`, `t=b-z`, `H=e dot t`, `E=||e||^2`, `X=||t||^2` :
 
 ```text
 q2 : H>0
-q3 : H>0 et 4*H^2>E*X
-q4 : H>0 et 3*H^2>E*X
+q3 : H>0 et 4H^2>EX
+q4 : H>0 et 3H^2>EX
 ```
 
-Les égalités ne créditent jamais. Une évaluation rend le masque imbriqué
-`q4 => q3 => q2`.
+À `t` fixé puis à `e` fixé, chaque lane est une section convexe de cône de
+Lorentz. Si les 64 couples de coins du produit relaxé
+`(C-A)×(B-C)` passent, le vrai rectangle est `ALL`. Un échec reste `UNKNOWN`,
+car les deux différences partagent réellement le même `z`.
 
-### 7.1 `SOC64`
+Pour `a,b` fixés, le spindle est aussi convexe en `z`. Le prédicat est donc
+séparément convexe en `a,b,z`; les 512 triples de coins caractérisent exactement
+`ALL` sur l'enveloppe AABB continue. Un coin fictif échouant ne donne jamais
+`NONE` sur les seuls points du nœud.
 
-Former `Ebox=C-A` et `Tbox=B-C`. À l'un des vecteurs fixé, chaque lane est
-l'intérieur d'un cône de Lorentz convexe dans l'autre. Si les 64 couples de
-coins passent, tout `Ebox×Tbox` passe et donc tout `A×B×C` passe.
+Le classifieur `JungSpindleRect-v0` du pin `7d2efcb` est une autre borne : il
+combine des extrema séparés de `D,V,T`. Son disjonctif est sûr mais n'a gagné
+qu'environ trois centièmes de point dans le diagnostic déclaré à `n=6000,s=8`.
+Cette mesure ne réfute ni `SOC64` ni `CORNER512`, qui ne sont pas encore
+implémentés; elle réfute l'espoir que les extrema décorrélés suffisent sur des
+boîtes grossières.
 
-Un échec est `UNKNOWN`, jamais `NONE`, car `Ebox/Tbox` oublient le `z` commun.
+Même exact pour `ALL`, `CORNER512` ne prouve aucune parcimonie. Compter ses
+early exits, opérations larges, tâches et gain transitif avant de le porter.
 
-### 7.2 `CORNER512`
+### 6.3 Cages de quatre à six sites
 
-Le spindle est séparément convexe en `a`, `b`, `z`. Le produit continu des
-trois AABB est `ALL` si et seulement si ses 512 triples de coins passent. Le
-coût adaptatif est `2^(d_A+d_B+d_C)` lorsque certains axes sont dégénérés.
+Une cage ancre-globale minimale est une base positive de dimension trois et
+peut contenir quatre, cinq ou six sites. Un constructeur tétra-only est un fast
+path exact mais incomplet. Une cellule de Voronoï locale à six facettes a au
+plus huit sommets; sa fleur fournit donc un nombre constant de formes
+quadratiques vérifiables sur un `BNode`.
 
-Un coin échouant peut être fictif par rapport aux points du nœud. Il prouve
-seulement `AABB_envelope_not_all` et guide un split ; il ne fournit pas un
-`NONE` scientifique.
+Huit cages à unions d'IDs disjointes ferment q4, neuf ferment q3. Une banque
+bornée est un proposer : échec, égalité, reuse d'ID, rang inférieur, overflow
+ou cap délègue toujours. `0` intérieur au hull inversé prouve seulement un
+rayon borné; une cible est fermée lorsque son point inversé est strictement
+dans le hull, ou lorsque toutes les facettes transformées passent.
 
-Sous u16, `E`, `X`, `|H|<2^34`; les comparaisons finales demandent jusqu'à 70
-bits. CPU `i128` ou deux limbs device sont nécessaires.
+Le tri exact des rayons rationnels peut être plus large que les formes
+ponctuelles; multiprécision ou majorant conservateur puis replay des formes est
+requis. Une cage minimisée doit recalculer sa fleur. Aucune loi globale de coût
+ne découle de la seule existence de cages.
 
-## 8. LP projectif : crédit directionnel général
+## 7. q4 : shallow local seulement après les portes E4/M4
 
-Translater l'ancre en zéro. Pour les témoins `s_i=z_i-a`, la cible `d=b-a`,
-`D=||d||^2`, `q_i=||s_i||^2`, définir :
+Pour une arête `ab`, tout site actif induit une forme affine dans le plan
+médiateur. q2 interroge le point central; q3 le pied unique d'une ligne; q4 les
+intersections shallow de deux formes. Les lanes partagent un codec, pas leurs
+sorties.
 
-$$\kappa_G(d)=\min\left\lbrace \sum_i\alpha_iq_i:\sum_i\alpha_is_i=d,\ \alpha_i\geq0\right\rbrace.$$
+Le moteur q4 candidat construit localement les niveaux nécessaires des formes
+P et N et émet seulement les intersections `P-P`, `N-N` et `P-N` dont le rang
+peut satisfaire la lane. Il traite atomiquement lignes confondues, bundles
+pondérés et concurrences; il rejoue indépendance, positivité, owner, Jung,
+rang, `BallKey` et census.
 
-Le dual maximise `y dot d` sous `y dot s_i<=q_i`. Un centre de sphère par
-`a,b` sans intérieur dans `G` satisfait aussi `y dot d=D`.
+Il ne construit aucun arrangement global. Il n'est instancié que si `E4`,
+`M4`, tâches et HWM sont verts. Le code exhaustif actuel reste son oracle, pas
+son modèle GPU.
 
-### Théorème LP1
+## 8. Plateaux, fold et sortie
 
-`G` crédite au moins un intérieur sur toute sphère par `a,b` si et seulement si
-`d` appartient au cône positif de `G` et `kappa_G(d)<D`. L'égalité est ouverte.
+Le profil u16 n'exclut pas les cosphères. La politique candidate régulière est
+fail-closed : un extra-shell **pertinent pour une lane admise** retourne
+`unsupported_degeneracy` tant qu'aucun quotient complet n'est reçu. Cette
+fermeture de `RelevantGP` reste elle-même à prouver.
 
-Le primal a trois égalités. Après suppression de `s_i=0`, un optimum basique
-emploie au plus trois coefficients positifs. Le certificat directionnel
-élémentaire a donc au plus trois `PointId`, sans exiger que les témoins entourent
-l'ancre.
+Un `SphereRun` interne lossless conserve `BallKey`, `I_B/U_B`, supports ou
+handle de provenance et disposition. Il ne rend pas un plateau publiable. Un
+quotient saturé H0 doit encore recevoir joins par intersection, lots gelés,
+coverage, dix forêts et verticales contre Gamma exhaustif. Si le contrat exige
+chaque `SupportKey`, ni quotient non reçu, ni streaming ne supprime la borne de
+sortie.
 
-### 8.1 Fast path q4
+Le fold consomme des références exactes opaques, pas les coordonnées ni les
+limbs natifs. Dix millions de points n'imposent pas binary64 : la grille u16 3D
+contient `2^48` sites. Le codec d'index dense peut devenir u32 séparément. Un
+futur profil binary64 exact est une phase distincte derrière `ExactKernel` et
+une sérialisation BigInt/dyadique variable.
 
-Répéter huit fois : résoudre le LP sur le pool restant, extraire une base
-couvrante, retirer ses IDs. Un succès donne huit intérieurs distincts pour toute
-sphère. L'échec est fail-open.
+## 9. Ordre de réalisation vers le G4
 
-`O(8P)` n'est qu'une cible espérée avec LP-type exact randomisé en dimension
-trois, seed/permutation pinnées. Il ne s'agit ni d'une borne worst-case, ni d'un
-coût GPU reçu. Les constructions fraction-free ou 192/256 bits sont nécessaires
-si une comparaison de fractions monte vers 137 bits ; les 87 bits de la forme
-de vérification ne suffisent pas à borner le constructeur.
+1. Fermer 0A sur tout u16 : largeurs, vrais `PointId`, juge indépendant,
+   `BallKey`, RLE avant census, lanes et statuts transactionnels.
+2. Fermer 0B sur petit `n` jusqu'au payload complet, sous permutations,
+   tilings, caps et reprises.
+3. Substituer seulement la source : fenêtre E3/E4 finale, puis portes M3/M4.
+4. Implémenter q3 `owner-edge -> BallKey -> Q3FootPowerRange`; comparer WSSD
+   aiguë seulement comme broad phase sur le même coût transitif.
+5. Implémenter q4 shallow local seulement après E4/M4 verts.
+6. Porter la tranche entière par count--scan--fill, tâches persistantes, SoA,
+   radix/RLE et arithmétique large reçue.
+7. Exécuter des microgates `1500/3000/6000`, puis
+   `12500/25000/50000` uniquement si tâches, octets, HWM et sorties passent.
+8. Qualifier trente répétitions chaudes à `50000` avec le payload officiel.
 
-### 8.2 Oracle complet de multiplicité
-
-Noter `C_h(P,d)` la propriété « toute sphère par `a,b` possède au moins `h`
-intérieurs dans `P` ». Si une base `G` couvre une fois :
+La porte composée publie au minimum :
 
 ```text
-C_0(P,d) = vrai
-C_h(P,d) <=> pour chaque z dans G, C_(h-1)(P sans z,d)
+E3/E4, max par ancre, CLOSED/OPEN/PENDING
+M3/M4, blocs, tâches, splits, visites
+BallKeys brutes/uniques, supports, census, shells
+sortie H, opérations larges, octets/HWM
+temps par phase et warm_e2e
+commandes, seeds, HEAD, diff, hashes, codes de sortie
 ```
 
-La récurrence est exacte. Les nombres maximaux de LP sont 3280 pour q4, 9841
-pour q3 et 29524 pour q2. Elle est complète relativement au pool `P`, et pour le
-nuage seulement avec `P=X\{a,b}`. Ce n'est pas un hot path et un résultat
-négatif ne réfute aucun support.
+Une pente seule, un taux de fermeture, un `OK` CPU ou une extrapolation de
+bande passante ne qualifie aucun SLO.
 
-### 8.3 Extension à un `BNode`
+## 10. Fixtures permanentes prioritaires
 
-Pour une base de rang plein trois, Cramer produit trois formes coniques faibles
-`n_i dot d>=0` et :
+- owner équilatéral/isocèle sous permutation indépendante stockage/PointId ;
+- q3 aigu, droit, obtus, `G=0`, `P=-1/0/+1`, seuil huit/neuf ;
+- triangle et tétraèdre u16 maximaux, clés et barycentriques attendus ;
+- deux supports pour une `BallKey`, un census, deux `SupportRecord` ;
+- cosphère 384 sans troncature et extra-shell pertinent fail-closed ;
+- partenaire q3 au-delà d'un cutoff de rang 128 ;
+- `SOC64` succès axial et faux-échec du produit relaxé ;
+- `CORNER512` coin omis, égalité, axe dégénéré et largeur 70 bits ;
+- LP rang un/deux/trois, égalité `kappa=D`, pool capé et IDs supprimés ;
+- cage octaédrique six-sites, tétra-only, reuse d'ID et rayon mal arrondi ;
+- caps exacts puis moins un, continuation, permutation, tuilage et reprise ;
+- comparaison lot par lot des dix forêts, coverage et verticales.
 
-$$F(d)=r\left\Vert d\right\Vert^2-p\mathbin{\cdot}d>0.$$
+## 11. Non-claims
 
-Sur une boîte entière, les minima linéaires sont aux coins et le minimum de
-`F` est séparable, aux deux entiers voisins de `p_k/(2r)` clipés par axe. Le
-verdict strict est `min F>=1`.
+Il existe une voie q3 exacte, GPU-factorisable et conditionnellement sparse :
+`owner-edge × carrier -> pied -> BallKey/RLE -> profondeur batchée`. Il n'existe
+aucune preuve que « triangles aigus » fournisse seul une source sparse, ni une
+garantie universelle sous-quadratique.
 
-Une base de rang un ou deux doit être augmentée avec des IDs disponibles,
-traitée dans sa dimension ou envoyée à la feuille ; jamais `r=0`. L'arbre de
-multiplicité sur un `BNode` est sûr seulement si chaque groupe à chaque nœud est
-`ALL` sur toute la boîte et si le chemin d'IDs supprimés est sérialisé. Il n'est
-pas complet au niveau rectangle. Un nœud peut payer jusqu'à 3280 LP et 13120
-minima avant split ; le fast path seulement huit LP et 32 minima.
+`SOC64`, `CORNER512`, LP projectif et cages sont des certificateurs ou
+falsificateurs précis. Aucun n'a encore démontré le contrat 50000/G4. Le
+contrat reste ouvert jusqu'à production du même `BenchmarkOutputContract-v1`
+complet dans le p95 déclaré.
 
-## 9. Cages de Voronoï de quatre à six sites
-
-Une cage ancre-globale est un groupe dont les vecteurs relatifs engendrent
-positivement `R^3`. Une base positive minimale 3D contient quatre à six
-vecteurs. Sa cellule locale bornée a au plus six facettes et huit sommets ; les
-formes de fleur ferment un `BNode` lorsque chacune est strictement positive.
-
-Le proposer rapide peut affecter chaque ID à un rôle primaire unique dans des
-frames entières, maintenir six queues exclusives et employer des horaires
-latins. Six rôles ne garantissent ni une cage ni un octaèdre : chaque groupe est
-validé exactement. `P=48` est seulement la capacité de huit groupes de six.
-
-La fixture axiale utilise `G_k={a+/-k e_i}`. Chaque `G_k` est une base minimale
-de six et ferme lorsque :
-
-$$\left\Vert d\right\Vert^2>k\left(|d_x|+|d_y|+|d_z|\right).$$
-
-Elle tue le proposer tétra-only pour les témoins axiaux et l'acceptation de
-l'égalité. Ses nombres de crédits concernent les groupes alignés `G_k`, jamais
-l'optimum parmi tous les appariements.
-
-Une base minimale de six est composée de trois paires de rayons opposés et a
-`omega=3`. Le pire minimal est cinq sites avec `omega=4`, donnant le seuil
-suffisant `delta>=4h-3`; la fixture
-`{(1,0,0),(-1,1,0),(-1,-1,0),(-1,0,1),(-1,0,-1)}` atteint quatre. Une cage
-non minimale peut avoir un autre budget, calculé exactement. Réduire une cage
-agrandit sa cellule : sommets, fleurs et rayon sont toujours recalculés.
-
-Les formes de fleur demandent environ 87 bits. Certains tris exacts de rayons
-rationnels demandent près de 240 bits ; éviter ce tri par majorants conservateurs
-ou multiprécision au build, puis garder les formes comme autorité.
-
-## 10. Compteur de formes et moteurs locaux
-
-Une fenêtre sparse ne borne pas le coût aval. Pour chaque arête ouverte `e`, le
-compteur `EdgeActiveFormCounter` mesure les sites/formes actifs `m_e` et publie :
-
-$$M_q=\sum_{e\in E_q}m_e.$$
-
-Deux portes sont nécessaires avant tout moteur local : `E_q` et `M_q`, avec
-tâches, octets et HWM. Ensuite seulement :
-
-- q3 : un pied unique par carrier, RLE par `BallKey`, range-count saturé à neuf
-  et census unique par boule survivante ;
-- q4 : niveaux shallow locaux des formes `P-P`, `N-N`, `P-N`, sans arrangement
-  complet ; puis positivité, owner, RLE et census.
-
-La complexité shallow en rang constant porte sur les centres distincts et les
-bundles pondérés ; elle ne borne pas les `SupportKey` d'une cosphère ni le join
-arête×forme avant mesure de `M_q`.
-
-## 11. Dégénérescences
-
-Pour une boule `B`, `I_B` est l'intérieur strict, `U_B` le shell et `S` un
-support propre. Dans la branche régulière `U_B=S`, le record direct est unique.
-Si `U_B!=S`, la politique candidate du domaine `RelevantGP` rend
-`unsupported_degeneracy` pour tout support pertinent tant qu'aucun quotient
-complet n'est reçu.
-
-Cette décision dépend de la lane et de `p+q<=smax`; le rang fermé
-`|I_B|+|U_B|` ne remplace pas la pertinence. Un `SphereRun` interne peut
-conserver le census et un handle de supports pour rendre le layout futur
-réversible. Il n'autorise ni un `PlateauEvent` public ni l'omission de la
-provenance.
-
-Un quotient saturé doit reconstruire les intersections pondérées, racines
-pré-lot, généalogie, lots, coverage et verticales. Une preuve H0 seule ne suffit
-pas au `BenchmarkOutputContract-v1`.
-
-## 12. Fold borné `0B`
-
-L'oracle `0A` alimente un spool externe borné. Le pipeline :
-
-```text
-BallEvents scellés
-  -> tri/merge par ExactLevelToken
-  -> macro-lots d'égalité
-  -> activations, gateways et coverage
-  -> dix forêts horizontales
-  -> applications verticales
-  -> BenchmarkOutputContract-v1
-```
-
-La comparaison porte sur les membres, pas les comptes : clés, supports,
-`I_B/U_B`, owners, lots, arêtes de forêts, gateways, coverage et verticales.
-Les variantes résidente et spillée doivent être identiques sous chunks de taille
-un, coupures au milieu d'un niveau égal, permutations, tilings et reprise.
-
-## 13. Porte industrielle
-
-Une campagne n'est recevable que si elle conserve :
-
-- commit, état du worktree, commande, binaire, environnement et seeds ;
-- codes de sortie, sorties brutes et manifeste non auto-référent ;
-- ledger exclusif, continuations et statut final ;
-- `E3/E4`, `M3/M4`, tâches, visites, splits et opérations larges ;
-- `BallKey` brutes/uniques, shells, census, supports, sortie `H` ;
-- octets, HWM et temps de chaque phase ;
-- 30 nuages frais à 50k, p50/p95/max et chaque valeur brute.
-
-Une pente verte sur quatre tailles mono-graine ne prouve ni linéarité ni borne
-du maximum. Une sortie réellement lourde conduit à une analyse output-sensitive,
-un quotient reçu ou `resource_exhausted`, jamais à un préfixe silencieux.
-
-## 14. Ordre d'implémentation recommandé
-
-1. réparer `0A` sur tout u16 et tuer ses mutants d'indépendance ;
-2. fermer `0B` exhaustif borné ;
-3. intégrer `SOC64`, puis `CORNER512` rentable dans le classifieur existant ;
-4. comparer LP projectif et cages en counter-only sur le même sink ;
-5. gater conjointement `E4`, `M4`, travail, HWM et sortie ;
-6. fermer q3 et q4 locaux ;
-7. porter count--scan--fill, parité du payload, puis G4 ;
-8. seulement après succès 50k, qualifier les paliers de cardinalité suivants.
-
-Les preuves détaillées et leur contre-audit sont dans
-[`audits/AUDIT_REPONSE_PLAN_VERTICAL_SOC64_LP_1AA487D_20260813.md`](audits/AUDIT_REPONSE_PLAN_VERTICAL_SOC64_LP_1AA487D_20260813.md).
+GCP non utilisé pour cette proposition.
