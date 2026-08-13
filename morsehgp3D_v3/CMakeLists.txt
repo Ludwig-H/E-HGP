@@ -4255,3 +4255,14 @@ mhgp3v_add_expected_code_test_for(mhgp3v_ball_event_probe
 mhgp3v_add_expected_code_test_for(mhgp3v_ball_event_probe
   mhgp3v_ball_event_refus_domaine "REFUS" 2
   --family=uniform --points=14 --coord=128)
+
+# `JungSpindleRect-v0` : le certificat anisotrope sur rectangle. Il est EXACT et
+# garde par `fixtures_terme_t`, mais son gain mesure est NUL — trois centiemes de
+# point — parce que `Tabs` est le MINIMUM de `|T|` sur le bloc alors que le gain
+# par paire vient des sites ou `|T|` est MAXIMAL. La porte conserve la
+# disjonction, qui ne peut jamais perdre un support, et enregistre son taux.
+add_test(NAME mhgp3v_wspd_wavefront_spindle_rect
+  COMMAND mhgp3v_wspd_wavefront_probe --family=eight_clusters --points=2000
+          --sep-euclid=8/1 --tight --vwave --window=512 --spindle --window-ledger)
+set_tests_properties(mhgp3v_wspd_wavefront_spindle_rect PROPERTIES
+  PASS_REGULAR_EXPRESSION "spindle_ALL=[0-9]+ essais=[0-9]+ tabs_non_nul=[0-9]+")

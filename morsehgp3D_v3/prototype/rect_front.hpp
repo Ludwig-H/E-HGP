@@ -440,6 +440,89 @@ inline RectVerdict rect_central_verdict(long long dlo, long long smin, long long
 // zero, un ou deux etait auparavant traitee silencieusement comme q4.
 enum class RectLane { kQ2 = 0, kQ3 = 1, kQ4 = 2 };
 
+inline long long rect_axis_near(long long z, long long lo, long long hi) {
+  if (z < lo) return (lo - z) * (lo - z);
+  if (z > hi) return (z - hi) * (z - hi);
+  return 0;
+}
+inline long long rect_axis_far(long long z, long long lo, long long hi) {
+  const long long a = (z - lo) * (z - lo), b = (z - hi) * (z - hi);
+  return a > b ? a : b;
+}
+
+inline void rect_t_axis(long long alo, long long ahi, long long blo, long long bhi,
+                           long long clo, long long chi, long long* lo, long long* hi) {
+  long long cand[6];
+  int nc = 0;
+  auto add = [&](long long z) {
+    if (z < clo) z = clo;
+    if (z > chi) z = chi;
+    for (int i = 0; i < nc; ++i) if (cand[i] == z) return;
+    cand[nc++] = z;
+  };
+  // MINIMUM : ruptures de `dist(.,A)` et milieu de `B`.
+  add(clo); add(chi); add(alo); add(ahi);
+  const long long mb = blo + bhi;                 // milieu double, sans division
+  add(mb >= 0 ? mb / 2 : (mb - 1) / 2);
+  add(mb >= 0 ? (mb + 1) / 2 : mb / 2);
+  *lo = rect_axis_near(cand[0], alo, ahi) - rect_axis_far(cand[0], blo, bhi);
+  for (int i = 1; i < nc; ++i) {
+    const long long v = rect_axis_near(cand[i], alo, ahi) - rect_axis_far(cand[i], blo, bhi);
+    if (v < *lo) *lo = v;
+  }
+  // MAXIMUM : le role de `A` et `B` s'echange.
+  nc = 0;
+  add(clo); add(chi); add(blo); add(bhi);
+  const long long ma = alo + ahi;
+  add(ma >= 0 ? ma / 2 : (ma - 1) / 2);
+  add(ma >= 0 ? (ma + 1) / 2 : ma / 2);
+  *hi = rect_axis_far(cand[0], alo, ahi) - rect_axis_near(cand[0], blo, bhi);
+  for (int i = 1; i < nc; ++i) {
+    const long long v = rect_axis_far(cand[i], alo, ahi) - rect_axis_near(cand[i], blo, bhi);
+    if (v > *hi) *hi = v;
+  }
+}
+
+
+// ---- `JungSpindleRect-v0` : LE CŒUR ANISOTROPE, SUR UN RECTANGLE.
+//
+// Le certificat central teste `209 V2 <= 56 D2`, qui est la BOULE INSCRITE dans
+// le vrai cœur : la reduction supprime le terme favorable `-4 (d.v)^2`, maximal
+// SUR L'AXE de l'arete. Mesure par paire : sur `eight_clusters`, le cœur exact
+// porte `5,6` fois plus de temoins et fait tomber la fraction de cœur vide de
+// `13,8 %` a `0,9 %`.
+//
+// Le passage au rectangle demande un MINORANT de `(d.v)^2`, donc l'intervalle de
+// `T = d.v`. L'identite qui debloque tout est `T = ||z-a||^2 - ||z-b||^2`, donc
+// T est SEPARABLE PAR AXE — `a`, `b` et `z` choisissent leurs coordonnees
+// independamment dans des boites alignees. `rect_t_axis` rend l'intervalle exact
+// par axe ; tester les seuls coins serait FAUX.
+//
+// Quand l'intervalle traverse zero, le minorant sur est zero et l'on retombe sur
+// la boule inscrite : fail-open, donc sain, jamais optimiste.
+inline long long rect_t_abs(const RectBox& a, const RectBox& b, const RectBox& c) {
+  long long lo = 0, hi = 0;
+  for (int i = 0; i < 3; ++i) {
+    long long l = 0, h = 0;
+    rect_t_axis(a.lo[i], a.hi[i], b.lo[i], b.hi[i], c.lo[i], c.hi[i], &l, &h);
+    lo += l; hi += h;
+  }
+  if (lo <= 0 && hi >= 0) return 0;                 // l'intervalle enjambe zero
+  const long long al = lo < 0 ? -lo : lo, ah = hi < 0 ? -hi : hi;
+  return al < ah ? al : ah;
+}
+
+// `ALL` seulement, jamais `NONE` : ce certificat ne refuse rien.
+inline bool rect_spindle_all(long long dlo, long long dhi, long long vhi,
+                             long long tabs, int lane) {
+  if (dlo <= vhi) return false;
+  const __int128 g = (__int128)(dlo - vhi) * (dlo - vhi);
+  const __int128 r = (__int128)dhi * vhi - (__int128)tabs * tabs;
+  if (lane == 2) return g > 2 * r;                  // q4
+  if (lane == 1) return 3 * g > 4 * r;              // q3
+  return dhi < dlo || vhi < dlo;                    // q2 : deja exact
+}
+
 // ---- COEUR CENTRAL ENTIER, PARTAGE PAR LES TROIS LANES
 // (audit `AUDIT_DEBLOCAGE_WSPD_PREFIX_CARRIERS`, section 5).
 //

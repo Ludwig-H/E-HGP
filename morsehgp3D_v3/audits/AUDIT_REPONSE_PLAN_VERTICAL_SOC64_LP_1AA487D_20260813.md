@@ -325,8 +325,10 @@ correct.
 Pour q4, le fast path répète huit fois : résoudre le LP sur le pool restant,
 extraire une base couvrante de taille au plus trois, puis retirer ses IDs. S'il
 réussit, les huit groupes disjoints fournissent huit intérieurs distincts à
-toute sphère. À dimension fixe, la cible pratique est `O(8P)` attendu, jamais
-`C(P,3)`.
+toute sphère. Une cible `O(8P)` espérée est défendable seulement avec un
+algorithme LP-type exact randomisé dans le dual de dimension trois, seed et
+permutation pinnées ; ce n'est ni une borne déterministe, ni une propriété d'un
+simplex générique, ni encore un coût GPU reçu.
 
 L'échec glouton n'est pas un rejet. Il existe toutefois un certificat récursif
 exact et complet pour une paire. Noter `C_h(P,d)` la propriété « toute sphère
@@ -345,9 +347,11 @@ intérieur ; si `C_h` est vraie, chaque branche possède encore `C_(h-1)`.
 
 Comme `|G|<=3`, q4 demande au plus
 `1+3+...+3^7=(3^8-1)/2=3280` petits LP ; q3 au plus `9841`, q2 au plus
-`29524`. Ce n'est pas un hot path par paire. C'est en revanche un oracle borné
-complet du résiduel, beaucoup plus informatif que le compte de la boule
-centrale ou le taux `spindle_empty`.
+`29524`. Ce n'est pas un hot path par paire. C'est un oracle borné complet de
+la **multiplicité relativement au pool `P`**. Il n'est complet pour le nuage que
+si `P=X` privé de l'ancre et de la cible ; avec un préfixe borné, tout échec
+reste fail-open. Même sur le pool complet, un résultat négatif ne génère ni ne
+réfute un support q4.
 
 ### 3.2 Extension sans `PairId` à un `BNode`
 
@@ -365,19 +369,34 @@ coins. Le minimum de `F` est séparable ; par axe, tester les deux entiers voisi
 de `p_k/(2r)`, clipés, suffit. Un `BNode` est ALL lorsque les trois minima
 linéaires sont non négatifs et `min F>=1`.
 
+Une base LP peut avoir rang un ou deux. Avant les formes ci-dessus, il faut
+l'augmenter canoniquement par des IDs encore disponibles jusqu'à un triple
+indépendant, employer un classifieur de dimension inférieure, ou descendre à la
+feuille. La formule `F` n'est jamais appelée avec `r=0`.
+
 Une tâche `(AnchorId,BNodeKey,pool,credit_state)` peut donc :
 
 1. choisir un `d` représentatif et extraire des bases par LP ;
 2. valider ces mêmes bases sur tout le `BNode` par les quatre formes ;
-3. fermer le span si huit preuves disjointes, ou l'arbre récursif complet,
-   passent sur tout le nœud ;
+3. fermer le span si huit preuves disjointes passent sur tout le nœud ; l'arbre
+   récursif reste sûr seulement si chaque groupe de chaque nœud est `ALL` sur
+   la boîte et si le chemin sérialise exactement les IDs supprimés ;
 4. sinon scinder, réutiliser les preuves acquises ou sérialiser une
    continuation ;
 5. à la feuille, employer l'oracle LP complet, sans cutoff de rang.
 
 Une base choisie au représentant mais non uniforme ne réfute rien. Elle ne fait
-que déclencher le split. Les trois formes simples tiennent dans les largeurs
-déjà reçues ; `F` demande environ 87 bits sous u16, donc `i128` ou deux limbs.
+que déclencher le split. L'arbre n'est pas complet au niveau rectangle : un
+certificat commun peut manquer même si chaque feuille est fermable. Au pire q4,
+un nœud paierait `3280` LP et `13120` minima de formes avant ses splits ; le
+fast path paie huit LP et 32 minima. Les copies de pools sont remplacées par un
+chemin de huit IDs ou un DAG mémoïsé.
+
+Les trois formes simples tiennent dans les largeurs reçues et `F` demande
+environ 87 bits sous u16. Cette borne ne couvre pas le **constructeur** LP : une
+comparaison naïve de fractions peut atteindre environ 137 bits. Exiger un
+noyau fraction-free borné ou 192/256 bits ; ne pas déduire `i128` pour tout le
+LP du seul coût de vérification de `F`.
 
 Cette route est un candidat direct pour `PWC0-A` : elle n'emploie ni `PairId`,
 ni Delaunay, ni arrangement global, et son certificat élémentaire est le même
@@ -389,7 +408,7 @@ L'audit précédent spécialisait trop tôt une cage en tétraèdre. Une cage
 ancre-globale est un ensemble dont les vecteurs relatifs engendrent positivement
 `R^3`. Après suppression des redondants, c'est une base positive ; en dimension
 trois elle peut contenir **de quatre à six vecteurs**, pas toujours quatre.
-Cette borne classique est rappelée dans [Planiden et Wang, *Nicely structured
+Cette borne classique est rappelée dans [Hare, Jarry-Bolduc et Planiden, *Nicely structured
 positive bases with maximal cosine measure*](https://doi.org/10.1007/s11590-023-01973-2).
 
 La cellule locale `V_G` possède alors au plus six facettes et au plus huit
@@ -404,24 +423,32 @@ a=(32768,32768,32768)
 G_k={a +/- k*e1, a +/- k*e2, a +/- k*e3}, k=1,...,8.
 ```
 
-Aucun sous-ensemble de quatre sites ne contient `a` strictement en dimension
-trois : annuler une coordonnée exige ses deux signes, et quatre sites ne peuvent
-apparier que deux axes. Chaque `G_k` est pourtant une base positive minimale de
-six sites et `V_Gk=[-k/2,k/2]^3`. Elle couvre exactement lorsque :
+Aucun tétra formé de quatre **témoins axiaux** ne contient `a` strictement en
+dimension trois : annuler une coordonnée exige ses deux signes, et quatre sites
+ne peuvent apparier que deux axes. La cible `b` doit néanmoins rester dans le
+pool réel ; un tétra qui l'emploie tombe ici à l'égalité projective et ne fournit
+pas huit crédits distincts. Chaque `G_k` est une base positive minimale de six
+sites et `V_Gk=[-k/2,k/2]^3`. Elle couvre exactement lorsque :
 
 $$\left\Vert d\right\Vert^2>k\left(|d_x|+|d_y|+|d_z|\right).$$
 
-Pour `d=(-9,-9,-9)`, les huit cages ferment q4. Pour
-`d=(-8,-8,-8)`, la huitième est à égalité et seulement sept crédits existent.
-Avec dix couches, `d=(-9,-9,-9)`, `(-10,-10,-10)` et
-`(-11,-11,-11)` ferment respectivement exactement huit, neuf et dix cages :
-une seule banque peut servir q4, q3 et q2 par ordre statistique des seuils.
+Pour `d=(-9,-9,-9)`, les huit groupes alignés `G_k` ferment q4. Pour
+`d=(-8,-8,-8)`, le groupe `G_8` est à égalité et seulement sept de ces huit
+`G_k` créditent. Avec dix couches, les trois directions citées créditent
+respectivement huit, neuf et dix **groupes alignés**. Ces comptes ne sont pas
+des optima globaux : un autre appariement des rayons peut trouver davantage de
+cages. La fixture tue tétra-only et l'acceptation de l'égalité, jamais un bon
+horaire latin alternatif.
 
 Le constructeur P0 peut employer des frames directionnelles entières, des
 queues par rôle et des horaires latins : quatre rôles pour les tétras, six rôles
 `+/-axe` pour les octa-cages. Les permutations rendent les groupes disjoints par
-construction ; chaque proposition est ensuite validée exactement. `P=48`
-permet huit groupes de six, `P=96` des réparations ou dix groupes partagés.
+construction seulement si chaque ID reçoit un rôle primaire unique et chaque
+rang n'est consommé qu'une fois ; chaque proposition est ensuite validée
+exactement. Six rôles génériques forment un `SixRoleCageProposer`, pas un
+octaèdre avant validation des trois paires de rayons opposés. `P=48` donne la
+capacité de huit groupes de six, sans en garantir l'existence ; `P=96` permet
+des réparations ou dix groupes partagés.
 Un échec ouvre. Plusieurs frames ou salts sont des certificats alternatifs et
 leurs crédits ne sont jamais additionnés s'ils réutilisent des IDs.
 
@@ -432,11 +459,19 @@ Deux corrections de largeur et de profondeur sont impératives :
   croisés. Ne pas annoncer un cutoff radial `i128` exact. Employer un calcul
   multiprécision au build de banque ou un majorant entier conservateur, puis
   garder les formes comme autorité ;
-- le seuil angulaire `delta>=3h-2` vaut pour les tétra-cages, ou plus
-  généralement lorsque chaque groupe enlève au plus trois points d'un
-  demi-espace ouvert. Une base positive de six peut en enlever jusqu'à cinq.
-  Le seuil universel grossier devient `delta>=5h-4`, ou mieux un budget exact
-  `omega(G)` par groupe.
+- le seuil angulaire `delta>=3h-2` vaut pour les tétra-cages et pour une base
+  minimale de six, qui est formée de trois paires de rayons opposés. Le pire cas
+  minimal est une base de cinq avec `omega=4`, donc le seuil universel minimal
+  devient `delta>=4h-3`. La fixture
+  `{(1,0,0),(-1,1,0),(-1,-1,0),(-1,0,1),(-1,0,-1)}` atteint quatre points dans
+  le demi-espace ouvert de normale `(-1,0,0)`. Une cage six-sites non minimale
+  peut coûter cinq ; il faut alors l'annoncer comme telle et calculer
+  `omega(G)` exactement.
+
+Supprimer une contrainte redondante pour le positive-span préserve la
+bornitude, mais agrandit `V_G` et peut perdre une fermeture. Il faut recalculer
+sommets, fleurs et rayon après toute minimisation ; conserver une cage non
+minimale peut être volontaire pour le rappel, au prix d'IDs et de `omega`.
 
 Les cages ancre-globales restent un fast path radial intéressant. Le LP
 directionnel est plus général et doit servir de référence : il peut fermer une

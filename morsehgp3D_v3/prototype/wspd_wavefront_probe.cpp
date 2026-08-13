@@ -56,7 +56,7 @@ struct Pair { int a, b; };
 // applique le masque central. Le rectangle n'est jamais materialise en memoire ;
 // seuls les residuels sont compactes. C'est le gain de bande passante du
 // kernel vise.
-struct BankStat { long long reads = 0, recerts = 0, tronques = 0, juges = 0, faux = 0, v_all = 0, v_none = 0, v_descente = 0, closed[3] = {0, 0, 0}; };
+struct BankStat { long long spindle_all = 0, spindle_essais = 0, spindle_tabs = 0, reads = 0, recerts = 0, tronques = 0, juges = 0, faux = 0, v_all = 0, v_none = 0, v_descente = 0, closed[3] = {0, 0, 0}; };
 
 // ---- PROPOSITION PAR DESCENTE, alternative a la fenetre Morton.
 //
@@ -86,6 +86,7 @@ bool g_tight = false;
 // Le masque central est suffisant, jamais complet ; le repli est un SECOND
 // certificat suffisant, non comparable. Leur disjonction reste suffisante.
 bool g_fallback = false;
+bool g_spindle = false;
 bool g_bank = false;
 long long g_win = 32, g_bankl = 16;
 long long g_warms = 0;
@@ -484,49 +485,6 @@ int rang_fixture() {
 // TESTER LES SEULS COINS EST FAUX, et l'audit en donne le contre-exemple : sur
 // `A=[0,1]`, `B=[0,3]`, `C=[0,2]`, le maximum exact vaut `4` en `(0,2,2)` alors
 // que les huit choix d'extremites ne donnent que `3`. C'est une fixture.
-inline long long axe_dist2(long long z, long long lo, long long hi) {
-  if (z < lo) return (lo - z) * (lo - z);
-  if (z > hi) return (z - hi) * (z - hi);
-  return 0;
-}
-inline long long axe_far2(long long z, long long lo, long long hi) {
-  const long long a = (z - lo) * (z - lo), b = (z - hi) * (z - hi);
-  return a > b ? a : b;
-}
-
-inline void t_interval_axe(long long alo, long long ahi, long long blo, long long bhi,
-                           long long clo, long long chi, long long* lo, long long* hi) {
-  long long cand[6];
-  int nc = 0;
-  auto add = [&](long long z) {
-    if (z < clo) z = clo;
-    if (z > chi) z = chi;
-    for (int i = 0; i < nc; ++i) if (cand[i] == z) return;
-    cand[nc++] = z;
-  };
-  // MINIMUM : ruptures de `dist(.,A)` et milieu de `B`.
-  add(clo); add(chi); add(alo); add(ahi);
-  const long long mb = blo + bhi;                 // milieu double, sans division
-  add(mb >= 0 ? mb / 2 : (mb - 1) / 2);
-  add(mb >= 0 ? (mb + 1) / 2 : mb / 2);
-  *lo = axe_dist2(cand[0], alo, ahi) - axe_far2(cand[0], blo, bhi);
-  for (int i = 1; i < nc; ++i) {
-    const long long v = axe_dist2(cand[i], alo, ahi) - axe_far2(cand[i], blo, bhi);
-    if (v < *lo) *lo = v;
-  }
-  // MAXIMUM : le role de `A` et `B` s'echange.
-  nc = 0;
-  add(clo); add(chi); add(blo); add(bhi);
-  const long long ma = alo + ahi;
-  add(ma >= 0 ? ma / 2 : (ma - 1) / 2);
-  add(ma >= 0 ? (ma + 1) / 2 : ma / 2);
-  *hi = axe_far2(cand[0], alo, ahi) - axe_dist2(cand[0], blo, bhi);
-  for (int i = 1; i < nc; ++i) {
-    const long long v = axe_far2(cand[i], alo, ahi) - axe_dist2(cand[i], blo, bhi);
-    if (v > *hi) *hi = v;
-  }
-}
-
 // FIXTURE ET AUDIT DE L'AUDIT. La prescription ci-dessus est ce sur quoi le
 // moteur va reposer ; je ne la recois pas sur parole. Elle est donc comparee a
 // une enumeration EXHAUSTIVE de tous les `(a,b,z)` sur des boites petites, et
@@ -536,7 +494,7 @@ int terme_t_fixtures() {
   // (1) Le contre-exemple de l'audit, en une dimension.
   {
     long long lo = 0, hi = 0;
-    t_interval_axe(0, 1, 0, 3, 0, 2, &lo, &hi);
+    mhgp3v::rect_t_axis(0, 1, 0, 3, 0, 2, &lo, &hi);
     long long vrai_lo = 1LL << 60, vrai_hi = -(1LL << 60), coins = -(1LL << 60);
     for (long long a = 0; a <= 1; ++a)
       for (long long b = 0; b <= 3; ++b)
@@ -575,7 +533,7 @@ int terme_t_fixtures() {
     long long lo = 0, hi = 0;
     for (int i = 0; i < 3; ++i) {
       long long l = 0, h = 0;
-      t_interval_axe(al[i], ah[i], bl[i], bh[i], cl[i], ch[i], &l, &h);
+      mhgp3v::rect_t_axis(al[i], ah[i], bl[i], bh[i], cl[i], ch[i], &l, &h);
       lo += l; hi += h;
     }
     // Verite : enumeration complete de `A x B x C`.
@@ -820,6 +778,7 @@ int main(int argc, char** argv) {
     else if (a == "--climb") { g_bank = true; g_vwave = true; g_climb = true; }
     else if (a.rfind("--smax=", 0) == 0) set_smax(arg_ll(val("--smax=").c_str(), 4, 34, "smax"));
     else if (a == "--fallback") g_fallback = true;
+    else if (a == "--spindle") g_spindle = true;
     else if (a == "--vwave") { g_bank = true; g_vwave = true; }
     else if (a == "--descent") { g_bank = true; g_descent = true; }
     else if (a.rfind("--window=", 0) == 0) { g_win = arg_ll(val("--window=").c_str(), 2, 1024, "window"); g_bank = true; }
@@ -1044,6 +1003,20 @@ int main(int argc, char** argv) {
                   // distance —, qui n'est pas comparable et peut mordre la ou
                   // le central renonce. La disjonction de deux certificats
                   // suffisants reste suffisante.
+                  // `JungSpindleRect-v0` en DISJONCTION. Deux certificats
+                  // suffisants et non comparables restent suffisants. Le central
+                  // teste la boule INSCRITE ; le spindle rend le terme
+                  // directionnel que la reduction jetait.
+                  if (v == RectVerdict::kMixed && g_spindle) {
+                    const long long dhi = mhgp3v::rect_maxsq(qa, qb);
+                    const long long tabs = mhgp3v::rect_t_abs(qa, qb, cb2);
+                    ++bank.spindle_essais;
+                    if (tabs > 0) ++bank.spindle_tabs;
+                    if (mhgp3v::rect_spindle_all(dlo, dhi, smx, tabs, lane)) {
+                      v = RectVerdict::kAll;
+                      ++bank.spindle_all;
+                    }
+                  }
                   if (v == RectVerdict::kMixed && g_fallback) {
                     long long mxk = 0;
                     const RectVerdict w =
@@ -1622,7 +1595,7 @@ int main(int argc, char** argv) {
                 " | arbre_med=%.1f ms arbre_p95=%.1f ms vague=%.1f ms"
                 " | banque lectures=%lld recert=%lld ferme q2=%lld q3=%lld q4=%lld"
                 " | masse fermee q2=%.2f%% records fermes q2=%.2f%% tronques=%lld"
-                " juges=%lld faux=%lld | verdicts ALL=%lld NONE=%lld descente_pure=%lld"
+                " juges=%lld faux=%lld | verdicts ALL=%lld NONE=%lld descente_pure=%lld spindle_ALL=%lld essais=%lld tabs_non_nul=%lld"
                 " | seuils=%d/%d/%d degre_residuel somme=%lld (= 2 x masse_res %lld) max=%lld moyen=%.1f"
                 " | partenaires max=%lld moyen=%.2f"
                 " | residuel : %lld paires tirees DANS LA MASSE ouverte,"
@@ -1638,7 +1611,7 @@ int main(int argc, char** argv) {
                 bank.reads, bank.recerts, bank.closed[0], bank.closed[1], bank.closed[2],
                 100.0 * (double)mass_closed_q2 / (double)total,
                 100.0 * (double)bank.closed[0] / (double)std::max<size_t>(1, terms.size()),
-                bank.tronques, bank.juges, bank.faux, bank.v_all, bank.v_none, bank.v_descente,
+                bank.tronques, bank.juges, bank.faux, bank.v_all, bank.v_none, bank.v_descente, bank.spindle_all, bank.spindle_essais, bank.spindle_tabs,
                 g_need[0], g_need[1], g_need[2], nsum, masse_res, nmax, (double)nsum / (double)m,
                 dmax, (double)dsum / (double)std::max(1LL, dnz),
                 ech, (double)som_temoins / (double)std::max(1LL, ech), max_temoins,
