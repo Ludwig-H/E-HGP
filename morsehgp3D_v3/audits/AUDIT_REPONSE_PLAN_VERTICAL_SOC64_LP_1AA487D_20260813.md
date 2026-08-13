@@ -15,7 +15,9 @@ Cette réponse vise
 SHA-256
 `c3cfb97ccdd3d65757db7ba5d0480db56fe1d0edf5eb3c3e9ac5912bfb1ad970`.
 Le snapshot observé est le `HEAD`
-`1aa487d77b447d7359ba9a81b7ab1285b4a27abf`, worktree propre. Les
+`1aa487d77b447d7359ba9a81b7ab1285b4a27abf`, worktree propre au moment du
+relevé, avant les corrections concurrentes de Claude et les deltas
+documentaires des deux auditeurs. Les
 empreintes du probe et de CMake sont respectivement
 `0e7d4d753fd52adfd2d007659fe845025d8bafeea608e0b3c323edae086c19e0`
 et `c76776a579e6e2c57881b450bb999b7285bbd2edd3b6687f16a1cd8c0af54df4`.
@@ -27,7 +29,7 @@ Réponses directes aux trois questions :
    parcimonie.** Une fenêtre encore dense ne la rend pas prématurée : cette
    tranche est bornée et sert d'autorité de composition, pas de benchmark. Il
    faut cependant construire la tranche la plus mince qui traverse
-   `BallForm -> PrimitiveSphereKey -> census -> BallEvent -> fold`, pas
+   `BallForm -> BallKey primitive -> census -> BallEvent -> fold`, pas
    préconstruire tout le producteur optimisé.
 2. **Préparer une frontière de profil dans l'ABI, pas implémenter `binary64`
    dans la v3 u16.** Le fold ne doit dépendre ni du packing u16, ni de cinq
@@ -35,12 +37,13 @@ Réponses directes aux trois questions :
    backend u16 reste le seul profil de cette phase ; un futur producteur
    binary64 certifié pourra se brancher derrière la même sémantique sans
    réécrire le fold.
-3. **Conserver la multiplicité lossless comme baseline.** Un quotient de
-   plateau n'entre dans `BenchmarkOutputContract-v1` qu'après preuve de
-   reconstruction des dix forêts, coverage et verticales. Le quotient Johnson
-   discuté jusqu'ici ne reçoit que le H0 normalisé. Un refus explicite est un
-   statut de ressource ou de domaine, jamais une façon silencieuse de rendre un
-   résultat exact incomplet.
+3. **Conserver un `SphereRun` interne réversible, puis appliquer la politique
+   de domaine reçue.** Dans le contrat régulier courant, un extra-shell utile
+   mène à `unsupported_degeneracy`; il n'oblige pas à développer toutes les
+   `SupportKey`. Un quotient de plateau n'entre dans
+   `BenchmarkOutputContract-v1` qu'après preuve des dix forêts, coverage et
+   verticales. Si un contrat futur exige la provenance Gamma complète, un flux
+   lossless explicite reste une autre disposition, jamais un succès implicite.
 
 Le recul de Claude est donc juste. Deux corrections empêchent toutefois de
 transformer ce bon ordre en nouveau récit optimiste : `2,6e9`
@@ -49,13 +52,59 @@ sur les constantes », et une pente `sum_E4` verte ne suffit pas à sélectionne
 le certificateur. Les tâches, les lectures, les produits larges, le census, la
 HWM et le fold restent dans le coût de bout en bout.
 
+### 0.1 Contre-audit de l'autre auditeur
+
+Le présent audit relit explicitement
+[`AUDIT_REPONSE_ROUTE_VERTICAL_SLICE_1AA487D_20260813.md`](AUDIT_REPONSE_ROUTE_VERTICAL_SLICE_1AA487D_20260813.md),
+au lieu de l'utiliser comme autorité implicite.
+
+Verdicts reçus de cet autre audit :
+
+- son défaut `owner_edge` est exact au pin : le sujet et son juge comparaient
+  les positions Morton/`GenerationRank`, jamais les `PointId`, et partageaient
+  le même helper ; les six verts ne pouvaient donc pas tuer ce mutant ;
+- sa contre-fixture équilatérale relabellée est correcte : l'ordre Morton
+  `1,2,0` fait choisir `(1,2)` par rang alors que la plus petite `EdgeKey` par
+  `PointId` est `(0,1)` ;
+- son ordre « tranche exhaustive bornée, puis substitution de la source, puis
+  portage » sépare correctement réception sémantique et SLO ;
+- sa séparation `ExactKernel -> identité de sphère -> BallEvent/fold` est la
+  bonne couture pour ne pas figer les limbs u16 dans l'ABI.
+
+Corrections imposées à cet autre audit :
+
+1. Le nom canonique déjà fixé par `PROPOSITION.md` est `BallKey` pour
+   `(CloudEpoch, équation primitive normalisée)` ; cette clé précède le census.
+   `SphereIdentity` peut être l'interface/codec de cette `BallKey`, pas une
+   seconde identité postérieure contenant `I_B/U_B`. Ces ensembles restent
+   dans `BallEvent` ou `SphereRun`.
+2. `unsupported_degeneracy` est la politique documentée du domaine régulier
+   `RelevantGP`, mais sa fermeture globale v3 est encore non reçue. Il faut
+   donc écrire « politique candidate fail-closed actuelle », pas « exactitude
+   universelle sur toute entrée u16 ». Le profil de coordonnées et le domaine
+   d'admission sont deux axes différents.
+3. Le `SphereRun` lossless est un état interne réversible. Il n'autorise ni un
+   `PlateauEvent` public, ni le quotient saturé, ni l'omission des
+   `SupportKey` lorsque le contrat de sortie les exige.
+4. Le rejeu `6/6 en 0,13 s` est valable pour le snapshot cité. Les chiffres de
+   recertification proviennent toutefois d'un diagnostic mono-graine produit
+   sur `HEAD=b96751c` avec treize fichiers modifiés ; ils corrigent une
+   extrapolation arithmétique, mais ne deviennent ni reçu causal ni modèle G4.
+5. Après ce pin, Claude a commencé une correction concurrente de l'owner. Elle
+   doit être repinnée, compilée et rejouée avec le mutant indépendant avant que
+   le défaut puisse être déclaré fermé.
+
+Ce contre-audit corrige aussi ma première formulation : il n'existe pas de
+« `BallKey` sémantique après shell ». La clé géométrique primitive est déjà la
+`BallKey`; le census enrichit l'événement sans changer son identité.
+
 ## 1. Étape zéro : une tranche verticale mince, pas un second oracle horizontal
 
 L'objet minimal à recevoir est `VerticalBallEventSlice-v0` :
 
 ```text
 BallForm rationnelle + SupportKey + owner proposé
-  -> PrimitiveSphereKey normalisée
+  -> BallKey primitive normalisée
   -> RLE des formes de même sphère
   -> un census exact du nuage : I_B et U_B triés
   -> décisions p+q par support incident
@@ -70,15 +119,15 @@ optimisation amont falsifiable sur l'identité complète
 `(BallKey,SupportKey,I_B,U_B,owner)` puis sur les dix forêts, leurs lots et
 leurs verticales.
 
-La `PrimitiveSphereKey` précède le census parce qu'elle encode l'équation
-primitive de la sphère. La `BallKey` sémantique qui emploie le shell vient après
-le census. Ce découpage évite la circularité « BallKey avant de connaître
-`U_B` » et mutualise le census entre tous les supports d'une cosphère.
+La `BallKey` précède le census parce qu'elle encode l'équation primitive de la
+sphère avec l'identité du nuage. Le census ajoute `I_B/U_B` au `BallEvent` sans
+modifier cette clé. Ce découpage évite toute dépendance circulaire au shell et
+mutualise le census entre tous les supports d'une cosphère.
 
 Portes minimales de la tranche :
 
 - une sphère régulière `U_B=S`, avec un intérieur réel conservé dans `I_B` ;
-- deux `SupportKey` distinctes pour une même `PrimitiveSphereKey`, un seul
+- deux `SupportKey` distinctes pour une même `BallKey`, un seul
   census et deux décisions de lane ;
 - la fixture cocyclique de six points, puis un petit shell lourd, sans
   troncature de la provenance ;
@@ -100,22 +149,22 @@ ExactKeySchemaId
 CloudEpoch / CloudDigest
 PointId et listes triées I_B, U_B, SupportKey
 ExactLevelToken + comparateur du profil
-PrimitiveSphereKeyRef opaque et sérialisable
+BallKeyRef opaque et sérialisable
 BallEventKind = REGULAR | PLATEAU_LOSSLESS | PLATEAU_QUOTIENT
 provenance_digest, continuation et status
 ```
 
 Le fold consomme les identités, l'ordre exact des niveaux, les incidences et
 les événements ; il ne lit jamais les coordonnées ni les limbs de la clé. Pour
-u16, `PrimitiveSphereKeyRef` peut pointer vers cinq entiers primitifs à largeur
+u16, `BallKeyRef` peut pointer vers cinq entiers primitifs à largeur
 fixe reçue. Un futur profil binary64 pourra employer des entiers dyadiques
 normalisés, des expansions ou un stockage large différent derrière le même
 contrat. Il ne faut ni figer la sérialisation native de `__int128`, ni ajouter
 maintenant des prédicats binary64 hors du profil déclaré.
 
-### 1.2 Cosphère lourde : décision réversible de layout
+### 1.2 Cosphère lourde : état réversible, refus courant
 
-La baseline exacte conserve :
+L'état interne commun conserve :
 
 ```text
 PlateauEvent {
@@ -125,14 +174,16 @@ PlateauEvent {
 }
 ```
 
-Le stream peut être produit et consommé par chunks ; il n'impose pas un
-catalogue résident. Il ne supprime cependant pas le travail ni la taille de
-sortie intrinsèques. `PLATEAU_QUOTIENT` reste une variante d'événement séparée,
-avec `quotient_schema` et preuve de reconstruction. Tant que seules les
-composantes H0 sont reçues, elle ne peut alimenter le contrat complet. Cette
-union rend le choix futur réversible : ajouter un quotient n'altère pas la
-branche lossless et un refus de ressource ne change jamais la sémantique d'un
-succès.
+Le profil courant n'émet pas automatiquement ce `PlateauEvent` : sous la
+politique régulière documentée, `U_B!=S` produit un
+`unsupported_degeneracy` atomique après conservation du témoin nécessaire au
+diagnostic. Un `SupportStreamRef` lossless peut être produit par chunks dans un
+futur contrat qui exige Gamma complet ; il n'impose pas un catalogue résident,
+mais ne supprime ni le travail ni la taille de sortie intrinsèques.
+`PLATEAU_QUOTIENT` reste une variante séparée, avec `quotient_schema` et preuve
+de reconstruction. Tant que seules les composantes H0 sont reçues, elle ne
+peut alimenter le contrat complet. Le `SphereRun` rend ces choix de politique
+réversibles sans transformer un refus en succès.
 
 ## 2. Premier levier après la tranche : `SOC64`, puis `CORNER512`
 
@@ -427,9 +478,9 @@ ou être une ablation de ce même trajet.
   `M`, census uniques et temps transitif. La comparaison `s=3/s=8` a déjà
   montré que réduire `E_4` peut multiplier le temps par `7,6`.
 - `resource_exhausted` est un résultat atomique sans payload, distinct de
-  `unsupported_degeneracy`. Le second n'est licite que si le domaine public
-  exclut explicitement l'entrée ; le profil u16 actuel n'exclut pas les
-  cosphères.
+  `unsupported_degeneracy`. Le second est licite sous un domaine d'admission
+  `RelevantGP` explicitement fermé et reçu ; le simple profil de coordonnées
+  u16 n'exclut aucune cosphère. Cette fermeture v3 reste ouverte.
 - Le contrat secondaire reste `p95 warm_e2e<1 s` à `50000`; le principal reste
   `100 ms`. Aucun calcul de bande passante théorique, aucune extrapolation de
   `n=6000` et aucun CTest CPU ne reçoit l'un ou l'autre.

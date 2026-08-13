@@ -8,7 +8,71 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-## Observation live q3 — `HEAD=92d0c0f`, delta d'audit seulement
+## Observation live owner et route — `HEAD=f516198`, logiciel concurrent non figé
+
+Cette observation du 13 août 2026, snapshot `21:47:46 UTC`, supersède les
+sections précédentes. Le `HEAD` est
+`f516198424482b045395240aae621ea00f58b379`, commit
+`the owner decides on PointId, and an oracle that counts does not see a wrong tie-break`.
+Avant le nouveau travail logiciel concurrent, le delta restant était limité à
+deux audits. Claude a ensuite créé `prototype/ball_event.hpp`, encore non suivi
+au relevé : ce fichier n'appartient pas au pin et interdit de déclarer la
+tranche verticale reçue. GCP non utilisé.
+
+Empreintes du pin : `prototype/wspd_wavefront_probe.cpp`
+`8d8d8588b473cccf8232dfa1fb8ff5854df51583598c92979f69abfb90e6358c`
+et `CMakeLists.txt`
+`193fc27f1659e159dc0dfdfd9cc4bd5c26777a1ceddf673b9974f86ccda7ad04`.
+Le build ciblé passe. Les deux fixtures owner/rang passent en `0,02 s` et les
+six portes `q3_*`, dont le mutant `owner-generationrank` et le nominal riche en
+égalités, passent en `0,30 s`. Le catalogue CTest contient ponctuellement
+`723` tests.
+
+La découverte de l'autre auditeur au parent `1aa487d` était correcte : le
+sujet et son juge partageaient un owner sur `GenerationRank`. Claude a fermé ce
+défaut au pin présent : le comparateur reçoit `spid`, le juge scientifique
+reste non muté, la clé globale trie les vrais `PointId`, trois relabelings sont
+testés et le mutant sort par le désaccord attendu. Ce résultat reçoit ce
+tie-break borné ; il ne reçoit encore ni `M3`, ni `BallEvent`, ni fold.
+
+Le contre-audit de l'autre réponse impose quatre précisions durables :
+
+- la `BallKey` existante est `(CloudEpoch, équation primitive normalisée)` et
+  précède le census ; `SphereIdentity` peut être son interface/codec, jamais
+  une seconde clé contenant `I_B/U_B` ;
+- `unsupported_degeneracy` est la politique fail-closed candidate du domaine
+  régulier `RelevantGP`, dont la fermeture globale v3 reste non reçue, pas une
+  propriété du seul profil de coordonnées u16 ;
+- un `SphereRun` lossless est un état interne réversible, pas l'autorisation
+  d'émettre un plateau ni d'omettre la provenance Gamma ;
+- les recertifications archivées sous `HEAD=b96751c`, worktree à treize fichiers
+  modifiés et une graine, restent un diagnostic, pas un modèle G4 reçu.
+
+L'ordre de route reste : fermer une tranche verticale exhaustive et bornée
+`BallForm -> BallKey -> census I_B/U_B -> BallEvent -> fold ->` dix forêts et
+verticales, puis substituer seulement la source. L'émission par ancre n'a aucun
+watermark monotone ; « streamé » signifie runs spillables, tri/merge global et
+mémoire résidente bornée, jamais commit online.
+
+Deux déblocages mathématiques supplémentaires sont désormais proposés sous
+falsificateurs : `SOC64` donne un `ALL` rectangle sûr en 64 couples de coins et
+`CORNER512` l'équivalence `ALL` de l'enveloppe AABB continue ; le LP projectif
+caractérise un crédit par `d` dans le cône et `kappa(d)<||d||^2`, avec une base
+optimale d'au plus trois `PointId`. Répété huit fois il donne un fast path q4 ;
+son arbre de suppressions à au plus `3280` petits LP est un oracle pairwise
+complet, pas le hot path. Les cages restent une ablation : une base positive
+minimale 3D peut avoir quatre à six sites, donc un constructeur tétra-only est
+incomplet.
+
+Réponses, preuves, fixtures et contre-audit explicite des deux auditeurs :
+
+- [AUDIT_REPONSE_ROUTE_VERTICAL_SLICE_1AA487D_20260813.md](AUDIT_REPONSE_ROUTE_VERTICAL_SLICE_1AA487D_20260813.md) ;
+- [AUDIT_REPONSE_PLAN_VERTICAL_SOC64_LP_1AA487D_20260813.md](AUDIT_REPONSE_PLAN_VERTICAL_SOC64_LP_1AA487D_20260813.md).
+
+Le contrat G4 reste ouvert : aucun `BenchmarkOutputContract-v1` complet,
+kernel résident, échantillon p95 ni temps à `50000` n'est reçu.
+
+## Observation précédente q3 — `HEAD=92d0c0f`, delta d'audit seulement
 
 Cette observation du 13 août 2026, snapshot `21:25:01 UTC`, supersède les
 observations historiques ci-dessous. Le `HEAD` est

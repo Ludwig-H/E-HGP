@@ -4200,3 +4200,58 @@ add_test(NAME mhgp3v_wspd_wavefront_q3_owner_egalites
           --sep-euclid=2/1 --tight --q3-sep=4 --q3-oracle=200)
 set_tests_properties(mhgp3v_wspd_wavefront_q3_owner_egalites PROPERTIES
   PASS_REGULAR_EXPRESSION "owners_faux=0")
+
+# --- ETAPE 0A : `BallFormToBallEvent-v0`, LA TRANCHE VERTICALE QUI PRODUIT.
+#
+# La chaine v3 comptait des paires depuis des jours sans jamais produire un
+# objet. Cette sonde prend un petit nuage, enumere EXHAUSTIVEMENT ses formes
+# q2/q3/q4, et rend `PrimitiveSphereKey`, `SupportKey`, `I_B`, `U_B`, owner et
+# disposition. Elle n'est pas le chemin produit : c'est l'autorite que la source
+# sparse devra reproduire exactement.
+add_executable(mhgp3v_ball_event_probe prototype/ball_event_probe.cpp)
+target_include_directories(mhgp3v_ball_event_probe PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/prototype)
+target_compile_options(mhgp3v_ball_event_probe PRIVATE -Wall -Wextra -Werror)
+
+# LE JUGE EST INDEPENDANT PAR SA ROUTE : il resout le systeme de GRAM dans la
+# base du support, forme centre et rayon comme RATIONNELS, et compare par
+# produit croise. Le sujet emploie la forme close `W` a l'arite trois, un Cramer
+# en coordonnees a l'arite quatre, et ne forme jamais de centre.
+add_test(NAME mhgp3v_ball_event_juge
+  COMMAND mhgp3v_ball_event_probe --family=uniform --points=14 --coord=32
+          --min-runs=200 --min-supports=300 --min-arite4=50)
+set_tests_properties(mhgp3v_ball_event_juge PROPERTIES
+  PASS_REGULAR_EXPRESSION "ball_event accord=OUI")
+
+# LA FAMILLE `grid` EST LE REGIME DUR : elle porte des cospheres, des formes
+# degenerees et des refus de domaine, que `uniform` n'exerce presque pas.
+add_test(NAME mhgp3v_ball_event_juge_cospheres
+  COMMAND mhgp3v_ball_event_probe --family=grid --points=14 --coord=32
+          --min-runs=200 --min-supports=200 --min-refus=20)
+set_tests_properties(mhgp3v_ball_event_juge_cospheres PROPERTIES
+  PASS_REGULAR_EXPRESSION "ball_event accord=OUI")
+
+add_test(NAME mhgp3v_ball_event_juge_amas
+  COMMAND mhgp3v_ball_event_probe --family=clusters --points=14 --coord=32 --min-supports=100)
+set_tests_properties(mhgp3v_ball_event_juge_amas PROPERTIES
+  PASS_REGULAR_EXPRESSION "ball_event accord=OUI")
+
+# TROIS MUTANTS, TROIS PROPRIETES DISTINCTES : l'owner decide sur l'index du
+# tuple et non sur le `PointId` ; la coquille est comptee comme interieur ; la
+# cle primitive n'est pas reduite par son pgcd, ce qui eclate les cospheres.
+mhgp3v_add_expected_code_test_for(mhgp3v_ball_event_probe
+  mhgp3v_ball_event_mutant_owner_index "mutant_killed=1" 4
+  --family=grid --points=14 --coord=32 --inject=owner-index)
+mhgp3v_add_expected_code_test_for(mhgp3v_ball_event_probe
+  mhgp3v_ball_event_mutant_coquille "mutant_killed=1" 4
+  --family=grid --points=14 --coord=32 --inject=coquille-interieure)
+mhgp3v_add_expected_code_test_for(mhgp3v_ball_event_probe
+  mhgp3v_ball_event_mutant_cle "mutant_killed=1" 4
+  --family=grid --points=14 --coord=32 --inject=cle-non-reduite)
+
+# LE PLANCHER DOIT MORDRE, ET LE JUGE DOIT REFUSER SON DOMAINE.
+mhgp3v_add_expected_code_test_for(mhgp3v_ball_event_probe
+  mhgp3v_ball_event_plancher_mord "PLANCHER" 3
+  --family=uniform --points=14 --coord=32 --min-arite4=999999)
+mhgp3v_add_expected_code_test_for(mhgp3v_ball_event_probe
+  mhgp3v_ball_event_refus_domaine "REFUS" 2
+  --family=uniform --points=14 --coord=128)

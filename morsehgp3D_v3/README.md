@@ -27,23 +27,35 @@ Le verdict lié au `HEAD` et au worktree est tenu uniquement dans
 [`AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md). Ne déduire aucun état
 live d'une note datée, d'un message de commit ou du seul passage d'un CTest.
 
-Au pin 1aa487d, le bon prochain jalon est une tranche verticale bornée :
+Au pin `f516198`, le bon prochain jalon reste une tranche verticale bornée :
 BallForm exhaustives de l'oracle, BallEvent avec I_B/U_B, spool et tri global,
 lots, fold, dix forêts, verticales et BenchmarkOutputContract-v1. Ce squelette
 précède la parcimonie sans devenir une source exhaustive produit. Il sépare les
 complétudes de source, d'événements et de fold ; une source incomplète peut être
 différenciée mais ne publie aucun succès.
 
-L'intégration owner du pin reste à corriger : owner_edge compare les positions
-GenerationRank, pas les PointId annoncés, et le sujet partage ce tie-break avec
-son oracle. La couture future est ExactKernel vers SphereIdentity ; le fold ne
-dépend ni des deux limbs u16 ni d'un futur BigInt. Dix millions de points
-n'imposent pas binary64, puisque la grille u16 3D contient 2^48 sites. Pour les
-cosphères lourdes, le profil exact courant retourne
-unsupported_degeneracy ; un SphereRun versionné conserve néanmoins la voie vers
-un futur quotient saturé reçu. Réponses aux trois questions, budget corrigé et
-contre-fixture owner :
+L'autre auditeur a découvert au parent `1aa487d` que l'owner comparait des
+positions `GenerationRank` et que le sujet partageait ce tie-break avec son
+oracle. Claude le ferme dans `f516198` : labels `PointId`, juge non muté, trois
+relabelings et mutant dédié sont verts. La couture future est ExactKernel vers
+la `BallKey` primitive puis BallEvent ; le fold ne dépend ni des deux limbs u16
+ni d'un futur BigInt. Dix millions de points n'imposent pas binary64, puisque la
+grille u16 3D contient $2^{48}$ sites. Pour les cosphères lourdes, la politique
+candidate du domaine régulier retourne `unsupported_degeneracy`; un SphereRun
+versionné conserve néanmoins la voie vers un futur quotient saturé reçu.
+Réponses aux trois questions, budget corrigé et contre-fixture owner :
 [AUDIT_REPONSE_ROUTE_VERTICAL_SLICE_1AA487D_20260813.md](audits/AUDIT_REPONSE_ROUTE_VERTICAL_SLICE_1AA487D_20260813.md).
+
+Deux leviers mathématiques sont prêts pour l'après-tranche. `SOC64` certifie un
+rectangle `ALL` par 64 couples de coins sans décorréler les termes du spindle ;
+`CORNER512` est exact pour le verdict `ALL` de l'enveloppe AABB continue. Plus
+généralement, un LP de dimension trois caractérise un crédit projectif par une
+base optimale d'au plus trois `PointId`; huit extractions disjointes sont un
+fast path q4, et un arbre de suppressions borné fournit l'oracle pairwise exact
+du résiduel. Le même audit corrige les cages : une base positive minimale 3D
+peut contenir quatre à six sites, pas toujours quatre. Preuves, limites,
+fixtures et contre-audit de l'autre auditeur :
+[AUDIT_REPONSE_PLAN_VERTICAL_SOC64_LP_1AA487D_20260813.md](audits/AUDIT_REPONSE_PLAN_VERTICAL_SOC64_LP_1AA487D_20260813.md).
 
 Au pin 92d0c0f, la seconde vague q3 confirme un déblocage positif : sous une
 arête maximale, l'acuité du triangle se réduit exactement au signe de

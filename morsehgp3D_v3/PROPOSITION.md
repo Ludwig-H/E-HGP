@@ -3194,7 +3194,7 @@ Après ce vert seulement, substituer la source par la fenêtre E3/E4 et comparer
 les membres de sortie, jamais seulement les comptes. Une fenêtre rouge change
 la source, pas BallEvent ni le fold.
 
-### 19.2 L'owner live doit recevoir les PointId
+### 19.2 L'owner du parent devait recevoir les PointId
 
 owner_edge du pin 1aa487d compare encore ses indices u, v et w. Dans la vague,
 ce sont des GenerationRank, alors que le tie-break scientifique porte sur
@@ -3212,19 +3212,25 @@ L'ordre Morton 1,2,0 ferait choisir (1,2) au code live ; l'owner PointId est
 (0,1). Le comparateur reçoit les labels, la clé globale emploie spid triés et
 une porte de relabeling tue owner-generationrank.
 
+Le successeur `f516198` ferme ce défaut borné : `spid` est passé au
+comparateur, le juge scientifique n'est pas injecté, les clés globales trient
+les vrais labels, trois relabelings passent et le mutant dédié mord. Cette
+réception locale ne couvre ni `M3`, ni `BallEvent`, ni le fold.
+
 ### 19.3 Couture numérique stable
 
 Le profil courant reste quantized_u16_input_only. L'ABI se sépare néanmoins en
 trois couches :
 
 1. ExactKernel propre au profil calcule les décisions et la clé canonique ;
-2. SphereIdentity porte encodage versionné, comparaison exacte, niveau et
-   projection complète derrière tout digest ;
-3. BallEvent et le fold ne consomment que SphereIdentity, PointId, I_B/U_B,
+2. BallKey porte CloudEpoch, équation primitive, encodage versionné,
+   comparaison exacte et projection complète derrière tout digest ;
+3. BallEvent et le fold ne consomment que BallKey, PointId, I_B/U_B,
    owners, dispositions et preuves.
 
 Le hot path u16 conserve ses deux limbs. Il ne sérialise jamais __int128 natif.
-Un futur ExactKernel binary64 pourra employer dyadiques, filtres et repli
+`SphereIdentity` peut nommer l'interface ou le codec de `BallKey`, jamais une
+seconde identité post-census. Un futur ExactKernel binary64 pourra employer dyadiques, filtres et repli
 multiprécision sans changer le fold. Cette couture est préparée maintenant ;
 le backend binary64, ses largeurs et le claim 10 M attendent une phase formelle
 distincte.
@@ -3236,7 +3242,7 @@ restent trois champs indépendants du manifeste.
 
 ### 19.4 Cosphère lourde : refus actuel sans layout irréversible
 
-Le domaine exact régulier courant impose U_B=S pour les événements utiles.
+La politique candidate du domaine régulier courant impose U_B=S pour les événements utiles.
 Lorsque le census trouve U_B différent de S, la transaction retourne
 unsupported_degeneracy tant que le quotient n'est pas reçu. La cosphère u16 à
 384 points peut donc être refusée après une seule sphère et son census, sans
@@ -3263,6 +3269,10 @@ unsupported_degeneracy reste une décision de domaine stable ;
 resource_exhausted reste une incapacité physique sur une entrée admise. Aucun
 seuil de mémoire ne transforme l'un en l'autre.
 
+Cette politique ne découle pas du seul profil u16. Elle exige que le domaine
+`RelevantGP` soit explicitement annoncé et que sa fermeture globale soit reçue ;
+ce dernier point reste ouvert en v3.
+
 ### 19.5 La porte de coût est composée
 
 L'extrapolation 2,6 milliards de recertifications en 100 ms demanderait 26
@@ -3278,3 +3288,75 @@ réelle appelle output sensitivity, quotient reçu ou resource_exhausted.
 
 Réponse complète et contre-fixture owner :
 [AUDIT_REPONSE_ROUTE_VERTICAL_SLICE_1AA487D_20260813.md](audits/AUDIT_REPONSE_ROUTE_VERTICAL_SLICE_1AA487D_20260813.md).
+
+### 19.6 Palier rectangle corrélé : `SOC64`, puis `CORNER512`
+
+Pour `e=z-a`, `t=b-z`, `H=e dot t`, `E=||e||^2` et `X=||t||^2`, une seule
+évaluation rend les lanes imbriquées : q2 exige `H>0`, q3 ajoute
+`4H^2>EX`, q4 ajoute `3H^2>EX`. À `t` fixé, puis à `e` fixé, chaque prédicat
+est l'intérieur d'un cône de Lorentz convexe.
+
+Former `Ebox=C-A` et `Tbox=B-C`. Si les 64 couples de coins de
+`Ebox×Tbox` passent une lane, tout le rectangle la passe : `SOC64` est un
+verdict `ALL` sûr. Un échec reste `UNKNOWN`, car les deux boîtes oublient le
+`z` commun. Tester ensuite les 512 triples de coins de `A×B×C` est équivalent
+au verdict `ALL` de l'enveloppe AABB continue, par convexité séparée en `a`,
+`b` et `z`. Un coin fictif échouant ne vaut toujours pas `NONE` pour les seuls
+`PointId` stockés.
+
+La cascade est `classifieur existant OR SOC64 OR CORNER512 incrémental`, puis
+split, terminal exact ou continuation. Sous u16, la comparaison finale demande
+jusqu'à 70 bits : `i128` CPU ou deux limbs device. Les fixtures axiale,
+faux-échec SOC64, égalités q3/q4, coin omis et largeur sont obligatoires.
+
+### 19.7 Crédit projectif par LP, sans cage globale obligatoire
+
+Translater l'ancre en zéro. Pour `s_i=z_i-a`, `d=b-a`,
+`D=||d||^2` et `q_i=||s_i||^2`, définir :
+
+$$\kappa_G(d)=\min\left\lbrace \sum_i\alpha_iq_i:\sum_i\alpha_is_i=d,\ \alpha_i\geq0\right\rbrace.$$
+
+Le groupe `G` met au moins un de ses sites à l'intérieur de toute sphère par
+`a,b` si et seulement si `d` appartient au cône positif de `G` et
+`kappa_G(d)<D`. L'égalité reste ouverte. Le dual maximise `y dot d` sous
+`y dot s_i<=q_i`; le plan `y dot d=D` représente exactement les centres
+mauvais. Trois égalités suffisent, donc un optimum basique emploie au plus trois
+`PointId`.
+
+Le fast path q4 extrait gloutonnement huit bases couvrantes disjointes, chacune
+par un LP de dimension fixe, puis valide leurs formes sur un `BNode`. Son échec
+ne rejette rien. Un oracle pairwise exact et complet est toutefois disponible :
+si `G` est une base couvrante de taille au plus trois, la propriété « toute
+sphère possède au moins `h` intérieurs » vaut exactement lorsque, pour chaque
+`z` de `G`, elle vaut à profondeur `h-1` après suppression de `z`. Le pire cas
+q4 est `1+3+...+3^7=3280` LP ; il reste donc un oracle/résiduel borné, jamais le
+hot path par paire.
+
+Pour une base pleine de trois vecteurs, Cramer donne trois formes linéaires
+faibles et une forme quadratique `F(d)=r||d||^2-p dot d`. Le minimum entier de
+`F` sur une boîte est séparable. Un succès uniforme ferme un `BNode` sans
+`PairId`; un échec au représentant déclenche seulement split ou continuation.
+
+### 19.8 Les cages minimales ont quatre à six sites
+
+Une cage ancre-globale minimale est une base positive de dimension trois. Elle
+peut avoir quatre, cinq ou six sites ; un constructeur tétra-only est donc
+incomplet. Avec au plus six facettes, sa cellule de Voronoï locale bornée a au
+plus huit sommets et conserve une quantité constante de formes de fleur.
+
+La fixture octaédrique prend, pour `k=1,...,8`, les six sites
+`a+/-k*e_i`. Aucun sous-ensemble de quatre ne contient `a` en intérieur 3D,
+mais chaque groupe de six est minimal positif et ferme exactement les
+partenaires tels que `||d||^2>k(|d_x|+|d_y|+|d_z|)`. Elle tue tétra-only,
+égalité acceptée, rôle réutilisé et sept formes au lieu de huit.
+
+Les formes directionnelles restent sous environ 87 bits, mais comparer
+exactement certains rayons rationnels de cages peut demander environ 240 bits.
+Le build de banque emploie donc multiprécision ou un rayon entier majorant ; le
+reporter conserve les formes exactes comme autorité. De même, le seuil de
+profondeur `delta>=3h-2` ne vaut que pour les tétras ou les groupes dont le
+budget `omega<=3` est vérifié. Une cage de six peut coûter cinq sites dans un
+demi-espace ouvert.
+
+Preuves complètes, contre-fixtures et contre-audit de la réponse précédente :
+[AUDIT_REPONSE_PLAN_VERTICAL_SOC64_LP_1AA487D_20260813.md](audits/AUDIT_REPONSE_PLAN_VERTICAL_SOC64_LP_1AA487D_20260813.md).
