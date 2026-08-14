@@ -5318,4 +5318,20 @@ add_test(NAME mhgp3v_supports_retenus_localite
           --supports-retenus)
 set_tests_properties(mhgp3v_supports_retenus_localite PROPERTIES
   PASS_REGULAR_EXPRESSION
-  "supports_retenus : n=120 retenus=60378 retenus/n=503.15 ratio_arete_espacement moyen=7.07 max=23.00 rang_max moyen=48.1 pire=109")
+  "supports_retenus : n=120 non_degeneres=8212806 bien_centres=600311 \(7.31%\) retenus=7344 retenus/n=61.20 ratio_arete_espacement moyen=5.94 max=12.04 rang_max moyen=43.5 pire=99")
+
+# LA BONNE CENTRALITE : L'AUTORITE q4, SANS FORMER LE CENTRE.
+#
+# Un quadruplet a circumsphere peu remplie n'est un support que si son
+# circumcentre est STRICTEMENT interieur au tetraedre ; sinon sa miniboule se
+# reduit a une arite inferieure. Par Cramer, `c = N/(2 O)`, et le signe de
+# `orient3d(face, c)` vaut celui de `det3(e1, e2, N - 2 O q0)` fois celui de
+# `O` : aucune division, aucun flottant, tout sous `2^109` donc dans `i128`.
+#
+# Quatre cas la separent : le tetraedre regulier et le tetraedre PLAT du
+# contre-audit sont bien centres — l'aplatissement n'a rien a voir avec la
+# centralite —, tandis que la fixture de shell, ou `ab` est un diametre et les
+# poids de `c,d` nuls, et un tetraedre tres obtus sont refuses.
+add_test(NAME mhgp3v_corner8_centre COMMAND mhgp3v_corner8_probe --centre)
+set_tests_properties(mhgp3v_corner8_centre PROPERTIES
+  PASS_REGULAR_EXPRESSION "corner8_centre : regulier=1 plat=1 shell=0 obtus=0")

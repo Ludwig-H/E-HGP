@@ -387,18 +387,44 @@ prouver `sup_support Phi_S(q)<0` à chacun de ses huit coins, uniformément sur
 `A×B×C×D`, après `Delta>0` et positivité stricte des poids. La convexité en `z`
 rend ces huit tests nécessaires et suffisants pour chaque support fixé ; elle
 ne rend pas exacte l'enclosure des facteurs support. Une borne indécise splitte
-ou rend `PENDING`, et huit coins extérieurs ne prouvent jamais `NONE`. La route
-G4 garde donc `O/J` séparés en i128 lorsque le signe est uniforme, réserve trois
-limbs i192 au résiduel réellement indécis et ne paie le pgcd que pour les
-survivants émis ; basculer tout q4 en i256 serait un surcoût inutile.
+ou rend `PENDING`, et huit coins extérieurs ne prouvent jamais `NONE`. Une route
+G4 candidate garde `O/J` séparés en i128 lorsque le signe est uniforme, réserve
+un entier élargi au résiduel réellement indécis et ne paie le pgcd que pour les
+survivants émis. Trois limbs i192 suffisent arithmétiquement, mais il faut
+mesurer fraction résiduelle, registres, spills et occupation face à i256 avant
+de conclure sur le coût.
+
+Le contrôle algébrique Python corrélé qui falsifie `Delta=O^2` et `Phi=O*J` sur
+10 000 q4 u16 non dégénérés, sans appeler le microkernel C++ ni recevoir les
+enclosures ou la performance, est conservé
+dans [`audits/AUDIT_RECU_GRAM_UNIFIE_1FD9CF1_20260814.md`](audits/AUDIT_RECU_GRAM_UNIFIE_1FD9CF1_20260814.md).
 
 Chaque support complet produit donc une seule `BallKey` candidate, mais aucun
 census n'est payé avant le RLE. Les dégénérescences peuvent envoyer plusieurs
 `SupportKey` vers la même `BallKey` ; le RLE conserve toute cette provenance et
 paie exactement un census par `BallKey` unique. Un support non positif n'est
 jamais réémis depuis WST3/WST4 sous une arité inférieure, ce qui créerait un
-doublon ; sa source q2/q3 indépendante porte déjà son support minimal. Avec
-`d=b-a`, `D=d dot d`, `w=2*c-a-b` et `U_z=2*z-a-b`, poser :
+doublon ; sa source q2/q3 indépendante porte déjà son support minimal.
+
+La conséquence industrielle directe est un unique backend de census q2/q3/q4.
+Pour une `BallForm=(A,B,C)` fixée avec `A>0`, poser :
+
+```text
+P(z) = A*||z||^2+B dot z+C = C+sum_j (A*z_j^2+B_j*z_j)
+```
+
+Sur une AABB entière, chaque minimum axial est atteint à l'un des deux entiers
+voisins de `-B_j/(2A)`, clipés dans l'intervalle, et chaque maximum à une
+extrémité. Les extrema sont donc exacts sans centre ni flottant. `max P<0`
+crédite toute la population du nœud ; `min P>=0` exclut son intérieur strict ;
+seul `min P>0` exclut aussi le shell. Le compteur sature au seuil
+`h_q=12-q`, soit `10/9/8` pour q2/q3/q4 sous `smax=11`, puis une survivante
+reçoit son census complet `I_B/U_B`. Ce `BallFormRange-u16` remplace les
+backends de census dupliqués après RLE ; il ne réduit pas le nombre de supports
+candidats et ne transforme donc pas à lui seul une source quadratique en route
+50k.
+
+Avec `d=b-a`, `D=d dot d`, `w=2*c-a-b` et `U_z=2*z-a-b`, poser :
 
 ```text
 F_z(w) = D - ||U_z||^2 + 2*U_z dot w, avec w dot d = 0

@@ -971,7 +971,7 @@ int main(int argc, char** argv) {
       }
       return r;
     };
-    long long retenus = 0, rang_max_global = 0;
+    long long retenus = 0, rang_max_global = 0, non_degeneres = 0, bien_centres = 0;
     double somme_ratio = 0.0, ratio_max = 0.0;
     double somme_rang = 0.0;
     for (long long i = 0; i < m; ++i)
@@ -983,6 +983,12 @@ int main(int argc, char** argv) {
       for (int t2 = 0; t2 < 4; ++t2)
         for (int c = 0; c < 3; ++c) P[t2][c] = (i64)sp[(size_t)idx[t2]][c];
       if (mhgp3v::c8::orient3d(P[0], P[1], P[2], P[3]) == 0) continue;
+      ++non_degeneres;
+      // L'AUTORITE q4 : les quatre poids du circumcentre strictement positifs.
+      // Sans elle, on compte des quadruplets a sphere peu remplie, pas des
+      // supports — leur miniboule se reduirait a une arite inferieure.
+      if (!mhgp3v::c8::bien_centre(P[0], P[1], P[2], P[3])) continue;
+      ++bien_centres;
       long long interieurs = 0;
       for (long long z = 0; z < m && interieurs <= 7; ++z) {
         if (z == i || z == j || z == k || z == l) continue;
@@ -1022,10 +1028,13 @@ int main(int argc, char** argv) {
       somme_rang += (double)rmax;
       if (rmax > rang_max_global) rang_max_global = rmax;
     }
-    std::printf("supports_retenus : n=%lld retenus=%lld retenus/n=%.2f"
+    std::printf("supports_retenus : n=%lld non_degeneres=%lld bien_centres=%lld"
+                " (%.2f%%) retenus=%lld retenus/n=%.2f"
                 " ratio_arete_espacement moyen=%.2f max=%.2f"
                 " rang_max moyen=%.1f pire=%lld\n",
-                m, retenus, (double)retenus / (double)m,
+                m, non_degeneres, bien_centres,
+                100.0 * (double)bien_centres / (double)std::max(1LL, non_degeneres),
+                retenus, (double)retenus / (double)m,
                 somme_ratio / (double)std::max(1LL, retenus), ratio_max,
                 somme_rang / (double)std::max(1LL, retenus), rang_max_global);
     if (retenus == 0) {

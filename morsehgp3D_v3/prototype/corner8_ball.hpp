@@ -169,6 +169,85 @@ MHGP_HD inline bool interieur_strict(const i64 a[3], const i64 b[3], const i64 x
 }
 
 // ---------------------------------------------------------------------------
+// BONNE CENTRALITE : LES QUATRE POIDS STRICTEMENT POSITIFS.
+//
+// C'est l'AUTORITE q4. Un quadruplet dont la circumsphere est peu remplie n'est
+// un support que si son circumcentre est STRICTEMENT interieur au tetraedre —
+// sinon la miniboule se reduit a un support d'arite inferieure et l'evenement
+// appartient a q3 ou q2.
+//
+// Le centre n'est jamais forme. Il verifie `2 M c = b` avec `M` de lignes
+// `u_i = p_i - p_0` et `b_i = ||p_i||^2 - ||p_0||^2`, donc par Cramer
+// `c = N / (2 O)` ou `O = det3(u_1,u_2,u_3)` est l'orientation et `N_j` un
+// determinant entier. Pour la face opposee au sommet `i`, de sommets
+// `q_0,q_1,q_2` :
+//
+//   signe( orient3d(q,c) ) = signe( det3(q_1-q_0, q_2-q_0, N - 2 O q_0) )
+//                            * signe(O)
+//
+// et le poids `lambda_i` est strictement positif exactement quand ce signe
+// egale celui de `orient3d(q, p_i)`. Aucune division, aucun flottant.
+//
+// LARGEURS, PROFIL u16. Coordonnees sous `2^16`, differences sous `2^17`,
+// `|b| < 2^35`, donc `|N| < 2^72` et `|2 O q_0| < 2^71`. Le determinant final
+// combine deux colonnes en `2^17` et une en `2^72` : il reste sous `2^109`,
+// donc dans `i128`.
+MHGP_HD inline bool bien_centre(const i64 p0[3], const i64 p1[3], const i64 p2[3],
+                                const i64 p3[3]) {
+  const i64* p[4] = {p0, p1, p2, p3};
+  i64 u[3][3];
+  i128 b[3];
+  for (int k = 0; k < 3; ++k) {
+    for (int j = 0; j < 3; ++j) u[k][j] = p[k + 1][j] - p0[j];
+    i128 n1 = 0, n0 = 0;
+    for (int j = 0; j < 3; ++j) {
+      n1 += (i128)p[k + 1][j] * p[k + 1][j];
+      n0 += (i128)p0[j] * p0[j];
+    }
+    b[k] = n1 - n0;
+  }
+  const i128 O = det3(u[0], u[1], u[2]);
+  if (O == 0) return false;   // support degenere : jamais q4
+
+  // `N_j` : Cramer, colonne `j` de `M` remplacee par `b`.
+  i128 N[3];
+  for (int j = 0; j < 3; ++j) {
+    i128 col[3][3];
+    for (int k = 0; k < 3; ++k)
+      for (int c = 0; c < 3; ++c) col[k][c] = (c == j) ? b[k] : (i128)u[k][c];
+    N[j] = col[0][0] * (col[1][1] * col[2][2] - col[1][2] * col[2][1]) -
+           col[0][1] * (col[1][0] * col[2][2] - col[1][2] * col[2][0]) +
+           col[0][2] * (col[1][0] * col[2][1] - col[1][1] * col[2][0]);
+  }
+
+  auto det3_i128 = [](const i128 a[3], const i128 v[3], const i128 w[3]) -> i128 {
+    return a[0] * (v[1] * w[2] - v[2] * w[1]) -
+           a[1] * (v[0] * w[2] - v[2] * w[0]) +
+           a[2] * (v[0] * w[1] - v[1] * w[0]);
+  };
+
+  for (int i = 0; i < 4; ++i) {
+    const i64* q[3];
+    int nq = 0;
+    for (int g = 0; g < 4; ++g) if (g != i) q[nq++] = p[g];
+    i128 e1[3], e2[3], cc[3], pp[3];
+    for (int j = 0; j < 3; ++j) {
+      e1[j] = (i128)q[1][j] - q[0][j];
+      e2[j] = (i128)q[2][j] - q[0][j];
+      cc[j] = N[j] - 2 * O * (i128)q[0][j];
+      pp[j] = (i128)p[i][j] - q[0][j];
+    }
+    const i128 dc = det3_i128(e1, e2, cc);
+    const i128 dp = det3_i128(e1, e2, pp);
+    if (dc == 0 || dp == 0) return false;   // le centre est SUR une face
+    // `signe(orient(q,c)) = signe(dc) * signe(O)` doit egaler `signe(dp)`.
+    const bool sc = ((dc > 0) == (O > 0));
+    if (sc != (dp > 0)) return false;
+  }
+  return true;
+}
+
+// ---------------------------------------------------------------------------
 // ARITHMETIQUE D'INTERVALLES, i128.
 // ---------------------------------------------------------------------------
 struct Iv {

@@ -28,7 +28,7 @@ doit être déduit de ces probes CPU.
 
 ## Verdict actuel
 
-Le `HEAD=1fd9cf1d40dda12bcad569fab1227657551941cb` contient quatre avancées
+Le `HEAD=f1b78c0b8a4407e3f1e568acdb23ada4f7862ddf` contient quatre avancées
 directement liées à l'idée de support complet, puis plusieurs diagnostics de
 réduction du broad phase WST3/WST4 :
 
@@ -105,7 +105,8 @@ biaisée ; zéro succès sur 3000 tirages ne prouve ni une fréquence `10^-8`, n
 que la masse q4 positive est du déchet, ni que le rayon est le filtre dominant.
 Le sampler combinadique u128 exact, ses strates de rejet et son plafond
 `samples*n` sont spécifiés dans `PROPOSITION.md`.
-Le worktree postérieur `--supports-retenus` reste également oracle-only. Il
+Le mode `--supports-retenus`, désormais commis à `f1b78c0`, reste également
+oracle-only. Il
 énumère exactement l'ensemble brut `orientation!=0 && I<=7`, pas les supports
 q4 positifs : il omet les quatre poids, le shell et le RLE par `BallKey`. Sa
 « localité de rayon » est le rapport plus-grande-arête/espacement ; ce n'est
@@ -114,7 +115,24 @@ sans tie `PointId` correspond au plus à une clique kNN mutuelle non déclarée.
 Enfin, le cap `n=260` autorise jusqu'à `47 627 157 760` tests in-sphere puis
 `575 990 939 160` comparaisons de distance : c'est une borne d'entrée, pas un
 budget. L'énumération globale des 4-ensembles n'a pas besoin d'owner pour
-l'exact-once ; l'owner est requis pour son raccord à `OwnedCK`.
+l'exact-once ; l'owner est requis pour son raccord à `OwnedCK`. Elle hérite en
+outre du rejet global des positions dupliquées du probe, contraire au profil
+`PointId` déclaré. La CTest ajoutée pour ce mode omet `--ordre=4` et emploie
+`PASS_REGULAR_EXPRESSION` : elle grave précisément la sortie q4 sous le mode q3
+par défaut au lieu d'en exiger le rejet. Deux rejeux passent ici en 30,49 s et
+33,91 s à `n=120`, durées diagnostiques non benchmark, ce qui reçoit un oracle
+borné de falsification, pas son titre « aucun préfixe
+kNN » ni une route 50k.
+
+Le worktree postérieur ajoute maintenant un test entier de bonne centralité q4
+par Cramer et signes des quatre faces, puis l'applique avant `I<=7`. Les quatre
+fixtures locales passent, mais aucune CTest ne porte encore `--centre` et la
+porte stable de localité devient rouge (`CTest rc=8`) : son ancienne regex
+attend la population brute. À `uniform,n=120`, le delta publie
+`600311/8212806=7,31 %` tétraèdres bien centrés puis `7344` shallow. C'est un
+gain de sémantique et un diagnostic de sélectivité, pas encore une réception :
+permutations, extrêmes u16, oracle Gram indépendant, shell, `BallKey/RLE`, ABI
+invalid/unknown et voie device restent ouverts.
 
 Votre idée mathématique est donc reçue sous sa forme exacte : la hiérarchie
 HGP n'a besoin que des supports minimaux positifs complets. q2 teste une boule
@@ -127,6 +145,14 @@ strictement positifs. Pour q3, le centre est
 intrinsèque au plan, mais la boule et son census sont ambiants en dimension
 trois. Les sphères incidentes à une ancre partielle ne sont que le domaine d'un
 prune facultatif, jamais la source.
+
+Cette unicité permet aussi de partager le census : après normalisation et RLE
+des `BallKey`, q2, q3 et q4 utilisent la même somme de trois quadratiques
+convexes `A*z_j^2+B_j*z_j`. Ses extrema sur une AABB u16 entière sont exacts
+par axe ; le compteur sature à `10/9/8` intérieurs avant le census complet du
+shell. Cela supprime les centres continus et les census répétés par support,
+mais pas la génération potentiellement quadratique des supports : le gain SLO
+dépend encore d'une source factorisée et d'un preflight de masse.
 
 La généralisation WSPD exacte est combinatoire, pas une exigence de séparation
 de toutes les paires de facteurs. Pour un rectangle d'arête et une partition de

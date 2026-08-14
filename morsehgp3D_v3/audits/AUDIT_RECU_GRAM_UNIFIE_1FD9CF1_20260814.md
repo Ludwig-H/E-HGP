@@ -8,15 +8,33 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-Pin documentaire : `HEAD=1fd9cf1d40dda12bcad569fab1227657551941cb`.
+Pin de base documentaire : `HEAD=1fd9cf1d40dda12bcad569fab1227657551941cb`.
+Le reçu a été intégré au commit `f1b78c0b8a4407e3f1e568acdb23ada4f7862ddf` ;
+son nom conserve volontairement le pin auquel le microkernel a été audité.
 
 Ce reçu vérifie seulement deux identités algébriques du microkernel Gram q4 :
 `Delta=O^2` et `Phi=O*J`. Il ne reçoit ni enclosure de boîtes support, ni
-positivité, ni source WST, ni census, ni performance. La preuve algébrique reste
-l'autorité ; ce différentiel déterministe est une porte de falsification bornée.
+positivité, ni source WST, ni census, ni microkernel C++, ni performance. Les
+deux calculs Python partagent `det3` : c'est un contrôle algébrique corrélé et
+une porte de falsification bornée, pas un différentiel d'implémentation.
 
-Environnement : Python `3.12.1`, seed `20260814`, coordonnées entières uniformes
-dans `[-10,10]`, bornes incluses. La cible est exactement 10 000 q4 non
+Le noyau de preuve est celui de
+[`PROPOSITION.md` §4.3](../PROPOSITION.md#43-miniboule-unique-et-plan-médiateur-fini).
+Pour la matrice carrée q4 `M`, on a
+`Delta=det(M^T*M)=det(M)^2=O^2`. Ensuite
+`M*adj(M^T*M)=Delta*M^(-T)` donne
+`Phi=Delta*(||s||^2-s^T*M^(-T)*ell)`. Les opérations de lignes du déterminant
+in-sphere donnent simultanément
+`J=O*(||s||^2-s^T*M^(-T)*ell)`, donc `Phi=O*J`.
+
+Le tirage ci-dessous ne garantit ni `Phi<0`, ni `Phi=0`, ni les deux signes de
+`O`. Une réception logicielle ajoutera des fixtures déterministes pour
+`O>0/O<0/O=0`, intérieur/shell/extérieur et permutation impaire, puis comparera
+un sujet C++ à une autorité distincte. Le mot « unifié » du nom renvoie à la
+formule q2/q3/q4 de la proposition ; le présent reçu n'exerce que q4.
+
+Environnement : Python `3.12.1`, seed `20260814`, coordonnées u16 uniformes
+dans `[0,20]`, bornes incluses. La cible est exactement 10 000 q4 non
 dégénérés.
 
 ```bash
@@ -25,8 +43,8 @@ import hashlib
 import random
 
 SEED = 20260814
-LOW = -10
-HIGH = 10
+LOW = 0
+HIGH = 20
 TARGET = 10_000
 rng = random.Random(SEED)
 
@@ -128,8 +146,8 @@ PY
 Sortie attendue et observée :
 
 ```text
-PASS seed=20260814 range=[-10,10] accepted=10000 draws=10029
-fixture_sha256=47656f6c64c4f18f6533f1ef59a578452606f3e5297752fea7d12107b0877140
+PASS seed=20260814 range=[0,20] accepted=10000 draws=10029
+fixture_sha256=e0a7f07cc819a8c402e44394baf2c41e38b837dba901153eddaa87d61905f4b1
 ```
 
 GCP non utilisé.

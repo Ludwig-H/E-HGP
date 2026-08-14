@@ -8,7 +8,7 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-> **Alerte au `HEAD=1fd9cf1d40dda12bcad569fab1227657551941cb`.** Les
+> **Alerte au `HEAD=f1b78c0b8a4407e3f1e568acdb23ada4f7862ddf`.** Les
 > commits `89774d0`, `e3f1925` et `88a9ba8` ajoutent respectivement
 > `Corner8BallDepth`, un broad phase WST3 et son produit WST4 ; `22d1cb0` en
 > publie la note de coût. `a73161c` corrige ensuite le signe d'acuité par
@@ -49,21 +49,42 @@ Cadre : `phase=exploration_v3_hors_registre`,
 >
 > `1fd9cf1` ajoute ensuite un sampler `--masse` et une CTest à regex. Ils ne
 > sont pas reçus : le sampler choisit les
-> blocs témoins uniformément au lieu de les pondérer par `|C|`, conserve les
-> rangs Morton pour le tie owner au lieu de `EdgeKey(PointId)` et force
+> blocs témoins uniformément au lieu de les pondérer par `|C|`; son ordre fixe
+> de slots tranche le tie owner au lieu de `EdgeKey(PointId)` et il force
 > provisoirement la positivité par `const bool centre=true`. Il accepte aussi `--masse` sans
 > `--ordre=4` et appelle `retenus` le seul test `I<=7`, sans extra-shell.
 > Aucune de ses sorties ne décrit donc encore la masse q4 positive.
 >
-> Le worktree postérieur, SHA-256 WST `23a2be338ac36b364d89b52669657f31602662ee9bb6b9e1716f97c4177ef0a3`,
-> ajoute `--supports-retenus`. Il énumère encore tous les tétraèdres non
+> `f1b78c0` committe ensuite `--supports-retenus`, SHA-256 WST
+> `23a2be338ac36b364d89b52669657f31602662ee9bb6b9e1716f97c4177ef0a3`, et
+> sa CTest à regex, CMake
+> `258b9eb979ca2119d21eade9a8ac6db9dcb8c4893a8e57d7042fdcbc7477b11a`.
+> Il énumère encore tous les tétraèdres non
 > coplanaires avec `I<=7`, sans positivité, shell ni `BallKey/RLE`. Cette boucle
 > globale est exact-once sans owner ; elle ne calcule toutefois pas l'owner
 > requis pour une provenance ou comparaison `OwnedCK`. Son
 > commentaire assimile abusivement la plus grande arête au circumrayon, et le
 > maximum des douze rangs dirigés n'est pas une condition nécessaire d'une
-> route owner. Le cap `n=260` autorise un pire cas prohibitif. Ce delta n'est
-> pas reçu non plus.
+> route owner. Le cap `n=260` autorise un pire cas prohibitif. La nouvelle CTest
+> passe en 30,49 s puis 33,91 s à seulement `n=120` sur la machine de l'auditeur et omet
+> précisément `--ordre=4` : elle
+> reçoit donc une sortie q4 sous le mode q3 par défaut au lieu de mordre le
+> défaut d'option. Le titre « aucun préfixe kNN » n'est pas reçu : la fixture
+> 50k exclut une source ancrée `k<=12499`, pas toute architecture locale ni une
+> croissance asymptotique.
+>
+> Après ce pin, Claude raccorde un candidat `c8::bien_centre` par Cramer et
+> signes de faces : Corner8 header
+> `34ae231c3b1518a67f0b573269b9ba68a2fe1038fda8b84419b725aa5b2ae68b`,
+> probe `a126622e9c4ebbd5c81f60d54f4a3e896d0a9a86f26ce665ba940c7f85d90bc1`
+> et WST `03dc123a2c7eadb48b79cb6c54bc6a8ff44cd2911aa73f89106c2e3e5c02e9b1`.
+> La formule est cohérente sous le profil u16 et les quatre fixtures
+> locales rendent `regulier=1 plat=1 shell=0 obtus=0`, mais aucun CTest ne porte
+> encore `--centre`, aucune permutation/orientation opposée ni autorité Gram
+> indépendante n'est exercée. Le raccord WST casse la porte stable :
+> `mhgp3v_supports_retenus_localite` rend `CTest rc=8`, car CMake attend encore
+> `retenus=60378` tandis que le delta publie `bien_centres=600311` et
+> `retenus=7344`. Ce live mobile n'est pas reçu.
 >
 > Les défauts antérieurs restent actifs : les portes HC saines sont à regex et
 > ne jugent pas chaque promotion ; `--fenetre-exhaustive` contourne les gates ;
@@ -81,16 +102,17 @@ Cadre : `phase=exploration_v3_hors_registre`,
 ## Snapshot
 
 Le dernier commit stable relu est
-`HEAD=1fd9cf1d40dda12bcad569fab1227657551941cb`, commit
-`la masse est du dechet : zero tirage sur trois mille est retenu`. Il
+`HEAD=f1b78c0b8a4407e3f1e568acdb23ada4f7862ddf`, commit
+`aucun prefixe kNN ne capture les supports : le pire rang suit n`. Il
 absorbe le raccord Midball de `a58d020`, HC et la borne de `c1e2e3b`, Corner8
 de `89774d0`, WST3 de `e3f1925`, WST4 de `88a9ba8`, la correction du signe
 aigu, l'échelle rationnelle, le diagnostic Corner8 postérieur au broad phase,
 le certificat bisigne de `f7ab7bb`, la conservation des couples non séparés,
-les compteurs `Sym2`, puis le sampler `--masse`. Après ce pin, le delta logiciel
-mobile de Claude porte sur `prototype/wst3_probe.cpp`, SHA-256
-`23a2be338ac36b364d89b52669657f31602662ee9bb6b9e1716f97c4177ef0a3`, et
-ajoute `--supports-retenus`. Les autres changements visibles sont les présentes
+les compteurs `Sym2`, le sampler `--masse`, puis l'oracle brut
+`--supports-retenus` et sa porte à regex. Après ce pin, le delta logiciel mobile
+de Claude porte sur `prototype/corner8_ball.hpp`,
+`prototype/corner8_probe.cpp` et `prototype/wst3_probe.cpp`, aux hashes détaillés
+dans l'alerte ci-dessus. Les autres changements visibles sont les présentes
 écritures documentaires ; aucun logiciel n'a été modifié par l'auditeur.
 
 Le code applique `diag2*num<=rayon2*den`, donc `num/den` se comporte comme une
@@ -107,12 +129,12 @@ rend encore le juge owner vert par pure surcouverture et publie
 `3 132 900=binom(60,2)^2` tuples candidats. Cela ne reçoit aucune sélectivité
 aval.
 
-Empreintes SHA-256 au commit `1fd9cf1` :
+Empreintes SHA-256 au commit `f1b78c0` :
 
 - `CMakeLists.txt` :
-  `5d864422a26b4025831438faf1a1a8fbb31393e0e50a006514c25fd968478671` ;
+  `258b9eb979ca2119d21eade9a8ac6db9dcb8c4893a8e57d7042fdcbc7477b11a` ;
 - `prototype/wst3_probe.cpp` :
-  `cb62ff882a43930c6ee7d3d3ea09af8ebb456aa96cf31347b22db80bb7d2b892` ;
+  `23a2be338ac36b364d89b52669657f31602662ee9bb6b9e1716f97c4177ef0a3` ;
 - `prototype/corner8_ball.hpp` :
   `c09ef9f2f7b3c0710464cbb108bd0c6285b2d1c36b41e2771a1b9fa267508a1c` ;
 - `prototype/corner8_probe.cpp` :
@@ -134,9 +156,11 @@ Empreintes SHA-256 au commit `1fd9cf1` :
 
 Le commit stable reçoit la primitive BJD, un packing disjoint sûr sur ses
 campagnes causales, huit portes BJD ciblées, treize portes Midball, cinq portes
-HC, une porte de réfutation de la borne, six portes Corner8 et dix portes
-WST3/WST4 enregistrées. Les `16/16` Corner8/WST ciblées passent ; aucune suite
-complète du catalogue de `837` tests n'a été rejouée dans ce snapshot. Ces verts ne
+HC, une porte de réfutation de la borne, six portes Corner8 et onze portes
+WST3/WST4 enregistrées. Les `16/16` Corner8/WST antérieures passent au pin
+précédent ; la nouvelle porte `--supports-retenus` passe seule en 30,49 s à
+`n=120`. Aucune suite complète du catalogue de `838` tests n'a été rejouée dans
+ce snapshot. Ces verts ne
 ferment pas les défauts de composition et d'identité ci-dessus. Il ne reçoit ni
 projection CK--WST distinct-ID/owner,
 ni profondeur `tau(F)`, ni ledger persistant de vrais `PointId`, ni primitive
@@ -519,10 +543,10 @@ pondère seulement le terminal par `|A||B|(sum_i |C_i|)^2`, puis choisit les
 indices de blocs `u,v` uniformément. Un point d'une petite cellule reçoit donc
 une probabilité différente d'un point d'une grosse cellule. La diagonale est
 ordonnée, contient `x=y`, et le cumul en `double` perd les unités au-delà de
-`2^53`. L'owner ignore les égalités `EdgeKey` et porte sur les rangs Morton ;
-les vrais `PointId=pid[rank]` ne sont pas utilisés pour ce tie total. L'égalité
-de deux rangs teste néanmoins correctement l'identité du record tant que le tri
-reste bijectif. Enfin
+`2^53`. L'owner ignore les égalités `EdgeKey` : la première paire dans l'ordre
+fixe des six slots gagne tout tie, indépendamment des vrais
+`PointId=pid[rank]`. L'égalité de deux rangs teste néanmoins correctement
+l'identité du record tant que le tri reste bijectif. Enfin
 `const bool centre=true` classe tout support non dégénéré comme q4 positif :
 `non_centres` reste zéro par construction et `retenus` mélange les
 circonsphères non minimales. `retenus` ne teste en outre que `I<=7`, sans
@@ -574,7 +598,7 @@ loi réellement tirée et des strates positives/owner appariées. La seule CTest
 enregistrée fixe `uniform,n=2000` et accepte une regex ; elle ne reçoit ni la
 seconde famille citée par le commit, ni le code de sortie après cette ligne.
 
-### Delta mobile `--supports-retenus` : ce ne sont pas encore les supports q4
+### Commit `f1b78c0`, `--supports-retenus` : ce ne sont pas encore les supports q4
 
 Le nouveau mode exhaustif filtre seulement `O!=0` et `I<=7` : son objet réel est
 `Raw4={S: |S|=4, affdim(S)=3, I(circ(S))<=7}`. Il manque les
@@ -612,8 +636,8 @@ position dupliquée donne un plus proche voisin à distance nulle, `max(1,esp)`
 invente en outre une échelle positive sans contrat. Au cap autorisé `n=260`, il existe
 `186043585` quadruplets, jusqu'à `47627157760` tests in-sphere et, sur une
 cohorte cosphérique shallow, `575990939160` distances de rang : la borne
-d'entrée n'est pas un budget. Le mode s'exécute en outre après le WST et le
-compteur `Sym2` qu'il n'utilise pas. La directive à Claude est : brancher ce
+d'entrée n'est pas un budget. Le mode s'exécute en outre après le WST et, en
+ordre quatre, le compteur `Sym2` qu'il n'utilise pas. La directive à Claude est : brancher ce
 mode avant le broad phase, préflighter un budget u128, publier `PARTIEL` au cap,
 et nommer la population (`SupportKey` ou `BallKey`) ainsi que la relation kNN.
 Le probe refuse en amont toute position Morton dupliquée, contrairement au
@@ -623,8 +647,48 @@ par `max(1,esp)` est actuellement inatteignable dans ce mode, pas traité.
 La voie reçue est :
 positivité T--Q/L, BallKey/RLE, census `I/U`, métrique locale explicitement
 versionnée, cap d'opérations et statut `PARTIEL`, le tout oracle-only.
-Le mode doit aussi exiger `--ordre=4` et être exclusif de `--masse` ; le delta
-accepte actuellement l'ordre trois par défaut tout en imprimant des q4.
+Le mode doit aussi exiger `--ordre=4` et être exclusif de `--masse` ; il accepte
+actuellement l'ordre trois par défaut tout en imprimant des q4.
+
+La seule porte CTest fixe `uniform,n=120`, attend par regex
+`retenus=60378`, `ratio moyen=7,07` et `rang pire=109`, puis passe ici en
+30,49 s. Elle n'exerce ni positivité, ni shell, ni `BallKey`, ni la fixture 50k,
+et `PASS_REGULAR_EXPRESSION` n'impose pas le code final après la ligne. Son
+temps à 120 points confirme un oracle borné de falsification, pas une route vers
+50k.
+
+Réparation de porte demandée à Claude : renommer le mode et la sortie
+`raw4_ile7_locality`, le rendre standalone ou exiger `--ordre=4`, fixer
+explicitement les deux seeds, poser un `TIMEOUT` et un cap u128 de travail, puis
+faire contrôler `rc=0` par un wrapper plutôt que par une regex seule. Les
+fixtures positives, poids négatif/nul, shell, tie `PointId` et la construction
+analytique 50k doivent être séparées de ce snapshot statistique.
+
+### Delta live post-`f1b78c0` : positivité q4 par Cramer, intégration rouge
+
+Le nouveau `c8::bien_centre` résout implicitement
+`2 M c=(||p_i||^2-||p_0||^2)_i`, puis compare le centre et chaque sommet au
+même côté de la face opposée. Sous indépendance affine, ce test est équivalent
+aux quatre barycentriques strictement positives. Les bornes publiées sont
+conservatrices sur u16 : les déterminants finaux restent sous 109 bits, donc
+i128 suffit. Le build ciblé est vert et `--centre` classe correctement les
+quatre fixtures régulière, positive aplatie, poids nuls et obtuse.
+
+Ce résultat est encore une réception locale incomplète. `--centre` n'est dans
+aucune CTest ; les fixtures partagent le sujet et n'exercent ni permutation
+impaire, ni orientation opposée, ni extrêmes u16, ni comparaison aux
+numérateurs `L_0,...,L_3`/Gram. L'ABI booléenne fusionne dégénérescence,
+précondition invalide et poids non positif, et le header ne préflighte pas le
+domaine avant les soustractions signées. Le helper local lambda sous
+`MHGP_HD` doit aussi être compilé sur la voie CUDA avant tout claim device.
+
+Le raccord transforme enfin la population mesurée en
+`Positive4 intersect {I<=7}`, mais ne répare ni shell, ni `BallKey/RLE`, ni
+positions dupliquées, ni rang kNN typé. Il invalide la regex stable : à
+`uniform,n=120`, `CTest rc=8` après 8,63 s, avec
+`non_degeneres=8212806`, `bien_centres=600311 (7,31 %)` et `retenus=7344`.
+Cette chute est un diagnostic utile de sélectivité, pas encore une source ou
+une pente.
 
 ## P0 : `0A` reste ouvert sur u16
 
@@ -650,8 +714,14 @@ complet. Avec `G=M^T M`, `Delta=det(G)`, `r=adj(G) diag(G)` et
 `2 Delta-sum r_i`, tandis que
 `Phi(z)=Delta||z-a||^2-(z-a)^T t` décide exactement la puissance. Il redonne la
 boule diamétrale en q2, la boule ambiante en q3 et `Delta=O^2`, `Phi=O*J` en
-q4. Un contrôle entier indépendant a vérifié ces identités sur 10 000 q4
-aléatoires.
+q4. Un contrôle algébrique Python corrélé au profil u16 a vérifié ces deux identités sur
+10 000 q4 non dégénérés après 10 029 tirages, seed `20260814`, avec digest des
+fixtures
+`e0a7f07cc819a8c402e44394baf2c41e38b837dba901153eddaa87d61905f4b1` :
+[`AUDIT_RECU_GRAM_UNIFIE_1FD9CF1_20260814.md`](AUDIT_RECU_GRAM_UNIFIE_1FD9CF1_20260814.md).
+Il ne reçoit aucun microkernel C++ et partage `det3` entre ses deux côtés ; les
+fixtures déterministes de signe, shell, permutation et dégénérescence restent
+à graver.
 
 Au terminal q4, calculer directement `T=det3(v1,v2,v3)` et
 `Q=sum_i ||v_i||^2*(v_j cross v_k)` : les quatre numérateurs de Cramer tiennent
@@ -663,10 +733,21 @@ prouver `sup_support Phi(q)<0` à chaque coin, après indépendance et positivit
 uniformes sur les facteurs support. Huit coins extérieurs ne prouvent jamais
 `NONE`.
 
-La route G4 garde donc le hot path `O/J` séparé en i128 sur les blocs de signe
-uniforme, réserve trois limbs i192 au résiduel et ne paie le pgcd que pour les
-survivants émis. Ces formes ne sont pas encore implémentées ni jugées par une
-autorité BigInt ; elles rendent le P0 actionnable, pas reçu.
+Une route G4 candidate garde le hot path `O/J` séparé en i128 sur les blocs de
+signe uniforme, réserve un entier élargi au résiduel et ne paie le pgcd que
+pour les survivants émis. La sûreté arithmétique de trois limbs i192 est
+démontrée, mais son coût ne l'est pas : comparer i192 et i256 sur la fraction
+résiduelle, les registres, spills et l'occupation avant de choisir. Ces formes
+ne sont pas encore implémentées ni jugées par une autorité BigInt ; elles
+rendent le P0 actionnable, pas reçu.
+
+Une conséquence supplémentaire est reçue algébriquement : après RLE, toute
+`BallForm=(A,B,C)`, `A>0`, emploie le même range-count exact sur AABB u16,
+car `A||z||^2+B dot z+C` est une somme de trois quadratiques convexes séparées.
+Minimum entier aux deux voisins du sommet axial clipé, maximum aux endpoints,
+puis saturation à `10/9/8` intérieurs pour q2/q3/q4. Cette factorisation évite
+un backend et un census par arité ; elle ne borne ni le nombre de `SupportKey`,
+ni celui des `BallKey`, et n'est donc pas encore une preuve du SLO.
 
 Autorité, valeurs exactes et fixtures :
 [`AUDIT_BALL_EVENT_V0_2B89EA1_20260813.md`](AUDIT_BALL_EVENT_V0_2B89EA1_20260813.md).
@@ -1165,10 +1246,13 @@ HEAD Corner8 : 6/6 ciblés ; bloc=4096 supports/32768 témoins, oracle ponctuel 
 pin 22d1cb0 WST3 : 5/5 ciblés ; uniform n=120, 280840 triangles, zéro manquant/doublon owner
 pin 22d1cb0 WST4 : 1/1 ciblé ; uniform n=60, 487635 quadruplets, zéro manquant/doublon owner
   copies non-owner, diagonales, vrai PointId, doublons de position et coût non jugés
-HEAD 1fd9cf1 : dix portes WST3/WST4 enregistrées ; 10/10 vertes en 31,49 s au présent rejeu, durée non benchmark
-HEAD 1fd9cf1 : 16/16 portes Corner8/WST3/WST4 ciblées vertes au rejeu antérieur ; aucune ne passe --corner8 ni n'exerce le bisigne
-HEAD 1fd9cf1 --masse n=60/S=1000 : 9,00 % IDs répétés, 76,10 % owner hors, moyenne 25,3, retenus 1,00 % ; sortie biaisée/non positive
-catalogue HEAD : 837 CTests après reconfiguration ; aucune suite complète 837/837 rejouée ici
+pin 1fd9cf1 : dix portes WST3/WST4 ; 10/10 vertes en 31,49 s, durée non benchmark
+pin 1fd9cf1 : 16/16 portes Corner8/WST3/WST4 ciblées vertes ; aucune ne passe --corner8 ni n'exerce le bisigne
+pin 1fd9cf1 --masse n=60/S=1000 : 9,00 % IDs répétés, 76,10 % owner hors, moyenne 25,3, retenus 1,00 % ; sortie biaisée/non positive
+HEAD f1b78c0 --supports-retenus n=120 : 1/1 regex verte en 30,49 s puis 33,91 s ; oracle brut non positif, mode q3 par défaut
+live bien_centre --centre : build vert ; regulier=1 plat=1 shell=0 obtus=0 ; aucune CTest
+live bien_centre + supports n=120 : CTest rc=8 en 8,63 s ; bien_centres=600311, retenus=7344
+catalogue HEAD : 838 CTests après reconfiguration ; aucune suite complète 838/838 rejouée ici
 ablation BJD n=1500 uniform : masse q4 -12,55 %, CPU user médian +5,47 %, lectures identiques
 ablation BJD n=1500 amas : masse q4 -0,87 %, CPU user médian +8,15 %, lectures identiques
 session G4 SOC actif : CTest rc=8, aucune rampe, cible TERMINATED

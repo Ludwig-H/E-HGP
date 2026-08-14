@@ -238,11 +238,43 @@ int fixture_bloc(C8Mutant mu) {
   return 0;
 }
 
+// ---------------------------------------------------------------------------
+// LES FIXTURES DE BONNE CENTRALITE.
+// ---------------------------------------------------------------------------
+int fixtures_centre() {
+  // 1. Tetraedre regulier : quatre poids `1/4`, donc bien centre.
+  const i64 r0[3] = {0, 0, 0}, r1[3] = {0, 1, 1}, r2[3] = {1, 0, 1}, r3[3] = {1, 1, 0};
+  const bool reg = mhgp3v::c8::bien_centre(r0, r1, r2, r3);
+
+  // 2. Le tetraedre PLAT du contre-audit : poids `1/4` malgre l'aplatissement.
+  const i64 f0[3] = {3000, 2000, 2001}, f1[3] = {2000, 3000, 1999};
+  const i64 f2[3] = {1000, 2000, 2001}, f3[3] = {2000, 1000, 1999};
+  const bool plat = mhgp3v::c8::bien_centre(f0, f1, f2, f3);
+
+  // 3. La fixture de SHELL : `a,b,c,d` cospheriques autour de `(2,0,0)` mais
+  //    `ab` est un DIAMETRE, donc les poids de `c` et `d` sont nuls et
+  //    l'evenement reste q2. Elle doit etre refusee.
+  const i64 s0[3] = {0, 0, 0}, s1[3] = {4, 0, 0}, s2b[3] = {2, 2, 0}, s3[3] = {2, 0, 2};
+  const bool shell = mhgp3v::c8::bien_centre(s0, s1, s2b, s3);
+
+  // 4. Un tetraedre tres obtus : le centre sort par une face.
+  const i64 o0[3] = {0, 0, 0}, o1[3] = {100, 0, 0}, o2[3] = {50, 1, 0}, o3[3] = {50, 0, 1};
+  const bool obtus = mhgp3v::c8::bien_centre(o0, o1, o2, o3);
+
+  std::printf("corner8_centre : regulier=%d plat=%d shell=%d obtus=%d\n",
+              reg ? 1 : 0, plat ? 1 : 0, shell ? 1 : 0, obtus ? 1 : 0);
+  if (!reg || !plat || shell || obtus) {
+    std::fprintf(stderr, "DESACCORD: la bonne centralite ne classe pas les quatre cas\n");
+    return 1;
+  }
+  return 0;
+}
+
 }  // namespace
 
 int main(int argc, char** argv) {
   long long tours = 0, seed = 1;
-  bool veut_bloc = false, veut_convexite = false;
+  bool veut_bloc = false, veut_convexite = false, veut_centre = false;
   C8Mutant mu = C8Mutant::kNone;
   for (int i = 1; i < argc; ++i) {
     const std::string a = argv[i];
@@ -253,6 +285,7 @@ int main(int argc, char** argv) {
       seed = arg_ll(val("--seed=").c_str(), 1, (1LL << 40), "seed");
     else if (a == "--bloc") veut_bloc = true;
     else if (a == "--convexite") veut_convexite = true;
+    else if (a == "--centre") veut_centre = true;
     else if (a == "--inject=corners-outside-implies-none")
       mu = C8Mutant::kCornersOutsideImpliesNone;
     else if (a == "--inject=c8-accept-equality") mu = C8Mutant::kAcceptEquality;
@@ -260,8 +293,12 @@ int main(int argc, char** argv) {
     else if (a == "--inject=c8-norme-aux-coins") mu = C8Mutant::kNormeAuxCoins;
     else refuse("argument inconnu");
   }
-  if (tours == 0 && !veut_bloc && !veut_convexite)
+  if (tours == 0 && !veut_bloc && !veut_convexite && !veut_centre)
     refuse("--selftest, --bloc ou --convexite est exige");
+  if (veut_centre) {
+    const int rc = fixtures_centre();
+    if (rc != 0) return rc;
+  }
   if (mu != C8Mutant::kNone && tours == 0 && !veut_bloc)
     refuse("un mutant exige --selftest ou --bloc");
   if (veut_convexite) {
