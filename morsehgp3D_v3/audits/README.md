@@ -60,6 +60,14 @@ ancienne phrase imposant le rejet global des positions dupliquées est périmée
   un statut distinct ; un `--dmax` observé ne reçoit pas la complétude de J0 ;
   le best-first axial est exact pour un seed q4 ponctuel, jamais par simple
   évaluation des coins d'un `FaceBlock` variable.
+- [`REPONSE_AUDIT_Q18_Q20_CALOTTES_ADMISSIBLES_20260815.md`](REPONSE_AUDIT_Q18_Q20_CALOTTES_ADMISSIBLES_20260815.md) :
+  réfutation de la première restriction aux directions admissibles, réponse à
+  Q18--Q20 et théorème réparé. Le lemme antipodal est juste, mais
+  l'admissibilité n'est pas monotone et une cellule doit **intersecter**
+  l'enveloppe potentielle. La version sûre marque les directions vérifiant
+  `2(s.u)>max(r,||s||)`, fail-open, puis applique séparément les seuils
+  `10/9/8`. La note proposée est conservée avec bannière rouge parce que le
+  probe la cite directement.
 - [`AUDIT_RECU_GRAM_UNIFIE_1FD9CF1_20260814.md`](AUDIT_RECU_GRAM_UNIFIE_1FD9CF1_20260814.md) :
   contrôle algébrique Python corrélé et borné des identités q4 `Delta=O^2` et
   `Phi=O*J` sur 10 000 fixtures u16 non dégénérées ; il ne reçoit ni microkernel

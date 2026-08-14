@@ -608,8 +608,10 @@ paires ; chaque bloc non descendu porte un certificat exact propre à sa lane ou
 reste une continuation. Les rayons locaux par calottes peuvent fermer certaines
 incidences d'endpoint ; une paire reste au résiduel tant qu'aucun endpoint ne la
 ferme.
-Avant `unresolved_pair_mass=0`, les comptes publiés sont des bornes inférieures
-tronquées et non la taille de l'objet.
+Avant `unresolved_pair_mass=0`, owner et shell exacts, les comptes publiés sont
+des ledgers tronqués sans ordre garanti et non la taille de l'objet : une ancre
+omise sous-compte, tandis qu'un owner dupliqué ou un extra-shell silencieux
+surcompte.
 
 Le prototype J0 commis à `acd792d`, puis paramétré à `0195480`, fournit une
 réfutation permanente du garde empirique. Sur `two_lines,n=10`, son exécution
@@ -627,6 +629,26 @@ ci-dessus. Les `11/11` CTests ciblés, verts en `8,82 s`, n'ont ni juge q3, ni
 fixture `two_lines`, ni records `I_B/U_B/BallKey`; ils ne reçoivent donc pas
 J0. Le détail reproductible est dans
 [`audits/AUDIT_WORKTREE_LANE_SOURCE_SCALE_J0_20260814.md`](audits/AUDIT_WORKTREE_LANE_SOURCE_SCALE_J0_20260814.md).
+
+La rampe CPU 48 cœurs confirme la forme du verrou sans recevoir la source. À
+`uniform,50000`, le ledger vaut `21 432 482` candidats sous `smax=11` et
+`4 004 994` sous `smax=6`, soit une réduction `5,35` plutôt que douze. Le
+premier cas matérialise encore `6 091 112 797` paires de lentille pour
+`9 768 840` q4, un ratio `623,5`. Sur les amas, le cutoff refuse dès 12 500
+après jusqu'à `24 135 659 695` paires. Ces compteurs imposent de retirer le
+produit q4 et de mesurer séparément les `Q4Seed3`, pas d'élargir la fenêtre de
+la grille. Reçu et limites :
+[`audits/AUDIT_CONTRE_SESSION_J0_LANE_SOURCE_G4_20260815.md`](audits/AUDIT_CONTRE_SESSION_J0_LANE_SOURCE_G4_20260815.md).
+
+La première proposition de « cellules admissibles à `r` » ne répare pas la
+complétude. Son lemme antipodal est correct, mais un partenaire admissible à
+`D>=r` peut avoir `||v-x||>r`; le voisinage à `r` le perd. Une enveloppe sûre
+des directions possibles est l'union, sur `s=v-x`, des calottes
+`2(s.u)>max(r,||s||)`. Toute cellule qui **intersecte** cette union est
+potentielle et doit être couverte entièrement, ou scindée fail-open. Les
+seuils restent autonomes `10/9/8`. Le théorème, la version shell plus serrée et
+les contre-fixtures sont dans
+[`audits/REPONSE_AUDIT_Q18_Q20_CALOTTES_ADMISSIBLES_20260815.md`](audits/REPONSE_AUDIT_Q18_Q20_CALOTTES_ADMISSIBLES_20260815.md).
 
 Chaque générateur généralise WSPD jusqu'au census de **sa propre** miniboule ;
 une lentille ou un support positif sans profondeur n'est qu'une supersource.

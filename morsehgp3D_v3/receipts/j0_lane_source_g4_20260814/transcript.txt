@@ -1,8 +1,8 @@
-git_head=bfef1783ec1dbb7295fd70514fe2e9c3163b5473 fichiers_modifies=0
+git_head=3657289dcb2960c7e7605b12cfe9d9c34552935e fichiers_modifies=0
 sha256 morsehgp3D_v3/prototype/lane_source_scale_probe.cpp = eaa37010a4cb5b01911e601fe1053d324c33fb4c865d84b51d59f34996b55dfe
 sha256 morsehgp3D_v3/prototype/q4seed_axis_topr4.hpp = 0ac896c76151d208c0598a645db3ad03d1ddebf559e1db41350d1f8cf86775f2
 sha256 morsehgp3D_v3/CMakeLists.txt = 031684ad097162ac82e062fc755045d921ddd68547dc0712b7298a4f16d57ad8
-[GARDE pre-mutation] cible=devpod-gpu-exploration/europe-west4-ai1a/ehgp-blackwell-spot-ai1a état=TERMINATED machine=g4-standard-48 provisioning=SPOT action=STOP maxRunDuration=5400s.
+[GARDE pre-mutation] cible=devpod-gpu-exploration/europe-west4-ai1a/ehgp-blackwell-spot-ai1a état=TERMINATED machine=g4-standard-48 provisioning=SPOT action=STOP maxRunDuration=1800s.
 [SET-SCHEDULING] Reconfiguration protégée demandée :
   compte              : louis.hauseux@gmail.com
   projet              : devpod-gpu-exploration
@@ -14,17 +14,42 @@ sha256 morsehgp3D_v3/CMakeLists.txt = 031684ad097162ac82e062fc755045d921ddd68547
 Updated [https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/europe-west4-ai1a/instances/ehgp-blackwell-spot-ai1a].
 [GARDE post-mutation] cible=devpod-gpu-exploration/europe-west4-ai1a/ehgp-blackwell-spot-ai1a état=TERMINATED machine=g4-standard-48 provisioning=SPOT action=STOP maxRunDuration=1800s.
 [OK] maxRunDuration=1800s recertifié sur la cible TERMINATED devpod-gpu-exploration/europe-west4-ai1a/ehgp-blackwell-spot-ai1a; aucune VM démarrée ou arrêtée.
-[GARDE SSH] Clé de session ssh-ed25519 utilisable sans interaction (SHA256:ja6yBMgpIKku4rw+aeb/+ZcBPuaMmF33gnEETh3Vdf0).
-durée OS Login restante hors borne: 5681s, attendu 1800..2460s
-[ERREUR] La clé SSH de session n'est pas inscrite une seule fois dans OS Login avec une expiration restante comprise entre maxRunDuration et maxRunDuration + 660 secondes; démarrage refusé.
---- fermeture ciblee (rc=1) ---
-[BLOCAGE] demarrage tente mais generation INCONNUE :
-  projet=devpod-gpu-exploration zone=europe-west4-ai1a instance=ehgp-blackwell-spot-ai1a
-  dernier etat connu : voir ci-dessus dans ce journal
-  aucun arret non versionne n'est appele — il pourrait viser une
-  session concurrente. Controle manuel :
-    gcloud compute instances describe ehgp-blackwell-spot-ai1a \
-      --zone=europe-west4-ai1a --project=devpod-gpu-exploration \
-      --format='value(status,lastStartTimestamp)'
-    ./gcp-migration/stop_and_verify.sh --yes \
-      --expected-last-start-timestamp <horodatage lu ci-dessus>
+[GARDE SSH] Clé de session ssh-ed25519 utilisable sans interaction (SHA256:eBNWHi76xHdMW/R03l6jy1pzZ8ybeyOgvPP7XL1O4fU).
+[GARDE SSH] Clé OS Login unique, expiration fixe=2026-08-14T21:49:25.759582Z, durée restante=2086s.
+[START] Démarrage protégé demandé :
+  compte                 : louis.hauseux@gmail.com
+  projet                 : devpod-gpu-exploration
+  instance               : ehgp-blackwell-spot-ai1a
+  zone                   : europe-west4-ai1a
+  machine/provisioning   : g4-standard-48 / SPOT
+  maxRunDuration GCE     : 1800 s
+  arrêt invité secondaire : 20 min
+Starting instance(s) ehgp-blackwell-spot-ai1a...
+................................................done.
+Updated [https://compute.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/europe-west4-ai1a/instances/ehgp-blackwell-spot-ai1a].
+Instance internal IP is 10.164.0.7
+Instance external IP is 34.7.9.84
+[GARDE-FOU GCE] action=STOP, maxRunDuration=1800s, échéance calculée=1786743891, échéance sûre=1786743591, terminationTimestamp non exposé; échéance calculée certifiée
+[GARDE-FOU INVITÉ] Armement de shutdown -P +20 via SSH.
+Shutdown scheduled for Fri 2026-08-14 21:35:21 UTC, use 'shutdown -c' to cancel.
+MODE=poweroff
+USEC=1786743321591163
+
+[GARDE-FOU GCE] action=STOP, maxRunDuration=1800s, échéance calculée=1786743891, échéance sûre=1786743591, terminationTimestamp non exposé; échéance calculée certifiée
+[SUCCÈS] VM démarrée avec deux coupe-circuits vérifiés. Fermez la session avec stop_and_verify.sh.
+generation verrouillee : 2026-08-14T14:14:51.883-07:00
+tar_sha256=515863d1762f08efb0dbe1ec747fbe02ad514f16326411d82a8c483ab25460c0
+total 16
+drwxrwxr-x 2 louis_hauseux_gmail_com louis_hauseux_gmail_com 4096 Aug 14 21:03 .
+drwxrwxr-x 6 louis_hauseux_gmail_com louis_hauseux_gmail_com 4096 Aug 14 21:03 ..
+-rw-rw-r-- 1 louis_hauseux_gmail_com louis_hauseux_gmail_com 5628 Aug 14 21:08 rampe_j0.txt
+78 /home/louis_hauseux_gmail_com/j0/out/rampe_j0.txt
+78 /workspaces/E-HGP/morsehgp3D_v3/receipts/j0_lane_source_g4_20260814/rampe_j0.txt
+recuperation terminee
+--- fermeture ciblee (rc=0) ---
+[STOP] État actuel de ehgp-blackwell-spot-ai1a : RUNNING.
+Stopping instance(s) ehgp-blackwell-spot-ai1a...
+...................................................................................................................................................................................................................................................................................................done.
+Updated [https://compute.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/europe-west4-ai1a/instances/ehgp-blackwell-spot-ai1a].
+[OK] Cible ehgp-blackwell-spot-ai1a arrêtée et vérifiée (état GCE TERMINATED).
+[INFO] Aucune autre VM project=e-hgp active détectée.

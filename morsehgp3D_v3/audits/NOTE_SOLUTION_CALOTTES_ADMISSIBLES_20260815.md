@@ -1,4 +1,4 @@
-# Le certificat de localité échoue là où le contrat vit — et pourquoi il exige trop
+# Proposition réfutée — restriction du certificat aux directions admissibles
 
 Date : 15 août 2026 UTC.
 
@@ -7,6 +7,15 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `profile=quantized_u16_input_only`,
 `mode=proposition_math_non_recue`,
 `public_status=not_claimed`.
+
+> **Statut : réfuté.** Le lemme du partenaire antipodal reste correct, mais le
+> théorème du §3 est faux : l'admissibilité n'est pas monotone de `D` vers
+> `r<D`, et le test de cellule échange `exists u, exists v` avec
+> `exists v, for all u`. La fixture `x=(0,0,0)`, `v=(10,0,0)`, `r=5` rend
+> l'hypothèse vraie par vacuité malgré une q2 positive vide de diamètre dix.
+> Ce fichier est conservé uniquement parce que le probe expérimental le cite ;
+> l'autorité corrigée et les réponses Q18--Q20 sont dans
+> [`REPONSE_AUDIT_Q18_Q20_CALOTTES_ADMISSIBLES_20260815.md`](REPONSE_AUDIT_Q18_Q20_CALOTTES_ADMISSIBLES_20260815.md).
 
 Cette note mesure d'abord, propose ensuite. La proposition n'est pas reçue et
 n'est pas implémentée ; elle est soumise à l'auditeur avant tout code.

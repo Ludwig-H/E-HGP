@@ -8,14 +8,15 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-> **Verdict live au `HEAD=01954807e38a931e5c874e701da6367ff89384d6`.**
+> **Verdict live au `HEAD=3657289dcb2960c7e7605b12cfe9d9c34552935e`.**
 > Le pin noyau `a369452` porte `Q4SeedAxisTopR4`, son probe, 39 CTests déclarés,
 > les vrais IDs de census, la capacité 163, les comptes requis et les fates de
 > plateau. Il refuse aussi tout replay après `MORT_GAP` et tout apex dont le
 > compte retenu atteint `r4`. `acd792d` ajoute la première sonde J0 et
 > `0195480` une option de coupure et une recette de session ; aucun de ces deux
-> commits n'est une mesure reçue. Le worktree courant ne contient que les
-> présentes corrections documentaires d'audit ;
+> commits n'est une mesure reçue. Le worktree courant contient les présentes
+> corrections documentaires d'audit et le brut concurrent J0 non suivi, à
+> préserver ;
 > aucune mesure G4 nouvelle n'entre dans le verdict.
 > Q14 est fermée contractuellement : aucune structure de Delaunay n'est
 > autorisée, y compris d'ordre un, comme source, squelette, filtre ou census.
@@ -70,6 +71,17 @@ Cadre : `phase=exploration_v3_hors_registre`,
 > Contre-audit :
 > [`AUDIT_WORKTREE_LANE_SOURCE_SCALE_J0_20260814.md`](AUDIT_WORKTREE_LANE_SOURCE_SCALE_J0_20260814.md).
 >
+> Q18--Q20 sont également tranchées. Le lemme antipodal de la note des calottes
+> admissibles est juste, mais son théorème est faux : une direction admissible
+> à `D` ne l'est pas nécessairement à `r<D`, et le test aux sommets décide la
+> contenance d'une calotte au lieu de son intersection avec la cellule. La q2
+> `x=0,v=(10,0,0),r=5` réfute la proposition par vacuité. La réparation sûre
+> marque fail-open toute cellule intersectant
+> `2(s.u)>max(r,||s||)`, puis applique séparément `10/9/8`. Les `20/20` CTests
+> du probe passent en `44,74 s`, mais n'exercent pas cette fixture et le
+> falsificateur q4 compare l'arête maximale au lieu du diamètre `2R`.
+> [`REPONSE_AUDIT_Q18_Q20_CALOTTES_ADMISSIBLES_20260815.md`](REPONSE_AUDIT_Q18_Q20_CALOTTES_ADMISSIBLES_20260815.md).
+>
 > La recette `session_axis_top8_g4.sh` de `840a2e2` ne devait pas être lancée :
 > quand son horodatage de génération est vide, son trap appelle un arrêt non
 > versionné susceptible de toucher une session préexistante ; ses 76 runs
@@ -87,6 +99,15 @@ Cadre : `phase=exploration_v3_hors_registre`,
 > `78,8 s` CPU chargé sur `uniform,50000`, sans BallKey, census, fold ou
 > payload. La cible d'une seconde reste ouverte ; aucune nouvelle session G4
 > ne précède les gates CPU des trois producteurs.
+>
+> La rampe J0 concurrente n'est pas une mesure GPU et rend elle-même
+> `INCOMPLET_OU_TRONQUE` : dix runs, quatre codes non nuls et pire cutoff
+> `0,940`. Seul `uniform` atteint 50 000 : `21 432 482` candidats à `smax=11`
+> en 38 s CPU et `4 004 994` à `smax=6` en 4 s CPU. Les amas meurent à 12 500,
+> après jusqu'à `24 135 659 695` paires de lentille. Les générations de calcul
+> ont été arrêtées et certifiées `TERMINATED`. Le brut récupéré est un ledger
+> sans ordre garanti, pas un compte de supports. Contre-audit et hashes :
+> [`AUDIT_CONTRE_SESSION_J0_LANE_SOURCE_G4_20260815.md`](AUDIT_CONTRE_SESSION_J0_LANE_SOURCE_G4_20260815.md).
 >
 > Contrôles frais : `39/39` CTests `^mhgp3v_q4axis` passent en `38,86 s`, avec
 > des seuils `smax=7/14`, trois exact-once, le plateau de 100 IDs et le refus de

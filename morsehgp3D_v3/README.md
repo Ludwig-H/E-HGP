@@ -19,8 +19,9 @@ exacte sur son domaine public. Le contrat reste ouvert : à `n=50000` et
 `K_max=10`, aucun échantillon ne qualifie encore le payload complet sous
 `p95 warm_e2e<1 s` sur G4. Aucun kernel GPU G4 bout-en-bout n'est reçu. Un reçu
 antérieur sur VM G4 est explicitement `GPU_RUN=NO` et mesure `78,8 s` CPU sur
-`uniform,50000`, sans BallKey, census, fold ni payload ; la dernière tentative
-a échoué avant sa rampe et a seulement certifié l'arrêt de sa cible.
+`uniform,50000`, sans BallKey, census, fold ni payload. La nouvelle rampe J0
+est également CPU-only et diagnostique ; elle ne produit toujours ni
+BallEvent, fold ou payload.
 
 Le profil v3 courant reste exactement `quantized_u16_input_only`. Le contrat
 normatif binary64 demeure un profil distinct et ouvert : un arrondi ponctuel
@@ -48,6 +49,23 @@ deux P0, ni le shell. Aucun exposant de sortie, chiffre 50k ou SLO ne doit être
 déduit de cette sonde avant conservation de toute la masse d'ancres et
 comparaison des records complets. Le contre-audit reproductible est
 [`audits/AUDIT_WORKTREE_LANE_SOURCE_SCALE_J0_20260814.md`](audits/AUDIT_WORKTREE_LANE_SOURCE_SCALE_J0_20260814.md).
+
+Son brut concurrent localise néanmoins le mur. Sur `uniform,50000`, il compte
+`21 432 482` candidats à `smax=11` en 38 s CPU et `4 004 994` à `smax=6` en
+4 s CPU. Le repli ne réduit donc ce ledger que d'un facteur `5,35`, pas douze.
+La route paie encore `6 091 112 797` paires de lentille à `smax=11`, soit
+`623,5` par q4 retenu. Sur `eight_clusters,12500,smax=11`, elle atteint
+`24 135 659 695` paires puis refuse la coupure ; aucun chiffre amas 25k/50k
+n'existe. Le verdict est `INCOMPLET_OU_TRONQUE`, pas une réception J0. Voir
+[`audits/AUDIT_CONTRE_SESSION_J0_LANE_SOURCE_G4_20260815.md`](audits/AUDIT_CONTRE_SESSION_J0_LANE_SOURCE_G4_20260815.md).
+
+La première restriction du certificat de calottes aux directions
+« admissibles à `r` » est réfutée : un partenaire d'un support de diamètre
+`D>=r` peut être plus loin que `r`, et une cellule doit intersecter la région
+potentielle plutôt que contenir une même calotte aux trois sommets. La version
+sûre marque fail-open les directions vérifiant
+`2(s.u)>max(r,||s||)`, puis applique indépendamment les seuils `10/9/8`.
+[`audits/REPONSE_AUDIT_Q18_Q20_CALOTTES_ADMISSIBLES_20260815.md`](audits/REPONSE_AUDIT_Q18_Q20_CALOTTES_ADMISSIBLES_20260815.md).
 
 ## Verdict actuel
 
@@ -222,7 +240,8 @@ Un J0 de dimensionnement exact doit couvrir toutes les ancres de la
 `NeutralPairPartition`. Le diamètre maximal observé sous un `--dmax` ne prouve
 pas l'absence de support au-delà de la coupure. Une masse sautée doit porter un
 certificat local exact ou rester une continuation ; sinon les compteurs sont
-des bornes inférieures tronquées, pas la taille de l'objet.
+des ledgers tronqués sans ordre garanti, pas la taille de l'objet. Avant owner,
+shell et source complète, omissions et surcomptes peuvent coexister.
 
 Le nouveau déblocage interne à `Lane4` supprime le produit de cellules. Pour un
 `Q4Seed3` aigu

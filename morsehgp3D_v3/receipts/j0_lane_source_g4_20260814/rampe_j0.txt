@@ -1,0 +1,78 @@
+=== famille=terrain smax=6 n=12500 espacements=10
+REFUS: diametre retenu 153.2 > 0,75 dmax=163 — mesure tronquee
+lane_source : famille=terrain n=12500 smax=6 morts=5/4/3 espacement=16.3 dmax=163 thr=48
+  ancres : testees=14926888 q2=129560 q3=234502 q4=216379 (17.31/pt)
+  travail : seeds_aigus=5419081 paires_lentille=861009321 bien_centres=116725954 lens_max=1212 inner_max=3117
+  candidats : q2=129560 q3=135885 q4=8148 total=273593 | /n : 10.365 10.871 0.652 21.887 | candidats_sur_retenus=105671.2
+  coupure : diam_max=153.2 dmax=163 rapport=0.940
+code=3 secondes=6
+=== PISTE terrain smax=6 ARRETEE au code 3
+=== famille=terrain smax=11 n=12500 espacements=10
+REFUS: diametre retenu 153.2 > 0,75 dmax=163 — mesure tronquee
+lane_source : famille=terrain n=12500 smax=11 morts=10/9/8 espacement=16.3 dmax=163 thr=48
+  ancres : testees=14926888 q2=253142 q3=481746 q4=504123 (40.33/pt)
+  travail : seeds_aigus=12248933 paires_lentille=2522307318 bien_centres=301170267 lens_max=1247 inner_max=3157
+  candidats : q2=253142 q3=593224 q4=70132 total=916498 | /n : 20.251 47.458 5.611 73.320 | candidats_sur_retenus=35965.1
+  coupure : diam_max=153.2 dmax=163 rapport=0.940
+code=3 secondes=19
+=== PISTE terrain smax=11 ARRETEE au code 3
+=== famille=uniform smax=6 n=12500 espacements=10
+lane_source : famille=uniform n=12500 smax=6 morts=5/4/3 espacement=10.0 dmax=100 thr=48
+  ancres : testees=15260278 q2=230752 q3=593977 q4=562265 (44.98/pt)
+  travail : seeds_aigus=8005520 paires_lentille=111670408 bien_centres=21148112 lens_max=164 inner_max=522
+  candidats : q2=230752 q3=526687 q4=195892 total=953331 | /n : 18.460 42.135 15.671 76.266 | candidats_sur_retenus=570.1
+  coupure : diam_max=36.1 dmax=100 rapport=0.361
+code=0 secondes=1
+=== famille=uniform smax=6 n=25000 espacements=10
+lane_source : famille=uniform n=25000 smax=6 morts=5/4/3 espacement=10.0 dmax=100 thr=48
+  ancres : testees=34592049 q2=469314 q3=1225208 q4=1159442 (46.38/pt)
+  travail : seeds_aigus=16965611 paires_lentille=241074522 bien_centres=45996946 lens_max=206 inner_max=720
+  candidats : q2=469314 q3=1081600 q4=405927 total=1956841 | /n : 18.773 43.264 16.237 78.274 | candidats_sur_retenus=593.9
+  coupure : diam_max=41.6 dmax=100 rapport=0.416
+code=0 secondes=2
+=== famille=uniform smax=6 n=50000 espacements=10
+lane_source : famille=uniform n=50000 smax=6 morts=5/4/3 espacement=10.0 dmax=100 thr=48
+  ancres : testees=75780216 q2=952789 q3=2508928 q4=2373959 (47.48/pt)
+  travail : seeds_aigus=35143117 paires_lentille=498056446 bien_centres=95372598 lens_max=185 inner_max=626
+  candidats : q2=952789 q3=2216329 q4=835876 total=4004994 | /n : 19.056 44.327 16.718 80.100 | candidats_sur_retenus=595.8
+  coupure : diam_max=37.7 dmax=100 rapport=0.377
+code=0 secondes=4
+=== famille=uniform smax=11 n=12500 espacements=10
+lane_source : famille=uniform n=12500 smax=11 morts=10/9/8 espacement=10.0 dmax=100 thr=48
+  ancres : testees=15260278 q2=449864 q3=1280040 q4=1421844 (113.75/pt)
+  travail : seeds_aigus=38012775 paires_lentille=1316848437 bien_centres=234743600 lens_max=261 inner_max=839
+  candidats : q2=449864 q3=2302455 q4=2266637 total=5018956 | /n : 35.989 184.196 181.331 401.516 | candidats_sur_retenus=581.0
+  coupure : diam_max=42.3 dmax=100 rapport=0.423
+code=0 secondes=8
+=== famille=uniform smax=11 n=25000 espacements=10
+lane_source : famille=uniform n=25000 smax=11 morts=10/9/8 espacement=10.0 dmax=100 thr=48
+  ancres : testees=34592049 q2=919567 q3=2667108 q4=2970908 (118.84/pt)
+  travail : seeds_aigus=81785996 paires_lentille=2883082712 bien_centres=518334153 lens_max=307 inner_max=920
+  candidats : q2=919567 q3=4754695 q4=4704961 total=10379223 | /n : 36.783 190.188 188.198 415.169 | candidats_sur_retenus=612.8
+  coupure : diam_max=45.7 dmax=100 rapport=0.457
+code=0 secondes=19
+=== famille=uniform smax=11 n=50000 espacements=10
+lane_source : famille=uniform n=50000 smax=11 morts=10/9/8 espacement=10.0 dmax=100 thr=48
+  ancres : testees=75780216 q2=1873994 q3=5499525 q4=6137220 (122.74/pt)
+  travail : seeds_aigus=171956174 paires_lentille=6091112797 bien_centres=1100846370 lens_max=311 inner_max=1106
+  candidats : q2=1873994 q3=9789648 q4=9768840 total=21432482 | /n : 37.480 195.793 195.377 428.650 | candidats_sur_retenus=623.5
+  coupure : diam_max=45.1 dmax=100 rapport=0.451
+code=0 secondes=38
+=== famille=eight_clusters smax=6 n=12500 espacements=14
+REFUS: diametre retenu 181.5 > 0,75 dmax=210 — mesure tronquee
+lane_source : famille=eight_clusters n=12500 smax=6 morts=5/4/3 espacement=15.0 dmax=210 thr=48
+  ancres : testees=17395977 q2=215558 q3=683753 q4=676061 (54.08/pt)
+  travail : seeds_aigus=40433791 paires_lentille=6266706925 bien_centres=889799321 lens_max=1474 inner_max=5915
+  candidats : q2=215558 q3=475647 q4=172368 total=863573 | /n : 17.245 38.052 13.789 69.086 | candidats_sur_retenus=36356.6
+  coupure : diam_max=181.5 dmax=210 rapport=0.864
+code=3 secondes=35
+=== PISTE eight_clusters smax=6 ARRETEE au code 3
+=== famille=eight_clusters smax=11 n=12500 espacements=14
+REFUS: diametre retenu 194.5 > 0,75 dmax=210 — mesure tronquee
+lane_source : famille=eight_clusters n=12500 smax=11 morts=10/9/8 espacement=15.0 dmax=210 thr=48
+  ancres : testees=17395977 q2=415467 q3=1414348 q4=1606643 (128.53/pt)
+  travail : seeds_aigus=125165174 paires_lentille=24135659695 bien_centres=3219429926 lens_max=1474 inner_max=5954
+  candidats : q2=415467 q3=2032435 q4=1925894 total=4373796 | /n : 33.237 162.595 154.072 349.904 | candidats_sur_retenus=12532.2
+  coupure : diam_max=194.5 dmax=210 rapport=0.926
+code=3 secondes=147
+=== PISTE eight_clusters smax=11 ARRETEE au code 3
