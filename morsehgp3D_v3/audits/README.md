@@ -32,21 +32,21 @@ ancienne phrase imposant le rejet global des positions dupliquées est périmée
 - [`AUDIT_WORKTREE_Q4SEED_AXIS_TOPR4_20260814.md`](AUDIT_WORKTREE_Q4SEED_AXIS_TOPR4_20260814.md) :
   contre-audit consolidé du noyau ponctuel interne à `Lane4` : `r4`
   paramétrique, IDs `I_B/U_B`, `MORT_GAP` et exact-once ; réparation au
-  `33766f6` de la troncature 100-vers-99, puis P0 restants sur un replay
-  `MORT_GAP`/deep encore publié `EXACT` et sur les préconditions d'identités non
-  imposées. La suite fraîche passe 39 portes sur 40 ; la fixture ties ne tue pas
-  le mutant du shell persistant.
+  `33766f6` de la troncature 100-vers-99, puis réparation au `a369452` du replay
+  `MORT_GAP`/deep. Le P0 restant porte sur les préconditions d'identités non
+  imposées. La suite fraîche passe 39 portes sur 39 ; le mutant du shell
+  persistant est tué par la campagne scanline plateau.
 - [`AUDIT_CONTRE_SESSION_AXIS_TOP8_G4_840A2E2_20260814.md`](AUDIT_CONTRE_SESSION_AXIS_TOP8_G4_840A2E2_20260814.md) :
   contre-audit de l'ancienne recette G4 CPU et de son successeur au `d55bb9a` :
   fermeture générationnelle et zone IA réparées, mais parser du verdict
   incompatible avec les nouveaux records, exact-once rendant le cardinal de
   lignes impossible, réfutations copiées après verdict, absence de deadline
-  globale et P0 replay/identités préalable. GCP non utilisé par l'audit.
+  globale et P0 d'identités préalable. GCP non utilisé par l'audit.
 - [`NOTE_CLAUDE_PLAN_50K_PUIS_TRENTE_MILLIONS_20260814.md`](NOTE_CLAUDE_PLAN_50K_PUIS_TRENTE_MILLIONS_20260814.md) :
   plan de route frais et non reçu, du producteur autonome par lane vers le
   payload puis CUDA. Son J0 reste conditionné par une source complète et son
-  noyau ponctuel q4 reste candidat tant que les portes `MORT_GAP`/deep et
-  d'identités invalides du contre-audit sont rouges.
+  noyau ponctuel q4 reste candidat tant que la porte d'identités invalides du
+  contre-audit est rouge ; la branche `MORT_GAP`/deep est réparée au `a369452`.
 - [`QUESTIONS_CLAUDE_PROFIL_ENTREE_ET_J0_20260814.md`](QUESTIONS_CLAUDE_PROFIL_ENTREE_ET_J0_20260814.md)
   et [`REPONSE_AUDIT_Q15_Q17_PROFIL_J0_AXIS_20260814.md`](REPONSE_AUDIT_Q15_Q17_PROFIL_J0_AXIS_20260814.md) :
   Q15--Q17 et réponse contractuelle. La v3 reste u16 tandis que binary64 garde

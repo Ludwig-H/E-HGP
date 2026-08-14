@@ -470,9 +470,10 @@ report. `BallFormRange-u16` reste l'autorité/fallback, mais un second parcours
 global q4 serait du travail redondant lorsque ces IDs et leur complétude sont
 reçus. Le défaut du pin `3507b5e` — un shell attendu de 100 IDs tronqué à 99 —
 est réparé au `33766f6` par une capacité de 163, les comptes requis et des fates
-typés. Aucun consommateur ne peut pourtant sauter le fallback tant que le replay
-ne refuse pas `MORT_GAP`, les apex retenus mais profonds et les entrées de
-`PointId` non injectives ou non disjointes.
+typés. `a369452` refuse ensuite toute sélection autre que `OUVERT` et tout apex
+dont le compte intérieur retenu atteint `r4`. Aucun consommateur ne peut encore
+sauter le fallback tant que les entrées de `PointId` non injectives ou non
+disjointes ne sont pas refusées par l'API.
 
 Avec `d=b-a`, `D=d dot d`, `w=2*c-a-b` et `U_z=2*z-a-b`, poser :
 
@@ -593,6 +594,22 @@ Ce n'est ni un support q3, ni un événement de `Lane3`, ni un record que q4
 serait autorisé à y lire. Réciproquement, `PairAnchor3` n'est pas une sortie de
 `Lane2`. Le partage permis porte seulement sur les coordonnées, l'index Morton,
 la partition neutre et des fonctions géométriques pures sans état de lane.
+
+Le profil courant de ces générateurs est u16 seulement. Le contrat binary64 de
+la spécification garde un statut distinct : aucun arrondi ponctuel fixe,
+non injectif et sans side-channel ne peut préserver universellement les signes
+InSphere, le shell et l'ordre des niveaux. Une similarité-lattice exacte
+enregistrée est un sous-domaine sûr ; toute autre équivalence après
+quantification demande un certificat complet propre à l'entrée.
+
+La complétude de J0 ne se déduit pas du plus grand diamètre observé sous une
+coupure `--dmax`. La `NeutralPairPartition` doit conserver toute la masse des
+paires ; chaque bloc non descendu porte un certificat exact propre à sa lane ou
+reste une continuation. Les rayons locaux par calottes peuvent fermer certaines
+incidences d'endpoint ; une paire reste au résiduel tant qu'aucun endpoint ne la
+ferme.
+Avant `unresolved_pair_mass=0`, les comptes publiés sont des bornes inférieures
+tronquées et non la taille de l'objet.
 
 Chaque générateur généralise WSPD jusqu'au census de **sa propre** miniboule ;
 une lentille ou un support positif sans profondeur n'est qu'une supersource.
@@ -2481,7 +2498,7 @@ parser collecte seulement les lignes de sweep mais compte aussi les neuf codes
 exact-once, donc son cardinal d'accord est impossible ; il cherche des champs
 du probe historique et décide avant de rapatrier les sorties rouges. Le reste
 du timeout n'est pas recalculé avant chaque run, exact-once reste hors deadline
-globale et les P0 `MORT_GAP`/deep et d'identités du replay sont encore ouverts.
+globale et le P0 d'identités du replay est encore ouvert.
 La tentative précédente n'a exécuté aucun build : elle certifie seulement
 l'arrêt ciblé `TERMINATED`.
 

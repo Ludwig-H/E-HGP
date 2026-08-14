@@ -23,17 +23,18 @@ antérieur sur VM G4 est explicitement `GPU_RUN=NO` et mesure `78,8 s` CPU sur
 a échoué avant sa rampe et a seulement certifié l'arrêt de sa cible.
 
 Le profil v3 courant reste exactement `quantized_u16_input_only`. Le contrat
-normatif binary64 demeure un profil distinct et ouvert : une quantification
-générique ne préserve pas le HGP, car deux points situés de part et d'autre
-d'une frontière InSphere arbitrairement proche peuvent être arrondis sur la
-même position. Une mesure u16 ne qualifie donc ni le payload ni le SLO
-binary64.
+normatif binary64 demeure un profil distinct et ouvert : un arrondi ponctuel
+fixe, non injectif et sans certificat ne préserve pas le HGP, car deux points
+situés de part et d'autre d'une frontière InSphere arbitrairement proche peuvent
+être envoyés sur la même position. Une similarité-lattice exacte enregistrée
+est un sous-domaine sûr ; une mesure u16 générale ne qualifie ni le payload ni
+le SLO binary64.
 
 La recette G4 q4 courante reste non reçue : son parser mélange sweeps et
 exact-once de sorte que le cardinal attendu est impossible, cherche des champs
 du probe supprimé, décide avant de rapatrier une réfutation et ne porte pas de
-deadline globale. Le noyau qu'elle lancerait garde en outre les P0
-`MORT_GAP`/deep et d'identités ci-dessous. Aucun nouveau reçu 50k ne doit être
+deadline globale. Le noyau qu'elle lancerait garde en outre le P0 des
+identités d'entrée ci-dessous. Aucun nouveau reçu 50k ne doit être
 déduit de ces probes CPU.
 
 ## Verdict actuel
@@ -179,10 +180,10 @@ sont exacts par axe. `active_arity_mask` efface q2/q3/q4 respectivement à
 `10/9/8` intérieurs. Pour q4, le théorème `Q4SeedAxisTopR4` permet de transporter
 la liste exacte `I_B/U_B`. Le commit `33766f6` conserve les IDs, porte le buffer
 de shell à sa capacité prouvée de 163, publie les comptes requis et type les
-plateaux. Son replay n'est toutefois pas encore une autorité : il accepte une
-sélection `MORT_GAP`, ne rejette pas un apex retenu mais profond et ne vérifie
-pas l'injectivité/disjonction des `PointId`. Le backend reste donc
-l'autorité/fallback jusqu'à réception de ces préconditions. Cela supprime les
+plateaux ; `a369452` refuse désormais `MORT_GAP` et tout apex dont le compte
+retenu atteint `r4`. Son replay n'est toutefois pas encore une autorité : ni la
+sélection ni l'API n'imposent l'injectivité/disjonction des `PointId`. Le backend
+reste donc l'autorité/fallback jusqu'à réception de cette précondition. Cela supprime les
 census répétés par support, pas une sortie réellement lourde.
 
 La source WSPD active suit directement les trois contrats de miniboule : q2

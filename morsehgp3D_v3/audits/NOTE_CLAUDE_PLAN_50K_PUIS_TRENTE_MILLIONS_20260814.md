@@ -32,9 +32,9 @@ n'existe pas.
 Ce qui est acquis et le rend abordable : Q14 est fermée — aucune Delaunay,
 ordre un inclus — et les trois lanes sont indépendantes. Le noyau
 `Q4SeedAxisTopR4` reste un candidat ponctuel : la sélection extrémale et la mort
-par gaps sont reçues dans leur domaine, mais le replay publie encore `EXACT`
-après `MORT_GAP` ou pour un apex profond et n'impose pas les préconditions
-d'identités. L'exact-once courant ne confronte pas encore owner et primary à
+par gaps sont reçues dans leur domaine, et `a369452` refuse désormais les
+replays `MORT_GAP` ou profonds. Il n'impose pas encore les préconditions
+d'identités. L'exact-once courant ne confronte pas owner et primary à
 une provenance indépendante.
 
 ## 1. Le seul chiffre qui décide de tout
@@ -202,7 +202,7 @@ cessent d'être des cas limites et deviennent le régime dominant. La politique 
 dégénérescence — `RLE` par `BallKey`, plateau déclaré, ou
 `unsupported_degeneracy` — n'est plus un garde-fou, c'est le chemin principal.
 Le fate typé du census est donc une brique de J6 autant que du présent ; son API
-reste à recevoir sur `MORT_GAP`, les apex profonds et les identités invalides.
+reste à recevoir sur les identités invalides.
 
 **La matérialisation.** À `428` supports par point, trente millions de points
 donnent `1,3·10^10` supports. Aucune mémoire ne les tient. Deux issues, et il

@@ -206,9 +206,8 @@ Enfin, l'en-tête « ne modifie aucune garde » reste faux : la recette reconfig
 être autorisées et sûres, mais doivent être nommées exactement.
 
 Indépendamment du runner, `33766f6` répare le P0 de capacité du census au
-`3507b5e`, mais la session reste interdite : `census_replay` publie encore
-`EXACT` après `MORT_GAP` ou pour un apex retenu mais profond, et ne valide pas
-l'injectivité/disjonction des `PointId`. La suite fraîche est en outre rouge à
-`39/40`, car la nouvelle fixture de racines coégales ne peut pas tuer un mutant
-qui ne touche que le shell persistant. Une grande sweep CPU ne reçoit aucune de
-ces préconditions et ne transforme pas ce probe en route 50k.
+`3507b5e` et `a369452` ferme les replays `MORT_GAP`/deep. La session reste
+interdite : sélection et replay ne valident toujours pas
+l'injectivité/disjonction des `PointId`, tandis que les défauts propres au
+runner ci-dessus sont inchangés. La suite fraîche passe `39/39`, ce qui reçoit
+le probe borné et non une route 50k.

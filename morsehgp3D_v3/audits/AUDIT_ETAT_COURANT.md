@@ -8,10 +8,12 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-> **Verdict live au `HEAD=f6b0650c49f2153ba8258c216440f19b96867bab`.**
-> Le pin noyau `33766f6` porte `Q4SeedAxisTopR4`, son probe, 40 CTests déclarés,
+> **Verdict live au `HEAD=a369452f665cf13480b5d8039d22449e16e9ba57`.**
+> Le pin noyau `a369452` porte `Q4SeedAxisTopR4`, son probe, 39 CTests déclarés,
 > les vrais IDs de census, la capacité 163, les comptes requis et les fates de
-> plateau. Le `HEAD` ajoute un plan de route 50k, pas une mesure. Le worktree
+> plateau. Il refuse aussi tout replay après `MORT_GAP` et tout apex dont le
+> compte retenu atteint `r4`. Le `HEAD` ajoute un plan de route 50k et les
+> réponses Q15--Q17, pas une mesure. Le worktree
 > courant ne contient que les présentes corrections documentaires d'audit ;
 > aucune mesure G4 nouvelle n'entre dans le verdict.
 > Q14 est fermée contractuellement : aucune structure de Delaunay n'est
@@ -41,11 +43,18 @@ Cadre : `phase=exploration_v3_hors_registre`,
 > produit `MORT_GAP`, compare `I_B/U_B` à un juge InSphere à trois classes et
 > reçoit le primary/exact-once sur trois petites familles. `33766f6` répare la
 > troncature 100-vers-99, distingue groupes et masse d'IDs et refuse les
-> plateaux sous `RelevantGP`. Il reste deux P0 reproductibles : le replay publie
-> encore `EXACT` après `MORT_GAP` ou pour un apex retenu mais profond ; ni la
-> sélection ni le replay n'imposent l'injectivité et la disjonction des
-> `PointId`. Contre-audit, fixtures et hashes :
+> plateaux sous `RelevantGP`. `a369452` ferme les faux `EXACT` après
+> `MORT_GAP`/deep. Il reste un P0 reproductible : ni la sélection ni le replay
+> n'imposent l'injectivité et la disjonction des `PointId`. Contre-audit,
+> fixtures et hashes :
 > [`AUDIT_WORKTREE_Q4SEED_AXIS_TOPR4_20260814.md`](AUDIT_WORKTREE_Q4SEED_AXIS_TOPR4_20260814.md).
+>
+> Q15--Q17 sont tranchées pour cette tranche : la v3 reste u16 et le contrat
+> binary64 conserve un statut séparé ; une coupure `--dmax` validée seulement
+> par le maximum observé ne reçoit pas la complétude de J0 ; le best-first axial
+> est exact sur un `Q4Seed3` singleton, pas sur les coins d'un `FaceBlock`
+> variable. Réponse et preuves :
+> [`REPONSE_AUDIT_Q15_Q17_PROFIL_J0_AXIS_20260814.md`](REPONSE_AUDIT_Q15_Q17_PROFIL_J0_AXIS_20260814.md).
 >
 > La recette `session_axis_top8_g4.sh` de `840a2e2` ne devait pas être lancée :
 > quand son horodatage de génération est vide, son trap appelle un arrêt non
@@ -57,7 +66,7 @@ Cadre : `phase=exploration_v3_hors_registre`,
 > Son successeur répare l'arrêt générationnel et la zone, mais son parser ne
 > peut jamais accorder simultanément les sweeps et neuf exact-once, cherche les
 > anciens noms de métriques et rapatrie encore les preuves après le verdict. Il
-> reste interdit tant que ces défauts et les P0 du replay ne sont pas fermés.
+> reste interdit tant que ces défauts et le P0 d'identités ne sont pas fermés.
 >
 > Il n'existe toujours aucune mesure GPU G4 bout-en-bout. Le reçu
 > `chaine_complete_g4_20260813` est `GPU_RUN=NO`, `PRODUCT_OUTPUT=NO` et mesure
@@ -65,12 +74,13 @@ Cadre : `phase=exploration_v3_hors_registre`,
 > payload. La cible d'une seconde reste ouverte ; aucune nouvelle session G4
 > ne précède les gates CPU des trois producteurs.
 >
-> Contrôles frais : `39/40` CTests `^mhgp3v_q4axis` passent en `44,46 s`, avec
-> des seuils `smax=7/14`, trois exact-once et le plateau de 100 IDs. L'échec est
-> causal : `mhgp3v_q4axis_mutant_shell_plateau` attend le code quatre, mais le
-> mutant survit car sa fixture n'a aucun shell persistant `B=0,A=0`. Le noyau
-> ponctuel `Lane4` reste un oracle borné ; les trois producteurs WSPD autonomes
-> ne sont pas implémentés et aucune complexité 50k n'est reçue.
+> Contrôles frais : `39/39` CTests `^mhgp3v_q4axis` passent en `38,86 s`, avec
+> des seuils `smax=7/14`, trois exact-once, le plateau de 100 IDs et le refus de
+> replay sur la fixture `MORT_GAP`. Le mutant du shell persistant est tué par la
+> campagne scanline `Plateau`, et non par la fixture ties qui ne contient aucun
+> `B=0,A=0`. Le noyau ponctuel `Lane4` reste un oracle borné ; les trois
+> producteurs WSPD autonomes ne sont pas implémentés et aucune complexité 50k
+> n'est reçue.
 
 > **Alerte au pin logiciel `6e815d28b3e229a0161eb00d6fa0c9a272efac5d`.** Les
 > commits `89774d0`, `e3f1925` et `88a9ba8` ajoutent respectivement

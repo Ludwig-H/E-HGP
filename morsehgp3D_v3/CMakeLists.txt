@@ -5537,3 +5537,55 @@ set_tests_properties(mhgp3v_q4axis_plateau PROPERTIES PASS_REGULAR_EXPRESSION
 # plateau est un groupe de racines egales, pas un shell PERSISTANT (`B=0, A=0`).
 # Le mutant n'y a rien a corrompre. Seule une famille scanline, avec ses
 # coplanarites massives, le mord — et c'est la porte ci-dessus.
+
+# ---------------------------------------------------------------------------
+# J0 : LA TAILLE DE L'OBJET, AUX ECHELLES DU CONTRAT.
+#
+# Specification : jalon J0 de
+# audits/NOTE_CLAUDE_PLAN_50K_PUIS_TRENTE_MILLIONS_20260814.md.
+#
+# Un seul chiffre gouverne la faisabilite : combien de supports l'objet
+# contient-il ? Le brute force `C(n,4)` plafonne a `n ~ 400`, donc la sonde
+# enumere par ANCRE D'ARETE DIAMETRALE — et son mode `--verifie` prouve que
+# cette enumeration EGALE le brute force, sur q2 comme sur q4.
+#
+# Ce qu'elle publie reste un LEDGER DE CANDIDATS sous coupure `--dmax` declaree,
+# pas un nombre certifie : la coupure n'est pas le rayon par calottes. La sonde
+# publie le diametre reellement atteint et REFUSE a `0,75 dmax`.
+# ---------------------------------------------------------------------------
+add_executable(mhgp3v_lane_source_scale_probe prototype/lane_source_scale_probe.cpp)
+target_include_directories(mhgp3v_lane_source_scale_probe PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(mhgp3v_lane_source_scale_probe PRIVATE mhgp Threads::Threads)
+target_compile_options(mhgp3v_lane_source_scale_probe PRIVATE -Wall -Wextra -Werror)
+
+# L'EXACTITUDE CONTRE LE BRUTE FORCE, SUR LES DEUX FAMILLES OBLIGATOIRES ET AUX
+# DEUX PROFILS DE RANG. Sans elle, l'enumeration par ancre n'est qu'une
+# heuristique rapide.
+foreach(j0_fam uniform eight_clusters)
+  foreach(j0_smax 11 6)
+    add_test(NAME mhgp3v_lane_source_verifie_${j0_fam}_${j0_smax}
+             COMMAND mhgp3v_lane_source_scale_probe --verifie --family=${j0_fam}
+                     --points=100 --seed=1 --smax=${j0_smax} --threads=2)
+    # CTest ne gere pas les references arriere : c'est la porte JUMELLE a code
+    # qui decide l'egalite, la sonde rendant 1 des qu'un compte differe. Le regex
+    # ne garde ici que la non-vacuite du diagnostic.
+    set_tests_properties(mhgp3v_lane_source_verifie_${j0_fam}_${j0_smax} PROPERTIES
+      PASS_REGULAR_EXPRESSION "verifie : brute_q2=[1-9][0-9]* ancre_q2=[0-9]+ brute_q4=[1-9][0-9]* ancre_q4=[0-9]+")
+    add_test(NAME mhgp3v_lane_source_verifie_${j0_fam}_${j0_smax}_code
+             COMMAND mhgp3v_lane_source_scale_probe --verifie --family=${j0_fam}
+                     --points=100 --seed=1 --smax=${j0_smax} --threads=2)
+  endforeach()
+endforeach()
+
+# LE MUTANT DE COUPURE : une coupure trop courte tronque la mesure, et la sonde
+# doit le DIRE, pas rendre un nombre plus petit. `--dmax` minuscule sur les amas,
+# ou la contre-famille a de longs supports traversant les vides.
+mhgp3v_add_expected_code_test_for(mhgp3v_lane_source_scale_probe
+  mhgp3v_lane_source_refus_coupure "mesure tronquee" 3
+  --family=eight_clusters --points=400 --smax=11 --threads=2 --dmax=40)
+mhgp3v_add_expected_code_test_for(mhgp3v_lane_source_scale_probe
+  mhgp3v_lane_source_refus_domaine "--points hors domaine" 2
+  --family=uniform --points=400000)
+mhgp3v_add_expected_code_test_for(mhgp3v_lane_source_scale_probe
+  mhgp3v_lane_source_refus_verifie_cap "--verifie est borne a 200 points" 2
+  --verifie --family=uniform --points=1000)

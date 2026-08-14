@@ -254,3 +254,47 @@ l'ordre utile est `HORS_DOMAINE/DEEP`, `UNSUPPORTED_DEGENERACY`, `PENDING_CAP`,
 Avec les caps actuels et une `Selection` valide, `PENDING_CAP` est au demeurant
 inatteignable ; une gate à cap abaissé doit le recevoir sans prétendre exercer
 le chemin nominal.
+
+## Addendum au pin `a369452`
+
+Snapshot relu : `HEAD=a369452f665cf13480b5d8039d22449e16e9ba57`, header
+SHA-256 `0ac896c76151d208c0598a645db3ad03d1ddebf559e1db41350d1f8cf86775f2`,
+probe SHA-256
+`dbb01b8c03a1b852db1c88eaf6de88b1afed0fe2a8e43a040f5310f60bd2e004`
+et CMake SHA-256
+`160c315905a8cd56b45397cc720c6fd0f232a7a9bdc82150ee7d748255ce9ff9`.
+
+Les deux défauts de domaine du replay sont réparés. Toute sélection autre que
+`OUVERT`, y compris `MORT_GAP`, rend désormais `HORS_DOMAINE` sans payload. Sur
+un seed ouvert, le replay reconstruit d'abord le compte intérieur tronqué et
+rend pareillement `HORS_DOMAINE` lorsqu'il atteint `r4`. La fixture mort-16
+publie maintenant `fate_apex=HORS_DOMAINE`. Le second cas est mathématiquement
+correct par le théorème extrémal, mais une fixture dédiée
+`OUVERT+apex_retenu_deep` manque encore pour protéger cette branche.
+
+Rejeux frais après reconfiguration : build ciblé vert ; `39/39` CTests
+`^mhgp3v_q4axis` passent en `38,86 s` sur le rejeu principal et `39,25 s` sur
+le rejeu indépendant. Le plateau rend `UNSUPPORTED_DEGENERACY` sous
+`RelevantGP`, puis `EXACT` avec shell `100/100` sous `Plateau`. Le mutant du
+shell persistant est causalement tué par la scanline plateau : code quatre,
+570 apex shallow, 31 dégénérescences et quatre identités fausses ; la référence
+rend zéro identité fausse.
+
+Le P0 restant est l'identité d'entrée. `select_axis_topr4` ne reçoit pas les
+trois IDs du seed et suppose seulement que l'appelant les a masqués ; aucune
+porte n'impose seed injectif, `sites` injectif et disjoint, ledgers deux à deux
+disjoints ni occurrence unique de l'apex. Reproduction actuelle : les deux IDs
+uniques d'un entrant de racine `-1` et d'un sortant de racine `+1`, avec
+`T2=2,r4=2`, donnent `OUVERT,min=1` ; dupliquer chacun dans `sites` donne
+faussement `MORT_GAP,min=2`. Le correctif de domaine ne peut pas réparer une
+sélection déjà falsifiée par ses identités.
+
+La priorité des fates reste à canoniser, sans P0 nominal puisque les capacités
+prouvées rendent `PENDING_CAP` inatteignable pour une `Selection` valide. Le
+code laisse `PENDING_CAP` gagner sur `UNSUPPORTED_DEGENERACY`. Sous
+`RelevantGP`, une dégénérescence déjà prouvée restera interdite quelle que soit
+la capacité ; des diagnostics orthogonaux éviteraient ce choix artificiel.
+
+Enfin, le commentaire source disant encore que `sel` peut être `kMortGap` est
+périmé face au garde effectif. Il n'affecte pas l'exécution, mais doit être
+aligné lors d'une future modification de code par Claude.
