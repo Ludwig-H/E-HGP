@@ -271,6 +271,27 @@ chaque paire. Les égalités et endpoints masqués relationnellement restent dan
 `U_closed`; seuls les facteurs encore indécis sont scindés et les preuves
 s'héritent.
 
+`MidballInterval-u16` doit être une autorité unique partagée, non un doublon de
+`rect_h_interval`. Son wrapper vérifie `0<=lo<=hi<=65535`, paire propre et
+identités ; toute violation rend `INVALID/UNKNOWN`. Le minimum de `H` est exact
+sur l'AABB continue comme sur le réseau. Le maximum actuellement utile au
+profil quantifié est exact sur `integer_lattice_u16_aabb_envelope` et son verdict
+doit donc être nommé `NONE_LATTICE_U16`, jamais `NONE_CONTINUOUS`. Si un
+consommateur exige le continu, pour chaque paire d'extrémités `a,b` d'un axe il
+calcule `s=a+b`, `y=clip(s,[2*zl,2*zh])`, puis
+`max4=(b-a)^2-(y-s)^2`; la somme des trois maxima d'échelle quatre décide sans
+flottant. L'égalité exclut l'intérieur mais reste shell : elle ne retire jamais
+un span du census fermé.
+
+Dans le certificateur central, Midball entre d'abord comme disjonctif
+**ALL-only**. Le fast path calcule uniquement les trois minima, soit 24 produits
+i64 par bloc, et ne remplace jamais le `NONE` d'un autre certificateur par son
+propre `MIXED`. Le maximum n'est payé que par une voie qui consomme réellement
+`NONE_LATTICE_U16`. Appels, gains nouveaux, lectures évitées, temps, `pending`
+et coûts des deux vues sont publiés séparément. Le statut logiciel live et les
+fixtures bloquantes restent autoritaires dans
+[`audits/AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md).
+
 Le tape physique peut être linéaire alors que `sum |A||B|` est quadratique.
 Un bloc accepté reste donc paresseux jusqu'à un consommateur factorisé reçu ou
 jusqu'au preflight d'une expansion atomique. La WSPD ne rend égaux ni niveaux,
@@ -289,16 +310,19 @@ centres. Avec
 F_z(w) = D - ||U_z||^2 + 2*U_z dot w, avec w dot d = 0
 ```
 
-Le signe de `F_z` donne exactement intérieur, shell ou extérieur. q2 interroge
+Le signe de `F_z` donne exactement intérieur, shell ou extérieur. Avec la
+convention `Pow<0` pour l'intérieur et `t=c-(a+b)/2`, on a
+`F_z(2t)=-4*Pow_z(t)` ; cette parité de signe doit être testée. q2 interroge
 seulement `w=0`, la boule de diamètre `ab`. q3 prend le point de norme minimale
 sur la ligne `F_x=0`, c'est-à-dire le pied auto-centré du troisième site. q4
 prend l'intersection de `F_x=0` et `F_y=0`. Positivité, owner, shell et
 `BallKey` restent des recertifications séparées.
 
 Plus généralement, si `o` est le circumcentre intrinsèque de `S`, toute sphère
-incidente a pour centre `o+w`, `w` orthogonal à `aff(S)`, et rayon carré
-`R^2+||w||^2`. La puissance de `z` est affine en `w`. L'intersection de toutes
-ces boules ouvertes est exactement `aff(S) intersect int(B(o,R))` : segment
+incidente a pour centre `o+w`, avec `w` orthogonal à l'espace directeur
+`aff(S)-o`, et rayon carré `R^2+||w||^2`. La puissance de `z` est affine en
+`w`. L'intersection de toutes ces boules ouvertes est exactement
+`aff(S) intersect int(B(o,R))` : segment
 ouvert pour q2, circumdisque planaire pour une face q3, boule entière pour q4.
 Ce `UnboundedAffineCoreCount` est un prune sûr des complétions, mais souvent
 vide en position générique.
@@ -326,6 +350,14 @@ le résiduel exact emploie les pieds q3 et les intersections shallow q4 `0..7`,
 pas toutes les sphères passant par l'ancre. Preuve et fixtures :
 [`audits/AUDIT_MINIBOULE_UNIQUE_RESIDUEL_SHALLOW_5809BD2_20260814.md`](audits/AUDIT_MINIBOULE_UNIQUE_RESIDUEL_SHALLOW_5809BD2_20260814.md).
 
+Cette réduction est exacte **pour une paire fixée**. Sur un rectangle CK,
+`a,b,D,U_z`, le plan médiateur, les pieds et les intersections varient ensemble.
+Aucun arrangement shallow commun à `A×B` n'est encore prouvé. Le raccord doit
+donc soit fournir un classifieur paramétré uniforme, soit développer les
+`PairId` sous un cap explicite ; l'unicité rend la source finie, jamais sparse.
+Les bornes locales de niveaux `0..8/0..7` ne bornent ni la construction, ni le
+census, ni la somme globale sur toutes les ancres.
+
 Le diagnostic `--fenetre-exacte`, introduit au pin `5809bd2` puis mesuré au
 commit `694920a`, décide bien q2 sur les
 paires tirées. Pour q3/q4, ses singletons universels minorent seulement la
@@ -337,11 +369,47 @@ particulier, `U_K<h` ne prouve pas l'existence d'une sphère peu profonde et
 n'autorise ni le nom « squelette exact » ni une inclusion dans un graphe de
 Delaunay d'ordre onze.
 
-Le worktree postérieur ajoute un mode exhaustif et les libellés typés. Il ne
+Le commit `8fd6f59` ajoute un mode exhaustif et les libellés typés. Il ne
 change pas l'objet mathématique : q3/q4 comptent exactement `U<h`, toujours un
 majorant. Ce mode doit rester un oracle borné : au delta observé il est cubique,
 n'a pas de cap d'opérations, retourne après la première taille d'une liste et
-nomme `u_moyen` la moyenne du seul préfixe de mille paires.
+nomme `u_moyen` la moyenne du seul préfixe de mille paires. Son retour anticipé
+précède aussi les portes BJD/finales et peut rendre code zéro avec un plancher
+impossible ou un mutant survivant ; toute combinaison doit être refusée ou les
+gates communes doivent précéder le retour. `--fenetre-exacte/--fenetre-seed`
+doivent être incompatibles avec ce mode plutôt qu'acceptées puis ignorées.
+
+### 4.4 Midball q2 : consolider, puis spécialiser le hot path
+
+Le même commit ajoute `MidballBlockDepth` et neuf portes. Ses extrema sont
+exacts sur le produit des **AABB du réseau entier u16**, pas sur les seuls
+`PointId` occupés ; `ALL` est aussi exact continûment, tandis que `NONE` ne doit
+pas prétendre exclure le point continu à demi-coordonnée. Cette primitive
+duplique `rect_h_interval/rect_classify` déjà présents dans `rect_front.hpp`,
+avec leurs fixtures réseau/continu, milieu impair et extrêmes u16. Une seule
+autorité doit survivre.
+
+Pour le raccord q2, une seule dominance est générale :
+
+```text
+central ALL => Hmin>0
+```
+
+Midball doit donc être essayé sur tout verdict central non `ALL`, y compris
+`NONE`. La corrélation perdue entre `D` et le score interdit le converse : pour
+`A=[0,8]`, `B=[10,100]`, `C={9}`, on a `Hmin=1>0`, mais `Dmin=4` et
+`smin=8100`, donc Midball `ALL` face à central `NONE`. Le fallback ne reprend
+que `MIXED` et ne couvre pas ce cas. Le hot path calcule néanmoins seulement
+`Hmin`, soit 24 produits ; le maximum entier et `NONE` sont inutiles pour cette
+disjonction.
+
+Le raccord WSPD mobile suivant `8fd6f59` applique désormais cette règle, refuse
+les modes incompatibles, publie ses promotions et ajoute un juge primal. Il
+reste non reçu : compteurs et planchers globaux masquent une taille sans gain
+après une taille productive, le produit du cap du juge peut déborder i64, le
+juge ne vérifie pas chaque promotion, `--fenetre-exhaustive` court-circuite ses
+gates et aucune CTest d'intégration ne l'exerce. Ces obligations et le hash live
+sont maintenus dans l'audit courant.
 
 ## 5. Générateur q3 recommandé
 
@@ -1650,7 +1718,8 @@ variable.
    petit `n` jusqu'au payload complet, sous permutations, tilings, caps et
    reprises.
 3. Recevoir `CKPairTape` comme partition q2 exacte et son certificateur
-   `[L_open,U_closed]`, puis mesurer `F2` et la masse logique séparément.
+   `[L_open,U_closed]`, brancher `Midball ALL` min-only avant descente, puis
+   mesurer `F2`, appels/gains, lectures et masse logique séparément.
 4. Au niveau paire/microtile, calculer d'abord le sandwich `U_K<=D_K<=C` :
    `C<h` saute Jung sans décider les cofaces, `U_K>=h` ferme, le résiduel appelle
    `JungDiskDepth9/8`. Sur une proof-tile CK, proposer une même base/pondération,
@@ -1684,7 +1753,7 @@ fermetures avant descente, les nœuds de transversal, `F4/M4`, les splits, les
 octets et la HWM. Elle n'autorise aucun claim 0A/0B ou produit avant les portes
 1--2 ci-dessus.
 
-La recette G4 au `HEAD=694920a` ne doit pas être relancée en l'état. Elle omet
+La recette G4 au `HEAD=8fd6f59` ne doit pas être relancée en l'état. Elle omet
 une cible pourtant sélectionnée par son regex CTest, ne sélectionne pas les
 nouvelles portes `mhgp3v_bjd_*`, avale le code de `check_rampe_pentes.py` sous
 `set +e` et omet `--exige-fenetre-finale`. Elle permet aussi à chaque job quatre

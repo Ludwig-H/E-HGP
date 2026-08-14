@@ -25,8 +25,10 @@ ancienne phrase imposant le rejet global des positions dupliquées est périmée
 - [`AUDIT_MINIBOULE_UNIQUE_RESIDUEL_SHALLOW_5809BD2_20260814.md`](AUDIT_MINIBOULE_UNIQUE_RESIDUEL_SHALLOW_5809BD2_20260814.md) :
   lemme exact de miniboule unique au support complet, famille normale au support
   partiel, cœur affine, sandwich `U<=D<=C`, q3 par pied, q4 par intersections,
-  contre-fixtures u16 de non-hérédité et contre-audit du diagnostic
-  `--fenetre-exacte` au commit `694920a`.
+  contre-fixtures u16 de non-hérédité, contre-audit des samplers au commit
+  `8fd6f59` et réception de `MidballBlockDepth` : `ALL` continu sûr, `NONE`
+  limité au réseau u16, portes à regex fail-open, raccord ALL-only à consolider
+  avec l'autorité antérieure `rect_h_interval`.
 - [`AUDIT_LIVE_BLOCK_JUNG_CREDITS_TAU_783A789_20260814.md`](AUDIT_LIVE_BLOCK_JUNG_CREDITS_TAU_783A789_20260814.md) :
   contre-audit historique du raccord `BlockJungDual64` au parent `783a789` ;
   réfutation du double crédit d'identité, packing réparé mais no-go dans

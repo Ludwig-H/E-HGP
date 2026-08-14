@@ -21,7 +21,7 @@ sans kernel CUDA et certifié l'arrêt ciblé. La seconde a échoué avant toute
 rampe (`CTest rc=8`, cibles non construites) : elle ne fournit aucune mesure
 SOC/G4.
 
-La recette au `HEAD=694920a` reste non relançable : elle omet encore une cible
+La recette au `HEAD=8fd6f59` reste non relançable : elle omet encore une cible
 sélectionnée par son regex CTest, ne sélectionne pas les nouvelles portes BJD,
 ignore le code de l'analyseur de pentes, n'exige pas une fenêtre finale et
 autorise quatre timeouts séquentiels dont la somme dépasse les deux
@@ -34,16 +34,25 @@ est `p95 warm_e2e<100 ms` et la cible secondaire `p95 warm_e2e<1 s` sur un G4,
 sortie complète et synchronisation comprises. Aucun échantillon qualifiable ne
 reçoit l'une ou l'autre.
 
-Le dernier commit stable relu est `694920a`. Il intègre le packing d'identités
-BJD réparé, refuse maintenant un juge partiel et les principaux modes vacuaires,
-grave `collinear_seven` et passe les huit CTests BJD ciblés. Le packing agit
-toujours après toute la descente ; `--exige-q4-ouvert` reste vacuaire sans juge
-et la famille ignore une valeur `--points` différente de neuf. Le verdict
-détaillé et la solution `tau(F)` sont dans
+Le dernier commit stable relu est `8fd6f59`. Il intègre le packing d'identités
+BJD réparé et ses huit CTests, refuse `--exige-q4-ouvert` sans juge et toute
+cardinalité autre que neuf pour `collinear_seven`. Le packing agit toujours
+après toute la descente. Le verdict détaillé et la solution `tau(F)` sont dans
 [`audits/AUDIT_LIVE_BLOCK_JUNG_CREDITS_TAU_783A789_20260814.md`](audits/AUDIT_LIVE_BLOCK_JUNG_CREDITS_TAU_783A789_20260814.md).
-Un delta non repinné corrige déjà ces deux refus et ajoute un sampler exhaustif ;
-ce dernier reste un oracle cubique sans cap, saute les tailles suivantes après
-la première et n'a pas encore de CTest.
+
+Le même commit ajoute `MidballBlockDepth` et neuf portes ciblées. Ses extrema
+ne portent pas tous le même domaine : `ALL` est exact sur l'AABB continue,
+`NONE` sur l'enveloppe du **réseau u16**, pas sur le seul produit des `PointId`
+occupés. Le header appelle pourtant ce dernier domaine continu. La primitive
+duplique `rect_h_interval` déjà présente ; ses deux portes saines à regex peuvent
+en outre masquer un code non nul. Un raccord WSPD mobile postérieur essaie
+`--midball` en disjonction ALL-only. Il compile, refuse maintenant l'absence de
+`--vwave`, publie ses promotions et possède un juge final. Il reste sans
+preflight u16, compte d'appels/population, juge causal de chaque promotion ni
+CTest d'intégration ; compteurs multi-tailles, cap i64 et bypass par le mode
+exhaustif restent ouverts. Une ablation amas à `n=1500` baisse lectures/résiduel q2 de
+`7,41 %/29,95 %`, mais augmente la médiane de vague de `14,1 %` : le fast path
+doit calculer seulement le minimum, pas les 72 produits de la primitive complète.
 
 Le pin `5809bd2` ajoute `--fenetre-exacte` et `694920a` en publie des pentes. Le
 nom doit être lu avec prudence :
@@ -55,6 +64,10 @@ diagnostique, pas un résultat de complexité ni une inclusion Delaunay.
 Le lemme exact, les contre-fixtures u16 et la route pieds/intersections shallow
 sont dans
 [`audits/AUDIT_MINIBOULE_UNIQUE_RESIDUEL_SHALLOW_5809BD2_20260814.md`](audits/AUDIT_MINIBOULE_UNIQUE_RESIDUEL_SHALLOW_5809BD2_20260814.md).
+Le mode exhaustif commité au pin `8fd6f59` retire seulement l'erreur de tirage
+sur les paires. Il reste cubique sans preflight et son retour anticipé précède
+les gates communes : un plancher BJD impossible ou un mutant peut encore finir
+code zéro. Il ne constitue donc qu'un oracle borné défectueux, pas une porte.
 
 Le pin historique `2b89ea1` introduit enfin une première tranche
 `BallForm -> PrimitiveSphereKey -> census I_B/U_B -> SphereRun`. C'est le bon

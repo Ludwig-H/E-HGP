@@ -8,12 +8,14 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-> **Alerte au `HEAD=694920a`.** Le commit reçoit le refus des juges BJD
-> partiels, les principaux preflights de modes vacuaires, `collinear_seven` et
-> huit CTests BJD verts. Son titre « fenêtre exacte en n^1,09 » dépasse toutefois
-> la mesure : q3/q4 échantillonnent `U`, les témoins individuellement universels,
-> et publient un majorant de fenêtre. Ils ne décident ni la profondeur
-> collective `D`, ni les circumcentres réalisables, ni une inclusion Delaunay.
+> **Alerte au `HEAD=8fd6f59`.** Le commit reçoit neuf portes
+> `MidballBlockDepth`, mais duplique l'autorité `rect_h_interval` déjà présente
+> et mélange deux domaines : son `ALL` vaut sur l'AABB continue, tandis que son
+> `NONE` vaut seulement sur l'enveloppe du réseau entier u16. Le header revendique
+> à tort le continu pour les deux, et les deux portes saines à regex peuvent
+> masquer un code non nul. Son mode
+> `--fenetre-exhaustive` est commité avec un retour anticipé avant les gates :
+> un plancher BJD impossible ou un mutant peuvent rendre code zéro.
 > Le verdict exact sur l'idée de miniboule unique est
 > [`AUDIT_MINIBOULE_UNIQUE_RESIDUEL_SHALLOW_5809BD2_20260814.md`](AUDIT_MINIBOULE_UNIQUE_RESIDUEL_SHALLOW_5809BD2_20260814.md) : q2 possède bien
 > une seule boule diamétrale ; q3 et q4 ont chacun une boule canonique une fois
@@ -25,28 +27,35 @@ Cadre : `phase=exploration_v3_hors_registre`,
 ## Snapshot
 
 Le dernier commit stable relu est
-`HEAD=694920ac59d58afdd639bd5156a481223e8d37d8`, commit
-`la fenetre exacte est en n^1,09 la ou le certificat en publie n^1,95`. Depuis
-le pin `cec4a4f`, quatre commits ont ajouté `SOC64`, `BlockJungDual64`, son
-packing réparé, puis les portes BJD et le sampler de cœur universel.
+`HEAD=8fd6f59bff450fbc88abff7f330be6c2da994a36`, commit
+`q2 n'a qu'un centre : son predicat de bloc est exact, pas suffisant`. Depuis
+le pin `cec4a4f`, cinq commits ont ajouté `SOC64`, `BlockJungDual64`, son
+packing réparé, les portes BJD, le sampler de cœur universel, puis la primitive
+q2 dupliquée et son oracle.
 
-Après ce pin, Claude modifie de nouveau
-`prototype/wspd_wavefront_probe.cpp`. Le delta refuse maintenant
-`--exige-q4-ouvert` sans juge et une taille autre que neuf pour
-`collinear_seven`, puis ajoute les libellés typés et un mode exhaustif du
-sampler. Il compile mais reste non repinné : le mode est cubique sans preflight,
-saute les tailles suivantes après la première et n'a pas de CTest. Les autres
+Après ce pin, Claude modifie de nouveau seulement
+`prototype/wspd_wavefront_probe.cpp` côté logiciel pour raccorder l'option
+`--midball`. Une première révision échouait sous `-Werror` sur un compteur
+inutilisé. La révision mobile courante, hash
+`63c79bd6ce707a66f304ca4613c225929d419d07e0d5e99547d914a877b6fa01`,
+compile, refuse l'option sans `--vwave`, imprime promotions et juge final. Elle
+ne publie toujours ni appels ni population promue et aucune CTest WSPD ne
+l'exerce. Les autres
 changements du worktree sont les présentes écritures documentaires. L'auditeur
 n'a modifié aucun logiciel.
 
-Empreintes SHA-256 au commit `694920a` :
+Empreintes SHA-256 au commit `8fd6f59` :
 
 - `CMakeLists.txt` :
-  `de4b604a556b016687f6f488168c077c8b50e28a6937fb49a80ec3f7b0452832` ;
+  `bfbf6517c13ba665bcec909e5b5f64e3609c8e99348e3d508794af7bba89e103` ;
 - `prototype/wspd_wavefront_probe.cpp` :
-  `4ae1757c4dc86e85a58e750f148485a7378f2881c4bae411d6738b77dba9bd43` ;
+  `7a650991bb8bd206075e7a5b7d02cb96bbea1cdb6dab5f692004f587f50235db` ;
 - `prototype/cloud_families.hpp` :
   `f825334096c80407c57e2ca05f6f59f6ae3dd6313746beb8e73d689e9082dded` ;
+- `prototype/midball_block.hpp` :
+  `c35518fbab55689d7113c51a150ae09055cd4444397721b0d4fc2c48bc2655b6` ;
+- `prototype/midball_probe.cpp` :
+  `09a753f5335d676c21e2356a42a86dfe665453198c1291c7e6ab13b4142c5419` ;
 - `prototype/jung_dual_probe.cpp` :
   `d05a997c1c10e1e02918f3a585e7cdee45fda6814edf4930ccbae9b4030fd4e6` ;
 - `prototype/block_jung_dual.hpp` :
@@ -55,7 +64,8 @@ Empreintes SHA-256 au commit `694920a` :
   `18e6dd0f1aeafca51639805761a15855acbd08f4446ef9b4cbe7132db64977eb`.
 
 Le commit stable reçoit la primitive BJD, un packing disjoint sûr sur ses
-campagnes causales et huit portes BJD ciblées. Il ne reçoit ni source CK--WST,
+campagnes causales, huit portes BJD ciblées et neuf portes midball. Il ne reçoit
+ni source CK--WST,
 ni profondeur `tau(F)`, ni ledger persistant de vrais `PointId`, ni primitive
 device, ni payload. Son `--fenetre-exacte` n'est exact que pour la miniboule q2
 échantillonnée sous domaine régulier ; ses lanes q3/q4 publient un majorant par
@@ -160,6 +170,42 @@ l'inclusion Delaunay affirmée dans la note de Claude. Le résultat reste utile
 pour éviter des appels Jung lorsque `C<h` et pour fermer immédiatement lorsque
 `U>=h`, à condition de rester blockwise. Un scan de 50 000 témoins pour chacun
 des `1 392 028` blocs historiques `s=2` dépasserait 69 milliards de tests.
+
+## `MidballBlockDepth` stable : théorème q2 reçu, ABI et raccord ouverts
+
+Le minimum de `H(a,b,z)=(z-a) dot (b-z)` implémenté au pin est exact sur
+l'AABB continue et `hmin>0` constitue donc un `ALL` q2 sûr. Son maximum teste
+les entiers voisins du point stationnaire : il est exact sur le réseau u16, pas
+sur l'enveloppe continue. Avec `A={0}`, `B={1}`, `C=[0,1]`, le code trouve
+`hmax=0` et `NONE`, alors que le maximum continu vaut `1/4`. Ce verdict reste
+sûr pour les vrais sites quantifiés ; il doit être typé `NONE_LATTICE_U16` ou
+remplacé par le numérateur exact d'échelle quatre avant toute réutilisation
+continue.
+
+Le header ne préflighte ni domaine u16, ni `lo<=hi`, ni paire propre, ni
+identités et n'expose aucun `INVALID/UNKNOWN`. Il duplique
+`rect_h_interval`, qui publie déjà le bon domaine réseau. Les 9/9 CTests affichés
+verts ne ferment pas ces points : les deux portes saines emploient
+`PASS_REGULAR_EXPRESSION`; `--selftest=1` imprime `accord=OUI` puis rend le code
+`3`, démontrant que le texte précède le plancher. La fixture de non-hérédité ne
+recertifie pas encore l'acuité q3 ni les barycentriques positives q4.
+
+Le raccord live ALL-only est l'ordonnance saine : ajouter uniquement un gain
+`ALL`, sans remplacer le `NONE` du certificateur central. Au snapshot courant,
+il compile mais n'a aucune CTest WSPD et appelle la primitive complète à 72
+multiplications i64 alors que le minimum seul en demande 24. Sur
+`eight_clusters,n=1500,s=8`, une ablation alternée réduit les lectures de
+`7,41 %` et le résiduel q2 de `29,95 %`, avec `pending=0`, mais augmente la
+médiane de vague de `14,1 %` sur la machine partagée. La porte suivante est une
+autorité partagée min-only, un juge compatible avec les gains midball et un
+différentiel causal de lectures/temps.
+
+Le juge live reste ouvert : ses compteurs sont globaux à une liste de tailles,
+son produit de cap `na*nb*m` peut déborder i64, il juge les fermetures finales
+plutôt que chaque promotion et le retour de `--fenetre-exhaustive` contourne ses
+planchers. Le plancher de gain doit être une option de campagne. La seule
+dominance reçue est `central ALL => Midball ALL`; Midball peut au contraire
+promouvoir un `central NONE`, par exemple sur `A=[0,8],B=[10,100],C={9}`.
 
 ## P0 : `0A` reste ouvert sur u16
 
@@ -526,7 +572,7 @@ demandé des exécutables absents ; CTest a rendu `rc=8`. Le transcript conserve
 l'échec et `stop_and_verify.sh` certifie exactement
 `devpod-gpu-exploration/europe-west4-ai1a/ehgp-blackwell-spot-ai1a` en
 `TERMINATED`. Ce reçu qualifie l'arrêt, pas SOC64, une pente ou le SLO. Le
-script inchangé jusqu'au commit `694920a` est seulement corrigé partiellement et n'a pas de
+script inchangé jusqu'au commit `8fd6f59` est seulement corrigé partiellement et n'a pas de
 reçu d'exécution : il omet encore `mhgp3v_jung_dual_judge`, sélectionné par son
 regex CTest, et ce regex ignore les portes `mhgp3v_bjd_*`. Il avale le code de
 l'analyseur, omet `--exige-fenetre-finale`, gate le seul `sum_E` à `1,70` au
@@ -639,15 +685,21 @@ pin 5809bd2, BJD sans vwave : code 0/OK, essais=0, couvrants=0 (mode vacuaire)
 HEAD SOC actif + juge shadow : zéro verdict actif jugé ; raccord actif sans autorité intégrée
 HEAD judge-vwave + SOC/BJD : code 1, 149 fermetures dites « sans 10 » ; juge central incompatible avec les preuves collectives q4
 rejeu local historique Jung/BJD : 16/16 verts en 1,45 s, dont 13 Jung et 3 BJD intégrés
-HEAD 694920a BJD ciblé : 8/8 verts ; 0,26 s présent rejeu, 0,36 s précédent
+pin 694920a BJD ciblé : 8/8 verts ; 0,26 s présent rejeu, 0,36 s précédent
   PARTIEL code 3, sans-vwave code 2, mutants code 4
-HEAD exige-q4-ouvert seul : code 0/OK, porte encore vacuaire
-HEAD collinear_seven avec --points=200 : exécute silencieusement n=9
-HEAD collinear_seven sain : zéro groupe, zéro fermeture, 55 candidats déjà crédités rejetés
+pin 694920a exige-q4-ouvert seul : code 0/OK ; collinear_seven points=200 exécute n=9
+HEAD 8fd6f59 BJD ciblé : 8/8 verts ; exige-q4-ouvert sans juge et collinear n=200 refus code 2
+HEAD collinear_seven sain : zéro groupe, zéro fermeture, 55 visites de feuilles déjà créditées rejetées
+HEAD midball standalone : 9/9 affichés verts en 0,95 s présent rejeu ;
+  deux portes saines à regex, doublon de rect_h_interval, réception ouverte
+HEAD midball --selftest=1 : accord=OUI imprimé puis plancher code 3
 HEAD fenetre-exacte n=200, S=1000 : 198000 scans ; q2 exact échantillonné, q3/q4 majorants ; aucune CTest dédiée
-delta exhaustif n=200 : 19900 paires, U<h=3790/10059/10937, 3184359 tests
-delta exhaustif --points=8,9 : n=9 sauté par retour après les 28 paires de n=8
-delta exige-q4-ouvert sans juge / collinear_seven n=200 : refus code 2
+HEAD exhaustif n=200 : 19900 paires, U<h=3790/10059/10937, 3184359 tests
+HEAD exhaustif --points=8,9 : n=9 sauté par retour après les 28 paires de n=8
+HEAD exhaustif + plancher BJD impossible ou mutant : code 0, gates court-circuitées
+worktree midball 63c79bd6 : build vert ; refus sans vwave, promotions publiées
+  n=1500 amas : lectures -7,41 %, résiduel q2 -29,95 %, vague médiane +14,1 %
+  multi-n : compteurs hérités ; cap i64 et bypass exhaustif du juge ouverts
 ablation BJD n=1500 uniform : masse q4 -12,55 %, CPU user médian +5,47 %, lectures identiques
 ablation BJD n=1500 amas : masse q4 -0,87 %, CPU user médian +8,15 %, lectures identiques
 session G4 SOC actif : CTest rc=8, aucune rampe, cible TERMINATED
@@ -670,6 +722,7 @@ réparer 0A u16 et isoler les juges de mutants
   -> raccorder BallEvent aux autorités Gamma par ordres/lots/verticales
   -> recevoir 0B et le payload borné
   -> recevoir CKPairTape q2 et ses certificats [L,U]
+  -> Midball ALL min-only, domaine/IDs préflightés, avant toute descente q2
   -> triage canonique U<=D<=C par paire/microtile
   -> SOC64 union-disjointe + JungDiskDepth9/8 seulement sur U<h<=C
   -> primal proposer -> BlockJungDual64 uniforme -> branch-and-cut tau(E)>=h

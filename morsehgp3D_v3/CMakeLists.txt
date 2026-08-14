@@ -4974,3 +4974,46 @@ mhgp3v_add_expected_code_test_for(mhgp3v_midball_probe
 mhgp3v_add_expected_code_test_for(mhgp3v_midball_probe
   mhgp3v_midball_refus_mutant_sans_juge "un mutant de primitive exige --selftest" 2
   --fixtures --inject=midball-drop-axis)
+
+# ---------------------------------------------------------------------------
+# `MidballBlockDepth` BRANCHE DANS LA VAGUE, EN DISJONCTION.
+#
+# Le verdict central q2 compare `max(s)` a `min(D)`, deux extrema pris
+# SEPAREMENT sur le rectangle. Le minimum exact de `H` sur le meme produit de
+# boites decide la meme lane sans cette perte.
+#
+# EN DISJONCTION, JAMAIS EN REMPLACEMENT. Les deux `NONE` different : le
+# central elague des qu'aucun `z` n'est UNIVERSEL, alors que `max H <= 0` exige
+# que toute paire exclue tout `z`. Substituer le second detruit l'elagage,
+# consomme le budget de descente et fait PERDRE des fermetures — mesure a
+# `n=3000` sur huit amas : recertifications `31 538 327 -> 46 889 303` et masse
+# q2 ouverte `262 529 -> 685 040`. En disjonction, les memes mesures donnent
+# `29 542 758` recertifications et `188 460` de masse : c'est le premier
+# certificat de cette exploration qui reduit A LA FOIS la fenetre et le travail.
+#
+# Le juge n'emprunte rien au sujet : il enumere les vrais `PointId` et exige
+# `need[0]` temoins universels sur TOUTE paire du rectangle, dans l'ecriture
+# `(g,Q)`. Ni `H`, ni la separation par axe, ni aucun extremum de boite n'y
+# apparaissent.
+add_test(NAME mhgp3v_midball_vwave_juge
+  COMMAND mhgp3v_wspd_wavefront_probe --family=eight_clusters --points=200
+          --sep-euclid=8/1 --tight --vwave --window=512 --window-ledger
+          --midball --juge-midball=400000)
+set_tests_properties(mhgp3v_midball_vwave_juge PROPERTIES
+  PASS_REGULAR_EXPRESSION
+  "midball q2 : all=5540 gains=5540 \\| juge=3122 faux=0 sautes=0")
+
+mhgp3v_add_expected_code_test_for(mhgp3v_wspd_wavefront_probe
+  mhgp3v_midball_refus_sans_vwave "--midball exige --vwave" 2
+  --family=eight_clusters --points=200 --sep-euclid=8/1 --tight --window=512
+  --midball)
+mhgp3v_add_expected_code_test_for(mhgp3v_wspd_wavefront_probe
+  mhgp3v_midball_refus_juge_sans_sujet "--juge-midball exige --midball" 2
+  --family=eight_clusters --points=200 --sep-euclid=8/1 --tight --vwave
+  --window=512 --window-ledger --juge-midball=400000)
+# Le juge de vague ne recompose que les temoins du masque CENTRAL : avec un
+# disjonctif exact il declarerait faux des fermetures legitimes.
+mhgp3v_add_expected_code_test_for(mhgp3v_wspd_wavefront_probe
+  mhgp3v_midball_refus_judge_vwave "--judge-vwave ne recompose pas le disjonctif midball" 2
+  --family=eight_clusters --points=200 --sep-euclid=8/1 --tight --vwave
+  --window=512 --window-ledger --midball --judge-vwave)

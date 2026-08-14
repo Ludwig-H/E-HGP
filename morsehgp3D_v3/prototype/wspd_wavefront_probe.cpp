@@ -18,6 +18,7 @@
 #include <chrono>
 
 #include "block_jung_dual.hpp"
+#include "midball_block.hpp"
 #include "oracle/jung_dual_judge.hpp"
 #include "rect_front.hpp"
 #include "soc64_rect.hpp"
@@ -278,6 +279,14 @@ bool g_exige_q4_ouvert = false;
 // Fenetre decidee PAR PAIRE : nombre de paires tirees uniformement, et graine.
 long long g_fenetre_exacte = 0;
 long long g_fenetre_seed = 1;
+// `MidballBlockDepth` branche sur la lane q2 : le predicat EXACT remplace la
+// comparaison de deux extrema separes.
+bool g_midball = false;
+long long g_midball_all = 0, g_midball_gain = 0;
+// Juge du credit midball : cap en triples `|A||B|m`. Un cap atteint est un
+// REFUS DE JUGER, jamais un accord.
+long long g_juge_midball = 0;
+long long g_mb_juges = 0, g_mb_faux = 0, g_mb_sautes = 0;
 // Parcours EXHAUSTIF de toutes les paires : le compte devient exact et la
 // question du modele aleatoire disparait.
 bool g_fenetre_exhaustive = false;
@@ -1020,6 +1029,8 @@ int main(int argc, char** argv) {
     else if (a.rfind("--min-bjd-groupes=", 0) == 0) g_min_bjd_groupes = arg_ll(val("--min-bjd-groupes=").c_str(), 1, (1LL << 40), "min-bjd-groupes");
     else if (a == "--exige-q4-ouvert") g_exige_q4_ouvert = true;
     else if (a.rfind("--fenetre-exacte=", 0) == 0) g_fenetre_exacte = arg_ll(val("--fenetre-exacte=").c_str(), 1, (1LL << 24), "fenetre-exacte");
+    else if (a == "--midball") g_midball = true;
+    else if (a.rfind("--juge-midball=", 0) == 0) g_juge_midball = arg_ll(val("--juge-midball=").c_str(), 1, (1LL << 40), "juge-midball");
     else if (a == "--fenetre-exhaustive") { g_fenetre_exhaustive = true; if (g_fenetre_exacte == 0) g_fenetre_exacte = 1; }
     else if (a.rfind("--fenetre-seed=", 0) == 0) g_fenetre_seed = arg_ll(val("--fenetre-seed=").c_str(), 1, (1LL << 40), "fenetre-seed");
     else if (a == "--inject-bjd-reutilise") g_inject_bjd_reutilise = true;
@@ -1053,6 +1064,12 @@ int main(int argc, char** argv) {
   // zero avec `essais=0`, donc un vert qui ne prouve rien. Un mutant sans son
   // juge est du meme ordre : il ne peut etre ni tue ni survivant.
   if (g_bjd_groupes > 0 && !g_vwave) refuse("--bjd-groupes exige --vwave");
+  if (g_midball && !g_vwave) refuse("--midball exige --vwave");
+  if (g_juge_midball > 0 && !g_midball) refuse("--juge-midball exige --midball");
+  // Le juge de vague ne recompose que les temoins du masque CENTRAL. Avec un
+  // disjonctif exact il declarerait faux des fermetures legitimes.
+  if (g_midball && g_judge_vwave)
+    refuse("--judge-vwave ne recompose pas le disjonctif midball");
   if (g_juge_bjd > 0 && g_bjd_groupes == 0) refuse("--juge-bjd exige --bjd-groupes");
   if (g_min_bjd_fermetures > 0 && g_juge_bjd == 0)
     refuse("--min-bjd-fermetures exige --juge-bjd");
@@ -1304,6 +1321,40 @@ int main(int argc, char** argv) {
             for (int lane = 0; lane < 3; ++lane) {
               if (!(m & (1u << lane))) continue;
               RectVerdict v = mhgp3v::rect_central_verdict(dlo, smn, smx, lane);
+              // ---- q2 N'A QU'UN CENTRE : SON PREDICAT DE BLOC EST EXACT.
+              //
+              // Le verdict central compare `max(s)` a `min(D)`, deux extrema
+              // pris SEPAREMENT sur le rectangle : c'est une relaxation, et
+              // elle perd des que la paire qui maximise `s` n'est pas celle
+              // qui minimise `D`. Or `4H = D - s`, et `H` se separe par axe :
+              // son minimum exact sur le produit des trois boites est la somme
+              // des trois minima. On decide donc la lane q2 EXACTEMENT, au
+              // meme endroit et sans descente supplementaire.
+              if (g_midball && lane == 0) {
+                mhgp3v::midball::Box ma{}, mb{}, mc{};
+                for (int dd5 = 0; dd5 < 3; ++dd5) {
+                  ma.lo[dd5] = qa.lo[dd5]; ma.hi[dd5] = qa.hi[dd5];
+                  mb.lo[dd5] = qb.lo[dd5]; mb.hi[dd5] = qb.hi[dd5];
+                  mc.lo[dd5] = cb2.lo[dd5]; mc.hi[dd5] = cb2.hi[dd5];
+                }
+                // EN DISJONCTION, JAMAIS EN REMPLACEMENT. Les deux verdicts
+                // n'ont pas le meme `NONE` : le central elague des que plus
+                // aucun z n'est UNIVERSEL, alors que le minimum de `H` exige
+                // que toute paire exclue tout z. Substituer le second detruit
+                // l'elagage, consomme le budget de descente et fait perdre des
+                // fermetures ailleurs — mesure a `n=3000` sur huit amas :
+                // recertifications `31 538 327 -> 46 889 303` et masse q2
+                // ouverte `262 529 -> 685 040`. Seul le `ALL` est repris, et
+                // seulement quand le central ne l'a pas deja rendu.
+                if (v != RectVerdict::kAll) {
+                  const auto mv = mhgp3v::midball::midball_block(ma, mb, mc);
+                  if (mv == mhgp3v::midball::MidballVerdict::kAll) {
+                    v = RectVerdict::kAll;
+                    ++g_midball_all;
+                    ++g_midball_gain;
+                  }
+                }
+              }
               // Le masque central est SUFFISANT, jamais complet. Sous
               // `--fallback`, un `MIXED` central est repris par le
               // classifieur complet — `Hmin` et les deux maxima de
@@ -1780,6 +1831,43 @@ int main(int argc, char** argv) {
         const int* need = g_need;
         for (int lane = 0; lane < 3; ++lane)
           if (cred[lane] >= need[lane]) ++bank.closed[lane];
+        // ---- LE JUGE DU CREDIT MIDBALL.
+        //
+        // Une fermeture q2 affirme qu'il existe `need[0]` `PointId` DISTINCTS
+        // interieurs a la boule diametrale de TOUTE paire du rectangle. Le juge
+        // l'enumere sur les vrais points, dans l'ecriture `(g,Q)` de
+        // `spindle_cone.hpp`, qui ne partage ni `H`, ni la separation par axe,
+        // ni aucun extremum de boite avec le sujet.
+        if (g_juge_midball > 0 && g_midball && cred[0] >= need[0]) {
+          const int fa = (wa < 0) ? (-1 - wa) : nodes[wa].first;
+          const int la5 = (wa < 0) ? (-1 - wa) : nodes[wa].last;
+          const int fb = (wb < 0) ? (-1 - wb) : nodes[wb].first;
+          const int lb5 = (wb < 0) ? (-1 - wb) : nodes[wb].last;
+          const long long na = (long long)(la5 - fa + 1);
+          const long long nb = (long long)(lb5 - fb + 1);
+          if (na <= 0 || nb <= 0 || na * nb * (long long)m > g_juge_midball) {
+            ++g_mb_sautes;
+          } else {
+            long long univ = 0;
+            for (long long z = 0; z < m; ++z) {
+              bool universel = true;
+              for (long long ia = fa; ia <= la5 && universel; ++ia) {
+                if (ia == z) { universel = false; break; }
+                for (long long ib = fb; ib <= lb5; ++ib) {
+                  if (ib == z) { universel = false; break; }
+                  if (mhgp3v::cone::lane_of_target_gq(
+                          sp[(size_t)ia][0], sp[(size_t)ia][1], sp[(size_t)ia][2],
+                          sp[(size_t)z][0], sp[(size_t)z][1], sp[(size_t)z][2],
+                          sp[(size_t)ib][0], sp[(size_t)ib][1], sp[(size_t)ib][2]) <
+                      mhgp3v::cone::kLaneQ2) { universel = false; break; }
+                }
+              }
+              if (universel) ++univ;
+            }
+            ++g_mb_juges;
+            if (univ < need[0]) ++g_mb_faux;
+          }
+        }
         // JUGE DE LA VAGUE. Toute fermeture affirme qu'il existe `need`
         // `PointId` DISTINCTS satisfaisant le masque central sur tout
         // `A x B`. On le verifie par balayage exhaustif du nuage, dans une
@@ -2763,6 +2851,30 @@ int main(int argc, char** argv) {
                   soc.bjd_couples,
                   (double)soc.bjd_couples / (double)std::max(1LL, soc.bjd_essais),
                   soc.bjd_rejetes_credite);
+    }
+    if (g_midball) {
+      std::printf("midball q2 : all=%lld gains=%lld | juge=%lld faux=%lld sautes=%lld\n",
+                  g_midball_all, g_midball_gain, g_mb_juges, g_mb_faux, g_mb_sautes);
+      // UN SEUL DESACCORD SUFFIT : le verdict `ALL` est universel sur tout le
+      // rectangle, il n'a pas de taux d'erreur admissible.
+      if (g_mb_faux != 0) {
+        std::fprintf(stderr,
+                     "DESACCORD: %lld fermetures q2 sans %d PointId universels\n",
+                     g_mb_faux, g_need[0]);
+        return 1;
+      }
+      if (g_juge_midball > 0 && g_mb_sautes != 0) {
+        std::fprintf(stderr, "PARTIEL: %lld fermetures q2 non jugees\n", g_mb_sautes);
+        return 3;
+      }
+      if (g_juge_midball > 0 && g_mb_juges == 0) {
+        std::fprintf(stderr, "PLANCHER: aucune fermeture q2 jugee\n");
+        return 3;
+      }
+      if (g_midball_gain == 0) {
+        std::fprintf(stderr, "PLANCHER: le disjonctif midball n'a rien change\n");
+        return 3;
+      }
     }
     if (g_juge_bjd > 0) {
       // UN SEUL DESACCORD SUFFIT. `faux` compte les groupes que le juge primal
