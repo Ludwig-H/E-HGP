@@ -4676,7 +4676,7 @@ add_test(NAME mhgp3v_jung_dual_ablation_amas
 set_tests_properties(mhgp3v_jung_dual_ablation_amas PROPERTIES
   PASS_REGULAR_EXPRESSION "dual_ablation famille=eight_clusters .* gain=[1-9]")
 mhgp3v_add_expected_code_test_for(mhgp3v_jung_dual_probe
-  mhgp3v_jung_dual_reject_sans_mode "choisir --selftest ou --ablation" 2 --seed=1)
+  mhgp3v_jung_dual_reject_sans_mode "choisir --selftest, --ablation ou --fixtures" 2 --seed=1)
 mhgp3v_add_expected_code_test_for(mhgp3v_jung_dual_probe
   mhgp3v_jung_dual_reject_inject "--inject inconnu" 2 --selftest --inject=dual-inconnu)
 mhgp3v_add_expected_code_test_for(mhgp3v_jung_dual_probe
@@ -4739,3 +4739,40 @@ add_test(NAME mhgp3v_ordre_proche_sans_effet
           --ordre-proche)
 set_tests_properties(mhgp3v_ordre_proche_sans_effet PROPERTIES
   PASS_REGULAR_EXPRESSION "fenetre q4 : terminaux_ouverts=[0-9]+ masse_ouverte=1071162 ")
+
+# LA FIXTURE `u < p < d` : LE CONTRAT DEMANDE LA PROFONDEUR, PAS L'UNIVERSALITE.
+#
+# Section 5.5 de `AUDIT_CONTRE_RECEPTION_M4_V2_DEPTHBLOCK_5BFC5C8_20260814.md`.
+# Elle separe trois quantites que tout le reste du travail confondait :
+#   u = temoins interieurs a TOUTE sphere admissible ;
+#   p = groupes couvrants a identites disjointes ;
+#   d = min sur les centres du nombre de temoins interieurs.
+# On a `u <= p <= d`, et le contrat demande `d >= 8`. Sur la configuration
+# `a=(0,100,100)`, `b=(40,100,100)` avec six temoins de corde et trois gadgets
+# aux regions mauvaises non vides et deux a deux disjointes dans le disque de
+# Jung, on mesure exactement `u=6 < p=7 < d=8`.
+#
+# Elle refute donc DEUX affirmations d'un coup : « le certificat singleton est
+# presque optimal » — il rate deux unites sur huit — et « huit groupes disjoints
+# suffisent comme decision complete » — le packing plafonne a sept alors que la
+# profondeur vaut huit. Une porte qui assimile echec du packing et profondeur
+# insuffisante perd des fermetures VRAIES.
+add_test(NAME mhgp3v_jung_dual_fixture_u_p_d COMMAND mhgp3v_jung_dual_probe --fixtures)
+set_tests_properties(mhgp3v_jung_dual_fixture_u_p_d PROPERTIES
+  PASS_REGULAR_EXPRESSION "dual_fixture u_p_d : u=6 p=7 d=8")
+
+# ---------------------------------------------------------------------------
+# `SOC64` EST ESSAYE AUSSI SUR UN `NONE` CENTRAL, ET C'EST GRATUIT.
+#
+# Le test central q4 est `s <= (56/209) D`, et `56/209 = 0,267943` approche
+# `2 - sqrt(3) = 0,267949`, qui est exactement la forme du spindle dans le PIRE
+# cas `U perpendiculaire a d`. Un `NONE` central ne signifie donc pas qu'aucun
+# point n'est temoin universel : il signifie qu'aucun n'est dans la boule
+# INSCRITE. Essayer `SOC64` la-dessus n'ajoute aucune descente — un `NONE` n'en
+# declenchait deja aucune — et double la masse fermee sur `uniform`.
+add_test(NAME mhgp3v_soc64_sur_none_central
+  COMMAND mhgp3v_wspd_wavefront_probe --family=uniform --points=1500
+          --sep-euclid=8/1 --tight --vwave --window=512 --window-ledger
+          --soc64-shadow)
+set_tests_properties(mhgp3v_soc64_sur_none_central PROPERTIES
+  PASS_REGULAR_EXPRESSION "terminaux fermetures=39218 masse_fermee=173575")

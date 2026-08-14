@@ -718,6 +718,84 @@ propriete du CONTRAT, pas du certificat.
 >
 > Y a-t-il un troisieme levier que je ne vois pas ?
 
+## 6 quinquies. La reponse a la Question 9, et le gain gratuit qu'elle m'a fait trouver
+
+> **Vous repondez que le troisieme levier est COLLECTIF, et vous avez raison de
+> bout en bout.** Je mesurais `u`, le nombre de temoins interieurs a TOUTE
+> sphere admissible. Le contrat demande `d`, la profondeur : qu'a CHAQUE centre
+> il existe huit temoins interieurs, qui peuvent changer avec le centre. On a
+> toujours `u <= p <= d`, et j'optimisais la mauvaise extremite.
+
+### Votre fixture est exacte, je l'ai verifiee et gravee
+
+`a=(0,100,100)`, `b=(40,100,100)`, six temoins de corde `(j,100,100)` et trois
+gadgets `(20,111,100)`, `(20,92,108)`, `(20,92,92)`.
+
+Les centres q4 admissibles vivent dans `x=20` avec `Y^2+Z^2 <= 200`, et
+`R^2 = 400+Y^2+Z^2`. Les six temoins de corde verifient `(j-20)^2 < 400`, donc
+sont universels. Les trois gadgets ont pour regions mauvaises `Y <= -279/22`,
+`Y-Z >= 17` et `Y+Z >= 17` : non vides dans le disque de rayon `14,142`, et
+deux a deux disjointes — leurs intersections exigeraient respectivement
+`Z <= -29,68`, `Z >= 29,68` et `Y >= 17`, toutes hors du disque.
+
+Donc au plus un gadget manque a chaque centre : `d = 8`. Mais deux gadgets
+quelconques forment un groupe couvrant, et il n'y en a que trois : `p = 7`.
+
+Mon propre code la confirme : **`u=6`, `p=7`, `d=8`**, avec 42 groupes
+couvrants trouves. Elle est gravee dans `mhgp3v_jung_dual_fixture_u_p_d`.
+
+Elle refute deux choses que j'affirmais il y a une heure : « le certificat
+singleton est presque optimal » — il rate deux unites sur huit — et « huit
+groupes disjoints suffisent comme decision complete » — le packing plafonne a
+sept quand la profondeur vaut huit. Mon `96 %` d'hier ne mesurait donc que le
+rappel de `SOC64` sur `u`, sur une cohorte conditionnee, et pas du tout sa
+position vis-a-vis du contrat.
+
+### Le gain gratuit trouve en cherchant votre reponse
+
+En instrumentant, j'ai vu que mon shadow n'essayait `SOC64` que sur un `MIXED`
+central. C'etait une perte systematique, et elle se demontre : le test central
+q4 est `s <= (56/209) D`, or `56/209 = 0,267943` approche
+`2 - sqrt(3) = 0,267949`, qui est **exactement la forme du spindle dans le pire
+cas `U perpendiculaire a d`**. Des qu'un point a `(U.d)^2 > 0`, le spindle lui
+autorise un score strictement plus grand. Un `NONE` central ne dit donc pas
+« aucun temoin universel ici », il dit « aucun dans la boule INSCRITE ».
+
+Essayer `SOC64` sur un `NONE` est gratuit : un `NONE` ne declenchait deja
+aucune descente, donc rien n'est ajoute au parcours.
+
+| famille, `n=3000` | masse q4 fermee avant | apres | |
+|---|---:|---:|---|
+| `uniform` | 201 421 (19,60 %) | **415 630 (40,45 %)** | x2,06 |
+| `eight_clusters` | 526 535 (13,01 %) | **727 255 (17,98 %)** | x1,38 |
+
+### Deux hypotheses que j'ai testees et qui sont mortes
+
+- **L'ordre de descente** : reordonner par proximite au milieu ne change rien,
+  parce que `tronques=0` — le budget ne borne jamais. Refute.
+- **L'elagage `NONE`** : descendre malgre un `NONE` central ne gagne rien non
+  plus. Sur `n=200` et `n=400` avec `window=1024` et `tronques=0` des deux
+  cotes, les masses sont identiques au bit pres. Le `NONE` n'elague donc pas de
+  temoins atteignables ; ce qu'il coutait, c'etait de ne pas essayer `SOC64`
+  dessus — et c'est repare.
+
+Vos autres corrections sur `--diag-feuille` sont recues sans reserve : la
+cohorte est fortement conditionnee — premiers parcours jusqu'au cap, feuilles
+seules, `|A||B|<=64`, lane vivante sous ses ancetres, repetitions possibles —
+et les portes ne verifient pas encore les implications par incidence
+`central_ALL => exact` et `SOC_ALL => exact`, ni la disjonction des credits, ni
+la comparaison des deux ordres dans le meme processus.
+
+> **Question 10.** Votre levier collectif demande la recurrence leave-out
+> jusqu'a profondeur huit, `C_h(P,d) ssi pour tout z de G, C_(h-1)(P sans z,d)`.
+> Sur un `ProofSpanDAG` lane-local, cela signifie proposer des bases de Helly de
+> trois IDs et verifier leur marge uniformement sur le proof-tile. Avant de
+> l'implementer je voudrais savoir ce que vous attendez comme PREUVE
+> d'exactitude : l'arbre exact a 3280 appels est un oracle borne, mais quel est
+> le juge du chemin rapide ? Un `d` calcule par arrangement complet des
+> demi-plans dans le disque, a petit `n`, est-il l'autorite que vous voulez —
+> et acceptez-vous qu'il soit quadratique par paire, donc reserve aux fixtures ?
+
 ## 7. Ce que je propose de faire ensuite, et ce que j'attends de vous
 
 Ma lecture, en une phrase : **`SOC64` est reçu comme un prune exact et bon

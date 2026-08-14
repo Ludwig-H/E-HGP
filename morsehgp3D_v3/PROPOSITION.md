@@ -297,6 +297,16 @@ une incidence canonique `owner EdgeKey(ab) × PointId(x)`, pas un triplet libre.
 
 ### 5.2 `OwnedCK-WST3` : extension exacte aux triplets
 
+La source doit être une **partition** CK des paires non ordonnées de
+`PointId`, pas une WSPD qui les couvre éventuellement plusieurs fois. Chaque
+paire possède un unique `RectId` stable. À l'échelle carrier choisie pour ce
+rectangle, les `CellId` half-open forment une antichaîne qui partitionne les
+IDs de la fenêtre : un parent et l'un de ses descendants ne coexistent jamais.
+Tout raffinement remplace atomiquement un atome par l'ensemble complet de ses
+enfants disjoints. Ces trois propriétés, avec l'owner total
+`(distance^2 maximale, EdgeKey minimale)`, portent la preuve exact-once ; elles
+ne peuvent pas être remplacées par une déduplication après émission.
+
 Pour un rectangle CK `R=(A,B)`, choisir une boule déterministe
 `B_R=(o_R,r_R)` contenant `A union B`, puis un niveau Morton dont la maille est
 comparable à `eta*r_R`. Énumérer les cellules non vides `C` de ce niveau qui
@@ -325,6 +335,17 @@ descendent. `ALL_ACUTE` reste une source factorisée exacte, jamais la preuve
 que sa masse cubique, son rang, son shell ou ses `BallKey` sont bon marché. Le
 tape carrier est requis dès que `q3_open || q4_open`; une fermeture de rang q3
 ne supprime jamais la relation géométrique nécessaire à q4.
+
+Le classifieur d'acuité de boîte peut être exact sur l'enveloppe continue à
+coût constant. Poser `K=(a-x) dot (b-x)`. Sous owner `ab` et IDs distincts,
+les deux angles adjacents à `ab` sont déjà strictement aigus ; `K>0` décide le
+troisième et exclut la collinéarité. Par axe, minimiser
+`(a_j-x_j)(b_j-x_j)` revient à essayer les quatre couples d'endpoints `a_j,b_j`
+et `x_j=clip((a_j+b_j)/2,C_j)` ; le maximum essaie les mêmes couples aux deux
+endpoints de `C_j`. Les trois axes sont indépendants, donc leurs minima/maxima
+s'additionnent. `K_min>0` donne `ALL_ACUTE`, `K_max<=0` donne `NONE_ACUTE`,
+sinon le bloc se scinde. L'owner emploie parallèlement les bornes exactes de
+distance AABB et descend toute égalité jusqu'au tie-break `EdgeKey`.
 
 Avant l'extension, `JungDiskDepth9` peut fermer une paire singleton ou un
 microtile dont toutes les paires sont explicitement rejouées. Il n'est pas un
@@ -439,10 +460,12 @@ C_0(P,d) = true
 C_h(P,d) iff, for every z in G, C_(h-1)(P without z,d)
 ```
 
-Avec des bases de taille au plus trois, q4 demande au plus 3280 appels LP,
-q3 9841 et q2 29524. Ce sont des nombres d'appels d'oracle borné, pas une borne
-du reporter ni un hot path par paire. Rangs un/deux, stricte, shell, suppressions
-par `PointId` et coût du solveur exact restent explicites.
+Avec des bases de taille au plus trois et le contrat `smax=11`, les profondeurs
+`h=8/9/10` demandent au plus `3280/9841/29524` appels LP. Leur association
+q4/q3/q2 vient donc de ce contrat de rang, pas des lanes seules. Ce sont des
+nombres d'appels d'oracle borné, pas une borne du reporter ni un hot path par
+paire. Rangs un/deux, stricte, shell, suppressions par `PointId` et coût du
+solveur exact restent explicites.
 
 ### 6.2 `JungDiskDepth` : restreindre aux centres Morse admissibles
 
@@ -595,11 +618,37 @@ Une écriture entière évite de construire une base orthonormée du plan. Poser
 `v_z=2*(D*u_z-(u_z dot d)*d)` et
 `c_z=D*(D-||u_z||^2)`. Comme `s dot d=0`, le mauvais demi-plan devient
 `s dot v_z>=c_z`. Une projection sur un bord a
-`r^2=c_z^2/||v_z||^2`; une intersection de deux bords se résout par leur Gram
-`||v_i||^2||v_j||^2-(v_i dot v_j)^2`. Sous u16, les comparaisons singleton
-atteignent environ 142 bits et les intersections environ 250 bits. L'oracle
-primal emploie donc GMP/i256 ; le dual `A/P/R` i128 reste le vérificateur GPU
-plus compact. Cette indépendance arithmétique est volontaire.
+`r^2=c_z^2/||v_z||^2`; une intersection de deux bords se résout par leur Gram.
+
+La promesse i256 exige toutefois une réduction avant les comparaisons. Pour les
+contraintes `i,j,k`, poser :
+
+```text
+g_i    = D-||u_i||^2
+K_ij   = D*(u_i dot u_j)-(u_i dot d)*(u_j dot d)
+Delta  = K_ii*K_jj-K_ij^2
+N      = g_i^2*K_jj-2*g_i*g_j*K_ij+g_j^2*K_ii
+```
+
+On a `v_i dot v_j=4*D*K_ij` et `c_i=D*g_i`. Si `K_ii=0`, `g_i>0` rend
+l'intersection vide et `g_i<=0` rend la contrainte redondante. Sinon une
+projection `i` est faisable si `g_i*K_ik>=g_k*K_ii` pour tout `k`, puis ferme
+q4 si `g_i^2>2*K_ii` et q3 si `3*g_i^2>4*K_ii`. Pour deux bords, exiger
+`Delta>0`, rejouer chaque contrainte `k` par :
+
+```text
+(g_i*K_jj-g_j*K_ij)*K_ki
+ +(g_j*K_ii-g_i*K_ij)*K_kj >= g_k*Delta
+```
+
+puis fermer q4 si `N>2*Delta` et q3 si `3*N>4*Delta`. Sous u16,
+`|g|<2^36` et `|K|<2^71`; ces formes réduites restent sous environ 180 bits.
+i256 est donc sûr sur cette route. Une évaluation naïve en `v/c/Gram` peut
+dépasser 256 bits lors du replay contre le troisième demi-plan et doit rester
+GMP. Cas `D=0`, normale nulle, contraintes parallèles, `Delta=0` et tout
+dénominateur non positif rendent le candidat non admissible ou la tâche
+`UNKNOWN`; chaque candidat retenu est rejoué contre toutes les contraintes.
+Le dual `A/P/R` i128 reste le vérificateur GPU plus compact.
 
 La profondeur exacte utilise ensuite un DAG de suppressions. Écrire
 `Depth(P,0)=true`. Pour `h>0`, trouver une base `G`, de taille au plus trois,
@@ -612,8 +661,9 @@ Depth(P,h) = AND over z in G of Depth(P minus {z},h-1)
 La récurrence est un iff si `G` est réellement couvrant. Au centre considéré,
 au moins un `z` de `G` est intérieur ; le fils qui retire cet ID fournit les
 `h-1` autres intérieurs distincts. Le nombre maximal d'appels de recherche de
-base est `(3^h-1)/2` : `3280` pour q4 et `9841` pour q3. C'est un oracle borné,
-pas le hot path par paire.
+base est `(3^h-1)/2` : `3280` pour `h=8` et `9841` pour `h=9`. Ces valeurs
+correspondent à q4/q3 seulement sous le contrat `smax=11`. C'est un oracle
+borné, pas le hot path par paire.
 
 Le fast path GPU cherche plutôt huit ou neuf groupes couvrants disjoints, ce
 qui donne immédiatement la même profondeur avec huit ou neuf reçus. S'il
@@ -625,6 +675,27 @@ reçu primal, trois handles enfants et le niveau. Les files SoA exécutent
 uniformément ses polynômes ; un échec scinde `A/B`. La continuité d'une marge
 stricte garantit qu'un reçu ponctuel reste valable sur un voisinage assez fin,
 sans jamais promettre un poids commun sur une tuile grossière.
+
+Le packing disjoint est strictement incomplet. Pour q4, prendre
+`a=(0,100,100)`, `b=(40,100,100)`, les six témoins universels
+`u_j=(j,100,100)`, `j=1,...,6`, puis
+`g1=(20,111,100)`, `g2=(20,92,108)`, `g3=(20,92,92)`. Dans le disque
+`Y^2+Z^2<=200`, les trois régions mauvaises sont :
+
+```text
+Y <= -279/22
+Y-Z >= 17
+Y+Z >= 17
+```
+
+Elles sont non vides mais deux à deux disjointes. Les gadgets fournissent donc
+toujours deux intérieurs et la profondeur totale vaut huit. Pourtant seuls les
+six `u_j` couvrent seuls ; parmi les trois gadgets, une seule paire disjointe
+peut former un septième groupe. Le packing maximal vaut sept. L'analogue q3
+emploie sept `u_j` et les gadgets `(20,113,100)`, `(20,91,109)`,
+`(20,91,91)` dans `3(Y^2+Z^2)<=400` : profondeur neuf, packing maximal huit.
+Ces fixtures rendent obligatoire le fallback leave-out pour une autorité
+complète.
 
 ### 6.4 `SOC64` et `CORNER512`
 
@@ -810,6 +881,16 @@ autres distances ; le carré propre d'une arête plus courte ne le ferait pas.
 Une `BallKey` n'existe qu'après résolution du support et serait donc un owner de
 génération circulaire.
 
+La jointure exige **au moins un** carrier aigu, jamais deux. La fixture u16
+`p0=(8,2,12)`, `p1=(1,3,9)`, `p2=(4,0,0)`, `p3=(10,5,1)` a pour owner unique
+`p0p2`; la face de carrier `p1` est non aiguë, celle de `p3` est aiguë, et les
+poids q4 valent
+`(1459/3750,977/11250,3613/11250,761/3750)`, tous positifs. Une route par
+couples non ordonnés teste donc `Acute(x) OR Acute(y)`. Une route orientée prend
+le plus petit `PointId` parmi les carriers aigus comme primaire et laisse
+l'autre sommet arbitraire. Exiger deux faces aiguës perd la fixture ; émettre
+depuis chaque face aiguë duplique les cas qui en ont deux.
+
 Le preflight `M4_apex` n'a pas besoin de développer carrier × apex. Pour une
 arête owner `e`, retirer les sites collinéaires, définir `V_e` par les quatre
 arêtes endpoint qui ne battent pas `e`, `A_e` par l'acuité stricte et
@@ -845,6 +926,26 @@ census ; leurs comparaisons peuvent demander environ 155 bits sous u16. Si
 `n dot s=0`, la puissance est constante : négative pour un intérieur permanent,
 nulle pour un shell permanent, positive pour un extérieur permanent. Ces sites
 ne sont jamais jetés ; les IDs du support sont masqués séparément.
+
+La positivité q4 se teste aussi sans solveur générique. Pour l'apex `y`, poser
+`s=y-a`, `A_y=G||s||^2-W dot s` et `B_y=n dot s`. Son poids barycentrique vaut
+exactement `lambda_y=A_y/(2B_y^2)`. Sous la face owner aiguë, les quatre poids
+sont strictement positifs si et seulement si `B_y!=0`, `0<A_y<2B_y^2` et :
+
+```text
+F*X*B_y^2 > A_y*(G+(F-E)*(d dot s)+(F-D)*(u dot s))
+E*(D-F)*B_y^2 > A_y*(E*(d dot s)-F*(u dot s))
+D*(E-F)*B_y^2 > A_y*(D*(u dot s)-F*(d dot s))
+```
+
+Les trois lignes sont les poids de `a`, `b` et `x`. Elles viennent des
+barycentriques du pied q3
+`(F*X,E*(D-F),D*(E-F))/(2G)` auxquels on soustrait
+`lambda_y` fois la projection barycentrique de `y`. Elles donnent un
+`ApexWellCenteredBlock` `ALL/NONE/MIXED` par bornes corrélées avant toute
+Cramer 4×4. Sous u16, les produits de comparaison peuvent atteindre environ
+174 bits : employer trois limbs/BigInt, pas i128. Les égalités, `B_y=0`,
+`A_y=0` et `A_y=2B_y^2` sont des fixtures obligatoires.
 
 Avant de matérialiser les apex, exploiter la même droite comme certificateur de
 profondeur. Son intersection avec `K_4(ab)` est un segment fermé `J_f`. Avec
@@ -942,9 +1043,11 @@ symbolique, forme WST4, applique profondeur et barycentriques au niveau bloc
 avant tout fill, puis ne
 matérialise une face que si le résiduel justifie la sweep.
 
-Le sampler v2 du HEAD ne fournit pas encore une estimation reçue : le mapping
-multiply-high est biaisé sans rejet, `2 sigma` n'est pas un intervalle certifié,
-le contrôle ne juge pas le décodeur rang--`PairId` et la vue SOC reste absente.
+Le sampler v2 du HEAD ne fournit pas encore une estimation reçue : sa borne
+Hoeffding est correcte sous i.i.d. uniforme, mais le mapping multiply-high reste
+sans rejet, les streams n'ont pas de contrat d'indépendance, `W4` n'a pas
+d'intervalle et le contrôle ne juge pas le décodeur rang--`PairId` dans un mode
+exhaustif déterministe. La vue SOC reste absente.
 Son option `--rang` peut réussir sans lancer le sampler, ignore les extra-shells
 et conditionne le tirage sans les poids nécessaires. Le brute-force q4 reçoit
 une énumération bornée, mais recopie les prédicats du sujet et appelle à tort

@@ -226,6 +226,9 @@ bool g_profondeur_exacte = false;
 bool g_ordre_proche = false;
 // Diagnostic de feuille : ou le credit se perd-il exactement ?
 long long g_diag_feuille = 0;
+// Descendre malgre un `NONE` central : il n'est exact que pour la boule
+// inscrite, pas pour le spindle.
+bool g_none_descend = false;
 // Profondeur exacte du RECTANGLE : elle separe la perte de BOITE de la perte de
 // BUDGET. Sa valeur est le nombre de rectangles ouverts a juger.
 long long g_profondeur_rect = 0;
@@ -957,6 +960,7 @@ int main(int argc, char** argv) {
     else if (a == "--judge-flips") { g_soc64_shadow = true; g_judge_flips = true; }
     else if (a == "--profondeur-exacte") { g_window = true; g_profondeur_exacte = true; }
     else if (a == "--ordre-proche") g_ordre_proche = true;
+    else if (a == "--none-descend") g_none_descend = true;
     else if (a.rfind("--diag-feuille=", 0) == 0) { g_soc64_shadow = true; g_diag_feuille = arg_ll(val("--diag-feuille=").c_str(), 1, (1LL << 22), "diag-feuille"); }
     else if (a.rfind("--profondeur-rect=", 0) == 0) { g_soc64_shadow = true; g_profondeur_rect = arg_ll(val("--profondeur-rect=").c_str(), 1, (1LL << 22), "profondeur-rect"); }
     else if (a.rfind("--rect-stride=", 0) == 0) g_rect_stride = arg_ll(val("--rect-stride=").c_str(), 1, (1LL << 20), "rect-stride");
@@ -1278,7 +1282,23 @@ int main(int argc, char** argv) {
               // ---- LEDGER BASELINE. Inchange, bit pour bit.
               if (v == RectVerdict::kAll) { cred[lane] += pop; eut_all = true; }
               else if (v == RectVerdict::kMixed) mixed |= 1u << lane;
-              else eut_none = true;
+              else {
+                eut_none = true;
+                // ---- LE `NONE` CENTRAL N'EST EXACT QUE POUR LE CERTIFICAT
+                // CENTRAL, ET C'EST TOUTE LA QUESTION.
+                //
+                // `rect_central_verdict` rend `NONE` quand le MINIMUM du score
+                // sur la boite depasse le seuil `56/209 D`, c'est-a-dire quand
+                // aucun point de la boite n'est dans la BOULE INSCRITE. Mais le
+                // domaine exact est le SPINDLE, strictement plus grand : un
+                // point hors de la boule inscrite peut parfaitement etre un
+                // temoin universel exact. Elaguer ce sous-arbre perd donc de
+                // vrais credits, silencieusement.
+                //
+                // Ce drapeau descend quand meme. Il ne credite rien de plus par
+                // lui-meme — il rend seulement les temoins profonds ATTEIGNABLES.
+                if (g_none_descend) mixed |= 1u << lane;
+              }
 
               // ---- LEDGER COMBINE. `SOC64` est un disjonctif DE PLUS, place
               // APRES le spindle et le fallback : le contre-audit relevait a
@@ -1292,7 +1312,24 @@ int main(int argc, char** argv) {
               // `cred` sans jamais les additionner.
               if (!(cm & (1u << lane))) continue;
               RectVerdict w = v;
-              if (w == RectVerdict::kMixed && g_soc64_shadow && lane == 2) {
+              // ---- SOC64 EST ESSAYE DES QUE LE CENTRAL NE FERME PAS, Y COMPRIS
+              // SUR UN `NONE`.
+              //
+              // La premiere version ne l'essayait que sur `MIXED`. C'etait une
+              // perte systematique, et elle se demontre : le test central q4
+              // est `s <= (56/209) D`, et `56/209 = 0,267943` approche
+              // `2 - sqrt(3) = 0,267949`, qui est exactement la forme du
+              // spindle dans le PIRE cas `U perpendiculaire a d`. Des qu'un
+              // point a `(U.d)^2 > 0`, le spindle lui autorise un score
+              // strictement plus grand que la boule inscrite. Un `NONE` central
+              // ne signifie donc PAS qu'aucun point n'est temoin universel : il
+              // signifie qu'aucun n'est dans la boule inscrite.
+              //
+              // Essayer `SOC64` sur un `NONE` est gratuit — il n'ajoute aucune
+              // descente, puisqu'un `NONE` n'en declenchait deja aucune — et
+              // strictement sur : un `SOC64-ALL` credite une population dont
+              // chaque point est universel.
+              if (w != RectVerdict::kAll && g_soc64_shadow && lane == 2) {
                 mhgp3v::soc::Box sa{}, sb{}, sc{};
                 for (int d = 0; d < 3; ++d) {
                   sa.lo[d] = qa.lo[d]; sa.hi[d] = qa.hi[d];

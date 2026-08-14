@@ -70,7 +70,7 @@ struct Rng {
 }  // namespace
 
 int main(int argc, char** argv) {
-  bool selftest = false, ablation = false;
+  bool selftest = false, ablation = false, fixtures = false;
   long long seed = 1, rounds = 200000, span = 65535;
   long long n = 600, groupes_max = 8, voisins = 16, echantillon = 256;
   std::string famille = "eight_clusters";
@@ -84,6 +84,7 @@ int main(int argc, char** argv) {
     const std::string val = (eq == std::string::npos) ? std::string() : arg.substr(eq + 1);
     long long parsed = 0;
     if (key == "--selftest") selftest = true;
+    else if (key == "--fixtures") fixtures = true;
     else if (key == "--ablation") ablation = true;
     else if (key == "--seed") { if (!parse_ll(val.c_str(), &parsed)) refuse("--seed invalide"); seed = parsed; }
     else if (key == "--rounds") { if (!parse_ll(val.c_str(), &parsed)) refuse("--rounds invalide"); rounds = parsed; }
@@ -104,7 +105,114 @@ int main(int argc, char** argv) {
       else refuse("--inject inconnu");
     } else refuse("argument inconnu");
   }
-  if (!selftest && !ablation) refuse("choisir --selftest ou --ablation");
+  if (!selftest && !ablation && !fixtures) refuse("choisir --selftest, --ablation ou --fixtures");
+
+  // -------------------------------------------------------------------------
+  // LA FIXTURE `u < p < d`, ET CE QU'ELLE REFUTE.
+  //
+  // Elle vient de la section 5.5 de
+  // `AUDIT_CONTRE_RECEPTION_M4_V2_DEPTHBLOCK_5BFC5C8_20260814.md`. Elle separe
+  // trois quantites que tout le travail de la journee avait confondues :
+  //
+  //   u = nombre de temoins interieurs a TOUTE sphere admissible (universels)
+  //   p = nombre maximal de groupes couvrants a identites DISJOINTES
+  //   d = min sur les centres admissibles du nombre de temoins interieurs
+  //
+  // On a toujours `u <= p <= d`, et le CONTRAT demande `d >= 8` — pas `u >= 8`.
+  // Un rang huit n'exige pas huit temoins fixes : il exige qu'a chaque centre
+  // il en existe huit, et ils peuvent changer avec le centre.
+  //
+  // La configuration : `a=(0,100,100)`, `b=(40,100,100)`, six temoins
+  // `(j,100,100)` pour `j=1..6`, et trois gadgets `(20,111,100)`,
+  // `(20,92,108)`, `(20,92,92)`.
+  //
+  // Les centres admissibles q4 vivent dans le plan mediateur `x=20`, a distance
+  // au plus `||h||/sqrt(2)` du milieu, soit `Y^2+Z^2 <= 200` en ecrivant
+  // `c=(20,100+Y,100+Z)`. Le rayon carre vaut `R^2 = 400+Y^2+Z^2`.
+  //
+  //   - un temoin `(j,100,100)` est interieur ssi `(j-20)^2 < 400`, donc
+  //     toujours pour `0<j<40` : les six sont UNIVERSELS, `u=6` ;
+  //   - le gadget `(20,111,100)` est interieur ssi `-22Y < 279`, sa region
+  //     mauvaise est `Y <= -279/22 = -12,681` ;
+  //   - `(20,92,108)` est interieur ssi `Y-Z < 17`, mauvaise `Y-Z >= 17` ;
+  //   - `(20,92,92)` est interieur ssi `Y+Z < 17`, mauvaise `Y+Z >= 17`.
+  //
+  // Les trois regions mauvaises sont NON VIDES dans le disque de rayon
+  // `sqrt(200) = 14,142` et DEUX A DEUX DISJOINTES :
+  //   `Y<=-12,681` et `Y-Z>=17` donnent `Z <= -29,68`, hors du disque ;
+  //   `Y<=-12,681` et `Y+Z>=17` donnent `Z >= 29,68`, hors du disque ;
+  //   `Y-Z>=17` et `Y+Z>=17` donnent `Y >= 17 > 14,142`, hors du disque.
+  //
+  // Donc a chaque centre au plus UN gadget manque : `d = 6+2 = 8`. Mais deux
+  // gadgets quelconques forment un groupe couvrant — leurs regions mauvaises
+  // ont une intersection vide — et il n'y a que trois gadgets : le packing
+  // disjoint maximal vaut `p = 6+1 = 7`.
+  //
+  //   u = 6  <  p = 7  <  d = 8
+  //
+  // Cette fixture refute DEUX choses a la fois. D'abord « le singleton est
+  // presque optimal » : `u=6` alors que le contrat est satisfait. Ensuite
+  // « huit groupes disjoints suffisent comme decision complete » : `p=7 < 8`
+  // alors que `d=8`. Une porte qui assimile echec du packing et profondeur
+  // insuffisante perd des fermetures VRAIES.
+  if (fixtures) {
+    const mhgp::i64 a[3] = {0, 100, 100}, b[3] = {40, 100, 100};
+    mhgp::i64 t[9][3];
+    for (int j = 0; j < 6; ++j) { t[j][0] = j + 1; t[j][1] = 100; t[j][2] = 100; }
+    t[6][0] = 20; t[6][1] = 111; t[6][2] = 100;
+    t[7][0] = 20; t[7][1] = 92;  t[7][2] = 108;
+    t[8][0] = 20; t[8][1] = 92;  t[8][2] = 92;
+
+    long long u = 0;
+    for (int j = 0; j < 9; ++j)
+      if (dual_lane_single(a, b, t[j], DualMutant::kNone) >= kLaneQ4) ++u;
+
+    // `p` par recherche exhaustive : on enumere les sous-ensembles couvrants de
+    // taille au plus trois, puis on extrait gloutonnement des groupes a
+    // identites disjointes. Neuf temoins : la recherche est complete.
+    std::vector<std::vector<int>> couvrants;
+    for (int i1 = 0; i1 < 9; ++i1) {
+      mhgp::i64 z1[1][3] = {{t[i1][0], t[i1][1], t[i1][2]}};
+      const mhgp::i64 w1[1] = {1};
+      if (dual_lane(a, b, z1, w1, 1, DualMutant::kNone) >= kLaneQ4)
+        couvrants.push_back({i1});
+      for (int i2 = i1 + 1; i2 < 9; ++i2) {
+        mhgp::i64 z2[2][3] = {{t[i1][0], t[i1][1], t[i1][2]},
+                              {t[i2][0], t[i2][1], t[i2][2]}};
+        for (const auto& wv : (const long long[][2]){{1,1},{1,2},{2,1},{1,3},{3,1},{2,3},{3,2}}) {
+          const mhgp::i64 w2[2] = {wv[0], wv[1]};
+          if (dual_lane(a, b, z2, w2, 2, DualMutant::kNone) >= kLaneQ4) {
+            couvrants.push_back({i1, i2});
+            break;
+          }
+        }
+      }
+    }
+    // Extraction gloutonne par taille croissante : elle est optimale ici, les
+    // singletons etant tous disjoints entre eux.
+    std::vector<char> pris(9, 0);
+    long long pmax = 0;
+    for (std::size_t taille = 1; taille <= 3; ++taille)
+      for (const auto& g : couvrants) {
+        if (g.size() != taille) continue;
+        bool libre = true;
+        for (int id : g) if (pris[(std::size_t)id]) libre = false;
+        if (!libre) continue;
+        for (int id : g) pris[(std::size_t)id] = 1;
+        ++pmax;
+      }
+
+    std::printf("dual_fixture u_p_d : u=%lld p=%lld d=8 groupes_couvrants=%zu\n", u, pmax,
+                couvrants.size());
+    if (u != 6 || pmax != 7) {
+      std::fprintf(stderr, "FIXTURE REFUTEE u_p_d : u=%lld (attendu 6) p=%lld (attendu 7)\n",
+                   u, pmax);
+      return 3;
+    }
+    std::printf("dual_fixture accord=OUI : u=6 < p=7 < d=8, le singleton et le packing"
+                " sont tous deux incomplets\n");
+    return 0;
+  }
   if (span < 16 || span > 65535) refuse("--span hors du profil u16 [16,65535]");
   if (n < 8 || n > 200000) refuse("--points hors bornes [8,200000]");
   if (voisins < 2 || voisins > 64) refuse("--voisins hors bornes [2,64]");

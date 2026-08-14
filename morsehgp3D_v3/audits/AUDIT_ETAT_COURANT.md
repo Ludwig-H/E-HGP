@@ -278,9 +278,9 @@ Le contre-audit du sampler v2, du brute-force, la réponse entière à la questi
 7 et les microgates `JungDual/BlockBallDepth8` sont dans
 [`AUDIT_CONTRE_RECEPTION_M4_V2_DEPTHBLOCK_5BFC5C8_20260814.md`](AUDIT_CONTRE_RECEPTION_M4_V2_DEPTHBLOCK_5BFC5C8_20260814.md).
 
-## `JungDual` live : identité reçue sur papier, primitive non reçue
+## `JungDual` au HEAD : identité reçue sur papier, primitive non reçue
 
-La forme entière `A/P/R` du prototype live est algébriquement correcte lorsque
+La forme entière `A/P/R` du prototype au HEAD est algébriquement correcte lorsque
 les coordonnées sont u16, la paire est propre et la somme des poids vérifie
 `W<=65535`. Le cas singleton redonne bien les seuils SOC q3/q4. La fonction
 actuelle ne cherche toutefois aucun optimum : elle certifie seulement la
@@ -303,7 +303,7 @@ déclenche encore un overflow signé sous UBSan. Enfin, `--echantillon=0` et
 La réception exige donc un vérificateur nommé par sa vraie sémantique
 `verify_dual_weights_lane`, caps avant calcul, fixtures exactes pour chaque
 frontière, juge rationnel du disque continu à `k>1`, invariant pairwise et
-mutants sans comportement indéfini. Les gains live `23/256` sur huit amas,
+mutants sans comportement indéfini. Les gains observés `23/256` sur huit amas,
 `18/256` uniforme, `5/256` terrain et `0/256` deux-droites restent des
 diagnostics de paires arbitraires, pas un gain de la source CK--WST.
 
@@ -315,6 +315,13 @@ intersections de deux bords. Comparer strictement `3*r^2>D` ou `2*r^2>D`
 certifie q3/q4. Une base couvrante alimente ensuite le DAG exact
 `Depth(P,h)=AND_z Depth(P minus {z},h-1)`. Les groupes disjoints sont le fast
 path GPU ; ce DAG borné et le split de rectangle sont l'autorité/fallback.
+Une fixture u16 gravée atteint profondeur huit avec six singletons universels
+et trois gadgets dont les régions mauvaises sont non vides mais deux à deux
+disjointes : le packing maximal n'est que sept. L'analogue q3 donne profondeur
+neuf et packing huit. L'échec du fast path ne peut donc jamais fermer le débat.
+Cela répond à la Question 9 de Claude : le troisième levier est un raffinement
+de **preuve** collectif, orthogonal au `RectId` CK, puis `FaceAxis/BlockBall` ;
+il ne change ni `smax`, ni l'owner, et n'expanse pas les paires.
 
 ## SOC64 : primitive exacte, rentabilité toujours ouverte
 
@@ -349,7 +356,7 @@ branche combinée à son premier `ALL`. Sur le replay borné `uniform,n=120`, le
 terminaux de masse `95`, contre `127` et `316` avec l'ancienne somme fautive.
 La contradiction est donc observée. Cinq CTests WSPD--SOC gravent désormais le
 shadow, le juge de rectangles et le témoin de surcompte ; ils passent au HEAD.
-Le delta live ajoute un juge direct des flips par IDs distincts et tue le
+Le HEAD ajoute un juge direct des flips par IDs distincts et tue le
 mutant `soc-somme-au-lieu-union` : à cap complet, `168` flips sont jugés et
 `25` faux ferment le mutant. Mais à cap `1000`, trois flips sont sautés et le
 probe imprime tout de même `accord=OUI juges=47 sautes=3 faux=0`. Un accord

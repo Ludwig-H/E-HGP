@@ -136,7 +136,10 @@ sont rejetées, quotientées ou filtrées exactement avant cette promotion.
 q3 recertifie `E+X-D>0` et l'indépendance affine. q4 ne signifie pas « quatre
 faces aiguës » : l'autorité est la stricte positivité des quatre
 barycentriques du circumcentre. Une face aiguë adjacente à l'arête maximale
-sert seulement à choisir un carrier géométrique primaire.
+sert seulement à choisir un carrier géométrique primaire. La jointure teste
+`Acute(x) OR Acute(y)`, jamais `AND` : un q4 positif peut n'avoir qu'une seule
+face aiguë adjacente. Si les deux le sont, le plus petit `PointId` aigu est le
+primaire et supprime le doublon ; l'autre sommet reste un apex arbitraire.
 
 Le chemin q4 élimine d'abord les `CarrierBlock` sans face aiguë, avant de
 former les couples de cellules. Les blocs `ALL_ACUTE` restent symboliques :
@@ -410,12 +413,14 @@ n'est exact : des supports positifs gardent un partenaire arbitrairement loin
 en rang. Aucun arrangement global, aucune mosaïque Delaunay d'ordre supérieur
 et aucun catalogue exhaustif ne deviennent le chemin produit.
 
-Au HEAD `8268753`, le sampler v2 retire `PENDING` et la censure des grosses
-lentilles, mais son tirage multiply-high n'est pas uniforme exact sans rejet,
-son `2 sigma` n'est pas un intervalle certifié et son contrôle ne compare pas le
-décodage rang--`PairId` à une vérité indépendante. `--rang` peut en outre
-réussir sans `--porteurs`, ignore les extra-shells et mesure un échantillon
-conditionnel non pondéré, pas `H4/W4`.
+Au HEAD `8f47835`, le sampler v2 retire `PENDING` et la censure des grosses
+lentilles, puis remplace `2 sigma` par une demi-largeur Hoeffding correcte sous
+des tirages i.i.d. uniformes. Son implémentation ne reçoit pas encore cette loi :
+multiply-high reste sans rejet, les streams SplitMix n'ont pas de contrat
+d'indépendance, le delta n'est pas réparti sur les décisions simultanées et
+`W4` n'a pas d'intervalle. Le contrôle ne compare pas le décodage à un mode
+exhaustif déterministe. `--rang` peut en outre réussir sans `--porteurs`, ignore
+les extra-shells et mesure un échantillon conditionnel non pondéré, pas `H4/W4`.
 
 Le nouveau `q4_brute_oracle` reçoit seulement une énumération exhaustive
 bornée. Son claim `M4=Theta(n^4)` pour tout nuage est faux : sa propre famille
@@ -427,14 +432,14 @@ Une construction ouverte sur quatre sous-cubes prouve néanmoins une masse
 q4 bien centrée quartique **avant rang** ; un cinquième sous-cube fournit huit
 intérieurs uniformes et montre pourquoi `BlockBallDepth8` doit agir avant fill.
 
-Le worktree postérieur au HEAD contient deux diagnostics non reçus. Le juge
-direct des flips SOC tue le mutant de somme lorsqu'il énumère tout, mais
-imprime encore `accord=OUI` lorsque son cap laisse des flips non jugés. Le
-prototype `JungDual` a une identité entière correcte sous
-`sum(weights)<=65535` ; il ne fait cependant qu'essayer sept pondérations ad
-hoc, n'a pas de juge continu `k>1`, n'impose pas son cap dans le header et
-possède un mutant de largeur à overflow signé. Ces chemins restent des
-propositions live, pas des portes reçues.
+Le HEAD contient aussi le juge direct des flips SOC et `JungDual`. Le premier
+tue le mutant de somme lorsqu'il énumère tout, mais imprime encore `accord=OUI`
+si son cap laisse des flips non jugés. Le second a une identité entière correcte
+sous `sum(weights)<=65535` ; il ne fait cependant qu'essayer sept pondérations,
+n'a pas de juge continu `k>1`, n'impose pas son cap dans le header et possède un
+mutant de largeur à overflow signé. Ses onze CTests verts reçoivent des chemins
+et mutants, pas le collectif annoncé. Le HEAD inclut aussi les diagnostics de
+feuilles et d'ordre de descente ; leurs cohortes et coûts restent à recevoir.
 
 Le raffinement local réduit effectivement `E4`, mais ses parents et enfants
 sont encore mélangés dans plusieurs compteurs de tentative. Son coût doit être

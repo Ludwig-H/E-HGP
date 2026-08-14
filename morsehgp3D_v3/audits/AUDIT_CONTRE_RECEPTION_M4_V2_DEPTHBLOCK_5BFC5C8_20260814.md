@@ -491,6 +491,17 @@ huit/neuf groupes disjoints comme fast path ; le DAG de suppressions est le
 fallback capé ou l'oracle. Sur un rectangle, une base proposée n'est héritée
 qu'après vérification uniforme de sa marge ; sinon on scinde `A/B`.
 
+Le fast path n'est pas complet, même exactement au seuil. La fixture q4
+`a=(0,100,100)`, `b=(40,100,100)` possède six témoins universels
+`(j,100,100)`, `j=1..6`, et trois gadgets `(20,111,100)`, `(20,92,108)`,
+`(20,92,92)`. Leurs régions mauvaises dans `Y^2+Z^2<=200` sont respectivement
+`Y<=-279/22`, `Y-Z>=17` et `Y+Z>=17` : elles sont non vides et deux à deux
+disjointes. La profondeur vaut donc huit, mais au plus sept groupes couvrants
+peuvent être disjoints. L'analogue q3 avec sept universels et les gadgets
+`(20,113,100)`, `(20,91,109)`, `(20,91,91)` a profondeur neuf et packing huit.
+Une porte qui assimile échec du packing et profondeur insuffisante perd des
+fermetures vraies.
+
 P0 d'API et de portes :
 
 - `dual_lane` ne borne pas `sum w_z<=65535`, alors que toute sa preuve de
@@ -573,6 +584,128 @@ comparer plusieurs familles/seeds et exiger l'égalité des fates lorsque les de
 ordres sont finaux. À budget tronqué, toute comparaison de masse reste un
 surensemble avec `PENDING`, jamais une victoire de source.
 
+### 5.4 `--diag-feuille` : cohorte utile, pas rappel global de SOC64
+
+Le delta suivant compare sur 200 000 **incidences de feuilles visitées** le
+certificat central inscrit, SOC64 et le juge ponctuel `(g,Q)`. Les deux nouveaux
+CTests passent et publient environ `27,5/42,7/44,4 %` sur huit amas et
+`26,6/40,6/42,1 %` sur uniforme. L'ordre attendu est cohérent avec les preuves
+de suffisance.
+
+L'unité est toutefois fortement conditionnée : premiers parcours jusqu'au cap,
+seulement `tk.node` feuille, endpoint rectangle de masse `|A||B|<=64`, lane
+encore vivante sous ses ancêtres, et répétitions possibles du même témoin sous
+plusieurs rectangles. Ce n'est ni un échantillon uniforme des PointId, ni la
+masse des rectangles, ni `M4_open`. Dire que SOC « capte 96 % de l'atteignable »
+est recevable uniquement sur cette cohorte, comme ratio `feuilles_soc /
+feuilles_exact`; il ne prédit pas huit IDs distincts par rectangle et encore
+moins la masse q4 fermée.
+
+Les portes regex figent trois totaux agrégés. Elles ne vérifient pas les
+implications **par incidence** `central_ALL => exact` et `SOC_ALL => exact`, ni
+la disjonction des crédits. Le test `ordre_proche_sans_effet` lance seulement
+l'ordre proche et cherche un ancien nombre `E4`; il ne compare pas les deux
+ordres dans le même processus et n'exige pas explicitement `pending=0`. Enfin,
+les commentaires « tronqués=0 partout » et « douze configurations identiques »
+ne sont gravés par aucun de ces trois CTests.
+
+La gate utile publie une matrice appariée par incidence et par terminal, compte
+les faux positifs, les huit-uplets d'IDs distincts et leur masse, puis compare
+baseline/SOC/exact sur le même univers terminal. Sans cette jointure, le
+diagnostic explique un écart de prédicat mais ne tranche toujours pas M4.
+
+### 5.5 P0 du delta `--none-descend` : la vue combinée est éteinte
+
+Le commit `c271c84` conclut trop vite que `pending=0` signifie que toutes les
+feuilles pertinentes ont été atteintes. Le parcours élague un nœud
+`central-NONE` : ce verdict est exact pour la boule inscrite, pas pour SOC64 ou
+le spindle exact. La cohorte de `--diag-feuille` est donc conditionnée par cet
+élagage et ne mesure aucun plafond global.
+
+Un replay exhaustif borné `eight_clusters,n=200,window=512` donne, sur les
+incidences effectivement visitées :
+
+```text
+parcours courant :  C/S/E = 2621/4870/5033,    SOC/exact = 96,761 %
+none-descend     :  C/S/E = 2621/16718/19416, SOC/exact = 86,104 %
+```
+
+Le prune central cachait donc `14383` témoins exacts et `11848` témoins SOC.
+À `n=1500`, la descente rend à nouveau le budget actif :
+
+```text
+baseline        : pending=0,      E4=1071162, fenêtre finale OUI
+none-descend    : pending=127858, E4=1117700, fenêtre finale NON
++ ordre-proche  : pending=117915, E4=1071199, fenêtre finale NON
+```
+
+Le delta live ne répare pourtant pas la vue combinée. Sur `v=NONE`, il ajoute
+la lane au masque baseline `mixed`, mais laisse `w=v`; SOC n'est appelé que si
+`w==MIXED`, puis `cmask` reste intersecté avec le masque central. Les branches
+nouvellement parcourues consomment donc le quantum sans pouvoir créditer SOC.
+Sur le petit replay, les statistiques du shadow sont strictement identiques
+avec et sans `--none-descend`, malgré les `11848` témoins SOC cachés.
+
+La réparation exacte exige deux traversées logiques indépendantes :
+
+```text
+baseline : central-ALL crédite, central-MIXED descend, central-NONE élague
+combined : central-ALL crédite ; sinon SOC-ALL crédite ;
+           sinon SOC-UNKNOWN descend, même si central est NONE
+physique  : poursuivre un enfant si baseline-MIXED OR combined-MIXED
+```
+
+Chaque vue possède son masque, son ledger, sa saturation, son cap et son
+`PENDING`. Une porte bornée compare la vue combinée à l'union exacte des
+`PointId` et contient explicitement un chemin
+`central-NONE -> descendant SOC-ALL`. `--none-descend` tel quel reste un
+diagnostic réfuté.
+
+Enfin, seul le témoin est singleton dans `--diag-feuille`; `A×B` conserve
+jusqu'à 64 paires. Le ratio mélange donc puissance du prédicat et relaxation
+des boîtes. Lorsque `A` et `B` sont singleton, SOC64 se réduit au prédicat
+`(g,Q)` et leur accord est exact. Le titre « SOC64 à 96 % de son plafond »
+ne vaut que sur la cohorte de petites boîtes déjà atteintes, jamais comme
+plafond ponctuel ni comme gain M4.
+
+### 5.6 Réponse à la Question 9 : le troisième levier est collectif
+
+Le ratio `SOC64/exact` porte sur une exigence bien plus forte que le contrat :
+le **même** témoin doit être intérieur pour tout centre du domaine. Le rang
+demande seulement qu'à chaque centre il existe huit témoins intérieurs, qui
+peuvent changer avec le centre. Formellement :
+
+```text
+u = nombre de témoins intérieurs pour tous les centres
+d = min_c nombre de témoins intérieurs au centre c
+u <= d
+```
+
+Améliorer encore le prédicat singleton ne touche pas le cas structurel où
+aucun témoin supplémentaire n'est universel mais plusieurs demi-plans couvrent
+collectivement le disque. La fixture des six universels et trois gadgets a
+`u=6`, profondeur q4 `d=8`, et packing disjoint maximal sept. Elle réfute donc
+simultanément « le singleton est presque optimal pour le contrat » et « huit
+groupes disjoints suffisent comme décision complète ».
+
+Le troisième levier conserve la factorisation :
+
+1. garder le `RectId` CK coarse comme owner immuable ;
+2. attacher un `ProofSpanDAG` lane-local qui propose des bases Helly de trois
+   IDs, vérifie leur marge uniformément et scinde seulement le proof-tile
+   `MIXED`, sans émettre les `PairId` ;
+3. appliquer la récurrence leave-out jusqu'à profondeur huit/neuf sous cap ;
+4. après carrier/apex, recommencer sur le segment `FaceAxisJung` puis sur la
+   famille plus petite `BlockBallDepth`, où le domaine de centres est restreint ;
+5. envoyer seulement le résiduel vers les niveaux shallow.
+
+Le seuil `need=8` ne change pas et aucune mosaïque d'ordre supérieur n'est
+construite. La gate publie, sur la même cohorte, `u`, le packing `p`, la
+profondeur exacte `d`, puis les masses `u<8<=p` et `p<8<=d`, les proof-tiles,
+splits, octets et `M4_apex` fermé. Une moyenne de `9,30` ne prouve pas à elle
+seule que la perte au seuil explique les flips ; l'histogramme apparié le
+prouve ou le réfute.
+
 ## 6. M4 sans échantillonnage : intervalles de blocs
 
 Le delta live propose d'abord une identité exacte pour une arête fixée
@@ -592,6 +725,14 @@ avec au moins un carrier ; la somme retire exactement les paires coplanaires.
 Sous un `EdgeKey` total et une normalisation projective qui identifie les signes
 opposés, l'identité est correcte et exact-once. Elle mérite les fixtures
 collinearité, direction opposée, tie de longueur et deux carriers aigus.
+
+La relation incidente est un `OR`, pas un `AND`. Le q4 positif
+`p0=(8,2,12)`, `p1=(1,3,9)`, `p2=(4,0,0)`, `p3=(10,5,1)` a l'arête owner
+unique `p0p2`, une seule face adjacente aiguë et quatre poids positifs. Le
+carrier aigu est primaire ; l'autre sommet reste un apex admissible même si sa
+face owner n'est pas aiguë. Cette fixture tue une jointure de deux
+`AcuteCarrierBlock` et, symétriquement, le carrier primaire tue le doublon
+lorsque les deux faces sont aiguës.
 
 Cette identité débloque un **preflight**, pas encore son coût. `V_e`, `A_e`, la
 relation `xy` et `PlaneKey_e` dépendent toutes de la même arête. Un dual-tree
@@ -616,6 +757,23 @@ Ainsi `M4_L<=M4_apex<=M4_U`. Si `M4_L` suffit déjà à rendre rouge un moteur
 ponctuel, l'ablation s'arrête sans estimation. Si `M4_U` est sous le budget, la
 porte est verte. Sinon on scinde les blocs de plus grande masse jusqu'au cap,
 où le verdict reste `UNKNOWN`. Employer au moins u128 pour masses et produits.
+
+Le filtre positif du résiduel a lui aussi une forme fermée. Pour une face
+owner aiguë `(a,b,x)`, reprendre `D,E,F,G,n,W` de `PROPOSITION.md`; pour
+`s=y-a`, poser `A_y=G||s||^2-W dot s` et `B_y=n dot s`. Le poids de l'apex
+vaut `A_y/(2B_y^2)`. Les trois poids de face sont positifs exactement lorsque,
+en plus de `B_y!=0` et `0<A_y<2B_y^2`, on a :
+
+```text
+F*X*B_y^2 > A_y*(G+(F-E)*(d dot s)+(F-D)*(u dot s))
+E*(D-F)*B_y^2 > A_y*(E*(d dot s)-F*(u dot s))
+D*(E-F)*B_y^2 > A_y*(D*(u dot s)-F*(d dot s))
+```
+
+Ces comparaisons donnent `ApexWellCenteredBlock` sans solveur générique et
+atteignent environ 174 bits sous u16. Elles ne réduisent pas seules l'exposant :
+la fixture quartique positive impose de les combiner avec `BlockBallDepth8`
+avant tout fill.
 
 La borne `O(s^3*eta^-6*n)` ne porte que sur les blocs WST4 **initiaux**, sous
 les hypothèses CK et à `s,eta` fixés. Elle ne borne ni les splits `MIXED`, ni
