@@ -650,6 +650,15 @@ seuils restent autonomes `10/9/8`. Le théorème, la version shell plus serrée 
 les contre-fixtures sont dans
 [`audits/REPONSE_AUDIT_Q18_Q20_CALOTTES_ADMISSIBLES_20260815.md`](audits/REPONSE_AUDIT_Q18_Q20_CALOTTES_ADMISSIBLES_20260815.md).
 
+Le pin `95b41b7` matérialise l'intersection du cône, les partenaires globaux et
+la comparaison q4 au diamètre `2R`. Ses mesures bornées passent de `23,00 %` à
+`88,00 %` sur `uniform`, et de `0,00 %` à `14,33 %` sur `terrain`, mais ces
+pourcentages ne sont pas encore des certificats : `floor(sqrt(ds))+1`
+sur-approxime le seuil et peut omettre une cellule potentielle. L'ABI exacte
+transmet `T2=max(r*r,ds)` et compare les carrés sans racine. La fixture
+`s=(10,0,0)` avec un sommet `(3,0,-5)` sépare les deux versions. Après ce
+correctif, q3 et la masse résiduelle resteront encore à fermer.
+
 La construction positive ne s'arrête pas à cette réfutation. Sur une arête
 maximale exacte `e=(a,b)`, l'égalité de shell et Jung bornent les directions du
 centre. Minimiser le quotient de puissance sur ce cap redonne les cœurs
@@ -677,10 +686,26 @@ baseline de flat scan et de parité, pas encore l'architecture : sa prochaine
 étape peut immédiatement remplacer le rescan de census par
 `census_replay(sel,apex,seed3,pw)`, avec fates séparés et vrais `I_B/U_B`.
 Ensuite seulement, la forme J2 remplace le CSR dupliqué par les wavefronts
-`(SeedId,WitnessNode,side,cutoff)` et réutiliser `Q_theta` pour top-k, census et
+`(SeedId,WitnessNode,side,cutoff)` et réutilise `Q_theta` pour top-k, census et
 shell. `DEBORDEMENT` est une continuation ou un refus, jamais une mort. Le reçu
 borné, les limites du batch et la gate causale sont dans
 [`audits/AUDIT_CONSTRUCTIF_AXIS_DEVICE_2C14313_20260815.md`](audits/AUDIT_CONSTRUCTIF_AXIS_DEVICE_2C14313_20260815.md).
+
+Le premier attempt G4 compile ce flat scan sous CUDA 12.9 mais termine
+`rc=127` avant le scp du brut et avant tout verdict. Le transcript certifie la
+cible `TERMINATED`; il ne reçoit aucune parité ni aucun débit. Le prochain
+attempt doit d'abord préserver/récupérer le fichier distant, fixer
+`CMAKE_CUDA_ARCHITECTURES=120-real`, hacher une copie immuable du runner et
+séparer `PREFIX_PARITY` de la parité d'un batch complet.
+
+La matérialisation peut être bornée par un tuilage exact du domaine déjà couvert
+par `dmax`. Chaque support est émis dans la tuile de son sommet
+lexicographiquement minimal ; un halo L-inf
+`H=ceil(3*dmax/2)` contient tous ses sommets, intérieurs et shell, car
+`2R<=sqrt(3/2)*D` pour q4 et les constantes q2/q3 sont plus petites. La somme
+des multiensembles de tuiles doit égaler le global avec IDs inchangés. Ce
+recollement borne la HWM, mais ne donne aucune autorité aux ancres omises par
+la coupure.
 
 Chaque générateur généralise WSPD jusqu'au census de **sa propre** miniboule ;
 une lentille ou un support positif sans profondeur n'est qu'une supersource.

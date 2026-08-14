@@ -8,7 +8,7 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-> **Verdict live au `HEAD=11130cb1f2114d3569991e96606c49bd1d6cc853`.**
+> **Verdict live au `HEAD=6be6bd855362b5b41ed60161c9c9e395f266f672`.**
 > Le pin noyau `a369452` porte `Q4SeedAxisTopR4`, son probe, 39 CTests déclarés,
 > les vrais IDs de census, la capacité 163, les comptes requis et les fates de
 > plateau. Il refuse aussi tout replay après `MORT_GAP` et tout apex dont le
@@ -18,10 +18,12 @@ Cadre : `phase=exploration_v3_hors_registre`,
 > son statut tronqué ; `91486d4` grave les trois contre-fixtures qui réfutent
 > l'ancien théorème des calottes. `2d8aa5f` raccorde ensuite `--axe` et ramène
 > la sélection top-r de `O(m^2)` à `O(m*r4)` ; `2c14313` ajoute sa baseline
-> host/device plate ; `11130cb` ajoute une recette de session G4, pas un reçu.
-> Le worktree courant contient les présents textes d'audit et des deltas CMake/
-> calottes concurrents appartenant à Claude. Aucune mesure CUDA ou GPU nouvelle
-> n'entre dans le verdict.
+> host/device plate ; `11130cb` ajoute sa première recette G4. Son attempt
+> incomplet est qualifié plus bas.
+> `95b41b7` implémente ensuite l'enveloppe de calottes corrigée et `6be6bd8`
+> accélère par grille la construction du lot device. Le worktree courant porte
+> encore des deltas de session et de tuilage appartenant à Claude. Aucune
+> mesure CUDA ou GPU nouvelle n'entre dans le verdict.
 > Q14 est fermée contractuellement : aucune structure de Delaunay n'est
 > autorisée, y compris d'ordre un, comme source, squelette, filtre ou census.
 >
@@ -83,10 +85,18 @@ Cadre : `phase=exploration_v3_hors_registre`,
 > marque fail-open toute cellule intersectant
 > `2(s.u)>max(r,||s||)`, puis applique séparément `10/9/8`. `91486d4` grave
 > désormais la vacuité q2, l'échange de quantificateurs et la différence entre
-> arête q4 et diamètre `2R`; les `24/24` CTests caps passent en `38,81 s`.
-> Cela reçoit la **réfutation**, pas le théorème réparé : le chemin aléatoire
-> `--falsifie` compare encore l'arête maximale au lieu de `2R` et n'énumère
-> aucun q3.
+> arête q4 et diamètre `2R`. `95b41b7` met en œuvre l'enveloppe réparée par
+> intersection, emploie les partenaires globaux et corrige le falsificateur q4
+> pour comparer le diamètre `2R`. Ses `34` CTests sont déclarés ; sur les
+> mesures bornées rapportées, la part dite certifiée passe de `23,00 %` à
+> `88,00 %` sur `uniform` et de `0,00 %` à `14,33 %` sur `terrain`, sans
+> violation q2/q4 sur quatre familles. Ces gains ne sont pas encore reçus : le
+> classifieur remplace `||s||` par `floor(sqrt(||s||^2))+1`, rétrécit
+> l'enveloppe et peut omettre une cellule potentielle. La fixture
+> `s=(10,0,0)`, cellule `(2,0,-6),(3,0,-5),(2,-1,-5)`, donne `3600>3400`
+> exactement mais le code teste `3600>4114`. Réparation directe : propager
+> `T2=max(r*r,||s||^2)` et comparer les carrés, sans racine. q3 n'est toujours
+> pas falsifié et le résiduel terrain reste majoritaire.
 > [`REPONSE_AUDIT_Q18_Q20_CALOTTES_ADMISSIBLES_20260815.md`](REPONSE_AUDIT_Q18_Q20_CALOTTES_ADMISSIBLES_20260815.md).
 >
 > La recette `session_axis_top8_g4.sh` de `840a2e2` ne devait pas être lancée :
@@ -138,6 +148,21 @@ Cadre : `phase=exploration_v3_hors_registre`,
 > `DEBORDEMENT` est aujourd'hui agrégé aux morts dans le raccord et l'API fixe
 > déborde pour `r4=65`; il faut continuation/refus pour le premier et
 > `1<=r4<=64` pour la seconde.
+> `6be6bd8` retire déjà un coût incident du harness : la construction du lot
+> n'effectue plus un scan de tous les points par paire, mais réutilise une grille
+> exacte de voisinage. Le commit rapporte `200 000` seeds et `19,3 M` sites
+> construits en `40 s` à `n=3000`. Ce chiffre qualifie le builder, pas le
+> kernel ; une gate CSR multiensemble grille = scan naïf sur petit `n` doit
+> précéder son emploi comme autorité de parité.
+>
+> Le tuilage exploré dans le worktree a une preuve simple et utile : attribuer
+> le support à son sommet lexicographique minimal et charger un halo entier
+> `ceil(3*dmax/2)` contient tout `I_B/U_B`, puisque
+> `2R<=sqrt(3/2)*D` en q4. Il ne certifie que le domaine déjà borné par `dmax`.
+> Son raccourci courant `Q.size()<5 => tuile vide` est incomplet : une q2 vide
+> tient dans deux points, une q3 dans trois et une q4 dans quatre. Appliquer les
+> planchers `2/3/4` par lane, conserver les IDs globaux, puis comparer les
+> multiensembles globaux et tuilés.
 > [`AUDIT_CONSTRUCTIF_AXIS_DEVICE_2C14313_20260815.md`](AUDIT_CONSTRUCTIF_AXIS_DEVICE_2C14313_20260815.md).
 >
 > Contrôles frais : `39/39` CTests `^mhgp3v_q4axis` passent en `38,25 s`, avec
@@ -149,17 +174,27 @@ Cadre : `phase=exploration_v3_hors_registre`,
 > n'est reçue. Une comparaison indépendante de `O(m*r4)` à la référence
 > `O(m^2)` sur `10 000` configurations rationnelles, ties et caps compris, ne
 > trouve aucun écart pour `r4>=2`.
+> La configuration et les builds ciblés courants réussissent ; `37/37` CTests
+> `^mhgp3v_(caps_|axis_device)` passent en `199,89 s`. La fixture entière qui
+> réfute `sqrt(ds)+1` n'est pas encore dans ces portes : leur vert ne reçoit pas
+> les nouveaux pourcentages de calottes.
 >
-> La recette G4 de `11130cb` ne doit pas encore être lancée telle quelle : elle
-> prévoit douze cas pouvant durer chacun `900 s`, soit `10 800 s`, contre un
-> arrêt invité à `4 500 s`; son `RUN_TIMEOUT=3300` n'est pas consommé et son
-> verdict accepterait un préfixe non vide au lieu d'exiger les douze clés.
-> Réparation constructive : smoke court de parité, timeout global, cardinal de
-> matrice exact, `cap=0` pour les cas de correction, puis lots de débit
-> séparés. La copie du transcript doit aussi suivre, et non précéder, un
-> éventuel `[ARRET NON CERTIFIE]`. Aucun reçu local `axis_cuda_g4_20260815`
-> n'existe à cette relecture. La recette n'a pas été exécutée par l'audit ; GCP
-> n'a pas été utilisé.
+> La recette G4 au pin `11130cb` prévoyait douze cas pouvant durer chacun
+> `900 s`, soit `10 800 s`, contre un arrêt invité à `4 500 s`; son
+> `RUN_TIMEOUT=3300` n'encadrait rien. Le worktree réduit ce budget à huit cas
+> de `300 s`, mais doit encore imposer un timeout global, le cardinal exact de
+> la matrice et un fate `PREFIX_PARITY` pour tout `cap=1`.
+>
+> Un attempt concurrent du pin propre `11130cb` a compilé sous CUDA 12.9 sur
+> RTX PRO 6000 Blackwell, puis a fini `rc=127` avant scp et avant verdict. Le
+> reçu local ne contient que le transcript SHA-256 `9354b206...`; le fichier
+> distant de 72 lignes n'a pas été rapatrié. Il n'existe donc aucune mesure de
+> parité ou de débit recevable. La génération ciblée est certifiée
+> `TERMINATED`. Avant toute relance, préserver cet attempt et récupérer le brut
+> distant sans exécuter le `rm -rf ~/ax` du runner. La compilation a en outre
+> ciblé `52`, pas explicitement `120-real`; la prochaine recette doit fixer
+> l'architecture et hacher sa propre copie immuable. La recette n'a pas été
+> exécutée par l'audit ; GCP n'a pas été utilisé.
 
 > **Alerte au pin logiciel `6e815d28b3e229a0161eb00d6fa0c9a272efac5d`.** Les
 > commits `89774d0`, `e3f1925` et `88a9ba8` ajoutent respectivement

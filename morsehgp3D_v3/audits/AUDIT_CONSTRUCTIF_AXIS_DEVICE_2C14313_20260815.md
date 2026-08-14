@@ -26,9 +26,32 @@ CMakeLists.txt          547a720ae45c2a4e8fbc14f2faf4dafcdf87e0a48431c0cade09e961
 
 Le `HEAD=11130cb1f2114d3569991e96606c49bd1d6cc853` ajoute ensuite uniquement la
 recette `session_axis_cuda_g4.sh` ; les cinq fichiers du noyau ci-dessus sont
-inchangés. Aucun reçu `axis_cuda_g4_20260815` n'existe au moment de cette
-relecture. Cette recette est donc auditée statiquement ci-dessous, sans lancer
-ni interroger GCP.
+inchangés. Une session concurrente a depuis produit le reçu incomplet décrit en
+section 8. La recette est auditée sans lancer ni interroger GCP.
+
+Le pin `6be6bd855362b5b41ed60161c9c9e395f266f672` remplace ensuite le scan
+`O(N)` par paire du **builder de qualification** par la grille partagée des
+sondes. Le commit rapporte `200 000` seeds et `19,3 M` sites construits en
+`40 s` à `n=3000`. Cette amélioration est orthogonale au kernel et ne change
+pas les hashes noyau ci-dessus ; elle requiert la gate CSR grille = scan naïf
+décrite plus bas.
+
+Le contrôle indépendant de la grille est positif : `60 000` requêtes avec
+`769 427` points requis, puis `30 226` milieux dont les trois coordonnées
+peuvent être demi-entières, donnent zéro perte et zéro doublon. Sur `64`
+configurations, le ledger complet `SeedKey -> IDs témoins triés` égale le scan
+naïf pour `937 739` seeds et `51 327 628` incidences. La preuve est simple :
+`offd2` est une minoration de la distance cellule-boîte, et le rayon entier
+`floor(sqrt(D2))+2` absorbe l'écart au vrai demi-milieu avant le filtre exact
+`nu<=4D2`.
+
+Trois durcissements restent utiles : vider `offs/offd2` au début d'un second
+`build_offsets`, graver cette propriété comme CTest, et ne pas appeler canonique
+un batch tronqué. Les voisins de cellules à distance égale ne sont pas triés
+par `PointId`; à `cap=0` l'ensemble est exact, à `cap=1` le préfixe dépend de
+l'ordre de grille. Une primitive ultérieure `query_ball2(center2,radius2)` peut
+en outre travailler directement avec `center2=a+b` et `radius2=4D2`, sans
+`sqrt` ni sur-requête : c'est déjà la forme AABB requise par le BVH J2.
 
 ## 1. Avancée reçue comme diagnostic borné
 
@@ -188,11 +211,20 @@ sphère de paramètre `theta`. Elle fournit un unique moteur
    intérieur, shell, extérieur.
 
 Sur une AABB, le minimum de `q*G*s_i^2-H_i*s_i` est obtenu par clamp axe par
-axe. Une borne minimale positive ou nulle taille `OUT`. Le maximum de la
+axe. Une borne minimale strictement positive taille `OUT`. Le maximum de la
 quadratique convexe est à un des huit coins ; un maximum strictement négatif
 crédite `ALL`. Zéro descend. Une première passe entretient le heap de
 `k<=r4`, une seconde range-reporte tout le groupe égal ; le census s'arrête au
 huitième intérieur.
+
+Avant même le BVH, la baseline plate peut aussi passer de cinq scans à deux
+sans changer son résultat. Le premier scan classifie chaque site une seule
+fois, compte les permanents et maintient simultanément les `r4` meilleurs
+entrants et sortants ; après connaissance de `p`, les rangs `k=r4-p` fixent les
+deux cutoffs. Le second scan range-reporte simultanément les deux groupes avec
+ties complets. Cette variante réduit environ par `2,5` les appels
+`site_power/classify` et donne une meilleure baseline au futur BVH ; elle doit
+être comparée champ par champ à la sélection courante, y compris `DEAD_GAP`.
 
 La largeur doit être fixée dès l'ABI. Pour le root de l'apex, normaliser
 `p=A_y*sgn(B_y)` et `q=abs(B_y)`. Avec `C=q*G` et
@@ -224,6 +256,8 @@ Avant une session G4 :
   ensembles q4, pas seulement leur cardinal ;
 - ajouter un cas `batch_complete=true,cap=0` et un cas tronqué qui rend un fate
   explicite ;
+- comparer, sur petit `n`, le CSR produit par la grille au CSR produit par un
+  scan naïf, IDs et offsets compris ;
 - comparer `RationalBallRange` au flat scan sur chaque seed, chaque groupe de
   roots et chaque `I_B/U_B` ;
 - tuer `B_sign_ignored`, `Q_theta<=0`, `max_not_corners`, `min_not_clamped`,
@@ -251,8 +285,10 @@ Réparation constructive minimale :
    courte et parité obligatoire ;
 2. si vert, lancer les tailles croissantes sous un timeout **global** inférieur
    à `RUN_TIMEOUT`, et `timeout --kill-after` pour chaque binaire ;
-3. exiger exactement le nombre de runs planifié, `cap=0`, les hashes et
-   `ecarts=0` ;
+3. exiger exactement le nombre de runs planifié, les hashes et `ecarts=0` ; les
+   quatre petits cas complets doivent avoir `cap=0`, tandis qu'un grand lot
+   tronqué est typé `PREFIX_PARITY` et ne peut jamais rendre
+   `PARITE_EXACTE_COMPLETE` ;
 4. copier le transcript seulement après avoir ajouté un éventuel
    `[ARRET NON CERTIFIE]` : dans le trap courant, la copie précède encore cette
    ligne malgré le commentaire inverse ;
@@ -262,5 +298,46 @@ Ce protocole reçoit utilement la baseline plate. Il ne faut pas attendre la
 wavefront BVH pour apprendre si l'arithmétique host/device est identique, mais
 il faut garder `kernel_flat_scan` et `warm_e2e` comme deux métriques sans lien
 de promotion automatique.
+
+## 8. Reçu CUDA incomplet apparu pendant l'audit
+
+Le reçu local
+`receipts/axis_cuda_g4_20260815/transcript.txt`, SHA-256
+`9354b206da302a2f35554988a0427e45e8527ade151f92aa115159b61e9cac10`, porte
+le pin propre `11130cb`. Il établit uniquement :
+
+- GPU `NVIDIA RTX PRO 6000 Blackwell Server Edition`, pilote `580.173.02` ;
+- CUDA `12.9`, compilation et édition de liens réussies ;
+- ELF produit de SHA-256
+  `3661a39c8a6e558be955b38169b4863d2d613b14badcb54243257e92e1eaa46c` ;
+- fichier distant `out/axis_cuda.txt` annoncé à `72` lignes ;
+- sortie de session `rc=127` **avant** le scp et avant le verdict ;
+- arrêt de la génération ciblée, état `TERMINATED`, aucune autre VM active
+  selon le transcript.
+
+Le brut `axis_cuda.txt` n'a pas été rapatrié. Il n'existe donc localement ni
+code par cas, ni parité, ni temps kernel, ni débit recevable. Le reçu vaut
+`FAILED_INCOMPLETE`, pas `PARITE_EXACTE`.
+
+Priorité de reprise : préserver le transcript dans un répertoire d'attempt
+immuable, puis récupérer le fichier distant **avant** toute relance de la
+recette, car son build commence par `rm -rf ~/ax`. La VM est arrêtée ; cet audit
+n'autorise et n'effectue aucun redémarrage. Une future session gardée doit
+rapatrier/streamer le brut même si SSH se termine après la matrice.
+
+La configuration distante publie en outre
+`source par ancre device active pour 52`. Le projet ne doit pas accepter la
+valeur préinitialisée de l'environnement pour cette cible : passer explicitement
+`-DCMAKE_CUDA_ARCHITECTURES=120-real`, publier `ptxas -v`, puis vérifier le
+code objet réellement chargé. Enfin, le runner lui-même a été modifié dans le
+worktree pendant la fenêtre de session et son hash n'est pas dans le reçu.
+Copier et hacher une version immuable du script, puis exporter un snapshot de `HEAD`,
+évite cette ambiguïté au prochain attempt.
+
+Contrôle local frais au worktree de l'audit : configuration et builds ciblés
+réussis, puis `37/37` CTests `^mhgp3v_(caps_|axis_device)` verts en
+`199,89 s`. Ce vert confirme l'intégration existante ; il ne couvre ni la
+fixture `T2` de l'addendum calottes, ni une parité CUDA, ni la gate CSR
+grille-versus-naïf encore temporaire.
 
 GCP non utilisé.

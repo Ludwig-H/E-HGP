@@ -67,6 +67,14 @@ sûre marque fail-open les directions vérifiant
 `2(s.u)>max(r,||s||)`, puis applique indépendamment les seuils `10/9/8`.
 [`audits/REPONSE_AUDIT_Q18_Q20_CALOTTES_ADMISSIBLES_20260815.md`](audits/REPONSE_AUDIT_Q18_Q20_CALOTTES_ADMISSIBLES_20260815.md).
 
+`95b41b7` implémente l'intersection et les partenaires globaux ; ses mesures
+annoncent `88,00 %` sur `uniform` et `14,33 %` sur `terrain`. Elles restent à
+recertifier : le classifieur arrondit `||s||` vers le haut et peut omettre une
+cellule potentielle. Le correctif exact est de propager
+`T2=max(r*r,||s||^2)` et de comparer les carrés, sans `sqrt`. La fixture et les
+trois comparaisons entières sont dans l'audit Q18--Q20. Même après ce patch, le
+résiduel terrain, q3 et la masse d'ancres hors cutoff restent à fermer.
+
 La route constructive qui en résulte est maintenant spécifiée. Une
 `NeutralPairPartition` WSPD conserve exactement la masse ; chaque lane tente
 son propre cœur `W2/W3/W4Depth`, puis scinde ou continue. Lane3 évalue
@@ -86,7 +94,15 @@ donc d'abord le branchement de `census_replay` pour supprimer le second scan,
 puis la descente `Q_theta` sur BVH pour supprimer le premier. `DEBORDEMENT`
 doit continuer ou refuser, jamais être compté comme une mort. `2c14313` porte
 le flat scan sur device comme baseline de parité, mais ne contient pas encore
-cette descente ; `11130cb` ajoute une recette G4, sans reçu local à ce stade.
+cette descente. L'attempt G4 du pin `11130cb` compile sous CUDA 12.9, mais finit
+`rc=127` avant le rapatriement du brut et avant le verdict ; sa cible est
+certifiée `TERMINATED`, mais aucune parité ni aucun débit n'est reçu. Préserver
+et récupérer le fichier distant avant toute relance qui effacerait `~/ax`.
+`6be6bd8` accélère déjà la construction du lot par une grille partagée ; sa
+prochaine porte compare le CSR complet à un scan naïf sur petit `n`. Pour
+borner ensuite la HWM, un tuilage exact est possible : propriétaire par sommet
+lexicographique minimal et halo entier `ceil(3*dmax/2)`, avec recollement des
+multiensembles et IDs globaux. Ce lemme ne certifie pas le cutoff lui-même.
 Audit et gates J1.5/J2 :
 [`audits/AUDIT_CONSTRUCTIF_AXIS_DEVICE_2C14313_20260815.md`](audits/AUDIT_CONSTRUCTIF_AXIS_DEVICE_2C14313_20260815.md).
 

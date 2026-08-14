@@ -73,8 +73,9 @@ ancienne phrase imposant le rejet global des positions dupliquées est périmée
   l'admissibilité n'est pas monotone et une cellule doit **intersecter**
   l'enveloppe potentielle. La version sûre marque les directions vérifiant
   `2(s.u)>max(r,||s||)`, fail-open, puis applique séparément les seuils
-  `10/9/8`. La note proposée est conservée avec bannière rouge parce que le
-  probe la cite directement.
+  `10/9/8`. L'addendum réfute aussi l'arrondi `sqrt(ds)+1` de `95b41b7` et
+  donne le correctif entier `T2=max(r*r,ds)`. La note proposée est conservée
+  avec bannière rouge parce que le probe la cite directement.
 - [`NOTE_SOLUTION_WSPD_NIVEAUX_SHALLOW_AUTONOMES_20260815.md`](NOTE_SOLUTION_WSPD_NIVEAUX_SHALLOW_AUTONOMES_20260815.md) :
   proposition constructive sans Delaunay : conservation exacte de la masse
   WSPD, morts `W2/W3/W4Depth` propres à chaque lane, centres affines dans le
@@ -85,8 +86,11 @@ ancienne phrase imposant le rejet global des positions dupliquées est périmée
   réception bornée du pivot q4 : mêmes comptes que le brute sur petits nuages
   et `59x` moins de propositions à `n=6000`, puis localisation du scan témoin
   restant. Le port device est une baseline CSR plate, host-only dans l'audit ;
-  la gate suivante remplace ce CSR par la wavefront BVH `Q_theta` et compare
-  roots, census et identités au flat scan.
+  `6be6bd8` accélère son builder par grille. Les gates suivantes branchent le
+  replay de census, comparent le CSR grille au scan naïf, puis remplacent ce CSR
+  par la wavefront BVH `Q_theta`. L'addendum qualifie aussi le premier attempt
+  G4 : compilation réussie, `rc=127` avant rapatriement/verdict, cible
+  `TERMINATED`, donc aucune parité ni aucun débit reçu.
 - [`AUDIT_RECU_GRAM_UNIFIE_1FD9CF1_20260814.md`](AUDIT_RECU_GRAM_UNIFIE_1FD9CF1_20260814.md) :
   contrôle algébrique Python corrélé et borné des identités q4 `Delta=O^2` et
   `Phi=O*J` sur 10 000 fixtures u16 non dégénérées ; il ne reçoit ni microkernel

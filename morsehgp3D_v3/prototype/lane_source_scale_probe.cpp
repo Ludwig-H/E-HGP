@@ -284,8 +284,32 @@ std::vector<Pt> nuage(const std::string& family, long long n, long long coord,
 // `smax` fixe les trois seuils de MORT : `smax-1`, `smax-2`, `smax-3` pour q2,
 // q3, q4. Un support est retenu si son nombre d'interieurs est STRICTEMENT
 // inferieur au seuil de sa lane.
+// LE TUILAGE. `noyau` vaut nul hors mode tuile ; sinon un support n'est compte
+// que si son sommet LEX-MINIMAL tombe dans la boite `[lo,hi)`. C'est la
+// condition d'un recollement sans double compte : chaque support de l'espace a
+// un unique sommet lex-minimal, donc une unique tuile proprietaire.
+struct Noyau {
+  bool actif = false;
+  i64 lo[3] = {0, 0, 0}, hi[3] = {0, 0, 0};
+};
+
+inline bool lexmin_dans(const std::vector<Pt>& P, const int* id, int k, const Noyau& t) {
+  if (!t.actif) return true;
+  int lm = 0;
+  for (int u = 1; u < k; ++u) {
+    const Pt& a = P[(size_t)id[u]];
+    const Pt& b = P[(size_t)id[lm]];
+    if (a.c[0] < b.c[0] || (a.c[0] == b.c[0] &&
+        (a.c[1] < b.c[1] || (a.c[1] == b.c[1] && a.c[2] < b.c[2])))) lm = u;
+  }
+  const Pt& v = P[(size_t)id[lm]];
+  for (int c = 0; c < 3; ++c)
+    if (v.c[c] < t.lo[c] || v.c[c] >= t.hi[c]) return false;
+  return true;
+}
+
 void balaye(const std::vector<Pt>& P, const Grid& grid, int smax, i64 dmax,
-            long long tid, long long threads, bool axe, Ledger* out) {
+            long long tid, long long threads, bool axe, const Noyau& noyau, Ledger* out) {
   const int mort2 = smax - 1, mort3 = smax - 2, mort4 = smax - 3;
   const i64 dmax2 = dmax * dmax;
   const int m = (int)P.size();
@@ -344,7 +368,13 @@ void balaye(const std::vector<Pt>& P, const Grid& grid, int smax, i64 dmax,
       if ((long long)inner.size() > out->inner_max) out->inner_max = (long long)inner.size();
       // q2 : le fuseau q2 EST l'interieur de la boule diametrale, donc `f2` est
       // exactement le rang. Rien a recompter.
-      if (a2) { ++out->cand_q2; if (D2 > out->diam2_max) out->diam2_max = D2; }
+      if (a2) {
+        const int id2[2] = {ia, jb};
+        if (lexmin_dans(P, id2, 2, noyau)) {
+          ++out->cand_q2;
+          if (D2 > out->diam2_max) out->diam2_max = D2;
+        }
+      }
       // Les porteurs aigus, PRE-RANG. Filtrer ici serait la cascade interdite.
       for (int ip : lens) {
         const Pt& Pp = P[(size_t)ip];
@@ -367,6 +397,8 @@ void balaye(const std::vector<Pt>& P, const Grid& grid, int smax, i64 dmax,
           if (dedans(A, B3, P[(size_t)z])) { if (++ins >= mort3) break; }
         }
         if (ins >= mort3) continue;
+        const int id3[3] = {ia, jb, t};
+        if (!lexmin_dans(P, id3, 3, noyau)) continue;
         ++out->cand_q3;
         if (D2 > out->diam2_max) out->diam2_max = D2;
       }
@@ -418,6 +450,8 @@ void balaye(const std::vector<Pt>& P, const Grid& grid, int smax, i64 dmax,
               }
             }
             if (ins >= mort4) continue;
+            const int id4[4] = {ia, jb, ip, iq};
+            if (!lexmin_dans(P, id4, 4, noyau)) continue;
             ++out->cand_q4;
             if (D2 > out->diam2_max) out->diam2_max = D2;
           }
@@ -462,6 +496,8 @@ void balaye(const std::vector<Pt>& P, const Grid& grid, int smax, i64 dmax,
             }
           }
           if (ins >= mort4) continue;
+          const int idq[4] = {ia, jb, ip, iq};
+          if (!lexmin_dans(P, idq, 4, noyau)) continue;
           ++out->cand_q4;
           if (D2 > out->diam2_max) out->diam2_max = D2;
         }
@@ -517,11 +553,13 @@ int main(int argc, char** argv) {
   long long n = 2000, coord = 0, seed = 1, smax = 11, threads = 0, dmax = 0;
   double dmax_esp = 10.0;   // coupure exprimee en ESPACEMENTS moyens mesures
   bool verifie = false, axe = false;
+  long long tuilage = 0;
   for (int i = 1; i < argc; ++i) {
     const std::string a = argv[i];
     auto val = [&](const char* p) { return a.substr(std::strlen(p)); };
     if (a == "--verifie") verifie = true;
     else if (a == "--axe") axe = true;
+    else if (a.rfind("--tuilage=", 0) == 0) tuilage = atoll(val("--tuilage=").c_str());
     else if (a.rfind("--family=", 0) == 0) family = val("--family=");
     else if (a.rfind("--points=", 0) == 0) n = atoll(val("--points=").c_str());
     else if (a.rfind("--coord=", 0) == 0) coord = atoll(val("--coord=").c_str());
@@ -558,14 +596,69 @@ int main(int argc, char** argv) {
   grid.build(P, std::max<i64>(1, (i64)(1.2 * espacement)));
   grid.build_offsets(dmax + 4);
 
-  std::vector<Ledger> acc((size_t)threads);
-  std::vector<std::thread> th;
-  for (long long t = 0; t < threads; ++t)
-    th.emplace_back(balaye, std::cref(P), std::cref(grid), (int)smax, dmax, t, threads,
-                    axe, &acc[(size_t)t]);
-  for (auto& x : th) x.join();
-  Ledger g;
-  for (const Ledger& a : acc) fusionne(&g, a);
+  auto campagne = [&](const Noyau& noyau, const std::vector<Pt>& Q,
+                      const Grid& gq) {
+    std::vector<Ledger> acc((size_t)threads);
+    std::vector<std::thread> th;
+    for (long long t = 0; t < threads; ++t)
+      th.emplace_back(balaye, std::cref(Q), std::cref(gq), (int)smax, dmax, t, threads,
+                      axe, std::cref(noyau), &acc[(size_t)t]);
+    for (auto& x : th) x.join();
+    Ledger r;
+    for (const Ledger& u : acc) fusionne(&r, u);
+    return r;
+  };
+  Noyau global;
+  Ledger g = campagne(global, P, grid);
+
+  // LE TUILAGE, ET SA PORTE. Chaque support de l'espace a un unique sommet
+  // lex-minimal, donc une unique tuile proprietaire : la somme sur les tuiles
+  // doit EGALER le global, sans double compte ni perte. La marge vaut
+  // `1,5 dmax`, ce qui suffit — tout sommet est a `dmax` du lex-minimal et tout
+  // interieur a `0,966 D` du milieu, donc a `1,5 dmax` du lex-minimal.
+  if (tuilage > 1) {
+    if (tuilage > 8) refuse("--tuilage est borne a 8");
+    const i64 marge = (i64)(1.5 * (double)dmax) + 2;
+    long long s2 = 0, s3 = 0, s4 = 0;
+    long long tuiles_vides = 0;
+    for (long long tx = 0; tx < tuilage; ++tx)
+      for (long long ty = 0; ty < tuilage; ++ty)
+        for (long long tz = 0; tz < tuilage; ++tz) {
+          Noyau t;
+          t.actif = true;
+          const long long ti[3] = {tx, ty, tz};
+          for (int c = 0; c < 3; ++c) {
+            const i64 span = hi[c] - lo[c] + 1;
+            t.lo[c] = lo[c] + (i64)(span * ti[c] / tuilage);
+            t.hi[c] = (ti[c] + 1 == tuilage) ? (hi[c] + 1)
+                                             : lo[c] + (i64)(span * (ti[c] + 1) / tuilage);
+          }
+          std::vector<Pt> Q;
+          for (const Pt& p : P) {
+            bool dedans = true;
+            for (int c = 0; c < 3; ++c)
+              if (p.c[c] < t.lo[c] - marge || p.c[c] >= t.hi[c] + marge) dedans = false;
+            if (dedans) Q.push_back(p);
+          }
+          if (Q.size() < 5) { ++tuiles_vides; continue; }
+          Grid gq;
+          gq.build(Q, std::max<i64>(1, (i64)(1.2 * espacement)));
+          gq.build_offsets(dmax + 4);
+          const Ledger r = campagne(t, Q, gq);
+          s2 += r.cand_q2; s3 += r.cand_q3; s4 += r.cand_q4;
+        }
+    std::printf("tuilage : k=%lld marge=%lld tuiles_vides=%lld"
+                " somme q2=%lld q3=%lld q4=%lld | global q2=%lld q3=%lld q4=%lld"
+                " ecarts=%lld/%lld/%lld\n",
+                tuilage, (long long)marge, tuiles_vides, s2, s3, s4,
+                g.cand_q2, g.cand_q3, g.cand_q4,
+                s2 - g.cand_q2, s3 - g.cand_q3, s4 - g.cand_q4);
+    if (s2 != g.cand_q2 || s3 != g.cand_q3 || s4 != g.cand_q4) {
+      std::fprintf(stderr, "DESACCORD: le tuilage ne recolle pas le global\n");
+      return 1;
+    }
+    return 0;
+  }
 
   const double dm = std::sqrt((double)g.diam2_max);
   std::printf("lane_source : famille=%s n=%d smax=%lld morts=%lld/%lld/%lld"

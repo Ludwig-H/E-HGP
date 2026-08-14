@@ -196,3 +196,52 @@ coupure `0,940`; seules les deux pistes `uniform` ont atteint 50 000, les amas
 se sont arrêtés à 12 500. Ses `50/50` tests verts ne réparent aucun P0 de
 source. Les deux générations ont été arrêtées de façon ciblée et certifiées
 `TERMINATED`. L'auditeur n'a lancé, interrogé ou arrêté aucune VM.
+
+## 8. Addendum au pin `95b41b7` : enlever la racine carrée
+
+Le pin `95b41b7` implémente bien les deux corrections structurelles : cellule
+potentielle par intersection et partenaires globaux. Son classifieur n'est
+toutefois pas encore exact, car il remplace `max(r,||s||)` par l'entier
+`floor(sqrt(||s||^2))+1`. Ce seuil est trop grand, y compris lorsque la norme
+est entière, et peut supprimer une vraie cellule potentielle.
+
+Contre-fixture entière pour `m=8`, `r<=10` :
+
+```text
+s=(10,0,0)
+cellule={(2,0,-6),(3,0,-5),(2,-1,-5)}
+sommet g=(3,0,-5)
+```
+
+La condition exacte au sommet est vraie :
+
+```text
+4*(s.g)^2 = 3600 > ||s||^2*||g||^2 = 100*34 = 3400.
+```
+
+Le code prend `T=11` puis teste `3600>121*34`, faux. Une cellule nécessaire
+peut donc être omise et un certificat peut devenir faussement vert.
+
+La réparation est plus simple et plus exacte que l'arrondi : passer partout
+
+```text
+T2 = max(r*r, ||s||^2)
+```
+
+sans calculer de racine carrée. Les trois classes de candidats se comparent
+alors uniquement par entiers :
+
+```text
+sommet    : dot>0 et 4*dot^2 > T2*||g||^2
+interieur : direction s dans le cone et 4*||s||^2 > T2
+arc       : projection admissible et 4*||proj(s)||^2 > T2
+```
+
+Pour l'arc, la dernière ligne conserve directement la forme déjà présente,
+`4*(sn*nn-sdn^2)>T2*nn`. L'égalité reste non potentielle pour l'inégalité
+stricte, sans tolérance. Graver la fixture ci-dessus tue le mutant
+`sqrt_plus_one`. Après ce patch seulement, les pourcentages `88,00 %` et
+`14,33 %` pourront être interprétés comme des certificats plutôt que comme des
+mesures prometteuses à recertifier.
+
+GCP non utilisé pour cet addendum.

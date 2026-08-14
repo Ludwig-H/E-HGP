@@ -373,6 +373,54 @@ remplacer les `6,09` milliards de couples par le top-r axial, puis publier
 octets et HWM. Aucun « facteur quarante restant » ne doit être déduit avant ce
 rejeu et l'aval complet.
 
+### 8.1 Tuilage exact du résiduel borné
+
+Le calcul peut être sharded sans perdre le census. Fixer un cutoff reçu
+`D<=dmax` sur l'arête maximale et attribuer chaque support à la boîte cœur qui
+contient son sommet de coordonnées lexicographiquement minimal. Les boîtes cœur
+sont demi-ouvertes et disjointes ; un support positif propre a des sommets de
+positions distinctes, donc un propriétaire unique. En production, le vrai
+`PointId` tranche également toute égalité de représentation.
+
+Si `x` est un sommet du support et `y` appartient à sa miniboule fermée, alors
+`|y-x|<=2R`. Jung donne les trois bornes :
+
+```text
+q2 : 2R <= D
+q3 : 2R <= 2D/sqrt(3)
+q4 : 2R <= sqrt(3/2)*D
+```
+
+Le halo L-inf entier
+
+```text
+H = ceil(3*dmax/2)
+```
+
+est donc conservatif pour les sommets, tous les intérieurs et tout le shell des
+trois lanes. Il évite une racine carrée et se calcule par
+`(3*dmax+1)/2` pour un `dmax` entier non négatif. Chaque tuile charge son cœur
+plus ce halo, exécute les mêmes prédicats globaux, puis n'émet que les supports
+dont le propriétaire est dans le cœur. Les IDs restent globaux ou passent par
+une table locale-vers-globale monotone ; les compacter sans cette table
+changerait l'ABI des sorties.
+
+La gate exacte est : multiensemble global égal à la somme disjointe des
+multiensembles de tuiles, avec égalité de `SupportKey`, owner, primary,
+`BallKey`, `I_B/U_B` et multiplicité. Tester milieux demi-entiers, supports au
+coin de huit tuiles, shell exactement sur le halo, positions dupliquées hors
+support et permutations d'IDs. Une tuile ne peut pas être sautée parce que son
+halo contient moins de cinq points : deux points peuvent porter une q2 vide,
+trois une q3 vide et quatre une q4 vide. Le seul raccourci commun sûr est
+`|halo|<2`; mieux, chaque lane applique son propre plancher `2/3/4`.
+
+Ce lemme reçoit le **recollement conditionnel au cutoff** ; il ne transforme
+jamais `dmax` en certificat de complétude et ne remplace pas
+`NeutralPairPartition/PENDING` pour les ancres plus longues. Un batch tronqué
+par cap n'a pas non plus un préfixe canonique si l'ordre de visite de la grille
+diffère du scan : il peut prouver la parité host/device de son propre préfixe,
+pas l'égalité à une source globale.
+
 ## 9. Ordre d'implémentation conseillé à Claude
 
 1. Recevoir la conservation de masse de `NeutralPairPartition` sur petit `n`,
@@ -388,7 +436,8 @@ rejeu et l'aval complet.
 5. Recevoir séparément Lane3 par `Third3 -> centre ambiant -> Depth9`, sans
    jamais consulter Lane2.
 6. Raccorder les trois sorties à `BallKey/RLE`, puis seulement porter les
-   queues reçues sur G4.
+   queues reçues sur G4. Le tuilage à halo ci-dessus peut alors borner la HWM
+   de chaque batch sans modifier les ensembles.
 
 La première gate n'a pas besoin de 50 000 points. Sur `n<=140`, comparer pour
 chaque lane les **ensembles** de `SupportKey`, owners, `BallKey`, `I_B/U_B` et
