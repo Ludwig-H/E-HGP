@@ -112,7 +112,7 @@ La source retenue exploite Callahan--Kosaraju sans développer son produit
 cartésien :
 
 ```text
-CKPairTape(A,B)                          tous les q2, exact-once
+CKPairTape(A,B)                          toutes les paires, exact-once
   -> OwnedCK-WST3(A,B,C)                carrier de l'arête maximale
   -> OwnedCK-WST4(A,B,C,D)              second carrier/apex
   -> BallKey/RLE -> rang/census -> fold
@@ -123,6 +123,8 @@ Morton. Tout troisième ou quatrième sommet d'un support dont `ab` est l'arête
 maximale appartient à `3B_R`. Les cellules non vides de ce niveau donnent donc
 une extension ternaire complète, puis leurs couples non ordonnés une extension
 quaternaire complète. L'owner longueur/`EdgeKey` rend les sorties exact-once.
+Une paire n'est q2 propre que si `D=||b-a||^2>0` : les positions dupliquées
+sont rejetées, quotientées ou filtrées exactement avant cette promotion.
 
 q3 recertifie `E+X-D>0` et l'indépendance affine. q4 ne signifie pas « quatre
 faces aiguës » : l'autorité est la stricte positivité des quatre
@@ -140,10 +142,12 @@ un q4 régulier de rang 4, alors que ses six arêtes q2 et ses quatre faces q3 o
 toutes rang 12. `OwnedCK-WST4` doit donc consommer la relation aiguë q3
 **pré-rang**, jamais les événements q3 retenus.
 
-Le nombre de blocs vaut conditionnellement `O(s^3 n)`,
-`O(s^3*eta^-3*n)` et `O(s^3*eta^-6*n)` pour q2/q3/q4. Leur masse logique peut
-rester quadratique ou pire. Les blocs sont paresseux jusqu'à un consommateur
-factorisé reçu ou au preflight atomique d'une vraie sortie. Le rapport complet
+Le nombre de blocs initiaux vaut conditionnellement `O(s^3 n)`,
+`O(s^3*eta^-3*n)` et `O(s^3*eta^-6*n)` pour q2/q3/q4, avec `0<eta<=1` et une
+vraie propriété fair/compressed-split. Ces bornes ne couvrent pas tous les
+raffinements `MIXED`. Leur masse logique peut rester quadratique ou pire. Les
+blocs sont paresseux jusqu'à un consommateur factorisé reçu ou au preflight
+atomique d'une vraie sortie. Le rapport complet
 et son contre-audit sont
 [`audits/AUDIT_SOURCE_CK_WST_Q2_Q3_Q4_35FCEA8_20260814.md`](audits/AUDIT_SOURCE_CK_WST_Q2_Q3_Q4_35FCEA8_20260814.md)
 et
@@ -192,12 +196,18 @@ vague sur une machine partagée ; ne pas lancer sa rampe 50k. Un retour inférie
 
 ### `JungDiskDepth`, puis LP projectif
 
-Pour une arête maximale `ab`, les centres q3 et q4 ne parcourent pas tout le
-plan médiateur : avec `y=2c`, ils restent dans les disques exacts de Jung
-`||y-d||^2<=D/3` et `||y-d||^2<=D/2`. Dans ce plan 2D, un groupe d'au plus
-trois IDs peut certifier qu'au moins un témoin est intérieur pour tout centre
-admissible. Neuf groupes disjoints ferment q3, huit ferment q4. Cette porte
-précède la création de `WST3/WST4`.
+Pour une paire ponctuelle owner `ab`, les centres q3 et q4 ne parcourent pas
+tout le plan médiateur : avec `y=2c`, ils restent dans les disques exacts de
+Jung `||y-d||^2<=D/3` et `||y-d||^2<=D/2`. Dans ce plan 2D fixe, un groupe d'au
+plus trois IDs peut certifier qu'au moins un témoin est intérieur pour tout
+centre admissible. Neuf groupes disjoints ferment q3, huit ferment q4 avant la
+création des carriers de cette paire.
+
+Cette preuve ne ferme pas un rectangle CK : ses endpoints font varier le plan,
+le disque et les demi-plans. Il faut scinder jusqu'à une paire/microtile rejoué,
+ou prouver un futur `BlockJungDiskDepth` uniforme. Une fixture `2×2` ferme q4
+sur la paire basse alors qu'aucun de ses huit témoins n'est même q2 intérieur
+sur la paire haute ; tout transfert depuis un représentant reste interdit.
 
 Le LP global reste un oracle utile, mais son échec ne prouve plus une pénurie
 sur le disque Morse : une fixture à huit groupes ferme `JungDiskDepth8` alors

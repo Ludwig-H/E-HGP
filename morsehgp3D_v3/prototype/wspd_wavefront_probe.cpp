@@ -177,6 +177,9 @@ long long g_min_soc_taches = 0;
 // ne peut donc pas s'y compenser.
 bool g_judge_soc64 = false;
 long long g_soc_judge_cap = 4096;   // triples enumeres par verdict juge
+// Echantillon scelle de porteurs aigus : le premier chiffre de `M3`/`M4`.
+long long g_m4_sample = 0;
+long long g_min_m4_echantillon = 0;
 
 // ---- `EdgeWindowRangeAdd-v0` : la fenetre d'aretes, EXACTE et en `O(F+n)`.
 //
@@ -890,6 +893,8 @@ int main(int argc, char** argv) {
     else if (a.rfind("--max-slope-e4=", 0) == 0) g_max_slope_e4 = std::atof(val("--max-slope-e4=").c_str());
     else if (a == "--soc64-shadow") g_soc64_shadow = true;
     else if (a == "--judge-soc64") { g_soc64_shadow = true; g_judge_soc64 = true; }
+    else if (a.rfind("--porteurs=", 0) == 0) { g_window = true; g_m4_sample = arg_ll(val("--porteurs=").c_str(), 1, (1LL << 22), "porteurs"); }
+    else if (a.rfind("--min-masse-porteurs=", 0) == 0) g_min_m4_echantillon = arg_ll(val("--min-masse-porteurs=").c_str(), 1, (1LL << 40), "min-masse-porteurs");
     else if (a.rfind("--soc-judge-cap=", 0) == 0) { g_judge_soc64 = true; g_soc64_shadow = true; g_soc_judge_cap = arg_ll(val("--soc-judge-cap=").c_str(), 1, (1LL << 24), "soc-judge-cap"); }
     else if (a.rfind("--min-soc-taches=", 0) == 0) g_min_soc_taches = arg_ll(val("--min-soc-taches=").c_str(), 1, (1LL << 40), "min-soc-taches");
     else refuse("option inconnue");
@@ -899,6 +904,8 @@ int main(int argc, char** argv) {
   // zero : un vert par vacuite. Refus AVANT tout calcul.
   if (g_soc64_shadow && !g_vwave) refuse("--soc64-shadow exige --vwave");
   if (g_min_soc_taches > 0 && !g_soc64_shadow) refuse("--min-soc-taches exige --soc64-shadow");
+  if (g_min_m4_echantillon > 0 && g_m4_sample == 0)
+    refuse("--min-masse-porteurs exige --porteurs");
   if (ns.empty()) ns = {4000, 16000};
 
   mhgp3v::CloudFamily fam;
@@ -907,6 +914,9 @@ int main(int argc, char** argv) {
   else if (family == "eight_clusters") fam = mhgp3v::CloudFamily::kEightClusters;
   else if (family == "scanline_single_pass") fam = mhgp3v::CloudFamily::kScanlineSinglePass;
   else if (family == "scanline_overlap_multiecho") fam = mhgp3v::CloudFamily::kScanlineOverlapMultiecho;
+  // CONTRE-FAMILLE, pas un regime du contrat : masse universelle quadratique,
+  // source q3/q4 vide. Elle sert a refuter, jamais a qualifier.
+  else if (family == "two_lines") fam = mhgp3v::CloudFamily::kTwoLines;
   else refuse("famille inconnue");
   if (oracle && ns.back() > 64) refuse("l'oracle exige n <= 64");
 
@@ -1983,6 +1993,133 @@ int main(int argc, char** argv) {
                     pending_lane[lane] ? " SURENSEMBLE" : "");
       std::printf("orientations q4 : A<B=%lld B<A=%lld | oracle paires=%lld desaccords=%lld\n",
                   orient_ab, orient_ba, oracle_pairs, oracle_desaccords);
+
+      // ---------------------------------------------------------------------
+      // `EdgeAcuteCarrierSample-v0` : LE PREMIER CHIFFRE DE `M3`/`M4`.
+      //
+      // Les deux contre-audits du 14 aout exigent la meme chose et pour la meme
+      // raison : une fenetre d'aretes sparse ne borne NI `M3`, NI `M4`, NI les
+      // spheres uniques. Tant que ce nombre est inconnu, aucune porte de cout
+      // n'est decidable — c'est ce qui rend incomparables un temps de vague et
+      // une masse `E4` evitee.
+      //
+      // CE QUI EST COMPTE. Pour une arete ouverte `ab`, un PORTEUR ADMISSIBLE
+      // est un site `x` tel que `ab` soit l'arete maximale faible du triangle
+      // `abx` ET que ce triangle soit strictement aigu. Avec `d=b-a`, `u=x-a` :
+      //
+      //   D = d.d,  E = u.u,  F = d.u,  X = D+E-2F,  V = 2u-d
+      //   maximalite faible : D >= E et D >= X
+      //   acuite stricte    : V.V > D        (car V.V - D = 2(E+X-D))
+      //
+      // Ce compte n'est pas un choix esthetique. Le lemme du porteur aigu de
+      // `AUDIT_DEBLOCAGE_Q4_PORTEUR_AIGU_SOC64_LIVE_35FCEA8_20260814.md`
+      // section 4 dit que tout tetraedre strictement bien centre possede, pour
+      // son arete maximale, au moins une face incidente strictement aigue.
+      // Les porteurs admissibles sont donc EXACTEMENT les candidats du premier
+      // etage d'une source q4 owner-edge, et leur nombre est le premier facteur
+      // de `M4`.
+      //
+      // POURQUOI UN ECHANTILLON. Compter exactement demanderait de developper
+      // les paires ouvertes — precisement ce que la fenetre evite. On tire donc
+      // un echantillon SCELLE, DETERMINISTE et PONDERE PAR LA MASSE `|A||B|`,
+      // par tirage systematique sur la masse cumulee : aucun generateur
+      // pseudo-aleatoire, aucune dependance a l'ordre de stockage, et la meme
+      // graine rend le meme echantillon. L'extrapolation `E * moyenne` est
+      // publiee comme une ESTIMATION et jamais comme une mesure.
+      //
+      // LE COMPTE ZERO EST LE PLUS INFORMATIF. Sur la contre-famille u16 a deux
+      // droites, `n^2/4` paires restent ouvertes pour tout certificat universel
+      // alors qu'AUCUN triangle n'est aigu : la source q3/q4 y est vide. Une
+      // source qui compte ses porteurs voit cela ; une porte sur `sum E4` ne le
+      // voit pas. `aretes_sans_porteur` est donc publie a part.
+      if (g_m4_sample > 0) {
+        for (int lane = 1; lane <= 2; ++lane) {
+          // 1. Masse cumulee des terminaux OUVERTS de la lane.
+          std::vector<long long> cum;
+          std::vector<size_t> idx;
+          cum.reserve(terms.size() + 1);
+          long long acc = 0;
+          cum.push_back(0);
+          for (size_t i = 0; i < terms.size(); ++i) {
+            if (i < fate.size() && (fate[i] & (1u << lane))) continue;
+            const int ta = terms[i].a, tb = terms[i].b;
+            const long long fa = (ta < 0) ? (-1 - ta) : nodes[ta].first;
+            const long long la = (ta < 0) ? (-1 - ta) : nodes[ta].last;
+            const long long fb = (tb < 0) ? (-1 - tb) : nodes[tb].first;
+            const long long lb = (tb < 0) ? (-1 - tb) : nodes[tb].last;
+            acc += (la - fa + 1) * (lb - fb + 1);
+            idx.push_back(i);
+            cum.push_back(acc);
+          }
+          if (acc <= 0) {
+            std::printf("porteurs q%d : masse_ouverte=0 echantillon=0\n", lane + 2);
+            continue;
+          }
+          const long long k = std::min<long long>(g_m4_sample, acc);
+          long long somme = 0, maxi = 0, sans = 0;
+          std::vector<long long> cnts;
+          cnts.reserve((size_t)k);
+          for (long long j = 0; j < k; ++j) {
+            // Tirage systematique EXACT sur la masse cumulee : la j-ieme cible
+            // est le point de masse `(2j+1) * acc / (2k)`, sans flottant.
+            const long long cible = (2 * j + 1) * acc / (2 * k);
+            const size_t pos = (size_t)(std::upper_bound(cum.begin(), cum.end(), cible) -
+                                        cum.begin() - 1);
+            if (pos >= idx.size()) continue;
+            const size_t ti = idx[pos];
+            const int ta = terms[ti].a, tb = terms[ti].b;
+            const long long fa = (ta < 0) ? (-1 - ta) : nodes[ta].first;
+            const long long la = (ta < 0) ? (-1 - ta) : nodes[ta].last;
+            const long long fb = (tb < 0) ? (-1 - tb) : nodes[tb].first;
+            const long long lb = (tb < 0) ? (-1 - tb) : nodes[tb].last;
+            const long long ka = la - fa + 1, kb = lb - fb + 1;
+            const long long dans = cible - cum[pos];
+            const long long ra = fa + dans / kb;
+            const long long rb = fb + dans % kb;
+            const long long ax = sp[(size_t)ra][0], ay = sp[(size_t)ra][1], az = sp[(size_t)ra][2];
+            const long long bx = sp[(size_t)rb][0], by = sp[(size_t)rb][1], bz = sp[(size_t)rb][2];
+            const long long dx = bx - ax, dy = by - ay, dz = bz - az;
+            const long long dd = dx * dx + dy * dy + dz * dz;
+            long long porteurs = 0;
+            for (long long r = 0; r < m; ++r) {
+              if (r == ra || r == rb) continue;
+              const long long ux = sp[(size_t)r][0] - ax;
+              const long long uy = sp[(size_t)r][1] - ay;
+              const long long uz = sp[(size_t)r][2] - az;
+              const long long ee = ux * ux + uy * uy + uz * uz;
+              const long long ff = dx * ux + dy * uy + dz * uz;
+              const long long xx = dd + ee - 2 * ff;
+              if (dd < ee || dd < xx) continue;              // `ab` non maximale
+              const long long vx = 2 * ux - dx, vy = 2 * uy - dy, vz = 2 * uz - dz;
+              if (vx * vx + vy * vy + vz * vz > dd) ++porteurs;   // strictement aigu
+            }
+            (void)ka;
+            somme += porteurs;
+            if (porteurs > maxi) maxi = porteurs;
+            if (porteurs == 0) ++sans;
+            cnts.push_back(porteurs);
+          }
+          std::sort(cnts.begin(), cnts.end());
+          const long long p50 = cnts.empty() ? 0 : cnts[cnts.size() / 2];
+          const long long p95 = cnts.empty() ? 0 : cnts[(cnts.size() * 95) / 100];
+          const double moy = cnts.empty() ? 0.0 : (double)somme / (double)cnts.size();
+          std::printf("porteurs q%d : echantillon=%zu masse_ouverte=%lld moyen=%.3f p50=%lld"
+                      " p95=%lld max=%lld sans_porteur=%lld (%.3f%%) | M%d_estime=%.6g\n",
+                      lane + 2, cnts.size(), acc, moy, p50, p95, maxi, sans,
+                      100.0 * (double)sans / (double)std::max<size_t>(1, cnts.size()),
+                      lane + 2, moy * (double)acc);
+        }
+        if (g_min_m4_echantillon > 0) {
+          // Un echantillon vide n'est pas une mesure. Le plancher porte sur la
+          // masse ouverte q4, seule garantie que quelque chose a ete tire.
+          if (mass_open[2] < g_min_m4_echantillon) {
+            std::fprintf(stderr, "PLANCHER: masse q4 ouverte %lld, %lld exigee pour"
+                                 " l'echantillon de porteurs\n",
+                         mass_open[2], g_min_m4_echantillon);
+            return 3;
+          }
+        }
+      }
 
       // PLANCHERS DE COUVERTURE. Sans eux, un ledger vert ne dit rien : zero
       // terminal ouvert ou une seule orientation exercee rendraient le

@@ -61,8 +61,9 @@ preuves disponibles.
 L'audit reçoit la construction mathématique comme proposition exacte et
 GPU-factorisable, pas comme implémentation :
 
-- une WSPD Callahan--Kosaraju canonique partitionne toutes les paires q2 en
-  `O(s^3 n)` rectangles physiques sans les développer ;
+- une WSPD Callahan--Kosaraju canonique partitionne toutes les paires en
+  `O(s^3 n)` rectangles physiques sans les développer ; après rejet/quotient
+  des positions dupliquées et filtre `D>0`, elle source tous les q2 propres ;
 - pour chaque rectangle `R=(A,B)`, les cellules Morton d'une échelle liée à sa
   boule `B_R` et rencontrant `3B_R` couvrent tout carrier d'un support dont
   `ab` est l'arête maximale ; l'owner longueur/`EdgeKey` donne un unique
@@ -71,10 +72,12 @@ GPU-factorisable, pas comme implémentation :
   `OwnedCK-WST4(A,B,C,D)` ; q4 recertifie directement les quatre
   barycentriques du circumcentre.
 
-Les nombres de blocs conditionnels sont `O(s^3 n)`,
-`O(s^3*eta^-3*n)` et `O(s^3*eta^-6*n)`. Ils ne bornent pas les masses logiques
-`|A||B|`, `|A||B||C|` et `|A||B||C||D|`. Chaque bloc reste paresseux jusqu'à un
-consommateur factorisé reçu ou au preflight atomique de sa vraie sortie.
+Les nombres de blocs **initiaux** conditionnels sont `O(s^3 n)`,
+`O(s^3*eta^-3*n)` et `O(s^3*eta^-6*n)` sous une vraie propriété
+fair/compressed-split et `0<eta<=1`. Ils ne bornent ni les raffinements `MIXED`,
+ni les masses logiques `|A||B|`, `|A||B||C|` et `|A||B||C||D|`. Chaque bloc
+reste paresseux jusqu'à un consommateur factorisé reçu ou au preflight atomique
+de sa vraie sortie.
 
 Une fixture u16 de 64 points interdit toute cascade de rang : un q4 régulier a
 rang 4 alors que ses six arêtes q2 et ses quatre faces q3 ont toutes rang 12.
@@ -82,9 +85,12 @@ rang 4 alors que ses six arêtes q2 et ses quatre faces q3 ont toutes rang 12.
 événements q3 retenus. Le rapport et le recalcul exact sont dans
 [`AUDIT_SOURCE_CK_WST_Q2_Q3_Q4_35FCEA8_20260814.md`](AUDIT_SOURCE_CK_WST_Q2_Q3_Q4_35FCEA8_20260814.md).
 
-Avant de multiplier les carriers, `JungDiskDepth9/8` restreint les centres au
-disque imposé par Jung dans le plan médiateur. Des groupes disjoints de trois
-IDs au plus peuvent y fermer q3/q4 même lorsque le LP sur tout le plan échoue.
+Pour une paire ponctuelle, `JungDiskDepth9/8` restreint les centres au disque
+imposé par Jung dans le plan médiateur. Des groupes disjoints de trois IDs au
+plus peuvent y fermer q3/q4 même lorsque le LP sur tout le plan échoue. Cette
+preuve ne ferme pas un rectangle CK : le plan et les demi-plans varient avec
+`a,b`. Une contre-fixture `2×2` est désormais documentée ; il faut scinder vers
+des microtiles rejoués ou prouver un `BlockJungDiskDepth` uniforme.
 
 ## P0 : `0A` reste ouvert sur u16
 
@@ -290,7 +296,7 @@ réparer 0A u16 et isoler les juges de mutants
   -> raccorder BallEvent aux autorités Gamma par ordres/lots/verticales
   -> recevoir 0B et le payload borné
   -> recevoir CKPairTape q2 et ses certificats [L,U]
-  -> SOC64 union-disjointe + JungDiskDepth9/8 avant expansion
+  -> SOC64 union-disjointe block-level + JungDiskDepth9/8 paire/microtile
   -> OwnedCK-WST3 puis WST4 pré-rang, avec fixture de non-cascade
   -> raffinement porteur de preuves sur les tâches encore MIXED
   -> mesurer F2/F3/F4, M3/M4, BallKeys, census, H et coût transitif

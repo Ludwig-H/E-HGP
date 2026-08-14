@@ -232,16 +232,21 @@ la rentabilité.
 La fenêtre doit désormais être portée par une vraie décomposition de
 Callahan--Kosaraju. Une WSPD canonique produit `O(s^3 n)` rectangles
 `A×B` en dimension trois et partitionne exactement toutes les paires non
-ordonnées. Comme deux points distincts forment toujours un support géométrique
-q2 positif, ce tape est la source q2 complète ; il n'est pas un simple
-proposer.
+ordonnées. Une paire n'est un support géométrique q2 propre que si
+`D=||b-a||^2>0`. L'entrée doit donc rejeter ou quotienter les positions
+dupliquées, ou le tape filtrer `D=0` exactement. Sous cette porte, il est la
+source q2 complète ; ce n'est pas un simple proposer.
 
 Chaque rectangle porte une partition persistante du witness tree et deux
-bornes disjointes : masse strictement intérieure garantie `L_open`, masse
-fermée encore possible `U_closed`. Sous `smax=11`, `L_open>=10` ferme tout le
-rectangle ; `U_closed<=9` donne un packet d'au plus neuf IDs qui suffit à
-rejouer exactement intérieur et shell de chaque paire. Seuls les facteurs
-`MIXED` sont scindés et les preuves `ALL/NONE` s'héritent.
+bornes : masse strictement intérieure garantie `L_open`, et cardinalité de
+l'union fixe des IDs encore possiblement dans une boule fermée `U_closed`.
+Pour `H=(z-a) dot (b-z)`, `max H<=0` exclut seulement l'intérieur ; seul
+`max H<0` exclut aussi le shell et permet de retirer un span de `U_closed`.
+Sous `smax=11`, `L_open>=10` ferme tout le rectangle ; `U_closed<=9` donne un
+packet d'au plus neuf IDs qui suffit à rejouer exactement intérieur et shell de
+chaque paire. Les égalités et endpoints masqués relationnellement restent dans
+`U_closed`; seuls les facteurs encore indécis sont scindés et les preuves
+s'héritent.
 
 Le tape physique peut être linéaire alors que `sum |A||B|` est quadratique.
 Un bloc accepté reste donc paresseux jusqu'à un consommateur factorisé reçu ou
@@ -283,18 +288,24 @@ rencontrent `3B_R`. Si `ab` est l'arête maximale d'un triangle `abx`, alors
 Chaque triangle choisit l'arête de longueur maximale, puis la plus petite
 `EdgeKey` à égalité. Cette arête appartient à un rectangle CK unique et le
 carrier à une cellule half-open unique : le tuple retenu
-`OwnedCK-WST3(A,B,C)` est exact-once. Son nombre physique est
-`O(s^3*eta^-3*n)`, soit `O(s^6*n)` lorsque `eta` est proportionnel à `1/s`.
+`OwnedCK-WST3(A,B,C)` est exact-once. Pour `0<eta<=1`, son nombre de blocs
+initiaux est `O(s^3*eta^-3*n)`, soit `O(s^6*n)` sous le choix supplémentaire
+`eta` proportionnel à `1/s`. Ce majorant ne couvre ni la localisation, ni les
+diagonales, ni tous les raffinements `MIXED`.
 
 Après owner, q3 est positif si `E+X-D>0` et `G=D*E-F^2>0`. Les blocs reçoivent
 `ALL_ACUTE/NONE_ACUTE/MIXED` par bornes entières sûres ; les égalités
 descendent. `ALL_ACUTE` reste une source factorisée exacte, jamais la preuve
 que sa masse cubique, son rang, son shell ou ses `BallKey` sont bon marché.
 
-Avant l'extension, `JungDiskDepth9` peut fermer un rectangle q3. Sur le
-résiduel, un quatrième facteur witness applique `L_open/U_closed`; neuf
-intérieurs ferment, tandis qu'au plus huit sites possiblement fermés donnent
-un packet exact.
+Avant l'extension, `JungDiskDepth9` peut fermer une paire singleton ou un
+microtile dont toutes les paires sont explicitement rejouées. Il n'est pas un
+certificateur de rectangle CK tant qu'un `BlockJungDiskDepth(A,B,G)` uniforme
+n'est pas prouvé : le plan, le disque et les demi-plans varient avec `a,b`. Sur
+le résiduel, un quatrième facteur witness applique `L_open/U_closed`; neuf
+intérieurs ferment, tandis qu'au plus huit IDs de l'union fermée possible
+donnent un packet exact. Pour la puissance q3, `min P>=0` exclut seulement
+l'intérieur et `min P>0` exclut aussi le shell.
 
 ### 5.3 Pied unique et puissance exacte
 
@@ -421,9 +432,20 @@ groupe est vide si ce groupe fournit au moins un intérieur pour tout centre
 admissible. Helly dans ce plan affine donne une sous-base d'au plus trois IDs.
 Neuf groupes disjoints ferment q3 et huit ferment q4.
 
-Cette porte est strictement plus adaptée que le LP sur tout le plan. Un échec
-du LP global ne diagnostique pas une pénurie de témoins sur `K_q`. Le hot path
-propose et valide de petits groupes ; l'arbre de suppressions reste un oracle.
+Ce théorème fixe une paire ponctuelle. Pour un rectangle `A×B`, `d`, le plan,
+le disque et les demi-plans changent avec les endpoints. Il faut donc soit
+scinder jusqu'à une paire ou un microtile explicitement rejoué, soit prouver un
+nouveau classifieur `BlockJungDiskDepth(A,B,G)` quantifié sur tout le produit.
+La fixture `A={(0,0,0),(0,100,0)}`, `B={(100,0,0),(100,100,0)}` et
+`z_j=(50,j,0)`, `j=0,...,7`, ferme q4 pour la paire basse mais ne fournit même
+aucun témoin q2 pour la paire haute. Elle interdit toute promotion depuis un
+représentant vers le rectangle.
+
+Cette porte paire-level est strictement plus adaptée que le LP sur tout le
+plan. Un échec du LP global ne diagnostique pas une pénurie de témoins sur
+`K_q`. Le hot path propose et valide de petits groupes ; l'arbre de suppressions
+reste un oracle. Sur un rectangle non prouvé uniformément, le résultat reste
+`MIXED`.
 
 ### 6.3 `SOC64` et `CORNER512`
 
@@ -587,8 +609,10 @@ Pour le même rectangle owner `R=(A,B)`, réutiliser les cellules carrier de
 `3B_R` et former des couples non ordonnés `(C,D)`. Si `C!=D`, le bloc porte
 `A×B×C×D`; si `C=D`, il porte `A×B×binom(C,2)` sans IDs répétés. Tout q4 dont
 `ab` est l'arête maximale possède ses deux autres sommets dans `3B_R`, donc un
-unique bloc `OwnedCK-WST4`. Le nombre physique avant filtres vaut
-`O(s^3*eta^-6*n)`, soit `O(s^9*n)` pour `eta` proportionnel à `1/s`.
+unique bloc `OwnedCK-WST4`. Pour `0<eta<=1`, le nombre de blocs initiaux avant
+filtres vaut `O(s^3*eta^-6*n)`, soit `O(s^9*n)` sous le choix supplémentaire
+`eta` proportionnel à `1/s`. Ce majorant ne couvre ni localisation ni
+raffinements `MIXED`.
 
 Un tétraèdre q4 positif possède au moins une face aiguë adjacente à son arête
 maximale. `WST4` peut donc choisir le plus petit `PointId` des carriers aigus
@@ -613,8 +637,10 @@ census ; leurs comparaisons peuvent demander environ 155 bits sous u16.
 L'autorité q4 reste directe : quatre IDs distincts, orientation non nulle,
 owner parmi six arêtes et quatre numérateurs barycentriques du circumcentre
 strictement positifs. « Quatre faces aiguës » n'est ni nécessaire ni suffisant.
-Après `JungDiskDepth8`, seuls les rectangles ouverts construisent leurs couples
-de cellules ; le `count` et le preflight précèdent impérativement le `fill`.
+Après `JungDiskDepth8`, seules les paires singleton ou microtiles effectivement
+fermés évitent leurs couples de cellules. Un rectangle CK ne les évite que si
+un futur classifieur uniforme le prouve. Le `count` et le preflight précèdent
+impérativement le `fill`.
 
 Si la masse de couples carrier reste rouge, le moteur local du plan médiateur
 reste le successeur : q2 interroge son point central, q3 le pied unique d'une
@@ -658,8 +684,10 @@ variable.
    reprises.
 3. Recevoir `CKPairTape` comme partition q2 exacte et son certificateur
    `[L_open,U_closed]`, puis mesurer `F2` et la masse logique séparément.
-4. Ajouter `JungDiskDepth9/8`, `OriginOnionDepth` et un shadow `SOC64` à union
-   de preuves disjointe, capé et jugé, avant toute multiplication carrier.
+4. Ajouter `JungDiskDepth9/8` au niveau paire/microtile,
+   `OriginOnionDepth` et un shadow `SOC64` à union de preuves disjointe, capé et
+   jugé, avant toute multiplication carrier ; ne promouvoir Jung au rectangle
+   qu'après un théorème uniforme.
 5. Construire `OwnedCK-WST3` counter-only, recevoir couverture/owner/acuité,
    puis raccorder `BallKey -> Q3FootPowerRange` et le census.
 6. Construire `OwnedCK-WST4` depuis la relation aiguë géométrique pré-rang,

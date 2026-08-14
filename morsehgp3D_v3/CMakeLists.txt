@@ -4458,3 +4458,60 @@ mhgp3v_add_expected_code_test_for(mhgp3v_wspd_wavefront_probe
   mhgp3v_wspd_soc64_plancher_taches "PLANCHER" 3
   --family=uniform --points=400 --sep-euclid=8/1 --tight --vwave --window=512
   --window-ledger --soc64-shadow --min-soc-taches=1000000000)
+
+# ---------------------------------------------------------------------------
+# `EdgeAcuteCarrierSample-v0` : LE PREMIER CHIFFRE DE `M3`/`M4`.
+#
+# Les deux contre-audits du 14 aout exigent la meme chose : une fenetre d'aretes
+# sparse ne borne NI `M3`, NI `M4`. Tant que ce nombre est inconnu, aucune porte
+# de cout n'est decidable, et comparer un temps de vague a une masse `E4` evitee
+# n'a pas de sens. L'echantillon est SCELLE : tirage systematique sur la masse
+# cumulee, pondere par `|A||B|`, sans generateur pseudo-aleatoire.
+add_test(NAME mhgp3v_porteurs_uniform
+  COMMAND mhgp3v_wspd_wavefront_probe --family=uniform --points=1500
+          --sep-euclid=8/1 --tight --vwave --window=512 --window-ledger
+          --porteurs=2048 --min-masse-porteurs=100000)
+set_tests_properties(mhgp3v_porteurs_uniform PROPERTIES
+  PASS_REGULAR_EXPRESSION "porteurs q4 : echantillon=2048 masse_ouverte=[0-9]+ moyen=[0-9]+")
+
+# LA CONTRE-FAMILLE A DEUX DROITES, GRAVEE.
+#
+# Section 3 de `AUDIT_DEBLOCAGE_Q4_PORTEUR_AIGU_SOC64_LIVE_35FCEA8_20260814.md`.
+# Avec `A_i=(i,0,0)` et `B_j=(0,j,H)`, chaque paire croisee possede une sphere
+# vide : les puissances exterieures des autres sites valent exactement
+# `(k-i)^2` et `(l-j)^2`. AUCUN certificat universel sound ne les ferme.
+# Pourtant aucun triangle n'est aigu, donc la vraie source q3/q4 est VIDE.
+#
+# Ces deux portes mesurent les deux nombres cote a cote sur le meme nuage. La
+# premiere exige que la masse universelle ouverte soit bien quadratique — sans
+# quoi la refutation serait vide. La seconde exige ZERO porteur sur la totalite
+# de l'echantillon. Un jour ou la seconde deviendrait non nulle, c'est le
+# compteur de porteurs qui serait faux, pas la geometrie.
+add_test(NAME mhgp3v_two_lines_masse_universelle_quadratique
+  COMMAND mhgp3v_wspd_wavefront_probe --family=two_lines --points=400
+          --sep-euclid=8/1 --tight --vwave --window=512 --window-ledger
+          --porteurs=4096 --min-ouverts=1000)
+set_tests_properties(mhgp3v_two_lines_masse_universelle_quadratique PROPERTIES
+  PASS_REGULAR_EXPRESSION "fenetre q4 : terminaux_ouverts=[0-9]+ masse_ouverte=4[0-9][0-9][0-9][0-9] ")
+add_test(NAME mhgp3v_two_lines_zero_porteur_aigu
+  COMMAND mhgp3v_wspd_wavefront_probe --family=two_lines --points=400
+          --sep-euclid=8/1 --tight --vwave --window=512 --window-ledger
+          --porteurs=4096)
+set_tests_properties(mhgp3v_two_lines_zero_porteur_aigu PROPERTIES
+  PASS_REGULAR_EXPRESSION "porteurs q4 : echantillon=4096 masse_ouverte=[0-9]+ moyen=0.000 p50=0 p95=0 max=0 sans_porteur=4096 .100.000%. . M4_estime=0")
+# Le meme nuage juge aussi SOC64 : il ferme quelques paires intra-droite, jamais
+# les croisees. Le juge `(g,Q)` doit rester d'accord sur cette famille aussi.
+add_test(NAME mhgp3v_two_lines_soc64_juge
+  COMMAND mhgp3v_wspd_wavefront_probe --family=two_lines --points=400
+          --sep-euclid=8/1 --tight --vwave --window=512 --window-ledger
+          --judge-soc64 --min-soc-taches=10000)
+set_tests_properties(mhgp3v_two_lines_soc64_juge PROPERTIES
+  PASS_REGULAR_EXPRESSION "soc64_juge accord=OUI verdicts_juges=[0-9]+ sautes=[0-9]+ triples=[0-9]+ faux=0")
+
+mhgp3v_add_expected_code_test_for(mhgp3v_wspd_wavefront_probe
+  mhgp3v_porteurs_reject_plancher_sans_echantillon "--min-masse-porteurs exige --porteurs" 2
+  --family=uniform --points=200 --min-masse-porteurs=1)
+mhgp3v_add_expected_code_test_for(mhgp3v_wspd_wavefront_probe
+  mhgp3v_porteurs_plancher_masse "PLANCHER" 3
+  --family=uniform --points=400 --sep-euclid=8/1 --tight --vwave --window=512
+  --window-ledger --porteurs=64 --min-masse-porteurs=1000000000)

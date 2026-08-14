@@ -44,7 +44,24 @@ enum class CloudFamily {
   kTerrain,
   kScanlineSinglePass,
   kScanlineOverlapMultiecho,
-  kEightClusters
+  kEightClusters,
+  // ---- CONTRE-FAMILLE, PAS UN REGIME DU CONTRAT.
+  //
+  // `two_lines` vient de la section 3 de
+  // audits/AUDIT_DEBLOCAGE_Q4_PORTEUR_AIGU_SOC64_LIVE_35FCEA8_20260814.md. Elle
+  // n'est pas une famille de mesure : c'est une REFUTATION gravee. Avec
+  // A_i=(i,0,0) et B_j=(0,j,H), chaque paire croisee possede une sphere vide de
+  // centre (i, j, (H^2+i^2-j^2)/(2H)), puisque les puissances exterieures des
+  // autres sites valent exactement (k-i)^2 et (l-j)^2, strictement positives.
+  //
+  // Donc AUCUN certificat universel sound ne ferme ces m^2 = n^2/4 paires : ni
+  // le masque central, ni SOC64, ni CORNER512, ni un LP, ni des cages. Et
+  // pourtant la vraie source q3/q4 y est VIDE : pour i<k, l'angle en A_i
+  // verifie (A_k-A_i).(B_j-A_i) = -(k-i) i < 0, donc aucun triangle n'est aigu.
+  //
+  // Elle est ici pour qu'une porte puisse mesurer les deux nombres cote a cote
+  // sur le meme nuage : masse universelle quadratique, ZERO porteur aigu.
+  kTwoLines
 };
 
 inline const char* cloud_family_name(CloudFamily family) {
@@ -54,6 +71,7 @@ inline const char* cloud_family_name(CloudFamily family) {
     case CloudFamily::kScanlineSinglePass: return "scanline_single_pass";
     case CloudFamily::kScanlineOverlapMultiecho: return "scanline_overlap_multiecho";
     case CloudFamily::kEightClusters: return "eight_clusters";
+    case CloudFamily::kTwoLines: return "two_lines";
   }
   return "?";
 }
@@ -74,6 +92,10 @@ inline int cloud_family_default_coord(CloudFamily family, int n) {
     case CloudFamily::kTerrain: c = std::sqrt((double)n * 25.0); break;
     case CloudFamily::kScanlineSinglePass:
     case CloudFamily::kScanlineOverlapMultiecho: c = std::sqrt((double)n * 40.0); break;
+    // La contre-famille EXIGE toute la grille : la hauteur `H` separe les deux
+    // droites et la construction de la sphere vide en depend. Une emprise
+    // reduite changerait l'objet refute.
+    case CloudFamily::kTwoLines: c = 65536.0; break;
   }
   return (int)std::max(4.0, std::min(65536.0, c));
 }
@@ -300,10 +322,38 @@ inline std::vector<mhgp::P3> scanline_cloud(int n, int coord, long long seed,
   return pts;
 }
 
+// ---------------------------------------------------------------------------
+// LA CONTRE-FAMILLE A DEUX DROITES.
+//
+//   A_i = (i, 0, 0)        pour i = 1..m
+//   B_j = (0, j, H)        pour j = 1..m,   H = coord - 1
+//
+// Elle est DETERMINISTE : aucune graine ne l'affecte, et c'est voulu. Une
+// refutation qui dependrait d'un tirage ne serait pas une refutation.
+//
+// Le nombre de points rendu est `2m` avec `m = n/2` ; un `n` impair rend
+// `n-1` points. L'appelant qui exige une cardinalite exacte doit passer un `n`
+// pair, et le probe le refuse sinon par son propre controle de cardinalite.
+inline std::vector<mhgp::P3> two_lines_cloud(int n, int coord) {
+  std::vector<mhgp::P3> pts;
+  const int m = n / 2;
+  if (m <= 0) return pts;
+  const int h = std::max(1, coord - 1);
+  // Les indices commencent a 1 : `A_0 = (0,0,0)` et `B_0 = (0,0,H)` seraient
+  // sur l'axe commun et casseraient l'argument d'angle obtus.
+  const int imax = std::min(m, h);
+  pts.reserve((size_t)(2 * imax));
+  for (int i = 1; i <= imax; ++i) pts.push_back(mhgp::P3{(std::uint16_t)i, 0, 0});
+  for (int j = 1; j <= imax; ++j)
+    pts.push_back(mhgp::P3{0, (std::uint16_t)j, (std::uint16_t)h});
+  return pts;
+}
+
 inline std::vector<mhgp::P3> make_family_cloud(CloudFamily family, int n, int coord,
                                                long long seed,
                                                bool mutant_overshoot = false) {
   switch (family) {
+    case CloudFamily::kTwoLines: return two_lines_cloud(n, coord);
     case CloudFamily::kUniform: return uniform_cloud(n, coord, seed);
     case CloudFamily::kEightClusters: return eight_clusters_cloud(n, coord, seed);
     case CloudFamily::kTerrain: return terrain_cloud(n, coord, seed);

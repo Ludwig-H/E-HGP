@@ -301,28 +301,118 @@ sur `eight_clusters`, mesure peut-être le mauvais objet.
   autonome, `SocStats.wide` compte toujours deux au lieu de trois ou quatre.
   Ce sont des dettes reconnues, pas des oublis.
 
-## 6. Ce que je propose de faire ensuite, et ce que j'attends de vous
+## 6. `M4` existe maintenant, et c'est le chiffre qui décide
+
+Vous exigez tous les deux `M4` avant tout claim, et il n'existait **nulle
+part** dans le code — le symbole n'apparaissait que dans `PROPOSITION.md`.
+Je l'ai implémenté sous la forme que vous demandez : `EdgeAcuteCarrierSample-v0`,
+échantillon **scellé, déterministe, pondéré par la masse `|A||B|`**, par tirage
+systématique sur la masse cumulée. Aucun générateur pseudo-aléatoire.
+
+Ce qui est compté, pour une arête ouverte `ab` : le nombre de sites `x` tels que
+`ab` soit l'arête maximale faible de `abx` **et** que `abx` soit strictement
+aigu, c'est-à-dire `D>=E`, `D>=X`, `V.V>D`. Ce n'est pas un choix : par votre
+lemme du porteur aigu, ce sont **exactement** les candidats du premier étage
+d'une source q4 owner-edge.
+
+L'estimateur est stable : `486,2 / 492,0 / 489,6 / 490,9` pour
+`K = 512 / 2048 / 4096 / 16384` sur `eight_clusters` à `n=3000`, soit `1,2 %`
+d'écart sur un facteur trente-deux d'échantillon.
+
+| famille | `n` | `E4` ouverte | porteurs/arête | `M4` estimé |
+|---|---:|---:|---:|---:|
+| `uniform` | 1 500 | 443 392 | 111,8 | `4,96e7` |
+| `uniform` | 3 000 | 1 027 538 | 128,7 | `1,32e8` |
+| `uniform` | 6 000 | 2 394 081 | 133,4 | `3,19e8` |
+| `eight_clusters` | 1 500 | 1 071 162 | 236,0 | `2,53e8` |
+| `eight_clusters` | 3 000 | 4 045 644 | 489,6 | `1,98e9` |
+| `eight_clusters` | 6 000 | 15 135 764 | 1 023,4 | `1,55e10` |
+
+| famille | pente `E4` | pente porteurs/arête | **pente `M4`** |
+|---|---|---|---|
+| `uniform` | 1,2125 / 1,2203 | 0,2031 / 0,0514 | **1,4157 / 1,2717** |
+| `eight_clusters` | 1,9172 / 1,9035 | 1,0530 / 1,0638 | **2,9702 / 2,9673** |
+
+**Sur `eight_clusters`, `M4` est cubique.** Et la cause est structurelle, pas
+constante : le nombre de porteurs admissibles par arête ouverte croît
+**linéairement en `n`** (pente `1,06`). La raison tient en une ligne — la
+maximalité faible `D>=E` confine `x` à la boule de rayon `||ab||` autour de `a` ;
+or les arêtes q4 encore ouvertes sur un nuage en amas sont précisément les
+**longues arêtes inter-amas**, dont la boule de maximalité avale un amas entier.
+Le facteur de factorisation owner-edge x carrier y est donc `Theta(n)` par arête.
+
+Sur `uniform` le même compteur sature — `111,8 -> 128,7 -> 133,4`, pente
+`0,05` — et `M4` reste à `1,27`. Mais la constante est déjà écrasante :
+`3,19e8` incidences à `n=6000`, soit environ `53 000` par point ; l'extrapolation
+naïve à `50 000` donne `4,9e9`. Une seconde de bout en bout à ce niveau
+suppose plus de cinq milliards d'incidences traitées, et ce n'est que le
+**premier** facteur, avant l'apex.
+
+Autrement dit : `E4` à `1,22` sur `uniform` avait l'air vert, et il masquait un
+`M4` de `1,27` avec une constante de cinq mille par point.
+
+### La contre-famille, mesurée
+
+J'ai gravé votre famille à deux droites comme famille de nuage `two_lines`,
+déterministe et sans graine. À `n=400`, donc `m=200` :
+
+```text
+fenetre q4 : masse_ouverte=48114 (60,293 % de C(n,2))
+porteurs q4 : echantillon=4096 moyen=0.000 max=0 sans_porteur=4096 (100,000 %)
+M4_estime=0
+```
+
+À `n=800` : `176 714` de masse ouverte, `55,3 %` de `C(n,2)`, et de nouveau
+**zéro porteur sur la totalité de l'échantillon**. `SOC64` n'y ferme que
+quelques paires intra-droite, et son juge `(g,Q)` reste d'accord.
+
+La démonstration est donc complète et elle est expérimentale : sur ce nuage le
+résiduel universel est quadratique et la source est vide. **Le compteur de
+porteurs le voit instantanément ; la porte sur `sum E4` ne le voit pas.** Cinq
+CTests gravent ce couple de nombres.
+
+## 7. Ce que je propose de faire ensuite, et ce que j'attends de vous
 
 Ma lecture, en une phrase : **`SOC64` est reçu comme un prune exact et bon
 marché, et il est réfuté comme sauvetage de la voie centrale.** Il entre dans
 l'union des certificats ; il ne change pas l'architecture.
 
-Ordre que je propose, sous réserve de vos réponses aux quatre questions :
+Les points 2 à 4 de la liste que j'avais écrite sont faits dans cette même
+passe : le compteur de porteurs, la contre-famille gravée, et `M4`. Reste :
 
 ```text
-1. figer SOC64 en OR de prune, sans rampe 50k : la mesure de pente est deja faite
-   et elle est rouge
-2. implementer le lemme du porteur aigu comme PORTE, pas comme source :
-   compter les faces aigues exactes sur les memes rectangles, en counter-only
-3. graver la contre-famille a deux droites comme fixture permanente, avec le
-   compte attendu : n^2/4 de masse universelle, ZERO face aigue, ZERO sweep
-4. mesurer M4 avant toute nouvelle porte de cout
-5. seulement alors, CKPairTape-v0 ou AcuteCarrierGateway selon votre reponse 4 bis
+1. figer SOC64 en OR de prune, sans rampe 50k : la pente est mesuree et rouge
+2. decider si `sum E4` reste une porte, ou si `M4` la remplace  -> Question 4
+3. si M4 remplace E4 : mesurer M4 a 12500/25000/50000 sur G4, avec l'echantillon
+   scelle, et gater la PENTE de M4 et non celle de E4
+4. attaquer la cause structurelle : la boule de maximalite d'une longue arete
+   inter-amas avale un amas entier                              -> Question 5
+5. CKPairTape-v0 ou AcuteCarrierGateway selon votre reponse 4 bis
 ```
+
+> **Question 5, née de la mesure `M4`.** Sur `eight_clusters`, les porteurs par
+> arête ouverte croissent en `Theta(n)` parce que la maximalité faible confine
+> `x` à la boule de rayon `||ab||` autour de `a`, et qu'une longue arête
+> inter-amas y enferme un amas entier. Ce n'est pas une constante à optimiser,
+> c'est la géométrie de la famille. Deux issues me semblent possibles et je ne
+> sais pas choisir :
+>
+> - **soit** la profondeur doit tuer ces arêtes AVANT l'énumération des
+>   porteurs — mais `SOC64` n'en ferme que 32 %, et votre contre-famille montre
+>   qu'aucun certificat universel ne peut garantir de les tuer ;
+> - **soit** l'ordre `owner-edge x carrier` est le mauvais ordre pour les amas,
+>   et il faut un owner qui ne soit pas l'arête maximale — au prix de perdre
+>   l'exact-once que l'arête maximale garantit.
+>
+> Voyez-vous une troisième issue ? Et le `3B_R` de votre section 3.1 change-t-il
+> quelque chose à ce compte, ou ne fait-il que le borner par en haut sans
+> réduire le nombre réel de porteurs admissibles ?
 
 Je ne lance aucune session G4 tant que la question 4 n'est pas tranchée : une
 rampe à 50 000 sur `sum E4` coûterait une session pour mesurer un objet dont
-votre contre-famille montre qu'il peut être découplé de la sortie.
+votre contre-famille montre qu'il peut être découplé de la sortie. Si vous
+tranchez pour `M4`, la session est prête à partir — l'échantillon scellé coûte
+`K x n` opérations, donc rien.
 
 ## 7. Non-claims
 

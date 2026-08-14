@@ -363,6 +363,29 @@ un intérieur pour tout centre admissible. Dans le plan affine de dimension
 deux, Helly fournit toujours une sous-base d'au plus trois IDs. Neuf groupes
 disjoints ferment q3 ; huit ferment q4.
 
+Cette preuve fixe `a,b`, donc `d`, le plan, le disque et les demi-plans. Elle ne
+se transfère pas automatiquement à un rectangle `A×B`. Un
+`BlockJungDiskDepth(A,B,G)` devrait quantifier le même verdict pour tout
+`a in A`, `b in B` et tout centre du disque correspondant, avec un classifieur
+`ALL/MIXED` prouvé. En son absence, la porte est exacte seulement sur une paire
+singleton ou un microtile dont toutes les paires sont explicitement rejouées ;
+un échec reste fail-open et ne ferme jamais le rectangle parent.
+
+La contre-fixture u16 minimale suivante interdit de valider seulement un
+représentant du rectangle :
+
+```text
+A={(0,0,0),(0,100,0)}
+B={(100,0,0),(100,100,0)}
+z_j=(50,j,0), j=0,...,7
+```
+
+Pour la paire basse, `H=2500-j^2`, `E=X=2500+j^2` et, au pire `j=7`,
+`H=2451>0` ainsi que `3H^2-EX=11524802>0`. Les huit singletons ferment donc
+q4. Pour la paire haute, `H=2500-(100-j)^2<=-6149` : aucun de ces témoins n'est
+même q2 intérieur. Une fermeture paire ne peut donc pas être promue en
+fermeture de `A×B`.
+
 Le hot path GPU n'exécute pas l'arbre complet de suppressions. Il propose de
 petits groupes de deux ou trois IDs, valide exactement l'infaisabilité
 disque--demi-plans, puis compte des groupes disjoints. L'échec reste fail-open.
@@ -415,10 +438,12 @@ raw/unique BallKeys          après génération
 octets, HWM, wide_ops        puis temps par phase
 ```
 
-Le q4 ne construit jamais `F4` pour un rectangle déjà fermé par
-`JungDiskDepth8`. Le q3 ne construit jamais `F3` pour un rectangle fermé par
-`JungDiskDepth9`. Cette ordonnance place le certificat avant la multiplication
-des carriers.
+Le q4 ne construit jamais ses carriers pour une **paire singleton** déjà fermée
+par `JungDiskDepth8`; de même q3 avec `JungDiskDepth9`. Un rectangle CK entier
+ne bénéficie de cette ordonnance que si un futur `BlockJungDiskDepth` prouve la
+quantification uniforme, ou après split jusqu'à des microtiles explicitement
+rejoués. Le cœur CK et les classifieurs rectangle restent les seuls certificats
+block-uniformes déjà établis ici.
 
 ## 7. Contre-audit de l'autre auditeur
 
@@ -450,11 +475,12 @@ Ordre d'implémentation proposé, sans toucher au code de Claude :
    qui rejoue tous les witnesses après un split ;
 3. implémenter `OwnedCK-WST3-v0` en mode counter-only : couverture exhaustive
    à petit `n`, owner, cellules de `3B_R`, `ALL/NONE/MIXED`, sans BallKey ;
-4. ajouter `JungDiskDepth9` puis le census q3 ;
+4. ajouter `JungDiskDepth9` au niveau paire/microtile et graver la
+   contre-fixture qui interdit sa promotion au rectangle, puis le census q3 ;
 5. implémenter `OwnedCK-WST4-v0` depuis les carriers géométriques pré-rang,
    avec paires de cellules `CROSS/WITHIN`, carrier aigu canonique et quatre
    barycentriques exactes ;
-6. ajouter `JungDiskDepth8`, la fixture de 64 points et les mutants
+6. ajouter `JungDiskDepth8` au même niveau borné, la fixture de 64 points et les mutants
    `q4_requires_retained_q3`, `q4_requires_q2_clique` et
    `q4_uses_q3_depth_mask` ;
 7. câbler aussi `arity-cascade` sur la fixture `arite4` : le binaire courant

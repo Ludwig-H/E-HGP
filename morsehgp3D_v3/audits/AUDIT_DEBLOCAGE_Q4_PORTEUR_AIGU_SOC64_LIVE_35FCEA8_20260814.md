@@ -264,6 +264,35 @@ fenêtre de profondeur : filtrer par la sortie q3 reçue perdrait des q4.
 
 ## 5. Source candidate : `AcuteCarrierGateway-q4`
 
+### 5.1 Fenêtre carrier `2B_R`, exacte et optimale
+
+La fenêtre `3B_R` proposée par l'autre auditeur est sûre mais non optimale.
+Si une boule `B_R=B(o_R,r_R)` contient les deux facteurs owner, tout troisième
+sommet `x` d'un support dont `ab` est une arête maximale appartient à
+`2B_R`; le facteur deux est sharp.
+
+Normaliser `B_R` en la boule unité centrée en zéro, puis écrire
+`a=m-h`, `b=m+h` et `x=m+q`. L'appartenance de `a,b` à la boule donne
+
+$$\left\Vert m\right\Vert^2+\left\Vert h\right\Vert^2+2\left|m\mathbin{\cdot}h\right|\leq1.$$
+
+La maximalité de `ab` donne `||q-h||,||q+h||<=2||h||`, donc
+
+$$\left\Vert q\right\Vert^2+2\left|q\mathbin{\cdot}h\right|\leq3\left\Vert h\right\Vert^2.$$
+
+Par Cauchy,
+
+$$\left\Vert x\right\Vert\leqleft\Vert m\right\Vert+\sqrt{3}\left\Vert h\right\Vert\leq2.$$
+
+L'égalité est atteinte pour `m` orthogonal à `h`, `||m||=1/2`,
+`||h||=sqrt(3)/2` et `q=3m`. Passer de `3B_R` à `2B_R` divise le plafond de
+cellules par `3,375` et celui de leurs couples par environ `11,39`, sans perdre
+un carrier. Aucune preuve de couverture n'impose par ailleurs
+`eta=Theta(1/s)` : commencer avec `eta=Theta(1)` et mesurer séparément les
+raffinements `MIXED`.
+
+### 5.2 Porte aiguë et sweep
+
 Pour `d=b-a`, `u=x-a`, poser
 
 ```text
