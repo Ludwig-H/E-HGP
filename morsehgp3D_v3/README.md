@@ -28,7 +28,7 @@ doit être déduit de ces probes CPU.
 
 ## Verdict actuel
 
-Le pin logiciel `fe37aa5b17a59c27a4a866b91b259886e808875d` contient quatre avancées
+Le pin logiciel `6e815d28b3e229a0161eb00d6fa0c9a272efac5d` contient quatre avancées
 directement liées à l'idée de support complet, puis plusieurs diagnostics de
 réduction du broad phase WST3/WST4 :
 

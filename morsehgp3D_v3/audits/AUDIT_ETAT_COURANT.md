@@ -8,7 +8,7 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-> **Alerte au pin logiciel `fe37aa5b17a59c27a4a866b91b259886e808875d`.** Les
+> **Alerte au pin logiciel `6e815d28b3e229a0161eb00d6fa0c9a272efac5d`.** Les
 > commits `89774d0`, `e3f1925` et `88a9ba8` ajoutent respectivement
 > `Corner8BallDepth`, un broad phase WST3 et son produit WST4 ; `22d1cb0` en
 > publie la note de coût. `a73161c` corrige ensuite le signe d'acuité par
@@ -98,7 +98,7 @@ Cadre : `phase=exploration_v3_hors_registre`,
 > positivité ; l'autre reçoit `4096` supports « tous bien centrés » dans une
 > fixture qui n'appelle jamais `bien_centre`.
 >
-> Le commit `fe37aa5` ajoute aussi sur `prototype/wst3_probe.cpp`,
+> Le commit `6e815d2` ajoute aussi sur `prototype/wst3_probe.cpp`,
 > SHA-256 `a697ae896240652ec372d7dce3b26f119c7a82971d478312abb9b16ddc6a5c51`,
 > ajoute un histogramme de rang. Il ne change pas `bien_centre`, mais son
 > commentaire sur-affirme la portée : la CDF ne décrit que la clique kNN
@@ -122,7 +122,7 @@ Cadre : `phase=exploration_v3_hors_registre`,
 ## Snapshot
 
 Le dernier commit logiciel stable relu est
-`fe37aa5b17a59c27a4a866b91b259886e808875d`, commit
+`6e815d28b3e229a0161eb00d6fa0c9a272efac5d`, commit
 `le rang moyen est sous-lineaire, le pire ne l'est pas encore`. Il
 absorbe le raccord Midball de `a58d020`, HC et la borne de `c1e2e3b`, Corner8
 de `89774d0`, WST3 de `e3f1925`, WST4 de `88a9ba8`, la correction du signe
@@ -130,7 +130,7 @@ aigu, l'échelle rationnelle, le diagnostic Corner8 postérieur au broad phase,
 le certificat bisigne de `f7ab7bb`, la conservation des couples non séparés,
 les compteurs `Sym2`, le sampler `--masse`, puis l'oracle brut
 `--supports-retenus`, la positivité Cramer de `34cf05d`, sa porte corrigée à
-`08dec609` et l'histogramme de rang de `fe37aa5`. Le worktree était propre avant
+`08dec609` et l'histogramme de rang de `6e815d2`. Le worktree était propre avant
 les présentes écritures documentaires. Aucun logiciel n'a été modifié par
 l'auditeur.
 
@@ -148,7 +148,7 @@ rend encore le juge owner vert par pure surcouverture et publie
 `3 132 900=binom(60,2)^2` tuples candidats. Cela ne reçoit aucune sélectivité
 aval.
 
-Empreintes SHA-256 au commit `fe37aa5` :
+Empreintes SHA-256 au commit `6e815d2` :
 
 - `CMakeLists.txt` :
   `051f0103db6d8bf2ddd3ec600fd70039c3bacacfbcb77308274c597bf12f5642` ;
