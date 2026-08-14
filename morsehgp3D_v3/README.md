@@ -37,6 +37,18 @@ deadline globale. Le noyau qu'elle lancerait garde en outre le P0 des
 identités d'entrée ci-dessous. Aucun nouveau reçu 50k ne doit être
 déduit de ces probes CPU.
 
+La première sonde J0 de `acd792d` reste elle aussi diagnostique. Sur la famille
+intégrée `two_lines,n=10`, elle retourne code zéro avec vingt candidats q2 et
+un rapport `diam_max/dmax=0,007`, alors que son propre brute force en trouve
+quarante-cinq. Porter la coupure à soixante-quatre espacements ne change pas ce
+faux vert. Son owner q3 duplique en outre un triangle aigu isocèle quand deux
+arêtes maximales partagent le même plus petit `PointId`, et aucun juge q3
+n'existe dans `--verifie`. Les onze CTests J0 passent, mais ne couvrent ni ces
+deux P0, ni le shell. Aucun exposant de sortie, chiffre 50k ou SLO ne doit être
+déduit de cette sonde avant conservation de toute la masse d'ancres et
+comparaison des records complets. Le contre-audit reproductible est
+[`audits/AUDIT_WORKTREE_LANE_SOURCE_SCALE_J0_20260814.md`](audits/AUDIT_WORKTREE_LANE_SOURCE_SCALE_J0_20260814.md).
+
 ## Verdict actuel
 
 Historiquement, le pin logiciel `6e815d28b3e229a0161eb00d6fa0c9a272efac5d` contient quatre avancées
@@ -186,7 +198,7 @@ sélection ni l'API n'imposent l'injectivité/disjonction des `PointId`. Le back
 reste donc l'autorité/fallback jusqu'à réception de cette précondition. Cela supprime les
 census répétés par support, pas une sortie réellement lourde.
 
-La source WSPD active suit directement les trois contrats de miniboule : q2
+La source WSPD cible suit directement les trois contrats de miniboule : q2
 garde les paires dont la boule diamétrale a au plus neuf intérieurs ; q3 garde
 les triangles strictement aigus dont la miniboule ambiante en a au plus huit ;
 q4 garde les tétraèdres bien centrés dont la circumsphère en a au plus sept.
@@ -198,6 +210,13 @@ leurs queues, records, caps, continuations et preuves de complétude sont
 disjoints. `PairAnchor3` est créé dans `Lane3`, jamais lu dans la sortie q2 ;
 `Q4Seed3` est créé dans `Lane4`, jamais lu dans la sortie q3. Un préfixe
 ternaire interne à q4 n'est pas un support ni un événement q3.
+
+La sonde J0 actuelle n'implémente pas encore ce fork : elle construit un même
+vecteur `acu`, consommé par q3 avec son bit owner puis décodé par q4. Cela ne
+crée pas de propagation de verdict, mais reste un record inter-lanes interdit
+pour l'architecture. Les producteurs reçus devront posséder séparément
+`Third3/owner3` et `Q4Seed3/primary4` ; seul un calcul géométrique pur et
+immutable peut être mis en cache en commun.
 
 Un J0 de dimensionnement exact doit couvrir toutes les ancres de la
 `NeutralPairPartition`. Le diamètre maximal observé sous un `--dmax` ne prouve

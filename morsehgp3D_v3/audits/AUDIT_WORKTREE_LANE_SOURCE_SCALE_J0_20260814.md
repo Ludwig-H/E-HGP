@@ -10,9 +10,16 @@ Cadre : `phase=exploration_v3_hors_registre`,
 
 Snapshot lu sans modifier le prototype :
 
-- `HEAD=a369452f665cf13480b5d8039d22449e16e9ba57` ;
-- `prototype/lane_source_scale_probe.cpp` non suivi, 547 lignes,
-  SHA-256 `03b5e1a3d1ca31e3f2559dbb4418d37a86632f60078ed333d7aa3b4ef618c52f`.
+- blob initial ensuite commis au
+  `acd792d79f920226182761c8a6c653028fd8c729`, 547 lignes, SHA-256
+  `03b5e1a3d1ca31e3f2559dbb4418d37a86632f60078ed333d7aa3b4ef618c52f` ;
+- relu sous `HEAD=01954807e38a931e5c874e701da6367ff89384d6` après l'ajout de
+  `--dmax-espacements`, SHA-256
+  `eaa37010a4cb5b01911e601fe1053d324c33fb4c865d84b51d59f34996b55dfe`.
+
+Le second delta ne répare aucune réfutation ci-dessous. Même à la borne
+`--dmax-espacements=64`, la fixture `two_lines` rend encore le faux vert avec
+`q2=20` contre `45` au brute force.
 
 GCP n'a pas été utilisé. Ce contre-audit ne reçoit aucun logiciel, aucun
 chiffre J0 et aucun SLO. Il n'autorise aucune structure de Delaunay, d'aucun
@@ -52,17 +59,26 @@ Les trois fuseaux stricts implémentent les bonnes inégalités. Avec
 `smax-1`, `smax-2`, `smax-3`, soit `10/9/8` sous `smax=11`. Les égalités
 restent shell et ne créditent aucun intérieur.
 
-La structure de contrôle ne forme pas une cascade de verdicts. `a2`, `a3` et
-`a4` sont calculés séparément ; q4 ne lit pas le verdict q3, et q3 ne lit pas le
-verdict q2. La liste de points aigus construite dans la boucle q4 est un préfixe
-géométrique interne à cette lane, pas une sortie q3. Cette propriété doit être
-conservée.
+Les bits `a2`, `a3` et `a4` sont calculés séparément : q4 ne lit pas le verdict
+q3, et q3 ne lit pas le verdict q2. Le prototype ne réalise toutefois pas
+encore les trois producteurs autonomes. Il construit un unique vecteur `acu`
+avant les deux blocs, `Lane3` le consomme en interprétant le signe comme owner
+q3, puis `Lane4` consomme le même record et en décode le signe. C'est une sonde
+monolithique, pas le fork contractuel. Pour devenir une architecture, q3 doit
+posséder son `Third3/owner3` et q4 son `Q4Seed3/primary4`, sans record, fate,
+cap ou provenance partagé. Une éventuelle mutualisation ne peut porter que sur
+un résultat géométrique pur, immutable et sans sémantique de lane.
 
 Sur `uniform,n=60,coord=1000,dmax=5000,smax=11`, la compilation autonome et le
 rejeu borné donnent `brute_q2=1038`, `ancre_q2=1038`, `brute_q4=3283` et
 `ancre_q4=3283`. C'est une vérification utile de l'énumération sur cette entrée,
 mais seulement en cardinalité et avec les mêmes routines `bien_centre` et
 `interieur_strict` des deux côtés.
+
+Après configuration et build Release, les onze CTests
+`^mhgp3v_lane_source_` du commit passent en `8,82 s`. Ce vert n'exerce ni
+`two_lines`, ni l'owner q3, ni le shell : les P0 sont donc hors couverture, pas
+réfutés par la suite.
 
 ## 2. P0 — la sentinelle de coupure rend un faux vert
 
@@ -153,7 +169,9 @@ un oracle indépendant pour q2, q3 et q4.
 
 Le parseur `atoll` accepte des suffixes : `--points=20junk` exécute vingt
 points et retourne zéro. `--coord=70000` est également accepté et exécuté,
-alors que le profil annoncé est u16. Les options `dmax`, `threads`, `coord` et
+alors que le profil annoncé est u16. Le nouvel `atof` accepte notamment `nan` :
+la comparaison de domaine est alors fausse et la conversion ultérieure vers
+`i64` sort du domaine défini du jalon. Les options `dmax`, `threads`, `coord` et
 leurs produits n'ont pas de caps industriels : `dmax*dmax` peut déborder,
 `threads` peut provoquer une allocation non bornée et le cast vers `int`, la
 grille dense alloue `dim_x*dim_y*dim_z`, tandis que la table d'offsets alloue
@@ -184,7 +202,8 @@ encore moins le contrat d'une seconde sur G4.
 4. Recevoir les préconditions u16, le parseur, les caps, continuations,
    compteurs de visites, octets et HWM.
 5. Remplacer la coupure empirique par la partition WSPD neutre complète et les
-   certificats propres aux trois producteurs autonomes.
+   certificats propres aux trois producteurs autonomes ; séparer aussi le
+   vecteur `acu` partagé en sources et provenances possédées par leur lane.
 
 Avant ces portes CPU, lancer cette sonde à 50 000 sur G4 ne produirait qu'une
 mesure tronquée non interprétable. GCP non utilisé.

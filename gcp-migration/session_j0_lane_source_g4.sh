@@ -187,8 +187,7 @@ gcloud compute scp "${TAR}" "${GCP_INSTANCE_NAME}:/tmp/v3.tgz" \
   tar xzf /tmp/v3.tgz
   echo "coeurs=$(nproc)"; cmake --version | head -1; g++ --version | head -1
   cmake -S morsehgp3D_v3 -B build -DCMAKE_BUILD_TYPE=Release >/dev/null
-  cmake --build build --target mhgp3v_lane_source_scale_probe \\
-        mhgp3v_q4seed_axis_topr4_probe -j48
+  cmake --build build --target mhgp3v_lane_source_scale_probe mhgp3v_q4seed_axis_topr4_probe -j48
   sha256sum build/mhgp3v_lane_source_scale_probe build/mhgp3v_q4seed_axis_topr4_probe
 ' 2>&1 | tee -a "${LOG}"
 

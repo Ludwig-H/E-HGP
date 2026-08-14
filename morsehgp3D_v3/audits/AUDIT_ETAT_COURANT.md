@@ -8,13 +8,14 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-> **Verdict live au `HEAD=a369452f665cf13480b5d8039d22449e16e9ba57`.**
+> **Verdict live au `HEAD=01954807e38a931e5c874e701da6367ff89384d6`.**
 > Le pin noyau `a369452` porte `Q4SeedAxisTopR4`, son probe, 39 CTests déclarés,
 > les vrais IDs de census, la capacité 163, les comptes requis et les fates de
 > plateau. Il refuse aussi tout replay après `MORT_GAP` et tout apex dont le
-> compte retenu atteint `r4`. Le `HEAD` ajoute un plan de route 50k et les
-> réponses Q15--Q17, pas une mesure. Le worktree
-> courant ne contient que les présentes corrections documentaires d'audit ;
+> compte retenu atteint `r4`. `acd792d` ajoute la première sonde J0 et
+> `0195480` une option de coupure et une recette de session ; aucun de ces deux
+> commits n'est une mesure reçue. Le worktree courant ne contient que les
+> présentes corrections documentaires d'audit ;
 > aucune mesure G4 nouvelle n'entre dans le verdict.
 > Q14 est fermée contractuellement : aucune structure de Delaunay n'est
 > autorisée, y compris d'ordre un, comme source, squelette, filtre ou census.
@@ -56,6 +57,19 @@ Cadre : `phase=exploration_v3_hors_registre`,
 > variable. Réponse et preuves :
 > [`REPONSE_AUDIT_Q15_Q17_PROFIL_J0_AXIS_20260814.md`](REPONSE_AUDIT_Q15_Q17_PROFIL_J0_AXIS_20260814.md).
 >
+> Le prototype `lane_source_scale_probe` confirme certaines identités de
+> fuseau et conserve des bits de verdict séparés, mais ne reçoit pas J0. Sa
+> famille intégrée `two_lines,n=10` retourne code zéro avec `q2=20` et
+> `diam_max/dmax=0,007`, tandis que son propre brute force trouve `45` q2.
+> La borne `--dmax-espacements=64` garde le même faux vert. L'owner q3 compare
+> seulement le plus petit endpoint d'arêtes maximales égales et duplique un
+> triangle aigu isocèle ; aucun juge q3 ne le voit. Le vecteur `acu` est en
+> outre un record matériel partagé entre q3 et q4, contraire au fork autonome
+> s'il devenait architecture. Les `11/11` CTests ciblés passent en `8,82 s`,
+> mais n'exercent aucune de ces réfutations, ni `I_B/U_B` ou le shell.
+> Contre-audit :
+> [`AUDIT_WORKTREE_LANE_SOURCE_SCALE_J0_20260814.md`](AUDIT_WORKTREE_LANE_SOURCE_SCALE_J0_20260814.md).
+>
 > La recette `session_axis_top8_g4.sh` de `840a2e2` ne devait pas être lancée :
 > quand son horodatage de génération est vide, son trap appelle un arrêt non
 > versionné susceptible de toucher une session préexistante ; ses 76 runs
@@ -80,7 +94,8 @@ Cadre : `phase=exploration_v3_hors_registre`,
 > campagne scanline `Plateau`, et non par la fixture ties qui ne contient aucun
 > `B=0,A=0`. Le noyau ponctuel `Lane4` reste un oracle borné ; les trois
 > producteurs WSPD autonomes ne sont pas implémentés et aucune complexité 50k
-> n'est reçue.
+> n'est reçue. La nouvelle recette J0 n'a pas été exécutée par l'audit ; GCP
+> n'a pas été utilisé.
 
 > **Alerte au pin logiciel `6e815d28b3e229a0161eb00d6fa0c9a272efac5d`.** Les
 > commits `89774d0`, `e3f1925` et `88a9ba8` ajoutent respectivement
