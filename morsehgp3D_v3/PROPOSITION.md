@@ -545,13 +545,88 @@ au rectangle. Les poids fixes vérifiés donnent `ALL`; leur échec, une marge
 nulle ou un dénominateur au-delà du cap donnent `MIXED/UNKNOWN`. La rationalité
 découle de la marge stricte par densité, sans borne universelle de dénominateur.
 
+La contre-fixture cartésienne
+`z1=(9,1,0)`, `z2=(2,2,0)`,
+`A={(4,0,0),(2,1,0)}` et `B={(0,10,0),(6,9,0)}` rend ce swap concret. Chaque
+paire possède un poids q4 valide, mais `a1,b2` impose approximativement
+`0.290<lambda(z1)<0.366`, tandis que `a2,b1` impose
+`0<=lambda(z1)<0.058`. Aucun poids commun ne ferme donc le produit. Scinder
+est une partie mathématique de l'algorithme, pas une faiblesse du proposer.
+
 Cette porte paire-level est strictement plus adaptée que le LP sur tout le
 plan. Un échec du LP global ne diagnostique pas une pénurie de témoins sur
 `K_q`. Le hot path propose et valide de petits groupes ; l'arbre de suppressions
 reste un oracle. Sur un rectangle non prouvé uniformément, le résultat reste
 `MIXED`.
 
-### 6.3 `SOC64` et `CORNER512`
+### 6.3 Base primale exacte et profondeur Jung
+
+Le dual sert au hot path ; une autorité indépendante se formule directement
+comme une projection convexe en dimension deux. Pour une paire fixe, poser
+`d=b-a`, `D=||d||^2`, `u_z=a+b-2z` et `s=2w`. Les mauvais centres, où `z`
+n'est pas strictement intérieur, vérifient :
+
+```text
+s dot d = 0
+2*s dot u_z >= D-||u_z||^2
+q3 : 3*||s||^2 <= D
+q4 : 2*||s||^2 <= D
+```
+
+Pour un groupe `G`, soit `P_G` l'intersection des demi-plans mauvais dans le
+plan orthogonal à `d`. Si `P_G` est vide, `G` couvre le disque. Sinon poser
+`r_G^2=min_{s in P_G}||s||^2`. Le reçu exact est :
+
+```text
+q3 : 3*r_G^2 > D
+q4 : 2*r_G^2 > D
+```
+
+L'inégalité est stricte : l'égalité fournit un centre de shell et ne crédite
+aucun intérieur. En dimension deux, le minimiseur est nécessairement l'origine,
+la projection de l'origine sur une frontière, ou l'intersection de deux
+frontières. Pour une base de trois IDs au plus, le vérificateur énumère donc un
+nombre constant de candidats, contrôle toutes les inégalités en entier et ne
+partage aucune formule `A/P/R` avec le sujet. Pour un pool plus grand, un
+algorithme LP-type trouve une base active ; le hot path peut seulement proposer
+une base, car une base vérifiée suffit à fermer.
+
+Une écriture entière évite de construire une base orthonormée du plan. Poser
+`v_z=2*(D*u_z-(u_z dot d)*d)` et
+`c_z=D*(D-||u_z||^2)`. Comme `s dot d=0`, le mauvais demi-plan devient
+`s dot v_z>=c_z`. Une projection sur un bord a
+`r^2=c_z^2/||v_z||^2`; une intersection de deux bords se résout par leur Gram
+`||v_i||^2||v_j||^2-(v_i dot v_j)^2`. Sous u16, les comparaisons singleton
+atteignent environ 142 bits et les intersections environ 250 bits. L'oracle
+primal emploie donc GMP/i256 ; le dual `A/P/R` i128 reste le vérificateur GPU
+plus compact. Cette indépendance arithmétique est volontaire.
+
+La profondeur exacte utilise ensuite un DAG de suppressions. Écrire
+`Depth(P,0)=true`. Pour `h>0`, trouver une base `G`, de taille au plus trois,
+qui couvre le disque, puis vérifier :
+
+```text
+Depth(P,h) = AND over z in G of Depth(P minus {z},h-1)
+```
+
+La récurrence est un iff si `G` est réellement couvrant. Au centre considéré,
+au moins un `z` de `G` est intérieur ; le fils qui retire cet ID fournit les
+`h-1` autres intérieurs distincts. Le nombre maximal d'appels de recherche de
+base est `(3^h-1)/2` : `3280` pour q4 et `9841` pour q3. C'est un oracle borné,
+pas le hot path par paire.
+
+Le fast path GPU cherche plutôt huit ou neuf groupes couvrants disjoints, ce
+qui donne immédiatement la même profondeur avec huit ou neuf reçus. S'il
+échoue, le DAG de suppressions peut poursuivre sous budget ; sinon la tâche
+reste `MIXED`. Un `ProofNode` stocke au plus trois `PointId`, leurs poids ou le
+reçu primal, trois handles enfants et le niveau. Les files SoA exécutent
+`propose -> verify -> count/scan/fill`; un cap produit `PENDING`, jamais
+`CLOSED`. Sur un rectangle CK, chaque nœud propose au représentant puis vérifie
+uniformément ses polynômes ; un échec scinde `A/B`. La continuité d'une marge
+stricte garantit qu'un reçu ponctuel reste valable sur un voisinage assez fin,
+sans jamais promettre un poids commun sur une tuile grossière.
+
+### 6.4 `SOC64` et `CORNER512`
 
 Pour `e=z-a`, `t=b-z`, `H=e dot t`, `E=||e||^2`, `X=||t||^2` :
 
@@ -618,7 +693,7 @@ le booléen `retour>=q4`, mais l'API expose sinon `UNKNOWN_BELOW_FLOOR`. La
 fixture `A={(0,0,0)}`, `C={(1,1,1)}`, `B=[0,4]x{1}x{1}` distingue q3 au centre
 de `NONE` au minimum réel.
 
-### 6.4 Cages de quatre à six sites
+### 6.5 Cages de quatre à six sites
 
 Une cage ancre-globale réduite est une positive basis inclusion-minimale de
 dimension trois et peut contenir quatre, cinq ou six sites. Un constructeur
@@ -651,7 +726,7 @@ u16, alors qu'une comparaison naïve de deux rayons rationnels peut approcher
 une contrainte agrandit la cellule et peut perdre une fermeture. Aucune loi
 globale de coût ne découle de la seule existence de cages.
 
-### 6.5 LP comme diagnostic de cause
+### 6.6 LP comme diagnostic de cause
 
 Avant d'investir dans un constructeur de cages GPU ou d'ajouter de la
 profondeur, appliquer le LP projectif sur un échantillon déterministe du même
@@ -671,7 +746,7 @@ multiprécision reçoit sa propre preuve de largeur : `i128` suffit au replay
 d'une forme, pas à toutes les comparaisons de valeurs rationnelles du
 constructeur LP.
 
-### 6.6 `OriginOnionDepth-h` collectif
+### 6.7 `OriginOnionDepth-h` collectif
 
 Inverser une banque autour de l'ancre par
 `p_z=(z-a)/||z-a||^2`. Poser `P_0=P`, puis retirer à chaque couche un ID
@@ -693,7 +768,7 @@ capée ou IDs non authentifiés donnent `UNKNOWN`. `h=8/9/10` ferme
 respectivement q4/q3/q2. Ce certificat crédite collectivement des BNodes, mais
 reste universel.
 
-### 6.7 Limite commune des certificats universels
+### 6.8 Limite commune des certificats universels
 
 Pour `A_i=(i,0,0)` et `B_j=(0,j,65535)`, avec
 `1<=i,j<=25000`, chaque paire croisée possède une sphère vide admissible dans

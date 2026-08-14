@@ -258,6 +258,24 @@ mais ne préflighte pas encore `W`, ne juge pas indépendamment les groupes
 `k=2/3` et ne constitue ni un `BlockJungDualTile` uniforme ni une primitive
 CUDA reçue.
 
+Le raccord live construit et passe `11/11` CTests JungDual. Ces verts reçoivent
+la transcription singleton, cinq mutants et une ablation non vide ; l'en-tête
+annonce un juge par sphères construites qui n'existe pas encore dans le probe,
+et l'ablation porte sur toutes les paires plutôt que sur `OPEN_FINAL` q4.
+
+La dissection live à `eight_clusters,n=1500` trouve huit témoins singleton
+exacts pour `89,5 %` de 200 PairId ouverts tirés par masse, contre `26,5 %` de
+200 rectangles hachés. Ce signal favorise les microtiles et les preuves
+uniformes, mais les deux taux ne se soustraient pas : PairId mass-weighted et
+rectangles non pondérés ne sont ni appariés ni munis d'un intervalle, et le
+second test n'exerce aucun groupe Jung.
+
+L'ordre de descente live `--ordre-proche` réduit le pending sur ce même nuage
+aux petits budgets, mais à finalité `window=256/512` il rend le même
+`E4=1071162` que l'ordre Morton. Il compresse donc le budget du certificateur
+central ; il ne réduit pas son résiduel géométrique et ne remplace ni Jung
+collectif ni `BlockBallDepth8`.
+
 La primitive entière associée ne décide pas elle-même l'existence de ces
 poids : elle vérifie un vecteur rationnel fourni. Son contrat exige `D>0`, de
 un à trois IDs authentifiés, des poids positifs, une somme capée et le profil
@@ -265,6 +283,16 @@ u16 ; tout échec du proposant reste `UNKNOWN`. Le wrapper, et non le tableau de
 coordonnées, porte la disjonction des groupes. Une réception `k>1` exige un
 juge exact de la faisabilité sur le disque continu ; un accord singleton avec
 `SOC64` ou quelques centres tirés ne suffit pas.
+
+Ce juge reste de taille constante par base : avec `u_z=a+b-2z` et `s=2w`, les
+centres non couverts satisfont `2*s dot u_z>=D-||u_z||^2` dans le plan
+`s dot (b-a)=0`. Le point de norme minimale de trois demi-plans au plus est
+l'origine, une projection sur un bord ou l'intersection de deux bords. Le test
+strict est `3*r^2>D` pour q3 et `2*r^2>D` pour q4. Une base couvrante `G`
+certifie ensuite récursivement `Depth(P,h)` par tous les
+`Depth(P minus {z},h-1)`, `z` dans `G`; le DAG porte au plus trois enfants par
+niveau. Les groupes disjoints restent le fast path, cette récurrence le juge
+borné.
 
 Après une face aiguë, une seconde porte collective travaille en dimension un.
 Sur le segment de centres `J_f` compatible avec `K_4(ab)`, chaque témoin porte

@@ -654,6 +654,70 @@ raffinement à 36 % : tous nibblaient un résiduel dont l'essentiel est artefact
 >   descente par proximité au milieu plutôt que par la clé de Morton ? C'est un
 >   changement local, mesurable, et il ne touche à aucune sémantique.
 
+## 6 quater. La Question 8 est tranchee par la mesure, et pas dans le sens que je croyais
+
+J'ai implemente la reponse que je proposais moi-meme — reordonner la descente
+`Central-VWave` par proximite au milieu `m_0` au lieu de suivre la cle de
+Morton. **Effet mesure : rigoureusement nul.** Douze configurations, trois
+familles, deux tailles, avec et sans : masses ouvertes identiques au bit pres.
+
+La raison est simple et je ne l'avais pas verifiee avant de proposer :
+`tronques=0` et `pending=0` partout. **Le budget d'expansions ne borne
+jamais.** La descente atteint toutes ses feuilles ; l'ordre dans lequel elle
+les atteint ne peut donc rien changer. Mon « un tiers perdu par le budget »
+etait une inference, pas une mesure, et elle est fausse.
+
+### La vraie cause, mesuree sur les feuilles
+
+Puisque la descente atteint les feuilles, le credit doit finir par etre pris
+point par point. J'ai donc compare, sur les seules feuilles temoins et pour q4,
+**trois verdicts sur le meme objet** :
+
+| famille, `n=1500` | boule inscrite `56/209` | `SOC64` | universalite exacte `(g,Q)` |
+|---|---:|---:|---:|
+| `uniform` | 26,61 % | 40,58 % | **42,14 %** |
+| `eight_clusters` | 27,47 % | 42,74 % | **44,45 %** |
+
+La perte n'est ni le budget, ni la granularite du temoin : **c'est le predicat
+lui-meme**. `CentralBall209` est la boule INSCRITE dans le spindle, donc une
+suffisance strictement plus faible, et elle ne capte que les deux tiers de ce
+qui est atteignable sur une feuille.
+
+Et `SOC64` capte `42,74/44,45 = 96,2 %` des feuilles reellement universelles.
+Comme il est sound, ses succes sont inclus dans les exactes : **il ne reste
+donc presque rien a gagner d'un meilleur predicat ponctuel.** C'est un resultat
+negatif utile — il ferme la recherche d'un troisieme certificat de boite.
+
+### Ce que cela laisse comme explication
+
+Le juge exact dit que `34 %` des terminaux ouverts possedent au moins huit
+temoins universels, alors que le shadow `SOC64` n'en fait basculer que `7 %`.
+L'ecart s'explique par une seule chose : **la distribution est serree contre le
+seuil**. La moyenne mesuree est `9,30` temoins universels par terminal ouvert,
+pour un `need[2]` de huit. Perdre les `3,8 %` que `SOC64` n'attrape pas fait
+passer sous le seuil une grande partie des terminaux qui n'avaient que huit ou
+neuf temoins.
+
+Autrement dit : le certificat n'est pas loin d'etre optimal, mais `need=8` a
+`smax=11` tombe au milieu de la distribution des temoins disponibles. C'est une
+propriete du CONTRAT, pas du certificat.
+
+> **Question 9, qui remplace ma Question 8.** Si le predicat ponctuel est a
+> `96 %` de son plafond et que le budget ne borne pas, alors le residuel q4 ne
+> se reduira plus par un meilleur certificat de boite. Deux leviers restent, et
+> je ne sais pas lequel vous jugez recevable :
+>
+> - **la granularite** : descendre au microtile/paire, ou chaque paire dispose
+>   de dizaines de temoins qui lui sont propres — mais on perd la factorisation
+>   par rectangle qui rend le front lineaire ;
+> - **le seuil** : `need[q] = smax + 1 - q` place q4 a huit exactement la ou la
+>   distribution des temoins universels a sa masse. Un `smax` plus petit
+>   changerait l'objet, donc c'est une question de specification et non
+>   d'implementation — mais elle merite d'etre posee explicitement plutot que
+>   subie.
+>
+> Y a-t-il un troisieme levier que je ne vois pas ?
+
 ## 7. Ce que je propose de faire ensuite, et ce que j'attends de vous
 
 Ma lecture, en une phrase : **`SOC64` est reçu comme un prune exact et bon

@@ -11,38 +11,40 @@ Cadre : `phase=exploration_v3_hors_registre`,
 ## Snapshot
 
 Le pin relu est
-`HEAD=82687530bb0ccfb0b27b08951006acf5860d3447`, commit
-`la marge du rejet est de deux ordres de grandeur, et elle s'ouvre avec n`. Il
-reçoit au HEAD le replay SOC combiné/capé, `CarrierApexEstimator-v2`, le
-diagnostic `--rang`, l'énumérateur `q4_brute_oracle` et leurs portes. Il ne
-reçoit toujours ni source CK--WST, ni profondeur q4 factorisée, ni payload
-complet. Le titre du commit est un claim à auditer, pas un verdict reçu.
+`HEAD=8f47835c8b6c798e0737632dc653153a887f846b`, commit
+`la perte est disseque : ni SOC64 ni le raffinement ne visaient la bonne cible`.
+Il reçoit au HEAD le replay SOC combiné/capé, son juge direct de flips,
+`CarrierApexEstimator-v2`, le diagnostic de profondeur, l'énumérateur q4 et le
+prototype `JungDual` avec onze portes. Il ne reçoit toujours ni source CK--WST,
+ni certificat Jung uniforme de rectangle, ni profondeur q4 factorisée, ni
+payload complet. Le titre du commit est un claim à auditer, pas un verdict
+reçu.
 
 Empreintes SHA-256 au HEAD :
 
 - `CMakeLists.txt` :
-  `1541965b1704c022b98a87c7fbb20b24814fc9e26fbff5c6f7ab12da8ac7e7b3` ;
+  `87b3e5d30c25b432d2631ed3572c6e462438c007de0326b5ba926378c819879b` ;
 - `prototype/q4_brute_oracle.cpp` :
-  `f7026a8d67d7eed6a5b0804db6bb7a3d6bbc680918344af40ec8ce9cea394555` ;
+  `0a410d9ffa22e117f660fdeac88227cc65a5417f97e395fa6332111a54d823cf` ;
 - `prototype/soc64_rect.hpp` :
   `bbd1de16f4884d98ed2033f6c072ef6245cff6a8e90d95d5283f6e2bbe9ad902` ;
 - `prototype/soc64_probe.cpp` :
   `d442b59279f345d11337b86993b8b620774eb236815a8f77a227cbf8edc4944f` ;
 - `prototype/wspd_wavefront_probe.cpp` :
-  `fe146f28d962750facc92f0597246f995c044662188d99a5b687a72bf70486ce` ;
+  `9a931a6a01be98ab3d8b0037c9360ef7f2e3d203d6d55b9292251c876e00a7bb` ;
+- `prototype/jung_dual.hpp` :
+  `1b9dffa1767988b812e1da360775858d023383112fcdde6e905d8ac3b2b46001` ;
+- `prototype/jung_dual_probe.cpp` :
+  `05c6199a16bcfe1399aa600b4b7089b15b2b53efcb9707ea4e3c6368d9e71386` ;
 - `prototype/cloud_families.hpp` :
   `1f9089ba5972bf76aece6d899bacd8682341f394833c5d06e46ea2a921efad57`.
 
-Le worktree live n'est pas le HEAD : Claude y modifie
-`prototype/wspd_wavefront_probe.cpp` et `prototype/q4_brute_oracle.cpp`, et y
-ajoute `prototype/jung_dual.hpp` ainsi que `prototype/jung_dual_probe.cpp`.
-Leurs SHA-256 observés pendant ce contre-audit sont respectivement
-`1ad2e4da568a44880f85bdbc9ba57a4792cd92ce96f5ed2730765a19974ec125`,
-`0a410d9ffa22e117f660fdeac88227cc65a5417f97e395fa6332111a54d823cf`,
-`1b9dffa1767988b812e1da360775858d023383112fcdde6e905d8ac3b2b46001` et
-`a5c256e6d2474312bc41c88124f63a108913615759304bbece0e5ccceab6eb36`.
-Ces deltas concurrents ne sont pas attribués à l'auditeur. Ses écritures restent
-limitées à `README.md`, `PROPOSITION.md` et `audits/`. GCP non utilisé.
+Le worktree live ajoute aussi un delta concurrent de Claude dans
+`prototype/wspd_wavefront_probe.cpp`, SHA-256
+`a5f9868166c5fe12d303e0b347b9138eb8e0143090386ced8ded538443ff0d4b`,
+pour l'option `--ordre-proche`. Il n'est pas attribué à l'auditeur. Les
+écritures de celui-ci restent limitées à `README.md`, `PROPOSITION.md` et
+`audits/`; aucun fichier logiciel n'est modifié par lui. GCP non utilisé.
 
 ## Verdict
 
@@ -218,12 +220,14 @@ phase exigerait une nouvelle preuve de couverture ; une `BallKey` est aval et
 serait un owner de génération circulaire.
 
 Le sampler v2 améliore v1 : il exclut `PENDING` et ne censure plus les grosses
-lentilles. Il n'est toujours pas reçu comme estimateur : le multiply-high n'est
-uniforme exact que lorsque la taille divise `2^64`, `2 sigma` n'est pas un
-intervalle certifié, le champ `doublons` ne compte que des répétitions
-consécutives et le contrôle ne compare pas le décodeur rang--`PairId` à une
-vérité indépendante. Avec `K=20000,N=6917`, il imprime `doublons=3` alors que
-le pigeonhole en impose au moins `13083`. La vue combinée SOC reste absente.
+lentilles. Le HEAD a remplacé la fausse barre `2 sigma` par une demi-largeur
+Hoeffding correcte **conditionnellement** à des tirages indépendants et
+uniformes. Cette loi n'est pas reçue : multiply-high reste sans rejet exact,
+les deux streams SplitMix à seed fixe n'ont pas de contrat d'indépendance et le
+delta n'est pas réparti sur les décisions simultanées. `W4` n'a pas d'intervalle
+propre. Le champ est honnêtement renommé `repetitions_consecutives`, mais le
+contrôle direct ne compare toujours pas le décodeur rang--`PairId` à un mode
+exhaustif déterministe. La vue combinée SOC reste absente.
 
 `--rang` peut sortir code zéro sans `--porteurs` et sans aucune ligne rang. Sur
 `two_lines,n=40`, il peut aussi juger zéro bien-centré puis réussir. Son taux
@@ -259,6 +263,15 @@ boule contenant les endpoints est connue ; elle réduit les cellules, pas la
 masse réelle. Une grande masse logique peut tenir dans peu de blocs, mais elle
 n'est utile que si le consommateur de profondeur reste lui-même factorisé.
 
+La dissection `n=1500` trouve huit témoins singleton exacts pour `89,5 %` de
+200 PairId q4 ouverts tirés par masse, contre `26,5 %` de 200 rectangles hachés.
+Elle révèle du potentiel pairwise, sans mesurer la perte causale : les deux
+échantillons ne sont ni appariés ni pondérés dans la même unité, et le second
+n'exerce aucun groupe Jung. L'option live `--ordre-proche` réduit fortement le
+pending aux fenêtres 32--128, mais à finalité 256/512 le résiduel reste exactement
+`E4=1071162` dans les deux ordres. C'est une compression de budget du
+certificateur central, pas une réduction M4.
+
 Réponses aux six questions, preuves, contre-fixtures et portes :
 [`AUDIT_REPONSE_M4_PORTEURS_AIGUS_4515A8B_20260814.md`](AUDIT_REPONSE_M4_PORTEURS_AIGUS_4515A8B_20260814.md).
 Le contre-audit du sampler v2, du brute-force, la réponse entière à la question
@@ -281,10 +294,11 @@ en-tête : il compare seulement `k=1` à `(g,Q)`, puis essaie sept pondérations
 ad hoc dans une ablation. Il ne relie ses paires ni aux owners, ni au résiduel
 CK--WST. Le header n'impose pas `sum(weights)<=65535`, additionne la somme en
 `int64` signé et ne porte aucun `PointId`; le wrapper futur doit authentifier
-les IDs et la disjonction des groupes. Le mutant étroit déclenche réellement
-un overflow signé sous UBSan, le mutant d'égalité survit au random faute de
-fixture et `ignore-weights` est invisible au seul juge singleton. Enfin,
-`--echantillon=0` et `--groupes=0` réussissent par vacuité.
+les IDs et la disjonction des groupes. Le delta live grave l'égalité q4 et tue
+`ignore-weights` par deux appels au même prédicat avec des poids différents ;
+cela couvre les mutants sans juger la géométrie collective. Le mutant étroit
+déclenche encore un overflow signé sous UBSan. Enfin, `--echantillon=0` et
+`--groupes=0` réussissent par vacuité.
 
 La réception exige donc un vérificateur nommé par sa vraie sémantique
 `verify_dual_weights_lane`, caps avant calcul, fixtures exactes pour chaque
@@ -292,6 +306,15 @@ frontière, juge rationnel du disque continu à `k>1`, invariant pairwise et
 mutants sans comportement indéfini. Les gains live `23/256` sur huit amas,
 `18/256` uniforme, `5/256` terrain et `0/256` deux-droites restent des
 diagnostics de paires arbitraires, pas un gain de la source CK--WST.
+
+Le verrou mathématique du juge est levé. Dans le plan `s dot (b-a)=0`, chaque
+témoin mauvais est un demi-plan
+`2*s dot (a+b-2z)>=D-||a+b-2z||^2`. Le point de norme minimale d'une base de
+trois demi-plans est parmi l'origine, les projections sur un bord et les
+intersections de deux bords. Comparer strictement `3*r^2>D` ou `2*r^2>D`
+certifie q3/q4. Une base couvrante alimente ensuite le DAG exact
+`Depth(P,h)=AND_z Depth(P minus {z},h-1)`. Les groupes disjoints sont le fast
+path GPU ; ce DAG borné et le split de rectangle sont l'autorité/fallback.
 
 ## SOC64 : primitive exacte, rentabilité toujours ouverte
 
@@ -388,9 +411,10 @@ Le prototype live `JungDual` code correctement la forme entière ponctuelle
 `A/P/R` et ses seuils q3/q4 sous u16 et `sum w<=65535`. Il n'est pas reçu : la
 somme des poids n'est pas préflightée, le commentaire inverse le minimax, les
 cas collectifs `k=2/3` n'ont pas de juge géométrique indépendant, les paramètres
-zéro rendent l'ablation vacuaire et le mutant `ignore-weights` est invisible au
-selftest singleton. Son succès représente une paire ponctuelle, jamais encore
-un rectangle CK uniforme ni un chemin device.
+zéro rendent l'ablation vacuaire. Le delta live tue désormais `ignore-weights`
+par deux appels pondérés au même prédicat, sans juger la couverture. Son succès
+représente une paire ponctuelle, jamais encore un rectangle CK uniforme ni un
+chemin device.
 
 Le contre-audit détaillé corrige aussi les anciennes confusions entre q2 et q4,
 cutoff kNN, taux empirique et borne structurelle.
@@ -405,11 +429,12 @@ fixtures centre_cell arité 3/4 + mutant cascade : 3/3
 SOC64 isolé : 16/16 ; WSPD--SOC intégré : 5/5, oracle d'union incomplet
 WSPD--SOC/porteurs/two_lines/cap au HEAD : 17/17 en 33,18 s
 q4_brute au HEAD : 5/5 en 2,40 s, prédicats et shell non indépendants
-worktree WSPD--SOC/porteurs/two_lines/cap/q4 : 21/22 en 31,61 s ; regex
-  `doublons` périmée après renommage `repetitions_consecutives`
+worktree SOC/WSPD/porteurs/two_lines/q4/JungDual : 49/49 en 23,44 s
+dissection de perte live : 1/1 en 0,80 s, populations non appariées
 flip direct cap 1000 : accord=OUI, juges=47, sautes=3, faux=0 (statut faux)
 mutant somme cap complet : code 4, juges=168, sautes=0, faux=25
 JungDual UBSan étroit : overflow signé à jung_dual.hpp:157
+JungDual live : 11/11 verts en 0,24 s, juge collectif et OPEN_FINAL absents
 --rang=10 sans --porteurs : code 0, aucune ligne rang
 two_lines n=40 avec rang : code 0, bien_centres_juges=0
 suite complète : interrompue après 28/734 terminés, tous verts

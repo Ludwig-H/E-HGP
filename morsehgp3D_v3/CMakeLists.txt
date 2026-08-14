@@ -4701,3 +4701,41 @@ add_test(NAME mhgp3v_dissection_perte_amas
           --profondeur-rect=200 --rect-stride=307 --porteurs=200 --profondeur-exacte)
 set_tests_properties(mhgp3v_dissection_perte_amas PROPERTIES
   PASS_REGULAR_EXPRESSION "profondeur_exacte q4 : paires_jugees=200 .* fermables_par_certificat_exact=[0-9]+")
+
+# ---------------------------------------------------------------------------
+# OU LE CREDIT SE PERD-IL ? LE DIAGNOSTIC DE FEUILLE.
+#
+# La descente n'est PAS bornee par le budget : `tronques=0` et `pending=0`
+# partout, donc elle atteint toutes ses feuilles. Reordonner la descente par
+# proximite au milieu (`--ordre-proche`) ne change RIEN — douze configurations,
+# masses identiques au bit pres. L'hypothese du budget est donc refutee.
+#
+# La cause est le PREDICAT. Sur les seules feuilles temoins et pour q4, trois
+# verdicts sont compares sur le meme objet : la boule inscrite `56/209`
+# actuellement branchee, le certificat correle `SOC64`, et l'universalite
+# exacte `(g,Q)` point par point. La boule inscrite ne capte que les deux tiers
+# de ce qui est atteignable ; `SOC64` en capte `96 %`.
+#
+# Ce test grave les trois taux ensemble : leur ORDRE est ce qui compte, et il
+# est structurel — `central <= soc64 <= exact`, la premiere inegalite etant
+# large et la seconde serree.
+add_test(NAME mhgp3v_diag_feuille_amas
+  COMMAND mhgp3v_wspd_wavefront_probe --family=eight_clusters --points=1500
+          --sep-euclid=8/1 --tight --vwave --window=512 --window-ledger
+          --diag-feuille=200000)
+set_tests_properties(mhgp3v_diag_feuille_amas PROPERTIES
+  PASS_REGULAR_EXPRESSION "feuilles q4 : diagnostiquees=200000 . central_209=54931 .27.47.. soc64=85481 .42.74.. exact_gq=88892 .44.45..")
+add_test(NAME mhgp3v_diag_feuille_uniform
+  COMMAND mhgp3v_wspd_wavefront_probe --family=uniform --points=1500
+          --sep-euclid=8/1 --tight --vwave --window=512 --window-ledger
+          --diag-feuille=200000)
+set_tests_properties(mhgp3v_diag_feuille_uniform PROPERTIES
+  PASS_REGULAR_EXPRESSION "feuilles q4 : diagnostiquees=200000 . central_209=53215 .26.61.. soc64=81159 .40.58.. exact_gq=84277 .42.14..")
+# L'ORDRE DE DESCENTE NE CHANGE RIEN, ET C'EST GRAVE COMME TEL. Un jour ou ce
+# test deviendrait rouge, c'est que le budget serait redevenu contraignant.
+add_test(NAME mhgp3v_ordre_proche_sans_effet
+  COMMAND mhgp3v_wspd_wavefront_probe --family=eight_clusters --points=1500
+          --sep-euclid=8/1 --tight --vwave --window=512 --window-ledger
+          --ordre-proche)
+set_tests_properties(mhgp3v_ordre_proche_sans_effet PROPERTIES
+  PASS_REGULAR_EXPRESSION "fenetre q4 : terminaux_ouverts=[0-9]+ masse_ouverte=1071162 ")

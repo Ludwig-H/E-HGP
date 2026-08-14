@@ -111,6 +111,10 @@ struct SocShadowStat {
   long long rect_fermables = 0;   // ... et qui possedent `need` temoins universels
   double rect_temoins = 0.0;      // somme des temoins universels de rectangle
   double rect_masse = 0.0;        // somme des |A|.|B| juges
+  long long feuilles = 0;         // feuilles temoins q4 diagnostiquees
+  long long feuilles_central = 0; // ... que la boule inscrite 56/209 credite
+  long long feuilles_soc = 0;     // ... que SOC64 credite
+  long long feuilles_exact = 0;   // ... qui sont universelles au sens (g,Q)
   long long rect_singletons = 0;  // rectangles reduits a UNE paire
   long long wide = 0;             // multiplications 128 bits reellement formees
   // --- LE LEDGER FAUTIF, CONSERVE COMME TEMOIN.
@@ -217,6 +221,11 @@ double g_porteurs_delta = 0.01;
 // Profondeur EXACTE par paire : elle separe ce que la geometrie interdit de ce
 // que la relaxation de boite et le budget coutent.
 bool g_profondeur_exacte = false;
+// Ordre de descente par proximite au milieu, au lieu de la cle de Morton. Il ne
+// change aucune semantique : a budget infini le meme fate est publie.
+bool g_ordre_proche = false;
+// Diagnostic de feuille : ou le credit se perd-il exactement ?
+long long g_diag_feuille = 0;
 // Profondeur exacte du RECTANGLE : elle separe la perte de BOITE de la perte de
 // BUDGET. Sa valeur est le nombre de rectangles ouverts a juger.
 long long g_profondeur_rect = 0;
@@ -947,6 +956,8 @@ int main(int argc, char** argv) {
     else if (a.rfind("--rang=", 0) == 0) g_rang_budget = arg_ll(val("--rang=").c_str(), 1, (1LL << 22), "rang");
     else if (a == "--judge-flips") { g_soc64_shadow = true; g_judge_flips = true; }
     else if (a == "--profondeur-exacte") { g_window = true; g_profondeur_exacte = true; }
+    else if (a == "--ordre-proche") g_ordre_proche = true;
+    else if (a.rfind("--diag-feuille=", 0) == 0) { g_soc64_shadow = true; g_diag_feuille = arg_ll(val("--diag-feuille=").c_str(), 1, (1LL << 22), "diag-feuille"); }
     else if (a.rfind("--profondeur-rect=", 0) == 0) { g_soc64_shadow = true; g_profondeur_rect = arg_ll(val("--profondeur-rect=").c_str(), 1, (1LL << 22), "profondeur-rect"); }
     else if (a.rfind("--rect-stride=", 0) == 0) g_rect_stride = arg_ll(val("--rect-stride=").c_str(), 1, (1LL << 20), "rect-stride");
     else if (a.rfind("--flip-judge-cap=", 0) == 0) { g_soc64_shadow = true; g_judge_flips = true; g_flip_judge_cap = arg_ll(val("--flip-judge-cap=").c_str(), 1, (1LL << 40), "flip-judge-cap"); }
@@ -1216,6 +1227,54 @@ int main(int argc, char** argv) {
                     mhgp3v::rect_classify(qa, qb, cb2, (RectLane)lane, &mxk);
                 if (w == RectVerdict::kAll) v = RectVerdict::kAll;
               }
+              // ---- OU LE CREDIT SE PERD-IL, EXACTEMENT ?
+              //
+              // La descente n'est PAS bornee par le budget : `pending=0`
+              // partout, donc elle atteint ses feuilles. Le credit devrait donc
+              // finir par etre pris point par point. On compare ici, sur les
+              // seules FEUILLES temoins et pour q4, trois verdicts sur le meme
+              // objet :
+              //   central : `rect_central_verdict`, la boule INSCRITE 56/209 ;
+              //   soc64   : le certificat correle, 64 couples de coins ;
+              //   exact   : `(g,Q)` point par point, universel sur tout A x B.
+              // Le premier est une SUFFISANCE, pas le spindle exact. S'il perd
+              // deja sur une feuille, la perte n'est ni le budget, ni la
+              // granularite du temoin : c'est le predicat lui-meme.
+              if (g_diag_feuille && lane == 2 && tk.node < 0) {
+                const int fa = (wa < 0) ? (-1 - wa) : nodes[wa].first;
+                const int la2 = (wa < 0) ? (-1 - wa) : nodes[wa].last;
+                const int fb = (wb < 0) ? (-1 - wb) : nodes[wb].first;
+                const int lb2 = (wb < 0) ? (-1 - wb) : nodes[wb].last;
+                const long long na = (long long)(la2 - fa + 1);
+                const long long nb = (long long)(lb2 - fb + 1);
+                if (na * nb <= 64 && soc.feuilles < g_diag_feuille) {
+                  ++soc.feuilles;
+                  if (v == RectVerdict::kAll) ++soc.feuilles_central;
+                  const int zr = -1 - tk.node;
+                  bool exact = true;
+                  for (long long ia = fa; ia <= la2 && exact; ++ia) {
+                    if (ia == zr) { exact = false; break; }
+                    for (long long ib = fb; ib <= lb2; ++ib) {
+                      if (ib == zr) { exact = false; break; }
+                      if (mhgp3v::cone::lane_of_target_gq(
+                              sp[(size_t)ia][0], sp[(size_t)ia][1], sp[(size_t)ia][2],
+                              sp[(size_t)zr][0], sp[(size_t)zr][1], sp[(size_t)zr][2],
+                              sp[(size_t)ib][0], sp[(size_t)ib][1], sp[(size_t)ib][2]) <
+                          mhgp3v::cone::kLaneQ4) { exact = false; break; }
+                    }
+                  }
+                  if (exact) ++soc.feuilles_exact;
+                  mhgp3v::soc::Box sa{}, sb{}, sc{};
+                  for (int dd2 = 0; dd2 < 3; ++dd2) {
+                    sa.lo[dd2] = qa.lo[dd2]; sa.hi[dd2] = qa.hi[dd2];
+                    sb.lo[dd2] = qb.lo[dd2]; sb.hi[dd2] = qb.hi[dd2];
+                    sc.lo[dd2] = cb2.lo[dd2]; sc.hi[dd2] = cb2.hi[dd2];
+                  }
+                  if (mhgp3v::soc::soc64_all_lane(sa, sb, sc, mhgp3v::soc::SocMutant::kNone,
+                                                  mhgp3v::cone::kLaneQ4, nullptr) >=
+                      mhgp3v::cone::kLaneQ4) ++soc.feuilles_soc;
+                }
+              }
               // ---- LEDGER BASELINE. Inchange, bit pour bit.
               if (v == RectVerdict::kAll) { cred[lane] += pop; eut_all = true; }
               else if (v == RectVerdict::kMixed) mixed |= 1u << lane;
@@ -1312,8 +1371,39 @@ int main(int argc, char** argv) {
             else ++bank.v_none;
             if (mixed && tk.node >= 0) {
               if (sn + 2 > 96) { abandonne = true; break; }       // jamais en silence
-              st[sn++] = {nodes[tk.node].left, mixed, cmixed};
-              st[sn++] = {nodes[tk.node].right, mixed, cmixed};
+              // ---- L'ORDRE DE DESCENTE, ET POURQUOI IL DECIDE.
+              //
+              // La pile est LIFO : le dernier empile est le premier depile.
+              // L'ordre historique empile gauche puis droite, c'est-a-dire
+              // l'ordre de la CLE DE MORTON, qui n'a aucun rapport avec
+              // l'endroit ou vivent les temoins. Or le budget `--window` est
+              // borne : les nœuds visites sont ceux que la pile atteint AVANT
+              // epuisement du quantum, et la mesure de dissection montre qu'un
+              // tiers des terminaux ouverts possede pourtant assez de temoins
+              // universels au niveau du rectangle. Ils existent ; la descente
+              // ne les atteint pas.
+              //
+              // Les nœuds crediteurs sont tous autour de `m_0`, le milieu du
+              // rectangle. On empile donc le plus LOIN d'abord, pour depiler le
+              // plus PROCHE en premier. C'est un changement d'ORDRE, pas de
+              // semantique : a budget infini le meme ensemble de nœuds est
+              // visite et le meme fate est publie.
+              int cg = nodes[tk.node].left, cd = nodes[tk.node].right;
+              if (g_ordre_proche) {
+                auto prio = [&](int ch) -> long long {
+                  if (ch >= 0) return box_dist2_to(nodes[ch], m4, g_tight);
+                  const auto& q = sp[(size_t)(-1 - ch)];
+                  long long acc2 = 0;
+                  for (int i = 0; i < 3; ++i) {
+                    const long long e = m4[i] - 4 * q[i];
+                    acc2 += e * e;
+                  }
+                  return acc2;
+                };
+                if (prio(cg) < prio(cd)) { const int t2 = cg; cg = cd; cd = t2; }
+              }
+              st[sn++] = {cg, mixed, cmixed};
+              st[sn++] = {cd, mixed, cmixed};
             }
           }
           // Une pile pleine ou un quantum epuise laisse des taches VIVANTES.
@@ -2134,6 +2224,20 @@ int main(int argc, char** argv) {
                      "la baseline\n",
                      soc.invariant_viole);
         return 3;
+      }
+      if (g_diag_feuille > 0) {
+        std::printf("feuilles q4 : diagnostiquees=%lld | central_209=%lld (%.2f%%)"
+                    " soc64=%lld (%.2f%%) exact_gq=%lld (%.2f%%)\n",
+                    soc.feuilles, soc.feuilles_central,
+                    100.0 * (double)soc.feuilles_central / (double)std::max(1LL, soc.feuilles),
+                    soc.feuilles_soc,
+                    100.0 * (double)soc.feuilles_soc / (double)std::max(1LL, soc.feuilles),
+                    soc.feuilles_exact,
+                    100.0 * (double)soc.feuilles_exact / (double)std::max(1LL, soc.feuilles));
+        if (soc.feuilles == 0) {
+          std::fprintf(stderr, "PLANCHER: aucune feuille temoin diagnostiquee\n");
+          return 3;
+        }
       }
       if (g_profondeur_rect > 0) {
         std::printf("profondeur_rect q4 : rectangles_juges=%lld masse_moyenne=%.2f"

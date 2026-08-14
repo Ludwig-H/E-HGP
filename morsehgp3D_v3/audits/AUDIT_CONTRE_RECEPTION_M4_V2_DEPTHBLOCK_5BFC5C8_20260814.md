@@ -182,6 +182,26 @@ bien centrés rencontrés et n'a pas les poids de sélection nécessaires. Son
 ratio `retenus` n'est donc ni `H4/W4`, ni un estimateur de sortie. La vue SOC
 appariée reste absente.
 
+### 2.5 Delta live : Hoeffding répare la barre nulle, pas encore la loi
+
+Le worktree postérieur au pin remplace `2 sigma` par la demi-largeur Hoeffding
+conditionnelle correcte. La contre-fixture `K=1` imprime désormais
+`C4=1560` avec une demi-largeur `48240`, et `M4=4680` avec une demi-largeur
+`892500` : elle ne prétend plus une précision nulle. Cette réparation est
+nécessaire et reçue comme formule.
+
+La couverture probabiliste ne l'est pas encore. Les rangs restent obtenus par
+multiply-high presque uniforme, sans rejet exact, depuis des compteurs SplitMix
+à seed fixe dont la loi et l'indépendance conditionnelle des deux étages ne sont
+pas contractées. Le `delta` n'est pas réparti sur toutes les lanes, familles,
+tailles et décisions simultanées. `W4_positive_quadrature` reste sans intervalle
+propre. Enfin `porteurs_controle` parcourt directement la population, mais ne
+compare toujours pas dans le processus les valeurs de la quadrature à un mode
+exhaustif déterministe `0..N-1` ; son commentaire promet plus que son code.
+
+Le delta améliore donc un diagnostic, sans rendre le sampler apte à décider une
+pente M4 ou une campagne G4.
+
 ## 3. Contre-audit de `q4_brute_oracle`
 
 Chaque quadruplet possède exactement une arête owner, mais `Q_e` exige encore
@@ -403,7 +423,7 @@ overflow signé volontaire : ce comportement indéfini invaliderait le kill.
 Claude a matérialisé pendant l'audit `prototype/jung_dual.hpp` et
 `prototype/jung_dual_probe.cpp`, aux empreintes live respectives
 `1b9dffa1767988b812e1da360775858d023383112fcdde6e905d8ac3b2b46001` et
-`a5c256e6d2474312bc41c88124f63a108913615759304bbece0e5ccceab6eb36`.
+`05c6199a16bcfe1399aa600b4b7089b15b2b53efcb9707ea4e3c6368d9e71386`.
 La forme `A/P/R`, l'ordre des coefficients q3/q4 et les largeurs ponctuelles
 sont corrects sous le contrat annoncé.
 
@@ -417,12 +437,14 @@ min_w max_z Phi_z(w) > 0
 et non « maximum sur le disque du minimum sur le groupe ». La formule codée
 correspond au bon ordre, mais la preuve documentaire doit être corrigée.
 
-Le probe ne reçoit encore que le cas singleton : son selftest compare `k=1` à
-`(g,Q)`. Contrairement à son en-tête, aucun chemin ne construit des centres du
-disque de Jung pour juger indépendamment un groupe `k=2/3`. L'ablation appelle
-directement le prédicat dual et tire toutes les paires du nuage ; elle ne lit
-ni fate ni tape des paires q4 `OPEN_FINAL`. Son gain est donc un diagnostic
-all-pairs du proposer, pas le gain sur le verrou M4.
+Le selftest compare toujours seulement `k=1` à `(g,Q)`. Contrairement à son
+en-tête, aucun chemin ne construit des centres du disque de Jung pour juger
+indépendamment un groupe `k=2/3`. La nouvelle boucle à deux jeux de poids tue
+le mutant `dual-ignore-weights`, mais elle teste seulement que deux appels au
+même prédicat diffèrent ; ce n'est pas un oracle de couverture. L'ablation
+appelle directement le prédicat dual et tire toutes les paires du nuage ; elle
+ne lit ni fate ni tape des paires q4 `OPEN_FINAL`. Son gain est donc un
+diagnostic all-pairs du proposer, pas le gain sur le verrou M4.
 
 Fixture collective minimale q4 :
 
@@ -440,19 +462,46 @@ donnent `A=64`, `R=1872` et ferment q4, tandis que `(1,1)` donne `A=32`,
 `R=720` et ne dépasse que q3. Enfin `z=(2,1,1)` donne l'égalité q4
 `A=24`, `R=288`, `A^2=2R` : elle doit rester non-q4.
 
+L'autorité primale est constante sur une base. Poser `u_z=a+b-2z` et `s=2w`.
+Les mauvais centres vérifient `s dot (b-a)=0` et
+`2*s dot u_z>=D-||u_z||^2`. Dans ce plan, minimiser `||s||^2` sur
+l'intersection des demi-plans. Le minimiseur est l'origine, une projection sur
+un bord ou l'intersection de deux bords. Pour trois IDs au plus, il suffit donc
+d'énumérer un nombre constant de candidats exacts. Le groupe couvre q4 si
+l'intersection est vide ou si `2*r^2>D`, q3 si elle est vide ou si `3*r^2>D` ;
+l'égalité est shell.
+
+Pour éviter une base orthonormée, prendre
+`v_z=2*(D*u_z-(u_z dot d)*d)` et `c_z=D*(D-||u_z||^2)` : le demi-plan devient
+`s dot v_z>=c_z`. Les projections demandent environ 142 bits et les
+intersections de deux bords environ 250 bits sous u16. Ce juge primal doit donc
+rester GMP/i256 ; le dual `A/P/R` i128 est le vérificateur device compact.
+
+Cette base donne aussi une profondeur sans exiger huit groupes globalement
+disjoints. Avec `Depth(P,0)=true` et une base couvrante `G`, on a exactement :
+
+```text
+Depth(P,h) = AND_{z in G} Depth(P minus {z},h-1)
+```
+
+Au centre considéré, choisir le membre de `G` qui est intérieur puis le fils
+qui l'a supprimé garantit des IDs distincts. Le pire nombre de recherches de
+base vaut `(3^h-1)/2`, soit `3280` pour q4 et `9841` pour q3. Le hot path garde
+huit/neuf groupes disjoints comme fast path ; le DAG de suppressions est le
+fallback capé ou l'oracle. Sur un rectangle, une base proposée n'est héritée
+qu'après vérification uniforme de sa marge ; sinon on scinde `A/B`.
+
 P0 d'API et de portes :
 
 - `dual_lane` ne borne pas `sum w_z<=65535`, alors que toute sa preuve de
   largeur l'exige ; préflighter la somme sans overflow avant le calcul ;
-- `--groupes=0` et `--echantillon=0` ne sont pas refusés et peuvent rendre une
-  ablation vide ; borner explicitement toutes les tailles et `rounds` ;
+- `--groupes=0 --echantillon=0` n'est pas refusé et rend une ablation vide en
+  code zéro ; borner explicitement toutes les tailles et `rounds` ;
 - `dual-narrow-i64` exécute des overflows signés, donc un comportement indéfini
   ne peut porter une porte ; émuler une troncature non signée définie ;
-- le commentaire annonce code `4` pour un mutant tué, alors que le selftest
-  rend actuellement `0` lorsqu'il trouve des divergences et `4` lorsque le
-  mutant survit ; aligner la convention du dépôt ;
-- `dual-ignore-weights` est invisible dans le seul selftest `k=1,w=1` ; il doit
-  être exercé par une fixture collective dédiée ;
+- la convention code `4 = mutant tué` et le mutant `dual-ignore-weights` ont
+  été réparés dans le delta live ; conserver néanmoins la fixture collective
+  fixe ci-dessus, car le balayage aléatoire ne juge pas la sémantique ;
 - huit groupes doivent conserver des listes de `PointId` disjointes. Une
   simple profondeur numérique sans reçu d'IDs ne ferme rien.
 
@@ -462,6 +511,67 @@ compilation et de largeur propre avant tout claim G4.
 
 Le prototype est donc une primitive mathématique prometteuse, pas encore une
 porte collective reçue ni un `BlockJungDualTile`.
+
+Le raccord CMake live, SHA-256
+`87b3e5d30c25b432d2631ed3572c6e462438c007de0326b5ba926378c819879b`,
+construit le probe ; ses onze CTests passent en `0,24 s`. Ils reçoivent la
+transcription singleton, cinq mutants et une ablation non vide sur une seed,
+pas le juge géométrique collectif annoncé ni le domaine `OPEN_FINAL`.
+
+### 5.2 La nouvelle « dissection de perte » ne compare pas la même population
+
+Le CTest live `mhgp3v_dissection_perte_amas` passe. Son replay
+`eight_clusters,n=1500` publie :
+
+```text
+profondeur_rect : 200 rectangles, masse moyenne 7,74,
+  26,5 % avec huit témoins singleton communs à tout A×B
+profondeur_exacte q4 : 200 PairId OPEN_FINAL tirés par masse,
+  89,5 % avec huit témoins singleton universels de la paire
+```
+
+Le contraste est intéressant, mais il ne sépare pas quantitativement « boîte »
+et « budget ». Le premier échantillon porte uniformément par enregistrement
+accepté après filtre de hash et s'arrête à 200 ; le second porte sur la masse
+des PairId ouverts. Un gros rectangle et un singleton ont donc le même poids
+d'un côté et des poids `|A||B|` différents de l'autre. Les deux taux n'ont ni
+la même unité, ni intervalle, ni appariement rectangle vers ses paires.
+
+En outre `profondeur_rect` compte seulement des témoins **singleton** communs à
+toutes les paires. Il ne juge pas les groupes collectifs de `JungDual`, encore
+moins un `BlockJungDualTile` uniforme. La conclusion sûre est directionnelle :
+le certificat exact pairwise possède un réservoir de fermetures que la boîte et
+le budget actuels perdent. La réparation reste microtile/bloc avec preuve
+uniforme ; matérialiser les PairId pour récolter les `89,5 %` recréerait le mur
+M4. Publier ensuite le gain apparié en masse `M4_L/M4_U`, pas comparer ces deux
+pourcentages bruts.
+
+### 5.3 Delta live `--ordre-proche` : meilleur budget, même résiduel final
+
+Le worktree postérieur à `8f47835` change seulement l'ordre DFS des deux enfants
+MIXED : le nœud dont l'AABB est le plus proche du milieu du rectangle est
+dépilé d'abord. Les largeurs u16 gardent le carré de cette distance dans i64 et
+le prédicat certifié reste inchangé. À budget infini, l'ensemble visité et le
+fate sont donc les mêmes ; sous budget fini, seul le partage `CLOSED/PENDING`
+peut changer.
+
+Un A/B déterministe `eight_clusters,n=1500` donne :
+
+| fenêtre | ordre Morton : pending | ordre proche : pending | résiduel final |
+|---:|---:|---:|---:|
+| 32 | 124012 | 109546 | non final |
+| 64 | 80680 | 43607 | non final |
+| 128 | 2587 | 121 | non final |
+| 256 | 0 | 0 | `E4=1071162` dans les deux cas |
+| 512 | 0 | 0 | `E4=1071162` dans les deux cas |
+
+Le levier est donc réel comme compression du budget du certificateur central,
+mais nul sur son résiduel géométrique final dans ce replay. Il ne répond ni à
+M4, ni à la profondeur collective. La phrase « les nœuds créditeurs sont tous
+autour du milieu » justifie une heuristique, pas une optimalité : une gate doit
+comparer plusieurs familles/seeds et exiger l'égalité des fates lorsque les deux
+ordres sont finaux. À budget tronqué, toute comparaison de masse reste un
+surensemble avec `PENDING`, jamais une victoire de source.
 
 ## 6. M4 sans échantillonnage : intervalles de blocs
 
@@ -577,6 +687,7 @@ Après reconfiguration du worktree :
 ```text
 SOC64 isolé + WSPD--SOC + porteurs/apex/two_lines : 33/33 verts
 q4 brute-force : 4/4 verts
+JungDual live : 11/11 verts, juge collectif indépendant absent
 contre-fixture K=1 estimateur : code 0, intervalle nul faux
 q4 brute eight_clusters n=120 : M4=5402516, W4=778626, test I<=7=3764
 ```
