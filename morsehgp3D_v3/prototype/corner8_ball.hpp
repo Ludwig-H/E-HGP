@@ -233,6 +233,90 @@ MHGP_HD inline Iv norme_box_point(const Box& P, const i64 q[3], C8Mutant mu) {
 // seulement si TOUT point de `Z` est strictement interieur a la circumsphere de
 // TOUT support du bloc.
 // ---------------------------------------------------------------------------
+// L'orientation ne depend QUE des quatre facteurs support, jamais du temoin :
+// la tester une fois par bloc, et non une fois par nœud visite, est a la fois
+// un diagnostic et une economie. Rend `0` si le signe n'est pas fixe.
+MHGP_HD inline int orientation_signe(const Box& A, const Box& B, const Box& X,
+                                     const Box& Y) {
+  // ---- FORME CENTREE, ET POURQUOI ELLE CHANGE TOUT.
+  //
+  // L'arithmetique d'intervalles naive developpe `det3` en six monomes traites
+  // comme independants : son erreur est du PREMIER ordre en le rayon des
+  // boites, et elle laisse le signe indecis sur `77 %` des blocs meme quand les
+  // cellules sont minuscules.
+  //
+  // `det3` est TRILINEAIRE. En ecrivant `u = uc + du` avec `|du| <= ur`, le
+  // developpement a huit termes se groupe par ordre :
+  //
+  //   ordre 0 : det3(uc,vc,wc)                    — la valeur au centre
+  //   ordre 1 : somme_i ur_i |cross(vc,wc)_i| + les deux permutations
+  //   ordre 2 et 3 : bornes par intervalles, mais ils sont en `r^2` et `r^3`
+  //
+  // L'erreur devient donc quadratique en le rayon. Tout est fait sur les
+  // quantites DOUBLEES `2u = (B.lo+B.hi) - (A.lo+A.hi)` et
+  // `2*ur = (B.hi-B.lo) + (A.hi-A.lo)`, ce qui evite toute division : le
+  // determinant y est huit fois le vrai, et le SIGNE est le meme.
+  i128 uc[3], ur[3], vc[3], vr[3], wc[3], wr[3];
+  for (int i = 0; i < 3; ++i) {
+    uc[i] = ((i128)B.lo[i] + B.hi[i]) - ((i128)A.lo[i] + A.hi[i]);
+    ur[i] = ((i128)B.hi[i] - B.lo[i]) + ((i128)A.hi[i] - A.lo[i]);
+    vc[i] = ((i128)X.lo[i] + X.hi[i]) - ((i128)A.lo[i] + A.hi[i]);
+    vr[i] = ((i128)X.hi[i] - X.lo[i]) + ((i128)A.hi[i] - A.lo[i]);
+    wc[i] = ((i128)Y.lo[i] + Y.hi[i]) - ((i128)A.lo[i] + A.hi[i]);
+    wr[i] = ((i128)Y.hi[i] - Y.lo[i]) + ((i128)A.hi[i] - A.lo[i]);
+  }
+  auto cross_abs = [](const i128 p[3], const i128 q[3], i128 out[3]) {
+    for (int i = 0; i < 3; ++i) {
+      const int j = (i + 1) % 3, k = (i + 2) % 3;
+      const i128 c = p[j] * q[k] - p[k] * q[j];
+      out[i] = c < 0 ? -c : c;
+    }
+  };
+  // Valeur au centre : `det3(uc,vc,wc)`.
+  i128 cvw[3];
+  for (int i = 0; i < 3; ++i) {
+    const int j = (i + 1) % 3, k = (i + 2) % 3;
+    cvw[i] = vc[j] * wc[k] - vc[k] * wc[j];
+  }
+  i128 centre = 0;
+  for (int i = 0; i < 3; ++i) centre += uc[i] * cvw[i];
+
+  // Ordre un : trois produits scalaires de rayons par des cofacteurs absolus.
+  i128 e1 = 0;
+  {
+    i128 acvw[3], acwu[3], acuv[3];
+    cross_abs(vc, wc, acvw);
+    cross_abs(wc, uc, acwu);
+    cross_abs(uc, vc, acuv);
+    for (int i = 0; i < 3; ++i)
+      e1 += ur[i] * acvw[i] + vr[i] * acwu[i] + wr[i] * acuv[i];
+  }
+  // Ordres deux et trois : les rayons sont positifs, donc majorer chaque
+  // determinant par la somme de ses six monomes absolus suffit.
+  auto det_abs_bound = [](const i128 p[3], const i128 q[3], const i128 r[3]) {
+    i128 acc = 0;
+    for (int i = 0; i < 3; ++i) {
+      const int j = (i + 1) % 3, k = (i + 2) % 3;
+      const i128 t1 = p[i] * q[j] * r[k];
+      const i128 t2 = p[i] * q[k] * r[j];
+      acc += (t1 < 0 ? -t1 : t1) + (t2 < 0 ? -t2 : t2);
+    }
+    return acc;
+  };
+  auto absv = [](const i128 p[3], i128 out[3]) {
+    for (int i = 0; i < 3; ++i) out[i] = p[i] < 0 ? -p[i] : p[i];
+  };
+  i128 auc[3], avc[3], awc[3];
+  absv(uc, auc); absv(vc, avc); absv(wc, awc);
+  const i128 e2 = det_abs_bound(ur, vr, awc) + det_abs_bound(ur, avc, wr) +
+                  det_abs_bound(auc, vr, wr);
+  const i128 e3 = det_abs_bound(ur, vr, wr);
+  const i128 err = e1 + e2 + e3;
+  if (centre > err) return 1;
+  if (centre < -err) return -1;
+  return 0;
+}
+
 MHGP_HD inline BallVerdict corner8_block(const Box& A, const Box& B, const Box& X,
                                          const Box& Y, const Box& Z,
                                          C8Mutant mu = C8Mutant::kNone,

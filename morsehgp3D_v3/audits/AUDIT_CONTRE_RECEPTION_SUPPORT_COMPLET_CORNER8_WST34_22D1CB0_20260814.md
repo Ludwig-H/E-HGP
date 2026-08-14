@@ -26,7 +26,7 @@ Empreintes SHA-256 :
   `9f29100613543cdf1f246243ec7b8112b4c84826618c4a053b3332361c49115f`.
 
 > [!CAUTION]
-> **Successeur `HEAD=3703097` mathématiquement rouge.** Le filtre d'acuité
+> **Révision `3703097` mathématiquement rouge, réparée par `a73161c`.** Le filtre d'acuité
 > committé après ce snapshot affirme `E+X-D=2H` pour
 > `H=(x-a) dot (b-x)`. L'identité exacte est `E+X-D=-2H`. Il élimine donc le
 > côté aigu au lieu du côté non aigu. Toutes ses mesures
@@ -35,7 +35,9 @@ Empreintes SHA-256 :
 > `p0=(0,0,0),p1=(0,1,1),p2=(1,0,1),p3=(1,1,0)`, avec IDs
 > `0<1<2<3`, a l'owner `EdgeKey(0,1)`, quatre poids `1/4` et
 > `H(p0,p1,p2)=H(p0,p1,p3)=-1`. Le filtre committé retire précisément son
-> couple de carriers. La correction et la porte sont détaillées en Q6.
+> couple de carriers. `a73161c` corrige le signe et ajoute la fixture scalaire ;
+> toutes les mesures de la révision rouge restent invalides. La correction et
+> la portée de la porte sont détaillées en Q6 et dans l'audit courant.
 
 ## Verdict exécutif
 
@@ -409,6 +411,37 @@ CKPairTape exact avec vrais PointId et multiplicité
   -> census/shell/BallKey/RLE avant tout fill
 ```
 
+Le filtre aigu fournit une factorisation plus forte que le seul compteur. Pour
+un rectangle, partitionner l'antichaîne témoin en `A`, blocs qui peuvent porter
+une face aiguë incidente à `ab`, et `N`, blocs uniformément non aigus. Le lemme
+du porteur donne alors la couverture symbolique exacte des couples encore
+possibles :
+
+```text
+Q4CandidateCellPairs = Sym2(A) disjoint_union Cross(A,N)
+```
+
+`Sym2` désigne ici les couples non ordonnés `C<=D`, diagonale comprise ;
+`Sym2(N)` disparaît. Il ne faut surtout pas développer les deux termes : ce sont
+deux descripteurs de produit par rectangle. Dans `Sym2(A)`, le carrier primaire
+ne peut être choisi qu'à la projection pointwise ou par un filtre factorisé sur
+les vrais `PointId`; un tie-break entre blocs `MIXED` serait insuffisant.
+`Cross(A,N)` est déjà orienté. Owner tétraédrique, distinct-ID et positivité
+restent des filtres aval obligatoires.
+
+Mieux encore, la liste WST3 elle-même n'a pas à être remplie avant le
+consommateur. Un `LensDescriptor(RectId,root)` lance une traversée paresseuse du
+BVH témoin. Un nœud hors lentille disparaît. Un nœud `NONE_ACUTE` disparaît du
+flux **carrier**, mais reste disponible comme apex dans `Cross(A,N)` ; le jeter
+des deux flux perdrait les tétraèdres qui n'ont qu'un seul carrier aigu. Un
+carrier encore possible appelle d'abord `FaceAxisJungDepth8Block`. S'il ferme
+toutes ses complétions, aucun apex n'est ouvert. Sinon seulement, une tâche
+dual-tree `(CarrierNode,ApexRoot)` descend le produit résiduel et appelle
+owner/positivité/Corner8. Cette ordonnance remplace les `44` millions de blocs
+WST3 et le milliard de couples diagnostiqués à `n=32000` par des tâches guidées
+par preuves ; son pire cas reste ouvert, mais elle attaque enfin le coût avant
+matérialisation.
+
 Pour q3, la version support-complet analogue à Corner8 peut éviter le centre.
 Avec `u=b-a`, `v=c-a`, `U=u dot u`, `V=v dot v`, `F=u dot v` et
 `Delta=U*V-F^2>0`, poser
@@ -457,5 +490,76 @@ profilage et sortie appariée.
 
 Rejeux ciblés : Corner8 `6/6`, WST3 parent `5/5`, WST4 `1/1`. Ces verts
 reçoivent les campagnes bornées décrites, pas les coutures absentes.
+
+## 10. Post-scriptum à `3703097`, réparation `a73161c`
+
+Le commit `3703097` ajoute un compteur d'acuité avec le signe inversé. Avec
+`H=(x-a) dot (b-x)`, on a exactement `E+X-D=-2H`; le troisième angle est aigu
+si et seulement si `H<0`. Les taux et gains publiés par la révision `H>0` sont
+donc invalides. Un tétraèdre régulier
+`(0,0,0),(0,1,1),(1,0,1),(1,1,0)` a `H=-1` pour ses deux carriers et mord
+directement cette faute.
+
+Le commit `a73161c` corrige le routage potentiel : `Hmin>=0` donne
+`NONE_ACUTE`, `Hmax<0` donne `ALL_ACUTE`, sinon `MIXED`; pour le produit q4,
+conserver un couple dès qu'au moins un facteur vérifie `Hmin<0` est sûr. La
+fixture scalaire du tétraèdre régulier et la sous-suite WST `8/8` passent. Elles
+ne traversent toutefois pas le filtre de bloc puis le produit contre un juge q4
+positif. Ce filtre reste un coût par bloc, pas « gratuit » : il appelle
+l'extremum Midball. Il ne répare ni owner, ni diagonales, ni vrais `PointId`, ni
+multiplicité ou positivité.
+
+Deux défauts sont stables au `HEAD=a73161c` :
+
+- le commentaire de `--echelle=num/den` exige
+  `diag^2*den<=rayon^2*num`, mais la révision observée calcule
+  `diag^2*num<=rayon^2*den`. L'option implémente l'inverse du ratio documenté ;
+- la porte `--echelle=1/256` ne mord pas ce mutant. À `n=1000`, les comptes
+  WST4 sont `6 159 060` pour `1/1`, `35 494` pour `1/64` et `65 167 274` pour
+  `64/1`, exactement le sens inverse du contrat. À `1/4096,n=60`, chaque
+  rectangle peut s'arrêter à la racine et le juge owner reste vert par pure
+  surcouverture ; il ne reçoit ni sélectivité ni coût ;
+- l'identité `sum choose2(C_i)+sum C_i*C_j=choose2(sum C_i)` remplace
+  correctement le double loop et l'accumulation u128 est sûre sous le cap de
+  points. La sortie reconvertit toutefois ce compte en `double` avec six
+  chiffres ; ce n'est pas un reçu exact et cela ne réduit pas
+  `candidate_blocks=sum k_t(k_t+1)/2`.
+
+La rampe `n=1000..32000` réfute l'extrapolation de la pente locale `1,73`.
+L'échelle grossière de `a73161c` réduit fortement le nombre fini de descripteurs,
+mais ne prouve ni quasi-linéarité, ni convergence vers `41,6` cellules : les
+nœuds LBVH ne sont pas les cubes d'un niveau Morton fixé requis par cet argument
+de packing, et la masse logique est simplement repoussée vers l'aval. La route
+reste : sémantique d'échelle non ambiguë, vraie grille ou preuve LBVH,
+projection owner/distinct-ID, acuité et profondeur avant tout produit résiduel.
+
+Le worktree suivant ajoute un diagnostic `--corner8` **après** la
+matérialisation de `par_terminal` et parcourt explicitement les couples `u<=v`.
+Il ne retire donc encore aucune tâche du produit. Sur les diagonales `C=D`, le
+produit de boîtes contient nécessairement `x=y`, donc l'orientation contient
+zéro : à l'échelle très grossière où chaque rectangle n'a que sa racine, le
+diagnostic est `100 % orient_indecise` et ne peut fermer aucun bloc. La voie
+exacte est un raffinement paresseux de `binom(C,2)` en `LL/LR/RR` jusqu'à des
+facteurs disjoints, jamais l'abandon de la diagonale.
+
+Le nouveau prétest d'orientation centré est un majorant sûr, mais il n'est pas
+transmis à `corner8_block`, qui recalcule l'ancien intervalle. La promesse
+« orientation une seule fois » est donc fausse : lorsqu'ancien et nouveau
+tests diffèrent, chaque nœud témoin peut refaire un verdict définitivement
+`MIXED`. Sur `uniform,n=60,echelle=1,corner8=10000`, le diagnostic soumet
+`10000` couples, en déclare `9704` indécis, ne ferme qu'un couple et paie
+`35117` visites ; sur `eight_clusters,n=60,echelle=1/256`, les `379` couples
+sont tous indécis. Aucun CTest, juge indépendant, statut `PARTIEL` du cap ou
+plancher causal ne reçoit ce raccord. `masse_fermee` est la masse physique de
+la candidate-cover observée, pas un compte d'événements q4 owner/positifs.
+
+La révision mobile suivante saute tout couple dont `C,D` ne satisfait pas le
+séparateur CK. C'est un filtre fail-open acceptable pour un diagnostic de
+fermetures partielles, mais pas une source : des supports q4 valides ont des
+carriers proches ou appartiennent à la diagonale `binom(C,2)`. Le commentaire
+dit en outre « tous les couples de facteurs », alors que le code ne teste que
+`C--D` ; `A--C`, `A--D`, `B--C` et `B--D` ne le sont pas. La condition utile
+pour Corner8 est une orientation uniformément non nulle après raffinement, pas
+une séparation CK nécessaire entre chaque paire de sommets.
 
 GCP non utilisé.

@@ -593,12 +593,13 @@ construction. Les comptes bruts se nomment donc `CandidateCover`, jamais
 précéder `sum k_t^2`. Le contre-audit reçu est
 [`audits/AUDIT_CONTRE_RECEPTION_SUPPORT_COMPLET_CORNER8_WST34_22D1CB0_20260814.md`](audits/AUDIT_CONTRE_RECEPTION_SUPPORT_COMPLET_CORNER8_WST34_22D1CB0_20260814.md).
 
-Le filtre d'acuité committé au `HEAD=3703097` n'est pas reçu : il emploie
-`H=(x-a) dot (b-x)=F-E`, mais affirme à tort `E+X-D=2H`. La bonne identité est
-`E+X-D=-2H`. Les extrema exacts se lisent donc
+Le classifieur normatif emploie `H=(x-a) dot (b-x)=F-E` et l'identité
+`E+X-D=-2H`. Ses extrema exacts se lisent donc
 `Hmax<0 => ALL_ACUTE`, `Hmin>=0 => NONE_ACUTE`, sinon `MIXED`. La fixture du
 tétraèdre régulier, owner `EdgeKey(0,1)`, quatre poids `1/4` et deux carriers
-`H=-1`, doit précéder toute nouvelle mesure WST4.
+`H=-1`, est permanente. Toute mesure issue de la révision historique qui
+classait `H>0` comme aiguë est invalidée. Le statut logiciel, les pins et la
+portée du juge sont maintenus uniquement dans l'audit courant.
 
 Après owner, q3 est positif si `E+X-D>0` et `G=D*E-F^2>0`. Les blocs reçoivent
 `ALL_ACUTE/NONE_ACUTE/MIXED` par bornes entières sûres ; les égalités

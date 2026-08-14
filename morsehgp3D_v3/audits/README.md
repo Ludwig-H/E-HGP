@@ -27,7 +27,9 @@ ancienne phrase imposant le rejet global des positions dupliquées est périmée
   réception conditionnelle de Corner8, réfutation de l'exact-once physique des
   probes WST3/WST4 et réponses Q6--Q9. Le statut reçu est `CandidateCover`
   avant distinct-ID/owner/positivité ; la profondeur doit précéder le produit
-  WST4 brut.
+  WST4 brut. Son post-scriptum conserve la réfutation du signe à `3703097` et
+  sa réparation à `a73161c`; l'intégration Corner8 mobile reste dans l'audit
+  courant.
 - [`AUDIT_MINIBOULE_UNIQUE_RESIDUEL_SHALLOW_5809BD2_20260814.md`](AUDIT_MINIBOULE_UNIQUE_RESIDUEL_SHALLOW_5809BD2_20260814.md) :
   lemme exact de miniboule unique au support complet, famille normale au support
   partiel, cœur affine, sandwich `U<=D<=C`, q3 par pied, q4 par intersections,

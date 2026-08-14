@@ -64,6 +64,7 @@
 #include <vector>
 
 #include "cloud_families.hpp"
+#include "corner8_ball.hpp"
 #include "midball_block.hpp"
 #include "rect_front.hpp"
 #include "wspd_wavefront.hpp"
@@ -166,6 +167,13 @@ int main(int argc, char** argv) {
   std::string family = "uniform";
   long long n = 0, seed = 12345, sep_num = 8, sep_den = 1, coord = 0;
   bool juge = false, fixture_tetra = false;
+  // ---- LA JONCTION : FERMER LE BLOC AVANT DE LE DEVELOPPER.
+  //
+  // La source rend des blocs `(A,B,C,D)` de supports candidats. `Corner8` teste
+  // leur UNIQUE circumsphere sur des nœuds temoins : si la population creditee
+  // atteint le seuil, tout le bloc sort du contrat et n'est JAMAIS developpe.
+  // C'est le seul endroit ou l'on economise un produit entier.
+  long long corner8 = 0;   // nombre de blocs WST4 soumis, 0 = desactive
   long long min_blocs = 0;
   // ---- L'ECHELLE DU BLOC, ET POURQUOI ELLE DECIDE TOUT.
   //
@@ -209,6 +217,7 @@ int main(int argc, char** argv) {
     }
     else if (a == "--juge") juge = true;
     else if (a == "--fixture-tetra") fixture_tetra = true;
+    else if (a.rfind("--corner8=", 0) == 0) corner8 = arg_ll(val("--corner8=").c_str(), 1, (1LL << 30), "corner8");
     else if (a.rfind("--ordre=", 0) == 0) ordre = arg_ll(val("--ordre=").c_str(), 3, 4, "ordre");
     else if (a.rfind("--echelle=", 0) == 0) {
       // `num/den` : la descente s'arrete des que `diag^2 <= (num/den) rayon^2`.
@@ -592,6 +601,117 @@ int main(int argc, char** argv) {
         return 1;
       }
     }
+  }
+  // ---- CORNER8 SUR LES BLOCS DE LA SOURCE.
+  if (corner8 > 0) {
+    long long soumis = 0, fermes = 0, orient_mixte = 0, coins = 0, orient_indecise = 0;
+    long long cd_non_separes = 0;
+    long long visites8 = 0;
+    unsigned __int128 masse_fermee = 0;
+    const int seuil = 8;   // `smax=11` : huit interieurs sortent q4 du contrat
+    for (size_t t = 0; t < terms.size() && soumis < corner8; ++t) {
+      mhgp3v::c8::Box A{}, B{};
+      {
+        mhgp3v::RectBox ra{}, rb{};
+        box_of(terms[t].a, &ra);
+        box_of(terms[t].b, &rb);
+        for (int i = 0; i < 3; ++i) {
+          A.lo[i] = ra.lo[i]; A.hi[i] = ra.hi[i];
+          B.lo[i] = rb.lo[i]; B.hi[i] = rb.hi[i];
+        }
+      }
+      const auto& bl = par_terminal[t];
+      for (size_t u = 0; u < bl.size() && soumis < corner8; ++u)
+        for (size_t v = u; v < bl.size() && soumis < corner8; ++v) {
+          mhgp3v::c8::Box C{}, D{};
+          {
+            mhgp3v::RectBox rc{}, rd{};
+            box_of(bl[u].c, &rc);
+            box_of(bl[v].c, &rd);
+            for (int i = 0; i < 3; ++i) {
+              C.lo[i] = rc.lo[i]; C.hi[i] = rc.hi[i];
+              D.lo[i] = rd.lo[i]; D.hi[i] = rd.hi[i];
+            }
+          }
+          ++soumis;
+          // ---- LA SEPARATION DOIT PORTER SUR TOUS LES COUPLES DE FACTEURS.
+          //
+          // Une WSPD ne separe que `(A,B)`. Mais l'orientation d'un tetraedre
+          // depend des QUATRE sommets : si `C` et `D` sont proches — et sur la
+          // diagonale ils sont identiques — le signe du determinant reste
+          // indecidable quelle que soit la finesse des cellules. La vraie
+          // generalisation de Callahan--Kosaraju a l'ordre quatre demande donc
+          // que TOUS les couples de facteurs soient bien separes.
+          if (!sep_ok(bl[u].c, bl[v].c)) { ++cd_non_separes; continue; }
+          // ---- L'ORIENTATION D'ABORD, ET UNE SEULE FOIS.
+          //
+          // Elle ne depend que des quatre facteurs support. Si son signe n'est
+          // pas fixe sur le bloc, `Corner8` rendra `MIXED` pour TOUT temoin :
+          // parcourir l'arbre est alors du travail pur perdu.
+          if (mhgp3v::c8::orientation_signe(A, B, C, D) == 0) { ++orient_indecise; continue; }
+          // Plages d'IDs des quatre facteurs : un temoin doit en etre DISJOINT,
+          // sinon il pourrait etre l'un des sommets du support.
+          const int fa = (terms[t].a < 0) ? (-1 - terms[t].a) : nodes[terms[t].a].first;
+          const int la2 = (terms[t].a < 0) ? (-1 - terms[t].a) : nodes[terms[t].a].last;
+          const int fb = (terms[t].b < 0) ? (-1 - terms[t].b) : nodes[terms[t].b].first;
+          const int lb2 = (terms[t].b < 0) ? (-1 - terms[t].b) : nodes[terms[t].b].last;
+          const int fc = (bl[u].c < 0) ? (-1 - bl[u].c) : nodes[bl[u].c].first;
+          const int lc = (bl[u].c < 0) ? (-1 - bl[u].c) : nodes[bl[u].c].last;
+          const int fd = (bl[v].c < 0) ? (-1 - bl[v].c) : nodes[bl[v].c].first;
+          const int ld = (bl[v].c < 0) ? (-1 - bl[v].c) : nodes[bl[v].c].last;
+          long long credits = 0;
+          bool mixte = false;
+          int st8[128];
+          int sn8 = 0;
+          st8[sn8++] = 0;
+          while (sn8 > 0 && credits < seuil) {
+            const int nd = st8[--sn8];
+            ++visites8;
+            const int nf = (nd < 0) ? (-1 - nd) : nodes[nd].first;
+            const int nl = (nd < 0) ? (-1 - nd) : nodes[nd].last;
+            // Chevauchement avec un facteur : on descend, on ne credite pas.
+            const bool chevauche =
+                !(nl < fa || nf > la2) || !(nl < fb || nf > lb2) ||
+                !(nl < fc || nf > lc) || !(nl < fd || nf > ld);
+            mhgp3v::c8::Box Z{};
+            {
+              mhgp3v::RectBox rz{};
+              box_of(nd, &rz);
+              for (int i = 0; i < 3; ++i) { Z.lo[i] = rz.lo[i]; Z.hi[i] = rz.hi[i]; }
+            }
+            if (!chevauche) {
+              const auto vd = mhgp3v::c8::corner8_block(A, B, C, D, Z,
+                                                        mhgp3v::c8::C8Mutant::kNone, &coins);
+              if (vd == mhgp3v::c8::BallVerdict::kAllInterior) {
+                credits += count_of(nd);
+                continue;   // nœud credite : ses descendants ne le sont plus
+              }
+            }
+            if (nd < 0) continue;
+            if (sn8 + 2 > 128) { mixte = true; break; }
+            st8[sn8++] = nodes[nd].left;
+            st8[sn8++] = nodes[nd].right;
+          }
+          if (credits >= seuil) {
+            ++fermes;
+            const unsigned __int128 mm =
+                (unsigned __int128)count_of(terms[t].a) * (unsigned __int128)count_of(terms[t].b) *
+                (unsigned __int128)count_of(bl[u].c) * (unsigned __int128)count_of(bl[v].c);
+            masse_fermee += mm;
+          } else if (mixte) ++orient_mixte;
+        }
+    }
+    std::printf("corner8_source : soumis=%lld cd_non_separes=%lld (%.2f%%)"
+                " orient_indecise=%lld (%.2f%%)"
+                " fermes=%lld (%.2f%% des orientes) masse_fermee=%.6g"
+                " visites=%lld coins=%lld piles_saturees=%lld\n",
+                soumis, cd_non_separes,
+                100.0 * (double)cd_non_separes / (double)std::max(1LL, soumis),
+                orient_indecise,
+                100.0 * (double)orient_indecise / (double)std::max(1LL, soumis - cd_non_separes),
+                fermes,
+                100.0 * (double)fermes / (double)std::max(1LL, soumis - cd_non_separes - orient_indecise),
+                (double)masse_fermee, visites8, coins, orient_mixte);
   }
   std::printf("OK famille=%s\n", family.c_str());
   return 0;

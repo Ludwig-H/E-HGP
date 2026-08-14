@@ -8,14 +8,15 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-> **Alerte au `HEAD=3703097`.** Les commits `89774d0`, `e3f1925` et
+> **Alerte au `HEAD=a73161c`.** Les commits `89774d0`, `e3f1925` et
 > `88a9ba8` ajoutent respectivement `Corner8BallDepth`, un broad phase WST3 et
 > son produit WST4 ; `22d1cb0` en publie la note de coût. Le successeur
-> `3703097` branche un filtre d'acuité **au signe inversé** : avec
-> `H=(x-a) dot (b-x)`, l'identité exacte est `E+X-D=-2H`, et non `2H`.
-> Le tétraèdre régulier de tie a deux carriers `H=-1`, quatre poids `1/4`, et
-> le nouveau filtre les retire. Toute mesure `blocs4_aigu/gain`, dont
-> `1,62x`, est invalide avant correction et porte déterministe.
+> `3703097` avait branché un filtre d'acuité au signe inversé. `a73161c`
+> applique maintenant l'identité exacte `E+X-D=-2H`, garde `H<0`, ajoute la
+> fixture du tétraèdre régulier et rétracte le gain `1,62x`. La fixture vérifie
+> les deux valeurs `H=-1` et les six longueurs égales ; elle ne recalcule pas
+> indépendamment les quatre barycentriques `1/4` ni l'owner sur de vrais
+> `PointId`.
 >
 > Le théorème de la
 > miniboule unique est reçu uniquement pour un **support minimal positif
@@ -44,20 +45,29 @@ Cadre : `phase=exploration_v3_hors_registre`,
 ## Snapshot
 
 Le dernier commit stable relu est
-`HEAD=37030978bffe1362833c4e6740ff08fe08a8ec1e`, commit
-`je corrige ma propre pente : 1,73 etait transitoire, la constante est le mur`. Il
+`HEAD=a73161c7a01ce17ab687e50f09a6f1e619826de8`, commit
+`l'echelle des cellules divise la constante par six cents`. Il
 absorbe le raccord Midball de `a58d020`, HC et la borne de `c1e2e3b`, Corner8
-de `89774d0`, WST3 de `e3f1925`, WST4 de `88a9ba8` et la note de Claude. Au
-présent snapshot, l'auditeur modifie seulement les documents autorisés.
-Claude modifie concurremment `prototype/wst3_probe.cpp` ; ce delta logiciel
-mobile n'est pas reçu. Aucun logiciel n'a été modifié par l'auditeur.
+de `89774d0`, WST3 de `e3f1925`, WST4 de `88a9ba8`, la correction du signe
+aigu et l'échelle rationnelle. Le delta logiciel mobile de Claude porte sur
+`prototype/corner8_ball.hpp` et `prototype/wst3_probe.cpp`; il expérimente une
+jonction Corner8 après la construction du broad phase. Hors présentes écritures
+documentaires, aucun logiciel n'a été modifié par l'auditeur.
 
-Empreintes SHA-256 au commit `3703097` :
+Le commit stable ajoute une échelle rationnelle `num/den` dont le commentaire
+annonce `diag2<=num/den*rayon2`, mais compare actuellement
+`diag2*num<=rayon2*den`. Numérateur et dénominateur sont inversés : augmenter
+le rapport raffine dans le code alors que l'API annonce des cellules plus
+grosses. La comparaison conforme au commentaire est
+`diag2*den<=rayon2*num`, en i128. Le cas historique `1/1` ne distingue pas ce
+mutant ; une paire de portes `4/1` et `1/4` est nécessaire.
+
+Empreintes SHA-256 au commit `a73161c` :
 
 - `CMakeLists.txt` :
-  `2687033ab827d04a08299c3105af850facef53246d13f2eda8c881ffcb84f807` ;
+  `a4d6f7ed0e1746a5a7a2f88921fe138d3eb01ad550077b253abc72c918b16f48` ;
 - `prototype/wst3_probe.cpp` :
-  `7fbb026c05293ced20b215b5a58fe6fe434c9d08de1d0bc1d31d62c9069c9830` ;
+  `f0619c8901317e0dc8be264e063e7d3abfb91d1c49a945797abe6f0549bdf0c1` ;
 - `prototype/corner8_ball.hpp` :
   `35d140031f76cfba5394013e95a35c61643a22bb6ad89c2670535c9dc259e2d0` ;
 - `prototype/corner8_probe.cpp` :
@@ -79,8 +89,8 @@ Empreintes SHA-256 au commit `3703097` :
 
 Le commit stable reçoit la primitive BJD, un packing disjoint sûr sur ses
 campagnes causales, huit portes BJD ciblées, treize portes Midball, cinq portes
-HC, une porte de réfutation de la borne, six portes Corner8 et six portes
-WST3/WST4. Les verts ciblés ne ferment pas les défauts de composition et
+HC, une porte de réfutation de la borne, six portes Corner8 et huit portes
+WST3/WST4 enregistrées. Les verts ciblés ne ferment pas les défauts de composition et
 d'identité ci-dessus. Il ne reçoit ni projection CK--WST distinct-ID/owner,
 ni profondeur `tau(F)`, ni ledger persistant de vrais `PointId`, ni primitive
 device, ni payload. Son `--fenetre-exacte` n'est exact que pour la miniboule q2
@@ -336,12 +346,18 @@ dans
 
 ## `WST3/WST4` au HEAD : candidate cover, pas source `Owned` reçue
 
-Le filtre d'acuité du `HEAD=3703097` est P0 rouge. Pour
+Le filtre d'acuité rouge de `3703097` est réparé au `HEAD=a73161c`. Pour
 `H=(x-a) dot (b-x)`, une face est aiguë en `x` lorsque `H<0`. La classification
 exacte est `Hmax<0 => ALL_ACUTE`, `Hmin>=0 => NONE_ACUTE`, sinon `MIXED`.
-Le juge WST4 courant contrôle les couples bruts et ignore le booléen `aigu` ;
-il reste donc vert tout en laissant le filtre supprimer le tétraèdre régulier
-de la fixture. Aucune mesure filtrée du commit n'est reçue.
+Le juge WST4 contrôle cependant toujours les couples bruts et ignore le booléen
+`aigu`; la nouvelle fixture tue le signe inversé, mais ne reçoit ni owner, ni
+positivité q4, ni la relation filtrée.
+
+Le ratio stable `--echelle=num/den` reste inversé entre son commentaire et sa
+comparaison entière. Le code teste `diag2*num<=rayon2*den`, donc un rapport plus
+grand raffine, alors que l'API annonce `diag2<=num/den*rayon2`, où un rapport
+plus grand grossit les cellules. Les mesures étiquetées `1/256` décrivent le
+comportement du code, pas la grandeur documentée.
 
 Le lemme arête maximale--lentille est correct et les campagnes bornées couvrent
 chaque triplet/quadruplet dans le rectangle de l'owner choisi : WST3 `5/5` et
@@ -362,8 +378,30 @@ La réparation de performance est une vraie grille Morton au niveau lié à
 `r_R`, puis `ALL/NONE_ACUTE`, profondeur et owner uniforme **avant** tout
 `sum k_t^2`. Le count de masse des paires de cellules emploie
 `binom(sum |C_i|,2)` en temps linéaire par rectangle et en u128, jamais une
-boucle `u<v` ni un `double`. Les questions Q6--Q9 et la gate coût appariée sont
-résolues dans le contre-audit ci-dessus.
+boucle `u<v`. La sortie reconvertit encore l'u128 en `double` à six chiffres
+pour l'affichage : le reçu exact doit publier l'entier. Les questions Q6--Q9 et
+la gate coût appariée sont résolues dans le contre-audit ci-dessus.
+
+Le raccord Corner8 mobile observé n'économise encore aucun produit : il est
+exécuté après le count WST4 et après le juge, sur `par_terminal` déjà
+matérialisé. Il ne supprime aucune tâche aval et ne possède ni CTest de jonction,
+ni juge causal, ni refus sur support non owner/non positif. Son crédit de huit
+spans témoins disjoints est une voie `ALL` potentiellement sûre sous les
+préconditions de Corner8, mais ses compteurs `fermes/masse_fermee` portent la
+candidate-cover brute, pas des supports q4 authentifiés. Un cap `--corner8`
+tronque en outre le diagnostic; il ne doit jamais être interprété comme une
+fermeture complète.
+
+Deux optimisations annoncées n'ont pas encore leur sémantique. Le prétest
+`orientation_signe` centré est une enclosure potentiellement plus mordante,
+mais `corner8_block` recalcule ensuite l'ancien intervalle d'orientation et ne
+consomme pas le signe certifié. Son erreur contient d'ailleurs un terme `e1`
+linéaire dans les rayons : elle n'est pas quadratique comme l'affirme le
+commentaire. Enfin, `sep_ok(C,D)` est seulement un filtre suffisant de coût.
+Une arête-owner longue peut avoir deux apex proches ; une source q4 exacte doit
+raffiner `C×D` ou laisser `PENDING`, jamais supprimer la complétion faute de
+séparation. Le delta ne vérifie au demeurant pas les cinq autres séparations
+qu'annonce son commentaire.
 
 ## P0 : `0A` reste ouvert sur u16
 
@@ -754,19 +792,23 @@ Preuves, largeurs, fixtures et cascade :
 
 ## Contre-audit croisé des flux documentaires
 
-Dans ce corpus, « l'autre auditeur » désigne opérationnellement
-`AUDIT_REPONSE_ROUTE_VERTICAL_SLICE_1AA487D_20260813.md`, explicitement relu
-par `AUDIT_REPONSE_PLAN_VERTICAL_SOC64_LP_1AA487D_20260813.md` section 0.1. Il
-ne désigne pas une identité indépendante vérifiable. Les conclusions sont donc
-reçues ou rejetées par leur contenu et leur snapshot, jamais par autorité
-personnelle.
+Dans ce corpus, « l'autre auditeur » est une relation locale au document et ne
+désigne aucune identité globale vérifiable. Par exemple,
+`AUDIT_REPONSE_PLAN_VERTICAL_SOC64_LP_1AA487D_20260813.md` section 0.1 relit
+explicitement `AUDIT_REPONSE_ROUTE_VERTICAL_SLICE_1AA487D_20260813.md`, tandis
+que d'autres rapports relisent PLAN ou une proposition non nommée. Lorsqu'un
+lien explicite existe, il est cité ; sinon la provenance est indéterminée. Les
+conclusions sont reçues ou rejetées par preuve, fixture et pin, jamais par
+autorité personnelle.
 
-Le premier de ces documents a correctement découvert l'owner décidé sur
+`AUDIT_REPONSE_ROUTE_VERTICAL_SLICE_1AA487D_20260813.md` a correctement
+découvert l'owner décidé sur
 `GenerationRank` plutôt que `PointId`; Claude l'a réparé localement au commit
 `f516198`. Il a aussi correctement relevé l'incomplétude de `0A` et la nécessité
 des lots/verticales.
 
-Ses propositions LP/cages sont recevables après les restrictions intégrées
+Les propositions LP/cages de
+`AUDIT_REPONSE_PLAN_VERTICAL_SOC64_LP_1AA487D_20260813.md` sont recevables après les restrictions intégrées
 dans la proposition consolidée : complétude LP seulement sur le pool mondial,
 largeur du constructeur distincte du vérificateur `F`, traitement des bases de
 rang inférieur, et recalcul de la fleur après réduction d'une cage. Les comptes
@@ -792,8 +834,8 @@ auditeur avait raison de demander une broad phase et de refuser une borne de
 sortie ; son angle mort, comme le mien, était la couture entre l'owner abstrait
 et les records réellement comptés. Le statut live reste `CandidateCover`.
 
-Le second contre-audit mathématique de cette passe a également corrigé mes
-propres formulations : `2B_R` est sharp seulement à information de boule
+`AUDIT_CONTRE_RECEPTION_M4_V2_DEPTHBLOCK_5BFC5C8_20260814.md` corrige également
+les formulations antérieures : `2B_R` est sharp seulement à information de boule
 contenante fixée ; un poids `lambda` commun rend `BlockJungDual` sûr mais
 incomplet à cause du swap `for all pair exists lambda`; et un glouton arbitraire
 de groupes sur l'axe n'est pas complet. La formulation est maintenant plus
@@ -803,7 +845,7 @@ matching global. Ces corrections sont intégrées à la proposition et aux fixtu
 mêmes groupes couvrent uniformément un bloc : cette efficacité reste une gate
 falsifiable.
 
-Le dernier contre-audit valide les signes et seuils stricts du primal Jung,
+Le même contre-audit valide les signes et seuils stricts du primal Jung,
 mais corrige deux nouveaux raccourcis : i256 n'est sûr qu'après la réduction
 `g_i/K_ij`, et les comptes `3280/9841` appartiennent aux profondeurs `h=8/9`
 sous `smax=11`. Il réfute aussi l'interprétation du diagnostic feuilles : seul
@@ -871,10 +913,11 @@ révision commise ec5ec3d4 : fates/masses appariés sans SOC/BJD/climb ; lecture
   ledgers combinés, BJD, climb, CTest de parité et mutant de conservation ouverts
 HEAD Corner8 : 6/6 ciblés ; bloc=4096 supports/32768 témoins, oracle ponctuel corrélé
   selftest=1 imprime accord=OUI puis code 3 ; drop-corner/norme hors porte ; produit-OJ absent
-HEAD WST3 : 5/5 ciblés ; uniform n=120, 280840 triangles, zéro manquant/doublon owner
-HEAD WST4 : 1/1 ciblé ; uniform n=60, 487635 quadruplets, zéro manquant/doublon owner
+pin 22d1cb0 WST3 : 5/5 ciblés ; uniform n=120, 280840 triangles, zéro manquant/doublon owner
+pin 22d1cb0 WST4 : 1/1 ciblé ; uniform n=60, 487635 quadruplets, zéro manquant/doublon owner
   copies non-owner, diagonales, vrai PointId, doublons de position et coût non jugés
-catalogue HEAD : 833 CTests après reconfiguration ; aucune suite complète 833/833 rejouée ici
+HEAD a73161c : huit portes WST3/WST4 enregistrées, dont signe aigu et échelle fine ; rejeu ciblé en cours
+catalogue HEAD : 835 CTests après reconfiguration ; aucune suite complète 835/835 rejouée ici
 ablation BJD n=1500 uniform : masse q4 -12,55 %, CPU user médian +5,47 %, lectures identiques
 ablation BJD n=1500 amas : masse q4 -0,87 %, CPU user médian +8,15 %, lectures identiques
 session G4 SOC actif : CTest rc=8, aucune rampe, cible TERMINATED

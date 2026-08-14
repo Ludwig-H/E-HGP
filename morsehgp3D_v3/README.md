@@ -28,8 +28,8 @@ doit être déduit de ces probes CPU.
 
 ## Verdict actuel
 
-Le `HEAD=3703097` contient trois avancées directement liées à l'idée de support
-complet, puis la note de coût WST3/WST4 :
+Le `HEAD=a73161c` contient trois avancées directement liées à l'idée de support
+complet, puis une première réduction de la taille du broad phase WST3/WST4 :
 
 - `Corner8BallDepth` reçoit un certificat q4 `ALL_INTERIOR` sur un produit de
   boîtes de supports et une boîte témoin ; il évite centre et division, mais ne
@@ -39,29 +39,39 @@ complet, puis la note de coût WST3/WST4 :
 - son produit non ordonné route de même les deux sommets restants d'un
   quadruplet.
 
-Le filtre d'acuité ajouté au dernier commit est mathématiquement rouge. Avec
-`H=(x-a) dot (b-x)`, l'identité correcte est `E+X-D=-2H`, pas `2H` : une face
-est aiguë en `x` lorsque `H<0`. Le tétraèdre régulier de tie a deux carriers
-`H=-1` et quatre poids `1/4`; le filtre committé les retire. Les gains WST4
-filtrés annoncés ne sont donc pas recevables avant correction et fixture.
+Le commit intermédiaire `3703097` avait inversé le signe du filtre d'acuité.
+`a73161c` applique désormais l'identité correcte `E+X-D=-2H`, garde une face
+aiguë lorsque `H<0`, ajoute la fixture du tétraèdre régulier de tie et rétracte
+les gains issus du signe faux. Cette réparation reçoit le signe scalaire de la
+fixture, pas encore une relation q4 positive : le juge WST4 ignore toujours
+les copies sous les ancres non-owner, les `PointId` distincts et les
+barycentriques.
 
 Ce troisième point n'est pas encore `OwnedCK-WST3/WST4`. Le probe ne filtre ni
 les occurrences provenant d'arêtes non-owner, ni les diagonales de `PointId`,
-ni l'acuité q3, ni le bien-centrage q4. Son juge choisit l'owner a posteriori et
-ne regarde que ce rectangle : il prouve la **couverture adressée par owner**,
-pas l'exact-once de toute la relation émise. Son tie-break emploie en outre le
-rang Morton au lieu du vrai `PointId`, et le probe rejette les positions
-dupliquées au lieu d'en conserver la multiplicité.
+ni le bien-centrage q4. Il classe désormais les blocs qui peuvent contenir une
+face aiguë, mais n'applique ce bit qu'à un compteur : il ne produit pas encore
+la relation q3 positive. Son juge choisit l'owner a posteriori et ne regarde que
+ce rectangle : il prouve la **couverture adressée par owner**, pas l'exact-once
+de toute la relation émise. Son tie-break emploie en outre le rang Morton au
+lieu du vrai `PointId`, et le probe rejette les positions dupliquées au lieu
+d'en conserver la multiplicité.
 
 La distinction coût/couverture est impérative. Arrêter la descente dès la
-racine resterait une couverture owner exacte, mais sans sélectivité. À
-`uniform,n=1000,s=2,echelle=1`, le probe publie `483373` blocs WST3 puis
-`6159060` couples WST4 pour une masse candidate q4 de `202720222091` ; ce
-n'est ni une source q4 filtrée ni un coût proche de l'ordre deux. Le compteur
-WST4 doit employer l'identité
+racine resterait une couverture adressée par owner, mais sans sélectivité.
+L'échelle rationnelle du dernier commit réduit fortement le nombre de
+descripteurs sur la rampe finie, sans réduire la masse logique des quadruplets
+qu'ils représentent ni recevoir une borne de packing pour les nœuds LBVH. Son
+commentaire `num/den` et sa comparaison entière décrivent encore deux rapports
+inverses. Le compteur WST4 emploie correctement l'identité
 `sum binom(|C_i|,2)+sum_{i<j}|C_i||C_j|=binom(sum_i |C_i|,2)` sans boucle
-quadratique sur les blocs, puis owner, injectivité et positivité doivent
-précéder tout `fill`.
+quadratique sur les blocs, mais reconvertit encore l'entier u128 en `double`
+pour l'affichage. Owner, injectivité, positivité et profondeur doivent précéder
+tout `fill`.
+
+Le worktree de Claude expérimente ensuite un raccord Corner8 au broad phase.
+Ce delta mobile n'est ni un résultat du `HEAD`, ni reçu : son état, ses hashes
+et ses contre-fixtures restent exclusivement dans l'audit courant.
 
 Votre idée mathématique est donc reçue sous sa forme exacte : la hiérarchie
 HGP n'a besoin que des supports minimaux positifs complets. q2 teste une boule
