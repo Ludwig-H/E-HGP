@@ -103,6 +103,8 @@ struct SocShadowStat {
   long long faux = 0;          // triples reels refutant un verdict `ALL`
   long long triples = 0;       // triples enumeres par le juge
   long long invariant_viole = 0;  // ccred < cred : les ledgers ont diverge
+  long long cap_refuses = 0;      // taches refusees par le cap : ledger NON final
+  long long wide = 0;             // multiplications 128 bits reellement formees
   // --- LE LEDGER FAUTIF, CONSERVE COMME TEMOIN.
   //
   // C'est l'ecriture que le contre-audit a refutee : additionner `cred[2]` et
@@ -176,10 +178,31 @@ long long g_min_soc_taches = 0;
 // sujet : ni H, ni E, ni X, ni les differences de Minkowski. Une faute commune
 // ne peut donc pas s'y compenser.
 bool g_judge_soc64 = false;
+// CAP DETERMINISTE DU SHADOW. Le contre-audit exige `max_soc_tasks <= 4096`
+// pour le diagnostic initial et le statut `PENDING` au cap : sans lui, le claim
+// « bon marche » n'est pas recevable, puisque les runs live soumettent jusqu'a
+// 48,6 millions de taches. Au cap, la vue combinee cesse d'etre creditee et le
+// ledger publie n'est plus final — il devient un MINORANT explicite.
+long long g_soc_cap = 0;
 long long g_soc_judge_cap = 4096;   // triples enumeres par verdict juge
 // Echantillon scelle de porteurs aigus : le premier chiffre de `M3`/`M4`.
 long long g_m4_sample = 0;
 long long g_min_m4_echantillon = 0;
+// `r_e` : nombre de PAIRES tirees dans chaque lentille pour l'etage interieur.
+// Il borne le cout sans jamais censurer une arete de la moyenne.
+long long g_apex_sample = 0;
+// Oracle exhaustif de `C4`, par un parcours independant des terminaux.
+long long g_porteurs_oracle = 0;
+// Graine SCELLEE de l'estimateur. Elle est publiee avec le resultat : une
+// estimation dont on ne peut pas rejouer le tirage n'est pas verifiable.
+long long g_porteurs_seed = 1;
+// Budget d'apex bien centres dont on calcule le RANG exact : le seul filtre qui
+// separe une masse de candidats d'une sortie utile.
+long long g_rang_budget = 0;
+// MUTANT : imprimer `C4` sous le libelle `M4`. C'est exactement la faute que la
+// version `v0` de ce compteur commettait, et qu'un contre-audit a du relever.
+// Une faute corrigee sans mutant revient.
+bool g_inject_c4_comme_m4 = false;
 
 // ---- `EdgeWindowRangeAdd-v0` : la fenetre d'aretes, EXACTE et en `O(F+n)`.
 //
@@ -893,8 +916,14 @@ int main(int argc, char** argv) {
     else if (a.rfind("--max-slope-e4=", 0) == 0) g_max_slope_e4 = std::atof(val("--max-slope-e4=").c_str());
     else if (a == "--soc64-shadow") g_soc64_shadow = true;
     else if (a == "--judge-soc64") { g_soc64_shadow = true; g_judge_soc64 = true; }
+    else if (a.rfind("--soc-cap=", 0) == 0) { g_soc64_shadow = true; g_soc_cap = arg_ll(val("--soc-cap=").c_str(), 1, (1LL << 40), "soc-cap"); }
     else if (a.rfind("--porteurs=", 0) == 0) { g_window = true; g_m4_sample = arg_ll(val("--porteurs=").c_str(), 1, (1LL << 22), "porteurs"); }
     else if (a.rfind("--min-masse-porteurs=", 0) == 0) g_min_m4_echantillon = arg_ll(val("--min-masse-porteurs=").c_str(), 1, (1LL << 40), "min-masse-porteurs");
+    else if (a.rfind("--apex=", 0) == 0) g_apex_sample = arg_ll(val("--apex=").c_str(), 1, (1LL << 22), "apex");
+    else if (a.rfind("--porteurs-seed=", 0) == 0) g_porteurs_seed = arg_ll(val("--porteurs-seed=").c_str(), 0, (1LL << 40), "porteurs-seed");
+    else if (a.rfind("--rang=", 0) == 0) g_rang_budget = arg_ll(val("--rang=").c_str(), 1, (1LL << 22), "rang");
+    else if (a.rfind("--porteurs-oracle=", 0) == 0) { g_window = true; g_porteurs_oracle = arg_ll(val("--porteurs-oracle=").c_str(), 4, 4000, "porteurs-oracle"); }
+    else if (a == "--inject=porteurs-c4-comme-m4") g_inject_c4_comme_m4 = true;
     else if (a.rfind("--soc-judge-cap=", 0) == 0) { g_judge_soc64 = true; g_soc64_shadow = true; g_soc_judge_cap = arg_ll(val("--soc-judge-cap=").c_str(), 1, (1LL << 24), "soc-judge-cap"); }
     else if (a.rfind("--min-soc-taches=", 0) == 0) g_min_soc_taches = arg_ll(val("--min-soc-taches=").c_str(), 1, (1LL << 40), "min-soc-taches");
     else refuse("option inconnue");
@@ -906,6 +935,11 @@ int main(int argc, char** argv) {
   if (g_min_soc_taches > 0 && !g_soc64_shadow) refuse("--min-soc-taches exige --soc64-shadow");
   if (g_min_m4_echantillon > 0 && g_m4_sample == 0)
     refuse("--min-masse-porteurs exige --porteurs");
+  if (g_apex_sample > 0 && g_m4_sample == 0) refuse("--apex exige --porteurs");
+  if (g_porteurs_oracle > 0 && g_m4_sample == 0) refuse("--porteurs-oracle exige --porteurs");
+  // Un mutant sans son juge est un vert par vacuite : il faut l'oracle.
+  if (g_inject_c4_comme_m4 && g_porteurs_oracle == 0)
+    refuse("--inject=porteurs-c4-comme-m4 exige --porteurs-oracle");
   if (ns.empty()) ns = {4000, 16000};
 
   mhgp3v::CloudFamily fam;
@@ -1177,12 +1211,16 @@ int main(int argc, char** argv) {
                   sb.lo[d] = qb.lo[d]; sb.hi[d] = qb.hi[d];
                   sc.lo[d] = cb2.lo[d]; sc.hi[d] = cb2.hi[d];
                 }
+                if (g_soc_cap > 0 && soc.taches >= g_soc_cap) {
+                  ++soc.cap_refuses;
+                } else {
                 mhgp3v::soc::SocStats sst{};
                 ++soc.taches;
                 const int sl = mhgp3v::soc::soc64_all_lane(
                     sa, sb, sc, mhgp3v::soc::SocMutant::kNone, mhgp3v::cone::kLaneQ4, &sst);
                 soc.couples += sst.pairs;
                 soc.early += sst.early;
+                soc.wide += sst.wide;
                 if (sl >= mhgp3v::cone::kLaneQ4) {
                   ++soc.all;
                   w = RectVerdict::kAll;
@@ -1231,6 +1269,7 @@ int main(int argc, char** argv) {
                       ++soc.juges_sautes;
                     }
                   }
+                }
                 }
               }
               if (w == RectVerdict::kAll) ccred[lane] += pop;
@@ -1931,11 +1970,14 @@ int main(int argc, char** argv) {
     // existante : les portes en place lisent des lignes entieres.
     if (g_soc64_shadow) {
       std::printf("soc64_shadow q4 : tentatives taches=%lld all=%lld (%.3f%%) couples=%lld"
-                  " couples/tache=%.2f early=%lld masse_creditee=%lld fermetures=%lld"
+                  " couples/tache=%.2f early=%lld larges=%lld cap_refuses=%lld"
+                  " ledger=%s masse_creditee=%lld fermetures=%lld"
                   " | terminaux fermetures=%lld masse_fermee=%lld seuil=%d\n",
                   soc.taches, soc.all,
                   100.0 * (double)soc.all / (double)std::max(1LL, soc.taches), soc.couples,
                   (double)soc.couples / (double)std::max(1LL, soc.taches), soc.early,
+                  soc.wide, soc.cap_refuses,
+                  soc.cap_refuses == 0 ? "FINAL" : "MINORANT_CAP",
                   soc.masse_creditee, soc.tentatives_fermees, soc.fermetures, soc.masse_fermee,
                   g_need[2]);
       // LE TEMOIN DE LA FAUTE, PUBLIE A COTE DU RESULTAT. Il n'est jamais le
@@ -1995,50 +2037,154 @@ int main(int argc, char** argv) {
                   orient_ab, orient_ba, oracle_pairs, oracle_desaccords);
 
       // ---------------------------------------------------------------------
-      // `EdgeAcuteCarrierSample-v0` : LE PREMIER CHIFFRE DE `M3`/`M4`.
+      // `CarrierApexEstimator-v2` : ESTIMATEUR EMBOITE, SANS CENSURE.
       //
-      // Les deux contre-audits du 14 aout exigent la meme chose et pour la meme
-      // raison : une fenetre d'aretes sparse ne borne NI `M3`, NI `M4`, NI les
-      // spheres uniques. Tant que ce nombre est inconnu, aucune porte de cout
-      // n'est decidable — c'est ce qui rend incomparables un temps de vague et
-      // une masse `E4` evitee.
+      // Les versions precedentes de ce compteur ont ete refutees deux fois, et
+      // les deux fois pour la meme raison de fond : un nombre publie sans sa
+      // loi n'est pas une mesure.
       //
-      // CE QUI EST COMPTE. Pour une arete ouverte `ab`, un PORTEUR ADMISSIBLE
-      // est un site `x` tel que `ab` soit l'arete maximale faible du triangle
-      // `abx` ET que ce triangle soit strictement aigu. Avec `d=b-a`, `u=x-a` :
+      //   v0 imprimait `E4 * moyenne(|A_e|)` sous le nom `M4`. C'etait `C4`,
+      //      sans tie-break d'owner, donc meme pas `C4` exactement : un
+      //      triangle a egalite y etait credite sous plusieurs aretes.
+      //   v1 reparait l'owner et ajoutait l'apex, mais RETIRAIT de la moyenne
+      //      toute arete dont `binom(|L_e|,2)` depassait le cap. Cette censure
+      //      porte precisement sur la variable qui rend le cout lourd : elle
+      //      biaise vers le BAS, et d'autant plus que la vraie valeur est
+      //      grande. `AUDIT_REPONSE_M4_PORTEURS_AIGUS_4515A8B_20260814.md`
+      //      section 2.2 a raison de la refuser.
       //
-      //   D = d.d,  E = u.u,  F = d.u,  X = D+E-2F,  V = 2u-d
-      //   maximalite faible : D >= E et D >= X
-      //   acuite stricte    : V.V > D        (car V.V - D = 2(E+X-D))
+      // La v2 suit le schema emboite de la section 3.1 de ce meme audit.
       //
-      // Ce compte n'est pas un choix esthetique. Le lemme du porteur aigu de
-      // `AUDIT_DEBLOCAGE_Q4_PORTEUR_AIGU_SOC64_LIVE_35FCEA8_20260814.md`
-      // section 4 dit que tout tetraedre strictement bien centre possede, pour
-      // son arete maximale, au moins une face incidente strictement aigue.
-      // Les porteurs admissibles sont donc EXACTEMENT les candidats du premier
-      // etage d'une source q4 owner-edge, et leur nombre est le premier facteur
-      // de `M4`.
+      // ETAGE EXTERIEUR. `N` est la masse d'aretes q4 OUVERTES ET FINALES —
+      // les terminaux `PENDING` sont exclus et leur masse est publiee a part,
+      // car un terminal tronque n'a pas de sort connu. On tire `K` rangs
+      // uniformes independants dans `[0,N)` par un generateur counter-based
+      // seede, jamais par des milieux de quantiles : la quadrature
+      // deterministe peut s'aligner sur une periodicite de Morton et n'a
+      // aucune barre d'erreur. La bijection rang -> paire passe par la masse
+      // cumulee des terminaux. Les estimateurs sont Hansen--Hurwitz.
       //
-      // POURQUOI UN ECHANTILLON. Compter exactement demanderait de developper
-      // les paires ouvertes — precisement ce que la fenetre evite. On tire donc
-      // un echantillon SCELLE, DETERMINISTE et PONDERE PAR LA MASSE `|A||B|`,
-      // par tirage systematique sur la masse cumulee : aucun generateur
-      // pseudo-aleatoire, aucune dependance a l'ordre de stockage, et la meme
-      // graine rend le meme echantillon. L'extrapolation `E * moyenne` est
-      // publiee comme une ESTIMATION et jamais comme une mesure.
+      // ETAGE INTERIEUR. Pour eviter `binom(l_e,2)` sur une grosse lentille,
+      // on tire `r_e` rangs uniformes de PAIRES dans la lentille, decodes par
+      // unranking triangulaire EXACT — recherche binaire sur les prefixes
+      // entiers, aucun flottant —, puis on evalue l'indicatrice exacte de
+      // `Q_e`. L'estimateur local est `binom(l_e,2) * moyenne`. AUCUNE arete
+      // n'est jamais retiree de la moyenne : un cap reduit `r_e`, il ne censure
+      // pas la population.
       //
-      // LE COMPTE ZERO EST LE PLUS INFORMATIF. Sur la contre-famille u16 a deux
-      // droites, `n^2/4` paires restent ouvertes pour tout certificat universel
-      // alors qu'AUCUN triangle n'est aigu : la source q3/q4 y est vide. Une
-      // source qui compte ses porteurs voit cela ; une porte sur `sum E4` ne le
-      // voit pas. `aretes_sans_porteur` est donc publie a part.
+      // CE QUI EST PUBLIE. Graine, `K`, digest des paires tirees, doublons,
+      // variance empirique, demi-largeur a deux sigma. Les noms sont
+      // `C4_carrier_quadrature` et `M4_apex_quadrature` : ce sont des
+      // ESTIMATIONS et le nom le dit. Le nom nu `M4` est interdit.
       if (g_m4_sample > 0) {
+        // `EdgeKey` sur les vrais `PointId`, jamais sur le rang de tri.
+        auto edge_key_moins = [&](long long r1, long long r2, long long s1,
+                                  long long s2) -> bool {
+          long long a1 = spid[(size_t)r1], a2 = spid[(size_t)r2];
+          if (a1 > a2) std::swap(a1, a2);
+          long long b1 = spid[(size_t)s1], b2 = spid[(size_t)s2];
+          if (b1 > b2) std::swap(b1, b2);
+          return (a1 != b1) ? (a1 < b1) : (a2 < b2);
+        };
+        auto d2 = [&](long long r1, long long r2) -> long long {
+          const long long dx = sp[(size_t)r1][0] - sp[(size_t)r2][0];
+          const long long dy = sp[(size_t)r1][1] - sp[(size_t)r2][1];
+          const long long dz = sp[(size_t)r1][2] - sp[(size_t)r2][2];
+          return dx * dx + dy * dy + dz * dz;
+        };
+        // `e` reste-t-il owner face a l'arete `(r1,r2)` de longueur carree `l` ?
+        // Strictement plus longue : non. Egale : le tie-break `EdgeKey` decide.
+        auto owner_tient = [&](long long dd, long long ra, long long rb, long long l,
+                               long long r1, long long r2) -> bool {
+          if (l > dd) return false;
+          if (l < dd) return true;
+          return edge_key_moins(ra, rb, r1, r2);
+        };
+        auto dans_ae = [&](long long dd, long long ra, long long rb,
+                           long long rx) -> bool {
+          const long long ee = d2(rx, ra), xx = d2(rx, rb);
+          if (ee > dd || xx > dd) return false;
+          if (!owner_tient(dd, ra, rb, ee, ra, rx)) return false;
+          if (!owner_tient(dd, ra, rb, xx, rb, rx)) return false;
+          return ee + xx > dd;   // `ab` faiblement maximale : aigu <=> E + X > D
+        };
+        // Indicatrice exacte de `Q_e` sur un couple ordonne `(rx, ry)`.
+        auto dans_qe = [&](long long dd, long long ra, long long rb, long long rx,
+                           long long ry, bool* positif) -> bool {
+          if (!owner_tient(dd, ra, rb, d2(rx, ry), rx, ry)) return false;
+          if (!owner_tient(dd, ra, rb, d2(rx, ra), ra, rx)) return false;
+          if (!owner_tient(dd, ra, rb, d2(rx, rb), rb, rx)) return false;
+          if (!owner_tient(dd, ra, rb, d2(ry, ra), ra, ry)) return false;
+          if (!owner_tient(dd, ra, rb, d2(ry, rb), rb, ry)) return false;
+          if (!dans_ae(dd, ra, rb, rx) && !dans_ae(dd, ra, rb, ry)) return false;
+          const long long ux = sp[(size_t)rx][0] - sp[(size_t)ra][0];
+          const long long uy = sp[(size_t)rx][1] - sp[(size_t)ra][1];
+          const long long uz = sp[(size_t)rx][2] - sp[(size_t)ra][2];
+          const long long vx = sp[(size_t)ry][0] - sp[(size_t)ra][0];
+          const long long vy = sp[(size_t)ry][1] - sp[(size_t)ra][1];
+          const long long vz = sp[(size_t)ry][2] - sp[(size_t)ra][2];
+          const long long wx = sp[(size_t)rb][0] - sp[(size_t)ra][0];
+          const long long wy = sp[(size_t)rb][1] - sp[(size_t)ra][1];
+          const long long wz = sp[(size_t)rb][2] - sp[(size_t)ra][2];
+          if (wx * (uy * vz - uz * vy) - wy * (ux * vz - uz * vx) +
+              wz * (ux * vy - uy * vx) == 0) return false;
+          // Bien centre : les quatre barycentriques du circumcentre strictement
+          // positives, decidees sans division. `G_ij = ui.uj`, `r_i = |ui|^2`,
+          // `beta_i = det(G_i)/(2 det G)` : il suffit de `det G > 0`,
+          // `det G_i > 0` et `somme det G_i < 2 det G`. Sous u16, un
+          // determinant 3x3 d'entrees 34 bits tient sur 104 bits.
+          *positif = false;
+          const long long g11 = wx * wx + wy * wy + wz * wz;
+          const long long g22 = ux * ux + uy * uy + uz * uz;
+          const long long g33 = vx * vx + vy * vy + vz * vz;
+          const long long g12 = wx * ux + wy * uy + wz * uz;
+          const long long g13 = wx * vx + wy * vy + wz * vz;
+          const long long g23 = ux * vx + uy * vy + uz * vz;
+          auto det3 = [](__int128 a11, __int128 a12, __int128 a13, __int128 a21,
+                         __int128 a22, __int128 a23, __int128 a31, __int128 a32,
+                         __int128 a33) -> __int128 {
+            return a11 * (a22 * a33 - a23 * a32) - a12 * (a21 * a33 - a23 * a31) +
+                   a13 * (a21 * a32 - a22 * a31);
+          };
+          const __int128 dg = det3(g11, g12, g13, g12, g22, g23, g13, g23, g33);
+          if (dg > 0) {
+            const __int128 e1 = det3(g11, g12, g13, g22, g22, g23, g33, g23, g33);
+            const __int128 e2 = det3(g11, g11, g13, g12, g22, g23, g13, g33, g33);
+            const __int128 e3 = det3(g11, g12, g11, g12, g22, g22, g13, g23, g33);
+            if (e1 > 0 && e2 > 0 && e3 > 0 && e1 + e2 + e3 < 2 * dg) *positif = true;
+          }
+          return true;
+        };
+        // Generateur counter-based : la graine est SCELLEE et le j-ieme tirage
+        // ne depend que de `(graine, j)`. Aucun etat, donc aucune dependance a
+        // l'ordre d'evaluation.
+        auto splitmix = [](unsigned long long x) -> unsigned long long {
+          x += 0x9E3779B97F4A7C15ULL;
+          x = (x ^ (x >> 30)) * 0xBF58476D1CE4E5B9ULL;
+          x = (x ^ (x >> 27)) * 0x94D049BB133111EBULL;
+          return x ^ (x >> 31);
+        };
+        // Unranking triangulaire EXACT : rang `r` dans `[0, C(l,2))` -> couple
+        // `i < j`. Recherche binaire sur `prefixe(i) = i*(2l-i-1)/2`, en
+        // entiers, sans jamais former une racine carree.
+        auto unrank = [](long long l, long long r, long long* oi, long long* oj) {
+          long long lo = 0, hi = l - 2;
+          while (lo < hi) {
+            const long long mid = (lo + hi + 1) / 2;
+            const long long pref = mid * (2 * l - mid - 1) / 2;
+            if (pref <= r) lo = mid; else hi = mid - 1;
+          }
+          *oi = lo;
+          *oj = r - lo * (2 * l - lo - 1) / 2 + lo + 1;
+        };
+
         for (int lane = 1; lane <= 2; ++lane) {
-          // 1. Masse cumulee des terminaux OUVERTS de la lane.
+          // POPULATION : ouverte ET FINALE. Un terminal `PENDING` a un sort
+          // inconnu ; l'inclure ferait viser un surensemble sans le dire.
           std::vector<long long> cum;
           std::vector<size_t> idx;
           cum.reserve(terms.size() + 1);
-          long long acc = 0;
+          long long acc = 0, masse_pending = 0;
           cum.push_back(0);
           for (size_t i = 0; i < terms.size(); ++i) {
             if (i < fate.size() && (fate[i] & (1u << lane))) continue;
@@ -2047,71 +2193,270 @@ int main(int argc, char** argv) {
             const long long la = (ta < 0) ? (-1 - ta) : nodes[ta].last;
             const long long fb = (tb < 0) ? (-1 - tb) : nodes[tb].first;
             const long long lb = (tb < 0) ? (-1 - tb) : nodes[tb].last;
-            acc += (la - fa + 1) * (lb - fb + 1);
+            const long long msz = (la - fa + 1) * (lb - fb + 1);
+            if (i < pend.size() && (pend[i] & (1u << lane))) { masse_pending += msz; continue; }
+            acc += msz;
             idx.push_back(i);
             cum.push_back(acc);
           }
           if (acc <= 0) {
-            std::printf("porteurs q%d : masse_ouverte=0 echantillon=0\n", lane + 2);
+            std::printf("porteurs q%d : population_finale=0 masse_pending=%lld\n", lane + 2,
+                        masse_pending);
             continue;
           }
-          const long long k = std::min<long long>(g_m4_sample, acc);
-          long long somme = 0, maxi = 0, sans = 0;
-          std::vector<long long> cnts;
-          cnts.reserve((size_t)k);
+          const long long k = g_m4_sample;
+          long long somme_a = 0;
+          double somme_a2 = 0.0;
+          double somme_q = 0.0, somme_q2 = 0.0, somme_p = 0.0;
+          long long maxi = 0, sans = 0, doublons = 0, tires = 0;
+          long long lens_max = 0, paires_internes = 0;
+          long long rang_faits = 0, rang_retenus = 0, rang_max = 0;
+          double somme_rang = 0.0;
+          unsigned long long digest = 1469598103934665603ULL;   // FNV-1a 64
+          unsigned long long precedent = ~0ULL;
+          std::vector<long long> le;
           for (long long j = 0; j < k; ++j) {
-            // Tirage systematique EXACT sur la masse cumulee : la j-ieme cible
-            // est le point de masse `(2j+1) * acc / (2k)`, sans flottant.
-            const long long cible = (2 * j + 1) * acc / (2 * k);
-            const size_t pos = (size_t)(std::upper_bound(cum.begin(), cum.end(), cible) -
+            // Rang uniforme dans `[0, acc)`. Le produit est forme en 128 bits :
+            // `acc` atteint `C(n,2)` et un `long long` deborderait au-dela du
+            // domaine 50k. Le contre-audit avait raison de le relever.
+            const unsigned long long h =
+                splitmix((unsigned long long)g_porteurs_seed * 0x100000001B3ULL +
+                         (unsigned long long)j);
+            const long long rang = (long long)(((unsigned __int128)h * (unsigned __int128)acc) >> 64);
+            const size_t pos = (size_t)(std::upper_bound(cum.begin(), cum.end(), rang) -
                                         cum.begin() - 1);
             if (pos >= idx.size()) continue;
             const size_t ti = idx[pos];
             const int ta = terms[ti].a, tb = terms[ti].b;
             const long long fa = (ta < 0) ? (-1 - ta) : nodes[ta].first;
-            const long long la = (ta < 0) ? (-1 - ta) : nodes[ta].last;
             const long long fb = (tb < 0) ? (-1 - tb) : nodes[tb].first;
             const long long lb = (tb < 0) ? (-1 - tb) : nodes[tb].last;
-            const long long ka = la - fa + 1, kb = lb - fb + 1;
-            const long long dans = cible - cum[pos];
+            const long long kb = lb - fb + 1;
+            const long long dans = rang - cum[pos];
             const long long ra = fa + dans / kb;
             const long long rb = fb + dans % kb;
-            const long long ax = sp[(size_t)ra][0], ay = sp[(size_t)ra][1], az = sp[(size_t)ra][2];
-            const long long bx = sp[(size_t)rb][0], by = sp[(size_t)rb][1], bz = sp[(size_t)rb][2];
-            const long long dx = bx - ax, dy = by - ay, dz = bz - az;
-            const long long dd = dx * dx + dy * dy + dz * dz;
+            ++tires;
+            {
+              unsigned long long p1 = (unsigned long long)spid[(size_t)ra];
+              unsigned long long p2 = (unsigned long long)spid[(size_t)rb];
+              if (p1 > p2) std::swap(p1, p2);
+              const unsigned long long cle = p1 * 1000003ULL + p2;
+              if (cle == precedent) ++doublons;
+              precedent = cle;
+              digest ^= p1; digest *= 1099511628211ULL;
+              digest ^= p2; digest *= 1099511628211ULL;
+            }
+            const long long dd = d2(ra, rb);
             long long porteurs = 0;
+            le.clear();
             for (long long r = 0; r < m; ++r) {
               if (r == ra || r == rb) continue;
-              const long long ux = sp[(size_t)r][0] - ax;
-              const long long uy = sp[(size_t)r][1] - ay;
-              const long long uz = sp[(size_t)r][2] - az;
-              const long long ee = ux * ux + uy * uy + uz * uz;
-              const long long ff = dx * ux + dy * uy + dz * uz;
-              const long long xx = dd + ee - 2 * ff;
-              if (dd < ee || dd < xx) continue;              // `ab` non maximale
-              const long long vx = 2 * ux - dx, vy = 2 * uy - dy, vz = 2 * uz - dz;
-              if (vx * vx + vy * vy + vz * vz > dd) ++porteurs;   // strictement aigu
+              if (d2(r, ra) > dd || d2(r, rb) > dd) continue;   // hors de `L_e`
+              le.push_back(r);
+              if (dans_ae(dd, ra, rb, r)) ++porteurs;
             }
-            (void)ka;
-            somme += porteurs;
+            somme_a += porteurs;
+            somme_a2 += (double)porteurs * (double)porteurs;
             if (porteurs > maxi) maxi = porteurs;
             if (porteurs == 0) ++sans;
-            cnts.push_back(porteurs);
+
+            // ---- ETAGE INTERIEUR. Jamais de censure : un cap reduit `r_e`.
+            const long long l = (long long)le.size();
+            if (l > lens_max) lens_max = l;
+            const long long total_paires = (l < 2) ? 0 : l * (l - 1) / 2;
+            double qhat = 0.0, phat = 0.0;
+            if (total_paires > 0) {
+              const long long re = std::min<long long>(g_apex_sample, total_paires);
+              long long touches = 0, touches_pos = 0;
+              for (long long t = 0; t < re; ++t) {
+                const unsigned long long h2 =
+                    splitmix((unsigned long long)g_porteurs_seed * 0x9E3779B9ULL +
+                             (unsigned long long)j * 0x100000001B3ULL +
+                             (unsigned long long)t + 0xABCDEF01ULL);
+                const long long rp =
+                    (long long)(((unsigned __int128)h2 * (unsigned __int128)total_paires) >> 64);
+                long long i1 = 0, i2 = 0;
+                unrank(l, rp, &i1, &i2);
+                if (i1 < 0 || i2 >= l) continue;
+                bool positif = false;
+                if (dans_qe(dd, ra, rb, le[(size_t)i1], le[(size_t)i2], &positif)) {
+                  ++touches;
+                  if (positif) ++touches_pos;
+                }
+                ++paires_internes;
+              }
+              if (re > 0) {
+                qhat = (double)total_paires * (double)touches / (double)re;
+                phat = (double)total_paires * (double)touches_pos / (double)re;
+              }
+            }
+            somme_q += qhat;
+            somme_q2 += qhat * qhat;
+            somme_p += phat;
+
+            // ---- LE RANG DU CANDIDAT, ET L'ECART CANDIDATS -> SORTIE.
+            //
+            // `M4_apex` et `W4_positive` comptent des CANDIDATS. Un support q4
+            // n'est retenu que si sa propre sphere circonscrite contient au
+            // plus `smax - 4` points interieurs. C'est ce filtre, et lui seul,
+            // qui separe une masse quartique d'une sortie utile — et il ne
+            // s'applique qu'apres avoir connu la sphere.
+            //
+            // Le predicat est le determinant in-sphere 4x4, translate en `a` :
+            // lignes `(p-a, |p-a|^2)` pour `p = b, x, y, z`, son signe corrige
+            // par l'orientation `det3(b-a,x-a,y-a)`. Sous u16 il tient sur
+            // environ 87 bits — trois coordonnees a 65535 et une norme carree a
+            // 1,3e10 donnent 8,8e25 apres les 24 permutations — donc `i128`.
+            if (g_rang_budget > 0 && rang_faits < g_rang_budget && total_paires > 0) {
+              const long long re2 = std::min<long long>(8, total_paires);
+              for (long long t = 0; t < re2 && rang_faits < g_rang_budget; ++t) {
+                const unsigned long long h3 =
+                    splitmix((unsigned long long)g_porteurs_seed * 0x2545F491ULL +
+                             (unsigned long long)j * 0x9E3779B9ULL +
+                             (unsigned long long)t + 0x5DEECE66DULL);
+                const long long rp =
+                    (long long)(((unsigned __int128)h3 * (unsigned __int128)total_paires) >> 64);
+                long long i1 = 0, i2 = 0;
+                unrank(l, rp, &i1, &i2);
+                if (i1 < 0 || i2 >= l) continue;
+                bool positif = false;
+                if (!dans_qe(dd, ra, rb, le[(size_t)i1], le[(size_t)i2], &positif)) continue;
+                if (!positif) continue;                 // seuls les bien centres
+                const long long rx = le[(size_t)i1], ry = le[(size_t)i2];
+                const __int128 ux = sp[(size_t)rx][0] - sp[(size_t)ra][0];
+                const __int128 uy = sp[(size_t)rx][1] - sp[(size_t)ra][1];
+                const __int128 uz = sp[(size_t)rx][2] - sp[(size_t)ra][2];
+                const __int128 vx = sp[(size_t)ry][0] - sp[(size_t)ra][0];
+                const __int128 vy = sp[(size_t)ry][1] - sp[(size_t)ra][1];
+                const __int128 vz = sp[(size_t)ry][2] - sp[(size_t)ra][2];
+                const __int128 wx = sp[(size_t)rb][0] - sp[(size_t)ra][0];
+                const __int128 wy = sp[(size_t)rb][1] - sp[(size_t)ra][1];
+                const __int128 wz = sp[(size_t)rb][2] - sp[(size_t)ra][2];
+                const __int128 orient = wx * (uy * vz - uz * vy) - wy * (ux * vz - uz * vx) +
+                                        wz * (ux * vy - uy * vx);
+                const __int128 nw = wx * wx + wy * wy + wz * wz;
+                const __int128 nu = ux * ux + uy * uy + uz * uz;
+                const __int128 nv = vx * vx + vy * vy + vz * vz;
+                const __int128 c0 = uy * (vz * nw - nv * wz) - uz * (vy * nw - nv * wy) +
+                                    nu * (vy * wz - vz * wy);
+                const __int128 c1 = ux * (vz * nw - nv * wz) - uz * (vx * nw - nv * wx) +
+                                    nu * (vx * wz - vz * wx);
+                const __int128 c2 = ux * (vy * nw - nv * wy) - uy * (vx * nw - nv * wx) +
+                                    nu * (vx * wy - vy * wx);
+                const __int128 c3 = ux * (vy * wz - vz * wy) - uy * (vx * wz - vz * wx) +
+                                    uz * (vx * wy - vy * wx);
+                long long interieurs = 0;
+                for (long long z = 0; z < m; ++z) {
+                  if (z == ra || z == rb || z == rx || z == ry) continue;
+                  const __int128 zx = sp[(size_t)z][0] - sp[(size_t)ra][0];
+                  const __int128 zy = sp[(size_t)z][1] - sp[(size_t)ra][1];
+                  const __int128 zz = sp[(size_t)z][2] - sp[(size_t)ra][2];
+                  const __int128 nz = zx * zx + zy * zy + zz * zz;
+                  const __int128 det4 = -zx * c0 + zy * c1 - zz * c2 + nz * c3;
+                  if ((orient > 0) ? (det4 < 0) : (det4 > 0)) ++interieurs;
+                }
+                ++rang_faits;
+                somme_rang += (double)interieurs;
+                if (interieurs <= (long long)g_need[2] - 1) ++rang_retenus;
+                if (interieurs > rang_max) rang_max = interieurs;
+              }
+            }
           }
-          std::sort(cnts.begin(), cnts.end());
-          const long long p50 = cnts.empty() ? 0 : cnts[cnts.size() / 2];
-          const long long p95 = cnts.empty() ? 0 : cnts[(cnts.size() * 95) / 100];
-          const double moy = cnts.empty() ? 0.0 : (double)somme / (double)cnts.size();
-          std::printf("porteurs q%d : echantillon=%zu masse_ouverte=%lld moyen=%.3f p50=%lld"
-                      " p95=%lld max=%lld sans_porteur=%lld (%.3f%%) | M%d_estime=%.6g\n",
-                      lane + 2, cnts.size(), acc, moy, p50, p95, maxi, sans,
-                      100.0 * (double)sans / (double)std::max<size_t>(1, cnts.size()),
-                      lane + 2, moy * (double)acc);
+          if (tires == 0) {
+            std::fprintf(stderr, "REFUS : aucun tirage valide sur %lld demandes\n", k);
+            return 2;
+          }
+          const double moy_a = (double)somme_a / (double)tires;
+          const double var_a = std::max(0.0, somme_a2 / (double)tires - moy_a * moy_a);
+          const double moy_q = somme_q / (double)tires;
+          const double var_q = std::max(0.0, somme_q2 / (double)tires - moy_q * moy_q);
+          const double moy_p = somme_p / (double)tires;
+          const double demi_a = 2.0 * std::sqrt(var_a / (double)tires) * (double)acc;
+          const double demi_q = 2.0 * std::sqrt(var_q / (double)tires) * (double)acc;
+          std::printf("porteurs q%d : population_finale=%lld masse_pending=%lld tires=%lld"
+                      " graine=%lld doublons=%lld digest=%016llx | A_e moyen=%.3f max=%lld"
+                      " sans=%lld (%.3f%%) | C4_carrier_quadrature=%.10g +/-%.4g\n",
+                      lane + 2, acc, masse_pending, tires, g_porteurs_seed, doublons,
+                      (unsigned long long)digest, moy_a, maxi, sans,
+                      100.0 * (double)sans / (double)tires, moy_a * (double)acc, demi_a);
+          if (g_rang_budget > 0) {
+            std::printf("rang q%d : bien_centres_juges=%lld interieurs_moyen=%.1f max=%lld"
+                        " | retenus_a_rang_max_%d : %lld (%.6f%%)\n",
+                        lane + 2, rang_faits,
+                        (rang_faits == 0) ? 0.0 : somme_rang / (double)rang_faits, rang_max,
+                        g_need[2] - 1, rang_retenus,
+                        100.0 * (double)rang_retenus / (double)std::max(1LL, rang_faits));
+          }
+          if (g_apex_sample > 0) {
+            std::printf("apex q%d : L_e max=%lld paires_internes=%lld r_e=%lld"
+                        " | Q_e moyen=%.3f M4_apex_quadrature=%.10g +/-%.4g"
+                        " | W4_positive_quadrature=%.10g ratio=%.6f\n",
+                        lane + 2, lens_max, paires_internes, g_apex_sample, moy_q,
+                        moy_q * (double)acc, demi_q, moy_p * (double)acc,
+                        (moy_q > 0.0) ? moy_p / moy_q : 0.0);
+          }
         }
+
+        // -------------------------------------------------------------------
+        // CONTROLE D'INDEX EXHAUSTIF. Ce n'est PAS un oracle independant : il
+        // reutilise les memes lambdas geometriques, les memes terminaux et les
+        // memes fates, et le contre-audit a raison de le dire. Il verifie une
+        // seule chose, mais il la verifie exactement : que le decodage
+        // `rang -> (terminal, ra, rb)` de l'echantillonneur enumere la meme
+        // population que le parcours direct des plages. C'est le defaut le plus
+        // silencieux possible de ce compteur, et ce controle le ferme.
+        //
+        // Il COMPARE les totaux dans le processus et rend 1 en cas d'ecart ; il
+        // ne se contente pas d'imprimer deux lignes qu'un regex confronterait.
+        if (g_porteurs_oracle > 0) {
+          if (m > g_porteurs_oracle) {
+            // UN JUGE SAUTE NE VAUT JAMAIS ACCORD. Le contre-audit a reproduit
+            // la vacuite : `points=100 --porteurs-oracle=4` sortait zero sans
+            // ligne oracle ni mutant.
+            std::fprintf(stderr,
+                         "REFUS : --porteurs-oracle=%lld < n=%lld, le controle serait saute\n",
+                         g_porteurs_oracle, m);
+            return 2;
+          }
+          for (int lane = 1; lane <= 2; ++lane) {
+            long long c4 = 0, masse = 0, m4o = 0;
+            for (size_t i = 0; i < terms.size(); ++i) {
+              if (i < fate.size() && (fate[i] & (1u << lane))) continue;
+              if (i < pend.size() && (pend[i] & (1u << lane))) continue;
+              const int ta = terms[i].a, tb = terms[i].b;
+              const long long fa = (ta < 0) ? (-1 - ta) : nodes[ta].first;
+              const long long la = (ta < 0) ? (-1 - ta) : nodes[ta].last;
+              const long long fb = (tb < 0) ? (-1 - tb) : nodes[tb].first;
+              const long long lb = (tb < 0) ? (-1 - tb) : nodes[tb].last;
+              for (long long ra = fa; ra <= la; ++ra)
+                for (long long rb = fb; rb <= lb; ++rb) {
+                  ++masse;
+                  const long long dd = d2(ra, rb);
+                  std::vector<long long> lo;
+                  for (long long r = 0; r < m; ++r) {
+                    if (r == ra || r == rb) continue;
+                    if (d2(r, ra) <= dd && d2(r, rb) <= dd) lo.push_back(r);
+                    if (dans_ae(dd, ra, rb, r)) ++c4;
+                  }
+                  for (size_t i1 = 0; i1 < lo.size(); ++i1)
+                    for (size_t i2 = i1 + 1; i2 < lo.size(); ++i2) {
+                      bool pos = false;
+                      if (dans_qe(dd, ra, rb, lo[i1], lo[i2], &pos)) ++m4o;
+                    }
+                }
+            }
+            std::printf("porteurs_controle q%d : population_finale=%lld C4_carrier=%lld"
+                        " M4_apex=%lld\n",
+                        lane + 2, masse, c4, g_inject_c4_comme_m4 ? c4 : m4o);
+            if (g_inject_c4_comme_m4 && m4o != c4) {
+              std::printf("mutant_killed=1 porteurs-c4-comme-m4 : C4_carrier=%lld mais"
+                          " M4_apex=%lld\n", c4, m4o);
+              return 4;
+            }
+          }
+        }
+
         if (g_min_m4_echantillon > 0) {
-          // Un echantillon vide n'est pas une mesure. Le plancher porte sur la
-          // masse ouverte q4, seule garantie que quelque chose a ete tire.
           if (mass_open[2] < g_min_m4_echantillon) {
             std::fprintf(stderr, "PLANCHER: masse q4 ouverte %lld, %lld exigee pour"
                                  " l'echantillon de porteurs\n",

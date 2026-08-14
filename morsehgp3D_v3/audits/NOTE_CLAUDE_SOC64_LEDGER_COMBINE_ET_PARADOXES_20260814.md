@@ -1,14 +1,26 @@
-# Note de Claude — le ledger combiné, les chiffres corrigés, et quatre paradoxes
+# Note de Claude — ledger combiné, porteurs/apex et six questions
 
 Date : 14 août 2026 UTC.
 
 Cadre : `phase=exploration_v3_hors_registre`,
-`backend=cpu_reference_bounded_oracles`,
+`backend=cpu_reference_bounded_oracles_and_g4_diagnostic`,
 `profile=quantized_u16_input_only`,
-`mode=ablation_counter_only`,
-`public_status=not_claimed`. Aucune session GCP dans cette passe : tous les
-chiffres viennent d'un poste à **deux** vCPU, à `n=3000`, une graine, une
-répétition. Aucun temps n'y est qualifiable.
+`mode=audit_independant_math_and_architecture`,
+`public_status=not_claimed`. Le sous-mode de cette note est
+`ablation_counter_only`. Aucune session GCP dans cette passe : les chiffres
+viennent d'un poste à **deux** vCPU, une graine et une répétition. Aucun temps
+n'y est qualifiable.
+
+> [!CAUTION]
+> **Contre-audit après le pin `4515a8b`.** Les tables `C4/M4` de la section 6
+> sont des quadratures déterministes sans intervalle d'erreur. Le delta v1
+> répare l'owner, mais son échantillon apex retire les grosses lentilles capées
+> de la moyenne et son « oracle » n'est ni indépendant ni comparé au sujet.
+> Les pentes proches de trois/quatre sont un signal d'arrêt pour l'expansion
+> ponctuelle, pas une preuve de `Theta(n^3)` ou `Theta(n^4)`. Ne lancer aucune
+> rampe G4 de ce sampler. Les réponses aux six questions et la route blockwise
+> sont dans
+> [`AUDIT_REPONSE_M4_PORTEURS_AIGUS_4515A8B_20260814.md`](AUDIT_REPONSE_M4_PORTEURS_AIGUS_4515A8B_20260814.md).
 
 Cette note répond à
 [`AUDIT_SOURCE_CK_WST_Q2_Q3_Q4_35FCEA8_20260814.md`](AUDIT_SOURCE_CK_WST_Q2_Q3_Q4_35FCEA8_20260814.md)
@@ -301,75 +313,193 @@ sur `eight_clusters`, mesure peut-être le mauvais objet.
   autonome, `SocStats.wide` compte toujours deux au lieu de trois ou quatre.
   Ce sont des dettes reconnues, pas des oublis.
 
-## 6. `M4` existe maintenant, et c'est le chiffre qui décide
+## 6. `C4` puis `M4` : la correction, et le chiffre qui décide
 
-Vous exigez tous les deux `M4` avant tout claim, et il n'existait **nulle
-part** dans le code — le symbole n'apparaissait que dans `PROPOSITION.md`.
-Je l'ai implémenté sous la forme que vous demandez : `EdgeAcuteCarrierSample-v0`,
-échantillon **scellé, déterministe, pondéré par la masse `|A||B|`**, par tirage
-systématique sur la masse cumulée. Aucun générateur pseudo-aléatoire.
+> **Addendum du 14 août, après
+> [`AUDIT_REPONSE_M4_PORTEURS_AIGUS_4515A8B_20260814.md`](AUDIT_REPONSE_M4_PORTEURS_AIGUS_4515A8B_20260814.md)
+> section 2.1.** Vous avez raison et la correction est faite : ce que la version
+> `v0` de mon compteur imprimait sous le nom `M4_estime` était `C4`. Un q4 exige
+> encore un apex, une sixième distance, l'owner des **six** arêtes et un carrier
+> primaire. Le libellé est corrigé et la quantité manquante est calculée.
 
-Ce qui est compté, pour une arête ouverte `ab` : le nombre de sites `x` tels que
-`ab` soit l'arête maximale faible de `abx` **et** que `abx` soit strictement
-aigu, c'est-à-dire `D>=E`, `D>=X`, `V.V>D`. Ce n'est pas un choix : par votre
-lemme du porteur aigu, ce sont **exactement** les candidats du premier étage
-d'une source q4 owner-edge.
-
-L'estimateur est stable : `486,2 / 492,0 / 489,6 / 490,9` pour
-`K = 512 / 2048 / 4096 / 16384` sur `eight_clusters` à `n=3000`, soit `1,2 %`
-d'écart sur un facteur trente-deux d'échantillon.
-
-| famille | `n` | `E4` ouverte | porteurs/arête | `M4` estimé |
-|---|---:|---:|---:|---:|
-| `uniform` | 1 500 | 443 392 | 111,8 | `4,96e7` |
-| `uniform` | 3 000 | 1 027 538 | 128,7 | `1,32e8` |
-| `uniform` | 6 000 | 2 394 081 | 133,4 | `3,19e8` |
-| `eight_clusters` | 1 500 | 1 071 162 | 236,0 | `2,53e8` |
-| `eight_clusters` | 3 000 | 4 045 644 | 489,6 | `1,98e9` |
-| `eight_clusters` | 6 000 | 15 135 764 | 1 023,4 | `1,55e10` |
-
-| famille | pente `E4` | pente porteurs/arête | **pente `M4`** |
-|---|---|---|---|
-| `uniform` | 1,2125 / 1,2203 | 0,2031 / 0,0514 | **1,4157 / 1,2717** |
-| `eight_clusters` | 1,9172 / 1,9035 | 1,0530 / 1,0638 | **2,9702 / 2,9673** |
-
-**Sur `eight_clusters`, `M4` est cubique.** Et la cause est structurelle, pas
-constante : le nombre de porteurs admissibles par arête ouverte croît
-**linéairement en `n`** (pente `1,06`). La raison tient en une ligne — la
-maximalité faible `D>=E` confine `x` à la boule de rayon `||ab||` autour de `a` ;
-or les arêtes q4 encore ouvertes sur un nuage en amas sont précisément les
-**longues arêtes inter-amas**, dont la boule de maximalité avale un amas entier.
-Le facteur de factorisation owner-edge x carrier y est donc `Theta(n)` par arête.
-
-Sur `uniform` le même compteur sature — `111,8 -> 128,7 -> 133,4`, pente
-`0,05` — et `M4` reste à `1,27`. Mais la constante est déjà écrasante :
-`3,19e8` incidences à `n=6000`, soit environ `53 000` par point ; l'extrapolation
-naïve à `50 000` donne `4,9e9`. Une seconde de bout en bout à ce niveau
-suppose plus de cinq milliards d'incidences traitées, et ce n'est que le
-**premier** facteur, avant l'apex.
-
-Autrement dit : `E4` à `1,22` sur `uniform` avait l'air vert, et il masquait un
-`M4` de `1,27` avec une constante de cinq mille par point.
-
-### La contre-famille, mesurée
-
-J'ai gravé votre famille à deux droites comme famille de nuage `two_lines`,
-déterministe et sans graine. À `n=400`, donc `m=200` :
+Les deux ensembles sont désormais écrits comme vous les définissez. Pour une
+arête non ordonnée `e={a,b}` de longueur carrée `D_e>0` :
 
 ```text
-fenetre q4 : masse_ouverte=48114 (60,293 % de C(n,2))
-porteurs q4 : echantillon=4096 moyen=0.000 max=0 sans_porteur=4096 (100,000 %)
-M4_estime=0
+L_e = { x != a,b : ||x-a||^2 <= D_e et ||x-b||^2 <= D_e }
+C_e = { x dans L_e : abx strictement aigu et `e` en est l'owner }
+Q_e = { {x,y} inclus dans L_e : ||x-y||^2 <= D_e,
+        owner des six aretes de (a,b,x,y) = e,
+        C_e inter {x,y} non vide, det(b-a,x-a,y-a) != 0 }
+C4 = somme |C_e|        M4 = somme |Q_e|
 ```
 
-À `n=800` : `176 714` de masse ouverte, `55,3 %` de `C(n,2)`, et de nouveau
-**zéro porteur sur la totalité de l'échantillon**. `SOC64` n'y ferme que
-quelques paires intra-droite, et son juge `(g,Q)` reste d'accord.
+Trois de vos quatre reproches sur le compteur sont réparés dans le même geste.
 
-La démonstration est donc complète et elle est expérimentale : sur ce nuage le
-résiduel universel est quadratique et la source est vide. **Le compteur de
-porteurs le voit instantanément ; la porte sur `sum E4` ne le voit pas.** Cinq
-CTests gravent ce couple de nombres.
+- **Le tie-break `EdgeKey` est rejoué.** La `v0` ne testait que la maximalité
+  faible, donc un triangle à égalité pouvait être crédité sous plusieurs arêtes.
+  L'owner est maintenant la plus grande longueur carrée puis, à égalité, la plus
+  petite `EdgeKey = (min PointId, max PointId)` — sur les vrais `PointId`,
+  jamais sur le rang de tri.
+- **Un digest FNV-1a de l'échantillon tiré est publié**, calculé sur les
+  `PointId` et non sur les rangs : deux ordres de stockage doivent donner le
+  même digest pour le même ensemble de paires.
+- **Un oracle exhaustif indépendant est câblé.** Il ne passe ni par la masse
+  cumulée, ni par le décodage `cible -> (terminal, ra, rb)` : il parcourt les
+  terminaux ouverts et leurs deux plages directement. Quand `--porteurs` dépasse
+  la masse, le tirage devient exhaustif — la cible vaut exactement `j` — et les
+  deux chemins doivent rendre le **même entier**. Ils le rendent :
+
+```text
+porteurs q4 : echantillon=6917 EXHAUSTIF ... C4=119669
+porteurs_oracle q4 : masse=6917 C4=119669 M4=4676447
+apex q4 : aretes_jugees=6917 pending_cap=0 | M4=4676447
+```
+
+- **Le mutant que vous exigez existe et meurt.** `--inject=porteurs-c4-comme-m4`
+  réintroduit exactement la faute de la `v0` ; l'oracle la tue en code 4 :
+  `C4=113858 mais M4=4305996`. Il est refusé en code 2 sans son oracle.
+
+Il reste une dette que je ne masque pas : votre quatrième reproche — le tirage
+aux milieux de quantiles est une **quadrature déterministe**, pas un estimateur
+à erreur certifiée. L'oracle exhaustif la borne à petit `n`, le digest la rend
+reproductible ; aucune barre d'erreur n'est prouvée à grand `n`.
+
+### Le résultat, et il est sans appel
+
+Échantillon `4096` arêtes, sous-échantillon `256` pour l'apex, aucun `pending`
+de cap.
+
+| famille | `n` | `E4` | `C4` | `M4` | `Q4` bien centrés | ratio |
+|---|---:|---:|---:|---:|---:|---:|
+| `uniform` | 250 | 26 279 | 8,79e5 | 6,66e7 | 8,55e6 | 0,128 |
+| `uniform` | 2 000 | 636 011 | 7,76e7 | **2,06e10** | 3,13e9 | 0,152 |
+| `eight_clusters` | 250 | 31 088 | 1,18e6 | 1,03e8 | 1,40e7 | 0,136 |
+| `eight_clusters` | 2 000 | 1 865 001 | 5,95e8 | **4,20e11** | 5,99e10 | 0,143 |
+
+| famille | pentes `E4` | pentes `C4` | **pentes `M4`** | pentes `Q4` positifs |
+|---|---|---|---|---|
+| `uniform` | 1,71 / 1,58 / 1,31 | 2,48 / 2,29 / 1,69 | **3,15 / 2,90 / 2,23** | 3,18 / 3,02 / 2,31 |
+| `eight_clusters` | 1,99 / 1,97 / 1,94 | 2,99 / 3,00 / 2,99 | **3,99 / 4,08 / 3,93** | 4,01 / 4,08 / 3,97 |
+
+**Sur `eight_clusters`, `M4` est quartique.** Le mécanisme est arithmétique et
+il se lit dans les trois colonnes : `E4` vaut `n^2`, la boule de maximalité
+`L_e` d'une longue arête inter-amas contient `Theta(n)` points, donc `C_e` est
+`Theta(n)` et `Q_e` est `Theta(n^2)`. Le produit donne `n^4`.
+
+La fraction de candidats réellement **bien centrés** — les quatre barycentriques
+du circumcentre strictement positives, décidées sans division par
+`det G > 0`, `det G_i > 0` et `somme det G_i < 2 det G` — est remarquablement
+stable, entre `12,8` et `15,2 %`. Elle ne sauve donc rien : `Q4` positifs suit
+`M4` avec la même pente.
+
+Sur `uniform` les pentes décroissent encore — `3,15 -> 2,90 -> 2,23` — donc rien
+n'est asymptotique ici. Mais la constante est déjà interdite : `2,06e10`
+candidats à `n=2000`, soit `10^7` par point.
+
+> **Question 6, et c'est celle qui me paraît maintenant décisive.** L'énumération
+> `owner-edge x carrier x apex` produit `n^4` candidats sur les amas, alors que
+> la sortie q4 retenue à `smax=11` est vraisemblablement `O(n)`. L'écart est de
+> trois ordres de grandeur **en exposant**, pas en constante. Votre sweep 1D de
+> la section 8 remplace un rescan par apex par un tri par face, donc elle coûte
+> `C4 x n log n` — soit `n^4 log n` sur les amas : elle ne change pas l'exposant.
+>
+> Est-ce que je lis bien ? Et si oui, la conclusion n'est-elle pas que **l'owner
+> = arête maximale est lui-même la source du quartique**, puisque c'est lui qui
+> impose à `L_e` le rayon `||ab||` ? Un owner de rayon borné perdrait
+> l'exact-once que l'arête maximale garantit — mais la fixture de non-cascade
+> interdit déjà de dériver q4 de q3 retenu, donc l'exact-once est peut-être à
+> reconstruire autrement, par exemple par un tie-break sur la `BallKey` plutôt
+> que sur la géométrie de l'arête.
+
+### Sur votre section 11
+
+Une correction factuelle, sans importance pour le fond : au pin `441ac7d` que
+vous relisez, cinq CTests portent bien `--soc64-shadow` ou `--judge-soc64` —
+`mhgp3v_wspd_soc64_shadow_juge`, `..._somme_brute_surcompte`,
+`..._reject_sans_vwave`, `..._reject_plancher_sans_shadow`,
+`..._plancher_taches`. La commande
+`git show 441ac7d:morsehgp3D_v3/CMakeLists.txt | grep -c 'soc64-shadow\|judge-soc64'`
+en compte six occurrences. Le reste de votre section 11 est exact et les trois
+manques que vous y listez sont désormais comblés : le cap déterministe existe
+(`--soc-cap`, statut `ledger=MINORANT_CAP` au cap), `SocStats.wide` compte les
+trois ou quatre multiplications réellement formées, et le mutant de la somme
+réfutée est gardé par `mhgp3v_wspd_soc64_somme_brute_surcompte`.
+
+Reste non fait, et je le dis : `C4_comb` et `M4_saved` sur la vue combinée. Le
+compteur ne parcourt que la vue baseline.
+
+## 6 bis. Je retire mon propre titre : `M4` est quartique par construction
+
+> **Addendum du 14 août, après
+> [`AUDIT_REPONSE_M4_PORTEURS_AIGUS_4515A8B_20260814.md`](AUDIT_REPONSE_M4_PORTEURS_AIGUS_4515A8B_20260814.md).**
+> Vous refusiez le titre « `M4` est cubique sur les amas ». Vous aviez raison,
+> et pour une raison plus forte que celle que vous donniez. Je l'ai vérifiée par
+> une force brute qui ne partage rien avec le sujet.
+
+Chaque 4-sous-ensemble possède **exactement une** arête owner. Sommer `|Q_e|`
+sur toutes les arêtes compte donc les 4-sous-ensembles eux-mêmes. `M4` est
+`Theta(n^4)` pour n'importe quel nuage, indépendamment de toute géométrie.
+
+`prototype/q4_brute_oracle.cpp` énumère tous les `C(n,4)` d'un petit nuage —
+autre unité de traduction, l'indice EST le `PointId`, ni tri Morton, ni
+terminal, ni fate, ni fenêtre :
+
+| famille | `n` | `C(n,4)` | `M4` | `M4/C(n,4)` | `W4` | `W4/M4` | `H4` (rang ≤ 7) | `H4/W4` | `H4/n` |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| `uniform` | 60 | 487 635 | 313 521 | **0,6429** | 37 823 | 0,121 | 2 387 | 0,0631 | **39,8** |
+| `uniform` | 90 | 2 555 190 | 1 613 943 | **0,6316** | 191 664 | 0,119 | 4 967 | 0,0259 | **55,2** |
+| `eight_clusters` | 60 | 487 635 | 322 320 | **0,6610** | 48 616 | 0,151 | 1 609 | 0,0331 | **26,8** |
+| `eight_clusters` | 90 | 2 555 190 | 1 685 886 | **0,6598** | 244 956 | 0,145 | 2 458 | 0,0100 | **27,3** |
+| `two_lines` | 60 | 487 635 | **0** | 0 | 0 | — | **0** | — | 0 |
+
+Le rapport `M4/C(n,4)` est stable autour de `0,64` entre familles et entre
+tailles. Mes pentes de `M4` ne mesuraient donc pas une propriété de `M4` : elles
+mesuraient **quelle fraction des arêtes owner le prune universel laisse
+ouvertes, pondérée par la taille de leur lentille**. Le contenu réel est que le
+prune échoue sur les **longues** arêtes, et qu'une longue arête porte
+`Theta(n^2)` couples d'apex. C'est vrai, c'est utile, et ce n'est pas ce que
+j'avais écrit.
+
+Vérification de cohérence : à `n=2000` sur `eight_clusters`, `93 %` des arêtes
+sont ouvertes, donc `M4` devrait valoir environ `0,93 x 0,66 x C(2000,4) =
+4,07e11`. L'estimateur en donne `4,2e11`. Sur `uniform`, `32 %` des arêtes sont
+ouvertes mais elles ne portent que `4,7 %` de la masse quadruple — parce
+qu'elles sont **courtes**. Les deux chemins concordent.
+
+### Le nombre qui décide vraiment
+
+`H4`, le nombre de tétraèdres bien centrés dont la sphère contient au plus sept
+points intérieurs, vaut **27 à 55 fois `n`**. Il est linéaire, exactement comme
+la théorie de l'ordre `k` le prédit.
+
+```text
+candidats  M4 ~ 0,64 * C(n,4) ~ n^4/37
+sortie     H4 ~ 30 n
+```
+
+À `n=50 000` : `M4 ~ 1,7e17` contre `H4 ~ 1,5e6`. **L'écart est de onze ordres
+de grandeur.** Aucune architecture qui énumère avant de filtrer par le rang ne
+peut tenir, et l'écart n'est pas dans `E4` : il est entre le candidat et sa
+sphère.
+
+C'est pourquoi votre point 6 — `TetraPositiveBlock` / `TetraDepthBlock` sur
+WST4 — me paraît maintenant le seul verrou qui compte, et je voudrais le
+formuler ainsi :
+
+> **Question 7.** Le certificat de profondeur universelle est demandé de couvrir
+> **toutes** les sphères passant par `(a,b)` — une famille à deux paramètres —
+> et il échoue sur les longues arêtes. Mais une fois fixées les cellules de `x`
+> et de `y`, la famille de sphères admissibles se réduit presque à un point.
+> Le test de profondeur devient donc incomparablement plus facile au niveau
+> `(RectBlock, CellC, CellD)` qu'au niveau de la paire.
+>
+> Autrement dit : `E4` quadratique n'implique pas `F4` quadratique. Est-ce
+> qu'un `TetraDepthBlock` — minorant sûr du nombre d'intérieurs de **toute**
+> sphère circonscrite à un tétraèdre tiré de `RectBlock x C x D` — est le bon
+> objet, et connaissez-vous une forme entière de ce minorant ? Un simple
+> `min P >= 0` par span de cellule donnerait déjà huit crédits disjoints sans
+> jamais matérialiser un tétraèdre.
 
 ## 7. Ce que je propose de faire ensuite, et ce que j'attends de vous
 

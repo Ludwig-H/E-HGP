@@ -4472,7 +4472,7 @@ add_test(NAME mhgp3v_porteurs_uniform
           --sep-euclid=8/1 --tight --vwave --window=512 --window-ledger
           --porteurs=2048 --min-masse-porteurs=100000)
 set_tests_properties(mhgp3v_porteurs_uniform PROPERTIES
-  PASS_REGULAR_EXPRESSION "porteurs q4 : echantillon=2048 masse_ouverte=[0-9]+ moyen=[0-9]+")
+  PASS_REGULAR_EXPRESSION "porteurs q4 : population_finale=[0-9]+ masse_pending=[0-9]+ tires=2048 graine=[0-9]+ doublons=[0-9]+ digest=[0-9a-f]+ . A_e moyen=[0-9]+.* C4_carrier_quadrature=")
 
 # LA CONTRE-FAMILLE A DEUX DROITES, GRAVEE.
 #
@@ -4497,8 +4497,12 @@ add_test(NAME mhgp3v_two_lines_zero_porteur_aigu
   COMMAND mhgp3v_wspd_wavefront_probe --family=two_lines --points=400
           --sep-euclid=8/1 --tight --vwave --window=512 --window-ledger
           --porteurs=4096)
+# Le libelle est `C4`, et c'est le fond de la correction : ce compteur mesure la
+# relation q3 geometrique PRE-RANG, pas la masse quaternaire. Cette porte a
+# echoue au moment du renommage, et c'est ainsi qu'on sait que le renommage a
+# bien eu lieu.
 set_tests_properties(mhgp3v_two_lines_zero_porteur_aigu PROPERTIES
-  PASS_REGULAR_EXPRESSION "porteurs q4 : echantillon=4096 masse_ouverte=[0-9]+ moyen=0.000 p50=0 p95=0 max=0 sans_porteur=4096 .100.000%. . M4_estime=0")
+  PASS_REGULAR_EXPRESSION "porteurs q4 : .* A_e moyen=0.000 max=0 sans=4096 .100.000%. . C4_carrier_quadrature=0 ")
 # Le meme nuage juge aussi SOC64 : il ferme quelques paires intra-droite, jamais
 # les croisees. Le juge `(g,Q)` doit rester d'accord sur cette famille aussi.
 add_test(NAME mhgp3v_two_lines_soc64_juge
@@ -4508,6 +4512,55 @@ add_test(NAME mhgp3v_two_lines_soc64_juge
 set_tests_properties(mhgp3v_two_lines_soc64_juge PROPERTIES
   PASS_REGULAR_EXPRESSION "soc64_juge accord=OUI verdicts_juges=[0-9]+ sautes=[0-9]+ triples=[0-9]+ faux=0")
 
+# L'ORACLE EXHAUSTIF DE `C4` ET `M4`. Il ne passe NI par la masse cumulee, NI
+# par le decodage `cible -> (terminal, ra, rb)` de l'echantillonneur : il
+# parcourt les terminaux ouverts et leurs deux plages directement. Quand
+# `--porteurs` depasse la masse, le tirage devient exhaustif et les deux chemins
+# doivent rendre le MEME entier. C'est la seule facon de savoir que
+# l'arithmetique d'index de l'echantillonneur est juste — le defaut le plus
+# silencieux possible de ce compteur.
+add_test(NAME mhgp3v_porteurs_oracle_uniform
+  COMMAND mhgp3v_wspd_wavefront_probe --family=uniform --points=120
+          --sep-euclid=8/1 --tight --vwave --window=512 --window-ledger
+          --porteurs=20000 --apex=4096 --porteurs-oracle=200)
+set_tests_properties(mhgp3v_porteurs_oracle_uniform PROPERTIES
+  PASS_REGULAR_EXPRESSION "porteurs_controle q4 : population_finale=6917 C4_carrier=119669 M4_apex=4676447")
+# UN JUGE SAUTE NE VAUT JAMAIS ACCORD. Le contre-audit a reproduit la vacuite :
+# `points=100 --porteurs-oracle=4` sortait zero sans ligne de controle ni
+# mutant. Le refus est desormais anterieur au calcul.
+mhgp3v_add_expected_code_test_for(mhgp3v_wspd_wavefront_probe
+  mhgp3v_porteurs_reject_controle_saute "le controle serait saute" 2
+  --family=uniform --points=100 --sep-euclid=8/1 --tight --vwave --window=512
+  --window-ledger --porteurs=1000 --porteurs-oracle=4)
+# LE MUTANT QUE LE CONTRE-AUDIT A EXIGE. La version `v0` de ce compteur
+# imprimait `C4` sous le libelle `M4` — la relation q3 geometrique pre-rang
+# confondue avec la masse quaternaire. Le mutant reintroduit exactement cette
+# faute, et l'oracle la tue : `C4=113858` mais `M4=4305996`.
+mhgp3v_add_expected_code_test_for(mhgp3v_wspd_wavefront_probe
+  mhgp3v_porteurs_kill_c4_comme_m4 "mutant_killed=1 porteurs-c4-comme-m4" 4
+  --family=uniform --points=120 --sep-euclid=8/1 --tight --vwave --window=512
+  --window-ledger --porteurs=2000 --porteurs-oracle=200
+  --inject=porteurs-c4-comme-m4)
+mhgp3v_add_expected_code_test_for(mhgp3v_wspd_wavefront_probe
+  mhgp3v_porteurs_reject_mutant_sans_oracle
+  "--inject=porteurs-c4-comme-m4 exige --porteurs-oracle" 2
+  --family=uniform --points=120 --sep-euclid=8/1 --tight --vwave --window=512
+  --window-ledger --porteurs=1000 --inject=porteurs-c4-comme-m4)
+# La contre-famille doit rendre ZERO des deux cotes, et par les deux chemins.
+add_test(NAME mhgp3v_two_lines_oracle_c4_m4_nuls
+  COMMAND mhgp3v_wspd_wavefront_probe --family=two_lines --points=120
+          --sep-euclid=8/1 --tight --vwave --window=512 --window-ledger
+          --porteurs=20000 --apex=4096 --porteurs-oracle=200)
+set_tests_properties(mhgp3v_two_lines_oracle_c4_m4_nuls PROPERTIES
+  PASS_REGULAR_EXPRESSION "porteurs_controle q4 : population_finale=5742 C4_carrier=0 M4_apex=0")
+# LE CAP DETERMINISTE DU SHADOW. Au cap, le ledger cesse d'etre final et le dit.
+add_test(NAME mhgp3v_soc64_cap_minorant
+  COMMAND mhgp3v_wspd_wavefront_probe --family=eight_clusters --points=800
+          --sep-euclid=8/1 --tight --vwave --window=512 --window-ledger
+          --soc-cap=4096)
+set_tests_properties(mhgp3v_soc64_cap_minorant PROPERTIES
+  PASS_REGULAR_EXPRESSION "cap_refuses=[1-9][0-9]* ledger=MINORANT_CAP")
+
 mhgp3v_add_expected_code_test_for(mhgp3v_wspd_wavefront_probe
   mhgp3v_porteurs_reject_plancher_sans_echantillon "--min-masse-porteurs exige --porteurs" 2
   --family=uniform --points=200 --min-masse-porteurs=1)
@@ -4515,3 +4568,46 @@ mhgp3v_add_expected_code_test_for(mhgp3v_wspd_wavefront_probe
   mhgp3v_porteurs_plancher_masse "PLANCHER" 3
   --family=uniform --points=400 --sep-euclid=8/1 --tight --vwave --window=512
   --window-ledger --porteurs=64 --min-masse-porteurs=1000000000)
+
+# ---------------------------------------------------------------------------
+# ORACLE DE FORCE BRUTE q4 : LA VERITE TERRAIN, SANS RIEN PARTAGER AVEC LE SUJET.
+#
+# Le contre-audit `AUDIT_REPONSE_M4_PORTEURS_AIGUS_4515A8B_20260814.md`
+# section 11 reproche au controle interne du probe de partager les lambdas
+# geometriques, les terminaux et les fates. Cette cible ne partage rien : autre
+# unite de traduction, indice = PointId, ni tri Morton, ni fenetre, ni fate.
+#
+# Elle enumere TOUS les 4-sous-ensembles et separe trois nombres que le projet
+# confondait : les candidats `M4`, les bien centres `W4`, et la sortie `H4` a
+# rang au plus `smax-4`. Ses valeurs sont gravees.
+add_executable(mhgp3v_q4_brute_oracle prototype/q4_brute_oracle.cpp)
+target_include_directories(mhgp3v_q4_brute_oracle PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(mhgp3v_q4_brute_oracle PRIVATE mhgp)
+target_compile_options(mhgp3v_q4_brute_oracle PRIVATE -Wall -Wextra -Werror)
+
+# `M4` EST QUARTIQUE PAR CONSTRUCTION, ET C'EST LA LE POINT. Chaque
+# 4-sous-ensemble possede exactement une arete owner ; sommer `|Q_e|` sur toutes
+# les aretes compte donc les 4-sous-ensembles eux-memes. Le rapport mesure
+# `0,6429`, et la porte le grave : un jour ou il s'effondrerait, ce serait la
+# definition de l'owner qui aurait change.
+add_test(NAME mhgp3v_q4_brute_uniform_60
+  COMMAND mhgp3v_q4_brute_oracle --family=uniform --points=60)
+set_tests_properties(mhgp3v_q4_brute_uniform_60 PROPERTIES
+  PASS_REGULAR_EXPRESSION "4-sous-ensembles=487635 M4_total=313521 W4=37823 H4.rang<=7.=2387")
+add_test(NAME mhgp3v_q4_brute_clusters_60
+  COMMAND mhgp3v_q4_brute_oracle --family=eight_clusters --points=60)
+set_tests_properties(mhgp3v_q4_brute_clusters_60 PROPERTIES
+  PASS_REGULAR_EXPRESSION "4-sous-ensembles=487635 M4_total=322320 W4=48616 H4.rang<=7.=1609")
+# LA SORTIE EST LINEAIRE, LES CANDIDATS NE LE SONT PAS. A `n=90`, `H4/n` vaut
+# encore `27,3` sur les amas alors que `M4/C(n,4)` reste a `0,66` : l'ecart
+# entre candidats et sortie est le vrai verrou, et il n'est pas dans `E4`.
+add_test(NAME mhgp3v_q4_brute_clusters_90
+  COMMAND mhgp3v_q4_brute_oracle --family=eight_clusters --points=90)
+set_tests_properties(mhgp3v_q4_brute_clusters_90 PROPERTIES
+  PASS_REGULAR_EXPRESSION "M4_total=1685886 W4=244956 H4.rang<=7.=2458")
+# LA CONTRE-FAMILLE, VUE PAR UN CHEMIN TOTALEMENT DISJOINT : zero candidat, donc
+# zero sortie, alors que le residuel universel y est quadratique.
+add_test(NAME mhgp3v_q4_brute_two_lines
+  COMMAND mhgp3v_q4_brute_oracle --family=two_lines --points=60)
+set_tests_properties(mhgp3v_q4_brute_two_lines PROPERTIES
+  PASS_REGULAR_EXPRESSION "M4_total=0 W4=0 H4.rang<=7.=0")

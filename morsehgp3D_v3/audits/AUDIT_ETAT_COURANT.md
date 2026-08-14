@@ -11,38 +11,36 @@ Cadre : `phase=exploration_v3_hors_registre`,
 ## Snapshot
 
 Le pin relu est
-`HEAD=35fcea884cb93eff24db1e7c5962f8be23d4cb04`, commit
-`the kill criterion of stage one fired : refinement moves the constant, not the exponent`.
-Le commit ne change pas le code producteur de son parent `3c11bc8`; il ajoute
-les audits et le reçu de rampe. Le worktree du reçu était propre. Le worktree
-courant ne l'est pas : outre la consolidation documentaire autorisée, Claude
-modifie concurremment le probe WSPD, CMake et les nouveaux probes SOC64.
-L'auditeur ne touche pas ces fichiers et ne transforme jamais leur état
-intermédiaire en statut du `HEAD`.
+`HEAD=4515a8b43d5397de97d71482c1f489ebd2a71c16`, commit
+`M4 existe enfin, et il est cubique sur les amas`. Il reçoit au HEAD le replay
+SOC combiné, `EdgeAcuteCarrierSample-v0`, la contre-famille `two_lines` et les
+portes associées ; il ne reçoit toujours ni source CK--WST, ni payload complet.
 
-Empreintes SHA-256 du code **au HEAD mesuré avant les deltas live** :
+Empreintes SHA-256 au HEAD :
 
-- `prototype/ball_event.hpp` :
-  `eedd8521c31fa7963506b4fc1030eb6f92491d3d79f0e8356641c7035660b24a` ;
-- `prototype/ball_event_probe.cpp` :
-  `4a85f6cbdd74054160266ee2bbb1dd13a1d54fb7ffb9ce522855aff93be3e793` ;
-- `prototype/wspd_wavefront_probe.cpp` :
-  `cfddfc89222a9179086f99b247abf933cc24f2d22f2d2422099b86aebad8ad74` ;
 - `CMakeLists.txt` :
-  `3be8e878ea86f8a406e01bcf1e21e5a6986929d66420323118095c8a60c4b223`.
+  `a09c96976cbb922e05491c096c26604319916397373dafcbefb91dde1ad435e7` ;
+- `prototype/soc64_rect.hpp` :
+  `b4750efee21affbf3160fb4db0f39b3498d4afd19093187db939450b317f3bc1` ;
+- `prototype/soc64_probe.cpp` :
+  `d442b59279f345d11337b86993b8b620774eb236815a8f77a227cbf8edc4944f` ;
+- `prototype/wspd_wavefront_probe.cpp` :
+  `d5953d616cb29bd1ba25b256aed493b2fb7bd01e1a2256003c5d4009d3662fc5` ;
+- `prototype/cloud_families.hpp` :
+  `1f9089ba5972bf76aece6d899bacd8682341f394833c5d06e46ea2a921efad57`.
 
-Les écritures de l'auditeur restent limitées à `README.md`, `PROPOSITION.md`
-et `audits/`. Les suppressions documentaires déjà présentes appartiennent à la
-consolidation concurrente ; elles ne sont pas attribuées à cette passe.
-L'auditeur n'a pas utilisé GCP ; la session de Claude consignée au commit a
-utilisé une G4 SPOT comme hôte CPU et l'a certifiée `TERMINATED`.
+Le worktree est mouvant pendant ce contre-audit. Claude modifie CMake,
+`soc64_rect.hpp` et le probe WSPD ; le delta live observé ajoute notamment
+`EdgeCarrierApexSample-v1`. L'auditeur ne touche aucun fichier logiciel et ne
+transforme pas ce delta en statut du HEAD. Ses écritures restent limitées à
+`README.md`, `PROPOSITION.md` et `audits/`. GCP non utilisé.
 
 ## Verdict
 
 Le contrat G4 reste ouvert. Il n'existe encore ni source u16 reçue, ni stage
 `0B`, ni `BenchmarkOutputContract-v1`, ni campagne p95 à 50 000 points.
 
-Le progrès live se décompose en trois probes utiles, mais non reçus comme
+Le progrès reçu se décompose en quatre probes/campagnes utiles, mais non reçus comme
 chaîne produit :
 
 1. `BallFormToBallEvent-v0` forme des sphères et des census sur petit domaine ;
@@ -65,8 +63,9 @@ GPU-factorisable, pas comme implémentation :
   `O(s^3 n)` rectangles physiques sans les développer ; après rejet/quotient
   des positions dupliquées et filtre `D>0`, elle source tous les q2 propres ;
 - pour chaque rectangle `R=(A,B)`, les cellules Morton d'une échelle liée à sa
-  boule `B_R` et rencontrant `3B_R` couvrent tout carrier d'un support dont
-  `ab` est l'arête maximale ; l'owner longueur/`EdgeKey` donne un unique
+  boule `B_R` et rencontrant `2B_R` couvrent tout carrier d'un support dont
+  `ab` est l'arête maximale ; l'intersection avec les deux enveloppes endpoint
+  resserre encore ce domaine. L'owner longueur/`EdgeKey` donne un unique
   `OwnedCK-WST3(A,B,C)` ;
 - les couples non ordonnés de ces cellules donnent de même un unique
   `OwnedCK-WST4(A,B,C,D)` ; q4 recertifie directement les quatre
@@ -82,7 +81,8 @@ de sa vraie sortie.
 Une fixture u16 de 64 points interdit toute cascade de rang : un q4 régulier a
 rang 4 alors que ses six arêtes q2 et ses quatre faces q3 ont toutes rang 12.
 `WST4` doit donc consommer les carriers aigus géométriques pré-rang, jamais les
-événements q3 retenus. Le rapport et le recalcul exact sont dans
+événements q3 retenus. La relation est construite lorsque
+`q3_open || q4_open`, même si la lane de rang q3 est déjà fermée. Le rapport et le recalcul exact sont dans
 [`AUDIT_SOURCE_CK_WST_Q2_Q3_Q4_35FCEA8_20260814.md`](AUDIT_SOURCE_CK_WST_Q2_Q3_Q4_35FCEA8_20260814.md).
 
 Pour une paire ponctuelle, `JungDiskDepth9/8` restreint les centres au disque
@@ -156,8 +156,8 @@ dépasser 100 %. Séparer impérativement `AttemptStats` de `TerminalLedger`.
 
 Le prochain jalon utile est `ProofCarryingLocalRefinement-v0` : un enfant
 hérite les spans `ALL/NONE` du parent et ne rejoue que sa frontière `MIXED`.
-Mesurer ensuite le coût transitif `E4 -> M4 -> BallKeys -> census -> fold`, pas
-la seule pente de `E4`.
+Mesurer ensuite le coût transitif `E4 -> F3/C4_carrier -> F4/M4_apex ->
+BallKeys -> census -> fold`, pas la seule pente de `E4`.
 
 Audit complet et défauts de la recette G4 :
 [`AUDIT_CONTRE_RAFFINEMENT_LOCAL_ET_SESSION_G4_3C11BC8_20260813.md`](AUDIT_CONTRE_RAFFINEMENT_LOCAL_ET_SESSION_G4_3C11BC8_20260813.md).
@@ -185,23 +185,54 @@ La portée s'arrête là :
   front n'est pas mesuré.
 
 `uniform` seule ne peut qualifier le SLO : `TEST_PLAN` §14.5 et G6 exigent
-Poisson uniforme et le mélange équilibré de huit amas. Le prochain mouvement
-est un diagnostic `SOC64+LP`, puis seulement les cages si la perte mesurée le
-justifie.
+Poisson uniforme et le mélange équilibré de huit amas. `sum E4` reste la gate
+du certificateur universel mesuré, mais la contre-famille `two_lines` interdit
+d'en faire une gate de la source : elle conserve une masse quadratique avec
+zéro carrier aigu et zéro q4.
 
 Réponses complètes aux trois questions de Claude :
 [`AUDIT_REPONSE_CRITERE_MORT_SOC64_LP_35FCEA8_20260813.md`](AUDIT_REPONSE_CRITERE_MORT_SOC64_LP_35FCEA8_20260813.md).
 Le détail contractuel du reçu et des continuations est dans
 [`AUDIT_CONTRE_RECU_RAMPE_RAFFINEMENT_G4_35FCEA8_20260813.md`](AUDIT_CONTRE_RECU_RAMPE_RAFFINEMENT_G4_35FCEA8_20260813.md).
 
-## Déblocage mathématique prioritaire
+## Porteurs aigus et « M4 » : résultat rouge, mauvais libellé
+
+Au HEAD, `EdgeAcuteCarrierSample-v0` extrapole le nombre de sites `x` pour
+lesquels `ab` est maximale faible dans `abx` et la face est aiguë. Les pentes
+observées de cette quadrature sont proches de `2,97` sur `eight_clusters` entre
+1500, 3000 et 6000 points. C'est un signal rouge pour toute architecture qui
+développe `arête × porteur` ponctuellement.
+
+Ce chiffre n'est pourtant pas un `M4` reçu : owner `EdgeKey` absent au HEAD,
+`PENDING` mélangé à l'ouvert, quantiles fixes sans seed ni intervalle d'erreur,
+vue baseline seule et aucun apex. Le delta live v1 répare l'owner et compte les
+apex de chaque arête jugée, mais censure les grosses lentilles au cap puis les
+retire de la moyenne ; il peut imprimer zéro lorsque toutes sont capées.
+
+Le schéma courant sépare `C4_carrier` pour les faces aiguës,
+`M4_apex` pour les quadruplets canoniques avant barycentriques,
+`W4_positive` après positivité et `H4_rank` après census. La troisième voie de
+Claude est donc reçue : garder l'owner maximal, conserver les CarrierBlocks
+`ALL_ACUTE/NONE_ACUTE/MIXED` symboliques, former WST4 avant toute face exacte,
+puis utiliser la sweep seulement comme fallback. L'enveloppe `2B_R`, qui est
+sharp, remplace `3B_R` et s'intersecte avec les deux enveloppes endpoint.
+
+Une grande masse logique `C4_carrier` peut tenir dans peu de blocs `F3`; seule
+la mesure `F3/F4`, splits, touches, événements, octets et HWM décide la route.
+Aucune rampe G4 50k du sampler n'est autorisée : avec `K=16384`, son seul scan
+paie déjà 819,2 millions de tests par lane.
+
+Réponses aux cinq questions, preuve de `2B_R`, estimateur emboîté valide et
+contre-audit du v1 :
+[`AUDIT_REPONSE_M4_PORTEURS_AIGUS_4515A8B_20260814.md`](AUDIT_REPONSE_M4_PORTEURS_AIGUS_4515A8B_20260814.md).
+
+## SOC64 : primitive exacte, rentabilité toujours ouverte
 
 Le faible gain du classifieur scalaire `D/V/T` ne réfute que des extrema
 décorrélés. Il ne réfute ni le spindle ponctuel, ni les rectangles corrélés, ni
 le disque de Jung.
 
-La prochaine ablation doit être `SOC64-shadow-q4`, avant davantage de
-raffinement. Pour `e=z-a`, `t=b-z`, `H=e dot t`, `E=||e||^2`, `X=||t||^2`, q4
+Pour `e=z-a`, `t=b-z`, `H=e dot t`, `E=||e||^2`, `X=||t||^2`, q4
 exige `H>0` et `3H^2>EX`. Si les 64 couples de coins de
 `(C-A) times (B-C)` passent, tout le rectangle est `ALL`; le premier échec est
 seulement `UNKNOWN`. La fixture axiale où toutes les différences sont
@@ -226,14 +257,16 @@ sous-arbre. Le contre-audit a forcé sa réécriture : `cred` conserve la baseli
 branche combinée à son premier `ALL`. Sur le replay borné `uniform,n=120`, les
 `624` verdicts SOC-`ALL` et `3873` triples ont zéro faux ; l'union ferme `41`
 terminaux de masse `95`, contre `127` et `316` avec l'ancienne somme fautive.
-La contradiction est donc observée, mais aucune CTest ne grave encore ce replay,
-le surcompte strict ni un mutant `sum_instead_of_union` : le raccord reste non
-reçu.
+La contradiction est donc observée. Cinq CTests WSPD--SOC gravent désormais le
+shadow, le juge et le témoin de surcompte ; ils passent au HEAD. Ils ne
+comparent toujours pas l'union à une vraie traversée PointId et aucun mutant
+`sum_instead_of_union` ne réintroduit la faute : le raccord reste non reçu.
 
-Le raccord n'a pas non plus le cap de 4096 tâches annoncé. Un diagnostic local
+Le HEAD n'a pas non plus le cap de 4096 tâches annoncé. Un diagnostic local
 à `n=1000` en a soumis environ `988000` et `3,69` millions de couples ; ce
 shadow doit être échantillonné hors chrono ou rendre un statut tronqué explicite.
-Ces chiffres ne sont pas une extrapolation recevable vers le SLO.
+Le delta live ajoute `--soc-cap` et un statut `MINORANT_CAP`, mais ce worktree
+n'est pas reçu. Ces chiffres ne sont pas une extrapolation recevable vers le SLO.
 
 `JungDiskDepth8` restreint le plan des centres au disque
 `||y-d||^2<=D/2`. Une fixture à huit groupes disjoints ferme ce disque alors
@@ -279,7 +312,9 @@ ball_event Release ciblé : 10/10 verts
 suite ciblée ball_event/WSPD/Gamma/postings/saturated : 87/87 verts
 faces q4 exactes : 5/5 ; q3 côtés hors rang : 6/6
 fixtures centre_cell arité 3/4 + mutant cascade : 3/3
-SOC64 isolé : 16/16 ; raccord WSPD shadow : non reçu
+SOC64 isolé : 16/16 ; WSPD--SOC intégré : 5/5, oracle d'union incomplet
+porteurs/two_lines au HEAD : 6/6
+delta live porteurs/apex : build vert, sous-suite 10/11, regex v0 périmée
 suite complète : interrompue après 28/734 terminés, tous verts
 grid n=16 : refus_domaine=99 puis fold=OUI
 clusters n=5, coord=4 : timeout après 2 s, capacité non preflightée
@@ -297,9 +332,10 @@ réparer 0A u16 et isoler les juges de mutants
   -> recevoir 0B et le payload borné
   -> recevoir CKPairTape q2 et ses certificats [L,U]
   -> SOC64 union-disjointe block-level + JungDiskDepth9/8 paire/microtile
-  -> OwnedCK-WST3 puis WST4 pré-rang, avec fixture de non-cascade
+  -> CarrierBlocks dans 2B_R-lentille dès q3_open || q4_open
+  -> OwnedCK-WST3 puis WST4 symbolique pré-rang, avec fixture de non-cascade
   -> raffinement porteur de preuves sur les tâches encore MIXED
-  -> mesurer F2/F3/F4, M3/M4, BallKeys, census, H et coût transitif
+  -> mesurer F2/F3/C4_carrier/F4/M4_apex/T4_site, BallKeys, census, H
   -> seulement alors portage device et campagne G4 50k
 ```
 

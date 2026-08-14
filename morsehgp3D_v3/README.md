@@ -57,7 +57,7 @@ La prochaine chaîne à fermer est :
 0A  BallForm -> BallKey -> census -> BallEvent exact
 0B  oracle exhaustif borné -> lots -> dix forêts -> verticales -> payload
 1   CKPairTape q2 -> porteurs aigus -> OwnedCK-WST3/WST4, toujours factorisés
-2   certifier rang/census et mesurer F2/F3/F4, M3/M4 et H
+2   certifier rang/census et mesurer F2/F3/C4_carrier/F4/M4_apex/T4_site
 3   porter la même tranche sur device, puis mesurer warm_e2e sur G4
 4   ouvrir séparément tout nouveau profil numérique
 ```
@@ -120,9 +120,15 @@ CKPairTape(A,B)                          toutes les paires, exact-once
 
 Pour chaque rectangle CK, une boule `B_R` contenant `A union B` fixe un niveau
 Morton. Tout troisième ou quatrième sommet d'un support dont `ab` est l'arête
-maximale appartient à `3B_R`. Les cellules non vides de ce niveau donnent donc
-une extension ternaire complète, puis leurs couples non ordonnés une extension
-quaternaire complète. L'owner longueur/`EdgeKey` rend les sorties exact-once.
+maximale appartient à `2B_R`; la constante deux est sharp. En écrivant
+`a=m-h`, `b=m+h`, `x=m+q` autour du centre de `B_R`, les endpoints donnent
+`||m||^2+||h||^2<=R^2`, tandis que la maximalité donne
+`||q+h||,||q-h||<=2||h||`, donc `||q||<=sqrt(3)||h||` et `||x||<=2R`.
+Intersecter avec `B(c_A,U_AB+r_A)` et `B(c_B,U_AB+r_B)`, où `U_AB` majore
+les distances endpoint, resserre encore le domaine sans perdre de carrier.
+Les cellules non vides de ce niveau donnent une extension ternaire complète,
+puis leurs couples non ordonnés une extension quaternaire complète. L'owner
+longueur/`EdgeKey` rend les sorties exact-once.
 Une paire n'est q2 propre que si `D=||b-a||^2>0` : les positions dupliquées
 sont rejetées, quotientées ou filtrées exactement avant cette promotion.
 
@@ -132,15 +138,19 @@ barycentriques du circumcentre. Une face aiguë adjacente à l'arête maximale
 sert seulement à choisir un carrier géométrique primaire.
 
 Le chemin q4 élimine d'abord les `CarrierBlock` sans face aiguë, avant de
-former les couples de cellules. Pour une face exacte, les centres vivent sur
+former les couples de cellules. Les blocs `ALL_ACUTE` restent symboliques :
+WST4 est formé avant toute expansion par face. Pour une face exacte résiduelle, les centres vivent sur
 une droite et la puissance de chaque apex y est affine : une sweep 1D par lots
 égaux remplace l'arrangement 2D comme candidat principal. Les comparaisons
-rationnelles peuvent dépasser `i128` sous u16.
+rationnelles peuvent dépasser `i128` sous u16. Un site dont le dénominateur de
+sweep est nul contribue une puissance constante négative, nulle ou positive ;
+il n'est jamais jeté.
 
 Les masques de rang restent indépendants. Une fixture u16 de 64 points possède
 un q4 régulier de rang 4, alors que ses six arêtes q2 et ses quatre faces q3 ont
 toutes rang 12. `OwnedCK-WST4` doit donc consommer la relation aiguë q3
-**pré-rang**, jamais les événements q3 retenus.
+**pré-rang**, jamais les événements q3 retenus. Le tape carrier est construit
+dès que `q3_open || q4_open`, même si la lane de rang q3 est fermée.
 
 Le nombre de blocs initiaux vaut conditionnellement `O(s^3 n)`,
 `O(s^3*eta^-3*n)` et `O(s^3*eta^-6*n)` pour q2/q3/q4, avec `0<eta<=1` et une
@@ -152,6 +162,8 @@ et son contre-audit sont
 [`audits/AUDIT_SOURCE_CK_WST_Q2_Q3_Q4_35FCEA8_20260814.md`](audits/AUDIT_SOURCE_CK_WST_Q2_Q3_Q4_35FCEA8_20260814.md)
 et
 [`audits/AUDIT_DEBLOCAGE_Q4_PORTEUR_AIGU_SOC64_LIVE_35FCEA8_20260814.md`](audits/AUDIT_DEBLOCAGE_Q4_PORTEUR_AIGU_SOC64_LIVE_35FCEA8_20260814.md).
+Les réponses à Claude et le contre-audit des compteurs porteurs/apex sont dans
+[`audits/AUDIT_REPONSE_M4_PORTEURS_AIGUS_4515A8B_20260814.md`](audits/AUDIT_REPONSE_M4_PORTEURS_AIGUS_4515A8B_20260814.md).
 
 ## Déblocages mathématiques prêts après `0A`
 
@@ -189,9 +201,12 @@ Le shadow courant corrige cette faute : il compare les ledgers baseline et
 union combinée, place SOC après les fallbacks et arrête une branche combinée à
 son premier `ALL`. Un replay borné mesure `41` fermetures de masse `95`, contre
 `127` et `316` avec la somme fautive. Il doit encore être capé, recevoir une
-porte CTest intégrée et tuer un mutant `sum_instead_of_union`. À `n=2000`, le
+comparaison PointId de l'union et tuer un mutant `sum_instead_of_union`. Cinq
+portes CTest intégrées passent désormais, mais ne couvrent pas ces deux
+obligations. À `n=2000`, le
 shadow non capé a déjà soumis `3 809 028` tâches et ajouté environ `2,1 s` à la
-vague sur une machine partagée ; ne pas lancer sa rampe 50k. Un retour inférieur
+vague sur une machine partagée. Le delta live ajoute un cap qui publie
+`MINORANT_CAP`; il n'est pas reçu au HEAD. Ne pas lancer sa rampe 50k. Un retour inférieur
 à `floor=q4` signifie seulement `UNKNOWN_BELOW_FLOOR`, pas une lane exacte.
 
 ### `JungDiskDepth`, puis LP projectif
@@ -208,6 +223,33 @@ le disque et les demi-plans. Il faut scinder jusqu'à une paire/microtile rejou�
 ou prouver un futur `BlockJungDiskDepth` uniforme. Une fixture `2×2` ferme q4
 sur la paire basse alors qu'aucun de ses huit témoins n'est même q2 intérieur
 sur la paire haute ; tout transfert depuis un représentant reste interdit.
+
+Un candidat uniforme exact est `BlockJungDualTile`. Écrire `m=(a+b)/2`,
+`h=(b-a)/2`, `c=m+w`, avec `w dot h=0` et
+`||w||<=kappa||h||`, où `kappa^2=1/3` pour q3 et `1/2` pour q4. Un groupe
+ferme une paire si et seulement s'il existe des poids rationnels `lambda_z`
+positifs de somme un tels que, avec
+`alpha=||h||^2-sum lambda_z||m-z||^2` et `p=m-sum lambda_z z`, on ait :
+
+```text
+q3 : alpha>0 et 3*alpha^2 > 4*(||h||^2||p||^2-(p dot h)^2)
+q4 : alpha>0 et   alpha^2 > 2*(||h||^2||p||^2-(p dot h)^2)
+```
+
+Helly borne une base à trois IDs. Un certificat de bloc conserve une même base
+et des poids rationnels, puis prouve ces polynômes sur tout `A×B` par bornes
+entières, Bernstein/SOS ou split fail-open. Tester seulement les coins est
+faux. Pour un témoin singleton, ce dual redonne exactement `SOC64`.
+
+Après une face aiguë, une seconde porte collective travaille en dimension un.
+Sur le segment de centres `J_f` compatible avec `K_4(ab)`, chaque témoin porte
+la forme affine `P_z(tau)=A_z-tau*B_z`; il est intérieur lorsque `P_z<0`.
+Un groupe couvre tout `J_f` si `J_f intersect intersection_z{P_z>=0}` est vide.
+Helly 1D donne une base d'au plus deux IDs ; huit groupes disjoints ferment
+toutes les extensions q4 de la face avant apex et avant sweep. La version bloc
+doit vérifier signes et produits croisés uniformément, sinon scinder. La chaîne
+de prune devient donc `Jung edge 2D -> carrier aigu -> Jung axe 1D -> WST4`,
+et la sweep par face n'est autorisée qu'après preflight de son résiduel.
 
 Le LP global reste un oracle utile, mais son échec ne prouve plus une pénurie
 sur le disque Morse : une fixture à huit groupes ferme `JungDiskDepth8` alors
@@ -256,7 +298,8 @@ Le raffinement des seuls terminaux q4 non fermés réduit réellement `E4` à
 `n=3000`, `s=8` : `eight_clusters` passe de `4 045 644` à `2 597 699` arêtes
 résiduelles et `uniform` de `1 027 538` à `464 599`. Mais à profondeur quatre,
 les recertifications passent respectivement de `31 538 327` à `199 169 436`
-et de `108 858 186` à `193 020 841`. Sans `M4`, BallKeys, census et fold, il
+et de `108 858 186` à `193 020 841`. Sans `F3/C4_carrier/F4/M4_apex`,
+BallKeys, census et fold, il
 est faux de conclure que le levier « paie ».
 
 La télémétrie de tête double-compte les parents ensuite scindés et imprime
@@ -299,7 +342,9 @@ Une pente `sum_E4` ne qualifie rien seule. Chaque campagne publie au minimum :
 
 - masses exclusives `CLOSED/OPEN/PENDING`, avec `pending=0` pour une fenêtre
   finale ;
-- `E3/E4`, maximum par ancre, `M3/M4=sum m_ab`, tâches, splits et visites ;
+- `E3/E4`, maximum par ancre, `F3`, `C4_carrier=edge×carrier aigu`, `F4`,
+  `M4_apex=edge×carrier-primaire×apex`, puis `W4_positive/H4_rank` ;
+- `N4_event`, `Z4_const`, `R4_bundle` et `T4_site` séparés ;
 - `BallKey` brutes/uniques, supports, census et tailles de shell ;
 - sorties `H`, octets, HWM, opérations larges et temps par phase ;
 - commandes, seeds, commit, diff, binaire et codes de sortie.
@@ -308,6 +353,14 @@ Les diagnostics CPU existants ne sont pas des modèles G4. Aucun cutoff kNN
 n'est exact : des supports positifs gardent un partenaire arbitrairement loin
 en rang. Aucun arrangement global, aucune mosaïque Delaunay d'ordre supérieur
 et aucun catalogue exhaustif ne deviennent le chemin produit.
+
+Au HEAD `4515a8b`, `--porteurs` ne scanne qu'un troisième sommet `x` par arête
+et imprime cette quadrature sous `M4_estime`. Il manque owner `EdgeKey`,
+exclusion `PENDING`, loi aléatoire/intervalle et vue SOC appariée. Le delta live
+v1 répare l'owner et compte `M4_apex` par arête, mais retire de sa moyenne les
+grosses lentilles capées ; il peut imprimer zéro si elles sont toutes capées.
+Ces chiffres restent diagnostics. Leur pente proche de trois sur les amas
+réfute l'expansion ponctuelle `edge×carrier`, pas les CarrierBlocks factorisés.
 
 Le raffinement local réduit effectivement `E4`, mais ses parents et enfants
 sont encore mélangés dans plusieurs compteurs de tentative. Son coût doit être

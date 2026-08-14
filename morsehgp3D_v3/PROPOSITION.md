@@ -189,14 +189,32 @@ input_mass = closed_mass + open_mass + pending_mass
 ouvert puis un scan calculent les degrés orientés et leur somme sans expansion
 des paires. Une égalité avec l'expansion PairId est exigée sur petit `n`.
 
-Après la fenêtre, `EdgeActiveCarrierCounter` mesure avant tout fill :
+Après la fenêtre, les compteurs doivent distinguer le premier facteur carrier
+du vrai produit quaternaire :
 
 ```text
-M3 = sum over open q3 edges of active q3 carriers
-M4 = sum over open q4 edges of active forms
+F3 = CarrierBlocks physiques initiaux
+C4_carrier = sum over open q4 owner edges of acute geometric carriers
+F4 = WST4Blocks physiques après prune carrier
+M4_apex = masse logique exact-once (owner edge, primary acute carrier, apex)
+W4_positive = masse après barycentriques strictes
+H4_rank = masse après rang/census
+N4_event, Z4_const, R4_bundle, T4_site = coûts distincts de la sweep
 ```
 
-Une fenêtre d'arêtes sparse ne borne ni `M3`, ni `M4`, ni les sphères uniques.
+Pour `e={a,b}`, `L_e` contient les sites dont les deux distances à `a,b` ne
+dépassent pas `D_e=||b-a||^2`, et `C_e` ceux dont `abx` est aigu avec owner
+longueur/`EdgeKey`. `M4_apex` compte les paires `{x,y}` de `L_e` dont la sixième
+distance ne dépasse pas `D_e`, dont l'owner parmi six arêtes est `e`, dont au
+moins un membre appartient à `C_e`, et dont l'orientation 3D est non nulle. Si
+les deux faces sont aiguës, le plus petit `PointId` est le carrier primaire.
+
+Une fenêtre d'arêtes sparse ne borne ni `C4_carrier`, ni `M4_apex`, ni les
+sphères uniques. Un compteur qui scanne seulement `x` vise `C4_carrier`, jamais
+`M4_apex`. Tout bloc `MIXED` contribue à `M4_apex_pending` ou à des bornes
+`M4_apex_L/M4_apex_U`; `pending=0` est requis avant une valeur finale. Les
+anciens reçus `M=sum m_ab` sont renommés `L4_form_v0` et ne sont pas
+réinterprétés silencieusement.
 
 ### 4.1 Raffinement local porteur de preuves
 
@@ -282,21 +300,31 @@ une incidence canonique `owner EdgeKey(ab) × PointId(x)`, pas un triplet libre.
 Pour un rectangle CK `R=(A,B)`, choisir une boule déterministe
 `B_R=(o_R,r_R)` contenant `A union B`, puis un niveau Morton dont la maille est
 comparable à `eta*r_R`. Énumérer les cellules non vides `C` de ce niveau qui
-rencontrent `3B_R`. Si `ab` est l'arête maximale d'un triangle `abx`, alors
-`||x-a||<=||a-b||<=2r_R`, donc `x` appartient nécessairement à `3B_R`.
+rencontrent `2B_R`. Cette constante est sûre et sharp : avec
+`a=m-h,b=m+h,x=m+q`, les endpoints donnent
+`||m||^2+||h||^2<=r_R^2`, la maximalité donne
+`||q||<=sqrt(3)||h||`, puis `||x-o_R||<=2r_R`.
+
+Si `A` est dans `B(c_A,r_A)`, `B` dans `B(c_B,r_B)` et `U_AB` majore les
+distances endpoint, intersecter encore avec
+`B(c_A,U_AB+r_A)` et `B(c_B,U_AB+r_B)`. Chaque facteur est une enveloppe sûre ;
+un test AABB--boule indécis conserve la cellule.
 
 Chaque triangle choisit l'arête de longueur maximale, puis la plus petite
 `EdgeKey` à égalité. Cette arête appartient à un rectangle CK unique et le
 carrier à une cellule half-open unique : le tuple retenu
 `OwnedCK-WST3(A,B,C)` est exact-once. Pour `0<eta<=1`, son nombre de blocs
-initiaux est `O(s^3*eta^-3*n)`, soit `O(s^6*n)` sous le choix supplémentaire
-`eta` proportionnel à `1/s`. Ce majorant ne couvre ni la localisation, ni les
-diagonales, ni tous les raffinements `MIXED`.
+initiaux est `O(s^3*eta^-3*n)`. Aucun théorème n'impose
+`eta=Theta(1/s)` : commencer avec `eta=Theta(1)` et compter séparément les
+splits `MIXED`. Ce majorant ne couvre ni la localisation, ni les diagonales, ni
+tous les raffinements `MIXED`.
 
 Après owner, q3 est positif si `E+X-D>0` et `G=D*E-F^2>0`. Les blocs reçoivent
 `ALL_ACUTE/NONE_ACUTE/MIXED` par bornes entières sûres ; les égalités
 descendent. `ALL_ACUTE` reste une source factorisée exacte, jamais la preuve
-que sa masse cubique, son rang, son shell ou ses `BallKey` sont bon marché.
+que sa masse cubique, son rang, son shell ou ses `BallKey` sont bon marché. Le
+tape carrier est requis dès que `q3_open || q4_open`; une fermeture de rang q3
+ne supprime jamais la relation géométrique nécessaire à q4.
 
 Avant l'extension, `JungDiskDepth9` peut fermer une paire singleton ou un
 microtile dont toutes les paires sont explicitement rejouées. Il n'est pas un
@@ -440,6 +468,31 @@ La fixture `A={(0,0,0),(0,100,0)}`, `B={(100,0,0),(100,100,0)}` et
 `z_j=(50,j,0)`, `j=0,...,7`, ferme q4 pour la paire basse mais ne fournit même
 aucun témoin q2 pour la paire haute. Elle interdit toute promotion depuis un
 représentant vers le rectangle.
+
+Un certificat dual donne néanmoins une voie uniforme falsifiable. Écrire
+`m=(a+b)/2`, `h=(b-a)/2`, `c=m+w`, avec `w dot h=0` et
+`||w||<=kappa||h||`, où `kappa^2=1/3` pour q3 et `1/2` pour q4. Pour un groupe
+de témoins, le minimax sur le disque de `w` et le simplexe fournit des poids
+rationnels `lambda_z>=0`, de somme un. Avec
+`alpha=||h||^2-sum lambda_z||m-z||^2` et `p=m-sum lambda_z z`, la couverture
+de la paire équivaut à :
+
+```text
+q3 : alpha>0 et 3*alpha^2 > 4*(||h||^2||p||^2-(p dot h)^2)
+q4 : alpha>0 et   alpha^2 > 2*(||h||^2||p||^2-(p dot h)^2)
+```
+
+Helly borne une base à trois IDs. Pour un témoin singleton, ces deux conditions
+se réduisent exactement à `H>0 && 4H^2>EX` et
+`H>0 && 3H^2>EX` : `BlockJungDualTile` généralise donc `SOC64`.
+
+Au niveau rectangle, une base et des poids rationnels proposés ne créditent
+`ALL` que si les deux inégalités sont prouvées sur tout `A×B`. Une première
+borne entière peu coûteuse utilise
+`alpha=-a dot b+(a+b) dot zbar-qbar`, puis une enveloppe de `h cross p` ;
+Bernstein/SOS ou un split traite le résiduel. L'échec reste `MIXED`. Les coins
+seuls ne suffisent pas : deux témoins peuvent couvrir tous les couples extrêmes
+et n'être que shell pour une paire médiane.
 
 Cette porte paire-level est strictement plus adaptée que le LP sur tout le
 plan. Un échec du LP global ne diagnostique pas une pénurie de témoins sur
@@ -606,18 +659,28 @@ aigu et zéro sweep sans tableau de `PairId`.
 ## 7. q4 : `OwnedCK-WST4`, puis shallow local si nécessaire
 
 Pour le même rectangle owner `R=(A,B)`, réutiliser les cellules carrier de
-`3B_R` et former des couples non ordonnés `(C,D)`. Si `C!=D`, le bloc porte
+la fenêtre `2B_R`--lentille et former des couples non ordonnés `(C,D)`. Si `C!=D`, le bloc porte
 `A×B×C×D`; si `C=D`, il porte `A×B×binom(C,2)` sans IDs répétés. Tout q4 dont
-`ab` est l'arête maximale possède ses deux autres sommets dans `3B_R`, donc un
+`ab` est l'arête maximale possède ses deux autres sommets dans cette fenêtre, donc un
 unique bloc `OwnedCK-WST4`. Pour `0<eta<=1`, le nombre de blocs initiaux avant
-filtres vaut `O(s^3*eta^-6*n)`, soit `O(s^9*n)` sous le choix supplémentaire
-`eta` proportionnel à `1/s`. Ce majorant ne couvre ni localisation ni
+filtres vaut `O(s^3*eta^-6*n)`. Commencer à `eta=Theta(1)` et raffiner les
+seuls `MIXED`; ce majorant ne couvre ni localisation ni
 raffinements `MIXED`.
+
+Même avec `C!=D`, les facteurs peuvent recouper les ensembles d'IDs `A` ou
+`B`. Les masses et preflights retirent donc explicitement les diagonales
+`A/C`, `A/D`, `B/C`, `B/D`, en plus de `C=D`. Le test terminal de quatre IDs
+distincts protège la sûreté, mais ne rendrait pas seul les compteurs exacts.
 
 Un tétraèdre q4 positif possède au moins une face aiguë adjacente à son arête
 maximale. `WST4` peut donc choisir le plus petit `PointId` des carriers aigus
 comme carrier primaire et l'autre comme apex. Cette relation q3 est
 **géométrique et pré-rang**. Elle ne vient jamais des événements q3 retenus.
+Changer l'owner ne réduit pas le nombre total de quadruplets : il ne fait que
+repartir une partition exact-once. L'arête maximale est au contraire l'ancre
+edge-local la plus serrée, car elle impose les cinq autres distances au plus
+égales à `D`. Une `BallKey` n'existe qu'après résolution du support et serait
+donc un owner de génération circulaire.
 
 La construction ne forme pas aveuglément tous les couples `(C,D)`. Elle
 classe d'abord `CarrierBlock(A,B,C)` en `ALL_ACUTE/NONE_ACUTE/MIXED`, élimine
@@ -632,7 +695,34 @@ droite `c(tau)=a+(W+tau*n)/(2G)`. Pour `s=z-a`, la puissance mise à l'échelle
 est `G||s||^2-W dot s-tau*n dot s`. Chaque apex non coplanaire donne donc un
 événement rationnel sur une sweep 1D, plutôt qu'une intersection nouvelle de
 deux lignes dans un arrangement 2D. Les valeurs égales sont groupées avant le
-census ; leurs comparaisons peuvent demander environ 155 bits sous u16.
+census ; leurs comparaisons peuvent demander environ 155 bits sous u16. Si
+`n dot s=0`, la puissance est constante : négative pour un intérieur permanent,
+nulle pour un shell permanent, positive pour un extérieur permanent. Ces sites
+ne sont jamais jetés ; les IDs du support sont masqués séparément.
+
+Avant de matérialiser les apex, exploiter la même droite comme certificateur de
+profondeur. Son intersection avec `K_4(ab)` est un segment fermé `J_f`. Pour
+chaque témoin, poser `A_z=G||z-a||^2-W dot (z-a)` et
+`B_z=n dot (z-a)` ; l'absence d'intérieur est le demi-intervalle
+`A_z-tau*B_z>=0`. Un groupe couvre toute la face si :
+
+```text
+J_f intersect intersection_z {tau : A_z-tau*B_z>=0} = empty
+```
+
+Helly en dimension un réduit un tel reçu à au plus deux IDs. Huit groupes de
+`PointId` disjoints ferment toutes les extensions q4 de la face avant apex et
+avant sweep. Pour une face fixe, les bornes de l'intersection sont les extrema
+des ratios `A_z/B_z` par signe ; l'égalité signifie shell et ne crédite rien.
+Un `FaceAxisJungDepth8Block` propose les petites bases sur un représentant,
+vérifie signes et produits croisés sur tout `A×B×C`, puis rend `ALL` ou scinde
+fail-open. Un succès parent s'hérite dans le `ProofSpanDAG`.
+
+La hiérarchie q4 devient donc : Jung edge 2D, porte aiguë, Jung axe 1D,
+`ApexWellCenteredBlock`, puis seulement le résiduel vers WST4/sweep. Cette
+ordonnance attaque la masse `C4_carrier` avant de développer une face ; une
+borne linéaire sur le nombre de blocs ne suffirait pas sans ce consommateur
+factorisé.
 
 L'autorité q4 reste directe : quatre IDs distincts, orientation non nulle,
 owner parmi six arêtes et quatre numérateurs barycentriques du circumcentre
@@ -645,13 +735,27 @@ impérativement le `fill`.
 Si la masse de couples carrier reste rouge, le moteur local du plan médiateur
 reste le successeur : q2 interroge son point central, q3 le pied unique d'une
 ligne et q4 les intersections shallow `P-P/N-N/P-N`. Il ne construit aucun
-arrangement global et ne s'instancie qu'après les portes `F4/M4`, tâches et
+arrangement global et ne s'instancie qu'après les portes `F4/M4_apex`, tâches et
 HWM. Le code exhaustif actuel reste son oracle, pas son modèle GPU.
 
-La gate porte sur les objets physiques `F4`, blocs aigus, événements, touches
-site-face, octets et HWM, pas sur la seule masse sémantique `E4`. Une masse
+La gate porte sur les objets physiques `F4`, blocs aigus, `N4_event`,
+`Z4_const`, `R4_bundle`, `T4_site`, octets et HWM, pas sur la seule masse
+sémantique `E4`. Une masse
 quadratique peut rester factorisée ; inversement, un scan de tous les sites par
 face est rouge même si peu de supports survivent.
+
+Le pin `4515a8b` observe une quadrature `arête × porteur` de pente proche de
+`2,97` sur `eight_clusters`. Elle réfute l'expansion ponctuelle, pas WST4 : un
+bloc `ALL_ACUTE` porte sa masse par un seul record, `NONE_ACUTE` disparaît et
+seuls les `MIXED` se divisent. L'ordre physique garde donc le carrier
+symbolique, forme WST4, applique owner/barycentriques/profondeur, puis ne
+matérialise une face que si le résiduel justifie la sweep.
+
+Le sampler du HEAD ne fournit pas une estimation reçue : owner faible,
+`PENDING` inclus, quantiles fixes sans seed ni intervalle et baseline seule. Le
+delta live v1 répare l'owner et calcule `M4_apex` par arête jugée, mais retire
+les grandes lentilles capées de la moyenne et peut imprimer zéro si elles sont
+toutes capées. Aucun de ces chiffres ne justifie une rampe G4 50k.
 
 ## 8. Plateaux, fold et sortie
 
@@ -684,19 +788,23 @@ variable.
    reprises.
 3. Recevoir `CKPairTape` comme partition q2 exacte et son certificateur
    `[L_open,U_closed]`, puis mesurer `F2` et la masse logique séparément.
-4. Ajouter `JungDiskDepth9/8` au niveau paire/microtile,
+4. Ajouter `JungDiskDepth9/8` au niveau paire/microtile, puis
+   `BlockJungDualTile` avec preuve uniforme ou split,
    `OriginOnionDepth` et un shadow `SOC64` à union de preuves disjointe, capé et
    jugé, avant toute multiplication carrier ; ne promouvoir Jung au rectangle
    qu'après un théorème uniforme.
-5. Construire `OwnedCK-WST3` counter-only, recevoir couverture/owner/acuité,
+5. Construire `OwnedCK-WST3` counter-only dans la fenêtre `2B_R`--lentille,
+   recevoir couverture/owner/acuité,
    puis raccorder `BallKey -> Q3FootPowerRange` et le census.
 6. Construire `OwnedCK-WST4` depuis la relation aiguë géométrique pré-rang,
-   éliminer les blocs sans carrier avant les couples de cellules, puis tester
-   la sweep 1D par face ; recertifier directement les quatre barycentriques et
-   la fixture où aucun sous-événement q2/q3 n'est retenu.
+   éliminer les blocs sans carrier avant les couples de cellules, appliquer
+   `FaceAxisJungDepth8Block` avant apex, puis tester la sweep 1D seulement après
+   preflight ; recertifier directement les quatre barycentriques et la fixture
+   où aucun sous-événement q2/q3 n'est retenu.
 7. Employer LP/cages comme diagnostics du même résiduel ; appliquer le
    raffinement porteur de preuves aux tâches encore `MIXED`, puis regater
-   `F3/F4`, `M3/M4` et choisir le shallow local q4 seulement si nécessaire.
+   `F3/C4_carrier/F4/M4_apex/T4_site` et choisir le shallow local q4 seulement
+   si nécessaire.
 8. Porter la tranche entière par count--scan--fill, tâches persistantes, SoA,
    radix/RLE et arithmétique large reçue.
 9. Exécuter des microgates `1500/3000/6000`, puis
@@ -716,7 +824,7 @@ Le résultat borné est néanmoins décisionnel : la configuration
 `Central-VWave + s=8 + window=512 + raffinement<=4` garde des pentes `sum_E4`
 proches de `1,9` sur `eight_clusters` et doit être remplacée sur cette famille.
 Cela ne réfute ni `SOC64/CORNER512`, ni LP/PWC, ni les cages. Sur `uniform`, la
-pente E4 seule reste verte mais ne borne pas `M4` ni le payload. Le SLO officiel
+pente E4 seule reste verte mais ne borne pas `M4_apex` ni le payload. Le SLO officiel
 ne peut pas être qualifié sur `uniform` seule : le plan évalue les objectifs sur
 Poisson uniforme **et** le mélange équilibré de huit amas, et G6 exige les deux
 familles favorables.
@@ -726,7 +834,8 @@ La porte composée publie au minimum :
 ```text
 E3/E4, max par ancre, CLOSED/OPEN/PENDING
 F2/F3/F4 physiques et masses logiques factorisées
-M3/M4, blocs, tâches, splits, visites
+C4_carrier, M4_apex, W4_positive, H4_rank
+N4_event, Z4_const, R4_bundle, T4_site, tâches, splits, visites
 BallKeys brutes/uniques, supports, census, shells
 sortie H, opérations larges, octets/HWM
 temps par phase et warm_e2e
@@ -746,7 +855,12 @@ bande passante ne qualifie aucun SLO.
 - niveau exact sous changement d'échelle, fractions voisines, transitivité et
   overflow sous UBSan ; une faute numérique sous mutant garde son statut ;
 - cosphère 384 sans troncature et extra-shell pertinent fail-closed ;
-- partition CK exacte-once, cellule carrier dans `3B_R`, `C=D` sans ID répété ;
+- partition CK exacte-once, carrier dans la fenêtre `2B_R`--lentille,
+  diagonales `A/C,A/D,B/C,B/D` et `C=D` sans ID répété ;
+- site de sweep à dénominateur nul avec puissance constante négative, nulle ou
+  positive, plus mutant `drop-zero-denominator` ;
+- tétraèdre entier aux six arêtes égales pour tuer la maximalité faible sans
+  tie-break `EdgeKey` ;
 - q4 positif avec aucun de ses six q2 ni quatre q3 retenu à `smax=11` ;
 - q4 positif à deux faces obtuses et quatre faces aiguës avec q4 négatif ;
 - partenaires q3 et q4 au-delà d'un cutoff de rang 128 ;
@@ -824,3 +938,7 @@ dans
 Le contre-audit SOC live, la contre-famille universelle, la sweep par porteur
 aigu et le certificat par pelages sont dans
 [`audits/AUDIT_DEBLOCAGE_Q4_PORTEUR_AIGU_SOC64_LIVE_35FCEA8_20260814.md`](audits/AUDIT_DEBLOCAGE_Q4_PORTEUR_AIGU_SOC64_LIVE_35FCEA8_20260814.md).
+La réponse aux cinq questions de Claude, la nomenclature
+`C4_carrier/M4_apex`, la preuve sharp de `2B_R` et le contre-audit des
+échantillonneurs v0/v1 sont dans
+[`audits/AUDIT_REPONSE_M4_PORTEURS_AIGUS_4515A8B_20260814.md`](audits/AUDIT_REPONSE_M4_PORTEURS_AIGUS_4515A8B_20260814.md).

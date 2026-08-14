@@ -243,15 +243,24 @@ MHGP_HD inline int lane_of_et(const i64 e[3], const i64 t[3],
     return kLaneQ2;
   }
 
-  const i128 hh = (i128)h * (i128)h;
-  const i128 ex = (i128)e2 * (i128)x2;
+  // COMPTE EXACT DES MULTIPLICATIONS LARGES. La version precedente ajoutait
+  // deux forfaitairement ; le contre-audit
+  // `AUDIT_REPONSES_SOC64_M4_ET_ROUTE_CK_WST_441AC7D_20260814.md` section 2.1
+  // releve a juste titre que le chemin en forme trois ou quatre selon la lane.
+  // Un compteur de cout qui ne compte pas le cout n'est pas un compteur.
+  const i128 hh = (i128)h * (i128)h;          // 1
+  const i128 ex = (i128)e2 * (i128)x2;        // 2
   if (st != nullptr) st->wide += 2;
   if (mu == SocMutant::kAcceptEquality) {
+    if (st != nullptr) ++st->wide;            // 3 : c4 * hh
     if ((i128)c4 * hh >= ex) return kLaneQ4;
+    if (st != nullptr) ++st->wide;            // 4 : c3 * hh
     if ((i128)c3 * hh >= ex) return kLaneQ3;
     return kLaneQ2;
   }
+  if (st != nullptr) ++st->wide;              // 3 : c4 * hh
   if ((i128)c4 * hh > ex) return kLaneQ4;
+  if (st != nullptr) ++st->wide;              // 4 : c3 * hh
   if ((i128)c3 * hh > ex) return kLaneQ3;
   return kLaneQ2;
 }

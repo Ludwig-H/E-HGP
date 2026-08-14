@@ -17,10 +17,16 @@ logiciel, un reçu ou une autorité conservée.
 - [`AUDIT_ETAT_COURANT.md`](AUDIT_ETAT_COURANT.md) : unique verdict mutable,
   pin, worktree, tests et blocages.
 - [`AUDIT_SOURCE_CK_WST_Q2_Q3_Q4_35FCEA8_20260814.md`](AUDIT_SOURCE_CK_WST_Q2_Q3_Q4_35FCEA8_20260814.md) :
-  source factorisée Callahan--Kosaraju pour tous les q2, extensions exact-once
-  `OwnedCK-WST3/WST4`, disque de Jung et fixture de non-cascade. Son lift Jung
-  d'une paire vers tout un rectangle et son ordre avant multiplication restent
-  des obligations, précisées par le contre-audit suivant.
+  partition factorisée Callahan--Kosaraju de toutes les paires, source de tous
+  les q2 propres après `D>0`, extensions exact-once `OwnedCK-WST3/WST4`, disque
+  de Jung paire-level et fixture de non-cascade. Un lift Jung vers tout un
+  rectangle exige encore un théorème uniforme.
+- [`AUDIT_REPONSE_M4_PORTEURS_AIGUS_4515A8B_20260814.md`](AUDIT_REPONSE_M4_PORTEURS_AIGUS_4515A8B_20260814.md) :
+  réponses aux six questions de Claude ; séparation
+  `E4/F3/C4_carrier/F4/M4_apex/T4_site`, contre-audit des quadratures v0/v1,
+  preuve sharp de `2B_R`, comparaison baseline/SOC et ordre
+  `CKPairTape -> Jung collectif -> CarrierBlocks symboliques -> WST4`, avec
+  sweep seulement après preflight.
 - [`AUDIT_DEBLOCAGE_Q4_PORTEUR_AIGU_SOC64_LIVE_35FCEA8_20260814.md`](AUDIT_DEBLOCAGE_Q4_PORTEUR_AIGU_SOC64_LIVE_35FCEA8_20260814.md) :
   contre-audit du shadow SOC64, obstruction u16 aux routes universelles, lemme
   du porteur aigu, sweep q4 1D, pelages inversés et portes physiques.
@@ -52,8 +58,8 @@ logiciel, un reçu ou une autorité conservée.
 - [`NOTE_CLAUDE_SOC64_LEDGER_COMBINE_ET_PARADOXES_20260814.md`](NOTE_CLAUDE_SOC64_LEDGER_COMBINE_ET_PARADOXES_20260814.md) :
   réponse de Claude aux deux contre-audits du 14 août. Acceptation du
   double-comptage, replay virtuel combiné, chiffres corrigés, mesure de `f(n)`
-  sur trois tailles, et quatre questions ouvertes — dont celle de savoir si
-  `sum E4` est encore le bon objet de porte.
+  sur trois tailles, puis sampler de porteurs et cinq questions. Ses claims
+  `M4 cubique` sont requalifiés par l'audit précédent.
 - [`NOTE_CLAUDE_ROUTE_50K_PUIS_DIZAINES_DE_MILLIONS_20260813.md`](NOTE_CLAUDE_ROUTE_50K_PUIS_DIZAINES_DE_MILLIONS_20260813.md) :
   questions de route de Claude, conservées avec bannière de rétractation. Ses
   claims live sont subordonnés à `AUDIT_ETAT_COURANT.md`.
