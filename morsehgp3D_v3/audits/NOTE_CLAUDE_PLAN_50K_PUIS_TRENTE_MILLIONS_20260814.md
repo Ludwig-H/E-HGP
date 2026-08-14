@@ -77,6 +77,13 @@ source autonome de chaque lane est complète contre son oracle borné. Avant
 cela, elle ne publie que des ledgers de candidats, jamais un nombre de supports
 produit.
 
+**État au `0195480`.** La première sonde ne satisfait pas cette précondition.
+Sur `two_lines,n=10`, elle rend code zéro et vingt q2 avec un diamètre observé
+très loin du cutoff, tandis que son brute force en trouve quarante-cinq. Elle
+duplique aussi un q3 isocèle à égalité d'arêtes maximales et partage un record
+`acu` entre q3 et q4. Les onze CTests verts ne couvrent pas ces P0. Voir
+[`AUDIT_WORKTREE_LANE_SOURCE_SCALE_J0_20260814.md`](AUDIT_WORKTREE_LANE_SOURCE_SCALE_J0_20260814.md).
+
 **Porte de sortie.** Trois exposants successifs publiés par arité, avec la
 règle du plan de test : deux exposants successifs `> 1,35` suspendent tout.
 Publier aussi `candidats/retenus` par lane.

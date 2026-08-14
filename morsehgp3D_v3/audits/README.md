@@ -36,6 +36,13 @@ ancienne phrase imposant le rejet global des positions dupliquées est périmée
   `MORT_GAP`/deep. Le P0 restant porte sur les préconditions d'identités non
   imposées. La suite fraîche passe 39 portes sur 39 ; le mutant du shell
   persistant est tué par la campagne scanline plateau.
+- [`AUDIT_WORKTREE_LANE_SOURCE_SCALE_J0_20260814.md`](AUDIT_WORKTREE_LANE_SOURCE_SCALE_J0_20260814.md) :
+  contre-audit de la première sonde de dimensionnement J0. Il reçoit les
+  identités ponctuelles des fuseaux, mais réfute la sentinelle `dmax` sur
+  `two_lines` (`20` q2 contre `45`), l'owner q3 sur un triangle isocèle à deux
+  arêtes maximales et le partage matériel du vecteur `acu` entre q3 et q4. Les
+  onze CTests verts n'exercent ni ces P0, ni le shell ; aucun chiffre 50k n'est
+  reçu.
 - [`AUDIT_CONTRE_SESSION_AXIS_TOP8_G4_840A2E2_20260814.md`](AUDIT_CONTRE_SESSION_AXIS_TOP8_G4_840A2E2_20260814.md) :
   contre-audit de l'ancienne recette G4 CPU et de son successeur au `d55bb9a` :
   fermeture générationnelle et zone IA réparées, mais parser du verdict

@@ -122,6 +122,13 @@ Le refus a posteriori ne peut donc publier que
 `truncated_candidate_lower_bound`, jamais `source_complete` ni un exposant de
 sortie exact.
 
+La sonde ajoutée ensuite à `acd792d` falsifie déjà ce garde sur une famille
+intégrée. `two_lines,n=10` rend code zéro, vingt q2 et
+`diam_max/dmax=0,007`; son mode `--verifie` trouve quarante-cinq q2. Même
+`--dmax-espacements=64` conserve vingt contre quarante-cinq. Cette fixture doit
+rester permanente : elle transforme le no-go informationnel en régression
+exécutable.
+
 J0 exact doit porter le reçu suivant :
 
 1. `NeutralPairPartition` couvre chaque paire non ordonnée exactement une fois ;

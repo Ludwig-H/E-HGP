@@ -611,6 +611,23 @@ ferme.
 Avant `unresolved_pair_mass=0`, les comptes publiés sont des bornes inférieures
 tronquées et non la taille de l'objet.
 
+Le prototype J0 commis à `acd792d`, puis paramétré à `0195480`, fournit une
+réfutation permanente du garde empirique. Sur `two_lines,n=10`, son exécution
+non vérifiée rend code zéro, `q2=20` et `diam_max/dmax=0,007`; le même binaire
+avec `--verifie` trouve `brute_q2=45` et rend code un. Même la borne de
+soixante-quatre espacements conserve `20` contre `45`. Le maximum observé ne
+peut donc jamais remplacer la conservation des ancres ou les calottes
+certifiées.
+
+Cette sonde duplique aussi q3 lorsque deux arêtes maximales égales partagent
+leur premier endpoint : l'owner ne compare pas le second composant de
+`EdgeKey`. Enfin, son vecteur `acu` est consommé matériellement par q3 puis q4.
+Il s'agit d'un diagnostic monolithique, pas des producteurs autonomes spécifiés
+ci-dessus. Les `11/11` CTests ciblés, verts en `8,82 s`, n'ont ni juge q3, ni
+fixture `two_lines`, ni records `I_B/U_B/BallKey`; ils ne reçoivent donc pas
+J0. Le détail reproductible est dans
+[`audits/AUDIT_WORKTREE_LANE_SOURCE_SCALE_J0_20260814.md`](audits/AUDIT_WORKTREE_LANE_SOURCE_SCALE_J0_20260814.md).
+
 Chaque générateur généralise WSPD jusqu'au census de **sa propre** miniboule ;
 une lentille ou un support positif sans profondeur n'est qu'une supersource.
 Le contrat précis et la réponse négative à Q14 sont dans
