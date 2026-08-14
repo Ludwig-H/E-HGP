@@ -30,7 +30,7 @@ ni un support q3, ni une sortie q3. `Lane2`, `Lane3` et `Lane4` restent trois
 énumérations indépendantes ; aucune Delaunay de quelque ordre que ce soit n'est
 admise.
 
-## Verdict court
+## Verdict au pin `3507b5e`
 
 Le commit ferme cinq défauts importants de la première révision :
 
@@ -77,7 +77,7 @@ sélection reste `OUVERT`, sans overflow, avec 48 entrants et 49 sortants. Pour
 l'un de ces apex, le shell exact contient les trois IDs du seed et les 97 IDs
 égaux, soit 100 IDs.
 
-Le buffer courant a pour capacité `32+64+3=99`. `census_replay` continue son
+Le buffer du pin `3507b5e` a pour capacité `32+64+3=99`. `census_replay` continue son
 range-report, incrémente `range_reports=97`, mais cesse silencieusement
 d'écrire au 99e slot. Il rend donc une liste fausse avec `degenere=true`, sans
 `required_count`, overflow ou verdict non consommable.
@@ -183,40 +183,74 @@ arrêté la génération exacte `2026-08-14T13:00:56.283-07:00` et certifié la 
 La cible d'une seconde pour 50k reste entièrement ouverte. GCP non utilisé par
 l'auditeur.
 
-## Addendum worktree après `d55bb9a`
+## Addendum au pin `33766f6`, relu sous `HEAD=f6b0650`
 
-Claude répare actuellement le P0 100-vers-99 sans toucher aux lanes : header
-SHA-256 `b2c7c8e447e4c4ab31a942c6d72b85e0f530bc7eb19ee02ccc657e7559015e07`,
+Le commit `33766f6e5cf0bae2beb0c257ce75e25e48ce7b50` répare le
+100-vers-99 sans toucher aux lanes. Pins relus : header SHA-256
+`c0a8e29edc43dbb17348b0997ed7d719965c4e5f0915799dc44ce43502eef332`,
 probe SHA-256
-`c593bee96a046393a91e4d66ee84dd90d6049d83fc8a63900119776489582a8c`.
-Le delta porte `kCapShellTotal=163`, les comptes requis, des fates typés,
-reconstruit le groupe égal depuis les extrêmes retenus, vérifie l'unicité brute
-et retire correctement l'assertion `cand_max<=2*r4`.
+`bec94df62c911672032daf6cb339e6c4778021195630551dc562befe6888dea5`.
+Le code porte `kCapShellTotal=163`, les comptes requis, des fates typés,
+reconstruit le groupe égal depuis les extrêmes retenus, applique
+`UNSUPPORTED_DEGENERACY` sous `RelevantGP`, vérifie l'unicité brute des listes
+publiées et retire correctement l'assertion `cand_max<=2*r4`.
 
-Deux conditions restent à fermer avant réception de ce delta :
+### P0 — un census mort ou profond peut encore être publié `EXACT`
 
-1. `CensusFate::kUnsupportedDegeneracy` est déclaré mais jamais attribué.
-   `degenere=true` peut donc encore sortir avec `fate=EXACT`. Après un replay
-   complet sans overflow, tout shell persistant ou ID égal hors apex doit
-   remplacer `EXACT` par `UNSUPPORTED_DEGENERACY` sous `RelevantGP`.
-2. Le commentaire exige un apex shallow, mais l'API ne vérifie que son
-   appartenance aux extrêmes et accepte explicitement une sélection
-   `kMortGap`. Le test exact est interne : si le compte reconstruit atteint
-   `r4`, rejeter l'apex sans publier les listes ; s'il reste inférieur à `r4`,
-   le théorème prouve que la reconstruction est complète. `kMortGap` doit
-   rendre immédiatement `HORS_DOMAINE`, jamais un census.
+Le commentaire exige un apex shallow, mais l'API accepte explicitement une
+sélection `kMortGap` et ne vérifie que l'appartenance de l'apex aux extrêmes.
+La fixture géométrique `fixture_mort16` du probe donne une reproduction directe
+avec le header public : `selection=MORT_GAP min=8 apex=11 census=EXACT I=8
+required_I=8 U=4`. Or `MORT_GAP` certifie précisément qu'aucune complétion de
+profondeur strictement inférieure à huit n'existe ; aucun census ne doit sortir.
 
-L'API suppose aussi que `sites` contient des `PointId` uniques, disjoints des
-trois IDs du seed. Ce n'est ni typé ni vérifié : répéter un même ID peut créer
-un faux `MORT_PERMANENTS/MORT_GAP`. Ajouter un préflight ou un type de vue
-distinct-ID, puis des permutations/relabelings clairsemés ; canonicaliser la
-sortie ne doit jamais masquer une duplication de l'entrée.
+Même `OUVERT` ne rend pas tous les extrêmes shallow. Avec `T2=200`, `r4=2`, une
+racine entrante `-5` et trois sortantes `-2,0,2`, la sélection est `OUVERT` et
+retient l'entrant, mais celui-ci a trois vrais intérieurs ; le replay n'en voit
+que deux et rend encore `EXACT`. La réparation est interne et exacte : refuser
+toute sélection autre que `OUVERT`, reconstruire d'abord le compte tronqué à la
+racine et rendre `DEEP/HORS_DOMAINE` sans publier de liste dès qu'il atteint
+`r4`. En dessous de `r4`, le théorème extrémal garantit justement que le compte
+et les identités retenus sont complets.
 
-Le fate doit avoir une priorité déterministe : overflow/capacité avant
-dégénérescence, puis aucune consommation de tableau pour tout fate non exact.
-Ajouter les portes `97-ties -> UNSUPPORTED_DEGENERACY avec required_shell=100`,
-`census_cap_minus_one -> PENDING_CAP`, `deep_retained_apex -> HORS_DOMAINE` et
-`mort_gap_census -> HORS_DOMAINE`. Le mutant historique
-`shell_compte_interieur` n'a plus d'effet produit sur une branche déjà
-unsupported ; il doit être déplacé vers une gate diagnostique de payload ou
-remplacé par `drop_equal_id/drop_persistent_shell`.
+### P0 — les préconditions d'identité ne sont pas imposées
+
+L'API suppose que `sites` contient des `PointId` uniques, disjoints des trois
+IDs du seed, mais ne le type ni ne le vérifie. Une fixture abstraite exacte avec
+`T2=2`, `r4=2`, un entrant de racine `-1` et un sortant de racine `+1` donne
+`OUVERT,min=1` avec les deux IDs uniques ; dupliquer chacun dans la liste donne
+à tort `MORT_GAP,min=2`. Plus directement, `sites=[7,7]` peut publier
+`U=[seed3,7,7]` avec `degenere=false`, et une intersection `seed3`/`sites`
+duplique pareillement un ID.
+
+La porte doit vérifier : seed injectif ; chaque ledger injectif ; ledgers deux
+à deux disjoints et disjoints du seed ; apex présent exactement une fois.
+L'identité invalide rend `HORS_DOMAINE` dans tous les profils. Elle ne doit pas
+être confondue avec plusieurs vrais `PointId` co-shell, qui donnent
+`UNSUPPORTED_DEGENERACY` sous `RelevantGP` et restent publiables sous une
+politique `Plateau` reçue.
+
+### Rejeu courant et fate du mutant shell
+
+Après reconfiguration et rebuild, `39/40` CTests `^mhgp3v_q4axis` passent en
+`44,46 s`. La fixture nominale de 97 racines rend bien
+`UNSUPPORTED_DEGENERACY` sous `RelevantGP`, puis `EXACT`, `n_shell=100` et
+`requis_shell=100` sous `Plateau`. L'unique échec est
+`mhgp3v_q4axis_mutant_shell_plateau` : code obtenu un au lieu de quatre, avec
+`MUTANT SURVIVANT: a8-shell-compte-interieur`.
+
+Cet échec est causal. Le mutant ne touche que le shell persistant `B=0,A=0`,
+alors que la fixture 97-ties n'a que des racines non nulles coégales. Ajouter
+un apex de racine zéro et un vrai shell persistant `(A,B)=(0,0)` sous le profil
+`Plateau` ; l'attendu est `I_B` vide et `U_B=seed3+apex+persistant`, tandis que
+le mutant crédite faussement le persistant à `I_B`. La fixture 97-ties doit
+rester la porte du cap et du tie report, pas être chargée de tuer un mutant
+qu'elle n'exerce pas.
+
+Pour les fates, exposer de préférence les diagnostics orthogonaux `invalid`,
+`deep`, `degenerate` et `required>capacity`, puis canoniser. Sous `RelevantGP`,
+l'ordre utile est `HORS_DOMAINE/DEEP`, `UNSUPPORTED_DEGENERACY`, `PENDING_CAP`,
+`EXACT` ; sous `Plateau`, il est `HORS_DOMAINE/DEEP`, `PENDING_CAP`, `EXACT`.
+Avec les caps actuels et une `Selection` valide, `PENDING_CAP` est au demeurant
+inatteignable ; une gate à cap abaissé doit le recevoir sans prétendre exercer
+le chemin nominal.

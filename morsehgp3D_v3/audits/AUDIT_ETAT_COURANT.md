@@ -8,11 +8,11 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-> **Verdict live au `HEAD=d55bb9a7add87a54bbd500e323fe6fa5bf45c5a2`.**
-> Le pin noyau `3507b5e` remplace le prototype historique `AxisTop8` par
-> `Q4SeedAxisTopR4`, son probe, 36 CTests et les vrais IDs de census. Le
-> `HEAD` ajoute le successeur de recette G4 et corrige sa cible vers la zone IA.
-> Le worktree courant ne contient que les présentes corrections d'audit ;
+> **Verdict live au `HEAD=f6b0650c49f2153ba8258c216440f19b96867bab`.**
+> Le pin noyau `33766f6` porte `Q4SeedAxisTopR4`, son probe, 40 CTests déclarés,
+> les vrais IDs de census, la capacité 163, les comptes requis et les fates de
+> plateau. Le `HEAD` ajoute un plan de route 50k, pas une mesure. Le worktree
+> courant ne contient que les présentes corrections documentaires d'audit ;
 > aucune mesure G4 nouvelle n'entre dans le verdict.
 > Q14 est fermée contractuellement : aucune structure de Delaunay n'est
 > autorisée, y compris d'ordre un, comme source, squelette, filtre ou census.
@@ -37,17 +37,15 @@ Cadre : `phase=exploration_v3_hors_registre`,
 > désigne ni un support ni une sortie q3. Contrat et réponse à Q14 :
 > [`NOTE_SOLUTION_CONTRAT_SOURCE_AIGUE_20260814.md`](NOTE_SOLUTION_CONTRAT_SOURCE_AIGUE_20260814.md).
 >
-> Le commit courant paramètre `r4=smax-3`, transporte les IDs permanents et le
-> shell, produit `MORT_GAP`, compare `I_B/U_B` à un juge InSphere à trois
-> classes et reçoit le primary/exact-once sur trois petites familles. Il reste
-> un P0 reproductible : 97 IDs de même racine donnent un shell attendu de 100
-> IDs, mais `Census.shell` en rend 99 sans fate d'overflow. La campagne confond
-> aussi la borne en groupes avec une borne en sites et accepte une dégénérescence
-> en la comptant seulement. Contre-audit, fixture et hashes :
+> Le pin noyau paramètre `r4=smax-3`, transporte les IDs permanents et le shell,
+> produit `MORT_GAP`, compare `I_B/U_B` à un juge InSphere à trois classes et
+> reçoit le primary/exact-once sur trois petites familles. `33766f6` répare la
+> troncature 100-vers-99, distingue groupes et masse d'IDs et refuse les
+> plateaux sous `RelevantGP`. Il reste deux P0 reproductibles : le replay publie
+> encore `EXACT` après `MORT_GAP` ou pour un apex retenu mais profond ; ni la
+> sélection ni le replay n'imposent l'injectivité et la disjonction des
+> `PointId`. Contre-audit, fixtures et hashes :
 > [`AUDIT_WORKTREE_Q4SEED_AXIS_TOPR4_20260814.md`](AUDIT_WORKTREE_Q4SEED_AXIS_TOPR4_20260814.md).
-> Le worktree élargit déjà le buffer à 163 et retire la fausse borne en sites,
-> mais `UNSUPPORTED_DEGENERACY` n'est pas encore attribué et un census reste
-> appelable après `MORT_GAP` ; l'addendum du contre-audit garde ces deux portes.
 >
 > La recette `session_axis_top8_g4.sh` de `840a2e2` ne devait pas être lancée :
 > quand son horodatage de génération est vide, son trap appelle un arrêt non
@@ -59,7 +57,7 @@ Cadre : `phase=exploration_v3_hors_registre`,
 > Son successeur répare l'arrêt générationnel et la zone, mais son parser ne
 > peut jamais accorder simultanément les sweeps et neuf exact-once, cherche les
 > anciens noms de métriques et rapatrie encore les preuves après le verdict. Il
-> reste interdit tant que ces défauts et le P0 `U_B` ne sont pas fermés.
+> reste interdit tant que ces défauts et les P0 du replay ne sont pas fermés.
 >
 > Il n'existe toujours aucune mesure GPU G4 bout-en-bout. Le reçu
 > `chaine_complete_g4_20260813` est `GPU_RUN=NO`, `PRODUCT_OUTPUT=NO` et mesure
@@ -67,10 +65,12 @@ Cadre : `phase=exploration_v3_hors_registre`,
 > payload. La cible d'une seconde reste ouverte ; aucune nouvelle session G4
 > ne précède les gates CPU des trois producteurs.
 >
-> Contrôles frais : les 36 CTests `^mhgp3v_q4axis` passent en `38,24 s`, avec
-> des seuils `smax=7/14` et trois exact-once. Le noyau ponctuel `Lane4` est donc
-> exercé dans son domaine borné ; les trois producteurs WSPD autonomes ne sont
-> pas implémentés et aucune complexité 50k n'est reçue.
+> Contrôles frais : `39/40` CTests `^mhgp3v_q4axis` passent en `44,46 s`, avec
+> des seuils `smax=7/14`, trois exact-once et le plateau de 100 IDs. L'échec est
+> causal : `mhgp3v_q4axis_mutant_shell_plateau` attend le code quatre, mais le
+> mutant survit car sa fixture n'a aucun shell persistant `B=0,A=0`. Le noyau
+> ponctuel `Lane4` reste un oracle borné ; les trois producteurs WSPD autonomes
+> ne sont pas implémentés et aucune complexité 50k n'est reçue.
 
 > **Alerte au pin logiciel `6e815d28b3e229a0161eb00d6fa0c9a272efac5d`.** Les
 > commits `89774d0`, `e3f1925` et `88a9ba8` ajoutent respectivement
@@ -418,7 +418,7 @@ planchers. Le plancher de gain doit être une option de campagne. La seule
 dominance reçue est `central ALL => Midball ALL`; Midball peut au contraire
 promouvoir un `central NONE`, par exemple sur `A=[0,8],B=[10,100],C={9}`.
 
-## `HCBlockDepth` au HEAD : formule sûre, intégration non reçue
+## `HCBlockDepth` au pin historique : formule sûre, intégration non reçue
 
 Le delta HC emploie `H=(z-a) dot (b-z)` et
 `C=(b-z) cross (z-a)`. Les conditions q3 `3H^2>||C||^2` et q4
@@ -445,7 +445,7 @@ Midball. À `eight_clusters,n=200`, les lectures baissent
 médiane CPU `8,3 -> 13,7 s`. Ces diagnostics reçoivent la réduction logique,
 pas un chemin chaud ni le SLO.
 
-## `--borne-sup` au HEAD : invariant utile, raccord multivue réfuté
+## `--borne-sup` au pin historique : invariant utile, raccord multivue réfuté
 
 Pour une seule vue de crédits singleton, l'idée est exacte. Si les tâches
 empilées forment une antichaîne, poser pour chaque lane
@@ -492,7 +492,7 @@ commise n'est recevable avant cette parité. Le snapshot falsifié, la portée
 exacte du lemme et les obligations sont détaillés dans
 [`AUDIT_LIVE_BORNE_SUP_CREDITS_A58D020_20260814.md`](AUDIT_LIVE_BORNE_SUP_CREDITS_A58D020_20260814.md).
 
-## `Corner8BallDepth` au HEAD : lemme `ALL` reçu, événement non raccordé
+## `Corner8BallDepth` au pin historique : lemme `ALL` reçu, événement non raccordé
 
 Pour un support q4 fixé et positif, `sigma*J(S,z)` est strictement convexe en
 `z`. Ses huit coins donnent donc un certificat `ALL_INTERIOR` complet sur une
@@ -513,9 +513,9 @@ Le détail, les fixtures `drop-corner`, support non positif et q3 ambiant sont
 dans
 [`AUDIT_CONTRE_RECEPTION_SUPPORT_COMPLET_CORNER8_WST34_22D1CB0_20260814.md`](AUDIT_CONTRE_RECEPTION_SUPPORT_COMPLET_CORNER8_WST34_22D1CB0_20260814.md).
 
-## `WST3/WST4` au HEAD : candidate cover, pas source `Owned` reçue
+## `WST3/WST4` au pin historique : candidate cover, pas source `Owned` reçue
 
-Le filtre d'acuité rouge de `3703097` est réparé au `HEAD=a73161c`. Pour
+Le filtre d'acuité rouge de `3703097` est réparé au pin `a73161c`. Pour
 `H=(x-a) dot (b-x)`, une face est aiguë en `x` lorsque `H<0`. La classification
 exacte est `Hmax<0 => ALL_ACUTE`, `Hmin>=0 => NONE_ACUTE`, sinon `MIXED`.
 Le juge WST4 contrôle cependant toujours les couples bruts et ignore le booléen
@@ -619,7 +619,7 @@ mauvais bit 1 ; ses huit descendants `{9,11}^3` donnent `J=1664`, soit le bit 2
 qui ferme réellement la lane négative. Le mutant `mask-any-continue` doit
 manquer cette fermeture et le swap de deux sommets exerce la lane opposée.
 
-La fixture plate enregistrée au HEAD vérifie seulement, par regex,
+La fixture plate enregistrée dans ce snapshot historique vérifie seulement, par regex,
 `R2=1000001`, `cospherique=1` et `orientation_nulle=0`. Elle réfute utilement
 l'implication « petit déterminant donc grand rayon relatif », mais ne juge ni
 les poids `1/4`, ni l'owner, ni `R/diam`, ni la mesure d'aplatissement.
@@ -955,7 +955,7 @@ Réponses complètes aux trois questions de Claude :
 Le détail contractuel du reçu et des continuations est dans
 [`AUDIT_CONTRE_RECU_RAMPE_RAFFINEMENT_G4_35FCEA8_20260813.md`](AUDIT_CONTRE_RECU_RAMPE_RAFFINEMENT_G4_35FCEA8_20260813.md).
 
-## `C4/M4/H4` : le mur avant rang est réel, les claims du HEAD ne le sont pas
+## `C4/M4/H4` : le mur avant rang est réel, les claims du pin audité ne le sont pas
 
 Le schéma courant sépare `C4_carrier` pour les faces aiguës,
 `M4_apex` pour les quadruplets canoniques avant barycentriques,
@@ -967,7 +967,7 @@ phase exigerait une nouvelle preuve de couverture ; une `BallKey` est aval et
 serait un owner de génération circulaire.
 
 Le sampler v2 améliore v1 : il exclut `PENDING` et ne censure plus les grosses
-lentilles. Le HEAD a remplacé la fausse barre `2 sigma` par une demi-largeur
+lentilles. Le pin audité a remplacé la fausse barre `2 sigma` par une demi-largeur
 Hoeffding correcte **conditionnellement** à des tirages indépendants et
 uniformes. Cette loi n'est pas reçue : multiply-high reste sans rejet exact,
 les deux streams SplitMix à seed fixe n'ont pas de contrat d'indépendance et le
@@ -1058,7 +1058,7 @@ Le contre-audit du sampler v2, du brute-force, la réponse entière à la questi
 7 et les microgates `JungDual/BlockBallDepth8` sont dans
 [`AUDIT_CONTRE_RECEPTION_M4_V2_DEPTHBLOCK_5BFC5C8_20260814.md`](AUDIT_CONTRE_RECEPTION_M4_V2_DEPTHBLOCK_5BFC5C8_20260814.md).
 
-## `JungDepth` et `BlockJungDual64` au HEAD stable : théorème fixe reçu, intégration ouverte
+## `JungDepth` et `BlockJungDual64` au pin historique : théorème fixe reçu, intégration ouverte
 
 La forme entière duale `A/P/R` est correcte sous u16, paire propre et
 `sum(weights)<=65535`, mais elle vérifie seulement les poids fournis. Son échec
@@ -1067,9 +1067,9 @@ reste `UNKNOWN`. `BlockJungDual64::make_base` préflighte la somme en `i128`, ma
 porte les `PointId`, et le mutant étroit utilise un overflow signé. Le wrapper
 futur authentifie donc profil, cap, IDs et disjonction. Il peut exposer une
 primitive nommée `verify_dual_weights_lane`, mais ce symbole n'existe pas au
-`HEAD` et ne serait jamais un décideur de couverture.
+ce pin et ne serait jamais un décideur de couverture.
 
-Le HEAD ajoute le bon juge indépendant pour une base fixe. Dans le plan
+Le pin audité ajoute le bon juge indépendant pour une base fixe. Dans le plan
 `s dot (b-a)=0`, il minimise exactement `||s||^2` sur les demi-plans mauvais,
 en BigInt, puis compare strictement `3*r^2>D` ou `2*r^2>D`. Les formes
 `K_ij`, `Delta` et `N` sont algébriquement cohérentes et les fixtures q4 de
@@ -1085,7 +1085,7 @@ Le titre du commit « le primal retire encore un espoir » n'est pas reçu.
 `--primal` ne remplace que les groupes de taille deux d'un greedy disjoint sur
 `--voisins`; la taille trois emploie encore une banque finie. Il mesure donc
 `p`, jamais la profondeur `d`. Aucun CTest ne lance ce mode et le claim « quatre
-mesures identiques » est faux sur le binaire du même HEAD : à
+mesures identiques » est faux sur le binaire du même pin : à
 `eight_clusters,n=600`, les fermetures passent `169 -> 170`, et à `n=1500`,
 `189 -> 190`. Même sur sa cible réduite, le primal récupère déjà une base.
 
@@ -1185,7 +1185,7 @@ Sur une tuile, les mêmes bases doivent être vérifiées uniformément ou provo
 un split. Après une face aiguë fixe, la dimension un est plus forte : les top-k
 seuils donnent constructivement un noyau d'au plus 16 IDs pour q4.
 
-## SOC64 actif au HEAD : baisse locale du résiduel, aucune campagne G4 reçue
+## SOC64 actif au pin historique : baisse locale du résiduel, aucune campagne G4 reçue
 
 Le faible gain du classifieur scalaire `D/V/T` ne réfute que des extrema
 décorrélés. Il ne réfute ni le spindle ponctuel, ni les rectangles corrélés, ni
@@ -1325,8 +1325,8 @@ suite ciblée ball_event/WSPD/Gamma/postings/saturated : 87/87 verts
 faces q4 exactes : 5/5 ; q3 côtés hors rang : 6/6
 fixtures centre_cell arité 3/4 + mutant cascade : 3/3
 SOC64 isolé : 16/16 ; WSPD--SOC intégré : 5/5, oracle d'union incomplet
-WSPD--SOC/porteurs/two_lines/cap au HEAD : 17/17 en 33,18 s
-q4_brute au HEAD : 5/5 en 2,40 s, prédicats et shell non indépendants
+WSPD--SOC/porteurs/two_lines/cap au snapshot historique : 17/17 en 33,18 s
+q4_brute au snapshot historique : 5/5 en 2,40 s, prédicats et shell non indépendants
 sous-suite SOC/WSPD/porteurs/two_lines/q4/Jung/diag/ordre : 56/56 en 25,79 s
 contre-calcul BigInt ad hoc Corner8 (pas une CTest) : 4096/4096,
   marge owner=11892000,
@@ -1335,27 +1335,27 @@ dissection de perte live : 1/1 en 0,80 s, populations non appariées
 flip direct cap 1000 : accord=OUI, juges=47, sautes=3, faux=0 (statut faux)
 mutant somme cap complet : code 4, juges=168, sautes=0, faux=25
 JungDual UBSan étroit : overflow signé à jung_dual.hpp:157
-Jung ciblé au HEAD : 13/13 verts en 0,31 s, collectif k=2 reçu, k=3/tau(E)/OPEN_FINAL absents
-BJD header au HEAD : seulement point + boîtes dégénérées ; produits non dégénérés absents
+Jung ciblé au snapshot historique : 13/13 verts en 0,31 s, collectif k=2 reçu, k=3/tau(E)/OPEN_FINAL absents
+BJD header au snapshot historique : seulement point + boîtes dégénérées ; produits non dégénérés absents
 BJD intégré au pin 5809bd2 : 3/3 CTests verts, nominal et deux mutants de ledger
 rejeu consolidé précommit SOC/Jung/BJD : 10/10 verts en 1,21 s sur cette machine
 pin 5809bd2, BJD cap 1 : code 0/OK avec groupes sautes=98 et fermetures sautees=10 (statut faux)
 pin 5809bd2, BJD sans vwave : code 0/OK, essais=0, couvrants=0 (mode vacuaire)
-HEAD SOC actif + juge shadow : zéro verdict actif jugé ; raccord actif sans autorité intégrée
-HEAD judge-vwave + SOC/BJD : code 1, 149 fermetures dites « sans 10 » ; juge central incompatible avec les preuves collectives q4
+snapshot historique, SOC actif + juge shadow : zéro verdict actif jugé ; raccord actif sans autorité intégrée
+snapshot historique, judge-vwave + SOC/BJD : code 1, 149 fermetures dites « sans 10 » ; juge central incompatible avec les preuves collectives q4
 rejeu local historique Jung/BJD : 16/16 verts en 1,45 s, dont 13 Jung et 3 BJD intégrés
 pin 694920a BJD ciblé : 8/8 verts ; 0,26 s présent rejeu, 0,36 s précédent
   PARTIEL code 3, sans-vwave code 2, mutants code 4
 pin 694920a exige-q4-ouvert seul : code 0/OK ; collinear_seven points=200 exécute n=9
 pin 8fd6f59 BJD ciblé : 8/8 verts ; exige-q4-ouvert sans juge et collinear n=200 refus code 2
 pin 8fd6f59 collinear_seven sain : zéro groupe, zéro fermeture, 55 visites de feuilles déjà créditées rejetées
-HEAD midball standalone : 9/9 affichés verts en 0,95 s présent rejeu ;
+snapshot historique, midball standalone : 9/9 affichés verts en 0,95 s présent rejeu ;
   deux portes saines à regex, doublon de rect_h_interval, réception ouverte
-HEAD midball --selftest=1 : accord=OUI imprimé puis plancher code 3
-HEAD fenetre-exacte n=200, S=1000 : 198000 scans ; q2 exact échantillonné, q3/q4 majorants ; aucune CTest dédiée
-HEAD exhaustif n=200 : 19900 paires, U<h=3790/10059/10937, 3184359 tests
-HEAD exhaustif --points=8,9 : n=9 sauté par retour après les 28 paires de n=8
-HEAD exhaustif + plancher BJD impossible ou mutant : code 0, gates court-circuitées
+snapshot historique, midball --selftest=1 : accord=OUI imprimé puis plancher code 3
+snapshot historique, fenetre-exacte n=200, S=1000 : 198000 scans ; q2 exact échantillonné, q3/q4 majorants ; aucune CTest dédiée
+snapshot historique, exhaustif n=200 : 19900 paires, U<h=3790/10059/10937, 3184359 tests
+snapshot historique, exhaustif --points=8,9 : n=9 sauté par retour après les 28 paires de n=8
+snapshot historique, exhaustif + plancher BJD impossible ou mutant : code 0, gates court-circuitées
 pin a58d020 WSPD 63c79bd6 / CMake 4c6cb24e : build vert ; 13/13 affichés verts
   n=1500 amas : lectures -7,41 %, résiduel q2 -29,95 %, vague médiane +14,1 %
   multi-n : compteurs hérités ; cap i64 et bypass exhaustif du juge ouverts
@@ -1372,8 +1372,8 @@ pin 1fd9cf1 : 16/16 portes Corner8/WST3/WST4 ciblées vertes ; aucune ne passe -
 pin 1fd9cf1 --masse n=60/S=1000 : 9,00 % IDs répétés, 76,10 % owner hors, moyenne 25,3, retenus 1,00 % ; sortie biaisée/non positive
 pin f1b78c0 --supports-retenus n=120 : 1/1 regex verte en 30,49 s puis 33,91 s ; population Raw4 non positive, mode q3 par défaut
 révision transitoire pré-08dec bien_centre + supports n=120 : CTest rc=8 en 8,63 s ; bien_centres=600311, retenus=7344
-HEAD 08dec609 Corner8/WST ciblés : 18/18 verts en 13,39--19,31 s ; centre 0,00--0,02 s, supports 5,10--9,61 s ; regex fail-open, shell/RLE absents
-catalogue HEAD : 839 CTests après reconfiguration ; aucune suite complète 839/839 rejouée ici
+pin 08dec609, Corner8/WST ciblés : 18/18 verts en 13,39--19,31 s ; centre 0,00--0,02 s, supports 5,10--9,61 s ; regex fail-open, shell/RLE absents
+catalogue historique : 839 CTests après reconfiguration ; aucune suite complète 839/839 rejouée ici
 ablation BJD n=1500 uniform : masse q4 -12,55 %, CPU user médian +5,47 %, lectures identiques
 ablation BJD n=1500 amas : masse q4 -0,87 %, CPU user médian +8,15 %, lectures identiques
 session G4 SOC actif : CTest rc=8, aucune rampe, cible TERMINATED

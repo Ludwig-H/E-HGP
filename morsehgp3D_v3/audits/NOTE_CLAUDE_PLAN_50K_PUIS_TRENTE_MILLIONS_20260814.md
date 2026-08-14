@@ -1,11 +1,11 @@
-# Plan — du noyau reçu au contrat 50 000, puis aux dizaines de millions
+# Plan — du noyau ponctuel candidat au contrat 50 000, puis aux dizaines de millions
 
 Date : 14 août 2026 UTC.
 
 Cadre : `phase=exploration_v3_hors_registre`,
-`backend=cpu_reference_bounded_oracles`,
+`backend=cpu_reference_bounded_oracles_and_g4_diagnostic`,
 `profile=quantized_u16_input_only`,
-`mode=plan_de_route_non_recu`,
+`mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
 Ce plan ne certifie rien et n'ouvre aucune phase. Il ordonne le travail restant
@@ -30,9 +30,12 @@ un facteur `790` à combler : c'est un facteur `790` **plus** un aval entier qui
 n'existe pas.
 
 Ce qui est acquis et le rend abordable : Q14 est fermée — aucune Delaunay,
-ordre un inclus — les trois lanes sont indépendantes, et le noyau
-`Q4SeedAxisTopR4` est reçu au niveau ponctuel avec identités exactes, mort par
-gaps typée et exact-once par provenance primaire.
+ordre un inclus — et les trois lanes sont indépendantes. Le noyau
+`Q4SeedAxisTopR4` reste un candidat ponctuel : la sélection extrémale et la mort
+par gaps sont reçues dans leur domaine, mais le replay publie encore `EXACT`
+après `MORT_GAP` ou pour un apex profond et n'impose pas les préconditions
+d'identités. L'exact-once courant ne confronte pas encore owner et primary à
+une provenance indépendante.
 
 ## 1. Le seul chiffre qui décide de tout
 
@@ -69,6 +72,11 @@ delà de `n=260`. Sans elle, aucune borne de coût n'est vérifiable et aucun ch
 d'architecture n'est argumenté. C'est la mesure la moins chère et la plus
 décisive du plan.
 
+**Précondition.** Cette mesure ne devient une mesure de l'objet que lorsque la
+source autonome de chaque lane est complète contre son oracle borné. Avant
+cela, elle ne publie que des ledgers de candidats, jamais un nombre de supports
+produit.
+
 **Porte de sortie.** Trois exposants successifs publiés par arité, avec la
 règle du plan de test : deux exposants successifs `> 1,35` suspendent tout.
 Publier aussi `candidats/retenus` par lane.
@@ -78,7 +86,8 @@ la cible `100 ms` est arithmétiquement hors d'atteinte et le contrat doit être
 renégocié en `p95 < 1 s`, ou `K_max` abaissé. **Il faut le dire à ce moment-là,
 pas après six jalons.**
 
-**Coût.** Une session G4 en zone IA, CPU 48 cœurs, moins d'une heure. Les
+**Coût proposé, non reçu.** Une session G4 en zone IA, CPU 48 cœurs, moins
+d'une heure. Les
 oracles exhaustifs plafonnent à `n≈400` ; au-delà, la mesure emploie
 l'énumération par ancre d'arête diamétrale, validée exacte contre le brute force
 `C(n,4)`.
@@ -89,7 +98,7 @@ l'énumération par ancre d'arête diamétrale, validée exacte contre le brute 
 split-tree Morton, génération des `Q4Seed3` owner/aigus, puis
 `Q4SeedAxisTopR4` alimenté par une **recherche best-first sur l'octree**.
 
-**Pourquoi c'est ouvert maintenant, alors que cinq certificats de bloc ont
+**Pourquoi cela peut s'ouvrir après les P0 du replay, alors que cinq certificats de bloc ont
 échoué.** Parce que `Lane4` n'a plus besoin d'un certificat de profondeur
 uniforme sur un rectangle. À `Q4Seed3` fixé, `A_z` est une quadratique convexe
 séparable en `z` et `B_z` est linéaire : un nœud témoin se borne par clamp
@@ -192,8 +201,8 @@ comparable au bruit capteur : les coplanarités et les positions dupliquées
 cessent d'être des cas limites et deviennent le régime dominant. La politique de
 dégénérescence — `RLE` par `BallKey`, plateau déclaré, ou
 `unsupported_degeneracy` — n'est plus un garde-fou, c'est le chemin principal.
-Le fate typé du census, reçu au jalon courant, est donc une brique de J6 autant
-que du présent.
+Le fate typé du census est donc une brique de J6 autant que du présent ; son API
+reste à recevoir sur `MORT_GAP`, les apex profonds et les identités invalides.
 
 **La matérialisation.** À `428` supports par point, trente millions de points
 donnent `1,3·10^10` supports. Aucune mémoire ne les tient. Deux issues, et il
@@ -209,19 +218,19 @@ nécessaire. C'est la seule voie de tuilage qui ne soit pas une heuristique.
 la chaîne globale restreinte à son noyau, sur une fixture où un support traverse
 la frontière.
 
-## 9. Ce qui est décidé, et ce qui attend l'utilisateur
+## 9. Décisions déjà fixées pour cette tranche
 
 Décidé et sans ambiguïté : aucune Delaunay ; trois lanes indépendantes ; pas de
 produit `carrier x apex` ; `RelevantGP` rend `unsupported_degeneracy` plutôt
 qu'un cardinal.
 
-Trois décisions appartiennent à l'utilisateur, et le plan les attend :
-
-1. **le SLO**, si J0 montre que `100 ms` est hors d'atteinte à `428` supports
-   par point — renégocier à `1 s`, ou abaisser `K_max` ;
-2. **le profil d'entrée**, `u16` contre `binary64`, avant d'écrire l'aval ;
-3. **la garde `terminationTimestamp` en zone standard** : aujourd'hui seules les
-   zones IA disposent du repli par échéance calculée, et c'est la seule raison
-   pour laquelle la dernière session a échoué.
+Les instructions courantes ferment les trois choix immédiats. La tranche vise
+d'abord le seuil secondaire `p95 warm_e2e < 1 s` demandé par l'utilisateur,
+sans rétracter ni renégocier silencieusement la cible produit primaire de
+`100 ms`. Le profil v3 reste `quantized_u16_input_only` ; `binary64` ouvrirait
+un profil séparé. Enfin, toute future session emploie la zone IA et le runner
+gardé seulement après fermeture des portes CPU et du contre-audit du runner.
+J0 peut motiver une demande ultérieure de changement de contrat, jamais la
+décider seul.
 
 GCP non utilisé pour l'écriture de cette note.

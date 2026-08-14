@@ -501,10 +501,11 @@ inline Census census_replay(const Selection& sel, int apex, const int seed3[3],
                             PowFn pw, Mutant mut = Mutant::kNone,
                             Profil profil = Profil::kRelevantGp) {
   Census c;
-  if (sel.verdict == SeedVerdict::kDebordement ||
-      sel.verdict == SeedVerdict::kMortDegeneree ||
-      sel.verdict == SeedVerdict::kMortT2 ||
-      sel.verdict == SeedVerdict::kMortPermanents) {
+  // LE DOMAINE DE LA PREUVE, IMPOSE ET NON COMMENTE. Le replay n'est exact que
+  // pour un apex SHALLOW d'un seed OUVERT. `MORT_GAP` est aussi hors domaine :
+  // le seed est ferme, aucun apex n'y est pertinent, et publier un census y
+  // serait publier un objet inexistant.
+  if (sel.verdict != SeedVerdict::kOuvert) {
     c.fate = CensusFate::kHorsDomaine;
     return c;
   }
@@ -536,6 +537,16 @@ inline Census census_replay(const Selection& sel, int apex, const int seed3[3],
   for (int t = 0; t < sel.n_sortants; ++t) {
     const int z = sel.sortants[t];
     if (z != apex && cmp_racines(pw(z), pa) > 0) pousse_int(z);
+  }
+  // UN APEX PROFOND EST HORS DOMAINE, ET LE REPLAY LE DECOUVRE LUI-MEME. La
+  // preuve « tout interieur est dans les extremes retenus » suppose la
+  // profondeur strictement inferieure a `r4` ; au-dela, des non-extremes
+  // peuvent manquer et la liste serait fausse sans le dire.
+  if (c.requis_interieur >= sel.r4) {
+    Census hd;
+    hd.fate = CensusFate::kHorsDomaine;
+    hd.requis_interieur = c.requis_interieur;
+    return hd;
   }
   // `U_B` = seed, shell persistant, groupe d'egalite de la racine.
   for (int t = 0; t < 3; ++t) pousse_shell(seed3[t]);

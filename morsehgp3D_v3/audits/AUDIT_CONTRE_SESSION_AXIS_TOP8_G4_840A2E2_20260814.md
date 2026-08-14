@@ -205,7 +205,10 @@ Enfin, l'en-tête « ne modifie aucune garde » reste faux : la recette reconfig
 `maxRunDuration` et ajoute une clé OS Login expirante. Ces mutations peuvent
 être autorisées et sûres, mais doivent être nommées exactement.
 
-Indépendamment du runner, le P0 logiciel du census au `3507b5e` interdit la
-session : la fixture 97-ties tronque `U_B` de 100 à 99 IDs sans fate. Une grande
-sweep CPU ne peut pas recevoir un payload que son oracle accepte après
-troncature.
+Indépendamment du runner, `33766f6` répare le P0 de capacité du census au
+`3507b5e`, mais la session reste interdite : `census_replay` publie encore
+`EXACT` après `MORT_GAP` ou pour un apex retenu mais profond, et ne valide pas
+l'injectivité/disjonction des `PointId`. La suite fraîche est en outre rouge à
+`39/40`, car la nouvelle fixture de racines coégales ne peut pas tuer un mutant
+qui ne touche que le shell persistant. Une grande sweep CPU ne reçoit aucune de
+ces préconditions et ne transforme pas ce probe en route 50k.

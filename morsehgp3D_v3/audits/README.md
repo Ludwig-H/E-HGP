@@ -30,23 +30,29 @@ ancienne phrase imposant le rejet global des positions dupliquées est périmée
   caps, continuations ou preuves de complétude. Le `Q4Seed3` est un préfixe
   interne à `Lane4`, pas un support ou une sortie q3.
 - [`AUDIT_WORKTREE_Q4SEED_AXIS_TOPR4_20260814.md`](AUDIT_WORKTREE_Q4SEED_AXIS_TOPR4_20260814.md) :
-  contre-audit consolidé au `3507b5e` du noyau ponctuel interne à `Lane4` :
-  `r4` paramétrique, IDs `I_B/U_B`, `MORT_GAP` et exact-once désormais exercés ;
-  P0 restant sur une fixture de 97 IDs cosphériques, où le shell attendu de 100
-  IDs est tronqué à 99 sans fate ; distinction obligatoire entre borne de
-  groupes et masse d'IDs, dégénérescence fail-closed et portée encore
-  quadratique par seed.
+  contre-audit consolidé du noyau ponctuel interne à `Lane4` : `r4`
+  paramétrique, IDs `I_B/U_B`, `MORT_GAP` et exact-once ; réparation au
+  `33766f6` de la troncature 100-vers-99, puis P0 restants sur un replay
+  `MORT_GAP`/deep encore publié `EXACT` et sur les préconditions d'identités non
+  imposées. La suite fraîche passe 39 portes sur 40 ; la fixture ties ne tue pas
+  le mutant du shell persistant.
 - [`AUDIT_CONTRE_SESSION_AXIS_TOP8_G4_840A2E2_20260814.md`](AUDIT_CONTRE_SESSION_AXIS_TOP8_G4_840A2E2_20260814.md) :
   contre-audit de l'ancienne recette G4 CPU et de son successeur au `d55bb9a` :
   fermeture générationnelle et zone IA réparées, mais parser du verdict
   incompatible avec les nouveaux records, exact-once rendant le cardinal de
   lignes impossible, réfutations copiées après verdict, absence de deadline
-  global et P0 `U_B` préalable. GCP non utilisé par l'audit.
-- [`NOTE_CLAUDE_Q4SEED_AXIS_TOPR4_ET_BLOCAGE_G4_20260814.md`](NOTE_CLAUDE_Q4SEED_AXIS_TOPR4_ET_BLOCAGE_G4_20260814.md) :
-  journal de tranche de Claude, non autorité de réception : indépendance des
-  lanes mesurée, 36 portes locales, correction du diagnostic de zone GCP et
-  liste de blocages déclarés. Son claim de census complet est supersédé par la
-  fixture 100-vers-99 du contre-audit, et le runner G4 reste interdit.
+  globale et P0 replay/identités préalable. GCP non utilisé par l'audit.
+- [`NOTE_CLAUDE_PLAN_50K_PUIS_TRENTE_MILLIONS_20260814.md`](NOTE_CLAUDE_PLAN_50K_PUIS_TRENTE_MILLIONS_20260814.md) :
+  plan de route frais et non reçu, du producteur autonome par lane vers le
+  payload puis CUDA. Son J0 reste conditionné par une source complète et son
+  noyau ponctuel q4 reste candidat tant que les portes `MORT_GAP`/deep et
+  d'identités invalides du contre-audit sont rouges.
+- [`QUESTIONS_CLAUDE_PROFIL_ENTREE_ET_J0_20260814.md`](QUESTIONS_CLAUDE_PROFIL_ENTREE_ET_J0_20260814.md)
+  et [`REPONSE_AUDIT_Q15_Q17_PROFIL_J0_AXIS_20260814.md`](REPONSE_AUDIT_Q15_Q17_PROFIL_J0_AXIS_20260814.md) :
+  Q15--Q17 et réponse contractuelle. La v3 reste u16 tandis que binary64 garde
+  un statut distinct ; un `--dmax` observé ne reçoit pas la complétude de J0 ;
+  le best-first axial est exact pour un seed q4 ponctuel, jamais par simple
+  évaluation des coins d'un `FaceBlock` variable.
 - [`AUDIT_RECU_GRAM_UNIFIE_1FD9CF1_20260814.md`](AUDIT_RECU_GRAM_UNIFIE_1FD9CF1_20260814.md) :
   contrôle algébrique Python corrélé et borné des identités q4 `Delta=O^2` et
   `Phi=O*J` sur 10 000 fixtures u16 non dégénérées ; il ne reçoit ni microkernel
@@ -62,7 +68,7 @@ ancienne phrase imposant le rejet global des positions dupliquées est périmée
   WST4 brut. Son post-scriptum conserve la réfutation du signe à `3703097`, sa
   réparation à `a73161c`, le diagnostic Corner8 de `069d903` et les réponses
   Q10--Q13 sur orientation, bisigne, raffinement par lane et diagonale `Sym2`.
-  Le verdict live au pin logiciel `6e815d2` est maintenu dans
+  Le verdict historique au pin logiciel `6e815d2` est conservé dans
   `AUDIT_ETAT_COURANT.md` :
   le bisigne est commis, les couples non séparés ne sont plus jetés, mais
   `Sym2` reste un compteur, le caller bisigne perd le mauvais bit et Corner8

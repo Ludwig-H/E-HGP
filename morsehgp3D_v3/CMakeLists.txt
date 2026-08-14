@@ -5377,7 +5377,7 @@ add_test(NAME mhgp3v_q4axis_mort16_code
 add_test(NAME mhgp3v_q4axis_mort16
          COMMAND mhgp3v_q4seed_axis_topr4_probe --fixture-mort-16)
 set_tests_properties(mhgp3v_q4axis_mort16 PROPERTIES PASS_REGULAR_EXPRESSION
-  "fixture_mort16 : r4=8 profondeur_min_Jf=8 retrait_un_min=7 verdict=MORT_GAP minoree=8 shallow=0 gaps_faux=0")
+  "fixture_mort16 : r4=8 profondeur_min_Jf=8 retrait_un_min=7 verdict=MORT_GAP minoree=8 shallow=0 gaps_faux=0 fate_apex=HORS_DOMAINE")
 
 # FIXTURE DE FRONTIERE : `J_f` est FERME. Le tetraedre regulier sature Jung, son
 # apex tombe exactement sur le bout, et le temoin `(98,100,104)` cospherique du

@@ -22,15 +22,23 @@ antérieur sur VM G4 est explicitement `GPU_RUN=NO` et mesure `78,8 s` CPU sur
 `uniform,50000`, sans BallKey, census, fold ni payload ; la dernière tentative
 a échoué avant sa rampe et a seulement certifié l'arrêt de sa cible.
 
-La recette reste elle-même non reçue au HEAD : cible Jung sélectionnée mais non
-construite sur un build propre, nouvelles portes BJD/Midball/HC/borne/Corner8/WST
-exclues, code de l'analyseur avalé, finalité non exigée et quatre timeouts
-séquentiels incompatibles avec les coupe-circuits. Aucun nouveau reçu 50k ne
-doit être déduit de ces probes CPU.
+Le profil v3 courant reste exactement `quantized_u16_input_only`. Le contrat
+normatif binary64 demeure un profil distinct et ouvert : une quantification
+générique ne préserve pas le HGP, car deux points situés de part et d'autre
+d'une frontière InSphere arbitrairement proche peuvent être arrondis sur la
+même position. Une mesure u16 ne qualifie donc ni le payload ni le SLO
+binary64.
+
+La recette G4 q4 courante reste non reçue : son parser mélange sweeps et
+exact-once de sorte que le cardinal attendu est impossible, cherche des champs
+du probe supprimé, décide avant de rapatrier une réfutation et ne porte pas de
+deadline globale. Le noyau qu'elle lancerait garde en outre les P0
+`MORT_GAP`/deep et d'identités ci-dessous. Aucun nouveau reçu 50k ne doit être
+déduit de ces probes CPU.
 
 ## Verdict actuel
 
-Le pin logiciel `6e815d28b3e229a0161eb00d6fa0c9a272efac5d` contient quatre avancées
+Historiquement, le pin logiciel `6e815d28b3e229a0161eb00d6fa0c9a272efac5d` contient quatre avancées
 directement liées à l'idée de support complet, puis plusieurs diagnostics de
 réduction du broad phase WST3/WST4 :
 
@@ -169,12 +177,13 @@ et RLE, une `BallKey` peut être parcourue par la même somme de trois
 quadratiques convexes `A*z_j^2+B_j*z_j`. Ses extrema sur une AABB u16 entière
 sont exacts par axe. `active_arity_mask` efface q2/q3/q4 respectivement à
 `10/9/8` intérieurs. Pour q4, le théorème `Q4SeedAxisTopR4` permet de transporter
-la liste exacte `I_B/U_B`. Le prototype courant conserve désormais les IDs et
-les compare à un juge InSphere indépendant, mais son buffer de shell de 99
-slots tronque encore sans fate la fixture de 100 IDs. Le backend reste donc
-l'autorité/fallback jusqu'à réception d'un compte requis, d'un overflow typé et
-du tie report complet. Cela supprime les census répétés par support, pas une
-sortie réellement lourde.
+la liste exacte `I_B/U_B`. Le commit `33766f6` conserve les IDs, porte le buffer
+de shell à sa capacité prouvée de 163, publie les comptes requis et type les
+plateaux. Son replay n'est toutefois pas encore une autorité : il accepte une
+sélection `MORT_GAP`, ne rejette pas un apex retenu mais profond et ne vérifie
+pas l'injectivité/disjonction des `PointId`. Le backend reste donc
+l'autorité/fallback jusqu'à réception de ces préconditions. Cela supprime les
+census répétés par support, pas une sortie réellement lourde.
 
 La source WSPD active suit directement les trois contrats de miniboule : q2
 garde les paires dont la boule diamétrale a au plus neuf intérieurs ; q3 garde
@@ -189,14 +198,22 @@ disjoints. `PairAnchor3` est créé dans `Lane3`, jamais lu dans la sortie q2 ;
 `Q4Seed3` est créé dans `Lane4`, jamais lu dans la sortie q3. Un préfixe
 ternaire interne à q4 n'est pas un support ni un événement q3.
 
+Un J0 de dimensionnement exact doit couvrir toutes les ancres de la
+`NeutralPairPartition`. Le diamètre maximal observé sous un `--dmax` ne prouve
+pas l'absence de support au-delà de la coupure. Une masse sautée doit porter un
+certificat local exact ou rester une continuation ; sinon les compteurs sont
+des bornes inférieures tronquées, pas la taille de l'objet.
+
 Le nouveau déblocage interne à `Lane4` supprime le produit de cellules. Pour un
 `Q4Seed3` aigu
 exacte, les centres compatibles sont sur un segment axial et chaque site a une
 puissance affine `A_z-tau*B_z`. Si `p` sites sont intérieurs sur tout le
 segment, toute circumsphère de profondeur au plus sept a son apex parmi les
 `8-p` premières racines `B>0` ou les `8-p` dernières racines `B<0` : au plus
-seize groupes, avec ties complets. Le replay de ces extrêmes reconstruit
-exactement `I_B/U_B`. Pour une arête owner portant `m_e` lignes carrier, il y a
+seize groupes, avec ties complets. Pour un apex retenu **et shallow**, sur des
+`PointId` injectifs et disjoints, le replay de ces extrêmes reconstruit
+exactement `I_B/U_B`; l'API courante doit encore imposer ces préconditions. Pour
+une arête owner portant `m_e` lignes carrier, il y a
 au plus `8m_e` centres q4 shallow lorsque `m_e` compte toutes les lignes de
 sites admissibles ; le générateur limité aux `m_e^acute` faces aiguës a la
 borne de propositions `16m_e^acute`. C'est le remplacement déterministe de

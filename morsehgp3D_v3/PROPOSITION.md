@@ -468,10 +468,11 @@ puis le RLE attache et valide le reçu. En particulier, `Q4SeedAxisTopR4` recons
 exactement `I_B/U_B` à partir de ses racines extrémales et de son equality
 report. `BallFormRange-u16` reste l'autorité/fallback, mais un second parcours
 global q4 serait du travail redondant lorsque ces IDs et leur complétude sont
-reçus. Le prototype au pin `3507b5e` n'a pas encore ce reçu de complétude : un
-groupe de 97 IDs égaux donne un shell attendu de 100 IDs, tronqué à 99 sans
-fate. Aucun consommateur ne peut donc sauter le fallback tant qu'un
-`required_shell_count` et un overflow/continuation typé ne ferment pas ce cas.
+reçus. Le défaut du pin `3507b5e` — un shell attendu de 100 IDs tronqué à 99 —
+est réparé au `33766f6` par une capacité de 163, les comptes requis et des fates
+typés. Aucun consommateur ne peut pourtant sauter le fallback tant que le replay
+ne refuse pas `MORT_GAP`, les apex retenus mais profonds et les entrées de
+`PointId` non injectives ou non disjointes.
 
 Avec `d=b-a`, `D=d dot d`, `w=2*c-a-b` et `U_z=2*z-a-b`, poser :
 
@@ -2147,6 +2148,18 @@ owner aiguë `(96,108,100),(108,96,100),(92,96,100)`, complétée par 49 IDs en
 `(100,100,110)` et 48 en `(100,100,92)`, exige exactement 100 IDs de shell et
 tue tout buffer de 99 silencieux.
 
+Le domaine du replay fait partie du théorème. Les trois IDs du `Q4Seed3` sont
+distincts ; chaque autre `PointId` apparaît exactement une fois et hors du
+seed ; les ledgers permanents, shell, entrants et sortants sont deux à deux
+disjoints. La sélection doit être `OUVERT`, l'apex doit apparaître exactement
+une fois parmi les racines retenues et son compte intérieur tronqué doit être
+strictement inférieur à `r4`. S'il atteint `r4`, le fate est `DEEP` ou
+`HORS_DOMAINE` et aucune liste n'est publiée. S'il est inférieur à `r4`, tout
+intérieur et tout co-shell omis aurait déjà forcé `r4` extrêmes meilleurs : les
+IDs reconstruits sont donc complets. Une répétition d'identité est
+`HORS_DOMAINE`, tandis que plusieurs identités distinctes co-shell relèvent de
+la politique déclarée `RelevantGP` ou `Plateau`.
+
 Tout tétraèdre q4 positif choisit d'abord son arête owner, puis le plus petit
 vrai `PointId` parmi ses deux `Q4Seed3` aigus comme provenance primaire. Cette
 règle donne un seul préfixe générateur à l'intérieur de `Lane4`. La voie q4
@@ -2463,14 +2476,14 @@ Q4SeedAxisTopR4)`, toujours contre vérité exhaustive. Elle mesure les morts
 les groupes d'égalité, les splits, les octets et la HWM. Elle n'autorise aucun
 claim 0A/0B ou produit avant les portes 1--2 ci-dessus.
 
-La recette G4 reste défectueuse et ne doit pas être relancée en l'état. Elle
-omet une cible pourtant
-sélectionnée par son regex CTest, ne sélectionne pas les nouvelles portes BJD,
-Midball, HC, borne, Corner8 ou WST, avale le code de
-`check_rampe_pentes.py` sous `set +e` et omet `--exige-fenetre-finale`. Elle permet aussi à chaque job quatre
-timeouts de `3000 s`, incompatibles avec ses coupe-circuits invité `4800 s` et
-GCE `5400 s`. Le reçu SOC actif existant s'arrête avant la rampe avec
-`CTest rc=8` et certifie seulement `TERMINATED`.
+La recette G4 q4 reste défectueuse et ne doit pas être relancée en l'état. Son
+parser collecte seulement les lignes de sweep mais compte aussi les neuf codes
+exact-once, donc son cardinal d'accord est impossible ; il cherche des champs
+du probe historique et décide avant de rapatrier les sorties rouges. Le reste
+du timeout n'est pas recalculé avant chaque run, exact-once reste hors deadline
+globale et les P0 `MORT_GAP`/deep et d'identités du replay sont encore ouverts.
+La tentative précédente n'a exécuté aucun build : elle certifie seulement
+l'arrêt ciblé `TERMINATED`.
 
 Les campagnes, échecs, hashes et états GCP sont autoritaires uniquement dans
 [`audits/AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md) et les reçus.

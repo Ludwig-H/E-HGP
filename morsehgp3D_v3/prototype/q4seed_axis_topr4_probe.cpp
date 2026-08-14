@@ -339,13 +339,25 @@ int fixture_mort_16(int r4, Mutant mut) {
   std::vector<int> scratch;
   Bilan b;
   bilan_seed(P, 1, 2, 0, r4, mut, &scratch, &b);
+  // LE DOMAINE DE LA PREUVE EST EXERCE ICI, ET NULLE PART AILLEURS. Sur un seed
+  // `MORT_GAP` aucun apex n'est pertinent : le replay doit rendre
+  // `HORS_DOMAINE`, jamais un census. Sans cette assertion la precondition
+  // resterait un commentaire.
+  const char* fate_mort = "AUCUN";
+  if (sel.n_entrants + sel.n_sortants > 0) {
+    const int apex = sel.n_entrants ? sel.entrants[0] : sel.sortants[0];
+    const int seed3[3] = {1, 2, 0};
+    fate_mort = mhgp3v::q4axis::census_fate_name(
+        mhgp3v::q4axis::census_replay(sel, apex, seed3, pw, mut).fate);
+  }
   std::printf("fixture_mort16 : r4=%d profondeur_min_Jf=%lld retrait_un_min=%lld"
-              " verdict=%s minoree=%d shallow=%lld gaps_faux=%lld\n",
+              " verdict=%s minoree=%d shallow=%lld gaps_faux=%lld fate_apex=%s\n",
               r4, dmin, dmin_sans_un, mhgp3v::q4axis::verdict_name(sel.verdict),
-              sel.profondeur_min_minoree, b.shallow, b.gaps_faux);
+              sel.profondeur_min_minoree, b.shallow, b.gaps_faux, fate_mort);
   const bool nominal = (dmin == 8) && (dmin_sans_un == 7) && (b.shallow == 0) &&
                        (b.gaps_faux == 0) && (sel.verdict == SeedVerdict::kMortGap) &&
-                       (sel.profondeur_min_minoree == 8);
+                       (sel.profondeur_min_minoree == 8) &&
+                       (std::string(fate_mort) == "HORS_DOMAINE");
   if (mut != Mutant::kNone) {
     if (!nominal) {
       std::printf("mutant_killed=1 %s\n", mhgp3v::q4axis::mutant_name(mut));
