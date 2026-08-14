@@ -14,6 +14,7 @@
 | Instance doit être travaillée maintenant | non, phase fermée |
 | Le descripteur de nœud est le levier décisif | non, le plus faible des trois d'après les ablations publiées |
 | « HGP bat les contrôles sur l'oracle de partition » suffit à justifier le programme | non, porte de réfutation seulement |
+| Utiliser une hiérarchie de densité comme structure auto-supervisée est nouveau | non en soi : déjà fait hors LiDAR ; seul le cluster tree conservé en LiDAR reste libre |
 
 Cette appréciation est volontairement sévère : le papier HSA n'a aucune expérience 3D dense, et le papier HGP sur SemanticKITTI utilise la sémantique de vérité terrain pour une tâche de regroupement. Aucun des deux ne constitue une preuve directe du modèle proposé.
 
@@ -135,7 +136,7 @@ Même backbone, descripteur, opérateur, nombre de nœuds, budget et seeds ; éc
 
 ### No-go
 
-Suspendre le claim HGP si le gain contre le meilleur contrôle est inférieur à environ +0,5 mIoU et si l'intervalle apparié à 95 % recouvre zéro. Continuer seulement si HGP gagne sur un autre axe pré-déclaré, par exemple robustesse ou coût.
+Suspendre le claim HGP si le gain contre le meilleur contrôle est inférieur à environ +0,5 mIoU et si l'intervalle apparié à 95 % recouvre zéro. Continuer seulement si HGP gagne sur un autre axe pré-déclaré, par exemple robustesse ou coût. En supervision complète, le plancher de bruit de R17 s'applique en plus de ce seuil apparié.
 
 ## R7 — HSA et QC-HSA n'apportent rien au-delà du pooling
 
@@ -317,6 +318,71 @@ Les ablations publiées sur cette famille exacte de modèles confirment la même
 ### No-go
 
 Si l'écart entre le modèle et l'oracle de sa propre partition dépasse dix points, la valeur de HGP ne peut plus être revendiquée sur la qualité des régions : améliorer un plafond déjà non atteint ne peut pas payer. Elle doit alors venir d'ailleurs — niveaux de densité interprétables, théorie de récupérabilité, recouvrement pour $K\geq2$ — et le papier doit le dire ainsi plutôt que « notre arbre est meilleur ». Si l'écart au propre oracle reste au contraire faible, c'est cette mesure, et non le gain de plafond, qui devient l'argument à défendre.
+
+## R16 — La nouveauté revendiquée est déjà prise
+
+### Mécanisme
+
+Le seul point de nouveauté qui tienne est étroit : dans la littérature LiDAR consultée, personne n'utilise le cluster tree lui-même, toutes les méthodes condensant la hiérarchie de densité en une partition plate. Conserver les nœuds internes, la relation parent--enfant et les niveaux comme signal reste libre en LiDAR — mais pas ailleurs, et les deux arguments habituels de démarcation ne démarquent rien.
+
+| Antériorité | Ce qu'elle occupe déjà | Ce qu'elle laisse |
+|---|---|---|
+| cTree (Sharma & Kaul, NeurIPS 2020, arXiv 2009.14168) | deux tâches prétexte prédisant la décomposition hiérarchique | hiérarchie métrique par cover tree, pas de densité ; échelle objet, pas scène LiDAR |
+| HASSL (arXiv 2607.04353, 7 juillet 2026) | hiérarchie HDBSCAN multi-niveaux comme structure SSL, prototypes par niveau | microscopie cellule unique, pas LiDAR |
+| Part2Object (ECCV 2024) | instance non supervisée par décomposition hiérarchique | pas de tâche prétexte de représentation LiDAR |
+| Superpoint Transformer (ICCV 2023, déjà cité en R12) | partition hiérarchique multi-niveaux | supervisée, issue de cut-pursuit, pas de densité |
+
+| Argument de démarcation | Pourquoi il ne démarque pas |
+|---|---|
+| « sans caméra » | TARL, SegContrast, BEVContrast, ALSO, STSSL et ALPINE sont sans caméra ; seuls Seal et HilDA sont caméra |
+| « nous utilisons la densité » | HDBSCAN est le producteur de segments standard du LiDAR depuis TARL |
+
+L'argument « exact », vraie singularité du dépôt, est orthogonal à cette littérature : personne n'y exige l'exactitude de la hiérarchie, HDBSCAN heuristique suffit.
+
+
+Antériorité la plus dangereuse, et elle est récente : **PointINS** (Bosch, mars 2026) a déjà démontré que des unités structurées non annotées paient sur SemanticKITTI — $+3{,}2$ PQ contre DOS, et $52{,}8$ contre $49{,}6$ en probing panoptique. Son pipeline est plat et ad hoc ($k$-means, graphe $k$-NN, composantes connexes par parcours en largeur), sans garantie de correction ni de stabilité, mais la revendication « des unités structurées valent mieux que des unités aléatoires » est **prise**. Ce qui reste libre est exactement : hiérarchie **non condensée**, **exacte**, à **niveaux prédits**.
+
+### Test de réfutation
+
+Audit d'antériorité daté et versionné avant rédaction, puis l'ablation à quatre bras qui décide de tout, à architecture, budget, graines et augmentations identiques :
+
+| Bras | Ce qu'il isole |
+|---|---|
+| (i) HGP exact | la revendication complète |
+| (ii) HDBSCAN, hiérarchie conservée | l'apport propre de l'exactitude |
+| (iii) HDBSCAN condensé plat, protocole TARL | l'apport propre de la hiérarchie |
+| (iv) arbre aléatoire | le plancher structurel |
+
+### No-go
+
+Si (ii) égale (i), la contribution se réduit à « utiliser une hiérarchie », déjà publiée par cTree et HASSL : il faut alors soit démontrer qu'une hiérarchie exacte change une métrique aval — sinon un relecteur répondra qu'HDBSCAN approché suffit et coûte moins cher —, soit changer de revendication. Si (iii) égale (i) et (ii), c'est la hiérarchie elle-même qui ne porte rien, et le programme SSL tombe. Ne jamais présenter « sans caméra » ou « fondé sur la densité » comme la nouveauté.
+
+## R17 — Le gain revendiqué est sous le plancher de bruit
+
+### Mécanisme
+
+Sur SemanticKITTI, la dispersion des conditions d'entraînement dépasse l'écart que le programme espère mesurer, et le facteur dominant est la recette d'augmentation, pas l'architecture.
+
+| Source de variation | Amplitude mesurée |
+|---|---|
+| graine, backend TorchSparse (avertissement mmdetection3d) | environ $1{,}5$ mIoU |
+| nombre de GPU et taille de batch (Pointcept, issue #556) | de $66{,}5$ à $69{,}3$ sur la même configuration |
+| LaserMix + PolarMix sur MinkUNet | $+3{,}5$ (de $66{,}9$ à $70{,}4$) |
+| instance CutMix + PolarMix sur WaffleIron | $+4{,}3$ (de $62{,}5$ à $66{,}8$) |
+| TTA | $+1{,}4$ MinkUNet, $+2{,}4$ Cylinder3D, $+1{,}2$ SphereFormer |
+
+Un gain supervisé d'un point n'est donc ni mesurable ni attribuable : il est indistinguable du bruit de graine et plus petit que l'effet d'augmentation. Corollaire opérationnel : Pointcept n'implémente ni LaserMix ni PolarMix, donc un bras HGP entraîné sous Pointcept contre un bras concurrent entraîné avec ces augmentations mesure la recette, pas la structure.
+
+### Test de réfutation
+
+- trois graines minimum par bras, moyenne et intervalle de confiance rapportés, jamais un run unique ;
+- augmentations strictement appariées entre bras, énumérées dans le papier ;
+- TTA activée ou désactivée des deux côtés, jamais un chiffre nu contre un chiffre augmenté ;
+- baseline reproduite localement et rapportée comme telle, jamais recopiée d'un papier.
+
+### No-go
+
+Si l'effet reste sous $1{,}5$ point après appariement des recettes, ne pas le revendiquer en supervision complète. Se reporter au régime à peu d'étiquettes, où les écarts sont d'un autre ordre : entre `scratch` et le meilleur SSL publié, l'écart vaut $9{,}7$ points à $0{,}1\,\%$ d'étiquettes (de $30{,}0$ à $39{,}7$) contre $1{,}4$ point à $100\,\%$ (de $62{,}7$ à $64{,}1$). Les baselines à battre y sont TARL ($37{,}9$ / $52{,}5$ / $61{,}2$ / $63{,}4$ / $63{,}7$) et BEVContrast ($39{,}7$ / $53{,}8$ / $61{,}4$ / $63{,}4$ / $64{,}1$) aux fractions $0{,}1$ / $1$ / $10$ / $50$ / $100\,\%$.
 
 ## Tableau de décision global
 

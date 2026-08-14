@@ -32,6 +32,18 @@ Développés au chapitre 6 du guide. À connaître **avant** de proposer quoi qu
 
 ---
 
+## Où va le projet
+
+La cible reste la segmentation sémantique de SemanticKITTI. Mais le **régime** a changé, pour une raison mesurable : en supervision complète la marge est d'environ un point et la variance de graine vaut $1{,}5$ point — un gain n'y serait ni mesurable ni attribuable. En régime à peu d'étiquettes, la marge est de **10,3 points** (linear probing $62{,}0$ contre supervisé $72{,}3$).
+
+La revendication est donc devenue négative et précise :
+
+> Toute l'auto-supervision LiDAR fabrique ses unités avec HDBSCAN, **condense l'arbre en une partition plate et le jette**. Nous ne condensons pas : les nœuds internes, la relation parent–enfant et les niveaux sont le signal.
+
+Ce qu'elle n'est pas : ni « utiliser une hiérarchie » (cTree, NeurIPS 2020), ni « utiliser la densité » (standard du domaine depuis TARL), ni « sans caméra » (déjà le cas de TARL, SegContrast, BEVContrast, ALSO). Les concurrents directs sont **DOS** et **PointINS**, pas Concerto. Détail au [chapitre 8 du guide](GUIDE.md) et dans [STRATEGIE_PUBLICATION.md](STRATEGIE_PUBLICATION.md).
+
+---
+
 ## Carte du dossier
 
 | Document | Contenu |

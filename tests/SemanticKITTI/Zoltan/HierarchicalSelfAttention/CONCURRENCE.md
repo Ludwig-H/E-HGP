@@ -48,7 +48,7 @@ Régime de ce projet : séquence 08, **une trame à l'inférence, LiDAR seul, sa
 | MinkowskiNet, OpenPCSeg/PCSeg | **70,04** | oui | oui | oui | « trained with merely train split », « without employing any Test Time Augmentation or ensembling » ; repris comme baseline par RAPiD-Seg |
 | RPVNet, OpenPCSeg | 68,86 | oui | oui | oui | même protocole déclaré |
 | SPVCNN, OpenPCSeg | 68,58 | oui | oui | oui | même protocole déclaré |
-| WaffleIron-48-256 | 68,0 | oui | oui | non | README garantit « a final mIoU of 68.0% », 6,8 M paramètres, `instance_cutmix` à l'entraînement ; le plus simple à exécuter |
+| WaffleIron-48-256 | 68,0 | oui | oui | non | README garantit « a final mIoU of 68.0% », 6,8 M paramètres, `instance_cutmix` à l'entraînement ; **aucune extension CUDA à compiler** (ni torchsparse, ni MinkowskiEngine, ni spconv, ni flash-attn), installation pip sous PyTorch 2.2 ; ablation val 62,5 -> 66,8 (cutmix+polarmix) -> 67,6 (features 5D) -> 68,0 (stochastic depth) ; aucun chiffre val avec TTA n'a jamais été publié, le 68,0 est nu |
 | SphereFormer | 67,8 | oui | oui | non | table du dépôt : « Val mIoU (tta) 69.0 » contre « Val mIoU 67.8 » |
 | Cylinder3D, OpenPCSeg | 66,07 | oui | oui | oui | même protocole déclaré |
 
@@ -72,11 +72,14 @@ WaffleIron, VaViT, MinkUNet mmdetection3d et LSK3DNet mélangent tous des scans 
 | 66,2 sans TTA, 68,8 avec TTA | VaViT |
 | 68,3 | DITR, 3DV 2026 |
 | 66,8 | meilleur de trois runs communautaires, Pointcept #410 |
+| 69,30 / 66,52 / 66,53 | trois reproductions indépendantes, Pointcept #556, ouverte le 13 janvier 2026 |
 | 69,1 | cité par Sonata, même premier auteur, repris par Volt |
 
 L'issue primaire est Pointcept #186, « About the config file of PTv3 on semantickitti », ouverte le 27 mars 2024 et **toujours ouverte** en août 2026, citée par VaViT et par DITR. Dans #410, le mainteneur Gofinge écrit : « I am pretty sure these number in the paper is exactly observed with my experiments. Unfortunately, I cannot access the original experiment record ». DITR résume : « Reproducing PTv3 results on the SemanticKITTI dataset has been notoriously hard for the community ». LitePT (CVPR 2026) déclare « we follow PTv3 and use test time augmentation (TTA) » avec chunking et vote, et chiffre le retrait à environ 2 mIoU : le 70,8 n'appartient donc probablement pas au régime sans TTA.
 
-**Fait décisif pour le choix de baseline** : `configs/semantic_kitti/` de Pointcept (dépôt poussé le 3 août 2026) ne contient **aucune** config PTv3, alors que nuScenes, Waymo, ScanNet et S3DIS en ont une, et les lignes SemanticKITTI du model zoo PointTransformerV3 sont vides — ni config, ni poids, ni exp record. Pointcept est donc inutilisable pour PTv3 sur SemanticKITTI, et PTv3 ne peut pas être la baseline de départ de WP0.
+Dans #481, le mainteneur admet « I already forgot where I got this number during paper writing ».
+
+**Fait décisif pour le choix de baseline** : `configs/semantic_kitti/` de Pointcept (dépôt poussé le 3 août 2026) ne contient **aucune** config PTv3, alors que nuScenes, Waymo, ScanNet et S3DIS en ont une, et les lignes SemanticKITTI du model zoo PointTransformerV3 sont vides — ni config, ni poids, ni exp record. Pointcept n'implémente par ailleurs ni LaserMix ni PolarMix (0 occurrence), ce qui explique probablement une part de l'écart annoncé/reproduit. Pointcept est donc inutilisable pour PTv3 sur SemanticKITTI, et PTv3 ne peut pas être la baseline de départ de WP0 ; s'il est utilisé malgré tout, reporter sa propre baseline réentraînée, jamais le 70,8 du papier.
 
 ## Le test, et pourquoi ses chiffres ne sont pas comparables
 
@@ -99,7 +102,7 @@ RAPiD-Seg (backbone MinkUNet34 réimplémenté par PCSeg, baseline 70,04 ; C-RAP
 | Travail | Chiffres | Régime |
 |---|---|---|
 | Volt / Volume Transformer, RWTH Aachen, [arXiv 2604.19609](https://arxiv.org/abs/2604.19609), 21 avril 2026 | test **75,2** (Volt-B), val 72,5 ; Volt-S 70,5 mono-jeu et 72,2 multi-jeux ; nuScenes val 82,2 | entraînement conjoint multi-jeux ; meilleur test 2026 identifié, toujours sous 76,5 ; présomption forte mais **non confirmée** que `kadir_yilmaz` 75,21 = Volt |
-| Sonata, CVPR 2025 Highlight, [arXiv 2503.16429](https://arxiv.org/abs/2503.16429) | val **72,6** | fine-tuning complet d'un PTv3 préentraîné en auto-supervisé multi-jeux ; meilleur val LiDAR seul recensé |
+| Sonata, CVPR 2025 Highlight, [arXiv 2503.16429](https://arxiv.org/abs/2503.16429) | val **72,6** | fine-tuning complet d'un PTv3 préentraîné en auto-supervisé multi-jeux ; meilleur val LiDAR seul recensé, mais poids extérieurs non publiés — section « Sonata et sa lignée » |
 | UniD-Shift, [arXiv 2605.07356](https://arxiv.org/abs/2605.07356), 8 mai 2026 | val 71,8 | fusion LiDAR + caméra, 359,8 M paramètres, 240 ms |
 | SP2T, ICCV 2025, [arXiv 2412.11540](https://arxiv.org/abs/2412.11540) | val 71,7 / test 75,4 | TTA, sans ensemble |
 | OA-CNNs, CVPR 2024, [arXiv 2403.14418](https://arxiv.org/abs/2403.14418) | val 70,6 | sans TTA déclarée |
@@ -112,13 +115,93 @@ Ces chiffres sont des instantanés et non des constantes : ils doivent être ré
 
 ## Leçons pour HGP-HSA
 
-- **Baseline WP0** : partir de MinkUNet mmdetection3d (70,3) ou OpenPCSeg (70,04), les seules recettes complètes de notre régime ; ne pas partir de PTv3, dont Pointcept ne fournit rien pour SemanticKITTI.
+- **Baseline WP0 : WaffleIron-48-256**, et non OpenPCSeg comme recommandé précédemment. Motif décisif : config unique `configs/WaffleIron-48-256__kitti.yaml`, checkpoint vivant, aucune extension CUDA à compiler, et un mainteneur qui répond précisément (Gilles Puy, #19 : 68,0 val et 70,8 test avec `--trainval` et 12 votes ; #5 : 4x RTX 2080 Ti, environ 2 jours pour 45 époques, un seul V100 32 Go suffit).
+- **Second porteur : MinkUNet**, famille radicalement différente (convolution sparse voxelisée contre MLP et convolutions 2D denses sur projections) : mmdetection3d `minkunet34_w32_spconv` 69,3 avec poids et log vivants, variante torchsparse annoncée à 70,3, OpenPCSeg 70,04. Attention : OpenPCSeg annonce 70,04 en liant `minkunet_mk34_cr10.yaml` alors que le fichier de poids s'appelle `mk34_cr16` — vérifier l'appariement config/poids avant de citer.
+- **Le facteur dominant est la recette, pas l'architecture** : LaserMix/PolarMix valent +3,5 sur MinkUNet (66,9 -> 70,4), instance cutmix + polarmix +4,3 sur WaffleIron (62,5 -> 66,8), soit plus que l'écart entre la plupart des architectures publiées. Les deux bras d'une évaluation HGP doivent activer les mêmes augmentations, sinon le gain mesuré est un gain d'augmentation déguisé.
+- **Plancher de bruit** : environ 1,5 mIoU de fluctuation selon la graine (avertissement mmdetection3d), 66,5 à 69,3 selon GPU et batch (Pointcept #556). Tout gain sous environ 1,5 point sur un run unique n'est pas distinguable du bruit : trois graines minimum par bras, et jamais de comparaison sans TTA contre avec TTA (+1,4 MinkUNet, +2,4 Cylinder3D, +1,2 SphereFormer ; la TTA mmdetection3d coûte 36 passes avant).
 - **RAPiD-Seg** montre qu'un descripteur géométrique doit intégrer la variation de densité avec la portée et la rémission. C'est le contrôle le plus direct de la fonction support, et son val 73,02 le comparateur le plus exigeant — sous réserve d'une recette non auditable.
 - **SphereFormer** encode déjà la géométrie sphérique du capteur. Un gain HGP limité aux longues distances doit être comparé à ce biais, pas à un modèle cartésien naïf ; son 67,8 val sans TTA est le point de comparaison, pas son 74,8 test.
 - **LSK3DNet** rappelle qu'une attention sophistiquée doit battre un CNN sparse adaptatif en précision ou sur un axe Pareto clair ; son 75,6 test est un chiffre TTA déclaré, hors de notre régime.
 - **SP2T** est un concurrent conceptuel direct : son double flux et ses proxies locaux réduisent l'attention point–point tout en conservant du contexte sparse. Le gain HGP doit être isolé d'un simple effet de tokens proxy.
 - **VaViT** fournit une baseline ViT globale publique, sans TTA, à 68,0 val : utile pour la reproductibilité, pas comme seuil, et son tableau n'est pas un état de l'art.
 - **TASeg, UniSeg et DITR** prouvent la valeur des ressources supplémentaires — temps, caméra, préentraînement externe. Ils restent dans des colonnes distinctes pour ne pas diluer le claim LiDAR mono-trame.
+
+## Sonata et sa lignée
+
+[Sonata](https://arxiv.org/abs/2503.16429) (CVPR 2025 Highlight, Wu et al., Meta + HKU) : PTv3 de 108 M paramètres, encodeur seul, auto-distillation de type DINOv2 — enseignant EMA, Sinkhorn-Knopp, KoLeo, 4096 prototypes. Vues : 2 globales (40-100 % des points), 4 locales (5-40 %), 2 masquées. **Les unités de la tâche prétexte sont donc des sous-ensembles aléatoires**, jamais des régions structurées.
+
+Son diagnostic est le *geometric shortcut*, verbatim : « This shortcut refers to the tendency of the model to collapse to easily accessible, low-level geometric cues, such as normal direction or point height. This spatial information is inevitably introduced into point cloud operators along with point coordinates rather than through input features, making it difficult to obscure and nearly impossible to mask effectively. » Le grief porte sur les **coordonnées**, pas sur les features d'entrée : Sonata fournit lui-même les normales (`feat_keys=("coord","color","normal")`). Preuve quantitative : linear probing ScanNet à 5,6 (PointContrast) et 21,8 (MSC), contre 63,1 pour des features DINOv2 reprojetées. Remèdes : suppression du décodeur (20,7 -> 60,4 à elle seule), jitter accru sur les points masqués, curriculum sur la taille et le ratio de masque.
+
+Table 8, tout en validation :
+
+| Val | Sonata linéaire | Sonata décodeur | PPT supervisé | Sonata fine-tuning | PTv3 supervisé |
+|---|---:|---:|---:|---:|---:|
+| SemanticKITTI | 62,0 | 68,4 | 72,3 | **72,6** | 69,1 |
+| nuScenes | 66,1 | 77,3 | 81,2 | 81,7 | 80,4 |
+| Waymo | 60,5 | 70,8 | 72,1 | 72,9 | 71,3 |
+
+- **Le gain extérieur sur PPT supervisé est de +0,3 mIoU**, à comparer aux +50 points de linear probing obtenus en intérieur. La marge réelle d'une meilleure représentation auto-supervisée en extérieur est l'écart linéaire-supervisé, soit **10,3 points sur SemanticKITTI** (62,0 contre 72,3) : c'est le seul budget que ce dossier puisse viser.
+- **Non reproductible en l'état.** Le modèle extérieur est un préentraînement séparé — « we adapt pre-training paradigm of Sonata to outdoor LiDAR scenarios through joint training on nuScenes, Waymo, and SemanticKITTI » — donc les 139 769 scènes intérieures (72 % synthétiques ASE, 200 époques, batch 96, 32 GPU, ni type de GPU ni temps rapportés) ne servent pas aux chiffres KITTI, dont le coût n'est pas documenté. Les poids extérieurs n'ont jamais été publiés ; l'énumération complète de Pointcept (726 fichiers) ne contient aucune config Sonata kitti/nuscenes/waymo ; issues #456 et #469 ouvertes. Code Apache 2.0 mais **poids en CC-BY-NC 4.0** (restriction héritée de HM3D et ArkitScenes) : à traiter comme `HGP-old/`, jamais importé dans la ligne produit.
+- **Sonata nomme lui-même la densité** comme obstacle principal à l'unification intérieur-extérieur : « The main challenges lie in point density and input features: point density can be aligned by scaling, while enhancing outdoor LiDAR data with color from lifted images and pseudo normal vectors based on LiDAR viewing direction helps bridge feature gaps », avec la limitation déclarée « Currently, Sonata separates pre-training for each setting ». C'est exactement l'objet de ce dossier : une structure de densité explicite plutôt qu'un rééchelonnement.
+
+Les successeurs du même groupe, eux, publient des configs KITTI : `configs/concerto/semseg-ptv3-large-v1m1-kitti-4a-lin.py` et sa variante `-withcolornormal-`, `configs/utonia/...-6a/6b/6c-kitti-lin/dec/ft.py`. Les poids Concerto sont également CC-BY-NC.
+
+## La lignée complète, et qui il faut réellement battre
+
+Sonata n'est ni le plus fort ni le plus utilisable de sa famille. Sur SemanticKITTI val :
+
+| Modèle | linéaire | décodeur | fine-tuning | coût de pré-entraînement | poids |
+|---|---|---|---|---|---|
+| PTv3 supervisé | $70{,}8$ annoncé | — | — | — | pas de config KITTI |
+| Sonata, CVPR 2025 | $62{,}0$ | $68{,}4$ | $72{,}6$ | 32 GPU | **outdoor non publiés** |
+| Concerto, NeurIPS 2025 | $66{,}6$ | $69{,}3$ | $71{,}2$ | 85 h $\times$ 16 H20 | publiés, config KITTI |
+| Utonia, ICML 2026 | $\mathbf{67{,}7}$ | $\mathbf{70{,}0}$ | $72{,}0$ | 64 H20 | publiés, config KITTI |
+| **DOS**, hors lignée | $67{,}5$ | — | $\mathbf{73{,}5}$ | **2 A100 $\times$ 20 h** | publiés |
+
+Trois lectures, et la troisième décide de la stratégie.
+
+**Le fine-tuning sature** autour de $72$–$73$ ; c'est le probing qui sépare. C'est l'argument même de Sonata sur ce qui mesure une représentation, donc c'est le probing qu'il faut rapporter.
+
+**DOS bat toute la lignée sur SemanticKITTI pour deux ordres de grandeur de calcul en moins** — $2$ A100 pendant $20$ h contre $64$ H20. Sur ce benchmark, une meilleure idée bat davantage de calcul, ce qui rend le programme finançable sans cluster.
+
+**Aucun de ces modèles ne dérive de structure depuis la géométrie du nuage.** Sonata en fait une doctrine explicite : aucun algorithme conçu par l'humain, aucune segmentation pré-calculée. Concerto a bien de la structure, mais **importée de l'image** — patchs DINOv2, appariement pixel–point par calibration — et elle s'effondre sans couleur : $36{,}8$ contre $77{,}0$ mIoU, c'est-à-dire précisément le régime du LiDAR nu. Utonia a de la structure, mais elle vient de la **trajectoire du capteur**, par agrégation multi-trames alignée en pose, et non de la scène.
+
+### PointINS : à la fois la validation et le concurrent
+
+PointINS (Bosch Research et Lübeck, mars 2026) construit des pseudo-instances sans annotation — $k$-means grossier, graphe $k$-NN, composantes connexes par parcours en largeur — et gagne $+3{,}2$ PQ sur SemanticKITTI et $+4{,}8$ sur nuScenes contre DOS. En probing panoptique : $52{,}8$ PQ contre $49{,}6$.
+
+C'est la démonstration que **des unités structurées paient**, obtenue avec un pipeline **plat, ad hoc, sans garantie de correction ni de stabilité**. C'est exactement le substitut grossier qu'un arbre de fusion exact remplacerait — et c'est donc la baseline à battre, avec DOS.
+
+**Conséquence de protocole :** se comparer à Concerto sur du LiDAR nu serait attaquer un modèle hors de son régime, et un relecteur le verrait. Les concurrents sont **DOS** et **PointINS**.
+
+## Auto-supervision LiDAR : l'état de l'art et ses unités
+
+| Méthode | Unité utilisée | Comment elle est obtenue | Caméra |
+|---|---|---|:-:|
+| SegContrast, RA-L 2022 | segments **plats**, un seul niveau | RANSAC (sol) + DBSCAN ; contraste au niveau segment ; fondateur de la ligne | non |
+| TARL, CVPR 2023 | segments d'objet sur 12 scans accumulés | Patchwork (sol) + HDBSCAN ; motif explicite : meilleurs segments en région peu dense | non |
+| UNIT, [arXiv 2409.07887](https://arxiv.org/abs/2409.07887) | idem, 40 scans | Patchwork++ + HDBSCAN | non |
+| STSSL, CVPR 2023 | contraste spatio-temporel | unité non vérifiée par cette veille | non |
+| BEVContrast | cellule BEV régulière | grille fixe | non |
+| ALSO | aucune | reconstruction de surface, sans segments | non |
+| Seal, NeurIPS 2023 Spotlight, [arXiv 2306.09347](https://arxiv.org/abs/2306.09347) | superpoints | superpixels SAM / X-Decoder / OpenSeeD / SEEM sur les images caméra, projetés par calibration, InfoNCE spatial + cohérence temporelle bidirectionnelle ; mais son point-to-segment repose sur **RANSAC + HDBSCAN**, donc sur du clustering géométrique et non sur les segments VFM | oui |
+
+Seal : nuScenes linear probing 44,95 contre 38,8 pour SLidR ; SemanticKITTI à 1 % d'étiquettes 46,63 contre 44,60.
+
+SemanticKITTI, mIoU par fraction d'étiquettes, tels que rapportés par BEVContrast (protocole BEVContrast, non celui de la section « barre en validation ») :
+
+| Préentraînement | 0,1 % | 1 % | 10 % | 50 % | 100 % |
+|---|---:|---:|---:|---:|---:|
+| depuis zéro | 30,0 | 46,2 | 57,6 | 61,8 | 62,7 |
+| PointContrast | 32,4 | 47,9 | 59,7 | 62,7 | 63,4 |
+| SegContrast | 32,3 | 48,9 | 58,7 | 62,1 | 62,3 |
+| DepthContrast | 32,5 | 49,0 | 60,3 | 62,9 | 63,9 |
+| STSSL | 32,0 | 49,4 | 60,0 | 62,9 | 63,3 |
+| ALSO | 35,0 | 50,0 | 60,5 | 63,4 | 63,6 |
+| TARL | 37,9 | 52,5 | 61,2 | 63,4 | 63,7 |
+| BEVContrast | **39,7** | **53,8** | **61,4** | 63,4 | **64,1** |
+
+**Toutes condensent.** Chacune réduit la hiérarchie de densité à une partition plate — excess-of-mass ou équivalent — et jette l'arbre : personne, dans la littérature LiDAR consultée, n'utilise le cluster tree lui-même. Conserver les nœuds internes, la relation parent-enfant et les niveaux comme signal n'est revendiqué par aucun travail LiDAR ; c'est le seul point de nouveauté qui tienne dans cette lignée.
 
 ## Concurrents conceptuels : hiérarchie et attention
 
@@ -260,6 +343,14 @@ La leçon utile aujourd'hui est simple : améliorer la sémantique est le premie
 ## Positionnement défendable
 
 Le papier potentiel ne doit pas raconter « tous les clusters ont un vecteur de même taille ». Cette propriété est commode, mais ni nouvelle ni suffisante.
+
+### Ce qui ne distingue pas
+
+- **« Sans caméra » ne distingue pas** : TARL, SegContrast, BEVContrast, ALSO, STSSL et ALPINE le sont tous ; seuls Seal et HilDA utilisent la caméra.
+- **« Nous utilisons la densité » ne distingue pas non plus** : HDBSCAN est le producteur de segments standard du domaine LiDAR depuis TARL.
+- Antériorités à citer obligatoirement : [cTree](https://arxiv.org/abs/2009.14168) (Sharma & Kaul, NeurIPS 2020) partitionne par cover tree — hiérarchie métrique et non de densité — avec deux tâches prétexte qui prédisent la décomposition hiérarchique, mais à l'échelle de l'objet et non de la scène LiDAR ; [HASSL](https://arxiv.org/abs/2607.04353) (7 juillet 2026) fait **déjà** hiérarchie HDBSCAN multi-niveaux comme structure SSL avec prototypes par niveau, en microscopie cellule unique ; Part2Object (ECCV 2024) pour l'instance non supervisée ; Superpoint Transformer a une partition hiérarchique multi-niveaux, mais supervisée et issue de cut-pursuit.
+- **L'ablation qui décide de tout**, à architecture et budget identiques : (i) HGP exact, (ii) HDBSCAN à hiérarchie conservée, (iii) HDBSCAN condensé plat (protocole TARL), (iv) arbre aléatoire. Le bras (ii) sépare l'apport de l'exactitude de celui de la hiérarchie ; si (i) et (ii) sont équivalents, la contribution se réduit à « utiliser une hiérarchie », déjà prise par cTree et HASSL.
+- L'argument « exact » est la vraie singularité du dépôt, mais il est **orthogonal** à cette littérature : personne n'y exige l'exactitude de la hiérarchie, HDBSCAN heuristique suffit. Il faut donc démontrer que l'exactitude déplace une métrique aval, faute de quoi un reviewer répondra qu'HDBSCAN approché suffit et coûte moins cher.
 
 Le positionnement le plus solide est :
 

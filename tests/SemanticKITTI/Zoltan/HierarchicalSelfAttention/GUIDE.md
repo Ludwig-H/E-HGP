@@ -455,23 +455,81 @@ Trois pièges à connaître :
 
 Ces chiffres sont des **instantanés à réauditer avant soumission**. Détail complet dans [CONCURRENCE.md](CONCURRENCE.md).
 
+### Le vrai terrain n'est pas la supervision complète
+
+Deux chiffres décident de la stratégie.
+
+| Régime | Marge disponible | Plancher de bruit |
+|---|---|---|
+| supervision complète | ~1 point | **±1,5 mIoU** de variance de graine |
+| **peu d'étiquettes** | **10,3 points** — linear probing 62,0 contre supervisé 72,3 | écarts d'un autre ordre |
+
+En supervision complète, **un gain d'un point n'est pas mesurable**. Ce n'est pas du confort : la variance de graine sur SemanticKITTI vaut $1{,}5$ point, et la recette d'augmentation vaut plus que l'écart entre la plupart des architectures publiées — $+3{,}5$ sur MinkUNet, $+4{,}3$ sur WaffleIron. Un effet sous ce seuil n'est ni mesurable ni attribuable.
+
+### L'angle mort de l'auto-supervision 3D
+
+Les trois modèles dominants de la lignée Pointcept, sur SemanticKITTI val :
+
+| | linéaire | décodeur | fine-tuning | coût de pré-entraînement |
+|---|---|---|---|---|
+| Sonata (CVPR'25) | 62,0 | 68,4 | 72,6 | 32 GPU, poids outdoor **non publiés** |
+| Concerto (NeurIPS'25) | 66,6 | 69,3 | 71,2 | 85 h × 16 H20 |
+| Utonia (ICML'26) | **67,7** | **70,0** | 72,0 | 64 H20 |
+| **DOS** (hors lignée) | 67,5 | — | **73,5** | **2 A100 × 20 h** |
+
+Trois observations, et la troisième est l'ouverture.
+
+1. **Le fine-tuning sature** autour de 72–73 ; c'est le *probing* qui sépare. C'est l'argument même de Sonata sur ce qui mesure une représentation — donc c'est le probing qu'il faut rapporter.
+2. **DOS bat toute la lignée sur SemanticKITTI pour deux ordres de grandeur de calcul en moins.** Une meilleure idée bat plus de calcul sur ce benchmark : c'est ce qui rend le programme finançable.
+3. **Aucun de ces modèles ne dérive de structure depuis la géométrie du nuage.** Sonata en fait une doctrine explicite — aucun « algorithme conçu par l'humain », aucune segmentation pré-calculée. Concerto a bien de la structure, mais **importée de l'image** (patchs DINOv2) : sans couleur, il tombe de $77{,}0$ à $36{,}8$ mIoU, c'est-à-dire précisément sur du LiDAR nu. Utonia a de la structure, mais elle vient de la **trajectoire du capteur**, pas de la scène.
+
+### La revendication, et elle est négative
+
+Toute la littérature d'auto-supervision LiDAR fabrique ses unités avec HDBSCAN — SegContrast, TARL, UNIT, et jusqu'au *point-to-segment* de Seal. **Toutes condensent l'arbre en une partition plate et le jettent.**
+
+> La revendication est : **ne pas condenser.** Garder les nœuds internes, la relation parent–enfant et les niveaux comme signal.
+
+Ce qu'elle **n'est pas**, et il faut le dire avant qu'un relecteur le fasse : ni « nous utilisons une hiérarchie » (cTree, NeurIPS 2020), ni « nous utilisons la densité » (HDBSCAN est le standard du domaine depuis TARL), ni « sans caméra » (TARL, SegContrast, BEVContrast, ALSO le sont déjà).
+
+**Et quelqu'un vient d'entrer dans l'angle mort.** PointINS (Bosch, mars 2026) construit des pseudo-instances sans annotation — k-means, graphe $k$-NN, composantes connexes — et gagne $+3{,}2$ PQ sur SemanticKITTI contre DOS. C'est à la fois la validation de l'hypothèse et le concurrent direct : il prouve que des unités structurées paient, mais avec un pipeline **plat et ad hoc, sans garantie**. C'est le substitut grossier qu'un arbre de fusion exact remplacerait.
+
+### Pourquoi HGP plutôt que l'arbre condensé de HDBSCAN
+
+C'est la première question qu'on posera. La chaîne est courte :
+
+> ne pas condenser → **les niveaux servent** → un niveau doit avoir un sens → l'exactitude de HGP le lui donne → la percolation prédit lesquels sont utilisables.
+
+L'exactitude de la thèse ne devient porteuse **que** parce qu'on utilise les niveaux — ce que personne ne fait. Mais il faudra le **démontrer** : dans cette littérature, personne n'exige l'exactitude, HDBSCAN heuristique suffit et coûte moins cher.
+
+D'où l'ablation qui décide de tout, à architecture et budget identiques :
+
+| Bras | Ce qu'il teste |
+|---|---|
+| HGP exact | la proposition |
+| **HDBSCAN, hiérarchie conservée** | **sépare l'exactitude de la hiérarchie** |
+| HDBSCAN condensé plat | le protocole TARL |
+| arbre aléatoire | le contrôle |
+
+Si le deuxième bras égale le premier, la contribution se réduit à « utiliser une hiérarchie » — déjà pris.
+
 ### Le classement honnête des actifs
 
 | Actif | Force | Pourquoi |
 |---|---|---|
-| **HGP + percolation** | **fort** | personne d'autre ne l'a : correspondance exacte, fonction et vitesse de percolation, limite gaussienne $\mu=K+a\sqrt{K}$ — une théorie quantitative de la fraction récupérable avant fusion parasite |
-| le descripteur | moyen | le théorème justifie mais ne contribue pas |
-| HSA | **faible** | papier d'une autre équipe, aucune expérience 3D, réduction aux moyennes, aucun paramètre apprenable |
+| **exactitude des niveaux + percolation** | **fort** | c'est ce que personne d'autre n'a, et c'est ce qui rend « ne pas condenser » défendable |
+| la hiérarchie elle-même | moyen | déjà utilisée ailleurs (cTree, HASSL, PointINS) |
+| le descripteur de nœud | faible | les ablations publiées le placent loin derrière l'adjacence et la profondeur |
+| HSA | faible | opérateur d'une autre équipe, aucune expérience 3D, aucun paramètre apprenable |
 
 ### La conclusion de venue
 
-Un gain de mIoU SemanticKITTI, même net, est un papier **CVPR/ICCV/ECCV** — et il y sera jugé sur l'ingénierie du backbone autant que sur l'idée.
+Un gain de mIoU en supervision complète est un papier **CVPR/ICCV/ECCV**, et il y sera jugé sur l'ingénierie du backbone — avec un effet sous le plancher de bruit.
 
-NeurIPS/ICML acceptent la perception 3D quand le cadrage est représentation, théorie ou passage à l'échelle (PTv2, Seal, SFCNet, Concerto, Utonia). La forme plausible est donc : **une théorie de ce qui est récupérable dans une hiérarchie de densité, sa version valable pour un échantillonnage capteur inhomogène, la mesure qui la vérifie, et l'opérateur qui l'exploite** — le gain de segmentation devenant une validation, pas la contribution.
+Une revendication sur **ce qui structure l'auto-supervision**, validée en régime à peu d'étiquettes où les écarts sont d'un autre ordre, adossée à une théorie qui prédit les niveaux au lieu de les régler, est une soumission **NeurIPS/ICML** plausible sans exiger le premier rang d'un classement.
 
-Le point théorique le plus prometteur est l'extension de l'analyse de percolation à une **intensité inhomogène** modélisant la portée. C'est difficile en toute généralité ; une version locale par changement d'échelle, prédisant le déplacement du niveau critique en fonction de la portée et vérifiée empiriquement, suffirait — et répondrait à 6.3 dans le même geste.
+**Risque de nouveauté à citer, pas à ignorer.** HASSL (juillet 2026) fait déjà hiérarchie HDBSCAN multi-niveaux comme structure d'auto-supervision, avec prototypes par niveau — en microscopie cellule unique. Le principe est publié dans un autre domaine ; il faut se positionner comme transfert **et** exactification, pas comme invention.
 
----
+**Licences.** Les poids de Sonata, Concerto et Utonia sont tous **CC-BY-NC 4.0**. Seul le code de Sonata est Apache 2.0. À tracer comme `HGP-old/`.
 
 ## Chapitre 9 — Où en est-on
 

@@ -81,4 +81,4 @@ Vocabulaire des statuts : `backend` ∈ {reference_cpu, cuda, cuda_g4}, `profile
 
 ## Licences
 
-MIT (racine) sur le code actif et la doc, **sauf** : `HGP-old/` (licence historique non commerciale) et les PDF de `docs/references/` (conditions fichier par fichier dans `references.toml`, intégrité par `python tools/check_references.py`).
+MIT (racine) sur le code actif et la doc, **sauf** : les poids pré-entraînés de la lignée Pointcept (Sonata, Concerto, Utonia) s'ils sont utilisés dans `tests/SemanticKITTI/`, tous en **CC-BY-NC 4.0** — à traiter comme `HGP-old/`, jamais importés dans la ligne produit ; `HGP-old/` (licence historique non commerciale) et les PDF de `docs/references/` (conditions fichier par fichier dans `references.toml`, intégrité par `python tools/check_references.py`).

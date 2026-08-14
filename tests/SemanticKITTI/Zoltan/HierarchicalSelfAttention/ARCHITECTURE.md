@@ -64,25 +64,29 @@ Trois granularités seront comparées avec, dans tous les cas, une sortie finale
 
 ### Choix de la baseline
 
-Dépôts vérifiés le 14 août 2026. Chiffres val SemanticKITTI, une trame à l'inférence, LiDAR seul, sans TTA, entraînement mono-jeu.
+Dépôts vérifiés le 14 août 2026. Chiffres val SemanticKITTI, une trame à l'inférence, LiDAR seul, sans TTA, entraînement mono-jeu. La recommandation précédente, MinkowskiNet OpenPCSeg en principal, est **corrigée sur preuve** : elle sous-estimait le coût d'installation, qui est le vrai facteur de reproductibilité.
 
-| Candidat | val sans TTA | Ce qui est publié | Réserve principale |
+| Candidat | val sans TTA | Extension CUDA à compiler | Ce qui est publié |
 |---|---|---|---|
-| MinkowskiNet, OpenPCSeg/PCSeg | 70,04 | config, poids, régime déclaré verbatim : « trained with merely train split », « without employing any Test Time Augmentation or ensembling » | architecture de 2019 ; recette figée par le dépôt |
-| MinkUNet34v2-W32, mmdetection3d | 70,3 | config, `.pth` et log par ligne du tableau | torchsparse fluctue d'environ 1,5 mIoU selon la graine, de l'aveu du README |
-| WaffleIron-48-256 | 68,0 | config, checkpoint, chiffre garanti par le README ; 6,8M paramètres | instance CutMix à l'entraînement, donc mélange de scans |
-| SphereFormer | 67,8 | config et poids, table `Val mIoU (tta) 69.0 / Val mIoU 67.8` | écart val 67,8 → test 74,8 jamais documenté |
-| PTv3, Pointcept | — | rien | `configs/semantic_kitti/` ne contient aucune config PTv3 et les lignes SemanticKITTI du model zoo sont vides ; inutilisable en l'état |
+| **WaffleIron-48-256** (principal) | 68,0 | **aucune** ; pip simple, PyTorch 2.2 | config unique `configs/WaffleIron-48-256__kitti.yaml`, checkpoint vivant (HTTP 206), chiffre garanti par le README, 6,8M paramètres |
+| **MinkUNet** (second porteur) | 69,3 (mmdet3d spconv) ; 70,3 (torchsparse annoncé) ; 70,04 (OpenPCSeg) | oui : spconv ou torchsparse ou MinkowskiEngine | config, `.pth` et log par ligne (mmdet3d) ; régime OpenPCSeg déclaré verbatim « trained with merely train split », « without employing any Test Time Augmentation or ensembling », 2 A100 et environ 12 h |
+| SphereFormer | 67,8 | oui | config et poids, table `Val mIoU (tta) 69.0 / Val mIoU 67.8` |
+| PTv3, Pointcept | — | oui | **exclu**, voir ci-dessous |
 
-La baseline principale est **MinkowskiNet OpenPCSeg à 70,04**, pour deux raisons cumulées : c'est la seule dont le régime d'entraînement et d'évaluation est déclaré explicitement, donc la seule dont l'écart mesuré soit imputable au modèle ; et c'est exactement le backbone dont part RAPiD-Seg, meilleur concurrent LiDAR-seul du test (76,1), ce qui rend la comparaison directe. Le **second porteur est WaffleIron**, petit, rapide et garanti par son README, chargé de vérifier qu'un effet HGP n'est pas propre au backbone. PTv3 ne bloque plus WP0 : ce n'est plus un arbitrage prudentiel, c'est un constat de dépôt.
+**Baseline principale : WaffleIron.** L'argument décisif n'est pas le mIoU, c'est qu'aucune extension CUDA n'est à compiler (ni torchsparse, ni MinkowskiEngine, ni spconv, ni flash-attn) : en 2026, c'est ce qui rend un dépôt réellement reproductible. S'y ajoutent une chaîne fermée config → poids → commande → chiffre, le README qui dit littéralement « This should give you a final mIoU of 68.0% », et un mainteneur qui répond précisément (issue #19 : 68,0 en val, 70,8 en test avec `--trainval` et 12 votes ; issue #5 : 4x RTX 2080 Ti et environ 2 jours pour 45 époques, un seul V100 32 Go suffit). Ablation val du papier : 62,5 → 66,8 (cutmix + polarmix) → 67,6 (features 5D) → 68,0 (stochastic depth). **Le 68,0 est nu** : aucun chiffre val avec TTA n'a jamais été publié pour ce dépôt, donc rien n'autorise à le comparer à un chiffre TTA.
 
-Deux mises en garde encadrent toute lecture de ces chiffres.
+**Second porteur : MinkUNet**, famille d'architecture radicalement différente (convolution sparse voxelisée contre MLP et convolutions 2D denses sur projections). C'est précisément le point : un effet HGP qui survit aux deux n'est pas propre au backbone. Avertissement à lever avant toute citation : OpenPCSeg annonce 70,04 en liant `minkunet_mk34_cr10.yaml` alors que le fichier de poids s'appelle `mk34_cr16` ; l'appariement config/poids doit être confirmé, sinon on cite un chiffre pour une autre capacité.
 
-D'abord, une comparaison doit apparier la **recette** et pas seulement l'architecture. Le 63,8 souvent cité pour MinkUNet mesure une recette de 2019 ; la même architecture atteint 71,8 val avec une recette moderne. Opposer 63,8 à 68,0 mesure donc des augmentations de données, pas des modèles.
+**Exclusion maintenue : PTv3/Pointcept.** Issue #556, ouverte le 13 janvier 2026, donne trois reproductions indépendantes à 69,30 / 66,52 / 66,53 contre 70,8 annoncé ; l'issue #186 est ouverte depuis mars 2024 ; dans l'issue #481 le mainteneur admet « I already forgot where I got this number during paper writing ». Si Pointcept est employé malgré tout, seule sa propre baseline réentraînée est citable, jamais le 70,8 du papier.
 
-Ensuite, « mono-trame » ne vaut qu'**à l'inférence**. Toutes les recettes de tête mélangent des scans à l'entraînement (instance CutMix, LaserMix, PolarMix, PillarMix). Chaque ligne rapportée déclare donc séparément le régime d'entraînement, l'usage éventuel de TTA, d'ensemble ou de `train+val`, et le nombre de trames vues à l'inférence.
+**Le facteur dominant est la recette, pas l'architecture.** LaserMix/PolarMix valent +3,5 mIoU sur MinkUNet (66,9 → 70,4) ; instance cutmix + polarmix valent +4,3 sur WaffleIron (62,5 → 66,8), soit plus que l'écart entre la plupart des architectures publiées. Toute évaluation de HGP active donc **exactement les mêmes augmentations sur les deux bras**, faute de quoi le gain mesuré est un gain d'augmentation déguisé. Corollaire : Pointcept n'implémente ni LaserMix ni PolarMix (0 occurrence), ce qui explique probablement une part de l'écart annoncé/reproduit.
 
-Le backbone reçoit exactement les mêmes entrées et la même recette dans toutes les comparaisons appariées.
+| Règle de protocole | Fait qui la fonde |
+|---|---|
+| Plancher de bruit d'environ 1,5 mIoU | mmdetection3d avertit que le backend TorchSparse fluctue d'environ 1,5 mIoU selon la graine ; l'issue Pointcept #556 va de 66,5 à 69,3 selon le nombre de GPU et le batch |
+| Trois graines minimum par bras | tout gain revendiqué sous environ 1,5 point sur un run unique n'est pas distinguable du bruit |
+| Jamais un chiffre sans TTA contre un chiffre avec TTA | TTA vaut +1,4 (MinkUNet 70,4 → 71,8), +2,4 (Cylinder3D), +1,2 (SphereFormer) ; celle de mmdet3d coûte 36 passes avant |
+| Régime déclaré ligne par ligne | « mono-trame » ne vaut qu'à l'inférence : les recettes de tête mélangent des scans à l'entraînement (instance CutMix, LaserMix, PolarMix, PillarMix). Déclarer entraînement, TTA, ensemble, `train+val`, trames vues à l'inférence |
 
 Pour chaque feuille $i$, le backbone produit $f_i^{0}\in\mathbb{R}^{d}$. Les projections Q/K/V et les normalisations suivent la définition de la baseline HSA testée. Les coordonnées absolues ou cylindriques ne sont pas supprimées : le repère ego et la gravité sont sémantiquement utiles.
 
