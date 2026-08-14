@@ -251,27 +251,54 @@ Il faut comprendre trois choses avant de s'engager.
 
 **3. La profondeur est un problème de calcul.** L'algorithme demande $D$ produits matrice creuse–vecteur **séquentiels**, où $D$ est la profondeur de la hiérarchie. Un arbre de fusion issu d'une filtration est typiquement très déséquilibré, avec de longues chaînes de fusions ponctuelles. La **condensation** de l'arbre n'est donc pas une optimisation optionnelle : c'est une condition d'existence sur GPU — et elle modifie l'objet, donc elle doit être versionnée et ablatée.
 
-### La tension centrale : la laminarisation efface HGP
+### La laminarité : le problème est plus petit qu'il n'y paraît, et le manuscrit le résout
 
-C'est le point le plus important du chapitre, et il conditionne tout choix d'opérateur.
+HSA exige un arbre **strictement laminaire** : son lemme de sous-structure optimale est énoncé sur une *partition*, avec des ensembles de feuilles disjoints. Et on a vu au chapitre 2 que pour $K\geq2$ les $K$-polyèdres **se recouvrent**. On pourrait en conclure que HSA force à détruire ce qui distingue HGP. Ce serait faux, et le § 9.1 du manuscrit le dit explicitement :
 
-HSA exige un arbre **strictement laminaire** : son lemme de sous-structure optimale est énoncé sur une *partition*, avec des ensembles de feuilles disjoints. Or on a vu au chapitre 2 que pour $K\geq2$ les $K$-polyèdres **se recouvrent**.
+> « pour $K\geq2$, l'objet naturel n'est pas une partition de $X$, mais un recouvrement de $X$ **(ou bien une partition des $(K-1)$-simplexes)** »
+
+Autrement dit : **la hiérarchie est déjà laminaire — sur les facettes.** L'arbre de fusion est construit sur $\mathcal{F}_K$, l'ensemble des facettes, et il en est une partition à chaque niveau. Le recouvrement n'apparaît **que** lorsqu'on projette vers les points, parce qu'un point appartient à plusieurs facettes.
 
 ```mermaid
 graph LR
-  A["HGP, K ≥ 2<br/>polyèdres qui se recouvrent<br/><b>ce qui distingue HGP</b>"] -->|laminarisation| B["arbre laminaire<br/>= un arbre de fusion de densité<br/><b>comparable à HDBSCAN</b>"]
-  B --> C["HSA"]
-  A -.->|"voie T6, risquée"| D["attention sur le DAG<br/>de recouvrement"]
+  P["points x"] -->|"incidence<br/>un point est dans<br/>plusieurs facettes"| F["facettes τ<br/><b>l'arbre vit ici</b><br/>et il est laminaire"]
+  F --> N["nœuds = composantes<br/>de facettes"]
+  N --> H["HSA<br/>sans laminarisation ad hoc"]
 ```
 
-Laminariser **supprime exactement la propriété qui distingue HGP de la concurrence**. Et à $K=1$, HGP *est* le Single-Linkage. Deux issues, à choisir explicitement :
+Le bon choix architectural est donc : **les feuilles sont les facettes, pas les points.** L'arbre est alors exactement laminaire, HSA s'applique sans bricolage, et rien n'est détruit au niveau de l'arbre.
 
-1. assumer la laminarisation, et faire porter la contribution ailleurs (théorie, correction capteur, descripteur) ;
-2. traiter le recouvrement comme l'objet, et construire l'attention sur le **DAG de recouvrement** — c'est [T6](THEOREMES.md), plus distinctif et plus risqué.
+### La partition de l'unité, déjà écrite dans la thèse
 
-Si un budget de nouveauté doit aller à un opérateur, il doit aller à la seconde.
+Reste à relier les points aux facettes. Le § 9.1 fournit exactement l'objet que l'architecture réclamait sans l'avoir.
 
-**À retenir.** HSA est une baseline nécessaire, pas une contribution. Et il impose une laminarisation qui coûte précisément ce qu'on voulait vendre.
+Chaque facette $\tau$ reçoit un score local $S_\tau=\sum_{\sigma\supset\tau,\,|\sigma|=K+1}\psi\left(\rho(\sigma)\right)$ avec $\psi(t)=1/t^{p}$, où $\rho(\sigma)$ est le rayon de naissance. Chaque point normalise par $T_x=\sum_{\tau\ni x}S_\tau$, et l'on pose
+
+$w_{x\tau}=\frac{S_\tau}{T_x},\qquad w_{x\tau}\geq0,\qquad \sum_{\tau\ni x}w_{x\tau}=1.$
+
+C'est une **partition de l'unité** : « lorsqu'un point appartient à au moins une face, il distribue une masse totale égale à $1$ entre les faces qui le contiennent ». Elle est pondérée par la densité de naissance, donc pas arbitraire.
+
+Trois conséquences, et elles débloquent plusieurs points ouverts du dossier.
+
+1. **Conservation de la masse, gratuitement.** Pour toute antichaîne, en posant $w_{x\to v}=\sum_{\tau\in v}w_{x\tau}$, on a $\sum_v w_{x\to v}=1$. Aucun double comptage : c'est la condition que [ARCHITECTURE.md](ARCHITECTURE.md) exigeait avant d'autoriser $K\geq2$.
+2. **Le canal de masse devient correct.** La CDF additive double-comptait pour $K\geq2$ ; il suffit de pondérer chaque point par $w_{x\to v}$ et l'additivité redevient exacte.
+3. **La masse d'un nœud n'est plus son cardinal.** Le manuscrit définit $m_\tau=S_\tau\sum_{x\in\tau}1/T_x$, et c'est cette masse — pas un comptage de faces — qui alimente `min_cluster_size` dans l'arbre condensé.
+
+### Rendre le vote différentiable
+
+La thèse convertit en partition stricte par **vote pondéré** : $V_x(c)=\sum_{\tau\ni x,\ \ell(\tau)=c}w_{x\tau}$, puis $\hat\ell(x)\in\arg\max_c V_x(c)$ (Proposition 7). Pour $K=1$ le vote est trivial et redonne le Single-Linkage.
+
+Pour un réseau, il suffit de **remplacer l'argmax par la combinaison convexe** : si $p_\tau$ est la distribution prédite sur la facette $\tau$, la prédiction du point est
+
+$p(x)=\sum_{\tau\ni x}w_{x\tau}\,p_\tau.$
+
+C'est exactement la Proposition 7 avant le durcissement, donc différentiable, et chaque point garde une prédiction propre puisque les $w_{x\tau}$ dépendent de $x$. L'argmax redevient la version d'inférence si une partition stricte est demandée.
+
+**Ce qui reste vraiment perdu.** Uniquement au moment du durcissement, et c'est mesurable : la marge $V_x^{(1)}-V_x^{(2)}$ entre les deux premiers clusters. La fraction de points à vote contesté **est** le coût de la laminarisation, et c'est un diagnostic à rapporter, pas une inquiétude abstraite.
+
+**Ce que ça coûte.** Les facettes sont plus nombreuses que les points, donc l'arbre a plus de feuilles — à mesurer avant de conclure, avec la profondeur et le degré (voir le goulot n° 3 ci-dessus).
+
+**À retenir.** HSA reste une baseline, pas une contribution. Mais l'objection « il faut laminariser, donc on perd HGP » tombe : l'arbre est laminaire sur les facettes, la partition de l'unité existe déjà, et le vote de la thèse a une relaxation différentiable immédiate.
 
 ---
 

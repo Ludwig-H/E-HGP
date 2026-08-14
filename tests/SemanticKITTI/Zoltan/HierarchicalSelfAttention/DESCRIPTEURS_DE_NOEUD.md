@@ -185,7 +185,7 @@ on a $N_{A\cup B}=N_A+N_B$ pour des enfants disjoints : une addition par case, e
 Deux réserves.
 
 1. **La normalisation par nœud casse l'exactitude sur grille fixe.** Recentrer et redimensionner translate et dilate l'argument, $F^{c'}(u,t)=F^{c}\left(t+\left\langle u,c'-c\right\rangle\right)$ : exact **comme fonction**, mais sur une grille de seuils figée il faut rééchantillonner, donc interpoler. Même mécanique que pour les canaux radiaux : agréger dans un repère global, normaliser à la lecture. Une liste de **quantiles**, elle, ne se fusionne pas du tout.
-2. **Pour $K\geq2$, l'additivité double-compte.** Les $K$-polyèdres se recouvrent, donc un point appartenant à deux composantes serait compté deux fois. C'est exactement le problème d'ownership $w_{iv}$ ; la CDF le rend visible au lieu de le cacher.
+2. **Pour $K\geq2$, l'additivité double-compterait — et le manuscrit fournit le correctif.** Les $K$-polyèdres se recouvrent, donc un point appartenant à deux composantes serait compté deux fois. Le § 9.1 définit la partition de l'unité $w_{x\tau}=S_\tau/T_x$, avec $S_\tau=\sum_{\sigma\supset\tau,\left|\sigma\right|=K+1}\psi\left(\rho(\sigma)\right)$, $\psi(t)=1/t^{p}$, et $T_x=\sum_{\tau\ni x}S_\tau$. En pondérant chaque point par $w_{x\to v}=\sum_{\tau\in v}w_{x\tau}$, l'additivité redevient **exacte** et la masse est conservée sur toute antichaîne, puisque $\sum_v w_{x\to v}=1$. Le comptage brut $n_v$ doit alors être remplacé partout par cette masse pondérée.
 
 ### Deux économies pratiques
 

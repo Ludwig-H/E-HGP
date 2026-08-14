@@ -29,6 +29,28 @@ où $E_{V\!F}$ code $x\in F$, $E_{FQ}^{\mathrm{elem}}$ code $F\subset Q$ et $m_v
 
 Ce graphe d'incidence conserve un certificat élémentaire exact de $H_0$, car les deux graphes ont le même $\pi_0$. Il ne conserve ni toute l'adjacence full ni automatiquement le nerf complet des régions témoins : un claim sur leurs trous ou leur homotopie exige les intersections d'arité supérieure correspondantes, ou directement leur géométrie. Un graphe $\Gamma$ seul perd même l'incidence point--facette.
 
+## Scores de facettes et partition de l'unité
+
+Le manuscrit n'attache pas seulement des niveaux aux cellules : il attache à chaque facette un score local positif, dont dérivent la masse d'un nœud et une partition de l'unité sur les points. Avec les notations de ce document, une facette est $\tau=F$ de cardinal $K$ et une coface élémentaire est $\sigma=Q$ de cardinal $K+1$. Le score est
+
+$$S_{\tau}=\sum_{\sigma\supset\tau,\;|\sigma|=K+1}\psi\left(\rho(\sigma)\right),\qquad\psi(t)=\frac{1}{t^{p}},$$
+
+où $\rho(\sigma)$ est le rayon de naissance du $K$-simplexe $\sigma$ dans la filtration ; dans la paramétrisation carrée employée ici, $\rho(\sigma)=\sqrt{\beta(\sigma)}$, et l'export déclare s'il publie $\rho$ ou $\beta$.
+
+La fonction de poids $\psi$ est un paramètre contractuel, pas une constante d'implémentation. Le défaut est $\psi(t)=1/t^{p}$, que le manuscrit justifie parce qu'il « reflète plus exactement la densité locale » ; le choix uniforme $\psi=1$ est admissible et ramène $S_{\tau}$ au nombre de cofaces incidentes ; toute fonction de poids décroissante est admissible. Ces choix ne définissent pas le même objet : ils changent $S_{\tau}$, donc les masses, donc l'arbre condensé après seuillage, donc les nœuds publiés. `facet_score_version`, `facet_score_psi=inv_pow|uniform|other`, `facet_score_p` et `facet_score_scope=filtration|level_cut` sont donc versionnés au même titre que `cut_policy`, et deux exports qui diffèrent par $\psi$ ou par $p$ ne partagent pas un hash de configuration. `facet_score_scope` tranche si la somme porte sur toutes les cofaces construites de la filtration ou seulement sur celles actives au niveau de coupe : les deux lectures donnent des scores différents et aucune n'est implicite.
+
+Chaque point normalise par la somme des scores des facettes qui le contiennent :
+
+$$T_{x}=\sum_{\tau\ni x}S_{\tau},\qquad w_{x\tau}=\frac{S_{\tau}}{T_{x}}.$$
+
+Cette notation $T_{x}$, indexée par un point, ne doit pas être confondue avec la région témoin $T_a(F)$ définie plus bas, indexée par un niveau et une facette. On a $w_{x\tau}\geq0$ et $\sum_{\tau\ni x}w_{x\tau}=1$ : « lorsqu'un point appartient à au moins une face, il distribue une masse totale égale à $1$ entre les faces qui le contiennent ». La convention est $1/T_{x}=0$ lorsque $T_{x}=0$ ; le point ne distribue alors aucune masse et n'est réclamé par aucun nœud. Ce zéro est une valeur exportée, jamais une donnée manquante, et il n'est pas remplacé silencieusement par une répartition uniforme.
+
+La masse d'une facette est
+
+$$m_{\tau}=S_{\tau}\sum_{x\in\tau}\frac{1}{T_{x}}.$$
+
+Le manuscrit précise que « c'est ce poids $m_{\tau}$, et non le simple comptage des faces, qui est utilisé par le seuil `min_cluster_size` dans l'arbre condensé ». La masse d'un nœud est $\sum_{\tau\in v}m_{\tau}$, et la masse qu'un point projette sur un nœud est $w_{x\to v}=\sum_{\tau\in v,\;\tau\ni x}w_{x\tau}$ ; sur une antichaîne, $\sum_{v}w_{x\to v}=1$. Tout canal additif de masse doit donc pondérer chaque point par $w_{x\to v}$ : le comptage brut $n_v$ double-compte les points partagés entre facettes et n'est pas conservatif. Le contrat d'export correspondant est fixé plus bas ; sa contrainte principale est que $T_{x}$ n'est pas composante-local.
+
 ## Coupe versionnée d'une branche persistante
 
 Un nœud persistant ne détermine pas un payload statique : ses facettes, cofaces et témoins évoluent entre naissance et fusion. Le payload est donc attaché à une arête hiérarchique et non au seul identifiant de nœud. Pour une arête $p\leftarrow v$, la baseline fixe `cut_policy_version=1`, `cut_policy=pre_parent`, `cut_level=a_p` et `cut_side=strict` : elle lit l'état de $v$ juste avant le lot de fusion de $p$, avec les cellules satisfaisant $\beta<a_p$. L'embedding enfant--parent est ainsi conditionné par cette coupe.
@@ -36,6 +58,8 @@ Un nœud persistant ne détermine pas un payload statique : ses facettes, coface
 Une racine sans parent utilise `cut_policy=explicit`, le dernier niveau fini enregistré, `cut_side=closed` et $\beta\leq a_{\mathrm{terminal}}$. Le format sérialise aussi naissance, mort, liste ordonnée des niveaux d'événements et deltas de facettes, cofaces et incidences. Un nœud né et fusionné dans le même lot rend la coupe stricte vide : il est rejeté ou conservé sous une politique explicite de lot d'événements, jamais converti silencieusement en coupe fermée. Toute autre politique parmi `pre_parent|post_birth|explicit` reçoit les valeurs de niveau et de côté correspondantes et ne partage pas un hash de configuration avec la baseline.
 
 ## Trois carriers géométriques dérivés
+
+Aucun de ces carriers, ni l'objet source dont ils dérivent, n'est une classe d'une partition des points : le manuscrit rappelle que « pour $K\geq2$, l'objet naturel n'est pas une partition de $X$, mais un recouvrement de $X$ (ou bien une partition des $(K-1)$-simplexes) ». La partition porte donc sur $\mathcal{F}_K(a)$, l'ensemble des $(K-1)$-simplexes effectivement construits, qui est réparti sans recouvrement entre les composantes d'un niveau ; le $K$-polyèdre source $V_v(a)$ reste une union d'observations et peut rencontrer $V_{v'}(a)$ pour $v'\neq v$. Cette remarque vaut pour les quatre valeurs de `carrier_kind`, `source_points` compris.
 
 ### Carrier des facettes
 
@@ -85,6 +109,10 @@ Trois axes orthogonaux sont versionnés dans chaque expérience :
 
 `coface_pl` sérialise en plus sa politique d'isolés. `witness_approx` enregistre la métrique, la tolérance $\varepsilon_W$ et l'oracle de comparaison ; il n'est jamais accepté sous `witness_exact`. La branche principale recommandée conserve le payload `marked_incidence` et compare `facet_pl` à `witness_union`. Le premier représente directement les observations et leurs interactions ; le second est l'objet continu exact de la théorie HGP. Les combiner est autorisé, mais leur gain et leur coût doivent être isolés.
 
+Le canal 2 doit permettre de recalculer $T_{x}$ sans redemander la filtration ambiante. Deux modes sont admis, et le mode retenu est déclaré : `facet_score_source=stored` publie $S_{\tau}$ pour chaque facette exportée ; `facet_score_source=recomputed` publie les rayons de naissance $\rho(\sigma)$ de toutes les cofaces de cardinal $K+1$ incidentes à ces facettes, y compris celles qui n'ont soudé aucune paire de facettes de la composante et qui ne figurent donc pas dans $\mathcal{Q}_v^{\mathrm{elem}}$, le consommateur reformant $S_{\tau}$. Dans les deux cas, les incidences point--facette $E_{V\!F}$ doivent être complètes sur $V_v$ : une incidence tronquée fausse $T_{x}$, donc tous les poids $w_{x\tau}$ de ce point, sans produire d'erreur localement détectable.
+
+Surtout, $T_{x}$ n'est pas composante-local : un point peut appartenir à des facettes rattachées à des composantes distinctes de la même antichaîne, et son dénominateur les somme toutes. Un export composante-local ne suffit donc pas à le reconstruire seul. Le contrat impose l'une des deux résolutions, déclarée par `normalizer_scope` : `per_point_exported` sérialise $T_{x}$ comme champ du point, valable pour l'antichaîne et le niveau déclarés ; `antichain_join` n'exporte que les scores et exige la jointure de toutes les composantes de l'antichaîne avant tout calcul de $w_{x\tau}$. Un $T_{x}$ calculé sur une seule composante est un défaut, pas une approximation.
+
 ## Complétude relative et état de v3
 
 `Complet` signifie complet **relativement au carrier déclaré et à la composante demandée**, jamais matérialisation du complexe de Čech ambiant, de $\Gamma_K$ global ou d'une mosaïque de Delaunay d'ordre supérieur. Les cellules canoniques peuvent être stockées une seule fois par scan, puis référencées par les nœuds de la hiérarchie.
@@ -98,6 +126,8 @@ Une présentation sparse est recevable seulement avec l'une des autorités suiva
 - `h0_only` : elle certifie seulement la même composante et la même union d'observations.
 
 Le dernier statut ne suffit pas à alimenter une branche géométrique complète. Deux sources ayant le même $H_0$ peuvent avoir des incidences, des carriers PL et des unions témoins différents.
+
+Aucune de ces autorités ne porte sur les scores. Un producteur qui publie $S_{\tau}$, $m_{\tau}$ ou $w_{x\tau}$ déclare en plus `facet_score_version`, `facet_score_psi`, `facet_score_p`, `facet_score_scope`, `facet_score_source` et `normalizer_scope` : sans eux, `incidence_complete` reconstruit bien $G_v^{\mathrm{inc}}$, mais ni les masses ni la partition de l'unité.
 
 Au `HEAD` de cette étude, le cadre v3 reste `public_status=not_claimed` et son audit live est antérieur au `HEAD`. Surtout, la voie v3 ne persiste pas un payload composante-local complet de facettes, cofaces et incidences ; ses certificats sparse actuels visent principalement la réduction hiérarchique. Le canal 2 exige donc un nouvel exporteur composante-local certifié. Il ne peut pas être reconstruit depuis la seule forêt de points et ne doit pas réintroduire sous un autre nom l'oracle Gamma exhaustif dans le chemin produit.
 
@@ -131,6 +161,11 @@ Les sept énoncés T0 à T6 — sémantique des carriers, invariance aux certifi
 - rayon extérieur non binné comme témoin d'une violation du seul recentrage : $g$ continu, agrégation exacte par $\max$, et pourtant $\left\lbrace c+e_{1}\right\rbrace$ et $\left\lbrace c+e_{2}\right\rbrace$ valent tous deux $1$ au centre $c$ puis $2$ et $\sqrt{2}$ au centre $c-e_{1}$ ;
 - carrier PL à $K=3$ dont la CDF de volume est identiquement nulle, contre la même CDF pondérée par l'aire des triangles ;
 - recouvrements $K\geq2$ avant et après laminarisation ;
+- point incident à plusieurs facettes rattachées à des composantes différentes de la même antichaîne, avec $\sum_{\tau\ni x}w_{x\tau}=1$ vérifié aux coordonnées exactes et $w_{x\to v}$ rapporté nœud par nœud ;
+- cas dégénéré $T_{x}=0$ sous la convention $1/T_{x}=0$ : le point ne distribue aucune masse, aucun nœud ne le réclame, et le zéro n'est ni remplacé par une répartition uniforme ni traité comme une valeur manquante ;
+- $K=1$, où les faces sont les points eux-mêmes : $S_{\tau}$ est porté par un unique point, le vote pondéré est trivial, et la sortie doit être exactement celle du single-linkage, sans écart de labels ni de seuil ;
+- antichaîne complète sur laquelle $\sum_{v}w_{x\to v}=1$ est vérifié point par point, et où la masse pondérée diffère du comptage brut $n_v$ ;
+- même antichaîne sous deux fonctions de poids, $\psi(t)=1/t^{p}$ et $\psi=1$ : masses, arbre condensé après `min_cluster_size` et nœuds publiés diffèrent, donc les hashes de configuration doivent différer ;
 - même patch sous homothétie, puis sous transport et rééchantillonnage LiDAR.
 
 Toute collision qui invalide un claim devient une fixture permanente ; elle n'est pas retirée lorsque l'encodeur change.

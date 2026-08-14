@@ -106,10 +106,14 @@ Détail et démonstrations dans [DESCRIPTEURS_DE_NOEUD.md](DESCRIPTEURS_DE_NOEUD
 | Terme | Définition |
 |---|---|
 | **Arbre de fusion** | Arbre décrivant qui fusionne avec qui, et à quel niveau, le long de la filtration. |
-| **Laminaire** | Se dit d'une famille d'ensembles où deux membres sont soit disjoints, soit emboîtés. Condition requise par HSA — et **incompatible** avec le recouvrement pour $K\geq2$. |
-| **Laminarisation** | Projection forcée d'un recouvrement vers un arbre laminaire. Supprime exactement ce qui distingue HGP de HDBSCAN. |
-| **DAG de recouvrement** | Alternative à la laminarisation : traiter les appartenances multiples comme l'objet. C'est la voie T6. |
-| **Ownership $w_{iv}$** | Poids d'appartenance d'un point à une composante, avec $w_{iv}\geq0$ et $\sum_v w_{iv}=1$. Requis pour éviter le double comptage. |
+| **Laminaire** | Se dit d'une famille d'ensembles où deux membres sont soit disjoints, soit emboîtés. Condition requise par HSA. L'arbre HGP **l'est déjà**, sur les facettes : le recouvrement n'existe que dans la projection vers les points. |
+| **Laminarisation** | Durcissement du recouvrement en une partition stricte des points. Sa perte est mesurable par la marge du vote pondéré. |
+| **$S_\tau$** | Score local d'une facette, $\sum_{\sigma\supset\tau,\left|\sigma\right|=K+1}\psi\left(\rho(\sigma)\right)$ avec $\psi(t)=1/t^{p}$. Reflète la densité de naissance. |
+| **$T_x$** | Normalisateur d'un point, $\sum_{\tau\ni x}S_\tau$. Empêche qu'un point incident à beaucoup de faces soit surpondéré. |
+| **Partition de l'unité $w_{x\tau}$** | $S_\tau/T_x$ : chaque point distribue une masse totale de $1$ entre les facettes qui le contiennent. C'est l'ownership que l'architecture exigeait, et le manuscrit le fournit (§ 9.1). |
+| **Masse de nœud $m_\tau$** | $S_\tau\sum_{x\in\tau}1/T_x$. Remplace le comptage de faces dans `min_cluster_size`. |
+| **Vote pondéré** | $V_x(c)=\sum_{\tau\ni x,\ \ell(\tau)=c}w_{x\tau}$, puis $\arg\max_c$. Conversion en partition stricte (Proposition 7). Sa relaxation différentiable est $p(x)=\sum_\tau w_{x\tau}p_\tau$. |
+| **DAG de recouvrement** | Attention définie directement sur les appartenances multiples, sans passer par les facettes comme feuilles. C'est T6, désormais une extension et non une condition d'existence. |
 | **Antichaîne** | Ensemble de nœuds deux à deux non emboîtés couvrant tous les points. C'est une « coupe » de la hiérarchie. |
 | **Condensation** | Élagage de l'arbre pour supprimer les longues chaînes de fusions ponctuelles. Condition d'existence de HSA sur GPU, pas une optimisation. |
 | **HSA** | *Hierarchical Self-Attention*, NeurIPS 2025. Attention dont les scores sont constants par blocs entre sous-arbres frères. |

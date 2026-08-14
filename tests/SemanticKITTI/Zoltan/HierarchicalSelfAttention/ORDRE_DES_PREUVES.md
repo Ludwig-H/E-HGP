@@ -88,22 +88,35 @@ Cela ne change pas l'objectif sémantique. Cela fournit une preuve d'existence d
 
 **Un signal contraire à consigner.** L'ablation d'ALPINE montre qu'un seuil proportionnel à la portée, à la manière de LESS, donne $75{,}9$ PQ contre $76{,}3$ pour le seuil constant par classe, malgré une optimisation de son coefficient à l'échelle du jeu de données. Une correction de portée naïve **dégrade** donc leur clustering. Cela n'invalide pas la correction proposée en M2 — leur seuil est un rayon de liaison, pas un niveau de densité $K$-NN, et les deux ne se corrigent pas de la même façon — mais cela interdit de présenter la correction range-aware comme acquise. Elle doit être mesurée, et le résultat négatif d'ALPINE cité.
 
-## La tension centrale : la laminarisation détruit ce qui distingue HGP
+## La laminarité n'est pas le problème que je croyais
 
-Ce point mérite d'être énoncé seul, parce qu'il conditionne le choix de l'opérateur.
+Cette section corrige une erreur de la version précédente de ce document, qui affirmait que la laminarisation détruisait ce qui distingue HGP. C'est faux, et le § 9.1 du manuscrit le dit littéralement :
 
-Ce qui sépare HGP de HDBSCAN n'est pas la hiérarchie mais la **connexité d'ordre supérieur** : pour $K\geq2$, les $K$-polyèdres **se recouvrent**, un même point pouvant appartenir simultanément à plusieurs composantes d'un même niveau. Le manuscrit le souligne dès la figure des six points : « on voit déjà apparaître le phénomène essentiel : pour $K\geq2$, les polyèdres peuvent se recouvrir ».
+> « pour $K\geq2$, l'objet naturel n'est pas une partition de $X$, mais un recouvrement de $X$ (ou bien une **partition des $(K-1)$-simplexes**) »
 
-Or HSA exige un arbre strictement laminaire : son lemme de sous-structure optimale est énoncé sur une **partition** de l'ensemble d'indices, avec des ensembles de feuilles disjoints, et sa définition de la distance positionnelle repose sur l'unicité des chemins vers la racine. Alimenter HSA impose donc de laminariser, c'est-à-dire d'attribuer chaque point à une seule composante.
+**L'arbre de fusion est déjà laminaire, sur les facettes.** Il est construit sur $\mathcal{F}_K$ et en constitue une partition à chaque niveau. Le recouvrement n'apparaît que dans la projection vers les points, un point appartenant à plusieurs facettes. HSA, dont le lemme de sous-structure optimale porte sur une partition des feuilles, est donc satisfait sans aucun bricolage **dès lors que les feuilles sont les facettes et non les points**.
 
-La conséquence est inconfortable et doit être assumée : **la projection laminaire supprime exactement la propriété qui distingue HGP de la concurrence.** Ce qui reste après laminarisation est un arbre de fusion de densité, c'est-à-dire, du point de vue de l'opérateur, une variante de ce que HDBSCAN ou une partition superpoint fournissent déjà — avec un coût de construction plus élevé. Et à $K=1$, HGP **est** le single-linkage : la configuration la plus simple du programme est aussi celle qui n'a aucune nouveauté structurelle.
+### La partition de l'unité existe déjà
 
-Deux issues seulement, et il faut choisir explicitement.
+Le § 9.1 fournit exactement l'objet que [ARCHITECTURE.md](ARCHITECTURE.md) exigeait avant d'autoriser $K\geq2$. À chaque facette il associe $S_\tau=\sum_{\sigma\supset\tau,\,\left|\sigma\right|=K+1}\psi\left(\rho(\sigma)\right)$ avec $\psi(t)=1/t^{p}$, puis normalise par point via $T_x=\sum_{\tau\ni x}S_\tau$. En posant $w_{x\tau}=S_\tau/T_x$, on a $w_{x\tau}\geq0$ et $\sum_{\tau\ni x}w_{x\tau}=1$ : une partition de l'unité pondérée par la densité de naissance, donc pas arbitraire.
 
-1. Assumer la laminarisation, et faire porter la contribution sur autre chose que la structure : la théorie de récupérabilité, la correction capteur, ou le descripteur. La comparaison honnête devient alors « notre arbre laminarisé contre les autres arbres », et elle doit être gagnée sur l'oracle d'antichaîne, pas sur un argument théorique.
-2. Traiter le recouvrement comme l'objet, c'est-à-dire construire l'opérateur d'attention sur le **DAG de recouvrement**, avec des poids d'appartenance $w_{iv}$, conservation de masse et réduction exacte au cas laminaire. C'est exactement T6 du [programme théorique](THEOREMES.md), qualifié à juste titre de « plus distinctif mais plus risqué ».
+Trois verrous sautent d'un coup.
 
-C'est la seconde issue qui mérite le budget de nouveauté d'un opérateur. Si l'on doit inventer une attention, il faut l'inventer là où la mathématique de HGP survit à l'opérateur — sur les recouvrements — et non reproduire HSA sur un arbre dont la laminarisation a déjà effacé la différence.
+1. **Conservation de la masse.** Pour toute antichaîne, $w_{x\to v}=\sum_{\tau\in v}w_{x\tau}$ vérifie $\sum_v w_{x\to v}=1$. Absence de double comptage, en une ligne.
+2. **Canal de masse correct.** La CDF additive double-comptait pour $K\geq2$ ; pondérer chaque point par $w_{x\to v}$ rétablit l'exactitude.
+3. **Masse de nœud.** Le manuscrit définit $m_\tau=S_\tau\sum_{x\in\tau}1/T_x$ et l'utilise à la place du comptage de faces dans `min_cluster_size`.
+
+### Le vote de la thèse a une relaxation différentiable immédiate
+
+La conversion en partition stricte se fait par vote pondéré, $V_x(c)=\sum_{\tau\ni x,\ \ell(\tau)=c}w_{x\tau}$ puis $\hat\ell(x)\in\arg\max_c V_x(c)$ (Proposition 7). Il suffit de remplacer l'argmax par la combinaison convexe $p(x)=\sum_{\tau\ni x}w_{x\tau}\,p_\tau$ pour obtenir une lecture point-wise différentiable, chaque point gardant une prédiction propre puisque les poids dépendent de lui. L'argmax redevient la version d'inférence lorsqu'une partition stricte est demandée.
+
+### Ce qui reste ouvert, et ce qui reste vrai
+
+Le durcissement final perd de l'information, et cette perte est **mesurable** : la marge $V_x^{(1)}-V_x^{(2)}$ entre les deux premiers clusters. La fraction de points à vote contesté est le coût exact de la laminarisation et doit être rapportée.
+
+Reste également vrai, et indépendant de tout cela : à $K=1$ HGP **est** le single-linkage, donc la configuration la plus simple du programme n'a aucune nouveauté structurelle ; et le nombre de facettes dépasse celui des points, donc passer les feuilles aux facettes augmente la taille de l'arbre — à mesurer avec la profondeur et le degré avant d'en faire la baseline.
+
+T6 du [programme théorique](THEOREMES.md) n'est donc plus une condition d'existence mais une **extension** : l'attention directement définie sur le DAG de recouvrement, sans passer par les facettes comme feuilles. Elle reste le seul endroit où un budget de nouveauté d'opérateur serait bien placé, mais le programme n'est plus bloqué sans elle.
 
 ## Où placer le budget de nouveauté
 

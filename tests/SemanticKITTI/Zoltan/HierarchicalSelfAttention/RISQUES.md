@@ -8,6 +8,7 @@
 | Support + composante HGP complète incidence-aware est une hypothèse cohérente | oui, gain et coût non démontrés |
 | HGP apporte un signal utile à un backbone local fort | plausible, non démontré |
 | HSA ou QC-HSA est le meilleur opérateur sur HGP | ouvert, preuve 3D absente |
+| Alimenter HSA impose une laminarisation destructrice, donc la voie $K\geq2$ est bloquée | non, l'arbre est déjà laminaire sur les facettes ; ce qui reste est un coût à mesurer |
 | Un modèle hybride HGP + local peut être compétitif | crédible mais à haut risque |
 | SemanticKITTI seul suffit pour ICML/NeurIPS | improbable |
 | Instance doit être travaillée maintenant | non, phase fermée |
@@ -172,20 +173,34 @@ Si les voies de correction doivent devenir aussi coûteuses qu'une attention loc
 
 ### Mécanisme
 
-Pour $K>1$, les composantes facettées peuvent induire des unions de points qui se chevauchent. HSA standard suppose une partition imbriquée.
+Ce risque ne disparaît pas, mais il change de nature, et la formulation antérieure était fausse. Pour $K>1$, les composantes facettées induisent bien des unions de points qui se chevauchent, et HSA suppose bien une partition imbriquée ; il n'en résulte pourtant aucun blocage. Le manuscrit de thèse, Partie II, § 9.1, « Et lorsqu'on impose une partition stricte des données ? », page 96, énonce que « pour $K \geq 2$, l'objet naturel n'est pas une partition de $X$, mais un recouvrement de $X$ (ou bien une partition des $(K-1)$-simplexes) ». L'arbre de fusion est donc déjà laminaire, non sur les points mais sur $F_{K}$, l'ensemble des $(K-1)$-simplexes effectivement construits — les sommets du graphe dual, c'est-à-dire les simplexes de Gabriel dans la version standard — dont il forme une partition à chaque niveau. Le recouvrement n'apparaît que dans la projection vers les points, un point appartenant à plusieurs facettes.
 
-La projection par « partition de l'unité » n'est pas encore une méthode définie. Le chemin de référence reste donc $K=1$ ou une laminarisation déterministe auditée tant qu'une application $w_{iv}$, son domaine et sa règle de construction ne sont pas spécifiés.
+La conséquence architecturale est directe : si les feuilles sont les facettes et non les points, l'hypothèse de HSA est satisfaite sans aucun bricolage, puisque son lemme de sous-structure optimale porte sur une partition des feuilles, ce qui est exactement le cas ici. Rien n'est détruit au niveau de l'arbre.
+
+La partition de l'unité que ce document réclamait sans l'avoir existe déjà, et elle est celle du manuscrit. À chaque facette $\tau$ est associé un score local positif $S_{\tau} = \sum_{\sigma \supset \tau, |\sigma| = K+1} \psi(\rho(\sigma))$, où $\rho(\sigma)$ est le rayon de naissance du $K$-simplexe $\sigma$ dans la filtration et $\psi(t) = 1/t^{p}$ ; $\psi$ peut être toute fonction de poids décroissante, le choix uniforme $\psi = 1$ restant possible, mais $1/t^{p}$ « reflète plus exactement la densité locale ». Chaque point normalise par $T_{x} = \sum_{\tau \ni x} S_{\tau}$, avec la convention $1/T_{x} = 0$ lorsque $T_{x} = 0$. En posant $w_{x\tau} = S_{\tau}/T_{x}$, on obtient $w_{x\tau} \geq 0$ et $\sum_{\tau \ni x} w_{x\tau} = 1$ : « lorsqu'un point appartient à au moins une face, il distribue une masse totale égale à 1 entre les faces qui le contiennent ». C'est l'instanciation explicite de l'application $w_{iv}$ dont l'absence était présentée ici comme un obstacle.
+
+La conservation de la masse en découle en une ligne. Pour toute antichaîne, en posant $w_{x \to v} = \sum_{\tau \in v} w_{x\tau}$, on a $\sum_{v} w_{x \to v} = 1$. Il n'y a donc pas de double comptage, et le canal de masse additif — la CDF projetée — redevient exact dès que chaque point est pondéré par $w_{x \to v}$ : le comptage brut $n_{v}$ doit être remplacé partout par cette masse pondérée. La masse d'un nœud suit la même définition, $m_{\tau} = S_{\tau} \sum_{x \in \tau} 1/T_{x}$, et le manuscrit précise que « c'est ce poids $m_{\tau}$, et non le simple comptage des faces, qui est utilisé par le seuil `min_cluster_size` dans l'arbre condensé ».
+
+La conversion en partition stricte est la Proposition 7 du manuscrit : $V_{x}(c) = \sum_{\tau \ni x, \ell(\tau) = c} S_{\tau}/T_{x}$, puis $\mathrm{label}(x) \in \arg\max_{c} V_{x}(c)$. Elle garantit une partition disjointe, avec une classe $-1$ pour les points non classés, sous une règle déterministe de départage des égalités. Pour $K = 1$, les faces sont les points eux-mêmes, le vote est trivial et restitue exactement le single-linkage. Pour un réseau, il suffit de remplacer l'argmax par la combinaison convexe $p(x) = \sum_{\tau \ni x} w_{x\tau} p_{\tau}$, où $p_{\tau}$ est la distribution prédite sur la facette : c'est la Proposition 7 avant durcissement, donc différentiable, et chaque point conserve une prédiction propre puisque les poids dépendent de lui. L'argmax redevient la version d'inférence si une partition stricte est exigée.
+
+Le programme n'est donc plus bloqué : ce qui était écrit ici comme une condition d'existence est devenu un coût à mesurer, sur trois axes. Premièrement, le coût du passage aux facettes comme feuilles : les facettes sont plus nombreuses que les points, donc prendre les facettes comme feuilles augmente la taille de l'arbre, et profondeur, degré et nombre de feuilles sont à mesurer avant d'en faire la baseline. Deuxièmement, la perte au durcissement : le passage à la partition stricte perd de l'information, mais cette perte est mesurable par la marge $V_{x}^{(1)} - V_{x}^{(2)}$ entre les deux premiers clusters, et la fraction de points à vote contesté est le coût exact de la laminarisation. Troisièmement, à $K = 1$, HGP est le single-linkage : la configuration la plus simple n'apporte aucune nouveauté structurelle, et ne peut donc pas porter seule le claim.
+
+T6 — l'attention directement sur le DAG de recouvrement, sans passer par les facettes comme feuilles — n'est plus une condition d'existence mais une extension. Il reste le seul endroit où un budget de nouveauté d'opérateur serait bien placé, mais le programme n'est plus bloqué sans lui.
 
 ### Test de réfutation
 
-- validation de laminarité ;
-- comptage des multi-appartenances ;
-- comparaison arbre natif disponible et projection laminaire auditée ; le modèle multi-arbre/DAG n'entre qu'après définition de $w_{iv}$ ;
-- conservation des masses et absence de double comptage.
+- mesurer la fraction de points à vote contesté et la distribution complète de la marge $V_{x}^{(1)} - V_{x}^{(2)}$, et rapporter cette fraction comme diagnostic du coût de la laminarisation ;
+- comparer nombre de feuilles, profondeur et degré avec les facettes comme feuilles contre les points comme feuilles, sur les mêmes scans, avant de fixer la baseline ;
+- vérifier numériquement $\sum_{\tau \ni x} w_{x\tau} = 1$, puis $\sum_{v} w_{x \to v} = 1$ sur toute antichaîne, y compris sur les points où $T_{x} = 0$ ;
+- vérifier que la masse pondérée remplace bien le comptage brut $n_{v}$ partout, et que $m_{\tau}$ pilote effectivement `min_cluster_size` dans l'arbre condensé ;
+- validation de laminarité sur $F_{K}$ et comptage des multi-appartenances point--facette ;
+- comparer, à budget égal, le vote pondéré durci et la combinaison convexe différentiable ;
+- contrôle $K = 1$ obligatoire, où la voie doit restituer exactement le single-linkage ;
+- comparer arbre natif sur facettes et projection laminaire auditée ; le modèle multi-arbre/DAG reste une extension.
 
 ### No-go
 
-Refuser tout résultat dont la projection dépend de l'ordre d'itération, n'est pas reproductible ou ne vérifie pas $\sum_v w_{iv}=1$ sur un domaine déclaré. Tant que ces poids ne sont pas définis, aucune propriété de conservation ou de stochasticité n'est revendiquée pour le DAG. Si une projection perd l'avantage HGP, le modèle HSA standard n'est pas adapté ; ouvrir une nouvelle voie DAG avec ses propres preuves ou revenir à $K=1$.
+Si la fraction de points à vote contesté est élevée et que le passage aux facettes comme feuilles fait exploser la taille de l'arbre, la voie $K \geq 2$ n'est pas exploitable avec cet opérateur : revenir à $K = 1$ en assumant qu'il n'y a alors aucune nouveauté structurelle par rapport au single-linkage, ou ouvrir T6 comme extension avec ses propres preuves. Refuser tout résultat dont la projection dépend de l'ordre d'itération, dont la règle de départage des égalités n'est ni déterministe ni déclarée, ou qui ne vérifie pas $\sum_{\tau \ni x} w_{x\tau} = 1$ sur un domaine déclaré. Ne présenter aucun gain $K \geq 2$ sans rapporter en regard la fraction de points contestés et la taille de l'arbre.
 
 ## R10 — Le coût théorique ne devient pas un gain GPU
 
