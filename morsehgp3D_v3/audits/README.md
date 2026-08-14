@@ -28,12 +28,15 @@ ancienne phrase imposant le rejet global des positions dupliquées est périmée
   contre-fixtures u16 de non-hérédité, contre-audit des samplers et réception de
   `MidballBlockDepth` au pin `8fd6f59`, puis du raccord/juge WSPD au pin
   `a58d020` : `ALL` continu sûr, `NONE` limité au réseau u16, portes à regex
-  fail-open et autorité à consolider avec `rect_h_interval`.
+  fail-open et autorité à consolider avec `rect_h_interval`. Il contre-audite
+  aussi le delta `HCBlockDepth` : facteurs q3/q4 sûrs, enclosure conservatrice,
+  autorité exacte `Corner512` déjà existante et intégration worktree non reçue.
 - [`AUDIT_LIVE_BORNE_SUP_CREDITS_A58D020_20260814.md`](AUDIT_LIVE_BORNE_SUP_CREDITS_A58D020_20260814.md) :
   contre-audit de `--borne-sup` après `a58d020` ; la révision `90640885`
   oubliait les enfants `MIXED` et supprimait toutes les fermetures. La
-  réparation mobile `ec5ec3d4` restaure la parité sur l'ablation rejouée, mais
-  ledgers combinés, BJD, `--climb`, portée du verdict et portes restent ouverts.
+  réparation mobile `ec5ec3d4` restaure la parité singleton sur l'ablation
+  rejouée, mais perd encore des fermetures avec la vue combinée et BJD. La
+  source `--climb` omet indépendamment une feuille malgré un statut final.
 - [`AUDIT_LIVE_HC_BLOCK_DEPTH_A58D020_20260814.md`](AUDIT_LIVE_HC_BLOCK_DEPTH_A58D020_20260814.md) :
   preuve du certificat `(H,C)` q2/q3/q4, audit du delta `--hc` après `a58d020`,
   réduction logique reçue mais intégration NO-GO : CTest Midball cassée, aucune

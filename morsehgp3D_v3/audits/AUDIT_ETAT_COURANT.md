@@ -8,24 +8,21 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-> **Alerte au `HEAD=a58d020`.** Le commit reçoit treize portes
-> `MidballBlockDepth`, mais duplique l'autorité `rect_h_interval` déjà présente
-> et mélange deux domaines : son `ALL` vaut sur l'AABB continue, tandis que son
-> `NONE` vaut seulement sur l'enveloppe du réseau entier u16. Le header revendique
-> à tort le continu pour les deux, et les trois portes saines à regex peuvent
-> masquer un code non nul. Son mode
-> `--fenetre-exhaustive` est commité avec un retour anticipé avant les gates :
-> un plancher BJD impossible ou un mutant peuvent rendre code zéro.
-> La première révision postérieure de `--borne-sup`, hash `90640885`, est
-> réfutée : elle retirait un parent `MIXED` de `reste` sans réinsérer ses
-> enfants et supprimait toutes les fermetures. La réparation mobile `ec5ec3d4`
-> retrouve la parité sur une ablation, mais reste non reçue : potentiel baseline
-> appliqué à la vue combinée et banque BJD ne sont pas couverts. Le delta HC
-> suivant est mathématiquement sûr mais sans CTest/juge d'intégration et fait
-> déjà régresser la sous-suite Midball worktree à `12/13`.
+> **Alerte au `HEAD=c1e2e3b`.** Le commit absorbe `HCBlockDepth` et la
+> réparation locale de `--borne-sup`. Le build ciblé est vert ; les dix-huit
+> CTests nommés Midball/HC et la CTest borne passent. Cela ne reçoit pas les
+> raccords. Les deux portes HC saines utilisent une regex qui peut masquer un
+> code non nul, aucune ne juge chaque promotion WSPD, HC reste recalculé jusque
+> trois fois par tâche et `--hc --midball` termine code `3` sur un plancher
+> marginal nul. Le retour anticipé `--fenetre-exhaustive` contourne toujours
+> ces gates. Plus grave, le commentaire CMake affirmant que `cred+reste`
+> majore exactement le crédit final n'est vrai que pour le ledger singleton
+> baseline : le mode accepté perd encore une fermeture SOC combinée à `n=16`
+> et deux fermetures BJD q4 à `n=64`, sans troncature et avec code zéro. La
+> porte borne ne compare ni fates ni masses à une exécution OFF.
 > Le verdict exact sur l'idée de miniboule unique est
-> [`AUDIT_MINIBOULE_UNIQUE_RESIDUEL_SHALLOW_5809BD2_20260814.md`](AUDIT_MINIBOULE_UNIQUE_RESIDUEL_SHALLOW_5809BD2_20260814.md) : q2 possède bien
-> une seule boule diamétrale ; q3 et q4 ont chacun une boule canonique une fois
+> [`AUDIT_MINIBOULE_UNIQUE_RESIDUEL_SHALLOW_5809BD2_20260814.md`](AUDIT_MINIBOULE_UNIQUE_RESIDUEL_SHALLOW_5809BD2_20260814.md) : l'événement q2 canonique est bien
+> la boule diamétrale ; q3 et q4 ont chacun une boule canonique une fois
 > leur support complet. Sur une ancre partielle, le sandwich `U<=D<=C` choisit
 > entre fermeture, `tau(F)` et passage immédiat aux complétions.
 > La dernière session G4 a échoué avant sa rampe et la cible a été certifiée
@@ -34,36 +31,25 @@ Cadre : `phase=exploration_v3_hors_registre`,
 ## Snapshot
 
 Le dernier commit stable relu est
-`HEAD=a58d0207d8e0482ced4b0207144fa311193c0388`, commit
-`le premier certificat qui retire du travail, et non qui en ajoute`. Il absorbe
-le raccord Midball WSPD et quatre CTests d'intégration après le pin `8fd6f59`
-de la primitive.
+`HEAD=c1e2e3bd51b85947a0cb5b29ad3fca2d812485a5`, commit
+`le meme raisonnement porte q3 et q4, mais son prix depasse son gain`. Il
+absorbe le raccord Midball du parent `a58d020`, `HCBlockDepth`, la seconde
+révision de `--borne-sup`, six portes supplémentaires et les deux
+contre-audits live. Au présent snapshot, le worktree ne modifie que les cinq
+documents autorisés de cette passe ; l'auditeur n'a modifié aucun logiciel.
 
-Après ce pin, Claude modifie de nouveau `prototype/wspd_wavefront_probe.cpp`,
-`prototype/midball_block.hpp` et `prototype/midball_probe.cpp`. Le snapshot
-mobile relu porte les hashes
-`WSPD=6330b79586066c575c59e4480a17fdf864fdef77b261a3a7f33c66bd68ed9c5b`,
-`header=921e649f0ebbbfb7a8034bedaeeb0a14a2eaaadf9eadb092f4f8c3cdbfd9403b`
-et `probe=587ecc58ebdd592245449fef901be9d2fac3f4b9287752648554c48f2e7dcc49`.
-Il ajoute `--borne-sup` puis `HCBlockDepth`. La révision `90640885` de la borne
-violait la conservation `MIXED`; sa réparation `ec5ec3d4` réinsère les enfants,
-mais reste incompatible avec la vue combinée et BJD. HC est un certificat sûr
-mais sans CTest ni juge d'intégration ; son changement de message fait régresser
-la sous-suite Midball worktree à `12/13`. Les autres changements sont les
-présentes écritures documentaires. L'auditeur n'a modifié aucun logiciel.
-
-Empreintes SHA-256 au commit `a58d020` :
+Empreintes SHA-256 au commit `c1e2e3b` :
 
 - `CMakeLists.txt` :
-  `4c6cb24ee965ad7a852428119fca08568ad440d759884d69b3c5ed62a202fdc9` ;
+  `7c8911a5bd110cb2663fc54eca34fbd8e4ae5bd616021f1b3535a60d8ad4b9ef` ;
 - `prototype/wspd_wavefront_probe.cpp` :
-  `63c79bd6ce707a66f304ca4613c225929d419d07e0d5e99547d914a877b6fa01` ;
+  `6330b79586066c575c59e4480a17fdf864fdef77b261a3a7f33c66bd68ed9c5b` ;
 - `prototype/cloud_families.hpp` :
   `f825334096c80407c57e2ca05f6f59f6ae3dd6313746beb8e73d689e9082dded` ;
 - `prototype/midball_block.hpp` :
-  `c35518fbab55689d7113c51a150ae09055cd4444397721b0d4fc2c48bc2655b6` ;
+  `921e649f0ebbbfb7a8034bedaeeb0a14a2eaaadf9eadb092f4f8c3cdbfd9403b` ;
 - `prototype/midball_probe.cpp` :
-  `09a753f5335d676c21e2356a42a86dfe665453198c1291c7e6ab13b4142c5419` ;
+  `587ecc58ebdd592245449fef901be9d2fac3f4b9287752648554c48f2e7dcc49` ;
 - `prototype/jung_dual_probe.cpp` :
   `d05a997c1c10e1e02918f3a585e7cdee45fda6814edf4930ccbae9b4030fd4e6` ;
 - `prototype/block_jung_dual.hpp` :
@@ -72,7 +58,9 @@ Empreintes SHA-256 au commit `a58d020` :
   `18e6dd0f1aeafca51639805761a15855acbd08f4446ef9b4cbe7132db64977eb`.
 
 Le commit stable reçoit la primitive BJD, un packing disjoint sûr sur ses
-campagnes causales, huit portes BJD ciblées et treize portes midball. Il ne reçoit
+campagnes causales, huit portes BJD ciblées, treize portes Midball, cinq portes
+HC et une porte de réfutation de la borne. Les `18/18` Midball/HC et `1/1`
+borne affichés verts ne ferment pas les défauts de composition ci-dessus. Il ne reçoit
 ni source CK--WST,
 ni profondeur `tau(F)`, ni ledger persistant de vrais `PointId`, ni primitive
 device, ni payload. Son `--fenetre-exacte` n'est exact que pour la miniboule q2
@@ -152,9 +140,12 @@ des microtiles rejoués ou prouver un `BlockJungDiskDepth` uniforme.
 
 ## Miniboule canonique : oui au support complet, non à la cascade
 
-Pour un support minimal positif complet, la boule ambiante événementielle est
-unique : diamètre q2, centre/rayon donnés par le circumcercle intrinsèque du
-triangle aigu q3, circumsphère du tétraèdre bien centré q4. Le circumdisque
+Pour un support minimal positif affinement indépendant fixé, la miniboule et
+donc la boule canonique de son événement complet sont uniques : diamètre q2,
+centre/rayon donnés par le circumcercle intrinsèque du triangle aigu q3,
+circumsphère du tétraèdre bien centré q4. Pour les arités inférieures à quatre,
+une famille de sphères ambiantes reste incidente au support sans être portée
+minimalement par lui. Le circumdisque
 planaire q3 est le cœur des sphères incidentes, pas l'événement ambiant. Une
 arité supérieure conserve toutefois des centres différents tant que son support
 n'est pas complet. Deux fixtures séparées montrent qu'une paire q2 de rang
@@ -222,6 +213,26 @@ plutôt que chaque promotion et le retour de `--fenetre-exhaustive` contourne se
 planchers. Le plancher de gain doit être une option de campagne. La seule
 dominance reçue est `central ALL => Midball ALL`; Midball peut au contraire
 promouvoir un `central NONE`, par exemple sur `A=[0,8],B=[10,100],C={9}`.
+
+## Worktree `HCBlockDepth` : formule sûre, intégration rouge
+
+Le delta HC emploie `H=(z-a) dot (b-z)` et
+`C=(b-z) cross (z-a)`. Les conditions q3 `3H^2>||C||^2` et q4
+`2H^2>||C||^2` sont exactes ; `Hmin` exact et une majoration par composantes de
+`C` donnent un `ALL` sûr mais conservateur. Ce n'est ni la source des supports
+q3/q4 ni une nouvelle autorité exacte : `corner512_all_lane` reçoit déjà
+l'enveloppe continue complète. Les selftests manuels sains passent et les deux
+mutants ciblés meurent, mais aucune CTest HC n'existe.
+
+Le raccord recalcule HC jusque trois fois par nœud, n'a aucun juge de promotion,
+hérite ses compteurs entre tailles et est contourné par
+`--fenetre-exhaustive`. `--hc --midball` finit structurellement code `3`, HC
+ayant absorbé tous les gains q2 avant le plancher Midball. Le changement de
+diagnostic du probe fait aussi régresser une porte stable : la sous-suite
+worktree vaut `12/13`. À `eight_clusters,n=200`, les lectures baissent
+`247966 -> 226535`, mais la vague one-shot monte `119,8 -> 214,2 ms` ; ce
+signal n'autorise aucun claim performance. Le détail et la fixture de
+conservatisme sont dans l'audit Miniboule.
 
 ## Worktree `--borne-sup` : invariant utile, raccord multivue réfuté
 

@@ -223,9 +223,11 @@ gardent donc leur multiplicité. Un quotient silencieux changerait la profondeur
 
 ### Miniboule unique et centres critiques finis
 
-Une fois le support minimal positif complet fixé, son événement est son unique
-boule ambiante, dont le centre et le rayon sont intrinsèques à l'espace affine
-du support. Pour q2, le centre est exactement le milieu et
+Pour un support minimal positif affinement indépendant fixé, la miniboule —
+donc la boule canonique de l'événement complet porté par ce support — est
+unique. Si son arité est inférieure à quatre, il subsiste une famille de
+sphères ambiantes incidentes, mais elles ne sont pas des événements dont ce
+support est le support minimal. Pour q2, le centre canonique est exactement le milieu et
 `(z-a) dot (b-z)>0` décide l'intérieur strict ; l'égalité est shell, et le
 verdict HGP complet conserve le census fermé et le `BallKey`. Pour une ancre
 `ab` fixée, q3 prend le pied
@@ -233,6 +235,13 @@ auto-centré de la ligne du troisième site dans le plan médiateur, et q4
 l'intersection de deux lignes. Le continuum du disque de Jung n'est donc pas la
 source des événements : il reste le domaine légitime d'un prune collectif avant
 la génération finie.
+
+Ainsi la source HGP n'énumère jamais une famille continue de sphères : q2 teste
+la seule boule diamétrale, q3 la seule circum-boule de chaque triangle aigu et
+q4 la seule circumsphère de chaque tétraèdre bien centré. Les domaines de
+centres attachés à une ancre partielle sont exclusivement des accélérateurs de
+prune ; leur échec n'ajoute aucun événement et n'autorise aucune cascade de
+rang.
 
 Pour un domaine de centres contenant le centre canonique, `C` désigne son
 nombre d'intérieurs, `U` les témoins individuellement universels et `D` la

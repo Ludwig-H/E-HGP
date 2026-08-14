@@ -303,7 +303,20 @@ Pour tout support minimal positif affinement indépendant `S`, le centre
 intrinsèque dans `aff(S)` et la miniboule sont uniques. L'ensemble des supports
 complets du nuage est fini ; en revanche, un prune portant sur **toutes les
 complétions** d'une ancre partielle garde légitimement un domaine continu de
-centres. Avec
+centres. Ce domaine continu n'est jamais une source d'événements HGP et ne doit
+être ni énuméré ni matérialisé : il sert seulement à un certificat facultatif
+qui évite de générer certaines complétions. La source normative est finie :
+
+```text
+q2 : paire distincte -> boule diamétrale unique
+q3 : triangle strictement aigu -> circum-boule intrinsèque unique
+q4 : tétraèdre affinement indépendant bien centré -> circumsphère unique
+support non positif -> réduction à une arité minimale inférieure
+```
+
+Chaque support complet produit donc une seule `BallKey` candidate et un seul
+census. Les dégénérescences peuvent envoyer plusieurs `SupportKey` vers la même
+`BallKey` ; le RLE conserve cette provenance sans refaire le census. Avec
 `d=b-a`, `D=d dot d`, `w=2*c-a-b` et `U_z=2*z-a-b`, poser :
 
 ```text
@@ -452,6 +465,37 @@ quand `upper-need` est petit, et les nœuds proches probablement `ALL` quand
 `need-cred` est petit. L'ordre reste heuristique ; les extrema et les deux
 bornes restent exacts. Les portes OFF/ON exigent fates, masses, pending et
 sorties bit-identiques avant de mesurer les visites évitées.
+
+### 4.6 Préfiltre HC q3/q4 et autorité `Corner512`
+
+Pour `e=z-a`, `t=b-z`, `H=e dot t` et `C=t cross e`, les lanes vérifient :
+
+```text
+q2 : H>0
+q3 : H>0 et 3 H^2>||C||^2
+q4 : H>0 et 2 H^2>||C||^2
+```
+
+Sur trois AABB, `Hmin` est exact. Enfermer chaque composante de `C` par deux
+intervalles de produits puis sommer les maxima absolus carrés donne un majorant
+sûr de `||C||^2`. La comparaison avec `2Hmin^2/3Hmin^2` est donc un préfiltre
+`ALL` fail-open. Elle n'est pas exacte : les corrélations entre les deux termes
+d'une composante, entre composantes et avec `Hmin` sont perdues. Ce certificat
+compte des témoins universels d'une ancre partielle ; il ne remplace pas les
+supports complets et leurs boules uniques.
+
+L'autorité exacte d'enveloppe existe déjà : `corner512_all_lane` vérifie les
+`8*8*8` triples de coins. L'équivalence vient de la convexité du cône de
+Lorentz, de l'affinité en `a,b`, et de l'affinité de `C` avec la concavité de
+`H` en chaque coordonnée de `z`. L'ordonnance coût-adaptative est donc
+`central -> HCIntervalAll -> SOC64 -> Corner512/split`, avec arrêt au premier
+`ALL`; aucun de ces échecs ne vaut `NONE` géométrique.
+
+Le delta HC courant est un probe, pas un jalon : aucune CTest/aucun juge WSPD,
+triple recalcul possible dans la boucle des lanes, composition Midball rouge,
+compteurs multi-tailles et bypass exhaustif. L'intégration industrielle calcule
+la lane HC une fois par nœud, la réutilise pour q2/q3/q4 et mesure son gain
+marginal face au fallback déjà actif.
 
 ## 5. Générateur q3 recommandé
 

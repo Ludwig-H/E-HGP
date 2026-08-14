@@ -5074,3 +5074,65 @@ set_tests_properties(mhgp3v_borne_sup_refutation PROPERTIES
 mhgp3v_add_expected_code_test_for(mhgp3v_wspd_wavefront_probe
   mhgp3v_hc_refus_sans_vwave "--hc exige --vwave" 2
   --family=eight_clusters --points=200 --sep-euclid=8/1 --tight --window=512 --hc)
+
+# ---------------------------------------------------------------------------
+# `Corner8BallDepth` : LE SUPPORT COMPLET N'A QU'UNE BOULE.
+#
+# Tant qu'on ferme une PAIRE, le centre reste une variable libre et tout le
+# certificat consiste a quantifier sur le disque de Jung. Une fois le SUPPORT
+# complet, il n'y a plus rien a quantifier : `{a,b,c,d}` determine sa
+# circumsphere, et il suffit d'en compter les interieurs.
+#
+# Le predicat ne forme ni centre ni division : avec `O = det3(u,v,w)` et `J` le
+# determinant in-sphere translate, `z` est strictement interieur si et seulement
+# si `O*J < 0`. Sur un bloc, les deux signes sont bornes SEPAREMENT — le produit
+# n'est jamais forme.
+#
+# La convexite fait le reste. A signe d'orientation fixe, le coefficient de
+# `||z||^2` dans `sigma*J` vaut `|O| > 0` : la forme est strictement convexe en
+# `z`, donc son maximum sur une boite temoin est a l'un des huit coins. Les
+# coins sont COMPLETS pour prouver l'interieur — et seulement dans ce sens.
+add_executable(mhgp3v_corner8_probe prototype/corner8_probe.cpp)
+target_include_directories(mhgp3v_corner8_probe PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(mhgp3v_corner8_probe PRIVATE mhgp)
+target_compile_options(mhgp3v_corner8_probe PRIVATE -Wall -Wextra -Werror)
+
+add_test(NAME mhgp3v_corner8_selftest COMMAND mhgp3v_corner8_probe --selftest=2000)
+set_tests_properties(mhgp3v_corner8_selftest PROPERTIES
+  PASS_REGULAR_EXPRESSION
+  "corner8_selftest accord=OUI tours=2000 all=[0-9]+ mixed=[0-9]+ desaccords=0")
+
+# L'IMPLICATION NE S'INVERSE PAS. Le tetraedre `(3,2,2),(1,2,2),(2,3,2),(2,2,3)`
+# et la boite `[1,3]^3` ont leurs huit coins EXTERIEURS et leur centre
+# INTERIEUR : une fonction convexe peut etre negative au centre et positive
+# partout aux coins.
+add_test(NAME mhgp3v_corner8_convexite COMMAND mhgp3v_corner8_probe --convexite)
+set_tests_properties(mhgp3v_corner8_convexite PROPERTIES
+  PASS_REGULAR_EXPRESSION "corner8_convexite : coins_exterieurs=8 centre_interieur=1")
+
+# LA FIXTURE u16 MISE A L'ECHELLE. Cinq spans de huit points, quarante
+# `PointId` distincts, `4096` supports tous bien centres dont les huit temoins
+# de `Z` sont uniformement interieurs. UN SEUL bloc doit fermer, avant tout fill.
+add_test(NAME mhgp3v_corner8_bloc COMMAND mhgp3v_corner8_probe --bloc)
+set_tests_properties(mhgp3v_corner8_bloc PROPERTIES
+  PASS_REGULAR_EXPRESSION
+  "corner8_bloc : verdict=ALL_INTERIOR supports=4096 temoins=32768 interieurs=32768")
+
+# DEUX MUTANTS MEURENT SUR LE TIRAGE, DEUX NON — ET C'EST DIT.
+#
+# `corners-outside-implies-none` tombe massivement (23 236 desaccords sur
+# 60 000 tirages) et `c8-accept-equality` sur trois cas de shell. En revanche
+# `c8-drop-corner` n'a d'effet que si le huitieme coin est le SEUL a echouer, et
+# `c8-norme-aux-coins` que si la boite temoin chevauche un facteur support. Ces
+# deux-la ne sont PAS exerces par un tirage uniforme : ils resteront hors porte
+# tant qu'une fixture deterministe ne les vise pas. Les enregistrer comme verts
+# serait un vert par vacuite.
+foreach(_c8_mutant IN ITEMS corners-outside-implies-none c8-accept-equality)
+  string(REPLACE "-" "_" _c8_nom "${_c8_mutant}")
+  mhgp3v_add_expected_code_test_for(mhgp3v_corner8_probe
+    mhgp3v_${_c8_nom} "mutant_killed=1 ${_c8_mutant}" 4
+    --selftest=60000 --inject=${_c8_mutant})
+endforeach()
+
+mhgp3v_add_expected_code_test_for(mhgp3v_corner8_probe
+  mhgp3v_corner8_refus_sans_mode "--selftest, --bloc ou --convexite est exige" 2)

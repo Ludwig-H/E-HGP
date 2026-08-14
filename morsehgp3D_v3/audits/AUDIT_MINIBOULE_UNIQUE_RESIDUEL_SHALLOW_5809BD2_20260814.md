@@ -38,10 +38,12 @@ ces fautes précises, pas comme réception de `tau(F)`, de la source finie, du
 sampler statistique, du chemin device ou du contrat G4.
 
 L'intuition proposée est **exacte au niveau du support minimal complet** :
-une fois un support positif affinement indépendant fixé, son événement est son
-unique boule ambiante, dont le centre et le rayon sont déterminés dans l'espace
-affine du support. En particulier, un support q2 `{a,b}` ne possède
-qu'un centre, le milieu, et qu'une boule, la boule de diamètre `ab`.
+pour un support positif affinement indépendant fixé, la miniboule et donc la
+boule canonique de l'événement complet qu'il porte sont uniques ; leur centre
+et leur rayon sont déterminés dans l'espace affine du support. Pour une paire
+`{a,b}`, l'événement q2 canonique a pour centre le milieu et pour boule la boule
+de diamètre `ab`. Il subsiste néanmoins un plan de centres de sphères ambiantes
+incidentes à `a,b` ; celles-ci ne sont pas des événements de support minimal q2.
 
 Deux conséquences doivent rester séparées :
 
