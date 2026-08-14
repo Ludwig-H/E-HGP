@@ -446,48 +446,117 @@ inline Selection select_axis_topr4(const SeedAxis& f, const int* sites, int n_si
 // cardinaux. Le groupe d'egalite de la racine est RANGE-REPORTE : en production
 // c'est une requete bornee sur l'octree, ici un balayage compte comme tel.
 // ---------------------------------------------------------------------------
+// LES PRECONDITIONS SONT DANS L'API, PAS DANS UN COMMENTAIRE. La preuve du
+// replay ne porte QUE sur un apex retenu de profondeur strictement inferieure a
+// `r4`, sur une selection non debordee. Appele hors de ce domaine, le replay
+// peut legitimement omettre des non-extremes : il rend alors `kHorsDomaine` et
+// ne pretend a aucun census exact.
+// LE PROFIL DECIDE CE QU'UNE EGALITE VAUT. Sous `RelevantGP`, toute egalite
+// hors support et tout shell persistant rendent `unsupported_degeneracy` : un
+// compteur n'est pas un fate. Hors de ce profil, une politique de plateau
+// DECLAREE publie la liste complete, et la capacite prouvee doit suffire.
+enum class Profil { kRelevantGp, kPlateau };
+
+enum class CensusFate {
+  kExact,                    // `I_B` et `U_B` sont complets et consommables
+  kPendingCap,               // capacite depassee : le compte requis est publie
+  kUnsupportedDegeneracy,    // egalite hors support ou shell persistant
+  kHorsDomaine,              // precondition violee : rien n'est publie
+};
+
+inline const char* census_fate_name(CensusFate f) {
+  switch (f) {
+    case CensusFate::kExact: return "EXACT";
+    case CensusFate::kPendingCap: return "PENDING_CAP";
+    case CensusFate::kUnsupportedDegeneracy: return "UNSUPPORTED_DEGENERACY";
+    case CensusFate::kHorsDomaine: return "HORS_DOMAINE";
+  }
+  return "?";
+}
+
+// CAPACITE PROUVEE. `I_B` : au plus `kCapPermanents` permanents plus les deux
+// cotes retenus. `U_B` : les trois IDs du seed, le shell persistant, et le
+// groupe d'egalite de la racine — lequel est INCLUS dans les groupes retenus
+// des deux cotes, jamais au-dela.
+inline constexpr int kCapInterieur = kCapPermanents + 2 * kCapRacines;
+inline constexpr int kCapShellTotal = 3 + kCapShell + 2 * kCapRacines;
+
 struct Census {
+  CensusFate fate = CensusFate::kExact;
   int n_interieur = 0, n_shell = 0;
-  int interieur[kCapPermanents + 2 * kCapRacines] = {0};
-  int shell[kCapShell + kCapRacines + 3] = {0};
+  int requis_interieur = 0, requis_shell = 0;   // comptes VOULUS, meme si tronques
+  int interieur[kCapInterieur] = {0};
+  int shell[kCapShellTotal] = {0};
   bool degenere = false;     // groupe d'egalite non trivial ou shell persistant
   long long range_reports = 0;
 };
 
+// `sel` doit etre `kOuvert` ou `kMortGap` — jamais `kDebordement` — et `apex`
+// doit etre l'un des extremes retenus. Le shell est reconstruit DEPUIS LES
+// GROUPES RETENUS : pour un apex deja prouve shallow, tout site de racine egale
+// appartient necessairement a ces groupes complets, donc aucun second balayage
+// global n'est requis. C'est la reparation preferable de l'auditeur.
 template <class PowFn>
-inline Census census_replay(const Selection& sel, int apex,
-                            const int seed3[3], const int* sites, int n_sites,
-                            PowFn pw, Mutant mut = Mutant::kNone) {
+inline Census census_replay(const Selection& sel, int apex, const int seed3[3],
+                            PowFn pw, Mutant mut = Mutant::kNone,
+                            Profil profil = Profil::kRelevantGp) {
   Census c;
+  if (sel.verdict == SeedVerdict::kDebordement ||
+      sel.verdict == SeedVerdict::kMortDegeneree ||
+      sel.verdict == SeedVerdict::kMortT2 ||
+      sel.verdict == SeedVerdict::kMortPermanents) {
+    c.fate = CensusFate::kHorsDomaine;
+    return c;
+  }
+  {
+    bool retenu = false;
+    for (int t = 0; t < sel.n_entrants && !retenu; ++t) retenu = (sel.entrants[t] == apex);
+    for (int t = 0; t < sel.n_sortants && !retenu; ++t) retenu = (sel.sortants[t] == apex);
+    if (!retenu) { c.fate = CensusFate::kHorsDomaine; return c; }
+  }
   const SitePower pa = pw(apex);
-  for (int t = 0; t < sel.n_perm && t < kCapPermanents; ++t)
-    c.interieur[c.n_interieur++] = sel.permanents[t];
+  auto pousse_int = [&](int id) {
+    ++c.requis_interieur;
+    if (c.n_interieur < kCapInterieur) c.interieur[c.n_interieur++] = id;
+    else c.fate = CensusFate::kPendingCap;
+  };
+  auto pousse_shell = [&](int id) {
+    ++c.requis_shell;
+    if (c.n_shell < kCapShellTotal) c.shell[c.n_shell++] = id;
+    else c.fate = CensusFate::kPendingCap;
+  };
+  // `I_B` = permanents, entrants retenus strictement anterieurs, sortants
+  // retenus strictement posterieurs.
+  if (sel.n_perm > kCapPermanents) c.fate = CensusFate::kPendingCap;
+  for (int t = 0; t < sel.n_perm && t < kCapPermanents; ++t) pousse_int(sel.permanents[t]);
   for (int t = 0; t < sel.n_entrants; ++t) {
     const int z = sel.entrants[t];
-    if (z == apex) continue;
-    if (cmp_racines(pw(z), pa) < 0) c.interieur[c.n_interieur++] = z;
+    if (z != apex && cmp_racines(pw(z), pa) < 0) pousse_int(z);
   }
   for (int t = 0; t < sel.n_sortants; ++t) {
     const int z = sel.sortants[t];
-    if (z == apex) continue;
-    if (cmp_racines(pw(z), pa) > 0) c.interieur[c.n_interieur++] = z;
+    if (z != apex && cmp_racines(pw(z), pa) > 0) pousse_int(z);
   }
-  for (int t = 0; t < 3; ++t) c.shell[c.n_shell++] = seed3[t];
+  // `U_B` = seed, shell persistant, groupe d'egalite de la racine.
+  for (int t = 0; t < 3; ++t) pousse_shell(seed3[t]);
   for (int t = 0; t < sel.n_shell; ++t) {
-    c.shell[c.n_shell++] = sel.shell[t];
+    pousse_shell(sel.shell[t]);
     c.degenere = true;
-    if (mut == Mutant::kShellCompteInterieur) c.interieur[c.n_interieur++] = sel.shell[t];
+    if (mut == Mutant::kShellCompteInterieur) pousse_int(sel.shell[t]);
   }
-  // RANGE REPORT du groupe d'egalite complet de la racine de l'apex.
-  for (int i = 0; i < n_sites; ++i) {
-    const int z = sites[i];
-    ++c.range_reports;
-    const SitePower pz = pw(z);
-    if (pz.B == 0) continue;
-    if (cmp_racines(pz, pa) != 0) continue;
-    if (c.n_shell < (int)(sizeof(c.shell) / sizeof(c.shell[0]))) c.shell[c.n_shell++] = z;
-    if (z != apex) c.degenere = true;
+  for (int pass = 0; pass < 2; ++pass) {
+    const int cnt = pass ? sel.n_sortants : sel.n_entrants;
+    const int* tab = pass ? sel.sortants : sel.entrants;
+    for (int t = 0; t < cnt; ++t) {
+      ++c.range_reports;
+      if (cmp_racines(pw(tab[t]), pa) != 0) continue;
+      pousse_shell(tab[t]);
+      if (tab[t] != apex) c.degenere = true;
+    }
   }
+  if (c.degenere && profil == Profil::kRelevantGp &&
+      c.fate == CensusFate::kExact)
+    c.fate = CensusFate::kUnsupportedDegeneracy;
   return c;
 }
 

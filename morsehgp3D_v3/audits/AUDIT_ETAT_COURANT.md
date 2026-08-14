@@ -8,12 +8,12 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-> **Verdict live au `HEAD=840a2e28679aa3e5e3d8ec706daa680a52ac1bde`.**
-> `069acf7` ajoute le noyau CPU `AxisTop8`, son probe, 23 CTests et les textes
-> contractuels ; `840a2e2` paramètre la borne par le seuil de mort et ajoute une
-> recette G4 CPU. Le worktree courant contient les présentes corrections
-> documentaires et un candidat non suivi `prototype/q4seed_axis_topr4.hpp` : ce
-> dernier n'entre dans aucun résultat de build ou de test rapporté ici.
+> **Verdict live au `HEAD=d55bb9a7add87a54bbd500e323fe6fa5bf45c5a2`.**
+> Le pin noyau `3507b5e` remplace le prototype historique `AxisTop8` par
+> `Q4SeedAxisTopR4`, son probe, 36 CTests et les vrais IDs de census. Le
+> `HEAD` ajoute le successeur de recette G4 et corrige sa cible vers la zone IA.
+> Le worktree courant ne contient que les présentes corrections d'audit ;
+> aucune mesure G4 nouvelle n'entre dans le verdict.
 > Q14 est fermée contractuellement : aucune structure de Delaunay n'est
 > autorisée, y compris d'ordre un, comme source, squelette, filtre ou census.
 >
@@ -37,22 +37,29 @@ Cadre : `phase=exploration_v3_hors_registre`,
 > désigne ni un support ni une sortie q3. Contrat et réponse à Q14 :
 > [`NOTE_SOLUTION_CONTRAT_SOURCE_AIGUE_20260814.md`](NOTE_SOLUTION_CONTRAT_SOURCE_AIGUE_20260814.md).
 >
-> Claude a ajouté puis commis `prototype/axis_top8.hpp` et
-> `axis_top8_probe.cpp`. À `069acf7`, le sujet restait fixé à huit malgré son CLI,
-> et perdait à `seuil=8` `440` apex sur `uniform` et `428` sur
-> `eight_clusters`. Le commit `840a2e2` paramètre désormais `mort=seuil+1` :
-> les deux rejeux passent avec zéro manque, ainsi que `uniform,seuil=15`.
-> Restent P0 : seulement le compte des permanents, aucun shell exact, aucun
-> reçu de mort par gaps et aucun primary q4 global. Contre-audit, hashes du
-> commit et protocole de réception :
+> Le commit courant paramètre `r4=smax-3`, transporte les IDs permanents et le
+> shell, produit `MORT_GAP`, compare `I_B/U_B` à un juge InSphere à trois
+> classes et reçoit le primary/exact-once sur trois petites familles. Il reste
+> un P0 reproductible : 97 IDs de même racine donnent un shell attendu de 100
+> IDs, mais `Census.shell` en rend 99 sans fate d'overflow. La campagne confond
+> aussi la borne en groupes avec une borne en sites et accepte une dégénérescence
+> en la comptant seulement. Contre-audit, fixture et hashes :
 > [`AUDIT_WORKTREE_Q4SEED_AXIS_TOPR4_20260814.md`](AUDIT_WORKTREE_Q4SEED_AXIS_TOPR4_20260814.md).
+> Le worktree élargit déjà le buffer à 163 et retire la fausse borne en sites,
+> mais `UNSUPPORTED_DEGENERACY` n'est pas encore attribué et un census reste
+> appelable après `MORT_GAP` ; l'addendum du contre-audit garde ces deux portes.
 >
-> La recette `session_axis_top8_g4.sh` de `840a2e2` ne doit pas être lancée :
+> La recette `session_axis_top8_g4.sh` de `840a2e2` ne devait pas être lancée :
 > quand son horodatage de génération est vide, son trap appelle un arrêt non
 > versionné susceptible de toucher une session préexistante ; ses 76 runs
-> séquentiels en puissance cinq ne tiennent pas non plus dans le budget
-> 55/75/90 minutes. Contre-audit statique :
+> séquentiels ne tiennent pas dans le budget. Une tentative concurrente a
+> échoué avant build ; le garde interne a arrêté sa génération exacte et
+> certifié `TERMINATED`. Contre-audit et transcript :
 > [`AUDIT_CONTRE_SESSION_AXIS_TOP8_G4_840A2E2_20260814.md`](AUDIT_CONTRE_SESSION_AXIS_TOP8_G4_840A2E2_20260814.md).
+> Son successeur répare l'arrêt générationnel et la zone, mais son parser ne
+> peut jamais accorder simultanément les sweeps et neuf exact-once, cherche les
+> anciens noms de métriques et rapatrie encore les preuves après le verdict. Il
+> reste interdit tant que ces défauts et le P0 `U_B` ne sont pas fermés.
 >
 > Il n'existe toujours aucune mesure GPU G4 bout-en-bout. Le reçu
 > `chaine_complete_g4_20260813` est `GPU_RUN=NO`, `PRODUCT_OUTPUT=NO` et mesure
@@ -60,11 +67,10 @@ Cadre : `phase=exploration_v3_hors_registre`,
 > payload. La cible d'une seconde reste ouverte ; aucune nouvelle session G4
 > ne précède les gates CPU des trois producteurs.
 >
-> Contrôles frais : `check_docs.py` valide `106` Markdown,
-> `check_implementation_status.py` valide `20` phases et les 23 CTests
-> `^mhgp3v_axis_top8_` passent en `10,23 s`. Le noyau ponctuel `Lane4` est donc
-> exercé au profil top-8 ; les trois producteurs WSPD autonomes ne sont pas
-> implémentés.
+> Contrôles frais : les 36 CTests `^mhgp3v_q4axis` passent en `38,24 s`, avec
+> des seuils `smax=7/14` et trois exact-once. Le noyau ponctuel `Lane4` est donc
+> exercé dans son domaine borné ; les trois producteurs WSPD autonomes ne sont
+> pas implémentés et aucune complexité 50k n'est reçue.
 
 > **Alerte au pin logiciel `6e815d28b3e229a0161eb00d6fa0c9a272efac5d`.** Les
 > commits `89774d0`, `e3f1925` et `88a9ba8` ajoutent respectivement

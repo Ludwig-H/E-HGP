@@ -5463,7 +5463,7 @@ add_test(NAME mhgp3v_q4axis_exact_once_terrain
 # REFUS ET PLANCHERS, A CODE EXACT.
 mhgp3v_add_expected_code_test_for(mhgp3v_q4seed_axis_topr4_probe
   mhgp3v_q4axis_refus_sans_mode
-  "--fixture-16, --fixture-mort-16, --fixture-jung-tendu, --fixture-t2, --sweep ou --exact-once est exige" 2)
+  "--fixture-16, --fixture-mort-16, --fixture-jung-tendu, --fixture-t2, --fixture-plateau, --sweep ou --exact-once est exige" 2)
 mhgp3v_add_expected_code_test_for(mhgp3v_q4seed_axis_topr4_probe
   mhgp3v_q4axis_refus_cap "la campagne exhaustive est bornee a 400 points" 2
   --sweep --family=uniform --points=500)
@@ -5512,5 +5512,28 @@ mhgp3v_add_expected_code_test_for(mhgp3v_q4seed_axis_topr4_probe
   --sweep --family=uniform --points=60 --threads=2 --inject=a8-abs-avant-tri)
 mhgp3v_add_expected_code_test_for(mhgp3v_q4seed_axis_topr4_probe
   mhgp3v_q4axis_mutant_shell "mutant_killed=1 a8-shell-compte-interieur" 4
-  --sweep --family=scanline_single_pass --points=60 --threads=2
+  --sweep --family=scanline_single_pass --points=60 --threads=2 --profil=plateau
   --inject=a8-shell-compte-interieur)
+# Le profil PLATEAU est aussi exerce en campagne honnete : sans lui, aucune
+# comparaison d'identites n'a lieu la ou un shell existe.
+add_test(NAME mhgp3v_q4axis_sweep_scanline_plateau
+         COMMAND mhgp3v_q4seed_axis_topr4_probe --sweep --family=scanline_single_pass
+                 --points=60 --seed=1 --threads=2 --profil=plateau
+                 --min-seeds=3000 --min-shallow=200)
+
+# LA CONTRE-FIXTURE DE CAPACITE : 97 IDs de MEME racine axiale. L'ancien buffer
+# valait `32+64+3=99` et cessait SILENCIEUSEMENT d'ecrire au 99e slot ; il
+# rendait une liste fausse sans overflow ni compte requis. La capacite prouvee
+# vaut `3+32+2*64=163`, le compte VOULU est publie meme tronque, et le PROFIL
+# decide : `RelevantGP` refuse la degenerescence, un plateau declare la publie
+# entiere. Un compteur n'est pas un fate.
+add_test(NAME mhgp3v_q4axis_plateau_code
+         COMMAND mhgp3v_q4seed_axis_topr4_probe --fixture-plateau)
+add_test(NAME mhgp3v_q4axis_plateau
+         COMMAND mhgp3v_q4seed_axis_topr4_probe --fixture-plateau)
+set_tests_properties(mhgp3v_q4axis_plateau PROPERTIES PASS_REGULAR_EXPRESSION
+  "fixture_plateau : aigu=1 verdict=OUVERT entrants=48 sortants=49 fate_relevant_gp=UNSUPPORTED_DEGENERACY fate_plateau=EXACT n_shell=100 requis_shell=100")
+# `a8-shell-compte-interieur` n'est PAS double sur `--fixture-plateau` : ce
+# plateau est un groupe de racines egales, pas un shell PERSISTANT (`B=0, A=0`).
+# Le mutant n'y a rien a corrompre. Seule une famille scanline, avec ses
+# coplanarites massives, le mord — et c'est la porte ci-dessus.

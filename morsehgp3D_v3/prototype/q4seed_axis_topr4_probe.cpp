@@ -49,6 +49,7 @@
 #include <cstring>
 #include <map>
 #include <string>
+#include <string>
 #include <thread>
 #include <vector>
 
@@ -61,6 +62,7 @@ namespace {
 using mhgp::i128;
 using mhgp::i64;
 using mhgp3v::q4axis::Mutant;
+using mhgp3v::q4axis::Profil;
 using mhgp3v::q4axis::SeedVerdict;
 
 struct Pt {
@@ -170,10 +172,13 @@ struct Bilan {
   long long candidats = 0, groupes = 0, shallow = 0;
   long long manquants = 0, bornes = 0, identites_fausses = 0, gaps_faux = 0;
   long long debordes = 0, degeneres = 0, cand_max = 0;
+  long long fate_exact = 0, fate_cap = 0, fate_degen = 0, fate_hors = 0;
+  long long doublons_bruts = 0, refus_abusifs = 0, ids_max = 0;
 };
 
 void bilan_seed(const std::vector<Pt>& P, int ia, int ib, int ix, int r4,
-                Mutant mut, std::vector<int>* scratch, Bilan* out) {
+                Mutant mut, std::vector<int>* scratch, Bilan* out,
+                Profil profil = Profil::kRelevantGp) {
   const auto f = mhgp3v::q4axis::seed_axis(P[(size_t)ia].c, P[(size_t)ib].c, P[(size_t)ix].c);
   scratch->clear();
   for (size_t z = 0; z < P.size(); ++z) {
@@ -230,15 +235,37 @@ void bilan_seed(const std::vector<Pt>& P, int ia, int ib, int ix, int r4,
     for (int t = 0; t < sel.n_entrants && !dedans; ++t) dedans = (sel.entrants[t] == y);
     for (int t = 0; t < sel.n_sortants && !dedans; ++t) dedans = (sel.sortants[t] == y);
     if (!dedans) { ++out->manquants; continue; }
-    const auto c = mhgp3v::q4axis::census_replay(sel, y, seed3, scratch->data(),
-                                                 (int)scratch->size(), pw, mut);
+    const auto c = mhgp3v::q4axis::census_replay(sel, y, seed3, pw, mut, profil);
+    switch (c.fate) {
+      case mhgp3v::q4axis::CensusFate::kExact: ++out->fate_exact; break;
+      case mhgp3v::q4axis::CensusFate::kPendingCap: ++out->fate_cap; break;
+      case mhgp3v::q4axis::CensusFate::kUnsupportedDegeneracy: ++out->fate_degen; break;
+      case mhgp3v::q4axis::CensusFate::kHorsDomaine: ++out->fate_hors; break;
+    }
+    if (c.degenere) ++out->degeneres;
+    if (c.fate != mhgp3v::q4axis::CensusFate::kExact) {
+      // UN FATE N'EST PAS UN ECHEC, mais il ne doit pas etre ABUSIF : si le
+      // census exhaustif est trivial — quatre IDs de shell, aucun ex aequo — le
+      // sujet n'avait aucune raison de refuser.
+      if (v.U_B.size() == 4) ++out->refus_abusifs;
+      continue;
+    }
+    // L'UNICITE BRUTE EST VERIFIEE AVANT toute canonicalisation : trier puis
+    // `unique` masquerait un doublon accidentel d'ID.
     std::vector<int> IB(c.interieur, c.interieur + c.n_interieur);
     std::vector<int> UB(c.shell, c.shell + c.n_shell);
+    if ((int)UB.size() > out->ids_max) out->ids_max = (long long)UB.size();
+    {
+      std::vector<int> t = UB;
+      std::sort(t.begin(), t.end());
+      if (std::unique(t.begin(), t.end()) != t.end()) ++out->doublons_bruts;
+      std::vector<int> ti = IB;
+      std::sort(ti.begin(), ti.end());
+      if (std::unique(ti.begin(), ti.end()) != ti.end()) ++out->doublons_bruts;
+    }
     std::sort(IB.begin(), IB.end());
     std::sort(UB.begin(), UB.end());
-    UB.erase(std::unique(UB.begin(), UB.end()), UB.end());
     if (IB != v.I_B || UB != v.U_B) ++out->identites_fausses;
-    if (c.degenere) ++out->degeneres;
   }
 }
 
@@ -343,8 +370,12 @@ int fixture_jung_tendu(int r4, Mutant mut) {
   const int bout = mhgp3v::q4axis::cmp_racine_bout(py, f.T2, +1);
   std::vector<int> scratch;
   Bilan b1, b2;
-  bilan_seed(P, 0, 1, 2, r4, mut, &scratch, &b1);   // apex `B>0`, bout droit
-  bilan_seed(P, 0, 1, 3, r4, mut, &scratch, &b2);   // apex `B<0`, bout gauche
+  // Le temoin cospherique fait de ce cas un PLATEAU declare : sous
+  // `RelevantGP` il rendrait `unsupported_degeneracy`, ce qui est correct mais
+  // n'exercerait plus les identites. La fixture `--fixture-plateau` teste
+  // l'autre profil.
+  bilan_seed(P, 0, 1, 2, r4, mut, &scratch, &b1, Profil::kPlateau);
+  bilan_seed(P, 0, 1, 3, r4, mut, &scratch, &b2, Profil::kPlateau);
   std::printf("fixture_jung_tendu : T2=%lld bout_apex=%d s1=%lld m1=%lld i1=%lld"
               " s2=%lld m2=%lld i2=%lld degeneres=%lld\n",
               (long long)f.T2, bout, b1.shallow, b1.manquants, b1.identites_fausses,
@@ -390,6 +421,73 @@ int fixture_t2(int r4) {
   return 0;
 }
 
+
+// LA CONTRE-FIXTURE DE L'AUDITEUR : quatre-vingt-dix-sept IDs de MEME racine.
+// Le `Q4Seed3` aigu owner est `(96,108,100)`, `(108,96,100)`, `(92,96,100)` ;
+// quarante-neuf vrais `PointId` distincts occupent `(100,100,110)` et
+// quarante-huit `(100,100,92)`. Tous partagent la racine axiale, donc le shell
+// exact d'un apex vaut `3 + 97 = 100` IDs.
+//
+// L'ancien buffer avait pour capacite `32+64+3=99` et cessait SILENCIEUSEMENT
+// d'ecrire au 99e slot : il rendait une liste fausse sans overflow ni compte
+// requis. La capacite prouvee vaut desormais `3+32+2*64=163`, le compte VOULU
+// est publie meme tronque, et le profil decide du fate.
+int fixture_plateau(int r4, Mutant mut) {
+  std::vector<Pt> P = {Pt{{96, 108, 100}}, Pt{{108, 96, 100}}, Pt{{92, 96, 100}}};
+  for (int t = 0; t < 49; ++t) P.push_back(Pt{{100, 100, 110}});
+  for (int t = 0; t < 48; ++t) P.push_back(Pt{{100, 100, 92}});
+  const auto f = mhgp3v::q4axis::seed_axis(P[0].c, P[1].c, P[2].c);
+  const bool aigu = mhgp3v::q4axis::seed_aigu(P[0].c, P[1].c, P[2].c);
+  std::vector<int> sites;
+  for (size_t z = 3; z < P.size(); ++z) sites.push_back((int)z);
+  auto pw = [&](int i) { return mhgp3v::q4axis::site_power(f, P[(size_t)i].c); };
+  const auto sel = mhgp3v::q4axis::select_axis_topr4(f, sites.data(), (int)sites.size(),
+                                                     pw, r4, mut);
+  const int seed3[3] = {0, 1, 2};
+  int apex = -1;
+  if (sel.n_entrants > 0) apex = sel.entrants[0];
+  else if (sel.n_sortants > 0) apex = sel.sortants[0];
+  int n_shell_plateau = 0, requis_plateau = 0, requis_int_plateau = 0;
+  const char* fate_gp = "AUCUN";
+  const char* fate_pl = "AUCUN";
+  if (apex >= 0) {
+    const auto gp = mhgp3v::q4axis::census_replay(sel, apex, seed3, pw, mut,
+                                                  Profil::kRelevantGp);
+    const auto pl = mhgp3v::q4axis::census_replay(sel, apex, seed3, pw, mut,
+                                                  Profil::kPlateau);
+    fate_gp = mhgp3v::q4axis::census_fate_name(gp.fate);
+    fate_pl = mhgp3v::q4axis::census_fate_name(pl.fate);
+    n_shell_plateau = pl.n_shell;
+    requis_plateau = pl.requis_shell;
+    requis_int_plateau = pl.requis_interieur;
+  }
+  std::printf("fixture_plateau : aigu=%d verdict=%s entrants=%d sortants=%d"
+              " fate_relevant_gp=%s fate_plateau=%s n_shell=%d requis_shell=%d"
+              " requis_interieur=%d\n",
+              (int)aigu, mhgp3v::q4axis::verdict_name(sel.verdict),
+              sel.n_entrants, sel.n_sortants, fate_gp, fate_pl,
+              n_shell_plateau, requis_plateau, requis_int_plateau);
+  const bool nominal = aigu && (sel.verdict == SeedVerdict::kOuvert) && (apex >= 0) &&
+                       (std::string(fate_gp) == "UNSUPPORTED_DEGENERACY") &&
+                       (std::string(fate_pl) == "EXACT") &&
+                       (n_shell_plateau == 100) && (requis_plateau == 100) &&
+                       (requis_int_plateau == 0);
+  if (mut != Mutant::kNone) {
+    if (!nominal) {
+      std::printf("mutant_killed=1 %s\n", mhgp3v::q4axis::mutant_name(mut));
+      return 4;
+    }
+    std::fprintf(stderr, "MUTANT SURVIVANT: %s\n", mhgp3v::q4axis::mutant_name(mut));
+    return 1;
+  }
+  if (!nominal) {
+    std::fprintf(stderr, "DESACCORD: le plateau de 97 racines egales n'est ni"
+                 " refuse sous RelevantGP ni complet sous plateau\n");
+    return 1;
+  }
+  return 0;
+}
+
 // ---------------------------------------------------------------------------
 // CAMPAGNES.
 // ---------------------------------------------------------------------------
@@ -414,7 +512,7 @@ std::vector<Pt> nuage(const std::string& family, long long n, long long coord,
 
 int campagne(const std::string& family, long long n, long long coord, long long seed,
              int r4, long long threads, Mutant mut, long long min_seeds,
-             long long min_shallow) {
+             long long min_shallow, Profil profil) {
   if (n < 5 || n > 400) refuse("la campagne exhaustive est bornee a 400 points");
   const std::vector<Pt> P = nuage(family, n, coord, seed);
   const int m = (int)P.size();
@@ -430,7 +528,7 @@ int campagne(const std::string& family, long long n, long long coord, long long 
           if (!arete_owner(P, id, 3, 0, 1)) continue;
           if (!mhgp3v::q4axis::seed_aigu(P[(size_t)ia].c, P[(size_t)ib].c,
                                          P[(size_t)ix].c)) continue;
-          bilan_seed(P, ia, ib, ix, r4, mut, &scratch, &A);
+          bilan_seed(P, ia, ib, ix, r4, mut, &scratch, &A, profil);
         }
   };
   std::vector<std::thread> th;
@@ -444,17 +542,26 @@ int campagne(const std::string& family, long long n, long long coord, long long 
     g.manquants += a.manquants; g.bornes += a.bornes;
     g.identites_fausses += a.identites_fausses; g.gaps_faux += a.gaps_faux;
     g.debordes += a.debordes; g.degeneres += a.degeneres;
+    g.fate_exact += a.fate_exact; g.fate_cap += a.fate_cap;
+    g.fate_degen += a.fate_degen; g.fate_hors += a.fate_hors;
+    g.doublons_bruts += a.doublons_bruts; g.refus_abusifs += a.refus_abusifs;
+    if (a.ids_max > g.ids_max) g.ids_max = a.ids_max;
     if (a.cand_max > g.cand_max) g.cand_max = a.cand_max;
   }
   const long long seeds = g.morts_T2 + g.morts_perm + g.morts_gap + g.ouverts;
   std::printf("q4seed_axis_topr4 : famille=%s n=%d r4=%d seeds=%lld morts_T2=%lld"
               " morts_perm=%lld morts_gap=%lld ouverts=%lld candidats=%lld groupes=%lld"
               " cand_max=%lld shallow=%lld manquants=%lld bornes=%lld"
-              " identites_fausses=%lld gaps_faux=%lld degeneres=%lld debordes=%lld\n",
+              " identites_fausses=%lld gaps_faux=%lld degeneres=%lld debordes=%lld"
+              " fate_exact=%lld fate_cap=%lld fate_degen=%lld fate_hors=%lld"
+              " doublons_bruts=%lld refus_abusifs=%lld ids_max=%lld\n",
               family.c_str(), m, r4, seeds, g.morts_T2, g.morts_perm, g.morts_gap,
               g.ouverts, g.candidats, g.groupes, g.cand_max, g.shallow, g.manquants,
-              g.bornes, g.identites_fausses, g.gaps_faux, g.degeneres, g.debordes);
-  const long long fautes = g.manquants + g.bornes + g.identites_fausses + g.gaps_faux;
+              g.bornes, g.identites_fausses, g.gaps_faux, g.degeneres, g.debordes,
+              g.fate_exact, g.fate_cap, g.fate_degen, g.fate_hors,
+              g.doublons_bruts, g.refus_abusifs, g.ids_max);
+  const long long fautes = g.manquants + g.bornes + g.identites_fausses +
+                           g.gaps_faux + g.doublons_bruts + g.refus_abusifs;
   if (mut != Mutant::kNone) {
     if (fautes > 0 || g.debordes > 0) {
       std::printf("mutant_killed=1 %s\n", mhgp3v::q4axis::mutant_name(mut));
@@ -472,18 +579,19 @@ int campagne(const std::string& family, long long n, long long coord, long long 
     return 3;
   }
   if (fautes > 0) {
-    std::fprintf(stderr, "DESACCORD: manquants=%lld bornes=%lld identites=%lld gaps=%lld\n",
-                 g.manquants, g.bornes, g.identites_fausses, g.gaps_faux);
+    std::fprintf(stderr, "DESACCORD: manquants=%lld bornes=%lld identites=%lld"
+                 " gaps=%lld doublons=%lld refus_abusifs=%lld\n",
+                 g.manquants, g.bornes, g.identites_fausses, g.gaps_faux,
+                 g.doublons_bruts, g.refus_abusifs);
     return 1;
   }
   if (g.debordes > 0) {
     std::fprintf(stderr, "PLANCHER: %lld debordements de capacite\n", g.debordes);
     return 3;
   }
-  if (g.cand_max > 2 * r4) {
-    std::fprintf(stderr, "DESACCORD: cand_max=%lld > 2 r4\n", g.cand_max);
-    return 1;
-  }
+  // LA BORNE PORTE SUR LES GROUPES, PAS SUR LES SITES : un plateau valide peut
+  // depasser `2 r4` IDs sans contredire le theoreme. C'est `bornes` — calcule
+  // sur les groupes — qui decide, jamais `cand_max`.
   return 0;
 }
 
@@ -630,11 +738,13 @@ int main(int argc, char** argv) {
   long long n = 60, coord = 0, seed = 1, smax = 11, threads = 0;
   long long min_seeds = 1, min_shallow = 1, min_q4 = 1, min_q3_morts = 0;
   Mutant mut = Mutant::kNone;
+  Profil profil = Profil::kRelevantGp;
   for (int i = 1; i < argc; ++i) {
     const std::string a = argv[i];
     auto val = [&](const char* p) { return a.substr(std::strlen(p)); };
     if (a == "--fixture-16" || a == "--fixture-mort-16" || a == "--fixture-jung-tendu" ||
-        a == "--fixture-t2" || a == "--sweep" || a == "--exact-once") mode = a;
+        a == "--fixture-t2" || a == "--fixture-plateau" || a == "--sweep" ||
+        a == "--exact-once") mode = a;
     else if (a.rfind("--family=", 0) == 0) family = val("--family=");
     else if (a.rfind("--points=", 0) == 0) n = atoll(val("--points=").c_str());
     else if (a.rfind("--coord=", 0) == 0) coord = atoll(val("--coord=").c_str());
@@ -645,12 +755,18 @@ int main(int argc, char** argv) {
     else if (a.rfind("--min-shallow=", 0) == 0) min_shallow = atoll(val("--min-shallow=").c_str());
     else if (a.rfind("--min-q4=", 0) == 0) min_q4 = atoll(val("--min-q4=").c_str());
     else if (a.rfind("--min-q3-morts=", 0) == 0) min_q3_morts = atoll(val("--min-q3-morts=").c_str());
+    else if (a.rfind("--profil=", 0) == 0) {
+      const std::string v = val("--profil=");
+      if (v == "relevant_gp") profil = Profil::kRelevantGp;
+      else if (v == "plateau") profil = Profil::kPlateau;
+      else refuse("profil inconnu : " + v);
+    }
     else if (a.rfind("--inject=", 0) == 0) mut = mutant_de(val("--inject="));
     else refuse("option inconnue : " + a);
   }
   if (mode.empty())
     refuse("--fixture-16, --fixture-mort-16, --fixture-jung-tendu, --fixture-t2,"
-           " --sweep ou --exact-once est exige");
+           " --fixture-plateau, --sweep ou --exact-once est exige");
   // `r4 = smax - 3` est le PREMIER nombre d'interieurs qui rejette un q4.
   if (smax < 4 || smax > 18) refuse("--smax hors domaine");
   const int r4 = (int)smax - 3;
@@ -660,8 +776,10 @@ int main(int argc, char** argv) {
   if (mode == "--fixture-mort-16") return fixture_mort_16(r4, mut);
   if (mode == "--fixture-jung-tendu") return fixture_jung_tendu(r4, mut);
   if (mode == "--fixture-t2") return fixture_t2(r4);
+  if (mode == "--fixture-plateau") return fixture_plateau(r4, mut);
   if (family.empty()) refuse("--sweep et --exact-once exigent --family");
   if (mode == "--exact-once")
     return exact_once(family, n, coord, seed, r4, min_q4, min_q3_morts);
-  return campagne(family, n, coord, seed, r4, threads, mut, min_seeds, min_shallow);
+  return campagne(family, n, coord, seed, r4, threads, mut, min_seeds, min_shallow,
+                  profil);
 }

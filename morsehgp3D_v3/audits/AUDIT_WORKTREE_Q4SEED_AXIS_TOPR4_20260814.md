@@ -143,7 +143,11 @@ au brute force global.
 Les trois gates exact-once régulières passent et le primary choisit bien le plus
 petit vrai `PointId` parmi les deux `Q4Seed3` aigus. Leur oracle accepte toutefois
 les supports par positivité et profondeur sans classifier le shell complet ;
-elles ne reçoivent donc pas un plateau ni le fate `RelevantGP`.
+elles ne reçoivent donc pas un plateau ni le fate `RelevantGP`. La map attendue
+ne transporte pas non plus l'`EdgeKey` owner ni le `PointId` primary calculés
+par une autorité indépendante : une mauvaise provenance qui émet quand même
+chaque `SupportKey` une fois peut rester verte. Comparer une valeur structurée
+`(SupportKey,EdgeKey,primary)` des deux côtés.
 
 Le CLI emploie toujours `atoll` : suffixes et overflows sont acceptés, plusieurs
 modes s'écrasent, des options étrangères à une fixture sont ignorées,
@@ -178,3 +182,41 @@ arrêté la génération exacte `2026-08-14T13:00:56.283-07:00` et certifié la 
 
 La cible d'une seconde pour 50k reste entièrement ouverte. GCP non utilisé par
 l'auditeur.
+
+## Addendum worktree après `d55bb9a`
+
+Claude répare actuellement le P0 100-vers-99 sans toucher aux lanes : header
+SHA-256 `b2c7c8e447e4c4ab31a942c6d72b85e0f530bc7eb19ee02ccc657e7559015e07`,
+probe SHA-256
+`c593bee96a046393a91e4d66ee84dd90d6049d83fc8a63900119776489582a8c`.
+Le delta porte `kCapShellTotal=163`, les comptes requis, des fates typés,
+reconstruit le groupe égal depuis les extrêmes retenus, vérifie l'unicité brute
+et retire correctement l'assertion `cand_max<=2*r4`.
+
+Deux conditions restent à fermer avant réception de ce delta :
+
+1. `CensusFate::kUnsupportedDegeneracy` est déclaré mais jamais attribué.
+   `degenere=true` peut donc encore sortir avec `fate=EXACT`. Après un replay
+   complet sans overflow, tout shell persistant ou ID égal hors apex doit
+   remplacer `EXACT` par `UNSUPPORTED_DEGENERACY` sous `RelevantGP`.
+2. Le commentaire exige un apex shallow, mais l'API ne vérifie que son
+   appartenance aux extrêmes et accepte explicitement une sélection
+   `kMortGap`. Le test exact est interne : si le compte reconstruit atteint
+   `r4`, rejeter l'apex sans publier les listes ; s'il reste inférieur à `r4`,
+   le théorème prouve que la reconstruction est complète. `kMortGap` doit
+   rendre immédiatement `HORS_DOMAINE`, jamais un census.
+
+L'API suppose aussi que `sites` contient des `PointId` uniques, disjoints des
+trois IDs du seed. Ce n'est ni typé ni vérifié : répéter un même ID peut créer
+un faux `MORT_PERMANENTS/MORT_GAP`. Ajouter un préflight ou un type de vue
+distinct-ID, puis des permutations/relabelings clairsemés ; canonicaliser la
+sortie ne doit jamais masquer une duplication de l'entrée.
+
+Le fate doit avoir une priorité déterministe : overflow/capacité avant
+dégénérescence, puis aucune consommation de tableau pour tout fate non exact.
+Ajouter les portes `97-ties -> UNSUPPORTED_DEGENERACY avec required_shell=100`,
+`census_cap_minus_one -> PENDING_CAP`, `deep_retained_apex -> HORS_DOMAINE` et
+`mort_gap_census -> HORS_DOMAINE`. Le mutant historique
+`shell_compte_interieur` n'a plus d'effet produit sur une branche déjà
+unsupported ; il doit être déplacé vers une gate diagnostique de payload ou
+remplacé par `drop_equal_id/drop_persistent_shell`.

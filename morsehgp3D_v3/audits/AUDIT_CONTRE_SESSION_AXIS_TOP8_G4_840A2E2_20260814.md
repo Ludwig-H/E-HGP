@@ -133,3 +133,79 @@ fail-closed, primary/exact-once et options CLI ; ajouter au moins un CTest avec
 seuil différent de sept ; mesurer une rampe bornée ; seulement alors produire
 une recette G4 réaliste. Cette session restera un diagnostic CPU 48 cœurs, pas
 une mesure GPU et encore moins le contrat bout-en-bout 50k sous une seconde.
+
+## Addendum — successeur `session_q4seed_axis_topr4_g4.sh`
+
+Snapshot statique au
+`HEAD=d55bb9a7add87a54bbd500e323fe6fa5bf45c5a2`, SHA-256 du runner
+`eabfdcd56503d60f1830539ee90c468f7e37863a4202139466856d70327b5d93`.
+GCP non utilisé par l'auditeur.
+
+Le successeur corrige deux points : aucune branche n'appelle plus un arrêt sans
+génération, et la cible par défaut est la paire IA autorisée
+`europe-west4-ai1a/ehgp-blackwell-spot-ai1a`, où le garde peut certifier
+l'échéance calculée si `terminationTimestamp` est entièrement absent. La
+première tentative en zone standard a donc échoué fermé à cause du choix de
+zone ; elle ne prouve aucune régression GCE.
+
+Le nouveau runner ne doit pourtant pas être lancé avant les réparations
+suivantes.
+
+### P0 — verdict impossible et champs périmés
+
+Le parser ne collecte comme juges que les lignes commençant par
+`q4seed_axis_topr4`, mais ajoute aux `codes` les neuf runs `exact_once`. Si ces
+runs terminent, `len(juges)==len(codes)` est faux par construction : le verdict
+ne peut jamais être `ACCORD`.
+
+Il cherche en outre les anciens champs `aigues_owner`, `bornes_cassees` et
+`census_faux`. Le probe courant publie `seeds`, `bornes`,
+`identites_fausses` et `gaps_faux`. Les métriques absentes valent silencieusement
+zéro, la détection de famille vide cherche elle aussi l'ancien libellé, et
+aucune grammaire ne compare les tuples attendus. Le verdict doit parser deux
+types de records explicitement, exiger chaque champ, chaque clé
+`(palier,famille,n,seed,smax)` et les neuf clés exact-once, puis rejeter doublon,
+absence et ligne inconnue.
+
+### P0 — une réfutation reste bloquée sur la VM
+
+`rampe.txt` et `exact_once.txt` sont encore rapatriés **après** le verdict sous
+`set -e`. Un verdict rouge saute donc les `scp` et détruit la preuve au prochain
+`rm -rf ~/q4`. Les deux fichiers doivent être streamés ou rapatriés avant toute
+décision. Le chemin de reçu reste fixe, sans clé de génération ni manifeste de
+hashes.
+
+### P0 — la rampe n'a pas encore de deadline global
+
+`reste` est calculé une fois au début d'un palier puis réutilisé comme timeout
+pour chacun de ses 18 runs séquentiels. Ce n'est pas une borne du palier. Les
+neuf exact-once de 900 s chacun sont ensuite hors du budget de rampe. Un palier
+rouge n'arrête pas immédiatement les suivants et `timeout` n'emploie toujours
+pas `--kill-after`.
+
+Il faut un deadline monotone absolu : recalcul du reste avant chaque run,
+réserve fixe pour copie/cleanup, arrêt au premier code non nul, puis exact-once
+ouvert seulement si sa borne totale tient encore. `RUN_TIMEOUT` doit être parsé
+comme entier borné avant interpolation dans la commande distante ; aujourd'hui
+une valeur d'environnement arbitraire devient du shell distant.
+
+### P1 — provenance et cleanup
+
+Le commentaire et la commande parlent encore de 23 tests alors que le pin en
+possède 36. `ctest -R ... | tail -6` n'emploie pas `--no-tests=error`, ne vérifie
+pas le cardinal et jette la sortie complète. Le tar envoyé n'est pas conservé,
+le runner et les sorties ne sont pas hashés et un worktree sale reste admis.
+
+En cleanup, le transcript est bien copié après l'appel d'arrêt, mais toujours
+**avant** l'ajout de `[ARRET NON CERTIFIE]` lorsque `stop_rc!=0`. La copie doit
+être la toute dernière opération après calcul et journalisation du statut
+final.
+
+Enfin, l'en-tête « ne modifie aucune garde » reste faux : la recette reconfigure
+`maxRunDuration` et ajoute une clé OS Login expirante. Ces mutations peuvent
+être autorisées et sûres, mais doivent être nommées exactement.
+
+Indépendamment du runner, le P0 logiciel du census au `3507b5e` interdit la
+session : la fixture 97-ties tronque `U_B` de 100 à 99 IDs sans fate. Une grande
+sweep CPU ne peut pas recevoir un payload que son oracle accepte après
+troncature.

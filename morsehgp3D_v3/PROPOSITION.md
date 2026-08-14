@@ -468,7 +468,10 @@ puis le RLE attache et valide le reçu. En particulier, `Q4SeedAxisTopR4` recons
 exactement `I_B/U_B` à partir de ses racines extrémales et de son equality
 report. `BallFormRange-u16` reste l'autorité/fallback, mais un second parcours
 global q4 serait du travail redondant lorsque ces IDs et leur complétude sont
-reçus.
+reçus. Le prototype au pin `3507b5e` n'a pas encore ce reçu de complétude : un
+groupe de 97 IDs égaux donne un shell attendu de 100 IDs, tronqué à 99 sans
+fate. Aucun consommateur ne peut donc sauter le fallback tant qu'un
+`required_shell_count` et un overflow/continuation typé ne ferment pas ce cas.
 
 Avec `d=b-a`, `D=d dot d`, `w=2*c-a-b` et `U_z=2*z-a-b`, poser :
 
@@ -2135,6 +2138,14 @@ vide. Toute autre situation rend `unsupported_degeneracy`; elle n'autorise ni
 troncature, ni choix arbitraire d'un représentant. Le range selection remplace
 donc à la fois le produit carrier×apex et le second census q4. La `BallKey`
 canonique et le RLE restent exigés pour l'identité et la provenance.
+
+La capacité porte sur des IDs, pas sur les seuls groupes. Si chaque côté garde
+au plus `kCapRacines` IDs et le shell persistant au plus `kCapShell`, le buffer
+de replay doit contenir au moins `3+2*kCapRacines+kCapShell` IDs ou rendre avant
+toute consommation un fate `PENDING_CAP` avec le compte requis. La fixture
+owner aiguë `(96,108,100),(108,96,100),(92,96,100)`, complétée par 49 IDs en
+`(100,100,110)` et 48 en `(100,100,92)`, exige exactement 100 IDs de shell et
+tue tout buffer de 99 silencieux.
 
 Tout tétraèdre q4 positif choisit d'abord son arête owner, puis le plus petit
 vrai `PointId` parmi ses deux `Q4Seed3` aigus comme provenance primaire. Cette

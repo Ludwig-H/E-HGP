@@ -30,18 +30,23 @@ ancienne phrase imposant le rejet global des positions dupliquées est périmée
   caps, continuations ou preuves de complétude. Le `Q4Seed3` est un préfixe
   interne à `Lane4`, pas un support ou une sortie q3.
 - [`AUDIT_WORKTREE_Q4SEED_AXIS_TOPR4_20260814.md`](AUDIT_WORKTREE_Q4SEED_AXIS_TOPR4_20260814.md) :
-  contre-audit du nouveau noyau ponctuel : fixtures top-8 vertes au
-  profil fixe, réfutation de `--seuil=8` au commit puis réparation paramétrique
-  commise à `840a2e2` ; absence persistante dans le probe commis des identités
-  `I_B/U_B`, du shell, du reçu de mort par gaps et du primary q4 global ;
-  protocole de réception comme composant interne de `Lane4`, jamais comme flux
-  depuis q3.
+  contre-audit consolidé au `3507b5e` du noyau ponctuel interne à `Lane4` :
+  `r4` paramétrique, IDs `I_B/U_B`, `MORT_GAP` et exact-once désormais exercés ;
+  P0 restant sur une fixture de 97 IDs cosphériques, où le shell attendu de 100
+  IDs est tronqué à 99 sans fate ; distinction obligatoire entre borne de
+  groupes et masse d'IDs, dégénérescence fail-closed et portée encore
+  quadratique par seed.
 - [`AUDIT_CONTRE_SESSION_AXIS_TOP8_G4_840A2E2_20260814.md`](AUDIT_CONTRE_SESSION_AXIS_TOP8_G4_840A2E2_20260814.md) :
-  interdiction statique de lancer la recette G4 CPU au pin : son fallback
-  d'arrêt sans génération peut toucher une session préexistante, sa matrice de
-  76 runs séquentiels ne tient pas dans le coupe-circuit et sa couverture ne
-  reçoit encore ni IDs/shell, ni `DEAD_GAP`, ni primary/exact-once. GCP non
-  utilisé par l'audit.
+  contre-audit de l'ancienne recette G4 CPU et de son successeur au `d55bb9a` :
+  fermeture générationnelle et zone IA réparées, mais parser du verdict
+  incompatible avec les nouveaux records, exact-once rendant le cardinal de
+  lignes impossible, réfutations copiées après verdict, absence de deadline
+  global et P0 `U_B` préalable. GCP non utilisé par l'audit.
+- [`NOTE_CLAUDE_Q4SEED_AXIS_TOPR4_ET_BLOCAGE_G4_20260814.md`](NOTE_CLAUDE_Q4SEED_AXIS_TOPR4_ET_BLOCAGE_G4_20260814.md) :
+  journal de tranche de Claude, non autorité de réception : indépendance des
+  lanes mesurée, 36 portes locales, correction du diagnostic de zone GCP et
+  liste de blocages déclarés. Son claim de census complet est supersédé par la
+  fixture 100-vers-99 du contre-audit, et le runner G4 reste interdit.
 - [`AUDIT_RECU_GRAM_UNIFIE_1FD9CF1_20260814.md`](AUDIT_RECU_GRAM_UNIFIE_1FD9CF1_20260814.md) :
   contrôle algébrique Python corrélé et borné des identités q4 `Delta=O^2` et
   `Phi=O*J` sur 10 000 fixtures u16 non dégénérées ; il ne reçoit ni microkernel

@@ -169,10 +169,12 @@ et RLE, une `BallKey` peut être parcourue par la même somme de trois
 quadratiques convexes `A*z_j^2+B_j*z_j`. Ses extrema sur une AABB u16 entière
 sont exacts par axe. `active_arity_mask` efface q2/q3/q4 respectivement à
 `10/9/8` intérieurs. Pour q4, le théorème `Q4SeedAxisTopR4` permet de transporter
-la liste exacte `I_B/U_B`; le prototype courant n'en conserve encore que des
-comptes. Le backend reste l'autorité/fallback et ne pourra éviter un second
-scan que lorsque le reçu axial d'IDs et le tie report seront complets. Cela supprime
-les census répétés par support, pas une sortie réellement lourde.
+la liste exacte `I_B/U_B`. Le prototype courant conserve désormais les IDs et
+les compare à un juge InSphere indépendant, mais son buffer de shell de 99
+slots tronque encore sans fate la fixture de 100 IDs. Le backend reste donc
+l'autorité/fallback jusqu'à réception d'un compte requis, d'un overflow typé et
+du tie report complet. Cela supprime les census répétés par support, pas une
+sortie réellement lourde.
 
 La source WSPD active suit directement les trois contrats de miniboule : q2
 garde les paires dont la boule diamétrale a au plus neuf intérieurs ; q3 garde
@@ -250,7 +252,7 @@ La prochaine chaîne à fermer est :
 2a  Lane2 autonome -> Pair2 -> MidballDepth10
 2b  Lane3 autonome -> PairAnchor3 x Third3 -> Q3MiniballDepth9 ambiant
 2c  Lane4 autonome -> PairAnchor4 x Q4Seed3 x Fourth4
-    -> Q4SeedAxisTopR4 -> Positive4 -> I_B/U_B exacts, aucun Sym2
+    -> Q4SeedAxisTopR4 -> Positive4 -> I_B/U_B avec cap/fate reçus, aucun Sym2
 3   réunir seulement les sorties reçues dans BallKey/RLE puis 0A/0B
 4   porter les trois producteurs sur device, puis mesurer warm_e2e sur G4
 5   ouvrir séparément tout nouveau profil numérique
