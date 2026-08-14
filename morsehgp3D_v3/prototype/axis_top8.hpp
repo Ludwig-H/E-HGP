@@ -278,7 +278,8 @@ struct Selection {
   bool debordement = false;     // groupes d'egalite au-dela de la capacite
   bool shell_persistant = false;
   int p = 0;                    // permanents
-  int k = 0;                    // `8-p`
+  int k = 0;                    // `mort - p`
+  int mort = 8;                 // seuil de mort en nombre d'interieurs
   int n_entrants = 0, n_sortants = 0;
   int entrants[kCapSelection] = {0};
   int sortants[kCapSelection] = {0};
@@ -286,9 +287,11 @@ struct Selection {
 
 // `sites` : indices ; `pw(i)` rend la `SitePower` du site `i`. Les trois IDs de
 // la face doivent DEJA etre masques par l'appelant.
+// `mort` est le nombre d'interieurs qui TUE (huit sous rang ferme onze pour
+// q4). La borne est alors `2*(mort-p)` racines candidates.
 template <class PowFn>
 inline Selection select_top8(const FaceAxis& f, const int* sites, int n_sites,
-                             PowFn pw, A8Mutant mut = A8Mutant::kNone) {
+                             PowFn pw, A8Mutant mut = A8Mutant::kNone, int mort = 8) {
   Selection sel;
   const bool t2_ok = (f.T2 > 0);
   if (!f.reguliere || !t2_ok) { sel.face_morte = true; return sel; }
@@ -302,8 +305,9 @@ inline Selection select_top8(const FaceAxis& f, const int* sites, int n_sites,
     else if (c == SiteClass::kShellPersistant) sel.shell_persistant = true;
   }
   sel.p = perm;
-  if (perm >= 8) { sel.face_morte = true; return sel; }
-  sel.k = (mut == A8Mutant::kKFixe7) ? 7 : (8 - perm);
+  sel.mort = mort;
+  if (perm >= mort) { sel.face_morte = true; return sel; }
+  sel.k = (mut == A8Mutant::kKFixe7) ? (mort - 1) : (mort - perm);
   // Le cap du mutant est GLOBAL : c'est le nombre total de racines retenues
   // qu'il plafonne, pas celui d'un cote.
   const int cap_total = (mut == A8Mutant::kCap15) ? 15 : (2 * kCapSelection);

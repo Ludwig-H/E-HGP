@@ -10,8 +10,9 @@ Cadre : `phase=exploration_v3_hors_registre`,
 
 ## Snapshot et périmètre
 
-Le `HEAD` relu est `504f334bdfad90581b58086ced8eb6a35cf438d8`.
-Les deux fichiers sont apparus non suivis pendant l'audit :
+Le snapshot a d'abord été relu non suivi au parent
+`504f334bdfad90581b58086ced8eb6a35cf438d8`, puis Claude l'a commis sans changer
+ces deux octets au `HEAD=069acf7c26312b6146cb8d1ce890cb5f4d681cac` :
 
 | fichier | SHA-256 relu |
 | --- | --- |
@@ -66,6 +67,11 @@ ni débordement :
 
 Ces résultats falsifient des erreurs du noyau fixe ; ils ne qualifient aucune
 complexité, aucune source WSPD et aucun SLO.
+
+Après configuration CMake et build Release, les 23 CTests
+`^mhgp3v_axis_top8_` passent en `10,23 s`. Cette couverture ne change aucun des
+P0 ci-dessous : aucun test ne demande `--seuil=8`, ne compare les listes d'IDs
+du census, ne classe le shell complet ou ne décide le primary global.
 
 ## P0 — le domaine `--seuil` est incomplet
 

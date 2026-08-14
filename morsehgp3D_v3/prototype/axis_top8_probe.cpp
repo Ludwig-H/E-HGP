@@ -137,6 +137,7 @@ struct FaceBilan {
 
 FaceBilan face_bilan(const std::vector<Pt>& P, int ia, int ib, int ix,
                      long long seuil, A8Mutant mut, std::vector<int>* scratch) {
+  const int mort = (int)seuil + 1;
   FaceBilan bil;
   const i64* a = P[(size_t)ia].c;
   const i64* b = P[(size_t)ib].c;
@@ -152,7 +153,8 @@ FaceBilan face_bilan(const std::vector<Pt>& P, int ia, int ib, int ix,
     scratch->push_back(zi);
   }
   auto pw = [&](int i) { return mhgp3v::axis8::site_power(f, P[(size_t)i].c); };
-  const auto sel = mhgp3v::axis8::select_top8(f, scratch->data(), (int)scratch->size(), pw, mut);
+  const auto sel =
+      mhgp3v::axis8::select_top8(f, scratch->data(), (int)scratch->size(), pw, mut, mort);
   bil.deborde = sel.debordement ? 1 : 0;
   bil.p = sel.p;
   if (sel.face_morte) {
@@ -175,7 +177,7 @@ FaceBilan face_bilan(const std::vector<Pt>& P, int ia, int ib, int ix,
         if (!deja) ++bil.groupes;
       }
   }
-  if (!sel.face_morte && bil.groupes > 16 - 2 * sel.p) bil.borne_cassee = 1;
+  if (!sel.face_morte && bil.groupes > 2 * (mort - sel.p)) bil.borne_cassee = 1;
 
   // SWEEP EXHAUSTIVE : tous les sites sont des apex candidats.
   for (int y : *scratch) {
@@ -443,6 +445,9 @@ int campagne(const std::string& family, long long n, long long coord, long long 
   else if (family == "eight_clusters") fam = mhgp3v::CloudFamily::kEightClusters;
   else if (family == "terrain") fam = mhgp3v::CloudFamily::kTerrain;
   else if (family == "two_lines") fam = mhgp3v::CloudFamily::kTwoLines;
+  else if (family == "scanline_single_pass") fam = mhgp3v::CloudFamily::kScanlineSinglePass;
+  else if (family == "scanline_overlap_multiecho")
+    fam = mhgp3v::CloudFamily::kScanlineOverlapMultiecho;
   else refuse("famille inconnue : " + family);
   if (coord <= 0) coord = mhgp3v::cloud_family_default_coord(fam, (int)n);
   const auto brut = mhgp3v::make_family_cloud(fam, (int)n, (int)coord, seed);

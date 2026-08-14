@@ -8,10 +8,10 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-> **Verdict live au `HEAD=504f334bdfad90581b58086ced8eb6a35cf438d8`.**
-> Le dernier pin logiciel reste
-> `6e815d28b3e229a0161eb00d6fa0c9a272efac5d`; les deux commits suivants sont
-> documentaires et le worktree était propre avant les présentes écritures.
+> **Verdict live au `HEAD=069acf7c26312b6146cb8d1ce890cb5f4d681cac`.**
+> Ce commit ajoute le noyau CPU `AxisTop8`, son probe, 23 CTests et les textes
+> contractuels. Le worktree était propre immédiatement après ce commit, avant
+> les présentes corrections d'audit.
 > Q14 est fermée contractuellement : aucune structure de Delaunay n'est
 > autorisée, y compris d'ordre un, comme source, squelette, filtre ou census.
 >
@@ -35,8 +35,8 @@ Cadre : `phase=exploration_v3_hors_registre`,
 > désigne ni un support ni une sortie q3. Contrat et réponse à Q14 :
 > [`NOTE_SOLUTION_CONTRAT_SOURCE_AIGUE_20260814.md`](NOTE_SOLUTION_CONTRAT_SOURCE_AIGUE_20260814.md).
 >
-> Claude a ajouté pendant l'audit `prototype/axis_top8.hpp` et
-> `axis_top8_probe.cpp`, encore non suivis. Le noyau fixe passe ses quatre
+> Claude a ajouté puis commis `prototype/axis_top8.hpp` et
+> `axis_top8_probe.cpp`. Le noyau fixe passe ses quatre
 > fixtures et deux sweeps `n=60,seuil=7`, mais son CLI accepte à tort d'autres
 > seuils : à `seuil=8`, il perd `440` apex sur `uniform` et `428` sur
 > `eight_clusters`. Il ne transporte que le compte des permanents, ne juge pas
@@ -50,10 +50,10 @@ Cadre : `phase=exploration_v3_hors_registre`,
 > payload. La cible d'une seconde reste ouverte ; aucune nouvelle session G4
 > ne précède les gates CPU des trois producteurs.
 >
-> Contrôles documentaires présents : `check_docs.py` valide `106` Markdown et
-> `check_implementation_status.py` valide `20` phases. Le rejeu ciblé
-> `ctest -I 818,835` passe `18/18` en `18,37 s`. Ces tests reçoivent seulement
-> les probes Corner8/WST historiques ; les trois producteurs ne sont pas
+> Contrôles frais : `check_docs.py` valide `106` Markdown,
+> `check_implementation_status.py` valide `20` phases et les 23 CTests
+> `^mhgp3v_axis_top8_` passent en `10,23 s`. Le noyau ponctuel `Lane4` est donc
+> exercé au profil top-8 ; les trois producteurs WSPD autonomes ne sont pas
 > implémentés.
 
 > **Alerte au pin logiciel `6e815d28b3e229a0161eb00d6fa0c9a272efac5d`.** Les
