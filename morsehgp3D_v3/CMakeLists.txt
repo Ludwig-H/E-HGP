@@ -5318,7 +5318,7 @@ add_test(NAME mhgp3v_supports_retenus_localite
           --supports-retenus)
 set_tests_properties(mhgp3v_supports_retenus_localite PROPERTIES
   PASS_REGULAR_EXPRESSION
-  "supports_retenus : n=120 non_degeneres=8212806 bien_centres=600311 \(7.31%\) retenus=7344 retenus/n=61.20 ratio_arete_espacement moyen=5.94 max=12.04 rang_max moyen=43.5 pire=99")
+  "supports_retenus : n=120 non_degeneres=8212806 bien_centres=600311 \\(7.31%\\) retenus=7344 retenus/n=61.20 ratio_arete_espacement moyen=5.94 max=12.04 rang_max moyen=43.5 pire=99")
 
 # LA BONNE CENTRALITE : L'AUTORITE q4, SANS FORMER LE CENTRE.
 #

@@ -670,16 +670,21 @@ Le nouveau `c8::bien_centre` résout implicitement
 `2 M c=(||p_i||^2-||p_0||^2)_i`, puis compare le centre et chaque sommet au
 même côté de la face opposée. Sous indépendance affine, ce test est équivalent
 aux quatre barycentriques strictement positives. Les bornes publiées sont
-conservatrices sur u16 : les déterminants finaux restent sous 109 bits, donc
-i128 suffit. Le build ciblé est vert et `--centre` classe correctement les
-quatre fixtures régulière, positive aplatie, poids nuls et obtuse.
+conservatrices sur u16 ; une redérivation donne `|N|<2^69` et `|dc|<2^104`,
+donc i128 suffit. Le build ciblé est vert et `--centre` classe correctement les
+quatre fixtures régulière, positive aplatie, poids nuls et obtuse. Un
+contre-calcul Gram/T--Q indépendant sur 20 000 q4 u16 aléatoires, puis les 24
+permutations des 50 premiers, ne trouve aucun désaccord ; il reste un diagnostic
+d'audit, pas une porte versionnée.
 
-Ce résultat est encore une réception locale incomplète. `--centre` n'est dans
-aucune CTest ; les fixtures partagent le sujet et n'exercent ni permutation
-impaire, ni orientation opposée, ni extrêmes u16, ni comparaison aux
-numérateurs `L_0,...,L_3`/Gram. L'ABI booléenne fusionne dégénérescence,
-précondition invalide et poids non positif, et le header ne préflighte pas le
-domaine avant les soustractions signées. Le helper local lambda sous
+Ce résultat est encore une réception logicielle incomplète. `--centre` n'est
+dans aucune CTest ; les fixtures du dépôt partagent le sujet et ne gravent ni
+permutation impaire, ni orientation opposée, ni extrêmes u16, ni comparaison
+aux numérateurs `L_0,...,L_3`/Gram. L'ABI booléenne fusionne dégénérescence,
+précondition invalide et poids non positif, et le header `i64` ne préflighte pas
+le domaine avant les soustractions signées : hors u16, l'overflow peut précéder
+tout fail-open. Il faut soit des points u16 authentifiés par type, soit un
+verdict `{positive,nonpositive,degenerate,invalid,numeric_failure}`. Le helper local lambda sous
 `MHGP_HD` doit aussi être compilé sur la voie CUDA avant tout claim device.
 
 Le raccord transforme enfin la population mesurée en

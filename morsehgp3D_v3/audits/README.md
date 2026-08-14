@@ -45,7 +45,9 @@ ancienne phrase imposant le rejet global des positions dupliquées est périmée
   Le commit `f1b78c0`, SHA logiciel `23a2be33`, nommé `--supports-retenus`
   énumère seulement `orientation!=0 && I<=7`, sans positivité, shell ni RLE ;
   sa métrique est arête/espacement et son cap en points n'est pas un budget. Le
-  détail live et les fixtures sont maintenus dans `AUDIT_ETAT_COURANT.md`.
+  worktree postérieur ajoute la positivité q4 par Cramer, mais casse sa CTest et
+  reste sans shell/RLE/oracle indépendant. Le détail live et les fixtures sont
+  maintenus dans `AUDIT_ETAT_COURANT.md`.
 - [`AUDIT_MINIBOULE_UNIQUE_RESIDUEL_SHALLOW_5809BD2_20260814.md`](AUDIT_MINIBOULE_UNIQUE_RESIDUEL_SHALLOW_5809BD2_20260814.md) :
   lemme exact de miniboule unique au support complet, famille normale au support
   partiel, cœur affine, sandwich `U<=D<=C`, q3 par pied, q4 par intersections,
