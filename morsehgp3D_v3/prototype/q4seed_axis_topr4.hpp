@@ -108,6 +108,14 @@
 //   comparaison de racines  : `A_1 B_2` vs `A_2 B_1`      < 2^155
 //   appartenance a `J_f`    : `2 A^2` vs `T2 B^2`          < 2^209
 // `i128` ne suffit donc PAS : les deux comparaisons passent par `BigInt<4>`.
+//
+// ---------------------------------------------------------------------------
+// HOTE ET DEVICE PARTAGENT CE FICHIER, ET C'EST LA CONDITION DE LA PARITE
+//
+// Toutes les fonctions numeriques portent `MHGP_HD`. Le kernel CUDA
+// n'implemente AUCUNE geometrie : il appelle `select_axis_topr4`, exactement la
+// fonction que l'hote compile. Sans cela, une comparaison bit a bit
+// comparerait deux implementations et non deux executions.
 #pragma once
 
 #include <cstdint>
@@ -166,7 +174,7 @@ struct SeedAxis {
   bool jung_ouverte = false;   // `T2>0` : le segment n'est pas reduit a un point
 };
 
-inline SeedAxis seed_axis(const i64 a[3], const i64 b[3], const i64 x[3]) {
+MHGP_HD inline SeedAxis seed_axis(const i64 a[3], const i64 b[3], const i64 x[3]) {
   SeedAxis f;
   i128 d[3], u[3];
   for (int i = 0; i < 3; ++i) {
@@ -190,7 +198,7 @@ inline SeedAxis seed_axis(const i64 a[3], const i64 b[3], const i64 x[3]) {
 }
 
 // Le prefixe est-il STRICTEMENT aigu ? Les trois produits scalaires de coin.
-inline bool seed_aigu(const i64 a[3], const i64 b[3], const i64 x[3]) {
+MHGP_HD inline bool seed_aigu(const i64 a[3], const i64 b[3], const i64 x[3]) {
   auto dot = [](const i64 o[3], const i64 p[3], const i64 q[3]) -> i128 {
     i128 s = 0;
     for (int i = 0; i < 3; ++i) s += (i128)(p[i] - o[i]) * (q[i] - o[i]);
@@ -207,7 +215,7 @@ struct SitePower {
   i128 B = 0;
 };
 
-inline SitePower site_power(const SeedAxis& f, const i64 z[3]) {
+MHGP_HD inline SitePower site_power(const SeedAxis& f, const i64 z[3]) {
   SitePower p;
   i128 s[3];
   for (int i = 0; i < 3; ++i) s[i] = (i128)z[i] - f.a[i];
@@ -221,7 +229,7 @@ inline SitePower site_power(const SeedAxis& f, const i64 z[3]) {
 // ---------------------------------------------------------------------------
 // COMPARAISONS EXACTES SUR 256 BITS.
 // ---------------------------------------------------------------------------
-inline int sgn_2AA_moins_T2YY(i128 A, i128 Y, i128 T2) {
+MHGP_HD inline int sgn_2AA_moins_T2YY(i128 A, i128 Y, i128 T2) {
   const B4 aa = mhgp::mul128(A, A);
   const B4 aa2 = mhgp::big_add(aa, aa);
   const B4 yy = mhgp::mul128(T2, Y * Y);
@@ -229,7 +237,7 @@ inline int sgn_2AA_moins_T2YY(i128 A, i128 Y, i128 T2) {
 }
 
 // signe de `A - Y tau_max` avec `tau_max^2 = T2/2`, `T2>0`.
-inline int sgn_A_moins_Ytau(i128 A, i128 Y, i128 T2) {
+MHGP_HD inline int sgn_A_moins_Ytau(i128 A, i128 Y, i128 T2) {
   if (A == 0 && Y == 0) return 0;
   if (A >= 0 && Y <= 0) return 1;
   if (A <= 0 && Y >= 0) return -1;
@@ -238,13 +246,13 @@ inline int sgn_A_moins_Ytau(i128 A, i128 Y, i128 T2) {
 }
 
 // signe de `rho_z - eps tau_max`, `eps` valant `+1` ou `-1`. Suppose `B!=0`.
-inline int cmp_racine_bout(const SitePower& p, i128 T2, int eps) {
+MHGP_HD inline int cmp_racine_bout(const SitePower& p, i128 T2, int eps) {
   const int s = sgn_A_moins_Ytau(p.A, p.B * eps, T2);
   return (p.B > 0) ? s : -s;
 }
 
 // signe de `rho_1 - rho_2`. Suppose `B_1!=0` et `B_2!=0`.
-inline int cmp_racines(const SitePower& p, const SitePower& q) {
+MHGP_HD inline int cmp_racines(const SitePower& p, const SitePower& q) {
   const B4 l = mhgp::mul128(p.A, q.B);
   const B4 r = mhgp::mul128(q.A, p.B);
   int s = mhgp::big_cmp(l, r);
@@ -264,7 +272,7 @@ enum class SiteClass {
   kShellPersistant,  // `B=0` et `A=0` : cospherique sur tout l'axe
 };
 
-inline SiteClass classify(const SitePower& p, i128 T2, Mutant mut = Mutant::kNone) {
+MHGP_HD inline SiteClass classify(const SitePower& p, i128 T2, Mutant mut = Mutant::kNone) {
   if (p.B == 0) {
     if (p.A == 0) return SiteClass::kShellPersistant;
     if (p.A < 0) {
@@ -337,7 +345,7 @@ struct Selection {
 // `sites` : vrais `PointId`, les trois du `Q4Seed3` DEJA masques par l'appelant.
 // `pw(i)` rend la `SitePower` du site `i`.
 template <class PowFn>
-inline Selection select_axis_topr4(const SeedAxis& f, const int* sites, int n_sites,
+MHGP_HD inline Selection select_axis_topr4(const SeedAxis& f, const int* sites, int n_sites,
                                    PowFn pw, int r4 = 8, Mutant mut = Mutant::kNone) {
   Selection sel;
   sel.r4 = r4;
@@ -517,7 +525,7 @@ struct Census {
 // appartient necessairement a ces groupes complets, donc aucun second balayage
 // global n'est requis. C'est la reparation preferable de l'auditeur.
 template <class PowFn>
-inline Census census_replay(const Selection& sel, int apex, const int seed3[3],
+MHGP_HD inline Census census_replay(const Selection& sel, int apex, const int seed3[3],
                             PowFn pw, Mutant mut = Mutant::kNone,
                             Profil profil = Profil::kRelevantGp) {
   Census c;

@@ -5675,3 +5675,46 @@ mhgp3v_add_expected_code_test_for(mhgp3v_caps_admissible_probe
 mhgp3v_add_expected_code_test_for(mhgp3v_caps_admissible_probe
   mhgp3v_caps_admissible_refus_falsifie "--falsifie est borne a 400 points" 2
   --falsifie --family=uniform --points=1000)
+
+# ---------------------------------------------------------------------------
+# QUALIFICATION HOTE/DEVICE DE `Q4SeedAxisTopR4`.
+#
+# Le kernel n'implemente AUCUNE geometrie : il appelle `evaluate_seed`, ecrite
+# une seule fois dans `axis_device_job.hpp` et compilee pour les deux cibles.
+# Sans cela, une comparaison bit a bit comparerait deux implementations et non
+# deux executions.
+#
+# La cible se construit SANS CUDA : le chemin hote reste qualifiable seul, et le
+# binaire dit alors `device : absent`. Avec `-DMHGP3V_ENABLE_CUDA=ON`, le kernel
+# est ajoute et la parite de chaque champ de chaque verdict est exigee.
+# ---------------------------------------------------------------------------
+add_executable(mhgp3v_axis_device prototype/axis_device_qualification.cpp)
+target_include_directories(mhgp3v_axis_device PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(mhgp3v_axis_device PRIVATE mhgp Threads::Threads)
+target_compile_options(mhgp3v_axis_device PRIVATE
+  $<$<COMPILE_LANGUAGE:CXX>:-Wall;-Wextra;-Werror>)
+if(MHGP3V_ENABLE_CUDA)
+  target_sources(mhgp3v_axis_device PRIVATE prototype/axis_device_kernel.cu)
+  target_compile_definitions(mhgp3v_axis_device PRIVATE MHGP3V_AXIS_CUDA)
+  set_target_properties(mhgp3v_axis_device PROPERTIES
+    CUDA_ARCHITECTURES "${CMAKE_CUDA_ARCHITECTURES}"
+    CUDA_STANDARD 20
+    CUDA_STANDARD_REQUIRED ON
+    CUDA_EXTENSIONS OFF
+    CUDA_SEPARABLE_COMPILATION OFF)
+  # Meme hygiene numerique que les autres kernels : aucun FMA contracte, aucun
+  # flush-to-zero. Le chemin est entier, la discipline le rend reproductible.
+  target_compile_options(mhgp3v_axis_device PRIVATE
+    $<$<COMPILE_LANGUAGE:CUDA>:--fmad=false;--ftz=false;--prec-div=true;--prec-sqrt=true>)
+endif()
+# Le chemin hote seul, borne, avec plancher de non-vacuite.
+add_test(NAME mhgp3v_axis_device_hote
+         COMMAND mhgp3v_axis_device --family=uniform --points=600 --seed=1 --smax=6
+                 --max-seeds=20000)
+set_tests_properties(mhgp3v_axis_device_hote PROPERTIES PASS_REGULAR_EXPRESSION
+  "axis_device : famille=uniform n=600 smax=6 r4=3 seeds=[1-9][0-9]*")
+add_test(NAME mhgp3v_axis_device_hote_code
+         COMMAND mhgp3v_axis_device --family=uniform --points=600 --seed=1 --smax=6
+                 --max-seeds=20000)
+mhgp3v_add_expected_code_test_for(mhgp3v_axis_device
+  mhgp3v_axis_device_refus_domaine "--points hors domaine" 2 --points=10)
