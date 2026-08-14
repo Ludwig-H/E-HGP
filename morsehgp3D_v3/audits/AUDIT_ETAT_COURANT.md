@@ -214,27 +214,32 @@ planchers. Le plancher de gain doit être une option de campagne. La seule
 dominance reçue est `central ALL => Midball ALL`; Midball peut au contraire
 promouvoir un `central NONE`, par exemple sur `A=[0,8],B=[10,100],C={9}`.
 
-## Worktree `HCBlockDepth` : formule sûre, intégration rouge
+## `HCBlockDepth` au HEAD : formule sûre, intégration non reçue
 
 Le delta HC emploie `H=(z-a) dot (b-z)` et
 `C=(b-z) cross (z-a)`. Les conditions q3 `3H^2>||C||^2` et q4
 `2H^2>||C||^2` sont exactes ; `Hmin` exact et une majoration par composantes de
 `C` donnent un `ALL` sûr mais conservateur. Ce n'est ni la source des supports
 q3/q4 ni une nouvelle autorité exacte : `corner512_all_lane` reçoit déjà
-l'enveloppe continue complète. Les selftests manuels sains passent et les deux
-mutants ciblés meurent, mais aucune CTest HC n'existe.
+l'enveloppe continue complète. Le commentaire du commit ne perd pas seulement
+la corrélation entre les deux produits d'une composante : il perd aussi la
+simultanéité entre les trois maxima de composantes, puis entre `hmin` et le
+pire `C`. Trois fixtures séparées dans l'audit HC isolent ces trois pertes.
 
-Le raccord recalcule HC jusque trois fois par nœud, n'a aucun juge de promotion,
-hérite ses compteurs entre tailles et est contourné par
-`--fenetre-exhaustive`. `--hc --midball` finit structurellement code `3`, HC
-ayant absorbé tous les gains q2 avant le plancher Midball. Le changement de
-diagnostic du probe fait aussi régresser une porte stable : la sous-suite
-worktree vaut `12/13`. À `eight_clusters,n=200`, les lectures baissent
-`247966 -> 226535`, mais la vague one-shot monte `119,8 -> 214,2 ms` ; ce
-signal n'autorise aucun claim performance. Le détail et la fixture de
-conservatisme sont dans l'audit Miniboule.
+Les cinq CTests HC du commit passent, avec les deux mutants tués. Les portes
+saines `mhgp3v_hc_selftest` et `mhgp3v_hc_vwave` restent toutefois à
+`PASS_REGULAR_EXPRESSION` ; `--selftest-hc=1` imprime `accord=OUI` avant son
+plancher puis rend code `3`. Le raccord recalcule HC jusque trois fois par
+nœud, n'a aucun juge de chaque promotion, hérite ses compteurs entre tailles et
+est contourné par `--fenetre-exhaustive`. `--hc --midball` finit
+structurellement code `3`, HC ayant absorbé tous les gains q2 avant le plancher
+Midball. À `eight_clusters,n=200`, les lectures baissent
+`247966 -> 226535`, mais la vague one-shot monte `119,8 -> 214,2 ms` ; à
+`n=3000`, le commit rapporte `31 538 327 -> 27 552 424` lectures mais une
+médiane CPU `8,3 -> 13,7 s`. Ces diagnostics reçoivent la réduction logique,
+pas un chemin chaud ni le SLO.
 
-## Worktree `--borne-sup` : invariant utile, raccord multivue réfuté
+## `--borne-sup` au HEAD : invariant utile, raccord multivue réfuté
 
 Pour une seule vue de crédits singleton, l'idée est exacte. Si les tâches
 empilées forment une antichaîne, poser pour chaque lane
@@ -247,8 +252,8 @@ La première révision, hash `90640885`, soustrayait le parent `MIXED` sans
 réinsérer ses enfants. Elle transformait donc cette borne supérieure en
 sous-estimateur. Fixture causale `uniform,n=16,coord=64,seed=1,window=1024` :
 la baseline ferme une q2 après `3171` lectures ; la révision annonce zéro
-fermeture après `117` lectures, `351` lanes mortes et aucune troncature. Le hash
-mobile suivant `ec5ec3d` réinsère bien les deux populations ; cette fixture
+fermeture après `117` lectures, `351` lanes mortes et aucune troncature. La
+révision désormais commise réinsère bien les deux populations ; cette fixture
 retrouve la fermeture et passe de `3171` à `2177` lectures. Le premier défaut
 doit rester un mutant permanent `drop-mixed-children`.
 
@@ -260,8 +265,8 @@ Le raccord reste néanmoins faux sur les modes acceptés :
   fermeture à zéro avec la borne ;
 - BJD propose des crédits collectifs **après** la boucle à partir des feuilles
   vues. La borne des singletons ne majore pas ces groupes et l'arrêt précoce
-  réduit leur banque. `uniform,n=100,seed=4,SOC+BJD8` passe ainsi de
-  `464` à `462` q4 fermées avec code zéro et `fenetre_finale=OUI` ;
+  réduit leur banque. `terrain,n=64,coord=64,seed=3,BJD8` passe ainsi de
+  `84` à `82` q4 fermées et de `338` à `319` groupes avec code zéro ;
 - `visites_evitees` ne compte ni les tâches encore empilées au break, ni leurs
   descendants, et les compteurs sont globaux aux tailles. Ce n'est pas encore
   une mesure du travail supprimé.
@@ -269,13 +274,15 @@ Le raccord reste néanmoins faux sur les modes acceptés :
   feuille `pos0` ; la mortalité porte alors sur un parcours incomplet, pas sur
   tous les témoins géométriquement disponibles.
 
-La réparation minimale sépare `reste/mort` par vue et garde le parcours vivant
+La CTest `mhgp3v_borne_sup_refutation` passe, mais ne vérifie qu'une ligne de
+compteurs par regex : aucune exécution OFF n'est comparée et les combinaisons
+fausses restent acceptées. La réparation minimale sépare `reste/mort` par vue et garde le parcours vivant
 sur l'union de leurs bits. Jusqu'à une borne composée authentifiée, le mode doit
 refuser BJD et tout proposant post-boucle. Les portes permanentes comparent
 fates, masses et fermetures exactes à la baseline sans troncature, mordent
 `drop-mixed-children`, le cas `cred=0,ccred=7,reste=1,h=8`, la fixture BJD
 ci-dessus, les fenêtres capées et plusieurs tailles. Aucun gain de la révision
-mobile n'est recevable avant cette parité. Le snapshot falsifié, la portée
+commise n'est recevable avant cette parité. Le snapshot falsifié, la portée
 exacte du lemme et les obligations sont détaillés dans
 [`AUDIT_LIVE_BORNE_SUP_CREDITS_A58D020_20260814.md`](AUDIT_LIVE_BORNE_SUP_CREDITS_A58D020_20260814.md).
 

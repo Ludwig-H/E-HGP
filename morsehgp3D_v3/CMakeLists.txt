@@ -5136,3 +5136,70 @@ endforeach()
 
 mhgp3v_add_expected_code_test_for(mhgp3v_corner8_probe
   mhgp3v_corner8_refus_sans_mode "--selftest, --bloc ou --convexite est exige" 2)
+
+# ---------------------------------------------------------------------------
+# `OwnedCK-WST3` : LA SOURCE D'ORDRE TROIS, COUNTER-ONLY.
+#
+# Une WSPD decompose les `C(n,2)` paires en `O(s^3 n)` rectangles. L'etendre aux
+# TRIPLETS sans developper un seul triangle est la vraie source q3.
+#
+# Chaque triangle est attribue a son arete MAXIMALE. Si `ab` l'est, alors
+# `||x-a|| <= ||b-a||` et `||x-b|| <= ||b-a||` : le troisieme sommet vit dans la
+# LENTILLE des deux boules de rayon `||b-a||`. Sur un rectangle entier, majorer
+# par `Dmax(A,B)` et remplacer les endpoints par leurs boites donne une
+# condition NECESSAIRE, donc sure pour la couverture — et sans aucune racine
+# carree : la distance a une boite se separe par axe et tout se compare au carre.
+#
+# Le juge enumere les `C(n,3)` triangles a petit `n`, determine l'owner de
+# chacun et exige que son troisieme sommet appartienne a EXACTEMENT UN bloc du
+# rectangle owner. Couverture manquante et doublon sont deux fautes distinctes.
+add_executable(mhgp3v_wst3_probe prototype/wst3_probe.cpp)
+target_include_directories(mhgp3v_wst3_probe PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(mhgp3v_wst3_probe PRIVATE mhgp)
+target_compile_options(mhgp3v_wst3_probe PRIVATE -Wall -Wextra -Werror)
+
+add_test(NAME mhgp3v_wst3_couverture
+  COMMAND mhgp3v_wst3_probe --family=uniform --points=120 --sep-euclid=2/1 --juge
+          --min-blocs=100)
+set_tests_properties(mhgp3v_wst3_couverture PROPERTIES
+  PASS_REGULAR_EXPRESSION "wst3_juge : triangles=[0-9]+ manquants=0 doublons=0")
+
+add_test(NAME mhgp3v_wst3_couverture_amas
+  COMMAND mhgp3v_wst3_probe --family=eight_clusters --points=120 --sep-euclid=2/1
+          --juge --min-blocs=100)
+set_tests_properties(mhgp3v_wst3_couverture_amas PROPERTIES
+  PASS_REGULAR_EXPRESSION "wst3_juge : triangles=[0-9]+ manquants=0 doublons=0")
+
+# UN SEUL MUTANT MORD LA COUVERTURE, ET C'EST DIT. `wst3-rayon-min` retrecit la
+# lentille et laisse `145 236` triangles non couverts sur `n=120`. Les deux
+# autres — `wst3-pas-de-descente` et `wst3-une-seule-boule` — SUR-couvrent : ils
+# degradent le cout, jamais la couverture, et le juge de couverture ne peut donc
+# pas les tuer. Les enregistrer ici serait un vert par vacuite ; il leur faut une
+# porte de COUT, pas de correction.
+mhgp3v_add_expected_code_test_for(mhgp3v_wst3_probe
+  mhgp3v_wst3_rayon_min "mutant_killed=1 wst3-rayon-min" 4
+  --family=uniform --points=120 --sep-euclid=2/1 --juge --inject=wst3-rayon-min)
+
+# L'ECHELLE LIEE AU RECTANGLE. Exiger l'inclusion complete force a raffiner
+# jusqu'a la frontiere de la lentille : le cout suit une SURFACE et le nombre de
+# blocs redevient quadratique. En arretant la descente des que la cellule est
+# petite devant le rayon du domaine, la couverture reste exact-once — une
+# antichaine est disjointe — et le domaine est seulement SUR-couvert, ce qui est
+# sur puisque la lentille n'est qu'une condition necessaire.
+#
+# Mesure sur `uniform`, `s=2`, `n = 1000..16000` :
+#   inclusion complete : pentes 1,95 / 1,56 / 1,70 / 1,76
+#   echelle=16         : pentes 1,50 / 1,64 / 1,66 / 1,23
+#   echelle=1          : pentes 1,28 / 1,47 / 1,48 / 1,09
+# et les rectangles WSPD eux-memes suivent 1,07 / 1,18 / 1,24 / 1,01. A echelle
+# grossiere, le nombre de blocs d'ordre TROIS suit donc celui de l'ordre DEUX a
+# une constante pres — environ trente-deux blocs par rectangle.
+add_test(NAME mhgp3v_wst3_echelle_couverture
+  COMMAND mhgp3v_wst3_probe --family=eight_clusters --points=140 --sep-euclid=2/1
+          --echelle=1 --juge --min-blocs=1000)
+set_tests_properties(mhgp3v_wst3_echelle_couverture PROPERTIES
+  PASS_REGULAR_EXPRESSION "wst3_juge : triangles=447580 manquants=0 doublons=0")
+
+mhgp3v_add_expected_code_test_for(mhgp3v_wst3_probe
+  mhgp3v_wst3_refus_mutant_sans_juge "un mutant exige --juge" 2
+  --family=uniform --points=120 --inject=wst3-rayon-min)

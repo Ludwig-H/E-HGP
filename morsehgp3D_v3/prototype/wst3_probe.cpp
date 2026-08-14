@@ -1,0 +1,403 @@
+// MorseHGP3D v3 — `OwnedCK-WST3` : LA SOURCE D'ORDRE TROIS, COUNTER-ONLY.
+//
+// Specification : section 5.2 de `PROPOSITION.md` et section 6 de
+// audits/AUDIT_MINIBOULE_UNIQUE_RESIDUEL_SHALLOW_5809BD2_20260814.md.
+// Cadre : phase=exploration_v3_hors_registre, backend=cpu_reference,
+//         profile=quantized_u16_input_only, mode=source_factorisee_counter_only,
+//         public_status=not_claimed.
+//
+// ---------------------------------------------------------------------------
+// CE QUE CE PROBE FAIT, ET CE QU'IL NE FAIT PAS
+//
+// Une WSPD decompose les `C(n,2)` paires en `O(s^3 n)` rectangles. La question
+// est de l'etendre aux TRIPLETS sans developper un seul triangle. Ce probe
+// construit cette extension et la COMPTE ; il n'emet aucun triangle, ne calcule
+// aucun circumcentre et ne decide aucun rang.
+//
+// ---------------------------------------------------------------------------
+// LE DOMAINE DU TROISIEME SOMMET, ET POURQUOI IL EST BORNE
+//
+// Chaque triangle est attribue a son arete MAXIMALE — l'owner, avec tie-break
+// par `EdgeKey`. Si `ab` est l'arete maximale de `{a,b,x}`, alors par
+// definition :
+//
+//   ||x-a|| <= ||b-a||   et   ||x-b|| <= ||b-a||
+//
+// Le troisieme sommet vit donc dans la LENTILLE, l'intersection des deux boules
+// de rayon `||b-a||` centrees aux deux endpoints. Pour un rectangle `(A,B)`
+// entier, une condition NECESSAIRE — donc sure pour la couverture — s'obtient
+// en majorant `||b-a||` par `Dmax(A,B)` et en remplacant chaque endpoint par sa
+// boite :
+//
+//   dist(x, A) <= Dmax(A,B)   et   dist(x, B) <= Dmax(A,B)
+//
+// où `dist` est la distance a la BOITE. Aucune racine carree n'est formee : les
+// deux membres sont compares au carre, et la distance a une boite se separe par
+// axe. C'est exact sur les entiers.
+//
+// ---------------------------------------------------------------------------
+// LA DECOMPOSITION EN BLOCS
+//
+// Pour chaque rectangle `(A,B)`, on descend l'arbre des temoins :
+//   - un nœud ENTIEREMENT dans le domaine devient un bloc `(A,B,C)` ;
+//   - un nœud entierement HORS du domaine est elague ;
+//   - sinon on descend, et une feuille indecise devient son propre bloc.
+// Les blocs emis sont donc deux a deux disjoints et couvrent exactement le
+// domaine : c'est une partition, condition de l'exact-once.
+//
+// ---------------------------------------------------------------------------
+// LE JUGE
+//
+// A petit `n`, il enumere les `C(n,3)` triangles, determine l'arete maximale de
+// chacun par `EdgeKey`, et exige que le troisieme sommet appartienne a
+// EXACTEMENT UN bloc du rectangle owner. Une couverture manquante et un doublon
+// sont deux fautes distinctes, comptees separement.
+//
+// Codes : 1 = desaccord du juge, 2 = refus avant calcul, 3 = plancher,
+// 4 = mutant tue.
+#include <algorithm>
+#include <array>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <string>
+#include <vector>
+
+#include "cloud_families.hpp"
+#include "rect_front.hpp"
+#include "wspd_wavefront.hpp"
+
+namespace {
+
+using mhgp::i64;
+
+[[noreturn]] void refuse(const char* why) {
+  std::fprintf(stderr, "REFUS: %s\n", why);
+  std::exit(2);
+}
+
+long long arg_ll(const char* s, long long lo, long long hi, const char* nom) {
+  char* fin = nullptr;
+  const long long v = std::strtoll(s, &fin, 10);
+  if (fin == s || (fin != nullptr && *fin != '\0')) refuse(nom);
+  if (v < lo || v > hi) refuse(nom);
+  return v;
+}
+
+enum class Wst3Mutant {
+  kNone,
+  kRayonMin,        // `Dmin` au lieu de `Dmax` : la lentille retrecit, on perd
+  kUneSeuleBoule,   // oublie la contrainte sur `B` : sur-couverture
+  kPasDeDescente,   // n'emet que la racine : un seul bloc, jamais disjoint
+};
+
+const char* mutant_name(Wst3Mutant m) {
+  switch (m) {
+    case Wst3Mutant::kNone: return "none";
+    case Wst3Mutant::kRayonMin: return "wst3-rayon-min";
+    case Wst3Mutant::kUneSeuleBoule: return "wst3-une-seule-boule";
+    case Wst3Mutant::kPasDeDescente: return "wst3-pas-de-descente";
+  }
+  return "?";
+}
+
+struct Bloc { int c; };   // le nœud temoin ; `A` et `B` sont ceux du rectangle
+
+// Distance carree MAXIMALE d'un point de `C` a la boite `A`. Separable par axe :
+// sur chaque axe, la distance a l'intervalle est une fonction convexe par
+// morceaux dont le maximum sur `[C.lo,C.hi]` est a une extremite.
+i64 dist2_max_box_to_box(const mhgp3v::RectBox& C, const mhgp3v::RectBox& A) {
+  i64 acc = 0;
+  for (int i = 0; i < 3; ++i) {
+    const i64 dl0 = A.lo[i] - C.lo[i], dl1 = C.lo[i] - A.hi[i];
+    const i64 dh0 = A.lo[i] - C.hi[i], dh1 = C.hi[i] - A.hi[i];
+    i64 dl = dl0 > dl1 ? dl0 : dl1;
+    i64 dh = dh0 > dh1 ? dh0 : dh1;
+    if (dl < 0) dl = 0;
+    if (dh < 0) dh = 0;
+    const i64 d = dl > dh ? dl : dh;
+    acc += d * d;
+  }
+  return acc;
+}
+
+// Distance carree MINIMALE d'un point de `C` a la boite `A`.
+i64 dist2_min_box_to_box(const mhgp3v::RectBox& C, const mhgp3v::RectBox& A) {
+  i64 acc = 0;
+  for (int i = 0; i < 3; ++i) {
+    i64 d = 0;
+    if (A.lo[i] > C.hi[i]) d = A.lo[i] - C.hi[i];
+    else if (C.lo[i] > A.hi[i]) d = C.lo[i] - A.hi[i];
+    acc += d * d;
+  }
+  return acc;
+}
+
+}  // namespace
+
+int main(int argc, char** argv) {
+  std::string family = "uniform";
+  long long n = 0, seed = 12345, sep_num = 8, sep_den = 1, coord = 0;
+  bool juge = false;
+  long long min_blocs = 0;
+  // ---- L'ECHELLE DU BLOC, ET POURQUOI ELLE DECIDE TOUT.
+  //
+  // Exiger qu'un nœud soit ENTIEREMENT dans la lentille force a raffiner
+  // jusqu'a sa frontiere : le cout devient proportionnel a une SURFACE, et le
+  // nombre de blocs redevient quadratique — mesure `n^1,8` sur `uniform`.
+  //
+  // L'audit prescrit l'inverse : des cellules d'une echelle LIEE au rectangle.
+  // On arrete donc la descente des que la cellule est assez petite devant le
+  // rayon du domaine, et on garde tout nœud qui le RENCONTRE. La couverture
+  // reste exact-once — les nœuds d'une antichaine sont disjoints — et le domaine
+  // est seulement SUR-couvert, ce qui est sur : la lentille est une condition
+  // necessaire, le predicat exact filtrera en aval.
+  long long echelle = 0;
+  Wst3Mutant mu = Wst3Mutant::kNone;
+  for (int i = 1; i < argc; ++i) {
+    const std::string a = argv[i];
+    auto val = [&](const char* p) { return a.substr(std::strlen(p)); };
+    if (a.rfind("--family=", 0) == 0) family = val("--family=");
+    else if (a.rfind("--points=", 0) == 0) n = arg_ll(val("--points=").c_str(), 4, 200000, "points");
+    else if (a.rfind("--seed=", 0) == 0) seed = arg_ll(val("--seed=").c_str(), 1, (1LL << 40), "seed");
+    else if (a.rfind("--coord=", 0) == 0) coord = arg_ll(val("--coord=").c_str(), 4, 65536, "coord");
+    else if (a.rfind("--sep-euclid=", 0) == 0) {
+      const std::string v = val("--sep-euclid=");
+      const size_t p = v.find('/');
+      if (p == std::string::npos) refuse("sep-euclid");
+      sep_num = arg_ll(v.substr(0, p).c_str(), 1, 1024, "sep-euclid");
+      sep_den = arg_ll(v.substr(p + 1).c_str(), 1, 1024, "sep-euclid");
+    }
+    else if (a == "--juge") juge = true;
+    else if (a.rfind("--echelle=", 0) == 0) echelle = arg_ll(val("--echelle=").c_str(), 1, (1LL << 20), "echelle");
+    else if (a.rfind("--min-blocs=", 0) == 0) min_blocs = arg_ll(val("--min-blocs=").c_str(), 1, (1LL << 40), "min-blocs");
+    else if (a == "--inject=wst3-rayon-min") mu = Wst3Mutant::kRayonMin;
+    else if (a == "--inject=wst3-une-seule-boule") mu = Wst3Mutant::kUneSeuleBoule;
+    else if (a == "--inject=wst3-pas-de-descente") mu = Wst3Mutant::kPasDeDescente;
+    else refuse("argument inconnu");
+  }
+  if (n == 0) refuse("--points est exige");
+  if (mu != Wst3Mutant::kNone && !juge) refuse("un mutant exige --juge");
+
+  mhgp3v::CloudFamily fam;
+  if (family == "uniform") fam = mhgp3v::CloudFamily::kUniform;
+  else if (family == "eight_clusters") fam = mhgp3v::CloudFamily::kEightClusters;
+  else if (family == "two_lines") fam = mhgp3v::CloudFamily::kTwoLines;
+  else refuse("famille inconnue");
+  if (coord == 0) coord = mhgp3v::cloud_family_default_coord(fam, (int)n);
+
+  const std::vector<mhgp::P3> cloud =
+      mhgp3v::make_family_cloud(fam, (int)n, (int)coord, seed);
+  std::vector<std::array<long long, 3>> pts;
+  for (const mhgp::P3& p : cloud) pts.push_back({p.x, p.y, p.z});
+  if (pts.size() < 4) refuse("nuage trop petit apres deduplication");
+
+  // Tri de Morton, identique au front WSPD : le meme arbre, les memes `RectId`.
+  std::vector<int> pid(pts.size());
+  for (size_t i = 0; i < pts.size(); ++i) pid[i] = (int)i;
+  std::sort(pid.begin(), pid.end(), [&](int u, int v) {
+    const unsigned long long ku = mhgp3v::wf_morton48(pts[u][0], pts[u][1], pts[u][2]);
+    const unsigned long long kv = mhgp3v::wf_morton48(pts[v][0], pts[v][1], pts[v][2]);
+    if (ku != kv) return ku < kv;
+    return u < v;
+  });
+  std::vector<std::array<long long, 3>> sp(pts.size());
+  for (size_t i = 0; i < pid.size(); ++i) sp[i] = pts[pid[i]];
+  std::vector<unsigned long long> keys(sp.size());
+  for (size_t i = 0; i < sp.size(); ++i)
+    keys[i] = mhgp3v::wf_morton48(sp[i][0], sp[i][1], sp[i][2]);
+  for (size_t i = 1; i < keys.size(); ++i)
+    if (keys[i] == keys[i - 1]) refuse("positions dupliquees : le profil les rejette");
+
+  std::vector<mhgp3v::WfNode> nodes = mhgp3v::wf_build(keys);
+  mhgp3v::wf_tight_boxes(&nodes, sp);
+  const long long m = (long long)sp.size();
+
+  auto box_of = [&](int nd, mhgp3v::RectBox* out) {
+    if (nd < 0) {
+      const auto& p = sp[(size_t)(-1 - nd)];
+      for (int i = 0; i < 3; ++i) { out->lo[i] = p[i]; out->hi[i] = p[i]; }
+    } else {
+      for (int i = 0; i < 3; ++i) { out->lo[i] = nodes[nd].tlo[i]; out->hi[i] = nodes[nd].thi[i]; }
+    }
+  };
+  auto count_of = [&](int nd) -> long long {
+    return (nd < 0) ? 1LL : (long long)(nodes[nd].last - nodes[nd].first + 1);
+  };
+
+  // ---- LA VAGUE WSPD, exactement celle du front : `count -> scan -> fill`.
+  struct Pair { int a, b; };
+  std::vector<Pair> wave;
+  for (size_t i = 0; i < nodes.size(); ++i)
+    wave.push_back({nodes[i].left, nodes[i].right});
+  std::vector<Pair> terms;
+  auto sep_ok = [&](int u, int v) -> bool {
+    mhgp3v::RectBox ba{}, bb{};
+    box_of(u, &ba);
+    box_of(v, &bb);
+    // Separation euclidienne : `dist >= s * max(rayon)`, au carre et en entiers.
+    i64 r2 = 0;
+    for (int i = 0; i < 3; ++i) {
+      const i64 da = ba.hi[i] - ba.lo[i], db = bb.hi[i] - bb.lo[i];
+      const i64 d = std::max(da, db);
+      r2 += d * d;
+    }
+    const i64 dmin = dist2_min_box_to_box(ba, bb);
+    // `dist^2 * (2*den)^2 >= (num)^2 * r2` avec rayon = diagonale/2.
+    return (__int128)dmin * (__int128)(4 * sep_den * sep_den) >=
+           (__int128)(sep_num * sep_num) * (__int128)r2;
+  };
+  while (!wave.empty()) {
+    std::vector<Pair> next;
+    for (const Pair& p : wave) {
+      if (sep_ok(p.a, p.b)) { terms.push_back(p); continue; }
+      // Scinder le plus GROS des deux, comme la recursion canonique.
+      const bool split_a = count_of(p.a) >= count_of(p.b);
+      const int v = split_a ? p.a : p.b;
+      if (v < 0) { terms.push_back(p); continue; }   // deux feuilles : terminal
+      const int l = nodes[v].left, r = nodes[v].right;
+      if (split_a) { next.push_back({l, p.b}); next.push_back({r, p.b}); }
+      else { next.push_back({p.a, l}); next.push_back({p.a, r}); }
+    }
+    wave.swap(next);
+  }
+
+  // ---- L'EXTENSION D'ORDRE TROIS, COUNTER-ONLY.
+  long long blocs = 0;
+  double masse = 0.0;
+  long long visites = 0;
+  // Pour le juge : les blocs de chaque rectangle, dans l'ordre des terminaux.
+  std::vector<std::vector<Bloc>> par_terminal;
+  if (juge) par_terminal.resize(terms.size());
+
+  for (size_t t = 0; t < terms.size(); ++t) {
+    mhgp3v::RectBox ba{}, bb{};
+    box_of(terms[t].a, &ba);
+    box_of(terms[t].b, &bb);
+    const i64 dmax = mhgp3v::rect_maxsq(ba, bb);
+    const i64 dmin = dist2_min_box_to_box(ba, bb);
+    // MUTANT `wst3-rayon-min` : borner la lentille par la distance MINIMALE du
+    // rectangle. Le domaine retrecit et des troisiemes sommets legitimes en
+    // sortent — le juge doit trouver des triangles non couverts.
+    const i64 rayon2 = (mu == Wst3Mutant::kRayonMin) ? dmin : dmax;
+
+    int st[128];
+    int sn = 0;
+    st[sn++] = 0;   // racine de l'arbre des temoins
+    if (nodes.empty()) continue;
+    while (sn > 0) {
+      const int nd = st[--sn];
+      ++visites;
+      mhgp3v::RectBox bc{};
+      box_of(nd, &bc);
+      // Hors du domaine ? Un seul des deux tests suffit a elaguer.
+      if (dist2_min_box_to_box(bc, ba) > rayon2) continue;
+      if (mu != Wst3Mutant::kUneSeuleBoule && dist2_min_box_to_box(bc, bb) > rayon2)
+        continue;
+      // Entierement dedans ? Alors le nœud EST un bloc.
+      const bool dedans =
+          dist2_max_box_to_box(bc, ba) <= rayon2 &&
+          (mu == Wst3Mutant::kUneSeuleBoule || dist2_max_box_to_box(bc, bb) <= rayon2);
+      // Assez petit devant le rayon du domaine ? Alors on s'arrete aussi, et le
+      // bloc SUR-couvre : c'est le regime a echelle liee.
+      bool assez_petit = false;
+      if (echelle > 0) {
+        i64 diag2 = 0;
+        for (int i = 0; i < 3; ++i) {
+          const i64 e = bc.hi[i] - bc.lo[i];
+          diag2 += e * e;
+        }
+        assez_petit = (__int128)diag2 * (__int128)echelle <= (__int128)rayon2;
+      }
+      if (dedans || assez_petit || nd < 0 || mu == Wst3Mutant::kPasDeDescente) {
+        ++blocs;
+        masse += (double)count_of(terms[t].a) * (double)count_of(terms[t].b) *
+                 (double)count_of(nd);
+        if (juge) par_terminal[t].push_back(Bloc{nd});
+        continue;
+      }
+      if (sn + 2 > 128) { std::fprintf(stderr, "PLANCHER: pile temoin saturee\n"); return 3; }
+      st[sn++] = nodes[nd].left;
+      st[sn++] = nodes[nd].right;
+    }
+  }
+
+  std::printf("wst3 : n=%lld famille=%s sep=%lld/%lld | rectangles=%zu blocs=%lld"
+              " blocs/n=%.2f masse=%.0f visites=%lld\n",
+              m, family.c_str(), sep_num, sep_den, terms.size(), blocs,
+              (double)blocs / (double)m, masse, visites);
+
+  if (min_blocs > 0 && blocs < min_blocs) {
+    std::fprintf(stderr, "PLANCHER: %lld blocs, %lld exiges\n", blocs, min_blocs);
+    return 3;
+  }
+
+  // ---- LE JUGE DE COUVERTURE EXACT-ONCE.
+  if (juge) {
+    if (m > 220) refuse("le juge exhaustif est borne a 220 points");
+    // Appartenance d'un point a un nœud : plage `[first,last]` de l'ordre trie.
+    auto contient = [&](int nd, long long r) -> bool {
+      if (nd < 0) return (-1 - nd) == (int)r;
+      return r >= nodes[nd].first && r <= nodes[nd].last;
+    };
+    long long manquants = 0, doublons = 0, juges = 0;
+    for (long long i = 0; i < m; ++i)
+      for (long long j = i + 1; j < m; ++j)
+        for (long long k = j + 1; k < m; ++k) {
+          const long long idx[3] = {i, j, k};
+          // Arete maximale du triangle, tie-break par indice trie — un ordre
+          // total, donc un owner unique.
+          i64 best = -1;
+          int bu = 0, bv = 1;
+          for (int u = 0; u < 3; ++u)
+            for (int v = u + 1; v < 3; ++v) {
+              i64 d2 = 0;
+              for (int c = 0; c < 3; ++c) {
+                const i64 e = sp[(size_t)idx[u]][c] - sp[(size_t)idx[v]][c];
+                d2 += e * e;
+              }
+              if (d2 > best || (d2 == best && (idx[u] < idx[bu] ||
+                                               (idx[u] == idx[bu] && idx[v] < idx[bv])))) {
+                best = d2; bu = u; bv = v;
+              }
+            }
+          int w = 3 - bu - bv;
+          const long long ra = idx[bu], rb = idx[bv], rx = idx[w];
+          ++juges;
+          // Le rectangle owner : celui qui contient la paire `(ra,rb)`.
+          long long vus = 0;
+          for (size_t t = 0; t < terms.size(); ++t) {
+            const bool ab = contient(terms[t].a, ra) && contient(terms[t].b, rb);
+            const bool ba2 = contient(terms[t].a, rb) && contient(terms[t].b, ra);
+            if (!ab && !ba2) continue;
+            for (const Bloc& b : par_terminal[t])
+              if (contient(b.c, rx)) ++vus;
+          }
+          if (vus == 0) ++manquants;
+          else if (vus > 1) ++doublons;
+        }
+    std::printf("wst3_juge : triangles=%lld manquants=%lld doublons=%lld\n", juges,
+                manquants, doublons);
+    if (manquants != 0 || doublons != 0) {
+      if (mu != Wst3Mutant::kNone) {
+        std::printf("mutant_killed=1 %s : %lld triangles non couverts et %lld"
+                    " doubles\n", mutant_name(mu), manquants, doublons);
+        return 4;
+      }
+      std::fprintf(stderr, "DESACCORD: %lld triangles non couverts, %lld doubles\n",
+                   manquants, doublons);
+      return 1;
+    }
+    if (mu != Wst3Mutant::kNone) {
+      std::fprintf(stderr, "MUTANT SURVIVANT : %s couvre encore exact-once\n",
+                   mutant_name(mu));
+      return 3;
+    }
+    if (juges == 0) {
+      std::fprintf(stderr, "PLANCHER: aucun triangle juge\n");
+      return 3;
+    }
+  }
+  std::printf("OK famille=%s\n", family.c_str());
+  return 0;
+}
