@@ -130,6 +130,12 @@ les distances endpoint, resserre encore le domaine sans perdre de carrier.
 Les cellules non vides de ce niveau donnent une extension ternaire complète,
 puis leurs couples non ordonnés une extension quaternaire complète. L'owner
 longueur/`EdgeKey` rend les sorties exact-once.
+Cette preuve exige que `CKPairTape` partitionne réellement les paires non
+ordonnées et que les cellules half-open forment une antichaîne. Un raffinement
+remplace atomiquement le parent par tous ses enfants disjoints. Pour la
+diagonale q4, `binom(C,2)` devient tous les `binom(C_i,2)` et tous les
+`C_i×C_j`, `i<j`; pour `C×D`, tous les `C_i×D_j`. Le carrier primaire oriente
+la sweep mais ne crée jamais une seconde copie du `CellPair`.
 Une paire n'est q2 propre que si `D=||b-a||^2>0` : les positions dupliquées
 sont rejetées, quotientées ou filtrées exactement avant cette promotion.
 
@@ -207,14 +213,25 @@ Le shadow courant corrige cette faute : il compare les ledgers baseline et
 union combinée, place SOC après les fallbacks et arrête une branche combinée à
 son premier `ALL`. Un replay borné mesure `41` fermetures de masse `95`, contre
 `127` et `316` avec la somme fautive. Il doit encore recevoir une
-comparaison PointId de l'union et tuer un mutant `sum_instead_of_union`. Cinq
-portes CTest intégrées passent désormais, mais ne couvrent pas ces deux
-obligations. À `n=2000`, le
+comparaison PointId de l'union. Le juge direct des flips tue désormais le mutant
+`sum_instead_of_union` lorsqu'il énumère tout, mais annonce encore `accord=OUI`
+si son cap saute des flips et aucune porte CTest ne garde ce chemin. Cinq portes
+CTest intégrées passent. À `n=2000`, le
 shadow non capé a déjà soumis `3 809 028` tâches et ajouté environ `2,1 s` à la
 vague sur une machine partagée. Le HEAD fournit désormais un cap qui publie
 `MINORANT_CAP` ; ce cap borne le diagnostic sans recevoir la politique de
 sélection ni la rentabilité transitive. Ne pas lancer sa rampe 50k. Un retour inférieur
 à `floor=q4` signifie seulement `UNKNOWN_BELOW_FLOOR`, pas une lane exacte.
+
+Le HEAD essaie maintenant SOC au nœud courant même si le central rend `NONE`.
+Ce gain partiel est sûr, mais la vue combinée ne descend toujours pas lorsque
+SOC rend `UNKNOWN` sous ce `NONE`. `cmask` reste subordonné au masque baseline.
+Un replay borné révèle `14383` témoins exacts cachés sous ce prune et fait
+tomber SOC/exact de `96,76 %` à `86,10 %` sur la cohorte élargie. La réparation
+est un parcours physique commun à deux masques logiques indépendants : baseline
+descend sur `central-MIXED`; combined teste SOC sur tout central non-`ALL` et
+descend sur `SOC-UNKNOWN`, avec son propre cap et son propre `PENDING`.
+`--none-descend` tel qu'il existe ne propage pas ce masque combiné.
 
 ### `JungDiskDepth`, puis LP projectif
 
@@ -295,20 +312,52 @@ strict est `3*r^2>D` pour q3 et `2*r^2>D` pour q4. Une base couvrante `G`
 certifie ensuite récursivement `Depth(P,h)` par tous les
 `Depth(P minus {z},h-1)`, `z` dans `G`; le DAG porte au plus trois enfants par
 niveau. Les groupes disjoints restent le fast path, cette récurrence le juge
-borné.
+borné. Sous `smax=11`, elle demande au plus `3280` recherches de base pour
+`h=8` et `9841` pour `h=9`. Ces nombres viennent de la profondeur, pas des noms
+q4/q3. L'oracle entier tient en i256 après réduction par
+`g_i=D-||u_i||^2` et
+`K_ij=D*(u_i dot u_j)-(u_i dot d)*(u_j dot d)` ; le replay Gram brut peut
+dépasser 256 bits et reste GMP.
+
+Le packing disjoint n'est pas complet. Une fixture u16 possède six témoins
+universels, sept groupes couvrants disjoints au maximum, mais une profondeur
+q4 exactement huit : `u=6<p=7<d=8`. Le hot path tente le packing, puis un
+`ProofSpanDAG` de suppressions capé ; un cap produit `PENDING`. Sur un bloc CK,
+chaque base proposée doit garder une marge uniforme ou provoquer un split du
+proof-tile, jamais l'expansion des `PairId`.
+
+Helly avec tolérance comprime en outre tout succès ponctuel. Pour les ensembles
+fermés `B_z` de centres où `z` n'est pas intérieur, `Depth(P,h)` signifie qu'il
+n'existe aucun point commun après suppression de `h-1` ensembles. Il existe
+donc toujours un sous-pool qui certifie déjà la profondeur, de taille
+`eta(3,h)<(h+1)^2` : au plus **80 IDs pour q4** et **99 pour q3**. Un
+`ToleranceKernel` porte ces IDs et le vérificateur rejoue exactement leur
+arrangement dans le disque. Ce résultat borne le payload, pas sa recherche ni
+le nombre de tuiles ; pour un rectangle, le même noyau doit être prouvé sur
+tout `A×B` ou provoquer un split. Le détail et la source primaire sont dans
+[`PROPOSITION.md`](PROPOSITION.md#noyau-de-helly-avec-tolérance-et-hypergraphe-exact).
+
+La profondeur possède surtout une réduction combinatoire exacte. Former
+l'hypergraphe de rang trois dont chaque hyperarête est une base Helly couvrante
+donne `d=tau(E)`, le nombre transversal minimal ; le packing actuel n'est que
+`p=nu(E)<=d`. Un branch-and-cut alterne alors un petit solveur de transversal
+bitset et une HPI qui rend soit un contre-centre, soit une nouvelle base
+disjointe. Le device vérifie chaque base géométrique une fois, puis rejoue la
+preuve de `tau(E)>=8/9` sans refaire la géométrie à chaque branche.
 
 Après une face aiguë, une seconde porte collective travaille en dimension un.
 Sur le segment de centres `J_f` compatible avec `K_4(ab)`, chaque témoin porte
 la forme affine `P_z(tau)=A_z-tau*B_z`; il est intérieur lorsque `P_z<0`.
-Un groupe couvre tout `J_f` si `J_f intersect intersection_z{P_z>=0}` est vide.
-Helly 1D donne une base d'au plus deux IDs ; huit groupes disjoints ferment
-toutes les extensions q4 de la face avant apex et avant sweep. La version bloc
-doit vérifier signes et produits croisés uniformément, sinon scinder. La chaîne
-de prune devient donc `Jung edge 2D -> carrier aigu -> Jung axe 1D -> WST4
-broad-phase symbolique -> BlockBallDepth8 sur carrier×apex -> résiduel`. La
-sweep par face n'est autorisée qu'après preflight. Le rang se prouve ainsi
-avant chaque `BallKey` ponctuelle ; il n'est pas nécessaire d'énumérer les q4
-pour commencer à le filtrer.
+La profondeur fixe-face se décide exactement sans sweep globale : après `p`
+témoins permanents, conserver les `8-p` seuils `tau<alpha` les plus grands et
+les `8-p` seuils `tau>beta` les plus petits. Leur replay groupe les égalités
+shell et forme un `AxisToleranceKernel` d'au plus **16 IDs**. C'est un scan
+`O(n)` à mémoire `O(8)`, et la spécialisation constructive de
+`eta(2,8)=16`. La version bloc vérifie signes, ordre et marges uniformément,
+sinon scinde. La chaîne devient `Jung edge 2D -> carrier aigu -> noyau axe 1D
+-> WST4 symbolique -> BlockBallDepth8 sur carrier×apex -> résiduel`. La sweep
+par face n'est autorisée qu'après preflight ; il n'est pas nécessaire
+d'énumérer les q4 pour commencer à prouver leur rang.
 
 Le LP global reste un oracle utile, mais son échec ne prouve plus une pénurie
 sur le disque Morse : une fixture à huit groupes ferme `JungDiskDepth8` alors
@@ -413,7 +462,7 @@ n'est exact : des supports positifs gardent un partenaire arbitrairement loin
 en rang. Aucun arrangement global, aucune mosaïque Delaunay d'ordre supérieur
 et aucun catalogue exhaustif ne deviennent le chemin produit.
 
-Au HEAD `8f47835`, le sampler v2 retire `PENDING` et la censure des grosses
+Au HEAD `e54c908`, le sampler v2 retire `PENDING` et la censure des grosses
 lentilles, puis remplace `2 sigma` par une demi-largeur Hoeffding correcte sous
 des tirages i.i.d. uniformes. Son implémentation ne reçoit pas encore cette loi :
 multiply-high reste sans rejet, les streams SplitMix n'ont pas de contrat

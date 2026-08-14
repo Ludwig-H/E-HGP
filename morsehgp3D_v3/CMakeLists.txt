@@ -4637,15 +4637,22 @@ set_tests_properties(mhgp3v_q4_brute_marge_rejet PROPERTIES
 # Ce sont deux derivations independantes ; leur accord sur cent mille triples en
 # pleine largeur u16 est la seule preuve disponible que la forme entiere du
 # minimax est juste.
-add_executable(mhgp3v_jung_dual_probe prototype/jung_dual_probe.cpp)
-target_include_directories(mhgp3v_jung_dual_probe PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+# LE JUGE EST UNE UNITE DE TRADUCTION SEPAREE, ET UN AUTRE OBJET MATHEMATIQUE.
+# Le sujet decide par la voie DUALE — il choisit des poids et teste `A^2 > 2R`.
+# Le juge prend la voie PRIMALE : il ne choisit aucun poids, il minimise
+# `||s||^2` sur l'intersection des demi-plans mauvais et compare au rayon du
+# disque de Jung. Son arithmetique est `mhgp3v::BigInt`, signe et magnitude —
+# `K` atteint 70 bits sous u16, donc `Delta` et `N` environ 140 : `i128` ne
+# suffit pas.
+add_executable(mhgp3v_jung_dual_probe prototype/jung_dual_probe.cpp
+  oracle/jung_dual_judge.cpp)
+target_include_directories(mhgp3v_jung_dual_probe PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
+  ${CMAKE_CURRENT_SOURCE_DIR}/oracle)
 target_link_libraries(mhgp3v_jung_dual_probe PRIVATE mhgp)
 target_compile_options(mhgp3v_jung_dual_probe PRIVATE -Wall -Wextra -Werror)
 
 add_test(NAME mhgp3v_jung_dual_selftest
   COMMAND mhgp3v_jung_dual_probe --selftest --seed=1 --rounds=100000)
-set_tests_properties(mhgp3v_jung_dual_selftest PROPERTIES
-  PASS_REGULAR_EXPRESSION "dual_selftest accord=OUI tires=100000 desaccords=0")
 add_test(NAME mhgp3v_jung_dual_selftest_petit
   COMMAND mhgp3v_jung_dual_probe --selftest --seed=7 --rounds=100000 --span=64)
 set_tests_properties(mhgp3v_jung_dual_selftest_petit PROPERTIES
@@ -4757,6 +4764,29 @@ set_tests_properties(mhgp3v_ordre_proche_sans_effet PROPERTIES
 # suffisent comme decision complete » — le packing plafonne a sept alors que la
 # profondeur vaut huit. Une porte qui assimile echec du packing et profondeur
 # insuffisante perd des fermetures VRAIES.
+# LES TROIS FIXTURES DU JUGE PRIMAL, EN BINAIRE AUTONOME. Elles viennent de la
+# section 5.1 du contre-audit et exercent ce que le selftest dual ne pouvait
+# pas : la couverture COLLECTIVE — `a=(0,0,0)`, `b=(100,0,0)`, `z1=(42,26,0)`,
+# `z2=(42,0,26)`, ou aucun singleton ne passe q4 mais le groupe couvre —, la
+# dependance aux poids, et la frontiere stricte `g^2 = 2R`.
+add_executable(mhgp3v_jung_dual_judge oracle/jung_dual_judge_fixtures.cpp
+  oracle/jung_dual_judge.cpp)
+target_include_directories(mhgp3v_jung_dual_judge PRIVATE
+  ${CMAKE_CURRENT_SOURCE_DIR}/oracle)
+target_compile_options(mhgp3v_jung_dual_judge PRIVATE -Wall -Wextra -Werror)
+add_test(NAME mhgp3v_jung_dual_judge_fixtures COMMAND mhgp3v_jung_dual_judge --fixtures)
+set_tests_properties(mhgp3v_jung_dual_judge_fixtures PROPERTIES
+  PASS_REGULAR_EXPRESSION "juge_primal accord=OUI fixtures=3 refutees=0")
+
+# L'IMPLICATION EST DIRECTIONNELLE, ET C'EST TOUT CE QU'ON EXIGE. Le predicat
+# dual est SUFFISANT, donc `dual couvre => primal couvre`. La reciproque est
+# fausse : la banque de poids est finie et rate environ la moitie des groupes
+# couvrants sur des tirages uniformes. Cette incompletude est MESUREE, pas
+# refusee — et elle se revele sans effet sur les groupes que le proposer
+# choisit reellement, qui sont les plus proches du milieu.
+set_tests_properties(mhgp3v_jung_dual_selftest PROPERTIES
+  PASS_REGULAR_EXPRESSION "dual_collectif accord=OUI groupes=[0-9]+ dual=[0-9]+ primal=[0-9]+ . non_sound=0")
+
 add_test(NAME mhgp3v_jung_dual_fixture_u_p_d COMMAND mhgp3v_jung_dual_probe --fixtures)
 set_tests_properties(mhgp3v_jung_dual_fixture_u_p_d PROPERTIES
   PASS_REGULAR_EXPRESSION "dual_fixture u_p_d : u=6 p=7 d=8")

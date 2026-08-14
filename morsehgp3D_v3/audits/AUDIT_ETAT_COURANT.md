@@ -11,19 +11,20 @@ Cadre : `phase=exploration_v3_hors_registre`,
 ## Snapshot
 
 Le pin relu est
-`HEAD=8f47835c8b6c798e0737632dc653153a887f846b`, commit
-`la perte est disseque : ni SOC64 ni le raffinement ne visaient la bonne cible`.
-Il reçoit au HEAD le replay SOC combiné/capé, son juge direct de flips,
-`CarrierApexEstimator-v2`, le diagnostic de profondeur, l'énumérateur q4 et le
-prototype `JungDual` avec onze portes. Il ne reçoit toujours ni source CK--WST,
-ni certificat Jung uniforme de rectangle, ni profondeur q4 factorisée, ni
-payload complet. Le titre du commit est un claim à auditer, pas un verdict
-reçu.
+`HEAD=e54c908d9115a5859fe1bd54e65cbe5a53d74d23`, commit
+`je mesurais u, le contrat demande d : la fixture u=6 < p=7 < d=8`.
+Il reçoit au HEAD le replay SOC combiné/capé, `CarrierApexEstimator-v2`,
+l'énumérateur q4, le prototype `JungDual`, la fixture `u<p<d`, les diagnostics
+de feuilles et d'ordre, ainsi qu'un essai SOC sur les nœuds `central-NONE`.
+Il ne reçoit toujours ni source CK--WST, ni certificat Jung uniforme de
+rectangle, ni profondeur q4 factorisée, ni traversée combinée complète sous
+`central-NONE`, ni payload complet. Les titres des commits sont des claims à
+auditer, pas des verdicts reçus.
 
 Empreintes SHA-256 au HEAD :
 
 - `CMakeLists.txt` :
-  `87b3e5d30c25b432d2631ed3572c6e462438c007de0326b5ba926378c819879b` ;
+  `0d862b2a19b36f00191e383b32a62e6c9e1bbec39fb78dc934a92a64d16bbed1` ;
 - `prototype/q4_brute_oracle.cpp` :
   `0a410d9ffa22e117f660fdeac88227cc65a5417f97e395fa6332111a54d823cf` ;
 - `prototype/soc64_rect.hpp` :
@@ -31,20 +32,18 @@ Empreintes SHA-256 au HEAD :
 - `prototype/soc64_probe.cpp` :
   `d442b59279f345d11337b86993b8b620774eb236815a8f77a227cbf8edc4944f` ;
 - `prototype/wspd_wavefront_probe.cpp` :
-  `9a931a6a01be98ab3d8b0037c9360ef7f2e3d203d6d55b9292251c876e00a7bb` ;
+  `fe9d8adab5b80dfa0ed80285ed20199cf302cbe33796beaa9a7c7d716b4747b9` ;
 - `prototype/jung_dual.hpp` :
   `1b9dffa1767988b812e1da360775858d023383112fcdde6e905d8ac3b2b46001` ;
 - `prototype/jung_dual_probe.cpp` :
-  `05c6199a16bcfe1399aa600b4b7089b15b2b53efcb9707ea4e3c6368d9e71386` ;
+  `0c4450da87d6856d47b7617b7a6187f99d5f2be0e3c614e5284db1568a907fea` ;
 - `prototype/cloud_families.hpp` :
   `1f9089ba5972bf76aece6d899bacd8682341f394833c5d06e46ea2a921efad57`.
 
-Le worktree live ajoute aussi un delta concurrent de Claude dans
-`prototype/wspd_wavefront_probe.cpp`, SHA-256
-`a5f9868166c5fe12d303e0b347b9138eb8e0143090386ced8ded538443ff0d4b`,
-pour l'option `--ordre-proche`. Il n'est pas attribué à l'auditeur. Les
-écritures de celui-ci restent limitées à `README.md`, `PROPOSITION.md` et
-`audits/`; aucun fichier logiciel n'est modifié par lui. GCP non utilisé.
+Le worktree relu ne contient que les corrections documentaires de l'auditeur
+dans `PROPOSITION.md` et `audits/`. Ses écritures restent limitées à
+`README.md`, `PROPOSITION.md` et `audits/`; aucun fichier logiciel n'est
+modifié par lui. GCP non utilisé.
 
 ## Verdict
 
@@ -262,6 +261,11 @@ résiduel preflighté. `2B_R` est une enveloppe extérieure sharp lorsque seule 
 boule contenant les endpoints est connue ; elle réduit les cellules, pas la
 masse réelle. Une grande masse logique peut tenir dans peu de blocs, mais elle
 n'est utile que si le consommateur de profondeur reste lui-même factorisé.
+Sur une face fixe, ce consommateur est désormais explicite : conserver les
+`8-p` seuils gauches les plus grands et les `8-p` seuils droits les plus petits,
+après `p` témoins permanents, donne un noyau exact d'au plus 16 IDs. Un scan
+top-k `O(n)` et un replay des égalités remplacent la sweep et le DAG général ;
+le lift bloc vérifie uniformément l'ordre de ces seuils ou scinde.
 
 La dissection `n=1500` trouve huit témoins singleton exacts pour `89,5 %` de
 200 PairId q4 ouverts tirés par masse, contre `26,5 %` de 200 rectangles hachés.
@@ -369,6 +373,25 @@ ni sa rentabilité transitive. Le replay exhaustif à `n=1000` avait soumis
 environ `988000` tâches et `3,69` millions de couples : un cap atteint reste un
 minorant/pending et ne peut devenir une fenêtre finale. Ces chiffres ne sont
 pas une extrapolation recevable vers le SLO.
+
+Le dernier delta essaie aussi SOC au nœud courant lorsque le central rend
+`NONE`. Ce crédit ponctuel est sûr, mais la traversée combinée reste incomplète :
+si SOC rend `UNKNOWN`, `cmask` n'est pas transmis aux enfants et demeure
+subordonné au masque baseline. Or `central-NONE` ne réfute que la boule
+inscrite. Sur `eight_clusters,n=200`, descendre ces branches révèle `14383`
+témoins exacts et `11848` témoins SOC cachés ; SOC/exact passe de `96,761 %`
+sur la cohorte élaguée à `86,104 %` sur la cohorte élargie. À `n=1500`, le
+budget redevient massivement actif. Le test `soc64_sur_none_central` reçoit donc
+un gain partiel, pas le plafond ni la traversée correcte.
+
+La réparation est constructive : garder des masques, ledgers, saturations,
+caps et `PENDING` indépendants. La baseline descend seulement
+`central-MIXED`; la vue combinée crédite `central-ALL`, sinon teste SOC puis
+descend sur `SOC-UNKNOWN`, même sous `central-NONE`. Le parcours physique suit
+l'union des deux masques. Une fixture
+`central-NONE -> descendant SOC-ALL` et un oracle d'union par `PointId` borné
+gardent cette propriété. L'option `--none-descend` actuelle ne propage pas cette
+vue et reste un diagnostic réfuté.
 
 `JungDiskDepth8` restreint le plan des centres au disque
 `||y-d||^2<=D/2`. Une fixture à huit groupes disjoints ferme ce disque alors

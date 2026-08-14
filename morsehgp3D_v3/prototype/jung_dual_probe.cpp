@@ -29,6 +29,7 @@
 
 #include "cloud_families.hpp"
 #include "jung_dual.hpp"
+#include "jung_dual_judge.hpp"
 
 namespace {
 
@@ -70,7 +71,7 @@ struct Rng {
 }  // namespace
 
 int main(int argc, char** argv) {
-  bool selftest = false, ablation = false, fixtures = false;
+  bool selftest = false, ablation = false, fixtures = false, primal = false;
   long long seed = 1, rounds = 200000, span = 65535;
   long long n = 600, groupes_max = 8, voisins = 16, echantillon = 256;
   std::string famille = "eight_clusters";
@@ -85,6 +86,7 @@ int main(int argc, char** argv) {
     long long parsed = 0;
     if (key == "--selftest") selftest = true;
     else if (key == "--fixtures") fixtures = true;
+    else if (key == "--primal") primal = true;
     else if (key == "--ablation") ablation = true;
     else if (key == "--seed") { if (!parse_ll(val.c_str(), &parsed)) refuse("--seed invalide"); seed = parsed; }
     else if (key == "--rounds") { if (!parse_ll(val.c_str(), &parsed)) refuse("--rounds invalide"); rounds = parsed; }
@@ -311,6 +313,67 @@ int main(int argc, char** argv) {
                   dual_mutant_name(mutant), desaccords, morsures_gravees);
       return 4;
     }
+    // ---- LE JUGE COLLECTIF INDEPENDANT, POUR `k >= 2`.
+    //
+    // Le contre-audit relevait a juste titre que rien ne jugeait un groupe :
+    // comparer deux appels au meme predicat n'est pas un oracle de couverture.
+    // Le juge primal, lui, ne choisit AUCUN poids — il minimise `||s||^2` sur
+    // l'intersection des demi-plans mauvais et compare au rayon du disque de
+    // Jung. Autre unite de traduction, autre arithmetique (`BigInt` signe et
+    // magnitude), autre objet mathematique.
+    //
+    // L'implication exigee est DIRECTIONNELLE, et c'est ce qui compte : le
+    // predicat dual est SUFFISANT, donc `dual couvre => primal couvre`. La
+    // reciproque est fausse et ne doit pas etre exigee — la banque de poids
+    // est finie, donc le dual rate des groupes que le primal accepte. On
+    // mesure cette incompletude au lieu de la refuser.
+    {
+      Rng rj((unsigned long long)seed * 104729ULL + 7ULL);
+      long long duo = 0, dual_ok = 0, primal_ok = 0, unsound = 0, incomplet = 0;
+      static const long long kW2[][2] = {{1,1},{1,2},{2,1},{1,3},{3,1},{2,3},{3,2}};
+      for (long long r = 0; r < rounds / 4; ++r) {
+        long long a2[3], b2[3], zz[2][3];
+        for (int j = 0; j < 3; ++j) {
+          a2[j] = rj.in(0, span < 4096 ? span : 4096);
+          b2[j] = rj.in(0, span < 4096 ? span : 4096);
+          zz[0][j] = rj.in(0, span < 4096 ? span : 4096);
+          zz[1][j] = rj.in(0, span < 4096 ? span : 4096);
+        }
+        if (a2[0] == b2[0] && a2[1] == b2[1] && a2[2] == b2[2]) continue;
+        ++duo;
+        bool dcouvre = false;
+        mhgp::i64 za[2][3] = {{zz[0][0], zz[0][1], zz[0][2]}, {zz[1][0], zz[1][1], zz[1][2]}};
+        mhgp::i64 aa[3] = {a2[0], a2[1], a2[2]}, bb[3] = {b2[0], b2[1], b2[2]};
+        for (const auto& wv : kW2) {
+          const mhgp::i64 w[2] = {wv[0], wv[1]};
+          if (dual_lane(aa, bb, za, w, 2, DualMutant::kNone) >= kLaneQ4) { dcouvre = true; break; }
+        }
+        const bool pcouvre =
+            mhgp3v::jjudge::primal_couvre(a2, b2, zz, 2, 4) ==
+            mhgp3v::jjudge::Verdict::kCouvre;
+        if (dcouvre) ++dual_ok;
+        if (pcouvre) ++primal_ok;
+        if (dcouvre && !pcouvre) {
+          ++unsound;
+          if (unsound <= 3)
+            std::fprintf(stderr, "DESACCORD collectif : le dual couvre, le primal non — "
+                                 "a=(%lld,%lld,%lld) b=(%lld,%lld,%lld) "
+                                 "z1=(%lld,%lld,%lld) z2=(%lld,%lld,%lld)\n",
+                         a2[0], a2[1], a2[2], b2[0], b2[1], b2[2], zz[0][0], zz[0][1],
+                         zz[0][2], zz[1][0], zz[1][1], zz[1][2]);
+        }
+        if (pcouvre && !dcouvre) ++incomplet;
+      }
+      std::printf("dual_collectif accord=%s groupes=%lld dual=%lld primal=%lld"
+                  " | non_sound=%lld incompletude_banque=%lld (%.3f%%)\n",
+                  unsound == 0 ? "OUI" : "NON", duo, dual_ok, primal_ok, unsound,
+                  incomplet, 100.0 * (double)incomplet / (double)std::max(1LL, primal_ok));
+      if (unsound != 0) return 1;
+      if (primal_ok == 0) {
+        std::fprintf(stderr, "PLANCHER: le juge primal n'a couvert aucun groupe\n");
+        return 3;
+      }
+    }
     if (desaccords != 0) return 1;
     // Anti-vacuite : les quatre verdicts doivent avoir ete exerces.
     if (vus[0] == 0 || vus[2] == 0 || vus[3] == 0 || vus[4] == 0) {
@@ -425,12 +488,24 @@ int main(int argc, char** argv) {
           if (pris[(size_t)r2]) continue;
           mhgp::i64 z[2][3] = {{p[(size_t)r1][0], p[(size_t)r1][1], p[(size_t)r1][2]},
                                {p[(size_t)r2][0], p[(size_t)r2][1], p[(size_t)r2][2]}};
-          for (const auto& wv : kPoids2) {
-            const mhgp::i64 w[2] = {wv[0], wv[1]};
-            if (dual_lane(A.data(), B.data(), z, w, 2, mutant) >= kLaneQ4) {
-              pris[(size_t)r1] = 1; pris[(size_t)r2] = 1; ++pg; ++groupes_2; trouve = true;
-              break;
+          bool couvre = false;
+          if (primal) {
+            // LE PRIMAL EST LE CERTIFICAT, PAS SEULEMENT LE JUGE. Il ne cherche
+            // aucun poids : il minimise. La banque finie ratait la moitie des
+            // groupes couvrants, et cette moitie est recuperee ici sans
+            // recherche.
+            long long a2[3] = {A[0], A[1], A[2]}, b2[3] = {B[0], B[1], B[2]};
+            long long zz[2][3] = {{z[0][0], z[0][1], z[0][2]}, {z[1][0], z[1][1], z[1][2]}};
+            couvre = mhgp3v::jjudge::primal_couvre(a2, b2, zz, 2, 4) ==
+                     mhgp3v::jjudge::Verdict::kCouvre;
+          } else {
+            for (const auto& wv : kPoids2) {
+              const mhgp::i64 w[2] = {wv[0], wv[1]};
+              if (dual_lane(A.data(), B.data(), z, w, 2, mutant) >= kLaneQ4) { couvre = true; break; }
             }
+          }
+          if (couvre) {
+            pris[(size_t)r1] = 1; pris[(size_t)r2] = 1; ++pg; ++groupes_2; trouve = true;
           }
         }
       }
@@ -464,10 +539,10 @@ int main(int argc, char** argv) {
     if (pg >= groupes_max && p1 < groupes_max) ++gain;
   }
 
-  std::printf("dual_ablation famille=%s n=%lld paires=%lld seuil=%lld voisins=%lld"
+  std::printf("dual_ablation%s famille=%s n=%lld paires=%lld seuil=%lld voisins=%lld"
               " | fermees_temoin_unique=%lld (%.3f%%) fermees_groupes=%lld (%.3f%%)"
               " | gain=%lld (%.3f%%) | groupes tailles 1=%lld 2=%lld 3=%lld\n",
-              famille.c_str(), m, paires, groupes_max, voisins, fermees1,
+              primal ? "_primal" : "", famille.c_str(), m, paires, groupes_max, voisins, fermees1,
               100.0 * (double)fermees1 / (double)std::max(1LL, paires), fermeesg,
               100.0 * (double)fermeesg / (double)std::max(1LL, paires), gain,
               100.0 * (double)gain / (double)std::max(1LL, paires), groupes_1, groupes_2,

@@ -796,6 +796,89 @@ la comparaison des deux ordres dans le meme processus.
 > demi-plans dans le disque, a petit `n`, est-il l'autorite que vous voulez —
 > et acceptez-vous qu'il soit quadratique par paire, donc reserve aux fixtures ?
 
+## 6 sexies. Le juge primal existe, et il retire encore un de mes espoirs
+
+> **Reponse a ma Question 10.** Vous donnez l'autorite primale, et elle est
+> exactement ce qu'il fallait : constante, exacte, et d'un autre objet
+> mathematique que le sujet.
+
+### La derivation, verifiee avant d'etre codee
+
+Avec `s = 2w` et `u_z = a+b-2z`, un temoin est MAUVAIS pour le centre `s`
+lorsque `2 s.u_z >= g_z`, avec `g_z = D - ||u_z||^2`. Le groupe couvre la lane
+si et seulement si l'intersection de ses demi-plans mauvais ne rencontre pas le
+disque de Jung `||s||^2 <= D/2`. Comme cette intersection est un convexe ferme,
+cela equivaut a minimiser `||s||^2` dessus — et le minimum d'une forme
+quadratique sur une intersection de demi-plans est atteint a l'origine, sur la
+projection d'un bord, ou a l'intersection de deux bords. Pour trois IDs au
+plus, c'est un nombre CONSTANT de candidats.
+
+Avec vos formes reduites `K_ij = D(u_i.u_j) - (u_i.d)(u_j.d)`,
+`Delta = K_ii K_jj - K_ij^2` et `N = g_i^2 K_jj - 2 g_i g_j K_ij + g_j^2 K_ii`,
+on obtient `||s||^2 = (D/4) N/Delta`, donc `q4 : N > 2 Delta` et
+`q3 : 3N > 4 Delta`. J'ai verifie la coherence a un bord actif : elle redonne
+`g^2 > 2R`, c'est-a-dire exactement le predicat ponctuel `(g,Q)`. Vos trois
+fixtures sont confirmees numeriquement :
+
+```text
+collective-q4  : Delta=731161600000000  N=2680291328000000 > 2Delta  -> couvre
+                 aucun singleton ne passe (g=7040, g^2 < 2R)
+poids-decident : Delta=82944  N=184320 > 2Delta=165888  -> couvre
+frontiere-q4   : g=24, R=288, g^2 = 2R = 576  -> reste hors du cone ouvert
+```
+
+`oracle/jung_dual_judge.cpp` l'implemente en `BigInt` — `K` atteint 70 bits
+sous u16, donc `Delta` et `N` environ 140, et `i128` ne suffit pas. Unite de
+traduction separee, arithmetique signe-et-magnitude, aucun poids choisi.
+
+### Le controle croise, et ce qu'il donne
+
+Sur dix mille groupes de deux temoins tires uniformement :
+
+```text
+dual_collectif accord=OUI groupes=10000 dual=525 primal=1054
+                          non_sound=0  incompletude_banque=529 (50,19 %)
+```
+
+**`non_sound = 0`** : le predicat dual n'affirme jamais une couverture que le
+primal refute. C'est la seule direction exigee, et elle tient.
+
+**La banque de poids finie rate la moitie des groupes couvrants.** J'ai cru
+tenir la un facteur deux, et j'ai remplace la banque par le primal dans
+l'ablation.
+
+**Gain : rigoureusement nul.** Les quatre mesures sont identiques au terminal
+pres. L'explication est que les groupes que le proposer choisit sont les plus
+PROCHES du milieu, et sur ceux-la la banque est deja complete ; les 50 %
+manquants sont des groupes lointains que le proposer ne regarde jamais. Encore
+un negatif, et je le consigne comme tel.
+
+### Bilan de `JungDual`
+
+Il est mathematiquement recevable, juge par une autorite independante, et son
+gain reste de **2 a 8 %, decroissant avec `n`**. Ce n'est pas le levier.
+
+Vos autres corrections sont recues : mon commentaire inversait effectivement le
+minimax — la couverture est `min_w max_z Phi_z(w) > 0 = max_lambda min_w sum
+lambda_z Phi_z(w) > 0` — la formule codee etant juste, c'est la preuve
+documentaire qui etait fausse. Et mon ablation tire toutes les paires du nuage,
+pas la population `OPEN_FINAL` q4 : son gain est un diagnostic all-pairs du
+proposer, pas le gain sur le verrou.
+
+> **Question 11.** Il ne me reste plus d'hypothese testable a ce niveau. Le
+> predicat ponctuel est a `96 %` de `u`, le budget ne borne pas, l'ordre de
+> descente est neutre, l'elagage `NONE` ne perd rien, le groupe gagne `3 %` et
+> le packing plafonne sous `d`. Tout ce que j'ai mesure converge vers votre
+> conclusion : **la decision doit passer de `u` a `d`**, donc de la couverture
+> au NIVEAU SHALLOW.
+>
+> Avant de construire les niveaux `0..7`, une seule chose me manque : leur
+> juge. Un `d` calcule par arrangement complet des demi-plans dans le disque,
+> a petit `n` et en `BigInt`, est-il l'autorite que vous voulez ? Il est
+> quadratique par paire, donc reserve aux fixtures — mais il donnerait `u`, `p`
+> et `d` sur le meme objet, ce qui rendrait enfin comparables toutes les
+> mesures de cette journee.
+
 ## 7. Ce que je propose de faire ensuite, et ce que j'attends de vous
 
 Ma lecture, en une phrase : **`SOC64` est reçu comme un prune exact et bon

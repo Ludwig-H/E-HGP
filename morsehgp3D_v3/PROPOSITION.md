@@ -610,9 +610,22 @@ aucun intérieur. En dimension deux, le minimiseur est nécessairement l'origine
 la projection de l'origine sur une frontière, ou l'intersection de deux
 frontières. Pour une base de trois IDs au plus, le vérificateur énumère donc un
 nombre constant de candidats, contrôle toutes les inégalités en entier et ne
-partage aucune formule `A/P/R` avec le sujet. Pour un pool plus grand, un
-algorithme LP-type trouve une base active ; le hot path peut seulement proposer
+partage aucune formule `A/P/R` avec le sujet. Pour un pool plus grand, une
+intersection de demi-plans exacte construit le polygone fermé `P_G`. S'il est
+vide, Helly fournit un conflit d'au plus trois demi-plans. S'il ne l'est pas,
+le point de norme minimale est calculé ; lorsqu'il est hors du disque de Jung,
+ses conditions KKT n'emploient qu'un ou deux demi-plans actifs. Une base de
+trois n'est donc nécessaire que lorsque l'intersection des demi-plans est vide.
+Le coût complet est `O(N log N)` pour le tri angulaire puis `O(N)` pour
+l'intersection et le point le plus proche. Le hot path peut seulement proposer
 une base, car une base vérifiée suffit à fermer.
+
+Dans la récurrence leave-out, l'ordre angulaire est trié une fois pour la paire
+puis filtré en `O(N)` à chaque état. Les demi-plans parallèles et les
+coordonnées dupliquées ne sont jamais coalescés définitivement : supprimer le
+`PointId` portant la contrainte la plus forte peut rendre la suivante active.
+Il faut conserver tous les IDs, ou au moins les `h` contraintes les plus fortes
+par direction pour une décision de profondeur `h`.
 
 Une écriture entière évite de construire une base orthonormée du plan. Poser
 `v_z=2*(D*u_z-(u_z dot d)*d)` et
@@ -663,7 +676,95 @@ au moins un `z` de `G` est intérieur ; le fils qui retire cet ID fournit les
 `h-1` autres intérieurs distincts. Le nombre maximal d'appels de recherche de
 base est `(3^h-1)/2` : `3280` pour `h=8` et `9841` pour `h=9`. Ces valeurs
 correspondent à q4/q3 seulement sous le contrat `smax=11`. C'est un oracle
-borné, pas le hot path par paire.
+borné, pas le hot path par paire. Même avec seulement 32 octets par nœud
+interne, le pire cas représente environ 102,5 KiB pour q4 et 307,5 KiB pour q3
+par paire. Un DAG partagé est authentifié par
+`(PairId, lane, h, RemovedIdSet)` ; partager seulement sur la base courante
+serait faux. La disjonction porte sur chaque chemin racine--feuille. Des
+branches sœurs peuvent réutiliser légitimement le même ID.
+
+La promotion CK se définit sans changer de quantificateur. Pour une proof-tile
+`Q` et l'ensemble des IDs déjà retirés `S`, poser `BlockJD(Q,S,h)` égal à
+« pour toute paire propre de `Q`, la profondeur du pool authentifié privé de
+`S` est au moins `h` ». À chaque nœud, les mêmes IDs de base et les mêmes poids
+sont vérifiés uniformément sur tout `A×B`, puis les enfants portent
+`S union {z}`. Un échec de proposition, de largeur ou de borne rend `MIXED` ;
+une partition disjointe des vrais enfants CK remplace alors la tuile, jusqu'à
+l'oracle paire singleton. Un reçu conserve au minimum `RectId`, `TileId`,
+lane, `h`, `smax`, digest de `RemovedIdSet`, IDs/poids de base, cap de largeur,
+bornes polynomiales, handles enfants et preuve de partition.
+
+Il faut en outre garantir `D>0` sur la tuile. Un témoin qui devient l'un des
+endpoints est shell et ne crédite rien : l'ABI simple exige donc que les IDs de
+base soient disjoints des facteurs endpoint, ou scinde explicitement les
+stripes relationnelles correspondantes. Si la politique d'entrée conserve
+deux `PointId` à la même position, leur multiplicité reste réelle pour la
+profondeur. Par exemple, pour `a=(0,0,0)`, `b=(4,0,0)`, deux IDs distincts en
+`(2,0,0)` donnent profondeur deux ; un quotient silencieux par coordonnées la
+détruirait.
+
+#### Noyau de Helly avec tolérance et hypergraphe exact
+
+Le DAG exponentiel n'est pas la seule forme de reçu. Pour une paire fixe,
+noter `B_z=K_q intersect H_z` l'ensemble convexe fermé des centres admissibles
+où `z` n'est pas strictement intérieur. Un centre appartient à tous les `B_z`
+sauf au plus `h-1` exactement lorsqu'il possède au plus `h-1` témoins
+intérieurs. Ainsi `Depth(P,h)` signifie que la famille `{B_z:z in P}` n'a
+aucun point commun avec tolérance `h-1`.
+
+Le théorème de Helly avec tolérance de Montejano--Oliveros donne alors, par
+contraposée, un sous-pool `C` qui certifie déjà la même profondeur et vérifie
+`|C|<=eta(3,h)`. La borne d'Erdős--Gallai--Tuza satisfait
+`eta(3,h)<binom(h+2,2)+binom(h+1,2)=(h+1)^2`. Il existe donc toujours un reçu
+de **80 IDs au plus pour q4** et de **99 IDs au plus pour q3**, sous
+`smax=11`. La source primaire du transfert tolérant est
+[Tolerance in Helly Type Theorems](https://doi.org/10.1007/s00454-010-9296-6),
+théorème 3.1.
+
+Il existe une formulation algorithmique encore plus directe. Construire
+l'hypergraphe `E_q(P)` dont les sommets sont les `PointId` témoins et dont les
+hyperarêtes sont tous les groupes `G`, `1<=|G|<=3`, qui couvrent `K_q`. Alors :
+
+```text
+Depth_q(P) = tau(E_q(P))
+```
+
+où `tau` est la taille minimale d'un transversal d'hyperarêtes. En effet,
+l'ensemble des témoins intérieurs en un centre frappe chaque base couvrante,
+donc `tau<=Depth`. Réciproquement, si `R` frappe toutes les bases et si les
+mauvais demi-plans de `P minus R` avaient une intersection vide, Helly
+fournirait une base couvrante disjointe de `R`, contradiction. Il existe donc
+un centre où tous les IDs hors `R` sont mauvais, d'où `Depth<=|R|`. Les trois
+quantités du diagnostic ont ainsi un sens combinatoire exact : `u` compte les
+arêtes singleton, `p=nu(E)` est le packing maximal et `d=tau(E)`, avec
+`u<=p<=d`.
+
+Un constructeur exact fonctionne par séparation de coupes. Il maintient un
+petit ensemble `F` d'hyperarêtes déjà certifiées et résout le transversal borné
+`tau(F)`. Si `tau(F)>=h`, le reçu ferme. Sinon il choisit un transversal
+`R`, `|R|<h`, et appelle l'intersection de demi-plans sur `P minus R`. Un
+contre-centre prouve `Depth<h`; une intersection vide rend une nouvelle base
+`G` disjointe de `R`, qui est ajoutée à `F`. Sous cap, l'absence de terminaison
+rend `UNKNOWN`. Le replay GPU vérifie chaque petite base géométrique une seule
+fois, puis résout `tau(F)>=h` par branches bitset de facteur au plus trois ; il
+ne répète plus la géométrie à chaque nœud leave-out.
+
+Un `ToleranceKernel` contient ces IDs authentifiés et les hyperarêtes utilisées,
+avec leurs reçus. Une autre autorité recalcule la profondeur en parcourant
+toutes les faces de l'arrangement de leurs droites, clipé au disque de Jung.
+Cet arrangement possède `O(|C|^2)` faces ; un replay simple de tous les IDs par
+face coûte `O(|C|^3)`, constant mais encore trop cher comme boucle universelle.
+Les faces de dimension zéro et un sont indispensables, car une égalité est
+shell et peut porter le minimum. Un proposer exact peut extraire un noyau par
+suppression d'IDs avec l'oracle, puis le device ne reçoit que la liste bornée
+et le problème combinatoire de transversal.
+
+Ce résultat rend le **payload** de succès sparse ; il ne borne ni le coût de
+recherche, ni le nombre de proof-tiles CK. Surtout, il vaut pour une paire fixe :
+`for all pair exists kernel` n'implique pas `exists kernel for all pair`. Sur
+une tuile, un même noyau doit être vérifié uniformément ou conduire à un split.
+Le `ToleranceKernel` complète donc le packing et peut remplacer le stockage du
+pire DAG, sans abolir `BlockJD`, ses masques d'endpoints ni ses continuations.
 
 Le fast path GPU cherche plutôt huit ou neuf groupes couvrants disjoints, ce
 qui donne immédiatement la même profondeur avec huit ou neuf reçus. S'il
@@ -695,7 +796,15 @@ peut former un septième groupe. Le packing maximal vaut sept. L'analogue q3
 emploie sept `u_j` et les gadgets `(20,113,100)`, `(20,91,109)`,
 `(20,91,91)` dans `3(Y^2+Z^2)<=400` : profondeur neuf, packing maximal huit.
 Ces fixtures rendent obligatoire le fallback leave-out pour une autorité
-complète.
+complète. Elles ont pourtant des preuves très compactes. Après la chaîne des
+six singletons q4, prendre `G={g1,g2}` à profondeur deux ; ses deux fils à
+profondeur un utilisent respectivement `{g2,g3}` et `{g1,g3}`. Le DAG q4 n'a
+que neuf nœuds internes. L'analogue q3 en a dix après ses sept singletons. Le
+réemploi de `g3` dans deux branches sœurs est valide et tue tout mutant qui
+impose une disjonction globale au lieu d'une disjonction par chemin. Les trois
+bases de gadgets possèdent aussi des reçus duals à poids `(1,1)` : pour q4,
+`A^2-2R` vaut `3923216`, `3923216`, puis `1458176`; pour q3,
+`3A^2-4R` vaut `8074928`, `8074928`, puis `2581248`.
 
 ### 6.4 `SOC64` et `CORNER512`
 
@@ -864,6 +973,22 @@ filtres vaut `O(s^3*eta^-6*n)`. Commencer à `eta=Theta(1)` et raffiner les
 seuls `MIXED`; ce majorant ne couvre ni localisation ni
 raffinements `MIXED`.
 
+La partition q4 doit rester explicite sous raffinement. Pour des enfants
+half-open disjoints `C_i`, l'atome diagonal est remplacé par tous les
+`binom(C_i,2)` et tous les `C_i×C_j` avec `i<j`; pour deux cellules distinctes,
+`C×D` est remplacé par tous les `C_i×D_j`. Le remplacement est atomique et le
+parent disparaît. Sur la diagonale, les IDs suivent `x<y`. Ces identités
+partitionnent les couples restants sans omission ni doublon ; elles interdisent
+une coexistence parent--enfant dans la wavefront.
+
+Le `CellPair` reste non ordonné jusqu'au test géométrique. Le carrier primaire
+sert seulement à orienter une sweep ou une émission terminale : il ne crée pas
+une seconde copie du même `CellPair`. Une émission depuis chacune des deux
+faces aiguës duplique un q4, tandis qu'une jointure exigeant deux faces aiguës
+perd les q4 qui n'en ont qu'une. `SupportKey` est décidé avant tout RLE par
+`BallKey` ; deux supports distincts partageant une sphère restent deux
+provenances.
+
 Même avec `C!=D`, les facteurs peuvent recouper les ensembles d'IDs `A` ou
 `B`. Les masses et preflights retirent donc explicitement les diagonales
 `A/C`, `A/D`, `B/C`, `B/D`, en plus de `C=D`. Le test terminal de quatre IDs
@@ -890,6 +1015,14 @@ couples non ordonnés teste donc `Acute(x) OR Acute(y)`. Une route orientée pre
 le plus petit `PointId` parmi les carriers aigus comme primaire et laisse
 l'autre sommet arbitraire. Exiger deux faces aiguës perd la fixture ; émettre
 depuis chaque face aiguë duplique les cas qui en ont deux.
+
+La fixture de tie
+`p0=(0,0,0)`, `p1=(0,1,1)`, `p2=(1,0,1)`, `p3=(1,1,0)`
+a ses six distances au carré égales à deux, son centre en
+`(1/2,1/2,1/2)` et quatre poids `1/4`. Avec les IDs `0<1<2<3`, l'owner q4
+est exactement `EdgeKey(0,1)`, le `CellPair` porte `{2,3}` et le primary de la
+sweep vaut `2`. Elle tue les owners non déterministes, l'émission depuis les
+deux carriers et la coexistence d'un parent avec ses enfants.
 
 Le preflight `M4_apex` n'a pas besoin de développer carrier × apex. Pour une
 arête owner `e`, retirer les sites collinéaires, définir `V_e` par les quatre
@@ -960,26 +1093,31 @@ profondeur. Son intersection avec `K_4(ab)` est un segment fermé `J_f`. Avec
 J_f intersect intersection_z {tau : A_z-tau*B_z>=0} = empty
 ```
 
-Helly en dimension un réduit un tel reçu à au plus deux IDs. Huit groupes de
-`PointId` disjoints ferment toutes les extensions q4 de la face avant apex et
-avant sweep. Pour une face fixe, les bornes de l'intersection sont les extrema
-des ratios `A_z/B_z` par signe ; l'égalité signifie shell et ne crédite rien.
-Un `FaceAxisJungDepth8Block` propose les petites bases sur un représentant,
-vérifie signes et produits croisés sur tout `A×B×C`, puis rend `ALL` ou scinde
-fail-open. Un succès parent s'hérite dans le `ProofSpanDAG`.
+Helly avec tolérance en dimension un donne ici un reçu constructif, plus simple
+que le DAG leave-out. Classer d'abord les témoins qui sont intérieurs sur tout
+`J_f` ; en conserver `p=min(h,n_permanents)`. Chaque autre témoin utile est une
+demi-droite ouverte `tau<alpha` ou `tau>beta`. Poser `k=h-p`, garder les `k`
+plus grands `alpha` et les `k` plus petits `beta`, avec leurs `PointId`.
 
-Les bouts de `J_f` étant généralement irrationnels, une comparaison élevée au
-carré certifie d'abord son signe. `B_z=0` conserve les trois cas constant
-intérieur/shell/extérieur. Huit groupes disjoints forment un reçu suffisant ;
-la profondeur exacte fixe-face emploie la récurrence leave-out ou un maximum
-matching du graphe-chaîne, pas un glouton arbitraire.
+Pour tout `tau`, le nombre de demi-droites gauches retenues vaut
+`min(k,n_gauches(tau))`, et de même à droite. Si la famille complète a
+profondeur au moins `h`, leur somme vaut donc au moins `k` partout ; la famille
+retenue a la même profondeur minimale. La réciproque est immédiate puisqu'il
+s'agit d'un sous-pool. Ainsi un `AxisToleranceKernel-h` exact contient au plus
+`p+2k=2h-p` IDs : **16 pour q4**, **18 pour q3**, et souvent moins.
 
-Comme le seuil contractuel vaut huit, ce matching ne demande pas un tri global :
-un scan garde les huit rayons droits aux plus petits seuils, les huit rayons
-gauches aux plus grands seuils et les singletons couvrants, puis apparie ces
-petits tableaux dans l'ordre. Le coût fixe-face est `O(n)` avec `O(8)` mémoire ;
-au niveau bloc, un LBVH/range-extrema peut proposer ces IDs et la preuve
-uniforme les accepte ou scinde.
+Un seul scan top-k suivi du replay des deux bouts de `J_f` et des seuils groupés
+décide donc exactement la profondeur d'une face fixe en `O(n)` avec `O(h)`
+mémoire. L'égalité est shell et ne crédite rien. Les bouts de `J_f` étant
+généralement irrationnels, les comparaisons emploient signe puis carré exact ;
+`B_z=0` conserve les trois cas constant intérieur/shell/extérieur. Cette forme
+est la spécialisation constructive de `eta(2,h)=2h`.
+
+Un `FaceAxisJungDepth8Block` propose ce petit noyau sur un représentant, puis
+vérifie orientations, signes, ordre des seuils et marges sur tout `A×B×C`.
+`ALL` s'hérite ; toute inversion d'ordre, égalité ou borne indécise scinde
+fail-open. Un LBVH/range-extrema peut proposer directement les top-k sans
+matérialiser les faces ou les apex.
 
 Après ajout d'une cellule apex, `BlockBallDepth8(A,B,C,D)` restreint encore la
 famille de centres. Si `B_y` change de signe sur `D`, son image en `tau` peut

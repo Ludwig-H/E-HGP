@@ -29,10 +29,12 @@ Empreintes SHA-256 au HEAD :
 - `prototype/cloud_families.hpp` :
   `1f9089ba5972bf76aece6d899bacd8682341f394833c5d06e46ea2a921efad57`.
 
-Le worktree est redevenu mouvant après ce commit. Claude modifie le brute-force
-q4 et précise la preuve de `2B_R` dans l'audit précédent. Ces deltas live ne
-sont pas attribués à l'auditeur et ne deviennent pas le statut du HEAD.
-L'auditeur ne modifie aucun fichier logiciel. GCP non utilisé.
+Ce pin reste l'ancre historique du contre-audit v2. Les sections 5.2--5.6
+auditent ensuite les deltas reçus jusqu'au `HEAD=e54c908` ; elles ne changent
+pas les empreintes historiques ci-dessus. Le verdict mutable et les empreintes
+courantes sont dans
+[`AUDIT_ETAT_COURANT.md`](AUDIT_ETAT_COURANT.md). L'auditeur ne modifie aucun
+fichier logiciel. GCP non utilisé.
 
 ## Verdict direct
 
@@ -473,9 +475,18 @@ l'égalité est shell.
 
 Pour éviter une base orthonormée, prendre
 `v_z=2*(D*u_z-(u_z dot d)*d)` et `c_z=D*(D-||u_z||^2)` : le demi-plan devient
-`s dot v_z>=c_z`. Les projections demandent environ 142 bits et les
-intersections de deux bords environ 250 bits sous u16. Ce juge primal doit donc
-rester GMP/i256 ; le dual `A/P/R` i128 est le vérificateur device compact.
+`s dot v_z>=c_z`. Les projections demandent environ 142 bits et les tests de
+rayon des intersections environ 250 bits sous u16. Le replay naïf d'une
+intersection contre un troisième demi-plan peut toutefois dépasser i256. La
+route i256 sûre réduit d'abord `g_i=D-||u_i||^2` et
+`K_ij=D*(u_i dot u_j)-(u_i dot d)*(u_j dot d)`. Elle emploie
+`Delta=K_ii*K_jj-K_ij^2` et
+`N=g_i^2*K_jj-2*g_i*g_j*K_ij+g_j^2*K_ii`, rejoue toutes les contraintes dans
+ces formes, puis teste q4 par `N>2*Delta` et q3 par `3*N>4*Delta`. Les plus
+grandes comparaisons restent sous environ 180 bits. Sans cette réduction,
+l'oracle reste GMP. `D=0`, normale nulle, parallélisme, Gram nul et tout
+dénominateur non positif sont des cas explicites. Le dual `A/P/R` i128 est le
+vérificateur device compact sous son cap de poids.
 
 Cette base donne aussi une profondeur sans exiger huit groupes globalement
 disjoints. Avec `Depth(P,0)=true` et une base couvrante `G`, on a exactement :
@@ -486,7 +497,8 @@ Depth(P,h) = AND_{z in G} Depth(P minus {z},h-1)
 
 Au centre considéré, choisir le membre de `G` qui est intérieur puis le fils
 qui l'a supprimé garantit des IDs distincts. Le pire nombre de recherches de
-base vaut `(3^h-1)/2`, soit `3280` pour q4 et `9841` pour q3. Le hot path garde
+base vaut `(3^h-1)/2`, soit `3280` pour `h=8` et `9841` pour `h=9`. Leur nom
+q4/q3 vient du contrat `smax=11`, pas des lanes seules. Le hot path garde
 huit/neuf groupes disjoints comme fast path ; le DAG de suppressions est le
 fallback capé ou l'oracle. Sur un rectangle, une base proposée n'est héritée
 qu'après vérification uniforme de sa marge ; sinon on scinde `A/B`.
@@ -705,6 +717,99 @@ profondeur exacte `d`, puis les masses `u<8<=p` et `p<8<=d`, les proof-tiles,
 splits, octets et `M4_apex` fermé. Une moyenne de `9,30` ne prouve pas à elle
 seule que la perte au seuil explique les flips ; l'histogramme apparié le
 prouve ou le réfute.
+
+Un renforcement de Helly rend ce troisième levier beaucoup plus sparse. Pour
+chaque témoin, `B_z=K_q intersect H_z` est l'ensemble convexe fermé des centres
+où il n'est pas intérieur. La profondeur est inférieure à `h` si et seulement
+si les `B_z` ont un point commun après suppression d'au plus `h-1` ensembles.
+Par contraposée du théorème de Helly avec tolérance, toute profondeur au moins
+`h` possède donc un sous-pool qui la certifie déjà, de taille au plus
+`eta(3,h)` ([Montejano--Oliveros, théorème 3.1](https://doi.org/10.1007/s00454-010-9296-6)).
+La borne de Tuza donne `eta(3,h)<(h+1)^2` : **80 IDs suffisent
+toujours pour q4 et 99 pour q3** sous `smax=11`.
+
+Ce `ToleranceKernel` est une meilleure ABI de succès que le pire arbre : le
+payload contient les IDs, puis un vérificateur exact recalcule la profondeur
+sur l'arrangement borné de leurs droites et du disque. Un replay simple possède
+`O(k^2)` faces et `O(k^3)` tests pour `k<=80/99`, parallélisables mais encore à
+mesurer. Le théorème est existentiel : il ne rend pas gratuite la recherche du
+noyau et n'échange toujours pas `for all pair exists kernel` avec
+`exists kernel for all pair`. Un noyau proposé sur une proof-tile doit être
+vérifié uniformément ou provoquer un split.
+
+La meilleure réduction n'est toutefois pas l'arrangement complet. Soit `E`
+l'hypergraphe de rang trois dont chaque arête est une base Helly couvrante. On
+a exactement `d=tau(E)`, où `tau` est le transversal minimal. Tout ensemble
+d'intérieurs à un centre frappe chaque base, donc `tau<=d`. Inversement, si un
+transversal `R` frappe toutes les bases, Helly force un centre commun aux
+demi-plans mauvais de `P minus R`; ce centre a au plus `|R|` intérieurs, donc
+`d<=tau`.
+
+Cette identité transforme le fallback en branch-and-cut. Maintenir des bases
+déjà vérifiées `F`; si `tau(F)>=h`, fermer. Sinon choisir un transversal
+`R`, `|R|<h`, et appeler HPI sur `P minus R`. Elle rend soit un contre-centre,
+soit une nouvelle base disjointe de `R`. Le device vérifie chaque base
+géométrique une fois puis rejoue `tau(F)>=h` par bitsets, au lieu de refaire la
+géométrie dans les `3^h` branches. Le diagnostic se lit maintenant exactement
+comme `u=#singletons`, `p=nu(E)` et `d=tau(E)`.
+
+L'ABI mathématique est désormais assez précise pour un prototype borné. Pour
+une paire fixe, intersecter exactement les demi-plans de non-intérieur dans le
+plan médiateur. Si l'intersection est vide, une base de Helly a au plus trois
+IDs ; sinon le point de norme minimale a au plus deux contraintes actives. Le
+tri angulaire coûte `O(N log N)` une fois, puis chaque état leave-out filtre les
+contraintes en `O(N)`. Les parallèles ne sont pas coalescés définitivement :
+retirer un `PointId` peut exposer la contrainte suivante de même direction.
+
+Pour une tuile CK `Q`, définir `BlockJD(Q,S,h)` avec le quantificateur
+`for all (a,b) in Q` et l'ensemble d'IDs retirés `S`. Une base commune n'est
+créditée qu'après preuve uniforme sur tout `A×B`; ses enfants portent
+`S union {z}`. Tout échec est `MIXED` puis split disjoint, jamais une preuve de
+faible profondeur. Le hash-cons du DAG inclut
+`(RectId,TileId,lane,h,RemovedIdSet)`. La disjonction des IDs ne vaut que le
+long d'un chemin racine--feuille : des branches sœurs peuvent réemployer le
+même témoin.
+
+La fixture `u/g` précédente fournit précisément ce reçu positif compact. En
+q4, six bases singleton sont suivies de `G={g1,g2}` ; les deux fils utilisent
+`{g2,g3}` et `{g1,g3}`. Neuf nœuds internes prouvent la profondeur huit alors
+qu'aucun packing de huit groupes n'existe. En q3, sept singletons donnent un
+DAG de dix nœuds pour la profondeur neuf. Un mutant `packing_is_complete` ou
+`siblings_must_be_disjoint` doit donc mourir sur ces fixtures. Les pires arbres
+restent lourds : `3280/9841` nœuds internes, environ `102,5/307,5 KiB` par
+paire à 32 octets par nœud. Le DAG est un certificateur capé, pas une nouvelle
+boucle universelle sur les PairId.
+
+Enfin, l'exact-once de WST4 exige une vraie partition, pas seulement un owner.
+Le `CKPairTape` partitionne les paires, les cellules half-open forment une
+antichaîne, et un parent raffiné est remplacé atomiquement par tous ses enfants.
+Pour une cellule diagonale, il faut émettre tous les `binom(C_i,2)` et les
+`C_i×C_j`, `i<j`; pour `C×D`, tous les `C_i×D_j`. Le `CellPair` demeure non
+ordonné ; le primary aigu oriente seulement la sweep. Cette règle, avec owner
+distance/`EdgeKey`, empêche à la fois la perte du cas à une seule face aiguë et
+le doublon du cas à deux faces aiguës.
+
+### 5.7 Solution fixe-face : un noyau exact de 16 IDs, sans sweep globale
+
+Après une face aiguë fixe, les centres q4 admissibles forment un segment
+`J_f`. Chaque témoin est intérieur sur tout le segment, jamais, ou sur une
+demi-droite ouverte `tau<alpha` ou `tau>beta`. Soit `p` le nombre de témoins
+permanents capé à `h`, et `k=h-p`. Un scan conserve seulement les `k` plus
+grands `alpha` et les `k` plus petits `beta`.
+
+Pour tout `tau`, le nombre retenu de demi-droites gauches vaut
+`min(k,n_gauches(tau))`, et symétriquement à droite. Si le pool complet a
+profondeur `h`, la somme retenue vaut donc au moins `k` en tout point. La
+réciproque vient de l'inclusion du sous-pool. Ce noyau d'au plus
+`p+2k=2h-p` IDs décide exactement la profondeur : au plus **16 IDs pour q4**
+et **18 pour q3**.
+
+L'implémentation fixe-face est un scan top-k `O(n)` avec `O(h)` mémoire, puis
+un replay exact des deux bouts et des seuils groupés ; l'égalité reste shell.
+Au niveau bloc, un range-extrema propose ces IDs et vérifie uniformément leur
+ordre et leur marge sur `A×B×C`; toute inversion ou égalité scinde. Cette
+porte se place **avant** la jointure apex et remplace, sur ce domaine 1D, le
+DAG à `3280` appels par un payload constant.
 
 ## 6. M4 sans échantillonnage : intervalles de blocs
 
