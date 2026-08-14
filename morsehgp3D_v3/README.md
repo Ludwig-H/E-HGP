@@ -28,7 +28,7 @@ doit être déduit de ces probes CPU.
 
 ## Verdict actuel
 
-Le `HEAD=a73161c` contient trois avancées directement liées à l'idée de support
+Le `HEAD=069d903` contient trois avancées directement liées à l'idée de support
 complet, puis une première réduction de la taille du broad phase WST3/WST4 :
 
 - `Corner8BallDepth` reçoit un certificat q4 `ALL_INTERIOR` sur un produit de
@@ -69,9 +69,13 @@ quadratique sur les blocs, mais reconvertit encore l'entier u128 en `double`
 pour l'affichage. Owner, injectivité, positivité et profondeur doivent précéder
 tout `fill`.
 
-Le worktree de Claude expérimente ensuite un raccord Corner8 au broad phase.
-Ce delta mobile n'est ni un résultat du `HEAD`, ni reçu : son état, ses hashes
-et ses contre-fixtures restent exclusivement dans l'audit courant.
+Le même commit branche un diagnostic Corner8 après la matérialisation et le
+count du broad phase. Il ne sauve donc encore aucun produit WST4. Il refuse en
+outre les couples `C,D` non séparés au lieu de raffiner leur produit symétrique :
+c'est fail-open pour ce diagnostic facultatif, mais ce n'est pas une règle de
+source exacte. Le worktree de Claude expérimente déjà un certificat bisigne ;
+son état, ses hashes et ses contre-fixtures restent exclusivement dans l'audit
+courant.
 
 Votre idée mathématique est donc reçue sous sa forme exacte : la hiérarchie
 HGP n'a besoin que des supports minimaux positifs complets. q2 teste une boule
@@ -266,9 +270,13 @@ sert seulement à choisir un carrier géométrique primaire. La jointure teste
 face aiguë adjacente. Si les deux le sont, le plus petit `PointId` aigu est le
 primaire et supprime le doublon ; l'autre sommet reste un apex arbitraire.
 
-Le chemin q4 élimine d'abord les `CarrierBlock` sans face aiguë, avant de
-former les couples de cellules. Les blocs `ALL_ACUTE` restent symboliques :
-WST4 est formé avant toute expansion par face. Pour une face exacte résiduelle, les centres vivent sur
+Au niveau des blocs, partitionner les cellules en `A` (`Hmin<0`, carrier aigu
+possible) et `N` (`Hmin>=0`, uniformément non aigu). Le résiduel q4 est gardé
+symboliquement comme `Sym2(A) disjoint_union Cross(A,N)`. `N` disparaît
+seulement du rôle carrier et reste indispensable comme apex : le supprimer des
+deux flux perdrait les q4 qui n'ont qu'une face aiguë adjacente. Aucun de ces
+deux produits n'est rempli avant profondeur, owner, distinct-ID et positivité.
+Pour une face exacte résiduelle, les centres vivent sur
 une droite et la puissance de chaque apex y est affine : une sweep 1D par lots
 égaux remplace l'arrangement 2D comme candidat principal. Les comparaisons
 rationnelles peuvent dépasser `i128` sous u16. Un site dont le dénominateur de

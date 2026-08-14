@@ -314,7 +314,81 @@ MHGP_HD inline int orientation_signe(const Box& A, const Box& B, const Box& X,
   const i128 err = e1 + e2 + e3;
   if (centre > err) return 1;
   if (centre < -err) return -1;
+  // La forme centree n'est pas uniformement meilleure que l'evaluation naive :
+  // ses termes d'ordre deux et trois sont majores grossierement. Les deux sont
+  // SURES, donc essayer la seconde quand la premiere renonce ne coute qu'un
+  // calcul et ne peut pas rendre un signe faux.
+  Iv u[3], v[3], w[3];
+  for (int i = 0; i < 3; ++i) {
+    u[i] = Iv{(i128)B.lo[i] - (i128)A.hi[i], (i128)B.hi[i] - (i128)A.lo[i]};
+    v[i] = Iv{(i128)X.lo[i] - (i128)A.hi[i], (i128)X.hi[i] - (i128)A.lo[i]};
+    w[i] = Iv{(i128)Y.lo[i] - (i128)A.hi[i], (i128)Y.hi[i] - (i128)A.lo[i]};
+  }
+  const Iv o = iv_det3(u, v, w);
+  if (o.lo > 0) return 1;
+  if (o.hi < 0) return -1;
   return 0;
+}
+
+// ---------------------------------------------------------------------------
+// SE PASSER DU SIGNE DE L'ORIENTATION.
+//
+// Un temoin `z` est interieur si et seulement si `sign(O) != sign(J)`. Quand
+// l'orientation du bloc est indecise, il porte des supports des DEUX signes —
+// mais rien n'oblige a trancher : il suffit de crediter les deux cas
+// SEPAREMENT.
+//
+//   `J_U < 0` sur un nœud temoin  -> tous ses points sont interieurs a tous
+//                                    les supports d'orientation POSITIVE ;
+//   `J_L > 0` sur un nœud temoin  -> idem pour l'orientation NEGATIVE.
+//
+// Si les deux ledgers atteignent le seuil, alors TOUT support du bloc possede
+// assez d'interieurs, quel que soit son signe. L'orientation n'a plus besoin
+// d'etre decidee, et les blocs presque coplanaires — ceux que la separation ne
+// pourra jamais rendre decidables — redeviennent traitables.
+//
+// La convexite reste ce qui rend les huit coins complets : a signe FIXE de `J`
+// recherche, on borne `J` sur la boite temoin par ses coins, et le meme
+// argument de stricte convexite en `z` s'applique dans chaque cas.
+//
+// Rend un masque de deux bits : `1` = `ALL` pour `sigma=+1`, `2` = pour
+// `sigma=-1`. Zero signifie seulement « ce classifieur ne conclut pas ».
+MHGP_HD inline int corner8_bisigne(const Box& A, const Box& B, const Box& X,
+                                   const Box& Y, const Box& Z,
+                                   C8Mutant mu = C8Mutant::kNone,
+                                   long long* coins = nullptr) {
+  bool plus_ok = true, moins_ok = true;
+  const int ncoins = (mu == C8Mutant::kDropCorner) ? 7 : 8;
+  for (int k = 0; k < ncoins && (plus_ok || moins_ok); ++k) {
+    i64 q[3];
+    box_corner(Z, k, q);
+    if (coins != nullptr) ++*coins;
+    const Box* boxes[4] = {&A, &B, &X, &Y};
+    Iv row[4][3];
+    Iv nrm[4];
+    for (int t = 0; t < 4; ++t) {
+      diff_box_point(*boxes[t], q, row[t]);
+      nrm[t] = norme_box_point(*boxes[t], q, mu);
+    }
+    Iv acc{0, 0};
+    for (int t = 0; t < 4; ++t) {
+      int idx[3], n = 0;
+      for (int s2 = 0; s2 < 4; ++s2) if (s2 != t) idx[n++] = s2;
+      const Iv m = iv_det3(row[idx[0]], row[idx[1]], row[idx[2]]);
+      const Iv term = iv_mul(nrm[t], m);
+      if ((3 - t) % 2 == 0) acc = iv_add(acc, term);
+      else acc = iv_sub(acc, term);
+    }
+    // `sigma=+1` exige `J < 0` partout ; `sigma=-1` exige `J > 0` partout.
+    if (mu == C8Mutant::kAcceptEquality) {
+      if (acc.hi > 0) plus_ok = false;
+      if (acc.lo < 0) moins_ok = false;
+    } else {
+      if (acc.hi >= 0) plus_ok = false;
+      if (acc.lo <= 0) moins_ok = false;
+    }
+  }
+  return (plus_ok ? 1 : 0) | (moins_ok ? 2 : 0);
 }
 
 MHGP_HD inline BallVerdict corner8_block(const Box& A, const Box& B, const Box& X,

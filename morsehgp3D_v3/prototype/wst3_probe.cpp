@@ -606,6 +606,7 @@ int main(int argc, char** argv) {
   if (corner8 > 0) {
     long long soumis = 0, fermes = 0, orient_mixte = 0, coins = 0, orient_indecise = 0;
     long long cd_non_separes = 0;
+    unsigned __int128 masse_soumise = 0;
     long long visites8 = 0;
     unsigned __int128 masse_fermee = 0;
     const int seuil = 8;   // `smax=11` : huit interieurs sortent q4 du contrat
@@ -634,6 +635,12 @@ int main(int argc, char** argv) {
             }
           }
           ++soumis;
+          {
+            const unsigned __int128 mm =
+                (unsigned __int128)count_of(terms[t].a) * (unsigned __int128)count_of(terms[t].b) *
+                (unsigned __int128)count_of(bl[u].c) * (unsigned __int128)count_of(bl[v].c);
+            masse_soumise += mm;
+          }
           // ---- LA SEPARATION DOIT PORTER SUR TOUS LES COUPLES DE FACTEURS.
           //
           // Une WSPD ne separe que `(A,B)`. Mais l'orientation d'un tetraedre
@@ -648,7 +655,8 @@ int main(int argc, char** argv) {
           // Elle ne depend que des quatre facteurs support. Si son signe n'est
           // pas fixe sur le bloc, `Corner8` rendra `MIXED` pour TOUT temoin :
           // parcourir l'arbre est alors du travail pur perdu.
-          if (mhgp3v::c8::orientation_signe(A, B, C, D) == 0) { ++orient_indecise; continue; }
+          const int sg = mhgp3v::c8::orientation_signe(A, B, C, D);
+          if (sg == 0) ++orient_indecise;
           // Plages d'IDs des quatre facteurs : un temoin doit en etre DISJOINT,
           // sinon il pourrait etre l'un des sommets du support.
           const int fa = (terms[t].a < 0) ? (-1 - terms[t].a) : nodes[terms[t].a].first;
@@ -659,12 +667,18 @@ int main(int argc, char** argv) {
           const int lc = (bl[u].c < 0) ? (-1 - bl[u].c) : nodes[bl[u].c].last;
           const int fd = (bl[v].c < 0) ? (-1 - bl[v].c) : nodes[bl[v].c].first;
           const int ld = (bl[v].c < 0) ? (-1 - bl[v].c) : nodes[bl[v].c].last;
-          long long credits = 0;
+          // Deux ledgers : les temoins surs pour l'orientation positive, et
+          // ceux surs pour la negative. Un bloc d'orientation DECIDEE n'a
+          // besoin que du sien ; un bloc indecis a besoin des deux.
+          long long credits_plus = 0, credits_moins = 0;
           bool mixte = false;
           int st8[128];
           int sn8 = 0;
           st8[sn8++] = 0;
-          while (sn8 > 0 && credits < seuil) {
+          while (sn8 > 0 && !((sg > 0 && credits_plus >= seuil) ||
+                             (sg < 0 && credits_moins >= seuil) ||
+                             (credits_plus >= seuil && credits_moins >= seuil))) {
+            if (sn8 == 0) break;
             const int nd = st8[--sn8];
             ++visites8;
             const int nf = (nd < 0) ? (-1 - nd) : nodes[nd].first;
@@ -680,10 +694,11 @@ int main(int argc, char** argv) {
               for (int i = 0; i < 3; ++i) { Z.lo[i] = rz.lo[i]; Z.hi[i] = rz.hi[i]; }
             }
             if (!chevauche) {
-              const auto vd = mhgp3v::c8::corner8_block(A, B, C, D, Z,
-                                                        mhgp3v::c8::C8Mutant::kNone, &coins);
-              if (vd == mhgp3v::c8::BallVerdict::kAllInterior) {
-                credits += count_of(nd);
+              const int masque = mhgp3v::c8::corner8_bisigne(
+                  A, B, C, D, Z, mhgp3v::c8::C8Mutant::kNone, &coins);
+              if (masque != 0) {
+                if (masque & 1) credits_plus += count_of(nd);
+                if (masque & 2) credits_moins += count_of(nd);
                 continue;   // nœud credite : ses descendants ne le sont plus
               }
             }
@@ -692,7 +707,10 @@ int main(int argc, char** argv) {
             st8[sn8++] = nodes[nd].left;
             st8[sn8++] = nodes[nd].right;
           }
-          if (credits >= seuil) {
+          const bool ferme = (sg > 0) ? (credits_plus >= seuil)
+                           : (sg < 0) ? (credits_moins >= seuil)
+                                      : (credits_plus >= seuil && credits_moins >= seuil);
+          if (ferme) {
             ++fermes;
             const unsigned __int128 mm =
                 (unsigned __int128)count_of(terms[t].a) * (unsigned __int128)count_of(terms[t].b) *
@@ -704,6 +722,7 @@ int main(int argc, char** argv) {
     std::printf("corner8_source : soumis=%lld cd_non_separes=%lld (%.2f%%)"
                 " orient_indecise=%lld (%.2f%%)"
                 " fermes=%lld (%.2f%% des orientes) masse_fermee=%.6g"
+                " masse_soumise=%.6g part_masse=%.4f%%"
                 " visites=%lld coins=%lld piles_saturees=%lld\n",
                 soumis, cd_non_separes,
                 100.0 * (double)cd_non_separes / (double)std::max(1LL, soumis),
@@ -711,7 +730,9 @@ int main(int argc, char** argv) {
                 100.0 * (double)orient_indecise / (double)std::max(1LL, soumis - cd_non_separes),
                 fermes,
                 100.0 * (double)fermes / (double)std::max(1LL, soumis - cd_non_separes - orient_indecise),
-                (double)masse_fermee, visites8, coins, orient_mixte);
+                (double)masse_fermee, (double)masse_soumise,
+                100.0 * (double)masse_fermee / (double)(masse_soumise ? masse_soumise : 1),
+                visites8, coins, orient_mixte);
   }
   std::printf("OK famille=%s\n", family.c_str());
   return 0;

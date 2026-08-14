@@ -8,7 +8,7 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-> **Alerte au `HEAD=a73161c`.** Les commits `89774d0`, `e3f1925` et
+> **Alerte au `HEAD=069d903`.** Les commits `89774d0`, `e3f1925` et
 > `88a9ba8` ajoutent respectivement `Corner8BallDepth`, un broad phase WST3 et
 > son produit WST4 ; `22d1cb0` en publie la note de coût. Le successeur
 > `3703097` avait branché un filtre d'acuité au signe inversé. `a73161c`
@@ -16,7 +16,13 @@ Cadre : `phase=exploration_v3_hors_registre`,
 > fixture du tétraèdre régulier et rétracte le gain `1,62x`. La fixture vérifie
 > les deux valeurs `H=-1` et les six longueurs égales ; elle ne recalcule pas
 > indépendamment les quatre barycentriques `1/4` ni l'owner sur de vrais
-> `PointId`.
+> `PointId`. Le même commit stabilise une option `--echelle=num/den`
+> réciproque de son contrat : sa porte `1/256` reste verte par surcouverture et
+> ne distingue pas le mutant `256/1`.
+> `069d903` ajoute ensuite un diagnostic Corner8 sur un préfixe du produit brut.
+> Il confirme que la séparation aide certains certificats, mais ne reçoit pas
+> la thèse « séparation nécessaire » : un support q4 valide peut avoir deux
+> apex proches, et la diagonale `C=D` doit être raffinée par `Sym2`, pas jetée.
 >
 > Le théorème de la
 > miniboule unique est reçu uniquement pour un **support minimal positif
@@ -28,6 +34,13 @@ Cadre : `phase=exploration_v3_hors_registre`,
 > conserve les ancres non-owner et les diagonales, tie-breake par rang Morton et
 > rejette à tort les positions dupliquées. Le verdict détaillé et les réponses
 > Q6--Q9 sont dans le nouveau contre-audit support-complet.
+>
+> Le commit `069d903` raccorde Corner8 seulement comme diagnostic après
+> matérialisation du WST3 et parcours explicite des couples WST4. Il ne retire
+> aucune tâche aval, n'a ni CTest ni juge causal, et saute désormais les
+> couples `C--D` non séparés : c'est une fermeture partielle fail-open, pas une
+> source complète. Son helper d'orientation centré n'est pas transmis à
+> `corner8_block`, qui recalcule l'ancien intervalle.
 >
 > Les défauts antérieurs restent actifs : les portes HC saines sont à regex et
 > ne jugent pas chaque promotion ; `--fenetre-exhaustive` contourne les gates ;
@@ -45,14 +58,15 @@ Cadre : `phase=exploration_v3_hors_registre`,
 ## Snapshot
 
 Le dernier commit stable relu est
-`HEAD=a73161c7a01ce17ab687e50f09a6f1e619826de8`, commit
-`l'echelle des cellules divise la constante par six cents`. Il
+`HEAD=069d90329c0562963ea8b4b40eec2a0102918456`, commit
+`Louis avait raison sur s : la separation gouverne la decidabilite`. Il
 absorbe le raccord Midball de `a58d020`, HC et la borne de `c1e2e3b`, Corner8
 de `89774d0`, WST3 de `e3f1925`, WST4 de `88a9ba8`, la correction du signe
-aigu et l'échelle rationnelle. Le delta logiciel mobile de Claude porte sur
-`prototype/corner8_ball.hpp` et `prototype/wst3_probe.cpp`; il expérimente une
-jonction Corner8 après la construction du broad phase. Hors présentes écritures
-documentaires, aucun logiciel n'a été modifié par l'auditeur.
+aigu, l'échelle rationnelle et le diagnostic Corner8 postérieur au broad phase.
+Le delta logiciel mobile de Claude porte à nouveau sur
+`prototype/corner8_ball.hpp` et `prototype/wst3_probe.cpp`; il expérimente un
+certificat bisigne. Hors présentes écritures documentaires, aucun logiciel n'a
+été modifié par l'auditeur.
 
 Le commit stable ajoute une échelle rationnelle `num/den` dont le commentaire
 annonce `diag2<=num/den*rayon2`, mais compare actuellement
@@ -62,14 +76,20 @@ grosses. La comparaison conforme au commentaire est
 `diag2*den<=rayon2*num`, en i128. Le cas historique `1/1` ne distingue pas ce
 mutant ; une paire de portes `4/1` et `1/4` est nécessaire.
 
-Empreintes SHA-256 au commit `a73161c` :
+Le rejeu causal `uniform,n=1000` donne `6 159 060` blocs WST4 à `1/1`,
+`35 494` à `1/64` et `65 167 274` à `64/1`. À `1/4096,n=60`, l'arrêt racine
+rend encore le juge owner vert par pure surcouverture et publie
+`3 132 900=binom(60,2)^2` tuples candidats. Cela ne reçoit aucune sélectivité
+aval.
+
+Empreintes SHA-256 au commit `069d903` :
 
 - `CMakeLists.txt` :
   `a4d6f7ed0e1746a5a7a2f88921fe138d3eb01ad550077b253abc72c918b16f48` ;
 - `prototype/wst3_probe.cpp` :
-  `f0619c8901317e0dc8be264e063e7d3abfb91d1c49a945797abe6f0549bdf0c1` ;
+  `f6d1203eb97f62a2695956bfadd6aea0fee56b0eec353c8a8423c3f5ecbafc3f` ;
 - `prototype/corner8_ball.hpp` :
-  `35d140031f76cfba5394013e95a35c61643a22bb6ad89c2670535c9dc259e2d0` ;
+  `ee4d03e320e678e29428b9263620e9795ec66d83034fd3fef53df70424d2ea36` ;
 - `prototype/corner8_probe.cpp` :
   `9f29100613543cdf1f246243ec7b8112b4c84826618c4a053b3332361c49115f` ;
 - `prototype/wspd_wavefront_probe.cpp` :
@@ -391,6 +411,16 @@ préconditions de Corner8, mais ses compteurs `fermes/masse_fermee` portent la
 candidate-cover brute, pas des supports q4 authentifiés. Un cap `--corner8`
 tronque en outre le diagnostic; il ne doit jamais être interprété comme une
 fermeture complète.
+
+La diagonale `C=D` contient le choix `x=y`, donc son intervalle d'orientation
+contient nécessairement zéro. Elle exige un raffinement paresseux exact de
+`binom(C,2)` en `LL/LR/RR`; la supprimer perdrait les q4 dont les deux sommets
+restants partagent la cellule. Le worktree saute plus largement tout couple
+`C--D` non séparé. C'est sûr pour un diagnostic de fermetures partielles, mais
+incomplet ; malgré son commentaire « tous les couples », il ne teste ni
+`A--C/A--D` ni `B--C/B--D`. Le prétest d'orientation centré est sûr, mais
+`corner8_block` recalcule ensuite l'ancien intervalle au lieu de consommer son
+signe : la promesse « une seule fois » et le gain associé ne sont pas reçus.
 
 Deux optimisations annoncées n'ont pas encore leur sémantique. Le prétest
 `orientation_signe` centré est une enclosure potentiellement plus mordante,

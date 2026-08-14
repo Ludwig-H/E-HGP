@@ -1436,6 +1436,29 @@ le plus petit `PointId` parmi les carriers aigus comme primaire et laisse
 l'autre sommet arbitraire. Exiger deux faces aiguës perd la fixture ; émettre
 depuis chaque face aiguë duplique les cas qui en ont deux.
 
+La même règle se factorise sans former le carré des blocs. Pour un rectangle,
+partitionner les cellules en `A`, celles dont `Hmin<0` permet encore un carrier
+aigu, et `N`, celles dont `Hmin>=0` prouve `NONE_ACUTE`. Au niveau de cette
+relaxation, les couples possibles sont exactement :
+
+```text
+Q4CandidateCellPairs = Sym2(A) disjoint_union Cross(A,N)
+```
+
+`Sym2(A)` conserve sa diagonale `binom(C,2)` ; `Cross(A,N)` est orienté de
+façon unique par les deux classes. Un nœud `N` disparaît seulement comme
+carrier, jamais comme apex. Ces deux termes restent des descripteurs de produit,
+pas des buffers ni une source q4 déjà owner/positive.
+
+La liste WST3 elle-même peut rester virtuelle. Un
+`LensDescriptor(RectId,root)` descend le BVH témoin : hors lentille disparaît,
+`NONE_ACUTE` rejoint seulement le pool apex, et un carrier possible appelle
+d'abord `FaceAxisJungDepth8Block`. Si ce reçu ferme toutes ses complétions,
+aucun apex n'est ouvert ; sinon une tâche dual-tree
+`(CarrierNode,ApexRoot)` descend seulement le produit résiduel avant
+owner/distinct-ID/positivité/Corner8. Le pire cas n'est pas borné par ce contrat,
+mais l'ordonnance attaque le coût avant matérialisation.
+
 La fixture de tie
 `p0=(0,0,0)`, `p1=(0,1,1)`, `p2=(1,0,1)`, `p3=(1,1,0)`
 a ses six distances au carré égales à deux, son centre en
@@ -1559,9 +1582,10 @@ addition/carry/scan déterministes, soit le contrat prouvé `n<=50000` :
 `6*choose(n,4)<2^61` et `n^4<2^63`, avec preflight avant cast vers `uint64_t`.
 
 La construction ne forme pas aveuglément tous les couples `(C,D)`. Elle
-classe d'abord `CarrierBlock(A,B,C)` en `ALL_ACUTE/NONE_ACUTE/MIXED`, élimine
-`NONE_ACUTE`, puis associe seulement les carriers aigus possibles aux cellules
-d'apex. La famille u16 à deux droites doit ainsi produire zéro face aiguë et
+classe d'abord `CarrierBlock(A,B,C)` en `ALL_ACUTE/NONE_ACUTE/MIXED`, puis
+conserve symboliquement `Sym2(A) disjoint_union Cross(A,N)` avec
+`A={Hmin<0}` et `N={Hmin>=0}`. `N` est éliminé comme carrier mais reste dans le
+pool apex. La famille u16 à deux droites doit ainsi produire zéro face aiguë et
 zéro bloc q4 malgré `n^2/4` paires non fermées par les certificats universels.
 
 Pour une face exacte `(a,b,x)`, poser `d=b-a`, `u=x-a`,
