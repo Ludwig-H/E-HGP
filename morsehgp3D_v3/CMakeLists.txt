@@ -4918,3 +4918,59 @@ mhgp3v_add_expected_code_test_for(mhgp3v_wspd_wavefront_probe
   --family=eight_clusters --points=200 --sep-euclid=8/1 --tight --vwave
   --window=512 --window-ledger --soc64-actif --bjd-groupes=8 --juge-bjd=64
   --inject-bjd-chevauche)
+
+# ---------------------------------------------------------------------------
+# `MidballBlockDepth` : LE PREDICAT q2 EXACT, SUR UN BLOC, AVANT LA DESCENTE.
+#
+# Section 4 et reponse Q5 de
+# `AUDIT_MINIBOULE_UNIQUE_RESIDUEL_SHALLOW_5809BD2_20260814.md`.
+#
+# Un support q2 n'a qu'UN centre — le milieu — donc qu'UNE boule. Il n'y a
+# aucun continuum a quantifier, et le predicat exact est celui de Thales
+# `H(a,b,z) = (z-a).(b-z) > 0`. Sa somme se separe par axe, chaque terme est
+# lineaire en `a` et `b` et CONCAVE en `z` : le minimum sur le produit de trois
+# AABB est donc la somme des trois minima aux sommets — la valeur exacte, pas
+# une relaxation. Le maximum, lui, exige le point stationnaire `(a+b)/2`
+# rabattu : le calculer aux seuls sommets est le mutant `midball-max-aux-coins`
+# et produirait de faux `NONE`.
+#
+# Le juge n'emprunte rien a la primitive : il enumere tous les triplets entiers
+# des trois boites. Les planchers exigent les trois verdicts.
+add_executable(mhgp3v_midball_probe prototype/midball_probe.cpp)
+target_include_directories(mhgp3v_midball_probe PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(mhgp3v_midball_probe PRIVATE mhgp)
+target_compile_options(mhgp3v_midball_probe PRIVATE -Wall -Wextra -Werror)
+
+add_test(NAME mhgp3v_midball_selftest COMMAND mhgp3v_midball_probe --selftest=4000)
+set_tests_properties(mhgp3v_midball_selftest PROPERTIES
+  PASS_REGULAR_EXPRESSION
+  "midball_selftest accord=OUI tours=4000 all=[0-9]+ none=[0-9]+ mixed=[0-9]+ desaccords=0 bornes_fausses=0")
+
+foreach(_mb_mutant IN ITEMS
+    midball-max-aux-coins midball-accept-equality midball-drop-axis
+    midball-min-au-milieu)
+  string(REPLACE "-" "_" _mb_nom "${_mb_mutant}")
+  mhgp3v_add_expected_code_test_for(mhgp3v_midball_probe
+    mhgp3v_${_mb_nom} "mutant_killed=1 ${_mb_mutant}" 4
+    --selftest=4000 --inject=${_mb_mutant})
+endforeach()
+
+# LA NON-HEREDITE, GRAVEE. Un q2 profond — dix temoins dans la boule
+# diametrale — laisse subsister un q3 de rang trois et un q4 de rang quatre,
+# car leurs centres uniques sont AILLEURS. Propager la profondeur q2 vers les
+# lanes superieures est le mutant `midball-prune-q3q4`.
+add_test(NAME mhgp3v_midball_non_heredite COMMAND mhgp3v_midball_probe --fixtures)
+set_tests_properties(mhgp3v_midball_non_heredite PROPERTIES
+  PASS_REGULAR_EXPRESSION
+  "midball_fixtures : q2_interieurs=10 thales=10 q3_interieurs=0 q4_interieurs=0 cospherique_q3=1 cospherique_q4=1")
+mhgp3v_add_expected_code_test_for(mhgp3v_midball_probe
+  mhgp3v_midball_mutant_prune_q3q4 "mutant_killed=1 midball-prune-q3q4" 4
+  --fixtures --inject=midball-prune-q3q4)
+
+# Refus avant calcul : un mode vide ou un mutant sans son juge ne peut pas etre
+# vert.
+mhgp3v_add_expected_code_test_for(mhgp3v_midball_probe
+  mhgp3v_midball_refus_sans_mode "--selftest ou --fixtures est exige" 2)
+mhgp3v_add_expected_code_test_for(mhgp3v_midball_probe
+  mhgp3v_midball_refus_mutant_sans_juge "un mutant de primitive exige --selftest" 2
+  --fixtures --inject=midball-drop-axis)

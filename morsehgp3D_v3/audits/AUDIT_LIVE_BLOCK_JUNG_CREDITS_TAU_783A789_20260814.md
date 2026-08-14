@@ -11,9 +11,10 @@ Cadre : `phase=exploration_v3_hors_registre`,
 > [!CAUTION]
 > Ce rapport conserve le snapshot historique `783a789` et le premier delta
 > live. Le commit `5809bd2` a depuis absorbé le packing réparé et ses trois
-> CTests. Les défauts de juge partiel et d'options vacuaires décrits ici restent
-> vrais au pin `5809bd2`; un worktree ultérieur tente de les réparer sans être
-> encore repinné. Le verdict courant et le lemme de miniboule unique sont dans
+> CTests. Le commit `694920a` refuse ensuite les juges partiels, les principaux
+> modes vacuaires et porte la sous-suite BJD à huit CTests ; les défauts restent
+> historiques au pin `5809bd2`. Le verdict courant et le lemme de miniboule
+> unique sont dans
 > [`AUDIT_ETAT_COURANT.md`](AUDIT_ETAT_COURANT.md) et
 > [`AUDIT_MINIBOULE_UNIQUE_RESIDUEL_SHALLOW_5809BD2_20260814.md`](AUDIT_MINIBOULE_UNIQUE_RESIDUEL_SHALLOW_5809BD2_20260814.md).
 

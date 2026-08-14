@@ -23,15 +23,16 @@ ancienne phrase imposant le rejet global des positions dupliquées est périmée
 - [`AUDIT_ETAT_COURANT.md`](AUDIT_ETAT_COURANT.md) : unique verdict mutable,
   pin, worktree, tests et blocages.
 - [`AUDIT_MINIBOULE_UNIQUE_RESIDUEL_SHALLOW_5809BD2_20260814.md`](AUDIT_MINIBOULE_UNIQUE_RESIDUEL_SHALLOW_5809BD2_20260814.md) :
-  lemme exact de miniboule unique, q2 diamétral, q3 par pied auto-centré, q4 par
-  intersections shallow, contre-fixtures u16 de non-hérédité et audit du
-  diagnostic `--fenetre-exacte`.
+  lemme exact de miniboule unique au support complet, famille normale au support
+  partiel, cœur affine, sandwich `U<=D<=C`, q3 par pied, q4 par intersections,
+  contre-fixtures u16 de non-hérédité et contre-audit du diagnostic
+  `--fenetre-exacte` au commit `694920a`.
 - [`AUDIT_LIVE_BLOCK_JUNG_CREDITS_TAU_783A789_20260814.md`](AUDIT_LIVE_BLOCK_JUNG_CREDITS_TAU_783A789_20260814.md) :
   contre-audit historique du raccord `BlockJungDual64` au parent `783a789` ;
   réfutation du double crédit d'identité, packing réparé mais no-go dans
   l'ordonnance actuelle, fixture des sept témoins collinéaires, remplacement
   par `tau(F)>=8`, génération par coupes, préfiltre bilinéaire exact et état de
-  la dernière session G4. Sa bannière renvoie au pin courant `5809bd2`.
+  la dernière session G4. Sa bannière renvoie au verdict courant.
 - [`AUDIT_CONTRE_RECEPTION_M4_V2_DEPTHBLOCK_5BFC5C8_20260814.md`](AUDIT_CONTRE_RECEPTION_M4_V2_DEPTHBLOCK_5BFC5C8_20260814.md) :
   autorité courante sur le verrou M4 ; contre-fixture de l'intervalle nul du
   sampler v2, limites du brute-force/H4, `Depth=tau(E)`,
@@ -81,6 +82,10 @@ ancienne phrase imposant le rejet global des positions dupliquées est périmée
   sur trois tailles, puis sampler de porteurs et cinq questions. Ses claims
   `M4 cubique` et « `BlockJungDualTile` implémenté » sont requalifiés par les
   bannières de supersession et les contre-audits actifs.
+- [`NOTE_CLAUDE_FENETRE_PAR_PAIRE_ET_UNICITE_20260814.md`](NOTE_CLAUDE_FENETRE_PAR_PAIRE_ET_UNICITE_20260814.md) :
+  mesures locales de rectangles, masse et singletons universels. Sa bannière
+  retire les claims « fenêtre exacte », squelette quasi-linéaire et inclusion
+  Delaunay : q3/q4 publient un majorant `U<h`, sans modèle Hoeffding reçu.
 - [`NOTE_CLAUDE_ROUTE_50K_PUIS_DIZAINES_DE_MILLIONS_20260813.md`](NOTE_CLAUDE_ROUTE_50K_PUIS_DIZAINES_DE_MILLIONS_20260813.md) :
   questions de route de Claude, conservées avec bannière de rétractation. Ses
   claims live sont subordonnés à `AUDIT_ETAT_COURANT.md`.

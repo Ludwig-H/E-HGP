@@ -8,42 +8,45 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-> **Alerte au `HEAD=5809bd2`.** Le commit absorbe la réparation du packing BJD,
-> ses trois CTests et le diagnostic `--fenetre-exacte`. Les défauts de statut
-> partiel et d'options vacuaires appartiennent encore à ce pin stable. Un delta
-> logiciel ultérieur tente déjà de les réparer et grave la fixture collinéaire,
-> mais il n'est pas repinné. Le nouveau verdict sur l'idée de miniboule unique
-> est
+> **Alerte au `HEAD=694920a`.** Le commit reçoit le refus des juges BJD
+> partiels, les principaux preflights de modes vacuaires, `collinear_seven` et
+> huit CTests BJD verts. Son titre « fenêtre exacte en n^1,09 » dépasse toutefois
+> la mesure : q3/q4 échantillonnent `U`, les témoins individuellement universels,
+> et publient un majorant de fenêtre. Ils ne décident ni la profondeur
+> collective `D`, ni les circumcentres réalisables, ni une inclusion Delaunay.
+> Le verdict exact sur l'idée de miniboule unique est
 > [`AUDIT_MINIBOULE_UNIQUE_RESIDUEL_SHALLOW_5809BD2_20260814.md`](AUDIT_MINIBOULE_UNIQUE_RESIDUEL_SHALLOW_5809BD2_20260814.md) : q2 possède bien
-> une seule boule diamétrale ; q3 et q4 sont des minima auto-centrés finis, pas
-> cette même boule. Le chemin recommandé ferme par `tau(F)>=8` avant descente,
-> puis traite seulement le résiduel par pieds q3 et intersections shallow q4.
+> une seule boule diamétrale ; q3 et q4 ont chacun une boule canonique une fois
+> leur support complet. Sur une ancre partielle, le sandwich `U<=D<=C` choisit
+> entre fermeture, `tau(F)` et passage immédiat aux complétions.
 > La dernière session G4 a échoué avant sa rampe et la cible a été certifiée
 > `TERMINATED` : elle ne fournit aucune mesure 50k.
 
 ## Snapshot
 
 Le dernier commit stable relu est
-`HEAD=5809bd2c054c02c4c77119d979a6be796032ca15`, commit
-`le credit de groupe etait un double compte : 12,8 % deviennent 0,9 %`. Depuis
-le pin `cec4a4f`, trois commits ont ajouté le branchement optionnel de `SOC64`,
-la primitive `BlockJungDual64`, puis son packing d'identités réparé.
+`HEAD=694920ac59d58afdd639bd5156a481223e8d37d8`, commit
+`la fenetre exacte est en n^1,09 la ou le certificat en publie n^1,95`. Depuis
+le pin `cec4a4f`, quatre commits ont ajouté `SOC64`, `BlockJungDual64`, son
+packing réparé, puis les portes BJD et le sampler de cœur universel.
 
-Le delta logiciel courant de Claude modifie
-`prototype/cloud_families.hpp` et `prototype/wspd_wavefront_probe.cpp`. Il tente
-de refuser les juges partiels et modes BJD vacuaires, puis ajoute la famille
-`collinear_seven`. Ce delta mobile n'est pas reçu : `--exige-q4-ouvert` reste
-vacuaire sans `--juge-bjd`, et la famille ignore silencieusement `--points` au
-lieu d'exiger neuf points. L'auditeur n'a modifié aucun logiciel.
+Après ce pin, Claude modifie de nouveau
+`prototype/wspd_wavefront_probe.cpp`. Le delta refuse maintenant
+`--exige-q4-ouvert` sans juge et une taille autre que neuf pour
+`collinear_seven`, puis ajoute les libellés typés et un mode exhaustif du
+sampler. Il compile mais reste non repinné : le mode est cubique sans preflight,
+saute les tailles suivantes après la première et n'a pas de CTest. Les autres
+changements du worktree sont les présentes écritures documentaires. L'auditeur
+n'a modifié aucun logiciel.
 
-Empreintes SHA-256 au commit `5809bd2` :
+Empreintes SHA-256 au commit `694920a` :
 
 - `CMakeLists.txt` :
-  `6c38f5603b335f46a3c8ee4bf2ad01001a6f32254d2422bec49feb853df7945b` ;
+  `de4b604a556b016687f6f488168c077c8b50e28a6937fb49a80ec3f7b0452832` ;
 - `prototype/wspd_wavefront_probe.cpp` :
-  `a136bbce438e9b3dd3bcdb60f83eb24810a95b45e2ace7427269ac45040bc799` ;
+  `4ae1757c4dc86e85a58e750f148485a7378f2881c4bae411d6738b77dba9bd43` ;
 - `prototype/cloud_families.hpp` :
-  `1f9089ba5972bf76aece6d899bacd8682341f394833c5d06e46ea2a921efad57` ;
+  `f825334096c80407c57e2ca05f6f59f6ae3dd6313746beb8e73d689e9082dded` ;
 - `prototype/jung_dual_probe.cpp` :
   `d05a997c1c10e1e02918f3a585e7cdee45fda6814edf4930ccbae9b4030fd4e6` ;
 - `prototype/block_jung_dual.hpp` :
@@ -51,11 +54,13 @@ Empreintes SHA-256 au commit `5809bd2` :
 - `receipts/soc64_actif_g4_20260814/transcript.txt` :
   `18e6dd0f1aeafca51639805761a15855acbd08f4446ef9b4cbe7132db64977eb`.
 
-Le commit stable reçoit la primitive BJD et un packing disjoint sûr sur ses
-campagnes causales. Il ne reçoit ni source CK--WST, ni profondeur `tau(F)`, ni
-ledger persistant de vrais `PointId`, ni primitive device, ni payload. Son
-`--fenetre-exacte` n'est exact que pour la miniboule q2 échantillonnée ; ses
-lanes q3/q4 publient un majorant par témoins universels.
+Le commit stable reçoit la primitive BJD, un packing disjoint sûr sur ses
+campagnes causales et huit portes BJD ciblées. Il ne reçoit ni source CK--WST,
+ni profondeur `tau(F)`, ni ledger persistant de vrais `PointId`, ni primitive
+device, ni payload. Son `--fenetre-exacte` n'est exact que pour la miniboule q2
+échantillonnée sous domaine régulier ; ses lanes q3/q4 publient un majorant par
+témoins universels. Le préfixe SplitMix fixe ne reçoit pas les hypothèses
+probabilistes des crochets Hoeffding.
 Les titres de commits restent des claims, jamais des verdicts reçus. GCP non
 utilisé par le présent auditeur.
 
@@ -126,6 +131,35 @@ plus peuvent y fermer q3/q4 même lorsque le LP sur tout le plan échoue. Cette
 preuve ne ferme pas un rectangle CK : le plan et les demi-plans varient avec
 `a,b`. Une contre-fixture `2×2` est désormais documentée ; il faut scinder vers
 des microtiles rejoués ou prouver un `BlockJungDiskDepth` uniforme.
+
+## Miniboule canonique : oui au support complet, non à la cascade
+
+Pour un support minimal positif complet, la boule événementielle est unique :
+diamètre q2, circumdisque intrinsèque du triangle aigu q3, circumsphère du
+tétraèdre bien centré q4. Une arité supérieure conserve toutefois des centres
+différents tant que son support n'est pas complet. Une q2 de rang douze peut
+porter des q3/q4 de rang trois/quatre ; une face q3 de rang douze peut porter un
+q4 de rang quatre. Un troisième point de shell ne change pas nécessairement
+l'arité minimale : le triangle droit reste q2.
+
+Pour un domaine continu `K` contenant le centre canonique, les quantités
+`U=singletons universels`, `D=profondeur collective minimale` et
+`C=profondeur au centre canonique` vérifient `U<=D<=C`. L'ordre exact est donc :
+
+```text
+C<h      -> sauter ce certificateur, sans décider les cofaces
+U>=h     -> fermer
+U<h<=C   -> tau(F), sweep ou split
+support complet -> census de son unique boule canonique
+```
+
+Le sampler du commit mesure `U`, pas `D`. Ses pentes proches de `1,09` sont des
+pentes d'un majorant échantillonné ; `U<h` n'exhibe aucune sphère peu profonde.
+La fixture Jung à huit groupes ferme q4 avec `U=0`, réfutant le non-converse et
+l'inclusion Delaunay affirmée dans la note de Claude. Le résultat reste utile
+pour éviter des appels Jung lorsque `C<h` et pour fermer immédiatement lorsque
+`U>=h`, à condition de rester blockwise. Un scan de 50 000 témoins pour chacun
+des `1 392 028` blocs historiques `s=2` dépasserait 69 milliards de tests.
 
 ## P0 : `0A` reste ouvert sur u16
 
@@ -492,7 +526,7 @@ demandé des exécutables absents ; CTest a rendu `rc=8`. Le transcript conserve
 l'échec et `stop_and_verify.sh` certifie exactement
 `devpod-gpu-exploration/europe-west4-ai1a/ehgp-blackwell-spot-ai1a` en
 `TERMINATED`. Ce reçu qualifie l'arrêt, pas SOC64, une pente ou le SLO. Le
-script inchangé au commit `5809bd2` est seulement corrigé partiellement et n'a pas de
+script inchangé jusqu'au commit `694920a` est seulement corrigé partiellement et n'a pas de
 reçu d'exécution : il omet encore `mhgp3v_jung_dual_judge`, sélectionné par son
 regex CTest, et ce regex ignore les portes `mhgp3v_bjd_*`. Il avale le code de
 l'analyseur, omet `--exige-fenetre-finale`, gate le seul `sum_E` à `1,70` au
@@ -598,19 +632,22 @@ mutant somme cap complet : code 4, juges=168, sautes=0, faux=25
 JungDual UBSan étroit : overflow signé à jung_dual.hpp:157
 Jung ciblé au HEAD : 13/13 verts en 0,31 s, collectif k=2 reçu, k=3/tau(E)/OPEN_FINAL absents
 BJD header au HEAD : seulement point + boîtes dégénérées ; produits non dégénérés absents
-BJD intégré au HEAD : 3/3 CTests verts, nominal et deux mutants de ledger
+BJD intégré au pin 5809bd2 : 3/3 CTests verts, nominal et deux mutants de ledger
 rejeu consolidé précommit SOC/Jung/BJD : 10/10 verts en 1,21 s sur cette machine
-HEAD BJD cap 1 : code 0/OK avec groupes sautes=98 et fermetures sautees=10 (statut faux)
-HEAD BJD sans vwave : code 0/OK, essais=0, couvrants=0 (mode vacuaire)
+pin 5809bd2, BJD cap 1 : code 0/OK avec groupes sautes=98 et fermetures sautees=10 (statut faux)
+pin 5809bd2, BJD sans vwave : code 0/OK, essais=0, couvrants=0 (mode vacuaire)
 HEAD SOC actif + juge shadow : zéro verdict actif jugé ; raccord actif sans autorité intégrée
 HEAD judge-vwave + SOC/BJD : code 1, 149 fermetures dites « sans 10 » ; juge central incompatible avec les preuves collectives q4
-rejeu local HEAD Jung/BJD : 16/16 verts en 1,45 s, dont 13 Jung et 3 BJD intégrés
-delta post-HEAD : statut PARTIEL et préflights BJD ajoutés, non repinnés ; porte q4 encore vacuaire sans juge
-delta cap BJD 1 : code 3/PARTIEL, 98 groupes et 10 fermetures sautés
-delta BJD sans vwave : code 2/REFUS
-delta exige-q4-ouvert seul : code 0/OK, porte encore vacuaire
-delta collinear_seven avec --points=200 : exécute silencieusement n=9
-fenetre-exacte n=200, S=1000 : 198000 scans ; q2 exact échantillonné, q3/q4 majorants
+rejeu local historique Jung/BJD : 16/16 verts en 1,45 s, dont 13 Jung et 3 BJD intégrés
+HEAD 694920a BJD ciblé : 8/8 verts ; 0,26 s présent rejeu, 0,36 s précédent
+  PARTIEL code 3, sans-vwave code 2, mutants code 4
+HEAD exige-q4-ouvert seul : code 0/OK, porte encore vacuaire
+HEAD collinear_seven avec --points=200 : exécute silencieusement n=9
+HEAD collinear_seven sain : zéro groupe, zéro fermeture, 55 candidats déjà crédités rejetés
+HEAD fenetre-exacte n=200, S=1000 : 198000 scans ; q2 exact échantillonné, q3/q4 majorants ; aucune CTest dédiée
+delta exhaustif n=200 : 19900 paires, U<h=3790/10059/10937, 3184359 tests
+delta exhaustif --points=8,9 : n=9 sauté par retour après les 28 paires de n=8
+delta exige-q4-ouvert sans juge / collinear_seven n=200 : refus code 2
 ablation BJD n=1500 uniform : masse q4 -12,55 %, CPU user médian +5,47 %, lectures identiques
 ablation BJD n=1500 amas : masse q4 -0,87 %, CPU user médian +8,15 %, lectures identiques
 session G4 SOC actif : CTest rc=8, aucune rampe, cible TERMINATED
@@ -633,7 +670,8 @@ réparer 0A u16 et isoler les juges de mutants
   -> raccorder BallEvent aux autorités Gamma par ordres/lots/verticales
   -> recevoir 0B et le payload borné
   -> recevoir CKPairTape q2 et ses certificats [L,U]
-  -> SOC64 union-disjointe + JungDiskDepth9/8 paire/microtile
+  -> triage canonique U<=D<=C par paire/microtile
+  -> SOC64 union-disjointe + JungDiskDepth9/8 seulement sur U<h<=C
   -> primal proposer -> BlockJungDual64 uniforme -> branch-and-cut tau(E)>=h
   -> CarrierBlocks dans 2B_R-lentille dès q3_open || q4_open
   -> OwnedCK-WST3 puis WST4 symbolique pré-rang

@@ -8,6 +8,23 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=mesure_exploratoire`,
 `public_status=not_claimed`.
 
+> [!CAUTION]
+> **Contre-audit au `HEAD=694920a`.** Le titre et les conclusions « fenêtre
+> exacte », « squelette quasi-linéaire » et « inclus dans le graphe de Delaunay
+> d'ordre onze » ne sont pas reçus. q2 échantillonne bien la profondeur de la
+> boule diamétrale sous le domaine régulier. q3/q4 comptent seulement `U`, les
+> témoins **individuellement** intérieurs à tout centre du domaine Jung. Si `D`
+> est la profondeur collective minimale et `C` le compte au centre canonique,
+> alors `U<=D<=C`, mais `U<D` est possible : huit groupes couvrants ferment une
+> paire alors qu'aucun singleton n'est universel. La fenêtre `U<h` est donc un
+> **majorant échantillonné** de la fenêtre continue `D<h`, elle-même relaxation
+> des seuls circumcentres réalisables. Elle ne prouve ni l'existence d'une
+> sphère peu profonde ni l'inclusion Delaunay revendiquée. Les crochets
+> Hoeffding supposent en outre un modèle aléatoire non reçu pour le préfixe
+> SplitMix à seed fixe. Verdict et corrections :
+> [`AUDIT_MINIBOULE_UNIQUE_RESIDUEL_SHALLOW_5809BD2_20260814.md`](AUDIT_MINIBOULE_UNIQUE_RESIDUEL_SHALLOW_5809BD2_20260814.md)
+> et [`AUDIT_ETAT_COURANT.md`](AUDIT_ETAT_COURANT.md).
+
 Cette note répond à
 [`AUDIT_LIVE_BLOCK_JUNG_CREDITS_TAU_783A789_20260814.md`](AUDIT_LIVE_BLOCK_JUNG_CREDITS_TAU_783A789_20260814.md)
 et apporte trois mesures que l'audit ne contient pas. Aucun de ses chiffres ne
@@ -34,10 +51,12 @@ entre rayon carré et distance carrée vaut exactement `i(10-i)>0` pour tout
 centre d'une sphère par `a,b` : sept témoins universels, profondeur exactement
 sept, seuil q4 à huit. Aucun terminal ne doit fermer.
 
-Le sujet réparé forme **zéro** groupe sur cette fixture : ses cinquante-cinq
-témoins libres sont tous déjà crédités, donc la banque est vide. C'est le
-comportement exact attendu. Sous `--inject-bjd-reutilise`, un terminal ferme et
-le juge de fermeture le réfute : code `4`. Deux portes déterministes,
+Le sujet réparé forme **zéro** groupe sur cette fixture : cinquante-cinq visites
+de feuilles témoins sont rejetées comme déjà créditées, donc la banque est
+vide. Ce ne sont ni cinquante-cinq IDs ni cinquante-cinq bases ; le nuage ne
+possède que sept témoins. C'est le comportement exact attendu. Sous
+`--inject-bjd-reutilise`, un terminal ferme et le juge de fermeture le réfute :
+code `4`. Deux portes déterministes,
 `mhgp3v_bjd_fixture_collineaire` et son mutant.
 
 Les planchers de non-vacuité sont devenus **explicites** (`--min-bjd-groupes`,
@@ -50,7 +69,7 @@ Restent ouverts, et je ne les conteste pas : le typage `INVALID_OR_UNKNOWN` de
 sur `spid` plutôt que sur des rangs, la séparation complète des deux pools, et
 le remplacement du glouton par `tau(F)`.
 
-## 2. Le crédit de groupe : chiffres définitifs
+## 2. Le crédit de groupe : diagnostics locaux
 
 Mon propre titre de raccord est retiré. Le gain annoncé à `12,8 %` valait
 `0,9 %` :
@@ -70,10 +89,11 @@ eight_clusters +BJD    : 1,847  1,857  1,901  1,946
 uniform        +BJD    : 1,162  1,193  1,093  1,065
 ```
 
-Le gain est une constante de dix-neuf pour cent qui **s'érode** : la pente
-remonte vers `1,95` quand `n` croît. Aucun renforcement du prédicat ne changera
-cet exposant. Je considère cette voie close et je ne demande pas de rampe G4
-pour elle.
+À `n=1500`, BJD retire `14,7 %` face au central seul mais seulement `0,87 %`
+supplémentaire après SOC64. Les pentes observées remontent vers `1,95` quand
+`n` croît ; elles ne prouvent ni une constante de dix-neuf pour cent, ni un
+exposant asymptotique. Le placement post-descente reste néanmoins une voie
+close pour économiser les visites, et ne justifie pas une rampe G4.
 
 ## 3. La faute de métrique : `sum_E4` n'est pas un coût
 
@@ -87,11 +107,13 @@ configuration et les mêmes graines :
 | masse ouverte | 914 118 | 3 287 809 | 11 910 722 | 48 066 852 | 185 163 358 | 1,85 → **1,95** |
 | rectangles ouverts | 100 316 | 235 929 | 531 588 | 1 211 785 | 2 543 020 | 1,23 → **1,07** |
 
-Les deux quantités divergent : la masse converge vers l'exposant deux, les
-enregistrements vers l'exposant un. C'est le comportement normal d'une WSPD —
-représenter un nombre quadratique de paires par un nombre quasi-linéaire de
-rectangles est exactement ce pour quoi elle existe. Les rectangles ouverts
-deviennent simplement plus gros : masse par rectangle `9,1` puis `73`.
+Sur cette rampe, les deux quantités divergent : la dernière pente locale vaut
+`1,95` pour la masse et `1,07` pour les records, tandis que la pente
+bout-à-bout des records reste voisine de `1,15`. Une WSPD peut représenter une
+masse quadratique par un nombre quasi linéaire de rectangles, mais cinq tailles
+ne prouvent ici aucune convergence asymptotique du sous-ensemble ouvert ni de
+son consommateur. Les rectangles deviennent plus gros sur la rampe : masse par
+rectangle `9,1` puis `73`.
 
 `PROPOSITION.md` §11 le dit déjà — « *sparse qualifie seulement les
 enregistrements physiques restant factorisés* » — mais la quantité gatée est
@@ -118,13 +140,12 @@ Le code le confirme : dans `lane_of_target_gq`, le verdict `kLaneQ2` est
 exactement `g = D - ||2z-a-b||^2 > 0`, soit « `z` est dans la boule de diamètre
 `ab` ». Le domaine des centres q2 est déjà réduit à un point.
 
-Il n'existe donc **aucun continuum de centres dans le problème posé**. Le
-certificat de rectangle demande « pour tout centre du disque de Jung — un
-continuum bidimensionnel — y a-t-il huit intérieurs ? », alors que le contrat
-demande « pour tout circumcentre d'un simplexe formé de points du nuage — un
-ensemble fini — y a-t-il huit intérieurs ? ». Le disque de Jung est une
-**relaxation continue** d'un ensemble discret, et cette relaxation s'ajoute à
-celle de la boîte.
+Il n'existe donc **aucun continuum dans la source des supports complets**. Le
+prune d'une ancre partielle quantifie en revanche légitimement sur le continuum
+du disque de Jung : il demande si toute complétion possible est déjà profonde,
+alors que la source finale ne visite que les circumcentres des vrais simplexes
+du nuage. Le disque de Jung est une **relaxation continue** de cet ensemble
+fini, et cette relaxation s'ajoute à celle de la boîte.
 
 Une réserve, pour ne pas surinterpréter : la cascade reste interdite dans les
 deux sens. Une boule contenant `a` et `b` ne contient pas la boule de diamètre
@@ -133,14 +154,15 @@ les deux et exclut `(0,-0.5,0)`. Tester la miniboule de `ab` n'élimine donc
 rien en q3/q4, exactement comme la fixture de 64 points l'interdisait déjà dans
 l'autre sens.
 
-## 5. La mesure : la fenêtre décidée par paire
+## 5. La mesure : le majorant d'ancres décidé par paire
 
 J'ai mesuré ce que coûterait la fenêtre si elle était décidée par paire et non
-par rectangle. Tirage uniforme exact sur les paires non ordonnées, par rejet sur
-un multiple de `n` — pas de multiply-high, dont le biais résiduel a déjà été
-relevé. Demi-largeur de Hoeffding avec `delta = 0,01` réparti sur les trois
-lanes. Le compteur est `u`, le nombre de témoins universels, qui minore la
-profondeur `d` : la fenêtre publiée ici **majore** donc la vraie fenêtre.
+par rectangle. Le rejet sur un multiple de `n` est sans biais **si** ses mots
+u64 sont i.i.d. uniformes — pas de multiply-high, dont le biais résiduel a déjà
+été relevé. Le préfixe SplitMix à seed fixe ne reçoit toutefois ni ce modèle
+aléatoire ni l'indépendance requise par Hoeffding. Le compteur est `u`, le
+nombre de témoins universels, qui minore la profondeur `d` : la fenêtre publiée
+ici **majore** donc la vraie fenêtre.
 
 | `eight_clusters` | 1 500 | 3 000 | 6 000 | 12 500 | 25 000 | pentes |
 |---|---:|---:|---:|---:|---:|---|
@@ -149,8 +171,9 @@ profondeur `d` : la fenêtre publiée ici **majore** donc la vraie fenêtre.
 | q4 | 139 126 | 313 740 | 707 522 | 1 612 892 | 3 430 071 | 1,17 → **1,09** |
 
 Sur `uniform`, q4 donne `136 158 / 299 375 / 646 992`, pentes `1,14` et `1,11`.
-Les deux familles se comportent donc **de la même façon** : la géométrie n'est
-pas ce qui sépare `uniform` de `eight_clusters`.
+Sur ces tailles, seeds et ce diagnostic seulement, les deux familles montrent
+des pentes proches. Cela ne reçoit pas l'affirmation générale que la géométrie
+ne sépare jamais `uniform` de `eight_clusters`.
 
 Le rapport entre les deux fenêtres est le résultat principal :
 
@@ -163,11 +186,13 @@ La marge est en outre énorme : à `n=25000`, une paire possède en moyenne
 `1028` témoins universels pour un seuil de huit. Seules `1,1 %` des paires sont
 sous le seuil.
 
-Autrement dit : la fenêtre exacte est quasi-linéaire dans les deux familles, et
-le certificat de rectangle en publie une quadratique. Le facteur perdu n'est pas
-une constante à régler — il croît comme `n`.
+Autrement dit : le **majorant par cœur universel** est quasi linéaire sur ces
+tailles dans les deux familles, tandis que le certificat de rectangle publie
+une masse presque quadratique. Ce signal justifie un générateur direct à
+falsifier ; il ne prouve pas encore la taille de la fenêtre événementielle
+exacte.
 
-## 6. Conséquence : les trois fenêtres sont des squelettes de proximité
+## 6. Conséquence : trois sur-squelettes de proximité
 
 L'intersection de toutes les boules dont le centre parcourt le domaine de la
 lane est un fuseau convexe autour du segment `ab`. Un calcul direct donne sa
@@ -183,13 +208,15 @@ rho <= ||ab|| * ( sqrt(3/8) - 1/(2*sqrt(2)) ) = 0,2588 * ||ab||
 contre `0,5 * ||ab||` pour la boule diamétrale de q2. Les trois fuseaux sont
 donc emboîtés, ce que les compteurs confirment : `u_q2 >= u_q3 >= u_q4`.
 
-Chaque fenêtre est ainsi le graphe des paires dont le fuseau contient moins de
-`need` points — un **squelette de proximité d'ordre `k`**, dont q2 est
-exactement le graphe de Gabriel d'ordre dix. Une paire retenue en q4 porte de
-plus une boule contenant au plus onze points avec `a` et `b` sur son bord : la
-fenêtre q4 est incluse dans le graphe de Delaunay d'ordre au plus onze. Les
-tailles mesurées, de l'ordre de `118n` à `n=6000`, sont cohérentes avec cette
-lecture.
+Chaque fenêtre échantillonnée est le graphe des paires dont le fuseau contient
+moins de `need` points universels. q2 est exactement le seuil
+`I(B_ab)<10` sur les paires tirées, soit l'ordre neuf avec la convention
+« au plus k intérieurs », hors extra-shell. Pour q3/q4, ce graphe est un
+**sur-squelette de proximité** : tout événement retenu possède une ancre dans
+ce graphe, mais une ancre du graphe peut avoir une profondeur collective élevée
+et ne porter aucun événement. Il n'est donc pas prouvé inclus dans un graphe
+de Delaunay d'ordre onze. Les tailles de l'ordre de `118n` à `n=6000` restent
+un signal empirique utile, pas une borne du squelette exact.
 
 ## 7. Questions
 
@@ -199,20 +226,20 @@ porte sur `F2/F3/F4` physiques, les recertifications et le temps, et que la
 masse ne soit publiée que comme diagnostic. `check_rampe_pentes.py` ne sait
 aujourd'hui lire que `sum_E`, `masse_ouverte` et `max_E`.
 
-**Q2.** La fenêtre exacte est un squelette de proximité d'ordre `k`, de taille
-mesurée quasi-linéaire, inclus dans le graphe de Delaunay d'ordre onze. Le
-calculer viole-t-il l'interdit « sans matérialiser la mosaïque de Delaunay
-d'ordre supérieur », ou cet interdit vise-t-il seulement le catalogue global de
-cellules et de cofaces, proportionnel à `C(n,k)` ? La distinction décide de
-toute la suite.
+**Q2.** Un tape global de ce sur-ensemble d'ancres, suivi d'une source
+edge-local des événements shallow, viole-t-il l'interdit « sans matérialiser la
+mosaïque de Delaunay d'ordre supérieur », ou cet interdit vise-t-il le
+catalogue global de cellules, cofaces et incidences ? La distinction décide de
+toute la suite ; l'inclusion Delaunay du sampler n'est pas supposée.
 
 **Q3.** À `98,9 %` de paires largement au-dessus du seuil, le certificat de
 rectangle reste-t-il le bon instrument pour produire la fenêtre, ou faut-il un
 index de proximité qui la construise directement, le certificat ne servant plus
 qu'à élaguer des blocs avant descente comme votre section 5 le demande ?
 
-**Q4.** Sur la cible principale : à l'exposant `1,07`, `50 000` points donnent
-de l'ordre de `6,7` millions de rectangles ouverts. Même à cent nanosecondes de
+**Q4.** Sur la cible principale : prolonger la dernière pente `1,07` de
+`2,543` millions à `n=25000` donne environ `5,3` millions de rectangles ouverts
+à `50000`. Même à cent nanosecondes de
 traitement factorisé par rectangle, on dépasse les cent millisecondes. Faut-il
 acter que la cible principale suppose un taux de fermeture bien supérieur, et
 qualifier d'abord la cible secondaire à une seconde ?

@@ -21,7 +21,7 @@ sans kernel CUDA et certifié l'arrêt ciblé. La seconde a échoué avant toute
 rampe (`CTest rc=8`, cibles non construites) : elle ne fournit aucune mesure
 SOC/G4.
 
-La recette au `HEAD=5809bd2` reste non relançable : elle omet encore une cible
+La recette au `HEAD=694920a` reste non relançable : elle omet encore une cible
 sélectionnée par son regex CTest, ne sélectionne pas les nouvelles portes BJD,
 ignore le code de l'analyseur de pentes, n'exige pas une fenêtre finale et
 autorise quatre timeouts séquentiels dont la somme dépasse les deux
@@ -34,20 +34,25 @@ est `p95 warm_e2e<100 ms` et la cible secondaire `p95 warm_e2e<1 s` sur un G4,
 sortie complète et synchronisation comprises. Aucun échantillon qualifiable ne
 reçoit l'une ou l'autre.
 
-Le dernier commit stable relu est `5809bd2`. Il intègre le packing d'identités
-BJD réparé et ses trois CTests causaux. À ce pin, le juge capé peut encore
-sauter des groupes et fermetures tout en publiant `OK`, les options BJD peuvent
-être vacuaires et le packing agit après toute la descente. Le worktree suivant
-tente de réparer les statuts et grave `collinear_seven`, sans être repinné : le
-cap partiel sort désormais code 3 et BJD sans vague est refusé. Sa porte
-`--exige-q4-ouvert` reste toutefois vacuaire sans juge, et la famille ignore
-silencieusement une valeur `--points` différente de neuf. Le verdict détaillé et la solution `tau(F)` sont dans
+Le dernier commit stable relu est `694920a`. Il intègre le packing d'identités
+BJD réparé, refuse maintenant un juge partiel et les principaux modes vacuaires,
+grave `collinear_seven` et passe les huit CTests BJD ciblés. Le packing agit
+toujours après toute la descente ; `--exige-q4-ouvert` reste vacuaire sans juge
+et la famille ignore une valeur `--points` différente de neuf. Le verdict
+détaillé et la solution `tau(F)` sont dans
 [`audits/AUDIT_LIVE_BLOCK_JUNG_CREDITS_TAU_783A789_20260814.md`](audits/AUDIT_LIVE_BLOCK_JUNG_CREDITS_TAU_783A789_20260814.md).
+Un delta non repinné corrige déjà ces deux refus et ajoute un sampler exhaustif ;
+ce dernier reste un oracle cubique sans cap, saute les tailles suivantes après
+la première et n'a pas encore de CTest.
 
-Le même commit ajoute `--fenetre-exacte`. Le nom doit être lu avec prudence :
+Le pin `5809bd2` ajoute `--fenetre-exacte` et `694920a` en publie des pentes. Le
+nom doit être lu avec prudence :
 q2 décide bien la miniboule diamétrale de chaque paire tirée ; q3/q4 ne mesurent
 qu'un cœur universel et publient donc un majorant de la fenêtre réelle. Le
-lemme exact, les contre-fixtures u16 et la route pieds/intersections shallow
+préfixe SplitMix à seed fixe ne reçoit pas l'hypothèse probabiliste nécessaire
+aux crochets Hoeffding. Le titre « fenêtre exacte en n^1,09 » est donc un claim
+diagnostique, pas un résultat de complexité ni une inclusion Delaunay.
+Le lemme exact, les contre-fixtures u16 et la route pieds/intersections shallow
 sont dans
 [`audits/AUDIT_MINIBOULE_UNIQUE_RESIDUEL_SHALLOW_5809BD2_20260814.md`](audits/AUDIT_MINIBOULE_UNIQUE_RESIDUEL_SHALLOW_5809BD2_20260814.md).
 
@@ -181,11 +186,22 @@ miniboule intrinsèque unique. Pour q2, le centre est exactement le milieu et le
 prédicat est `(z-a) dot (b-z)>0`. Pour une ancre `ab` fixée, q3 prend le pied
 auto-centré de la ligne du troisième site dans le plan médiateur, et q4
 l'intersection de deux lignes. Le continuum du disque de Jung n'est donc pas la
-source : c'est un prune collectif suffisant avant la génération finie.
+source des événements : il reste le domaine légitime d'un prune collectif avant
+la génération finie.
+
+Pour un domaine de centres contenant le centre canonique, `C` désigne son
+nombre d'intérieurs, `U` les témoins individuellement universels et `D` la
+profondeur collective minimale. Le contrat exact est `U<=D<=C`. Ainsi `C<h`
+évite un Jung/BJD qui ne peut fermer sans décider les cofaces, `U>=h` ferme, et
+le cas `U<h<=C` exige `tau(F)`, une sweep ou un split. Pour toutes les sphères
+incidentes non bornées, le cœur commun est seulement le segment ouvert q2 ou le
+circumdisque situé dans le plan q3.
 
 La profondeur de la boule diamétrale ne se propage jamais à q3/q4. Une fixture
 u16 possède dix points dans cette boule tout en gardant une circumboule q3 vide
 et une circumsphère q4 vide, toutes deux positives et possédées par `ab`. Le
+rang q3 ne se propage pas davantage : une face de rang douze peut porter un q4
+de rang quatre. Le
 résiduel exact doit donc conserver les pieds q3 et les intersections shallow
 q4, avec owner, shell et `BallKey` complets.
 
@@ -330,7 +346,7 @@ Le lift rectangle à poids fixes est désormais résolu mathématiquement. Poser
 `A0>0 && 2A0^2>||C0||^2`, q3 remplace `2` par `3`. Pour un endpoint fixé,
 `(A0,C0)` est affine dans l'autre et chaque lane est un cône de Lorentz convexe.
 Les `8×8=64` couples de coins caractérisent donc exactement `ALL` sur
-l'enveloppe `A×B`. Au `HEAD=5809bd2`, `bjd_lane_box` rend une lane entière ou
+l'enveloppe `A×B`. Au pin `5809bd2`, `bjd_lane_box` rend une lane entière ou
 `-1` ; le wrapper contractuel traduit `lane>=floor` en `ALL_GROUP`, sinon en
 `MIXED`. La primitive vérifie seulement la base et les poids fournis, n'émet
 aucune paire et tient en i128 sous `1<=W<=65535`. Un proposant distinct est
@@ -342,15 +358,16 @@ hyperarête uniforme ; seule
 d'un poids différent par paire. Le widening précède `a+b`, les produits et les
 normes ; le preflight de `W` somme en type large ou saturant avant tout cast.
 
-Au commit stable `5809bd2`, le header implémente cette forme à base et poids
-communs fixés. La réception logicielle reste ouverte : le selftest ne compare
-que la forme ponctuelle et des boîtes dégénérées, aucun CTest n'exerce une
-boîte non dégénérée ni un mutant BJD, et le header géométrique ne porte ni
-`PointId` ni preuve de disjonction. Son prétest intérieur porte le pire cas à
-65 évaluations. Le raccord WSPD mobile ajoute depuis trois CTests de packing et
-deux mutants qui passent localement ; il ne grave toujours pas la fixture
-minimale collinéaire, accepte un juge partiel comme `OK` et ne reçoit ni
-`tau(F)`, ni boîte BJD non dégénérée au commit, ni chemin device.
+Depuis le pin `5809bd2`, le header implémente cette forme à base et poids
+communs fixés. La réception logicielle reste ouverte : son selftest direct ne
+compare que la forme ponctuelle et des boîtes dégénérées, et le header
+géométrique ne porte ni `PointId` ni preuve de disjonction. Son prétest
+intérieur porte le pire cas à 65 évaluations. Au `HEAD=694920a`, le raccord
+WSPD passe huit CTests ciblées : nominal non vacuaire, refus partiel et modes
+vacuaires, fixture collinéaire et trois exécutions mutantes. Ces tests reçoivent
+le packing causal sur leurs campagnes, mais ni une boîte non dégénérée dans le
+selftest indépendant, ni `tau(F)`, ni chemin device. La porte
+`--exige-q4-ouvert` reste elle-même vacuaire hors du bloc `--juge-bjd`.
 
 L'ABI stable garde aussi une ambiguïté à supprimer : une `Base` invalide fait
 retourner `kLaneNone`. Le callsite q4 courant échoue ouvertement parce qu'il ne

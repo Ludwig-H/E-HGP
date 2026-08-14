@@ -278,6 +278,9 @@ bool g_exige_q4_ouvert = false;
 // Fenetre decidee PAR PAIRE : nombre de paires tirees uniformement, et graine.
 long long g_fenetre_exacte = 0;
 long long g_fenetre_seed = 1;
+// Parcours EXHAUSTIF de toutes les paires : le compte devient exact et la
+// question du modele aleatoire disparait.
+bool g_fenetre_exhaustive = false;
 // Profondeur exacte du RECTANGLE : elle separe la perte de BOITE de la perte de
 // BUDGET. Sa valeur est le nombre de rectangles ouverts a juger.
 long long g_profondeur_rect = 0;
@@ -1017,6 +1020,7 @@ int main(int argc, char** argv) {
     else if (a.rfind("--min-bjd-groupes=", 0) == 0) g_min_bjd_groupes = arg_ll(val("--min-bjd-groupes=").c_str(), 1, (1LL << 40), "min-bjd-groupes");
     else if (a == "--exige-q4-ouvert") g_exige_q4_ouvert = true;
     else if (a.rfind("--fenetre-exacte=", 0) == 0) g_fenetre_exacte = arg_ll(val("--fenetre-exacte=").c_str(), 1, (1LL << 24), "fenetre-exacte");
+    else if (a == "--fenetre-exhaustive") { g_fenetre_exhaustive = true; if (g_fenetre_exacte == 0) g_fenetre_exacte = 1; }
     else if (a.rfind("--fenetre-seed=", 0) == 0) g_fenetre_seed = arg_ll(val("--fenetre-seed=").c_str(), 1, (1LL << 40), "fenetre-seed");
     else if (a == "--inject-bjd-reutilise") g_inject_bjd_reutilise = true;
     else if (a == "--inject-bjd-chevauche") g_inject_bjd_chevauche = true;
@@ -1054,6 +1058,10 @@ int main(int argc, char** argv) {
     refuse("--min-bjd-fermetures exige --juge-bjd");
   if (g_min_bjd_groupes > 0 && g_juge_bjd == 0)
     refuse("--min-bjd-groupes exige --juge-bjd");
+  // L'exigence de non-fermeture vit dans le bloc du juge : hors de lui, elle ne
+  // serait jamais evaluee et rendrait `OK` sans rien verifier.
+  if (g_exige_q4_ouvert && g_juge_bjd == 0)
+    refuse("--exige-q4-ouvert exige --juge-bjd");
   if ((g_inject_bjd_reutilise || g_inject_bjd_chevauche) && g_juge_bjd == 0)
     refuse("un mutant bjd exige --juge-bjd");
   if (ns.empty()) ns = {4000, 16000};
@@ -1067,7 +1075,13 @@ int main(int argc, char** argv) {
   // CONTRE-FAMILLE, pas un regime du contrat : masse universelle quadratique,
   // source q3/q4 vide. Elle sert a refuter, jamais a qualifier.
   else if (family == "two_lines") fam = mhgp3v::CloudFamily::kTwoLines;
-  else if (family == "collinear_seven") fam = mhgp3v::CloudFamily::kCollinearSeven;
+  else if (family == "collinear_seven") {
+    fam = mhgp3v::CloudFamily::kCollinearSeven;
+    // Une fixture GRAVEE n'a pas de cardinalite libre. Executer silencieusement
+    // neuf points sous `--points=200` laisserait croire a une mesure d'echelle.
+    for (long long nn : ns)
+      if (nn != 9) refuse("collinear_seven est une fixture de neuf points");
+  }
   else refuse("famille inconnue");
   if (oracle && ns.back() > 64) refuse("l'oracle exige n <= 64");
 
@@ -2490,11 +2504,67 @@ int main(int argc, char** argv) {
       long long ferme[3] = {0, 0, 0};
       long long somme_u[3] = {0, 0, 0};
       long long tires = 0, scans = 0, plein = 0;
+      const long long plein_max_decl = 1000;
+      // ---- LE MODE EXHAUSTIF SUPPRIME LA QUESTION DE LA LOI.
+      //
+      // Le contre-audit refuse a juste titre les crochets de Hoeffding sur un
+      // flux `SplitMix` scelle : une graine fixe ne constitue pas un modele
+      // aleatoire recu. Plutot que de defendre un intervalle, on retire le
+      // besoin d'intervalle — toutes les paires non ordonnees sont parcourues,
+      // et le compte publie est EXACT.
+      if (g_fenetre_exhaustive) {
+        for (long long ia = 0; ia < m; ++ia) {
+          for (long long ib = ia + 1; ib < m; ++ib) {
+            ++tires;
+            const bool complet = (plein < plein_max_decl);
+            long long u[3] = {0, 0, 0};
+            for (long long z = 0; z < m; ++z) {
+              if (z == ia || z == ib) continue;
+              ++scans;
+              const int lane = mhgp3v::cone::lane_of_target_gq(
+                  sp[(size_t)ia][0], sp[(size_t)ia][1], sp[(size_t)ia][2],
+                  sp[(size_t)z][0], sp[(size_t)z][1], sp[(size_t)z][2],
+                  sp[(size_t)ib][0], sp[(size_t)ib][1], sp[(size_t)ib][2]);
+              if (lane >= mhgp3v::cone::kLaneQ2) ++u[0];
+              if (lane >= mhgp3v::cone::kLaneQ3) ++u[1];
+              if (lane >= mhgp3v::cone::kLaneQ4) ++u[2];
+              if (!complet && u[0] >= g_need[0] && u[1] >= g_need[1] && u[2] >= g_need[2])
+                break;
+            }
+            if (complet) {
+              ++plein;
+              for (int q = 0; q < 3; ++q) somme_u[q] += u[q];
+            }
+            for (int q = 0; q < 3; ++q)
+              if (u[q] >= g_need[q]) ++ferme[q];
+          }
+        }
+        // Noms TYPES : q2 decide exactement, q3/q4 majorent. `u` minore la
+        // profondeur collective `d`, donc `{u<h}` contient `{d<h}` mais ne
+        // prouve l'existence d'aucun centre peu profond.
+        const double cnp2 = (double)m * (double)(m - 1) / 2.0;
+        for (int q = 0; q < 3; ++q) {
+          const long long ouvert = tires - ferme[q];
+          std::printf("%s : mode=exhaustif paires=%lld u_moyen=%.2f ouverte=%lld"
+                      " fraction=%.6f seuil=%d scans=%lld\n",
+                      q == 0 ? "q2_midball_exact"
+                             : (q == 1 ? "q3_universal_upper_window"
+                                       : "q4_universal_upper_window"),
+                      tires, (double)somme_u[q] / (double)std::max(1LL, plein),
+                      ouvert, (double)ouvert / cnp2, g_need[q], scans);
+        }
+        if (tires != (long long)(cnp2)) {
+          std::fprintf(stderr, "PLANCHER: %lld paires parcourues, %.0f attendues\n",
+                       tires, cnp2);
+          return 3;
+        }
+        return 0;
+      }
       // Les mille premiers tirages sont scannes ENTIEREMENT, pour publier la
       // marge `u_moyen`. Au-dela, la decision seule importe et le scan sort des
       // que les trois seuils sont atteints : c'est le meme predicat, arrete
       // plus tot, jamais un predicat different.
-      const long long plein_max = 1000;
+      const long long plein_max = plein_max_decl;
       for (long long k = 0; k < g_fenetre_exacte; ++k) {
         long long ia = tirage(), ib = tirage();
         if (ia == ib) { --k; continue; }   // la diagonale n'est pas une paire
@@ -2530,9 +2600,13 @@ int main(int argc, char** argv) {
         const double p_ouvert = 1.0 - (double)ferme[q] / (double)tires;
         const double lo = p_ouvert - demi > 0.0 ? p_ouvert - demi : 0.0;
         const double hi = p_ouvert + demi < 1.0 ? p_ouvert + demi : 1.0;
-        std::printf("fenetre_exacte q%d : tires=%lld u_moyen=%.2f ouverte=%.6f"
-                    " [%.6f,%.6f] paires=%.0f [%.0f,%.0f] seuil=%d delta=%.4f scans=%lld\n",
-                    q + 2, tires, (double)somme_u[q] / (double)std::max(1LL, plein),
+        std::printf("%s : mode=echantillon modele=iid_NON_RECU tires=%lld u_moyen=%.2f"
+                    " ouverte=%.6f bande=[%.6f,%.6f] paires=%.0f [%.0f,%.0f] seuil=%d"
+                    " delta=%.4f scans=%lld\n",
+                    q == 0 ? "q2_midball_exact"
+                           : (q == 1 ? "q3_universal_upper_window"
+                                     : "q4_universal_upper_window"),
+                    tires, (double)somme_u[q] / (double)std::max(1LL, plein),
                     p_ouvert, lo, hi,
                     p_ouvert * cnp, lo * cnp, hi * cnp, g_need[q], delta, scans);
       }

@@ -279,8 +279,10 @@ ni `BallKey`, ni census.
 ### 4.3 Miniboule unique et plan médiateur fini
 
 Pour tout support minimal positif affinement indépendant `S`, le centre
-intrinsèque dans `aff(S)` et la miniboule sont uniques. La source exacte ancrée
-par une paire propre `a,b` ne parcourt donc aucun continuum. Avec
+intrinsèque dans `aff(S)` et la miniboule sont uniques. L'ensemble des supports
+complets du nuage est fini ; en revanche, un prune portant sur **toutes les
+complétions** d'une ancre partielle garde légitimement un domaine continu de
+centres. Avec
 `d=b-a`, `D=d dot d`, `w=2*c-a-b` et `U_z=2*z-a-b`, poser :
 
 ```text
@@ -293,21 +295,53 @@ sur la ligne `F_x=0`, c'est-à-dire le pied auto-centré du troisième site. q4
 prend l'intersection de `F_x=0` et `F_y=0`. Positivité, owner, shell et
 `BallKey` restent des recertifications séparées.
 
+Plus généralement, si `o` est le circumcentre intrinsèque de `S`, toute sphère
+incidente a pour centre `o+w`, `w` orthogonal à `aff(S)`, et rayon carré
+`R^2+||w||^2`. La puissance de `z` est affine en `w`. L'intersection de toutes
+ces boules ouvertes est exactement `aff(S) intersect int(B(o,R))` : segment
+ouvert pour q2, circumdisque planaire pour une face q3, boule entière pour q4.
+Ce `UnboundedAffineCoreCount` est un prune sûr des complétions, mais souvent
+vide en position générique.
+
+Pour un domaine borné `K` contenant le centre canonique, noter `C` son nombre
+d'intérieurs, `U_K` les singletons intérieurs pour tout centre et `D_K` la
+profondeur collective minimale. Toujours :
+
+```text
+U_K <= D_K <= C
+```
+
+Ainsi `C<h` court-circuite seulement le certificateur relaxé Jung/BJD,
+`U_K>=h` ferme, et `U_K<h<=C` appelle `tau(F)`, une sweep ou un split. Les seuls
+circumcentres effectivement réalisables forment un sous-ensemble de `K` qui ne
+contient généralement pas le centre q2 ; `C<h` ne décide donc aucune coface.
+
 La profondeur q2 n'est pas héréditaire vers les cofaces. Il existe une fixture
 u16 où dix IDs sont dans la boule diamétrale de `ab`, tandis qu'une circumboule
 q3 positive et une circumsphère q4 positive possédées par `ab` n'en contiennent
-aucun. Le disque de Jung/BJD est donc un prune collectif suffisant avant cette
-source finie, jamais la définition de l'événement. Après les fermetures de bloc,
+aucun. Une seconde fixture ferme une face q3 au rang douze tout en gardant une
+coface q4 de rang quatre. Le disque de Jung/BJD est donc un prune collectif
+suffisant avant cette source finie, jamais la définition de l'événement. Après les fermetures de bloc,
 le résiduel exact emploie les pieds q3 et les intersections shallow q4 `0..7`,
 pas toutes les sphères passant par l'ancre. Preuve et fixtures :
 [`audits/AUDIT_MINIBOULE_UNIQUE_RESIDUEL_SHALLOW_5809BD2_20260814.md`](audits/AUDIT_MINIBOULE_UNIQUE_RESIDUEL_SHALLOW_5809BD2_20260814.md).
 
-Le diagnostic `--fenetre-exacte` du commit `5809bd2` décide bien q2 sur les
+Le diagnostic `--fenetre-exacte`, introduit au pin `5809bd2` puis mesuré au
+commit `694920a`, décide bien q2 sur les
 paires tirées. Pour q3/q4, ses singletons universels minorent seulement la
 profondeur ; sa masse ouverte est un majorant, sans pieds, intersections,
 owner ou census. Son flux SplitMix à seed fixe ne reçoit pas l'hypothèse
 d'indépendance de Hoeffding. Il reste un diagnostic
-`PairUniversalCoreSample`, pas une mesure exacte ou un reçu statistique.
+`PairUniversalCoreSample`, pas une mesure exacte ou un reçu statistique. En
+particulier, `U_K<h` ne prouve pas l'existence d'une sphère peu profonde et
+n'autorise ni le nom « squelette exact » ni une inclusion dans un graphe de
+Delaunay d'ordre onze.
+
+Le worktree postérieur ajoute un mode exhaustif et les libellés typés. Il ne
+change pas l'objet mathématique : q3/q4 comptent exactement `U<h`, toujours un
+majorant. Ce mode doit rester un oracle borné : au delta observé il est cubique,
+n'a pas de cap d'opérations, retourne après la première taille d'une liste et
+nomme `u_moyen` la moyenne du seul préfixe de mille paires.
 
 ## 5. Générateur q3 recommandé
 
@@ -575,7 +609,7 @@ q4 : A4>0 et   A4^2>2*R
 ```
 
 Sous u16, la preuve de largeur i128 exige `W=sum_z w_z<=65535`, contrôlé sans
-overflow avant le prédicat. Au `HEAD=5809bd2`, seul
+overflow avant le prédicat. Au pin `5809bd2`, seul
 `BlockJungDual64::make_base` préflighte la somme en accumulation large puis la
 borne à 65 535. `dual_lane` ne possède pas encore ce cap et le symbole
 contractuel `verify_dual_weights_lane` n'existe pas dans le logiciel. Le futur
@@ -710,10 +744,10 @@ créditées dans les deux vues, impose des groupes disjoints et tue deux mutants
 dans trois CTests. Ce n'est pas encore une réception. À ce pin,
 `--juge-bjd=1` laisse des groupes et fermetures sautés avec
 `fenetre_finale=OUI`, `OK` et le code zéro ; sans `--vwave`, l'option BJD peut
-réussir avec zéro essai. Un worktree ultérieur tente de réparer ces deux
-statuts et grave la fixture collinéaire, sans être repinné. Le cap partiel et
-BJD sans vague sont maintenant refusés, mais `--exige-q4-ouvert` reste vacuaire
-sans juge et `collinear_seven` ignore un `--points` différent de neuf. Surtout,
+réussir avec zéro essai. Le commit `694920a` répare ces deux statuts, grave la
+fixture collinéaire et porte la sous-suite BJD à huit CTests verts. Il ne ferme
+pas encore la réception : `--exige-q4-ouvert` reste vacuaire sans juge et
+`collinear_seven` ignore un `--points` différent de neuf. Surtout,
 le packing reste calculé après la descente et n'économise aucune recertification. Le
 contre-audit et la fixture source u16 sont dans
 [`audits/AUDIT_LIVE_BLOCK_JUNG_CREDITS_TAU_783A789_20260814.md`](audits/AUDIT_LIVE_BLOCK_JUNG_CREDITS_TAU_783A789_20260814.md).
@@ -1617,9 +1651,11 @@ variable.
    reprises.
 3. Recevoir `CKPairTape` comme partition q2 exacte et son certificateur
    `[L_open,U_closed]`, puis mesurer `F2` et la masse logique séparément.
-4. Ajouter `JungDiskDepth9/8` au niveau paire/microtile. Sur une proof-tile CK,
-   proposer une même base/pondération, la vérifier par `BlockJungDual64`, puis
-   fermer seulement sur un reçu `tau(E)>=9/8` authentifiant groupes et spans.
+4. Au niveau paire/microtile, calculer d'abord le sandwich `U_K<=D_K<=C` :
+   `C<h` saute Jung sans décider les cofaces, `U_K>=h` ferme, le résiduel appelle
+   `JungDiskDepth9/8`. Sur une proof-tile CK, proposer une même base/pondération,
+   la vérifier par `BlockJungDual64`, puis fermer seulement sur un reçu
+   `tau(E)>=9/8` authentifiant groupes et spans.
    SOC64 actif utilise un ledger séparé et descend sur `UNKNOWN`. Aucun de ces
    diagnostics ne précède la réception de 0A/0B et CK dans la route produit.
 5. Construire `OwnedCK-WST3` counter-only dans la fenêtre `2B_R`--lentille,
@@ -1648,7 +1684,7 @@ fermetures avant descente, les nœuds de transversal, `F4/M4`, les splits, les
 octets et la HWM. Elle n'autorise aucun claim 0A/0B ou produit avant les portes
 1--2 ci-dessus.
 
-La recette G4 au `HEAD=5809bd2` ne doit pas être relancée en l'état. Elle omet
+La recette G4 au `HEAD=694920a` ne doit pas être relancée en l'état. Elle omet
 une cible pourtant sélectionnée par son regex CTest, ne sélectionne pas les
 nouvelles portes `mhgp3v_bjd_*`, avale le code de `check_rampe_pentes.py` sous
 `set +e` et omet `--exige-fenetre-finale`. Elle permet aussi à chaque job quatre
