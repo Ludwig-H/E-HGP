@@ -573,7 +573,7 @@ l'intérieur d'un cône de Lorentz convexe
 huit coins de `B`, la convexité séparée propage donc le verdict à tout
 `A×B`; la réciproque est triviale. `BlockJungDual64` est ainsi une
 **équivalence exacte sur l'enveloppe AABB continue** pour cette base et ces
-poids : 64 prédicats, early exit, puis `ALL` ou `MIXED`.
+poids : 64 prédicats, early exit, puis `ALL_GROUP` ou `MIXED`.
 
 Sous u16, poser `U=65535`. Avec `1<=L<=U`, les écritures
 `A0=-sum_z w_z*(z-a) dot (z-b)` et
@@ -586,6 +586,13 @@ la plus petite lane universelle. Un coin échoué ne réfute ni les seuls points
 ni une autre pondération ; il impose un split ou `MIXED`. La contre-fixture
 « coins bons, paire médiane shell » ne concernait que des poids reproposés
 séparément aux coins : elle ne réfute pas ce théorème à poids communs.
+
+Le mapping G4 naturel affecte une proof-tile à un CTA de 64 threads, un couple
+de coins par thread, puis deux ballots warp et une réduction. Chaque thread
+forme `A0,C0` avec widening et compare environ 106 bits via deux limbs u64 ;
+`MHGP_HD __int128` ne constitue pas une primitive device reçue. Le proposant
+de poids reste séparé du vérificateur, afin que le tape rejoue exactement la
+base et les poids authentifiés.
 
 Cette promotion est seulement un certificat suffisant :
 `for all (a,b) exists lambda(a,b)` n'implique pas l'existence de poids communs
@@ -816,7 +823,7 @@ Le `ToleranceKernel` complète donc le packing et peut remplacer le stockage du
 pire DAG, sans abolir `BlockJD`, ses masques d'endpoints ni ses continuations.
 
 Le fast path GPU cherche plutôt huit ou neuf groupes couvrants disjoints, ce
-qui donne immédiatement la même profondeur avec huit ou neuf reçus. S'il
+qui certifie immédiatement les seuils `Depth>=8/9` avec huit ou neuf reçus. S'il
 échoue, le DAG de suppressions peut poursuivre sous budget ; sinon la tâche
 reste `MIXED`. Un `ProofNode` stocke au plus trois `PointId`, leurs poids ou le
 reçu primal, trois handles enfants et le niveau. Les files SoA exécutent
@@ -1085,7 +1092,7 @@ face.
 Si `E_e(S)` compte les paires de `S` dont l'arête ne bat pas `e`, alors
 `E_e(V_e)-E_e(N_e)` compte exactement les paires incidentes à au moins un
 carrier aigu. Grouper par la direction projective
-`(b-a) cross (z-a)`, divisée par le pgcd absolu de ses composantes puis signée
+`(b-a) cross (z-a)`, calculée en i64, divisée par le pgcd absolu de ses composantes puis signée
 avec sa première composante non nulle positive, et soustraire le même count
 dans chaque classe `pi` retire exactement l'orientation nulle. Poser
 `V_{e,pi}=V_e intersect pi` et `N_{e,pi}=N_e intersect pi` :
@@ -1340,6 +1347,12 @@ i128 suffit lorsque `O` et `J` sont jugés séparément.
 Un test `(F4Block,WitnessNode)` paie au plus 192 monômes de déterminant, plus
 l'orientation, avec early exit ; il n'énumère aucun quadruplet.
 
+Sur G4, un CTA traite un couple `(F4Block,WitnessNode)` : huit groupes de 24
+monômes produisent les intervalles des coins, puis une réduction de signe rend
+`ALL/MIXED`. Le count conserve le reçu et crédite la population ; scan/fill ne
+réexécute pas ces déterminants. La gate physique publie couples testés, monômes
+larges, early exits, visites de nœuds témoins, octets et HWM.
+
 Le parcours BVH utilise une antichaîne de `WitnessNode` disjoints des quatre
 spans support. Un nœud `ALL_INTERIOR` crédite toute sa population ; dès huit
 vrais `PointId` distincts, le bloc q4 ferme et le reçu conserve huit IDs
@@ -1536,9 +1549,14 @@ bande passante ne qualifie aucun SLO.
   `drop-corner`, `vary-weights-per-corner`, `accept-equality` et
   `narrow-before-widen` ;
 - count factorisé `M4_e` contre expansion : tie `EdgeKey`, site collinéaire,
-  deux carriers aigus, même `PlaneKey` et plans distincts ;
+  deux carriers aigus, même `PlaneKey`, plans distincts et checksum
+  `Q_aff=#4-ensembles affine-indépendants` ;
+- Möbius `inj4` sur tous les motifs de recouvrement, parité de `C=D`,
+  conservation parent--enfants, mutant `saturate-before-subtract` et ledgers
+  `M4_raw/residual_output` indépendants ;
 - Jung axe : événements opposés égaux, trois constantes `B=0`, noyau top-k
-  contre sweep exhaustive et mutants `wrong_extrema/drop_equal_shell` ;
+  contre sweep exhaustive, `T2<0/0/>0`, bouts 207 bits et mutants
+  `wrong_extrema/drop_equal_shell` ;
 - cinq nœuds u16 mis à l'échelle ci-dessus : `4096` supports q4, huit témoins
   uniformes et fermeture `Corner8BallDepth` avant fill ;
 - cosphère centre `(4,4,4)`, rayon carré 25, shell de 24 permutations de

@@ -282,18 +282,23 @@ complets ; les saturer séparément peut transformer `B+2-(B+1)=1` en zéro.
 `M4_raw` pré-profondeur et `residual_output` après profondeur sont deux ledgers :
 une fermeture de profondeur crédite `domain_mass_closed`, pas `M4_closed`.
 
-La route reçue comme proposition est : `BlockJungDual64` sur l'arête,
+La route reçue comme proposition est : proposer des bases sur l'arête, les
+vérifier par `BlockJungDual64`, puis fermer seulement si `tau(E_Q)>=8` ;
 `FaceAxisJungDepth8` après la porte aiguë, puis
-`Corner8BallDepth/BlockBallDepth8` après la cellule apex. `ALL` ferme un bloc,
-`MIXED` scinde et la sweep ne reçoit que le résiduel preflighté. `2B_R` est une enveloppe extérieure sharp lorsque seule la
+`Corner8BallDepth/BlockBallDepth8` après la cellule apex. Un reçu de profondeur
+`ALL` ferme un bloc, `MIXED` scinde et la sweep ne reçoit que le résiduel
+preflighté. `2B_R` est une enveloppe extérieure sharp lorsque seule la
 boule contenant les endpoints est connue ; elle réduit les cellules, pas la
 masse réelle. Une grande masse logique peut tenir dans peu de blocs, mais elle
 n'est utile que si le consommateur de profondeur reste lui-même factorisé.
-Sur une face fixe, ce consommateur est désormais explicite : conserver les
-`8-p` seuils gauches les plus grands et les `8-p` seuils droits les plus petits,
-après `p` témoins permanents, donne un noyau exact d'au plus 16 IDs. Un scan
+Sur une face fixe, ce consommateur est désormais explicite : poser
+`p=min(8,n_permanents)`, puis conserver les `8-p` seuils gauches les plus grands
+et les `8-p` seuils droits les plus petits donne un noyau d'au plus 16 IDs qui
+préserve exactement le seuil `Depth>=8`. Un scan
 top-k `O(n)` et un replay des égalités remplacent la sweep et le DAG général ;
-le lift bloc vérifie uniformément l'ordre de ces seuils ou scinde.
+une égalité uniforme est groupée comme shell, seul un ordre indécis scinde.
+Les bouts irrationnels montent vers 207 bits sous u16 et exigent i256/quatre
+limbs ; le lift bloc garde sa propre preuve de largeur.
 
 La dissection `n=1500` trouve huit témoins singleton exacts pour `89,5 %` de
 200 PairId q4 ouverts tirés par masse, contre `26,5 %` de 200 rectangles hachés.
@@ -371,8 +376,9 @@ Les 64 couples de coins caractérisent donc exactement `ALL` sur l'enveloppe
 passent uniformément ; les autres provoquent un split. Sous u16 et
 `1<=W<=65535`, les identités `A4=4*A0`, `R=4*||C0||^2` et les bornes
 `|A0|<2^50`, `|C0_i|<2^49` placent ses comparaisons dans i128. Cette combinaison
-`primal proposer -> dual64 verifier -> tau(E)>=8` est la première solution
-constructive de `BlockJungDepth8` sans expansion des `PairId`.
+`primal proposer -> dual64 verifier -> tau(E)>=8` est le premier certificat
+constructif fail-open de `BlockJungDepth8` sans tableau de `PairId`. Son pire
+cas peut encore visiter toutes les feuilles du produit.
 Ces bornes supposent un widening avant les sommes, normes et produits, ainsi
 qu'un preflight de `W` en accumulation large ou saturante.
 
@@ -564,7 +570,7 @@ réparer 0A u16 et isoler les juges de mutants
   -> recevoir 0B et le payload borné
   -> recevoir CKPairTape q2 et ses certificats [L,U]
   -> SOC64 union-disjointe + JungDiskDepth9/8 paire/microtile
-  -> ToleranceKernel + branch-and-cut tau(E), puis BlockJungDual64 uniforme
+  -> primal proposer -> BlockJungDual64 uniforme -> branch-and-cut tau(E)>=h
   -> CarrierBlocks dans 2B_R-lentille dès q3_open || q4_open
   -> OwnedCK-WST3 puis WST4 symbolique pré-rang
   -> FaceAxisJungDepth8 puis Corner8BallDepth/BlockBallDepth8 avant tout fill q4

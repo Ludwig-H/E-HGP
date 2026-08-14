@@ -29,6 +29,7 @@
 
 #include "cloud_families.hpp"
 #include "jung_dual.hpp"
+#include "block_jung_dual.hpp"
 #include "jung_dual_judge.hpp"
 
 namespace {
@@ -313,6 +314,60 @@ int main(int argc, char** argv) {
                   dual_mutant_name(mutant), desaccords, morsures_gravees);
       return 4;
     }
+    // ---- `BlockJungDual64` CONTRE LE DUAL PONCTUEL.
+    //
+    // Les deux ecritures doivent decider LA MEME CHOSE sur un couple ponctuel :
+    // `A = 4 A0` et `R = 4 ||C0||^2`, donc `A^2 > 2R` equivaut a
+    // `2 A0^2 > ||C0||^2`. C'est la verification la moins chere que la forme de
+    // bloc est bien la meme mathematique, et elle doit tenir sur des dizaines
+    // de milliers de tirages avant qu'on ose l'appliquer a un rectangle.
+    //
+    // Ensuite seulement, la propriete qui compte : sur une boite reduite a deux
+    // points, les 64 coins doivent redonner exactement le verdict ponctuel.
+    {
+      Rng rb2((unsigned long long)seed * 7717ULL + 3ULL);
+      long long paires_bjd = 0, desac_point = 0, desac_boite = 0;
+      static const long long kWB[][2] = {{1,1},{1,2},{2,1},{1,3},{3,1},{2,3},{3,2}};
+      for (long long r = 0; r < rounds / 4; ++r) {
+        mhgp::i64 a2[3], b2[3], zz[2][3];
+        const long long sp2 = (span < 4096) ? span : 4096;
+        for (int j = 0; j < 3; ++j) {
+          a2[j] = rb2.in(0, sp2); b2[j] = rb2.in(0, sp2);
+          zz[0][j] = rb2.in(0, sp2); zz[1][j] = rb2.in(0, sp2);
+        }
+        if (a2[0] == b2[0] && a2[1] == b2[1] && a2[2] == b2[2]) continue;
+        const auto& wv = kWB[r % 7];
+        const mhgp::i64 w[2] = {wv[0], wv[1]};
+        const int dual = dual_lane(a2, b2, zz, w, 2, DualMutant::kNone);
+        const auto base = mhgp3v::bjd::make_base(zz, w, 2);
+        const int bloc = mhgp3v::bjd::bjd_lane_point(base, a2, b2, mhgp3v::bjd::BjdMutant::kNone);
+        ++paires_bjd;
+        if (dual != bloc) {
+          ++desac_point;
+          if (desac_point <= 3)
+            std::fprintf(stderr, "DESACCORD bloc/point : dual=%d bjd=%d\n", dual, bloc);
+        }
+        // Boites reduites a des points : les 64 coins doivent redonner le meme.
+        mhgp3v::bjd::Box A2{}, B2{};
+        for (int j = 0; j < 3; ++j) {
+          A2.lo[j] = A2.hi[j] = a2[j];
+          B2.lo[j] = B2.hi[j] = b2[j];
+        }
+        const int bboite = mhgp3v::bjd::bjd_lane_box(base, A2, B2,
+                                                     mhgp3v::bjd::BjdMutant::kNone, kLaneQ2);
+        if (bboite != bloc) {
+          ++desac_boite;
+          if (desac_boite <= 3)
+            std::fprintf(stderr, "DESACCORD boite/point : boite=%d point=%d\n", bboite, bloc);
+        }
+      }
+      std::printf("bjd_selftest accord=%s couples=%lld desaccords_point=%lld"
+                  " desaccords_boite=%lld\n",
+                  (desac_point == 0 && desac_boite == 0) ? "OUI" : "NON", paires_bjd,
+                  desac_point, desac_boite);
+      if (desac_point != 0 || desac_boite != 0) return 1;
+    }
+
     // ---- LE JUGE COLLECTIF INDEPENDANT, POUR `k >= 2`.
     //
     // Le contre-audit relevait a juste titre que rien ne jugeait un groupe :

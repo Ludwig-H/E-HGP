@@ -4806,3 +4806,24 @@ add_test(NAME mhgp3v_soc64_sur_none_central
           --soc64-shadow)
 set_tests_properties(mhgp3v_soc64_sur_none_central PROPERTIES
   PASS_REGULAR_EXPRESSION "terminaux fermetures=39218 masse_fermee=173575")
+
+# ---------------------------------------------------------------------------
+# `BlockJungDual64` : UN GROUPE FERME UN RECTANGLE ENTIER, EN 64 COINS.
+#
+# Section 5.9 de `AUDIT_CONTRE_RECEPTION_M4_V2_DEPTHBLOCK_5BFC5C8_20260814.md`.
+# C'est l'ABI qui manquait entre le proposer de poids et la tuile CK : pour une
+# base et des poids FIXES, elle decide tout le produit AABB sans developper un
+# seul `PairId`.
+#
+# Ce n'est pas une relaxation mais une EQUIVALENCE. Avec `L=somme w`,
+# `Z=somme w z`, `Q=somme w ||z||^2`, on pose `A0 = -L(a.b)+(a+b).Z-Q` et
+# `C0 = L(a x b) - a x Z - Z x b`. `A0` et `C0` sont AFFINES en `a` a `b` fixe,
+# et reciproquement ; le cone de Lorentz strict est convexe ; les 64 couples de
+# coins sont donc necessaires et suffisants.
+#
+# L'identite avec la forme `A/P/R` se verifie a la main — `A = 4 A0` et
+# `R = 4 ||C0||^2`, donc `A^2 > 2R` equivaut a `2 A0^2 > ||C0||^2` — et le
+# selftest l'exige sur vingt mille tirages, puis exige que les 64 coins
+# redonnent le verdict ponctuel sur des boites reduites a des points.
+set_tests_properties(mhgp3v_jung_dual_selftest_petit PROPERTIES
+  PASS_REGULAR_EXPRESSION "bjd_selftest accord=OUI couples=[0-9]+ desaccords_point=0 desaccords_boite=0")

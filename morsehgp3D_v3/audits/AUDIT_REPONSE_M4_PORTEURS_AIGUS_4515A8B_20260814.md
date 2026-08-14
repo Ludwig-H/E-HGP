@@ -659,27 +659,30 @@ au bord de `J_f`; une version `FaceAxisJungDepth8Block` ne rend `ALL` qu'après
 vérification uniforme sur `A×B×C`, sinon elle scinde.
 
 Extraire successivement une paire compatible par un glouton arbitraire n'est
-pas exact pour la profondeur. Une preuve de profondeur huit utilise soit la
-récurrence leave-out, soit le maximum matching du graphe-chaîne des demi-droites.
-Au seuil huit, un scan conserve seulement les huit plus petits seuils de rayons
-droits, les huit plus grands seuils gauches et les singletons couvrants, puis
-apparie ces tableaux constants : `O(n)` temps, `O(8)` mémoire par face fixe.
+pas exact pour la profondeur. Au seuil `r=8`, poser
+`p=min(r,n_permanents)`, `k=r-p`, puis garder les `k` plus petits seuils droits
+et les `k` plus grands seuils gauches. Ce sous-pool vérifie exactement
+`Depth(kernel)>=r iff Depth(pool)>=r`; il ne préserve pas la profondeur
+numérique au-delà de huit. Le scan coûte `O(n)` temps et `O(8)` mémoire.
 Un LBVH peut proposer les extrema sans rescan global ; le verifier de bloc reste
 entier et fail-open.
 Les fixtures permanentes incluent deux événements opposés égaux, qui ne donnent
 aucun crédit au point shell, les trois cas constants `B=0`, et un cas où le
-premier choix glouton détruit un matching de taille deux.
+top-k est comparé à la sweep exhaustive.
 
 Après ajout d'une cellule apex, `BlockBallDepth8(A,B,C,D;G_j)` est encore plus
 fort : il restreint le même axe au sous-intervalle réellement atteint par `D`
 et certifie huit groupes sur toutes les BallForms du bloc. Le déterminant
 in-sphere ponctuel tient dans `i128` sous u16, mais une AABB ne devient pas un
 polytope levé par ses seuls coins ; il faut borner séparément `||p||^2`,
-l'orientation et le signe, ou employer Bernstein/SOS exact. `ALL` ferme le
-bloc, `MIXED` scinde et les égalités restent shell.
+l'orientation et le signe. Une fois le signe d'orientation fixe, la forme
+normalisée est convexe en témoin : huit coins **intérieurs** suffisent pour
+`ALL`, mais huit coins extérieurs ne donnent pas `NONE`. `ALL` ferme le bloc,
+`MIXED` scinde et les égalités restent shell.
 
-La hiérarchie proposée est ainsi : `BlockJungDual` sur l'arête, Jung 1D après
-la porte aiguë, `BlockBallDepth8` après la cellule apex, puis seulement le
+La hiérarchie proposée est ainsi : proposer des bases, les vérifier par
+`BlockJungDual64`, fermer à `tau(E)>=8`, appliquer Jung 1D après la porte aiguë,
+puis `Corner8BallDepth/BlockBallDepth8` après la cellule apex et seulement le
 résiduel sous budget vers sweep ou fill. Elle généralise le même certificat
 collectif de q2/q3 à q4 sans construire de mosaïque d'ordre supérieur.
 

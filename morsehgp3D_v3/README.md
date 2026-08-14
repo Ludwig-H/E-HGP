@@ -290,9 +290,11 @@ Le lift rectangle à poids fixes est désormais résolu mathématiquement. Poser
 `A0>0 && 2A0^2>||C0||^2`, q3 remplace `2` par `3`. Pour un endpoint fixé,
 `(A0,C0)` est affine dans l'autre et chaque lane est un cône de Lorentz convexe.
 Les `8×8=64` couples de coins caractérisent donc exactement `ALL` sur
-l'enveloppe `A×B`. `BlockJungDual64` rend `ALL` ou `MIXED`, tient en i128 sous
+l'enveloppe `A×B`. `BlockJungDual64` rend `ALL_GROUP` ou `MIXED`, tient en i128 sous
 `1<=W<=65535`, et repropose les poids après split sans jamais émettre les
-paires. Les contrôles `A4=4*A0` et `R=4*||C0||^2` fixent les facteurs ; cette
+paires. `ALL_GROUP` ajoute une hyperarête uniforme ; seule
+`tau(E_Q)>=8/9` ferme la profondeur du rectangle. Les contrôles
+`A4=4*A0` et `R=4*||C0||^2` fixent les facteurs ; cette
 équivalence porte seulement sur le reçu à poids communs, pas sur l'existence
 d'un poids différent par paire. Le widening précède `a+b`, les produits et les
 normes ; le preflight de `W` somme en type large ou saturant avant tout cast.
@@ -344,7 +346,7 @@ Helly avec tolérance comprime en outre tout succès ponctuel. Pour les ensemble
 fermés `B_z` de centres où `z` n'est pas intérieur, `Depth(P,h)` signifie qu'il
 n'existe, pour **aucun** ensemble `R` de `h-1` IDs au plus, un point commun à
 tous les `B_z` restants. Il existe
-donc toujours un sous-pool qui certifie déjà la profondeur, de taille
+donc toujours un sous-pool qui certifie déjà le seuil `Depth>=h`, de taille
 `eta(3,h)<(h+1)^2` : au plus **80 IDs pour q4** et **99 pour q3**. Un
 `ToleranceKernel` porte ces IDs et le vérificateur rejoue exactement leur
 arrangement dans le disque. Ce résultat borne le payload, pas sa recherche ni
@@ -366,13 +368,15 @@ même mécanisme de profondeur à travers q3 et q4.
 Après une face aiguë, une seconde porte collective travaille en dimension un.
 Sur le segment de centres `J_f` compatible avec `K_4(ab)`, chaque témoin porte
 la forme affine `P_z(tau)=A_z-tau*B_z`; il est intérieur lorsque `P_z<0`.
-La profondeur fixe-face se décide exactement sans sweep globale : après `p`
-témoins permanents, conserver les `8-p` seuils `tau<alpha` les plus grands et
+Le seuil q4 fixe-face se décide exactement sans sweep globale : poser
+`p=min(8,n_permanents)`, puis conserver les `8-p` seuils `tau<alpha` les plus grands et
 les `8-p` seuils `tau>beta` les plus petits. Leur replay groupe les égalités
 shell et forme un `AxisToleranceKernel` d'au plus **16 IDs**. C'est un scan
 `O(n)` à mémoire `O(8)`, et la spécialisation constructive de
-`eta(2,8)=16`. La version bloc vérifie signes, ordre et marges uniformément,
-sinon scinde. La chaîne devient `Jung edge 2D -> carrier aigu -> noyau axe 1D
+`eta(2,8)=16`; il préserve l'équivalence `Depth>=8`, pas la valeur numérique
+au-delà de huit. Les bouts irrationnels exigent jusqu'à environ 207 bits sous
+u16, donc i256/quatre limbs. La version bloc groupe une égalité uniformément
+prouvée comme shell et ne scinde qu'un ordre indécis. La chaîne devient `Jung edge 2D -> carrier aigu -> noyau axe 1D
 -> WST4 symbolique -> BlockBallDepth8 sur carrier×apex -> résiduel`. La sweep
 par face n'est autorisée qu'après preflight ; il n'est pas nécessaire
 d'énumérer les q4 pour commencer à prouver leur rang.

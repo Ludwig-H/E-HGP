@@ -829,21 +829,28 @@ le doublon du cas à deux faces aiguës.
 
 Après une face aiguë fixe, les centres q4 admissibles forment un segment
 `J_f`. Chaque témoin est intérieur sur tout le segment, jamais, ou sur une
-demi-droite ouverte `tau<alpha` ou `tau>beta`. Soit `p` le nombre de témoins
-permanents capé à `h`, et `k=h-p`. Un scan conserve seulement les `k` plus
+demi-droite ouverte `tau<alpha` ou `tau>beta`. Pour un seuil cible `r`, poser
+`p=min(r,n_permanents)` et `k=r-p`. Un scan conserve seulement les `k` plus
 grands `alpha` et les `k` plus petits `beta`.
 
 Pour tout `tau`, le nombre retenu de demi-droites gauches vaut
 `min(k,n_gauches(tau))`, et symétriquement à droite. Si le pool complet a
-profondeur `h`, la somme retenue vaut donc au moins `k` en tout point. La
-réciproque vient de l'inclusion du sous-pool. Ce noyau d'au plus
-`p+2k=2h-p` IDs décide exactement la profondeur : au plus **16 IDs pour q4**
-et **18 pour q3**.
+profondeur au moins `r`, la somme retenue vaut donc au moins `k` en tout point.
+La réciproque vient de l'inclusion du sous-pool. Le contrat exact est
+`Depth(kernel)>=r iff Depth(pool)>=r`, pas l'égalité de leurs valeurs
+numériques. Ce noyau contient au plus `p+2k=2r-p` IDs : **16 pour q4** et
+**18 pour q3**.
 
-L'implémentation fixe-face est un scan top-k `O(n)` avec `O(h)` mémoire, puis
+L'implémentation fixe-face est un scan top-k `O(n)` avec `O(r)` mémoire, puis
 un replay exact des deux bouts et des seuils groupés ; l'égalité reste shell.
+Avec `D,E,F,G` de la face, q4 possède la réduction
+`T2=D*(G-2*(E-F)^2)` et `J_f={tau:2*tau^2<=T2}`. `T2<0` rend le domaine vide,
+`T2=0` un centre unique ; q3 remplace `2` par `3`. Sous u16, l'ordre de deux
+seuils tient vers 155 bits, mais les bouts demandent jusqu'à environ 207 bits
+via `2*A_z^2<=T2*B_z^2` : employer i256/quatre limbs.
 Au niveau bloc, un range-extrema propose ces IDs et vérifie uniformément leur
-ordre et leur marge sur `A×B×C`; toute inversion ou égalité scinde. Cette
+ordre et leur marge sur `A×B×C`. Une égalité uniformément prouvée est groupée
+et rejouée comme shell ; seul un ordre indécis ou inversable scinde. Cette
 porte se place **avant** la jointure apex et remplace, sur ce domaine 1D, le
 DAG à `3280` appels par un payload constant.
 
@@ -918,8 +925,9 @@ Le contre-audit indépendant redonne `alpha=A0/L`, `p=P/(2L)`, `A4=4*A0` et
 la nécessité/suffisance des 64 coins pour ce reçu commun.
 
 Cette primitive fournit l'ABI manquante entre le proposer de poids et la
-proof-tile CK : précalculer `L/Z/Q`, early-exit sur 64 prédicats, rendre `ALL`
-si tous passent, sinon `MIXED` et reproposer après split. Sous u16 et
+proof-tile CK : précalculer `L/Z/Q`, early-exit sur 64 prédicats, rendre
+`ALL_GROUP` si tous passent, sinon `MIXED` et reproposer après split. Ce verdict ajoute
+une hyperarête uniforme ; seul `tau(E_Q)>=h` ferme la profondeur. Sous u16 et
 `1<=L<=65535`, i128 suffit : avec `U=65535`,
 `|A0|<=3*L*U^2<2^50` et `|C0_i|<=2*L*U^2<2^49`. Un échec ne vaut jamais
 `NONE`, car une autre pondération peut réussir. La contre-fixture `2×2` aux
@@ -944,13 +952,19 @@ M4_e = E_e(V_e)-E_e(N_e)
 ```
 
 Ici `pi` est la direction projective primitive canonique de
-`(b-a) cross (z-a)` : division par le pgcd absolu puis signe de la première
+`(b-a) cross (z-a)`, calculée en i64 : division par le pgcd absolu puis signe de la première
 composante non nulle positif. Poser explicitement
 `V_{e,pi}=V_e intersect pi` et `N_{e,pi}=N_e intersect pi`. La première différence conserve exactement les paires
 avec au moins un carrier ; la somme retire exactement les paires coplanaires.
 Sous un `EdgeKey` total et une normalisation projective qui identifie les signes
 opposés, l'identité est correcte et exact-once. Elle mérite les fixtures
 collinearité, direction opposée, tie de longueur et deux carriers aigus.
+
+Le checksum global est particulièrement mordant :
+`Q_aff=sum_e[E_e(V_e)-sum_pi E_e(V_{e,pi})]` doit égaler exactement le nombre
+de 4-sous-ensembles affine-indépendants. Puis M4 soustrait le même terme sur
+`N_e`. Les vues appariées `GOOD` et `AFFINE minus BOTH_NONACUTE` doivent
+coïncider.
 
 La relation incidente est un `OR`, pas un `AND`. Le q4 positif
 `p0=(8,2,12)`, `p1=(1,3,9)`, `p2=(4,0,0)`, `p3=(10,5,1)` a l'arête owner
@@ -1065,7 +1079,7 @@ complète pour chaque face.
 
 ```text
 CKPairTape exact-once
-  -> SOC64 optionnel + BlockJungDualTile9/8, sans expansion PairId
+  -> SOC64 + primal proposer + BlockJungDual64 + tau(E)>=9/8
   -> CarrierBlocks dans la fenêtre 2B_R--lentille
   -> WST4 broad-phase symbolique et diagonales distinct-ID
   -> owner/acuité et signe d'orientation uniformes
@@ -1079,7 +1093,8 @@ Ne pas lancer de rampe M4 à 50 000. L'ordre des microgates est :
 
 1. exactitude de `BlockJungDual64` sur petits produits et mutants
    `drop-corner/vary-weights-per-corner/accept-equality/narrow-before-widen` ;
-2. exactitude de l'intervalle `[M4_L,M4_U]` et de toutes les diagonales ;
+2. exactitude de `[M4_L,M4_U]`, Möbius sur tous recouvrements, parité `C=D`,
+   conservation parent--enfants et mutant `saturate-before-subtract` ;
 3. `Corner8BallDepth/BlockBallDepth8` contre brute-force indépendant, fixture
    u16 mise à l'échelle, égalité shell et mutant
    `corners-outside-implies-none` ;

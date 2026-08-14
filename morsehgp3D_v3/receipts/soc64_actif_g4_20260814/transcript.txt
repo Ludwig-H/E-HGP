@@ -1,0 +1,96 @@
+git_head=110fe76e1d061ee40416d6903de28d20249f7747 fichiers_modifies=1
+sha256 morsehgp3D_v3/prototype/wspd_wavefront_probe.cpp = 64936944ef2f190299a2f7d67b0387b5002aab9c9019c6e830db6492e0189dfb
+sha256 morsehgp3D_v3/prototype/soc64_rect.hpp = bbd1de16f4884d98ed2033f6c072ef6245cff6a8e90d95d5283f6e2bbe9ad902
+sha256 morsehgp3D_v3/audits/check_rampe_pentes.py = de9a7f04fc327ecbbfb47d0dcfd9347bef05a305acc98aee3ba6632028e05ae2
+[GARDE pre-mutation] cible=devpod-gpu-exploration/europe-west4-ai1a/ehgp-blackwell-spot-ai1a état=TERMINATED machine=g4-standard-48 provisioning=SPOT action=STOP maxRunDuration=3600s.
+[SET-SCHEDULING] Reconfiguration protégée demandée :
+  compte              : louis.hauseux@gmail.com
+  projet              : devpod-gpu-exploration
+  zone                : europe-west4-ai1a
+  instance            : ehgp-blackwell-spot-ai1a
+  état certifié       : TERMINATED
+  maxRunDuration cible: 5400 s
+  action              : STOP
+Updated [https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/europe-west4-ai1a/instances/ehgp-blackwell-spot-ai1a].
+[GARDE post-mutation] cible=devpod-gpu-exploration/europe-west4-ai1a/ehgp-blackwell-spot-ai1a état=TERMINATED machine=g4-standard-48 provisioning=SPOT action=STOP maxRunDuration=5400s.
+[OK] maxRunDuration=5400s recertifié sur la cible TERMINATED devpod-gpu-exploration/europe-west4-ai1a/ehgp-blackwell-spot-ai1a; aucune VM démarrée ou arrêtée.
+[GARDE SSH] Clé de session ssh-ed25519 utilisable sans interaction (SHA256:TRjAUe6gmExt6O2j3FXR6biu67czmnnfn4pzzRmeXpU).
+[GARDE SSH] Clé OS Login unique, expiration fixe=2026-08-14T12:44:19.778214Z, durée restante=5975s.
+[START] Démarrage protégé demandé :
+  compte                 : louis.hauseux@gmail.com
+  projet                 : devpod-gpu-exploration
+  instance               : ehgp-blackwell-spot-ai1a
+  zone                   : europe-west4-ai1a
+  machine/provisioning   : g4-standard-48 / SPOT
+  maxRunDuration GCE     : 5400 s
+  arrêt invité secondaire : 80 min
+Starting instance(s) ehgp-blackwell-spot-ai1a...
+..............................................done.
+Updated [https://compute.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/europe-west4-ai1a/instances/ehgp-blackwell-spot-ai1a].
+Instance internal IP is 10.164.0.7
+Instance external IP is 34.12.137.145
+[GARDE-FOU GCE] action=STOP, maxRunDuration=5400s, échéance calculée=1786710896, échéance sûre=1786710596, terminationTimestamp non exposé; échéance calculée certifiée
+[GARDE-FOU INVITÉ] Armement de shutdown -P +80 via SSH.
+Shutdown scheduled for Fri 2026-08-14 12:25:38 UTC, use 'shutdown -c' to cancel.
+MODE=poweroff
+USEC=1786710338251162
+
+[GARDE-FOU GCE] action=STOP, maxRunDuration=5400s, échéance calculée=1786710896, échéance sûre=1786710596, terminationTimestamp non exposé; échéance calculée certifiée
+[SUCCÈS] VM démarrée avec deux coupe-circuits vérifiés. Fermez la session avec stop_and_verify.sh.
+generation verrouillee : 2026-08-14T04:04:56.428-07:00
+tar_sha256=2b4d0fad2f506160a9049ff86c916e85323899478f7af3adb56ffe4c59ce8c61
+coeurs=48
+cmake version 4.4.2
+g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0
+CMake Warning at CMakeLists.txt:37 (message):
+  mhgp3v : GMP absent, la validation arithmetique perd son temoin large
+
+
+[  0%] Building CXX object morsehgp3D_v2_build/CMakeFiles/mhgp.dir/src/catalogue.cpp.o
+[ 25%] Building CXX object morsehgp3D_v2_build/CMakeFiles/mhgp.dir/src/forest.cpp.o
+[ 50%] Building CXX object morsehgp3D_v2_build/CMakeFiles/mhgp.dir/src/run.cpp.o
+In file included from /home/louis_hauseux_gmail_com/soc/morsehgp3D_v2/include/mhgp/mhgp.hpp:8,
+                 from /home/louis_hauseux_gmail_com/soc/morsehgp3D_v2/src/run.cpp:9:
+/home/louis_hauseux_gmail_com/soc/morsehgp3D_v2/include/mhgp/exact.hpp:25:14: warning: ISO C++ does not support ‘__int128’ for ‘type name’ [-Wpedantic]
+   25 | using i128 = __int128;
+      |              ^~~~~~~~
+/home/louis_hauseux_gmail_com/soc/morsehgp3D_v2/include/mhgp/exact.hpp:26:23: warning: ISO C++ does not support ‘__int128’ for ‘type name’ [-Wpedantic]
+   26 | using u128 = unsigned __int128;
+      |                       ^~~~~~~~
+In file included from /home/louis_hauseux_gmail_com/soc/morsehgp3D_v2/include/mhgp/mhgp.hpp:8,
+                 from /home/louis_hauseux_gmail_com/soc/morsehgp3D_v2/src/forest.cpp:9:
+/home/louis_hauseux_gmail_com/soc/morsehgp3D_v2/include/mhgp/exact.hpp:25:14: warning: ISO C++ does not support ‘__int128’ for ‘type name’ [-Wpedantic]
+   25 | using i128 = __int128;
+      |              ^~~~~~~~
+/home/louis_hauseux_gmail_com/soc/morsehgp3D_v2/include/mhgp/exact.hpp:26:23: warning: ISO C++ does not support ‘__int128’ for ‘type name’ [-Wpedantic]
+   26 | using u128 = unsigned __int128;
+      |                       ^~~~~~~~
+In file included from /home/louis_hauseux_gmail_com/soc/morsehgp3D_v2/include/mhgp/mhgp.hpp:8,
+                 from /home/louis_hauseux_gmail_com/soc/morsehgp3D_v2/src/catalogue.cpp:22:
+/home/louis_hauseux_gmail_com/soc/morsehgp3D_v2/include/mhgp/exact.hpp:25:14: warning: ISO C++ does not support ‘__int128’ for ‘type name’ [-Wpedantic]
+   25 | using i128 = __int128;
+      |              ^~~~~~~~
+/home/louis_hauseux_gmail_com/soc/morsehgp3D_v2/include/mhgp/exact.hpp:26:23: warning: ISO C++ does not support ‘__int128’ for ‘type name’ [-Wpedantic]
+   26 | using u128 = unsigned __int128;
+      |                       ^~~~~~~~
+[ 75%] Linking CXX static library libmhgp.a
+[ 75%] Built target mhgp
+[100%] Building CXX object CMakeFiles/mhgp3v_wspd_wavefront_probe.dir/prototype/wspd_wavefront_probe.cpp.o
+[100%] Linking CXX executable mhgp3v_wspd_wavefront_probe
+[100%] Built target mhgp3v_wspd_wavefront_probe
+a08abe8a16d48cb1925baa8460d74ef88b704bebd20ef5e9f9368d12a061a4c9  build/mhgp3v_wspd_wavefront_probe
+	625 - mhgp3v_soc64_plancher_perte (Failed)
+	626 - mhgp3v_soc64_plancher_gain (Failed)
+	709 - mhgp3v_wspd_front_multiplicite (Not Run)
+	710 - mhgp3v_wspd_front_mutant_omission (Failed)
+	711 - mhgp3v_wspd_front_mutant_doublon (Failed)
+	712 - mhgp3v_wspd_front_refus_leaf (Failed)
+	713 - mhgp3v_wspd_front_refus_oracle_trop_grand (Failed)
+Errors while running CTest
+--- arret certifie (rc=8) ---
+[STOP] État actuel de ehgp-blackwell-spot-ai1a : RUNNING.
+Stopping instance(s) ehgp-blackwell-spot-ai1a...
+......................................................................................................................................................................................................................................................................................................done.
+Updated [https://compute.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/europe-west4-ai1a/instances/ehgp-blackwell-spot-ai1a].
+[OK] Cible ehgp-blackwell-spot-ai1a arrêtée et vérifiée (état GCE TERMINATED).
+[INFO] Aucune autre VM project=e-hgp active détectée.

@@ -149,15 +149,23 @@ gcloud compute scp "${TAR}" "${GCP_INSTANCE_NAME}:/tmp/v3.tgz" \
   tar xzf /tmp/v3.tgz
   echo "coeurs=$(nproc)"; cmake --version | head -1; g++ --version | head -1
   cmake -S morsehgp3D_v3 -B build -DCMAKE_BUILD_TYPE=Release >/dev/null
-  cmake --build build --target mhgp3v_wspd_wavefront_probe -j48
-  sha256sum build/mhgp3v_wspd_wavefront_probe
+  # TOUTES les cibles dont la porte de rejeu a besoin. La session precedente
+  # n'en construisait qu'une et lancait un regex plus large : les binaires
+  # absents faisaient echouer des tests qui n'avaient rien a voir avec la
+  # mesure, et la session s'arretait — correctement, mais pour rien.
+  cmake --build build --target mhgp3v_wspd_wavefront_probe mhgp3v_soc64_probe \
+        mhgp3v_wspd_front_probe mhgp3v_jung_dual_probe -j48
+  for t in mhgp3v_wspd_wavefront_probe mhgp3v_soc64_probe mhgp3v_wspd_front_probe \
+           mhgp3v_jung_dual_probe; do sha256sum build/$t; done
 ' 2>&1 | tee -a "${LOG}"
 
 # ---- 2. Rejeu INDEPENDANT des portes sur la VM.
 "${SSH[@]}" 'set -euo pipefail
   export PATH=$HOME/.local/bin:$PATH
   cd ~/soc
-  ctest --test-dir build --output-on-failure -j24 -R "^mhgp3v_(wspd|soc64|porteurs|two_lines)" 2>&1 | tail -8
+  ctest --test-dir build --output-on-failure -j24 \
+    -R "^mhgp3v_(wspd|soc64|porteurs|two_lines|jung_dual|diag_feuille|dissection|ordre_proche)" \
+    2>&1 | tail -10
 ' 2>&1 | tee -a "${LOG}"
 
 # ---- 3. LA RAMPE. Trois familles, deux certificats, quatre tailles.
