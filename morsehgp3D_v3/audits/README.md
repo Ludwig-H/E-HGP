@@ -37,7 +37,7 @@ ancienne phrase imposant le rejet global des positions dupliquées est périmée
   WST4 brut. Son post-scriptum conserve la réfutation du signe à `3703097`, sa
   réparation à `a73161c`, le diagnostic Corner8 de `069d903` et les réponses
   Q10--Q13 sur orientation, bisigne, raffinement par lane et diagonale `Sym2`.
-  Le verdict live au pin logiciel `08dec609` est maintenu dans
+  Le verdict live au pin logiciel `fe37aa5` est maintenu dans
   `AUDIT_ETAT_COURANT.md` :
   le bisigne est commis, les couples non séparés ne sont plus jetés, mais
   `Sym2` reste un compteur, le caller bisigne perd le mauvais bit et Corner8

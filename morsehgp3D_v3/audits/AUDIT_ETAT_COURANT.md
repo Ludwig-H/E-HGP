@@ -8,7 +8,7 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-> **Alerte au pin logiciel `08dec60920a93c15ef200da136d61995976db695`.** Les
+> **Alerte au pin logiciel `fe37aa5b17a59c27a4a866b91b259886e808875d`.** Les
 > commits `89774d0`, `e3f1925` et `88a9ba8` ajoutent respectivement
 > `Corner8BallDepth`, un broad phase WST3 et son produit WST4 ; `22d1cb0` en
 > publie la note de coût. `a73161c` corrige ensuite le signe d'acuité par
@@ -98,7 +98,7 @@ Cadre : `phase=exploration_v3_hors_registre`,
 > positivité ; l'autre reçoit `4096` supports « tous bien centrés » dans une
 > fixture qui n'appelle jamais `bien_centre`.
 >
-> Après ce pin, le delta logiciel de Claude sur `prototype/wst3_probe.cpp`,
+> Le commit `fe37aa5` ajoute aussi sur `prototype/wst3_probe.cpp`,
 > SHA-256 `a697ae896240652ec372d7dce3b26f119c7a82971d478312abb9b16ddc6a5c51`,
 > ajoute un histogramme de rang. Il ne change pas `bien_centre`, mais son
 > commentaire sur-affirme la portée : la CDF ne décrit que la clique kNN
@@ -122,17 +122,17 @@ Cadre : `phase=exploration_v3_hors_registre`,
 ## Snapshot
 
 Le dernier commit logiciel stable relu est
-`08dec60920a93c15ef200da136d61995976db695`, commit
-`echapper les parentheses : un regex de porte n'est pas du texte`. Il
+`fe37aa5b17a59c27a4a866b91b259886e808875d`, commit
+`le rang moyen est sous-lineaire, le pire ne l'est pas encore`. Il
 absorbe le raccord Midball de `a58d020`, HC et la borne de `c1e2e3b`, Corner8
 de `89774d0`, WST3 de `e3f1925`, WST4 de `88a9ba8`, la correction du signe
 aigu, l'échelle rationnelle, le diagnostic Corner8 postérieur au broad phase,
 le certificat bisigne de `f7ab7bb`, la conservation des couples non séparés,
 les compteurs `Sym2`, le sampler `--masse`, puis l'oracle brut
-`--supports-retenus`, la positivité Cramer de `34cf05d` et sa porte corrigée à
-`08dec609`. Le worktree contient ensuite le delta histogramme WST de Claude
-épinglé dans l'alerte, hors présentes écritures documentaires. Aucun logiciel
-n'a été modifié par l'auditeur.
+`--supports-retenus`, la positivité Cramer de `34cf05d`, sa porte corrigée à
+`08dec609` et l'histogramme de rang de `fe37aa5`. Le worktree était propre avant
+les présentes écritures documentaires. Aucun logiciel n'a été modifié par
+l'auditeur.
 
 Le code applique `diag2*num<=rayon2*den`, donc `num/den` se comporte comme une
 finesse croissante. Un commentaire de formule, CMake et la porte dite
@@ -148,12 +148,12 @@ rend encore le juge owner vert par pure surcouverture et publie
 `3 132 900=binom(60,2)^2` tuples candidats. Cela ne reçoit aucune sélectivité
 aval.
 
-Empreintes SHA-256 au commit `08dec609` :
+Empreintes SHA-256 au commit `fe37aa5` :
 
 - `CMakeLists.txt` :
   `051f0103db6d8bf2ddd3ec600fd70039c3bacacfbcb77308274c597bf12f5642` ;
 - `prototype/wst3_probe.cpp` :
-  `03dc123a2c7eadb48b79cb6c54bc6a8ff44cd2911aa73f89106c2e3e5c02e9b1` ;
+  `a697ae896240652ec372d7dce3b26f119c7a82971d478312abb9b16ddc6a5c51` ;
 - `prototype/corner8_ball.hpp` :
   `34ae231c3b1518a67f0b573269b9ba68a2fe1038fda8b84419b725aa5b2ae68b` ;
 - `prototype/corner8_probe.cpp` :
