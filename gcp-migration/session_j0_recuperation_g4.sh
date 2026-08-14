@@ -80,10 +80,15 @@ chmod 700 "${GCP_SSH_KEY_DIR}"
 export GCP_SSH_KEY_FILE="${GCP_SSH_KEY_DIR}/id_ed25519"
 ssh-keygen -q -t ed25519 -N '' -C 'e-hgp-j0-recup' -f "${GCP_SSH_KEY_FILE}"
 chmod 600 "${GCP_SSH_KEY_FILE}"
-GCP_SSH_KEY_EXPIRATION_UTC="$(python3 -c 'from datetime import datetime,timedelta,timezone; print((datetime.now(timezone.utc)+timedelta(minutes=95)).isoformat(timespec="seconds").replace("+00:00","Z"))')"
+# LE TTL DE LA CLE SE DERIVE DE LA DUREE GCE, IL N'EST PAS FIXE. La garde exige
+# une expiration restante dans `[maxRunDuration, maxRunDuration+660]`. Une
+# recette courte avec un TTL de 95 minutes est donc refusee avant tout
+# demarrage — c'est ce qui vient d'arriver, et c'est le bon comportement.
+SSH_TTL_MINUTES=$(( MAX_RUN_SECONDS / 60 + 5 ))
+GCP_SSH_KEY_EXPIRATION_UTC="$(python3 -c "from datetime import datetime,timedelta,timezone; print((datetime.now(timezone.utc)+timedelta(minutes=${SSH_TTL_MINUTES})).isoformat(timespec='seconds').replace('+00:00','Z'))")"
 export GCP_SSH_KEY_EXPIRATION_UTC
-gcloud compute os-login ssh-keys add --key-file="${GCP_SSH_KEY_FILE}.pub" --ttl=95m \
-  --project="${GCP_PROJECT_ID}" >/dev/null
+gcloud compute os-login ssh-keys add --key-file="${GCP_SSH_KEY_FILE}.pub" \
+  --ttl="${SSH_TTL_MINUTES}m" --project="${GCP_PROJECT_ID}" >/dev/null
 
 # ---------------------------------------------------------------------------
 # LA FERMETURE CIBLEE, REPAREE.
