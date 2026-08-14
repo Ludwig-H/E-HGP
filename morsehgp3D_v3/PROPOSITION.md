@@ -674,9 +674,12 @@ Le raccord ponctuel de `2d8aa5f` valide le remplacement : à
 deviennent `830 044` roots. Le temps reste `25--28 s`, car le prototype relit
 encore chaque liste `inner` par seed. Le port device de `2c14313` est donc une
 baseline de flat scan et de parité, pas encore l'architecture : sa prochaine
-forme doit remplacer le CSR dupliqué par les wavefronts
+étape peut immédiatement remplacer le rescan de census par
+`census_replay(sel,apex,seed3,pw)`, avec fates séparés et vrais `I_B/U_B`.
+Ensuite seulement, la forme J2 remplace le CSR dupliqué par les wavefronts
 `(SeedId,WitnessNode,side,cutoff)` et réutiliser `Q_theta` pour top-k, census et
-shell. Le reçu borné, les limites du batch et la gate causale sont dans
+shell. `DEBORDEMENT` est une continuation ou un refus, jamais une mort. Le reçu
+borné, les limites du batch et la gate causale sont dans
 [`audits/AUDIT_CONSTRUCTIF_AXIS_DEVICE_2C14313_20260815.md`](audits/AUDIT_CONSTRUCTIF_AXIS_DEVICE_2C14313_20260815.md).
 
 Chaque générateur généralise WSPD jusqu'au census de **sa propre** miniboule ;

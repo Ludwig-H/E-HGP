@@ -12,7 +12,7 @@ L'auditeur n'a utilisé aucune ressource GCP. Cet audit ne modifie aucun code et
 n'autorise aucune structure de Delaunay. Il juge le raccord q4 de `2d8aa5f`,
 puis la qualification host/device de `2c14313`.
 
-Snapshot lu :
+Snapshot noyau lu :
 
 ```text
 HEAD=2c14313d5848c46b1f0abcc1e910d26b862a88a4
@@ -23,6 +23,12 @@ axis_device_kernel.cu   1fbeb822e127484cefbc6054ebe43469f814b2184940d6358f166bfd
 axis_device_qual.cpp    994c0da9f9030638cb2ace9279f9954f12d701eee327d8ddedc7f62cad020547
 CMakeLists.txt          547a720ae45c2a4e8fbc14f2faf4dafcdf87e0a48431c0cade09e961b3e6121f
 ```
+
+Le `HEAD=11130cb1f2114d3569991e96606c49bd1d6cc853` ajoute ensuite uniquement la
+recette `session_axis_cuda_g4.sh` ; les cinq fichiers du noyau ci-dessus sont
+inchangés. Aucun reçu `axis_cuda_g4_20260815` n'existe au moment de cette
+relecture. Cette recette est donc auditée statiquement ci-dessous, sans lancer
+ni interroger GCP.
 
 ## 1. Avancée reçue comme diagnostic borné
 
@@ -44,10 +50,13 @@ Le raccord `--axe` supprime effectivement la boucle
   q4, tandis que les propositions passent de `48 791 131` paires à `830 044`
   roots, soit un facteur proche de cinquante-neuf.
 
-La campagne q4axis existante reste verte après la réécriture ; les groupes
-d'égalité, les bouts fermés, permanents, morts par gap et seuils paramétriques
-restent donc exercés. Ce résultat répond constructivement au mur mesuré : le
-produit de lentille n'est plus nécessaire à la complétude q4 ponctuelle.
+La campagne q4axis existante reste verte après la réécriture : `39/39` en
+`38,25 s`. Une comparaison indépendante de la sélection `O(m*k)` à l'ancienne
+référence `O(m^2)` sur `10 000` configurations rationnelles, avec ties, caps et
+les dix modes, ne trouve aucun écart pour `r4>=2`. Les groupes d'égalité, les
+bouts fermés, permanents, morts par gap et seuils paramétriques restent donc
+exercés. Ce résultat répond constructivement au mur mesuré : le produit de
+lentille n'est plus nécessaire à la complétude q4 ponctuelle.
 
 Il ne reçoit pas encore les identités de la source J0 : le mode `--verifie`
 compare des cardinaux q2/q4, pas les ensembles de `SupportKey`, owners,
@@ -120,6 +129,45 @@ preuve de source ni une mesure de tous les seeds.
 7. Les préconditions d'IDs injectifs/disjoints de la sélection restent le P0
    antérieur ; déplacer l'appel sur device ne les impose pas.
 
+Deux portes d'intégration sont aussi à fermer avant que `--axe` devienne un
+producteur :
+
+- `DEBORDEMENT` est actuellement agrégé avec les morts géométriques. Il faut un
+  `switch` exhaustif : `MORT_*` ferme, `OUVERT` continue, `DEBORDEMENT` déclenche
+  une continuation dynamique, un fallback exact ou un refus non nul. Il ne
+  peut jamais incrémenter `seeds_morts`.
+- l'API accepte un `r4` supérieur à la capacité de son tableau `seuil[64]`.
+  Un appel `r4=65` déborde sous ASan. Le contrat device doit vérifier
+  `1<=r4<=64` avant tout accès ; la borne CLI actuelle ne remplace pas la
+  précondition de l'API partagée.
+
+## 4.1 Premier gain immédiat : supprimer le rescan de census
+
+Avant même le BVH, le prototype peut enlever le second balayage de `inner`.
+Après `owner6`, positivité et primary, appeler
+`census_replay(sel,iq,seed3,pw)` puis router son fate :
+
+```text
+EXACT                    -> consommer I_B/U_B
+UNSUPPORTED_DEGENERACY   -> refus RelevantGP ou lane Plateau déclarée
+PENDING_CAP              -> continuation/fallback exact
+HORS_DOMAINE             -> apex profond ou appel invalide, aucune sortie
+```
+
+La sélection a déjà conservé tous les permanents, tous les extrêmes strictement
+intérieurs et le groupe de root égal nécessaire à un apex shallow. Ce raccord
+remplace les lignes de rescan par une reconstruction de taille bornée ; il ne
+change ni la source ni l'index et constitue donc un jalon J1.5 facilement
+falsifiable. La gate doit comparer le multiensemble
+`SupportKey -> (owner,primary,I_B,U_B,multiplicite)` au legacy et au brute, pas
+seulement `cand_q4`.
+
+Ce gain suppose les IDs du seed distincts, les IDs témoins injectifs, les deux
+ensembles disjoints et l'apex présent exactement une fois dans les extrêmes.
+Tant que le type `Selection` ne garantit pas ces invariants, le caller doit les
+préflighter et une violation vaut `HORS_DOMAINE`, non dégénérescence
+géométrique.
+
 ## 5. La primitive J2 à écrire, sans réinventer un index de roots
 
 Pour un cutoff rationnel `theta=p/q`, `q>0`, poser
@@ -145,6 +193,15 @@ quadratique convexe est à un des huit coins ; un maximum strictement négatif
 crédite `ALL`. Zéro descend. Une première passe entretient le heap de
 `k<=r4`, une seconde range-reporte tout le groupe égal ; le census s'arrête au
 huitième intérieur.
+
+La largeur doit être fixée dès l'ABI. Pour le root de l'apex, normaliser
+`p=A_y*sgn(B_y)` et `q=abs(B_y)`. Avec `C=q*G` et
+`H_i=q*W_i+p*n_i`, le minimum d'un axe, multiplié par `4*C`, vaut
+`4*C*(C*e^2-H_i*e)` si le clamp tombe sur un bout `e`, et `-H_i^2` sinon.
+Sous u16, les produits intermédiaires montent à environ 278 bits : un entier
+signé de 320 bits (`BigInt<5>` dans l'ABI actuelle) est la borne conservative à
+recevoir. `BigInt<4>` ne suffit pas à promettre ce prune. Le test est strict :
+`min>0` taille, `max<0` crédite ; toute égalité descend ou range-reporte.
 
 La source device suivante ne doit donc plus copier un CSR par seed. Elle lit un
 Morton BVH global et porte des tâches :
@@ -178,5 +235,32 @@ La porte de promotion est une baisse de `sites_lus/seed`, pas seulement un
 grand nombre de `Msites/s`. Le contrat d'une seconde reste bout-en-bout et
 inclut encore les trois lanes autonomes, `BallKey/RLE`, fold, forêts,
 verticales et copie hôte.
+
+## 7. Relecture statique de la recette G4 `11130cb`
+
+La recette a de bonnes décisions : arrêt ciblé par génération, parité avant
+débit et rapatriement du brut avant le verdict. Elle ne doit toutefois pas être
+lancée telle quelle : ses douze runs ont chacun `timeout 900`, soit jusqu'à
+`10 800 s`, alors que l'arrêt invité est armé à `4 500 s`. La variable
+`RUN_TIMEOUT=3300` annoncée n'encadre aucune commande. Une campagne peut donc
+être coupée avant son reçu complet.
+
+Réparation constructive minimale :
+
+1. faire un smoke de quatre petits cas (`2 familles x 2 smax`) avec une borne
+   courte et parité obligatoire ;
+2. si vert, lancer les tailles croissantes sous un timeout **global** inférieur
+   à `RUN_TIMEOUT`, et `timeout --kill-after` pour chaque binaire ;
+3. exiger exactement le nombre de runs planifié, `cap=0`, les hashes et
+   `ecarts=0` ;
+4. copier le transcript seulement après avoir ajouté un éventuel
+   `[ARRET NON CERTIFIE]` : dans le trap courant, la copie précède encore cette
+   ligne malgré le commentaire inverse ;
+5. publier séparément construction CSR, H2D, kernel, D2H et total.
+
+Ce protocole reçoit utilement la baseline plate. Il ne faut pas attendre la
+wavefront BVH pour apprendre si l'arithmétique host/device est identique, mais
+il faut garder `kernel_flat_scan` et `warm_e2e` comme deux métriques sans lien
+de promotion automatique.
 
 GCP non utilisé.

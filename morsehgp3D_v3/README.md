@@ -82,9 +82,12 @@ Le premier raccord confirme cette direction. À `n=6000,smax=6`, le mode axial
 conserve les `89 796` q4 du chemin plat et remplace `48 791 131` couples par
 `830 044` roots proposés, soit environ `59x` moins. Le mur reste `25--28 s`
 parce que chaque seed balaie encore tout son CSR témoin : le prochain jalon est
-donc la descente `Q_theta` sur BVH, pas un déterminant plus rapide. `2c14313`
-porte le flat scan sur device comme baseline de parité, mais ne contient pas
-encore cette descente et n'a produit aucune mesure CUDA. Audit et gate J2 :
+donc d'abord le branchement de `census_replay` pour supprimer le second scan,
+puis la descente `Q_theta` sur BVH pour supprimer le premier. `DEBORDEMENT`
+doit continuer ou refuser, jamais être compté comme une mort. `2c14313` porte
+le flat scan sur device comme baseline de parité, mais ne contient pas encore
+cette descente ; `11130cb` ajoute une recette G4, sans reçu local à ce stade.
+Audit et gates J1.5/J2 :
 [`audits/AUDIT_CONSTRUCTIF_AXIS_DEVICE_2C14313_20260815.md`](audits/AUDIT_CONSTRUCTIF_AXIS_DEVICE_2C14313_20260815.md).
 
 ## Verdict actuel

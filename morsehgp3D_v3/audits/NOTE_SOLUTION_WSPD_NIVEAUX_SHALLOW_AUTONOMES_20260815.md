@@ -267,6 +267,13 @@ Q4Seed3
   -> replay exact I_B/U_B
 ```
 
+Les fates de sélection ne sont pas interchangeables. `DEAD_*` retire une masse
+prouvée ; `OPEN` produit des roots ; `OVERFLOW` conserve toute la masse dans
+une continuation dynamique, un fallback exact ou un refus. L'agréger à
+`DEAD_*` rendrait la source incomplète. De même, l'API fixe doit refuser avant
+écriture tout `r4` hors de `[1,64]` et préflighter l'injectivité des IDs
+témoins, leur disjonction du seed et les trois IDs distincts du seed.
+
 Il n'existe aucun record `CellPair`, `Sym2` ou `carrier x apex`. Pour `m_e`
 lignes d'une arête, le nombre de groupes d'incidences proposés est au plus
 `2*r4*m_e`; chaque centre géométrique compte au moins deux incidences, donc le
@@ -295,6 +302,15 @@ Une première passe maintient les `k<=r4` meilleurs sites, une seconde
 range-reporte le groupe entier égal au root d'ordre `k`. Le flottant peut
 ordonner la queue, jamais décider un prune.
 
+La version u16 peut fermer sa largeur exactement. Normaliser le cutoff par
+`p=A_y*sgn(B_y)`, `q=abs(B_y)`, puis poser `C=q*G` et
+`H_i=q*W_i+p*n_i`. Après multiplication par `4*C`, la contribution minimale
+d'un axe vaut `4*C*(C*e^2-H_i*e)` quand le clamp tombe sur un bout `e`, et
+`-H_i^2` quand il tombe à l'intérieur. Les bornes u16 portent le plus grand
+intermédiaire à environ 278 bits : réserver un entier signé de 320 bits, soit
+`BigInt<5>` avec le type actuel. Une largeur 256 bits n'est pas un contrat sûr
+pour ce prune.
+
 La même forme donne le census sans rescan plat. Le minimum positif ou nul
 taille le nœud ; comme `Q_theta` est convexe, son maximum est à l'un des huit
 coins et un maximum strictement négatif crédite toute la population. Le
@@ -315,6 +331,21 @@ seed d'orientation positive peut être la face non aiguë d'un q4 positif. La
 route reçue la plus simple conserve donc d'abord le primary aigu et les deux
 côtés `First/Last`, puis compare toute variante orientée aux mêmes ensembles
 de `SupportKey`.
+
+### 7.4 Jalon intermédiaire sans nouveau BVH
+
+Le raccord ponctuel actuel scanne les témoins une fois pour sélectionner les
+roots, puis rescane `inner` pour chaque apex. Le premier patch utile est plus
+petit que la wavefront : après `owner6`, positivité et primary, appeler le
+`census_replay` de la sélection. Pour un apex shallow il reconstruit exactement
+`I_B` avec les permanents et les extrêmes stricts, et `U_B` avec le seed, le
+shell persistant et le groupe égal. `EXACT` seul émet ; `HORS_DOMAINE`,
+`UNSUPPORTED_DEGENERACY` et `PENDING_CAP` ont des routes distinctes.
+
+Cette étape supprime le second scan sans toucher au générateur et fournit
+immédiatement les identités nécessaires à une gate multiensemble. Elle ne
+supprime pas le premier terme `sum_seed |B(m,D) inter P|` ; c'est précisément
+la responsabilité du jalon BVH `Q_theta` suivant.
 
 ## 8. Coût à mesurer honnêtement
 
@@ -349,11 +380,14 @@ rejeu et l'aval complet.
 2. Créer trois tapes réellement disjoints et raccorder `W2/W3/W4Depth` avant
    toute complétion ; tuer le mutant qui réutilise `acu`.
 3. Dans Lane4 seulement, remplacer la boucle de paires de lentille par
-   `Q4SeedAxisTopR4` et son best-first Morton. C'est le changement qui attaque
-   directement les milliards observés.
-4. Recevoir séparément Lane3 par `Third3 -> centre ambiant -> Depth9`, sans
+   `Q4SeedAxisTopR4`, router `OVERFLOW` sans perte, puis brancher son
+   `census_replay`. Comparer les vrais `I_B/U_B` au brute.
+4. Remplacer ensuite le premier scan témoin par le best-first Morton
+   `Q_theta`. C'est le changement qui attaque directement les milliards
+   observés et le temps résiduel.
+5. Recevoir séparément Lane3 par `Third3 -> centre ambiant -> Depth9`, sans
    jamais consulter Lane2.
-5. Raccorder les trois sorties à `BallKey/RLE`, puis seulement porter les
+6. Raccorder les trois sorties à `BallKey/RLE`, puis seulement porter les
    queues reçues sur G4.
 
 La première gate n'a pas besoin de 50 000 points. Sur `n<=140`, comparer pour

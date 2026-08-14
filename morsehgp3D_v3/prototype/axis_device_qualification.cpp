@@ -36,6 +36,7 @@
 
 #include "prototype/axis_device_job.hpp"
 #include "prototype/cloud_families.hpp"
+#include "prototype/lane_grid.hpp"
 
 namespace {
 
@@ -47,12 +48,8 @@ using mhgp::i64;
   std::exit(2);
 }
 
-struct Pt { i64 c[3] = {0, 0, 0}; };
-
-inline i64 d2p(const Pt& a, const Pt& b) {
-  const i64 x = a.c[0] - b.c[0], y = a.c[1] - b.c[1], z = a.c[2] - b.c[2];
-  return x * x + y * y + z * z;
-}
+using mhgp3v::lanegrid::Pt;
+using mhgp3v::lanegrid::d2p;
 
 inline bool fuseau4(i128 D2, i128 nu, i128 dot) {
   const i128 g = D2 - nu;
@@ -125,12 +122,21 @@ int main(int argc, char** argv) {
   std::vector<i64> coords((size_t)3 * N);
   for (int i = 0; i < N; ++i)
     for (int c = 0; c < 3; ++c) coords[(size_t)3 * i + c] = P[(size_t)i].c[c];
-  std::vector<int> seeds, offsets, sites;
+  // LA GRILLE, parce qu'un balayage `O(N)` par paire ne finit pas : a `n=6000`
+  // il demanderait `10^11` operations pour construire un lot qui n'est meme pas
+  // le sujet de la mesure.
+  mhgp3v::lanegrid::Grid grid;
+  grid.build(P, std::max<i64>(1, (i64)(1.2 * esp)));
+  grid.build_offsets(dmax + 4);
+  std::vector<int> seeds, offsets, sites, nb;
   offsets.push_back(0);
   std::vector<int> inner, lens;
   bool cap_atteint = false;
-  for (int ia = 0; ia < N && !cap_atteint; ++ia)
-    for (int jb = ia + 1; jb < N && !cap_atteint; ++jb) {
+  for (int ia = 0; ia < N && !cap_atteint; ++ia) {
+    nb.clear();
+    grid.query(P[(size_t)ia].c, dmax, [&](int j) { if (j > ia) nb.push_back(j); return true; });
+    for (int jb : nb) {
+      if (cap_atteint) break;
       const i64 D2 = d2p(P[(size_t)ia], P[(size_t)jb]);
       if (D2 == 0 || D2 > dmax * dmax) continue;
       const i128 ex = P[(size_t)jb].c[0] - P[(size_t)ia].c[0];
@@ -138,7 +144,13 @@ int main(int argc, char** argv) {
       const i128 ez = P[(size_t)jb].c[2] - P[(size_t)ia].c[2];
       long long f4 = 0;
       inner.clear(); lens.clear();
-      for (int z = 0; z < N; ++z) {
+      const i64 mc[3] = {(P[(size_t)ia].c[0] + P[(size_t)jb].c[0]) / 2,
+                         (P[(size_t)ia].c[1] + P[(size_t)jb].c[1]) / 2,
+                         (P[(size_t)ia].c[2] + P[(size_t)jb].c[2]) / 2};
+      const i64 rin = (i64)std::sqrt((double)D2) + 2;
+      std::vector<int> voisins;
+      grid.query(mc, rin, [&](int z) { voisins.push_back(z); return true; });
+      for (int z : voisins) {
         if (z == ia || z == jb) continue;
         const i128 ux = 2 * (i128)P[(size_t)z].c[0] - (P[(size_t)ia].c[0] + P[(size_t)jb].c[0]);
         const i128 uy = 2 * (i128)P[(size_t)z].c[1] - (P[(size_t)ia].c[1] + P[(size_t)jb].c[1]);
@@ -163,6 +175,7 @@ int main(int argc, char** argv) {
         offsets.push_back((int)sites.size());
       }
     }
+  }
   const int nseeds = (int)seeds.size() / 3;
   if (nseeds == 0) { std::fprintf(stderr, "PLANCHER: aucun Q4Seed3\n"); return 3; }
 

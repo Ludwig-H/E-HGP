@@ -8,7 +8,7 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-> **Verdict live au `HEAD=2c14313d5848c46b1f0abcc1e910d26b862a88a4`.**
+> **Verdict live au `HEAD=11130cb1f2114d3569991e96606c49bd1d6cc853`.**
 > Le pin noyau `a369452` porte `Q4SeedAxisTopR4`, son probe, 39 CTests déclarés,
 > les vrais IDs de census, la capacité 163, les comptes requis et les fates de
 > plateau. Il refuse aussi tout replay après `MORT_GAP` et tout apex dont le
@@ -18,8 +18,10 @@ Cadre : `phase=exploration_v3_hors_registre`,
 > son statut tronqué ; `91486d4` grave les trois contre-fixtures qui réfutent
 > l'ancien théorème des calottes. `2d8aa5f` raccorde ensuite `--axe` et ramène
 > la sélection top-r de `O(m^2)` à `O(m*r4)` ; `2c14313` ajoute sa baseline
-> host/device plate. Le worktree courant ne contient que les présents textes
-> d'audit. Aucune mesure CUDA ou GPU nouvelle n'entre dans le verdict.
+> host/device plate ; `11130cb` ajoute une recette de session G4, pas un reçu.
+> Le worktree courant contient les présents textes d'audit et des deltas CMake/
+> calottes concurrents appartenant à Claude. Aucune mesure CUDA ou GPU nouvelle
+> n'entre dans le verdict.
 > Q14 est fermée contractuellement : aucune structure de Delaunay n'est
 > autorisée, y compris d'ordre un, comme source, squelette, filtre ou census.
 >
@@ -128,18 +130,35 @@ Cadre : `phase=exploration_v3_hors_registre`,
 > q4. Le temps reste `25--28 s`, car chaque seed rescane encore son voisinage.
 > Le lot device de `2c14313` transporte précisément ce flat scan en CSR ; ses
 > `3/3` CTests host-only passent en `1,48 s`, mais le test nominal est tronqué
-> (`cap=1`) et aucune descente BVH n'existe. Le prochain jalon reçu est le
-> moteur `Q_theta` AABB partagé par First/Last, census et shell, avec un batch
-> complet explicite et les identités comparées.
+> (`cap=1`) et aucune descente BVH n'existe. Le jalon immédiat est de brancher
+> `census_replay` après owner/positivité afin de supprimer le second scan et de
+> produire les vrais `I_B/U_B`. Le jalon suivant est le moteur `Q_theta` AABB
+> partagé par First/Last, census et shell, avec un batch complet explicite et
+> les identités comparées. Deux portes de sûreté restent nettes :
+> `DEBORDEMENT` est aujourd'hui agrégé aux morts dans le raccord et l'API fixe
+> déborde pour `r4=65`; il faut continuation/refus pour le premier et
+> `1<=r4<=64` pour la seconde.
 > [`AUDIT_CONSTRUCTIF_AXIS_DEVICE_2C14313_20260815.md`](AUDIT_CONSTRUCTIF_AXIS_DEVICE_2C14313_20260815.md).
 >
-> Contrôles frais : `39/39` CTests `^mhgp3v_q4axis` passent en `38,86 s`, avec
+> Contrôles frais : `39/39` CTests `^mhgp3v_q4axis` passent en `38,25 s`, avec
 > des seuils `smax=7/14`, trois exact-once, le plateau de 100 IDs et le refus de
 > replay sur la fixture `MORT_GAP`. Le mutant du shell persistant est tué par la
 > campagne scanline `Plateau`, et non par la fixture ties qui ne contient aucun
 > `B=0,A=0`. Le noyau ponctuel `Lane4` reste un oracle borné ; les trois
 > producteurs WSPD autonomes ne sont pas implémentés et aucune complexité 50k
-> n'est reçue. La nouvelle recette J0 n'a pas été exécutée par l'audit ; GCP
+> n'est reçue. Une comparaison indépendante de `O(m*r4)` à la référence
+> `O(m^2)` sur `10 000` configurations rationnelles, ties et caps compris, ne
+> trouve aucun écart pour `r4>=2`.
+>
+> La recette G4 de `11130cb` ne doit pas encore être lancée telle quelle : elle
+> prévoit douze cas pouvant durer chacun `900 s`, soit `10 800 s`, contre un
+> arrêt invité à `4 500 s`; son `RUN_TIMEOUT=3300` n'est pas consommé et son
+> verdict accepterait un préfixe non vide au lieu d'exiger les douze clés.
+> Réparation constructive : smoke court de parité, timeout global, cardinal de
+> matrice exact, `cap=0` pour les cas de correction, puis lots de débit
+> séparés. La copie du transcript doit aussi suivre, et non précéder, un
+> éventuel `[ARRET NON CERTIFIE]`. Aucun reçu local `axis_cuda_g4_20260815`
+> n'existe à cette relecture. La recette n'a pas été exécutée par l'audit ; GCP
 > n'a pas été utilisé.
 
 > **Alerte au pin logiciel `6e815d28b3e229a0161eb00d6fa0c9a272efac5d`.** Les
