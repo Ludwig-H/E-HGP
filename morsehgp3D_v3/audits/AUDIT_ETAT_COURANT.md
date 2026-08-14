@@ -8,7 +8,7 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-> **Alerte au `HEAD=f1b78c0b8a4407e3f1e568acdb23ada4f7862ddf`.** Les
+> **Alerte au `HEAD=08dec60920a93c15ef200da136d61995976db695`.** Les
 > commits `89774d0`, `e3f1925` et `88a9ba8` ajoutent respectivement
 > `Corner8BallDepth`, un broad phase WST3 et son produit WST4 ; `22d1cb0` en
 > publie la note de coût. `a73161c` corrige ensuite le signe d'acuité par
@@ -28,8 +28,13 @@ Cadre : `phase=exploration_v3_hors_registre`,
 >
 > Le théorème de la
 > miniboule unique est reçu uniquement pour un **support minimal positif
-> complet**. Corner8 est un certificat `ALL_INTERIOR` conditionnel sur un vrai
-> support q4 déjà authentifié ; ses `6/6` portes ne jugent ni positivité, ni
+> complet**. Ces supports forment une supersource finie exhaustive par
+> Carathéodory et témoignent `c in conv(U_B)` ; ils ne suffisent pas à publier
+> un événement dégénéré. Le contrat régulier exige encore
+> `c in relint(conv(U_B))`. Hors `RelevantGP`, le shell complet et sa disposition
+> donnent `unsupported_degeneracy/plateau_pending` tant qu'une extension
+> indépendante n'est pas reçue. Corner8 est un certificat `ALL_INTERIOR` conditionnel sur un vrai
+> support q4 déjà authentifié ; ses six portes historiques ne jugent ni positivité, ni
 > owner, ni IDs, et son oracle ponctuel recopie le prédicat du sujet. Les
 > `5/5` portes WST3 et les portes WST4 reçoivent une couverture dans le rectangle
 > owner choisi par leur juge, pas une source physique exact-once : le tape brut
@@ -55,11 +60,11 @@ Cadre : `phase=exploration_v3_hors_registre`,
 > `--ordre=4` et appelle `retenus` le seul test `I<=7`, sans extra-shell.
 > Aucune de ses sorties ne décrit donc encore la masse q4 positive.
 >
-> `f1b78c0` committe ensuite `--supports-retenus`, SHA-256 WST
+> `f1b78c0` avait committé `--supports-retenus`, SHA-256 WST
 > `23a2be338ac36b364d89b52669657f31602662ee9bb6b9e1716f97c4177ef0a3`, et
 > sa CTest à regex, CMake
 > `258b9eb979ca2119d21eade9a8ac6db9dcb8c4893a8e57d7042fdcbc7477b11a`.
-> Il énumère encore tous les tétraèdres non
+> Dans cette révision, il énumérait tous les tétraèdres non
 > coplanaires avec `I<=7`, sans positivité, shell ni `BallKey/RLE`. Cette boucle
 > globale est exact-once sans owner ; elle ne calcule toutefois pas l'owner
 > requis pour une provenance ou comparaison `OwnedCK`. Son
@@ -73,18 +78,25 @@ Cadre : `phase=exploration_v3_hors_registre`,
 > 50k exclut une source ancrée `k<=12499`, pas toute architecture locale ni une
 > croissance asymptotique.
 >
-> Après ce pin, Claude raccorde un candidat `c8::bien_centre` par Cramer et
-> signes de faces : Corner8 header
+> `34cf05d` committe ensuite `c8::bien_centre` par Cramer et signes de faces,
+> puis `08dec609` répare l'échappement de sa regex CMake : Corner8 header
 > `34ae231c3b1518a67f0b573269b9ba68a2fe1038fda8b84419b725aa5b2ae68b`,
 > probe `a126622e9c4ebbd5c81f60d54f4a3e896d0a9a86f26ce665ba940c7f85d90bc1`
 > et WST `03dc123a2c7eadb48b79cb6c54bc6a8ff44cd2911aa73f89106c2e3e5c02e9b1`.
-> La formule est cohérente sous le profil u16 et les quatre fixtures
-> locales rendent `regulier=1 plat=1 shell=0 obtus=0`, mais aucun CTest ne porte
-> encore `--centre`, aucune permutation/orientation opposée ni autorité Gram
-> indépendante n'est exercée. Le raccord WST casse la porte stable :
-> `mhgp3v_supports_retenus_localite` rend `CTest rc=8`, car CMake attend encore
-> `retenus=60378` tandis que le delta publie `bien_centres=600311` et
-> `retenus=7344`. Ce live mobile n'est pas reçu.
+> La formule est cohérente sous le profil u16 et le raccord transforme la
+> population en `Positive4 intersect {I<=7}`. Les `18/18` portes Corner8/WST
+> ciblées passent sur deux rejeux en `13,39--19,31 s`. Les deux portes nouvellement pertinentes
+> `mhgp3v_corner8_centre` et `mhgp3v_supports_retenus_localite` passent au
+> présent rejeu en `0,00--0,02 s` et `5,10--9,61 s`; le catalogue reconfiguré contient `839`
+> tests. L'ancien `CTest rc=8` est donc un replay historique antérieur à
+> `08dec609`, pas l'état courant. La réception reste pourtant ouverte : les
+> portes sont à regex, la seconde omet `--ordre=4`, les fixtures ne couvrent ni
+> permutations, orientation opposée, extrêmes u16 ou entrées invalides, et
+> aucune autorité C++ indépendante ne juge les poids. Le shell, `BallKey/RLE`,
+> les positions dupliquées, l'ABI typée et la voie device restent absents. Deux
+> commentaires CMake sont en outre faux : l'un affirme que le compteur omet la
+> positivité ; l'autre reçoit `4096` supports « tous bien centrés » dans une
+> fixture qui n'appelle jamais `bien_centre`.
 >
 > Les défauts antérieurs restent actifs : les portes HC saines sont à regex et
 > ne jugent pas chaque promotion ; `--fenetre-exhaustive` contourne les gates ;
@@ -102,18 +114,16 @@ Cadre : `phase=exploration_v3_hors_registre`,
 ## Snapshot
 
 Le dernier commit stable relu est
-`HEAD=f1b78c0b8a4407e3f1e568acdb23ada4f7862ddf`, commit
-`aucun prefixe kNN ne capture les supports : le pire rang suit n`. Il
+`HEAD=08dec60920a93c15ef200da136d61995976db695`, commit
+`echapper les parentheses : un regex de porte n'est pas du texte`. Il
 absorbe le raccord Midball de `a58d020`, HC et la borne de `c1e2e3b`, Corner8
 de `89774d0`, WST3 de `e3f1925`, WST4 de `88a9ba8`, la correction du signe
 aigu, l'échelle rationnelle, le diagnostic Corner8 postérieur au broad phase,
 le certificat bisigne de `f7ab7bb`, la conservation des couples non séparés,
 les compteurs `Sym2`, le sampler `--masse`, puis l'oracle brut
-`--supports-retenus` et sa porte à regex. Après ce pin, le delta logiciel mobile
-de Claude porte sur `prototype/corner8_ball.hpp`,
-`prototype/corner8_probe.cpp` et `prototype/wst3_probe.cpp`, aux hashes détaillés
-dans l'alerte ci-dessus. Les autres changements visibles sont les présentes
-écritures documentaires ; aucun logiciel n'a été modifié par l'auditeur.
+`--supports-retenus`, la positivité Cramer de `34cf05d` et sa porte corrigée à
+`08dec609`. Le worktree était propre avant les présentes écritures
+documentaires ; aucun logiciel n'a été modifié par l'auditeur.
 
 Le code applique `diag2*num<=rayon2*den`, donc `num/den` se comporte comme une
 finesse croissante. Un commentaire de formule, CMake et la porte dite
@@ -129,16 +139,16 @@ rend encore le juge owner vert par pure surcouverture et publie
 `3 132 900=binom(60,2)^2` tuples candidats. Cela ne reçoit aucune sélectivité
 aval.
 
-Empreintes SHA-256 au commit `f1b78c0` :
+Empreintes SHA-256 au commit `08dec609` :
 
 - `CMakeLists.txt` :
-  `258b9eb979ca2119d21eade9a8ac6db9dcb8c4893a8e57d7042fdcbc7477b11a` ;
+  `051f0103db6d8bf2ddd3ec600fd70039c3bacacfbcb77308274c597bf12f5642` ;
 - `prototype/wst3_probe.cpp` :
-  `23a2be338ac36b364d89b52669657f31602662ee9bb6b9e1716f97c4177ef0a3` ;
+  `03dc123a2c7eadb48b79cb6c54bc6a8ff44cd2911aa73f89106c2e3e5c02e9b1` ;
 - `prototype/corner8_ball.hpp` :
-  `c09ef9f2f7b3c0710464cbb108bd0c6285b2d1c36b41e2771a1b9fa267508a1c` ;
+  `34ae231c3b1518a67f0b573269b9ba68a2fe1038fda8b84419b725aa5b2ae68b` ;
 - `prototype/corner8_probe.cpp` :
-  `9f29100613543cdf1f246243ec7b8112b4c84826618c4a053b3332361c49115f` ;
+  `a126622e9c4ebbd5c81f60d54f4a3e896d0a9a86f26ce665ba940c7f85d90bc1` ;
 - `prototype/wspd_wavefront_probe.cpp` :
   `6330b79586066c575c59e4480a17fdf864fdef77b261a3a7f33c66bd68ed9c5b` ;
 - `prototype/cloud_families.hpp` :
@@ -156,11 +166,14 @@ Empreintes SHA-256 au commit `f1b78c0` :
 
 Le commit stable reçoit la primitive BJD, un packing disjoint sûr sur ses
 campagnes causales, huit portes BJD ciblées, treize portes Midball, cinq portes
-HC, une porte de réfutation de la borne, six portes Corner8 et onze portes
-WST3/WST4 enregistrées. Les `16/16` Corner8/WST antérieures passent au pin
-précédent ; la nouvelle porte `--supports-retenus` passe seule en 30,49 s à
-`n=120`. Aucune suite complète du catalogue de `838` tests n'a été rejouée dans
-ce snapshot. Ces verts ne
+HC, une porte de réfutation de la borne, sept portes Corner8 et onze portes
+WST3/WST4 enregistrées. Les `18/18` portes Corner8/WST ciblées passent sur deux
+rejeux en `13,39--19,31 s`. Les deux portes nouvellement pertinentes,
+`corner8_centre` et `supports_retenus_localite`, passent respectivement en
+`0,00--0,02 s` et `5,10--9,61 s`.
+Aucun de ces temps diagnostiques n'est un benchmark.
+Aucune suite complète du catalogue de `839` tests n'a été rejouée dans ce
+snapshot. Ces verts ne
 ferment pas les défauts de composition et d'identité ci-dessus. Il ne reçoit ni
 projection CK--WST distinct-ID/owner,
 ni profondeur `tau(F)`, ni ledger persistant de vrais `PointId`, ni primitive
@@ -598,9 +611,9 @@ loi réellement tirée et des strates positives/owner appariées. La seule CTest
 enregistrée fixe `uniform,n=2000` et accepte une regex ; elle ne reçoit ni la
 seconde famille citée par le commit, ni le code de sortie après cette ligne.
 
-### Commit `f1b78c0`, `--supports-retenus` : ce ne sont pas encore les supports q4
+### État historique `f1b78c0` de `--supports-retenus` : population q4 brute
 
-Le nouveau mode exhaustif filtre seulement `O!=0` et `I<=7` : son objet réel est
+À ce pin, le mode exhaustif filtre seulement `O!=0` et `I<=7` : son objet réel est
 `Raw4={S: |S|=4, affdim(S)=3, I(circ(S))<=7}`. Il manque les
 quatre poids strictement positifs : la fixture
 `(10,10,10),(14,10,10),(10,14,10),(10,10,11)` a `I=0`, mais des poids
@@ -650,50 +663,64 @@ versionnée, cap d'opérations et statut `PARTIEL`, le tout oracle-only.
 Le mode doit aussi exiger `--ordre=4` et être exclusif de `--masse` ; il accepte
 actuellement l'ordre trois par défaut tout en imprimant des q4.
 
-La seule porte CTest fixe `uniform,n=120`, attend par regex
+La seule porte CTest de ce pin fixe `uniform,n=120`, attend par regex
 `retenus=60378`, `ratio moyen=7,07` et `rang pire=109`, puis passe ici en
 30,49 s. Elle n'exerce ni positivité, ni shell, ni `BallKey`, ni la fixture 50k,
 et `PASS_REGULAR_EXPRESSION` n'impose pas le code final après la ligne. Son
 temps à 120 points confirme un oracle borné de falsification, pas une route vers
 50k.
 
-Réparation de porte demandée à Claude : renommer le mode et la sortie
-`raw4_ile7_locality`, le rendre standalone ou exiger `--ordre=4`, fixer
-explicitement les deux seeds, poser un `TIMEOUT` et un cap u128 de travail, puis
-faire contrôler `rc=0` par un wrapper plutôt que par une regex seule. Les
-fixtures positives, poids négatif/nul, shell, tie `PointId` et la construction
-analytique 50k doivent être séparées de ce snapshot statistique.
+Les réparations encore demandées à Claude sont de rendre le mode standalone ou
+d'exiger `--ordre=4`, fixer explicitement les deux seeds, poser un `TIMEOUT` et
+un cap u128 de travail, puis faire contrôler `rc=0` par un wrapper plutôt que par
+une regex seule. Les fixtures de poids positif, négatif et nul, shell, tie
+`PointId` et la construction analytique 50k doivent être séparées du snapshot
+statistique.
 
-### Delta live post-`f1b78c0` : positivité q4 par Cramer, intégration rouge
+### Commits `34cf05d` et `08dec609` : positivité q4 ponctuelle reçue sous u16, intégration ouverte
 
-Le nouveau `c8::bien_centre` résout implicitement
+`c8::bien_centre` résout implicitement
 `2 M c=(||p_i||^2-||p_0||^2)_i`, puis compare le centre et chaque sommet au
 même côté de la face opposée. Sous indépendance affine, ce test est équivalent
 aux quatre barycentriques strictement positives. Les bornes publiées sont
 conservatrices sur u16 ; une redérivation donne `|N|<2^69` et `|dc|<2^104`,
 donc i128 suffit. Le build ciblé est vert et `--centre` classe correctement les
-quatre fixtures régulière, positive aplatie, poids nuls et obtuse. Un
-contre-calcul Gram/T--Q indépendant sur 20 000 q4 u16 aléatoires, puis les 24
-permutations des 50 premiers, ne trouve aucun désaccord ; il reste un diagnostic
-d'audit, pas une porte versionnée.
+quatre fixtures régulière, positive aplatie, poids nuls et obtuse. Un diagnostic
+inline non versionné, seed `20260814`, a comparé une réimplémentation
+Cramer/faces à la positivité Gram sur 20 000 tirages dans `[0,20]^3`, dont
+19 929 non dégénérés, et trois permutations choisies par cas, sans désaccord.
+Il n'a ni digest, ni commande conservée et ne constitue donc pas un reçu.
 
-Ce résultat est encore une réception logicielle incomplète. `--centre` n'est
-dans aucune CTest ; les fixtures du dépôt partagent le sujet et ne gravent ni
-permutation impaire, ni orientation opposée, ni extrêmes u16, ni comparaison
-aux numérateurs `L_0,...,L_3`/Gram. L'ABI booléenne fusionne dégénérescence,
-précondition invalide et poids non positif, et le header `i64` ne préflighte pas
-le domaine avant les soustractions signées : hors u16, l'overflow peut précéder
-tout fail-open. Il faut soit des points u16 authentifiés par type, soit un
-verdict `{positive,nonpositive,degenerate,invalid,numeric_failure}`. Le helper local lambda sous
-`MHGP_HD` doit aussi être compilé sur la voie CUDA avant tout claim device.
+Les `18/18` portes Corner8/WST ciblées passent sur deux rejeux en
+`13,39--19,31 s`. La porte
+`mhgp3v_corner8_centre` est désormais enregistrée et, avec
+`mhgp3v_supports_retenus_localite`, passe sur deux rejeux diagnostiques en
+`0,00--0,02 s` et `5,10--9,61 s`. L'échec `rc=8` observé pendant le raccord
+est historique : `08dec609` a corrigé l'échappement de la regex. Cette réception logicielle reste
+incomplète. Les deux portes sont à `PASS_REGULAR_EXPRESSION`, les fixtures du
+dépôt partagent le sujet et ne gravent ni permutation impaire, ni orientation
+opposée, ni extrêmes u16, ni comparaison aux numérateurs `L_0,...,L_3`/Gram.
+L'ABI booléenne fusionne dégénérescence, précondition invalide et poids non
+positif, et le header `i64` ne préflighte pas le domaine avant les soustractions
+signées : hors u16, l'overflow peut précéder tout fail-open. Il faut soit des
+points u16 authentifiés par type, soit un verdict
+`{positive,nonpositive,degenerate,invalid,numeric_failure}`. Le helper local
+lambda sous `MHGP_HD` doit aussi être compilé sur la voie CUDA avant tout claim
+device.
 
-Le raccord transforme enfin la population mesurée en
+Le raccord transforme la population mesurée en
 `Positive4 intersect {I<=7}`, mais ne répare ni shell, ni `BallKey/RLE`, ni
-positions dupliquées, ni rang kNN typé. Il invalide la regex stable : à
-`uniform,n=120`, `CTest rc=8` après 8,63 s, avec
+positions dupliquées, ni rang kNN typé. À `uniform,n=120`, il publie
 `non_degeneres=8212806`, `bien_centres=600311 (7,31 %)` et `retenus=7344`.
-Cette chute est un diagnostic utile de sélectivité, pas encore une source ou
-une pente.
+Cette chute est un diagnostic utile de sélectivité, pas encore un `BallEvent`,
+une pente ou un résultat H4 : elle mesure exactement
+`Positive4 intersect {I<=7}`. Le commentaire CMake de la porte dit
+encore à tort que la positivité n'est pas appliquée. Un autre commentaire reçoit
+`4096` supports « tous bien centrés », alors que la fixture `--bloc` n'appelle
+pas `bien_centre` : cette jonction support-complet vers Corner8 reste sans
+oracle. Le titre de commit « H4 trente n » n'est donc pas reçu ; les deux
+tailles uniformes donnent déjà `61--73 n`, contre `30--35 n` seulement sur les
+amas, et aucun shell/RLE/rang fermé n'est calculé.
 
 ## P0 : `0A` reste ouvert sur u16
 
@@ -749,8 +776,12 @@ rendent le P0 actionnable, pas reçu.
 Une conséquence supplémentaire est reçue algébriquement : après RLE, toute
 `BallForm=(A,B,C)`, `A>0`, emploie le même range-count exact sur AABB u16,
 car `A||z||^2+B dot z+C` est une somme de trois quadratiques convexes séparées.
-Minimum entier aux deux voisins du sommet axial clipé, maximum aux endpoints,
-puis saturation à `10/9/8` intérieurs pour q2/q3/q4. Cette factorisation évite
+Minimum entier aux deux voisins du sommet axial clipé, maximum aux endpoints.
+Les lanes-support ferment à `10/9/8` intérieurs pour q2/q3/q4 ; si une
+`BallKey` est partagée entre arités, le run garde les bits encore vivants et ne
+sature pas globalement à huit. Après census complet, `U_B` décide le rang fermé
+et la disposition ; `c in conv(U_B)` est déjà garanti par le support positif.
+Cette factorisation évite
 un backend et un census par arité ; elle ne borne ni le nombre de `SupportKey`,
 ni celui des `BallKey`, et n'est donc pas encore une preuve du SLO.
 
@@ -1231,8 +1262,8 @@ rejeu local historique Jung/BJD : 16/16 verts en 1,45 s, dont 13 Jung et 3 BJD i
 pin 694920a BJD ciblé : 8/8 verts ; 0,26 s présent rejeu, 0,36 s précédent
   PARTIEL code 3, sans-vwave code 2, mutants code 4
 pin 694920a exige-q4-ouvert seul : code 0/OK ; collinear_seven points=200 exécute n=9
-HEAD 8fd6f59 BJD ciblé : 8/8 verts ; exige-q4-ouvert sans juge et collinear n=200 refus code 2
-HEAD collinear_seven sain : zéro groupe, zéro fermeture, 55 visites de feuilles déjà créditées rejetées
+pin 8fd6f59 BJD ciblé : 8/8 verts ; exige-q4-ouvert sans juge et collinear n=200 refus code 2
+pin 8fd6f59 collinear_seven sain : zéro groupe, zéro fermeture, 55 visites de feuilles déjà créditées rejetées
 HEAD midball standalone : 9/9 affichés verts en 0,95 s présent rejeu ;
   deux portes saines à regex, doublon de rect_h_interval, réception ouverte
 HEAD midball --selftest=1 : accord=OUI imprimé puis plancher code 3
@@ -1246,7 +1277,7 @@ pin a58d020 WSPD 63c79bd6 / CMake 4c6cb24e : build vert ; 13/13 affichés verts
 révision borne-sup 90640885 : zéro fermeture q2/q3/q4, pending=0, fenêtre finale OUI ; réfuté
 révision commise ec5ec3d4 : fates/masses appariés sans SOC/BJD/climb ; lectures -0,0274 %
   ledgers combinés, BJD, climb, CTest de parité et mutant de conservation ouverts
-HEAD Corner8 : 6/6 ciblés ; bloc=4096 supports/32768 témoins, oracle ponctuel corrélé
+pin 1fd9cf1 Corner8 : 6/6 ciblés ; bloc=4096 supports/32768 témoins, oracle ponctuel corrélé
   selftest=1 imprime accord=OUI puis code 3 ; drop-corner/norme hors porte ; produit-OJ absent
 pin 22d1cb0 WST3 : 5/5 ciblés ; uniform n=120, 280840 triangles, zéro manquant/doublon owner
 pin 22d1cb0 WST4 : 1/1 ciblé ; uniform n=60, 487635 quadruplets, zéro manquant/doublon owner
@@ -1254,10 +1285,10 @@ pin 22d1cb0 WST4 : 1/1 ciblé ; uniform n=60, 487635 quadruplets, zéro manquant
 pin 1fd9cf1 : dix portes WST3/WST4 ; 10/10 vertes en 31,49 s, durée non benchmark
 pin 1fd9cf1 : 16/16 portes Corner8/WST3/WST4 ciblées vertes ; aucune ne passe --corner8 ni n'exerce le bisigne
 pin 1fd9cf1 --masse n=60/S=1000 : 9,00 % IDs répétés, 76,10 % owner hors, moyenne 25,3, retenus 1,00 % ; sortie biaisée/non positive
-HEAD f1b78c0 --supports-retenus n=120 : 1/1 regex verte en 30,49 s puis 33,91 s ; oracle brut non positif, mode q3 par défaut
-live bien_centre --centre : build vert ; regulier=1 plat=1 shell=0 obtus=0 ; aucune CTest
-live bien_centre + supports n=120 : CTest rc=8 en 8,63 s ; bien_centres=600311, retenus=7344
-catalogue HEAD : 838 CTests après reconfiguration ; aucune suite complète 838/838 rejouée ici
+pin f1b78c0 --supports-retenus n=120 : 1/1 regex verte en 30,49 s puis 33,91 s ; population Raw4 non positive, mode q3 par défaut
+révision transitoire pré-08dec bien_centre + supports n=120 : CTest rc=8 en 8,63 s ; bien_centres=600311, retenus=7344
+HEAD 08dec609 Corner8/WST ciblés : 18/18 verts en 13,39--19,31 s ; centre 0,00--0,02 s, supports 5,10--9,61 s ; regex fail-open, shell/RLE absents
+catalogue HEAD : 839 CTests après reconfiguration ; aucune suite complète 839/839 rejouée ici
 ablation BJD n=1500 uniform : masse q4 -12,55 %, CPU user médian +5,47 %, lectures identiques
 ablation BJD n=1500 amas : masse q4 -0,87 %, CPU user médian +8,15 %, lectures identiques
 session G4 SOC actif : CTest rc=8, aucune rampe, cible TERMINATED

@@ -309,9 +309,9 @@ qui évite de générer certaines complétions. La source normative est finie :
 
 ```text
 q2 : paire distincte -> boule diamétrale unique
-q3 : triangle strictement aigu -> centre/rayon intrinsèques, boule ambiante unique
+q3 : triangle strictement aigu -> centre/rayon intrinsèques, miniboule ambiante canonique unique
 q4 : tétraèdre affinement indépendant bien centré -> circumsphère unique
-support non positif -> rejet à cette arité ; la source inférieure le porte déjà
+support non positif -> rejet de ce SupportKey ; sa miniboule est d'arité inférieure
 ```
 
 La preuve tient dans l'identité barycentrique suivante. Si
@@ -325,7 +325,9 @@ sum_i lambda_i*||p_i-y||^2 = R^2+||o-y||^2
 Toute boule centrée en `y` qui contient `S` a donc un rayon carré au moins
 `R^2+||o-y||^2`, avec égalité minimale uniquement pour `y=o`. Un troisième ou
 quatrième site sur le shell ne devient pas automatiquement membre du support :
-une barycentrique nulle ramène la miniboule à l'arité inférieure.
+une barycentrique nulle ramène la miniboule du tuple à l'arité inférieure. Cela
+ne signifie pas que cette source inférieure porte la même circumsphère ; une
+autre base positive du shell peut produire sa `BallKey`.
 
 La même preuve donne un microkernel entier unique pour q2, q3 et q4. Écrire le
 support sous la forme `S={a,a+m_1,...,a+m_k}`, avec `k=1,2,3`, puis poser :
@@ -399,12 +401,36 @@ Le contrôle algébrique Python corrélé qui falsifie `Delta=O^2` et `Phi=O*J` 
 enclosures ou la performance, est conservé
 dans [`audits/AUDIT_RECU_GRAM_UNIFIE_1FD9CF1_20260814.md`](audits/AUDIT_RECU_GRAM_UNIFIE_1FD9CF1_20260814.md).
 
-Chaque support complet produit donc une seule `BallKey` candidate, mais aucun
-census n'est payé avant le RLE. Les dégénérescences peuvent envoyer plusieurs
+Chaque support positif produit donc une seule `BallKey` candidate, mais aucun
+census n'est payé avant le RLE. Les coïncidences cosphériques peuvent envoyer plusieurs
 `SupportKey` vers la même `BallKey` ; le RLE conserve toute cette provenance et
-paie exactement un census par `BallKey` unique. Un support non positif n'est
-jamais réémis depuis WST3/WST4 sous une arité inférieure, ce qui créerait un
-doublon ; sa source q2/q3 indépendante porte déjà son support minimal.
+paie exactement un census par `BallKey` unique. Un support non positif est
+simplement rejeté de cette source ; la complétude vient de Carathéodory : si le
+centre `c` d'une boule appartient à l'enveloppe convexe de son shell `U_B`, il
+existe dans `U_B` une base affinement indépendante de taille au plus quatre
+dont `c` est une combinaison strictement positive.
+
+Cette source positive est une supersource exhaustive de miniboules candidates ;
+elle ne reçoit pas à elle seule un événement Morse dégénéré.
+Pour une boule `B` de rayon strictement positif, définir :
+
+```text
+P(B) = {S subset U_B : S affinement indépendant, 2<=|S|<=4,
+        c appartient à relint(conv(S))}
+```
+
+Alors `P(B)!=empty` si et seulement si `c appartient à conv(U_B)`. Cela prouve
+que `B` est une miniboule saturée engendrée par au moins une base positive ; ce
+n'est pas le critère Morse régulier normatif. Sous les hypothèses de
+Reani--Bobrowski, celui-ci exige encore
+`c appartient à relint(conv(U_B))`. Ainsi `BallKey/RLE -> census U_B ->
+disposition` reste obligatoire pour le rang fermé, la provenance et la
+criticité. Sous `RelevantGP`, une lane pertinente
+`|I_B|+|S|<=smax` vérifie `U_B=S`, donc la positivité de `S` suffit. Hors de ce
+domaine, une base positive sur une face de `conv(U_B)` n'autorise ni rejet
+silencieux ni publication : tant qu'une politique dégénérée indépendante n'est
+pas reçue, elle donne `unsupported_degeneracy/plateau_pending`. Une même
+`BallKey` peut conserver des supports positifs d'arités différentes.
 
 La conséquence industrielle directe est un unique backend de census q2/q3/q4.
 Pour une `BallForm=(A,B,C)` fixée avec `A>0`, poser :
@@ -417,9 +443,12 @@ Sur une AABB entière, chaque minimum axial est atteint à l'un des deux entiers
 voisins de `-B_j/(2A)`, clipés dans l'intervalle, et chaque maximum à une
 extrémité. Les extrema sont donc exacts sans centre ni flottant. `max P<0`
 crédite toute la population du nœud ; `min P>=0` exclut son intérieur strict ;
-seul `min P>0` exclut aussi le shell. Le compteur sature au seuil
-`h_q=12-q`, soit `10/9/8` pour q2/q3/q4 sous `smax=11`, puis une survivante
-reçoit son census complet `I_B/U_B`. Ce `BallFormRange-u16` remplace les
+seul `min P>0` exclut aussi le shell. Chaque lane-support ferme au seuil
+`h_q=12-q`, soit `10/9/8` pour q2/q3/q4 sous `smax=11`. Sur une `BallKey`
+partagée entre arités, le run conserve donc trois bits actifs et poursuit le
+compte jusqu'au seuil de la plus petite arité incidente ; saturer globalement à
+huit perdrait un q2 ou q3 encore pertinent. Une survivante reçoit ensuite son
+census complet `I_B/U_B` et sa disposition. Ce `BallFormRange-u16` remplace les
 backends de census dupliqués après RLE ; il ne réduit pas le nombre de supports
 candidats et ne transforme donc pas à lui seul une source quadratique en route
 50k.

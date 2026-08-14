@@ -28,7 +28,7 @@ doit être déduit de ces probes CPU.
 
 ## Verdict actuel
 
-Le `HEAD=f1b78c0b8a4407e3f1e568acdb23ada4f7862ddf` contient quatre avancées
+Le `HEAD=08dec60920a93c15ef200da136d61995976db695` contient quatre avancées
 directement liées à l'idée de support complet, puis plusieurs diagnostics de
 réduction du broad phase WST3/WST4 :
 
@@ -105,37 +105,43 @@ biaisée ; zéro succès sur 3000 tirages ne prouve ni une fréquence `10^-8`, n
 que la masse q4 positive est du déchet, ni que le rayon est le filtre dominant.
 Le sampler combinadique u128 exact, ses strates de rejet et son plafond
 `samples*n` sont spécifiés dans `PROPOSITION.md`.
-Le mode `--supports-retenus`, désormais commis à `f1b78c0`, reste également
-oracle-only. Il
-énumère exactement l'ensemble brut `orientation!=0 && I<=7`, pas les supports
-q4 positifs : il omet les quatre poids, le shell et le RLE par `BallKey`. Sa
-« localité de rayon » est le rapport plus-grande-arête/espacement ; ce n'est
-qu'un proxy à facteur deux **après** positivité, pas le circumrayon. Son rang
-sans tie `PointId` correspond au plus à une clique kNN mutuelle non déclarée.
-Enfin, le cap `n=260` autorise jusqu'à `47 627 157 760` tests in-sphere puis
-`575 990 939 160` comparaisons de distance : c'est une borne d'entrée, pas un
-budget. L'énumération globale des 4-ensembles n'a pas besoin d'owner pour
-l'exact-once ; l'owner est requis pour son raccord à `OwnedCK`. Elle hérite en
-outre du rejet global des positions dupliquées du probe, contraire au profil
-`PointId` déclaré. La CTest ajoutée pour ce mode omet `--ordre=4` et emploie
-`PASS_REGULAR_EXPRESSION` : elle grave précisément la sortie q4 sous le mode q3
-par défaut au lieu d'en exiger le rejet. Deux rejeux passent ici en 30,49 s et
-33,91 s à `n=120`, durées diagnostiques non benchmark, ce qui reçoit un oracle
-borné de falsification, pas son titre « aucun préfixe
-kNN » ni une route 50k.
+Le mode exhaustif `--supports-retenus`, introduit brut à `f1b78c0`, applique
+désormais le test entier `c8::bien_centre` commis à `34cf05d`, puis `I<=7`.
+Il énumère donc la population ponctuelle `Positive4 intersect {I<=7}` des
+`SupportKey`, pas encore des événements HGP : shell, `BallKey`, RLE et provenance
+des supports cosphériques restent absents. Sa « localité de rayon » est le
+rapport plus-grande-arête/espacement ; ce n'est qu'un proxy à facteur deux
+**après** positivité, pas le circumrayon. Son rang sans tie `PointId` correspond
+au plus à une clique kNN mutuelle non déclarée. Enfin, le cap `n=260` autorise
+jusqu'à `47 627 157 760` tests in-sphere puis `575 990 939 160` comparaisons de
+distance : c'est une borne d'entrée, pas un budget. L'énumération globale des
+4-ensembles n'a pas besoin d'owner pour l'exact-once ; l'owner est requis pour
+son raccord à `OwnedCK`. Elle hérite en outre du rejet global des positions
+dupliquées du probe, contraire au profil `PointId` déclaré.
 
-Le worktree postérieur ajoute maintenant un test entier de bonne centralité q4
-par Cramer et signes des quatre faces, puis l'applique avant `I<=7`. Les quatre
-fixtures locales passent, mais aucune CTest ne porte encore `--centre` et la
-porte stable de localité devient rouge (`CTest rc=8`) : son ancienne regex
-attend la population brute. À `uniform,n=120`, le delta publie
-`600311/8212806=7,31 %` tétraèdres bien centrés puis `7344` shallow. C'est un
-gain de sémantique et un diagnostic de sélectivité, pas encore une réception :
-permutations, extrêmes u16, oracle Gram indépendant, shell, `BallKey/RLE`, ABI
-invalid/unknown et voie device restent ouverts.
+`c8::bien_centre` est mathématiquement cohérent sous entrée u16 authentifiée :
+Cramer et les quatre signes de faces équivalent aux quatre poids
+circumcentriques strictement positifs. Au `HEAD`, les `18/18` portes ciblées
+Corner8/WST passent sur deux rejeux en `13,39--19,31 s`. Les diagnostics
+individuels donnent `0,00--0,02 s` pour `mhgp3v_corner8_centre` et
+`5,10--9,61 s` pour
+`mhgp3v_supports_retenus_localite`; le catalogue contient `839` CTests. Cela remplace
+l'échec transitoire antérieur à `08dec609`, mais ne constitue pas une réception
+indépendante : les portes restent à regex, la seconde omet `--ordre=4`, aucun
+budget de travail n'est imposé, et les fixtures ne couvrent ni permutations,
+orientation opposée, extrêmes u16, hors-profil, ni mutants de poids nul ou
+négatif. L'ABI publique prend des `i64` sans preflight u16 et fusionne
+non-positif, dégénéré et entrée invalide dans un booléen. Les commentaires CMake
+qui disent encore que ce compteur n'applique pas la positivité, ou que les
+`4096` supports du bloc sont tous bien centrés sans appeler ce prédicat, sont
+des claims périmés. Le titre « H4 trente n » n'est pas reçu : la population est
+`Positive4 intersect {I<=7}`, pas `H4_rank`, et vaut déjà `61--73 n` sur les
+deux tailles uniformes contre `30--35 n` seulement sur les amas. Ni le
+shell/RLE, ni une source 50k, ni une pente ou un coût de bout en bout ne sont
+mesurés.
 
-Votre idée mathématique est donc reçue sous sa forme exacte : la hiérarchie
-HGP n'a besoin que des supports minimaux positifs complets. q2 teste une boule
+Votre idée mathématique est donc reçue sous sa forme exacte : la source finie
+exhaustive n'a besoin que des supports minimaux positifs complets. q2 teste une boule
 diamétrale par paire de positions distinctes, donc `D>0`. Deux IDs au même site
 ne forment pas q2 entre eux, mais chacun reste endpoint avec tout autre site et
 leur multiplicité est conservée dans le census. q3
@@ -146,11 +152,23 @@ intrinsèque au plan, mais la boule et son census sont ambiants en dimension
 trois. Les sphères incidentes à une ancre partielle ne sont que le domaine d'un
 prune facultatif, jamais la source.
 
+En dégénérescence, un support positif témoigne une miniboule candidate :
+Carathéodory donne l'équivalence entre l'existence d'une telle base de taille
+au plus quatre et `c in conv(U_B)`. Il ne suffit toutefois pas à construire le
+`BallEvent`. Sous le contrat régulier Reani--Bobrowski, le census du shell
+complet doit encore vérifier `c in relint(conv(U_B))`, puis décider rang fermé,
+disposition et provenance. Sous `RelevantGP`, une lane pertinente
+`|I_B|+|S|<=smax` vérifie `U_B=S`, donc la positivité suffit. Hors de ce domaine,
+la source conserve la `BallKey` et rend `unsupported_degeneracy/plateau_pending`
+tant qu'une politique dégénérée indépendante n'est pas reçue.
+
 Cette unicité permet aussi de partager le census : après normalisation et RLE
 des `BallKey`, q2, q3 et q4 utilisent la même somme de trois quadratiques
 convexes `A*z_j^2+B_j*z_j`. Ses extrema sur une AABB u16 entière sont exacts
-par axe ; le compteur sature à `10/9/8` intérieurs avant le census complet du
-shell. Cela supprime les centres continus et les census répétés par support,
+par axe. Les lanes q2/q3/q4 ferment respectivement à `10/9/8` intérieurs ; une
+`BallKey` partagée entre arités conserve les bits encore vivants au lieu de
+saturer globalement à huit, puis reçoit le census complet du shell. Cela
+supprime les centres continus et les census répétés par support,
 mais pas la génération potentiellement quadratique des supports : le gain SLO
 dépend encore d'une source factorisée et d'un preflight de masse.
 
