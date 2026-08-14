@@ -75,6 +75,12 @@ ancienne phrase imposant le rejet global des positions dupliquées est périmée
   `2(s.u)>max(r,||s||)`, fail-open, puis applique séparément les seuils
   `10/9/8`. La note proposée est conservée avec bannière rouge parce que le
   probe la cite directement.
+- [`NOTE_SOLUTION_WSPD_NIVEAUX_SHALLOW_AUTONOMES_20260815.md`](NOTE_SOLUTION_WSPD_NIVEAUX_SHALLOW_AUTONOMES_20260815.md) :
+  proposition constructive sans Delaunay : conservation exacte de la masse
+  WSPD, morts `W2/W3/W4Depth` propres à chaque lane, centres affines dans le
+  plan médiateur et niveau shallow q4 par top-r/BVH, sans produit de lentille.
+  Elle donne les primitives AABB `Q_theta`, l'owner/primary exact-once, le
+  ledger physique et l'ordre de raccord ; aucun logiciel ou SLO n'y est reçu.
 - [`AUDIT_RECU_GRAM_UNIFIE_1FD9CF1_20260814.md`](AUDIT_RECU_GRAM_UNIFIE_1FD9CF1_20260814.md) :
   contrôle algébrique Python corrélé et borné des identités q4 `Delta=O^2` et
   `Phi=O*J` sur 10 000 fixtures u16 non dégénérées ; il ne reçoit ni microkernel

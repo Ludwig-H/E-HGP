@@ -1,6 +1,6 @@
 # Audit courant de MorseHGP3D v3
 
-Date : 14 août 2026 UTC.
+Date : 15 août 2026 UTC.
 
 Cadre : `phase=exploration_v3_hors_registre`,
 `backend=cpu_reference_bounded_oracles_and_g4_diagnostic`,
@@ -8,16 +8,19 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-> **Verdict live au `HEAD=3657289dcb2960c7e7605b12cfe9d9c34552935e`.**
+> **Verdict live au `HEAD=91486d4d79deb5682cd7f02e9a64c64589ca3008`.**
 > Le pin noyau `a369452` porte `Q4SeedAxisTopR4`, son probe, 39 CTests déclarés,
 > les vrais IDs de census, la capacité 163, les comptes requis et les fates de
 > plateau. Il refuse aussi tout replay après `MORT_GAP` et tout apex dont le
 > compte retenu atteint `r4`. `acd792d` ajoute la première sonde J0 et
 > `0195480` une option de coupure et une recette de session ; aucun de ces deux
-> commits n'est une mesure reçue. Le worktree courant contient les présentes
-> corrections documentaires d'audit et le brut concurrent J0 non suivi, à
-> préserver ;
-> aucune mesure G4 nouvelle n'entre dans le verdict.
+> commits n'est une mesure reçue. `0fe016f` conserve désormais le brut J0 et
+> son statut tronqué ; `91486d4` grave les trois contre-fixtures qui réfutent
+> l'ancien théorème des calottes. Le worktree courant contient le raccord
+> expérimental `--axe`, la sélection top-r ramenée de `O(m^2)` à `O(m*r4)` et
+> la présente proposition constructive ; ces deltas logiciels appartiennent à
+> Claude et restent à comparer différentiellement. Aucune mesure GPU nouvelle
+> n'entre dans le verdict.
 > Q14 est fermée contractuellement : aucune structure de Delaunay n'est
 > autorisée, y compris d'ordre un, comme source, squelette, filtre ou census.
 >
@@ -77,9 +80,12 @@ Cadre : `phase=exploration_v3_hors_registre`,
 > contenance d'une calotte au lieu de son intersection avec la cellule. La q2
 > `x=0,v=(10,0,0),r=5` réfute la proposition par vacuité. La réparation sûre
 > marque fail-open toute cellule intersectant
-> `2(s.u)>max(r,||s||)`, puis applique séparément `10/9/8`. Les `20/20` CTests
-> du probe passent en `44,74 s`, mais n'exercent pas cette fixture et le
-> falsificateur q4 compare l'arête maximale au lieu du diamètre `2R`.
+> `2(s.u)>max(r,||s||)`, puis applique séparément `10/9/8`. `91486d4` grave
+> désormais la vacuité q2, l'échange de quantificateurs et la différence entre
+> arête q4 et diamètre `2R`; les `24/24` CTests caps passent en `38,81 s`.
+> Cela reçoit la **réfutation**, pas le théorème réparé : le chemin aléatoire
+> `--falsifie` compare encore l'arête maximale au lieu de `2R` et n'énumère
+> aucun q3.
 > [`REPONSE_AUDIT_Q18_Q20_CALOTTES_ADMISSIBLES_20260815.md`](REPONSE_AUDIT_Q18_Q20_CALOTTES_ADMISSIBLES_20260815.md).
 >
 > La recette `session_axis_top8_g4.sh` de `840a2e2` ne devait pas être lancée :
@@ -108,6 +114,14 @@ Cadre : `phase=exploration_v3_hors_registre`,
 > ont été arrêtées et certifiées `TERMINATED`. Le brut récupéré est un ledger
 > sans ordre garanti, pas un compte de supports. Contre-audit et hashes :
 > [`AUDIT_CONTRE_SESSION_J0_LANE_SOURCE_G4_20260815.md`](AUDIT_CONTRE_SESSION_J0_LANE_SOURCE_G4_20260815.md).
+>
+> La sortie constructive de ces réfutations est maintenant explicite : WSPD
+> avec conservation de masse, morts de fuseau séparées `10/9/8`, `Third3`
+> direct pour Lane3 et niveau shallow des lignes du plan médiateur pour Lane4.
+> Le top-r axial remplace le produit de lentille ; `Q_theta=q*A-p*B` fournit le
+> futur best-first et le census capé sur AABB. Aucun résultat de lane n'en
+> alimente une autre.
+> [`NOTE_SOLUTION_WSPD_NIVEAUX_SHALLOW_AUTONOMES_20260815.md`](NOTE_SOLUTION_WSPD_NIVEAUX_SHALLOW_AUTONOMES_20260815.md).
 >
 > Contrôles frais : `39/39` CTests `^mhgp3v_q4axis` passent en `38,86 s`, avec
 > des seuils `smax=7/14`, trois exact-once, le plateau de 100 IDs et le refus de

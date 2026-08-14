@@ -363,28 +363,48 @@ inline Selection select_axis_topr4(const SeedAxis& f, const int* sites, int n_si
   const int cap_total = (mut == Mutant::kCapMoinsUn) ? (2 * r4 - 1) : (2 * kCapRacines);
 
   // Passe 2 : `First_k` et `Last_k`, groupes d'egalite complets.
+  //
+  // LA SEMANTIQUE EST INCHANGEE, LE COUT NE L'EST PAS. La regle reste « garder
+  // `z` si strictement moins de `k` sites lui sont strictement meilleurs », ce
+  // qui equivaut a « garder tout site dont la racine est au plus la `k`-ieme
+  // plus petite, multiplicites comprises » — donc les groupes d'egalite entiers.
+  // Une premiere passe retient les `k` meilleures racines dans un tableau trie
+  // borne, une seconde collecte tout ce qui atteint ce seuil : `O(m k)` au lieu
+  // de `O(m^2)`. A `smax=6`, `k <= 3` : le gain est d'emblee de deux ordres.
   for (int pass = 0; pass < 2; ++pass) {
     const bool entrant = (pass == 0);
     int* out = entrant ? sel.entrants : sel.sortants;
     int& cnt = entrant ? sel.n_entrants : sel.n_sortants;
     bool garde_petites = entrant;
     if (!entrant && mut == Mutant::kSigneBInverse) garde_petites = true;
+    const SiteClass vise = entrant ? SiteClass::kEntrant : SiteClass::kSortant;
+    auto mieux = [&](const SitePower& a, const SitePower& b) {
+      int cr = cmp_racines(a, b);
+      if (mut == Mutant::kAbsAvantTri && b.B < 0) cr = -cr;
+      return garde_petites ? (cr < 0) : (cr > 0);
+    };
+    // Passe 2a : le seuil, c'est-a-dire la `k`-ieme meilleure racine.
+    SitePower seuil[kCapRacines];
+    int ns = 0;
+    bool seuil_atteint = false;
+    for (int i = 0; i < n_sites; ++i) {
+      const SitePower p = pw(sites[i]);
+      if (classify(p, f.T2, mut) != vise) continue;
+      int pos = ns;
+      while (pos > 0 && mieux(p, seuil[pos - 1])) --pos;
+      if (pos >= sel.k) continue;
+      const int fin = (ns < sel.k) ? ns : sel.k - 1;
+      for (int t = fin; t > pos; --t) seuil[t] = seuil[t - 1];
+      seuil[pos] = p;
+      if (ns < sel.k) ++ns;
+      if (ns >= sel.k) seuil_atteint = true;
+    }
+    // Passe 2b : tout site atteignant le seuil, groupes d'egalite compris.
     for (int i = 0; i < n_sites; ++i) {
       const int id = sites[i];
-      const SitePower p = pw(id);
-      const SiteClass c = classify(p, f.T2, mut);
-      if (entrant ? (c != SiteClass::kEntrant) : (c != SiteClass::kSortant)) continue;
-      int strictement_mieux = 0;
-      for (int j = 0; j < n_sites; ++j) {
-        if (j == i) continue;
-        const SitePower q = pw(sites[j]);
-        const SiteClass cq = classify(q, f.T2, mut);
-        if (entrant ? (cq != SiteClass::kEntrant) : (cq != SiteClass::kSortant)) continue;
-        int cr = cmp_racines(q, p);
-        if (mut == Mutant::kAbsAvantTri && p.B < 0) cr = -cr;
-        if (garde_petites ? (cr < 0) : (cr > 0)) ++strictement_mieux;
-      }
-      if (strictement_mieux >= sel.k) continue;
+      const SitePower p = pw(sites[i]);
+      if (classify(p, f.T2, mut) != vise) continue;
+      if (seuil_atteint && mieux(seuil[ns - 1], p)) continue;
       if (sel.n_entrants + sel.n_sortants >= cap_total || cnt >= kCapRacines) {
         sel.verdict = SeedVerdict::kDebordement;
         return sel;

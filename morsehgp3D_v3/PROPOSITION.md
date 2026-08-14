@@ -650,6 +650,25 @@ seuils restent autonomes `10/9/8`. Le théorème, la version shell plus serrée 
 les contre-fixtures sont dans
 [`audits/REPONSE_AUDIT_Q18_Q20_CALOTTES_ADMISSIBLES_20260815.md`](audits/REPONSE_AUDIT_Q18_Q20_CALOTTES_ADMISSIBLES_20260815.md).
 
+La construction positive ne s'arrête pas à cette réfutation. Sur une arête
+maximale exacte `e=(a,b)`, l'égalité de shell et Jung bornent les directions du
+centre. Minimiser le quotient de puissance sur ce cap redonne les cœurs
+universels `W2/W3/W4` : dix, neuf ou huit témoins stricts ferment donc l'ancre
+de leur lane avant toute complétion. Au niveau WSPD, un bloc est fermé par une
+enclosure corrélée reçue, scindé ou conservé comme continuation ; jamais omis
+par une fenêtre.
+
+Pour une arête résiduelle, les centres des sphères passant par ses endpoints
+vivent dans son plan médiateur et chaque site y définit une forme affine.
+Lane3 évalue le point propre à chacun de ses `Third3`. Lane4 sélectionne les
+premiers/derniers roots sur chaque `Q4Seed3` et remplace ainsi
+`sum_e binom(m_e,2)` par des visites de BVH et au plus `2*r4*m_e` groupes
+d'incidences. Le cutoff rationnel `theta=p/q` se traite par la quadratique
+séparable `Q_theta=q*A-p*B`; son minimum continu taille un nœud et son maximum
+aux coins crédite le census. L'architecture, la preuve du primary aigu q4,
+les ledgers et les fixtures sont dans
+[`audits/NOTE_SOLUTION_WSPD_NIVEAUX_SHALLOW_AUTONOMES_20260815.md`](audits/NOTE_SOLUTION_WSPD_NIVEAUX_SHALLOW_AUTONOMES_20260815.md).
+
 Chaque générateur généralise WSPD jusqu'au census de **sa propre** miniboule ;
 une lentille ou un support positif sans profondeur n'est qu'une supersource.
 Le contrat précis et la réponse négative à Q14 sont dans

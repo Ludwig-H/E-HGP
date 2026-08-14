@@ -67,6 +67,17 @@ sûre marque fail-open les directions vérifiant
 `2(s.u)>max(r,||s||)`, puis applique indépendamment les seuils `10/9/8`.
 [`audits/REPONSE_AUDIT_Q18_Q20_CALOTTES_ADMISSIBLES_20260815.md`](audits/REPONSE_AUDIT_Q18_Q20_CALOTTES_ADMISSIBLES_20260815.md).
 
+La route constructive qui en résulte est maintenant spécifiée. Une
+`NeutralPairPartition` WSPD conserve exactement la masse ; chaque lane tente
+son propre cœur `W2/W3/W4Depth`, puis scinde ou continue. Lane3 évalue
+directement le centre ambiant de ses propres `Third3`. Lane4 construit ses
+propres seeds et énumère le niveau shallow de leurs formes affines sur le plan
+médiateur : au plus `2*r4` groupes de roots par ligne, sans aucun produit
+`lentille x lentille`. Le best-first exact emploie la quadratique séparable
+`Q_theta=q*A-p*B` sur le Morton BVH. Proposition, invariants de masse et ordre
+d'implémentation :
+[`audits/NOTE_SOLUTION_WSPD_NIVEAUX_SHALLOW_AUTONOMES_20260815.md`](audits/NOTE_SOLUTION_WSPD_NIVEAUX_SHALLOW_AUTONOMES_20260815.md).
+
 ## Verdict actuel
 
 Historiquement, le pin logiciel `6e815d28b3e229a0161eb00d6fa0c9a272efac5d` contient quatre avancées

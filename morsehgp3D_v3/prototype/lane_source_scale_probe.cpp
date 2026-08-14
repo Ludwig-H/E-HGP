@@ -74,6 +74,7 @@
 
 #include "cloud_families.hpp"
 #include "corner8_ball.hpp"
+#include "q4seed_axis_topr4.hpp"
 
 namespace {
 
@@ -243,6 +244,7 @@ struct Ledger {
   long long paires_testees = 0, ancres_q2 = 0, ancres_q3 = 0, ancres_q4 = 0;
   long long seeds_aigus = 0, paires_lentille = 0, bien_centres = 0;
   long long cand_q2 = 0, cand_q3 = 0, cand_q4 = 0;
+  long long racines = 0, seeds_ouverts = 0, seeds_morts = 0;
   i64 diam2_max = 0;
   long long lens_max = 0, inner_max = 0;
 };
@@ -253,6 +255,8 @@ void fusionne(Ledger* g, const Ledger& a) {
   g->seeds_aigus += a.seeds_aigus; g->paires_lentille += a.paires_lentille;
   g->bien_centres += a.bien_centres;
   g->cand_q2 += a.cand_q2; g->cand_q3 += a.cand_q3; g->cand_q4 += a.cand_q4;
+  g->racines += a.racines; g->seeds_ouverts += a.seeds_ouverts;
+  g->seeds_morts += a.seeds_morts;
   if (a.diam2_max > g->diam2_max) g->diam2_max = a.diam2_max;
   if (a.lens_max > g->lens_max) g->lens_max = a.lens_max;
   if (a.inner_max > g->inner_max) g->inner_max = a.inner_max;
@@ -281,11 +285,11 @@ std::vector<Pt> nuage(const std::string& family, long long n, long long coord,
 // q3, q4. Un support est retenu si son nombre d'interieurs est STRICTEMENT
 // inferieur au seuil de sa lane.
 void balaye(const std::vector<Pt>& P, const Grid& grid, int smax, i64 dmax,
-            long long tid, long long threads, Ledger* out) {
+            long long tid, long long threads, bool axe, Ledger* out) {
   const int mort2 = smax - 1, mort3 = smax - 2, mort4 = smax - 3;
   const i64 dmax2 = dmax * dmax;
   const int m = (int)P.size();
-  std::vector<int> nb, inner, lens, acu;
+  std::vector<int> nb, inner, lens, acu, sites;
   for (int ia = (int)tid; ia < m; ia += (int)threads) {
     const Pt& A = P[(size_t)ia];
     nb.clear();
@@ -366,8 +370,61 @@ void balaye(const std::vector<Pt>& P, const Grid& grid, int smax, i64 dmax,
         ++out->cand_q3;
         if (D2 > out->diam2_max) out->diam2_max = D2;
       }
+      // q4 PAR NOYAU D'AXE. A `Q4Seed3` fixe, la puissance d'un site le long
+      // de l'axe est AFFINE : tout apex shallow est parmi au plus `2(r4-p)`
+      // racines extremales. La boucle sur la lentille disparait.
+      if (a4 && axe) for (int t : acu) {
+        const int ip = t >= 0 ? t : -1 - t;
+        const Pt& Pp = P[(size_t)ip];
+        const auto f = mhgp3v::q4axis::seed_axis(A.c, B.c, Pp.c);
+        sites.clear();
+        for (int z : inner) if (z != ip) sites.push_back(z);
+        auto pw = [&](int i) { return mhgp3v::q4axis::site_power(f, P[(size_t)i].c); };
+        const auto sel = mhgp3v::q4axis::select_axis_topr4(
+            f, sites.data(), (int)sites.size(), pw, mort4);
+        if (sel.verdict != mhgp3v::q4axis::SeedVerdict::kOuvert) { ++out->seeds_morts; continue; }
+        ++out->seeds_ouverts;
+        for (int pass = 0; pass < 2; ++pass) {
+          const int cnt = pass ? sel.n_sortants : sel.n_entrants;
+          const int* tab = pass ? sel.sortants : sel.entrants;
+          for (int u = 0; u < cnt; ++u) {
+            const int iq = tab[u];
+            ++out->racines;
+            const Pt& Pq = P[(size_t)iq];
+            if (iq < ip && aigu(A, B, Pq)) continue;   // porteur primaire
+            if (d2p(Pp, Pq) > D2) continue;
+            const int id[4] = {ia, jb, ip, iq};
+            const Pt* qq[4] = {&A, &B, &Pp, &Pq};
+            bool ok = true;
+            for (int u2 = 0; u2 < 4 && ok; ++u2)
+              for (int v2 = u2 + 1; v2 < 4; ++v2) {
+                if (u2 == 0 && v2 == 1) continue;
+                const i64 e = d2p(*qq[u2], *qq[v2]);
+                if (e > D2) { ok = false; break; }
+                if (e == D2) {
+                  const int lo2 = std::min(id[u2], id[v2]);
+                  const int hi2 = std::max(id[u2], id[v2]);
+                  const int lo1 = std::min(ia, jb), hi1 = std::max(ia, jb);
+                  if (lo2 < lo1 || (lo2 == lo1 && hi2 < hi1)) { ok = false; break; }
+                }
+              }
+            if (!ok) continue;
+            if (!mhgp3v::c8::bien_centre(A.c, B.c, Pp.c, Pq.c)) continue;
+            long long ins = 0;
+            for (int z : inner) {
+              if (z == ip || z == iq) continue;
+              if (mhgp3v::c8::interieur_strict(A.c, B.c, Pp.c, Pq.c, P[(size_t)z].c)) {
+                if (++ins >= mort4) break;
+              }
+            }
+            if (ins >= mort4) continue;
+            ++out->cand_q4;
+            if (D2 > out->diam2_max) out->diam2_max = D2;
+          }
+        }
+      }
       // q4 : porteur aigu PRIMAIRE, quatrieme sommet dans la lentille.
-      if (a4) for (int t : acu) {
+      if (a4 && !axe) for (int t : acu) {
         const int ip = t >= 0 ? t : -1 - t;
         const Pt& Pp = P[(size_t)ip];
         for (int iq : lens) {
@@ -459,11 +516,12 @@ int main(int argc, char** argv) {
   std::string family = "uniform";
   long long n = 2000, coord = 0, seed = 1, smax = 11, threads = 0, dmax = 0;
   double dmax_esp = 10.0;   // coupure exprimee en ESPACEMENTS moyens mesures
-  bool verifie = false;
+  bool verifie = false, axe = false;
   for (int i = 1; i < argc; ++i) {
     const std::string a = argv[i];
     auto val = [&](const char* p) { return a.substr(std::strlen(p)); };
     if (a == "--verifie") verifie = true;
+    else if (a == "--axe") axe = true;
     else if (a.rfind("--family=", 0) == 0) family = val("--family=");
     else if (a.rfind("--points=", 0) == 0) n = atoll(val("--points=").c_str());
     else if (a.rfind("--coord=", 0) == 0) coord = atoll(val("--coord=").c_str());
@@ -504,7 +562,7 @@ int main(int argc, char** argv) {
   std::vector<std::thread> th;
   for (long long t = 0; t < threads; ++t)
     th.emplace_back(balaye, std::cref(P), std::cref(grid), (int)smax, dmax, t, threads,
-                    &acc[(size_t)t]);
+                    axe, &acc[(size_t)t]);
   for (auto& x : th) x.join();
   Ledger g;
   for (const Ledger& a : acc) fusionne(&g, a);
@@ -517,16 +575,18 @@ int main(int argc, char** argv) {
   std::printf("  ancres : testees=%lld q2=%lld q3=%lld q4=%lld (%.2f/pt)\n",
               g.paires_testees, g.ancres_q2, g.ancres_q3, g.ancres_q4,
               (double)g.ancres_q4 / (double)m);
-  std::printf("  travail : seeds_aigus=%lld paires_lentille=%lld bien_centres=%lld"
-              " lens_max=%lld inner_max=%lld\n",
-              g.seeds_aigus, g.paires_lentille, g.bien_centres, g.lens_max, g.inner_max);
+  std::printf("  travail : seeds_aigus=%lld paires_lentille=%lld racines=%lld"
+              " seeds_ouverts=%lld seeds_morts=%lld bien_centres=%lld lens_max=%lld"
+              " inner_max=%lld\n",
+              g.seeds_aigus, g.paires_lentille, g.racines, g.seeds_ouverts,
+              g.seeds_morts, g.bien_centres, g.lens_max, g.inner_max);
   const long long tot = g.cand_q2 + g.cand_q3 + g.cand_q4;
   std::printf("  candidats : q2=%lld q3=%lld q4=%lld total=%lld"
               " | /n : %.3f %.3f %.3f %.3f | candidats_sur_retenus=%.1f\n",
               g.cand_q2, g.cand_q3, g.cand_q4, tot,
               (double)g.cand_q2 / m, (double)g.cand_q3 / m, (double)g.cand_q4 / m,
               (double)tot / m,
-              (double)g.paires_lentille / (double)std::max(1LL, g.cand_q4));
+              (double)(g.paires_lentille + g.racines) / (double)std::max(1LL, g.cand_q4));
   std::printf("  coupure : diam_max=%.1f dmax=%lld rapport=%.3f\n", dm, dmax,
               dm / (double)dmax);
 
