@@ -4064,7 +4064,8 @@ mhgp3v_add_expected_code_test_for(mhgp3v_wspd_front_probe
 
 # --- WSPD par vagues sur octree comprime de Morton : le prototype dont le
 # kernel GPU sera la transcription directe. Aucune recursion, aucune pile.
-add_executable(mhgp3v_wspd_wavefront_probe prototype/wspd_wavefront_probe.cpp)
+add_executable(mhgp3v_wspd_wavefront_probe prototype/wspd_wavefront_probe.cpp
+  oracle/jung_dual_judge.cpp)
 target_include_directories(mhgp3v_wspd_wavefront_probe PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(mhgp3v_wspd_wavefront_probe PRIVATE mhgp)
 target_compile_options(mhgp3v_wspd_wavefront_probe PRIVATE -Wall -Wextra -Werror)
@@ -4827,3 +4828,46 @@ set_tests_properties(mhgp3v_soc64_sur_none_central PROPERTIES
 # redonnent le verdict ponctuel sur des boites reduites a des points.
 set_tests_properties(mhgp3v_jung_dual_selftest_petit PROPERTIES
   PASS_REGULAR_EXPRESSION "bjd_selftest accord=OUI couples=[0-9]+ desaccords_point=0 desaccords_boite=0")
+
+# ---------------------------------------------------------------------------
+# `BlockJungDual64` BRANCHE DANS LA VAGUE : LE CREDIT DE GROUPE, ET SA
+# CONDITION DE VALIDITE.
+#
+# Un groupe couvrant vaut UNE unite de profondeur. Elle ne s'ajoute a celles
+# des temoins universels QUE si les identites sont disjointes — sinon le meme
+# `PointId` porte deux unites. C'est la faute `somme-au-lieu-union` deja tuee
+# deux fois sur le shadow `SOC64`, et le premier raccord des groupes la
+# reproduisait : il puisait ses membres dans TOUTES les feuilles visitees, y
+# compris celles que le certificat central venait de crediter.
+#
+# Deux juges independants gardent ce credit :
+#   - le juge PRIMAL `BigInt` de `oracle/jung_dual_judge.cpp` verifie que
+#     chaque groupe credite couvre TOUTES les paires de son rectangle. Il ne
+#     choisit aucun poids : il minimise `||s||^2` sur les demi-plans mauvais ;
+#   - le juge de FERMETURE recompose la famille disjointe complete — groupes
+#     couvrants plus universels hors groupes, en `(g,Q)` — et exige `need`
+#     unites. Il mord la ou le juge des flips ne peut rien : les groupes
+#     changent le fate de la BASELINE, donc leurs fermetures ne sont pas des
+#     flips.
+add_test(NAME mhgp3v_bjd_credit_disjoint
+  COMMAND mhgp3v_wspd_wavefront_probe --family=eight_clusters --points=200
+          --sep-euclid=8/1 --tight --vwave --window=512 --window-ledger
+          --soc64-actif --bjd-groupes=8 --juge-bjd=64)
+set_tests_properties(mhgp3v_bjd_credit_disjoint PROPERTIES
+  PASS_REGULAR_EXPRESSION
+  "juge_bjd q4 : groupes=256 paires=442 faux=0 unknown=0 sautes=0 \\| fermetures juges=17 faux=0 sautes=0")
+
+# LES DEUX MUTANTS DE DISJONCTION. Le premier est exactement l'ecriture du
+# raccord initial ; le second recredite le meme groupe jusqu'au seuil. Tous
+# deux ferment des rectangles ou une seule identite interieure porte plusieurs
+# unites de profondeur, et le juge de fermeture doit les tuer.
+mhgp3v_add_expected_code_test_for(mhgp3v_wspd_wavefront_probe
+  mhgp3v_bjd_mutant_reutilise_temoin "mutant_killed=1 bjd-reutilise-temoin" 4
+  --family=eight_clusters --points=200 --sep-euclid=8/1 --tight --vwave
+  --window=512 --window-ledger --soc64-actif --bjd-groupes=8 --juge-bjd=64
+  --inject-bjd-reutilise)
+mhgp3v_add_expected_code_test_for(mhgp3v_wspd_wavefront_probe
+  mhgp3v_bjd_mutant_groupes_chevauchants "mutant_killed=1 bjd-groupes-chevauchants" 4
+  --family=eight_clusters --points=200 --sep-euclid=8/1 --tight --vwave
+  --window=512 --window-ledger --soc64-actif --bjd-groupes=8 --juge-bjd=64
+  --inject-bjd-chevauche)

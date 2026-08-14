@@ -16,6 +16,11 @@ logiciel, un reçu ou une autorité conservée.
 
 - [`AUDIT_ETAT_COURANT.md`](AUDIT_ETAT_COURANT.md) : unique verdict mutable,
   pin, worktree, tests et blocages.
+- [`AUDIT_LIVE_BLOCK_JUNG_CREDITS_TAU_783A789_20260814.md`](AUDIT_LIVE_BLOCK_JUNG_CREDITS_TAU_783A789_20260814.md) :
+  contre-audit live du raccord `BlockJungDual64`; réfutation du double crédit
+  d'identité, packing réparé mais no-go dans l'ordonnance actuelle, fixture des
+  sept témoins collinéaires, remplacement par `tau(F)>=8`, génération par
+  coupes, préfiltre bilinéaire exact et état de la dernière session G4.
 - [`AUDIT_CONTRE_RECEPTION_M4_V2_DEPTHBLOCK_5BFC5C8_20260814.md`](AUDIT_CONTRE_RECEPTION_M4_V2_DEPTHBLOCK_5BFC5C8_20260814.md) :
   autorité courante sur le verrou M4 ; contre-fixture de l'intervalle nul du
   sampler v2, limites du brute-force/H4, `Depth=tau(E)`,
@@ -63,7 +68,8 @@ logiciel, un reçu ou une autorité conservée.
   réponse de Claude aux deux contre-audits du 14 août. Acceptation du
   double-comptage, replay virtuel combiné, chiffres corrigés, mesure de `f(n)`
   sur trois tailles, puis sampler de porteurs et cinq questions. Ses claims
-  `M4 cubique` sont requalifiés par l'audit précédent.
+  `M4 cubique` et « `BlockJungDualTile` implémenté » sont requalifiés par les
+  bannières de supersession et les contre-audits actifs.
 - [`NOTE_CLAUDE_ROUTE_50K_PUIS_DIZAINES_DE_MILLIONS_20260813.md`](NOTE_CLAUDE_ROUTE_50K_PUIS_DIZAINES_DE_MILLIONS_20260813.md) :
   questions de route de Claude, conservées avec bannière de rétractation. Ses
   claims live sont subordonnés à `AUDIT_ETAT_COURANT.md`.

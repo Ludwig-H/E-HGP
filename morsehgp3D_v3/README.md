@@ -15,9 +15,17 @@ public_status=not_claimed
 ```
 
 La v3 n'est ni promue dans le registre officiel, ni qualifiée GPU, ni déclarée
-exacte sur son domaine public. Une session G4 SPOT documentée au `HEAD=35fcea8`
-a utilisé ses 48 processeurs logiques comme ressource CPU, sans kernel CUDA ;
-le reçu certifie l'arrêt ciblé `TERMINATED` et ne qualifie aucun SLO.
+exacte sur son domaine public. La campagne CPU historique au pin `35fcea8` et
+la tentative SOC active au pin `110fe76` ont toutes deux utilisé une G4 SPOT
+sans kernel CUDA et certifié l'arrêt ciblé. La seconde a échoué avant toute
+rampe (`CTest rc=8`, cibles non construites) : elle ne fournit aucune mesure
+SOC/G4.
+
+La recette au `HEAD=783a789` reste non relançable : elle omet encore une cible
+sélectionnée par son regex CTest, ne sélectionne pas les nouvelles portes BJD,
+ignore le code de l'analyseur de pentes, n'exige pas une fenêtre finale et
+autorise quatre timeouts séquentiels dont la somme dépasse les deux
+coupe-circuits. Le contre-audit live donne les corrections bloquantes.
 
 ## Verdict actuel
 
@@ -25,6 +33,13 @@ Le contrat n'est pas rempli. Pour `n=50000` et `K_max=10`, la cible principale
 est `p95 warm_e2e<100 ms` et la cible secondaire `p95 warm_e2e<1 s` sur un G4,
 sortie complète et synchronisation comprises. Aucun échantillon qualifiable ne
 reçoit l'une ou l'autre.
+
+Le dernier commit stable relu est `783a789`. Le worktree mobile de Claude
+raccorde `BlockJungDual64` au probe WSPD. Son packing d'identités réparé passe
+trois CTests causaux, mais son juge capé peut encore sauter des groupes et des
+fermetures tout en publiant `OK`; il agit en outre après avoir payé toute la
+descente. Le verdict détaillé et la solution `tau(F)` sont dans
+[`audits/AUDIT_LIVE_BLOCK_JUNG_CREDITS_TAU_783A789_20260814.md`](audits/AUDIT_LIVE_BLOCK_JUNG_CREDITS_TAU_783A789_20260814.md).
 
 Le pin historique `2b89ea1` introduit enfin une première tranche
 `BallForm -> PrimitiveSphereKey -> census I_B/U_B -> SphereRun`. C'est le bon
@@ -62,6 +77,13 @@ La prochaine chaîne à fermer est :
 3   porter la même tranche sur device, puis mesurer warm_e2e sur G4
 4   ouvrir séparément tout nouveau profil numérique
 ```
+
+Cette séquence bloque une réception produit, pas l'audit de coût. Une piste
+parallèle `counter-only` peut recevoir sur petit `n`, contre l'oracle exhaustif,
+`CKPairTape -> carrier aigu -> BlockJungDual64/tau(F) ->
+AxisKernel/BlockBallDepth`. Elle doit mesurer les fermetures avant descente,
+les splits, `F4/M4`, les nœuds de transversal, les octets et la HWM ; elle ne
+ferme ni 0A, ni 0B et ne crée aucun claim public.
 
 Une source incomplète peut être comparée dans le sink de référence, mais ne
 publie jamais un succès. Il n'existe pas de watermark monotone par ancre : les
@@ -136,8 +158,11 @@ remplace atomiquement le parent par tous ses enfants disjoints. Pour la
 diagonale q4, `binom(C,2)` devient tous les `binom(C_i,2)` et tous les
 `C_i×C_j`, `i<j`; pour `C×D`, tous les `C_i×D_j`. Le carrier primaire oriente
 la sweep mais ne crée jamais une seconde copie du `CellPair`.
-Une paire n'est q2 propre que si `D=||b-a||^2>0` : les positions dupliquées
-sont rejetées, quotientées ou filtrées exactement avant cette promotion.
+Une paire n'est q2 propre que si `D=||b-a||^2>0` : seule cette paire endpoint
+dégénérée est filtrée. Une position géométrique peut être bucketisée, mais tous
+les `PointId` et leur multiplicité restent présents dans les pools témoins et
+les produits ; les paires de chacun de ces IDs vers une troisième position
+gardent donc leur multiplicité. Un quotient silencieux changerait la profondeur.
 
 q3 recertifie `E+X-D>0` et l'indépendance affine. q4 ne signifie pas « quatre
 faces aiguës » : l'autorité est la stricte positivité des quatre
@@ -198,40 +223,36 @@ Le `JungSpindleRect-v0` actuellement branché n'est pas `SOC64/CORNER512` : il
 combine des extrema séparés de `D,V,T`. Son diagnostic `n=6000,s=8` gagne
 environ trois centièmes de point seulement. Cela réfute cette combinaison sur
 les boîtes grossières mesurées, pas les deux théorèmes corrélés. Leur primitive
-et 16 CTests bornés sont verts au HEAD ; l'ablation WSPD et son coût transitif
-restent non reçus.
+et leurs 16 portes isolées sont verts au pin stable. L'intégration WSPD active
+et son coût transitif restent non reçus, comme borné ci-dessous.
 
-La prochaine ablation recommandée est `SOC64-shadow-q4` sur un échantillon
-déterministe de tâches `central-MIXED`, avec cap propre, early exits, masse
-créditable et aucun changement de fate. Si le signal est positif, le brancher
-**avant** le raffinement local : un certificat corrélé évite une scission,
-alors qu'un certificat rejoué après la scission paie déjà son front.
+`SOC64` existe désormais en mode shadow et en mode actif optionnel. Le mode
+actif est un disjonctif q4 sûr : un `ALL` change le fate, un échec reste
+inconclusif. Le message du commit `110fe76` annonce une baisse locale du
+résiduel à `n=3000`, mais aucun reçu brut ne permet de la promouvoir en pente
+ou en résultat G4. La tentative archivée sous
+`receipts/soc64_actif_g4_20260814/` a échoué avant la mesure et s'est arrêtée
+`TERMINATED`.
 
-Le premier raccord live du 14 août additionnait les crédits SOC d'un ancêtre
-aux crédits baseline du même sous-arbre et comptait deux fois les mêmes IDs.
-Le shadow courant corrige cette faute : il compare les ledgers baseline et
-union combinée, place SOC après les fallbacks et arrête une branche combinée à
-son premier `ALL`. Un replay borné mesure `41` fermetures de masse `95`, contre
-`127` et `316` avec la somme fautive. Il doit encore recevoir une
-comparaison PointId de l'union. Le juge direct des flips tue désormais le mutant
-`sum_instead_of_union` lorsqu'il énumère tout, mais annonce encore `accord=OUI`
-si son cap saute des flips. Cinq portes CTest intégrées passent, sans garder la
-non-vacuité du juge ni un oracle d'union par vrais IDs. À `n=2000`, le
-shadow non capé a déjà soumis `3 809 028` tâches et ajouté environ `2,1 s` à la
-vague sur une machine partagée. Le HEAD fournit désormais un cap qui publie
-`MINORANT_CAP` ; ce cap borne le diagnostic sans recevoir la politique de
-sélection ni la rentabilité transitive. Ne pas lancer sa rampe 50k. Un retour inférieur
-à `floor=q4` signifie seulement `UNKNOWN_BELOW_FLOOR`, pas une lane exacte.
+Le parcours actif reste incomplet sous `central-NONE` : si SOC est `UNKNOWN`,
+il ne descend pas encore sa propre vue vers les enfants. Le prochain jalon
+n'est donc plus un shadow initial, mais une porte locale appariée : union de
+preuves par vrais `PointId`, mutant de chevauchement, `pending=0`, coût/HWM,
+puis tailles `1500/3000/6000`. Ne pas lancer 50 000 avant cette porte. Un
+retour inférieur à `floor=q4` signifie seulement `UNKNOWN_BELOW_FLOOR`, pas
+une lane exacte.
 
-Le HEAD essaie maintenant SOC au nœud courant même si le central rend `NONE`.
-Ce gain partiel est sûr, mais la vue combinée ne descend toujours pas lorsque
-SOC rend `UNKNOWN` sous ce `NONE`. `cmask` reste subordonné au masque baseline.
-Un replay borné révèle `14383` témoins exacts cachés sous ce prune et fait
-tomber SOC/exact de `96,76 %` à `86,10 %` sur la cohorte élargie. La réparation
-est un parcours physique commun à deux masques logiques indépendants : baseline
-descend sur `central-MIXED`; combined teste SOC sur tout central non-`ALL` et
-descend sur `SOC-UNKNOWN`, avec son propre cap et son propre `PENDING`.
-`--none-descend` tel qu'il existe ne propage pas ce masque combiné.
+Le chemin `--soc64-actif` n'a pas encore de juge propre. Lui adjoindre
+`--judge-soc64` ne valide pas ses succès : l'actif promeut d'abord `v=ALL`, puis
+le shadow saute ce verdict et peut finir avec zéro verdict jugé. L'autorité
+active-only doit recomposer les vrais `PointId` distincts pour chaque fermeture
+et séparer ses compteurs de ceux du shadow.
+
+`--judge-vwave` n'est pas cette autorité : il recompte seulement les
+singletons du central. Combiné à SOC/BJD sur la fixture `eight_clusters,n=200`,
+il rejette 149 fermetures collectives valides et affiche « sans 10 » alors que
+la lane q4 exige huit. Cette combinaison doit être refusée jusqu'à un juge qui
+recompose chaque type de preuve.
 
 ### `JungDiskDepth`, puis LP projectif
 
@@ -270,19 +291,13 @@ Cette version bloc est sûre mais incomplète : `for all pair exists lambda`
 n'implique pas `exists lambda for all pair`. Un échec ou un dénominateur trop
 large rend `MIXED/UNKNOWN`, jamais `NONE`.
 
-La forme entière directement alignée sur le prototype pose
+La forme entière directement alignée sur le vérificateur pose
 `W=sum w_z`, `D=||b-a||^2`, `A=W*D-sum w_z||a+b-2z||^2`,
 `P=W*(a+b)-2*sum w_z*z` et
 `R=D||P||^2-(P dot (b-a))^2`. Elle teste q3 par
 `A>0 && 3A^2>4R` et q4 par `A>0 && A^2>2R`. Sous u16, la largeur i128 annoncée
-exige `W<=65535` vérifié avant toute somme. Le prototype live code ces seuils,
-mais ne préflighte pas encore `W` et ne constitue ni une primitive CUDA reçue
-ni une profondeur de bloc.
-
-Le HEAD ajoute un juge primal BigInt indépendant pour une base fixe ; les
-`13/13` CTests Jung ciblés passent et le collectif `k=2` est exercé. Il manque
-une fixture nécessairement ternaire, le calcul de profondeur `d`, le preflight
-u16 et le raccord `OPEN_FINAL`.
+exige `W<=65535` vérifié avant toute somme. Une primitive CUDA et une profondeur
+de bloc restent ouvertes.
 
 Le lift rectangle à poids fixes est désormais résolu mathématiquement. Poser
 `A0=-W*(a dot b)+(a+b) dot Z-Q` et
@@ -290,14 +305,51 @@ Le lift rectangle à poids fixes est désormais résolu mathématiquement. Poser
 `A0>0 && 2A0^2>||C0||^2`, q3 remplace `2` par `3`. Pour un endpoint fixé,
 `(A0,C0)` est affine dans l'autre et chaque lane est un cône de Lorentz convexe.
 Les `8×8=64` couples de coins caractérisent donc exactement `ALL` sur
-l'enveloppe `A×B`. `BlockJungDual64` rend `ALL_GROUP` ou `MIXED`, tient en i128 sous
-`1<=W<=65535`, et repropose les poids après split sans jamais émettre les
-paires. `ALL_GROUP` ajoute une hyperarête uniforme ; seule
+l'enveloppe `A×B`. Au `HEAD=783a789`, `bjd_lane_box` rend une lane entière ou
+`-1` ; le wrapper contractuel traduit `lane>=floor` en `ALL_GROUP`, sinon en
+`MIXED`. La primitive vérifie seulement la base et les poids fournis, n'émet
+aucune paire et tient en i128 sous `1<=W<=65535`. Un proposant distinct est
+rappelé dans les enfants après split. `ALL_GROUP` ajoute une
+hyperarête uniforme ; seule
 `tau(E_Q)>=8/9` ferme la profondeur du rectangle. Les contrôles
 `A4=4*A0` et `R=4*||C0||^2` fixent les facteurs ; cette
 équivalence porte seulement sur le reçu à poids communs, pas sur l'existence
 d'un poids différent par paire. Le widening précède `a+b`, les produits et les
 normes ; le preflight de `W` somme en type large ou saturant avant tout cast.
+
+Au commit stable `783a789`, le header implémente cette forme à base et poids
+communs fixés. La réception logicielle reste ouverte : le selftest ne compare
+que la forme ponctuelle et des boîtes dégénérées, aucun CTest n'exerce une
+boîte non dégénérée ni un mutant BJD, et le header géométrique ne porte ni
+`PointId` ni preuve de disjonction. Son prétest intérieur porte le pire cas à
+65 évaluations. Le raccord WSPD mobile ajoute depuis trois CTests de packing et
+deux mutants qui passent localement ; il ne grave toujours pas la fixture
+minimale collinéaire, accepte un juge partiel comme `OK` et ne reçoit ni
+`tau(F)`, ni boîte BJD non dégénérée au commit, ni chemin device.
+
+L'ABI stable garde aussi une ambiguïté à supprimer : une `Base` invalide fait
+retourner `kLaneNone`. Le callsite q4 courant échoue ouvertement parce qu'il ne
+lit que `retour>=q4`, mais un futur consommateur pourrait prendre cette valeur
+pour un vrai `NONE`. La réception exige `ALL_GROUP/MIXED/INVALID_OR_UNKNOWN`, ou
+un `UNKNOWN` explicite pour toute invalidité. Le commentaire minimax de
+`jung_dual.hpp` inverse ses quantificateurs, quoique les formules utilisent la
+bonne identité.
+
+Une fermeture de profondeur ne peut additionner des scalaires anonymes. Le
+packing minimal conserve des groupes de `PointId` deux à deux disjoints et
+disjoints de tout singleton/span déjà crédité dans la même vue. La route plus
+forte conserve les groupes comme hyperarêtes et teste `tau(F)>=8/9`. Cap ou
+juge sauté donne `PARTIEL/UNKNOWN`.
+
+Le greedy égal-poids courant est un no-go comme hot path sous son ordonnance.
+À `n=1500`, il réduit la masse q4 ouverte de `12,55 %` sur `uniform` et de
+`0,87 %` sur `eight_clusters`, mais ne retire aucune des `32387961` et
+`9366805` recertifications ; les médianes CPU utilisateur augmentent
+respectivement de `5,47 %` et `8,15 %`. Il faut fermer la proof-tile avant la
+descente, générer les bases par coupes et mesurer le coût aval réellement évité.
+Un préfiltre exact proposé dans `PROPOSITION.md`, fondé sur le minimum bilinéaire
+exact de `A0` et des intervalles coordonnée de `C0`, peut certifier `ALL` en
+36 valeurs scalaires avant le fallback des 64 coins.
 
 La dissection live à `eight_clusters,n=1500` trouve huit témoins singleton
 exacts pour `89,5 %` de 200 PairId ouverts tirés par masse, contre `26,5 %` de
@@ -502,7 +554,7 @@ n'est exact : des supports positifs gardent un partenaire arbitrairement loin
 en rang. Aucun arrangement global, aucune mosaïque Delaunay d'ordre supérieur
 et aucun catalogue exhaustif ne deviennent le chemin produit.
 
-Au HEAD `cec4a4f`, le sampler v2 retire `PENDING` et la censure des grosses
+Au pin historique `cec4a4f`, le sampler v2 retire `PENDING` et la censure des grosses
 lentilles, puis remplace `2 sigma` par une demi-largeur Hoeffding correcte sous
 des tirages i.i.d. uniformes. Son implémentation ne reçoit pas encore cette loi :
 multiply-high reste sans rejet, les streams SplitMix n'ont pas de contrat
@@ -531,7 +583,7 @@ in-sphere normalisé en `z`, huit coins certifient `ALL_INTERIOR`; un seul bloc
 du futur classifieur doit donc fermer avant fill. Les coins ne certifient pas le verdict inverse
 `NONE`.
 
-Le HEAD contient aussi le juge direct des flips SOC et `JungDual`. Le premier
+Ce pin contient aussi le juge direct des flips SOC et `JungDual`. Le premier
 tue le mutant de somme lorsqu'il énumère tout, mais imprime encore `accord=OUI`
 si son cap laisse des flips non jugés. Le second a une identité entière correcte
 sous `sum(weights)<=65535` ; il ne fait cependant qu'essayer sept pondérations,
@@ -548,6 +600,10 @@ métriques physiques et n'exige pas la finalité ; elle n'est pas une campagne d
 qualification. Voir
 [`audits/AUDIT_CONTRE_RAFFINEMENT_LOCAL_ET_SESSION_G4_3C11BC8_20260813.md`](audits/AUDIT_CONTRE_RAFFINEMENT_LOCAL_ET_SESSION_G4_3C11BC8_20260813.md)
 et son contre-reçu au pin `35fcea8`.
+
+Le détail live, les hashes, les reçus G4 et le worktree ne sont maintenus que
+dans [`audits/AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md). Les
+paragraphes ci-dessus bornent les non-claims et les obligations mathématiques.
 
 ## Construire et tester
 

@@ -26,6 +26,12 @@ n'y est qualifiable.
 > `M4=Theta(n^4)` n'est pas universel, `I<=7` n'est pas `H4_rank`, la moyenne
 > observée ne prouve ni linéarité ni marge uniforme, et la rampe M4 50k est
 > refusée au profit de `BlockBallDepth8` avant fill.
+> L'addendum 6 ter est lui aussi supersédé sur un point de statut : à son pin,
+> seul `JungDual` ponctuel était implémenté et comparé pour `k=1`.
+> `BlockJungDualTile`, les poids communs à une AABB, le ledger de vrais
+> `PointId` et la profondeur n'étaient pas reçus. Le `HEAD=783a789` ajoute
+> depuis `BlockJungDual64` pour une base pondérée fixe ; son intégration de
+> profondeur reste ouverte dans l'audit live.
 
 Cette note répond à
 [`AUDIT_SOURCE_CK_WST_Q2_Q3_Q4_35FCEA8_20260814.md`](AUDIT_SOURCE_CK_WST_Q2_Q3_Q4_35FCEA8_20260814.md)
@@ -552,8 +558,9 @@ là où il est, au lieu de le déplacer.
 > **Addendum, après
 > [`AUDIT_CONTRE_RECEPTION_M4_V2_DEPTHBLOCK_5BFC5C8_20260814.md`](AUDIT_CONTRE_RECEPTION_M4_V2_DEPTHBLOCK_5BFC5C8_20260814.md).**
 > Vos cinq reproches sur `CarrierApexEstimator-v2` sont corrigés, votre
-> `BlockJungDualTile` est implémenté et jugé, et la mesure qu'il a rendue
-> possible reclasse tout ce que j'ai fait aujourd'hui.
+> candidat `JungDual` ponctuel est implémenté et jugé pour `k=1`; la tuile
+> uniforme et son raccord de profondeur restent alors des propositions. La
+> mesure rendue possible reclasse tout ce que j'ai fait aujourd'hui.
 
 ### Ce que j'ai corrigé
 
@@ -570,7 +577,7 @@ là où il est, au lieu de le déplacer.
   la boucle tire avec remise, donc `K > N` ne rend rien exhaustif.
 - **`NaN` supprimés** des rapports vides du brute-force.
 
-### `BlockJungDualTile`, implémenté et jugé
+### `JungDual` ponctuel implémenté ; tuile non reçue à ce pin
 
 `prototype/jung_dual.hpp` porte la forme entière de votre section 5 :
 `A = W D - somme w_z ||a+b-2z||^2`, `P = W(a+b) - 2 somme w_z z`,

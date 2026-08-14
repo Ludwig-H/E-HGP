@@ -251,9 +251,14 @@ La fenêtre doit désormais être portée par une vraie décomposition de
 Callahan--Kosaraju. Une WSPD canonique produit `O(s^3 n)` rectangles
 `A×B` en dimension trois et partitionne exactement toutes les paires non
 ordonnées. Une paire n'est un support géométrique q2 propre que si
-`D=||b-a||^2>0`. L'entrée doit donc rejeter ou quotienter les positions
-dupliquées, ou le tape filtrer `D=0` exactement. Sous cette porte, il est la
-source q2 complète ; ce n'est pas un simple proposer.
+`D=||b-a||^2>0`. Le tape filtre exactement cette paire endpoint dégénérée. Une
+implémentation peut bucketiser les positions dupliquées pour la géométrie, mais
+elle conserve tous les vrais `PointId` et leur multiplicité dans les pools
+témoins et les produits. Les paires de chacun de ces IDs vers une troisième
+position gardent leur multiplicité ; un quotient silencieux changerait la
+profondeur.
+Sous cette porte, il est la source q2 complète ; ce n'est pas un simple
+proposer.
 
 Chaque rectangle porte une partition persistante du witness tree et deux
 bornes : masse strictement intérieure garantie `L_open`, et cardinalité de
@@ -492,7 +497,11 @@ La fixture `A={(0,0,0),(0,100,0)}`, `B={(100,0,0),(100,100,0)}` et
 aucun témoin q2 pour la paire haute. Elle interdit toute promotion depuis un
 représentant vers le rectangle.
 
-Un certificat dual donne néanmoins une voie uniforme falsifiable. Écrire
+Un certificat dual donne néanmoins une voie uniforme falsifiable. La bonne
+orientation du minimax est
+`min_w max_z Phi_z(w)=max_lambda min_w sum_z lambda_z Phi_z(w)` ; le commentaire
+actuel de `prototype/jung_dual.hpp` l'inverse, même si ses formules emploient la
+bonne identité. Écrire
 `m=(a+b)/2`, `h=(b-a)/2`, `c=m+w`, avec `w dot h=0` et
 `||w||<=kappa||h||`, où `kappa^2=1/3` pour q3 et `1/2` pour q4. Pour un groupe
 de témoins, le minimax sur le disque de `w` et le simplexe fournit des poids
@@ -533,9 +542,14 @@ q4 : A4>0 et   A4^2>2*R
 ```
 
 Sous u16, la preuve de largeur i128 exige `W=sum_z w_z<=65535`, contrôlé sans
-overflow avant le prédicat. Le header ne possède pas encore ce preflight. Le
-HEAD ajoute un juge primal BigInt indépendant et exerce le collectif `k=2`, mais
-pas encore une fixture Helly `k=3`, la profondeur ni un certificateur de bloc.
+overflow avant le prédicat. Au `HEAD=783a789`, seul
+`BlockJungDual64::make_base` préflighte la somme en accumulation large puis la
+borne à 65 535. `dual_lane` ne possède pas encore ce cap et le symbole
+contractuel `verify_dual_weights_lane` n'existe pas dans le logiciel. Le futur
+wrapper **doit** préflighter coordonnées u16, `lo<=hi`, paire propre, IDs
+authentifiés et contrat de preuves ; toute violation rend `UNKNOWN` avant un
+cast étroit. Le juge primal `k=2/3` et la profondeur appartiennent à l'oracle,
+jamais au vérificateur de poids.
 
 L'ABI de vérification doit nommer exactement ce qu'elle décide. Une primitive
 `verify_dual_weights_lane` reçoit une paire propre `D>0`, de un à trois
@@ -554,9 +568,39 @@ gain n'est qu'un minorant. Le juge `k>1` compare la couverture du disque continu
 ni au même prédicat dual. Les mutants de largeur emploient une arithmétique
 définie ; un overflow signé volontaire n'est pas une contradiction causale.
 
+#### Proposant exact de poids communs pour deux IDs
+
+Une base de deux témoins n'exige pas une banque finie. Paramétrer les poids
+normalisés par `lambda in (0,1)`, avec
+`Z(lambda)=z2+lambda*(z1-z2)` et
+`Q(lambda)=||z2||^2+lambda*(||z1||^2-||z2||^2)`. Pour chacun des 64 couples de coins, écrire
+`A_i(lambda)=alpha_i+beta_i*lambda` et
+`C_i(lambda)=u_i+v_i*lambda`. La lane q4 impose
+`A_i(lambda)>0` et
+`2*A_i(lambda)^2-||C_i(lambda)||^2>0`; q3 remplace `2` par `3`.
+
+La préimage de l'intérieur du cône de Lorentz par cette droite affine est un
+intervalle ouvert. Intersecter exactement les 64 intervalles et `(0,1)` décide
+donc s'il existe un même poids réel sur toute la tuile. Les bornes sont des
+racines de quadratiques à coefficients entiers ; leur ordre se compare en
+BigInt sans les arrondir. Dans l'intervalle final, Stern--Brocot ou les
+fractions continues donnent le rationnel de plus petit dénominateur. Pour
+`lambda=p/q`, employer les poids réduits `(p,q-p)`, exiger `q<=65535`, puis
+rejouer `BlockJungDual64`. Intervalle vide, frontière seule ou dénominateur trop
+grand donnent `MIXED/UNKNOWN` et un split, jamais `NONE`.
+
+Cette primitive sépare proprement le proposant du vérificateur et évite de
+retester plusieurs poids arbitraires pour la même paire. Ses fixtures sont :
+intervalle commun non trivial ; coins individuellement faisables mais
+intersection vide ; intervalle sans rationnel de dénominateur au plus 65 535 ;
+extrémité `lambda=0/1` rabattue vers le singleton ; invariance par pgcd et
+permutation des deux témoins. Le branch-and-cut appelle ce proposant seulement
+sur une base qui réfute son transversal courant.
+
 Au niveau rectangle, les poids **fixes** admettent un classifieur exact beaucoup
-plus simple. Poser
-`C0=L*(a cross b)-a cross Z-Z cross b`; comme `C=L*C0`, le reçu devient :
+plus simple. Poser `A0=-L*(a dot b)+(a+b) dot Z-Q` et
+`C0=L*(a cross b)-a cross Z-Z cross b`. Alors
+`P cross (b-a)=2*C0`, donc `R=4*||C0||^2`, et le reçu devient :
 
 ```text
 q3 : A0>0 et 3*A0^2 > ||C0||^2
@@ -573,7 +617,29 @@ l'intérieur d'un cône de Lorentz convexe
 huit coins de `B`, la convexité séparée propage donc le verdict à tout
 `A×B`; la réciproque est triviale. `BlockJungDual64` est ainsi une
 **équivalence exacte sur l'enveloppe AABB continue** pour cette base et ces
-poids : 64 prédicats, early exit, puis `ALL_GROUP` ou `MIXED`.
+poids : 64 prédicats de coins, plus au besoin un prétest intérieur de rejet
+sûr, puis `ALL_GROUP` ou `MIXED`. Si le prétest est conservé, la télémétrie et
+le budget annoncent 65 évaluations au pire.
+
+Un fast path suffisant évite souvent ces 64 prédicats complets. Pour chaque axe,
+les extrema de `g_i(x,y)=-L*x*y+Z_i*(x+y)` sur `A_i×B_i` sont aux quatre coins ;
+ainsi `Amin=sum_i min(g_i)-Q` est le minimum exact de `A0`. Pour une permutation
+cyclique `(i,p,q)`, poser `f_pq(x,y)=L*x*y-x*Z_q-Z_p*y` ; comme
+`C_i=f_pq(a_p,b_q)-f_qp(a_q,b_p)` sépare deux couples de variables, son
+intervalle coordonnée est exact à partir de deux fois quatre coins. Avec
+`Mi=max(abs(Ci_lo),abs(Ci_hi))`, les tests stricts
+`2*Amin^2>sum_i Mi^2` et `3*Amin^2>sum_i Mi^2`, sous `Amin>0`, certifient
+respectivement q4 et q3. L'échec retombe sur les 64 coins ou `MIXED` ; il ne
+vaut jamais `NONE`. Cette porte `BJD-BilinearBounds` paie 36 valeurs
+bilinéaires scalaires, garde toutes les préconditions u16/poids/IDs et doit être
+reçue par l'implication `FAST_ALL => BJD64_ALL` sur petits produits exacts.
+
+Le fallback ne reforme pas 64 dot/cross. La bilinéarité donne une table exacte
+composée de la valeur au coin bas, de six différences premières et de neuf
+différences mixtes `Delta a_i Delta b_j` pour `(A0,C0)`. Chaque couple de coins
+se reconstruit ensuite par additions `i128`, avant les carrés et comparaisons de
+cône. La porte de réception impose la parité bit-à-bit avec l'évaluation directe
+sur les 64 coins, y compris aux égalités et aux bornes u16.
 
 Sous u16, poser `U=65535`. Avec `1<=L<=U`, les écritures
 `A0=-sum_z w_z*(z-a) dot (z-b)` et
@@ -586,6 +652,38 @@ la plus petite lane universelle. Un coin échoué ne réfute ni les seuls points
 ni une autre pondération ; il impose un split ou `MIXED`. La contre-fixture
 « coins bons, paire médiane shell » ne concernait que des poids reproposés
 séparément aux coins : elle ne réfute pas ce théorème à poids communs.
+
+L'ABI logicielle du pin stable ne porte pas encore exactement ce contrat.
+`make_base` préflighte `L` en `i128`, mais `bjd_lane_box` rend `kLaneNone` pour
+une base invalide. Le callsite q4 courant reste fail-open parce qu'il ne teste
+que `retour>=q4`; un futur consommateur pourrait néanmoins confondre invalidité
+et `NONE` géométrique. Le résultat reçu est un type séparé
+`ALL_GROUP/MIXED/INVALID_OR_UNKNOWN`, ou une valeur `UNKNOWN` explicite pour
+toute base invalide. `dual_lane` doit en outre recevoir son propre preflight de
+poids avant de prétendre au même domaine.
+
+`ALL_GROUP` ne vaut qu'une contrainte de profondeur. Le wrapper reçu doit
+conserver les vrais ensembles de `PointId`. Le packing minimal impose des groupes deux à
+deux disjoints et disjoints de tous les singletons ou proof-spans déjà crédités
+dans la même vue ; deux vues logiques ont deux ledgers d'identités. La route
+plus complète garde aussi les groupes recouvrants comme hyperarêtes et ferme
+sur `tau(F)>=h`. Additionner `cred` et un nombre de groupes sans l'un de ces
+reçus est le mutant `sum-instead-of-union`. Un juge capé publie
+`PARTIEL/UNKNOWN` ; son absence ne vaut pas accord.
+
+Le worktree mobile au pin stable `783a789` reçoit provisoirement le packing :
+il exclut les feuilles déjà créditées dans les deux vues, impose des groupes
+disjoints et tue deux mutants dans trois CTests. Ce n'est pas encore une
+réception. Avec `--juge-bjd=1`, des groupes et fermetures sautés coexistent avec
+`fenetre_finale=OUI`, `OK` et le code zéro ; sans `--vwave`, l'option BJD peut
+réussir avec zéro essai. Surtout, le packing est calculé après la descente et
+n'économise aucune recertification. Le contre-audit et la fixture source u16
+sont dans
+[`audits/AUDIT_LIVE_BLOCK_JUNG_CREDITS_TAU_783A789_20260814.md`](audits/AUDIT_LIVE_BLOCK_JUNG_CREDITS_TAU_783A789_20260814.md).
+Le juge singleton `--judge-vwave` n'est pas composable avec SOC/BJD : il doit
+être refusé dans ces modes tant qu'il ne rejoue pas leurs hyperarêtes et seuils.
+De même, le shadow `--judge-soc64` ne juge pas un succès déjà promu par le
+chemin actif ; une porte active-only est requise.
 
 Le mapping G4 naturel affecte une proof-tile à un CTA de 64 threads, un couple
 de coins par thread, puis deux ballots warp et une réduction. Chaque thread
@@ -822,16 +920,26 @@ une tuile, un même noyau doit être vérifié uniformément ou conduire à un s
 Le `ToleranceKernel` complète donc le packing et peut remplacer le stockage du
 pire DAG, sans abolir `BlockJD`, ses masques d'endpoints ni ses continuations.
 
-Le fast path GPU cherche plutôt huit ou neuf groupes couvrants disjoints, ce
-qui certifie immédiatement les seuils `Depth>=8/9` avec huit ou neuf reçus. S'il
-échoue, le DAG de suppressions peut poursuivre sous budget ; sinon la tâche
-reste `MIXED`. Un `ProofNode` stocke au plus trois `PointId`, leurs poids ou le
-reçu primal, trois handles enfants et le niveau. Les files SoA exécutent
-`propose -> verify -> count/scan/fill`; un cap produit `PENDING`, jamais
-`CLOSED`. Sur un rectangle CK, chaque nœud propose au représentant puis vérifie
-uniformément ses polynômes ; un échec scinde `A/B`. La continuité d'une marge
-stricte garantit qu'un reçu ponctuel reste valable sur un voisinage assez fin,
-sans jamais promettre un poids commun sur une tuile grossière.
+Le fast path conserve `U`, les singletons universels obligatoires, puis une
+petite famille `F` d'hyperarêtes uniformément reçues. Il teste directement
+`tau(F_res)>=h-|U|` par branchement bitset : au plus `3^7` feuilles pour q4 et
+`3^8` pour q3 avant mémoïsation. Le packing disjoint reste une ablation sûre,
+pas la décision principale. Un transversal trop petit fournit la coupe qui
+demande une nouvelle base au proposant ; chaque base géométrique est vérifiée
+une fois avant d'entrer dans `F`. Un cap produit `PENDING`, jamais `CLOSED`.
+Sur un rectangle CK, un échec de preuve uniforme scinde `A/B`. La continuité
+d'une marge stricte garantit qu'un reçu ponctuel reste valable sur un
+voisinage assez fin, sans promettre un poids commun sur une tuile grossière.
+Le raffinement candidat part du front CK coarse reçu, proche de `s=2`, plutôt
+que d'un front global `s=8`. Pour `k=2`, une intersection vide des intervalles
+de `lambda` conserve les deux coins qui imposent les bornes incompatibles et
+scinde d'abord le facteur ou l'axe qui les sépare le plus. Pour un échec BJD
+plus général, il choisit le facteur qui maximise la variation bornée de
+`A0/C0`. Ce choix est une heuristique d'ordonnance, pas une preuve ; l'exactitude
+vient de la partition exhaustive des enfants, qui héritent toutes les
+hyperarêtes et pondérations déjà uniformes. La fixture de réception exige un
+parent sans poids commun, deux enfants `ALL` et une somme des masses enfants
+exactement égale à celle du parent.
 
 Le packing disjoint est strictement incomplet. Pour q4, prendre
 `a=(0,100,100)`, `b=(40,100,100)`, les six témoins universels
@@ -882,46 +990,26 @@ séparément convexe en `a,b,z`; les 512 triples de coins caractérisent exactem
 `ALL` sur l'enveloppe AABB continue. Un coin fictif échouant ne donne jamais
 `NONE` sur les seuls points du nœud.
 
-Le classifieur `JungSpindleRect-v0` du pin `7d2efcb` est une autre borne : il
-combine des extrema séparés de `D,V,T`. Son disjonctif est sûr mais n'a gagné
-qu'environ trois centièmes de point dans le diagnostic déclaré à `n=6000,s=8`.
-Cette mesure ne réfute ni `SOC64` ni `CORNER512`. Leur primitive et leur probe
-borné existent désormais dans le worktree, sans recevoir encore le shadow
-WSPD ni son coût transitif. Elle réfute seulement l'espoir que les extrema
-décorrélés suffisent sur des boîtes grossières.
+Le classifieur `JungSpindleRect-v0` qui combine des extrema séparés de `D,V,T`
+est une autre borne. Son faible gain historique ne réfute ni `SOC64` ni
+`CORNER512`. Même exact pour `ALL`, `CORNER512` ne prouve aucune parcimonie.
 
-Même exact pour `ALL`, `CORNER512` ne prouve aucune parcimonie. Compter ses
-early exits, opérations larges, tâches et gain transitif avant de le porter.
+Les états d'implémentation, campagnes et reçus SOC sont maintenus dans
+[`audits/AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md). La porte
+normative est : shadow apparié sans changement de fate ; oracle d'union par
+vrais `PointId` ; puis branchement actif seulement avec proof-ledger, cap et
+`PENDING` propres. `central-NONE` n'autorise pas à déclarer le domaine exact
+vide ; une vue combinée complète descend sur `SOC-UNKNOWN`.
 
-Le micro-jalon prioritaire est `SOC64-shadow-q4`, avant toute promotion des
-cages : au plus 4096 tâches `central-MIXED` par famille, 65 prédicats au pire
-par tâche prétest central compris, aucun changement de fate. Il publie early
-exits, masse créditable, opérations larges, temps et HWM. La fixture
-`A=[0,99]x{100}x{100}`, `B=[101,200]x{100}x{100}`,
-`C={(100,100,100)}` ferme q4 par `SOC64` alors que les extrema scalaires
-échouent.
-
-Si le signal est non vide, brancher `SOC64` avant le raffinement pour éviter
-les splits. `CORNER512` vient seulement sur les tâches de forte masse où ses
-513 prédicats, prétest compris, peuvent être amortis. Un échec reste
+Mesurer tâches, early exits, opérations larges, octets, HWM et coût transitif
+avant toute rampe. `CORNER512` ne vient que sur les tâches de masse suffisante
+pour amortir ses 512 coins, plus un éventuel prétest. Un échec reste
 `AABB_envelope_not_all/UNKNOWN`, jamais `NONE` pour les points stockés.
 
-Le premier raccord live du 14 août n'implémentait pas ce protocole : il
-additionnait `soc_cred` d'un ancêtre SOC-`ALL` aux crédits baseline du même
-nœud ou de ses descendants. Claude l'a réécrit après contre-audit. Le shadow
-courant emploie deux parcours logiques : baseline inchangée et union combinée.
-Dans l'union, il applique d'abord les fallbacks baseline ; si le verdict final
-reste `MIXED`, il essaie SOC ; tout `ALL` arrête conceptuellement la branche.
-Le flip est `baseline_open && combined_closed`, jamais
-`cred+soc_cred>=seuil`.
-
-Le replay `uniform,n=120` donne zéro faux sur `624` verdicts SOC et mesure `41`
-fermetures de masse `95`, tandis que la somme réfutée en annoncerait `127` de
-masse `316`. Cette contradiction doit devenir une porte. Le raccord n'a
-toujours pas de cap maximal et a soumis environ `988000` tâches à `n=1000`.
-Ajouter un échantillonnage déterministe capé, un statut tronqué, un juge d'IDs
-distincts, une CTest intégrée et les mutants de chevauchement avant de publier
-une masse gagnée ou un temps extrapolé.
+La fixture `A=[0,99]x{100}x{100}`, `B=[101,200]x{100}x{100}` et
+`C={(100,100,100)}` ferme q4 par `SOC64` alors que les extrema scalaires
+échouent. Le mutant `sum-instead-of-union` additionne les preuves d'un ancêtre
+et de ses descendants ; l'oracle d'identités doit le tuer.
 
 Avec `floor>q2`, un retour inférieur au plancher signifie seulement que le
 seuil est impossible ; ce n'est pas la lane `ALL` exacte. L'appel q4 peut lire
@@ -1278,6 +1366,23 @@ exigent davantage : `T2<2^102`, `|A_z|<2^103`, `|B_z|<2^51`, et le test
 la largeur du lift uniforme `A×B×C` reste une gate distincte. Cette forme est
 la spécialisation constructive de `eta(2,r)=2r`.
 
+L'implémentation peut éviter un replay ambigu en écrivant le test de gap
+directement. Trier `alpha_1>=...` et `beta_1<=...`, compléter par les sentinelles
+`alpha_t=-inf` et `beta_t=+inf`, puis, pour chaque `j=0,...,k-1`, exiger
+`max(ell,alpha_{j+1})>min(u,beta_{k-j})`. Une inégalité non satisfaite exhibe un
+`tau` de `J_f` avec au plus `k-1` intérieurs non permanents. La comparaison est
+strictement `>` : à l'égalité, les événements sont shell. La fixture q4
+strictement aiguë prend `a=(220,440,440)`, `b=(660,440,440)` et
+`x=(440,682,440)`. L'arête owner `ab` a le carré de longueur `193600`, contre
+`106964` pour les deux autres ; les trois produits angulaires valent
+`96800,96800,10164`, tous strictement positifs. Ajouter les sept IDs permanents
+`(275+55*j,440,440)`, `j=0,...,6`, puis `z+=(440,461,661)` et
+`z-=(440,461,219)`. Le centre axial `c0=(440,461,440)` a
+`R^2=48841=221^2` : les deux derniers témoins sont shell au même événement et
+la profondeur minimale vaut exactement sept. Cette fixture tue `>=`, l'oubli
+des événements égaux et un test limité aux extrémités sans sortir du domaine
+face owner aiguë.
+
 Un `FaceAxisJungDepth8Block` propose ce petit noyau sur un représentant, puis
 vérifie orientations, signes, ordre des seuils et marges sur tout `A×B×C`.
 `ALL` s'hérite. Une égalité uniformément prouvée est groupée et rejouée comme
@@ -1474,11 +1579,11 @@ variable.
    reprises.
 3. Recevoir `CKPairTape` comme partition q2 exacte et son certificateur
    `[L_open,U_closed]`, puis mesurer `F2` et la masse logique séparément.
-4. Ajouter `JungDiskDepth9/8` au niveau paire/microtile, puis
-   `BlockJungDualTile` avec preuve uniforme ou split,
-   `OriginOnionDepth` et un shadow `SOC64` à union de preuves disjointe, capé et
-   jugé, avant toute multiplication carrier ; ne promouvoir Jung au rectangle
-   qu'après un théorème uniforme.
+4. Ajouter `JungDiskDepth9/8` au niveau paire/microtile. Sur une proof-tile CK,
+   proposer une même base/pondération, la vérifier par `BlockJungDual64`, puis
+   fermer seulement sur un reçu `tau(E)>=9/8` authentifiant groupes et spans.
+   SOC64 actif utilise un ledger séparé et descend sur `UNKNOWN`. Aucun de ces
+   diagnostics ne précède la réception de 0A/0B et CK dans la route produit.
 5. Construire `OwnedCK-WST3` counter-only dans la fenêtre `2B_R`--lentille,
    recevoir couverture/owner/acuité,
    puis raccorder `BallKey -> Q3FootPowerRange` et le census.
@@ -1498,23 +1603,28 @@ variable.
    `12500/25000/50000` uniquement si tâches, octets, HWM et sorties passent.
 10. Qualifier trente répétitions chaudes à `50000` avec le payload officiel.
 
-La session CPU sur VM G4 du pin `3c11bc8`, publiée au `HEAD=35fcea8`, a terminé
-ses quarante processus et certifié l'arrêt ciblé. Elle ne ferme toutefois pas
-la porte : quatre tailles restent quatre processus et les pentes sont calculées
-après coup ; `fenetre_finale` n'est ni conservé ni gaté ; `terrain` contient
-effectivement des continuations q3/q4 ; les temps et recertifications sont
-supprimés du log ; et le chemin d'échec du script n'est pas reçu. Réparer ces
-points, exiger tous les codes zéro **et** `pending=0`, puis archiver aussi les
-échecs. Cette campagne reste CPU et ne reçoit aucun débit GPU.
+La piste de coût peut avancer en parallèle comme diagnostic `counter-only` sur
+petit `n` : `CKPairTape -> carrier aigu -> BlockJungDual64/tau(F) ->
+AxisKernel/BlockBallDepth`, toujours contre vérité exhaustive. Elle mesure les
+fermetures avant descente, les nœuds de transversal, `F4/M4`, les splits, les
+octets et la HWM. Elle n'autorise aucun claim 0A/0B ou produit avant les portes
+1--2 ci-dessus.
 
-Le résultat borné est néanmoins décisionnel : la configuration
-`Central-VWave + s=8 + window=512 + raffinement<=4` garde des pentes `sum_E4`
-proches de `1,9` sur `eight_clusters` et doit être remplacée sur cette famille.
-Cela ne réfute ni `SOC64/CORNER512`, ni LP/PWC, ni les cages. Sur `uniform`, la
-pente E4 seule reste verte mais ne borne pas `M4_apex` ni le payload. Le SLO officiel
-ne peut pas être qualifié sur `uniform` seule : le plan évalue les objectifs sur
-Poisson uniforme **et** le mélange équilibré de huit amas, et G6 exige les deux
-familles favorables.
+La recette G4 au `HEAD=783a789` ne doit pas être relancée en l'état. Elle omet
+une cible pourtant sélectionnée par son regex CTest, ne sélectionne pas les
+nouvelles portes `mhgp3v_bjd_*`, avale le code de `check_rampe_pentes.py` sous
+`set +e` et omet `--exige-fenetre-finale`. Elle permet aussi à chaque job quatre
+timeouts de `3000 s`, incompatibles avec ses coupe-circuits invité `4800 s` et
+GCE `5400 s`. Le reçu SOC actif existant s'arrête avant la rampe avec
+`CTest rc=8` et certifie seulement `TERMINATED`.
+
+Les campagnes, échecs, hashes et états GCP sont autoritaires uniquement dans
+[`audits/AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md) et les reçus.
+Une campagne ne passe qu'avec tous les codes zéro, `pending=0`, payload
+officiel, coûts conservés et arrêt ciblé certifié. Le no-go historique de la
+configuration centrale sur huit amas ne réfute aucun certificateur corrélé.
+Le SLO ne peut pas être qualifié sur `uniform` seule : le plan exige aussi le
+mélange équilibré de huit amas.
 
 La porte composée publie au minimum :
 

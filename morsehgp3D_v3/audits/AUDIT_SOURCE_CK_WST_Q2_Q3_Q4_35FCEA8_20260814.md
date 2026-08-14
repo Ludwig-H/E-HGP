@@ -31,8 +31,10 @@ l'auditeur, ni reçus par le présent rapport. L'auditeur n'a modifié aucun
 fichier logiciel et n'a pas utilisé GCP.
 
 Verdict : Callahan--Kosaraju fournit le bon **tape factorisé exact** de toutes
-les paires. Après rejet ou quotient des positions dupliquées et filtre exact
-`D>0`, il devient la source de tous les q2 propres. Une extension ternaire puis
+les paires. Seules les paires endpoint de distance nulle sont filtrées. La
+géométrie peut bucketiser une position dupliquée seulement si elle conserve sa
+multiplicité et la liste de ses vrais `PointId` dans tous les produits ; sous le
+filtre exact `D>0`, le tape devient la source de tous les q2 propres. Une extension ternaire puis
 quaternaire, nommée ici `OwnedCK-WST`, couvre exactement les supports q3 et q4
 par blocs et possède une ordonnance
 `count--scan--fill` naturelle. Elle doit rester paresseuse : sa parcimonie
@@ -89,9 +91,11 @@ $$\binom{X}{2}=\bigsqcup_i A_i\times B_i.$$
 
 Chaque paire non ordonnée de `PointId` apparaît donc exactement une fois. En
 dimension trois, le nombre physique de rectangles vaut `O(s^3 n)`. Une paire
-n'est cependant un q2 propre que si `D=||b-a||^2>0`. L'entrée doit donc rejeter
-ou quotienter les positions dupliquées, ou le tape doit filtrer `D=0`
-exactement. Sous cette porte, `CKPairTape` est une génération q2 complète sans
+n'est cependant un q2 propre que si `D=||b-a||^2>0`. Le tape filtre exactement
+cette paire endpoint. Bucketiser la géométrie de positions dupliquées est permis
+seulement si la multiplicité et tous les vrais `PointId` restent présents : les
+paires de chacun de ces IDs vers une troisième position ne sont jamais
+coalescées. Sous cette porte, `CKPairTape` est une génération q2 complète sans
 matrice de paires.
 
 L'ABI minimale est :

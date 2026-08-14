@@ -17,6 +17,8 @@
 #include "cloud_families.hpp"
 #include <chrono>
 
+#include "block_jung_dual.hpp"
+#include "oracle/jung_dual_judge.hpp"
 #include "rect_front.hpp"
 #include "soc64_rect.hpp"
 #include "wspd_front.hpp"
@@ -117,6 +119,27 @@ struct SocShadowStat {
   long long feuilles_exact = 0;   // ... qui sont universelles au sens (g,Q)
   long long actifs = 0;           // appels de SOC64 BRANCHE (il change le fate)
   long long actifs_all = 0;       // ... qui ferment
+  long long bjd_essais = 0;       // groupes soumis a `BlockJungDual64`
+  long long bjd_groupes = 0;      // ... couvrants, donc un credit chacun
+  long long bjd_couples = 0;      // couples de coins evalues
+  // LE RECU D'IDENTITES. Un credit de groupe ne vaut que s'il est DISJOINT de
+  // tout ce que la baseline a deja credite : sinon deux unites de profondeur
+  // reposent sur le meme `PointId`. C'est la faute `somme-au-lieu-union` du
+  // shadow SOC64, transposee aux groupes.
+  long long bjd_rejetes_credite = 0;   // temoins ecartes car deja credites
+  // LE JUGE PRIMAL, SUR LES GROUPES CREDITES. Il est dans une autre unite de
+  // traduction, une autre arithmetique (`BigInt`) et un autre objet
+  // mathematique (primal, aucun poids choisi).
+  long long bjd_juges = 0;        // groupes credites reellement juges
+  long long bjd_paires = 0;       // paires `(a,b)` du rectangle jugees
+  long long bjd_faux = 0;         // groupes refutes sur au moins une paire
+  long long bjd_unknown = 0;      // degenerescences explicites du juge
+  long long bjd_sautes = 0;       // au-dela du cap : REFUS DE JUGER
+  // FERMETURES q4 auxquelles un groupe a contribue. Le juge y recompose la
+  // famille disjointe complete : groupes couvrants + universels hors groupes.
+  long long ferm_juges = 0;
+  long long ferm_faux = 0;
+  long long ferm_sautes = 0;
   long long rect_singletons = 0;  // rectangles reduits a UNE paire
   long long wide = 0;             // multiplications 128 bits reellement formees
   // --- LE LEDGER FAUTIF, CONSERVE COMME TEMOIN.
@@ -233,6 +256,23 @@ long long g_diag_feuille = 0;
 bool g_none_descend = false;
 // `SOC64` BRANCHE : il devient un disjonctif du certificat et change le fate.
 bool g_soc64_actif = false;
+// Groupes `BlockJungDual64` : nombre maximal cherche par rectangle.
+long long g_bjd_groupes = 0;
+constexpr int kMaxFeuilles = 24;
+constexpr int kMaxGroupes = 8;
+// Cap du juge primal des groupes, en paires `|A| |B|` par groupe. Un cap
+// atteint est un REFUS DE JUGER, jamais un accord implicite.
+long long g_juge_bjd = 0;
+// MUTANT `bjd-reutilise-temoin` : reprendre l'ecriture refutee, ou un temoin
+// deja credite par le certificat central peut entrer dans un groupe. Le juge
+// des flips doit alors trouver des fermetures sans huit identites distinctes.
+bool g_inject_bjd_reutilise = false;
+// MUTANT `bjd-groupes-chevauchants` : ne pas retirer de la banque les temoins
+// d'un groupe deja retenu. Deux groupes partagent alors un `PointId`.
+bool g_inject_bjd_chevauche = false;
+// Fenetre decidee PAR PAIRE : nombre de paires tirees uniformement, et graine.
+long long g_fenetre_exacte = 0;
+long long g_fenetre_seed = 1;
 // Profondeur exacte du RECTANGLE : elle separe la perte de BOITE de la perte de
 // BUDGET. Sa valeur est le nombre de rectangles ouverts a juger.
 long long g_profondeur_rect = 0;
@@ -966,6 +1006,12 @@ int main(int argc, char** argv) {
     else if (a == "--ordre-proche") g_ordre_proche = true;
     else if (a == "--none-descend") g_none_descend = true;
     else if (a == "--soc64-actif") g_soc64_actif = true;
+    else if (a.rfind("--bjd-groupes=", 0) == 0) g_bjd_groupes = arg_ll(val("--bjd-groupes=").c_str(), 1, kMaxGroupes, "bjd-groupes");
+    else if (a.rfind("--juge-bjd=", 0) == 0) g_juge_bjd = arg_ll(val("--juge-bjd=").c_str(), 1, (1LL << 20), "juge-bjd");
+    else if (a.rfind("--fenetre-exacte=", 0) == 0) g_fenetre_exacte = arg_ll(val("--fenetre-exacte=").c_str(), 1, (1LL << 24), "fenetre-exacte");
+    else if (a.rfind("--fenetre-seed=", 0) == 0) g_fenetre_seed = arg_ll(val("--fenetre-seed=").c_str(), 1, (1LL << 40), "fenetre-seed");
+    else if (a == "--inject-bjd-reutilise") g_inject_bjd_reutilise = true;
+    else if (a == "--inject-bjd-chevauche") g_inject_bjd_chevauche = true;
     else if (a.rfind("--diag-feuille=", 0) == 0) { g_soc64_shadow = true; g_diag_feuille = arg_ll(val("--diag-feuille=").c_str(), 1, (1LL << 22), "diag-feuille"); }
     else if (a.rfind("--profondeur-rect=", 0) == 0) { g_soc64_shadow = true; g_profondeur_rect = arg_ll(val("--profondeur-rect=").c_str(), 1, (1LL << 22), "profondeur-rect"); }
     else if (a.rfind("--rect-stride=", 0) == 0) g_rect_stride = arg_ll(val("--rect-stride=").c_str(), 1, (1LL << 20), "rect-stride");
@@ -1064,6 +1110,14 @@ int main(int argc, char** argv) {
     std::vector<Pair> terms;
     BankStat bank;
     SocShadowStat soc;
+    int feuilles_vues[kMaxFeuilles] = {0};
+    int nfeuilles = 0;
+    // LES GROUPES RETENUS PAR CE TERMINAL, ET LEUR RECU. Sans les identites, un
+    // credit de groupe n'est qu'un nombre : le juge en a besoin pour verifier a
+    // la fois la couverture ET la disjonction.
+    int bjd_grp[kMaxGroupes][2] = {{0, 0}};
+    bool bjd_couvre[kMaxGroupes] = {false};
+    int nbjd = 0;
     // PAR TERMINAL, UN SORT PAR LANE — pas un seul bit q2. Le contre-audit le
     // demande explicitement : sans `closed_mask` par lane, q3 et q4 ne sont que
     // des agregats et leur fenetre ne peut pas etre calculee. `pend` marque les
@@ -1171,6 +1225,7 @@ int main(int argc, char** argv) {
           long long exp = 0;
           bool abandonne = false;
           const int* need = g_need;
+          nfeuilles = 0;
           while (sn > 0 && exp < g_win) {
             const Task tk = st[--sn];
             // MUTANT `masque-global` : rendre au parent un masque complet
@@ -1207,6 +1262,9 @@ int main(int argc, char** argv) {
             unsigned mixed = 0;
             unsigned cmixed = 0;
             bool eut_all = false, eut_none = false;
+            // Les deux vues creditent-elles DEJA cette feuille en q4 ? La
+            // reponse decide si elle peut entrer dans un groupe.
+            bool q4_all_baseline = false, q4_all_combine = false;
             for (int lane = 0; lane < 3; ++lane) {
               if (!(m & (1u << lane))) continue;
               RectVerdict v = mhgp3v::rect_central_verdict(dlo, smn, smx, lane);
@@ -1314,7 +1372,10 @@ int main(int argc, char** argv) {
                 soc.wide += sst.wide;
               }
               // ---- LEDGER BASELINE.
-              if (v == RectVerdict::kAll) { cred[lane] += pop; eut_all = true; }
+              if (v == RectVerdict::kAll) {
+                cred[lane] += pop; eut_all = true;
+                if (lane == 2) q4_all_baseline = true;
+              }
               else if (v == RectVerdict::kMixed) mixed |= 1u << lane;
               else {
                 eut_none = true;
@@ -1431,8 +1492,37 @@ int main(int argc, char** argv) {
                 }
                 }
               }
-              if (w == RectVerdict::kAll) ccred[lane] += pop;
-              else if (w == RectVerdict::kMixed) cmixed |= 1u << lane;
+              if (w == RectVerdict::kAll) {
+                ccred[lane] += pop;
+                if (lane == 2) q4_all_combine = true;
+              } else if (w == RectVerdict::kMixed) cmixed |= 1u << lane;
+            }
+            // ---- LA BANQUE DE TEMOINS DU PROPOSER, ET SA REGLE DE DISJONCTION.
+            //
+            // Un groupe couvrant vaut UNE unite de profondeur : pour toute
+            // paire du rectangle, au moins un de ses membres est interieur.
+            // Cette unite ne s'ajoute a celles des temoins universels que si
+            // les identites sont DISJOINTES — sinon le meme `PointId` est
+            // compte deux fois, et c'est exactement la faute
+            // `somme-au-lieu-union` que les deux contre-audits ont deja tuee
+            // sur le shadow SOC64.
+            //
+            // Sont donc ecartes de la banque :
+            //   - toute feuille dont la lane q4 est deja morte dans le masque,
+            //     car un ancetre `ALL` a alors CREDITE toute sa population, y
+            //     compris celle-ci, sans que la descente le rappelle ;
+            //   - toute feuille que l'une des deux vues vient de crediter.
+            //
+            // Un nœud interne n'entre jamais dans la banque : la base doit
+            // etre faite de `PointId` fixes, pas d'une boite.
+            if (g_bjd_groupes > 0 && tk.node < 0) {
+              const bool libre = ((m & 4u) != 0) && ((cm & 4u) != 0) &&
+                                 !q4_all_baseline && !q4_all_combine;
+              if (libre || g_inject_bjd_reutilise) {
+                if (nfeuilles < kMaxFeuilles) feuilles_vues[nfeuilles++] = -1 - tk.node;
+              } else {
+                ++soc.bjd_rejetes_credite;
+              }
             }
             // OU PASSE LE TRAVAIL ? Un `MIXED` pur est une descente pure :
             // il ne credite rien, n'elague rien, et ne sert qu'a atteindre
@@ -1485,6 +1575,116 @@ int main(int argc, char** argv) {
           // la COMPLETUDE est perdue, jamais la surete.
           if (abandonne || (sn > 0 && exp >= g_win)) { ++bank.tronques; tronque = true; }
           taken = exp;
+
+          // ---- `BlockJungDual64` : DES GROUPES, SUR LE RECTANGLE ENTIER.
+          //
+          // Le certificat central, `SOC64` et le spindle demandent tous a UN
+          // temoin d'etre universel. `BlockJungDual64` demande seulement qu'au
+          // moins un membre du groupe le soit, pour chaque centre admissible —
+          // et il le decide sur tout le produit `A x B` en soixante-quatre
+          // coins, sans developper un seul `PairId`.
+          //
+          // Chaque groupe couvrant a identites DISJOINTES vaut UN credit,
+          // exactement comme un temoin universel : les deux sont commensurables
+          // parce qu'ils prouvent la meme chose — une unite de profondeur. La
+          // disjonction n'est PAS un detail de comptage, c'est la condition de
+          // validite : deux unites qui reposent sur le meme `PointId` n'en font
+          // qu'une. La banque `feuilles_vues` a deja ecarte les temoins
+          // credites ; `pris` garde les groupes deux a deux disjoints.
+          //
+          // Le cout est borne par construction : au plus `kMaxFeuilles` temoins
+          // retenus, au plus `g_bjd_groupes` groupes cherches, et l'extraction
+          // s'arrete des que le seuil est atteint.
+          nbjd = 0;
+          if (g_bjd_groupes > 0 && cred[2] < need[2] && nfeuilles >= 2) {
+            bool pris[kMaxFeuilles] = {false};
+            for (int g = 0; g < g_bjd_groupes && cred[2] < need[2] && nbjd < kMaxGroupes; ++g) {
+              bool trouve = false;
+              for (int i1 = 0; i1 < nfeuilles && !trouve; ++i1) {
+                if (pris[i1]) continue;
+                for (int i2 = i1 + 1; i2 < nfeuilles && !trouve; ++i2) {
+                  if (pris[i2]) continue;
+                  const int r1 = feuilles_vues[i1], r2 = feuilles_vues[i2];
+                  const mhgp::i64 zz[2][3] = {
+                      {sp[(size_t)r1][0], sp[(size_t)r1][1], sp[(size_t)r1][2]},
+                      {sp[(size_t)r2][0], sp[(size_t)r2][1], sp[(size_t)r2][2]}};
+                  const mhgp::i64 ww[2] = {1, 1};
+                  const auto base = mhgp3v::bjd::make_base(zz, ww, 2);
+                  mhgp3v::bjd::Box ba{}, bb{};
+                  for (int dd4 = 0; dd4 < 3; ++dd4) {
+                    ba.lo[dd4] = qa.lo[dd4]; ba.hi[dd4] = qa.hi[dd4];
+                    bb.lo[dd4] = qb.lo[dd4]; bb.hi[dd4] = qb.hi[dd4];
+                  }
+                  ++soc.bjd_essais;
+                  long long cpl = 0;
+                  if (mhgp3v::bjd::bjd_lane_box(base, ba, bb, mhgp3v::bjd::BjdMutant::kNone,
+                                                mhgp3v::cone::kLaneQ4, &cpl) >=
+                      mhgp3v::cone::kLaneQ4) {
+                    // MUTANT `bjd-groupes-chevauchants` : ne pas retirer les
+                    // membres de la banque. Le meme groupe est alors recredite
+                    // jusqu'au seuil, et une seule identite interieure porte
+                    // huit unites de profondeur.
+                    if (!g_inject_bjd_chevauche) { pris[i1] = true; pris[i2] = true; }
+                    bjd_grp[nbjd][0] = r1;
+                    bjd_grp[nbjd][1] = r2;
+                    ++nbjd;
+                    ++cred[2]; ++ccred[2];
+                    ++soc.bjd_groupes;
+                    trouve = true;
+                  }
+                  soc.bjd_couples += cpl;
+                }
+              }
+              if (!trouve) break;
+            }
+          }
+          // ---- LE JUGE PRIMAL DES GROUPES CREDITES.
+          //
+          // `BlockJungDual64` est un certificat DUAL sur des boites : il fixe
+          // des poids et teste soixante-quatre couples de coins. Le juge prend
+          // la voie PRIMALE, sur les vraies paires : dans le plan mediateur de
+          // `(a,b)`, il minimise exactement `||s||^2` sur l'intersection des
+          // demi-plans ou aucun membre n'est interieur, en `BigInt`, et compare
+          // au rayon du disque de Jung. Il ne choisit aucun poids.
+          //
+          // Ce que ce juge verifie est exactement ce que le credit affirme :
+          // pour TOUTE paire du rectangle, au moins un membre du groupe est
+          // strictement interieur a toute sphere admissible. Un desaccord est
+          // une faute du sujet, jamais une tolerance.
+          if (g_juge_bjd > 0 && nbjd > 0) {
+            const int fa = (wa < 0) ? (-1 - wa) : nodes[wa].first;
+            const int la3 = (wa < 0) ? (-1 - wa) : nodes[wa].last;
+            const int fb = (wb < 0) ? (-1 - wb) : nodes[wb].first;
+            const int lb3 = (wb < 0) ? (-1 - wb) : nodes[wb].last;
+            const long long na = (long long)(la3 - fa + 1);
+            const long long nb = (long long)(lb3 - fb + 1);
+            for (int g = 0; g < nbjd; ++g) {
+              bjd_couvre[g] = false;
+              if (na <= 0 || nb <= 0 || na * nb > g_juge_bjd) { ++soc.bjd_sautes; continue; }
+              ++soc.bjd_juges;
+              const long long zz[2][3] = {
+                  {sp[(size_t)bjd_grp[g][0]][0], sp[(size_t)bjd_grp[g][0]][1],
+                   sp[(size_t)bjd_grp[g][0]][2]},
+                  {sp[(size_t)bjd_grp[g][1]][0], sp[(size_t)bjd_grp[g][1]][1],
+                   sp[(size_t)bjd_grp[g][1]][2]}};
+              bool refute = false, inconnu = false;
+              for (long long ia = fa; ia <= la3 && !refute; ++ia) {
+                for (long long ib = fb; ib <= lb3 && !refute; ++ib) {
+                  const long long aa[3] = {sp[(size_t)ia][0], sp[(size_t)ia][1],
+                                           sp[(size_t)ia][2]};
+                  const long long bb2[3] = {sp[(size_t)ib][0], sp[(size_t)ib][1],
+                                            sp[(size_t)ib][2]};
+                  ++soc.bjd_paires;
+                  const auto vd = mhgp3v::jjudge::primal_couvre(aa, bb2, zz, 2, 4);
+                  if (vd == mhgp3v::jjudge::Verdict::kNeCouvrePas) refute = true;
+                  else if (vd == mhgp3v::jjudge::Verdict::kUnknown) inconnu = true;
+                }
+              }
+              if (refute) ++soc.bjd_faux;
+              else if (inconnu) ++soc.bjd_unknown;
+              else bjd_couvre[g] = true;
+            }
+          }
         } else if (g_descent) {
           // Descente au meilleur d'abord vers `m_0`, pile bornee.
           std::pair<long long, int> heap[64];
@@ -1592,10 +1792,32 @@ int main(int argc, char** argv) {
           const long long nb = (long long)(lb2 - fb + 1);
           const bool flip = g_inject_somme_union ? (cred[2] + soc_cred_brut >= need[2])
                                                  : (ccred[2] >= need[2]);
-          if (flip) {
+          // ---- LES GROUPES CHANGENT CE QUE LE JUGE DOIT COMPTER.
+          //
+          // Sans `BlockJungDual64`, une fermeture affirme `need` temoins
+          // UNIVERSELS distincts, et les compter suffit. Avec des groupes,
+          // l'affirmation est plus faible et strictement correcte : une famille
+          // d'ensembles DISJOINTS, chacun garantissant au moins un interieur.
+          // Le compte juste est donc
+          //   #groupes couvrants + #universels HORS de ces groupes,
+          // et non le seul nombre d'universels — qui refuserait a tort une
+          // fermeture legitime, puisque `u < d` est precisement le regime que
+          // ces groupes exploitent.
+          //
+          // Un groupe non juge — juge desactive ou cap atteint — rend le flip
+          // NON JUGEABLE. Un refus de juger n'est jamais un accord.
+          bool grp_tous_juges = true;
+          for (int g = 0; g < nbjd; ++g)
+            if (!bjd_couvre[g]) grp_tous_juges = false;
+          if (flip && !grp_tous_juges) { ++soc.flips_sautes; }
+          else if (flip) {
             if (na > 0 && nb > 0 && na * nb * (long long)m <= g_flip_judge_cap) {
               long long distincts = 0;
               for (long long z = 0; z < m; ++z) {
+                bool membre = false;
+                for (int g = 0; g < nbjd; ++g)
+                  if (bjd_grp[g][0] == (int)z || bjd_grp[g][1] == (int)z) membre = true;
+                if (membre) continue;   // deja compte par son groupe
                 bool universel = true;
                 for (long long ia = fa; ia <= la2 && universel; ++ia) {
                   if (ia == z) { universel = false; break; }
@@ -1611,10 +1833,80 @@ int main(int argc, char** argv) {
                 if (universel) ++distincts;
               }
               ++soc.flips_juges;
-              if (distincts < need[2]) ++soc.flips_faux;
+              // La famille disjointe complete : un credit par groupe couvrant,
+              // un credit par universel qui n'appartient a aucun groupe.
+              if (distincts + (long long)nbjd < need[2]) ++soc.flips_faux;
             } else {
               ++soc.flips_sautes;
             }
+          }
+        }
+        // ---- LE JUGE DES FERMETURES PAR GROUPES.
+        //
+        // `BlockJungDual64` est BRANCHE : il credite `cred`, donc il change le
+        // fate de la baseline. Le juge des flips ci-dessus ne peut donc pas le
+        // couvrir — il ne s'arme que sur les terminaux que la baseline laisse
+        // ouverts. Ce juge-ci prend l'autre moitie : chaque terminal q4 FERME
+        // auquel au moins un groupe a contribue.
+        //
+        // Ce qu'une telle fermeture affirme, exactement : il existe une famille
+        // d'ensembles de `PointId` DEUX A DEUX DISJOINTS, de cardinal au moins
+        // `need[2]`, telle que pour toute paire du rectangle et toute sphere
+        // admissible, chaque ensemble contient au moins un point interieur. Le
+        // juge la recompose depuis les vrais identifiants :
+        //   - chaque groupe credite est verifie par le juge PRIMAL `BigInt`,
+        //     sur toutes les paires du rectangle ;
+        //   - chaque universel est verifie point par point en `(g,Q)`, et n'est
+        //     compte que s'il n'appartient a aucun groupe.
+        //
+        // Les deux mutants de disjonction meurent ici : reutiliser un temoin
+        // deja credite, ou recrediter le meme groupe, laisse le total juge
+        // strictement sous le seuil.
+        if (g_juge_bjd > 0 && nbjd > 0 && cred[2] >= need[2]) {
+          const int fa = (wa < 0) ? (-1 - wa) : nodes[wa].first;
+          const int la4 = (wa < 0) ? (-1 - wa) : nodes[wa].last;
+          const int fb = (wb < 0) ? (-1 - wb) : nodes[wb].first;
+          const int lb4 = (wb < 0) ? (-1 - wb) : nodes[wb].last;
+          const long long na = (long long)(la4 - fa + 1);
+          const long long nb = (long long)(lb4 - fb + 1);
+          bool grp_tous_juges = true;
+          for (int g = 0; g < nbjd; ++g)
+            if (!bjd_couvre[g]) grp_tous_juges = false;
+          if (!grp_tous_juges || na <= 0 || nb <= 0 ||
+              na * nb * (long long)m > g_flip_judge_cap) {
+            ++soc.ferm_sautes;
+          } else {
+            // Les identites deja retenues par un groupe, comptees une fois.
+            long long unites = 0;
+            for (int g = 0; g < nbjd; ++g) {
+              bool neuf = true;
+              for (int h = 0; h < g; ++h)
+                if (bjd_grp[h][0] == bjd_grp[g][0] || bjd_grp[h][0] == bjd_grp[g][1] ||
+                    bjd_grp[h][1] == bjd_grp[g][0] || bjd_grp[h][1] == bjd_grp[g][1])
+                  neuf = false;
+              if (neuf) ++unites;   // un groupe qui chevauche n'ajoute rien
+            }
+            for (long long z = 0; z < m; ++z) {
+              bool membre = false;
+              for (int g = 0; g < nbjd; ++g)
+                if (bjd_grp[g][0] == (int)z || bjd_grp[g][1] == (int)z) membre = true;
+              if (membre) continue;
+              bool universel = true;
+              for (long long ia = fa; ia <= la4 && universel; ++ia) {
+                if (ia == z) { universel = false; break; }
+                for (long long ib = fb; ib <= lb4; ++ib) {
+                  if (ib == z) { universel = false; break; }
+                  if (mhgp3v::cone::lane_of_target_gq(
+                          sp[(size_t)ia][0], sp[(size_t)ia][1], sp[(size_t)ia][2],
+                          sp[(size_t)z][0], sp[(size_t)z][1], sp[(size_t)z][2],
+                          sp[(size_t)ib][0], sp[(size_t)ib][1], sp[(size_t)ib][2]) <
+                      mhgp3v::cone::kLaneQ4) { universel = false; break; }
+                }
+              }
+              if (universel) ++unites;
+            }
+            ++soc.ferm_juges;
+            if (unites < need[2]) ++soc.ferm_faux;
           }
         }
         // ---- PROFONDEUR EXACTE DU RECTANGLE, ET LA DISSECTION DE LA PERTE.
@@ -2130,6 +2422,103 @@ int main(int argc, char** argv) {
     // l'axe, au contraire, `(d.v)^2 = V2 D2` et la condition redevient `H > 0` :
     // le vrai cœur atteint la boule diametrale entiere. C'est precisement la
     // region ou vivent les temoins d'une paire inter-amas.
+    // ---- LA FENETRE EXACTE PAR PAIRE, ET CE QU'ELLE MESURE.
+    //
+    // Tout le certificat de rectangle repose sur un quantificateur PLUS FORT
+    // que le contrat. Pour une paire, l'evenement d'un support est UNIQUE :
+    // c'est sa miniboule. Pour q2 le domaine des centres est donc reduit au
+    // MILIEU, et `kLaneQ2` est exactement « z est dans la boule de diametre
+    // ab » — le critere de Gabriel. Pour q3 et q4, les centres admissibles
+    // sont les circumcentres de vrais simplexes du nuage, un ensemble FINI ;
+    // le disque de Jung n'en est qu'une enveloppe continue.
+    //
+    // On mesure ici ce que couterait la fenetre si elle etait decidee PAR
+    // PAIRE et non par rectangle. Le compteur `u` est le nombre de temoins
+    // universels sur le domaine de la lane ; il minore la profondeur exacte
+    // `d`, donc la fenetre publiee ici MAJORE la vraie fenetre. Une pente
+    // lineaire sur ce majorant suffirait a condamner la fenetre par rectangle.
+    //
+    // Le tirage est uniforme EXACT sur les paires non ordonnees : deux indices
+    // tires par rejet sur un multiple de `m`, puis rejet de la diagonale.
+    // Aucun multiply-high, dont le biais residuel a deja ete releve. La
+    // demi-largeur est celle de Hoeffding pour une proportion, avec `delta`
+    // annonce et REPARTI sur les trois lanes ; ce n'est pas une barre a deux
+    // sigma, que l'audit a explicitement refusee.
+    if (g_fenetre_exacte > 0) {
+      if (m < 3) {
+        std::fprintf(stderr, "REFUS: fenetre exacte demande au moins trois points\n");
+        return 2;
+      }
+      auto splitmix64 = [](unsigned long long& s) -> unsigned long long {
+        s += 0x9E3779B97F4A7C15ULL;
+        unsigned long long z = s;
+        z = (z ^ (z >> 30)) * 0xBF58476D1CE4E5B9ULL;
+        z = (z ^ (z >> 27)) * 0x94D049BB133111EBULL;
+        return z ^ (z >> 31);
+      };
+      unsigned long long etat = (unsigned long long)g_fenetre_seed * 0x2545F4914F6CDD1DULL + 12345ULL;
+      const unsigned long long mm = (unsigned long long)m;
+      // Plus grand multiple de `m` representable : au-dela, on rejette.
+      const unsigned long long borne = (~0ULL) - ((~0ULL) % mm) - 1ULL;
+      auto tirage = [&]() -> long long {
+        unsigned long long x;
+        do { x = splitmix64(etat); } while (x > borne);
+        return (long long)(x % mm);
+      };
+      long long ferme[3] = {0, 0, 0};
+      long long somme_u[3] = {0, 0, 0};
+      long long tires = 0, scans = 0, plein = 0;
+      // Les mille premiers tirages sont scannes ENTIEREMENT, pour publier la
+      // marge `u_moyen`. Au-dela, la decision seule importe et le scan sort des
+      // que les trois seuils sont atteints : c'est le meme predicat, arrete
+      // plus tot, jamais un predicat different.
+      const long long plein_max = 1000;
+      for (long long k = 0; k < g_fenetre_exacte; ++k) {
+        long long ia = tirage(), ib = tirage();
+        if (ia == ib) { --k; continue; }   // la diagonale n'est pas une paire
+        ++tires;
+        const bool complet = (plein < plein_max);
+        long long u[3] = {0, 0, 0};
+        for (long long z = 0; z < m; ++z) {
+          if (z == ia || z == ib) continue;
+          ++scans;
+          const int lane = mhgp3v::cone::lane_of_target_gq(
+              sp[(size_t)ia][0], sp[(size_t)ia][1], sp[(size_t)ia][2],
+              sp[(size_t)z][0], sp[(size_t)z][1], sp[(size_t)z][2],
+              sp[(size_t)ib][0], sp[(size_t)ib][1], sp[(size_t)ib][2]);
+          // Une lane forte implique les plus faibles : le domaine q4 contient
+          // le domaine q3, qui contient le centre q2.
+          if (lane >= mhgp3v::cone::kLaneQ2) ++u[0];
+          if (lane >= mhgp3v::cone::kLaneQ3) ++u[1];
+          if (lane >= mhgp3v::cone::kLaneQ4) ++u[2];
+          if (!complet && u[0] >= g_need[0] && u[1] >= g_need[1] && u[2] >= g_need[2]) break;
+        }
+        if (complet) {
+          ++plein;
+          for (int q = 0; q < 3; ++q) somme_u[q] += u[q];
+        }
+        for (int q = 0; q < 3; ++q)
+          if (u[q] >= g_need[q]) ++ferme[q];
+      }
+      // `delta` global reparti sur les trois lanes publiees simultanement.
+      const double delta = 0.01 / 3.0;
+      const double demi = std::sqrt(std::log(2.0 / delta) / (2.0 * (double)tires));
+      const double cnp = (double)m * (double)(m - 1) / 2.0;
+      for (int q = 0; q < 3; ++q) {
+        const double p_ouvert = 1.0 - (double)ferme[q] / (double)tires;
+        const double lo = p_ouvert - demi > 0.0 ? p_ouvert - demi : 0.0;
+        const double hi = p_ouvert + demi < 1.0 ? p_ouvert + demi : 1.0;
+        std::printf("fenetre_exacte q%d : tires=%lld u_moyen=%.2f ouverte=%.6f"
+                    " [%.6f,%.6f] paires=%.0f [%.0f,%.0f] seuil=%d delta=%.4f scans=%lld\n",
+                    q + 2, tires, (double)somme_u[q] / (double)std::max(1LL, plein),
+                    p_ouvert, lo, hi,
+                    p_ouvert * cnp, lo * cnp, hi * cnp, g_need[q], delta, scans);
+      }
+      if (tires < g_fenetre_exacte) {
+        std::fprintf(stderr, "PLANCHER: tirage incomplet\n");
+        return 3;
+      }
+    }
     long long som_exact4 = 0, exact4_vide = 0, exact4_suffisant = 0;
     if (g_inflation > 0) {
       unsigned long long rng = 0x9E3779B97F4A7C15ull;
@@ -2270,6 +2659,69 @@ int main(int argc, char** argv) {
                 100.0 * (double)exact4_suffisant / (double)std::max(1LL, ech));
     // LIGNE AUTONOME DU SHADOW. Elle n'entre dans aucune chaine de format
     // existante : les portes en place lisent des lignes entieres.
+    if (g_bjd_groupes > 0) {
+      std::printf("bjd_groupes q4 : essais=%lld couvrants=%lld (%.3f%%) couples=%lld"
+                  " couples/essai=%.2f rejetes_credite=%lld\n",
+                  soc.bjd_essais, soc.bjd_groupes,
+                  100.0 * (double)soc.bjd_groupes / (double)std::max(1LL, soc.bjd_essais),
+                  soc.bjd_couples,
+                  (double)soc.bjd_couples / (double)std::max(1LL, soc.bjd_essais),
+                  soc.bjd_rejetes_credite);
+    }
+    if (g_juge_bjd > 0) {
+      // UN SEUL DESACCORD SUFFIT. `faux` compte les groupes que le juge primal
+      // refute sur au moins une paire ; `ferm_faux` compte les fermetures dont
+      // la famille disjointe reconstruite n'atteint pas le seuil.
+      std::printf("juge_bjd q4 : groupes=%lld paires=%lld faux=%lld unknown=%lld"
+                  " sautes=%lld | fermetures juges=%lld faux=%lld sautes=%lld\n",
+                  soc.bjd_juges, soc.bjd_paires, soc.bjd_faux, soc.bjd_unknown,
+                  soc.bjd_sautes, soc.ferm_juges, soc.ferm_faux, soc.ferm_sautes);
+      const bool mutant_bjd = g_inject_bjd_reutilise || g_inject_bjd_chevauche;
+      // UNE SEULE PAIRE REFUTANTE SUFFIT. Le verdict de couverture est
+      // universel sur le rectangle : il n'a pas de taux d'erreur admissible.
+      if (soc.bjd_faux != 0) {
+        std::fprintf(stderr,
+                     "DESACCORD: %lld groupes credites ne couvrent pas toutes les"
+                     " paires de leur rectangle\n", soc.bjd_faux);
+        return 1;
+      }
+      if (soc.ferm_faux != 0) {
+        if (mutant_bjd) {
+          std::printf("mutant_killed=1 %s : %lld fermetures sans %d identites"
+                      " disjointes\n",
+                      g_inject_bjd_reutilise ? "bjd-reutilise-temoin"
+                                             : "bjd-groupes-chevauchants",
+                      soc.ferm_faux, g_need[2]);
+          return 4;
+        }
+        std::fprintf(stderr,
+                     "DESACCORD: %lld fermetures par groupes ne possedent pas %d"
+                     " unites disjointes\n", soc.ferm_faux, g_need[2]);
+        return 1;
+      }
+      if (mutant_bjd) {
+        std::fprintf(stderr,
+                     "MUTANT SURVIVANT : aucune fermetures refutable"
+                     " (juges=%lld sautes=%lld)\n", soc.ferm_juges, soc.ferm_sautes);
+        return 3;
+      }
+      // PLANCHERS CONTRE LE VERT PAR VACUITE. Un juge qui ne juge rien ne
+      // prouve rien : ni les groupes, ni les fermetures qu'ils produisent.
+      if (soc.bjd_juges == 0) {
+        std::fprintf(stderr, "PLANCHER: aucun groupe credite juge\n");
+        return 3;
+      }
+      if (soc.ferm_juges == 0) {
+        std::fprintf(stderr, "PLANCHER: aucune fermeture par groupes jugee\n");
+        return 3;
+      }
+      if (soc.bjd_rejetes_credite == 0) {
+        std::fprintf(stderr,
+                     "PLANCHER: la regle de disjonction n'a ecarte aucun temoin,"
+                     " le mutant de reutilisation serait vacuaire\n");
+        return 3;
+      }
+    }
     if (g_soc64_actif) {
       std::printf("soc64_actif q4 : appels=%lld fermetures=%lld (%.3f%%) couples=%lld"
                   " larges=%lld\n",
