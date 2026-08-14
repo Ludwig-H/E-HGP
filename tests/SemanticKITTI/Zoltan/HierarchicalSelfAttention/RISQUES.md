@@ -11,6 +11,8 @@
 | Un modèle hybride HGP + local peut être compétitif | crédible mais à haut risque |
 | SemanticKITTI seul suffit pour ICML/NeurIPS | improbable |
 | Instance doit être travaillée maintenant | non, phase fermée |
+| Le descripteur de nœud est le levier décisif | non, le plus faible des trois d'après les ablations publiées |
+| « HGP bat les contrôles sur l'oracle de partition » suffit à justifier le programme | non, porte de réfutation seulement |
 
 Cette appréciation est volontairement sévère : le papier HSA n'a aucune expérience 3D dense, et le papier HGP sur SemanticKITTI utilise la sémantique de vérité terrain pour une tâche de regroupement. Aucun des deux ne constitue une preuve directe du modèle proposé.
 
@@ -21,6 +23,8 @@ Cette appréciation est volontairement sévère : le papier HSA n'a aucune expé
 La densité d'un LiDAR décroît avec la portée et dépend de l'angle, de l'occultation et de la surface. HGP peut séparer le même objet à longue distance et fusionner le sol proche, même si son modèle de densité est mathématiquement fondé.
 
 Une observation plus lointaine n'est pas une homothétie du nuage métrique : l'échantillonnage angulaire s'amincit, des retours disparaissent et les occultations changent. L'invariance d'échelle du descripteur ne réfute donc pas ce risque.
+
+La correction range-aware n'est pas non plus acquise, et un signal contraire publié l'interdit explicitement : l'ablation d'ALPINE (Sautier et al., 3DV 2026) montre qu'un seuil proportionnel à la portée, à la manière de LESS, donne $75{,}9$ PQ contre $76{,}3$ pour le seuil constant par classe, malgré l'optimisation de son coefficient à l'échelle du jeu de données. Une correction de portée naïve dégrade donc leur clustering. Le transfert n'est pas immédiat — leur seuil est un rayon de liaison et non un niveau de densité $K$-NN — mais la correction doit être mesurée, et non supposée, avec ce résultat négatif cité.
 
 ### Test de réfutation
 
@@ -253,6 +257,51 @@ Le cadre v3 courant reste `public_status=not_claimed`, son audit live est antér
 ### No-go
 
 Ne pas entraîner ni publier la branche complète si son entrée provient d'une reconstruction heuristique non déclarée depuis la forêt. Si aucun exporteur sparse certifié n'est viable, limiter l'étude à un oracle borné ou revenir à un canal de points explicitement approximatif.
+
+## R14 — Les structures filiformes sont sous-segmentées par la connexité d'ordre supérieur
+
+### Mécanisme
+
+C'est le risque le plus spécifique du dossier, et il faut le dire : il oppose l'avantage revendiqué de HGP au profil exact des classes qui décident de la métrique visée. Il est écrit dans le manuscrit lui-même, § 9.3, sur le jeu `birch2` : HDBSCAN à $k=100$ obtient un ARI de $0{,}996$ et classe $99{,}7\,\%$ des points, tandis que HGP-Clusterer à $k=84$ obtient un ARI de $0{,}441$ et classe $83{,}9\,\%$ des points. La cause avancée par le manuscrit est explicite : « les clusters sont essentiellement filiformes et sont donc mieux identifiés avec de simples graphes ».
+
+Le mécanisme est structurel et non anecdotique. La connexité d'ordre $K$ exige que $K$ points soient simultanément proches. Le long d'une structure filiforme ou d'une surface mince échantillonnée de façon éparse, cette condition n'est satisfaite qu'à un rayon nettement plus grand que celui qui suffirait à une connexité par arêtes. L'objet fin naît donc tard dans la filtration, et à ce niveau tardif ses voisines l'ont déjà rejoint. Le résultat observable est une sous-segmentation des objets fins, et non une fragmentation : HGP achète sa résistance au chaînage en retardant la naissance des objets minces.
+
+Or la marge de progression du mIoU SemanticKITTI porte exactement sur ces classes-là — `pole`, `traffic-sign`, `bicycle`, `person`, `bicyclist`, `motorcyclist`, `fence` — les classes volumiques plafonnant déjà très haut. Le manuscrit suggère une atténuation, observée sur `birch2` : changer d'estimateur, $\hat{\rho}=1/r^{2}$. Une atténuation testable ne dispense pas de mesurer d'abord l'ampleur du problème. Le développement complet de ce point figure dans [ORDRE_DES_PREUVES.md](ORDRE_DES_PREUVES.md).
+
+### Test de réfutation
+
+- mIoU-oracle stratifié par dimension intrinsèque estimée du nœud, à partir des valeurs propres de la covariance de ses points, en séparant régimes linéaire, planaire et volumique ;
+- même oracle stratifié par classe fine contre classe volumique, avec les classes rares rapportées séparément ;
+- comparer la portée des niveaux de naissance des objets fins contre HDBSCAN au même $K$, sur les mêmes points et à taux de compression apparié ;
+- mesurer, pour chaque objet fin de la vérité terrain, le niveau auquel il naît et le niveau auquel il est absorbé par un voisin ;
+- rejouer l'ensemble avec l'estimateur $\hat{\rho}=1/r^{2}$ et rapporter séparément l'effet de ce changement d'estimateur ;
+- croiser avec la portée, la sous-segmentation attendue et l'amincissement angulaire étant corrélés.
+
+### No-go
+
+Si la sous-segmentation des classes fines est du même ordre que le gain obtenu sur les classes volumiques, HGP ne peut pas être défendu comme hiérarchie pour une métrique moyennée par classe, et le claim doit être retiré ou restreint à un régime déclaré. Si l'atténuation par changement d'estimateur ne réduit pas l'écart sans détruire le gain sur le reste, il faut soit publier ce constat comme résultat négatif, soit changer de métrique cible en l'annonçant, soit conditionner la filtration au capteur. Ne présenter aucun gain agrégé sans la ventilation fin/volumique qui montre d'où il vient.
+
+## R15 — Le goulot n'est pas la partition
+
+### Mécanisme
+
+L'hypothèse implicite du programme est « meilleure partition, donc meilleure segmentation ». La littérature superpoint publie déjà l'oracle qui la teste, et son verdict lui est défavorable. SPG (CVPR 2018), table 5, S3DIS 6-fold : l'oracle « Perfect » atteint $88{,}2$ mIoU et $92{,}7$ mAcc pour un modèle à $62{,}1$. SPT (ICCV 2023) écrit que « the performance of SPT is more than 20 points below the oracle, suggesting that the partition does not strongly limit its performance », soit un oracle supérieur ou égal à $89$ pour un modèle à $68{,}9$ sur Area 5. SuperCluster (3DV 2024) constate que « the high performance of this oracle ($93{,}4$ PQ) indicates that very little precision is lost by working with superpoints », son second oracle de clustering restant à $83{,}6$ PQ.
+
+Ces méthodes laissent donc déjà environ vingt points d'oracle non convertis. Améliorer le plafond d'une partition qui n'est pas saturée ne peut pas produire de gain, et un diagnostic d'oracle favorable à HGP est une porte de réfutation, jamais une porte de promotion : le perdre tue le programme, le gagner ne prouve presque rien.
+
+Les ablations publiées sur cette famille exacte de modèles confirment la même hiérarchie des priorités. SPT : retirer toutes les features handcrafted de nœud coûte $-0{,}7$ mIoU sur S3DIS 6-fold, $-4{,}1$ sur KITTI-360 et $-1{,}4$ sur DALES ; retirer l'encodage d'adjacence coûte $-6{,}3$, $-5{,}4$ et $-3{,}0$ ; passer à un seul niveau de partition coûte $-8{,}4$, $-5{,}1$ et $-0{,}9$. EZ-SP (ICRA 2026) va plus loin : remplacer les features handcrafted par un petit réseau appris change le résultat de $\pm0{,}1$ mIoU. Le descripteur de nœud est le levier le plus faible des trois ; l'adjacence et le nombre de niveaux dominent. Ce constat borne directement l'enjeu du débat de [DESCRIPTEURS_DE_NOEUD.md](DESCRIPTEURS_DE_NOEUD.md), et l'ordre de mesure qui en découle est celui de [ORDRE_DES_PREUVES.md](ORDRE_DES_PREUVES.md).
+
+### Test de réfutation
+
+- mesurer l'écart entre le modèle entraîné et l'oracle de sa propre partition, à budget de régions apparié, sur le même dataset et les mêmes seeds ;
+- rapporter en parallèle l'oracle de coupes à niveau fixé, convention de la littérature superpoint, pour permettre la comparaison directe avec les chiffres publiés ;
+- reproduire les trois ablations de SPT sur la partition HGP — descripteur de nœud, encodage d'adjacence, nombre de niveaux — et vérifier si leur ordre de grandeur relatif se retrouve ;
+- comparer descripteur handcrafted et descripteur appris de même budget, comme contrôle du constat EZ-SP ;
+- rapporter la courbe oracle contre nombre de régions pour HGP et pour chaque contrôle, plutôt qu'un point unique.
+
+### No-go
+
+Si l'écart entre le modèle et l'oracle de sa propre partition dépasse dix points, la valeur de HGP ne peut plus être revendiquée sur la qualité des régions : améliorer un plafond déjà non atteint ne peut pas payer. Elle doit alors venir d'ailleurs — niveaux de densité interprétables, théorie de récupérabilité, recouvrement pour $K\geq2$ — et le papier doit le dire ainsi plutôt que « notre arbre est meilleur ». Si l'écart au propre oracle reste au contraire faible, c'est cette mesure, et non le gain de plafond, qui devient l'argument à défendre.
 
 ## Tableau de décision global
 

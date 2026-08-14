@@ -1,6 +1,18 @@
-# Note — les deux (ou trois) canaux directionnels : support, dernière sortie, première entrée
+# Descripteurs de nœud — support, canaux radiaux, canal de masse
 
-Cette note répond à une proposition précise : décrire chaque nœud HGP par **deux vecteurs**, sa fonction support normalisée et sa « dernière sortie » du polyèdre normalisée, éventuellement complétées par sa « première entrée ». Elle ne remplace pas [GEOMETRIC_DESCRIPTOR_AUDIT.md](GEOMETRIC_DESCRIPTOR_AUDIT.md), qui traite déjà le rayon extérieur comme ablation ; elle ajoute ce que cet audit ne contient pas : un théorème de caractérisation du canal support, le statut exact du canal d'entrée, et une échelle de complétude mesurable.
+Ce document traite la question : **comment résumer un nœud de la hiérarchie en un vecteur de taille fixe ?** Il part d'une proposition précise — décrire chaque nœud par sa fonction support normalisée et sa « dernière sortie » du polyèdre, éventuellement complétées par sa « première entrée » — et en établit le statut exact.
+
+Pour une entrée progressive, lire d'abord le [chapitre 4 du guide](GUIDE.md). Ce document-ci est le niveau de détail avec les démonstrations. Il complète [CONTRAT_HGP.md](CONTRAT_HGP.md), qui porte sur les carriers et leur sérialisation.
+
+## La géométrie, avant tout le reste
+
+Une confusion coûte cher si on ne la lève pas d'emblée : **$u$ est un vecteur unitaire de $S^{2}$, pas un plan.**
+
+Mais les fibres de $x\mapsto\left\langle u,x\right\rangle$ **sont** les plans orthogonaux à $u$ : tous les points d'un même plan $\perp u$ ont la même projection. Donc $u$ seul désigne une **famille de plans parallèles**, et le couple $(u,t)$ désigne **un** plan précis, celui à la cote $t$. Le demi-espace $\left\lbrace x:\left\langle u,x\right\rangle\leq t\right\rbrace$ est ce qui se trouve dessous.
+
+C'est de là que vient le nom : $h(u)=\max_x\left\langle u,x\right\rangle$ donne la position du dernier plan $\perp u$ qui touche encore l'ensemble — **le plan d'appui**. Le plan est la sortie, pas l'entrée.
+
+Vérification par les degrés de liberté : $u\in S^{2}$ en apporte $2$, $t\in\mathbb{R}$ en apporte $1$, et $(u,t)\in S^{2}\times\mathbb{R}$ en apporte $3$ — exactement la dimension de l'espace des plans orientés de $\mathbb{R}^{3}$. D'où, directement, le coût des canaux : le support vit sur $S^{2}$ et coûte $D$ ; la CDF vit sur $S^{2}\times\mathbb{R}$ et coûte $D\times B$. La fonction support est littéralement **le bord du domaine de la CDF**, le lieu où celle-ci atteint $1$.
 
 ## Résumé du verdict
 
@@ -9,7 +21,7 @@ Cette note répond à une proposition précise : décrire chaque nœud HGP par *
 3. Le canal « dernière sortie » $\rho_{\mathrm{out}}$ et le canal « première entrée » $\rho_{\mathrm{in}}$ échappent au théorème parce qu'ils **ne se recentrent pas en forme close** — et non, comme je l'avais d'abord écrit, parce qu'ils sont discontinus : le rayon extérieur non binné est parfaitement continu et échoue déjà. Le fenêtrage angulaire leur coûte la continuité **en plus**. C'est ce renoncement au recentrage qui achète la sensibilité à la non-convexité.
 4. Autour d'un centre propre au nœud, $\rho_{\mathrm{in}}$ est **vacu ou instable** : identiquement nul dès que le centre appartient au carrier, et non continu en distance de Hausdorff sinon. Tel quel, ce troisième canal n'est pas défendable.
 5. Autour d'un **centre global unique — l'origine capteur** — les trois canaux redeviennent exactement fusionnables ($\max$, $\max$, $\min$), et $\rho_{\mathrm{in}}$ devient une quantité physique interprétable : la surface visible. C'est la version de la proposition qu'il faut tester.
-6. Aucun de ces points ne rend l'état de l'art probable. Le descripteur n'est pas le facteur limitant du mIoU SemanticKITTI ; voir [REVIEWER_VERDICT.md](REVIEWER_VERDICT.md) et le § Où le descripteur ne peut pas aider.
+6. Aucun de ces points ne rend l'état de l'art probable. Le descripteur n'est pas le facteur limitant du mIoU SemanticKITTI ; voir [STRATEGIE_PUBLICATION.md](STRATEGIE_PUBLICATION.md) et le § Où le descripteur ne peut pas aider.
 
 ## Théorème — le canal support est forcé
 
@@ -138,7 +150,121 @@ Le mIoU SemanticKITTI est dominé par les classes rares et fines : `bicycle`, `m
 
 Il faut donc **stratifier par cardinalité de nœud dès la première mesure** et accepter le résultat : si le gain se concentre sur les grandes classes, il ne se transformera pas en mIoU. Ce point ne réfute pas la hiérarchie ; il réfute l'idée que le descripteur de nœud soit le facteur limitant.
 
-Le même argument frappe la hiérarchie elle-même, et plus durement : la connexité d'ordre $K$ exige que $K$ points soient simultanément proches, ce que les structures filiformes ne fournissent pas — le manuscrit documente ce mode d'échec sur `birch2`. Voir [NOTE_CLAUDE_ORDRE_DES_PREUVES.md](NOTE_CLAUDE_ORDRE_DES_PREUVES.md).
+Le même argument frappe la hiérarchie elle-même, et plus durement : la connexité d'ordre $K$ exige que $K$ points soient simultanément proches, ce que les structures filiformes ne fournissent pas — le manuscrit documente ce mode d'échec sur `birch2`. Voir [ORDRE_DES_PREUVES.md](ORDRE_DES_PREUVES.md).
+
+## Le canal de masse : la CDF projetée
+
+Les trois canaux précédents sont **tous des extrema**. C'est leur limite commune, et elle est théorique : un $\max$-pooling ne peut pas approcher une moyenne — c'est la séparation classique PointNet / DeepSets, dont le centre de masse est le contre-exemple canonique.
+
+### Définition
+
+Prends un nœud et une direction $u$. Projette tous ses points : tu obtiens un nuage de nombres en dimension 1. Le support en garde **un seul**, le maximum. Le canal CDF garde **toute la distribution** :
+
+$F_v(u_j,t_b)=n_v^{-1}\sum_{x\in C_v}\mathbf{1}\left\lbrace\left\langle u_j,(x-c_v)/R_v\right\rangle\leq t_b\right\rbrace$
+
+Le support en est un cas particulier dégénéré : $h(u)=\sup\left\lbrace t:F(u,t)<1\right\rbrace$ et $-h(-u)=\inf\left\lbrace t:F(u,t)>0\right\rbrace$. **La CDF contient les deux valeurs de support et tout ce qu'elles jettent.**
+
+### Une seule filtration, trois lectures
+
+C'est la bonne façon de situer ce canal. Les trois descripteurs directionnels du dossier reposent sur la même construction — le sous-niveau $\left\langle x,u\right\rangle\leq t$ — et ne diffèrent que par ce qu'ils en résument.
+
+| Lecture du sous-niveau | Descripteur | Agrégation | Ce qu'il voit |
+|---|---|---|---|
+| l'**extremum** | fonction support | $\max$ | l'enveloppe convexe |
+| la **masse** | CDF projetée | $+$ | la distribution des points |
+| la **topologie** | ECT / WECT | $\chi$ | trous et composantes |
+
+### Elle se fusionne exactement, elle aussi
+
+C'est ce qui la rend compatible avec l'arbre : **les comptes sont additifs**. En stockant les comptes non normalisés dans un repère commun,
+
+$N_v(u_j,t_b)=\#\left\lbrace x\in C_v:\left\langle u_j,x-c_0\right\rangle\leq t_b\right\rbrace$
+
+on a $N_{A\cup B}=N_A+N_B$ pour des enfants disjoints : une addition par case, exacte, une seule passe ascendante. Le support est le membre $\max$ du monoïde, la CDF en est le membre $+$. Et $n_v$ tombe gratuitement — c'est la dernière case — donc la densité aussi.
+
+Deux réserves.
+
+1. **La normalisation par nœud casse l'exactitude sur grille fixe.** Recentrer et redimensionner translate et dilate l'argument, $F^{c'}(u,t)=F^{c}\left(t+\left\langle u,c'-c\right\rangle\right)$ : exact **comme fonction**, mais sur une grille de seuils figée il faut rééchantillonner, donc interpoler. Même mécanique que pour les canaux radiaux : agréger dans un repère global, normaliser à la lecture. Une liste de **quantiles**, elle, ne se fusionne pas du tout.
+2. **Pour $K\geq2$, l'additivité double-compte.** Les $K$-polyèdres se recouvrent, donc un point appartenant à deux composantes serait compté deux fois. C'est exactement le problème d'ownership $w_{iv}$ ; la CDF le rend visible au lieu de le cacher.
+
+### Deux économies pratiques
+
+- **Antipodes.** Pour le support, $u$ et $-u$ ne sont pas redondants, puisque $h(-u)=-\min_x\left\langle u,x\right\rangle$ : il faut la sphère entière. Pour la CDF, $\left\langle -u,x\right\rangle\leq t\iff\left\langle u,x\right\rangle\geq-t$, donc $F(-u,t)=1-F\left(u,(-t)^{-}\right)$ : la direction opposée est entièrement déterminée, et le plan projectif $\mathbb{RP}^{2}$ suffit — **deux fois moins de directions**. Vérification de cohérence : la CDF sur une demi-sphère fournit les deux extrémités de chaque axe, c'est-à-dire $h$ sur la sphère entière.
+- Le facteur $B$ est donc en pratique un facteur $B/2$ à budget d'information égal.
+
+### Ce que ça achète
+
+- **Le cube plein contre sa frontière**, fixture permanente du dossier : mêmes support et rayon extérieur, profils de masse totalement différents. C'est le seul des canaux qui la distingue.
+- **La haie contre la clôture** : mêmes $\rho_{\mathrm{in}}$, $\rho_{\mathrm{out}}$ et épaisseur ; l'une a des retours étalés en profondeur, l'autre deux surfaces et du vide entre.
+- **La densité et le cardinal**, invisibles à tout $\max$-pooling.
+
+Par **Cramér–Wold**, la collection de toutes les projections 1-D détermine la mesure : à résolution infinie la CDF projetée est un descripteur **complet** de la mesure ponctuelle normalisée, ce que la fonction support n'est prouvablement pas. À grille finie ce n'est qu'un sketch, mais strictement plus riche à budget apparié.
+
+Le seul argument sérieux contre est la dimension, $D\times B$ contre $D$. Il se règle par ablation à budget apparié : `support seul`, `CDF seule`, `les deux`, à $D\times B$ constant.
+
+## Points ou polyèdre reconstruit ?
+
+Question distincte de la précédente, et la réponse dépend du canal.
+
+| Canal | Points ou carrier reconstruit |
+|---|---|
+| support $h$ | **aucune différence** — c'est une identité, pas une approximation |
+| support de $W_v(a)$ | **vraie différence**, la seule reconstruction qui paye |
+| CDF / masse | **vrai choix**, et c'est exactement le débat de la portée |
+| radial depuis le capteur | **points** ; le carrier n'ajoute que de l'interpolation |
+
+### Pour le support, la question n'a pas d'objet
+
+$h_{C_v^{F}}(u)=\max_{F\in\mathcal{F}_v}\max_{x\in F}\left\langle u,x\right\rangle=h_{V_v}(u)$.
+
+Le support du carrier PL des facettes **est** celui de ses sommets, exactement, pour toute direction. Reconstruire $\bigcup_F\mathrm{conv}(F)$ pour en prendre ensuite le support, c'est payer un travail combinatoire pour retrouver un maximum sur les points. **Calcule $h$ sur les points, toujours.**
+
+### La seule reconstruction qui apporte quelque chose
+
+$W_v(a)$ est le seul des quatre carriers dont le support diffère de celui des points, et ce qu'il mesure est intéressant. Un point témoin $y\in W_v(a)$ doit avoir $K$ observations à distance $\leq\sqrt a$ ; près du bord du nuage il n'y en a pas assez, donc le niveau de densité **recule** par rapport à l'enveloppe des points. La grandeur nouvelle est
+
+$\Delta_v(u)=h_{V_v}(u)-h_{W_v(a)}(u)\geq0$
+
+soit une **mesure directionnelle de la densité au bord** : de combien faut-il rentrer, dans la direction $u$, avant que la condition d'ordre $K$ soit satisfaite. Les points seuls ne la donnent pas, et elle est propre à HGP — un octree ou des superpoints n'ont pas d'équivalent.
+
+Elle est aussi le canal le plus directement lié au risque de portée : $\Delta_v$ grandit quand l'échantillonnage s'amincit. Soit c'est un descripteur utile, soit c'est un thermomètre de portée — et c'est mesurable.
+
+### Comment la calculer sans énumérer les facettes
+
+C'est ce qui rend l'affaire faisable, l'énumération de $\mathcal{F}_v$ étant précisément ce que l'invariant d'architecture interdit. On passe par la caractérisation en ensemble de niveau, $L_K(a)=\left\lbrace y:r_K(y)\leq\sqrt a\right\rbrace$ où $r_K$ est la distance au $K$-ième voisin. Par direction $u_j$ :
+
+1. partir de $t\leftarrow h_{V_v}(u_j)$ ;
+2. **dichotomie sur $t$** : tester si le plan $\left\lbrace\left\langle u_j,y\right\rangle=t\right\rbrace$ rencontre $W_v$ ;
+3. test d'appartenance en $y$ par requête $K$-NN : $r_K(y)\leq\sqrt a$ **et** les $K$ voisins appartiennent à $C_v$. La seconde condition règle l'appartenance à la **composante** ; le $K$-ième voisin global ne suffit pas.
+
+Coût : $\mathcal{O}\left(D\log(1/\varepsilon)\right)$ requêtes $K$-NN par nœud, sans mosaïque ni énumération. Deux clauses contractuelles : c'est une approximation, donc `authority=witness_approx` avec $\varepsilon_W$ sérialisé et jamais `witness_exact` ; et le balayage doit échantillonner la trace du plan, pas un point unique, sinon on rate les composantes fines.
+
+**Le coût caché est la composabilité.** $W_v(a)$ dépend du **niveau**, donc contrairement à $h_{V_v}$ il ne se compose pas par $\max$ : on n'a que l'encadrement $h_{W_p}(u)\geq\max_{v\in\mathrm{enfants}}h_{W_v}(u)$, l'écart venant des facettes nées entre $a_p^{-}$ et $a_p$ et de la croissance des boules. À `cut_policy=pre_parent` tous les enfants sont lus au même niveau, donc la borne est serrée et corrigible par les deltas — mais c'est un recalcul par nœud, pas une passe ascendante gratuite.
+
+### Pour la CDF, le choix est réel, et c'est le débat de la portée
+
+Points et carrier mesurent deux grandeurs **différentes** :
+
+- **sur les points**, la **masse d'échantillonnage** : combien de retours, et où. Le signal LiDAR le plus fort, et le plus contaminé par la portée ;
+- **sur le carrier**, une grandeur **géométrique** : longueur, aire ou volume, invariante à la densité d'échantillonnage.
+
+Leur différence **est** le diagnostic de portée. Calculer les deux et regarder leur écart en fonction de la distance est plus informatif que l'un ou l'autre isolément.
+
+**Piège dimensionnel à connaître avant de coder.** Dans $\mathbb{R}^{3}$, $\mathrm{conv}(F)$ avec $\left|F\right|=K$ est de dimension $K-1$ : pour $K=2$ des **segments**, pour $K=3$ des **triangles**, donc de mesure de Lebesgue **nulle**. Une CDF de *volume* du carrier PL est identiquement dégénérée dans le régime $K=2,3$ prévu. Il faut pondérer par la mesure de Hausdorff de la bonne dimension — longueur pour $K=2$, aire pour $K=3$. C'est faisable en forme close : la projection d'un segment est une densité **uniforme** sur un intervalle, celle d'un triangle est **affine par morceaux**, et le tout reste additif sur les facettes.
+
+### Pour les canaux radiaux, reste sur les points
+
+Depuis l'origine capteur, un scan mono-retour donne au plus un point par faisceau : le nuage du cluster est déjà exactement étoilé, et $\rho_{\mathrm{out}}$ sur les points est déjà la description complète. Reconstruire le carrier n'ajoute que de l'**interpolation entre faisceaux** — un lissage, pas de l'information nouvelle.
+
+### Ordre d'implémentation
+
+1. $h$ sur les points — gratuit, exact, une passe ascendante ;
+2. CDF sur les points — additive, exacte, une passe ascendante ;
+3. $\rho_{\mathrm{in}}$, $\rho_{\mathrm{out}}$, épaisseur, masque, comptes, depuis le capteur — mêmes propriétés ;
+4. **puis seulement** $\Delta_v(u)$, par dichotomie $K$-NN, en `witness_approx`, avec son coût mesuré ;
+5. CDF géométrique du carrier PL, en contrôle, uniquement pour le diagnostic de portée.
+
+Les trois premiers ne demandent aucune reconstruction et se remplissent en une seule remontée. Le quatrième est le seul qui justifie de reconstruire quoi que ce soit, et c'est aussi le seul à casser la composabilité — donc celui à ablater le plus sévèrement.
 
 ## Spécification minimale implémentable
 
@@ -155,7 +281,7 @@ Si la proposition doit être codée telle quelle, voici sa version défendable, 
 
 Les six canaux se remplissent en **une seule passe ascendante** sur l'arbre, chacun par un monoïde exact ($\max$, $\min$, $\vee$, $+$). Aucun n'exige de recalcul par nœud. Le masque et le comptage sont obligatoires : sans eux, un bin vide et un bin à un seul point sont indiscernables, et c'est la source d'erreur la plus probable de cette famille de descripteurs.
 
-**Le canal qu'il faut ajouter en priorité n'est pas un canal de forme, c'est un canal de masse — et il y a un théorème pour le dire.** La fusion par $\max$ et la fusion par $\sum$ sont toutes deux exactes sur l'arbre, mais elles ne sont pas d'expressivité comparable : un agrégateur $\max$ à la PointNet ne peut pas approcher des moyennes de fonctions continues — le centre de masse en est le contre-exemple canonique — alors qu'un agrégateur additif à la DeepSets le peut, et lui est strictement supérieur à cardinalité fixée. Les canaux $h$, $\rho_{\mathrm{out}}$ et $\rho_{\mathrm{in}}$ sont **tous les trois** des extrema : ils ne voient aucune masse intérieure. Le tenseur de CDF projetées $F_v(u_j,t_b)=n_v^{-1}\sum_{x\in C_v}\mathbf{1}\left\lbrace\left\langle u_j,(x-c_v)/R_v\right\rangle\leq t_b\right\rbrace$, déjà signalé comme « ajout prioritaire » dans [ARCHITECTURE.md](ARCHITECTURE.md), est additif donc exactement fusionnable dans un repère commun, et strictement plus expressif. Il devrait faire partie de la proposition dès le départ, au même titre que les deux vecteurs directionnels — c'est le canal qui répond à la fixture « cube plein contre frontière ».
+**Le tenseur de CDF projetées $F_v(u_j,t_b)$ doit figurer dans cette table dès le départ**, au même titre que les canaux directionnels : il est additif donc exactement fusionnable, strictement plus expressif que les trois extrema, et c'est le seul canal qui répond à la fixture « cube plein contre frontière ». Voir la section dédiée ci-dessus.
 
 À cela s'ajoutent les canaux non normalisés déjà listés dans [ARCHITECTURE.md](ARCHITECTURE.md) — $\log R_v$, $\log(1+n_v)$, portée du centre, naissance/mort/persistance, valeurs propres de covariance, statistiques de rémission — qui portent l'échelle absolue que la normalisation détruit et qui, sur SemanticKITTI, sont probablement plus discriminants que la forme elle-même.
 
@@ -163,7 +289,7 @@ Les six canaux se remplissent en **une seule passe ascendante** sur l'arbre, cha
 
 Deux diagnostics, sans aucun entraînement, tranchent l'essentiel.
 
-1. **Oracle d'antichaîne.** Sur la séquence 08, construire la forêt HGP, sélectionner une antichaîne à budget de régions fixé, étiqueter chaque nœud par sa classe majoritaire et rapporter le mIoU obtenu, contre HDBSCAN, octree/voxel, partition superpoint et arbre aléatoire à compression égale. Le protocole exact — et pourquoi « la meilleure antichaîne au sens du mIoU » n'est pas un objectif bien posé — est dans [NOTE_CLAUDE_ORDRE_DES_PREUVES.md](NOTE_CLAUDE_ORDRE_DES_PREUVES.md). Si HGP ne domine aucun contrôle, le programme est réfuté en une semaine.
-2. **Stabilité par portée.** Transporter le même objet à plusieurs portées, rééchantillonner selon un modèle capteur déclaré, et mesurer la dérive des niveaux de naissance/mort et de l'ancêtre commun. C'est le test de [R1](RISKS_AND_GO_NO_GO.md) ; il conditionne tout le reste, car une hiérarchie qui encode la portée n'est pas une hiérarchie sémantique.
+1. **Oracle d'antichaîne.** Sur la séquence 08, construire la forêt HGP, sélectionner une antichaîne à budget de régions fixé, étiqueter chaque nœud par sa classe majoritaire et rapporter le mIoU obtenu, contre HDBSCAN, octree/voxel, partition superpoint et arbre aléatoire à compression égale. Le protocole exact — et pourquoi « la meilleure antichaîne au sens du mIoU » n'est pas un objectif bien posé — est dans [ORDRE_DES_PREUVES.md](ORDRE_DES_PREUVES.md). Si HGP ne domine aucun contrôle, le programme est réfuté en une semaine.
+2. **Stabilité par portée.** Transporter le même objet à plusieurs portées, rééchantillonner selon un modèle capteur déclaré, et mesurer la dérive des niveaux de naissance/mort et de l'ancêtre commun. C'est le test de [R1](RISQUES.md) ; il conditionne tout le reste, car une hiérarchie qui encode la portée n'est pas une hiérarchie sémantique.
 
 Ces deux mesures coûtent moins qu'une seule journée de GPU et valent plus que toute extension supplémentaire de la spécification.

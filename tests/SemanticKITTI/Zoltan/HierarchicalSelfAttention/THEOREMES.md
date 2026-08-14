@@ -2,7 +2,7 @@
 
 ## Décision
 
-Le programme central porte désormais sur le couple **support normalisé + payload HGP marqué d'un carrier non convexe**, et non sur `support + fonction radiale`. Le second canal conserve une composante marquée avec points, facettes, cofaces, incidences, géométrie et niveaux. Le payload combinatoire n'est lui-même ni convexe ni non convexe ; il choisit explicitement entre points source, carrier PL des facettes, carrier PL des cofaces et union témoin canonique $W_v(a)$. Ces objets sont définis dans [POLYHEDRAL_COMPLEX_BRANCH.md](POLYHEDRAL_COMPLEX_BRANCH.md).
+Le programme central porte désormais sur le couple **support normalisé + payload HGP marqué d'un carrier non convexe**, et non sur `support + fonction radiale`. Le second canal conserve une composante marquée avec points, facettes, cofaces, incidences, géométrie et niveaux. Le payload combinatoire n'est lui-même ni convexe ni non convexe ; il choisit explicitement entre points source, carrier PL des facettes, carrier PL des cofaces et union témoin canonique $W_v(a)$. Ces objets sont définis dans [CONTRAT_HGP.md](CONTRAT_HGP.md).
 
 `QC-HSA` reste un module théorique utile pour exploiter ensuite cette structure. Sa projection reverse-KL est trop élémentaire et trop proche des précédents multi-échelles pour porter seule le papier. Elle peut devenir une partie du résultat T5 si les résumés du canal complet produisent un certificat de raffinement calculable.
 

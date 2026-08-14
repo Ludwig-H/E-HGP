@@ -6,6 +6,12 @@ Déterminer si, et sous quelles conditions, la hiérarchie HGP est un meilleur s
 
 Le plan est ordonné par information acquise : les expériences les moins coûteuses éliminent d'abord les hypothèses fragiles, avant l'entraînement d'un grand modèle.
 
+## Constat préalable — la spécification est complète, la mesure est absente
+
+Le dossier contient aujourd'hui une spécification très complète — objet, contrat de données, carriers, descripteurs de nœud, opérateur hiérarchique, protocole expérimental, registre de risques — et aucune mesure. Le rendement marginal d'une ligne de spécification supplémentaire est donc proche de zéro, alors que celui de la première mesure est très élevé : c'est elle, et non un raffinement du formalisme, qui décide si le programme continue. Le plan ci-dessous est réordonné en conséquence, de sorte que la première mesure arrive avant toute nouvelle spécification.
+
+L'ordre des trois mesures d'entrée, leur protocole corrigé et le budget de nouveauté qu'elles conditionnent sont établis dans [ORDRE_DES_PREUVES.md](ORDRE_DES_PREUVES.md) ; ce plan les intègre sans les redémontrer. La caractérisation des canaux de descripteur, qui n'est pas sur le chemin critique, est traitée dans [DESCRIPTEURS_DE_NOEUD.md](DESCRIPTEURS_DE_NOEUD.md). Concrètement, M1 et M2 sont absorbées par WP1, M3 devient WP1bis et précède WP2 ; aucune des trois ne demande d'entraînement.
+
 ## WP0 — Reproductibilité et contrat des données
 
 ### Travail
@@ -45,6 +51,14 @@ Pour $K=1,2,3$, calculer sur train et validation. Vérifier d'abord par fixture 
 - courbe compression–composition–localisation–mIoU pour différentes coupes/condensations ;
 - mêmes mesures pour RSL/HDBSCAN, octree/voxel tree et arbre aléatoire contrôlé.
 
+Deux de ces mesures sont prioritaires et portent les noms M1 et M2 dans [ORDRE_DES_PREUVES.md](ORDRE_DES_PREUVES.md). Elles ne demandent que la hiérarchie et les labels, aucun entraînement, et elles tranchent davantage que toute la matrice d'ablation prévue en aval : elles doivent donc être exécutées avant le reste de WP1.
+
+**M1 — oracle d'antichaîne.** Choisir une antichaîne, c'est-à-dire un ensemble de nœuds deux à deux non emboîtés couvrant tous les points, étiqueter chaque nœud par sa classe majoritaire, puis calculer le mIoU obtenu. La formulation naïve est mal posée : le mIoU n'est pas additif sur les régions, donc « la meilleure antichaîne au sens du mIoU » n'est pas un problème d'optimisation bien posé et ne doit jamais être annoncé comme tel. Le protocole correct comporte deux volets. D'abord, à budget de régions fixé $R$, sélectionner l'antichaîne qui minimise l'impureté totale $\sum_{v} n_v H\left(\pi_v\right)$, critère additif sur les nœuds, qui admet une programmation dynamique exacte en une passe ascendante sur l'arbre avec un état « nombre de régions consommées dans le sous-arbre » ; rapporter ensuite le mIoU de l'antichaîne ainsi obtenue comme descripteur, jamais comme optimum. Ensuite, en complément, rapporter le mIoU-oracle de coupes à niveau fixé, qui est la convention de la littérature superpoint et permet la comparaison directe avec ses chiffres publiés. Tracer ces courbes en fonction du nombre de régions, à compression appariée, contre RSL/HDBSCAN au même $K$, un octree ou une grille de voxels, une partition superpoint et un arbre aléatoire de mêmes tailles de régions, en stratifiant obligatoirement par portée et par classe et en rapportant séparément les classes rares.
+
+**Règle d'asymétrie, à fixer avant d'exécuter M1.** Cet oracle est déjà publié par la littérature superpoint, et son verdict y est défavorable à l'hypothèse « meilleure partition implique meilleure segmentation ». SPG rapporte sur S3DIS 6-fold un oracle de partition à $88{,}2$ mIoU pour un modèle à $62{,}1$ ; SPT observe que sa performance est à plus de vingt points sous l'oracle et en conclut que la partition ne limite pas fortement le résultat, soit un oracle $\gtrsim 89$ sur Area 5 pour un modèle à $68{,}9$ ; SuperCluster note qu'un oracle à $93{,}4$ PQ indique que très peu de précision est perdue en travaillant sur superpoints. Une vingtaine de points d'oracle sont donc déjà non convertis, et améliorer le plafond d'une partition qui n'est pas saturée ne peut pas payer. M1 est en conséquence une **porte de réfutation et non une porte de promotion** : le perdre réfute le programme sémantique, le gagner ne prouve presque rien. Le résultat doit être présenté avec cette asymétrie explicite, et un résultat négatif publié plutôt qu'absorbé. Le corollaire est à accepter dès maintenant : si le goulot n'est pas la partition, la valeur éventuelle de HGP ne peut pas venir de la qualité de ses régions.
+
+**M2 — stabilité sous transport et rééchantillonnage.** Prendre des objets étiquetés à portée courte, les transporter à plusieurs portées et les rééchantillonner selon un modèle capteur déclaré — amincissement angulaire, disparition de retours, changement d'occultation — puis mesurer la dérive des niveaux de naissance et de mort, la stabilité de l'ancêtre commun et la persistance relative. Tester dans le même mouvement la correction : remplacer le niveau brut $a$ par un niveau normalisé par la densité d'échantillonnage attendue du capteur à cette portée et à cet angle d'incidence. Si la dérive intra-objet passe nettement sous la séparation interclasse, la filtration consciente du capteur devient une contribution en soi et répond à l'objection de portée au lieu de la contourner. Cette correction ne peut cependant pas être présentée comme acquise : l'ablation d'ALPINE montre qu'un seuil proportionnel à la portée, à la manière de LESS, donne $75{,}9$ PQ contre $76{,}3$ pour un seuil constant par classe, malgré une optimisation de son coefficient. Une correction de portée naïve dégrade donc leur clustering ; le cas n'est pas identique — leur seuil est un rayon de liaison et non un niveau de densité $K$-NN — mais ce résultat négatif doit être cité.
+
 Deux courbes diagnostiques d'une **sortie dure token-constante**, qui n'est pas le modèle principal, sont distinguées :
 
 1. baseline réalisable du label majoritaire par token, optimale pour l'accuracy token-constante mais pas pour le mIoU ;
@@ -55,6 +69,8 @@ Une optimisation multiclasses exacte ou bornée sur de petites fixtures peut com
 ### Livrables
 
 - rapport `hierarchy_audit` par scan, classe, portée et $K$ ;
+- courbes M1 impureté–mIoU–nombre de régions et tableau M2 de dérive des niveaux, avec et sans normalisation par la densité d'échantillonnage attendue ;
+- mesure de la profondeur $D$ et de la distribution des degrés de l'arbre de fusion, avant et après condensation, avec la statistique du nombre de produits matrice creuse–vecteur séquentiels qu'elle implique : l'algorithme HSA en demande $D$ en séquence, donc la condensation de l'arbre est une **condition d'existence sur GPU** et non une optimisation, et ce chiffre doit être connu avant WP4 ;
 - figures des courbes de sortie dure majoritaire/optimiste mIoU–compression et stabilité–portée ;
 - fixtures minimales des échecs de laminarité, chaining et frontières traversées.
 
@@ -63,6 +79,37 @@ Une optimisation multiclasses exacte ou bornée sur de petites fixtures peut com
 - si HGP ne bat pas le meilleur contrôle structurel à coût apparié, le claim « meilleur arbre » est suspendu ; l'appariement porte sur compression, nombre de nœuds internes, paramètres, arêtes, profondeur/degrés, $\sum_v d_v^2$, latence et VRAM, pas sur le seul nombre de feuilles qui reste identique lorsque les points sont feuilles ;
 - si la baseline majoritaire perd plus de 1 à 2 points au taux de compression utile, seule la tête dure cluster-constante est rejetée ; une feuille micro-token reste admissible si un décodeur point-wise relocalise les classes et si les proportions restent bien estimées ;
 - si la profondeur ou les degrés rendent HSA impraticable, tester une condensation documentée avant tout modèle complet.
+
+## WP1bis — Diagnostic à une seule variable par substitution du clusterer d'ALPINE
+
+Ce lot est court, prioritaire, sans entraînement, et placé avant WP2. Il correspond à la mesure M3 de [ORDRE_DES_PREUVES.md](ORDRE_DES_PREUVES.md).
+
+**Ce que ce lot n'est pas.** Il n'ouvre pas la phase instance comme contribution : celle-ci reste fermée dans les termes fixés plus bas, et l'usage d'un clustering pour les instances n'est plus une contribution suffisante. Il s'agit ici d'un diagnostic à une seule variable, qui teste l'effet arbre au coût de calcul le plus bas et dont le résultat conditionne l'engagement de semaines de GPU sur la voie sémantique. Une phase fermée pour la publication peut rester ouverte pour le diagnostic.
+
+### Travail
+
+Reprendre le pipeline ALPINE tel quel — mêmes logits sémantiques gelés publics, mêmes seuils $t_c$, même découpage récursif des boîtes — et remplacer uniquement les composantes connexes du graphe $k$-NN élagué par les $K$-polyèdres à $K=2,3$. Rapporter PQ, PQ des classes thing, la ventilation par portée et le temps par trame sur matériel déclaré.
+
+### Pourquoi ce lot avant WP2
+
+Le clusterer pèse lourd et sa contribution est isolable. À sémantique MinkUNet identique et découpage de boîtes désactivé pour tous, sur SemanticKITTI val, ALPINE obtient $65{,}5$ PQ, D&M $61{,}8$, DBSCAN $56{,}7$ et HDBSCAN $55{,}1$ : l'écart imputable au seul clusterer est de $10{,}4$ PQ, et HDBSCAN, dont HGP est le correctif de principe, est bon dernier.
+
+Le clusterer d'ALPINE est littéralement du single-linkage : projection BEV par classe thing, graphe $k$-NN à $k=32$, suppression des arêtes plus longues qu'un seuil constant par classe tiré de dimensions d'objets trouvées sur le web, composantes connexes, puis découpage récursif des composantes dont la boîte dépasse de $30\,\%$ la boîte de référence. C'est donc HGP à $K=1$ avec un rayon dépendant de la classe et une projection BEV, et son mode d'échec déclaré par ses auteurs est le chaînage, « failure cases can be crafted by making two objects closer than the chosen threshold ». HGP à $K\geq2$ en est exactement la généralisation d'ordre supérieur, celle que la thèse construit pour corriger ce mode d'échec : la baseline et l'hypothèse coïncident, ce qui rend l'expérience identifiable.
+
+Le plafond est bas et doit être annoncé avant de mesurer, sous peine de surinterpréter le résultat. L'oracle d'instance à sémantique figée ne rapporte que $+4{,}3$ PQ sur nuScenes avec PTv3, de $78{,}9$ à $83{,}2$, et $+3{,}8$ avec WaffleIron-768 ; sous sémantique parfaite, le clusterer d'ALPINE ne perd que $1{,}0$ PQ sur SemanticKITTI et $3{,}8$ sur nuScenes, ce qui conduit ses auteurs à conclure que l'extraction d'instances est largement saturée. ALPINE ne dépasse les têtes d'instance entraînées que de $+0{,}1$ à $+0{,}8$ PQ. Dans ce barème, $+1$ à $+2$ PQ serait un résultat fort et $+4$ le maximum atteignable.
+
+La contrainte réelle est le temps, et elle est défavorable. ALPINE tourne à $14{,}4$ Hz sur un seul cœur CPU, quand le seul chiffre disponible pour le pipeline HGP historique est de l'ordre de la seconde par trame SemanticKITTI. Il y a plus d'un ordre de grandeur à combler, aucun jury ne l'ignorera, et le temps mesuré ici est un résultat au même titre que le PQ.
+
+### Livrables
+
+- reçu de reproduction d'ALPINE à l'identique, logits gelés inclus, obtenu avant toute substitution ;
+- tableau PQ, PQ†, RQ, SQ et PQ des classes thing à sémantique gelée, ALPINE contre HGP $K=1,2,3$, avec ventilation par portée et temps par trame sur matériel déclaré ;
+- fixtures de chaînage construites explicitement, où la prédiction de la thèse est vérifiable point par point, y compris les cas où elle échoue ;
+- consignation du signal contraire déjà relevé en M2 sur la correction de portée.
+
+### Porte
+
+Si HGP à $K=2,3$ ne bat pas du single-linkage à sémantique gelée et à protocole identique, sur la tâche même que la thèse a construite pour lui, l'hypothèse d'un effet arbre utile est sévèrement affaiblie ; ce résultat doit être consigné avant d'engager des semaines de GPU sur la voie sémantique, et non absorbé. Un gain se lit dans le barème ci-dessus et non dans l'absolu. Un dépassement du budget de temps de plus d'un ordre de grandeur est un résultat négatif à part entière et non un détail d'implémentation. Enfin, un succès ici ne promeut aucun claim d'instance : il autorise seulement la poursuite du programme sémantique.
 
 ## WP2 — Canal support + complexe HGP marqué
 
@@ -80,7 +127,9 @@ La voie implémentable procède ensuite ainsi :
 4. produire un readout par nœud, le concaténer éventuellement au support source et aux side channels métriques, puis l'injecter dans le même opérateur hiérarchique ;
 5. commencer par $K=1$ ou une laminarisation auditée ; la voie recouvrante reste bloquée tant qu'une application déterministe $w_{iv}$, son domaine, la contrainte $\sum_v w_{iv}=1$ et ses tests de conservation de masse ne sont pas spécifiés.
 
-Aucun de ces jalons ne construit le complexe de Čech global ni une mosaïque de Delaunay d'ordre supérieur. Les comparaisons causales P0–P7 du protocole isolent `support seul`, `complexe seul`, `support + complexe`, accès à $\Gamma_K^{\mathrm{elem}}$ avec tokens précalculés, sac de tokens sans messages, mutant invalide et support + radial. P2 et P3 conservent exactement les mêmes `payload_kind`, `carrier_kind`, `authority` et coupe. Lorsque les sommets du carrier source/PL sont disponibles, le support source est calculable et tout gain P3 sur P2 est un shortcut d'optimisation ; cette redondance n'est jamais transférée au support de $W_v(a_v)$.
+Aucun de ces jalons ne construit le complexe de Čech global ni une mosaïque de Delaunay d'ordre supérieur.
+
+La voie de calcul réaliste en dimension 3 n'est d'ailleurs pas la voie exacte, et ce point doit être décidé explicitement plutôt que subi. Le manuscrit ne donne aucune borne de complexité pour $\mathrm{Del}_K$ en dimension $p$ — la seule borne citée, $O\left(n^{\lceil p/2 \rceil}\right)$, concerne la triangulation de Delaunay ordinaire — et sa section 9.3 propose à la place Vietoris-Rips, encadré par $\mathrm{Cech}\left(X,r\right) \subseteq \mathrm{VR}\left(X,r\right) \subseteq \mathrm{Cech}\left(X,\alpha_p r\right)$ avec $\alpha_p=\sqrt{2p/\left(p+1\right)}$ par le théorème de Jung, soit $\alpha_3=\sqrt{1{,}5}\approx 1{,}2247$ en dimension 3. Cette voie se réduit à quatre opérations de graphe massivement parallélisables et, pour $K=2$, à une énumération de triangles par intersection de listes d'adjacence triées dont le coût suit le nombre réel de triangles et non $C\left(n,K+1\right)$. Le prix payé n'est donc pas le temps mais l'exactitude : sous Vietoris-Rips, le Théorème 2 ne tient plus qu'à $\alpha_3$ près. En conséquence, le choix exact contre approché doit être inscrit au contrat comme un niveau d'`authority` distinct, avec le facteur $\alpha_3$ déclaré dans le reçu, et aucun résultat obtenu par cette voie ne peut être présenté comme exact. Le seul chiffre de temps disponible côté manuscrit est de l'ordre de la seconde par trame SemanticKITTI, pour une cible usuelle de dix trames par seconde. Les comparaisons causales P0–P7 du protocole isolent `support seul`, `complexe seul`, `support + complexe`, accès à $\Gamma_K^{\mathrm{elem}}$ avec tokens précalculés, sac de tokens sans messages, mutant invalide et support + radial. P2 et P3 conservent exactement les mêmes `payload_kind`, `carrier_kind`, `authority` et coupe. Lorsque les sommets du carrier source/PL sont disponibles, le support source est calculable et tout gain P3 sur P2 est un shortcut d'optimisation ; cette redondance n'est jamais transférée au support de $W_v(a_v)$.
 
 Les contrôles compressés restent CDF/histogrammes directionnels, ECT/WECT fini, moments/covariance, kernel mean et mini-PointNet/Deep Sets à dimension, paramètres et coût aussi proches que possible. Orthogonalement, ablater géométrie seule, proportions sémantiques prédites seules, puis leur combinaison avec entropie moyenne et désaccord. Aucune proportion GT n'entre dans le forward.
 
@@ -138,7 +187,7 @@ Geler avant E3 la représentation retenue en E2 : mêmes `payload_kind`, `carrie
 - message passing parent–enfant/frères ;
 - Sequoia/attention hiérarchique locale si adaptable ;
 - HSA ;
-- `QC-HSA`, projection conditionnée par la feuille décrite dans [THEOREM_PROGRAM.md](THEOREM_PROGRAM.md) ;
+- `QC-HSA`, projection conditionnée par la feuille décrite dans [THEOREMES.md](THEOREMES.md) ;
 - raffinement adaptatif d'antichaînes par requête, seulement après validation de `QC-HSA` fixe ;
 - contrôle de type Fast Multipole Attention si une adaptation fidèle est possible ;
 - attention locale du backbone supplémentaire à paramètres égaux ;
@@ -215,6 +264,8 @@ Le second dataset doit tester le mécanisme, pas seulement ajouter une ligne de 
 
 ## Phase instance — fermée jusqu'à validation sémantique
 
+Cette fermeture porte sur la contribution, pas sur le diagnostic : WP1bis utilise la tâche d'instance comme instrument de mesure à sémantique gelée, sans en tirer aucun claim d'instance, et ne constitue donc pas une ouverture anticipée de cette phase.
+
 Condition d'ouverture : modèle sémantique finalisé, logits reproductibles et gain HGP établi. Alors seulement :
 
 - geler les mêmes logits sémantiques ;
@@ -235,8 +286,9 @@ Le calendrier dépend de la disponibilité du dataset et des GPU ; il exprime un
 | Fenêtre | Jalon | Sortie attendue |
 |---|---|---|
 | semaines 1–2 | WP0 | contrat, baseline reproduite, évaluateur figé |
-| semaines 3–5 | WP1 | audit HGP et décision points/tokens |
-| semaines 4–7 | WP2 en parallèle | décision support/complexe/carrier et coût d'incidence |
+| semaines 3–5 | WP1, M1 et M2 d'abord | audit HGP, oracle d'antichaîne, stabilité en portée, décision points/tokens |
+| semaines 3–4 | WP1bis, en parallèle de WP1 | PQ à sémantique gelée et temps par trame, verdict à une seule variable sur l'effet arbre |
+| semaines 4–7 | WP2 en parallèle | décision support/complexe/carrier, choix exact contre Vietoris-Rips, coût d'incidence |
 | semaines 8–11 | WP3 | effet propre de l'arbre |
 | semaines 12–16 | WP4 | effet propre de HSA et profil système |
 | semaines 17–21 | WP5 | modèle sémantique verrouillé, stress tests |

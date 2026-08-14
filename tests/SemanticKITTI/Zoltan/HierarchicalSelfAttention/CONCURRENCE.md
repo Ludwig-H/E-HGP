@@ -22,7 +22,7 @@ Sources : [ancien classement officiel](https://codalab.lisn.upsaclay.fr/competit
 
 ## Méthodes sémantiques à battre ou expliquer
 
-Les tracks A–D sont définis dans [EXPERIMENTAL_PROTOCOL.md](EXPERIMENTAL_PROTOCOL.md#régimes-de-comparaison). `NR` signifie que le point n'est pas explicitement rapporté dans la source primaire auditée ; il ne signifie pas « non utilisé ».
+Les tracks A–D sont définis dans [EXPERIMENTAL_PROTOCOL.md](EXPERIMENTAL_PROTOCOL.md#régimes-de-comparaison). `NR` signifie que le point n'est pas explicitement rapporté dans la source primaire auditée ; il ne signifie pas « non utilisé ». La colonne test de ce tableau relève du régime permissif du serveur caché, où l'agrégation temporelle, le TTA, les ensembles, le préentraînement multi-datasets et le multimodal sont admis sans être distingués par la fiche de soumission ; elle ne se compare donc pas à un résultat de validation mono-trame sans TTA. La sous-section « Barre val en régime strict » ci-dessous donne le barème réellement pertinent pour ce projet.
 
 | Méthode | Val / test mIoU | Entrée à l'inférence | Ressources d'entraînement | TTA | Inférences/étages | Statut de comparaison |
 |---|---:|---|---|---|---|---|
@@ -40,6 +40,28 @@ Les tracks A–D sont définis dans [EXPERIMENTAL_PROTOCOL.md](EXPERIMENTAL_PROT
 | VaViT, arXiv 2026 | 68,0 / NR | LiDAR mono-trame | SemanticKITTI | non | NR | résultat validation strict, pas de test caché |
 
 Les scores val et test ne sont jamais interchangeables. Par exemple, RWAFormer appelle parfois la séquence 08 « test » et rapporte 75,3 ; il s'agit du split public de validation, pas du serveur 11–21. Sa taxonomie/reporting doit en outre être reproduite avec le YAML officiel avant comparaison.
+
+### Barre val en régime strict
+
+Le régime qui engage réellement ce projet est le plus étroit des deux : validation sur la séquence 08, mono-trame, LiDAR seul, sans TTA ni ensemble. Une reproduction contrôlée récente réentraîne les principaux concurrents dans ce seul cadre — Puy et al., *Vanilla ViT for Automotive Point Cloud Semantic Segmentation*, prépublication [arXiv 2605.31177](https://arxiv.org/abs/2605.31177), valeo.ai, 29 mai 2026 — et donne le classement suivant.
+
+| Méthode | mIoU val, mono-trame, LiDAR seul, sans TTA |
+|---|---:|
+| MinkUNet | 63,8 |
+| Cylinder3D | 64,3 |
+| SPVNAS | 64,7 |
+| FlatFormer-S | 65,3 |
+| PTv3, reproduit | 66,2 |
+| VaViT-B | 67,6 |
+| SphereFormer | 67,8 |
+| VaViT-B\* | 68,0 |
+| WaffleIron-256 | 68,0 |
+
+Deux conséquences en découlent. D'abord, la valeur 70,8 en validation annoncée par PTv3, celle que porte la ligne « PTv3 seul » du tableau précédent, n'est pas reproductible : l'écart est documenté dans l'issue Pointcept #410 et la reproduction contrôlée s'arrête à 66,2. Ensuite, la barre honnête à viser en régime strict est d'environ 68 mIoU en validation, et non 76 ; les 76,5 du serveur caché appartiennent à un autre barème et ne fixent aucun seuil pour ce projet.
+
+Les chiffres test restent utiles à condition d'être lus avec leur régime, qui est bien plus permissif : TASeg 76,5 avec agrégation temporelle de seize trames passées, RAPiD-Seg 76,1 en LiDAR seul, LSK3DNet 75,6 avec TTA, instance CutMix et époques supplémentaires déclarés, PTv3+PPT 75,5 avec préentraînement multi-datasets, UniSeg 75,2 en multimodal, SphereFormer 74,8, PTv3 74,2, WaffleIron 70,8 avec dix augmentations de test. Aucune de ces valeurs ne borne un résultat obtenu en régime strict, ni par le haut ni par le bas.
+
+Ces chiffres sont des instantanés de veille et non des constantes. Ils doivent être réaudités contre leurs sources primaires avant toute soumission, y compris ceux de la reproduction contrôlée dont le statut de prépublication n'est pas définitif.
 
 ### Leçons pour HGP-HSA
 
@@ -61,6 +83,14 @@ Les scores val et test ne sont jamais interchangeables. Par exemple, RWAFormer a
 Pour **un arbre donné**, avec Q/K LayerNormés après projection, l'énergie quadratique, la température et le rescaling du papier, HSA minimise $\sum_i D_{\mathrm{KL}}\left(\theta^{\mathrm{HSA}}_i\,\Vert\,\theta^{\mathrm{flat}}_i\right)$ sur la famille de matrices stochastiques satisfaisant les contraintes de blocs. La cible plate utilise la même énergie et les mêmes positions ; il ne s'agit pas d'une attention Softmax arbitraire. Ce résultat porte sur les poids d'attention et ne garantit ni la qualité de la hiérarchie, ni les effets des projections V/gates/MLP, ni un gain de segmentation.
 
 Le calcul est bottom-up puis top-down, en $\mathcal{O}(M b^{2})$ pour $M$ familles et un branchement maximal $b$. Le papier reconnaît que les parcours d'arbre sont mal adaptés au GPU et propose des opérations sparse par profondeur ainsi qu'une concaténation en largeur. Il n'évalue aucun nuage 3D ni aucune segmentation dense ; ses expériences portent surtout sur la classification et le remplacement de couches de RoBERTa. Certains remplacements complets dégradent fortement les résultats, ce qui motive une architecture hybride et des blocs tardifs.
+
+Trois conséquences mécaniques doivent être posées avant toute intégration, parce qu'elles déterminent ce qu'un gain observé pourrait signifier.
+
+La première est une réduction. Sous LayerNorm appliqué après projection, l'énergie d'interaction entre deux sous-arbres ne dépend que des moyennes des requêtes et des clés de chaque sous-arbre, pondérées par leur taille. Une HSA fidèle est donc mécaniquement une attention sur des moyennes de sous-arbres, c'est-à-dire un objet très proche d'un contrôle bottom-up/top-down par moyenne suivie d'un MLP. Ce contrôle doit figurer dans le protocole : sans lui, tout gain sera attribué à HSA alors qu'il peut venir de la seule hiérarchie.
+
+La deuxième concerne l'endroit exact où la géométrie entre. Les auteurs indiquent que leur cadre n'ajoute aucun paramètre apprenable le long de la hiérarchie. Le descripteur géométrique n'intervient donc que par le produit scalaire $\epsilon(A')^{\top}\epsilon(B')$ entre frères, soit un unique scalaire de biais par couple de frères. Quelle que soit la richesse du descripteur de nœud, il est comprimé à cet endroit sur une seule dimension ; c'est un goulot structurel, à confronter aux ablations rapportées plus bas et à l'analyse de [DESCRIPTEURS_DE_NOEUD.md](DESCRIPTEURS_DE_NOEUD.md).
+
+La troisième est un coût. L'algorithme demande $D$ produits matrice creuse–vecteur strictement séquentiels, où $D$ est la profondeur de l'arbre. La condensation de l'arbre de fusion n'est donc pas une optimisation facultative mais une condition d'existence sur GPU : un arbre de fusion binaire brut sur un scan produit une profondeur qui interdit l'entraînement. Le papier mesure lui-même le prix d'un remplacement mal placé : en zero-shot, QNLI tombe à 0,5072, soit le niveau du hasard. Aucune expérience 3D ni dense n'accompagne ces résultats ; les validations portent uniquement sur du texte.
 
 ### Sequoia, TMLR 2024
 
@@ -84,6 +114,10 @@ Le calcul est bottom-up puis top-down, en $\mathcal{O}(M b^{2})$ pour $M$ famill
 
 [SPT](https://openaccess.thecvf.com/content/ICCV2023/html/Robert_Efficient_3D_Semantic_Segmentation_with_Superpoint_Transformer_ICCV_2023_paper.html) utilise déjà une partition géométrique hiérarchique et une attention multi-échelle. Il n'est pas publié sur SemanticKITTI, mais son ablation sur KITTI-360 attribue plusieurs points de mIoU à la hiérarchie et à l'adjacence. Une adaptation SemanticKITTI est une baseline conceptuelle obligatoire.
 
+Le détail de la recette compte, car il fixe précisément ce qu'une variante HGP devrait déplacer. La partition est obtenue par $l_{0}$-cut-pursuit hiérarchique parallélisé sur deux niveaux, avec une réduction du nombre d'éléments d'environ trente fois puis cinq fois. Chaque point porte huit features — trois radiométriques, puis linéarité, planarité, dispersion, verticalité et élévation estimées sur ses 50 plus proches voisins — et chaque arête en porte dix-huit : sept d'interface, quatre de ratio, sept de pose. L'attention est une graph-attention intra-niveau entre superpoints adjacents, complétée par un décodeur en U qui réinjecte le parent ; il n'y a donc pas d'attention entre niveaux au sens de HSA. Les résultats sont 76,0 sur S3DIS 6-fold, 68,9 sur Area 5, 63,5 sur la validation KITTI-360 et 79,6 sur DALES, pour 0,21 M de paramètres, 3,0 GPU-heures d'entraînement et environ 2 s d'inférence.
+
+Un fait de veille doit être isolé, car il oriente la stratégie plus qu'aucun score : aucune méthode de la lignée superpoint ne publie SemanticKITTI mono-trame. Ni SPG, ni SSP, ni SPNet, ni SPT, ni SuperCluster, ni EZ-SP. Toutes rapportent S3DIS, ScanNet, DALES ou KITTI-360 accumulé. La lecture est à double tranchant. D'un côté le créneau est libre, et un premier résultat superpoint crédible en mono-trame serait en soi une contribution de positionnement. De l'autre, cette communauté a de fait concédé le mono-trame aux méthodes voxel et point denses, probablement parce qu'une trame unique offre trop peu de points par région pour qu'une agrégation par superpoint conserve du signal. Une absence prolongée dans une communauté active est plus souvent un obstacle identifié qu'un oubli : la charge de la preuve revient à celui qui ouvre le créneau.
+
 ### EZ-SP, ICRA 2026
 
 [EZ-SP](https://arxiv.org/abs/2512.00385) remplace la partition CPU de SPT par un clustering appris sur GPU, annoncé à moins de 60k paramètres et beaucoup plus rapide que les partitions antérieures. Même sans score SemanticKITTI publié, il est le concurrent système direct de MorseHGP3D : HGP doit démontrer soit une meilleure structure, soit un coût Pareto comparable.
@@ -99,6 +133,26 @@ Le calcul est bottom-up puis top-down, en $\mathcal{O}(M b^{2})$ pour $M$ famill
 - [SuperCluster](https://arxiv.org/abs/2401.06704) formule la segmentation panoptique comme clustering d'un graphe de superpoints.
 - [SSTNet](https://openaccess.thecvf.com/content/ICCV2021/html/Liang_Instance_Segmentation_in_3D_Scenes_Using_Semantic_Superpoint_Tree_Networks_ICCV_2021_paper.html) apprend et coupe un arbre de superpoints pour les instances intérieures.
 
+## L'oracle de partition, et pourquoi il réfute plus qu'il ne promeut
+
+La lignée superpoint publie systématiquement un oracle de partition : on attribue à chaque région la meilleure étiquette possible et on mesure le plafond ainsi atteint. Ce diagnostic est régulièrement invoqué comme argument en faveur d'une meilleure partition ; les chiffres publiés disent l'inverse.
+
+- SPG (CVPR 2018), tableau 5, S3DIS en 6-fold : l'oracle « Perfect » atteint 88,2 mIoU et 92,7 mAcc, alors que SPG lui-même rapporte 62,1.
+- SPT (ICCV 2023) conclut explicitement « The performance of SPT is more than 20 points below the oracle, suggesting that the partition does not strongly limit its performance ». Avec 68,9 sur S3DIS Area 5, cela place son oracle au-delà de 89.
+- SuperCluster (3DV 2024) écrit de même « The high performance of this oracle (93,4 PQ) indicates that very little precision is lost by working with superpoints », son second oracle de clustering restant à 83,6 PQ.
+
+Une vingtaine de points d'oracle sont donc déjà disponibles et non convertis. Relever le plafond d'une partition qui n'est pas saturée ne peut pas payer, puisque le facteur limitant se trouve en aval, dans le modèle qui exploite les régions. Il en résulte une règle d'usage pour ce projet : un diagnostic d'oracle est une porte de réfutation et non de promotion. Un oracle HGP nettement inférieur à ceux ci-dessus condamne la voie ; un oracle supérieur ne prouve rien, puisque le concurrent laisse déjà vingt points sur la table. [ORDRE_DES_PREUVES.md](ORDRE_DES_PREUVES.md) place cette mesure en première position et explique pourquoi le mIoU n'est pas le critère à optimiser sur l'arbre.
+
+Les ablations publiées sur cette famille exacte pointent dans la même direction et hiérarchisent les leviers. Superpoint Transformer mesure, en mIoU perdu :
+
+| Ablation | S3DIS 6-fold | KITTI-360 | DALES |
+|---|---:|---:|---:|
+| retirer toutes les features de nœud handcrafted | -0,7 | -4,1 | -1,4 |
+| retirer l'encodage d'adjacence | -6,3 | -5,4 | -3,0 |
+| passer à un seul niveau de partition | -8,4 | -5,1 | -0,9 |
+
+EZ-SP (ICRA 2026) complète le tableau : remplacer les features handcrafted par un petit réseau appris change le résultat de plus ou moins 0,1 mIoU. Le descripteur de nœud est donc le plus faible des trois leviers, loin derrière l'adjacence et le nombre de niveaux. Un travail dont la contribution principale serait un meilleur descripteur de nœud viserait précisément l'axe où la littérature mesure le moins d'effet ; c'est un argument à intégrer avant le choix du budget de nouveauté, et non après. [DESCRIPTEURS_DE_NOEUD.md](DESCRIPTEURS_DE_NOEUD.md) traite séparément la question de ce que ce descripteur peut au mieux contenir.
+
 ## Ce que HGP apporte réellement
 
 Le papier [Generalization of single-linkage with higher-order interactions](https://link.springer.com/article/10.1007/s41109-025-00756-1) montre, sous ses hypothèses de position générale, que les $K$-polyèdres correspondent aux clusters de haute densité de son estimateur $K$-NN **sur l'échantillon fini**. C'est un fondement plus précis qu'une oversegmentation heuristique, mais ni une preuve de consistance vers l'arbre de Hartigan populationnel ni une garantie d'alignement sémantique.
@@ -112,6 +166,8 @@ Son expérience SemanticKITTI ne mesure toutefois pas la segmentation sémantiqu
 | $K=3$ | 0,829 | 0,917 | 0,903 |
 
 Cela soutient l'exploration de $K=2$ et réfute l'idée « un ordre plus grand est toujours meilleur ». Cela ne démontre pas qu'HGP aide à prédire les classes. Le papier indique aussi que des clusters d'ordre supérieur peuvent partager des points et qu'une attribution dure perd cette structure.
+
+Ce recouvrement entre en tension directe avec HSA, et la tension doit être nommée ici plutôt que découverte à l'implémentation. Le lemme de sous-structure optimale de HSA est énoncé sur une partition, donc sur des ensembles de feuilles disjoints : l'arbre doit être strictement laminaire. Or pour $K \geq 2$ les $K$-polyèdres se recouvrent, le manuscrit notant qu'« on voit déjà apparaître le phénomène essentiel : pour $K \geq 2$, les polyèdres peuvent se recouvrir ». Laminariser l'arbre pour le rendre acceptable par HSA supprime donc exactement ce qui distingue HGP de HDBSCAN, et à $K = 1$ HGP est le single-linkage. Le dilemme ne se résout pas par un réglage : soit l'on rabote la structure et la nouveauté doit alors porter sur autre chose que l'arbre, soit l'on conserve le recouvrement et il faut un opérateur d'attention sur le DAG de recouvrement plutôt que sur un arbre. Si un budget de nouveauté doit aller à un opérateur, c'est vers ce second terme qu'il doit aller ; [ORDRE_DES_PREUVES.md](ORDRE_DES_PREUVES.md) en fait la cible T6 du [programme théorique](THEOREMES.md) et non un préalable.
 
 L'apport potentiel au projet n'est pas seulement une hiérarchie donnée à HSA. La proposition conserve aussi un **complexe HGP marqué** : facettes d'une composante du graphe complet $\Gamma_K^{\mathrm{full}}$, cofaces élémentaires qui certifient une sous-adjacence $\Gamma_K^{\mathrm{elem}}$ de mêmes composantes $H_0$, incidences, coordonnées et niveaux de filtration. Ce payload est plus riche que le $K$-polyèdre défini dans la source comme ensemble de points. Son schéma fixe `payload_kind=marked_incidence`, un `carrier_kind` parmi `source_points`, `facet_pl`, `coface_pl`, `witness_union`, et une `authority` parmi `incidence_complete`, `pl_complete`, `witness_exact`, `witness_approx`, `h0_only`. Ces réalisations et autorités ne doivent pas être confondues. Le payload n'est pas actuellement une sortie certifiée de MorseHGP3D v3. Sa construction sparse, sans matérialiser le complexe de Čech ambiant, fait donc partie de la question scientifique et système.
 

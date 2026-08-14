@@ -115,33 +115,25 @@ La complexité de l'encodeur d'incidence dépend du payload composante-local eff
 
 ## Programme théorique T0--T6
 
-### T0 — Sémantique des carriers
+Les sept énoncés T0 à T6 — sémantique des carriers, invariance aux certificats équivalents, conscience des incidences, équivariance et stabilité, composition sparse, couplage avec l'attention et recouvrements — sont énoncés une seule fois, dans [THEOREMES.md](THEOREMES.md). Ne pas les redupliquer ici : une seule version fait foi.
 
-Prouver que $\Gamma_{K}^{\mathrm{full}}$ est le graphe d'intersection des témoins, que $\Gamma_{K}^{\mathrm{elem}}$ est un sous-graphe ayant seulement le même $\pi_0$, puis identifier son $K$-polyèdre discret et $W_v(a)$. Prouver les identités de support uniquement pour les carriers PL sous leurs hypothèses exactes. Ce résultat est une obligation de correction, pas une nouveauté.
+## Fixtures permanentes
 
-### T1 — Invariance aux certificats équivalents
+- mêmes observations et même support, incidences différentes ;
+- singleton $K=1$ à $a>0$ : $C_v^{F}=\left\lbrace x\right\rbrace$ mais $W_v(a)=\overline{B}(x,\sqrt{a})$, donc supports différents ;
+- carrier des facettes contre carrier des cofaces ;
+- carrier PL contre $W_v$, avec supports différents ;
+- coface absente, facette isolée et politique d'augmentation ;
+- même composante $H_0$ mais couvertures témoins différentes ;
+- deux certificats sparse équivalents contre un certificat seulement `h0_only` ;
+- replay `cut_policy=pre_parent`, `cut_side=strict` des deltas, racine explicite fermée et plateaux à égalité ;
+- cube plein contre frontière pour l'ablation radiale ;
+- rayon extérieur non binné comme témoin d'une violation du seul recentrage : $g$ continu, agrégation exacte par $\max$, et pourtant $\left\lbrace c+e_{1}\right\rbrace$ et $\left\lbrace c+e_{2}\right\rbrace$ valent tous deux $1$ au centre $c$ puis $2$ et $\sqrt{2}$ au centre $c-e_{1}$ ;
+- carrier PL à $K=3$ dont la CDF de volume est identiquement nulle, contre la même CDF pondérée par l'aire des triangles ;
+- recouvrements $K\geq2$ avant et après laminarisation ;
+- même patch sous homothétie, puis sous transport et rééchantillonnage LiDAR.
 
-Définir une projection scientifique canonique $\kappa$ qui retire ordre des records, duplications de preuve et témoins auxiliaires. Si deux exports sparse certifiés satisfont $\kappa(S_1)=\kappa(S_2)$ pour le triplet contractuel annoncé et la même politique de coupe, l'encodeur doit produire exactement la même représentation. L'équivalence `h0_only` ne doit jamais être promue en équivalence géométrique.
-
-### T2 — Conscience des incidences
-
-Sur une classe bornée, caractériser les objets séparés par l'encodeur. La fixture minimale exige : mêmes observations, mêmes supports et mêmes statistiques de cellules, mais incidences différentes impliquent des représentations différentes. Un MPNN ordinaire peut échouer ; une garantie demande un encodage canonique, une puissance de type WL adaptée ou des identifiants structurels.
-
-### T3 — Équivariance et stabilité
-
-Sous une similitude $x\mapsto\lambda Rx+t$, avec $\lambda>0$ et $R\in\mathrm{O}(3)$, et $a\mapsto\lambda^{2}a$, prouver l'équivariance des points source et des trois carriers dérivés, puis l'invariance de leur forme normalisée, avec rotation équivariante ou repère global explicitement conservé. Pour une bijection $\varphi:X\to X'$ telle que $\max_{x\in X}\left\Vert\varphi(x)-x\right\Vert\leq\varepsilon$, prouver $L_K^{X}(a)\subseteq L_K^{X'}((\sqrt{a}+\varepsilon)^2)$ et l'inclusion symétrique. Une stabilité de composante exige en plus une marge aux événements de naissance ou de fusion.
-
-### T4 — Composition sparse exacte ou bornée
-
-Définir l'union canonique des tables composante-locales et prouver associativité, commutativité et idempotence. Les cellules nouvellement activées sont des deltas explicites, et leur replay doit reconstruire toute coupe versionnée. Un résumé fixe n'est déclaré fusionnable que s'il est un homomorphisme de cette union ; sinon, borner l'erreur de condensation. Le coût dépend des cellules actives ou ajoutées, jamais du complexe ambiant exhaustif.
-
-### T5 — Couplage avec l'attention
-
-Produire depuis les tokens du carrier une borne calculable sur l'oscillation des scores ou valeurs dans une branche. Raffiner jusqu'aux cellules ou points lorsque la borne dépasse la tolérance, avec monotonie et convergence vers la cible dense sous mêmes scores et masques. QC-HSA reste un module candidat de ce théorème, pas le substitut du canal 2.
-
-### T6 — Recouvrements
-
-Pour les $K$-polyèdres chevauchants, définir un opérateur sur DAG et des poids d'incidence. Prouver séparément conservation de masse, stochasticité, équivariance au réindexage, absence de double comptage et réduction au cas laminaire. Une projection arbitraire vers un arbre ne reçoit aucune de ces propriétés gratuitement.
+Toute collision qui invalide un claim devient une fixture permanente ; elle n'est pas retirée lorsque l'encodeur change.
 
 ## Ablations et falsifications obligatoires
 
