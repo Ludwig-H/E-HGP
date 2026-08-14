@@ -1,5 +1,20 @@
-// MorseHGP3D v3 — LE CERTIFICAT DE LOCALITE, RESTREINT AUX DIRECTIONS
-// REELLEMENT ATTEIGNABLES.
+// MorseHGP3D v3 — LA RESTRICTION AUX DIRECTIONS ADMISSIBLES, ET SA REFUTATION.
+//
+// STATUT : LE THEOREME DU §3 DE LA NOTE EST FAUX. L'auditeur l'a refute dans
+// audits/REPONSE_AUDIT_Q18_Q20_CALOTTES_ADMISSIBLES_20260815.md :
+//   1. l'admissibilite N'EST PAS MONOTONE de `D` vers `r<D` — l'intervalle est
+//      `|s| <= D < 2(s.u)`, et grandir `D` relache la premiere inegalite tout
+//      en durcissant la seconde ;
+//   2. le test par sommets ECHANGE LES QUANTIFICATEURS : il prouve
+//      `exists v, for all u dans C`, alors que la preuve exige de marquer toute
+//      cellule verifiant `exists u dans C, exists v` ;
+//   3. mon falsificateur comparait `r` a la plus grande ARETE du support, quand
+//      le theoreme porte sur le DIAMETRE `2R` de la circumsphere.
+//
+// Ce fichier conserve la mesure du gain — qui reste un fait — et grave les
+// trois contre-fixtures. Il ne certifie plus rien. La forme corrigee,
+// `A_r(x) = union_v { u : 2(s.u) > max(r,|s|) }` avec marquage des cellules par
+// INTERSECTION et non par inclusion, n'est pas implementee ici.
 //
 // Specification : audits/NOTE_SOLUTION_CALOTTES_ADMISSIBLES_20260815.md.
 // Cadre : phase=exploration_v3_hors_registre, backend=cpu_reference,
@@ -203,6 +218,120 @@ bool certifie(const Pt& x, const std::vector<Pt>& P, const std::vector<int>& voi
   return ok;
 }
 
+
+// ---------------------------------------------------------------------------
+// LES TROIS CONTRE-FIXTURES, GRAVEES.
+// ---------------------------------------------------------------------------
+inline i128 det3i(const i128 u[3], const i128 v[3], const i128 w[3]) {
+  return u[0] * (v[1] * w[2] - v[2] * w[1]) - u[1] * (v[0] * w[2] - v[2] * w[0]) +
+         u[2] * (v[0] * w[1] - v[1] * w[0]);
+}
+
+// `4 R^2` d'un tetraedre, en rationnel exact : `|Num|^2 / O^2`.
+// Compare a `r^2` par `|Num|^2` contre `r^2 O^2`, sur 256 bits.
+int cmp_4R2_a_r2(const Pt& p0, const Pt& p1, const Pt& p2, const Pt& p3, i64 r) {
+  i128 a[3], b[3], g[3];
+  for (int i = 0; i < 3; ++i) {
+    a[i] = (i128)p1.c[i] - p0.c[i];
+    b[i] = (i128)p2.c[i] - p0.c[i];
+    g[i] = (i128)p3.c[i] - p0.c[i];
+  }
+  auto cr = [](const i128 u[3], const i128 v[3], i128 o[3]) {
+    o[0] = u[1] * v[2] - u[2] * v[1];
+    o[1] = u[2] * v[0] - u[0] * v[2];
+    o[2] = u[0] * v[1] - u[1] * v[0];
+  };
+  i128 bg[3], ga[3], ab[3];
+  cr(b, g, bg); cr(g, a, ga); cr(a, b, ab);
+  const i128 O = a[0] * bg[0] + a[1] * bg[1] + a[2] * bg[2];
+  if (O == 0) return 0;
+  const i128 na = a[0] * a[0] + a[1] * a[1] + a[2] * a[2];
+  const i128 nb = b[0] * b[0] + b[1] * b[1] + b[2] * b[2];
+  const i128 ng = g[0] * g[0] + g[1] * g[1] + g[2] * g[2];
+  i128 num[3];
+  for (int j = 0; j < 3; ++j) num[j] = na * bg[j] + nb * ga[j] + ng * ab[j];
+  // `4R^2 = |Num|^2 / O^2` : comparer `|Num|^2` a `r^2 O^2`.
+  mhgp::BigInt<4> gauche = mhgp::big_add(
+      mhgp::big_add(mhgp::mul128(num[0], num[0]), mhgp::mul128(num[1], num[1])),
+      mhgp::mul128(num[2], num[2]));
+  const mhgp::BigInt<4> droite = mhgp::mul128((i128)r * r, O * O);
+  return mhgp::big_cmp(gauche, droite);
+}
+
+int fixtures_refutation() {
+  int fautes = 0;
+  // (1) LA VACUITE. `x` et `v` distants de dix, coupure cinq : aucun point
+  // distinct n'est a distance au plus cinq, donc toutes les cellules sont
+  // declarees non admissibles et l'hypothese est vraie PAR VACUITE. Pourtant la
+  // boule diametrale de `xv` est une q2 positive, vide, de diametre dix.
+  {
+    std::vector<Pt> P = {Pt{{0, 0, 0}}, Pt{{10, 0, 0}}};
+    const DirGrid g = build_grid(4);
+    Compteurs c;
+    std::vector<int> v0 = {1}, v1 = {0};
+    const bool c0 = certifie(P[0], P, v0, g, 5, 8, true, &c);
+    const bool c1 = certifie(P[1], P, v1, g, 5, 8, true, &c);
+    const i64 D2 = d2p(P[0], P[1]);
+    const bool refute = (c0 || c1) && D2 >= 25;
+    std::printf("refutation_vacuite : certifie_x=%d certifie_v=%d D2=%lld r2=25"
+                " refute=%d\n", (int)c0, (int)c1, (long long)D2, (int)refute);
+    if (!refute) { std::fprintf(stderr, "ATTENDU: la vacuite doit refuter\n"); ++fautes; }
+  }
+  // (2) LES QUANTIFICATEURS. La cellule `e1,e2,e3` et `s=(10,1,1)`. La
+  // direction `u=s/|s|` est admissible — `|s|=D` et `s.u=D>D/2` — mais aux
+  // sommets `e2` et `e3` le produit scalaire ne vaut que un : le test par
+  // sommets declare la cellule NON admissible alors qu'elle INTERSECTE
+  // l'ensemble admissible.
+  {
+    const i64 s[3] = {10, 1, 1};
+    const i64 e[3][3] = {{1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
+    const i64 D2 = s[0] * s[0] + s[1] * s[1] + s[2] * s[2];   // 102
+    bool tous_sommets = true;
+    for (int k = 0; k < 3; ++k) {
+      const i64 dot = e[k][0] * s[0] + e[k][1] * s[1] + e[k][2] * s[2];
+      if (!((i128)4 * dot * dot > (i128)D2 * 1)) tous_sommets = false;
+    }
+    // `u = s/|s|` : `2 (s.u) = 2|s| > |s| = D`, donc la direction EST admissible.
+    const bool direction_admissible = true;
+    std::printf("refutation_quantificateurs : D2=%lld test_sommets=%d"
+                " direction_admissible=%d refute=%d\n",
+                (long long)D2, (int)tous_sommets, (int)direction_admissible,
+                (int)(!tous_sommets && direction_admissible));
+    if (tous_sommets) {
+      std::fprintf(stderr, "ATTENDU: le test par sommets doit echouer ici\n");
+      ++fautes;
+    }
+  }
+  // (3) L'ARETE N'EST PAS LE DIAMETRE. Tetraedre regulier translate : ses six
+  // aretes valent sqrt(8) = 2,83, mais sa circumsphere a pour diametre
+  // sqrt(12) = 3,46. A `r=3`, un falsificateur qui compare la plus grande arete
+  // a `r` laisse passer un support dont la boule DEPASSE `r`.
+  {
+    const Pt q[4] = {Pt{{101, 101, 101}}, Pt{{101, 99, 99}},
+                     Pt{{99, 101, 99}}, Pt{{99, 99, 101}}};
+    i64 arete2 = 0;
+    for (int u = 0; u < 4; ++u)
+      for (int w = u + 1; w < 4; ++w) {
+        const i64 e = d2p(q[u], q[w]);
+        if (e > arete2) arete2 = e;
+      }
+    const int c = cmp_4R2_a_r2(q[0], q[1], q[2], q[3], 3);
+    const bool arete_sous_r = (arete2 < 9);
+    const bool boule_sur_r = (c > 0);
+    std::printf("refutation_arete_vs_diametre : arete2=%lld r2=9 arete_sous_r=%d"
+                " quatre_R2_sur_r2=%d refute=%d\n",
+                (long long)arete2, (int)arete_sous_r, (int)boule_sur_r,
+                (int)(arete_sous_r && boule_sur_r));
+    if (!(arete_sous_r && boule_sur_r)) {
+      std::fprintf(stderr, "ATTENDU: arete sous r et boule au-dessus de r\n");
+      ++fautes;
+    }
+  }
+  if (fautes) return 1;
+  std::printf("fixtures_refutation : trois contre-fixtures reproduites\n");
+  return 0;
+}
+
 std::vector<Pt> nuage(const std::string& f, long long n, long long coord, long long seed) {
   mhgp3v::CloudFamily fam;
   if (f == "uniform") fam = mhgp3v::CloudFamily::kUniform;
@@ -231,6 +360,7 @@ int main(int argc, char** argv) {
     const std::string a = argv[i];
     auto val = [&](const char* p) { return a.substr(std::strlen(p)); };
     if (a == "--falsifie") falsifie = true;
+    else if (a == "--fixtures-refutation") { return fixtures_refutation(); }
     else if (a.rfind("--family=", 0) == 0) family = val("--family=");
     else if (a.rfind("--points=", 0) == 0) n = atoll(val("--points=").c_str());
     else if (a.rfind("--coord=", 0) == 0) coord = atoll(val("--coord=").c_str());

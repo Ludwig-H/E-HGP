@@ -5614,9 +5614,30 @@ target_include_directories(mhgp3v_caps_admissible_probe PRIVATE ${CMAKE_CURRENT_
 target_link_libraries(mhgp3v_caps_admissible_probe PRIVATE mhgp Threads::Threads)
 target_compile_options(mhgp3v_caps_admissible_probe PRIVATE -Wall -Wextra -Werror)
 
-# LA FALSIFICATION EST LA PORTE PRINCIPALE. Tout support q2 retenu dont un
-# sommet est certifie doit avoir un diametre sous le rayon certifie. Une seule
-# violation refute le theoreme et rend 1.
+# LES TROIS CONTRE-FIXTURES DE LA REFUTATION. Elles sont la porte PRINCIPALE de
+# ce module : le theoreme des directions admissibles est FAUX, et ces trois cas
+# le montrent — vacuite a l'echelle `r`, echange de quantificateurs au test par
+# sommets, et arete confondue avec le diametre `2R`.
+add_test(NAME mhgp3v_caps_refutation_code
+         COMMAND mhgp3v_caps_admissible_probe --fixtures-refutation)
+add_test(NAME mhgp3v_caps_refutation
+         COMMAND mhgp3v_caps_admissible_probe --fixtures-refutation)
+set_tests_properties(mhgp3v_caps_refutation PROPERTIES PASS_REGULAR_EXPRESSION
+  "refutation_vacuite : certifie_x=1 certifie_v=1 D2=100 r2=25 refute=1")
+add_test(NAME mhgp3v_caps_refutation_quantificateurs
+         COMMAND mhgp3v_caps_admissible_probe --fixtures-refutation)
+set_tests_properties(mhgp3v_caps_refutation_quantificateurs PROPERTIES
+  PASS_REGULAR_EXPRESSION "refutation_quantificateurs : D2=102 test_sommets=0 direction_admissible=1 refute=1")
+add_test(NAME mhgp3v_caps_refutation_arete
+         COMMAND mhgp3v_caps_admissible_probe --fixtures-refutation)
+set_tests_properties(mhgp3v_caps_refutation_arete PROPERTIES PASS_REGULAR_EXPRESSION
+  "refutation_arete_vs_diametre : arete2=8 r2=9 arete_sous_r=1 quatre_R2_sur_r2=1 refute=1")
+
+# LES PORTES CI-DESSOUS NE VALIDENT AUCUN THEOREME. Elles mesurent seulement
+# qu'aucune violation n'apparait sur des nuages ALEATOIRES denses — ce qui est
+# vrai et ce qui est exactement pourquoi elles etaient trompeuses : la
+# refutation vit dans une configuration a deux points, pas dans un nuage dense.
+# Elles sont conservees comme diagnostic, sous ce nom.
 foreach(caps_fam uniform terrain scanline_single_pass scanline_overlap_multiecho
                  eight_clusters)
   # `n=150` exerce AUSSI q4 : le brute force `C(n,4)` y est calculable, et q4

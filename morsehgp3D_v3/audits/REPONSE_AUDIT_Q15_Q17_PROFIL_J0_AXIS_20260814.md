@@ -118,9 +118,10 @@ Cela ne prouve rien sur les paires qui n'ont pas été énumérées. Le maximum 
 diamètres **observés** est une statistique conditionnée par `D<=dmax` : une
 unique ancre pertinente à `0,8*dmax`, sans aucune sortie près de la frontière
 intérieure, laisse passer la garde `max_observe<0,75*dmax` tout en étant omise.
-Le refus a posteriori ne peut donc publier que
-`truncated_candidate_lower_bound`, jamais `source_complete` ni un exposant de
-sortie exact.
+Le refus a posteriori ne peut donc publier qu'un
+`truncated_candidate_ledger`, jamais `source_complete` ni un exposant de
+sortie exact. Avant owner et shell reçus, ce ledger n'a même pas un ordre
+global garanti : omissions et surcomptes peuvent coexister.
 
 La sonde ajoutée ensuite à `acd792d` falsifie déjà ce garde sur une famille
 intégrée. `two_lines,n=10` rend code zéro, vingt q2 et
@@ -150,8 +151,8 @@ J0 exact doit porter le reçu suivant :
 
 Le fuseau `W_q` et la recherche locale peuvent réduire ce parcours. Ils ne
 remplacent pas le reçu de couverture. Avec `--dmax` non certifié, Claude peut
-continuer à mesurer des coûts et des bornes inférieures clairement étiquetés ;
-il ne doit pas alimenter le tableau de dimensionnement exact de J0.
+continuer à mesurer des coûts et des ledgers tronqués clairement étiquetés ; il
+ne doit pas alimenter le tableau de dimensionnement exact de J0.
 
 ## Q17 — domaine exact du best-first axial
 

@@ -84,6 +84,15 @@ duplique aussi un q3 isocèle à égalité d'arêtes maximales et partage un rec
 `acu` entre q3 et q4. Les onze CTests verts ne couvrent pas ces P0. Voir
 [`AUDIT_WORKTREE_LANE_SOURCE_SCALE_J0_20260814.md`](AUDIT_WORKTREE_LANE_SOURCE_SCALE_J0_20260814.md).
 
+**Rampe CPU reçue comme diagnostic rouge seulement.** Sur `uniform,50000`, le
+ledger atteint `21 432 482` candidats à `smax=11` et `4 004 994` à `smax=6` :
+le repli mesuré vaut un facteur `5,35`, pas douze. La première piste matérialise
+encore `6 091 112 797` paires de lentille. Les amas refusent la coupure dès
+12 500, après jusqu'à `24 135 659 695` paires ; aucune pente 25k/50k n'existe
+pour cette famille obligatoire. Ces nombres ne franchissent pas la précondition
+ci-dessus et ne déclenchent aucune renégociation du contrat. Voir
+[`AUDIT_CONTRE_SESSION_J0_LANE_SOURCE_G4_20260815.md`](AUDIT_CONTRE_SESSION_J0_LANE_SOURCE_G4_20260815.md).
+
 **Porte de sortie.** Trois exposants successifs publiés par arité, avec la
 règle du plan de test : deux exposants successifs `> 1,35` suspendent tout.
 Publier aussi `candidats/retenus` par lane.
@@ -93,11 +102,10 @@ la cible `100 ms` est arithmétiquement hors d'atteinte et le contrat doit être
 renégocié en `p95 < 1 s`, ou `K_max` abaissé. **Il faut le dire à ce moment-là,
 pas après six jalons.**
 
-**Coût proposé, non reçu.** Une session G4 en zone IA, CPU 48 cœurs, moins
-d'une heure. Les
-oracles exhaustifs plafonnent à `n≈400` ; au-delà, la mesure emploie
-l'énumération par ancre d'arête diamétrale, validée exacte contre le brute force
-`C(n,4)`.
+**Coût observé, non reçu comme J0.** La session CPU 48 cœurs a duré de quelques
+secondes sur `uniform` jusqu'à 147 secondes sur un seul palier amas ; elle a
+rendu `INCOMPLET_OU_TRONQUE`. Les oracles exhaustifs plafonnent à `n≈400` et le
+mode par ancre n'est pas une source complète au-delà.
 
 ## 3. J1 — `Lane4` producteur autonome, sans certificat de bloc
 

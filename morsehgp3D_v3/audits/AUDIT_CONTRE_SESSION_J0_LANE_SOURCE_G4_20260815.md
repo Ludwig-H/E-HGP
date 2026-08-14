@@ -80,6 +80,15 @@ Les exposants diagnostiques entre tailles successives valent environ
 point vaut un facteur `5,35`, pas le facteur douze supposé dans le plan. Même
 sous `K=5`, le ledger compte quatre millions de candidats à 50 000 points.
 
+L'écart de `0,09 %` avec les `21 413 140` clés historiques est une
+**corroboration de cardinalité**, pas l'identité de deux populations. Aucun
+juge n'a comparé leurs `SupportKey`, owners, `I_B/U_B` ou `BallKey`; les deux
+chemins peuvent partager la même définition incomplète et certaines routines
+géométriques. Le tableau §3 de `RESULTATS.md` doit donc se lire « candidats »,
+jamais « supports ». De même, diviser quatre secondes CPU par l'objectif
+100 ms ne donne pas un « facteur restant 40 » de produit : l'aval est absent,
+le cutoff n'est pas complet et le travail GPU n'est pas mesuré.
+
 La masse de travail reste très supérieure au ledger. À `uniform,50000` :
 
 - `smax=11` : `75 780 216` ancres testées, `171 956 174` seeds aigus,

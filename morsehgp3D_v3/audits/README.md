@@ -43,6 +43,13 @@ ancienne phrase imposant le rejet global des positions dupliquées est périmée
   arêtes maximales et le partage matériel du vecteur `acu` entre q3 et q4. Les
   onze CTests verts n'exercent ni ces P0, ni le shell ; aucun chiffre 50k n'est
   reçu.
+- [`AUDIT_CONTRE_SESSION_J0_LANE_SOURCE_G4_20260815.md`](AUDIT_CONTRE_SESSION_J0_LANE_SOURCE_G4_20260815.md) :
+  contre-audit de la rampe CPU sur VM G4 et de ses scripts. Les générations
+  sont arrêtées/`TERMINATED`, mais le verdict est `INCOMPLET_OU_TRONQUE`. Le
+  brut récupéré chiffre le mur : `6,09` milliards de paires de lentille pour
+  `21,43` millions de candidats `uniform,50000,smax=11`, et jusqu'à `24,14`
+  milliards dès `eight_clusters,12500`. Le reçu reste un ledger tronqué, pas
+  une mesure de supports ni un SLO GPU.
 - [`AUDIT_CONTRE_SESSION_AXIS_TOP8_G4_840A2E2_20260814.md`](AUDIT_CONTRE_SESSION_AXIS_TOP8_G4_840A2E2_20260814.md) :
   contre-audit de l'ancienne recette G4 CPU et de son successeur au `d55bb9a` :
   fermeture générationnelle et zone IA réparées, mais parser du verdict
