@@ -157,6 +157,14 @@ target-node conditionnellement aux singletons `(a,z)`. Cela ne décide ni un
 rectangle CK complet `A x B` où `a` varie, ni un verdict `NONE`, ni son compte
 de rang : ces produits exigent corrélation ou split fail-open.
 
+**Rejeu indépendant.** Le selftest non mutant de `spindle_cone_probe` passe
+`199806` petits cas, `200000` cas u16, `120000` isométries, `20000` boîtes et
+`40000` comparaisons BigInt sans réfutation. Un second juge rationnel par
+fractions a vérifié `2000` tirages par arité et chaque arête diamétrale : tout
+point des fuseaux stricts a une puissance strictement négative. Ces contrôles
+reçoivent les formules ponctuelles du théorème, pas le count d'un rectangle CK
+ni une complexité.
+
 ## 5. Ce que « généraliser WSPD » demande encore
 
 Le contrat demande, pour q3 et q4, une partition analogue à CK dont chaque bloc

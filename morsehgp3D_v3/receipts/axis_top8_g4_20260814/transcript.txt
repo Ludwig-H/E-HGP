@@ -1,0 +1,55 @@
+git_head=840a2e28679aa3e5e3d8ec706daa680a52ac1bde fichiers_modifies=2
+sha256 morsehgp3D_v3/prototype/axis_top8.hpp = 78282847f4395cada2d2b572b2ad8d81f40f76dcefea8e5e89576fa19d4c1ddb
+sha256 morsehgp3D_v3/prototype/axis_top8_probe.cpp = af9c87adb8250a3c3897ed1ca1716bc7decef7bb72e1c7c908cf1292b3c18966
+sha256 morsehgp3D_v3/CMakeLists.txt = e0f6695ed805d9aaeff72bc1d64d042f99d7e1b205b56cb37b6c7ba6955798ce
+[GARDE pre-mutation] cible=devpod-gpu-exploration/europe-west4-a/ehgp-blackwell-spot état=TERMINATED machine=g4-standard-48 provisioning=SPOT action=STOP maxRunDuration=3600s.
+[SET-SCHEDULING] Reconfiguration protégée demandée :
+  compte              : louis.hauseux@gmail.com
+  projet              : devpod-gpu-exploration
+  zone                : europe-west4-a
+  instance            : ehgp-blackwell-spot
+  état certifié       : TERMINATED
+  maxRunDuration cible: 5400 s
+  action              : STOP
+Updated [https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/europe-west4-a/instances/ehgp-blackwell-spot].
+[GARDE post-mutation] cible=devpod-gpu-exploration/europe-west4-a/ehgp-blackwell-spot état=TERMINATED machine=g4-standard-48 provisioning=SPOT action=STOP maxRunDuration=5400s.
+[OK] maxRunDuration=5400s recertifié sur la cible TERMINATED devpod-gpu-exploration/europe-west4-a/ehgp-blackwell-spot; aucune VM démarrée ou arrêtée.
+[GARDE SSH] Clé de session ssh-ed25519 utilisable sans interaction (SHA256:qrmvOhoHJBcIpq7HCsp1DfvpYJX/yINLkXYo8aYoSfw).
+[GARDE SSH] Clé OS Login unique, expiration fixe=2026-08-14T21:35:17.467881Z, durée restante=5675s.
+[START] Démarrage protégé demandé :
+  compte                 : louis.hauseux@gmail.com
+  projet                 : devpod-gpu-exploration
+  instance               : ehgp-blackwell-spot
+  zone                   : europe-west4-a
+  machine/provisioning   : g4-standard-48 / SPOT
+  maxRunDuration GCE     : 5400 s
+  arrêt invité secondaire : 75 min
+Starting instance(s) ehgp-blackwell-spot...
+...................................................done.
+Updated [https://compute.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/europe-west4-a/instances/ehgp-blackwell-spot].
+Instance internal IP is 10.164.0.4
+Instance external IP is 34.7.9.84
+[ATTENTE] terminationTimestamp non encore matérialisé (tentative 1/12).
+[ATTENTE] terminationTimestamp non encore matérialisé (tentative 2/12).
+[ATTENTE] terminationTimestamp non encore matérialisé (tentative 3/12).
+[ATTENTE] terminationTimestamp non encore matérialisé (tentative 4/12).
+[ATTENTE] terminationTimestamp non encore matérialisé (tentative 5/12).
+[ATTENTE] terminationTimestamp non encore matérialisé (tentative 6/12).
+[ATTENTE] terminationTimestamp non encore matérialisé (tentative 7/12).
+[ATTENTE] terminationTimestamp non encore matérialisé (tentative 8/12).
+[ATTENTE] terminationTimestamp non encore matérialisé (tentative 9/12).
+[ATTENTE] terminationTimestamp non encore matérialisé (tentative 10/12).
+[ATTENTE] terminationTimestamp non encore matérialisé (tentative 11/12).
+[ATTENTE] terminationTimestamp non encore matérialisé (tentative 12/12).
+[ERREUR] La garde post-démarrage g4-standard-48/SPOT/TERMINATE/STOP n’a pas pu être certifiée : terminationTimestamp est resté absent.
+[URGENCE] Démarrage non certifié : tentative d’arrêt de la génération 2026-08-14T13:00:56.283-07:00 sur ehgp-blackwell-spot.
+[STOP] État actuel de ehgp-blackwell-spot : RUNNING.
+Stopping instance(s) ehgp-blackwell-spot...
+.......................................................................................................................................................................................................................................................................................done.
+Updated [https://compute.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/europe-west4-a/instances/ehgp-blackwell-spot].
+[OK] Cible ehgp-blackwell-spot arrêtée et vérifiée (état GCE TERMINATED).
+[INFO] Aucune autre VM project=e-hgp active détectée.
+[URGENCE] Arrêt ciblé certifié pour la génération 2026-08-14T13:00:56.283-07:00.
+--- arret certifie (rc=1) ---
+[OK] Cible ehgp-blackwell-spot labellisée project=e-hgp et déjà arrêtée (état GCE TERMINATED).
+[INFO] Aucune autre VM project=e-hgp active détectée.

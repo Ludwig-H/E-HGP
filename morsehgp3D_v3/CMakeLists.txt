@@ -5337,113 +5337,180 @@ set_tests_properties(mhgp3v_corner8_centre PROPERTIES
   PASS_REGULAR_EXPRESSION "corner8_centre : regulier=1 plat=1 shell=0 obtus=0")
 
 # ---------------------------------------------------------------------------
-# `AxisTop8` : LES COMPLETIONS q4 D'UNE FACE AIGUE, SANS PRODUIT.
+# `Q4SeedAxisTopR4` : LES COMPLETIONS q4 D'UN `Q4Seed3`, SANS PRODUIT.
 #
-# Tranche demandee par
-# audits/AUDIT_DEBLOCAGE_SOURCE_SHALLOW_SANS_DELAUNAY_20260814.md : implementer
-# en diagnostic CPU borne un `AxisTop8` ponctuel CONTRE une sweep exhaustive, et
-# graver les deux fixtures sharp AVANT tout code q4 de produit.
+# Specification : PROPOSITION.md section 7.2. Reception demandee par
+# audits/AUDIT_WORKTREE_Q4SEED_AXIS_TOPR4_20260814.md, et contrat de source
+# dans audits/NOTE_SOLUTION_CONTRAT_SOURCE_AIGUE_20260814.md.
 #
-# Le sujet vit sur la puissance AFFINE `A_z - tau B_z` le long de l'axe de la
-# face ; le juge vit sur le determinant InSphere d'ordre quatre de
-# `corner8_ball.hpp`. Aucune algebre n'est partagee.
+# L'entree est un `Q4Seed3` : un prefixe ternaire CREE ET POSSEDE par `Lane4`.
+# Ce n'est ni un support q3, ni un record lu depuis `Lane3`. q2, q3 et q4 sont
+# TROIS ENUMERATIONS INDEPENDANTES et le rang n'est pas hereditaire ; la porte
+# `--exact-once` publie `seeds_rang_q3_mort`, le nombre de prefixes deja morts
+# pour q3 qui produisent pourtant un q4 pertinent, et exige qu'il soit non nul.
 #
-# CHAQUE PORTE A REGEX EST DOUBLEE D'UNE PORTE A CODE. Un `PASS_REGULAR_EXPRESSION`
-# masque le code de retour ; la porte jumelle sans regex le restaure.
+# QUATRE CHOSES SONT JUGEES : la selection, les IDENTITES `I_B/U_B` contre un
+# juge `insphere_j` a trois classes, la MORT PAR GAPS typee, et l'EXACT-ONCE
+# global contre le brute force `C(n,4)`.
+#
+# CHAQUE PORTE A REGEX EST DOUBLEE D'UNE PORTE A CODE : un
+# `PASS_REGULAR_EXPRESSION` masque le code de retour.
 # ---------------------------------------------------------------------------
-add_executable(mhgp3v_axis_top8_probe prototype/axis_top8_probe.cpp)
-target_include_directories(mhgp3v_axis_top8_probe PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(mhgp3v_axis_top8_probe PRIVATE mhgp Threads::Threads)
-target_compile_options(mhgp3v_axis_top8_probe PRIVATE -Wall -Wextra -Werror)
+add_executable(mhgp3v_q4seed_axis_topr4_probe prototype/q4seed_axis_topr4_probe.cpp)
+target_include_directories(mhgp3v_q4seed_axis_topr4_probe PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(mhgp3v_q4seed_axis_topr4_probe PRIVATE mhgp Threads::Threads)
+target_compile_options(mhgp3v_q4seed_axis_topr4_probe PRIVATE -Wall -Wextra -Werror)
 
-# FIXTURE SHARP 1 : seize completions, la borne ne descend pas a quinze.
-add_test(NAME mhgp3v_axis_top8_fixture16_code
-         COMMAND mhgp3v_axis_top8_probe --fixture-16)
-add_test(NAME mhgp3v_axis_top8_fixture16
-         COMMAND mhgp3v_axis_top8_probe --fixture-16)
-set_tests_properties(mhgp3v_axis_top8_fixture16 PROPERTIES PASS_REGULAR_EXPRESSION
-  "fixture16 : owner=EdgeKey\\(1,2\\) carrier_primaire=0 q4=16 candidats=16 groupes=16 p=0 borne=16 manquants=0 census_faux=0 deborde=0 extra_shell=0 hist=2,2,2,2,2,2,2,2")
+# FIXTURE SHARP 1 : seize completions, deux a chaque profondeur de zero a sept.
+# La borne ne descend pas a quinze.
+add_test(NAME mhgp3v_q4axis_fixture16_code
+         COMMAND mhgp3v_q4seed_axis_topr4_probe --fixture-16)
+add_test(NAME mhgp3v_q4axis_fixture16
+         COMMAND mhgp3v_q4seed_axis_topr4_probe --fixture-16)
+set_tests_properties(mhgp3v_q4axis_fixture16 PROPERTIES PASS_REGULAR_EXPRESSION
+  "fixture16 : r4=8 owner=EdgeKey\\(1,2\\) q4=16 candidats=16 groupes=16 manquants=0 identites_fausses=0 gaps_faux=0 degeneres=0 hist=2,2,2,2,2,2,2,2")
 
-# FIXTURE SHARP 2 : le certificat de mort est sharp lui aussi.
-add_test(NAME mhgp3v_axis_top8_mort16_code
-         COMMAND mhgp3v_axis_top8_probe --fixture-mort-16)
-add_test(NAME mhgp3v_axis_top8_mort16
-         COMMAND mhgp3v_axis_top8_probe --fixture-mort-16)
-set_tests_properties(mhgp3v_axis_top8_mort16 PROPERTIES PASS_REGULAR_EXPRESSION
-  "fixture_mort16 : profondeur_min_Jf=8 retrait_un_min=7 p=0 candidats=16 shallow=0 manquants=0")
+# FIXTURE SHARP 2 : la mort par gaps est TYPEE et sharp. Profondeur minimale
+# huit sur tout `J_f`, sept des qu'on retire un seul des seize temoins.
+add_test(NAME mhgp3v_q4axis_mort16_code
+         COMMAND mhgp3v_q4seed_axis_topr4_probe --fixture-mort-16)
+add_test(NAME mhgp3v_q4axis_mort16
+         COMMAND mhgp3v_q4seed_axis_topr4_probe --fixture-mort-16)
+set_tests_properties(mhgp3v_q4axis_mort16 PROPERTIES PASS_REGULAR_EXPRESSION
+  "fixture_mort16 : r4=8 profondeur_min_Jf=8 retrait_un_min=7 verdict=MORT_GAP minoree=8 shallow=0 gaps_faux=0")
 
-# FIXTURE DE FRONTIERE : `J_f` est FERME. Le tetraedre regulier sature la borne
-# de Jung, et son apex tombe exactement sur le bout ; le temoin `(98,100,104)`
-# est cospherique du meme bout et reste un SHELL, jamais un interieur.
-add_test(NAME mhgp3v_axis_top8_jung_tendu_code
-         COMMAND mhgp3v_axis_top8_probe --fixture-jung-tendu)
-add_test(NAME mhgp3v_axis_top8_jung_tendu
-         COMMAND mhgp3v_axis_top8_probe --fixture-jung-tendu)
-set_tests_properties(mhgp3v_axis_top8_jung_tendu PROPERTIES PASS_REGULAR_EXPRESSION
-  "bout_apex=0 valide=1 profondeur=0 candidats=2 shallow=1 manquants=0 census_faux=0 face2_candidats=2 face2_shallow=1 face2_manquants=0")
+# FIXTURE DE FRONTIERE : `J_f` est FERME. Le tetraedre regulier sature Jung, son
+# apex tombe exactement sur le bout, et le temoin `(98,100,104)` cospherique du
+# meme bout reste un SHELL. Les deux orientations `B>0` et `B<0` sont exercees.
+add_test(NAME mhgp3v_q4axis_jung_tendu_code
+         COMMAND mhgp3v_q4seed_axis_topr4_probe --fixture-jung-tendu)
+add_test(NAME mhgp3v_q4axis_jung_tendu
+         COMMAND mhgp3v_q4seed_axis_topr4_probe --fixture-jung-tendu)
+set_tests_properties(mhgp3v_q4axis_jung_tendu PROPERTIES PASS_REGULAR_EXPRESSION
+  "bout_apex=0 s1=1 m1=0 i1=0 s2=1 m2=0 i2=0")
 
-# THEOREME : une face owner STRICTEMENT AIGUE a toujours `T2 > 0`, car l'angle
+# THEOREME : un `Q4Seed3` owner STRICTEMENT AIGU a toujours `T2>0`, car l'angle
 # oppose a l'arete maximale est le plus grand, donc dans `[60,90)` degres, donc
-# `sin^2 C >= 3/4 > 2/3`. La branche `T2 <= 0` est INATTEIGNABLE sous acuite
-# owner ; la porte grave les deux cotes et la campagne verifie `mortes_T2=0`.
-add_test(NAME mhgp3v_axis_top8_t2_positif_code
-         COMMAND mhgp3v_axis_top8_probe --fixture-t2-positif)
-add_test(NAME mhgp3v_axis_top8_t2_positif
-         COMMAND mhgp3v_axis_top8_probe --fixture-t2-positif)
-set_tests_properties(mhgp3v_axis_top8_t2_positif PROPERTIES PASS_REGULAR_EXPRESSION
-  "obtus=1 T2_obtus_negatif=1 aigu=1 T2_aigu_positif=1 obtuse_morte_T2=1 obtuse_candidats=0")
+# `sin^2 C >= 3/4 > 2/3`. La branche `T2<=0` est INATTEIGNABLE sous acuite
+# owner ; elle reste implementee et exercee sur un prefixe obtus.
+add_test(NAME mhgp3v_q4axis_t2_code COMMAND mhgp3v_q4seed_axis_topr4_probe --fixture-t2)
+add_test(NAME mhgp3v_q4axis_t2 COMMAND mhgp3v_q4seed_axis_topr4_probe --fixture-t2)
+set_tests_properties(mhgp3v_q4axis_t2 PROPERTIES PASS_REGULAR_EXPRESSION
+  "obtus=1 T2_obtus_negatif=1 aigu=1 T2_aigu_positif=1 verdict_obtus_mort_T2=1 candidats=0")
 
-# CAMPAGNE DIFFERENTIELLE. Les planchers interdisent le vert par vacuite : sans
-# faces aigues owner ni apex shallow, la porte rend 3.
-foreach(a8_famille uniform eight_clusters terrain)
-  add_test(NAME mhgp3v_axis_top8_sweep_${a8_famille}
-           COMMAND mhgp3v_axis_top8_probe --sweep --family=${a8_famille}
-                   --points=60 --seed=1 --threads=2 --min-faces=300 --min-shallow=100)
-endforeach()
-# La contre-famille `two_lines` n'a AUCUN triangle aigu : la source q3/q4 y est
-# vide. C'est la seule porte ou le plancher est nul, et elle l'exige.
-add_test(NAME mhgp3v_axis_top8_two_lines_vide
-         COMMAND mhgp3v_axis_top8_probe --sweep --family=two_lines
-                 --points=60 --threads=2 --min-faces=0 --min-shallow=0)
-set_tests_properties(mhgp3v_axis_top8_two_lines_vide PROPERTIES PASS_REGULAR_EXPRESSION
-  "famille=two_lines n=60 seuil=7 faces=[0-9]+ aigues_owner=0 ")
-add_test(NAME mhgp3v_axis_top8_two_lines_vide_code
-         COMMAND mhgp3v_axis_top8_probe --sweep --family=two_lines
-                 --points=60 --threads=2 --min-faces=0 --min-shallow=0)
+# CAMPAGNE DIFFERENTIELLE. Chaque famille porte SES PROPRES planchers : un vert
+# par vacuite rend 3.
+add_test(NAME mhgp3v_q4axis_sweep_uniform
+         COMMAND mhgp3v_q4seed_axis_topr4_probe --sweep --family=uniform
+                 --points=60 --seed=1 --threads=2 --min-seeds=10000 --min-shallow=3000)
+add_test(NAME mhgp3v_q4axis_sweep_amas
+         COMMAND mhgp3v_q4seed_axis_topr4_probe --sweep --family=eight_clusters
+                 --points=60 --seed=1 --threads=2 --min-seeds=10000 --min-shallow=2000)
+add_test(NAME mhgp3v_q4axis_sweep_terrain
+         COMMAND mhgp3v_q4seed_axis_topr4_probe --sweep --family=terrain
+                 --points=60 --seed=1 --threads=2 --min-seeds=5000 --min-shallow=200)
+# Les familles SCANLINE portent les coplanarites massives : c'est la seule
+# ou le shell persistant existe, donc la seule qui morde
+# `a8-shell-compte-interieur`.
+add_test(NAME mhgp3v_q4axis_sweep_scanline
+         COMMAND mhgp3v_q4seed_axis_topr4_probe --sweep --family=scanline_single_pass
+                 --points=60 --seed=1 --threads=2 --min-seeds=3000 --min-shallow=200)
+add_test(NAME mhgp3v_q4axis_sweep_multiecho
+         COMMAND mhgp3v_q4seed_axis_topr4_probe --sweep --family=scanline_overlap_multiecho
+                 --points=60 --seed=1 --threads=2 --min-seeds=500 --min-shallow=100)
 
-# PLANCHERS ET REFUS, A CODE EXACT.
-mhgp3v_add_expected_code_test_for(mhgp3v_axis_top8_probe
-  mhgp3v_axis_top8_refus_sans_mode
-  "--fixture-16, --fixture-mort-16, --fixture-jung-tendu, --fixture-t2-positif ou --sweep est exige" 2)
-mhgp3v_add_expected_code_test_for(mhgp3v_axis_top8_probe
-  mhgp3v_axis_top8_refus_cap "la campagne exhaustive est bornee a 400 points" 2
+# UN SEUIL DIFFERENT DE SEPT. Sans lui, l'ABI parametrique n'est pas testee :
+# `r4=smax-3` doit gouverner `p>=r4`, `k=r4-p` et la borne `2(r4-p)`.
+add_test(NAME mhgp3v_q4axis_sweep_smax_14
+         COMMAND mhgp3v_q4seed_axis_topr4_probe --sweep --family=uniform
+                 --points=60 --seed=1 --threads=2 --smax=14
+                 --min-seeds=10000 --min-shallow=5000)
+add_test(NAME mhgp3v_q4axis_sweep_smax_7
+         COMMAND mhgp3v_q4seed_axis_topr4_probe --sweep --family=uniform
+                 --points=60 --seed=1 --threads=2 --smax=7
+                 --min-seeds=10000 --min-shallow=500)
+
+# LA CONTRE-FAMILLE `two_lines` : aucun triangle aigu, donc AUCUN `Q4Seed3`
+# owner. La source q4 y est vide, et c'est la seule porte a plancher nul.
+add_test(NAME mhgp3v_q4axis_two_lines_vide
+         COMMAND mhgp3v_q4seed_axis_topr4_probe --sweep --family=two_lines
+                 --points=60 --threads=2 --min-seeds=0 --min-shallow=0)
+set_tests_properties(mhgp3v_q4axis_two_lines_vide PROPERTIES PASS_REGULAR_EXPRESSION
+  "famille=two_lines n=60 r4=8 seeds=0 ")
+add_test(NAME mhgp3v_q4axis_two_lines_vide_code
+         COMMAND mhgp3v_q4seed_axis_topr4_probe --sweep --family=two_lines
+                 --points=60 --threads=2 --min-seeds=0 --min-shallow=0)
+
+# L'EXACT-ONCE GLOBAL, CONTRE LE BRUTE FORCE `C(n,4)`. Zero manque, zero
+# doublon, zero surplus. `--min-q3-morts` EXIGE que l'independance des lanes
+# soit reellement exercee : des prefixes deja morts pour q3 doivent produire des
+# q4 pertinents, sinon la porte est verte par vacuite.
+add_test(NAME mhgp3v_q4axis_exact_once_uniform
+         COMMAND mhgp3v_q4seed_axis_topr4_probe --exact-once --family=uniform
+                 --points=50 --seed=1 --min-q4=2000 --min-q3-morts=10)
+set_tests_properties(mhgp3v_q4axis_exact_once_uniform PROPERTIES PASS_REGULAR_EXPRESSION
+  "manque=0 doublon=0 surplus=0")
+add_test(NAME mhgp3v_q4axis_exact_once_uniform_code
+         COMMAND mhgp3v_q4seed_axis_topr4_probe --exact-once --family=uniform
+                 --points=50 --seed=1 --min-q4=2000 --min-q3-morts=10)
+add_test(NAME mhgp3v_q4axis_exact_once_amas
+         COMMAND mhgp3v_q4seed_axis_topr4_probe --exact-once --family=eight_clusters
+                 --points=50 --seed=1 --min-q4=1500 --min-q3-morts=10)
+add_test(NAME mhgp3v_q4axis_exact_once_terrain
+         COMMAND mhgp3v_q4seed_axis_topr4_probe --exact-once --family=terrain
+                 --points=50 --seed=1 --min-q4=100 --min-q3-morts=1)
+
+# REFUS ET PLANCHERS, A CODE EXACT.
+mhgp3v_add_expected_code_test_for(mhgp3v_q4seed_axis_topr4_probe
+  mhgp3v_q4axis_refus_sans_mode
+  "--fixture-16, --fixture-mort-16, --fixture-jung-tendu, --fixture-t2, --sweep ou --exact-once est exige" 2)
+mhgp3v_add_expected_code_test_for(mhgp3v_q4seed_axis_topr4_probe
+  mhgp3v_q4axis_refus_cap "la campagne exhaustive est bornee a 400 points" 2
   --sweep --family=uniform --points=500)
-mhgp3v_add_expected_code_test_for(mhgp3v_axis_top8_probe
-  mhgp3v_axis_top8_plancher_vide "PLANCHER: 0 faces aigues owner" 3
-  --sweep --family=two_lines --points=60 --threads=2 --min-faces=1)
+mhgp3v_add_expected_code_test_for(mhgp3v_q4seed_axis_topr4_probe
+  mhgp3v_q4axis_refus_cap_exact_once "l'exact-once exhaustif est borne a 200 points" 2
+  --exact-once --family=uniform --points=300)
+mhgp3v_add_expected_code_test_for(mhgp3v_q4seed_axis_topr4_probe
+  mhgp3v_q4axis_refus_smax "--smax hors domaine" 2
+  --sweep --family=uniform --points=60 --smax=99)
+mhgp3v_add_expected_code_test_for(mhgp3v_q4seed_axis_topr4_probe
+  mhgp3v_q4axis_plancher_vide "PLANCHER: 0 Q4Seed3 aigus owner" 3
+  --sweep --family=two_lines --points=60 --threads=2 --min-seeds=1)
+# LE PLANCHER QUI GARDE L'INDEPENDANCE DES LANES : si aucun prefixe q3-mort ne
+# produit de q4, la fixture d'independance n'est pas exercee et la campagne est
+# refusee, meme si tout le reste est vert.
+mhgp3v_add_expected_code_test_for(mhgp3v_q4seed_axis_topr4_probe
+  mhgp3v_q4axis_plancher_independance "prefixes q3-morts utiles" 3
+  --exact-once --family=terrain --points=50 --min-q4=100 --min-q3-morts=100)
 
-# LES SEPT MUTANTS, A CODE DE SORTIE 4. Chacun est tue par la porte nommee ici,
-# et par elle seule dans certains cas : `a8-bouts-ouverts` et
-# `a8-permanence-large` n'existent qu'a la FRONTIERE de `J_f`, donc seule la
-# fixture du tetraedre regulier les mord.
-mhgp3v_add_expected_code_test_for(mhgp3v_axis_top8_probe
-  mhgp3v_axis_top8_mutant_cap15 "mutant_killed=1 a8-cap15" 4
-  --fixture-16 --inject=a8-cap15)
-mhgp3v_add_expected_code_test_for(mhgp3v_axis_top8_probe
-  mhgp3v_axis_top8_mutant_k_fixe_7 "mutant_killed=1 a8-k-fixe-7" 4
-  --fixture-16 --inject=a8-k-fixe-7)
-mhgp3v_add_expected_code_test_for(mhgp3v_axis_top8_probe
-  mhgp3v_axis_top8_mutant_bouts_ouverts "mutant_killed=1 a8-bouts-ouverts" 4
+# LES NEUF MUTANTS, A CODE DE SORTIE 4. Chacun est nomme avec la porte QUI SEULE
+# le mord : les deux frontieres de `J_f` n'existent que sur le tetraedre
+# regulier, et le shell persistant que sur une famille scanline.
+mhgp3v_add_expected_code_test_for(mhgp3v_q4seed_axis_topr4_probe
+  mhgp3v_q4axis_mutant_cap "mutant_killed=1 a8-cap-moins-un" 4
+  --fixture-16 --inject=a8-cap-moins-un)
+mhgp3v_add_expected_code_test_for(mhgp3v_q4seed_axis_topr4_probe
+  mhgp3v_q4axis_mutant_k_fixe "mutant_killed=1 a8-k-fixe-r4-moins-un" 4
+  --fixture-16 --inject=a8-k-fixe-r4-moins-un)
+mhgp3v_add_expected_code_test_for(mhgp3v_q4seed_axis_topr4_probe
+  mhgp3v_q4axis_mutant_bouts_ouverts "mutant_killed=1 a8-bouts-ouverts" 4
   --fixture-jung-tendu --inject=a8-bouts-ouverts)
-mhgp3v_add_expected_code_test_for(mhgp3v_axis_top8_probe
-  mhgp3v_axis_top8_mutant_permanence_large "mutant_killed=1 a8-permanence-large" 4
+mhgp3v_add_expected_code_test_for(mhgp3v_q4seed_axis_topr4_probe
+  mhgp3v_q4axis_mutant_permanence_large "mutant_killed=1 a8-permanence-large" 4
   --fixture-jung-tendu --inject=a8-permanence-large)
-mhgp3v_add_expected_code_test_for(mhgp3v_axis_top8_probe
-  mhgp3v_axis_top8_mutant_signe_b "mutant_killed=1 a8-signe-b-inverse" 4
+mhgp3v_add_expected_code_test_for(mhgp3v_q4seed_axis_topr4_probe
+  mhgp3v_q4axis_mutant_gap_large "mutant_killed=1 a8-gap-large" 4
+  --fixture-mort-16 --inject=a8-gap-large)
+mhgp3v_add_expected_code_test_for(mhgp3v_q4seed_axis_topr4_probe
+  mhgp3v_q4axis_mutant_signe_b "mutant_killed=1 a8-signe-b-inverse" 4
   --sweep --family=uniform --points=60 --threads=2 --inject=a8-signe-b-inverse)
-mhgp3v_add_expected_code_test_for(mhgp3v_axis_top8_probe
-  mhgp3v_axis_top8_mutant_b_zero "mutant_killed=1 a8-oublie-b-zero" 4
+mhgp3v_add_expected_code_test_for(mhgp3v_q4seed_axis_topr4_probe
+  mhgp3v_q4axis_mutant_b_zero "mutant_killed=1 a8-oublie-b-zero" 4
   --sweep --family=uniform --points=60 --threads=2 --inject=a8-oublie-b-zero)
-mhgp3v_add_expected_code_test_for(mhgp3v_axis_top8_probe
-  mhgp3v_axis_top8_mutant_abs_tri "mutant_killed=1 a8-abs-avant-tri" 4
+mhgp3v_add_expected_code_test_for(mhgp3v_q4seed_axis_topr4_probe
+  mhgp3v_q4axis_mutant_abs_tri "mutant_killed=1 a8-abs-avant-tri" 4
   --sweep --family=uniform --points=60 --threads=2 --inject=a8-abs-avant-tri)
+mhgp3v_add_expected_code_test_for(mhgp3v_q4seed_axis_topr4_probe
+  mhgp3v_q4axis_mutant_shell "mutant_killed=1 a8-shell-compte-interieur" 4
+  --sweep --family=scanline_single_pass --points=60 --threads=2
+  --inject=a8-shell-compte-interieur)

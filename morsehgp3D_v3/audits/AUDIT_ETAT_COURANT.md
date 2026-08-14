@@ -8,10 +8,12 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-> **Verdict live au `HEAD=069acf7c26312b6146cb8d1ce890cb5f4d681cac`.**
-> Ce commit ajoute le noyau CPU `AxisTop8`, son probe, 23 CTests et les textes
-> contractuels. Le worktree était propre immédiatement après ce commit, avant
-> les présentes corrections d'audit.
+> **Verdict live au `HEAD=840a2e28679aa3e5e3d8ec706daa680a52ac1bde`.**
+> `069acf7` ajoute le noyau CPU `AxisTop8`, son probe, 23 CTests et les textes
+> contractuels ; `840a2e2` paramètre la borne par le seuil de mort et ajoute une
+> recette G4 CPU. Le worktree courant contient les présentes corrections
+> documentaires et un candidat non suivi `prototype/q4seed_axis_topr4.hpp` : ce
+> dernier n'entre dans aucun résultat de build ou de test rapporté ici.
 > Q14 est fermée contractuellement : aucune structure de Delaunay n'est
 > autorisée, y compris d'ordre un, comme source, squelette, filtre ou census.
 >
@@ -36,13 +38,21 @@ Cadre : `phase=exploration_v3_hors_registre`,
 > [`NOTE_SOLUTION_CONTRAT_SOURCE_AIGUE_20260814.md`](NOTE_SOLUTION_CONTRAT_SOURCE_AIGUE_20260814.md).
 >
 > Claude a ajouté puis commis `prototype/axis_top8.hpp` et
-> `axis_top8_probe.cpp`. Le noyau fixe passe ses quatre
-> fixtures et deux sweeps `n=60,seuil=7`, mais son CLI accepte à tort d'autres
-> seuils : à `seuil=8`, il perd `440` apex sur `uniform` et `428` sur
-> `eight_clusters`. Il ne transporte que le compte des permanents, ne juge pas
-> le shell, ne produit pas le reçu de mort par gaps et ne teste pas le primary
-> q4 global. Contre-audit et hashes :
+> `axis_top8_probe.cpp`. À `069acf7`, le sujet restait fixé à huit malgré son CLI,
+> et perdait à `seuil=8` `440` apex sur `uniform` et `428` sur
+> `eight_clusters`. Le commit `840a2e2` paramètre désormais `mort=seuil+1` :
+> les deux rejeux passent avec zéro manque, ainsi que `uniform,seuil=15`.
+> Restent P0 : seulement le compte des permanents, aucun shell exact, aucun
+> reçu de mort par gaps et aucun primary q4 global. Contre-audit, hashes du
+> commit et protocole de réception :
 > [`AUDIT_WORKTREE_Q4SEED_AXIS_TOPR4_20260814.md`](AUDIT_WORKTREE_Q4SEED_AXIS_TOPR4_20260814.md).
+>
+> La recette `session_axis_top8_g4.sh` de `840a2e2` ne doit pas être lancée :
+> quand son horodatage de génération est vide, son trap appelle un arrêt non
+> versionné susceptible de toucher une session préexistante ; ses 76 runs
+> séquentiels en puissance cinq ne tiennent pas non plus dans le budget
+> 55/75/90 minutes. Contre-audit statique :
+> [`AUDIT_CONTRE_SESSION_AXIS_TOP8_G4_840A2E2_20260814.md`](AUDIT_CONTRE_SESSION_AXIS_TOP8_G4_840A2E2_20260814.md).
 >
 > Il n'existe toujours aucune mesure GPU G4 bout-en-bout. Le reçu
 > `chaine_complete_g4_20260813` est `GPU_RUN=NO`, `PRODUCT_OUTPUT=NO` et mesure

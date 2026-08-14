@@ -168,9 +168,10 @@ Cette unicité fournit aussi un backend de census partagé : après normalisatio
 et RLE, une `BallKey` peut être parcourue par la même somme de trois
 quadratiques convexes `A*z_j^2+B_j*z_j`. Ses extrema sur une AABB u16 entière
 sont exacts par axe. `active_arity_mask` efface q2/q3/q4 respectivement à
-`10/9/8` intérieurs. Pour q4, `Q4SeedAxisTopR4` transporte déjà la liste exacte
-`I_B/U_B`; le backend reste l'autorité/fallback mais ne doit pas refaire un
-second scan lorsque le reçu axial et le tie report sont complets. Cela supprime
+`10/9/8` intérieurs. Pour q4, le théorème `Q4SeedAxisTopR4` permet de transporter
+la liste exacte `I_B/U_B`; le prototype courant n'en conserve encore que des
+comptes. Le backend reste l'autorité/fallback et ne pourra éviter un second
+scan que lorsque le reçu axial d'IDs et le tie report seront complets. Cela supprime
 les census répétés par support, pas une sortie réellement lourde.
 
 La source WSPD active suit directement les trois contrats de miniboule : q2
