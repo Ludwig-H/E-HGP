@@ -343,8 +343,10 @@ parallèle, mais elle ne devient source qu'après raccord CK.
 
 Ne pas remplacer l'owner arête maximale. Il fournit la couverture, le tie-break
 exact-once et le lemme d'existence d'une face aiguë. La boule `3B_R` de la
-première proposition est sûre mais non optimale : **`2B_R` suffit et la
-constante deux est atteignable**.
+première proposition est sûre mais non optimale : pour `R>0`, **`2B_R` suffit
+et la constante deux est atteignable lorsque la seule information est
+`{a,b} subset B_R`**. Une structure CK plus riche peut encore resserrer cette
+enveloppe extérieure ; `2B_R` n'est pas l'enveloppe géométrique exacte.
 
 Translater `B_R` à l'origine et écrire `a=m-h`, `b=m+h`, `x=m+q`. Les endpoints
 dans `B_R` donnent `||m||^2+||h||^2<=R^2`. La maximalité de `ab` donne
@@ -352,8 +354,11 @@ dans `B_R` donnent `||m||^2+||h||^2<=R^2`. La maximalité de `ab` donne
 `||q||^2+2|q dot h|<=3||h||^2` et `||q||<=sqrt(3)||h||`. Ainsi
 `||x||<=||m||+sqrt(3)||h||<=2R`. Le cas `m` orthogonal à `h`,
 `||m||=R/2`, `||h||=sqrt(3)R/2`, `q=3m` atteint deux. Passer de `3B_R` à
-`2B_R` divise le plafond volumique par `27/8` et celui des couples de cellules
-par `729/64`, sans toucher la couverture.
+`2B_R` divise le volume continu du plafond par `27/8` et son carré par
+`729/64`, sans promettre ces facteurs exacts sur le nombre de cellules Morton.
+Une fixture u16 d'égalité est `o=(4,4,2)`, `R^2=8`,
+`a=(4,2,4)`, `b=(2,4,0)`, `x=(0,0,2)` : les trois côtés valent 24 et
+`||x-o||^2=4R^2`; les `PointId` fixent `ab` comme owner à égalité.
 
 Pour un rectangle CK serré, prendre encore l'intersection avec deux enveloppes
 endpoint. Si `A` est dans `B(c_A,r_A)`, `B` dans `B(c_B,r_B)` et `U_AB`

@@ -73,7 +73,8 @@ int main(int argc, char** argv) {
     return (x1 != y1) ? (x1 < y1) : (x2 < y2);
   };
 
-  long long tot4 = 0, m4 = 0, w4 = 0, h4 = 0;
+  long long tot4 = 0, m4 = 0, w4 = 0, h4 = 0, maxint = 0;
+  double somme_int = 0.0;
   std::vector<long long> hist(64, 0);
   int q[4];
   for (q[0] = 0; q[0] < m; ++q[0])
@@ -149,6 +150,8 @@ int main(int argc, char** argv) {
          if ((orient > 0) ? (det4 < 0) : (det4 > 0)) ++interieurs;
        }
        if (interieurs < (long long)hist.size()) ++hist[(size_t)interieurs];
+       somme_int += (double)interieurs;
+       if (interieurs > maxint) maxint = interieurs;
        if (interieurs <= rangmax) ++h4;
      }
   std::printf("famille=%s n=%d coord=%d | 4-sous-ensembles=%lld M4_total=%lld W4=%lld"
@@ -156,6 +159,14 @@ int main(int argc, char** argv) {
   std::printf("  M4/C(n,4)=%.4f  W4/M4=%.4f  H4/W4=%.6f  H4/n=%.3f\n",
               (double)m4 / (double)tot4, (double)w4 / (double)m4,
               (double)h4 / (double)w4, (double)h4 / (double)m);
+  // LA MARGE DU REJET. Un candidat rejete ne l'est pas de justesse : la
+  // profondeur moyenne de sa sphere depasse le seuil de deux ordres de
+  // grandeur. C'est exactement ce qui laisse de la place a un certificat de
+  // BLOC conservateur — il n'a qu'a certifier « au moins huit », alors que la
+  // valeur typique est cent fois plus grande.
+  std::printf("  interieurs_moyen=%.2f max=%lld seuil=%d marge=%.1fx\n",
+              (w4 == 0) ? 0.0 : somme_int / (double)w4, maxint, rangmax,
+              (w4 == 0 || rangmax == 0) ? 0.0 : somme_int / (double)w4 / (double)rangmax);
   std::printf("  histogramme des interieurs (0..15) :");
   for (int i = 0; i < 16; ++i) std::printf(" %lld", hist[(size_t)i]);
   std::printf("\n");

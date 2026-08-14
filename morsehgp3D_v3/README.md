@@ -57,7 +57,8 @@ La prochaine chaîne à fermer est :
 0A  BallForm -> BallKey -> census -> BallEvent exact
 0B  oracle exhaustif borné -> lots -> dix forêts -> verticales -> payload
 1   CKPairTape q2 -> porteurs aigus -> OwnedCK-WST3/WST4, toujours factorisés
-2   certifier rang/census et mesurer F2/F3/C4_carrier/F4/M4_apex/T4_site
+2   certifier profondeur par blocs avant fill, puis rang/census et
+    F2/F3/C4_carrier/F4/M4_apex/T4_site
 3   porter la même tranche sur device, puis mesurer warm_e2e sur G4
 4   ouvrir séparément tout nouveau profil numérique
 ```
@@ -224,11 +225,11 @@ ou prouver un futur `BlockJungDiskDepth` uniforme. Une fixture `2×2` ferme q4
 sur la paire basse alors qu'aucun de ses huit témoins n'est même q2 intérieur
 sur la paire haute ; tout transfert depuis un représentant reste interdit.
 
-Un candidat uniforme exact est `BlockJungDualTile`. Écrire `m=(a+b)/2`,
+Un candidat de certificat `ALL` uniforme est `BlockJungDualTile`. Écrire `m=(a+b)/2`,
 `h=(b-a)/2`, `c=m+w`, avec `w dot h=0` et
 `||w||<=kappa||h||`, où `kappa^2=1/3` pour q3 et `1/2` pour q4. Un groupe
 ferme une paire si et seulement s'il existe des poids rationnels `lambda_z`
-positifs de somme un tels que, avec
+non négatifs de somme un tels que, avec
 `alpha=||h||^2-sum lambda_z||m-z||^2` et `p=m-sum lambda_z z`, on ait :
 
 ```text
@@ -240,6 +241,9 @@ Helly borne une base à trois IDs. Un certificat de bloc conserve une même base
 et des poids rationnels, puis prouve ces polynômes sur tout `A×B` par bornes
 entières, Bernstein/SOS ou split fail-open. Tester seulement les coins est
 faux. Pour un témoin singleton, ce dual redonne exactement `SOC64`.
+Cette version bloc est sûre mais incomplète : `for all pair exists lambda`
+n'implique pas `exists lambda for all pair`. Un échec ou un dénominateur trop
+large rend `MIXED/UNKNOWN`, jamais `NONE`.
 
 Après une face aiguë, une seconde porte collective travaille en dimension un.
 Sur le segment de centres `J_f` compatible avec `K_4(ab)`, chaque témoin porte
@@ -248,8 +252,11 @@ Un groupe couvre tout `J_f` si `J_f intersect intersection_z{P_z>=0}` est vide.
 Helly 1D donne une base d'au plus deux IDs ; huit groupes disjoints ferment
 toutes les extensions q4 de la face avant apex et avant sweep. La version bloc
 doit vérifier signes et produits croisés uniformément, sinon scinder. La chaîne
-de prune devient donc `Jung edge 2D -> carrier aigu -> Jung axe 1D -> WST4`,
-et la sweep par face n'est autorisée qu'après preflight de son résiduel.
+de prune devient donc `Jung edge 2D -> carrier aigu -> Jung axe 1D ->
+BlockBallDepth8 sur carrier×apex -> WST4 résiduel`, et la sweep par face n'est
+autorisée qu'après preflight. Le rang se prouve ainsi avant chaque BallKey
+ponctuelle ; il n'est pas nécessaire d'énumérer les q4 pour commencer à le
+filtrer.
 
 Le LP global reste un oracle utile, mais son échec ne prouve plus une pénurie
 sur le disque Morse : une fixture à huit groupes ferme `JungDiskDepth8` alors
@@ -354,13 +361,21 @@ n'est exact : des supports positifs gardent un partenaire arbitrairement loin
 en rang. Aucun arrangement global, aucune mosaïque Delaunay d'ordre supérieur
 et aucun catalogue exhaustif ne deviennent le chemin produit.
 
-Au HEAD `4515a8b`, `--porteurs` ne scanne qu'un troisième sommet `x` par arête
-et imprime cette quadrature sous `M4_estime`. Il manque owner `EdgeKey`,
-exclusion `PENDING`, loi aléatoire/intervalle et vue SOC appariée. Le delta live
-v1 répare l'owner et compte `M4_apex` par arête, mais retire de sa moyenne les
-grosses lentilles capées ; il peut imprimer zéro si elles sont toutes capées.
-Ces chiffres restent diagnostics. Leur pente proche de trois sur les amas
-réfute l'expansion ponctuelle `edge×carrier`, pas les CarrierBlocks factorisés.
+Au HEAD `5bfc5c8`, le sampler v2 retire `PENDING` et la censure des grosses
+lentilles, mais son tirage multiply-high n'est pas uniforme exact sans rejet,
+son `2 sigma` n'est pas un intervalle certifié et son contrôle ne compare pas le
+décodage rang--`PairId` à une vérité indépendante. `--rang` peut en outre
+réussir sans `--porteurs`, ignore les extra-shells et mesure un échantillon
+conditionnel non pondéré, pas `H4/W4`.
+
+Le nouveau `q4_brute_oracle` reçoit seulement une énumération exhaustive
+bornée. Son claim `M4=Theta(n^4)` pour tout nuage est faux : sa propre famille
+`two_lines` donne `M4=0`. Ses prédicats recopient le Gram--Cramer/in-sphere du
+sujet, son `H4` teste seulement les intérieurs et oublie le shell, et les cas
+vides impriment `NaN`. Les quatre CTests verts ne réparent pas ces défauts.
+Une construction ouverte sur quatre sous-cubes prouve néanmoins une masse
+q4 bien centrée quartique **avant rang** ; un cinquième sous-cube fournit huit
+intérieurs uniformes et montre pourquoi `BlockBallDepth8` doit agir avant fill.
 
 Le raffinement local réduit effectivement `E4`, mais ses parents et enfants
 sont encore mélangés dans plusieurs compteurs de tentative. Son coût doit être

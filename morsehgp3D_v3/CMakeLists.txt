@@ -4611,3 +4611,14 @@ add_test(NAME mhgp3v_q4_brute_two_lines
   COMMAND mhgp3v_q4_brute_oracle --family=two_lines --points=60)
 set_tests_properties(mhgp3v_q4_brute_two_lines PROPERTIES
   PASS_REGULAR_EXPRESSION "M4_total=0 W4=0 H4.rang<=7.=0")
+
+# LA MARGE DU REJET, ET POURQUOI ELLE OUVRE UNE VOIE. Un candidat q4 rejete ne
+# l'est pas de justesse : la profondeur moyenne de sa sphere croit lineairement
+# en `n` — 22,5 puis 34,4 puis 46,4 pour n = 60, 90, 120 — alors que le seuil
+# reste a sept. Un certificat de BLOC n'a donc qu'a certifier « au moins huit »
+# quand la valeur typique est deja six fois plus grande, et l'ecart s'ouvre avec
+# la taille. C'est cette marge qui rend `TetraDepthBlock` plausible.
+add_test(NAME mhgp3v_q4_brute_marge_rejet
+  COMMAND mhgp3v_q4_brute_oracle --family=eight_clusters --points=120)
+set_tests_properties(mhgp3v_q4_brute_marge_rejet PROPERTIES
+  PASS_REGULAR_EXPRESSION "interieurs_moyen=46.40 max=116 seuil=7 marge=6.6x")

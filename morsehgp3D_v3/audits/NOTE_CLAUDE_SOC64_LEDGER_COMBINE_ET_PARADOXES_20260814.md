@@ -501,6 +501,47 @@ formuler ainsi :
 > `min P >= 0` par span de cellule donnerait déjà huit crédits disjoints sans
 > jamais matérialiser un tétraèdre.
 
+### Pourquoi je crois que cette voie a de la place : la marge du rejet
+
+J'ai d'abord cru tenir un certificat de paire nouveau, en bornant le
+circumcentre par Jung. Pour un tétraèdre bien centré d'arête maximale `ab`, le
+rayon vérifie `D/4 <= R^2 <= 3D/8`, donc le centre reste à distance au plus
+`sqrt(D/8)` du milieu `m`. Tout point `z` tel que
+`||z-m||^2 + 2||z-m||_perp sqrt(D/8) < D/4` est alors intérieur à **toute**
+sphère admissible. C'est exact — et c'est exactement le spindle que
+`spindle_cone.hpp` implémente déjà, dont `CentralBall209` est la version
+inscrite `||U||^2 <= (56/209) D`. Le certificat de paire est donc déjà au
+maximum de ce que cette géométrie permet, et il échoue quand même sur les
+longues arêtes. Ce n'est pas une constante à récupérer.
+
+La raison de son échec est structurelle et se dit en une phrase : **le
+certificat de paire doit couvrir la pire sphère**, et une longue arête
+inter-amas en possède toujours une, presque vide, qui bombe vers le vide entre
+les amas. Une seule sphère vide suffit à laisser la paire ouverte.
+
+Mais les autres sphères de la même paire, elles, sont pleines. L'oracle de
+force brute mesure cette dissymétrie :
+
+| famille | `n` | intérieurs moyens d'un candidat | max | seuil | **marge** |
+|---|---:|---:|---:|---:|---:|
+| `uniform` | 60 / 90 / 120 | 22,25 / 33,47 / 45,37 | 56 / 86 / 115 | 7 | 3,2x / 4,8x / **6,5x** |
+| `eight_clusters` | 60 / 90 / 120 | 22,52 / 34,38 / 46,40 | 56 / 86 / 116 | 7 | 3,2x / 4,9x / **6,6x** |
+
+La profondeur moyenne d'un candidat croît **linéairement en `n`** — environ
+`n/2,6` — pendant que le seuil reste à sept. À `n=50 000` la valeur typique
+serait de l'ordre de `19 000` contre un seuil de `7`, soit une marge de
+`2 700x`.
+
+Un candidat rejeté ne l'est donc pas de justesse : il l'est de deux ordres de
+grandeur, et l'écart s'ouvre avec la taille. **C'est cette marge qui rend un
+certificat de bloc plausible** : il n'a besoin de certifier que « au moins
+huit », et il peut être très conservateur sans rien perdre. Le coût serait un
+range-count par bloc `(RectBlock, C, D)` — donc par `F4`, que votre borne
+`O(s^9 n)` rend linéaire — et non par candidat `M4`.
+
+C'est la seule voie que je voie qui attaque l'écart de onze ordres de grandeur
+là où il est, au lieu de le déplacer.
+
 ## 7. Ce que je propose de faire ensuite, et ce que j'attends de vous
 
 Ma lecture, en une phrase : **`SOC64` est reçu comme un prune exact et bon

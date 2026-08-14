@@ -494,6 +494,12 @@ Bernstein/SOS ou un split traite le résiduel. L'échec reste `MIXED`. Les coins
 seuls ne suffisent pas : deux témoins peuvent couvrir tous les couples extrêmes
 et n'être que shell pour une paire médiane.
 
+Cette promotion est seulement un certificat suffisant :
+`for all (a,b) exists lambda(a,b)` n'implique pas l'existence de poids communs
+au rectangle. Les poids fixes vérifiés donnent `ALL`; leur échec, une marge
+nulle ou un dénominateur au-delà du cap donnent `MIXED/UNKNOWN`. La rationalité
+découle de la marge stricte par densité, sans borne universelle de dénominateur.
+
 Cette porte paire-level est strictement plus adaptée que le LP sur tout le
 plan. Un échec du LP global ne diagnostique pas une pénurie de témoins sur
 `K_q`. Le hot path propose et valide de petits groupes ; l'arbre de suppressions
@@ -701,8 +707,11 @@ nulle pour un shell permanent, positive pour un extérieur permanent. Ces sites
 ne sont jamais jetés ; les IDs du support sont masqués séparément.
 
 Avant de matérialiser les apex, exploiter la même droite comme certificateur de
-profondeur. Son intersection avec `K_4(ab)` est un segment fermé `J_f`. Pour
-chaque témoin, poser `A_z=G||z-a||^2-W dot (z-a)` et
+profondeur. Son intersection avec `K_4(ab)` est un segment fermé `J_f`. Avec
+`c_0=a+W/(2G)`, `m=(a+b)/2` et `h=(b-a)/2`, il s'écrit
+`J_f={tau:tau^2<=T_f}`, où
+`T_f=4G*(||h||^2/2-||c_0-m||^2)`. Pour chaque témoin, poser
+`A_z=G||z-a||^2-W dot (z-a)` et
 `B_z=n dot (z-a)` ; l'absence d'intérieur est le demi-intervalle
 `A_z-tau*B_z>=0`. Un groupe couvre toute la face si :
 
@@ -718,8 +727,24 @@ Un `FaceAxisJungDepth8Block` propose les petites bases sur un représentant,
 vérifie signes et produits croisés sur tout `A×B×C`, puis rend `ALL` ou scinde
 fail-open. Un succès parent s'hérite dans le `ProofSpanDAG`.
 
+Les bouts de `J_f` étant généralement irrationnels, une comparaison élevée au
+carré certifie d'abord son signe. `B_z=0` conserve les trois cas constant
+intérieur/shell/extérieur. Huit groupes disjoints forment un reçu suffisant ;
+la profondeur exacte fixe-face emploie la récurrence leave-out ou un maximum
+matching du graphe-chaîne, pas un glouton arbitraire.
+
+Après ajout d'une cellule apex, `BlockBallDepth8(A,B,C,D)` restreint encore la
+famille de centres. Si `B_y` change de signe sur `D`, son image en `tau` peut
+être non bornée ou disjointe : reprendre tout `J_f` ou rendre `MIXED`. Sinon un
+intervalle conservateur est vérifié. Le déterminant in-sphere ponctuel tient
+dans `i128` sous u16 ; son produit par l'orientation peut dépasser 128 bits, donc
+les deux signes sont classés séparément. Une enveloppe de bloc ne traite jamais
+une AABB levée comme le convexe de ses seuls coins : elle borne `||p||^2`
+séparément ou utilise Bernstein/SOS exact.
+
 La hiérarchie q4 devient donc : Jung edge 2D, porte aiguë, Jung axe 1D,
-`ApexWellCenteredBlock`, puis seulement le résiduel vers WST4/sweep. Cette
+`ApexWellCenteredBlock`, `BlockBallDepth8`, puis seulement le résiduel vers
+WST4/sweep. Cette
 ordonnance attaque la masse `C4_carrier` avant de développer une face ; une
 borne linéaire sur le nombre de blocs ne suffirait pas sans ce consommateur
 factorisé.
@@ -751,11 +776,24 @@ seuls les `MIXED` se divisent. L'ordre physique garde donc le carrier
 symbolique, forme WST4, applique owner/barycentriques/profondeur, puis ne
 matérialise une face que si le résiduel justifie la sweep.
 
-Le sampler du HEAD ne fournit pas une estimation reçue : owner faible,
-`PENDING` inclus, quantiles fixes sans seed ni intervalle et baseline seule. Le
-delta live v1 répare l'owner et calcule `M4_apex` par arête jugée, mais retire
-les grandes lentilles capées de la moyenne et peut imprimer zéro si elles sont
-toutes capées. Aucun de ces chiffres ne justifie une rampe G4 50k.
+Le sampler v2 du HEAD ne fournit pas encore une estimation reçue : le mapping
+multiply-high est biaisé sans rejet, `2 sigma` n'est pas un intervalle certifié,
+le contrôle ne juge pas le décodeur rang--`PairId` et la vue SOC reste absente.
+Son option `--rang` peut réussir sans lancer le sampler, ignore les extra-shells
+et conditionne le tirage sans les poids nécessaires. Le brute-force q4 reçoit
+une énumération bornée, mais recopie les prédicats du sujet et appelle à tort
+`H4` le seul test `I<=7`. Aucun de ces chiffres ne justifie une rampe G4 50k.
+
+Le mur avant rang est néanmoins réel sur une famille explicite. Pour
+`a=(20,20,20)`, `b=(30,30,30)`, `x=(19,31,31)`, `y=(31,19,31)`, `ab` est
+owner unique, les deux faces adjacentes sont aiguës et les poids q4 valent
+`(47,3,55,55)/160`. Ces propriétés persistent sur quatre petits sous-cubes :
+la masse `W4_positive` y est quartique. Mais les huit points
+`(20+i,20+j,30+k)`, `i,j,k` dans `{0,1}`, sont tous strictement intérieurs ;
+par continuité, un cinquième sous-cube ferme uniformément ce produit à
+`smax=11`. Cette fixture exige que la profondeur de bloc agisse avant le fill,
+et tue toute route qui compte sur les seules barycentriques pour réduire
+l'exposant.
 
 ## 8. Plateaux, fold et sortie
 
