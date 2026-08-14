@@ -1,6 +1,6 @@
 # Glossaire
 
-Tous les termes du dossier, une ou deux lignes chacun. Les définitions mathématiques normatives sont dans [CONTRAT_HGP.md](CONTRAT_HGP.md) et [THEOREMES.md](THEOREMES.md) ; ici, on cherche à comprendre vite.
+Tous les termes du dossier, une ou deux lignes chacun. Les définitions mathématiques normatives sont dans [CONTRAT_HGP.md](archive/CONTRAT_HGP.md) et [THEOREMES.md](archive/THEOREMES.md) ; ici, on cherche à comprendre vite.
 
 Trois symboles à ne **jamais** confondre, c'est la confusion la plus fréquente du dossier :
 
@@ -80,7 +80,7 @@ $W_v$ vit dans l'espace des **centres de boules** : ce n'est ni un polytope, ni 
 
 ## Descripteurs de nœud
 
-Détail et démonstrations dans [DESCRIPTEURS_DE_NOEUD.md](DESCRIPTEURS_DE_NOEUD.md).
+Détail et démonstrations dans [DESCRIPTEURS_DE_NOEUD.md](archive/DESCRIPTEURS_DE_NOEUD.md).
 
 | Terme | Définition |
 |---|---|

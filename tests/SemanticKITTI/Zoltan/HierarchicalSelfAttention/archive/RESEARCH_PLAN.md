@@ -10,7 +10,7 @@ Le plan est ordonné par information acquise : les expériences les moins coûte
 
 Le dossier contient aujourd'hui une spécification très complète — objet, contrat de données, carriers, descripteurs de nœud, opérateur hiérarchique, protocole expérimental, registre de risques — et aucune mesure. Le rendement marginal d'une ligne de spécification supplémentaire est donc proche de zéro, alors que celui de la première mesure est très élevé : c'est elle, et non un raffinement du formalisme, qui décide si le programme continue. Le plan ci-dessous est réordonné en conséquence, de sorte que la première mesure arrive avant toute nouvelle spécification.
 
-L'ordre des trois mesures d'entrée, leur protocole corrigé et le budget de nouveauté qu'elles conditionnent sont établis dans [VOIES.md](VOIES.md) ; ce plan les intègre sans les redémontrer. La caractérisation des canaux de descripteur, qui n'est pas sur le chemin critique, est traitée dans [DESCRIPTEURS_DE_NOEUD.md](DESCRIPTEURS_DE_NOEUD.md). Concrètement, M1 et M2 sont absorbées par WP1, M3 devient WP1bis et précède WP2 ; aucune des trois ne demande d'entraînement.
+L'ordre des trois mesures d'entrée, leur protocole corrigé et le budget de nouveauté qu'elles conditionnent sont établis dans [VOIES.md](../VOIES.md) ; ce plan les intègre sans les redémontrer. La caractérisation des canaux de descripteur, qui n'est pas sur le chemin critique, est traitée dans [DESCRIPTEURS_DE_NOEUD.md](DESCRIPTEURS_DE_NOEUD.md). Concrètement, M1 et M2 sont absorbées par WP1, M3 devient WP1bis et précède WP2 ; aucune des trois ne demande d'entraînement.
 
 ## WP0 — Reproductibilité et contrat des données
 
@@ -51,7 +51,7 @@ Pour $K=1,2,3$, calculer sur train et validation. Vérifier d'abord par fixture 
 - courbe compression–composition–localisation–mIoU pour différentes coupes/condensations ;
 - mêmes mesures pour RSL/HDBSCAN, octree/voxel tree et arbre aléatoire contrôlé.
 
-Deux de ces mesures sont prioritaires et portent les noms M1 et M2 dans [VOIES.md](VOIES.md). Elles ne demandent que la hiérarchie et les labels, aucun entraînement, et elles tranchent davantage que toute la matrice d'ablation prévue en aval : elles doivent donc être exécutées avant le reste de WP1.
+Deux de ces mesures sont prioritaires et portent les noms M1 et M2 dans [VOIES.md](../VOIES.md). Elles ne demandent que la hiérarchie et les labels, aucun entraînement, et elles tranchent davantage que toute la matrice d'ablation prévue en aval : elles doivent donc être exécutées avant le reste de WP1.
 
 **M1 — oracle d'antichaîne.** Choisir une antichaîne, c'est-à-dire un ensemble de nœuds deux à deux non emboîtés couvrant tous les points, étiqueter chaque nœud par sa classe majoritaire, puis calculer le mIoU obtenu. La formulation naïve est mal posée : le mIoU n'est pas additif sur les régions, donc « la meilleure antichaîne au sens du mIoU » n'est pas un problème d'optimisation bien posé et ne doit jamais être annoncé comme tel. Le protocole correct comporte deux volets. D'abord, à budget de régions fixé $R$, sélectionner l'antichaîne qui minimise l'impureté totale $\sum_{v} n_v H\left(\pi_v\right)$, critère additif sur les nœuds, qui admet une programmation dynamique exacte en une passe ascendante sur l'arbre avec un état « nombre de régions consommées dans le sous-arbre » ; rapporter ensuite le mIoU de l'antichaîne ainsi obtenue comme descripteur, jamais comme optimum. Ensuite, en complément, rapporter le mIoU-oracle de coupes à niveau fixé, qui est la convention de la littérature superpoint et permet la comparaison directe avec ses chiffres publiés. Tracer ces courbes en fonction du nombre de régions, à compression appariée, contre RSL/HDBSCAN au même $K$, un octree ou une grille de voxels, une partition superpoint et un arbre aléatoire de mêmes tailles de régions, en stratifiant obligatoirement par portée et par classe et en rapportant séparément les classes rares.
 
@@ -82,7 +82,7 @@ Une optimisation multiclasses exacte ou bornée sur de petites fixtures peut com
 
 ## WP1bis — Diagnostic à une seule variable par substitution du clusterer d'ALPINE
 
-Ce lot est court, prioritaire, sans entraînement, et placé avant WP2. Il correspond à la mesure M3 de [VOIES.md](VOIES.md).
+Ce lot est court, prioritaire, sans entraînement, et placé avant WP2. Il correspond à la mesure M3 de [VOIES.md](../VOIES.md).
 
 **Ce que ce lot n'est pas.** Il n'ouvre pas la phase instance comme contribution : celle-ci reste fermée dans les termes fixés plus bas, et l'usage d'un clustering pour les instances n'est plus une contribution suffisante. Il s'agit ici d'un diagnostic à une seule variable, qui teste l'effet arbre au coût de calcul le plus bas et dont le résultat conditionne l'engagement de semaines de GPU sur la voie sémantique. Une phase fermée pour la publication peut rester ouverte pour le diagnostic.
 

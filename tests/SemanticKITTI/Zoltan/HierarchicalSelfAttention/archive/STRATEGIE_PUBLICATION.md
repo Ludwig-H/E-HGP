@@ -29,7 +29,7 @@ C'est la première question d'un relecteur : HDBSCAN est gratuit, disponible et 
 | 2 | les niveaux servent de signal | prototypes, tâches prétextes ou pertes indexés par niveau |
 | 3 | un niveau doit alors avoir un sens | sinon le niveau $\ell$ d'une scène et le niveau $\ell$ d'une autre ne désignent pas la même chose, et le signal est du bruit indexé |
 | 4 | l'exactitude de HGP donne ce sens | coïncidence exacte entre $K$-polyèdres et amas discrets de forte densité $K$-NN, cf. [THEOREMES.md](THEOREMES.md) |
-| 5 | la percolation dit quels niveaux sont utilisables | fonction et vitesse de percolation, limite gaussienne $\mu = K + a\sqrt{K}$, cf. [VOIES.md](VOIES.md) |
+| 5 | la percolation dit quels niveaux sont utilisables | fonction et vitesse de percolation, limite gaussienne $\mu = K + a\sqrt{K}$, cf. [VOIES.md](../VOIES.md) |
 
 L'exactitude ne devient load-bearing **que par le maillon 2**. Tant qu'on condense, un arbre heuristique suffit : c'est précisément pourquoi personne n'a jamais eu besoin d'exactitude dans cette littérature, et pourquoi l'argument « exact » y est resté orthogonal.
 
@@ -93,7 +93,7 @@ Conséquence de rédaction : la phrase « nous utilisons une hiérarchie comme s
 
 Ce ne sont ni Sonata ni Concerto. **DOS** (Bosch et Freiburg, décembre 2025) mène le fine-tuning SemanticKITTI à $73{,}5$ pour $2$ A100 pendant $20$ h. **PointINS** (mars 2026) démontre déjà que des unités structurées paient — $+3{,}2$ PQ sur SemanticKITTI contre DOS — avec un pipeline plat et ad hoc, sans garantie. Se comparer à Concerto sur du LiDAR nu serait attaquer un modèle hors de son régime : sans couleur il tombe de $77{,}0$ à $36{,}8$ mIoU.
 
-PointINS est donc à la fois la validation de l'hypothèse et le concurrent direct. La revendication doit se lire contre lui : **la structure doit être une hiérarchie de densité, gardée entière plutôt qu'aplatie, et ses niveaux se prédisent au lieu de se régler.** Voir [CONCURRENCE.md](CONCURRENCE.md).
+PointINS est donc à la fois la validation de l'hypothèse et le concurrent direct. La revendication doit se lire contre lui : **la structure doit être une hiérarchie de densité, gardée entière plutôt qu'aplatie, et ses niveaux se prédisent au lieu de se régler.** Voir [CONCURRENCE.md](../CONCURRENCE.md).
 
 ## L'ablation qui décide de tout
 
@@ -133,7 +133,7 @@ Le $68{,}0$ de WaffleIron est nu : aucun chiffre val avec TTA n'a jamais été p
 
 ## Classement des actifs
 
-Ce classement décide de ce qui va dans le titre et de ce qui reste en appendice ; l'ordre des mesures qui l'instruit figure dans [VOIES.md](VOIES.md).
+Ce classement décide de ce qui va dans le titre et de ce qui reste en appendice ; l'ordre des mesures qui l'instruit figure dans [VOIES.md](../VOIES.md).
 
 | Actif | Rang | Rôle |
 |---|---|---|
@@ -312,7 +312,7 @@ Continuer vers un modèle complet seulement si :
 - HSA ou son successeur bat pooling/message passing sur le même arbre ;
 - les contraintes de mémoire permettent des batches et trois seeds réalistes.
 
-L'ordre dans lequel ces conditions sont éprouvées n'est pas libre, et il ne commence pas par le descripteur : les chiffres SPT et EZ-SP cités plus haut placent ce levier au dernier rang, derrière l'adjacence et surtout le nombre de niveaux. Les mesures suivent l'ordre fixé par [VOIES.md](VOIES.md), et la définition des canaux celle de [DESCRIPTEURS_DE_NOEUD.md](DESCRIPTEURS_DE_NOEUD.md).
+L'ordre dans lequel ces conditions sont éprouvées n'est pas libre, et il ne commence pas par le descripteur : les chiffres SPT et EZ-SP cités plus haut placent ce levier au dernier rang, derrière l'adjacence et surtout le nombre de niveaux. Les mesures suivent l'ordre fixé par [VOIES.md](../VOIES.md), et la définition des canaux celle de [DESCRIPTEURS_DE_NOEUD.md](DESCRIPTEURS_DE_NOEUD.md).
 
 Sinon, publier le résultat négatif le plus informatif ou pivoter : étude de stabilité des arbres de densité LiDAR, descripteur topologique borné, ou benchmark causal de hiérarchies. Ne pas protéger l'histoire initiale en changeant simultanément backbone, arbre, descripteur et recette.
 

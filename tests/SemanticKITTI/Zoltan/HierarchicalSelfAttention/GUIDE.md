@@ -108,7 +108,7 @@ La mécanique de la preuve est simple et vaut la peine d'être comprise, parce q
 
 Des convexes qui se recouvrent : les composantes de la réunion correspondent aux composantes du graphe d'intersection. D'où le théorème.
 
-**À retenir.** HGP n'est pas « encore un algorithme de clustering ». C'est le seul dont la hiérarchie coïncide **niveau par niveau** avec un modèle statistique explicite (Hartigan avec estimateur $K$-NN). C'est son actif principal — et [le seul que personne d'autre ne possède](STRATEGIE_PUBLICATION.md).
+**À retenir.** HGP n'est pas « encore un algorithme de clustering ». C'est le seul dont la hiérarchie coïncide **niveau par niveau** avec un modèle statistique explicite (Hartigan avec estimateur $K$-NN). C'est son actif principal — et [le seul que personne d'autre ne possède](archive/STRATEGIE_PUBLICATION.md).
 
 ---
 
@@ -150,7 +150,7 @@ La règle qui compte : **l'objectif d'entraînement doit être exactement celui 
 
 ## Chapitre 4 — Décrire un nœud
 
-C'est le chapitre le plus technique, et celui où les intuitions trompent le plus. Le détail complet est dans [DESCRIPTEURS_DE_NOEUD.md](DESCRIPTEURS_DE_NOEUD.md) ; voici la carte.
+C'est le chapitre le plus technique, et celui où les intuitions trompent le plus. Le détail complet est dans [DESCRIPTEURS_DE_NOEUD.md](archive/DESCRIPTEURS_DE_NOEUD.md) ; voici la carte.
 
 ### 4.1 Une seule construction, trois lectures
 
@@ -168,7 +168,7 @@ Ce qui change d'un descripteur à l'autre, c'est **ce qu'on résume** de ce bala
 
 ### 4.2 La fonction support n'est pas un choix, elle est forcée
 
-Résultat démontré dans [DESCRIPTEURS_DE_NOEUD.md](DESCRIPTEURS_DE_NOEUD.md) : si l'on exige d'un canal qu'il soit à la fois
+Résultat démontré dans [DESCRIPTEURS_DE_NOEUD.md](archive/DESCRIPTEURS_DE_NOEUD.md) : si l'on exige d'un canal qu'il soit à la fois
 
 - **exactement agrégeable** le long de l'arbre de fusion,
 - **exactement recentrable** en forme close,
@@ -280,7 +280,7 @@ C'est une **partition de l'unité** : « lorsqu'un point appartient à au moins 
 
 Trois conséquences, et elles débloquent plusieurs points ouverts du dossier.
 
-1. **Conservation de la masse, gratuitement.** Pour toute antichaîne, en posant $w_{x\to v}=\sum_{\tau\in v}w_{x\tau}$, on a $\sum_v w_{x\to v}=1$. Aucun double comptage : c'est la condition que [ARCHITECTURE.md](ARCHITECTURE.md) exigeait avant d'autoriser $K\geq2$.
+1. **Conservation de la masse, gratuitement.** Pour toute antichaîne, en posant $w_{x\to v}=\sum_{\tau\in v}w_{x\tau}$, on a $\sum_v w_{x\to v}=1$. Aucun double comptage : c'est la condition que [ARCHITECTURE.md](archive/ARCHITECTURE.md) exigeait avant d'autoriser $K\geq2$.
 2. **Le canal de masse devient correct.** La CDF additive double-comptait pour $K\geq2$ ; il suffit de pondérer chaque point par $w_{x\to v}$ et l'additivité redevient exacte.
 3. **La masse d'un nœud n'est plus son cardinal.** Le manuscrit définit $m_\tau=S_\tau\sum_{x\in\tau}1/T_x$, et c'est cette masse — pas un comptage de faces — qui alimente `min_cluster_size` dans l'arbre condensé.
 
@@ -555,10 +555,10 @@ Les mots « exact », « temps réel », « GPU-friendly » et « état de l'art
 
 | Vous voulez… | Lisez |
 |---|---|
-| le détail des descripteurs, avec les démonstrations | [DESCRIPTEURS_DE_NOEUD.md](DESCRIPTEURS_DE_NOEUD.md) |
+| le détail des descripteurs, avec les démonstrations | [DESCRIPTEURS_DE_NOEUD.md](archive/DESCRIPTEURS_DE_NOEUD.md) |
 | savoir quoi faire lundi matin | [VOIES.md](VOIES.md) |
 | la définition d'un terme | [GLOSSAIRE.md](GLOSSAIRE.md) |
-| le modèle et ses contrats d'entrée | [ARCHITECTURE.md](ARCHITECTURE.md) |
-| ce qu'un relecteur exigeant répondrait | [STRATEGIE_PUBLICATION.md](STRATEGIE_PUBLICATION.md) |
+| le modèle et ses contrats d'entrée | [ARCHITECTURE.md](archive/ARCHITECTURE.md) |
+| ce qu'un relecteur exigeant répondrait | [STRATEGIE_PUBLICATION.md](archive/STRATEGIE_PUBLICATION.md) |
 | les risques chiffrés et les règles d'arrêt | [RISQUES.md](RISQUES.md) |
 | la concurrence | [CONCURRENCE.md](CONCURRENCE.md) |

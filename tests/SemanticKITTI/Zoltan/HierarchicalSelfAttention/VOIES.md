@@ -48,6 +48,50 @@ Donc un pré-entraînement auto-supervisé bien conçu vaut, sur ce benchmark, *
 
 ---
 
+## 0 bis. Le fil qui relie tout : le **niveau**
+
+En reprenant l'ensemble, une régularité saute aux yeux et elle organise tout le reste.
+
+| Ce qui est mort | Ce que ça utilisait |
+|---|---|
+| le descripteur de nœud | la **forme** d'un nœud |
+| « notre partition est meilleure » | **une seule coupe** |
+| HSA | la **topologie** de l'arbre |
+| « hiérarchie comme structure d'auto-supervision » | la relation **parent–enfant** |
+
+| Ce qui survit | Ce que ça utilise |
+|---|---|
+| voie 1, la mesure | les **niveaux** séparent-ils les classes |
+| voie 3, la supervision | superviser **sur le niveau** |
+| le prior de DINO | la masse **à un niveau** |
+| voie 4, l'ultramétrique | le **niveau** de l'ancêtre commun |
+
+Ce n'est pas un hasard. L'actif unique de la thèse est que **le niveau a un sens** : il *est* le niveau de densité $K$-NN, exactement. Chez HDBSCAN, un niveau est un rayon d'accessibilité mutuelle, qui dépend de l'échelle locale et ne transfère pas.
+
+Et personne n'a jamais eu besoin qu'un niveau signifie quelque chose, **parce que personne n'utilise les niveaux** — ils utilisent des nombres de clusters. D'où la thèse du projet, en une ligne :
+
+> **Faire du niveau l'objet. Alors l'exactitude compte.**
+
+### L'expérience qui teste l'actif lui-même
+
+Cela change la question centrale de la voie 1. « HGP est-il plus pur que HDBSCAN ? » ne teste pas l'actif. La bonne question est :
+
+> **Le niveau $\lambda$ veut-il dire la même chose d'un scan à l'autre ?**
+
+Pour HGP il le devrait — c'est une densité, une grandeur physique. Pour HDBSCAN il ne le devrait pas. **La transférabilité du niveau entre scans est la signature mesurable de la calibration.**
+
+Protocole, sans aucun entraînement :
+
+1. tracer pureté en fonction du niveau, scan par scan, pour HGP et pour HDBSCAN ;
+2. mesurer la **dispersion entre scans** de ces courbes ;
+3. vérifier si le niveau optimal d'un scan reste optimal sur un autre.
+
+Si les courbes de HGP se superposent et pas celles de HDBSCAN, l'actif est démontré — sans GPU, sans réseau. Si elles ne se superposent pas davantage, l'exactitude ne sert à rien en aval et les voies 3 et 4 tombent ensemble.
+
+C'est l'expérience la plus directe et la moins chère du programme, et son résultat est interprétable dans les deux sens.
+
+---
+
 ## 1. Ce qui est fermé
 
 | Voie | Le fait qui la ferme |
@@ -247,7 +291,7 @@ Cette section corrige une erreur de la version précédente de ce document, qui 
 
 ### La partition de l'unité existe déjà
 
-Le § 9.1 fournit exactement l'objet que [ARCHITECTURE.md](ARCHITECTURE.md) exigeait avant d'autoriser $K\geq2$. À chaque facette il associe $S_\tau=\sum_{\sigma\supset\tau,\,\left|\sigma\right|=K+1}\psi\left(\rho(\sigma)\right)$ avec $\psi(t)=1/t^{p}$, puis normalise par point via $T_x=\sum_{\tau\ni x}S_\tau$. En posant $w_{x\tau}=S_\tau/T_x$, on a $w_{x\tau}\geq0$ et $\sum_{\tau\ni x}w_{x\tau}=1$ : une partition de l'unité pondérée par la densité de naissance, donc pas arbitraire.
+Le § 9.1 fournit exactement l'objet que [ARCHITECTURE.md](archive/ARCHITECTURE.md) exigeait avant d'autoriser $K\geq2$. À chaque facette il associe $S_\tau=\sum_{\sigma\supset\tau,\,\left|\sigma\right|=K+1}\psi\left(\rho(\sigma)\right)$ avec $\psi(t)=1/t^{p}$, puis normalise par point via $T_x=\sum_{\tau\ni x}S_\tau$. En posant $w_{x\tau}=S_\tau/T_x$, on a $w_{x\tau}\geq0$ et $\sum_{\tau\ni x}w_{x\tau}=1$ : une partition de l'unité pondérée par la densité de naissance, donc pas arbitraire.
 
 Trois verrous sautent d'un coup.
 
@@ -265,7 +309,7 @@ Le durcissement final perd de l'information, et cette perte est **mesurable** : 
 
 Reste également vrai, et indépendant de tout cela : à $K=1$ HGP **est** le single-linkage, donc la configuration la plus simple du programme n'a aucune nouveauté structurelle ; et le nombre de facettes dépasse celui des points, donc passer les feuilles aux facettes augmente la taille de l'arbre — à mesurer avec la profondeur et le degré avant d'en faire la baseline.
 
-T6 du [programme théorique](THEOREMES.md) n'est donc plus une condition d'existence mais une **extension** : l'attention directement définie sur le DAG de recouvrement, sans passer par les facettes comme feuilles. Elle reste le seul endroit où un budget de nouveauté d'opérateur serait bien placé, mais le programme n'est plus bloqué sans elle.
+T6 du [programme théorique](archive/THEOREMES.md) n'est donc plus une condition d'existence mais une **extension** : l'attention directement définie sur le DAG de recouvrement, sans passer par les facettes comme feuilles. Elle reste le seul endroit où un budget de nouveauté d'opérateur serait bien placé, mais le programme n'est plus bloqué sans elle.
 
 ### C. La tension entre la théorie et les mesures, qui est une contribution en puissance
 
@@ -308,3 +352,67 @@ Deux conséquences à retenir :
 - l'anisotropie écrase la marge d'un facteur $4$ et l'aplatit en $K$ : à $\Delta v/\Delta h = 4$, passer de $K=1$ à $K=4$ ne change presque rien. C'est une explication candidate de l'optimum empirique à $K=2$, et le rééchelonnement en élévation est le correctif à tester.
 
 Cette expérience est un jouet — deux plans, pas de vraie scène. Elle ne prouve rien sur SemanticKITTI. Elle montre seulement **quelle variable il faut contrôler** : la densité de bruit dans la séparation.
+
+---
+
+## Claims autorisés et preuves requises
+
+| Claim potentiel | Preuve minimale |
+|---|---|
+| l'arbre non condensé bat sa propre condensation plate | bras (ii) contre (iii), même recette et mêmes augmentations, trois graines, IC excluant zéro |
+| l'exactitude de la hiérarchie change une métrique aval | bras (i) contre (ii), même consommateur d'arbre et même budget ; sans ce résultat, l'exactitude sort du papier |
+| les niveaux ont le même sens d'une scène à l'autre | prédiction de percolation confrontée au niveau de fusion mesuré, stratifiée par bins de portée |
+| gain en régime à peu d'étiquettes | 0,1 / 1 / 10 %, protocole TARL/BEVContrast, trois graines, contre scratch $46{,}2$, TARL $52{,}5$ et BEVContrast $53{,}8$ à 1 % |
+| HGP est un meilleur prior | arbres échangés à budget constant, seeds appariées, IC excluant zéro |
+| le complexe HGP apporte de la géométrie utile | points, accès à $\Gamma_K^{\mathrm{elem}}$, sac de tokens sans messages, incidences du contrat, mutant invalide, MPSN/CWN/EMPSN/SAT et Deep Sets à capacité égale |
+| le support source aide le complexe source/PL | complexe seul contre support source + complexe, mêmes `payload_kind`, `carrier_kind`, `authority`, coupe, cellules, capacité et recette ; aucun transfert au support de `witness_union` |
+| HSA exploite mieux HGP | même arbre/features contre pooling et message passing |
+| QC-HSA est la projection optimale annoncée | preuve complète, solveur dense sur petits arbres, inclusion HSA et facteur de cardinalité vérifiés |
+| QC-HSA préserve mieux les points | reverse-KL et erreurs de frontière inférieurs à HSA, coût $C_T$ et latence inclus |
+| robuste à longue portée | gains par bins et perturbations, pas seulement moyenne globale |
+| plus efficace | latence et mémoire end-to-end sur même matériel |
+| SOTA LiDAR mono-trame | audit frais, protocole strict, résultat test caché |
+| général | second dataset/capteur et mécanisme cohérent |
+
+Ne pas revendiquer :
+
+- nouveauté par le seul usage d'une hiérarchie (cTree, HASSL), de la densité (HDBSCAN standard depuis TARL) ou de l'absence de caméra (TARL, SegContrast, BEVContrast, ALSO, STSSL, ALPINE) ;
+- l'exactitude comme avantage tant que le bras (ii) n'a pas été mesuré ;
+- un gain obtenu contre un bras dont les augmentations diffèrent, ou sous $1{,}5$ point sur un run unique ;
+- une comparaison à un chiffre publié avec TTA, ensemble ou recette différente, ni au $70{,}8$ de PTv3 non reproduit ;
+- une reproduction de Sonata extérieur — poids jamais publiés — ni l'import de poids CC-BY-NC dans la ligne produit ;
+- invariance rotationnelle d'un vecteur sur directions fixes ;
+- préservation complète de la géométrie par fonction support ;
+- préservation de la non-convexité par seul rayon extérieur hors cas étoilé ;
+- nouveauté par le seul usage d'un réseau ou d'une attention simpliciale ;
+- « complexe complet » sans préciser le contrat reconstruit et les cellules omises ;
+- opérateur DAG conservatif tant que les poids $w_{iv}$, leur domaine et la contrainte $\sum_v w_{iv}=1$ ne sont pas définis et testés ;
+- nouveauté par la seule utilisation d'ECT/WECT, de Fourier ou d'un kernel mean ;
+- complexité linéaire sans bornes de degré et mesure réelle ;
+- optimalité sémantique ou approximation d'une attention arbitraire à partir du théorème KL très borné de HSA ;
+- certificat mIoU à partir de Pinsker ou d'une marge point-wise ;
+- exactitude ou statut GPU de MorseHGP3D hors registre.
+
+## Figures décisives
+
+1. **Schéma d'architecture** : backbone local, graphe d'incidence point–facette, hiérarchie HGP, support global, HSA tardif et décodeur point-fin.
+2. **Résultat QC-HSA** : rectangles HSA contre partitions feuille–sous-arbre, projection fermée, coût supplémentaire et pont conditionnel vers les hauteurs de fusion.
+3. **Diagnostic de compression dure** : vote majoritaire réalisable et union par classe optimiste, distincts du modèle à proportions et de sa sortie point-wise.
+4. **Ablation à quatre bras** : (i) exact conservé, (ii) heuristique conservé, (iii) heuristique condensé, (iv) aléatoire, par fraction d'étiquettes, avec IC sur trois graines.
+5. **Stabilité capteur** : variation de hiérarchie et mIoU selon portée/thinning.
+6. **Représentations et collisions** : mêmes sommets/support mais incidences distinctes, certificats sparse équivalents et perturbations de filtration ; le hash canonique les sépare, tandis que les collisions du learned encoder sont mesurées jusqu'à preuve d'expressivité.
+7. **Pareto système** : mIoU contre latence/VRAM, coût HGP inclus, avec $N_W$ et $\varepsilon_W$ pour l'union témoin.
+8. **Analyse d'erreurs** : frontière sémantique traversée par une branche et rôle du gate résiduel.
+
+## Tables décisives
+
+- les quatre bras × fractions d'étiquettes 0,1 / 1 / 10 / 100 %, contre scratch, TARL et BEVContrast au même protocole ;
+- comparaison track A strict, avec colonnes modality, temporal, external data, TTA, ensemble ;
+- ablation HGP $K=1$/SL comme fixture, puis HGP $K=2,3$ vs RSL/octree/superpoints/random ;
+- points seuls, $\Gamma_K^{\mathrm{elem}}$ avec tokens précalculés, sac des mêmes tokens sans messages, complexe d'incidence, complexe + support source et mutant d'incidences invalide, à budget égal ;
+- encodeur proposé vs MPSN/CWN/EMPSN/SAT/TopNets et Deep Sets ;
+- HSA vs pooling/message passing/local attention ;
+- QC-HSA vs HSA : KL, sortie, frontière, mIoU, $C_T$, VRAM et latence ;
+- IoU par classe et distance ;
+- temps construction/arbre/extraction des incidences/encodeur/réseau/reprojection ;
+- second dataset et changement de capteur.

@@ -2,7 +2,7 @@
 
 Ce document traite la question : **comment résumer un nœud de la hiérarchie en un vecteur de taille fixe ?** Il part d'une proposition précise — décrire chaque nœud par sa fonction support normalisée et sa « dernière sortie » du polyèdre, éventuellement complétées par sa « première entrée » — et en établit le statut exact.
 
-Pour une entrée progressive, lire d'abord le [chapitre 4 du guide](GUIDE.md). Ce document-ci est le niveau de détail avec les démonstrations. Il complète [CONTRAT_HGP.md](CONTRAT_HGP.md), qui porte sur les carriers et leur sérialisation.
+Pour une entrée progressive, lire d'abord le [chapitre 4 du guide](../GUIDE.md). Ce document-ci est le niveau de détail avec les démonstrations. Il complète [CONTRAT_HGP.md](CONTRAT_HGP.md), qui porte sur les carriers et leur sérialisation.
 
 ## La géométrie, avant tout le reste
 
@@ -150,7 +150,7 @@ Le mIoU SemanticKITTI est dominé par les classes rares et fines : `bicycle`, `m
 
 Il faut donc **stratifier par cardinalité de nœud dès la première mesure** et accepter le résultat : si le gain se concentre sur les grandes classes, il ne se transformera pas en mIoU. Ce point ne réfute pas la hiérarchie ; il réfute l'idée que le descripteur de nœud soit le facteur limitant.
 
-Le même argument frappe la hiérarchie elle-même, et plus durement : la connexité d'ordre $K$ exige que $K$ points soient simultanément proches, ce que les structures filiformes ne fournissent pas — le manuscrit documente ce mode d'échec sur `birch2`. Voir [VOIES.md](VOIES.md).
+Le même argument frappe la hiérarchie elle-même, et plus durement : la connexité d'ordre $K$ exige que $K$ points soient simultanément proches, ce que les structures filiformes ne fournissent pas — le manuscrit documente ce mode d'échec sur `birch2`. Voir [VOIES.md](../VOIES.md).
 
 ## Le canal de masse : la CDF projetée
 
@@ -289,7 +289,7 @@ Les six canaux se remplissent en **une seule passe ascendante** sur l'arbre, cha
 
 Deux diagnostics, sans aucun entraînement, tranchent l'essentiel.
 
-1. **Oracle d'antichaîne.** Sur la séquence 08, construire la forêt HGP, sélectionner une antichaîne à budget de régions fixé, étiqueter chaque nœud par sa classe majoritaire et rapporter le mIoU obtenu, contre HDBSCAN, octree/voxel, partition superpoint et arbre aléatoire à compression égale. Le protocole exact — et pourquoi « la meilleure antichaîne au sens du mIoU » n'est pas un objectif bien posé — est dans [VOIES.md](VOIES.md). Si HGP ne domine aucun contrôle, le programme est réfuté en une semaine.
-2. **Stabilité par portée.** Transporter le même objet à plusieurs portées, rééchantillonner selon un modèle capteur déclaré, et mesurer la dérive des niveaux de naissance/mort et de l'ancêtre commun. C'est le test de [R1](RISQUES.md) ; il conditionne tout le reste, car une hiérarchie qui encode la portée n'est pas une hiérarchie sémantique.
+1. **Oracle d'antichaîne.** Sur la séquence 08, construire la forêt HGP, sélectionner une antichaîne à budget de régions fixé, étiqueter chaque nœud par sa classe majoritaire et rapporter le mIoU obtenu, contre HDBSCAN, octree/voxel, partition superpoint et arbre aléatoire à compression égale. Le protocole exact — et pourquoi « la meilleure antichaîne au sens du mIoU » n'est pas un objectif bien posé — est dans [VOIES.md](../VOIES.md). Si HGP ne domine aucun contrôle, le programme est réfuté en une semaine.
+2. **Stabilité par portée.** Transporter le même objet à plusieurs portées, rééchantillonner selon un modèle capteur déclaré, et mesurer la dérive des niveaux de naissance/mort et de l'ancêtre commun. C'est le test de [R1](../RISQUES.md) ; il conditionne tout le reste, car une hiérarchie qui encode la portée n'est pas une hiérarchie sémantique.
 
 Ces deux mesures coûtent moins qu'une seule journée de GPU et valent plus que toute extension supplémentaire de la spécification.

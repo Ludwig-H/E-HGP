@@ -19,7 +19,7 @@ Les autres documents sont plus précis et plus sévères, mais ils ne s'entrent 
 |---|---|
 | **comprendre** (30 min) | [GUIDE.md](GUIDE.md) |
 | **décider quoi faire** (2 h) | [GUIDE.md](GUIDE.md) → [VOIES.md](VOIES.md) → [RISQUES.md](RISQUES.md) |
-| **implémenter** (1 jour) | ci-dessus, puis [ARCHITECTURE.md](ARCHITECTURE.md) → [DESCRIPTEURS_DE_NOEUD.md](DESCRIPTEURS_DE_NOEUD.md) → [CONTRAT_HGP.md](CONTRAT_HGP.md) → [EXPERIMENTAL_PROTOCOL.md](EXPERIMENTAL_PROTOCOL.md) |
+| **implémenter** (1 jour) | ci-dessus, puis [ARCHITECTURE.md](archive/ARCHITECTURE.md) → [DESCRIPTEURS_DE_NOEUD.md](archive/DESCRIPTEURS_DE_NOEUD.md) → [CONTRAT_HGP.md](archive/CONTRAT_HGP.md) → [PROTOCOLE.md](PROTOCOLE.md) |
 
 ---
 
@@ -52,23 +52,20 @@ Quatre voies sont **fermées** par des chiffres, dont deux formulations que j'ai
 
 ## Carte du dossier
 
-| Document | Contenu |
-|---|---|
-| [GUIDE.md](GUIDE.md) | Le parcours complet. **Point d'entrée.** |
-| [GLOSSAIRE.md](GLOSSAIRE.md) | Tous les termes, une ligne chacun. |
-| **[VOIES.md](VOIES.md)** | **Les voies retenues et leurs feuilles de route ; ce qui est fermé et par quel chiffre.** |
-| [RISQUES.md](RISQUES.md) | Les réfutations possibles, leurs tests, les règles d'arrêt chiffrées. |
-| [CONCURRENCE.md](CONCURRENCE.md) | L'état de l'art, les régimes de comparaison, l'espace de nouveauté. |
-| [DESCRIPTEURS_DE_NOEUD.md](DESCRIPTEURS_DE_NOEUD.md) | Comment résumer un nœud : support, canaux radiaux, canal de masse, points contre polyèdre reconstruit. |
-| [ARCHITECTURE.md](ARCHITECTURE.md) | Le modèle, ses contrats d'entrée, les baselines appariées. |
-| [CONTRAT_HGP.md](CONTRAT_HGP.md) | L'objet HGP marqué, ses quatre carriers, sa sérialisation, ses fixtures. |
-| [THEOREMES.md](THEOREMES.md) | Le programme théorique T0–T6 et la proposition QC-HSA. |
-| [RESEARCH_PLAN.md](RESEARCH_PLAN.md) | Les lots de travail, leurs livrables et leurs portes. |
-| [EXPERIMENTAL_PROTOCOL.md](EXPERIMENTAL_PROTOCOL.md) | Splits, métriques, régimes, matrice d'ablation. |
-| [STRATEGIE_PUBLICATION.md](STRATEGIE_PUBLICATION.md) | Positionnement, claims autorisés, pivots selon le résultat. |
-| [REFERENCES.md](REFERENCES.md) | Sources primaires et statut de chaque chiffre. |
+Huit documents au premier plan. Six autres sont dans [`archive/`](archive/README.md) : ils sont corrects, mais sur aucune voie retenue.
 
-Sources locales : le [papier HSA (NeurIPS 2025)](NeurIPS-2025-hierarchical-self-attention-generalizing-neural-attention-mechanics-to-multi-scale-problems-Paper-Conference.pdf) est dans ce dossier ; le manuscrit de thèse est en `docs/references/MANUSCRIT_THESE_HAUSEUX.pdf`, dont les parties I et II sont la définition normative de HGP.
+| Document | Contenu | Pour qui |
+|---|---|---|
+| **[GUIDE.md](GUIDE.md)** | tout le projet en neuf chapitres autonomes | **commencez ici** |
+| [GLOSSAIRE.md](GLOSSAIRE.md) | chaque terme en une ligne | à garder ouvert à côté |
+| **[VOIES.md](VOIES.md)** | la cible, ce qui est fermé et par quel chiffre, les voies retenues et leurs feuilles de route | pour décider |
+| [RISQUES.md](RISQUES.md) | les réfutations possibles et les règles d'arrêt | pour décider |
+| [CONCURRENCE.md](CONCURRENCE.md) | qui fait quoi, dans quel régime, avec quels chiffres | pour se comparer |
+| [PROTOCOLE.md](PROTOCOLE.md) | splits, métriques, régimes, choix de la baseline | pour implémenter |
+| [REFERENCES.md](REFERENCES.md) | sources primaires et statut de chaque chiffre | pour citer |
+| [archive/](archive/README.md) | descripteur, T0–T6, contrat marqué, ancienne architecture | si une voie aboutit |
+
+Le [papier HSA](NeurIPS-2025-hierarchical-self-attention-generalizing-neural-attention-mechanics-to-multi-scale-problems-Paper-Conference.pdf) est dans ce dossier ; le manuscrit de thèse est en `docs/references/MANUSCRIT_THESE_HAUSEUX.pdf`, dont les parties I et II sont la définition normative de HGP.
 
 ---
 
