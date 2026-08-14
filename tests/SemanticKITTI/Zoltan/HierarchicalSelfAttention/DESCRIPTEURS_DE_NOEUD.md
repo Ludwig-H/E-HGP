@@ -150,7 +150,7 @@ Le mIoU SemanticKITTI est dominé par les classes rares et fines : `bicycle`, `m
 
 Il faut donc **stratifier par cardinalité de nœud dès la première mesure** et accepter le résultat : si le gain se concentre sur les grandes classes, il ne se transformera pas en mIoU. Ce point ne réfute pas la hiérarchie ; il réfute l'idée que le descripteur de nœud soit le facteur limitant.
 
-Le même argument frappe la hiérarchie elle-même, et plus durement : la connexité d'ordre $K$ exige que $K$ points soient simultanément proches, ce que les structures filiformes ne fournissent pas — le manuscrit documente ce mode d'échec sur `birch2`. Voir [ORDRE_DES_PREUVES.md](ORDRE_DES_PREUVES.md).
+Le même argument frappe la hiérarchie elle-même, et plus durement : la connexité d'ordre $K$ exige que $K$ points soient simultanément proches, ce que les structures filiformes ne fournissent pas — le manuscrit documente ce mode d'échec sur `birch2`. Voir [VOIES.md](VOIES.md).
 
 ## Le canal de masse : la CDF projetée
 
@@ -289,7 +289,7 @@ Les six canaux se remplissent en **une seule passe ascendante** sur l'arbre, cha
 
 Deux diagnostics, sans aucun entraînement, tranchent l'essentiel.
 
-1. **Oracle d'antichaîne.** Sur la séquence 08, construire la forêt HGP, sélectionner une antichaîne à budget de régions fixé, étiqueter chaque nœud par sa classe majoritaire et rapporter le mIoU obtenu, contre HDBSCAN, octree/voxel, partition superpoint et arbre aléatoire à compression égale. Le protocole exact — et pourquoi « la meilleure antichaîne au sens du mIoU » n'est pas un objectif bien posé — est dans [ORDRE_DES_PREUVES.md](ORDRE_DES_PREUVES.md). Si HGP ne domine aucun contrôle, le programme est réfuté en une semaine.
+1. **Oracle d'antichaîne.** Sur la séquence 08, construire la forêt HGP, sélectionner une antichaîne à budget de régions fixé, étiqueter chaque nœud par sa classe majoritaire et rapporter le mIoU obtenu, contre HDBSCAN, octree/voxel, partition superpoint et arbre aléatoire à compression égale. Le protocole exact — et pourquoi « la meilleure antichaîne au sens du mIoU » n'est pas un objectif bien posé — est dans [VOIES.md](VOIES.md). Si HGP ne domine aucun contrôle, le programme est réfuté en une semaine.
 2. **Stabilité par portée.** Transporter le même objet à plusieurs portées, rééchantillonner selon un modèle capteur déclaré, et mesurer la dérive des niveaux de naissance/mort et de l'ancêtre commun. C'est le test de [R1](RISQUES.md) ; il conditionne tout le reste, car une hiérarchie qui encode la portée n'est pas une hiérarchie sémantique.
 
 Ces deux mesures coûtent moins qu'une seule journée de GPU et valent plus que toute extension supplémentaire de la spécification.

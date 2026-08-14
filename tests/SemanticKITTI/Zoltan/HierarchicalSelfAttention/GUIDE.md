@@ -144,7 +144,7 @@ Le piège serait de croire que ces proportions suffisent. Elles ne **localisent*
 
 La règle qui compte : **l'objectif d'entraînement doit être exactement celui de la baseline reproduite** dans toutes les variantes comparées. Une loss auxiliaire sur les proportions ne s'ouvre qu'après l'ablation de la structure, sinon on confond gain architectural et recette d'entraînement.
 
-**À retenir.** Trois expériences, pas une. Et l'ordre dans lequel on les fait n'est pas neutre : voir [ORDRE_DES_PREUVES.md](ORDRE_DES_PREUVES.md).
+**À retenir.** Trois expériences, pas une. Et l'ordre dans lequel on les fait n'est pas neutre : voir [VOIES.md](VOIES.md).
 
 ---
 
@@ -377,7 +377,7 @@ Mais il fournit lui-même la sortie : le complexe de **Vietoris–Rips**, avec l
 
 Le dossier contient une spécification plus complète que la plupart des sections méthodes publiées, et **aucune mesure**. Le rendement marginal d'une ligne de spécification supplémentaire est donc proche de zéro.
 
-Trois diagnostics, aucun ne demande d'entraînement. Détail dans [ORDRE_DES_PREUVES.md](ORDRE_DES_PREUVES.md).
+Trois diagnostics, aucun ne demande d'entraînement. Détail dans [VOIES.md](VOIES.md).
 
 ### M1 — L'arbre est-il aligné sur la sémantique ?
 
@@ -427,7 +427,7 @@ Le chapitre 7 du manuscrit mesure la **vitesse de percolation**, c'est-à-dire c
 
 Or l'étude HGP sur SemanticKITTI trouvait $K=2$ meilleur que $K=1$ **et** que $K=3$. Sur données réelles, l'optimum est tout de suite, pas au bout.
 
-Ce désaccord n'est pas un embarras, c'est le sujet. Les vitesses sont mesurées sur un processus de Poisson homogène ; un scan LiDAR échantillonne des surfaces avec une densité qui dépend de la portée. **L'écart entre la prédiction et l'observation est exactement l'effet du capteur, et il se mesure.** Détail et protocole dans [ORDRE_DES_PREUVES.md](ORDRE_DES_PREUVES.md).
+Ce désaccord n'est pas un embarras, c'est le sujet. Les vitesses sont mesurées sur un processus de Poisson homogène ; un scan LiDAR échantillonne des surfaces avec une densité qui dépend de la portée. **L'écart entre la prédiction et l'observation est exactement l'effet du capteur, et il se mesure.** Détail et protocole dans [VOIES.md](VOIES.md).
 
 **À retenir.** Si HGP ne bat pas du Single-Linkage sur la tâche que la thèse a conçue pour lui, il est peu probable qu'il apporte quoi que ce soit à la segmentation sémantique. Et si six scalaires n'apportent rien, une architecture entière n'apportera pas davantage.
 
@@ -483,15 +483,21 @@ Trois observations, et la troisième est l'ouverture.
 2. **DOS bat toute la lignée sur SemanticKITTI pour deux ordres de grandeur de calcul en moins.** Une meilleure idée bat plus de calcul sur ce benchmark : c'est ce qui rend le programme finançable.
 3. **Aucun de ces modèles ne dérive de structure depuis la géométrie du nuage.** Sonata en fait une doctrine explicite — aucun « algorithme conçu par l'humain », aucune segmentation pré-calculée. Concerto a bien de la structure, mais **importée de l'image** (patchs DINOv2) : sans couleur, il tombe de $77{,}0$ à $36{,}8$ mIoU, c'est-à-dire précisément sur du LiDAR nu. Utonia a de la structure, mais elle vient de la **trajectoire du capteur**, pas de la scène.
 
-### La revendication, et elle est négative
+### La revendication, après audit d'antériorité
 
-Toute la littérature d'auto-supervision LiDAR fabrique ses unités avec HDBSCAN — SegContrast, TARL, UNIT, et jusqu'au *point-to-segment* de Seal. **Toutes condensent l'arbre en une partition plate et le jettent.**
+J'ai porté un temps la formule « ne pas condenser ». Un audit l'a fermée : « hiérarchie de clusters comme structure d'auto-supervision » est **9/10 occupé** — HCSC (CVPR 2022, arbres de prototypes parent–enfant), MHCCL (AAAI 2023), HASSL (juillet 2026, HDBSCAN + distillation, microscopie). Et « arbre à niveaux indexés par un rayon sur nuage 3D comme tâche prétexte » est **8/10 occupé** par Sharma & Kaul, **NeurIPS 2020**.
 
-> La revendication est : **ne pas condenser.** Garder les nœuds internes, la relation parent–enfant et les niveaux comme signal.
+Ce qui reste entier est plus étroit, et c'est le résultat le plus utile de tout l'audit :
 
-Ce qu'elle **n'est pas**, et il faut le dire avant qu'un relecteur le fasse : ni « nous utilisons une hiérarchie » (cTree, NeurIPS 2020), ni « nous utilisons la densité » (HDBSCAN est le standard du domaine depuis TARL), ni « sans caméra » (TARL, SegContrast, BEVContrast, ALSO le sont déjà).
+> Chez **tous** les antécédents, l'axe de supervision est un **nombre de clusters** — PCL $25\,000$ ; HCSC $3000$–$2000$–$1000$ ; MHCCL des partitions successives. **Jamais un paramètre de filtration.**
 
-**Et quelqu'un vient d'entrer dans l'angle mort.** PointINS (Bosch, mars 2026) construit des pseudo-instances sans annotation — k-means, graphe $k$-NN, composantes connexes — et gagne $+3{,}2$ PQ sur SemanticKITTI contre DOS. C'est à la fois la validation de l'hypothèse et le concurrent direct : il prouve que des unités structurées paient, mais avec un pipeline **plat et ad hoc, sans garantie**. C'est le substitut grossier qu'un arbre de fusion exact remplacerait.
+D'où la revendication :
+
+> **Superviser sur le niveau de filtration, pas sur un nombre de clusters.** HGP rend ce niveau signifiant — il *est* le niveau de densité $K$-NN — et la percolation dit lequel choisir. Occupation : $1/10$.
+
+**Et quelqu'un est déjà entré dans l'angle mort voisin.** PointINS (Bosch, mars 2026) construit des pseudo-instances sans annotation — $k$-means, graphe $k$-NN, composantes connexes — et gagne $+3{,}2$ PQ sur SemanticKITTI contre DOS. « Des unités structurées valent mieux que des unités aléatoires » est donc **pris**. Ce qui reste : non condensé, exact, à niveaux prédits.
+
+**Un avertissement sur HASSL, qui joue dans les deux sens.** Il occupe l'idée, mais sa propre ablation ne crédite la composante hiérarchique que de $+0{,}3$ à $+0{,}6$ point — l'essentiel de son gain vient de son enseignant de segmentation. C'est une antériorité pour la formulation, **pas une preuve que le mécanisme fonctionne**.
 
 ### Pourquoi HGP plutôt que l'arbre condensé de HDBSCAN
 
@@ -550,7 +556,7 @@ Les mots « exact », « temps réel », « GPU-friendly » et « état de l'art
 | Vous voulez… | Lisez |
 |---|---|
 | le détail des descripteurs, avec les démonstrations | [DESCRIPTEURS_DE_NOEUD.md](DESCRIPTEURS_DE_NOEUD.md) |
-| savoir quoi faire lundi matin | [ORDRE_DES_PREUVES.md](ORDRE_DES_PREUVES.md) |
+| savoir quoi faire lundi matin | [VOIES.md](VOIES.md) |
 | la définition d'un terme | [GLOSSAIRE.md](GLOSSAIRE.md) |
 | le modèle et ses contrats d'entrée | [ARCHITECTURE.md](ARCHITECTURE.md) |
 | ce qu'un relecteur exigeant répondrait | [STRATEGIE_PUBLICATION.md](STRATEGIE_PUBLICATION.md) |

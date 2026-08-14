@@ -29,7 +29,7 @@ C'est la première question d'un relecteur : HDBSCAN est gratuit, disponible et 
 | 2 | les niveaux servent de signal | prototypes, tâches prétextes ou pertes indexés par niveau |
 | 3 | un niveau doit alors avoir un sens | sinon le niveau $\ell$ d'une scène et le niveau $\ell$ d'une autre ne désignent pas la même chose, et le signal est du bruit indexé |
 | 4 | l'exactitude de HGP donne ce sens | coïncidence exacte entre $K$-polyèdres et amas discrets de forte densité $K$-NN, cf. [THEOREMES.md](THEOREMES.md) |
-| 5 | la percolation dit quels niveaux sont utilisables | fonction et vitesse de percolation, limite gaussienne $\mu = K + a\sqrt{K}$, cf. [ORDRE_DES_PREUVES.md](ORDRE_DES_PREUVES.md) |
+| 5 | la percolation dit quels niveaux sont utilisables | fonction et vitesse de percolation, limite gaussienne $\mu = K + a\sqrt{K}$, cf. [VOIES.md](VOIES.md) |
 
 L'exactitude ne devient load-bearing **que par le maillon 2**. Tant qu'on condense, un arbre heuristique suffit : c'est précisément pourquoi personne n'a jamais eu besoin d'exactitude dans cette littérature, et pourquoi l'argument « exact » y est resté orthogonal.
 
@@ -133,7 +133,7 @@ Le $68{,}0$ de WaffleIron est nu : aucun chiffre val avec TTA n'a jamais été p
 
 ## Classement des actifs
 
-Ce classement décide de ce qui va dans le titre et de ce qui reste en appendice ; l'ordre des mesures qui l'instruit figure dans [ORDRE_DES_PREUVES.md](ORDRE_DES_PREUVES.md).
+Ce classement décide de ce qui va dans le titre et de ce qui reste en appendice ; l'ordre des mesures qui l'instruit figure dans [VOIES.md](VOIES.md).
 
 | Actif | Rang | Rôle |
 |---|---|---|
@@ -312,7 +312,7 @@ Continuer vers un modèle complet seulement si :
 - HSA ou son successeur bat pooling/message passing sur le même arbre ;
 - les contraintes de mémoire permettent des batches et trois seeds réalistes.
 
-L'ordre dans lequel ces conditions sont éprouvées n'est pas libre, et il ne commence pas par le descripteur : les chiffres SPT et EZ-SP cités plus haut placent ce levier au dernier rang, derrière l'adjacence et surtout le nombre de niveaux. Les mesures suivent l'ordre fixé par [ORDRE_DES_PREUVES.md](ORDRE_DES_PREUVES.md), et la définition des canaux celle de [DESCRIPTEURS_DE_NOEUD.md](DESCRIPTEURS_DE_NOEUD.md).
+L'ordre dans lequel ces conditions sont éprouvées n'est pas libre, et il ne commence pas par le descripteur : les chiffres SPT et EZ-SP cités plus haut placent ce levier au dernier rang, derrière l'adjacence et surtout le nombre de niveaux. Les mesures suivent l'ordre fixé par [VOIES.md](VOIES.md), et la définition des canaux celle de [DESCRIPTEURS_DE_NOEUD.md](DESCRIPTEURS_DE_NOEUD.md).
 
 Sinon, publier le résultat négatif le plus informatif ou pivoter : étude de stabilité des arbres de densité LiDAR, descripteur topologique borné, ou benchmark causal de hiérarchies. Ne pas protéger l'histoire initiale en changeant simultanément backbone, arbre, descripteur et recette.
 

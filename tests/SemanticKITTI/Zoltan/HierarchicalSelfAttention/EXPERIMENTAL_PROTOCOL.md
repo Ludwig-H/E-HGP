@@ -151,7 +151,7 @@ La coupe est également contractuelle. `cut_policy` appartient à `pre_parent`, 
 
 ## Diagnostics préalables sans entraînement
 
-Trois mesures précèdent la matrice d'expériences. Elles ne demandent aucun entraînement, seulement la construction de la hiérarchie et les labels, et elles testent l'effet arbre sans le confondre avec le descripteur ni avec l'opérateur. Leur ordre, leur justification et les chiffres de veille qui les calibrent sont dans [ORDRE_DES_PREUVES.md](ORDRE_DES_PREUVES.md) ; on ne reprend ici que le protocole et la règle de décision. Aucune étape de la matrice n'est lancée avant que M1 et M2 aient un résultat consigné, y compris négatif.
+Trois mesures précèdent la matrice d'expériences. Elles ne demandent aucun entraînement, seulement la construction de la hiérarchie et les labels, et elles testent l'effet arbre sans le confondre avec le descripteur ni avec l'opérateur. Leur ordre, leur justification et les chiffres de veille qui les calibrent sont dans [VOIES.md](VOIES.md) ; on ne reprend ici que le protocole et la règle de décision. Aucune étape de la matrice n'est lancée avant que M1 et M2 aient un résultat consigné, y compris négatif.
 
 ### M1 — Oracle d'antichaîne
 

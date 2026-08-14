@@ -16,7 +16,7 @@ Les autres documents sont plus précis et plus sévères, mais ils ne s'entrent 
 | Vous voulez… | Lisez, dans l'ordre |
 |---|---|
 | **comprendre** (30 min) | [GUIDE.md](GUIDE.md) |
-| **décider quoi faire** (2 h) | [GUIDE.md](GUIDE.md) → [ORDRE_DES_PREUVES.md](ORDRE_DES_PREUVES.md) → [RISQUES.md](RISQUES.md) |
+| **décider quoi faire** (2 h) | [GUIDE.md](GUIDE.md) → [VOIES.md](VOIES.md) → [RISQUES.md](RISQUES.md) |
 | **implémenter** (1 jour) | ci-dessus, puis [ARCHITECTURE.md](ARCHITECTURE.md) → [DESCRIPTEURS_DE_NOEUD.md](DESCRIPTEURS_DE_NOEUD.md) → [CONTRAT_HGP.md](CONTRAT_HGP.md) → [EXPERIMENTAL_PROTOCOL.md](EXPERIMENTAL_PROTOCOL.md) |
 
 ---
@@ -34,13 +34,15 @@ Développés au chapitre 6 du guide. À connaître **avant** de proposer quoi qu
 
 ## Où va le projet
 
-La cible reste la segmentation sémantique de SemanticKITTI. Mais le **régime** a changé, pour une raison mesurable : en supervision complète la marge est d'environ un point et la variance de graine vaut $1{,}5$ point — un gain n'y serait ni mesurable ni attribuable. En régime à peu d'étiquettes, la marge est de **10,3 points** (linear probing $62{,}0$ contre supervisé $72{,}3$).
+Quatre voies sont **fermées** par des chiffres vérifiés : battre l'état de l'art supervisé (marge $1$ point sous un bruit de $1{,}5$), « notre partition est meilleure » (vingt points d'oracle non convertis), le descripteur de nœud (le levier le plus faible), et HSA comme contribution.
 
-La revendication est donc devenue négative et précise :
+Deux formulations que j'ai portées un temps sont également fermées, et c'est un audit d'antériorité qui les ferme : « hiérarchie de clusters comme structure d'auto-supervision » est **9/10 occupé** (HCSC 2022, MHCCL 2023, HASSL 2026), et « arbre à niveaux indexés par un rayon sur nuage 3D comme tâche prétexte » est **8/10 occupé** par Sharma & Kaul, NeurIPS 2020.
 
-> Toute l'auto-supervision LiDAR fabrique ses unités avec HDBSCAN, **condense l'arbre en une partition plate et le jette**. Nous ne condensons pas : les nœuds internes, la relation parent–enfant et les niveaux sont le signal.
+Ce qui reste entier tient en une phrase, et elle est étroite :
 
-Ce qu'elle n'est pas : ni « utiliser une hiérarchie » (cTree, NeurIPS 2020), ni « utiliser la densité » (standard du domaine depuis TARL), ni « sans caméra » (déjà le cas de TARL, SegContrast, BEVContrast, ALSO). Les concurrents directs sont **DOS** et **PointINS**, pas Concerto. Détail au [chapitre 8 du guide](GUIDE.md) et dans [STRATEGIE_PUBLICATION.md](STRATEGIE_PUBLICATION.md).
+> Chez **tous** les antécédents, l'axe de supervision est un **nombre de clusters** — PCL $25\,000$, HCSC $3000$–$2000$–$1000$. Jamais un paramètre de filtration. **Superviser sur le niveau de filtration**, que HGP rend signifiant et que la percolation permet de choisir, est à $1/10$ occupé.
+
+Trois voies restent ouvertes, chacune avec sa feuille de route dans **[VOIES.md](VOIES.md)** : la **mesure** (l'oracle de partition n'existe sur aucun benchmark LiDAR mono-scan), l'**instance sans entraînement** (substitution du seul clusterer d'ALPINE), et la **supervision par le niveau**. Une quatrième — l'ultramétrique dans l'attention — attend son audit d'antériorité.
 
 ---
 
@@ -50,7 +52,7 @@ Ce qu'elle n'est pas : ni « utiliser une hiérarchie » (cTree, NeurIPS 2020), 
 |---|---|
 | [GUIDE.md](GUIDE.md) | Le parcours complet. **Point d'entrée.** |
 | [GLOSSAIRE.md](GLOSSAIRE.md) | Tous les termes, une ligne chacun. |
-| [ORDRE_DES_PREUVES.md](ORDRE_DES_PREUVES.md) | Quoi mesurer, dans quel ordre, et où placer le budget de nouveauté. |
+| **[VOIES.md](VOIES.md)** | **Les voies retenues et leurs feuilles de route ; ce qui est fermé et par quel chiffre.** |
 | [RISQUES.md](RISQUES.md) | Les réfutations possibles, leurs tests, les règles d'arrêt chiffrées. |
 | [CONCURRENCE.md](CONCURRENCE.md) | L'état de l'art, les régimes de comparaison, l'espace de nouveauté. |
 | [DESCRIPTEURS_DE_NOEUD.md](DESCRIPTEURS_DE_NOEUD.md) | Comment résumer un nœud : support, canaux radiaux, canal de masse, points contre polyèdre reconstruit. |
@@ -76,6 +78,6 @@ Sources locales : le [papier HSA (NeurIPS 2025)](NeurIPS-2025-hierarchical-self-
 
 **Dépendance ouverte.** La v3 ne livre pas encore le payload facettes–cofaces–incidences complet ; sa route réduite s'arrête aux composantes $H_0$. Vérifier au runtime la fraîcheur de `morsehgp3D_v3/audits/AUDIT_ETAT_COURANT.md`.
 
-**Portée instance.** Fermée comme contribution. Mais [ORDRE_DES_PREUVES.md](ORDRE_DES_PREUVES.md) montre que le pipeline ALPINE, avec substitution du seul clusterer, est le **diagnostic** le moins cher de l'effet arbre : une phase fermée pour la publication peut rester ouverte pour la mesure.
+**Portée instance.** Fermée comme contribution. Mais [VOIES.md](VOIES.md) montre que le pipeline ALPINE, avec substitution du seul clusterer, est le **diagnostic** le moins cher de l'effet arbre : une phase fermée pour la publication peut rester ouverte pour la mesure.
 
 `python tools/check_docs.py` exclut `tests/**` : son succès ne valide pas ce corpus.
