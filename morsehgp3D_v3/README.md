@@ -21,7 +21,7 @@ sans kernel CUDA et certifié l'arrêt ciblé. La seconde a échoué avant toute
 rampe (`CTest rc=8`, cibles non construites) : elle ne fournit aucune mesure
 SOC/G4.
 
-La recette au `HEAD=783a789` reste non relançable : elle omet encore une cible
+La recette au `HEAD=5809bd2` reste non relançable : elle omet encore une cible
 sélectionnée par son regex CTest, ne sélectionne pas les nouvelles portes BJD,
 ignore le code de l'analyseur de pentes, n'exige pas une fenêtre finale et
 autorise quatre timeouts séquentiels dont la somme dépasse les deux
@@ -34,12 +34,22 @@ est `p95 warm_e2e<100 ms` et la cible secondaire `p95 warm_e2e<1 s` sur un G4,
 sortie complète et synchronisation comprises. Aucun échantillon qualifiable ne
 reçoit l'une ou l'autre.
 
-Le dernier commit stable relu est `783a789`. Le worktree mobile de Claude
-raccorde `BlockJungDual64` au probe WSPD. Son packing d'identités réparé passe
-trois CTests causaux, mais son juge capé peut encore sauter des groupes et des
-fermetures tout en publiant `OK`; il agit en outre après avoir payé toute la
-descente. Le verdict détaillé et la solution `tau(F)` sont dans
+Le dernier commit stable relu est `5809bd2`. Il intègre le packing d'identités
+BJD réparé et ses trois CTests causaux. À ce pin, le juge capé peut encore
+sauter des groupes et fermetures tout en publiant `OK`, les options BJD peuvent
+être vacuaires et le packing agit après toute la descente. Le worktree suivant
+tente de réparer les statuts et grave `collinear_seven`, sans être repinné : le
+cap partiel sort désormais code 3 et BJD sans vague est refusé. Sa porte
+`--exige-q4-ouvert` reste toutefois vacuaire sans juge, et la famille ignore
+silencieusement une valeur `--points` différente de neuf. Le verdict détaillé et la solution `tau(F)` sont dans
 [`audits/AUDIT_LIVE_BLOCK_JUNG_CREDITS_TAU_783A789_20260814.md`](audits/AUDIT_LIVE_BLOCK_JUNG_CREDITS_TAU_783A789_20260814.md).
+
+Le même commit ajoute `--fenetre-exacte`. Le nom doit être lu avec prudence :
+q2 décide bien la miniboule diamétrale de chaque paire tirée ; q3/q4 ne mesurent
+qu'un cœur universel et publient donc un majorant de la fenêtre réelle. Le
+lemme exact, les contre-fixtures u16 et la route pieds/intersections shallow
+sont dans
+[`audits/AUDIT_MINIBOULE_UNIQUE_RESIDUEL_SHALLOW_5809BD2_20260814.md`](audits/AUDIT_MINIBOULE_UNIQUE_RESIDUEL_SHALLOW_5809BD2_20260814.md).
 
 Le pin historique `2b89ea1` introduit enfin une première tranche
 `BallForm -> PrimitiveSphereKey -> census I_B/U_B -> SphereRun`. C'est le bon
@@ -163,6 +173,21 @@ dégénérée est filtrée. Une position géométrique peut être bucketisée, m
 les `PointId` et leur multiplicité restent présents dans les pools témoins et
 les produits ; les paires de chacun de ces IDs vers une troisième position
 gardent donc leur multiplicité. Un quotient silencieux changerait la profondeur.
+
+### Miniboule unique et centres critiques finis
+
+Une fois le support minimal positif complet fixé, son événement est sa
+miniboule intrinsèque unique. Pour q2, le centre est exactement le milieu et le
+prédicat est `(z-a) dot (b-z)>0`. Pour une ancre `ab` fixée, q3 prend le pied
+auto-centré de la ligne du troisième site dans le plan médiateur, et q4
+l'intersection de deux lignes. Le continuum du disque de Jung n'est donc pas la
+source : c'est un prune collectif suffisant avant la génération finie.
+
+La profondeur de la boule diamétrale ne se propage jamais à q3/q4. Une fixture
+u16 possède dix points dans cette boule tout en gardant une circumboule q3 vide
+et une circumsphère q4 vide, toutes deux positives et possédées par `ab`. Le
+résiduel exact doit donc conserver les pieds q3 et les intersections shallow
+q4, avec owner, shell et `BallKey` complets.
 
 q3 recertifie `E+X-D>0` et l'indépendance affine. q4 ne signifie pas « quatre
 faces aiguës » : l'autorité est la stricte positivité des quatre
@@ -305,7 +330,7 @@ Le lift rectangle à poids fixes est désormais résolu mathématiquement. Poser
 `A0>0 && 2A0^2>||C0||^2`, q3 remplace `2` par `3`. Pour un endpoint fixé,
 `(A0,C0)` est affine dans l'autre et chaque lane est un cône de Lorentz convexe.
 Les `8×8=64` couples de coins caractérisent donc exactement `ALL` sur
-l'enveloppe `A×B`. Au `HEAD=783a789`, `bjd_lane_box` rend une lane entière ou
+l'enveloppe `A×B`. Au `HEAD=5809bd2`, `bjd_lane_box` rend une lane entière ou
 `-1` ; le wrapper contractuel traduit `lane>=floor` en `ALL_GROUP`, sinon en
 `MIXED`. La primitive vérifie seulement la base et les poids fournis, n'émet
 aucune paire et tient en i128 sous `1<=W<=65535`. Un proposant distinct est
@@ -317,7 +342,7 @@ hyperarête uniforme ; seule
 d'un poids différent par paire. Le widening précède `a+b`, les produits et les
 normes ; le preflight de `W` somme en type large ou saturant avant tout cast.
 
-Au commit stable `783a789`, le header implémente cette forme à base et poids
+Au commit stable `5809bd2`, le header implémente cette forme à base et poids
 communs fixés. La réception logicielle reste ouverte : le selftest ne compare
 que la forme ponctuelle et des boîtes dégénérées, aucun CTest n'exerce une
 boîte non dégénérée ni un mutant BJD, et le header géométrique ne porte ni

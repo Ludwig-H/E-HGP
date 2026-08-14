@@ -270,6 +270,11 @@ bool g_inject_bjd_reutilise = false;
 // MUTANT `bjd-groupes-chevauchants` : ne pas retirer de la banque les temoins
 // d'un groupe deja retenu. Deux groupes partagent alors un `PointId`.
 bool g_inject_bjd_chevauche = false;
+// Plancher EXPLICITE de fermetures jugees, et porte de non-fermeture q4 : la
+// fixture gravee doit rester ouverte, une famille de mesure doit fermer.
+long long g_min_bjd_fermetures = 0;
+long long g_min_bjd_groupes = 0;
+bool g_exige_q4_ouvert = false;
 // Fenetre decidee PAR PAIRE : nombre de paires tirees uniformement, et graine.
 long long g_fenetre_exacte = 0;
 long long g_fenetre_seed = 1;
@@ -1008,6 +1013,9 @@ int main(int argc, char** argv) {
     else if (a == "--soc64-actif") g_soc64_actif = true;
     else if (a.rfind("--bjd-groupes=", 0) == 0) g_bjd_groupes = arg_ll(val("--bjd-groupes=").c_str(), 1, kMaxGroupes, "bjd-groupes");
     else if (a.rfind("--juge-bjd=", 0) == 0) g_juge_bjd = arg_ll(val("--juge-bjd=").c_str(), 1, (1LL << 20), "juge-bjd");
+    else if (a.rfind("--min-bjd-fermetures=", 0) == 0) g_min_bjd_fermetures = arg_ll(val("--min-bjd-fermetures=").c_str(), 1, (1LL << 40), "min-bjd-fermetures");
+    else if (a.rfind("--min-bjd-groupes=", 0) == 0) g_min_bjd_groupes = arg_ll(val("--min-bjd-groupes=").c_str(), 1, (1LL << 40), "min-bjd-groupes");
+    else if (a == "--exige-q4-ouvert") g_exige_q4_ouvert = true;
     else if (a.rfind("--fenetre-exacte=", 0) == 0) g_fenetre_exacte = arg_ll(val("--fenetre-exacte=").c_str(), 1, (1LL << 24), "fenetre-exacte");
     else if (a.rfind("--fenetre-seed=", 0) == 0) g_fenetre_seed = arg_ll(val("--fenetre-seed=").c_str(), 1, (1LL << 40), "fenetre-seed");
     else if (a == "--inject-bjd-reutilise") g_inject_bjd_reutilise = true;
@@ -1035,6 +1043,19 @@ int main(int argc, char** argv) {
   // Un mutant sans son juge est un vert par vacuite : il faut l'oracle.
   if (g_inject_c4_comme_m4 && g_porteurs_oracle == 0)
     refuse("--inject=porteurs-c4-comme-m4 exige --porteurs-oracle");
+  // ---- LES MODES VACUAIRES SONT REFUSES AVANT TOUT CALCUL.
+  //
+  // `--bjd-groupes` sans `--vwave` ne visite aucune feuille : il rendait code
+  // zero avec `essais=0`, donc un vert qui ne prouve rien. Un mutant sans son
+  // juge est du meme ordre : il ne peut etre ni tue ni survivant.
+  if (g_bjd_groupes > 0 && !g_vwave) refuse("--bjd-groupes exige --vwave");
+  if (g_juge_bjd > 0 && g_bjd_groupes == 0) refuse("--juge-bjd exige --bjd-groupes");
+  if (g_min_bjd_fermetures > 0 && g_juge_bjd == 0)
+    refuse("--min-bjd-fermetures exige --juge-bjd");
+  if (g_min_bjd_groupes > 0 && g_juge_bjd == 0)
+    refuse("--min-bjd-groupes exige --juge-bjd");
+  if ((g_inject_bjd_reutilise || g_inject_bjd_chevauche) && g_juge_bjd == 0)
+    refuse("un mutant bjd exige --juge-bjd");
   if (ns.empty()) ns = {4000, 16000};
 
   mhgp3v::CloudFamily fam;
@@ -1046,6 +1067,7 @@ int main(int argc, char** argv) {
   // CONTRE-FAMILLE, pas un regime du contrat : masse universelle quadratique,
   // source q3/q4 vide. Elle sert a refuter, jamais a qualifier.
   else if (family == "two_lines") fam = mhgp3v::CloudFamily::kTwoLines;
+  else if (family == "collinear_seven") fam = mhgp3v::CloudFamily::kCollinearSeven;
   else refuse("famille inconnue");
   if (oracle && ns.back() > 64) refuse("l'oracle exige n <= 64");
 
@@ -2672,8 +2694,17 @@ int main(int argc, char** argv) {
       // UN SEUL DESACCORD SUFFIT. `faux` compte les groupes que le juge primal
       // refute sur au moins une paire ; `ferm_faux` compte les fermetures dont
       // la famille disjointe reconstruite n'atteint pas le seuil.
-      std::printf("juge_bjd q4 : groupes=%lld paires=%lld faux=%lld unknown=%lld"
+      // ---- UN REFUS DE JUGER N'EST PAS UN ACCORD.
+      //
+      // La premiere ecriture publiait `OK` et le code zero avec des dizaines de
+      // groupes sautes sous le cap : `--juge-bjd=1` rendait `groupes=158
+      // sautes=98` et un succes. Le statut est desormais `PARTIEL` des qu'un
+      // seul claim reste non juge, et la gate le refuse.
+      const bool bjd_complet = (soc.bjd_sautes == 0 && soc.ferm_sautes == 0 &&
+                                soc.bjd_unknown == 0);
+      std::printf("juge_bjd q4 : statut=%s groupes=%lld paires=%lld faux=%lld unknown=%lld"
                   " sautes=%lld | fermetures juges=%lld faux=%lld sautes=%lld\n",
+                  bjd_complet ? "COMPLET" : "PARTIEL",
                   soc.bjd_juges, soc.bjd_paires, soc.bjd_faux, soc.bjd_unknown,
                   soc.bjd_sautes, soc.ferm_juges, soc.ferm_faux, soc.ferm_sautes);
       const bool mutant_bjd = g_inject_bjd_reutilise || g_inject_bjd_chevauche;
@@ -2707,12 +2738,20 @@ int main(int argc, char** argv) {
       }
       // PLANCHERS CONTRE LE VERT PAR VACUITE. Un juge qui ne juge rien ne
       // prouve rien : ni les groupes, ni les fermetures qu'ils produisent.
-      if (soc.bjd_juges == 0) {
-        std::fprintf(stderr, "PLANCHER: aucun groupe credite juge\n");
+      // Plancher EXPLICITE la aussi : sur la fixture gravee, le sujet repare ne
+      // doit former AUCUN groupe, puisque tous ses temoins sont deja credites.
+      // Un plancher cable rendrait cette absence indistinguable d'une panne.
+      if (soc.bjd_juges < g_min_bjd_groupes) {
+        std::fprintf(stderr, "PLANCHER: %lld groupes credites juges, %lld exiges\n",
+                     soc.bjd_juges, g_min_bjd_groupes);
         return 3;
       }
-      if (soc.ferm_juges == 0) {
-        std::fprintf(stderr, "PLANCHER: aucune fermeture par groupes jugee\n");
+      // Le plancher de fermetures est EXPLICITE, jamais implicite : une fixture
+      // de refutation doit precisement ne rien fermer, et un plancher cable
+      // dans le sujet la rendrait impossible a graver.
+      if (soc.ferm_juges < g_min_bjd_fermetures) {
+        std::fprintf(stderr, "PLANCHER: %lld fermetures par groupes jugees, %lld exigees\n",
+                     soc.ferm_juges, g_min_bjd_fermetures);
         return 3;
       }
       if (soc.bjd_rejetes_credite == 0) {
@@ -2720,6 +2759,24 @@ int main(int argc, char** argv) {
                      "PLANCHER: la regle de disjonction n'a ecarte aucun temoin,"
                      " le mutant de reutilisation serait vacuaire\n");
         return 3;
+      }
+      if (!bjd_complet) {
+        std::fprintf(stderr,
+                     "PARTIEL: %lld groupes et %lld fermetures non juges, %lld"
+                     " degenerescences — la fenetre publiee n'est pas jugee\n",
+                     soc.bjd_sautes, soc.ferm_sautes, soc.bjd_unknown);
+        return 3;
+      }
+      // ---- LA PORTE DE LA FIXTURE GRAVEE.
+      //
+      // Sur `collinear_seven`, la profondeur du pool vaut exactement sept et le
+      // seuil q4 en demande huit : AUCUN terminal ne doit fermer. Une fermeture
+      // y est la signature exacte d'un credit qui s'additionne sans disjonction.
+      if (g_exige_q4_ouvert && closed_terms[2] != 0) {
+        std::fprintf(stderr,
+                     "DESACCORD: %lld terminaux q4 fermes alors que la profondeur"
+                     " du pool vaut sept\n", closed_terms[2]);
+        return (g_inject_bjd_reutilise || g_inject_bjd_chevauche) ? 4 : 1;
       }
     }
     if (g_soc64_actif) {

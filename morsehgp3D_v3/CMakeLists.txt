@@ -4852,10 +4852,57 @@ set_tests_properties(mhgp3v_jung_dual_selftest_petit PROPERTIES
 add_test(NAME mhgp3v_bjd_credit_disjoint
   COMMAND mhgp3v_wspd_wavefront_probe --family=eight_clusters --points=200
           --sep-euclid=8/1 --tight --vwave --window=512 --window-ledger
-          --soc64-actif --bjd-groupes=8 --juge-bjd=64)
+          --soc64-actif --bjd-groupes=8 --juge-bjd=64
+          --min-bjd-groupes=200 --min-bjd-fermetures=10)
 set_tests_properties(mhgp3v_bjd_credit_disjoint PROPERTIES
   PASS_REGULAR_EXPRESSION
-  "juge_bjd q4 : groupes=256 paires=442 faux=0 unknown=0 sautes=0 \\| fermetures juges=17 faux=0 sautes=0")
+  "juge_bjd q4 : statut=COMPLET groupes=256 paires=442 faux=0 unknown=0 sautes=0 \\| fermetures juges=17 faux=0 sautes=0")
+
+# UN REFUS DE JUGER N'EST PAS UN ACCORD. Sous un cap trop petit, la premiere
+# ecriture publiait `OK`, `fenetre_finale=OUI` et le code zero avec quatre-vingt
+# dix-huit groupes non juges. Le statut est desormais `PARTIEL` et la gate le
+# refuse par un code de plancher.
+mhgp3v_add_expected_code_test_for(mhgp3v_wspd_wavefront_probe
+  mhgp3v_bjd_refus_juge_partiel "PARTIEL: " 3
+  --family=eight_clusters --points=200 --sep-euclid=8/1 --tight --vwave
+  --window=512 --window-ledger --soc64-actif --bjd-groupes=8 --juge-bjd=1)
+
+# LES MODES VACUAIRES SONT REFUSES AVANT TOUT CALCUL, pas verts a zero essai.
+mhgp3v_add_expected_code_test_for(mhgp3v_wspd_wavefront_probe
+  mhgp3v_bjd_refus_sans_vwave "--bjd-groupes exige --vwave" 2
+  --family=eight_clusters --points=200 --sep-euclid=8/1 --tight
+  --window=512 --bjd-groupes=8)
+mhgp3v_add_expected_code_test_for(mhgp3v_wspd_wavefront_probe
+  mhgp3v_bjd_refus_mutant_sans_juge "un mutant bjd exige --juge-bjd" 2
+  --family=eight_clusters --points=200 --sep-euclid=8/1 --tight --vwave
+  --window=512 --window-ledger --bjd-groupes=8 --inject-bjd-reutilise)
+
+# ---------------------------------------------------------------------------
+# LA FIXTURE GRAVEE `seven_collinear_plus_reused_pair`.
+#
+# Section 2 de `AUDIT_LIVE_BLOCK_JUNG_CREDITS_TAU_783A789_20260814.md`. Avec
+# `a=(0,0,0)`, `b=(10,0,0)` et `z_i=(i,0,0)` pour `1<=i<=7`, la difference
+# entre rayon carre et distance carree vaut exactement `i(10-i)>0` pour TOUT
+# centre d'une sphere par `a,b`. Les sept temoins sont donc universels et la
+# profondeur du pool vaut exactement SEPT, alors que le seuil q4 en demande
+# huit : aucun terminal ne doit fermer.
+#
+# Toute paire de ces memes temoins reste pourtant une base couvrante. Un credit
+# qui les reutilise publie donc un huitieme credit sans huitieme identite. La
+# fixture est deterministe et ne depend d'aucune graine ; les portes
+# statistiques sur `eight_clusters` ne la remplacent pas.
+add_test(NAME mhgp3v_bjd_fixture_collineaire
+  COMMAND mhgp3v_wspd_wavefront_probe --family=collinear_seven --points=9
+          --sep-euclid=32/1 --tight --vwave --window=512 --window-ledger
+          --soc64-actif --bjd-groupes=8 --juge-bjd=64 --exige-q4-ouvert)
+set_tests_properties(mhgp3v_bjd_fixture_collineaire PROPERTIES
+  PASS_REGULAR_EXPRESSION
+  "bjd_groupes q4 : essais=20 couvrants=0 \\(0.000%\\) couples=20 couples/essai=1.00 rejetes_credite=55")
+mhgp3v_add_expected_code_test_for(mhgp3v_wspd_wavefront_probe
+  mhgp3v_bjd_fixture_collineaire_mutant "mutant_killed=1 bjd-reutilise-temoin" 4
+  --family=collinear_seven --points=9 --sep-euclid=32/1 --tight --vwave
+  --window=512 --window-ledger --soc64-actif --bjd-groupes=8 --juge-bjd=64
+  --exige-q4-ouvert --inject-bjd-reutilise)
 
 # LES DEUX MUTANTS DE DISJONCTION. Le premier est exactement l'ecriture du
 # raccord initial ; le second recredite le meme groupe jusqu'au seuil. Tous

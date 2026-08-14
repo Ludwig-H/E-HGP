@@ -12,15 +12,26 @@ sont consolidées dans `../PROPOSITION.md`; seules restent les autorités live e
 les dépendances historiques encore citées directement ou transitivement par le
 logiciel, un reçu ou une autorité conservée.
 
+Règle de supersession globale pour les textes historiques : seule une paire
+endpoint de distance `D=0` est filtrée. Une géométrie peut bucketiser une
+position dupliquée, mais tous les vrais `PointId`, leur multiplicité et leurs
+paires vers les autres positions restent dans les pools et produits. Toute
+ancienne phrase imposant le rejet global des positions dupliquées est périmée.
+
 ## Autorités actives
 
 - [`AUDIT_ETAT_COURANT.md`](AUDIT_ETAT_COURANT.md) : unique verdict mutable,
   pin, worktree, tests et blocages.
+- [`AUDIT_MINIBOULE_UNIQUE_RESIDUEL_SHALLOW_5809BD2_20260814.md`](AUDIT_MINIBOULE_UNIQUE_RESIDUEL_SHALLOW_5809BD2_20260814.md) :
+  lemme exact de miniboule unique, q2 diamétral, q3 par pied auto-centré, q4 par
+  intersections shallow, contre-fixtures u16 de non-hérédité et audit du
+  diagnostic `--fenetre-exacte`.
 - [`AUDIT_LIVE_BLOCK_JUNG_CREDITS_TAU_783A789_20260814.md`](AUDIT_LIVE_BLOCK_JUNG_CREDITS_TAU_783A789_20260814.md) :
-  contre-audit live du raccord `BlockJungDual64`; réfutation du double crédit
-  d'identité, packing réparé mais no-go dans l'ordonnance actuelle, fixture des
-  sept témoins collinéaires, remplacement par `tau(F)>=8`, génération par
-  coupes, préfiltre bilinéaire exact et état de la dernière session G4.
+  contre-audit historique du raccord `BlockJungDual64` au parent `783a789` ;
+  réfutation du double crédit d'identité, packing réparé mais no-go dans
+  l'ordonnance actuelle, fixture des sept témoins collinéaires, remplacement
+  par `tau(F)>=8`, génération par coupes, préfiltre bilinéaire exact et état de
+  la dernière session G4. Sa bannière renvoie au pin courant `5809bd2`.
 - [`AUDIT_CONTRE_RECEPTION_M4_V2_DEPTHBLOCK_5BFC5C8_20260814.md`](AUDIT_CONTRE_RECEPTION_M4_V2_DEPTHBLOCK_5BFC5C8_20260814.md) :
   autorité courante sur le verrou M4 ; contre-fixture de l'intervalle nul du
   sampler v2, limites du brute-force/H4, `Depth=tau(E)`,

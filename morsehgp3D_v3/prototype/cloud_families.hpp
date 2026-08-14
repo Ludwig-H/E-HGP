@@ -61,7 +61,25 @@ enum class CloudFamily {
   //
   // Elle est ici pour qu'une porte puisse mesurer les deux nombres cote a cote
   // sur le meme nuage : masse universelle quadratique, ZERO porteur aigu.
-  kTwoLines
+  kTwoLines,
+  // ---- SECONDE REFUTATION GRAVEE : LE CREDIT DE GROUPE NE S'AJOUTE PAS.
+  //
+  // Fixture `seven_collinear_plus_reused_pair`, section 2 de
+  // audits/AUDIT_LIVE_BLOCK_JUNG_CREDITS_TAU_783A789_20260814.md.
+  //
+  //   a = (0,0,0)   b = (10,0,0)   z_i = (i,0,0) pour 1 <= i <= 7
+  //
+  // Pour TOUT centre `c=(5,u,v)` d'une sphere passant par `a` et `b`, la
+  // difference entre le rayon carre et la distance carree a `z_i` vaut
+  // exactement `i(10-i) > 0` : les sept temoins sont universels, et la
+  // profondeur du pool vaut exactement SEPT.
+  //
+  // Or toute PAIRE de ces memes temoins reste une base couvrante. Un credit de
+  // groupe qui ne verifie pas la disjonction publie donc un huitieme credit
+  // sans huitieme identite, et ferme une lane q4 qui doit rester ouverte. La
+  // fixture est deterministe : elle ne depend d'aucune graine, et aucune
+  // famille pseudo-aleatoire ne la remplace.
+  kCollinearSeven
 };
 
 inline const char* cloud_family_name(CloudFamily family) {
@@ -72,6 +90,7 @@ inline const char* cloud_family_name(CloudFamily family) {
     case CloudFamily::kScanlineOverlapMultiecho: return "scanline_overlap_multiecho";
     case CloudFamily::kEightClusters: return "eight_clusters";
     case CloudFamily::kTwoLines: return "two_lines";
+    case CloudFamily::kCollinearSeven: return "collinear_seven";
   }
   return "?";
 }
@@ -96,6 +115,9 @@ inline int cloud_family_default_coord(CloudFamily family, int n) {
     // droites et la construction de la sphere vide en depend. Une emprise
     // reduite changerait l'objet refute.
     case CloudFamily::kTwoLines: c = 65536.0; break;
+    // La fixture est gravee aux coordonnees exactes de l'audit : son emprise
+    // est celle de `b`, jamais une grille derivee de `n`.
+    case CloudFamily::kCollinearSeven: c = 16.0; break;
   }
   return (int)std::max(4.0, std::min(65536.0, c));
 }
@@ -349,11 +371,25 @@ inline std::vector<mhgp::P3> two_lines_cloud(int n, int coord) {
   return pts;
 }
 
+// La fixture, aux coordonnees EXACTES de l'audit. `n` est ignore : neuf points,
+// ni un de plus ni un de moins. Les sept temoins sont universels, la profondeur
+// vaut sept, et le seuil q4 en demande huit.
+inline std::vector<mhgp::P3> collinear_seven_cloud() {
+  std::vector<mhgp::P3> pts;
+  pts.reserve(9);
+  pts.push_back(mhgp::P3{0, 0, 0});     // a
+  pts.push_back(mhgp::P3{10, 0, 0});    // b
+  for (int i = 1; i <= 7; ++i)
+    pts.push_back(mhgp::P3{(std::uint16_t)i, 0, 0});
+  return pts;
+}
+
 inline std::vector<mhgp::P3> make_family_cloud(CloudFamily family, int n, int coord,
                                                long long seed,
                                                bool mutant_overshoot = false) {
   switch (family) {
     case CloudFamily::kTwoLines: return two_lines_cloud(n, coord);
+    case CloudFamily::kCollinearSeven: return collinear_seven_cloud();
     case CloudFamily::kUniform: return uniform_cloud(n, coord, seed);
     case CloudFamily::kEightClusters: return eight_clusters_cloud(n, coord, seed);
     case CloudFamily::kTerrain: return terrain_cloud(n, coord, seed);

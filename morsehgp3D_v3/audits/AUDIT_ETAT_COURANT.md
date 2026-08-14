@@ -8,40 +8,42 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-> **Alerte de worktree au `HEAD=783a789`.** Le contre-audit live détaillé du
-> delta mouvant de Claude est
-> [`AUDIT_LIVE_BLOCK_JUNG_CREDITS_TAU_783A789_20260814.md`](AUDIT_LIVE_BLOCK_JUNG_CREDITS_TAU_783A789_20260814.md).
-> La primitive `BlockJungDual64` à poids fixes est sûre, mais son premier
-> raccord additionnait des groupes à des singletons sans union de `PointId` ;
-> le raccord courant répare ce packing et trois CTests causaux passent. Il
-> publie encore `OK` lorsque son juge est partiel, accepte des options vacuaires
-> et agit après la descente complète. Le chemin recommandé conserve les bases
-> comme hyperarêtes et ferme sur `tau(F)>=8` **avant** cette descente. La dernière
-> session G4 documentée a échoué avant sa rampe et a bien été arrêtée
+> **Alerte au `HEAD=5809bd2`.** Le commit absorbe la réparation du packing BJD,
+> ses trois CTests et le diagnostic `--fenetre-exacte`. Les défauts de statut
+> partiel et d'options vacuaires appartiennent encore à ce pin stable. Un delta
+> logiciel ultérieur tente déjà de les réparer et grave la fixture collinéaire,
+> mais il n'est pas repinné. Le nouveau verdict sur l'idée de miniboule unique
+> est
+> [`AUDIT_MINIBOULE_UNIQUE_RESIDUEL_SHALLOW_5809BD2_20260814.md`](AUDIT_MINIBOULE_UNIQUE_RESIDUEL_SHALLOW_5809BD2_20260814.md) : q2 possède bien
+> une seule boule diamétrale ; q3 et q4 sont des minima auto-centrés finis, pas
+> cette même boule. Le chemin recommandé ferme par `tau(F)>=8` avant descente,
+> puis traite seulement le résiduel par pieds q3 et intersections shallow q4.
+> La dernière session G4 a échoué avant sa rampe et la cible a été certifiée
 > `TERMINATED` : elle ne fournit aucune mesure 50k.
 
 ## Snapshot
 
 Le dernier commit stable relu est
-`HEAD=783a78934fef97b2c2836ee49c6f03ddd18d2e08`, commit
-`BlockJungDual64 : une base ferme un rectangle entier en 64 coins`. Depuis le
-pin `cec4a4f`, deux commits ont ajouté le branchement optionnel de `SOC64`, sa
-recette G4, puis la primitive `BlockJungDual64`.
+`HEAD=5809bd2c054c02c4c77119d979a6be796032ca15`, commit
+`le credit de groupe etait un double compte : 12,8 % deviennent 0,9 %`. Depuis
+le pin `cec4a4f`, trois commits ont ajouté le branchement optionnel de `SOC64`,
+la primitive `BlockJungDual64`, puis son packing d'identités réparé.
 
-Le delta logiciel observé de Claude porte sur
-`M morsehgp3D_v3/CMakeLists.txt` et
-`M morsehgp3D_v3/prototype/wspd_wavefront_probe.cpp`, hors présentes écritures
-documentaires de l'auditeur. Il tente le raccord de
-groupes BJD au ledger WSPD, avec reçus d'identité, mutants et juge primal. Ce
-delta mobile n'est pas reçu et doit être repinné, compilé et rejoué après
-stabilisation. L'auditeur n'a modifié aucun logiciel.
+Le delta logiciel courant de Claude modifie
+`prototype/cloud_families.hpp` et `prototype/wspd_wavefront_probe.cpp`. Il tente
+de refuser les juges partiels et modes BJD vacuaires, puis ajoute la famille
+`collinear_seven`. Ce delta mobile n'est pas reçu : `--exige-q4-ouvert` reste
+vacuaire sans `--juge-bjd`, et la famille ignore silencieusement `--points` au
+lieu d'exiger neuf points. L'auditeur n'a modifié aucun logiciel.
 
-Empreintes SHA-256 au commit `783a789` :
+Empreintes SHA-256 au commit `5809bd2` :
 
 - `CMakeLists.txt` :
-  `2532db5f1befa1520e3aa0fd20d1dc2788a2ca62004a40d15b0d4839063c60f5` ;
+  `6c38f5603b335f46a3c8ee4bf2ad01001a6f32254d2422bec49feb853df7945b` ;
 - `prototype/wspd_wavefront_probe.cpp` :
-  `64936944ef2f190299a2f7d67b0387b5002aab9c9019c6e830db6492e0189dfb` ;
+  `a136bbce438e9b3dd3bcdb60f83eb24810a95b45e2ace7427269ac45040bc799` ;
+- `prototype/cloud_families.hpp` :
+  `1f9089ba5972bf76aece6d899bacd8682341f394833c5d06e46ea2a921efad57` ;
 - `prototype/jung_dual_probe.cpp` :
   `d05a997c1c10e1e02918f3a585e7cdee45fda6814edf4930ccbae9b4030fd4e6` ;
 - `prototype/block_jung_dual.hpp` :
@@ -49,9 +51,11 @@ Empreintes SHA-256 au commit `783a789` :
 - `receipts/soc64_actif_g4_20260814/transcript.txt` :
   `18e6dd0f1aeafca51639805761a15855acbd08f4446ef9b4cbe7132db64977eb`.
 
-Le commit stable reçoit l'identité algébrique ponctuelle de BJD et son header
-CPU. Il ne reçoit ni source CK--WST, ni profondeur factorisée, ni ledger de
-`PointId` combinant groupes et singletons, ni primitive device, ni payload.
+Le commit stable reçoit la primitive BJD et un packing disjoint sûr sur ses
+campagnes causales. Il ne reçoit ni source CK--WST, ni profondeur `tau(F)`, ni
+ledger persistant de vrais `PointId`, ni primitive device, ni payload. Son
+`--fenetre-exacte` n'est exact que pour la miniboule q2 échantillonnée ; ses
+lanes q3/q4 publient un majorant par témoins universels.
 Les titres de commits restent des claims, jamais des verdicts reçus. GCP non
 utilisé par le présent auditeur.
 
@@ -409,11 +413,11 @@ cohérentes avec Montejano--Oliveros, théorème 3.1, puis la borne stricte de T
 `eta(3,h)<(h+1)^2`. Cette redérivation valide les énoncés, pas une indépendance
 organisationnelle ni l'intégration live.
 
-La réception logicielle de bloc reste ouverte. Le seul CTest BJD du commit
-stable est une regex greffée au selftest Jung : il compare les deux formes sur
-des couples ponctuels puis des AABB dégénérées en points. Il n'exerce aucun
-produit AABB non dégénéré, aucun mutant BJD, aucun changement de poids par coin,
-ni les preflights coordonnées/boîtes/IDs. `bjd_lane_box` paie en outre un
+La réception logicielle de bloc reste ouverte. Les tests du header comparent
+les deux formes sur des couples ponctuels puis des AABB dégénérées en points.
+Le commit ajoute trois CTests d'intégration WSPD, dont deux mutants de ledger,
+mais toujours aucun produit AABB non dégénéré, changement de poids par coin ou
+preflight coordonnées/boîtes/IDs du wrapper. `bjd_lane_box` paie en outre un
 prétest intérieur puis jusqu'à 64 coins : le pire cas annoncé est 65 prédicats,
 pas 64.
 
@@ -488,7 +492,7 @@ demandé des exécutables absents ; CTest a rendu `rc=8`. Le transcript conserve
 l'échec et `stop_and_verify.sh` certifie exactement
 `devpod-gpu-exploration/europe-west4-ai1a/ehgp-blackwell-spot-ai1a` en
 `TERMINATED`. Ce reçu qualifie l'arrêt, pas SOC64, une pente ou le SLO. Le
-script du commit `783a789` est seulement corrigé partiellement et n'a pas de
+script inchangé au commit `5809bd2` est seulement corrigé partiellement et n'a pas de
 reçu d'exécution : il omet encore `mhgp3v_jung_dual_judge`, sélectionné par son
 regex CTest, et ce regex ignore les portes `mhgp3v_bjd_*`. Il avale le code de
 l'analyseur, omet `--exige-fenetre-finale`, gate le seul `sum_E` à `1,70` au
@@ -593,14 +597,20 @@ flip direct cap 1000 : accord=OUI, juges=47, sautes=3, faux=0 (statut faux)
 mutant somme cap complet : code 4, juges=168, sautes=0, faux=25
 JungDual UBSan étroit : overflow signé à jung_dual.hpp:157
 Jung ciblé au HEAD : 13/13 verts en 0,31 s, collectif k=2 reçu, k=3/tau(E)/OPEN_FINAL absents
-BJD au HEAD : seulement point + boîtes dégénérées ; produits non dégénérés/mutants absents
-worktree BJD packing : 3/3 CTests verts, nominal et deux mutants
-rejeu consolidé worktree SOC/Jung/BJD : 10/10 verts en 1,21 s sur cette machine
-worktree BJD cap 1 : code 0/OK avec groupes sautes=98 et fermetures sautees=10 (statut faux)
-worktree BJD sans vwave : code 0/OK, essais=0, couvrants=0 (mode vacuaire)
-worktree SOC actif + juge shadow : zéro verdict actif jugé ; raccord actif sans autorité intégrée
-worktree judge-vwave + SOC/BJD : code 1, 149 fermetures dites « sans 10 » ; juge central incompatible avec les preuves collectives q4
-rejeu local final Jung/BJD : 16/16 verts en 1,45 s, dont 13 Jung et 3 BJD live
+BJD header au HEAD : seulement point + boîtes dégénérées ; produits non dégénérés absents
+BJD intégré au HEAD : 3/3 CTests verts, nominal et deux mutants de ledger
+rejeu consolidé précommit SOC/Jung/BJD : 10/10 verts en 1,21 s sur cette machine
+HEAD BJD cap 1 : code 0/OK avec groupes sautes=98 et fermetures sautees=10 (statut faux)
+HEAD BJD sans vwave : code 0/OK, essais=0, couvrants=0 (mode vacuaire)
+HEAD SOC actif + juge shadow : zéro verdict actif jugé ; raccord actif sans autorité intégrée
+HEAD judge-vwave + SOC/BJD : code 1, 149 fermetures dites « sans 10 » ; juge central incompatible avec les preuves collectives q4
+rejeu local HEAD Jung/BJD : 16/16 verts en 1,45 s, dont 13 Jung et 3 BJD intégrés
+delta post-HEAD : statut PARTIEL et préflights BJD ajoutés, non repinnés ; porte q4 encore vacuaire sans juge
+delta cap BJD 1 : code 3/PARTIEL, 98 groupes et 10 fermetures sautés
+delta BJD sans vwave : code 2/REFUS
+delta exige-q4-ouvert seul : code 0/OK, porte encore vacuaire
+delta collinear_seven avec --points=200 : exécute silencieusement n=9
+fenetre-exacte n=200, S=1000 : 198000 scans ; q2 exact échantillonné, q3/q4 majorants
 ablation BJD n=1500 uniform : masse q4 -12,55 %, CPU user médian +5,47 %, lectures identiques
 ablation BJD n=1500 amas : masse q4 -0,87 %, CPU user médian +8,15 %, lectures identiques
 session G4 SOC actif : CTest rc=8, aucune rampe, cible TERMINATED

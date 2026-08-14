@@ -8,6 +8,15 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
+> [!CAUTION]
+> Ce rapport conserve le snapshot historique `783a789` et le premier delta
+> live. Le commit `5809bd2` a depuis absorbé le packing réparé et ses trois
+> CTests. Les défauts de juge partiel et d'options vacuaires décrits ici restent
+> vrais au pin `5809bd2`; un worktree ultérieur tente de les réparer sans être
+> encore repinné. Le verdict courant et le lemme de miniboule unique sont dans
+> [`AUDIT_ETAT_COURANT.md`](AUDIT_ETAT_COURANT.md) et
+> [`AUDIT_MINIBOULE_UNIQUE_RESIDUEL_SHALLOW_5809BD2_20260814.md`](AUDIT_MINIBOULE_UNIQUE_RESIDUEL_SHALLOW_5809BD2_20260814.md).
+
 ## 0. Snapshot et verdict court
 
 Le pin de code relu est `HEAD=783a78934fef97b2c2836ee49c6f03ddd18d2e08`.
@@ -164,7 +173,7 @@ rend code zéro et `OK` avec `groupes=158`, `sautes=98`, puis
 même, `--bjd-groupes=8` sans `--vwave` rend code zéro avec `essais=0` et
 `couvrants=0`; le preflight d'options doit refuser les modes vacuaires.
 
-## 3. Réparation minimale sûre : packing reçu
+## 3. Réparation minimale sûre : packing candidat
 
 Pour conserver provisoirement la sémantique scalaire, chaque vue maintient :
 
@@ -201,8 +210,9 @@ de la proof-tile. Pour tout centre, l'ensemble des témoins intérieurs frappe
 chaque arête de `F`. Ainsi `tau(F)` minore la profondeur réelle. Fermer dès
 `tau(F)>=h` est donc sûr même si `F` est incomplet.
 
-Si `F` contient toutes les bases de Helly couvrantes du pool sur un domaine
-convexe bidimensionnel, l'égalité `Depth=tau(F)` suit dans les deux sens :
+Pour une **paire d'endpoints fixe**, si `F` contient toutes les bases de Helly
+couvrantes du pool sur son domaine convexe bidimensionnel, l'égalité
+`Depth=tau(F)` suit dans les deux sens :
 
 1. les intérieurs de tout centre forment un transversal, donc
    `tau(F)<=Depth` ;
@@ -210,7 +220,9 @@ convexe bidimensionnel, l'égalité `Depth=tau(F)` suit dans les deux sens :
    une intersection commune par Helly, donc un centre possède au plus `|T|`
    intérieurs et `Depth<=tau(F)`.
 
-Cette écriture traite correctement les recouvrements. Sept arêtes singleton et
+Cette égalité ne se transfère pas automatiquement à une proof-tile dont les
+endpoints varient. Pour une famille de bases reçues uniformément sur la tuile,
+seule `tau(F)<=Depth` est générale et suffit à fermer. Cette écriture traite correctement les recouvrements. Sept arêtes singleton et
 une paire formée de deux de leurs IDs gardent `tau(F)=7` : la fausse huitième
 unité disparaît sans règle spéciale.
 
@@ -247,10 +259,11 @@ U = singletons universels reçus ; F = hyperarêtes uniformes reçues
 répéter sous un cap explicite :
   si tau(F_res) >= h-|U| : ALL_DEPTH
   sinon extraire un transversal R de taille < h-|U|
-  proposer sur un représentant une base Helly dans P minus (U union R)
-  vérifier cette base et ses poids par BlockJungDual64 sur toute la tuile
-  si ALL : ajouter l'hyperarête à F
-  sinon : split ou UNKNOWN, jamais NONE
+  résoudre exactement l'HPI de P minus (U union R) sur une paire représentante
+  si contre-centre : R réfute la profondeur de cette paire et guide le split
+  si intersection vide : extraire une base de Helly G minimale, |G|<=3
+  vérifier G et ses poids par BlockJungDual64 sur toute la tuile
+  si ALL uniforme : ajouter l'hyperarête à F ; sinon split/UNKNOWN, jamais NONE
 ```
 
 Le proposant primal doit rendre une base active de taille au plus trois et un
@@ -260,13 +273,13 @@ la séparation demande, non sur toutes les paires du pool. Un cache clé par
 enfants qui héritent d'un reçu valide.
 
 Tant que `F` ne contient que singletons et paires, le solveur q4 branche sur au
-plus deux sommets et descend au plus `2^7=128` feuilles ; une base ternaire
-n'entre que si le séparateur prouve qu'elle est indispensable. À un
-contre-centre proposé, une requête nearest-neighbor AABB exacte sur
-`P minus (U union R)` peut rendre directement un témoin strictement intérieur,
-au lieu de collecter 24 feuilles après la descente. Les bornes de distance, les
-exclusions d'IDs et l'égalité shell sont exactes ; cap ou requête indécise donne
-`UNKNOWN/split`.
+plus deux sommets et descend au plus `2^7=128` feuilles. Une base ternaire
+n'entre qu'après minimisation du conflit : ses trois sous-paires doivent être
+testées. À un contre-centre provisoire, une requête nearest-neighbor AABB exacte
+sur `P minus (U union R)` ne fournit qu'une contrainte violée ; elle accélère
+l'HPI mais ne constitue pas une hyperarête. La boucle continue jusqu'à un vrai
+contre-centre certifié ou une base de Helly, puis seulement BJD vérifie cette
+base uniformément. Cap ou requête indécise donne `UNKNOWN/split`.
 
 ### Préfiltre exact `BJD-BilinearBounds`
 
@@ -487,7 +500,8 @@ relancer avant correction locale et dry-run de la sélection CTest.
 quatre points structurants :
 
 - les poids doivent rester fixes sur les 64 coins ;
-- `Depth=tau(E)` est la quantité mathématique pertinente ;
+- pour une paire fixe, `Depth=tau(E)` est la quantité mathématique pertinente ;
+  sur une tuile variable, `tau(F)` reste seulement une minoration sûre ;
 - la profondeur doit fermer un bloc avant fill ;
 - un échec d'un certificat uniforme impose `MIXED/UNKNOWN` ou un split.
 
@@ -497,8 +511,8 @@ Deux durcissements sont nécessaires :
    documents que jugée indépendamment sur des boîtes non dégénérées ; les
    selftests point/boîte-point ne reçoivent pas la quantification live ;
 2. son angle mort était le raccord live des identités et l'absence de tests
-   AABB non dégénérés. Il recommandait déjà `Depth=tau(E)`, le branch-and-cut et
-   le packing comme seul fast path ; la faute d'addition scalaire appartient au
+   AABB non dégénérés. Il recommandait déjà `Depth=tau(E)` sur le domaine
+   pair-level, le branch-and-cut et le packing comme seul fast path ; la faute d'addition scalaire appartient au
    premier raccord live, pas à cette proposition.
 
 `AUDIT_SOURCE_CK_WST_Q2_Q3_Q4_35FCEA8_20260814.md` garde une proposition

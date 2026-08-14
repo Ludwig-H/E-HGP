@@ -276,6 +276,39 @@ Un bloc accepté reste donc paresseux jusqu'à un consommateur factorisé reçu 
 jusqu'au preflight d'une expansion atomique. La WSPD ne rend égaux ni niveaux,
 ni `BallKey`, ni census.
 
+### 4.3 Miniboule unique et plan médiateur fini
+
+Pour tout support minimal positif affinement indépendant `S`, le centre
+intrinsèque dans `aff(S)` et la miniboule sont uniques. La source exacte ancrée
+par une paire propre `a,b` ne parcourt donc aucun continuum. Avec
+`d=b-a`, `D=d dot d`, `w=2*c-a-b` et `U_z=2*z-a-b`, poser :
+
+```text
+F_z(w) = D - ||U_z||^2 + 2*U_z dot w, avec w dot d = 0
+```
+
+Le signe de `F_z` donne exactement intérieur, shell ou extérieur. q2 interroge
+seulement `w=0`, la boule de diamètre `ab`. q3 prend le point de norme minimale
+sur la ligne `F_x=0`, c'est-à-dire le pied auto-centré du troisième site. q4
+prend l'intersection de `F_x=0` et `F_y=0`. Positivité, owner, shell et
+`BallKey` restent des recertifications séparées.
+
+La profondeur q2 n'est pas héréditaire vers les cofaces. Il existe une fixture
+u16 où dix IDs sont dans la boule diamétrale de `ab`, tandis qu'une circumboule
+q3 positive et une circumsphère q4 positive possédées par `ab` n'en contiennent
+aucun. Le disque de Jung/BJD est donc un prune collectif suffisant avant cette
+source finie, jamais la définition de l'événement. Après les fermetures de bloc,
+le résiduel exact emploie les pieds q3 et les intersections shallow q4 `0..7`,
+pas toutes les sphères passant par l'ancre. Preuve et fixtures :
+[`audits/AUDIT_MINIBOULE_UNIQUE_RESIDUEL_SHALLOW_5809BD2_20260814.md`](audits/AUDIT_MINIBOULE_UNIQUE_RESIDUEL_SHALLOW_5809BD2_20260814.md).
+
+Le diagnostic `--fenetre-exacte` du commit `5809bd2` décide bien q2 sur les
+paires tirées. Pour q3/q4, ses singletons universels minorent seulement la
+profondeur ; sa masse ouverte est un majorant, sans pieds, intersections,
+owner ou census. Son flux SplitMix à seed fixe ne reçoit pas l'hypothèse
+d'indépendance de Hoeffding. Il reste un diagnostic
+`PairUniversalCoreSample`, pas une mesure exacte ou un reçu statistique.
+
 ## 5. Générateur q3 recommandé
 
 ### 5.1 Réduction exacte arête-owner × porteur
@@ -542,7 +575,7 @@ q4 : A4>0 et   A4^2>2*R
 ```
 
 Sous u16, la preuve de largeur i128 exige `W=sum_z w_z<=65535`, contrôlé sans
-overflow avant le prédicat. Au `HEAD=783a789`, seul
+overflow avant le prédicat. Au `HEAD=5809bd2`, seul
 `BlockJungDual64::make_base` préflighte la somme en accumulation large puis la
 borne à 65 535. `dual_lane` ne possède pas encore ce cap et le symbole
 contractuel `verify_dual_weights_lane` n'existe pas dans le logiciel. Le futur
@@ -600,7 +633,8 @@ sur une base qui réfute son transversal courant.
 Au niveau rectangle, les poids **fixes** admettent un classifieur exact beaucoup
 plus simple. Poser `A0=-L*(a dot b)+(a+b) dot Z-Q` et
 `C0=L*(a cross b)-a cross Z-Z cross b`. Alors
-`P cross (b-a)=2*C0`, donc `R=4*||C0||^2`, et le reçu devient :
+`C=(L*a-Z) cross (L*b-Z)=L*C0`, `P cross (b-a)=2*C0`, donc
+`R=4*||C0||^2`, et le reçu devient :
 
 ```text
 q3 : A0>0 et 3*A0^2 > ||C0||^2
@@ -671,14 +705,17 @@ sur `tau(F)>=h`. Additionner `cred` et un nombre de groupes sans l'un de ces
 reçus est le mutant `sum-instead-of-union`. Un juge capé publie
 `PARTIEL/UNKNOWN` ; son absence ne vaut pas accord.
 
-Le worktree mobile au pin stable `783a789` reçoit provisoirement le packing :
-il exclut les feuilles déjà créditées dans les deux vues, impose des groupes
-disjoints et tue deux mutants dans trois CTests. Ce n'est pas encore une
-réception. Avec `--juge-bjd=1`, des groupes et fermetures sautés coexistent avec
+Le commit `5809bd2` met en œuvre le packing : il exclut les feuilles déjà
+créditées dans les deux vues, impose des groupes disjoints et tue deux mutants
+dans trois CTests. Ce n'est pas encore une réception. À ce pin,
+`--juge-bjd=1` laisse des groupes et fermetures sautés avec
 `fenetre_finale=OUI`, `OK` et le code zéro ; sans `--vwave`, l'option BJD peut
-réussir avec zéro essai. Surtout, le packing est calculé après la descente et
-n'économise aucune recertification. Le contre-audit et la fixture source u16
-sont dans
+réussir avec zéro essai. Un worktree ultérieur tente de réparer ces deux
+statuts et grave la fixture collinéaire, sans être repinné. Le cap partiel et
+BJD sans vague sont maintenant refusés, mais `--exige-q4-ouvert` reste vacuaire
+sans juge et `collinear_seven` ignore un `--points` différent de neuf. Surtout,
+le packing reste calculé après la descente et n'économise aucune recertification. Le
+contre-audit et la fixture source u16 sont dans
 [`audits/AUDIT_LIVE_BLOCK_JUNG_CREDITS_TAU_783A789_20260814.md`](audits/AUDIT_LIVE_BLOCK_JUNG_CREDITS_TAU_783A789_20260814.md).
 Le juge singleton `--judge-vwave` n'est pas composable avec SOC/BJD : il doit
 être refusé dans ces modes tant qu'il ne rejoue pas leurs hyperarêtes et seuils.
@@ -931,9 +968,10 @@ Sur un rectangle CK, un échec de preuve uniforme scinde `A/B`. La continuité
 d'une marge stricte garantit qu'un reçu ponctuel reste valable sur un
 voisinage assez fin, sans promettre un poids commun sur une tuile grossière.
 Le raffinement candidat part du front CK coarse reçu, proche de `s=2`, plutôt
-que d'un front global `s=8`. Pour `k=2`, une intersection vide des intervalles
-de `lambda` conserve les deux coins qui imposent les bornes incompatibles et
-scinde d'abord le facteur ou l'axe qui les sépare le plus. Pour un échec BJD
+que d'un front global `s=8`. Pour `k=2`, une intersection vide conserve un
+certificat minimal : un coin infaisable, deux intervalles de coins
+incompatibles, ou un conflit coin--frontière `lambda=0/1`. Le raffinement
+scinde d'abord le facteur ou l'axe qui sépare le support de ce conflit. Pour un échec BJD
 plus général, il choisit le facteur qui maximise la variation bornée de
 `A0/C0`. Ce choix est une heuristique d'ordonnance, pas une preuve ; l'exactitude
 vient de la partition exhaustive des enfants, qui héritent toutes les
@@ -1610,7 +1648,7 @@ fermetures avant descente, les nœuds de transversal, `F4/M4`, les splits, les
 octets et la HWM. Elle n'autorise aucun claim 0A/0B ou produit avant les portes
 1--2 ci-dessus.
 
-La recette G4 au `HEAD=783a789` ne doit pas être relancée en l'état. Elle omet
+La recette G4 au `HEAD=5809bd2` ne doit pas être relancée en l'état. Elle omet
 une cible pourtant sélectionnée par son regex CTest, ne sélectionne pas les
 nouvelles portes `mhgp3v_bjd_*`, avale le code de `check_rampe_pentes.py` sous
 `set +e` et omet `--exige-fenetre-finale`. Elle permet aussi à chaque job quatre

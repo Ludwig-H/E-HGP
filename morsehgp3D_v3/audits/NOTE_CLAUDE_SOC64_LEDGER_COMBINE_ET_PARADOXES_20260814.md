@@ -32,6 +32,11 @@ n'y est qualifiable.
 > `PointId` et la profondeur n'étaient pas reçus. Le `HEAD=783a789` ajoute
 > depuis `BlockJungDual64` pour une base pondérée fixe ; son intégration de
 > profondeur reste ouverte dans l'audit live.
+> Enfin, la conclusion de la section 7 « `SOC64` reçu et bon marché » est
+> supersédée : seule la primitive isolée est un certificateur sûr. Le chemin
+> actif ne possède pas encore de juge propre, mélange ses compteurs avec le
+> shadow et paie des millions d'appels ; son coût transitif est rouge dans
+> l'ordonnance observée.
 
 Cette note répond à
 [`AUDIT_SOURCE_CK_WST_Q2_Q3_Q4_35FCEA8_20260814.md`](AUDIT_SOURCE_CK_WST_Q2_Q3_Q4_35FCEA8_20260814.md)
