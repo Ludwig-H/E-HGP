@@ -6,6 +6,48 @@ Règle de lecture : une voie est *fermée* quand un fait vérifié la rend non p
 
 ---
 
+## 0. La cible : état de l'art SemanticKITTI mono-scan
+
+Le dossier vise l'état de l'art. Voici l'arithmétique qui dit à quelles conditions c'est atteignable, et par quelle voie.
+
+### Le chiffre à battre
+
+| | Valeur | Régime |
+|---|---|---|
+| baseline reproductible | $68{,}0$ WaffleIron, $70{,}3$ MinkUNet | val, une trame, LiDAR seul, sans TTA |
+| **SOTA val** | **$73{,}5$ — DOS** | val, fine-tuning après pré-entraînement auto-supervisé |
+| SOTA test, LiDAR seul | $76{,}1$ — RAPiD-Seg | test, recette non documentée |
+| SOTA test, tous régimes | $76{,}5$ | TASeg (LiDAR + caméra + temps) et SimpleSeg (non attribuable) |
+
+**L'écart à combler en val est de $+3{,}2$ à $+5{,}5$ points.**
+
+### Pourquoi ce n'est pas exclu
+
+Un raisonnement que le dossier a longtemps porté à tort : « l'auto-supervision ne paie qu'à peu d'étiquettes ». Sonata le suggère — $+0{,}3$ sur PPT supervisé. **DOS le réfute** : $73{,}5$ en fine-tuning contre $69{,}1$ pour PTv3 supervisé, soit **$+3$ à $+4$ points à supervision complète**, pour $2$ A100 pendant $20$ h.
+
+Donc un pré-entraînement auto-supervisé bien conçu vaut, sur ce benchmark, **le même ordre de grandeur que l'écart à combler**. C'est la seule voie du dossier dont un précédent publié démontre qu'elle peut produire plusieurs points en supervision complète.
+
+### Les conditions, et elles sont dures
+
+1. **Battre DOS**, pas une baseline nue. DOS a trois composantes — distillation observable, softmaps sémantiques, prior de Zipf–Sinkhorn — là où la voie 3 en propose une. Se comparer au scratch serait malhonnête.
+2. **Dépasser le plancher de bruit.** Variance de graine $1{,}5$ point. Un gain revendiqué doit être d'au moins $2$ points sur trois graines, avec augmentations appariées.
+3. **La voie 1 doit passer d'abord.** Si l'arbre HGP ne sépare pas les classes sur un scan unique, la voie 3 n'a pas de matière.
+4. **Le régime doit être déclaré ligne à ligne.** Le SOTA val de DOS est-il avec ou sans TTA ? Non vérifié à ce jour. À établir avant toute comparaison.
+5. **Le test est une autre affaire.** Y viser $76{,}1$ demande la machinerie de soumission — entraînement train+val, décisions de TTA — et le classement officiel est aujourd'hui **non attribuable**. Viser le val en régime strict est la cible scientifique ; le test est un objectif séparé, à verrouiller après.
+
+### Ce que cela ordonne
+
+| Voie | Rapport à la cible SOTA |
+|---|---|
+| **Voie 3 — supervision par le niveau de filtration** | **la seule avec un chemin arithmétique vers le SOTA** |
+| Voie 1 — la mesure | condition d'entrée de la voie 3 |
+| Voie 2 — instance ALPINE | diagnostic rapide, **hors** de la cible SOTA sémantique |
+| Voie 4 — ultramétrique | complément possible de la voie 3, antériorité non vérifiée |
+
+**Estimation honnête.** SOTA val en régime strict : $10$ à $15\,\%$. SOTA test : nettement moins. Ce n'est pas une promesse, c'est un pari dont l'arithmétique tient.
+
+---
+
 ## 1. Ce qui est fermé
 
 | Voie | Le fait qui la ferme |

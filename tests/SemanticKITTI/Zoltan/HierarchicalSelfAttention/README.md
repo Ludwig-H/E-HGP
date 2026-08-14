@@ -2,6 +2,8 @@
 
 **La question :** une hiérarchie de clusters construite sur la densité — et non apprise — peut-elle donner à un réseau un meilleur contexte multi-échelle pour segmenter un scan LiDAR ?
 
+**La cible :** l'état de l'art SemanticKITTI mono-scan. En val, régime strict, le chiffre à battre est **$73{,}5$** (DOS) depuis une baseline reproductible à $68{,}0$–$70{,}3$ — soit $+3{,}2$ à $+5{,}5$ points.
+
 **L'état, au 14 août 2026 :** conception et falsification. **Aucune expérience apprise.** Aucun statut SOTA revendiqué. `public_status=not_claimed`.
 
 ---
@@ -34,15 +36,17 @@ Développés au chapitre 6 du guide. À connaître **avant** de proposer quoi qu
 
 ## Où va le projet
 
-Quatre voies sont **fermées** par des chiffres vérifiés : battre l'état de l'art supervisé (marge $1$ point sous un bruit de $1{,}5$), « notre partition est meilleure » (vingt points d'oracle non convertis), le descripteur de nœud (le levier le plus faible), et HSA comme contribution.
+**Une seule voie a un chemin arithmétique vers l'état de l'art**, et c'est la voie 3 de [VOIES.md](VOIES.md) : un pré-entraînement auto-supervisé dont l'axe de supervision est le **niveau de filtration**.
 
-Deux formulations que j'ai portées un temps sont également fermées, et c'est un audit d'antériorité qui les ferme : « hiérarchie de clusters comme structure d'auto-supervision » est **9/10 occupé** (HCSC 2022, MHCCL 2023, HASSL 2026), et « arbre à niveaux indexés par un rayon sur nuage 3D comme tâche prétexte » est **8/10 occupé** par Sharma & Kaul, NeurIPS 2020.
+Le raisonnement tient en trois lignes. Le dossier a longtemps porté l'idée que l'auto-supervision ne paie qu'à peu d'étiquettes — Sonata donne $+0{,}3$ en fine-tuning complet. **DOS le réfute** : $73{,}5$ contre $69{,}1$ pour PTv3 supervisé, soit $+3$ à $+4$ points à supervision complète, pour $2$ A100 pendant $20$ h. Un pré-entraînement bien conçu vaut donc, sur ce benchmark, **le même ordre de grandeur que l'écart à combler**.
 
-Ce qui reste entier tient en une phrase, et elle est étroite :
+Et ce qui reste libre pour s'y distinguer est étroit mais réel :
 
-> Chez **tous** les antécédents, l'axe de supervision est un **nombre de clusters** — PCL $25\,000$, HCSC $3000$–$2000$–$1000$. Jamais un paramètre de filtration. **Superviser sur le niveau de filtration**, que HGP rend signifiant et que la percolation permet de choisir, est à $1/10$ occupé.
+> Chez **tous** les antécédents, l'axe de supervision est un **nombre de clusters** — PCL $25\,000$, HCSC $3000$–$2000$–$1000$. Jamais un paramètre de filtration. **Superviser sur le niveau**, que HGP rend signifiant et que la percolation permet de choisir, est à $1/10$ occupé.
 
-Trois voies restent ouvertes, chacune avec sa feuille de route dans **[VOIES.md](VOIES.md)** : la **mesure** (l'oracle de partition n'existe sur aucun benchmark LiDAR mono-scan), l'**instance sans entraînement** (substitution du seul clusterer d'ALPINE), et la **supervision par le niveau**. Une quatrième — l'ultramétrique dans l'attention — attend son audit d'antériorité.
+Quatre voies sont **fermées** par des chiffres, dont deux formulations que j'ai portées un temps : « hiérarchie de clusters comme structure d'auto-supervision » est $9/10$ occupé (HCSC, MHCCL, HASSL), et « arbre à rayons sur nuage 3D comme prétexte » est $8/10$ occupé par Sharma & Kaul, NeurIPS 2020.
+
+**Estimation honnête : $10$ à $15\,\%$ pour le SOTA val en régime strict.** Les conditions — battre DOS et non le scratch, dépasser $1{,}5$ point de bruit sur trois graines, et faire passer la voie 1 d'abord — sont dans [VOIES.md](VOIES.md).
 
 ---
 
