@@ -153,6 +153,18 @@ int main(int argc, char** argv) {
   // est seulement SUR-couvert, ce qui est sur : la lentille est une condition
   // necessaire, le predicat exact filtrera en aval.
   long long echelle = 0;
+  // ---- L'ORDRE QUATRE EST UN PRODUIT, PAS UNE NOUVELLE RECHERCHE.
+  //
+  // Pour un tetraedre `{a,b,x,y}` d'arete maximale `ab`, les DEUX autres
+  // sommets satisfont la meme contrainte que le troisieme sommet d'un
+  // triangle : ils sont dans la lentille. Les blocs `WST4` d'un rectangle sont
+  // donc exactement les COUPLES NON ORDONNES de ses blocs `WST3`, diagonale
+  // comprise — un couple `{C,C}` porte les paires internes a une meme cellule.
+  //
+  // L'exact-once est alors automatique : les blocs `WST3` sont disjoints, donc
+  // `x` tombe dans au plus un `C` et `y` dans au plus un `D`, et le couple non
+  // ordonne `{C,D}` est unique.
+  long long ordre = 3;
   Wst3Mutant mu = Wst3Mutant::kNone;
   for (int i = 1; i < argc; ++i) {
     const std::string a = argv[i];
@@ -169,6 +181,7 @@ int main(int argc, char** argv) {
       sep_den = arg_ll(v.substr(p + 1).c_str(), 1, 1024, "sep-euclid");
     }
     else if (a == "--juge") juge = true;
+    else if (a.rfind("--ordre=", 0) == 0) ordre = arg_ll(val("--ordre=").c_str(), 3, 4, "ordre");
     else if (a.rfind("--echelle=", 0) == 0) echelle = arg_ll(val("--echelle=").c_str(), 1, (1LL << 20), "echelle");
     else if (a.rfind("--min-blocs=", 0) == 0) min_blocs = arg_ll(val("--min-blocs=").c_str(), 1, (1LL << 40), "min-blocs");
     else if (a == "--inject=wst3-rayon-min") mu = Wst3Mutant::kRayonMin;
@@ -268,7 +281,7 @@ int main(int argc, char** argv) {
   long long visites = 0;
   // Pour le juge : les blocs de chaque rectangle, dans l'ordre des terminaux.
   std::vector<std::vector<Bloc>> par_terminal;
-  if (juge) par_terminal.resize(terms.size());
+  par_terminal.resize(terms.size());
 
   for (size_t t = 0; t < terms.size(); ++t) {
     mhgp3v::RectBox ba{}, bb{};
@@ -313,7 +326,7 @@ int main(int argc, char** argv) {
         ++blocs;
         masse += (double)count_of(terms[t].a) * (double)count_of(terms[t].b) *
                  (double)count_of(nd);
-        if (juge) par_terminal[t].push_back(Bloc{nd});
+        par_terminal[t].push_back(Bloc{nd});
         continue;
       }
       if (sn + 2 > 128) { std::fprintf(stderr, "PLANCHER: pile temoin saturee\n"); return 3; }
@@ -326,6 +339,27 @@ int main(int argc, char** argv) {
               " blocs/n=%.2f masse=%.0f visites=%lld\n",
               m, family.c_str(), sep_num, sep_den, terms.size(), blocs,
               (double)blocs / (double)m, masse, visites);
+
+  // ---- ORDRE QUATRE : LE PRODUIT NON ORDONNE DES BLOCS D'UN MEME RECTANGLE.
+  long long blocs4 = 0;
+  double masse4 = 0.0;
+  if (ordre >= 4) {
+    for (size_t t = 0; t < terms.size(); ++t) {
+      const long long k = (long long)par_terminal[t].size();
+      blocs4 += k * (k + 1) / 2;
+      const double mab = (double)count_of(terms[t].a) * (double)count_of(terms[t].b);
+      for (size_t u = 0; u < par_terminal[t].size(); ++u) {
+        const double cu = (double)count_of(par_terminal[t][u].c);
+        // Diagonale : les paires INTERNES a la cellule, donc `C(cu,2)`.
+        masse4 += mab * cu * (cu - 1.0) / 2.0;
+        for (size_t v = u + 1; v < par_terminal[t].size(); ++v)
+          masse4 += mab * cu * (double)count_of(par_terminal[t][v].c);
+      }
+    }
+    std::printf("wst4 : blocs=%lld blocs/n=%.2f masse=%.0f blocs/rect=%.2f\n",
+                blocs4, (double)blocs4 / (double)m, masse4,
+                (double)blocs4 / (double)std::max<size_t>(1, terms.size()));
+  }
 
   if (min_blocs > 0 && blocs < min_blocs) {
     std::fprintf(stderr, "PLANCHER: %lld blocs, %lld exiges\n", blocs, min_blocs);
@@ -396,6 +430,59 @@ int main(int argc, char** argv) {
     if (juges == 0) {
       std::fprintf(stderr, "PLANCHER: aucun triangle juge\n");
       return 3;
+    }
+    // ---- LE JUGE D'ORDRE QUATRE.
+    if (ordre >= 4) {
+      long long manq4 = 0, doub4 = 0, juges4 = 0;
+      for (long long i = 0; i < m; ++i)
+      for (long long j = i + 1; j < m; ++j)
+      for (long long k = j + 1; k < m; ++k)
+      for (long long l = k + 1; l < m; ++l) {
+        const long long idx[4] = {i, j, k, l};
+        i64 best = -1;
+        int bu = 0, bv = 1;
+        for (int u = 0; u < 4; ++u)
+          for (int v = u + 1; v < 4; ++v) {
+            i64 d2 = 0;
+            for (int c = 0; c < 3; ++c) {
+              const i64 e = sp[(size_t)idx[u]][c] - sp[(size_t)idx[v]][c];
+              d2 += e * e;
+            }
+            if (d2 > best || (d2 == best && (idx[u] < idx[bu] ||
+                                             (idx[u] == idx[bu] && idx[v] < idx[bv])))) {
+              best = d2; bu = u; bv = v;
+            }
+          }
+        long long rx = -1, ry = -1;
+        for (int u = 0; u < 4; ++u)
+          if (u != bu && u != bv) { if (rx < 0) rx = idx[u]; else ry = idx[u]; }
+        const long long ra = idx[bu], rb = idx[bv];
+        ++juges4;
+        long long vus = 0;
+        for (size_t t = 0; t < terms.size(); ++t) {
+          const bool ab = contient(terms[t].a, ra) && contient(terms[t].b, rb);
+          const bool ba2 = contient(terms[t].a, rb) && contient(terms[t].b, ra);
+          if (!ab && !ba2) continue;
+          // Le couple non ordonne `{C,D}` qui porte `x` et `y`.
+          for (size_t u = 0; u < par_terminal[t].size(); ++u)
+            for (size_t v = u; v < par_terminal[t].size(); ++v) {
+              const int cu = par_terminal[t][u].c, cv = par_terminal[t][v].c;
+              const bool xy = contient(cu, rx) && contient(cv, ry);
+              const bool yx = contient(cu, ry) && contient(cv, rx);
+              if (u == v) { if (contient(cu, rx) && contient(cu, ry)) ++vus; }
+              else if (xy || yx) ++vus;
+            }
+        }
+        if (vus == 0) ++manq4;
+        else if (vus > 1) ++doub4;
+      }
+      std::printf("wst4_juge : quadruplets=%lld manquants=%lld doublons=%lld\n",
+                  juges4, manq4, doub4);
+      if (manq4 != 0 || doub4 != 0) {
+        std::fprintf(stderr, "DESACCORD: %lld quadruplets non couverts, %lld doubles\n",
+                     manq4, doub4);
+        return 1;
+      }
     }
   }
   std::printf("OK famille=%s\n", family.c_str());

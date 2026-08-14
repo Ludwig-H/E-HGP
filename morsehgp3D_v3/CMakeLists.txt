@@ -5203,3 +5203,22 @@ set_tests_properties(mhgp3v_wst3_echelle_couverture PROPERTIES
 mhgp3v_add_expected_code_test_for(mhgp3v_wst3_probe
   mhgp3v_wst3_refus_mutant_sans_juge "un mutant exige --juge" 2
   --family=uniform --points=120 --inject=wst3-rayon-min)
+
+# `OwnedCK-WST4` : L'ORDRE QUATRE EST UN PRODUIT, PAS UNE NOUVELLE RECHERCHE.
+#
+# Pour un tetraedre `{a,b,x,y}` d'arete maximale `ab`, les DEUX autres sommets
+# satisfont la meme contrainte que le troisieme sommet d'un triangle : ils sont
+# dans la lentille. Les blocs `WST4` d'un rectangle sont donc exactement les
+# COUPLES NON ORDONNES de ses blocs `WST3`, diagonale comprise — `{C,C}` porte
+# les paires internes a une meme cellule.
+#
+# L'exact-once suit sans preuve supplementaire : les blocs `WST3` sont
+# disjoints, donc `x` tombe dans au plus un `C` et `y` dans au plus un `D`, et
+# le couple non ordonne est unique. Le juge le verifie tout de meme sur les
+# `C(n,4)` quadruplets, owner par owner.
+add_test(NAME mhgp3v_wst4_couverture
+  COMMAND mhgp3v_wst3_probe --family=uniform --points=60 --sep-euclid=2/1
+          --echelle=1 --ordre=4 --juge --min-blocs=1000)
+set_tests_properties(mhgp3v_wst4_couverture PROPERTIES
+  PASS_REGULAR_EXPRESSION
+  "wst4_juge : quadruplets=487635 manquants=0 doublons=0")
