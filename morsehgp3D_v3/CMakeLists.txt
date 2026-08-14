@@ -5335,3 +5335,115 @@ set_tests_properties(mhgp3v_supports_retenus_localite PROPERTIES
 add_test(NAME mhgp3v_corner8_centre COMMAND mhgp3v_corner8_probe --centre)
 set_tests_properties(mhgp3v_corner8_centre PROPERTIES
   PASS_REGULAR_EXPRESSION "corner8_centre : regulier=1 plat=1 shell=0 obtus=0")
+
+# ---------------------------------------------------------------------------
+# `AxisTop8` : LES COMPLETIONS q4 D'UNE FACE AIGUE, SANS PRODUIT.
+#
+# Tranche demandee par
+# audits/AUDIT_DEBLOCAGE_SOURCE_SHALLOW_SANS_DELAUNAY_20260814.md : implementer
+# en diagnostic CPU borne un `AxisTop8` ponctuel CONTRE une sweep exhaustive, et
+# graver les deux fixtures sharp AVANT tout code q4 de produit.
+#
+# Le sujet vit sur la puissance AFFINE `A_z - tau B_z` le long de l'axe de la
+# face ; le juge vit sur le determinant InSphere d'ordre quatre de
+# `corner8_ball.hpp`. Aucune algebre n'est partagee.
+#
+# CHAQUE PORTE A REGEX EST DOUBLEE D'UNE PORTE A CODE. Un `PASS_REGULAR_EXPRESSION`
+# masque le code de retour ; la porte jumelle sans regex le restaure.
+# ---------------------------------------------------------------------------
+add_executable(mhgp3v_axis_top8_probe prototype/axis_top8_probe.cpp)
+target_include_directories(mhgp3v_axis_top8_probe PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(mhgp3v_axis_top8_probe PRIVATE mhgp Threads::Threads)
+target_compile_options(mhgp3v_axis_top8_probe PRIVATE -Wall -Wextra -Werror)
+
+# FIXTURE SHARP 1 : seize completions, la borne ne descend pas a quinze.
+add_test(NAME mhgp3v_axis_top8_fixture16_code
+         COMMAND mhgp3v_axis_top8_probe --fixture-16)
+add_test(NAME mhgp3v_axis_top8_fixture16
+         COMMAND mhgp3v_axis_top8_probe --fixture-16)
+set_tests_properties(mhgp3v_axis_top8_fixture16 PROPERTIES PASS_REGULAR_EXPRESSION
+  "fixture16 : owner=EdgeKey\\(1,2\\) carrier_primaire=0 q4=16 candidats=16 groupes=16 p=0 borne=16 manquants=0 census_faux=0 deborde=0 extra_shell=0 hist=2,2,2,2,2,2,2,2")
+
+# FIXTURE SHARP 2 : le certificat de mort est sharp lui aussi.
+add_test(NAME mhgp3v_axis_top8_mort16_code
+         COMMAND mhgp3v_axis_top8_probe --fixture-mort-16)
+add_test(NAME mhgp3v_axis_top8_mort16
+         COMMAND mhgp3v_axis_top8_probe --fixture-mort-16)
+set_tests_properties(mhgp3v_axis_top8_mort16 PROPERTIES PASS_REGULAR_EXPRESSION
+  "fixture_mort16 : profondeur_min_Jf=8 retrait_un_min=7 p=0 candidats=16 shallow=0 manquants=0")
+
+# FIXTURE DE FRONTIERE : `J_f` est FERME. Le tetraedre regulier sature la borne
+# de Jung, et son apex tombe exactement sur le bout ; le temoin `(98,100,104)`
+# est cospherique du meme bout et reste un SHELL, jamais un interieur.
+add_test(NAME mhgp3v_axis_top8_jung_tendu_code
+         COMMAND mhgp3v_axis_top8_probe --fixture-jung-tendu)
+add_test(NAME mhgp3v_axis_top8_jung_tendu
+         COMMAND mhgp3v_axis_top8_probe --fixture-jung-tendu)
+set_tests_properties(mhgp3v_axis_top8_jung_tendu PROPERTIES PASS_REGULAR_EXPRESSION
+  "bout_apex=0 valide=1 profondeur=0 candidats=2 shallow=1 manquants=0 census_faux=0 face2_candidats=2 face2_shallow=1 face2_manquants=0")
+
+# THEOREME : une face owner STRICTEMENT AIGUE a toujours `T2 > 0`, car l'angle
+# oppose a l'arete maximale est le plus grand, donc dans `[60,90)` degres, donc
+# `sin^2 C >= 3/4 > 2/3`. La branche `T2 <= 0` est INATTEIGNABLE sous acuite
+# owner ; la porte grave les deux cotes et la campagne verifie `mortes_T2=0`.
+add_test(NAME mhgp3v_axis_top8_t2_positif_code
+         COMMAND mhgp3v_axis_top8_probe --fixture-t2-positif)
+add_test(NAME mhgp3v_axis_top8_t2_positif
+         COMMAND mhgp3v_axis_top8_probe --fixture-t2-positif)
+set_tests_properties(mhgp3v_axis_top8_t2_positif PROPERTIES PASS_REGULAR_EXPRESSION
+  "obtus=1 T2_obtus_negatif=1 aigu=1 T2_aigu_positif=1 obtuse_morte_T2=1 obtuse_candidats=0")
+
+# CAMPAGNE DIFFERENTIELLE. Les planchers interdisent le vert par vacuite : sans
+# faces aigues owner ni apex shallow, la porte rend 3.
+foreach(a8_famille uniform eight_clusters terrain)
+  add_test(NAME mhgp3v_axis_top8_sweep_${a8_famille}
+           COMMAND mhgp3v_axis_top8_probe --sweep --family=${a8_famille}
+                   --points=60 --seed=1 --threads=2 --min-faces=300 --min-shallow=100)
+endforeach()
+# La contre-famille `two_lines` n'a AUCUN triangle aigu : la source q3/q4 y est
+# vide. C'est la seule porte ou le plancher est nul, et elle l'exige.
+add_test(NAME mhgp3v_axis_top8_two_lines_vide
+         COMMAND mhgp3v_axis_top8_probe --sweep --family=two_lines
+                 --points=60 --threads=2 --min-faces=0 --min-shallow=0)
+set_tests_properties(mhgp3v_axis_top8_two_lines_vide PROPERTIES PASS_REGULAR_EXPRESSION
+  "famille=two_lines n=60 seuil=7 faces=[0-9]+ aigues_owner=0 ")
+add_test(NAME mhgp3v_axis_top8_two_lines_vide_code
+         COMMAND mhgp3v_axis_top8_probe --sweep --family=two_lines
+                 --points=60 --threads=2 --min-faces=0 --min-shallow=0)
+
+# PLANCHERS ET REFUS, A CODE EXACT.
+mhgp3v_add_expected_code_test_for(mhgp3v_axis_top8_probe
+  mhgp3v_axis_top8_refus_sans_mode
+  "--fixture-16, --fixture-mort-16, --fixture-jung-tendu, --fixture-t2-positif ou --sweep est exige" 2)
+mhgp3v_add_expected_code_test_for(mhgp3v_axis_top8_probe
+  mhgp3v_axis_top8_refus_cap "la campagne exhaustive est bornee a 400 points" 2
+  --sweep --family=uniform --points=500)
+mhgp3v_add_expected_code_test_for(mhgp3v_axis_top8_probe
+  mhgp3v_axis_top8_plancher_vide "PLANCHER: 0 faces aigues owner" 3
+  --sweep --family=two_lines --points=60 --threads=2 --min-faces=1)
+
+# LES SEPT MUTANTS, A CODE DE SORTIE 4. Chacun est tue par la porte nommee ici,
+# et par elle seule dans certains cas : `a8-bouts-ouverts` et
+# `a8-permanence-large` n'existent qu'a la FRONTIERE de `J_f`, donc seule la
+# fixture du tetraedre regulier les mord.
+mhgp3v_add_expected_code_test_for(mhgp3v_axis_top8_probe
+  mhgp3v_axis_top8_mutant_cap15 "mutant_killed=1 a8-cap15" 4
+  --fixture-16 --inject=a8-cap15)
+mhgp3v_add_expected_code_test_for(mhgp3v_axis_top8_probe
+  mhgp3v_axis_top8_mutant_k_fixe_7 "mutant_killed=1 a8-k-fixe-7" 4
+  --fixture-16 --inject=a8-k-fixe-7)
+mhgp3v_add_expected_code_test_for(mhgp3v_axis_top8_probe
+  mhgp3v_axis_top8_mutant_bouts_ouverts "mutant_killed=1 a8-bouts-ouverts" 4
+  --fixture-jung-tendu --inject=a8-bouts-ouverts)
+mhgp3v_add_expected_code_test_for(mhgp3v_axis_top8_probe
+  mhgp3v_axis_top8_mutant_permanence_large "mutant_killed=1 a8-permanence-large" 4
+  --fixture-jung-tendu --inject=a8-permanence-large)
+mhgp3v_add_expected_code_test_for(mhgp3v_axis_top8_probe
+  mhgp3v_axis_top8_mutant_signe_b "mutant_killed=1 a8-signe-b-inverse" 4
+  --sweep --family=uniform --points=60 --threads=2 --inject=a8-signe-b-inverse)
+mhgp3v_add_expected_code_test_for(mhgp3v_axis_top8_probe
+  mhgp3v_axis_top8_mutant_b_zero "mutant_killed=1 a8-oublie-b-zero" 4
+  --sweep --family=uniform --points=60 --threads=2 --inject=a8-oublie-b-zero)
+mhgp3v_add_expected_code_test_for(mhgp3v_axis_top8_probe
+  mhgp3v_axis_top8_mutant_abs_tri "mutant_killed=1 a8-abs-avant-tri" 4
+  --sweep --family=uniform --points=60 --threads=2 --inject=a8-abs-avant-tri)

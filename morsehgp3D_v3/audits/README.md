@@ -22,6 +22,18 @@ ancienne phrase imposant le rejet global des positions dupliquées est périmée
 
 - [`AUDIT_ETAT_COURANT.md`](AUDIT_ETAT_COURANT.md) : unique verdict mutable,
   pin, worktree, tests et blocages.
+- [`NOTE_SOLUTION_CONTRAT_SOURCE_AIGUE_20260814.md`](NOTE_SOLUTION_CONTRAT_SOURCE_AIGUE_20260814.md) :
+  autorité contractuelle mathématique, sans réception logicielle : réponse
+  négative à Q14, théorème exact des fuseaux `W2/W3/W4` et contrat de
+  trois producteurs autonomes. `Lane2`, `Lane3` et `Lane4` peuvent mutualiser
+  un index Morton et une partition neutre, mais jamais leurs records, verdicts,
+  caps, continuations ou preuves de complétude. Le `Q4Seed3` est un préfixe
+  interne à `Lane4`, pas un support ou une sortie q3.
+- [`AUDIT_WORKTREE_Q4SEED_AXIS_TOPR4_20260814.md`](AUDIT_WORKTREE_Q4SEED_AXIS_TOPR4_20260814.md) :
+  contre-audit du nouveau noyau ponctuel non suivi : fixtures top-8 vertes au
+  profil fixe, réfutation de `--seuil=8`, absence des identités `I_B/U_B`, du
+  shell, du reçu de mort par gaps et du primary q4 global ; protocole de
+  réception comme composant interne de `Lane4`, jamais comme flux depuis q3.
 - [`AUDIT_RECU_GRAM_UNIFIE_1FD9CF1_20260814.md`](AUDIT_RECU_GRAM_UNIFIE_1FD9CF1_20260814.md) :
   contrôle algébrique Python corrélé et borné des identités q4 `Delta=O^2` et
   `Phi=O*J` sur 10 000 fixtures u16 non dégénérées ; il ne reçoit ni microkernel

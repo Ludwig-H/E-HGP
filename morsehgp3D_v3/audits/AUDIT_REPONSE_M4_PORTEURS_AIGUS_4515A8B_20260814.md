@@ -14,7 +14,9 @@ Cadre : `phase=exploration_v3_hors_registre`,
 > `AUDIT_CONTRE_RECEPTION_M4_V2_DEPTHBLOCK_5BFC5C8_20260814.md`. En
 > particulier, les cubes unitaires u16 de la section 7.2 ne forment pas une
 > fixture uniforme, et une même pondération Jung fixe est exactement vérifiable
-> sur un rectangle par 64 couples de coins.
+> sur un rectangle par 64 couples de coins. Le tape commun q3/q4 décrit
+> uniquement ce probe historique : le contrat courant exige `Lane3` et `Lane4`
+> autonomes, et `Q4Seed3` est régénéré dans `Lane4`.
 
 Le pin relu est `HEAD=4515a8b43d5397de97d71482c1f489ebd2a71c16`,
 commit `M4 existe enfin, et il est cubique sur les amas`. Le worktree est
@@ -378,9 +380,9 @@ Ces deux moteurs ne sont pas identiques. WST4 garde les carrier cells
 symboliques ; la sweep fixe une face et doit voir tous les sites globaux pour
 le census. Développer prématurément chaque bloc `ALL_ACUTE` en faces peut payer
 `C4_carrier*n`. La sweep est donc un fallback après les gates physiques de
-WST4, pas une extension obligatoire de chaque carrier. Le tape géométrique
-reste vivant dès que `q3_open || q4_open` : fermer la lane de rang q3 ne doit
-jamais supprimer les carriers nécessaires à q4.
+WST4, pas une extension obligatoire de chaque carrier. Le tape commun
+`q3_open || q4_open` de cette proposition est désormais interdit. `Lane4`
+construit ses propres `Q4Seed3` sans lire l'état de `Lane3`.
 
 `CKPairTape-v0` vient d'abord. Sans son `RectId` canonique, sa partition de
 paires et son oracle `PairId -> RectId`, la porte aiguë reste un diagnostic sans

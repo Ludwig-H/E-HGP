@@ -1,8 +1,8 @@
 # MorseHGP3D v3
 
 MorseHGP3D v3 explore une construction exacte et industrielle de la hiérarchie
-Morse/HGP en dimension trois, sans matérialiser la mosaïque de Delaunay d'ordre
-supérieur.
+Morse/HGP en dimension trois, sans construire aucune structure de Delaunay, y
+compris le graphe ou la triangulation d'ordre un.
 
 Cadre courant :
 
@@ -17,8 +17,10 @@ public_status=not_claimed
 La v3 n'est ni promue dans le registre officiel, ni qualifiée GPU, ni déclarée
 exacte sur son domaine public. Le contrat reste ouvert : à `n=50000` et
 `K_max=10`, aucun échantillon ne qualifie encore le payload complet sous
-`p95 warm_e2e<1 s` sur G4. La dernière tentative G4 a échoué avant la rampe et
-a seulement certifié l'arrêt de sa cible.
+`p95 warm_e2e<1 s` sur G4. Aucun kernel GPU G4 bout-en-bout n'est reçu. Un reçu
+antérieur sur VM G4 est explicitement `GPU_RUN=NO` et mesure `78,8 s` CPU sur
+`uniform,50000`, sans BallKey, census, fold ni payload ; la dernière tentative
+a échoué avant sa rampe et a seulement certifié l'arrêt de sa cible.
 
 La recette reste elle-même non reçue au HEAD : cible Jung sélectionnée mais non
 construite sur un build propre, nouvelles portes BJD/Midball/HC/borne/Corner8/WST
@@ -162,25 +164,54 @@ disposition et provenance. Sous `RelevantGP`, une lane pertinente
 la source conserve la `BallKey` et rend `unsupported_degeneracy/plateau_pending`
 tant qu'une politique dégénérée indépendante n'est pas reçue.
 
-Cette unicité permet aussi de partager le census : après normalisation et RLE
-des `BallKey`, q2, q3 et q4 utilisent la même somme de trois quadratiques
-convexes `A*z_j^2+B_j*z_j`. Ses extrema sur une AABB u16 entière sont exacts
-par axe. `active_arity_mask` contient seulement les arités incidentes et efface
-q2/q3/q4 respectivement à `10/9/8` intérieurs ; un masque non nul impose encore
-le census complet du shell. Il est distinct du `active_sign_mask` Corner8.
-Cela
-supprime les centres continus et les census répétés par support,
-mais pas la génération potentiellement quadratique des supports : le gain SLO
-dépend encore d'une source factorisée et d'un preflight de masse.
+Cette unicité fournit aussi un backend de census partagé : après normalisation
+et RLE, une `BallKey` peut être parcourue par la même somme de trois
+quadratiques convexes `A*z_j^2+B_j*z_j`. Ses extrema sur une AABB u16 entière
+sont exacts par axe. `active_arity_mask` efface q2/q3/q4 respectivement à
+`10/9/8` intérieurs. Pour q4, `Q4SeedAxisTopR4` transporte déjà la liste exacte
+`I_B/U_B`; le backend reste l'autorité/fallback mais ne doit pas refaire un
+second scan lorsque le reçu axial et le tie report sont complets. Cela supprime
+les census répétés par support, pas une sortie réellement lourde.
 
-La généralisation WSPD exacte est combinatoire, pas une exigence de séparation
-de toutes les paires de facteurs. Pour un rectangle d'arête et une partition de
-cellules témoins `C_i`, les atomes d'ordre `q` sont indexés par les multiplicités
-`alpha_i>=0`, `sum alpha_i=q-2`, et portent
-`A×B×product_i binom(C_i,alpha_i)` avant les filtres
-distinct-ID/owner/positivité. À q4, cela donne les produits `C_i×C_j` pour
-`i<j` et les diagonales `binom(C_i,2)`. Un couple non séparé est raffiné ou reste
-`PENDING`; il n'est jamais supprimé.
+La source WSPD active suit directement les trois contrats de miniboule : q2
+garde les paires dont la boule diamétrale a au plus neuf intérieurs ; q3 garde
+les triangles strictement aigus dont la miniboule ambiante en a au plus huit ;
+q4 garde les tétraèdres bien centrés dont la circumsphère en a au plus sept.
+Les seuils de mort sont `10/9/8` sous `smax=11`.
+
+Ces trois lanes sont des producteurs autonomes. Ils peuvent lire le même
+`PointStore`, le même index Morton et une `NeutralPairPartition` immuable, mais
+leurs queues, records, caps, continuations et preuves de complétude sont
+disjoints. `PairAnchor3` est créé dans `Lane3`, jamais lu dans la sortie q2 ;
+`Q4Seed3` est créé dans `Lane4`, jamais lu dans la sortie q3. Un préfixe
+ternaire interne à q4 n'est pas un support ni un événement q3.
+
+Le nouveau déblocage interne à `Lane4` supprime le produit de cellules. Pour un
+`Q4Seed3` aigu
+exacte, les centres compatibles sont sur un segment axial et chaque site a une
+puissance affine `A_z-tau*B_z`. Si `p` sites sont intérieurs sur tout le
+segment, toute circumsphère de profondeur au plus sept a son apex parmi les
+`8-p` premières racines `B>0` ou les `8-p` dernières racines `B<0` : au plus
+seize groupes, avec ties complets. Le replay de ces extrêmes reconstruit
+exactement `I_B/U_B`. Pour une arête owner portant `m_e` lignes carrier, il y a
+au plus `8m_e` centres q4 shallow lorsque `m_e` compte toutes les lignes de
+sites admissibles ; le générateur limité aux `m_e^acute` faces aiguës a la
+borne de propositions `16m_e^acute`. C'est le remplacement déterministe de
+`binom(m_e,2)`.
+
+La voie active est un fork :
+
+```text
+NeutralPairPartition
+  |- Lane2(Pair2 -> Q2MidballDepth10)
+  |- Lane3(PairAnchor3 x Third3 -> Q3MiniballDepth9)
+  `- Lane4(PairAnchor4 x Q4Seed3 x Fourth4 -> Q4SeedAxisTopR4 -> Positive4)
+```
+
+Les trois sorties rejoignent seulement ensuite `BallKey/RLE`. `WST4`,
+`CellPair` et `Sym2` restent des diagnostics de masse historiques, pas
+l'ordonnance P0. Le contrat est précisé dans
+[`audits/NOTE_SOLUTION_CONTRAT_SOURCE_AIGUE_20260814.md`](audits/NOTE_SOLUTION_CONTRAT_SOURCE_AIGUE_20260814.md).
 
 Un déblocage arithmétique accompagne cette réduction. Pour tout support complet
 `S={a,a+m_1,...,a+m_k}`, `k=1,2,3`, poser `G=M^T M`,
@@ -214,20 +245,22 @@ La prochaine chaîne à fermer est :
 ```text
 0A  BallForm -> BallKey -> census -> BallEvent exact
 0B  oracle exhaustif borné -> lots -> dix forêts -> verticales -> payload
-1   CKPairTape q2 -> CandidateWST3 -> distinct-ID/owner/acuité -> OwnedCK-WST3
-    -> profondeur carrier -> résiduel WST4 paresseux, toujours factorisé
-2   certifier profondeur par blocs avant fill, puis rang/census et
-    F2/F3/C4_carrier/F4/M4_apex/T4_site
-3   porter la même tranche sur device, puis mesurer warm_e2e sur G4
-4   ouvrir séparément tout nouveau profil numérique
+1   manifeste NoDelaunay -> NeutralPairPartition exacte et immuable
+2a  Lane2 autonome -> Pair2 -> MidballDepth10
+2b  Lane3 autonome -> PairAnchor3 x Third3 -> Q3MiniballDepth9 ambiant
+2c  Lane4 autonome -> PairAnchor4 x Q4Seed3 x Fourth4
+    -> Q4SeedAxisTopR4 -> Positive4 -> I_B/U_B exacts, aucun Sym2
+3   réunir seulement les sorties reçues dans BallKey/RLE puis 0A/0B
+4   porter les trois producteurs sur device, puis mesurer warm_e2e sur G4
+5   ouvrir séparément tout nouveau profil numérique
 ```
 
 Cette séquence bloque une réception produit, pas l'audit de coût. Une piste
 parallèle `counter-only` peut recevoir sur petit `n`, contre l'oracle exhaustif,
-`CKPairTape -> carrier aigu -> BlockJungDual64/tau(F) ->
-AxisKernel/BlockBallDepth`. Elle doit mesurer les fermetures avant descente,
-les splits, `F4/M4`, les nœuds de transversal, les octets et la HWM ; elle ne
-ferme ni 0A, ni 0B et ne crée aucun claim public.
+`NeutralPairPartition -> Lane4(Q4Seed3Block -> Q4SeedAxisTopR4)`. Elle doit mesurer les morts
+`T2/permanents/gaps`, les groupes de racines, les splits, les comparaisons
+larges, les octets et la HWM ; elle ne ferme ni 0A, ni 0B et ne crée aucun
+claim public.
 
 Une source incomplète peut être comparée dans le sink de référence, mais ne
 publie jamais un succès. Il n'existe pas de watermark monotone par ancre : les
@@ -273,13 +306,19 @@ Avant d'appeler `0A` fermé :
 6. différencier toute la sortie de `0A`, puis fermer `0B` par générateurs et
    ordres jusqu'au `BenchmarkOutputContract-v1`.
 
-## Source factorisée q2/q3/q4
+## Ancienne factorisation WST3/WST4, désormais diagnostic
 
-La source retenue exploite Callahan--Kosaraju sans développer son produit
-cartésien :
+La section suivante conserve seulement les preuves de couverture et les
+obligations qui jugent le probe courant. Elle n'est plus une route P0. Aucun
+`CellPair` ou `Sym2` ne doit être raccordé aux trois producteurs autonomes.
+
+La factorisation ci-dessous décrit uniquement le probe historique réfuté. Les
+flèches ne sont pas une ordonnance et ne doivent jamais être traduites en flux
+entre `Lane2`, `Lane3` et `Lane4` :
 
 ```text
-CKPairTape(A,B)                          toutes les paires, exact-once
+HISTORICAL_PROBE_ONLY:
+CKPairTape(A,B)                          toutes les paires
   -> OwnedCK-WST3(A,B,C)                carrier de l'arête maximale
   -> OwnedCK-WST4(A,B,C,D)              second carrier/apex
   -> BallKey/RLE -> rang/census -> fold
@@ -314,9 +353,9 @@ maximale appartient à `2B_R`; la constante deux est sharp. En écrivant
 `||q+h||,||q-h||<=2||h||`, donc `||q||<=sqrt(3)||h||` et `||x||<=2R`.
 Intersecter avec `B(c_A,U_AB+r_A)` et `B(c_B,U_AB+r_B)`, où `U_AB` majore
 les distances endpoint, resserre encore le domaine sans perdre de carrier.
-Les cellules non vides de ce niveau donnent une extension ternaire complète,
-puis leurs couples non ordonnés une extension quaternaire complète. L'owner
-longueur/`EdgeKey` rend les sorties exact-once.
+Dans cette identité combinatoire historique, les cellules non vides donnent
+des facteurs ternaires et leurs couples des facteurs quaternaires. Cela ne
+constitue aucune preuve de complétude du probe et ne relie aucune lane active.
 Cette preuve exige que `CKPairTape` partitionne réellement les paires non
 ordonnées et que les cellules half-open forment une antichaîne. Un raffinement
 remplace atomiquement le parent par tous ses enfants disjoints. Pour la
@@ -360,43 +399,32 @@ le cas `U<h<=C` exige `tau(F)`, une sweep ou un split. Pour toutes les sphères
 incidentes non bornées, le cœur commun est seulement le segment ouvert q2 ou le
 circumdisque situé dans le plan q3.
 
-Le seul census de la boule diamétrale ne fournit aucune règle générale de
-propagation vers q3/q4 ; les IDs du segment ouvert, eux, appartiennent au cœur
-affine de toutes les sphères incidentes. Deux fixtures u16 séparées, partageant
-`a,b` et les dix témoins, gardent respectivement une boule q3 ambiante vide et
-une sphère q4 vide, toutes deux positives ; l'owner `ab` du cas q4 est fixé par
-`EdgeKey(ab)<EdgeKey(c4,d4)`. Réunir les deux nuages créerait des extra-shell et
-invaliderait les rangs annoncés. Le rang q3 ne se propage pas davantage : une
-face de rang douze peut porter un q4 de rang quatre. Le
-résiduel exact doit donc conserver les pieds q3 et les intersections shallow
-q4, avec owner, shell et `BallKey` complets.
+Aucune inférence entre lanes n'est définie. `Lane2`, `Lane3` et `Lane4`
+construisent et recensent chacune leurs propres supports complets, puis livrent
+séparément owner, shell et `BallKey` au sink commun.
 
 q3 recertifie `E+X-D>0` et l'indépendance affine. q4 ne signifie pas « quatre
 faces aiguës » : l'autorité est la stricte positivité des quatre
-barycentriques du circumcentre. Une face aiguë adjacente à l'arête maximale
-sert seulement à choisir un carrier géométrique primaire. La jointure teste
+barycentriques du circumcentre. Un `Q4Seed3` aigu adjacent à l'arête maximale,
+produit dans `Lane4`, sert seulement à choisir une provenance géométrique
+primaire. La jointure q4 teste
 `Acute(x) OR Acute(y)`, jamais `AND` : un q4 positif peut n'avoir qu'une seule
 face aiguë adjacente. Si les deux le sont, le plus petit `PointId` aigu est le
 primaire et supprime le doublon ; l'autre sommet reste un apex arbitraire.
 
-Au niveau des blocs, partitionner les cellules en `A` (`Hmin<0`, carrier aigu
-possible) et `N` (`Hmin>=0`, uniformément non aigu). Le résiduel q4 est gardé
-symboliquement comme `Sym2(A) disjoint_union Cross(A,N)`. `N` disparaît
-seulement du rôle carrier et reste indispensable comme apex : le supprimer des
-deux flux perdrait les q4 qui n'ont qu'une face aiguë adjacente. Aucun de ces
-deux produits n'est rempli avant profondeur, owner, distinct-ID et positivité.
-Pour une face exacte résiduelle, les centres vivent sur
+Le probe historique partitionnait les cellules en `A` (`Hmin<0`) et `N`
+(`Hmin>=0`), puis comptait
+`Sym2(A) disjoint_union Cross(A,N)`. Cette construction reste un diagnostic de
+masse réfuté, jamais une entrée de `Lane4`. Pour un `Q4Seed3` exact, les centres vivent sur
 une droite et la puissance de chaque apex y est affine : une sweep 1D par lots
 égaux remplace l'arrangement 2D comme candidat principal. Les comparaisons
 rationnelles peuvent dépasser `i128` sous u16. Un site dont le dénominateur de
 sweep est nul contribue une puissance constante négative, nulle ou positive ;
 il n'est jamais jeté.
 
-Les masques de rang restent indépendants. Une fixture u16 de 64 points possède
-un q4 régulier de rang 4, alors que ses six arêtes q2 et ses quatre faces q3 ont
-toutes rang 12. `OwnedCK-WST4` doit donc consommer la relation aiguë q3
-**pré-rang**, jamais les événements q3 retenus. Le tape carrier est construit
-dès que `q3_open || q4_open`, même si la lane de rang q3 est fermée.
+Dans l'architecture active, `Lane4` régénère ses propres `Q4Seed3` depuis la
+partition neutre. Elle ne lit ni relation, ni masque `q3_open`, ni tape, ni
+événement de `Lane3`.
 
 Le nombre de blocs initiaux vaut conditionnellement `O(s^3 n)`,
 `O(s^3*eta^-3*n)` et `O(s^3*eta^-6*n)` pour q2/q3/q4, avec `0<eta<=1` et une
@@ -755,8 +783,9 @@ Une pente `sum_E4` ne qualifie rien seule. Chaque campagne publie au minimum :
 
 - masses exclusives `CLOSED/OPEN/PENDING`, avec `pending=0` pour une fenêtre
   finale ;
-- `E3/E4`, maximum par ancre, `F3`, `C4_carrier=edge×carrier aigu`, `F4`,
-  `M4_apex=edge×carrier-primaire×apex`, puis `W4_positive/H4_rank` ;
+- `E3/E4`, maximum par ancre, `F2`, `FaceBlock`, q3 shallow,
+  `T4_site/acute_face`, accepts primary, morts `T2/permanent/gap`, groupes de
+  racines et ties, puis `W4_positive/H4_rank` ;
 - `N4_event`, `Z4_const`, `R4_bundle` et `T4_site` séparés ;
 - `BallKey` brutes/uniques, supports, census et tailles de shell ;
 - sorties `H`, octets, HWM, opérations larges et temps par phase ;
@@ -767,8 +796,8 @@ kNN universel n'est reçu : une fixture u16 de exactement 50 000 IDs conserve un
 q4 régulier vide tout en plaçant au moins 12 499 distracteurs devant chacun de
 ses trois partenaires, depuis chacun de ses quatre sommets. Elle réfute toute
 source ancrée `k<=12499`, pas toute architecture locale imaginable. Aucun
-arrangement global, aucune mosaïque Delaunay d'ordre supérieur et aucun
-catalogue exhaustif ne deviennent le chemin produit.
+arrangement global, aucune structure de Delaunay de quelque ordre que ce soit
+et aucun catalogue exhaustif ne deviennent le chemin produit.
 
 Au pin historique `cec4a4f`, le sampler v2 retire `PENDING` et la censure des grosses
 lentilles, puis remplace `2 sigma` par une demi-largeur Hoeffding correcte sous

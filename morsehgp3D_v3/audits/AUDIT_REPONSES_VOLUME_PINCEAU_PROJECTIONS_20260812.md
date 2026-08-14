@@ -8,8 +8,8 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-Question auditée :
-[`NOTE_CLAUDE_MESURE_VOLUME_ARRANGEMENT_20260812.md`](NOTE_CLAUDE_MESURE_VOLUME_ARRANGEMENT_20260812.md).
+La note de question et de provenance, désormais absorbée, a été supprimée ; le
+présent audit conserve les mesures, réponses et contre-exemples durables.
 Le `HEAD` observé est
 `8c00ab07695ef353e673ab73a778a6f260c87509`. Le snapshot logiciel audité est :
 

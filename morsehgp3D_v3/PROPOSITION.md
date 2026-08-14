@@ -23,7 +23,8 @@ synchronisation et sortie exigée par `BenchmarkOutputContract-v1`.
 
 Le chemin produit ne construit jamais :
 
-- mosaïque de Delaunay d'ordre supérieur ;
+- structure de Delaunay de quelque ordre que ce soit, y compris le graphe ou
+  la triangulation d'ordre un ;
 - arrangement global de plans ou de droites ;
 - matrice globale de cofaces ;
 - catalogue résident de tous les supports ;
@@ -449,9 +450,9 @@ voisins de `-B_j/(2A)`, clipés dans l'intervalle, et chaque maximum à une
 extrémité. Les extrema sont donc exacts sans centre ni flottant. `max P<0`
 crédite toute la population du nœud ; `min P>=0` exclut son intérieur strict ;
 seul `min P>0` exclut aussi le shell. Chaque lane-support ferme au seuil
-`h_q=12-q`, soit `10/9/8` pour q2/q3/q4 sous `smax=11`. Sur une `BallKey`
+`h_q=smax-q+1`, soit `10/9/8` pour q2/q3/q4 sous `smax=11`. Sur une `BallKey`
 partagée entre arités, `active_arity_mask` ne contient que les arités incidentes
-et efface le bit `q` dès que `I_B>=12-q`. Un masque nul autorise l'arrêt pour la
+et efface le bit `q` dès que `I_B>=h_q`. Un masque nul autorise l'arrêt pour la
 fenêtre demandée ; sinon le parcours termine le census `I_B/U_B` et la
 disposition des bits survivants. Saturer globalement à huit perdrait un q2 ou
 q3 encore pertinent. Ce masque est distinct du `active_sign_mask` du
@@ -460,6 +461,14 @@ certificateur Corner8 bisigne et n'en répare pas le caller. Ce
 backends de census dupliqués après RLE ; il ne réduit pas le nombre de supports
 candidats et ne transforme donc pas à lui seul une source quadratique en route
 50k.
+
+Une source shallow peut transporter un reçu de census déjà complet sans rendre
+la `BallKey` circulaire : la clé reste calculée uniquement depuis le support,
+puis le RLE attache et valide le reçu. En particulier, `Q4SeedAxisTopR4` reconstruit
+exactement `I_B/U_B` à partir de ses racines extrémales et de son equality
+report. `BallFormRange-u16` reste l'autorité/fallback, mais un second parcours
+global q4 serait du travail redondant lorsque ces IDs et leur complétude sont
+reçus.
 
 Avec `d=b-a`, `D=d dot d`, `w=2*c-a-b` et `U_z=2*z-a-b`, poser :
 
@@ -533,8 +542,8 @@ owner ou census. Son flux SplitMix à seed fixe ne reçoit pas l'hypothèse
 d'indépendance de Hoeffding. Il reste un diagnostic
 `PairUniversalCoreSample`, pas une mesure exacte ou un reçu statistique. En
 particulier, `U_K<h` ne prouve pas l'existence d'une sphère peu profonde et
-n'autorise ni le nom « squelette exact » ni une inclusion dans un graphe de
-Delaunay d'ordre onze.
+n'autorise ni le nom « squelette exact », ni aucune structure de proximité
+supplémentaire. Toute Delaunay est de toute façon hors contrat.
 
 Le commit `8fd6f59` ajoute un mode exhaustif et les libellés typés. Il ne
 change pas l'objet mathématique : q3/q4 comptent exactement `U<h`, toujours un
@@ -545,6 +554,46 @@ précède aussi les portes BJD/finales et peut rendre code zéro avec un planche
 impossible ou un mutant survivant ; toute combinaison doit être refusée ou les
 gates communes doivent précéder le retour. `--fenetre-exacte/--fenetre-seed`
 doivent être incompatibles avec ce mode plutôt qu'acceptées puis ignorées.
+
+### 4.3 bis Trois énumérateurs shallow autonomes
+
+Le contrat de génération est désormais explicite et ne fait intervenir aucune
+structure de Delaunay :
+
+```text
+q2 : paire propre -> boule diamétrale -> I_B<=9
+q3 : triangle strictement aigu -> miniboule ambiante unique -> I_B<=8
+q4 : tétraèdre bien centré -> circumsphère unique -> I_B<=7
+```
+
+Sous `RelevantGP`, `U_B=S`. Pour une arité `q`, le maximum accepté est
+`d_q=smax-q` et le premier compte rejeté est `h_q=d_q+1`. À `smax=11`, les
+maxima acceptés sont `9/8/7` et les seuils de mort `10/9/8`. Ainsi
+`Q3MiniballDepth9` signifie « certifier au moins neuf intérieurs et rejeter » ;
+il ne signifie jamais accepter `I_B<=9`.
+
+Le split-tree Morton et une `NeutralPairPartition` immuable peuvent être
+mutualisés comme index pur. Ils alimentent ensuite trois générateurs dont les
+queues, records, verdicts, caps, continuations et preuves de complétude sont
+disjoints :
+
+```text
+PointStore + MortonIndex + NeutralPairPartition
+  |- Lane2(Pair2)                         -> Positive2 -> B2 -> reject_at_10
+  |- Lane3(PairAnchor3,Third3)            -> Positive3 -> B3 -> reject_at_9
+  `- Lane4(PairAnchor4,Q4Seed3,Fourth4)   -> Positive4 -> B4 -> reject_at_8
+```
+
+`Q4Seed3` est un préfixe ternaire créé et possédé exclusivement par `Lane4`.
+Ce n'est ni un support q3, ni un événement de `Lane3`, ni un record que q4
+serait autorisé à y lire. Réciproquement, `PairAnchor3` n'est pas une sortie de
+`Lane2`. Le partage permis porte seulement sur les coordonnées, l'index Morton,
+la partition neutre et des fonctions géométriques pures sans état de lane.
+
+Chaque générateur généralise WSPD jusqu'au census de **sa propre** miniboule ;
+une lentille ou un support positif sans profondeur n'est qu'une supersource.
+Le contrat précis et la réponse négative à Q14 sont dans
+[`audits/NOTE_SOLUTION_CONTRAT_SOURCE_AIGUE_20260814.md`](audits/NOTE_SOLUTION_CONTRAT_SOURCE_AIGUE_20260814.md).
 
 ### 4.4 Midball q2 : consolider, puis spécialiser le hot path
 
@@ -639,8 +688,9 @@ Lorentz, de l'affinité en `a,b`, et de l'affinité de `C` avec la concavité de
 `ALL`; aucun de ces échecs ne vaut `NONE` géométrique.
 
 HC reste un préfiltre, pas un jalon de source. L'intégration industrielle
-calcule la lane une fois par nœud, la réutilise pour q2/q3/q4 et mesure son gain
-marginal face au fallback déjà actif. Les défauts logiciels et les portes
+calcule sur un nœud les trois prédicats purs demandés par les trois producteurs
+autonomes et mesure leur gain marginal face au fallback déjà actif. Elle ne
+partage aucun verdict ni état de complétude entre eux. Les défauts logiciels et les portes
 présentes sont maintenus uniquement dans l'audit courant.
 
 ## 5. Générateur q3 recommandé
@@ -729,13 +779,14 @@ tétraèdre régulier, owner `EdgeKey(0,1)`, quatre poids `1/4` et deux carriers
 classait `H>0` comme aiguë est invalidée. Le statut logiciel, les pins et la
 portée du juge sont maintenus uniquement dans l'audit courant.
 
-Après owner, q3 est positif si `E+X-D>0` et `G=D*E-F^2>0`. Les blocs reçoivent
+Après owner, q3 est positif si `E+X-D>0` et `G=D*E-F^2>0`. Les blocs historiques reçoivent
 `ALL_ACUTE/NONE_ACUTE/MIXED` par bornes entières sûres ; les égalités
 descendent. `ALL_ACUTE` ne signifie ni owner commun, ni `BallKey` commune. La
 relation n'est exacte qu'après intersection de tous les filtres, et cela ne
 prouve jamais que sa masse, son rang, son shell ou ses `BallKey` sont bon marché. Le
-tape carrier est requis dès que `q3_open || q4_open`; une fermeture de rang q3
-ne supprime jamais la relation géométrique nécessaire à q4.
+Le tape commun `q3_open || q4_open` décrit le probe réfuté et n'appartient pas
+à l'architecture active. `Lane3` construit ses triples ; `Lane4` construit
+indépendamment ses `Q4Seed3` depuis la partition neutre.
 
 Le classifieur d'acuité de boîte peut être exact sur l'enveloppe continue à
 coût constant. Poser `K=(a-x) dot (b-x)`. Sous owner `ab` et IDs distincts,
@@ -827,7 +878,7 @@ cible honnête inclut `f log m`.
 ### 5.6 Limite de sortie
 
 Des configurations réelles en dimension trois possèdent un nombre quadratique
-de triangles Delaunay critiques, aigus et vides. Cette obstruction interdit une
+de triangles q3 critiques, aigus et vides. Cette obstruction interdit une
 promesse universelle de catalogue q3 sous-quadratique; elle ne donne pas encore
 un pire cas `50000` sur grille u16 fixe. Une fixture u16 cocyclique de 384
 points porte déjà `2322560` supports aigus pour une seule sphère. Le RLE sauve
@@ -1507,9 +1558,23 @@ positivité géométrique doit appartenir au générateur principal. La fixture
 porte une masse quadratique dans quelques `RectKey`, puis exige zéro carrier
 aigu et zéro sweep sans tableau de `PairId`.
 
-## 7. q4 : `OwnedCK-WST4`, puis shallow local si nécessaire
+## 7. q4 : générateur autonome et sélection axiale extrémale
 
-### 7.0 Généralisation CK exacte à un support complet d'ordre `q`
+La route active ne forme plus `OwnedCK-WST4`, `CellPair`, `Sym2` ou
+carrier×apex. `Lane4` construit elle-même ses `Q4Seed3Block` depuis son univers
+quaternaire WSPD, sans lire aucun objet de `Lane3`, puis demande au noyau axial
+les seules racines pouvant porter une circumsphère shallow. Le fait qu'un
+`Q4Seed3` ait trois IDs et soit géométriquement un triangle ne lui donne aucun
+statut q3. Une fois le quatrième ID connu, owner6 et le plus petit vrai
+`PointId` parmi les deux préfixes aigus choisissent la provenance primaire
+exact-once ; positivité q4 et régularité s'appliquent avant toute émission.
+
+La factorisation WST4 décrite ci-dessous reste une identité combinatoire, un
+oracle de masse et un fallback réfutable ; elle n'est plus l'ordonnance P0. En
+particulier, son `Sym2(A) disjoint_union Cross(A,N)` ne doit plus être raccordé
+au chemin produit. Le théorème génératif qui le remplace est au § 7.2.
+
+### 7.1 Factorisation CK de référence, non active en P0
 
 La généralisation utile du WSPD est d'abord combinatoire. Soit un rectangle
 pair-exact `R=(A,B)` et une antichaîne de cellules témoins disjointes
@@ -1685,10 +1750,10 @@ Même avec `C!=D`, les facteurs peuvent recouper les ensembles d'IDs `A` ou
 `A/C`, `A/D`, `B/C`, `B/D`, en plus de `C=D`. Le test terminal de quatre IDs
 distincts protège la sûreté, mais ne rendrait pas seul les compteurs exacts.
 
-Un tétraèdre q4 positif possède au moins une face aiguë adjacente à son arête
-maximale. `WST4` peut donc choisir le plus petit `PointId` des carriers aigus
-comme carrier primaire et l'autre comme apex. Cette relation q3 est
-**géométrique et pré-rang**. Elle ne vient jamais des événements q3 retenus.
+Un tétraèdre q4 positif possède au moins un `Q4Seed3` aigu adjacent à son arête
+maximale. À l'intérieur de `Lane4`, le plus petit `PointId` parmi ces préfixes
+choisit la provenance primaire et l'autre point devient le quatrième rôle. Ce
+record ternaire est produit par `Lane4` et n'a aucun statut q3.
 Changer seulement l'owner ne réduit ni les vrais supports ni les 4-ensembles à
 attribuer : il repartit une relation exact-once. Une autre broad phase pourrait
 avoir un surensemble différent, mais exige une nouvelle preuve de couverture.
@@ -1939,8 +2004,11 @@ T2 = D*(G-2*(E-F)^2)
 J_f = {tau : 2*tau^2<=T2}
 ```
 
-Si `T2<0`, le domaine est vide ; si `T2=0`, il se réduit à un centre. Pour q3,
-remplacer par `3*tau^2<=D*(G-3*(E-F)^2)`. Pour chaque témoin, poser
+Si `T2<0`, le domaine est vide. Si `T2=0`, le seul centre est dans le plan de
+la face : le poids de tout apex vaut zéro, donc la lane q4 strictement positive
+est vide elle aussi. Le verdict de mort q4 est ainsi `T2<=0`, pas seulement
+`T2<0`. Pour q3, remplacer par
+`3*tau^2<=D*(G-3*(E-F)^2)`. Pour chaque témoin, poser
 `A_z=G||z-a||^2-W dot (z-a)` et
 `B_z=n dot (z-a)` ; l'absence d'intérieur est le demi-intervalle
 `A_z-tau*B_z>=0`. Un groupe couvre toute la face si :
@@ -1999,8 +2067,135 @@ shell ; seul un ordre dont l'intervalle peut s'inverser ou une borne indécise
 scinde fail-open. Un LBVH/range-extrema peut proposer directement les top-k sans
 matérialiser les faces ou les apex.
 
-Après ajout d'une cellule apex, `BlockBallDepth8(A,B,C,D)` restreint encore la
-famille de centres. Normaliser d'abord les diagonales de `PointId` : CK garantit
+### 7.2 `Q4SeedAxisExtremalCompletion-r4` : noyau interne de `Lane4`
+
+Ce théorème n'établit aucune dépendance envers q3 : son entrée est un
+`Q4Seed3` produit dans `Lane4`. Poser `r4=smax-3`, le premier nombre
+d'intérieurs qui rejette un support q4 ; à `smax=11`, `r4=8`.
+
+Pour un `Q4Seed3` exact, masquer ses trois IDs et noter `p` le nombre de sites strictement
+intérieurs sur **tout** `J_f`. Cela comprend `B_z=0,A_z<0`, mais aussi les
+racines entrantes strictement avant le bout gauche et les racines sortantes
+strictement après le bout droit. Le reçu conserve leurs vrais `PointId`. Les
+sites `B_z=0,A_z=0` forment séparément le shell persistant. Si `p>=r4`, aucune
+complétion q4 pertinente n'existe. Sinon poser `k=r4-p` et ne sélectionner que
+parmi les racines non permanentes rencontrant `J_f`.
+
+Pour `B_z!=0`, écrire `rho_z=A_z/B_z`. Un site de signe `B_z>0` entre dans la
+boule lorsque `tau` franchit `rho_z` vers la droite ; un site de signe
+`B_z<0` en sort lorsque `tau` franchit `rho_z` vers la droite. Conserver :
+
+```text
+First_k = k plus petites racines parmi B_z>0
+Last_k  = k plus grandes racines parmi B_z<0
+```
+
+Tout quatrième point régulier dont la circumsphère contient moins de `r4`
+intérieurs est
+dans `First_k union Last_k`. En effet, un apex positif absent de `First_k`
+possède déjà `k` entrants strictement antérieurs ; avec les `p` permanents, sa
+profondeur est au moins `r4`. Le cas négatif est symétrique avec les sortants
+strictement postérieurs. Ainsi :
+
+```text
+candidate_root_groups <= 2*(r4-p) <= 2*(smax-3)
+```
+
+Au profil courant, cette borne vaut `2*(8-p)<=16`. La généralisation ne change
+donc ni le noyau top-8 ni ses fixtures ; elle explicite seulement le paramètre
+de contrat et élimine l'ambiguïté avec le seuil q3 `smax-2`.
+
+Pour une arête owner fixée, noter `m` le nombre de lignes géométriques définies
+par **tous** les sites non coplanaires admissibles, pas seulement les faces
+aiguës que le générateur orientera. La somme sur ces lignes est au plus `16m`
+incidences shallow. Chaque centre d'intersection est incident à au moins deux
+lignes, donc il existe au plus `8m` centres géométriques de profondeur au plus
+sept. En revanche, si `m_acute` ne compte que les faces aiguës effectivement
+parcourues, la borne directe des propositions est `16m_acute`; il serait faux
+de la diviser par deux lorsqu'un q4 n'a qu'une face aiguë adjacente à l'owner.
+Ces bornes sont déterministes, sans ordre aléatoire et sans Delaunay. Sous
+concurrence de lignes, elles portent encore sur les centres et groupes ; la
+masse de `SupportKey` peut être grande et suit la politique fail-closed de
+dégénérescence.
+
+Ce majorant porte sur des groupes d'égalité complets. À une racine shallow,
+tous les intérieurs sont aussi dans le noyau : un intérieur omis impliquerait
+déjà `k` extrêmes intérieurs et contredirait la profondeur inférieure à huit.
+Le replay fournit donc exactement :
+
+```text
+I_B = permanents
+      union First_k strictement avant la racine
+      union Last_k strictement après la racine
+U_B = face union groupe d'égalité de la racine union shell persistant
+```
+
+Sous `RelevantGP`, le groupe contient un seul apex et le shell persistant est
+vide. Toute autre situation rend `unsupported_degeneracy`; elle n'autorise ni
+troncature, ni choix arbitraire d'un représentant. Le range selection remplace
+donc à la fois le produit carrier×apex et le second census q4. La `BallKey`
+canonique et le RLE restent exigés pour l'identité et la provenance.
+
+Tout tétraèdre q4 positif choisit d'abord son arête owner, puis le plus petit
+vrai `PointId` parmi ses deux `Q4Seed3` aigus comme provenance primaire. Cette
+règle donne un seul préfixe générateur à l'intérieur de `Lane4`. La voie q4
+active est donc :
+
+```text
+Q4Seed3Block owner/aigu
+ -> Q4SeedAxisTopR4
+ -> au plus 2*(smax-3) groupes de racines
+ -> distinct-ID4/owner6/carrier primaire/positivité
+ -> BallKey(I_B,U_B)
+```
+
+Aucun `CellPair`, `Sym2` ou record carrier×apex n'est autorisé sur cette voie.
+Pour chaque lot de préfixes q4 ouverts, exiger
+`candidate_root_groups<=sum_f 2*(r4-p_f)` et `apex_pair_records=0`.
+
+Pour une face fixe, `A_z` est convexe séparable en `z` et `B_z` linéaire. Une
+recherche best-first sur l'octree peut donc sélectionner les extrêmes par
+bornes rationnelles sûres, en descendant tout nœud de signe `B` mixte ou dont
+l'intervalle chevauche le cutoff. Les égalités sont toujours descendues ou
+range-reportées jusqu'au groupe complet.
+
+Cette exactitude ne se transfère pas automatiquement à un `FaceBlock` où
+`a,b,x` varient. `G,W,n,T2` et les comparaisons croisées de racines sont des
+polynômes de degré supérieur, ni multiaffines ni convexes dans tous les
+facteurs. Tous les coins d'un produit ayant le même ordre ne prouvent donc pas
+`ALL`. Une extension d'intervalles/Bernstein reçue, ou un microtile exhaustif,
+doit vérifier le classement ; sinon le bloc splitte fail-open.
+
+Une fixture u16 concrète tue `corners_order_implies_all`. Après translation par
+`(10,10,10)`, prendre `a=(10,10,10)`, `b=(24,10,10)`, les quatre coins carrier
+`(13,16,10),(13,18,10),(21,16,10),(21,18,10)`, le vrai carrier intérieur
+`(16,17,10)` et les témoins `z1=(17,16,16)`, `z2=(13,5,15)`. Tous les carriers
+sont aigus, `ab` reste owner et `T2>0`. L'ordre des deux racines est le même aux
+quatre coins, mais s'inverse strictement au carrier intérieur.
+
+La borne seize est sharp dans le profil u16. Prendre
+`p0=(125,100,100)`, `p1=(93,124,100)`, `p2=(93,76,100)`, puis
+`y_h=(100,100,100+h)` pour
+`h=-33,...,-26,26,...,33`. Les seize tétraèdres ont tous l'owner unique
+`p1p2`, le carrier primaire `p0`, des poids strictement positifs, aucun
+extra-shell et des profondeurs `7,...,0,0,...,7`. Un cap quinze perd donc un
+support régulier. Avec la même face et `h=-24,...,-17,17,...,24`, les seize
+témoins rendent la profondeur minimale exactement huit et chacun est
+nécessaire : la taille `2r=16` du certificat de mort est elle aussi sharp.
+
+Le contrat indépendant des trois lanes et les précautions de vocabulaire sont
+dans
+[`audits/NOTE_SOLUTION_CONTRAT_SOURCE_AIGUE_20260814.md`](audits/NOTE_SOLUTION_CONTRAT_SOURCE_AIGUE_20260814.md).
+
+### 7.3 Ancien consommateur WST4, diagnostic seulement
+
+Les certificats ci-dessous restent sûrs pour juger le probe historique ou
+comme preuves complémentaires sur un microtile `MIXED`. Ils ne réintroduisent
+ni cellule apex, ni produit WST4 dans la route active de `Lane4`.
+
+Dans le probe historique, après ajout d'une cellule apex,
+`BlockBallDepth8(A,B,C,D)` restreint encore la famille de centres. Normaliser
+d'abord les diagonales de `PointId` : CK garantit
 `A/B`, ou les scinde ; la géométrie raffine ensuite toute intersection
 `A/C,A/D,B/C,B/D,C/D` jusqu'à quatre spans disjoints. La formule de Möbius
 corrige leur masse, pas leur domaine intervalle : une diagonale laissée dans un
@@ -2117,10 +2312,10 @@ Le cas symétrique `C=D` se raffine paresseusement par
 le test d'orientation ; les quatre intersections endpoint--carrier/apex suivent
 la même normalisation laminaire.
 
-La hiérarchie q4 devient donc : Jung edge 2D, porte aiguë, Jung axe 1D,
-`OwnedCK-WST4` **broad-phase symbolique**, normalisation distinct-ID et signe
-d'orientation, puis `Corner8BallDepth/BlockBallDepth8` sur le produit
-carrier--apex. Seul le résiduel paie les barycentriques, la sweep ou le fill.
+La hiérarchie suivante décrivait l'ancienne proposition WST4, désormais
+diagnostique : Jung edge 2D, porte aiguë, Jung axe 1D,
+`OwnedCK-WST4` broad-phase symbolique, normalisation distinct-ID et signe
+d'orientation, puis `Corner8BallDepth/BlockBallDepth8` sur son produit.
 Owner et acuité sont assez bon marché pour précéder normalement une traversée
 témoin complète ; un essai `Corner8` sur quelques gros nœuds peut en revanche
 précéder le prédicat barycentrique large. Si owner/positivité ne sont pas encore
@@ -2136,9 +2331,8 @@ fermés évitent leurs couples de cellules. Un rectangle CK ne les évite que si
 un futur classifieur uniforme le prouve. Le `count` et le preflight précèdent
 impérativement le `fill`.
 
-Si la masse de couples carrier reste rouge, le moteur local du plan médiateur
-reste le successeur : q2 interroge son point central, q3 le pied unique d'une
-ligne et q4 les intersections shallow `P-P/N-N/P-N`. Il ne construit aucun
+Le successeur candidat est propre à `Lane4` : son moteur local du plan
+médiateur interroge les intersections shallow de lignes de ses `Q4Seed3`. Il ne construit aucun
 arrangement global et ne s'instancie qu'après les portes `F4/M4_apex`, tâches et
 HWM. Le code exhaustif actuel reste son oracle, pas son modèle GPU.
 
@@ -2152,9 +2346,7 @@ Le pin `4515a8b` observe une quadrature `arête × porteur` de pente proche de
 `2,97` sur `eight_clusters`. Elle réfute l'expansion ponctuelle, pas WST4 : un
 bloc `ALL_ACUTE` porte sa masse par un seul record, `NONE_ACUTE` disparaît et
 seuls les `MIXED` se divisent. L'ordre physique garde donc le carrier
-symbolique, forme WST4, applique profondeur et barycentriques au niveau bloc
-avant tout fill, puis ne
-matérialise une face que si le résiduel justifie la sweep.
+symbolique dans ce diagnostic. Cela n'est plus une ordonnance active.
 
 Le sampler v2 du HEAD ne fournit pas encore une estimation reçue : sa borne
 Hoeffding est correcte sous i.i.d. uniforme, mais le mapping multiply-high reste
@@ -2227,41 +2419,38 @@ variable.
 2. Raccorder les événements aux générateurs/facettes Gamma et fermer 0B sur
    petit `n` jusqu'au payload complet, sous permutations, tilings, caps et
    reprises.
-3. Recevoir `CKPairTape` comme partition q2 exacte et son certificateur
-   `[L_open,U_closed]`, brancher `Midball ALL` min-only avant descente, puis
-   mesurer `F2`, appels/gains, lectures et masse logique séparément.
-4. Au niveau paire/microtile, calculer d'abord le sandwich `U_K<=D_K<=C` :
-   `C<h` saute Jung sans décider les cofaces, `U_K>=h` ferme, le résiduel appelle
-   `JungDiskDepth9/8`. Sur une proof-tile CK, proposer une même base/pondération,
-   la vérifier par `BlockJungDual64`, puis fermer seulement sur un reçu
-   `tau(E)>=9/8` authentifiant groupes et spans.
-   SOC64 actif utilise un ledger séparé et descend sur `UNKNOWN`. Aucun de ces
-   diagnostics ne précède la réception de 0A/0B et CK dans la route produit.
-5. Partir du `WST3CandidateCover` counter-only désormais présent, normaliser les
-   vrais `PointId`, recevoir l'owner et `ALL/NONE_ACUTE` avant de le nommer
-   `OwnedCK-WST3`, puis raccorder `BallKey -> Q3FootPowerRange` et le census.
-6. Appliquer profondeur et filtre carrier **avant** le carré des cellules, puis
-   construire seulement le résiduel `OwnedCK-WST4`, recevoir le count factorisé `M4_e`, puis
-   appliquer `FaceAxisJungDepth8Block` et `BlockBallDepth8` avant fill. Tester la
-   sweep 1D seulement après preflight ; recertifier directement les quatre
-   barycentriques, le rang fermé `I+U` et la fixture où aucun sous-événement
-   q2/q3 n'est retenu.
-7. Employer LP/cages comme diagnostics du même résiduel ; appliquer le
-   raffinement porteur de preuves aux tâches encore `MIXED`, puis regater
-   `F3/C4_carrier/F4/M4_apex/T4_site` et choisir le shallow local q4 seulement
-   si nécessaire.
-8. Porter la tranche entière par count--scan--fill, tâches persistantes, SoA,
-   radix/RLE et arithmétique large reçue.
-9. Exécuter des microgates `1500/3000/6000`, puis
-   `12500/25000/50000` uniquement si tâches, octets, HWM et sorties passent.
-10. Qualifier trente répétitions chaudes à `50000` avec le payload officiel.
+3. Recevoir un manifeste `NoDelaunay` : split-tree Morton, range queries et
+   `NeutralPairPartition` exacte, immuable, avec vrais IDs, positions
+   dupliquées et caps. Cette partition ne porte aucun statut de lane.
+4. Lancer trois producteurs indépendants, chacun avec sa queue, son ledger et
+   sa preuve de complétude : `Lane2` ferme sa boule diamétrale à dix intérieurs ;
+   `Lane3` construit ses propres triples, applique distinct-ID3, owner3,
+   acuité et rejette à neuf intérieurs ; `Lane4` construit ses propres
+   `Q4Seed3Block`, puis applique `Q4SeedAxisTopR4`, owner6 et positivité q4,
+   avec rejet à huit intérieurs. Aucune sortie d'une lane n'entre dans une
+   autre.
+5. Dans `Lane4` seulement, exiger zéro `CellPair/Sym2`, la borne
+   `candidate_root_groups<=sum_f 2*(r4-p_f)` et le tie report complet. Le
+   replay fournit directement `I_B/U_B` aux racines retenues.
+6. Recevoir le lift `Q4Seed3Block` par intervalles/Bernstein ou microtiles contre
+   l'oracle ponctuel. Les coins seuls sont un proposer. Employer Jung, SOC, LP,
+   cages et Corner8 seulement comme preuves complémentaires sur les tâches
+   `MIXED`, jamais comme condition de complétude de la source.
+7. Porter les trois producteurs par tâches persistantes, SoA, best-first top-k,
+   arithmétique i256 reçue, count--scan--fill et radix/RLE. Le fill consomme un
+   `DecisionTape` sans recalculer les prédicats.
+8. Exécuter les microgates `1500/3000/6000`; ne passer à
+   `12500/25000/50000` que si tâches, groupes de racines, octets, HWM, sorties
+   et pentes physiques passent, sans record carrier×apex.
+9. Qualifier deux warmups puis trente répétitions chaudes à `50000` avec le
+    payload officiel complet et une seule copie hôte incluse.
 
 La piste de coût peut avancer en parallèle comme diagnostic `counter-only` sur
-petit `n` : `CKPairTape -> carrier aigu -> BlockJungDual64/tau(F) ->
-AxisKernel/BlockBallDepth`, toujours contre vérité exhaustive. Elle mesure les
-fermetures avant descente, les nœuds de transversal, `F4/M4`, les splits, les
-octets et la HWM. Elle n'autorise aucun claim 0A/0B ou produit avant les portes
-1--2 ci-dessus.
+petit `n` : `NeutralPairPartition -> Lane4(Q4Seed3Block ->
+Q4SeedAxisTopR4)`, toujours contre vérité exhaustive. Elle mesure les morts
+`T2/permanent/gap`, les sélections extrémales,
+les groupes d'égalité, les splits, les octets et la HWM. Elle n'autorise aucun
+claim 0A/0B ou produit avant les portes 1--2 ci-dessus.
 
 La recette G4 reste défectueuse et ne doit pas être relancée en l'état. Elle
 omet une cible pourtant
@@ -2284,9 +2473,9 @@ La porte composée publie au minimum :
 
 ```text
 E3/E4, max par ancre, CLOSED/OPEN/PENDING
-F2/F3/F4 physiques et masses logiques factorisées
-C4_carrier, M4_apex, W4_positive, H4_rank
-N4_event, Z4_const, R4_bundle, T4_site, tâches, splits, visites
+F2, FaceBlocks q3, q3 shallow, T4_site/acute faces, primary accepts
+dead_T2/dead_perm8/dead_gap, candidate_root_groups, root ties
+W4_positive, H4_rank, N4_event, tâches, splits, visites axiales
 BallKeys brutes/uniques, supports, census, shells
 sortie H, opérations larges, octets/HWM
 temps par phase et warm_e2e
@@ -2324,6 +2513,16 @@ bande passante ne qualifie aucun SLO.
 - Jung axe : événements opposés égaux, trois constantes `B=0`, noyau top-k
   contre sweep exhaustive, `T2<0/0/>0`, bouts 207 bits et mutants
   `wrong_extrema/drop_equal_shell` ;
+- `Q4SeedAxisTopR4` génératif : fixture u16 de dix-neuf points donnant exactement
+  seize q4 réguliers, deux à chaque profondeur zéro à sept, owner `EdgeKey(1,2)`
+  et carrier primaire zéro ; mutants `cap15`, `first7/last7`, mauvais signe
+  `B<0`, division tronquée et double émission du primary ;
+- certificat axial sharp : même face avec seize témoins tous nécessaires pour
+  une profondeur minimale huit ; mutant `endpoint_counts_imply_depth` contre
+  la fixture seize-apex qui a les mêmes comptes aux bouts mais un gap central ;
+- `FaceBlock` coins insuffisants : ordre des deux racines identique aux quatre
+  coins carrier mais inversé au vrai point intérieur ; mutant
+  `corners_order_implies_all` ;
 - cinq nœuds u16 mis à l'échelle ci-dessus : `4096` supports q4, huit témoins
   uniformes et fermeture `Corner8BallDepth` avant fill ;
 - Corner8 : huitième coin seul extérieur, minimum de norme intérieur à un
@@ -2400,11 +2599,14 @@ une continuation, jamais fermer par son échec.
 
 ## 11. Non-claims
 
-Il existe une voie q2/q3/q4 exacte et GPU-factorisable en blocs :
-`CKPairTape -> OwnedCK-WST3 -> OwnedCK-WST4 -> BallKey/RLE -> profondeur
-batchée`. « Sparse » qualifie seulement les enregistrements physiques restant
-factorisés. Il n'existe aucune garantie universelle sous-quadratique pour la
-sortie explicite ou pour le raffinement des frontières `MIXED`.
+Il existe trois producteurs candidats GPU-factorisables en blocs, sans aucune
+Delaunay : `{Lane2(Q2MidballDepth10), Lane3(Q3MiniballDepth9),
+Lane4(Q4SeedAxisExtremalCompletion-r4)} -> BallKey/RLE`. Les accolades
+désignent un fork indépendant, jamais une composition séquentielle. « Sparse » qualifie seulement les
+enregistrements physiques restant factorisés. Il n'existe aucune garantie
+universelle sous-quadratique pour la sortie explicite ou pour le raffinement
+des frontières `MIXED`. La borne de seize apex par face retire le carré q4 ;
+elle ne borne ni le nombre de faces primaires, ni une sortie q2/q3 lourde.
 
 `SOC64`, `CORNER512`, LP projectif et cages sont des certificateurs ou
 falsificateurs précis. Aucun n'a encore démontré le contrat 50000/G4. Le

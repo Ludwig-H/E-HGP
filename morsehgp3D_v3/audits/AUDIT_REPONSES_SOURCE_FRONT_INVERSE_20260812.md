@@ -8,8 +8,8 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-Question auditée :
-[`QUESTIONS_CLAUDE_SOURCE_FRONT_INVERSE_20260812.md`](QUESTIONS_CLAUDE_SOURCE_FRONT_INVERSE_20260812.md).
+La question source, désormais résolue, a été supprimée ; le présent audit en
+conserve intégralement les réponses et les contre-exemples durables.
 Le `HEAD` observé est
 `8c00ab07695ef353e673ab73a778a6f260c87509`. Les conclusions mathématiques
 ci-dessous ne dépendent pas du statut Git des prototypes.

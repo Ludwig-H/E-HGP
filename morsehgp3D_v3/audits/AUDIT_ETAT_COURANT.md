@@ -8,6 +8,54 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
+> **Verdict live au `HEAD=504f334bdfad90581b58086ced8eb6a35cf438d8`.**
+> Le dernier pin logiciel reste
+> `6e815d28b3e229a0161eb00d6fa0c9a272efac5d`; les deux commits suivants sont
+> documentaires et le worktree était propre avant les présentes écritures.
+> Q14 est fermée contractuellement : aucune structure de Delaunay n'est
+> autorisée, y compris d'ordre un, comme source, squelette, filtre ou census.
+>
+> La route active comporte trois producteurs autonomes par miniboule : q2
+> boule diamétrale avec `I<=9`, q3 triangle aigu/miniboule ambiante avec
+> `I<=8`, q4 tétraèdre bien centré/circumsphère avec `I<=7`. Ils peuvent lire
+> le même index Morton et une `NeutralPairPartition` immuable, mais aucun
+> record, verdict, cap, continuation ou reçu de complétude ne passe d'une lane
+> à une autre.
+>
+> Le théorème `Q4SeedAxisExtremalCompletion-r4`, interne à `Lane4`, retire le
+> carré q4. Pour un `Q4Seed3` aigu exact avec `p` intérieurs permanents, tout quatrième point régulier
+> shallow est parmi les `8-p` premières racines axiales entrantes ou les
+> `8-p` dernières sortantes : au plus seize groupes, avec reconstruction
+> exacte de `I_B/U_B`. Pour une arête owner portant `m_e` lignes carrier, le
+> nombre de centres q4 shallow est au plus `8m_e` lorsque `m_e` compte toutes
+> les lignes admissibles ; sur les seules faces aiguës parcourues, la borne de
+> propositions est `16m_e^acute`, et non
+> `binom(m_e,2)`. `WST4/CellPair/Sym2` sont donc rétrogradés en diagnostics de
+> masse, pas route P0. `Q4Seed3` appartient exclusivement à `Lane4` et ne
+> désigne ni un support ni une sortie q3. Contrat et réponse à Q14 :
+> [`NOTE_SOLUTION_CONTRAT_SOURCE_AIGUE_20260814.md`](NOTE_SOLUTION_CONTRAT_SOURCE_AIGUE_20260814.md).
+>
+> Claude a ajouté pendant l'audit `prototype/axis_top8.hpp` et
+> `axis_top8_probe.cpp`, encore non suivis. Le noyau fixe passe ses quatre
+> fixtures et deux sweeps `n=60,seuil=7`, mais son CLI accepte à tort d'autres
+> seuils : à `seuil=8`, il perd `440` apex sur `uniform` et `428` sur
+> `eight_clusters`. Il ne transporte que le compte des permanents, ne juge pas
+> le shell, ne produit pas le reçu de mort par gaps et ne teste pas le primary
+> q4 global. Contre-audit et hashes :
+> [`AUDIT_WORKTREE_Q4SEED_AXIS_TOPR4_20260814.md`](AUDIT_WORKTREE_Q4SEED_AXIS_TOPR4_20260814.md).
+>
+> Il n'existe toujours aucune mesure GPU G4 bout-en-bout. Le reçu
+> `chaine_complete_g4_20260813` est `GPU_RUN=NO`, `PRODUCT_OUTPUT=NO` et mesure
+> `78,8 s` CPU chargé sur `uniform,50000`, sans BallKey, census, fold ou
+> payload. La cible d'une seconde reste ouverte ; aucune nouvelle session G4
+> ne précède les gates CPU des trois producteurs.
+>
+> Contrôles documentaires présents : `check_docs.py` valide `106` Markdown et
+> `check_implementation_status.py` valide `20` phases. Le rejeu ciblé
+> `ctest -I 818,835` passe `18/18` en `18,37 s`. Ces tests reçoivent seulement
+> les probes Corner8/WST historiques ; les trois producteurs ne sont pas
+> implémentés.
+
 > **Alerte au pin logiciel `6e815d28b3e229a0161eb00d6fa0c9a272efac5d`.** Les
 > commits `89774d0`, `e3f1925` et `88a9ba8` ajoutent respectivement
 > `Corner8BallDepth`, un broad phase WST3 et son produit WST4 ; `22d1cb0` en
@@ -200,6 +248,14 @@ Le contrat G4 reste ouvert. Il n'existe encore ni source u16 reçue, ni stage
 p95 à 50 000 points. Le squelette du contrat de benchmark existe, mais ses
 étages critiques restent incomplets ou absents.
 
+La source mathématique prioritaire est maintenant un fork de trois producteurs
+et non le produit `OwnedCK-WST4` : `{Lane2(MidballDepth10),
+Lane3(Q3MiniballDepth9), Lane4(Q4SeedAxisTopR4 -> Positive4)}`. Les accolades
+ne sont pas une composition. Chaque lane possède son univers, son ledger et sa
+preuve de complétude ; les sorties se rejoignent seulement dans `BallKey/RLE`.
+Aucun enregistrement carrier×apex ni `Sym2` n'est admis dans la tranche à
+recevoir.
+
 `SOC64 --actif` et `BlockJungDual64` sont des diagnostics amont. Aucun ne
 traverse `BallEvent -> 0B -> payload`; ils ne qualifient donc ni exactitude
 industrielle ni SLO.
@@ -222,10 +278,16 @@ reçue :
 Les noms « 0A fermé », « stage 0B » et « le raffinement paie » dépassent les
 preuves disponibles.
 
-## Nouvelle source candidate : `CKPairTape -> WST3 -> WST4`
+## Ancienne source candidate : `CKPairTape -> WST3 -> WST4`
 
-L'audit reçoit le contrat mathématique comme proposition exacte et
-GPU-factorisable. Le probe courant n'en implémente que le `CandidateCover` :
+Cette section juge le logiciel au pin et conserve ses obligations de
+couverture. Elle est supersédée comme ordonnance P0 par la source shallow et le
+théorème axial ci-dessus. `WST4`, `CellPair` et `Sym2` ne doivent plus être
+raccordés au chemin produit.
+
+Le bloc ci-dessous décrit uniquement le probe historique et ses masses ; il ne
+prescrit aucun flux entre les trois producteurs. Le probe courant n'implémente
+que le `CandidateCover` :
 
 - une WSPD Callahan--Kosaraju canonique partitionne toutes les paires en
   `O(s^3 n)` rectangles physiques sans les développer ; après filtrage des
@@ -251,11 +313,9 @@ ni les masses logiques `|A||B|`, `|A||B||C|` et `|A||B||C||D|`. Chaque bloc
 reste paresseux jusqu'à un consommateur factorisé reçu ou au preflight atomique
 de sa vraie sortie.
 
-Une fixture u16 de 64 points interdit toute cascade de rang : un q4 régulier a
-rang 4 alors que ses six arêtes q2 et ses quatre faces q3 ont toutes rang 12.
-`WST4` doit donc consommer les carriers aigus géométriques pré-rang, jamais les
-événements q3 retenus. La relation est construite lorsque
-`q3_open || q4_open`, même si la lane de rang q3 est déjà fermée. Le rapport et le recalcul exact sont dans
+Dans l'architecture active, `Lane4` régénère ses `Q4Seed3` depuis la partition
+neutre ; elle ne lit ni `q3_open`, ni tape, ni événement, ni verdict de
+`Lane3`. Le rapport historique et le recalcul exact sont dans
 [`AUDIT_SOURCE_CK_WST_Q2_Q3_Q4_35FCEA8_20260814.md`](AUDIT_SOURCE_CK_WST_Q2_Q3_Q4_35FCEA8_20260814.md).
 
 Pour une paire ponctuelle, `JungDiskDepth9/8` restreint les centres au disque
@@ -1319,27 +1379,23 @@ publique, ni performance.
 réparer 0A u16 et isoler les juges de mutants
   -> raccorder BallEvent aux autorités Gamma par ordres/lots/verticales
   -> recevoir 0B et le payload borné
-  -> recevoir CKPairTape q2 et ses certificats [L,U]
-  -> Midball ALL min-only, domaine/IDs préflightés, avant toute descente q2
-  -> triage canonique U<=D<=C par paire/microtile
-  -> SOC64 union-disjointe + JungDiskDepth9/8 seulement sur U<h<=C
-  -> primal proposer -> BlockJungDual64 uniforme -> branch-and-cut tau(E)>=h
-  -> CandidateWST3 coarse dans 2B_R-lentille dès q3_open || q4_open
-  -> normaliser vrais PointId, distinct-ID, owner et ALL/NONE_ACUTE par bloc
-  -> profondeur carrier avant de former paresseusement le résiduel WST4
-  -> positivité q4 puis Corner8BallDepth/BlockBallDepth8 avant tout fill
-  -> raffinement porteur de preuves sur les tâches encore MIXED
-  -> mesurer F2/F3/C4_carrier/F4/M4_apex/W4/H4/T4, BallKeys, census, H
+  -> recevoir manifeste NoDelaunay + NeutralPairPartition exacte et immuable
+  -> FORK Lane2 : Pair2 -> MidballDepth10 -> BallKey/RLE
+  -> FORK Lane3 : PairAnchor3 x Third3 -> Q3MiniballDepth9 -> BallKey/RLE
+  -> FORK Lane4 : PairAnchor4 x Q4Seed3 x Fourth4
+       -> Q4SeedAxisTopR4 -> owner6/primary/Positive4 -> BallKey/RLE
+  -> prouver séparément couverture, caps, pending=0 et payload de chaque fork
+  -> mesurer leurs tâches, racines, sorties, octets, census, H et HWM
   -> seulement alors portage device et campagne G4 50k
 ```
 
 Cet ordre bloque toute réception produit, pas la falsification architecturale.
 En parallèle, une piste `counter-only` peut recevoir sur petit `n`, contre
-vérité exhaustive, `CKPairTape -> carrier aigu -> BlockJungDual64/tau(F) ->
-AxisKernel/BlockBallDepth`. Elle ne promeut ni 0A, ni 0B, ni le statut public ;
-elle permet de mesurer les fermetures **avant** descente, les splits, `F4/M4`,
-les nœuds de transversal, les octets et la HWM avant d'investir dans un portage
-G4.
+vérité exhaustive, `NeutralPairPartition -> Lane4(Q4Seed3Block ->
+Q4SeedAxisTopR4)`. Elle ne promeut ni
+0A, ni 0B, ni le statut public ; elle permet de mesurer les morts
+`T2/permanents/gaps`, les sélections extrémales, les ties, les splits, les
+octets et la HWM avant d'investir dans un portage G4.
 
 La proposition consolidée est
 [`../PROPOSITION.md`](../PROPOSITION.md). L'index court des audits est
