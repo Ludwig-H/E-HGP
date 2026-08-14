@@ -202,7 +202,7 @@ gcloud compute scp "${TAR}" "${GCP_INSTANCE_NAME}:/tmp/v3.tgz" \
         set +e
         timeout 300 \$A --family=\$fam --points=\$n --seed=1 --smax=\$sm \\
           --max-seeds=300000 --max-sites=120000000 2>&1
-        echo \"code=\\${PIPESTATUS[0]}\"
+        code=\${PIPESTATUS[0]}; echo \"code=\${code}\"
         set -e
       done
     done

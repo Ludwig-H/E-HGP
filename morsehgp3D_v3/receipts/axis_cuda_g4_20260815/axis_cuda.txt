@@ -1,0 +1,72 @@
+=== famille=uniform smax=6 n=1500
+axis_device : famille=uniform n=1500 smax=6 r4=3 seeds=628990 sites=59947378 sites_moyens=95.3 cap=0
+  hote : 2159.79 ms, 0.29 Mseeds/s, 27.76 Msites/s
+  device : 11.99 ms, 52.46 Mseeds/s, 4999.97 Msites/s, acceleration=180.1x
+  parite : ecarts=0 sur 628990 verdicts
+code=\0
+=== famille=uniform smax=6 n=3000
+axis_device : famille=uniform n=3000 smax=6 r4=3 seeds=1384420 sites=135886440 sites_moyens=98.2 cap=0
+  hote : 4819.34 ms, 0.29 Mseeds/s, 28.20 Msites/s
+  device : 26.87 ms, 51.53 Mseeds/s, 5057.80 Msites/s, acceleration=179.4x
+  parite : ecarts=0 sur 1384420 verdicts
+code=\0
+=== famille=uniform smax=6 n=6000
+axis_device : famille=uniform n=6000 smax=6 r4=3 seeds=2956531 sites=293649536 sites_moyens=99.3 cap=0
+  hote : 10399.44 ms, 0.28 Mseeds/s, 28.24 Msites/s
+  device : 55.33 ms, 53.44 Mseeds/s, 5307.29 Msites/s, acceleration=188.0x
+  parite : ecarts=0 sur 2956531 verdicts
+code=\0
+=== famille=uniform smax=11 n=1500
+axis_device : famille=uniform n=1500 smax=11 r4=8 seeds=3000000 sites=544921534 sites_moyens=181.6 cap=1
+  hote : 21032.07 ms, 0.14 Mseeds/s, 25.91 Msites/s
+  device : 87.80 ms, 34.17 Mseeds/s, 6206.57 Msites/s, acceleration=239.6x
+  parite : ecarts=0 sur 3000000 verdicts
+code=\0
+=== famille=uniform smax=11 n=3000
+axis_device : famille=uniform n=3000 smax=11 r4=8 seeds=3000000 sites=566271542 sites_moyens=188.8 cap=1
+  hote : 21351.40 ms, 0.14 Mseeds/s, 26.52 Msites/s
+  device : 87.67 ms, 34.22 Mseeds/s, 6459.44 Msites/s, acceleration=243.6x
+  parite : ecarts=0 sur 3000000 verdicts
+code=\0
+=== famille=uniform smax=11 n=6000
+axis_device : famille=uniform n=6000 smax=11 r4=8 seeds=3000000 sites=589040105 sites_moyens=196.3 cap=1
+  hote : 21532.59 ms, 0.14 Mseeds/s, 27.36 Msites/s
+  device : 86.41 ms, 34.72 Mseeds/s, 6816.73 Msites/s, acceleration=249.2x
+  parite : ecarts=0 sur 3000000 verdicts
+code=\0
+=== famille=eight_clusters smax=6 n=1500
+axis_device : famille=eight_clusters n=1500 smax=6 r4=3 seeds=917948 sites=599999442 sites_moyens=653.6 cap=1
+  hote : 12177.39 ms, 0.08 Mseeds/s, 49.27 Msites/s
+  device : 42.92 ms, 21.39 Mseeds/s, 13979.84 Msites/s, acceleration=283.7x
+  parite : ecarts=0 sur 917948 verdicts
+code=\0
+=== famille=eight_clusters smax=6 n=3000
+axis_device : famille=eight_clusters n=3000 smax=6 r4=3 seeds=686017 sites=599999512 sites_moyens=874.6 cap=1
+  hote : 12188.63 ms, 0.06 Mseeds/s, 49.23 Msites/s
+  device : 43.55 ms, 15.75 Mseeds/s, 13776.22 Msites/s, acceleration=279.9x
+  parite : ecarts=0 sur 686017 verdicts
+code=\0
+=== famille=eight_clusters smax=6 n=6000
+axis_device : famille=eight_clusters n=6000 smax=6 r4=3 seeds=735344 sites=599999733 sites_moyens=815.9 cap=1
+  hote : 13890.54 ms, 0.05 Mseeds/s, 43.19 Msites/s
+  device : 62.04 ms, 11.85 Mseeds/s, 9670.42 Msites/s, acceleration=223.9x
+  parite : ecarts=0 sur 735344 verdicts
+code=\0
+=== famille=eight_clusters smax=11 n=1500
+axis_device : famille=eight_clusters n=1500 smax=11 r4=8 seeds=846872 sites=599999619 sites_moyens=708.5 cap=1
+  hote : 13373.52 ms, 0.06 Mseeds/s, 44.86 Msites/s
+  device : 45.78 ms, 18.50 Mseeds/s, 13106.00 Msites/s, acceleration=292.1x
+  parite : ecarts=0 sur 846872 verdicts
+code=\0
+=== famille=eight_clusters smax=11 n=3000
+axis_device : famille=eight_clusters n=3000 smax=11 r4=8 seeds=635718 sites=599999566 sites_moyens=943.8 cap=1
+  hote : 13661.37 ms, 0.05 Mseeds/s, 43.92 Msites/s
+  device : 51.56 ms, 12.33 Mseeds/s, 11637.61 Msites/s, acceleration=265.0x
+  parite : ecarts=0 sur 635718 verdicts
+code=\0
+=== famille=eight_clusters smax=11 n=6000
+axis_device : famille=eight_clusters n=6000 smax=11 r4=8 seeds=825371 sites=599999328 sites_moyens=726.9 cap=1
+  hote : 16968.59 ms, 0.05 Mseeds/s, 35.36 Msites/s
+  device : 67.41 ms, 12.24 Mseeds/s, 8900.87 Msites/s, acceleration=251.7x
+  parite : ecarts=0 sur 825371 verdicts
+code=\0

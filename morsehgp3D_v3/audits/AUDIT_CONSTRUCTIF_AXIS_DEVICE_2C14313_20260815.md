@@ -272,12 +272,16 @@ verticales et copie hôte.
 
 ## 7. Relecture statique de la recette G4 `11130cb`
 
-La recette a de bonnes décisions : arrêt ciblé par génération, parité avant
-débit et rapatriement du brut avant le verdict. Elle ne doit toutefois pas être
-lancée telle quelle : ses douze runs ont chacun `timeout 900`, soit jusqu'à
+La recette commise a de bonnes décisions : arrêt ciblé par génération, parité
+avant débit et rapatriement du brut avant le verdict. Elle ne devait toutefois
+pas être lancée telle quelle : ses douze runs ont chacun `timeout 900`, soit jusqu'à
 `10 800 s`, alors que l'arrêt invité est armé à `4 500 s`. La variable
 `RUN_TIMEOUT=3300` annoncée n'encadre aucune commande. Une campagne peut donc
 être coupée avant son reçu complet.
+
+Le worktree postérieur réduit la matrice à huit cas de `300 s`, ce qui ferme le
+calcul arithmétique le plus grossier. Il reste à employer le timeout global,
+exiger les huit clés et typer les lots tronqués comme décrit ci-dessous.
 
 Réparation constructive minimale :
 
@@ -324,6 +328,25 @@ immuable, puis récupérer le fichier distant **avant** toute relance de la
 recette, car son build commence par `rm -rf ~/ax`. La VM est arrêtée ; cet audit
 n'autorise et n'effectue aucun redémarrage. Une future session gardée doit
 rapatrier/streamer le brut même si SSH se termine après la matrice.
+
+Le pin `0bf46822416d126e0852391a978c3998e4b4c04f` ajoute une recette dédiée de
+récupération, mais ne contient toujours aucun `axis_cuda.txt`. Son sujet de
+commit ne constitue donc pas un reçu récupéré. Deux corrections minimales sont
+nécessaires avant exécution :
+
+1. écrire le nouveau journal dans un attempt ou dans
+   `recovery_transcript.txt` ; le cleanup courant recopie sur le même
+   `receipts/axis_cuda_g4_20260815/transcript.txt` et détruirait la provenance
+   originale ;
+2. ne pas répéter sans diagnostic la même commande `gcloud compute scp` qui a
+   précédé le `rc=127`. La voie SSH fonctionne déjà : publier d'abord
+   `wc -l` et `sha256sum`, puis streamer `cat ~/ax/out/axis_cuda.txt` vers un
+   fichier local temporaire, vérifier hash et 72 lignes, et seulement ensuite
+   le promouvoir dans le reçu.
+
+Cette reprise n'a besoin ni du tar du dépôt ni d'un nouveau build. Supprimer ces
+étapes réduit le temps facturable et évite de mêler le worktree courant à un
+brut produit par `11130cb`.
 
 La configuration distante publie en outre
 `source par ancre device active pour 52`. Le projet ne doit pas accepter la

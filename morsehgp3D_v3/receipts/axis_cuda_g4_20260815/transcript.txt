@@ -1,86 +1,55 @@
-git_head=11130cb1f2114d3569991e96606c49bd1d6cc853 fichiers_modifies=0
-sha256 morsehgp3D_v3/prototype/axis_device_job.hpp = d2f6ef0b1d8cde835e039931046c716bb5911c4d862fee87448e05739e5ceb0a
-sha256 morsehgp3D_v3/prototype/axis_device_kernel.cu = 1fbeb822e127484cefbc6054ebe43469f814b2184940d6358f166bfdf3eb5db5
-sha256 morsehgp3D_v3/prototype/axis_device_qualification.cpp = 994c0da9f9030638cb2ace9279f9954f12d701eee327d8ddedc7f62cad020547
+git_head=0bf46822416d126e0852391a978c3998e4b4c04f fichiers_modifies=0
+sha256 morsehgp3D_v3/prototype/lane_source_scale_probe.cpp = 3fcfc3f185d0b7ee8f02fa781f773175938773b3a8feaa70ab68e73cb07e9a33
 sha256 morsehgp3D_v3/prototype/q4seed_axis_topr4.hpp = d86f27d30e4b81834e3d711f7c24b9916879b85fc14e3407eaf8180b6d1aaacd
-[GARDE pre-mutation] cible=devpod-gpu-exploration/europe-west4-ai1a/ehgp-blackwell-spot-ai1a état=TERMINATED machine=g4-standard-48 provisioning=SPOT action=STOP maxRunDuration=1800s.
+sha256 morsehgp3D_v3/CMakeLists.txt = 165d3cbfd6245be81b7776260b73398ea9c9deda8159ebf8ea3aeba1634246cf
+[GARDE pre-mutation] cible=devpod-gpu-exploration/europe-west4-ai1a/ehgp-blackwell-spot-ai1a état=TERMINATED machine=g4-standard-48 provisioning=SPOT action=STOP maxRunDuration=5400s.
 [SET-SCHEDULING] Reconfiguration protégée demandée :
   compte              : louis.hauseux@gmail.com
   projet              : devpod-gpu-exploration
   zone                : europe-west4-ai1a
   instance            : ehgp-blackwell-spot-ai1a
   état certifié       : TERMINATED
-  maxRunDuration cible: 5400 s
+  maxRunDuration cible: 1800 s
   action              : STOP
 Updated [https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/europe-west4-ai1a/instances/ehgp-blackwell-spot-ai1a].
-[GARDE post-mutation] cible=devpod-gpu-exploration/europe-west4-ai1a/ehgp-blackwell-spot-ai1a état=TERMINATED machine=g4-standard-48 provisioning=SPOT action=STOP maxRunDuration=5400s.
-[OK] maxRunDuration=5400s recertifié sur la cible TERMINATED devpod-gpu-exploration/europe-west4-ai1a/ehgp-blackwell-spot-ai1a; aucune VM démarrée ou arrêtée.
-[GARDE SSH] Clé de session ssh-ed25519 utilisable sans interaction (SHA256:W3EjPT5t+E8sOWiF9ELzStj6IzG44ekiEMM1938IAxM).
-[GARDE SSH] Clé OS Login unique, expiration fixe=2026-08-14T23:23:26.270899Z, durée restante=5684s.
+[GARDE post-mutation] cible=devpod-gpu-exploration/europe-west4-ai1a/ehgp-blackwell-spot-ai1a état=TERMINATED machine=g4-standard-48 provisioning=SPOT action=STOP maxRunDuration=1800s.
+[OK] maxRunDuration=1800s recertifié sur la cible TERMINATED devpod-gpu-exploration/europe-west4-ai1a/ehgp-blackwell-spot-ai1a; aucune VM démarrée ou arrêtée.
+[GARDE SSH] Clé de session ssh-ed25519 utilisable sans interaction (SHA256:rZykbMvMV4M6Zw5IIQeIHLZBUZnECABMVkHqALtDDIs).
+[GARDE SSH] Clé OS Login unique, expiration fixe=2026-08-14T22:47:47.269120Z, durée restante=2086s.
 [START] Démarrage protégé demandé :
   compte                 : louis.hauseux@gmail.com
   projet                 : devpod-gpu-exploration
   instance               : ehgp-blackwell-spot-ai1a
   zone                   : europe-west4-ai1a
   machine/provisioning   : g4-standard-48 / SPOT
-  maxRunDuration GCE     : 5400 s
-  arrêt invité secondaire : 75 min
+  maxRunDuration GCE     : 1800 s
+  arrêt invité secondaire : 20 min
 Starting instance(s) ehgp-blackwell-spot-ai1a...
-.................................................done.
+..................................................done.
 Updated [https://compute.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/europe-west4-ai1a/instances/ehgp-blackwell-spot-ai1a].
 Instance internal IP is 10.164.0.7
-Instance external IP is 34.6.138.227
-[GARDE-FOU GCE] action=STOP, maxRunDuration=5400s, échéance calculée=1786749534, échéance sûre=1786749234, terminationTimestamp non exposé; échéance calculée certifiée
-[GARDE-FOU INVITÉ] Armement de shutdown -P +75 via SSH.
-Shutdown scheduled for Fri 2026-08-14 23:04:29 UTC, use 'shutdown -c' to cancel.
+Instance external IP is 34.7.9.84
+[GARDE-FOU GCE] action=STOP, maxRunDuration=1800s, échéance calculée=1786747393, échéance sûre=1786747093, terminationTimestamp non exposé; échéance calculée certifiée
+[GARDE-FOU INVITÉ] Armement de shutdown -P +20 via SSH.
+Shutdown scheduled for Fri 2026-08-14 22:33:43 UTC, use 'shutdown -c' to cancel.
 MODE=poweroff
-USEC=1786748669263297
+USEC=1786746823594412
 
-[GARDE-FOU GCE] action=STOP, maxRunDuration=5400s, échéance calculée=1786749534, échéance sûre=1786749234, terminationTimestamp non exposé; échéance calculée certifiée
+[GARDE-FOU GCE] action=STOP, maxRunDuration=1800s, échéance calculée=1786747393, échéance sûre=1786747093, terminationTimestamp non exposé; échéance calculée certifiée
 [SUCCÈS] VM démarrée avec deux coupe-circuits vérifiés. Fermez la session avec stop_and_verify.sh.
-generation verrouillee : 2026-08-14T14:48:54.135-07:00
-tar_sha256=c26bdaadcb85dd55c0775fdbdfa95fb5eeb4f8c447906a23dc36731774066f89
-NVIDIA RTX PRO 6000 Blackwell Server Edition, 97887 MiB, 580.173.02
-Cuda compilation tools, release 12.9, V12.9.41
-Build cuda_12.9.r12.9/compiler.35813241_0
-coeurs=48
--- mhgp3v : source par ancre device active pour 52
--- Found Python3: /usr/bin/python3.10 (found version "3.10.12") found components: Interpreter
--- Configuring done (3.3s)
--- Generating done (0.0s)
--- Build files have been written to: /home/louis_hauseux_gmail_com/ax/build
-   26 | using u128 = unsigned __int128;
-      |                       ^~~~~~~~
-In file included from /home/louis_hauseux_gmail_com/ax/morsehgp3D_v2/include/mhgp/mhgp.hpp:8,
-                 from /home/louis_hauseux_gmail_com/ax/morsehgp3D_v2/src/run.cpp:9:
-/home/louis_hauseux_gmail_com/ax/morsehgp3D_v2/include/mhgp/exact.hpp:25:14: warning: ISO C++ does not support ‘__int128’ for ‘type name’ [-Wpedantic]
-   25 | using i128 = __int128;
-      |              ^~~~~~~~
-/home/louis_hauseux_gmail_com/ax/morsehgp3D_v2/include/mhgp/exact.hpp:26:23: warning: ISO C++ does not support ‘__int128’ for ‘type name’ [-Wpedantic]
-   26 | using u128 = unsigned __int128;
-      |                       ^~~~~~~~
-In file included from /home/louis_hauseux_gmail_com/ax/morsehgp3D_v2/include/mhgp/mhgp.hpp:8,
-                 from /home/louis_hauseux_gmail_com/ax/morsehgp3D_v2/src/catalogue.cpp:22:
-/home/louis_hauseux_gmail_com/ax/morsehgp3D_v2/include/mhgp/exact.hpp:25:14: warning: ISO C++ does not support ‘__int128’ for ‘type name’ [-Wpedantic]
-   25 | using i128 = __int128;
-      |              ^~~~~~~~
-/home/louis_hauseux_gmail_com/ax/morsehgp3D_v2/include/mhgp/exact.hpp:26:23: warning: ISO C++ does not support ‘__int128’ for ‘type name’ [-Wpedantic]
-   26 | using u128 = unsigned __int128;
-      |                       ^~~~~~~~
-[ 50%] Linking CXX static library libmhgp.a
-[ 50%] Built target mhgp
-[ 50%] Building CXX object CMakeFiles/mhgp3v_axis_device.dir/prototype/axis_device_qualification.cpp.o
-[ 75%] Building CUDA object CMakeFiles/mhgp3v_axis_device.dir/prototype/axis_device_kernel.cu.o
-nvcc warning : Support for offline compilation for architectures prior to '<compute/sm/lto>_75' will be removed in a future release (Use -Wno-deprecated-gpu-targets to suppress warning).
-[100%] Linking CXX executable mhgp3v_axis_device
-[100%] Built target mhgp3v_axis_device
-3661a39c8a6e558be955b38169b4863d2d613b14badcb54243257e92e1eaa46c  build/mhgp3v_axis_device
-=== MESURE TERMINEE ===
-72 out/axis_cuda.txt
---- fermeture ciblee (rc=127) ---
+generation verrouillee : 2026-08-14T15:13:13.467-07:00
+tar_sha256=4e0167e4925fd7a5cd1eb5a113ff7b8e28822e6da03fbd26b3376495725992cb
+total 12
+drwxrwxr-x 2 louis_hauseux_gmail_com louis_hauseux_gmail_com 4096 Aug 14 21:50 .
+drwxrwxr-x 6 louis_hauseux_gmail_com louis_hauseux_gmail_com 4096 Aug 14 21:50 ..
+-rw-rw-r-- 1 louis_hauseux_gmail_com louis_hauseux_gmail_com 3848 Aug 14 22:02 axis_cuda.txt
+72 /home/louis_hauseux_gmail_com/ax/out/axis_cuda.txt
+72 /workspaces/E-HGP/morsehgp3D_v3/receipts/axis_cuda_g4_20260815/axis_cuda.txt
+recuperation terminee
+--- fermeture ciblee (rc=0) ---
 [STOP] État actuel de ehgp-blackwell-spot-ai1a : RUNNING.
 Stopping instance(s) ehgp-blackwell-spot-ai1a...
-..............................................................................................................................................................................................................................................................done.
+.........................................................................................................................................................................................................................................................................done.
 Updated [https://compute.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/europe-west4-ai1a/instances/ehgp-blackwell-spot-ai1a].
 [OK] Cible ehgp-blackwell-spot-ai1a arrêtée et vérifiée (état GCE TERMINATED).
 [INFO] Aucune autre VM project=e-hgp active détectée.

@@ -8,7 +8,7 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-> **Verdict live au `HEAD=6be6bd855362b5b41ed60161c9c9e395f266f672`.**
+> **Verdict live au `HEAD=0bf46822416d126e0852391a978c3998e4b4c04f`.**
 > Le pin noyau `a369452` porte `Q4SeedAxisTopR4`, son probe, 39 CTests déclarés,
 > les vrais IDs de census, la capacité 163, les comptes requis et les fates de
 > plateau. Il refuse aussi tout replay après `MORT_GAP` et tout apex dont le
@@ -21,9 +21,11 @@ Cadre : `phase=exploration_v3_hors_registre`,
 > host/device plate ; `11130cb` ajoute sa première recette G4. Son attempt
 > incomplet est qualifié plus bas.
 > `95b41b7` implémente ensuite l'enveloppe de calottes corrigée et `6be6bd8`
-> accélère par grille la construction du lot device. Le worktree courant porte
-> encore des deltas de session et de tuilage appartenant à Claude. Aucune
-> mesure CUDA ou GPU nouvelle n'entre dans le verdict.
+> accélère par grille la construction du lot device. `0bf4682` committe le
+> tuilage diagnostique, le transcript CUDA incomplet et une recette de
+> récupération ; malgré son sujet de commit, le brut n'est pas encore local.
+> Le worktree courant ne contient que les deux présents audits. Aucune mesure
+> CUDA ou GPU nouvelle n'entre dans le verdict.
 > Q14 est fermée contractuellement : aucune structure de Delaunay n'est
 > autorisée, y compris d'ordre un, comme source, squelette, filtre ou census.
 >
@@ -155,7 +157,7 @@ Cadre : `phase=exploration_v3_hors_registre`,
 > kernel ; une gate CSR multiensemble grille = scan naïf sur petit `n` doit
 > précéder son emploi comme autorité de parité.
 >
-> Le tuilage exploré dans le worktree a une preuve simple et utile : attribuer
+> Le tuilage committé à `0bf4682` a une preuve simple et utile : attribuer
 > le support à son sommet lexicographique minimal et charger un halo entier
 > `ceil(3*dmax/2)` contient tout `I_B/U_B`, puisque
 > `2R<=sqrt(3/2)*D` en q4. Il ne certifie que le domaine déjà borné par `dmax`.
@@ -163,6 +165,12 @@ Cadre : `phase=exploration_v3_hors_registre`,
 > tient dans deux points, une q3 dans trois et une q4 dans quatre. Appliquer les
 > planchers `2/3/4` par lane, conserver les IDs globaux, puis comparer les
 > multiensembles globaux et tuilés.
+> Deux rejeux manuels du worktree recollent les **cardinaux du ledger borné** :
+> `uniform,n=100,k=2` donne `2139/8439/7069` des deux côtés, et
+> `two_lines,n=10,k=2` donne `20/0/0`. Le second rappelle exactement la portée :
+> le brute q2 vaut `45`, donc le tuilage préserve la troncature sans la réparer.
+> Le commit annonce aussi des recollements `k=2/3` sur uniform/terrain, mais ne
+> versionne ni brut ni CTest permanent ; ces mesures restent à graver.
 > [`AUDIT_CONSTRUCTIF_AXIS_DEVICE_2C14313_20260815.md`](AUDIT_CONSTRUCTIF_AXIS_DEVICE_2C14313_20260815.md).
 >
 > Contrôles frais : `39/39` CTests `^mhgp3v_q4axis` passent en `38,25 s`, avec
@@ -195,6 +203,15 @@ Cadre : `phase=exploration_v3_hors_registre`,
 > ciblé `52`, pas explicitement `120-real`; la prochaine recette doit fixer
 > l'architecture et hacher sa propre copie immuable. La recette n'a pas été
 > exécutée par l'audit ; GCP n'a pas été utilisé.
+>
+> `0bf4682` ajoute `session_ax_recuperation_g4.sh`, mais ne récupère encore
+> aucun fichier : le dossier reçu contient toujours le seul transcript. La
+> recette ne doit pas être lancée avant deux corrections de preuve. Elle écrit
+> son propre log dans le même `transcript.txt` et écraserait le reçu original ;
+> elle réemploie en outre exactement la voie `gcloud compute scp` qui vient de
+> rendre `127`. Employer un répertoire d'attempt distinct et streamer
+> `sha256sum` puis `cat` via la commande SSH déjà fonctionnelle, avec compte de
+> lignes et hash local, préserve l'original et évite de répéter le même échec.
 
 > **Alerte au pin logiciel `6e815d28b3e229a0161eb00d6fa0c9a272efac5d`.** Les
 > commits `89774d0`, `e3f1925` et `88a9ba8` ajoutent respectivement
