@@ -86,6 +86,12 @@ intrinsèque au plan, mais la boule et son census sont ambiants en dimension
 trois. Les sphères incidentes à une ancre partielle ne sont que le domaine d'un
 prune facultatif, jamais la source.
 
+Un déblocage arithmétique accompagne cette réduction : pour un tétraèdre
+ponctuel complet, une BallForm homogène fondée sur `T=det3` et son vecteur de
+cofacteurs décide les quatre poids et la sphère sous i128 sur tout u16. Elle
+remplace le chemin terminal estimé à 174 bits, pas les filtres de boîtes
+`MIXED`; sa formule et ses fixtures sont dans `PROPOSITION.md`.
+
 Le théorème, la portée conditionnelle de Corner8, les coutures exact-once et les
 réponses aux questions de coût sont reçus dans le
 [`contre-audit support-complet`](audits/AUDIT_CONTRE_RECEPTION_SUPPORT_COMPLET_CORNER8_WST34_22D1CB0_20260814.md).

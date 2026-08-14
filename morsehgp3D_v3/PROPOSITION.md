@@ -1617,8 +1617,46 @@ barycentriques du pied q3
 `lambda_y` fois la projection barycentrique de `y`. Elles donnent un
 `ApexWellCenteredBlock` `ALL/NONE/MIXED` par bornes corrélées avant toute
 Cramer 4×4. Sous u16, les produits de comparaison peuvent atteindre environ
-174 bits : employer trois limbs/BigInt, pas i128. Les égalités, `B_y=0`,
-`A_y=0` et `A_y=2B_y^2` sont des fixtures obligatoires.
+174 bits : employer trois limbs/BigInt, pas i128 pour ce **filtre de bloc**. Les
+égalités, `B_y=0`, `A_y=0` et `A_y=2B_y^2` sont des fixtures obligatoires.
+
+Au support ponctuel complet, une forme homogène plus courte évite ce chemin
+large. Poser `v1=b-a`, `v2=x-a`, `v3=y-a`, puis :
+
+```text
+T = det3(v1,v2,v3)
+h1 = ||v1||^2, h2 = ||v2||^2, h3 = ||v3||^2
+Q = h1*(v2 cross v3)+h2*(v3 cross v1)+h3*(v1 cross v2)
+```
+
+Le circumcentre vérifie `c-a=Q/(2T)`. Les numérateurs barycentriques sont :
+
+```text
+L1 = det3(Q,v2,v3)
+L2 = det3(v1,Q,v3)
+L3 = det3(v1,v2,Q)
+L0 = 2*T^2-L1-L2-L3
+```
+
+Le support est q4 positif si et seulement si `T!=0` et les quatre `Li` sont
+strictement positifs ; ses poids valent `Li/(2*T^2)`. Avec `A=abs(T)` et
+`Qbar=sign(T)*Q`, la puissance normalisée est :
+
+```text
+P(z) = A*||z-a||^2-Qbar dot (z-a)
+BallForm = (A, -(2*A*a+Qbar), A*||a||^2+a dot Qbar)
+```
+
+`P(z)<0` signifie intérieur strict. Sous u16, `|T|<2^51`, les composantes de
+`Q` restent sous `2^69`, les `Li` sous `2^106` et les coefficients/pouvoirs sous
+`2^87`; i128 signé ou deux limbs suffisent avec preflight avant toute opération.
+Cette largeur doit être vérifiée par une autorité BigInt, pas seulement affirmée
+par le sujet. Fixtures permanentes : tétraèdre régulier avec
+`L=(2,2,2,2)`, support non positif
+`(0,0,0),(4,0,0),(2,3,0),(2,0,1)` avec
+`L=(320,320,80,-432)`, permutation/orientation inversée, shell et extrema u16.
+Cette forme est l'autorité terminale candidate pour `0A`; elle ne transforme pas
+un produit de boîtes `MIXED` en `ALL` et ne remplace pas le filtre large de bloc.
 
 Avant de matérialiser les apex, exploiter la même droite comme certificateur de
 profondeur. Son intersection avec `K_4(ab)` est un segment fermé `J_f`. Avec

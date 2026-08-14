@@ -47,7 +47,7 @@ ce n'est pas le nombre de sites sur le shell qui fixe q2/q3/q4, mais le
 
 ```text
 support minimal positif complet de taille 2 -> unique boule diamétrale q2
-support minimal positif complet de taille 3 -> unique boule ambiante q3
+support minimal positif complet de taille 3 -> unique miniboule ambiante q3, centrée au circumcentre intrinsèque
 support minimal positif complet de taille 4 -> unique circumsphère q4
 ```
 
@@ -509,7 +509,7 @@ positif. Ce filtre reste un coût par bloc, pas « gratuit » : il appelle
 l'extremum Midball. Il ne répare ni owner, ni diagonales, ni vrais `PointId`, ni
 multiplicité ou positivité.
 
-Deux défauts sont stables au `HEAD=a73161c` :
+Trois défauts sont stables depuis `a73161c`, y compris au `HEAD=069d903` :
 
 - le commentaire de `--echelle=num/den` exige
   `diag^2*den<=rayon^2*num`, mais la révision observée calcule
@@ -533,7 +533,7 @@ de packing, et la masse logique est simplement repoussée vers l'aval. La route
 reste : sémantique d'échelle non ambiguë, vraie grille ou preuve LBVH,
 projection owner/distinct-ID, acuité et profondeur avant tout produit résiduel.
 
-Le worktree suivant ajoute un diagnostic `--corner8` **après** la
+Le commit `069d903` ajoute un diagnostic `--corner8` **après** la
 matérialisation de `par_terminal` et parcourt explicitement les couples `u<=v`.
 Il ne retire donc encore aucune tâche du produit. Sur les diagonales `C=D`, le
 produit de boîtes contient nécessairement `x=y`, donc l'orientation contient
@@ -553,7 +553,7 @@ sont tous indécis. Aucun CTest, juge indépendant, statut `PARTIEL` du cap ou
 plancher causal ne reçoit ce raccord. `masse_fermee` est la masse physique de
 la candidate-cover observée, pas un compte d'événements q4 owner/positifs.
 
-La révision mobile suivante saute tout couple dont `C,D` ne satisfait pas le
+Le même commit saute tout couple dont `C,D` ne satisfait pas le
 séparateur CK. C'est un filtre fail-open acceptable pour un diagnostic de
 fermetures partielles, mais pas une source : des supports q4 valides ont des
 carriers proches ou appartiennent à la diagonale `binom(C,2)`. Le commentaire
@@ -561,5 +561,131 @@ dit en outre « tous les couples de facteurs », alors que le code ne teste que
 `C--D` ; `A--C`, `A--D`, `B--C` et `B--D` ne le sont pas. La condition utile
 pour Corner8 est une orientation uniformément non nulle après raffinement, pas
 une séparation CK nécessaire entre chaque paire de sommets.
+
+## 11. Réponses Q10--Q13 à Claude
+
+### Q10 — décision d'orientation et aplatissement
+
+Aucune séparation deux-à-deux ne borne le volume normalisé d'un tétraèdre. La
+fixture u16 centrée en `o=(2000,2000,2000)`,
+
+```text
+A=o+(1000,0,1)   B=o+(0,1000,-1)
+C=o+(-1000,0,1)  D=o+(0,-1000,-1)
+```
+
+a quatre poids circumcentriques `1/4`, `R^2=1000001` et une orientation non
+nulle très petite relativement aux longueurs. La famille paramétrique analogue
+sur les réels, obtenue en remplaçant `1000` par `L` à hauteur un, a
+`R/sup_edge_length` qui tend vers `1/2` tandis que son aplatissement normalisé
+tend vers zéro. La fixture u16 tue déjà tout seuil uniforme revendiqué dans le
+profil ; seule la famille réelle porte l'énoncé asymptotique.
+
+Il existe une partition exacte **adaptative**, pas une borne linéaire reçue.
+Sur chaque produit, borner le déterminant centré : un intervalle strictement
+positif ou négatif fixe le signe ; un produit atomique de déterminant nul est
+rejeté à q4 ; sinon scinder le facteur dont le terme rayon--cofacteur domine.
+Chaque parent est remplacé par tous ses enfants disjoints. Sur un nuage fini, le
+processus termine au pire aux quadruplets ponctuels ; son nombre de blocs est
+output-sensitive et peut rester quartique. Pour une arête ponctuelle, une
+partition angulaire des projections autour de son axe peut fixer le signe de
+`4O=det(d,2x-a-b,2y-a-b)`, mais elle ne fournit pas davantage de borne linéaire
+sur les données adverses. Un cap publie `PENDING`, jamais
+`NONE` ni « support ouvert ».
+
+Le terme `e1` du helper centré est linéaire dans les rayons. La forme centrée
+peut réduire les dépendances d'intervalle, mais elle ne change pas l'ordre de
+l'erreur. Exiger `sep_ok(C,D)` est un choix de proposition, pas un théorème de
+complétude.
+
+### Q11 — petite orientation, rayon et certificat bisigne
+
+Une petite orientation ne force pas un grand circumrayon relatif : la famille
+précédente garde `R/sup_edge_length -> 1/2`. Même un rayon effectivement grand
+ne garantit aucun témoin intérieur dans un nuage arbitraire. Une borne de rayon
+ou une densité moyenne ne peut donc jamais fournir seule huit vrais `PointId`.
+La formule entière exacte est plus instructive. Avec
+`M=[b-a,x-a,y-a]`, `G=M^T*M`, `q=(||b-a||^2,||x-a||^2,||y-a||^2)` et
+`Delta=det(G)=O^2`, on a :
+
+```text
+R^2 = (q^T*adj(G)*q)/(4*Delta)
+```
+
+Petit `Delta` ne force un grand rayon que si le numérateur possède en plus une
+minoration indépendante, absente ici.
+
+Une réparation sûre sans signe uniforme est un **certificat bisigne**, pas une
+heuristique de rayon. Avec les conventions `O=det3(b-a,x-a,y-a)` et `J` de
+Corner8, l'intérieur strict vérifie `O*J<0`. Un ledger de huit IDs authentifiés
+universellement `J<0` ferme tous les supports `O>0`; un autre de huit IDs
+universellement `J>0` ferme tous les supports `O<0`. Les supports `O=0` ne sont
+pas q4. Chaque ledger doit être disjoint en lui-même des quatre IDs de support ;
+les deux ledgers ne sont jamais additionnés pour un même support. Un cap ou un
+ledger incomplet rend `MIXED/PENDING`.
+
+Pour `O>0`, `J` est convexe en `z` et huit coins négatifs suffisent ; pour
+`O<0`, `J` est concave et huit coins positifs suffisent. Ce n'est pas « la même
+convexité » dans les deux cas. Cette voie exige encore que les bornes
+`J<0/J>0` valent uniformément sur les facteurs support et la boîte témoin, un
+oracle ponctuel indépendant des deux strates, puis une exécution avant
+matérialisation.
+
+Une seconde réparation, souvent mieux corrélée, supprime entièrement le signe
+d'orientation. Poser `r=adj(G)*q` et, pour `s=z-a` :
+
+```text
+Phi(S,z) = Delta*||s||^2 - s^T*M*r = O*J(S,z)
+```
+
+Pour tout support non dégénéré, `z` est strictement intérieur si et seulement
+si `Phi<0`. Le coefficient quadratique est `Delta=O^2>0` : `Phi` est convexe
+quel que soit le signe de `O`, et ses huit coins suffisent sur une boîte témoin.
+Sous u16, environ 138 bits signés suffisent ; le hot path i128 peut garder son
+test rapide, puis un fallback i192/i256 traite le résiduel. Sur un produit de
+boîtes support, borner directement `Phi` peut rester `MIXED` par décorrélation ;
+un échec splitte ou publie `PENDING`, jamais un faux verdict.
+
+La même forme de Gram recertifie la positivité sans orientation. Les poids de
+`b,x,y` ont pour numérateurs `r_1,r_2,r_3` sur le dénominateur positif
+`2*Delta`, et celui de `a` a pour numérateur
+`2*Delta-r_1-r_2-r_3`. Les quatre doivent être strictement positifs. Owner et
+shell restent séparés. Le bisigne committé à `f7ab7bb` est donc une voie sûre
+conditionnelle, pas l'unique route sign-free ni une réception industrielle.
+
+### Q12 — séparation globale et raffinement par lane
+
+Conserver une seule `CKPairTape` coarse, proche du régime déjà favorable à q2,
+puis raffiner localement les produits témoins qui restent `MIXED`. q3 et q4
+peuvent avoir des arbres de continuation distincts, mais partagent le même
+`RectId`, les mêmes vrais `PointId` et l'owner total. L'exact-once est préservé
+si chaque raffinement remplace atomiquement un parent par une partition complète
+de ses enfants, avec `sum(child_mass)=parent_mass` et aucun parent simultanément
+actif.
+
+Il n'est donc pas nécessaire de choisir un unique grand `s`. Utiliser `s` pour
+la partition CK des paires, puis une échelle locale et un split guidé par le
+prédicat pour owner, acuité, orientation ou profondeur. Deux WSPD indépendantes
+par lane sans table de routage canonique recréeraient en revanche doublons et
+trous.
+
+### Q13 — la diagonale `C=D`
+
+La diagonale n'est ni un cas Corner8 immédiat, ni un déchet. Pour un nœud de
+deux enfants disjoints `L,R`, appliquer exactement :
+
+```text
+Sym2(C) = Sym2(L) disjoint_union (L cross R) disjoint_union Sym2(R)
+```
+
+Les diagonales d'une feuille à un seul `PointId` sont vides faute de deux IDs
+distincts. Une feuille géométrique bucketisant plusieurs IDs dupliqués conserve
+leurs paires, puis `Delta=0` les rejette à q4 ; la multiplicité n'est jamais
+supprimée par convention. Les produits croisés peuvent ensuite être classifiés ;
+les deux diagonales récursent. Cette identité termine sur l'arbre fini et
+conserve chaque paire non ordonnée une fois.
+Une sweep d'axe ou le shallow edge-local ne devient applicable qu'après fixation
+d'un vrai carrier `(a,b,x)` ; ce n'est pas un substitut à la partition initiale
+de `Sym2(C)`.
 
 GCP non utilisé.

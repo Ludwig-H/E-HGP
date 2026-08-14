@@ -3,10 +3,19 @@
 Date : 14 août 2026 UTC.
 
 Cadre : `phase=exploration_v3_hors_registre`,
-`backend=cpu_reference_bounded_oracles`,
+`backend=cpu_reference_bounded_oracles_and_g4_diagnostic`,
 `profile=quantized_u16_input_only`,
-`mode=question_mathematique`,
+`mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
+
+> [!CAUTION]
+> Ce fichier conserve les questions et mesures locales de Claude au commit
+> `069d903`; ce n'est pas une autorité. Les réponses Q10--Q13 et les
+> contre-fixtures sont dans
+> [`AUDIT_CONTRE_RECEPTION_SUPPORT_COMPLET_CORNER8_WST34_22D1CB0_20260814.md`](AUDIT_CONTRE_RECEPTION_SUPPORT_COMPLET_CORNER8_WST34_22D1CB0_20260814.md).
+> La séparation améliore parfois une décision uniforme, mais n'est ni une
+> condition nécessaire d'un support q4, ni une permission de supprimer un
+> couple non séparé.
 
 Ces questions sont mathématiques, pas d'ingénierie. Elles viennent d'une mesure
 qui bute sur un plancher que je ne sais pas expliquer.
@@ -21,10 +30,11 @@ testé.
 
 ## La mesure
 
-Sur `uniform, n=500`, cellules témoins très fines (`echelle=256/1`), vingt mille
-blocs soumis :
+Sur `uniform, n=500`, l'option `echelle=256/1` du code impose le seuil effectif
+`diag^2<=rayon^2/256` — l'inverse de son contrat textuel — et soumet les vingt
+mille premiers blocs :
 
-| `s` | couples `(C,D)` non séparés | orientation indécise | fermetures |
+| `s` | `(C,D)` non séparés / soumis | orientation indécise / séparés | fermetures / orientés |
 |---:|---:|---:|---:|
 | 2 | 21,0 % | 80,6 % | 30,9 % |
 | 8 | 28,9 % | 50,8 % | 54,7 % |
@@ -32,12 +42,13 @@ blocs soumis :
 
 Deux constats.
 
-**La séparation gouverne la décidabilité.** Louis avait raison de suspecter `s`.
-En passant de `s=2` à `s=8`, l'indécision d'orientation tombe de `80,6 %` à
-`50,8 %` et les fermetures montent de `30,9 %` à `54,7 %`. J'ai en outre dû
-étendre la séparation au couple `(C,D)` lui-même : une WSPD ne sépare que
-`(A,B)`, alors que l'orientation dépend des quatre sommets — et sur la diagonale
-`C=D` elle est structurellement indécidable.
+**La séparation est corrélée à la décidabilité sur ce préfixe.** En passant de
+`s=2` à `s=8`, l'indécision d'orientation baisse et la part de fermetures parmi
+les blocs orientés monte. Les trois colonnes n'ont cependant pas le même
+dénominateur et les vingt mille premiers blocs changent avec `s`; cette table
+n'est donc pas une ablation causale. Une WSPD ne sépare que `(A,B)`. Séparer
+`(C,D)` peut aider Corner8, mais un échec doit raffiner `Sym2(C)` ou rester
+`PENDING`, jamais supprimer une complétion q4.
 
 **Mais un plancher résiste.** Autour de `50 %`, augmenter `s` ne fait plus
 rien : `s=16` est même légèrement pire que `s=8`. Le coût, lui, continue de
@@ -51,10 +62,10 @@ devant l'incertitude de position, et aucune séparation par paires ne le corrige
 La séparation contrôle les distances ; elle ne contrôle pas l'aplatissement.
 
 J'ai essayé de gagner par l'arithmétique plutôt que par la géométrie, en
-remplaçant l'évaluation par intervalles de `det3` par une forme centrée dont
-l'erreur est quadratique en le rayon. Sans effet mesurable : `82,6 %`
-d'indécision au lieu de `77,3 %`, donc légèrement pire. Le problème n'est donc
-pas la finesse de la borne, il est géométrique.
+remplaçant l'évaluation par intervalles de `det3` par une forme centrée. Sa borne
+contient explicitement un terme `e1` linéaire dans les rayons, puis des termes
+quadratique et cubique; elle n'a donc pas l'ordre annoncé initialement. Le rejeu
+local donne `82,6 %` d'indécision au lieu de `77,3 %`, sans gain reçu.
 
 ## Q10 — Existe-t-il une décomposition qui borne l'aplatissement ?
 
@@ -74,21 +85,19 @@ raffiner indéfiniment le long de sa trace.
 
 ## Q11 — Les tétraèdres plats peuvent-ils être traités *sans* leur orientation ?
 
-Un tétraèdre presque coplanaire a un circumcentre très éloigné, donc une
-circumsphère énorme, donc beaucoup d'intérieurs — il devrait sortir du contrat
-de rang de lui-même. Existe-t-il un certificat qui exploite directement cela,
-c'est-à-dire qui ferme un bloc **parce que** son orientation est petite, sans
-jamais décider son signe ?
+La prémisse initiale « presque coplanaire implique grand circumrayon » est
+fausse, même pour un q4 positif. Les quatre points
+`(3000,2000,2001),(2000,3000,1999),(1000,2000,2001),(2000,1000,1999)` ont le
+centre `(2000,2000,2000)`, les poids `1/4`, `R^2=1000001` et une orientation
+normalisée qui tend vers zéro lorsqu'on augmente l'échelle horizontale à
+hauteur fixée. Une petite orientation et un rayon, même grand, ne garantissent
+de toute façon aucun des huit `PointId` intérieurs d'un nuage arbitraire.
 
-Une piste : borner par le bas le rayon de la circumsphère par
-`R >= produit des longueurs d'arêtes / (6 * |det3|)` — ou une forme entière
-équivalente — puis montrer qu'une boule de ce rayon contient nécessairement huit
-points sous une hypothèse de densité locale mesurable. Cela remplacerait la
-dichotomie « orientation décidée ou rien » par une trichotomie
-« orientation décidée / orientation petite donc sphère grosse / MIXED ».
-
-Est-ce que cette borne est exacte et calculable en entiers sous u16, et
-peut-elle porter un verdict `ALL` sûr plutôt qu'une heuristique ?
+La question corrigée est : peut-on fermer séparément les supports `O>0` avec
+huit témoins universels `J<0` et les supports `O<0` avec huit témoins universels
+`J>0`, sans fixer un signe commun au bloc ? Ce certificat bisigne est
+potentiellement sûr, mais exige deux ledgers authentifiés et un oracle de
+jonction; il ne découle pas du seul rayon.
 
 ## Q12 — Le bon `s` est-il différent par lane ?
 

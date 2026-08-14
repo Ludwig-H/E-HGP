@@ -5258,3 +5258,20 @@ add_test(NAME mhgp3v_wst4_echelle_fine
 set_tests_properties(mhgp3v_wst4_echelle_fine PROPERTIES
   PASS_REGULAR_EXPRESSION
   "wst4_juge : quadruplets=487635 manquants=0 doublons=0")
+
+# LA CONTRE-FIXTURE PLATE, EXIGEE PAR LA REPONSE Q10/Q11.
+#
+# `o=(2000,2000,2000)`, `A=o+(1000,0,1)`, `B=o+(0,1000,-1)`,
+# `C=o+(-1000,0,1)`, `D=o+(0,-1000,-1)` : quatre poids `1/4`, `R^2=1000001` et
+# une orientation NON nulle, dont l'aplatissement normalise tend vers zero quand
+# on etire l'echelle horizontale a hauteur fixee.
+#
+# Elle refute la premisse « presque coplanaire donc grand circumrayon » : le
+# rayon reste comparable a l'echelle horizontale. Un grand rayon ne garantirait
+# de toute facon aucun `PointId` interieur dans un nuage arbitraire — la
+# reparation sans signe uniforme est le certificat BISIGNE, pas une heuristique
+# de rayon.
+add_test(NAME mhgp3v_wst3_fixture_plate COMMAND mhgp3v_wst3_probe --fixture-plate)
+set_tests_properties(mhgp3v_wst3_fixture_plate PROPERTIES
+  PASS_REGULAR_EXPRESSION
+  "wst3_fixture_plate : R2=1000001 cospherique=1 orientation_nulle=0")

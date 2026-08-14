@@ -402,7 +402,7 @@ boucle `u<v`. La sortie reconvertit encore l'u128 en `double` à six chiffres
 pour l'affichage : le reçu exact doit publier l'entier. Les questions Q6--Q9 et
 la gate coût appariée sont résolues dans le contre-audit ci-dessus.
 
-Le raccord Corner8 mobile observé n'économise encore aucun produit : il est
+Le raccord Corner8 commis n'économise encore aucun produit : il est
 exécuté après le count WST4 et après le juge, sur `par_terminal` déjà
 matérialisé. Il ne supprime aucune tâche aval et ne possède ni CTest de jonction,
 ni juge causal, ni refus sur support non owner/non positif. Son crédit de huit
@@ -421,17 +421,31 @@ incomplet ; malgré son commentaire « tous les couples », il ne teste ni
 `A--C/A--D` ni `B--C/B--D`. Le prétest d'orientation centré est sûr, mais
 `corner8_block` recalcule ensuite l'ancien intervalle au lieu de consommer son
 signe : la promesse « une seule fois » et le gain associé ne sont pas reçus.
+L'enclosure centrée contient explicitement un terme `e1` linéaire dans les
+rayons ; son commentaire « erreur quadratique » est faux. `sep_ok(C,D)` reste
+seulement un filtre suffisant de coût. Une arête-owner longue peut avoir deux
+apex proches ; une source q4 exacte doit raffiner `C×D` ou laisser `PENDING`,
+jamais supprimer la complétion faute de séparation.
 
-Deux optimisations annoncées n'ont pas encore leur sémantique. Le prétest
-`orientation_signe` centré est une enclosure potentiellement plus mordante,
-mais `corner8_block` recalcule ensuite l'ancien intervalle d'orientation et ne
-consomme pas le signe certifié. Son erreur contient d'ailleurs un terme `e1`
-linéaire dans les rayons : elle n'est pas quadratique comme l'affirme le
-commentaire. Enfin, `sep_ok(C,D)` est seulement un filtre suffisant de coût.
-Une arête-owner longue peut avoir deux apex proches ; une source q4 exacte doit
-raffiner `C×D` ou laisser `PENDING`, jamais supprimer la complétion faute de
-séparation. Le delta ne vérifie au demeurant pas les cinq autres séparations
-qu'annonce son commentaire.
+Le worktree suivant essaie de contourner le signe uniforme par deux ledgers de
+témoins, `J<0` et `J>0`. Le principe peut être sûr : les supports `O>0`
+consomment huit vrais `PointId` du premier ledger, les supports `O<0` huit du
+second, et `O=0` n'est pas q4. La réception exige toutefois un oracle de cette
+jonction, des reçus d'identités séparés, le passage causal avant le produit et
+la suppression du préfixe biaisé. Sa télémétrie mélange encore les strates de
+signe, peut publier un taux supérieur à 100 %, emploie la mauvaise masse sur la
+diagonale et reconvertit u128 en `double`. Aucun taux de ce delta mobile ne
+qualifie le SLO.
+
+La rampe CPU locale `12500/25000/50000`, `--echelle=1/256` au sens du code et
+Corner8 désactivé, rend la gate physique rouge. Sur uniform, les deux dernières
+pentes des visites sont `1,907/1,036`; sur huit amas, `F3`, visites et `F4`
+finissent respectivement à `1,756`, `2,050` et `2,193`. À 50 000, la masse
+candidate vaut environ `3*binom(n,3)` en q3 et `6*binom(n,4)` en q4 : l'échelle
+coarse compresse presque l'univers brut sous plusieurs ancres, elle ne le
+sélectionne pas. Le prochain gain doit donc fermer ou projeter owner/positivité
+sur les descripteurs avant toute expansion ; une nouvelle rampe de préfixes
+Corner8 ne répondrait pas à ce verrou.
 
 ## P0 : `0A` reste ouvert sur u16
 
@@ -450,6 +464,14 @@ qu'annonce son commentaire.
 - `PointId`, epoch, profil, schéma, lanes, complétude et publication
   transactionnelle ne forment pas encore une ABI reçue ;
 - le census reste payé par support avant le RLE par `BallKey`.
+
+Une nouvelle forme homogène terminale enlève toutefois le besoin mathématique
+du chemin q4 à 174 bits : avec `T=det3(v1,v2,v3)` et
+`Q=sum_i ||v_i||^2*(v_j cross v_k)`, les quatre numérateurs de Cramer tiennent
+sous 106 bits et la BallForm sous 87 bits sur u16. La formule complète, ses
+bounds et fixtures sont maintenant dans `PROPOSITION.md`. Elle n'est pas encore
+implémentée ni jugée par une autorité BigInt ; elle transforme le P0 q4 en
+réparation i128/deux-limbs actionnable, pas en réception de `0A`.
 
 Autorité, valeurs exactes et fixtures :
 [`AUDIT_BALL_EVENT_V0_2B89EA1_20260813.md`](AUDIT_BALL_EVENT_V0_2B89EA1_20260813.md).
@@ -856,13 +878,15 @@ une source factorisée exacte. Elle ne devient toujours pas une liste sparse.
 De même, le théorème des faces aiguës q4 est utile uniquement avant le rang ;
 la fixture 64 points interdit toute cascade depuis les événements q3 retenus.
 
-Le contre-audit du probe live resserre à son tour **ma** formulation : les
+Le présent contre-audit du probe live resserre à son tour les formulations
+de `AUDIT_SOURCE_CK_WST_Q2_Q3_Q4_35FCEA8_20260814.md` : les
 conditions précédentes sont un contrat, pas l'état du tape `22d1cb0`. Le juge
 choisit l'owner puis ignore les autres ancres, tandis que le producteur brut ne
-projette ni owner, ni distinct-ID et partage un tie-break Morton. L'autre
-auditeur avait raison de demander une broad phase et de refuser une borne de
-sortie ; son angle mort, comme le mien, était la couture entre l'owner abstrait
-et les records réellement comptés. Le statut live reste `CandidateCover`.
+projette ni owner, ni distinct-ID et partage un tie-break Morton.
+`AUDIT_SOURCE_CK_WST_Q2_Q3_Q4_35FCEA8_20260814.md` avait raison de demander une
+broad phase et de refuser une borne de sortie ; son angle mort était la couture
+entre l'owner abstrait et les records réellement comptés. Le statut live reste
+`CandidateCover`.
 
 `AUDIT_CONTRE_RECEPTION_M4_V2_DEPTHBLOCK_5BFC5C8_20260814.md` corrige également
 les formulations antérieures : `2B_R` est sharp seulement à information de boule
@@ -946,7 +970,8 @@ HEAD Corner8 : 6/6 ciblés ; bloc=4096 supports/32768 témoins, oracle ponctuel 
 pin 22d1cb0 WST3 : 5/5 ciblés ; uniform n=120, 280840 triangles, zéro manquant/doublon owner
 pin 22d1cb0 WST4 : 1/1 ciblé ; uniform n=60, 487635 quadruplets, zéro manquant/doublon owner
   copies non-owner, diagonales, vrai PointId, doublons de position et coût non jugés
-HEAD a73161c : huit portes WST3/WST4 enregistrées, dont signe aigu et échelle fine ; rejeu ciblé en cours
+HEAD 069d903 : huit portes WST3/WST4 enregistrées, dont signe aigu et échelle ; 8/8 ciblées vertes
+worktree bisigne : 12/12 portes préexistantes WST3/WST4/Corner8 vertes en 11,76 s ; aucune n'exerce la jonction
 catalogue HEAD : 835 CTests après reconfiguration ; aucune suite complète 835/835 rejouée ici
 ablation BJD n=1500 uniform : masse q4 -12,55 %, CPU user médian +5,47 %, lectures identiques
 ablation BJD n=1500 amas : masse q4 -0,87 %, CPU user médian +8,15 %, lectures identiques

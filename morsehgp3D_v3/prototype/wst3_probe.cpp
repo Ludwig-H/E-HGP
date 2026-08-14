@@ -166,7 +166,7 @@ i64 dist2_min_box_to_box(const mhgp3v::RectBox& C, const mhgp3v::RectBox& A) {
 int main(int argc, char** argv) {
   std::string family = "uniform";
   long long n = 0, seed = 12345, sep_num = 8, sep_den = 1, coord = 0;
-  bool juge = false, fixture_tetra = false;
+  bool juge = false, fixture_tetra = false, fixture_plate = false;
   // ---- LA JONCTION : FERMER LE BLOC AVANT DE LE DEVELOPPER.
   //
   // La source rend des blocs `(A,B,C,D)` de supports candidats. `Corner8` teste
@@ -217,13 +217,16 @@ int main(int argc, char** argv) {
     }
     else if (a == "--juge") juge = true;
     else if (a == "--fixture-tetra") fixture_tetra = true;
+    else if (a == "--fixture-plate") fixture_plate = true;
     else if (a.rfind("--corner8=", 0) == 0) corner8 = arg_ll(val("--corner8=").c_str(), 1, (1LL << 30), "corner8");
     else if (a.rfind("--ordre=", 0) == 0) ordre = arg_ll(val("--ordre=").c_str(), 3, 4, "ordre");
     else if (a.rfind("--echelle=", 0) == 0) {
-      // `num/den` : la descente s'arrete des que `diag^2 <= (num/den) rayon^2`.
-      // Un rapport PLUS GRAND donne des cellules plus grosses, donc moins de
-      // blocs et davantage de sur-couverture — et comme l'ordre quatre est un
-      // produit, le gain y est QUADRATIQUE.
+      // `num/den` : la descente s'arrete des que
+      // `diag^2 * num <= rayon^2 * den`, c'est-a-dire
+      // `diag^2 <= (den/num) rayon^2`. Un rapport `num/den` PLUS GRAND donne
+      // donc des cellules plus FINES — `256/1` impose `diag^2 <= rayon^2/256`.
+      // Le contre-audit a releve que mon commentaire disait l'inverse ; les
+      // mesures, elles, portaient bien la lecture ci-dessus.
       const std::string v = val("--echelle=");
       const size_t sl = v.find('/');
       if (sl == std::string::npos) {
@@ -275,6 +278,41 @@ int main(int argc, char** argv) {
                 egales);
     if (hs[0] != -1 || hs[1] != -1 || aigus != 2 || egales != 6) {
       std::fprintf(stderr, "DESACCORD: la fixture du tetraedre regulier ne tient pas\n");
+      return 1;
+    }
+    return 0;
+  }
+  // ---- LA CONTRE-FIXTURE PLATE, EXIGEE PAR LA REPONSE Q10/Q11.
+  //
+  // `o=(2000,2000,2000)` et
+  // `A=o+(1000,0,1)`, `B=o+(0,1000,-1)`, `C=o+(-1000,0,1)`, `D=o+(0,-1000,-1)`.
+  // Quatre poids circumcentriques `1/4`, `R^2=1000001`, orientation NON nulle,
+  // et un aplatissement normalise qui tend vers zero quand on etire l'echelle
+  // horizontale a hauteur fixee.
+  //
+  // Elle refute ma premisse : « presque coplanaire donc grand circumrayon » est
+  // FAUX. Le rayon reste comparable a l'echelle horizontale, et un grand rayon
+  // ne garantirait de toute facon aucun `PointId` interieur.
+  if (fixture_plate) {
+    const i64 o[3] = {2000, 2000, 2000};
+    const i64 dd[4][3] = {{1000, 0, 1}, {0, 1000, -1}, {-1000, 0, 1}, {0, -1000, -1}};
+    i64 p[4][3];
+    for (int k = 0; k < 4; ++k)
+      for (int i = 0; i < 3; ++i) p[k][i] = o[i] + dd[k][i];
+    i64 r2[4];
+    for (int k = 0; k < 4; ++k) {
+      r2[k] = 0;
+      for (int i = 0; i < 3; ++i) {
+        const i64 e = p[k][i] - o[i];
+        r2[k] += e * e;
+      }
+    }
+    const mhgp::i128 orient = mhgp3v::c8::orient3d(p[0], p[1], p[2], p[3]);
+    const bool cospherique = (r2[0] == r2[1] && r2[1] == r2[2] && r2[2] == r2[3]);
+    std::printf("wst3_fixture_plate : R2=%lld cospherique=%d orientation_nulle=%d\n",
+                (long long)r2[0], cospherique ? 1 : 0, orient == 0 ? 1 : 0);
+    if (!cospherique || r2[0] != 1000001 || orient == 0) {
+      std::fprintf(stderr, "DESACCORD: la contre-fixture plate ne tient pas\n");
       return 1;
     }
     return 0;
@@ -446,7 +484,7 @@ int main(int argc, char** argv) {
               (double)blocs / (double)m, masse, visites);
 
   // ---- ORDRE QUATRE : LE PRODUIT NON ORDONNE DES BLOCS D'UN MEME RECTANGLE.
-  long long blocs4 = 0, blocs4_aigu = 0, blocs3_aigu = 0;
+  long long blocs4 = 0, blocs4_aigu = 0, blocs3_aigu = 0, blocs4_sym2 = 0, blocs4_croises = 0;
   unsigned __int128 masse4 = 0;
   if (ordre >= 4) {
     for (size_t t = 0; t < terms.size(); ++t) {
@@ -457,6 +495,29 @@ int main(int argc, char** argv) {
       // support q4 d'owner `ab` ne peut y vivre.
       blocs4_aigu += k * (k + 1) / 2 - na * (na + 1) / 2;
       blocs4 += k * (k + 1) / 2;
+      blocs4_croises += k * (k - 1) / 2;
+      // ---- LA DIAGONALE SE DECOMPOSE, ELLE NE S'EMET PAS.
+      //
+      // `Sym2(C) = Sym2(L) disjoint_union (L x R) disjoint_union Sym2(R)` :
+      // l'identite recursive de la reponse Q13. Emettre `{C,C}` comme un bloc
+      // unique laisse deux sommets dans la MEME boite, donc une orientation
+      // structurellement indecidable ; la decomposition rend chaque couple
+      // porteur de deux facteurs disjoints. Les diagonales singleton sont vides,
+      // faute de deux `PointId` distincts. Le compte est exact : un sous-arbre
+      // de population `c` fournit `c-1` couples internes, un par nœud interne.
+      for (const Bloc& b : par_terminal[t]) {
+        int stx[128];
+        int snx = 0;
+        stx[snx++] = b.c;
+        while (snx > 0) {
+          const int nd = stx[--snx];
+          if (nd < 0) continue;   // feuille : aucune paire interne
+          ++blocs4_sym2;
+          if (snx + 2 > 128) break;
+          stx[snx++] = nodes[nd].left;
+          stx[snx++] = nodes[nd].right;
+        }
+      }
       // ---- L'IDENTITE BINOMIALE REMPLACE LA BOUCLE QUADRATIQUE.
       //
       // Les blocs temoins d'un rectangle sont DISJOINTS, donc
@@ -476,6 +537,10 @@ int main(int argc, char** argv) {
                 (double)blocs4 / (double)std::max<size_t>(1, terms.size()),
                 blocs3_aigu, blocs4_aigu, (double)blocs4_aigu / (double)m,
                 (double)blocs4 / (double)std::max(1LL, blocs4_aigu));
+    std::printf("wst4_sym2 : croises=%lld diagonale_decomposee=%lld total=%lld"
+                " total/n=%.2f (contre %lld en diagonale plate)\n",
+                blocs4_croises, blocs4_sym2, blocs4_croises + blocs4_sym2,
+                (double)(blocs4_croises + blocs4_sym2) / (double)m, blocs4);
   }
 
   if (min_blocs > 0 && blocs < min_blocs) {
@@ -605,7 +670,7 @@ int main(int argc, char** argv) {
   // ---- CORNER8 SUR LES BLOCS DE LA SOURCE.
   if (corner8 > 0) {
     long long soumis = 0, fermes = 0, orient_mixte = 0, coins = 0, orient_indecise = 0;
-    long long cd_non_separes = 0;
+    long long cd_pending = 0;
     unsigned __int128 masse_soumise = 0;
     long long visites8 = 0;
     unsigned __int128 masse_fermee = 0;
@@ -649,7 +714,12 @@ int main(int argc, char** argv) {
           // indecidable quelle que soit la finesse des cellules. La vraie
           // generalisation de Callahan--Kosaraju a l'ordre quatre demande donc
           // que TOUS les couples de facteurs soient bien separes.
-          if (!sep_ok(bl[u].c, bl[v].c)) { ++cd_non_separes; continue; }
+          // UN COUPLE NON SEPARE N'EST PAS SUPPRIME. Le contre-audit a pris
+          // cette faute en flagrant delit : `sep_ok(C,D)` est une PROPOSITION
+          // qui aide `Corner8`, jamais une condition necessaire d'un support
+          // q4. Un echec doit raffiner `Sym2(C)` ou rester `PENDING` — le
+          // supprimer perd des complements legitimes.
+          if (!sep_ok(bl[u].c, bl[v].c)) { ++cd_pending; }
           // ---- L'ORIENTATION D'ABORD, ET UNE SEULE FOIS.
           //
           // Elle ne depend que des quatre facteurs support. Si son signe n'est
@@ -719,17 +789,17 @@ int main(int argc, char** argv) {
           } else if (mixte) ++orient_mixte;
         }
     }
-    std::printf("corner8_source : soumis=%lld cd_non_separes=%lld (%.2f%%)"
+    std::printf("corner8_source : soumis=%lld cd_pending=%lld (%.2f%%)"
                 " orient_indecise=%lld (%.2f%%)"
-                " fermes=%lld (%.2f%% des orientes) masse_fermee=%.6g"
+                " fermes=%lld (%.2f%% des soumis) masse_fermee=%.6g"
                 " masse_soumise=%.6g part_masse=%.4f%%"
                 " visites=%lld coins=%lld piles_saturees=%lld\n",
-                soumis, cd_non_separes,
-                100.0 * (double)cd_non_separes / (double)std::max(1LL, soumis),
+                soumis, cd_pending,
+                100.0 * (double)cd_pending / (double)std::max(1LL, soumis),
                 orient_indecise,
-                100.0 * (double)orient_indecise / (double)std::max(1LL, soumis - cd_non_separes),
+                100.0 * (double)orient_indecise / (double)std::max(1LL, soumis),
                 fermes,
-                100.0 * (double)fermes / (double)std::max(1LL, soumis - cd_non_separes - orient_indecise),
+                100.0 * (double)fermes / (double)std::max(1LL, soumis),
                 (double)masse_fermee, (double)masse_soumise,
                 100.0 * (double)masse_fermee / (double)(masse_soumise ? masse_soumise : 1),
                 visites8, coins, orient_mixte);
