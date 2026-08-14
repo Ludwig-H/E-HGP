@@ -5627,11 +5627,36 @@ set_tests_properties(mhgp3v_caps_refutation PROPERTIES PASS_REGULAR_EXPRESSION
 add_test(NAME mhgp3v_caps_refutation_quantificateurs
          COMMAND mhgp3v_caps_admissible_probe --fixtures-refutation)
 set_tests_properties(mhgp3v_caps_refutation_quantificateurs PROPERTIES
-  PASS_REGULAR_EXPRESSION "refutation_quantificateurs : D2=102 test_sommets=0 direction_admissible=1 refute=1")
+  PASS_REGULAR_EXPRESSION "refutation_quantificateurs : D2=102 test_sommets=0 direction_admissible=1 intersection_corrigee=1 refute=1")
+# LE MUTANT `inclusion` EST TUE ICI, ET NULLE PART AILLEURS. Sur un nuage
+# aleatoire dense il survit — la distinction inclusion/intersection ne s'y voit
+# pas. Seule la cellule `e1,e2,e3` avec `s=(10,1,1)` la montre : le test par
+# sommets rend faux, le classifieur exact rend vrai.
 add_test(NAME mhgp3v_caps_refutation_arete
          COMMAND mhgp3v_caps_admissible_probe --fixtures-refutation)
 set_tests_properties(mhgp3v_caps_refutation_arete PROPERTIES PASS_REGULAR_EXPRESSION
   "refutation_arete_vs_diametre : arete2=8 r2=9 arete_sous_r=1 quatre_R2_sur_r2=1 refute=1")
+
+# LA FORME CORRIGEE : enveloppe `A_r`, marquage par INTERSECTION, partenaires
+# NON restreints a `B(x,r)`. Ses chiffres sont bien plus modestes que ceux de la
+# version refutee — `terrain` passe de `0` a `14 %` et non a `98 %` — et c'est
+# exactement ce qui les rend croyables.
+foreach(caps_fam uniform terrain scanline_single_pass eight_clusters)
+  add_test(NAME mhgp3v_caps_corrige_falsifie_${caps_fam}
+           COMMAND mhgp3v_caps_admissible_probe --corrige --falsifie
+                   --family=${caps_fam} --points=150 --seed=1 --kmin=8 --threads=2)
+  set_tests_properties(mhgp3v_caps_corrige_falsifie_${caps_fam} PROPERTIES
+    PASS_REGULAR_EXPRESSION "falsifie : supports_q2_testes=[1-9][0-9]* violations=0 supports_q4_testes=[1-9][0-9]* violations_q4=0")
+  add_test(NAME mhgp3v_caps_corrige_falsifie_${caps_fam}_code
+           COMMAND mhgp3v_caps_admissible_probe --corrige --falsifie
+                   --family=${caps_fam} --points=150 --seed=1 --kmin=8 --threads=2)
+endforeach()
+add_test(NAME mhgp3v_caps_corrige_gain_uniform
+         COMMAND mhgp3v_caps_admissible_probe --corrige --family=uniform --points=300
+                 --seed=1 --kmin=8 --threads=2 --min-certifies-pct=80)
+add_test(NAME mhgp3v_caps_corrige_gain_terrain
+         COMMAND mhgp3v_caps_admissible_probe --corrige --family=terrain --points=300
+                 --seed=1 --kmin=8 --threads=2 --min-certifies-pct=10)
 
 # LES PORTES CI-DESSOUS NE VALIDENT AUCUN THEOREME. Elles mesurent seulement
 # qu'aucune violation n'apparait sur des nuages ALEATOIRES denses — ce qui est

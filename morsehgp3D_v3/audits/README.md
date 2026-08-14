@@ -81,6 +81,12 @@ ancienne phrase imposant le rejet global des positions dupliquées est périmée
   plan médiateur et niveau shallow q4 par top-r/BVH, sans produit de lentille.
   Elle donne les primitives AABB `Q_theta`, l'owner/primary exact-once, le
   ledger physique et l'ordre de raccord ; aucun logiciel ou SLO n'y est reçu.
+- [`AUDIT_CONSTRUCTIF_AXIS_DEVICE_2C14313_20260815.md`](AUDIT_CONSTRUCTIF_AXIS_DEVICE_2C14313_20260815.md) :
+  réception bornée du pivot q4 : mêmes comptes que le brute sur petits nuages
+  et `59x` moins de propositions à `n=6000`, puis localisation du scan témoin
+  restant. Le port device est une baseline CSR plate, host-only dans l'audit ;
+  la gate suivante remplace ce CSR par la wavefront BVH `Q_theta` et compare
+  roots, census et identités au flat scan.
 - [`AUDIT_RECU_GRAM_UNIFIE_1FD9CF1_20260814.md`](AUDIT_RECU_GRAM_UNIFIE_1FD9CF1_20260814.md) :
   contrôle algébrique Python corrélé et borné des identités q4 `Delta=O^2` et
   `Phi=O*J` sur 10 000 fixtures u16 non dégénérées ; il ne reçoit ni microkernel

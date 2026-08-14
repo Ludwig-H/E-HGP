@@ -288,8 +288,10 @@ Plus concrètement, pour un cutoff rationnel `theta=p/q`, `q>0`, poser
 `Q_theta` est une somme de trois quadratiques
 `q*G*s_i^2-H_i*s_i`. Son minimum continu sur une boîte est obtenu en clampant
 `H_i/(2qG)` sur chaque intervalle ; après multiplication par `4qG`, le signe
-est entier. Pour un entrant `B>0`, `Q_theta<0` signifie que son root bat le
-cutoff. Une première passe maintient les `k<=r4` meilleurs sites, une seconde
+est entier. Pour un entrant `B>0`, `Q_theta<0` signifie `rho<theta`; pour un
+sortant `B<0`, la même inégalité signifie `rho>theta`. Le même moteur traite
+donc `First` et `Last`, avec seulement le demi-espace de signe de `B` changé.
+Une première passe maintient les `k<=r4` meilleurs sites, une seconde
 range-reporte le groupe entier égal au root d'ordre `k`. Le flottant peut
 ordonner la queue, jamais décider un prune.
 

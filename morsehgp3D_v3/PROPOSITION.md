@@ -669,6 +669,16 @@ aux coins crédite le census. L'architecture, la preuve du primary aigu q4,
 les ledgers et les fixtures sont dans
 [`audits/NOTE_SOLUTION_WSPD_NIVEAUX_SHALLOW_AUTONOMES_20260815.md`](audits/NOTE_SOLUTION_WSPD_NIVEAUX_SHALLOW_AUTONOMES_20260815.md).
 
+Le raccord ponctuel de `2d8aa5f` valide le remplacement : à
+`n=6000,smax=6`, sortie q4 identique `89796`, mais `48 791 131` couples
+deviennent `830 044` roots. Le temps reste `25--28 s`, car le prototype relit
+encore chaque liste `inner` par seed. Le port device de `2c14313` est donc une
+baseline de flat scan et de parité, pas encore l'architecture : sa prochaine
+forme doit remplacer le CSR dupliqué par les wavefronts
+`(SeedId,WitnessNode,side,cutoff)` et réutiliser `Q_theta` pour top-k, census et
+shell. Le reçu borné, les limites du batch et la gate causale sont dans
+[`audits/AUDIT_CONSTRUCTIF_AXIS_DEVICE_2C14313_20260815.md`](audits/AUDIT_CONSTRUCTIF_AXIS_DEVICE_2C14313_20260815.md).
+
 Chaque générateur généralise WSPD jusqu'au census de **sa propre** miniboule ;
 une lentille ou un support positif sans profondeur n'est qu'une supersource.
 Le contrat précis et la réponse négative à Q14 sont dans

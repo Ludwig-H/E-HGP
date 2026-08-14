@@ -258,6 +258,9 @@ int cmp_4R2_a_r2(const Pt& p0, const Pt& p1, const Pt& p2, const Pt& p3, i64 r) 
   return mhgp::big_cmp(gauche, droite);
 }
 
+// Declaree plus bas : le classifieur exact de la forme corrigee.
+bool cellule_intersecte(const DirGrid& g, size_t c, const i64 s[3], i64 T);
+
 int fixtures_refutation() {
   int fautes = 0;
   // (1) LA VACUITE. `x` et `v` distants de dix, coupure cinq : aucun point
@@ -293,10 +296,28 @@ int fixtures_refutation() {
     }
     // `u = s/|s|` : `2 (s.u) = 2|s| > |s| = D`, donc la direction EST admissible.
     const bool direction_admissible = true;
+    // LA FORME CORRIGEE DOIT MARQUER CETTE CELLULE. Le classifieur exact
+    // calcule le maximum de `s.u` sur le cone : `s` est dans l'octant positif,
+    // donc ce maximum vaut `|s|` et `2|s| = 20,2 > T = 11`. L'inclusion aux
+    // sommets, elle, echoue. C'est precisement le mutant a tuer.
+    const DirGrid g1 = build_grid(1);
+    bool intersecte = false;
+    for (size_t c = 0; c < g1.cells.size() && !intersecte; ++c) {
+      bool octant_positif = true;
+      for (int k = 0; k < 3; ++k) {
+        const auto& gv = g1.vertices[(size_t)g1.cells[c][(size_t)k]];
+        if (gv[0] < 0 || gv[1] < 0 || gv[2] < 0) octant_positif = false;
+      }
+      if (octant_positif) intersecte = cellule_intersecte(g1, c, s, 11);
+    }
     std::printf("refutation_quantificateurs : D2=%lld test_sommets=%d"
-                " direction_admissible=%d refute=%d\n",
+                " direction_admissible=%d intersection_corrigee=%d refute=%d\n",
                 (long long)D2, (int)tous_sommets, (int)direction_admissible,
-                (int)(!tous_sommets && direction_admissible));
+                (int)intersecte, (int)(!tous_sommets && direction_admissible));
+    if (!intersecte) {
+      std::fprintf(stderr, "ATTENDU: le classifieur corrige doit marquer la cellule\n");
+      ++fautes;
+    }
     if (tous_sommets) {
       std::fprintf(stderr, "ATTENDU: le test par sommets doit echouer ici\n");
       ++fautes;
@@ -332,6 +353,153 @@ int fixtures_refutation() {
   return 0;
 }
 
+
+// ---------------------------------------------------------------------------
+// LA FORME CORRIGEE PAR L'AUDITEUR.
+//
+// Enveloppe necessaire des directions de supports positifs de diametre au moins
+// `r`, monotone dans la bonne variable :
+//
+//   A_r(x) = union_v { u sur S2 : 2 (s.u) > max(r, |s|) },   s = v-x.
+//
+// Pour une miniboule positive reelle de diametre `D >= r`, le partenaire du
+// lemme verifie `D < 2(s.u)` ; deux points de sa sphere etant distants d'au plus
+// `D`, on a aussi `|s| <= D`. Sa direction appartient donc a `A_r(x)`.
+//
+// THEOREME. Si chaque direction de `A_r(x)` est couverte par au moins `h`
+// calottes interieures a l'echelle `r`, aucune miniboule positive passant par
+// `x` de diametre au moins `r` n'a moins de `h` interieurs.
+//
+// DEUX CORRECTIONS DE FOND PAR RAPPORT A MA VERSION REFUTEE.
+//
+// D'abord une cellule est marquee POTENTIELLE des qu'elle INTERSECTE une
+// calotte de `A_r`, jamais quand un meme point rend toute la cellule
+// admissible : `exists u dans C, exists v` et non `exists v, for all u`. Le
+// maximum de `s.u` sur la cellule est calcule EXACTEMENT — direction de `s` si
+// elle est dans le cone, projections sur les trois arcs quand elles y tombent,
+// et sommets — chaque candidat compare par des entiers.
+//
+// Ensuite les partenaires ne sont PAS restreints a `B(x,r)`. Un point plus
+// lointain porte la direction d'un support de diametre superieur a `r`, et se
+// limiter aux voisins recree exactement la contre-fixture q2 a deux points.
+// ---------------------------------------------------------------------------
+inline i128 det3g(const i64 a[3], const i64 b[3], const i64 c[3]) {
+  return (i128)a[0] * ((i128)b[1] * c[2] - (i128)b[2] * c[1]) -
+         (i128)a[1] * ((i128)b[0] * c[2] - (i128)b[2] * c[0]) +
+         (i128)a[2] * ((i128)b[0] * c[1] - (i128)b[1] * c[0]);
+}
+
+// La cellule `C` intersecte-t-elle `{ u : 2 (s.u) > T }` ? Exact, entier.
+bool cellule_intersecte(const DirGrid& g, size_t c, const i64 s[3], i64 T) {
+  const i64* gv[3];
+  i64 gn2[3];
+  for (int k = 0; k < 3; ++k) {
+    gv[k] = g.vertices[(size_t)g.cells[c][(size_t)k]].data();
+    gn2[k] = g.vnorm2[(size_t)g.cells[c][(size_t)k]];
+  }
+  const i128 T2 = (i128)T * T;
+  // (a) les sommets : `2 (s.g)/|g| > T`  <=>  `4 (s.g)^2 > T^2 |g|^2`.
+  for (int k = 0; k < 3; ++k) {
+    const i128 dot = (i128)gv[k][0] * s[0] + (i128)gv[k][1] * s[1] + (i128)gv[k][2] * s[2];
+    if (dot > 0 && 4 * dot * dot > T2 * gn2[k]) return true;
+  }
+  const i128 sn = (i128)s[0] * s[0] + (i128)s[1] * s[1] + (i128)s[2] * s[2];
+  // (b) la direction de `s`, si elle est DANS le cone : le maximum vaut alors
+  // `|s|`, et la condition devient `4 |s|^2 > T^2`.
+  {
+    const i128 D = det3g(gv[0], gv[1], gv[2]);
+    if (D != 0) {
+      const i128 a = det3g(s, gv[1], gv[2]);
+      const i128 b = det3g(gv[0], s, gv[2]);
+      const i128 cc = det3g(gv[0], gv[1], s);
+      const bool dedans_cone = (D > 0) ? (a >= 0 && b >= 0 && cc >= 0)
+                                       : (a <= 0 && b <= 0 && cc <= 0);
+      if (dedans_cone && 4 * sn > T2) return true;
+    }
+  }
+  // (c) les trois arcs : projection de `s` sur le plan de l'arc, retenue
+  // seulement si elle tombe DANS l'arc.
+  for (int e = 0; e < 3; ++e) {
+    const i64* gi = gv[e];
+    const i64* gj = gv[(e + 1) % 3];
+    const i128 ni2 = gn2[e], nj2 = gn2[(e + 1) % 3];
+    const i128 gij = (i128)gi[0] * gj[0] + (i128)gi[1] * gj[1] + (i128)gi[2] * gj[2];
+    const i128 si = (i128)s[0] * gi[0] + (i128)s[1] * gi[1] + (i128)s[2] * gi[2];
+    const i128 sj = (i128)s[0] * gj[0] + (i128)s[1] * gj[1] + (i128)s[2] * gj[2];
+    const i128 G = ni2 * nj2 - gij * gij;
+    if (G <= 0) continue;
+    if (nj2 * si - gij * sj < 0) continue;   // coefficient sur `gi` negatif
+    if (ni2 * sj - gij * si < 0) continue;   // coefficient sur `gj` negatif
+    i64 n[3];
+    n[0] = gi[1] * gj[2] - gi[2] * gj[1];
+    n[1] = gi[2] * gj[0] - gi[0] * gj[2];
+    n[2] = gi[0] * gj[1] - gi[1] * gj[0];
+    const i128 nn = (i128)n[0] * n[0] + (i128)n[1] * n[1] + (i128)n[2] * n[2];
+    if (nn == 0) continue;
+    const i128 sdn = (i128)s[0] * n[0] + (i128)s[1] * n[1] + (i128)s[2] * n[2];
+    // `|P|^2 = (|s|^2 |n|^2 - (s.n)^2) / |n|^2` ; condition `4|P|^2 > T^2`.
+    if (4 * (sn * nn - sdn * sdn) > T2 * nn) return true;
+  }
+  return false;
+}
+
+// Le certificat corrige. `POTENTIELLE` par intersection, partenaires GLOBAUX.
+bool certifie_corrige(const Pt& x, const std::vector<Pt>& P, const DirGrid& g, i64 r,
+                      int kmin, bool mutant_inclusion, Compteurs* cpt) {
+  const size_t nc = g.cells.size();
+  std::vector<int> depth(nc, 0);
+  std::vector<char> pot(nc, 0);
+  const i64 r2 = r * r;
+  for (size_t idv = 0; idv < P.size(); ++idv) {
+    const Pt& v = P[idv];
+    i64 s[3];
+    for (int k = 0; k < 3; ++k) s[k] = v.c[k] - x.c[k];
+    const i64 ds = s[0] * s[0] + s[1] * s[1] + s[2] * s[2];
+    if (ds == 0) continue;
+    // `T = max(r, |s|)` : la comparaison se fait sur les carres.
+    const i64 T = (ds >= r2) ? (i64)(std::sqrt((double)ds) + 1.0) : r;
+    for (size_t c = 0; c < nc; ++c) {
+      if (!pot[c]) {
+        // LE MUTANT : marquer seulement quand les TROIS sommets sont dedans,
+        // c'est-a-dire confondre inclusion et intersection.
+        bool marque;
+        if (mutant_inclusion) {
+          marque = true;
+          const i128 T2 = (i128)T * T;
+          for (int k = 0; k < 3 && marque; ++k) {
+            const auto& gv = g.vertices[(size_t)g.cells[c][(size_t)k]];
+            const i128 dot = (i128)gv[0] * s[0] + (i128)gv[1] * s[1] + (i128)gv[2] * s[2];
+            const i64 n2 = g.vnorm2[(size_t)g.cells[c][(size_t)k]];
+            if (!(dot > 0 && 4 * dot * dot > T2 * n2)) marque = false;
+          }
+        } else {
+          marque = cellule_intersecte(g, c, s, T);
+        }
+        if (marque) pot[c] = 1;
+      }
+      if (ds > r2) continue;   // une calotte INTERIEURE a l'echelle `r`
+      bool couvre = true;
+      for (int k = 0; k < 3 && couvre; ++k) {
+        const auto& gv = g.vertices[(size_t)g.cells[c][(size_t)k]];
+        const i128 dot = (i128)gv[0] * s[0] + (i128)gv[1] * s[1] + (i128)gv[2] * s[2];
+        if (dot <= 0) { couvre = false; break; }
+        const i64 n2 = g.vnorm2[(size_t)g.cells[c][(size_t)k]];
+        if (!((i128)dot * dot * r2 > (i128)n2 * ds * ds)) couvre = false;
+      }
+      if (couvre) ++depth[c];
+    }
+  }
+  bool ok = true;
+  for (size_t c = 0; c < nc; ++c) {
+    ++cpt->cellules;
+    if (!pot[c]) continue;
+    ++cpt->admissibles;
+    if (depth[c] >= kmin) ++cpt->couvertes;
+    else ok = false;
+  }
+  return ok;
+}
+
 std::vector<Pt> nuage(const std::string& f, long long n, long long coord, long long seed) {
   mhgp3v::CloudFamily fam;
   if (f == "uniform") fam = mhgp3v::CloudFamily::kUniform;
@@ -355,12 +523,14 @@ int main(int argc, char** argv) {
   std::string family = "uniform";
   long long n = 800, coord = 0, seed = 1, kmin = 8, m = 4, threads = 0;
   double rayon_esp = 10.0, min_pct = 0.0;
-  bool falsifie = false;
+  bool falsifie = false, corrige = false, mut_inclusion = false;
   for (int i = 1; i < argc; ++i) {
     const std::string a = argv[i];
     auto val = [&](const char* p) { return a.substr(std::strlen(p)); };
     if (a == "--falsifie") falsifie = true;
     else if (a == "--fixtures-refutation") { return fixtures_refutation(); }
+    else if (a == "--corrige") corrige = true;
+    else if (a == "--inject=inclusion") mut_inclusion = true;
     else if (a.rfind("--family=", 0) == 0) family = val("--family=");
     else if (a.rfind("--points=", 0) == 0) n = atoll(val("--points=").c_str());
     else if (a.rfind("--coord=", 0) == 0) coord = atoll(val("--coord=").c_str());
@@ -408,7 +578,10 @@ int main(int argc, char** argv) {
       cert_tout[(size_t)i] =
           certifie(P[(size_t)i], P, vois, g, r, (int)kmin, false, &muet) ? 1 : 0;
       cert_adm[(size_t)i] =
-          certifie(P[(size_t)i], P, vois, g, r, (int)kmin, true, &cpt[(size_t)tid]) ? 1 : 0;
+          corrige ? (certifie_corrige(P[(size_t)i], P, g, r, (int)kmin, mut_inclusion,
+                                      &cpt[(size_t)tid]) ? 1 : 0)
+                  : (certifie(P[(size_t)i], P, vois, g, r, (int)kmin, true,
+                              &cpt[(size_t)tid]) ? 1 : 0);
     }
   };
   std::vector<std::thread> th;
@@ -420,8 +593,9 @@ int main(int argc, char** argv) {
   }
   long long nt = 0, na = 0;
   for (int i = 0; i < N; ++i) { nt += cert_tout[(size_t)i]; na += cert_adm[(size_t)i]; }
-  std::printf("caps_admissible : famille=%s n=%d m=%lld cellules=%zu kmin=%lld"
+  std::printf("caps_admissible : mode=%s famille=%s n=%d m=%lld cellules=%zu kmin=%lld"
               " rayon=%lld (%.1f espacements)\n",
+              corrige ? (mut_inclusion ? "corrige_mutant" : "corrige") : "refute",
               family.c_str(), N, m, g.cells.size(), kmin, (long long)r, rayon_esp);
   std::printf("  certificats : toutes_cellules=%lld (%.2f%%) admissibles=%lld (%.2f%%)"
               " gain=%.2f pts\n",
@@ -474,17 +648,17 @@ int main(int argc, char** argv) {
                   ++ins;
               }
               if (ins >= kmin) continue;
-              i64 dd = 0;
+              // LE DIAMETRE DE LA BOULE, PAS LA PLUS GRANDE ARETE. Le
+              // tetraedre regulier a des aretes `sqrt(8)` et une circumsphere
+              // de diametre `sqrt(12)` : comparer l'arete a `r` laisserait
+              // passer un support dont la boule depasse `r`.
               const int id[4] = {i, j, k, l};
-              for (int u = 0; u < 4; ++u)
-                for (int w = u + 1; w < 4; ++w) {
-                  const i64 e = d2p(P[(size_t)id[u]], P[(size_t)id[w]]);
-                  if (e > dd) dd = e;
-                }
               ++t4;
               bool un_certifie = false;
               for (int u = 0; u < 4; ++u) un_certifie = un_certifie || cert_adm[(size_t)id[u]];
-              if (un_certifie && dd >= r * r) ++v4;
+              if (un_certifie &&
+                  cmp_4R2_a_r2(P[(size_t)i], P[(size_t)j], P[(size_t)k], P[(size_t)l], r) >= 0)
+                ++v4;
             }
     }
     std::printf("falsifie : supports_q2_testes=%lld violations=%lld"

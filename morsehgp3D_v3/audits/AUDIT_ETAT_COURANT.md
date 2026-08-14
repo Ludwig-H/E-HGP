@@ -8,7 +8,7 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-> **Verdict live au `HEAD=91486d4d79deb5682cd7f02e9a64c64589ca3008`.**
+> **Verdict live au `HEAD=2c14313d5848c46b1f0abcc1e910d26b862a88a4`.**
 > Le pin noyau `a369452` porte `Q4SeedAxisTopR4`, son probe, 39 CTests déclarés,
 > les vrais IDs de census, la capacité 163, les comptes requis et les fates de
 > plateau. Il refuse aussi tout replay après `MORT_GAP` et tout apex dont le
@@ -16,11 +16,10 @@ Cadre : `phase=exploration_v3_hors_registre`,
 > `0195480` une option de coupure et une recette de session ; aucun de ces deux
 > commits n'est une mesure reçue. `0fe016f` conserve désormais le brut J0 et
 > son statut tronqué ; `91486d4` grave les trois contre-fixtures qui réfutent
-> l'ancien théorème des calottes. Le worktree courant contient le raccord
-> expérimental `--axe`, la sélection top-r ramenée de `O(m^2)` à `O(m*r4)` et
-> la présente proposition constructive ; ces deltas logiciels appartiennent à
-> Claude et restent à comparer différentiellement. Aucune mesure GPU nouvelle
-> n'entre dans le verdict.
+> l'ancien théorème des calottes. `2d8aa5f` raccorde ensuite `--axe` et ramène
+> la sélection top-r de `O(m^2)` à `O(m*r4)` ; `2c14313` ajoute sa baseline
+> host/device plate. Le worktree courant ne contient que les présents textes
+> d'audit. Aucune mesure CUDA ou GPU nouvelle n'entre dans le verdict.
 > Q14 est fermée contractuellement : aucune structure de Delaunay n'est
 > autorisée, y compris d'ordre un, comme source, squelette, filtre ou census.
 >
@@ -122,6 +121,17 @@ Cadre : `phase=exploration_v3_hors_registre`,
 > futur best-first et le census capé sur AABB. Aucun résultat de lane n'en
 > alimente une autre.
 > [`NOTE_SOLUTION_WSPD_NIVEAUX_SHALLOW_AUTONOMES_20260815.md`](NOTE_SOLUTION_WSPD_NIVEAUX_SHALLOW_AUTONOMES_20260815.md).
+>
+> Le pivot ponctuel est vert et matériel : à `n=6000,smax=6`, même sortie q4
+> `89796`, avec `830044` roots au lieu de `48 791 131` couples, soit environ
+> `59x` moins de propositions. Les petits `--axe --verifie` retrouvent le brute
+> q4. Le temps reste `25--28 s`, car chaque seed rescane encore son voisinage.
+> Le lot device de `2c14313` transporte précisément ce flat scan en CSR ; ses
+> `3/3` CTests host-only passent en `1,48 s`, mais le test nominal est tronqué
+> (`cap=1`) et aucune descente BVH n'existe. Le prochain jalon reçu est le
+> moteur `Q_theta` AABB partagé par First/Last, census et shell, avec un batch
+> complet explicite et les identités comparées.
+> [`AUDIT_CONSTRUCTIF_AXIS_DEVICE_2C14313_20260815.md`](AUDIT_CONSTRUCTIF_AXIS_DEVICE_2C14313_20260815.md).
 >
 > Contrôles frais : `39/39` CTests `^mhgp3v_q4axis` passent en `38,86 s`, avec
 > des seuils `smax=7/14`, trois exact-once, le plateau de 100 IDs et le refus de

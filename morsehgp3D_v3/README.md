@@ -78,6 +78,15 @@ médiateur : au plus `2*r4` groupes de roots par ligne, sans aucun produit
 d'implémentation :
 [`audits/NOTE_SOLUTION_WSPD_NIVEAUX_SHALLOW_AUTONOMES_20260815.md`](audits/NOTE_SOLUTION_WSPD_NIVEAUX_SHALLOW_AUTONOMES_20260815.md).
 
+Le premier raccord confirme cette direction. À `n=6000,smax=6`, le mode axial
+conserve les `89 796` q4 du chemin plat et remplace `48 791 131` couples par
+`830 044` roots proposés, soit environ `59x` moins. Le mur reste `25--28 s`
+parce que chaque seed balaie encore tout son CSR témoin : le prochain jalon est
+donc la descente `Q_theta` sur BVH, pas un déterminant plus rapide. `2c14313`
+porte le flat scan sur device comme baseline de parité, mais ne contient pas
+encore cette descente et n'a produit aucune mesure CUDA. Audit et gate J2 :
+[`audits/AUDIT_CONSTRUCTIF_AXIS_DEVICE_2C14313_20260815.md`](audits/AUDIT_CONSTRUCTIF_AXIS_DEVICE_2C14313_20260815.md).
+
 ## Verdict actuel
 
 Historiquement, le pin logiciel `6e815d28b3e229a0161eb00d6fa0c9a272efac5d` contient quatre avancées
