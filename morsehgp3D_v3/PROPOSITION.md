@@ -340,10 +340,12 @@ Ainsi `C<h` court-circuite seulement le certificateur relaxé Jung/BJD,
 circumcentres effectivement réalisables forment un sous-ensemble de `K` qui ne
 contient généralement pas le centre q2 ; `C<h` ne décide donc aucune coface.
 
-La profondeur q2 n'est pas héréditaire vers les cofaces. Il existe une fixture
-u16 où dix IDs sont dans la boule diamétrale de `ab`, tandis qu'une circumboule
-q3 positive et une circumsphère q4 positive possédées par `ab` n'en contiennent
-aucun. Une seconde fixture ferme une face q3 au rang douze tout en gardant une
+La profondeur q2 n'est pas héréditaire vers les cofaces. Deux fixtures u16
+séparées partagent `a,b` et dix IDs dans la boule diamétrale : la première garde
+une boule q3 ambiante positive vide, la seconde une circumsphère q4 positive
+vide, dont l'owner `ab` est fixé par l'ordre `EdgeKey`. Réunir les deux nuages
+créerait des extra-shell et détruirait les rangs réguliers annoncés. Une
+troisième fixture ferme une face q3 au rang douze tout en gardant une
 coface q4 de rang quatre. Le disque de Jung/BJD est donc un prune collectif
 suffisant avant cette source finie, jamais la définition de l'événement. Après les fermetures de bloc,
 le résiduel exact emploie les pieds q3 et les intersections shallow q4 `0..7`,
@@ -399,17 +401,57 @@ Midball doit donc être essayé sur tout verdict central non `ALL`, y compris
 `NONE`. La corrélation perdue entre `D` et le score interdit le converse : pour
 `A=[0,8]`, `B=[10,100]`, `C={9}`, on a `Hmin=1>0`, mais `Dmin=4` et
 `smin=8100`, donc Midball `ALL` face à central `NONE`. Le fallback ne reprend
-que `MIXED` et ne couvre pas ce cas. Le hot path calcule néanmoins seulement
-`Hmin`, soit 24 produits ; le maximum entier et `NONE` sont inutiles pour cette
-disjonction.
+que `MIXED` et ne couvre pas ce cas. Seul `Hmin` est sémantiquement nécessaire,
+soit 24 produits. Le source appelle encore la primitive complète, mais
+l'inlining Release élimine déjà le maximum et laisse 24 multiplications dans
+le bloc machine ; une ABI min-only explicite sert surtout l'autorité commune et
+le futur device.
 
-Le raccord WSPD mobile suivant `8fd6f59` applique désormais cette règle, refuse
-les modes incompatibles, publie ses promotions et ajoute un juge primal. Il
+Le raccord WSPD stable au pin `a58d020` applique cette règle, refuse les modes
+incompatibles, publie ses promotions et ajoute un juge primal et quatre CTests
+d'intégration. Il
 reste non reçu : compteurs et planchers globaux masquent une taille sans gain
 après une taille productive, le produit du cap du juge peut déborder i64, le
 juge ne vérifie pas chaque promotion, `--fenetre-exhaustive` court-circuite ses
-gates et aucune CTest d'intégration ne l'exerce. Ces obligations et le hash live
-sont maintenus dans l'audit courant.
+gates et sa seule CTest saine d'intégration à regex peut masquer un code non
+nul. Ces obligations et les hashes live sont maintenus dans l'audit courant.
+
+### 4.5 Borne duale de vague : maintenir `upper`, pas `reste`
+
+Une coupure exacte du **certificateur singleton** complète la saturation par le
+bas. Pour chaque ledger `L` et lane `q`, initialiser :
+
+```text
+upper[L,q] = cred[L,q] + population disjointe représentée par sa pile
+```
+
+Il est plus sûr de maintenir directement `upper` que de soustraire un parent
+puis réajouter ses enfants :
+
+```text
+ALL                    -> upper inchangé (reste devient crédit)
+MIXED interne          -> upper inchangé (les enfants partitionnent le parent)
+NONE consommé          -> upper -= pop(parent)
+MIXED sans continuation-> upper -= pop(parent)
+upper < need[q]         -> SINGLETON_CERTIFICATE_EXHAUSTED
+```
+
+Cette écriture rend impossible le mutant `drop-mixed-children` qui a réfuté la
+première révision `--borne-sup`. Les préconditions sont impératives : piles en
+antichaîne, populations/IDs authentifiés, un `upper` séparé pour `cred/mask` et
+`ccred/cmask`, et conservation exacte lors d'un split. `--climb` inclut ou
+borne aussi la feuille centrale omise. Une source de crédit post-boucle comme
+BJD impose son propre potentiel de banque ; en son absence, la combinaison est
+refusée.
+
+Le statut n'est jamais `EVENT_OPEN`. Un échec du cœur universel ne réfute ni un
+groupe Jung, ni une complétion q3/q4 : il signifie seulement que cette source
+de crédits ne peut plus atteindre le seuil. Pour rendre la coupure utile, une
+ordonnance adaptative peut traiter d'abord les gros nœuds probablement `NONE`
+quand `upper-need` est petit, et les nœuds proches probablement `ALL` quand
+`need-cred` est petit. L'ordre reste heuristique ; les extrema et les deux
+bornes restent exacts. Les portes OFF/ON exigent fates, masses, pending et
+sorties bit-identiques avant de mesurer les visites évitées.
 
 ## 5. Générateur q3 recommandé
 
@@ -813,10 +855,10 @@ dans trois CTests. Ce n'est pas encore une réception. À ce pin,
 `--juge-bjd=1` laisse des groupes et fermetures sautés avec
 `fenetre_finale=OUI`, `OK` et le code zéro ; sans `--vwave`, l'option BJD peut
 réussir avec zéro essai. Le commit `694920a` répare ces deux statuts, grave la
-fixture collinéaire et porte la sous-suite BJD à huit CTests verts. Il ne ferme
-pas encore la réception : `--exige-q4-ouvert` reste vacuaire sans juge et
-`collinear_seven` ignore un `--points` différent de neuf. Surtout,
-le packing reste calculé après la descente et n'économise aucune recertification. Le
+fixture collinéaire et porte la sous-suite BJD à huit CTests verts. Le parent
+`8fd6f59` refuse ensuite `--exige-q4-ouvert` sans juge et une cardinalité autre
+que neuf pour `collinear_seven`. La réception reste ouverte : surtout, le
+packing est calculé après la descente et n'économise aucune recertification. Le
 contre-audit et la fixture source u16 sont dans
 [`audits/AUDIT_LIVE_BLOCK_JUNG_CREDITS_TAU_783A789_20260814.md`](audits/AUDIT_LIVE_BLOCK_JUNG_CREDITS_TAU_783A789_20260814.md).
 Le juge singleton `--judge-vwave` n'est pas composable avec SOC/BJD : il doit
@@ -1753,7 +1795,7 @@ fermetures avant descente, les nœuds de transversal, `F4/M4`, les splits, les
 octets et la HWM. Elle n'autorise aucun claim 0A/0B ou produit avant les portes
 1--2 ci-dessus.
 
-La recette G4 au `HEAD=8fd6f59` ne doit pas être relancée en l'état. Elle omet
+La recette G4 au `HEAD=a58d020` ne doit pas être relancée en l'état. Elle omet
 une cible pourtant sélectionnée par son regex CTest, ne sélectionne pas les
 nouvelles portes `mhgp3v_bjd_*`, avale le code de `check_rampe_pentes.py` sous
 `set +e` et omet `--exige-fenetre-finale`. Elle permet aussi à chaque job quatre

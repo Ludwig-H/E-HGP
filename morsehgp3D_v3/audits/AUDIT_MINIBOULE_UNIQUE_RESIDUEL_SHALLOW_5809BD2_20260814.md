@@ -10,8 +10,8 @@ Cadre : `phase=exploration_v3_hors_registre`,
 
 > [!IMPORTANT]
 > Ce rapport a d'abord été intégré par le commit `694920a`, dont le titre
-> affirmait une « fenêtre exacte » en `n^1,09`, puis étendu au
-> `HEAD=8fd6f59`. Le contre-audit resserre les deux claims : q2 est exact par
+> affirmait une « fenêtre exacte » en `n^1,09`, puis étendu aux pins
+> `8fd6f59` et `a58d020`. Le contre-audit resserre les deux claims : q2 est exact par
 > paire sous le domaine régulier ; q3/q4 produisent un majorant `U<h`, pas la
 > fenêtre des événements. `MidballBlockDepth` calcule un `ALL` exact sur
 > l'enveloppe continue, mais son `NONE` stable est exact seulement sur le réseau
@@ -22,12 +22,14 @@ Cadre : `phase=exploration_v3_hors_registre`,
 Cet audit a commencé au pin
 `5809bd2c054c02c4c77119d979a6be796032ca15`, qui a introduit le diagnostic
 `--fenetre-exacte`. Le snapshot stable relu est désormais
-`HEAD=8fd6f59bff450fbc88abff7f330be6c2da994a36`, commit
-`q2 n'a qu'un centre : son predicat de bloc est exact, pas suffisant`. Il
-ajoute la primitive et son probe. Un delta logiciel postérieur de Claude tente
-de raccorder `--midball` au WSPD ; au snapshot relu, il échoue encore à compiler
-sous `-Werror`. Les autres écritures du worktree sont documentaires. L'auditeur
-ne modifie aucun logiciel.
+`HEAD=a58d0207d8e0482ced4b0207144fa311193c0388`, commit
+`le premier certificat qui retire du travail, et non qui en ajoute`. Il
+absorbe le raccord WSPD et quatre CTests d'intégration après le pin historique
+`8fd6f59` de la primitive. Ses empreintes sont
+`WSPD=63c79bd6ce707a66f304ca4613c225929d419d07e0d5e99547d914a877b6fa01`
+et `CMake=4c6cb24ee965ad7a852428119fca08568ad440d759884d69b3c5ed62a202fdc9`.
+Le build ciblé et les 13 CTests Midball passent sous les réserves ci-dessous.
+L'auditeur ne modifie aucun logiciel.
 
 Le pin `694920a` absorbait aussi les réparations BJD postérieures : fixture
 `collinear_seven`, statut `COMPLET/PARTIEL`, refus des modes vacuaires et huit
@@ -36,8 +38,9 @@ ces fautes précises, pas comme réception de `tau(F)`, de la source finie, du
 sampler statistique, du chemin device ou du contrat G4.
 
 L'intuition proposée est **exacte au niveau du support minimal complet** :
-une fois un support positif affinement indépendant fixé, son événement est sa
-miniboule intrinsèque unique. En particulier, un support q2 `{a,b}` ne possède
+une fois un support positif affinement indépendant fixé, son événement est son
+unique boule ambiante, dont le centre et le rayon sont déterminés dans l'espace
+affine du support. En particulier, un support q2 `{a,b}` ne possède
 qu'un centre, le milieu, et qu'une boule, la boule de diamètre `ab`.
 
 Deux conséquences doivent rester séparées :
@@ -305,7 +308,7 @@ affine précédent, soit quantifier sur le domaine Jung, soit poursuivre jusqu'a
 support complet. Additionner la population tridimensionnelle de la boule
 diamétrale à une lane supérieure est le mutant `midball-prune-q3q4`.
 
-### 4.1 Réception de `MidballBlockDepth` et raccord WSPD mobile
+### 4.1 Réception de `MidballBlockDepth` et raccord WSPD stable
 
 La partie `ALL` de la primitive stable au pin `8fd6f59` est mathématiquement
 saine. Sur chaque axe, `f(a,b,z)=(z-a)(b-z)` est affine séparément en `a,b` et
@@ -337,17 +340,20 @@ L'autorité antérieure possède déjà les fixtures réseau contre continu, mil
 impair, extrêmes u16 et des mutants du maximum. Une réception industrielle doit
 consolider ces deux écritures, préflighter `0<=lo<=hi<=65535`, la paire propre
 et les identités, puis conserver les nouveaux mutants du minimum et du shell.
-Les neuf CTests Midball passent, mais les portes saines à regex peuvent masquer
-un code non nul ; `--selftest=1` imprime ainsi `accord=OUI` avant de finir code
-`3` sur son plancher. La fixture q3/q4 ne mord encore ni acuité, ni indépendance
-affine, ni barycentriques positives, ni owner, ni extra-shell.
+Les neuf CTests autonomes de `8fd6f59`, puis les quatre portes d'intégration de
+`a58d020`, passent. Trois portes saines emploient toutefois un
+`PASS_REGULAR_EXPRESSION` qui peut masquer un code non nul ; `--selftest=1`
+imprime ainsi `accord=OUI` avant de finir code `3` sur son plancher. La fixture
+q3/q4 ne mord encore ni acuité, ni indépendance affine, ni barycentriques
+positives, ni owner, ni extra-shell.
 
-Le raccord WSPD mobile courant, hash
+Le raccord WSPD stable de `a58d020`, hash
 `63c79bd6ce707a66f304ca4613c225929d419d07e0d5e99547d914a877b6fa01`,
 compile, emploie `Midball ALL` en disjonction, refuse `--midball` sans
 `--vwave`, refuse son juge sans Midball et le juge central incompatible,
-publie `all/gains`, puis juge les fermetures q2 sur les vrais points. Il reste
-dirty et sans CTest d'intégration.
+publie `all/gains`, puis juge les fermetures q2 sur les vrais points. Les quatre
+CTest WSPD couvrent un nominal et trois refus ; aucun mutant d'intégration ne
+force encore une fausse promotion à mordre le juge.
 
 Une seule dominance est générale :
 
@@ -360,8 +366,10 @@ score. Pour `A=[0,8]`, `B=[10,100]`, `C={9}`, on a `Hmin=1>0`, mais
 `Dmin=4` et `smin=smax=8100` : Midball rend `ALL` face à central `NONE`. Le
 raccord doit donc essayer Midball sur tout verdict central non `ALL`, y compris
 `NONE`; le fallback limité à `MIXED` ne couvre pas ce cas. En revanche, seul
-`hmin` est consommé : un hot path à 24 produits remplace sans perte le calcul
-complet min+max, et doit réutiliser l'autorité/type de boîte communs.
+`hmin` est sémantiquement consommé. L'ABI source devrait l'exprimer et réutiliser
+l'autorité/type de boîte communs. Ce n'est pas un gain CPU Release encore à
+prendre : l'inlining élimine déjà `axis_max`, et le bloc machine de promotion
+contient 24 multiplications entières.
 
 Le juge live n'est pas encore fail-closed : ses compteurs globaux ne sont pas
 remis à zéro entre deux tailles ; `na*nb*m` peut déborder `i64` avant sa
@@ -377,8 +385,75 @@ Sur les mêmes rectangles `eight_clusters,n=1500,s=8,window=512`, le raccord
 ALL-only donne `lectures 9 570 325 -> 8 860 702`, résiduel q2
 `106 809 -> 74 817`, fermetures q2 `90 735 -> 93 193`,
 `all=gains=156 711`, `pending=0` et q3/q4 inchangés. Les temps alternés restent
-défavorables et bruités, cohérents avec le maximum calculé puis jeté. C'est un
-signal causal q2, pas un rapprochement reçu du contrat une seconde.
+défavorables et bruités ; sans profilage, ils ne peuvent pas être attribués à
+`axis_max`, déjà éliminé du binaire. C'est un signal causal q2, pas un
+rapprochement reçu du contrat une seconde.
+
+### 4.2 `HCBlockDepth` : certificat sûr, pas source q3/q4
+
+Le worktree suivant étend le même préfiltre avec
+
+```text
+e=z-a ; t=b-z ; H=e dot t ; C=t cross e
+q2 : H>0
+q3 : H>0 et 3 H^2>||C||^2
+q4 : H>0 et 2 H^2>||C||^2
+```
+
+Les facteurs sont exacts : dans l'écriture conique, `g=4H` et
+`Q=4||C||^2`. L'ordre q4, puis q3, puis q2 est donc correct. `Hmin` est exact
+sur les trois AABB. Chaque composante de `C` est enfermée par deux intervalles
+de produits, puis la somme des trois maxima absolus carrés majore
+`||C||^2`. Comparer cette majoration à `2Hmin^2` ou `3Hmin^2` ne peut produire
+qu'un `ALL` sûr sous le profil u16 ; l'échec reste `MIXED`.
+
+Ce classifieur est conservateur de plusieurs façons, pas seulement lors de la
+soustraction des deux produits. Avec
+`A={(0,0,0)}`, `B={(1,1,3)}` et
+`C=[(0,1,1),(0,1,2)]`, les deux témoins ont `H=2` et
+`||C||^2=6`, donc toute la boîte est q4. La somme des maxima par composante
+vaut pourtant `9` : le classifieur ne rend que q3. Il perd aussi la corrélation
+entre `Hmin` et le pire `C`. Son statut exact est donc
+`HCIntervalAll-sufficient`, jamais « décision exacte de la lane ».
+
+Il ne définit pas davantage les événements q3/q4. Il certifie qu'un même
+`PointId` témoin appartient au cœur conique de **toutes** les paires d'un
+rectangle ; les supports complets et leurs boules canoniques restent la source
+finie du §3. L'autorité exacte d'enveloppe existe déjà dans
+`soc64_rect.hpp` : `corner512_all_lane` vérifie les `8*8*8` triples de coins.
+Son équivalence vient de la convexité du cône en `(H,C)`, de l'affinité en
+`a,b`, et, coordonnée par coordonnée en `z`, de l'affinité de `C` et de la
+concavité de `H`. Le nouveau préfiltre doit donc s'insérer avant
+`SOC64/Corner512`, pas créer une troisième autorité concurrente.
+
+Au snapshot worktree
+`midball_block.hpp=921e649f0ebbbfb7a8034bedaeeb0a14a2eaaadf9eadb092f4f8c3cdbfd9403b`,
+`midball_probe.cpp=587ecc58ebdd592245449fef901be9d2fac3f4b9287752648554c48f2e7dcc49`
+et `wspd_wavefront_probe.cpp=6330b79586066c575c59e4480a17fdf864fdef77b261a3a7f33c66bd68ed9c5b`,
+les tests manuels sains passent `4*20000` rectangles sans désaccord ; les
+mutants coefficient et corrélation meurent avec les codes attendus. Mais le
+CMake ne contient aucune porte HC et la sous-suite Midball régresse à `12/13`
+par changement du diagnostic de refus. Le raccord n'a aucun juge causal et
+refuse l'ancien juge de vague.
+
+L'intégration recalcule en outre `hc_lane_block` dans la boucle des trois lanes,
+alors qu'une seule lane minimale rendue suffit aux trois comparaisons. `--hc`
+suivi de `--midball` consomme tous les gains q2 du second puis échoue sur son
+plancher nul ; `--fenetre-exhaustive` contourne encore les planchers ; les
+compteurs sont globaux aux tailles. Le commentaire « une trentaine de
+multiplications » n'est pas reçu : le source forme 24 produits pour `Hmin`, 24
+pour six intervalles de produits, puis les carrés larges, et l'appel générique
+contient encore le maximum Midball avant optimisation. Il faut mesurer le bloc
+Release, calculer HC une fois par nœud, refuser ou typer la composition Midball,
+et ajouter un oracle de chaque promotion.
+
+Diagnostic local, non benchmark : sur les mêmes rectangles
+`eight_clusters,n=200,window=512`, HC réduit les lectures
+`247966 -> 226535`, la masse q2 ouverte `7755 -> 5972`, q3
+`19847 -> 19464` et q4 `19875 -> 19648`, mais la vague one-shot passe de
+`119,8` à `214,2 ms`. Le gain de recertifications est causal ; le coût et le
+contrat G4 restent rouges tant que le triple recalcul et les portes précédentes
+ne sont pas réparés.
 
 ## 5. Audit de `--fenetre-exacte` au commit
 
@@ -658,109 +733,7 @@ vrai verdict uniforme sur les deux boîtes endpoint. Si la boîte témoin varie,
 suit pas du seul minimum de `A0`. Il faut un wrapper exact reçu, un scan capé
 des vrais IDs ou un split ; sinon le verdict reste `MIXED`.
 
-## 9. Audit de `MidballBlockDepth` au `HEAD=8fd6f59`
-
-Le commit `8fd6f59bff450fbc88abff7f330be6c2da994a36` ajoute
-`prototype/midball_block.hpp`, son probe indépendant et neuf CTests. La
-sous-suite `ctest -R '^mhgp3v_midball_'` passe `9/9` en `1,28 s` sur cette
-machine. Le théorème q2 est bon, mais la portée et l'autorité logicielle doivent
-être resserrées avant tout raccord produit.
-
-### 9.1 Exact sur quelle boîte ?
-
-Le minimum de `H` est bien la somme de trois minima aux huit triplets de bornes
-par axe. Il est exact sur l'enveloppe continue et sur le réseau. Le maximum
-implémenté essaie les deux entiers autour de `(a+b)/2` : il est exact sur
-
-```text
-(A intersect Z^3) × (B intersect Z^3) × (C intersect Z^3),
-```
-
-pas sur l'enveloppe continue. Prendre en une dimension `A={0}`, `B={1}` et
-`C=[0,1]`. Les deux valeurs u16 `z=0,1` ont `H=0`, donc le code rend `NONE`,
-alors que le point continu `z=1/2` a `H=1/4>0`. Le verdict est sûr pour le
-profil u16, mais son type doit dire `NONE_INTERIOR_U16_GRID`, jamais « aucun
-point de l'enveloppe continue ».
-
-Même sur le réseau, l'AABB reste un sur-ensemble des `PointId` réellement
-occupés. Avec `a=(0,0,0)`, `b=(4,4,0)` et les deux seuls témoins
-`(0,2,0),(2,0,0)`, chaque vrai témoin a `H=4>0`, mais leur boîte contient le
-coin vide `(0,0,0)` où `H=0`. La primitive rend `MIXED` au lieu de l'`ALL` du
-produit réel. La formulation reçue est donc
-`exact_integer_lattice_u16_aabb_envelope`, certificat fail-open des vrais
-points, pas « classifieur exact du bloc de PointId ».
-
-### 9.2 Seconde autorité inutile
-
-La même primitive existe déjà dans `prototype/rect_front.hpp` sous les noms
-`rect_h_interval` et `rect_classify`. Elle possède déjà :
-
-- le minimum aux coins et le maximum entier au milieu rabattu ;
-- les mutants `max-par-coins` et `sommet-non-ecrete` ;
-- les fixtures `reseau_contre_continu`, `milieu_impair` et `extremes_u16` ;
-- un juge exhaustif indépendant et un raccord q2 dans le fallback.
-
-`midball_block.hpp` constitue donc une deuxième autorité presque identique,
-avec une documentation moins précise. La route industrielle doit consolider
-sur `rect_h_interval`, ajouter à cette autorité commune les mutants utiles
-`accept-equality/drop-axis/min-au-milieu`, et supprimer toute divergence de
-type. Les nouvelles fixtures q3/q4 sont utiles, mais leur code vérifie seulement
-la cosphéricité et le nombre d'intérieurs ; il doit aussi mordre la positivité
-barycentrique, l'owner et l'absence d'extra-shell de chacun des deux nuages
-séparés.
-
-### 9.3 Raccord WSPD mobile et dominance q2
-
-Le raccord postérieur non repinné au hash
-`63c79bd6ce707a66f304ca4613c225929d419d07e0d5e99547d914a877b6fa01`
-parse `--midball` et l'insère dans la vague. Une première révision ne compilait
-pas sous `-Werror`, puis une seconde acceptait l'option sans vague et ne publiait
-aucun compteur. Le snapshot courant compile, refuse `--midball` sans `--vwave`,
-refuse le juge central incompatible, imprime `all/gains` et ajoute un juge
-primal capé des fermetures q2. Il reste dirty et sans CTest d'intégration.
-
-Une seule dominance est reçue : `central ALL => Midball ALL`. L'implication
-`central NONE => Midball ALL impossible`, inscrite dans une révision de ce
-rapport, était fausse parce que les extrema `D` et `s` sont décorrélés. La
-fixture u16 unidimensionnelle, plongée dans les trois axes, est :
-
-```text
-A=[0,8], B=[10,100], C={9}
-Hmin=1>0 ; Dmin=4 ; smin=smax=8100
-Midball ALL ; central NONE
-```
-
-Le raccord a donc raison d'essayer Midball sur tout verdict central différent
-de `ALL`, y compris `NONE`. Le fallback ne couvre que `MIXED` et ne rend pas cet
-appel redondant. En revanche, comme seul un nouvel `ALL` est consommé, le
-maximum et `axis_max` restent inutiles : trois axes fois huit coins, soit 24
-produits, suffisent. Réutiliser directement le type de boîte commun évite encore
-les copies et la divergence d'autorité.
-
-Le juge live n'est pas encore fail-closed :
-
-- ses compteurs sont globaux aux tailles d'une même commande ; un gain à `n=50`
-  masque le plancher nul d'un `n=8` suivant ;
-- `na*nb*m` est formé en i64 avant comparaison au cap et peut déborder pour les
-  cardinalités CLI admises ; le budget doit être calculé en i128 ou par divisions
-  gardées, puis décrémenté globalement, pas réinitialisé par fermeture ;
-- il juge seulement une fermeture finale, pas chaque promotion de bloc ; un faux
-  `ALL` peut être masqué par d'autres témoins corrects ;
-- le retour anticipé de `--fenetre-exhaustive` contourne juge et planchers : avec
-  `n=8`, `--midball --juge-midball=1` rend code zéro en mode exhaustif, contre
-  code `3` sans ce mode ;
-- le plancher `gain==0` devrait être une exigence explicite de campagne, pas
-  changer inconditionnellement la sémantique normale de `--midball`.
-
-Sur les mêmes rectangles `eight_clusters,n=1500,s=8,window=512`, le raccord
-ALL-only donne `lectures 9 570 325 -> 8 860 702`, `masse q2 ouverte
-106 809 -> 74 817`, `fermetures q2 90 735 -> 93 193`, avec
-`all=gains=156 711`, `pending=0`, `fenetre_finale=OUI` et lignes q3/q4
-identiques. Les temps alternés restent défavorables et bruités, cohérents avec
-les 48 produits de maximum morts. Cette réduction q2 est causale ; q4 reste
-ouvert à `95,278 %` et le contrat une seconde n'est pas rapproché à lui seul.
-
-## 10. Fixtures et portes permanentes
+## 9. Fixtures et portes permanentes
 
 - q2 : milieu et rayon exacts, `D=0`, shell strict, dix IDs distincts ;
 - triangle droit : troisième point shell mais support minimal q2 ;
@@ -789,7 +762,7 @@ La propriété de miniboule unique ouvre une source finie plus directe ; elle ne
 reçoit encore ni le coût global, ni le chemin device, ni `BallEvent -> 0B`, ni
 le contrat 50 000/G4.
 
-## 11. Rejeux ponctuels du contre-audit
+## 10. Rejeux ponctuels du contre-audit
 
 ```text
 build ciblé wspd_wavefront_probe au pin stable : vert
@@ -798,8 +771,10 @@ HEAD 8fd6f59 midball ciblé : 9/9 affichés verts en 0,95 s présent rejeu
   mais deux portes saines emploient PASS_REGULAR_EXPRESSION ; réception ouverte
 midball --selftest=1 : accord=OUI imprimé puis plancher code 3
 delta WSPD ALL-only intermédiaire : build rouge sous -Werror, compteur inutilisé
-delta WSPD 82b67234 ALL-only : build vert ; sans vwave, option vacuaire code 0
+HEAD a58d020 WSPD 63c79bd6 / CMake 4c6cb24e : build vert ; 13/13 affichés verts
   n=1500 amas : lectures -7,41 %, résiduel q2 -29,95 %, vague médiane +14,1 %
+  n=8 seul code 3, après n=200 code 0 par compteurs hérités
+  n=8 + juge cap1 + exhaustif : code 0, juge/plancher court-circuités
 eight_clusters n=200, S=1000, seed=1 :
   q2 ouverte=0,198 ; q3=0,520 ; q4=0,559 ; scans=198000
 delta exhaustif n=200 : 19900 paires ; U<h=3790/10059/10937 ; 3184359 tests

@@ -287,6 +287,25 @@ long long g_midball_all = 0, g_midball_gain = 0;
 // REFUS DE JUGER, jamais un accord.
 long long g_juge_midball = 0;
 long long g_mb_juges = 0, g_mb_faux = 0, g_mb_sautes = 0;
+// ---- BORNE SUPERIEURE DES CREDITS ATTEIGNABLES.
+//
+// La vague sature par le BAS — elle arrete une lane des que `cred >= need` —
+// mais elle n'abandonne jamais une branche dont le total atteignable est deja
+// insuffisant. Or `cred + reste` majore exactement le credit final : `reste`
+// est la population encore empilee, un nœud `NONE` la retire, un nœud `ALL` la
+// transfere dans `cred`, et un `MIXED` la conserve exactement puisque ses deux
+// enfants partitionnent sa population. Cette somme est donc DECROISSANTE, et
+// des qu'elle passe sous le seuil la lane est morte : continuer a descendre ne
+// peut plus rien fermer.
+bool g_borne_sup = false;
+// `HCBlockDepth` : le meme raisonnement, pousse aux lanes q3 et q4. `H` est
+// exact par separation d'axes, `||C||^2` est majore composante par composante.
+// C'est un PREFILTRE bon marche — une trentaine de multiplications contre
+// soixante-quatre triplets pour `SOC64` — place au meme endroit que le
+// certificat central et en DISJONCTION avec lui.
+bool g_hc = false;
+long long g_hc_all[3] = {0, 0, 0}, g_hc_gain[3] = {0, 0, 0};
+long long g_bs_lanes_mortes = 0, g_bs_visites_evitees = 0;
 // Parcours EXHAUSTIF de toutes les paires : le compte devient exact et la
 // question du modele aleatoire disparait.
 bool g_fenetre_exhaustive = false;
@@ -1030,6 +1049,8 @@ int main(int argc, char** argv) {
     else if (a == "--exige-q4-ouvert") g_exige_q4_ouvert = true;
     else if (a.rfind("--fenetre-exacte=", 0) == 0) g_fenetre_exacte = arg_ll(val("--fenetre-exacte=").c_str(), 1, (1LL << 24), "fenetre-exacte");
     else if (a == "--midball") g_midball = true;
+    else if (a == "--borne-sup") g_borne_sup = true;
+    else if (a == "--hc") g_hc = true;
     else if (a.rfind("--juge-midball=", 0) == 0) g_juge_midball = arg_ll(val("--juge-midball=").c_str(), 1, (1LL << 40), "juge-midball");
     else if (a == "--fenetre-exhaustive") { g_fenetre_exhaustive = true; if (g_fenetre_exacte == 0) g_fenetre_exacte = 1; }
     else if (a.rfind("--fenetre-seed=", 0) == 0) g_fenetre_seed = arg_ll(val("--fenetre-seed=").c_str(), 1, (1LL << 40), "fenetre-seed");
@@ -1065,6 +1086,10 @@ int main(int argc, char** argv) {
   // juge est du meme ordre : il ne peut etre ni tue ni survivant.
   if (g_bjd_groupes > 0 && !g_vwave) refuse("--bjd-groupes exige --vwave");
   if (g_midball && !g_vwave) refuse("--midball exige --vwave");
+  if (g_borne_sup && !g_vwave) refuse("--borne-sup exige --vwave");
+  if (g_hc && !g_vwave) refuse("--hc exige --vwave");
+  if (g_hc && g_judge_vwave)
+    refuse("--judge-vwave ne recompose pas le disjonctif hc");
   if (g_juge_midball > 0 && !g_midball) refuse("--juge-midball exige --midball");
   // Le juge de vague ne recompose que les temoins du masque CENTRAL. Avec un
   // disjonctif exact il declarerait faux des fermetures legitimes.
@@ -1275,6 +1300,19 @@ int main(int argc, char** argv) {
           } else {
             st[sn++] = {0, 7u, 7u};
           }
+          // `reste[lane]` : population encore empilee pour cette lane. Elle est
+          // initialisee depuis les taches de depart, qui forment une antichaine
+          // — leurs populations ne se recouvrent donc jamais.
+          long long reste[3] = {0, 0, 0};
+          auto pop_of = [&](int nd) -> long long {
+            return (nd < 0) ? 1LL : (long long)(nodes[nd].last - nodes[nd].first + 1);
+          };
+          if (g_borne_sup)
+            for (int t = 0; t < sn; ++t)
+              for (int lane = 0; lane < 3; ++lane)
+                if (st[t].mask & (1u << lane)) reste[lane] += pop_of(st[t].node);
+          unsigned mort = 0;   // lanes dont le total atteignable est insuffisant
+          bool mort_prouvee = false;   // sortie PROUVEE, jamais une troncature
           long long exp = 0;
           bool abandonne = false;
           const int* need = g_need;
@@ -1286,6 +1324,14 @@ int main(int argc, char** argv) {
             // la population est alors creditee DEUX fois. C'est la faute
             // que j'avais ecrite, et le juge doit la tuer.
             unsigned m = g_inject_global ? 7u : tk.mask;
+            if (g_borne_sup) {
+              // La tache quitte la pile : sa population n'est plus « en
+              // attente », elle est en train d'etre decidee.
+              for (int lane = 0; lane < 3; ++lane)
+                if (tk.mask & (1u << lane)) reste[lane] -= pop_of(tk.node);
+              m &= ~mort;
+              if (!m) { ++g_bs_visites_evitees; continue; }
+            }
             for (int lane = 0; lane < 3; ++lane)
               if (cred[lane] >= need[lane]) m &= ~(1u << lane);   // lane saturee
             if (!m) continue;
@@ -1330,6 +1376,30 @@ int main(int argc, char** argv) {
               // son minimum exact sur le produit des trois boites est la somme
               // des trois minima. On decide donc la lane q2 EXACTEMENT, au
               // meme endroit et sans descente supplementaire.
+              // ---- `HCBlockDepth`, EN DISJONCTION SUR LES TROIS LANES.
+              //
+              // Le masque central jette le terme directionnel `(U.d)^2` et
+              // suppose `C` maximal : c'est le pire cas `2-sqrt(3)`. Ce
+              // classifieur borne les trois composantes de `C` separement, donc
+              // il mord partout ou la geometrie n'est pas au pire cas. Comme
+              // pour midball, seul le `ALL` est repris : le `NONE` du central a
+              // une autre semantique et c'est lui qui porte l'elagage.
+              if (g_hc && v != RectVerdict::kAll) {
+                mhgp3v::midball::Box ha{}, hb{}, hc{};
+                for (int dd6 = 0; dd6 < 3; ++dd6) {
+                  ha.lo[dd6] = qa.lo[dd6]; ha.hi[dd6] = qa.hi[dd6];
+                  hb.lo[dd6] = qb.lo[dd6]; hb.hi[dd6] = qb.hi[dd6];
+                  hc.lo[dd6] = cb2.lo[dd6]; hc.hi[dd6] = cb2.hi[dd6];
+                }
+                const int hl = mhgp3v::midball::hc_lane_block(ha, hb, hc);
+                // `kLaneQ2/Q3/Q4` valent 2/3/4 : la lane `l` est fermee des que
+                // le verdict atteint `l+2`.
+                if (hl >= lane + 2) {
+                  v = RectVerdict::kAll;
+                  ++g_hc_all[lane];
+                  ++g_hc_gain[lane];
+                }
+              }
               if (g_midball && lane == 0) {
                 mhgp3v::midball::Box ma{}, mb{}, mc{};
                 for (int dd5 = 0; dd5 < 3; ++dd5) {
@@ -1650,8 +1720,30 @@ int main(int argc, char** argv) {
                 };
                 if (prio(cg) < prio(cd)) { const int t2 = cg; cg = cd; cd = t2; }
               }
+              // Les deux enfants PARTITIONNENT la population du parent : la
+              // remettre en attente conserve exactement `cred + reste`.
+              if (g_borne_sup)
+                for (int lane = 0; lane < 3; ++lane)
+                  if (mixed & (1u << lane)) reste[lane] += pop_of(cg) + pop_of(cd);
               st[sn++] = {cg, mixed, cmixed};
               st[sn++] = {cd, mixed, cmixed};
+            }
+            // ---- LE TEST DE MORT, APRES CHAQUE DECISION.
+            //
+            // `cred + reste` ne peut que decroitre : c'est le credit final le
+            // plus optimiste encore possible. Sous le seuil, la lane ne fermera
+            // jamais, et toute descente supplementaire pour elle est du travail
+            // pur perdu. Ce n'est PAS une troncature : le sort de la lane est
+            // decide, definitivement ouvert, et non pas inconnu.
+            if (g_borne_sup) {
+              for (int lane = 0; lane < 3; ++lane) {
+                if (mort & (1u << lane)) continue;
+                if (cred[lane] < need[lane] && cred[lane] + reste[lane] < need[lane]) {
+                  mort |= 1u << lane;
+                  ++g_bs_lanes_mortes;
+                }
+              }
+              if ((mort & 7u) == 7u) { mort_prouvee = true; break; }
             }
           }
           // Une pile pleine ou un quantum epuise laisse des taches VIVANTES.
@@ -1660,7 +1752,9 @@ int main(int argc, char** argv) {
           // la continuation reste a faire, et l'audit `dfa9e1b` a raison de
           // refuser le mot. Les credits deja acquis restent valides ; seule
           // la COMPLETUDE est perdue, jamais la surete.
-          if (abandonne || (sn > 0 && exp >= g_win)) { ++bank.tronques; tronque = true; }
+          if (!mort_prouvee && (abandonne || (sn > 0 && exp >= g_win))) {
+            ++bank.tronques; tronque = true;
+          }
           taken = exp;
 
           // ---- `BlockJungDual64` : DES GROUPES, SUR LE RECTANGLE ENTIER.
@@ -2851,6 +2945,18 @@ int main(int argc, char** argv) {
                   soc.bjd_couples,
                   (double)soc.bjd_couples / (double)std::max(1LL, soc.bjd_essais),
                   soc.bjd_rejetes_credite);
+    }
+    if (g_hc) {
+      std::printf("hc : all_q2=%lld all_q3=%lld all_q4=%lld\n",
+                  g_hc_all[0], g_hc_all[1], g_hc_all[2]);
+      if (g_hc_gain[0] + g_hc_gain[1] + g_hc_gain[2] == 0) {
+        std::fprintf(stderr, "PLANCHER: le disjonctif hc n'a rien change\n");
+        return 3;
+      }
+    }
+    if (g_borne_sup) {
+      std::printf("borne_sup : lanes_mortes=%lld visites_evitees=%lld\n",
+                  g_bs_lanes_mortes, g_bs_visites_evitees);
     }
     if (g_midball) {
       std::printf("midball q2 : all=%lld gains=%lld | juge=%lld faux=%lld sautes=%lld\n",

@@ -247,10 +247,89 @@ int fixtures(bool prune_q3q4) {
   return 0;
 }
 
+// ---------------------------------------------------------------------------
+// LE JUGE DE `HCBlockDepth`. Il n'emprunte rien au classifieur : pour chaque
+// triplet entier des trois boites il evalue la lane ponctuelle dans l'ecriture
+// `(g,Q)` de `spindle_cone.hpp` — ni `H`, ni `C`, ni aucun intervalle n'y
+// apparait — puis exige que le verdict de bloc ne promette JAMAIS plus que le
+// pire point.
+int selftest_hc(long long tours, MidballMutant mu, long long seed) {
+  unsigned long long etat = (unsigned long long)seed * 0x9E3779B97F4A7C15ULL + 11ULL;
+  long long desaccords = 0;
+  long long ferme[5] = {0, 0, 0, 0, 0};
+  for (long long t = 0; t < tours; ++t) {
+    Box A{}, B{}, C{};
+    const unsigned regime = (unsigned)(splitmix(etat) % 3);
+    for (int i = 0; i < 3; ++i) {
+      const i64 a0 = (i64)(splitmix(etat) % 40);
+      const i64 b0 = (i64)(splitmix(etat) % 40);
+      const i64 c0 = (i64)(splitmix(etat) % 40);
+      i64 wa = 0, wb = 0, wc = 0;
+      if (regime == 0) {
+        wa = (i64)(splitmix(etat) % 3);
+        wb = (i64)(splitmix(etat) % 3);
+        wc = (i64)(splitmix(etat) % 3);
+      } else if (regime == 1) {
+        wc = (i64)(splitmix(etat) % 5);
+      } else {
+        wa = (i64)(splitmix(etat) % 4);
+        wb = (i64)(splitmix(etat) % 4);
+      }
+      A.lo[i] = a0; A.hi[i] = a0 + wa;
+      B.lo[i] = b0; B.hi[i] = b0 + wb;
+      C.lo[i] = c0; C.hi[i] = c0 + wc;
+    }
+    const int bloc = mhgp3v::midball::hc_lane_block(A, B, C, mu, nullptr);
+    if (bloc >= 0 && bloc <= 4) ++ferme[bloc];
+    if (bloc <= mhgp3v::cone::kLaneNone) continue;
+    // Pire lane ponctuelle sur les vrais entiers.
+    int pire = mhgp3v::cone::kLaneQ4 + 1;
+    for (i64 ax = A.lo[0]; ax <= A.hi[0]; ++ax)
+    for (i64 ay = A.lo[1]; ay <= A.hi[1]; ++ay)
+    for (i64 az = A.lo[2]; az <= A.hi[2]; ++az)
+    for (i64 bx = B.lo[0]; bx <= B.hi[0]; ++bx)
+    for (i64 by = B.lo[1]; by <= B.hi[1]; ++by)
+    for (i64 bz = B.lo[2]; bz <= B.hi[2]; ++bz)
+    for (i64 cx = C.lo[0]; cx <= C.hi[0]; ++cx)
+    for (i64 cy = C.lo[1]; cy <= C.hi[1]; ++cy)
+    for (i64 cz = C.lo[2]; cz <= C.hi[2]; ++cz) {
+      const int l = mhgp3v::cone::lane_of_target_gq(ax, ay, az, cx, cy, cz, bx, by, bz);
+      if (l < pire) pire = l;
+    }
+    if (bloc > pire) ++desaccords;
+  }
+  std::printf("hc_selftest accord=%s tours=%lld none=%lld q2=%lld q3=%lld q4=%lld"
+              " desaccords=%lld mutant=%s\n",
+              desaccords == 0 ? "OUI" : "NON", tours, ferme[0], ferme[2], ferme[3],
+              ferme[4], desaccords, mhgp3v::midball::midball_mutant_name(mu));
+  if (desaccords != 0) {
+    if (mu != MidballMutant::kNone) {
+      std::printf("mutant_killed=1 %s : %lld verdicts de bloc plus forts que le"
+                  " pire point\n",
+                  mhgp3v::midball::midball_mutant_name(mu), desaccords);
+      return 4;
+    }
+    std::fprintf(stderr, "DESACCORD: %lld verdicts de bloc refutes\n", desaccords);
+    return 1;
+  }
+  if (mu != MidballMutant::kNone) {
+    std::fprintf(stderr, "MUTANT SURVIVANT : %s n'a produit aucun desaccord\n",
+                 mhgp3v::midball::midball_mutant_name(mu));
+    return 3;
+  }
+  // PLANCHERS : les trois lanes fermantes doivent apparaitre.
+  if (ferme[2] == 0 || ferme[3] == 0 || ferme[4] == 0) {
+    std::fprintf(stderr, "PLANCHER: q2=%lld q3=%lld q4=%lld\n", ferme[2], ferme[3],
+                 ferme[4]);
+    return 3;
+  }
+  return 0;
+}
+
 }  // namespace
 
 int main(int argc, char** argv) {
-  long long tours = 0, seed = 1;
+  long long tours = 0, tours_hc = 0, seed = 1;
   bool veut_fixtures = false;
   MidballMutant mu = MidballMutant::kNone;
   bool prune_q3q4 = false;
@@ -261,6 +340,10 @@ int main(int argc, char** argv) {
       tours = arg_ll(val("--selftest=").c_str(), 1, (1LL << 22), "selftest");
     else if (a.rfind("--seed=", 0) == 0)
       seed = arg_ll(val("--seed=").c_str(), 1, (1LL << 40), "seed");
+    else if (a.rfind("--selftest-hc=", 0) == 0)
+      tours_hc = arg_ll(val("--selftest-hc=").c_str(), 1, (1LL << 22), "selftest-hc");
+    else if (a == "--inject=hc-swap-coeff") mu = MidballMutant::kSwapCoeffHC;
+    else if (a == "--inject=hc-correlation-ignoree") mu = MidballMutant::kCorrelationIgnoree;
     else if (a == "--fixtures") veut_fixtures = true;
     else if (a == "--inject=midball-max-aux-coins") mu = MidballMutant::kMaxAuxCoins;
     else if (a == "--inject=midball-accept-equality") mu = MidballMutant::kAcceptEquality;
@@ -269,8 +352,9 @@ int main(int argc, char** argv) {
     else if (a == "--inject=midball-prune-q3q4") prune_q3q4 = true;
     else refuse("argument inconnu");
   }
-  if (tours == 0 && !veut_fixtures) refuse("--selftest ou --fixtures est exige");
-  if (mu != MidballMutant::kNone && tours == 0)
+  if (tours == 0 && tours_hc == 0 && !veut_fixtures)
+    refuse("--selftest, --selftest-hc ou --fixtures est exige");
+  if (mu != MidballMutant::kNone && tours == 0 && tours_hc == 0)
     refuse("un mutant de primitive exige --selftest");
   if (prune_q3q4 && !veut_fixtures) refuse("midball-prune-q3q4 exige --fixtures");
   if (veut_fixtures) {
@@ -279,6 +363,10 @@ int main(int argc, char** argv) {
   }
   if (tours > 0) {
     const int rc = selftest(tours, mu, seed);
+    if (rc != 0) return rc;
+  }
+  if (tours_hc > 0) {
+    const int rc = selftest_hc(tours_hc, mu, seed);
     if (rc != 0) return rc;
   }
   return 0;

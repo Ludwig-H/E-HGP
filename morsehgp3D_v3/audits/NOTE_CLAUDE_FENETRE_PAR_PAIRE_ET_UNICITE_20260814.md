@@ -150,9 +150,10 @@ fini, et cette relaxation s'ajoute à celle de la boîte.
 Une réserve, pour ne pas surinterpréter : la cascade reste interdite dans les
 deux sens. Une boule contenant `a` et `b` ne contient pas la boule de diamètre
 `ab` — avec `a=(-1,0,0)`, `b=(1,0,0)`, la sphère de centre `(0,10,0)` passe par
-les deux et exclut `(0,-0.5,0)`. Tester la miniboule de `ab` n'élimine donc
-rien en q3/q4, exactement comme la fixture de 64 points l'interdisait déjà dans
-l'autre sens.
+les deux et exclut `(0,-0.5,0)`. Tester la miniboule de `ab` ne fournit donc
+aucune règle générale d'élimination q3/q4. Les IDs du segment ouvert restent
+une exception exacte : ils appartiennent au cœur affine de toutes les sphères
+incidentes. La fixture de 64 points interdit déjà la cascade dans l'autre sens.
 
 ## 5. La mesure : le majorant d'ancres décidé par paire
 

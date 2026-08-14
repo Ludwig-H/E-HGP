@@ -8,14 +8,21 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-> **Alerte au `HEAD=8fd6f59`.** Le commit reçoit neuf portes
+> **Alerte au `HEAD=a58d020`.** Le commit reçoit treize portes
 > `MidballBlockDepth`, mais duplique l'autorité `rect_h_interval` déjà présente
 > et mélange deux domaines : son `ALL` vaut sur l'AABB continue, tandis que son
 > `NONE` vaut seulement sur l'enveloppe du réseau entier u16. Le header revendique
-> à tort le continu pour les deux, et les deux portes saines à regex peuvent
+> à tort le continu pour les deux, et les trois portes saines à regex peuvent
 > masquer un code non nul. Son mode
 > `--fenetre-exhaustive` est commité avec un retour anticipé avant les gates :
 > un plancher BJD impossible ou un mutant peuvent rendre code zéro.
+> La première révision postérieure de `--borne-sup`, hash `90640885`, est
+> réfutée : elle retirait un parent `MIXED` de `reste` sans réinsérer ses
+> enfants et supprimait toutes les fermetures. La réparation mobile `ec5ec3d4`
+> retrouve la parité sur une ablation, mais reste non reçue : potentiel baseline
+> appliqué à la vue combinée et banque BJD ne sont pas couverts. Le delta HC
+> suivant est mathématiquement sûr mais sans CTest/juge d'intégration et fait
+> déjà régresser la sous-suite Midball worktree à `12/13`.
 > Le verdict exact sur l'idée de miniboule unique est
 > [`AUDIT_MINIBOULE_UNIQUE_RESIDUEL_SHALLOW_5809BD2_20260814.md`](AUDIT_MINIBOULE_UNIQUE_RESIDUEL_SHALLOW_5809BD2_20260814.md) : q2 possède bien
 > une seule boule diamétrale ; q3 et q4 ont chacun une boule canonique une fois
@@ -27,29 +34,30 @@ Cadre : `phase=exploration_v3_hors_registre`,
 ## Snapshot
 
 Le dernier commit stable relu est
-`HEAD=8fd6f59bff450fbc88abff7f330be6c2da994a36`, commit
-`q2 n'a qu'un centre : son predicat de bloc est exact, pas suffisant`. Depuis
-le pin `cec4a4f`, cinq commits ont ajouté `SOC64`, `BlockJungDual64`, son
-packing réparé, les portes BJD, le sampler de cœur universel, puis la primitive
-q2 dupliquée et son oracle.
+`HEAD=a58d0207d8e0482ced4b0207144fa311193c0388`, commit
+`le premier certificat qui retire du travail, et non qui en ajoute`. Il absorbe
+le raccord Midball WSPD et quatre CTests d'intégration après le pin `8fd6f59`
+de la primitive.
 
-Après ce pin, Claude modifie de nouveau seulement
-`prototype/wspd_wavefront_probe.cpp` côté logiciel pour raccorder l'option
-`--midball`. Une première révision échouait sous `-Werror` sur un compteur
-inutilisé. La révision mobile courante, hash
-`63c79bd6ce707a66f304ca4613c225929d419d07e0d5e99547d914a877b6fa01`,
-compile, refuse l'option sans `--vwave`, imprime promotions et juge final. Elle
-ne publie toujours ni appels ni population promue et aucune CTest WSPD ne
-l'exerce. Les autres
-changements du worktree sont les présentes écritures documentaires. L'auditeur
-n'a modifié aucun logiciel.
+Après ce pin, Claude modifie de nouveau `prototype/wspd_wavefront_probe.cpp`,
+`prototype/midball_block.hpp` et `prototype/midball_probe.cpp`. Le snapshot
+mobile relu porte les hashes
+`WSPD=6330b79586066c575c59e4480a17fdf864fdef77b261a3a7f33c66bd68ed9c5b`,
+`header=921e649f0ebbbfb7a8034bedaeeb0a14a2eaaadf9eadb092f4f8c3cdbfd9403b`
+et `probe=587ecc58ebdd592245449fef901be9d2fac3f4b9287752648554c48f2e7dcc49`.
+Il ajoute `--borne-sup` puis `HCBlockDepth`. La révision `90640885` de la borne
+violait la conservation `MIXED`; sa réparation `ec5ec3d4` réinsère les enfants,
+mais reste incompatible avec la vue combinée et BJD. HC est un certificat sûr
+mais sans CTest ni juge d'intégration ; son changement de message fait régresser
+la sous-suite Midball worktree à `12/13`. Les autres changements sont les
+présentes écritures documentaires. L'auditeur n'a modifié aucun logiciel.
 
-Empreintes SHA-256 au commit `8fd6f59` :
+Empreintes SHA-256 au commit `a58d020` :
 
 - `CMakeLists.txt` :
-  `bfbf6517c13ba665bcec909e5b5f64e3609c8e99348e3d508794af7bba89e103` ;
+  `4c6cb24ee965ad7a852428119fca08568ad440d759884d69b3c5ed62a202fdc9` ;
 - `prototype/wspd_wavefront_probe.cpp` :
-  `7a650991bb8bd206075e7a5b7d02cb96bbea1cdb6dab5f692004f587f50235db` ;
+  `63c79bd6ce707a66f304ca4613c225929d419d07e0d5e99547d914a877b6fa01` ;
 - `prototype/cloud_families.hpp` :
   `f825334096c80407c57e2ca05f6f59f6ae3dd6313746beb8e73d689e9082dded` ;
 - `prototype/midball_block.hpp` :
@@ -64,7 +72,7 @@ Empreintes SHA-256 au commit `8fd6f59` :
   `18e6dd0f1aeafca51639805761a15855acbd08f4446ef9b4cbe7132db64977eb`.
 
 Le commit stable reçoit la primitive BJD, un packing disjoint sûr sur ses
-campagnes causales, huit portes BJD ciblées et neuf portes midball. Il ne reçoit
+campagnes causales, huit portes BJD ciblées et treize portes midball. Il ne reçoit
 ni source CK--WST,
 ni profondeur `tau(F)`, ni ledger persistant de vrais `PointId`, ni primitive
 device, ni payload. Son `--fenetre-exacte` n'est exact que pour la miniboule q2
@@ -144,13 +152,16 @@ des microtiles rejoués ou prouver un `BlockJungDiskDepth` uniforme.
 
 ## Miniboule canonique : oui au support complet, non à la cascade
 
-Pour un support minimal positif complet, la boule événementielle est unique :
-diamètre q2, circumdisque intrinsèque du triangle aigu q3, circumsphère du
-tétraèdre bien centré q4. Une arité supérieure conserve toutefois des centres
-différents tant que son support n'est pas complet. Une q2 de rang douze peut
-porter des q3/q4 de rang trois/quatre ; une face q3 de rang douze peut porter un
-q4 de rang quatre. Un troisième point de shell ne change pas nécessairement
-l'arité minimale : le triangle droit reste q2.
+Pour un support minimal positif complet, la boule ambiante événementielle est
+unique : diamètre q2, centre/rayon donnés par le circumcercle intrinsèque du
+triangle aigu q3, circumsphère du tétraèdre bien centré q4. Le circumdisque
+planaire q3 est le cœur des sphères incidentes, pas l'événement ambiant. Une
+arité supérieure conserve toutefois des centres différents tant que son support
+n'est pas complet. Deux fixtures séparées montrent qu'une paire q2 de rang
+douze peut porter respectivement un q3 de rang trois ou un q4 de rang quatre ;
+une face q3 de rang douze peut porter un q4 de rang quatre. Un troisième point
+de shell ne change pas nécessairement l'arité minimale : le triangle droit
+reste q2.
 
 Pour un domaine continu `K` contenant le centre canonique, les quantités
 `U=singletons universels`, `D=profondeur collective minimale` et
@@ -184,21 +195,26 @@ continue.
 
 Le header ne préflighte ni domaine u16, ni `lo<=hi`, ni paire propre, ni
 identités et n'expose aucun `INVALID/UNKNOWN`. Il duplique
-`rect_h_interval`, qui publie déjà le bon domaine réseau. Les 9/9 CTests affichés
-verts ne ferment pas ces points : les deux portes saines emploient
-`PASS_REGULAR_EXPRESSION`; `--selftest=1` imprime `accord=OUI` puis rend le code
-`3`, démontrant que le texte précède le plancher. La fixture de non-hérédité ne
-recertifie pas encore l'acuité q3 ni les barycentriques positives q4.
+`rect_h_interval`, dont le calcul et les fixtures portent eux aussi un domaine
+réseau insuffisamment typé dans l'API. Les 13/13 CTests affichés verts ne ferment
+pas ces points : trois portes saines emploient `PASS_REGULAR_EXPRESSION` ;
+`--selftest=1` imprime `accord=OUI` puis rend le code `3`, démontrant que le
+texte précède le plancher. La fixture de non-hérédité ne recertifie pas encore
+l'acuité q3 ni les barycentriques positives q4.
 
-Le raccord live ALL-only est l'ordonnance saine : ajouter uniquement un gain
+Le raccord stable ALL-only est l'ordonnance saine : ajouter uniquement un gain
 `ALL`, sans remplacer le `NONE` du certificateur central. Au snapshot courant,
-il compile mais n'a aucune CTest WSPD et appelle la primitive complète à 72
-multiplications i64 alors que le minimum seul en demande 24. Sur
+il compile et affiche 13/13 CTests ciblés verts, mais la porte saine WSPD à regex
+reste fail-open. Le source appelle la primitive complète, mais GCC Release
+élimine déjà le maximum inutilisé : le bloc machine de promotion contient 24
+multiplications. Une ABI min-only reste utile pour l'autorité et le device, pas
+comme gain CPU présumé. Sur
 `eight_clusters,n=1500,s=8`, une ablation alternée réduit les lectures de
 `7,41 %` et le résiduel q2 de `29,95 %`, avec `pending=0`, mais augmente la
-médiane de vague de `14,1 %` sur la machine partagée. La porte suivante est une
-autorité partagée min-only, un juge compatible avec les gains midball et un
-différentiel causal de lectures/temps.
+médiane de vague de `14,1 %` sur la machine partagée. Cette hausse ne peut pas
+être attribuée à `axis_max`, absent du binaire. La porte suivante est une
+autorité partagée min-only, un juge de chaque promotion et un différentiel
+causal profilé de lectures/temps.
 
 Le juge live reste ouvert : ses compteurs sont globaux à une liste de tailles,
 son produit de cap `na*nb*m` peut déborder i64, il juge les fermetures finales
@@ -206,6 +222,51 @@ plutôt que chaque promotion et le retour de `--fenetre-exhaustive` contourne se
 planchers. Le plancher de gain doit être une option de campagne. La seule
 dominance reçue est `central ALL => Midball ALL`; Midball peut au contraire
 promouvoir un `central NONE`, par exemple sur `A=[0,8],B=[10,100],C={9}`.
+
+## Worktree `--borne-sup` : invariant utile, raccord multivue réfuté
+
+Pour une seule vue de crédits singleton, l'idée est exacte. Si les tâches
+empilées forment une antichaîne, poser pour chaque lane
+`P=cred+sum(pop(task))`. Un `ALL` transfère la population de la pile au crédit,
+un `NONE` la retire, et un `MIXED` remplace le parent par deux enfants disjoints
+de même population totale. Ainsi `P` ne croît pas ; `P<h` prouve que cette
+source singleton ne fermera plus la lane.
+
+La première révision, hash `90640885`, soustrayait le parent `MIXED` sans
+réinsérer ses enfants. Elle transformait donc cette borne supérieure en
+sous-estimateur. Fixture causale `uniform,n=16,coord=64,seed=1,window=1024` :
+la baseline ferme une q2 après `3171` lectures ; la révision annonce zéro
+fermeture après `117` lectures, `351` lanes mortes et aucune troncature. Le hash
+mobile suivant `ec5ec3d` réinsère bien les deux populations ; cette fixture
+retrouve la fermeture et passe de `3171` à `2177` lectures. Le premier défaut
+doit rester un mutant permanent `drop-mixed-children`.
+
+Le raccord reste néanmoins faux sur les modes acceptés :
+
+- `reste/mort` ne suit que `cred/mask`. Il efface ensuite `m`, donc aussi
+  `cmask`, alors que la vue combinée peut avoir `ccred>cred`. Sur
+  `terrain,n=16,coord=64,seed=3,--soc64-shadow`, la vue combinée passe d'une
+  fermeture à zéro avec la borne ;
+- BJD propose des crédits collectifs **après** la boucle à partir des feuilles
+  vues. La borne des singletons ne majore pas ces groupes et l'arrêt précoce
+  réduit leur banque. `uniform,n=100,seed=4,SOC+BJD8` passe ainsi de
+  `464` à `462` q4 fermées avec code zéro et `fenetre_finale=OUI` ;
+- `visites_evitees` ne compte ni les tâches encore empilées au break, ni leurs
+  descendants, et les compteurs sont globaux aux tailles. Ce n'est pas encore
+  une mesure du travail supprimé.
+- `--climb` initialise le potentiel sur les seuls frères remontés et omet la
+  feuille `pos0` ; la mortalité porte alors sur un parcours incomplet, pas sur
+  tous les témoins géométriquement disponibles.
+
+La réparation minimale sépare `reste/mort` par vue et garde le parcours vivant
+sur l'union de leurs bits. Jusqu'à une borne composée authentifiée, le mode doit
+refuser BJD et tout proposant post-boucle. Les portes permanentes comparent
+fates, masses et fermetures exactes à la baseline sans troncature, mordent
+`drop-mixed-children`, le cas `cred=0,ccred=7,reste=1,h=8`, la fixture BJD
+ci-dessus, les fenêtres capées et plusieurs tailles. Aucun gain de la révision
+mobile n'est recevable avant cette parité. Le snapshot falsifié, la portée
+exacte du lemme et les obligations sont détaillés dans
+[`AUDIT_LIVE_BORNE_SUP_CREDITS_A58D020_20260814.md`](AUDIT_LIVE_BORNE_SUP_CREDITS_A58D020_20260814.md).
 
 ## P0 : `0A` reste ouvert sur u16
 
@@ -572,7 +633,7 @@ demandé des exécutables absents ; CTest a rendu `rc=8`. Le transcript conserve
 l'échec et `stop_and_verify.sh` certifie exactement
 `devpod-gpu-exploration/europe-west4-ai1a/ehgp-blackwell-spot-ai1a` en
 `TERMINATED`. Ce reçu qualifie l'arrêt, pas SOC64, une pente ou le SLO. Le
-script inchangé jusqu'au commit `8fd6f59` est seulement corrigé partiellement et n'a pas de
+script inchangé jusqu'au commit `a58d020` est seulement corrigé partiellement et n'a pas de
 reçu d'exécution : il omet encore `mhgp3v_jung_dual_judge`, sélectionné par son
 regex CTest, et ce regex ignore les portes `mhgp3v_bjd_*`. Il avale le code de
 l'analyseur, omet `--exige-fenetre-finale`, gate le seul `sum_E` à `1,70` au
@@ -697,9 +758,12 @@ HEAD fenetre-exacte n=200, S=1000 : 198000 scans ; q2 exact échantillonné, q3/
 HEAD exhaustif n=200 : 19900 paires, U<h=3790/10059/10937, 3184359 tests
 HEAD exhaustif --points=8,9 : n=9 sauté par retour après les 28 paires de n=8
 HEAD exhaustif + plancher BJD impossible ou mutant : code 0, gates court-circuitées
-worktree midball 63c79bd6 : build vert ; refus sans vwave, promotions publiées
+HEAD a58d020 WSPD 63c79bd6 / CMake 4c6cb24e : build vert ; 13/13 affichés verts
   n=1500 amas : lectures -7,41 %, résiduel q2 -29,95 %, vague médiane +14,1 %
   multi-n : compteurs hérités ; cap i64 et bypass exhaustif du juge ouverts
+worktree borne-sup 90640885 : zéro fermeture q2/q3/q4, pending=0, fenêtre finale OUI ; réfuté
+worktree borne-sup ec5ec3d4 : fates/masses appariés sans SOC/BJD/climb ; lectures -0,0274 %
+  ledgers combinés, BJD, climb, CTest de parité et mutant de conservation ouverts
 ablation BJD n=1500 uniform : masse q4 -12,55 %, CPU user médian +5,47 %, lectures identiques
 ablation BJD n=1500 amas : masse q4 -0,87 %, CPU user médian +8,15 %, lectures identiques
 session G4 SOC actif : CTest rc=8, aucune rampe, cible TERMINATED

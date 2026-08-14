@@ -4970,7 +4970,7 @@ mhgp3v_add_expected_code_test_for(mhgp3v_midball_probe
 # Refus avant calcul : un mode vide ou un mutant sans son juge ne peut pas etre
 # vert.
 mhgp3v_add_expected_code_test_for(mhgp3v_midball_probe
-  mhgp3v_midball_refus_sans_mode "--selftest ou --fixtures est exige" 2)
+  mhgp3v_midball_refus_sans_mode "--selftest, --selftest-hc ou --fixtures est exige" 2)
 mhgp3v_add_expected_code_test_for(mhgp3v_midball_probe
   mhgp3v_midball_refus_mutant_sans_juge "un mutant de primitive exige --selftest" 2
   --fixtures --inject=midball-drop-axis)
@@ -5017,3 +5017,60 @@ mhgp3v_add_expected_code_test_for(mhgp3v_wspd_wavefront_probe
   mhgp3v_midball_refus_judge_vwave "--judge-vwave ne recompose pas le disjonctif midball" 2
   --family=eight_clusters --points=200 --sep-euclid=8/1 --tight --vwave
   --window=512 --window-ledger --midball --judge-vwave)
+
+# ---------------------------------------------------------------------------
+# `HCBlockDepth` : LA MEME IDEE POUSSEE AUX LANES q3 ET q4 — ET SON PRIX.
+#
+# Dans la representation `(H,C)`, `q3` vaut `3H^2 > ||C||^2` et `q4`
+# `2H^2 > ||C||^2`. `H` reste exact par separation d'axes ; chaque composante de
+# `C` est bornee par intervalle, ce qui ne perd que la correlation entre ses deux
+# produits — donc ne cree que des `MIXED`, jamais un faux `ALL`.
+#
+# LE GAIN EST REEL ET LE PRIX AUSSI. A `eight_clusters,n=3000` le disjonctif
+# retire `12,6 %` des recertifications et `17,6 %` de la fenetre q3, mais la
+# mediane de trois temps CPU passe de `8,3 s` a `13,7 s`. Le predicat coute plus
+# que les visites qu'il economise, exactement comme `SOC64` et `BJD` avant lui.
+# Il est donc grave comme DIAGNOSTIC mesure, pas comme chemin chaud : seul
+# `--midball`, dont le surcout est dans le bruit, reste candidat.
+add_test(NAME mhgp3v_hc_selftest COMMAND mhgp3v_midball_probe --selftest-hc=3000)
+set_tests_properties(mhgp3v_hc_selftest PROPERTIES
+  PASS_REGULAR_EXPRESSION
+  "hc_selftest accord=OUI tours=3000 none=[0-9]+ q2=[0-9]+ q3=[0-9]+ q4=[0-9]+ desaccords=0")
+
+foreach(_hc_mutant IN ITEMS hc-swap-coeff hc-correlation-ignoree)
+  string(REPLACE "-" "_" _hc_nom "${_hc_mutant}")
+  mhgp3v_add_expected_code_test_for(mhgp3v_midball_probe
+    mhgp3v_${_hc_nom} "mutant_killed=1 ${_hc_mutant}" 4
+    --selftest-hc=3000 --inject=${_hc_mutant})
+endforeach()
+
+add_test(NAME mhgp3v_hc_vwave
+  COMMAND mhgp3v_wspd_wavefront_probe --family=eight_clusters --points=3000
+          --sep-euclid=8/1 --tight --vwave --window=512 --window-ledger --hc)
+set_tests_properties(mhgp3v_hc_vwave PROPERTIES
+  PASS_REGULAR_EXPRESSION
+  "hc : all_q2=439603 all_q3=431194 all_q4=358618")
+
+# ---------------------------------------------------------------------------
+# BORNE SUPERIEURE DES CREDITS : REFUTATION MESUREE.
+#
+# `cred + reste` majore exactement le credit final atteignable — un `NONE`
+# retire sa population, un `ALL` la transfere, un `MIXED` la conserve puisque
+# ses deux enfants la partitionnent. Abandonner une lane des que cette somme
+# passe sous le seuil est donc exact et sans risque.
+#
+# Le gain est NUL : `31 538 327 -> 31 535 026` recertifications, soit un
+# centieme de pour cent. La raison est structurelle : le seuil vaut huit a dix
+# points, une misere devant les populations empilees, si bien que la lane ne
+# meurt qu'une fois la pile presque vide. La coupure par le haut ne peut pas
+# fonctionner sur cette quantite ; il faudrait majorer les temoins ENCORE
+# ADMISSIBLES, ce qui demande precisement la visite qu'on cherche a eviter.
+add_test(NAME mhgp3v_borne_sup_refutation
+  COMMAND mhgp3v_wspd_wavefront_probe --family=eight_clusters --points=3000
+          --sep-euclid=8/1 --tight --vwave --window=512 --window-ledger --borne-sup)
+set_tests_properties(mhgp3v_borne_sup_refutation PROPERTIES
+  PASS_REGULAR_EXPRESSION
+  "borne_sup : lanes_mortes=648746 visites_evitees=525")
+mhgp3v_add_expected_code_test_for(mhgp3v_wspd_wavefront_probe
+  mhgp3v_hc_refus_sans_vwave "--hc exige --vwave" 2
+  --family=eight_clusters --points=200 --sep-euclid=8/1 --tight --window=512 --hc)

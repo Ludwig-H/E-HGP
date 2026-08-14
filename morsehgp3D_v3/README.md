@@ -21,7 +21,7 @@ sans kernel CUDA et certifié l'arrêt ciblé. La seconde a échoué avant toute
 rampe (`CTest rc=8`, cibles non construites) : elle ne fournit aucune mesure
 SOC/G4.
 
-La recette au `HEAD=8fd6f59` reste non relançable : elle omet encore une cible
+La recette au `HEAD=a58d020` reste non relançable : elle omet encore une cible
 sélectionnée par son regex CTest, ne sélectionne pas les nouvelles portes BJD,
 ignore le code de l'analyseur de pentes, n'exige pas une fenêtre finale et
 autorise quatre timeouts séquentiels dont la somme dépasse les deux
@@ -34,25 +34,54 @@ est `p95 warm_e2e<100 ms` et la cible secondaire `p95 warm_e2e<1 s` sur un G4,
 sortie complète et synchronisation comprises. Aucun échantillon qualifiable ne
 reçoit l'une ou l'autre.
 
-Le dernier commit stable relu est `8fd6f59`. Il intègre le packing d'identités
-BJD réparé et ses huit CTests, refuse `--exige-q4-ouvert` sans juge et toute
-cardinalité autre que neuf pour `collinear_seven`. Le packing agit toujours
+Le dernier commit stable relu est `a58d020`. Son parent `8fd6f59` intègre le
+packing d'identités BJD réparé et ses huit CTests, refuse
+`--exige-q4-ouvert` sans juge et toute cardinalité autre que neuf pour
+`collinear_seven`. Le packing agit toujours
 après toute la descente. Le verdict détaillé et la solution `tau(F)` sont dans
 [`audits/AUDIT_LIVE_BLOCK_JUNG_CREDITS_TAU_783A789_20260814.md`](audits/AUDIT_LIVE_BLOCK_JUNG_CREDITS_TAU_783A789_20260814.md).
 
-Le même commit ajoute `MidballBlockDepth` et neuf portes ciblées. Ses extrema
+Le pin `8fd6f59` ajoute `MidballBlockDepth` et neuf portes ciblées ; `a58d020`
+ajoute son raccord WSPD et quatre portes d'intégration. Ses extrema
 ne portent pas tous le même domaine : `ALL` est exact sur l'AABB continue,
 `NONE` sur l'enveloppe du **réseau u16**, pas sur le seul produit des `PointId`
 occupés. Le header appelle pourtant ce dernier domaine continu. La primitive
-duplique `rect_h_interval` déjà présente ; ses deux portes saines à regex peuvent
-en outre masquer un code non nul. Un raccord WSPD mobile postérieur essaie
-`--midball` en disjonction ALL-only. Il compile, refuse maintenant l'absence de
-`--vwave`, publie ses promotions et possède un juge final. Il reste sans
+duplique `rect_h_interval` déjà présente ; trois portes saines à regex peuvent
+en outre masquer un code non nul. Le raccord essaie `--midball` en disjonction
+ALL-only, refuse l'absence de `--vwave`, publie ses promotions et possède un
+juge final. Il reste sans
 preflight u16, compte d'appels/population, juge causal de chaque promotion ni
-CTest d'intégration ; compteurs multi-tailles, cap i64 et bypass par le mode
-exhaustif restent ouverts. Une ablation amas à `n=1500` baisse lectures/résiduel q2 de
-`7,41 %/29,95 %`, mais augmente la médiane de vague de `14,1 %` : le fast path
-doit calculer seulement le minimum, pas les 72 produits de la primitive complète.
+porte d'intégration saine fail-closed : trois refus vérifient leur code, mais le
+nominal emploie une regex capable de masquer un code non nul. Compteurs
+multi-tailles, cap i64 et bypass par le mode exhaustif restent ouverts. Une
+ablation amas à `n=1500` baisse lectures/résiduel q2 de
+`7,41 %/29,95 %`, mais augmente la médiane de vague de `14,1 %`. Le source
+appelle la primitive complète, mais l'inlining Release élimine déjà le maximum :
+le bloc machine de promotion contient 24 multiplications. Une ABI min-only reste
+souhaitable pour l'autorité commune et le device, pas comme gain CPU présumé.
+
+Le worktree postérieur explore `--borne-sup`, une coupure quand crédit acquis
+plus population encore atteignable tombe sous le seuil. La première révision
+`90640885` oubliait de remettre les enfants d'un parent `MIXED` et publiait
+zéro fermeture avec `pending=0`. La réparation mobile `ec5ec3d4` retrouve la
+parité baseline sur une ablation, mais ne sépare pas encore `cred/ccred`, ne
+borne pas la banque BJD et perd effectivement des fermetures dans ces deux
+combinaisons. `--climb` est un défaut distinct : sa propre antichaîne omet une
+feuille malgré un statut final. La borne économise seulement
+`0,0274 %` des lectures sur l'ablation amas à `n=1500`. Aucun gain ni verdict
+exact n'est reçu avant les portes du
+[`contre-audit dédié`](audits/AUDIT_LIVE_BORNE_SUP_CREDITS_A58D020_20260814.md).
+
+Le même worktree ajoute `HCBlockDepth`, préfiltre q2/q3/q4 par
+`H=(z-a) dot (b-z)` et `C=(b-z) cross (z-a)`. Les facteurs
+`3H^2>||C||^2` pour q3 et `2H^2>||C||^2` pour q4 sont exacts ; les intervalles
+de composantes donnent un `ALL` sûr mais conservateur, pas une source
+d'événements. `Corner512` est déjà l'autorité exacte de l'enveloppe. Le delta HC
+n'a aucune CTest ni juge d'intégration, recalcule le même classifieur jusqu'à
+trois fois par nœud, rend `--hc --midball` structurellement rouge et fait
+régresser la sous-suite Midball worktree à `12/13`. Son diagnostic CPU réduit
+les lectures à `n=200`, mais augmente fortement le temps one-shot ; aucune
+promotion performance n'en découle.
 
 Le pin `5809bd2` ajoute `--fenetre-exacte` et `694920a` en publie des pentes. Le
 nom doit être lu avec prudence :
@@ -194,9 +223,12 @@ gardent donc leur multiplicité. Un quotient silencieux changerait la profondeur
 
 ### Miniboule unique et centres critiques finis
 
-Une fois le support minimal positif complet fixé, son événement est sa
-miniboule intrinsèque unique. Pour q2, le centre est exactement le milieu et le
-prédicat est `(z-a) dot (b-z)>0`. Pour une ancre `ab` fixée, q3 prend le pied
+Une fois le support minimal positif complet fixé, son événement est son unique
+boule ambiante, dont le centre et le rayon sont intrinsèques à l'espace affine
+du support. Pour q2, le centre est exactement le milieu et
+`(z-a) dot (b-z)>0` décide l'intérieur strict ; l'égalité est shell, et le
+verdict HGP complet conserve le census fermé et le `BallKey`. Pour une ancre
+`ab` fixée, q3 prend le pied
 auto-centré de la ligne du troisième site dans le plan médiateur, et q4
 l'intersection de deux lignes. Le continuum du disque de Jung n'est donc pas la
 source des événements : il reste le domaine légitime d'un prune collectif avant
@@ -210,11 +242,14 @@ le cas `U<h<=C` exige `tau(F)`, une sweep ou un split. Pour toutes les sphères
 incidentes non bornées, le cœur commun est seulement le segment ouvert q2 ou le
 circumdisque situé dans le plan q3.
 
-La profondeur de la boule diamétrale ne se propage jamais à q3/q4. Une fixture
-u16 possède dix points dans cette boule tout en gardant une circumboule q3 vide
-et une circumsphère q4 vide, toutes deux positives et possédées par `ab`. Le
-rang q3 ne se propage pas davantage : une face de rang douze peut porter un q4
-de rang quatre. Le
+Le seul census de la boule diamétrale ne fournit aucune règle générale de
+propagation vers q3/q4 ; les IDs du segment ouvert, eux, appartiennent au cœur
+affine de toutes les sphères incidentes. Deux fixtures u16 séparées, partageant
+`a,b` et les dix témoins, gardent respectivement une boule q3 ambiante vide et
+une sphère q4 vide, toutes deux positives ; l'owner `ab` du cas q4 est fixé par
+`EdgeKey(ab)<EdgeKey(c4,d4)`. Réunir les deux nuages créerait des extra-shell et
+invaliderait les rangs annoncés. Le rang q3 ne se propage pas davantage : une
+face de rang douze peut porter un q4 de rang quatre. Le
 résiduel exact doit donc conserver les pieds q3 et les intersections shallow
 q4, avec owner, shell et `BallKey` complets.
 
@@ -375,12 +410,13 @@ Depuis le pin `5809bd2`, le header implémente cette forme à base et poids
 communs fixés. La réception logicielle reste ouverte : son selftest direct ne
 compare que la forme ponctuelle et des boîtes dégénérées, et le header
 géométrique ne porte ni `PointId` ni preuve de disjonction. Son prétest
-intérieur porte le pire cas à 65 évaluations. Au `HEAD=694920a`, le raccord
-WSPD passe huit CTests ciblées : nominal non vacuaire, refus partiel et modes
-vacuaires, fixture collinéaire et trois exécutions mutantes. Ces tests reçoivent
-le packing causal sur leurs campagnes, mais ni une boîte non dégénérée dans le
-selftest indépendant, ni `tau(F)`, ni chemin device. La porte
-`--exige-q4-ouvert` reste elle-même vacuaire hors du bloc `--juge-bjd`.
+intérieur porte le pire cas à 65 évaluations. Au pin `694920a`, le raccord WSPD
+passe huit CTests ciblées : nominal non vacuaire, refus partiel et modes
+vacuaires, fixture collinéaire et trois exécutions mutantes. Le parent
+`8fd6f59` refuse en plus `--exige-q4-ouvert` sans `--juge-bjd` et une
+cardinalité autre que neuf pour la fixture. Ces tests reçoivent le packing
+causal sur leurs campagnes, mais ni une boîte non dégénérée dans le selftest
+indépendant, ni `tau(F)`, ni chemin device.
 
 L'ABI stable garde aussi une ambiguïté à supprimer : une `Base` invalide fait
 retourner `kLaneNone`. Le callsite q4 courant échoue ouvertement parce qu'il ne

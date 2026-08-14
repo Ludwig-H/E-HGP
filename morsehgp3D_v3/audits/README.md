@@ -25,10 +25,20 @@ ancienne phrase imposant le rejet global des positions dupliquées est périmée
 - [`AUDIT_MINIBOULE_UNIQUE_RESIDUEL_SHALLOW_5809BD2_20260814.md`](AUDIT_MINIBOULE_UNIQUE_RESIDUEL_SHALLOW_5809BD2_20260814.md) :
   lemme exact de miniboule unique au support complet, famille normale au support
   partiel, cœur affine, sandwich `U<=D<=C`, q3 par pied, q4 par intersections,
-  contre-fixtures u16 de non-hérédité, contre-audit des samplers au commit
-  `8fd6f59` et réception de `MidballBlockDepth` : `ALL` continu sûr, `NONE`
-  limité au réseau u16, portes à regex fail-open, raccord ALL-only à consolider
-  avec l'autorité antérieure `rect_h_interval`.
+  contre-fixtures u16 de non-hérédité, contre-audit des samplers et réception de
+  `MidballBlockDepth` au pin `8fd6f59`, puis du raccord/juge WSPD au pin
+  `a58d020` : `ALL` continu sûr, `NONE` limité au réseau u16, portes à regex
+  fail-open et autorité à consolider avec `rect_h_interval`.
+- [`AUDIT_LIVE_BORNE_SUP_CREDITS_A58D020_20260814.md`](AUDIT_LIVE_BORNE_SUP_CREDITS_A58D020_20260814.md) :
+  contre-audit de `--borne-sup` après `a58d020` ; la révision `90640885`
+  oubliait les enfants `MIXED` et supprimait toutes les fermetures. La
+  réparation mobile `ec5ec3d4` restaure la parité sur l'ablation rejouée, mais
+  ledgers combinés, BJD, `--climb`, portée du verdict et portes restent ouverts.
+- [`AUDIT_LIVE_HC_BLOCK_DEPTH_A58D020_20260814.md`](AUDIT_LIVE_HC_BLOCK_DEPTH_A58D020_20260814.md) :
+  preuve du certificat `(H,C)` q2/q3/q4, audit du delta `--hc` après `a58d020`,
+  réduction logique reçue mais intégration NO-GO : CTest Midball cassée, aucune
+  porte HC, triple calcul par tâche, composition Midball fautive, ABI et coût
+  encore ouverts.
 - [`AUDIT_LIVE_BLOCK_JUNG_CREDITS_TAU_783A789_20260814.md`](AUDIT_LIVE_BLOCK_JUNG_CREDITS_TAU_783A789_20260814.md) :
   contre-audit historique du raccord `BlockJungDual64` au parent `783a789` ;
   réfutation du double crédit d'identité, packing réparé mais no-go dans
