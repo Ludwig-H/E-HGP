@@ -327,6 +327,68 @@ Toute boule centrée en `y` qui contient `S` a donc un rayon carré au moins
 quatrième site sur le shell ne devient pas automatiquement membre du support :
 une barycentrique nulle ramène la miniboule à l'arité inférieure.
 
+La même preuve donne un microkernel entier unique pour q2, q3 et q4. Écrire le
+support sous la forme `S={a,a+m_1,...,a+m_k}`, avec `k=1,2,3`, puis poser :
+
+```text
+M = [m_1 ... m_k]
+G = M^T*M
+ell = diag(G)
+Delta = det(G)
+r = adj(G)*ell
+t = M*r
+```
+
+`Delta>0` est exactement l'indépendance affine. Pour `k=1`, cela impose des
+coordonnées distinctes, donc `D>0` ; deux `PointId` au même site conservent leur
+multiplicité dans le census mais ne forment pas un support q2. Prendre
+explicitement `adj([D])=[1]`. Les poids du circumcentre sont alors, sans solveur
+ni division dans la décision :
+
+```text
+lambda_{i+1} = r_i/(2*Delta)
+lambda_a = (2*Delta-sum_i r_i)/(2*Delta)
+```
+
+Le support est minimal positif si et seulement si ces `k+1` numérateurs sont
+strictement positifs. Pour `s=z-a`, définir :
+
+```text
+Phi_S(z) = Delta*||s||^2 - s^T*t
+```
+
+On a exactement `Phi<0` à l'intérieur, `Phi=0` sur le shell et `Phi>0` à
+l'extérieur. Pour `k=1`, cette identité redonne
+`||z-a||^2-(z-a) dot (b-a)<0`, donc la boule diamétrale. Pour `k=2`, elle
+redonne la boule q3 ambiante. Pour `k=3`, `Delta=O^2` et `Phi=O*J` : aucune
+orientation n'est nécessaire.
+
+La forme primitive destinée au RLE est obtenue directement, toujours sans
+centre :
+
+```text
+BallForm = (Delta, -2*Delta*a-t, Delta*||a||^2+a dot t)
+```
+
+Réduire ses coefficients par leur pgcd et imposer le premier coefficient
+positif donne la clé géométrique avant ajout du profil/epoch. Au support q4
+ponctuel, la division algébrique par `|O|` redonne la forme `T/Qbar` plus courte
+décrite plus bas et tient en i128. L'implémentation terminale calcule directement
+`T/Qbar` puis le pgcd ; former d'abord la grande BallForm de Gram annulerait ce
+bénéfice. Pour `k=1`, la forme primitive se réduit directement à
+`(1,-a-b,a dot b)`.
+
+Sur un produit de boîtes dont le signe varie, la valeur finale vérifie
+`|Phi|<432*65535^8<2^137`, mais une enclosure Gram naïve peut former des
+intermédiaires jusqu'à `1944*65535^8<2^139`. Il faut donc jusqu'à 140 bits
+signés d'intermédiaire ; i192 est sûr, i256 reste une autorité simple. Les huit
+coins éliminent uniquement la variable témoin : pour fermer un `WitnessNode`,
+prouver `sup_support Phi_S(q)<0` à chacun de ses huit coins, uniformément sur
+`A×B×C×D`, après `Delta>0` et positivité stricte des poids. La convexité en `z`
+rend ces huit tests nécessaires et suffisants pour chaque support fixé ; elle
+ne rend pas exacte l'enclosure des facteurs support. Une borne indécise splitte
+ou rend `PENDING`, et huit coins extérieurs ne prouvent jamais `NONE`.
+
 Chaque support complet produit donc une seule `BallKey` candidate, mais aucun
 census n'est payé avant le RLE. Les dégénérescences peuvent envoyer plusieurs
 `SupportKey` vers la même `BallKey` ; le RLE conserve toute cette provenance et
@@ -1381,6 +1443,64 @@ aigu et zéro sweep sans tableau de `PairId`.
 
 ## 7. q4 : `OwnedCK-WST4`, puis shallow local si nécessaire
 
+### 7.0 Généralisation CK exacte à un support complet d'ordre `q`
+
+La généralisation utile du WSPD est d'abord combinatoire. Soit un rectangle
+pair-exact `R=(A,B)` et une antichaîne de cellules témoins disjointes
+`C_1,...,C_k` couvrant le domaine nécessaire de ses complétions. Pour tout
+`q>=2`, chaque vecteur entier
+
+```text
+alpha_i>=0, sum_i alpha_i=q-2, alpha_i<=|C_i|
+```
+
+définit exactement un atome symbolique :
+
+```text
+A x B x product_i binom(C_i,alpha_i)
+```
+
+La relation de supports complets est l'intersection de ces atomes avec
+`INJECTIVE(PointId)`, l'owner total parmi toutes les arêtes et la positivité
+circumcentrique. À q3, un seul `alpha_i` vaut un. À q4, on obtient exactement
+les produits `C_i x C_j`, `i<j`, et les diagonales `binom(C_i,2)`. Cette
+partition porte votre intuition sans quantifier sur des sphères incidentes à un
+support partiel : chaque tuple complet survivant possède ensuite une seule
+boule canonique à recenser.
+
+Le nombre d'atomes symboliques non vides est le coefficient :
+
+```text
+[z^(q-2)] product_i (1+z+...+z^min(|C_i|,q-2))
+```
+
+Il est au plus `binom(k+q-3,q-2)`. Si, et seulement si, une construction
+fair/compressed reçoit `k=O(eta^-3)` cellules par rectangle et
+`O(s^3*n)` rectangles, le nombre de blocs initiaux est donc conditionnellement
+`O(s^3*n*eta^(-3*(q-2)))`. Cette borne ne couvre ni les splits
+owner/positivité/profondeur, ni la masse de sortie. Le LBVH actuel et son arrêt
+par AABB serrée ne reçoivent pas encore l'hypothèse de packing.
+
+Pour des endpoints fixés, poser `n_i=|C_i minus {a,b}|`. La masse de l'atome
+`alpha` est `product_i binom(n_i,alpha_i)` et la somme sur tous les `alpha`
+vaut exactement `binom(sum_i n_i,q-2)`. Ainsi q3 possède `k` types non vides ;
+q4 en possède `binom(k,2)+#{i:n_i>=2}`. Une représentation par slots ordonnés
+doit quotienter par `product_i alpha_i!`. En dimension trois, la positivité est
+vide pour `q>4`, faute de support minimal affinement indépendant plus grand.
+
+Aucune séparation CK entre chaque paire `C_i,C_j` n'est requise pour la
+complétude. Une telle séparation peut rendre un prédicat uniforme plus mordant ;
+son échec déclenche un split atomique ou `PENDING`, jamais la suppression de
+l'atome. En particulier :
+
+```text
+Sym2(C) = Sym2(L) disjoint_union (L x R) disjoint_union Sym2(R)
+```
+
+quand `L,R` partitionnent `C`. Un compteur `|C|-1` des nœuds internes ne vaut
+pas implémentation de cette relation : la jonction aval doit réellement porter
+les deux facteurs disjoints et retirer le parent.
+
 Pour le même rectangle owner `R=(A,B)`, réutiliser les cellules carrier de
 la fenêtre `2B_R`--lentille et former paresseusement des couples non ordonnés
 `(C,D)`. Si `C!=D`, le bloc candidat porte `A×B×C×D`; si `C=D`, il porte
@@ -1745,7 +1865,10 @@ J(S,z) = det4((a-z,||a-z||^2),
 ```
 
 Avec cette convention, `z` est strictement intérieur si et seulement si
-`O*J<0`. Ne jamais former ce produit. Si un intervalle d'orientation sur
+`O*J<0`. Ne jamais former ce produit en i128 ni multiplier deux intervalles
+décorrélés. Sur le résiduel dont le signe d'orientation reste indécis, employer
+la forme Gram corrélée `Phi=O*J` ci-dessus en i192/i256 ; ses huit coins restent
+complets. Si un intervalle d'orientation sur
 `A×B×C×D` exclut zéro, fixer `sigma=sign(O)`. Pour chaque support ponctuel,
 le coefficient de `||z||^2` dans `sigma*J(S,z)` vaut `|O|>0` : cette fonction
 est strictement convexe en `z`. Son maximum sur une AABB témoin `Z` est donc
@@ -1759,6 +1882,27 @@ borner le déterminant 4×4 par ses 24 monômes de Leibniz sur
 du bloc. Une borne indécise rend `MIXED`. Pour un support fixé, la condition aux
 huit coins est nécessaire et suffisante sur l'enveloppe continue ; la perte du
 classifieur de bloc vient seulement des intervalles sur les facteurs support.
+
+Le certificat bisigne évite d'exiger un signe uniforme de `O`. Garder un ledger
+`P` de spans dont les huit coins prouvent `J<0` et un ledger `N` de spans dont
+les huit coins prouvent `J>0`. Après exclusion de `O=0`, fermer exactement la
+voie concernée lorsque :
+
+```text
+O>0 uniforme  et |P|>=8
+O<0 uniforme  et |N|>=8
+O de signes possibles des deux côtés et |P|>=8 et |N|>=8
+```
+
+Chaque ledger est une antichaîne de vrais `PointId`, sans doublon et disjointe
+des quatre facteurs support. Les deux ledgers peuvent se recouper entre eux,
+car ils ne sont jamais additionnés pour un même support. Le parcours transporte
+des tâches `(WitnessNode,active_sign_mask)` : il crédite seulement
+`certified_mask & active_sign_mask`, puis descend le même nœud pour
+`active_sign_mask & ~certified_mask`. Un succès pour le mauvais signe ne permet
+donc jamais le `continue` global du nœud. Une lane arrivée à huit se désactive ;
+cap ou pile saturée donne `PENDING`. Cette règle est nécessaire pour que le
+bisigne reste mordant, même si son omission ne crée ici que des faux négatifs.
 
 Pour une ligne issue de la boîte `p_i in [l_i,u_i]`, borner sa dernière
 composante sans regarder seulement les coins :

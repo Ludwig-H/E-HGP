@@ -578,8 +578,10 @@ a quatre poids circumcentriques `1/4`, `R^2=1000001` et une orientation non
 nulle très petite relativement aux longueurs. La famille paramétrique analogue
 sur les réels, obtenue en remplaçant `1000` par `L` à hauteur un, a
 `R/sup_edge_length` qui tend vers `1/2` tandis que son aplatissement normalisé
-tend vers zéro. La fixture u16 tue déjà tout seuil uniforme revendiqué dans le
-profil ; seule la famille réelle porte l'énoncé asymptotique.
+tend vers zéro. Dans le profil u16 fini, la fixture affichée réfute tout seuil
+pratique supérieur à sa valeur ; elle ne prouve pas à elle seule l'absence
+d'un plancher positif dépendant de la résolution. Seule la famille réelle porte
+l'énoncé asymptotique indépendant de la résolution.
 
 Il existe une partition exacte **adaptative**, pas une borne linéaire reçue.
 Sur chaque produit, borner le déterminant centré : un intervalle strictement
@@ -687,5 +689,152 @@ conserve chaque paire non ordonnée une fois.
 Une sweep d'axe ou le shallow edge-local ne devient applicable qu'après fixation
 d'un vrai carrier `(a,b,x)` ; ce n'est pas un substitut à la partition initiale
 de `Sym2(C)`.
+
+## 12. Contre-réception du commit `52585c5`
+
+Snapshot relu : `HEAD=52585c57b81fd429a1b9974f02217655f8c7661a`,
+`prototype/wst3_probe.cpp=e604069a38e9cd699968d41869769c57c85d360a87de4a3b9f2b5de2e65145bd`,
+`prototype/corner8_ball.hpp=c09ef9f2f7b3c0710464cbb108bd0c6285b2d1c36b41e2771a1b9fa267508a1c`
+et `CMakeLists.txt=363a4fdac07eed17ed98334511d216f39e821629c77b2ebb8076c281f3b903b4`.
+Le worktree était propre avant les présentes écritures documentaires. Le commit
+répare une omission : `sep_ok(C,D)` incrémente désormais un diagnostic mais ne
+supprime plus le couple. Il ne reçoit pas encore la source q4, `Sym2` ou le
+raccord bisigne.
+
+### 12.1 La généralisation exacte n'exige pas toutes les séparations
+
+Pour le rectangle pair-exact `R=(A,B)` et son antichaîne témoin disjointe
+`C_1,...,C_k`, les atomes d'ordre `q` sont indexés par :
+
+```text
+alpha_i>=0, sum_i alpha_i=q-2, alpha_i<=|C_i|
+Atom(alpha) = A x B x product_i binom(C_i,alpha_i)
+```
+
+La relation reçue est leur intersection avec distinct-ID, owner total et
+positivité. À q3, un seul facteur fournit un ID. À q4, la partition est
+exactement `C_i x C_j` pour `i<j`, plus `binom(C_i,2)`. Le nombre d'atomes non
+vides est le coefficient
+`[z^(q-2)] product_i (1+z+...+z^min(|C_i|,q-2))`, donc au plus
+`binom(k+q-3,q-2)`. La borne conditionnelle
+`O(s^3*n*eta^(-3*(q-2)))` demande encore une vraie preuve
+fair/compressed de `k=O(eta^-3)` ; le LBVH courant ne la fournit pas.
+
+La séparation deux à deux n'est pas une précondition de cette partition. Elle
+peut aider un classifieur uniforme, mais son échec ne donne que split ou
+`PENDING`. La fixture suivante fixe trois facteurs et fait varier le quatrième :
+
+```text
+A=(1000,1000,30000)
+B=(60000,1000,30000)
+C=(1000,60000,30000)
+D={(30000,30000,29999),(30000,30000,30001)}
+```
+
+Les deux orientations valent respectivement `-3481000000` et `+3481000000`.
+Des facteurs spatialement lointains peuvent donc porter les deux signes ; aucune
+collection de seules distances pairwise ne fixe l'orientation.
+
+### 12.2 `Sym2` est compté, pas routé
+
+Le commit parcourt chaque sous-arbre `C` et incrémente un compteur à chacun de
+ses nœuds internes. Cela retrouve numériquement `|C|-1`, mais ne construit ni ne
+consomme la partition
+`Sym2(C)=Sym2(L) disjoint_union (L x R) disjoint_union Sym2(R)`. La boucle
+Corner8 reste `u<=v` sur les blocs WST3 plats et soumet toujours `{C,C}` comme
+deux boîtes identiques. Ce produit contient `x=y`, donc `O=J=0`; il force
+l'intervalle bisigne à renoncer et peut déclencher presque un parcours complet
+de l'arbre témoin par bloc.
+
+Le rejeu local `n=60` à échelle grossière publie `478/478` couples
+`cd_pending`, `478` orientations indécises, zéro fermeture et `56882` visites,
+après `27393` itérations consacrées au simple compte `Sym2`. Sa
+`masse_soumise=6.34469e6` emploie encore `|C|^2` sur la diagonale, tandis que la
+masse candidate non ordonnée exacte vaut `3.11968e6`. Un vrai raccord doit
+porter les deux facteurs enfants disjoints, retirer atomiquement le parent et
+calculer l'injectivité par vrais `PointId` ; le compteur seul n'est pas ce
+raccord.
+
+Ce compteur est lui-même un mur inutile : sur `uniform`, `n=1000/2000/4000`,
+`--echelle=1/256`, il effectue respectivement
+`25434157/103783757/459477476` itérations, de pentes `2,029/2,146`. À `n=4000`,
+cela vaut `3248x` les `141468` couples plats. Pour la seule télémétrie,
+`count_of(C)-1` donne le même nombre en `O(1)` par cellule ; pour le produit
+réel, `Sym2` doit rester un descripteur paresseux et ne descendre qu'à la demande
+d'un prédicat `MIXED`.
+
+### 12.3 Le théorème bisigne est sûr, son caller perd le mauvais bit
+
+Pour un support fixé `O>0`, `J` est convexe en `z` et huit coins `J<0`
+certifient une boîte intérieure. Pour `O<0`, `J` est concave et huit coins
+`J>0` donnent l'implication symétrique. Deux ledgers authentifiés ferment donc
+sûrement les deux strates, sans jamais additionner leurs crédits. Cette preuve
+du flux mathématique antérieur est reçue.
+
+Le caller de `52585c5` crédite toutefois tout masque non nul puis exécute un
+`continue` global. Il peut ainsi arrêter la descente parce qu'un nœud certifie
+le **mauvais** signe. La fixture déjà présente dans le probe Corner8 prend :
+
+```text
+A=(3,2,2), B=(1,2,2), C=(2,3,2), D=(2,2,3), Z=[1,3]^3
+```
+
+Ici `O=-2` et les huit coins du parent ont `J=-4` : le parent ne crédite que la
+voie `O>0`, inutile au support réel `O<0`. Son centre a pourtant `J=+2` et est
+intérieur. Le `continue` empêche précisément de descendre vers cette preuve.
+C'est un faux négatif, pas un faux `ALL`, mais il peut annuler le gain annoncé.
+
+La fixture de ledger au seuil huit est plus directe :
+
+```text
+A=(14,10,10), B=(6,10,10), C=(10,14,10), D=(10,10,14), O=-128
+parent Z=[5,15]^3       : J=-7552 aux huit coins, masque 1
+huit enfants {9,11}^3  : J=+1664, masque 2
+```
+
+Le caller actuel crédite le masque 1 puis ne visite jamais les huit IDs du
+masque 2, seuls capables de fermer le support négatif. Échanger deux sommets
+donne la fixture symétrique.
+
+La correction normative est une pile de `(WitnessNode,active_sign_mask)` :
+créditer l'intersection du masque certifié et des lanes actives, puis descendre
+le même nœud pour les bits restants. `O=0` est rejeté comme support q4. Un bloc
+d'orientation mixte peut contenir de tels tuples dégénérés : les retirer avant
+la masse/fermeture conserve la sûreté de la relation, mais la télémétrie brute
+qui les inclut dans `masse_fermee` est fausse. Il faut une fixture de mauvais
+bit, son swap d'orientation, un oracle causal par bloc, les vrais IDs des deux
+antichaînes et un statut `PENDING` au cap.
+
+Le rejeu ciblé du snapshot donne `15/15` portes Corner8/WST3/WST4 vertes en
+`14,67 s`, mais aucune commande enregistrée ne passe `--corner8` et aucune
+CTest n'appelle `corner8_bisigne`. Les verts ne couvrent donc ni 12.2 ni 12.3.
+Plusieurs portes saines utilisent encore `PASS_REGULAR_EXPRESSION`, qui peut
+masquer un code non nul ultérieur.
+
+### 12.4 Portée performance
+
+La rampe CPU locale `12500/25000/50000`, Corner8 désactivé, reste rouge : la
+dernière pente vaut `2,050` pour les visites et `2,193` pour F4 sur huit amas.
+À `n=50000`, la masse candidate est proche de `3*binom(n,3)` en q3 et de
+`6*binom(n,4)` en q4. Le filtre d'acuité coarse conserve plus de `99,998 %` des
+blocs q3 et q4 dans les deux familles mesurées. Le prochain jalon doit donc
+projeter distinct-ID/owner/positivité ou fermer la profondeur sur des
+descripteurs **avant** leur produit ; compter `Sym2`, parcourir un préfixe ou
+recenser la masse brute ne rapproche pas du SLO.
+
+### 12.5 Contre-audit croisé des deux flux
+
+Le flux mathématique a proposé la partition par multiplicités et signalé le
+`continue` du mauvais bit. Le présent rapport a redérivé la partition, vérifié
+les lignes du caller et donné deux fixtures indépendantes. Le flux performance
+a signalé que `Sym2` n'était qu'un compteur et que la masse diagonale était
+ordonnée ; la lecture du consommateur `u<=v` et le rejeu `n=60` le confirment.
+En revanche, toute formulation antérieure exigeant toutes les séparations
+pairwise est rejetée par la fixture aux orientations opposées de 12.1.
+
+Ces validations portent sur contenu, pin, commande et contre-fixture. Aucun
+artefact durable ne prouve une identité organisationnelle indépendante des
+différents « auditeurs » ; cette expression reste relationnelle au document et
+ne vaut jamais argument d'autorité.
 
 GCP non utilisé.

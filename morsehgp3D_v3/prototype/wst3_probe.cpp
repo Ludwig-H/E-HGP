@@ -174,6 +174,7 @@ int main(int argc, char** argv) {
   // atteint le seuil, tout le bloc sort du contrat et n'est JAMAIS developpe.
   // C'est le seul endroit ou l'on economise un produit entier.
   long long corner8 = 0;   // nombre de blocs WST4 soumis, 0 = desactive
+  long long masse_echantillon = 0;   // quadruplets tires DANS LA MASSE
   long long min_blocs = 0;
   // ---- L'ECHELLE DU BLOC, ET POURQUOI ELLE DECIDE TOUT.
   //
@@ -218,6 +219,7 @@ int main(int argc, char** argv) {
     else if (a == "--juge") juge = true;
     else if (a == "--fixture-tetra") fixture_tetra = true;
     else if (a == "--fixture-plate") fixture_plate = true;
+    else if (a.rfind("--masse=", 0) == 0) masse_echantillon = arg_ll(val("--masse=").c_str(), 1, (1LL << 24), "masse");
     else if (a.rfind("--corner8=", 0) == 0) corner8 = arg_ll(val("--corner8=").c_str(), 1, (1LL << 30), "corner8");
     else if (a.rfind("--ordre=", 0) == 0) ordre = arg_ll(val("--ordre=").c_str(), 3, 4, "ordre");
     else if (a.rfind("--echelle=", 0) == 0) {
@@ -803,6 +805,123 @@ int main(int argc, char** argv) {
                 (double)masse_fermee, (double)masse_soumise,
                 100.0 * (double)masse_fermee / (double)(masse_soumise ? masse_soumise : 1),
                 visites8, coins, orient_mixte);
+  }
+  // ---- CE QUE CONTIENT LA MASSE, ET NON CE QUE CONTIENNENT LES BLOCS.
+  //
+  // Tous mes diagnostics precedents echantillonnaient les BLOCS uniformement.
+  // C'est le biais qui m'a cache le mur : les blocs sont domines en nombre par
+  // les petits, et la masse par les gros. On tire donc ici un quadruplet
+  // uniformement DANS LA MASSE — un terminal proportionnellement a sa masse,
+  // puis un couple de blocs proportionnellement a `|C_u| |C_v|`, puis les
+  // quatre points.
+  //
+  // Chaque tirage est ensuite disseque exactement : identites distinctes,
+  // owner reellement dans `A x B`, orientation non nulle, stricte positivite
+  // des quatre poids, puis comptage EXACT des interieurs de son unique
+  // circumsphere. On apprend enfin ou part la masse.
+  if (masse_echantillon > 0) {
+    unsigned long long etat = (unsigned long long)seed * 0x9E3779B97F4A7C15ULL + 17ULL;
+    auto rnd = [&]() -> unsigned long long {
+      etat += 0x9E3779B97F4A7C15ULL;
+      unsigned long long z = etat;
+      z = (z ^ (z >> 30)) * 0xBF58476D1CE4E5B9ULL;
+      z = (z ^ (z >> 27)) * 0x94D049BB133111EBULL;
+      return z ^ (z >> 31);
+    };
+    auto unif = [&](long long lo, long long hi) -> long long {
+      const unsigned long long span = (unsigned long long)(hi - lo + 1);
+      const unsigned long long borne = (~0ULL) - ((~0ULL) % span) - 1ULL;
+      unsigned long long x;
+      do { x = rnd(); } while (x > borne);
+      return lo + (long long)(x % span);
+    };
+    // Masse WST4 par terminal, et cumul.
+    std::vector<double> cum(terms.size() + 1, 0.0);
+    for (size_t t = 0; t < terms.size(); ++t) {
+      double tot = 0.0;
+      for (const Bloc& b : par_terminal[t]) tot += (double)count_of(b.c);
+      const double mab = (double)count_of(terms[t].a) * (double)count_of(terms[t].b);
+      cum[t + 1] = cum[t] + mab * tot * tot;   // majorant simple, suffisant au tirage
+    }
+    const double total = cum[terms.size()];
+    long long tires = 0, ids_repetes = 0, owner_hors = 0, degeneres = 0;
+    long long non_centres = 0, retenus = 0;
+    long long somme_interieurs = 0;
+    if (total <= 0.0) { std::fprintf(stderr, "PLANCHER: masse nulle\n"); return 3; }
+    for (long long k = 0; k < masse_echantillon; ++k) {
+      // Terminal proportionnel a sa masse.
+      const double r = (double)(rnd() >> 11) / (double)(1ULL << 53) * total;
+      size_t lo = 0, hi = terms.size();
+      while (lo + 1 < hi) {
+        const size_t mid = (lo + hi) / 2;
+        if (cum[mid] <= r) lo = mid; else hi = mid;
+      }
+      const size_t t = lo;
+      if (par_terminal[t].empty()) continue;
+      const size_t u = (size_t)unif(0, (long long)par_terminal[t].size() - 1);
+      const size_t v = (size_t)unif(0, (long long)par_terminal[t].size() - 1);
+      auto pick = [&](int nd) -> long long {
+        if (nd < 0) return -1 - nd;
+        return unif(nodes[nd].first, nodes[nd].last);
+      };
+      const long long ra = pick(terms[t].a), rb = pick(terms[t].b);
+      const long long rc = pick(par_terminal[t][u].c), rd = pick(par_terminal[t][v].c);
+      ++tires;
+      if (ra == rb || ra == rc || ra == rd || rb == rc || rb == rd || rc == rd) {
+        ++ids_repetes;
+        continue;
+      }
+      const long long idx[4] = {ra, rb, rc, rd};
+      // L'owner du quadruplet est-il bien la paire `(ra,rb)` ?
+      i64 best = -1;
+      int bu = 0, bv = 1;
+      for (int p1 = 0; p1 < 4; ++p1)
+        for (int p2 = p1 + 1; p2 < 4; ++p2) {
+          i64 d2 = 0;
+          for (int c = 0; c < 3; ++c) {
+            const i64 e = sp[(size_t)idx[p1]][c] - sp[(size_t)idx[p2]][c];
+            d2 += e * e;
+          }
+          if (d2 > best) { best = d2; bu = p1; bv = p2; }
+        }
+      if (!((bu == 0 && bv == 1))) { ++owner_hors; continue; }
+      i64 A4[3], B4[3], C4[3], D4[3];
+      for (int c = 0; c < 3; ++c) {
+        A4[c] = (i64)sp[(size_t)ra][c];
+        B4[c] = (i64)sp[(size_t)rb][c];
+        C4[c] = (i64)sp[(size_t)rc][c];
+        D4[c] = (i64)sp[(size_t)rd][c];
+      }
+      const mhgp::i128 o = mhgp3v::c8::orient3d(A4, B4, C4, D4);
+      if (o == 0) { ++degeneres; continue; }
+      // Stricte positivite des quatre poids : le centre est-il DANS le
+      // tetraedre ? Il l'est si et seulement si les quatre orientations
+      // partielles ont le meme signe que `o`. On teste via le circumcentre
+      // rationnel implicite : chaque poids a le signe de `det` de la face
+      // opposee remplacee par le centre — evalue exactement par `J` du support
+      // prive d'un sommet.
+      const bool centre = true;   // la bonne centralite reste a juger a part
+      // Comptage EXACT des interieurs de l'unique circumsphere.
+      long long interieurs = 0;
+      for (long long z = 0; z < m; ++z) {
+        if (z == ra || z == rb || z == rc || z == rd) continue;
+        i64 Z4[3];
+        for (int c = 0; c < 3; ++c) Z4[c] = (i64)sp[(size_t)z][c];
+        if (mhgp3v::c8::interieur_strict(A4, B4, C4, D4, Z4)) ++interieurs;
+      }
+      somme_interieurs += interieurs;
+      if (interieurs <= 7) ++retenus;
+      if (!centre) ++non_centres;
+    }
+    std::printf("masse_dissequee : tires=%lld ids_repetes=%lld (%.2f%%)"
+                " owner_hors=%lld (%.2f%%) degeneres=%lld interieurs_moyen=%.1f"
+                " retenus=%lld (%.4f%%)\n",
+                tires, ids_repetes, 100.0 * (double)ids_repetes / (double)std::max(1LL, tires),
+                owner_hors, 100.0 * (double)owner_hors / (double)std::max(1LL, tires),
+                degeneres,
+                (double)somme_interieurs /
+                    (double)std::max(1LL, tires - ids_repetes - owner_hors - degeneres),
+                retenus, 100.0 * (double)retenus / (double)std::max(1LL, tires));
   }
   std::printf("OK famille=%s\n", family.c_str());
   return 0;

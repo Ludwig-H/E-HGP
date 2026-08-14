@@ -5275,3 +5275,28 @@ add_test(NAME mhgp3v_wst3_fixture_plate COMMAND mhgp3v_wst3_probe --fixture-plat
 set_tests_properties(mhgp3v_wst3_fixture_plate PROPERTIES
   PASS_REGULAR_EXPRESSION
   "wst3_fixture_plate : R2=1000001 cospherique=1 orientation_nulle=0")
+
+# CE QUE CONTIENT LA MASSE, ET NON CE QUE CONTIENNENT LES BLOCS.
+#
+# Tous les diagnostics precedents echantillonnaient les BLOCS uniformement.
+# C'est le biais qui cachait le mur : les blocs sont domines en nombre par les
+# petits, et la masse par les gros. `--masse` tire un quadruplet uniformement
+# DANS LA MASSE, puis le disseque exactement.
+#
+# A `n=2000`, `s=2`, trois mille tirages, sur les deux familles :
+#   - `82,7 %` ont leur arete maximale HORS du rectangle : ils appartiennent au
+#     bloc d'un autre owner. C'est la « projection owner » que l'audit
+#     distinguait du flux emis ;
+#   - les autres ont en moyenne `915` interieurs sur `2000` points, soit
+#     `46 %` du nuage dans leur circumsphere ;
+#   - ZERO tirage sur trois mille a `I <= 7`, le seuil du contrat.
+#
+# La masse candidate est donc quasi integralement du dechet, et la sortie reelle
+# est trop rare pour qu'un echantillon de cette taille la rencontre. Le filtre
+# discriminant n'est ni l'owner ni l'acuite : c'est la TAILLE de la circumsphere.
+add_test(NAME mhgp3v_wst4_masse_dissequee
+  COMMAND mhgp3v_wst3_probe --family=uniform --points=2000 --sep-euclid=2/1
+          --echelle=1/256 --ordre=4 --masse=3000)
+set_tests_properties(mhgp3v_wst4_masse_dissequee PROPERTIES
+  PASS_REGULAR_EXPRESSION
+  "masse_dissequee : tires=3000 ids_repetes=12 \\(0.40%\\) owner_hors=2481 \\(82.70%\\) degeneres=0 interieurs_moyen=915.0 retenus=0")

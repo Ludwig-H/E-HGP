@@ -28,16 +28,18 @@ doit être déduit de ces probes CPU.
 
 ## Verdict actuel
 
-Le `HEAD=069d903` contient trois avancées directement liées à l'idée de support
-complet, puis une première réduction de la taille du broad phase WST3/WST4 :
+Le `HEAD=52585c57b81fd429a1b9974f02217655f8c7661a` contient quatre avancées
+directement liées à l'idée de support complet, puis plusieurs diagnostics de
+réduction du broad phase WST3/WST4 :
 
 - `Corner8BallDepth` reçoit un certificat q4 `ALL_INTERIOR` sur un produit de
   boîtes de supports et une boîte témoin ; il évite centre et division, mais ne
   propose ni supports, ni owner, ni positivité ;
 - `WST3CandidateCover` route une fois le troisième sommet dans l'antichaîne du
   rectangle qui contient l'arête-owner ;
-- son produit non ordonné route de même les deux sommets restants d'un
-  quadruplet.
+- son produit non ordonné couvre de même les deux sommets restants d'un
+  quadruplet ; `f7ab7bb` ajoute le certificat Corner8 bisigne et `52585c5`
+  cesse de supprimer les couples témoins non séparés.
 
 Le commit intermédiaire `3703097` avait inversé le signe du filtre d'acuité.
 `a73161c` applique désormais l'identité correcte `E+X-D=-2H`, garde une face
@@ -59,23 +61,37 @@ d'en conserver la multiplicité.
 
 La distinction coût/couverture est impérative. Arrêter la descente dès la
 racine resterait une couverture adressée par owner, mais sans sélectivité.
-L'échelle rationnelle du dernier commit réduit fortement le nombre de
+L'échelle rationnelle réduit fortement le nombre de
 descripteurs sur la rampe finie, sans réduire la masse logique des quadruplets
-qu'ils représentent ni recevoir une borne de packing pour les nœuds LBVH. Son
-commentaire `num/den` et sa comparaison entière décrivent encore deux rapports
-inverses. Le compteur WST4 emploie correctement l'identité
+qu'ils représentent ni recevoir une borne de packing pour les nœuds LBVH. Le
+comportement actuel du code est `diag^2*num<=rayon^2*den`, donc un rapport plus
+grand raffine. Le nom d'option, un commentaire local et les portes CMake
+conservent la convention inverse : il n'existe donc pas encore de contrat
+versionné non ambigu. La réparation est soit de renommer ce paramètre
+`--finesse=num/den`, soit de conserver un ratio diamètre/rayon et d'inverser la
+comparaison ; deux portes réciproques doivent distinguer les deux sens.
+Le compteur WST4 emploie correctement l'identité
 `sum binom(|C_i|,2)+sum_{i<j}|C_i||C_j|=binom(sum_i |C_i|,2)` sans boucle
 quadratique sur les blocs, mais reconvertit encore l'entier u128 en `double`
 pour l'affichage. Owner, injectivité, positivité et profondeur doivent précéder
 tout `fill`.
 
-Le même commit branche un diagnostic Corner8 après la matérialisation et le
-count du broad phase. Il ne sauve donc encore aucun produit WST4. Il refuse en
-outre les couples `C,D` non séparés au lieu de raffiner leur produit symétrique :
-c'est fail-open pour ce diagnostic facultatif, mais ce n'est pas une règle de
-source exacte. Le worktree de Claude expérimente déjà un certificat bisigne ;
-son état, ses hashes et ses contre-fixtures restent exclusivement dans l'audit
-courant.
+Le diagnostic Corner8 reste exécuté après la matérialisation et le count du
+broad phase : il n'épargne encore aucun produit WST4. `52585c5` marque les
+couples `C,D` non séparés sans les supprimer, ce qui répare une perte de
+complétions. Il compte aussi la décomposition récursive de `Sym2(C)`, mais ne la
+route pas : la jonction Corner8 parcourt toujours les couples plats `u<=v` et
+soumet encore la diagonale `{C,C}` comme deux boîtes identiques.
+Le comptage récursif lui-même atteint `459477476` nœuds à `n=4000`, contre
+`141468` couples plats : pour la télémétrie, `|C|-1` suffit ; pour la source,
+`Sym2` doit rester paresseux et ne descendre qu'au besoin.
+
+Le théorème bisigne commis est sûr sous ses préconditions, mais son caller est
+incomplet. Dès qu'un nœud témoin certifie l'un des deux signes de `J`, il ne
+descend plus ce nœud, même si la lane active exige l'autre signe. Il faut porter
+un masque de lanes actives par tâche, créditer seulement les bits conclus et
+continuer les bits restants. Aucune CTest actuelle ne juge cette jonction, ses
+vrais `PointId`, ses deux ledgers ou sa causalité avant le produit.
 
 Votre idée mathématique est donc reçue sous sa forme exacte : la hiérarchie
 HGP n'a besoin que des supports minimaux positifs complets. q2 teste une boule
@@ -86,11 +102,27 @@ intrinsèque au plan, mais la boule et son census sont ambiants en dimension
 trois. Les sphères incidentes à une ancre partielle ne sont que le domaine d'un
 prune facultatif, jamais la source.
 
-Un déblocage arithmétique accompagne cette réduction : pour un tétraèdre
-ponctuel complet, une BallForm homogène fondée sur `T=det3` et son vecteur de
-cofacteurs décide les quatre poids et la sphère sous i128 sur tout u16. Elle
-remplace le chemin terminal estimé à 174 bits, pas les filtres de boîtes
-`MIXED`; sa formule et ses fixtures sont dans `PROPOSITION.md`.
+La généralisation WSPD exacte est combinatoire, pas une exigence de séparation
+de toutes les paires de facteurs. Pour un rectangle d'arête et une partition de
+cellules témoins `C_i`, les atomes d'ordre `q` sont indexés par les multiplicités
+`alpha_i>=0`, `sum alpha_i=q-2`, et portent
+`A×B×product_i binom(C_i,alpha_i)` avant les filtres
+distinct-ID/owner/positivité. À q4, cela donne les produits `C_i×C_j` pour
+`i<j` et les diagonales `binom(C_i,2)`. Un couple non séparé est raffiné ou reste
+`PENDING`; il n'est jamais supprimé.
+
+Un déblocage arithmétique accompagne cette réduction. Pour tout support complet
+`S={a,a+m_1,...,a+m_k}`, `k=1,2,3`, poser `G=M^T M`,
+`Delta=det(G)` et `r=adj(G) diag(G)`. Les numérateurs des poids sont les `r_i`
+et `2 Delta-sum r_i`, tandis que
+`Phi_S(z)=Delta||z-a||^2-(z-a)^T M r` décide exactement intérieur, shell et
+extérieur. Cette même forme redonne la boule diamétrale q2, la boule ambiante
+q3 et, en q4, `Delta=O^2` et `Phi=O*J` sans choisir le signe d'orientation.
+Elle fournit directement une `BallForm` primitive. Le support q4 ponctuel se
+réduit ensuite à la forme `T/Qbar` qui tient en i128 sur u16 ; un produit de
+boîtes au signe indécis garde le numérateur corrélé en i192/i256 et rend
+`PENDING` s'il ne peut pas le borner. La formule et les portes requises sont
+dans `PROPOSITION.md`.
 
 Le théorème, la portée conditionnelle de Corner8, les coutures exact-once et les
 réponses aux questions de coût sont reçus dans le

@@ -8,39 +8,51 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-> **Alerte au `HEAD=069d903`.** Les commits `89774d0`, `e3f1925` et
-> `88a9ba8` ajoutent respectivement `Corner8BallDepth`, un broad phase WST3 et
-> son produit WST4 ; `22d1cb0` en publie la note de coût. Le successeur
-> `3703097` avait branché un filtre d'acuité au signe inversé. `a73161c`
-> applique maintenant l'identité exacte `E+X-D=-2H`, garde `H<0`, ajoute la
-> fixture du tétraèdre régulier et rétracte le gain `1,62x`. La fixture vérifie
-> les deux valeurs `H=-1` et les six longueurs égales ; elle ne recalcule pas
-> indépendamment les quatre barycentriques `1/4` ni l'owner sur de vrais
-> `PointId`. Le même commit stabilise une option `--echelle=num/den`
-> réciproque de son contrat : sa porte `1/256` reste verte par surcouverture et
-> ne distingue pas le mutant `256/1`.
-> `069d903` ajoute ensuite un diagnostic Corner8 sur un préfixe du produit brut.
-> Il confirme que la séparation aide certains certificats, mais ne reçoit pas
-> la thèse « séparation nécessaire » : un support q4 valide peut avoir deux
-> apex proches, et la diagonale `C=D` doit être raffinée par `Sym2`, pas jetée.
+> **Alerte au `HEAD=52585c57b81fd429a1b9974f02217655f8c7661a`.** Les
+> commits `89774d0`, `e3f1925` et `88a9ba8` ajoutent respectivement
+> `Corner8BallDepth`, un broad phase WST3 et son produit WST4 ; `22d1cb0` en
+> publie la note de coût. `a73161c` corrige ensuite le signe d'acuité par
+> `E+X-D=-2H` et garde `H<0`. La fixture associée vérifie le scalaire et les
+> six longueurs égales, mais pas indépendamment les quatre poids `1/4` ni
+> l'owner sur de vrais `PointId`.
+>
+> `069d903` raccorde Corner8 après le broad phase ; `f7ab7bb` ajoute un
+> certificat bisigne conditionnellement sûr ; `52585c5` cesse de supprimer les
+> couples `C,D` non séparés, compte une décomposition `Sym2` et ajoute une
+> fixture plate. Ces trois ajouts restent diagnostiques : Corner8 intervient
+> après matérialisation, `cd_pending` n'est pas un état de continuation et le
+> compteur `Sym2` ne remplace pas les blocs diagonaux dans le consommateur.
+> Sur `u=v`, `masse_soumise` et `masse_fermee` emploient encore `|C|^2` au
+> lieu de `binom(|C|,2)`. La fixture plate, reçue par regex, ne teste ni poids
+> `1/4`, ni ratio d'aplatissement.
 >
 > Le théorème de la
 > miniboule unique est reçu uniquement pour un **support minimal positif
 > complet**. Corner8 est un certificat `ALL_INTERIOR` conditionnel sur un vrai
 > support q4 déjà authentifié ; ses `6/6` portes ne jugent ni positivité, ni
 > owner, ni IDs, et son oracle ponctuel recopie le prédicat du sujet. Les
-> `5/5` portes WST3 et la porte WST4 reçoivent une couverture dans le rectangle
+> `5/5` portes WST3 et les portes WST4 reçoivent une couverture dans le rectangle
 > owner choisi par leur juge, pas une source physique exact-once : le tape brut
 > conserve les ancres non-owner et les diagonales, tie-breake par rang Morton et
 > rejette à tort les positions dupliquées. Le verdict détaillé et les réponses
-> Q6--Q9 sont dans le nouveau contre-audit support-complet.
+> Q6--Q13 sont dans le contre-audit support-complet.
 >
-> Le commit `069d903` raccorde Corner8 seulement comme diagnostic après
-> matérialisation du WST3 et parcours explicite des couples WST4. Il ne retire
-> aucune tâche aval, n'a ni CTest ni juge causal, et saute désormais les
-> couples `C--D` non séparés : c'est une fermeture partielle fail-open, pas une
-> source complète. Son helper d'orientation centré n'est pas transmis à
-> `corner8_block`, qui recalcule l'ancien intervalle.
+> Le paramètre `--echelle=num/den` n'a toujours pas une sémantique cohérente.
+> Le code compare `diag2*num<=rayon2*den`, tandis que le commentaire de formule,
+> CMake et le nom de la porte fine emploient encore le rapport réciproque. Le
+> nouveau compteur `Sym2` et la conservation des couples non séparés réparent
+> des pertes conceptuelles, mais aucun des deux ne retire encore du travail au
+> chemin Corner8. Le certificat bisigne n'a ni juge causal de jonction, ni
+> mesure appariée avant produit. Son caller abandonne en outre un nœud dès que
+> **l'un** des deux bits conclut, même si la lane active demande l'autre : c'est
+> sûr mais incomplet. Il faut des tâches `(node,active_sign_mask)`.
+>
+> Après ce pin, Claude expérimente un sampler `--masse` dans
+> `prototype/wst3_probe.cpp`. Le delta mobile n'est pas reçu : il choisit les
+> blocs témoins uniformément au lieu de les pondérer par `|C|`, conserve les
+> rangs Morton comme IDs, omet le tie `EdgeKey` et force provisoirement la
+> positivité par `const bool centre=true`. Aucune de ses sorties ne décrit donc
+> encore la masse q4 positive.
 >
 > Les défauts antérieurs restent actifs : les portes HC saines sont à regex et
 > ne jugent pas chaque promotion ; `--fenetre-exhaustive` contourne les gates ;
@@ -58,23 +70,26 @@ Cadre : `phase=exploration_v3_hors_registre`,
 ## Snapshot
 
 Le dernier commit stable relu est
-`HEAD=069d90329c0562963ea8b4b40eec2a0102918456`, commit
-`Louis avait raison sur s : la separation gouverne la decidabilite`. Il
+`HEAD=52585c57b81fd429a1b9974f02217655f8c7661a`, commit
+`un couple non separe n'est pas un dechet : je supprimais des complements`. Il
 absorbe le raccord Midball de `a58d020`, HC et la borne de `c1e2e3b`, Corner8
 de `89774d0`, WST3 de `e3f1925`, WST4 de `88a9ba8`, la correction du signe
-aigu, l'échelle rationnelle et le diagnostic Corner8 postérieur au broad phase.
-Le delta logiciel mobile de Claude porte à nouveau sur
-`prototype/corner8_ball.hpp` et `prototype/wst3_probe.cpp`; il expérimente un
-certificat bisigne. Hors présentes écritures documentaires, aucun logiciel n'a
-été modifié par l'auditeur.
+aigu, l'échelle rationnelle, le diagnostic Corner8 postérieur au broad phase,
+le certificat bisigne de `f7ab7bb`, puis la conservation des couples non
+séparés et les compteurs `Sym2`. Après ce pin, le delta logiciel mobile de
+Claude porte sur `prototype/wst3_probe.cpp`, SHA-256
+`cb62ff882a43930c6ee7d3d3ea09af8ebb456aa96cf31347b22db80bb7d2b892`, et
+ajoute le sampler `--masse`. Les autres modifications visibles sont les
+présentes écritures documentaires ; aucun logiciel n'a été modifié par
+l'auditeur.
 
-Le commit stable ajoute une échelle rationnelle `num/den` dont le commentaire
-annonce `diag2<=num/den*rayon2`, mais compare actuellement
-`diag2*num<=rayon2*den`. Numérateur et dénominateur sont inversés : augmenter
-le rapport raffine dans le code alors que l'API annonce des cellules plus
-grosses. La comparaison conforme au commentaire est
-`diag2*den<=rayon2*num`, en i128. Le cas historique `1/1` ne distingue pas ce
-mutant ; une paire de portes `4/1` et `1/4` est nécessaire.
+Le code applique `diag2*num<=rayon2*den`, donc `num/den` se comporte comme une
+finesse croissante. Un commentaire de formule, CMake et la porte dite
+`echelle_fine` conservent encore `diag2*den<=rayon2*num`. Il faut versionner le
+sens : soit renommer le comportement actuel `--finesse=num/den`, soit garder
+un rapport diamètre/rayon et inverser la comparaison. Le cas historique `1/1`
+ne distingue pas ces contrats ; une paire de portes réciproques `4/1` et
+`1/4` est nécessaire.
 
 Le rejeu causal `uniform,n=1000` donne `6 159 060` blocs WST4 à `1/1`,
 `35 494` à `1/64` et `65 167 274` à `64/1`. À `1/4096,n=60`, l'arrêt racine
@@ -82,14 +97,14 @@ rend encore le juge owner vert par pure surcouverture et publie
 `3 132 900=binom(60,2)^2` tuples candidats. Cela ne reçoit aucune sélectivité
 aval.
 
-Empreintes SHA-256 au commit `069d903` :
+Empreintes SHA-256 au commit `52585c5` :
 
 - `CMakeLists.txt` :
-  `a4d6f7ed0e1746a5a7a2f88921fe138d3eb01ad550077b253abc72c918b16f48` ;
+  `363a4fdac07eed17ed98334511d216f39e821629c77b2ebb8076c281f3b903b4` ;
 - `prototype/wst3_probe.cpp` :
-  `f6d1203eb97f62a2695956bfadd6aea0fee56b0eec353c8a8423c3f5ecbafc3f` ;
+  `e604069a38e9cd699968d41869769c57c85d360a87de4a3b9f2b5de2e65145bd` ;
 - `prototype/corner8_ball.hpp` :
-  `ee4d03e320e678e29428b9263620e9795ec66d83034fd3fef53df70424d2ea36` ;
+  `c09ef9f2f7b3c0710464cbb108bd0c6285b2d1c36b41e2771a1b9fa267508a1c` ;
 - `prototype/corner8_probe.cpp` :
   `9f29100613543cdf1f246243ec7b8112b4c84826618c4a053b3332361c49115f` ;
 - `prototype/wspd_wavefront_probe.cpp` :
@@ -109,9 +124,11 @@ Empreintes SHA-256 au commit `069d903` :
 
 Le commit stable reçoit la primitive BJD, un packing disjoint sûr sur ses
 campagnes causales, huit portes BJD ciblées, treize portes Midball, cinq portes
-HC, une porte de réfutation de la borne, six portes Corner8 et huit portes
-WST3/WST4 enregistrées. Les verts ciblés ne ferment pas les défauts de composition et
-d'identité ci-dessus. Il ne reçoit ni projection CK--WST distinct-ID/owner,
+HC, une porte de réfutation de la borne, six portes Corner8 et neuf portes
+WST3/WST4 enregistrées. Les `9/9` WST ciblées passent ; aucune suite complète
+du catalogue de `836` tests n'a été rejouée dans ce snapshot. Ces verts ne
+ferment pas les défauts de composition et d'identité ci-dessus. Il ne reçoit ni
+projection CK--WST distinct-ID/owner,
 ni profondeur `tau(F)`, ni ledger persistant de vrais `PointId`, ni primitive
 device, ni payload. Son `--fenetre-exacte` n'est exact que pour la miniboule q2
 échantillonnée sous domaine régulier ; ses lanes q3/q4 publient un majorant par
@@ -373,11 +390,11 @@ Le juge WST4 contrôle cependant toujours les couples bruts et ignore le boolée
 `aigu`; la nouvelle fixture tue le signe inversé, mais ne reçoit ni owner, ni
 positivité q4, ni la relation filtrée.
 
-Le ratio stable `--echelle=num/den` reste inversé entre son commentaire et sa
-comparaison entière. Le code teste `diag2*num<=rayon2*den`, donc un rapport plus
-grand raffine, alors que l'API annonce `diag2<=num/den*rayon2`, où un rapport
-plus grand grossit les cellules. Les mesures étiquetées `1/256` décrivent le
-comportement du code, pas la grandeur documentée.
+Le ratio stable `--echelle=num/den` reste contradictoire entre code,
+commentaire et CMake. Le code teste `diag2*num<=rayon2*den`, donc un rapport
+plus grand raffine, tandis que le commentaire de formule et la porte dite
+`echelle_fine` emploient le rapport réciproque. Les mesures étiquetées `1/256`
+décrivent le comportement du code, pas un contrat API reçu.
 
 Le lemme arête maximale--lentille est correct et les campagnes bornées couvrent
 chaque triplet/quadruplet dans le rectangle de l'owner choisi : WST3 `5/5` et
@@ -394,12 +411,22 @@ rectangle ; les pentes et la constante proche de 32 sont des diagnostics finis.
 La masse WST4 proche de `n^4` et `187` millions de blocs à `n=8000` rendent le
 produit brut rouge, sans mesurer encore `M4_apex`.
 
+La généralisation exacte à l'ordre `q` est combinatoire. Pour une antichaîne
+témoin disjointe `C_1,...,C_k`, les atomes sont
+`A x B x product_i binom(C_i,alpha_i)` avec `alpha_i>=0` et
+`sum alpha_i=q-2`, puis intersection avec distinct-ID, owner total,
+indépendance affine et positivité. À q4, cela donne tous les produits croisés
+et toutes les diagonales `binom(C_i,2)`. Le nombre de types vaut
+`[z^(q-2)] product_i (1+z+...+z^min(|C_i|,q-2))`, au plus
+`binom(k+q-3,q-2)`. Aucune séparation entre toutes les paires de facteurs n'est
+requise ; son échec donne split ou `PENDING`.
+
 La réparation de performance est une vraie grille Morton au niveau lié à
 `r_R`, puis `ALL/NONE_ACUTE`, profondeur et owner uniforme **avant** tout
 `sum k_t^2`. Le count de masse des paires de cellules emploie
 `binom(sum |C_i|,2)` en temps linéaire par rectangle et en u128, jamais une
 boucle `u<v`. La sortie reconvertit encore l'u128 en `double` à six chiffres
-pour l'affichage : le reçu exact doit publier l'entier. Les questions Q6--Q9 et
+pour l'affichage : le reçu exact doit publier l'entier. Les questions Q6--Q13 et
 la gate coût appariée sont résolues dans le contre-audit ci-dessus.
 
 Le raccord Corner8 commis n'économise encore aucun produit : il est
@@ -415,27 +442,55 @@ fermeture complète.
 La diagonale `C=D` contient le choix `x=y`, donc son intervalle d'orientation
 contient nécessairement zéro. Elle exige un raffinement paresseux exact de
 `binom(C,2)` en `LL/LR/RR`; la supprimer perdrait les q4 dont les deux sommets
-restants partagent la cellule. Le worktree saute plus largement tout couple
-`C--D` non séparé. C'est sûr pour un diagnostic de fermetures partielles, mais
-incomplet ; malgré son commentaire « tous les couples », il ne teste ni
-`A--C/A--D` ni `B--C/B--D`. Le prétest d'orientation centré est sûr, mais
-`corner8_block` recalcule ensuite l'ancien intervalle au lieu de consommer son
-signe : la promesse « une seule fois » et le gain associé ne sont pas reçus.
-L'enclosure centrée contient explicitement un terme `e1` linéaire dans les
-rayons ; son commentaire « erreur quadratique » est faux. `sep_ok(C,D)` reste
-seulement un filtre suffisant de coût. Une arête-owner longue peut avoir deux
-apex proches ; une source q4 exacte doit raffiner `C×D` ou laisser `PENDING`,
-jamais supprimer la complétion faute de séparation.
+restants partagent la cellule. `52585c5` ne supprime plus un couple `C--D` non
+séparé : il incrémente `cd_pending`, puis continue le diagnostic. Ce compteur
+n'est toutefois ni un tape, ni un statut `PENDING`. Malgré son commentaire
+« tous les couples », il ne teste en outre ni `A--C/A--D` ni `B--C/B--D`.
+Le prétest d'orientation centré est sûr, mais `corner8_block` recalcule ensuite
+l'ancien intervalle au lieu de consommer son signe. L'enclosure centrée contient
+un terme `e1` linéaire dans les rayons ; son ancien commentaire « erreur
+quadratique » est faux. Une arête-owner longue peut avoir deux apex proches :
+la séparation reste une priorité de coût, jamais une condition de source.
 
-Le worktree suivant essaie de contourner le signe uniforme par deux ledgers de
-témoins, `J<0` et `J>0`. Le principe peut être sûr : les supports `O>0`
-consomment huit vrais `PointId` du premier ledger, les supports `O<0` huit du
-second, et `O=0` n'est pas q4. La réception exige toutefois un oracle de cette
-jonction, des reçus d'identités séparés, le passage causal avant le produit et
-la suppression du préfixe biaisé. Sa télémétrie mélange encore les strates de
-signe, peut publier un taux supérieur à 100 %, emploie la mauvaise masse sur la
-diagonale et reconvertit u128 en `double`. Aucun taux de ce delta mobile ne
-qualifie le SLO.
+Le nouveau `wst4_sym2` ne fait encore que compter les nœuds internes de la
+décomposition. La jonction Corner8 boucle toujours sur les couples `u<=v`
+originaux ; elle ne remplace donc aucun parent diagonal par les trois tâches
+disjointes `Sym2(L)`, `L cross R`, `Sym2(R)`. De plus,
+`masse_soumise/masse_fermee` emploient `|A||B||C||D|` : pour `u=v`, la masse
+candidate non ordonnée est au contraire
+`|A||B| binom(|C|,2)`, avant même distinct-ID et owner.
+
+Le coût de ce compteur est déjà rouge. Sur `uniform,n=1000/2000/4000`, il
+parcourt `25434157/103783757/459477476` nœuds internes, de pentes
+`2,029/2,146`; à `n=4000`, c'est `3248x` les `141468` couples plats. La valeur
+diagnostique `|C|-1` se calcule en `O(1)` par cellule. La relation réelle doit
+rester un descripteur paresseux et ne se raffiner qu'au prédicat `MIXED`.
+
+Le certificat bisigne commis à `f7ab7bb` emploie deux ledgers de témoins,
+`J<0` et `J>0`. Son principe est sûr : les supports `O>0` consomment huit vrais
+`PointId` du premier ledger, les supports `O<0` huit du second, et `O=0` n'est
+pas q4. Son caller reste conservateur et incomplet : lorsqu'un masque non nul
+crédite seulement une strate, il abandonne le nœud au lieu de poursuivre les
+lanes encore actives. La réception exige un masque de lanes par tâche, un oracle
+de jonction, des reçus d'identités séparés et une exécution avant produit. Sa
+télémétrie agrège encore les strates et reconvertit u128 en `double` ; aucun de
+ses taux ne qualifie le SLO.
+
+La contre-fixture existe déjà côté Corner8 : pour `A=(3,2,2)`, `B=(1,2,2)`,
+`C=(2,3,2)`, `D=(2,2,3)` et `Z=[1,3]^3`, on a `O=-2`, les huit coins du
+parent ont `J=-4` et le centre a `J=+2`. Le parent ne certifie que le bit inutile
+`O>0`, puis le `continue` cache les descendants utiles à `O<0`. La fixture
+ledger directement exécutable prend
+`A=(14,10,10)`, `B=(6,10,10)`, `C=(10,14,10)`, `D=(10,10,14)`, donc
+`O=-128`. Le parent témoin `[5,15]^3` donne `J=-7552` aux huit coins, soit le
+mauvais bit 1 ; ses huit descendants `{9,11}^3` donnent `J=1664`, soit le bit 2
+qui ferme réellement la lane négative. Le mutant `mask-any-continue` doit
+manquer cette fermeture et le swap de deux sommets exerce la lane opposée.
+
+La fixture plate enregistrée au HEAD vérifie seulement, par regex,
+`R2=1000001`, `cospherique=1` et `orientation_nulle=0`. Elle réfute utilement
+l'implication « petit déterminant donc grand rayon relatif », mais ne juge ni
+les poids `1/4`, ni l'owner, ni `R/diam`, ni la mesure d'aplatissement.
 
 La rampe CPU locale `12500/25000/50000`, `--echelle=1/256` au sens du code et
 Corner8 désactivé, rend la gate physique rouge. Sur uniform, les deux dernières
@@ -970,9 +1025,9 @@ HEAD Corner8 : 6/6 ciblés ; bloc=4096 supports/32768 témoins, oracle ponctuel 
 pin 22d1cb0 WST3 : 5/5 ciblés ; uniform n=120, 280840 triangles, zéro manquant/doublon owner
 pin 22d1cb0 WST4 : 1/1 ciblé ; uniform n=60, 487635 quadruplets, zéro manquant/doublon owner
   copies non-owner, diagonales, vrai PointId, doublons de position et coût non jugés
-HEAD 069d903 : huit portes WST3/WST4 enregistrées, dont signe aigu et échelle ; 8/8 ciblées vertes
-worktree bisigne : 12/12 portes préexistantes WST3/WST4/Corner8 vertes en 11,76 s ; aucune n'exerce la jonction
-catalogue HEAD : 835 CTests après reconfiguration ; aucune suite complète 835/835 rejouée ici
+HEAD 52585c5 : neuf portes WST3/WST4 enregistrées ; 9/9 ciblées vertes en 13,80 s au présent rejeu, durée non benchmark
+HEAD 52585c5 : 15/15 portes Corner8/WST3/WST4 ciblées vertes au rejeu antérieur ; aucune ne passe --corner8 ni n'exerce le bisigne
+catalogue HEAD : 836 CTests après reconfiguration ; aucune suite complète 836/836 rejouée ici
 ablation BJD n=1500 uniform : masse q4 -12,55 %, CPU user médian +5,47 %, lectures identiques
 ablation BJD n=1500 amas : masse q4 -0,87 %, CPU user médian +8,15 %, lectures identiques
 session G4 SOC actif : CTest rc=8, aucune rampe, cible TERMINATED

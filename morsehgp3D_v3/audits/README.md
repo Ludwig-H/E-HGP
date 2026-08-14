@@ -30,6 +30,11 @@ ancienne phrase imposant le rejet global des positions dupliquées est périmée
   WST4 brut. Son post-scriptum conserve la réfutation du signe à `3703097`, sa
   réparation à `a73161c`, le diagnostic Corner8 de `069d903` et les réponses
   Q10--Q13 sur orientation, bisigne, raffinement par lane et diagonale `Sym2`.
+  Le verdict live au pin `52585c5` est maintenu dans `AUDIT_ETAT_COURANT.md` :
+  le bisigne est commis, les couples non séparés ne sont plus jetés, mais
+  `Sym2` reste un compteur, le caller bisigne perd le mauvais bit et Corner8
+  demeure post-produit. La généralisation exacte d'ordre `q` par vecteurs de
+  multiplicités `alpha` est consolidée dans ce contre-audit et la proposition.
 - [`AUDIT_MINIBOULE_UNIQUE_RESIDUEL_SHALLOW_5809BD2_20260814.md`](AUDIT_MINIBOULE_UNIQUE_RESIDUEL_SHALLOW_5809BD2_20260814.md) :
   lemme exact de miniboule unique au support complet, famille normale au support
   partiel, cœur affine, sandwich `U<=D<=C`, q3 par pied, q4 par intersections,
@@ -112,11 +117,6 @@ ancienne phrase imposant le rejet global des positions dupliquées est périmée
   brute rouge est un diagnostic utile ; ses claims exact-once, constante WST3,
   borne composée et filtre d'acuité au signe inversé sont rétractés par sa
   bannière et le contre-audit support-complet actif.
-- [`QUESTIONS_CLAUDE_SEPARATION_ORDRE_QUATRE_20260814.md`](QUESTIONS_CLAUDE_SEPARATION_ORDRE_QUATRE_20260814.md) :
-  questions de Claude au pin `069d903` sur orientation q4 et séparation. Sa
-  bannière corrige les dénominateurs, l'échelle réciproque, l'erreur prétendue
-  quadratique et l'implication fausse « presque coplanaire donc grand rayon » ;
-  les réponses autoritaires sont dans le contre-audit support-complet.
 - [`NOTE_CLAUDE_ROUTE_50K_PUIS_DIZAINES_DE_MILLIONS_20260813.md`](NOTE_CLAUDE_ROUTE_50K_PUIS_DIZAINES_DE_MILLIONS_20260813.md) :
   questions de route de Claude, conservées avec bannière de rétractation. Ses
   claims live sont subordonnés à `AUDIT_ETAT_COURANT.md`.
