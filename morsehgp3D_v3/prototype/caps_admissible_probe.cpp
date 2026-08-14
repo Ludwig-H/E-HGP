@@ -80,6 +80,7 @@
 #include <vector>
 
 #include "cloud_families.hpp"
+#include "corner8_ball.hpp"
 
 namespace {
 
@@ -324,7 +325,41 @@ int main(int argc, char** argv) {
         ++testes;
         if ((cert_adm[(size_t)i] || cert_adm[(size_t)j]) && D2 >= r * r) ++viole;
       }
-    std::printf("falsifie : supports_q2_testes=%lld violations=%lld\n", testes, viole);
+    // LE VRAI OBJET EST q4. Le brute force `C(n,4)` est borne a 160 points ;
+    // au-dela la porte ne teste que q2 et le dit.
+    long long t4 = 0, v4 = 0;
+    if (N <= 160) {
+      for (int i = 0; i < N; ++i)
+        for (int j = i + 1; j < N; ++j)
+          for (int k = j + 1; k < N; ++k)
+            for (int l = k + 1; l < N; ++l) {
+              const i64* q[4] = {P[(size_t)i].c, P[(size_t)j].c, P[(size_t)k].c,
+                                 P[(size_t)l].c};
+              if (mhgp3v::c8::orient3d(q[0], q[1], q[2], q[3]) == 0) continue;
+              if (!mhgp3v::c8::bien_centre(q[0], q[1], q[2], q[3])) continue;
+              long long ins = 0;
+              for (int z = 0; z < N && ins < kmin; ++z) {
+                if (z == i || z == j || z == k || z == l) continue;
+                if (mhgp3v::c8::interieur_strict(q[0], q[1], q[2], q[3], P[(size_t)z].c))
+                  ++ins;
+              }
+              if (ins >= kmin) continue;
+              i64 dd = 0;
+              const int id[4] = {i, j, k, l};
+              for (int u = 0; u < 4; ++u)
+                for (int w = u + 1; w < 4; ++w) {
+                  const i64 e = d2p(P[(size_t)id[u]], P[(size_t)id[w]]);
+                  if (e > dd) dd = e;
+                }
+              ++t4;
+              bool un_certifie = false;
+              for (int u = 0; u < 4; ++u) un_certifie = un_certifie || cert_adm[(size_t)id[u]];
+              if (un_certifie && dd >= r * r) ++v4;
+            }
+    }
+    std::printf("falsifie : supports_q2_testes=%lld violations=%lld"
+                " supports_q4_testes=%lld violations_q4=%lld\n", testes, viole, t4, v4);
+    viole += v4;
     if (testes == 0) { std::fprintf(stderr, "PLANCHER: aucun support teste\n"); return 3; }
     if (viole > 0) {
       std::fprintf(stderr, "REFUTATION: %lld supports depassent le rayon certifie\n", viole);

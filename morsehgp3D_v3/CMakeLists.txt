@@ -5619,14 +5619,21 @@ target_compile_options(mhgp3v_caps_admissible_probe PRIVATE -Wall -Wextra -Werro
 # violation refute le theoreme et rend 1.
 foreach(caps_fam uniform terrain scanline_single_pass scanline_overlap_multiecho
                  eight_clusters)
+  # `n=150` exerce AUSSI q4 : le brute force `C(n,4)` y est calculable, et q4
+  # est le vrai objet. A `n=350` seul q2 serait teste.
   add_test(NAME mhgp3v_caps_admissible_falsifie_${caps_fam}
            COMMAND mhgp3v_caps_admissible_probe --falsifie --family=${caps_fam}
-                   --points=350 --seed=1 --kmin=8 --threads=2)
+                   --points=150 --seed=1 --kmin=8 --threads=2)
   set_tests_properties(mhgp3v_caps_admissible_falsifie_${caps_fam} PROPERTIES
-    PASS_REGULAR_EXPRESSION "falsifie : supports_q2_testes=[1-9][0-9]* violations=0")
+    PASS_REGULAR_EXPRESSION "falsifie : supports_q2_testes=[1-9][0-9]* violations=0 supports_q4_testes=[1-9][0-9]* violations_q4=0")
   add_test(NAME mhgp3v_caps_admissible_falsifie_${caps_fam}_code
            COMMAND mhgp3v_caps_admissible_probe --falsifie --family=${caps_fam}
-                   --points=350 --seed=1 --kmin=8 --threads=2)
+                   --points=150 --seed=1 --kmin=8 --threads=2)
+  # Et une seconde taille, uniquement q2, pour que la couverture ne depende pas
+  # d'un seul cardinal.
+  add_test(NAME mhgp3v_caps_admissible_falsifie_${caps_fam}_q2
+           COMMAND mhgp3v_caps_admissible_probe --falsifie --family=${caps_fam}
+                   --points=350 --seed=2 --kmin=8 --threads=2)
 endforeach()
 
 # LE GAIN EST GRAVE FAMILLE PAR FAMILLE, avec un plancher : si la restriction
