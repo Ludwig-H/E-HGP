@@ -2451,6 +2451,16 @@ mhgp3v_add_expected_code_test_for(mhgp3v_centre_cell
 mhgp3v_add_expected_code_test_for(mhgp3v_centre_cell
   mhgp3v_centre_cell_kill_arity_cascade "MUTANT TUE" 4
   --fixtures=arite3 --inject=arity-cascade)
+# LA MEME FAUTE, VUE DEPUIS L'ARITE QUATRE. Le contre-audit
+# `AUDIT_SOURCE_CK_WST_Q2_Q3_Q4_35FCEA8_20260814.md` section 8, point 7, releve
+# que le binaire tuait deja le mutant sur `arite4` mais qu'aucune porte ne
+# l'exigeait : la couverture reposait sur un accident. La contre-fixture u16 de
+# 64 points de la section 4.4 dit pourquoi les deux portes sont necessaires —
+# un q4 regulier peut n'avoir AUCUN de ses dix sous-supports q2 ou q3 retenu,
+# donc une cascade depuis q3 est fausse dans les deux sens de lecture.
+mhgp3v_add_expected_code_test_for(mhgp3v_centre_cell
+  mhgp3v_centre_cell_kill_arity_cascade_arite4 "MUTANT TUE" 4
+  --fixtures=arite4 --inject=arity-cascade)
 
 # REFUS AVANT CALCUL : code 2.
 mhgp3v_add_expected_code_test_for(mhgp3v_centre_cell
@@ -3195,6 +3205,124 @@ mhgp3v_add_expected_code_test_for(mhgp3v_spindle_cone_probe
 mhgp3v_add_expected_code_test_for(mhgp3v_spindle_cone_probe
   mhgp3v_cone_plancher_refutations "plancher de refutations q4" 3
   --points=200 --family=uniform --seed=1 --min-none-q4=100000000)
+
+# ---------------------------------------------------------------------------
+# `SOC64` / `CORNER512` : LE CERTIFICAT CORRELE D'UN RECTANGLE.
+#
+# Specification : PROPOSITION.md section 6.2 ; ordre impose par
+# audits/AUDIT_REPONSE_CRITERE_MORT_SOC64_LP_35FCEA8_20260813.md section 4.1.
+#
+# Le classifieur `JungSpindleRect-v0` combine des EXTREMA SEPARES de D, V et T
+# sur le meme rectangle et ne gagne que trois centiemes de point. La question
+# ouverte etait de savoir si cette perte vient de la DECORRELATION des extrema
+# ou d'une absence reelle de coeur commun. Ces portes jugent le premier terme.
+#
+# L'autorite est l'ENUMERATION DU RESEAU ENTIER de A x B x C, bornee par un cap
+# explicite. La chaine exigee est un ORDRE, jamais une egalite :
+#   soc64 <= corner512 <= exhaustif.
+# Une porte qui exigerait l'egalite refuserait le fail-open, qui est la
+# propriete voulue.
+add_executable(mhgp3v_soc64_probe prototype/soc64_probe.cpp)
+target_include_directories(mhgp3v_soc64_probe PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(mhgp3v_soc64_probe PRIVATE mhgp)
+target_compile_options(mhgp3v_soc64_probe PRIVATE -Wall -Wextra -Werror)
+
+# Les huit fixtures sont gravees aux coordonnees exactes. Deux d'entre elles
+# portent le resultat mathematique lui-meme : `soc64-axial` ferme q4 la ou les
+# extrema scalaires n'atteignent meme pas q3, et `soc64-faux-echec-relaxe`
+# montre le produit relaxe SOUS-ESTIMANT un rectangle reellement q4 — donc
+# UNKNOWN, jamais NONE. L'equivariance par les 48 isometries du reseau est
+# verifiee sur chacune.
+add_test(NAME mhgp3v_soc64_fixtures COMMAND mhgp3v_soc64_probe --fixtures)
+set_tests_properties(mhgp3v_soc64_fixtures PROPERTIES
+  PASS_REGULAR_EXPRESSION "fixtures accord=OUI refutees=0")
+
+# Le selftest tire des rectangles dans deux regimes : petites boites jugees par
+# enumeration complete du reseau, grandes boites jugees par echantillonnage de
+# triples interieurs. Les planchers interdisent le vert par vacuite, et
+# `--min-perte-relaxe` exige d'avoir OBSERVE le fail-open — donc d'avoir mesure
+# le prix de la relaxation, et pas seulement ses succes.
+add_test(NAME mhgp3v_soc64_selftest COMMAND mhgp3v_soc64_probe
+         --selftest --seed=1 --rounds=20000
+         --min-soc64-all=500 --min-corner512-all=500 --min-exhaustifs=5000
+         --min-gain-scalaire=20 --min-perte-relaxe=1)
+add_test(NAME mhgp3v_soc64_selftest_serre COMMAND mhgp3v_soc64_probe
+         --selftest --seed=7 --rounds=20000 --span=4096
+         --min-soc64-all=500 --min-gain-scalaire=100 --min-perte-relaxe=20)
+
+# LES SEPT MUTANTS, ET LA FIXTURE QUI TUE CHACUN.
+#
+# Le code 4 signifie « mutant SURVIVANT » : la porte est donc a code ZERO, et
+# c'est le binaire qui refuse quand la faute passe inapercue. `soc-narrow-i64`
+# merite une mention : sa premiere fixture large etait COLINEAIRE, donc H^2 et
+# E X y enroulaient du meme cote et l'ordre survivait par accident. Il a fallu
+# un couple presque orthogonal — E X = 3,69e19 contre 3H^2 = 1,29e10 — pour que
+# l'enroulement change le verdict. Une fixture large ne suffit pas : il faut
+# une fixture large ou l'enroulement DECIDE.
+foreach(_soc_mutant IN ITEMS
+        soc-no-positivity soc-accept-equality soc-swap-coeff soc-narrow-i64
+        soc-diagonal-only soc-seven-targets soc-minkowski-same)
+  string(REPLACE "-" "_" _soc_nom "${_soc_mutant}")
+  add_test(NAME mhgp3v_soc64_mutant_${_soc_nom}
+           COMMAND mhgp3v_soc64_probe --fixtures --inject=${_soc_mutant})
+  set_tests_properties(mhgp3v_soc64_mutant_${_soc_nom} PROPERTIES
+    PASS_REGULAR_EXPRESSION "mutant ${_soc_mutant} mort sur")
+endforeach()
+
+# Refus avant tout calcul, et planchers a code exact.
+mhgp3v_add_expected_code_test_for(mhgp3v_soc64_probe
+  mhgp3v_soc64_reject_sans_mode "choisir --fixtures ou --selftest" 2 --seed=1)
+mhgp3v_add_expected_code_test_for(mhgp3v_soc64_probe
+  mhgp3v_soc64_reject_span "--span hors du profil u16" 2 --selftest --span=70000)
+mhgp3v_add_expected_code_test_for(mhgp3v_soc64_probe
+  mhgp3v_soc64_reject_inject "--inject inconnu" 2 --fixtures --inject=soc-inconnu)
+mhgp3v_add_expected_code_test_for(mhgp3v_soc64_probe
+  mhgp3v_soc64_reject_plancher_sans_campagne
+  "les planchers de couverture exigent --selftest" 2 --fixtures --min-soc64-all=1)
+mhgp3v_add_expected_code_test_for(mhgp3v_soc64_probe
+  mhgp3v_soc64_plancher_perte "plancher perte_relaxe non atteint" 3
+  --selftest --seed=1 --rounds=200 --min-perte-relaxe=100000000)
+mhgp3v_add_expected_code_test_for(mhgp3v_soc64_probe
+  mhgp3v_soc64_plancher_gain "plancher gain_sur_scalaire non atteint" 3
+  --selftest --seed=1 --rounds=200 --min-gain-scalaire=100000000)
+
+# ---------------------------------------------------------------------------
+# ANALYSEUR DE RAMPE : LA PORTE DE CROISSANCE, EN ARITHMETIQUE EXACTE.
+#
+# La rampe G4 du pin `35fcea8` ne calculait aucune pente : `--max-slope=9`
+# etait inerte parce que chaque processus ne recevait qu'UNE taille, et le
+# verdict `1,7` a ete pose a la main dans une note posterieure. Cet analyseur
+# decide `pente <= p/q` par la comparaison ENTIERE `m2^q n1^p <= m1^q n2^p` :
+# aucun logarithme flottant n'est evalue, et une pente exactement au seuil est
+# decidee sans ambiguite.
+if(Python3_FOUND)
+  add_test(NAME mhgp3v_rampe_fixtures
+           COMMAND ${Python3_EXECUTABLE}
+                   ${CMAKE_CURRENT_SOURCE_DIR}/audits/check_rampe_pentes.py --fixtures)
+  set_tests_properties(mhgp3v_rampe_fixtures PROPERTIES
+    PASS_REGULAR_EXPRESSION "fixtures accord=OUI refutees=0")
+  # LE RECU REEL EST UNE FIXTURE. Le seuil `1,7` de la note de route est
+  # applique au recu grave du pin `35fcea8` : la porte DOIT rendre 3, parce que
+  # `eight_clusters` la depasse sur ses trois intervalles et que trois fenetres
+  # `terrain` ont du `pending`. Si un jour ce test devient vert, c'est que le
+  # recu a change, et il faudra le dire.
+  add_test(NAME mhgp3v_rampe_recu_35fcea8_refuse
+           COMMAND ${CMAKE_COMMAND}
+                   "-DPROGRAM=${Python3_EXECUTABLE}"
+                   "-DEXPECTED=eight_clusters/r4"
+                   "-DEXPECTED_CODE=3"
+                   "-DARGUMENTS=${CMAKE_CURRENT_SOURCE_DIR}/audits/check_rampe_pentes.py;--repertoire=${CMAKE_CURRENT_SOURCE_DIR}/receipts/rampe_raffinement_g4_20260813;--lane=4;--metrique=sum_E;--max-pente=17/10;--exige-code-zero;--exige-pending-zero"
+                   -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/expect_failure.cmake)
+  # Une matrice incomplete est un refus AVANT tout calcul, pas une moyenne sur
+  # ce qui est present.
+  add_test(NAME mhgp3v_rampe_matrice_incomplete
+           COMMAND ${CMAKE_COMMAND}
+                   "-DPROGRAM=${Python3_EXECUTABLE}"
+                   "-DEXPECTED=matrice incomplete"
+                   "-DEXPECTED_CODE=2"
+                   "-DARGUMENTS=${CMAKE_CURRENT_SOURCE_DIR}/audits/check_rampe_pentes.py;--repertoire=${CMAKE_CURRENT_SOURCE_DIR}/receipts/rampe_raffinement_g4_20260813;--familles=uniform,terrain;--profondeurs=0,4"
+                   -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/expect_failure.cmake)
+endif()
 
 # ---------------------------------------------------------------------------
 # GARDE-FOU DE CONFIGURATION : PAS DE QUANTIFICATEUR `{n}` DANS UNE REGEX CTEST.
@@ -4284,3 +4412,49 @@ add_test(NAME mhgp3v_wspd_wavefront_spindle_rect
           --sep-euclid=8/1 --tight --vwave --window=512 --spindle --window-ledger)
 set_tests_properties(mhgp3v_wspd_wavefront_spindle_rect PROPERTIES
   PASS_REGULAR_EXPRESSION "spindle_ALL=[0-9]+ essais=[0-9]+ tabs_non_nul=[0-9]+")
+
+# ---------------------------------------------------------------------------
+# `SOC64-shadow-q4` DANS LE CERTIFICATEUR CENTRAL : LE REPLAY VIRTUEL COMBINE.
+#
+# Les deux contre-audits du 14 aout ont trouve independamment la meme faute dans
+# la premiere version : elle additionnait `cred[2]` et un credit SOC64 sur des
+# ensembles NON DISJOINTS, parce qu'un descendant `central-ALL` recredite des
+# `PointId` deja comptes par un ancetre `SOC64-ALL`. Le shadow tient desormais
+# DEUX ledgers sur un seul parcours, et le `flip` les COMPARE au lieu de les
+# sommer.
+#
+# Le juge est une seconde arithmetique : quand SOC64 rend `ALL`, le probe
+# enumere les vrais `PointId` des trois nœuds et rejoue chaque triple dans
+# l'ecriture `(g,Q)` de `spindle_cone.hpp`, qui ne partage ni `H`, ni `E`, ni
+# `X`, ni aucune difference de Minkowski. Un seul triple refutant rend 1 : un
+# verdict universel n'a pas de taux d'erreur admissible.
+add_test(NAME mhgp3v_wspd_soc64_shadow_juge
+  COMMAND mhgp3v_wspd_wavefront_probe --family=eight_clusters --points=800
+          --sep-euclid=8/1 --tight --vwave --window=512 --window-ledger
+          --judge-soc64 --min-soc-taches=100000)
+set_tests_properties(mhgp3v_wspd_soc64_shadow_juge PROPERTIES
+  PASS_REGULAR_EXPRESSION "soc64_juge accord=OUI verdicts_juges=[0-9]+ sautes=[0-9]+ triples=[0-9]+ faux=0")
+
+# LE TEMOIN DE LA FAUTE, GARDE. Le ledger refute est calcule a cote et publie
+# sur sa propre ligne ; la porte exige qu'il SURCOMPTE strictement, donc que
+# l'ecart mesure ne retombe pas silencieusement a zero. Si un jour il devient
+# nul, c'est que le parcours a change et il faudra le dire.
+add_test(NAME mhgp3v_wspd_soc64_somme_brute_surcompte
+  COMMAND mhgp3v_wspd_wavefront_probe --family=eight_clusters --points=1200
+          --sep-euclid=8/1 --tight --vwave --window=512 --window-ledger
+          --raffine=4 --soc64-shadow)
+set_tests_properties(mhgp3v_wspd_soc64_somme_brute_surcompte PROPERTIES
+  PASS_REGULAR_EXPRESSION "soc64_somme_brute q4 : fermetures=[0-9]+ masse_fermee=[0-9]+ \\| surcompte fermetures=[1-9][0-9]* masse=[1-9][0-9]*")
+
+# REFUS AVANT CALCUL. Sans `--vwave` le shadow ne verrait jamais une boite
+# temoin et publierait zero tache avec un code zero : un vert par vacuite.
+mhgp3v_add_expected_code_test_for(mhgp3v_wspd_wavefront_probe
+  mhgp3v_wspd_soc64_reject_sans_vwave "--soc64-shadow exige --vwave" 2
+  --family=uniform --points=200 --soc64-shadow)
+mhgp3v_add_expected_code_test_for(mhgp3v_wspd_wavefront_probe
+  mhgp3v_wspd_soc64_reject_plancher_sans_shadow "--min-soc-taches exige --soc64-shadow" 2
+  --family=uniform --points=200 --min-soc-taches=1)
+mhgp3v_add_expected_code_test_for(mhgp3v_wspd_wavefront_probe
+  mhgp3v_wspd_soc64_plancher_taches "PLANCHER" 3
+  --family=uniform --points=400 --sep-euclid=8/1 --tight --vwave --window=512
+  --window-ledger --soc64-shadow --min-soc-taches=1000000000)

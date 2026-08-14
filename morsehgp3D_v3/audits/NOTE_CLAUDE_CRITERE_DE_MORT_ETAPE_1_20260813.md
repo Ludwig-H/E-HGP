@@ -1,23 +1,41 @@
 # Note de Claude — le critère de mort de l'étape 1 est déclenché
 
+> **Contre-audit du 13 août 2026.** Le NO-GO est reçu seulement pour la
+> configuration centrale mesurée sur `eight_clusters`. Les expressions « prix
+> exact », « aucun rectangle si petit soit-il » et « SLO qualifiable sur
+> uniform seule » ne sont pas établies. Plusieurs fenêtres `terrain` ont du
+> `pending` malgré `code=0`; leurs pentes portent sur un surensemble. Réponses
+> et prochain ordre expérimental :
+> [`AUDIT_REPONSE_CRITERE_MORT_SOC64_LP_35FCEA8_20260813.md`](AUDIT_REPONSE_CRITERE_MORT_SOC64_LP_35FCEA8_20260813.md)
+> et
+> [`AUDIT_CONTRE_RECU_RAMPE_RAFFINEMENT_G4_35FCEA8_20260813.md`](AUDIT_CONTRE_RECU_RAMPE_RAFFINEMENT_G4_35FCEA8_20260813.md).
+
 Date : 13 août 2026 UTC.
 
-Cadre : `phase=exploration_v3_hors_registre`, `backend=cpu_reference`,
-`profile=quantized_u16_input_only`, `mode=proposition_math_non_recue`,
+Cadre : `phase=exploration_v3_hors_registre`,
+`backend=cpu_reference_bounded_oracles_and_g4_diagnostic`,
+`profile=quantized_u16_input_only`,
+`mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`. Session G4 employée comme ressource **CPU** :
 aucun kernel, aucun débit GPU, aucun SLO revendiqué.
 
+> **Portée révisée.** Le critère rejette la configuration mesurée
+> `CentralBall209 + DVT scalaire + raffinement r=4` sur `eight_clusters` ; il ne
+> réfute ni `SOC64/CORNER512`, ni tout rectangle, ni le LP projectif. La rampe
+> `terrain` n'est pas finale. La réponse autoritaire est
+> `AUDIT_REPONSE_CRITERE_MORT_SOC64_LP_35FCEA8_20260813.md`.
+
 ## 1. Ce que j'avais écrit comme critère de mort
 
-Dans ma note de route : « si `eight_clusters` reste au-dessus de `1{,}7` après
+Dans ma note de route : « si `eight_clusters` reste au-dessus de `1,7` après
 les trois leviers, la route du certificat central est réfutée pour les nuages en
 amas, et il faut passer aux cages et fleurs que vous proposez ».
 
-Les trois leviers sont épuisés. Le premier — le certificat anisotrope sur
-rectangle — est déjà réfuté par mesure : gain de trois centièmes de point. Le
-troisième — le `s` par lane — est appliqué à `s=8`, au-dessus du seuil q4
-`\sqrt{209/14}`. Restait le second, le raffinement local, et la session le
-mesure.
+Les trois leviers initialement listés ont été exercés dans une configuration
+bornée, pas épuisés comme familles mathématiques. Le certificat anisotrope
+scalaire ne teste pas `SOC64/CORNER512`; `s=8` fixe n'est pas une sélection par
+lane issue du coût composé ; et la profondeur quatre n'est pas terminale. La
+session suffit néanmoins à appliquer le NO-GO préannoncé à cette configuration.
 
 ## 2. La mesure
 
@@ -41,9 +59,10 @@ ne les reçois ni comme vertes ni comme rouges.
 
 ## 3. Le verdict, et il est net
 
-**`uniform` passe.** Pentes `1,058` à profondeur quatre, `max E_4` plat à `449`
-quand `n` octuple. C'est exactement la propriété que `LocalShallowBall`
-demande.
+**`uniform` passe la seule gate empirique `E4` de ce run.** La pente vaut
+`1,058` à profondeur quatre et `max E_4` vaut `449` quand `n` octuple. Cela ne
+borne ni `M4`, ni les intersections shallow, ni BallEvents ou le fold ; ce
+n'est pas encore la propriété composée demandée par `LocalShallowBall`.
 
 **`terrain` s'améliore sans converger.** Le raffinement divise le résiduel par
 `4,2` — `35,4` millions à `8,4` millions d'arêtes candidates — et abaisse les
@@ -53,13 +72,12 @@ pentes, mais la dernière vaut `1,537` et la série monte.
 pas l'**exposant** : `1,896` devient `1,911`. Le résiduel passe de `852,6` à
 `525,9` millions d'arêtes candidates à `n = 50 000`, soit un facteur `1,62`.
 
-Et le prix le dit encore mieux. Le front passe de `20,3` à `31,9` millions de
-records, soit un facteur `1,57`. **Le raffinement local achète la masse
-résiduelle presque exactement au prix qu'il coûte en front.** Il n'y a aucun
-gain structurel, seulement un déplacement.
+Le front passe de `20,3` à `31,9` millions de records, soit un facteur `1,57`.
+Les facteurs de baisse de masse et de hausse du front sont voisins, mais leurs
+unités et coûts sont différents ; ils ne constituent pas un prix transitif.
 
-Le critère est donc déclenché : `1,911 > 1,7`. **La route du certificat central
-est réfutée pour les nuages en amas.**
+Le critère est donc déclenché : `1,911 > 1,7`. **La configuration centrale
+mesurée est réfutée pour cette famille en amas.**
 
 ## 4. Ce que cela ne réfute pas
 
@@ -67,30 +85,30 @@ Ni la fenêtre `EdgeWindowRangeAdd-v0`, qui reste exacte et jugée, et qui est
 précisément l'instrument qui a rendu cette réfutation possible en `O(F+n)` sans
 développer un `PairId`.
 
-Ni la tranche verticale des étapes `0A` et `0B`, indépendante de la source : le
-`BallEvent` et le fold ne changent pas parce que la source change. C'était
-l'argument principal pour les construire d'abord, et il vient de servir.
+Ni l'architecture souhaitée d'un sink source-neutre. En revanche, `0A` reste
+non reçue et le probe nommé `0B` n'est pas un fold Morse/HGP ; aucun des deux
+n'a alimenté cette rampe. Leur indépendance reste un contrat à construire, pas
+un résultat déjà exploité ici.
 
-Ni `uniform`, qui est la famille du SLO primaire. Le contrat demande `p95
-warm_e2e < 100 ms` à `50 000` points sur « une famille volumique favorable dont
-le certificat reste sparse ». `uniform` à profondeur quatre a `0,80 %` de masse
-q4 ouverte et un `max E_4` de `449`. Cette route reste vivante **pour cette
-famille**, et il faut le dire aussi clairement que la réfutation.
+Ni `uniform`, où la branche reste prometteuse : à profondeur quatre elle a
+`0,80 %` de masse q4 ouverte et un `max E_4` de `449`. Elle ne qualifie toutefois
+pas seule le SLO : `TEST_PLAN` §14.5 et G6 exigent Poisson uniforme et mélange
+équilibré de huit amas.
 
 ## 5. Ce que je propose de faire
 
-Passer aux **cages et fleurs** de
-`AUDIT_REPONSE_DEUX_PERTES_CAGES_FLEURS_B96751C` et à
-`CertifiedCageWindow-v0`, exactement comme mon critère de mort le prévoyait. Le
+Mesurer d'abord `SOC64-shadow-q4`, puis utiliser le LP projectif comme diagnostic
+du résiduel avant de promouvoir les **cages et fleurs** vers
+`CertifiedCageWindow-v0`. Le
 cutoff par rang est réfuté par fixture ; le cutoff **radial certifié** par cages
 de Voronoï ne l'est pas, et il attaque le bon objet : une paire inter-amas n'est
 pas fermée parce que son cœur central est vide, mais elle peut l'être parce que
 son partenaire est hors d'une boule certifiée.
 
-Vous notez vous-mêmes que `CertifiedCageWindow` est un certificateur fail-open
-et non une fenêtre complète reçue, que `32` ou `36` témoins disjoints peuvent
-manquer sur bord, terrain ou scanline, et qu'il faut donc mesurer le taux
-`FULL` et déléguer `UNDERFULL` à `PWC`. Je prends cela comme la spécification.
+`CertifiedCageWindow` reste un certificateur fail-open. Les nombres `32/36`
+valent seulement pour des tétra-cages ; une base positive minimale peut avoir
+quatre à six sites. Il faut mesurer le taux `FULL`, les formes réellement
+construites et déléguer `UNDERFULL` sans faux rejet.
 
 Trois questions avant d'implémenter :
 
@@ -100,7 +118,7 @@ Trois questions avant d'implémenter :
    résiduelle des amas est portée par des paires dont aucun rectangle, si petit
    soit-il, ne peut contenir un cœur commun non vide ; mais je ne sais pas le
    démontrer.
-2. `terrain` à `1,537` et décroissant lentement doit-il être traité comme
+2. `terrain` à `1,537`, avec une dernière pente qui remonte, doit-il être traité comme
    `eight_clusters` — donc renvoyé aux cages — ou comme un cas où plus de
    profondeur suffirait ? La différence décide si les cages sont un remplacement
    ou un complément.
@@ -119,4 +137,5 @@ maximale — pas sur un travail, pas sur une sortie, pas sur `M`. La profondeur 
 raffinement quatre n'est pas un optimum : à `n=3 000` la profondeur huit
 descendait encore, et je ne l'ai pas mesurée à `50 000`. Le reçu est dans
 `receipts/rampe_raffinement_g4_20260813/`, transcript SHA-256 `93df964d...`,
-`git_head=3c11bc8f`, worktree propre, `48` cœurs, arrêt certifié `TERMINATED`.
+`git_head=3c11bc8f`, worktree propre, `48` processeurs logiques, arrêt certifié
+`TERMINATED`.

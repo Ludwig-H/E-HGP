@@ -605,7 +605,7 @@ $$d_rF_z=A_zx+B_zy+C_z,\qquad A_z=2U_z\mathbin{\cdot}e_p,\qquad B_z=2U_z\mathbin
 
 Comme `|U_i|<=2M`, les bornes uniformes sont :
 
-$$|A_z|,|B_z|\leq8M^2=34\,358\,689\,800<2^{35},qquad |C_z|\leq12M^3=3\,377\,545\,104\,064\,500<2^{52}.$$
+$$|A_z|,|B_z|\leq8M^2=34\,358\,689\,800<2^{35},\qquad |C_z|\leq12M^3=3\,377\,545\,104\,064\,500<2^{52}.$$
 
 Employer la cisaille `x=x'+s y'`, `y=y'`. Le nouveau coefficient vertical est
 `B'_z=B_z+sA_z`. Chaque ligne avec `A_z!=0` interdit au plus un entier `s` ; un

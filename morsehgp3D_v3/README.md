@@ -15,7 +15,9 @@ public_status=not_claimed
 ```
 
 La v3 n'est ni promue dans le registre officiel, ni qualifiée GPU, ni déclarée
-exacte sur son domaine public. GCP n'est pas impliqué dans l'état décrit ici.
+exacte sur son domaine public. Une session G4 SPOT documentée au `HEAD=35fcea8`
+a utilisé ses 48 processeurs logiques comme ressource CPU, sans kernel CUDA ;
+le reçu certifie l'arrêt ciblé `TERMINATED` et ne qualifie aucun SLO.
 
 ## Verdict actuel
 
@@ -33,7 +35,8 @@ huit CTests du pin, puis les dix du successeur, ne couvrent que `coord<=64` ;
 leur juge de Gram dépasse lui-même 128 bits sur des fixtures u16, ne recertifie
 ni la positivité ni la clé primitive, et le mutant de clé reste corrélé.
 
-Le `HEAD=3c11bc8` ajoute un probe nommé stage 0B. Il ne ferme pas 0B : il
+Le producteur au pin `3c11bc8`, inchangé au `HEAD=35fcea8`, ajoute un probe
+nommé stage 0B. Il ne ferme pas 0B : il
 compare Kruskal à Floyd--Warshall sur le même hypergraphe de `PointId`, dans
 une unique DSU. Il n'émet ni dix forêts par ordre, ni lots, coverage,
 verticales ou payload. Cette DSU est structurellement fausse dès `k=2` lorsque
@@ -53,8 +56,8 @@ La prochaine chaîne à fermer est :
 ```text
 0A  BallForm -> BallKey -> census -> BallEvent exact
 0B  oracle exhaustif borné -> lots -> dix forêts -> verticales -> payload
-1   substituer seulement la source sparse et mesurer E3/E4, M3/M4 et H
-2   intégrer les moteurs q3/q4 locaux si la porte de coût composée est verte
+1   CKPairTape q2 -> porteurs aigus -> OwnedCK-WST3/WST4, toujours factorisés
+2   certifier rang/census et mesurer F2/F3/F4, M3/M4 et H
 3   porter la même tranche sur device, puis mesurer warm_e2e sur G4
 4   ouvrir séparément tout nouveau profil numérique
 ```
@@ -103,33 +106,52 @@ Avant d'appeler `0A` fermé :
 6. différencier toute la sortie de `0A`, puis fermer `0B` par générateurs et
    ordres jusqu'au `BenchmarkOutputContract-v1`.
 
-## Générateur q3 retenu
+## Source factorisée q2/q3/q4
 
-Les triangles aigus suffisent à caractériser la positivité q3, mais pas à
-garantir une source sparse. La factorisation retenue est néanmoins forte :
-choisir l'arête maximale canonique transforme chaque q3 en une incidence
-`owner EdgeKey × carrier PointId`; le carrier détermine un unique centre, donc
-une seule `BallKey` et une requête de profondeur.
+La source retenue exploite Callahan--Kosaraju sans développer son produit
+cartésien :
 
 ```text
-fenêtre E3 finale
-  -> blocs owner-edge × carrier aigu et preflight M3
-  -> BallKey géométrique + RLE
-  -> Q3FootPowerRange LBVH, arrêt au neuvième intérieur
-  -> un census par BallKey survivante
-  -> BallEvent puis fold
+CKPairTape(A,B)                          tous les q2, exact-once
+  -> OwnedCK-WST3(A,B,C)                carrier de l'arête maximale
+  -> OwnedCK-WST4(A,B,C,D)              second carrier/apex
+  -> BallKey/RLE -> rang/census -> fold
 ```
 
-Une WSPD/WSSD aiguë peut compresser ou proposer les blocs, mais ne borne ni
-leur masse, ni le rang, ni le nombre de sphères ou de supports. Les niveaux
-shallow q3 ne viennent qu'en ablation si les visites LBVH sont rouges. La route
-est conditionnellement sparse et output-sensitive, jamais linéaire au pire.
-Formules, bornes et fixtures sont consolidées dans
-[`PROPOSITION.md`](PROPOSITION.md).
+Pour chaque rectangle CK, une boule `B_R` contenant `A union B` fixe un niveau
+Morton. Tout troisième ou quatrième sommet d'un support dont `ab` est l'arête
+maximale appartient à `3B_R`. Les cellules non vides de ce niveau donnent donc
+une extension ternaire complète, puis leurs couples non ordonnés une extension
+quaternaire complète. L'owner longueur/`EdgeKey` rend les sorties exact-once.
+
+q3 recertifie `E+X-D>0` et l'indépendance affine. q4 ne signifie pas « quatre
+faces aiguës » : l'autorité est la stricte positivité des quatre
+barycentriques du circumcentre. Une face aiguë adjacente à l'arête maximale
+sert seulement à choisir un carrier géométrique primaire.
+
+Le chemin q4 élimine d'abord les `CarrierBlock` sans face aiguë, avant de
+former les couples de cellules. Pour une face exacte, les centres vivent sur
+une droite et la puissance de chaque apex y est affine : une sweep 1D par lots
+égaux remplace l'arrangement 2D comme candidat principal. Les comparaisons
+rationnelles peuvent dépasser `i128` sous u16.
+
+Les masques de rang restent indépendants. Une fixture u16 de 64 points possède
+un q4 régulier de rang 4, alors que ses six arêtes q2 et ses quatre faces q3 ont
+toutes rang 12. `OwnedCK-WST4` doit donc consommer la relation aiguë q3
+**pré-rang**, jamais les événements q3 retenus.
+
+Le nombre de blocs vaut conditionnellement `O(s^3 n)`,
+`O(s^3*eta^-3*n)` et `O(s^3*eta^-6*n)` pour q2/q3/q4. Leur masse logique peut
+rester quadratique ou pire. Les blocs sont paresseux jusqu'à un consommateur
+factorisé reçu ou au preflight atomique d'une vraie sortie. Le rapport complet
+et son contre-audit sont
+[`audits/AUDIT_SOURCE_CK_WST_Q2_Q3_Q4_35FCEA8_20260814.md`](audits/AUDIT_SOURCE_CK_WST_Q2_Q3_Q4_35FCEA8_20260814.md)
+et
+[`audits/AUDIT_DEBLOCAGE_Q4_PORTEUR_AIGU_SOC64_LIVE_35FCEA8_20260814.md`](audits/AUDIT_DEBLOCAGE_Q4_PORTEUR_AIGU_SOC64_LIVE_35FCEA8_20260814.md).
 
 ## Déblocages mathématiques prêts après `0A`
 
-Trois pistes sont assez précises pour être implémentées dans les composants
+Quatre pistes sont assez précises pour être implémentées dans les composants
 existants, avec échec fail-open.
 
 ### `SOC64` et `CORNER512`
@@ -147,8 +169,9 @@ Pour `e=z-a`, `t=b-z`, `H=e dot t`, `E=||e||^2`, `X=||t||^2`, q3 exige
 Le `JungSpindleRect-v0` actuellement branché n'est pas `SOC64/CORNER512` : il
 combine des extrema séparés de `D,V,T`. Son diagnostic `n=6000,s=8` gagne
 environ trois centièmes de point seulement. Cela réfute cette combinaison sur
-les boîtes grossières mesurées, pas les deux théorèmes corrélés, qui restent à
-implémenter et à mesurer.
+les boîtes grossières mesurées, pas les deux théorèmes corrélés. Leur primitive
+et 16 CTests bornés ont été observés verts dans le worktree ; l'ablation WSPD
+et son coût transitif restent non reçus.
 
 La prochaine ablation recommandée est `SOC64-shadow-q4` sur un échantillon
 déterministe de tâches `central-MIXED`, avec cap propre, early exits, masse
@@ -156,7 +179,29 @@ créditable et aucun changement de fate. Si le signal est positif, le brancher
 **avant** le raffinement local : un certificat corrélé évite une scission,
 alors qu'un certificat rejoué après la scission paie déjà son front.
 
-### LP projectif
+Le premier raccord live du 14 août additionnait les crédits SOC d'un ancêtre
+aux crédits baseline du même sous-arbre et comptait deux fois les mêmes IDs.
+Le shadow courant corrige cette faute : il compare les ledgers baseline et
+union combinée, place SOC après les fallbacks et arrête une branche combinée à
+son premier `ALL`. Un replay borné mesure `41` fermetures de masse `95`, contre
+`127` et `316` avec la somme fautive. Il doit encore être capé, recevoir une
+porte CTest intégrée et tuer un mutant `sum_instead_of_union`. À `n=2000`, le
+shadow non capé a déjà soumis `3 809 028` tâches et ajouté environ `2,1 s` à la
+vague sur une machine partagée ; ne pas lancer sa rampe 50k. Un retour inférieur
+à `floor=q4` signifie seulement `UNKNOWN_BELOW_FLOOR`, pas une lane exacte.
+
+### `JungDiskDepth`, puis LP projectif
+
+Pour une arête maximale `ab`, les centres q3 et q4 ne parcourent pas tout le
+plan médiateur : avec `y=2c`, ils restent dans les disques exacts de Jung
+`||y-d||^2<=D/3` et `||y-d||^2<=D/2`. Dans ce plan 2D, un groupe d'au plus
+trois IDs peut certifier qu'au moins un témoin est intérieur pour tout centre
+admissible. Neuf groupes disjoints ferment q3, huit ferment q4. Cette porte
+précède la création de `WST3/WST4`.
+
+Le LP global reste un oracle utile, mais son échec ne prouve plus une pénurie
+sur le disque Morse : une fixture à huit groupes ferme `JungDiskDepth8` alors
+que le LP sur tout le plan échoue dès la profondeur un.
 
 Pour `s_i=z_i-a`, `d=b-a`, `D=||d||^2`, `q_i=||s_i||^2`, poser :
 
@@ -170,9 +215,23 @@ relativement au pool, jusqu'à 3280 appels LP pour q4. Cette propriété porte s
 toutes les sphères par la paire, pas seulement les supports Morse; un échec
 reste fail-open pour la source. Ce dernier n'est pas un hot path.
 
+### Pelages inversés collectifs
+
+`OriginOnionDepth-h` inverse une banque autour de l'ancre, retire
+successivement les sommets de `conv({0} union P)`, puis teste si la cible
+inversée reste strictement dans la dernière coque sans chute de rang. Chaque
+couche fournit alors un ID intérieur distinct dans toute sphère par la paire.
+Une facette se rejoue sur un BNode par le test séparable
+`v||d||^2-u dot d>=1`, sous environ 87 bits. `h=8/9/10` ferme q4/q3/q2.
+
+Ce fast path reste universel. Sur la famille u16 à deux droites, tous les
+certificats universels peuvent laisser `n^2/4` paires alors que tous les
+triangles sont obtus et la vraie source q3/q4 est vide. La porte par carrier
+aigu doit y rendre zéro sans développer de `PairId`.
+
 ### Cages de quatre à six sites
 
-Une base positive minimale 3D peut avoir quatre, cinq ou six sites. Les cages
+Une positive basis inclusion-minimale 3D peut avoir quatre, cinq ou six sites. Les cages
 tétra-only sont donc incomplètes. Une cage de six facettes possède au plus huit
 sommets de fleur. `SixRoleCageProposer` reste une ablation counter-only ; chaque
 groupe doit être validé exactement, et réduire une cage impose de recalculer sa
@@ -198,11 +257,18 @@ séparés de l'objet final.
 La réparation algorithmique proposée est `ProofCarryingLocalRefinement` : un
 enfant hérite des CNodes témoins déjà `ALL`, des `NONE` et de leurs IDs ; seuls
 les `MIXED` sont rejoués. Cela évite de repartir de la racine à chaque split et
-se prête à `count--scan--fill` avec continuations persistantes. La recette G4
-committée n'a pas été exécutée : elle ne calcule aucune pente entre ses quatre
-processus, ne gate pas `fenetre_finale`, masque les métriques physiques et doit
-être réparée avant usage. Détails et commandes :
-[`audits/AUDIT_CONTRE_RAFFINEMENT_LOCAL_ET_SESSION_G4_3C11BC8_20260813.md`](audits/AUDIT_CONTRE_RAFFINEMENT_LOCAL_ET_SESSION_G4_3C11BC8_20260813.md).
+se prête à `count--scan--fill` avec continuations persistantes.
+
+La recette G4 a depuis été exécutée sur CPU. Les quarante processus rendent
+zéro, mais `terrain` conserve des continuations q3/q4 à 25 000 et 50 000 : ses
+`sum_E4` sont des surensembles, pas des fenêtres finales. Sur
+`eight_clusters`, `pending=0` et les pentes restent proches de `1,9` après
+profondeur quatre ; cela réfute la configuration centrale mesurée, pas tous les
+certificateurs rectangle. Le rapport `1,62` contre `1,57` compare en outre des
+unités différentes et ne mesure pas un prix. Détails et réponses :
+[`audits/AUDIT_REPONSE_CRITERE_MORT_SOC64_LP_35FCEA8_20260813.md`](audits/AUDIT_REPONSE_CRITERE_MORT_SOC64_LP_35FCEA8_20260813.md)
+et
+[`audits/AUDIT_CONTRE_RECU_RAMPE_RAFFINEMENT_G4_35FCEA8_20260813.md`](audits/AUDIT_CONTRE_RECU_RAMPE_RAFFINEMENT_G4_35FCEA8_20260813.md).
 
 ## Dégénérescences et sortie lourde
 
@@ -236,10 +302,11 @@ et aucun catalogue exhaustif ne deviennent le chemin produit.
 Le raffinement local réduit effectivement `E4`, mais ses parents et enfants
 sont encore mélangés dans plusieurs compteurs de tentative. Son coût doit être
 jugé après séparation `AttemptStats/TerminalLedger` et avec héritage des preuves
-`ALL/NONE`. La recette G4 actuelle ne calcule pas la pente inter-tailles, coupe
-des métriques décisives et lance des diagnostics CPU concurrents ; elle n'est
-pas une campagne de qualification. Voir
-[`audits/AUDIT_CONTRE_RAFFINEMENT_LOCAL_ET_SESSION_G4_3C11BC8_20260813.md`](audits/AUDIT_CONTRE_RAFFINEMENT_LOCAL_ET_SESSION_G4_3C11BC8_20260813.md).
+`ALL/NONE`. La campagne CPU G4 a calculé ses pentes après coup, coupe les
+métriques physiques et n'exige pas la finalité ; elle n'est pas une campagne de
+qualification. Voir
+[`audits/AUDIT_CONTRE_RAFFINEMENT_LOCAL_ET_SESSION_G4_3C11BC8_20260813.md`](audits/AUDIT_CONTRE_RAFFINEMENT_LOCAL_ET_SESSION_G4_3C11BC8_20260813.md)
+et son contre-reçu au pin `35fcea8`.
 
 ## Construire et tester
 

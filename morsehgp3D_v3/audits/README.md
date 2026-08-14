@@ -9,39 +9,64 @@ Cadre : `phase=exploration_v3_hors_registre`,
 Ce dossier n'est plus un journal chronologique. Les propositions abandonnées,
 questions résolues et audits absorbés ont été supprimés. Les preuves durables
 sont consolidées dans `../PROPOSITION.md`; seules restent les autorités live et
-les dépendances historiques encore citées par le logiciel ou un reçu.
+les dépendances historiques encore citées directement ou transitivement par le
+logiciel, un reçu ou une autorité conservée.
 
 ## Autorités actives
 
 - [`AUDIT_ETAT_COURANT.md`](AUDIT_ETAT_COURANT.md) : unique verdict mutable,
   pin, worktree, tests et blocages.
+- [`AUDIT_SOURCE_CK_WST_Q2_Q3_Q4_35FCEA8_20260814.md`](AUDIT_SOURCE_CK_WST_Q2_Q3_Q4_35FCEA8_20260814.md) :
+  source factorisée Callahan--Kosaraju pour tous les q2, extensions exact-once
+  `OwnedCK-WST3/WST4`, disque de Jung et fixture de non-cascade. Son lift Jung
+  d'une paire vers tout un rectangle et son ordre avant multiplication restent
+  des obligations, précisées par le contre-audit suivant.
+- [`AUDIT_DEBLOCAGE_Q4_PORTEUR_AIGU_SOC64_LIVE_35FCEA8_20260814.md`](AUDIT_DEBLOCAGE_Q4_PORTEUR_AIGU_SOC64_LIVE_35FCEA8_20260814.md) :
+  contre-audit du shadow SOC64, obstruction u16 aux routes universelles, lemme
+  du porteur aigu, sweep q4 1D, pelages inversés et portes physiques.
 - [`AUDIT_BALL_EVENT_V0_2B89EA1_20260813.md`](AUDIT_BALL_EVENT_V0_2B89EA1_20260813.md) :
   contre-audit de la tranche `0A`; overflows u16, indépendance du juge, ABI,
   `RelevantGP`, caps et fixtures.
+- [`AUDIT_CONTRE_RECEPTION_STAGE_0B_3C11BC8_20260813.md`](AUDIT_CONTRE_RECEPTION_STAGE_0B_3C11BC8_20260813.md) :
+  le probe Kruskal/Floyd reçoit une fermeture de points bornée, pas les dix
+  folds HGP ; filtre unsupported, comparateur de niveau et fixtures bloquantes.
+- [`AUDIT_CONTRE_RAFFINEMENT_LOCAL_ET_SESSION_G4_3C11BC8_20260813.md`](AUDIT_CONTRE_RAFFINEMENT_LOCAL_ET_SESSION_G4_3C11BC8_20260813.md) :
+  gain `E4`, coût du raffinement, ledgers tentative/terminal, héritage de
+  preuves et défauts fail-closed de la recette G4.
+- [`AUDIT_REPONSE_CRITERE_MORT_SOC64_LP_35FCEA8_20260813.md`](AUDIT_REPONSE_CRITERE_MORT_SOC64_LP_35FCEA8_20260813.md) :
+  réponses aux trois questions de Claude, portée du NO-GO amas et cascade
+  `SOC64 -> LP -> cages` avant davantage de raffinement.
+- [`AUDIT_CONTRE_RECU_RAMPE_RAFFINEMENT_G4_35FCEA8_20260813.md`](AUDIT_CONTRE_RECU_RAMPE_RAFFINEMENT_G4_35FCEA8_20260813.md) :
+  finalité des fenêtres, pentes terrain sur surensemble, coût non comparable,
+  portée du SLO et réparations de la recette réutilisable.
 - [`AUDIT_CONTRE_RECEPTION_BALL_EVENT_2B89EA1_20260813.md`](AUDIT_CONTRE_RECEPTION_BALL_EVENT_2B89EA1_20260813.md) :
   rejeu indépendant de 0A ; RLE avant census, Gram au-delà d'i128, vrais
   `PointId`, statut transactionnel et générateur pouvant ne pas terminer.
-- [`AUDIT_CONTRE_RECEPTION_STAGE_0B_3C11BC8_20260813.md`](AUDIT_CONTRE_RECEPTION_STAGE_0B_3C11BC8_20260813.md) :
-  réfutation du claim 0B ; DSU de points contre générateurs par ordre,
-  comparateur exact, lots, dix forêts, coverage et verticales manquants.
-- [`AUDIT_CONTRE_RAFFINEMENT_LOCAL_ET_SESSION_G4_3C11BC8_20260813.md`](AUDIT_CONTRE_RAFFINEMENT_LOCAL_ET_SESSION_G4_3C11BC8_20260813.md) :
-  mesure du gain `E4` et de son coût, double comptage des tentatives,
-  `ProofCarryingLocalRefinement` et blocages de la recette G4 avant exécution.
 - [`AUDIT_REPONSE_PLAN_VERTICAL_SOC64_LP_1AA487D_20260813.md`](AUDIT_REPONSE_PLAN_VERTICAL_SOC64_LP_1AA487D_20260813.md) :
-  réponse mathématique consolidée, contre-audit de l'autre auditeur,
-  `SOC64/CORNER512`, LP projectif et cages quatre--six sites.
+  preuves historiques `SOC64/CORNER512`, LP projectif et cages quatre--six
+  sites. Son ordre d'exécution est supersédé par `AUDIT_ETAT_COURANT.md` et
+  `PROPOSITION.md`.
 - [`AUDIT_REPONSE_ROUTE_VERTICAL_SLICE_1AA487D_20260813.md`](AUDIT_REPONSE_ROUTE_VERTICAL_SLICE_1AA487D_20260813.md) :
   autre audit ayant découvert l'owner `GenerationRank`; conservé pour la chaîne
   de preuve, avec ses corrections dans l'audit précédent.
+- [`NOTE_CLAUDE_SOC64_LEDGER_COMBINE_ET_PARADOXES_20260814.md`](NOTE_CLAUDE_SOC64_LEDGER_COMBINE_ET_PARADOXES_20260814.md) :
+  réponse de Claude aux deux contre-audits du 14 août. Acceptation du
+  double-comptage, replay virtuel combiné, chiffres corrigés, mesure de `f(n)`
+  sur trois tailles, et quatre questions ouvertes — dont celle de savoir si
+  `sum E4` est encore le bon objet de porte.
 - [`NOTE_CLAUDE_ROUTE_50K_PUIS_DIZAINES_DE_MILLIONS_20260813.md`](NOTE_CLAUDE_ROUTE_50K_PUIS_DIZAINES_DE_MILLIONS_20260813.md) :
-  note active de Claude et questions de route. Ses claims live sont toujours
-  subordonnés à `AUDIT_ETAT_COURANT.md`.
+  questions de route de Claude, conservées avec bannière de rétractation. Ses
+  claims live sont subordonnés à `AUDIT_ETAT_COURANT.md`.
+- [`NOTE_CLAUDE_CRITERE_DE_MORT_ETAPE_1_20260813.md`](NOTE_CLAUDE_CRITERE_DE_MORT_ETAPE_1_20260813.md) :
+  mesure et questions de Claude, avec bannière vers les contre-audits
+  `35fcea8`; ses généralisations initiales sont rétractées.
 
 ## Dépendances historiques gardées
 
 Ces fichiers ne sont pas des verdicts live. Ils restent parce que CMake, un
-prototype ou un reçu les cite encore. Le code ne doit pas prendre leur titre ou
-leur ancien statut pour une réception actuelle.
+prototype, un reçu ou une autorité les cite directement ou transitivement. Le
+code ne doit pas prendre leur titre ou leur ancien statut pour une réception
+actuelle.
 
 - géométrie/cellules :
   `NOTE_ARCHITECTURE_GPU_LISTES_CELLULES_CENTRES_20260812.md`,
@@ -76,7 +101,8 @@ leur ancien statut pour une réception actuelle.
 
 - `check_gate_d_fold_f0.py` ;
 - `check_centre_cell_independent_judge.py` ;
-- `check_centre_cell_thread_invariance.py`.
+- `check_centre_cell_thread_invariance.py` ;
+- `check_rampe_pentes.py`.
 
 Ils sont appelés par CTest et ne sont pas des documents historiques.
 

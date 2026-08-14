@@ -18,6 +18,7 @@
 #include <chrono>
 
 #include "rect_front.hpp"
+#include "soc64_rect.hpp"
 #include "wspd_front.hpp"
 #include "wspd_wavefront.hpp"
 
@@ -57,6 +58,62 @@ struct Pair { int a, b; int r = 0; };   // `r` : profondeur de RAFFINEMENT local
 // seuls les residuels sont compactes. C'est le gain de bande passante du
 // kernel vise.
 struct BankStat { long long spindle_all = 0, spindle_essais = 0, spindle_tabs = 0, reads = 0, recerts = 0, tronques = 0, juges = 0, faux = 0, v_all = 0, v_none = 0, v_descente = 0, closed[3] = {0, 0, 0}; };
+
+// ---- `SOC64-shadow-q4` : COMPTEURS SEPARES, AUCUN FATE TOUCHE.
+//
+// Ils vivent dans leur propre structure et non dans `BankStat`, pour qu'aucune
+// ligne de sortie existante ne bouge et qu'aucune porte en place ne les lise
+// par accident. Le shadow ne consomme ni le quantum `exp`, ni la pile, ni les
+// compteurs `reads`/`recerts` : il regarde exactement les taches que le
+// certificat central a laissees `MIXED` en q4 et dit ce qu'il en ferait.
+//
+// AVERTISSEMENT PORTE PAR LE RECU. Ces nombres sont une ESTIMATION A ORDRE DE
+// VISITE CONSTANT, pas un rejeu. Un vrai branchement de SOC64 arreterait la
+// descente sur un nœud ferme et rendrait son budget a d'autres sous-arbres ;
+// le shadow, lui, continue de descendre. Le masque `socm` empeche seulement le
+// double comptage d'un nœud deja couvert par un ancetre.
+// LES DEUX LEDGERS SONT SEPARES, ET C'EST LA REPARATION EXIGEE PAR L'AUDIT.
+//
+// Sous `--raffine`, `certifier` est appele pendant la phase de COMPTAGE sur des
+// rectangles qui ne sont pas des terminaux, puis ceux-ci sont scindes et leurs
+// enfants sont certifies a leur tour. Un compteur incremente dans le
+// certificateur compte donc des TENTATIVES : le parent, puis ses deux enfants,
+// puis leurs quatre petits-enfants. C'est exactement le defaut que
+// `AUDIT_ETAT_COURANT.md` releve sur `bank.closed`, `pending_lane` et
+// `mass_closed_q2`, et qui leur fait imprimer jusqu'a 380 % de masse fermee.
+//
+// La premiere version de ce shadow reproduisait la faute : elle publiait
+// 157,67 % de masse q4 fermee sur `eight_clusters` a profondeur quatre. Le
+// ledger TERMINAL ci-dessous n'est alimente qu'au seul endroit ou `fate` et
+// `pend` sont ecrits, c'est-a-dire pour les paires effectivement terminales.
+struct SocShadowStat {
+  // --- AttemptStats : une ligne par appel du certificateur.
+  long long taches = 0;        // taches (rectangle, CNode) MIXED en q4 soumises
+  long long all = 0;           // SOC64 rend q4 sur toute la boite relaxee
+  long long couples = 0;       // couples de coins reellement evalues
+  long long early = 0;         // sorties anticipees
+  long long masse_creditee = 0;    // population temoin creditee, sans double compte
+  long long tentatives_fermees = 0;  // appels ou le shadow aurait franchi le seuil
+  // --- TerminalLedger : une ligne par paire TERMINALE, exclusif et final.
+  long long fermetures = 0;    // terminaux q4 qui passeraient de OUVERT a FERME
+  long long masse_fermee = 0;  // masse de paires portee par ces terminaux
+  // --- Juge independant.
+  long long juges = 0;         // verdicts `ALL` effectivement enumeres
+  long long juges_sautes = 0;  // verdicts trop gros pour le cap : NON juges
+  long long faux = 0;          // triples reels refutant un verdict `ALL`
+  long long triples = 0;       // triples enumeres par le juge
+  long long invariant_viole = 0;  // ccred < cred : les ledgers ont diverge
+  // --- LE LEDGER FAUTIF, CONSERVE COMME TEMOIN.
+  //
+  // C'est l'ecriture que le contre-audit a refutee : additionner `cred[2]` et
+  // une somme brute de populations SOC64. Les deux ensembles ne sont pas
+  // disjoints — un descendant central `ALL` recompte des temoins deja comptes
+  // par un ancetre SOC `ALL`. On le calcule EN PARALLELE, sans jamais le
+  // publier comme resultat, pour que l'ecart soit MESURE et garde par une
+  // porte. Une faute qu'on retire sans laisser de temoin revient.
+  long long fermetures_brutes = 0;
+  long long masse_fermee_brute = 0;
+};
 
 // ---- PROPOSITION PAR DESCENTE, alternative a la fenetre Morton.
 //
@@ -107,6 +164,19 @@ bool g_vwave = false;
 bool g_inject_global = false;
 bool g_climb = false;
 bool g_judge_vwave = false;
+// `SOC64-shadow-q4`, counter-only. Il n'a de sens que dans la branche VWave :
+// c'est la seule qui produise des taches de BOITE `MIXED`. Les deux autres
+// branches classent des points, ou SOC64 degenere en un seul couple.
+bool g_soc64_shadow = false;
+long long g_min_soc_taches = 0;
+// JUGE DU SHADOW. Un verdict `ALL` de SOC64 affirme que TOUT point du nœud
+// temoin est un temoin q4 de TOUTE paire du rectangle. Le juge le verifie par
+// enumeration des vrais points, dans la representation historique `(g,Q)` de
+// `spindle_cone.hpp`, qui ne partage AUCUNE quantite intermediaire avec le
+// sujet : ni H, ni E, ni X, ni les differences de Minkowski. Une faute commune
+// ne peut donc pas s'y compenser.
+bool g_judge_soc64 = false;
+long long g_soc_judge_cap = 4096;   // triples enumeres par verdict juge
 
 // ---- `EdgeWindowRangeAdd-v0` : la fenetre d'aretes, EXACTE et en `O(F+n)`.
 //
@@ -818,8 +888,17 @@ int main(int argc, char** argv) {
     else if (a.rfind("--min-orientations=", 0) == 0) g_min_orient = arg_ll(val("--min-orientations=").c_str(), 1, (1LL << 40), "min-orientations");
     else if (a.rfind("--min-fermes=", 0) == 0) g_min_closed = arg_ll(val("--min-fermes=").c_str(), 1, (1LL << 40), "min-fermes");
     else if (a.rfind("--max-slope-e4=", 0) == 0) g_max_slope_e4 = std::atof(val("--max-slope-e4=").c_str());
+    else if (a == "--soc64-shadow") g_soc64_shadow = true;
+    else if (a == "--judge-soc64") { g_soc64_shadow = true; g_judge_soc64 = true; }
+    else if (a.rfind("--soc-judge-cap=", 0) == 0) { g_judge_soc64 = true; g_soc64_shadow = true; g_soc_judge_cap = arg_ll(val("--soc-judge-cap=").c_str(), 1, (1LL << 24), "soc-judge-cap"); }
+    else if (a.rfind("--min-soc-taches=", 0) == 0) g_min_soc_taches = arg_ll(val("--min-soc-taches=").c_str(), 1, (1LL << 40), "min-soc-taches");
     else refuse("option inconnue");
   }
+  // LE SHADOW EXIGE LA BRANCHE QUI PRODUIT SES TACHES. Sans `--vwave` il ne
+  // verrait jamais une boite temoin, et publierait zero tache avec un code
+  // zero : un vert par vacuite. Refus AVANT tout calcul.
+  if (g_soc64_shadow && !g_vwave) refuse("--soc64-shadow exige --vwave");
+  if (g_min_soc_taches > 0 && !g_soc64_shadow) refuse("--min-soc-taches exige --soc64-shadow");
   if (ns.empty()) ns = {4000, 16000};
 
   mhgp3v::CloudFamily fam;
@@ -891,6 +970,7 @@ int main(int argc, char** argv) {
     // ---- VAGUES : `count -> scan -> fill`, aucune pile.
     std::vector<Pair> terms;
     BankStat bank;
+    SocShadowStat soc;
     // PAR TERMINAL, UN SORT PAR LANE — pas un seul bit q2. Le contre-audit le
     // demande explicitement : sans `closed_mask` par lane, q3 et q4 ne sont que
     // des agregats et leur fenetre ne peut pas etre calculee. `pend` marque les
@@ -909,7 +989,8 @@ int main(int argc, char** argv) {
     // raffinement local exige l'inverse : certifier, puis decider si l'on
     // scinde. C'est le levier qui reste apres la refutation du spindle sur
     // rectangle, et il ne peut pas s'ecrire sans cette extraction.
-      auto certifier = [&](int wa, int wb, unsigned char* out_f, unsigned char* out_p) {
+      auto certifier = [&](int wa, int wb, unsigned char* out_f, unsigned char* out_p,
+                           unsigned char* out_soc) {
         const mhgp3v::WspdBox ba = cell_of(nodes, sp, wa);
         const mhgp3v::WspdBox bb = cell_of(nodes, sp, wb);
         mhgp3v::RectBox qa{}, qb{};
@@ -921,6 +1002,13 @@ int main(int argc, char** argv) {
         }
         const long long dlo = mhgp3v::rect_minsq(qa, qb);   // UNE fois
         long long cred[3] = {0, 0, 0};
+        // LEDGER COMBINE : les credits qu'un algorithme disposant AUSSI de
+        // SOC64 aurait accumules, sur le meme parcours. Il n'est jamais
+        // additionne a `cred` ; il le REMPLACE dans la vue combinee.
+        long long ccred[3] = {0, 0, 0};
+        // Somme brute des populations SOC64-`ALL`, sans aucun masque : le
+        // ledger fautif, conserve comme temoin de l'ecart.
+        long long soc_cred_brut = 0;
         long long taken = 0;
         bool tronque = false;
         if (g_vwave) {
@@ -930,7 +1018,32 @@ int main(int argc, char** argv) {
           // CREDITEE UNE SECONDE FOIS en q2 — une fausse fermeture. Seuls
           // les bits `MIXED` du parent passent aux enfants ; les bits
           // `ALL`/`NONE` y sont consommes exactement une fois.
-          struct Task { int node; unsigned mask; };
+          // ---- DEUX LEDGERS, UN SEUL PARCOURS : LE REPLAY VIRTUEL COMBINE.
+          //
+          // La premiere version de ce shadow additionnait `cred[2]` et un
+          // credit SOC64 separe, avec un masque empechant SOC -> SOC. Le
+          // contre-audit `AUDIT_SOURCE_CK_WST_Q2_Q3_Q4_35FCEA8_20260814.md`
+          // section 10 a montre que cela ne suffit pas : SOC64 ferme un nœud,
+          // le shadow continue quand meme de descendre, et un DESCENDANT
+          // central `ALL` recredite alors une population deja comptee par
+          // l'ancetre SOC. Les deux ensembles ne sont pas disjoints, et la
+          // somme annonce un gain inexistant. Separer les structures de
+          // compteurs ne separe pas les ensembles.
+          //
+          // La reparation est celle que l'audit prescrit. On maintient DEUX
+          // masques de lanes vivantes sur la MEME pile :
+          //   `mask`  : vue BASELINE, exactement le parcours historique ;
+          //   `cmask` : vue COMBINEE, ou SOC64 est un disjonctif de plus.
+          // Chaque vue credite au plus une fois par lane et par branche, et la
+          // vue combinee ETEINT sa lane des qu'elle ferme — donc ses
+          // descendants ne la recreditent jamais.
+          //
+          // Le parcours reste celui de la baseline, bit pour bit : aucune
+          // visite, aucun `exp`, aucun `bank.reads` ne change. C'est licite
+          // parce que `cmask` est toujours inclus dans `mask` — SOC64 ne fait
+          // que promouvoir `MIXED` en `ALL`, donc la vue combinee sature plus
+          // tot, jamais plus tard.
+          struct Task { int node; unsigned mask; unsigned cmask; };
           Task st[96];
           int sn = 0;
           // REPERAGE PUIS REMONTEE. Descendre depuis la RACINE pour chaque
@@ -955,12 +1068,12 @@ int main(int argc, char** argv) {
               const int par = (cur < 0) ? leaf_parent[-1 - cur] : nodes[cur].parent;
               if (par < 0) break;
               const int frere = (nodes[par].left == cur) ? nodes[par].right : nodes[par].left;
-              st[sn++] = {frere, 7u};
+              st[sn++] = {frere, 7u, 7u};
               cur = par;
             }
-            if (sn == 0) st[sn++] = {0, 7u};
+            if (sn == 0) st[sn++] = {0, 7u, 7u};
           } else {
-            st[sn++] = {0, 7u};
+            st[sn++] = {0, 7u, 7u};
           }
           long long exp = 0;
           bool abandonne = false;
@@ -975,6 +1088,14 @@ int main(int argc, char** argv) {
             for (int lane = 0; lane < 3; ++lane)
               if (cred[lane] >= need[lane]) m &= ~(1u << lane);   // lane saturee
             if (!m) continue;
+            // Vue combinee : meme regle de saturation, sur SES propres credits.
+            // L'intersection avec `m` materialise l'inclusion `cmask` dans
+            // `mask` — si elle etait fausse, la vue combinee serait creditee
+            // sur une visite que la baseline ne fait pas, et le shadow ne
+            // serait plus un shadow.
+            unsigned cm = tk.cmask & m;
+            for (int lane = 0; lane < 3; ++lane)
+              if (ccred[lane] >= need[lane]) cm &= ~(1u << lane);
             ++exp; ++bank.reads; ++bank.recerts;
             mhgp3v::RectBox cb2{};
             long long pop = 1;
@@ -991,6 +1112,7 @@ int main(int argc, char** argv) {
             long long smn = 0, smx = 0;
             mhgp3v::rect_s_interval(qa, qb, cb2, &smn, &smx);
             unsigned mixed = 0;
+            unsigned cmixed = 0;
             bool eut_all = false, eut_none = false;
             for (int lane = 0; lane < 3; ++lane) {
               if (!(m & (1u << lane))) continue;
@@ -1021,9 +1143,88 @@ int main(int argc, char** argv) {
                     mhgp3v::rect_classify(qa, qb, cb2, (RectLane)lane, &mxk);
                 if (w == RectVerdict::kAll) v = RectVerdict::kAll;
               }
+              // ---- LEDGER BASELINE. Inchange, bit pour bit.
               if (v == RectVerdict::kAll) { cred[lane] += pop; eut_all = true; }
               else if (v == RectVerdict::kMixed) mixed |= 1u << lane;
               else eut_none = true;
+
+              // ---- LEDGER COMBINE. `SOC64` est un disjonctif DE PLUS, place
+              // APRES le spindle et le fallback : le contre-audit relevait a
+              // juste titre qu'un SOC place avant eux pouvait crediter un nœud
+              // que le fallback aurait de toute facon ferme, et compter deux
+              // fois la meme population.
+              //
+              // La vue combinee ne credite QUE si sa propre lane est encore
+              // vivante, et l'eteint des qu'elle ferme : ses descendants ne la
+              // recreditent jamais. C'est ce qui rend `ccred` comparable a
+              // `cred` sans jamais les additionner.
+              if (!(cm & (1u << lane))) continue;
+              RectVerdict w = v;
+              if (w == RectVerdict::kMixed && g_soc64_shadow && lane == 2) {
+                mhgp3v::soc::Box sa{}, sb{}, sc{};
+                for (int d = 0; d < 3; ++d) {
+                  sa.lo[d] = qa.lo[d]; sa.hi[d] = qa.hi[d];
+                  sb.lo[d] = qb.lo[d]; sb.hi[d] = qb.hi[d];
+                  sc.lo[d] = cb2.lo[d]; sc.hi[d] = cb2.hi[d];
+                }
+                mhgp3v::soc::SocStats sst{};
+                ++soc.taches;
+                const int sl = mhgp3v::soc::soc64_all_lane(
+                    sa, sb, sc, mhgp3v::soc::SocMutant::kNone, mhgp3v::cone::kLaneQ4, &sst);
+                soc.couples += sst.pairs;
+                soc.early += sst.early;
+                if (sl >= mhgp3v::cone::kLaneQ4) {
+                  ++soc.all;
+                  w = RectVerdict::kAll;
+                  soc.masse_creditee += pop;
+                  // Le temoin fautif. Il est ici un MINORANT de l'ancienne
+                  // ecriture : celle-ci appelait SOC64 sur des nœuds que la
+                  // vue combinee a deja eteints, donc elle surcomptait encore
+                  // davantage. L'ecart mesure est donc conservateur.
+                  soc_cred_brut += pop;
+                  // ---- LE JUGE. Il enumere les VRAIS points, pas les coins.
+                  //
+                  // SOC64 travaille sur des boites ; le juge prend les
+                  // `PointId` reellement stockes dans les trois nœuds et evalue
+                  // chaque triple dans l'ecriture `(g,Q)` de `spindle_cone.hpp` :
+                  // g = D2 - |U|^2 avec U = 2z-a-b, Q = D2|U|^2 - (U.d)^2, et
+                  // q4 <=> g > 0 et g^2 > 2Q. Ni H, ni E, ni X, ni aucune
+                  // difference de Minkowski n'y apparait : une faute commune ne
+                  // peut pas s'y compenser.
+                  if (g_judge_soc64) {
+                    const int fa = (wa < 0) ? (-1 - wa) : nodes[wa].first;
+                    const int la2 = (wa < 0) ? (-1 - wa) : nodes[wa].last;
+                    const int fb = (wb < 0) ? (-1 - wb) : nodes[wb].first;
+                    const int lb2 = (wb < 0) ? (-1 - wb) : nodes[wb].last;
+                    const int fc = (tk.node < 0) ? (-1 - tk.node) : nodes[tk.node].first;
+                    const int lc = (tk.node < 0) ? (-1 - tk.node) : nodes[tk.node].last;
+                    const long long na = (long long)(la2 - fa + 1);
+                    const long long nb = (long long)(lb2 - fb + 1);
+                    const long long nc = (long long)(lc - fc + 1);
+                    // Le cap est un REFUS DE JUGER, jamais un accord implicite.
+                    if (na > 0 && nb > 0 && nc > 0 && na <= g_soc_judge_cap &&
+                        na * nb <= g_soc_judge_cap && na * nb * nc <= g_soc_judge_cap) {
+                      ++soc.juges;
+                      bool refute = false;
+                      for (int ia = fa; ia <= la2 && !refute; ++ia)
+                        for (int ib = fb; ib <= lb2 && !refute; ++ib)
+                          for (int ic = fc; ic <= lc; ++ic) {
+                            ++soc.triples;
+                            const int lj = mhgp3v::cone::lane_of_target_gq(
+                                sp[ia][0], sp[ia][1], sp[ia][2],
+                                sp[ic][0], sp[ic][1], sp[ic][2],
+                                sp[ib][0], sp[ib][1], sp[ib][2]);
+                            if (lj < mhgp3v::cone::kLaneQ4) { refute = true; break; }
+                          }
+                      if (refute) ++soc.faux;
+                    } else {
+                      ++soc.juges_sautes;
+                    }
+                  }
+                }
+              }
+              if (w == RectVerdict::kAll) ccred[lane] += pop;
+              else if (w == RectVerdict::kMixed) cmixed |= 1u << lane;
             }
             // OU PASSE LE TRAVAIL ? Un `MIXED` pur est une descente pure :
             // il ne credite rien, n'elague rien, et ne sert qu'a atteindre
@@ -1033,8 +1234,8 @@ int main(int argc, char** argv) {
             else ++bank.v_none;
             if (mixed && tk.node >= 0) {
               if (sn + 2 > 96) { abandonne = true; break; }       // jamais en silence
-              st[sn++] = {nodes[tk.node].left, mixed};
-              st[sn++] = {nodes[tk.node].right, mixed};
+              st[sn++] = {nodes[tk.node].left, mixed, cmixed};
+              st[sn++] = {nodes[tk.node].right, mixed, cmixed};
             }
           }
           // Une pile pleine ou un quantum epuise laisse des taches VIVANTES.
@@ -1122,6 +1323,49 @@ int main(int argc, char** argv) {
           }
         }
         const long long msz = count_of(nodes, wa) * count_of(nodes, wb);
+        // LE SEUL NOMBRE QUI DECIDE : ce rectangle, q4 OUVERT pour le
+        // certificat central, serait-il FERME par le certificat correle ? Un
+        // gain en credits qui ne franchit jamais `need[2]` ne ferme rien et ne
+        // vaut rien.
+        //
+        // Le verdict est RENDU A L'APPELANT, il n'est pas comptabilise ici :
+        // sous `--raffine` cet appel peut porter sur un rectangle qui sera
+        // scinde, et seul l'appelant sait s'il est terminal.
+        if (out_soc != nullptr) {
+          // `flip` compare DEUX LEDGERS, il n'additionne pas deux ensembles.
+          // C'est la difference exacte entre l'ancienne version fautive et
+          // celle-ci : `ccred[2]` est le nombre de temoins qu'un algorithme
+          // disposant de SOC64 aurait credites, chacun compte une seule fois.
+          const bool flip = g_soc64_shadow && cred[2] < need[2] && ccred[2] >= need[2];
+          if (flip) ++soc.tentatives_fermees;
+          // Le meme test, ecrit comme la version refutee : une SOMME de deux
+          // ensembles qui ne sont pas disjoints.
+          const bool flip_brut =
+              g_soc64_shadow && cred[2] < need[2] && cred[2] + soc_cred_brut >= need[2];
+          *out_soc = (unsigned char)((flip ? 1u : 0u) | (flip_brut ? 2u : 0u));
+        }
+        // ---- INVARIANT DU REPLAY, ET SA FORME EXACTE.
+        //
+        // La forme naive `ccred >= cred` est FAUSSE, et le compteur ci-dessous
+        // l'a refutee sur 419 rectangles au premier essai. La raison est la
+        // saturation : la vue combinee ferme plus tot, donc elle ARRETE de
+        // crediter, pendant que la baseline continue d'empiler des temoins
+        // dont elle n'a plus besoin. Avec `need=8`, un SOC64 qui credite 10 au
+        // premier nœud s'arrete a 10, tandis que la baseline peut atteindre 12
+        // en trois nœuds. Le total combine est alors plus petit, alors que la
+        // vue combinee est strictement meilleure.
+        //
+        // La forme exacte est donc `ccred >= min(cred, need)`. Elle dit ce qui
+        // compte : sur chaque sous-arbre ou la vue combinee repond `ALL`, la
+        // population du nœud majore la somme des populations `ALL` DISJOINTES
+        // que la baseline y aurait creditees — jusqu'a saturation. Sa violation
+        // signalerait que les deux ledgers ne partagent plus le meme parcours.
+        if (g_soc64_shadow) {
+          for (int lane = 0; lane < 3; ++lane) {
+            const long long plancher = (cred[lane] < need[lane]) ? cred[lane] : need[lane];
+            if (ccred[lane] < plancher) ++soc.invariant_viole;
+          }
+        }
         unsigned char f = 0, pn = 0;
         for (int lane = 0; lane < 3; ++lane) {
           if (cred[lane] >= need[lane]) { f |= (unsigned char)(1u << lane); continue; }
@@ -1140,6 +1384,7 @@ int main(int argc, char** argv) {
       std::vector<int> cnt(wave.size());
       std::vector<char> sep(wave.size());
       std::vector<unsigned char> fpre(wave.size(), 0), ppre(wave.size(), 0), done(wave.size(), 0);
+      std::vector<unsigned char> spre(wave.size(), 0);   // verdict shadow de la tentative
       for (size_t i = 0; i < wave.size(); ++i) {
         ++tests;
         const mhgp3v::WspdBox ca = cell_of(nodes, sp, wave[i].a);
@@ -1151,7 +1396,7 @@ int main(int argc, char** argv) {
           // RAFFINEMENT LOCAL : certifier AVANT de decider. Un terminal dont la
           // lane cible reste ouverte est scinde, tant qu'il reste du budget et
           // qu'il n'est pas deja une paire de feuilles.
-          certifier(wave[i].a, wave[i].b, &fpre[i], &ppre[i]);
+          certifier(wave[i].a, wave[i].b, &fpre[i], &ppre[i], &spre[i]);
           done[i] = 1;
           const bool ferme = (fpre[i] & (unsigned char)(1u << g_raffine_lane)) != 0;
           if (ferme || wave[i].r >= g_raffine || (la && lb)) { cnt[i] = 0; continue; }
@@ -1168,11 +1413,20 @@ int main(int argc, char** argv) {
           terms.push_back(wave[i]);
           if (!g_bank) { fate.push_back(0); pend.push_back(0); }
           if (g_bank) {
-            unsigned char f = 0, pn = 0;
-            if (done[i]) { f = fpre[i]; pn = ppre[i]; }     // deja certifie
-            else certifier(wave[i].a, wave[i].b, &f, &pn);
+            unsigned char f = 0, pn = 0, sc = 0;
+            if (done[i]) { f = fpre[i]; pn = ppre[i]; sc = spre[i]; }   // deja certifie
+            else certifier(wave[i].a, wave[i].b, &f, &pn, &sc);
             fate.push_back(f);
             pend.push_back(pn);
+            // LEDGER TERMINAL DU SHADOW. Ce point du programme est le SEUL ou
+            // une paire est definitivement terminale : `cnt[i]==0` et son sort
+            // est ecrit dans `fate`/`pend`. Compter ici, et seulement ici,
+            // interdit qu'un parent scinde et ses enfants soient additionnes.
+            if (sc != 0u) {
+              const long long mm = count_of(nodes, wave[i].a) * count_of(nodes, wave[i].b);
+              if (sc & 1u) { ++soc.fermetures; soc.masse_fermee += mm; }
+              if (sc & 2u) { ++soc.fermetures_brutes; soc.masse_fermee_brute += mm; }
+            }
           }
           continue;
         }
@@ -1663,6 +1917,57 @@ int main(int argc, char** argv) {
                 exact4_vide, 100.0 * (double)exact4_vide / (double)std::max(1LL, ech),
                 g_need[2], exact4_suffisant,
                 100.0 * (double)exact4_suffisant / (double)std::max(1LL, ech));
+    // LIGNE AUTONOME DU SHADOW. Elle n'entre dans aucune chaine de format
+    // existante : les portes en place lisent des lignes entieres.
+    if (g_soc64_shadow) {
+      std::printf("soc64_shadow q4 : tentatives taches=%lld all=%lld (%.3f%%) couples=%lld"
+                  " couples/tache=%.2f early=%lld masse_creditee=%lld fermetures=%lld"
+                  " | terminaux fermetures=%lld masse_fermee=%lld seuil=%d\n",
+                  soc.taches, soc.all,
+                  100.0 * (double)soc.all / (double)std::max(1LL, soc.taches), soc.couples,
+                  (double)soc.couples / (double)std::max(1LL, soc.taches), soc.early,
+                  soc.masse_creditee, soc.tentatives_fermees, soc.fermetures, soc.masse_fermee,
+                  g_need[2]);
+      // LE TEMOIN DE LA FAUTE, PUBLIE A COTE DU RESULTAT. Il n'est jamais le
+      // resultat : il mesure de combien l'ecriture refutee se serait trompee.
+      std::printf("soc64_somme_brute q4 : fermetures=%lld masse_fermee=%lld"
+                  " | surcompte fermetures=%lld masse=%lld\n",
+                  soc.fermetures_brutes, soc.masse_fermee_brute,
+                  soc.fermetures_brutes - soc.fermetures,
+                  soc.masse_fermee_brute - soc.masse_fermee);
+      if (soc.invariant_viole != 0) {
+        std::fprintf(stderr,
+                     "INVARIANT VIOLE: %lld rectangles ou le ledger combine credite MOINS que "
+                     "la baseline\n",
+                     soc.invariant_viole);
+        return 3;
+      }
+      if (g_judge_soc64) {
+        std::printf("soc64_juge accord=%s verdicts_juges=%lld sautes=%lld triples=%lld faux=%lld\n",
+                    soc.faux == 0 ? "OUI" : "NON", soc.juges, soc.juges_sautes, soc.triples,
+                    soc.faux);
+        // UN SEUL TRIPLE REFUTANT SUFFIT. Le verdict `ALL` est universel : il
+        // n'a pas de taux d'erreur admissible.
+        if (soc.faux != 0) {
+          std::fprintf(stderr,
+                       "DESACCORD: %lld verdicts SOC64 `ALL` refutes par enumeration des points\n",
+                       soc.faux);
+          return 1;
+        }
+        // Un juge qui n'a rien juge n'est pas un accord.
+        if (soc.juges == 0) {
+          std::fprintf(stderr, "PLANCHER: le juge SOC64 n'a enumere aucun verdict\n");
+          return 3;
+        }
+      }
+      // PLANCHER DE COUVERTURE. Une campagne qui ne soumet aucune tache au
+      // certificat correle ne mesure rien ; sans ce plancher elle serait verte.
+      if (g_min_soc_taches > 0 && soc.taches < g_min_soc_taches) {
+        std::fprintf(stderr, "PLANCHER: %lld taches SOC64 soumises, %lld exigees\n", soc.taches,
+                     g_min_soc_taches);
+        return 3;
+      }
+    }
     if (g_window) {
       for (int lane = 0; lane < 3; ++lane)
         std::printf("fenetre q%d : terminaux_ouverts=%lld masse_ouverte=%lld (%.3f%% de C(n,2))"

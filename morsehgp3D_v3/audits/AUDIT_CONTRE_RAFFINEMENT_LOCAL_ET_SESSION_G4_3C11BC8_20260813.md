@@ -1,5 +1,10 @@
 # Contre-audit du raffinement local et de la session G4
 
+> **Statut historique.** Ce document audite la recette avant son exécution. La
+> session a depuis été lancée par Claude, arrêtée avec cible `TERMINATED`, puis
+> contre-auditée dans
+> [`AUDIT_CONTRE_RECU_RAMPE_RAFFINEMENT_G4_35FCEA8_20260813.md`](AUDIT_CONTRE_RECU_RAMPE_RAFFINEMENT_G4_35FCEA8_20260813.md).
+
 Date : 13 août 2026 UTC.
 
 Cadre : `phase=exploration_v3_hors_registre`,

@@ -1,5 +1,13 @@
 # Réponse au plan de route : fermer une tranche verticale, puis employer les certificats qui changent réellement le coût
 
+> **Statut historique.** Les preuves SOC64/CORNER512 et LP de ce document
+> restent utiles. Son ordre « fermer VerticalBallEventSlice maintenant » et sa
+> voie q3 dite reçue sont supersédés par
+> [`AUDIT_ETAT_COURANT.md`](AUDIT_ETAT_COURANT.md) et
+> [`../PROPOSITION.md`](../PROPOSITION.md). La borne `delta>=4h-3` ci-dessous
+> est seulement suffisante pour l'extraction gloutonne ; elle ne prouve ni son
+> optimalité globale, ni le crédit de la fleur pour une cible donnée.
+
 Date : 13 août 2026 UTC.
 
 Cadre : `phase=exploration_v3_hors_registre`,
@@ -427,7 +435,8 @@ Aucun tétra formé de quatre **témoins axiaux** ne contient `a` strictement en
 dimension trois : annuler une coordonnée exige ses deux signes, et quatre sites
 ne peuvent apparier que deux axes. La cible `b` doit néanmoins rester dans le
 pool réel ; un tétra qui l'emploie tombe ici à l'égalité projective et ne fournit
-pas huit crédits distincts. Chaque `G_k` est une base positive minimale de six
+pas huit crédits distincts. Chaque `G_k` est une positive basis
+inclusion-minimale de six
 sites et `V_Gk=[-k/2,k/2]^3`. Elle couvre exactement lorsque :
 
 $$\left\Vert d\right\Vert^2>k\left(|d_x|+|d_y|+|d_z|\right).$$
@@ -459,10 +468,10 @@ Deux corrections de largeur et de profondeur sont impératives :
   croisés. Ne pas annoncer un cutoff radial `i128` exact. Employer un calcul
   multiprécision au build de banque ou un majorant entier conservateur, puis
   garder les formes comme autorité ;
-- le seuil angulaire `delta>=3h-2` vaut pour les tétra-cages et pour une base
-  minimale de six, qui est formée de trois paires de rayons opposés. Le pire cas
-  minimal est une base de cinq avec `omega=4`, donc le seuil universel minimal
-  devient `delta>=4h-3`. La fixture
+- le seuil angulaire `delta>=3h-2` vaut pour les tétra-cages et pour une
+  positive basis inclusion-minimale de six, formée de trois paires de rayons
+  opposés. Le pire cas de l'argument glouton est une positive basis de cinq
+  avec `omega=4`; la borne suffisante devient donc `delta>=4h-3`. La fixture
   `{(1,0,0),(-1,1,0),(-1,-1,0),(-1,0,1),(-1,0,-1)}` atteint quatre points dans
   le demi-espace ouvert de normale `(-1,0,0)`. Une cage six-sites non minimale
   peut coûter cinq ; il faut alors l'annoncer comme telle et calculer

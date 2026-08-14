@@ -1,6 +1,6 @@
 # Proposition consolidée MorseHGP3D v3
 
-Date : 13 août 2026 UTC.
+Date : 14 août 2026 UTC.
 
 Cadre : `phase=exploration_v3_hors_registre`,
 `backend=cpu_reference_bounded_oracles_and_g4_diagnostic`,
@@ -160,6 +160,18 @@ ni total, ni sûr, ni opaque au profil. La réparation réutilise
 `saturated_fold.hpp`, `gamma_forest_judge.cpp` et les fixtures Gate D par
 ordre, au lieu d'étendre la DSU de points.
 
+Le fold reçoit seulement un token préflighté :
+
+```text
+ExactLevelToken = schema + numerator>=0 + denominator>0 + canonical_encoding
+```
+
+Tous les tokens sont construits en arithmétique exacte avant le tri. Leur
+comparateur est pur, total et sans chemin d'échec. Un overflow signé détecté
+après multiplication est déjà un comportement indéfini ; une faute numérique
+reste `numeric_failure` sous toute injection et ne tue jamais un mutant d'un
+autre composant.
+
 ## 4. Fenêtre d'arêtes certifiée
 
 Pour chaque lane, `E_q(a)` contient les seconds endpoints dont la paire n'est
@@ -215,6 +227,27 @@ tentatives restent distinctes des fates terminaux. Le gate compare les mêmes
 jusqu'à `M4`, BallRuns, census et fold. Une baisse de `E4` seule ne décide pas
 la rentabilité.
 
+### 4.2 `CKPairTape` : source q2 factorisée exacte
+
+La fenêtre doit désormais être portée par une vraie décomposition de
+Callahan--Kosaraju. Une WSPD canonique produit `O(s^3 n)` rectangles
+`A×B` en dimension trois et partitionne exactement toutes les paires non
+ordonnées. Comme deux points distincts forment toujours un support géométrique
+q2 positif, ce tape est la source q2 complète ; il n'est pas un simple
+proposer.
+
+Chaque rectangle porte une partition persistante du witness tree et deux
+bornes disjointes : masse strictement intérieure garantie `L_open`, masse
+fermée encore possible `U_closed`. Sous `smax=11`, `L_open>=10` ferme tout le
+rectangle ; `U_closed<=9` donne un packet d'au plus neuf IDs qui suffit à
+rejouer exactement intérieur et shell de chaque paire. Seuls les facteurs
+`MIXED` sont scindés et les preuves `ALL/NONE` s'héritent.
+
+Le tape physique peut être linéaire alors que `sum |A||B|` est quadratique.
+Un bloc accepté reste donc paresseux jusqu'à un consommateur factorisé reçu ou
+jusqu'au preflight d'une expansion atomique. La WSPD ne rend égaux ni niveaux,
+ni `BallKey`, ni census.
+
 ## 5. Générateur q3 recommandé
 
 ### 5.1 Réduction exacte arête-owner × porteur
@@ -239,18 +272,29 @@ V dot V > D
 car `V dot V-D=2(E+X-D)`. L'égalité est un triangle droit. Chaque q3 est donc
 une incidence canonique `owner EdgeKey(ab) × PointId(x)`, pas un triplet libre.
 
-### 5.2 Rôle d'une WSPD/WSSD aiguë
+### 5.2 `OwnedCK-WST3` : extension exacte aux triplets
 
-Une WSPD/WSSD ternaire peut proposer des blocs `ALL/NONE/MIXED` ou compresser
-le broad phase. Elle n'est pas l'autorité de la source :
+Pour un rectangle CK `R=(A,B)`, choisir une boule déterministe
+`B_R=(o_R,r_R)` contenant `A union B`, puis un niveau Morton dont la maille est
+comparable à `eta*r_R`. Énumérer les cellules non vides `C` de ce niveau qui
+rencontrent `3B_R`. Si `ab` est l'arête maximale d'un triangle `abx`, alors
+`||x-a||<=||a-b||<=2r_R`, donc `x` appartient nécessairement à `3B_R`.
 
-- un bloc `ALL_ACUTE(A,B,C)` peut représenter une masse cubique ;
-- la frontière droite peut raffiner jusqu'aux points ;
-- l'acuité ne décide ni profondeur, ni shell, ni owner, ni `BallKey` ;
-- une représentation linéaire ne borne pas l'expansion ni la sortie.
+Chaque triangle choisit l'arête de longueur maximale, puis la plus petite
+`EdgeKey` à égalité. Cette arête appartient à un rectangle CK unique et le
+carrier à une cellule half-open unique : le tuple retenu
+`OwnedCK-WST3(A,B,C)` est exact-once. Son nombre physique est
+`O(s^3*eta^-3*n)`, soit `O(s^6*n)` lorsque `eta` est proportionnel à `1/s`.
 
-Le bon usage est une ablation sur le même ledger transitif `E3, M3, BallKeys,
-census, supports, fold`, jamais une conclusion depuis le nombre de cellules.
+Après owner, q3 est positif si `E+X-D>0` et `G=D*E-F^2>0`. Les blocs reçoivent
+`ALL_ACUTE/NONE_ACUTE/MIXED` par bornes entières sûres ; les égalités
+descendent. `ALL_ACUTE` reste une source factorisée exacte, jamais la preuve
+que sa masse cubique, son rang, son shell ou ses `BallKey` sont bon marché.
+
+Avant l'extension, `JungDiskDepth9` peut fermer un rectangle q3. Sur le
+résiduel, un quatrième facteur witness applique `L_open/U_closed`; neuf
+intérieurs ferment, tandis qu'au plus huit sites possiblement fermés donnent
+un packet exact.
 
 ### 5.3 Pied unique et puissance exacte
 
@@ -361,7 +405,27 @@ q3 9841 et q2 29524. Ce sont des nombres d'appels d'oracle borné, pas une borne
 du reporter ni un hot path par paire. Rangs un/deux, stricte, shell, suppressions
 par `PointId` et coût du solveur exact restent explicites.
 
-### 6.2 `SOC64` et `CORNER512`
+### 6.2 `JungDiskDepth` : restreindre aux centres Morse admissibles
+
+Translater `a` en zéro, poser `y=2c`, `d=b-a` et `D=||d||^2`. Les domaines
+nécessaires des centres d'une sphère q3 ou q4 dont `ab` est l'arête maximale
+sont :
+
+$$K_3(d)=\left\lbrace y:y\mathbin{\cdot}d=D,\ ||y-d||^2\leq\frac{D}{3}\right\rbrace,$$
+
+$$K_4(d)=\left\lbrace y:y\mathbin{\cdot}d=D,\ ||y-d||^2\leq\frac{D}{2}\right\rbrace.$$
+
+Un témoin relatif `s=z-a` est intérieur lorsque
+`y dot s>||s||^2`. L'intersection de `K_q(d)` avec les demi-plans opposés d'un
+groupe est vide si ce groupe fournit au moins un intérieur pour tout centre
+admissible. Helly dans ce plan affine donne une sous-base d'au plus trois IDs.
+Neuf groupes disjoints ferment q3 et huit ferment q4.
+
+Cette porte est strictement plus adaptée que le LP sur tout le plan. Un échec
+du LP global ne diagnostique pas une pénurie de témoins sur `K_q`. Le hot path
+propose et valide de petits groupes ; l'arbre de suppressions reste un oracle.
+
+### 6.3 `SOC64` et `CORNER512`
 
 Pour `e=z-a`, `t=b-z`, `H=e dot t`, `E=||e||^2`, `X=||t||^2` :
 
@@ -384,18 +448,56 @@ séparément convexe en `a,b,z`; les 512 triples de coins caractérisent exactem
 Le classifieur `JungSpindleRect-v0` du pin `7d2efcb` est une autre borne : il
 combine des extrema séparés de `D,V,T`. Son disjonctif est sûr mais n'a gagné
 qu'environ trois centièmes de point dans le diagnostic déclaré à `n=6000,s=8`.
-Cette mesure ne réfute ni `SOC64` ni `CORNER512`, qui ne sont pas encore
-implémentés; elle réfute l'espoir que les extrema décorrélés suffisent sur des
-boîtes grossières.
+Cette mesure ne réfute ni `SOC64` ni `CORNER512`. Leur primitive et leur probe
+borné existent désormais dans le worktree, sans recevoir encore le shadow
+WSPD ni son coût transitif. Elle réfute seulement l'espoir que les extrema
+décorrélés suffisent sur des boîtes grossières.
 
 Même exact pour `ALL`, `CORNER512` ne prouve aucune parcimonie. Compter ses
 early exits, opérations larges, tâches et gain transitif avant de le porter.
 
-### 6.3 Cages de quatre à six sites
+Le micro-jalon prioritaire est `SOC64-shadow-q4`, avant toute promotion des
+cages : au plus 4096 tâches `central-MIXED` par famille, 65 prédicats au pire
+par tâche prétest central compris, aucun changement de fate. Il publie early
+exits, masse créditable, opérations larges, temps et HWM. La fixture
+`A=[0,99]x{100}x{100}`, `B=[101,200]x{100}x{100}`,
+`C={(100,100,100)}` ferme q4 par `SOC64` alors que les extrema scalaires
+échouent.
 
-Une cage ancre-globale minimale est une base positive de dimension trois et
-peut contenir quatre, cinq ou six sites. Un constructeur tétra-only est un fast
-path exact mais incomplet. Une cellule de Voronoï locale à six facettes a au
+Si le signal est non vide, brancher `SOC64` avant le raffinement pour éviter
+les splits. `CORNER512` vient seulement sur les tâches de forte masse où ses
+513 prédicats, prétest compris, peuvent être amortis. Un échec reste
+`AABB_envelope_not_all/UNKNOWN`, jamais `NONE` pour les points stockés.
+
+Le premier raccord live du 14 août n'implémentait pas ce protocole : il
+additionnait `soc_cred` d'un ancêtre SOC-`ALL` aux crédits baseline du même
+nœud ou de ses descendants. Claude l'a réécrit après contre-audit. Le shadow
+courant emploie deux parcours logiques : baseline inchangée et union combinée.
+Dans l'union, il applique d'abord les fallbacks baseline ; si le verdict final
+reste `MIXED`, il essaie SOC ; tout `ALL` arrête conceptuellement la branche.
+Le flip est `baseline_open && combined_closed`, jamais
+`cred+soc_cred>=seuil`.
+
+Le replay `uniform,n=120` donne zéro faux sur `624` verdicts SOC et mesure `41`
+fermetures de masse `95`, tandis que la somme réfutée en annoncerait `127` de
+masse `316`. Cette contradiction doit devenir une porte. Le raccord n'a
+toujours pas de cap maximal et a soumis environ `988000` tâches à `n=1000`.
+Ajouter un échantillonnage déterministe capé, un statut tronqué, un juge d'IDs
+distincts, une CTest intégrée et les mutants de chevauchement avant de publier
+une masse gagnée ou un temps extrapolé.
+
+Avec `floor>q2`, un retour inférieur au plancher signifie seulement que le
+seuil est impossible ; ce n'est pas la lane `ALL` exacte. L'appel q4 peut lire
+le booléen `retour>=q4`, mais l'API expose sinon `UNKNOWN_BELOW_FLOOR`. La
+fixture `A={(0,0,0)}`, `C={(1,1,1)}`, `B=[0,4]x{1}x{1}` distingue q3 au centre
+de `NONE` au minimum réel.
+
+### 6.4 Cages de quatre à six sites
+
+Une cage ancre-globale réduite est une positive basis inclusion-minimale de
+dimension trois et peut contenir quatre, cinq ou six sites. Un constructeur
+tétra-only est un fast path exact mais incomplet. Une cellule de Voronoï locale
+à six facettes a au
 plus huit sommets; sa fleur fournit donc un nombre constant de formes
 quadratiques vérifiables sur un `BNode`.
 
@@ -405,27 +507,125 @@ ou cap délègue toujours. `0` intérieur au hull inversé prouve seulement un
 rayon borné; une cible est fermée lorsque son point inversé est strictement
 dans le hull, ou lorsque toutes les facettes transformées passent.
 
+Les budgets doivent suivre la taille réellement validée des cages. Huit cages
+six-sites peuvent consommer 48 IDs et jusqu'à 64 formes de fleur; neuf peuvent
+en consommer 54 et jusqu'à 72. `P=48` est donc une capacité q4, jamais une
+preuve d'existence ni un budget q3. Pour une base positive minimale 3D,
+`omega`, le nombre maximal de ses vecteurs dans un demi-espace ouvert, vaut au
+plus quatre. La condition `delta>=4h-3` est une borne suffisante pour extraire
+gloutonnement `h` positive bases, soit `delta>=29` pour q4. Son optimalité
+globale n'est pas démontrée et elle ne prouve pas que les fleurs obtenues
+créditent une cible donnée ; elle ne devient jamais un rejet scientifique.
+
 Le tri exact des rayons rationnels peut être plus large que les formes
 ponctuelles; multiprécision ou majorant conservateur puis replay des formes est
-requis. Une cage minimisée doit recalculer sa fleur. Aucune loi globale de coût
-ne découle de la seule existence de cages.
+requis. Le test directionnel d'une forme tient dans environ 87 bits signés sous
+u16, alors qu'une comparaison naïve de deux rayons rationnels peut approcher
+240 bits. Une cage minimisée doit recalculer sa cellule et sa fleur : retirer
+une contrainte agrandit la cellule et peut perdre une fermeture. Aucune loi
+globale de coût ne découle de la seule existence de cages.
 
-## 7. q4 : shallow local seulement après les portes E4/M4
+### 6.5 LP comme diagnostic de cause
 
-Pour une arête `ab`, tout site actif induit une forme affine dans le plan
-médiateur. q2 interroge le point central; q3 le pied unique d'une ligne; q4 les
-intersections shallow de deux formes. Les lanes partagent un codec, pas leurs
-sorties.
+Avant d'investir dans un constructeur de cages GPU ou d'ajouter de la
+profondeur, appliquer le LP projectif sur un échantillon déterministe du même
+résiduel scellé après le masque central et `SOC64-shadow` :
 
-Le moteur q4 candidat construit localement les niveaux nécessaires des formes
-P et N et émet seulement les intersections `P-P`, `N-N` et `P-N` dont le rang
-peut satisfaire la lane. Il traite atomiquement lignes confondues, bundles
-pondérés et concurrences; il rejoue indépendance, positivité, owner, Jung,
-rang, `BallKey` et census.
+- succès LP avec échec des rectangles : perte de factorisation ou de boîte ;
+- échec de huit extractions gloutonnes mais succès de l'arbre exact : packing
+  insuffisant ;
+- échec avec pool mondial : profondeur universelle insuffisante, sans conclure
+  à l'absence d'un support Morse ;
+- échec sur pool capé : résultat inconnu.
 
-Il ne construit aucun arrangement global. Il n'est instancié que si `E4`,
-`M4`, tâches et HWM sont verts. Le code exhaustif actuel reste son oracle, pas
-son modèle GPU.
+Cette matrice choisit entre meilleur rectangle, packing directionnel, cage
+quatre--six sites et moteur local. L'arbre q4 à 3280 appels reste un oracle
+borné ; il ne devient jamais le hot path. Le solveur fraction-free ou
+multiprécision reçoit sa propre preuve de largeur : `i128` suffit au replay
+d'une forme, pas à toutes les comparaisons de valeurs rationnelles du
+constructeur LP.
+
+### 6.6 `OriginOnionDepth-h` collectif
+
+Inverser une banque autour de l'ancre par
+`p_z=(z-a)/||z-a||^2`. Poser `P_0=P`, puis retirer à chaque couche un ID
+canonique pour chaque sommet géométrique non nul de
+`K_j=conv({0} union P_j)`. Si `p_b` appartient à l'intérieur relatif des `h`
+coques, toute sphère passant par `a,b` contient au moins un ID distinct de
+chaque couche.
+
+La preuve vient de l'équation inversée : la frontière vaut `y dot p=1`, son
+intérieur `y dot p>1`, et `y dot 0=0`. Un point de valeur un dans l'intérieur
+relatif force donc un sommet de la coque à valeur strictement supérieure à un.
+Même rang affine entre `K_0` et `K_(h-1)`, puis appartenance stricte à la
+dernière coque, est une condition suffisante moins chère.
+
+Une facette `u dot p<=v` devient, pour `d=b-a`,
+`v||d||^2-u dot d>=1`. Son minimum sur une AABB est séparable et son replay
+reste sous environ 87 bits dans le profil u16. Rang qui chute, égalité, banque
+capée ou IDs non authentifiés donnent `UNKNOWN`. `h=8/9/10` ferme
+respectivement q4/q3/q2. Ce certificat crédite collectivement des BNodes, mais
+reste universel.
+
+### 6.7 Limite commune des certificats universels
+
+Pour `A_i=(i,0,0)` et `B_j=(0,j,65535)`, avec
+`1<=i,j<=25000`, chaque paire croisée possède une sphère vide admissible dans
+le disque de Jung q4. LP, Jung, onion et cages peuvent donc laisser
+`n^2/4` paires. Pourtant tous les triangles sont obtus, donc la vraie source
+q3/q4 est vide.
+
+La masse universelle ne devient plus une gate préalable à une source
+factorisée. Ces certificats sont des OR de prune et des diagnostics ; la
+positivité géométrique doit appartenir au générateur principal. La fixture
+porte une masse quadratique dans quelques `RectKey`, puis exige zéro carrier
+aigu et zéro sweep sans tableau de `PairId`.
+
+## 7. q4 : `OwnedCK-WST4`, puis shallow local si nécessaire
+
+Pour le même rectangle owner `R=(A,B)`, réutiliser les cellules carrier de
+`3B_R` et former des couples non ordonnés `(C,D)`. Si `C!=D`, le bloc porte
+`A×B×C×D`; si `C=D`, il porte `A×B×binom(C,2)` sans IDs répétés. Tout q4 dont
+`ab` est l'arête maximale possède ses deux autres sommets dans `3B_R`, donc un
+unique bloc `OwnedCK-WST4`. Le nombre physique avant filtres vaut
+`O(s^3*eta^-6*n)`, soit `O(s^9*n)` pour `eta` proportionnel à `1/s`.
+
+Un tétraèdre q4 positif possède au moins une face aiguë adjacente à son arête
+maximale. `WST4` peut donc choisir le plus petit `PointId` des carriers aigus
+comme carrier primaire et l'autre comme apex. Cette relation q3 est
+**géométrique et pré-rang**. Elle ne vient jamais des événements q3 retenus.
+
+La construction ne forme pas aveuglément tous les couples `(C,D)`. Elle
+classe d'abord `CarrierBlock(A,B,C)` en `ALL_ACUTE/NONE_ACUTE/MIXED`, élimine
+`NONE_ACUTE`, puis associe seulement les carriers aigus possibles aux cellules
+d'apex. La famille u16 à deux droites doit ainsi produire zéro face aiguë et
+zéro bloc q4 malgré `n^2/4` paires non fermées par les certificats universels.
+
+Pour une face exacte `(a,b,x)`, poser `d=b-a`, `u=x-a`,
+`D=d dot d`, `E=u dot u`, `F=d dot u`, `G=DE-F^2`,
+`n=d cross u` et `W=E(D-F)d+D(E-F)u`. Les centres compatibles forment la
+droite `c(tau)=a+(W+tau*n)/(2G)`. Pour `s=z-a`, la puissance mise à l'échelle
+est `G||s||^2-W dot s-tau*n dot s`. Chaque apex non coplanaire donne donc un
+événement rationnel sur une sweep 1D, plutôt qu'une intersection nouvelle de
+deux lignes dans un arrangement 2D. Les valeurs égales sont groupées avant le
+census ; leurs comparaisons peuvent demander environ 155 bits sous u16.
+
+L'autorité q4 reste directe : quatre IDs distincts, orientation non nulle,
+owner parmi six arêtes et quatre numérateurs barycentriques du circumcentre
+strictement positifs. « Quatre faces aiguës » n'est ni nécessaire ni suffisant.
+Après `JungDiskDepth8`, seuls les rectangles ouverts construisent leurs couples
+de cellules ; le `count` et le preflight précèdent impérativement le `fill`.
+
+Si la masse de couples carrier reste rouge, le moteur local du plan médiateur
+reste le successeur : q2 interroge son point central, q3 le pied unique d'une
+ligne et q4 les intersections shallow `P-P/N-N/P-N`. Il ne construit aucun
+arrangement global et ne s'instancie qu'après les portes `F4/M4`, tâches et
+HWM. Le code exhaustif actuel reste son oracle, pas son modèle GPU.
+
+La gate porte sur les objets physiques `F4`, blocs aigus, événements, touches
+site-face, octets et HWM, pas sur la seule masse sémantique `E4`. Une masse
+quadratique peut rester factorisée ; inversement, un scan de tous les sites par
+face est rouge même si peu de supports survivent.
 
 ## 8. Plateaux, fold et sortie
 
@@ -453,31 +653,51 @@ variable.
 
 1. Fermer 0A sur tout u16 : largeurs, vrais `PointId`, juge indépendant,
    `BallKey`, RLE avant census, lanes et statuts transactionnels.
-2. Fermer 0B sur petit `n` jusqu'au payload complet, sous permutations,
-   tilings, caps et reprises.
-3. Substituer seulement la source : fenêtre E3/E4 finale, puis portes M3/M4.
-4. Implémenter q3 `owner-edge -> BallKey -> Q3FootPowerRange`; comparer WSSD
-   aiguë seulement comme broad phase sur le même coût transitif.
-5. Implémenter q4 shallow local seulement après E4/M4 verts.
-6. Porter la tranche entière par count--scan--fill, tâches persistantes, SoA,
+2. Raccorder les événements aux générateurs/facettes Gamma et fermer 0B sur
+   petit `n` jusqu'au payload complet, sous permutations, tilings, caps et
+   reprises.
+3. Recevoir `CKPairTape` comme partition q2 exacte et son certificateur
+   `[L_open,U_closed]`, puis mesurer `F2` et la masse logique séparément.
+4. Ajouter `JungDiskDepth9/8`, `OriginOnionDepth` et un shadow `SOC64` à union
+   de preuves disjointe, capé et jugé, avant toute multiplication carrier.
+5. Construire `OwnedCK-WST3` counter-only, recevoir couverture/owner/acuité,
+   puis raccorder `BallKey -> Q3FootPowerRange` et le census.
+6. Construire `OwnedCK-WST4` depuis la relation aiguë géométrique pré-rang,
+   éliminer les blocs sans carrier avant les couples de cellules, puis tester
+   la sweep 1D par face ; recertifier directement les quatre barycentriques et
+   la fixture où aucun sous-événement q2/q3 n'est retenu.
+7. Employer LP/cages comme diagnostics du même résiduel ; appliquer le
+   raffinement porteur de preuves aux tâches encore `MIXED`, puis regater
+   `F3/F4`, `M3/M4` et choisir le shallow local q4 seulement si nécessaire.
+8. Porter la tranche entière par count--scan--fill, tâches persistantes, SoA,
    radix/RLE et arithmétique large reçue.
-7. Exécuter des microgates `1500/3000/6000`, puis
+9. Exécuter des microgates `1500/3000/6000`, puis
    `12500/25000/50000` uniquement si tâches, octets, HWM et sorties passent.
-8. Qualifier trente répétitions chaudes à `50000` avec le payload officiel.
+10. Qualifier trente répétitions chaudes à `50000` avec le payload officiel.
 
-La session CPU sur VM G4 committée au pin `3c11bc8` n'est pas encore une porte
-exécutable : quatre tailles sont quatre processus, donc aucune pente n'est
-calculée ; `fenetre_finale` n'est ni conservé ni gaté ; les temps et
-recertifications sont supprimés du log ; les statuts non nuls peuvent mourir
-avant leur publication ; et le trap de session est installé après le retour du
-démarrage puis le parsing du handoff. Réparer ces points, exiger tous les codes
-zéro et archiver aussi les échecs avant toute mutation GCP. Même réparée, cette
-campagne reste CPU et ne reçoit aucun débit GPU.
+La session CPU sur VM G4 du pin `3c11bc8`, publiée au `HEAD=35fcea8`, a terminé
+ses quarante processus et certifié l'arrêt ciblé. Elle ne ferme toutefois pas
+la porte : quatre tailles restent quatre processus et les pentes sont calculées
+après coup ; `fenetre_finale` n'est ni conservé ni gaté ; `terrain` contient
+effectivement des continuations q3/q4 ; les temps et recertifications sont
+supprimés du log ; et le chemin d'échec du script n'est pas reçu. Réparer ces
+points, exiger tous les codes zéro **et** `pending=0`, puis archiver aussi les
+échecs. Cette campagne reste CPU et ne reçoit aucun débit GPU.
+
+Le résultat borné est néanmoins décisionnel : la configuration
+`Central-VWave + s=8 + window=512 + raffinement<=4` garde des pentes `sum_E4`
+proches de `1,9` sur `eight_clusters` et doit être remplacée sur cette famille.
+Cela ne réfute ni `SOC64/CORNER512`, ni LP/PWC, ni les cages. Sur `uniform`, la
+pente E4 seule reste verte mais ne borne pas `M4` ni le payload. Le SLO officiel
+ne peut pas être qualifié sur `uniform` seule : le plan évalue les objectifs sur
+Poisson uniforme **et** le mélange équilibré de huit amas, et G6 exige les deux
+familles favorables.
 
 La porte composée publie au minimum :
 
 ```text
 E3/E4, max par ancre, CLOSED/OPEN/PENDING
+F2/F3/F4 physiques et masses logiques factorisées
 M3/M4, blocs, tâches, splits, visites
 BallKeys brutes/uniques, supports, census, shells
 sortie H, opérations larges, octets/HWM
@@ -495,28 +715,84 @@ bande passante ne qualifie aucun SLO.
 - triangle et tétraèdre u16 maximaux, clés et barycentriques attendus ;
 - deux supports pour une `BallKey`, un census, deux `SupportRecord` ;
 - juge BigInt sur triangle u16 maximal et générateur capacité plus un ;
+- niveau exact sous changement d'échelle, fractions voisines, transitivité et
+  overflow sous UBSan ; une faute numérique sous mutant garde son statut ;
 - cosphère 384 sans troncature et extra-shell pertinent fail-closed ;
-- partenaire q3 au-delà d'un cutoff de rang 128 ;
+- partition CK exacte-once, cellule carrier dans `3B_R`, `C=D` sans ID répété ;
+- q4 positif avec aucun de ses six q2 ni quatre q3 retenu à `smax=11` ;
+- q4 positif à deux faces obtuses et quatre faces aiguës avec q4 négatif ;
+- partenaires q3 et q4 au-delà d'un cutoff de rang 128 ;
+- dix témoins q2 dans la boule diamétrale qui ne ferment pas q4 ;
 - `SOC64` succès axial et faux-échec du produit relaxé ;
+- retour SOC sous `floor=q4` différent de la vraie lane minimale ;
+- shadow `SOC-ALL(parent)` puis `central-ALL(child)`, union et somme distinctes ;
+- `JungDiskDepth8` positif alors que le LP global échoue à profondeur un ;
+- `OriginOnionDepth` à huit/neuf/dix couches, égalité, chute de rang et ID
+  dupliqué ;
+- deux droites u16 : résiduel universel `n^2/4`, zéro carrier aigu et zéro
+  sweep sans allocation par paire ;
+- q4 bien centré avec arête non maximale choisie comme faux owner, pour mordre
+  un usage trop large du lemme aigu ;
 - `CORNER512` coin omis, égalité, axe dégénéré et largeur 70 bits ;
 - LP rang un/deux/trois, égalité `kappa=D`, pool capé et IDs supprimés ;
 - cage octaédrique six-sites, tétra-only, reuse d'ID et rayon mal arrondi ;
 - fold `k=2` avec générateurs partageant un point mais moins de deux IDs ;
 - raffinement profondeur zéro à quatre, héritage de preuves et zéro double
   comptage terminal ;
+- analyseur de rampe : taille manquante, code non nul, pending positif et pente
+  exactement au seuil ;
 - caps exacts puis moins un, continuation, permutation, tuilage et reprise ;
 - comparaison lot par lot des dix forêts, coverage et verticales.
 
+Deux fixtures q4 exactes empêchent de réintroduire un cutoff de rang ou de
+confondre q2 et q4. Pour la première :
+
+```text
+a=(100,100,100), b=(200,100,100)
+x=(150,30,120), y=(150,30,80)
+c=(150,80,100), R2=2900
+z_i=(150+i,140,100), i=-4,...,5
+```
+
+`ab` est l'unique arête maximale du tétraèdre, `c` est strictement intérieur
+avec poids `(5/14,5/14,1/7,1/7)`, et les quatre sommets sont cosphériques.
+Chaque `z_i` est strictement dans la boule diamétrale de `ab`, mais strictement
+hors de cette sphère. Dix crédits q2 ne ferment donc pas le support q4 vide.
+
+Pour la seconde :
+
+```text
+c=(30000,30000,30000)
+a=(5000,40000,30000), b=(55000,40000,30000)
+x=(30000,5000,40000), y=(30000,5000,20000)
+z_j=(5000,40000+j,30000), j=1,...,4381
+```
+
+Les quatre sommets ont `R2=725000000`, le même centre intérieur et les mêmes
+poids strictement positifs ; `ab` est leur unique arête maximale. Tous les
+`z_j` sont plus proches de `a` que `b`, mais strictement hors de la sphère.
+Le support q4 vide subsiste donc avec `b` au-delà du rang 4380. Un préfixe kNN
+peut proposer des témoins ou une continuation, jamais fermer par son échec.
+
 ## 11. Non-claims
 
-Il existe une voie q3 exacte, GPU-factorisable et conditionnellement sparse :
-`owner-edge × carrier -> pied -> BallKey/RLE -> profondeur batchée`. Il n'existe
-aucune preuve que « triangles aigus » fournisse seul une source sparse, ni une
-garantie universelle sous-quadratique.
+Il existe une voie q2/q3/q4 exacte et GPU-factorisable en blocs :
+`CKPairTape -> OwnedCK-WST3 -> OwnedCK-WST4 -> BallKey/RLE -> profondeur
+batchée`. « Sparse » qualifie seulement les enregistrements physiques restant
+factorisés. Il n'existe aucune garantie universelle sous-quadratique pour la
+sortie explicite ou pour le raffinement des frontières `MIXED`.
 
 `SOC64`, `CORNER512`, LP projectif et cages sont des certificateurs ou
 falsificateurs précis. Aucun n'a encore démontré le contrat 50000/G4. Le
 contrat reste ouvert jusqu'à production du même `BenchmarkOutputContract-v1`
 complet dans le p95 déclaré.
 
-GCP non utilisé pour cette proposition.
+GCP non utilisé par l'auditeur pour cette proposition. Le reçu CPU G4 relu
+certifie l'arrêt ciblé de la session qu'il documente.
+
+La preuve de couverture, les owners, les fixtures et le contre-audit live sont
+dans
+[`audits/AUDIT_SOURCE_CK_WST_Q2_Q3_Q4_35FCEA8_20260814.md`](audits/AUDIT_SOURCE_CK_WST_Q2_Q3_Q4_35FCEA8_20260814.md).
+Le contre-audit SOC live, la contre-famille universelle, la sweep par porteur
+aigu et le certificat par pelages sont dans
+[`audits/AUDIT_DEBLOCAGE_Q4_PORTEUR_AIGU_SOC64_LIVE_35FCEA8_20260814.md`](audits/AUDIT_DEBLOCAGE_Q4_PORTEUR_AIGU_SOC64_LIVE_35FCEA8_20260814.md).
