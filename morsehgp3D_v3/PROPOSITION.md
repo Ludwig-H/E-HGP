@@ -486,6 +486,51 @@ Helly borne une base à trois IDs. Pour un témoin singleton, ces deux condition
 se réduisent exactement à `H>0 && 4H^2>EX` et
 `H>0 && 3H^2>EX` : `BlockJungDualTile` généralise donc `SOC64`.
 
+La forme entière évite toute division. Pour des poids entiers `w_z>=0`, poser
+`L=sum w_z`, `Z=sum w_z*z`, `Q=sum w_z*||z||^2`,
+`A=-L*(a dot b)+(a+b) dot Z-Q` et
+`C=(L*a-Z) cross (L*b-Z)`. Le même reçu vérifie :
+
+```text
+q3 : A>0 et 3*A^2*L^2 > ||C||^2
+q4 : A>0 et 2*A^2*L^2 > ||C||^2
+```
+
+La largeur dépend du dénominateur commun `L`; un cap dépassé rend `UNKNOWN`.
+
+Une forme équivalente, directement adaptée à une implémentation sans fractions,
+pose `W=sum_z w_z`, `D=||b-a||^2`,
+`A=W*D-sum_z w_z||a+b-2z||^2`,
+`P=W*(a+b)-2*sum_z w_z*z` et
+`R=D||P||^2-(P dot (b-a))^2`. Elle décide :
+
+```text
+q3 : A>0 et 3*A^2>4*R
+q4 : A>0 et   A^2>2*R
+```
+
+Sous u16, la preuve de largeur i128 exige `W=sum_z w_z<=65535`, contrôlé sans
+overflow avant le prédicat. Le prototype live ne possède pas encore ce
+preflight, ni un juge géométrique indépendant pour les groupes de deux ou trois
+témoins ; il reste donc un proposer ponctuel, pas un certificateur de bloc reçu.
+
+L'ABI de vérification doit nommer exactement ce qu'elle décide. Une primitive
+`verify_dual_weights_lane` reçoit une paire propre `D>0`, de un à trois
+`PointId` authentifiés, des poids strictement positifs et un cap vérifié sur
+`L`. Elle certifie uniquement **ces poids fournis**. Son échec ne dit pas que
+le groupe ne couvre pas le disque : un autre vecteur rationnel peut réussir,
+et des vecteurs différents peuvent certifier q3 et q4. Le wrapper de profondeur
+garantit la disjonction des groupes de `PointId`; une simple routine de
+coordonnées ne peut pas porter cette propriété. Coordonnées hors u16, somme de
+poids hors cap, paire dégénérée, overflow potentiel ou recherche incomplète
+rendent `UNKNOWN` avant tout calcul étroit.
+
+Le proposant peut essayer une petite banque de poids puis scinder, mais son
+gain n'est qu'un minorant. Le juge `k>1` compare la couverture du disque continu
+à une faisabilité exacte des demi-plans, pas à quelques centres échantillonnés
+ni au même prédicat dual. Les mutants de largeur emploient une arithmétique
+définie ; un overflow signé volontaire n'est pas une contradiction causale.
+
 Au niveau rectangle, une base et des poids rationnels proposés ne créditent
 `ALL` que si les deux inégalités sont prouvées sur tout `A×B`. Une première
 borne entière peu coûteuse utilise
@@ -682,11 +727,31 @@ Un tétraèdre q4 positif possède au moins une face aiguë adjacente à son ar�
 maximale. `WST4` peut donc choisir le plus petit `PointId` des carriers aigus
 comme carrier primaire et l'autre comme apex. Cette relation q3 est
 **géométrique et pré-rang**. Elle ne vient jamais des événements q3 retenus.
-Changer l'owner ne réduit pas le nombre total de quadruplets : il ne fait que
-repartir une partition exact-once. L'arête maximale est au contraire l'ancre
-edge-local la plus serrée, car elle impose les cinq autres distances au plus
-égales à `D`. Une `BallKey` n'existe qu'après résolution du support et serait
-donc un owner de génération circulaire.
+Changer seulement l'owner ne réduit ni les vrais supports ni les 4-ensembles à
+attribuer : il repartit une relation exact-once. Une autre broad phase pourrait
+avoir un surensemble différent, mais exige une nouvelle preuve de couverture.
+L'arête maximale fournit immédiatement un diamètre `D` qui majore les cinq
+autres distances ; le carré propre d'une arête plus courte ne le ferait pas.
+Une `BallKey` n'existe qu'après résolution du support et serait donc un owner de
+génération circulaire.
+
+Le preflight `M4_apex` n'a pas besoin de développer carrier × apex. Pour une
+arête owner `e`, retirer les sites collinéaires, définir `V_e` par les quatre
+arêtes endpoint qui ne battent pas `e`, `A_e` par l'acuité stricte et
+`N_e=V_e minus A_e`. Si `E_e(S)` compte les paires de `S` dont l'arête ne bat
+pas `e`, alors `E_e(V_e)-E_e(N_e)` compte exactement les paires incidentes à
+au moins un carrier aigu. Grouper ensuite par la direction projective primitive
+`PlaneKey_e(z)=(b-a) cross (z-a)` et soustraire le même count dans chaque
+classe retire exactement l'orientation nulle :
+
+```text
+M4_e = E_e(V_e)-E_e(N_e)
+       - sum_pi (E_e(V_e,pi)-E_e(N_e,pi))
+```
+
+Chaque `E_e` est un range-count dual-tree/cell-pair `ALL/NONE/MIXED`, avec
+tie-break `EdgeKey` exact. L'identité donne un count et des bornes avant fill,
+pas les barycentriques, le rang ou les BallKeys.
 
 La construction ne forme pas aveuglément tous les couples `(C,D)`. Elle
 classe d'abord `CarrierBlock(A,B,C)` en `ALL_ACUTE/NONE_ACUTE/MIXED`, élimine
@@ -733,6 +798,13 @@ intérieur/shell/extérieur. Huit groupes disjoints forment un reçu suffisant ;
 la profondeur exacte fixe-face emploie la récurrence leave-out ou un maximum
 matching du graphe-chaîne, pas un glouton arbitraire.
 
+Comme le seuil contractuel vaut huit, ce matching ne demande pas un tri global :
+un scan garde les huit rayons droits aux plus petits seuils, les huit rayons
+gauches aux plus grands seuils et les singletons couvrants, puis apparie ces
+petits tableaux dans l'ordre. Le coût fixe-face est `O(n)` avec `O(8)` mémoire ;
+au niveau bloc, un LBVH/range-extrema peut proposer ces IDs et la preuve
+uniforme les accepte ou scinde.
+
 Après ajout d'une cellule apex, `BlockBallDepth8(A,B,C,D)` restreint encore la
 famille de centres. Si `B_y` change de signe sur `D`, son image en `tau` peut
 être non bornée ou disjointe : reprendre tout `J_f` ou rendre `MIXED`. Sinon un
@@ -742,11 +814,29 @@ les deux signes sont classés séparément. Une enveloppe de bloc ne traite jama
 une AABB levée comme le convexe de ses seuls coins : elle borne `||p||^2`
 séparément ou utilise Bernstein/SOS exact.
 
+Une première enveloppe entière exploitable choisit une origine locale `o` et
+un support représentant, puis écrit sa BallForm témoin
+`P0(r)=A0||r||^2+B0 dot r+C0`, avec `r=z-o`. Si `dA,dB_i,dC` bornent les
+variations de coefficients sur `A×B×C×D`, alors sur un witness node `Z` :
+
+```text
+E = maxabs(dA)*Qmax + sum_i maxabs(dB_i)*maxabs(r_i) + maxabs(dC)
+J(block,Z) subset [min_Z P0-E, max_Z P0+E]
+```
+
+Les extrema de `P0` se calculent axe par axe aux endpoints et aux entiers
+`floor/ceil(-B0_i/(2*A0))` clipés. Un signe strict opposé à l'orientation sur
+tout le produit crédite la population du nœud ; huit IDs témoins disjoints des
+quatre facteurs ferment q4. L'égalité reste `MIXED/shell`. Les coins seuls sont
+insuffisants pour la forme quadratique.
+
 La hiérarchie q4 devient donc : Jung edge 2D, porte aiguë, Jung axe 1D,
-`ApexWellCenteredBlock`, `BlockBallDepth8`, puis seulement le résiduel vers
-WST4/sweep. Cette
-ordonnance attaque la masse `C4_carrier` avant de développer une face ; une
-borne linéaire sur le nombre de blocs ne suffirait pas sans ce consommateur
+`OwnedCK-WST4` **broad-phase symbolique**, puis `BlockBallDepth8` et les
+barycentriques sur ce produit carrier--apex. Seul le résiduel est émis vers la
+sweep ou le fill. `BlockBallDepth8` peut précéder la positivité lorsqu'il est
+moins cher, mais il ne précède pas l'existence du bloc WST4 qui quantifie
+`A×B×C×D`. Cette ordonnance attaque `C4_carrier/M4_apex` avant toute expansion ;
+une borne linéaire sur le nombre de blocs ne suffirait pas sans ce consommateur
 factorisé.
 
 L'autorité q4 reste directe : quatre IDs distincts, orientation non nulle,
@@ -773,7 +863,8 @@ Le pin `4515a8b` observe une quadrature `arête × porteur` de pente proche de
 `2,97` sur `eight_clusters`. Elle réfute l'expansion ponctuelle, pas WST4 : un
 bloc `ALL_ACUTE` porte sa masse par un seul record, `NONE_ACUTE` disparaît et
 seuls les `MIXED` se divisent. L'ordre physique garde donc le carrier
-symbolique, forme WST4, applique owner/barycentriques/profondeur, puis ne
+symbolique, forme WST4, applique profondeur et barycentriques au niveau bloc
+avant tout fill, puis ne
 matérialise une face que si le résiduel justifie la sweep.
 
 Le sampler v2 du HEAD ne fournit pas encore une estimation reçue : le mapping
@@ -835,10 +926,11 @@ variable.
    recevoir couverture/owner/acuité,
    puis raccorder `BallKey -> Q3FootPowerRange` et le census.
 6. Construire `OwnedCK-WST4` depuis la relation aiguë géométrique pré-rang,
-   éliminer les blocs sans carrier avant les couples de cellules, appliquer
-   `FaceAxisJungDepth8Block` avant apex, puis tester la sweep 1D seulement après
-   preflight ; recertifier directement les quatre barycentriques et la fixture
-   où aucun sous-événement q2/q3 n'est retenu.
+   éliminer les blocs sans carrier, recevoir le count factorisé `M4_e`, puis
+   appliquer `FaceAxisJungDepth8Block` et `BlockBallDepth8` avant fill. Tester la
+   sweep 1D seulement après preflight ; recertifier directement les quatre
+   barycentriques, le rang fermé `I+U` et la fixture où aucun sous-événement
+   q2/q3 n'est retenu.
 7. Employer LP/cages comme diagnostics du même résiduel ; appliquer le
    raffinement porteur de preuves aux tâches encore `MIXED`, puis regater
    `F3/C4_carrier/F4/M4_apex/T4_site` et choisir le shallow local q4 seulement
@@ -895,6 +987,17 @@ bande passante ne qualifie aucun SLO.
 - cosphère 384 sans troncature et extra-shell pertinent fail-closed ;
 - partition CK exacte-once, carrier dans la fenêtre `2B_R`--lentille,
   diagonales `A/C,A/D,B/C,B/D` et `C=D` sans ID répété ;
+- égalité sharp `2B_R`, dual Jung q3/q4 à égalité shell, poids `lambda`
+  pairwise sans poids commun au rectangle et mutant `corners-only` ;
+- count factorisé `M4_e` contre expansion : tie `EdgeKey`, site collinéaire,
+  deux carriers aigus, même `PlaneKey` et plans distincts ;
+- Jung axe : événements opposés égaux, trois constantes `B=0`, matching de
+  taille deux détruit par un choix glouton ;
+- quatre sous-cubes q4 positifs et huit témoins uniformes du cinquième pour
+  recevoir `BlockBallDepth8` avant fill ;
+- cosphère centre `(4,4,4)`, rayon carré 25, shell de 24 permutations de
+  `(±3,±4,0)` : `I=0,U=24`, donc jamais q4 régulier
+  retenu à `smax=11` ; mutant `drop-extra-shell` ;
 - site de sweep à dénominateur nul avec puissance constante négative, nulle ou
   positive, plus mutant `drop-zero-denominator` ;
 - tétraèdre entier aux six arêtes égales pour tuer la maximalité faible sans
@@ -976,7 +1079,10 @@ dans
 Le contre-audit SOC live, la contre-famille universelle, la sweep par porteur
 aigu et le certificat par pelages sont dans
 [`audits/AUDIT_DEBLOCAGE_Q4_PORTEUR_AIGU_SOC64_LIVE_35FCEA8_20260814.md`](audits/AUDIT_DEBLOCAGE_Q4_PORTEUR_AIGU_SOC64_LIVE_35FCEA8_20260814.md).
-La réponse aux cinq questions de Claude, la nomenclature
+La première réponse aux six questions de Claude, la nomenclature
 `C4_carrier/M4_apex`, la preuve sharp de `2B_R` et le contre-audit des
 échantillonneurs v0/v1 sont dans
 [`audits/AUDIT_REPONSE_M4_PORTEURS_AIGUS_4515A8B_20260814.md`](audits/AUDIT_REPONSE_M4_PORTEURS_AIGUS_4515A8B_20260814.md).
+Le contre-audit du sampler v2 et du brute-force, la réponse à la question 7,
+la forme entière de `BlockBallDepth8` et le fallback shallow sont dans
+[`audits/AUDIT_CONTRE_RECEPTION_M4_V2_DEPTHBLOCK_5BFC5C8_20260814.md`](audits/AUDIT_CONTRE_RECEPTION_M4_V2_DEPTHBLOCK_5BFC5C8_20260814.md).

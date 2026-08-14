@@ -34,7 +34,7 @@ Le nom nu `M4` est donc interdit dans les reçus : employer
 | P4 : retirer `sum E4` ? | le retirer du rôle de proxy de sortie ; le conserver comme métrique du sous-système de prune universelle | la gate architecturale porte sur `F3`, `C4_carrier`, `F4`, `M4_apex`, sweep, BallKeys, H et coût |
 | P4 bis : WST et gateway sont-ils la même route ? | même préfixe logique CK+carrier aigu, mais WST4 par couples de cellules et sweep par face sont deux moteurs physiques | implémenter d'abord `CKPairTape-v0`, puis les CarrierBlocks symboliques ; choisir WST4 avant toute expansion par face |
 | P5 : carriers quasi linéaires par arête | ne changer ni owner ni exact-once ; factoriser la masse en blocs `ALL_ACUTE/MIXED` et former WST4 avant de développer les faces | remplacer `3B_R` par l'enveloppe exacte plus serrée ci-dessous ; elle réduit les cellules, pas les vrais carriers |
-| P6 : le candidat devient-il quartique et faut-il owner par `BallKey` ? | un owner ne fait que partitionner les quadruplets et ne change pas leur cardinal total ; l'arête maximale fournit même la lentille edge-local la plus serrée | garder cet owner logique et fermer/ranker les blocs avant fill ; `BallKey` est aval et serait un owner de génération circulaire |
+| P6 : le candidat devient-il quartique et faut-il owner par `BallKey` ? | changer seulement l'owner ne réduit ni les vrais supports ni les 4-ensembles ; l'arête maximale fournit un diamètre qui borne les cinq autres arêtes | garder cet owner logique et fermer/ranker les blocs avant fill ; une autre broad phase exige une preuve neuve et `BallKey` est aval |
 
 ## 2. Le symbole `M4` avait deux sens : les séparer
 
@@ -166,6 +166,46 @@ La sortie v1 par arête est un calcul sujet borné utile de `M4_apex` et
 `W4_positive`, pas un oracle indépendant. Son extrapolation sur les arêtes non
 capées n'est ni Horvitz--Thompson, ni une borne inférieure déclarée avec masse
 manquante : elle ne peut alimenter une pente ou une décision G4.
+
+### 2.3 Compter `M4_apex` exactement sans développer carrier × apex
+
+Une identité factorisée évite l'estimateur pour le **count**. Fixer une arête
+owner `e={a,b}` de carré `D_e`. Dire qu'une autre arête `f` ne bat pas `e`
+signifie `D_f<D_e`, ou `D_f=D_e` et `EdgeKey(e)<EdgeKey(f)` ; l'égalité de clé
+n'arrive que pour `f=e`.
+
+Retirer d'abord les sites collinéaires à `e`, puis poser :
+
+```text
+V_e = {z : az et bz ne battent pas e}
+A_e = {z dans V_e : (z-a) dot (b-z) > 0}
+N_e = V_e minus A_e
+E_e(S) = nombre de {x,y} subset S tels que xy ne bat pas e
+```
+
+Le premier count `E_e(V_e)-E_e(N_e)` donne exactement les paires admissibles
+incidentes à au moins un carrier aigu, sans doubler le cas où les deux le sont.
+Il reste à retirer les tétraèdres coplanaires. Pour chaque site, définir
+`PlaneKey_e(z)` comme la direction projective primitive canonique de
+`(b-a) cross (z-a)`. Deux sites non collinéaires donnent orientation nulle avec
+`a,b` si et seulement s'ils ont la même clé. Par conséquent :
+
+```text
+M4_e = E_e(V_e)-E_e(N_e)
+       - sum_pi (E_e(V_e,pi)-E_e(N_e,pi))
+```
+
+Cette identité est exacte et exact-once ; elle réfute aussi « owner implique
+tous les `C(n,4)` ». Chaque `E_e` se calcule par paires de cellules : distance
+universellement sous le seuil donne un count combinatoire, au-dessus donne
+zéro, et seul `MIXED` se subdivise. Les classes `PlaneKey` se radix/RLE avant
+la même soustraction. Le count reste un preflight : il ne produit ni
+barycentriques, ni profondeur, ni `BallKey`.
+
+Les microgates comparent l'identité à l'expansion de tous les `PairId` et
+couvrent tie `EdgeKey`, site collinéaire, deux carriers aigus, deux plans
+distincts et deux sites du même plan. Les masses baseline/combined réemploient
+exactement les mêmes counts et diffèrent seulement par le fate de `e`.
 
 ## 3. Les deux vues doivent aller jusqu'aux joins
 
@@ -431,7 +471,9 @@ pour chaque face matérialisée paie au moins `Theta(n^4)` touches, avant le log
 Elle ne peut donc pas être le consommateur systématique des carriers. Cela ne
 fait pas de l'owner maximal la cause du quartique : tout quadruplet existe avant
 son attribution à une arête, et changer l'owner ne réduit pas le nombre de
-4-sous-ensembles. Un owner `BallKey` est circulaire : calculer la clé demande
+4-sous-ensembles. Une autre relation candidate pourrait être plus serrée, mais
+elle aurait sa propre obligation de couverture et d'exact-once. Un owner
+`BallKey` est circulaire : calculer la clé demande
 déjà les quatre sommets, le centre et la sphère. Il reste utile après génération
 pour RLE/dédoublonnage, jamais pour éviter la génération.
 
@@ -531,7 +573,7 @@ ou AxisRun. La gate sépare donc `C4_carrier`, `M4_apex`, nombre de faces/axes,
    ni les plateaux. Toute expansion réelle reste preflightée, quotientée par
    une politique reçue ou refusée atomiquement.
 
-### 9.1 Candidat exact pour `BlockJungDiskDepth`
+### 9.1 Certificateur `ALL` sûr pour `BlockJungDiskDepth`
 
 Un verrou mathématique supplémentaire peut être levé sans promouvoir un test
 de coins. Écrire `m=(a+b)/2`, `h=(b-a)/2`, `c=m+w`, avec `w dot h=0` et
@@ -561,6 +603,13 @@ Une borne initiale à coût constant utilise
 `alpha=-a dot b+(a+b) dot zbar-qbar` et une enveloppe de `h cross p`. Pour un
 témoin singleton, le dual redonne exactement les critères `SOC64` q3/q4 ; il
 en est donc la généralisation collective.
+
+Une forme entière compacte est directement GPU-friendly. Pour des poids
+`w_z>=0`, poser `L=sum w_z`, `Z=sum w_z*z`, `Q=sum w_z||z||^2`,
+`A=-L*(a dot b)+(a+b) dot Z-Q` et
+`C=(L*a-Z) cross (L*b-Z)`. Le reçu teste `A>0`, puis q3
+`3*A^2*L^2>||C||^2` ou q4 `2*A^2*L^2>||C||^2`. Il ne forme aucune division ;
+la largeur dépend toutefois de `L`, donc un cap dépassé rend `UNKNOWN`.
 
 La quantification doit rester explicite : `for all (a,b) exists lambda(a,b)`
 n'implique pas l'existence d'un même `lambda` pour tout le rectangle. Une base
@@ -600,6 +649,11 @@ vérification uniforme sur `A×B×C`, sinon elle scinde.
 Extraire successivement une paire compatible par un glouton arbitraire n'est
 pas exact pour la profondeur. Une preuve de profondeur huit utilise soit la
 récurrence leave-out, soit le maximum matching du graphe-chaîne des demi-droites.
+Au seuil huit, un scan conserve seulement les huit plus petits seuils de rayons
+droits, les huit plus grands seuils gauches et les singletons couvrants, puis
+apparie ces tableaux constants : `O(n)` temps, `O(8)` mémoire par face fixe.
+Un LBVH peut proposer les extrema sans rescan global ; le verifier de bloc reste
+entier et fail-open.
 Les fixtures permanentes incluent deux événements opposés égaux, qui ne donnent
 aucun crédit au point shell, les trois cas constants `B=0`, et un cas où le
 premier choix glouton détruit un matching de taille deux.
@@ -643,30 +697,35 @@ Ordre recommandé :
    `M4_apex/T4_site/BallKeys/H`, sous caps déterministes ;
 9. aucune rampe G4 50000 avant passage des microgates et preflight du payload.
 
-## 11. État du contre-audit live
+## 11. État du contre-audit au `HEAD=8268753`
 
-La primitive SOC isolée passe `16/16` CTests ; les portes ponctuelles du cône
-passent `39/39`. Le replay union `cred/ccred` est cohérent dans la source relue,
-recompile et préserve les sorties baseline sur deux microgates avec et sans
-raffinement. La somme réfutée surcompte effectivement les fermetures.
+La sous-suite combinée
+`wspd_soc64|porteurs|two_lines|soc64_cap|q4_brute` passe `22/22`. Le replay SOC
+union-disjointe, son cap et le témoin de somme brute sont exécutables ; il
+manque au HEAD un juge direct de chaque flip par union de `PointId` distincts
+et les mutants union/descendant/fallback. Un cap atteint reste
+`MINORANT_CAP/pending`, jamais une fermeture finale. Le delta postérieur ajoute
+ce juge et tue le mutant de somme à cap complet, mais publie à tort
+`accord=OUI` lorsque des flips sont sautés ; ce chemin reste non reçu et non
+câblé par CTest.
 
-Le HEAD câble désormais cinq portes WSPD SOC, dont un shadow jugé et le témoin
-de surcompte brut ; elles passent dans le rejeu courant. Il manque encore un
-juge direct des flips distinct-ID, les mutants d'union/descendant/fallback et
-le cap maximal. Le delta live corrige `SocStats.wide` en comptant trois ou
-quatre produits source selon l'early exit ; ce n'est pas un compteur
-d'instructions machine.
+Les verts porteurs ne reçoivent pas le sampler v2. Le mapping multiply-high
+est biaisé sans rejection sampling, `2 sigma` n'est pas un IC, le contrôle ne
+juge pas le décodeur rang--`PairId` et le mutant C4-comme-M4 meurt dans la lane
+q3 avant de tester q4. `--rang=10` seul sort zéro sans exécuter de rang ; un run
+`two_lines` peut aussi finir avec `bien_centres_juges=0`. Les extra-shells ne
+sont comptés ni dans ce chemin, ni dans le brute-force.
 
-La sous-suite live `wspd_soc64|porteurs|two_lines` passe `15/16`. L'unique rouge
-est causalement documentaire : le code imprime désormais `C4_estime=0`, tandis
-que la regex `mhgp3v_two_lines_zero_porteur_aigu` attend encore
-`M4_estime=0`. Les nouvelles portes dites « oracle porteurs » partagent encore
-les lambdas géométriques, les terminaux et les fates du sujet ; le mutant peut
-être sauté lorsque `m>--porteurs-oracle`. Elles ne constituent pas encore un
-oracle PointId indépendant de `C4/M4`.
+Les cinq portes `q4_brute` reçoivent des valeurs figées, pas une autorité
+géométrique indépendante. Le fichier recopie Gram--Cramer/in-sphere, accepte
+options/familles invalides, n'a pas de cap `n`, produit `NaN` pour une
+population vide et appelle `H4` le test incomplet `I<=7`. Sa famille
+`two_lines` donne elle-même `M4=0`, donc les claims « quartique pour tout
+nuage » et « deux ordres de marge » sont rejetés. À `n=120`, la gate ne montre
+que `46,40/7=6,6` fois le seuil.
 
-La formulation recevable est donc : **primitive `ALL` exacte, replay union
-plausible et premières portes intégrées ; coût transitif, flips et source
-C4/M4 non reçus**.
+La formulation recevable est : **primitive SOC `ALL` exacte et capée ; signal
+fort que l'expansion q4 pré-rang est interdite ; source CK/WST, count M4
+factorisé, profondeur de bloc, rang fermé et coût transitif non reçus**.
 
 GCP non utilisé.

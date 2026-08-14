@@ -104,6 +104,14 @@ struct SocShadowStat {
   long long triples = 0;       // triples enumeres par le juge
   long long invariant_viole = 0;  // ccred < cred : les ledgers ont diverge
   long long cap_refuses = 0;      // taches refusees par le cap : ledger NON final
+  long long flips_juges = 0;      // flips confrontes a la cardinalite distincte
+  long long flips_sautes = 0;     // flips trop gros pour le cap : NON juges
+  long long flips_faux = 0;       // flips sans les `need` identites distinctes
+  long long rect_juges = 0;       // rectangles ouverts dont la profondeur est exacte
+  long long rect_fermables = 0;   // ... et qui possedent `need` temoins universels
+  double rect_temoins = 0.0;      // somme des temoins universels de rectangle
+  double rect_masse = 0.0;        // somme des |A|.|B| juges
+  long long rect_singletons = 0;  // rectangles reduits a UNE paire
   long long wide = 0;             // multiplications 128 bits reellement formees
   // --- LE LEDGER FAUTIF, CONSERVE COMME TEMOIN.
   //
@@ -199,6 +207,21 @@ long long g_porteurs_seed = 1;
 // Budget d'apex bien centres dont on calcule le RANG exact : le seul filtre qui
 // separe une masse de candidats d'une sortie utile.
 long long g_rang_budget = 0;
+// Juge direct des flips : il verifie la CARDINALITE DISTINCTE que chaque
+// fermeture pretend, et non chaque verdict pris isolement.
+bool g_judge_flips = false;
+long long g_flip_judge_cap = 400000;   // triples (a,b,z) enumeres par flip
+// Niveau de confiance DECLARE de la borne de Hoeffding. Il est publie avec le
+// resultat : une demi-largeur sans son `delta` n'est pas un intervalle.
+double g_porteurs_delta = 0.01;
+// Profondeur EXACTE par paire : elle separe ce que la geometrie interdit de ce
+// que la relaxation de boite et le budget coutent.
+bool g_profondeur_exacte = false;
+// Profondeur exacte du RECTANGLE : elle separe la perte de BOITE de la perte de
+// BUDGET. Sa valeur est le nombre de rectangles ouverts a juger.
+long long g_profondeur_rect = 0;
+long long g_rect_stride = 997;   // pas du filtre de hachage de l'echantillon
+bool g_inject_somme_union = false;
 // MUTANT : imprimer `C4` sous le libelle `M4`. C'est exactement la faute que la
 // version `v0` de ce compteur commettait, et qu'un contre-audit a du relever.
 // Une faute corrigee sans mutant revient.
@@ -922,6 +945,12 @@ int main(int argc, char** argv) {
     else if (a.rfind("--apex=", 0) == 0) g_apex_sample = arg_ll(val("--apex=").c_str(), 1, (1LL << 22), "apex");
     else if (a.rfind("--porteurs-seed=", 0) == 0) g_porteurs_seed = arg_ll(val("--porteurs-seed=").c_str(), 0, (1LL << 40), "porteurs-seed");
     else if (a.rfind("--rang=", 0) == 0) g_rang_budget = arg_ll(val("--rang=").c_str(), 1, (1LL << 22), "rang");
+    else if (a == "--judge-flips") { g_soc64_shadow = true; g_judge_flips = true; }
+    else if (a == "--profondeur-exacte") { g_window = true; g_profondeur_exacte = true; }
+    else if (a.rfind("--profondeur-rect=", 0) == 0) { g_soc64_shadow = true; g_profondeur_rect = arg_ll(val("--profondeur-rect=").c_str(), 1, (1LL << 22), "profondeur-rect"); }
+    else if (a.rfind("--rect-stride=", 0) == 0) g_rect_stride = arg_ll(val("--rect-stride=").c_str(), 1, (1LL << 20), "rect-stride");
+    else if (a.rfind("--flip-judge-cap=", 0) == 0) { g_soc64_shadow = true; g_judge_flips = true; g_flip_judge_cap = arg_ll(val("--flip-judge-cap=").c_str(), 1, (1LL << 40), "flip-judge-cap"); }
+    else if (a == "--inject=soc-somme-au-lieu-union") { g_soc64_shadow = true; g_judge_flips = true; g_inject_somme_union = true; }
     else if (a.rfind("--porteurs-oracle=", 0) == 0) { g_window = true; g_porteurs_oracle = arg_ll(val("--porteurs-oracle=").c_str(), 4, 4000, "porteurs-oracle"); }
     else if (a == "--inject=porteurs-c4-comme-m4") g_inject_c4_comme_m4 = true;
     else if (a.rfind("--soc-judge-cap=", 0) == 0) { g_judge_soc64 = true; g_soc64_shadow = true; g_soc_judge_cap = arg_ll(val("--soc-judge-cap=").c_str(), 1, (1LL << 24), "soc-judge-cap"); }
@@ -1380,12 +1409,124 @@ int main(int argc, char** argv) {
         // Le verdict est RENDU A L'APPELANT, il n'est pas comptabilise ici :
         // sous `--raffine` cet appel peut porter sur un rectangle qui sera
         // scinde, et seul l'appelant sait s'il est terminal.
+        // ---- LE JUGE DIRECT DES FLIPS, SUR CARDINALITE DISTINCTE.
+        //
+        // Un flip affirme exactement ceci : il existe au moins `need[2]`
+        // `PointId` DISTINCTS qui sont temoins q4 universels de TOUTE paire du
+        // rectangle. Le juge de rectangle `SOC-ALL` ne verifie pas cela — il
+        // verifie chaque verdict pris isolement. C'est precisement la faute de
+        // chevauchement que les deux contre-audits ont trouvee : des verdicts
+        // individuellement corrects peuvent recouvrir les MEMES identites.
+        //
+        // Ce juge-ci enumere les vrais `PointId` du nuage, exige l'universalite
+        // sur tout `A x B`, et compte les identites DISTINCTES. Il emploie la
+        // representation `(g,Q)`, qui ne partage ni H, ni E, ni X, ni aucune
+        // difference de Minkowski avec le sujet.
+        if (g_judge_flips && g_soc64_shadow && cred[2] < need[2]) {
+          const int fa = (wa < 0) ? (-1 - wa) : nodes[wa].first;
+          const int la2 = (wa < 0) ? (-1 - wa) : nodes[wa].last;
+          const int fb = (wb < 0) ? (-1 - wb) : nodes[wb].first;
+          const int lb2 = (wb < 0) ? (-1 - wb) : nodes[wb].last;
+          const long long na = (long long)(la2 - fa + 1);
+          const long long nb = (long long)(lb2 - fb + 1);
+          const bool flip = g_inject_somme_union ? (cred[2] + soc_cred_brut >= need[2])
+                                                 : (ccred[2] >= need[2]);
+          if (flip) {
+            if (na > 0 && nb > 0 && na * nb * (long long)m <= g_flip_judge_cap) {
+              long long distincts = 0;
+              for (long long z = 0; z < m; ++z) {
+                bool universel = true;
+                for (long long ia = fa; ia <= la2 && universel; ++ia) {
+                  if (ia == z) { universel = false; break; }
+                  for (long long ib = fb; ib <= lb2; ++ib) {
+                    if (ib == z) { universel = false; break; }
+                    if (mhgp3v::cone::lane_of_target_gq(
+                            sp[(size_t)ia][0], sp[(size_t)ia][1], sp[(size_t)ia][2],
+                            sp[(size_t)z][0], sp[(size_t)z][1], sp[(size_t)z][2],
+                            sp[(size_t)ib][0], sp[(size_t)ib][1], sp[(size_t)ib][2]) <
+                        mhgp3v::cone::kLaneQ4) { universel = false; break; }
+                  }
+                }
+                if (universel) ++distincts;
+              }
+              ++soc.flips_juges;
+              if (distincts < need[2]) ++soc.flips_faux;
+            } else {
+              ++soc.flips_sautes;
+            }
+          }
+        }
+        // ---- PROFONDEUR EXACTE DU RECTANGLE, ET LA DISSECTION DE LA PERTE.
+        //
+        // La profondeur exacte par PAIRE dit ce que la geometrie permet. Elle ne
+        // dit pas si le certificat de BOITE pourrait y arriver : celui-ci exige
+        // les MEMES temoins pour toutes les paires du rectangle. On compte donc
+        // ici les temoins universels sur tout `A x B`, exhaustivement, dans
+        // l'ecriture `(g,Q)`.
+        //
+        //   temoins_rect >= need  et lane ouverte -> la perte est le BUDGET
+        //                                            ou l'ordre de descente
+        //   temoins_rect <  need  et paires fermables -> la perte est la
+        //                                            RELAXATION DE BOITE
+        //
+        // Les deux sont des pertes d'ingenierie, pas des obstructions
+        // geometriques, mais elles n'appellent pas la meme reparation.
+        if (g_profondeur_rect && cred[2] < need[2]) {
+          const int fa = (wa < 0) ? (-1 - wa) : nodes[wa].first;
+          const int la2 = (wa < 0) ? (-1 - wa) : nodes[wa].last;
+          const int fb = (wb < 0) ? (-1 - wb) : nodes[wb].first;
+          const int lb2 = (wb < 0) ? (-1 - wb) : nodes[wb].last;
+          const long long na = (long long)(la2 - fa + 1);
+          const long long nb = (long long)(lb2 - fb + 1);
+          // ECHANTILLON REPARTI, PAS LA TETE DE LA VAGUE. Prendre les premiers
+          // terminaux ouverts rencontres donnait 0 % de fermables — et c'etait
+          // un ARTEFACT : les premiers terminaux sont les feuilles d'indices
+          // Morton adjacents, c'est-a-dire les aretes les plus COURTES du
+          // nuage, dont le spindle q4 est minuscule et legitimement vide. Un
+          // filtre de hachage sur l'identite du rectangle repartit
+          // l'echantillon sur toute la vague.
+          unsigned long long hh = (unsigned long long)fa * 1000003ULL +
+                                  (unsigned long long)fb + 0x9E3779B97F4A7C15ULL;
+          hh ^= hh >> 30; hh *= 0xBF58476D1CE4E5B9ULL;
+          hh ^= hh >> 27; hh *= 0x94D049BB133111EBULL;
+          hh ^= hh >> 31;
+          if (na > 0 && nb > 0 && na * nb * (long long)m <= g_flip_judge_cap &&
+              soc.rect_juges < g_profondeur_rect &&
+              (long long)(hh % (unsigned long long)g_rect_stride) == 0) {
+            long long univ = 0;
+            for (long long z = 0; z < m; ++z) {
+              bool universel = true;
+              for (long long ia = fa; ia <= la2 && universel; ++ia) {
+                if (ia == z) { universel = false; break; }
+                for (long long ib = fb; ib <= lb2; ++ib) {
+                  if (ib == z) { universel = false; break; }
+                  if (mhgp3v::cone::lane_of_target_gq(
+                          sp[(size_t)ia][0], sp[(size_t)ia][1], sp[(size_t)ia][2],
+                          sp[(size_t)z][0], sp[(size_t)z][1], sp[(size_t)z][2],
+                          sp[(size_t)ib][0], sp[(size_t)ib][1], sp[(size_t)ib][2]) <
+                      mhgp3v::cone::kLaneQ4) { universel = false; break; }
+                }
+              }
+              if (universel) ++univ;
+            }
+            ++soc.rect_juges;
+            soc.rect_masse += (double)(na * nb);
+            if (na * nb == 1) ++soc.rect_singletons;
+            soc.rect_temoins += univ;
+            if (univ >= need[2]) ++soc.rect_fermables;
+          }
+        }
         if (out_soc != nullptr) {
           // `flip` compare DEUX LEDGERS, il n'additionne pas deux ensembles.
           // C'est la difference exacte entre l'ancienne version fautive et
           // celle-ci : `ccred[2]` est le nombre de temoins qu'un algorithme
           // disposant de SOC64 aurait credites, chacun compte une seule fois.
-          const bool flip = g_soc64_shadow && cred[2] < need[2] && ccred[2] >= need[2];
+          // MUTANT `soc-somme-au-lieu-union` : reprendre l'ecriture refutee
+          // comme CRITERE de flip. Le juge des flips doit alors trouver des
+          // fermetures qui ne possedent pas huit identites distinctes.
+          const bool flip = g_soc64_shadow && cred[2] < need[2] &&
+                            (g_inject_somme_union ? (cred[2] + soc_cred_brut >= need[2])
+                                                  : (ccred[2] >= need[2]));
           if (flip) ++soc.tentatives_fermees;
           // Le meme test, ecrit comme la version refutee : une SOMME de deux
           // ensembles qui ne sont pas disjoints.
@@ -1994,6 +2135,50 @@ int main(int argc, char** argv) {
                      soc.invariant_viole);
         return 3;
       }
+      if (g_profondeur_rect > 0) {
+        std::printf("profondeur_rect q4 : rectangles_juges=%lld masse_moyenne=%.2f"
+                    " singletons=%lld (%.1f%%) temoins_moyen=%.2f"
+                    " | fermables_par_boite_exacte=%lld (%.3f%%) seuil=%d\n",
+                    soc.rect_juges,
+                    (soc.rect_juges == 0) ? 0.0 : soc.rect_masse / (double)soc.rect_juges,
+                    soc.rect_singletons,
+                    100.0 * (double)soc.rect_singletons / (double)std::max(1LL, soc.rect_juges),
+                    (soc.rect_juges == 0) ? 0.0 : soc.rect_temoins / (double)soc.rect_juges,
+                    soc.rect_fermables,
+                    100.0 * (double)soc.rect_fermables / (double)std::max(1LL, soc.rect_juges),
+                    g_need[2]);
+        if (soc.rect_juges == 0) {
+          std::fprintf(stderr, "PLANCHER: aucun rectangle ouvert juge\n");
+          return 3;
+        }
+      }
+      if (g_judge_flips) {
+        std::printf("soc64_flips accord=%s juges=%lld sautes=%lld faux=%lld\n",
+                    soc.flips_faux == 0 ? "OUI" : "NON", soc.flips_juges,
+                    soc.flips_sautes, soc.flips_faux);
+        if (soc.flips_faux != 0) {
+          if (g_inject_somme_union) {
+            std::printf("mutant_killed=1 soc-somme-au-lieu-union : %lld fermetures sans"
+                        " %d identites distinctes\n", soc.flips_faux, g_need[2]);
+            return 4;
+          }
+          std::fprintf(stderr,
+                       "DESACCORD: %lld fermetures ne possedent pas %d PointId distincts\n",
+                       soc.flips_faux, g_need[2]);
+          return 1;
+        }
+        if (g_inject_somme_union) {
+          std::fprintf(stderr,
+                       "MUTANT SURVIVANT : soc-somme-au-lieu-union n'a produit aucun flip"
+                       " refutable (juges=%lld sautes=%lld)\n", soc.flips_juges,
+                       soc.flips_sautes);
+          return 3;
+        }
+        if (soc.flips_juges == 0) {
+          std::fprintf(stderr, "PLANCHER: aucun flip juge\n");
+          return 3;
+        }
+      }
       if (g_judge_soc64) {
         std::printf("soc64_juge accord=%s verdicts_juges=%lld sautes=%lld triples=%lld faux=%lld\n",
                     soc.faux == 0 ? "OUI" : "NON", soc.juges, soc.juges_sautes, soc.triples,
@@ -2211,6 +2396,9 @@ int main(int argc, char** argv) {
           long long maxi = 0, sans = 0, doublons = 0, tires = 0;
           long long lens_max = 0, paires_internes = 0;
           long long rang_faits = 0, rang_retenus = 0, rang_max = 0;
+          long long exacts_faits = 0, fermables_exact = 0;
+          double somme_exacts = 0.0;
+          const long long need_lane = g_need[lane];
           double somme_rang = 0.0;
           unsigned long long digest = 1469598103934665603ULL;   // FNV-1a 64
           unsigned long long precedent = ~0ULL;
@@ -2241,6 +2429,9 @@ int main(int argc, char** argv) {
               unsigned long long p2 = (unsigned long long)spid[(size_t)rb];
               if (p1 > p2) std::swap(p1, p2);
               const unsigned long long cle = p1 * 1000003ULL + p2;
+              // Ce compteur ne detecte que des rangs egaux CONSECUTIFS ; avec
+              // remise et `K > N` la plupart des repetitions lui echappent. Il
+              // s'appelle donc ce qu'il est.
               if (cle == precedent) ++doublons;
               precedent = cle;
               digest ^= p1; digest *= 1099511628211ULL;
@@ -2254,6 +2445,34 @@ int main(int argc, char** argv) {
               if (d2(r, ra) > dd || d2(r, rb) > dd) continue;   // hors de `L_e`
               le.push_back(r);
               if (dans_ae(dd, ra, rb, r)) ++porteurs;
+            }
+            // ---- LA PROFONDEUR EXACTE DE LA PAIRE, ET CE QU'ELLE REVELE.
+            //
+            // La fenetre declare cette paire OUVERTE. Mais elle le declare au
+            // niveau du RECTANGLE, sous relaxation de boite et sous un budget
+            // d'expansions borne. La question que personne n'avait posee est :
+            // cette paire serait-elle fermee par le certificat EXACT, celui qui
+            // balaie tous les `PointId` un par un ?
+            //
+            // On compte donc les temoins universels exacts de la paire, dans
+            // l'ecriture `(g,Q)` qui ne partage rien avec le certificat
+            // central. L'ecart entre les deux mesure exactement ce que la
+            // relaxation de boite et le budget COUTENT — et non ce que la
+            // geometrie interdit.
+            if (g_profondeur_exacte) {
+              long long exacts = 0;
+              for (long long z = 0; z < m; ++z) {
+                if (z == ra || z == rb) continue;
+                if (mhgp3v::cone::lane_of_target_gq(
+                        sp[(size_t)ra][0], sp[(size_t)ra][1], sp[(size_t)ra][2],
+                        sp[(size_t)z][0], sp[(size_t)z][1], sp[(size_t)z][2],
+                        sp[(size_t)rb][0], sp[(size_t)rb][1], sp[(size_t)rb][2]) >=
+                    (lane == 2 ? mhgp3v::cone::kLaneQ4 : mhgp3v::cone::kLaneQ3))
+                  ++exacts;
+              }
+              somme_exacts += (double)exacts;
+              if (exacts >= need_lane) ++fermables_exact;
+              ++exacts_faits;
             }
             somme_a += porteurs;
             somme_a2 += (double)porteurs * (double)porteurs;
@@ -2371,14 +2590,44 @@ int main(int argc, char** argv) {
           const double moy_q = somme_q / (double)tires;
           const double var_q = std::max(0.0, somme_q2 / (double)tires - moy_q * moy_q);
           const double moy_p = somme_p / (double)tires;
-          const double demi_a = 2.0 * std::sqrt(var_a / (double)tires) * (double)acc;
-          const double demi_q = 2.0 * std::sqrt(var_q / (double)tires) * (double)acc;
+          // ---- L'INTERVALLE EST UNE BORNE DE HOEFFDING, PAS `2 sigma`.
+          //
+          // Le contre-audit a produit la contre-fixture qui tue `2 sigma` : avec
+          // `--porteurs=1`, la variance empirique vaut MECANIQUEMENT zero et le
+          // binaire annoncait `1560 +/- 0` contre `4652` exact. Une demi-largeur
+          // nulle autour d'une valeur fausse n'est ni une couverture, ni une
+          // porte.
+          //
+          // Chaque observation exterieure de `|A_e|` vit dans `[0, n-2]` et
+          // chaque observation emboitee de `|Q_e|` dans `[0, C(n-2,2)]`. Pour un
+          // niveau `delta` declare, la demi-largeur bilaterale sure vaut
+          // `N * etendue * sqrt(log(2/delta) / (2K))`. Elle est large ; c'est le
+          // prix d'une borne qui vaut vraiment, et une borne trop large rend
+          // `UNKNOWN` au lieu de mentir.
+          const double etendue_a = (double)std::max(1LL, m - 2);
+          const double etendue_q = etendue_a * (etendue_a - 1.0) / 2.0;
+          const double ln_terme = std::log(2.0 / g_porteurs_delta);
+          const double facteur = std::sqrt(ln_terme / (2.0 * (double)tires));
+          const double demi_a = (double)acc * etendue_a * facteur;
+          const double demi_q = (double)acc * etendue_q * facteur;
+          (void)var_a; (void)var_q;
           std::printf("porteurs q%d : population_finale=%lld masse_pending=%lld tires=%lld"
-                      " graine=%lld doublons=%lld digest=%016llx | A_e moyen=%.3f max=%lld"
-                      " sans=%lld (%.3f%%) | C4_carrier_quadrature=%.10g +/-%.4g\n",
+                      " graine=%lld repetitions_consecutives=%lld digest=%016llx"
+                      " | A_e moyen=%.3f max=%lld"
+                      " sans=%lld (%.3f%%) | C4_carrier_quadrature=%.10g Hoeffding%.3g=%.4g\n",
                       lane + 2, acc, masse_pending, tires, g_porteurs_seed, doublons,
                       (unsigned long long)digest, moy_a, maxi, sans,
-                      100.0 * (double)sans / (double)tires, moy_a * (double)acc, demi_a);
+                      100.0 * (double)sans / (double)tires, moy_a * (double)acc,
+                      g_porteurs_delta, demi_a);
+          if (g_profondeur_exacte) {
+            std::printf("profondeur_exacte q%d : paires_jugees=%lld temoins_moyen=%.2f"
+                        " | fermables_par_certificat_exact=%lld (%.3f%%) seuil=%lld\n",
+                        lane + 2, exacts_faits,
+                        (exacts_faits == 0) ? 0.0 : somme_exacts / (double)exacts_faits,
+                        fermables_exact,
+                        100.0 * (double)fermables_exact / (double)std::max(1LL, exacts_faits),
+                        need_lane);
+          }
           if (g_rang_budget > 0) {
             std::printf("rang q%d : bien_centres_juges=%lld interieurs_moyen=%.1f max=%lld"
                         " | retenus_a_rang_max_%d : %lld (%.6f%%)\n",
@@ -2389,7 +2638,7 @@ int main(int argc, char** argv) {
           }
           if (g_apex_sample > 0) {
             std::printf("apex q%d : L_e max=%lld paires_internes=%lld r_e=%lld"
-                        " | Q_e moyen=%.3f M4_apex_quadrature=%.10g +/-%.4g"
+                        " | Q_e moyen=%.3f M4_apex_quadrature=%.10g Hoeffding=%.4g"
                         " | W4_positive_quadrature=%.10g ratio=%.6f\n",
                         lane + 2, lens_max, paires_internes, g_apex_sample, moy_q,
                         moy_q * (double)acc, demi_q, moy_p * (double)acc,

@@ -16,17 +16,19 @@ logiciel, un reçu ou une autorité conservée.
 
 - [`AUDIT_ETAT_COURANT.md`](AUDIT_ETAT_COURANT.md) : unique verdict mutable,
   pin, worktree, tests et blocages.
+- [`AUDIT_CONTRE_RECEPTION_M4_V2_DEPTHBLOCK_5BFC5C8_20260814.md`](AUDIT_CONTRE_RECEPTION_M4_V2_DEPTHBLOCK_5BFC5C8_20260814.md) :
+  autorité courante sur le verrou M4 ; contre-fixture de l'intervalle nul du
+  sampler v2, limites du brute-force/H4, forme entière de `BlockBallDepth8`,
+  audit live de `JungDual`, count M4 factorisé et fallback shallow edge-local.
 - [`AUDIT_SOURCE_CK_WST_Q2_Q3_Q4_35FCEA8_20260814.md`](AUDIT_SOURCE_CK_WST_Q2_Q3_Q4_35FCEA8_20260814.md) :
   partition factorisée Callahan--Kosaraju de toutes les paires, source de tous
   les q2 propres après `D>0`, extensions exact-once `OwnedCK-WST3/WST4`, disque
   de Jung paire-level et fixture de non-cascade. Un lift Jung vers tout un
   rectangle exige encore un théorème uniforme.
 - [`AUDIT_REPONSE_M4_PORTEURS_AIGUS_4515A8B_20260814.md`](AUDIT_REPONSE_M4_PORTEURS_AIGUS_4515A8B_20260814.md) :
-  réponses aux six questions de Claude ; séparation
-  `E4/F3/C4_carrier/F4/M4_apex/T4_site`, contre-audit des quadratures v0/v1,
-  preuve sharp de `2B_R`, comparaison baseline/SOC et ordre
-  `CKPairTape -> Jung collectif -> CarrierBlocks symboliques -> WST4`, avec
-  sweep seulement après preflight.
+  première réponse aux six questions de Claude ; séparation
+  `E4/F3/C4_carrier/F4/M4_apex/W4/H4/T4_site`, preuve sharp de `2B_R` et ordre
+  blockwise. Son état des samplers est supersédé par le contre-audit v2 ci-dessus.
 - [`AUDIT_DEBLOCAGE_Q4_PORTEUR_AIGU_SOC64_LIVE_35FCEA8_20260814.md`](AUDIT_DEBLOCAGE_Q4_PORTEUR_AIGU_SOC64_LIVE_35FCEA8_20260814.md) :
   contre-audit du shadow SOC64, obstruction u16 aux routes universelles, lemme
   du porteur aigu, sweep q4 1D, pelages inversés et portes physiques.

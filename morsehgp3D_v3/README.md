@@ -165,6 +165,8 @@ et
 [`audits/AUDIT_DEBLOCAGE_Q4_PORTEUR_AIGU_SOC64_LIVE_35FCEA8_20260814.md`](audits/AUDIT_DEBLOCAGE_Q4_PORTEUR_AIGU_SOC64_LIVE_35FCEA8_20260814.md).
 Les réponses à Claude et le contre-audit des compteurs porteurs/apex sont dans
 [`audits/AUDIT_REPONSE_M4_PORTEURS_AIGUS_4515A8B_20260814.md`](audits/AUDIT_REPONSE_M4_PORTEURS_AIGUS_4515A8B_20260814.md).
+Le contre-audit v2 et la réponse entière `BlockBallDepth8` sont dans
+[`audits/AUDIT_CONTRE_RECEPTION_M4_V2_DEPTHBLOCK_5BFC5C8_20260814.md`](audits/AUDIT_CONTRE_RECEPTION_M4_V2_DEPTHBLOCK_5BFC5C8_20260814.md).
 
 ## Déblocages mathématiques prêts après `0A`
 
@@ -201,13 +203,14 @@ aux crédits baseline du même sous-arbre et comptait deux fois les mêmes IDs.
 Le shadow courant corrige cette faute : il compare les ledgers baseline et
 union combinée, place SOC après les fallbacks et arrête une branche combinée à
 son premier `ALL`. Un replay borné mesure `41` fermetures de masse `95`, contre
-`127` et `316` avec la somme fautive. Il doit encore être capé, recevoir une
+`127` et `316` avec la somme fautive. Il doit encore recevoir une
 comparaison PointId de l'union et tuer un mutant `sum_instead_of_union`. Cinq
 portes CTest intégrées passent désormais, mais ne couvrent pas ces deux
 obligations. À `n=2000`, le
 shadow non capé a déjà soumis `3 809 028` tâches et ajouté environ `2,1 s` à la
-vague sur une machine partagée. Le delta live ajoute un cap qui publie
-`MINORANT_CAP`; il n'est pas reçu au HEAD. Ne pas lancer sa rampe 50k. Un retour inférieur
+vague sur une machine partagée. Le HEAD fournit désormais un cap qui publie
+`MINORANT_CAP` ; ce cap borne le diagnostic sans recevoir la politique de
+sélection ni la rentabilité transitive. Ne pas lancer sa rampe 50k. Un retour inférieur
 à `floor=q4` signifie seulement `UNKNOWN_BELOW_FLOOR`, pas une lane exacte.
 
 ### `JungDiskDepth`, puis LP projectif
@@ -245,6 +248,24 @@ Cette version bloc est sûre mais incomplète : `for all pair exists lambda`
 n'implique pas `exists lambda for all pair`. Un échec ou un dénominateur trop
 large rend `MIXED/UNKNOWN`, jamais `NONE`.
 
+La forme entière directement alignée sur le prototype pose
+`W=sum w_z`, `D=||b-a||^2`, `A=W*D-sum w_z||a+b-2z||^2`,
+`P=W*(a+b)-2*sum w_z*z` et
+`R=D||P||^2-(P dot (b-a))^2`. Elle teste q3 par
+`A>0 && 3A^2>4R` et q4 par `A>0 && A^2>2R`. Sous u16, la largeur i128 annoncée
+exige `W<=65535` vérifié avant toute somme. Le prototype live code ces seuils,
+mais ne préflighte pas encore `W`, ne juge pas indépendamment les groupes
+`k=2/3` et ne constitue ni un `BlockJungDualTile` uniforme ni une primitive
+CUDA reçue.
+
+La primitive entière associée ne décide pas elle-même l'existence de ces
+poids : elle vérifie un vecteur rationnel fourni. Son contrat exige `D>0`, de
+un à trois IDs authentifiés, des poids positifs, une somme capée et le profil
+u16 ; tout échec du proposant reste `UNKNOWN`. Le wrapper, et non le tableau de
+coordonnées, porte la disjonction des groupes. Une réception `k>1` exige un
+juge exact de la faisabilité sur le disque continu ; un accord singleton avec
+`SOC64` ou quelques centres tirés ne suffit pas.
+
 Après une face aiguë, une seconde porte collective travaille en dimension un.
 Sur le segment de centres `J_f` compatible avec `K_4(ab)`, chaque témoin porte
 la forme affine `P_z(tau)=A_z-tau*B_z`; il est intérieur lorsque `P_z<0`.
@@ -252,11 +273,11 @@ Un groupe couvre tout `J_f` si `J_f intersect intersection_z{P_z>=0}` est vide.
 Helly 1D donne une base d'au plus deux IDs ; huit groupes disjoints ferment
 toutes les extensions q4 de la face avant apex et avant sweep. La version bloc
 doit vérifier signes et produits croisés uniformément, sinon scinder. La chaîne
-de prune devient donc `Jung edge 2D -> carrier aigu -> Jung axe 1D ->
-BlockBallDepth8 sur carrier×apex -> WST4 résiduel`, et la sweep par face n'est
-autorisée qu'après preflight. Le rang se prouve ainsi avant chaque BallKey
-ponctuelle ; il n'est pas nécessaire d'énumérer les q4 pour commencer à le
-filtrer.
+de prune devient donc `Jung edge 2D -> carrier aigu -> Jung axe 1D -> WST4
+broad-phase symbolique -> BlockBallDepth8 sur carrier×apex -> résiduel`. La
+sweep par face n'est autorisée qu'après preflight. Le rang se prouve ainsi
+avant chaque `BallKey` ponctuelle ; il n'est pas nécessaire d'énumérer les q4
+pour commencer à le filtrer.
 
 Le LP global reste un oracle utile, mais son échec ne prouve plus une pénurie
 sur le disque Morse : une fixture à huit groupes ferme `JungDiskDepth8` alors
@@ -361,7 +382,7 @@ n'est exact : des supports positifs gardent un partenaire arbitrairement loin
 en rang. Aucun arrangement global, aucune mosaïque Delaunay d'ordre supérieur
 et aucun catalogue exhaustif ne deviennent le chemin produit.
 
-Au HEAD `5bfc5c8`, le sampler v2 retire `PENDING` et la censure des grosses
+Au HEAD `8268753`, le sampler v2 retire `PENDING` et la censure des grosses
 lentilles, mais son tirage multiply-high n'est pas uniforme exact sans rejet,
 son `2 sigma` n'est pas un intervalle certifié et son contrôle ne compare pas le
 décodage rang--`PairId` à une vérité indépendante. `--rang` peut en outre
@@ -372,10 +393,20 @@ Le nouveau `q4_brute_oracle` reçoit seulement une énumération exhaustive
 bornée. Son claim `M4=Theta(n^4)` pour tout nuage est faux : sa propre famille
 `two_lines` donne `M4=0`. Ses prédicats recopient le Gram--Cramer/in-sphere du
 sujet, son `H4` teste seulement les intérieurs et oublie le shell, et les cas
-vides impriment `NaN`. Les quatre CTests verts ne réparent pas ces défauts.
+vides impriment encore certains `NaN`. Les cinq CTests verts ne réparent pas
+ces défauts.
 Une construction ouverte sur quatre sous-cubes prouve néanmoins une masse
 q4 bien centrée quartique **avant rang** ; un cinquième sous-cube fournit huit
 intérieurs uniformes et montre pourquoi `BlockBallDepth8` doit agir avant fill.
+
+Le worktree postérieur au HEAD contient deux diagnostics non reçus. Le juge
+direct des flips SOC tue le mutant de somme lorsqu'il énumère tout, mais
+imprime encore `accord=OUI` lorsque son cap laisse des flips non jugés. Le
+prototype `JungDual` a une identité entière correcte sous
+`sum(weights)<=65535` ; il ne fait cependant qu'essayer sept pondérations ad
+hoc, n'a pas de juge continu `k>1`, n'impose pas son cap dans le header et
+possède un mutant de largeur à overflow signé. Ces chemins restent des
+propositions live, pas des portes reçues.
 
 Le raffinement local réduit effectivement `E4`, mais ses parents et enfants
 sont encore mélangés dans plusieurs compteurs de tentative. Son coût doit être

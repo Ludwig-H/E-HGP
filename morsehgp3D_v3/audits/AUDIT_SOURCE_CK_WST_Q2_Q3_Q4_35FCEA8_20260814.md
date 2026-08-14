@@ -8,6 +8,9 @@
 > `eta=Theta(1/s)`. L'ordre consolidé, la contre-famille u16 et la sweep 1D sont
 > dans
 > [`AUDIT_DEBLOCAGE_Q4_PORTEUR_AIGU_SOC64_LIVE_35FCEA8_20260814.md`](AUDIT_DEBLOCAGE_Q4_PORTEUR_AIGU_SOC64_LIVE_35FCEA8_20260814.md).
+> La borne sharp `2B_R`, les quantificateurs de `BlockJungDual`, le Jung 1D
+> sur l'axe d'une face et `BlockBallDepth8` sont contre-audités dans
+> [`AUDIT_REPONSE_M4_PORTEURS_AIGUS_4515A8B_20260814.md`](AUDIT_REPONSE_M4_PORTEURS_AIGUS_4515A8B_20260814.md).
 
 Date : 14 août 2026 UTC.
 
@@ -175,16 +178,21 @@ La WSPD borne le tape physique. Elle ne rend pas égaux les niveaux ou les
 Pour un rectangle CK `R=(A,B)`, choisir une boule déterministe
 `B_R=B(o_R,r_R)` contenant `A union B`, avec `r_R>0`. Choisir un niveau Morton
 `h(R)` dont le diamètre de cellule est comparable à `eta*r_R`, puis énumérer
-les cellules non vides `C` de ce niveau qui rencontrent `3B_R`.
+les cellules non vides `C` de ce niveau qui rencontrent `2B_R`.
 
 Cette région est complète pour l'arête maximale. Si `ab` est l'arête maximale
-d'un triangle `abx`, alors `||x-a||<=||a-b||<=2r_R`, donc :
+d'un triangle `abx`, translater `o_R` et écrire
+`a=m-h`, `b=m+h`, `x=m+q`. Les endpoints donnent
+`||m||^2+||h||^2<=r_R^2`, et la maximalité donne
+`||q+h||,||q-h||<=2||h||`, donc `||q||<=sqrt(3)||h||`. Ainsi :
 
-$$||x-o_R||\leq||x-a||+||a-o_R||\leq3r_R.$$
+$$||x-o_R||\leq||m||+\sqrt{3}||h||\leq2r_R.$$
 
 Le point `x` appartient à une unique cellule half-open du niveau `h(R)`. Une
 grille de pas comparable à `eta*r_R` possède `O((1+eta^{-1})^3)` cellules
-rencontrant `3B_R`. Pour `0<eta<=1`, le nombre de tuples physiques initiaux
+rencontrant `2B_R`. Cette constante est sharp si la seule information est que
+`B_R` contient les endpoints ; `2B_R` reste une enveloppe extérieure, pas le
+lieu exact. Pour `0<eta<=1`, le nombre de tuples physiques initiaux
 avant filtres vaut donc :
 
 $$F_3=O(s^3\eta^{-3}n).$$
@@ -259,7 +267,7 @@ ses trois arêtes possède dix intérieurs, deux points de shell et rang 12.
 ### 4.1 Construction directe depuis le même rectangle owner
 
 Pour chaque `R=(A,B)`, réutiliser le même niveau `h(R)` et sa liste de cellules
-carrier rencontrant `3B_R`. Un tuple q4 est :
+carrier rencontrant `2B_R`. Un tuple q4 est :
 
 ```text
 OwnerEdgeBlock(A,B) x CarrierCell(C) x CarrierCell(D)
@@ -270,7 +278,7 @@ sans répétition `A×B×binom(C,2)`. Les paires de cellules sont non ordonnées
 la règle d'owner sur les six arêtes est rejouée exactement.
 
 Si `ab` est l'arête maximale du tétraèdre `abxy`, les deux carriers `x,y`
-appartiennent à `3B_R` par la preuve q3. Ils possèdent donc un unique couple de
+appartiennent à `2B_R` par la preuve q3. Ils possèdent donc un unique couple de
 cellules au niveau `h(R)`. Pour `0<eta<=1`, le nombre physique initial avant
 filtres vaut :
 
@@ -413,7 +421,7 @@ Les trois étages utilisent la même mécanique :
 1. radix Morton u16 et hiérarchie canonique ;
 2. wavefront CK `(AKey,BKey)` jusqu'à séparation ;
 3. classification pair-level q2/q3/q4, héritage du `ProofSpanDAG` ;
-4. `count` des cellules non vides de niveau `h(R)` rencontrant `3B_R` ;
+4. `count` des cellules non vides de niveau `h(R)` rencontrant `2B_R` ;
 5. scan et émission `WST3`, puis filtre owner/acuité ;
 6. seulement pour les rectangles q4 ouverts, count triangulaire des couples
    de cellules, scan et émission `WST4` ;
@@ -433,7 +441,8 @@ F2, F3, F4                    blocs physiques
 mass2, mass3, mass4          masse logique factorisée
 L/U et masse fermée          par lane
 mixed/refined/pending        par étage
-M3 et M4                     incidences réellement ouvertes
+C4_carrier, M4_apex          incidences carrier et carrier--apex
+T4_site                      touches réellement exécutées
 raw/unique BallKeys          après génération
 octets, HWM, wide_ops        puis temps par phase
 ```
@@ -474,7 +483,7 @@ Ordre d'implémentation proposé, sans toucher au code de Claude :
 2. ajouter le certificateur q2 `[L_open,U_closed]`, le cœur commun et le mutant
    qui rejoue tous les witnesses après un split ;
 3. implémenter `OwnedCK-WST3-v0` en mode counter-only : couverture exhaustive
-   à petit `n`, owner, cellules de `3B_R`, `ALL/NONE/MIXED`, sans BallKey ;
+   à petit `n`, owner, cellules de `2B_R`, `ALL/NONE/MIXED`, sans BallKey ;
 4. ajouter `JungDiskDepth9` au niveau paire/microtile et graver la
    contre-fixture qui interdit sa promotion au rectangle, puis le census q3 ;
 5. implémenter `OwnedCK-WST4-v0` depuis les carriers géométriques pré-rang,
@@ -483,9 +492,8 @@ Ordre d'implémentation proposé, sans toucher au code de Claude :
 6. ajouter `JungDiskDepth8` au même niveau borné, la fixture de 64 points et les mutants
    `q4_requires_retained_q3`, `q4_requires_q2_clique` et
    `q4_uses_q3_depth_mask` ;
-7. câbler aussi `arity-cascade` sur la fixture `arite4` : le binaire courant
-   tue déjà le mutant, mais CMake ne possède qu'une porte explicitement motivée
-   par l'arité trois ;
+7. conserver la porte `arity-cascade` désormais câblée sur `arite4`, en plus
+   de la fixture d'arité trois ;
 8. seulement après les oracles, mesurer le ledger transitif jusqu'au fold et
    au payload, puis envisager le port G4.
 
@@ -555,19 +563,17 @@ Il juge `624` rectangles SOC-`ALL`, soit `3873` triples réels, avec zéro faux,
 et le ledger combiné ferme `41` terminaux de masse `95`. L'ancienne somme
 fautive aurait déclaré `127` fermetures de masse `316`, donc un surcompte de
 `86` fermetures et `221` unités de masse. Ce résultat reçoit la correction du
-chevauchement pour ce replay borné ; il ne reçoit pas encore l'intégration.
-
-En effet, CMake ne contient encore aucune porte utilisant `--soc64-shadow` ou
-`--judge-soc64`. Les `43/43` tests existants `soc64|wspd_wavefront` passent,
-mais ils couvrent seulement le probe SOC isolé et les portes WSPD historiques.
-Il faut graver le replay ci-dessus, exiger `faux=0`, `pending=0`, invariant nul,
-et un plancher strict `surcompte>0`, puis tuer un mutant
-`soc-sum-instead-of-union`. Le juge courant recertifie chaque rectangle
-SOC-`ALL`, pas encore la cardinalité distincte qui justifie chaque flip.
+chevauchement pour ce replay borné. Depuis ce pin historique, CMake a ajouté
+cinq portes WSPD--SOC, dont le shadow jugé et le témoin de surcompte brut. Elles
+ne comparent cependant pas encore chaque flip à la cardinalité de l'union de
+`PointId` distincts et ne tuent pas les mutants union/descendant/fallback. Le
+juge courant recertifie chaque rectangle SOC-`ALL`, pas encore la cardinalité
+distincte qui justifie chaque flip.
 
 Enfin, le protocole proposé plafonnait l'ablation à `4096` tâches par famille,
-mais aucun cap maximal n'est implémenté. À `n=1000`, le shadow a soumis environ
-`988000` tâches et `3,69` millions de couples. Ce coût non borné interdit toute
+mais le cap ajouté après ce pin n'est pas encore reçu comme politique hot path.
+À `n=1000`, le shadow exhaustif a soumis environ `988000` tâches et `3,69`
+millions de couples. Ce coût non borné interdit toute
 extrapolation vers `50000/1 s` ; la campagne doit échantillonner
 déterministement hors chrono ou rendre un statut tronqué explicite.
 

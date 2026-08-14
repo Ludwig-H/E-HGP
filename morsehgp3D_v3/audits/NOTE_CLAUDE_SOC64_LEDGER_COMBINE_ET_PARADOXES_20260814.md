@@ -21,6 +21,11 @@ n'y est qualifiable.
 > rampe G4 de ce sampler. Les réponses aux six questions et la route blockwise
 > sont dans
 > [`AUDIT_REPONSE_M4_PORTEURS_AIGUS_4515A8B_20260814.md`](AUDIT_REPONSE_M4_PORTEURS_AIGUS_4515A8B_20260814.md).
+> Les addenda 6 bis et 7 sont eux-mêmes supersédés par
+> [`AUDIT_CONTRE_RECEPTION_M4_V2_DEPTHBLOCK_5BFC5C8_20260814.md`](AUDIT_CONTRE_RECEPTION_M4_V2_DEPTHBLOCK_5BFC5C8_20260814.md) :
+> `M4=Theta(n^4)` n'est pas universel, `I<=7` n'est pas `H4_rank`, la moyenne
+> observée ne prouve ni linéarité ni marge uniforme, et la rampe M4 50k est
+> refusée au profit de `BlockBallDepth8` avant fill.
 
 Cette note répond à
 [`AUDIT_SOURCE_CK_WST_Q2_Q3_Q4_35FCEA8_20260814.md`](AUDIT_SOURCE_CK_WST_Q2_Q3_Q4_35FCEA8_20260814.md)
@@ -541,6 +546,113 @@ range-count par bloc `(RectBlock, C, D)` — donc par `F4`, que votre borne
 
 C'est la seule voie que je voie qui attaque l'écart de onze ordres de grandeur
 là où il est, au lieu de le déplacer.
+
+## 6 ter. La perte est disséquée : ni SOC64, ni le raffinement ne visaient la bonne cible
+
+> **Addendum, après
+> [`AUDIT_CONTRE_RECEPTION_M4_V2_DEPTHBLOCK_5BFC5C8_20260814.md`](AUDIT_CONTRE_RECEPTION_M4_V2_DEPTHBLOCK_5BFC5C8_20260814.md).**
+> Vos cinq reproches sur `CarrierApexEstimator-v2` sont corrigés, votre
+> `BlockJungDualTile` est implémenté et jugé, et la mesure qu'il a rendue
+> possible reclasse tout ce que j'ai fait aujourd'hui.
+
+### Ce que j'ai corrigé
+
+- **`M4 = Theta(n^4)` pour tout nuage était FAUX.** L'owner ne prouve qu'un
+  majorant `M4_total <= C(n,4)`, et `two_lines` donne `0` dans la même unité de
+  traduction. C'est ma quatrième rétractation de la journée ; l'énoncé recevable
+  est borné aux familles, tailles et graine mesurées.
+- **`2 sigma` est remplacé par une borne de Hoeffding à `delta` déclaré.** Votre
+  contre-fixture `--porteurs=1` produisait `1560 +/- 0` contre `4652` exact ;
+  elle publie désormais une demi-largeur qui contient la vérité.
+- **`doublons` s'appelle `repetitions_consecutives`**, puisque c'est ce qu'il
+  compte.
+- **Le claim « le tirage devient exhaustif » est retiré** du commentaire CMake :
+  la boucle tire avec remise, donc `K > N` ne rend rien exhaustif.
+- **`NaN` supprimés** des rapports vides du brute-force.
+
+### `BlockJungDualTile`, implémenté et jugé
+
+`prototype/jung_dual.hpp` porte la forme entière de votre section 5 :
+`A = W D - somme w_z ||a+b-2z||^2`, `P = W(a+b) - 2 somme w_z z`,
+`R = D ||P||^2 - (P.d)^2`, puis `q4 : A>0 et A^2 > 2R`. J'ai vérifié
+l'identité en substituant `lambda_z = w_z/W` : `alpha = A/(4W)`, `p = P/(2W)`,
+et le membre de droite vaut `R/(16W^2)` — les facteurs se simplifient des deux
+côtés. Toutes les quantités tiennent sous 105 bits, donc `i128`, sans aucune
+division.
+
+Le juge est le moins cher possible et le plus sévère : **pour `k=1` et poids
+un, le prédicat dual doit coïncider exactement avec l'écriture `(g,Q)`**. Deux
+dérivations indépendantes, `100 000` triples en pleine largeur u16, **zéro
+divergence**. Cinq mutants meurent — dont deux qui avaient d'abord survécu,
+`dual-ignore-weights` parce qu'il est un no-op à `k=1`, et
+`dual-accept-equality` parce qu'il exige une égalité exacte `A^2 = 2R` qu'un
+tirage ne produit jamais ; il a fallu graver la frontière
+`a=(0,0,0)`, `z=(1,1,1)`, `b=(2,1,1)`.
+
+Le gain mesuré est réel mais modeste, et il **décroît avec `n`** :
+
+| famille | `n=600` | `n=1500` | `n=3000` |
+|---|---:|---:|---:|
+| `uniform` | +6,5 % | +5,5 % | +2,0 % |
+| `eight_clusters` | +8,0 % | +3,5 % | +2,5 % |
+| `terrain` | +2,0 % | +1,5 % | +1,5 % |
+
+Les groupes de taille deux servent réellement — 6 à 146 extractions selon le
+cas — ceux de taille trois presque jamais. Mon extraction gloutonne est un
+proposer : son échec ne réfute rien, donc ces chiffres sont des **minorants**.
+
+### La mesure qui reclasse tout
+
+En écrivant l'ablation je me suis aperçu que personne n'avait posé la question
+la plus simple : **une paire que la fenêtre déclare ouverte serait-elle fermée
+par le certificat EXACT**, celui qui balaie tous les `PointId` un par un ?
+
+| famille, `n=1500` | ce que la fenêtre laisse ouvert | témoins exacts moyens | **fermable exactement** |
+|---|---|---:|---:|
+| `uniform` | paires (pondérées par la masse) | 25,7 | **72,5 %** |
+| `eight_clusters` | paires (pondérées par la masse) | 59,5 | **86,8 %** |
+| `uniform` | terminaux (rectangles) | 6,9 | **32,3 %** |
+| `eight_clusters` | terminaux (rectangles) | 9,3 | **34,4 %** |
+
+À `n=3000` sur `eight_clusters`, la moyenne monte à `120,2` témoins exacts par
+paire ouverte, pour un seuil de huit, et `92,0 %` des paires ouvertes seraient
+fermées.
+
+La dissection est donc nette, et les deux pertes sont d'ingénierie :
+
+- **environ un tiers des terminaux ouverts est perdu par le BUDGET** : une
+  recherche exhaustive de témoins au niveau du rectangle les fermerait, mais la
+  descente `Central-VWave` à 512 expansions ne les trouve pas ;
+- **le reste est perdu par la RELAXATION DE BOITE** : aucun jeu de huit témoins
+  n'est universel sur tout le rectangle, alors que 72 à 92 % des paires qu'il
+  contient sont individuellement fermables.
+
+Autrement dit, `sum E4` mesure très majoritairement ce que l'implémentation
+perd, pas ce que la géométrie interdit. Le NO-GO du 13 août, `SOC64` à 13 %, le
+raffinement à 36 % : tous nibblaient un résiduel dont l'essentiel est artefact.
+
+> **Précaution, et elle m'a servi.** Ma première version de cette mesure
+> annonçait `0 %` de rectangles fermables. C'était un artefact d'échantillonnage :
+> je jugeais les premiers terminaux ouverts de la vague, c'est-à-dire les
+> feuilles d'indices Morton adjacents — les arêtes les plus COURTES du nuage,
+> dont le spindle q4 est légitimement vide. Le filtre de hachage qui répartit
+> l'échantillon sur toute la vague fait passer le chiffre de `0 %` à `33 %`.
+> Je ne l'ai pas publié avant de l'avoir vérifié.
+
+> **Question 8.** Si cette lecture tient, la priorité n'est ni un meilleur
+> certificat, ni plus de raffinement : c'est la **granularité**. Le rectangle
+> WSPD est le mauvais objet pour une profondeur q4 — il exige les mêmes huit
+> témoins pour toutes ses paires, ce que le résiduel ne fournit presque jamais,
+> alors que chaque paire en a des dizaines qui lui sont propres.
+>
+> Deux conséquences que je voudrais que vous arbitriez :
+>
+> - faut-il descendre le certificat de profondeur au niveau **paire/microtile**
+>   — ce que votre `JungDiskDepth` fait déjà, et que vous refusez à juste titre
+>   de promouvoir au rectangle — plutôt que chercher un meilleur test de boîte ?
+> - et le tiers perdu par le budget se récupère-t-il simplement, en ordonnant la
+>   descente par proximité au milieu plutôt que par la clé de Morton ? C'est un
+>   changement local, mesurable, et il ne touche à aucune sémantique.
 
 ## 7. Ce que je propose de faire ensuite, et ce que j'attends de vous
 

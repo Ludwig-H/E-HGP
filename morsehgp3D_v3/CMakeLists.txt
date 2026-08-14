@@ -4472,7 +4472,7 @@ add_test(NAME mhgp3v_porteurs_uniform
           --sep-euclid=8/1 --tight --vwave --window=512 --window-ledger
           --porteurs=2048 --min-masse-porteurs=100000)
 set_tests_properties(mhgp3v_porteurs_uniform PROPERTIES
-  PASS_REGULAR_EXPRESSION "porteurs q4 : population_finale=[0-9]+ masse_pending=[0-9]+ tires=2048 graine=[0-9]+ doublons=[0-9]+ digest=[0-9a-f]+ . A_e moyen=[0-9]+.* C4_carrier_quadrature=")
+  PASS_REGULAR_EXPRESSION "porteurs q4 : population_finale=[0-9]+ masse_pending=[0-9]+ tires=2048 graine=[0-9]+ repetitions_consecutives=[0-9]+ digest=[0-9a-f]+ . A_e moyen=[0-9]+.* C4_carrier_quadrature=[0-9.]+ Hoeffding")
 
 # LA CONTRE-FAMILLE A DEUX DROITES, GRAVEE.
 #
@@ -4622,3 +4622,82 @@ add_test(NAME mhgp3v_q4_brute_marge_rejet
   COMMAND mhgp3v_q4_brute_oracle --family=eight_clusters --points=120)
 set_tests_properties(mhgp3v_q4_brute_marge_rejet PROPERTIES
   PASS_REGULAR_EXPRESSION "interieurs_moyen=46.40 max=116 seuil=7 marge=6.6x")
+
+# ---------------------------------------------------------------------------
+# `JungDual` : UN GROUPE DE TEMOINS FERME UNE PAIRE.
+#
+# Forme entiere de la condition minimax donnee par la section 5 de
+# `AUDIT_CONTRE_RECEPTION_M4_V2_DEPTHBLOCK_5BFC5C8_20260814.md`. Le certificat
+# central demande a UN temoin d'etre interieur a TOUTE sphere admissible ;
+# `JungDual` demande seulement qu'au moins un membre du groupe le soit. Huit
+# groupes a identites disjointes ferment q4.
+#
+# LE JUGE LE MOINS CHER ET LE PLUS SEVERE. Pour `k=1` et poids un, le predicat
+# dual DOIT coincider avec l'ecriture historique `(g,Q)` de `spindle_cone.hpp`.
+# Ce sont deux derivations independantes ; leur accord sur cent mille triples en
+# pleine largeur u16 est la seule preuve disponible que la forme entiere du
+# minimax est juste.
+add_executable(mhgp3v_jung_dual_probe prototype/jung_dual_probe.cpp)
+target_include_directories(mhgp3v_jung_dual_probe PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(mhgp3v_jung_dual_probe PRIVATE mhgp)
+target_compile_options(mhgp3v_jung_dual_probe PRIVATE -Wall -Wextra -Werror)
+
+add_test(NAME mhgp3v_jung_dual_selftest
+  COMMAND mhgp3v_jung_dual_probe --selftest --seed=1 --rounds=100000)
+set_tests_properties(mhgp3v_jung_dual_selftest PROPERTIES
+  PASS_REGULAR_EXPRESSION "dual_selftest accord=OUI tires=100000 desaccords=0")
+add_test(NAME mhgp3v_jung_dual_selftest_petit
+  COMMAND mhgp3v_jung_dual_probe --selftest --seed=7 --rounds=100000 --span=64)
+set_tests_properties(mhgp3v_jung_dual_selftest_petit PROPERTIES
+  PASS_REGULAR_EXPRESSION "dual_selftest accord=OUI")
+
+# LES CINQ MUTANTS. Deux d'entre eux ont d'abord SURVECU, et c'est instructif :
+# `dual-ignore-weights` est un no-op a `k=1` puisque le poids y vaut deja un, et
+# `dual-accept-equality` exige une egalite EXACTE `A^2 = 2R` que des coordonnees
+# tirees ne produisent jamais. Il a fallu une fixture gravee pour chacun — la
+# frontiere `a=(0,0,0)`, `z=(1,1,1)`, `b=(2,1,1)`, et un balayage a deux poids
+# distincts.
+foreach(_dual_mutant IN ITEMS
+        dual-no-positivity dual-accept-equality dual-swap-coeff dual-narrow-i64
+        dual-ignore-weights)
+  string(REPLACE "-" "_" _dual_nom "${_dual_mutant}")
+  mhgp3v_add_expected_code_test_for(mhgp3v_jung_dual_probe
+    mhgp3v_jung_dual_kill_${_dual_nom} "MUTANT TUE" 4
+    --selftest --seed=1 --rounds=100000 --inject=${_dual_mutant})
+endforeach()
+
+# L'ABLATION. Elle mesure le seul chiffre qui compte : combien de paires un
+# groupe ferme que le temoin unique ne ferme pas. L'invariant d'inclusion est
+# arme dans le binaire — un groupe de taille un EST un temoin unique, donc
+# l'extraction ne peut jamais fermer moins.
+add_test(NAME mhgp3v_jung_dual_ablation_amas
+  COMMAND mhgp3v_jung_dual_probe --ablation --family=eight_clusters --points=600
+          --echantillon=200 --voisins=16 --seed=1 --min-gain=1)
+set_tests_properties(mhgp3v_jung_dual_ablation_amas PROPERTIES
+  PASS_REGULAR_EXPRESSION "dual_ablation famille=eight_clusters .* gain=[1-9]")
+mhgp3v_add_expected_code_test_for(mhgp3v_jung_dual_probe
+  mhgp3v_jung_dual_reject_sans_mode "choisir --selftest ou --ablation" 2 --seed=1)
+mhgp3v_add_expected_code_test_for(mhgp3v_jung_dual_probe
+  mhgp3v_jung_dual_reject_inject "--inject inconnu" 2 --selftest --inject=dual-inconnu)
+mhgp3v_add_expected_code_test_for(mhgp3v_jung_dual_probe
+  mhgp3v_jung_dual_plancher_gain "PLANCHER" 3
+  --ablation --family=terrain --points=600 --echantillon=20 --min-gain=100000)
+
+# ---------------------------------------------------------------------------
+# LA DISSECTION DE LA PERTE : BOITE OU BUDGET ?
+#
+# `--profondeur-exacte` compte, pour un echantillon de PAIRES q4 ouvertes, les
+# temoins universels exacts de la paire. `--profondeur-rect` fait de meme pour
+# le RECTANGLE entier. L'ecart separe ce que la geometrie interdit de ce que la
+# relaxation de boite et le budget coutent.
+#
+# L'ECHANTILLON DE RECTANGLES EST REPARTI PAR HACHAGE, et ce n'est pas un
+# detail : prendre les premiers terminaux ouverts de la vague donnait 0 % de
+# fermables, parce que ce sont les feuilles d'indices Morton adjacents, donc les
+# aretes les PLUS COURTES, dont le spindle q4 est legitimement vide.
+add_test(NAME mhgp3v_dissection_perte_amas
+  COMMAND mhgp3v_wspd_wavefront_probe --family=eight_clusters --points=1500
+          --sep-euclid=8/1 --tight --vwave --window=512 --window-ledger
+          --profondeur-rect=200 --rect-stride=307 --porteurs=200 --profondeur-exacte)
+set_tests_properties(mhgp3v_dissection_perte_amas PROPERTIES
+  PASS_REGULAR_EXPRESSION "profondeur_exacte q4 : paires_jugees=200 .* fermables_par_certificat_exact=[0-9]+")

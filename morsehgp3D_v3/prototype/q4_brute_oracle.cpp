@@ -11,13 +11,22 @@
 // EST le PointId, il n'y a ni tri Morton ni rang), aucun terminal, aucun fate,
 // aucune fenetre. Il n'a besoin que du generateur de nuage.
 //
-// CE QU'IL ETABLIT, ET QUI RETIRE UN DE MES PROPRES TITRES. `M4_apex` somme
-// `|Q_e|` sur les aretes owner. Or chaque 4-sous-ensemble possede EXACTEMENT
-// une arete owner. La somme sur TOUTES les aretes est donc le nombre de
-// 4-sous-ensembles non coplanaires portant une face aigue incidente a leur
-// arete maximale — c'est-a-dire `Theta(n^4)` pour n'importe quel nuage. Les
-// mesures ci-dessous donnent un rapport `M4/C(n,4)` autour de `0,64`, stable
-// entre familles et entre tailles.
+// CE QU'IL ETABLIT, ET LES DEUX TITRES QU'IL M'A FAIT RETIRER.
+//
+// PREMIER RETRAIT. `M4_apex` somme `|Q_e|` sur les aretes owner. Chaque
+// 4-sous-ensemble possede EXACTEMENT une arete owner, donc la somme sur TOUTES
+// les aretes compte des 4-sous-ensembles : cela prouve `M4_total <= C(n,4)`.
+//
+// SECOND RETRAIT, et il est a mon debit. J'en avais conclu « donc `Theta(n^4)`
+// pour n'importe quel nuage ». C'est FAUX : l'owner ne donne qu'un MAJORANT, et
+// `Q_e` exige encore une orientation non nulle et une face aigue incidente. La
+// famille `two_lines` de ce meme binaire imprime `M4_total=0`. Le contre-audit
+// `AUDIT_CONTRE_RECEPTION_M4_V2_DEPTHBLOCK_5BFC5C8_20260814.md` section 3 a
+// raison de le refuter dans la meme unite de traduction que le claim.
+//
+// L'enonce recevable est donc borne : sur les familles, tailles et graine
+// mesurees ici, `M4_total/C(n,4)` vaut environ `0,64` et reste stable ; et il
+// vaut `0` sur la contre-famille. Rien de tout cela n'est une loi universelle.
 //
 // « `M4` est cubique sur les amas » etait donc un faux titre : ce que mesurait
 // la pente etait la fraction d'aretes owner que le prune universel laisse
@@ -156,9 +165,11 @@ int main(int argc, char** argv) {
      }
   std::printf("famille=%s n=%d coord=%d | 4-sous-ensembles=%lld M4_total=%lld W4=%lld"
               " H4(rang<=%d)=%lld\n", fam.c_str(), m, coord, tot4, m4, w4, rangmax, h4);
+  // Une division vide imprimait `NaN` sur la contre-famille. Un `NaN` dans un
+  // recu n'est pas une mesure : les rapports indefinis valent zero et le sont.
   std::printf("  M4/C(n,4)=%.4f  W4/M4=%.4f  H4/W4=%.6f  H4/n=%.3f\n",
-              (double)m4 / (double)tot4, (double)w4 / (double)m4,
-              (double)h4 / (double)w4, (double)h4 / (double)m);
+              (double)m4 / (double)tot4, (m4 == 0) ? 0.0 : (double)w4 / (double)m4,
+              (w4 == 0) ? 0.0 : (double)h4 / (double)w4, (double)h4 / (double)m);
   // LA MARGE DU REJET. Un candidat rejete ne l'est pas de justesse : la
   // profondeur moyenne de sa sphere depasse le seuil de deux ordres de
   // grandeur. C'est exactement ce qui laisse de la place a un certificat de

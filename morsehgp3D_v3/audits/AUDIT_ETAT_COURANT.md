@@ -11,37 +11,46 @@ Cadre : `phase=exploration_v3_hors_registre`,
 ## Snapshot
 
 Le pin relu est
-`HEAD=4515a8b43d5397de97d71482c1f489ebd2a71c16`, commit
-`M4 existe enfin, et il est cubique sur les amas`. Il reçoit au HEAD le replay
-SOC combiné, `EdgeAcuteCarrierSample-v0`, la contre-famille `two_lines` et les
-portes associées ; il ne reçoit toujours ni source CK--WST, ni payload complet.
+`HEAD=82687530bb0ccfb0b27b08951006acf5860d3447`, commit
+`la marge du rejet est de deux ordres de grandeur, et elle s'ouvre avec n`. Il
+reçoit au HEAD le replay SOC combiné/capé, `CarrierApexEstimator-v2`, le
+diagnostic `--rang`, l'énumérateur `q4_brute_oracle` et leurs portes. Il ne
+reçoit toujours ni source CK--WST, ni profondeur q4 factorisée, ni payload
+complet. Le titre du commit est un claim à auditer, pas un verdict reçu.
 
 Empreintes SHA-256 au HEAD :
 
 - `CMakeLists.txt` :
-  `a09c96976cbb922e05491c096c26604319916397373dafcbefb91dde1ad435e7` ;
+  `1541965b1704c022b98a87c7fbb20b24814fc9e26fbff5c6f7ab12da8ac7e7b3` ;
+- `prototype/q4_brute_oracle.cpp` :
+  `f7026a8d67d7eed6a5b0804db6bb7a3d6bbc680918344af40ec8ce9cea394555` ;
 - `prototype/soc64_rect.hpp` :
-  `b4750efee21affbf3160fb4db0f39b3498d4afd19093187db939450b317f3bc1` ;
+  `bbd1de16f4884d98ed2033f6c072ef6245cff6a8e90d95d5283f6e2bbe9ad902` ;
 - `prototype/soc64_probe.cpp` :
   `d442b59279f345d11337b86993b8b620774eb236815a8f77a227cbf8edc4944f` ;
 - `prototype/wspd_wavefront_probe.cpp` :
-  `d5953d616cb29bd1ba25b256aed493b2fb7bd01e1a2256003c5d4009d3662fc5` ;
+  `fe146f28d962750facc92f0597246f995c044662188d99a5b687a72bf70486ce` ;
 - `prototype/cloud_families.hpp` :
   `1f9089ba5972bf76aece6d899bacd8682341f394833c5d06e46ea2a921efad57`.
 
-Le worktree est mouvant pendant ce contre-audit. Claude modifie CMake,
-`soc64_rect.hpp` et le probe WSPD ; le delta live observé ajoute notamment
-`EdgeCarrierApexSample-v1`. L'auditeur ne touche aucun fichier logiciel et ne
-transforme pas ce delta en statut du HEAD. Ses écritures restent limitées à
-`README.md`, `PROPOSITION.md` et `audits/`. GCP non utilisé.
+Le worktree live n'est pas le HEAD : Claude y modifie
+`prototype/wspd_wavefront_probe.cpp` et `prototype/q4_brute_oracle.cpp`, et y
+ajoute `prototype/jung_dual.hpp` ainsi que `prototype/jung_dual_probe.cpp`.
+Leurs SHA-256 observés pendant ce contre-audit sont respectivement
+`1ad2e4da568a44880f85bdbc9ba57a4792cd92ce96f5ed2730765a19974ec125`,
+`0a410d9ffa22e117f660fdeac88227cc65a5417f97e395fa6332111a54d823cf`,
+`1b9dffa1767988b812e1da360775858d023383112fcdde6e905d8ac3b2b46001` et
+`a5c256e6d2474312bc41c88124f63a108913615759304bbece0e5ccceab6eb36`.
+Ces deltas concurrents ne sont pas attribués à l'auditeur. Ses écritures restent
+limitées à `README.md`, `PROPOSITION.md` et `audits/`. GCP non utilisé.
 
 ## Verdict
 
 Le contrat G4 reste ouvert. Il n'existe encore ni source u16 reçue, ni stage
 `0B`, ni `BenchmarkOutputContract-v1`, ni campagne p95 à 50 000 points.
 
-Le progrès reçu se décompose en quatre probes/campagnes utiles, mais non reçus comme
-chaîne produit :
+Le snapshot contient cinq probes/campagnes utiles, mais aucune chaîne produit
+reçue :
 
 1. `BallFormToBallEvent-v0` forme des sphères et des census sur petit domaine ;
 2. `PointHypergraphBottleneckClosureProbe-v0` compare Kruskal et Floyd sur un
@@ -49,7 +58,9 @@ chaîne produit :
 3. le raffinement local réduit le résiduel `E4` du certificateur central, au
    prix d'un front et d'un nombre de recertifications supérieurs ;
 4. la rampe à 50 000 points rejette la configuration centrale mesurée sur
-   `eight_clusters`, sans réfuter les certificateurs rectangles corrélés.
+   `eight_clusters`, sans réfuter les certificateurs rectangles corrélés ;
+5. `q4_brute_oracle` énumère les 4-sous-ensembles à petit `n`, avec un census
+   et des prédicats encore corrélés/incomplets sur le shell.
 
 Les noms « 0A fermé », « stage 0B » et « le raffinement paie » dépassent les
 preuves disponibles.
@@ -195,36 +206,92 @@ Réponses complètes aux trois questions de Claude :
 Le détail contractuel du reçu et des continuations est dans
 [`AUDIT_CONTRE_RECU_RAMPE_RAFFINEMENT_G4_35FCEA8_20260813.md`](AUDIT_CONTRE_RECU_RAMPE_RAFFINEMENT_G4_35FCEA8_20260813.md).
 
-## Porteurs aigus et « M4 » : résultat rouge, mauvais libellé
-
-Au HEAD, `EdgeAcuteCarrierSample-v0` extrapole le nombre de sites `x` pour
-lesquels `ab` est maximale faible dans `abx` et la face est aiguë. Les pentes
-observées de cette quadrature sont proches de `2,97` sur `eight_clusters` entre
-1500, 3000 et 6000 points. C'est un signal rouge pour toute architecture qui
-développe `arête × porteur` ponctuellement.
-
-Ce chiffre n'est pourtant pas un `M4` reçu : owner `EdgeKey` absent au HEAD,
-`PENDING` mélangé à l'ouvert, quantiles fixes sans seed ni intervalle d'erreur,
-vue baseline seule et aucun apex. Le delta live v1 répare l'owner et compte les
-apex de chaque arête jugée, mais censure les grosses lentilles au cap puis les
-retire de la moyenne ; il peut imprimer zéro lorsque toutes sont capées.
+## `C4/M4/H4` : le mur avant rang est réel, les claims du HEAD ne le sont pas
 
 Le schéma courant sépare `C4_carrier` pour les faces aiguës,
 `M4_apex` pour les quadruplets canoniques avant barycentriques,
-`W4_positive` après positivité et `H4_rank` après census. La troisième voie de
-Claude est donc reçue : garder l'owner maximal, conserver les CarrierBlocks
-`ALL_ACUTE/NONE_ACUTE/MIXED` symboliques, former WST4 avant toute face exacte,
-puis utiliser la sweep seulement comme fallback. L'enveloppe `2B_R`, qui est
-sharp, remplace `3B_R` et s'intersecte avec les deux enveloppes endpoint.
+`W4_positive` après positivité et `H4_rank` après census. L'owner maximal doit
+rester dans la route proposée : changer seulement l'owner ne réduit ni les
+vrais supports ni les 4-ensembles à attribuer. L'arête maximale fournit un
+diamètre qui borne immédiatement les cinq autres distances. Une autre broad
+phase exigerait une nouvelle preuve de couverture ; une `BallKey` est aval et
+serait un owner de génération circulaire.
 
-Une grande masse logique `C4_carrier` peut tenir dans peu de blocs `F3`; seule
-la mesure `F3/F4`, splits, touches, événements, octets et HWM décide la route.
-Aucune rampe G4 50k du sampler n'est autorisée : avec `K=16384`, son seul scan
-paie déjà 819,2 millions de tests par lane.
+Le sampler v2 améliore v1 : il exclut `PENDING` et ne censure plus les grosses
+lentilles. Il n'est toujours pas reçu comme estimateur : le multiply-high n'est
+uniforme exact que lorsque la taille divise `2^64`, `2 sigma` n'est pas un
+intervalle certifié, le champ `doublons` ne compte que des répétitions
+consécutives et le contrôle ne compare pas le décodeur rang--`PairId` à une
+vérité indépendante. Avec `K=20000,N=6917`, il imprime `doublons=3` alors que
+le pigeonhole en impose au moins `13083`. La vue combinée SOC reste absente.
 
-Réponses aux cinq questions, preuve de `2B_R`, estimateur emboîté valide et
-contre-audit du v1 :
+`--rang` peut sortir code zéro sans `--porteurs` et sans aucune ligne rang. Sur
+`two_lines,n=40`, il peut aussi juger zéro bien-centré puis réussir. Son taux
+est conditionné par arête et par positif, sans poids `binom(|L_e|,2)` : ce
+n'est pas `H4/W4`. Surtout, il compte seulement `I_B`. Le rang fermé vaut
+`|I_B|+|U_B|`; sous le régime régulier q4 il faut `I<=7` **et** `U=4`, ou un
+refus des extra-shells pertinents. Le libellé `rang<=7` est donc faux.
+
+Le nouvel énumérateur brut confirme seulement des comptes exhaustifs à petit
+`n`. Il recopie Gram--Cramer et in-sphere du sujet : l'énumération est
+indépendante, les prédicats ne le sont pas. Son claim
+`M4=Theta(n^4)` « pour n'importe quel nuage » est réfuté par sa propre famille
+`two_lines`, où `M4=0`. Les tailles `60/90/120` ne prouvent ni `H4` linéaire ni
+une marge de deux ordres ; à `eight_clusters,n=120`, le rapport moyen publié au
+seuil sept est seulement `6,6`. Les cas `n<4` produisent encore `NaN`, et aucun
+cap n'empêche le coût `O(n^5)`.
+
+Le mur mathématique existe néanmoins. La fixture exacte
+`a=(20,20,20)`, `b=(30,30,30)`, `x=(19,31,31)`, `y=(31,19,31)` possède owner
+`ab` unique, deux faces aiguës et barycentriques `(47,3,55,55)/160`. Elle reste
+q4 positive sur quatre petits sous-cubes, donnant une masse
+`W4_positive=Theta(n^4)` avant rang. Les huit témoins
+`(20+i,20+j,30+k)`, `i,j,k` dans `{0,1}`, sont pourtant tous strictement
+intérieurs ; un cinquième sous-cube ferme uniformément ce produit à
+`smax=11`. La bonne cible est donc une preuve de profondeur **par bloc avant
+fill**, pas une énumération plus rapide des quadruplets.
+
+La route reçue comme proposition est : `BlockJungDual` sur l'arête,
+`FaceAxisJungDepth8` après la porte aiguë, puis `BlockBallDepth8` après la
+cellule apex. `ALL` ferme un bloc, `MIXED` scinde et la sweep ne reçoit que le
+résiduel preflighté. `2B_R` est une enveloppe extérieure sharp lorsque seule la
+boule contenant les endpoints est connue ; elle réduit les cellules, pas la
+masse réelle. Une grande masse logique peut tenir dans peu de blocs, mais elle
+n'est utile que si le consommateur de profondeur reste lui-même factorisé.
+
+Réponses aux six questions, preuves, contre-fixtures et portes :
 [`AUDIT_REPONSE_M4_PORTEURS_AIGUS_4515A8B_20260814.md`](AUDIT_REPONSE_M4_PORTEURS_AIGUS_4515A8B_20260814.md).
+Le contre-audit du sampler v2, du brute-force, la réponse entière à la question
+7 et les microgates `JungDual/BlockBallDepth8` sont dans
+[`AUDIT_CONTRE_RECEPTION_M4_V2_DEPTHBLOCK_5BFC5C8_20260814.md`](AUDIT_CONTRE_RECEPTION_M4_V2_DEPTHBLOCK_5BFC5C8_20260814.md).
+
+## `JungDual` live : identité reçue sur papier, primitive non reçue
+
+La forme entière `A/P/R` du prototype live est algébriquement correcte lorsque
+les coordonnées sont u16, la paire est propre et la somme des poids vérifie
+`W<=65535`. Le cas singleton redonne bien les seuils SOC q3/q4. La fonction
+actuelle ne cherche toutefois aucun optimum : elle certifie seulement la
+pondération fournie. Son retour négatif ne réfute donc jamais la couverture du
+groupe. Le commentaire source inverse en outre les quantificateurs : la
+propriété est `min_w max_z Phi_z(w)>0`, puis son dual sur le simplexe, et non
+`max_w min_z`.
+
+Le probe ne possède aucun juge continu indépendant pour `k>1`, malgré son
+en-tête : il compare seulement `k=1` à `(g,Q)`, puis essaie sept pondérations
+ad hoc dans une ablation. Il ne relie ses paires ni aux owners, ni au résiduel
+CK--WST. Le header n'impose pas `sum(weights)<=65535`, additionne la somme en
+`int64` signé et ne porte aucun `PointId`; le wrapper futur doit authentifier
+les IDs et la disjonction des groupes. Le mutant étroit déclenche réellement
+un overflow signé sous UBSan, le mutant d'égalité survit au random faute de
+fixture et `ignore-weights` est invisible au seul juge singleton. Enfin,
+`--echantillon=0` et `--groupes=0` réussissent par vacuité.
+
+La réception exige donc un vérificateur nommé par sa vraie sémantique
+`verify_dual_weights_lane`, caps avant calcul, fixtures exactes pour chaque
+frontière, juge rationnel du disque continu à `k>1`, invariant pairwise et
+mutants sans comportement indéfini. Les gains live `23/256` sur huit amas,
+`18/256` uniforme, `5/256` terrain et `0/256` deux-droites restent des
+diagnostics de paires arbitraires, pas un gain de la source CK--WST.
 
 ## SOC64 : primitive exacte, rentabilité toujours ouverte
 
@@ -258,15 +325,20 @@ branche combinée à son premier `ALL`. Sur le replay borné `uniform,n=120`, le
 `624` verdicts SOC-`ALL` et `3873` triples ont zéro faux ; l'union ferme `41`
 terminaux de masse `95`, contre `127` et `316` avec l'ancienne somme fautive.
 La contradiction est donc observée. Cinq CTests WSPD--SOC gravent désormais le
-shadow, le juge et le témoin de surcompte ; ils passent au HEAD. Ils ne
-comparent toujours pas l'union à une vraie traversée PointId et aucun mutant
-`sum_instead_of_union` ne réintroduit la faute : le raccord reste non reçu.
+shadow, le juge de rectangles et le témoin de surcompte ; ils passent au HEAD.
+Le delta live ajoute un juge direct des flips par IDs distincts et tue le
+mutant `soc-somme-au-lieu-union` : à cap complet, `168` flips sont jugés et
+`25` faux ferment le mutant. Mais à cap `1000`, trois flips sont sautés et le
+probe imprime tout de même `accord=OUI juges=47 sautes=3 faux=0`. Un accord
+partiel doit être `PARTIEL/UNKNOWN`, et aucun CTest ne câble encore ce chemin.
+Le raccord reste donc non reçu.
 
-Le HEAD n'a pas non plus le cap de 4096 tâches annoncé. Un diagnostic local
-à `n=1000` en a soumis environ `988000` et `3,69` millions de couples ; ce
-shadow doit être échantillonné hors chrono ou rendre un statut tronqué explicite.
-Le delta live ajoute `--soc-cap` et un statut `MINORANT_CAP`, mais ce worktree
-n'est pas reçu. Ces chiffres ne sont pas une extrapolation recevable vers le SLO.
+Le HEAD possède maintenant `--soc-cap` et le statut `MINORANT_CAP`; les portes
+de refus/cap passent. Cela borne un run, sans recevoir la politique de sélection
+ni sa rentabilité transitive. Le replay exhaustif à `n=1000` avait soumis
+environ `988000` tâches et `3,69` millions de couples : un cap atteint reste un
+minorant/pending et ne peut devenir une fenêtre finale. Ces chiffres ne sont
+pas une extrapolation recevable vers le SLO.
 
 `JungDiskDepth8` restreint le plan des centres au disque
 `||y-d||^2<=D/2`. Une fixture à huit groupes disjoints ferme ce disque alors
@@ -302,6 +374,24 @@ une source factorisée exacte. Elle ne devient toujours pas une liste sparse.
 De même, le théorème des faces aiguës q4 est utile uniquement avant le rang ;
 la fixture 64 points interdit toute cascade depuis les événements q3 retenus.
 
+Le second contre-audit mathématique de cette passe a également corrigé mes
+propres formulations : `2B_R` est sharp seulement à information de boule
+contenante fixée ; un poids `lambda` commun rend `BlockJungDual` sûr mais
+incomplet à cause du swap `for all pair exists lambda`; et la profondeur Jung
+sur l'axe exige un maximum matching du graphe-chaîne, pas un glouton arbitraire.
+Ces corrections sont intégrées à la proposition et aux fixtures. Pour
+`BlockBallDepth`, une profondeur moyenne élevée ne prouve pas encore que huit
+mêmes groupes couvrent uniformément un bloc : cette efficacité reste une gate
+falsifiable.
+
+Le prototype live `JungDual` code correctement la forme entière ponctuelle
+`A/P/R` et ses seuils q3/q4 sous u16 et `sum w<=65535`. Il n'est pas reçu : la
+somme des poids n'est pas préflightée, le commentaire inverse le minimax, les
+cas collectifs `k=2/3` n'ont pas de juge géométrique indépendant, les paramètres
+zéro rendent l'ablation vacuaire et le mutant `ignore-weights` est invisible au
+selftest singleton. Son succès représente une paire ponctuelle, jamais encore
+un rectangle CK uniforme ni un chemin device.
+
 Le contre-audit détaillé corrige aussi les anciennes confusions entre q2 et q4,
 cutoff kNN, taux empirique et borne structurelle.
 
@@ -313,8 +403,15 @@ suite ciblée ball_event/WSPD/Gamma/postings/saturated : 87/87 verts
 faces q4 exactes : 5/5 ; q3 côtés hors rang : 6/6
 fixtures centre_cell arité 3/4 + mutant cascade : 3/3
 SOC64 isolé : 16/16 ; WSPD--SOC intégré : 5/5, oracle d'union incomplet
-porteurs/two_lines au HEAD : 6/6
-delta live porteurs/apex : build vert, sous-suite 10/11, regex v0 périmée
+WSPD--SOC/porteurs/two_lines/cap au HEAD : 17/17 en 33,18 s
+q4_brute au HEAD : 5/5 en 2,40 s, prédicats et shell non indépendants
+worktree WSPD--SOC/porteurs/two_lines/cap/q4 : 21/22 en 31,61 s ; regex
+  `doublons` périmée après renommage `repetitions_consecutives`
+flip direct cap 1000 : accord=OUI, juges=47, sautes=3, faux=0 (statut faux)
+mutant somme cap complet : code 4, juges=168, sautes=0, faux=25
+JungDual UBSan étroit : overflow signé à jung_dual.hpp:157
+--rang=10 sans --porteurs : code 0, aucune ligne rang
+two_lines n=40 avec rang : code 0, bien_centres_juges=0
 suite complète : interrompue après 28/734 terminés, tous verts
 grid n=16 : refus_domaine=99 puis fold=OUI
 clusters n=5, coord=4 : timeout après 2 s, capacité non preflightée
@@ -331,11 +428,13 @@ réparer 0A u16 et isoler les juges de mutants
   -> raccorder BallEvent aux autorités Gamma par ordres/lots/verticales
   -> recevoir 0B et le payload borné
   -> recevoir CKPairTape q2 et ses certificats [L,U]
-  -> SOC64 union-disjointe block-level + JungDiskDepth9/8 paire/microtile
+  -> SOC64 union-disjointe + JungDiskDepth9/8 paire/microtile
+  -> BlockJungDualTile ALL uniforme, échec MIXED
   -> CarrierBlocks dans 2B_R-lentille dès q3_open || q4_open
-  -> OwnedCK-WST3 puis WST4 symbolique pré-rang, avec fixture de non-cascade
+  -> OwnedCK-WST3 puis WST4 symbolique pré-rang
+  -> FaceAxisJungDepth8 puis BlockBallDepth8 avant tout fill q4
   -> raffinement porteur de preuves sur les tâches encore MIXED
-  -> mesurer F2/F3/C4_carrier/F4/M4_apex/T4_site, BallKeys, census, H
+  -> mesurer F2/F3/C4_carrier/F4/M4_apex/W4/H4/T4, BallKeys, census, H
   -> seulement alors portage device et campagne G4 50k
 ```
 
