@@ -119,10 +119,34 @@ mécanique : `blocs4 = somme_t k_t (k_t+1)/2`, et `k_t`, le nombre de blocs
 `n=8000`. Son carré amplifie cette croissance. Sur les amas, la pente atteint
 `2,30`.
 
-À `n=8000` la source rend déjà `187` millions de blocs sur `uniform`, soit
-`23 000 n`. Extrapolée à `50 000` — et je souligne que c'est une extrapolation,
-pas une mesure — elle en donnerait de l'ordre de `4*10^9`. La source d'ordre
-quatre **brute** n'est donc pas un chemin produit.
+### 4.1 Correction : la pente `1,73` était transitoire
+
+J'ai poussé la rampe à `16 000` et `32 000` avant de vous envoyer cette note, et
+elle corrige ma propre lecture :
+
+| `uniform` | 1000 | 2000 | 4000 | 8000 | 16000 | 32000 |
+|---|---:|---:|---:|---:|---:|---:|
+| rectangles | 26 532 | 55 690 | 126 148 | 298 646 | 602 116 | 1 267 213 |
+| blocs WST3 | 483 373 | 1 170 433 | 3 246 230 | 9 079 065 | 19 282 814 | 44 509 862 |
+| blocs WST4 | 6,16e6 | 1,71e7 | 5,66e7 | 1,87e8 | 4,18e8 | 1,05e9 |
+| `k_t` | 18,2 | 21,0 | 25,7 | 30,4 | 32,0 | 35,1 |
+
+Les pentes de `blocs4` deviennent `1,47 / 1,73 / 1,73 / 1,16 / 1,33`. La valeur
+`1,73` n'est donc pas asymptotique : elle appartient au régime où `k_t` monte
+encore vers sa constante géométrique. Une boule de rayon `R` contient de l'ordre
+de `(2*sqrt(3))^3 = 41,6` cellules de diagonale `R`, et `k_t` semble converger
+vers ce voisinage — `35,1` à `n=32000`.
+
+La conclusion honnête n'est donc pas « super-linéaire » mais : **quasi-linéaire
+avec une constante inacceptable**. À `n=32000` la source rend `32 736` blocs
+d'ordre quatre par point. Ce n'est pas l'exposant qui interdit le chemin
+produit, c'est le facteur constant.
+
+Le filtre d'acuité aide, sans suffire. Comme `E+X-D = 2H`, le prédicat
+d'acuité est exactement celui de Thalès, donc déjà séparable et exact : un bloc
+dont `max H <= 0` ne peut porter aucun carrier. Il élimine `55 %` des blocs
+WST3, mais le couple survit dès qu'un seul de ses deux membres est aigu — le
+`OR` du lemme, jamais le `AND` — donc le gain plafonne à `1,46x` puis `1,62x`.
 
 ## 5. Ce que cela déplace
 

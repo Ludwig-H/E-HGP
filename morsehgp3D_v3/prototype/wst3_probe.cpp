@@ -64,6 +64,7 @@
 #include <vector>
 
 #include "cloud_families.hpp"
+#include "midball_block.hpp"
 #include "rect_front.hpp"
 #include "wspd_wavefront.hpp"
 
@@ -101,7 +102,21 @@ const char* mutant_name(Wst3Mutant m) {
   return "?";
 }
 
-struct Bloc { int c; };   // le nœud temoin ; `A` et `B` sont ceux du rectangle
+// ---- LE FILTRE D'ACUITE EST LE PREDICAT DE THALES, ET C'EST GRATUIT.
+//
+// La face `(a,b,x)` est aigue en `x` si et seulement si
+// `E + X - D = ||x-a||^2 + ||b-x||^2 - ||b-a||^2 > 0`, et cette quantite vaut
+// exactement `2 (x-a).(b-x) = 2H`. Le filtre d'acuite est donc `H > 0`, le meme
+// predicat que `MidballBlockDepth` — separable par axe, exact, sans division.
+//
+// Un bloc dont le MAXIMUM de `H` est negatif ou nul ne peut porter aucun
+// carrier aigu : le lemme du porteur exige qu'un support q4 d'owner `ab` ait au
+// moins une face aigue incidente a `ab`. Le couple `{C,D}` n'est donc forme que
+// si l'un des deux blocs peut etre aigu — jamais `AND`, toujours `OR`.
+struct Bloc {
+  int c;
+  bool aigu;   // le bloc peut-il contenir un carrier aigu ?
+};
 
 // Distance carree MAXIMALE d'un point de `C` a la boite `A`. Separable par axe :
 // sur chaque axe, la distance a l'intervalle est une fonction convexe par
@@ -326,7 +341,17 @@ int main(int argc, char** argv) {
         ++blocs;
         masse += (double)count_of(terms[t].a) * (double)count_of(terms[t].b) *
                  (double)count_of(nd);
-        par_terminal[t].push_back(Bloc{nd});
+        {
+          mhgp3v::midball::Box ma{}, mb{}, mc{};
+          for (int i = 0; i < 3; ++i) {
+            ma.lo[i] = ba.lo[i]; ma.hi[i] = ba.hi[i];
+            mb.lo[i] = bb.lo[i]; mb.hi[i] = bb.hi[i];
+            mc.lo[i] = bc.lo[i]; mc.hi[i] = bc.hi[i];
+          }
+          const auto mv = mhgp3v::midball::midball_block(ma, mb, mc);
+          par_terminal[t].push_back(
+              Bloc{nd, mv != mhgp3v::midball::MidballVerdict::kNone});
+        }
         continue;
       }
       if (sn + 2 > 128) { std::fprintf(stderr, "PLANCHER: pile temoin saturee\n"); return 3; }
@@ -341,11 +366,16 @@ int main(int argc, char** argv) {
               (double)blocs / (double)m, masse, visites);
 
   // ---- ORDRE QUATRE : LE PRODUIT NON ORDONNE DES BLOCS D'UN MEME RECTANGLE.
-  long long blocs4 = 0;
+  long long blocs4 = 0, blocs4_aigu = 0, blocs3_aigu = 0;
   double masse4 = 0.0;
   if (ordre >= 4) {
     for (size_t t = 0; t < terms.size(); ++t) {
       const long long k = (long long)par_terminal[t].size();
+      long long na = 0;   // blocs qui ne peuvent PAS porter de carrier aigu
+      for (const Bloc& b : par_terminal[t]) if (!b.aigu) ++na; else ++blocs3_aigu;
+      // Les couples dont AUCUN membre ne peut etre aigu sont exclus : aucun
+      // support q4 d'owner `ab` ne peut y vivre.
+      blocs4_aigu += k * (k + 1) / 2 - na * (na + 1) / 2;
       blocs4 += k * (k + 1) / 2;
       const double mab = (double)count_of(terms[t].a) * (double)count_of(terms[t].b);
       for (size_t u = 0; u < par_terminal[t].size(); ++u) {
@@ -356,9 +386,12 @@ int main(int argc, char** argv) {
           masse4 += mab * cu * (double)count_of(par_terminal[t][v].c);
       }
     }
-    std::printf("wst4 : blocs=%lld blocs/n=%.2f masse=%.0f blocs/rect=%.2f\n",
+    std::printf("wst4 : blocs=%lld blocs/n=%.2f masse=%.0f blocs/rect=%.2f"
+                " | aigus : blocs3=%lld blocs4=%lld blocs4/n=%.2f gain=%.2fx\n",
                 blocs4, (double)blocs4 / (double)m, masse4,
-                (double)blocs4 / (double)std::max<size_t>(1, terms.size()));
+                (double)blocs4 / (double)std::max<size_t>(1, terms.size()),
+                blocs3_aigu, blocs4_aigu, (double)blocs4_aigu / (double)m,
+                (double)blocs4 / (double)std::max(1LL, blocs4_aigu));
   }
 
   if (min_blocs > 0 && blocs < min_blocs) {

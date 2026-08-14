@@ -15,111 +15,56 @@ public_status=not_claimed
 ```
 
 La v3 n'est ni promue dans le registre officiel, ni qualifiée GPU, ni déclarée
-exacte sur son domaine public. La campagne CPU historique au pin `35fcea8` et
-la tentative SOC active au pin `110fe76` ont toutes deux utilisé une G4 SPOT
-sans kernel CUDA et certifié l'arrêt ciblé. La seconde a échoué avant toute
-rampe (`CTest rc=8`, cibles non construites) : elle ne fournit aucune mesure
-SOC/G4.
-
-La recette au `HEAD=a58d020` reste non relançable : elle omet encore une cible
-sélectionnée par son regex CTest, ne sélectionne pas les nouvelles portes BJD,
-ignore le code de l'analyseur de pentes, n'exige pas une fenêtre finale et
-autorise quatre timeouts séquentiels dont la somme dépasse les deux
-coupe-circuits. Le contre-audit live donne les corrections bloquantes.
+exacte sur son domaine public. Le contrat reste ouvert : à `n=50000` et
+`K_max=10`, aucun échantillon ne qualifie encore le payload complet sous
+`p95 warm_e2e<1 s` sur G4. La dernière tentative G4 a échoué avant la rampe et
+a seulement certifié l'arrêt de sa cible.
 
 ## Verdict actuel
 
-Le contrat n'est pas rempli. Pour `n=50000` et `K_max=10`, la cible principale
-est `p95 warm_e2e<100 ms` et la cible secondaire `p95 warm_e2e<1 s` sur un G4,
-sortie complète et synchronisation comprises. Aucun échantillon qualifiable ne
-reçoit l'une ou l'autre.
+Le `HEAD=88a9ba8` contient trois avancées directement liées à l'idée de support
+complet :
 
-Le dernier commit stable relu est `a58d020`. Son parent `8fd6f59` intègre le
-packing d'identités BJD réparé et ses huit CTests, refuse
-`--exige-q4-ouvert` sans juge et toute cardinalité autre que neuf pour
-`collinear_seven`. Le packing agit toujours
-après toute la descente. Le verdict détaillé et la solution `tau(F)` sont dans
-[`audits/AUDIT_LIVE_BLOCK_JUNG_CREDITS_TAU_783A789_20260814.md`](audits/AUDIT_LIVE_BLOCK_JUNG_CREDITS_TAU_783A789_20260814.md).
+- `Corner8BallDepth` reçoit un certificat q4 `ALL_INTERIOR` sur un produit de
+  boîtes de supports et une boîte témoin ; il évite centre et division, mais ne
+  propose ni supports, ni owner, ni positivité ;
+- `WST3CandidateCover` route une fois le troisième sommet dans l'antichaîne du
+  rectangle qui contient l'arête-owner ;
+- son produit non ordonné route de même les deux sommets restants d'un
+  quadruplet.
 
-Le pin `8fd6f59` ajoute `MidballBlockDepth` et neuf portes ciblées ; `a58d020`
-ajoute son raccord WSPD et quatre portes d'intégration. Ses extrema
-ne portent pas tous le même domaine : `ALL` est exact sur l'AABB continue,
-`NONE` sur l'enveloppe du **réseau u16**, pas sur le seul produit des `PointId`
-occupés. Le header appelle pourtant ce dernier domaine continu. La primitive
-duplique `rect_h_interval` déjà présente ; trois portes saines à regex peuvent
-en outre masquer un code non nul. Le raccord essaie `--midball` en disjonction
-ALL-only, refuse l'absence de `--vwave`, publie ses promotions et possède un
-juge final. Il reste sans
-preflight u16, compte d'appels/population, juge causal de chaque promotion ni
-porte d'intégration saine fail-closed : trois refus vérifient leur code, mais le
-nominal emploie une regex capable de masquer un code non nul. Compteurs
-multi-tailles, cap i64 et bypass par le mode exhaustif restent ouverts. Une
-ablation amas à `n=1500` baisse lectures/résiduel q2 de
-`7,41 %/29,95 %`, mais augmente la médiane de vague de `14,1 %`. Le source
-appelle la primitive complète, mais l'inlining Release élimine déjà le maximum :
-le bloc machine de promotion contient 24 multiplications. Une ABI min-only reste
-souhaitable pour l'autorité commune et le device, pas comme gain CPU présumé.
+Ce troisième point n'est pas encore `OwnedCK-WST3/WST4`. Le probe ne filtre ni
+les occurrences provenant d'arêtes non-owner, ni les diagonales de `PointId`,
+ni l'acuité q3, ni le bien-centrage q4. Son juge choisit l'owner a posteriori et
+ne regarde que ce rectangle : il prouve la **couverture adressée par owner**,
+pas l'exact-once de toute la relation émise. Son tie-break emploie en outre le
+rang Morton au lieu du vrai `PointId`, et le probe rejette les positions
+dupliquées au lieu d'en conserver la multiplicité.
 
-Le worktree postérieur explore `--borne-sup`, une coupure quand crédit acquis
-plus population encore atteignable tombe sous le seuil. La première révision
-`90640885` oubliait de remettre les enfants d'un parent `MIXED` et publiait
-zéro fermeture avec `pending=0`. La réparation mobile `ec5ec3d4` retrouve la
-parité baseline sur une ablation, mais ne sépare pas encore `cred/ccred`, ne
-borne pas la banque BJD et perd effectivement des fermetures dans ces deux
-combinaisons. `--climb` est un défaut distinct : sa propre antichaîne omet une
-feuille malgré un statut final. La borne économise seulement
-`0,0274 %` des lectures sur l'ablation amas à `n=1500`. Aucun gain ni verdict
-exact n'est reçu avant les portes du
-[`contre-audit dédié`](audits/AUDIT_LIVE_BORNE_SUP_CREDITS_A58D020_20260814.md).
+La distinction coût/couverture est impérative. Arrêter la descente dès la
+racine resterait une couverture owner exacte, mais sans sélectivité. À
+`uniform,n=1000,s=2,echelle=1`, le probe publie `483373` blocs WST3 puis
+`6159060` couples WST4 pour une masse candidate q4 de `202720222091` ; ce
+n'est ni une source q4 filtrée ni un coût proche de l'ordre deux. Le compteur
+WST4 doit employer l'identité
+`sum binom(|C_i|,2)+sum_{i<j}|C_i||C_j|=binom(sum_i |C_i|,2)` sans boucle
+quadratique sur les blocs, puis owner, injectivité et positivité doivent
+précéder tout `fill`.
 
-Le même worktree ajoute `HCBlockDepth`, préfiltre q2/q3/q4 par
-`H=(z-a) dot (b-z)` et `C=(b-z) cross (z-a)`. Les facteurs
-`3H^2>||C||^2` pour q3 et `2H^2>||C||^2` pour q4 sont exacts ; les intervalles
-de composantes donnent un `ALL` sûr mais conservateur, pas une source
-d'événements. `Corner512` est déjà l'autorité exacte de l'enveloppe. Le delta HC
-n'a aucune CTest ni juge d'intégration, recalcule le même classifieur jusqu'à
-trois fois par nœud, rend `--hc --midball` structurellement rouge et fait
-régresser la sous-suite Midball worktree à `12/13`. Son diagnostic CPU réduit
-les lectures à `n=200`, mais augmente fortement le temps one-shot ; aucune
-promotion performance n'en découle.
+Votre idée mathématique est donc reçue sous sa forme exacte : la hiérarchie
+HGP n'a besoin que des supports minimaux positifs complets. q2 teste une boule
+diamétrale par paire distincte ; q3 une circum-boule par triangle strictement
+aigu ; q4 une circumsphère par tétraèdre affinement indépendant dont les quatre
+poids circumcentriques sont strictement positifs. Les sphères incidentes à une
+ancre partielle ne sont que le domaine d'un prune facultatif, jamais la source.
 
-Le pin `5809bd2` ajoute `--fenetre-exacte` et `694920a` en publie des pentes. Le
-nom doit être lu avec prudence :
-q2 décide bien la miniboule diamétrale de chaque paire tirée ; q3/q4 ne mesurent
-qu'un cœur universel et publient donc un majorant de la fenêtre réelle. Le
-préfixe SplitMix à seed fixe ne reçoit pas l'hypothèse probabiliste nécessaire
-aux crochets Hoeffding. Le titre « fenêtre exacte en n^1,09 » est donc un claim
-diagnostique, pas un résultat de complexité ni une inclusion Delaunay.
-Le lemme exact, les contre-fixtures u16 et la route pieds/intersections shallow
-sont dans
-[`audits/AUDIT_MINIBOULE_UNIQUE_RESIDUEL_SHALLOW_5809BD2_20260814.md`](audits/AUDIT_MINIBOULE_UNIQUE_RESIDUEL_SHALLOW_5809BD2_20260814.md).
-Le mode exhaustif commité au pin `8fd6f59` retire seulement l'erreur de tirage
-sur les paires. Il reste cubique sans preflight et son retour anticipé précède
-les gates communes : un plancher BJD impossible ou un mutant peut encore finir
-code zéro. Il ne constitue donc qu'un oracle borné défectueux, pas une porte.
-
-Le pin historique `2b89ea1` introduit enfin une première tranche
-`BallForm -> PrimitiveSphereKey -> census I_B/U_B -> SphereRun`. C'est le bon
-ordre architectural, mais **l'étape 0A n'est pas reçue pour u16** : les
-constructeurs q3/q4 rabattent des numérateurs de 67 à 81 bits vers `int64`, puis
-créent des carrés jusqu'à environ 162 bits dans `i128` avant réduction. Les
-huit CTests du pin, puis les dix du successeur, ne couvrent que `coord<=64` ;
-leur juge de Gram dépasse lui-même 128 bits sur des fixtures u16, ne recertifie
-ni la positivité ni la clé primitive, et le mutant de clé reste corrélé.
-
-Le producteur au pin `3c11bc8`, inchangé au `HEAD=35fcea8`, ajoute un probe
-nommé stage 0B. Il ne ferme pas 0B : il
-compare Kruskal à Floyd--Warshall sur le même hypergraphe de `PointId`, dans
-une unique DSU. Il n'émet ni dix forêts par ordre, ni lots, coverage,
-verticales ou payload. Cette DSU est structurellement fausse dès `k=2` lorsque
-deux générateurs distincts partagent un point mais moins de `k` identités.
-
-Le verdict live est dans
-[`audits/AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md). L'audit ciblé de
-la tranche est
-[`audits/AUDIT_BALL_EVENT_V0_2B89EA1_20260813.md`](audits/AUDIT_BALL_EVENT_V0_2B89EA1_20260813.md).
-Le contre-rejeu du faux 0B est
-[`audits/AUDIT_CONTRE_RECEPTION_STAGE_0B_3C11BC8_20260813.md`](audits/AUDIT_CONTRE_RECEPTION_STAGE_0B_3C11BC8_20260813.md).
+Les autres prototypes restent des accélérateurs non reçus : Midball/HC/SOC/Jung
+certifient des ancres partielles ; `--borne-sup` perd encore des fermetures avec
+la vue combinée ou BJD ; `BallFormToBallEvent-v0` déborde son contrat u16 ; le
+probe nommé 0B n'émet ni dix forêts, ni verticales, ni payload. Leur état exact,
+les hashes et les contre-fixtures sont centralisés dans
+[`audits/AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md). Les titres de
+commits et les taux locaux restent des diagnostics, jamais des claims produit.
 
 ## Route active
 
@@ -197,6 +142,27 @@ CKPairTape(A,B)                          toutes les paires, exact-once
   -> OwnedCK-WST4(A,B,C,D)              second carrier/apex
   -> BallKey/RLE -> rang/census -> fold
 ```
+
+Le mot `Owned` est réservé à l'intersection exacte suivante. Un cover de
+cellules, même disjoint à l'intérieur d'un rectangle, ne suffit pas :
+
+```text
+WST3CandidateCover
+  intersecte 3 PointId distincts, OWNER(ab), indépendance et triangle aigu
+  -> OwnedCK-WST3
+
+unordered CellPair(WST3CandidateCover)
+  intersecte 4 PointId distincts, OWNER(ab), orientation non nulle
+  intersecte 4 poids circumcentriques strictement positifs
+  -> OwnedCK-WST4
+```
+
+Chaque filtre est tri-state sur un bloc. `ALL` autorise le consommateur
+factorisé, `NONE` écarte le bloc, `MIXED` remplace atomiquement le parent par
+une partition complète ; égalité ou cap donnent `PENDING`, jamais un verdict
+inventé. Le tie-break owner porte sur les vrais `PointId`, indépendamment du
+rang Morton. Plusieurs `SupportKey` peuvent ensuite partager une `BallKey` :
+le RLE garde toutes les provenances et ne paie qu'un census complet par boule.
 
 Pour chaque rectangle CK, une boule `B_R` contenant `A union B` fixe un niveau
 Morton. Tout troisième ou quatrième sommet d'un support dont `ab` est l'arête

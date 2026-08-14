@@ -143,10 +143,10 @@ positivité, clé primitive, niveau, owner, `I_B/U_B` et activation de lane.
 
 ### 3.4 Statut du probe nommé stage 0B
 
-Le successeur `91aa287`, encore présent au `HEAD=3c11bc8`, ne ferme pas 0B. Il
-trie les runs réguliers, unionne les membres `I_B union U_B` dans une seule DSU
-de `PointId`, puis compare ses goulots à Floyd--Warshall sur les mêmes runs,
-membres, dispositions et niveaux.
+Le probe actuellement nommé stage 0B ne ferme pas 0B. Il trie les runs
+réguliers, unionne les membres `I_B union U_B` dans une seule DSU de `PointId`,
+puis compare ses goulots à Floyd--Warshall sur les mêmes runs, membres,
+dispositions et niveaux.
 
 Ce probe reçoit au plus la fermeture de cet hypergraphe fourni. Il est faux
 pour la sémantique HGP dès `k=2` : les générateurs `S={0,1,2}` et
@@ -311,12 +311,15 @@ qui évite de générer certaines complétions. La source normative est finie :
 q2 : paire distincte -> boule diamétrale unique
 q3 : triangle strictement aigu -> circum-boule intrinsèque unique
 q4 : tétraèdre affinement indépendant bien centré -> circumsphère unique
-support non positif -> réduction à une arité minimale inférieure
+support non positif -> rejet à cette arité ; la source inférieure le porte déjà
 ```
 
-Chaque support complet produit donc une seule `BallKey` candidate et un seul
-census. Les dégénérescences peuvent envoyer plusieurs `SupportKey` vers la même
-`BallKey` ; le RLE conserve cette provenance sans refaire le census. Avec
+Chaque support complet produit donc une seule `BallKey` candidate, mais aucun
+census n'est payé avant le RLE. Les dégénérescences peuvent envoyer plusieurs
+`SupportKey` vers la même `BallKey` ; le RLE conserve toute cette provenance et
+paie exactement un census par `BallKey` unique. Un support non positif n'est
+jamais réémis depuis WST3/WST4 sous une arité inférieure, ce qui créerait un
+doublon ; sa source q2/q3 indépendante porte déjà son support minimal. Avec
 `d=b-a`, `D=d dot d`, `w=2*c-a-b` et `U_z=2*z-a-b`, poser :
 
 ```text
@@ -420,14 +423,9 @@ l'inlining Release élimine déjà le maximum et laisse 24 multiplications dans
 le bloc machine ; une ABI min-only explicite sert surtout l'autorité commune et
 le futur device.
 
-Le raccord WSPD stable au pin `a58d020` applique cette règle, refuse les modes
-incompatibles, publie ses promotions et ajoute un juge primal et quatre CTests
-d'intégration. Il
-reste non reçu : compteurs et planchers globaux masquent une taille sans gain
-après une taille productive, le produit du cap du juge peut déborder i64, le
-juge ne vérifie pas chaque promotion, `--fenetre-exhaustive` court-circuite ses
-gates et sa seule CTest saine d'intégration à regex peut masquer un code non
-nul. Ces obligations et les hashes live sont maintenus dans l'audit courant.
+Le raccord exploratoire applique cette règle, mais sa réception reste dans
+[`audits/AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md). La proposition
+ne conserve ni pin, ni nombre de CTests, ni mesure mutable.
 
 ### 4.5 Borne duale de vague : maintenir `upper`, pas `reste`
 
@@ -491,11 +489,10 @@ Lorentz, de l'affinité en `a,b`, et de l'affinité de `C` avec la concavité de
 `central -> HCIntervalAll -> SOC64 -> Corner512/split`, avec arrêt au premier
 `ALL`; aucun de ces échecs ne vaut `NONE` géométrique.
 
-Le delta HC courant est un probe, pas un jalon : aucune CTest/aucun juge WSPD,
-triple recalcul possible dans la boucle des lanes, composition Midball rouge,
-compteurs multi-tailles et bypass exhaustif. L'intégration industrielle calcule
-la lane HC une fois par nœud, la réutilise pour q2/q3/q4 et mesure son gain
-marginal face au fallback déjà actif.
+HC reste un préfiltre, pas un jalon de source. L'intégration industrielle
+calcule la lane une fois par nœud, la réutilise pour q2/q3/q4 et mesure son gain
+marginal face au fallback déjà actif. Les défauts logiciels et les portes
+présentes sont maintenus uniquement dans l'audit courant.
 
 ## 5. Générateur q3 recommandé
 
@@ -521,7 +518,7 @@ V dot V > D
 car `V dot V-D=2(E+X-D)`. L'égalité est un triangle droit. Chaque q3 est donc
 une incidence canonique `owner EdgeKey(ab) × PointId(x)`, pas un triplet libre.
 
-### 5.2 `OwnedCK-WST3` : extension exacte aux triplets
+### 5.2 `WST3CandidateCover`, puis `OwnedCK-WST3`
 
 La source doit être une **partition** CK des paires non ordonnées de
 `PointId`, pas une WSPD qui les couvre éventuellement plusieurs fois. Chaque
@@ -548,17 +545,27 @@ un test AABB--boule indécis conserve la cellule.
 
 Chaque triangle choisit l'arête de longueur maximale, puis la plus petite
 `EdgeKey` à égalité. Cette arête appartient à un rectangle CK unique et le
-carrier à une cellule half-open unique : le tuple retenu
-`OwnedCK-WST3(A,B,C)` est exact-once. Pour `0<eta<=1`, son nombre de blocs
-initiaux est `O(s^3*eta^-3*n)`. Aucun théorème n'impose
-`eta=Theta(1/s)` : commencer avec `eta=Theta(1)` et compter séparément les
-splits `MIXED`. Ce majorant ne couvre ni la localisation, ni les diagonales, ni
-tous les raffinements `MIXED`.
+troisième ID à un span unique de son antichaîne. Cela reçoit seulement le
+routage `WST3CandidateCover`. La relation exacte est son intersection avec
+trois `PointId` distincts, le vrai prédicat owner et la positivité q3. Un juge
+qui choisit d'abord l'owner puis ignore les autres rectangles prouve la
+couverture adressée par owner ; il ne prouve pas que la relation brute émise
+est exact-once.
+
+Sous une vraie décomposition fair/compressed en cellules de maille comparable à
+`eta*r_R`, un argument de packing donne conditionnellement
+`O(s^3*eta^-3*n)` blocs initiaux pour `0<eta<=1`. Cette borne ne se transfère
+pas à un arbre de plages Morton scindé par population avec AABB serrées sans
+preuve supplémentaire. Elle ne couvre ni les splits owner/acuité, ni les
+diagonales, ni la masse logique, ni les `BallKey`, ni le census. Toute pente ou
+constante « blocs par rectangle » reste une mesure de `CandidateCover`, pas un
+théorème sur `OwnedCK-WST3`.
 
 Après owner, q3 est positif si `E+X-D>0` et `G=D*E-F^2>0`. Les blocs reçoivent
 `ALL_ACUTE/NONE_ACUTE/MIXED` par bornes entières sûres ; les égalités
-descendent. `ALL_ACUTE` reste une source factorisée exacte, jamais la preuve
-que sa masse cubique, son rang, son shell ou ses `BallKey` sont bon marché. Le
+descendent. `ALL_ACUTE` ne signifie ni owner commun, ni `BallKey` commune. La
+relation n'est exacte qu'après intersection de tous les filtres, et cela ne
+prouve jamais que sa masse, son rang, son shell ou ses `BallKey` sont bon marché. Le
 tape carrier est requis dès que `q3_open || q4_open`; une fermeture de rang q3
 ne supprime jamais la relation géométrique nécessaire à q4.
 
