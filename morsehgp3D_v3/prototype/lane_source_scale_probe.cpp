@@ -458,6 +458,7 @@ long long brute_q2(const std::vector<Pt>& P, int smax) {
 int main(int argc, char** argv) {
   std::string family = "uniform";
   long long n = 2000, coord = 0, seed = 1, smax = 11, threads = 0, dmax = 0;
+  double dmax_esp = 10.0;   // coupure exprimee en ESPACEMENTS moyens mesures
   bool verifie = false;
   for (int i = 1; i < argc; ++i) {
     const std::string a = argv[i];
@@ -469,6 +470,8 @@ int main(int argc, char** argv) {
     else if (a.rfind("--seed=", 0) == 0) seed = atoll(val("--seed=").c_str());
     else if (a.rfind("--smax=", 0) == 0) smax = atoll(val("--smax=").c_str());
     else if (a.rfind("--dmax=", 0) == 0) dmax = atoll(val("--dmax=").c_str());
+    else if (a.rfind("--dmax-espacements=", 0) == 0)
+      dmax_esp = atof(val("--dmax-espacements=").c_str());
     else if (a.rfind("--threads=", 0) == 0) threads = atoll(val("--threads=").c_str());
     else refuse("option inconnue : " + a);
   }
@@ -490,7 +493,8 @@ int main(int argc, char** argv) {
   double vol = 1.0;
   for (int c = 0; c < 3; ++c) vol *= (double)std::max<i64>(1, hi[c] - lo[c]);
   const double espacement = std::cbrt(vol / (double)m);
-  if (dmax <= 0) dmax = (i64)(10.0 * espacement + 0.5);
+  if (dmax_esp < 2.0 || dmax_esp > 64.0) refuse("--dmax-espacements hors domaine");
+  if (dmax <= 0) dmax = (i64)(dmax_esp * espacement + 0.5);
 
   Grid grid;
   grid.build(P, std::max<i64>(1, (i64)(1.2 * espacement)));
