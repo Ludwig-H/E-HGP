@@ -30,11 +30,17 @@ ancienne phrase imposant le rejet global des positions dupliquées est périmée
   WST4 brut. Son post-scriptum conserve la réfutation du signe à `3703097`, sa
   réparation à `a73161c`, le diagnostic Corner8 de `069d903` et les réponses
   Q10--Q13 sur orientation, bisigne, raffinement par lane et diagonale `Sym2`.
-  Le verdict live au pin `52585c5` est maintenu dans `AUDIT_ETAT_COURANT.md` :
+  Le verdict live au pin `1fd9cf1` est maintenu dans `AUDIT_ETAT_COURANT.md` :
   le bisigne est commis, les couples non séparés ne sont plus jetés, mais
   `Sym2` reste un compteur, le caller bisigne perd le mauvais bit et Corner8
   demeure post-produit. La généralisation exacte d'ordre `q` par vecteurs de
   multiplicités `alpha` est consolidée dans ce contre-audit et la proposition.
+  Le sampler `--masse` ajouté ensuite n'est ni uniforme dans les quadruplets, ni
+  filtré par positivité ; sa CTest à regex reste un diagnostic réfuté.
+  Le delta logiciel postérieur SHA `23a2be33` nommé `--supports-retenus`
+  énumère seulement `orientation!=0 && I<=7`, sans positivité, shell ni RLE ;
+  sa métrique est arête/espacement et son cap en points n'est pas un budget. Le
+  détail live et les fixtures sont maintenus dans `AUDIT_ETAT_COURANT.md`.
 - [`AUDIT_MINIBOULE_UNIQUE_RESIDUEL_SHALLOW_5809BD2_20260814.md`](AUDIT_MINIBOULE_UNIQUE_RESIDUEL_SHALLOW_5809BD2_20260814.md) :
   lemme exact de miniboule unique au support complet, famille normale au support
   partiel, cœur affine, sandwich `U<=D<=C`, q3 par pied, q4 par intersections,

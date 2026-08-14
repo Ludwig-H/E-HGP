@@ -175,6 +175,7 @@ int main(int argc, char** argv) {
   // C'est le seul endroit ou l'on economise un produit entier.
   long long corner8 = 0;   // nombre de blocs WST4 soumis, 0 = desactive
   long long masse_echantillon = 0;   // quadruplets tires DANS LA MASSE
+  bool supports_retenus = false;     // enumeration exhaustive des vrais supports
   long long min_blocs = 0;
   // ---- L'ECHELLE DU BLOC, ET POURQUOI ELLE DECIDE TOUT.
   //
@@ -219,6 +220,7 @@ int main(int argc, char** argv) {
     else if (a == "--juge") juge = true;
     else if (a == "--fixture-tetra") fixture_tetra = true;
     else if (a == "--fixture-plate") fixture_plate = true;
+    else if (a == "--supports-retenus") supports_retenus = true;
     else if (a.rfind("--masse=", 0) == 0) masse_echantillon = arg_ll(val("--masse=").c_str(), 1, (1LL << 24), "masse");
     else if (a.rfind("--corner8=", 0) == 0) corner8 = arg_ll(val("--corner8=").c_str(), 1, (1LL << 30), "corner8");
     else if (a.rfind("--ordre=", 0) == 0) ordre = arg_ll(val("--ordre=").c_str(), 3, 4, "ordre");
@@ -922,6 +924,115 @@ int main(int argc, char** argv) {
                 (double)somme_interieurs /
                     (double)std::max(1LL, tires - ids_repetes - owner_hors - degeneres),
                 retenus, 100.0 * (double)retenus / (double)std::max(1LL, tires));
+  }
+  // ---- LES SUPPORTS REELLEMENT RETENUS, ET LEUR LOCALITE.
+  //
+  // La masse ne contient presque aucun support retenu, et un tirage ne les
+  // rencontre pas. On les enumere donc EXHAUSTIVEMENT a petit `n` pour mesurer
+  // ce qui compte vraiment : leur circumrayon devant l'espacement local, et
+  // surtout le RANG maximal d'un sommet vis-a-vis d'un autre. Si ce rang est
+  // borne, une construction par voisinage borne les capture tous ; sinon aucun
+  // prefixe kNN n'est exact — ce que la fixture de l'audit affirme deja avec un
+  // partenaire au rang 4380.
+  if (supports_retenus) {
+    if (m > 260) refuse("l'enumeration exhaustive des supports est bornee a 260 points");
+    // Distance au plus proche voisin, par point : l'espacement local.
+    std::vector<i64> nn2((size_t)m, 0);
+    for (long long i = 0; i < m; ++i) {
+      i64 best = -1;
+      for (long long j = 0; j < m; ++j) {
+        if (i == j) continue;
+        i64 d2 = 0;
+        for (int c = 0; c < 3; ++c) {
+          const i64 e = sp[(size_t)i][c] - sp[(size_t)j][c];
+          d2 += e * e;
+        }
+        if (best < 0 || d2 < best) best = d2;
+      }
+      nn2[(size_t)i] = best;
+    }
+    // Rang de `j` dans le voisinage de `i` : nombre de points strictement plus
+    // proches de `i` que `j`.
+    auto rang = [&](long long i, long long j) -> long long {
+      i64 dij = 0;
+      for (int c = 0; c < 3; ++c) {
+        const i64 e = sp[(size_t)i][c] - sp[(size_t)j][c];
+        dij += e * e;
+      }
+      long long r = 0;
+      for (long long k = 0; k < m; ++k) {
+        if (k == i || k == j) continue;
+        i64 d2 = 0;
+        for (int c = 0; c < 3; ++c) {
+          const i64 e = sp[(size_t)i][c] - sp[(size_t)k][c];
+          d2 += e * e;
+        }
+        if (d2 < dij) ++r;
+      }
+      return r;
+    };
+    long long retenus = 0, rang_max_global = 0;
+    double somme_ratio = 0.0, ratio_max = 0.0;
+    double somme_rang = 0.0;
+    for (long long i = 0; i < m; ++i)
+    for (long long j = i + 1; j < m; ++j)
+    for (long long k = j + 1; k < m; ++k)
+    for (long long l = k + 1; l < m; ++l) {
+      i64 P[4][3];
+      const long long idx[4] = {i, j, k, l};
+      for (int t2 = 0; t2 < 4; ++t2)
+        for (int c = 0; c < 3; ++c) P[t2][c] = (i64)sp[(size_t)idx[t2]][c];
+      if (mhgp3v::c8::orient3d(P[0], P[1], P[2], P[3]) == 0) continue;
+      long long interieurs = 0;
+      for (long long z = 0; z < m && interieurs <= 7; ++z) {
+        if (z == i || z == j || z == k || z == l) continue;
+        i64 Z4[3];
+        for (int c = 0; c < 3; ++c) Z4[c] = (i64)sp[(size_t)z][c];
+        if (mhgp3v::c8::interieur_strict(P[0], P[1], P[2], P[3], Z4)) ++interieurs;
+      }
+      if (interieurs > 7) continue;
+      ++retenus;
+      // Circumrayon carre : la distance carree du circumcentre a un sommet. On
+      // le mesure par la plus grande arete, qui minore `2R`, et par le rang.
+      i64 dmax = 0;
+      for (int u2 = 0; u2 < 4; ++u2)
+        for (int v2 = u2 + 1; v2 < 4; ++v2) {
+          i64 d2 = 0;
+          for (int c = 0; c < 3; ++c) {
+            const i64 e = P[u2][c] - P[v2][c];
+            d2 += e * e;
+          }
+          if (d2 > dmax) dmax = d2;
+        }
+      // Espacement local : la plus petite distance au plus proche voisin parmi
+      // les quatre sommets.
+      i64 esp = nn2[(size_t)i];
+      for (int t2 = 1; t2 < 4; ++t2)
+        if (nn2[(size_t)idx[t2]] < esp) esp = nn2[(size_t)idx[t2]];
+      const double ratio = std::sqrt((double)dmax / (double)std::max<i64>(1, esp));
+      somme_ratio += ratio;
+      if (ratio > ratio_max) ratio_max = ratio;
+      long long rmax = 0;
+      for (int u2 = 0; u2 < 4; ++u2)
+        for (int v2 = 0; v2 < 4; ++v2) {
+          if (u2 == v2) continue;
+          const long long r = rang(idx[u2], idx[v2]);
+          if (r > rmax) rmax = r;
+        }
+      somme_rang += (double)rmax;
+      if (rmax > rang_max_global) rang_max_global = rmax;
+    }
+    std::printf("supports_retenus : n=%lld retenus=%lld retenus/n=%.2f"
+                " ratio_arete_espacement moyen=%.2f max=%.2f"
+                " rang_max moyen=%.1f pire=%lld\n",
+                m, retenus, (double)retenus / (double)m,
+                somme_ratio / (double)std::max(1LL, retenus), ratio_max,
+                somme_rang / (double)std::max(1LL, retenus), rang_max_global);
+    if (retenus == 0) {
+      std::fprintf(stderr, "PLANCHER: aucun support retenu\n");
+      return 3;
+    }
+    return 0;
   }
   std::printf("OK famille=%s\n", family.c_str());
   return 0;

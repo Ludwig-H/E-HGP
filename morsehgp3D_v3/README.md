@@ -28,7 +28,7 @@ doit être déduit de ces probes CPU.
 
 ## Verdict actuel
 
-Le `HEAD=52585c57b81fd429a1b9974f02217655f8c7661a` contient quatre avancées
+Le `HEAD=1fd9cf1d40dda12bcad569fab1227657551941cb` contient quatre avancées
 directement liées à l'idée de support complet, puis plusieurs diagnostics de
 réduction du broad phase WST3/WST4 :
 
@@ -93,11 +93,37 @@ un masque de lanes actives par tâche, créditer seulement les bits conclus et
 continuer les bits restants. Aucune CTest actuelle ne juge cette jonction, ses
 vrais `PointId`, ses deux ledgers ou sa causalité avant le produit.
 
+Le nouveau `--masse` ne reçoit pas les conclusions de son titre de commit. Il
+pondère le rectangle par une masse brute, puis choisit les **blocs** `C,D`
+uniformément au lieu de les pondérer par leurs populations ; le tirage n'est
+donc pas uniforme parmi les quadruplets. Son cumul est en `double`, l'owner
+ignore le tie par vraie `EdgeKey` et la positivité est provisoirement forcée par
+`const bool centre=true`. `retenus` ne teste que `I<=7`, sans extra-shell, et
+`--masse` est même accepté sans `--ordre=4` : un rejeu `n=40` sur le chemin q3
+rend `OK` avec une ligne q4 factice. La CTest à regex reproduit une seule sortie
+biaisée ; zéro succès sur 3000 tirages ne prouve ni une fréquence `10^-8`, ni
+que la masse q4 positive est du déchet, ni que le rayon est le filtre dominant.
+Le sampler combinadique u128 exact, ses strates de rejet et son plafond
+`samples*n` sont spécifiés dans `PROPOSITION.md`.
+Le worktree postérieur `--supports-retenus` reste également oracle-only. Il
+énumère exactement l'ensemble brut `orientation!=0 && I<=7`, pas les supports
+q4 positifs : il omet les quatre poids, le shell et le RLE par `BallKey`. Sa
+« localité de rayon » est le rapport plus-grande-arête/espacement ; ce n'est
+qu'un proxy à facteur deux **après** positivité, pas le circumrayon. Son rang
+sans tie `PointId` correspond au plus à une clique kNN mutuelle non déclarée.
+Enfin, le cap `n=260` autorise jusqu'à `47 627 157 760` tests in-sphere puis
+`575 990 939 160` comparaisons de distance : c'est une borne d'entrée, pas un
+budget. L'énumération globale des 4-ensembles n'a pas besoin d'owner pour
+l'exact-once ; l'owner est requis pour son raccord à `OwnedCK`.
+
 Votre idée mathématique est donc reçue sous sa forme exacte : la hiérarchie
 HGP n'a besoin que des supports minimaux positifs complets. q2 teste une boule
-diamétrale par paire distincte ; q3 une circum-boule par triangle strictement
-aigu ; q4 une circumsphère par tétraèdre affinement indépendant dont les quatre
-poids circumcentriques sont strictement positifs. Pour q3, le centre est
+diamétrale par paire de positions distinctes, donc `D>0`. Deux IDs au même site
+ne forment pas q2 entre eux, mais chacun reste endpoint avec tout autre site et
+leur multiplicité est conservée dans le census. q3
+teste une circum-boule par triangle strictement aigu ; q4 une circumsphère par
+tétraèdre affinement indépendant dont les quatre poids circumcentriques sont
+strictement positifs. Pour q3, le centre est
 intrinsèque au plan, mais la boule et son census sont ambiants en dimension
 trois. Les sphères incidentes à une ancre partielle ne sont que le domaine d'un
 prune facultatif, jamais la source.
@@ -691,10 +717,13 @@ Une pente `sum_E4` ne qualifie rien seule. Chaque campagne publie au minimum :
 - sorties `H`, octets, HWM, opérations larges et temps par phase ;
 - commandes, seeds, commit, diff, binaire et codes de sortie.
 
-Les diagnostics CPU existants ne sont pas des modèles G4. Aucun cutoff kNN
-n'est exact : des supports positifs gardent un partenaire arbitrairement loin
-en rang. Aucun arrangement global, aucune mosaïque Delaunay d'ordre supérieur
-et aucun catalogue exhaustif ne deviennent le chemin produit.
+Les diagnostics CPU existants ne sont pas des modèles G4. Aucun petit cutoff
+kNN universel n'est reçu : une fixture u16 de exactement 50 000 IDs conserve un
+q4 régulier vide tout en plaçant au moins 12 499 distracteurs devant chacun de
+ses trois partenaires, depuis chacun de ses quatre sommets. Elle réfute toute
+source ancrée `k<=12499`, pas toute architecture locale imaginable. Aucun
+arrangement global, aucune mosaïque Delaunay d'ordre supérieur et aucun
+catalogue exhaustif ne deviennent le chemin produit.
 
 Au pin historique `cec4a4f`, le sampler v2 retire `PENDING` et la censure des grosses
 lentilles, puis remplace `2 sigma` par une demi-largeur Hoeffding correcte sous

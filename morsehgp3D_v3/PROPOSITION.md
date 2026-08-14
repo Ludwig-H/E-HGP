@@ -387,7 +387,10 @@ prouver `sup_support Phi_S(q)<0` à chacun de ses huit coins, uniformément sur
 `A×B×C×D`, après `Delta>0` et positivité stricte des poids. La convexité en `z`
 rend ces huit tests nécessaires et suffisants pour chaque support fixé ; elle
 ne rend pas exacte l'enclosure des facteurs support. Une borne indécise splitte
-ou rend `PENDING`, et huit coins extérieurs ne prouvent jamais `NONE`.
+ou rend `PENDING`, et huit coins extérieurs ne prouvent jamais `NONE`. La route
+G4 garde donc `O/J` séparés en i128 lorsque le signe est uniforme, réserve trois
+limbs i192 au résiduel réellement indécis et ne paie le pgcd que pour les
+survivants émis ; basculer tout q4 en i256 serait un surcoût inutile.
 
 Chaque support complet produit donc une seule `BallKey` candidate, mais aucun
 census n'est payé avant le RLE. Les dégénérescences peuvent envoyer plusieurs
@@ -1481,10 +1484,11 @@ fair/compressed reçoit `k=O(eta^-3)` cellules par rectangle et
 owner/positivité/profondeur, ni la masse de sortie. Le LBVH actuel et son arrêt
 par AABB serrée ne reçoivent pas encore l'hypothèse de packing.
 
-Pour des endpoints fixés, poser `n_i=|C_i minus {a,b}|`. La masse de l'atome
-`alpha` est `product_i binom(n_i,alpha_i)` et la somme sur tous les `alpha`
-vaut exactement `binom(sum_i n_i,q-2)`. Ainsi q3 possède `k` types non vides ;
-q4 en possède `binom(k,2)+#{i:n_i>=2}`. Une représentation par slots ordonnés
+Pour des endpoints fixés, poser `n_i=|C_i minus {a,b}|` et
+`k_+=#{i:n_i>=1}`. La masse de l'atome `alpha` est
+`product_i binom(n_i,alpha_i)` et la somme sur tous les `alpha` vaut exactement
+`binom(sum_i n_i,q-2)`. Ainsi q3 possède `k_+` types non vides ; q4 en possède
+`binom(k_+,2)+#{i:n_i>=2}`. Une représentation par slots ordonnés
 doit quotienter par `product_i alpha_i!`. En dimension trois, la positivité est
 vide pour `q>4`, faute de support minimal affinement indépendant plus grand.
 
@@ -1500,6 +1504,90 @@ Sym2(C) = Sym2(L) disjoint_union (L x R) disjoint_union Sym2(R)
 quand `L,R` partitionnent `C`. Un compteur `|C|-1` des nœuds internes ne vaut
 pas implémentation de cette relation : la jonction aval doit réellement porter
 les deux facteurs disjoints et retirer le parent.
+
+Un sampler diagnostique de cette masse ne choisit jamais les **blocs** témoins
+uniformément. Sa loi cible est déclarée : tuple brut, `SupportKey` owner et
+`BallKey` après RLE sont trois populations différentes. À q4, sur une antichaîne
+de cellules témoins disjointes, poser `N=sum_i |C_i|`, puis pondérer chaque
+rectangle par la
+masse u128 `|A||B|*binom(N,2)`, tirer un indice combinadique uniforme dans
+`binom(N,2)`, puis mapper les deux offsets par les préfixes de populations vers
+les cellules. Cela échantillonne exactement les paires non ordonnées, diagonale
+comprise, sans matérialiser `Sym2`. Les endpoints sont ensuite tirés dans `A,B` ;
+distinct-ID, owner avec vraie `EdgeKey`, indépendance affine et positivité sont
+des rejets explicites. Un rejet conditionnel conserve l'uniformité des
+`SupportKey` survivants seulement si l'univers brut et le cumul sont exacts,
+les tirages dans `A` et `B` indépendants et uniformes, et chaque support owner
+possède exactement un représentant brut. Une loi uniforme sur les `BallKey`
+exige le RLE puis une nouvelle pondération.
+
+Les cumuls et le générateur uniforme restent u128 ; un `double` n'est pas une
+CDF exacte pour une masse au-delà de `2^53`. Le rapport publie seed, digest,
+masse brute, rejets par strate, taille effective et intervalle statistique. Le
+census de chaque échantillon coûte `O(n)` sans index reçu : le cap porte donc
+sur `samples*n`, calculé en u128 avant le premier tirage. Le mode exige
+explicitement `ordre=4`, une seule taille, une famille/seed/digest publiés et
+refuse toute option sans effet. Ce sampler falsifie une hypothèse de densité ;
+il ne prouve ni complétude de la source, ni exactitude produit, ni SLO.
+
+On peut même pondérer directement par la masse injective. Sous `A intersect
+B=empty`, soit `W=disjoint_union_i C_i`, `N=|W|`, `a=|A|`, `b=|B|`,
+`p=|A intersect W|` et `q=|B intersect W|`. La masse non ordonnée exacte de
+quatre IDs distincts vaut :
+
+```text
+(a-p)*(b-q)*binom(N,2)
++ (p*(b-q)+(a-p)*q)*binom(N-1,2)
++ p*q*binom(N-2,2)
+```
+
+La convention est `binom(m,2)=0` pour `m<2`, testée avant toute soustraction
+u128. L'intersection de deux spans Morton est `O(1)`, mais sommer `A intersect
+W` et `B intersect W` sur `k` cellules coûte `O(k)` sans index, `O(log k)`
+après tri et préfixes, et `O(1)` seulement avec une table de populations dédiée.
+Cette identité permet un tirage stratifié u128 sans rejeter les collisions avec
+les endpoints ; elle ne remplace ni l'owner, ni la positivité. Une proposition
+ordonnée avec remise peut aussi être uniforme après rejets, mais seulement si
+chaque **point** de `W`, et non chaque bloc, a la même probabilité et si chaque
+support survivant possède exactement ses deux ordres.
+
+Un oracle borné des **supports réellement retenus** applique une chaîne plus
+forte que `orientation!=0` puis `I<=7` : quatre vrais `PointId`, indépendance
+`Delta>0`, quatre poids Gram strictement positifs, `BallForm -> BallKey`, puis
+RLE des sphères égales et un census par `BallKey`. L'énumération globale
+`i<j<k<l` visite déjà chaque ensemble une fois et n'a pas besoin d'un owner ;
+l'owner total redevient obligatoire pour juger ou rejoindre `OwnedCK`, attribuer
+l'arête génératrice ou mesurer une route ancrée. La pertinence
+du support q4 teste `|I_B|+4<=11`. Séparément, le census publie tout le shell
+`U_B`, le rang fermé `|I_B|+|U_B|` et la disposition régulière, plateau ou
+unsupported ; un extra-shell ne supprime pas silencieusement un support
+pertinent. Sans positivité, un tétraèdre dont la miniboule est portée par une
+face ou une arête est faussement compté q4 ; sans cette séparation de statuts,
+une cosphère fait confondre `binom(n,4)` supports incidents et événements
+réguliers.
+
+La localité se mesure après cette chaîne. Le rayon exact est
+`R^2=(ell^T adj(G) ell)/(4 Delta)`, pas la plus grande arête ; une distance de
+plus proche voisin nulle sous positions dupliquées rend tout ratio local
+indéfini. Après positivité seulement, si `D` est la plus grande arête, alors
+`D<=2R` et `R<=D` : `D/sqrt(esp)` est au mieux un proxy à facteur deux de
+`R/sqrt(esp)`, jamais le circumrayon calculé. Un rang kNN porte une clé totale
+`(distance^2,PointId)` et doit nommer la relation qu'il cherche à capturer :
+source ancrée, owner dirigé, clique symétrisée-OR ou clique mutuelle. Avec le
+rang zéro-based `rho_u(v)`, une source ancrée exige
+`min_u max_{v!=u} rho_u(v)<k`, la clique OR exige
+`max_{u<v} min(rho_u(v),rho_v(u))<k`, et la clique mutuelle remplace ce dernier
+`min` par `max`. Le maximum des douze rangs dirigés ne teste que cette dernière
+route ; il n'est ni nécessaire pour une route owner/ancrée, ni une preuve
+qu'aucune autre construction locale n'est exacte.
+
+Cet oracle reste `small-n`. Le preflight évalue en u128
+`binom(n,4)*(n-4)` pour le census et le pire travail additionnel de rang avant
+de lancer la boucle. Le seul cap `n<=260` autoriserait encore jusqu'à
+`47 627 157 760` appels in-sphere, puis environ `580 455 985 200`
+itérations de boucle de rang, dont `575 990 939 160` comparaisons de distances
+si tous les quadruplets survivent ; il ne constitue pas un
+plafond industriel.
 
 Pour le même rectangle owner `R=(A,B)`, réutiliser les cellules carrier de
 la fenêtre `2B_R`--lentille et former paresseusement des couples non ordonnés
@@ -2211,8 +2299,8 @@ bande passante ne qualifie aucun SLO.
 - caps exacts puis moins un, continuation, permutation, tuilage et reprise ;
 - comparaison lot par lot des dix forêts, coverage et verticales.
 
-Deux fixtures q4 exactes empêchent de réintroduire un cutoff de rang ou de
-confondre q2 et q4. Pour la première :
+Deux fixtures q4 exactes empêchent de confondre q2 et q4 ou de promouvoir un
+cutoff kNN non prouvé. Pour la première :
 
 ```text
 a=(100,100,100), b=(200,100,100)
@@ -2226,20 +2314,26 @@ avec poids `(5/14,5/14,1/7,1/7)`, et les quatre sommets sont cosphériques.
 Chaque `z_i` est strictement dans la boule diamétrale de `ab`, mais strictement
 hors de cette sphère. Dix crédits q2 ne ferment donc pas le support q4 vide.
 
-Pour la seconde :
+La seconde réfute à la taille contractuelle une source kNN ancrée de petit
+préfixe. Poser `c=(30000,30000,30000)`, `L=10000` et prendre les quatre signes
+`S={(1,1,1),(1,-1,-1),(-1,1,-1),(-1,-1,1)}` :
 
 ```text
-c=(30000,30000,30000)
-a=(5000,40000,30000), b=(55000,40000,30000)
-x=(30000,5000,40000), y=(30000,5000,20000)
-z_j=(5000,40000+j,30000), j=1,...,4381
+v_s=c+L*s, s in S
+z_(s,j)=c+(L+j)*s, s in S, j=1,...,12499
 ```
 
-Les quatre sommets ont `R2=725000000`, le même centre intérieur et les mêmes
-poids strictement positifs ; `ab` est leur unique arête maximale. Tous les
-`z_j` sont plus proches de `a` que `b`, mais strictement hors de la sphère.
-Le support q4 vide subsiste donc avec `b` au-delà du rang 4380. Un préfixe kNN
-peut proposer des témoins ou une continuation, jamais fermer par son échec.
+Cela donne exactement `4+4*12499=50000` IDs u16. Les quatre `v_s` forment un
+tétraèdre régulier positif de centre `c`, de poids `1/4`, de rayon carré
+`300000000` et d'arêtes carrées `800000000`. Chaque `z_(s,j)` est strictement
+extérieur puisque sa distance carrée à `c` vaut `3*(L+j)^2`, mais il est à
+distance carrée `3*j^2<800000000` de `v_s`. Chacun des quatre sommets a donc au
+moins `12499` distracteurs strictement plus proches que chacun de ses trois
+partenaires. Le support q4 reste vide, sans extra-shell, mais toute source
+ancrée au préfixe `k<=12499` le perd. Cette fixture finie ne prétend pas une
+impossibilité asymptotique sous le domaine u16 ; elle interdit de transformer
+un petit cutoff observé en théorème. Un préfixe kNN peut proposer des témoins ou
+une continuation, jamais fermer par son échec.
 
 ## 11. Non-claims
 

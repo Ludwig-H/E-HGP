@@ -5300,3 +5300,22 @@ add_test(NAME mhgp3v_wst4_masse_dissequee
 set_tests_properties(mhgp3v_wst4_masse_dissequee PROPERTIES
   PASS_REGULAR_EXPRESSION
   "masse_dissequee : tires=3000 ids_repetes=12 \\(0.40%\\) owner_hors=2481 \\(82.70%\\) degeneres=0 interieurs_moyen=915.0 retenus=0")
+
+# LA LOCALITE DES SUPPORTS REELLEMENT RETENUS.
+#
+# La masse ne contient presque aucun support retenu et un tirage ne les
+# rencontre pas ; on les enumere donc EXHAUSTIVEMENT a petit `n`. Ce que la
+# mesure cherche n'est pas leur nombre mais leur LOCALITE : le rang maximal d'un
+# sommet vis-a-vis d'un autre. S'il est borne, une construction par voisinage
+# borne les capture tous.
+#
+# ATTENTION AU PERIMETRE. Ce compteur retient les quadruplets d'orientation non
+# nulle dont la circumsphere a au plus sept interieurs. Il n'applique PAS encore
+# la stricte positivite des quatre barycentriques, qui est l'autorite q4 : ses
+# nombres majorent donc `W4_positive` et ne sont pas `H4_rank`.
+add_test(NAME mhgp3v_supports_retenus_localite
+  COMMAND mhgp3v_wst3_probe --family=uniform --points=120 --sep-euclid=2/1
+          --supports-retenus)
+set_tests_properties(mhgp3v_supports_retenus_localite PROPERTIES
+  PASS_REGULAR_EXPRESSION
+  "supports_retenus : n=120 retenus=60378 retenus/n=503.15 ratio_arete_espacement moyen=7.07 max=23.00 rang_max moyen=48.1 pire=109")
