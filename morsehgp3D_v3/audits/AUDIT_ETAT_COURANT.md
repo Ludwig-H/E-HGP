@@ -8,18 +8,31 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-> **Alerte au `HEAD=c1e2e3b`.** Le commit absorbe `HCBlockDepth` et la
-> réparation locale de `--borne-sup`. Le build ciblé est vert ; les dix-huit
-> CTests nommés Midball/HC et la CTest borne passent. Cela ne reçoit pas les
-> raccords. Les deux portes HC saines utilisent une regex qui peut masquer un
-> code non nul, aucune ne juge chaque promotion WSPD, HC reste recalculé jusque
-> trois fois par tâche et `--hc --midball` termine code `3` sur un plancher
-> marginal nul. Le retour anticipé `--fenetre-exhaustive` contourne toujours
-> ces gates. Plus grave, le commentaire CMake affirmant que `cred+reste`
-> majore exactement le crédit final n'est vrai que pour le ledger singleton
-> baseline : le mode accepté perd encore une fermeture SOC combinée à `n=16`
-> et deux fermetures BJD q4 à `n=64`, sans troncature et avec code zéro. La
-> porte borne ne compare ni fates ni masses à une exécution OFF.
+> **Alerte au `HEAD=3703097`.** Les commits `89774d0`, `e3f1925` et
+> `88a9ba8` ajoutent respectivement `Corner8BallDepth`, un broad phase WST3 et
+> son produit WST4 ; `22d1cb0` en publie la note de coût. Le successeur
+> `3703097` branche un filtre d'acuité **au signe inversé** : avec
+> `H=(x-a) dot (b-x)`, l'identité exacte est `E+X-D=-2H`, et non `2H`.
+> Le tétraèdre régulier de tie a deux carriers `H=-1`, quatre poids `1/4`, et
+> le nouveau filtre les retire. Toute mesure `blocs4_aigu/gain`, dont
+> `1,62x`, est invalide avant correction et porte déterministe.
+>
+> Le théorème de la
+> miniboule unique est reçu uniquement pour un **support minimal positif
+> complet**. Corner8 est un certificat `ALL_INTERIOR` conditionnel sur un vrai
+> support q4 déjà authentifié ; ses `6/6` portes ne jugent ni positivité, ni
+> owner, ni IDs, et son oracle ponctuel recopie le prédicat du sujet. Les
+> `5/5` portes WST3 et la porte WST4 reçoivent une couverture dans le rectangle
+> owner choisi par leur juge, pas une source physique exact-once : le tape brut
+> conserve les ancres non-owner et les diagonales, tie-breake par rang Morton et
+> rejette à tort les positions dupliquées. Le verdict détaillé et les réponses
+> Q6--Q9 sont dans le nouveau contre-audit support-complet.
+>
+> Les défauts antérieurs restent actifs : les portes HC saines sont à regex et
+> ne jugent pas chaque promotion ; `--fenetre-exhaustive` contourne les gates ;
+> `cred+reste` ne majore que le ledger singleton baseline et perd encore une
+> fermeture SOC combinée à `n=16` et deux fermetures BJD q4 à `n=64`. La porte
+> borne ne compare ni fates ni masses à une exécution OFF.
 > Le verdict exact sur l'idée de miniboule unique est
 > [`AUDIT_MINIBOULE_UNIQUE_RESIDUEL_SHALLOW_5809BD2_20260814.md`](AUDIT_MINIBOULE_UNIQUE_RESIDUEL_SHALLOW_5809BD2_20260814.md) : l'événement q2 canonique est bien
 > la boule diamétrale ; q3 et q4 ont chacun une boule canonique une fois
@@ -31,17 +44,24 @@ Cadre : `phase=exploration_v3_hors_registre`,
 ## Snapshot
 
 Le dernier commit stable relu est
-`HEAD=c1e2e3bd51b85947a0cb5b29ad3fca2d812485a5`, commit
-`le meme raisonnement porte q3 et q4, mais son prix depasse son gain`. Il
-absorbe le raccord Midball du parent `a58d020`, `HCBlockDepth`, la seconde
-révision de `--borne-sup`, six portes supplémentaires et les deux
-contre-audits live. Au présent snapshot, le worktree ne modifie que les cinq
-documents autorisés de cette passe ; l'auditeur n'a modifié aucun logiciel.
+`HEAD=37030978bffe1362833c4e6740ff08fe08a8ec1e`, commit
+`je corrige ma propre pente : 1,73 etait transitoire, la constante est le mur`. Il
+absorbe le raccord Midball de `a58d020`, HC et la borne de `c1e2e3b`, Corner8
+de `89774d0`, WST3 de `e3f1925`, WST4 de `88a9ba8` et la note de Claude. Au
+présent snapshot, l'auditeur modifie seulement les documents autorisés.
+Claude modifie concurremment `prototype/wst3_probe.cpp` ; ce delta logiciel
+mobile n'est pas reçu. Aucun logiciel n'a été modifié par l'auditeur.
 
-Empreintes SHA-256 au commit `c1e2e3b` :
+Empreintes SHA-256 au commit `3703097` :
 
 - `CMakeLists.txt` :
-  `7c8911a5bd110cb2663fc54eca34fbd8e4ae5bd616021f1b3535a60d8ad4b9ef` ;
+  `2687033ab827d04a08299c3105af850facef53246d13f2eda8c881ffcb84f807` ;
+- `prototype/wst3_probe.cpp` :
+  `7fbb026c05293ced20b215b5a58fe6fe434c9d08de1d0bc1d31d62c9069c9830` ;
+- `prototype/corner8_ball.hpp` :
+  `35d140031f76cfba5394013e95a35c61643a22bb6ad89c2670535c9dc259e2d0` ;
+- `prototype/corner8_probe.cpp` :
+  `9f29100613543cdf1f246243ec7b8112b4c84826618c4a053b3332361c49115f` ;
 - `prototype/wspd_wavefront_probe.cpp` :
   `6330b79586066c575c59e4480a17fdf864fdef77b261a3a7f33c66bd68ed9c5b` ;
 - `prototype/cloud_families.hpp` :
@@ -59,9 +79,9 @@ Empreintes SHA-256 au commit `c1e2e3b` :
 
 Le commit stable reçoit la primitive BJD, un packing disjoint sûr sur ses
 campagnes causales, huit portes BJD ciblées, treize portes Midball, cinq portes
-HC et une porte de réfutation de la borne. Les `18/18` Midball/HC et `1/1`
-borne affichés verts ne ferment pas les défauts de composition ci-dessus. Il ne reçoit
-ni source CK--WST,
+HC, une porte de réfutation de la borne, six portes Corner8 et six portes
+WST3/WST4. Les verts ciblés ne ferment pas les défauts de composition et
+d'identité ci-dessus. Il ne reçoit ni projection CK--WST distinct-ID/owner,
 ni profondeur `tau(F)`, ni ledger persistant de vrais `PointId`, ni primitive
 device, ni payload. Son `--fenetre-exacte` n'est exact que pour la miniboule q2
 échantillonnée sous domaine régulier ; ses lanes q3/q4 publient un majorant par
@@ -81,7 +101,7 @@ p95 à 50 000 points. Le squelette du contrat de benchmark existe, mais ses
 traverse `BallEvent -> 0B -> payload`; ils ne qualifient donc ni exactitude
 industrielle ni SLO.
 
-Le snapshot contient cinq probes/campagnes utiles, mais aucune chaîne produit
+Le snapshot contient au moins sept probes/campagnes utiles, mais aucune chaîne produit
 reçue :
 
 1. `BallFormToBallEvent-v0` forme des sphères et des census sur petit domaine ;
@@ -92,15 +112,17 @@ reçue :
 4. la rampe à 50 000 points rejette la configuration centrale mesurée sur
    `eight_clusters`, sans réfuter les certificateurs rectangles corrélés ;
 5. `q4_brute_oracle` énumère les 4-sous-ensembles à petit `n`, avec un census
-   et des prédicats encore corrélés/incomplets sur le shell.
+   et des prédicats encore corrélés/incomplets sur le shell ;
+6. Corner8 certifie conditionnellement des blocs de témoins q4 `ALL` ;
+7. WST3/WST4 compte une couverture candidate avant projection owner/positivité.
 
 Les noms « 0A fermé », « stage 0B » et « le raffinement paie » dépassent les
 preuves disponibles.
 
 ## Nouvelle source candidate : `CKPairTape -> WST3 -> WST4`
 
-L'audit reçoit la construction mathématique comme proposition exacte et
-GPU-factorisable, pas comme implémentation :
+L'audit reçoit le contrat mathématique comme proposition exacte et
+GPU-factorisable. Le probe courant n'en implémente que le `CandidateCover` :
 
 - une WSPD Callahan--Kosaraju canonique partitionne toutes les paires en
   `O(s^3 n)` rectangles physiques sans les développer ; après filtrage des
@@ -111,11 +133,13 @@ GPU-factorisable, pas comme implémentation :
 - pour chaque rectangle `R=(A,B)`, les cellules Morton d'une échelle liée à sa
   boule `B_R` et rencontrant `2B_R` couvrent tout carrier d'un support dont
   `ab` est l'arête maximale ; l'intersection avec les deux enveloppes endpoint
-  resserre encore ce domaine. L'owner longueur/`EdgeKey` donne un unique
+  resserre encore ce domaine. Après projection distinct-ID, owner
+  longueur/`EdgeKey` et positivité, on obtient un unique
   `OwnedCK-WST3(A,B,C)` ;
-- les couples non ordonnés de ces cellules donnent de même un unique
-  `OwnedCK-WST4(A,B,C,D)` ; q4 recertifie directement les quatre
-  barycentriques du circumcentre.
+- après la même projection, les couples non ordonnés de ces cellules donnent
+  un unique `OwnedCK-WST4(A,B,C,D)` ; q4 recertifie directement les quatre
+  barycentriques du circumcentre. Le compteur brut antérieur à cette projection
+  n'est pas `Owned`.
 
 Les nombres de blocs **initiaux** conditionnels sont `O(s^3 n)`,
 `O(s^3*eta^-3*n)` et `O(s^3*eta^-6*n)` sous une vraie propriété
@@ -142,7 +166,8 @@ des microtiles rejoués ou prouver un `BlockJungDiskDepth` uniforme.
 
 Pour un support minimal positif affinement indépendant fixé, la miniboule et
 donc la boule canonique de son événement complet sont uniques : diamètre q2,
-centre/rayon donnés par le circumcercle intrinsèque du triangle aigu q3,
+centre/rayon donnés par le circumcercle intrinsèque du triangle aigu q3 mais
+boule et census ambiants en dimension trois,
 circumsphère du tétraèdre bien centré q4. Pour les arités inférieures à quatre,
 une famille de sphères ambiantes reste incidente au support sans être portée
 minimalement par lui. Le circumdisque
@@ -224,7 +249,9 @@ q3/q4 ni une nouvelle autorité exacte : `corner512_all_lane` reçoit déjà
 l'enveloppe continue complète. Le commentaire du commit ne perd pas seulement
 la corrélation entre les deux produits d'une composante : il perd aussi la
 simultanéité entre les trois maxima de composantes, puis entre `hmin` et le
-pire `C`. Trois fixtures séparées dans l'audit HC isolent ces trois pertes.
+pire `C`. Une fixture publiée isole la perte entre composantes ; les deux
+autres pertes sont identifiées algébriquement et doivent encore devenir des
+fixtures permanentes.
 
 Les cinq CTests HC du commit passent, avec les deux mutants tués. Les portes
 saines `mhgp3v_hc_selftest` et `mhgp3v_hc_vwave` restent toutefois à
@@ -285,6 +312,58 @@ ci-dessus, les fenêtres capées et plusieurs tailles. Aucun gain de la révisio
 commise n'est recevable avant cette parité. Le snapshot falsifié, la portée
 exacte du lemme et les obligations sont détaillés dans
 [`AUDIT_LIVE_BORNE_SUP_CREDITS_A58D020_20260814.md`](AUDIT_LIVE_BORNE_SUP_CREDITS_A58D020_20260814.md).
+
+## `Corner8BallDepth` au HEAD : lemme `ALL` reçu, événement non raccordé
+
+Pour un support q4 fixé et positif, `sigma*J(S,z)` est strictement convexe en
+`z`. Ses huit coins donnent donc un certificat `ALL_INTERIOR` complet sur une
+AABB témoin. Les largeurs `|O|<2^51` et `|J|<2^87` tiennent sous u16 lorsque
+les signes sont jugés séparément. Les `6/6` portes ciblées passent.
+
+La primitive ne préflighte toutefois ni boîtes u16, ni quatre IDs distincts,
+ni positivité barycentrique, ni owner, ni shell ou `BallKey`. Son oracle de
+bloc réemploie les prédicats ponctuels du sujet. Trois nominales sont à regex ;
+`--selftest=1` imprime `accord=OUI` puis rend code `3`. Deux mutants déterminants
+restent hors porte, `kProduitOJ` n'est pas implémenté et le mutant nommé
+`corners-outside-implies-none` produit en réalité un faux `ALL`.
+
+La fixture de 4096 supports prouve un bloc q4 utile, pas le raccord : avant
+owner/positivité/census, sa télémétrie est `domain_mass_closed`. Un bloc `ALL`
+paie environ 1508 multiplications d'extrémités `i128`, et non huit opérations.
+Le détail, les fixtures `drop-corner`, support non positif et q3 ambiant sont
+dans
+[`AUDIT_CONTRE_RECEPTION_SUPPORT_COMPLET_CORNER8_WST34_22D1CB0_20260814.md`](AUDIT_CONTRE_RECEPTION_SUPPORT_COMPLET_CORNER8_WST34_22D1CB0_20260814.md).
+
+## `WST3/WST4` au HEAD : candidate cover, pas source `Owned` reçue
+
+Le filtre d'acuité du `HEAD=3703097` est P0 rouge. Pour
+`H=(x-a) dot (b-x)`, une face est aiguë en `x` lorsque `H<0`. La classification
+exacte est `Hmax<0 => ALL_ACUTE`, `Hmin>=0 => NONE_ACUTE`, sinon `MIXED`.
+Le juge WST4 courant contrôle les couples bruts et ignore le booléen `aigu` ;
+il reste donc vert tout en laissant le filtre supprimer le tétraèdre régulier
+de la fixture. Aucune mesure filtrée du commit n'est reçue.
+
+Le lemme arête maximale--lentille est correct et les campagnes bornées couvrent
+chaque triplet/quadruplet dans le rectangle de l'owner choisi : WST3 `5/5` et
+WST4 `1/1`. Le juge ne cherche cependant aucune copie sous les ancres non-owner,
+ne compte pas les diagonales du tape, tie-breake avec les rangs Morton plutôt
+qu'avec les vrais `PointId` et refuse les positions dupliquées. Sujet et juge
+partagent ces deux dernières conventions.
+
+Ainsi les blocs courants sont une `candidate-cover exact-once après projection
+distinct-ID et owner`, pas encore `OwnedCK-WST3/WST4`. La projection distinct-ID, owner et
+positivité doit rester factorisée avant le produit. L'arrêt LBVH à échelle
+grossière donne une surcouverture sûre mais aucune borne de cellules par
+rectangle ; les pentes et la constante proche de 32 sont des diagnostics finis.
+La masse WST4 proche de `n^4` et `187` millions de blocs à `n=8000` rendent le
+produit brut rouge, sans mesurer encore `M4_apex`.
+
+La réparation de performance est une vraie grille Morton au niveau lié à
+`r_R`, puis `ALL/NONE_ACUTE`, profondeur et owner uniforme **avant** tout
+`sum k_t^2`. Le count de masse des paires de cellules emploie
+`binom(sum |C_i|,2)` en temps linéaire par rectangle et en u128, jamais une
+boucle `u<v` ni un `double`. Les questions Q6--Q9 et la gate coût appariée sont
+résolues dans le contre-audit ci-dessus.
 
 ## P0 : `0A` reste ouvert sur u16
 
@@ -705,6 +784,14 @@ une source factorisée exacte. Elle ne devient toujours pas une liste sparse.
 De même, le théorème des faces aiguës q4 est utile uniquement avant le rang ;
 la fixture 64 points interdit toute cascade depuis les événements q3 retenus.
 
+Le contre-audit du probe live resserre à son tour **ma** formulation : les
+conditions précédentes sont un contrat, pas l'état du tape `22d1cb0`. Le juge
+choisit l'owner puis ignore les autres ancres, tandis que le producteur brut ne
+projette ni owner, ni distinct-ID et partage un tie-break Morton. L'autre
+auditeur avait raison de demander une broad phase et de refuser une borne de
+sortie ; son angle mort, comme le mien, était la couture entre l'owner abstrait
+et les records réellement comptés. Le statut live reste `CandidateCover`.
+
 Le second contre-audit mathématique de cette passe a également corrigé mes
 propres formulations : `2B_R` est sharp seulement à information de boule
 contenante fixée ; un poids `lambda` commun rend `BlockJungDual` sûr mais
@@ -776,12 +863,18 @@ HEAD fenetre-exacte n=200, S=1000 : 198000 scans ; q2 exact échantillonné, q3/
 HEAD exhaustif n=200 : 19900 paires, U<h=3790/10059/10937, 3184359 tests
 HEAD exhaustif --points=8,9 : n=9 sauté par retour après les 28 paires de n=8
 HEAD exhaustif + plancher BJD impossible ou mutant : code 0, gates court-circuitées
-HEAD a58d020 WSPD 63c79bd6 / CMake 4c6cb24e : build vert ; 13/13 affichés verts
+pin a58d020 WSPD 63c79bd6 / CMake 4c6cb24e : build vert ; 13/13 affichés verts
   n=1500 amas : lectures -7,41 %, résiduel q2 -29,95 %, vague médiane +14,1 %
   multi-n : compteurs hérités ; cap i64 et bypass exhaustif du juge ouverts
-worktree borne-sup 90640885 : zéro fermeture q2/q3/q4, pending=0, fenêtre finale OUI ; réfuté
-worktree borne-sup ec5ec3d4 : fates/masses appariés sans SOC/BJD/climb ; lectures -0,0274 %
+révision borne-sup 90640885 : zéro fermeture q2/q3/q4, pending=0, fenêtre finale OUI ; réfuté
+révision commise ec5ec3d4 : fates/masses appariés sans SOC/BJD/climb ; lectures -0,0274 %
   ledgers combinés, BJD, climb, CTest de parité et mutant de conservation ouverts
+HEAD Corner8 : 6/6 ciblés ; bloc=4096 supports/32768 témoins, oracle ponctuel corrélé
+  selftest=1 imprime accord=OUI puis code 3 ; drop-corner/norme hors porte ; produit-OJ absent
+HEAD WST3 : 5/5 ciblés ; uniform n=120, 280840 triangles, zéro manquant/doublon owner
+HEAD WST4 : 1/1 ciblé ; uniform n=60, 487635 quadruplets, zéro manquant/doublon owner
+  copies non-owner, diagonales, vrai PointId, doublons de position et coût non jugés
+catalogue HEAD : 833 CTests après reconfiguration ; aucune suite complète 833/833 rejouée ici
 ablation BJD n=1500 uniform : masse q4 -12,55 %, CPU user médian +5,47 %, lectures identiques
 ablation BJD n=1500 amas : masse q4 -0,87 %, CPU user médian +8,15 %, lectures identiques
 session G4 SOC actif : CTest rc=8, aucune rampe, cible TERMINATED
@@ -808,9 +901,10 @@ réparer 0A u16 et isoler les juges de mutants
   -> triage canonique U<=D<=C par paire/microtile
   -> SOC64 union-disjointe + JungDiskDepth9/8 seulement sur U<h<=C
   -> primal proposer -> BlockJungDual64 uniforme -> branch-and-cut tau(E)>=h
-  -> CarrierBlocks dans 2B_R-lentille dès q3_open || q4_open
-  -> OwnedCK-WST3 puis WST4 symbolique pré-rang
-  -> FaceAxisJungDepth8 puis Corner8BallDepth/BlockBallDepth8 avant tout fill q4
+  -> CandidateWST3 coarse dans 2B_R-lentille dès q3_open || q4_open
+  -> normaliser vrais PointId, distinct-ID, owner et ALL/NONE_ACUTE par bloc
+  -> profondeur carrier avant de former paresseusement le résiduel WST4
+  -> positivité q4 puis Corner8BallDepth/BlockBallDepth8 avant tout fill
   -> raffinement porteur de preuves sur les tâches encore MIXED
   -> mesurer F2/F3/C4_carrier/F4/M4_apex/W4/H4/T4, BallKeys, census, H
   -> seulement alors portage device et campagne G4 50k

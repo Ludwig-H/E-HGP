@@ -3,10 +3,30 @@
 Date : 14 août 2026 UTC.
 
 Cadre : `phase=exploration_v3_hors_registre`,
-`backend=cpu_reference_bounded_oracles`,
+`backend=cpu_reference_bounded_oracles_and_g4_diagnostic`,
 `profile=quantized_u16_input_only`,
-`mode=mesure_exploratoire`,
-`public_status=not_claimed`.
+`mode=audit_independant_math_and_architecture`,
+`public_status=not_claimed`. La note rapporte localement une mesure
+`counter-only` ; cela ne change pas le cadre v3.
+
+> [!CAUTION]
+> **Contre-réception au même pin.** Les mesures de masse WST4 et le lemme de
+> lentille sont utiles, mais les claims `Owned/exact-once` ne sont pas reçus.
+> Le juge ne cherche que le rectangle de l'owner qu'il choisit ; il ignore les
+> copies sous les ancres non-owner et les diagonales du tape, partage le
+> tie-break par rang Morton et le probe refuse à tort les positions dupliquées.
+> Le statut est `CandidateCover exact-once après projection owner`. De plus,
+> `cred+reste` n'est sûr que pour le ledger singleton baseline et perd des
+> fermetures SOC/BJD dans les modes encore acceptés. Preuves, fixtures et
+> réponses Q6--Q9 :
+> [`AUDIT_CONTRE_RECEPTION_SUPPORT_COMPLET_CORNER8_WST34_22D1CB0_20260814.md`](AUDIT_CONTRE_RECEPTION_SUPPORT_COMPLET_CORNER8_WST34_22D1CB0_20260814.md).
+>
+> **Rétractation du filtre au successeur `3703097`.** L'identité committée
+> `E+X-D=2H` est fausse pour `H=(x-a) dot (b-x)` ; la bonne identité est
+> `E+X-D=-2H`. Une face est aiguë lorsque `H<0`. Le filtre publié élimine donc
+> de vrais carriers, notamment les deux carriers `H=-1` du tétraèdre régulier
+> à quatre poids `1/4`. Les nombres `1,46x/1,62x` ne mesurent pas un filtre sûr
+> et sont retirés de toute décision.
 
 Cette note répond à
 [`AUDIT_MINIBOULE_UNIQUE_RESIDUEL_SHALLOW_5809BD2_20260814.md`](AUDIT_MINIBOULE_UNIQUE_RESIDUEL_SHALLOW_5809BD2_20260814.md)
@@ -61,7 +81,7 @@ Deux mutants ne sont **pas** exercés par un tirage uniforme :
 `c8-norme-aux-coins` que si la boîte témoin chevauche un facteur support. Je
 les laisse hors porte plutôt que de les compter morts.
 
-## 3. `OwnedCK-WST3` : la source d'ordre trois existe et elle est exact-once
+## 3. `WST3CandidateCover` : couverture owner reçue, projection ouverte
 
 Chaque triangle appartient à son arête maximale. Si `ab` l'est, alors
 `||x-a|| <= ||b-a||` et `||x-b|| <= ||b-a||` : le troisième sommet vit dans la
@@ -71,8 +91,11 @@ racine carrée, la distance à une boîte se séparant par axe.
 
 Le juge énumère les `C(n,3)` triangles, détermine l'owner de chacun et exige
 que son troisième sommet appartienne à **exactement un** bloc du rectangle
-owner. Sur `uniform` et `eight_clusters` : `447 580` triangles, zéro manquant,
-zéro doublon. `wst3-rayon-min` en laisse `145 236` non couverts et meurt.
+owner. Sur `uniform,n=120`, il juge `280 840` triangles ; sur
+`eight_clusters,n=140`, `447 580` : zéro manquant et zéro doublon dans les deux
+cas. `wst3-rayon-min` perd des triangles et meurt. Cette porte ne cherche pas
+les copies dans les rectangles non-owner et ne reçoit donc pas l'exact-once
+physique global.
 
 La mesure a corrigé ma première construction. Exiger l'inclusion complète d'un
 nœud dans la lentille force à raffiner jusqu'à sa frontière : le coût suit une
@@ -88,16 +111,19 @@ sur-couvert.
 | échelle=1 | 1,28 | 1,47 | 1,48 | **1,09** |
 | rectangles WSPD | 1,07 | 1,18 | 1,24 | **1,01** |
 
-À échelle grossière, l'ordre trois suit donc l'ordre deux à une constante près.
+À échelle grossière, cette rampe finit avec une pente proche de celle des
+rectangles. Elle ne prouve ni constante universelle, ni borne adverse : l'arrêt
+LBVH n'impose pas un vrai niveau de grille Morton.
 
-## 4. `OwnedCK-WST4` : exact-once, mais le compte n'est pas linéaire
+## 4. `WST4CandidateCover` : produit conditionnellement unique, compte rouge
 
 L'ordre quatre est un produit et non une nouvelle recherche : pour un tétraèdre
 d'arête maximale `ab`, les **deux** autres sommets sont dans la lentille, donc
 les blocs `WST4` d'un rectangle sont les couples non ordonnés de ses blocs
-`WST3`, diagonale comprise. L'exact-once suit sans preuve supplémentaire, les
-blocs `WST3` étant disjoints ; le juge le vérifie tout de même sur les `C(n,4)`
-quadruplets : `487 635` à `n=60`, zéro manquant, zéro doublon.
+`WST3`, diagonale comprise. Dans **un rectangle owner déjà fixé**, les blocs
+WST3 disjoints donnent un couple unique ; le juge vérifie ce fait sur les
+`C(n,4)` quadruplets : `487 635` à `n=60`, zéro manquant, zéro doublon. Les
+copies non-owner et les diagonales de support restent hors de cette porte.
 
 C'est le compte qui refuse.
 
@@ -109,7 +135,7 @@ C'est le compte qui refuse.
 
 Deux lectures, et je ne veux pas les confondre.
 
-La masse logique suit exactement `n^4`. C'est la confirmation directe de votre
+Les quatre pentes observées de masse sont proches de quatre. C'est un diagnostic direct de votre
 verrou M4 : elle ne doit jamais être remplie, et la factorisation la représente
 ici par un nombre d'enregistrements plus petit d'un facteur `2*10^7` à `n=8000`.
 
@@ -131,22 +157,24 @@ elle corrige ma propre lecture :
 | blocs WST4 | 6,16e6 | 1,71e7 | 5,66e7 | 1,87e8 | 4,18e8 | 1,05e9 |
 | `k_t` | 18,2 | 21,0 | 25,7 | 30,4 | 32,0 | 35,1 |
 
-Les pentes de `blocs4` deviennent `1,47 / 1,73 / 1,73 / 1,16 / 1,33`. La valeur
-`1,73` n'est donc pas asymptotique : elle appartient au régime où `k_t` monte
-encore vers sa constante géométrique. Une boule de rayon `R` contient de l'ordre
-de `(2*sqrt(3))^3 = 41,6` cellules de diagonale `R`, et `k_t` semble converger
-vers ce voisinage — `35,1` à `n=32000`.
+Les pentes de `blocs4` deviennent `1,47 / 1,73 / 1,73 / 1,16 / 1,33`. Elles
+réfutent l'extrapolation fondée sur la seule pente `1,73`, mais ne prouvent pas
+un régime asymptotique. Le rapprochement avec `(2*sqrt(3))^3=41,6` est une
+hypothèse de packing pour de vraies cellules cubiques à niveau fixé ; les nœuds
+LBVH courants ne reçoivent ni cette maille, ni cette constante. `k_t=35,1` à
+`n=32000` reste une mesure finie.
 
-La conclusion honnête n'est donc pas « super-linéaire » mais : **quasi-linéaire
-avec une constante inacceptable**. À `n=32000` la source rend `32 736` blocs
-d'ordre quatre par point. Ce n'est pas l'exposant qui interdit le chemin
-produit, c'est le facteur constant.
+La conclusion bornée est seulement qu'à `n=32000` cette rampe rend `32736`
+blocs d'ordre quatre par point. Les deux dernières pentes `1,16/1,33` et le
+voisinage numérique de `41,6` ne prouvent ni convergence, ni quasi-linéarité :
+le probe emploie des AABB serrées de nœuds radix, pas les cellules d'un niveau
+Morton fixe exigées par l'argument de packing.
 
-Le filtre d'acuité aide, sans suffire. Comme `E+X-D = 2H`, le prédicat
-d'acuité est exactement celui de Thalès, donc déjà séparable et exact : un bloc
-dont `max H <= 0` ne peut porter aucun carrier. Il élimine `55 %` des blocs
-WST3, mais le couple survit dès qu'un seul de ses deux membres est aigu — le
-`OR` du lemme, jamais le `AND` — donc le gain plafonne à `1,46x` puis `1,62x`.
+Le premier filtre d'acuité mesuré est invalide. Pour
+`H=(x-a) dot (b-x)`, on a `E+X-D=-2H`; classifier `Hmax<0` comme
+`ALL_ACUTE`, `Hmin>=0` comme `NONE_ACUTE`, sinon `MIXED`. Le `OR` entre les
+deux carriers reste correct, mais aucun gain du filtre au signe inversé n'est
+conservé.
 
 ## 5. Ce que cela déplace
 
@@ -166,13 +194,15 @@ HCBlockDepth  : recertifications -12,6 %, q3 -17,6 %, temps +55 %
 MidballBlockDepth : recertifications -6,3 %, q2 -28 %, temps dans le bruit
 ```
 
-Seul le dernier survit, et c'est le seul dont le prédicat est **exact** plutôt
-que relaxé — le domaine des centres q2 étant réduit à un point.
+Dans cette ordonnance et sur ces diagnostics, seul le dernier ne montre pas un
+surcoût causal clair. Son prédicat q2 est exact sur la miniboule, mais cela ne
+reçoit ni son raccord, ni une dominance de coût sur les autres ordonnances.
 
-J'ai aussi réfuté une coupure par borne supérieure : `cred + reste` majore
-exactement le crédit atteignable et l'abandon est sûr, mais le gain est nul
-(`31 538 327 -> 31 535 026`), le seuil de huit points étant dérisoire devant
-les populations empilées.
+La coupure `cred+reste` majore exactement le crédit atteignable du seul ledger
+singleton baseline. Elle n'est pas une borne de la vue combinée ni de la banque
+BJD post-boucle : les contre-fixtures perdent des fermetures dans ces deux
+modes. Même sur l'ablation admissible, le gain mesuré est très faible
+(`31 538 327 -> 31 535 026`).
 
 ## 6. Questions
 

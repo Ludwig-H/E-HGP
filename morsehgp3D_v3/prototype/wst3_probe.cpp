@@ -102,17 +102,29 @@ const char* mutant_name(Wst3Mutant m) {
   return "?";
 }
 
-// ---- LE FILTRE D'ACUITE EST LE PREDICAT DE THALES, ET C'EST GRATUIT.
+// ---- LE FILTRE D'ACUITE, ET LE SIGNE QUE J'AVAIS INVERSE.
 //
-// La face `(a,b,x)` est aigue en `x` si et seulement si
-// `E + X - D = ||x-a||^2 + ||b-x||^2 - ||b-a||^2 > 0`, et cette quantite vaut
-// exactement `2 (x-a).(b-x) = 2H`. Le filtre d'acuite est donc `H > 0`, le meme
-// predicat que `MidballBlockDepth` — separable par axe, exact, sans division.
+// La face `(a,b,x)` est aigue au sommet `x` lorsque `(a-x).(b-x) > 0`. Or
+// `H = (x-a).(b-x) = -(a-x).(b-x)`, donc l'acuite est `H < 0` — et non `H > 0`.
+// L'identite le confirme : avec `b-a = (b-x) + (x-a)`,
+// `D = X + E + 2H`, donc `E + X - D = -2H`.
 //
-// Un bloc dont le MAXIMUM de `H` est negatif ou nul ne peut porter aucun
-// carrier aigu : le lemme du porteur exige qu'un support q4 d'owner `ab` ait au
-// moins une face aigue incidente a `ab`. Le couple `{C,D}` n'est donc forme que
-// si l'un des deux blocs peut etre aigu — jamais `AND`, toujours `OR`.
+// C'est exactement Thales, dans le bon sens : a l'INTERIEUR de la boule
+// diametrale l'angle vu depuis `x` est OBTUS, sur la sphere il est droit, et
+// c'est a l'EXTERIEUR qu'il est aigu. Ma premiere ecriture gardait donc les
+// blocs obtus et jetait les aigus, ce qui perd des q4 bien centres — le
+// contre-audit l'a pris en flagrant delit sur le tetraedre regulier
+// `(0,0,0),(0,1,1),(1,0,1),(1,1,0)`, dont les deux carriers ont `H=-1`.
+//
+// La classification exacte de bloc est donc :
+//
+//   Hmax <  0  -> ALL_ACUTE
+//   Hmin >= 0  -> NONE_ACUTE     (l'egalite est droite, donc NON aigue)
+//   sinon      -> MIXED
+//
+// Un couple `{C,D}` n'est forme que si l'un des deux blocs peut porter un
+// carrier aigu, c'est-a-dire des que `Hmin < 0` — le `OR` du lemme du porteur,
+// jamais le `AND`.
 struct Bloc {
   int c;
   bool aigu;   // le bloc peut-il contenir un carrier aigu ?
@@ -153,7 +165,7 @@ i64 dist2_min_box_to_box(const mhgp3v::RectBox& C, const mhgp3v::RectBox& A) {
 int main(int argc, char** argv) {
   std::string family = "uniform";
   long long n = 0, seed = 12345, sep_num = 8, sep_den = 1, coord = 0;
-  bool juge = false;
+  bool juge = false, fixture_tetra = false;
   long long min_blocs = 0;
   // ---- L'ECHELLE DU BLOC, ET POURQUOI ELLE DECIDE TOUT.
   //
@@ -167,7 +179,7 @@ int main(int argc, char** argv) {
   // reste exact-once — les nœuds d'une antichaine sont disjoints — et le domaine
   // est seulement SUR-couvert, ce qui est sur : la lentille est une condition
   // necessaire, le predicat exact filtrera en aval.
-  long long echelle = 0;
+  long long echelle = 0, echelle_den = 1;
   // ---- L'ORDRE QUATRE EST UN PRODUIT, PAS UNE NOUVELLE RECHERCHE.
   //
   // Pour un tetraedre `{a,b,x,y}` d'arete maximale `ab`, les DEUX autres
@@ -196,13 +208,67 @@ int main(int argc, char** argv) {
       sep_den = arg_ll(v.substr(p + 1).c_str(), 1, 1024, "sep-euclid");
     }
     else if (a == "--juge") juge = true;
+    else if (a == "--fixture-tetra") fixture_tetra = true;
     else if (a.rfind("--ordre=", 0) == 0) ordre = arg_ll(val("--ordre=").c_str(), 3, 4, "ordre");
-    else if (a.rfind("--echelle=", 0) == 0) echelle = arg_ll(val("--echelle=").c_str(), 1, (1LL << 20), "echelle");
+    else if (a.rfind("--echelle=", 0) == 0) {
+      // `num/den` : la descente s'arrete des que `diag^2 <= (num/den) rayon^2`.
+      // Un rapport PLUS GRAND donne des cellules plus grosses, donc moins de
+      // blocs et davantage de sur-couverture — et comme l'ordre quatre est un
+      // produit, le gain y est QUADRATIQUE.
+      const std::string v = val("--echelle=");
+      const size_t sl = v.find('/');
+      if (sl == std::string::npos) {
+        echelle = arg_ll(v.c_str(), 1, (1LL << 20), "echelle");
+        echelle_den = 1;
+      } else {
+        echelle = arg_ll(v.substr(0, sl).c_str(), 1, (1LL << 20), "echelle");
+        echelle_den = arg_ll(v.substr(sl + 1).c_str(), 1, (1LL << 20), "echelle");
+      }
+    }
     else if (a.rfind("--min-blocs=", 0) == 0) min_blocs = arg_ll(val("--min-blocs=").c_str(), 1, (1LL << 40), "min-blocs");
     else if (a == "--inject=wst3-rayon-min") mu = Wst3Mutant::kRayonMin;
     else if (a == "--inject=wst3-une-seule-boule") mu = Wst3Mutant::kUneSeuleBoule;
     else if (a == "--inject=wst3-pas-de-descente") mu = Wst3Mutant::kPasDeDescente;
     else refuse("argument inconnu");
+  }
+  // ---- LA FIXTURE DU TETRAEDRE REGULIER, EXIGEE PAR LE CONTRE-AUDIT.
+  //
+  // `p0=(0,0,0)`, `p1=(0,1,1)`, `p2=(1,0,1)`, `p3=(1,1,0)` : six aretes de
+  // longueur carree deux, owner `EdgeKey(0,1)`, centre `(1/2,1/2,1/2)` et
+  // quatre poids `1/4`. Pour `x=p2` et `x=p3`, `H = (x-p0).(p1-x) = -1`.
+  //
+  // Le filtre d'acuite doit donc les GARDER. Ma premiere ecriture, qui lisait
+  // l'acuite comme `H > 0`, retirait exactement ce couple de carriers et perdait
+  // un q4 bien centre.
+  if (fixture_tetra) {
+    const i64 p[4][3] = {{0, 0, 0}, {0, 1, 1}, {1, 0, 1}, {1, 1, 0}};
+    long long aigus = 0;
+    i64 hs[2] = {0, 0};
+    for (int k = 2; k < 4; ++k) {
+      i64 h = 0;
+      for (int i = 0; i < 3; ++i) h += (p[k][i] - p[0][i]) * (p[1][i] - p[k][i]);
+      hs[k - 2] = h;
+      if (h < 0) ++aigus;
+    }
+    // Les six aretes ont la meme longueur carree : l'owner vient du tie-break.
+    long long egales = 0;
+    for (int u = 0; u < 4; ++u)
+      for (int v = u + 1; v < 4; ++v) {
+        i64 d2 = 0;
+        for (int i = 0; i < 3; ++i) {
+          const i64 e = p[u][i] - p[v][i];
+          d2 += e * e;
+        }
+        if (d2 == 2) ++egales;
+      }
+    std::printf("wst3_tetra_regulier : H2=%lld H3=%lld carriers_aigus=%lld"
+                " aretes_egales=%lld\n", (long long)hs[0], (long long)hs[1], aigus,
+                egales);
+    if (hs[0] != -1 || hs[1] != -1 || aigus != 2 || egales != 6) {
+      std::fprintf(stderr, "DESACCORD: la fixture du tetraedre regulier ne tient pas\n");
+      return 1;
+    }
+    return 0;
   }
   if (n == 0) refuse("--points est exige");
   if (mu != Wst3Mutant::kNone && !juge) refuse("un mutant exige --juge");
@@ -335,7 +401,8 @@ int main(int argc, char** argv) {
           const i64 e = bc.hi[i] - bc.lo[i];
           diag2 += e * e;
         }
-        assez_petit = (__int128)diag2 * (__int128)echelle <= (__int128)rayon2;
+        // `diag^2 * echelle_den <= rayon^2 * echelle` — aucun flottant.
+        assez_petit = (__int128)diag2 * (__int128)echelle <= (__int128)rayon2 * (__int128)echelle_den;
       }
       if (dedans || assez_petit || nd < 0 || mu == Wst3Mutant::kPasDeDescente) {
         ++blocs;
@@ -348,9 +415,13 @@ int main(int argc, char** argv) {
             mb.lo[i] = bb.lo[i]; mb.hi[i] = bb.hi[i];
             mc.lo[i] = bc.lo[i]; mc.hi[i] = bc.hi[i];
           }
-          const auto mv = mhgp3v::midball::midball_block(ma, mb, mc);
-          par_terminal[t].push_back(
-              Bloc{nd, mv != mhgp3v::midball::MidballVerdict::kNone});
+          mhgp::i64 hmin = 0, hmax = 0;
+          (void)mhgp3v::midball::midball_block(ma, mb, mc,
+                                               mhgp3v::midball::MidballMutant::kNone,
+                                               &hmin, &hmax);
+          // Le bloc peut porter un carrier aigu des que `Hmin < 0`. `NONE_ACUTE`
+          // est `Hmin >= 0` : l'egalite est un angle droit, donc non aigu.
+          par_terminal[t].push_back(Bloc{nd, hmin < 0});
         }
         continue;
       }
@@ -367,7 +438,7 @@ int main(int argc, char** argv) {
 
   // ---- ORDRE QUATRE : LE PRODUIT NON ORDONNE DES BLOCS D'UN MEME RECTANGLE.
   long long blocs4 = 0, blocs4_aigu = 0, blocs3_aigu = 0;
-  double masse4 = 0.0;
+  unsigned __int128 masse4 = 0;
   if (ordre >= 4) {
     for (size_t t = 0; t < terms.size(); ++t) {
       const long long k = (long long)par_terminal[t].size();
@@ -377,18 +448,22 @@ int main(int argc, char** argv) {
       // support q4 d'owner `ab` ne peut y vivre.
       blocs4_aigu += k * (k + 1) / 2 - na * (na + 1) / 2;
       blocs4 += k * (k + 1) / 2;
-      const double mab = (double)count_of(terms[t].a) * (double)count_of(terms[t].b);
-      for (size_t u = 0; u < par_terminal[t].size(); ++u) {
-        const double cu = (double)count_of(par_terminal[t][u].c);
-        // Diagonale : les paires INTERNES a la cellule, donc `C(cu,2)`.
-        masse4 += mab * cu * (cu - 1.0) / 2.0;
-        for (size_t v = u + 1; v < par_terminal[t].size(); ++v)
-          masse4 += mab * cu * (double)count_of(par_terminal[t][v].c);
-      }
+      // ---- L'IDENTITE BINOMIALE REMPLACE LA BOUCLE QUADRATIQUE.
+      //
+      // Les blocs temoins d'un rectangle sont DISJOINTS, donc
+      //   somme_i C(|C_i|,2) + somme_{i<j} |C_i||C_j| = C(somme_i |C_i|, 2).
+      // Le count passe de `O(k^2)` a `O(k)`, et il est exact en `u128` — un
+      // `double` perd les unites des `10^15` atteints des `n=8000`.
+      unsigned __int128 tot = 0;
+      for (const Bloc& b : par_terminal[t]) tot += (unsigned __int128)count_of(b.c);
+      const unsigned __int128 mab =
+          (unsigned __int128)count_of(terms[t].a) * (unsigned __int128)count_of(terms[t].b);
+      masse4 += mab * (tot * (tot - 1) / 2);
     }
-    std::printf("wst4 : blocs=%lld blocs/n=%.2f masse=%.0f blocs/rect=%.2f"
-                " | aigus : blocs3=%lld blocs4=%lld blocs4/n=%.2f gain=%.2fx\n",
-                blocs4, (double)blocs4 / (double)m, masse4,
+    std::printf("wst4 : candidate_blocks=%lld blocs/n=%.2f candidate_mass=%.6g"
+                " blocs/rect=%.2f | aigus : blocs3=%lld blocs4=%lld blocs4/n=%.2f"
+                " gain=%.2fx\n",
+                blocs4, (double)blocs4 / (double)m, (double)masse4,
                 (double)blocs4 / (double)std::max<size_t>(1, terms.size()),
                 blocs3_aigu, blocs4_aigu, (double)blocs4_aigu / (double)m,
                 (double)blocs4 / (double)std::max(1LL, blocs4_aigu));

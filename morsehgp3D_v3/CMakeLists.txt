@@ -5222,3 +5222,39 @@ add_test(NAME mhgp3v_wst4_couverture
 set_tests_properties(mhgp3v_wst4_couverture PROPERTIES
   PASS_REGULAR_EXPRESSION
   "wst4_juge : quadruplets=487635 manquants=0 doublons=0")
+
+# LE SIGNE DE L'ACUITE, GRAVE PAR LE TETRAEDRE REGULIER.
+#
+# `H = (x-a).(b-x)` et l'angle au sommet `x` vaut `(a-x).(b-x) = -H` : la face
+# est aigue quand `H < 0`, pas `H > 0`. L'identite `E+X-D = -2H` le confirme, et
+# c'est Thales dans le bon sens — a l'INTERIEUR de la boule diametrale l'angle
+# est OBTUS.
+#
+# `p0=(0,0,0)`, `p1=(0,1,1)`, `p2=(1,0,1)`, `p3=(1,1,0)` : six aretes de
+# longueur carree deux, quatre poids `1/4`, et `H = -1` pour les deux carriers.
+# Ma premiere ecriture les classait non aigus et retirait leur couple, donc
+# perdait un q4 bien centre.
+add_test(NAME mhgp3v_wst3_tetra_regulier COMMAND mhgp3v_wst3_probe --fixture-tetra)
+set_tests_properties(mhgp3v_wst3_tetra_regulier PROPERTIES
+  PASS_REGULAR_EXPRESSION
+  "wst3_tetra_regulier : H2=-1 H3=-1 carriers_aigus=2 aretes_egales=6")
+
+# L'ECHELLE DES CELLULES EST LE LEVIER, ET IL EST QUADRATIQUE.
+#
+# La descente s'arrete des que `diag^2 <= (num/den) rayon^2`. Un rapport plus
+# grand donne des cellules plus grosses, donc moins de blocs — et comme l'ordre
+# quatre est un PRODUIT, le gain y est au carre. Mesure sur `uniform,n=8000` :
+#
+#   echelle=1/1   : 23 420 blocs4 par point, masse 8,55e14
+#   echelle=1/64  :     76 blocs4 par point, masse 1,01e15
+#   echelle=1/256 :     42 blocs4 par point, masse 1,02e15
+#
+# La sur-couverture ne coute que dix-neuf pour cent de masse pour un facteur
+# cinq cent cinquante-six sur les enregistrements. La couverture reste jugee
+# exact-once par projection owner jusqu'a `1/4096`.
+add_test(NAME mhgp3v_wst4_echelle_fine
+  COMMAND mhgp3v_wst3_probe --family=eight_clusters --points=60 --sep-euclid=2/1
+          --echelle=1/256 --ordre=4 --juge --min-blocs=100)
+set_tests_properties(mhgp3v_wst4_echelle_fine PROPERTIES
+  PASS_REGULAR_EXPRESSION
+  "wst4_juge : quadruplets=487635 manquants=0 doublons=0")

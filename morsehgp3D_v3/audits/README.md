@@ -22,6 +22,12 @@ ancienne phrase imposant le rejet global des positions dupliquées est périmée
 
 - [`AUDIT_ETAT_COURANT.md`](AUDIT_ETAT_COURANT.md) : unique verdict mutable,
   pin, worktree, tests et blocages.
+- [`AUDIT_CONTRE_RECEPTION_SUPPORT_COMPLET_CORNER8_WST34_22D1CB0_20260814.md`](AUDIT_CONTRE_RECEPTION_SUPPORT_COMPLET_CORNER8_WST34_22D1CB0_20260814.md) :
+  théorème exact de la miniboule au support minimal positif complet, q3 ambiant,
+  réception conditionnelle de Corner8, réfutation de l'exact-once physique des
+  probes WST3/WST4 et réponses Q6--Q9. Le statut reçu est `CandidateCover`
+  avant distinct-ID/owner/positivité ; la profondeur doit précéder le produit
+  WST4 brut.
 - [`AUDIT_MINIBOULE_UNIQUE_RESIDUEL_SHALLOW_5809BD2_20260814.md`](AUDIT_MINIBOULE_UNIQUE_RESIDUEL_SHALLOW_5809BD2_20260814.md) :
   lemme exact de miniboule unique au support complet, famille normale au support
   partiel, cœur affine, sandwich `U<=D<=C`, q3 par pied, q4 par intersections,
@@ -29,19 +35,20 @@ ancienne phrase imposant le rejet global des positions dupliquées est périmée
   `MidballBlockDepth` au pin `8fd6f59`, puis du raccord/juge WSPD au pin
   `a58d020` : `ALL` continu sûr, `NONE` limité au réseau u16, portes à regex
   fail-open et autorité à consolider avec `rect_h_interval`. Il contre-audite
-  aussi le delta `HCBlockDepth` : facteurs q3/q4 sûrs, enclosure conservatrice,
-  autorité exacte `Corner512` déjà existante et intégration worktree non reçue.
+  aussi la première révision `HCBlockDepth` : facteurs q3/q4 sûrs, enclosure
+  conservatrice et autorité exacte `Corner512` déjà existante. Son état
+  logiciel est supersédé par le pin `c1e2e3b` et l'audit courant.
 - [`AUDIT_LIVE_BORNE_SUP_CREDITS_A58D020_20260814.md`](AUDIT_LIVE_BORNE_SUP_CREDITS_A58D020_20260814.md) :
   contre-audit de `--borne-sup` après `a58d020` ; la révision `90640885`
   oubliait les enfants `MIXED` et supprimait toutes les fermetures. La
-  réparation mobile `ec5ec3d4` restaure la parité singleton sur l'ablation
+  réparation désormais commise `ec5ec3d4` restaure la parité singleton sur l'ablation
   rejouée, mais perd encore des fermetures avec la vue combinée et BJD. La
   source `--climb` omet indépendamment une feuille malgré un statut final.
 - [`AUDIT_LIVE_HC_BLOCK_DEPTH_A58D020_20260814.md`](AUDIT_LIVE_HC_BLOCK_DEPTH_A58D020_20260814.md) :
-  preuve du certificat `(H,C)` q2/q3/q4, audit du delta `--hc` après `a58d020`,
-  réduction logique reçue mais intégration NO-GO : CTest Midball cassée, aucune
-  porte HC, triple calcul par tâche, composition Midball fautive, ABI et coût
-  encore ouverts.
+  preuve du certificat `(H,C)` q2/q3/q4 et audit historique du delta `--hc`
+  après `a58d020`. Le pin `c1e2e3b` a réparé la CTest et ajouté cinq portes ;
+  le triple calcul, le juge de promotions, les compositions et le coût restent
+  ouverts dans l'audit courant.
 - [`AUDIT_LIVE_BLOCK_JUNG_CREDITS_TAU_783A789_20260814.md`](AUDIT_LIVE_BLOCK_JUNG_CREDITS_TAU_783A789_20260814.md) :
   contre-audit historique du raccord `BlockJungDual64` au parent `783a789` ;
   réfutation du double crédit d'identité, packing réparé mais no-go dans
@@ -56,8 +63,9 @@ ancienne phrase imposant le rejet global des positions dupliquées est périmée
 - [`AUDIT_SOURCE_CK_WST_Q2_Q3_Q4_35FCEA8_20260814.md`](AUDIT_SOURCE_CK_WST_Q2_Q3_Q4_35FCEA8_20260814.md) :
   partition factorisée Callahan--Kosaraju de toutes les paires, source de tous
   les q2 propres après `D>0`, extensions exact-once `OwnedCK-WST3/WST4`, disque
-  de Jung paire-level et fixture de non-cascade. Un lift Jung vers tout un
-  rectangle exige encore un théorème uniforme.
+  de Jung paire-level et fixture de non-cascade. Sa réalisation live est
+  requalifiée en `CandidateCover` par le contre-audit `22d1cb0` ci-dessus ; un
+  lift Jung vers tout un rectangle exige encore un théorème uniforme.
 - [`AUDIT_REPONSE_M4_PORTEURS_AIGUS_4515A8B_20260814.md`](AUDIT_REPONSE_M4_PORTEURS_AIGUS_4515A8B_20260814.md) :
   première réponse aux six questions de Claude ; séparation
   `E4/F3/C4_carrier/F4/M4_apex/W4/H4/T4_site`, preuve sharp de `2B_R` et ordre
@@ -97,10 +105,11 @@ ancienne phrase imposant le rejet global des positions dupliquées est périmée
   sur trois tailles, puis sampler de porteurs et cinq questions. Ses claims
   `M4 cubique` et « `BlockJungDualTile` implémenté » sont requalifiés par les
   bannières de supersession et les contre-audits actifs.
-- [`NOTE_CLAUDE_FENETRE_PAR_PAIRE_ET_UNICITE_20260814.md`](NOTE_CLAUDE_FENETRE_PAR_PAIRE_ET_UNICITE_20260814.md) :
-  mesures locales de rectangles, masse et singletons universels. Sa bannière
-  retire les claims « fenêtre exacte », squelette quasi-linéaire et inclusion
-  Delaunay : q3/q4 publient un majorant `U<h`, sans modèle Hoeffding reçu.
+- [`NOTE_CLAUDE_SOURCE_WST3_WST4_ET_SUPPORT_COMPLET_20260814.md`](NOTE_CLAUDE_SOURCE_WST3_WST4_ET_SUPPORT_COMPLET_20260814.md) :
+  réponse de Claude et mesures WST3/WST4 jusqu'au pin `3703097`. La masse WST4
+  brute rouge est un diagnostic utile ; ses claims exact-once, constante WST3,
+  borne composée et filtre d'acuité au signe inversé sont rétractés par sa
+  bannière et le contre-audit support-complet actif.
 - [`NOTE_CLAUDE_ROUTE_50K_PUIS_DIZAINES_DE_MILLIONS_20260813.md`](NOTE_CLAUDE_ROUTE_50K_PUIS_DIZAINES_DE_MILLIONS_20260813.md) :
   questions de route de Claude, conservées avec bannière de rétractation. Ses
   claims live sont subordonnés à `AUDIT_ETAT_COURANT.md`.

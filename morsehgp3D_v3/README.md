@@ -20,10 +20,16 @@ exacte sur son domaine public. Le contrat reste ouvert : à `n=50000` et
 `p95 warm_e2e<1 s` sur G4. La dernière tentative G4 a échoué avant la rampe et
 a seulement certifié l'arrêt de sa cible.
 
+La recette reste elle-même non reçue au HEAD : cible Jung sélectionnée mais non
+construite sur un build propre, nouvelles portes BJD/Midball/HC/borne/Corner8/WST
+exclues, code de l'analyseur avalé, finalité non exigée et quatre timeouts
+séquentiels incompatibles avec les coupe-circuits. Aucun nouveau reçu 50k ne
+doit être déduit de ces probes CPU.
+
 ## Verdict actuel
 
-Le `HEAD=88a9ba8` contient trois avancées directement liées à l'idée de support
-complet :
+Le `HEAD=3703097` contient trois avancées directement liées à l'idée de support
+complet, puis la note de coût WST3/WST4 :
 
 - `Corner8BallDepth` reçoit un certificat q4 `ALL_INTERIOR` sur un produit de
   boîtes de supports et une boîte témoin ; il évite centre et division, mais ne
@@ -32,6 +38,12 @@ complet :
   rectangle qui contient l'arête-owner ;
 - son produit non ordonné route de même les deux sommets restants d'un
   quadruplet.
+
+Le filtre d'acuité ajouté au dernier commit est mathématiquement rouge. Avec
+`H=(x-a) dot (b-x)`, l'identité correcte est `E+X-D=-2H`, pas `2H` : une face
+est aiguë en `x` lorsque `H<0`. Le tétraèdre régulier de tie a deux carriers
+`H=-1` et quatre poids `1/4`; le filtre committé les retire. Les gains WST4
+filtrés annoncés ne sont donc pas recevables avant correction et fixture.
 
 Ce troisième point n'est pas encore `OwnedCK-WST3/WST4`. Le probe ne filtre ni
 les occurrences provenant d'arêtes non-owner, ni les diagonales de `PointId`,
@@ -55,8 +67,14 @@ Votre idée mathématique est donc reçue sous sa forme exacte : la hiérarchie
 HGP n'a besoin que des supports minimaux positifs complets. q2 teste une boule
 diamétrale par paire distincte ; q3 une circum-boule par triangle strictement
 aigu ; q4 une circumsphère par tétraèdre affinement indépendant dont les quatre
-poids circumcentriques sont strictement positifs. Les sphères incidentes à une
-ancre partielle ne sont que le domaine d'un prune facultatif, jamais la source.
+poids circumcentriques sont strictement positifs. Pour q3, le centre est
+intrinsèque au plan, mais la boule et son census sont ambiants en dimension
+trois. Les sphères incidentes à une ancre partielle ne sont que le domaine d'un
+prune facultatif, jamais la source.
+
+Le théorème, la portée conditionnelle de Corner8, les coutures exact-once et les
+réponses aux questions de coût sont reçus dans le
+[`contre-audit support-complet`](audits/AUDIT_CONTRE_RECEPTION_SUPPORT_COMPLET_CORNER8_WST34_22D1CB0_20260814.md).
 
 Les autres prototypes restent des accélérateurs non reçus : Midball/HC/SOC/Jung
 certifient des ancres partielles ; `--borne-sup` perd encore des fermetures avec
@@ -73,7 +91,8 @@ La prochaine chaîne à fermer est :
 ```text
 0A  BallForm -> BallKey -> census -> BallEvent exact
 0B  oracle exhaustif borné -> lots -> dix forêts -> verticales -> payload
-1   CKPairTape q2 -> porteurs aigus -> OwnedCK-WST3/WST4, toujours factorisés
+1   CKPairTape q2 -> CandidateWST3 -> distinct-ID/owner/acuité -> OwnedCK-WST3
+    -> profondeur carrier -> résiduel WST4 paresseux, toujours factorisé
 2   certifier profondeur par blocs avant fill, puis rang/census et
     F2/F3/C4_carrier/F4/M4_apex/T4_site
 3   porter la même tranche sur device, puis mesurer warm_e2e sur G4
@@ -203,8 +222,9 @@ source des événements : il reste le domaine légitime d'un prune collectif ava
 la génération finie.
 
 Ainsi la source HGP n'énumère jamais une famille continue de sphères : q2 teste
-la seule boule diamétrale, q3 la seule circum-boule de chaque triangle aigu et
-q4 la seule circumsphère de chaque tétraèdre bien centré. Les domaines de
+la seule boule diamétrale, q3 la seule boule **ambiante** dont le centre et le
+rayon sont intrinsèques à chaque triangle aigu, et q4 la seule circumsphère de
+chaque tétraèdre bien centré. Les domaines de
 centres attachés à une ancre partielle sont exclusivement des accélérateurs de
 prune ; leur échec n'ajoute aucun événement et n'autorise aucune cascade de
 rang.
@@ -646,7 +666,8 @@ fixture exacte mise à l'échelle utilise les nœuds
 `Z=(20000,20000,30000)+{0,1}^3`, avec quarante `PointId` distincts. Ses `4096`
 supports sont q4 positifs et les huit IDs de `Z` sont uniformément intérieurs. Par convexité du déterminant
 in-sphere normalisé en `z`, huit coins certifient `ALL_INTERIOR`; un seul bloc
-du futur classifieur doit donc fermer avant fill. Les coins ne certifient pas le verdict inverse
+du classifieur standalone actuel ferme avant fill. Son raccord à de vrais
+supports owner/positifs reste ouvert. Les coins ne certifient pas le verdict inverse
 `NONE`.
 
 Ce pin contient aussi le juge direct des flips SOC et `JungDual`. Le premier

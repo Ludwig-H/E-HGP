@@ -309,10 +309,23 @@ qui évite de générer certaines complétions. La source normative est finie :
 
 ```text
 q2 : paire distincte -> boule diamétrale unique
-q3 : triangle strictement aigu -> circum-boule intrinsèque unique
+q3 : triangle strictement aigu -> centre/rayon intrinsèques, boule ambiante unique
 q4 : tétraèdre affinement indépendant bien centré -> circumsphère unique
 support non positif -> rejet à cette arité ; la source inférieure le porte déjà
 ```
+
+La preuve tient dans l'identité barycentrique suivante. Si
+`o=sum(lambda_i*p_i)`, tous les `lambda_i>0`, leur somme vaut un et
+`||p_i-o||=R`, alors pour tout centre `y` :
+
+```text
+sum_i lambda_i*||p_i-y||^2 = R^2+||o-y||^2
+```
+
+Toute boule centrée en `y` qui contient `S` a donc un rayon carré au moins
+`R^2+||o-y||^2`, avec égalité minimale uniquement pour `y=o`. Un troisième ou
+quatrième site sur le shell ne devient pas automatiquement membre du support :
+une barycentrique nulle ramène la miniboule à l'arité inférieure.
 
 Chaque support complet produit donc une seule `BallKey` candidate, mais aucun
 census n'est payé avant le RLE. Les dégénérescences peuvent envoyer plusieurs
@@ -333,6 +346,14 @@ seulement `w=0`, la boule de diamètre `ab`. q3 prend le point de norme minimale
 sur la ligne `F_x=0`, c'est-à-dire le pied auto-centré du troisième site. q4
 prend l'intersection de `F_x=0` et `F_y=0`. Positivité, owner, shell et
 `BallKey` restent des recertifications séparées.
+
+Pour q3, le centre est intrinsèque au plan du triangle mais la boule et son
+census sont ambiants en dimension trois. Par exemple
+`a=(0,0,0),b=(4,0,0),c=(2,3,0)` donnent
+`o=(2,5/6,0)`, `R^2=169/36`; le site `z=(2,1,1)`, hors du plan, a une
+puissance `-11/3` et compte comme intérieur q3. Le circumdisque planaire
+n'apparaît que comme cœur commun des sphères incidentes, jamais comme domaine
+du census canonique.
 
 Plus généralement, si `o` est le circumcentre intrinsèque de `S`, toute sphère
 incidente a pour centre `o+w`, avec `w` orthogonal à l'espace directeur
@@ -560,6 +581,24 @@ preuve supplémentaire. Elle ne couvre ni les splits owner/acuité, ni les
 diagonales, ni la masse logique, ni les `BallKey`, ni le census. Toute pente ou
 constante « blocs par rectangle » reste une mesure de `CandidateCover`, pas un
 théorème sur `OwnedCK-WST3`.
+
+Le probe counter-only reçoit seulement cette couverture adressée : WST3 `5/5`
+et WST4 `1/1` sur leurs campagnes bornées au pin audité. Il rejette les
+positions dupliquées, départage les owners par rang Morton, laisse les facteurs
+témoin recouvrir `A/B` et ne cherche aucune copie sous une ancre non-owner. Son
+juge partage les deux premières conventions et ignore les deux dernières par
+construction. Les comptes bruts se nomment donc `CandidateCover`, jamais
+`OwnedCK-WST3/WST4`. À `n=8000`, le produit WST4 atteint déjà environ
+`187` millions de blocs ; owner, distinct-ID, acuité et profondeur doivent
+précéder `sum k_t^2`. Le contre-audit reçu est
+[`audits/AUDIT_CONTRE_RECEPTION_SUPPORT_COMPLET_CORNER8_WST34_22D1CB0_20260814.md`](audits/AUDIT_CONTRE_RECEPTION_SUPPORT_COMPLET_CORNER8_WST34_22D1CB0_20260814.md).
+
+Le filtre d'acuité committé au `HEAD=3703097` n'est pas reçu : il emploie
+`H=(x-a) dot (b-x)=F-E`, mais affirme à tort `E+X-D=2H`. La bonne identité est
+`E+X-D=-2H`. Les extrema exacts se lisent donc
+`Hmax<0 => ALL_ACUTE`, `Hmin>=0 => NONE_ACUTE`, sinon `MIXED`. La fixture du
+tétraèdre régulier, owner `EdgeKey(0,1)`, quatre poids `1/4` et deux carriers
+`H=-1`, doit précéder toute nouvelle mesure WST4.
 
 Après owner, q3 est positif si `E+X-D>0` et `G=D*E-F^2>0`. Les blocs reçoivent
 `ALL_ACUTE/NONE_ACUTE/MIXED` par bornes entières sûres ; les égalités
@@ -1342,10 +1381,13 @@ aigu et zéro sweep sans tableau de `PairId`.
 ## 7. q4 : `OwnedCK-WST4`, puis shallow local si nécessaire
 
 Pour le même rectangle owner `R=(A,B)`, réutiliser les cellules carrier de
-la fenêtre `2B_R`--lentille et former des couples non ordonnés `(C,D)`. Si `C!=D`, le bloc porte
-`A×B×C×D`; si `C=D`, il porte `A×B×binom(C,2)` sans IDs répétés. Tout q4 dont
-`ab` est l'arête maximale possède ses deux autres sommets dans cette fenêtre, donc un
-unique bloc `OwnedCK-WST4`. Pour `0<eta<=1`, le nombre de blocs initiaux avant
+la fenêtre `2B_R`--lentille et former paresseusement des couples non ordonnés
+`(C,D)`. Si `C!=D`, le bloc candidat porte `A×B×C×D`; si `C=D`, il porte
+`A×B×binom(C,2)` sans répéter les deux IDs témoins. Tout q4 dont `ab` est
+l'arête maximale possède ses deux autres sommets dans cette fenêtre, donc un
+unique routage candidat. Le nom `OwnedCK-WST4` n'est acquis qu'après
+injectivité, owner parmi six arêtes, orientation non nulle et positivité des
+quatre poids. Pour `0<eta<=1`, le nombre de blocs initiaux avant
 filtres vaut `O(s^3*eta^-6*n)`. Commencer à `eta=Theta(1)` et raffiner les
 seuls `MIXED`; ce majorant ne couvre ni localisation ni
 raffinements `MIXED`.
@@ -1685,6 +1727,23 @@ i128 suffit lorsque `O` et `J` sont jugés séparément.
 Un test `(F4Block,WitnessNode)` paie au plus 192 monômes de déterminant, plus
 l'orientation, avec early exit ; il n'énumère aucun quadruplet.
 
+Le standalone de `89774d0`, inchangé au snapshot courant, reçoit ce lemme `ALL`
+mais pas son raccord événementiel. Son ABI ne préflighte ni domaine u16, ni
+boîtes valides, ni quatre IDs distincts, ni positivité, owner, shell ou
+`BallKey`. Son oracle exhaustif réemploie les prédicats ponctuels du sujet ;
+trois portes nominales sont à regex et `--selftest=1` imprime `accord=OUI` avant
+un code `3`. Les mutants `drop-corner` et `norme-aux-coins` restent hors porte,
+le mutant produit `O*J` est déclaré mais absent, et celui nommé
+`corners-outside-implies-none` produit en réalité un faux `ALL`. Les `6/6`
+verts ciblés reçoivent donc une campagne bornée, pas le support q4 complet.
+
+Avant les recertifications owner/positivité, un succès publie
+`domain_mass_closed`. La fixture cartésienne prouve par contre-calcul externe
+que ses 4096 supports sont positifs, mais le probe ne porte pas ces poids ni les
+vrais IDs. Une promotion industrielle se juge contre une autorité
+BigInt/rationnelle indépendante et compte les opérations : huit coins demandent
+des déterminants intervalles, pas huit tests scalaires.
+
 Sur G4, un CTA traite un couple `(F4Block,WitnessNode)` : huit groupes de 24
 monômes produisent les intervalles des coins, puis une réduction de signe rend
 `ALL/MIXED`. Le count conserve le reçu et crédite la population ; scan/fill ne
@@ -1820,11 +1879,11 @@ variable.
    `tau(E)>=9/8` authentifiant groupes et spans.
    SOC64 actif utilise un ledger séparé et descend sur `UNKNOWN`. Aucun de ces
    diagnostics ne précède la réception de 0A/0B et CK dans la route produit.
-5. Construire `OwnedCK-WST3` counter-only dans la fenêtre `2B_R`--lentille,
-   recevoir couverture/owner/acuité,
-   puis raccorder `BallKey -> Q3FootPowerRange` et le census.
-6. Construire `OwnedCK-WST4` depuis la relation aiguë géométrique pré-rang,
-   éliminer les blocs sans carrier, recevoir le count factorisé `M4_e`, puis
+5. Partir du `WST3CandidateCover` counter-only désormais présent, normaliser les
+   vrais `PointId`, recevoir l'owner et `ALL/NONE_ACUTE` avant de le nommer
+   `OwnedCK-WST3`, puis raccorder `BallKey -> Q3FootPowerRange` et le census.
+6. Appliquer profondeur et filtre carrier **avant** le carré des cellules, puis
+   construire seulement le résiduel `OwnedCK-WST4`, recevoir le count factorisé `M4_e`, puis
    appliquer `FaceAxisJungDepth8Block` et `BlockBallDepth8` avant fill. Tester la
    sweep 1D seulement après preflight ; recertifier directement les quatre
    barycentriques, le rang fermé `I+U` et la fixture où aucun sous-événement
@@ -1846,10 +1905,11 @@ fermetures avant descente, les nœuds de transversal, `F4/M4`, les splits, les
 octets et la HWM. Elle n'autorise aucun claim 0A/0B ou produit avant les portes
 1--2 ci-dessus.
 
-La recette G4 au `HEAD=a58d020` ne doit pas être relancée en l'état. Elle omet
-une cible pourtant sélectionnée par son regex CTest, ne sélectionne pas les
-nouvelles portes `mhgp3v_bjd_*`, avale le code de `check_rampe_pentes.py` sous
-`set +e` et omet `--exige-fenetre-finale`. Elle permet aussi à chaque job quatre
+La recette G4 reste défectueuse et ne doit pas être relancée en l'état. Elle
+omet une cible pourtant
+sélectionnée par son regex CTest, ne sélectionne pas les nouvelles portes BJD,
+Midball, HC, borne, Corner8 ou WST, avale le code de
+`check_rampe_pentes.py` sous `set +e` et omet `--exige-fenetre-finale`. Elle permet aussi à chaque job quatre
 timeouts de `3000 s`, incompatibles avec ses coupe-circuits invité `4800 s` et
 GCE `5400 s`. Le reçu SOC actif existant s'arrête avant la rampe avec
 `CTest rc=8` et certifie seulement `TERMINATED`.
@@ -1881,6 +1941,9 @@ bande passante ne qualifie aucun SLO.
 ## 10. Fixtures permanentes prioritaires
 
 - owner équilatéral/isocèle sous permutation indépendante stockage/PointId ;
+- support minimal contre shell : quatre sites cosphériques dont la miniboule
+  reste portée par une paire diamétrale ;
+- q3 ambiant : témoin hors du plan mais intérieur à la boule canonique ;
 - q3 aigu, droit, obtus, `G=0`, `P=-1/0/+1`, seuil huit/neuf ;
 - triangle et tétraèdre u16 maximaux, clés et barycentriques attendus ;
 - deux supports pour une `BallKey`, un census, deux `SupportRecord` ;
@@ -1905,6 +1968,10 @@ bande passante ne qualifie aucun SLO.
   `wrong_extrema/drop_equal_shell` ;
 - cinq nœuds u16 mis à l'échelle ci-dessus : `4096` supports q4, huit témoins
   uniformes et fermeture `Corner8BallDepth` avant fill ;
+- Corner8 : huitième coin seul extérieur, minimum de norme intérieur à un
+  facteur support, permutation, extrêmes u16, shell et oracle BigInt indépendant ;
+- WST3/WST4 : inventaire de toutes les ancres non-owner, diagonales de spans,
+  positions dupliquées avec multiplicité et tie-break par vrai `PointId` ;
 - cosphère centre `(4,4,4)`, rayon carré 25, shell de 24 permutations de
   `(±3,±4,0)` : `I=0,U=24`, donc jamais q4 régulier
   retenu à `smax=11` ; mutant `drop-extra-shell` ;

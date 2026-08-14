@@ -25,6 +25,18 @@ Empreintes SHA-256 :
 - `prototype/corner8_probe.cpp` :
   `9f29100613543cdf1f246243ec7b8112b4c84826618c4a053b3332361c49115f`.
 
+> [!CAUTION]
+> **Successeur `HEAD=3703097` mathématiquement rouge.** Le filtre d'acuité
+> committé après ce snapshot affirme `E+X-D=2H` pour
+> `H=(x-a) dot (b-x)`. L'identité exacte est `E+X-D=-2H`. Il élimine donc le
+> côté aigu au lieu du côté non aigu. Toutes ses mesures
+> `blocs4_aigu/gain`, dont le claim `1,62x`, sont invalides. Fixture minimale :
+> le tétraèdre régulier
+> `p0=(0,0,0),p1=(0,1,1),p2=(1,0,1),p3=(1,1,0)`, avec IDs
+> `0<1<2<3`, a l'owner `EdgeKey(0,1)`, quatre poids `1/4` et
+> `H(p0,p1,p2)=H(p0,p1,p3)=-1`. Le filtre committé retire précisément son
+> couple de carriers. La correction et la porte sont détaillées en Q6.
+
 ## Verdict exécutif
 
 L'intuition de Louis est **exacte après une correction de vocabulaire** :
@@ -313,6 +325,19 @@ minimale et ne reçoit pas cette borne.
 Sous owner maximal `ab`, les angles aux endpoints sont déjà non obtus. Le
 troisième angle est strictement aigu si et seulement si
 `K=(a-x) dot (b-x)>0`, équivalent à `E+X-D>0`.
+
+Avec l'ABI Midball, attention au signe :
+
+```text
+H=(x-a) dot (b-x)=-K
+Hmax<0  -> ALL_ACUTE
+Hmin>=0 -> NONE_ACUTE
+sinon   -> MIXED/split
+```
+
+Un simple test `midball verdict != NONE` est faux. `Midball NONE` agrège le
+cas strict `Hmax<0`, qui est entièrement aigu, et l'égalité shell ; il faut
+exposer les extrema stricts ou classifier directement `K`.
 
 La borne AABB exacte et séparable existe. Par axe, pour chacun des quatre
 couples d'endpoints `a_j,b_j`, la fonction

@@ -11,21 +11,26 @@ Cadre : `phase=exploration_v3_hors_registre`,
 > [!IMPORTANT]
 > Ce rapport a d'abord été intégré par le commit `694920a`, dont le titre
 > affirmait une « fenêtre exacte » en `n^1,09`, puis étendu aux pins
-> `8fd6f59` et `a58d020`. Le contre-audit resserre les deux claims : q2 est exact par
+> `8fd6f59`, `a58d020` et `c1e2e3b`. Le contre-audit resserre les deux claims : q2 est exact par
 > paire sous le domaine régulier ; q3/q4 produisent un majorant `U<h`, pas la
 > fenêtre des événements. `MidballBlockDepth` calcule un `ALL` exact sur
 > l'enveloppe continue, mais son `NONE` stable est exact seulement sur le réseau
-> entier u16, contrairement à un commentaire du header.
+> entier u16, contrairement à un commentaire du header. Le HEAD a depuis
+> avancé à `22d1cb0` avec Corner8 et WST3/WST4. Leur contre-réception active est
+> [`AUDIT_CONTRE_RECEPTION_SUPPORT_COMPLET_CORNER8_WST34_22D1CB0_20260814.md`](AUDIT_CONTRE_RECEPTION_SUPPORT_COMPLET_CORNER8_WST34_22D1CB0_20260814.md) ;
+> elle supersède les statuts logiciels ci-dessous sans modifier le lemme.
 
 ## 0. Snapshot et verdict
 
 Cet audit a commencé au pin
 `5809bd2c054c02c4c77119d979a6be796032ca15`, qui a introduit le diagnostic
-`--fenetre-exacte`. Le snapshot stable relu est désormais
-`HEAD=a58d0207d8e0482ced4b0207144fa311193c0388`, commit
+`--fenetre-exacte`. Le snapshot historique détaillé de Midball est
+`a58d0207d8e0482ced4b0207144fa311193c0388`, commit
 `le premier certificat qui retire du travail, et non qui en ajoute`. Il
 absorbe le raccord WSPD et quatre CTests d'intégration après le pin historique
-`8fd6f59` de la primitive. Ses empreintes sont
+`8fd6f59` de la primitive. Le snapshot live global est désormais
+`HEAD=22d1cb0` et reste autoritaire dans `AUDIT_ETAT_COURANT.md`. Les empreintes
+historiques Midball sont
 `WSPD=63c79bd6ce707a66f304ca4613c225929d419d07e0d5e99547d914a877b6fa01`
 et `CMake=4c6cb24ee965ad7a852428119fca08568ad440d759884d69b3c5ed62a202fdc9`.
 Le build ciblé et les 13 CTests Midball passent sous les réserves ci-dessous.
@@ -391,9 +396,10 @@ défavorables et bruités ; sans profilage, ils ne peuvent pas être attribués 
 `axis_max`, déjà éliminé du binaire. C'est un signal causal q2, pas un
 rapprochement reçu du contrat une seconde.
 
-### 4.2 `HCBlockDepth` : certificat sûr, pas source q3/q4
+### 4.2 `HCBlockDepth` : certificat sûr, historique du delta
 
-Le worktree suivant étend le même préfiltre avec
+Le worktree postérieur à `a58d020`, ensuite commis dans `c1e2e3b`, étend le
+même préfiltre avec
 
 ```text
 e=z-a ; t=b-z ; H=e dot t ; C=t cross e
@@ -428,15 +434,17 @@ Son équivalence vient de la convexité du cône en `(H,C)`, de l'affinité en
 concavité de `H`. Le nouveau préfiltre doit donc s'insérer avant
 `SOC64/Corner512`, pas créer une troisième autorité concurrente.
 
-Au snapshot worktree
+Au snapshot historique avant commit
 `midball_block.hpp=921e649f0ebbbfb7a8034bedaeeb0a14a2eaaadf9eadb092f4f8c3cdbfd9403b`,
 `midball_probe.cpp=587ecc58ebdd592245449fef901be9d2fac3f4b9287752648554c48f2e7dcc49`
 et `wspd_wavefront_probe.cpp=6330b79586066c575c59e4480a17fdf864fdef77b261a3a7f33c66bd68ed9c5b`,
-les tests manuels sains passent `4*20000` rectangles sans désaccord ; les
+les tests manuels sains passaient `4*20000` rectangles sans désaccord ; les
 mutants coefficient et corrélation meurent avec les codes attendus. Mais le
-CMake ne contient aucune porte HC et la sous-suite Midball régresse à `12/13`
-par changement du diagnostic de refus. Le raccord n'a aucun juge causal et
-refuse l'ancien juge de vague.
+CMake ne contenait aucune porte HC et la sous-suite Midball régressait à
+`12/13` par changement du diagnostic de refus. Le pin `c1e2e3b` a réparé cette
+régression et ajouté cinq portes HC ; deux nominales restent à regex, le
+raccord n'a toujours aucun juge de chaque promotion et refuse l'ancien juge de
+vague.
 
 L'intégration recalcule en outre `hc_lane_block` dans la boucle des trois lanes,
 alors qu'une seule lane minimale rendue suffit aux trois comparaisons. `--hc`
@@ -546,8 +554,7 @@ une obligation de complétude. Son propre replay CPU — lectures identiques et
 temps accru — justifie de tester d'abord la route support complet/canonique ou
 de déplacer réellement le certificat avant la descente.
 
-[`NOTE_CLAUDE_FENETRE_PAR_PAIRE_ET_UNICITE_20260814.md`](NOTE_CLAUDE_FENETRE_PAR_PAIRE_ET_UNICITE_20260814.md)
-mesure une information utile : à taille et seed données, la proportion de
+Le flux historique absorbé « fenêtre par paire » mesurait une information utile : à taille et seed données, la proportion de
 paires ayant assez de singletons universels. Elle a raison de séparer masse
 logique et rectangles physiques. Elle appelle toutefois ce majorant « fenêtre
 exacte », puis en déduit un squelette et une inclusion Delaunay. Cette déduction
@@ -562,13 +569,13 @@ Aucun artefact Git ne démontre que ces flux documentaires proviennent
 d'identités indépendantes. Ils sont contre-audités ici par leurs énoncés,
 leurs pins et leurs fixtures, jamais par autorité personnelle.
 
-## 8. Contre-audit de la note de Claude au `HEAD=694920a`
+## 8. Résultats absorbés du flux « fenêtre par paire » au pin `694920a`
 
-La note
-[`NOTE_CLAUDE_FENETRE_PAR_PAIRE_ET_UNICITE_20260814.md`](NOTE_CLAUDE_FENETRE_PAR_PAIRE_ET_UNICITE_20260814.md)
-reçoit correctement le lemme d'unicité et interdit elle-même la cascade q2 vers
-q3/q4. Elle mélange néanmoins encore une fenêtre d'**ancres candidates** avec
-la fenêtre exacte des événements finis.
+Le flux historique recevait correctement le lemme d'unicité et interdisait
+lui-même la cascade q2 vers q3/q4. Il mélangeait néanmoins une fenêtre
+d'**ancres candidates** avec la fenêtre exacte des événements finis. Le présent
+audit conserve ses mesures utiles et leur contre-réception ; la note source
+périmée a été supprimée.
 
 ### 8.1 État logiciel rejoué
 
