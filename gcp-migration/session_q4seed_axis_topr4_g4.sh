@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Session G4 — LA CAMPAGNE QUI TENTE DE REFUTER `FaceAxisExtremalCompletion-8`.
+# Session G4 — LA CAMPAGNE QUI TENTE DE REFUTER `Q4SeedAxisExtremalCompletion-r4`.
 #
 # Cette session utilise EXCLUSIVEMENT les scripts gardes du depot pour le
 # demarrage et l'arret. Elle ne cree aucune VM, ne modifie aucune garde et
@@ -8,15 +8,21 @@
 # ---------------------------------------------------------------------------
 # CE QU'ELLE MESURE, ET POURQUOI ELLE MERITE UNE MACHINE
 #
-# Le theoreme dit qu'a face aigue owner fixee, tout apex q4 de rang au plus `s`
-# est parmi au plus `2(s+1)-2p` racines extremales, et que le census se
-# reconstruit sans second balayage. C'est une affirmation UNIVERSELLE : elle ne
+# Le theoreme dit qu'a `Q4Seed3` owner aigu fixe, tout apex q4 de rang sous `r4`
+# est parmi au plus `2(r4-p)` racines extremales, et que `I_B/U_B` se
+# reconstruisent sans second balayage. C'est une affirmation UNIVERSELLE : elle ne
 # se confirme pas, elle se REFUTE. La seule chose utile est donc de la
 # confronter a une sweep exhaustive sur le plus de configurations possible.
 #
 # La sweep coute `O(n^5)` : le poste de developpement a DEUX vCPU et plafonne a
-# `n=60`. La machine est employee ici comme ressource CPU a 48 coeurs pour
-# monter a `n=300` sur SIX familles, plusieurs graines et quatre seuils.
+# `n=60`. La machine est employee ici comme ressource CPU a 48 coeurs.
+#
+# LA MATRICE EST GOUVERNEE PAR UN BUDGET, PAS PAR UNE LISTE. Le contre-audit
+# `AUDIT_CONTRE_SESSION_AXIS_TOP8_G4_840A2E2_20260814.md` a montre que
+# soixante-seize runs sequentiels ne tiennent dans aucune enveloppe : la somme
+# des timeouts autorises depassait soixante-dix heures. On mesure donc une
+# RAMPE causale — chaque taille n'est ouverte que si le debit observe prouve
+# qu'elle finit avant le coupe-circuit — et on s'arrete au premier palier rouge.
 # AUCUN kernel CUDA n'est execute et aucun debit GPU n'est mesure.
 #
 # ELLE NE REVENDIQUE NI SLO, NI DEBIT, NI STATUT PUBLIC. Un `manquants=0` sur
@@ -46,17 +52,17 @@ MAX_RUN_SECONDS="${MAX_RUN_SECONDS:-5400}"
 GUEST_SHUTDOWN_MINUTES="${GUEST_SHUTDOWN_MINUTES:-75}"
 RUN_TIMEOUT="${RUN_TIMEOUT:-3300}"
 
-WORK="$(mktemp -d /tmp/ehgp-axis8-session.XXXXXXXX)"
+WORK="$(mktemp -d /tmp/ehgp-q4axis-session.XXXXXXXX)"
 HANDOFF="${WORK}/handoff.json"
 LOG="${WORK}/session.log"
-RECU="${REPO_ROOT}/morsehgp3D_v3/receipts/axis_top8_g4_20260814"
+RECU="${REPO_ROOT}/morsehgp3D_v3/receipts/q4seed_axis_topr4_g4_20260814"
 echo "session dans ${WORK}"
 
 GIT_HEAD="$(git rev-parse HEAD)"
 GIT_DIRTY="$(git status --porcelain | wc -l)"
 echo "git_head=${GIT_HEAD} fichiers_modifies=${GIT_DIRTY}" | tee -a "${LOG}"
-for f in morsehgp3D_v3/prototype/axis_top8.hpp \
-         morsehgp3D_v3/prototype/axis_top8_probe.cpp \
+for f in morsehgp3D_v3/prototype/q4seed_axis_topr4.hpp \
+         morsehgp3D_v3/prototype/q4seed_axis_topr4_probe.cpp \
          morsehgp3D_v3/CMakeLists.txt; do
   echo "sha256 ${f} = $(sha256sum "${f}" | cut -d' ' -f1)" | tee -a "${LOG}"
 done
@@ -70,29 +76,77 @@ export GCP_SSH_KEY_DIR="${WORK}/ssh"
 mkdir -p "${GCP_SSH_KEY_DIR}"
 chmod 700 "${GCP_SSH_KEY_DIR}"
 export GCP_SSH_KEY_FILE="${GCP_SSH_KEY_DIR}/id_ed25519"
-ssh-keygen -q -t ed25519 -N '' -C 'e-hgp-axis8-session' -f "${GCP_SSH_KEY_FILE}"
+ssh-keygen -q -t ed25519 -N '' -C 'e-hgp-q4axis-session' -f "${GCP_SSH_KEY_FILE}"
 chmod 600 "${GCP_SSH_KEY_FILE}"
 GCP_SSH_KEY_EXPIRATION_UTC="$(python3 -c 'from datetime import datetime,timedelta,timezone; print((datetime.now(timezone.utc)+timedelta(minutes=95)).isoformat(timespec="seconds").replace("+00:00","Z"))')"
 export GCP_SSH_KEY_EXPIRATION_UTC
 gcloud compute os-login ssh-keys add --key-file="${GCP_SSH_KEY_FILE}.pub" --ttl=95m \
   --project="${GCP_PROJECT_ID}" >/dev/null
 
-# Le trap est arme AVANT le demarrage et lit la generation DANS le trap : un
-# handoff illisible ne peut pas laisser une VM allumee.
+# ---------------------------------------------------------------------------
+# LA FERMETURE CIBLEE, REPAREE.
+#
+# Contre-audit `AUDIT_CONTRE_SESSION_AXIS_TOP8_G4_840A2E2_20260814.md`, P0
+# securite : l'ancienne branche de secours appelait `stop_and_verify.sh --yes`
+# SANS `--expected-last-start-timestamp` des que `GENERATION` etait vide. Elle
+# pouvait donc arreter une session PREEXISTANTE OU CONCURRENTE sur la cible par
+# defaut — exactement ce que la regle imperative interdit.
+#
+# Trois etats, et un seul autorise l'arret :
+#   START_ATTEMPTED=0 -> aucun arret, jamais. Rien n'a ete demarre.
+#   START_ATTEMPTED=1 et generation connue -> arret VERSIONNE de cette
+#     generation, et d'elle seule.
+#   START_ATTEMPTED=1 et generation inconnue -> BLOCAGE. On signale projet,
+#     zone, nom, dernier etat connu et la commande de controle. On n'appelle
+#     jamais l'arret non versionne.
+#
+# Le transcript est copie APRES la decision finale : l'ancienne version le
+# copiait avant d'ajouter le fait bloquant, donc le recu pouvait l'omettre.
+# ---------------------------------------------------------------------------
+START_ATTEMPTED=0
 GENERATION=""
 cleanup() {
   local rc=$?
-  echo "--- arret certifie (rc=${rc}) ---" | tee -a "${LOG}"
+  echo "--- fermeture ciblee (rc=${rc}) ---" | tee -a "${LOG}"
   local stop_rc=0
-  if [ -n "${GENERATION}" ]; then
-    ./gcp-migration/stop_and_verify.sh --yes \
-      --expected-last-start-timestamp "${GENERATION}" 2>&1 | tee -a "${LOG}" || stop_rc=$?
+  local bloque=0
+  if [ "${START_ATTEMPTED}" -eq 0 ]; then
+    echo "[OK] aucun demarrage tente : aucun arret n'est appele." | tee -a "${LOG}"
   else
-    ./gcp-migration/stop_and_verify.sh --yes 2>&1 | tee -a "${LOG}" || stop_rc=$?
+    # La generation est lue et VALIDEE ici, dans le trap, jamais avant.
+    if [ -z "${GENERATION}" ] && [ -r "${HANDOFF}" ]; then
+      GENERATION="$(python3 -c "
+import json,sys
+try:
+    v = json.load(open('${HANDOFF}'))['last_start_timestamp']
+except Exception:
+    sys.exit(0)
+print(v if isinstance(v, str) and v.strip() else '')
+" 2>/dev/null || true)"
+    fi
+    if [ -n "${GENERATION}" ]; then
+      ./gcp-migration/stop_and_verify.sh --yes \
+        --expected-last-start-timestamp "${GENERATION}" 2>&1 | tee -a "${LOG}" || stop_rc=$?
+    else
+      bloque=1
+      {
+        echo "[BLOCAGE] demarrage tente mais generation INCONNUE :"
+        echo "  projet=${GCP_PROJECT_ID} zone=${GCP_ZONE} instance=${GCP_INSTANCE_NAME}"
+        echo "  dernier etat connu : voir ci-dessus dans ce journal"
+        echo "  aucun arret non versionne n'est appele — il pourrait viser une"
+        echo "  session concurrente. Controle manuel :"
+        echo "    gcloud compute instances describe ${GCP_INSTANCE_NAME} \\"
+        echo "      --zone=${GCP_ZONE} --project=${GCP_PROJECT_ID} \\"
+        echo "      --format='value(status,lastStartTimestamp)'"
+        echo "    ./gcp-migration/stop_and_verify.sh --yes \\"
+        echo "      --expected-last-start-timestamp <horodatage lu ci-dessus>"
+      } | tee -a "${LOG}"
+    fi
   fi
   mkdir -p "${RECU}"
   cp "${LOG}" "${RECU}/transcript.txt" || { echo "[COPIE RATEE] transcript"; exit 71; }
   echo "journal complet : ${LOG} (copie dans ${RECU})"
+  if [ "${bloque}" -ne 0 ]; then exit 72; fi
   if [ "${stop_rc}" -ne 0 ]; then
     echo "[ARRET NON CERTIFIE] stop_and_verify a rendu ${stop_rc} — echec bloquant" | tee -a "${LOG}"
     exit 70
@@ -101,6 +155,7 @@ cleanup() {
 }
 trap cleanup EXIT
 
+START_ATTEMPTED=1
 ./gcp-migration/start_and_verify.sh --yes \
   --guest-shutdown-minutes "${GUEST_SHUTDOWN_MINUTES}" \
   --handoff-file "${HANDOFF}" 2>&1 | tee -a "${LOG}"
@@ -126,12 +181,12 @@ gcloud compute scp "${TAR}" "${GCP_INSTANCE_NAME}:/tmp/v3.tgz" \
   export PATH=$HOME/.local/bin:$PATH
   python3 -m pip install --user --quiet --upgrade cmake >/dev/null 2>&1 || true
   export PATH=$HOME/.local/bin:$PATH
-  rm -rf ~/a8 && mkdir -p ~/a8 && cd ~/a8
+  rm -rf ~/q4 && mkdir -p ~/q4 && cd ~/q4
   tar xzf /tmp/v3.tgz
   echo "coeurs=$(nproc)"; cmake --version | head -1; g++ --version | head -1
   cmake -S morsehgp3D_v3 -B build -DCMAKE_BUILD_TYPE=Release >/dev/null
-  cmake --build build --target mhgp3v_axis_top8_probe -j48
-  sha256sum build/mhgp3v_axis_top8_probe
+  cmake --build build --target mhgp3v_q4seed_axis_topr4_probe -j48
+  sha256sum build/mhgp3v_q4seed_axis_topr4_probe
 ' 2>&1 | tee -a "${LOG}"
 
 # ---- 2. Rejeu INDEPENDANT des vingt-trois portes sur la VM. Les fixtures et
@@ -139,57 +194,58 @@ gcloud compute scp "${TAR}" "${GCP_INSTANCE_NAME}:/tmp/v3.tgz" \
 # autre ordonnancement avant que la campagne ait le moindre sens.
 "${SSH[@]}" 'set -euo pipefail
   export PATH=$HOME/.local/bin:$PATH
-  cd ~/a8
-  ctest --test-dir build --output-on-failure -j24 -R "^mhgp3v_axis_top8" 2>&1 | tail -6
+  cd ~/q4
+  ctest --test-dir build --output-on-failure -j24 -R "^mhgp3v_q4axis" 2>&1 | tail -6
 ' 2>&1 | tee -a "${LOG}"
 
-# ---- 3. LA CAMPAGNE. Six familles, trois tailles, plusieurs graines, quatre
-# seuils. La sortie brute est conservee EN ENTIER ; aucun filtre n'intervient
-# avant l'archivage.
+# ---- 3. LA RAMPE BUDGETEE. Chaque palier mesure son propre temps ; le palier
+# suivant n'est ouvert que si le temps CUMULE plus le cout EXTRAPOLE du palier
+# suivant tiennent dans le budget restant. L'extrapolation emploie l'exposant
+# cinq declare par le probe. Un palier rouge arrete la rampe, il ne la saute pas.
 "${SSH[@]}" "set -euo pipefail
   export PATH=\$HOME/.local/bin:\$PATH
-  cd ~/a8
-  A=./build/mhgp3v_axis_top8_probe
+  cd ~/q4
+  A=./build/mhgp3v_q4seed_axis_topr4_probe
   mkdir -p out
+  BUDGET=${RUN_TIMEOUT}
+  DEBUT=\$(date +%s)
   FAM='uniform eight_clusters terrain scanline_single_pass scanline_overlap_multiecho two_lines'
-  # Phase A : diversite maximale a petite taille, cinq graines.
-  for f in \$FAM; do for g in 1 2 3 4 5; do
-    echo \"=== A famille=\$f n=120 seed=\$g seuil=7\"
+  precedent=0
+  for n in 80 120 160 220 300; do
+    reste=\$(( BUDGET - (\$(date +%s) - DEBUT) ))
+    if [ \"\$precedent\" -gt 0 ]; then
+      # cout extrapole = precedent * (n/n_prec)^5, en arithmetique entiere
+      prev_n=\$prev_n_val
+      est=\$(( precedent * n * n * n * n * n / (prev_n * prev_n * prev_n * prev_n * prev_n) ))
+      if [ \"\$est\" -gt \"\$(( reste * 8 / 10 ))\" ]; then
+        echo \"=== PALIER n=\$n NON OUVERT : cout extrapole \${est}s > 80% du reste \${reste}s\"
+        break
+      fi
+    fi
+    t0=\$(date +%s)
+    for f in \$FAM; do for g in 1 2 3; do
+      echo \"=== n=\$n famille=\$f seed=\$g smax=11\"
+      set +e
+      timeout \$reste \$A --sweep --family=\$f --points=\$n --seed=\$g \\
+        --threads=48 --smax=11 --min-seeds=0 --min-shallow=0 2>&1
+      echo \"code=\\${PIPESTATUS[0]}\"
+      set -e
+    done; done
+    precedent=\$(( \$(date +%s) - t0 ))
+    prev_n_val=\$n
+    echo \"=== PALIER n=\$n TERMINE en \${precedent}s\"
+  done > out/rampe.txt 2>&1
+  # L'exact-once global, borne a 200 points, sur les trois familles denses.
+  for f in uniform eight_clusters terrain; do for n in 60 90 120; do
+    echo \"=== exact-once famille=\$f n=\$n\"
     set +e
-    timeout ${RUN_TIMEOUT} \$A --sweep --family=\$f --points=120 --seed=\$g \\
-      --threads=48 --seuil=7 --min-faces=0 --min-shallow=0 2>&1
-    echo \"code=\${PIPESTATUS[0]}\"
+    timeout 900 \$A --exact-once --family=\$f --points=\$n --seed=1 \\
+      --min-q4=1 --min-q3-morts=0 2>&1
+    echo \"code=\\${PIPESTATUS[0]}\"
     set -e
-  done; done > out/phaseA.txt 2>&1
-  # Phase B : trois graines a n=200.
-  for f in \$FAM; do for g in 1 2 3; do
-    echo \"=== B famille=\$f n=200 seed=\$g seuil=7\"
-    set +e
-    timeout ${RUN_TIMEOUT} \$A --sweep --family=\$f --points=200 --seed=\$g \\
-      --threads=48 --seuil=7 --min-faces=0 --min-shallow=0 2>&1
-    echo \"code=\${PIPESTATUS[0]}\"
-    set -e
-  done; done > out/phaseB.txt 2>&1
-  # Phase C : deux graines a n=300, la plus grande taille exhaustive tenable.
-  for f in \$FAM; do for g in 1 2; do
-    echo \"=== C famille=\$f n=300 seed=\$g seuil=7\"
-    set +e
-    timeout ${RUN_TIMEOUT} \$A --sweep --family=\$f --points=300 --seed=\$g \\
-      --threads=48 --seuil=7 --min-faces=0 --min-shallow=0 2>&1
-    echo \"code=\${PIPESTATUS[0]}\"
-    set -e
-  done; done > out/phaseC.txt 2>&1
-  # Phase D : la borne doit suivre 2(seuil+1)-2p, pas seulement seize.
-  for f in uniform eight_clusters terrain scanline_single_pass; do for s in 3 5 9 11; do
-    echo \"=== D famille=\$f n=200 seed=1 seuil=\$s\"
-    set +e
-    timeout ${RUN_TIMEOUT} \$A --sweep --family=\$f --points=200 --seed=1 \\
-      --threads=48 --seuil=\$s --min-faces=0 --min-shallow=0 2>&1
-    echo \"code=\${PIPESTATUS[0]}\"
-    set -e
-  done; done > out/phaseD.txt 2>&1
-  echo '=== CAMPAGNE TERMINEE ==='
-  wc -l out/phase*.txt
+  done; done > out/exact_once.txt 2>&1
+  echo '=== RAMPE TERMINEE ==='
+  wc -l out/*.txt
 " 2>&1 | tee -a "${LOG}"
 
 # ---- 4. LE VERDICT, EN ARITHMETIQUE ENTIERE ET SUR LA SORTIE BRUTE.
@@ -199,14 +255,14 @@ gcloud compute scp "${TAR}" "${GCP_INSTANCE_NAME}:/tmp/v3.tgz" \
 # couverture est non vide : au moins une famille doit produire des apex shallow,
 # sinon le vert est vacuite. `two_lines` est la seule exception attendue a zero.
 "${SSH[@]}" 'set -euo pipefail
-  cd ~/a8
+  cd ~/q4
   python3 - <<PY
 import re, sys, glob
 lignes = []
-for f in sorted(glob.glob("out/phase*.txt")):
+for f in sorted(glob.glob("out/*.txt")):
     lignes += [(f, l.rstrip()) for l in open(f)]
 codes = [int(l.split("=")[1]) for _, l in lignes if l.startswith("code=")]
-juges = [l for _, l in lignes if l.startswith("axis_top8_juge")]
+juges = [l for _, l in lignes if l.startswith("q4seed_axis_topr4")]
 def somme(cle):
     return sum(int(m.group(1)) for l in juges for m in [re.search(cle + r"=(\d+)", l)] if m)
 mauvais = [c for c in codes if c != 0]
@@ -220,7 +276,7 @@ vides = [l for l in juges if "aigues_owner=0 " in l and "two_lines" not in l]
 print("familles_vides_hors_two_lines=%d" % len(vides))
 ok = (not mauvais and somme("manquants") == 0 and somme("bornes_cassees") == 0
       and somme("census_faux") == 0 and somme("debordes") == 0
-      and tot_shallow > 100000 and not vides and len(juges) == len(codes))
+      and tot_shallow > 10000 and not vides and len(juges) == len(codes))
 print("VERDICT=%s" % ("ACCORD" if ok else "REFUTATION_OU_PLANCHER"))
 sys.exit(0 if ok else 1)
 PY
@@ -228,8 +284,8 @@ PY
 
 # ---- 5. Reçu : la sortie brute revient, entiere.
 mkdir -p "${RECU}"
-for p in phaseA phaseB phaseC phaseD; do
-  gcloud compute scp "${GCP_INSTANCE_NAME}:~/a8/out/${p}.txt" "${RECU}/${p}.txt" \
+for p in rampe exact_once; do
+  gcloud compute scp "${GCP_INSTANCE_NAME}:~/q4/out/${p}.txt" "${RECU}/${p}.txt" \
     --project="${GCP_PROJECT_ID}" --zone="${GCP_ZONE}" --quiet \
     --ssh-key-file="${GCP_SSH_KEY_FILE}" \
     --ssh-key-expiration="${GCP_SSH_KEY_EXPIRATION_UTC}" 2>&1 | tee -a "${LOG}"

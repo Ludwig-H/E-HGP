@@ -12,8 +12,23 @@ Snapshot : `HEAD=840a2e28679aa3e5e3d8ec706daa680a52ac1bde`, fichier
 `gcp-migration/session_axis_top8_g4.sh`, SHA-256
 `a2f67c33503fc1db8b3c3faa05a6d2b172458bd762392e51a9555dc556d1ebf0`.
 
-GCP n'a pas été utilisé. Cet audit est statique et la recette ne doit pas être
-lancée avant réparation de la fermeture ciblée ci-dessous.
+GCP n'a pas été utilisé par l'auditeur. La lecture initiale est statique et la
+recette ne doit pas être relancée avant réparation de la fermeture ciblée
+ci-dessous.
+
+### Addendum d'observation concurrente
+
+Après cette lecture, un transcript non suivi est apparu dans
+`receipts/axis_top8_g4_20260814/`, SHA-256
+`452fc650a11e79feb7452454d403e27a82aa38e009db5acce9cebae359b01981`.
+L'auditeur n'a ni lancé ni arrêté cette session. Le transcript montre un démarrage externe de la génération
+`2026-08-14T13:00:56.283-07:00`, puis l'échec de certification du
+`terminationTimestamp`. Le garde interne de `start_and_verify.sh` a arrêté
+**cette génération exacte** et certifié `TERMINATED`. Le trap externe a ensuite
+effectivement exécuté sa branche sans génération ; cette fois la cible était
+déjà arrêtée, mais le risque décrit ci-dessous est donc un chemin exécuté, pas
+une hypothèse. Aucun build, sweep, transfert de phase ou résultat GPU n'a été
+produit par cette tentative.
 
 ## Verdict
 
@@ -50,6 +65,19 @@ Le transcript est en outre copié avant que l'erreur finale d'arrêt non certifi
 soit ajoutée au journal. Le reçu copié peut donc omettre le fait bloquant ; la
 copie finale doit suivre toute décision de cleanup.
 
+## P0 preuve négative — le verdict précède le rapatriement
+
+Les sorties brutes `phaseA..D` restent sur la VM pendant la campagne. Le verdict
+distant est exécuté sous `set -e` **avant** les quatre `scp`. Une réfutation
+rend donc la commande SSH non nulle, déclenche le cleanup et empêche précisément
+le rapatriement des fichiers qui l'expliquent. Le prochain `rm -rf ~/a8` les
+détruit. Chaque phase doit être streamée ou copiée avant son verdict ; l'échec
+est un résultat à conserver, pas une raison de sauter l'archivage.
+
+Le chemin de reçu est fixe et n'est ni nettoyé ni versionné par génération. Un
+transcript neuf peut ainsi cohabiter avec d'anciens `phase*.txt`. Il faut un
+répertoire unique par génération/run, un manifeste de fichiers et leurs hashes.
+
 ## P0 faisabilité — 76 runs séquentiels sous un budget de 55 minutes
 
 Les phases demandent 30 runs à `n=120`, 18 à `n=200`, 12 à `n=300` et 16 à
@@ -67,6 +95,11 @@ global mesuré et un arrêt après le premier palier rouge ; les tailles/graines
 suivantes ne sont ouvertes que si le débit observé prouve qu'elles tiennent
 avant le coupe-circuit.
 
+Le timeout individuel n'emploie pas `--kill-after` et ne constitue donc pas une
+borne dure si le processus ne termine pas sur `SIGTERM`. Le deadline global
+doit être monotone et inférieur à l'arrêt invité avec une marge explicite pour
+le rapatriement et l'arrêt certifié.
+
 ## P1 — la campagne ne reçoit pas encore le contrat q4
 
 `manquants=0` et `census_faux=0` ne comparent aujourd'hui que la complétude des
@@ -82,9 +115,21 @@ par les autres runs. Chaque famille/phase doit publier ses propres planchers de
 faces, racines, événements, ties et morts, avec exception déclarée et vérifiée
 pour `two_lines`.
 
+Le parser du reçu ne compare pas l'ensemble exact des 76 tuples attendus. Un
+champ absent vaut implicitement zéro dans la somme, et `len(juges)==len(codes)`
+peut valider un sous-ensemble tronqué. De même, `ctest -R ... | tail -6` ne
+conserve pas la sortie complète, n'exige pas `--no-tests=error` et ne vérifie
+pas qu'il y a exactement 23 tests ; CTest peut rendre zéro quand la regex ne
+sélectionne rien.
+
+Enfin, le runner accepte un worktree sale, n'enregistre que son nombre de
+fichiers modifiés, ne conserve pas le tar réellement envoyé et ne hash ni le
+runner ni les sorties rapatriées. Le reçu doit déclarer une clé de run, le
+commit, le manifeste exact du worktree, le tar/ELF/runner et un statut structuré
+`completed`, `failed` ou `invalid`.
+
 La bonne séquence est donc : recevoir localement IDs/shell, `DEAD_GAP`, overflow
 fail-closed, primary/exact-once et options CLI ; ajouter au moins un CTest avec
 seuil différent de sept ; mesurer une rampe bornée ; seulement alors produire
 une recette G4 réaliste. Cette session restera un diagnostic CPU 48 cœurs, pas
 une mesure GPU et encore moins le contrat bout-en-bout 50k sous une seconde.
-
