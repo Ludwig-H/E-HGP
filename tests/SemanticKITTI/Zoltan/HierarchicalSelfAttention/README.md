@@ -110,6 +110,8 @@ Les critères chiffrés et les règles d'arrêt sont dans [RISKS_AND_GO_NO_GO.md
 - [RISKS_AND_GO_NO_GO.md](RISKS_AND_GO_NO_GO.md) : réfutations, kill gates et pivots.
 - [PAPER_STRATEGY.md](PAPER_STRATEGY.md) : positionnement d'une soumission de haut niveau.
 - [REFERENCES.md](REFERENCES.md) : sources primaires et statut des chiffres.
+- [NOTE_CLAUDE_DEUX_CANAUX_DIRECTIONNELS.md](NOTE_CLAUDE_DEUX_CANAUX_DIRECTIONNELS.md) : théorème de caractérisation du canal support, statut exact des canaux « dernière sortie » et « première entrée », centre capteur et échelle de complétude radiale.
+- [NOTE_CLAUDE_ORDRE_DES_PREUVES.md](NOTE_CLAUDE_ORDRE_DES_PREUVES.md) : ordre d'acquisition des preuves, deux diagnostics sans entraînement et placement du budget de nouveauté.
 - [papier HSA local](NeurIPS-2025-hierarchical-self-attention-generalizing-neural-attention-mechanics-to-multi-scale-problems-Paper-Conference.pdf) : copie vérifiée du papier NeurIPS 2025.
 
 ## Hors périmètre immédiat
