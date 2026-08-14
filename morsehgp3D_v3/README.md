@@ -28,7 +28,7 @@ doit être déduit de ces probes CPU.
 
 ## Verdict actuel
 
-Le `HEAD=08dec60920a93c15ef200da136d61995976db695` contient quatre avancées
+Le pin logiciel `08dec60920a93c15ef200da136d61995976db695` contient quatre avancées
 directement liées à l'idée de support complet, puis plusieurs diagnostics de
 réduction du broad phase WST3/WST4 :
 
@@ -165,9 +165,10 @@ tant qu'une politique dégénérée indépendante n'est pas reçue.
 Cette unicité permet aussi de partager le census : après normalisation et RLE
 des `BallKey`, q2, q3 et q4 utilisent la même somme de trois quadratiques
 convexes `A*z_j^2+B_j*z_j`. Ses extrema sur une AABB u16 entière sont exacts
-par axe. Les lanes q2/q3/q4 ferment respectivement à `10/9/8` intérieurs ; une
-`BallKey` partagée entre arités conserve les bits encore vivants au lieu de
-saturer globalement à huit, puis reçoit le census complet du shell. Cela
+par axe. `active_arity_mask` contient seulement les arités incidentes et efface
+q2/q3/q4 respectivement à `10/9/8` intérieurs ; un masque non nul impose encore
+le census complet du shell. Il est distinct du `active_sign_mask` Corner8.
+Cela
 supprime les centres continus et les census répétés par support,
 mais pas la génération potentiellement quadratique des supports : le gain SLO
 dépend encore d'une source factorisée et d'un preflight de masse.

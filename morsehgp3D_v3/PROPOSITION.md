@@ -314,6 +314,11 @@ q4 : tétraèdre affinement indépendant bien centré -> circumsphère unique
 support non positif -> rejet de ce SupportKey ; sa miniboule est d'arité inférieure
 ```
 
+Cette boule unique décide uniquement l'événement dont `S` est le support
+minimal. Le census de la boule q2 ne décide pas les complétions q3/q4 de la
+paire, et celui de la boule q3 ne décide pas ses complétions q4 : leurs
+supports, centres et boules canoniques sont différents.
+
 La preuve tient dans l'identité barycentrique suivante. Si
 `o=sum(lambda_i*p_i)`, tous les `lambda_i>0`, leur somme vaut un et
 `||p_i-o||=R`, alors pour tout centre `y` :
@@ -445,10 +450,13 @@ extrémité. Les extrema sont donc exacts sans centre ni flottant. `max P<0`
 crédite toute la population du nœud ; `min P>=0` exclut son intérieur strict ;
 seul `min P>0` exclut aussi le shell. Chaque lane-support ferme au seuil
 `h_q=12-q`, soit `10/9/8` pour q2/q3/q4 sous `smax=11`. Sur une `BallKey`
-partagée entre arités, le run conserve donc trois bits actifs et poursuit le
-compte jusqu'au seuil de la plus petite arité incidente ; saturer globalement à
-huit perdrait un q2 ou q3 encore pertinent. Une survivante reçoit ensuite son
-census complet `I_B/U_B` et sa disposition. Ce `BallFormRange-u16` remplace les
+partagée entre arités, `active_arity_mask` ne contient que les arités incidentes
+et efface le bit `q` dès que `I_B>=12-q`. Un masque nul autorise l'arrêt pour la
+fenêtre demandée ; sinon le parcours termine le census `I_B/U_B` et la
+disposition des bits survivants. Saturer globalement à huit perdrait un q2 ou
+q3 encore pertinent. Ce masque est distinct du `active_sign_mask` du
+certificateur Corner8 bisigne et n'en répare pas le caller. Ce
+`BallFormRange-u16` remplace les
 backends de census dupliqués après RLE ; il ne réduit pas le nombre de supports
 candidats et ne transforme donc pas à lui seul une source quadratique en route
 50k.

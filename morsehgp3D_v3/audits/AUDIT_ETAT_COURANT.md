@@ -8,7 +8,7 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-> **Alerte au `HEAD=08dec60920a93c15ef200da136d61995976db695`.** Les
+> **Alerte au pin logiciel `08dec60920a93c15ef200da136d61995976db695`.** Les
 > commits `89774d0`, `e3f1925` et `88a9ba8` ajoutent respectivement
 > `Corner8BallDepth`, un broad phase WST3 et son produit WST4 ; `22d1cb0` en
 > publie la note de coût. `a73161c` corrige ensuite le signe d'acuité par
@@ -98,6 +98,14 @@ Cadre : `phase=exploration_v3_hors_registre`,
 > positivité ; l'autre reçoit `4096` supports « tous bien centrés » dans une
 > fixture qui n'appelle jamais `bien_centre`.
 >
+> Après ce pin, le delta logiciel de Claude sur `prototype/wst3_probe.cpp`,
+> SHA-256 `a697ae896240652ec372d7dce3b26f119c7a82971d478312abb9b16ddc6a5c51`,
+> ajoute un histogramme de rang. Il ne change pas `bien_centre`, mais son
+> commentaire sur-affirme la portée : la CDF ne décrit que la clique kNN
+> mutuelle sous la convention `rho<k`, et reste optimiste sur les égalités car
+> le rang ignore le tie par vrai `PointId`. Ce delta mobile n'est ni testé ni
+> reçu comme source locale générale.
+>
 > Les défauts antérieurs restent actifs : les portes HC saines sont à regex et
 > ne jugent pas chaque promotion ; `--fenetre-exhaustive` contourne les gates ;
 > `cred+reste` ne majore que le ledger singleton baseline et perd encore une
@@ -113,8 +121,8 @@ Cadre : `phase=exploration_v3_hors_registre`,
 
 ## Snapshot
 
-Le dernier commit stable relu est
-`HEAD=08dec60920a93c15ef200da136d61995976db695`, commit
+Le dernier commit logiciel stable relu est
+`08dec60920a93c15ef200da136d61995976db695`, commit
 `echapper les parentheses : un regex de porte n'est pas du texte`. Il
 absorbe le raccord Midball de `a58d020`, HC et la borne de `c1e2e3b`, Corner8
 de `89774d0`, WST3 de `e3f1925`, WST4 de `88a9ba8`, la correction du signe
@@ -122,8 +130,9 @@ aigu, l'échelle rationnelle, le diagnostic Corner8 postérieur au broad phase,
 le certificat bisigne de `f7ab7bb`, la conservation des couples non séparés,
 les compteurs `Sym2`, le sampler `--masse`, puis l'oracle brut
 `--supports-retenus`, la positivité Cramer de `34cf05d` et sa porte corrigée à
-`08dec609`. Le worktree était propre avant les présentes écritures
-documentaires ; aucun logiciel n'a été modifié par l'auditeur.
+`08dec609`. Le worktree contient ensuite le delta histogramme WST de Claude
+épinglé dans l'alerte, hors présentes écritures documentaires. Aucun logiciel
+n'a été modifié par l'auditeur.
 
 Le code applique `diag2*num<=rayon2*den`, donc `num/den` se comporte comme une
 finesse croissante. Un commentaire de formule, CMake et la porte dite

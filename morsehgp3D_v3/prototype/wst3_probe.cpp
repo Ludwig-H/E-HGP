@@ -972,6 +972,7 @@ int main(int argc, char** argv) {
       return r;
     };
     long long retenus = 0, rang_max_global = 0, non_degeneres = 0, bien_centres = 0;
+    long long hist[16] = {0};
     double somme_ratio = 0.0, ratio_max = 0.0;
     double somme_rang = 0.0;
     for (long long i = 0; i < m; ++i)
@@ -1027,6 +1028,14 @@ int main(int argc, char** argv) {
         }
       somme_rang += (double)rmax;
       if (rmax > rang_max_global) rang_max_global = rmax;
+      // Histogramme dyadique du rang maximal : la courbe cumulative dit
+      // exactement quelle fraction des supports un voisinage de taille `k`
+      // capturerait, et donc combien de travail la CONTINUATION doit assumer.
+      {
+        int bucket = 0;
+        while (bucket < 15 && (1LL << (bucket + 3)) <= rmax) ++bucket;
+        ++hist[bucket];
+      }
     }
     std::printf("supports_retenus : n=%lld non_degeneres=%lld bien_centres=%lld"
                 " (%.2f%%) retenus=%lld retenus/n=%.2f"
@@ -1037,6 +1046,15 @@ int main(int argc, char** argv) {
                 retenus, (double)retenus / (double)m,
                 somme_ratio / (double)std::max(1LL, retenus), ratio_max,
                 somme_rang / (double)std::max(1LL, retenus), rang_max_global);
+    // Courbe cumulative : part des supports dont TOUS les rangs sont sous `k`.
+    std::printf("rangs_cumules :");
+    long long acc = 0;
+    for (int bkt = 0; bkt < 12; ++bkt) {
+      acc += hist[bkt];
+      std::printf(" k<=%lld:%.3f%%", (1LL << (bkt + 3)),
+                  100.0 * (double)acc / (double)std::max(1LL, retenus));
+    }
+    std::printf("\n");
     if (retenus == 0) {
       std::fprintf(stderr, "PLANCHER: aucun support retenu\n");
       return 3;

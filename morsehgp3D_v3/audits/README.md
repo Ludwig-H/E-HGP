@@ -29,15 +29,16 @@ ancienne phrase imposant le rejet global des positions dupliquées est périmée
   ni positivité, ni source WST, ni census, ni ABI, ni coût.
 - [`AUDIT_CONTRE_RECEPTION_SUPPORT_COMPLET_CORNER8_WST34_22D1CB0_20260814.md`](AUDIT_CONTRE_RECEPTION_SUPPORT_COMPLET_CORNER8_WST34_22D1CB0_20260814.md) :
   théorème exact de la miniboule au support minimal positif complet, q3 ambiant,
-  supersource exhaustive par Carathéodory, suivie du census et de la
-  disposition exacts sur le shell complet `U_B`,
+  supersource exhaustive par Carathéodory, puis nécessité du census, du test
+  `c in relint(conv(U_B))` et de la disposition exacts sur le shell complet,
   réception conditionnelle de Corner8, réfutation de l'exact-once physique des
   probes WST3/WST4 et réponses Q6--Q9. Le statut reçu est `CandidateCover`
   avant distinct-ID/owner/positivité ; la profondeur doit précéder le produit
   WST4 brut. Son post-scriptum conserve la réfutation du signe à `3703097`, sa
   réparation à `a73161c`, le diagnostic Corner8 de `069d903` et les réponses
   Q10--Q13 sur orientation, bisigne, raffinement par lane et diagonale `Sym2`.
-  Le verdict live au pin `08dec609` est maintenu dans `AUDIT_ETAT_COURANT.md` :
+  Le verdict live au pin logiciel `08dec609` est maintenu dans
+  `AUDIT_ETAT_COURANT.md` :
   le bisigne est commis, les couples non séparés ne sont plus jetés, mais
   `Sym2` reste un compteur, le caller bisigne perd le mauvais bit et Corner8
   demeure post-produit. La généralisation exacte d'ordre `q` par vecteurs de
