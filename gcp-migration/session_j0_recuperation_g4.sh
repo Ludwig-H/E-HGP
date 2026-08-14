@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Session G4 — J0 : LA TAILLE DE L'OBJET AUX ECHELLES DU CONTRAT.
+# Session G4 — RECUPERATION du brut J0 reste sur le disque.
 #
 # Cette session utilise EXCLUSIVEMENT les scripts gardes du depot pour le
 # demarrage et l'arret. Elle ne cree aucune VM, ne modifie aucune garde et
@@ -50,11 +50,11 @@ export GCP_ZONE="${GCP_ZONE:-europe-west4-ai1a}"
 export GCP_INSTANCE_NAME="${GCP_INSTANCE_NAME:-ehgp-blackwell-spot-ai1a}"
 # Coherence des trois durees : GCE 90 min, invite 75 min, run 55 min. Le run le
 # plus long doit finir avant l'arret invite, qui doit finir avant l'arret GCE.
-MAX_RUN_SECONDS="${MAX_RUN_SECONDS:-5400}"
-GUEST_SHUTDOWN_MINUTES="${GUEST_SHUTDOWN_MINUTES:-75}"
-RUN_TIMEOUT="${RUN_TIMEOUT:-3300}"
+MAX_RUN_SECONDS="${MAX_RUN_SECONDS:-1800}"
+GUEST_SHUTDOWN_MINUTES="${GUEST_SHUTDOWN_MINUTES:-20}"
+RUN_TIMEOUT="${RUN_TIMEOUT:-300}"
 
-WORK="$(mktemp -d /tmp/ehgp-j0-session.XXXXXXXX)"
+WORK="$(mktemp -d /tmp/ehgp-j0-recup.XXXXXXXX)"
 HANDOFF="${WORK}/handoff.json"
 LOG="${WORK}/session.log"
 RECU="${REPO_ROOT}/morsehgp3D_v3/receipts/j0_lane_source_g4_20260814"
@@ -78,7 +78,7 @@ export GCP_SSH_KEY_DIR="${WORK}/ssh"
 mkdir -p "${GCP_SSH_KEY_DIR}"
 chmod 700 "${GCP_SSH_KEY_DIR}"
 export GCP_SSH_KEY_FILE="${GCP_SSH_KEY_DIR}/id_ed25519"
-ssh-keygen -q -t ed25519 -N '' -C 'e-hgp-j0-session' -f "${GCP_SSH_KEY_FILE}"
+ssh-keygen -q -t ed25519 -N '' -C 'e-hgp-j0-recup' -f "${GCP_SSH_KEY_FILE}"
 chmod 600 "${GCP_SSH_KEY_FILE}"
 GCP_SSH_KEY_EXPIRATION_UTC="$(python3 -c 'from datetime import datetime,timedelta,timezone; print((datetime.now(timezone.utc)+timedelta(minutes=95)).isoformat(timespec="seconds").replace("+00:00","Z"))')"
 export GCP_SSH_KEY_EXPIRATION_UTC
@@ -178,108 +178,17 @@ gcloud compute scp "${TAR}" "${GCP_INSTANCE_NAME}:/tmp/v3.tgz" \
   --ssh-key-file="${GCP_SSH_KEY_FILE}" \
   --ssh-key-expiration="${GCP_SSH_KEY_EXPIRATION_UTC}" 2>&1 | tee -a "${LOG}"
 
-# ---- 1. Build, et empreinte de l'ELF reellement mesure.
+# ---- 1. Le brut de la rampe precedente est reste sur le disque de demarrage,
+# qui persiste a l'arret. On ne recalcule RIEN : on rapatrie, puis on s'arrete.
 "${SSH[@]}" 'set -euo pipefail
-  export PATH=$HOME/.local/bin:$PATH
-  python3 -m pip install --user --quiet --upgrade cmake >/dev/null 2>&1 || true
-  export PATH=$HOME/.local/bin:$PATH
-  rm -rf ~/j0 && mkdir -p ~/j0 && cd ~/j0
-  tar xzf /tmp/v3.tgz
-  echo "coeurs=$(nproc)"; cmake --version | head -1; g++ --version | head -1
-  cmake -S morsehgp3D_v3 -B build -DCMAKE_BUILD_TYPE=Release >/dev/null
-  cmake --build build --target mhgp3v_lane_source_scale_probe mhgp3v_q4seed_axis_topr4_probe -j48
-  sha256sum build/mhgp3v_lane_source_scale_probe build/mhgp3v_q4seed_axis_topr4_probe
+  ls -la ~/j0/out/ 2>/dev/null || { echo "AUCUN BRUT SUR LE DISQUE"; exit 1; }
+  wc -l ~/j0/out/*.txt
 ' 2>&1 | tee -a "${LOG}"
 
-# ---- 2. Rejeu INDEPENDANT des vingt-trois portes sur la VM. Les fixtures et
-# les mutants doivent repasser sur une autre machine, un autre compilateur et un
-# autre ordonnancement avant que la campagne ait le moindre sens.
-"${SSH[@]}" 'set -euo pipefail
-  export PATH=$HOME/.local/bin:$PATH
-  cd ~/j0
-  ctest --test-dir build --output-on-failure -j24 -R "^mhgp3v_(q4axis|lane_source)" 2>&1 | tail -6
-' 2>&1 | tee -a "${LOG}"
-
-# ---- 3. LA RAMPE J0. Six pistes ordonnees du moins cher au plus cher, trois
-# tailles chacune, avec ouverture conditionnelle du palier suivant.
-"${SSH[@]}" "set -euo pipefail
-  export PATH=\$HOME/.local/bin:\$PATH
-  cd ~/j0
-  L=./build/mhgp3v_lane_source_scale_probe
-  mkdir -p out
-  BUDGET=${RUN_TIMEOUT}
-  DEBUT=\$(date +%s)
-  # famille:smax:espacements — du moins cher au plus cher.
-  PISTES='terrain:6:10 terrain:11:10 uniform:6:10 uniform:11:10 eight_clusters:6:14 eight_clusters:11:14'
-  for piste in \$PISTES; do
-    fam=\$(echo \$piste | cut -d: -f1)
-    sm=\$(echo \$piste | cut -d: -f2)
-    esp=\$(echo \$piste | cut -d: -f3)
-    prec=0; prevn=0
-    for n in 12500 25000 50000; do
-      reste=\$(( BUDGET - (\$(date +%s) - DEBUT) ))
-      if [ \"\$reste\" -lt 60 ]; then echo \"=== BUDGET EPUISE avant \$fam smax=\$sm n=\$n\"; break; fi
-      if [ \"\$prec\" -gt 0 ]; then
-        est=\$(( prec * n * n / (prevn * prevn) ))
-        if [ \"\$est\" -gt \"\$(( reste * 8 / 10 ))\" ]; then
-          echo \"=== PALIER NON OUVERT \$fam smax=\$sm n=\$n : estime \${est}s > 80% de \${reste}s\"
-          break
-        fi
-      fi
-      echo \"=== famille=\$fam smax=\$sm n=\$n espacements=\$esp\"
-      t0=\$(date +%s)
-      set +e
-      timeout \$reste \$L --family=\$fam --points=\$n --seed=1 --smax=\$sm \\
-        --threads=48 --dmax-espacements=\$esp 2>&1
-      code=\${PIPESTATUS[0]}
-      set -e
-      dt=\$(( \$(date +%s) - t0 ))
-      echo \"code=\$code secondes=\$dt\"
-      if [ \"\$code\" -ne 0 ]; then echo \"=== PISTE \$fam smax=\$sm ARRETEE au code \$code\"; break; fi
-      prec=\$dt; prevn=\$n
-    done
-  done > out/rampe_j0.txt 2>&1
-  echo '=== RAMPE J0 TERMINEE ==='
-  grep -c '^code=0' out/rampe_j0.txt || true
-  wc -l out/rampe_j0.txt
-" 2>&1 | tee -a "${LOG}"
-
-# ---- 4. Reçu : la sortie brute revient, entiere.
 mkdir -p "${RECU}"
-for p in rampe_j0; do
-  gcloud compute scp "${GCP_INSTANCE_NAME}:~/j0/out/${p}.txt" "${RECU}/${p}.txt" \
-    --project="${GCP_PROJECT_ID}" --zone="${GCP_ZONE}" --quiet \
-    --ssh-key-file="${GCP_SSH_KEY_FILE}" \
-    --ssh-key-expiration="${GCP_SSH_KEY_EXPIRATION_UTC}" 2>&1 | tee -a "${LOG}"
-done
-# ---- 5. LE VERDICT. J0 ne juge pas une performance : il juge que la mesure
-# est LISIBLE. Tout code non nul, toute coupure qui mord, ou moins de deux
-# tailles par famille obligatoire rendent la session rouge.
-"${SSH[@]}" 'set -euo pipefail
-  cd ~/j0
-  python3 - <<PY
-import re, sys
-lignes = [l.rstrip() for l in open("out/rampe_j0.txt")]
-codes = [int(l.split("=")[1].split()[0]) for l in lignes if l.startswith("code=")]
-mesures = [l for l in lignes if l.startswith("lane_source :")]
-coupures = [float(m.group(1)) for l in lignes for m in [re.search(r"rapport=([0-9.]+)", l)] if m]
-par_famille = {}
-for l in lignes:
-    m = re.search(r"famille=(\w+) smax=(\d+) n=(\d+)", l)
-    if m and l.startswith("==="):
-        par_famille.setdefault((m.group(1), m.group(2)), []).append(int(m.group(3)))
-obligatoires = [k for k in par_famille if k[0] in ("uniform", "eight_clusters")]
-mauvais = [c for c in codes if c != 0]
-pire_coupure = max(coupures) if coupures else 0.0
-assez = all(len(par_famille[k]) >= 2 for k in obligatoires) and len(obligatoires) >= 4
-print("runs=%d codes_non_nuls=%d mesures=%d pire_coupure=%.3f pistes_obligatoires=%d"
-      % (len(codes), len(mauvais), len(mesures), pire_coupure, len(obligatoires)))
-for k in sorted(par_famille):
-    print("  %s smax=%s tailles=%s" % (k[0], k[1], par_famille[k]))
-ok = (not mauvais) and pire_coupure <= 0.75 and assez and len(mesures) == len(codes)
-print("VERDICT=%s" % ("LISIBLE" if ok else "INCOMPLET_OU_TRONQUE"))
-sys.exit(0 if ok else 1)
-PY
-' 2>&1 | tee -a "${LOG}"
-
-echo "campagne terminee" | tee -a "${LOG}"
+gcloud compute scp "${GCP_INSTANCE_NAME}:~/j0/out/rampe_j0.txt" "${RECU}/rampe_j0.txt" \
+  --project="${GCP_PROJECT_ID}" --zone="${GCP_ZONE}" --quiet \
+  --ssh-key-file="${GCP_SSH_KEY_FILE}" \
+  --ssh-key-expiration="${GCP_SSH_KEY_EXPIRATION_UTC}" 2>&1 | tee -a "${LOG}"
+wc -l "${RECU}/rampe_j0.txt" | tee -a "${LOG}"
+echo "recuperation terminee" | tee -a "${LOG}"

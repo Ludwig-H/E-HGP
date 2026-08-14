@@ -1,4 +1,4 @@
-git_head=01954807e38a931e5c874e701da6367ff89384d6 fichiers_modifies=0
+git_head=62b9c59c79e44d9d9a6fb90934de17fb4408e443 fichiers_modifies=0
 sha256 morsehgp3D_v3/prototype/lane_source_scale_probe.cpp = eaa37010a4cb5b01911e601fe1053d324c33fb4c865d84b51d59f34996b55dfe
 sha256 morsehgp3D_v3/prototype/q4seed_axis_topr4.hpp = 0ac896c76151d208c0598a645db3ad03d1ddebf559e1db41350d1f8cf86775f2
 sha256 morsehgp3D_v3/CMakeLists.txt = 262989674ec0b8cd90db1c774e5e90d3ccaea90936a744ba0a0621336d226eaa
@@ -14,8 +14,8 @@ sha256 morsehgp3D_v3/CMakeLists.txt = 262989674ec0b8cd90db1c774e5e90d3ccaea90936
 Updated [https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/europe-west4-ai1a/instances/ehgp-blackwell-spot-ai1a].
 [GARDE post-mutation] cible=devpod-gpu-exploration/europe-west4-ai1a/ehgp-blackwell-spot-ai1a état=TERMINATED machine=g4-standard-48 provisioning=SPOT action=STOP maxRunDuration=5400s.
 [OK] maxRunDuration=5400s recertifié sur la cible TERMINATED devpod-gpu-exploration/europe-west4-ai1a/ehgp-blackwell-spot-ai1a; aucune VM démarrée ou arrêtée.
-[GARDE SSH] Clé de session ssh-ed25519 utilisable sans interaction (SHA256:7UFnCofmn1H+h4cU3FwSQm/5y+jgGDR3q5rY66sIWp8).
-[GARDE SSH] Clé OS Login unique, expiration fixe=2026-08-14T22:34:17.545579Z, durée restante=5687s.
+[GARDE SSH] Clé de session ssh-ed25519 utilisable sans interaction (SHA256:4qQqC/GS+l3Eds5UdvxkK0Yfjkn5LuOqLIgVmsjhIMI).
+[GARDE SSH] Clé OS Login unique, expiration fixe=2026-08-14T22:37:33.802005Z, durée restante=5686s.
 [START] Démarrage protégé demandé :
   compte                 : louis.hauseux@gmail.com
   projet                 : devpod-gpu-exploration
@@ -25,20 +25,20 @@ Updated [https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/z
   maxRunDuration GCE     : 5400 s
   arrêt invité secondaire : 75 min
 Starting instance(s) ehgp-blackwell-spot-ai1a...
-..................................................done.
+..............................................done.
 Updated [https://compute.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/europe-west4-ai1a/instances/ehgp-blackwell-spot-ai1a].
 Instance internal IP is 10.164.0.7
-Instance external IP is 34.7.9.84
-[GARDE-FOU GCE] action=STOP, maxRunDuration=5400s, échéance calculée=1786746582, échéance sûre=1786746282, terminationTimestamp non exposé; échéance calculée certifiée
+Instance external IP is 34.6.138.227
+[GARDE-FOU GCE] action=STOP, maxRunDuration=5400s, échéance calculée=1786746778, échéance sûre=1786746478, terminationTimestamp non exposé; échéance calculée certifiée
 [GARDE-FOU INVITÉ] Armement de shutdown -P +75 via SSH.
-Shutdown scheduled for Fri 2026-08-14 22:15:14 UTC, use 'shutdown -c' to cancel.
+Shutdown scheduled for Fri 2026-08-14 22:18:26 UTC, use 'shutdown -c' to cancel.
 MODE=poweroff
-USEC=1786745714864632
+USEC=1786745906430651
 
-[GARDE-FOU GCE] action=STOP, maxRunDuration=5400s, échéance calculée=1786746582, échéance sûre=1786746282, terminationTimestamp non exposé; échéance calculée certifiée
+[GARDE-FOU GCE] action=STOP, maxRunDuration=5400s, échéance calculée=1786746778, échéance sûre=1786746478, terminationTimestamp non exposé; échéance calculée certifiée
 [SUCCÈS] VM démarrée avec deux coupe-circuits vérifiés. Fermez la session avec stop_and_verify.sh.
-generation verrouillee : 2026-08-14T13:59:42.143-07:00
-tar_sha256=7c264938f2ceed2aadccd24543fcf259bc8941b264fcddf611b257e60e51d6b1
+generation verrouillee : 2026-08-14T14:02:58.255-07:00
+tar_sha256=c438619a586859725982dc895408c593c099e9583d392433f29e90bcfaa54231
 coeurs=48
 cmake version 4.4.2
 g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0
@@ -47,15 +47,16 @@ CMake Warning at CMakeLists.txt:37 (message):
 
 
 [  0%] Building CXX object morsehgp3D_v2_build/CMakeFiles/mhgp.dir/src/catalogue.cpp.o
+[ 33%] Building CXX object morsehgp3D_v2_build/CMakeFiles/mhgp.dir/src/forest.cpp.o
+[ 66%] Building CXX object morsehgp3D_v2_build/CMakeFiles/mhgp.dir/src/run.cpp.o
 In file included from /home/louis_hauseux_gmail_com/j0/morsehgp3D_v2/include/mhgp/mhgp.hpp:8,
-                 from /home/louis_hauseux_gmail_com/j0/morsehgp3D_v2/src/catalogue.cpp:22:
+                 from /home/louis_hauseux_gmail_com/j0/morsehgp3D_v2/src/run.cpp:9:
 /home/louis_hauseux_gmail_com/j0/morsehgp3D_v2/include/mhgp/exact.hpp:25:14: warning: ISO C++ does not support ‘__int128’ for ‘type name’ [-Wpedantic]
    25 | using i128 = __int128;
       |              ^~~~~~~~
 /home/louis_hauseux_gmail_com/j0/morsehgp3D_v2/include/mhgp/exact.hpp:26:23: warning: ISO C++ does not support ‘__int128’ for ‘type name’ [-Wpedantic]
    26 | using u128 = unsigned __int128;
       |                       ^~~~~~~~
-[ 33%] Building CXX object morsehgp3D_v2_build/CMakeFiles/mhgp.dir/src/forest.cpp.o
 In file included from /home/louis_hauseux_gmail_com/j0/morsehgp3D_v2/include/mhgp/mhgp.hpp:8,
                  from /home/louis_hauseux_gmail_com/j0/morsehgp3D_v2/src/forest.cpp:9:
 /home/louis_hauseux_gmail_com/j0/morsehgp3D_v2/include/mhgp/exact.hpp:25:14: warning: ISO C++ does not support ‘__int128’ for ‘type name’ [-Wpedantic]
@@ -64,9 +65,8 @@ In file included from /home/louis_hauseux_gmail_com/j0/morsehgp3D_v2/include/mhg
 /home/louis_hauseux_gmail_com/j0/morsehgp3D_v2/include/mhgp/exact.hpp:26:23: warning: ISO C++ does not support ‘__int128’ for ‘type name’ [-Wpedantic]
    26 | using u128 = unsigned __int128;
       |                       ^~~~~~~~
-[ 66%] Building CXX object morsehgp3D_v2_build/CMakeFiles/mhgp.dir/src/run.cpp.o
 In file included from /home/louis_hauseux_gmail_com/j0/morsehgp3D_v2/include/mhgp/mhgp.hpp:8,
-                 from /home/louis_hauseux_gmail_com/j0/morsehgp3D_v2/src/run.cpp:9:
+                 from /home/louis_hauseux_gmail_com/j0/morsehgp3D_v2/src/catalogue.cpp:22:
 /home/louis_hauseux_gmail_com/j0/morsehgp3D_v2/include/mhgp/exact.hpp:25:14: warning: ISO C++ does not support ‘__int128’ for ‘type name’ [-Wpedantic]
    25 | using i128 = __int128;
       |              ^~~~~~~~
@@ -78,11 +78,33 @@ In file included from /home/louis_hauseux_gmail_com/j0/morsehgp3D_v2/include/mhg
 [100%] Building CXX object CMakeFiles/mhgp3v_lane_source_scale_probe.dir/prototype/lane_source_scale_probe.cpp.o
 [100%] Linking CXX executable mhgp3v_lane_source_scale_probe
 [100%] Built target mhgp3v_lane_source_scale_probe
-gmake: *** No rule to make target '\'.  Stop.
---- fermeture ciblee (rc=2) ---
+[ 66%] Built target mhgp
+[ 66%] Building CXX object CMakeFiles/mhgp3v_q4seed_axis_topr4_probe.dir/prototype/q4seed_axis_topr4_probe.cpp.o
+[100%] Linking CXX executable mhgp3v_q4seed_axis_topr4_probe
+[100%] Built target mhgp3v_q4seed_axis_topr4_probe
+d862c17b43cd89a38730719ce8e612f70db0684be1c81180ffb57482c8b57708  build/mhgp3v_lane_source_scale_probe
+14bd78f240b0f5372ff6212776c21111093a7bc7cc3d5ad662bb45ba28ba6802  build/mhgp3v_q4seed_axis_topr4_probe
+49/50 Test #845: mhgp3v_q4axis_sweep_amas ............................   Passed    0.68 sec
+50/50 Test #849: mhgp3v_q4axis_sweep_smax_14 .........................   Passed    0.68 sec
+
+100% tests passed out of 50
+
+Total Test time (real) =   0.70 sec
+=== RAMPE J0 TERMINEE ===
+6
+78 out/rampe_j0.txt
+runs=10 codes_non_nuls=4 mesures=10 pire_coupure=0.940 pistes_obligatoires=4
+  eight_clusters smax=11 tailles=[12500]
+  eight_clusters smax=6 tailles=[12500]
+  terrain smax=11 tailles=[12500]
+  terrain smax=6 tailles=[12500]
+  uniform smax=11 tailles=[12500, 25000, 50000]
+  uniform smax=6 tailles=[12500, 25000, 50000]
+VERDICT=INCOMPLET_OU_TRONQUE
+--- fermeture ciblee (rc=1) ---
 [STOP] État actuel de ehgp-blackwell-spot-ai1a : RUNNING.
 Stopping instance(s) ehgp-blackwell-spot-ai1a...
-......................................................................................................................................................................................................................................................................................done.
+.....................................................................................................................................................................................................................................................................................................................done.
 Updated [https://compute.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/europe-west4-ai1a/instances/ehgp-blackwell-spot-ai1a].
 [OK] Cible ehgp-blackwell-spot-ai1a arrêtée et vérifiée (état GCE TERMINATED).
 [INFO] Aucune autre VM project=e-hgp active détectée.
