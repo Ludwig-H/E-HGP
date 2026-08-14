@@ -118,6 +118,53 @@ Reste également vrai, et indépendant de tout cela : à $K=1$ HGP **est** le si
 
 T6 du [programme théorique](THEOREMES.md) n'est donc plus une condition d'existence mais une **extension** : l'attention directement définie sur le DAG de recouvrement, sans passer par les facettes comme feuilles. Elle reste le seul endroit où un budget de nouveauté d'opérateur serait bien placé, mais le programme n'est plus bloqué sans elle.
 
+## M4 — la porte de promotion la moins chère, et elle manquait
+
+M1 ne peut que réfuter, M2 ne fait que diagnostiquer, et M3 promeut sur une **autre** tâche. Il n'existe donc dans ce dossier **aucune porte de promotion bon marché sur la tâche visée** : pour obtenir un premier signal positif en segmentation sémantique, tout le programme suppose d'avoir construit descripteur, opérateur et architecture. C'est un défaut de séquencement, et il se corrige.
+
+L'expérience la plus petite qui puisse produire un signal positif ne demande **ni descripteur, ni opérateur, ni attention** : concaténer à l'entrée d'un backbone standard quelques **canaux scalaires par point**, tirés directement de la hiérarchie.
+
+Pour chaque point $x$ :
+
+- le niveau de naissance du plus petit nœud le contenant ;
+- le niveau auquel ce nœud fusionne dans son parent, et la persistance qui en résulte ;
+- la profondeur du nœud dans l'arbre ;
+- la masse pondérée $\sum_{\tau\in v}w_{x\tau}$ du nœud contenant, à un niveau fixé ;
+- la marge du vote pondéré $V_x^{(1)}-V_x^{(2)}$, qui mesure à quel point l'appartenance de ce point est contestée ;
+- éventuellement $\Delta_v(u)$ réduit à sa moyenne directionnelle.
+
+Six scalaires. On entraîne **exactement le même backbone**, même recette, mêmes graines, avec et sans ces canaux, et on compare.
+
+Ce que cette expérience teste est précisément la bonne question, et elle la teste seule : **la hiérarchie HGP porte-t-elle une information que le backbone local ne reconstruit pas déjà ?** Si six scalaires par point apportent un gain apparié, le programme est vivant et l'information existe. S'ils n'apportent rien, il est peu vraisemblable qu'un descripteur sphérique et une attention hiérarchique la fassent apparaître.
+
+Son coût est deux entraînements appariés par graine, contre une architecture complète à concevoir, implémenter et déboguer. Elle doit donc venir **avant** WP2, juste après M1 et M2.
+
+Une précaution : ces canaux encodent partiellement la portée, puisque les niveaux de densité en dépendent. Il faut donc les stratifier par distance et vérifier qu'un contrôle trivial — la portée elle-même, la densité locale brute, le rayon au $K$-ième voisin — ne reproduit pas le gain. Sinon on aura mesuré un thermomètre, pas une hiérarchie.
+
+## La tension entre la théorie et les mesures, qui est une contribution en puissance
+
+Le chapitre 7 du manuscrit mesure la **vitesse de percolation**, indice de la fraction d'un amas récupérable avant fusion parasite. En dimension $3$ :
+
+| $K$ | HGP | Robust Single-Linkage | DBSCAN |
+|---|---|---|---|
+| $2$ | $0{,}646$ | $0{,}462$ | $0{,}563$ |
+| $3$ | $0{,}690$ | $0{,}412$ | $0{,}582$ |
+| $4$ | $0{,}714$ | $0{,}400$ | $0{,}605$ |
+| $5$ | $0{,}732$ | $0{,}399$ | $0{,}625$ |
+
+La conclusion du manuscrit est nette : « les $K$-polyèdres améliorent systématiquement la vitesse de percolation dès que $K\geq2$ ». La théorie prédit donc une amélioration **monotone en $K$**.
+
+Or l'étude HGP existante sur SemanticKITTI observait $K=2$ supérieur à $K=1$ **et à $K=3$**. Sur données réelles, l'optimum n'est pas au bout : il est tout de suite.
+
+**Cette contradiction est un actif, pas un embarras.** Les vitesses sont mesurées sur un processus de Poisson homogène dans $\mathbb{R}^{p}$ ; un scan LiDAR est un échantillonnage de surfaces à densité angulaire fixée, dépendant de la portée et de l'occultation. L'écart entre la prédiction monotone et l'optimum observé à $K=2$ **est** l'effet du modèle d'échantillonnage, et il est mesurable.
+
+L'expérience correspondante est simple et n'a jamais été faite : mesurer où se situe l'optimum en $K$ sur données réelles, **stratifié par portée et par dimension intrinsèque du nœud**, et le confronter à la prédiction théorique. Deux issues, toutes deux publiables :
+
+- l'optimum se déplace vers les grands $K$ quand on corrige l'échantillonnage — la théorie transfère, la correction capteur est validée, et l'on tient le pont théorie–pratique ;
+- l'optimum reste à $K=2$ quel que soit le traitement — la théorie ne transfère pas, et il faut dire pourquoi. Les deux explications candidates sont déjà écrites dans ce dossier : la naissance retardée des objets filiformes, et la dépendance de la densité à la portée.
+
+C'est la seule expérience du dossier qui teste **la théorie elle-même** plutôt qu'une architecture. C'est aussi, à mon sens, celle qui a le meilleur rapport valeur scientifique sur coût.
+
 ## Où placer le budget de nouveauté
 
 Trois actifs sont candidats, et ils n'ont pas la même valeur.

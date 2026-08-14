@@ -28,7 +28,7 @@ Développés au chapitre 6 du guide. À connaître **avant** de proposer quoi qu
 1. **Le goulot n'est probablement pas la partition.** Dans la littérature superpoint, l'oracle de partition est déjà vingt points devant les modèles (SPG : $62{,}1$ contre $88{,}2$). Un diagnostic d'oracle est donc une **porte de réfutation, pas de promotion**.
 2. **HGP sous-segmente les objets fins** — le manuscrit le documente lui-même sur `birch2`. Or toute la marge de mIoU est sur `pole`, `traffic-sign`, `bicycle`, `person`, `bicyclist`.
 3. **Le descripteur de nœud est le levier le plus faible** : $-0{,}7$ à $-4{,}1$ mIoU quand on retire toutes les features de nœud, contre $-3{,}0$ à $-6{,}3$ pour l'adjacence et jusqu'à $-8{,}4$ pour le nombre de niveaux.
-4. **La barre val en régime strict est $\approx68$ mIoU**, pas $76$. Les $75$–$76$ sont des scores *test* avec agrégation temporelle, TTA ou multimodalité.
+4. **La barre val en régime strict est $\approx70{,}3$ mIoU** — MinkUNet34v2 de mmdetection3d, config, poids et log publiés, sans TTA. Pas $76$, qui est un score *test* obtenu avec caméra, temps ou TTA. Voir [CONCURRENCE.md](CONCURRENCE.md) : le classement officiel curaté est vide, le serveur a redémarré à zéro, et « mono-scan » ne désigne qu'un jeu d'étiquettes, pas une contrainte d'entrée.
 
 ---
 

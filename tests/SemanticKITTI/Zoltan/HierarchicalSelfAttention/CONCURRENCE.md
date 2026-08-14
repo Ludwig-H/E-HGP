@@ -1,78 +1,124 @@
 # État de l'art et espace de nouveauté
 
-Veille arrêtée au **13 août 2026**. Les scores ci-dessous proviennent de sources primaires, mais les régimes d'entrée et d'entraînement diffèrent. Aucun tableau unique ne doit être lu comme une course de nombres sans ces colonnes.
+Veille arrêtée au **14 août 2026**, sources primaires. Ce fichier est la référence unique du dossier sur « qui fait quoi, et dans quel régime » : chaque chiffre y porte son régime, et aucun n'est comparable à un autre sans lui.
 
-## État des sources officielles SemanticKITTI
+## Avertissement liminaire
 
-Trois sources coexistent :
+1. **Il n'existe aucun classement officiel attribuable méthode par méthode.** `semantic-kitti.org/tasks.html` annonce un classement des « approches publiées avec au moins un lien arXiv », mais la page ne contient qu'un `<!--PLACEHOLDER FOR SINGLE SCAN LEADERBOARD-->` et un « Last updated: » vide.
+2. **Le serveur a déménagé et le classement a redémarré à zéro.** CodaBench, seul serveur vivant, ne reporte aucune entrée historique ; son maximum est 75,21 et ses cinq têtes sont pseudonymes, donc non citables.
+3. **Le rang 1 historique s'appelle `SimpleSeg`** : 76,5, huit soumissions, aucune publication trouvable. Le « record SemanticKITTI » n'a pas d'article.
 
-1. l'ancien leaderboard CodaLab, fermé le 31 janvier 2026, conserve l'historique du test ;
-2. le nouveau CodaBench n'a pas migré automatiquement cet historique ; ses méthodes et fiches sont généralement non documentées ;
-3. le JSON du site SemanticKITTI liste des valeurs de papiers, mais il est incomplet et daté du 2 juin 2025.
+Toute citation de « l'état de l'art SemanticKITTI » doit donc préciser sa source **et** son régime, sous peine de comparer un serveur mort, un serveur remis à zéro et une page vide.
 
-Conséquences :
+### Les trois serveurs
 
-- l'ancien maximum serveur visible est **76,5 mIoU**, partagé par `SimpleSeg` et `TASeg` ; `SimpleSeg` n'a pas de méthode publiquement identifiable ;
-- TASeg est le meilleur résultat publié identifiable à **76,5**, mais son modèle utilise historique LiDAR et images ;
-- RAPiD-Seg à **76,1** est le comparateur publié le plus fort vérifié en LiDAR mono-trame, mais son absence de TTA/ensemble n'est pas explicitement certifiée et son inférence comporte deux passes apprises ;
-- le JSON officiel des papiers place LSK3DNet en tête à **75,6**, mais omet notamment TASeg et RAPiD-Seg ;
-- le nouveau CodaBench affiche le compte pseudonyme `kadir_yilmaz` à 75,2 au jour de la veille, sans méthode ni fiche renseignée ; il ne remplace pas l'historique.
+| Serveur | État au 14 août 2026 | Contenu |
+|---|---|---|
+| `codalab.org/competitions/20331` | mort depuis le 31 août 2022 | — |
+| `codalab.lisn.upsaclay.fr/competitions/6280` | gelé, bannière « we transferred the competition to Codabench! », fin le 31 janvier 2026 | historique complet : 381 utilisateurs, phase single scan 9324, dernière entrée 2026-01-19 |
+| `codabench.org/competitions/12448` | vivant, créé le 2025-12-31 | phase unique « Single Scan » (id 20274, leaderboard 13733) : 108 participants, 517 soumissions, 62 lignes |
 
-Sources : [ancien classement officiel](https://codalab.lisn.upsaclay.fr/competitions/6280/results/9324), [nouvelle compétition](https://www.codabench.org/competitions/12448/), [API du leaderboard actuel](https://www.codabench.org/api/phases/20274/get_leaderboard/?page=1&page_size=100), [table officielle des papiers](https://semantic-kitti.org/data/semantic_single.json).
+Le multi-scan est désormais une compétition distincte (CodaBench 17382, créée le 2026-07-04, 2 soumissions).
 
-## Méthodes sémantiques à battre ou expliquer
+Tête CodaBench : `kadir_yilmaz` 75,2142 (2026-03-03), `xoxosos` 74,9406 (2026-03-30), `pic-iii` 72,7475, `nwfi-ll` 72,3853, `yutta` 72,0568 (2026-08-07). Pour toutes, `display_name`, `organization` et `fact_sheet_answers` sont nuls et les résultats détaillés en `AccessDenied` : aucune n'est scientifiquement citable.
 
-Les tracks A–D sont définis dans [EXPERIMENTAL_PROTOCOL.md](EXPERIMENTAL_PROTOCOL.md#régimes-de-comparaison). `NR` signifie que le point n'est pas explicitement rapporté dans la source primaire auditée ; il ne signifie pas « non utilisé ». La colonne test de ce tableau relève du régime permissif du serveur caché, où l'agrégation temporelle, le TTA, les ensembles, le préentraînement multi-datasets et le multimodal sont admis sans être distingués par la fiche de soumission ; elle ne se compare donc pas à un résultat de validation mono-trame sans TTA. La sous-section « Barre val en régime strict » ci-dessous donne le barème réellement pertinent pour ce projet.
+Classement gelé (CSV officiel, mIoU à 0,1) : `SimpleSeg` 76,5 rang 1 (2023-11-19, aucune publication), TASeg 76,5 rang 2 (2023-11-18), RAPiD 76,1, `Cluster3DSeg_` 75,6, `Seger` 75,5, `PointTransformers` 75,5, `PointSeg` 75,3, UniSeg 75,2, SphereFormer 74,8, `kabouzeid` 74,4 (2024-11-13). Aucune entrée postérieure au 1er janvier 2024 ne dépasse 74,4 ; aucune postérieure au 1er janvier 2025 ne dépasse 73,7.
 
-| Méthode | Val / test mIoU | Entrée à l'inférence | Ressources d'entraînement | TTA | Inférences/étages | Statut de comparaison |
-|---|---:|---|---|---|---|---|
-| TASeg, CVPR 2024 | 72,7 / **76,5** | LiDAR temporel + images historiques | régime temporel/multimodal | NR | NR | track C, non strict |
-| RAPiD-Seg, ECCV 2024 | 73,0 / **76,1** | LiDAR mono-trame | pipeline class-aware appris | NR | 2 inférences séquentielles | plus proche ; recette stricte à auditer |
-| LSK3DNet, CVPR 2024 | 70,2 / **75,6** | LiDAR mono-trame | instance CutMix, davantage d'époques pour la recette test | oui | NR | track D, pas le claim strict |
-| PTv3 + PPT, CVPR 2024 | 72,3 / **75,5** | LiDAR mono-trame | préentraînement multi-datasets | NR | NR | track B |
-| SP2T, ICCV 2025 | 71,7 / **75,4** | LiDAR mono-trame | SemanticKITTI | oui | NR | track D ; concurrent conceptuel proche |
-| M3Net, CVPR 2024 | 72,0 / **75,1** | LiDAR mono-trame | entraînement multi-datasets | NR | NR | track B |
-| UniSeg, ICCV 2023 | 71,3 / **75,2** | RGB + point/voxel/range | multimodal | NR | NR | track C |
-| SphereFormer, CVPR 2023 | 67,8 / **74,8** | LiDAR mono-trame | SemanticKITTI | NR | NR | contrôle géométrique proche |
-| DITR, 3DV 2026 | 69,0 / **74,4** | LiDAR + image DINOv2 | préentraînement externe DINOv2 | NR | NR | tracks B+C ; image requise |
-| PTv3 seul, CVPR 2024 | 70,8 / **74,2** | LiDAR mono-trame | SemanticKITTI | NR | NR | cible de portage, pas baseline WP0 prête |
-| ProtoSEG, NeurIPS 2023 | **74,2** / NR | LiDAR | segmentation unifiée | NR | NR | contrôle semantic/panoptic, validation seulement |
-| VaViT, arXiv 2026 | 68,0 / NR | LiDAR mono-trame | SemanticKITTI | non | NR | résultat validation strict, pas de test caché |
+Sources : [ancien classement](https://codalab.lisn.upsaclay.fr/competitions/6280/results/9324), [compétition vivante](https://www.codabench.org/competitions/12448/), [API du leaderboard](https://www.codabench.org/api/phases/20274/get_leaderboard/?page=1&page_size=100).
 
-Les scores val et test ne sont jamais interchangeables. Par exemple, RWAFormer appelle parfois la séquence 08 « test » et rapporte 75,3 ; il s'agit du split public de validation, pas du serveur 11–21. Sa taxonomie/reporting doit en outre être reproduite avec le YAML officiel avant comparaison.
+## Ce que « single scan » veut dire, et ne veut pas dire
 
-### Barre val en régime strict
+C'est le piège principal du benchmark. Le texte officiel évalue 25 classes sur 28 : « Single scan ... we combine the moving classes with the corresponding non-moving class resulting in a total number of 19 classes for evaluation » ; « Multiple scans : we evaluate all 28 classes including moving and non-moving ». **La différence formelle entre les deux tracks est uniquement le jeu d'étiquettes, pas l'entrée.**
 
-Le régime qui engage réellement ce projet est le plus étroit des deux : validation sur la séquence 08, mono-trame, LiDAR seul, sans TTA ni ensemble. Une reproduction contrôlée récente réentraîne les principaux concurrents dans ce seul cadre — Puy et al., *Vanilla ViT for Automotive Point Cloud Semantic Segmentation*, prépublication [arXiv 2605.31177](https://arxiv.org/abs/2605.31177), valeo.ai, 29 mai 2026 — et donne le classement suivant.
+L'intention était mono-trame, et l'inobservabilité est avouée — Behley, issue `PRBonn/semantic-kitti-api` #4, 31 juillet 2019, verbatim :
 
-| Méthode | mIoU val, mono-trame, LiDAR seul, sans TTA |
-|---|---:|
-| MinkUNet | 63,8 |
-| Cylinder3D | 64,3 |
-| SPVNAS | 64,7 |
-| FlatFormer-S | 65,3 |
-| PTv3, reproduit | 66,2 |
-| VaViT-B | 67,6 |
-| SphereFormer | 67,8 |
-| VaViT-B\* | 68,0 |
-| WaffleIron-256 | 68,0 |
+> a. Single scan: You take only scan 245 and predict 245 with this information... b. Multi scan: You take information from 245, 244, 243, 242, 241... (You can also take more scans, we don't care. Since we only see the results of scan 245.)
 
-Deux conséquences en découlent. D'abord, la valeur 70,8 en validation annoncée par PTv3, celle que porte la ligne « PTv3 seul » du tableau précédent, n'est pas reproductible : l'écart est documenté dans l'issue Pointcept #410 et la reproduction contrôlée s'arrête à 66,2. Ensuite, la barre honnête à viser en régime strict est d'environ 68 mIoU en validation, et non 76 ; les 76,5 du serveur caché appartiennent à un autre barème et ne fixent aucun seuil pour ce projet.
+Ce que cela autorise en pratique : TASeg (CVPR 2024) fixe « the window size of temporal point clouds is set to 16 » et utilise **en plus** des images caméra temporelles (fenêtre 48). Sa table 11 en validation donne « TASeg wo/ TIAF — L+T — 37,9 M — 79 ms — 71,8 » et « TASeg — L+C+T — 46,7 M — 116 ms — 72,7 ». Le 76,5 test est donc multimodal et temporel, soumis au track single scan, accepté par le serveur.
 
-Les chiffres test restent utiles à condition d'être lus avec leur régime, qui est bien plus permissif : TASeg 76,5 avec agrégation temporelle de seize trames passées, RAPiD-Seg 76,1 en LiDAR seul, LSK3DNet 75,6 avec TTA, instance CutMix et époques supplémentaires déclarés, PTv3+PPT 75,5 avec préentraînement multi-datasets, UniSeg 75,2 en multimodal, SphereFormer 74,8, PTv3 74,2, WaffleIron 70,8 avec dix augmentations de test. Aucune de ces valeurs ne borne un résultat obtenu en régime strict, ni par le haut ni par le bas.
+Conséquence pour ce dossier : le track « single scan » ne certifie aucun régime d'entrée. Seul le texte de l'article le fait, et son silence ne vaut pas déclaration négative.
 
-Ces chiffres sont des instantanés de veille et non des constantes. Ils doivent être réaudités contre leurs sources primaires avant toute soumission, y compris ceux de la reproduction contrôlée dont le statut de prépublication n'est pas définitif.
+## La barre en validation, notre régime
 
-### Leçons pour HGP-HSA
+Régime de ce projet : séquence 08, **une trame à l'inférence, LiDAR seul, sans TTA ni ensemble, entraînement mono-jeu**. Les tracks de comparaison sont définis dans [EXPERIMENTAL_PROTOCOL.md](EXPERIMENTAL_PROTOCOL.md#régimes-de-comparaison).
 
-- **RAPiD-Seg** montre qu'un descripteur géométrique doit intégrer la variation de densité avec la portée et la rémission. Il constitue un contrôle plus direct de la fonction support que les seuls Transformers, mais son coût complet comprend deux passes apprises.
-- **SphereFormer** encode déjà la géométrie sphérique du capteur. Un gain HGP limité aux longues distances doit être comparé à ce biais, pas à un modèle cartésien naïf ; la source primaire auditée ne rapporte pas le statut TTA, qui reste donc `NR` plutôt que « non ».
-- **LSK3DNet** rappelle qu'une attention sophistiquée doit battre un CNN sparse adaptatif en précision ou sur un axe Pareto clair ; son score test 75,6 ne doit toutefois pas être rangé dans le track sans TTA.
-- **SP2T** est un concurrent direct : son double flux et ses proxies locaux réduisent l'attention point–point tout en conservant du contexte sparse. Son supplément applique rotation, scaling, flip et jitter au test ; son 75,4 reste donc hors track A. Le gain HGP doit être isolé d'un simple effet de tokens proxy.
-- **PTv3** simplifie l'attention par sérialisation et grands patches locaux. HGP doit apporter un contexte complémentaire, pas reproduire une partition spatiale plus coûteuse. Le dépôt public ne fournit pas une recette SemanticKITTI complète config+poids+score ; WP0 doit donc commencer par une baseline réellement épinglable.
-- **VaViT** fournit en 2026 une baseline ViT globale publique avec tokenisation BEV par piliers, stricte sans TTA mais limitée à 68,0 sur validation ; elle est utile pour la reproductibilité, pas comme seuil SOTA.
-- **FLARES** rappelle que la portée est déjà un axe architectural et système explicite ; certaines recettes rapportées utilisent TTA et/ou données CARLA et doivent rester dans des tracks séparés.
-- **TASeg, UniSeg, DITR et M3Net** prouvent la valeur des ressources supplémentaires. Ils restent dans des colonnes distinctes pour ne pas diluer le claim LiDAR mono-trame.
+| Recette | mIoU val | Config | Poids | Log | Notes |
+|---|---:|:-:|:-:|:-:|---|
+| MinkUNet34v2-W32, mmdetection3d, torchsparse + AMP + laser-polar-mix, 3x | **70,3** | oui | oui | oui | `tta_model`/`tta_pipeline` présents mais activés seulement par `--tta` : le 70,3 est bien sans TTA. Le README avertit d'environ 1,5 mIoU de fluctuation selon la graine |
+| MinkowskiNet, OpenPCSeg/PCSeg | **70,04** | oui | oui | oui | « trained with merely train split », « without employing any Test Time Augmentation or ensembling » ; repris comme baseline par RAPiD-Seg |
+| RPVNet, OpenPCSeg | 68,86 | oui | oui | oui | même protocole déclaré |
+| SPVCNN, OpenPCSeg | 68,58 | oui | oui | oui | même protocole déclaré |
+| WaffleIron-48-256 | 68,0 | oui | oui | non | README garantit « a final mIoU of 68.0% », 6,8 M paramètres, `instance_cutmix` à l'entraînement ; le plus simple à exécuter |
+| SphereFormer | 67,8 | oui | oui | non | table du dépôt : « Val mIoU (tta) 69.0 » contre « Val mIoU 67.8 » |
+| Cylinder3D, OpenPCSeg | 66,07 | oui | oui | oui | même protocole déclaré |
+
+**La barre à battre est 70,3 (mmdetection3d) ou 70,04 (OpenPCSeg), et non 68.** Ces deux lignes sont les seules à publier config, poids et log dans notre régime exact.
+
+### Pourquoi le tableau de VaViT n'est pas une table d'état de l'art
+
+VaViT ([arXiv 2605.31177](https://arxiv.org/abs/2605.31177), valeo.ai, 29 mai 2026), table 3 « results without test-time augmentation » : MinkUNet 63,8 ; Cylinder3D 64,3 ; SPVNAS 64,7 ; FlatFormer-S 65,3 ; PTv3 reproduit 66,2 ; VaViT-B 67,6 ; SphereFormer 67,8 ; VaViT-B\* 68,0 ; WaffleIron-256 68,0. C'est une **comparaison d'architectures à protocole apparié** : quatre des neuf chiffres sont recopiés de l'article PTv3, `*` signifie « meilleure époque et non la dernière », et VaViT ne soumet rien au test.
+
+Surtout, le 63,8 de MinkUNet mesure une recette de 2019, pas une architecture : l'étude empirique [arXiv 2405.14870](https://arxiv.org/abs/2405.14870) porte le même MinkUNet à 71,8 en validation — « improved by 5.0% with our default settings, and an additional 3.5% with mixing data augmentation. TTA further boosted performance by 1.4% ». Opposer 63,8 à 68,0 compare donc des protocoles d'entraînement, pas des modèles.
+
+### « Mono-trame » ne vaut qu'à l'inférence
+
+WaffleIron, VaViT, MinkUNet mmdetection3d et LSK3DNet mélangent tous des scans **à l'entraînement** : instance CutMix, LaserMix, PolarMix, PillarMix. La contrainte mono-trame porte sur l'entrée du réseau au test, jamais sur la construction des lots ; l'exiger à l'entraînement fabriquerait une baseline artificiellement faible.
+
+## PTv3 : ce qu'il faut savoir avant de s'en servir
+
+| Chiffre val | Origine |
+|---:|---|
+| 70,8 annoncé (test 74,2 ; PTv3+PPT 72,3 / 75,5) | article CVPR 2024 |
+| 66,2 sans TTA, 68,8 avec TTA | VaViT |
+| 68,3 | DITR, 3DV 2026 |
+| 66,8 | meilleur de trois runs communautaires, Pointcept #410 |
+| 69,1 | cité par Sonata, même premier auteur, repris par Volt |
+
+L'issue primaire est Pointcept #186, « About the config file of PTv3 on semantickitti », ouverte le 27 mars 2024 et **toujours ouverte** en août 2026, citée par VaViT et par DITR. Dans #410, le mainteneur Gofinge écrit : « I am pretty sure these number in the paper is exactly observed with my experiments. Unfortunately, I cannot access the original experiment record ». DITR résume : « Reproducing PTv3 results on the SemanticKITTI dataset has been notoriously hard for the community ». LitePT (CVPR 2026) déclare « we follow PTv3 and use test time augmentation (TTA) » avec chunking et vote, et chiffre le retrait à environ 2 mIoU : le 70,8 n'appartient donc probablement pas au régime sans TTA.
+
+**Fait décisif pour le choix de baseline** : `configs/semantic_kitti/` de Pointcept (dépôt poussé le 3 août 2026) ne contient **aucune** config PTv3, alors que nuScenes, Waymo, ScanNet et S3DIS en ont une, et les lignes SemanticKITTI du model zoo PointTransformerV3 sont vides — ni config, ni poids, ni exp record. Pointcept est donc inutilisable pour PTv3 sur SemanticKITTI, et PTv3 ne peut pas être la baseline de départ de WP0.
+
+## Le test, et pourquoi ses chiffres ne sont pas comparables
+
+| Méthode | Test | Val | Régime déclaré | Régime vérifié |
+|---|---:|---:|---|---|
+| TASeg, CVPR 2024 | **76,5** | 72,7 | fenêtre LiDAR 16 + images caméra fenêtre 48 | temporel et multimodal, confirmé par l'article |
+| RAPiD-Seg, ECCV 2024 Oral | **76,1** | 73,02 | « single-modal (LiDAR-only) », un seul passage avant par trame, 105 ms | LiDAR seul confirmé ; **aucune occurrence** de « test-time augmentation », « TTA », « ensemble », « voting » ni « multi-frame » : absence de mention, pas déclaration négative ; rien sur un entraînement train+val ; écart val→test de +3,1 inexpliqué |
+| LSK3DNet | 75,6 | 70,2 | « We apply instance CutMix and Test Time Augmentation (TTA) ... and enhance the model with extra training epochs » | augmenté, honnêtement déclaré ; 28,8 M paramètres |
+| PTv3 + PPT, CVPR 2024 | 75,5 | 72,3 | préentraînement multi-jeux | multi-jeux |
+| UniSeg, ICCV 2023 | 75,2 | — | multimodal RGB | multimodal |
+| SphereFormer, CVPR 2023 | 74,8 | 67,8 | rien de déclaré pour le test | écart val→test de **+7,0** totalement non documenté |
+| PTv3 seul, CVPR 2024 | 74,2 | 70,8 annoncé | — | val non reproductible, cf. section précédente |
+| 2DPASS | 72,9 | — | dépôt officiel, issue #13 : « The results on benchmarks are gained by training with additional validation set and using instance-level augmentation » | reproduction propre : 68,2, soit 4,7 points imputables au seul protocole |
+| WaffleIron | 70,8 | 68,0 | « 10 different augmentations » moyennées, entraînement train+val, « We do not use model ensemble to boost the test or validation performance » | déclaré et cohérent |
+
+RAPiD-Seg (backbone MinkUNet34 réimplémenté par PCSeg, baseline 70,04 ; C-RAPiD-Seg 73,02 val, R-RAPiD-Seg 72,3) est **le meilleur candidat LiDAR seul** de ce tableau, mais sa recette est silencieuse, pas certifiée propre : plausiblement stricte, non auditable. Aucune valeur de cette colonne test ne borne un résultat obtenu en régime strict, ni par le haut ni par le bas.
+
+## 2025-2026 : où en est le domaine
+
+| Travail | Chiffres | Régime |
+|---|---|---|
+| Volt / Volume Transformer, RWTH Aachen, [arXiv 2604.19609](https://arxiv.org/abs/2604.19609), 21 avril 2026 | test **75,2** (Volt-B), val 72,5 ; Volt-S 70,5 mono-jeu et 72,2 multi-jeux ; nuScenes val 82,2 | entraînement conjoint multi-jeux ; meilleur test 2026 identifié, toujours sous 76,5 ; présomption forte mais **non confirmée** que `kadir_yilmaz` 75,21 = Volt |
+| Sonata, CVPR 2025 Highlight, [arXiv 2503.16429](https://arxiv.org/abs/2503.16429) | val **72,6** | fine-tuning complet d'un PTv3 préentraîné en auto-supervisé multi-jeux ; meilleur val LiDAR seul recensé |
+| UniD-Shift, [arXiv 2605.07356](https://arxiv.org/abs/2605.07356), 8 mai 2026 | val 71,8 | fusion LiDAR + caméra, 359,8 M paramètres, 240 ms |
+| SP2T, ICCV 2025, [arXiv 2412.11540](https://arxiv.org/abs/2412.11540) | val 71,7 / test 75,4 | TTA, sans ensemble |
+| OA-CNNs, CVPR 2024, [arXiv 2403.14418](https://arxiv.org/abs/2403.14418) | val 70,6 | sans TTA déclarée |
+| DITR puis D-DITR, 3DV 2026, [arXiv 2503.18944](https://arxiv.org/abs/2503.18944) | val 69,0 / test 74,4 ; D-DITR val 69,8 | DITR projette des features DINOv2 à l'inférence ; D-DITR les distille et reste LiDAR seul à l'inférence ; correspond à l'entrée `kabouzeid` 74,4 |
+| LitePT, CVPR 2026 | **aucun chiffre SemanticKITTI** | nuScenes 82,2 / Waymo 73,1 / ScanNet / Structured3D seulement : toute ligne SemanticKITTI attribuée à LitePT serait fabriquée |
+
+Constat global : aucun nouveau SOTA entre le 29 mai et le 14 août 2026, et **aucun dépassement de 76,5 depuis 2023**. Le domaine a migré vers nuScenes, Waymo, ScanNet, l'occupancy et la complétion de scène ; CVPR 2026 n'évalue plus systématiquement SemanticKITTI ; Volt, VaViT et DITR ne soumettent plus au serveur. Un benchmark qui stagne récompense peu un gain marginal : c'est un argument de [STRATEGIE_PUBLICATION.md](STRATEGIE_PUBLICATION.md), pas seulement de veille.
+
+Ces chiffres sont des instantanés et non des constantes : ils doivent être réaudités contre leurs sources primaires avant toute soumission.
+
+## Leçons pour HGP-HSA
+
+- **Baseline WP0** : partir de MinkUNet mmdetection3d (70,3) ou OpenPCSeg (70,04), les seules recettes complètes de notre régime ; ne pas partir de PTv3, dont Pointcept ne fournit rien pour SemanticKITTI.
+- **RAPiD-Seg** montre qu'un descripteur géométrique doit intégrer la variation de densité avec la portée et la rémission. C'est le contrôle le plus direct de la fonction support, et son val 73,02 le comparateur le plus exigeant — sous réserve d'une recette non auditable.
+- **SphereFormer** encode déjà la géométrie sphérique du capteur. Un gain HGP limité aux longues distances doit être comparé à ce biais, pas à un modèle cartésien naïf ; son 67,8 val sans TTA est le point de comparaison, pas son 74,8 test.
+- **LSK3DNet** rappelle qu'une attention sophistiquée doit battre un CNN sparse adaptatif en précision ou sur un axe Pareto clair ; son 75,6 test est un chiffre TTA déclaré, hors de notre régime.
+- **SP2T** est un concurrent conceptuel direct : son double flux et ses proxies locaux réduisent l'attention point–point tout en conservant du contexte sparse. Le gain HGP doit être isolé d'un simple effet de tokens proxy.
+- **VaViT** fournit une baseline ViT globale publique, sans TTA, à 68,0 val : utile pour la reproductibilité, pas comme seuil, et son tableau n'est pas un état de l'art.
+- **TASeg, UniSeg et DITR** prouvent la valeur des ressources supplémentaires — temps, caméra, préentraînement externe. Ils restent dans des colonnes distinctes pour ne pas diluer le claim LiDAR mono-trame.
 
 ## Concurrents conceptuels : hiérarchie et attention
 
@@ -140,6 +186,8 @@ La lignée superpoint publie systématiquement un oracle de partition : on attri
 - SPG (CVPR 2018), tableau 5, S3DIS en 6-fold : l'oracle « Perfect » atteint 88,2 mIoU et 92,7 mAcc, alors que SPG lui-même rapporte 62,1.
 - SPT (ICCV 2023) conclut explicitement « The performance of SPT is more than 20 points below the oracle, suggesting that the partition does not strongly limit its performance ». Avec 68,9 sur S3DIS Area 5, cela place son oracle au-delà de 89.
 - SuperCluster (3DV 2024) écrit de même « The high performance of this oracle (93,4 PQ) indicates that very little precision is lost by working with superpoints », son second oracle de clustering restant à 83,6 PQ.
+
+Un fait de mesure doit accompagner ces chiffres : **aucun oracle de partition n'a jamais été publié sur SemanticKITTI mono-scan**. La métrique existe et circule (SPG, courbes oracle de SPT ICCV 2023, EZ-SP ICRA 2026), mais toujours sur S3DIS, Semantic3D, ScanNet, KITTI-360 ou DALES. Le mesurer ici produirait donc un chiffre qui n'existe nulle part : sans point de comparaison sur ce benchmark, il ne peut servir qu'à réfuter la voie, jamais à la promouvoir.
 
 Une vingtaine de points d'oracle sont donc déjà disponibles et non convertis. Relever le plafond d'une partition qui n'est pas saturée ne peut pas payer, puisque le facteur limitant se trouve en aval, dans le modèle qui exploite les régions. Il en résulte une règle d'usage pour ce projet : un diagnostic d'oracle est une porte de réfutation et non de promotion. Un oracle HGP nettement inférieur à ceux ci-dessus condamne la voie ; un oracle supérieur ne prouve rien, puisque le concurrent laisse déjà vingt points sur la table. [ORDRE_DES_PREUVES.md](ORDRE_DES_PREUVES.md) place cette mesure en première position et explique pourquoi le mIoU n'est pas le critère à optimiser sur l'arbre.
 

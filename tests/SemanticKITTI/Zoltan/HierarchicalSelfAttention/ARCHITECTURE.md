@@ -62,7 +62,27 @@ Trois granularités seront comparées avec, dans tous les cas, une sortie finale
 2. **micro-voxels ou micro-clusters comme feuilles**, seulement si les diagnostics de composition et le décodeur point-wise valident cette réduction ; la baseline majoritaire dure n'est pas à elle seule une porte sur cette granularité ;
 3. **facettes comme feuilles**, seule granularité qui rende l'arbre nativement laminaire. Les feuilles sont les éléments de $F_K$, les $(K-1)$-simplexes effectivement construits, et l'arbre de fusion en est une partition à chaque niveau ; le lemme de sous-structure optimale de HSA porte précisément sur une partition des feuilles, donc son hypothèse est satisfaite sans aucun bricolage et le recouvrement n'est pas détruit, puisqu'il subsiste intact dans la projection facettes vers points par les poids $w_{x\tau}$. Le coût est de taille : les facettes sont plus nombreuses que les points, donc profondeur, degré et nombre de feuilles augmentent et doivent être mesurés avant de faire de cette granularité la baseline. Pour $K=1$ les faces sont les points eux-mêmes et cette option coïncide avec la première.
 
-Le premier prototype doit partir d'une recette SemanticKITTI réellement reproductible et épinglable, par exemple MinkUNet/Cylinder3D ou une recette publique SphereFormer auditée. PTv3 reste le porteur Transformer ambitieux, mais son dépôt officiel ne fournit pas à ce jour une recette SemanticKITTI complète avec config, poids et résultat reproductible ; il ne doit donc pas bloquer WP0. Un second backbone fort devra vérifier que l'effet HGP n'est pas propre au porteur choisi. Le backbone reçoit exactement les mêmes entrées et la même recette dans toutes les comparaisons appariées.
+### Choix de la baseline
+
+Dépôts vérifiés le 14 août 2026. Chiffres val SemanticKITTI, une trame à l'inférence, LiDAR seul, sans TTA, entraînement mono-jeu.
+
+| Candidat | val sans TTA | Ce qui est publié | Réserve principale |
+|---|---|---|---|
+| MinkowskiNet, OpenPCSeg/PCSeg | 70,04 | config, poids, régime déclaré verbatim : « trained with merely train split », « without employing any Test Time Augmentation or ensembling » | architecture de 2019 ; recette figée par le dépôt |
+| MinkUNet34v2-W32, mmdetection3d | 70,3 | config, `.pth` et log par ligne du tableau | torchsparse fluctue d'environ 1,5 mIoU selon la graine, de l'aveu du README |
+| WaffleIron-48-256 | 68,0 | config, checkpoint, chiffre garanti par le README ; 6,8M paramètres | instance CutMix à l'entraînement, donc mélange de scans |
+| SphereFormer | 67,8 | config et poids, table `Val mIoU (tta) 69.0 / Val mIoU 67.8` | écart val 67,8 → test 74,8 jamais documenté |
+| PTv3, Pointcept | — | rien | `configs/semantic_kitti/` ne contient aucune config PTv3 et les lignes SemanticKITTI du model zoo sont vides ; inutilisable en l'état |
+
+La baseline principale est **MinkowskiNet OpenPCSeg à 70,04**, pour deux raisons cumulées : c'est la seule dont le régime d'entraînement et d'évaluation est déclaré explicitement, donc la seule dont l'écart mesuré soit imputable au modèle ; et c'est exactement le backbone dont part RAPiD-Seg, meilleur concurrent LiDAR-seul du test (76,1), ce qui rend la comparaison directe. Le **second porteur est WaffleIron**, petit, rapide et garanti par son README, chargé de vérifier qu'un effet HGP n'est pas propre au backbone. PTv3 ne bloque plus WP0 : ce n'est plus un arbitrage prudentiel, c'est un constat de dépôt.
+
+Deux mises en garde encadrent toute lecture de ces chiffres.
+
+D'abord, une comparaison doit apparier la **recette** et pas seulement l'architecture. Le 63,8 souvent cité pour MinkUNet mesure une recette de 2019 ; la même architecture atteint 71,8 val avec une recette moderne. Opposer 63,8 à 68,0 mesure donc des augmentations de données, pas des modèles.
+
+Ensuite, « mono-trame » ne vaut qu'**à l'inférence**. Toutes les recettes de tête mélangent des scans à l'entraînement (instance CutMix, LaserMix, PolarMix, PillarMix). Chaque ligne rapportée déclare donc séparément le régime d'entraînement, l'usage éventuel de TTA, d'ensemble ou de `train+val`, et le nombre de trames vues à l'inférence.
+
+Le backbone reçoit exactement les mêmes entrées et la même recette dans toutes les comparaisons appariées.
 
 Pour chaque feuille $i$, le backbone produit $f_i^{0}\in\mathbb{R}^{d}$. Les projections Q/K/V et les normalisations suivent la définition de la baseline HSA testée. Les coordonnées absolues ou cylindriques ne sont pas supprimées : le repère ego et la gravité sont sémantiquement utiles.
 

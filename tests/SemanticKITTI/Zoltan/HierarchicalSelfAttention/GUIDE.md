@@ -409,7 +409,27 @@ Le cadre chiffré est connu, et il est à double tranchant :
 
 Aucun entraînement, une baseline publiée, un plafond publié, et l'hypothèse exacte de la thèse.
 
-**À retenir.** Si HGP ne bat pas du Single-Linkage sur la tâche que la thèse a conçue pour lui, il est peu probable qu'il apporte quoi que ce soit à la segmentation sémantique.
+### M4 — six scalaires par point, et la seule porte qui puisse dire « oui »
+
+M1 ne peut que réfuter, M2 diagnostique, M3 promeut sur une autre tâche. Il manquait donc une **porte de promotion bon marché sur la tâche visée**.
+
+La plus petite expérience qui puisse produire un signal positif ne demande ni descripteur, ni opérateur, ni attention : concaténer à l'entrée d'un backbone standard **six scalaires par point** tirés de la hiérarchie — niveau de naissance, niveau de fusion, persistance, profondeur, masse du nœud contenant, et la marge du vote pondéré qui dit à quel point l'appartenance du point est contestée.
+
+Même backbone, même recette, mêmes graines, avec et sans. Deux entraînements appariés.
+
+Elle teste exactement la bonne question, et elle la teste seule : **la hiérarchie porte-t-elle une information que le backbone local ne reconstruit pas déjà ?** Un gain, et le programme est vivant. Rien, et il est peu probable qu'un descripteur sphérique plus une attention hiérarchique fassent apparaître ce qui n'était pas là.
+
+Précaution : ces canaux encodent partiellement la portée. Stratifier par distance, et vérifier qu'un contrôle trivial — la portée, la densité brute, le rayon au $K$-ième voisin — ne reproduit pas le gain.
+
+### La tension qui vaut peut-être plus que tout le reste
+
+Le chapitre 7 du manuscrit mesure la **vitesse de percolation**, c'est-à-dire ce qu'on peut récupérer d'un amas avant qu'il ne fusionne par erreur. En dimension 3, pour HGP : $0{,}646$ à $K=2$, puis $0{,}690$, $0{,}714$, $0{,}732$. La théorie prédit une amélioration **monotone en $K$**.
+
+Or l'étude HGP sur SemanticKITTI trouvait $K=2$ meilleur que $K=1$ **et** que $K=3$. Sur données réelles, l'optimum est tout de suite, pas au bout.
+
+Ce désaccord n'est pas un embarras, c'est le sujet. Les vitesses sont mesurées sur un processus de Poisson homogène ; un scan LiDAR échantillonne des surfaces avec une densité qui dépend de la portée. **L'écart entre la prédiction et l'observation est exactement l'effet du capteur, et il se mesure.** Détail et protocole dans [ORDRE_DES_PREUVES.md](ORDRE_DES_PREUVES.md).
+
+**À retenir.** Si HGP ne bat pas du Single-Linkage sur la tâche que la thèse a conçue pour lui, il est peu probable qu'il apporte quoi que ce soit à la segmentation sémantique. Et si six scalaires n'apportent rien, une architecture entière n'apportera pas davantage.
 
 ---
 
@@ -417,14 +437,23 @@ Aucun entraînement, une baseline publiée, un plafond publié, et l'hypothèse 
 
 ### La barre réelle
 
-Deux régimes qu'il ne faut jamais mélanger :
+D'abord, une définition qui piège tout le monde : **« mono-scan » ne désigne qu'un jeu d'étiquettes** — 19 classes au lieu de 25, les objets mobiles fusionnés avec leurs homologues statiques. **Ce n'est pas une contrainte sur l'entrée.** L'organisateur du benchmark l'écrit lui-même : « You can also take more scans, we don't care. Since we only see the results of scan 245. » TASeg, en tête à $76{,}5$, utilise 16 trames passées **et** la caméra.
 
-| Régime | Meilleurs chiffres | Lecture |
+Trois régimes, à ne jamais mélanger :
+
+| Régime | Meilleur chiffre | Ce que c'est |
 |---|---|---|
-| **val, mono-scan, LiDAR seul, sans TTA** — celui du dossier | PTv3 reproduit $66{,}2$ ; SphereFormer $67{,}8$ ; WaffleIron-256 $68{,}0$ | la cible réaliste est **$\approx68$** |
-| **test, tout permis** | TASeg $76{,}5$ (16 trames passées), RAPiD-Seg $76{,}1$, LSK3DNet $75{,}6$ (TTA déclarée) | un autre régime |
+| **val, une trame, LiDAR seul, sans TTA** — le nôtre | **$70{,}3$** MinkUNet34v2 (mmdetection3d), $70{,}0$ MinkowskiNet (OpenPCSeg) | config, poids et log publiés — c'est **la barre à battre** |
+| val, avec pré-entraînement ou multi-jeux | Sonata $72{,}6$ ; Volt-B $72{,}5$ | autre régime : ces modèles ont vu d'autres données |
+| test, tout permis | TASeg $76{,}5$ (LiDAR + caméra + temps) ; RAPiD-Seg $76{,}1$ (LiDAR seul) | un autre monde |
 
-Le $70{,}8$ val annoncé par PTv3 n'est pas reproductible. Viser $76$ en régime strict, c'est viser un nombre d'un autre régime. Ces chiffres sont des **instantanés à réauditer avant soumission**.
+Trois pièges à connaître :
+
+- **le $70{,}8$ val de PTv3 n'est reproductible par personne** : $66{,}2$ sans TTA, $68{,}3$, $68{,}8$, $69{,}1$ selon les équipes, et Pointcept ne publie **aucune** config SemanticKITTI pour PTv3 ;
+- **« mono-trame » ne vaut qu'à l'inférence** : toutes les méthodes de tête mélangent des scans à l'entraînement (CutMix, LaserMix, PolarMix) ;
+- **le rang 1 historique, $76{,}5$, s'appelle `SimpleSeg` et n'a aucune publication** — non citable. Et le classement curaté de `semantic-kitti.org` est aujourd'hui **vide**.
+
+Ces chiffres sont des **instantanés à réauditer avant soumission**. Détail complet dans [CONCURRENCE.md](CONCURRENCE.md).
 
 ### Le classement honnête des actifs
 
