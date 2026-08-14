@@ -8,6 +8,14 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
+> **Statut historique.** L'ordre d'exécution, les samplers et les propositions
+> Jung/BlockBall de ce pin sont supersédés par `AUDIT_ETAT_COURANT.md`,
+> `PROPOSITION.md` et
+> `AUDIT_CONTRE_RECEPTION_M4_V2_DEPTHBLOCK_5BFC5C8_20260814.md`. En
+> particulier, les cubes unitaires u16 de la section 7.2 ne forment pas une
+> fixture uniforme, et une même pondération Jung fixe est exactement vérifiable
+> sur un rectangle par 64 couples de coins.
+
 Le pin relu est `HEAD=4515a8b43d5397de97d71482c1f489ebd2a71c16`,
 commit `M4 existe enfin, et il est cubique sur les amas`. Le worktree est
 mouvant pendant le contre-audit : Claude y développe les samplers et portes
@@ -453,18 +461,19 @@ artefact du sampler. Prendre
 `y=(31,19,31)`. Les six distances carrées sont
 `300,243,243,123,123,288` : `ab` est owner unique et les deux faces adjacentes
 sont aiguës. Le circumcentre est `(189/8,189/8,111/4)`, de rayon carré
-`2763/32`, avec poids `(47,3,55,55)/160`, tous strictement positifs. Toutes les
-inégalités restent vraies sur quatre petits sous-cubes autour de ces points ;
-leur produit porte donc `Theta(n^4)` q4 bien centrés **avant rang**. L'owner ne
-crée pas cette masse : il ne fait que l'attribuer une fois.
+`2763/32`, avec poids `(47,3,55,55)/160`, tous strictement positifs. Par
+continuité stricte, les inégalités restent vraies sur un produit de quatre
+voisinages **réels**, qui porte donc `Theta(n^4)` q4 bien centrés avant rang.
+Cela ne reçoit pas les cubes unitaires u16 autrefois suggérés : leur expansion
+n'en conserve que `2093/4096`. L'owner ne crée pas cette masse ; il ne fait que
+l'attribuer une fois.
 
-La même fixture indique où gagner l'exposant. Les huit points
-`(20+i,20+j,30+k)`, avec `i,j,k` dans `{0,1}`, sont strictement intérieurs à la
-sphère ; le pire carré de distance vaut `1179/32<2763/32`. Par continuité, des
-sous-cubes de supports et de témoins conservent uniformément huit intérieurs :
-le bloc entier a rang fermé au moins douze et doit être rejeté à `smax=11`
-avant tout fill. `ApexWellCentered` seul ne peut donc pas sauver la route ; la
-profondeur factorisée doit précéder la matérialisation.
+Les huit points `(20+i,20+j,30+k)`, avec `i,j,k` dans `{0,1}`, sont strictement
+intérieurs de la seule sphère représentante ; cela ne les rend pas uniformes
+sur les cubes support. La fixture u16 de bloc correcte est mise à l'échelle
+autour de `20000/30000` et documentée dans l'audit actif : ses `4096` supports
+partagent réellement huit intérieurs. `ApexWellCentered` seul ne peut donc pas
+sauver la route ; la profondeur factorisée doit précéder la matérialisation.
 
 Conditionnellement à `C4_carrier=Theta(n^3)`, une sweep qui trie tous les sites
 pour chaque face matérialisée paie au moins `Theta(n^4)` touches, avant le log.
@@ -618,11 +627,14 @@ mais incomplet ; leur échec reste `MIXED`. La rationalité vient de la densité
 et de la marge stricte, sans borne automatique sur le dénominateur. Après un
 cap de largeur ou de dénominateur, le seul retour permis est `UNKNOWN`.
 
-Un test de coins reste insuffisant : avec trois points verticaux dans chacun de
-`A` et `B`, aux ordonnées `0,50,100`, et les deux témoins `(50,0,0)` et
-`(50,100,0)`, les quatre couples extrêmes sont couverts alors que la paire
-médiane ne possède que deux témoins de shell. Le mutant `corners-only` doit
-mourir.
+Tester l'**existence** d'une pondération séparément à chaque coin reste
+insuffisant : avec trois points verticaux dans chacun de `A` et `B`, aux
+ordonnées `0,50,100`, et les deux témoins `(50,0,0)` et `(50,100,0)`, les
+couples extrêmes sont couverts alors que la paire médiane ne possède que deux
+témoins de shell. En revanche, pour une même base et une même pondération
+fixe, la réécriture `A0/C0` est affine séparément en `a,b` et son cône de
+Lorentz est convexe : les 64 couples de coins sont exacts. Le mutant correct
+est `vary-weights-per-corner`, pas `corners-only-fixed-weights`.
 
 ### 9.2 Jung sur l'axe d'une face, puis profondeur du bloc q4
 
@@ -688,9 +700,9 @@ Ordre recommandé :
 5. recevoir `OwnedCK-WST4` symbolique avec `F4`, `M4_apex_L/U`, diagonales,
    owner des six arêtes, carrier primaire, puis `FaceAxisJungDepth8Block` avant
    toute face/apex matérialisée ;
-6. ajouter `TetraPositiveBlock/BlockBallDepth8` sur WST4, avec huit groupes
-   intérieurs disjoints, égalités shell et la fixture exacte à quatre sous-cubes
-   positifs mais fermés par le cinquième ;
+6. ajouter `Corner8BallDepth/BlockBallDepth8` sur WST4, avec huit groupes
+   intérieurs disjoints, égalités shell et la fixture u16 mise à l'échelle de
+   l'audit actif ;
 7. raccorder la sweep 1D seulement sur le résiduel qui justifie ce fallback,
    avec constantes `B_z=0`, lots égaux et largeur 155 bits ;
 8. comparer alors baseline et SOC combiné jusqu'à

@@ -29,8 +29,8 @@ Empreintes SHA-256 au HEAD :
 - `prototype/cloud_families.hpp` :
   `1f9089ba5972bf76aece6d899bacd8682341f394833c5d06e46ea2a921efad57`.
 
-Ce pin reste l'ancre historique du contre-audit v2. Les sections 5.2--5.6
-auditent ensuite les deltas reçus jusqu'au `HEAD=e54c908` ; elles ne changent
+Ce pin reste l'ancre historique du contre-audit v2. Les sections 5.2--5.9
+auditent ensuite les deltas reçus jusqu'au `HEAD=cec4a4f` ; elles ne changent
 pas les empreintes historiques ci-dessus. Le verdict mutable et les empreintes
 courantes sont dans
 [`AUDIT_ETAT_COURANT.md`](AUDIT_ETAT_COURANT.md). L'auditeur ne modifie aucun
@@ -224,10 +224,11 @@ Les valeurs exhaustives restent un signal très fort sur les deux régimes :
 | `two_lines` | 60 | 0 | — | 0 |
 
 La conclusion recevable est : `M4_total` et `W4_positive` ont une fraction
-quartique observée sur ces tailles, familles et cette seed. Une construction
-ouverte sur quatre sous-cubes, déjà donnée dans `PROPOSITION.md`, établit en
-outre une vraie borne quartique avant rang sur une famille explicite. Aucun de
-ces faits ne rend `M4` quartique pour tout nuage.
+quartique observée sur ces tailles, familles et cette seed. Un produit ouvert
+de quatre voisinages réels, déjà donné dans `PROPOSITION.md`, établit en outre
+une vraie borne quartique avant rang sur une famille explicite. La fixture u16
+de bloc est la version mise à l'échelle de la section 4, pas les cubes unitaires
+de l'ancien texte. Aucun de ces faits ne rend `M4` quartique pour tout nuage.
 
 Le ratio du test `I<=7` est petit, mais trois tailles ne prouvent pas
 `H4=Theta(n)`. En dimension trois, la théorie générale des mosaïques de
@@ -272,7 +273,10 @@ ou pour une contre-famille construite ; elles ne suivent pas des mesures SOC.
 ## 4. Réponse à la Question 7 : `BlockBallDepth8` entier
 
 Oui : la profondeur doit être certifiée sur `F4` avant tout fill de
-`M4_apex`. Le prédicat ponctuel possède une forme entière directe.
+`M4_apex`. Avant la géométrie, normaliser non seulement `C=D`, mais aussi
+`A/C,A/D,B/C,B/D` et `A/B` si CK ne le garantit pas. Möbius corrige la masse,
+pas l'intervalle géométrique d'un bloc encore diagonal. Le prédicat ponctuel
+possède ensuite une forme entière directe.
 
 Pour `u=b-a`, `v=x-a`, `w=y-a` et `r=z-a`, définir :
 
@@ -294,47 +298,51 @@ O_U < 0 et J_L > 0  -> ALL_INTERIOR
 0 dans [O_L,O_U] ou 0 dans [J_L,J_U] -> MIXED
 ```
 
-Les bornes portent sur tout
-`A×B×C×D×Z`, pas sur les seuls coins. `J` contient des normes quadratiques :
-une interpolation de coins AABB n'est pas exacte. Employer une forme centrée
-avec restes, des coefficients Bernstein rationnels vérifiés, ou scinder. Le
-proposer peut travailler en flottant ; seul le vérificateur entier crédite
-`ALL`.
+Le verrou se simplifie par convexité dans le témoin. Lorsque le signe
+`sigma=sign(O)` est fixe, le coefficient de `||z||^2` dans `sigma*J(S,z)` vaut
+`|O|>0`. Pour chaque support ponctuel, cette forme est donc strictement convexe
+en `z`, et son maximum sur une AABB témoin `Z` est atteint à l'un des huit
+coins. Les coins sont ainsi complets pour prouver `ALL_INTERIOR`, bien qu'ils
+ne puissent jamais prouver `NONE_INTERIOR` par simple inversion.
 
-Une première implémentation n'a pas besoin d'un tenseur Bernstein à quinze
-variables. Utiliser le déterminant lifté 5×5 original, dont chaque ligne vaut
-`(p_x,p_y,p_z,||p||^2,1)`, et borner ses 120 termes par intervalles entiers ;
-les minima/maxima de `||p||^2` sur une AABB sont séparables. Une version plus
-serrée pré-calcule pour le support les cinq cofacteurs de la forme sphérique
-`g||z||^2-q dot z+r`, puis borne cette quadratique sur `Z`. Les dépendances
-perdues ne créent que `MIXED`, jamais un faux `ALL`.
-
-Pour resserrer sans énorme tenseur, choisir une origine entière locale `o` et
-un tuple support représentant. Sa forme ponctuelle est
-`P0(r)=A0||r||^2+B0 dot r+C0`, avec `r=z-o`. Borner sur le bloc support les
-écarts de cofacteurs par `dA,dB_i,dC`, puis poser :
+Pour un coin fixe `q`, translater directement les quatre lignes support :
 
 ```text
-E = maxabs(dA)*Qmax + sum_i maxabs(dB_i)*maxabs(r_i) + maxabs(dC)
-J(B,Z) subset [min_Z P0-E, max_Z P0+E]
+row(p,q) = (p.x-q.x,p.y-q.y,p.z-q.z,||p-q||^2)
+J_q      = det4(row(a,q),row(b,q),row(x,q),row(y,q))
 ```
 
-`min_Z P0` et `max_Z P0` sont séparables : pour chaque axe, tester les deux
-endpoints et les entiers `floor/ceil(-B0_i/(2*A0))` clipés lorsque `A0` est non
-nul. Splitter ensuite le facteur qui contribue le plus à `E`. L'orientation
-`O` est multiaffine et peut, elle, être enveloppée par les coins de ses quatre
-facteurs ; cette propriété ne se transfère pas à `J`.
+Borner les 24 monômes de Leibniz de `J_q` sur `A×B×C×D`. Pour chaque norme
+d'une ligne issue de `p_i in [l_i,u_i]`, utiliser :
 
-Une contre-fixture minimale au raccourci `corners-only` prend le tétraèdre
-`(3,2,2),(1,2,2),(2,3,2),(2,2,3)`, de centre circonscrit `(2,2,2)` et de
-rayon un, puis le witness box continu `[1,3]^3`. Ses huit coins sont extérieurs
-à la sphère, tandis que son centre est strictement intérieur. Les extrema du
-lift quadratique ne sont donc pas déterminés par les coins de la boîte.
+```text
+Q_L = sum_i (0 si q_i in [l_i,u_i], sinon min((l_i-q_i)^2,(u_i-q_i)^2))
+Q_U = sum_i max((l_i-q_i)^2,(u_i-q_i)^2)
+```
 
-À l'échelle ponctuelle u16, `O` tient sous environ 51 bits et `J` sous environ
-87 bits. Les transformations Bernstein et leurs dénominateurs exigent une
-borne propre ; commencer avec un vérificateur i256, puis réduire seulement
-après preuve de largeur.
+Le minimum peut être intérieur à l'AABB ; le calculer aux seuls coins serait
+non sûr. Si les huit
+intervalles ont un signe strict opposé à `O`, tout le `WitnessNode` est
+intérieur de tout le bloc. Une dépendance perdue ne crée que `MIXED`. Pour un
+support fixé, le test aux huit coins est une équivalence exacte sur
+l'enveloppe continue ; sur un bloc support, le seul relâchement vient des
+intervalles de déterminant.
+
+La contre-fixture au tétraèdre
+`(3,2,2),(1,2,2),(2,3,2),(2,2,3)` et à la boîte `[1,3]^3` a bien les coins
+extérieurs et le centre intérieur. Elle tue uniquement le mutant
+`corners-outside-implies-none`; elle ne réfute pas
+`corners-inside-implies-all`. Un éventuel `NONE` sûr utilise une BallForm
+représentante `P0(r)=A0||r||^2+B0 dot r+C0`, `A0>0`, une erreur uniforme `E`
+sur les cofacteurs et le minorant affine donné par une tangente entière :
+`min_Z tangent(P0)-E>=0`. Sinon le verdict reste `MIXED`.
+
+Sous u16, `|O|<6*65535^3<2^51`; chaque monôme de `J` est au plus
+`3*65535^5` et la somme absolue au plus `72*65535^5<2^87`. Pour la BallForm
+optionnelle, une origine dans le cube u16 et des cofacteurs 4×4 directs donnent
+`E<720*65535^5<2^90` et des intermédiaires sous `2^91`. i128 suffit en jugeant
+les signes séparément ; le produit `O*J` est interdit. Un couple `(F4Block,WitnessNode)` demande au plus
+`8*24=192` monômes, plus l'orientation, et peut sortir tôt.
 
 Parcourir un BVH de témoins en nœuds disjoints. Un nœud `Z` classé
 `ALL_INTERIOR` crédite uniquement les IDs garantis distincts de **tous** les
@@ -347,29 +355,49 @@ Pseudo-ordonnance :
 
 ```text
 classify_depth(F4Block B):
-  certifier orientation non nulle et de signe fixe, sinon split
+  normaliser toutes les intersections de rôles
+  certifier le signe de l'orientation, sinon scinder A/B/C/D
   credits = 0
   parcourir les WitnessNodes Z disjoints des quatre facteurs:
-    borner J sur B x Z
-    si signe strictement intérieur sur tout le produit:
+    verdict = Corner8BallDepth(B,Z)
+    si verdict == ALL_INTERIOR:
       credits += population_min(Z)
       si credits >= 8: CLOSED_Q4
-    sinon si Z est MIXED et non terminal: descendre Z
+    si verdict == NONE_INTERIOR: élaguer Z
+    si MIXED vient de Z et Z non terminal: scinder Z
+    si MIXED vient du support: scinder A/B/C/D
   rendre MIXED
 ```
 
 Publier `F4_depth_tested`, `orientation_mixed`, `witness_nodes`,
-`determinant_bounds`, `wide_ops`, `credits`, `closed_mass`, `splits`, octets et
-HWM. Une fixture positive prend les quatre sommets de la construction ouverte
-de `PROPOSITION.md` et les huit témoins
-`(20+i,20+j,30+k)`, `i,j,k` dans `{0,1}` ; un mutant `corners-only`, un mutant
-de signe et un mutant qui crédite un ID support doivent mourir.
+`determinant_bounds`, `wide_ops`, `credits`, `domain_mass_closed`, `splits`, octets et
+HWM. La fixture u16 reçue comme cible est :
 
-Ce prune ne dépend ni de l'owner des six arêtes, ni des barycentriques : une
-sphère qui possède huit intérieurs est hors q4 même si son support sera ensuite
-rejeté pour une autre raison. Sur un `F4` broad-phase déjà distinct-ID, exécuter
-donc la profondeur **avant** owner et positivité ; le résiduel seul paie ces
-prédicats.
+```text
+A=(20000,20000,20000)+{0,1}^3
+B=(30000,30000,30000)+{0,1}^3
+C=(19000,31000,31000)+{0,1}^3
+D=(31000,19000,31000)+{0,1}^3
+Z=(20000,20000,30000)+{0,1}^3
+```
+
+Les cinq spans portent quarante `PointId` distincts du même `cloud_epoch`.
+L'expansion exacte des `4096` supports donne une marge owner minimale de
+`11892000` et une barycentrique minimale `13217143/721310286>0`. Séparément,
+le vérificateur intervalle continu donne l'orientation
+`[1438694087994,1441306088006]` et une pire borne supérieure de `J` aux huit
+coins égale à `-79011820908103787995`. Le futur classifieur doit donc créditer
+les huit IDs de `Z` dans un bloc et fermer avant fill. L'ancienne version non
+mise à l'échelle ne passait que `2093/4096` supports et n'était pas une fixture
+de bloc.
+
+Ce prune ne dépend mathématiquement ni de l'owner des six arêtes, ni des
+barycentriques : une sphère qui possède huit intérieurs est hors q4. Il exige
+cependant la normalisation distinct-ID et le signe d'orientation. Owner et
+acuité sont assez bon marché pour précéder normalement la traversée témoin ;
+un essai `Corner8` sur un gros nœud peut précéder le prédicat barycentrique
+large. Si owner/positivité ne sont pas encore décidés, compter
+`domain_mass_closed`, jamais `M4_closed`.
 
 ## 5. Fermer encore plus tôt : `BlockJungDualTile` sans fractions
 
@@ -390,10 +418,11 @@ q4 : A>0 et   A^2>2*R
 ```
 
 Ce sont exactement les inégalités minimax de `JungDiskDepth`, débarrassées de
-toutes les divisions. Pour `W<=65535` sous u16, les deux côtés restent sous
-environ 105 bits ; i128 signé suffit au prédicat ponctuel. Au niveau
-`A×B`, borner les polynômes quartiques sur tout le produit par arithmétique
-entière/Bernstein ou scinder. Les coins seuls restent interdits.
+toutes les divisions. Pour `W<=65535` sous u16, i128 signé suffit au prédicat
+ponctuel. La section 5.9 affine cette première proposition : à poids fixes, la
+réécriture en `(A0,C0)` est bi-affine et les 64 couples de coins sont un
+classifieur exact de l'enveloppe AABB. Ce qui reste interdit est de reproposer
+des poids différents à chaque coin puis de transférer leur union au rectangle.
 
 Un proposer trouve une base et des poids sur un représentant, le vérificateur
 uniforme décide `ALL/MIXED`, puis huit groupes d'IDs disjoints ferment q4. Un
@@ -420,10 +449,11 @@ arithmétique rationnelle indépendante. Tirer quelques centres ne prouve pas la
 couverture du disque continu. Les mutants de largeur n'emploient jamais un
 overflow signé volontaire : ce comportement indéfini invaliderait le kill.
 
-### 5.1 Contre-audit du prototype live `JungDual`
+### 5.1 Contre-audit historique du premier prototype `JungDual`
 
-Claude a matérialisé pendant l'audit `prototype/jung_dual.hpp` et
-`prototype/jung_dual_probe.cpp`, aux empreintes live respectives
+Au pin intermédiaire antérieur à `cec4a4f`, Claude avait matérialisé
+`prototype/jung_dual.hpp` et
+`prototype/jung_dual_probe.cpp`, aux empreintes historiques respectives
 `1b9dffa1767988b812e1da360775858d023383112fcdde6e905d8ac3b2b46001` et
 `05c6199a16bcfe1399aa600b4b7089b15b2b53efcb9707ea4e3c6368d9e71386`.
 La forme `A/P/R`, l'ordre des coefficients q3/q4 et les largeurs ponctuelles
@@ -439,8 +469,8 @@ min_w max_z Phi_z(w) > 0
 et non « maximum sur le disque du minimum sur le groupe ». La formule codée
 correspond au bon ordre, mais la preuve documentaire doit être corrigée.
 
-Le selftest compare toujours seulement `k=1` à `(g,Q)`. Contrairement à son
-en-tête, aucun chemin ne construit des centres du disque de Jung pour juger
+Le selftest de ce pin comparait seulement `k=1` à `(g,Q)`. Contrairement à son
+en-tête, aucun chemin n'y construisait des centres du disque de Jung pour juger
 indépendamment un groupe `k=2/3`. La nouvelle boucle à deux jeux de poids tue
 le mutant `dual-ignore-weights`, mais elle teste seulement que deux appels au
 même prédicat diffèrent ; ce n'est pas un oracle de couverture. L'ablation
@@ -532,14 +562,11 @@ Le marqueur `MHGP_HD` autour de `__int128` ne reçoit pas un chemin CUDA : il
 faut soit deux limbs device avec opérations gardées, soit une qualification de
 compilation et de largeur propre avant tout claim G4.
 
-Le prototype est donc une primitive mathématique prometteuse, pas encore une
-porte collective reçue ni un `BlockJungDualTile`.
-
-Le raccord CMake live, SHA-256
-`87b3e5d30c25b432d2631ed3572c6e462438c007de0326b5ba926378c819879b`,
-construit le probe ; ses onze CTests passent en `0,24 s`. Ils reçoivent la
-transcription singleton, cinq mutants et une ablation non vide sur une seed,
-pas le juge géométrique collectif annoncé ni le domaine `OPEN_FINAL`.
+Au pin historique de cette sous-section, le prototype était donc une primitive
+ponctuelle, pas un certificateur de bloc. Le HEAD courant a depuis ajouté un
+juge primal BigInt et reçoit `k=2`; les constats live autoritaires, notamment
+l'absence de fixture `k=3`, de profondeur `tau(E)` et de domaine `OPEN_FINAL`,
+sont consolidés en sections 5.8--5.9 et dans `AUDIT_ETAT_COURANT.md`.
 
 ### 5.2 La nouvelle « dissection de perte » ne compare pas la même population
 
@@ -721,12 +748,14 @@ prouve ou le réfute.
 Un renforcement de Helly rend ce troisième levier beaucoup plus sparse. Pour
 chaque témoin, `B_z=K_q intersect H_z` est l'ensemble convexe fermé des centres
 où il n'est pas intérieur. La profondeur est inférieure à `h` si et seulement
-si les `B_z` ont un point commun après suppression d'au plus `h-1` ensembles.
+si **il existe** `R`, `|R|<=h-1`, tel que les `B_z`, `z` hors de `R`, ont un
+point commun.
 Par contraposée du théorème de Helly avec tolérance, toute profondeur au moins
 `h` possède donc un sous-pool qui la certifie déjà, de taille au plus
 `eta(3,h)` ([Montejano--Oliveros, théorème 3.1](https://doi.org/10.1007/s00454-010-9296-6)).
-La borne de Tuza donne `eta(3,h)<(h+1)^2` : **80 IDs suffisent
-toujours pour q4 et 99 pour q3** sous `smax=11`.
+La [borne de Tuza](https://doi.org/10.1016/0095-8956(85)90043-7) donne
+`eta(3,h)<(h+1)^2` : par intégralité, **80 IDs suffisent toujours pour q4 et 99
+pour q3**, sans prétendre que ces valeurs de `eta` sont exactes.
 
 Ce `ToleranceKernel` est une meilleure ABI de succès que le pire arbre : le
 payload contient les IDs, puis un vérificateur exact recalcule la profondeur
@@ -752,6 +781,13 @@ soit une nouvelle base disjointe de `R`. Le device vérifie chaque base
 géométrique une fois puis rejoue `tau(F)>=h` par bitsets, au lieu de refaire la
 géométrie dans les `3^h` branches. Le diagnostic se lit maintenant exactement
 comme `u=#singletons`, `p=nu(E)` et `d=tau(E)`.
+
+Pour une tuile CK, le raccord sûr remplace `E` par les seules bases prouvées
+uniformément sur tout `A×B`. Leur transversal au moins `h` ferme le rectangle
+sans PairId. Un transversal plus petit guide la recherche de la prochaine base
+sur un représentant ; cette base n'entre dans le reçu qu'après vérification
+uniforme, sinon on scinde. L'absence de noyau commun sur une tuile grossière ne
+réfute jamais la profondeur de ses paires.
 
 L'ABI mathématique est désormais assez précise pour un prototype borné. Pour
 une paire fixe, intersecter exactement les demi-plans de non-intérieur dans le
@@ -811,13 +847,96 @@ ordre et leur marge sur `A×B×C`; toute inversion ou égalité scinde. Cette
 porte se place **avant** la jointure apex et remplace, sur ce domaine 1D, le
 DAG à `3280` appels par un payload constant.
 
+### 5.8 Contre-audit du HEAD `cec4a4f` : le primal ne juge pas encore `d`
+
+Le nouveau juge primal est le bon objet pour certifier une base fixe, mais le
+claim « gain rigoureusement nul, toutes les hypothèses épuisées » dépasse son
+raccord. L'option `--primal` remplace seulement la banque de poids des groupes
+de taille deux. La taille trois conserve `kPoids3`; le proposer reste un greedy
+de groupes disjoints sur les `--voisins` les plus proches. Il mesure donc encore
+`p=nu(E)`, jamais `d=tau(E)`, et n'exerce ni branch-and-cut, ni
+`ToleranceKernel`, ni proof-tile uniforme. Aucun CTest du HEAD ne lance
+`--primal`.
+
+Le claim numérique est en outre réfuté par le binaire du même HEAD, avec
+`seed=1`, `voisins=16`, `echantillon=200` :
+
+```text
+eight_clusters n=600  : dual 169 fermées, primal 170 ; gain 16 -> 17
+eight_clusters n=1500 : dual 189 fermées, primal 190 ; gain  7 ->  8
+```
+
+Commandes, en remplaçant `N` par `600` puis `1500` :
+
+```text
+build/v3/mhgp3v_jung_dual_probe --ablation --family=eight_clusters --points=N --voisins=16 --echantillon=200 --seed=1
+build/v3/mhgp3v_jung_dual_probe --ablation --primal --family=eight_clusters --points=N --voisins=16 --echantillon=200 --seed=1
+```
+
+Les groupes de taille deux passent respectivement `106 -> 107` et `39 -> 40`.
+La conclusion reçue est donc seulement : l'oracle primal récupère déjà une
+petite partie des bases ratées dans ce greedy, sans encore viser la profondeur.
+
+La porte `dual_fixture u_p_d` n'est pas une autorité de `d`. Elle calcule `u`,
+cherche seulement singletons/paires avec sept rapports, extrait greedily `p`,
+puis imprime le littéral `d=8`. Remplacer `g3` par un second `PointId` aux
+coordonnées de `g1=(20,111,100)` laisse le sujet imprimer `u=6,p=7,d=8`, alors
+que le vrai minimum vaut sept au centre `Y=-14,Z=0`. La fixture doit calculer
+`d` ou `tau`, jamais le graver dans la chaîne attendue.
+
+Le juge primal ne possède encore aucune fixture où une base de taille trois est
+nécessaire. Prendre `a=(0,100,100)`, `b=(100,100,100)` et
+`z1=(5,90,100)`, `z2=(5,100,90)`, `z3=(0,110,110)`. Dans le disque q4
+`Y^2+Z^2<=5000`, les régions mauvaises sont
+`Y>=75/2`, `Z>=75/2` et `Y+Z<=20`. Toute paire rencontre le disque, aux points
+`(75/2,75/2)`, `(75/2,-35/2)` ou `(-35/2,75/2)`, mais le triple est vide.
+Seul le groupe ternaire couvre. Ajouter aussi les deux cas de normale projetée
+nulle : pour `a=(0,0,0)`, `b=(4,0,0)`, le midpoint `z=(2,0,0)` est universel,
+tandis que `z=a` est shell partout. Les coordonnées doivent être préflightées
+u16 avant l'API générale.
+
+### 5.9 Solution rectangle : `BlockJungDual64`
+
+Le lift uniforme Jung ne demande ni Bernstein ni développement des `PairId`
+lorsque la base et ses poids sont fixés. Avec
+`L=sum w`, `Z=sum w*z`, `Q=sum w*||z||^2`, poser :
+
+```text
+A0 = -L*(a dot b)+(a+b) dot Z-Q
+C0 = L*(a cross b)-a cross Z-Z cross b
+```
+
+La couverture vaut q4 si `A0>0 && 2*A0^2>||C0||^2`, q3 si
+`A0>0 && 3*A0^2>||C0||^2`. Pour `b` fixé, `(A0,C0)` est affine en `a`, et
+réciproquement. Le cône de Lorentz strict de chaque lane est convexe. Passer
+les `8×8=64` couples de coins est donc nécessaire et suffisant pour tout le
+produit AABB continu `A×B`.
+
+Le contre-audit indépendant redonne `alpha=A0/L`, `p=P/(2L)`, `A4=4*A0` et
+`R=4*||C0||^2`, puis la double interpolation
+`F(a,b)=sum_ij alpha_i*beta_j*F(a_i,b_j)`. Il confirme ainsi les facteurs et
+la nécessité/suffisance des 64 coins pour ce reçu commun.
+
+Cette primitive fournit l'ABI manquante entre le proposer de poids et la
+proof-tile CK : précalculer `L/Z/Q`, early-exit sur 64 prédicats, rendre `ALL`
+si tous passent, sinon `MIXED` et reproposer après split. Sous u16 et
+`1<=L<=65535`, i128 suffit : avec `U=65535`,
+`|A0|<=3*L*U^2<2^50` et `|C0_i|<=2*L*U^2<2^49`. Un échec ne vaut jamais
+`NONE`, car une autre pondération peut réussir. La contre-fixture `2×2` aux
+intervalles de poids disjoints montre exactement pourquoi les poids doivent
+rester communs à une tuile et être reproposés dans ses enfants.
+Cette borne exige le widening avant `a+b`, tout dot/cross et `||z||^2`; le
+preflight de `L` somme lui-même en type large ou saturant avant rejet.
+
 ## 6. M4 sans échantillonnage : intervalles de blocs
 
 Le delta live propose d'abord une identité exacte pour une arête fixée
-`e={a,b}`. Retirer les sites collinéaires à `e`, puis noter `V_e` les sites
-dont les deux arêtes endpoint ne battent pas `e`, `A_e` les carriers strictement
-aigus et `N_e=V_e minus A_e`. Si `E_e(S)` compte les paires de `S` dont
-l'arête ne bat pas `e`, alors :
+`e={a,b}`. Exclure `a,b` et les sites tels que
+`(b-a) cross (z-a)=0`, puis noter `V_e` les sites dont les deux arêtes endpoint
+ne battent pas `e`, `A_e` les carriers strictement aigus et
+`N_e=V_e minus A_e`. Pour `f!=e`, « ne bat pas » signifie
+`D_f<D_e`, ou `D_f=D_e && EdgeKey(e)<EdgeKey(f)`. Si `E_e(S)` compte les
+paires de `S` dont l'arête ne bat pas `e`, alors :
 
 ```text
 M4_e = E_e(V_e)-E_e(N_e)
@@ -825,7 +944,9 @@ M4_e = E_e(V_e)-E_e(N_e)
 ```
 
 Ici `pi` est la direction projective primitive canonique de
-`(b-a) cross (z-a)`. La première différence conserve exactement les paires
+`(b-a) cross (z-a)` : division par le pgcd absolu puis signe de la première
+composante non nulle positif. Poser explicitement
+`V_{e,pi}=V_e intersect pi` et `N_{e,pi}=N_e intersect pi`. La première différence conserve exactement les paires
 avec au moins un carrier ; la somme retire exactement les paires coplanaires.
 Sous un `EdgeKey` total et une normalisation projective qui identifie les signes
 opposés, l'identité est correcte et exact-once. Elle mérite les fixtures
@@ -847,21 +968,44 @@ range-counts de distance et les RLE projectifs ont leurs propres compteurs,
 splits, octets et HWM. Le résultat ne fournit ni barycentriques, ni profondeur,
 ni `BallKey`.
 
-Lorsque le tape CK et WST4 partitionne exactement les tuples, M4 possède un
-compteur déterministe sans fill. Pour chaque bloc disjoint, calculer sa masse
-de quatre IDs distincts après les diagonales `A/C`, `A/D`, `B/C`, `B/D`, puis
-classifier owner, acuité et orientation :
+Le RLE projectif ne doit surtout pas devenir global. À 50 000 points, les
+`1249975000` arêtes demanderaient 10 Go à huit octets par record, et les
+`62496250050000` incidences `(e,z)` approchent 1 Po à seize octets. Garder
+l'arête factorisée dans CK--WST4 et n'employer cette identité que sur un
+microbatch endpoint borné.
 
-```text
-ALL_Q   -> ajouter mass(block) à M4_L et M4_U
-NONE_Q  -> ajouter zéro
-MIXED_Q -> ajouter mass(block) à M4_U et pending_mass
-```
+La masse injective d'un atome `A×B×C×D` se calcule exactement par Möbius sur
+les quinze partitions des quatre rôles : chaque bloc `T` de la partition
+contribue `(-1)^(|T|-1)(|T|-1)!` fois la taille de l'intersection des facteurs
+de `T`. Diviser par deux seulement pour `C=D`; ne pas diviser pour `C<D`. Cela
+traite en une formule les quatre diagonales endpoint--carrier/apex. Accumuler
+les termes positifs et négatifs séparément, exiger `pos>=neg`, puis, pour
+`C=D`, exiger la parité avant `/2`; un u128 non signé ne porte pas directement
+la somme de Möbius signée.
 
-Ainsi `M4_L<=M4_apex<=M4_U`. Si `M4_L` suffit déjà à rendre rouge un moteur
-ponctuel, l'ablation s'arrête sans estimation. Si `M4_U` est sous le budget, la
-porte est verte. Sinon on scinde les blocs de plus grande masse jusqu'au cap,
-où le verdict reste `UNKNOWN`. Employer au moins u128 pour masses et produits.
+Initialiser `M4_pending` à la somme des masses injectives des atomes non
+décidés. Pour une masse `m`, `ALL_Q` effectue
+`M4_pending-=m; M4_L+=m`, `NONE_Q` effectue `M4_pending-=m`, et `MIXED_Q`
+remplace atomiquement le parent par la partition complète de ses enfants, donc
+conserve `M4_pending`. Poser `M4_U=M4_L+M4_pending`.
+`M4_L>B_fill` rejette le moteur ponctuel qui matérialise M4, jamais la route
+factorisée profondeur/shallow. `M4_U<=B_fill` certifie seulement sa capacité ;
+count exact, offsets et publication exigent encore `M4_pending=0`. Au cap,
+rendre une continuation ou passer au shallow.
+
+Ne jamais saturer séparément les termes d'une soustraction : `E(V)=B+2` et
+`E(N)=B+1`, rabattus tous deux à `B+1`, produiraient zéro au lieu d'un.
+Fusionner la contribution positive au `CellPair` ou conserver les termes
+complets. `M4_raw_[L,U]` est pré-profondeur ;
+`residual_output_[L,U]` suit ce qui reste à émettre. Une fermeture de profondeur
+crédite `domain_mass_closed` et zéro sortie résiduelle, sans changer `M4_raw`.
+
+Le `DecisionTape` de count--scan--fill conserve lane/vue, quatre `NodeKey`,
+masse, décision/reçu, règle de split ou clés enfants, comptes, offsets et
+digest ; le fill ne recalcule aucun prédicat. Sous `n<=50000`,
+`6*choose(n,4)<2^61` et `n^4<2^63` autorisent un `uint64_t` device après
+preflight ; sinon il faut deux limbs et un scan avec carry. Conservation de
+masse, `planned=filled=consumed` et pending nul sont des portes.
 
 Le filtre positif du résiduel a lui aussi une forme fermée. Pour une face
 owner aiguë `(a,b,x)`, reprendre `D,E,F,G,n,W` de `PROPOSITION.md`; pour
@@ -924,19 +1068,21 @@ CKPairTape exact-once
   -> SOC64 optionnel + BlockJungDualTile9/8, sans expansion PairId
   -> CarrierBlocks dans la fenêtre 2B_R--lentille
   -> WST4 broad-phase symbolique et diagonales distinct-ID
-  -> BlockBallDepth8 avant owner, barycentriques et tout fill de M4/W4
-  -> owner/positivité seulement sur le résiduel
+  -> owner/acuité et signe d'orientation uniformes
+  -> Corner8BallDepth sur gros WitnessNodes avant barycentriques et fill
+  -> BlockBallDepth8 complet puis positivité sur le résiduel
   -> pour le seul résiduel edge/microtile : niveaux shallow 0..7
   -> BallKey/RLE, census complet, shell, fold et payload
 ```
 
 Ne pas lancer de rampe M4 à 50 000. L'ordre des microgates est :
 
-1. exactitude de `BlockJungDualTile` sur petits produits et mutant
-   `corners-only` ;
+1. exactitude de `BlockJungDual64` sur petits produits et mutants
+   `drop-corner/vary-weights-per-corner/accept-equality/narrow-before-widen` ;
 2. exactitude de l'intervalle `[M4_L,M4_U]` et de toutes les diagonales ;
-3. `BlockBallDepth8` contre brute-force indépendant, huit IDs fixes et égalité
-   shell ;
+3. `Corner8BallDepth/BlockBallDepth8` contre brute-force indépendant, fixture
+   u16 mise à l'échelle, égalité shell et mutant
+   `corners-outside-implies-none` ;
 4. niveaux shallow contre catalogue exhaustif, bundles et concurrences ;
 5. rampes `1500/3000/6000` sur `F3/F4`, splits, witness visits, centres,
    `J/H`, octets, HWM et temps ;
@@ -948,9 +1094,12 @@ Ne pas lancer de rampe M4 à 50 000. L'ordre des microgates est :
 Après reconfiguration du worktree :
 
 ```text
-SOC64 isolé + WSPD--SOC + porteurs/apex/two_lines : 33/33 verts
-q4 brute-force : 4/4 verts
-JungDual live : 11/11 verts, juge collectif indépendant absent
+sous-suite SOC/WSPD/porteurs/two_lines/q4/Jung/diag/ordre : 56/56, 25,79 s
+dont SOC64 isolé 16/16, WSPD--SOC 5/5, q4 brute 5/5, Jung 13/13
+Jung : base collective k=2 reçue, k=3/tau(E)/bloc uniforme absents
+contre-calcul BigInt ad hoc Corner8 (pas une CTest) : 4096/4096,
+  owner=11892000,
+  min bary=13217143/721310286, pire J_U=-79011820908103787995
 contre-fixture K=1 estimateur : code 0, intervalle nul faux
 q4 brute eight_clusters n=120 : M4=5402516, W4=778626, test I<=7=3764
 ```
@@ -971,34 +1120,14 @@ changer l'ordre physique, plutôt que chercher un owner `BallKey` circulaire.
 Le présent audit la renforce par deux sorties exactes : profondeur
 déterminantielle sur WST4, puis niveaux shallow sur le résiduel.
 
-## 10. Addendum live au `HEAD=8268753`
+## 10. Fraîcheur
 
-Le worktree postérieur au pin historique contient un header et un probe
-`JungDual` non suivis. L'identité `A/P/R` est correcte sous
-`sum(weights)<=65535`, mais l'implémentation ne recherche aucun optimum : elle
-certifie seulement un des sept vecteurs de poids essayés. Son commentaire écrit
-à tort `max_w min_z`; la couverture est `min_w max_z Phi_z(w)>0`, puis le dual
-`max_lambda min_w`. Le probe ne construit aucun centre pour juger `k>1`, malgré
-son en-tête ; il compare seulement le singleton à `(g,Q)`.
-
-Les blocages live sont causaux : le cap sur la somme des poids n'est pas
-appliqué dans le header, le mutant étroit déclenche un overflow signé UBSan,
-`dual-accept-equality` survit au random, `dual-ignore-weights` est invisible au
-juge singleton, `--echantillon=0` et `--groupes=0` sortent zéro. L'inclusion
-groupes/singletons n'est testée qu'en agrégé et peut masquer une perte par
-paire. Les ablations `23/256` huit-amas, `18/256` uniforme, `5/256` terrain et
-`0/256` deux-droites portent sur des paires arbitraires, pas sur le résiduel
-owner CK--WST.
-
-Le delta WSPD ajoute aussi le juge direct des flips demandé. À cap complet, le
-mutant de somme est tué avec `168` flips jugés et `25` faux. À cap `1000`, le
-nominal publie pourtant `accord=OUI juges=47 sautes=3 faux=0` : un juge partiel
-doit publier `PARTIEL/UNKNOWN`. Aucun de ces deux nouveaux chemins n'est encore
-câblé dans CMake.
-
-Après rebuild live, la sous-suite ciblée passe `21/22` en `31,61 s`. L'unique
-rouge est `mhgp3v_porteurs_uniform` : CMake exige encore le champ `doublons`
-alors que le probe l'a correctement renommé `repetitions_consecutives`. Ce rouge
-de cohérence ne répare aucune des lacunes statistiques décrites plus haut.
+L'ancien addendum au `HEAD=8268753` a été retiré : il décrivait un worktree
+intermédiaire et contredisait désormais les sections 5.8--5.9. L'état live
+autoritaire est le pin de `AUDIT_ETAT_COURANT.md`. Au `HEAD=cec4a4f`, le juge
+primal BigInt reçoit une base collective `k=2` et les `13/13` CTests Jung
+ciblés sont verts ; restent ouverts la fixture Helly `k=3`, le calcul de
+`tau(E)`, `BlockJungDual64` intégré, `Corner8BallDepth`, le replay device et le
+domaine `OPEN_FINAL`. Aucun de ces verts ne qualifie le SLO G4.
 
 GCP non utilisé.

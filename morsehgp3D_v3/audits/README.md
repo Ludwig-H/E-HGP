@@ -18,8 +18,9 @@ logiciel, un reçu ou une autorité conservée.
   pin, worktree, tests et blocages.
 - [`AUDIT_CONTRE_RECEPTION_M4_V2_DEPTHBLOCK_5BFC5C8_20260814.md`](AUDIT_CONTRE_RECEPTION_M4_V2_DEPTHBLOCK_5BFC5C8_20260814.md) :
   autorité courante sur le verrou M4 ; contre-fixture de l'intervalle nul du
-  sampler v2, limites du brute-force/H4, forme entière de `BlockBallDepth8`,
-  audit live de `JungDual`, count M4 factorisé et fallback shallow edge-local.
+  sampler v2, limites du brute-force/H4, `Depth=tau(E)`,
+  `BlockJungDual64`, noyau d'axe top-k, `Corner8BallDepth`, count M4 factorisé
+  par Möbius et fallback shallow edge-local.
 - [`AUDIT_SOURCE_CK_WST_Q2_Q3_Q4_35FCEA8_20260814.md`](AUDIT_SOURCE_CK_WST_Q2_Q3_Q4_35FCEA8_20260814.md) :
   partition factorisée Callahan--Kosaraju de toutes les paires, source de tous
   les q2 propres après `D>0`, extensions exact-once `OwnedCK-WST3/WST4`, disque
@@ -28,7 +29,8 @@ logiciel, un reçu ou une autorité conservée.
 - [`AUDIT_REPONSE_M4_PORTEURS_AIGUS_4515A8B_20260814.md`](AUDIT_REPONSE_M4_PORTEURS_AIGUS_4515A8B_20260814.md) :
   première réponse aux six questions de Claude ; séparation
   `E4/F3/C4_carrier/F4/M4_apex/W4/H4/T4_site`, preuve sharp de `2B_R` et ordre
-  blockwise. Son état des samplers est supersédé par le contre-audit v2 ci-dessus.
+  blockwise. Son état des samplers et ses premières fixtures Jung/BlockBall
+  sont supersédés par le contre-audit v2 ci-dessus.
 - [`AUDIT_DEBLOCAGE_Q4_PORTEUR_AIGU_SOC64_LIVE_35FCEA8_20260814.md`](AUDIT_DEBLOCAGE_Q4_PORTEUR_AIGU_SOC64_LIVE_35FCEA8_20260814.md) :
   contre-audit du shadow SOC64, obstruction u16 aux routes universelles, lemme
   du porteur aigu, sweep q4 1D, pelages inversés et portes physiques.

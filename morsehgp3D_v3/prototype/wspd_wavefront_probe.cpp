@@ -115,6 +115,8 @@ struct SocShadowStat {
   long long feuilles_central = 0; // ... que la boule inscrite 56/209 credite
   long long feuilles_soc = 0;     // ... que SOC64 credite
   long long feuilles_exact = 0;   // ... qui sont universelles au sens (g,Q)
+  long long actifs = 0;           // appels de SOC64 BRANCHE (il change le fate)
+  long long actifs_all = 0;       // ... qui ferment
   long long rect_singletons = 0;  // rectangles reduits a UNE paire
   long long wide = 0;             // multiplications 128 bits reellement formees
   // --- LE LEDGER FAUTIF, CONSERVE COMME TEMOIN.
@@ -229,6 +231,8 @@ long long g_diag_feuille = 0;
 // Descendre malgre un `NONE` central : il n'est exact que pour la boule
 // inscrite, pas pour le spindle.
 bool g_none_descend = false;
+// `SOC64` BRANCHE : il devient un disjonctif du certificat et change le fate.
+bool g_soc64_actif = false;
 // Profondeur exacte du RECTANGLE : elle separe la perte de BOITE de la perte de
 // BUDGET. Sa valeur est le nombre de rectangles ouverts a juger.
 long long g_profondeur_rect = 0;
@@ -961,6 +965,7 @@ int main(int argc, char** argv) {
     else if (a == "--profondeur-exacte") { g_window = true; g_profondeur_exacte = true; }
     else if (a == "--ordre-proche") g_ordre_proche = true;
     else if (a == "--none-descend") g_none_descend = true;
+    else if (a == "--soc64-actif") g_soc64_actif = true;
     else if (a.rfind("--diag-feuille=", 0) == 0) { g_soc64_shadow = true; g_diag_feuille = arg_ll(val("--diag-feuille=").c_str(), 1, (1LL << 22), "diag-feuille"); }
     else if (a.rfind("--profondeur-rect=", 0) == 0) { g_soc64_shadow = true; g_profondeur_rect = arg_ll(val("--profondeur-rect=").c_str(), 1, (1LL << 22), "profondeur-rect"); }
     else if (a.rfind("--rect-stride=", 0) == 0) g_rect_stride = arg_ll(val("--rect-stride=").c_str(), 1, (1LL << 20), "rect-stride");
@@ -1279,7 +1284,36 @@ int main(int argc, char** argv) {
                       mhgp3v::cone::kLaneQ4) ++soc.feuilles_soc;
                 }
               }
-              // ---- LEDGER BASELINE. Inchange, bit pour bit.
+              // ---- `SOC64` BRANCHE POUR DE VRAI.
+              //
+              // Le shadow mesure ; il ne ferme rien. Aucune mesure d'echelle
+              // n'a de sens tant que le certificat ne change pas le fate : la
+              // fenetre `E4` publiee reste celle du certificat central seul.
+              //
+              // Branche, `SOC64` est un DISJONCTIF de plus, exactement comme
+              // `--spindle` et `--fallback` : deux certificats suffisants et
+              // non comparables restent suffisants. Il est essaye des que le
+              // central ne ferme pas, `NONE` compris — un `NONE` central ne dit
+              // que « aucun point dans la boule inscrite ».
+              if (g_soc64_actif && lane == 2 && v != RectVerdict::kAll) {
+                mhgp3v::soc::Box sa{}, sb{}, sc{};
+                for (int dd3 = 0; dd3 < 3; ++dd3) {
+                  sa.lo[dd3] = qa.lo[dd3]; sa.hi[dd3] = qa.hi[dd3];
+                  sb.lo[dd3] = qb.lo[dd3]; sb.hi[dd3] = qb.hi[dd3];
+                  sc.lo[dd3] = cb2.lo[dd3]; sc.hi[dd3] = cb2.hi[dd3];
+                }
+                mhgp3v::soc::SocStats sst{};
+                ++soc.actifs;
+                if (mhgp3v::soc::soc64_all_lane(sa, sb, sc, mhgp3v::soc::SocMutant::kNone,
+                                                mhgp3v::cone::kLaneQ4, &sst) >=
+                    mhgp3v::cone::kLaneQ4) {
+                  v = RectVerdict::kAll;
+                  ++soc.actifs_all;
+                }
+                soc.couples += sst.pairs;
+                soc.wide += sst.wide;
+              }
+              // ---- LEDGER BASELINE.
               if (v == RectVerdict::kAll) { cred[lane] += pop; eut_all = true; }
               else if (v == RectVerdict::kMixed) mixed |= 1u << lane;
               else {
@@ -2236,6 +2270,13 @@ int main(int argc, char** argv) {
                 100.0 * (double)exact4_suffisant / (double)std::max(1LL, ech));
     // LIGNE AUTONOME DU SHADOW. Elle n'entre dans aucune chaine de format
     // existante : les portes en place lisent des lignes entieres.
+    if (g_soc64_actif) {
+      std::printf("soc64_actif q4 : appels=%lld fermetures=%lld (%.3f%%) couples=%lld"
+                  " larges=%lld\n",
+                  soc.actifs, soc.actifs_all,
+                  100.0 * (double)soc.actifs_all / (double)std::max(1LL, soc.actifs),
+                  soc.couples, soc.wide);
+    }
     if (g_soc64_shadow) {
       std::printf("soc64_shadow q4 : tentatives taches=%lld all=%lld (%.3f%%) couples=%lld"
                   " couples/tache=%.2f early=%lld larges=%lld cap_refuses=%lld"

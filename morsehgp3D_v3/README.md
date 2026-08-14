@@ -198,8 +198,8 @@ Le `JungSpindleRect-v0` actuellement branché n'est pas `SOC64/CORNER512` : il
 combine des extrema séparés de `D,V,T`. Son diagnostic `n=6000,s=8` gagne
 environ trois centièmes de point seulement. Cela réfute cette combinaison sur
 les boîtes grossières mesurées, pas les deux théorèmes corrélés. Leur primitive
-et 16 CTests bornés ont été observés verts dans le worktree ; l'ablation WSPD
-et son coût transitif restent non reçus.
+et 16 CTests bornés sont verts au HEAD ; l'ablation WSPD et son coût transitif
+restent non reçus.
 
 La prochaine ablation recommandée est `SOC64-shadow-q4` sur un échantillon
 déterministe de tâches `central-MIXED`, avec cap propre, early exits, masse
@@ -215,8 +215,8 @@ son premier `ALL`. Un replay borné mesure `41` fermetures de masse `95`, contre
 `127` et `316` avec la somme fautive. Il doit encore recevoir une
 comparaison PointId de l'union. Le juge direct des flips tue désormais le mutant
 `sum_instead_of_union` lorsqu'il énumère tout, mais annonce encore `accord=OUI`
-si son cap saute des flips et aucune porte CTest ne garde ce chemin. Cinq portes
-CTest intégrées passent. À `n=2000`, le
+si son cap saute des flips. Cinq portes CTest intégrées passent, sans garder la
+non-vacuité du juge ni un oracle d'union par vrais IDs. À `n=2000`, le
 shadow non capé a déjà soumis `3 809 028` tâches et ajouté environ `2,1 s` à la
 vague sur une machine partagée. Le HEAD fournit désormais un cap qui publie
 `MINORANT_CAP` ; ce cap borne le diagnostic sans recevoir la politique de
@@ -261,9 +261,11 @@ q4 : alpha>0 et   alpha^2 > 2*(||h||^2||p||^2-(p dot h)^2)
 ```
 
 Helly borne une base à trois IDs. Un certificat de bloc conserve une même base
-et des poids rationnels, puis prouve ces polynômes sur tout `A×B` par bornes
-entières, Bernstein/SOS ou split fail-open. Tester seulement les coins est
-faux. Pour un témoin singleton, ce dual redonne exactement `SOC64`.
+et des poids rationnels. À poids fixes, le test exact des 64 couples de coins
+décrit ci-dessous prouve les polynômes sur tout `A×B`, sans Bernstein ; un
+échec provoque un split fail-open. Tester les coins avec des poids reproposés
+séparément reste faux. Pour un témoin singleton, ce dual redonne exactement
+`SOC64`.
 Cette version bloc est sûre mais incomplète : `for all pair exists lambda`
 n'implique pas `exists lambda for all pair`. Un échec ou un dénominateur trop
 large rend `MIXED/UNKNOWN`, jamais `NONE`.
@@ -274,14 +276,26 @@ La forme entière directement alignée sur le prototype pose
 `R=D||P||^2-(P dot (b-a))^2`. Elle teste q3 par
 `A>0 && 3A^2>4R` et q4 par `A>0 && A^2>2R`. Sous u16, la largeur i128 annoncée
 exige `W<=65535` vérifié avant toute somme. Le prototype live code ces seuils,
-mais ne préflighte pas encore `W`, ne juge pas indépendamment les groupes
-`k=2/3` et ne constitue ni un `BlockJungDualTile` uniforme ni une primitive
-CUDA reçue.
+mais ne préflighte pas encore `W` et ne constitue ni une primitive CUDA reçue
+ni une profondeur de bloc.
 
-Le raccord live construit et passe `11/11` CTests JungDual. Ces verts reçoivent
-la transcription singleton, cinq mutants et une ablation non vide ; l'en-tête
-annonce un juge par sphères construites qui n'existe pas encore dans le probe,
-et l'ablation porte sur toutes les paires plutôt que sur `OPEN_FINAL` q4.
+Le HEAD ajoute un juge primal BigInt indépendant pour une base fixe ; les
+`13/13` CTests Jung ciblés passent et le collectif `k=2` est exercé. Il manque
+une fixture nécessairement ternaire, le calcul de profondeur `d`, le preflight
+u16 et le raccord `OPEN_FINAL`.
+
+Le lift rectangle à poids fixes est désormais résolu mathématiquement. Poser
+`A0=-W*(a dot b)+(a+b) dot Z-Q` et
+`C0=W*(a cross b)-a cross Z-Z cross b`. q4 vaut
+`A0>0 && 2A0^2>||C0||^2`, q3 remplace `2` par `3`. Pour un endpoint fixé,
+`(A0,C0)` est affine dans l'autre et chaque lane est un cône de Lorentz convexe.
+Les `8×8=64` couples de coins caractérisent donc exactement `ALL` sur
+l'enveloppe `A×B`. `BlockJungDual64` rend `ALL` ou `MIXED`, tient en i128 sous
+`1<=W<=65535`, et repropose les poids après split sans jamais émettre les
+paires. Les contrôles `A4=4*A0` et `R=4*||C0||^2` fixent les facteurs ; cette
+équivalence porte seulement sur le reçu à poids communs, pas sur l'existence
+d'un poids différent par paire. Le widening précède `a+b`, les produits et les
+normes ; le preflight de `W` somme en type large ou saturant avant tout cast.
 
 La dissection live à `eight_clusters,n=1500` trouve huit témoins singleton
 exacts pour `89,5 %` de 200 PairId ouverts tirés par masse, contre `26,5 %` de
@@ -328,7 +342,8 @@ proof-tile, jamais l'expansion des `PairId`.
 
 Helly avec tolérance comprime en outre tout succès ponctuel. Pour les ensembles
 fermés `B_z` de centres où `z` n'est pas intérieur, `Depth(P,h)` signifie qu'il
-n'existe aucun point commun après suppression de `h-1` ensembles. Il existe
+n'existe, pour **aucun** ensemble `R` de `h-1` IDs au plus, un point commun à
+tous les `B_z` restants. Il existe
 donc toujours un sous-pool qui certifie déjà la profondeur, de taille
 `eta(3,h)<(h+1)^2` : au plus **80 IDs pour q4** et **99 pour q3**. Un
 `ToleranceKernel` porte ces IDs et le vérificateur rejoue exactement leur
@@ -344,6 +359,9 @@ donne `d=tau(E)`, le nombre transversal minimal ; le packing actuel n'est que
 bitset et une HPI qui rend soit un contre-centre, soit une nouvelle base
 disjointe. Le device vérifie chaque base géométrique une fois, puis rejoue la
 preuve de `tau(E)>=8/9` sans refaire la géométrie à chaque branche.
+Le rang de cet hypergraphe décroît avec le domaine des centres : trois IDs sur
+le disque pair-level 2D, deux sur l'axe de face 1D, un à BallKey fixée. C'est le
+même mécanisme de profondeur à travers q3 et q4.
 
 Après une face aiguë, une seconde porte collective travaille en dimension un.
 Sur le segment de centres `J_f` compatible avec `K_4(ab)`, chaque témoin porte
@@ -359,6 +377,23 @@ sinon scinde. La chaîne devient `Jung edge 2D -> carrier aigu -> noyau axe 1D
 par face n'est autorisée qu'après preflight ; il n'est pas nécessaire
 d'énumérer les q4 pour commencer à prouver leur rang.
 
+Le preflight M4 reste lui aussi factorisé. Chaque atome WST4 porte une masse de
+quatre IDs distincts calculée par Möbius sur les quinze partitions des quatre
+facteurs. Initialiser `M4_pending` à la masse non décidée ; pour une masse `m`,
+`ALL_Q` fait `M4_pending-=m; M4_L+=m`, `NONE_Q` fait `M4_pending-=m` et
+`MIXED_Q` remplace atomiquement le parent par ses enfants. Ainsi
+`M4_U=M4_L+M4_pending`. `M4_L>B_fill` rejette seulement le fill ponctuel ;
+`M4_U<=B_fill` certifie sa capacité, mais count final, offsets et publication
+exigent encore `M4_pending=0`. Sinon continuer ou passer au shallow. L'identité exacte par arête/`PlaneKey` reste un
+microkernel endpoint borné : à 50 000 points, un catalogue global aurait déjà
+`1249975000` arêtes et `62496250050000` incidences `(e,z)`. Aucun de ces termes
+soustraits n'est saturé séparément avant le résultat positif.
+
+Deux ledgers restent distincts : `M4_raw_[L,U]` est pré-profondeur, tandis que
+`residual_output_[L,U]` suit le fill après profondeur et positivité. Une
+fermeture `ALL_INTERIOR` crédite `domain_mass_closed` et produit zéro sortie
+résiduelle ; elle ne rend jamais `M4_raw=0`.
+
 Le LP global reste un oracle utile, mais son échec ne prouve plus une pénurie
 sur le disque Morse : une fixture à huit groupes ferme `JungDiskDepth8` alors
 que le LP sur tout le plan échoue dès la profondeur un.
@@ -371,7 +406,8 @@ $$\kappa_G(d)=\min\left\lbrace \sum_i\alpha_iq_i:\sum_i\alpha_is_i=d,\ \alpha_i\
 `d` appartient au cône positif de `G` et `kappa_G(d)<D`. Un optimum basique
 emploie au plus trois IDs. Huit extractions disjointes donnent un fast path q4;
 un arbre de suppressions fournit un oracle complet de profondeur universelle
-relativement au pool, jusqu'à 3280 appels LP pour q4. Cette propriété porte sur
+relativement au pool, jusqu'à 3280 appels LP pour `h=8`, donc q4 sous
+`smax=11`. Cette propriété porte sur
 toutes les sphères par la paire, pas seulement les supports Morse; un échec
 reste fail-open pour la source. Ce dernier n'est pas un hot path.
 
@@ -462,7 +498,7 @@ n'est exact : des supports positifs gardent un partenaire arbitrairement loin
 en rang. Aucun arrangement global, aucune mosaïque Delaunay d'ordre supérieur
 et aucun catalogue exhaustif ne deviennent le chemin produit.
 
-Au HEAD `e54c908`, le sampler v2 retire `PENDING` et la censure des grosses
+Au HEAD `cec4a4f`, le sampler v2 retire `PENDING` et la censure des grosses
 lentilles, puis remplace `2 sigma` par une demi-largeur Hoeffding correcte sous
 des tirages i.i.d. uniformes. Son implémentation ne reçoit pas encore cette loi :
 multiply-high reste sans rejet, les streams SplitMix n'ont pas de contrat
@@ -477,17 +513,27 @@ bornée. Son claim `M4=Theta(n^4)` pour tout nuage est faux : sa propre famille
 sujet, son `H4` teste seulement les intérieurs et oublie le shell, et les cas
 vides impriment encore certains `NaN`. Les cinq CTests verts ne réparent pas
 ces défauts.
-Une construction ouverte sur quatre sous-cubes prouve néanmoins une masse
-q4 bien centrée quartique **avant rang** ; un cinquième sous-cube fournit huit
-intérieurs uniformes et montre pourquoi `BlockBallDepth8` doit agir avant fill.
+Une construction ouverte en coordonnées réelles prouve néanmoins qu'une masse
+q4 bien centrée peut être quartique **avant rang**. L'ancienne instanciation par
+cubes unitaires u16 n'était pas uniforme (`2093/4096` supports seulement). La
+fixture exacte mise à l'échelle utilise les nœuds
+`A=(20000,20000,20000)+{0,1}^3`,
+`B=(30000,30000,30000)+{0,1}^3`,
+`C=(19000,31000,31000)+{0,1}^3`,
+`D=(31000,19000,31000)+{0,1}^3` et
+`Z=(20000,20000,30000)+{0,1}^3`, avec quarante `PointId` distincts. Ses `4096`
+supports sont q4 positifs et les huit IDs de `Z` sont uniformément intérieurs. Par convexité du déterminant
+in-sphere normalisé en `z`, huit coins certifient `ALL_INTERIOR`; un seul bloc
+du futur classifieur doit donc fermer avant fill. Les coins ne certifient pas le verdict inverse
+`NONE`.
 
 Le HEAD contient aussi le juge direct des flips SOC et `JungDual`. Le premier
 tue le mutant de somme lorsqu'il énumère tout, mais imprime encore `accord=OUI`
 si son cap laisse des flips non jugés. Le second a une identité entière correcte
 sous `sum(weights)<=65535` ; il ne fait cependant qu'essayer sept pondérations,
-n'a pas de juge continu `k>1`, n'impose pas son cap dans le header et possède un
-mutant de largeur à overflow signé. Ses onze CTests verts reçoivent des chemins
-et mutants, pas le collectif annoncé. Le HEAD inclut aussi les diagnostics de
+n'impose pas son cap dans le header et possède un mutant de largeur à overflow
+signé. Le juge primal indépendant reçoit une base `k=2`, mais pas encore le cas
+ternaire, la profondeur ni la tuile uniforme. Le HEAD inclut aussi les diagnostics de
 feuilles et d'ordre de descente ; leurs cohortes et coûts restent à recevoir.
 
 Le raffinement local réduit effectivement `E4`, mais ses parents et enfants
