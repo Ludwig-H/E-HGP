@@ -15,7 +15,7 @@ Le dossier vise l'état de l'art. Voici l'arithmétique qui dit à quelles condi
 | | Valeur | Régime |
 |---|---|---|
 | baseline reproductible | $68{,}0$ WaffleIron, $70{,}3$ MinkUNet | val, une trame, LiDAR seul, sans TTA |
-| **SOTA val** | **$73{,}5$ — DOS** | val, fine-tuning après pré-entraînement auto-supervisé |
+| **SOTA val** | **$73{,}1$ — DOS** | val, fine-tuning après pré-entraînement auto-supervisé |
 | SOTA test, LiDAR seul | $76{,}1$ — RAPiD-Seg | test, recette non documentée |
 | SOTA test, tous régimes | $76{,}5$ | TASeg (LiDAR + caméra + temps) et SimpleSeg (non attribuable) |
 
@@ -23,7 +23,7 @@ Le dossier vise l'état de l'art. Voici l'arithmétique qui dit à quelles condi
 
 ### Pourquoi ce n'est pas exclu
 
-Un raisonnement que le dossier a longtemps porté à tort : « l'auto-supervision ne paie qu'à peu d'étiquettes ». Sonata le suggère — $+0{,}3$ sur PPT supervisé. **DOS le réfute** : $73{,}5$ en fine-tuning contre $69{,}1$ pour PTv3 supervisé, soit **$+3$ à $+4$ points à supervision complète**, pour $2$ A100 pendant $20$ h.
+Un raisonnement que le dossier a longtemps porté à tort : « l'auto-supervision ne paie qu'à peu d'étiquettes ». Sonata le suggère — $+0{,}3$ sur PPT supervisé. **DOS le réfute** : $73{,}1$ en fine-tuning contre $69{,}1$ pour PTv3 supervisé, soit **$+3$ à $+4$ points à supervision complète**, pour $2$ A100 pendant $20$ h. Chiffres lus dans le texte primaire ; en probing, DOS est à $67{,}5$ contre $62{,}0$ pour Sonata.
 
 Donc un pré-entraînement auto-supervisé bien conçu vaut, sur ce benchmark, **le même ordre de grandeur que l'écart à combler**. C'est la seule voie du dossier dont un précédent publié démontre qu'elle peut produire plusieurs points en supervision complète.
 
@@ -42,7 +42,7 @@ Donc un pré-entraînement auto-supervisé bien conçu vaut, sur ce benchmark, *
 | **Voie 3 — supervision par le niveau de filtration** | **la seule avec un chemin arithmétique vers le SOTA** |
 | Voie 1 — la mesure | condition d'entrée de la voie 3 |
 | Voie 2 — instance ALPINE | diagnostic rapide, **hors** de la cible SOTA sémantique |
-| Voie 4 — ultramétrique | complément possible de la voie 3, antériorité non vérifiée |
+| Voie 4 — ultramétrique | complément de la voie 3 ; auditée, retenue sous condition de formulation |
 
 **Estimation honnête.** SOTA val en régime strict : $10$ à $15\,\%$. SOTA test : nettement moins. Ce n'est pas une promesse, c'est un pari dont l'arithmétique tient.
 
@@ -232,13 +232,54 @@ Si le deuxième bras égale le premier, il ne reste que « utiliser une hiérarc
 
 ---
 
-## 6. Voie 4 — L'architecture, statut non vérifié
+## 6. Voie 4 — L'ultramétrique dans l'attention, désormais auditée
 
 **Ce que ce serait.** Un arbre de fusion définit exactement une **ultramétrique** sur les points — c'est l'équivalence dendrogramme/ultramétrique du chapitre 3 de la thèse. L'injecter comme biais relatif dans l'attention change ce que « proche » veut dire : de la distance euclidienne à la **connexité par densité**. Ce qui corrigerait le défaut structurel de l'attention locale sur LiDAR, qui mélange des surfaces proches et déconnectées.
 
-**Pourquoi elle n'est pas dans la liste des voies retenues.** Je n'ai **pas** vérifié son antériorité. La famille « distance structurelle comme biais d'attention » existe — Graphormer utilise les plus courts chemins, les transformers syntaxiques la distance dans l'arbre. L'audit conduit a porté sur l'auto-supervision, pas sur ce point.
+**Statut après audit : voie retenue, mais sous condition de formulation.** Le mécanisme d'injection est saturé à $9{,}5/10$ ; le porteur ultramétrique est à $3/10$. Détail au § 6 bis, avec ce qu'il ne faut jamais écrire.
 
-**Ce qu'il faut faire avant de l'ouvrir :** un audit d'antériorité ciblé sur « structural / tree / ultrametric distance as attention bias », et le diagnostic de décodage de l'ultramétrique de la voie 1. Si l'ultramétrique prédit mieux l'anneau que la classe, la voie est morte avant d'être ouverte.
+**La condition qui reste :** le diagnostic de décodage de l'ultramétrique, dans la voie 1. Si elle prédit mieux l'indice d'anneau que la classe, la voie meurt avant d'être ouverte.
+
+---
+
+## 6 bis. Les deux idées auditées : ce qui reste, et ce qu'il ne faut jamais écrire
+
+J'avais proposé deux mécanismes sans en auditer l'antériorité. C'est fait. Les deux survivent, mais **très étroitement**, et la façon de les formuler décide de tout.
+
+### L'ultramétrique comme biais d'attention
+
+| Composante | Occupé | Par qui |
+|---|---|---|
+| « injecter une distance structurelle en biais d'attention » | **9,5/10** | Graphormer donne **littéralement la formule** avec le plus court chemin ; Transformer-M empile plusieurs biais ; le **Code Transformer (ICLR 2021) utilise déjà une distance d'ancêtre dans un arbre**, avec binning |
+| ultramétrique, dendrogramme, arbre de fusion comme biais | **3/10** | Coneheads (NeurIPS 2023) : profondeur de l'ancêtre commun comme **score**, mais hiérarchie **apprise** et remplacement du produit scalaire |
+
+**À ne jamais écrire :** « nous proposons d'injecter une distance structurelle comme biais d'attention. » C'est une redécouverte, et un relecteur de graph-transformers la verra en une ligne.
+
+**Ce qui reste libre**, et c'est là que tout le budget doit aller : une ultramétrique **exogène**, calculée exactement **hors du réseau**, à des niveaux **physiques**, injectée **additivement** à côté du canal de contenu, avec une fonction monotone apprise sur les niveaux distincts. Aucun des travaux trouvés ne fait cela.
+
+Deux faits utiles. La **taxonomie de référence** des encodages relatifs (arXiv 2402.14202) énumère plus court chemin, distance de résistance, noyau de la chaleur, marches aléatoires, laplacien, distance de diffusion — **et aucune entrée hiérarchique**. La case est vide dans la taxonomie elle-même. Et la comparaison directe « ultramétrique exogène certifiée contre hiérarchie apprise » n'a jamais été tentée.
+
+Objection à préparer : un biais par paires coûte $\mathcal{O}(N^{2})$, et GraphGPS l'évite délibérément pour cette raison. Chez PTv3 l'attention est déjà bornée à des blocs, donc le coût est contenu — mais il faudra le dire.
+
+### Le prior de DINO dérivé de la hiérarchie
+
+L'antériorité décisive existe et elle vient de l'équipe DINO/MSN elle-même : **Assran *et al.*, « The Hidden Uniform Cluster Prior in Self-Supervised Learning », octobre 2022.** Ils nomment le prior uniforme comme hypothèse implicite et nuisible, étendent MSN à des priors arbitraires, et comparent deux choix : une loi de puissance à exposant fixé, et un **oracle égal à la vraie distribution des classes**.
+
+> Sur iNaturalist18, naturellement en longue traîne : **$+3{,}0$ % avec le vrai prior, $+1{,}0$ % seulement avec la loi de puissance.** Sur ImageNet, équilibré, la loi de puissance coûte $-19{,}9$ %.
+
+Cela coupe dans les deux sens, et il faut assumer les deux.
+
+**En faveur :** ils ont déjà fait tourner l'expérience décisive. Un prior **mesuré** vaut trois fois un prior **postulé**. Et leur oracle est impraticable — il exige les étiquettes. **La distribution de masse d'une hiérarchie est une approximation de cet oracle qui ne demande aucune étiquette.** C'est exactement le trou qu'ils laissent ouvert.
+
+**Contre :** le plafond est connu et bas. Entre la loi de puissance réglée et la vérité terrain, il y a environ deux points. Et DOS capture déjà $+1{,}8$ sur nuScenes avec **un seul scalaire balayé**. Une chaîne géométrique complète doit battre un hyperparamètre de recherche par grille — la première objection de relecture sera : « avez-vous seulement fait un balayage sérieux ? »
+
+**Ce qui reste libre, précisément.** Des priors estimés depuis les données existent — SoLar, ImbaGCD — mais ils les estiment **depuis les sorties du modèle**, ce qui est circulaire : le prior confirme ce que le réseau croit déjà. Une hiérarchie calculée sur la géométrie brute est **indépendante du réseau**. C'est la revendication la plus propre disponible, et il faut l'écrire ainsi.
+
+**Une correction à ma propre affirmation.** J'avais écrit que DOS tirait une partie de son avantage SemanticKITTI du prior de Zipf. **C'est faux** : il n'existe aucune ablation du Zipf sur SemanticKITTI dans DOS. Le gain est mesuré sur nuScenes ($+1{,}8$), ScanNet ($+0{,}9$) et ScanNet200 ($+1{,}3$). Le transfert à SemanticKITTI est une extrapolation, à annoncer comme telle.
+
+### Réserve de méthode, commune aux deux audits
+
+Le budget de recherche web était épuisé ; tout est passé par OpenAlex, l'API arXiv et la lecture directe. Ces index ne couvrent que **titre et résumé**. Un « 0 résultat » signifie « personne ne le revendique dans son résumé ». Et **les brevets n'ont pas été interrogés** — c'est un trou déclaré.
 
 ---
 
@@ -249,7 +290,7 @@ graph TD
   V1["Voie 1 — la mesure<br/>CPU, semaines<br/><b>porte de réfutation</b>"]
   V2["Voie 2 — instance ALPINE<br/>aucun entraînement<br/>indépendante"]
   V3["Voie 3 — niveau de filtration<br/>un pré-entraînement<br/><b>la seule revendication libre</b>"]
-  V4["Voie 4 — architecture<br/><i>audit d'antériorité requis</i>"]
+  V4["Voie 4 — ultramétrique dans l'attention<br/>auditée : porteur libre, mécanisme saturé"]
   V1 --> V3
   V1 -.diagnostic ultramétrique.-> V4
   V1 --- V2

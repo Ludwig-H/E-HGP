@@ -2,7 +2,7 @@
 
 **La question :** une hiérarchie de clusters construite sur la densité — et non apprise — peut-elle donner à un réseau un meilleur contexte multi-échelle pour segmenter un scan LiDAR ?
 
-**La cible :** l'état de l'art SemanticKITTI mono-scan. En val, régime strict, le chiffre à battre est **$73{,}5$** (DOS) depuis une baseline reproductible à $68{,}0$–$70{,}3$ — soit $+3{,}2$ à $+5{,}5$ points.
+**La cible :** l'état de l'art SemanticKITTI mono-scan. En val, régime strict, le chiffre à battre est **$73{,}1$** (DOS) depuis une baseline reproductible à $68{,}0$–$70{,}3$ — soit $+3{,}2$ à $+5{,}5$ points.
 
 **L'état, au 14 août 2026 :** conception et falsification. **Aucune expérience apprise.** Aucun statut SOTA revendiqué. `public_status=not_claimed`.
 
@@ -38,7 +38,7 @@ Développés au chapitre 6 du guide. À connaître **avant** de proposer quoi qu
 
 **Une seule voie a un chemin arithmétique vers l'état de l'art**, et c'est la voie 3 de [VOIES.md](VOIES.md) : un pré-entraînement auto-supervisé dont l'axe de supervision est le **niveau de filtration**.
 
-Le raisonnement tient en trois lignes. Le dossier a longtemps porté l'idée que l'auto-supervision ne paie qu'à peu d'étiquettes — Sonata donne $+0{,}3$ en fine-tuning complet. **DOS le réfute** : $73{,}5$ contre $69{,}1$ pour PTv3 supervisé, soit $+3$ à $+4$ points à supervision complète, pour $2$ A100 pendant $20$ h. Un pré-entraînement bien conçu vaut donc, sur ce benchmark, **le même ordre de grandeur que l'écart à combler**.
+Le raisonnement tient en trois lignes. Le dossier a longtemps porté l'idée que l'auto-supervision ne paie qu'à peu d'étiquettes — Sonata donne $+0{,}3$ en fine-tuning complet. **DOS le réfute** : $73{,}1$ contre $69{,}1$ pour PTv3 supervisé, soit $+3$ à $+4$ points à supervision complète, pour $2$ A100 pendant $20$ h. Un pré-entraînement bien conçu vaut donc, sur ce benchmark, **le même ordre de grandeur que l'écart à combler**.
 
 Et ce qui reste libre pour s'y distinguer est étroit mais réel :
 

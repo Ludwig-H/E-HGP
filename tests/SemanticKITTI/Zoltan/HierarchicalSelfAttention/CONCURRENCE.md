@@ -156,7 +156,7 @@ Sonata n'est ni le plus fort ni le plus utilisable de sa famille. Sur SemanticKI
 | Sonata, CVPR 2025 | $62{,}0$ | $68{,}4$ | $72{,}6$ | 32 GPU | **outdoor non publiés** |
 | Concerto, NeurIPS 2025 | $66{,}6$ | $69{,}3$ | $71{,}2$ | 85 h $\times$ 16 H20 | publiés, config KITTI |
 | Utonia, ICML 2026 | $\mathbf{67{,}7}$ | $\mathbf{70{,}0}$ | $72{,}0$ | 64 H20 | publiés, config KITTI |
-| **DOS**, hors lignée | $67{,}5$ | — | $\mathbf{73{,}5}$ | **2 A100 $\times$ 20 h** | publiés |
+| **DOS**, hors lignée | $67{,}5$ | — | $\mathbf{73{,}1}$ | **2 A100 $\times$ 20 h** | publiés |
 
 Trois lectures, et la troisième décide de la stratégie.
 
