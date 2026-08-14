@@ -44,8 +44,15 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "${REPO_ROOT}"
 
 export GCP_PROJECT_ID="${GCP_PROJECT_ID:-devpod-gpu-exploration}"
-export GCP_ZONE="${GCP_ZONE:-europe-west4-a}"
-export GCP_INSTANCE_NAME="${GCP_INSTANCE_NAME:-ehgp-blackwell-spot}"
+# LA ZONE EST UNE ZONE IA, ET CE N'EST PAS UN DETAIL. `verify_running_guard`
+# n'autorise le repli « echeance calculee certifiee » — champ
+# `terminationTimestamp` entierement absent — que si la zone correspond a
+# `*-ai*`. La premiere version de cette recette visait `europe-west4-a`, une
+# zone standard : le champ n'y est pas apparu en douze tentatives de cinq
+# secondes et la session a echoue fermé, correctement. On vise donc la paire IA
+# autorisee, celle de la recette qui fonctionne.
+export GCP_ZONE="${GCP_ZONE:-europe-west4-ai1a}"
+export GCP_INSTANCE_NAME="${GCP_INSTANCE_NAME:-ehgp-blackwell-spot-ai1a}"
 # Coherence des trois durees : GCE 90 min, invite 75 min, run 55 min. Le run le
 # plus long doit finir avant l'arret invite, qui doit finir avant l'arret GCE.
 MAX_RUN_SECONDS="${MAX_RUN_SECONDS:-5400}"

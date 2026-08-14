@@ -97,30 +97,52 @@ les mord ; `a8-shell-compte-interieur` n'existe que sous coplanarité massive et
 seule une famille `scanline` le mord. Deux campagnes tournent à `smax=7` et
 `smax=14` : l'ABI paramétrique n'est plus testée qu'à onze.
 
-## 6. Le blocage G4, et il n'est pas dans mon code
+## 6. Le blocage G4 : c'était ma zone, et je m'étais trompé de diagnostic
 
 La session `session_axis_top8_g4.sh` a démarré la VM puis **échoué fermé** : la
-garde post-démarrage de `start_and_verify.sh` attend
-`terminationTimestamp` sur la cible et il n'est jamais apparu. La cible a été
-arrêtée et certifiée `TERMINATED`; le transcript est conservé dans
+garde post-démarrage de `start_and_verify.sh` a interrogé `terminationTimestamp`
+douze fois toutes les cinq secondes, ne l'a jamais vu, et a refusé. La cible a
+été arrêtée et certifiée `TERMINATED`; le transcript est conservé dans
 `receipts/axis_top8_g4_20260814/`.
 
-Diagnostic : **l'API GCE n'expose plus ce champ**. Un `describe` complet de la
-cible ne contient aucune clé comportant `termin` au niveau instance ; le
-coupe-circuit lui-même est bien présent et correct dans `scheduling` —
-`maxRunDuration=5400s`, `instanceTerminationAction=STOP`,
-`provisioningModel=SPOT` — avec `lastStartTimestamp` lisible.
+**Correction d'un diagnostic que j'avais écrit trop vite.** J'avais conclu que
+« l'API GCE n'expose plus ce champ ». Cette conclusion n'est pas établie : je
+l'avais tirée d'un `describe` sur une instance **déjà `TERMINATED`**, où aucune
+échéance de terminaison n'a de raison d'exister. Ce n'était pas une preuve.
+J'avais aussi écrit que la garde « pré-démarrage » acceptait le champ absent et
+que la garde « post-démarrage » l'exigeait : c'est faux, il n'y a qu'une garde,
+`verify_running_guard`, et c'est elle qui imprime les deux messages.
 
-La garde pré-démarrage du même script accepte déjà ce cas et imprime
-« `terminationTimestamp` non exposé; échéance calculée certifiée ». La garde
-**post**-démarrage, elle, l'exige strictement et échoue. Ce déséquilibre bloque
-toute session G4 du dépôt, pas seulement la mienne.
+**La vraie cause.** Le repli « échéance calculée certifiée » existe bien dans
+`verify_running_guard`, mais il est conditionné à la **zone** :
 
-Je n'ai pas modifié `start_and_verify.sh` : c'est un script de sécurité, et
-aligner sa garde post-démarrage sur sa garde pré-démarrage — certifier
-l'échéance par `lastStartTimestamp + maxRunDuration` quand le champ est absent —
-est une décision qui appartient à l'utilisateur et à l'auditeur, pas à une
-réparation de fin de tranche. C'est le prochain point bloquant à trancher.
+```text
+if [[ -n "${termination_timestamp}" ]]; then ... else [[ "${ZONE}" == *-ai* ]] || return 1; fi
+```
+
+Le `README.md` de `gcp-migration/` le documente : « Certaines zones IA n'exposent
+pas ce champ ; uniquement pour une telle zone et un champ entièrement vide,
+l'échéance est calculée depuis `lastStartTimestamp` et la durée GCE. » Le repli
+est donc réservé aux zones IA, par conception.
+
+Or ma recette visait par défaut `europe-west4-a` / `ehgp-blackwell-spot`, une
+zone **standard**, alors que la recette qui fonctionnait — `session_soc64_actif_g4.sh` —
+vise `europe-west4-ai1a` / `ehgp-blackwell-spot-ai1a`. C'est mon erreur de
+configuration, pas une régression de la plateforme. Les deux cibles existent,
+sont `TERMINATED`, `SPOT`, `g4-standard-48`, `maxRunDuration=5400s`, action
+`STOP`.
+
+**Ce qui reste réellement inconnu.** En zone standard, le champ n'est pas apparu
+en soixante secondes. Deux explications restent ouvertes et je n'ai pas de quoi
+trancher : il apparaît plus tard que le budget de douze tentatives, ou il n'est
+plus exposé là non plus. Trancher demanderait une session dédiée à observer un
+`describe` sur une instance `RUNNING` en zone standard — je ne l'ai pas faite, et
+elle ne vaut pas une VM à elle seule tant que la zone IA fonctionne.
+
+**Réparation appliquée, sans toucher au script de sécurité.** La recette
+renommée vise désormais la paire IA autorisée, comme la recette qui marche.
+`start_and_verify.sh` n'est pas modifié : sa garde reste stricte en zone
+standard, ce qui est le comportement voulu.
 
 ## 7. Ce que j'ai réparé dans ma propre recette
 

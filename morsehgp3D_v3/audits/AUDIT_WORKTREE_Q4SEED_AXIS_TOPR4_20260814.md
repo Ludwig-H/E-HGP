@@ -1,4 +1,4 @@
-# Contre-audit worktree — `Q4SeedAxisTopR4`
+# Contre-audit — `Q4SeedAxisTopR4`
 
 Date : 14 août 2026 UTC.
 
@@ -8,231 +8,173 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-## Snapshot et périmètre
+## Snapshot et contrat
 
-Le snapshot a d'abord été relu non suivi au parent
-`504f334bdfad90581b58086ced8eb6a35cf438d8`, puis Claude l'a commis sans changer
-ces deux octets au `HEAD=069acf7c26312b6146cb8d1ce890cb5f4d681cac` :
+Snapshot logiciel relu :
+`HEAD=3507b5ee4c7bcf1531f263737c406aedf0a6a100`, commit
+`name the kernel after its lane and make it carry real identities`.
 
-| fichier | SHA-256 relu |
+| fichier | SHA-256 au `3507b5e` |
 | --- | --- |
-| `prototype/axis_top8.hpp` | `90360f41614f0f37ffa7fe80c5ee504fa8c84e60303d988b5cfbb243197be824` |
-| `prototype/axis_top8_probe.cpp` | `4c952fd29c2188f62420e3870a2cf46554293938edbb893bd0a5bcb31e10307b` |
+| `prototype/q4seed_axis_topr4.hpp` | `e818b99960e4d90e0c511ef28c023e7793bda31da6608a9518c1f549d8d992be` |
+| `prototype/q4seed_axis_topr4_probe.cpp` | `b41f7714f2df96bee467f820fe3990e85483d1e4499e207ab27882c672675f9a` |
+| `CMakeLists.txt` | `d809d02f43dd231844102e1dd1087ae73ef7c236f284c32ea566353ded5e4ca3` |
 
-Le correctif paramétrique est ensuite commis au
-`HEAD=840a2e28679aa3e5e3d8ec706daa680a52ac1bde` :
+Historique utile : `069acf7` introduisait un `AxisTop8` fixé à huit malgré son
+CLI ; `840a2e2` l'a paramétré par le seuil de mort. Le commit courant remplace
+entièrement ce prototype par le nom et l'API contractuels.
 
-| fichier | SHA-256 relu au `840a2e2` |
-| --- | --- |
-| `prototype/axis_top8.hpp` | `78282847f4395cada2d2b572b2ad8d81f40f76dcefea8e5e89576fa19d4c1ddb` |
-| `prototype/axis_top8_probe.cpp` | `af9c87adb8250a3c3897ed1ca1716bc7decef7bb72e1c7c908cf1292b3c18966` |
-
-L'auditeur n'a modifié aucun fichier de `prototype/`, `oracle/`, `tests/`,
-`receipts/`, `docs/` ou `gcp-migration/`. La compilation ci-dessous a produit
-uniquement `/tmp/mhgp3v_axis_top8_probe_audit`.
+L'auditeur n'a modifié aucun fichier de code. Le noyau est interne à `Lane4` :
+son entrée `Q4Seed3` est créée par `Lane4`, jamais lue depuis `Lane3`. Il n'est
+ni un support q3, ni une sortie q3. `Lane2`, `Lane3` et `Lane4` restent trois
+énumérations indépendantes ; aucune Delaunay de quelque ordre que ce soit n'est
+admise.
 
 ## Verdict court
 
-Le noyau ponctuel confirme utilement la borne extrémale et le commit `840a2e2`
-répare son ancien codage en dur à huit. La porte ne reçoit toutefois encore ni
-une source q4 autonome, ni le payload exact `I_B/U_B`, ni le certificat de mort
-par gaps, ni l'exact-once par provenance primaire. Les groupes d'égalité, les
-caps et plusieurs options CLI restent également sans contrat fail-closed.
+Le commit ferme cinq défauts importants de la première révision :
 
-Le nom contractuel est `Q4SeedAxisTopR4`, interne à `Lane4`. Le triple d'entrée
-est un `Q4Seed3` construit par `Lane4`; ce n'est ni un support q3, ni un record
-lu depuis `Lane3`. Les commentaires `face`, `carrier q3` et le lien vers
-`AUDIT_DEBLOCAGE_SOURCE_SHALLOW_SANS_DELAUNAY_20260814.md`, désormais supprimé,
-doivent être corrigés par Claude sans que l'auditeur touche au code.
+- `r4=smax-3` paramètre sélection, mort et borne ;
+- les vrais IDs permanents et le shell persistant sont transportés ;
+- le juge classe `insphere_j<0`, `==0` et `>0`, puis compare `I_B/U_B` ;
+- `MORT_GAP` est un verdict du sujet, confronté à un oracle indépendant ;
+- un mode exact-once compare le multiensemble global q4 au brute force et
+  mesure des `Q4Seed3` déjà morts pour q3, sans en dépendre.
 
-## Rejeu indépendant
+La réception reste cependant bloquée par une troncature silencieuse exacte du
+shell : le buffer `Census.shell` peut perdre un vrai `PointId` sans rendre de
+fate d'overflow. La gate accepte en outre encore une dégénérescence en ne faisant
+que la compter. Ce P0 précède toute nouvelle session G4.
 
-Compilation stricte :
+## Rejeux frais
 
-```text
-g++ -std=c++20 -O2 -Wall -Wextra -Werror -pthread \
-  -I morsehgp3D_v2/include -I morsehgp3D_v3/prototype \
-  morsehgp3D_v3/prototype/axis_top8_probe.cpp \
-  -o /tmp/mhgp3v_axis_top8_probe_audit
-```
-
-Les quatre fixtures nominales passent :
+Commandes :
 
 ```text
-fixture16       q4=16, candidats=16, groupes=16, manquants=0, census_faux=0
-fixture_mort16  profondeur_min_Jf=8, retrait_un_min=7
-Jung tendu      deux orientations, candidats=1, manquants=0
-T2              obtus mort, aigu T2>0
+cmake -S morsehgp3D_v3 -B build/v3 -DCMAKE_BUILD_TYPE=Release
+cmake --build build/v3 --target mhgp3v_q4seed_axis_topr4_probe --parallel
+ctest --test-dir build/v3 --output-on-failure -R '^mhgp3v_q4axis'
 ```
 
-Deux sweeps à `n=60`, `seuil=7`, passent sans manque, borne cassée, faux compte
-ni débordement :
+Résultat : `36/36` CTests passent en `38,24 s`, dont les seuils non nominaux
+`smax=7/14`, cinq familles non vides, la contre-famille `two_lines`, trois
+exact-once et neuf mutants. Cela reçoit utilement la branche régulière bornée ;
+cela ne mord pas la capacité réelle du shell ci-dessous.
 
-| famille | graines q4 aiguës owner | shallow | candidats | manquants |
-| --- | ---: | ---: | ---: | ---: |
-| `uniform` | 16 133 | 5 867 | 51 013 | 0 |
-| `eight_clusters` | 15 856 | 3 564 | 57 253 | 0 |
-
-Ces résultats falsifient des erreurs du noyau fixe ; ils ne qualifient aucune
-complexité, aucune source WSPD et aucun SLO.
-
-Après configuration CMake et build Release, les 23 CTests
-`^mhgp3v_axis_top8_` passent en `10,23 s`. Cette couverture ne change aucun des
-P0 ci-dessous : aucun test ne demande `--seuil=8`, ne compare les listes d'IDs
-du census, ne classe le shell complet ou ne décide le primary global.
-
-## Historique P0 — domaine `--seuil`, réparé au `840a2e2`
-
-`main` accepte `0<=seuil<=15`, mais `select_top8` ferme toujours à huit
-permanents et conserve toujours `k=8-p`. Le juge, lui, emploie la valeur CLI.
-Le différentiel reproduit immédiatement la perte :
+Contre-fixture indépendante compilée seulement dans `/tmp` :
 
 ```text
-uniform, n=60, seuil=8         shallow=7450, manquants=440, rc=1
-eight_clusters, n=60, seuil=8 shallow=5024, manquants=428, rc=1
+verdict=OUVERT entrants=48 sortants=49 n_shell=99 attendu=100 range=97
 ```
 
-Deux réparations seulement sont recevables : refuser toute valeur autre que
-sept avant calcul, ou paramétrer le sujet par `r4=seuil+1=smax-3`, avec
-`p>=r4`, `k=r4-p` et une borne `2*(r4-p)`. Le théorème consolidé retient la
-seconde formulation ; le profil courant redonne `r4=8` et seize racines.
+## P0 — `U_B` est tronqué sans fate
 
-### Réparation commise, noms encore à aligner
+Prendre le `Q4Seed3` aigu owner
+`a=(96,108,100)`, `b=(108,96,100)`, `x=(92,96,100)`. Ajouter 49 vrais
+`PointId` distincts de position `(100,100,110)` et 48 vrais `PointId` distincts
+de position `(100,100,92)`. Tous les 97 sites ont la même racine axiale ; la
+sélection reste `OUVERT`, sans overflow, avec 48 entrants et 49 sortants. Pour
+l'un de ces apex, le shell exact contient les trois IDs du seed et les 97 IDs
+égaux, soit 100 IDs.
 
-Claude a ensuite paramétré `select_top8` par `mort=seuil+1` au commit
-`840a2e2`. Les SHA-256 relus sont `78282847f4395cada2d2b572b2ad8d81f40f76dcefea8e5e89576fa19d4c1ddb`
-pour le header et `af9c87adb8250a3c3897ed1ca1716bc7decef7bb72e1c7c908cf1292b3c18966`
-pour le probe. Après rebuild :
+Le buffer courant a pour capacité `32+64+3=99`. `census_replay` continue son
+range-report, incrémente `range_reports=97`, mais cesse silencieusement
+d'écrire au 99e slot. Il rend donc une liste fausse avec `degenere=true`, sans
+`required_count`, overflow ou verdict non consommable.
 
-```text
-uniform, n=60, seuil=8         shallow=7450, manquants=0, cand_max=17, rc=0
-eight_clusters, n=60, seuil=8 shallow=5024, manquants=0, cand_max=18, rc=0
-uniform, n=60, seuil=15       shallow=21940, manquants=0, cand_max=28, rc=0
-```
+Réparation minimale : capacité prouvée
+`3+kCapShell+2*kCapRacines=163`, compte requis et fate typé en cas de dépassement.
+Réparation préférable : pour un apex déjà prouvé shallow, tout site de racine
+égale appartient nécessairement aux groupes complets retenus ; reconstruire le
+shell depuis `entrants/sortants` évite le second scan global. Dans les deux cas,
+un overflow ou un shell extra termine en `PENDING_CAP` ou
+`unsupported_degeneracy`, jamais en liste partielle.
 
-Le défaut de domaine est donc réparé au `HEAD`. Les noms et diagnostics restent
-toutefois codés top-8
-(`select_top8`, `morte_perm8`, messages `16-2p`) et les fixtures fixes ignorent
-la valeur CLI. Aucun CTest ne fixe encore une régression avec un seuil différent
-de sept ; ils doivent être alignés avant une ABI paramétrique.
+La preuve du replay porte seulement sur un apex retenu avec profondeur
+strictement inférieure à `r4`. L'API doit imposer ces préconditions avant de
+publier `I_B/U_B` ; appelée sur un apex profond ou après un verdict
+`DEBORDEMENT`, elle peut légitimement omettre des non-extrêmes et ne doit pas
+prétendre rendre un census exact.
 
-## P0 — le payload d'identités n'est ni produit ni jugé
+Enfin, le probe trie puis applique `unique` au shell sujet avant comparaison.
+Cette normalisation masque un doublon accidentel d'ID. Il faut vérifier
+séparément l'unicité brute, puis comparer la liste canonique.
 
-`Selection` conserve seulement le **compte** `p` des permanents et un booléen
-`shell_persistant`. Il ne conserve ni les `PointId` permanents, ni les IDs du
-shell persistant. Le replay du probe initialise seulement `dk=sel.p` et compare
-un cardinal au cardinal exhaustif. Il ne construit ni ne compare les listes
-triées `I_B/U_B`.
+## P0 — groupes bornés ne signifie pas IDs bornés
 
-De plus, `Verdict.shell_extra` reste toujours zéro : `juge_tetra` ne classe
-jamais `insphere_j==0`. Les sorties `extra_shell=0` ne prouvent donc rien sur
-`RelevantGP`, les groupes d'égalité ou le shell complet. Un shell persistant
-détecté par le sujet n'entraîne actuellement aucun refus.
+Le théorème borne `2*(r4-p)` **groupes de racines orientés**, jamais le nombre
+de sites. Pourtant la fin de `campagne` rejette `cand_max>2*r4`. Cette assertion
+contredit le théorème et peut transformer un plateau valide en « désaccord » au
+lieu d'un fate de dégénérescence/capacité. Le reçu de mort tient en
+`2*r4-p` groupes ou en RLE avec multiplicités, pas nécessairement en autant
+d'IDs.
 
-Réception minimale : transporter les vrais IDs permanents, range-reporter tout
-groupe de racine égal et le shell persistant, reconstruire les listes complètes
-`I_B/U_B`, puis les comparer à un juge `insphere_j<0/==0/>0`. Hors
-`RelevantGP`, une égalité non admise rend `unsupported_degeneracy`, jamais un
-succès par cardinal.
+La gate compte `c.degenere`, mais un run nominal peut rester vert avec ce compte
+non nul. Sous le profil `RelevantGP`, toute égalité hors support ou shell
+persistant doit rendre `unsupported_degeneracy`; hors de ce profil, une
+politique de plateau reçue est nécessaire. Un compteur n'est pas un fate.
 
-Le replay exact ne demande aucun second census global. Noter `P` les IDs
-permanents, `H` le shell persistant, `E` tous les IDs des groupes entrants
-retenus et `S` ceux des groupes sortants retenus. Pour l'apex `y` de racine
-`alpha_y`, il faut rendre exactement
-`I_y=P union {z in E:alpha_z<alpha_y} union {z in S:alpha_z>alpha_y}` et
-`U_y={a,b,x} union H union {z in E union S:alpha_z=alpha_y}`. Sur une branche
-vive, `|P|<mort`; un intérieur omis hors des extrêmes impliquerait déjà une
-profondeur au moins `mort`. En revanche `H` et un groupe égal peuvent être de
-masse arbitraire : RLE/continuation ou refus typé sont obligatoires, jamais un
-booléen ou un tableau partiel.
+## `MORT_GAP` — formule réparée, fixture permanente encore requise
 
-## P0 — la mort par gaps reste calculée par l'oracle
+Une première version non suivie, SHA-256 commençant par `df99`, évaluait
+seulement l'intervalle après chaque racine. Un groupe contenant à la même racine
+des entrants et des sortants peut être profond des deux côtés mais shallow à
+la racine elle-même, où tout le groupe est shell ; cette version rendait alors
+un faux `MORT_GAP`.
 
-`select_top8` ne publie `face_morte` que pour `T2<=0` ou `p>=8`. Dans
-`fixture_mort16`, il retourne encore seize candidats. Le champ `morte_gap` est
-posé ensuite parce que le probe exhaustif ne trouve aucun q4 shallow ; ce n'est
-pas le certificat de gaps constant annoncé.
+Le commit `3507b5e` corrige la formule : bout gauche fermé, racine exacte puis
+intervalle suivant, avec comparaisons strictes à la racine. La fixture u16 à
+graver est : seed
+`(100,100,100)`, `(100,110,110)`, `(110,100,110)` ; sept permanents
+`(100,101,101)` à `(100,105,105)`, puis `(101,100,101)` et `(102,100,102)` ;
+apex `(110,110,100)` et shell opposé `(98,100,104)`. Les deux racines sont
+égales au bout droit, la vraie profondeur minimale vaut sept et le verdict doit
+rester `OUVERT`. Elle falsifie l'ancien snapshot et protège simultanément
+égalité, shell et asymétrie du bout droit.
 
-Il faut une sortie typée `DEAD_GAP` accompagnée de son reçu de seuils, comparée
-à la profondeur minimale exhaustive et à ses mutants de frontière. Elle se
-calcule directement à partir des mêmes extrêmes : avec `k=mort-p`, grouper les
-`k` racines entrantes minimales et les `k` sortantes maximales, puis évaluer
-chaque intervalle de leur ordre fusionné **et chaque racine elle-même**. À une
-égalité, le groupe est shell et ne crédite aucun intérieur. Le prédicat tronqué
-est exact : `depth(tau)>=mort` si et seulement si
-`p+min(k,N_in(alpha<tau))+min(k,N_out(alpha>tau))>=mort`. Si tous les morceaux
-passent, ce replay `O(k log k)` rend `DEAD_GAP`; sinon il rend les intervalles
-shallow. Tant qu'il manque, le noyau réduit des candidats mais ne prouve pas la
-fermeture pré-apex promise.
+Le mode exact-once courant ne saute pas `kMortGap` avant de parcourir les
+candidats. Il peut donc rester vert même si une future régression ferme à tort
+un seed : ce mode teste le primary, mais pas encore l'usage causal de la mort.
+Ajouter une variante où `kMortGap` supprime réellement la branche, confrontée
+au brute force global.
 
-## P1 — provenance q4 et exact-once non testés
+## P1 — exact-once et options
 
-Le juge vérifie positivité et owner, puis compte par `Q4Seed3`. Il ne décide pas
-le primary entre les deux préfixes aigus d'un même tétraèdre et ne compare pas
-un ensemble global de `SupportKey` exact-once. La fixture seize n'exerce qu'un
-préfixe choisi manuellement ; son libellé `carrier_primaire=0` n'est pas une
-décision du sujet.
+Les trois gates exact-once régulières passent et le primary choisit bien le plus
+petit vrai `PointId` parmi les deux `Q4Seed3` aigus. Leur oracle accepte toutefois
+les supports par positivité et profondeur sans classifier le shell complet ;
+elles ne reçoivent donc pas un plateau ni le fate `RelevantGP`.
 
-La porte suivante doit construire les deux `Q4Seed3` possibles dans `Lane4`,
-appliquer le plus petit vrai `PointId` aigu, puis comparer le multiensemble
-global au brute force : zéro manque, zéro doublon, mêmes owners et mêmes
-`SupportKey`.
+Le CLI emploie toujours `atoll` : suffixes et overflows sont acceptés, plusieurs
+modes s'écrasent, des options étrangères à une fixture sont ignorées,
+`coord` n'est pas prévalidé u16, les planchers négatifs passent et `threads`
+n'a pas de cap. Réception : parse entier strict, options admissibles par mode,
+`min_*>=0`, domaine u16 et `1<=threads<=cap`.
 
-## P1 — groupes d'égalité et débordement ne sont pas reçus
+Deux mutants restent sémantiquement corrélés : `a8-signe-b-inverse` et
+`a8-abs-avant-tri` réalisent la même inversion sur les sortants. Les deux tests
+verts ne prouvent donc pas deux fautes indépendantes.
 
-La borne `2*(mort-p)` porte sur les **groupes de racines**, pas sur leur nombre
-d'IDs. Une dégénérescence peut donc contenir arbitrairement plus de candidats.
-Le tableau fixe de 64 IDs par côté peut devenir partiel ; le probe comptabilise
-alors `debordement`, mais il a déjà laissé circuler la sélection tronquée et
-rend un plancher générique. Une fixture de 65 IDs égaux manque.
+## Portée industrielle
 
-La consommation doit être impossible après overflow. Le fate attendu est une
-continuation `PENDING_CAP` portant le groupe complet, ou
-`unsupported_degeneracy` si le profil le permet ; aucun `SupportKey` ni verdict
-OK ne peut provenir d'un préfixe de groupe. Ajouter les mutants `drop_equal_id`,
-`drop_persistent_shell` et `continue_after_overflow`.
+Le sujet rescane tous les sites pour chaque racine : coût quadratique par
+`Q4Seed3`. La campagne ajoute l'énumération des seeds et l'oracle apex, avec un
+pire coût en puissance cinq. Elle reçoit un oracle CPU borné, ni un générateur
+WSPD/Morton q4, ni une range-query best-first, ni des blocs, continuations,
+octets/HWM ou une route 50k.
 
-## P1 — le contrat CLI et plusieurs mutants sont poreux
+Le raccord industriel reste exclusivement dans `Lane4` :
+`NeutralPairPartition -> PairAnchor4 -> Q4Seed3Block -> AxisTopR4 -> Positive4`.
+Il doit mesurer `seed_blocks/splits`, visites Morton, comparaisons larges,
+ties/overflows, morts par cause, octets et HWM. Aucun résultat, cap ou verdict
+de `Lane3` ne figure dans cette chaîne.
 
-Les appels suivants réussissent alors que leurs options sont ignorées ou ne
-mordent pas le mode choisi :
+## G4
 
-```text
---fixture-16 --seuil=8 --points=999999 --coord=999999
---fixture-t2-positif --inject=a8-cap15
---sweep --family=two_lines --min-faces=-1 --min-shallow=-1
-```
+Une tentative concurrente, non lancée par l'auditeur, a échoué avant build car
+le `terminationTimestamp` GCE n'a pas pu être certifié. Le garde interne a
+arrêté la génération exacte `2026-08-14T13:00:56.283-07:00` et certifié la cible
+`TERMINATED`. Elle ne produit aucune mesure CPU/GPU du noyau.
 
-Le parseur `atoll` accepte aussi suffixes et overflows ; `coord` n'est pas
-prévalidé dans le domaine u16, les modes multiples peuvent s'écraser et
-`threads` n'a pas de borne contractuelle. Il faut un parse entier strict, une
-table d'options admissibles par mode, `min_*> =0`, `1<=threads<=cap`, le domaine
-coordonné u16 et le cardinal réel du générateur.
-
-La campagne actuelle ne distingue pas non plus réellement tous les mutants :
-`kSigneBInverse` et `kAbsAvantTri` produisent les mêmes métriques sur le replay
-uniforme, `kBoutsOuverts` ne couvre qu'une frontière tandis que l'autre est
-portée par `kPermanenceLarge`, et `kKFixe7` suit désormais `mort-1`. Ces noms ne
-constituent donc pas trois preuves de mutation indépendantes.
-
-## P1 — portée physique
-
-La sélection actuelle est quadratique dans le nombre de sites par préfixe :
-chaque racine rescane toutes les autres. La campagne exhaustive ajoute les
-boucles sur paires, troisièmes rôles et quatrièmes rôles. Elle est un oracle
-borné, pas la généralisation WSPD ni la recherche best-first sur Morton requise
-pour 50 000 points. Le domaine `n<=400` n'est pas à lui seul un cap
-d'opérations ou de temps.
-
-Avant tout raccord G4, publier séparément `Q4Seed3Block`, visites de nœuds,
-comparaisons larges, groupes d'égalité, morts permanents/gaps, racines retenues,
-octets et HWM sur `1500/3000/6000`, sans produit `Lane3 x Lane4` et sans
-`CellPair/Sym2`.
-
-Le header conserve enfin un lien vers
-`AUDIT_DEBLOCAGE_SOURCE_SHALLOW_SANS_DELAUNAY_20260814.md`, brouillon incorrect
-qui a été supprimé. Claude doit le remplacer par l'autorité active
-`NOTE_SOLUTION_CONTRAT_SOURCE_AIGUE_20260814.md`; l'auditeur ne modifie pas le
-code.
-
-GCP non utilisé.
+La cible d'une seconde pour 50k reste entièrement ouverte. GCP non utilisé par
+l'auditeur.
