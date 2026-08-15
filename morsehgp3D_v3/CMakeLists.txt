@@ -5106,6 +5106,29 @@ add_test(NAME mhgp3v_core_ball_seuil_couple
 set_tests_properties(mhgp3v_core_ball_seuil_couple PROPERTIES PASS_REGULAR_EXPRESSION
   "fixture seuil-couple verifies=8 dec_q4=1105 coup_q4=1888")
 
+# LE CONTRE-EXEMPLE DU RÉ-AUDIT : une unité de rayon en trop N'EST PAS absorbée
+# par l'inégalité stricte. Le raisonnement fautif portait sur `R4`, alors que la
+# comparaison porte sur `R4^2` — une unité y devient environ `2 R4` — et les
+# distances de grille sont des racines, pas des entiers.
+add_test(NAME mhgp3v_core_ball_rayon_plus_un_code
+         COMMAND mhgp3v_core_ball_probe --fixture=rayon-plus-un)
+add_test(NAME mhgp3v_core_ball_rayon_plus_un
+         COMMAND mhgp3v_core_ball_probe --fixture=rayon-plus-un)
+set_tests_properties(mhgp3v_core_ball_rayon_plus_un PROPERTIES PASS_REGULAR_EXPRESSION
+  "rayon-plus-un R4=8 boule=0 fuseau=0")
+mhgp3v_add_expected_code_test_for(mhgp3v_core_ball_probe
+  mhgp3v_core_ball_mutant_rayon_plus_un "la stricte n.absorbe pas" 1
+  --fixture=rayon-plus-un --inject=boule-rayon-plus-un)
+
+# `--vrai-vivant` est FAUX dès qu'une masse est hors cap : les paires des
+# rectangles capés sont ajoutées au résiduel sans jamais être testées, donc le
+# compte n'est qu'un minorant. Contre-rejeu de l'auditeur : sur soixante points,
+# cap 512 donne 1594 et cap 1 donne 1201, les deux sortant code zéro.
+mhgp3v_add_expected_code_test_for(mhgp3v_combined_prefilter_probe
+  mhgp3v_combined_refus_vrai_vivant_hors_cap "paires hors cap" 3
+  --points=60 --family=uniform --seed=3 --separation=8 --smax=11
+  --cap-cellule=1 --vrai-vivant)
+
 add_test(NAME mhgp3v_core_ball_couple_sature_code
          COMMAND mhgp3v_core_ball_probe --fixture=couple-sature)
 add_test(NAME mhgp3v_core_ball_couple_sature
@@ -5127,7 +5150,7 @@ add_test(NAME mhgp3v_core_ball_ablation_rayon_dec
   COMMAND mhgp3v_core_ball_probe --points=400 --family=terrain --seed=3
           --separation=6 --rayon=dec --min-coeurs=200 --min-bulk=50 --min-elagues=500)
 set_tests_properties(mhgp3v_core_ball_ablation_rayon_dec PROPERTIES
-  PASS_REGULAR_EXPRESSION "lane q4 coeurs_non_vides=[0-9]+ direct=50647 descente=50647 faux=0")
+  PASS_REGULAR_EXPRESSION "lane q4 coeurs_non_vides=[0-9]+ direct=50656 descente=50656 faux=0")
 # Point 11 du plan : sphère englobant les POINTS plutôt que l'AABB. Deux usages
 # à ne pas confondre — serrer la sphère de SEPARATION rend la séparation plus
 # facile, donc produit des rectangles moins séparés et des cœurs plus PETITS.
@@ -5142,7 +5165,7 @@ add_test(NAME mhgp3v_core_ball_ablation_rayon_max
   COMMAND mhgp3v_core_ball_probe --points=400 --family=terrain --seed=3
           --separation=6 --min-coeurs=200 --min-bulk=50 --min-elagues=500)
 set_tests_properties(mhgp3v_core_ball_ablation_rayon_max PROPERTIES
-  PASS_REGULAR_EXPRESSION "lane q4 coeurs_non_vides=[0-9]+ direct=61454 descente=61454 faux=0")
+  PASS_REGULAR_EXPRESSION "lane q4 coeurs_non_vides=[0-9]+ direct=61462 descente=61462 faux=0")
 
 # ---------------------------------------------------------------------------
 # LE PROFIL u16 EST ANNONCÉ, DONC IMPOSÉ. Le ré-audit a trouvé que

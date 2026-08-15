@@ -677,7 +677,11 @@ inline Sphere sphere_of(const Box& b) {
     const i64 e = b.hi[i] - b.lo[i];
     acc += (i128)e * e;
   }
-  s.r2 = isqrt_floor(acc) + 1;  // demi-diagonale doublee, arrondie au-dessus
+  // LE VRAI PLAFOND, PAS `floor + 1`. Sur un carre parfait — et un singleton en
+  // est un, avec `acc = 0` — `floor + 1` majorait d'une unite entiere pour rien,
+  // ce qui retrecit tous les cœurs gratuitement. L'auditeur le releve deux fois.
+  s.r2 = isqrt_floor(acc);
+  if (s.r2 * s.r2 < acc) ++s.r2;
   return s;
 }
 
@@ -1010,14 +1014,21 @@ int main(int argc, char** argv) {
     const int va = h_first(r.v), vb = h_last(r.v);
     const int na = ub - ua + 1, nb = vb - va + 1;
     L.masse_totale += (long long)na * nb;
+    // LE COMPTEUR AVANT LE `continue`, ET C'ETAIT UN VRAI DEFAUT DE MESURE.
+    // Il etait incremente APRES le rejet des rectangles capes, donc il ne
+    // pouvait structurellement jamais depasser le cap. Le recu du 15 aout s'en
+    // servait pour conclure « le cap n'est pas en cause : cellule_max = 482
+    // reste sous 512 » — un raisonnement circulaire, et faux : a
+    // `terrain, n=32000, s=8`, cinquante-deux rectangles capes sur 5,6 millions
+    // portent SOIXANTE-QUINZE POUR CENT du residuel.
+    if (na > L.cellules_max) L.cellules_max = na;
+    if (nb > L.cellules_max) L.cellules_max = nb;
     if (na > cap || nb > cap) {
       ++L.non_decides;
       L.masse_non_decide += (long long)na * nb;
       for (int q = 0; q < 3; ++q) L.survivantes[q] += (long long)na * nb;
       continue;
     }
-    if (na > L.cellules_max) L.cellules_max = na;
-    if (nb > L.cellules_max) L.cellules_max = nb;
 
     const Box BA = h_box(r.u), BB = h_box(r.v);
     // Seize coins, une fois par rectangle : ils ne dependent d'aucun site.
@@ -1776,6 +1787,18 @@ int main(int argc, char** argv) {
     std::printf("instruction ancres=%lld lentille_moyenne=%.2f lentille_max=%lld\n",
                 L.lentille_ancres,
                 (double)L.lentille_somme / (double)L.lentille_ancres, L.lentille_max);
+  // LE COMPTE EST FAUX DES QU'UNE MASSE EST HORS CAP, et l'auditeur l'a montre
+  // par contre-rejeu : sur soixante points, cap 512 donne `q4_vivantes=1594`,
+  // cap 1 donne `1201`, et les deux sortaient code zero en se disant exactes.
+  // Les paires des rectangles capes sont ajoutees au residuel sans jamais etre
+  // testees, donc le compte publie n'est qu'un MINORANT de `V_q` et le mou un
+  // majorant sans garantie.
+  if (vrai_vivant && L.masse_non_decide != 0) {
+    std::fprintf(stderr,
+                 "PLANCHER : --vrai-vivant avec %lld paires hors cap — le compte"
+                 " serait un minorant, pas une mesure\n", L.masse_non_decide);
+    return 3;
+  }
   if (vrai_vivant) {
     std::printf("vraivivant");
     for (int q = 0; q < 3; ++q) {
@@ -1826,15 +1849,25 @@ int main(int argc, char** argv) {
       return 3;
     }
   }
-  // L'INVARIANT CENTRAL : le prefiltre est fail-open, donc son residuel
-  // CONTIENT les ancres vraiment vivantes. Une violation signifie qu'il a fermé
-  // à tort, et c'est le defaut le plus grave possible.
+  // CET INVARIANT EST CIRCULAIRE, ET CE N'EST PAS UNE PORTE DE SURETE.
+  //
+  // `vrai_vivantes` n'est incremente qu'APRES avoir etabli que la paire est
+  // dans le residuel : il en resulte structurellement
+  // `vrai_vivantes <= paires parcourues <= survivantes`. Une paire que le
+  // prefiltre aurait fermee a tort n'est jamais examinee, donc jamais vue.
+  // L'auditeur le demontre : avec `--fixture=coeur5 --inject=bulk-sans-masque`,
+  // le mutant ferme une vraie paire q2 et ce mode imprime pourtant
+  // `q2_vivantes=20 q2_mou=1.000` — il a simplement omis la vingt-et-unieme.
+  // Seul l'oracle independant par `PairId` signale la fausse mort.
+  //
+  // Le test est conserve comme garde-fou d'implementation — une violation
+  // signalerait un bug de comptage — jamais comme preuve de surete.
   if (vrai_vivant)
     for (int q = 0; q < 3; ++q)
       if (L.survivantes[q] < vrai_vivantes[q]) {
         std::fprintf(stderr,
-                     "PLANCHER : lane q%d, %lld survivantes < %lld vraiment vivantes —"
-                     " le prefiltre a ferme a tort\n",
+                     "PLANCHER : lane q%d, %lld survivantes < %lld W-vivantes —"
+                     " incoherence de comptage, PAS une preuve de fermeture a tort\n",
                      q + 2, L.survivantes[q], vrai_vivantes[q]);
         return 3;
       }

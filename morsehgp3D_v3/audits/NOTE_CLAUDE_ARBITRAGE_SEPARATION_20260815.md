@@ -10,6 +10,25 @@ Mesure faite à la demande de l'utilisateur, qui soutenait que `s=8` est le bon
 compromis pour des nuages de plusieurs dizaines de milliers de points. Il a
 raison, et le chiffre est beaucoup plus net que je ne l'attendais.
 
+> [!CAUTION]
+> **Le facteur `6,4` est rétracté : il vient du cap, pas des certificats.**
+> Le probe traite tout rectangle dont une extrémité dépasse `cap-cellule=512`
+> comme indécidé et ajoute **toute** sa masse aux survivantes. À
+> `terrain, n=32 000`, la baisse de masse hors cap vaut `49 096 900` ancres sur
+> les `49 566 930` gagnées, soit **`99,052 %` du gain**. Sur la seule masse
+> jugée, `s=8` gagne `17,238 %` — contre `17,503 %` à `n=8 000`, où aucun
+> rectangle n'est hors cap. **L'effet intrinsèque est donc presque invariant en
+> `n`**, et la mesure agrégée dit surtout que `s=8` raffine assez la WSPD pour
+> contourner le cap.
+>
+> J'avais exclu ce biais en invoquant `cellule_max = 482 < 512`. Ce champ était
+> mis à jour **après** le `continue` des rectangles hors cap : il ne pouvait
+> structurellement jamais dépasser le cap. Le compteur est corrigé — le vrai
+> maximum vaut `677` — et le reçu du 15 août reposait sur le même raisonnement
+> circulaire. Détail :
+> [`AUDIT_REAUDIT_DUAL_TREE_COEUR_BOULE_SEPARATION_EB1B52A_20260815.md`](AUDIT_REAUDIT_DUAL_TREE_COEUR_BOULE_SEPARATION_EB1B52A_20260815.md)
+> section 5.
+
 ## 1. Le fait
 
 `terrain`, `K=10`, chemin courant — cœur `corner64`, `h_a` par dual-tree :

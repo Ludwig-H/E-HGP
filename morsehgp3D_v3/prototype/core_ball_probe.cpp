@@ -409,6 +409,46 @@ int fixture_seuil_couple(BallMutant mu) {
 }
 
 // ---------------------------------------------------------------------------
+// FIXTURE `rayon-plus-un` : LE CONTRE-EXEMPLE DU RE-AUDIT.
+//
+// J'avais ecrit qu'une unite de trop sur le rayon etait absorbee par
+// l'inegalite stricte. C'est faux, et pour deux raisons cumulees : la
+// comparaison porte sur `R4^2`, donc une unite sur `R4` en vaut environ
+// `2 R4` sur son carre ; et les distances de grille sont des RACINES, pas des
+// entiers, donc la stricte n'absorbe rien.
+//
+// Geometrie de l'auditeur, q3 : `a=(0,0,0)`, `b=(7,0,0)`, `z=(3,2,0)`.
+// Le rayon quadruple vrai vaut `14/sqrt(3) = 8,0829`, donc `R4^2` vrai
+// vaut `65,33`. Le point est a `|4z - M|^2 = 68`.
+//
+//   plancher 8  -> `R4^2 = 64`, refuse : correct
+//   +1 = 9      -> `R4^2 = 81`, ACCEPTE, alors que le fuseau exact refute
+//                  avec `4H^2 = 256 < 260 = E T`.
+// ---------------------------------------------------------------------------
+int fixture_rayon_plus_un(BallMutant mu) {
+  const P3 a{0, 0, 0}, b{7, 0, 0}, z{3, 2, 0};
+  const i64 c2a[3] = {0, 0, 0}, c2b[3] = {14, 0, 0};
+  const i64 M[3] = {c2a[0] + c2b[0], c2a[1] + c2b[1], c2a[2] + c2b[2]};
+  const i64 R4 = mhgp3v::corebl::core_ball_radius4(14, 0, 0, 3, mu);
+  const i64 p3[3] = {z.x, z.y, z.z};
+  const bool boule = mhgp3v::corebl::ball_contains_point(M, R4, p3, mu);
+  const bool juge = dans_fuseau(a, b, z, 3);
+  std::printf("rayon-plus-un R4=%lld boule=%d fuseau=%d mutant=%s\n", (long long)R4,
+              (int)boule, (int)juge, ball_mutant_name(mu));
+  if (boule && !juge) {
+    std::fprintf(stderr, "DESACCORD : une unite de rayon en trop certifie un faux"
+                 " temoin — la stricte n'absorbe pas, les distances sont des racines\n");
+    return 1;
+  }
+  if (mu == BallMutant::kNone && (R4 != 8 || boule || juge)) {
+    std::fprintf(stderr, "PLANCHER : la geometrie gravee a derive"
+                 " (R4=%lld boule=%d fuseau=%d)\n", (long long)R4, (int)boule, (int)juge);
+    return 3;
+  }
+  return 0;
+}
+
+// ---------------------------------------------------------------------------
 // FIXTURE `couple-sature` : LA BORNE COUPLEE EST ATTEINTE, DONC INDEPASSABLE.
 //
 // Cauchy est une egalite quand `(|w|, |p|)` est proportionnel a `(2 kappa, 1)`.
@@ -660,7 +700,7 @@ int mode_nuage(const std::string& family, int n, i64 coord, long long seed, int 
       const i64 e = hi[i] - lo[i];
       acc += (i128)e * (i128)e;
     }
-    *r2 = mhgp3v::corebl::isqrt_floor_i128(acc) + 1;
+    *r2 = mhgp3v::corebl::isqrt_ceil_i128(acc);  // VRAI plafond, pas floor+1
   };
   auto h_sphere = [&](int h, i64 c2[3], i64* r2) {
     h_sphere_sep(h, c2, r2);
@@ -818,6 +858,7 @@ BallMutant mutant_de(const std::string& s) {
   if (s == "boule-kappa3-sur") return BallMutant::kKappaQ3Sur;
   if (s == "boule-kappa4-sur") return BallMutant::kKappaQ4Sur;
   if (s == "boule-oublie-derive") return BallMutant::kOublieDerive;
+  if (s == "boule-rayon-plus-un") return BallMutant::kRayonPlusUn;
   if (s == "boule-rayon-plus-deux") return BallMutant::kRayonPlusDeux;
   if (s == "boule-inclus-large") return BallMutant::kInclusLarge;
   if (s == "boule-disjoint-centre") return BallMutant::kDisjointCentre;
@@ -894,6 +935,7 @@ int main(int argc, char** argv) {
   if (fixture == "apex-signe") return fixture_apex_signe(mu);
   if (fixture == "seuil-couple") return fixture_seuil_couple(mu);
   if (fixture == "couple-sature") return fixture_couple_sature(mu);
+  if (fixture == "rayon-plus-un") return fixture_rayon_plus_un(mu);
   if (!fixture.empty()) refuse("fixture inconnue");
   return mode_nuage(family, n, coord, seed, sep, mu, min_coeurs, min_bulk, min_elagues,
                     rayon_dec, sphere_points);

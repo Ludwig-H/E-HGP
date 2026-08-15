@@ -111,16 +111,21 @@ enum class BallMutant {
   kKappaQ3Sur,     // remplace 1/sqrt(3) par 3/5 : SUR-estime, la boule deborde
   kKappaQ4Sur,     // remplace (sqrt6-sqrt2)/2 par 21/40 : idem en q4
   kOublieDerive,   // oublie le terme -S2 : le deplacement du milieu ignore
-  // ARRONDIR VERS LE HAUT D'UNE UNITE N'EST PAS UN MUTANT, ET C'EST UN
-  // RESULTAT. Avec le plancher `f = floor(vrai)` et l'inegalite STRICTE, les
-  // distances admises sont `far <= f - 1`. Avec `ceil = f + 1` elles deviennent
-  // `far <= f`, et `f <= vrai` : tout point admis reste dans le fuseau. La
-  // faute est donc absorbee, et l'ecrire comme mutant aurait produit une porte
-  // vacue — exactement le defaut que le contre-audit du 15 aout a trouve
-  // ailleurs. Il faut deux unites pour sortir, d'ou le mutant ci-dessous.
-  kRayonPlusDeux,  // sur-estime le rayon de deux unites quadruplees : le
-                   // premier entier strictement au-dela du vrai rayon devient
-                   // admissible, et la fixture `tangence` le refute
+  // « ARRONDIR VERS LE HAUT D'UNE UNITE EST ABSORBE » : C'ETAIT FAUX, ET LE
+  // RE-AUDIT DONNE LE CONTRE-EXEMPLE.
+  //
+  // Mon raisonnement portait sur `R4`, alors que la comparaison porte sur
+  // `R4^2` : une unite de trop sur le rayon devient environ `2 R4` de trop sur
+  // son carre. Et les distances de grille ne sont pas entieres, ce sont des
+  // racines — la stricte n'absorbe donc rien.
+  //
+  // Contre-fixture `rayon-plus-un`, q3, `a=(0,0,0)`, `b=(7,0,0)`, `z=(3,2,0)` :
+  // le rayon quadruple vrai vaut `14/sqrt(3) = 8,0829`, donc `R4^2` vrai vaut
+  // `65,33`. Le point est a `|4z - M|^2 = 68`. Le plancher `8` donne `64` et
+  // refuse — correct ; `+1 = 9` donne `81` et ACCEPTE, alors que le fuseau exact
+  // refute avec `4H^2 = 256 < 260 = E T`.
+  kRayonPlusUn,    // sur-estime le rayon d'UNE unite quadruplee : suffisant
+  kRayonPlusDeux,  // deux unites : la fixture `tangence` le refute aussi
   kInclusLarge,    // « boite dans la boule » avec <= sur le carre du rayon
                    // alors que le fuseau est OUVERT : la frontiere entre
   // « BOITE HORS DE LA BOULE » AVEC `>=` N'EST PAS UN MUTANT NON PLUS, ET
@@ -176,6 +181,7 @@ inline const char* ball_mutant_name(BallMutant m) {
     case BallMutant::kKappaQ3Sur: return "boule-kappa3-sur";
     case BallMutant::kKappaQ4Sur: return "boule-kappa4-sur";
     case BallMutant::kOublieDerive: return "boule-oublie-derive";
+    case BallMutant::kRayonPlusUn: return "boule-rayon-plus-un";
     case BallMutant::kRayonPlusDeux: return "boule-rayon-plus-deux";
     case BallMutant::kInclusLarge: return "boule-inclus-large";
     case BallMutant::kDisjointCentre: return "boule-disjoint-centre";
@@ -317,6 +323,7 @@ MHGP_HD inline i64 core_ball_radius4_dec(i64 d2, i64 rA2, i64 rB2, int q,
   const i128 prod = (i128)k.num * (i128)L2;
   i64 terme = (i64)(prod / k.den);  // plancher : minore encore, donc sur
   // MUTANT : deux unites suffisent a franchir le vrai rayon, une seule non.
+  if (mu == BallMutant::kRayonPlusUn) terme += 1;
   if (mu == BallMutant::kRayonPlusDeux) terme += 2;
   if (mu == BallMutant::kOublieDerive) return terme;  // MUTANT : derive ignoree
   return terme - S2;

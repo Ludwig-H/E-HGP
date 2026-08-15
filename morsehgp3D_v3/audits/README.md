@@ -28,6 +28,15 @@ ancienne phrase imposant le rejet global des positions dupliquées est périmée
 
 - [`AUDIT_ETAT_COURANT.md`](AUDIT_ETAT_COURANT.md) : unique verdict mutable,
   pin, worktree, tests et blocages.
+- [`AUDIT_REAUDIT_DUAL_TREE_COEUR_BOULE_SEPARATION_EB1B52A_20260815.md`](AUDIT_REAUDIT_DUAL_TREE_COEUR_BOULE_SEPARATION_EB1B52A_20260815.md) :
+  **verdict live**. Aucune nouvelle fausse fermeture sur les chemins nominaux ;
+  la garde de signe, la borne couplée et la conservation dual-tree sont reçues.
+  Deux conclusions quantitatives ne le sont pas : le gain dual-tree `2,2-3,0x`
+  comparait une baseline non fusionnée — face à une baseline elle aussi
+  multi-lane, le dual-tree coûte `+0,22` à `+30 %` — et `99,052 %` du facteur
+  `6,4` attribué à `s=8` vient de la masse hors `cap-cellule`. Il corrige aussi
+  ma normalisation de variance, montre que l'invariant `--vrai-vivant` est
+  circulaire, et réfute par contre-exemple mon « non-mutant » de l'arrondi `+1`.
 - [`AUDIT_REAUDIT_PREFILTRE_COMBINE_COEUR_BOULE_41DFD2C_20260815.md`](AUDIT_REAUDIT_PREFILTRE_COMBINE_COEUR_BOULE_41DFD2C_20260815.md) :
   verdict live du préfiltre au `66b4f0c`. Il reçoit la réparation q2,
   Corner64 et la primitive ouverte du cœur-boule dans leur périmètre, corrige la convention de

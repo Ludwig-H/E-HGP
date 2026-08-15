@@ -186,17 +186,19 @@ Quatre choses adoptées, et autant de réfutations gravées.
 | --- | --- | --- |
 | `corner64` au cœur | **adopté** | résiduel q4 `-38` à `-46 %`, temps `+18 %` |
 | autorité à 8 coins pour `h_a` | **adopté** | `ha_somme +5` à `+7 %`, temps `+2 %` |
-| dual-tree pour `h_a` | **adopté** | mêmes valeurs, `2,2` à `3,0x` moins d'évaluations |
+| fusion des trois lanes | **adopté** | un seul parcours des coins décide q2/q3/q4 |
+| dual-tree pour `h_a` | reçu comme **transformation sémantique**, pas comme optimisation | mêmes valeurs, mais `+0,22` à `+30 %` d'évaluations contre une baseline elle aussi fusionnée |
 | borne couplée du cœur | **adopté** | `+4` à `+21 %` de témoins, une soustraction |
 | boule d'apex pour `h_a` | réfuté par la mesure | `-11` points de fermeture, plus lent |
 | cœur-boule `ALL` | dominé par `corner64` | fermeture identique, plus lent |
 | boule extérieure `NONE` | dominée par `h_any_upper` | **zéro** coupe nette |
 | sphère des points | marge quasi nulle | `rayon serré / rayon AABB = 0,96` |
 
-Et un fait d'échelle qui prime sur tout le reste : **l'arbitrage de séparation
-n'est pas invariant**. Sur `terrain`, `s=8` retire `17,5 %` du résiduel à
-`n=8 000` mais `84,5 %` à `n=32 000`. Les certificats se resserrent à
-séparation donnée ; ils ne compensent pas une séparation insuffisante.
+Et un fait d'échelle, corrigé : **l'arbitrage de séparation est presque
+invariant** une fois le cap neutralisé. Sur `terrain`, `s=8` retire `17,503 %`
+du résiduel à `n=8 000` et `17,238 %` de la masse **jugée** à `n=32 000` ; le
+facteur `6,4` que j'avais publié venait à `99,052 %` de la masse hors
+`cap-cellule=512`, pas des certificats.
 
 ### `h_a` par boule d'apex : verte à `s=6`, fausse à `s=1`, non adoptée
 
