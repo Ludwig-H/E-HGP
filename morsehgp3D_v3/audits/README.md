@@ -73,6 +73,15 @@ ancienne phrase imposant le rejet global des positions dupliquées est périmée
   filtre ferme à tort (`212` et `1 525` fausses morts en régime tendu), la
   diagonale lue au niveau nœud annule tout (`ha_somme` à zéro), et sans cutoff
   la méthode coûte `2` à `4` fois plus que ce qu'elle remplace.
+- [`NOTE_CLAUDE_ECART_AU_VRAI_VIVANT_20260815.md`](NOTE_CLAUDE_ECART_AU_VRAI_VIVANT_20260815.md) :
+  la mesure qui borne tout le reste. Le préfiltre étant fail-open, le vrai
+  vivant se compte exactement en décidant les seules survivantes, sans `O(n^3)`.
+  Le mou est une fonction de (famille, séparation) et **pas** de `n` : `1,33` sur
+  `terrain` et `uniform` à `s=8`, `2,6` à `2,8` sur `eight_clusters`. Aucun
+  resserrement de certificat ne peut donc rendre plus que trente-trois pour cent
+  sur les deux premières familles. Un estimateur par échantillonnage y est
+  retiré, sa variance valant trois à douze écarts-types binomiaux sans
+  explication.
 - [`NOTE_CLAUDE_ARBITRAGE_SEPARATION_20260815.md`](NOTE_CLAUDE_ARBITRAGE_SEPARATION_20260815.md) :
   l'arbitrage `s=6` contre `s=8` n'est pas invariant d'échelle. Sur `terrain`,
   `s=8` retire `17,5 %` du résiduel à `n=8 000` mais `84,5 %` — un facteur
