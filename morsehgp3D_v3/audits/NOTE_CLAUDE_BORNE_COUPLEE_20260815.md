@@ -138,5 +138,5 @@ Q30 ; le mode `--no-bulk` ; la porte `direct == tree` pour l'apex.
 
 La campagne n'est pas régénérée et le reçu garde son bandeau q2 invalide.
 
-Suite complète : `832/833`. Le seul échec est `mhgp3v_arith_selftest`, faute
+Suite complète : `831/832`. Le seul échec est `mhgp3v_arith_selftest`, faute
 d'en-têtes GMP dans ce conteneur.
