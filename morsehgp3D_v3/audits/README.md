@@ -28,6 +28,14 @@ ancienne phrase imposant le rejet global des positions dupliquées est périmée
 
 - [`AUDIT_ETAT_COURANT.md`](AUDIT_ETAT_COURANT.md) : unique verdict mutable,
   pin, worktree, tests et blocages.
+- [`AUDIT_PREFILTRE_COMBINE_HMAX_Q2_Q3_Q4_20260815.md`](AUDIT_PREFILTRE_COMBINE_HMAX_Q2_Q3_Q4_20260815.md) :
+  contre-audit mathématique et logiciel du préfiltre
+  `h_coeur+h_a+h_b`. Il reçoit les fuseaux, les seuils et les trois ensembles
+  universels maximaux sous les pools imposés, mais grave le double crédit q2
+  qui ferme des ancres vivantes et invalide les chiffres q2 du reçu. Il réfute
+  aussi les claims de maximalité q3/q4 par quatre boîtes u16 et renvoie aux
+  autorités existantes `all_lane_of_box` et `corner512_all_lane` à
+  8/64/512 coins.
 - [`NOTE_SOLUTION_CONTRAT_SOURCE_AIGUE_20260814.md`](NOTE_SOLUTION_CONTRAT_SOURCE_AIGUE_20260814.md) :
   autorité contractuelle mathématique, sans réception logicielle : réponse
   négative à Q14, théorème exact des fuseaux `W2/W3/W4` et contrat de

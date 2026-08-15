@@ -8,6 +8,34 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
+> [!CAUTION]
+> **Blocage P0 du préfiltre combiné au sujet `4cd1f82`.**
+> `combined_prefilter_probe.cpp` crédite en bloc un nœud q2, puis redescend ce
+> même nœud pour q3/q4 et recrédite ses feuilles en q2. Le replay borné trouve
+> une ancre annoncée morte avec `hcore=10` alors que sa boule diamétrale ne
+> contient que cinq PointId strictement intérieurs. À `n=160`, au moins
+> `573/353/713` ancres q2 vivantes sont ainsi fermées à tort sur
+> `uniform/eight_clusters/terrain`. `recouvrements=0` est vacuaire : le champ
+> n'est jamais alimenté, et le juge ne reconstruit pas la décision
+> `hcore+h_a+h_b`. Les colonnes q2 du reçu
+> `prefiltre_combine_20260815` sont invalides.
+>
+> Le théorème abstrait survit : les trois intersections universelles maximales,
+> restreintes respectivement à `X\(A union B)`, `A` et `B`, sont disjointes par
+> PointId et leur somme au seuil `s_max-q+1` est sûre. Mais les compteurs q3/q4
+> ne sont pas « maximaux » : `xi_max_over_box` décorrèle les composantes de
+> `Xi`, puis le code décorrèle `Hmin` de `Ximax`. Il reste fail-open sur ces deux
+> lanes, tout en rejetant de vrais sites universels. Les autorités exactes sur
+> l'enveloppe existent déjà : `all_lane_of_box` à 8 coins et
+> `corner512_all_lane` à 64/512 coins. Un masque de lanes par frame interdit le
+> recrédit des descendants.
+>
+> Preuves, contre-exemples u16, ensembles maximaux, coût réel
+> `O(|A|^2+|B|^2)` avant histogramme et douze portes d'acceptation :
+> [`AUDIT_PREFILTRE_COMBINE_HMAX_Q2_Q3_Q4_20260815.md`](AUDIT_PREFILTRE_COMBINE_HMAX_Q2_Q3_Q4_20260815.md).
+> Ce bloc supersède uniquement les claims de sûreté/maximalité et les mesures
+> q2 du préfiltre combiné plus bas ; il ne reçoit aucune source ni aucun SLO.
+
 > **Verdict live au `HEAD=c03c0ee3b48b147ebb5d8b4e8c1651f42c1c2db6`.**
 > Le pin noyau `a369452` porte `Q4SeedAxisTopR4`, son probe, 39 CTests déclarés,
 > les vrais IDs de census, la capacité 163, les comptes requis et les fates de
