@@ -270,7 +270,7 @@ int fixture_seuil(BallMutant mu) {
   const i64 rA2 = 1000, rB2 = 1000;
   long long ok = 0;
   for (const Seuil& s : kSeuils) {
-    const i64 R4 = core_ball_radius4(s.L2 + rA2 + rB2, rA2, rB2, s.q, mu);
+    const i64 R4 = mhgp3v::corebl::core_ball_radius4_dec(s.L2 + rA2 + rB2, rA2, rB2, s.q, mu);
     const bool positif = R4 > 0;
     if (positif != s.positif) {
       std::fprintf(stderr, "PLANCHER : %s — R4=%lld, attendu %s\n", s.quoi,
@@ -343,6 +343,132 @@ int fixture_apex(BallMutant mu, i64 bx, i64 alo, i64 ahi) {
   }
   if (mu == BallMutant::kNone && certifies == 0) {
     std::fprintf(stderr, "PLANCHER : la boule d'apex ne certifie rien, la fixture est vacue\n");
+    return 3;
+  }
+  return 0;
+}
+
+// ---------------------------------------------------------------------------
+// FIXTURE `seuil-couple` : LE SEUIL DE LA BORNE COUPLEE.
+//
+// `R_coup > 0` equivaut a `2 kappa d2 > sqrt(2(4 kappa^2+1) S)`. Au cas
+// equilibre `rA2 = rB2 = 1000`, donc `S = 2 x 1000^2`, cela donne
+// `d2 > 1000 sqrt(4 kappa^2+1)/kappa`, soit avec `d2 = L2 + 2000` :
+//
+//   q2 : L2 > 828,43     q3 : L2 > 2000,00     q4 : L2 > 2350,66
+//
+// L'implementation, elle, bascule a `830 / 2003 / 2355` : les arrondis diriges
+// — plancher sur le terme positif, plafond sur la racine soustraite — coutent
+// `1,6`, `3,0` et `4,3` unites quadruplees, soit deux dixiemes de pour cent. La
+// fixture grave les bascules REELLES, pas le seuil continu : c'est le code
+// qu'elle juge.
+//
+// A comparer aux seuils de `R_dec`, que la fixture `seuil` continue de graver
+// sur `core_ball_radius4_dec` : `2001 / 3466 / 3866`. La borne couplee nait
+// donc a `41 %` (q3) et `39 %` (q4) de la separation qu'exige la decorrelee, et
+// c'est tout son interet. La derniere ligne le materialise : a `L2 = 3465`, q4
+// a deja un cœur couple alors que `R_dec` n'en aura pas avant `3866`.
+// ---------------------------------------------------------------------------
+const Seuil kSeuilsCouple[8] = {
+    {829, 2, false, "L2=829 q2 : le continu dit 828,43, l'entier pas encore"},
+    {830, 2, true,  "L2=830 q2 : bascule reelle"},
+    {2002, 3, false, "L2=2002 q3 : le continu dit 2000, l'entier pas encore"},
+    {2003, 3, true,  "L2=2003 q3 : bascule reelle"},
+    {2354, 4, false, "L2=2354 q4 : le continu dit 2350,66"},
+    {2355, 4, true,  "L2=2355 q4 : bascule reelle"},
+    {2354, 3, true,  "L2=2354 q3 deja au-dessus"},
+    {3465, 4, true,  "L2=3465 q4 couple, quand R_dec ne naitra qu'a 3866"},
+};
+
+int fixture_seuil_couple(BallMutant mu) {
+  const i64 rA2 = 1000, rB2 = 1000;
+  long long ok = 0;
+  for (const Seuil& s : kSeuilsCouple) {
+    const i64 R4 = mhgp3v::corebl::core_ball_radius4_couple(s.L2 + rA2 + rB2, rA2, rB2,
+                                                            s.q, mu);
+    const bool positif = R4 > 0;
+    if (positif != s.positif) {
+      std::fprintf(stderr, "PLANCHER : %s — R4=%lld, attendu %s\n", s.quoi,
+                   (long long)R4, s.positif ? "positif" : "vide");
+      return 3;
+    }
+    ++ok;
+  }
+  // LA BORNE COUPLEE DOIT DOMINER LA DECORRELEE dans le regime equilibre. Sans
+  // ce plancher, une borne couplee identiquement nulle passerait la fixture.
+  const i64 dec = mhgp3v::corebl::core_ball_radius4_dec(6000 + 2000, rA2, rB2, 4, mu);
+  const i64 cou = mhgp3v::corebl::core_ball_radius4_couple(6000 + 2000, rA2, rB2, 4, mu);
+  std::printf("fixture seuil-couple verifies=%lld dec_q4=%lld coup_q4=%lld mutant=%s\n",
+              ok, (long long)dec, (long long)cou, ball_mutant_name(mu));
+  if (mu == BallMutant::kNone && cou <= dec) {
+    std::fprintf(stderr, "PLANCHER : la borne couplee (%lld) ne domine pas la"
+                 " decorrelee (%lld) au regime equilibre\n", (long long)cou, (long long)dec);
+    return 3;
+  }
+  return 0;
+}
+
+// ---------------------------------------------------------------------------
+// FIXTURE `couple-sature` : LA BORNE COUPLEE EST ATTEINTE, DONC INDEPASSABLE.
+//
+// Cauchy est une egalite quand `(|w|, |p|)` est proportionnel a `(2 kappa, 1)`.
+// On construit donc l'adversaire exact en q2, ou `2 kappa = 1` rend
+// l'arithmetique entiere :
+//
+//   c_A = (2000,5000,5000)   c_B = (8000,5000,5000)   d = 6000
+//   u = (700,700,0)   v = (-700,700,0)
+//   donc w = (-700,0,0) ANTIPARALLELE a l'axe, p = (0,700,0) ORTHOGONALE,
+//   et |w| = |p| = 700, rapport 1 = 2 kappa_2.
+//
+//   a = (2700,5700,5000)   b = (7300,5700,5000)   |ab| = 4600
+//   m = (5000,5000,5000)   m_ab = (5000,5700,5000)
+//
+// La boule inscrite du fuseau q2 a pour rayon `kappa_2 |ab| = 2300` autour de
+// `m_ab`. Le point de `B(m,R)` le plus eloigne de `m_ab` est a distance
+// `R + 700`. La contrainte `R + 700 <= 2300` donne `R <= 1600`, et
+// `R_coup = kappa d - rho sqrt(4 kappa^2+1) = 3000 - 700 sqrt 2 . sqrt 2 = 1600`
+// EXACTEMENT. La borne est donc atteinte, pas approchee.
+//
+// Le point critique `z = (5000, 3400, 5000)` est a distance `1600` de `m` et
+// `2300` de `m_ab` : il est SUR la sphere diametrale, donc `H = 0`, donc hors
+// du fuseau ouvert. Tout rayon strictement superieur a `1600` le certifie a
+// tort. L'implementation rend `1599,75` — conservative d'un quart d'unite — et
+// le refuse ; les deux mutants de la borne couplee l'acceptent.
+// ---------------------------------------------------------------------------
+int fixture_couple_sature(BallMutant mu) {
+  const P3 a{2700, 5700, 5000}, b{7300, 5700, 5000};
+  const i64 c2a[3] = {4000, 10000, 10000}, c2b[3] = {16000, 10000, 10000};
+  const i64 M[3] = {c2a[0] + c2b[0], c2a[1] + c2b[1], c2a[2] + c2b[2]};
+  const i64 d2 = 12000;  // |c2b - c2a|, exact
+  // Rayon double majorant de chaque nœud : `rho = 700 sqrt 2 = 989,9495`.
+  const i64 rA2 = 1980, rB2 = 1980;
+
+  long long faux = 0, refuses = 0, acceptes = 0;
+  // Le point critique, et son voisin immediat a l'interieur.
+  const P3 zs[2] = {P3{5000, 3400, 5000}, P3{5000, 3401, 5000}};
+  const i64 R4 = mhgp3v::corebl::core_ball_radius4_couple(d2, rA2, rB2, 2, mu);
+  for (int i = 0; i < 2; ++i) {
+    const i64 p3[3] = {zs[i].x, zs[i].y, zs[i].z};
+    const bool boule = mhgp3v::corebl::ball_contains_point(M, R4, p3, mu);
+    const bool juge = dans_fuseau(a, b, zs[i], 2);
+    if (boule) ++acceptes; else ++refuses;
+    if (boule && !juge) ++faux;
+    std::printf("couple-sature z=(%lld,%lld,%lld) R4=%lld boule=%d fuseau=%d\n",
+                (long long)zs[i].x, (long long)zs[i].y, (long long)zs[i].z,
+                (long long)R4, (int)boule, (int)juge);
+  }
+  std::printf("fixture couple-sature faux=%lld acceptes=%lld refuses=%lld mutant=%s\n",
+              faux, acceptes, refuses, ball_mutant_name(mu));
+  if (faux > 0) {
+    std::fprintf(stderr, "DESACCORD : la borne couplee certifie %lld point(s) hors du"
+                 " fuseau — le rayon depasse la saturation\n", faux);
+    return 1;
+  }
+  // NON-VACUITE : le voisin interieur DOIT etre certifie, sinon la fixture ne
+  // prouverait que la timidite de la borne.
+  if (mu == BallMutant::kNone && acceptes != 1) {
+    std::fprintf(stderr, "PLANCHER : %lld accepte(s) au lieu de 1 — la borne est"
+                 " soit trop timide soit trop large\n", acceptes);
     return 3;
   }
   return 0;
@@ -430,7 +556,7 @@ struct Compte {
 
 int mode_nuage(const std::string& family, int n, i64 coord, long long seed, int sep,
                BallMutant mu, long long min_coeurs, long long min_bulk,
-               long long min_elagues) {
+               long long min_elagues, bool rayon_dec) {
   if (n < 4 || n > 4000) refuse("le mode nuage est borne a 4000 points");
   mhgp3v::CloudFamily fam;
   if (family == "uniform") fam = mhgp3v::CloudFamily::kUniform;
@@ -533,7 +659,10 @@ int mode_nuage(const std::string& family, int n, i64 coord, long long seed, int 
     const i64 M[3] = {ca[0] + cb[0], ca[1] + cb[1], ca[2] + cb[2]};
 
     for (int q = 2; q <= 4; ++q) {
-      const i64 R4 = core_ball_radius4(d2, ra, rb, q, mu);
+      // ABLATION : `--rayon=dec` n'emploie que la borne decorrelee, pour
+      // chiffrer ce que la borne couplee apporte.
+      const i64 R4 = rayon_dec ? mhgp3v::corebl::core_ball_radius4_dec(d2, ra, rb, q, mu)
+                               : core_ball_radius4(d2, ra, rb, q, mu);
       if (R4 <= 0) continue;
       ++C.coeurs_non_vides[q - 2];
 
@@ -605,8 +734,9 @@ int mode_nuage(const std::string& family, int n, i64 coord, long long seed, int 
   std::printf("cadre phase=exploration_v3_hors_registre backend=cpu_reference "
               "profile=quantized_u16_input_only mode=diagnostic_counter_only "
               "public_status=not_claimed\n");
-  std::printf("nuage famille=%s n=%d coord=%d seed=%lld separation=%d mutant=%s\n",
-              family.c_str(), m, coord_used, seed, sep, ball_mutant_name(mu));
+  std::printf("nuage famille=%s n=%d coord=%d seed=%lld separation=%d mutant=%s rayon=%s\n",
+              family.c_str(), m, coord_used, seed, sep, ball_mutant_name(mu),
+              rayon_dec ? "dec" : "max");
   std::printf("rectangles=%lld visites=%lld bulk=%lld elagues=%lld verifies=%lld\n",
               C.rectangles, C.visites, C.bulk, C.elagues, C.verifies);
   for (int q = 0; q < 3; ++q)
@@ -652,6 +782,8 @@ BallMutant mutant_de(const std::string& s) {
   if (s == "apex-longueur-double") return BallMutant::kApexLongueurDouble;
   if (s == "apex-coeff-echange") return BallMutant::kApexCoeffEchange;
   if (s == "apex-sans-garde") return BallMutant::kApexSansGarde;
+  if (s == "coup-sous-estime-c") return BallMutant::kCoupSousEstimeC;
+  if (s == "coup-plancher-racine") return BallMutant::kCoupPlancherRacine;
   refuse("mutant inconnu");
 }
 
@@ -684,6 +816,7 @@ int main(int argc, char** argv) {
   long long seed = 3, min_coeurs = 0, min_bulk = 0, min_elagues = 0;
   bool verbeux = false;
   i64 ax_bx = 0, ax_lo = 1000, ax_hi = 1100;
+  bool rayon_dec = false;
 
   for (int i = 1; i < argc; ++i) {
     const std::string a = argv[i];
@@ -702,6 +835,7 @@ int main(int argc, char** argv) {
     if (a.rfind("--apex-bx=", 0) == 0) { ax_bx = arg_borne(a.substr(10), "--apex-bx", 1, 65535); continue; }
     if (a.rfind("--apex-lo=", 0) == 0) { ax_lo = arg_borne(a.substr(10), "--apex-lo", 0, 65535); continue; }
     if (a.rfind("--apex-hi=", 0) == 0) { ax_hi = arg_borne(a.substr(10), "--apex-hi", 0, 65535); continue; }
+    if (a == "--rayon=dec") { rayon_dec = true; continue; }
     if (a == "--verbeux") { verbeux = true; continue; }
     refuse("argument inconnu");
   }
@@ -712,6 +846,9 @@ int main(int argc, char** argv) {
   if (fixture == "apex") return fixture_apex(mu, ax_bx ? ax_bx : 20000, ax_lo, ax_hi);
   if (fixture == "apex-serre") return fixture_apex(mu, ax_bx ? ax_bx : 1600, ax_lo, ax_hi);
   if (fixture == "apex-signe") return fixture_apex_signe(mu);
+  if (fixture == "seuil-couple") return fixture_seuil_couple(mu);
+  if (fixture == "couple-sature") return fixture_couple_sature(mu);
   if (!fixture.empty()) refuse("fixture inconnue");
-  return mode_nuage(family, n, coord, seed, sep, mu, min_coeurs, min_bulk, min_elagues);
+  return mode_nuage(family, n, coord, seed, sep, mu, min_coeurs, min_bulk, min_elagues,
+                    rayon_dec);
 }

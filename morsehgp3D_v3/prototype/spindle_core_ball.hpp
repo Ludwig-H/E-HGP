@@ -162,6 +162,12 @@ enum class BallMutant {
   kApexSansGarde,      // LE P0 DU RE-AUDIT : retire la garde de signe sur
                        // `gamma_q`. Le carre accepte alors une demi-ouverture
                        // NEGATIVE et certifie un faux temoin
+  // LES DEUX FAUTES DE LA BORNE COUPLEE.
+  kCoupSousEstimeC,    // rationnel SOUS `2(4 kappa^2+1)` : la penalite est
+                       // sous-estimee, le rayon deborde du fuseau
+  kCoupPlancherRacine, // plancher au lieu de plafond sur la racine SOUSTRAITE :
+                       // meme effet, d'une unite — et la borne etant SATUREE,
+                       // une unite suffit
 };
 
 inline const char* ball_mutant_name(BallMutant m) {
@@ -178,6 +184,8 @@ inline const char* ball_mutant_name(BallMutant m) {
     case BallMutant::kApexLongueurDouble: return "apex-longueur-double";
     case BallMutant::kApexCoeffEchange: return "apex-coeff-echange";
     case BallMutant::kApexSansGarde: return "apex-sans-garde";
+    case BallMutant::kCoupSousEstimeC: return "coup-sous-estime-c";
+    case BallMutant::kCoupPlancherRacine: return "coup-plancher-racine";
   }
   return "?";
 }
@@ -214,7 +222,93 @@ MHGP_HD inline Kappa2 deux_kappa(int q, BallMutant mu = BallMutant::kNone) {
 // `isqrt_floor` et `sphere_of` du probe. Les trois conservatismes vont dans le
 // meme sens.
 // ---------------------------------------------------------------------------
-MHGP_HD inline i64 core_ball_radius4(i64 d2, i64 rA2, i64 rB2, int q,
+// ---------------------------------------------------------------------------
+// RACINES ENTIERES DIRIGEES. `isqrt_ceil_i128` est le VRAI plafond — le plus
+// petit `t` avec `t^2 >= v` — et non `isqrt + 1` : sur un carre parfait, `+1`
+// rendrait un rejet strictement trop severe d'un cote et un credit trop
+// genereux de l'autre. Le re-audit signale exactement ce defaut au § 5.2 pour
+// `sphere_of`.
+// ---------------------------------------------------------------------------
+MHGP_HD inline i64 isqrt_floor_i128(i128 v) {
+  if (v <= 0) return 0;
+  i64 r = (i64)__builtin_sqrt((double)v);
+  while (r > 0 && (i128)r * r > v) --r;
+  while ((i128)(r + 1) * (r + 1) <= v) ++r;
+  return r;
+}
+
+MHGP_HD inline i64 isqrt_ceil_i128(i128 v) {
+  const i64 f = isqrt_floor_i128(v);
+  return ((i128)f * f == v) ? f : f + 1;
+}
+
+// ---------------------------------------------------------------------------
+// LA BORNE COUPLEE — section 3.3 du re-audit, et c'est un gain important.
+//
+// `R_dec` maximise SEPAREMENT le deplacement du milieu et la perte de longueur.
+// Or les deux sont lies par UNE SEULE contrainte. Avec `a = c_A + u`,
+// `b = c_B + v`, `p = (u+v)/2` et `w = (v-u)/2` :
+//
+//   |p|^2 + |w|^2 = (|u|^2 + |v|^2)/2 <= (r_A^2 + r_B^2)/2,
+//
+// identite exacte, sans hypothese d'orthogonalite. La penalite a majorer est
+// `2 kappa_q |w| + |p|`, et Cauchy sur `(2 kappa_q, 1).(|w|, |p|)` donne
+//
+//   R_coup,q = kappa_q d - sqrt((4 kappa_q^2 + 1)(r_A^2 + r_B^2)/2).
+//
+// LE GAIN. Au regime equilibre `r_A = r_B = rho` et `d >= (s+2) rho` :
+// `R_dec = rho(kappa s - 1)` mais `R_coup = rho(kappa(s+2) - sqrt(4 kappa^2+1))`.
+// A `s=6` en q4 : `0,553 rho` contre `0,944 rho`, soit `+71 %` sur le rayon et
+// un facteur cinq sur le volume du cœur. Aucune ne domine partout — `R_dec` est
+// meilleure sur les rectangles tres desequilibres — d'ou `max` des deux.
+//
+// LA BORNE EST SATUREE, donc tout arrondi du mauvais cote cree de VRAIS faux
+// credits ; ce n'est pas une marge theorique. En unites doublees, avec
+// `S = rA2^2 + rB2^2` :
+//
+//   R4_coup = 2 kappa_q d2 - sqrt(2(4 kappa_q^2 + 1) S),
+//
+// et le facteur sous la racine vaut EXACTEMENT `4` en q2, `8/3` en q3 et
+// `6 - 2 sqrt(3) = 2,5358983849` en q4. Il est SUR-approche (il est soustrait),
+// le terme positif `2 kappa_q d2` est SOUS-approche deux fois — plancher de
+// `d2`, rationnel sous `2 kappa_q`, puis plancher du produit — et la racine
+// soustraite est prise au VRAI plafond, `t` minimal avec `t^2 >= x`, jamais
+// `isqrt + 1`.
+//
+// Elle se garde toute seule : `(r_A+r_B)^2 <= 2(r_A^2+r_B^2)` et
+// `4 kappa^2 <= 4 kappa^2 + 1` donnent `R_coup <= 0` des que `d <= r_A + r_B`.
+// Aucun piege de signe comme celui de la boule d'apex.
+// ---------------------------------------------------------------------------
+struct Coup { i64 num, den; };  // rationnel SUR `2(4 kappa_q^2 + 1)`
+
+MHGP_HD inline Coup coup_facteur(int q, BallMutant mu = BallMutant::kNone) {
+  if (mu == BallMutant::kCoupSousEstimeC) {
+    // MUTANT : sous la vraie valeur, donc penalite sous-estimee.
+    if (q == 2) return Coup{39, 10};   // 3,9 < 4
+    if (q == 3) return Coup{26, 10};   // 2,6 < 2,6667
+    return Coup{25, 10};               // 2,5 < 2,5359
+  }
+  if (q == 2) return Coup{4, 1};       // exact
+  if (q == 3) return Coup{8, 3};       // exact
+  return Coup{2535899, 1000000};       // > 2,5358983849
+}
+
+MHGP_HD inline i64 core_ball_radius4_couple(i64 d2, i64 rA2, i64 rB2, int q,
+                                            BallMutant mu = BallMutant::kNone) {
+  if (d2 <= 0) return 0;
+  const Kappa2 k = deux_kappa(q, mu);
+  const i64 pos = (i64)(((i128)k.num * (i128)d2) / k.den);  // plancher : minore
+  const i128 S = (i128)rA2 * (i128)rA2 + (i128)rB2 * (i128)rB2;
+  const Coup c = coup_facteur(q, mu);
+  // Plafond de la division PUIS plafond de la racine : la penalite est majoree
+  // deux fois, donc le rayon minore deux fois.
+  const i128 rad = ((i128)c.num * S + (c.den - 1)) / c.den;
+  const i64 pen = (mu == BallMutant::kCoupPlancherRacine) ? isqrt_floor_i128(rad)
+                                                          : isqrt_ceil_i128(rad);
+  return pos - pen;
+}
+
+MHGP_HD inline i64 core_ball_radius4_dec(i64 d2, i64 rA2, i64 rB2, int q,
                                      BallMutant mu = BallMutant::kNone) {
   const i64 S2 = rA2 + rB2;
   const i64 L2 = d2 - S2;
@@ -226,6 +320,16 @@ MHGP_HD inline i64 core_ball_radius4(i64 d2, i64 rA2, i64 rB2, int q,
   if (mu == BallMutant::kRayonPlusDeux) terme += 2;
   if (mu == BallMutant::kOublieDerive) return terme;  // MUTANT : derive ignoree
   return terme - S2;
+}
+
+// LE RAYON PUBLIC : le meilleur des deux minorants. Aucun ne domine partout —
+// `R_dec` gagne sur les rectangles tres desequilibres, `R_coup` partout ailleurs
+// et largement. Les deux etant des minorants surs, leur max l'est aussi.
+MHGP_HD inline i64 core_ball_radius4(i64 d2, i64 rA2, i64 rB2, int q,
+                                     BallMutant mu = BallMutant::kNone) {
+  const i64 dec = core_ball_radius4_dec(d2, rA2, rB2, q, mu);
+  const i64 coup = core_ball_radius4_couple(d2, rA2, rB2, q, mu);
+  return coup > dec ? coup : dec;
 }
 
 // ---------------------------------------------------------------------------
@@ -359,19 +463,6 @@ MHGP_HD inline bool ball_contains_point(const i64 M[3], i64 R4, const i64 p[3],
 // `num <= 3U <= 4,8e11` sous 2,6e22. Tout tient dans `i128`, dont la borne est
 // 1,7e38 ; rien n'approche.
 // ===========================================================================
-MHGP_HD inline i64 isqrt_floor_i128(i128 v) {
-  if (v <= 0) return 0;
-  i64 r = (i64)__builtin_sqrt((double)v);
-  while (r > 0 && (i128)r * r > v) --r;
-  while ((i128)(r + 1) * (r + 1) <= v) ++r;
-  return r;
-}
-
-MHGP_HD inline i64 isqrt_ceil_i128(i128 v) {
-  const i64 f = isqrt_floor_i128(v);
-  return ((i128)f * f == v) ? f : f + 1;
-}
-
 // Rend `num` et `den` du carre du sinus de la demi-ouverture. `num <= 0`
 // signifie que le cone est degenere : `B` est trop proche ou trop gros pour que
 // la direction de `t` soit contrainte, et aucun temoin n'est certifiable.

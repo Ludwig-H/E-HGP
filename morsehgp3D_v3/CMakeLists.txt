@@ -5008,6 +5008,61 @@ mhgp3v_add_expected_code_test_for(mhgp3v_core_ball_probe
   --fixture=apex-signe --inject=apex-sans-garde)
 
 # ---------------------------------------------------------------------------
+# LA BORNE COUPLÉE — section 3.3 du ré-audit.
+#
+# `R_dec` maximise séparément le déplacement du milieu et la perte de longueur,
+# alors que les deux sont liés par UNE SEULE contrainte quadratique. La borne
+# couplée conserve cette corrélation, et elle est SATURÉE : tout arrondi du
+# mauvais côté crée de vrais faux crédits, ce n'est pas une marge théorique.
+#
+# `seuil-couple` grave les bascules RÉELLES de l'implémentation — `830 / 2003 /
+# 2355` en `L2` — contre `828,43 / 2000,00 / 2350,66` en continu : les arrondis
+# dirigés coûtent deux dixièmes de pour cent. À comparer aux seuils de `R_dec`,
+# `2001 / 3466 / 3866` : la couplée naît à `39 %` de la séparation qu'exige la
+# décorrélée.
+#
+# `couple-sature` construit l'adversaire exact où Cauchy est une égalité —
+# `w` antiparallèle à l'axe, `p` orthogonale, dans le rapport `(2 kappa, 1)` —
+# et vérifie que le point critique, exactement sur la sphère diamétrale donc
+# `H = 0`, est REFUSÉ. C'est la porte de sûreté : le mutant qui sous-estime le
+# facteur l'accepte et meurt au code 1.
+# ---------------------------------------------------------------------------
+add_test(NAME mhgp3v_core_ball_seuil_couple_code
+         COMMAND mhgp3v_core_ball_probe --fixture=seuil-couple)
+add_test(NAME mhgp3v_core_ball_seuil_couple
+         COMMAND mhgp3v_core_ball_probe --fixture=seuil-couple)
+set_tests_properties(mhgp3v_core_ball_seuil_couple PROPERTIES PASS_REGULAR_EXPRESSION
+  "fixture seuil-couple verifies=8 dec_q4=1105 coup_q4=1888")
+
+add_test(NAME mhgp3v_core_ball_couple_sature_code
+         COMMAND mhgp3v_core_ball_probe --fixture=couple-sature)
+add_test(NAME mhgp3v_core_ball_couple_sature
+         COMMAND mhgp3v_core_ball_probe --fixture=couple-sature)
+set_tests_properties(mhgp3v_core_ball_couple_sature PROPERTIES PASS_REGULAR_EXPRESSION
+  "fixture couple-sature faux=0 acceptes=1 refuses=1")
+
+mhgp3v_add_expected_code_test_for(mhgp3v_core_ball_probe
+  mhgp3v_core_ball_mutant_coup_c "hors du fuseau" 1
+  --fixture=couple-sature --inject=coup-sous-estime-c)
+mhgp3v_add_expected_code_test_for(mhgp3v_core_ball_probe
+  mhgp3v_core_ball_mutant_coup_racine "attendu vide" 3
+  --fixture=seuil-couple --inject=coup-plancher-racine)
+
+# L'ablation : la borne couplée doit trouver STRICTEMENT plus de témoins que la
+# décorrélée sur un vrai nuage, sans quoi elle ne servirait à rien. Et le mode
+# `--rayon=dec` reste sûr, ce qui interdit de le confondre avec une régression.
+add_test(NAME mhgp3v_core_ball_ablation_rayon_dec
+  COMMAND mhgp3v_core_ball_probe --points=400 --family=terrain --seed=3
+          --separation=6 --rayon=dec --min-coeurs=200 --min-bulk=50 --min-elagues=500)
+set_tests_properties(mhgp3v_core_ball_ablation_rayon_dec PROPERTIES
+  PASS_REGULAR_EXPRESSION "lane q4 coeurs_non_vides=[0-9]+ direct=50647 descente=50647 faux=0")
+add_test(NAME mhgp3v_core_ball_ablation_rayon_max
+  COMMAND mhgp3v_core_ball_probe --points=400 --family=terrain --seed=3
+          --separation=6 --min-coeurs=200 --min-bulk=50 --min-elagues=500)
+set_tests_properties(mhgp3v_core_ball_ablation_rayon_max PROPERTIES
+  PASS_REGULAR_EXPRESSION "lane q4 coeurs_non_vides=[0-9]+ direct=61454 descente=61454 faux=0")
+
+# ---------------------------------------------------------------------------
 # LE PROFIL u16 EST ANNONCÉ, DONC IMPOSÉ. Le ré-audit a trouvé que
 # `--coord=2147483647` était accepté, débordait sous UBSan et pouvait fermer à
 # tort ; que `--points=201 --oracle=1` lançait l'oracle hors de sa borne

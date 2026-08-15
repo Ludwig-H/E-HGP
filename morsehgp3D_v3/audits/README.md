@@ -73,6 +73,11 @@ ancienne phrase imposant le rejet global des positions dupliquées est périmée
   filtre ferme à tort (`212` et `1 525` fausses morts en régime tendu), la
   diagonale lue au niveau nœud annule tout (`ha_somme` à zéro), et sans cutoff
   la méthode coûte `2` à `4` fois plus que ce qu'elle remplace.
+- [`NOTE_CLAUDE_BORNE_COUPLEE_20260815.md`](NOTE_CLAUDE_BORNE_COUPLEE_20260815.md) :
+  la borne couplée du § 3.3 encodée, avec sa fixture de saturation. Elle naît à
+  `39 %` de la séparation qu'exige la décorrélée et trouve `4` à `21 %` de
+  témoins en plus ; l'écart étant en `O(r)` et non en `O(d)`, le gain s'estompe
+  quand la séparation dépasse le seuil.
 - [`NOTE_SOLUTION_CONTRAT_SOURCE_AIGUE_20260814.md`](NOTE_SOLUTION_CONTRAT_SOURCE_AIGUE_20260814.md) :
   autorité contractuelle mathématique, sans réception logicielle : réponse
   négative à Q14, théorème exact des fuseaux `W2/W3/W4` et contrat de
