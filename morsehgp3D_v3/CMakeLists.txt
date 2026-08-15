@@ -4466,3 +4466,117 @@ add_test(NAME mhgp3v_axis_device_hote_code
                  --max-seeds=20000)
 mhgp3v_add_expected_code_test_for(mhgp3v_axis_device
   mhgp3v_axis_device_refus_domaine "--points hors domaine" 2 --points=10)
+
+# ---------------------------------------------------------------------------
+# DOMINANCE 432 : LE PREMIER CERTIFICAT DONT LA FERMETURE CROIT AVEC `n`.
+#
+# Specification : audits/AUDIT_DEBLOCAGE_COLLECTIF_APRES_FENETRE_20260813.md
+# sections 2, 3 et 7 — premiere des trois voies mises en concurrence.
+#
+# Le groupe octaedrique ramene toute direction a la chambre canonique, et neuf
+# triangles de rayons entiers (3,i,j) la subdivisent : 48*9 = 432 sous-cones,
+# avec min cos^2(gamma) = 9/11 entre deux rayons d'un meme sous-cone. Pour un
+# couple (ancre, sous-cone), les huitieme, neuvieme et dixieme plus petites
+# HAUTEURS suffisent : toute cible dont la hauteur atteint le seuil est fermee
+# sans etre examinee individuellement. La decision porte sur un INTERVALLE de
+# hauteurs, pas sur une paire — c'est la difference exacte avec les six
+# ordonnances precedentes, qui partaient toutes de la paire.
+#
+# LE FACTEUR PUBLIE ETAIT TROP GROS DANS HUIT CAS SUR NEUF. Son trois vient de
+# ||v||^2 <= 3 tau(v)^2, qui est l'inegalite de la CHAMBRE, saturee seulement
+# sur la diagonale. Les sous-cones sont bien plus etroits, et le maximum de
+# ||v||^2/v_x^2 sur un triangle est atteint a un SOMMET. Les tests deviennent
+# `25 (9+i^2+j^2) tau(s)^2 <= 81 tau(d)^2` en q4 et `64 (...) <= 225 (...)` en
+# q3, avec une constante par sous-cone. Sur le sous-cone axial le seuil passe de
+# 3 a 1,843. Mesure a `n=8 000` : `uniform` ferme 25 fois plus, `eight_clusters`
+# et `terrain` 1,3 fois plus, sans un seul desaccord du juge.
+# ---------------------------------------------------------------------------
+add_executable(mhgp3v_directional_dominance_probe
+  prototype/directional_dominance_probe.cpp
+  prototype/spindle_cone_oracle.cpp)
+target_include_directories(mhgp3v_directional_dominance_probe PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(mhgp3v_directional_dominance_probe PRIVATE mhgp)
+target_compile_options(mhgp3v_directional_dominance_probe PRIVATE -Wall -Wextra -Werror)
+# LA PARTITION EST LA PREMIERE PORTE. Les 432 sous-cones doivent partitionner
+# les directions entieres, et surtout deux directions d'une meme cellule doivent
+# verifier cos^2(gamma) >= 9/11 : sans cette borne le cutoff radial est FAUX.
+# Le selftest l'exerce sur les 6 858 directions non nulles d'un cube 19^3, par
+# produits croises entiers, et exige que les 432 cellules soient non vides.
+add_test(NAME mhgp3v_dominance_selftest COMMAND mhgp3v_directional_dominance_probe --selftest)
+set_tests_properties(mhgp3v_dominance_selftest PROPERTIES
+  PASS_REGULAR_EXPRESSION "selftest accord=OUI")
+# LE JUGE EST ECHANTILLONNE, ET C'EST ASSUME. Le juge exhaustif est en O(n^3) :
+# il ne peut pas atteindre les tailles ou ce certificat commence a mordre — a
+# `n=200` il ne ferme rien du tout, faute de huit temoins dans une meme cellule
+# sur 432. L'echantillon tire les fermetures de PLUS PETITE MARGE, les seules ou
+# une faute peut se loger, et chacune est rejouee en O(n) par l'unite oracle
+# independante. UN ECHANTILLON NE PROUVE AUCUNE COMPLETUDE : il refute.
+#
+# LE CERTIFICAT DIRECT REMPLACE LA RELAXATION RADIALE, ET L'ABLATION MESURE LE
+# GAIN. Le cutoff tabule composait deux relaxations : `||s|| <= kappa tau(s)`
+# puis `r/D <= 3/5`. Le certificat direct emploie les deux rayons extremes de la
+# cellule et sa frontiere EST celle du spindle. Le seuil de hauteur descend de
+# pres de trois a `11/6` sur `U00` et a `3/2` sur `U22`. Mesure a `n=4 000`,
+# fermetures q4 dirigees, radiale contre directe : `uniform` 450 066 -> 2 036 954
+# (x4,53), `terrain` 7 700 953 -> 9 033 186 (x1,17), `multiecho` x1,11,
+# `eight_clusters` x1,01. Zero desaccord du juge echantillonne.
+add_test(NAME mhgp3v_dominance_uniform COMMAND mhgp3v_directional_dominance_probe
+         --points=2000 --family=uniform --seed=3 --judge-echantillon=800
+         --min-closed-q4=6000 --min-residuel=3000000 --min-cellules=300000)
+# ABLATION : la forme radiale tabulee, conservee pour que le gain de la table
+# directe soit mesurable et non affirme.
+add_test(NAME mhgp3v_dominance_ablation_radiale COMMAND mhgp3v_directional_dominance_probe
+         --points=2000 --family=uniform --seed=3 --ablation-radiale
+         --judge-echantillon=400 --min-closed-q4=6000 --min-residuel=3000000)
+add_test(NAME mhgp3v_dominance_clusters COMMAND mhgp3v_directional_dominance_probe
+         --points=2000 --family=eight_clusters --seed=3 --judge-echantillon=800
+         --min-closed-q4=8000 --min-residuel=3000000)
+add_test(NAME mhgp3v_dominance_terrain COMMAND mhgp3v_directional_dominance_probe
+         --points=2000 --family=terrain --seed=3 --judge-echantillon=800
+         --min-closed-q4=1000000 --min-residuel=2000000)
+add_test(NAME mhgp3v_dominance_multiecho COMMAND mhgp3v_directional_dominance_probe
+         --points=2000 --family=scanline_overlap_multiecho --seed=3 --judge-echantillon=800
+         --min-closed-q4=1000000 --min-residuel=2000000)
+# Juge EXHAUSTIF a petite taille : il ne ferme rien, mais il verifie que rien
+# n'est ferme a tort et que les identites de masse tiennent.
+add_test(NAME mhgp3v_dominance_juge_exhaustif COMMAND mhgp3v_directional_dominance_probe
+         --points=200 --family=terrain --seed=3 --judge)
+set_tests_properties(mhgp3v_dominance_juge_exhaustif PROPERTIES
+  PASS_REGULAR_EXPRESSION "accord=OUI")
+# MUTANTS ARMES.
+#
+# Aucune famille generique n'arme le mutant du SEUIL : la ou le cutoff ferme, la
+# paire possede en general bien plus que le seuil de temoins universels, et en
+# retirer un ne change aucun verdict. Le nuage grave `--cloud-seuil` place sept
+# temoins colineaires exactement — un de moins que la lane q4 n'en exige — et
+# rend la cellule sous-pleine pour la reference.
+mhgp3v_add_expected_code_test_for(mhgp3v_directional_dominance_probe
+  mhgp3v_dominance_mutant_seuil "MUTANT TUE" 4
+  --cloud-seuil --judge --inject=dom-h-moins-un)
+# LE DOMAINE `smax` EST DERIVE, PLUS FIGE. La CLI accepte `4 <= smax <= 34`
+# alors que le sujet employait `{10,9,8}`, qui ne vaut qu'a `smax=11` : a
+# `smax=34` le juge refute une fermeture que le sujet prononce. Le seuil vaut
+# desormais `h = smax+1-q`, et un `smax` exigeant plus que le tampon top-h
+# REFUSE au lieu de tronquer.
+mhgp3v_add_expected_code_test_for(mhgp3v_directional_dominance_probe
+  mhgp3v_dominance_reject_smax_hors_tampon "top-h superieur au tampon" 2
+  --points=200 --smax=34)
+# Refus contractuels.
+mhgp3v_add_expected_code_test_for(mhgp3v_directional_dominance_probe
+  mhgp3v_dominance_reject_mutant_sans_juge "un mutant sans juge ne prouve rien" 2
+  --points=200 --inject=dom-h-moins-un)
+mhgp3v_add_expected_code_test_for(mhgp3v_directional_dominance_probe
+  mhgp3v_dominance_reject_juge_non_borne "le juge ponctuel exhaustif est borne" 2
+  --points=1000 --judge)
+mhgp3v_add_expected_code_test_for(mhgp3v_directional_dominance_probe
+  mhgp3v_dominance_reject_smax "--smax hors du domaine d'enveloppe" 2
+  --points=200 --smax=9223372036854775807)
+mhgp3v_add_expected_code_test_for(mhgp3v_directional_dominance_probe
+  mhgp3v_dominance_reject_inconnu "argument inconnu" 2 --points=200 --turbo)
+# UN CERTIFICAT QUI FERME TOUT EST FAUX. Ce plancher porte sur ce qui RESTE.
+mhgp3v_add_expected_code_test_for(mhgp3v_directional_dominance_probe
+  mhgp3v_dominance_plancher_residuel "plancher de residuel q4" 3
+  --points=200 --family=terrain --seed=3 --min-residuel=100000000)
+mhgp3v_add_expected_code_test_for(mhgp3v_directional_dominance_probe
+  mhgp3v_dominance_plancher_ferme "plancher de fermeture q4" 3
+  --points=200 --family=uniform --seed=3 --min-closed-q4=1)

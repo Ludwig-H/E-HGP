@@ -15,8 +15,7 @@ avec leurs cibles et leurs cent quatre-vingt-douze CTests :
   et les deux profils de volume (`scale_profile`, `flats_scale_probe`) qui l'ont
   précisément fermé ;
 - **les cellules de centres** — `centre_cell_source.cpp`, `cell_credits`,
-  `cell_prune`, `directional_dominance`, leur juge et leurs deux scripts,
-  supersédés par `CKPairTape` ;
+  `cell_prune`, leur juge et leurs deux scripts, supersédés par `CKPairTape` ;
 - **le préfixe fini de voisins** comme autorité exhaustive (`prefix_index_gate`,
   `prefix_mass_probe`), interdit par le registre de la racine ;
 - **la génération locale certifiée par cône** (`certified_locality_probe`), faux
@@ -53,6 +52,7 @@ Contrat et preuves : [`../audits/NOTE_SOLUTION_CONTRAT_SOURCE_AIGUE_20260814.md`
 | **certificats de bloc** | `midball_block.hpp`, `corner8_ball.hpp`, `block_jung_dual.hpp`, `soc64_rect.hpp`, `spindle_cone.hpp` | prédicats `ALL` exacts ou suffisants ; deux sont exacts, aucun ne décide `NONE` |
 | **device** | `axis_device_*`, `anchor_source_kernel.cu`, `faceowner_device_*` | mêmes fonctions compilées pour deux cibles ; la parité est une propriété de construction, pas un accord à espérer |
 | **dimensionnement** | `lane_source_scale_probe.cpp`, `caps_admissible_probe.cpp` | mesure de l'objet (J0) |
+| **dominance 432** | `directional_dominance.hpp`, `directional_dominance_probe.cpp` | préfiltre d'ancre par sous-cône et hauteur — le seul certificat dont la fermeture **croît** avec `n` |
 | **oracles et juges** | `../oracle/*`, `q4_brute_oracle.cpp`, `anchored_catalogue.hpp` | arithmétique volontairement différente de la production |
 
 ## Ce qui reste, et qui porte encore une idée fermée
@@ -71,6 +71,38 @@ borné » : la tour de boules saturées (`saturated_fold*`, `hybrid_fold_validat
 `Gamma_k` depuis la définition du manuscrit — et `prefix_index.hpp`, dont
 `saturated_fold_hybrid.hpp` a encore besoin. Aucun n'est un chemin de
 production ; tous sont bornés et hors du produit.
+
+## Dominance directionnelle — rouverte le 15 août 2026
+
+`directional_dominance` avait été retiré avec les cellules de centres, au motif
+qu'il partageait leur cible de compilation. C'était une erreur de classement :
+ce n'est pas une pièce des cellules-centres mais un **préfiltre de paires**, et
+son prédicat n'a jamais été réfuté — seule la « gate à trois voies » qui le
+mettait en concurrence avec deux autres certificats l'a été, pour cause d'ELF,
+de cutoffs et d'univers différents.
+
+Le groupe octaédrique d'ordre 48 ramène toute direction à la chambre canonique ;
+neuf triangles de rayons entiers `(3,i,j)` la subdivisent, d'où `432` sous-cônes
+avec `min cos^2(gamma) = 9/11` entre deux rayons d'un même sous-cône. Si `d=b-a`
+et `s=z-a` sont dans le même sous-cône et que la hauteur `tau(d)` dépasse le
+seuil, `z` est un **témoin universel** de l'ancre `ab` prise comme arête
+maximale. Le prédicat est **exact et fail-open** : il ne ferme jamais à tort,
+mais il ne voit pas tous les témoins.
+
+Ce qui le distingue : pour un couple (ancre, sous-cône), les huitième, neuvième
+et dixième plus petites hauteurs suffisent — la décision porte sur un
+**intervalle de hauteurs**, jamais sur une paire. Et sa fermeture croît avec la
+taille du nuage, ce qu'aucun autre certificat du dossier ne fait :
+
+| famille | lane | `n=2 000` | `n=8 000` |
+| --- | --- | ---: | ---: |
+| `uniform` | q2 | `0,92 %` | `32,7 %` |
+| `uniform` | q4 | `3,13 %` | `41,6 %` |
+| `eight_clusters` | q2 | `0,09 %` | `20,0 %` |
+| `eight_clusters` | q4 | `0,60 %` | `27,1 %` |
+
+Ces chiffres sont un diagnostic `counter-only`, sans reçu épinglé ni pente à
+trois points. Ils ne qualifient rien ; ils justifient de rouvrir la piste.
 
 ## Réfutations gravées dans le code
 
