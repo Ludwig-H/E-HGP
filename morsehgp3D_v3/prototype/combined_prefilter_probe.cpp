@@ -85,9 +85,29 @@
 // Il ne produit AUCUN support, ne calcule aucun circumcentre, ne decide aucun
 // rang et ne qualifie aucun SLO. C'est un compteur.
 //
-// Un rectangle dont une extremite depasse `--cap-cellule` n'est pas decide :
-// toutes ses paires sont comptees SURVIVANTES et le rectangle est publie dans
-// `non_decides`. La mesure majore donc toujours le residuel.
+// LE CAP DE CELLULE, ET CE QU'IL FAUSSAIT. `h_a` et `h_b` se calculent par
+// auto-jointure `O(|A|^2)`, d'ou un cap. Deux strategies :
+//
+//   `--cap=scission` (DEFAUT) : un rectangle trop gros est RAFFINE — on
+//        redescend dans l'arbre jusqu'a ce que les deux extremites tiennent
+//        sous le cap. Le recouvrement est preserve, chaque sous-rectangle est
+//        re-teste pour la separation, et la recursion s'arrete au pire sur deux
+//        feuilles, qui sont des points. `masse_non_decide` vaut donc ZERO par
+//        construction, et la mesure ne majore plus le residuel.
+//   `--cap=refus` : l'ancienne strategie, conservee pour rejouer les recus
+//        anterieurs. Le rectangle n'est pas decide, toutes ses paires comptent
+//        SURVIVANTES, et le rectangle est publie dans `non_decides`.
+//
+// Pourquoi ce n'est pas un detail : a `terrain, n=32000, s=8`, cinquante-deux
+// rectangles capes sur 5,6 millions portaient SOIXANTE-QUINZE POUR CENT du
+// residuel, et `99,052 %` du gain que j'avais attribue a `s=8` venait de la
+// masse hors cap, pas des certificats.
+//
+// La separation N'EST PAS monotone sous raffinement, parce que la sphere
+// circonscrite a une AABB ne l'est pas : la boite `[0,10]^2 x {0}` est incluse
+// dans `[0,10]^3`, mais sa sphere (`rayon 5 sqrt(2)`, centre a `(5,5,0)`) sort
+// de celle du parent (`rayon 5 sqrt(3)`, centre a `(5,5,5)`). Chaque
+// sous-rectangle est donc RE-TESTE, jamais herite.
 //
 // CODES DE SORTIE : 1 desaccord du juge, 2 campagne refusee avant calcul,
 // 3 plancher ou invariant viole, 4 mutant tue.
@@ -780,7 +800,8 @@ struct Ledger {
   long long vivant_paires = 0;    // paires effectivement balayees
   long long vivant_travail = 0;   // VISITES de `z`, unite comparable entre modes
   long long vivant_evals = 0;     // EVALUATIONS du predicat `(e,t)`, par mode
-  long long vivant_degenerees = 0;  // paires `D = 0`, exclues de `V_q`
+  long long vivant_degenerees = 0;    // paires `D = 0` rencontrees, tous lanes
+  long long vivant_degen_lane[3] = {0, 0, 0};  // et par lane, pour corriger `S_q`
 };
 
 struct Rect {
@@ -791,6 +812,8 @@ struct Rect {
 
 int main(int argc, char** argv) {
   int n = 8000, smax = 11, sep = 8, cap = 512, judge = 0, min_rect = 0;
+  bool cap_scission = true;     // raffiner plutot que refuser : voir l'en-tete
+  bool refuse_doublons = false; // positions dupliquees : refus explicite
   long long seed = 3, coord = 0;
   CloudFamily family = CloudFamily::kUniform;
   Mutant mutant = Mutant::kNone;
@@ -850,6 +873,9 @@ int main(int argc, char** argv) {
     if (eat("--smax", &tmp)) { borne("--smax", 3, 32); smax = (int)tmp; continue; }
     if (eat("--separation", &tmp)) { borne("--separation", 1, 64); sep = (int)tmp; continue; }
     if (eat("--cap-cellule", &tmp)) { borne("--cap-cellule", 1, 1000000); cap = (int)tmp; continue; }
+    if (a == "--refuse-doublons") { refuse_doublons = true; continue; }
+    if (a == "--cap=scission") { cap_scission = true; continue; }
+    if (a == "--cap=refus") { cap_scission = false; continue; }
     if (eat("--seed", &seed)) continue;
     // PROFIL u16, ANNONCE DONC IMPOSE. Le re-audit a trouve qu'un
     // `--coord=2147483647` etait accepte, debordait sous UBSan et pouvait
@@ -888,9 +914,19 @@ int main(int argc, char** argv) {
     }
     if (a.rfind("--family=", 0) == 0) {
       const std::string f = a.substr(9);
+      // LES TROIS FAMILLES QUE J'AVAIS OMISES. Le generateur les produit depuis
+      // toujours ; c'est ce probe qui n'en acceptait que trois, et l'audit
+      // positif du `00cf78c` a raison de dire que mes rampes ne prouvaient donc
+      // rien sur les balayages ni sur la contre-famille. `two_lines` est
+      // decisive : elle porte une masse universelle QUADRATIQUE avec ZERO
+      // porteur aigu q3/q4, donc elle refute toute phrase du genre « le
+      // `W`-vivant ne devient pas quadratique ».
       if (f == "uniform") family = CloudFamily::kUniform;
       else if (f == "eight_clusters") family = CloudFamily::kEightClusters;
       else if (f == "terrain") family = CloudFamily::kTerrain;
+      else if (f == "scanline_single_pass") family = CloudFamily::kScanlineSinglePass;
+      else if (f == "scanline_overlap_multiecho") family = CloudFamily::kScanlineOverlapMultiecho;
+      else if (f == "two_lines") family = CloudFamily::kTwoLines;
       else { std::fprintf(stderr, "REFUS : famille inconnue %s\n", f.c_str()); return 2; }
       continue;
     }
@@ -1015,7 +1051,18 @@ int main(int argc, char** argv) {
     while (!stack.empty()) {
       const Rect r = stack.back();
       stack.pop_back();
-      if (separated(h_sphere(r.u), h_sphere(r.v), sep)) { rects.push_back(r); continue; }
+      // LE CAP EST UNE CONDITION D'ACCEPTATION, PAS UN REJET A POSTERIORI.
+      // En mode `scission`, un rectangle separe mais trop gros continue de se
+      // raffiner : le recouvrement est le meme, les sous-rectangles sont
+      // re-testes pour la separation, et l'arret sur deux feuilles borne la
+      // recursion — une feuille est un point, donc toujours sous le cap.
+      const bool sous_cap = cap_scission
+                                ? (h_pop(r.u) <= cap && h_pop(r.v) <= cap)
+                                : true;
+      if (sous_cap && separated(h_sphere(r.u), h_sphere(r.v), sep)) {
+        rects.push_back(r);
+        continue;
+      }
       const bool u_int = !h_leaf(r.u), v_int = !h_leaf(r.v);
       if (!u_int && !v_int) { rects.push_back(r); continue; }  // deux feuilles
       const bool split_u = u_int && (!v_int || h_pop(r.u) >= h_pop(r.v));
@@ -1102,6 +1149,15 @@ int main(int argc, char** argv) {
     if (na > L.cellules_max) L.cellules_max = na;
     if (nb > L.cellules_max) L.cellules_max = nb;
     if (na > cap || nb > cap) {
+      // En mode `scission`, la construction garantit `na, nb <= cap`. Y arriver
+      // signifierait que la condition d'acceptation et ce test divergent : ce
+      // n'est pas un rectangle a compter, c'est un invariant casse.
+      if (cap_scission) {
+        std::fprintf(stderr,
+                     "PLANCHER : rectangle %dx%d hors cap=%d en mode scission\n",
+                     na, nb, cap);
+        return 3;
+      }
       ++L.non_decides;
       L.masse_non_decide += (long long)na * nb;
       for (int q = 0; q < 3; ++q) L.survivantes[q] += (long long)na * nb;
@@ -1630,8 +1686,14 @@ int main(int argc, char** argv) {
           if (masque == 0) continue;  // paire fermee sur les trois lanes
           const P3& b = sorted_pts[bi];
           if (a.x == b.x && a.y == b.y && a.z == b.z) {
+            // `D = 0` : hors du domaine de `V_q`. Mais la paire EST comptee
+            // dans `S_q`, qui indexe des paires d'identifiants. La retenir par
+            // lane est le seul moyen de rendre le mou comparable : sinon le
+            // numerateur compte des paires que le denominateur exclut.
             ++L.vivant_degenerees;
-            continue;  // `D = 0` : hors du domaine de `V_q`
+            for (int q = 0; q < 3; ++q)
+              if (masque >> q & 1) ++L.vivant_degen_lane[q];
+            continue;
           }
           ++L.vivant_paires;
           int c3[3] = {0, 0, 0};
@@ -1965,9 +2027,50 @@ int main(int argc, char** argv) {
               mutant_name(mutant));
   std::printf("seuils h_q2=%d h_q3=%d h_q4=%d ha_mode=%s coeur_mode=%s\n", h_q[0], h_q[1],
               h_q[2], ha_fusion ? "fusion" : (ha_dual ? "dualtree" : (ha_boule ? "boule" : (ha_corner8 ? "corner8" : "jointure"))), core512 ? "corner64" : "bornes");
-  std::printf("wspd rectangles=%lld non_decides=%lld masse=%lld masse_non_decide=%lld cellule_max=%lld\n",
-              L.rectangles, L.non_decides, L.masse_totale, L.masse_non_decide, L.cellules_max);
+  std::printf("wspd rectangles=%lld non_decides=%lld masse=%lld masse_non_decide=%lld "
+              "cellule_max=%lld cap_mode=%s\n",
+              L.rectangles, L.non_decides, L.masse_totale, L.masse_non_decide,
+              L.cellules_max, cap_scission ? "scission" : "refus");
+  // ---- L'UNIVERS DES ANCRES N'EST PAS `C(n,2)`.
+  //
+  // Deux identifiants aux memes coordonnees ne forment pas une ancre : `D = 0`
+  // est hors du domaine. L'univers vaut donc `C(n,2) - somme_x C(m_x,2)`, ou
+  // `m_x` est la multiplicite de la position `x`. Le ledger de recouvrement, lui,
+  // reste sur `C(n,2)` : la WSPD couvre des paires d'INDICES, et confondre les
+  // deux denominateurs rendrait l'ecart de recouvrement faux.
+  long long paires_d0 = 0;
+  long long positions_distinctes = 0;
+  {
+    std::vector<P3> tri = sorted_pts;
+    std::sort(tri.begin(), tri.end(), [](const P3& p, const P3& q) {
+      if (p.x != q.x) return p.x < q.x;
+      if (p.y != q.y) return p.y < q.y;
+      return p.z < q.z;
+    });
+    for (size_t i = 0; i < tri.size();) {
+      size_t j = i + 1;
+      while (j < tri.size() && tri[j].x == tri[i].x && tri[j].y == tri[i].y &&
+             tri[j].z == tri[i].z)
+        ++j;
+      const long long m = (long long)(j - i);
+      paires_d0 += m * (m - 1) / 2;
+      ++positions_distinctes;
+      i = j;
+    }
+  }
   const long long total = (long long)n * (n - 1) / 2;
+  std::printf("univers paires_indices=%lld positions_distinctes=%lld paires_D0=%lld "
+              "univers_ancres=%lld\n",
+              total, positions_distinctes, paires_d0, total - paires_d0);
+  // L'audit du `00cf78c` demande au minimum un refus explicite des doublons,
+  // parce qu'ils deviennent artificiellement `W`-vivants. Il est optionnel : la
+  // structure juste — une geometrie sur les positions distinctes, chacune
+  // portant sa liste de `PointId` et sa multiplicite — n'est pas ecrite, et un
+  // refus par defaut interdirait des nuages que le reste du probe traite bien.
+  if (refuse_doublons && paires_d0 > 0) {
+    std::fprintf(stderr, "REFUS : %lld paires de positions dupliquees\n", paires_d0);
+    return 2;
+  }
   std::printf("ledger masse_attendue=%lld ecart=%lld recouvrements=%lld travail_h=%lld "
               "travail_ha=%lld\n",
               total, L.masse_totale - total, L.recouvrements, L.travail_h, L.travail_ha);
@@ -2002,11 +2105,37 @@ int main(int argc, char** argv) {
     return 3;
   }
   if (vrai_vivant) {
+    // ---- LE MOU, ET SES DEUX DENOMINATEURS.
+    //
+    // `mu = S_q / V_q` est un RAPPORT, et l'imprimer a `0` quand `V_q` est nul
+    // etait un mensonge de format : `0` se lit « le residuel est vide », alors
+    // que `V_q = 0` avec `S_q > 0` est exactement l'inverse — le residuel est
+    // ENTIEREMENT du mou. Trois cas, trois ecritures :
+    //
+    //   `V > 0`           `mu = S/V`
+    //   `V = 0`, `S > 0`  `mu = inf`     tout le residuel est retirable
+    //   `V = 0`, `S = 0`  `mu = NA`      il n'y a rien a mesurer
+    //
+    // Et deux quantites distinctes, qu'il faut nommer avec leur denominateur,
+    // l'audit du `00cf78c` ayant raison de dire qu'aucune des deux n'est
+    // fausse : `mu - 1` est le SURCOUT rapporte au plancher `V_q` ;
+    // `1 - 1/mu` est la FRACTION DU RESIDUEL encore retirable. J'avais publie
+    // la premiere en croyant publier la seconde.
+    //
+    // `S_q` est corrige des paires `D = 0` : elles sont dans `S_q`, qui indexe
+    // des paires d'identifiants, mais hors de `V_q`, defini sur `||a-b|| > 0`.
     std::printf("vraivivant");
     for (int q = 0; q < 3; ++q) {
-      const double mou = vrai_vivantes[q] > 0
-                             ? (double)L.survivantes[q] / (double)vrai_vivantes[q] : 0.0;
-      std::printf(" q%d_vivantes=%lld q%d_mou=%.3f", q + 2, vrai_vivantes[q], q + 2, mou);
+      const long long S = L.survivantes[q] - L.vivant_degen_lane[q];
+      const long long V = vrai_vivantes[q];
+      std::printf(" q%d_vivantes=%lld q%d_survivantes_D0exclu=%lld", q + 2, V, q + 2, S);
+      if (V > 0) {
+        const double mou = (double)S / (double)V;
+        std::printf(" q%d_mou=%.3f q%d_surcout=%.3f q%d_retirable=%.3f", q + 2, mou,
+                    q + 2, mou - 1.0, q + 2, 1.0 - 1.0 / mou);
+      } else {
+        std::printf(" q%d_mou=%s", q + 2, S > 0 ? "inf" : "NA");
+      }
     }
     // LE BUDGET, PUBLIE ET NON AFFIRME. Le re-audit demandait un compte en
     // `n |S|` : ces trois champs le rendent verifiables. `paires` doit rester du

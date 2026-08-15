@@ -5209,10 +5209,86 @@ mhgp3v_add_expected_code_test_for(mhgp3v_core_ball_probe
 # rectangles capés sont ajoutées au résiduel sans jamais être testées, donc le
 # compte n'est qu'un minorant. Contre-rejeu de l'auditeur : sur soixante points,
 # cap 512 donne 1594 et cap 1 donne 1201, les deux sortant code zéro.
+#
+# `--cap=refus` est désormais EXPLICITE dans cette porte. Le défaut est passé à
+# `--cap=scission`, qui raffine au lieu de rejeter et ne produit donc plus
+# jamais de masse hors cap : sans ce drapeau la porte deviendrait verte par
+# disparition de son objet, ce qui est la pire façon de perdre un test.
 mhgp3v_add_expected_code_test_for(mhgp3v_combined_prefilter_probe
   mhgp3v_combined_refus_vrai_vivant_hors_cap "paires hors cap" 3
   --points=60 --family=uniform --seed=3 --separation=8 --smax=11
-  --cap-cellule=1 --vrai-vivant)
+  --cap=refus --cap-cellule=1 --vrai-vivant)
+
+# ---------------------------------------------------------------------------
+# LA SCISSION RÉCURSIVE — P0.2 de l'audit positif du `00cf78c`.
+#
+# « Le plus simple est de subdiviser récursivement les rectangles dépassant le
+# cap en coupant le plus gros nœud, jusqu'à obtenir une couverture complète. »
+# C'est fait, et c'est le défaut. Trois choses à garder en tête :
+#
+#   * la séparation N'EST PAS monotone sous raffinement — la sphère
+#     circonscrite à une AABB ne l'est pas — donc chaque sous-rectangle est
+#     RE-TESTÉ, jamais hérité ;
+#   * la récursion s'arrête au pire sur deux feuilles, qui sont des points,
+#     donc elle termine et atteint toujours le cap ;
+#   * `masse_non_decide` vaut alors zéro par construction, ce que la porte
+#     ci-dessous exige à un cap volontairement minuscule.
+#
+# Le cap `4` sur `n=200` force la scission sur presque tout l'arbre : c'est le
+# régime où un défaut de couverture se verrait.
+foreach(fam uniform terrain eight_clusters two_lines)
+  add_test(NAME mhgp3v_combined_scission_couverture_${fam}
+    COMMAND mhgp3v_combined_prefilter_probe --points=200 --family=${fam} --seed=3
+            --separation=8 --smax=11 --cap=scission --cap-cellule=4)
+  set_tests_properties(mhgp3v_combined_scission_couverture_${fam} PROPERTIES
+    PASS_REGULAR_EXPRESSION "non_decides=0 masse=19900 masse_non_decide=0 ")
+endforeach()
+
+# ---------------------------------------------------------------------------
+# LA CONTRE-FAMILLE, ENFIN BRANCHÉE — et elle me réfute.
+#
+# `two_lines` porte une masse universelle QUADRATIQUE avec ZÉRO porteur aigu
+# q3/q4 : aucun certificat universel sound ne peut fermer ses `m^2 = n^2/4`
+# paires croisées, puisque chacune a une sphère vide. J'avais écrit que
+# « l'ensemble `W`-vivant ne devient pas quadratique » sur la foi de trois
+# familles ; l'audit du `00cf78c` a raison, et la mesure le confirme sur mon
+# propre code :
+#
+#   n     q2       q3          q4          exposants q4
+#   300   2 945    25 110      24 828
+#   600   5 945    95 310      94 728      1,932
+#   1200  11 945   370 710     369 528     1,964
+#   2400  23 945   1 461 510   1 459 128   1,981
+#
+# `q4 / (n/2)^2` vaut `1,1035` puis `1,0525`, `1,0265`, `1,0133` : la
+# convergence vers `m^2` PAR LE HAUT est la prédiction exacte de la famille.
+#
+# Le fait vraiment instructif est que **q2 reste linéaire** : le demi-espace
+# `H>0` tue les paires croisées, les fuseaux plus étroits de q3/q4 ne les tuent
+# pas. La quadratique est donc propre aux lanes aiguës, et seule la positivité
+# aiguë peut la couper — pas un cinquième certificat géométrique.
+#
+# `mou=1,000` sur les trois lanes : le préfiltre y est déjà optimal.
+add_test(NAME mhgp3v_combined_two_lines_quadratique
+  COMMAND mhgp3v_combined_prefilter_probe --points=600 --family=two_lines --seed=3
+          --separation=8 --smax=11 --vrai-vivant)
+set_tests_properties(mhgp3v_combined_two_lines_quadratique PROPERTIES
+  PASS_REGULAR_EXPRESSION
+  "q4_vivantes=94728 q4_survivantes_D0exclu=94728 q4_mou=1\\.000")
+
+# Les deux familles de balayage, que ce probe refusait alors que le générateur
+# les produit depuis toujours. Mes rampes ne disaient donc rien d'elles.
+foreach(fam scanline_single_pass scanline_overlap_multiecho)
+  add_test(NAME mhgp3v_combined_famille_${fam}
+    COMMAND mhgp3v_combined_prefilter_probe --points=300 --family=${fam} --seed=3
+            --separation=8 --smax=11 --vrai-vivant)
+  set_tests_properties(mhgp3v_combined_famille_${fam} PROPERTIES
+    PASS_REGULAR_EXPRESSION "q4_vivantes=[1-9][0-9]* ")
+endforeach()
+
+mhgp3v_add_expected_code_test_for(mhgp3v_combined_prefilter_probe
+  mhgp3v_combined_refus_famille_inconnue "famille inconnue" 2
+  --points=200 --family=poisson_homogene)
 
 add_test(NAME mhgp3v_core_ball_couple_sature_code
          COMMAND mhgp3v_core_ball_probe --fixture=couple-sature)
