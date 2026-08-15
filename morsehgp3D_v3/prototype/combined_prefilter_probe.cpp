@@ -102,6 +102,7 @@
 
 #include "mhgp/mhgp.hpp"
 #include "prototype/cloud_families.hpp"
+#include "prototype/soc64_rect.hpp"
 #include "prototype/wspd_wavefront.hpp"
 
 namespace {
@@ -129,6 +130,9 @@ enum class Mutant {
                     // lane aux enfants, qui la recreditent par leurs feuilles.
   kDropB,         // oublie la contribution de `B` : minorant plus faible, sur
                   // mais il doit se voir au compteur
+  kCorner64Sept,  // n'evalue que sept des huit coins de `A` : la specialisation
+                  // ponctuelle cesse d'etre le meme calcul que la reference et
+                  // SUR-certifie. Il rend la porte d'egalite non vacue.
 };
 
 const char* mutant_name(Mutant m) {
@@ -140,6 +144,7 @@ const char* mutant_name(Mutant m) {
     case Mutant::kThresholdOff: return "seuil-decale";
     case Mutant::kBulkSansMasque: return "bulk-sans-masque";
     case Mutant::kDropB: return "oublie-b";
+    case Mutant::kCorner64Sept: return "corner64-sept-coins";
   }
   return "?";
 }
@@ -454,6 +459,72 @@ inline bool universal_over_rect(const Box& A, const Box& B, const P3& z, int q,
 }
 
 // ---------------------------------------------------------------------------
+// CORNER64 : `corner512_all_lane` SPECIALISE AU TEMOIN PONCTUEL.
+//
+// Ce n'est PAS un predicat de plus. C'est exactement `corner512_all_lane` dont
+// on retire deux redondances de calcul, sans toucher a ce qu'il decide :
+//
+//   1. La boite du temoin est ici un POINT (`CZ.lo == CZ.hi`). Ses huit coins
+//      coincident donc, et la boucle `kc` de `soc64_rect.hpp` evalue huit fois
+//      le meme couple `(e,t)`. Il reste 8 x 8 = 64 couples DISTINCTS.
+//   2. Les seize coins de `A` et de `B` ne dependent pas du site : ils sont
+//      constants sur toute la descente d'un rectangle, alors que la fonction
+//      generale les recalcule par `box_corner` a chaque appel.
+//
+// L'egalite avec la reference n'est pas un raisonnement laisse au lecteur : le
+// mode `--compare-corner512` confronte les deux valeurs site par site et
+// `corner64_desaccords` doit rester nul, sous peine de code de sortie 3.
+//
+// Ce que la fonction rend garde le statut etabli par l'en-tete de
+// `soc64_rect.hpp` : la lane `ALL` du produit relaxe `Ebox x Tbox`, EXACTE sur
+// l'enveloppe continue, et seulement SUFFISANTE sur les points reellement
+// stockes — jamais `NONE` sur eux. C'est tout ce dont `h_coeur` a besoin.
+// ---------------------------------------------------------------------------
+struct Corner16 {
+  i64 a[8][3];
+  i64 b[8][3];
+};
+
+inline Corner16 corners_of_rect(const Box& A, const Box& B) {
+  Corner16 c{};
+  for (int k = 0; k < 8; ++k) {
+    for (int i = 0; i < 3; ++i) {
+      c.a[k][i] = (k & (1 << i)) ? A.hi[i] : A.lo[i];
+      c.b[k][i] = (k & (1 << i)) ? B.hi[i] : B.lo[i];
+    }
+  }
+  return c;
+}
+
+// Rend la lane `ALL` du produit relaxe, dans le meme codage que
+// `mhgp3v::cone::kLaneNone/kLaneQ2/kLaneQ3/kLaneQ4` (0/2/3/4).
+inline int corner64_all_lane(const Corner16& c, const P3& z, bool sept = false) {
+  const i64 zc[3] = {z.x, z.y, z.z};
+  int best = 4;
+  const int na = sept ? 7 : 8;  // MUTANT : un coin de `A` manquant sur-certifie.
+  for (int ka = 0; ka < na; ++ka) {
+    i64 e[3];
+    for (int i = 0; i < 3; ++i) e[i] = zc[i] - c.a[ka][i];
+    const i64 e2 = e[0] * e[0] + e[1] * e[1] + e[2] * e[2];
+    for (int kb = 0; kb < 8; ++kb) {
+      i64 t[3];
+      for (int i = 0; i < 3; ++i) t[i] = c.b[kb][i] - zc[i];
+      const i64 h = e[0] * t[0] + e[1] * t[1] + e[2] * t[2];
+      if (h <= 0) return 0;  // kLaneNone : le minimum du treillis, definitif
+      const i64 x2 = t[0] * t[0] + t[1] * t[1] + t[2] * t[2];
+      const i128 hh = (i128)h * (i128)h;
+      const i128 ex = (i128)e2 * (i128)x2;
+      // q3 : 4 H^2 > E X ; q4 : 3 H^2 > E X. Emboitement `W4 < W3 < W2`.
+      int lane = 2;
+      if (3 * hh > ex) lane = 4;
+      else if (4 * hh > ex) lane = 3;
+      if (lane < best) best = lane;
+    }
+  }
+  return best;
+}
+
+// ---------------------------------------------------------------------------
 // SEPARATION WSPD, ENTIERE ET CONSERVATRICE.
 // On minore `d` par racine entiere INFERIEURE et on majore les rayons par
 // racine entiere SUPERIEURE : le test est donc plus strict que le reel, donc
@@ -523,6 +594,13 @@ struct Ledger {
   long long oracle_faux_morts = 0;  // fermees a tort : DOIT rester nul
   long long oracle_ids_doubles = 0; // PointId credite deux fois : DOIT rester nul
   long long oracle_couverture_ko = 0; // paires vues != 1 fois : DOIT rester nul
+  // HARNAIS APPARIE `corner512` (question Q21/Q22 a l'auditeur).
+  long long c512_sites = 0;      // sites confrontes aux deux predicats
+  long long c512_gagne[3] = {0, 0, 0};  // corner512 certifie ou ma borne echoue
+  long long c512_perd[3] = {0, 0, 0};   // l'inverse
+  long long c512_faux[3] = {0, 0, 0};   // corner512 certifie, la force brute refute
+  long long c64_desaccords = 0;  // corner64 != corner512 : DOIT rester nul
+  long long c64_appels = 0;      // sites decides par la specialisation ponctuelle
 };
 
 struct Rect {
@@ -539,6 +617,8 @@ int main(int argc, char** argv) {
   double min_ferme_q4 = -1.0;
   int oracle_n = 0;
   bool fixture = false;
+  bool compare512 = false;
+  bool core512 = false;
 
   auto arg_ll = [](const char* s, long long* out) {
     const char* e = s + std::strlen(s);
@@ -569,6 +649,11 @@ int main(int argc, char** argv) {
     if (eat("--juge", &tmp)) { judge = (int)tmp; continue; }
     if (eat("--oracle", &tmp)) { oracle_n = (int)tmp; continue; }
     if (a == "--fixture=coeur5") { fixture = true; continue; }
+    if (a == "--compare-corner512") { compare512 = true; continue; }
+    // Les deux orthographes selectionnent le MEME predicat : `corner64` est
+    // `corner512` prive de ses huit coins de temoin confondus. La porte
+    // d'egalite du harnais apparie en est la preuve executable.
+    if (a == "--coeur=corner512" || a == "--coeur=corner64") { core512 = true; continue; }
     if (eat("--min-rectangles", &tmp)) { min_rect = (int)tmp; continue; }
     if (a.rfind("--min-ferme-q4=", 0) == 0) {
       min_ferme_q4 = std::atof(a.c_str() + 15);
@@ -590,6 +675,7 @@ int main(int argc, char** argv) {
       else if (m == "seuil-decale") mutant = Mutant::kThresholdOff;
       else if (m == "bulk-sans-masque") mutant = Mutant::kBulkSansMasque;
       else if (m == "oublie-b") mutant = Mutant::kDropB;
+      else if (m == "corner64-sept-coins") mutant = Mutant::kCorner64Sept;
       else { std::fprintf(stderr, "REFUS : mutant inconnu %s\n", m.c_str()); return 2; }
       continue;
     }
@@ -701,7 +787,7 @@ int main(int argc, char** argv) {
   // annonce par la CLI : le contre-audit avait raison de le relever.
   const int kHisto = smax + 2;
   std::vector<int> histo((size_t)kHisto, 0);
-  const bool oracle = (oracle_n > 0) || fixture;
+  const bool oracle = (oracle_n > 0) || fixture || compare512;
   std::vector<int> core_ids;
   std::vector<unsigned char> vu((size_t)n, 0);
   const long long npairs = (long long)n * (n - 1) / 2;
@@ -732,6 +818,8 @@ int main(int argc, char** argv) {
     if (nb > L.cellules_max) L.cellules_max = nb;
 
     const Box BA = h_box(r.u), BB = h_box(r.v);
+    // Seize coins, une fois par rectangle : ils ne dependent d'aucun site.
+    const Corner16 rect_corners = corners_of_rect(BA, BB);
 
     // ---- h_coeur : temoins universels du rectangle, HORS `A` et HORS `B`.
     //
@@ -786,6 +874,24 @@ int main(int argc, char** argv) {
           const int i = -1 - f.node;
           if (i >= ua && i <= ub) continue;  // disjonction avec `A`
           if (i >= va && i <= vb) continue;  // disjonction avec `B`
+          if (core512) {
+            // MESURE, PAS SUBSTITUTION. `corner64_all_lane` rend la lane `ALL`
+            // du produit relaxe, EXACTE sur l'enveloppe continue des deux
+            // boites — donc la meilleure decision qu'aucune borne tiree des
+            // seules AABB ne peut depasser. Ce mode sert a chiffrer l'effet sur
+            // la fermeture, question Q22 posee a l'auditeur ; la substitution
+            // en production attend la reponse a Q21.
+            //
+            // Les seize coins sont hisses HORS de la descente : ils ne
+            // dependent que du rectangle.
+            ++L.c64_appels;
+            const int lane = corner64_all_lane(rect_corners, sorted_pts[i]);
+            if (lane < 2) continue;
+            if ((m & 1) && hcore[0] < h_q[0]) { ++hcore[0]; if (oracle) core_ids.push_back(i); }
+            if ((m & 2) && hcore[1] < h_q[1] && lane >= 3) ++hcore[1];
+            if ((m & 4) && hcore[2] < h_q[2] && lane >= 4) ++hcore[2];
+            continue;
+          }
           const i64 hh = h_min_over_boxes(BA, BB, sorted_pts[i]);
           if (hh <= 0) continue;
           if ((m & 1) && hcore[0] < h_q[0]) { ++hcore[0]; if (oracle) core_ids.push_back(i); }
@@ -878,6 +984,55 @@ int main(int argc, char** argv) {
         if ((id >= ua && id <= ub) || (id >= va && id <= vb)) ++L.oracle_ids_doubles;
       }
       for (int id : core_ids) vu[(size_t)id] = 0;
+      // ---- HARNAIS APPARIE `corner512` (Q21/Q22).
+      //
+      // Il ne SUBSTITUE rien : il fait tourner les deux predicats sur les MEMES
+      // sites et compte trois choses. `gagne` mesure ce que `corner512`
+      // certifierait en plus — la reponse chiffree a Q22. `faux` mesure les cas
+      // ou il certifie une lane que la force brute sur les VRAIES paires du
+      // rectangle refute — la reponse a Q21 : s'il est non nul, le predicat
+      // n'est pas un certificat `ALL` valide sur des boites, et la substitution
+      // demandee en P1.6 serait une regression de surete.
+      if (compare512) {
+        mhgp3v::cone::Box CA, CB, CZ;
+        for (int k = 0; k < 3; ++k) {
+          CA.lo[k] = BA.lo[k]; CA.hi[k] = BA.hi[k];
+          CB.lo[k] = BB.lo[k]; CB.hi[k] = BB.hi[k];
+        }
+        for (int i = 0; i < n; ++i) {
+          if ((i >= ua && i <= ub) || (i >= va && i <= vb)) continue;
+          for (int k = 0; k < 3; ++k) {
+            CZ.lo[k] = CZ.hi[k] = (k == 0) ? sorted_pts[i].x
+                                : (k == 1) ? sorted_pts[i].y : sorted_pts[i].z;
+          }
+          const int lane = mhgp3v::soc::corner512_all_lane(CA, CB, CZ);
+          // PORTE D'EGALITE : la specialisation ponctuelle doit rendre la MEME
+          // valeur que la reference, site par site. Un seul desaccord suffit a
+          // refuser la campagne (code 3) : `corner64` n'est pas un predicat
+          // distinct, c'est le meme calcul sans ses redondances.
+          if (corner64_all_lane(rect_corners, sorted_pts[i],
+                                mutant == Mutant::kCorner64Sept) != lane)
+            ++L.c64_desaccords;
+          ++L.c512_sites;
+          for (int q = 0; q < 3; ++q) {
+            const bool mine = universal_over_rect(BA, BB, sorted_pts[i], q + 2, narrow,
+                                                  centre_only, corners_xi);
+            const bool his = (lane >= q + 2);
+            if (his && !mine) ++L.c512_gagne[q];
+            if (mine && !his) ++L.c512_perd[q];
+            if (!his) continue;
+            // force brute sur les vraies paires du rectangle
+            bool ok = true;
+            for (int ai = ua; ai <= ub && ok; ++ai)
+              for (int bi = va; bi <= vb && ok; ++bi) {
+                const Box pb = box_of_point(sorted_pts[bi]);
+                if (!universal_witness(sorted_pts[ai], pb, sorted_pts[i], q + 2, false))
+                  ok = false;
+              }
+            if (!ok) ++L.c512_faux[q];
+          }
+        }
+      }
       // P0.5 : couverture reelle, une occurrence par paire non ordonnee.
       // La somme `|A||B| = C(n,2)` peut masquer un doublon compense par un
       // manque ; ce compte-ci ne le peut pas.
@@ -1004,6 +1159,13 @@ int main(int argc, char** argv) {
                 q + 2, L.survivantes[q], total - L.survivantes[q], pct, L.coeur_total[q],
                 L.coeur_non_vide[q], L.ha_total[q], L.hb_total[q]);
   }
+  if (compare512)
+    std::printf("corner512 sites=%lld gagne=%lld/%lld/%lld perd=%lld/%lld/%lld "
+                "faux=%lld/%lld/%lld corner64_desaccords=%lld\n",
+                L.c512_sites, L.c512_gagne[0], L.c512_gagne[1], L.c512_gagne[2],
+                L.c512_perd[0], L.c512_perd[1], L.c512_perd[2],
+                L.c512_faux[0], L.c512_faux[1], L.c512_faux[2], L.c64_desaccords);
+  if (core512) std::printf("corner64 appels=%lld\n", L.c64_appels);
   std::printf("nonvacuite bulk_credits=%lld oracle_paires=%lld oracle_faux_morts=%lld "
               "oracle_ids_doubles=%lld oracle_couverture_ko=%lld\n",
               L.bulk_credits, L.oracle_paires, L.oracle_faux_morts, L.oracle_ids_doubles,
@@ -1021,6 +1183,24 @@ int main(int argc, char** argv) {
   if (mutant == Mutant::kNone && L.recouvrements != 0) {
     std::fprintf(stderr, "PLANCHER : recouvrement non nul sans mutant\n");
     return 3;
+  }
+  if (compare512) {
+    if (L.c512_sites == 0) {
+      std::fprintf(stderr, "PLANCHER : harnais apparie vide, aucun site confronte\n");
+      return 3;
+    }
+    // Q21, cote surete : `corner512` ne doit JAMAIS certifier une lane que la
+    // force brute sur les vraies paires du rectangle refute.
+    for (int q = 0; q < 3; ++q)
+      if (L.c512_faux[q] != 0) {
+        std::fprintf(stderr, "PLANCHER : corner512 refute par la force brute, lane q%d (%lld)\n",
+                     q + 2, L.c512_faux[q]);
+        return 3;
+      }
+    if (L.c64_desaccords != 0) {
+      std::fprintf(stderr, "PLANCHER : corner64 != corner512 sur %lld sites\n", L.c64_desaccords);
+      return 3;
+    }
   }
   if (min_rect > 0 && L.rectangles < min_rect) {
     std::fprintf(stderr, "PLANCHER : %lld rectangles, %d exiges\n", L.rectangles, min_rect);

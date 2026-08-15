@@ -625,7 +625,16 @@ int exact_once(const std::string& family, long long n, long long coord, long lon
   // UN DEBORDEMENT N'EST PAS UNE MORT, DONC IL NE PEUT PAS ETRE UN `continue`
   // MUET. Ici la route retenue est le REFUS : la masse du seed n'est ni prouvee
   // morte ni enumeree, donc l'exact-once ne peut pas conclure.
-  long long debordements = 0, refus_r4 = 0;
+  //
+  // Le compteur etait declare depuis `3507b5e` sans jamais etre alimente : sous
+  // `-Werror=unused-variable` la cible ne compilait plus, et le `kDebordement`
+  // tombait dans le meme `continue` muet que les trois morts reelles — ce que
+  // le commentaire ci-dessus interdit explicitement. Il est desormais compte,
+  // publie au recu, et refuse par le code 3, comme le fait deja le plancher
+  // `g.debordes` du balayage vingt lignes plus haut. Aucun `PASS_REGULAR_-`
+  // `EXPRESSION` existant n'est touche : ils s'ancrent sur `manque=0 doublon=0`
+  // `surplus=0`, qui precede le champ ajoute.
+  long long debordements = 0;
   std::vector<int> scratch;
   for (int ia = 0; ia < m; ++ia)
     for (int ib = ia + 1; ib < m; ++ib)
@@ -643,10 +652,13 @@ int exact_once(const std::string& family, long long n, long long coord, long lon
         auto pw = [&](int i) { return mhgp3v::q4axis::site_power(f, P[(size_t)i].c); };
         const auto sel = mhgp3v::q4axis::select_axis_topr4(f, scratch.data(),
                                                            (int)scratch.size(), pw, r4);
+        // LE DEBORDEMENT EST SEPARE DES TROIS MORTS. Une mort prouve que le
+        // seed n'emet rien ; un debordement prouve seulement que la capacite a
+        // manque. Les confondre ferait passer une lacune pour une preuve.
+        if (sel.verdict == SeedVerdict::kDebordement) { ++debordements; continue; }
         if (sel.verdict == SeedVerdict::kMortDegeneree ||
             sel.verdict == SeedVerdict::kMortT2 ||
-            sel.verdict == SeedVerdict::kMortPermanents ||
-            sel.verdict == SeedVerdict::kDebordement) continue;
+            sel.verdict == SeedVerdict::kMortPermanents) continue;
         for (int pass = 0; pass < 2; ++pass) {
           const int cnt = pass ? sel.n_sortants : sel.n_entrants;
           const int* tab = pass ? sel.sortants : sel.entrants;
@@ -715,9 +727,14 @@ int exact_once(const std::string& family, long long n, long long coord, long lon
   }
   std::printf("exact_once : famille=%s n=%d r4=%d attendus=%zu produits=%zu"
               " emissions=%lld manque=%lld doublon=%lld surplus=%lld"
-              " seeds_rang_q3_mort=%lld\n",
+              " seeds_rang_q3_mort=%lld debordements=%lld\n",
               family.c_str(), m, r4, attendus.size(), produits.size(), emissions,
-              manque, doublon, surplus, q3_morts_utiles);
+              manque, doublon, surplus, q3_morts_utiles, debordements);
+  if (debordements > 0) {
+    std::fprintf(stderr, "PLANCHER: %lld seeds debordes — ni morts ni enumeres,"
+                 " l'exact-once ne peut pas conclure\n", debordements);
+    return 3;
+  }
   if ((long long)attendus.size() < min_q4) {
     std::fprintf(stderr, "PLANCHER: %zu q4 attendus < %lld\n", attendus.size(), min_q4);
     return 3;

@@ -4701,3 +4701,43 @@ set_tests_properties(mhgp3v_combined_oracle_terrain PROPERTIES
 mhgp3v_add_expected_code_test_for(mhgp3v_combined_prefilter_probe
   mhgp3v_combined_refus_oracle_non_borne "REFUS : oracle non borne" 2
   --points=500 --oracle=500)
+
+# ---------------------------------------------------------------------------
+# HARNAIS APPARIE `corner512` / `corner64` — questions Q21 et Q22 de l'auditeur.
+#
+# Il fait tourner les DEUX predicats sur les MEMES sites et publie trois
+# comptes. Ce que chaque colonne prouve :
+#
+#   `perd=0/0/0`   la borne locale ne certifie JAMAIS ce que corner512 refuse :
+#                  corner512 la DOMINE. Ce n'est pas une chance, c'est le
+#                  theoreme de `soc64_rect.hpp` — l'evaluation aux coins decide
+#                  EXACTEMENT l'enveloppe continue, qu'aucune borne tiree des
+#                  seules AABB ne peut donc battre.
+#   `faux=0/0/0`   corner512 n'a jamais certifie une lane que la force brute sur
+#                  les VRAIES paires du rectangle refute. C'est la reponse
+#                  empirique a Q21, cote surete.
+#   `gagne=0/x/y`  il certifie STRICTEMENT plus en q3 et q4, jamais en q2 — et
+#                  ce zero en q2 est lui-meme un resultat : `h_min_over_boxes`
+#                  est exact pour `H`, donc rien a gagner sur cette lane.
+#   `corner64_...` la specialisation ponctuelle rend la MEME valeur que la
+#                  reference. Elle n'est pas un predicat de plus.
+#
+# Les planchers `sites=[1-9]` et `gagne=0/[1-9]` interdisent le vert par
+# vacuite : une porte qui ne confronte rien, ou qui ne rencontre jamais le cas
+# ou les deux predicats different, ne prouve rien.
+# ---------------------------------------------------------------------------
+foreach(fam uniform eight_clusters terrain)
+  add_test(NAME mhgp3v_combined_corner512_apparie_${fam}
+    COMMAND mhgp3v_combined_prefilter_probe --points=120 --family=${fam} --seed=3
+            --separation=6 --smax=11 --compare-corner512)
+  set_tests_properties(mhgp3v_combined_corner512_apparie_${fam} PROPERTIES
+    PASS_REGULAR_EXPRESSION
+    "corner512 sites=[1-9][0-9]* gagne=0/[1-9][0-9]*/[1-9][0-9]* perd=0/0/0 faux=0/0/0 corner64_desaccords=0")
+endforeach()
+
+# La porte a code qui double les trois regex ci-dessus : sans elle, un code de
+# sortie 3 passerait inapercu puisque `PASS_REGULAR_EXPRESSION` l'ignore.
+mhgp3v_add_expected_code_test_for(mhgp3v_combined_prefilter_probe
+  mhgp3v_combined_mutant_corner64_sept_coins "corner64 != corner512" 3
+  --points=120 --family=uniform --seed=3 --separation=6 --smax=11
+  --compare-corner512 --inject=corner64-sept-coins --juge=120)

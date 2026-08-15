@@ -126,12 +126,25 @@ Trois propriétés font l'intérêt du montage :
    rectangle, `h_a` que de `a`, `h_b` que de `b` ; le compte des survivantes se
    lit sur un histogramme de `h_b` à onze cases. Coût `O(|A|+|B|)`, jamais
    `O(|A||B|)`.
-2. **Les bornes sont exactes, pas conservatrices.** `H` est bilinéaire par axe,
-   son minimum est à un des quatre coins du rectangle plan. Et `Xi` est
-   **convexe en `a`** — car `(b-a) x (z-a) = b x z - b x a - a x z` est affine,
-   le terme `a x a` étant nul — donc son maximum est à un **sommet**. C'est ce
-   qui donne le `h` le plus grand qui reste rigoureux : par enveloppe
-   d'intervalles la fermeture q4 tombe de `91,0 %` à `47,6 %`.
+2. **`H` est exact, `Xi` ne l'est pas.** `H` est bilinéaire par axe, son minimum
+   est à un des quatre coins du rectangle plan — c'est exact. Pour `Xi`, la
+   convexité en `a` — car `(b-a) x (z-a) = b x z - b x a - a x z` est affine, le
+   terme `a x a` étant nul — place le maximum à un **sommet**, ce qui vaut
+   beaucoup mieux qu'une enveloppe d'intervalles (fermeture q4 `91,0 %` contre
+   `47,6 %`). Mais le contre-audit du 15 août a raison : `xi_max_over_box`
+   maximise **séparément** chaque composante du produit vectoriel, et ces trois
+   maxima ne sont pas atteints au même point. C'est un majorant sûr, **pas** le
+   maximum, et la borne reste donc conservatrice.
+   
+   `corner64_all_lane` lève exactement cette perte : c'est
+   `soc64_rect.hpp::corner512_all_lane` privé de ses huit coins de témoin
+   confondus — le témoin étant ici un **point** — et de la recomposition des
+   seize coins de `A` et `B` à chaque site. Il décide **exactement** l'enveloppe
+   continue des deux boîtes, donc aucune borne tirée des seules AABB ne peut le
+   battre. Mesure appariée, `n=4 000`, `s=6`, `K=10` : résiduel q4 `-38 %`
+   (`terrain`), `-44 %` (`uniform`), `-46 %` (`eight_clusters`), pour `+17` à
+   `+18 %` de temps. Réservé au mode `--coeur=corner64` tant que la substitution
+   n'est pas reçue.
 3. **Une seule descente pour les trois lanes**, les fuseaux étant emboîtés, et
    une seule évaluation de `(H, Xi)` par point, ni l'un ni l'autre ne dépendant
    de l'arité.

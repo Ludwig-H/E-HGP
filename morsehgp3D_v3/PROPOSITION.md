@@ -1786,6 +1786,50 @@ elle est conservée comme mutant de mesure, et l'écart est considérable — su
 `uniform,n=8000,s=6,K=10`, la fermeture q4 passe de `47,6 %` par intervalles à
 `91,0 %` par sommets.
 
+### 6bis.3bis `corner64` : la meilleure décision qu'une AABB autorise
+
+Le renvoi ci-dessus a été instruit. `corner512_all_lane` évalue le prédicat aux
+`512` triples de coins de `A x B x C` ; son en-tête établit que cela **décide
+exactement** l'admissibilité de l'enveloppe **continue** `A x B x C`, par un
+argument de convexité en trois temps — séparément en `a`, en `b` et en `z`. Sur
+les `PointId` réellement stockés le statut reste seulement suffisant, un coin
+fictif qui échoue ne prouvant rien à leur sujet ; c'est précisément le statut
+`ALL` dont `h_coeur` a besoin.
+
+Deux conséquences.
+
+**La domination est un théorème, pas une mesure.** `Hmin/Ximax` est dérivée des
+seules AABB de `A` et `B` ; `corner512` décide exactement l'enveloppe de ces
+mêmes AABB. Aucune borne tirée d'elles ne peut donc faire mieux. Le harnais
+apparié le constate — `perd = 0/0/0` sur `1,2` million de confrontations — mais
+il ne le découvre pas. Ce qu'il apporte est ailleurs : `faux = 0/0/0` contre la
+force brute, et `gagne = 0` en q2, qui confirme que la borne sur `H` était bien
+exacte et qu'il n'y avait rien à y gagner.
+
+**Le témoin est ponctuel, et cela change le coût.** La boîte `C` est ici réduite
+à un point : ses huit coins coïncident, et la boucle correspondante évalue huit
+fois le même couple `(e,t)`. Il reste `8 x 8 = 64` couples distincts. Les seize
+coins de `A` et `B`, eux, sont constants sur toute la descente d'un rectangle.
+`corner64_all_lane` retire ces deux redondances sans rien changer à ce qui est
+décidé — une porte confronte les deux valeurs site par site, et le mutant
+`corner64-sept-coins` la tue avec le code `3`. Mesure appariée, `n=4 000`,
+`s=6`, `s_max=11`, `K=10` :
+
+| famille | résiduel q4, `Hmin/Ximax` | résiduel q4, `corner64` | Δ | Δ temps |
+| --- | ---: | ---: | ---: | ---: |
+| `terrain` | `370 884` | `229 169` | `-38,2 %` | `+18 %` |
+| `uniform` | `1 286 213` | `722 255` | `-43,8 %` | `+17 %` |
+| `eight_clusters` | `3 095 790` | `1 672 585` | `-46,0 %` | `+18 %` |
+
+Le gain est le plus fort là où la fermeture était la plus faible, ce qui est la
+propriété attendue d'un préfiltre. Le contraste avec le verdict `SOC64`
+antérieur — `E4 -18 %` pour `temps +15 %`, perte nette — ne tient pas à un
+régime différent mais à ce que le témoin y était une **boîte** et non un point.
+
+Ces chiffres sont `counter-only` et ne promeuvent rien : la route par défaut
+reste `Hmin/Ximax`, la substitution attend sa réception, et la campagne des
+trente-six configurations n'est pas régénérée.
+
 ### 6bis.4 Ce que la descente doit borner
 
 Élaguer la recherche du cœur sur `max H` est beaucoup trop lâche : l'ensemble
@@ -3017,7 +3061,8 @@ des frontières `MIXED`. La borne de seize apex par face retire le carré q4 ;
 elle ne borne ni le nombre de faces primaires, ni une sortie q2/q3 lourde.
 
 Le préfiltre combiné de la section 6bis ne fait pas exception. Ses trois
-comptes sont prouvés disjoints et ses deux bornes sont exactes, mais il ferme
+comptes sont prouvés disjoints et sa borne sur `H` est exacte — celle sur `Xi`
+ne l'est pas, voir 6bis.3 — mais il ferme
 des **ancres**, pas des supports : `184` ancres q4 par point à
 `n=8 000, s=8, K=10` ne sont pas `428` supports par point, et chaque ancre
 survivante reste entièrement à instruire. Il ne rend donc pas le producteur
