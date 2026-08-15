@@ -1,0 +1,40 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C /workspaces/E-HGP status --short)",
+      "Bash(git -C /workspaces/E-HGP log --oneline -10)",
+      "Bash(git -C /workspaces/E-HGP diff --stat)",
+      "Bash(gcloud config *)",
+      "Bash(gcloud compute *)",
+      "Bash(python3 tools/check_implementation_status.py)",
+      "Bash(cmake -S /workspaces/E-HGP/morsehgp3d -B /tmp/ehgp-build-cpu-release -G \"Unix Makefiles\" -DCMAKE_BUILD_TYPE=Release -DMORSEHGP3D_BUILD_TESTS=ON -DMORSEHGP3D_BUILD_TOOLS=ON -DMORSEHGP3D_ENABLE_CUDA=OFF -DMORSEHGP3D_ENABLE_SANITIZERS=OFF -DCMAKE_EXPORT_COMPILE_COMMANDS=ON)",
+      "Read(//tmp/ehgp-build-cpu-release/**)",
+      "Bash(make -j2 morsehgp3d_gpu_k1_boruvka_hierarchy_tests morsehgp3d_hierarchy_morse_gamma_partition_sweep_tests morsehgp3d_hierarchy_critical_catalog_tests morsehgp3d_hierarchy_direct_morse_normalized_h0_product_session_tests morsehgp3d_hierarchy_direct_morse_resident_all_orders_vertical_bridge_tests morsehgp3d_sparse_higher_support_h0_chunk_run_tests)",
+      "Bash(git *)",
+      "Bash(awk 'NR>=1863 && NR<=1885' /workspaces/E-HGP/docs/implementation_status.toml)",
+      "Bash(awk 'NR>=3584 && NR<=3616' /workspaces/E-HGP/docs/implementation_status.toml)",
+      "Bash(cmake -S morsehgp3d -B build/morsehgp3d -DMORSEHGP3D_BUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Release)",
+      "Bash(cmake --build build/morsehgp3d --parallel)",
+      "Bash(ctest --test-dir build/morsehgp3d --output-on-failure)",
+      "Bash(echo \"EXIT=$?\")",
+      "Bash(gcloud auth *)",
+      "Bash(python3 -c ' *)",
+      "Bash(python3 -c \"print\\(0x15A048D1E7C93B25\\)\")",
+      "Bash(cmake --build build/morsehgp3d --parallel 2)",
+      "Bash(export GCP_PROJECT_ID=devpod-gpu-exploration)",
+      "Bash(pdftotext -f 5 -l 16 /workspaces/E-HGP/docs/references/MANUSCRIT_THESE_HAUSEUX.pdf toc.txt)",
+      "Bash(grep -n -A4 \"^Partie I$\" toc.txt)",
+      "Bash(pdftotext -f 33 -l 36 /workspaces/E-HGP/docs/references/MANUSCRIT_THESE_HAUSEUX.pdf p33.txt)",
+      "Bash(awk 'NR<=154 && /^## /{s=$0} END{}' docs/math/HIERARCHIE_DE_POINTS_MULTI_ORDRES.md)",
+      "Bash(awk -F: '$1<=156')",
+      "Bash(python tools/check_docs.py)",
+      "Bash(./gcp-migration/check_quotas.sh)",
+      "Bash(export GCP_PROJECT_ID=devpod-gpu-exploration GCP_ZONE=europe-west4-ai1a GCP_INSTANCE_NAME=ehgp-blackwell-spot-ai1a)",
+      "Bash(./gcp-migration/set_max_run_duration_and_verify.sh --yes --max-run-duration-seconds 14400)",
+      "Bash(export GCP_PROJECT_ID=devpod-gpu-exploration GCP_ZONE=europe-west4-ai1a GCP_INSTANCE_NAME=ehgp-blackwell-spot-ai1a GCP_SSH_KEY_FILE=/tmp/ehgp-session-ssh.wNgmBnUv/id_ed25519)",
+      "Bash(./gcp-migration/start_and_verify.sh --yes --guest-shutdown-minutes 230)",
+      "Bash(export GCP_PROJECT_ID=devpod-gpu-exploration GCP_ZONE=europe-west4-ai1a GCP_INSTANCE_NAME=ehgp-blackwell-spot-ai1a GCP_SSH_KEY_FILE=/tmp/ehgp-session-ssh.TcN5ayQL/id_ed25519)",
+      "Bash(timeout 110 ./gcp-migration/blackwell_preflight.sh)"
+    ]
+  }
+}

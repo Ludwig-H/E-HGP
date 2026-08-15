@@ -316,6 +316,7 @@ enum class SeedVerdict {
   kMortPermanents,   // `p>=r4`
   kMortGap,          // profondeur minoree `>= r4` partout sur `J_f`
   kDebordement,      // concurrence au-dela de la capacite : fail-closed
+  kRefusR4,          // `r4` hors `[1,kCapRacines]` : REFUS AVANT TOUT ACCES
 };
 
 inline const char* verdict_name(SeedVerdict v) {
@@ -326,8 +327,19 @@ inline const char* verdict_name(SeedVerdict v) {
     case SeedVerdict::kMortPermanents: return "MORT_PERMANENTS";
     case SeedVerdict::kMortGap: return "MORT_GAP";
     case SeedVerdict::kDebordement: return "DEBORDEMENT";
+    case SeedVerdict::kRefusR4: return "REFUS_R4";
   }
   return "?";
+}
+
+// UN DEBORDEMENT N'EST PAS UNE MORT. Il ne retire aucune masse prouvee : il
+// declare que la capacite fixe ne suffit pas et que l'appelant doit continuer
+// autrement — continuation dynamique, repli exact, ou refus non nul. `kRefusR4`
+// est de meme un refus d'appel, pas un verdict geometrique. Les agreger aux
+// `MORT_*` rendrait la source incomplete sans le dire.
+MHGP_HD inline bool verdict_est_mort(SeedVerdict v) {
+  return v == SeedVerdict::kMortDegeneree || v == SeedVerdict::kMortT2 ||
+         v == SeedVerdict::kMortPermanents || v == SeedVerdict::kMortGap;
 }
 
 struct Selection {
@@ -348,6 +360,11 @@ template <class PowFn>
 MHGP_HD inline Selection select_axis_topr4(const SeedAxis& f, const int* sites, int n_sites,
                                    PowFn pw, int r4 = 8, Mutant mut = Mutant::kNone) {
   Selection sel;
+  // LA PRECONDITION EST DANS L'API, AVANT TOUT ACCES. Le tableau `seuil` de la
+  // passe 2 a exactement `kCapRacines` cases et est indexe par `sel.k <= r4` :
+  // un `r4` hors domaine ecrivait hors des bornes. Le refus precede donc
+  // l'affectation de `sel.r4`, la lecture de `f` et toute ecriture.
+  if (r4 < 1 || r4 > kCapRacines) { sel.verdict = SeedVerdict::kRefusR4; return sel; }
   sel.r4 = r4;
   if (!f.reguliere) { sel.verdict = SeedVerdict::kMortDegeneree; return sel; }
   if (f.T2 <= 0) { sel.verdict = SeedVerdict::kMortT2; return sel; }
@@ -519,6 +536,28 @@ struct Census {
   long long range_reports = 0;
 };
 
+// L'INJECTIVITE COMPLETE, POUR LA PORTE ET NON POUR LE CHEMIN CHAUD. Elle
+// verifie que les quatre listes retenues ne repetent aucun `PointId`, qu'elles
+// sont disjointes deux a deux et disjointes du seed. C'est la precondition que
+// le BUILDER doit satisfaire ; elle est quadratique en la CAPACITE, jamais en
+// `n`. Un appelant de production la prouve par construction ; une gate la
+// verifie et refuse.
+MHGP_HD inline bool selection_ids_injectifs(const Selection& sel, const int seed3[3]) {
+  if (seed3[0] == seed3[1] || seed3[0] == seed3[2] || seed3[1] == seed3[2]) return false;
+  const int* listes[4] = {sel.permanents, sel.shell, sel.entrants, sel.sortants};
+  int tailles[4] = {sel.n_perm < kCapPermanents ? sel.n_perm : kCapPermanents,
+                    sel.n_shell, sel.n_entrants, sel.n_sortants};
+  for (int u = 0; u < 4; ++u)
+    for (int i = 0; i < tailles[u]; ++i) {
+      const int id = listes[u][i];
+      for (int t = 0; t < 3; ++t) if (id == seed3[t]) return false;
+      for (int v = u; v < 4; ++v)
+        for (int j = (v == u) ? i + 1 : 0; j < tailles[v]; ++j)
+          if (listes[v][j] == id) return false;
+    }
+  return true;
+}
+
 // `sel` doit etre `kOuvert` ou `kMortGap` — jamais `kDebordement` — et `apex`
 // doit etre l'un des extremes retenus. Le shell est reconstruit DEPUIS LES
 // GROUPES RETENUS : pour un apex deja prouve shallow, tout site de racine egale
@@ -537,11 +576,22 @@ MHGP_HD inline Census census_replay(const Selection& sel, int apex, const int se
     c.fate = CensusFate::kHorsDomaine;
     return c;
   }
+  // PREFLIGHT BORNE DES IDENTITES, PAS UN COMMENTAIRE. Le domaine de la preuve
+  // exige trois `PointId` de seed distincts, un apex hors du seed et un apex
+  // present EXACTEMENT UNE FOIS dans les extremes retenus. Un apex duplique
+  // ferait compter deux fois son propre groupe d'egalite. Tout ce controle est
+  // borne par les capacites fixes, donc constant.
+  if (seed3[0] == seed3[1] || seed3[0] == seed3[2] || seed3[1] == seed3[2]) {
+    c.fate = CensusFate::kHorsDomaine;
+    return c;
+  }
+  for (int t = 0; t < 3; ++t)
+    if (apex == seed3[t]) { c.fate = CensusFate::kHorsDomaine; return c; }
   {
-    bool retenu = false;
-    for (int t = 0; t < sel.n_entrants && !retenu; ++t) retenu = (sel.entrants[t] == apex);
-    for (int t = 0; t < sel.n_sortants && !retenu; ++t) retenu = (sel.sortants[t] == apex);
-    if (!retenu) { c.fate = CensusFate::kHorsDomaine; return c; }
+    int occurrences = 0;
+    for (int t = 0; t < sel.n_entrants; ++t) occurrences += (sel.entrants[t] == apex);
+    for (int t = 0; t < sel.n_sortants; ++t) occurrences += (sel.sortants[t] == apex);
+    if (occurrences != 1) { c.fate = CensusFate::kHorsDomaine; return c; }
   }
   const SitePower pa = pw(apex);
   auto pousse_int = [&](int id) {

@@ -311,13 +311,13 @@ intermédiaire à environ 278 bits : réserver un entier signé de 320 bits, soi
 `BigInt<5>` avec le type actuel. Une largeur 256 bits n'est pas un contrat sûr
 pour ce prune.
 
-La même forme donne le census sans rescan plat. Le minimum positif ou nul
-taille le nœud ; comme `Q_theta` est convexe, son maximum est à l'un des huit
-coins et un maximum strictement négatif crédite toute la population. Le
-parcours s'arrête au huitième intérieur ; en dessous, il range-reporte les
-vrais IDs et descend sur zéro pour le shell complet. Cette étape est un bon
-jalon séparé entre le top-k `O(m*r4)` déjà esquissé et le futur best-first
-complet.
+La même forme donne le census sans rescan plat. Seul un minimum strictement
+positif taille le nœud ; l'égalité descend pour préserver le shell. Comme
+`Q_theta` est convexe, son maximum est à l'un des huit coins et un maximum
+strictement négatif crédite toute la population. Le parcours s'arrête au
+huitième intérieur ; en dessous, il range-reporte les vrais IDs et descend sur
+zéro pour le shell complet. Cette étape est un bon jalon séparé entre le top-k
+`O(m*r4)` déjà esquissé et le futur best-first complet.
 
 Sur GPU, les tâches sont `(SeedId,WitnessNode,side,cutoff)` en SoA, avec petits
 heaps par warp, queues persistantes et `count--scan--fill`. Un `SeedBlock` ne
@@ -346,6 +346,29 @@ Cette étape supprime le second scan sans toucher au générateur et fournit
 immédiatement les identités nécessaires à une gate multiensemble. Elle ne
 supprime pas le premier terme `sum_seed |B(m,D) inter P|` ; c'est précisément
 la responsabilité du jalon BVH `Q_theta` suivant.
+
+Avant ce BVH, le lot peut aussi cesser de recopier le même voisinage. Pour une
+arête Lane4 `e=(a,b)`, stocker une fois
+`S_ab={z!=a,b:||2z-a-b||^2<=4D^2}` et une liste séparée de `Third4`. Le seed
+référence `(edge_id,Third4_id)` et masque ce dernier pendant le parcours. Cette
+factorisation est strictement interne à Lane4 ; aucune sortie q3 n'y participe.
+Elle réduit stockage et transfert selon le ratio pondéré
+`sum_e c_e*(m_e-1) / sum_e m_e`, sans prétendre réduire les visites
+arithmétiques. Le simple nombre moyen de seeds par arête n'est qu'un indicateur
+du potentiel, pas ce ratio d'octets.
+
+La baseline plate peut alors fusionner les cinq scans en deux. Le premier
+classifie chaque site une fois, compte les permanents et maintient les `r4`
+meilleurs roots des deux signes. Après `k=r4-p`, le second range-reporte les
+deux cutoffs avec leurs groupes égaux complets. `census_replay` reconstruit
+ensuite le payload shallow sans scan supplémentaire. La gate développe le lot
+factorisé vers l'ancien CSR et compare les IDs seed par seed avant toute mesure.
+
+Pour le futur BVH, `max(Q_theta)<0` est un `ALL` direct du census. Dans la
+sélection top-r, ce même verdict exige aussi un signe uniforme de `B` et une
+classe entrant/sortant certifiée sur le nœud ; sans ces deux preuves, il faut
+descendre. Un AABB BVH peut visiter tous les témoins au pire : aucun
+`O(k log n)` ni facteur constant n'est promis avant les compteurs de visites.
 
 ## 8. Coût à mesurer honnêtement
 
@@ -429,7 +452,8 @@ pas l'égalité à une source globale.
    toute complétion ; tuer le mutant qui réutilise `acu`.
 3. Dans Lane4 seulement, remplacer la boucle de paires de lentille par
    `Q4SeedAxisTopR4`, router `OVERFLOW` sans perte, puis brancher son
-   `census_replay`. Comparer les vrais `I_B/U_B` au brute.
+   `census_replay`. Factoriser ensuite `S_ab` par arête et recevoir la sélection
+   plate en deux passes. Comparer les vrais `I_B/U_B` au brute.
 4. Remplacer ensuite le premier scan témoin par le best-first Morton
    `Q_theta`. C'est le changement qui attaque directement les milliards
    observés et le temps résiduel.

@@ -85,12 +85,13 @@ ancienne phrase imposant le rejet global des positions dupliquées est périmée
 - [`AUDIT_CONSTRUCTIF_AXIS_DEVICE_2C14313_20260815.md`](AUDIT_CONSTRUCTIF_AXIS_DEVICE_2C14313_20260815.md) :
   réception bornée du pivot q4 : mêmes comptes que le brute sur petits nuages
   et `59x` moins de propositions à `n=6000`, puis localisation du scan témoin
-  restant. Le port device est une baseline CSR plate, host-only dans l'audit ;
-  `6be6bd8` accélère son builder par grille. Les gates suivantes branchent le
-  replay de census, comparent le CSR grille au scan naïf, puis remplacent ce CSR
-  par la wavefront BVH `Q_theta`. L'addendum qualifie aussi le premier attempt
-  G4 : compilation réussie, `rc=127` avant rapatriement/verdict, cible
-  `TERMINATED`, donc aucune parité ni aucun débit reçu.
+  restant. Le port device est une baseline CSR plate ; `6be6bd8` accélère son
+  builder par grille. Le brut G4 récupéré à `c03c0ee` reçoit la parité des
+  champs fixes `SeedOut` sur les CSR fournis et mesure `55,33 ms` pour
+  `293,6 M` incidences au plus grand lot complet. Il ne reçoit ni source K=10,
+  ni census, ni `warm_e2e`. Les gates suivantes factorisent `site_ids` par
+  arête Lane4, branchent le replay de census, comparent le CSR développé au
+  scan naïf, puis remplacent ses visites par la wavefront BVH `Q_theta`.
 - [`AUDIT_RECU_GRAM_UNIFIE_1FD9CF1_20260814.md`](AUDIT_RECU_GRAM_UNIFIE_1FD9CF1_20260814.md) :
   contrôle algébrique Python corrélé et borné des identités q4 `Delta=O^2` et
   `Phi=O*J` sur 10 000 fixtures u16 non dégénérées ; il ne reçoit ni microkernel
