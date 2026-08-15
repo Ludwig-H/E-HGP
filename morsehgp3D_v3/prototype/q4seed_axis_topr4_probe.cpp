@@ -171,7 +171,7 @@ struct Bilan {
   long long morts_degen = 0, morts_T2 = 0, morts_perm = 0, morts_gap = 0, ouverts = 0;
   long long candidats = 0, groupes = 0, shallow = 0;
   long long manquants = 0, bornes = 0, identites_fausses = 0, gaps_faux = 0;
-  long long debordes = 0, degeneres = 0, cand_max = 0;
+  long long debordes = 0, degeneres = 0, cand_max = 0, refus_r4 = 0;
   long long fate_exact = 0, fate_cap = 0, fate_degen = 0, fate_hors = 0;
   long long doublons_bruts = 0, refus_abusifs = 0, ids_max = 0;
 };
@@ -195,6 +195,7 @@ void bilan_seed(const std::vector<Pt>& P, int ia, int ib, int ix, int r4,
     case SeedVerdict::kMortPermanents: ++out->morts_perm; break;
     case SeedVerdict::kMortGap: ++out->morts_gap; break;
     case SeedVerdict::kDebordement: ++out->debordes; return;
+    case SeedVerdict::kRefusR4: ++out->refus_r4; return;
     case SeedVerdict::kOuvert: ++out->ouverts; break;
   }
   const long long cand = sel.n_entrants + sel.n_sortants;
@@ -554,6 +555,7 @@ int campagne(const std::string& family, long long n, long long coord, long long 
     g.manquants += a.manquants; g.bornes += a.bornes;
     g.identites_fausses += a.identites_fausses; g.gaps_faux += a.gaps_faux;
     g.debordes += a.debordes; g.degeneres += a.degeneres;
+    g.refus_r4 += a.refus_r4;
     g.fate_exact += a.fate_exact; g.fate_cap += a.fate_cap;
     g.fate_degen += a.fate_degen; g.fate_hors += a.fate_hors;
     g.doublons_bruts += a.doublons_bruts; g.refus_abusifs += a.refus_abusifs;
@@ -566,12 +568,12 @@ int campagne(const std::string& family, long long n, long long coord, long long 
               " cand_max=%lld shallow=%lld manquants=%lld bornes=%lld"
               " identites_fausses=%lld gaps_faux=%lld degeneres=%lld debordes=%lld"
               " fate_exact=%lld fate_cap=%lld fate_degen=%lld fate_hors=%lld"
-              " doublons_bruts=%lld refus_abusifs=%lld ids_max=%lld\n",
+              " doublons_bruts=%lld refus_abusifs=%lld ids_max=%lld refus_r4=%lld\n",
               family.c_str(), m, r4, seeds, g.morts_T2, g.morts_perm, g.morts_gap,
               g.ouverts, g.candidats, g.groupes, g.cand_max, g.shallow, g.manquants,
               g.bornes, g.identites_fausses, g.gaps_faux, g.degeneres, g.debordes,
               g.fate_exact, g.fate_cap, g.fate_degen, g.fate_hors,
-              g.doublons_bruts, g.refus_abusifs, g.ids_max);
+              g.doublons_bruts, g.refus_abusifs, g.ids_max, g.refus_r4);
   const long long fautes = g.manquants + g.bornes + g.identites_fausses +
                            g.gaps_faux + g.doublons_bruts + g.refus_abusifs;
   if (mut != Mutant::kNone) {
@@ -620,6 +622,10 @@ int exact_once(const std::string& family, long long n, long long coord, long lon
   // --- 1. Lane4 : prefixes owner aigus, selection, provenance primaire.
   std::map<std::vector<int>, int> produits;
   long long emissions = 0, q3_morts_utiles = 0;
+  // UN DEBORDEMENT N'EST PAS UNE MORT, DONC IL NE PEUT PAS ETRE UN `continue`
+  // MUET. Ici la route retenue est le REFUS : la masse du seed n'est ni prouvee
+  // morte ni enumeree, donc l'exact-once ne peut pas conclure.
+  long long debordements = 0, refus_r4 = 0;
   std::vector<int> scratch;
   for (int ia = 0; ia < m; ++ia)
     for (int ib = ia + 1; ib < m; ++ib)

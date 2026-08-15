@@ -147,8 +147,9 @@ preuve de source ni une mesure de tous les seeds.
    64 `SitePower` au cours des passes. La compilation G4 doit publier registres,
    local memory par thread, occupancy et spills ; une parité verte ne prédit
    aucun débit.
-6. Aucune compilation CUDA ou exécution GPU n'a encore été observée dans cet
-   audit. Les trois CTests verts sont host-only.
+6. À ce snapshot `2c14313`, aucune compilation CUDA ou exécution GPU n'avait
+   encore été observée. Les trois CTests verts de cette section sont host-only ;
+   la session postérieure est qualifiée séparément en section 8.
 7. Les préconditions d'IDs injectifs/disjoints de la sélection restent le P0
    antérieur ; déplacer l'appel sur device ne les impose pas.
 
@@ -191,6 +192,55 @@ Tant que le type `Selection` ne garantit pas ces invariants, le caller doit les
 préflighter et une violation vaut `HORS_DOMAINE`, non dégénérescence
 géométrique.
 
+## 4.2 Deuxième gain immédiat : factoriser le CSR par arête Lane4
+
+Le voisinage parcouru est attaché à l'arête, pas au seed. Pour une arête
+`e=(a,b)`, poser
+
+```text
+S_ab = {z != a,b : ||2z-a-b||^2 <= 4*D2}
+Q4Seed3 = (edge_id, Third4_id)
+```
+
+Le builder courant recopie `S_ab` pour chaque `Third4`, en retirant seulement
+le `Third4` lui-même. Un format exact plus compact stocke donc :
+
+```text
+Lane4EdgeBatch {
+  edges = {a,b,D2}
+  carrier_offsets, carrier_ids
+  site_offsets, site_ids
+  r4
+}
+```
+
+Le kernel lit la liste de l'arête et ignore exactement une occurrence de son
+`Third4`. Les carriers sont produits par Lane4 et ne sont jamais des records
+q3. Une instrumentation locale non versionnée au `c03c0ee` donne :
+
+| `n` | arêtes q4 | seeds q4 | seeds/arête |
+|---:|---:|---:|---:|
+| 1 500 | 57 680 | 628 990 | 10,90 |
+| 3 000 | 122 952 | 1 384 420 | 11,26 |
+| 6 000 | 257 996 | 2 956 531 | 11,46 |
+
+La multiplicité carrier est donc proche de onze, mais le facteur exact sur la
+composante `site_ids` vaut
+`sum_e c_e*(m_e-1) / sum_e m_e` et doit être publié : les voisinages peuvent
+être corrélés à `c_e`. La factorisation ne réduit pas encore le nombre de
+visites site-seed. Pour cela, la baseline plate effectue deux passes : la
+première classifie chaque site une fois et maintient simultanément les `r4`
+meilleurs entrants/sortants ;
+après `k=r4-p`, la seconde range-reporte les deux cutoffs et tous leurs ties.
+Le nombre causal d'appels `site_power/classify` passe de cinq à deux par
+incidence, puis `census_replay` retire le scan par apex.
+
+La gate développe à la volée le `Lane4EdgeBatch` vers l'ancien CSR et exige
+l'égalité des IDs par seed. Elle compare ensuite les vrais
+`SupportKey -> (owner,primary,I_B,U_B,multiplicite,fate)` au flat scan et au
+brute borné. Midpoints demi-entiers, `Third4` oublié lors du masque, ordre des
+cellules, ties et PointId colocalisés sont des fixtures obligatoires.
+
 ## 5. La primitive J2 à écrire, sans réinventer un index de roots
 
 Pour un cutoff rationnel `theta=p/q`, `q>0`, poser
@@ -216,6 +266,12 @@ quadratique convexe est à un des huit coins ; un maximum strictement négatif
 crédite `ALL`. Zéro descend. Une première passe entretient le heap de
 `k<=r4`, une seconde range-reporte tout le groupe égal ; le census s'arrête au
 huitième intérieur.
+
+Le `ALL` par maximum négatif s'applique directement au census. Pour le top-r,
+il faut en plus certifier sur tout le nœud le signe de `B` et la classe
+entrant/sortant ; sinon le nœud reste `MIXED` et descend. Un LBVH AABB exact
+peut visiter tout le voisinage au pire : `O(k log n)` n'est pas une borne reçue.
+Le gain doit être mesuré par `node_visits` et `sites_lus`, jamais supposé.
 
 Avant même le BVH, la baseline plate peut aussi passer de cinq scans à deux
 sans changer son résultat. Le premier scan classifie chaque site une seule
@@ -303,64 +359,97 @@ wavefront BVH pour apprendre si l'arithmétique host/device est identique, mais
 il faut garder `kernel_flat_scan` et `warm_e2e` comme deux métriques sans lien
 de promotion automatique.
 
-## 8. Reçu CUDA incomplet apparu pendant l'audit
+## 8. Reçu CUDA récupéré : pivot positif, portée bornée
 
-Le reçu local
-`receipts/axis_cuda_g4_20260815/transcript.txt`, SHA-256
-`9354b206da302a2f35554988a0427e45e8527ade151f92aa115159b61e9cac10`, porte
-le pin propre `11130cb`. Il établit uniquement :
+Le premier attempt porte le pin propre `11130cb`, le GPU
+`NVIDIA RTX PRO 6000 Blackwell Server Edition`, le pilote `580.173.02`, CUDA
+`12.9` et l'ELF SHA-256
+`3661a39c8a6e558be955b38169b4863d2d613b14badcb54243257e92e1eaa46c`.
+La session de calcul a fini `rc=127` après la matrice mais avant son scp et son
+verdict. Son transcript original SHA-256 `9354b206...` reste récupérable au pin
+`0bf4682`.
 
-- GPU `NVIDIA RTX PRO 6000 Blackwell Server Edition`, pilote `580.173.02` ;
-- CUDA `12.9`, compilation et édition de liens réussies ;
-- ELF produit de SHA-256
-  `3661a39c8a6e558be955b38169b4863d2d613b14badcb54243257e92e1eaa46c` ;
-- fichier distant `out/axis_cuda.txt` annoncé à `72` lignes ;
-- sortie de session `rc=127` **avant** le scp et avant le verdict ;
-- arrêt de la génération ciblée, état `TERMINATED`, aucune autre VM active
-  selon le transcript.
+Une session dédiée a ensuite rapatrié les `72` lignes sans recalculer. Le brut
+local `axis_cuda.txt` a pour SHA-256
+`d91b8b259664e12961e7343ede63add7bdb3bf5afdadfe405af58ac7ec4f0d3f`.
+La récupération finit `rc=0` et certifie la génération exacte `TERMINATED`,
+sans autre VM active selon son transcript SHA-256 `472a93e5...`. L'auditeur
+n'a démarré, interrogé ou arrêté aucune ressource GCP.
 
-Le brut `axis_cuda.txt` n'a pas été rapatrié. Il n'existe donc localement ni
-code par cas, ni parité, ni temps kernel, ni débit recevable. Le reçu vaut
-`FAILED_INCOMPLETE`, pas `PARITE_EXACTE`.
+Le résultat matériel est encourageant : les douze cas publient douze sorties
+device et douze parités avec `ecarts=0`, soit `18 617 211` verdicts de seeds et
+`5 789 713 735` incidences site-seed parcourues. Cette réception porte sur les
+champs fixes de `SeedOut` pour chaque CSR fourni ; elle ne prétend pas que le
+builder a émis tous les seeds. Le débit kernel seul va de
+`4 999,97` à `13 979,84 Msites/s`, pour `11,99--87,80 ms`, et l'accélération
+face au même flat scan host va de `179,4x` à `292,1x`.
 
-Priorité de reprise : préserver le transcript dans un répertoire d'attempt
-immuable, puis récupérer le fichier distant **avant** toute relance de la
-recette, car son build commence par `rm -rf ~/ax`. La VM est arrêtée ; cet audit
-n'autorise et n'effectue aucun redémarrage. Une future session gardée doit
-rapatrier/streamer le brut même si SSH se termine après la matrice.
+Trois lots seulement sont complets (`cap=0`) : `uniform,smax=6` à
+`n=1500/3000/6000`. Ils totalisent `4 969 941` seeds et `489 483 354`
+incidences ; leurs temps kernel sont `11,99/26,87/55,33 ms`. Une régression
+linéaire purement diagnostique de ces trois points donne environ `0,48 s` à
+`n=50000`. C'est une **inférence kernel-only sur une source sous cutoff**, pas
+une mesure 50k et encore moins le `warm_e2e`. Les neuf autres lots sont des
+préfixes `cap=1`, notamment tous les amas et tout `smax=11`.
 
-Le pin `0bf46822416d126e0852391a978c3998e4b4c04f` ajoute une recette dédiée de
-récupération, mais ne contient toujours aucun `axis_cuda.txt`. Son sujet de
-commit ne constitue donc pas un reçu récupéré. Deux corrections minimales sont
-nécessaires avant exécution :
+La parité elle-même est bornée aux champs de `SeedOut` : verdict, compteurs,
+minimum et vingt-quatre IDs par côté. Permanents, shell et census final n'y
+figurent pas. Les lignes de code sont en outre écrites `code=\0`, si bien que
+le parser `int(...)` aurait échoué même si le scp initial avait réussi. Le
+verdict exact est donc `AXIS_FLAT_PREFIX_PARITY`, avec une sous-porte complète
+sur les trois lots `uniform,smax=6`; jamais `PARITE_EXACTE` de la source.
 
-1. écrire le nouveau journal dans un attempt ou dans
-   `recovery_transcript.txt` ; le cleanup courant recopie sur le même
-   `receipts/axis_cuda_g4_20260815/transcript.txt` et détruirait la provenance
-   originale ;
-2. ne pas répéter sans diagnostic la même commande `gcloud compute scp` qui a
-   précédé le `rc=127`. La voie SSH fonctionne déjà : publier d'abord
-   `wc -l` et `sha256sum`, puis streamer `cat ~/ax/out/axis_cuda.txt` vers un
-   fichier local temporaire, vérifier hash et 72 lignes, et seulement ensuite
-   le promouvoir dans le reçu.
+Le résumé `RESULTATS.md` committé à `c03c0ee` ne recopie pas correctement ce
+cardinal : il annonce `14 787 889` verdicts et six configurations, tandis que
+les douze lignes du brut somment exactement à `18 617 211`. Il estime aussi
+`K=10` à environ `750 ms`, mais les neuf lots `smax=11` ou amas sont tronqués
+avant la source complète. Cette estimation K=10 ne peut donc pas servir de
+borne ; le résultat positif reçu est la parité de l'ABI fourni et le débit du
+scan, pas le cardinal de la source K=10.
 
-Cette reprise n'a besoin ni du tar du dépôt ni d'un nouveau build. Supprimer ces
-étapes réduit le temps facturable et évite de mêler le worktree courant à un
-brut produit par `11130cb`.
+La projection K=5 montre également pourquoi le CSR plat doit disparaître :
+`2,45 G` incidences excèdent `INT_MAX`, alors que `AxisJob::site_offset` est un
+`int`. Elles représentent environ `9,8 Go` d'IDs ; `24,6 M` sorties de la
+taille actuelle de `SeedOut` représentent encore environ `5,42 Go`. Passer
+l'offset en 64 bits évite un overflow mais ne rend pas ce trafic industriel.
+La solution raccordable est de produire les seeds par tuile sur device, de
+faire la descente `Q_theta`, de compacter seulement les groupes/fates
+survivants et de libérer la tuile avant la suivante.
 
-La configuration distante publie en outre
-`source par ancre device active pour 52`. Le projet ne doit pas accepter la
-valeur préinitialisée de l'environnement pour cette cible : passer explicitement
-`-DCMAKE_CUDA_ARCHITECTURES=120-real`, publier `ptxas -v`, puis vérifier le
-code objet réellement chargé. Enfin, le runner lui-même a été modifié dans le
-worktree pendant la fenêtre de session et son hash n'est pas dans le reçu.
-Copier et hacher une version immuable du script, puis exporter un snapshot de `HEAD`,
-évite cette ambiguïté au prochain attempt.
+La configuration distante publie enfin
+`source par ancre device active pour 52`, pas une cible native Blackwell
+explicitement reçue. Le prochain lot doit passer
+`-DCMAKE_CUDA_ARCHITECTURES=120-real`, publier `ptxas -v`, corriger
+`code=\0`, et séparer allocation, H2D, kernel, D2H et total. Le résultat
+présent montre que l'arithmétique plate n'est probablement plus le mur sur G4 ;
+il renforce la priorité constructive : supprimer le CSR et le premier scan par
+la wavefront BVH `Q_theta`, plutôt que micro-optimiser les prédicats.
+
+La récupération a écrasé le chemin `transcript.txt` par son propre journal.
+La provenance n'est pas perdue parce que le transcript de calcul original est
+committé à `0bf4682`, mais les prochains attempts doivent utiliser deux noms ou
+répertoires distincts et hacher une copie immuable du runner. Le brut n'avait
+pas reçu de hash pendant le calcul ; sa continuité est cohérente avec le même
+disque persistant, l'horodatage et les 72 lignes, mais son scellement SHA-256
+n'arrive qu'après récupération.
+
+Le `179,4x--292,1x` est mesuré contre un seul thread host. Le chiffre `4--6x`
+contre 48 cœurs du résumé est seulement cette plage divisée par 48 sous scaling
+idéal, pas un run CPU parallèle. De même, un gain BVH `5--10x` est une
+hypothèse à soumettre aux compteurs `node_visits` et `sites_lus`, pas une
+conclusion du flat scan.
+
+Le wrapper CUDA appelle bien la même `evaluate_seed` que l'hôte : il n'existe
+pas de seconde implémentation numérique à faire concorder, ce qui renforce la
+valeur de la porte de compilation. En revanche, `evaluate_seed` exécute
+`seed_axis`, `site_power` et `select_axis_topr4`. La phrase du reçu « le kernel
+n'implémente aucune géométrie » doit se lire « le wrapper ne duplique aucune
+géométrie », pas comme une absence de travail géométrique sur device.
 
 Contrôle local frais au worktree de l'audit : configuration et builds ciblés
 réussis, puis `37/37` CTests `^mhgp3v_(caps_|axis_device)` verts en
 `199,89 s`. Ce vert confirme l'intégration existante ; il ne couvre ni la
-fixture `T2` de l'addendum calottes, ni une parité CUDA, ni la gate CSR
-grille-versus-naïf encore temporaire.
+fixture `T2` de l'addendum calottes, ni la gate CSR grille-versus-naïf encore
+temporaire. La parité CUDA bornée est portée séparément par le reçu ci-dessus.
 
 GCP non utilisé.

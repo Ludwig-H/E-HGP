@@ -8,7 +8,7 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-> **Verdict live au `HEAD=0bf46822416d126e0852391a978c3998e4b4c04f`.**
+> **Verdict live au `HEAD=c03c0ee3b48b147ebb5d8b4e8c1651f42c1c2db6`.**
 > Le pin noyau `a369452` porte `Q4SeedAxisTopR4`, son probe, 39 CTests déclarés,
 > les vrais IDs de census, la capacité 163, les comptes requis et les fates de
 > plateau. Il refuse aussi tout replay après `MORT_GAP` et tout apex dont le
@@ -23,9 +23,10 @@ Cadre : `phase=exploration_v3_hors_registre`,
 > `95b41b7` implémente ensuite l'enveloppe de calottes corrigée et `6be6bd8`
 > accélère par grille la construction du lot device. `0bf4682` committe le
 > tuilage diagnostique, le transcript CUDA incomplet et une recette de
-> récupération ; malgré son sujet de commit, le brut n'est pas encore local.
-> Le worktree courant ne contient que les deux présents audits. Aucune mesure
-> CUDA ou GPU nouvelle n'entre dans le verdict.
+> récupération. `c03c0ee` committe ensuite le brut récupéré, son résumé et la
+> correction future de `code=\0`. Le worktree courant ne contient que les six
+> documents autorisés mis à jour par cet audit. Le brut est relu plus bas ;
+> aucune mesure bout-en-bout n'entre dans le verdict.
 > Q14 est fermée contractuellement : aucune structure de Delaunay n'est
 > autorisée, y compris d'ordre un, comme source, squelette, filtre ou census.
 >
@@ -144,7 +145,9 @@ Cadre : `phase=exploration_v3_hors_registre`,
 > `3/3` CTests host-only passent en `1,48 s`, mais le test nominal est tronqué
 > (`cap=1`) et aucune descente BVH n'existe. Le jalon immédiat est de brancher
 > `census_replay` après owner/positivité afin de supprimer le second scan et de
-> produire les vrais `I_B/U_B`. Le jalon suivant est le moteur `Q_theta` AABB
+> produire les vrais `I_B/U_B`, puis de factoriser le voisinage par arête et de
+> passer la sélection plate de cinq scans à deux. Le jalon suivant est le
+> moteur `Q_theta` AABB
 > partagé par First/Last, census et shell, avec un batch complet explicite et
 > les identités comparées. Deux portes de sûreté restent nettes :
 > `DEBORDEMENT` est aujourd'hui agrégé aux morts dans le raccord et l'API fixe
@@ -189,29 +192,54 @@ Cadre : `phase=exploration_v3_hors_registre`,
 >
 > La recette G4 au pin `11130cb` prévoyait douze cas pouvant durer chacun
 > `900 s`, soit `10 800 s`, contre un arrêt invité à `4 500 s`; son
-> `RUN_TIMEOUT=3300` n'encadrait rien. Le worktree réduit ce budget à huit cas
-> de `300 s`, mais doit encore imposer un timeout global, le cardinal exact de
-> la matrice et un fate `PREFIX_PARITY` pour tout `cap=1`.
+> `RUN_TIMEOUT=3300` n'encadrait rien. `0bf4682` réduit la prochaine matrice à
+> huit cas de `300 s`, mais doit encore imposer un timeout global, le cardinal
+> exact de la matrice et un fate `PREFIX_PARITY` pour tout `cap=1`.
 >
 > Un attempt concurrent du pin propre `11130cb` a compilé sous CUDA 12.9 sur
 > RTX PRO 6000 Blackwell, puis a fini `rc=127` avant scp et avant verdict. Le
-> reçu local ne contient que le transcript SHA-256 `9354b206...`; le fichier
-> distant de 72 lignes n'a pas été rapatrié. Il n'existe donc aucune mesure de
-> parité ou de débit recevable. La génération ciblée est certifiée
-> `TERMINATED`. Avant toute relance, préserver cet attempt et récupérer le brut
-> distant sans exécuter le `rm -rf ~/ax` du runner. La compilation a en outre
-> ciblé `52`, pas explicitement `120-real`; la prochaine recette doit fixer
-> l'architecture et hacher sa propre copie immuable. La recette n'a pas été
-> exécutée par l'audit ; GCP n'a pas été utilisé.
+> brut de 72 lignes a ensuite été récupéré sans recalcul, SHA-256 `d91b8b25...`;
+> la seconde génération finit `rc=0` et est certifiée `TERMINATED`. Les douze
+> lignes de parité donnent `ecarts=0` sur `18 617 211` verdicts et
+> `5 789 713 735` incidences. Le kernel plat atteint
+> `4 999,97--13 979,84 Msites/s` en `11,99--87,80 ms`, soit
+> `179,4x--292,1x` le même scan host.
 >
-> `0bf4682` ajoute `session_ax_recuperation_g4.sh`, mais ne récupère encore
-> aucun fichier : le dossier reçu contient toujours le seul transcript. La
-> recette ne doit pas être lancée avant deux corrections de preuve. Elle écrit
-> son propre log dans le même `transcript.txt` et écraserait le reçu original ;
-> elle réemploie en outre exactement la voie `gcloud compute scp` qui vient de
-> rendre `127`. Employer un répertoire d'attempt distinct et streamer
-> `sha256sum` puis `cat` via la commande SSH déjà fonctionnelle, avec compte de
-> lignes et hash local, préserve l'original et évite de répéter le même échec.
+> La réception reste volontairement bornée : seuls trois lots
+> `uniform,smax=6,n=1500/3000/6000` ont `cap=0`; tous les autres sont des
+> préfixes. Sur ces trois points, une extrapolation linéaire donne environ
+> `0,48 s` de **kernel seul** à 50k, sans autorité de source. `SeedOut` omet
+> permanents/shell/census, H2D et total ne sont pas mesurés, et le code a ciblé
+> `52`. Les marqueurs `code=\0` cassent aussi le parser. Verdict :
+> `AXIS_FLAT_PREFIX_PARITY`, pas source exacte ni `warm_e2e`. La récupération a
+> écrasé le chemin du transcript initial ; l'original reste au pin `0bf4682`,
+> mais les prochains attempts doivent séparer leurs journaux. Le fichier
+> `RESULTATS.md` de `c03c0ee` annonce `14 787 889` verdicts sur six
+> configurations ; le brut en contient exactement `18 617 211` sur douze runs.
+> Il qualifie aussi `K=10` à environ `750 ms`, alors que les trois runs
+> `smax=11` de chaque famille ont tous `cap=1` : ce chiffre n'est pas reçu.
+> Le batch K=5 projeté est lui-même trop grand pour l'ABI courante :
+> `2,45 G > INT_MAX` incidences, environ `9,8 Go` d'IDs et `5,42 Go` de
+> `SeedOut`. La seconde est seulement non réfutée par cet étage ; tuilage,
+> production device et compaction sont obligatoires avant une mesure 50k.
+> Une étape intermédiaire exacte évite déjà la duplication : le voisinage
+> `S_ab` est commun à tous les `Q4Seed3=(a,b,x)` d'une arête. Une instrumentation
+> locale non versionnée compte `57 680/122 952/257 996` arêtes pour
+> `628 990/1 384 420/2 956 531` seeds à
+> `uniform,n=1500/3000/6000`, soit `10,90/11,26/11,46` seeds par arête. Un
+> `Lane4EdgeBatch` stocke `S_ab` une fois, puis le kernel ignore seulement le
+> `Third4` courant. Le gain d'octets pondéré reste à mesurer par
+> `sum c_e*(m_e-1)/sum m_e`; cela réduit H2D/HWM, pas encore les visites. Les
+> deux scans exacts puis `census_replay` s'attaquent à celles-ci avant le BVH.
+> Le brut n'a été haché qu'après récupération, pas scellé pendant le calcul ;
+> le lien repose sur le disque persistant, l'horodatage et les 72 lignes. Enfin,
+> `4--6x` contre 48 cœurs et le gain BVH `5--10x` du résumé sont des hypothèses,
+> pas des mesures de ce reçu. Le wrapper CUDA n'a pas une seconde
+> implémentation divergente, ce qui est une bonne propriété de parité ; la
+> fonction partagée `evaluate_seed` calcule toutefois bien `seed_axis`, les
+> puissances et la sélection. Dire que le kernel ne contient « aucune
+> géométrie » est donc impropre.
+> L'audit n'a pas utilisé GCP.
 
 > **Alerte au pin logiciel `6e815d28b3e229a0161eb00d6fa0c9a272efac5d`.** Les
 > commits `89774d0`, `e3f1925` et `88a9ba8` ajoutent respectivement

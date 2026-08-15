@@ -31,12 +31,12 @@ situés de part et d'autre d'une frontière InSphere arbitrairement proche peuve
 est un sous-domaine sûr ; une mesure u16 générale ne qualifie ni le payload ni
 le SLO binary64.
 
-La recette G4 q4 courante reste non reçue : son parser mélange sweeps et
+L'ancienne recette G4 `AxisTop8` reste non reçue : son parser mélange sweeps et
 exact-once de sorte que le cardinal attendu est impossible, cherche des champs
 du probe supprimé, décide avant de rapatrier une réfutation et ne porte pas de
-deadline globale. Le noyau qu'elle lancerait garde en outre le P0 des
-identités d'entrée ci-dessous. Aucun nouveau reçu 50k ne doit être
-déduit de ces probes CPU.
+deadline globale. Elle ne doit pas être confondue avec le reçu CUDA borné du
+flat scan axial décrit plus bas. Aucun reçu 50k ne doit être déduit de ces
+probes CPU.
 
 La première sonde J0 de `acd792d` reste elle aussi diagnostique. Sur la famille
 intégrée `two_lines,n=10`, elle retourne code zéro avec vingt candidats q2 et
@@ -91,13 +91,33 @@ conserve les `89 796` q4 du chemin plat et remplace `48 791 131` couples par
 `830 044` roots proposés, soit environ `59x` moins. Le mur reste `25--28 s`
 parce que chaque seed balaie encore tout son CSR témoin : le prochain jalon est
 donc d'abord le branchement de `census_replay` pour supprimer le second scan,
-puis la descente `Q_theta` sur BVH pour supprimer le premier. `DEBORDEMENT`
+la factorisation par arête et les deux passes plates, puis la descente
+`Q_theta` sur BVH pour supprimer le premier scan. `DEBORDEMENT`
 doit continuer ou refuser, jamais être compté comme une mort. `2c14313` porte
 le flat scan sur device comme baseline de parité, mais ne contient pas encore
-cette descente. L'attempt G4 du pin `11130cb` compile sous CUDA 12.9, mais finit
-`rc=127` avant le rapatriement du brut et avant le verdict ; sa cible est
-certifiée `TERMINATED`, mais aucune parité ni aucun débit n'est reçu. Préserver
-et récupérer le fichier distant avant toute relance qui effacerait `~/ax`.
+cette descente. Le brut G4 produit au pin `11130cb` est désormais récupéré et
+committé à `c03c0ee`. Sur les douze CSR fournis, les champs fixes de `SeedOut`
+ont `ecarts=0` pour `18 617 211` seeds. Les trois seuls lots source complets
+(`cap=0`) sont `uniform,smax=6,n=1500/3000/6000` ; à `n=6000`, le kernel plat
+parcourt `293,6 M` incidences en `55,33 ms`, soit `5 307 Msites/s`. Une
+projection diagnostique donne environ `0,46--0,48 s` pour ce seul étage à 50k
+dans ce profil K=5. Elle ne vaut ni mesure 50k, ni K=10 — tous les lots
+`smax=11` sont tronqués — ni `warm_e2e`. Le reçu omet en outre source globale,
+census, H2D/D2H et payload ; la compilation annonce l'architecture `52`, pas
+une cible Blackwell native explicitement reçue. Le monolithe extrapolé ne peut
+d'ailleurs pas être le raccord industriel : `2,45 G` incidences dépassent les
+offsets CSR `int`, représentent environ `9,8 Go` d'IDs, et `24,6 M` sorties
+fixes représenteraient encore environ `5,42 Go`. Il faut produire, sélectionner
+et compacter par tuile sur device ; la projection signifie seulement que la
+seconde n'est pas réfutée par le kernel de sélection pris isolément. Un pont
+plus petit est déjà disponible : stocker `S_ab` une seule fois par arête propre
+à Lane4 et ne transporter par seed que son `Third4`. Sur les lots
+`uniform,n=1500/3000/6000`, le diagnostic compte environ
+`10,90/11,26/11,46` seeds par arête. Cette factorisation retire donc près de
+onze répétitions de carriers par arête ; le gain exact en octets `site_ids`
+reste à pondérer par la taille de chaque voisinage. Une sélection plate en deux
+passes au lieu de cinq, suivie de `census_replay`, réduit ensuite les lectures
+sans changer la sémantique.
 `6be6bd8` accélère déjà la construction du lot par une grille partagée ; sa
 prochaine porte compare le CSR complet à un scan naïf sur petit `n`. Pour
 borner ensuite la HWM, un tuilage exact est possible : propriétaire par sommet

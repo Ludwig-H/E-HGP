@@ -685,18 +685,50 @@ encore chaque liste `inner` par seed. Le port device de `2c14313` est donc une
 baseline de flat scan et de parité, pas encore l'architecture : sa prochaine
 étape peut immédiatement remplacer le rescan de census par
 `census_replay(sel,apex,seed3,pw)`, avec fates séparés et vrais `I_B/U_B`.
-Ensuite seulement, la forme J2 remplace le CSR dupliqué par les wavefronts
+Avant J2, `Lane4EdgeBatch` factorise le voisinage par arête et la sélection
+plate passe de cinq scans à deux. Ensuite, la forme J2 remplace leurs visites
+par les wavefronts
 `(SeedId,WitnessNode,side,cutoff)` et réutilise `Q_theta` pour top-k, census et
 shell. `DEBORDEMENT` est une continuation ou un refus, jamais une mort. Le reçu
 borné, les limites du batch et la gate causale sont dans
 [`audits/AUDIT_CONSTRUCTIF_AXIS_DEVICE_2C14313_20260815.md`](audits/AUDIT_CONSTRUCTIF_AXIS_DEVICE_2C14313_20260815.md).
 
-Le premier attempt G4 compile ce flat scan sous CUDA 12.9 mais termine
-`rc=127` avant le scp du brut et avant tout verdict. Le transcript certifie la
-cible `TERMINATED`; il ne reçoit aucune parité ni aucun débit. Le prochain
-attempt doit d'abord préserver/récupérer le fichier distant, fixer
-`CMAKE_CUDA_ARCHITECTURES=120-real`, hacher une copie immuable du runner et
-séparer `PREFIX_PARITY` de la parité d'un batch complet.
+Le brut du premier attempt G4 est maintenant récupéré et committé à `c03c0ee`.
+Les douze CSR fournis donnent `ecarts=0` sur les champs fixes de `SeedOut`, soit
+`18 617 211` seeds. La parité host/device du noyau plat est donc un résultat
+positif ; la complétude de source est une porte distincte. Seuls les trois lots
+`uniform,smax=6,n=1500/3000/6000` ont `cap=0`. Le dernier parcourt `293,6 M`
+incidences en `55,33 ms` (`5 307 Msites/s`) ; son extrapolation à 50k vaut
+environ `0,46--0,48 s` pour le kernel seul à K=5. Tous les lots `smax=11` sont
+tronqués, donc le reçu ne mesure pas K=10. Il ne chronomètre ni construction,
+ni H2D/D2H, ni census, ni aval, et la configuration annonce `52` plutôt qu'une
+cible Blackwell native explicitement reçue. La prochaine porte doit fixer
+`CMAKE_CUDA_ARCHITECTURES=120-real`, publier les phases temporelles, hacher une
+copie immuable du runner et séparer parité `SeedOut`, `SOURCE_BATCH_COMPLETE`
+et `warm_e2e`.
+
+La projection rend aussi le raccord physique monolithique impossible :
+`2,45 G` incidences dépassent `INT_MAX`, valent environ `9,8 Go` d'IDs et les
+`24,6 M` `SeedOut` fixes environ `5,42 Go`. Le jalon industriel n'élargit donc
+pas simplement l'offset : il produit les seeds dans une tuile device, descend
+le BVH `Q_theta`, compacte uniquement les groupes/fates survivants, puis libère
+la tuile. Le tuilage exact ci-dessous donne la frontière de travail ; les
+offsets 64 bits ne restent qu'un garde de diagnostic, pas une raison de
+matérialiser le CSR global.
+
+Le premier format device utile est donc factorisé par arête de Lane4 :
+`EdgeBatch={a,b,D2,Third4[],S_ab[]}`, où
+`S_ab={z!=a,b:||2z-a-b||^2<=4D2}` est stocké une fois et le kernel ignore le
+`Third4=x` courant. Aucun objet q3 n'entre dans cette ABI. Une instrumentation
+locale au pin `c03c0ee` trouve `10,90/11,26/11,46` seeds par arête sur
+`uniform,n=1500/3000/6000`. Cela localise une répétition proche de onze au
+niveau carrier, mais le facteur H2D/HWM exact doit publier
+`sum_e c_e*(m_e-1) / sum_e m_e`, car `c_e` et `m_e` peuvent être corrélés.
+Cette factorisation ne réduit pas encore les visites témoins. Le noyau exact
+enchaîne alors deux scans — classification et top-`r4` simultanés, puis
+range-report des deux cutoffs — au lieu des cinq
+scans courants, et `census_replay` supprime le rescan aval. Le BVH remplace
+ensuite ce second scan sans modifier l'ABI logique.
 
 La matérialisation peut être bornée par un tuilage exact du domaine déjà couvert
 par `dmax`. Chaque support est émis dans la tuile de son sommet
