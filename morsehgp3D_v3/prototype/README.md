@@ -54,6 +54,7 @@ Contrat et preuves : [`../audits/NOTE_SOLUTION_CONTRAT_SOURCE_AIGUE_20260814.md`
 | **dimensionnement** | `lane_source_scale_probe.cpp`, `caps_admissible_probe.cpp` | mesure de l'objet (J0) |
 | **dominance 432** | `directional_dominance.hpp`, `directional_dominance_probe.cpp` | préfiltre d'ancre par sous-cône et hauteur — fermeture croissante avec `n` |
 | **préfiltre combiné** | `combined_prefilter_probe.cpp` | `h_coeur + h_a + h_b` sur un rectangle CK ; trois comptes prouvés disjoints, décision par histogramme et non par paire |
+| **cœur-boule** | `spindle_core_ball.hpp`, `core_ball_probe.cpp` | le cœur d'un rectangle en **forme close** — boule inscrite tangente au fuseau — et les deux primitives sphère–boîte qui rendent le comptage `O(1)` par sous-arbre |
 | **oracles et juges** | `../oracle/*`, `q4_brute_oracle.cpp`, `anchored_catalogue.hpp` | arithmétique volontairement différente de la production |
 
 ## Ce qui reste, et qui porte encore une idée fermée
@@ -153,6 +154,37 @@ Le probe est `counter-only` : il compte des ancres survivantes, jamais des
 supports. Un rectangle non décidé compte toutes ses paires comme survivantes,
 donc la mesure **majore** le résiduel. Contrat et preuves : `../PROPOSITION.md`
 section 6bis.
+
+## Cœur-boule — le changement de primitive du 15 août 2026
+
+Raisonner par AABB ne rend pas seulement la borne plus lâche : cela fait
+résoudre le mauvais problème. Une boîte ne sait poser que « ce site est-il
+témoin », donc on visite les sites ; la question réelle est « combien de
+témoins », un **comptage dans une région**.
+
+Les trois fuseaux sont des lieux angulaires — `W_q = { z : angle(a,z,b) >
+theta_q }` avec `90°`, `120°`, `125,264°` — et la boule centrée au milieu de
+`[a,b]` de rayon `kappa_q |ab|` y est inscrite **tangentiellement**, donc
+optimale : `kappa_2 = 1/2`, `kappa_3 = sqrt(3)/6`, `kappa_4 = sin(15°)`. Le cœur
+d'un rectangle s'en déduit en une soustraction, sans coins ni `i128` :
+
+`R_q = kappa_q (d - r_A - r_B) - (r_A + r_B)/2`.
+
+Non vide dès que `s > 1/kappa_q`, soit `2,000 / 3,464 / 3,864` — la séparation
+du dossier portant sur l'**écart** des boules et non sur la distance des
+centres. Le probe grave ce seuil à environ un centième près.
+
+Deux fautes envisagées n'en sont pas, et c'est inscrit dans l'en-tête :
+arrondir la division rationnelle vers le haut d'une unité est absorbé par
+l'inégalité stricte, et écrire la disjonction avec `>=` décide exactement
+pareil. Les gater aurait produit des portes ne mordant sur aucun nuage.
+
+`h_coeur` devient une requête `k`-NN avec `k = h_q` : l'ancre meurt si et
+seulement si le `h_q`-ième plus proche voisin du centre est dans le cœur. Aucun
+kd-tree n'est ajouté — l'octree Morton porte déjà des intervalles
+`[first, last]`, donc le compte d'un sous-arbre est en `O(1)` ; il ne manquait
+que les deux primitives sphère–boîte. Spécification :
+[`../audits/NOTE_CLAUDE_COEUR_BOULE_FORME_CLOSE_20260815.md`](../audits/NOTE_CLAUDE_COEUR_BOULE_FORME_CLOSE_20260815.md).
 
 ## Réfutations gravées dans le code
 

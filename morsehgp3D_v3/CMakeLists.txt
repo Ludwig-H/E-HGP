@@ -4741,3 +4741,96 @@ mhgp3v_add_expected_code_test_for(mhgp3v_combined_prefilter_probe
   mhgp3v_combined_mutant_corner64_sept_coins "corner64 != corner512" 3
   --points=120 --family=uniform --seed=3 --separation=6 --smax=11
   --compare-corner512 --inject=corner64-sept-coins --juge=120)
+
+# ---------------------------------------------------------------------------
+# CŒUR-BOULE EN FORME CLOSE — `prototype/spindle_core_ball.hpp`.
+#
+# Spécification : audits/NOTE_CLAUDE_COEUR_BOULE_FORME_CLOSE_20260815.md.
+# Ces portes gravent la preuve AVANT toute mesure de fermeture, comme la note
+# s'y engage. Elles ne mesurent aucun résiduel et ne reçoivent aucune source.
+#
+# Trois familles de portes, et ce que chacune ne peut pas laisser passer :
+#
+#   `tangence`   les six points entiers qui encadrent `kappa_2`, `kappa_3` et
+#                `kappa_4` à une unité près des DEUX côtés. Le juge y est le
+#                fuseau exact en entiers, qui n'emploie aucune constante.
+#   `derive`     le terme `-S2` n'est pas décoratif : sans lui la boule déborde
+#                du côté de `A` et certifie ce que la paire extrême refute.
+#   nuage        complétude — la descente avec élagage et crédit en bloc doit
+#                compter EXACTEMENT ce que compte le balayage direct — et
+#                sûreté, chaque témoin certifié étant reconfronté au fuseau.
+#
+# Les planchers `--min-coeurs`, `--min-bulk` et `--min-elagues` interdisent le
+# vert par vacuité : une boule toujours vide passerait sinon toutes les portes
+# de sûreté et de complétude ci-dessus sans rien exercer.
+# ---------------------------------------------------------------------------
+add_executable(mhgp3v_core_ball_probe prototype/core_ball_probe.cpp)
+target_include_directories(mhgp3v_core_ball_probe PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(mhgp3v_core_ball_probe PRIVATE mhgp)
+target_compile_options(mhgp3v_core_ball_probe PRIVATE -Wall -Wextra -Werror)
+
+add_test(NAME mhgp3v_core_ball_tangence_code
+         COMMAND mhgp3v_core_ball_probe --fixture=tangence)
+add_test(NAME mhgp3v_core_ball_tangence
+         COMMAND mhgp3v_core_ball_probe --fixture=tangence)
+set_tests_properties(mhgp3v_core_ball_tangence PROPERTIES PASS_REGULAR_EXPRESSION
+  "fixture tangence juge_ok=6 boule_certifie=3 faux=0")
+
+# LE SEUIL DE SEPARATION, ET UNE ERREUR CORRIGEE. La note annonçait d'abord
+# `s > 2 + 1/kappa_q` en supposant la convention WSPD `d >= s max(r)` ; le
+# dossier sépare en réalité sur l'ÉCART des boules, `d - r_A - r_B >= s max(r)`,
+# donc le seuil est `s > 1/kappa_q` — 2,000 / 3,464 / 3,864. Le cœur naît bien
+# plus tôt qu'écrit. Les dix lignes de la fixture encadrent les trois
+# constantes, et deux d'entre elles (`s=3,4` en q3, `s=3,84` en q4) les serrent
+# à environ un centième : sans elles les mutants de constante survivraient ici.
+add_test(NAME mhgp3v_core_ball_seuil_code
+         COMMAND mhgp3v_core_ball_probe --fixture=seuil)
+add_test(NAME mhgp3v_core_ball_seuil
+         COMMAND mhgp3v_core_ball_probe --fixture=seuil)
+set_tests_properties(mhgp3v_core_ball_seuil PROPERTIES PASS_REGULAR_EXPRESSION
+  "fixture seuil verifies=10 mutant=none")
+
+mhgp3v_add_expected_code_test_for(mhgp3v_core_ball_probe
+  mhgp3v_core_ball_seuil_mutant_kappa3 "encore sous 1/kappa_3" 3
+  --fixture=seuil --inject=boule-kappa3-sur)
+mhgp3v_add_expected_code_test_for(mhgp3v_core_ball_probe
+  mhgp3v_core_ball_seuil_mutant_kappa4 "encore sous 1/kappa_4" 3
+  --fixture=seuil --inject=boule-kappa4-sur)
+
+add_test(NAME mhgp3v_core_ball_derive_code
+         COMMAND mhgp3v_core_ball_probe --fixture=derive)
+add_test(NAME mhgp3v_core_ball_derive
+         COMMAND mhgp3v_core_ball_probe --fixture=derive)
+set_tests_properties(mhgp3v_core_ball_derive PROPERTIES PASS_REGULAR_EXPRESSION
+  "fixture derive certifies=[1-9][0-9]* faux=0")
+
+foreach(fam uniform eight_clusters terrain)
+  add_test(NAME mhgp3v_core_ball_nuage_${fam}
+    COMMAND mhgp3v_core_ball_probe --points=400 --family=${fam} --seed=3
+            --separation=8 --min-coeurs=200 --min-bulk=50 --min-elagues=500)
+endforeach()
+
+# LES MUTANTS. Sans eux les portes ci-dessus sont des affirmations, pas des
+# épreuves. Trois cassent la sûreté (code 1), deux la complétude (code 3).
+mhgp3v_add_expected_code_test_for(mhgp3v_core_ball_probe
+  mhgp3v_core_ball_mutant_kappa3 "certifie" 1
+  --fixture=tangence --inject=boule-kappa3-sur)
+mhgp3v_add_expected_code_test_for(mhgp3v_core_ball_probe
+  mhgp3v_core_ball_mutant_kappa4 "certifie" 1
+  --fixture=tangence --inject=boule-kappa4-sur)
+mhgp3v_add_expected_code_test_for(mhgp3v_core_ball_probe
+  mhgp3v_core_ball_mutant_rayon_plus_deux "certifie" 1
+  --fixture=tangence --inject=boule-rayon-plus-deux)
+mhgp3v_add_expected_code_test_for(mhgp3v_core_ball_probe
+  mhgp3v_core_ball_mutant_inclus_large "certifie" 1
+  --fixture=tangence --inject=boule-inclus-large)
+mhgp3v_add_expected_code_test_for(mhgp3v_core_ball_probe
+  mhgp3v_core_ball_mutant_derive "hors du fuseau" 1
+  --fixture=derive --inject=boule-oublie-derive)
+mhgp3v_add_expected_code_test_for(mhgp3v_core_ball_probe
+  mhgp3v_core_ball_mutant_disjoint_centre "l'elagage ou le credit en bloc perd" 3
+  --points=400 --family=uniform --seed=3 --separation=8 --inject=boule-disjoint-centre)
+
+mhgp3v_add_expected_code_test_for(mhgp3v_core_ball_probe
+  mhgp3v_core_ball_refus_non_borne "le mode nuage est borne" 2
+  --points=9000)

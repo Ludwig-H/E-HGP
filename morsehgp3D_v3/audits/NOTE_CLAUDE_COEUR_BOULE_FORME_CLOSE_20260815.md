@@ -89,30 +89,62 @@ D'où, par la section 3 :
 Une soustraction. Aucun coin, aucune énumération, aucun `i128` : les quantités
 sont des distances. C'est le cœur commun du rectangle, en forme close.
 
-## 5. Ce que la forme close explique déjà
+## 5. Le seuil de séparation — première rédaction fausse, corrigée
 
-Avec la séparation WSPD `d >= s max(r_A, r_B)` et `r = r_A + r_B <= 2 max`, le
-pire cas `r_A = r_B` donne `d >= s r / 2`, donc
+> **Cette section a été écrite deux fois.** La première annonçait un seuil
+> `s > 2 + 1/kappa_q`, soit `4,00 / 5,46 / 5,86`, et en tirait une explication
+> du fait 3 du reçu. C'était faux, et la première mesure l'a montré : à `s = 4`
+> tous les cœurs étaient déjà non vides sur les trois familles. L'erreur porte
+> sur la **convention de séparation**, et la version ci-dessous la corrige.
 
-`R_q / r >= kappa_q (s/2 - 1) - 1/2`.
+Le dossier ne sépare pas sur la distance des centres `d >= s max(r)`, comme la
+WSPD classique, mais sur l'**écart des boules** :
 
-Le cœur est donc non vide **si et seulement si** `s > 2 + 1/kappa_q` :
+`separated()` rend `d - r_A - r_B >= s max(r_A, r_B)`.
 
-| lane | `s` minimal | `R_q/r` à `s=6` | à `s=8` | à `s=10` |
+Donc `L2 = d2 - S2 >= s r_max` directement, et avec `S2 <= 2 r_max` :
+
+`R4 = 2 kappa_q L2 - S2 >= 2 r_max (kappa_q s - 1)`.
+
+Le cœur est donc non vide dans le pire cas **si et seulement si**
+`s > 1 / kappa_q` :
+
+| lane | `s` minimal | `R_q / r_max` à `s=6` | à `s=8` | à `s=10` |
 | --- | ---: | ---: | ---: | ---: |
-| q2 | `4,000` | `0,500` | `1,000` | `1,500` |
-| q3 | `5,464` | `0,077` | `0,366` | `0,655` |
-| q4 | `5,864` | `0,018` | `0,276` | `0,535` |
+| q2 | `2,000` | `2,000` | `3,000` | `4,000` |
+| q3 | `3,464` | `0,732` | `1,309` | `1,887` |
+| q4 | `3,864` | `0,553` | `1,070` | `1,588` |
 
-À `s = 6` le cœur q4 vient tout juste de naître — `0,018 r` — alors qu'à `s = 8`
-il vaut quinze fois plus. **C'est l'explication du fait 3 du reçu**
-`prefiltre_combine_20260815`, que je n'avais su que constater : le facteur six
-sur le résiduel entre `s=6` et `s=8`, et le fait que l'écart soit maximal en q4.
-La forme close le prédit sans balayage, et donne le modèle de l'arbitrage :
-rayon du cœur linéaire en `s`, nombre de rectangles en `s^3`.
+Le cœur naît donc **beaucoup plus tôt** que je ne l'avais écrit, et il est déjà
+substantiel à `s = 6`. La mesure confirme le seuil et son ordre : sur
+`uniform, n=400`, la proportion de rectangles à cœur non vide vaut
 
-Deux réserves. Le tableau est un **pire cas** (`r_A = r_B`) ; un rectangle
-déséquilibré fait mieux. Et surtout, `sphere_of(box)` prend la sphère
+| `s` | q2 | q3 | q4 |
+| ---: | ---: | ---: | ---: |
+| `1` | `66,3 %` | `37,5 %` | `34,0 %` |
+| `2` | `100 %` | `74,1 %` | `68,1 %` |
+| `3` | `100 %` | `97,6 %` | `93,3 %` |
+| `4` | `100 %` | `100 %` | `100 %` |
+
+q2 bascule exactement à `2`, q3 et q4 entre `3` et `4`, et q3 — de seuil `3,464`
+contre `3,864` — est plus proche de la complétude à `s = 3`. C'est l'ordre que
+la forme close prédit.
+
+Le seuil corrigé est gravé par la fixture `seuil` du probe, dix lignes exactes
+dont deux serrent les constantes à environ un centième : à `s = 3,4` le vrai q3
+est encore vide alors qu'un `2 kappa_3` surestimé à `3/5` le rendrait positif,
+et de même à `s = 3,84` pour q4 contre `21/40`.
+
+**Ce que cette correction retire.** L'explication du fait 3 du reçu — le facteur
+six sur le résiduel entre `s=6` et `s=8` — ne tient plus telle que je l'avais
+écrite, puisque le cœur q4 n'est pas « à peine né » à `s=6`. Le rayon passe de
+`0,553` à `1,070 r_max`, soit un facteur `7,2` en **volume**, ce qui reste
+compatible avec le facteur six observé ; mais c'est désormais une compatibilité,
+pas une explication, et elle porte sur le cœur-boule quand la mesure portait sur
+la borne-boîte. Je ne revendique donc plus d'avoir expliqué ce fait.
+
+Deux réserves subsistent. Le tableau est un **pire cas** (`r_A = r_B`) ; un
+rectangle déséquilibré fait mieux. Et `sphere_of(box)` prend la sphère
 **circonscrite à l'AABB**, de rayon `sqrt(3)/2` fois le côté, là où la boule
 englobante minimale des points du nœud serait souvent bien plus petite. Ce
 `r` trop grand est de la marge laissée sur la table, et il entre linéairement
@@ -192,7 +224,36 @@ coïncident. Sur Q24 je garde la voie rapide comme pure optimisation de parcours
 doublée d'une porte vérifiant l'égalité des comptes avec et sans elle — l'option
 falsifiable, celle que je défendais.
 
-## 10. Ce que cette note ne revendique pas
+## 10. Ce que le point 1 a produit, et deux non-mutants
+
+Le point 1 du plan est fait : `prototype/spindle_core_ball.hpp` et sa porte
+`mhgp3v_core_ball_*`, dix-huit CTests verts. Aucune mesure de fermeture n'a été
+prise — la note s'y engageait, et l'ordre est tenu.
+
+**La tangence est vérifiée par un juge sans constante.** La fixture confronte
+les six points entiers au fuseau exact en entiers, qui n'emploie ni `kappa`, ni
+boule, ni rationnel : aucun défaut commun n'est possible. Les six verdicts
+tombent comme prévu, et le rayon rationnel tronqué les reproduit **tous les
+six** — `perdus = 0`, avec `R4 = 200 / 115 / 103` pour un `L2 = 200`.
+
+**La complétude est vérifiée séparément de la sûreté.** Sur `n=400` et les trois
+familles, la descente avec élagage et crédit en bloc compte **exactement** ce
+que compte le balayage direct, et les `3,2` millions de témoins certifiés sont
+reconfrontés au fuseau sur toutes les paires de leur rectangle : `faux = 0`.
+C'est la porte qui manquait au préfiltre de ce matin — un élagage trop gourmand
+perd des témoins sans jamais mentir, donc aucune porte de sûreté ne le verrait.
+
+**Deux fautes envisagées n'en sont pas, et le dire est un résultat.** Arrondir
+la division rationnelle vers le haut d'une unité est **absorbé** par l'inégalité
+stricte : avec `f = floor(vrai)`, les distances admises passent de `f-1` à `f`,
+et `f <= vrai`. De même, écrire la disjonction avec `>=` au lieu de `>` décide
+exactement pareil, puisqu'une boîte dont le point le plus proche est à distance
+`R4` n'a aucun point à distance `< R4`. Les deux auraient donné des portes qui
+ne mordent sur aucun nuage — le défaut même que votre contre-audit a trouvé
+ailleurs. Ils sont documentés comme non-mutants dans l'en-tête, et remplacés par
+deux fautes atteignables : `boule-rayon-plus-deux` et `boule-disjoint-centre`.
+
+## 11. Ce que cette note ne revendique pas
 
 Aucune mesure. Aucune promotion de statut : le préfiltre reste `counter-only` et
 ferme des **ancres**, pas des supports. La section 3 est une preuve
