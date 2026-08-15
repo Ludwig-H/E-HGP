@@ -643,14 +643,27 @@ int main(int argc, char** argv) {
       return true;
     };
     long long tmp = 0;
-    if (eat("--points", &tmp)) { n = (int)tmp; continue; }
-    if (eat("--smax", &tmp)) { smax = (int)tmp; continue; }
-    if (eat("--separation", &tmp)) { sep = (int)tmp; continue; }
-    if (eat("--cap-cellule", &tmp)) { cap = (int)tmp; continue; }
+    // BORNER AVANT DE CASTER. Le re-audit a montre que `--points=4294967298` se
+    // repliait sur `n=2` et que `--oracle=-1` etait accepte : la conversion
+    // vers `int` avait lieu AVANT toute validation. On valide en `long long`,
+    // puis seulement on caste.
+    auto borne = [&](const char* key, long long lo, long long hi) {
+      if (v < lo || v > hi) {
+        std::fprintf(stderr, "REFUS : %s=%lld hors de [%lld,%lld]\n", key, v, lo, hi);
+        std::exit(2);
+      }
+    };
+    if (eat("--points", &tmp)) { borne("--points", 1, 2000000); n = (int)tmp; continue; }
+    if (eat("--smax", &tmp)) { borne("--smax", 3, 32); smax = (int)tmp; continue; }
+    if (eat("--separation", &tmp)) { borne("--separation", 1, 64); sep = (int)tmp; continue; }
+    if (eat("--cap-cellule", &tmp)) { borne("--cap-cellule", 1, 1000000); cap = (int)tmp; continue; }
     if (eat("--seed", &seed)) continue;
-    if (eat("--coord", &coord)) continue;
-    if (eat("--juge", &tmp)) { judge = (int)tmp; continue; }
-    if (eat("--oracle", &tmp)) { oracle_n = (int)tmp; continue; }
+    // PROFIL u16, ANNONCE DONC IMPOSE. Le re-audit a trouve qu'un
+    // `--coord=2147483647` etait accepte, debordait sous UBSan et pouvait
+    // fermer a tort. Le domaine annonce est desormais garde.
+    if (eat("--coord", &coord)) { borne("--coord", 1, 65535); continue; }
+    if (eat("--juge", &tmp)) { borne("--juge", 0, 200); judge = (int)tmp; continue; }
+    if (eat("--oracle", &tmp)) { borne("--oracle", 0, 200); oracle_n = (int)tmp; continue; }
     if (a == "--fixture=coeur5") { fixture = true; continue; }
     if (a == "--compare-corner512") { compare512 = true; continue; }
     if (a == "--ha=boule") { ha_boule = true; continue; }
@@ -718,6 +731,18 @@ int main(int argc, char** argv) {
     pts = mhgp3v::make_family_cloud(family, n, coord_used, seed);
   }
   if ((int)pts.size() != n) { std::fprintf(stderr, "REFUS : nuage non genere\n"); return 2; }
+  // LE PROFIL EST VERIFIE SUR LES POINTS, PAS SEULEMENT SUR LA CLI. Une famille
+  // pourrait produire hors domaine sans qu'aucun argument ne l'annonce ; les
+  // largeurs prouvees de tout le fichier reposent sur `[0,65535]`.
+  for (int i = 0; i < n; ++i) {
+    const i64 c[3] = {pts[(size_t)i].x, pts[(size_t)i].y, pts[(size_t)i].z};
+    for (int k = 0; k < 3; ++k)
+      if (c[k] < 0 || c[k] > 65535) {
+        std::fprintf(stderr, "REFUS : profil u16 viole, point %d composante %d = %lld\n",
+                     i, k, (long long)c[k]);
+        return 2;
+      }
+  }
 
   // ---- Octree comprime de Morton, partage par les trois lanes.
   std::vector<unsigned long long> keys(n);
@@ -791,7 +816,19 @@ int main(int argc, char** argv) {
   // annonce par la CLI : le contre-audit avait raison de le relever.
   const int kHisto = smax + 2;
   std::vector<int> histo((size_t)kHisto, 0);
+  // `--oracle=N` EST UNE BORNE, PAS UN INTERRUPTEUR. Le re-audit a montre que
+  // `--points=201 --oracle=1` lancait l'oracle et sortait 0 alors que la limite
+  // annoncee est 200. `N` borne desormais reellement `n`, et
+  // `--compare-corner512`, qui active aussi l'oracle, recoit le meme cap.
   const bool oracle = (oracle_n > 0) || fixture || compare512;
+  if (oracle_n > 0 && n > oracle_n) {
+    std::fprintf(stderr, "REFUS : n=%d depasse la borne --oracle=%d\n", n, oracle_n);
+    return 2;
+  }
+  if (oracle && n > 200) {
+    std::fprintf(stderr, "REFUS : oracle borne a 200 points, n=%d\n", n);
+    return 2;
+  }
   std::vector<int> core_ids;
   std::vector<unsigned char> vu((size_t)n, 0);
   const long long npairs = (long long)n * (n - 1) / 2;
@@ -1217,7 +1254,8 @@ int main(int argc, char** argv) {
   std::printf("cloud family=%s n=%d coord=%d seed=%lld smax=%d separation=%d cap=%d inject=%s\n",
               mhgp3v::cloud_family_name(family), n, coord_used, seed, smax, sep, cap,
               mutant_name(mutant));
-  std::printf("seuils h_q2=%d h_q3=%d h_q4=%d\n", h_q[0], h_q[1], h_q[2]);
+  std::printf("seuils h_q2=%d h_q3=%d h_q4=%d ha_mode=%s coeur_mode=%s\n", h_q[0], h_q[1],
+              h_q[2], ha_boule ? "boule" : "jointure", core512 ? "corner64" : "bornes");
   std::printf("wspd rectangles=%lld non_decides=%lld masse=%lld masse_non_decide=%lld cellule_max=%lld\n",
               L.rectangles, L.non_decides, L.masse_totale, L.masse_non_decide, L.cellules_max);
   const long long total = (long long)n * (n - 1) / 2;

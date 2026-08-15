@@ -179,8 +179,7 @@ int fixture_derive(BallMutant mu) {
     const i64 e = c2b[i] - c2a[i];
     acc += (i128)e * (i128)e;
   }
-  i64 d2 = 0;
-  while ((i128)(d2 + 1) * (d2 + 1) <= acc) ++d2;  // racine entiere INFERIEURE
+  const i64 d2 = mhgp3v::corebl::isqrt_floor_i128(acc);  // racine entiere INFERIEURE
   // Rayons doubles majorants : `A` a pour demi-diagonale doublee 40, `B` 0.
   const i64 rA2 = 40, rB2 = 0;
 
@@ -313,7 +312,11 @@ int fixture_apex(BallMutant mu, i64 bx, i64 alo, i64 ahi) {
   for (int i = 0; i < 3; ++i) { const i64 e = ahi - alo; acc += (i128)e * e; }
   const i64 rA2 = mhgp3v::corebl::isqrt_floor_i128(acc) + 1;
 
+  // UNE MOYENNE AGREGEE NE PEUT PAS RECEVOIR LE LANE LE PLUS ETROIT. Le
+  // re-audit a raison : dans la fixture serree, q4 ne couvre que 71,3 % quand
+  // l'agregat des trois lanes affiche 81,1 %. La couverture sort par lane.
   long long certifies = 0, faux = 0, rates = 0, vrais = 0;
+  long long cq[3] = {0, 0, 0}, vq[3] = {0, 0, 0};
   for (int q = 2; q <= 4; ++q) {
     for (i64 x = alo; x <= ahi; ++x)
       for (i64 y = alo; y <= ahi; ++y) {
@@ -322,14 +325,17 @@ int fixture_apex(BallMutant mu, i64 bx, i64 alo, i64 ahi) {
         const i64 ed[3] = {2 * z.x - 2 * a.x, 2 * z.y - 2 * a.y, 2 * z.z - 2 * a.z};
         const bool boule = mhgp3v::corebl::apex_ball_contains(ud, rA2, 0, ed, q, mu);
         const bool juge = dans_fuseau(a, b, z, q);
-        if (boule) ++certifies;
-        if (juge) ++vrais;
+        if (boule) { ++certifies; ++cq[q - 2]; }
+        if (juge) { ++vrais; ++vq[q - 2]; }
         if (boule && !juge) ++faux;
         if (!boule && juge) ++rates;
       }
   }
   std::printf("fixture apex bx=%lld certifies=%lld vrais=%lld faux=%lld rates=%lld mutant=%s\n",
               (long long)bx, certifies, vrais, faux, rates, ball_mutant_name(mu));
+  for (int q = 0; q < 3; ++q)
+    std::printf("apex lane q%d certifies=%lld vrais=%lld couverture=%.3f\n", q + 2, cq[q],
+                vq[q], vq[q] > 0 ? 100.0 * (double)cq[q] / (double)vq[q] : 0.0);
   if (faux > 0) {
     std::fprintf(stderr, "DESACCORD : la boule d'apex certifie %lld point(s) hors du fuseau\n",
                  faux);
@@ -337,6 +343,69 @@ int fixture_apex(BallMutant mu, i64 bx, i64 alo, i64 ahi) {
   }
   if (mu == BallMutant::kNone && certifies == 0) {
     std::fprintf(stderr, "PLANCHER : la boule d'apex ne certifie rien, la fixture est vacue\n");
+    return 3;
+  }
+  return 0;
+}
+
+// ---------------------------------------------------------------------------
+// FIXTURE `apex-signe` : LE P0 DU RE-AUDIT, GRAVE AUX COORDONNEES EXACTES.
+//
+// `num` vaut `(sqrt(mult W) - N)^2`. C'est un CARRE : il est positif des deux
+// cotes de zero, donc `W > 0` — qui ne dit que `N < D` — ne suffit pas. Quand
+// `gamma_q = theta'_q - arcsin(N/D)` est NEGATIF le cone est vide, et l'ancien
+// code en tirait malgre tout un rayon positif.
+//
+// Geometrie de l'auditeur, deja separee a `s = 1` :
+//
+//   Box(A) = [(692,840,1000),(1308,1160,1000)]   r2_A = 695
+//   Box(B) = [(1820,755,1000),(2180,1245,1000)]  r2_B = 609
+//   a = (1000,1000,1000)  z = (1308,847,1000)  b = (1938,1245,1000)
+//
+// D'ou `ud = (2000,0,0)`, `U = 4 000 000`, `N = 609 + 2*695 = 1999` et
+// `W = 3999`. La garde q4 compare `2W = 7998` a `N^2 = 3 996 001` et refuse.
+// Sans elle, `num = 3 644 179 > 0` et `z` est certifie, alors que le fuseau
+// exact le refute : `H = 133 146`, `E = 118 273`, `T = 555 304`, donc
+// `3H^2 - E T = -12 493 898 044 < 0`.
+// ---------------------------------------------------------------------------
+int fixture_apex_signe(BallMutant mu) {
+  const P3 a{1000, 1000, 1000}, z{1308, 847, 1000}, b{1938, 1245, 1000};
+  const i64 ud[3] = {2000, 0, 0};
+  const i64 rA2 = 695, rB2 = 609;
+  const i64 ed[3] = {2 * z.x - 2 * a.x, 2 * z.y - 2 * a.y, 2 * z.z - 2 * a.z};
+
+  // Les invariants numeriques de la fixture sont verifies, pas supposes.
+  i128 U = 0;
+  for (int i = 0; i < 3; ++i) U += (i128)ud[i] * (i128)ud[i];
+  const i64 N = rB2 + 2 * rA2;
+  const i128 W = U - (i128)N * (i128)N;
+  if (U != 4000000 || N != 1999 || W != 3999) {
+    std::fprintf(stderr, "PLANCHER : la geometrie gravee a derive (U=%lld N=%lld W=%lld)\n",
+                 (long long)U, (long long)N, (long long)W);
+    return 3;
+  }
+
+  long long faux = 0, refuses = 0;
+  for (int q = 3; q <= 4; ++q) {
+    const bool boule = mhgp3v::corebl::apex_ball_contains(ud, rA2, rB2, ed, q, mu);
+    const bool juge = dans_fuseau(a, b, z, q);
+    if (boule && !juge) ++faux;
+    if (!boule) ++refuses;
+    std::printf("apex-signe q%d boule=%d fuseau=%d\n", q, (int)boule, (int)juge);
+  }
+  std::printf("fixture apex-signe faux=%lld refuses=%lld mutant=%s\n", faux, refuses,
+              ball_mutant_name(mu));
+  if (faux > 0) {
+    std::fprintf(stderr,
+                 "DESACCORD : gamma negatif accepte, %lld faux temoin(s) — la garde"
+                 " de signe manque\n", faux);
+    return 1;
+  }
+  // NON-VACUITE : sans mutant la garde doit REFUSER les deux lanes. Si elle
+  // acceptait en les jugeant vrais, la fixture ne prouverait plus rien.
+  if (mu == BallMutant::kNone && refuses != 2) {
+    std::fprintf(stderr, "PLANCHER : %lld refus au lieu de 2 — la garde ne mord pas\n",
+                 refuses);
     return 3;
   }
   return 0;
@@ -375,6 +444,13 @@ int mode_nuage(const std::string& family, int n, i64 coord, long long seed, int 
   std::vector<P3> pts((size_t)m);
   for (int i = 0; i < m; ++i)
     pts[(size_t)i] = P3{raw[(size_t)i].x, raw[(size_t)i].y, raw[(size_t)i].z};
+  // Le profil est verifie sur les POINTS : toutes les largeurs prouvees du
+  // sujet reposent sur `[0,65535]`.
+  for (int i = 0; i < m; ++i) {
+    const i64 c[3] = {pts[(size_t)i].x, pts[(size_t)i].y, pts[(size_t)i].z};
+    for (int k = 0; k < 3; ++k)
+      if (c[k] < 0 || c[k] > 65535) refuse("profil u16 viole par le nuage");
+  }
 
   // Index Morton, puis arbre : c'est la structure DEJA presente. Le cœur-boule
   // n'en demande pas d'autre — seulement les deux primitives sphere-boite.
@@ -418,9 +494,7 @@ int mode_nuage(const std::string& family, int n, i64 coord, long long seed, int 
       const i64 e = hi[i] - lo[i];
       acc += (i128)e * (i128)e;
     }
-    i64 r = 0;
-    while ((i128)(r + 1) * (r + 1) <= acc) ++r;
-    *r2 = r + 1;
+    *r2 = mhgp3v::corebl::isqrt_floor_i128(acc) + 1;
   };
 
   std::vector<Rect> rects;
@@ -435,8 +509,7 @@ int mode_nuage(const std::string& family, int n, i64 coord, long long seed, int 
       h_sphere(r.u, ca, &ra); h_sphere(r.v, cb, &rb);
       i128 acc = 0;
       for (int i = 0; i < 3; ++i) { const i64 e = cb[i] - ca[i]; acc += (i128)e * (i128)e; }
-      i64 d = 0;
-      while ((i128)(d + 1) * (d + 1) <= acc) ++d;
+      const i64 d = mhgp3v::corebl::isqrt_floor_i128(acc);
       const i64 rmax = ra > rb ? ra : rb;
       if ((i128)d - ra - rb >= (i128)sep * rmax) { rects.push_back(r); continue; }
       const bool ui = !h_leaf(r.u), vi = !h_leaf(r.v);
@@ -456,8 +529,7 @@ int mode_nuage(const std::string& family, int n, i64 coord, long long seed, int 
     h_sphere(r.u, ca, &ra); h_sphere(r.v, cb, &rb);
     i128 acc = 0;
     for (int i = 0; i < 3; ++i) { const i64 e = cb[i] - ca[i]; acc += (i128)e * (i128)e; }
-    i64 d2 = 0;
-    while ((i128)(d2 + 1) * (d2 + 1) <= acc) ++d2;
+    const i64 d2 = mhgp3v::corebl::isqrt_floor_i128(acc);
     const i64 M[3] = {ca[0] + cb[0], ca[1] + cb[1], ca[2] + cb[2]};
 
     for (int q = 2; q <= 4; ++q) {
@@ -579,14 +651,27 @@ BallMutant mutant_de(const std::string& s) {
   if (s == "apex-racine-oubliee") return BallMutant::kApexRacineOubliee;
   if (s == "apex-longueur-double") return BallMutant::kApexLongueurDouble;
   if (s == "apex-coeff-echange") return BallMutant::kApexCoeffEchange;
+  if (s == "apex-sans-garde") return BallMutant::kApexSansGarde;
   refuse("mutant inconnu");
 }
 
+// LA CONSOMMATION DOIT ETRE COMPLETE. Le re-audit a trouve que `--coord=12x`
+// etait lu comme `12`. On valide en `long long`, borne comprise, avant tout
+// cast — jamais l'inverse.
 long long arg_ll(const std::string& s) {
   long long v = 0;
   const char* b = s.c_str();
   auto r = std::from_chars(b, b + s.size(), v);
-  if (r.ec != std::errc()) refuse("entier illisible");
+  if (r.ec != std::errc() || r.ptr != b + s.size()) refuse("entier illisible");
+  return v;
+}
+
+long long arg_borne(const std::string& s, const char* key, long long lo, long long hi) {
+  const long long v = arg_ll(s);
+  if (v < lo || v > hi) {
+    std::fprintf(stderr, "REFUS : %s=%lld hors de [%lld,%lld]\n", key, v, lo, hi);
+    std::exit(2);
+  }
   return v;
 }
 
@@ -604,17 +689,19 @@ int main(int argc, char** argv) {
     const std::string a = argv[i];
     if (a.rfind("--fixture=", 0) == 0) { fixture = a.substr(10); continue; }
     if (a.rfind("--family=", 0) == 0) { family = a.substr(9); continue; }
-    if (a.rfind("--points=", 0) == 0) { n = (int)arg_ll(a.substr(9)); continue; }
-    if (a.rfind("--coord=", 0) == 0) { coord = arg_ll(a.substr(8)); continue; }
+    if (a.rfind("--points=", 0) == 0) { n = (int)arg_borne(a.substr(9), "--points", 1, 4000); continue; }
+    // PROFIL u16 ANNONCE, DONC IMPOSE : `--coord=2147483647` debordait sous
+    // UBSan et pouvait fermer a tort.
+    if (a.rfind("--coord=", 0) == 0) { coord = arg_borne(a.substr(8), "--coord", 1, 65535); continue; }
     if (a.rfind("--seed=", 0) == 0) { seed = arg_ll(a.substr(7)); continue; }
-    if (a.rfind("--separation=", 0) == 0) { sep = (int)arg_ll(a.substr(13)); continue; }
+    if (a.rfind("--separation=", 0) == 0) { sep = (int)arg_borne(a.substr(13), "--separation", 1, 64); continue; }
     if (a.rfind("--inject=", 0) == 0) { mut = a.substr(9); continue; }
     if (a.rfind("--min-coeurs=", 0) == 0) { min_coeurs = arg_ll(a.substr(13)); continue; }
     if (a.rfind("--min-bulk=", 0) == 0) { min_bulk = arg_ll(a.substr(11)); continue; }
     if (a.rfind("--min-elagues=", 0) == 0) { min_elagues = arg_ll(a.substr(14)); continue; }
-    if (a.rfind("--apex-bx=", 0) == 0) { ax_bx = arg_ll(a.substr(10)); continue; }
-    if (a.rfind("--apex-lo=", 0) == 0) { ax_lo = arg_ll(a.substr(10)); continue; }
-    if (a.rfind("--apex-hi=", 0) == 0) { ax_hi = arg_ll(a.substr(10)); continue; }
+    if (a.rfind("--apex-bx=", 0) == 0) { ax_bx = arg_borne(a.substr(10), "--apex-bx", 1, 65535); continue; }
+    if (a.rfind("--apex-lo=", 0) == 0) { ax_lo = arg_borne(a.substr(10), "--apex-lo", 0, 65535); continue; }
+    if (a.rfind("--apex-hi=", 0) == 0) { ax_hi = arg_borne(a.substr(10), "--apex-hi", 0, 65535); continue; }
     if (a == "--verbeux") { verbeux = true; continue; }
     refuse("argument inconnu");
   }
@@ -624,6 +711,7 @@ int main(int argc, char** argv) {
   if (fixture == "seuil") return fixture_seuil(mu);
   if (fixture == "apex") return fixture_apex(mu, ax_bx ? ax_bx : 20000, ax_lo, ax_hi);
   if (fixture == "apex-serre") return fixture_apex(mu, ax_bx ? ax_bx : 1600, ax_lo, ax_hi);
+  if (fixture == "apex-signe") return fixture_apex_signe(mu);
   if (!fixture.empty()) refuse("fixture inconnue");
   return mode_nuage(family, n, coord, seed, sep, mu, min_coeurs, min_bulk, min_elagues);
 }

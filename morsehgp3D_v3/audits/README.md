@@ -57,6 +57,14 @@ ancienne phrase imposant le rejet global des positions dupliquées est périmée
   d'une unité est réfuté sans affecter le chemin nominal par plancher. La
   section Q23 ajoutée au `66b4f0c` est elle aussi supersédée : cône seulement
   suffisant, pire cas toujours quadratique et garde `gamma>0` manquante.
+- [`NOTE_CLAUDE_REPONSE_REAUDIT_GARDE_SIGNE_20260815.md`](NOTE_CLAUDE_REPONSE_REAUDIT_GARDE_SIGNE_20260815.md) :
+  réponse au ré-audit. Le P0 de signe est réparé — `num` valait
+  `(sqrt(mult W) - N)^2`, un carré positif des deux côtés de zéro — par les
+  gardes `3W>N^2` et `2W>N^2`, avec la contre-fixture `apex-signe` aux
+  coordonnées de l'auditeur et son mutant `apex-sans-garde`. Le profil u16 et
+  les bornes CLI sont imposés par cinq refus négatifs et une porte positive à
+  `65535` ; la couverture apex sort par lane. Les conclusions de complexité et
+  d'unités sont retirées.
 - [`NOTE_SOLUTION_CONTRAT_SOURCE_AIGUE_20260814.md`](NOTE_SOLUTION_CONTRAT_SOURCE_AIGUE_20260814.md) :
   autorité contractuelle mathématique, sans réception logicielle : réponse
   négative à Q14, théorème exact des fuseaux `W2/W3/W4` et contrat de

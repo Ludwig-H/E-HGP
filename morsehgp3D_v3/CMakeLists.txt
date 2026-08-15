@@ -4639,7 +4639,7 @@ mhgp3v_add_expected_code_test_for(mhgp3v_combined_prefilter_probe
   mhgp3v_combined_refus_smax "REFUS : smax hors domaine" 2
   --points=100 --smax=3)
 mhgp3v_add_expected_code_test_for(mhgp3v_combined_prefilter_probe
-  mhgp3v_combined_refus_juge_non_borne "REFUS : juge non borne" 2
+  mhgp3v_combined_refus_juge_non_borne "--juge=500 hors de .0,200." 2
   --points=500 --juge=500)
 mhgp3v_add_expected_code_test_for(mhgp3v_combined_prefilter_probe
   mhgp3v_combined_refus_mutant_sans_juge "REFUS : un mutant sans juge ne prouve rien" 2
@@ -4684,19 +4684,22 @@ add_test(NAME mhgp3v_combined_oracle_uniform
   COMMAND mhgp3v_combined_prefilter_probe --points=160 --family=uniform --seed=3
           --separation=6 --oracle=160)
 set_tests_properties(mhgp3v_combined_oracle_uniform PROPERTIES
-  PASS_REGULAR_EXPRESSION "oracle_faux_morts=0 oracle_ids_doubles=0 oracle_couverture_ko=0")
+  PASS_REGULAR_EXPRESSION
+  "oracle_paires=[1-9][0-9]* oracle_faux_morts=0 oracle_ids_doubles=0 oracle_couverture_ko=0")
 
 add_test(NAME mhgp3v_combined_oracle_amas
   COMMAND mhgp3v_combined_prefilter_probe --points=160 --family=eight_clusters --seed=5
           --separation=8 --oracle=160)
 set_tests_properties(mhgp3v_combined_oracle_amas PROPERTIES
-  PASS_REGULAR_EXPRESSION "oracle_faux_morts=0 oracle_ids_doubles=0 oracle_couverture_ko=0")
+  PASS_REGULAR_EXPRESSION
+  "oracle_paires=[1-9][0-9]* oracle_faux_morts=0 oracle_ids_doubles=0 oracle_couverture_ko=0")
 
 add_test(NAME mhgp3v_combined_oracle_terrain
   COMMAND mhgp3v_combined_prefilter_probe --points=160 --family=terrain --seed=7
           --separation=6 --oracle=160)
 set_tests_properties(mhgp3v_combined_oracle_terrain PROPERTIES
-  PASS_REGULAR_EXPRESSION "oracle_faux_morts=0 oracle_ids_doubles=0 oracle_couverture_ko=0")
+  PASS_REGULAR_EXPRESSION
+  "oracle_paires=[1-9][0-9]* oracle_faux_morts=0 oracle_ids_doubles=0 oracle_couverture_ko=0")
 
 # ---------------------------------------------------------------------------
 # `h_a` PAR BOULE D'APEX — le chemin de la question Q23, gardé mais NON adopté.
@@ -4717,12 +4720,18 @@ foreach(fam uniform eight_clusters terrain)
             --separation=6 --oracle=160 --ha=boule)
   set_tests_properties(mhgp3v_combined_ha_boule_${fam} PROPERTIES
     PASS_REGULAR_EXPRESSION
-    "oracle_faux_morts=0 oracle_ids_doubles=0 oracle_couverture_ko=0")
+    "oracle_paires=[1-9][0-9]* oracle_faux_morts=0 oracle_ids_doubles=0 oracle_couverture_ko=0")
 endforeach()
 
 mhgp3v_add_expected_code_test_for(mhgp3v_combined_prefilter_probe
-  mhgp3v_combined_refus_oracle_non_borne "REFUS : oracle non borne" 2
+  mhgp3v_combined_refus_oracle_non_borne "--oracle=500 hors de .0,200." 2
   --points=500 --oracle=500)
+# `--compare-corner512` active l'oracle SANS passer par `--oracle`, donc sans sa
+# borne. Le ré-audit demandait qu'il reçoive le même cap ; c'est le seul chemin
+# par lequel le filet interne est atteignable, et il est désormais exercé.
+mhgp3v_add_expected_code_test_for(mhgp3v_combined_prefilter_probe
+  mhgp3v_combined_refus_compare512_cap "oracle borne a 200 points" 2
+  --points=201 --compare-corner512)
 
 # ---------------------------------------------------------------------------
 # HARNAIS APPARIE `corner512` / `corner64` — questions Q21 et Q22 de l'auditeur.
@@ -4876,14 +4885,14 @@ add_test(NAME mhgp3v_core_ball_apex_code
 add_test(NAME mhgp3v_core_ball_apex
          COMMAND mhgp3v_core_ball_probe --fixture=apex)
 set_tests_properties(mhgp3v_core_ball_apex PROPERTIES PASS_REGULAR_EXPRESSION
-  "fixture apex bx=20000 certifies=25750 vrais=27114 faux=0 rates=1364")
+  "apex lane q4 certifies=7820 vrais=8342 couverture=93\\.743")
 
 add_test(NAME mhgp3v_core_ball_apex_serre_code
          COMMAND mhgp3v_core_ball_probe --fixture=apex-serre)
 add_test(NAME mhgp3v_core_ball_apex_serre
          COMMAND mhgp3v_core_ball_probe --fixture=apex-serre)
 set_tests_properties(mhgp3v_core_ball_apex_serre PROPERTIES PASS_REGULAR_EXPRESSION
-  "fixture apex bx=1600 certifies=21557 vrais=26576 faux=0 rates=5019")
+  "apex lane q4 certifies=5779 vrais=8110 couverture=71\\.258")
 
 mhgp3v_add_expected_code_test_for(mhgp3v_core_ball_probe
   mhgp3v_core_ball_apex_mutant_oublie_rayon "hors du fuseau" 1
@@ -4898,6 +4907,63 @@ mhgp3v_add_expected_code_test_for(mhgp3v_core_ball_probe
   mhgp3v_core_ball_apex_serre_mutant_rayon "hors du fuseau" 1
   --fixture=apex-serre --inject=apex-oublie-rayon)
 
+# ---------------------------------------------------------------------------
+# LA GARDE DE SIGNE SUR `gamma_q` — P0 du ré-audit du 15 août, et il était réel.
+#
+# `num` vaut `(sqrt(mult W) - N)^2` : un CARRÉ, donc positif des deux côtés de
+# zéro. `W > 0` ne dit que `N < D`, jamais le signe de `gamma_q`. Quand celui-ci
+# est négatif le cône est vide, et l'ancien code en tirait un rayon positif.
+# La géométrie de l'auditeur, séparée dès `s=1`, le montre en une lane :
+# `U=4000000`, `N=1999`, `W=3999`, `2W=7998` contre `N^2=3996001`.
+#
+# Le mutant `apex-sans-garde` restaure exactement l'ancien comportement et doit
+# mourir : sans lui, cette porte ne prouverait pas que la garde sert.
+# ---------------------------------------------------------------------------
+add_test(NAME mhgp3v_core_ball_apex_signe_code
+         COMMAND mhgp3v_core_ball_probe --fixture=apex-signe)
+add_test(NAME mhgp3v_core_ball_apex_signe
+         COMMAND mhgp3v_core_ball_probe --fixture=apex-signe)
+set_tests_properties(mhgp3v_core_ball_apex_signe PROPERTIES PASS_REGULAR_EXPRESSION
+  "fixture apex-signe faux=0 refuses=2")
+
 mhgp3v_add_expected_code_test_for(mhgp3v_core_ball_probe
-  mhgp3v_core_ball_refus_non_borne "le mode nuage est borne" 2
+  mhgp3v_core_ball_apex_mutant_sans_garde "gamma negatif accepte" 1
+  --fixture=apex-signe --inject=apex-sans-garde)
+
+# ---------------------------------------------------------------------------
+# LE PROFIL u16 EST ANNONCÉ, DONC IMPOSÉ. Le ré-audit a trouvé que
+# `--coord=2147483647` était accepté, débordait sous UBSan et pouvait fermer à
+# tort ; que `--points=201 --oracle=1` lançait l'oracle hors de sa borne
+# annoncée ; que `--oracle=-1` passait ; que `--points=4294967298` se repliait
+# sur `n=2` ; et que `--coord=12x` était lu comme `12`. Cinq refus négatifs, et
+# une porte POSITIVE à `65535` pour que la borne ne soit pas un mur qui interdit
+# le domaine légitime.
+# ---------------------------------------------------------------------------
+mhgp3v_add_expected_code_test_for(mhgp3v_combined_prefilter_probe
+  mhgp3v_combined_refus_coord_hors_u16 "hors de .1,65535." 2
+  --points=40 --coord=2147483647)
+mhgp3v_add_expected_code_test_for(mhgp3v_combined_prefilter_probe
+  mhgp3v_combined_refus_oracle_borne_fausse "depasse la borne --oracle" 2
+  --points=201 --oracle=1)
+mhgp3v_add_expected_code_test_for(mhgp3v_combined_prefilter_probe
+  mhgp3v_combined_refus_oracle_negatif "hors de .0,200." 2
+  --oracle=-1 --points=40)
+mhgp3v_add_expected_code_test_for(mhgp3v_combined_prefilter_probe
+  mhgp3v_combined_refus_points_repliage "hors de .1,2000000." 2
+  --points=4294967298)
+mhgp3v_add_expected_code_test_for(mhgp3v_combined_prefilter_probe
+  mhgp3v_combined_refus_coord_suffixe "valeur non entiere" 2
+  --points=40 --coord=12x)
+mhgp3v_add_expected_code_test_for(mhgp3v_core_ball_probe
+  mhgp3v_core_ball_refus_coord_hors_u16 "hors de .1,65535." 2
+  --points=40 --coord=2147483647)
+
+add_test(NAME mhgp3v_combined_domaine_u16_haut
+  COMMAND mhgp3v_combined_prefilter_probe --points=40 --coord=65535 --oracle=40)
+set_tests_properties(mhgp3v_combined_domaine_u16_haut PROPERTIES
+  PASS_REGULAR_EXPRESSION
+  "oracle_paires=[1-9][0-9]* oracle_faux_morts=0 oracle_ids_doubles=0 oracle_couverture_ko=0")
+
+mhgp3v_add_expected_code_test_for(mhgp3v_core_ball_probe
+  mhgp3v_core_ball_refus_non_borne "--points=9000 hors de .1,4000." 2
   --points=9000)

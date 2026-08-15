@@ -159,6 +159,9 @@ enum class BallMutant {
   kApexCoeffEchange,   // q4 emprunte la constante de q3 : la demi-ouverture est
                        // sur-estimee de plus de cinq degres, et le fuseau q4,
                        // plus etroit, refuse les temoins gagnes
+  kApexSansGarde,      // LE P0 DU RE-AUDIT : retire la garde de signe sur
+                       // `gamma_q`. Le carre accepte alors une demi-ouverture
+                       // NEGATIVE et certifie un faux temoin
 };
 
 inline const char* ball_mutant_name(BallMutant m) {
@@ -174,6 +177,7 @@ inline const char* ball_mutant_name(BallMutant m) {
     case BallMutant::kApexRacineOubliee: return "apex-racine-oubliee";
     case BallMutant::kApexLongueurDouble: return "apex-longueur-double";
     case BallMutant::kApexCoeffEchange: return "apex-coeff-echange";
+    case BallMutant::kApexSansGarde: return "apex-sans-garde";
   }
   return "?";
 }
@@ -376,12 +380,31 @@ struct ApexNum { i128 num; i64 den; };
 MHGP_HD inline ApexNum apex_sin2(i128 U, i64 N, int q, BallMutant mu = BallMutant::kNone) {
   const i128 W = U - (i128)N * (i128)N;
   if (W <= 0) return ApexNum{0, 1};
-  if (q == 2) return ApexNum{W, 1};
+  if (q == 2) return ApexNum{W, 1};  // sin(theta'_2) = 1 : `W > 0` EST la garde
   // MUTANT : q4 prend le 3 de q3 au lieu de son 2, donc un cone trop ouvert.
   const i128 mult = (mu == BallMutant::kApexCoeffEchange) ? 3 : ((q == 3) ? 3 : 2);
   const i64 den_q = (mu == BallMutant::kApexCoeffEchange) ? 4 : ((q == 3) ? 4 : 3);
   // MUTANT : arrondir la racine SOUSTRAITE vers le bas MAJORE `num`, donc le
   // rayon, donc sort du cone.
+  // ----------------------------------------------------------------------
+  // GARDE DE SIGNE — P0 du re-audit du 15 aout, et il etait reel.
+  //
+  // `num` vaut exactement `(sqrt(mult W) - N)^2` : c'est un CARRE, donc il est
+  // positif des DEUX cotes de zero. `W > 0` ne dit que `N < D` ; il ne dit rien
+  // du signe de `gamma_q = theta'_q - arcsin(N/D)`. Quand `gamma_q < 0` le cone
+  // est VIDE, et pourtant l'ancien code en tirait un rayon positif.
+  //
+  // La condition correcte est `sin(theta'_q) > N/D`, soit
+  // `sin^2(theta'_q) U > N^2`. Avec `sin^2(theta'_3) = 3/4` cela donne
+  // `3U > 4N^2`, soit `3W > N^2` ; avec `sin^2(theta'_4) = 2/3`, `2U > 3N^2`,
+  // soit `2W > N^2`. C'est donc `mult W > N^2` dans les deux cas.
+  //
+  // Contre-fixture gravee `apex-signe`, deja separee a `s=1` : `U = 4 000 000`,
+  // `N = 1999`, `W = 3999`. `2W = 7998` contre `N^2 = 3 996 001` — la garde
+  // refuse, l'ancien code acceptait un temoin que le fuseau exact refute avec
+  // `3H^2 - E T = -12 493 898 044`.
+  if (mu != BallMutant::kApexSansGarde && mult * W <= (i128)N * (i128)N)
+    return ApexNum{0, 1};
   const i64 rac = isqrt_ceil_i128(mult * W);
   // MUTANT : sans le terme soustrait, la demi-ouverture n'est plus corrigee du
   // deplacement de `t`, et le cone vaut `theta'_q` tout entier.
