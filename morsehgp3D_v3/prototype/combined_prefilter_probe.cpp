@@ -131,6 +131,9 @@ enum class Mutant {
                     // lane aux enfants, qui la recreditent par leurs feuilles.
   kDropB,         // oublie la contribution de `B` : minorant plus faible, sur
                   // mais il doit se voir au compteur
+  kDualSansMasque,  // LE MEME DEFAUT QUE LE P0 q2, MAIS DANS LE DUAL-TREE : un
+                    // bloc credite ne retire pas la lane a ses enfants, qui la
+                    // recreditent. Les `h_a` cessent d'egaler la jointure.
   kCorner64Sept,  // n'evalue que sept des huit coins de `A` : la specialisation
                   // ponctuelle cesse d'etre le meme calcul que la reference et
                   // SUR-certifie. Il rend la porte d'egalite non vacue.
@@ -145,6 +148,7 @@ const char* mutant_name(Mutant m) {
     case Mutant::kThresholdOff: return "seuil-decale";
     case Mutant::kBulkSansMasque: return "bulk-sans-masque";
     case Mutant::kDropB: return "oublie-b";
+    case Mutant::kDualSansMasque: return "dual-sans-masque";
     case Mutant::kCorner64Sept: return "corner64-sept-coins";
   }
   return "?";
@@ -218,6 +222,126 @@ inline i128 xi_max_over_box(const P3& a, const Box& B, const P3& z, bool narrow)
 
 // `z` est-il temoin universel de lane `q` pour TOUTE cible `b` de la boite ?
 // `a` est un point. Fail-open : un `false` ne prouve rien.
+// ---------------------------------------------------------------------------
+// AUTORITE EXACTE A HUIT COINS POUR `h_a` ET `h_b`.
+//
+// A `a` et `z` FIXES, `t = b - z` est AFFINE en `b`, et l'ensemble admissible
+// en `t` est le cone circulaire ouvert d'axe `e = z - a` et de demi-angle
+// `theta'_q` — convexe. Les huit coins de `Box(B)` admissibles impliquent donc
+// toute la boite, et l'implication ne se renverse pas : un echec reste
+// `UNKNOWN`. C'est le meme argument que `soc64_rect.hpp`, degenere aux deux
+// temoins ponctuels, donc HUIT evaluations et non 512.
+//
+// Ce que cela remplace : `universal_witness` majore `Xi` par
+// `xi_max_over_box`, qui maximise SEPAREMENT le module de chaque composante du
+// produit vectoriel puis somme les carres — un majorant sur, jamais le maximum.
+// L'autorite aux coins est exacte sur l'enveloppe continue de la boite, donc
+// elle domine, et le contre-audit du 15 aout demandait deja ce remplacement
+// (P1.9). Elle ne peut que faire CROITRE `h_a`, donc la fermeture.
+inline bool universal_corner8(const P3& a, const Box& B, const P3& z, int q) {
+  const i64 e[3] = {z.x - a.x, z.y - a.y, z.z - a.z};
+  const i64 e2 = e[0] * e[0] + e[1] * e[1] + e[2] * e[2];
+  if (e2 == 0) return false;  // `z == a` : jamais un temoin de sa propre ancre
+  for (int c = 0; c < 8; ++c) {
+    const i64 b[3] = {(c & 1) ? B.hi[0] : B.lo[0], (c & 2) ? B.hi[1] : B.lo[1],
+                      (c & 4) ? B.hi[2] : B.lo[2]};
+    const i64 t[3] = {b[0] - z.x, b[1] - z.y, b[2] - z.z};
+    const i64 h = e[0] * t[0] + e[1] * t[1] + e[2] * t[2];
+    if (h <= 0) return false;
+    if (q == 2) continue;
+    const i64 t2 = t[0] * t[0] + t[1] * t[1] + t[2] * t[2];
+    const i128 hh = (i128)h * (i128)h;
+    const i128 ex = (i128)e2 * (i128)t2;
+    // q3 : 4H^2 > E T ; q4 : 3H^2 > E T. Emboitement `W4 < W3 < W2`.
+    if (q == 3 ? !(4 * hh > ex) : !(3 * hh > ex)) return false;
+  }
+  return true;
+}
+
+// Meme autorite, rendue comme LANE minimale (0/2/3/4) : les trois fuseaux etant
+// emboites, un seul parcours des huit coins decide les trois lanes.
+// ---------------------------------------------------------------------------
+// COINS DISTINCTS. Une AABB plate sur un axe n'a pas huit coins mais quatre ;
+// un point n'en a qu'un. `corner512_all_lane` boucle `8x8x8` sans le voir, et
+// evalue donc jusqu'a huit fois le meme triplet — c'est exactement la
+// redondance qui rendait `corner512` sept fois trop cher pour le cœur. Le cas
+// n'est pas theorique : `terrain` est quasi-surfacique, donc ses nœuds sont
+// souvent plats sur un axe, et `4 x 8 x 4 = 128` remplace alors `512`.
+inline int corners_distinct(const Box& B, i64 out[8][3]) {
+  int nx = 0;
+  i64 v[3][2];
+  int cnt[3];
+  for (int i = 0; i < 3; ++i) {
+    v[i][0] = B.lo[i];
+    v[i][1] = B.hi[i];
+    cnt[i] = (B.lo[i] == B.hi[i]) ? 1 : 2;
+  }
+  for (int i = 0; i < cnt[0]; ++i)
+    for (int j = 0; j < cnt[1]; ++j)
+      for (int k = 0; k < cnt[2]; ++k) {
+        out[nx][0] = v[0][i]; out[nx][1] = v[1][j]; out[nx][2] = v[2][k];
+        ++nx;
+      }
+  return nx;
+}
+
+// Lane `ALL` du produit relaxe `Box(U) x Box(B) x Box(Z)`, aux seuls coins
+// DISTINCTS. Meme decision que `corner512_all_lane` — l'argument de convexite
+// en trois temps ne depend pas de la multiplicite des coins enumeres — pour un
+// cout divise par huit des qu'une des trois boites est plate, et par 512 quand
+// les trois sont ponctuelles.
+inline int block_lane(const Box& U, const Box& Bp, const Box& Z, long long* ev) {
+  i64 cu[8][3], cb[8][3], cz[8][3];
+  const int nu = corners_distinct(U, cu);
+  const int nb2 = corners_distinct(Bp, cb);
+  const int nz = corners_distinct(Z, cz);
+  int best = 4;
+  for (int ia = 0; ia < nu; ++ia)
+    for (int ic = 0; ic < nz; ++ic) {
+      const i64 e[3] = {cz[ic][0] - cu[ia][0], cz[ic][1] - cu[ia][1], cz[ic][2] - cu[ia][2]};
+      const i64 e2 = e[0] * e[0] + e[1] * e[1] + e[2] * e[2];
+      if (e2 == 0) return 0;  // une ancre confondue avec un temoin
+      for (int ib = 0; ib < nb2; ++ib) {
+        if (ev) ++*ev;  // UNITE HOMOGENE : une evaluation du predicat (e,t)
+        const i64 t[3] = {cb[ib][0] - cz[ic][0], cb[ib][1] - cz[ic][1], cb[ib][2] - cz[ic][2]};
+        const i64 h = e[0] * t[0] + e[1] * t[1] + e[2] * t[2];
+        if (h <= 0) return 0;
+        const i64 t2 = t[0] * t[0] + t[1] * t[1] + t[2] * t[2];
+        const i128 hh = (i128)h * (i128)h;
+        const i128 ex = (i128)e2 * (i128)t2;
+        int lane = 2;
+        if (3 * hh > ex) lane = 4;
+        else if (4 * hh > ex) lane = 3;
+        if (lane < best) best = lane;
+        if (best == 2 && lane == 2) { /* q2 seul ; seul `NONE` sort */ }
+      }
+    }
+  return best;
+}
+
+inline int corner8_lane(const P3& a, const Box& B, const P3& z, long long* ev = nullptr) {
+  const i64 e[3] = {z.x - a.x, z.y - a.y, z.z - a.z};
+  const i64 e2 = e[0] * e[0] + e[1] * e[1] + e[2] * e[2];
+  if (e2 == 0) return 0;
+  int best = 4;
+  for (int c = 0; c < 8; ++c) {
+    if (ev) ++*ev;
+    const i64 b[3] = {(c & 1) ? B.hi[0] : B.lo[0], (c & 2) ? B.hi[1] : B.lo[1],
+                      (c & 4) ? B.hi[2] : B.lo[2]};
+    const i64 t[3] = {b[0] - z.x, b[1] - z.y, b[2] - z.z};
+    const i64 h = e[0] * t[0] + e[1] * t[1] + e[2] * t[2];
+    if (h <= 0) return 0;
+    const i64 t2 = t[0] * t[0] + t[1] * t[1] + t[2] * t[2];
+    const i128 hh = (i128)h * (i128)h;
+    const i128 ex = (i128)e2 * (i128)t2;
+    int lane = 2;
+    if (3 * hh > ex) lane = 4;
+    else if (4 * hh > ex) lane = 3;
+    if (lane < best) best = lane;
+  }
+  return best;
+}
+
 inline bool universal_witness(const P3& a, const Box& B, const P3& z, int q, bool narrow) {
   const i64 h = h_min_over_box(a, B, z, narrow);
   if (h <= 0) return false;
@@ -603,6 +727,8 @@ struct Ledger {
   long long c64_desaccords = 0;  // corner64 != corner512 : DOIT rester nul
   long long c64_appels = 0;      // sites decides par la specialisation ponctuelle
   long long travail_ha = 0;      // travail des SEULS postes h_a et h_b
+  long long dual_ecarts = 0;     // dual-tree != jointure : DOIT rester nul
+  long long dual_verifies = 0;   // points confrontes
 };
 
 struct Rect {
@@ -622,6 +748,10 @@ int main(int argc, char** argv) {
   bool compare512 = false;
   bool core512 = false;
   bool ha_boule = false;
+  bool ha_corner8 = false;
+  bool ha_dual = false;
+  long long dual_cutoff = 256;
+  bool ha_verifie = false;
 
   auto arg_ll = [](const char* s, long long* out) {
     const char* e = s + std::strlen(s);
@@ -667,6 +797,13 @@ int main(int argc, char** argv) {
     if (a == "--fixture=coeur5") { fixture = true; continue; }
     if (a == "--compare-corner512") { compare512 = true; continue; }
     if (a == "--ha=boule") { ha_boule = true; continue; }
+    if (a == "--ha=corner8") { ha_corner8 = true; continue; }
+    if (a == "--ha=dualtree") { ha_dual = true; continue; }
+    // PORTE METAMORPHIQUE : le dual-tree pretend rendre EXACTEMENT les memes
+    // `h_a` que la jointure ponctuelle a huit coins. Ce mode calcule les deux et
+    // les confronte point par point ; un seul ecart refuse la campagne.
+    if (a == "--verifie-jointure") { ha_verifie = true; ha_dual = true; continue; }
+    if (eat("--dual-cutoff", &tmp)) { borne("--dual-cutoff", 0, 100000); dual_cutoff = tmp; continue; }
     // Les deux orthographes selectionnent le MEME predicat : `corner64` est
     // `corner512` prive de ses huit coins de temoin confondus. La porte
     // d'egalite du harnais apparie en est la preuve executable.
@@ -693,6 +830,7 @@ int main(int argc, char** argv) {
       else if (m == "bulk-sans-masque") mutant = Mutant::kBulkSansMasque;
       else if (m == "oublie-b") mutant = Mutant::kDropB;
       else if (m == "corner64-sept-coins") mutant = Mutant::kCorner64Sept;
+      else if (m == "dual-sans-masque") mutant = Mutant::kDualSansMasque;
       else { std::fprintf(stderr, "REFUS : mutant inconnu %s\n", m.c_str()); return 2; }
       continue;
     }
@@ -1018,22 +1156,147 @@ int main(int argc, char** argv) {
       }
       return c > need ? need : c;
     };
+    // ---- AUTO-JOINTURE DUAL-TREE (P1.10 du re-audit).
+    //
+    // Elle calcule EXACTEMENT les memes `h_a` que la jointure ponctuelle a huit
+    // coins, et rien d'autre : la recursion ne s'arrete que sur un verdict
+    // `ALL` — qui implique le verdict ponctuel pour chaque couple des deux
+    // boites — ou sur un couple feuille-feuille, ou le test EST le test
+    // ponctuel. Ce n'est donc pas un nouveau minorant, c'est la meme valeur
+    // moins de travail. C'est la seconde branche de Q23, celle dont je disais
+    // ne pas voir comment l'obtenir.
+    //
+    // TROIS PROPRIETES QUI LA RENDENT SURE.
+    //
+    // 1. La partition des couples ordonnes. Depuis `(U,U)` on descend en
+    //    `(Ul,Ul) (Ul,Ur) (Ur,Ul) (Ur,Ur)`, qui partitionne `U x U` ; un couple
+    //    de nœuds disjoints se scinde d'un seul cote. Chaque couple ordonne
+    //    `(a,z)` est donc visite EXACTEMENT une fois, et la diagonale est
+    //    ecartee par le seul cas `(feuille,meme feuille)`.
+    // 2. Le range-add est un tableau de differences. Un nœud couvre un
+    //    intervalle CONTIGU de l'ordre Morton, donc crediter tous ses ancres
+    //    coute `O(1)` : `diff[first] += k ; diff[last+1] -= k`.
+    // 3. Le masque de lanes, exactement comme la reparation q2. Un bloc
+    //    credite pour la lane `q` retire ce bit avant de descendre, sinon ses
+    //    sous-blocs recrediteraient les memes couples — c'est le defaut que le
+    //    contre-audit avait trouve dans le cœur, et il se reproduirait ici.
+    auto dual_tree = [&](int racine, const Box& Bpart, int lo_i, int hi_i,
+                         std::vector<int>* diff) {
+      const long long cutoff = dual_cutoff;
+      const int m_pool = hi_i - lo_i + 1;
+      struct F { int u, z, mask; };
+      std::vector<F> st;
+      st.push_back({racine, racine, 7});
+      while (!st.empty()) {
+        const F f = st.back();
+        st.pop_back();
+        const bool lu = h_leaf(f.u), lz = h_leaf(f.z);
+        if (f.u == f.z) {
+          if (lu) continue;  // diagonale `a == z`
+          const int a1 = nodes[f.u].left, a2 = nodes[f.u].right;
+          st.push_back({a1, a1, f.mask});
+          st.push_back({a1, a2, f.mask});
+          st.push_back({a2, a1, f.mask});
+          st.push_back({a2, a2, f.mask});
+          continue;
+        }
+        // CUTOFF. Un test de bloc coute jusqu'a `8^3` evaluations ; un couple
+        // ponctuel en coute `8`. Tester un bloc qui couvre moins de `64`
+        // couples ne peut donc pas etre rentable, et la descente y perd. En
+        // dessous du seuil on paie directement les couples, ce qui rend la
+        // meme valeur — c'est la MEME autorite ponctuelle.
+        const int popu = h_pop(f.u), popz = h_pop(f.z);
+        if ((long long)popu * popz <= cutoff) {
+          const int fu = h_first(f.u), lau = h_last(f.u);
+          const int fz = h_first(f.z), laz = h_last(f.z);
+          for (int ia = fu; ia <= lau; ++ia)
+            for (int iz = fz; iz <= laz; ++iz) {
+              const int lp = corner8_lane(sorted_pts[ia], Bpart, sorted_pts[iz], &L.travail_ha);
+              for (int q = 0; q < 3; ++q) {
+                if (!(f.mask & (1 << q)) || q + 2 > lp) continue;
+                std::vector<int>& d = diff[q];
+                d[(size_t)(ia - lo_i)] += 1;
+                d[(size_t)(ia - lo_i + 1)] -= 1;
+              }
+            }
+          continue;
+        }
+        const int lane = block_lane(h_box(f.u), Bpart, h_box(f.z), &L.travail_ha);
+        int reste = f.mask;
+        if (lane >= 2) {
+          const int fu = h_first(f.u), lau = h_last(f.u);
+          const int pz = h_last(f.z) - h_first(f.z) + 1;
+          for (int q = 0; q < 3; ++q) {
+            if (!(reste & (1 << q)) || q + 2 > lane) continue;
+            std::vector<int>& d = diff[q];
+            d[(size_t)(fu - lo_i)] += pz;
+            d[(size_t)(lau - lo_i + 1)] -= pz;
+            // LE MASQUE : sans lui, les enfants recrediteraient les memes
+            // couples. C'est litteralement le defaut du P0 q2, transpose.
+            if (mutant != Mutant::kDualSansMasque) reste &= ~(1 << q);
+          }
+        }
+        if (reste == 0) continue;
+        if (lu && lz) continue;  // couple ponctuel deja decide exactement
+        if (!lu && (lz || h_pop(f.u) >= h_pop(f.z))) {
+          st.push_back({nodes[f.u].left, f.z, reste});
+          st.push_back({nodes[f.u].right, f.z, reste});
+        } else {
+          st.push_back({f.u, nodes[f.z].left, reste});
+          st.push_back({f.u, nodes[f.z].right, reste});
+        }
+      }
+      (void)m_pool;
+    };
+
     // `ud` doublee pour les deux sens, et rayons doubles majorants.
     const Sphere SA = h_sphere(r.u), SB = h_sphere(r.v);
+    // Les crédits paresseux du dual-tree, puis leur propagation aux feuilles.
+    std::vector<int> dA[3], dB[3];
+    if (ha_dual) {
+      for (int q = 0; q < 3; ++q) {
+        dA[q].assign((size_t)na + 1, 0);
+        dB[q].assign((size_t)nb + 1, 0);
+      }
+      dual_tree(r.u, BB, ua, ub, dA);
+      if (mutant != Mutant::kDropB) dual_tree(r.v, BA, va, vb, dB);
+      // Somme prefixe : le tableau de differences redevient un compte par point.
+      for (int q = 0; q < 3; ++q) {
+        int acc = 0;
+        for (int i = 0; i < na; ++i) { acc += dA[q][(size_t)i]; dA[q][(size_t)i] = acc; }
+        acc = 0;
+        for (int i = 0; i < nb; ++i) { acc += dB[q][(size_t)i]; dB[q][(size_t)i] = acc; }
+      }
+    }
     for (int q = 0; q < 3; ++q) {
       const int need = h_q[q];
       for (int i = 0; i < na; ++i) {
         const P3& a = sorted_pts[ua + i];
         int c = 0;
-        if (ha_boule) {
+        if (ha_dual) {
+          c = dA[q][(size_t)i];
+          if (c > need) c = need;  // ecretage APRES coup : min commute avec la somme
+          if (ha_verifie) {
+            int ref = 0;
+            for (int j = 0; j < na && ref < need; ++j) {
+              if (j == i) continue;
+              if (corner8_lane(a, BB, sorted_pts[ua + j]) >= q + 2) ++ref;
+            }
+            ++L.dual_verifies;
+            if (ref != c) ++L.dual_ecarts;
+          }
+        } else if (ha_boule) {
           const i64 ud[3] = {SB.c2[0] - 2 * a.x, SB.c2[1] - 2 * a.y, SB.c2[2] - 2 * a.z};
           c = compte_boule(a, ud, SA.r2, SB.r2, q, need, r.u, ua, ub);
         } else {
           for (int j = 0; j < na && c < need; ++j) {
             if (j == i) continue;
             ++L.travail_h;
-            ++L.travail_ha;
-            if (universal_witness(a, BB, sorted_pts[ua + j], q + 2, narrow)) ++c;
+            const P3& zz = sorted_pts[ua + j];
+            bool w;
+            if (ha_corner8) { w = corner8_lane(a, BB, zz, &L.travail_ha) >= q + 2; }
+            else { L.travail_ha += 8; w = universal_witness(a, BB, zz, q + 2, narrow); }
+            if (w) ++c;
           }
         }
         ha[(size_t)i * 3 + q] = c;
@@ -1043,15 +1306,21 @@ int main(int argc, char** argv) {
         const P3& b = sorted_pts[va + i];
         int c = 0;
         if (mutant != Mutant::kDropB) {
-          if (ha_boule) {
+          if (ha_dual) {
+            c = dB[q][(size_t)i];
+            if (c > need) c = need;
+          } else if (ha_boule) {
             const i64 ud[3] = {SA.c2[0] - 2 * b.x, SA.c2[1] - 2 * b.y, SA.c2[2] - 2 * b.z};
             c = compte_boule(b, ud, SB.r2, SA.r2, q, need, r.v, va, vb);
           } else {
             for (int j = 0; j < nb && c < need; ++j) {
               if (j == i) continue;
               ++L.travail_h;
-              ++L.travail_ha;
-              if (universal_witness(b, BA, sorted_pts[va + j], q + 2, narrow)) ++c;
+              const P3& zz = sorted_pts[va + j];
+              bool w;
+              if (ha_corner8) { w = corner8_lane(b, BA, zz, &L.travail_ha) >= q + 2; }
+              else { L.travail_ha += 8; w = universal_witness(b, BA, zz, q + 2, narrow); }
+              if (w) ++c;
             }
           }
         }
@@ -1255,7 +1524,7 @@ int main(int argc, char** argv) {
               mhgp3v::cloud_family_name(family), n, coord_used, seed, smax, sep, cap,
               mutant_name(mutant));
   std::printf("seuils h_q2=%d h_q3=%d h_q4=%d ha_mode=%s coeur_mode=%s\n", h_q[0], h_q[1],
-              h_q[2], ha_boule ? "boule" : "jointure", core512 ? "corner64" : "bornes");
+              h_q[2], ha_dual ? "dualtree" : (ha_boule ? "boule" : (ha_corner8 ? "corner8" : "jointure")), core512 ? "corner64" : "bornes");
   std::printf("wspd rectangles=%lld non_decides=%lld masse=%lld masse_non_decide=%lld cellule_max=%lld\n",
               L.rectangles, L.non_decides, L.masse_totale, L.masse_non_decide, L.cellules_max);
   const long long total = (long long)n * (n - 1) / 2;
@@ -1276,6 +1545,9 @@ int main(int argc, char** argv) {
                 L.c512_perd[0], L.c512_perd[1], L.c512_perd[2],
                 L.c512_faux[0], L.c512_faux[1], L.c512_faux[2], L.c64_desaccords);
   if (core512) std::printf("corner64 appels=%lld\n", L.c64_appels);
+  if (ha_dual)
+    std::printf("dualtree verifies=%lld ecarts=%lld cutoff=%lld\n", L.dual_verifies,
+                L.dual_ecarts, dual_cutoff);
   std::printf("nonvacuite bulk_credits=%lld oracle_paires=%lld oracle_faux_morts=%lld "
               "oracle_ids_doubles=%lld oracle_couverture_ko=%lld\n",
               L.bulk_credits, L.oracle_paires, L.oracle_faux_morts, L.oracle_ids_doubles,
@@ -1289,6 +1561,17 @@ int main(int argc, char** argv) {
     std::fprintf(stderr, "PLANCHER : la WSPD ne partitionne pas (%lld contre %lld)\n",
                  L.masse_totale, total);
     return 3;
+  }
+  if (ha_verifie) {
+    if (L.dual_verifies == 0) {
+      std::fprintf(stderr, "PLANCHER : aucun point confronte, la porte est vacue\n");
+      return 3;
+    }
+    if (L.dual_ecarts != 0) {
+      std::fprintf(stderr, "PLANCHER : dual-tree != jointure sur %lld point(s)\n",
+                   L.dual_ecarts);
+      return 3;
+    }
   }
   if (mutant == Mutant::kNone && L.recouvrements != 0) {
     std::fprintf(stderr, "PLANCHER : recouvrement non nul sans mutant\n");

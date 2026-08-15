@@ -65,6 +65,14 @@ ancienne phrase imposant le rejet global des positions dupliquées est périmée
   les bornes CLI sont imposés par cinq refus négatifs et une porte positive à
   `65535` ; la couverture apex sort par lane. Les conclusions de complexité et
   d'unités sont retirées.
+- [`NOTE_CLAUDE_DUAL_TREE_Q23_20260815.md`](NOTE_CLAUDE_DUAL_TREE_Q23_20260815.md) :
+  la seconde branche de Q23, implémentée. L'autorité exacte à huit coins fait
+  croître `h_a` de `5` à `7 %` pour `+2 %` de temps ; l'auto-jointure dual-tree
+  rend les MEMES valeurs pour `2,2` à `3,0` fois moins d'évaluations. Elle
+  corrige aussi trois manques du § 6.2 du ré-audit : sans masque de lanes le
+  filtre ferme à tort (`212` et `1 525` fausses morts en régime tendu), la
+  diagonale lue au niveau nœud annule tout (`ha_somme` à zéro), et sans cutoff
+  la méthode coûte `2` à `4` fois plus que ce qu'elle remplace.
 - [`NOTE_SOLUTION_CONTRAT_SOURCE_AIGUE_20260814.md`](NOTE_SOLUTION_CONTRAT_SOURCE_AIGUE_20260814.md) :
   autorité contractuelle mathématique, sans réception logicielle : réponse
   négative à Q14, théorème exact des fuseaux `W2/W3/W4` et contrat de

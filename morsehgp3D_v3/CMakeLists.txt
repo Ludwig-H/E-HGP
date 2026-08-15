@@ -4702,6 +4702,83 @@ set_tests_properties(mhgp3v_combined_oracle_terrain PROPERTIES
   "oracle_paires=[1-9][0-9]* oracle_faux_morts=0 oracle_ids_doubles=0 oracle_couverture_ko=0")
 
 # ---------------------------------------------------------------------------
+# AUTO-JOINTURE DUAL-TREE — la seconde branche de Q23, celle que le ré-audit
+# conseillait et que je disais ne pas savoir obtenir.
+#
+# Elle calcule EXACTEMENT les mêmes `h_a` que la jointure ponctuelle à huit
+# coins : la récursion ne s'arrête que sur un verdict `ALL` — qui implique le
+# verdict ponctuel pour chaque couple des deux boîtes — ou sur un couple
+# feuille-feuille, où le test EST le test ponctuel. Ce n'est donc pas un nouveau
+# minorant, c'est la même valeur pour moins de travail.
+#
+# `--verifie-jointure` calcule les DEUX et les confronte point par point : c'est
+# la porte métamorphique, et le mutant `dual-sans-masque` — littéralement le
+# défaut du P0 q2 transposé au dual-tree — la fait mourir au code 3. Le cutoff
+# est mis à `0` dans ces portes pour que les blocs soient réellement exercés :
+# au cutoff de production, les petites cellules passent toutes par la branche
+# ponctuelle et le masque ne serait jamais sollicité.
+# ---------------------------------------------------------------------------
+foreach(fam uniform eight_clusters terrain)
+  add_test(NAME mhgp3v_combined_dualtree_equivaut_${fam}
+    COMMAND mhgp3v_combined_prefilter_probe --points=400 --family=${fam} --seed=3
+            --separation=6 --verifie-jointure --dual-cutoff=0)
+  set_tests_properties(mhgp3v_combined_dualtree_equivaut_${fam} PROPERTIES
+    PASS_REGULAR_EXPRESSION "dualtree verifies=[1-9][0-9]* ecarts=0")
+endforeach()
+
+mhgp3v_add_expected_code_test_for(mhgp3v_combined_prefilter_probe
+  mhgp3v_combined_mutant_dual_sans_masque "dual-tree != jointure" 3
+  --points=400 --family=uniform --seed=3 --separation=6 --verifie-jointure
+  --dual-cutoff=0 --inject=dual-sans-masque --juge=200)
+
+# LA CONSEQUENCE, ET PAS SEULEMENT L'ECART. La porte métamorphique ci-dessus dit
+# que les comptes divergent ; celle-ci dit ce que ça coûte : sans masque le
+# filtre cesse d'être fail-open et ferme des ancres VIVANTES. Il faut un régime
+# tendu pour le voir — `smax=32` donne `h_q2=31`, et `separation=1` des cellules
+# larges — parce qu'à `s=6, smax=11` le sur-comptage ne suffit pas à franchir le
+# seuil. Deux familles, `212` et `1 525` fausses morts.
+mhgp3v_add_expected_code_test_for(mhgp3v_combined_prefilter_probe
+  mhgp3v_combined_mutant_dual_ferme_a_tort_amas "ancres fermees a tort" 1
+  --points=200 --family=eight_clusters --seed=3 --separation=1 --smax=32
+  --oracle=200 --ha=dualtree --dual-cutoff=0 --inject=dual-sans-masque --juge=200)
+mhgp3v_add_expected_code_test_for(mhgp3v_combined_prefilter_probe
+  mhgp3v_combined_mutant_dual_ferme_a_tort_terrain "ancres fermees a tort" 1
+  --points=200 --family=terrain --seed=3 --separation=1 --smax=32
+  --oracle=200 --ha=dualtree --dual-cutoff=0 --inject=dual-sans-masque --juge=200)
+
+# Et le témoin positif : la même configuration tendue, saine, ne ferme rien à
+# tort. Sans lui, les deux portes ci-dessus pourraient passer sur un probe
+# cassé qui refuserait tout.
+foreach(fam eight_clusters terrain)
+  add_test(NAME mhgp3v_combined_dualtree_tendu_${fam}
+    COMMAND mhgp3v_combined_prefilter_probe --points=200 --family=${fam} --seed=3
+            --separation=1 --smax=32 --oracle=200 --ha=dualtree --dual-cutoff=0)
+  set_tests_properties(mhgp3v_combined_dualtree_tendu_${fam} PROPERTIES
+    PASS_REGULAR_EXPRESSION
+    "oracle_paires=[1-9][0-9]* oracle_faux_morts=0 oracle_ids_doubles=0 oracle_couverture_ko=0")
+endforeach()
+
+# Le cutoff de production doit lui aussi rendre les mêmes valeurs : c'est une
+# optimisation de parcours, pas un second filtre.
+add_test(NAME mhgp3v_combined_dualtree_equivaut_cutoff_production
+  COMMAND mhgp3v_combined_prefilter_probe --points=400 --family=eight_clusters --seed=5
+          --separation=8 --verifie-jointure)
+set_tests_properties(mhgp3v_combined_dualtree_equivaut_cutoff_production PROPERTIES
+  PASS_REGULAR_EXPRESSION "dualtree verifies=[1-9][0-9]* ecarts=0 cutoff=256")
+
+# L'autorité exacte à huit coins pour `h_a` — elle ne peut que faire CROITRE le
+# compte, donc la fermeture, et l'oracle par `PairId` vérifie qu'elle ne ferme
+# jamais à tort.
+foreach(fam uniform eight_clusters terrain)
+  add_test(NAME mhgp3v_combined_ha_corner8_${fam}
+    COMMAND mhgp3v_combined_prefilter_probe --points=160 --family=${fam} --seed=3
+            --separation=6 --oracle=160 --ha=corner8)
+  set_tests_properties(mhgp3v_combined_ha_corner8_${fam} PROPERTIES
+    PASS_REGULAR_EXPRESSION
+    "oracle_paires=[1-9][0-9]* oracle_faux_morts=0 oracle_ids_doubles=0 oracle_couverture_ko=0")
+endforeach()
+
+# ---------------------------------------------------------------------------
 # `h_a` PAR BOULE D'APEX — le chemin de la question Q23, gardé mais NON adopté.
 #
 # Il remplace l'auto-jointure ponctuelle par une descente du seul sous-arbre
