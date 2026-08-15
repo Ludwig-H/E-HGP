@@ -54,7 +54,7 @@ Contrat et preuves : [`../audits/NOTE_SOLUTION_CONTRAT_SOURCE_AIGUE_20260814.md`
 | **dimensionnement** | `lane_source_scale_probe.cpp`, `caps_admissible_probe.cpp` | mesure de l'objet (J0) |
 | **dominance 432** | `directional_dominance.hpp`, `directional_dominance_probe.cpp` | préfiltre d'ancre par sous-cône et hauteur — fermeture croissante avec `n` |
 | **préfiltre combiné** | `combined_prefilter_probe.cpp` | `h_coeur + h_a + h_b` sur un rectangle CK ; trois comptes prouvés disjoints, décision par histogramme et non par paire |
-| **cœur-boule** | `spindle_core_ball.hpp`, `core_ball_probe.cpp` | le cœur d'un rectangle en **forme close** — boule inscrite tangente au fuseau — et les deux primitives sphère–boîte qui rendent le comptage `O(1)` par sous-arbre |
+| **cœur-boule** | `spindle_core_ball.hpp`, `core_ball_probe.cpp` | le cœur d'un rectangle en **forme close** — boule inscrite tangente au fuseau — et les deux primitives sphère–boîte qui rendent le comptage `O(1)` par sous-arbre ; contient aussi la **boule d'apex** de `h_a`, gardée mais non adoptée |
 | **oracles et juges** | `../oracle/*`, `q4_brute_oracle.cpp`, `anchored_catalogue.hpp` | arithmétique volontairement différente de la production |
 
 ## Ce qui reste, et qui porte encore une idée fermée
@@ -174,10 +174,30 @@ Non vide dès que `s > 1/kappa_q`, soit `2,000 / 3,464 / 3,864` — la séparati
 du dossier portant sur l'**écart** des boules et non sur la distance des
 centres. Le probe grave ce seuil à environ un centième près.
 
+### `h_a` par boule d'apex : construite, sûre, non adoptée
+
+La région de `h_a` n'est pas la boule du cœur mais un **cône d'apex `a`** de
+demi-ouverture `gamma_q = theta'_q - arcsin((r_B + 2 r_A)/D)` ; la boule qui y
+est inscrite est en forme close et gravée. Elle est sûre — elle minore `h_a`
+exact, donc le filtre reste fail-open, et `oracle_faux_morts = 0`.
+
+Elle n'est pourtant pas la route : l'auto-jointure qu'elle devait remplacer sort
+dès `h_q <= 10` atteint, donc coûte `O(|A| h_q)` et non `O(|A|^2)`. Ces deux
+postes ne pèsent que `14,6 %` du travail sur `uniform`, et le remplacement perd
+`11` points de fermeture q4 sur `eight_clusters` pour un temps plus mauvais.
+Détail dans [`../audits/PISTES_FERMEES.md`](../audits/PISTES_FERMEES.md).
+
+Le compteur `travail_ha` est ce qui reste de plus utile : il dit que le travail
+est dans la **descente du cœur**, `43` à `85 %` du total.
+
 Deux fautes envisagées n'en sont pas, et c'est inscrit dans l'en-tête :
 arrondir la division rationnelle vers le haut d'une unité est absorbé par
 l'inégalité stricte, et écrire la disjonction avec `>=` décide exactement
-pareil. Les gater aurait produit des portes ne mordant sur aucun nuage.
+pareil. S'y ajoutent deux autres du côté apex : la longueur `l` est un
+**paramètre libre** que la sûreté ne contraint pas, et l'arrondi bas de la
+racine soustraite n'est atteignable que si `r_A` est comparable à `D`, donc
+jamais sous séparation. Les gater aurait produit des portes ne mordant sur
+aucun nuage.
 
 `h_coeur` devient une requête `k`-NN avec `k = h_q` : l'ancre meurt si et
 seulement si le `h_q`-ième plus proche voisin du centre est dans le cœur. Aucun

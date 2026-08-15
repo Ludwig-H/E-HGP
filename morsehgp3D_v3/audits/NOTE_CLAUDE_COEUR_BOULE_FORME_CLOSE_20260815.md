@@ -253,7 +253,92 @@ ne mordent sur aucun nuage — le défaut même que votre contre-audit a trouvé
 ailleurs. Ils sont documentés comme non-mutants dans l'en-tête, et remplacés par
 deux fautes atteignables : `boule-rayon-plus-deux` et `boule-disjoint-centre`.
 
-## 11. Ce que cette note ne revendique pas
+## 11. Q23, fermée — et sa prémisse est fausse
+
+Le point 2 du plan est fait. Il donne une réponse que je n'attendais pas, et
+elle est négative.
+
+### 11.1 La région de `h_a` est un cône, pas la boule du cœur
+
+`h_a` compte les points `z` de `A` témoins de `(a,b)` pour tout `b`, à `a`
+fixé. La boule du cœur n'y sert à rien : elle est centrée à l'équateur du
+fuseau, loin de `A`. Les témoins de `A` sont au contraire près du **pôle** `a`,
+là où le fuseau se pince.
+
+À `a` fixé, avec `u = c_B - a`, `D = |u|` et `t = u + (delta - e)`,
+`|delta| <= r_B`, on a `angle(u,t) <= arcsin((r_B + |e|)/D)`, donc la condition
+du fuseau est garantie dès que
+
+`angle(e,u) < gamma_q = theta'_q - arcsin((r_B + 2 r_A)/D)`,
+
+en majorant `|e| <= 2 r_A`, ce que tout `z` de `A` vérifie automatiquement. La
+région est donc un **cône d'apex `a`**, et la boule demandée est celle qui y est
+**inscrite**, de centre `a + l u^` et de rayon `l sin(gamma_q)`. En unités
+doublées le `U` se simplifie et le test tient en une comparaison d'entiers :
+`den |G ed - l ud|^2 < l^2 num`.
+
+`l` s'avère être un **paramètre libre** : la sûreté ne le contraint pas, tout
+`z` de `A` vérifiant `|e| <= 2 r_A` par définition du diamètre. C'est le
+troisième non-mutant du fichier, après l'arrondi et la disjonction large.
+
+### 11.2 Ce que la boule coûte, mesuré
+
+Fixtures, `B` réduit à un point donc juge exact et complet : la boule capte
+`95,0 %` des vrais témoins en configuration éloignée, `81,1 %` en configuration
+serrée, avec `faux = 0`. En production c'est bien pire, et la géométrie le
+prédit : à `s = 6`, `(r_B + 2 r_A)/D` vaut environ `3/s = 0,5`, donc
+`arcsin = 30°` et `gamma_4 = 24,7°` contre `theta'_4 = 54,7°` — le rayon est
+divisé par deux. Sur `n=4000`, `s=6`, `K=10` :
+
+| famille | `ha_somme` jointure | par boule | fermeture q4 |
+| --- | ---: | ---: | --- |
+| `terrain` | `1 466 232` | `866 515` | `95,36 -> 94,34 %` |
+| `uniform` | `986 527` | `407 884` | `83,92 -> 82,81 %` |
+| `eight_clusters` | `1 016 656` | `514 865` | `61,29 -> 50,10 %` |
+
+À `s = 8` la correction est plus petite et la perte se réduit — `72,80 -> 68,33`
+sur `eight_clusters` — sans jamais s'annuler.
+
+### 11.3 La prémisse de Q23 ne tient pas
+
+Vous demandiez de remplacer les auto-jointures ponctuelles au motif d'un coût
+`O(|A|^2 + |B|^2)`. Le compteur dédié dit ce que ces deux postes pèsent
+réellement dans le travail total :
+
+| famille | part de `h_a` et `h_b` | par boule |
+| --- | ---: | ---: |
+| `uniform` | `14,6 %` | `17,0 %` |
+| `eight_clusters` | `35,3 %` | `31,0 %` |
+| `terrain` | `56,9 %` | `48,7 %` |
+
+**L'auto-jointure n'est pas quadratique en pratique.** Elle sort dès que le
+seuil `h_q <= 10` est atteint, donc elle coûte `O(|A| h_q)` et non `O(|A|^2)` —
+et `uniform`, la famille la plus lente, est celle où ces postes pèsent le
+moins. La boule réduit le travail de `28 %` sur `terrain`, mais l'**augmente**
+de `20 %` sur `uniform`, et le temps de paroi est plus mauvais dans les trois
+cas — `+6` à `+14 %` — chaque unité de travail par boule coûtant un `i128` et
+une racine entière là où l'auto-jointure ne fait qu'un produit scalaire.
+
+**Le travail est ailleurs** : dans la descente du cœur, `43` à `85 %` du total.
+C'est là que `corner64` et le cœur-boule agissent, et c'est le seul poste dont
+l'optimisation ait payé jusqu'ici.
+
+### 11.4 Ce que je fais du chemin
+
+Je le garde, compilé, exercé et gardé — trois portes vérifient
+`oracle_faux_morts=0` sur les trois familles, la boule minorant `h_a` exact donc
+le filtre restant fail-open. Mais **il n'est pas la route par défaut**, et je ne
+demande pas sa réception. Q23 est close par la mesure, pas par le choix entre
+vos deux branches : ni le minorant par bloc ni le calcul accéléré ne valent, sur
+ces tailles de cellule, ce qu'ils coûtent en fermeture.
+
+Si vous voyez une erreur dans l'attribution du coût — le compteur
+`travail_ha` compte les visites de nœud côté boule et les paires testées côté
+jointure, ce qui n'est pas la même unité — dites-le : c'est le seul point où je
+compare deux grandeurs qui ne sont pas homogènes, et le temps de paroi est ce
+qui m'a fait conclure.
+
+## 12. Ce que cette note ne revendique pas
 
 Aucune mesure. Aucune promotion de statut : le préfiltre reste `counter-only` et
 ferme des **ancres**, pas des supports. La section 3 est une preuve

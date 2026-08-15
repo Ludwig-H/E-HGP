@@ -73,3 +73,28 @@ Le détail reste dans l'historique Git.
 Nouveau théorème de complétude, fixture qui falsifie le motif d'abandon sans
 casser les contre-exemples, architecture sans structure globale interdite, porte
 de coût distincte. Un bon rappel empirique ne suffit jamais.
+
+## `h_a` par région au lieu d'auto-jointure — 15 août 2026
+
+**L'idée.** Le contre-audit du préfiltre combiné demandait de remplacer les
+auto-jointures ponctuelles `A x A` et `B x B`, de coût annoncé
+`O(|A|^2 + |B|^2)`, par des requêtes de région hiérarchiques (question Q23).
+
+**Ce qui a été construit.** La région exacte de `h_a` est un **cône d'apex `a`**
+de demi-ouverture `gamma_q = theta'_q - arcsin((r_B + 2 r_A)/D)`, et non la
+boule du cœur — celle-ci est centrée à l'équateur du fuseau, loin de `A`. La
+boule inscrite dans ce cône est en forme close, prouvée, gravée par deux
+fixtures et trois mutants, et sûre : `oracle_faux_morts = 0`.
+
+**Ce qui l'a fermée.** La prémisse. L'auto-jointure sort dès `h_q <= 10`
+atteint, donc elle coûte `O(|A| h_q)` et non `O(|A|^2)` : ces deux postes ne
+pèsent que `14,6 %` du travail sur `uniform`, la famille la plus lente. La
+boule réduit le travail de `28 %` sur `terrain` mais l'augmente de `20 %` sur
+`uniform`, le temps de paroi est plus mauvais dans les trois cas, et la
+fermeture q4 tombe de `61,3 %` à `50,1 %` sur `eight_clusters`.
+
+**Ce qui survit.** `spindle_core_ball.hpp` en entier, ses portes, et le chemin
+`--ha=boule` gardé compilé et exercé. Surtout : le compteur `travail_ha`, qui
+dit que le travail est dans la **descente du cœur** — `43` à `85 %` du total —
+et non dans les auto-jointures. C'est là qu'il faut optimiser.
+

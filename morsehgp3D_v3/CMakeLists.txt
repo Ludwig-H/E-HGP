@@ -4698,6 +4698,28 @@ add_test(NAME mhgp3v_combined_oracle_terrain
 set_tests_properties(mhgp3v_combined_oracle_terrain PROPERTIES
   PASS_REGULAR_EXPRESSION "oracle_faux_morts=0 oracle_ids_doubles=0 oracle_couverture_ko=0")
 
+# ---------------------------------------------------------------------------
+# `h_a` PAR BOULE D'APEX — le chemin de la question Q23, gardé mais NON adopté.
+#
+# Il remplace l'auto-jointure ponctuelle par une descente du seul sous-arbre
+# `A`, avec crédit en bloc et élagage. La boule étant inscrite dans le cône
+# d'apex, elle MINORE `h_a` exact : le filtre reste fail-open, ce que l'oracle
+# par `PairId` vérifie ici — `oracle_faux_morts=0` sur les trois familles.
+#
+# Il n'est pas la route par défaut, et la mesure dit pourquoi : voir la section
+# Q23 de `audits/NOTE_CLAUDE_COEUR_BOULE_FORME_CLOSE_20260815.md`. Ces portes
+# existent pour que le chemin reste compilé, exercé et sûr — pas pour le
+# promouvoir.
+# ---------------------------------------------------------------------------
+foreach(fam uniform eight_clusters terrain)
+  add_test(NAME mhgp3v_combined_ha_boule_${fam}
+    COMMAND mhgp3v_combined_prefilter_probe --points=160 --family=${fam} --seed=3
+            --separation=6 --oracle=160 --ha=boule)
+  set_tests_properties(mhgp3v_combined_ha_boule_${fam} PROPERTIES
+    PASS_REGULAR_EXPRESSION
+    "oracle_faux_morts=0 oracle_ids_doubles=0 oracle_couverture_ko=0")
+endforeach()
+
 mhgp3v_add_expected_code_test_for(mhgp3v_combined_prefilter_probe
   mhgp3v_combined_refus_oracle_non_borne "REFUS : oracle non borne" 2
   --points=500 --oracle=500)
@@ -4830,6 +4852,51 @@ mhgp3v_add_expected_code_test_for(mhgp3v_core_ball_probe
 mhgp3v_add_expected_code_test_for(mhgp3v_core_ball_probe
   mhgp3v_core_ball_mutant_disjoint_centre "l'elagage ou le credit en bloc perd" 3
   --points=400 --family=uniform --seed=3 --separation=8 --inject=boule-disjoint-centre)
+
+# ---------------------------------------------------------------------------
+# LA BOULE D'APEX — `h_a` sans auto-jointure quadratique (question Q23).
+#
+# La région de `h_a` n'est PAS la boule du cœur : celle-ci est centrée à
+# l'équateur du fuseau, loin de `A`. Les témoins de `A` sont près du PÔLE `a`,
+# et la région y est un CÔNE d'apex `a`, de demi-ouverture
+# `gamma_q = theta'_q - arcsin((r_B + 2 r_A)/D)`. Un cône contient des boules
+# inscrites, et c'est celle-là que le sujet calcule.
+#
+# Les deux fixtures balaient un plan de `A` et confrontent chaque point au
+# FUSEAU EXACT sur la paire `(a,b)` — `B` étant réduit à un point, la force
+# brute est complète, sans aucune approximation côté juge.
+#
+#   `faux`  doit rester nul : c'est la sûreté.
+#   `rates` mesure ce que la boule inscrite perd contre le cône. Il n'est PAS
+#           nul, et c'est le prix documenté de Q23 : 95,0 % de couverture en
+#           configuration éloignée, 81,1 % en configuration serrée.
+# ---------------------------------------------------------------------------
+add_test(NAME mhgp3v_core_ball_apex_code
+         COMMAND mhgp3v_core_ball_probe --fixture=apex)
+add_test(NAME mhgp3v_core_ball_apex
+         COMMAND mhgp3v_core_ball_probe --fixture=apex)
+set_tests_properties(mhgp3v_core_ball_apex PROPERTIES PASS_REGULAR_EXPRESSION
+  "fixture apex bx=20000 certifies=25750 vrais=27114 faux=0 rates=1364")
+
+add_test(NAME mhgp3v_core_ball_apex_serre_code
+         COMMAND mhgp3v_core_ball_probe --fixture=apex-serre)
+add_test(NAME mhgp3v_core_ball_apex_serre
+         COMMAND mhgp3v_core_ball_probe --fixture=apex-serre)
+set_tests_properties(mhgp3v_core_ball_apex_serre PROPERTIES PASS_REGULAR_EXPRESSION
+  "fixture apex bx=1600 certifies=21557 vrais=26576 faux=0 rates=5019")
+
+mhgp3v_add_expected_code_test_for(mhgp3v_core_ball_probe
+  mhgp3v_core_ball_apex_mutant_oublie_rayon "hors du fuseau" 1
+  --fixture=apex --inject=apex-oublie-rayon)
+mhgp3v_add_expected_code_test_for(mhgp3v_core_ball_probe
+  mhgp3v_core_ball_apex_mutant_racine_oubliee "hors du fuseau" 1
+  --fixture=apex --inject=apex-racine-oubliee)
+mhgp3v_add_expected_code_test_for(mhgp3v_core_ball_probe
+  mhgp3v_core_ball_apex_mutant_coeff "hors du fuseau" 1
+  --fixture=apex --inject=apex-coeff-echange)
+mhgp3v_add_expected_code_test_for(mhgp3v_core_ball_probe
+  mhgp3v_core_ball_apex_serre_mutant_rayon "hors du fuseau" 1
+  --fixture=apex-serre --inject=apex-oublie-rayon)
 
 mhgp3v_add_expected_code_test_for(mhgp3v_core_ball_probe
   mhgp3v_core_ball_refus_non_borne "le mode nuage est borne" 2

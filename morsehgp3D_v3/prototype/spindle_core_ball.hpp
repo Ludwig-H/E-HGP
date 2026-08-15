@@ -133,6 +133,32 @@ enum class BallMutant {
   kDisjointCentre, // elague sur la distance au CENTRE de la boite au lieu de son
                    // point le plus proche : une boite a cheval sur la sphere,
                    // centre au-dela, est coupee avec ses temoins dedans
+  // LES TROIS FAUTES DE LA BOULE D'APEX (`h_a`, question Q23).
+  kApexOublieRayon,    // N = r2_B seul : oublie que `z` s'ecarte de `a` de
+                       // 2 r_A, donc sur-estime la demi-ouverture du cone
+  // ARRONDIR LA RACINE SOUSTRAITE VERS LE BAS EST UNE FAUTE REELLE MAIS
+  // INATTEIGNABLE ICI — quatrieme non-mutant. `floor` au lieu de `ceil` majore
+  // `num` d'au plus `2N`, face a `num` de l'ordre de `mult W ~ mult U`. Pour
+  // qu'un point entier tombe dans l'ecart il faut `r_A` comparable a `D`,
+  // c'est-a-dire `B` a l'interieur de `A` — un rectangle que la separation ne
+  // produit jamais. Une recherche sur dix-huit geometries, jusqu'a `D = 78`
+  // pour `r_A = 34,6`, n'a produit aucun faux temoin. `isqrt_ceil` reste le
+  // choix conservateur, mais le gater aurait donne une porte qui ne mord pas.
+  // La faute reelle de cette ligne est l'oubli du terme, ci-dessous.
+  kApexRacineOubliee,  // omet `- 2 N sqrt(mult W)` : la correction d'ouverture
+                       // disparait, le cone s'ouvre a `theta'_q` entier
+  // `l` N'EST PAS UNE CONDITION DE SURETE, C'EST UN PARAMETRE LIBRE — troisieme
+  // non-mutant du fichier. La derivation exige `|e| <= 2 r_A` pour fixer
+  // `gamma_q` ; or tout `z` de `A` le verifie AUTOMATIQUEMENT, `2 r_A` etant le
+  // diametre. Et la boule garantit `angle(e,u) <= arcsin(R/l) = gamma_q` quel
+  // que soit `l`. Doubler `l` ne peut donc pas certifier un faux temoin : cela
+  // deplace seulement la boule le long de l'axe, et la mesure montre que c'est
+  // un plus MAUVAIS choix (87,9 % de couverture au lieu de 95,0 %). Il reste
+  // selectionnable pour mesurer ce compromis, jamais comme mutant.
+  kApexLongueurDouble,
+  kApexCoeffEchange,   // q4 emprunte la constante de q3 : la demi-ouverture est
+                       // sur-estimee de plus de cinq degres, et le fuseau q4,
+                       // plus etroit, refuse les temoins gagnes
 };
 
 inline const char* ball_mutant_name(BallMutant m) {
@@ -144,6 +170,10 @@ inline const char* ball_mutant_name(BallMutant m) {
     case BallMutant::kRayonPlusDeux: return "boule-rayon-plus-deux";
     case BallMutant::kInclusLarge: return "boule-inclus-large";
     case BallMutant::kDisjointCentre: return "boule-disjoint-centre";
+    case BallMutant::kApexOublieRayon: return "apex-oublie-rayon";
+    case BallMutant::kApexRacineOubliee: return "apex-racine-oubliee";
+    case BallMutant::kApexLongueurDouble: return "apex-longueur-double";
+    case BallMutant::kApexCoeffEchange: return "apex-coeff-echange";
   }
   return "?";
 }
@@ -254,6 +284,210 @@ MHGP_HD inline bool ball_contains_point(const i64 M[3], i64 R4, const i64 p[3],
                                         BallMutant mu = BallMutant::kNone) {
   const i64 lo[3] = {p[0], p[1], p[2]};
   return ball_contains_box(M, R4, lo, lo, mu);
+}
+
+// ===========================================================================
+// LA BOULE D'APEX : `h_a` SANS AUTO-JOINTURE QUADRATIQUE (question Q23).
+//
+// ---------------------------------------------------------------------------
+// LA REGION DE `h_a` N'EST PAS UNE BOULE, C'EST UN CONE
+//
+// `h_a` compte les points `z` de `A` qui sont temoins de `(a,b)` pour TOUT `b`
+// de `B`, a `a` FIXE. Le cœur ci-dessus ne sert a rien ici : sa boule est
+// centree a l'equateur du fuseau, loin de `A`, et n'y capte aucun point. Les
+// temoins de `A` sont au contraire pres du POLE `a`, la ou le fuseau se pince.
+//
+// A `a` fixe, avec `u = c_B - a`, `D = |u|`, `e = z-a` et `t = b-z` :
+//
+//   t = (c_B - a) + delta - e = u + (delta - e),   |delta| <= r_B,
+//
+// donc `angle(u,t) <= arcsin((r_B + |e|)/D)`. Comme `angle(e,t) <= angle(e,u)
+// + angle(u,t)`, la condition du fuseau `angle(e,t) < theta'_q` est garantie
+// des que
+//
+//   angle(e,u) < gamma_q = theta'_q - arcsin((r_B + 2 r_A)/D),
+//
+// en majorant `|e| <= 2 r_A` puisque `z` et `a` vivent tous deux dans `A`.
+// C'est un CONE d'apex `a` et d'axe `u`, avec
+// `theta'_2 = 90°`, `theta'_3 = 60°`, `theta'_4 = 54,7356°`.
+//
+// ---------------------------------------------------------------------------
+// ET UN CONE CONTIENT DES BOULES
+//
+// La boule centree en `a + l u^` de rayon `l sin(gamma_q)` est inscrite dans ce
+// cone et tangente a ses deux parois : l'angle maximal vu de l'apex vaut
+// exactement `arcsin(R/l) = gamma_q`. On prend `l <= r_A`, ce qui garantit que
+// tout point de la boule est a distance `l + R <= 2 r_A` de `a` — exactement
+// l'hypothese qui a servi a fixer `gamma_q`. L'argument se referme.
+//
+// C'est donc bien une boule, comme demande, mais une boule INSCRITE DANS LE
+// CONE et non la boule du cœur. Elle est strictement moins bonne que le cone
+// lui-meme — elle en rate les points proches des parois loin de l'axe — et ce
+// que cette perte coûte se mesure contre l'auto-jointure exacte.
+//
+// ---------------------------------------------------------------------------
+// LA FORME ENTIERE, OU `U` SE SIMPLIFIE
+//
+// En unites DOUBLEES : `ud = c2_B - 2a`, `U = |ud|^2`, `N = r2_B + 2 r2_A`,
+// `W = U - N^2`, et `G = isqrt_ceil(U) >= |ud|`. On prend
+// `l_d = r2_A |ud| / G <= r2_A`, de sorte que le centre mis a l'echelle `G`
+// vaut l'entier `G (2a) + r2_A ud`, et le rayon verifie
+//
+//   G^2 R_d^2 = r2_A^2 U sin^2(gamma_q).
+//
+// Or `sin(gamma_q) = [sin(theta') sqrt(W) - cos(theta') N] / sqrt(U)`, donc
+// `sin^2(gamma_q) = num / (den U)` et **le `U` se simplifie** :
+//
+//   q2 : den = 1, num = W
+//   q3 : den = 4, num = 3W + N^2 - 2 N sqrt(3W)
+//   q4 : den = 3, num = 2W + N^2 - 2 N sqrt(2W)
+//
+// Le test d'appartenance devient une seule comparaison d'entiers :
+//
+//   den * |G ed - r2_A ud|^2  <  r2_A^2 * num,     ed = 2z - 2a.
+//
+// Les racines soustraites sont arrondies au-dessus (`isqrt_ceil`), ce qui
+// MINORE `num`, donc minore le rayon : la boule reste dans le cone.
+//
+// LARGEURS. Coordonnees doublees sous 131070 : `|ud| <= 2,3e5`, `U <= 1,6e11`,
+// `G <= 4,1e5`. `|G ed - r2_A ud| <= 1,1e11`, son carre somme sur trois axes
+// sous 4,3e22, fois `den = 4` sous 1,8e23. A droite, `r2_A^2 <= 5,3e10` fois
+// `num <= 3U <= 4,8e11` sous 2,6e22. Tout tient dans `i128`, dont la borne est
+// 1,7e38 ; rien n'approche.
+// ===========================================================================
+MHGP_HD inline i64 isqrt_floor_i128(i128 v) {
+  if (v <= 0) return 0;
+  i64 r = (i64)__builtin_sqrt((double)v);
+  while (r > 0 && (i128)r * r > v) --r;
+  while ((i128)(r + 1) * (r + 1) <= v) ++r;
+  return r;
+}
+
+MHGP_HD inline i64 isqrt_ceil_i128(i128 v) {
+  const i64 f = isqrt_floor_i128(v);
+  return ((i128)f * f == v) ? f : f + 1;
+}
+
+// Rend `num` et `den` du carre du sinus de la demi-ouverture. `num <= 0`
+// signifie que le cone est degenere : `B` est trop proche ou trop gros pour que
+// la direction de `t` soit contrainte, et aucun temoin n'est certifiable.
+struct ApexNum { i128 num; i64 den; };
+
+MHGP_HD inline ApexNum apex_sin2(i128 U, i64 N, int q, BallMutant mu = BallMutant::kNone) {
+  const i128 W = U - (i128)N * (i128)N;
+  if (W <= 0) return ApexNum{0, 1};
+  if (q == 2) return ApexNum{W, 1};
+  // MUTANT : q4 prend le 3 de q3 au lieu de son 2, donc un cone trop ouvert.
+  const i128 mult = (mu == BallMutant::kApexCoeffEchange) ? 3 : ((q == 3) ? 3 : 2);
+  const i64 den_q = (mu == BallMutant::kApexCoeffEchange) ? 4 : ((q == 3) ? 4 : 3);
+  // MUTANT : arrondir la racine SOUSTRAITE vers le bas MAJORE `num`, donc le
+  // rayon, donc sort du cone.
+  const i64 rac = isqrt_ceil_i128(mult * W);
+  // MUTANT : sans le terme soustrait, la demi-ouverture n'est plus corrigee du
+  // deplacement de `t`, et le cone vaut `theta'_q` tout entier.
+  const i128 num = (mu == BallMutant::kApexRacineOubliee)
+                       ? mult * W + (i128)N * (i128)N
+                       : mult * W + (i128)N * (i128)N - 2 * (i128)N * (i128)rac;
+  return ApexNum{num, den_q};
+}
+
+// `ud` : `c2_B - 2a`, doublee. `ed` : `2z - 2a`, doublee. `rA2`, `rB2` : rayons
+// doubles majorants des deux nœuds. Rend vrai si `z` est certifie temoin de
+// `(a,b)` pour TOUT `b` de la boule englobante de `B`.
+MHGP_HD inline bool apex_ball_contains(const i64 ud[3], i64 rA2, i64 rB2,
+                                       const i64 ed[3], int q,
+                                       BallMutant mu = BallMutant::kNone) {
+  if (rA2 <= 0) return false;  // `A` est un point : aucun autre `z` a compter
+  i128 U = 0;
+  for (int i = 0; i < 3; ++i) U += (i128)ud[i] * (i128)ud[i];
+  // MUTANT : oublier que `z` s'ecarte de `a` — la borne `|e| <= 2 r_A` tombe.
+  const i64 N = (mu == BallMutant::kApexOublieRayon) ? rB2 : rB2 + 2 * rA2;
+  const ApexNum s2 = apex_sin2(U, N, q, mu);
+  if (s2.num <= 0) return false;
+  const i64 G = isqrt_ceil_i128(U);
+  if (G <= 0) return false;
+  // MUTANT : `l_d = 2 r2_A` viole `l <= r_A`, donc la boule deborde au-dela de
+  // `2 r_A` et l'hypothese qui fixe `gamma_q` ne tient plus.
+  const i64 lg = (mu == BallMutant::kApexLongueurDouble) ? 2 * rA2 : rA2;
+  i128 acc = 0;
+  for (int i = 0; i < 3; ++i) {
+    const i128 w = (i128)G * (i128)ed[i] - (i128)lg * (i128)ud[i];
+    acc += w * w;
+  }
+  return (i128)s2.den * acc < (i128)lg * (i128)lg * s2.num;
+}
+
+// ---------------------------------------------------------------------------
+// LA MEME BOULE, VUE COMME UNE BOULE DE L'ESPACE — POUR DESCENDRE L'INDEX.
+//
+// `f(z) = G (2z - 2a) - l ud` est AFFINE en `z`, de coefficient `2G`. Le test
+// `den |f(z)|^2 < l^2 num` est donc exactement l'appartenance a une boule de
+// centre entier `C = 2G a + l ud` et de rayon carre rationnel `l^2 num / den`,
+// dans les coordonnees mises a l'echelle `2G`. Les deux primitives sphere-boite
+// s'ecrivent alors comme plus haut, avec cette echelle et ce rationnel — et le
+// comptage d'un sous-arbre redevient `O(1)` quand la boite y est incluse.
+//
+// C'est ce qui ferme Q23 : `h_a` cesse d'etre une auto-jointure `O(|A|^2)` et
+// devient `|A|` requetes de boule sur le seul sous-arbre `A`.
+// ---------------------------------------------------------------------------
+struct ApexBall {
+  i64 C[3];     // centre entier, a l'echelle `2G`
+  i64 scale;    // `2G`
+  i128 r2num;   // `l^2 num`
+  i64 r2den;    // `den`
+  bool vide;    // cone degenere : rien n'est certifiable
+};
+
+MHGP_HD inline ApexBall apex_ball_of(const i64 a[3], const i64 ud[3], i64 rA2, i64 rB2,
+                                     int q, BallMutant mu = BallMutant::kNone) {
+  ApexBall out{};
+  out.vide = true;
+  if (rA2 <= 0) return out;
+  i128 U = 0;
+  for (int i = 0; i < 3; ++i) U += (i128)ud[i] * (i128)ud[i];
+  const i64 N = (mu == BallMutant::kApexOublieRayon) ? rB2 : rB2 + 2 * rA2;
+  const ApexNum s2 = apex_sin2(U, N, q, mu);
+  if (s2.num <= 0) return out;
+  const i64 G = isqrt_ceil_i128(U);
+  if (G <= 0) return out;
+  const i64 lg = (mu == BallMutant::kApexLongueurDouble) ? 2 * rA2 : rA2;
+  out.scale = 2 * G;
+  for (int i = 0; i < 3; ++i) out.C[i] = 2 * G * a[i] + lg * ud[i];
+  out.r2num = (i128)lg * (i128)lg * s2.num;
+  out.r2den = s2.den;
+  out.vide = false;
+  return out;
+}
+
+MHGP_HD inline bool apex_contains_box(const ApexBall& s, const i64 lo[3], const i64 hi[3]) {
+  if (s.vide) return false;
+  i128 far = 0;
+  for (int i = 0; i < 3; ++i) {
+    const i64 p = s.scale * lo[i] - s.C[i];
+    const i64 r = s.scale * hi[i] - s.C[i];
+    const i64 np = p < 0 ? -p : p;
+    const i64 nr = r < 0 ? -r : r;
+    const i64 w = np > nr ? np : nr;
+    far += (i128)w * (i128)w;
+  }
+  return (i128)s.r2den * far < s.r2num;
+}
+
+MHGP_HD inline bool apex_disjoint_box(const ApexBall& s, const i64 lo[3], const i64 hi[3]) {
+  if (s.vide) return true;
+  i128 near = 0;
+  for (int i = 0; i < 3; ++i) {
+    const i64 p = s.scale * lo[i], r = s.scale * hi[i];
+    i64 g = 0;
+    if (s.C[i] < p) g = p - s.C[i];
+    else if (s.C[i] > r) g = s.C[i] - r;
+    near += (i128)g * (i128)g;
+  }
+  return (i128)s.r2den * near > s.r2num;
+}
+
+MHGP_HD inline bool apex_contains_pt(const ApexBall& s, const i64 p[3]) {
+  return apex_contains_box(s, p, p);
 }
 
 }  // namespace corebl

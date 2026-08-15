@@ -285,6 +285,64 @@ int fixture_seuil(BallMutant mu) {
 }
 
 // ---------------------------------------------------------------------------
+// FIXTURE `apex` : LA DEMI-OUVERTURE DU CONE, ET CE QUE LA BOULE EN RATE.
+//
+// `A` est la boite `[1000,1100]^3` — donc `r2_A = 2 r_A` majore la demi-diagonale
+// — et `B` le point `(20000,1050,1050)`, tres loin sur l'axe des `x`. On prend
+// `a = (1000,1050,1050)`, l'extremite proche de `A` sur l'axe.
+//
+// La demi-ouverture vaut `gamma_q = theta'_q - arcsin((r_B + 2 r_A)/D)`. Ici
+// `r_B = 0` et `D = 19000`, donc la correction est petite et `gamma_q` reste
+// proche de `theta'_q`. La fixture balaie un plan et confronte, point par point,
+// ce que la boule d'apex certifie a ce que le FUSEAU EXACT dit sur la paire
+// `(a,b)` — puisque `B` est reduit a un point, la force brute est exacte et
+// complete, sans aucune approximation du cote du juge.
+//
+// Deux compteurs, et ils ne jouent pas le meme role. `faux` doit rester nul :
+// c'est la surete. `rates` mesure ce que la boule inscrite perd contre le cone,
+// et il n'est PAS nul — c'est le prix documente de la question Q23, pas un
+// defaut. Il est publie pour que la substitution se decide sur un chiffre.
+// ---------------------------------------------------------------------------
+int fixture_apex(BallMutant mu, i64 bx, i64 alo, i64 ahi) {
+  const P3 a{alo, 1050, 1050};
+  const P3 b{bx, 1050, 1050};
+  const i64 c2b[3] = {2 * b.x, 2 * b.y, 2 * b.z};
+  const i64 ud[3] = {c2b[0] - 2 * a.x, c2b[1] - 2 * a.y, c2b[2] - 2 * a.z};
+  // Rayon double majorant de `A` : demi-diagonale de la boite, doublee.
+  i128 acc = 0;
+  for (int i = 0; i < 3; ++i) { const i64 e = ahi - alo; acc += (i128)e * e; }
+  const i64 rA2 = mhgp3v::corebl::isqrt_floor_i128(acc) + 1;
+
+  long long certifies = 0, faux = 0, rates = 0, vrais = 0;
+  for (int q = 2; q <= 4; ++q) {
+    for (i64 x = alo; x <= ahi; ++x)
+      for (i64 y = alo; y <= ahi; ++y) {
+        const P3 z{x, y, 1050};
+        if (z.x == a.x && z.y == a.y && z.z == a.z) continue;
+        const i64 ed[3] = {2 * z.x - 2 * a.x, 2 * z.y - 2 * a.y, 2 * z.z - 2 * a.z};
+        const bool boule = mhgp3v::corebl::apex_ball_contains(ud, rA2, 0, ed, q, mu);
+        const bool juge = dans_fuseau(a, b, z, q);
+        if (boule) ++certifies;
+        if (juge) ++vrais;
+        if (boule && !juge) ++faux;
+        if (!boule && juge) ++rates;
+      }
+  }
+  std::printf("fixture apex bx=%lld certifies=%lld vrais=%lld faux=%lld rates=%lld mutant=%s\n",
+              (long long)bx, certifies, vrais, faux, rates, ball_mutant_name(mu));
+  if (faux > 0) {
+    std::fprintf(stderr, "DESACCORD : la boule d'apex certifie %lld point(s) hors du fuseau\n",
+                 faux);
+    return 1;
+  }
+  if (mu == BallMutant::kNone && certifies == 0) {
+    std::fprintf(stderr, "PLANCHER : la boule d'apex ne certifie rien, la fixture est vacue\n");
+    return 3;
+  }
+  return 0;
+}
+
+// ---------------------------------------------------------------------------
 // MODE NUAGE : COMPLETUDE DE LA DESCENTE, ET SURETE CONTRE LA FORCE BRUTE.
 // ---------------------------------------------------------------------------
 struct Rect { int u, v; };
@@ -517,6 +575,10 @@ BallMutant mutant_de(const std::string& s) {
   if (s == "boule-rayon-plus-deux") return BallMutant::kRayonPlusDeux;
   if (s == "boule-inclus-large") return BallMutant::kInclusLarge;
   if (s == "boule-disjoint-centre") return BallMutant::kDisjointCentre;
+  if (s == "apex-oublie-rayon") return BallMutant::kApexOublieRayon;
+  if (s == "apex-racine-oubliee") return BallMutant::kApexRacineOubliee;
+  if (s == "apex-longueur-double") return BallMutant::kApexLongueurDouble;
+  if (s == "apex-coeff-echange") return BallMutant::kApexCoeffEchange;
   refuse("mutant inconnu");
 }
 
@@ -536,6 +598,7 @@ int main(int argc, char** argv) {
   i64 coord = 65535;
   long long seed = 3, min_coeurs = 0, min_bulk = 0, min_elagues = 0;
   bool verbeux = false;
+  i64 ax_bx = 0, ax_lo = 1000, ax_hi = 1100;
 
   for (int i = 1; i < argc; ++i) {
     const std::string a = argv[i];
@@ -549,6 +612,9 @@ int main(int argc, char** argv) {
     if (a.rfind("--min-coeurs=", 0) == 0) { min_coeurs = arg_ll(a.substr(13)); continue; }
     if (a.rfind("--min-bulk=", 0) == 0) { min_bulk = arg_ll(a.substr(11)); continue; }
     if (a.rfind("--min-elagues=", 0) == 0) { min_elagues = arg_ll(a.substr(14)); continue; }
+    if (a.rfind("--apex-bx=", 0) == 0) { ax_bx = arg_ll(a.substr(10)); continue; }
+    if (a.rfind("--apex-lo=", 0) == 0) { ax_lo = arg_ll(a.substr(10)); continue; }
+    if (a.rfind("--apex-hi=", 0) == 0) { ax_hi = arg_ll(a.substr(10)); continue; }
     if (a == "--verbeux") { verbeux = true; continue; }
     refuse("argument inconnu");
   }
@@ -556,6 +622,8 @@ int main(int argc, char** argv) {
   if (fixture == "tangence") return fixture_tangence(mu, verbeux);
   if (fixture == "derive") return fixture_derive(mu);
   if (fixture == "seuil") return fixture_seuil(mu);
+  if (fixture == "apex") return fixture_apex(mu, ax_bx ? ax_bx : 20000, ax_lo, ax_hi);
+  if (fixture == "apex-serre") return fixture_apex(mu, ax_bx ? ax_bx : 1600, ax_lo, ax_hi);
   if (!fixture.empty()) refuse("fixture inconnue");
   return mode_nuage(family, n, coord, seed, sep, mu, min_coeurs, min_bulk, min_elagues);
 }

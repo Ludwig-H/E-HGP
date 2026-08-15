@@ -103,6 +103,7 @@
 #include "mhgp/mhgp.hpp"
 #include "prototype/cloud_families.hpp"
 #include "prototype/soc64_rect.hpp"
+#include "prototype/spindle_core_ball.hpp"
 #include "prototype/wspd_wavefront.hpp"
 
 namespace {
@@ -601,6 +602,7 @@ struct Ledger {
   long long c512_faux[3] = {0, 0, 0};   // corner512 certifie, la force brute refute
   long long c64_desaccords = 0;  // corner64 != corner512 : DOIT rester nul
   long long c64_appels = 0;      // sites decides par la specialisation ponctuelle
+  long long travail_ha = 0;      // travail des SEULS postes h_a et h_b
 };
 
 struct Rect {
@@ -619,6 +621,7 @@ int main(int argc, char** argv) {
   bool fixture = false;
   bool compare512 = false;
   bool core512 = false;
+  bool ha_boule = false;
 
   auto arg_ll = [](const char* s, long long* out) {
     const char* e = s + std::strlen(s);
@@ -650,6 +653,7 @@ int main(int argc, char** argv) {
     if (eat("--oracle", &tmp)) { oracle_n = (int)tmp; continue; }
     if (a == "--fixture=coeur5") { fixture = true; continue; }
     if (a == "--compare-corner512") { compare512 = true; continue; }
+    if (a == "--ha=boule") { ha_boule = true; continue; }
     // Les deux orthographes selectionnent le MEME predicat : `corner64` est
     // `corner512` prive de ses huit coins de temoin confondus. La porte
     // d'egalite du harnais apparie en est la preuve executable.
@@ -922,17 +926,78 @@ int main(int argc, char** argv) {
     }
 
     // ---- h_a et h_b, ecretes eux aussi.
+    //
+    // DEUX CHEMINS, ET C'EST LA REPONSE A Q23. Le chemin par defaut est
+    // l'auto-jointure ponctuelle `O(|A|^2)` que le contre-audit relevait. Le
+    // chemin `--ha=boule` calcule la BOULE D'APEX du couple `(a, B)` — forme
+    // close, voir `spindle_core_ball.hpp` — puis compte les points de `A`
+    // qu'elle contient par une DESCENTE du seul sous-arbre `A`, avec credit en
+    // bloc et elagage. Le comptage s'arrete des que le seuil `h_q` est atteint.
+    //
+    // La boule est INSCRITE dans le cone d'apex, donc elle en rate les points
+    // proches des parois : `h_a` par boule MINORE `h_a` exact. Le filtre reste
+    // donc fail-open, et l'ecart est mesure par `ha_manque`.
     ha.assign((size_t)na * 3, 0);
     hb.assign((size_t)nb * 3, 0);
+    auto compte_boule = [&](const P3& p, const i64 udv[3], i64 rSelf2, i64 rAutre2,
+                            int q, int need, int noeud, int lo_i, int hi_i) {
+      const i64 pa[3] = {p.x, p.y, p.z};
+      const auto sph = mhgp3v::corebl::apex_ball_of(pa, udv, rSelf2, rAutre2, q + 2);
+      if (sph.vide) return 0;
+      int c = 0;
+      std::vector<int> st;
+      st.push_back(noeud);
+      while (!st.empty() && c < need) {
+        const int h = st.back();
+        st.pop_back();
+        const Box bx = h_box(h);
+        ++L.travail_h;
+        ++L.travail_ha;
+        if (mhgp3v::corebl::apex_disjoint_box(sph, bx.lo, bx.hi)) continue;
+        const int fi = h_first(h), la = h_last(h);
+        if (fi > hi_i || la < lo_i) continue;
+        // Credit en bloc : le sous-arbre entier est dans la boule et ne
+        // contient pas `p` lui-meme. Sa POPULATION suffit, en O(1).
+        const bool contient_p = false;  // rempli ci-dessous pour les feuilles
+        (void)contient_p;
+        if (mhgp3v::corebl::apex_contains_box(sph, bx.lo, bx.hi)) {
+          int pop = la - fi + 1;
+          // `p` est exclu de son propre compte ; il ne peut etre que dans ce
+          // sous-arbre si son indice y tombe.
+          const int ip = &p - &sorted_pts[0];
+          if (ip >= fi && ip <= la) --pop;
+          c += pop;
+          continue;
+        }
+        if (h_leaf(h)) {
+          const int i = -1 - h;
+          if (i == (int)(&p - &sorted_pts[0])) continue;
+          const i64 zz[3] = {sorted_pts[i].x, sorted_pts[i].y, sorted_pts[i].z};
+          if (mhgp3v::corebl::apex_contains_pt(sph, zz)) ++c;
+          continue;
+        }
+        st.push_back(nodes[h].left);
+        st.push_back(nodes[h].right);
+      }
+      return c > need ? need : c;
+    };
+    // `ud` doublee pour les deux sens, et rayons doubles majorants.
+    const Sphere SA = h_sphere(r.u), SB = h_sphere(r.v);
     for (int q = 0; q < 3; ++q) {
       const int need = h_q[q];
       for (int i = 0; i < na; ++i) {
         const P3& a = sorted_pts[ua + i];
         int c = 0;
-        for (int j = 0; j < na && c < need; ++j) {
-          if (j == i) continue;
-          ++L.travail_h;
-          if (universal_witness(a, BB, sorted_pts[ua + j], q + 2, narrow)) ++c;
+        if (ha_boule) {
+          const i64 ud[3] = {SB.c2[0] - 2 * a.x, SB.c2[1] - 2 * a.y, SB.c2[2] - 2 * a.z};
+          c = compte_boule(a, ud, SA.r2, SB.r2, q, need, r.u, ua, ub);
+        } else {
+          for (int j = 0; j < na && c < need; ++j) {
+            if (j == i) continue;
+            ++L.travail_h;
+            ++L.travail_ha;
+            if (universal_witness(a, BB, sorted_pts[ua + j], q + 2, narrow)) ++c;
+          }
         }
         ha[(size_t)i * 3 + q] = c;
         L.ha_total[q] += c;
@@ -941,10 +1006,16 @@ int main(int argc, char** argv) {
         const P3& b = sorted_pts[va + i];
         int c = 0;
         if (mutant != Mutant::kDropB) {
-          for (int j = 0; j < nb && c < need; ++j) {
-            if (j == i) continue;
-            ++L.travail_h;
-            if (universal_witness(b, BA, sorted_pts[va + j], q + 2, narrow)) ++c;
+          if (ha_boule) {
+            const i64 ud[3] = {SA.c2[0] - 2 * b.x, SA.c2[1] - 2 * b.y, SA.c2[2] - 2 * b.z};
+            c = compte_boule(b, ud, SB.r2, SA.r2, q, need, r.v, va, vb);
+          } else {
+            for (int j = 0; j < nb && c < need; ++j) {
+              if (j == i) continue;
+              ++L.travail_h;
+              ++L.travail_ha;
+              if (universal_witness(b, BA, sorted_pts[va + j], q + 2, narrow)) ++c;
+            }
           }
         }
         hb[(size_t)i * 3 + q] = c;
@@ -1150,8 +1221,9 @@ int main(int argc, char** argv) {
   std::printf("wspd rectangles=%lld non_decides=%lld masse=%lld masse_non_decide=%lld cellule_max=%lld\n",
               L.rectangles, L.non_decides, L.masse_totale, L.masse_non_decide, L.cellules_max);
   const long long total = (long long)n * (n - 1) / 2;
-  std::printf("ledger masse_attendue=%lld ecart=%lld recouvrements=%lld travail_h=%lld\n",
-              total, L.masse_totale - total, L.recouvrements, L.travail_h);
+  std::printf("ledger masse_attendue=%lld ecart=%lld recouvrements=%lld travail_h=%lld "
+              "travail_ha=%lld\n",
+              total, L.masse_totale - total, L.recouvrements, L.travail_h, L.travail_ha);
   for (int q = 0; q < 3; ++q) {
     const double pct = total > 0 ? 100.0 * (double)(total - L.survivantes[q]) / (double)total : 0.0;
     std::printf("lane q%d survivantes=%lld fermees=%lld ferme_pct=%.3f coeur_somme=%lld "
