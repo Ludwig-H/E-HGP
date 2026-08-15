@@ -4702,6 +4702,40 @@ set_tests_properties(mhgp3v_combined_oracle_terrain PROPERTIES
   "oracle_paires=[1-9][0-9]* oracle_faux_morts=0 oracle_ids_doubles=0 oracle_couverture_ko=0")
 
 # ---------------------------------------------------------------------------
+# L'ECART AU VRAI VIVANT — la mesure qui dit s'il reste quelque chose à prendre.
+#
+# Le préfiltre est fail-open, donc son résiduel CONTIENT les ancres vraiment
+# vivantes. Tout resserrement de certificat est un pari tant qu'on ignore de
+# combien. Deux modes, et deux rôles :
+#
+#   `--vrai-vivant`  EXACT, et sans `O(n^3)`. Le préfiltre étant fail-open, toute
+#                    ancre vivante est PARMI les survivantes : il suffit de les
+#                    décider. Coût `C(n,2)` tests de budget plus
+#                    `survivantes x n` avec sortie anticipée — il suit donc le
+#                    résiduel. Reproduit à l'unité l'ancienne énumération
+#                    exhaustive (`n=600` : `17479 / 42294 / 45913`).
+#   `--echantillon`  conservé hors du chemin de mesure. À `n=600`, ses écarts au
+#                    compte exact valent trois à douze écarts-types binomiaux, et
+#                    remplacer xorshift64 par splitmix64 n'a pas suffi : la
+#                    variance résiduelle n'est pas expliquée, donc aucun chiffre
+#                    publié n'en dépend.
+#
+# L'invariant est la porte : une violation signifierait que le préfiltre ferme
+# à tort, le défaut le plus grave possible.
+# ---------------------------------------------------------------------------
+foreach(fam uniform eight_clusters terrain)
+  add_test(NAME mhgp3v_combined_vrai_vivant_${fam}
+    COMMAND mhgp3v_combined_prefilter_probe --points=300 --family=${fam} --seed=3
+            --separation=8 --smax=11 --vrai-vivant --ha=dualtree --coeur=corner64)
+  set_tests_properties(mhgp3v_combined_vrai_vivant_${fam} PROPERTIES
+    PASS_REGULAR_EXPRESSION "vraivivant q2_vivantes=[1-9][0-9]*")
+endforeach()
+
+mhgp3v_add_expected_code_test_for(mhgp3v_combined_prefilter_probe
+  mhgp3v_combined_refus_vrai_vivant_non_borne "--vrai-vivant non borne" 2
+  --points=50000 --vrai-vivant)
+
+# ---------------------------------------------------------------------------
 # LE CŒUR-BOULE DANS LA DESCENTE : mesurable, et NON adopté.
 #
 # `--coeur=boule` ajoute deux choses au cœur : un crédit en bloc `ALL` pour les

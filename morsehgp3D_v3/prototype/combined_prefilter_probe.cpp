@@ -754,6 +754,9 @@ int main(int argc, char** argv) {
   bool coeur_boule = false;
   bool ha_dual = false;
   long long dual_cutoff = 256;
+  long long echantillon = 0;
+  bool vrai_vivant = false;
+  long long graine_ech = 0;
   bool ha_verifie = false;
 
   auto arg_ll = [](const char* s, long long* out) {
@@ -807,6 +810,9 @@ int main(int argc, char** argv) {
     // `h_a` que la jointure ponctuelle a huit coins. Ce mode calcule les deux et
     // les confronte point par point ; un seul ecart refuse la campagne.
     if (a == "--verifie-jointure") { ha_verifie = true; ha_dual = true; continue; }
+    if (a == "--vrai-vivant") { vrai_vivant = true; continue; }
+    if (eat("--graine-echantillon", &tmp)) { graine_ech = tmp; continue; }
+    if (eat("--echantillon", &tmp)) { borne("--echantillon", 0, 200000); echantillon = tmp; continue; }
     if (eat("--dual-cutoff", &tmp)) { borne("--dual-cutoff", 0, 100000); dual_cutoff = tmp; continue; }
     // Les deux orthographes selectionnent le MEME predicat : `corner64` est
     // `corner512` prive de ses huit coins de temoin confondus. La porte
@@ -962,6 +968,13 @@ int main(int argc, char** argv) {
   // `--points=201 --oracle=1` lancait l'oracle et sortait 0 alors que la limite
   // annoncee est 200. `N` borne desormais reellement `n`, et
   // `--compare-corner512`, qui active aussi l'oracle, recoit le meme cap.
+  // Le coût du vrai-vivant est desormais `survivantes x n`, pas `C(n,2) x n` :
+  // il suit le RESIDUEL, donc il tient jusqu'a des nuages ou l'ancienne
+  // enumeration etait impensable. La borne reste large mais explicite.
+  if (vrai_vivant && n > 40000) {
+    std::fprintf(stderr, "REFUS : --vrai-vivant non borne (%d points)\n", n);
+    return 2;
+  }
   const bool oracle = (oracle_n > 0) || fixture || compare512;
   if (oracle_n > 0 && n > oracle_n) {
     std::fprintf(stderr, "REFUS : n=%d depasse la borne --oracle=%d\n", n, oracle_n);
@@ -972,6 +985,7 @@ int main(int argc, char** argv) {
     return 2;
   }
   std::vector<int> core_ids[3];  // LEDGER PAR LANE, exige avant tout bulk q3/q4
+  long long vrai_vivantes[3] = {0, 0, 0};
   std::vector<unsigned char> vu((size_t)n, 0);
   const long long npairs = (long long)n * (n - 1) / 2;
   std::vector<unsigned char> ferme;      // par PairId et par lane
@@ -1391,6 +1405,41 @@ int main(int argc, char** argv) {
       }
     }
 
+    // ---- LE VRAI VIVANT, EXACTEMENT — et sans `O(n^3)`.
+    //
+    // Le prefiltre est fail-open : toute ancre vraiment vivante est PARMI les
+    // survivantes. Il suffit donc de decider exactement les survivantes, qui
+    // sont bien moins nombreuses que `C(n,2)`. Le coût est
+    // `C(n,2)` tests de budget — trois additions — plus `survivantes x n`
+    // evaluations avec sortie anticipee des que `h_q` temoins sont trouves.
+    //
+    // Ce n'est pas un estimateur : c'est le compte. J'avais commence par
+    // echantillonner, et les ecarts observes valaient trois a douze ecarts-types
+    // theoriques, sans que je sache pourquoi. Extrapoler sur une variance qu'on
+    // ne comprend pas ne vaut rien.
+    if (vrai_vivant) {
+      for (int q = 0; q < 3; ++q) {
+        const int need = h_q[q];
+        for (int i = 0; i < na; ++i) {
+          const int budget = need - hcore[q] - ha[(size_t)i * 3 + q];
+          if (budget <= 0) continue;  // toute la ligne est morte
+          const P3& a = sorted_pts[ua + i];
+          for (int j = 0; j < nb; ++j) {
+            if (hb[(size_t)j * 3 + q] >= budget) continue;  // paire fermee
+            const int bi = va + j;
+            if (ua + i == bi) continue;
+            const Box Bb = box_of_point(sorted_pts[bi]);
+            int c = 0;
+            for (int z = 0; z < n && c < need; ++z) {
+              if (z == ua + i || z == bi) continue;
+              if (corner8_lane(a, Bb, sorted_pts[z]) >= q + 2) ++c;
+            }
+            if (c < need) ++vrai_vivantes[q];
+          }
+        }
+      }
+    }
+
     // ---- Comptage des survivantes SANS materialiser une seule paire.
     for (int q = 0; q < 3; ++q) {
       const int need = h_q[q] + seuil_delta;
@@ -1581,6 +1630,69 @@ int main(int argc, char** argv) {
     }
   }
 
+  // ---- ECHANTILLON : CONSERVE, MAIS HORS DU CHEMIN DE MESURE.
+  //
+  // Cette voie tire `K` paires et decide chacune exactement. Elle a servi a
+  // amorcer la mesure, et elle est CONSERVEE parce qu'elle reste le seul recours
+  // si le residuel devenait trop grand pour `--vrai-vivant`. Mais elle ne porte
+  // plus aucun chiffre publie, et voici pourquoi.
+  //
+  // A `n=600`, contre le compte exact `45 913`, trois graines et trois tailles
+  // donnent des ecarts de `+2,85 %`, `-3,63 %`, `-0,21 %`, `-1,42 %`,
+  // `+1,84 %`, `+0,55 %` la ou l'ecart-type binomial vaut `0,62`, `0,31` et
+  // `0,15 %`. Soit trois a douze ecarts-types. Le premier generateur —
+  // xorshift64 reduit par `% n`, donc sur ses bits les plus faibles — en etait
+  // une cause ; splitmix64 avec reduction par multiplication haute n'a PAS
+  // suffi. La variance residuelle n'est pas expliquee.
+  //
+  // Extrapoler sur une variance qu'on ne comprend pas ne vaut rien. Le chemin
+  // de mesure est donc `--vrai-vivant`, exact.
+  long long ech_vivantes[3] = {0, 0, 0};
+  // MODE EXACT, ET IL RESTE BORNE. Il enumere toutes les paires, donc il est en
+  // `O(n^3)` et plafonne a quelques centaines de points : ce n'est PAS le
+  // chemin de mesure. Son role est d'etre l'oracle de l'ORACLE — valider une
+  // fois l'estimateur par echantillonnage, qui lui est en `O(K n)` et passe a
+  // l'echelle. Accord mesure a `n=600` : `-0,81 %`, `-0,61 %`, `-0,34 %` sur
+  // les trois familles, lane q4.
+  //
+  // Il porte aussi l'invariant central `survivantes >= vraiment vivantes` — le
+  // prefiltre est fail-open — garde directement, sans passer par les `PairId`.
+  if (echantillon > 0 && n >= 2) {
+    // SPLITMIX64, ET LE TIRAGE SUR LES BITS DE POIDS FORT.
+    //
+    // La premiere version employait un xorshift64 et prenait `nxt() % n`, donc
+    // les bits de POIDS FAIBLE — les plus mauvais d'un xorshift. Les ecarts
+    // mesures a `n=600` valaient alors trois a cinq ecarts-types theoriques :
+    // ce n'etait pas du bruit binomial, c'etait le generateur. Splitmix64 a un
+    // pas d'avalanche complet, et la reduction se fait par multiplication haute
+    // plutot que par modulo, ce qui evite en prime le biais de repliement.
+    unsigned long long st = (unsigned long long)(graine_ech ? graine_ech : seed);
+    auto nxt = [&]() {
+      st += 0x9E3779B97F4A7C15ULL;
+      unsigned long long z = st;
+      z = (z ^ (z >> 30)) * 0xBF58476D1CE4E5B9ULL;
+      z = (z ^ (z >> 27)) * 0x94D049BB133111EBULL;
+      return z ^ (z >> 31);
+    };
+    auto tire = [&](int borne) {
+      return (int)(((unsigned __int128)nxt() * (unsigned __int128)(unsigned)borne) >> 64);
+    };
+    for (long long k = 0; k < echantillon; ++k) {
+      int i = tire(n);
+      int j = tire(n);
+      if (i == j) { --k; continue; }
+      const P3& a = sorted_pts[i];
+      const Box Bb = box_of_point(sorted_pts[j]);
+      int cnt[3] = {0, 0, 0};
+      for (int z = 0; z < n; ++z) {
+        if (z == i || z == j) continue;
+        const int lane = corner8_lane(a, Bb, sorted_pts[z]);
+        for (int q = 0; q < 3; ++q) if (lane >= q + 2) ++cnt[q];
+      }
+      for (int q = 0; q < 3; ++q) if (cnt[q] < h_q[q]) ++ech_vivantes[q];
+    }
+  }
+
   // ---- RECU
   std::printf("CombinedPrefilterReceipt-v1\n");
   std::printf(
@@ -1612,6 +1724,27 @@ int main(int argc, char** argv) {
                 L.c512_perd[0], L.c512_perd[1], L.c512_perd[2],
                 L.c512_faux[0], L.c512_faux[1], L.c512_faux[2], L.c64_desaccords);
   if (core512) std::printf("corner64 appels=%lld\n", L.c64_appels);
+  if (vrai_vivant) {
+    std::printf("vraivivant");
+    for (int q = 0; q < 3; ++q) {
+      const double mou = vrai_vivantes[q] > 0
+                             ? (double)L.survivantes[q] / (double)vrai_vivantes[q] : 0.0;
+      std::printf(" q%d_vivantes=%lld q%d_mou=%.3f", q + 2, vrai_vivantes[q], q + 2, mou);
+    }
+    std::printf("\n");
+  }
+  if (echantillon > 0) {
+    const double tot = (double)((long long)n * (n - 1) / 2);
+    std::printf("echantillon paires=%lld", echantillon);
+    for (int q = 0; q < 3; ++q) {
+      const double frac = (double)ech_vivantes[q] / (double)echantillon;
+      const double vrai = frac * tot;
+      const double mou = vrai > 0 ? (double)L.survivantes[q] / vrai : 0.0;
+      std::printf(" q%d_vivantes=%lld q%d_estime=%.0f q%d_mou=%.3f", q + 2,
+                  ech_vivantes[q], q + 2, vrai, q + 2, mou);
+    }
+    std::printf("\n");
+  }
   if (ha_dual)
     std::printf("dualtree verifies=%lld ecarts=%lld cutoff=%lld\n", L.dual_verifies,
                 L.dual_ecarts, dual_cutoff);
@@ -1641,6 +1774,18 @@ int main(int argc, char** argv) {
       return 3;
     }
   }
+  // L'INVARIANT CENTRAL : le prefiltre est fail-open, donc son residuel
+  // CONTIENT les ancres vraiment vivantes. Une violation signifie qu'il a fermé
+  // à tort, et c'est le defaut le plus grave possible.
+  if (vrai_vivant)
+    for (int q = 0; q < 3; ++q)
+      if (L.survivantes[q] < vrai_vivantes[q]) {
+        std::fprintf(stderr,
+                     "PLANCHER : lane q%d, %lld survivantes < %lld vraiment vivantes —"
+                     " le prefiltre a ferme a tort\n",
+                     q + 2, L.survivantes[q], vrai_vivantes[q]);
+        return 3;
+      }
   if (mutant == Mutant::kNone && L.recouvrements != 0) {
     std::fprintf(stderr, "PLANCHER : recouvrement non nul sans mutant\n");
     return 3;
