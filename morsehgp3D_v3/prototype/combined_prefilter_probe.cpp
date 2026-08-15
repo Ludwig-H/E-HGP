@@ -680,75 +680,75 @@ int main(int argc, char** argv) {
     const Box BA = h_box(r.u), BB = h_box(r.v);
 
     // ---- h_coeur : temoins universels du rectangle, HORS `A` et HORS `B`.
-    // Ecrete a `h_q` : au-dela le compte ne change aucune decision.
-    // ---- h_coeur : temoins universels du rectangle, HORS `A` et HORS `B`.
-    // La recherche descend l'octree et elague tout noeud dont le majorant de
-    // `H` est negatif : aucun de ses points ne peut etre temoin, pour aucune
-    // arite. L'elagage est sur, donc le compte reste un minorant EXACT de ce
-    // que le predicat sait certifier. Ecrete a `h_q` : au-dela le compte ne
-    // change aucune decision.
-    // ---- h_coeur : temoins universels du rectangle, HORS `A` et HORS `B`.
     //
-    // UNE SEULE DESCENTE POUR LES TROIS LANES. Les fuseaux sont emboites
-    // `W_4 < W_3 < W_2`, donc un noeud elague pour q2 l'est pour les trois :
-    // la descente est partagee et les trois compteurs avancent ensemble. Elle
-    // s'arrete des que les trois ont atteint leur seuil.
+    // MASQUE DE LANES PAR FRAME. Le contre-audit du 15 aout a trouve ici un P0 :
+    // un noeud credite EN BLOC pour q2 etait ensuite redescendu pour q3/q4, et
+    // ses feuilles recreditaient q2 une seconde fois. Le meme `PointId` comptait
+    // donc deux fois, `hcore[0]` sur-comptait, et des ancres VIVANTES etaient
+    // fermees — 573 faux rejets au moins sur `uniform,n=160`.
     //
-    // L'elagage porte sur `max_z min_{a,b} H` : c'est la quantite qui decide,
-    // et non `max H` qui couvrait toute l'union des boules diametrales.
+    // La pile transporte desormais `(noeud, masque)`. Un credit en bloc pour une
+    // lane EFFACE cette lane du masque transmis aux enfants ; une feuille
+    // n'incremente que les lanes encore actives. Les autres lanes continuent de
+    // descendre normalement.
+    //
+    // L'elagage porte sur `max_z min_{a,b} H`, valide pour les trois lanes
+    // puisque les fuseaux sont emboites `W_4 < W_3 < W_2`.
     int hcore[3] = {0, 0, 0};
     {
-      std::vector<int> st;
-      if (!nodes.empty()) st.push_back(0); else if (n == 1) st.push_back(-1);
+      struct Frame { int node; int mask; };
+      std::vector<Frame> st;
+      if (!nodes.empty()) st.push_back({0, 7});
+      else if (n == 1) st.push_back({-1, 7});
       while (!st.empty()) {
-        if (hcore[0] >= h_q[0] && hcore[1] >= h_q[1] && hcore[2] >= h_q[2]) break;
-        const int hnd = st.back();
+        const Frame f = st.back();
         st.pop_back();
-        const Box Z = h_box(hnd);
+        int m = f.mask;
+        for (int q = 0; q < 3; ++q)
+          if (hcore[q] >= h_q[q]) m &= ~(1 << q);  // lane saturee
+        if (m == 0) continue;
+        const Box Z = h_box(f.node);
         ++L.travail_h;
-        if (h_any_upper(BA, BB, Z) <= 0) continue;  // aucun temoin ici, toutes lanes
-        const bool leaf = h_leaf(hnd);
-        if (!leaf && hcore[0] < h_q[0] && h_all_inside(BA, BB, Z) > 0) {
+        if (h_any_upper(BA, BB, Z) <= 0) continue;  // aucun temoin ici
+        const bool leaf = h_leaf(f.node);
+        int child = m;
+        if (!leaf && (m & 1) && h_all_inside(BA, BB, Z) > 0) {
           // VOIE RAPIDE q2 : tout le noeud est temoin. On ne credite que s'il
           // ne chevauche ni `A` ni `B`, sans quoi la disjonction tomberait.
-          const int f = nodes[hnd].first, l = nodes[hnd].last;
-          const bool touche = !(l < ua || f > ub) || !(l < va || f > vb);
+          const int fi = nodes[f.node].first, la = nodes[f.node].last;
+          const bool touche = !(la < ua || fi > ub) || !(la < va || fi > vb);
           if (!touche) {
-            hcore[0] += (l - f + 1);
+            hcore[0] += (la - fi + 1);
             if (hcore[0] > h_q[0]) hcore[0] = h_q[0];
-            // q3/q4 exigent en plus la condition sur `Xi` : on descend quand meme.
+            child &= ~1;  // LA REPARATION : les enfants ne recreditent plus q2
           }
         }
         if (leaf) {
-          const int i = -1 - hnd;
-          const bool in_a = (i >= ua && i <= ub);
-          const bool in_b = (i >= va && i <= vb);
-          if (in_a || in_b) continue;  // disjonction : voir la note ci-dessus
-          // UNE SEULE evaluation de `(H, Xi)` par point : ni l'un ni l'autre
-          // ne depend de l'arite ; seules les constantes `3` et `2` en
-          // dependent. Recalculer par lane triplait le cout de la descente.
+          const int i = -1 - f.node;
+          if (i >= ua && i <= ub) continue;  // disjonction avec `A`
+          if (i >= va && i <= vb) continue;  // disjonction avec `B`
           const i64 hh = h_min_over_boxes(BA, BB, sorted_pts[i]);
           if (hh <= 0) continue;
-          if (hcore[0] < h_q[0]) ++hcore[0];
-          if (hcore[1] >= h_q[1] && hcore[2] >= h_q[2]) continue;
+          if ((m & 1) && hcore[0] < h_q[0]) ++hcore[0];
+          if ((m & 6) == 0) continue;
           i128 xi = 0;
           if (corners_xi) {
             xi = xi_max_over_boxes(BA, BB, sorted_pts[i]);
           } else {
-            for (int m = 0; m < 8; ++m) {
-              const P3 c{(m & 1) ? BA.hi[0] : BA.lo[0], (m & 2) ? BA.hi[1] : BA.lo[1],
-                         (m & 4) ? BA.hi[2] : BA.lo[2]};
-              const i128 v = xi_max_over_box(c, BB, sorted_pts[i], false);
+            for (int c = 0; c < 8; ++c) {
+              const P3 cp{(c & 1) ? BA.hi[0] : BA.lo[0], (c & 2) ? BA.hi[1] : BA.lo[1],
+                          (c & 4) ? BA.hi[2] : BA.lo[2]};
+              const i128 v = xi_max_over_box(cp, BB, sorted_pts[i], false);
               if (v > xi) xi = v;
             }
           }
           const i128 h2 = (i128)hh * (i128)hh;
-          if (hcore[1] < h_q[1] && 3 * h2 > xi) ++hcore[1];
-          if (hcore[2] < h_q[2] && 2 * h2 > xi) ++hcore[2];
+          if ((m & 2) && hcore[1] < h_q[1] && 3 * h2 > xi) ++hcore[1];
+          if ((m & 4) && hcore[2] < h_q[2] && 2 * h2 > xi) ++hcore[2];
           continue;
         }
-        st.push_back(nodes[hnd].left);
-        st.push_back(nodes[hnd].right);
+        st.push_back({nodes[f.node].left, child});
+        st.push_back({nodes[f.node].right, child});
       }
       for (int q = 0; q < 3; ++q) {
         L.coeur_total[q] += hcore[q];

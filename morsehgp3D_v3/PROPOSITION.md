@@ -1775,9 +1775,13 @@ fausse. En développant,
 
 le terme `a x a` étant nul : le produit vectoriel est **affine en `a`**. Donc
 `Xi = |affine(a)|^2` est **convexe** en `a`, et son maximum sur une boîte est
-atteint à un **sommet**. Tester les huit sommets est donc exact, et c'est le
-majorant le plus serré possible — donc le `h` le plus grand qui reste
-rigoureux. Une enveloppe d'intervalles serait sûre également, mais plus lâche :
+atteint à un **sommet**. Tester les huit sommets de `A` est correct pour la dépendance en `a`. Mais le
+majorant global n'est **pas** exact : `xi_max_over_box` maximise séparément le
+module de chaque composante du produit vectoriel puis somme les carrés, et ces
+trois maxima ne sont pas atteints au même point de la boîte. C'est un majorant
+sûr, et le claim « le plus serré possible » est **retiré** — le contre-audit du
+15 août le réfute et renvoie aux prédicats `all_lane_of_box` et
+`corner512_all_lane` déjà présents dans `soc64_rect.hpp`. Une enveloppe d'intervalles serait sûre également, mais plus lâche :
 elle est conservée comme mutant de mesure, et l'écart est considérable — sur
 `uniform,n=8000,s=6,K=10`, la fermeture q4 passe de `47,6 %` par intervalles à
 `91,0 %` par sommets.

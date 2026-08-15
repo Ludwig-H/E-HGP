@@ -1,5 +1,16 @@
 # Reçu — préfiltre d'ancre combiné, 15 août 2026
 
+> [!CAUTION]
+> **Colonne q2 INVALIDE, colonnes q3/q4 sûres mais à régénérer.** Le contre-audit
+> [`../../audits/AUDIT_PREFILTRE_COMBINE_HMAX_Q2_Q3_Q4_20260815.md`](../../audits/AUDIT_PREFILTRE_COMBINE_HMAX_Q2_Q3_Q4_20260815.md)
+> a trouvé un double crédit dans le compteur q2 : un nœud crédité en bloc était
+> redescendu et recrédité par ses feuilles, fermant des ancres **vivantes** —
+> au moins `573` faux rejets sur `uniform,n=160`. Tous les pourcentages q2 de ce
+> reçu sont donc faux. La réparation est faite au commit suivant ; la campagne
+> sera régénérée. Les colonnes q3/q4 ne ferment pas à tort, mais leurs bornes
+> perdent des témoins et devront elles aussi être reprises avec les prédicats
+> `all_lane_of_box` / `corner512_all_lane`.
+
 Cadre : `phase=exploration_v3_hors_registre`, `backend=cpu_reference`,
 `profile=quantized_u16_input_only`, `mode=diagnostic_counter_only`,
 `public_status=not_claimed`. GCP non utilisé.
