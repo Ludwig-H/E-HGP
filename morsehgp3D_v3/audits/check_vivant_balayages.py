@@ -53,8 +53,8 @@ import re
 import subprocess
 import sys
 
-# `vraivivant q2_vivantes=17479 q2_mou=1.088 ... paires=66760 travail=... evals=...`
-_VIVANTES = re.compile(r"q(\d)_vivantes=(\d+)")
+# `vraivivant V2_pair_walive=17479 V2_mou=1.088 ... paires=66760 travail=...`
+_VIVANTES = re.compile(r"V(\d)_pair_walive=(\d+)")
 _PAIRES = re.compile(r"\bpaires=(\d+)")
 _EVALS = re.compile(r"\bevals=(\d+)")
 _TRAVAIL = re.compile(r"\btravail=(\d+)")

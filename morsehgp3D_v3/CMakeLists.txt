@@ -4732,7 +4732,7 @@ foreach(fam uniform eight_clusters terrain)
     COMMAND mhgp3v_combined_prefilter_probe --points=300 --family=${fam} --seed=3
             --separation=8 --smax=11 --vrai-vivant --ha=dualtree --coeur=corner64)
   set_tests_properties(mhgp3v_combined_vrai_vivant_${fam} PROPERTIES
-    PASS_REGULAR_EXPRESSION "vraivivant q2_vivantes=[1-9][0-9]*")
+    PASS_REGULAR_EXPRESSION "vraivivant V2_pair_walive=[1-9][0-9]*")
 endforeach()
 
 mhgp3v_add_expected_code_test_for(mhgp3v_combined_prefilter_probe
@@ -5274,7 +5274,7 @@ add_test(NAME mhgp3v_combined_two_lines_quadratique
           --separation=8 --smax=11 --vrai-vivant)
 set_tests_properties(mhgp3v_combined_two_lines_quadratique PROPERTIES
   PASS_REGULAR_EXPRESSION
-  "q4_vivantes=94728 q4_survivantes_D0exclu=94728 q4_mou=1\\.000")
+  "V4_pair_walive=94728 V4_survivantes_D0exclu=94728 V4_mou=1\\.000")
 
 # Les deux familles de balayage, que ce probe refusait alors que le générateur
 # les produit depuis toujours. Mes rampes ne disaient donc rien d'elles.
@@ -5283,12 +5283,89 @@ foreach(fam scanline_single_pass scanline_overlap_multiecho)
     COMMAND mhgp3v_combined_prefilter_probe --points=300 --family=${fam} --seed=3
             --separation=8 --smax=11 --vrai-vivant)
   set_tests_properties(mhgp3v_combined_famille_${fam} PROPERTIES
-    PASS_REGULAR_EXPRESSION "q4_vivantes=[1-9][0-9]* ")
+    PASS_REGULAR_EXPRESSION "V4_pair_walive=[1-9][0-9]* ")
 endforeach()
 
 mhgp3v_add_expected_code_test_for(mhgp3v_combined_prefilter_probe
   mhgp3v_combined_refus_famille_inconnue "famille inconnue" 2
   --points=200 --family=poisson_homogene)
+
+# ---------------------------------------------------------------------------
+# LES ÉTAGES SÉPARÉS — `V4_pair_walive` contre `C4_carrier`.
+#
+# L'audit `eb42b57` a raison : le compteur que j'appelais `q4` faisait quatre
+# métiers. Il ne mesure que des PAIRES-ANCRAGES `W4`-vivantes. Le porteur ternaire
+# aigu est un autre étage, et c'est lui qui décide.
+#
+# LE LEMME, VÉRIFIÉ ET NON SUPPOSÉ. `(a,b)` étant l'arête maximale,
+#
+#     x est un porteur aigu de (a,b)   <=>   x dans L(a,b)  ET  H(a,x,b) < 0
+#
+# avec `H = (x-a).(b-x)`. Les angles en `a` et `b` sont gratuits : si l'angle en
+# `a` valait `>= 90`, alors `|bx|^2 >= |ax|^2 + |ab|^2 > |ab|^2` et `x` sortirait
+# de la lentille. Vérifié à `331 857` triplets sur quatre régimes, dont une
+# grille `3^3` volontairement dégénérée, sans un écart. La stricte compte :
+# `H = 0` est l'angle DROIT, et mon premier jet écrivait `H <= 0`, pour `185`
+# écarts sur `8 005` ancres — tous ce cas-là.
+#
+# Équivalent à la condition de l'audit `|ax|^2 + |bx|^2 > |ab|^2`, puisque
+# `|ax|^2 + |bx|^2 - |ab|^2 = -2H` : c'est bien la condition COUPLÉE, pas trois
+# bornes indépendantes qui perdraient la corrélation.
+#
+# CE QUE `two_lines` IMPOSE. `Theta(n^2)` paires `W4`-vivantes, et **zéro**
+# porteur. La contraction doit valoir exactement `1`.
+foreach(fam two_lines uniform terrain eight_clusters)
+  add_test(NAME mhgp3v_seed_elagage_exact_${fam}
+    COMMAND mhgp3v_combined_prefilter_probe --points=400 --family=${fam} --seed=3
+            --separation=8 --smax=11 --verifie-seed)
+  set_tests_properties(mhgp3v_seed_elagage_exact_${fam} PROPERTIES
+    PASS_REGULAR_EXPRESSION "ecarts=0 .*certif_juges=[1-9][0-9]* certif_desaccords=0")
+endforeach()
+
+# LA PORTE QUE L'AUDIT RÉCLAME, avec ses deux étages sur la même ligne.
+add_test(NAME mhgp3v_two_lines_etages_separes
+  COMMAND mhgp3v_combined_prefilter_probe --points=400 --family=two_lines --seed=3
+          --separation=8 --smax=11 --verifie-seed)
+set_tests_properties(mhgp3v_two_lines_etages_separes PROPERTIES
+  PASS_REGULAR_EXPRESSION
+  "V4_pair_walive=43128 ancres_sans_carrier=43128 contraction=1\\.0000 C4_carrier=0 C4_carrier_elag=0 ecarts=0")
+
+# ---------------------------------------------------------------------------
+# L'ÉLAGAGE PAR BLOC : deux disjoints, et je note ce que j'ai réfuté en route.
+#
+#   `bloc_hors_lentille`          la boîte est hors d'une des deux boules
+#                                 `B(a,|ab|)`, `B(b,|ab|)` — élague le LOINTAIN,
+#                                 et c'est lui qui rend la descente logarithmique ;
+#   `bloc_dans_boule_diametrale`  la boîte est dans la boule diamétrale fermée,
+#                                 soit `H >= 0` partout — c'est lui qui tue
+#                                 `two_lines`, dont la lentille est pleine mais
+#                                 entièrement non aiguë.
+#
+# DEUX RÉFUTATIONS MESURÉES, gardées ici parce qu'elles coûtent cher à redécouvrir :
+#
+#   * certificat au niveau du RECTANGLE `A x B` — la structure de `h_coeur`,
+#     qui vaudrait pour toutes les ancres d'un coup : `gain=1,005`,
+#     `90 324` blocs pour `99 210` points, soit `1,1` point par bloc. Le
+#     quantificateur universel sur `A x B` est trop fort, il échoue dès qu'une
+#     seule paire du rectangle rend un `x` aigu.
+#   * `bloc_dans_boule_diametrale` SEUL, sans le disjoint de lentille :
+#     `gain = 0,33` à `0,59` — PLUS LENT que le balayage complet. La boule
+#     diamétrale est petite devant l'emprise, donc « boîte incluse » ne peut
+#     jamais élaguer près de la racine, et la descente parcourait `657` nœuds
+#     sur `799`.
+#
+# Avec les deux : `13,29x` sur `two_lines` (tous les points élagués, `~30`
+# visites de nœud par ancre), `4,53x` sur `terrain`, `1,68x` sur `uniform`,
+# `1,20x` sur `eight_clusters`.
+#
+# Le coût est compté en ÉVALUATIONS DU PRÉDICAT des deux côtés — une par nœud
+# visité, une par point testé. Comparer des tests de feuilles à des tests de
+# points aurait fabriqué un gain, exactement comme le dual-tree l'avait fait.
+add_test(NAME mhgp3v_seed_elagage_gain_two_lines
+  COMMAND mhgp3v_combined_prefilter_probe --points=400 --family=two_lines --seed=3
+          --separation=8 --smax=11 --seeds)
+set_tests_properties(mhgp3v_seed_elagage_gain_two_lines PROPERTIES
+  PASS_REGULAR_EXPRESSION "points_elagues=17251200 ")
 
 add_test(NAME mhgp3v_core_ball_couple_sature_code
          COMMAND mhgp3v_core_ball_probe --fixture=couple-sature)

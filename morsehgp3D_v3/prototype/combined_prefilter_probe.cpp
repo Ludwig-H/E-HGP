@@ -397,6 +397,175 @@ inline int pair_lane(const P3& a, const P3& b, const P3& z) {
   return 2;
 }
 
+// ---------------------------------------------------------------------------
+// LE SEED AIGU, DECIDE PAR LE SIGNE DE `H` — ET C'EST LE MEME `H`.
+//
+// `(a,b)` etant l'arete maximale, un troisieme sommet `x` forme un SEED AIGU
+// ssi le triangle `abx` est aigu. Les trois angles se reduisent a UN test :
+//
+//   x est un seed de (a,b)   <=>   x dans L(a,b)   ET   H(a,x,b) < 0
+//
+// avec `L(a,b) = {x : |ax| <= |ab| et |bx| <= |ab|}` la lentille et
+// `H = (x-a).(b-x)` — exactement le `H` du fuseau, `e = x-a`, `t = b-x`.
+//
+// POURQUOI LES ANGLES EN `a` ET `b` SONT GRATUITS. Si l'angle en `a` valait
+// `>= 90`, alors `|bx|^2 = |ax|^2 + |ab|^2 - 2 (x-a).(b-a) >= |ax|^2 + |ab|^2`,
+// donc `|bx| > |ab|` des que `x != a` : `x` sortirait de la lentille. Dans la
+// lentille, seul l'angle en `x` peut etre obtus, et son signe est `-H`.
+//
+// LA STRICTE N'EST PAS COSMETIQUE. `H = 0` est l'angle DROIT exact, donc un
+// non-seed. Mon premier jet ecrivait `H <= 0` et faisait 185 ecarts sur 8005
+// ancres, tous de ce cas. Verifie ensuite a 331 857 triplets sur quatre
+// regimes — dont une grille `3^3` volontairement degeneree — sans un ecart.
+//
+// CE QUE CELA DONNE. `W_2(a,b) = {H > 0}` est la boule diametrale ouverte, donc
+// son adherence est `{H >= 0}` et la lentille se PARTITIONNE :
+//
+//   L = (L inter {H >= 0})  disjoint  (L inter {H < 0})
+//       \___ non-seeds ___/           \____ seeds ____/
+//
+// Un temoin q2 est donc exactement un non-seed : le meme parcours qui compte
+// les temoins designe les candidats. Identite de comptage verifiee elle aussi
+// sans ecart sur 8005 ancres :
+//
+//   #seeds(a,b) = |P inter L| - |P inter L inter {H >= 0}|.
+inline bool est_seed(const P3& a, const P3& b, const P3& x) {
+  const i64 ex = x.x - a.x, ey = x.y - a.y, ez = x.z - a.z;
+  const i64 tx = b.x - x.x, ty = b.y - x.y, tz = b.z - x.z;
+  const i64 ax2 = ex * ex + ey * ey + ez * ez;
+  const i64 bx2 = tx * tx + ty * ty + tz * tz;
+  if (ax2 == 0 || bx2 == 0) return false;  // `x` confondu avec une extremite
+  const i64 dx = b.x - a.x, dy = b.y - a.y, dz = b.z - a.z;
+  const i64 ab2 = dx * dx + dy * dy + dz * dz;
+  if (ax2 > ab2 || bx2 > ab2) return false;  // hors lentille : `(a,b)` non maximale
+  return ex * tx + ey * ty + ez * tz < 0;    // STRICTE : `H = 0` est l'angle droit
+}
+
+// AUTORITE DE BLOC POUR L'ELAGAGE DES SEEDS. Certifie qu'AUCUN `x` de `Box X`
+// n'est un seed d'AUCUNE ancre `(a,b)` de `Box A x Box B`, par le certificat
+// suffisant « `H >= 0` partout ».
+//
+// Les sommets suffisent, et l'argument est en trois temps comme pour le fuseau.
+// En developpant, `H = -|x|^2 + x.(a+b) - a.b` : CONCAVE en `x` — le terme
+// quadratique est `-|x|^2` — donc son minimum sur une boite est atteint en un
+// SOMMET ; et AFFINE en `a` comme en `b`. Le minimum sur le produit des trois
+// boites est donc atteint en un triplet de sommets, et les enumerer decide
+// exactement l'enveloppe continue.
+//
+// C'est le pendant exact du prefiltre, polarite retournee : la ou
+// `universal_corner8` certifie « tout le bloc est TEMOIN » pour crediter,
+// celui-ci certifie « tout le bloc est NON-SEED » pour elaguer. Meme descente,
+// memes coins, meme arithmetique.
+//
+// Le certificat est SUFFISANT, pas necessaire : un bloc peut n'avoir aucun seed
+// tout en contenant un point de `H < 0` hors lentille. L'elagage est donc
+// conservatif — il ne rate jamais un seed, il en garde parfois trop.
+// ---------------------------------------------------------------------------
+// LE MEME CERTIFICAT EN `O(1)` — parce que `H` sur une boite EST une boule.
+//
+// En completant le carre, avec `m = (a+b)/2` et `R = |ab|/2` :
+//
+//   H(x) = -|x|^2 + x.(a+b) - a.b = R^2 - |x - m|^2.
+//
+// Donc « `H >= 0` sur toute la boite `X` » equivaut EXACTEMENT a « `X` est
+// incluse dans la boule diametrale fermee ». Evident apres coup — `H > 0` EST
+// l'interieur de cette boule — mais je ne l'avais pas vu, et j'ai d'abord
+// enumere huit coins pour calculer un minimum dont le lieu est connu.
+//
+// Le maximum de `|x - m|` sur une AABB est atteint au coin le plus eloigne,
+// choisi AXE PAR AXE : trois maxima independants, pas huit combinaisons. En
+// coordonnees doublees — `M = a + b` entier, donc pas de demi-entier — le test
+// s'ecrit `max_{x in X} |2x - M|^2 <= |b - a|^2`, tout en entiers.
+//
+// Coût : trois `max`, trois carres, une comparaison. Contre huit evaluations du
+// produit scalaire. C'est ce facteur huit qui separait mon elagage refute
+// (`gain = 0,33` a `0,59`, plus lent que le balayage complet) de sa version
+// utilisable.
+inline bool bloc_dans_boule_diametrale(const P3& a, const P3& b, const Box& X) {
+  const i64 M[3] = {(i64)a.x + b.x, (i64)a.y + b.y, (i64)a.z + b.z};
+  const i64 d[3] = {(i64)b.x - a.x, (i64)b.y - a.y, (i64)b.z - a.z};
+  const i64 r2 = d[0] * d[0] + d[1] * d[1] + d[2] * d[2];
+  const i64 lo[3] = {X.lo[0], X.lo[1], X.lo[2]};
+  const i64 hi[3] = {X.hi[0], X.hi[1], X.hi[2]};
+  i128 far = 0;
+  for (int k = 0; k < 3; ++k) {
+    const i64 u = 2 * lo[k] - M[k], v = 2 * hi[k] - M[k];
+    const i64 au = u < 0 ? -u : u, av = v < 0 ? -v : v;
+    const i64 w = au > av ? au : av;
+    far += (i128)w * (i128)w;
+  }
+  return far <= (i128)r2;  // `H >= 0` partout : boule FERMEE, donc `<=`
+}
+
+// L'AUTRE DISJOINT, ET C'EST LUI QUI ELAGUE LE LOINTAIN.
+//
+// Mon premier elagage n'avait que « la boite est dans la boule diametrale ».
+// Mesure : `travail_elag` a peine change, `657` visites de nœud par ancre sur
+// un arbre de `799` nœuds — la descente parcourait tout. La cause est de
+// polarite : la boule diametrale est PETITE devant l'emprise du nuage, donc
+// « boite incluse » ne peut jamais elaguer pres de la racine.
+//
+// Or l'immense majorite des points ne sont pas des non-seeds parce que
+// `H >= 0`, mais parce qu'ils sont HORS LENTILLE. La lentille est locale ; la
+// boite lointaine se rejette donc en `O(1)` par disjonction avec `B(a,|ab|)`
+// ou `B(b,|ab|)`. C'est ce test-la qui rend la descente logarithmique.
+//
+// Distance MINIMALE d'un point a une AABB, axe par axe : trois `max` a zero.
+inline bool bloc_hors_lentille(const P3& a, const P3& b, const Box& X) {
+  const i64 d[3] = {(i64)b.x - a.x, (i64)b.y - a.y, (i64)b.z - a.z};
+  const i64 ab2 = d[0] * d[0] + d[1] * d[1] + d[2] * d[2];
+  const i64 c[2][3] = {{a.x, a.y, a.z}, {b.x, b.y, b.z}};
+  for (int s = 0; s < 2; ++s) {
+    i128 near = 0;
+    for (int k = 0; k < 3; ++k) {
+      i64 e = 0;
+      if (c[s][k] < X.lo[k]) e = X.lo[k] - c[s][k];
+      else if (c[s][k] > X.hi[k]) e = c[s][k] - X.hi[k];
+      near += (i128)e * (i128)e;
+    }
+    // `|cx| > |ab|` pour tout `x` de la boite : la boite est hors lentille.
+    if (near > (i128)ab2) return true;
+  }
+  return false;
+}
+
+// Le certificat complet : une DISJONCTION de deux conditions, chacune exacte
+// sur l'enveloppe continue. Certifier une disjonction par l'union de ses
+// disjoints certifies est CONSERVATIF — une boite peut n'avoir aucun seed sans
+// verifier ni l'un ni l'autre — donc l'elagage ne rate jamais un seed, il en
+// garde parfois trop. C'est le sens qu'il faut.
+inline bool bloc_sans_seed_boule(const P3& a, const P3& b, const Box& X, long long* ev) {
+  if (ev) ++*ev;
+  return bloc_hors_lentille(a, b, X) || bloc_dans_boule_diametrale(a, b, X);
+}
+
+// `ev` compte les EVALUATIONS DU PREDICAT `(e,t)`, la meme unite que le
+// balayage de reference. Sans lui, comparer « tests de feuilles » a « tests de
+// points » ignorerait le coût de la descente et fabriquerait un gain : c'est
+// exactement l'erreur que le re-audit avait relevee sur le dual-tree.
+//
+// Cette version a huit coins est CONSERVEE comme juge de la version `O(1)` :
+// les deux decident le meme predicat par deux chemins sans primitive commune,
+// et la porte `mhgp3v_seed_deux_certificats` exige leur accord.
+inline bool bloc_sans_seed(const Box& A, const Box& B, const Box& X, long long* ev) {
+  i64 ca[8][3], cb[8][3], cx[8][3];
+  const int na = corners_distinct(A, ca);
+  const int nb = corners_distinct(B, cb);
+  const int nx = corners_distinct(X, cx);
+  for (int ix = 0; ix < nx; ++ix)
+    for (int ia = 0; ia < na; ++ia) {
+      const i64 e[3] = {cx[ix][0] - ca[ia][0], cx[ix][1] - ca[ia][1],
+                        cx[ix][2] - ca[ia][2]};
+      for (int ib = 0; ib < nb; ++ib) {
+        if (ev) ++*ev;
+        const i64 t[3] = {cb[ib][0] - cx[ix][0], cb[ib][1] - cx[ix][1],
+                          cb[ib][2] - cx[ix][2]};
+        if (e[0] * t[0] + e[1] * t[1] + e[2] * t[2] < 0) return false;
+      }
+    }
+  return true;
+}
+
 inline bool universal_witness(const P3& a, const Box& B, const P3& z, int q, bool narrow) {
   const i64 h = h_min_over_box(a, B, z, narrow);
   if (h <= 0) return false;
@@ -802,6 +971,18 @@ struct Ledger {
   long long vivant_evals = 0;     // EVALUATIONS du predicat `(e,t)`, par mode
   long long vivant_degenerees = 0;    // paires `D = 0` rencontrees, tous lanes
   long long vivant_degen_lane[3] = {0, 0, 0};  // et par lane, pour corriger `S_q`
+  // ---- SEEDS AIGUS : reference contre elagage, et le travail des deux.
+  long long seed_total_ref = 0;     // seeds comptes par balayage complet
+  long long seed_total_elag = 0;    // seeds comptes par descente elaguee
+  long long seed_ancres = 0;        // ancres q3 survivantes instruites
+  long long seed_ancres_sans = 0;   // ... dont AUCUN seed : le cas `two_lines`
+  long long seed_travail_ref = 0;   // visites de `x` du balayage complet
+  long long seed_travail_elag = 0;  // visites de `x` de la descente elaguee
+  long long seed_blocs_elagues = 0; // sous-arbres rejetes en bloc
+  long long seed_points_elagues = 0;  // points evites par ces rejets
+  long long seed_ecarts = 0;        // reference != elagage : DOIT rester nul
+  long long seed_juges = 0;         // certificats confrontes aux deux chemins
+  long long seed_desaccords_certif = 0;  // O(1) != huit coins : DOIT rester nul
 };
 
 struct Rect {
@@ -814,6 +995,8 @@ int main(int argc, char** argv) {
   int n = 8000, smax = 11, sep = 8, cap = 512, judge = 0, min_rect = 0;
   bool cap_scission = true;     // raffiner plutot que refuser : voir l'en-tete
   bool refuse_doublons = false; // positions dupliquees : refus explicite
+  bool seeds = false;           // contraction W-vivant -> seeds aigus
+  bool seed_juge = false;       // confronter le certificat O(1) aux huit coins
   long long seed = 3, coord = 0;
   CloudFamily family = CloudFamily::kUniform;
   Mutant mutant = Mutant::kNone;
@@ -873,6 +1056,8 @@ int main(int argc, char** argv) {
     if (eat("--smax", &tmp)) { borne("--smax", 3, 32); smax = (int)tmp; continue; }
     if (eat("--separation", &tmp)) { borne("--separation", 1, 64); sep = (int)tmp; continue; }
     if (eat("--cap-cellule", &tmp)) { borne("--cap-cellule", 1, 1000000); cap = (int)tmp; continue; }
+    if (a == "--seeds") { seeds = true; continue; }
+    if (a == "--verifie-seed") { seeds = true; seed_juge = true; continue; }
     if (a == "--refuse-doublons") { refuse_doublons = true; continue; }
     if (a == "--cap=scission") { cap_scission = true; continue; }
     if (a == "--cap=refus") { cap_scission = false; continue; }
@@ -1782,6 +1967,124 @@ int main(int argc, char** argv) {
       }
     }
 
+    // ---- LES SEEDS AIGUS, ET L'ELAGAGE PAR BLOC.
+    //
+    // C'est le maillon suivant de la contraction que l'audit reclame :
+    // `W`-vivant -> seeds positifs -> supports -> fusions. Une ancre survivante
+    // n'est pas un support ; il lui faut au moins un troisieme sommet formant
+    // un triangle AIGU dont elle est l'arete maximale.
+    //
+    // Deux chemins, et le second doit rendre EXACTEMENT le compte du premier :
+    //
+    //   reference : balayage complet des `n` points par `est_seed`. C'est
+    //               `O(n)` par ancre, et c'est ce qui coûte `Theta(n^3)` sur
+    //               `two_lines` — `Theta(n^2)` ancres a lentille `n-2`.
+    //   elagage   : descente sur l'arbre, un sous-arbre entier rejete des que
+    //               `bloc_sans_seed(BA, BB, Box(X))` certifie `H >= 0` partout.
+    //               Le certificat vaut pour TOUTES les ancres du rectangle a la
+    //               fois, exactement comme `h_coeur`.
+    //
+    // Le compteur `seed_ancres_sans` est le chiffre qui compte : sur
+    // `two_lines` il doit valoir la totalite, puisque la vraie source q3/q4 y
+    // est vide. C'est la mesure de ce que la positivite retire et qu'aucun
+    // certificat de temoins ne pouvait retirer.
+    if (seeds) {
+      const int q = 2;  // lane q4 : `C4_carrier` se compte sur les V4-vivantes
+      const int need = h_q[q];
+      for (int i = 0; i < na; ++i) {
+        const int budget = need - hcore[q] - ha[(size_t)i * 3 + q];
+        if (budget <= 0) continue;
+        const int ai = ua + i;
+        const P3& a = sorted_pts[ai];
+        for (int j = 0; j < nb; ++j) {
+          if (hb[(size_t)j * 3 + q] >= budget) continue;
+          const int bi = va + j;
+          if (ai == bi) continue;
+          const P3& b = sorted_pts[bi];
+          if (a.x == b.x && a.y == b.y && a.z == b.z) continue;  // `D = 0`
+          ++L.seed_ancres;
+          long long cref = 0;
+          for (int x = 0; x < n; ++x) {
+            if (x == ai || x == bi) continue;
+            ++L.seed_travail_ref;
+            if (est_seed(a, b, sorted_pts[x])) ++cref;
+          }
+          L.seed_total_ref += cref;
+          if (cref == 0) ++L.seed_ancres_sans;
+
+          // Descente elaguee, meme resultat par un autre chemin.
+          long long celag = 0;
+          std::vector<int> st;
+          if (!nodes.empty()) st.push_back(0);
+          else if (n == 1) st.push_back(-1);
+          while (!st.empty()) {
+            const int h = st.back();
+            st.pop_back();
+            const int pf = h_first(h), pl = h_last(h);
+            // ---- LE CERTIFICAT PORTE SUR L'ANCRE, PAS SUR LE RECTANGLE.
+            //
+            // J'ai d'abord ecrit `bloc_sans_seed(BA, BB, Box(X))`, en me disant
+            // que le certificat vaudrait pour toutes les ancres du rectangle a
+            // la fois — la structure de `h_coeur`. C'est logiquement correct et
+            // MESURABLEMENT INUTILE : `gain=1,005` sur `two_lines`,
+            // `blocs_elagues=90 324` pour `points_elagues=99 210`, soit `1,1`
+            // point par bloc. Il n'elaguait que des feuilles.
+            //
+            // La cause est le quantificateur : exiger `H >= 0` pour TOUT
+            // `(a,b)` du produit `A x B` est bien plus fort que pour l'ancre
+            // courante, et echoue des qu'une seule paire du rectangle rend un
+            // `x` aigu. La mutualisation coûte ici plus qu'elle ne rapporte.
+            //
+            // Avec les boites PONCTUELLES de `a` et `b`, `corners_distinct` en
+            // rend un seul chacune : huit evaluations par nœud, contre
+            // `pop(X)` tests de points. Tout sous-arbre de plus de huit points
+            // certifie est un gain net.
+            const Box BX = h_box(h);
+            const bool sans = bloc_sans_seed_boule(a, b, BX, &L.seed_travail_elag);
+            // LE JUGE DU CERTIFICAT, sur le chemin et non a cote : les deux
+            // implementations n'ont aucune primitive commune — l'une enumere
+            // des coins et evalue `e.t`, l'autre calcule une distance maximale
+            // a un centre — et doivent decider identiquement.
+            // ---- LE JUGE PORTE SUR LA COMPOSANTE COMMUNE, ET PAS AUTRE CHOSE.
+            //
+            // J'ai d'abord confronte le certificat `O(1)` COMPLET aux huit
+            // coins, et lu `365 234` desaccords en croyant a un defaut. Les
+            // deux ne decident pas le meme predicat : le `O(1)` est la
+            // DISJONCTION `hors_lentille OU dans_boule`, les huit coins ne
+            // testent que `H >= 0`. Le desaccord etait le second disjoint qui
+            // faisait son travail — un juge mal cadre, pas un bug.
+            //
+            // La comparaison qui a un sens est `bloc_dans_boule_diametrale`
+            // contre `bloc_sans_seed` : meme predicat, deux chemins sans
+            // primitive commune — distance maximale a un centre d'un cote,
+            // enumeration de coins et produits scalaires de l'autre.
+            if (seed_juge) {
+              ++L.seed_juges;
+              if (bloc_sans_seed(box_of_point(a), box_of_point(b), BX, nullptr) !=
+                  bloc_dans_boule_diametrale(a, b, BX))
+                ++L.seed_desaccords_certif;
+            }
+            if (sans) {
+              ++L.seed_blocs_elagues;
+              L.seed_points_elagues += pl - pf + 1;
+              continue;
+            }
+            if (h_leaf(h)) {
+              const int x = pf;
+              if (x == ai || x == bi) continue;
+              ++L.seed_travail_elag;
+              if (est_seed(a, b, sorted_pts[x])) ++celag;
+              continue;
+            }
+            st.push_back(nodes[h].left);
+            st.push_back(nodes[h].right);
+          }
+          L.seed_total_elag += celag;
+          if (celag != cref) ++L.seed_ecarts;
+        }
+      }
+    }
+
     // ---- ORACLE (P0.3, P0.4, P0.5). Il materialise ce que le chemin normal
     // evite : la decision par `PairId`, l'identite des sites credites au coeur,
     // et la couverture reelle de la partition. Borne a petit `n`.
@@ -2104,6 +2407,44 @@ int main(int argc, char** argv) {
                  " serait un minorant, pas une mesure\n", L.masse_non_decide);
     return 3;
   }
+  if (seeds) {
+    // ---- LA CONTRACTION, PUBLIEE ET NON RACONTEE.
+    //
+    // `ancres` sont les q3 survivantes ; `sans_seed` celles qu'AUCUN triangle
+    // aigu ne peut porter — elles meurent par POSITIVITE, ce qu'aucun
+    // certificat de temoins ne pouvait faire. `travail_elag / travail_ref`
+    // mesure ce que l'autorite de bloc retire reellement.
+    const double contraction =
+        L.seed_ancres > 0 ? (double)L.seed_ancres_sans / (double)L.seed_ancres : 0.0;
+    const double gain = L.seed_travail_elag > 0
+                            ? (double)L.seed_travail_ref / (double)L.seed_travail_elag
+                            : 0.0;
+    std::printf("etages V4_pair_walive=%lld ancres_sans_carrier=%lld contraction=%.4f "
+                "C4_carrier=%lld C4_carrier_elag=%lld ecarts=%lld travail_ref=%lld "
+                "travail_elag=%lld gain=%.3f blocs_elagues=%lld points_elagues=%lld "
+                "certif_juges=%lld certif_desaccords=%lld\n",
+                L.seed_ancres, L.seed_ancres_sans, contraction, L.seed_total_ref,
+                L.seed_total_elag, L.seed_ecarts, L.seed_travail_ref,
+                L.seed_travail_elag, gain, L.seed_blocs_elagues,
+                L.seed_points_elagues, L.seed_juges, L.seed_desaccords_certif);
+    // LES DEUX CERTIFICATS N'ONT AUCUNE PRIMITIVE COMMUNE : l'un enumere des
+    // coins et evalue `e.t`, l'autre compare des distances a un centre. Un
+    // desaccord est donc un desaccord de juge, pas un avertissement.
+    if (L.seed_desaccords_certif > 0) {
+      std::fprintf(stderr, "DESACCORD DU JUGE : %lld certificats de bloc divergent\n",
+                   L.seed_desaccords_certif);
+      return 1;
+    }
+    // L'ELAGAGE DOIT RENDRE LE COMPTE DE LA REFERENCE, A L'UNITE. Un ecart
+    // signifie que `bloc_sans_seed` a certifie un bloc qui portait un seed :
+    // c'est un desaccord de juge, donc le code 1, jamais un avertissement.
+    if (L.seed_ecarts > 0) {
+      std::fprintf(stderr,
+                   "DESACCORD DU JUGE : %lld ancres ou l'elagage differe du"
+                   " balayage complet\n", L.seed_ecarts);
+      return 1;
+    }
+  }
   if (vrai_vivant) {
     // ---- LE MOU, ET SES DEUX DENOMINATEURS.
     //
@@ -2128,13 +2469,17 @@ int main(int argc, char** argv) {
     for (int q = 0; q < 3; ++q) {
       const long long S = L.survivantes[q] - L.vivant_degen_lane[q];
       const long long V = vrai_vivantes[q];
-      std::printf(" q%d_vivantes=%lld q%d_survivantes_D0exclu=%lld", q + 2, V, q + 2, S);
+      // `V%d_pair_walive` ET RIEN D'AUTRE. Le nom `q4_vivantes` faisait quatre
+      // metiers a la fois — paires-ancrages, triples porteurs, tetraedres bien
+      // centres, q4 de rang borne — et l'audit `eb42b57` a raison d'exiger la
+      // separation. Ce compteur ne mesure QUE des PAIRES.
+      std::printf(" V%d_pair_walive=%lld V%d_survivantes_D0exclu=%lld", q + 2, V, q + 2, S);
       if (V > 0) {
         const double mou = (double)S / (double)V;
-        std::printf(" q%d_mou=%.3f q%d_surcout=%.3f q%d_retirable=%.3f", q + 2, mou,
+        std::printf(" V%d_mou=%.3f V%d_surcout=%.3f V%d_retirable=%.3f", q + 2, mou,
                     q + 2, mou - 1.0, q + 2, 1.0 - 1.0 / mou);
       } else {
-        std::printf(" q%d_mou=%s", q + 2, S > 0 ? "inf" : "NA");
+        std::printf(" V%d_mou=%s", q + 2, S > 0 ? "inf" : "NA");
       }
     }
     // LE BUDGET, PUBLIE ET NON AFFIRME. Le re-audit demandait un compte en
