@@ -1796,7 +1796,51 @@ Les trois lanes partagent une seule descente, les fuseaux étant emboîtés
 ne dépendant pas de l'arité, une seule évaluation par point sert les trois
 compteurs.
 
-### 6bis.5 Ce que la mesure ne dit pas
+### 6bis.5 Mesure du 15 août 2026
+
+Campagne `counter-only`, graine `3`, profil u16, ledger bouclant exactement sur
+`C(n,2)` à chaque point. Fermeture des **ancres** en pourcentage de `C(n,2)`.
+Ce ne sont ni des supports, ni un débit, ni une pente reçue.
+
+`uniform` :
+
+| `n` | `s` | `K` | rect. | cell. max | q2 | q3 | q4 | q4 survivantes |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| `8 000` | `6` | `5` | `2,46 M` | `48` | `99,57 %` | `97,86 %` | `97,55 %` | `782 638` |
+| `8 000` | `6` | `10` | `2,46 M` | `48` | `99,22 %` | `93,95 %` | `90,98 %` | `2 886 951` |
+| `8 000` | `8` | `5` | `3,99 M` | `46` | `99,59 %` | `98,49 %` | `98,50 %` | `480 817` |
+| `8 000` | `8` | `10` | `3,99 M` | `46` | `99,29 %` | `96,30 %` | `95,41 %` | `1 467 542` |
+| `16 000` | `6` | `5` | `5,59 M` | `116` | `99,78 %` | `98,87 %` | `98,69 %` | `1 674 232` |
+
+Trois lectures, et aucune n'est une extrapolation.
+
+**`s = 8` domine `s = 6` à `K` égal.** En q4, `95,41 %` contre `90,98 %`, soit
+**deux fois moins d'ancres survivantes**, pour `1,62` fois plus de rectangles.
+Le compromis est donc favorable dans ce régime, ce qui n'allait pas de soi :
+augmenter `s` rétrécit `A` et `B`, donc appauvrit `h_a` et `h_b`, mais enrichit
+le cœur plus vite qu'il ne les appauvrit.
+
+**`K = 5` ferme davantage que `K = 10`**, mécaniquement : les seuils passent de
+`10/9/8` à `5/4/3`. L'écart en q4 est de `90,98 %` à `97,55 %` à `s = 6`.
+
+**La fermeture ne se dégrade pas avec `n`** sur cette famille : de `n=8 000` à
+`n=16 000` à `s=6, K=5`, q4 passe de `97,55 %` à `98,69 %`. Deux points ne font
+pas une pente ; c'est J0 qui tranchera.
+
+Le résiduel absolu reste le seul chiffre qui compte pour le contrat : à
+`n=8 000, s=8, K=10`, il reste `1,47` million d'ancres q4, soit `184` par
+point — à comparer aux `428` supports par point mesurés à `n=50 000`. Le
+préfiltre ramène donc le candidat dans le même ordre de grandeur que la sortie,
+ce qui n'était pas acquis. Il ne le rend pas *output-sensitive* pour autant :
+`184` ancres par point n'est pas `428` supports par point, et chaque ancre reste
+à instruire.
+
+**Campagnes restant à rendre** : `eight_clusters` et `terrain`, et les tailles
+`32 000`. C'est `eight_clusters` qui décide — la famille a résisté au cœur
+commun, au fuseau sur rectangle et aux cinq certificats de bloc — et aucune
+conclusion de famille obligatoire ne sera tirée avant.
+
+### 6bis.6 Ce que la mesure ne dit pas
 
 Le probe compte des **ancres survivantes**. Ce n'est pas un nombre de supports,
 ni un débit, ni une pente reçue. Un rectangle dont une extrémité dépasse le cap
@@ -2873,6 +2917,14 @@ enregistrements physiques restant factorisés. Il n'existe aucune garantie
 universelle sous-quadratique pour la sortie explicite ou pour le raffinement
 des frontières `MIXED`. La borne de seize apex par face retire le carré q4 ;
 elle ne borne ni le nombre de faces primaires, ni une sortie q2/q3 lourde.
+
+Le préfiltre combiné de la section 6bis ne fait pas exception. Ses trois
+comptes sont prouvés disjoints et ses deux bornes sont exactes, mais il ferme
+des **ancres**, pas des supports : `184` ancres q4 par point à
+`n=8 000, s=8, K=10` ne sont pas `428` supports par point, et chaque ancre
+survivante reste entièrement à instruire. Il ne rend donc pas le producteur
+*output-sensitive*, et aucune de ses mesures ne vaut pour une famille dont la
+campagne n'a pas été rendue — `eight_clusters` en particulier.
 
 `SOC64`, `CORNER512`, LP projectif et cages sont des certificateurs ou
 falsificateurs précis. Aucun n'a encore démontré le contrat 50000/G4. Le
