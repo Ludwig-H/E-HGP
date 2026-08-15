@@ -729,6 +729,9 @@ struct Ledger {
   long long travail_ha = 0;      // travail des SEULS postes h_a et h_b
   long long bulk_boule = 0;      // sous-arbres credites en O(1) par la boule
   long long elague_ext = 0;      // sous-arbres coupes par la boule exterieure
+  long long lentille_somme = 0;  // candidats d'instruction, cumules
+  long long lentille_max = 0;    // le pire cas, qui est ce qui compte
+  long long lentille_ancres = 0;
   long long dual_ecarts = 0;     // dual-tree != jointure : DOIT rester nul
   long long dual_verifies = 0;   // points confrontes
 };
@@ -756,6 +759,7 @@ int main(int argc, char** argv) {
   long long dual_cutoff = 256;
   long long echantillon = 0;
   bool vrai_vivant = false;
+  bool cout_instruction = false;
   long long graine_ech = 0;
   bool ha_verifie = false;
 
@@ -811,6 +815,7 @@ int main(int argc, char** argv) {
     // les confronte point par point ; un seul ecart refuse la campagne.
     if (a == "--verifie-jointure") { ha_verifie = true; ha_dual = true; continue; }
     if (a == "--vrai-vivant") { vrai_vivant = true; continue; }
+    if (a == "--cout-instruction") { cout_instruction = true; vrai_vivant = true; continue; }
     if (eat("--graine-echantillon", &tmp)) { graine_ech = tmp; continue; }
     if (eat("--echantillon", &tmp)) { borne("--echantillon", 0, 200000); echantillon = tmp; continue; }
     if (eat("--dual-cutoff", &tmp)) { borne("--dual-cutoff", 0, 100000); dual_cutoff = tmp; continue; }
@@ -1434,7 +1439,50 @@ int main(int argc, char** argv) {
               if (z == ua + i || z == bi) continue;
               if (corner8_lane(a, Bb, sorted_pts[z]) >= q + 2) ++c;
             }
-            if (c < need) ++vrai_vivantes[q];
+            if (c < need) {
+              ++vrai_vivantes[q];
+              // ---- LE COUT D'INSTRUCTION, MESURE ET NON SUPPOSE.
+              //
+              // Une ancre vivante doit ensuite etre INSTRUITE : retrouver ses
+              // supports. Pour q3, le troisieme sommet vit dans la LENTILLE
+              // `{c : |ac| <= |ab| et |bc| <= |ab|}`, puisque `(a,b)` est
+              // l'arete maximale. Son volume vaut `5 pi D^3/12`, soit
+              // exactement `2,5` fois la boule diametrale `pi D^3/6`.
+              //
+              // Or une ancre VIVANTE a moins de `h_2` points dans sa boule
+              // diametrale. Sous densite locale uniforme la lentille en
+              // contiendrait donc `2,5 h_2`, soit vingt-cinq a `s_max=11` :
+              // l'instruction serait en `O(h)` et non en `O(n)`.
+              //
+              // C'est exactement l'hypothese qui tombe sur un nuage groupe. On
+              // la mesure au lieu de la supposer.
+              if (cout_instruction && q == 2) {
+                const i64 dab = (sorted_pts[ua + i].x - sorted_pts[bi].x) *
+                                    (sorted_pts[ua + i].x - sorted_pts[bi].x) +
+                                (sorted_pts[ua + i].y - sorted_pts[bi].y) *
+                                    (sorted_pts[ua + i].y - sorted_pts[bi].y) +
+                                (sorted_pts[ua + i].z - sorted_pts[bi].z) *
+                                    (sorted_pts[ua + i].z - sorted_pts[bi].z);
+                long long lent = 0;
+                for (int c2 = 0; c2 < n; ++c2) {
+                  if (c2 == ua + i || c2 == bi) continue;
+                  const i64 da = (sorted_pts[c2].x - a.x) * (sorted_pts[c2].x - a.x) +
+                                 (sorted_pts[c2].y - a.y) * (sorted_pts[c2].y - a.y) +
+                                 (sorted_pts[c2].z - a.z) * (sorted_pts[c2].z - a.z);
+                  if (da > dab) continue;
+                  const i64 db = (sorted_pts[c2].x - sorted_pts[bi].x) *
+                                     (sorted_pts[c2].x - sorted_pts[bi].x) +
+                                 (sorted_pts[c2].y - sorted_pts[bi].y) *
+                                     (sorted_pts[c2].y - sorted_pts[bi].y) +
+                                 (sorted_pts[c2].z - sorted_pts[bi].z) *
+                                     (sorted_pts[c2].z - sorted_pts[bi].z);
+                  if (db <= dab) ++lent;
+                }
+                L.lentille_somme += lent;
+                if (lent > L.lentille_max) L.lentille_max = lent;
+                ++L.lentille_ancres;
+              }
+            }
           }
         }
       }
@@ -1724,6 +1772,10 @@ int main(int argc, char** argv) {
                 L.c512_perd[0], L.c512_perd[1], L.c512_perd[2],
                 L.c512_faux[0], L.c512_faux[1], L.c512_faux[2], L.c64_desaccords);
   if (core512) std::printf("corner64 appels=%lld\n", L.c64_appels);
+  if (cout_instruction && L.lentille_ancres > 0)
+    std::printf("instruction ancres=%lld lentille_moyenne=%.2f lentille_max=%lld\n",
+                L.lentille_ancres,
+                (double)L.lentille_somme / (double)L.lentille_ancres, L.lentille_max);
   if (vrai_vivant) {
     std::printf("vraivivant");
     for (int q = 0; q < 3; ++q) {
