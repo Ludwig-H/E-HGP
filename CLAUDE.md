@@ -28,7 +28,7 @@ python tools/check_docs.py
 python tools/check_implementation_status.py
 ```
 
-Exploration `morsehgp3D_v3/` (construit aussi v2 via `add_subdirectory`, ~290 CTests) :
+Exploration `morsehgp3D_v3/` (construit aussi v2 via `add_subdirectory`, 926 CTests dont 425 portes négatives à code de sortie exact) :
 
 ```bash
 cmake -S morsehgp3D_v3 -B build/v3 -DCMAKE_BUILD_TYPE=Release
@@ -61,7 +61,7 @@ Vocabulaire des statuts : `backend` ∈ {reference_cpu, cuda, cuda_g4}, `profile
 ## Architecture (vue d'ensemble)
 
 - `morsehgp3d/` — bibliothèque produit. Cible publique unique `morsehgp3d::morsehgp3d` (INTERFACE) → `src/cpu/api/point_hierarchy.cpp` ; en-tête public unique `include/morsehgp3d/morsehgp3d.hpp` → `api/point_hierarchy.hpp` : `build_exact_point_hierarchy(CertifiedTowerInput, PointHierarchyOptions)` → merge tree multi-ordres, routage descendant irréversible, rendus `select_lambda_cut` / `select_dbscan_radius` / `select_excess_of_mass`. Le réducteur est exact **relativement** à une tour déclarée complète par son producteur (reçus liés par `tower_payload_id`) ; il n'authentifie pas la vérité amont. `morsehgp3d/archive/` (surrogate point-MST v6, prototypes obsolètes) est hors build/API.
-- `morsehgp3D_v3/` — exploration courante (`exploration_v3_hors_registre`, aucun statut public). `prototype/` = sujets et portes ; `oracle/` = juge indépendant (bigint/rationnel propres, aucune primitive de production) ; `audits/` = cycle documentaire. Dépend de v2 comme « sémantique candidate et fixtures, jamais une autorité ».
+- `morsehgp3D_v3/` — exploration courante (`exploration_v3_hors_registre`, aucun statut public). `prototype/` = sujets et portes, carte dans `prototype/README.md` (dont les idées périmées encore compilées) ; `oracle/` = juge indépendant (bigint/rationnel propres, aucune primitive de production) ; `audits/` = cycle documentaire, avec `audits/archive/README.md` = registre des pistes fermées (idée, cause d'abandon, trace conservée). Dépend de v2 comme « sémantique candidate et fixtures, jamais une autorité ».
 - `morsehgp3D_v2/` — sujet jugé historique (lib `mhgp`), toujours construit par v3.
 - `tests/SemanticKITTI/Zoltan/HierarchicalSelfAttention/` — dossier de recherche : une hiérarchie de densité HGP aide-t-elle la segmentation sémantique LiDAR ? **Commencer par `GUIDE.md`** (parcours d'entrée en neuf chapitres), avec `GLOSSAIRE.md`. Conception et falsification uniquement, aucune expérience apprise, `public_status=not_claimed`. Trois contraintes à connaître avant de proposer quoi que ce soit : l'oracle de partition est une porte de **réfutation** et non de promotion ; HGP retarde la naissance des objets **filiformes**, là où se trouve la marge de mIoU ; le descripteur de nœud est le **levier le plus faible**. La cible est l'état de l'art val en régime strict : $73{,}1$ (DOS) à battre depuis une baseline reproductible à $68{,}0$–$70{,}3$. Se comparer à DOS, jamais au scratch. La laminarité exigée par une attention sur arbre n'est en revanche **pas** un obstacle : d'après le § 9.1 du manuscrit, l'arbre est déjà une partition des $(K-1)$-simplexes, donc laminaire sur les facettes, et la partition de l'unité $w_{x\tau}=S_\tau/T_x$ qui relie points et facettes y est fournie.
 - `HGP-old/` — Python historique figé, **licence non commerciale propre**, jamais importé.

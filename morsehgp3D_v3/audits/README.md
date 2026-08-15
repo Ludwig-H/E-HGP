@@ -6,11 +6,17 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
-Ce dossier n'est plus un journal chronologique. Les propositions abandonnées,
-questions résolues et audits absorbés ont été supprimés. Les preuves durables
-sont consolidées dans `../PROPOSITION.md`; seules restent les autorités live et
+Ce dossier n'est plus un journal chronologique. Les preuves durables sont
+consolidées dans `../PROPOSITION.md`; ne restent ici que les autorités live et
 les dépendances historiques encore citées directement ou transitivement par le
 logiciel, un reçu ou une autorité conservée.
+
+Les propositions abandonnées, questions résolues et audits absorbés sont
+**archivés**, non supprimés : ils vivent dans
+[`archive/`](archive/README.md), dont le registre condense en une ligne l'idée
+de chaque piste, la mesure ou la contre-fixture qui l'a tuée, et ce qui en
+survit. Un fichier de `archive/` n'est jamais une autorité et ne doit jamais
+être cité comme une réception.
 
 Règle de supersession globale pour les textes historiques : seule une paire
 endpoint de distance `D=0` est filtrée. Une géométrie peut bucketiser une
@@ -267,4 +273,19 @@ Un fichier daté ne devient jamais live. Avant toute conclusion :
 2. comparer son `HEAD` et son worktree au dépôt ;
 3. distinguer sujet, oracle, mutant, provenance et payload ;
 4. conserver toute contradiction mathématique comme fixture ;
-5. mettre à jour la proposition consolidée, puis supprimer la note absorbée.
+5. mettre à jour la proposition consolidée, puis **archiver** la note absorbée
+   dans [`archive/`](archive/README.md) en lui écrivant sa ligne de registre —
+   jamais la supprimer, et jamais la laisser traîner ici sans être déclarée.
+
+## Archive
+
+[`archive/`](archive/README.md) contient vingt-neuf textes retirés du dossier
+vivant le 15 août 2026, avec le registre qui condense chaque piste. Le critère
+d'archivage est mécanique et vérifiable : n'est archivé qu'un fichier qui n'est
+ni une autorité active, ni une dépendance historique gardée, ni cité par
+`CMakeLists.txt`, un prototype, un oracle, un reçu, `../PROPOSITION.md`,
+`../README.md` ou `AUDIT_ETAT_COURANT.md`.
+
+Tout fichier de ce dossier doit apparaître dans exactement une des sections
+ci-dessus, ou descendre dans `archive/`. Un fichier déclaré nulle part est un
+défaut d'index, pas un fichier neutre.

@@ -992,6 +992,11 @@ doit suivre exclusivement les scripts gardés et les coupe-circuits décrits par
   verdict mutable ;
 - [`audits/README.md`](audits/README.md) : index court des audits actifs et des
   dépendances historiques encore citées par le logiciel ;
+- [`audits/archive/README.md`](audits/archive/README.md) : registre des pistes
+  fermées — pour chacune, l'idée en une phrase, la mesure ou la contre-fixture
+  qui l'a tuée, et ce qui en survit. Rien n'y est une autorité ;
 - `oracle/` : juges bornés indépendants ;
+- [`prototype/README.md`](prototype/README.md) : carte du code, qui sépare la
+  route courante des **idées périmées encore compilées** ;
 - `prototype/` : candidats et probes, sans autorité produit implicite ;
 - `receipts/` : diagnostics et reçus, dont le statut est fixé par l'audit.
