@@ -89,7 +89,46 @@ Cela reste `+4` à `+21 %` de témoins pour une soustraction de plus, sans
 descente supplémentaire, et le maximum des deux est pris lane par lane puisque
 aucune ne domine partout.
 
-## 4. Ce qui reste de votre plan
+## 4. Point 11 : les sphères des points ne rendent presque rien
+
+J'ai essayé, parce que vous en faites la condition d'un gain au-delà de
+Corner64. Le résultat est négatif, et la raison est mesurable.
+
+**Premier piège, que j'ai commencé par y tomber : deux usages, deux sphères.**
+La sphère sert au test de **séparation**, donc à la partition, et au **rayon**
+du cœur. Serrer celle de séparation rend la séparation plus facile, donc produit
+des rectangles moins séparés, donc des cœurs plus **petits** : mesurée ainsi, la
+sphère des points paraissait perdre `3 %`. La partition doit rester sur la
+sphère de l'AABB.
+
+**Une fois découplé, le gain est réel mais minuscule** : `+0,1 %` à `+1,4 %` de
+témoins, le maximum sur `terrain`. Et la mesure dit pourquoi : à centre fixé,
+
+`rayon serré / rayon AABB = 0,969` (`uniform`, `eight_clusters`), `0,960`
+(`terrain`).
+
+La sphère circonscrite à une AABB **serrée** est donc déjà à quatre pour cent du
+meilleur rayon possible **à ce centre**. Il n'y avait presque rien à prendre.
+
+**Ce qui reste, et sa borne.** Le levier n'est pas le rayon mais le **centre**.
+Un minorant du rayon de la boule englobante minimale — la moitié du diamètre,
+estimé par la première passe de Ritter — vaut
+
+`0,848` (`uniform`), `0,849` (`eight_clusters`), `0,806` (`terrain`)
+
+fois le rayon AABB. Une vraie boule englobante minimale ne pourrait donc gagner
+que `15` à `19 %` de rayon, dont j'ai déjà `4 %`. Le reste demanderait une MEB
+exacte en arithmétique rationnelle, pour un gain de fermeture que la pente
+mesurée ici situe autour de `+5 %`. Je ne l'ouvre pas sans que vous jugiez ce
+rapport acceptable.
+
+**Conséquence sur l'autorité cône robuste.** Avec `sphere_of(box)` elle est
+dominée par l'autorité aux coins, puisque la sphère circonscrit la boîte. Avec
+la sphère des points elle cesse de l'être — mais de `4 %` de rayon seulement.
+Je ne l'implémente donc pas : elle coûterait trois racines dirigées par couple
+pour un gain que la mesure ci-dessus borne très bas.
+
+## 5. Ce qui reste de votre plan
 
 Non fait, et non prétendu : l'autorité cône robuste du § 6.2 — dont je note
 qu'avec `sphere_of(box)` elle serait **dominée** par l'autorité aux coins,
@@ -99,5 +138,5 @@ Q30 ; le mode `--no-bulk` ; la porte `direct == tree` pour l'apex.
 
 La campagne n'est pas régénérée et le reçu garde son bandeau q2 invalide.
 
-Suite complète : `830/831`. Le seul échec est `mhgp3v_arith_selftest`, faute
+Suite complète : `832/833`. Le seul échec est `mhgp3v_arith_selftest`, faute
 d'en-têtes GMP dans ce conteneur.

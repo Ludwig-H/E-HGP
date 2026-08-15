@@ -5056,6 +5056,16 @@ add_test(NAME mhgp3v_core_ball_ablation_rayon_dec
           --separation=6 --rayon=dec --min-coeurs=200 --min-bulk=50 --min-elagues=500)
 set_tests_properties(mhgp3v_core_ball_ablation_rayon_dec PROPERTIES
   PASS_REGULAR_EXPRESSION "lane q4 coeurs_non_vides=[0-9]+ direct=50647 descente=50647 faux=0")
+# Point 11 du plan : sphère englobant les POINTS plutôt que l'AABB. Deux usages
+# à ne pas confondre — serrer la sphère de SEPARATION rend la séparation plus
+# facile, donc produit des rectangles moins séparés et des cœurs plus PETITS.
+# La partition reste sur la sphère de l'AABB ; seul le rayon du cœur est serré.
+add_test(NAME mhgp3v_core_ball_sphere_points
+  COMMAND mhgp3v_core_ball_probe --points=400 --family=terrain --seed=3
+          --separation=6 --sphere=points --min-coeurs=200 --min-bulk=50 --min-elagues=500)
+set_tests_properties(mhgp3v_core_ball_sphere_points PROPERTIES
+  PASS_REGULAR_EXPRESSION "lane q4 coeurs_non_vides=[0-9]+ direct=62322 descente=62322 faux=0")
+
 add_test(NAME mhgp3v_core_ball_ablation_rayon_max
   COMMAND mhgp3v_core_ball_probe --points=400 --family=terrain --seed=3
           --separation=6 --min-coeurs=200 --min-bulk=50 --min-elagues=500)

@@ -556,7 +556,7 @@ struct Compte {
 
 int mode_nuage(const std::string& family, int n, i64 coord, long long seed, int sep,
                BallMutant mu, long long min_coeurs, long long min_bulk,
-               long long min_elagues, bool rayon_dec) {
+               long long min_elagues, bool rayon_dec, bool sphere_points) {
   if (n < 4 || n > 4000) refuse("le mode nuage est borne a 4000 points");
   mhgp3v::CloudFamily fam;
   if (family == "uniform") fam = mhgp3v::CloudFamily::kUniform;
@@ -611,7 +611,47 @@ int mode_nuage(const std::string& family, int n, i64 coord, long long seed, int 
     else { const P3& p = sp[(size_t)(-1 - h)]; out[0] = p.x; out[1] = p.y; out[2] = p.z; }
   };
   // Sphere englobante DOUBLEE, majorante — meme convention que le probe combine.
-  auto h_sphere = [&](int h, i64 c2[3], i64* r2) {
+  // ---------------------------------------------------------------------
+  // SPHERE ENGLOBANTE, DEUX VARIANTES — point 11 du plan du re-audit.
+  //
+  // `sphere_of(box)` prend la sphere CIRCONSCRITE a l'AABB, de rayon la
+  // demi-diagonale : elle suppose un point AU COIN. Or une AABB serree ne l'est
+  // que sur les six FACES, et les points peuvent ne jamais approcher les coins.
+  // Pour un nuage inscrit dans une sphere, la demi-diagonale majore le vrai
+  // rayon d'un facteur `sqrt(3)`.
+  //
+  // `--sphere=points` garde le meme centre — meme entier double, meme
+  // arithmetique — et remplace la demi-diagonale par le VRAI maximum sur les
+  // points du nœud. Strictement plus serre, sans aucun risque : tout majorant
+  // du rayon reste valide, et celui-ci en est un. Le coût est une passe par
+  // nœud sur sa plage, `O(n depth)` en tout, payee une seule fois.
+  // ---------------------------------------------------------------------
+  std::vector<i64> tight_r2;
+  if (sphere_points) {
+    tight_r2.assign(nodes.size(), 0);
+    for (size_t k = 0; k < nodes.size(); ++k) {
+      i64 c2[3];
+      for (int i = 0; i < 3; ++i) c2[i] = nodes[k].tlo[i] + nodes[k].thi[i];
+      i128 best = 0;
+      for (int j = nodes[k].first; j <= nodes[k].last; ++j) {
+        const i64 pc[3] = {2 * sp[(size_t)j].x, 2 * sp[(size_t)j].y, 2 * sp[(size_t)j].z};
+        i128 acc = 0;
+        for (int i = 0; i < 3; ++i) {
+          const i64 d = pc[i] - c2[i];
+          acc += (i128)d * (i128)d;
+        }
+        if (acc > best) best = acc;
+      }
+      tight_r2[k] = mhgp3v::corebl::isqrt_ceil_i128(best);  // VRAI plafond
+    }
+  }
+  // DEUX USAGES, DEUX SPHERES — et les confondre fausse la mesure. La sphere
+  // sert (a) au test de SEPARATION, donc a la partition, et (b) au RAYON du
+  // cœur. Serrer la sphere de separation rend la separation plus facile, donc
+  // produit des rectangles moins separes, donc des cœurs plus PETITS : mesuree
+  // ainsi, la sphere des points paraissait perdre 3 %. La partition reste donc
+  // sur la sphere de l'AABB, et seul le rayon du cœur profite du serrage.
+  auto h_sphere_sep = [&](int h, i64 c2[3], i64* r2) {
     i64 lo[3], hi[3];
     h_lo(h, lo); h_hi(h, hi);
     i128 acc = 0;
@@ -621,6 +661,10 @@ int mode_nuage(const std::string& family, int n, i64 coord, long long seed, int 
       acc += (i128)e * (i128)e;
     }
     *r2 = mhgp3v::corebl::isqrt_floor_i128(acc) + 1;
+  };
+  auto h_sphere = [&](int h, i64 c2[3], i64* r2) {
+    h_sphere_sep(h, c2, r2);
+    if (sphere_points) *r2 = (h >= 0) ? tight_r2[(size_t)h] : 0;
   };
 
   std::vector<Rect> rects;
@@ -632,7 +676,7 @@ int mode_nuage(const std::string& family, int n, i64 coord, long long seed, int 
       const Rect r = st.back();
       st.pop_back();
       i64 ca[3], cb[3], ra, rb;
-      h_sphere(r.u, ca, &ra); h_sphere(r.v, cb, &rb);
+      h_sphere_sep(r.u, ca, &ra); h_sphere_sep(r.v, cb, &rb);
       i128 acc = 0;
       for (int i = 0; i < 3; ++i) { const i64 e = cb[i] - ca[i]; acc += (i128)e * (i128)e; }
       const i64 d = mhgp3v::corebl::isqrt_floor_i128(acc);
@@ -734,9 +778,9 @@ int mode_nuage(const std::string& family, int n, i64 coord, long long seed, int 
   std::printf("cadre phase=exploration_v3_hors_registre backend=cpu_reference "
               "profile=quantized_u16_input_only mode=diagnostic_counter_only "
               "public_status=not_claimed\n");
-  std::printf("nuage famille=%s n=%d coord=%d seed=%lld separation=%d mutant=%s rayon=%s\n",
+  std::printf("nuage famille=%s n=%d coord=%d seed=%lld separation=%d mutant=%s rayon=%s sphere=%s\n",
               family.c_str(), m, coord_used, seed, sep, ball_mutant_name(mu),
-              rayon_dec ? "dec" : "max");
+              rayon_dec ? "dec" : "max", sphere_points ? "points" : "aabb");
   std::printf("rectangles=%lld visites=%lld bulk=%lld elagues=%lld verifies=%lld\n",
               C.rectangles, C.visites, C.bulk, C.elagues, C.verifies);
   for (int q = 0; q < 3; ++q)
@@ -817,6 +861,7 @@ int main(int argc, char** argv) {
   bool verbeux = false;
   i64 ax_bx = 0, ax_lo = 1000, ax_hi = 1100;
   bool rayon_dec = false;
+  bool sphere_points = false;
 
   for (int i = 1; i < argc; ++i) {
     const std::string a = argv[i];
@@ -836,6 +881,7 @@ int main(int argc, char** argv) {
     if (a.rfind("--apex-lo=", 0) == 0) { ax_lo = arg_borne(a.substr(10), "--apex-lo", 0, 65535); continue; }
     if (a.rfind("--apex-hi=", 0) == 0) { ax_hi = arg_borne(a.substr(10), "--apex-hi", 0, 65535); continue; }
     if (a == "--rayon=dec") { rayon_dec = true; continue; }
+    if (a == "--sphere=points") { sphere_points = true; continue; }
     if (a == "--verbeux") { verbeux = true; continue; }
     refuse("argument inconnu");
   }
@@ -850,5 +896,5 @@ int main(int argc, char** argv) {
   if (fixture == "couple-sature") return fixture_couple_sature(mu);
   if (!fixture.empty()) refuse("fixture inconnue");
   return mode_nuage(family, n, coord, seed, sep, mu, min_coeurs, min_bulk, min_elagues,
-                    rayon_dec);
+                    rayon_dec, sphere_points);
 }
