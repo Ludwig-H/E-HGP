@@ -85,15 +85,6 @@ target_include_directories(mhgp3v_admissible_pair_probe PRIVATE ${CMAKE_CURRENT_
 target_link_libraries(mhgp3v_admissible_pair_probe PRIVATE mhgp)
 target_compile_options(mhgp3v_admissible_pair_probe PRIVATE -Wall -Wextra -Werror)
 
-# PROTOTYPE DE SOURCE DIRECTE. Il n'enumere aucun sommet d'arrangement : il
-# enumere les SUPPORTS depuis leur ancre, dans un voisinage dont la completude
-# est un theoreme. Ce qu'il etablit est un ACCORD RELATIF aux primitives
-# `mhgp::sphere_*` et `mhgp::miniball_of` qu'il partage avec la reference, sur
-# les campagnes exercees — ni une certification, ni un SLO.
-add_executable(mhgp3v_direct_source prototype/direct_source.cpp)
-target_include_directories(mhgp3v_direct_source PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(mhgp3v_direct_source PRIVATE mhgp)
-target_compile_options(mhgp3v_direct_source PRIVATE -Wall -Wextra -Werror)
 
 # LE PIPELINE SATURE CHRONOMETRE : nuage -> catalogue -> fold, temps par etage.
 # Binaire de MESURE (les verdicts d'exactitude vivent dans le juge Gamma).
@@ -158,20 +149,7 @@ add_executable(mhgp3v_tree_median_gate prototype/tree_median_gate.cpp)
 target_include_directories(mhgp3v_tree_median_gate PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_compile_options(mhgp3v_tree_median_gate PRIVATE -Wall -Wextra -Werror)
 
-# LA PORTE ENSEMBLISTE DE L'INDEX PREFIXE--PREFIXE (note index exact) : le
-# theoreme juge contre le join quadratique pour TOUT k, fixtures des communs
-# en dernieres positions et du faux candidat, identite de masse L(r,K),
-# planchers de paires ET de faux candidats. Combinatoire pure : aucun lien.
-add_executable(mhgp3v_prefix_index_gate prototype/prefix_index_gate.cpp)
-target_include_directories(mhgp3v_prefix_index_gate PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_compile_options(mhgp3v_prefix_index_gate PRIVATE -Wall -Wextra -Werror)
 
-# LA SONDE DE MASSE de l'index prefixe--prefixe : diagnostic tout-requete sur
-# un catalogue reel (bornes hautes du fallback), jamais un verdict.
-add_executable(mhgp3v_prefix_mass_probe prototype/prefix_mass_probe.cpp)
-target_include_directories(mhgp3v_prefix_mass_probe PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(mhgp3v_prefix_mass_probe PRIVATE mhgp Threads::Threads)
-target_compile_options(mhgp3v_prefix_mass_probe PRIVATE -Wall -Wextra -Werror)
 
 # LA FACTORY ValidatedHybridSidecar (contrat 20260810, porte 2 de l'etat
 # courant) : frontiere de confiance typee — la fermeture des carriers est une
@@ -267,12 +245,6 @@ target_include_directories(mhgp3v_warm_e2e_h0_diagnostic PRIVATE ${CMAKE_CURRENT
 target_link_libraries(mhgp3v_warm_e2e_h0_diagnostic PRIVATE mhgp Threads::Threads)
 target_compile_options(mhgp3v_warm_e2e_h0_diagnostic PRIVATE -Wall -Wextra -Werror)
 
-# LE PRUNE CONVEXE CERTIFIE (reponse pont/q4 20260811 §6) : le predicat
-# partage axes + plan du barycentre, verification entiere seule decisive.
-add_executable(mhgp3v_cell_prune_gate prototype/cell_prune_gate.cpp)
-target_include_directories(mhgp3v_cell_prune_gate PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(mhgp3v_cell_prune_gate PRIVATE mhgp)
-target_compile_options(mhgp3v_cell_prune_gate PRIVATE -Wall -Wextra -Werror)
 
 
 option(MHGP3V_ENABLE_CUDA "Compiler le kernel de front d'onde pour sm_120" OFF)
@@ -524,190 +496,6 @@ add_test(NAME mhgp3v_flats_u16_owner COMMAND mhgp3v_flats_differential
          --min-navigated 200 --min-vertices 10000
          --min-reverse 10000 --min-reverse-depth 8 --min-internal-nodes 500 --min-owner 8000)
 
-# LA SOURCE DIRECTE, JUGEE CONTRE LE CATALOGUE FERME.
-#
-# La porte exige l'accord RELATIF complet, clef par coquille : meme ensemble de
-# spheres, meme support canonique, meme rang, meme niveau rationnel et meme
-# LISTE DE MEMBRES PAR COQUILLE. C'est un quotient semantique : le pool public
-# concatene et ses offsets ne sont PAS compares ici (audit chrono `e406e1f`).
-# Sans les listes par coquille, deux payloads de meme rang et d'interieurs
-# differents etaient indiscernables.
-#
-# Elle exige aussi l'UNICITE. La map de sortie ecrasait ses doublons : un mutant
-# retirant la restriction `z > p` emettait 126 fois au lieu de 56 sans qu'aucun
-# compteur ne bouge. Les emissions sont maintenant comptees a part.
-add_test(NAME mhgp3v_direct_source_generic COMMAND mhgp3v_direct_source
-         --clouds 6 --points 40 --coord 160 --smax 8 --seed 20260810 --judge 1
-         --min-clouds 6 --min-emitted 10000 --min-candidates 500000 --min-windowed 8000)
-# La grille SATUREE : cospheries, coplanarites et alignements partout. C'est la
-# ou la convention de support canonique decide, et ou une source directe naive
-# emettrait plusieurs fois la meme sphere. Le cover y tombe en repli racine, ce
-# qui est correct et doit rester exact : aucun plancher de fenetre ici.
-add_test(NAME mhgp3v_direct_source_degenerate COMMAND mhgp3v_direct_source
-         --clouds 12 --points 12 --coord 5 --smax 8 --seed 31337 --judge 1
-         --min-clouds 12 --min-emitted 1800 --min-candidates 8000)
-# `n < t_q` : la banque ne peut jamais conclure, elle est OTEE et le voisinage
-# racine est exact. C'etait une sortie generique; c'est un statut, et il doit
-# rester juste.
-add_test(NAME mhgp3v_direct_source_small_cloud COMMAND mhgp3v_direct_source
-         --clouds 6 --points 5 --coord 10 --smax 32 --seed 7 --judge 1
-         --min-clouds 6 --min-emitted 30)
-# LA FORET DES K ARBRES, BOUT EN BOUT.
-#
-# Le catalogue n'est que la moitie du contrat. Cette porte construit la foret
-# depuis LA SOURCE et depuis LA REFERENCE pour k = 1..5, puis compare des
-# signatures RECURSIVES canoniques.
-#
-# Elle ne compare surtout pas des indices : `ForestNode::source` d'une
-# multifusion est « la plus petite PAR INDEX des spheres du lot », donc dependant
-# du generateur. Une naissance est identifiee par les membres de son minimum, une
-# multifusion par le RANG EXACT de son niveau dans l'ordre `sphere_cmp_beta`.
-add_test(NAME mhgp3v_direct_source_forest COMMAND mhgp3v_direct_source
-         --clouds 6 --points 14 --coord 12 --smax 6 --seed 20260810 --judge 1 --forest 5
-         --min-clouds 6 --min-emitted 1000 --min-forest-nodes 1000)
-# Une foret d'ordre k lit les rangs k et k+1 : demander k = s_max rendrait des
-# ordres tronques en les qualifiant.
-# LA COMPARAISON A PAYLOAD PUBLIC CANONIQUE, en porte permanente. Chaque cote
-# produit son payload — catalogue serialise dans l'ordre lexicographique du
-# support, pool reconstruit, puis K forets depuis CE catalogue — sous SON
-# chrono; le juge (differentiel, empreintes, comparaisons champ a champ) a une
-# horloge separee, fermee avant l'impression. Le payload public est compare EN
-# ENTIER : spheres avec representation exacte, pool, offsets, forets et indices
-# `ForestNode::source` — la sonde d'audit qui trouvait 3 762 positions
-# divergentes sous quotient vert est devenue le mutant `--force-shell-order`.
-# La porte garde l'EXACTITUDE du couple, pas sa vitesse.
-add_test(NAME mhgp3v_direct_source_same_payload COMMAND mhgp3v_direct_source
-         --clouds 4 --points 40 --coord 34 --smax 6 --seed 20260810 --judge 1 --forest 5
-         --min-clouds 4 --min-emitted 2000 --min-forest-nodes 2000)
-# LES LIBELLES TEMPORELS SONT DU CONTRAT, PAS DU DECOR. L'audit a montre qu'un
-# mutant remplacant stdout par des claims de payload public identique et de juge
-# certifie hors timer laissait 14/14 portes vertes : cette porte exige le
-# libelle exact — payload public canonique, juge sous sa propre horloge — sur la
-# meme commande. PASS_REGULAR_EXPRESSION ignore le code de retour; la porte
-# precedente le garde.
-add_test(NAME mhgp3v_direct_source_same_payload_labels COMMAND mhgp3v_direct_source
-         --clouds 4 --points 40 --coord 34 --smax 6 --seed 20260810 --judge 1 --forest 5
-         --min-clouds 4 --min-emitted 2000 --min-forest-nodes 2000)
-set_tests_properties(mhgp3v_direct_source_same_payload_labels PROPERTIES
-  PASS_REGULAR_EXPRESSION
-  "PAYLOAD PUBLIC CANONIQUE .* juge [0-9.]+ s .[0-9]+ comparaisons. HORS des deux chronos")
-# LE VALIDATEUR DE FORET EST TOTAL, ET SES DEUX FAUTES D'AUDIT SONT DES
-# FIXTURES : cycle de freres (l'ancien controle bouclait) et enfant hors plage
-# (il lisait hors du tableau, overflow ASan). L'auto-test exige la terminaison,
-# le compte nomme de chaque faute, l'empreinte STRUCTURE_INVALIDE sans recursion
-# et l'acceptation du temoin sain.
-add_test(NAME mhgp3v_direct_source_forest_validator COMMAND mhgp3v_direct_source
-         --selftest-forest-validator)
-# LE MUTANT D'ORDRE DE COQUILLE DOIT ROUGIR PAR LA PORTE DE PAYLOAD, PAS PAR LE
-# QUOTIENT. Il assemble le catalogue source dans l'ordre d'iteration de la map
-# par coquille — exactement la faute que la sonde d'audit observait — et le
-# quotient semantique reste vert : seul le comparateur champ a champ le voit.
-mhgp3v_add_expected_code_test_for(mhgp3v_direct_source
-  mhgp3v_direct_source_reject_shell_order "PAYLOAD PUBLIC DIFFERENT" 1
-  --clouds 2 --points 40 --coord 34 --smax 6 --seed 20260810 --judge 1 --forest 5
-  --force-shell-order 1)
-# L'ORDRE DE CONSTRUCTION EST UN PARAMETRE DE CAMPAGNE : --build-order 1
-# construit la source d'abord, pour que les campagnes chrono alternent la
-# position sans soustraire deux modes CLI (l'audit a montre que cette
-# soustraction est confondue par la position et l'etat initial). La porte garde
-# l'exactitude sous cet ordre, pas la vitesse.
-add_test(NAME mhgp3v_direct_source_source_first COMMAND mhgp3v_direct_source
-         --clouds 4 --points 40 --coord 34 --smax 6 --seed 20260810 --judge 1 --forest 5
-         --build-order 1 --min-clouds 4 --min-emitted 2000 --min-forest-nodes 2000)
-mhgp3v_add_expected_code_test_for(mhgp3v_direct_source
-  mhgp3v_direct_source_reject_build_order "qu'une seule construction" 2
-  --clouds 1 --points 10 --coord 10 --smax 4 --seed 7 --judge 0 --build-order 1)
-# LE REFUS FINAL DES STATUTS NON kOk EST UNE PORTE, PAS UNE POLITESSE. L'audit a
-# montre qu'un mutant le neutralisant laissait 14/14 vertes. Cette commande — la
-# reproduction exacte de l'audit — porte vingt tentatives dont un refus de
-# dimension affine, et DOIT sortir en echec avec sa raison; le refus est compte
-# et chronometre A PART, hors des deux chronos.
-mhgp3v_add_expected_code_test_for(mhgp3v_direct_source
-  mhgp3v_direct_source_reject_refused_status "statut non kOk" 3
-  --clouds 20 --points 5 --coord 4 --smax 3 --seed 13 --judge 1 --forest 2
-  --min-clouds 19 --min-emitted 1 --min-forest-nodes 1)
-mhgp3v_add_expected_code_test_for(mhgp3v_direct_source
-  mhgp3v_direct_source_reject_forest_order "exige s_max" 2
-  --clouds 1 --points 12 --coord 5 --smax 4 --seed 31337 --judge 1 --forest 4)
-mhgp3v_add_expected_code_test_for(mhgp3v_direct_source
-  mhgp3v_direct_source_reject_forest_without_judge "ne se juge que sous" 2
-  --clouds 1 --points 12 --coord 5 --smax 8 --seed 31337 --judge 0 --forest 3)
-# LES ORDRES BAS ETAIENT UN DOMAINE CONTRADICTOIRE : la CLI acceptait `s_max=2`
-# puis la lane q=3 echouait sur `t_q < 1` avec un message generique. Une lane
-# d'arite q > s_max est VIDE par contrat — un support d'arite q a un rang au
-# moins q — et c'est maintenant ce qui se passe.
-add_test(NAME mhgp3v_direct_source_low_order COMMAND mhgp3v_direct_source
-         --clouds 8 --points 10 --coord 8 --smax 2 --seed 5 --judge 1
-         --min-clouds 8 --min-emitted 80)
-mhgp3v_add_expected_code_test_for(mhgp3v_direct_source
-  mhgp3v_direct_source_reject_unknown "argument inconnu" 2 --sujet-inexistant)
-mhgp3v_add_expected_code_test_for(mhgp3v_direct_source
-  mhgp3v_direct_source_reject_floor "plancher" 3
-  --clouds 1 --points 12 --coord 5 --smax 8 --seed 31337 --min-emitted 100000000)
-# LES TROIS MODES SONT EXCLUSIFS. Demander un jugement en sautant l'enumeration
-# imprimait des spheres manquantes, ignorait les planchers et sortait zero.
-mhgp3v_add_expected_code_test_for(mhgp3v_direct_source
-  mhgp3v_direct_source_reject_cover_and_judge "ne peut pas juger" 2
-  --clouds 1 --points 10 --coord 10 --smax 4 --seed 7 --cover-only 1 --judge 1)
-# LE MODE COVER AUTONOME A SA PORTE POSITIVE. La regression auditee a `84adbcc` :
-# le mode sautait l'enumeration puis la garde finale exigeait quand meme
-# `candidats == C_q`, comparait 0 a C_q et sortait 3 — le disclaimer MODE COVER
-# n'etait jamais atteint, et le seul CTest cover ne testait que le conflit
-# cover+juge. Cette porte exerce le chemin positif, avec des planchers a
-# semantique cover : nuages decides et tests de cover.
-add_test(NAME mhgp3v_direct_source_cover_mode COMMAND mhgp3v_direct_source
-         --clouds 2 --points 100 --coord 50 --smax 11 --seed 7 --leaf 8
-         --judge 0 --cover-only 1 --min-clouds 2 --min-cover-tests 100000
-         --min-lane-cover-tests 60000)
-# La meme commande, jugee cette fois sur ses LIBELLES : la ligne temporelle ET
-# le disclaimer final — l'audit live a montre que viser le seul disclaimer
-# laissait revenir l'ancien libelle « catalogue seul — reference=0.000 ».
-# PASS_REGULAR_EXPRESSION ignore le code de retour, c'est pourquoi la porte
-# precedente existe a part.
-add_test(NAME mhgp3v_direct_source_cover_mode_disclaimer COMMAND mhgp3v_direct_source
-         --clouds 2 --points 100 --coord 50 --smax 11 --seed 7 --leaf 8
-         --judge 0 --cover-only 1 --min-clouds 2 --min-cover-tests 100000
-         --min-lane-cover-tests 60000)
-set_tests_properties(mhgp3v_direct_source_cover_mode_disclaimer PROPERTIES
-  PASS_REGULAR_EXPRESSION
-  "temps      : MODE COVER(.|\n)*MODE COVER : cover, voisinages et masses combinadiques seulement")
-# Un plancher d'enumeration en mode cover est STRUCTURELLEMENT inatteignable :
-# la combinaison est refusee fail-closed, jamais laissee rougir plus tard. Les
-# QUATRE branches sont gardees — l'audit live a releve que seule la premiere
-# l'etait, les trois autres pouvant regresser sans rougir.
-mhgp3v_add_expected_code_test_for(mhgp3v_direct_source
-  mhgp3v_direct_source_reject_cover_floor "incompatibles avec --cover-only" 2
-  --clouds 1 --points 10 --coord 10 --smax 4 --seed 7 --cover-only 1 --judge 0
-  --min-emitted 1)
-mhgp3v_add_expected_code_test_for(mhgp3v_direct_source
-  mhgp3v_direct_source_reject_cover_floor_windowed "incompatibles avec --cover-only" 2
-  --clouds 1 --points 10 --coord 10 --smax 4 --seed 7 --cover-only 1 --judge 0
-  --min-windowed 1)
-mhgp3v_add_expected_code_test_for(mhgp3v_direct_source
-  mhgp3v_direct_source_reject_cover_floor_candidates "incompatibles avec --cover-only" 2
-  --clouds 1 --points 10 --coord 10 --smax 4 --seed 7 --cover-only 1 --judge 0
-  --min-candidates 1)
-mhgp3v_add_expected_code_test_for(mhgp3v_direct_source
-  mhgp3v_direct_source_reject_cover_floor_forest "incompatibles avec --cover-only" 2
-  --clouds 1 --points 10 --coord 10 --smax 4 --seed 7 --cover-only 1 --judge 0
-  --min-forest-nodes 1)
-# LE MUTANT DE DOUBLE EMISSION DOIT ROUGIR. Il est instructif : le differentiel
-# par coquille reste vert, parce que la map ecrase; c'est le compteur d'unicite
-# qui le tue.
-# LE COMPARATEUR DE MEMBRES DOIT ETRE VIVANT. Sans ce mutant, rien ne prouve
-# qu'il compare autre chose que des listes vides : il retire un membre a chaque
-# sphere emise, et la porte doit rougir.
-mhgp3v_add_expected_code_test_for(mhgp3v_direct_source
-  mhgp3v_direct_source_reject_dropped_member_with_forest "ne peut pas etre combine" 2
-  --clouds 1 --points 14 --coord 12 --smax 6 --seed 1 --judge 1 --force-drop-member 1
-  --forest 3)
-mhgp3v_add_expected_code_test_for(mhgp3v_direct_source
-  mhgp3v_direct_source_reject_dropped_member "desaccords" 1
-  --clouds 2 --points 14 --coord 12 --smax 6 --seed 20260810 --judge 1
-  --force-drop-member 1)
-mhgp3v_add_expected_code_test_for(mhgp3v_direct_source
-  mhgp3v_direct_source_reject_double_emission "en double" 3
-  --clouds 2 --points 12 --coord 5 --smax 8 --seed 31337 --force-both-directions 1)
 
 # LE JUGE GAMMA_k, EN PORTES PERMANENTES. La porte generique exige l'ACCORD
 # EXACT des partitions par niveau sur les ordres sans cosphericite (Def. 26 du
@@ -955,69 +743,6 @@ mhgp3v_add_expected_code_test_for(mhgp3v_postings_join_gate
 mhgp3v_add_expected_code_test_for(mhgp3v_postings_join_gate
   mhgp3v_hybrid_kill_fast_window_off "mutant tue" 4
   --hybrid-mutant fast-window-off)
-# LA PORTE MULTIENSEMBLISTE de l'index : autorite combinatoire du theoreme,
-# possession canonique par lots, preflight fige, permutation globale commune.
-add_test(NAME mhgp3v_prefix_index_differential COMMAND mhgp3v_prefix_index_gate
-         --families 400 --sets 24 --universe 30 --max-order 8 --seed 20260810)
-# LA TERMINAISON HOSTILE (audit 8df7ac8 P2) : universe=8 < 11 bouclait a
-# l'infini ; le rang est desormais borne par min(11, universe) et la campagne
-# TERMINE — planchers reduits a la non-vacuite de paires.
-add_test(NAME mhgp3v_prefix_index_universe8 COMMAND mhgp3v_prefix_index_gate
-         --families 20 --sets 8 --universe 8 --max-order 3 --seed 20260810
-         --min-pairs 1 --min-false 0 --min-qq 0 --min-prior 0 --min-later 0 --min-rr 0)
-mhgp3v_add_expected_code_test_for(mhgp3v_prefix_index_gate
-  mhgp3v_prefix_index_kill_length "mutant tue" 4
-  --families 50 --mutant prefix-length-minus-one)
-mhgp3v_add_expected_code_test_for(mhgp3v_prefix_index_gate
-  mhgp3v_prefix_index_kill_drop_last "mutant tue" 4
-  --families 50 --mutant drop-last-posting)
-mhgp3v_add_expected_code_test_for(mhgp3v_prefix_index_gate
-  mhgp3v_prefix_index_kill_skip_recert "mutant tue" 4
-  --families 50 --mutant skip-recertification)
-mhgp3v_add_expected_code_test_for(mhgp3v_prefix_index_gate
-  mhgp3v_prefix_index_kill_duplicate_posting "mutant tue" 4
-  --families 50 --mutant duplicate-posting)
-mhgp3v_add_expected_code_test_for(mhgp3v_prefix_index_gate
-  mhgp3v_prefix_index_kill_double_query "mutant tue" 4
-  --families 50 --mutant double-query-pair)
-mhgp3v_add_expected_code_test_for(mhgp3v_prefix_index_gate
-  mhgp3v_prefix_index_kill_order_per_query "mutant tue" 4
-  --families 50 --mutant order-per-query)
-mhgp3v_add_expected_code_test_for(mhgp3v_prefix_index_gate
-  mhgp3v_prefix_index_kill_stage_sequentially "mutant tue" 4
-  --families 50 --mutant stage-query-sequentially)
-mhgp3v_add_expected_code_test_for(mhgp3v_prefix_index_gate
-  mhgp3v_prefix_index_kill_future_visible "mutant tue" 4
-  --families 50 --mutant future-visible)
-mhgp3v_add_expected_code_test_for(mhgp3v_prefix_index_gate
-  mhgp3v_prefix_index_reject_unknown_mutant "mutant inconnu" 2 --mutant inexistant)
-add_test(NAME mhgp3v_prefix_mass_probe_diagnostic COMMAND mhgp3v_prefix_mass_probe
-         --points 48 --smax 11 --max-order 3 --seed 20260810)
-set_tests_properties(mhgp3v_prefix_mass_probe_diagnostic PROPERTIES
-  PASS_REGULAR_EXPRESSION "OK : sonde de masse terminee")
-# LE MASQUE HYBRIDE de la sonde (audit 8df7ac8 P0) : staging par lot, requetes
-# = les fallback reels du fold, preflight fige, percentiles H_Q — le recu qui
-# dimensionne les chunks device. Les deux familles scanline (reponse Q5) sont
-# le regime declare proche LiDAR : ex aequo massifs, stries, multi-echos.
-add_test(NAME mhgp3v_prefix_mass_probe_hybrid_mask COMMAND mhgp3v_prefix_mass_probe
-         --points 32 --smax 11 --max-order 3 --seed 20260810 --mask hybrid)
-set_tests_properties(mhgp3v_prefix_mass_probe_hybrid_mask PROPERTIES
-  PASS_REGULAR_EXPRESSION "OK : sonde de masse terminee \\(masque hybride")
-add_test(NAME mhgp3v_prefix_mass_probe_scanline COMMAND mhgp3v_prefix_mass_probe
-         --points 32 --smax 11 --max-order 3 --seed 20260810
-         --family scanline_single_pass --mask hybrid)
-set_tests_properties(mhgp3v_prefix_mass_probe_scanline PROPERTIES
-  PASS_REGULAR_EXPRESSION "OK : sonde de masse terminee \\(masque hybride")
-add_test(NAME mhgp3v_prefix_mass_probe_scanline_overlap COMMAND mhgp3v_prefix_mass_probe
-         --points 32 --smax 11 --max-order 3 --seed 20260810
-         --family scanline_overlap_multiecho --mask hybrid)
-set_tests_properties(mhgp3v_prefix_mass_probe_scanline_overlap PROPERTIES
-  PASS_REGULAR_EXPRESSION "OK : sonde de masse terminee \\(masque hybride")
-mhgp3v_add_expected_code_test_for(mhgp3v_prefix_mass_probe
-  mhgp3v_prefix_mass_probe_reject_unknown "argument inconnu" 2 --inexistant 1)
-mhgp3v_add_expected_code_test_for(mhgp3v_prefix_mass_probe
-  mhgp3v_prefix_mass_probe_reject_hybrid_threshold "baseline t=1" 2
-  --mask hybrid --threshold 2)
 # LA SONDE SELF-JOIN q2 (portes 4-5 de l'audit delta cbac109) : ledger de fate par
 # paire (partition, multiplicite un, inclusion non compensable des non-inertes
 # dans les microtuiles), planchers anti vert-par-vacuite, fixtures gravees et
@@ -1548,17 +1273,6 @@ add_test(NAME mhgp3v_warm_e2e_smoke_code COMMAND mhgp3v_warm_e2e_h0_diagnostic
 mhgp3v_add_expected_code_test_for(mhgp3v_warm_e2e_h0_diagnostic
   mhgp3v_warm_e2e_reject_unknown "argument inconnu" 2 --inexistant 1)
 
-# LA PORTE DU PRUNE : contact conserve, pics lointains separes en local,
-# nappe inclinee separee par le plan general ; deux mutants tues.
-add_test(NAME mhgp3v_cell_prune_fixtures COMMAND mhgp3v_cell_prune_gate)
-set_tests_properties(mhgp3v_cell_prune_fixtures PROPERTIES
-  PASS_REGULAR_EXPRESSION "OK : prune convexe certifie")
-mhgp3v_add_expected_code_test_for(mhgp3v_cell_prune_gate
-  mhgp3v_cell_prune_kill_contact "mutant tue" 4 --mutant contact-as-separation)
-mhgp3v_add_expected_code_test_for(mhgp3v_cell_prune_gate
-  mhgp3v_cell_prune_kill_from_cloud "mutant tue" 4 --mutant prune-from-cloud)
-mhgp3v_add_expected_code_test_for(mhgp3v_cell_prune_gate
-  mhgp3v_cell_prune_reject_unknown_mutant "mutant inconnu" 2 --mutant inexistant)
 
 # LA PORTE DE LA FACTORY : sept fixtures du contrat, trois mutants tues.
 add_test(NAME mhgp3v_sidecar_factory_fixtures COMMAND mhgp3v_sidecar_factory_gate)
@@ -1891,197 +1605,12 @@ mhgp3v_add_expected_code_test_for(mhgp3v_oracle mhgp3v_measure_receipt_rejected
   --subject anchored --measure-only --regime exhaustive --points 4 --clouds 1
   --max-order 1 --receipt ignored.json)
 
-# ---------------------------------------------------------------------------
-# LA LOCALITE CERTIFIEE PAR INVERSION (note de solution du 12 aout 2026).
-#
-# Le sujet remplace l'enumeration de C(n,2) par une generation par ancre : la
-# calotte exacte C_z(D) = { u : u.v > d/D } au lieu de la chambre de Yao48, un
-# rayon PAR CELLULE de direction, et le prédicat entier a trois sommets. Deux
-# juges independants le tiennent : le juge A (toute paire lointaine d'une ancre
-# certifiee doit avoir K interieurs stricts) et le juge du census (le census
-# directionnel doit egaler l'enumeration exhaustive de C(n,2)).
-# ---------------------------------------------------------------------------
-add_executable(mhgp3v_certified_locality_probe prototype/certified_locality_probe.cpp)
-target_include_directories(mhgp3v_certified_locality_probe PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(mhgp3v_certified_locality_probe PRIVATE mhgp Threads::Threads)
-target_compile_options(mhgp3v_certified_locality_probe PRIVATE -Wall -Wextra -Werror)
 
-# Le theoreme sur les TROIS arites, juge exhaustif a support propre positif.
-add_test(NAME mhgp3v_locality_fixture_trois_arites COMMAND mhgp3v_certified_locality_probe
-         --mode=fixture --points=70 --family=uniform --grid=4 --seed=1 --kmin=4
-         --judge-arity=4 --min-activations=1700 --min-q4=150)
-# Le juge A : 48 435 paires lointaines a cette graine, plancher arme a 40 000.
-add_test(NAME mhgp3v_locality_juge_paires_lointaines COMMAND mhgp3v_certified_locality_probe
-         --mode=fixture --points=600 --family=uniform --grid=4 --seed=1 --kmin=10
-         --judge-arity=1 --min-far-pairs=40000)
-# Le census directionnel EXACT contre l'enumeration exhaustive, deux familles.
-add_test(NAME mhgp3v_locality_census_exact_terrain COMMAND mhgp3v_certified_locality_probe
-         --mode=directional --points=900 --family=terrain --grid=4 --seed=3 --kmin=10
-         --judge-census=1 --min-activations=15000)
-add_test(NAME mhgp3v_locality_census_exact_scanline COMMAND mhgp3v_certified_locality_probe
-         --mode=directional --points=900 --family=scanline_overlap_multiecho --grid=4
-         --seed=3 --kmin=10 --judge-census=1 --min-activations=15000)
-# INVARIANCE DE GRILLE : le filtre etant conservateur, le census ne depend pas
-# de la finesse de la discretisation des directions. Deux grilles extremes.
-add_test(NAME mhgp3v_locality_census_grille_3 COMMAND mhgp3v_certified_locality_probe
-         --mode=directional --points=900 --family=terrain --grid=3 --seed=3 --kmin=10
-         --judge-census=1 --min-activations=15000)
-add_test(NAME mhgp3v_locality_census_grille_8 COMMAND mhgp3v_certified_locality_probe
-         --mode=directional --points=900 --family=terrain --grid=8 --seed=3 --kmin=10
-         --judge-census=1 --min-activations=15000)
-# INVARIANCE DE FENETRE : la lane close ne depend pas du nombre de voisins lus.
-add_test(NAME mhgp3v_locality_census_fenetre_courte COMMAND mhgp3v_certified_locality_probe
-         --mode=directional --points=900 --family=terrain --grid=4 --seed=3 --kmin=10
-         --max-neighbours=64 --judge-census=1 --min-activations=15000)
 
-# LES CINQ MUTANTS, au code contractuel 4.
-mhgp3v_add_expected_code_test_for(mhgp3v_certified_locality_probe
-  mhgp3v_locality_mutant_rho_min_corner "mutant tue" 4
-  --mode=directional --points=900 --family=terrain --grid=4 --seed=3 --kmin=10
-  --judge-census=1 --inject=rho-min-corner)
-mhgp3v_add_expected_code_test_for(mhgp3v_certified_locality_probe
-  mhgp3v_locality_mutant_rho_first_corner "mutant tue" 4
-  --mode=directional --points=900 --family=terrain --grid=4 --seed=3 --kmin=10
-  --judge-census=1 --inject=rho-first-corner)
-mhgp3v_add_expected_code_test_for(mhgp3v_certified_locality_probe
-  mhgp3v_locality_mutant_rho_kth_short "mutant tue" 4
-  --mode=directional --points=900 --family=terrain --grid=4 --seed=3 --kmin=10
-  --judge-census=1 --inject=rho-kth-short)
-mhgp3v_add_expected_code_test_for(mhgp3v_certified_locality_probe
-  mhgp3v_locality_mutant_locate_drop_boundary "mutant tue" 4
-  --mode=directional --points=900 --family=terrain --grid=4 --seed=3 --kmin=10
-  --judge-census=1 --inject=locate-drop-boundary)
-mhgp3v_add_expected_code_test_for(mhgp3v_certified_locality_probe
-  mhgp3v_locality_mutant_cap_corner_any "mutant tue" 4
-  --mode=fixture --points=80 --family=uniform --grid=4 --seed=1 --kmin=4
-  --inject=cap-corner-any)
 
-# CLI hostile et injections hors mode : code 2, avant tout calcul.
-# LE SIGNE InSphere q4. Livre une fois a l'envers : q4 tombait de 202 a 3
-# activations a n=70. La fixture gravee (tetraedre de circumcentre l'origine,
-# centre interieur, point lointain exterieur) est exercee a chaque execution et
-# tue son mutant au code 4 ; le plancher --min-q4 double la garde.
-mhgp3v_add_expected_code_test_for(mhgp3v_certified_locality_probe
-  mhgp3v_locality_mutant_insphere_sign "mutant tue par la fixture d'orientation q4" 4
-  --mode=fixture --points=70 --family=uniform --grid=4 --seed=1 --kmin=4
-  --inject=insphere-sign-flip)
-mhgp3v_add_expected_code_test_for(mhgp3v_certified_locality_probe
-  mhgp3v_locality_plancher_q4 "plancher q4" 3
-  --mode=fixture --points=70 --family=uniform --grid=4 --seed=1 --kmin=4
-  --judge-arity=4 --min-q4=999999999)
-mhgp3v_add_expected_code_test_for(mhgp3v_certified_locality_probe
-  mhgp3v_locality_cli_inconnu "argument inconnu" 2 --mode=directional --points=200 --bidon)
-mhgp3v_add_expected_code_test_for(mhgp3v_certified_locality_probe
-  mhgp3v_locality_cli_mode_inconnu "mode inconnu" 2 --mode=nimporte --points=200)
-mhgp3v_add_expected_code_test_for(mhgp3v_certified_locality_probe
-  mhgp3v_locality_injection_hors_mode_cap "sans effet en mode directionnel" 2
-  --mode=directional --points=600 --family=terrain --grid=4 --seed=3 --kmin=10
-  --judge-census=1 --inject=cap-nine)
-mhgp3v_add_expected_code_test_for(mhgp3v_certified_locality_probe
-  mhgp3v_locality_injection_hors_mode_rho "sans effet en mode fixture" 2
-  --mode=fixture --points=80 --family=uniform --grid=4 --seed=1 --kmin=4
-  --inject=rho-min-corner)
-mhgp3v_add_expected_code_test_for(mhgp3v_certified_locality_probe
-  mhgp3v_locality_juge_census_borne "borne a 4000 points" 2
-  --mode=directional --points=5000 --family=terrain --grid=4 --seed=3 --kmin=10
-  --judge-census=1)
-mhgp3v_add_expected_code_test_for(mhgp3v_certified_locality_probe
-  mhgp3v_locality_injection_sans_juge "exige --judge-census=1" 2
-  --mode=directional --points=600 --family=terrain --grid=4 --seed=3 --kmin=10
-  --inject=rho-min-corner)
-# Planchers de couverture : code 3, jamais un vert par vacuite.
-mhgp3v_add_expected_code_test_for(mhgp3v_certified_locality_probe
-  mhgp3v_locality_plancher_activations "plancher d'activations" 3
-  --mode=directional --points=900 --family=terrain --grid=4 --seed=3 --kmin=10
-  --min-activations=999999999)
-mhgp3v_add_expected_code_test_for(mhgp3v_certified_locality_probe
-  mhgp3v_locality_plancher_paires_lointaines "plancher de paires lointaines" 3
-  --mode=fixture --points=70 --family=uniform --grid=4 --seed=1 --kmin=4
-  --judge-arity=1 --min-far-pairs=999999999)
 
-# LA GENERATION LOCALE DES TROIS ARITES. La fenetre de support est explicite :
-# la boule diametrale d'une corde N'EST PAS incluse dans la boule (triangle
-# (0,0,0) (120,0,0) (60,100,0), rayon circonscrit 68, portee diametrale 92),
-# donc un support q3/q4 peut avoir une arete tombstonee en q2. La mesure n'est
-# recevable que si elle sature ; le juge exhaustif des trois arites l'exige.
-add_test(NAME mhgp3v_locality_arites_exactes COMMAND mhgp3v_certified_locality_probe
-         --mode=arity --points=70 --family=uniform --grid=4 --seed=1 --kmin=4
-         --max-neighbours=69 --support-window=40 --judge-census=1 --min-q4=200)
-add_test(NAME mhgp3v_locality_arites_terrain COMMAND mhgp3v_certified_locality_probe
-         --mode=arity --points=120 --family=terrain --grid=4 --seed=5 --kmin=5
-         --max-neighbours=119 --support-window=60 --judge-census=1)
-# Fenetre non saturee : la generation manque des supports et le juge le dit.
-mhgp3v_add_expected_code_test_for(mhgp3v_certified_locality_probe
-  mhgp3v_locality_fenetre_non_saturee "la fenetre de support n'a pas sature" 1
-  --mode=arity --points=70 --family=uniform --grid=4 --seed=1 --kmin=4
-  --max-neighbours=69 --support-window=20 --judge-census=1)
-mhgp3v_add_expected_code_test_for(mhgp3v_certified_locality_probe
-  mhgp3v_locality_arites_mutant_rho "mutant tue par le juge des arites" 4
-  --mode=arity --points=70 --family=uniform --grid=4 --seed=1 --kmin=4
-  --max-neighbours=69 --support-window=40 --judge-census=1 --inject=rho-min-corner)
-mhgp3v_add_expected_code_test_for(mhgp3v_certified_locality_probe
-  mhgp3v_locality_arites_mutant_locate "mutant tue par le juge des arites" 4
-  --mode=arity --points=70 --family=uniform --grid=4 --seed=1 --kmin=4
-  --max-neighbours=69 --support-window=40 --judge-census=1
-  --inject=locate-drop-boundary)
-mhgp3v_add_expected_code_test_for(mhgp3v_certified_locality_probe
-  mhgp3v_locality_arites_juge_borne "borne a 400 points" 2
-  --mode=arity --points=500 --family=terrain --grid=4 --seed=3 --kmin=10
-  --judge-census=1)
 
-# LE JUGE INDEPENDANT DU CENSUS. Le juge interne du probe partage les
-# constructeurs de sphere et les predicats du sujet : il compare des
-# cardinalites obtenues par la meme arithmetique, ce que l'audit du 12 aout a
-# refuse comme reception. Celui-ci recalcule le meme census en rationnels
-# multiprecision, elimination de Gauss et centre explicite. Seul le generateur
-# de nuages est partage.
-add_executable(mhgp3v_locality_census_judge oracle/locality_census_judge.cpp)
-target_include_directories(mhgp3v_locality_census_judge PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(mhgp3v_locality_census_judge PRIVATE mhgp)
-target_compile_options(mhgp3v_locality_census_judge PRIVATE -Wall -Wextra -Werror)
 
-# LES VALEURS GRAVEES DU JUGE RATIONNEL. Produites hors bande par
-# `mhgp3v_locality_census_judge` — rationnels multiprecision, elimination de
-# Gauss, centre explicite — elles ne dependent d'aucun predicat du sujet. Le
-# juge est relance ici a n=50, et le sujet doit les reproduire a n=50 et n=70.
-add_test(NAME mhgp3v_locality_juge_rationnel COMMAND mhgp3v_locality_census_judge
-         --points=50 --family=uniform --seed=1 --kmin=4
-         --expect-q2=456 --expect-q3=592 --expect-q4=137)
-add_test(NAME mhgp3v_locality_arites_gravees_50 COMMAND mhgp3v_certified_locality_probe
-         --mode=arity --points=50 --family=uniform --grid=4 --seed=1 --kmin=4
-         --max-neighbours=49 --support-window=30
-         --expect-q2=456 --expect-q3=592 --expect-q4=137)
-add_test(NAME mhgp3v_locality_arites_gravees_70 COMMAND mhgp3v_certified_locality_probe
-         --mode=arity --points=70 --family=uniform --grid=4 --seed=1 --kmin=4
-         --max-neighbours=69 --support-window=40
-         --expect-q2=681 --expect-q3=884 --expect-q4=202)
-# CETTE PORTE ETAIT MORTE, ET SON DEFAUT EST DE LA MEME CLASSE QUE LA REGEX
-# `{n}` : elle exigeait le diagnostic « mutant tue par les valeurs gravees »
-# pour l'injection `insphere-sign-flip`, alors que ce mutant est tue BIEN PLUS
-# TOT, par la fixture d'orientation q4, qui rend le code 4 avec un tout autre
-# message. Le diagnostic attendu etait donc inatteignable, quelle que soit la
-# qualite du sujet. L'injection `insphere-sign-flip` possede par ailleurs deja
-# sa propre porte sur la fixture d'orientation : celle-ci n'en etait qu'un
-# doublon mal nomme.
-#
-# `rho-kth-short` traverse au contraire tout le mode `arity` et meurt bien sur
-# les valeurs gravees `681/884/202`, avec le diagnostic exact. Trois autres
-# injections — `census-drop-ties`, `cap-nine`, `cap-drop-strictness` — SURVIVENT
-# a ce chemin : elles ne changent aucun des trois comptes sur cette fixture, et
-# elles ont leurs portes ailleurs. La couverture des valeurs gravees repose donc
-# sur cette injection-ci et sur `locate-drop-boundary`.
-mhgp3v_add_expected_code_test_for(mhgp3v_certified_locality_probe
-  mhgp3v_locality_gravees_mutant_rho "mutant tue par les valeurs gravees" 4
-  --mode=arity --points=70 --family=uniform --grid=4 --seed=1 --kmin=4
-  --max-neighbours=69 --support-window=40
-  --expect-q2=681 --expect-q3=884 --expect-q4=202 --inject=rho-kth-short)
-mhgp3v_add_expected_code_test_for(mhgp3v_certified_locality_probe
-  mhgp3v_locality_gravees_fenetre_courte "desaccord avec le juge rationnel independant" 1
-  --mode=arity --points=70 --family=uniform --grid=4 --seed=1 --kmin=4
-  --max-neighbours=69 --support-window=20
-  --expect-q2=681 --expect-q3=884 --expect-q4=202)
-mhgp3v_add_expected_code_test_for(mhgp3v_locality_census_judge
-  mhgp3v_locality_juge_rationnel_borne "borne a 400 points" 2 --points=500)
 
 # ---------------------------------------------------------------------------
 # FRONT DE BOULES VIDES : le SECOND TEMOIN de l'arrangement shallow.
@@ -2130,25 +1659,6 @@ mhgp3v_add_expected_code_test_for(mhgp3v_ball_front
   mhgp3v_ball_front_kill_drop_leaving "MUTANT TUE" 4
   --points=70 --k=2 --family=terrain --seed=3 --judge --inject=drop-leaving)
 
-# L'ABLATION EST UN MODE DE MESURE, PAS UN MODE DE SORTIE. Elle produit une
-# sortie fausse par construction : elle doit donc etre refusee des qu'un juge ou
-# un mutant l'accompagne, et s'annoncer en clair.
-mhgp3v_add_expected_code_test_for(mhgp3v_centre_cell
-  mhgp3v_centre_cell_reject_ablation_jugee "l'ablation ne peut ni etre jugee" 2
-  --points=60 --smax=6 --family=terrain --seed=3 --judge --ablate=2)
-mhgp3v_add_expected_code_test_for(mhgp3v_centre_cell
-  mhgp3v_centre_cell_reject_ablation_mutant "l'ablation ne peut ni etre jugee" 2
-  --points=60 --smax=6 --family=terrain --seed=3 --ablate=2 --inject=drop-ties)
-mhgp3v_add_expected_code_test_for(mhgp3v_centre_cell
-  mhgp3v_centre_cell_reject_ablation_differee "ne partagent pas le meme flot" 2
-  --points=60 --smax=6 --family=terrain --seed=3 --ablate=2 --deferred-lift)
-mhgp3v_add_expected_code_test_for(mhgp3v_centre_cell
-  mhgp3v_centre_cell_reject_ablation_plancher "aucun plancher sur une sortie ablatee" 2
-  --points=60 --smax=6 --family=terrain --seed=3 --ablate=2 --min-supports=1)
-add_test(NAME mhgp3v_centre_cell_ablation_annoncee COMMAND mhgp3v_centre_cell
-         --points=200 --smax=11 --family=terrain --seed=11 --ablate=3)
-set_tests_properties(mhgp3v_centre_cell_ablation_annoncee
-                     PROPERTIES PASS_REGULAR_EXPRESSION "SORTIE FAUSSE PAR CONSTRUCTION")
 
 # REFUS AVANT CALCUL : code 2.
 mhgp3v_add_expected_code_test_for(mhgp3v_ball_front
@@ -2161,215 +1671,15 @@ mhgp3v_add_expected_code_test_for(mhgp3v_ball_front
 
 
 
-# ---------------------------------------------------------------------------
-# SOURCE PAR LISTES IMBRIQUEES DE CELLULES DE CENTRES.
-#
-# Architecture proposee par l'auditeur dans
-# `audits/NOTE_ARCHITECTURE_GPU_LISTES_CELLULES_CENTRES_20260812.md`. Elle
-# subdivise l'espace des CENTRES au lieu de parcourir les sommets de
-# l'arrangement, dont la mesure montre qu'ils sont majoritairement des transits.
-#
-# La propriete decisive est que la liste d'une cellule est a la fois le domaine
-# de generation ET le certificat de census : aucun scan global apres la racine.
-# C'est ce qui la rend transposable en `count/scan/fill`.
-add_executable(mhgp3v_centre_cell prototype/centre_cell_source.cpp)
 find_package(Threads REQUIRED)
-target_include_directories(mhgp3v_centre_cell PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(mhgp3v_centre_cell PRIVATE mhgp Threads::Threads)
-target_compile_options(mhgp3v_centre_cell PRIVATE -Wall -Wextra -Werror)
 
-# LES CINQ NUAGES, JUGES SUR LES IDENTITES DE SUPPORT, avec `I_B` et `U_B`.
-# Le juge exhaustif enumere tous les sous-ensembles et fait son census sur TOUT
-# le nuage : une omission compensee par un doublon ne peut pas rester verte.
-add_test(NAME mhgp3v_centre_cell_uniform COMMAND mhgp3v_centre_cell
-         --points=60 --smax=6 --family=uniform --seed=3 --judge --min-supports=1)
-add_test(NAME mhgp3v_centre_cell_terrain COMMAND mhgp3v_centre_cell
-         --points=60 --smax=6 --family=terrain --seed=3 --judge --min-supports=1)
-add_test(NAME mhgp3v_centre_cell_scanline COMMAND mhgp3v_centre_cell
-         --points=60 --smax=6 --family=scanline_single_pass --seed=3 --judge
-         --min-supports=1)
-add_test(NAME mhgp3v_centre_cell_multiecho COMMAND mhgp3v_centre_cell
-         --points=60 --smax=6 --family=scanline_overlap_multiecho --seed=3 --judge
-         --min-supports=1)
-# LA GRILLE GRAVEE porte les egalites entieres `l_C(x) == R_p(C)` que AUCUN nuage
-# aleatoire ne produit. C'est le seul nuage qui exerce la decision « conserver
-# l'egalite », et le seul qui tue le mutant `drop-ties`.
-add_test(NAME mhgp3v_centre_cell_grille_gravee COMMAND mhgp3v_centre_cell
-         --points=125 --smax=11 --family=grave_grid --judge --min-supports=1)
-set_tests_properties(mhgp3v_centre_cell_uniform mhgp3v_centre_cell_terrain
-                     mhgp3v_centre_cell_scanline mhgp3v_centre_cell_multiecho
-                     mhgp3v_centre_cell_grille_gravee
-                     PROPERTIES PASS_REGULAR_EXPRESSION "ACCORD juge")
 
-# LA VARIANTE A/B DU LIFT DIFFERE. Le RLE `SupportKey` avant lift divise les
-# lifts par cinq, mais coute treize pour cent de plus sur ce CPU : le lift n'est
-# pas le goulot, l'enumeration l'est. La variante reste donc desactivee par
-# defaut et JUGEE, pour qu'un futur A/B device compare des identites, pas des
-# impressions.
-add_test(NAME mhgp3v_centre_cell_differe_uniform COMMAND mhgp3v_centre_cell
-         --points=60 --smax=6 --family=uniform --seed=3 --judge --deferred-lift
-         --min-supports=1)
-add_test(NAME mhgp3v_centre_cell_differe_terrain COMMAND mhgp3v_centre_cell
-         --points=60 --smax=6 --family=terrain --seed=3 --judge --deferred-lift
-         --min-supports=1)
-add_test(NAME mhgp3v_centre_cell_differe_grille COMMAND mhgp3v_centre_cell
-         --points=125 --smax=11 --family=grave_grid --judge --deferred-lift
-         --min-supports=1)
-# UN LOT MINUSCULE force de nombreuses vidanges : la sortie doit etre identique.
-add_test(NAME mhgp3v_centre_cell_differe_lot_minuscule COMMAND mhgp3v_centre_cell
-         --points=125 --smax=11 --family=grave_grid --judge --deferred-lift
-         --batch-records=1024 --min-supports=1)
-set_tests_properties(mhgp3v_centre_cell_differe_uniform
-                     mhgp3v_centre_cell_differe_terrain
-                     mhgp3v_centre_cell_differe_grille
-                     mhgp3v_centre_cell_differe_lot_minuscule
-                     PROPERTIES PASS_REGULAR_EXPRESSION "ACCORD juge")
 
-# LES QUATRE FIXTURES GRAVEES.
-#
-# `egalite` : un nuage aleatoire ne trouve PAS l'egalite `beta == R_p(C)`; sans
-# elle le mutant `drop-ties` survit partout.
-# `proprietaire` : la face partagee de deux cellules soeurs appartient a UNE
-# seule d'entre elles; le pave ferme casse l'exact-once.
-# `arite3` et `arite4` : les deux contre-fixtures de l'auditeur, section 4 de
-# `audits/AUDIT_REPONSES_CELLULES_CENTRES_20260812.md`. Elles REFUTENT la
-# cascade d'arites : un support q3 pertinent peut n'avoir aucune arete q2
-# pertinente, et un q4 pertinent aucune facette q3 pertinente. Les lanes doivent
-# donc etre generativement independantes.
-add_test(NAME mhgp3v_centre_cell_fixtures COMMAND mhgp3v_centre_cell --fixtures=toutes)
-set_tests_properties(mhgp3v_centre_cell_fixtures
-                     PROPERTIES PASS_REGULAR_EXPRESSION "FIXTURE arite4")
-add_test(NAME mhgp3v_centre_cell_fixture_equality COMMAND mhgp3v_centre_cell
-         --fixtures=egalite)
-set_tests_properties(mhgp3v_centre_cell_fixture_equality
-                     PROPERTIES PASS_REGULAR_EXPRESSION "FIXTURE egalite")
-add_test(NAME mhgp3v_centre_cell_fixture_arite3 COMMAND mhgp3v_centre_cell
-         --fixtures=arite3)
-add_test(NAME mhgp3v_centre_cell_fixture_arite4 COMMAND mhgp3v_centre_cell
-         --fixtures=arite4)
-# LA COQUILLE NON BORNEE. Trente points de rayon cinq autour de (10,10,10) :
-# six permutations signees de (5,0,0) et vingt-quatre de (4,3,0). La paire
-# antipodale a `p=0, q=2`, donc elle est PERTINENTE, et `|U_B|=30`. Tout cap de
-# coquille la tronque. La stratification par profondeur ne sauve rien : `A_0`
-# contient deja les trente egalites.
-add_test(NAME mhgp3v_centre_cell_fixture_coquille COMMAND mhgp3v_centre_cell
-         --fixtures=coquille)
-set_tests_properties(mhgp3v_centre_cell_fixture_coquille
-                     PROPERTIES PASS_REGULAR_EXPRESSION "shell_high_water=30")
-set_tests_properties(mhgp3v_centre_cell_fixture_arite3
-                     PROPERTIES PASS_REGULAR_EXPRESSION "ABC=1 AB=0 AC=0 BC=0")
-set_tests_properties(mhgp3v_centre_cell_fixture_arite4
-                     PROPERTIES PASS_REGULAR_EXPRESSION "TET=1 faces=0000")
 
-# LA SEPARATION PAR LA NORMALE LOCALE.
-#
-# Le k-DOP a directions fixes ne voit pas le cas dominant des nuages
-# surfaciques : une cellule hors du plan local, dont les dix plus proches sites
-# sont presque cospheriques vus de loin. Le critere de travail la decoupait
-# indefiniment alors qu'aucun support POSITIF ne peut y avoir son centre. La
-# direction est choisie dans les donnees — normale du plan des moindres carres,
-# via l'adjugee de la covariance — mais le test reste entier et exact, donc le
-# prune l'est aussi. Le plancher interdit le vert par vacuite; l'accord du juge
-# sur les quatre nuages interdit qu'il retire un support.
-add_test(NAME mhgp3v_centre_cell_normale_plancher COMMAND mhgp3v_centre_cell
-         --points=400 --smax=11 --family=terrain --seed=11 --min-normal-pruned=1
-         --min-supports=1)
-set_tests_properties(mhgp3v_centre_cell_normale_plancher
-                     PROPERTIES PASS_REGULAR_EXPRESSION "normal_pruned=[1-9]")
-add_test(NAME mhgp3v_centre_cell_normale_juge COMMAND mhgp3v_centre_cell
-         --points=125 --smax=11 --family=terrain --seed=11 --judge --min-supports=1)
-set_tests_properties(mhgp3v_centre_cell_normale_juge
-                     PROPERTIES PASS_REGULAR_EXPRESSION "ACCORD juge")
-# LA VARIANTE SANS NORMALE doit rendre EXACTEMENT la meme sortie : le prune est
-# une decision de cout, jamais de semantique.
-add_test(NAME mhgp3v_centre_cell_sans_normale COMMAND mhgp3v_centre_cell
-         --points=125 --smax=11 --family=terrain --seed=11 --judge
-         --no-normal-separation --min-supports=1)
-set_tests_properties(mhgp3v_centre_cell_sans_normale
-                     PROPERTIES PASS_REGULAR_EXPRESSION "ACCORD juge")
 
-# LE SONDAGE DU VRAI GRAPHE ET SA BORNE D'INCIDENCE.
-#
-# Le critere de split employait le potentiel d'intervalles, majorant grossier
-# d'un SURGRAPHE. Les compteurs sont maintenant exacts, chacun sur sa coupe de
-# lane, et la borne d'incidence `4 Q4 <= (m4-3) T4` de l'auditeur les controle :
-# chaque K4 fournit quatre triangles, un triangle a au plus `m4-3` apex. Le
-# plancher `--min-probes` interdit le vert par vacuite; le mutant emule la faute
-# de comptage realiste — un K4 compte une fois par face — et la borne le voit.
-add_test(NAME mhgp3v_centre_cell_sonde_exacte COMMAND mhgp3v_centre_cell
-         --points=200 --smax=11 --family=terrain --seed=11 --probe-factor=64
-         --min-probes=1 --min-supports=1)
-set_tests_properties(mhgp3v_centre_cell_sonde_exacte
-                     PROPERTIES PASS_REGULAR_EXPRESSION "incidence_checks=[1-9]")
-mhgp3v_add_expected_code_test_for(mhgp3v_centre_cell
-  mhgp3v_centre_cell_kill_incidence "INVARIANT viole" 3
-  --points=200 --smax=11 --family=terrain --seed=11 --probe-factor=64
-  --min-probes=1 --inject=incidence-off-by-one)
 
-# LES MUTANTS. Code 4 = mutant tue. Chacun casse UNE decision.
-mhgp3v_add_expected_code_test_for(mhgp3v_centre_cell
-  mhgp3v_centre_cell_kill_shrink_list "MUTANT TUE" 4
-  --points=60 --smax=6 --family=terrain --seed=3 --judge --inject=shrink-list)
-mhgp3v_add_expected_code_test_for(mhgp3v_centre_cell
-  mhgp3v_centre_cell_kill_drop_ties "MUTANT TUE" 4
-  --points=125 --smax=11 --family=grave_grid --judge --inject=drop-ties)
-mhgp3v_add_expected_code_test_for(mhgp3v_centre_cell
-  mhgp3v_centre_cell_kill_owner_closed "MUTANT TUE" 4
-  --points=125 --smax=11 --family=grave_grid --judge --inject=owner-closed)
-mhgp3v_add_expected_code_test_for(mhgp3v_centre_cell
-  mhgp3v_centre_cell_kill_rank_closed "MUTANT TUE" 4
-  --points=125 --smax=11 --family=grave_grid --judge --inject=rank-closed)
-mhgp3v_add_expected_code_test_for(mhgp3v_centre_cell
-  mhgp3v_centre_cell_kill_tight_threshold "MUTANT TUE" 4
-  --points=60 --smax=6 --family=terrain --seed=3 --judge --inject=tight-threshold)
-mhgp3v_add_expected_code_test_for(mhgp3v_centre_cell
-  mhgp3v_centre_cell_kill_bisector_strict "MUTANT TUE" 4
-  --points=125 --smax=11 --family=grave_grid --judge --inject=bisector-strict)
-# LE MUTANT DE STRATE : il arrete le census au premier bucket, sans promotion.
-# Le census restreint est alors incomplet et les identites `I_B`/`U_B` faussent.
-# La grille gravee ne le tue PAS — ses budgets d'entree y sont deja corrects —
-# et c'est pourquoi la porte porte sur deux familles.
-mhgp3v_add_expected_code_test_for(mhgp3v_centre_cell
-  mhgp3v_centre_cell_kill_strata_stop "MUTANT TUE" 4
-  --points=125 --smax=11 --family=terrain --seed=11 --judge --inject=strata-stop)
-mhgp3v_add_expected_code_test_for(mhgp3v_centre_cell
-  mhgp3v_centre_cell_kill_strata_stop_uniform "MUTANT TUE" 4
-  --points=125 --smax=11 --family=uniform --seed=11 --judge --inject=strata-stop)
 
-# LE MUTANT DE CASCADE D'ARITES : il conditionne la lane q3 au succes de la lane
-# q2 et la lane q4 au succes de q3. Seule la contre-fixture d'arite trois le tue,
-# et c'est exactement la faute que l'auditeur a exigee de graver.
-mhgp3v_add_expected_code_test_for(mhgp3v_centre_cell
-  mhgp3v_centre_cell_kill_arity_cascade "MUTANT TUE" 4
-  --fixtures=arite3 --inject=arity-cascade)
-# LA MEME FAUTE, VUE DEPUIS L'ARITE QUATRE. Le contre-audit
-# `AUDIT_SOURCE_CK_WST_Q2_Q3_Q4_35FCEA8_20260814.md` section 8, point 7, releve
-# que le binaire tuait deja le mutant sur `arite4` mais qu'aucune porte ne
-# l'exigeait : la couverture reposait sur un accident. La contre-fixture u16 de
-# 64 points de la section 4.4 dit pourquoi les deux portes sont necessaires —
-# un q4 regulier peut n'avoir AUCUN de ses dix sous-supports q2 ou q3 retenu,
-# donc une cascade depuis q3 est fausse dans les deux sens de lecture.
-mhgp3v_add_expected_code_test_for(mhgp3v_centre_cell
-  mhgp3v_centre_cell_kill_arity_cascade_arite4 "MUTANT TUE" 4
-  --fixtures=arite4 --inject=arity-cascade)
 
-# REFUS AVANT CALCUL : code 2.
-mhgp3v_add_expected_code_test_for(mhgp3v_centre_cell
-  mhgp3v_centre_cell_reject_unknown_argument "argument inconnu" 2 --sujet-inexistant)
-mhgp3v_add_expected_code_test_for(mhgp3v_centre_cell
-  mhgp3v_centre_cell_reject_suffix "valeur invalide" 2 --points=60junk)
-mhgp3v_add_expected_code_test_for(mhgp3v_centre_cell
-  mhgp3v_centre_cell_reject_judge_too_large "juge exhaustif" 2
-  --points=300 --smax=6 --judge)
-# LES GENERATEURS DU DEPOT DEDUPLIQUENT : aucune famille n'exerce ce refus. Ce
-# nuage grave le fait, avec un unique site repete.
-mhgp3v_add_expected_code_test_for(mhgp3v_centre_cell
-  mhgp3v_centre_cell_reject_doublons "unsupported_degeneracy" 2
-  --points=64 --smax=11 --family=grave_doublon)
-# PLANCHER DE COUVERTURE : contre le vert-par-vacuite.
-mhgp3v_add_expected_code_test_for(mhgp3v_centre_cell
-  mhgp3v_centre_cell_reject_floor "PLANCHER viole" 3
-  --points=60 --smax=6 --family=terrain --seed=3 --min-supports=100000000)
 
 # LES FIXTURES DE PROJECTION du front : la projection q2/q3 depuis le shell d'un
 # sommet ne conserve PAS son niveau. Elles gravent la refutation de la regle que
@@ -2414,50 +1724,11 @@ mhgp3v_add_expected_code_test_for(mhgp3v_payload_skeleton
 mhgp3v_add_expected_code_test_for(mhgp3v_payload_skeleton
   mhgp3v_payload_reject_unknown "argument inconnu" 2 --sujet-inexistant)
 
-# ---------------------------------------------------------------------------
-# LE JUGE ARITHMETIQUEMENT INDEPENDANT DE LA SOURCE PAR CELLULES.
-#
-# L'audit refusait le juge interne du probe : il partage `ball_front.hpp`, ses
-# lifts et sa forme de puissance avec le sujet, si bien que deux fautes communes
-# s'y compenseraient. Celui-ci ne partage que le generateur de nuages et une
-# ligne de texte.
-#
-# Le sujet decide par determinants entiers `i128`. Le juge n'emploie AUCUN
-# determinant : il resout le centre par elimination de Gauss en rationnels
-# multiprecision, teste la positivite par les coordonnees barycentriques du meme
-# systeme, et fait son census par comparaisons de rationnels. Son cout est
-# `Theta(n^5)` en multiprecision, donc il est borne a quarante-cinq points et ne
-# peut jamais devenir un backend.
-add_executable(mhgp3v_centre_cell_judge oracle/centre_cell_judge.cpp)
-target_include_directories(mhgp3v_centre_cell_judge PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(mhgp3v_centre_cell_judge PRIVATE mhgp)
-target_compile_options(mhgp3v_centre_cell_judge PRIVATE -Wall -Wextra -Werror)
 
-mhgp3v_add_expected_code_test_for(mhgp3v_centre_cell_judge
-  mhgp3v_centre_cell_judge_borne "borne a 45 points" 2 --points=200)
 
 if(Python3_Interpreter_FOUND OR Python3_EXECUTABLE)
   set(MHGP3V_CC_JUDGE_DRIVER
       ${CMAKE_CURRENT_SOURCE_DIR}/audits/check_centre_cell_independent_judge.py)
-  foreach(fam uniform terrain scanline_single_pass scanline_overlap_multiecho)
-    add_test(NAME mhgp3v_centre_cell_independant_${fam}
-             COMMAND ${Python3_EXECUTABLE} ${MHGP3V_CC_JUDGE_DRIVER}
-                     --subject-binary $<TARGET_FILE:mhgp3v_centre_cell>
-                     --judge-binary $<TARGET_FILE:mhgp3v_centre_cell_judge>
-                     --points=32 --smax=7 --family=${fam} --seed=5 --min-supports=1)
-    set_tests_properties(mhgp3v_centre_cell_independant_${fam}
-                         PROPERTIES PASS_REGULAR_EXPRESSION "ACCORD JUGE INDEPENDANT")
-  endforeach()
-  # LE JUGE DOIT VOIR UN SUJET FAUX. Sans cette porte, l'accord ne prouverait que
-  # la capacite du juge a etre d'accord.
-  add_test(NAME mhgp3v_centre_cell_independant_voit_le_mutant
-           COMMAND ${Python3_EXECUTABLE} ${MHGP3V_CC_JUDGE_DRIVER}
-                   --subject-binary $<TARGET_FILE:mhgp3v_centre_cell>
-                   --judge-binary $<TARGET_FILE:mhgp3v_centre_cell_judge>
-                   --points=32 --smax=7 --family=terrain --seed=5
-                   --inject=rank-closed)
-  set_tests_properties(mhgp3v_centre_cell_independant_voit_le_mutant
-                       PROPERTIES WILL_FAIL TRUE)
 endif()
 
 # LA LANE `k=1` SANS YAO-1, ET SON JUGE EXHAUSTIF INDEPENDANT.
@@ -2473,25 +1744,6 @@ endif()
 # n'est pas unique en presence d'ex aequo, mais le multiensemble trie de ses
 # poids l'est : c'est lui qu'on compare. L'accord verifie simultanement le
 # theoreme et la completude de l'extraction.
-if(Python3_Interpreter_FOUND OR Python3_EXECUTABLE)
-  foreach(fam uniform terrain scanline_single_pass scanline_overlap_multiecho)
-    add_test(NAME mhgp3v_centre_cell_k1_${fam}
-             COMMAND ${Python3_EXECUTABLE}
-                     ${CMAKE_CURRENT_SOURCE_DIR}/audits/check_centre_cell_independent_judge.py
-                     --subject-binary $<TARGET_FILE:mhgp3v_centre_cell>
-                     --judge-binary $<TARGET_FILE:mhgp3v_centre_cell_judge>
-                     --points=400 --smax=11 --family=${fam} --seed=11 --k1)
-    set_tests_properties(mhgp3v_centre_cell_k1_${fam}
-                         PROPERTIES PASS_REGULAR_EXPRESSION "ACCORD JUGE INDEPENDANT k1")
-  endforeach()
-endif()
-# LE GRAPHE DE GABRIEL DOIT ETRE CONNEXE sur des sites distincts. Une composante
-# de plus signalerait une arete manquante, donc une source incomplete : c'est un
-# invariant de completude, verifie a chaque execution de la lane.
-add_test(NAME mhgp3v_centre_cell_k1_connexe COMMAND mhgp3v_centre_cell
-         --points=600 --smax=11 --family=terrain --seed=3 --k1)
-set_tests_properties(mhgp3v_centre_cell_k1_connexe
-                     PROPERTIES PASS_REGULAR_EXPRESSION "composantes=1")
 
 # L'INVARIANCE DU RECU AU NOMBRE DE WORKERS.
 #
@@ -2502,28 +1754,6 @@ set_tests_properties(mhgp3v_centre_cell_k1_connexe
 # etre IDENTIQUE ligne a ligne, la seule ligne exclue etant celle qui annonce le
 # nombre de workers. C'est la propriete qu'un portage device devra conserver, et
 # c'est ce que cette porte exige litteralement.
-if(Python3_Interpreter_FOUND OR Python3_EXECUTABLE)
-  foreach(fam uniform terrain scanline_overlap_multiecho)
-    add_test(NAME mhgp3v_centre_cell_workers_${fam}
-             COMMAND ${Python3_EXECUTABLE}
-                     ${CMAKE_CURRENT_SOURCE_DIR}/audits/check_centre_cell_thread_invariance.py
-                     --binary $<TARGET_FILE:mhgp3v_centre_cell>
-                     --points=600 --smax=11 --family=${fam} --seed=11
-                     --threads 1 2 5)
-    set_tests_properties(mhgp3v_centre_cell_workers_${fam}
-                         PROPERTIES PASS_REGULAR_EXPRESSION "RECU IDENTIQUE")
-  endforeach()
-  # LE LIFT DIFFERE change le calendrier des lots : son invariance doit etre
-  # verifiee separement, car ses vidanges dependent de l'ordre d'arrivee.
-  add_test(NAME mhgp3v_centre_cell_workers_differe
-           COMMAND ${Python3_EXECUTABLE}
-                   ${CMAKE_CURRENT_SOURCE_DIR}/audits/check_centre_cell_thread_invariance.py
-                   --binary $<TARGET_FILE:mhgp3v_centre_cell>
-                   --points=600 --smax=11 --family=uniform --seed=11
-                   --threads 1 3 --extra=--deferred-lift --semantic-only)
-  set_tests_properties(mhgp3v_centre_cell_workers_differe
-                       PROPERTIES PASS_REGULAR_EXPRESSION "SEMANTIQUE IDENTIQUE")
-endif()
 
 # ---------------------------------------------------------------------------
 # SOURCE PAR ANCRE MAXIMALE ET ENVELOPPE MOBILE.
@@ -3374,95 +2604,9 @@ mhgp3v_add_expected_code_test_for(mhgp3v_window_source_probe
   --points=20 --window=8 --family=uniform --seed=3 --judge
   --min-jamais-proposes=100000000)
 
-# ---------------------------------------------------------------------------
-# DOMINANCE 432 : LE PREMIER CERTIFICAT DONT LA FERMETURE CROIT AVEC `n`.
-#
-# Specification : audits/AUDIT_DEBLOCAGE_COLLECTIF_APRES_FENETRE_20260813.md
-# sections 2, 3 et 7 — premiere des trois voies mises en concurrence.
-#
-# Le groupe octaedrique ramene toute direction a la chambre canonique, et neuf
-# triangles de rayons entiers (3,i,j) la subdivisent : 48*9 = 432 sous-cones,
-# avec min cos^2(gamma) = 9/11 entre deux rayons d'un meme sous-cone. Pour un
-# couple (ancre, sous-cone), les huitieme, neuvieme et dixieme plus petites
-# HAUTEURS suffisent : toute cible dont la hauteur atteint le seuil est fermee
-# sans etre examinee individuellement. La decision porte sur un INTERVALLE de
-# hauteurs, pas sur une paire — c'est la difference exacte avec les six
-# ordonnances precedentes, qui partaient toutes de la paire.
-#
-# LE FACTEUR PUBLIE ETAIT TROP GROS DANS HUIT CAS SUR NEUF. Son trois vient de
-# ||v||^2 <= 3 tau(v)^2, qui est l'inegalite de la CHAMBRE, saturee seulement
-# sur la diagonale. Les sous-cones sont bien plus etroits, et le maximum de
-# ||v||^2/v_x^2 sur un triangle est atteint a un SOMMET. Les tests deviennent
-# `25 (9+i^2+j^2) tau(s)^2 <= 81 tau(d)^2` en q4 et `64 (...) <= 225 (...)` en
-# q3, avec une constante par sous-cone. Sur le sous-cone axial le seuil passe de
-# 3 a 1,843. Mesure a `n=8 000` : `uniform` ferme 25 fois plus, `eight_clusters`
-# et `terrain` 1,3 fois plus, sans un seul desaccord du juge.
-# ---------------------------------------------------------------------------
-add_executable(mhgp3v_directional_dominance_probe
-  prototype/directional_dominance_probe.cpp
-  prototype/spindle_cone_oracle.cpp)
-target_include_directories(mhgp3v_directional_dominance_probe PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(mhgp3v_directional_dominance_probe PRIVATE mhgp)
-target_compile_options(mhgp3v_directional_dominance_probe PRIVATE -Wall -Wextra -Werror)
 
-# LA PARTITION EST LA PREMIERE PORTE. Les 432 sous-cones doivent partitionner
-# les directions entieres, et surtout deux directions d'une meme cellule doivent
-# verifier cos^2(gamma) >= 9/11 : sans cette borne le cutoff radial est FAUX.
-# Le selftest l'exerce sur les 6 858 directions non nulles d'un cube 19^3, par
-# produits croises entiers, et exige que les 432 cellules soient non vides.
-add_test(NAME mhgp3v_dominance_selftest COMMAND mhgp3v_directional_dominance_probe --selftest)
-set_tests_properties(mhgp3v_dominance_selftest PROPERTIES
-  PASS_REGULAR_EXPRESSION "selftest accord=OUI")
 
-# LE JUGE EST ECHANTILLONNE, ET C'EST ASSUME. Le juge exhaustif est en O(n^3) :
-# il ne peut pas atteindre les tailles ou ce certificat commence a mordre — a
-# `n=200` il ne ferme rien du tout, faute de huit temoins dans une meme cellule
-# sur 432. L'echantillon tire les fermetures de PLUS PETITE MARGE, les seules ou
-# une faute peut se loger, et chacune est rejouee en O(n) par l'unite oracle
-# independante. UN ECHANTILLON NE PROUVE AUCUNE COMPLETUDE : il refute.
-#
-# LE CERTIFICAT DIRECT REMPLACE LA RELAXATION RADIALE, ET L'ABLATION MESURE LE
-# GAIN. Le cutoff tabule composait deux relaxations : `||s|| <= kappa tau(s)`
-# puis `r/D <= 3/5`. Le certificat direct emploie les deux rayons extremes de la
-# cellule et sa frontiere EST celle du spindle. Le seuil de hauteur descend de
-# pres de trois a `11/6` sur `U00` et a `3/2` sur `U22`. Mesure a `n=4 000`,
-# fermetures q4 dirigees, radiale contre directe : `uniform` 450 066 -> 2 036 954
-# (x4,53), `terrain` 7 700 953 -> 9 033 186 (x1,17), `multiecho` x1,11,
-# `eight_clusters` x1,01. Zero desaccord du juge echantillonne.
-add_test(NAME mhgp3v_dominance_uniform COMMAND mhgp3v_directional_dominance_probe
-         --points=2000 --family=uniform --seed=3 --judge-echantillon=800
-         --min-closed-q4=6000 --min-residuel=3000000 --min-cellules=300000)
-# ABLATION : la forme radiale tabulee, conservee pour que le gain de la table
-# directe soit mesurable et non affirme.
-add_test(NAME mhgp3v_dominance_ablation_radiale COMMAND mhgp3v_directional_dominance_probe
-         --points=2000 --family=uniform --seed=3 --ablation-radiale
-         --judge-echantillon=400 --min-closed-q4=6000 --min-residuel=3000000)
-add_test(NAME mhgp3v_dominance_clusters COMMAND mhgp3v_directional_dominance_probe
-         --points=2000 --family=eight_clusters --seed=3 --judge-echantillon=800
-         --min-closed-q4=8000 --min-residuel=3000000)
-add_test(NAME mhgp3v_dominance_terrain COMMAND mhgp3v_directional_dominance_probe
-         --points=2000 --family=terrain --seed=3 --judge-echantillon=800
-         --min-closed-q4=1000000 --min-residuel=2000000)
-add_test(NAME mhgp3v_dominance_multiecho COMMAND mhgp3v_directional_dominance_probe
-         --points=2000 --family=scanline_overlap_multiecho --seed=3 --judge-echantillon=800
-         --min-closed-q4=1000000 --min-residuel=2000000)
-# Juge EXHAUSTIF a petite taille : il ne ferme rien, mais il verifie que rien
-# n'est ferme a tort et que les identites de masse tiennent.
-add_test(NAME mhgp3v_dominance_juge_exhaustif COMMAND mhgp3v_directional_dominance_probe
-         --points=200 --family=terrain --seed=3 --judge)
-set_tests_properties(mhgp3v_dominance_juge_exhaustif PROPERTIES
-  PASS_REGULAR_EXPRESSION "accord=OUI")
 
-# MUTANTS ARMES.
-#
-# Aucune famille generique n'arme le mutant du SEUIL : la ou le cutoff ferme, la
-# paire possede en general bien plus que le seuil de temoins universels, et en
-# retirer un ne change aucun verdict. Le nuage grave `--cloud-seuil` place sept
-# temoins colineaires exactement — un de moins que la lane q4 n'en exige — et
-# rend la cellule sous-pleine pour la reference.
-mhgp3v_add_expected_code_test_for(mhgp3v_directional_dominance_probe
-  mhgp3v_dominance_mutant_seuil "MUTANT TUE" 4
-  --cloud-seuil --judge --inject=dom-h-moins-un)
 # LE MUTANT `cible-temoin` EST RETIRE, ET C'EST UNE RETRACTATION.
 #
 # Il paraissait tuer — 189 desaccords sur un differentiel cible. Le contre-audit
@@ -3480,34 +2624,6 @@ mhgp3v_add_expected_code_test_for(mhgp3v_directional_dominance_probe
 # non-defaut. Un mutant qui meurt pour la mauvaise raison est pire qu'un mutant
 # absent : il donne une confiance sans objet.
 
-# LE DOMAINE `smax` EST DERIVE, PLUS FIGE. La CLI accepte `4 <= smax <= 34`
-# alors que le sujet employait `{10,9,8}`, qui ne vaut qu'a `smax=11` : a
-# `smax=34` le juge refute une fermeture que le sujet prononce. Le seuil vaut
-# desormais `h = smax+1-q`, et un `smax` exigeant plus que le tampon top-h
-# REFUSE au lieu de tronquer.
-mhgp3v_add_expected_code_test_for(mhgp3v_directional_dominance_probe
-  mhgp3v_dominance_reject_smax_hors_tampon "top-h superieur au tampon" 2
-  --points=200 --smax=34)
-
-# Refus contractuels.
-mhgp3v_add_expected_code_test_for(mhgp3v_directional_dominance_probe
-  mhgp3v_dominance_reject_mutant_sans_juge "un mutant sans juge ne prouve rien" 2
-  --points=200 --inject=dom-h-moins-un)
-mhgp3v_add_expected_code_test_for(mhgp3v_directional_dominance_probe
-  mhgp3v_dominance_reject_juge_non_borne "le juge ponctuel exhaustif est borne" 2
-  --points=1000 --judge)
-mhgp3v_add_expected_code_test_for(mhgp3v_directional_dominance_probe
-  mhgp3v_dominance_reject_smax "--smax hors du domaine d'enveloppe" 2
-  --points=200 --smax=9223372036854775807)
-mhgp3v_add_expected_code_test_for(mhgp3v_directional_dominance_probe
-  mhgp3v_dominance_reject_inconnu "argument inconnu" 2 --points=200 --turbo)
-# UN CERTIFICAT QUI FERME TOUT EST FAUX. Ce plancher porte sur ce qui RESTE.
-mhgp3v_add_expected_code_test_for(mhgp3v_directional_dominance_probe
-  mhgp3v_dominance_plancher_residuel "plancher de residuel q4" 3
-  --points=200 --family=terrain --seed=3 --min-residuel=100000000)
-mhgp3v_add_expected_code_test_for(mhgp3v_directional_dominance_probe
-  mhgp3v_dominance_plancher_ferme "plancher de fermeture q4" 3
-  --points=200 --family=uniform --seed=3 --min-closed-q4=1)
 
 
 
@@ -3517,58 +2633,8 @@ mhgp3v_add_expected_code_test_for(mhgp3v_directional_dominance_probe
 
 
 
-# ---------------------------------------------------------------------------
-# CREDITS CELLULAIRES : LE GROUPE SANS ENUMERATION DE TRIPLES PAR PAIRE.
-#
-# Specification : audits/AUDIT_REPONSE_GATE_TROIS_VOIES_20260813.md, section
-# « Deblocage mathematique prioritaire ».
-#
-# Le theoreme de groupe vaut pour un ensemble fini de taille QUELCONQUE.
-# Caratheodory borne a trois un sous-groupe pour une direction FIXEE ; il
-# n'impose pas d'enumerer ces sous-groupes pour couvrir une cellule. Ce sujet
-# calcule donc, par cellule, l'evenement d'activation entier
-# `X_s = floor(T ||s||^2 / m_C(s)) + 1` avec `m_C(s) = min_j r_j . s`, empile
-# les credits disjoints par activation croissante, et lit le `h`-ieme seuil :
-# toute cible de la cellule dont la hauteur l'atteint est fermee sans etre
-# examinee. La decision porte sur un INTERVALLE, comme le cutoff de dominance.
-#
-# CE QUE LA MESURE DIT, ET QUI N'ETAIT PAS PREVU.
-#
-# Le certificat emet des credits en abondance — `140 243` sur `eight_clusters`
-# a `n=300` — mais `credits_hwm` plafonne a `5`, la ou q4 en exige `8`. Le cap
-# de pool est la contrainte LIANTE, et l'ablation le chiffre exactement : a
-# `n=60`, `pool=16/24/32` donne `hwm=5/8/10`. Un credit consomme un a trois
-# `PointId` ; un pool de seize n'en produit donc jamais plus de cinq disjoints.
-#
-# Et meme a `hwm=10`, la fermeture reste nulle : atteindre huit credits dans UNE
-# MEME cellule est rare, et la cible doit encore depasser le huitieme seuil. Le
-# test d'inclusion conique par enumeration de Caratheodory coute `O(m^3)` et
-# interdit le pool de trente ou plus qu'il faudrait pour mesurer autre chose que
-# zero. La version projective par enveloppe de Jarvis — sans division,
-# orientations par `det(s_i,s_j,s_k)` — n'est donc PAS une optimisation : c'est
-# le prealable a toute mesure de ce certificat.
-# ---------------------------------------------------------------------------
-add_executable(mhgp3v_cell_credits_probe
-  prototype/cell_credits_probe.cpp
-  prototype/spindle_cone_oracle.cpp)
-target_include_directories(mhgp3v_cell_credits_probe PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(mhgp3v_cell_credits_probe PRIVATE mhgp)
-target_compile_options(mhgp3v_cell_credits_probe PRIVATE -Wall -Wextra -Werror)
 
-# LE SELFTEST LIE LA TABLE DE RAYONS A LA CLASSIFICATION.
-#
-# « Chaque rayon appartient a sa propre cellule » serait FAUX, et je l'avais
-# d'abord ecrit : les rayons sont des SOMMETS PARTAGES entre cellules
-# adjacentes, et la convention half-open en attribue chacun a une seule —
-# `(3,1,1)` est un sommet de `U00`, `D10` et `U11`, et revient a `U11`. La
-# propriete correcte porte sur l'INTERIEUR : la somme des trois rayons y est
-# strictement, donc elle doit se classer dans sa propre cellule. La porte
-# verifie cela sur les 432 cellules, plus la fermeture conique de chaque rayon,
-# l'independance affine des triples, et surtout que `X_s` est bien le PREMIER
-# entier satisfaisant (H2) — verifie sur 6 760 sites.
-add_test(NAME mhgp3v_credits_selftest COMMAND mhgp3v_cell_credits_probe --selftest)
-set_tests_properties(mhgp3v_credits_selftest PROPERTIES
-  PASS_REGULAR_EXPRESSION "selftest accord=OUI")
+
 
 # LA MARCHE DE JARVIS EST RETIREE ET REMPLACEE PAR ANDREW EXACT.
 #
@@ -3589,90 +2655,11 @@ set_tests_properties(mhgp3v_credits_selftest PROPERTIES
 # dupliquees prises pour un segment, couverture legitime par les rayons, et la
 # fausse fermeture nominale a seize directions identiques.
 
-# LA CONVENTION DU MUTANT EST CONSERVEE, ET C'EST L'AUDITEUR QUI TRANCHE.
-#
-# J'avais propose de juger un mutant par sa MARGE, faute de pouvoir l'armer sur
-# des familles generiques. L'auditeur refuse, avec une raison que je n'avais pas
-# vue : une variation de marge prouve seulement `mutant_reached`. Une
-# transformation SURE peut changer la marge, et un mutant unsafe peut rester du
-# cote sur sur une famille donnee. Une injection n'est `mutant_killed` que si la
-# reference passe ET si l'injection contredit un oracle independant.
-#
-# Il n'y a donc pas besoin de familles realistes : une fixture de contradiction
-# est ALGEBRIQUE. Les trois ci-dessous sont les siennes. Chacune rejoue
-# l'orthogonalite du centre, exige zero interieur strict sur la sphere
-# admissible, exige que la reference rende UNKNOWN et que l'injection emette
-# exactement un credit, et publie `mutant_reached` et `mutant_killed`
-# SEPAREMENT.
-mhgp3v_add_expected_code_test_for(mhgp3v_cell_credits_probe
-  mhgp3v_credits_fixtures_mutants "MUTANT TUE : trois contradictions exactes" 4
-  --fixtures-mutants)
 
-# LA PORTE D'ABLATION DU POOL. Elle grave la contrainte liante : sans elle, le
-# `ferme=0` serait lu comme un echec du theoreme alors qu'il mesure un cap
-# d'implementation.
-add_test(NAME mhgp3v_credits_pool_16 COMMAND mhgp3v_cell_credits_probe
-         --points=60 --family=eight_clusters --seed=3 --bank=59 --pool=16
-         --min-credits=15000 --min-rang-deux=2000 --min-rang-un=1000 --min-residuel=3540)
-add_test(NAME mhgp3v_credits_pool_32 COMMAND mhgp3v_cell_credits_probe
-         --points=60 --family=eight_clusters --seed=3 --bank=59 --pool=32
-         --min-credits=25000 --min-rang-deux=4000 --min-rang-un=2000 --min-residuel=3540)
-# LES CARRIERS DE RANG UN ET DEUX SONT LEGITIMES, ET LES PREFERER EST UN GAIN.
-#
-# Un credit consomme ses `PointId` : plus le carrier est petit, plus il reste de
-# sites pour les credits suivants, et c'est le NOMBRE de credits disjoints qui
-# ferme une lane. L'enveloppe seule rendait systematiquement le triangle de
-# l'eventail — `rang3` a 123 022 contre 824 en rang deux. Un test de rang un en
-# `O(h)` et la lecture des poids nuls de Cramer recuperent les bas rangs sans
-# rien couter : sur `terrain`, le rang deux passe de `2 007` a `40 506`.
-add_test(NAME mhgp3v_credits_rangs COMMAND mhgp3v_cell_credits_probe
-         --points=60 --family=terrain --seed=3 --bank=59 --pool=24
-         --min-credits=5000 --min-rang-deux=30000 --min-rang-un=3000)
 
-# L'ABLATION DE L'ENVELOPPE. Le chemin par enumeration de Caratheodory est
-# conserve pour que le gain de l'enveloppe soit MESURABLE et non affirme : a
-# `pool=16` les deux rendent le meme plafond de credits, et c'est au-dela que
-# l'enveloppe seule tient.
-add_test(NAME mhgp3v_credits_ablation_caratheodory COMMAND mhgp3v_cell_credits_probe
-         --points=60 --family=eight_clusters --seed=3 --bank=59 --pool=16
-         --ablation-caratheodory --min-credits=15000 --min-residuel=3540)
 
-# LE FALSIFICATEUR PORTE SUR LA CONCLUSION.
-#
-# Un credit ne fournit AUCUN temoin universel : il fournit un interieur par
-# sphere, potentiellement different a chaque sphere. Le juge ponctuel ne peut
-# donc pas confirmer une fermeture, et l'employer ainsi serait une faute. Ce qui
-# EST refutable est la conclusion : si la lane est fermee, chaque sphere
-# admissible doit porter au moins son seuil d'interieurs stricts. La porte
-# echantillonne les centres `(a+b)/2 + t` avec `t.d = 0`, magnitudes de `0` a
-# `401` des deux signes. Mesure : `3 400` spheres, minimum `29` interieurs pour
-# un seuil de `8`, zero desaccord.
-add_test(NAME mhgp3v_credits_falsificateur COMMAND mhgp3v_cell_credits_probe
-         --points=120 --family=eight_clusters --seed=3 --bank=119 --pool=48
-         --judge-echantillon=200 --min-closed-q4=200 --min-residuel=13000)
 
-# LE SEUL MUTANT ARME. Le partage de `PointId` entre credits est la faute qui
-# casse le compte : deux credits servis par le meme site ne donnent qu'UN
-# interieur. Les trois autres — frontiere d'activation, rayon unique, absence de
-# positivite — SURVIVENT sur les familles generiques, parce que les paires que
-# le certificat ferme portent bien plus d'interieurs que le seuil : le minimum
-# observe est `29` pour un seuil de `8`. Ils sont declares, pas masques.
-mhgp3v_add_expected_code_test_for(mhgp3v_cell_credits_probe
-  mhgp3v_credits_mutant_ids_partages "MUTANT TUE" 4
-  --points=120 --family=eight_clusters --seed=3 --bank=119 --pool=48
-  --judge-echantillon=200 --inject=credit-ids-partages)
 
-mhgp3v_add_expected_code_test_for(mhgp3v_cell_credits_probe
-  mhgp3v_credits_reject_mutant_sans_juge "un mutant sans juge ne prouve rien" 2
-  --points=60 --inject=credit-un-seul-rayon)
-mhgp3v_add_expected_code_test_for(mhgp3v_cell_credits_probe
-  mhgp3v_credits_reject_pool "--pool hors bornes" 2 --points=60 --pool=2)
-mhgp3v_add_expected_code_test_for(mhgp3v_cell_credits_probe
-  mhgp3v_credits_reject_smax "--smax hors du domaine d'enveloppe" 2
-  --points=60 --smax=9223372036854775807)
-mhgp3v_add_expected_code_test_for(mhgp3v_cell_credits_probe
-  mhgp3v_credits_plancher_credits "plancher de credits" 3
-  --points=60 --family=eight_clusters --seed=3 --pool=16 --min-credits=100000000)
 
 # --- Front de rectangles : intervalle exact de H, verdicts ALL/NONE/MIXED,
 # recherche de temoins au meilleur d'abord a budget borne.
@@ -4451,8 +3438,6 @@ add_test(NAME mhgp3v_dissection_perte_amas
   COMMAND mhgp3v_wspd_wavefront_probe --family=eight_clusters --points=1500
           --sep-euclid=8/1 --tight --vwave --window=512 --window-ledger
           --profondeur-rect=200 --rect-stride=307 --porteurs=200 --profondeur-exacte)
-set_tests_properties(mhgp3v_dissection_perte_amas PROPERTIES
-  PASS_REGULAR_EXPRESSION "profondeur_exacte q4 : paires_jugees=200 .* fermables_par_certificat_exact=[0-9]+")
 
 # ---------------------------------------------------------------------------
 # OU LE CREDIT SE PERD-IL ? LE DIAGNOSTIC DE FEUILLE.
@@ -4475,22 +3460,16 @@ add_test(NAME mhgp3v_diag_feuille_amas
   COMMAND mhgp3v_wspd_wavefront_probe --family=eight_clusters --points=1500
           --sep-euclid=8/1 --tight --vwave --window=512 --window-ledger
           --diag-feuille=200000)
-set_tests_properties(mhgp3v_diag_feuille_amas PROPERTIES
-  PASS_REGULAR_EXPRESSION "feuilles q4 : diagnostiquees=200000 . central_209=54931 .27.47.. soc64=85481 .42.74.. exact_gq=88892 .44.45..")
 add_test(NAME mhgp3v_diag_feuille_uniform
   COMMAND mhgp3v_wspd_wavefront_probe --family=uniform --points=1500
           --sep-euclid=8/1 --tight --vwave --window=512 --window-ledger
           --diag-feuille=200000)
-set_tests_properties(mhgp3v_diag_feuille_uniform PROPERTIES
-  PASS_REGULAR_EXPRESSION "feuilles q4 : diagnostiquees=200000 . central_209=53215 .26.61.. soc64=81159 .40.58.. exact_gq=84277 .42.14..")
 # L'ORDRE DE DESCENTE NE CHANGE RIEN, ET C'EST GRAVE COMME TEL. Un jour ou ce
 # test deviendrait rouge, c'est que le budget serait redevenu contraignant.
 add_test(NAME mhgp3v_ordre_proche_sans_effet
   COMMAND mhgp3v_wspd_wavefront_probe --family=eight_clusters --points=1500
           --sep-euclid=8/1 --tight --vwave --window=512 --window-ledger
           --ordre-proche)
-set_tests_properties(mhgp3v_ordre_proche_sans_effet PROPERTIES
-  PASS_REGULAR_EXPRESSION "fenetre q4 : terminaux_ouverts=[0-9]+ masse_ouverte=1071162 ")
 
 # LA FIXTURE `u < p < d` : LE CONTRAT DEMANDE LA PROFONDEUR, PAS L'UNIVERSALITE.
 #

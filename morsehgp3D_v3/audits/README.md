@@ -259,8 +259,6 @@ actuelle.
 ## Scripts gardés
 
 - `check_gate_d_fold_f0.py` ;
-- `check_centre_cell_independent_judge.py` ;
-- `check_centre_cell_thread_invariance.py` ;
 - `check_rampe_pentes.py`.
 
 Ils sont appelés par CTest et ne sont pas des documents historiques.
