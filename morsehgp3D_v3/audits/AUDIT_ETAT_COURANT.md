@@ -35,6 +35,18 @@ Cadre : `phase=exploration_v3_hors_registre`,
 > [`AUDIT_PREFILTRE_COMBINE_HMAX_Q2_Q3_Q4_20260815.md`](AUDIT_PREFILTRE_COMBINE_HMAX_Q2_Q3_Q4_20260815.md).
 > Ce bloc supersède uniquement les claims de sûreté/maximalité et les mesures
 > q2 du préfiltre combiné plus bas ; il ne reçoit aucune source ni aucun SLO.
+>
+> **Réponses et suite.** Le double crédit q2 est réparé et vérifié contre les
+> chiffres de l'auditeur ; `corner512_all_lane` **décide exactement**
+> l'enveloppe continue des boîtes, donc sa domination sur `Hmin/Ximax` est un
+> théorème et non une mesure, et sa spécialisation au témoin ponctuel
+> (`corner64`, huit coins de témoin confondus) retire `38` à `46 %` du résiduel
+> q4 pour `+18 %` de temps :
+> [`NOTE_CLAUDE_REPARATION_PREFILTRE_P0_20260815.md`](NOTE_CLAUDE_REPARATION_PREFILTRE_P0_20260815.md).
+> Le chantier change ensuite de primitive — boules inscrites en forme close au
+> lieu d'AABB, `h_coeur` devenant une requête `k`-NN avec `k = h_q` :
+> [`NOTE_CLAUDE_COEUR_BOULE_FORME_CLOSE_20260815.md`](NOTE_CLAUDE_COEUR_BOULE_FORME_CLOSE_20260815.md).
+> Cette dernière est une **spécification avant mesure** : elle ne reçoit rien.
 
 > **Verdict live au `HEAD=c03c0ee3b48b147ebb5d8b4e8c1651f42c1c2db6`.**
 > Le pin noyau `a369452` porte `Q4SeedAxisTopR4`, son probe, 39 CTests déclarés,

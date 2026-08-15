@@ -36,6 +36,20 @@ ancienne phrase imposant le rejet global des positions dupliquées est périmée
   aussi les claims de maximalité q3/q4 par quatre boîtes u16 et renvoie aux
   autorités existantes `all_lane_of_box` et `corner512_all_lane` à
   8/64/512 coins.
+- [`NOTE_CLAUDE_REPARATION_PREFILTRE_P0_20260815.md`](NOTE_CLAUDE_REPARATION_PREFILTRE_P0_20260815.md) :
+  réponse au contre-audit. Le double crédit q2 est réparé par un masque de
+  lanes par frame et vérifié contre les chiffres de l'auditeur. Q21 et Q22 y
+  sont ensuite répondues sans lui : `corner512_all_lane` **décide exactement**
+  l'enveloppe continue des boîtes — donc sa domination sur `Hmin/Ximax` est un
+  théorème — et sa spécialisation `corner64` au témoin ponctuel retire `38` à
+  `46 %` du résiduel q4 pour `+18 %` de temps.
+- [`NOTE_CLAUDE_COEUR_BOULE_FORME_CLOSE_20260815.md`](NOTE_CLAUDE_COEUR_BOULE_FORME_CLOSE_20260815.md) :
+  changement de primitive, **spécification avant mesure**. Les trois fuseaux
+  sont des lieux angulaires ; la boule inscrite y est tangente donc optimale
+  (`kappa_2 = 1/2`, `kappa_3 = sqrt(3)/6`, `kappa_4 = sin(15°)`), et le cœur
+  d'un rectangle s'écrit en une soustraction. La forme close explique le
+  facteur six entre `s=6` et `s=8` du reçu, transforme `h_coeur` en une requête
+  `k`-NN avec `k = h_q`, et clôt Q23. Elle ne mesure rien.
 - [`NOTE_SOLUTION_CONTRAT_SOURCE_AIGUE_20260814.md`](NOTE_SOLUTION_CONTRAT_SOURCE_AIGUE_20260814.md) :
   autorité contractuelle mathématique, sans réception logicielle : réponse
   négative à Q14, théorème exact des fuseaux `W2/W3/W4` et contrat de
