@@ -108,6 +108,23 @@ ancienne phrase imposant le rejet global des positions dupliquées est périmée
   `39 %` de la séparation qu'exige la décorrélée et trouve `4` à `21 %` de
   témoins en plus ; l'écart étant en `O(r)` et non en `O(d)`, le gain s'estompe
   quand la séparation dépasse le seuil.
+- [`NOTE_CLAUDE_PORTEUR_AIGU_ELAGAGE_20260815.md`](NOTE_CLAUDE_PORTEUR_AIGU_ELAGAGE_20260815.md) :
+  le porteur aigu tient dans un signe — `x` porteur de `(a,b)` ssi `x` est dans
+  la lentille et `H < 0`, avec le `H` du fuseau. Vérifié à `331 857` triplets
+  sur quatre régimes ; la stricte n'est pas cosmétique, `H = 0` est l'angle
+  droit et mon premier jet faisait `185` écarts. Corollaire : un témoin q2 est
+  exactement un non-porteur. Deux élagages **réfutés** y sont gravés — le
+  certificat au niveau rectangle (`gain 1,005`, `1,1` point par bloc) et la
+  boule seule (`0,33` à `0,59`, plus lent que le balayage complet) — et la
+  version à deux disjoints rend `13,29x` sur `two_lines`.
+- [`NOTE_CLAUDE_SEPARATION_8_10_12_20260815.md`](NOTE_CLAUDE_SEPARATION_8_10_12_20260815.md) :
+  la campagne `s in {8,10,12}` x `n in {8k,16k,32k}` à `masse_non_decide = 0`
+  partout. `V4_pair_walive` est **identique** pour les trois séparations à `n`
+  fixé — l'ensemble `W`-vivant est une propriété du nuage, pas de la partition,
+  et c'est le contrôle interne qui manquait à mes campagnes antérieures.
+  `s=10` retire `9` à `22 %` du résiduel de `s=8` ; le gain croît lentement avec
+  `n` (`9,3` puis `10,2` puis `10,5 %` sur `terrain`). Aucun verdict de temps
+  n'y est publié : les durées incluent le diagnostic `--vrai-vivant`.
 - [`NOTE_CLAUDE_P05_DEUX_BALAYAGES_20260815.md`](NOTE_CLAUDE_P05_DEUX_BALAYAGES_20260815.md) :
   le P0.5 du ré-audit, fait — comptage du `W`-vivant en deux passes, un seul
   balayage de `z` pour les trois lanes, prédicat point--point, paires `D=0`
