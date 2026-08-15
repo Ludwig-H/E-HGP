@@ -4702,6 +4702,44 @@ set_tests_properties(mhgp3v_combined_oracle_terrain PROPERTIES
   "oracle_paires=[1-9][0-9]* oracle_faux_morts=0 oracle_ids_doubles=0 oracle_couverture_ko=0")
 
 # ---------------------------------------------------------------------------
+# LE CŒUR-BOULE DANS LA DESCENTE : mesurable, et NON adopté.
+#
+# `--coeur=boule` ajoute deux choses au cœur : un crédit en bloc `ALL` pour les
+# TROIS lanes — jusqu'ici seule q2 en avait un — et un certificat `NONE` par
+# boule extérieure. La mesure refuse les deux.
+#
+#   `ALL`  : la fermeture est IDENTIQUE et le travail baisse de moins d'un pour
+#            cent, pour un temps de paroi plus mauvais. C'est ce que le § 5.1
+#            du ré-audit annonçait : avec `sphere_of(box)` la sphère circonscrit
+#            l'AABB, donc son certificat est dominé par Corner64.
+#   `NONE` : placé APRÈS `h_any_upper`, il coupe EXACTEMENT ZÉRO sous-arbre de
+#            plus. Les deux ne répondent pas à la même question — le cœur compte
+#            les témoins UNIVERSELS, et `h_any_upper` décide finement « aucun
+#            point de Z n'est universel », là où la boule exige « aucun point
+#            n'est témoin d'une seule paire ».
+#
+# Les portes gravent ces deux réfutations, et vérifient que le chemin reste sûr
+# — le ledger d'IDs est désormais PAR LANE, ce que le ré-audit exigeait avant
+# tout crédit q3/q4 en bloc.
+# ---------------------------------------------------------------------------
+foreach(fam uniform eight_clusters terrain)
+  add_test(NAME mhgp3v_combined_coeur_boule_sur_${fam}
+    COMMAND mhgp3v_combined_prefilter_probe --points=160 --family=${fam} --seed=3
+            --separation=6 --oracle=160 --coeur=boule --ha=dualtree)
+  set_tests_properties(mhgp3v_combined_coeur_boule_sur_${fam} PROPERTIES
+    PASS_REGULAR_EXPRESSION
+    "oracle_paires=[1-9][0-9]* oracle_faux_morts=0 oracle_ids_doubles=0 oracle_couverture_ko=0")
+endforeach()
+
+# LA REFUTATION, EXECUTABLE. Zéro coupe nette, et un plancher non nul sur les
+# crédits en bloc pour que la porte ne soit pas verte par vacuité.
+add_test(NAME mhgp3v_combined_boule_ext_dominee
+  COMMAND mhgp3v_combined_prefilter_probe --points=1000 --family=terrain --seed=3
+          --separation=6 --smax=11 --coeur=boule --ha=dualtree)
+set_tests_properties(mhgp3v_combined_boule_ext_dominee PROPERTIES
+  PASS_REGULAR_EXPRESSION "nonvacuite bulk_boule=[1-9][0-9]* elague_ext=0")
+
+# ---------------------------------------------------------------------------
 # AUTO-JOINTURE DUAL-TREE — la seconde branche de Q23, celle que le ré-audit
 # conseillait et que je disais ne pas savoir obtenir.
 #

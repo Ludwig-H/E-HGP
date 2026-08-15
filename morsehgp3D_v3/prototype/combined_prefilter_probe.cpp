@@ -727,6 +727,8 @@ struct Ledger {
   long long c64_desaccords = 0;  // corner64 != corner512 : DOIT rester nul
   long long c64_appels = 0;      // sites decides par la specialisation ponctuelle
   long long travail_ha = 0;      // travail des SEULS postes h_a et h_b
+  long long bulk_boule = 0;      // sous-arbres credites en O(1) par la boule
+  long long elague_ext = 0;      // sous-arbres coupes par la boule exterieure
   long long dual_ecarts = 0;     // dual-tree != jointure : DOIT rester nul
   long long dual_verifies = 0;   // points confrontes
 };
@@ -749,6 +751,7 @@ int main(int argc, char** argv) {
   bool core512 = false;
   bool ha_boule = false;
   bool ha_corner8 = false;
+  bool coeur_boule = false;
   bool ha_dual = false;
   long long dual_cutoff = 256;
   bool ha_verifie = false;
@@ -798,6 +801,7 @@ int main(int argc, char** argv) {
     if (a == "--compare-corner512") { compare512 = true; continue; }
     if (a == "--ha=boule") { ha_boule = true; continue; }
     if (a == "--ha=corner8") { ha_corner8 = true; continue; }
+    if (a == "--coeur=boule") { coeur_boule = true; continue; }
     if (a == "--ha=dualtree") { ha_dual = true; continue; }
     // PORTE METAMORPHIQUE : le dual-tree pretend rendre EXACTEMENT les memes
     // `h_a` que la jointure ponctuelle a huit coins. Ce mode calcule les deux et
@@ -967,7 +971,7 @@ int main(int argc, char** argv) {
     std::fprintf(stderr, "REFUS : oracle borne a 200 points, n=%d\n", n);
     return 2;
   }
-  std::vector<int> core_ids;
+  std::vector<int> core_ids[3];  // LEDGER PAR LANE, exige avant tout bulk q3/q4
   std::vector<unsigned char> vu((size_t)n, 0);
   const long long npairs = (long long)n * (n - 1) / 2;
   std::vector<unsigned char> ferme;      // par PairId et par lane
@@ -999,6 +1003,25 @@ int main(int argc, char** argv) {
     const Box BA = h_box(r.u), BB = h_box(r.v);
     // Seize coins, une fois par rectangle : ils ne dependent d'aucun site.
     const Corner16 rect_corners = corners_of_rect(BA, BB);
+    // La boule du cœur, en forme close, une fois par rectangle et par lane.
+    const Sphere SphA = h_sphere(r.u), SphB = h_sphere(r.v);
+    i64 Mb[3];
+    i64 R4b[3] = {0, 0, 0};
+    i64 R4ext = 0;
+    {
+      i128 acc = 0;
+      for (int k = 0; k < 3; ++k) {
+        Mb[k] = SphA.c2[k] + SphB.c2[k];
+        const i64 e = SphB.c2[k] - SphA.c2[k];
+        acc += (i128)e * (i128)e;
+      }
+      const i64 dd = isqrt_floor(acc);  // minorant, pour les cœurs
+      for (int q = 0; q < 3; ++q)
+        R4b[q] = mhgp3v::corebl::core_ball_radius4(dd, SphA.r2, SphB.r2, q + 2);
+      // La boule EXTERIEURE veut le sens inverse : un MAJORANT de la distance.
+      const i64 ddc = mhgp3v::corebl::isqrt_ceil_i128(acc);
+      R4ext = mhgp3v::corebl::outer_ball_radius4(ddc, SphA.r2, SphB.r2);
+    }
 
     // ---- h_coeur : temoins universels du rectangle, HORS `A` et HORS `B`.
     //
@@ -1016,7 +1039,7 @@ int main(int argc, char** argv) {
     // L'elagage porte sur `max_z min_{a,b} H`, valide pour les trois lanes
     // puisque les fuseaux sont emboites `W_4 < W_3 < W_2`.
     int hcore[3] = {0, 0, 0};
-    core_ids.clear();
+    for (int q = 0; q < 3; ++q) core_ids[q].clear();
     {
       struct Frame { int node; int mask; };
       std::vector<Frame> st;
@@ -1031,10 +1054,49 @@ int main(int argc, char** argv) {
         if (m == 0) continue;
         const Box Z = h_box(f.node);
         ++L.travail_h;
+        // CERTIFICAT `NONE` EN O(1) : hors de la boule exterieure, aucune paire
+        // du rectangle n'a de temoin ici, pour aucune lane.
+        // LA BOULE EXTERIEURE EST DOMINEE, ET LE COMPTEUR LE PROUVE. Placee
+        // AVANT `h_any_upper` elle semblait couper des millions de sous-arbres ;
+        // placee APRES, elle en coupe EXACTEMENT ZERO. `elague_ext` mesure donc
+        // le gain NET, et il est nul — voir l'en-tete de `spindle_core_ball.hpp`
+        // pour la raison : les deux certificats ne repondent pas a la meme
+        // question. Le test est conserve pour que la refutation reste
+        // executable, jamais parce qu'il servirait.
         if (h_any_upper(BA, BB, Z) <= 0) continue;  // aucun temoin ici
+        if (coeur_boule &&
+            mhgp3v::corebl::ball_disjoint_box(Mb, R4ext, Z.lo, Z.hi)) {
+          ++L.elague_ext;
+          continue;
+        }
         const bool leaf = h_leaf(f.node);
         int child = m;
-        if (!leaf && (m & 1) && h_all_inside(BA, BB, Z) > 0) {
+        // ---- CREDIT EN BLOC PAR LA BOULE, POUR LES TROIS LANES (P1.8).
+        //
+        // Jusqu'ici seule q2 avait une voie rapide : q3 et q4 descendaient
+        // jusqu'aux feuilles a chaque rectangle, et c'est la que se trouve
+        // l'essentiel du travail. La boule du cœur donne le certificat `ALL`
+        // manquant en `O(1)` par sous-arbre, avec le meme masque de lanes.
+        //
+        // Un echec du test boule est `UNKNOWN`, jamais `NONE` : la descente
+        // continue, et `h_any_upper` reste le seul certificat `NONE`.
+        if (!leaf && coeur_boule) {
+          const int fi = nodes[f.node].first, la = nodes[f.node].last;
+          const bool touche = !(la < ua || fi > ub) || !(la < va || fi > vb);
+          if (!touche) {
+            for (int q = 0; q < 3; ++q) {
+              if (!(child & (1 << q)) || R4b[q] <= 0) continue;
+              if (!mhgp3v::corebl::ball_contains_box(Mb, R4b[q], Z.lo, Z.hi)) continue;
+              hcore[q] += (la - fi + 1);
+              if (hcore[q] > h_q[q]) hcore[q] = h_q[q];
+              ++L.bulk_boule;
+              if (oracle) for (int k = fi; k <= la; ++k) core_ids[q].push_back(k);
+              if (mutant != Mutant::kBulkSansMasque) child &= ~(1 << q);
+            }
+            if (child == 0) continue;  // les trois lanes creditees : rien a descendre
+          }
+        }
+        if (!leaf && (m & 1) && (child & 1) && h_all_inside(BA, BB, Z) > 0) {
           // VOIE RAPIDE q2 : tout le noeud est temoin. On ne credite que s'il
           // ne chevauche ni `A` ni `B`, sans quoi la disjonction tomberait.
           const int fi = nodes[f.node].first, la = nodes[f.node].last;
@@ -1043,7 +1105,7 @@ int main(int argc, char** argv) {
             hcore[0] += (la - fi + 1);
             if (hcore[0] > h_q[0]) hcore[0] = h_q[0];
             ++L.bulk_credits;
-            if (oracle) for (int k = fi; k <= la; ++k) core_ids.push_back(k);
+            if (oracle) for (int k = fi; k <= la; ++k) core_ids[0].push_back(k);
             // LA REPARATION : les enfants ne recreditent plus q2. Le mutant
             // `bulk-sans-masque` reproduit exactement le defaut du 15 aout.
             if (mutant != Mutant::kBulkSansMasque) child &= ~1;
@@ -1066,14 +1128,14 @@ int main(int argc, char** argv) {
             ++L.c64_appels;
             const int lane = corner64_all_lane(rect_corners, sorted_pts[i]);
             if (lane < 2) continue;
-            if ((m & 1) && hcore[0] < h_q[0]) { ++hcore[0]; if (oracle) core_ids.push_back(i); }
+            if ((m & 1) && hcore[0] < h_q[0]) { ++hcore[0]; if (oracle) core_ids[0].push_back(i); }
             if ((m & 2) && hcore[1] < h_q[1] && lane >= 3) ++hcore[1];
             if ((m & 4) && hcore[2] < h_q[2] && lane >= 4) ++hcore[2];
             continue;
           }
           const i64 hh = h_min_over_boxes(BA, BB, sorted_pts[i]);
           if (hh <= 0) continue;
-          if ((m & 1) && hcore[0] < h_q[0]) { ++hcore[0]; if (oracle) core_ids.push_back(i); }
+          if ((m & 1) && hcore[0] < h_q[0]) { ++hcore[0]; if (oracle) core_ids[0].push_back(i); }
           if ((m & 6) == 0) continue;
           i128 xi = 0;
           if (corners_xi) {
@@ -1355,12 +1417,17 @@ int main(int argc, char** argv) {
       // P0.4 : chaque `PointId` credite au plus une fois, et jamais dans `A`
       // ou `B`. C'est ce controle, et non un compteur alimente par un mutant,
       // qui atteste la disjonction.
-      for (int id : core_ids) {
-        if (vu[(size_t)id]) { ++L.oracle_ids_doubles; continue; }
-        vu[(size_t)id] = 1;
-        if ((id >= ua && id <= ub) || (id >= va && id <= vb)) ++L.oracle_ids_doubles;
+      // P0.4, DESORMAIS PAR LANE. Le contre-audit exigeait ce ledger avant tout
+      // credit q3/q4 en bloc : sans lui, un double credit q3 ou q4 passerait
+      // inapercu exactement comme le double credit q2 du 15 aout.
+      for (int q = 0; q < 3; ++q) {
+        for (int id : core_ids[q]) {
+          if (vu[(size_t)id]) { ++L.oracle_ids_doubles; continue; }
+          vu[(size_t)id] = 1;
+          if ((id >= ua && id <= ub) || (id >= va && id <= vb)) ++L.oracle_ids_doubles;
+        }
+        for (int id : core_ids[q]) vu[(size_t)id] = 0;
       }
-      for (int id : core_ids) vu[(size_t)id] = 0;
       // ---- HARNAIS APPARIE `corner512` (Q21/Q22).
       //
       // Il ne SUBSTITUE rien : il fait tourner les deux predicats sur les MEMES
@@ -1548,6 +1615,7 @@ int main(int argc, char** argv) {
   if (ha_dual)
     std::printf("dualtree verifies=%lld ecarts=%lld cutoff=%lld\n", L.dual_verifies,
                 L.dual_ecarts, dual_cutoff);
+  std::printf("nonvacuite bulk_boule=%lld elague_ext=%lld\n", L.bulk_boule, L.elague_ext);
   std::printf("nonvacuite bulk_credits=%lld oracle_paires=%lld oracle_faux_morts=%lld "
               "oracle_ids_doubles=%lld oracle_couverture_ko=%lld\n",
               L.bulk_credits, L.oracle_paires, L.oracle_faux_morts, L.oracle_ids_doubles,

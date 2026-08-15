@@ -128,7 +128,48 @@ la sphère des points elle cesse de l'être — mais de `4 %` de rayon seulement
 Je ne l'implémente donc pas : elle coûterait trois racines dirigées par couple
 pour un gain que la mesure ci-dessus borne très bas.
 
-## 5. Ce qui reste de votre plan
+## 5. Point 8 : le cœur-boule dans la descente, et deux réfutations
+
+J'ai implémenté votre § 6.1 — crédit en bloc par la boule pour les **trois**
+lanes, là où seule q2 en avait un, et le ledger d'IDs **par lane** que vous
+exigiez avant tout crédit q3/q4 en bloc. Le chemin est sûr :
+`oracle_faux_morts=0` et `oracle_ids_doubles=0` sur les trois familles, et en
+régime tendu (`s_max=32`, `separation=1`).
+
+Il n'est pas adopté, et la mesure dit pourquoi.
+
+**Le certificat `ALL` est dominé, comme vous l'annonciez au § 5.1.** La
+fermeture est **identique** — au dernier chiffre, sur les trois familles — et le
+travail baisse de moins d'un pour cent, pour un temps de paroi plus mauvais.
+Pourtant la boule tire beaucoup : `498 650` crédits en bloc sur `terrain` à
+`n=4000`, soit `1,8` par rectangle, plus que la voie q2 existante. Elle credite
+donc, mais elle ne certifie rien que Corner64 ne certifie deja aux feuilles,
+puisque `sphere_of` circonscrit l'AABB.
+
+**Et j'ai cru trouver le levier manquant, à tort.** Le raisonnement était :
+puisque la descente s'arrête à `h_q <= 10` témoins, l'intérieur est bon marché
+et le coût est dans les rectangles à cœur presque vide, où aucun `ALL` ne peut
+aider ; donc ce qui manque est un `NONE`. J'ai ajouté la boule **extérieure** —
+le fuseau étant inclus dans la boule diamétrale, une boîte hors de
+`B(m, (d+r_A+r_B)/2 + (r_A+r_B)/2)` ne contient aucun témoin d'aucune paire.
+
+Placée **avant** le certificat existant, elle semblait couper des millions de
+sous-arbres — `17 M` sur `uniform`. Placée **après**, elle en coupe
+**exactement zéro**, sur les trois familles. `h_any_upper` la domine
+strictement.
+
+La raison est conceptuelle et j'avais confondu deux questions. Le cœur compte
+les témoins **universels**, donc le `NONE` dont la descente a besoin est « aucun
+point de `Z` n'est universel » — ce que `h_any_upper` décide finement en bornant
+`max_z min_{a,b} H`. La boule extérieure certifie « aucun point n'est témoin
+d'**une seule** paire » : une condition beaucoup plus forte à exiger, donc un
+certificat beaucoup plus faible. Elle ne pouvait pas gagner.
+
+Les deux réfutations sont gravées et exécutables — la porte exige
+`bulk_boule >= 1` et `elague_ext = 0` — parce qu'un compteur placé du mauvais
+côté m'a fait croire à un gain pendant une mesure entière.
+
+## 6. Ce qui reste de votre plan
 
 Non fait, et non prétendu : l'autorité cône robuste du § 6.2 — dont je note
 qu'avec `sphere_of(box)` elle serait **dominée** par l'autorité aux coins,
@@ -138,5 +179,5 @@ Q30 ; le mode `--no-bulk` ; la porte `direct == tree` pour l'apex.
 
 La campagne n'est pas régénérée et le reçu garde son bandeau q2 invalide.
 
-Suite complète : `831/832`. Le seul échec est `mhgp3v_arith_selftest`, faute
+Suite complète : `835/836`. Le seul échec est `mhgp3v_arith_selftest`, faute
 d'en-têtes GMP dans ce conteneur.

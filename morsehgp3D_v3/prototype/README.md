@@ -178,6 +178,26 @@ La séparation du dossier porte sur l'écart
 `2,000 / 3,464 / 3,864`, est une garantie uniforme au pire cas, pas une
 équivalence pour chaque rectangle.
 
+### Ce que la journée du 15 août a réellement retenu
+
+Quatre choses adoptées, et autant de réfutations gravées.
+
+| poste | verdict | chiffre |
+| --- | --- | --- |
+| `corner64` au cœur | **adopté** | résiduel q4 `-38` à `-46 %`, temps `+18 %` |
+| autorité à 8 coins pour `h_a` | **adopté** | `ha_somme +5` à `+7 %`, temps `+2 %` |
+| dual-tree pour `h_a` | **adopté** | mêmes valeurs, `2,2` à `3,0x` moins d'évaluations |
+| borne couplée du cœur | **adopté** | `+4` à `+21 %` de témoins, une soustraction |
+| boule d'apex pour `h_a` | réfuté par la mesure | `-11` points de fermeture, plus lent |
+| cœur-boule `ALL` | dominé par `corner64` | fermeture identique, plus lent |
+| boule extérieure `NONE` | dominée par `h_any_upper` | **zéro** coupe nette |
+| sphère des points | marge quasi nulle | `rayon serré / rayon AABB = 0,96` |
+
+Et un fait d'échelle qui prime sur tout le reste : **l'arbitrage de séparation
+n'est pas invariant**. Sur `terrain`, `s=8` retire `17,5 %` du résiduel à
+`n=8 000` mais `84,5 %` à `n=32 000`. Les certificats se resserrent à
+séparation donnée ; ils ne compensent pas une séparation insuffisante.
+
 ### `h_a` par boule d'apex : verte à `s=6`, fausse à `s=1`, non adoptée
 
 Le chemin `--ha=boule` inscrit une boule dans le **cône suffisant** d'apex `a`

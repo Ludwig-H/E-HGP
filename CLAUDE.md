@@ -28,7 +28,7 @@ python tools/check_docs.py
 python tools/check_implementation_status.py
 ```
 
-Exploration `morsehgp3D_v3/` (construit aussi v2 via `add_subdirectory`, 832 CTests, dont une majorité de portes négatives à code de sortie exact) :
+Exploration `morsehgp3D_v3/` (construit aussi v2 via `add_subdirectory`, 836 CTests, dont une majorité de portes négatives à code de sortie exact) :
 
 ```bash
 cmake -S morsehgp3D_v3 -B build/v3 -DCMAKE_BUILD_TYPE=Release

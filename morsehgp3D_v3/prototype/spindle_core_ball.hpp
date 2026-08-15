@@ -333,6 +333,45 @@ MHGP_HD inline i64 core_ball_radius4(i64 d2, i64 rA2, i64 rB2, int q,
 }
 
 // ---------------------------------------------------------------------------
+// LA BOULE EXTERIEURE : UN CERTIFICAT `NONE` EN O(1) — ET IL EST DOMINE.
+//
+// GARDE COMME REFUTATION GRAVEE, PAS COMME CHEMIN. Mesure : place APRES le
+// certificat `NONE` existant `h_any_upper`, il coupe EXACTEMENT ZERO
+// sous-arbre de plus, sur les trois familles a `n=4000`. La porte
+// `mhgp3v_combined_boule_ext_dominee` l'exige.
+//
+// La raison est conceptuelle, et je l'avais confondue. Le cœur compte les
+// temoins UNIVERSELS — temoins de TOUTES les paires du rectangle. Le `NONE`
+// dont la descente a besoin est donc « aucun point de `Z` n'est universel », et
+// `h_any_upper` le decide finement en bornant `max_z min_{a,b} H`. La boule
+// exterieure, elle, certifie « aucun point de `Z` n'est temoin d'UNE SEULE
+// paire » : une condition beaucoup plus forte a exiger, donc un certificat
+// beaucoup plus faible. Elle ne peut pas gagner.
+//
+// L'enonce reste vrai et le code correct ; c'est son utilite qui est refutee.
+//
+// Le fuseau `W_q(a,b)` est inclus dans la boule DIAMETRALE de `(a,b)`, pour les
+// trois lanes. Donc, sur tout le rectangle :
+//
+//   union_{a,b} W_q(a,b) incluse dans B(m, (d + r_A + r_B)/2 + (r_A + r_B)/2),
+//
+// le premier terme majorant le rayon diametral et le second le deplacement du
+// milieu. Une boite disjointe de cette boule ne contient AUCUN temoin, d'aucune
+// paire, d'aucune lane : la descente peut la couper entierement.
+//
+// SENS D'ARRONDI INVERSE de tout le reste du fichier. Ici la boule doit
+// SUR-approcher : `d2` est pris au PLAFOND, et le rayon majore. Sous-estimer
+// couperait des sous-arbres contenant de vrais temoins — une perte silencieuse
+// que seule une porte de completude verrait. En unites quadruplees :
+//
+//   R4_ext = d2_ceil + 2 S2.
+// ---------------------------------------------------------------------------
+MHGP_HD inline i64 outer_ball_radius4(i64 d2_ceil, i64 rA2, i64 rB2) {
+  const i64 S2 = rA2 + rB2;
+  return d2_ceil + 2 * S2;
+}
+
+// ---------------------------------------------------------------------------
 // LES DEUX PRIMITIVES SPHERE-BOITE, EXACTES EN ENTIERS.
 //
 // `M` est le centre en coordonnees QUADRUPLEES (c2_A + c2_B), `R4` le rayon
