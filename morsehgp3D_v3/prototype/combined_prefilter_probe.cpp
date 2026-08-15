@@ -125,6 +125,8 @@ enum class Mutant {
   kNarrowI64,     // forme `H^2` et `Xi` en i64 : debordement silencieux
   kCoreCentreOnly,  // teste le centre de la boite au lieu de ses huit coins
   kThresholdOff,  // seuil a `h_q+1` : ferme des ancres vivantes
+  kBulkSansMasque,  // LE BUG DU 15 AOUT : le credit en bloc ne retire pas la
+                    // lane aux enfants, qui la recreditent par leurs feuilles.
   kDropB,         // oublie la contribution de `B` : minorant plus faible, sur
                   // mais il doit se voir au compteur
 };
@@ -136,6 +138,7 @@ const char* mutant_name(Mutant m) {
     case Mutant::kNarrowI64: return "largeur-i64";
     case Mutant::kCoreCentreOnly: return "coeur-centre-seul";
     case Mutant::kThresholdOff: return "seuil-decale";
+    case Mutant::kBulkSansMasque: return "bulk-sans-masque";
     case Mutant::kDropB: return "oublie-b";
   }
   return "?";
@@ -511,6 +514,15 @@ struct Ledger {
   long long travail_h = 0;      // evaluations de `universal_witness`
   long long coeur_verifies = 0; // temoins de coeur re-verifies contre les vraies paires
   long long coeur_faux = 0;     // ... et pris en defaut : DOIT rester nul
+  // NON-VACUITE. Le contre-audit du 15 aout a montre que treize portes vertes
+  // n'avaient pas vu un double credit, faute de prouver qu'elles exercaient ce
+  // qu'elles testaient. Chaque compteur ci-dessous est un plancher : une porte
+  // qui le trouve nul se REFUSE au lieu de passer.
+  long long bulk_credits = 0;   // voies rapides q2 reellement declenchees
+  long long oracle_paires = 0;  // paires confrontees a la force brute
+  long long oracle_faux_morts = 0;  // fermees a tort : DOIT rester nul
+  long long oracle_ids_doubles = 0; // PointId credite deux fois : DOIT rester nul
+  long long oracle_couverture_ko = 0; // paires vues != 1 fois : DOIT rester nul
 };
 
 struct Rect {
@@ -525,6 +537,8 @@ int main(int argc, char** argv) {
   CloudFamily family = CloudFamily::kUniform;
   Mutant mutant = Mutant::kNone;
   double min_ferme_q4 = -1.0;
+  int oracle_n = 0;
+  bool fixture = false;
 
   auto arg_ll = [](const char* s, long long* out) {
     const char* e = s + std::strlen(s);
@@ -553,6 +567,8 @@ int main(int argc, char** argv) {
     if (eat("--seed", &seed)) continue;
     if (eat("--coord", &coord)) continue;
     if (eat("--juge", &tmp)) { judge = (int)tmp; continue; }
+    if (eat("--oracle", &tmp)) { oracle_n = (int)tmp; continue; }
+    if (a == "--fixture=coeur5") { fixture = true; continue; }
     if (eat("--min-rectangles", &tmp)) { min_rect = (int)tmp; continue; }
     if (a.rfind("--min-ferme-q4=", 0) == 0) {
       min_ferme_q4 = std::atof(a.c_str() + 15);
@@ -572,6 +588,7 @@ int main(int argc, char** argv) {
       else if (m == "largeur-i64") mutant = Mutant::kNarrowI64;
       else if (m == "coeur-centre-seul") mutant = Mutant::kCoreCentreOnly;
       else if (m == "seuil-decale") mutant = Mutant::kThresholdOff;
+      else if (m == "bulk-sans-masque") mutant = Mutant::kBulkSansMasque;
       else if (m == "oublie-b") mutant = Mutant::kDropB;
       else { std::fprintf(stderr, "REFUS : mutant inconnu %s\n", m.c_str()); return 2; }
       continue;
@@ -584,14 +601,32 @@ int main(int argc, char** argv) {
   if (smax < 4 || smax > 32) { std::fprintf(stderr, "REFUS : smax hors domaine\n"); return 2; }
   if (sep < 1 || sep > 64) { std::fprintf(stderr, "REFUS : separation hors domaine\n"); return 2; }
   if (judge > 400) { std::fprintf(stderr, "REFUS : juge non borne\n"); return 2; }
+  if (oracle_n > 200) { std::fprintf(stderr, "REFUS : oracle non borne\n"); return 2; }
   if (mutant != Mutant::kNone && judge <= 0) {
     std::fprintf(stderr, "REFUS : un mutant sans juge ne prouve rien\n");
     return 2;
   }
 
+  // ---- FIXTURE PERMANENTE DU CONTRE-AUDIT (section 5).
+  // `A` et `B` singletons ; un sous-arbre `Z` de CINQ PointId tous strictement
+  // dans `W2` et groupes ; aucun autre site. A `s_max=11`, `h_2=10`. Sans le
+  // masque de lanes, la voie rapide creditait cinq puis les feuilles cinq de
+  // plus : `hcore2=10`, et l'ancre VIVANTE etait fermee. La fixture exige
+  // `hcore2=5`, l'ancre survivante, et `bulk_credits>=1` — sans ce dernier
+  // plancher elle serait verte meme si la voie rapide ne se declenchait jamais,
+  // c'est-a-dire vacue comme celles que le contre-audit a prises en defaut.
   const int coord_used =
       coord > 0 ? (int)coord : mhgp3v::cloud_family_default_coord(family, n);
-  std::vector<P3> pts = mhgp3v::make_family_cloud(family, n, coord_used, seed);
+  std::vector<P3> pts;
+  if (fixture) {
+    pts = {P3{100, 500, 500}, P3{900, 500, 500},
+           P3{490, 500, 500}, P3{495, 500, 500}, P3{500, 500, 500},
+           P3{505, 500, 500}, P3{510, 500, 500}};
+    n = (int)pts.size();
+    smax = 11;
+  } else {
+    pts = mhgp3v::make_family_cloud(family, n, coord_used, seed);
+  }
   if ((int)pts.size() != n) { std::fprintf(stderr, "REFUS : nuage non genere\n"); return 2; }
 
   // ---- Octree comprime de Morton, partage par les trois lanes.
@@ -661,7 +696,26 @@ int main(int argc, char** argv) {
   const int seuil_delta = (mutant == Mutant::kThresholdOff) ? 1 : 0;
 
   std::vector<int> ha(0), hb(0);
-  std::vector<int> histo(16, 0);
+  // L'histogramme doit couvrir `h_2 = s_max - 1`, soit 31 a `s_max=32`. Seize
+  // cases ne couvraient que le domaine effectif, plus etroit que le domaine
+  // annonce par la CLI : le contre-audit avait raison de le relever.
+  const int kHisto = smax + 2;
+  std::vector<int> histo((size_t)kHisto, 0);
+  const bool oracle = (oracle_n > 0) || fixture;
+  std::vector<int> core_ids;
+  std::vector<unsigned char> vu((size_t)n, 0);
+  const long long npairs = (long long)n * (n - 1) / 2;
+  std::vector<unsigned char> ferme;      // par PairId et par lane
+  std::vector<unsigned> couverture;
+  if (oracle) {
+    if (npairs > 40000000LL) { std::fprintf(stderr, "REFUS : oracle non borne\n"); return 2; }
+    ferme.assign((size_t)npairs * 3, 0);
+    couverture.assign((size_t)npairs, 0);
+  }
+  auto pair_idx = [&](int i, int j) {
+    if (i > j) { const int k = i; i = j; j = k; }
+    return (long long)i * (2LL * n - i - 1) / 2 + (j - i - 1);
+  };
 
   for (const Rect& r : rects) {
     const int ua = h_first(r.u), ub = h_last(r.u);
@@ -695,6 +749,7 @@ int main(int argc, char** argv) {
     // L'elagage porte sur `max_z min_{a,b} H`, valide pour les trois lanes
     // puisque les fuseaux sont emboites `W_4 < W_3 < W_2`.
     int hcore[3] = {0, 0, 0};
+    core_ids.clear();
     {
       struct Frame { int node; int mask; };
       std::vector<Frame> st;
@@ -720,7 +775,11 @@ int main(int argc, char** argv) {
           if (!touche) {
             hcore[0] += (la - fi + 1);
             if (hcore[0] > h_q[0]) hcore[0] = h_q[0];
-            child &= ~1;  // LA REPARATION : les enfants ne recreditent plus q2
+            ++L.bulk_credits;
+            if (oracle) for (int k = fi; k <= la; ++k) core_ids.push_back(k);
+            // LA REPARATION : les enfants ne recreditent plus q2. Le mutant
+            // `bulk-sans-masque` reproduit exactement le defaut du 15 aout.
+            if (mutant != Mutant::kBulkSansMasque) child &= ~1;
           }
         }
         if (leaf) {
@@ -729,7 +788,7 @@ int main(int argc, char** argv) {
           if (i >= va && i <= vb) continue;  // disjonction avec `B`
           const i64 hh = h_min_over_boxes(BA, BB, sorted_pts[i]);
           if (hh <= 0) continue;
-          if ((m & 1) && hcore[0] < h_q[0]) ++hcore[0];
+          if ((m & 1) && hcore[0] < h_q[0]) { ++hcore[0]; if (oracle) core_ids.push_back(i); }
           if ((m & 6) == 0) continue;
           i128 xi = 0;
           if (corners_xi) {
@@ -793,18 +852,71 @@ int main(int argc, char** argv) {
       std::fill(histo.begin(), histo.end(), 0);
       for (int i = 0; i < nb; ++i) {
         int v = hb[(size_t)i * 3 + q];
-        if (v > 15) v = 15;
+        if (v > kHisto - 1) v = kHisto - 1;
         ++histo[v];
       }
-      std::vector<int> cum(17, 0);
-      for (int k = 0; k < 16; ++k) cum[k + 1] = cum[k] + histo[k];
+      std::vector<int> cum((size_t)kHisto + 1, 0);
+      for (int k = 0; k < kHisto; ++k) cum[k + 1] = cum[k] + histo[k];
       for (int i = 0; i < na; ++i) {
         const int budget = need - hcore[q] - ha[(size_t)i * 3 + q];
-        if (budget <= 0) continue;               // deja mort pour tout `b`
-        const int k = budget > 16 ? 16 : budget; // `h_b < budget`
+        if (budget <= 0) continue;                     // deja mort pour tout `b`
+        const int k = budget > kHisto ? kHisto : budget;  // `h_b < budget`
         L.survivantes[q] += cum[k];
       }
     }
+
+    // ---- ORACLE (P0.3, P0.4, P0.5). Il materialise ce que le chemin normal
+    // evite : la decision par `PairId`, l'identite des sites credites au coeur,
+    // et la couverture reelle de la partition. Borne a petit `n`.
+    if (oracle) {
+      // P0.4 : chaque `PointId` credite au plus une fois, et jamais dans `A`
+      // ou `B`. C'est ce controle, et non un compteur alimente par un mutant,
+      // qui atteste la disjonction.
+      for (int id : core_ids) {
+        if (vu[(size_t)id]) { ++L.oracle_ids_doubles; continue; }
+        vu[(size_t)id] = 1;
+        if ((id >= ua && id <= ub) || (id >= va && id <= vb)) ++L.oracle_ids_doubles;
+      }
+      for (int id : core_ids) vu[(size_t)id] = 0;
+      // P0.5 : couverture reelle, une occurrence par paire non ordonnee.
+      // La somme `|A||B| = C(n,2)` peut masquer un doublon compense par un
+      // manque ; ce compte-ci ne le peut pas.
+      for (int i = ua; i <= ub; ++i)
+        for (int j = va; j <= vb; ++j) ++couverture[(size_t)pair_idx(i, j)];
+      // P0.3 : la decision, paire par paire.
+      for (int q = 0; q < 3; ++q)
+        for (int i = 0; i < na; ++i)
+          for (int j = 0; j < nb; ++j) {
+            const int lower = hcore[q] + ha[(size_t)i * 3 + q] + hb[(size_t)j * 3 + q];
+            if (lower >= h_q[q] + seuil_delta)
+              ferme[(size_t)pair_idx(ua + i, va + j) * 3 + q] = 1;
+          }
+    }
+  }  // fin de la boucle sur les rectangles
+
+  // ---- CONFRONTATION A LA FORCE BRUTE (P0.3). Une paire fermee par le
+  // prefiltre DOIT etre vraiment morte. L'inverse n'est pas exige : le filtre
+  // est un minorant, il a le droit de laisser vivre une paire morte.
+  if (oracle) {
+    for (long long p = 0; p < npairs; ++p)
+      if (couverture[(size_t)p] != 1u) ++L.oracle_couverture_ko;
+    for (int i = 0; i < n; ++i)
+      for (int j = i + 1; j < n; ++j) {
+        const long long idx = pair_idx(i, j);
+        bool besoin = false;
+        for (int q = 0; q < 3; ++q) if (ferme[(size_t)idx * 3 + q]) besoin = true;
+        if (!besoin) continue;
+        ++L.oracle_paires;
+        const Box Bb = box_of_point(sorted_pts[j]);
+        int vrai[3] = {0, 0, 0};
+        for (int k = 0; k < n; ++k) {
+          if (k == i || k == j) continue;
+          for (int q = 0; q < 3; ++q)
+            if (universal_witness(sorted_pts[i], Bb, sorted_pts[k], q + 2, false)) ++vrai[q];
+        }
+        for (int q = 0; q < 3; ++q)
+          if (ferme[(size_t)idx * 3 + q] && vrai[q] < h_q[q]) ++L.oracle_faux_morts;
+      }
   }
 
   // ---- JUGE DU COEUR. Le juge ponctuel ne voit pas une faute qui n'apparait
@@ -892,6 +1004,10 @@ int main(int argc, char** argv) {
                 q + 2, L.survivantes[q], total - L.survivantes[q], pct, L.coeur_total[q],
                 L.coeur_non_vide[q], L.ha_total[q], L.hb_total[q]);
   }
+  std::printf("nonvacuite bulk_credits=%lld oracle_paires=%lld oracle_faux_morts=%lld "
+              "oracle_ids_doubles=%lld oracle_couverture_ko=%lld\n",
+              L.bulk_credits, L.oracle_paires, L.oracle_faux_morts, L.oracle_ids_doubles,
+              L.oracle_couverture_ko);
   if (judge > 0)
     std::printf("juge paires=%lld vivantes=%lld desaccords=%lld coeur_verifies=%lld coeur_faux=%lld\n",
                 juge_paires, juge_vivantes, desaccords, L.coeur_verifies, L.coeur_faux);
@@ -915,6 +1031,40 @@ int main(int argc, char** argv) {
     if (pct < min_ferme_q4) {
       std::fprintf(stderr, "PLANCHER : fermeture q4 %.3f%% sous le plancher %.3f%%\n", pct,
                    min_ferme_q4);
+      return 3;
+    }
+  }
+  if (oracle) {
+    if (L.oracle_couverture_ko > 0) {
+      std::fprintf(stderr, "PLANCHER : %lld paires vues un nombre de fois != 1\n",
+                   L.oracle_couverture_ko);
+      return 3;
+    }
+    if (L.oracle_ids_doubles > 0) {
+      std::fprintf(stderr, "DESACCORD DU JUGE : %lld PointId credites deux fois ou dans A/B\n",
+                   L.oracle_ids_doubles);
+      return 1;
+    }
+    if (L.oracle_faux_morts > 0) {
+      std::fprintf(stderr, "DESACCORD DU JUGE : %lld ancres fermees a tort\n",
+                   L.oracle_faux_morts);
+      return 1;
+    }
+  }
+  if (fixture) {
+    // La voie rapide DOIT s'etre declenchee, sinon la fixture ne prouve rien.
+    if (L.bulk_credits < 1) {
+      std::fprintf(stderr, "PLANCHER : la voie rapide q2 ne s'est pas declenchee\n");
+      return 3;
+    }
+    // L'ancre (a,b) de la fixture est le PairId des deux extremites ; elle a
+    // cinq interieurs stricts, donc elle DOIT survivre a `h_2 = 10`.
+    long long vivantes = 0;
+    for (long long pp = 0; pp < npairs; ++pp)
+      if (!ferme[(size_t)pp * 3]) ++vivantes;
+    if (vivantes != npairs) {
+      std::fprintf(stderr, "PLANCHER : %lld ancres q2 fermees sur la fixture, zero attendu\n",
+                   npairs - vivantes);
       return 3;
     }
   }

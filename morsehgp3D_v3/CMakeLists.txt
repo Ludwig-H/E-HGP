@@ -4654,3 +4654,50 @@ mhgp3v_add_expected_code_test_for(mhgp3v_combined_prefilter_probe
   mhgp3v_combined_mutant_centre "MUTANT TUE" 4
   --points=160 --family=eight_clusters --seed=5 --separation=8 --juge=160
   --inject=coeur-centre-seul)
+
+# ---------------------------------------------------------------------------
+# REPARATION P0 DU CONTRE-AUDIT DU 15 AOUT.
+#
+# La fixture grave le defaut trouve par l'auditeur : `A` et `B` singletons, un
+# sous-arbre de CINQ sites tous dans `W2`, `h_2 = 10`. Sans masque de lanes, la
+# voie rapide creditait cinq puis les feuilles cinq de plus — `hcore2 = 10` — et
+# l'ancre VIVANTE etait fermee.
+#
+# Trois planchers, parce qu'une porte qui ne prouve pas qu'elle exerce ce
+# qu'elle teste est exactement ce qui a laisse passer le bug :
+#   `bulk_credits >= 1`     la voie rapide s'est reellement declenchee ;
+#   `oracle_ids_doubles`    aucun PointId credite deux fois ni pris dans A/B ;
+#   `oracle_couverture_ko`  chaque paire vue exactement une fois.
+# ---------------------------------------------------------------------------
+add_test(NAME mhgp3v_combined_fixture_coeur5
+  COMMAND mhgp3v_combined_prefilter_probe --fixture=coeur5)
+set_tests_properties(mhgp3v_combined_fixture_coeur5 PROPERTIES
+  PASS_REGULAR_EXPRESSION "nonvacuite bulk_credits=[1-9]")
+
+mhgp3v_add_expected_code_test_for(mhgp3v_combined_prefilter_probe
+  mhgp3v_combined_mutant_bulk_sans_masque "PointId credites deux fois" 1
+  --fixture=coeur5 --inject=bulk-sans-masque --juge=7)
+
+# ORACLE PAR PairId : la seule porte qui teste la DECISION et non ses
+# ingredients. Elle exige `fermees` inclus dans `vraiment mortes`.
+add_test(NAME mhgp3v_combined_oracle_uniform
+  COMMAND mhgp3v_combined_prefilter_probe --points=160 --family=uniform --seed=3
+          --separation=6 --oracle=160)
+set_tests_properties(mhgp3v_combined_oracle_uniform PROPERTIES
+  PASS_REGULAR_EXPRESSION "oracle_faux_morts=0 oracle_ids_doubles=0 oracle_couverture_ko=0")
+
+add_test(NAME mhgp3v_combined_oracle_amas
+  COMMAND mhgp3v_combined_prefilter_probe --points=160 --family=eight_clusters --seed=5
+          --separation=8 --oracle=160)
+set_tests_properties(mhgp3v_combined_oracle_amas PROPERTIES
+  PASS_REGULAR_EXPRESSION "oracle_faux_morts=0 oracle_ids_doubles=0 oracle_couverture_ko=0")
+
+add_test(NAME mhgp3v_combined_oracle_terrain
+  COMMAND mhgp3v_combined_prefilter_probe --points=160 --family=terrain --seed=7
+          --separation=6 --oracle=160)
+set_tests_properties(mhgp3v_combined_oracle_terrain PROPERTIES
+  PASS_REGULAR_EXPRESSION "oracle_faux_morts=0 oracle_ids_doubles=0 oracle_couverture_ko=0")
+
+mhgp3v_add_expected_code_test_for(mhgp3v_combined_prefilter_probe
+  mhgp3v_combined_refus_oracle_non_borne "REFUS : oracle non borne" 2
+  --points=500 --oracle=500)
