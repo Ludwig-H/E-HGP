@@ -352,6 +352,60 @@ Cadre : `phase=exploration_v3_hors_registre`,
 > La dernière session G4 a échoué avant sa rampe et la cible a été certifiée
 > `TERMINATED` : elle ne fournit aucune mesure 50k.
 
+## Ménage documentaire et logiciel du 15 août 2026
+
+Cette section enregistre un travail d'hygiène et une réouverture. Elle ne
+promeut aucune phase, ne reçoit aucun logiciel et ne change aucun
+`public_status`.
+
+**Vingt-neuf audits supprimés, condensés dans
+[`PISTES_FERMEES.md`](PISTES_FERMEES.md).** Le critère est mécanique et
+rejouable : n'a été évacué qu'un fichier qui n'était ni une autorité active, ni
+une dépendance historique gardée, ni cité par `CMakeLists.txt`, un prototype,
+un oracle, un reçu, `../PROPOSITION.md`, `../README.md` ou le présent document.
+L'index affirmait depuis plusieurs sessions que ce ménage était fait ; il ne
+l'était pas — sur 89 fichiers, 29 n'étaient déclarés nulle part.
+
+**Vingt-trois sources supprimées, avec leurs cibles et leurs cent
+quatre-vingt-douze CTests** : le portage GPU du parcours order-k et les deux
+profils de volume qui l'ont fermé, les cellules de centres et leur juge, le
+préfixe fini de voisins, la localité certifiée par cône, la source directe par
+arrangement, les groupes coniques et le cœur commun de Jung. `CMakeLists.txt`
+perd `1 277` lignes, sans référence orpheline. Deux fichiers portant une idée
+fermée sont **gardés et documentés** : `order_k_bfs.hpp`, sujet du juge M1, et
+`center_cover_mass_probe.cpp`, hôte de la suite `p1a_*`.
+
+**`directional_dominance` est rouvert.** Il avait été retiré avec les
+cellules de centres au motif qu'il partageait leur cible de compilation ;
+c'était une erreur de classement. Son prédicat n'a jamais été réfuté — seule la
+gate à trois voies qui le mettait en concurrence l'a été. Rejeu `counter-only` :
+la fermeture q4 passe de `3,13 %` à `41,6 %` sur `uniform` et de `0,60 %` à
+`27,1 %` sur `eight_clusters` entre `n=2 000` et `n=8 000`. Aucun reçu épinglé,
+aucune pente à trois points.
+
+**Nouveau probe `combined_prefilter_probe`**, `13` portes. Il minore
+`|P inter W_q(a,b)|` par `h_coeur + h_a + h_b`, trois comptes prouvés
+disjoints — la disjonction est même automatique, puisque pour `z` dans `A` le
+choix `a = z` donne `H = 0`. La décision se lit sur un histogramme de `h_b`,
+jamais sur une paire. Deux bornes exactes : `H` bilinéaire par axe, et `Xi`
+**convexe en `a`** car `(b-a) x (z-a) = b x z - b x a - a x z` est affine — donc
+maximum à un sommet. L'énoncé, les preuves et les mesures sont en section 6bis
+de [`../PROPOSITION.md`](../PROPOSITION.md). C'est un compteur d'**ancres**,
+jamais de supports.
+
+**Défaut logiciel non corrigé, et il bloque le vert.**
+`mhgp3v_q4seed_axis_topr4_probe` ne compile pas depuis `3507b5e` :
+`debordements` et `refus_r4` sont déclarés et jamais câblés, sous `-Werror`. Ce
+n'est pas cosmétique — ligne 649, `kDebordement` tombe dans le même `continue`
+muet que les trois vraies morts, ce que le commentaire de la ligne 625 interdit
+explicitement. Arbitrer entre code 2 et code 3 modifie une sortie que des portes
+lisent au regex ; la décision n'appartient pas à l'auditeur.
+
+**État vérifié** : `761` CTests enregistrés, `760` passent hors la cible
+ci-dessus. Le seul autre échec est `mhgp3v_arith_selftest`, qui refuse
+correctement de qualifier sans GMP, absent du conteneur.
+
+
 ## Snapshot
 
 Le dernier commit logiciel stable relu est
