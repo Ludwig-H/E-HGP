@@ -77,27 +77,32 @@ ancienne phrase imposant le rejet global des positions dupliquées est périmée
 - [`NOTE_CLAUDE_DUAL_TREE_Q23_20260815.md`](NOTE_CLAUDE_DUAL_TREE_Q23_20260815.md) :
   la seconde branche de Q23, implémentée. L'autorité exacte à huit coins fait
   croître `h_a` de `5` à `7 %` pour `+2 %` de temps ; l'auto-jointure dual-tree
-  rend les MEMES valeurs pour `2,2` à `3,0` fois moins d'évaluations. Elle
+  rend les MEMES valeurs — mais le gain annoncé `2,2` à `3,0x` est **rétracté** :
+  il comparait une baseline non fusionnée, et face à une baseline elle aussi
+  multi-lane le dual-tree coûte `+0,22` à `+30 %`. La vraie optimisation est la
+  fusion des trois lanes. Elle
   corrige aussi trois manques du § 6.2 du ré-audit : sans masque de lanes le
   filtre ferme à tort (`212` et `1 525` fausses morts en régime tendu), la
   diagonale lue au niveau nœud annule tout (`ha_somme` à zéro), et sans cutoff
   la méthode coûte `2` à `4` fois plus que ce qu'elle remplace.
 - [`NOTE_CLAUDE_ECART_AU_VRAI_VIVANT_20260815.md`](NOTE_CLAUDE_ECART_AU_VRAI_VIVANT_20260815.md) :
-  la mesure qui borne tout le reste. Le préfiltre étant fail-open, le vrai
-  vivant se compte exactement en décidant les seules survivantes, sans `O(n^3)`.
-  Le mou est une fonction de (famille, séparation) et **pas** de `n` : `1,33` sur
-  `terrain` et `uniform` à `s=8`, `2,6` à `2,8` sur `eight_clusters`. Aucun
-  resserrement de certificat ne peut donc rendre plus que trente-trois pour cent
-  sur les deux premières familles. Un estimateur par échantillonnage y est
-  retiré, sa variance valant trois à douze écarts-types binomiaux sans
-  explication.
+  la mesure qui borne le resserrement des certificats, **corrigée trois fois**.
+  Le préfiltre étant fail-open, l'ensemble `W`-vivant se compte exactement en
+  décidant les seules survivantes, sans `O(n^3)` — à condition que
+  `masse_non_decide` soit nulle, ce que le probe impose désormais. Le mou croît
+  lentement avec `n` (`1,245` à `1,436` sur `terrain` pour un facteur huit) et
+  converge vers un avec `s` (`1,050` à `s=16`). La fraction retirable vaut
+  `1-1/mu`, soit `22,4 %` et non `33 %`. Trois exposants successifs donnent un
+  ensemble `W`-vivant quasi linéaire, entre `1,068` et `1,163`. Cinq
+  rétractations y sont inscrites, dont le retrait injustifié de
+  l'échantillonneur.
 - [`NOTE_CLAUDE_ARBITRAGE_SEPARATION_20260815.md`](NOTE_CLAUDE_ARBITRAGE_SEPARATION_20260815.md) :
-  l'arbitrage `s=6` contre `s=8` n'est pas invariant d'échelle. Sur `terrain`,
-  `s=8` retire `17,5 %` du résiduel à `n=8 000` mais `84,5 %` — un facteur
-  `6,4` — à `n=32 000`, pour `+67 %` de temps ; le seuil de rentabilité tombe
-  de `79` à `2,4` microsecondes par ancre instruite. Les améliorations du jour
-  resserrent les certificats à séparation donnée, elles ne compensent pas une
-  séparation insuffisante.
+  l'arbitrage `s=6` contre `s=8`, **avec son facteur `6,4` rétracté** :
+  `99,052 %` de la baisse venait de la masse hors `cap-cellule=512`, et le champ
+  `cellule_max` invoqué pour l'exclure était mis à jour après le rejet des
+  rectangles capés. Sur la seule masse jugée, `s=8` gagne `17,238 %` à
+  `n=32 000` contre `17,503 %` à `n=8 000` : l'effet intrinsèque est presque
+  invariant en `n`.
 - [`NOTE_CLAUDE_BORNE_COUPLEE_20260815.md`](NOTE_CLAUDE_BORNE_COUPLEE_20260815.md) :
   la borne couplée du § 3.3 encodée, avec sa fixture de saturation. Elle naît à
   `39 %` de la séparation qu'exige la décorrélée et trouve `4` à `21 %` de
