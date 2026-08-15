@@ -997,6 +997,7 @@ int main(int argc, char** argv) {
   bool refuse_doublons = false; // positions dupliquees : refus explicite
   bool seeds = false;           // contraction W-vivant -> seeds aigus
   bool seed_juge = false;       // confronter le certificat O(1) aux huit coins
+  bool fixture_owner = false;   // le facteur deux des faces incidentes, refute
   long long seed = 3, coord = 0;
   CloudFamily family = CloudFamily::kUniform;
   Mutant mutant = Mutant::kNone;
@@ -1069,6 +1070,7 @@ int main(int argc, char** argv) {
     if (eat("--juge", &tmp)) { borne("--juge", 0, 200); judge = (int)tmp; continue; }
     if (eat("--oracle", &tmp)) { borne("--oracle", 0, 200); oracle_n = (int)tmp; continue; }
     if (a == "--fixture=coeur5") { fixture = true; continue; }
+    if (a == "--fixture=owner-porteurs") { fixture_owner = true; continue; }
     if (a == "--compare-corner512") { compare512 = true; continue; }
     if (a == "--ha=boule") { ha_boule = true; ha_fusion = false; continue; }
     if (a == "--ha=corner8") { ha_corner8 = true; ha_fusion = false; continue; }
@@ -1169,6 +1171,88 @@ int main(int argc, char** argv) {
   // c'est-a-dire vacue comme celles que le contre-audit a prises en defaut.
   const int coord_used =
       coord > 0 ? (int)coord : mhgp3v::cloud_family_default_coord(family, n);
+  // ---- LE FACTEUR DEUX DES FACES INCIDENTES, REFUTE PAR UN TETRAEDRE ENTIER.
+  //
+  // On aurait pu croire que les DEUX faces incidentes a l'arete owner d'un
+  // tetraedre bien centre sont aigues, et en tirer `N4_event <= 2 r4 C4_carrier`
+  // avec un facteur deux garanti. C'est faux, et le contre-exemple de
+  // NOTE_AUDITEUR_ORDRE_EXECUTION_APRES_5CE2634 le montre en coordonnees
+  // entieres — verifie ici, pas rapporte :
+  //
+  //   p0=(6,2,5)  p1=(0,3,3)  p2=(1,4,6)  p3=(5,3,1)
+  //
+  // Aretes au carre : 41, 30, 18, 11, 29, 42. L'owner `p2p3` vaut 42, atteint
+  // UNE SEULE FOIS, donc il est unique sans tie-break. Le circumcentre est
+  // rationnel exact `(83/26, 81/26, 97/26)`, equidistant a `7259/676` des
+  // quatre sommets : c'est bien un tetraedre non degenere.
+  //
+  // Or des deux faces incidentes a `p2p3`, la face `(p0,p2,p3)` est aigue et la
+  // face `(p1,p2,p3)` ne l'est PAS. Le vrai centre n'est donc propose que par
+  // UN seul `Q4Seed3`. La borne correcte est `N4_event <= R4_bundle`, sans le
+  // facteur deux.
+  //
+  // Le tetraedre REGULIER quantifie sert de contraste : ses quatre faces sont
+  // aigues, donc les deux incidentes le sont. La fixture porte les deux, et
+  // c'est le CONTRASTE qui fait qu'elle n'est pas vacue.
+  if (fixture_owner) {
+    struct Tetra { const char* nom; int p[4][3]; };
+    const Tetra ts[2] = {
+        {"auditeur", {{6, 2, 5}, {0, 3, 3}, {1, 4, 6}, {5, 3, 1}}},
+        // Tetraedre regulier a coordonnees entieres : quatre sommets alternes
+        // du cube `{0,2}^3`, aretes toutes egales a 8.
+        {"regulier", {{0, 0, 0}, {2, 2, 0}, {2, 0, 2}, {0, 2, 2}}}};
+    int total_aigues_incidentes = 0;
+    for (const Tetra& t : ts) {
+      auto D2 = [&](int i, int j) {
+        i64 s = 0;
+        for (int k = 0; k < 3; ++k) {
+          const i64 d = (i64)t.p[i][k] - t.p[j][k];
+          s += d * d;
+        }
+        return s;
+      };
+      i64 mx = -1;
+      int oi = -1, oj = -1, mult = 0;
+      for (int i = 0; i < 4; ++i)
+        for (int j = i + 1; j < 4; ++j) {
+          const i64 d = D2(i, j);
+          if (d > mx) { mx = d; oi = i; oj = j; mult = 1; }
+          else if (d == mx) ++mult;
+        }
+      auto aigue = [&](int i, int j, int k) {
+        const int f[3][3] = {{i, j, k}, {j, i, k}, {k, i, j}};
+        for (int s = 0; s < 3; ++s) {
+          i64 h = 0;
+          for (int c = 0; c < 3; ++c)
+            h += ((i64)t.p[f[s][1]][c] - t.p[f[s][0]][c]) *
+                 ((i64)t.p[f[s][2]][c] - t.p[f[s][0]][c]);
+          if (h <= 0) return false;  // STRICTE : l'angle droit n'est pas aigu
+        }
+        return true;
+      };
+      int inc = 0;
+      for (int k = 0; k < 4; ++k) {
+        if (k == oi || k == oj) continue;
+        if (aigue(oi, oj, k)) ++inc;
+      }
+      total_aigues_incidentes += inc;
+      std::printf("owner tetra=%s arete_max=%lld owner=(%d,%d) multiplicite=%d "
+                  "faces_incidentes_aigues=%d\n",
+                  t.nom, (long long)mx, oi, oj, mult, inc);
+    }
+    // LE PLANCHER DE NON-VACUITE : `1` pour l'auditeur, `2` pour le regulier.
+    // Un total de `3` atteste que la fixture voit bien les deux regimes ; un
+    // total de `4` signifierait que le facteur deux est revenu.
+    if (total_aigues_incidentes != 3) {
+      std::fprintf(stderr,
+                   "PLANCHER : faces incidentes aigues = %d, attendu 3 (1 + 2)\n",
+                   total_aigues_incidentes);
+      return 3;
+    }
+    std::printf("owner total_faces_incidentes_aigues=%d facteur_deux=REFUTE\n",
+                total_aigues_incidentes);
+    return 0;
+  }
   std::vector<P3> pts;
   if (fixture) {
     pts = {P3{100, 500, 500}, P3{900, 500, 500},

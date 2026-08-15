@@ -5361,6 +5361,46 @@ set_tests_properties(mhgp3v_two_lines_etages_separes PROPERTIES
 # Le coût est compté en ÉVALUATIONS DU PRÉDICAT des deux côtés — une par nœud
 # visité, une par point testé. Comparer des tests de feuilles à des tests de
 # points aurait fabriqué un gain, exactement comme le dual-tree l'avait fait.
+# ---------------------------------------------------------------------------
+# LE FACTEUR DEUX DES FACES INCIDENTES, RÉFUTÉ EN COORDONNÉES ENTIÈRES.
+#
+# `NOTE_AUDITEUR_ORDRE_EXECUTION_APRES_5CE2634` donne le contre-exemple ; je l'ai
+# vérifié plutôt que rapporté. `p0=(6,2,5) p1=(0,3,3) p2=(1,4,6) p3=(5,3,1)` :
+# arêtes au carré `41 30 18 11 29 42`, owner `p2p3` de multiplicité **un** donc
+# unique sans tie-break, circumcentre rationnel exact `(83/26, 81/26, 97/26)`
+# équidistant à `7259/676`. Des deux faces incidentes à l'owner, `(p0,p2,p3)` est
+# aiguë et `(p1,p2,p3)` ne l'est pas.
+#
+# La borne devient `N4_event <= R4_bundle`, sans le facteur deux.
+#
+# LE CONTRASTE FAIT LA NON-VACUITÉ : le tétraèdre régulier — quatre sommets
+# alternés de `{0,2}^3`, arêtes toutes égales à `8` — a ses deux faces
+# incidentes aiguës. Le total `1 + 2 = 3` est le plancher ; `4` signifierait que
+# le facteur deux est revenu, `2` que la fixture ne voit plus le cas régulier.
+add_test(NAME mhgp3v_owner_facteur_deux_refute
+  COMMAND mhgp3v_combined_prefilter_probe --fixture=owner-porteurs)
+set_tests_properties(mhgp3v_owner_facteur_deux_refute PROPERTIES
+  PASS_REGULAR_EXPRESSION
+  "tetra=auditeur arete_max=42 owner=\\(2,3\\) multiplicite=1 faces_incidentes_aigues=1(.|\n)*tetra=regulier arete_max=8 owner=\\(0,1\\) multiplicite=6 faces_incidentes_aigues=2(.|\n)*facteur_deux=REFUTE")
+
+# ---------------------------------------------------------------------------
+# EXACT-ONCE DE LA SCISSION — priorité 1 de l'ordre d'exécution de l'auditeur.
+#
+# La scission récursive change la partition ; il faut donc prouver qu'elle
+# couvre encore chaque `PairId` **exactement une fois**. Les caps minuscules
+# forcent la récursion jusqu'au fond — `cap=2` descend `cellule_max` à `2` — et
+# l'oracle vérifie la couverture par `PairId`, pas par masse agrégée.
+foreach(c 512 8 2)
+  foreach(fam terrain uniform two_lines)
+    add_test(NAME mhgp3v_scission_exact_once_${fam}_cap${c}
+      COMMAND mhgp3v_combined_prefilter_probe --points=120 --family=${fam} --seed=3
+              --separation=8 --smax=11 --oracle=200 --cap=scission --cap-cellule=${c})
+    set_tests_properties(mhgp3v_scission_exact_once_${fam}_cap${c} PROPERTIES
+      PASS_REGULAR_EXPRESSION
+      "oracle_paires=[1-9][0-9]* oracle_faux_morts=0 oracle_ids_doubles=0 oracle_couverture_ko=0")
+  endforeach()
+endforeach()
+
 add_test(NAME mhgp3v_seed_elagage_gain_two_lines
   COMMAND mhgp3v_combined_prefilter_probe --points=400 --family=two_lines --seed=3
           --separation=8 --smax=11 --seeds)
