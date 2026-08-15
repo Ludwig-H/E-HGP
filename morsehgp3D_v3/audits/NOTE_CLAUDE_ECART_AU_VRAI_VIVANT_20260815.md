@@ -149,10 +149,18 @@ ligne avec les autres tailles.
 
 ## 8. Ce qui reste dû à l'auditeur
 
+**Fait depuis** : le compte en deux passes avec budget `n |S|`, le prédicat
+point--point multi-lane unique et l'exclusion des paires `D=0`. Détail, chiffres
+et portes dans
+[`NOTE_CLAUDE_P05_DEUX_BALAYAGES_20260815.md`](NOTE_CLAUDE_P05_DEUX_BALAYAGES_20260815.md).
+Les comptes n'ont pas bougé d'une unité — `uniform, n=600, s=8` rend toujours
+`17 479 / 42 294 / 45 913` — et l'ancien balayage est conservé sous
+`--vivant=legacy` précisément pour que cette invariance soit une porte et non
+une affirmation.
+
 Non fait, et je ne le prétends pas : le protocole cap-aware complet (histogramme
 de `max(|A|,|B|)`, scission récursive des gros endpoints, comparaison à
-stratégie de cap identique, matérialisation des `PairId` survivants) ; le compte
-en deux passes avec budget `n |S|` et prédicat point--point multi-lane unique ;
-l'exclusion des paires `D=0` ; et les portes réclamées en section 6.3 de son
-audit — trois lanes, `masse_non_decide=0` imprimé comme statut, égalité `s6/s8`
-sur le même nuage, et un mutant qui force une paire de `V_q` hors de `S_q`.
+stratégie de cap identique, matérialisation des `PairId` survivants) ; et les
+portes réclamées en section 6.3 de son audit — `masse_non_decide=0` imprimé
+comme statut positif, égalité `s6/s8` sur le même nuage, et un mutant qui force
+une paire de `V_q` hors de `S_q`.

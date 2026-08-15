@@ -4714,11 +4714,15 @@ set_tests_properties(mhgp3v_combined_oracle_terrain PROPERTIES
 #                    `survivantes x n` avec sortie anticipée — il suit donc le
 #                    résiduel. Reproduit à l'unité l'ancienne énumération
 #                    exhaustive (`n=600` : `17479 / 42294 / 45913`).
-#   `--echantillon`  conservé hors du chemin de mesure. À `n=600`, ses écarts au
-#                    compte exact valent trois à douze écarts-types binomiaux, et
-#                    remplacer xorshift64 par splitmix64 n'a pas suffi : la
-#                    variance résiduelle n'est pas expliquée, donc aucun chiffre
-#                    publié n'en dépend.
+#   `--echantillon`  conservé, et réhabilité. Je l'avais écarté au motif d'une
+#                    variance « inexpliquée » de trois à douze écarts-types : je
+#                    comparais des écarts RELATIFS à un écart-type ABSOLU en
+#                    points de proportion. Les écarts-types relatifs corrects
+#                    valent `2,414 %` / `1,207 %` / `0,604 %` pour
+#                    `K = 5000 / 20000 / 80000`, et les neuf écarts mesurés
+#                    tiennent tous sous `1,52` sigma. L'estimateur est sain ; le
+#                    compte exact reste préféré tant qu'il tient, parce qu'il ne
+#                    demande aucun intervalle.
 #
 # L'invariant est la porte : une violation signifierait que le préfiltre ferme
 # à tort, le défaut le plus grave possible.
@@ -4734,6 +4738,87 @@ endforeach()
 mhgp3v_add_expected_code_test_for(mhgp3v_combined_prefilter_probe
   mhgp3v_combined_refus_vrai_vivant_non_borne "--vrai-vivant non borne" 2
   --points=50000 --vrai-vivant)
+
+# ---------------------------------------------------------------------------
+# LES DEUX BALAYAGES DU `W`-VIVANT — P0.5 du ré-audit `eb1b52a`.
+#
+# Le balayage a été réécrit : trois passes sur `z`, une par lane, sont devenues
+# UNE passe alimentant trois compteurs, et `corner8_lane(a, Box(b), z)` — huit
+# coins identiques quand `b` est ponctuel — est devenu `pair_lane(a, b, z)`.
+# Les paires `D = 0` sont désormais exclues, `V_q` étant défini sur `D > 0`.
+#
+# Une réécriture de balayage et une réécriture de CE QUE LE BALAYAGE COMPTE se
+# ressemblent dans un diff. L'ancien est donc conservé sous `--vivant=legacy`,
+# et cette porte exige l'égalité À L'UNITÉ des trois comptes sur trois familles.
+#
+# CE QUE LA MESURE A CORRIGÉ DANS MON RAISONNEMENT. La section 6.4 du ré-audit
+# annonce huit évaluations redondantes par visite. C'est vrai du pire cas et
+# faux en régime : `corner8_lane` rend `0` dès le PREMIER coin dont `H <= 0`,
+# donc la redondance réelle vaut `1 + 7 P(H > 0)`. Mesurée à `n=300` : `1,386`
+# sur `uniform`, `1,245` sur `terrain`, `1,845` sur `eight_clusters` — jamais
+# huit. Le gain total en évaluations vaut `3,0` à `4,0`, et il vient donc
+# surtout de la fusion des trois passes, pas de la spécialisation ponctuelle.
+#
+# DEUX MUTANTS, DONT UN NEUTRE ASSUMÉ :
+#   `vivant-lane-unique`      rabat toute lane sur q2 dans le seul balayage
+#                             fusionné. La porte DOIT rendre 1.
+#   `vivant-sans-extinction`  n'éteint pas une lane qui atteint son seuil. Le
+#                             verdict étant `c < h_q` et `c` croissant, il est
+#                             NEUTRE — la porte doit rester verte. Il n'est pas
+#                             décoratif : il chiffre ce que l'extinction gagne
+#                             (`7 525 096` visites contre `6 690 404`, soit
+#                             `11,1 %` sur `uniform`, `13,1 %` sur `terrain`,
+#                             `24,3 %` sur `eight_clusters`), et il atteste que
+#                             la sortie anticipée ne change aucun compte.
+# ---------------------------------------------------------------------------
+if(Python3_FOUND)
+  add_test(NAME mhgp3v_vivant_deux_balayages
+           COMMAND ${Python3_EXECUTABLE}
+                   ${CMAKE_CURRENT_SOURCE_DIR}/audits/check_vivant_balayages.py
+                   --probe=$<TARGET_FILE:mhgp3v_combined_prefilter_probe>
+                   --points=300 --min-vivantes=500 --min-paires=2000)
+  set_tests_properties(mhgp3v_vivant_deux_balayages PROPERTIES
+    PASS_REGULAR_EXPRESSION
+    "balayages accord=OUI familles=3 desaccords=0 planchers_violes=0")
+
+  # LE MUTANT NEUTRE RESTE VERT, et son reçu chiffre l'extinction.
+  add_test(NAME mhgp3v_vivant_extinction_neutre
+           COMMAND ${Python3_EXECUTABLE}
+                   ${CMAKE_CURRENT_SOURCE_DIR}/audits/check_vivant_balayages.py
+                   --probe=$<TARGET_FILE:mhgp3v_combined_prefilter_probe>
+                   --points=300 --min-vivantes=500 --min-paires=2000
+                   --inject=vivant-sans-extinction)
+  set_tests_properties(mhgp3v_vivant_extinction_neutre PROPERTIES
+    PASS_REGULAR_EXPRESSION
+    "balayages accord=OUI familles=3 desaccords=0 planchers_violes=0")
+
+  # LE MUTANT LÉTAL MEURT, code 1 exact — un désaccord entre les deux juges.
+  add_test(NAME mhgp3v_vivant_mutant_lane_unique
+           COMMAND ${CMAKE_COMMAND}
+                   "-DPROGRAM=${Python3_EXECUTABLE}"
+                   "-DEXPECTED=accord=NON"
+                   "-DEXPECTED_CODE=1"
+                   "-DARGUMENTS=${CMAKE_CURRENT_SOURCE_DIR}/audits/check_vivant_balayages.py;--probe=$<TARGET_FILE:mhgp3v_combined_prefilter_probe>;--points=300;--min-vivantes=500;--min-paires=2000;--inject=vivant-lane-unique"
+                   -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/expect_failure.cmake)
+endif()
+
+# Un mutant `vivant-*` injecté dans son PROPRE juge le rendrait invisible : le
+# probe refuse avant tout calcul.
+mhgp3v_add_expected_code_test_for(mhgp3v_combined_prefilter_probe
+  mhgp3v_combined_refus_vivant_mutant_dans_son_juge "injecte dans son propre juge" 2
+  --points=200 --vivant=legacy --inject=vivant-lane-unique)
+
+# Et hors du mode `--vrai-vivant` il n'altère rien du tout : refus, plutôt qu'un
+# vert par vacuité qui laisserait croire le mutant survivant.
+mhgp3v_add_expected_code_test_for(mhgp3v_combined_prefilter_probe
+  mhgp3v_combined_refus_vivant_mutant_sans_mode "sans --vrai-vivant" 2
+  --points=200 --inject=vivant-lane-unique)
+
+# `--cout-instruction` ne mesure la lentille que sur la lane q4, ce que le
+# balayage legacy — une lane à la fois — ne peut pas alimenter.
+mhgp3v_add_expected_code_test_for(mhgp3v_combined_prefilter_probe
+  mhgp3v_combined_refus_cout_instruction_legacy "exige le balayage fusionne" 2
+  --points=200 --vivant=legacy --cout-instruction)
 
 # ---------------------------------------------------------------------------
 # LE CŒUR-BOULE DANS LA DESCENTE : mesurable, et NON adopté.

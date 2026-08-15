@@ -156,6 +156,45 @@ supports. Un rectangle non décidé compte toutes ses paires comme survivantes,
 donc la mesure **majore** le résiduel. Contrat et preuves : `../PROPOSITION.md`
 section 6bis.
 
+### Le `W`-vivant, et deux balayages qui doivent s'accorder
+
+`--vrai-vivant` décide exactement `V_q = {(a,b) : ||a-b|| > 0,
+|P inter W_q(a,b)| < h_q}`, les **`W`-vivantes**. Ce ne sont pas les ancres
+porteuses de supports : `V_q` contient encore des ancres sans aucune complétion
+positive, donc le mou `|S_q|/|V_q|` borne ce qu'un resserrement du **même
+critère de témoins** peut gagner, et rien de plus. La fraction du résiduel
+encore prenable vaut `1 - 1/mu`, non `mu - 1`.
+
+La mesure n'est possible que parce que le préfiltre est fail-open : `V_q` est
+inclus dans le résiduel `S_q`, il suffit donc de décider `S_q`. Coût `C(n,2)`
+tests de budget plus `|S_q| x n` évaluations, soit le résiduel et non le cube de
+`n`. Deux préconditions : la sûreté du préfiltre doit être établie **ailleurs**
+— par l'oracle `PairId`, jamais par le mode lui-même, dont l'invariant
+`survivantes >= W-vivantes` est circulaire — et `masse_non_decide` doit être
+nul, faute de quoi le probe refuse avec le code `3`.
+
+Deux balayages coexistent, et c'est délibéré :
+
+| mode | balayage | rôle |
+| --- | --- | --- |
+| `--vivant=fusion` (défaut) | une passe sur `z`, trois compteurs, lane éteinte à son seuil, prédicat `pair_lane` point--point | le chemin de mesure |
+| `--vivant=legacy` | trois passes, une par lane, `corner8_lane` sur une boîte ponctuelle | le juge indépendant du précédent |
+
+`audits/check_vivant_balayages.py` exige leur égalité **à l'unité** sur trois
+familles, avec planchers, et tue `--inject=vivant-lane-unique`. Une réécriture
+de balayage et une réécriture de ce que le balayage compte se ressemblent trop
+dans un diff pour qu'on s'en passe.
+
+**Ce que la mesure a corrigé.** Le ré-audit annonçait huit évaluations
+redondantes par visite dans le mode legacy. C'est le pire cas : `corner8_lane`
+rend `0` dès le premier coin dont `H <= 0`, donc la redondance vaut
+`1 + 7 P(H > 0)` — mesurée `1,386` / `1,245` / `1,845` sur
+`uniform` / `terrain` / `eight_clusters` à `n=300`, jamais `8`. Le gain total en
+évaluations vaut `3,0` à `4,0`, et il vient donc surtout de la fusion des trois
+passes. Le mutant **neutre** `vivant-sans-extinction` chiffre à part ce que la
+sortie anticipée gagne : `11,1` / `13,1` / `24,3 %` des visites, sans changer
+un seul compte.
+
 ## Cœur-boule — le changement de primitive du 15 août 2026
 
 Les trois fuseaux sont des lieux angulaires — `W_q = { z : angle(a,z,b) >
@@ -170,8 +209,9 @@ d'un rectangle admet le rayon sûr :
 Ce rayon décorrèle deux pires cas. Sans boucle supplémentaire, la borne
 couplée plus grande est
 `kappa_q d-sqrt((4kappa_q^2+1)(r_A^2+r_B^2)/2)` ; dans le régime séparé, elle
-est exacte parmi les boules de même centre lorsque `r_A=r_B`. Elle n'est pas
-encore implémentée.
+est exacte parmi les boules de même centre lorsque `r_A=r_B`. Elle **est**
+implémentée — `core_ball_radius4_couple`, et le rayon retenu est le maximum des
+deux — pour `+4` à `+21 %` de témoins et une soustraction de plus.
 
 La séparation du dossier porte sur l'écart
 `d-r_A-r_B >= s max(r_A,r_B)`. Le seuil `s>1/kappa_q`, soit

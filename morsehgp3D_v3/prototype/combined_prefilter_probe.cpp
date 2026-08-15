@@ -137,6 +137,16 @@ enum class Mutant {
   kCorner64Sept,  // n'evalue que sept des huit coins de `A` : la specialisation
                   // ponctuelle cesse d'etre le meme calcul que la reference et
                   // SUR-certifie. Il rend la porte d'egalite non vacue.
+  kVivantSansExtinction,  // dans le balayage fusionne, une lane qui atteint son
+                          // seuil n'est PAS eteinte, et son compteur continue
+                          // de croitre : sans effet ici, puisque le verdict est
+                          // `c < h_q`. C'est un mutant NEUTRE, et il sert a le
+                          // montrer — la porte des deux balayages doit rester
+                          // verte, sinon l'extinction n'etait pas anodine.
+  kVivantLaneUnique,      // le balayage fusionne rend la lane q2 pour tout
+                          // temoin, quel que soit l'angle : q3 et q4 comptent
+                          // alors zero temoin et deviennent toutes vivantes.
+                          // C'est LUI que la porte des deux balayages tue.
 };
 
 const char* mutant_name(Mutant m) {
@@ -150,6 +160,8 @@ const char* mutant_name(Mutant m) {
     case Mutant::kDropB: return "oublie-b";
     case Mutant::kDualSansMasque: return "dual-sans-masque";
     case Mutant::kCorner64Sept: return "corner64-sept-coins";
+    case Mutant::kVivantSansExtinction: return "vivant-sans-extinction";
+    case Mutant::kVivantLaneUnique: return "vivant-lane-unique";
   }
   return "?";
 }
@@ -340,6 +352,29 @@ inline int corner8_lane(const P3& a, const Box& B, const P3& z, long long* ev = 
     if (lane < best) best = lane;
   }
   return best;
+}
+
+// Meme predicat, aux TROIS temoins PONCTUELS. `corner8_lane(a, Box(b), z)`
+// enumere huit coins qui sont tous le meme point quand `b` est ponctuel : sept
+// evaluations sur huit sont litteralement identiques. Le re-audit du 15 aout le
+// releve en section 6.4. La decision est la meme — l'enveloppe convexe d'un
+// singleton est ce singleton — pour un huitieme du travail.
+//
+// Rendu : `0` si `z` n'est temoin d'aucune lane, sinon la LANE MAXIMALE dont il
+// est temoin (2, 3 ou 4), l'emboitement `W_4 < W_3 < W_2` faisant le reste.
+inline int pair_lane(const P3& a, const P3& b, const P3& z) {
+  const i64 e[3] = {z.x - a.x, z.y - a.y, z.z - a.z};
+  const i64 e2 = e[0] * e[0] + e[1] * e[1] + e[2] * e[2];
+  if (e2 == 0) return 0;  // `z == a` : jamais temoin de sa propre ancre
+  const i64 t[3] = {b.x - z.x, b.y - z.y, b.z - z.z};
+  const i64 h = e[0] * t[0] + e[1] * t[1] + e[2] * t[2];
+  if (h <= 0) return 0;  // couvre aussi `z == b`, ou `t = 0` donne `h = 0`
+  const i64 t2 = t[0] * t[0] + t[1] * t[1] + t[2] * t[2];
+  const i128 hh = (i128)h * (i128)h;
+  const i128 ex = (i128)e2 * (i128)t2;
+  if (3 * hh > ex) return 4;
+  if (4 * hh > ex) return 3;
+  return 2;
 }
 
 inline bool universal_witness(const P3& a, const Box& B, const P3& z, int q, bool narrow) {
@@ -738,6 +773,14 @@ struct Ledger {
   long long lentille_ancres = 0;
   long long dual_ecarts = 0;     // dual-tree != jointure : DOIT rester nul
   long long dual_verifies = 0;   // points confrontes
+  // Le coût REEL du mode `--vrai-vivant`, publie et non affirme. Le re-audit
+  // demandait un budget `n |S|` : ces deux compteurs le rendent verifiable —
+  // `vivant_paires` doit rester du meme ordre que `max_q survivantes`, et
+  // `vivant_travail` ne doit pas depasser `n x vivant_paires`.
+  long long vivant_paires = 0;    // paires effectivement balayees
+  long long vivant_travail = 0;   // VISITES de `z`, unite comparable entre modes
+  long long vivant_evals = 0;     // EVALUATIONS du predicat `(e,t)`, par mode
+  long long vivant_degenerees = 0;  // paires `D = 0`, exclues de `V_q`
 };
 
 struct Rect {
@@ -758,11 +801,17 @@ int main(int argc, char** argv) {
   bool core512 = false;
   bool ha_boule = false;
   bool ha_corner8 = false;
+  // LA FUSION EST LE DEFAUT. C'est l'autorite AABB exacte — huit coins, donc le
+  // maximum decidable depuis les boites — et le parcours le moins cher : un
+  // seul appel par couple decide les trois lanes. Tout gain doit se mesurer
+  // contre elle, jamais contre la version qui recalcule trois fois.
+  bool ha_fusion = true;
   bool coeur_boule = false;
   bool ha_dual = false;
   long long dual_cutoff = 256;
   long long echantillon = 0;
   bool vrai_vivant = false;
+  bool vivant_legacy = false;  // ablation : l'ancien balayage, trois passes
   bool cout_instruction = false;
   long long graine_ech = 0;
   bool ha_verifie = false;
@@ -810,15 +859,20 @@ int main(int argc, char** argv) {
     if (eat("--oracle", &tmp)) { borne("--oracle", 0, 200); oracle_n = (int)tmp; continue; }
     if (a == "--fixture=coeur5") { fixture = true; continue; }
     if (a == "--compare-corner512") { compare512 = true; continue; }
-    if (a == "--ha=boule") { ha_boule = true; continue; }
-    if (a == "--ha=corner8") { ha_corner8 = true; continue; }
+    if (a == "--ha=boule") { ha_boule = true; ha_fusion = false; continue; }
+    if (a == "--ha=corner8") { ha_corner8 = true; ha_fusion = false; continue; }
+    if (a == "--ha=fusion") { ha_fusion = true; continue; }
+    // Les trois autres chemins desactivent la fusion : ce sont des ablations.
+    if (a == "--ha=jointure") { ha_fusion = false; continue; }
     if (a == "--coeur=boule") { coeur_boule = true; continue; }
-    if (a == "--ha=dualtree") { ha_dual = true; continue; }
+    if (a == "--ha=dualtree") { ha_dual = true; ha_fusion = false; continue; }
     // PORTE METAMORPHIQUE : le dual-tree pretend rendre EXACTEMENT les memes
     // `h_a` que la jointure ponctuelle a huit coins. Ce mode calcule les deux et
     // les confronte point par point ; un seul ecart refuse la campagne.
-    if (a == "--verifie-jointure") { ha_verifie = true; ha_dual = true; continue; }
+    if (a == "--verifie-jointure") { ha_verifie = true; ha_dual = true; ha_fusion = false; continue; }
     if (a == "--vrai-vivant") { vrai_vivant = true; continue; }
+    if (a == "--vivant=legacy") { vrai_vivant = true; vivant_legacy = true; continue; }
+    if (a == "--vivant=fusion") { vrai_vivant = true; vivant_legacy = false; continue; }
     if (a == "--cout-instruction") { cout_instruction = true; vrai_vivant = true; continue; }
     if (eat("--graine-echantillon", &tmp)) { graine_ech = tmp; continue; }
     if (eat("--echantillon", &tmp)) { borne("--echantillon", 0, 200000); echantillon = tmp; continue; }
@@ -850,6 +904,8 @@ int main(int argc, char** argv) {
       else if (m == "oublie-b") mutant = Mutant::kDropB;
       else if (m == "corner64-sept-coins") mutant = Mutant::kCorner64Sept;
       else if (m == "dual-sans-masque") mutant = Mutant::kDualSansMasque;
+      else if (m == "vivant-sans-extinction") mutant = Mutant::kVivantSansExtinction;
+      else if (m == "vivant-lane-unique") mutant = Mutant::kVivantLaneUnique;
       else { std::fprintf(stderr, "REFUS : mutant inconnu %s\n", m.c_str()); return 2; }
       continue;
     }
@@ -862,7 +918,22 @@ int main(int argc, char** argv) {
   if (sep < 1 || sep > 64) { std::fprintf(stderr, "REFUS : separation hors domaine\n"); return 2; }
   if (judge > 400) { std::fprintf(stderr, "REFUS : juge non borne\n"); return 2; }
   if (oracle_n > 200) { std::fprintf(stderr, "REFUS : oracle non borne\n"); return 2; }
-  if (mutant != Mutant::kNone && judge <= 0) {
+  // Les deux mutants `vivant-*` ne touchent QUE le balayage fusionne du
+  // `W`-vivant, hors du chemin que le juge par force brute inspecte. Leur juge
+  // est l'autre balayage : `--vivant=legacy` calcule le meme compte par un
+  // chemin independant, et `audits/check_vivant_balayages.py` confronte les
+  // deux. Exiger `--juge` ici refuserait le seul montage qui les tue.
+  const bool mutant_vivant = (mutant == Mutant::kVivantSansExtinction ||
+                              mutant == Mutant::kVivantLaneUnique);
+  if (mutant_vivant && !vrai_vivant) {
+    std::fprintf(stderr, "REFUS : mutant `vivant-*` sans --vrai-vivant\n");
+    return 2;
+  }
+  if (mutant_vivant && vivant_legacy) {
+    std::fprintf(stderr, "REFUS : mutant `vivant-*` injecte dans son propre juge\n");
+    return 2;
+  }
+  if (mutant != Mutant::kNone && !mutant_vivant && judge <= 0) {
     std::fprintf(stderr, "REFUS : un mutant sans juge ne prouve rien\n");
     return 2;
   }
@@ -982,6 +1053,13 @@ int main(int argc, char** argv) {
   // enumeration etait impensable. La borne reste large mais explicite.
   if (vrai_vivant && n > 40000) {
     std::fprintf(stderr, "REFUS : --vrai-vivant non borne (%d points)\n", n);
+    return 2;
+  }
+  // Le balayage legacy ne connait qu'une lane a la fois : il ne peut pas
+  // alimenter le compteur de lentille, qui n'a de sens que sur la lane q4. Le
+  // combiner avec `--cout-instruction` rendrait un `lentille_ancres=0` muet.
+  if (cout_instruction && vivant_legacy) {
+    std::fprintf(stderr, "REFUS : --cout-instruction exige le balayage fusionne\n");
     return 2;
   }
   const bool oracle = (oracle_n > 0) || fixture || compare512;
@@ -1360,9 +1438,56 @@ int main(int argc, char** argv) {
         for (int i = 0; i < nb; ++i) { acc += dB[q][(size_t)i]; dB[q][(size_t)i] = acc; }
       }
     }
+    // ---- BASELINE FUSIONNEE : UN SEUL PARCOURS POUR LES TROIS LANES.
+    //
+    // Le ré-audit a raison, et la faute est instructive : `corner8_lane` rend
+    // deja la MEILLEURE lane en une passe, mais la boucle exterieure sur
+    // `q = 2,3,4` la rappelait trois fois sur le meme couple. J'avais applique
+    // exactement cette deduplication a `corner64` — huit coins de temoin
+    // confondus — puis a `block_lane` — coins distincts d'une boite plate — et
+    // je ne l'ai pas vue ici. Le gain que j'attribuais au dual-tree etait en
+    // realite celui de cette fusion, que le dual-tree faisait par construction.
+    //
+    // C'est desormais la REFERENCE : c'est contre elle que tout gain doit se
+    // mesurer, jamais contre la version qui recalcule trois fois.
+    if (ha_fusion) {
+      for (int i = 0; i < na; ++i) {
+        const P3& a = sorted_pts[ua + i];
+        int c[3] = {0, 0, 0};
+        for (int j = 0; j < na; ++j) {
+          if (j == i) continue;
+          if (c[0] >= h_q[0] && c[1] >= h_q[1] && c[2] >= h_q[2]) break;
+          const int lane = corner8_lane(a, BB, sorted_pts[ua + j], &L.travail_ha);
+          ++L.travail_h;
+          for (int q = 0; q < 3; ++q)
+            if (lane >= q + 2 && c[q] < h_q[q]) ++c[q];
+        }
+        for (int q = 0; q < 3; ++q) ha[(size_t)i * 3 + q] = c[q];
+      }
+      if (mutant != Mutant::kDropB) {
+        for (int i = 0; i < nb; ++i) {
+          const P3& b = sorted_pts[va + i];
+          int c[3] = {0, 0, 0};
+          for (int j = 0; j < nb; ++j) {
+            if (j == i) continue;
+            if (c[0] >= h_q[0] && c[1] >= h_q[1] && c[2] >= h_q[2]) break;
+            const int lane = corner8_lane(b, BA, sorted_pts[va + j], &L.travail_ha);
+            ++L.travail_h;
+            for (int q = 0; q < 3; ++q)
+              if (lane >= q + 2 && c[q] < h_q[q]) ++c[q];
+          }
+          for (int q = 0; q < 3; ++q) hb[(size_t)i * 3 + q] = c[q];
+        }
+      }
+      for (int q = 0; q < 3; ++q)
+        for (int i = 0; i < na; ++i) L.ha_total[q] += ha[(size_t)i * 3 + q];
+      for (int q = 0; q < 3; ++q)
+        for (int i = 0; i < nb; ++i) L.hb_total[q] += hb[(size_t)i * 3 + q];
+    }
     for (int q = 0; q < 3; ++q) {
       const int need = h_q[q];
       for (int i = 0; i < na; ++i) {
+        if (ha_fusion) break;  // deja calcule, en une seule passe
         const P3& a = sorted_pts[ua + i];
         int c = 0;
         if (ha_dual) {
@@ -1395,6 +1520,7 @@ int main(int argc, char** argv) {
         L.ha_total[q] += c;
       }
       for (int i = 0; i < nb; ++i) {
+        if (ha_fusion) break;  // deja calcule
         const P3& b = sorted_pts[va + i];
         int c = 0;
         if (mutant != Mutant::kDropB) {
@@ -1429,11 +1555,36 @@ int main(int argc, char** argv) {
     // `C(n,2)` tests de budget — trois additions — plus `survivantes x n`
     // evaluations avec sortie anticipee des que `h_q` temoins sont trouves.
     //
-    // Ce n'est pas un estimateur : c'est le compte. J'avais commence par
-    // echantillonner, et les ecarts observes valaient trois a douze ecarts-types
-    // theoriques, sans que je sache pourquoi. Extrapoler sur une variance qu'on
-    // ne comprend pas ne vaut rien.
-    if (vrai_vivant) {
+    // Ce n'est pas un estimateur : c'est le compte. J'avais d'abord retire
+    // l'echantillonneur en invoquant une variance « inexpliquee » de trois a
+    // douze ecarts-types — je comparais des ecarts RELATIFS a un ecart-type
+    // ABSOLU en points de proportion. Les neuf ecarts tiennent en fait sous
+    // `1,52` sigma : l'estimateur etait sain, et `--echantillon` reste offert
+    // quand le scan exact deborde son budget. Le compte exact reste preferable
+    // tant qu'il tient, parce qu'il ne demande aucun intervalle.
+    //
+    // ---- DEUX PASSES, ET UN SEUL BALAYAGE DE `z` POUR LES TROIS LANES.
+    //
+    // La premiere version bouclait `q` a l'exterieur : elle relisait donc trois
+    // fois le meme `z` pour la meme paire, et appelait `corner8_lane` sur une
+    // boite reduite a un point — huit coins identiques. Le re-audit du 15 aout
+    // le releve (section 6.4). Ici :
+    //
+    //   passe 1, `O(1)` par paire : le MASQUE des lanes ou `(a,b)` survit,
+    //            par test de budget ; masque vide, la paire est sautee ;
+    //   passe 2, seulement si le masque est non vide : UN balayage de `z`,
+    //            `pair_lane` une fois, trois compteurs alimentes, et chaque
+    //            lane ETEINTE des qu'elle atteint son seuil `h_q`.
+    //
+    // Les paires `D = 0` sont exclues : `V_q` est defini sur `||a-b|| > 0`, et
+    // un doublon quantifie n'est pas une ancre. Elles sont comptees a part.
+    //
+    // L'ancien balayage survit sous `--vivant=legacy`. Ce n'est pas de la
+    // nostalgie : les deux doivent rendre EXACTEMENT les memes trois comptes,
+    // et c'est le seul controle qui distingue « j'ai reecrit le balayage » de
+    // « j'ai reecrit ce que le balayage compte ». La porte
+    // `mhgp3v_vivant_deux_balayages` exige cette egalite.
+    if (vrai_vivant && vivant_legacy) {
       for (int q = 0; q < 3; ++q) {
         const int need = h_q[q];
         for (int i = 0; i < na; ++i) {
@@ -1444,13 +1595,64 @@ int main(int argc, char** argv) {
             if (hb[(size_t)j * 3 + q] >= budget) continue;  // paire fermee
             const int bi = va + j;
             if (ua + i == bi) continue;
-            const Box Bb = box_of_point(sorted_pts[bi]);
+            const P3& b = sorted_pts[bi];
+            if (a.x == b.x && a.y == b.y && a.z == b.z) continue;  // `D = 0`
+            const Box Bb = box_of_point(b);
             int c = 0;
             for (int z = 0; z < n && c < need; ++z) {
               if (z == ua + i || z == bi) continue;
-              if (corner8_lane(a, Bb, sorted_pts[z]) >= q + 2) ++c;
+              ++L.vivant_travail;
+              if (corner8_lane(a, Bb, sorted_pts[z], &L.vivant_evals) >= q + 2) ++c;
             }
-            if (c < need) {
+            ++L.vivant_paires;
+            if (c < need) ++vrai_vivantes[q];
+          }
+        }
+      }
+    }
+    if (vrai_vivant && !vivant_legacy) {
+      for (int i = 0; i < na; ++i) {
+        const int ai = ua + i;
+        const P3& a = sorted_pts[ai];
+        int budget[3];
+        int ligne = 0;
+        for (int q = 0; q < 3; ++q) {
+          budget[q] = h_q[q] - hcore[q] - ha[(size_t)i * 3 + q];
+          if (budget[q] > 0) ligne |= 1 << q;
+        }
+        if (ligne == 0) continue;  // ligne morte sur les trois lanes
+        for (int j = 0; j < nb; ++j) {
+          const int bi = va + j;
+          if (ai == bi) continue;
+          int masque = 0;
+          for (int q = 0; q < 3; ++q)
+            if ((ligne >> q & 1) && hb[(size_t)j * 3 + q] < budget[q]) masque |= 1 << q;
+          if (masque == 0) continue;  // paire fermee sur les trois lanes
+          const P3& b = sorted_pts[bi];
+          if (a.x == b.x && a.y == b.y && a.z == b.z) {
+            ++L.vivant_degenerees;
+            continue;  // `D = 0` : hors du domaine de `V_q`
+          }
+          ++L.vivant_paires;
+          int c3[3] = {0, 0, 0};
+          int actif = masque;
+          for (int z = 0; z < n && actif; ++z) {
+            if (z == ai || z == bi) continue;
+            ++L.vivant_travail;
+            ++L.vivant_evals;  // exactement une evaluation par visite
+            int lane = pair_lane(a, b, sorted_pts[z]);
+            if (mutant == Mutant::kVivantLaneUnique && lane > 2) lane = 2;
+            if (lane == 0) continue;
+            for (int q = 0; q < 3; ++q) {
+              if (!(actif >> q & 1)) continue;
+              if (lane >= q + 2 && ++c3[q] >= h_q[q] &&
+                  mutant != Mutant::kVivantSansExtinction)
+                actif &= ~(1 << q);
+            }
+          }
+          for (int q = 0; q < 3; ++q) {
+            if (!(masque >> q & 1) || c3[q] >= h_q[q]) continue;
+            {
               ++vrai_vivantes[q];
               // ---- LE COUT D'INSTRUCTION, MESURE ET NON SUPPOSE.
               //
@@ -1762,7 +1964,7 @@ int main(int argc, char** argv) {
               mhgp3v::cloud_family_name(family), n, coord_used, seed, smax, sep, cap,
               mutant_name(mutant));
   std::printf("seuils h_q2=%d h_q3=%d h_q4=%d ha_mode=%s coeur_mode=%s\n", h_q[0], h_q[1],
-              h_q[2], ha_dual ? "dualtree" : (ha_boule ? "boule" : (ha_corner8 ? "corner8" : "jointure")), core512 ? "corner64" : "bornes");
+              h_q[2], ha_fusion ? "fusion" : (ha_dual ? "dualtree" : (ha_boule ? "boule" : (ha_corner8 ? "corner8" : "jointure"))), core512 ? "corner64" : "bornes");
   std::printf("wspd rectangles=%lld non_decides=%lld masse=%lld masse_non_decide=%lld cellule_max=%lld\n",
               L.rectangles, L.non_decides, L.masse_totale, L.masse_non_decide, L.cellules_max);
   const long long total = (long long)n * (n - 1) / 2;
@@ -1806,6 +2008,14 @@ int main(int argc, char** argv) {
                              ? (double)L.survivantes[q] / (double)vrai_vivantes[q] : 0.0;
       std::printf(" q%d_vivantes=%lld q%d_mou=%.3f", q + 2, vrai_vivantes[q], q + 2, mou);
     }
+    // LE BUDGET, PUBLIE ET NON AFFIRME. Le re-audit demandait un compte en
+    // `n |S|` : ces trois champs le rendent verifiables. `paires` doit rester du
+    // meme ordre que le plus grand des `survivantes` ; `travail / (paires n)`
+    // mesure ce que la sortie anticipee gagne reellement ; `degenerees` dit
+    // combien de doublons quantifies ont ete ecartes du domaine de `V_q`.
+    std::printf(" paires=%lld travail=%lld evals=%lld degenerees=%lld",
+                L.vivant_paires, L.vivant_travail, L.vivant_evals,
+                L.vivant_degenerees);
     std::printf("\n");
   }
   if (echantillon > 0) {
@@ -1958,8 +2168,14 @@ int main(int argc, char** argv) {
                  desaccords);
     return 1;
   }
+  // Les mutants `vivant-*` sont hors du champ du juge par force brute : ils
+  // n'alterent aucun certificat, seulement le compte de `V_q`. Leur mort est
+  // constatee AILLEURS — par `audits/check_vivant_balayages.py`, qui confronte
+  // le balayage fusionne mute au balayage legacy non mute. Les declarer
+  // survivants ici masquerait ce montage derriere un code 3 sans rapport.
   if (mutant != Mutant::kNone && mutant != Mutant::kDropB &&
-      mutant != Mutant::kIntervalXi && desaccords == 0 && L.coeur_faux == 0) {
+      mutant != Mutant::kIntervalXi && !mutant_vivant &&
+      desaccords == 0 && L.coeur_faux == 0) {
     std::fprintf(stderr, "MUTANT SURVIVANT : %s n'a pas ete vu\n", mutant_name(mutant));
     return 3;
   }

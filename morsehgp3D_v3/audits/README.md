@@ -108,6 +108,17 @@ ancienne phrase imposant le rejet global des positions dupliquées est périmée
   `39 %` de la séparation qu'exige la décorrélée et trouve `4` à `21 %` de
   témoins en plus ; l'écart étant en `O(r)` et non en `O(d)`, le gain s'estompe
   quand la séparation dépasse le seuil.
+- [`NOTE_CLAUDE_P05_DEUX_BALAYAGES_20260815.md`](NOTE_CLAUDE_P05_DEUX_BALAYAGES_20260815.md) :
+  le P0.5 du ré-audit, fait — comptage du `W`-vivant en deux passes, un seul
+  balayage de `z` pour les trois lanes, prédicat point--point, paires `D=0`
+  exclues, budget publié et donc vérifiable. Elle **corrige l'auditeur** sur un
+  point : la redondance « à huit » de `corner8_lane` sur une boîte ponctuelle
+  vaut en fait `1+7 P(H>0)`, mesurée `1,245` à `1,845`, la sortie au premier
+  coin dont `H<=0` absorbant le reste. Le gain réel (`3,0` à `4,0x` en
+  évaluations, `1,9` à `2,4x` en temps de paroi) vient donc de la fusion des
+  trois passes. L'ancien balayage est conservé comme juge sous
+  `--vivant=legacy`, avec une porte d'égalité à l'unité, un mutant létal et un
+  mutant neutre qui chiffre la sortie anticipée.
 - [`NOTE_SOLUTION_CONTRAT_SOURCE_AIGUE_20260814.md`](NOTE_SOLUTION_CONTRAT_SOURCE_AIGUE_20260814.md) :
   autorité contractuelle mathématique, sans réception logicielle : réponse
   négative à Q14, théorème exact des fuseaux `W2/W3/W4` et contrat de
