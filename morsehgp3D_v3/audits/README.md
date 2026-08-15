@@ -73,6 +73,13 @@ ancienne phrase imposant le rejet global des positions dupliquées est périmée
   filtre ferme à tort (`212` et `1 525` fausses morts en régime tendu), la
   diagonale lue au niveau nœud annule tout (`ha_somme` à zéro), et sans cutoff
   la méthode coûte `2` à `4` fois plus que ce qu'elle remplace.
+- [`NOTE_CLAUDE_ARBITRAGE_SEPARATION_20260815.md`](NOTE_CLAUDE_ARBITRAGE_SEPARATION_20260815.md) :
+  l'arbitrage `s=6` contre `s=8` n'est pas invariant d'échelle. Sur `terrain`,
+  `s=8` retire `17,5 %` du résiduel à `n=8 000` mais `84,5 %` — un facteur
+  `6,4` — à `n=32 000`, pour `+67 %` de temps ; le seuil de rentabilité tombe
+  de `79` à `2,4` microsecondes par ancre instruite. Les améliorations du jour
+  resserrent les certificats à séparation donnée, elles ne compensent pas une
+  séparation insuffisante.
 - [`NOTE_CLAUDE_BORNE_COUPLEE_20260815.md`](NOTE_CLAUDE_BORNE_COUPLEE_20260815.md) :
   la borne couplée du § 3.3 encodée, avec sa fixture de saturation. Elle naît à
   `39 %` de la séparation qu'exige la décorrélée et trouve `4` à `21 %` de
