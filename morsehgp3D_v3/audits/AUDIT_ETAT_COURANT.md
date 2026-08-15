@@ -9,46 +9,45 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `public_status=not_claimed`.
 
 > [!CAUTION]
-> **Blocage P0 du préfiltre combiné au sujet `4cd1f82`.**
-> `combined_prefilter_probe.cpp` crédite en bloc un nœud q2, puis redescend ce
-> même nœud pour q3/q4 et recrédite ses feuilles en q2. Le replay borné trouve
-> une ancre annoncée morte avec `hcore=10` alors que sa boule diamétrale ne
-> contient que cinq PointId strictement intérieurs. À `n=160`, au moins
-> `573/353/713` ancres q2 vivantes sont ainsi fermées à tort sur
-> `uniform/eight_clusters/terrain`. `recouvrements=0` est vacuaire : le champ
-> n'est jamais alimenté, et le juge ne reconstruit pas la décision
-> `hcore+h_a+h_b`. Les colonnes q2 du reçu
-> `prefiltre_combine_20260815` sont invalides.
+> **Verdict live du préfiltre combiné au `HEAD=66b4f0c`.** Le double crédit q2
+> du pin `4cd1f82` est **réparé** : masque de lanes par frame, fixture de cinq
+> IDs, mutant causal, oracle par `PairId` et couverture exacte sont verts dans
+> le domaine u16. `uniform,n=160` retrouve `4054/8666` vivantes/fermées et zéro
+> faux mort. Le reçu q2 produit avant la réparation reste invalide et doit être
+> régénéré.
 >
-> Le théorème abstrait survit : les trois intersections universelles maximales,
-> restreintes respectivement à `X\(A union B)`, `A` et `B`, sont disjointes par
-> PointId et leur somme au seuil `s_max-q+1` est sûre. Mais les compteurs q3/q4
-> ne sont pas « maximaux » : `xi_max_over_box` décorrèle les composantes de
-> `Xi`, puis le code décorrèle `Hmin` de `Ximax`. Il reste fail-open sur ces deux
-> lanes, tout en rejetant de vrais sites universels. Les autorités exactes sur
-> l'enveloppe existent déjà : `all_lane_of_box` à 8 coins et
-> `corner512_all_lane` à 64/512 coins. Un masque de lanes par frame interdit le
-> recrédit des descendants.
+> `corner64_all_lane` est reçu comme décision exacte `ALL` sur l'enveloppe
+> continue `Box(A) x Box(B)` au témoin ponctuel. Sa spécialisation est correcte
+> et domine `Hmin/Ximax`, mais le chemin par défaut et `h_a/h_b` restent
+> conservateurs ; les auto-jointures coûtent encore
+> `O(|A|^2+|B|^2)` avant l'histogramme.
 >
-> Preuves, contre-exemples u16, ensembles maximaux, coût réel
-> `O(|A|^2+|B|^2)` avant histogramme et douze portes d'acceptation :
+> `6220ea3` ajoute une primitive cœur-boule **ouverte** dont le rayon rationnel,
+> les tests sphère--boîte et la parité descente/direct sont reçus sur trois
+> petits nuages. Son intégration combinée ne l'est pas : avec `sphere_of(box)`
+> elle reste un sous-certificat de Corner64, et ball-only diminue `h_a/h_b`.
+> Le claim « arrondir le rayon d'une unité vers le haut est sûr » est réfuté
+> par deux fixtures q3/q4 à norme irrationnelle ; le chemin nominal arrondit
+> heureusement vers le bas. Le ré-audit fournit aussi une borne couplée plus
+> forte — exacte au centre commun dans le cas équilibré —, un test Q30 sans
+> perte de fraction, l'autorité exacte cône--boule et l'auto-jointure à
+> range-add. Nouveau
+> P0 de garde : `--coord` hors u16 est accepté et peut déborder.
+>
+> `66b4f0c` ajoute le chemin optionnel `--ha=boule`. Il n'est **pas reçu** :
+> `apex_sin2` met le sinus au carré sans vérifier `gamma_q>0`. Une fixture u16
+> déjà WSPD à `separation=1` produit un faux témoin q4 puis une fausse fermeture
+> (`oracle_faux_morts=1`). Imposer `3W>N^2` en q3 et `2W>N^2` en q4 avant le
+> carré. Le cône employé est un sous-certificat uniforme, pas la région exacte
+> de `h_a`; l'arrêt après `h_q` succès ne supprime pas le pire cas quadratique.
+>
+> Autorité complète :
+> [`AUDIT_REAUDIT_PREFILTRE_COMBINE_COEUR_BOULE_41DFD2C_20260815.md`](AUDIT_REAUDIT_PREFILTRE_COMBINE_COEUR_BOULE_41DFD2C_20260815.md).
+> L'audit initial reste l'autorité historique de la faute et des ensembles
+> maximaux :
 > [`AUDIT_PREFILTRE_COMBINE_HMAX_Q2_Q3_Q4_20260815.md`](AUDIT_PREFILTRE_COMBINE_HMAX_Q2_Q3_Q4_20260815.md).
-> Ce bloc supersède uniquement les claims de sûreté/maximalité et les mesures
-> q2 du préfiltre combiné plus bas ; il ne reçoit aucune source ni aucun SLO.
->
-> **Réponses et suite.** Le double crédit q2 est réparé et vérifié contre les
-> chiffres de l'auditeur ; `corner512_all_lane` **décide exactement**
-> l'enveloppe continue des boîtes, donc sa domination sur `Hmin/Ximax` est un
-> théorème et non une mesure, et sa spécialisation au témoin ponctuel
-> (`corner64`, huit coins de témoin confondus) retire `38` à `46 %` du résiduel
-> q4 pour `+18 %` de temps :
-> [`NOTE_CLAUDE_REPARATION_PREFILTRE_P0_20260815.md`](NOTE_CLAUDE_REPARATION_PREFILTRE_P0_20260815.md).
-> Le chantier change ensuite de primitive — boules inscrites en forme close au
-> lieu d'AABB, `h_coeur` devenant une requête `k`-NN avec `k = h_q` :
-> [`NOTE_CLAUDE_COEUR_BOULE_FORME_CLOSE_20260815.md`](NOTE_CLAUDE_COEUR_BOULE_FORME_CLOSE_20260815.md).
-> Cette dernière est une **spécification avant mesure** : elle ne reçoit rien.
 
-> **Verdict live au `HEAD=c03c0ee3b48b147ebb5d8b4e8c1651f42c1c2db6`.**
+> **Verdict live au `HEAD=66b4f0c414e8cfaceb366acde2734bf6531a265c`.**
 > Le pin noyau `a369452` porte `Q4SeedAxisTopR4`, son probe, 39 CTests déclarés,
 > les vrais IDs de census, la capacité 163, les comptes requis et les fates de
 > plateau. Il refuse aussi tout replay après `MORT_GAP` et tout apex dont le
@@ -64,8 +63,8 @@ Cadre : `phase=exploration_v3_hors_registre`,
 > accélère par grille la construction du lot device. `0bf4682` committe le
 > tuilage diagnostique, le transcript CUDA incomplet et une recette de
 > récupération. `c03c0ee` committe ensuite le brut récupéré, son résumé et la
-> correction future de `code=\0`. Le worktree courant ne contient que les six
-> documents autorisés mis à jour par cet audit. Le brut est relu plus bas ;
+> correction future de `code=\0`. Les modifications du présent audit restent
+> limitées aux README, à `PROPOSITION.md` et au dossier `audits/`. Le brut est relu plus bas ;
 > aucune mesure bout-en-bout n'entre dans le verdict.
 > Q14 est fermée contractuellement : aucune structure de Delaunay n'est
 > autorisée, y compris d'ordre un, comme source, squelette, filtre ou census.
@@ -423,28 +422,27 @@ la fermeture q4 passe de `3,13 %` à `41,6 %` sur `uniform` et de `0,60 %` à
 `27,1 %` sur `eight_clusters` entre `n=2 000` et `n=8 000`. Aucun reçu épinglé,
 aucune pente à trois points.
 
-**Nouveau probe `combined_prefilter_probe`**, `13` portes. Il minore
+**Probe `combined_prefilter_probe`, état au `41dfd2c`.** Il minore
 `|P inter W_q(a,b)|` par `h_coeur + h_a + h_b`, trois comptes prouvés
 disjoints — la disjonction est même automatique, puisque pour `z` dans `A` le
 choix `a = z` donne `H = 0`. La décision se lit sur un histogramme de `h_b`,
-jamais sur une paire. Deux bornes exactes : `H` bilinéaire par axe, et `Xi`
-**convexe en `a`** car `(b-a) x (z-a) = b x z - b x a - a x z` est affine — donc
-maximum à un sommet. L'énoncé, les preuves et les mesures sont en section 6bis
-de [`../PROPOSITION.md`](../PROPOSITION.md). C'est un compteur d'**ancres**,
-jamais de supports.
+jamais sur une paire une fois les trois comptes connus. `H` est exact sur les
+AABB ; `xi_max_over_box` reste un majorant décorrélé. L'autorité exacte sur
+l'enveloppe continue est désormais `corner64`, reçue en mode diagnostique mais
+pas encore route par défaut. La formation courante de `h_a/h_b` reste en
+`O(|A|^2+|B|^2)`. C'est un compteur d'**ancres**, jamais de supports.
 
-**Défaut logiciel non corrigé, et il bloque le vert.**
-`mhgp3v_q4seed_axis_topr4_probe` ne compile pas depuis `3507b5e` :
-`debordements` et `refus_r4` sont déclarés et jamais câblés, sous `-Werror`. Ce
-n'est pas cosmétique — ligne 649, `kDebordement` tombe dans le même `continue`
-muet que les trois vraies morts, ce que le commentaire de la ligne 625 interdit
-explicitement. Arbitrer entre code 2 et code 3 modifie une sortie que des portes
-lisent au regex ; la décision n'appartient pas à l'auditeur.
+**Défaut de build antérieur réparé.** Les variables mortes de
+`mhgp3v_q4seed_axis_topr4_probe` qui bloquaient `-Werror` ont été retirées sans
+changer ses fates. Ce bloc historique ne bloque plus le vert ; le statut
+fonctionnel de cette autre lane reste celui de ses audits dédiés.
 
-**Mesure du préfiltre, trois familles, 35 configurations sur 36.** Reçu épinglé
+**Mesure historique du préfiltre, trois familles, 35 configurations sur 36.** Reçu épinglé
 [`../receipts/prefiltre_combine_20260815/`](../receipts/prefiltre_combine_20260815/README.md),
-ELF `b1472270`, source `3e135334`, commit `2c3eee3`. Trois faits, aucun reçu
-comme pente :
+ELF `b1472270`, source `3e135334`, commit `2c3eee3`. Ses colonnes q2 sont
+invalides à cause du double crédit réparé depuis ; ses colonnes q3/q4 restent
+des diagnostics du vieux chemin, pas une campagne Corner64 ou cœur-boule.
+Trois faits, aucun reçu comme pente :
 
 - la fermeture q4 **croît avec `n` sur huit séries sur douze** — les quatre
   `uniform` et les quatre `eight_clusters`, dont `76,52 -> 85,00 -> 92,44 %` à
@@ -461,9 +459,14 @@ comme pente :
   `n=50 000`. Le préfiltre retire une part importante du travail, pas l'ordre de
   grandeur.
 
-**État vérifié** : `761` CTests enregistrés, `760` passent hors la cible
-ci-dessus. Le seul autre échec est `mhgp3v_arith_selftest`, qui refuse
-correctement de qualifier sans GMP, absent du conteneur.
+**État de la présente ré-audition** : CMake n'est pas disponible dans
+l'environnement de l'auditeur. Le probe combiné compile directement avec
+`-Wall -Wextra -Werror`; fixture, mutant, trois oracles et trois comparaisons
+Corner64/512 ont été rejoués. Les deux fixtures apex et leurs trois mutants
+passent au `66b4f0c`, mais une confrontation supplémentaire à
+`separation=1,smax=4` produit bien `oracle_faux_morts=1`; les portes officielles
+à `s=6` ne couvrent pas ce régime. La note de réparation rapporte par ailleurs
+le build complet, avec le seul refus attendu de qualification sans GMP.
 
 
 ## Snapshot

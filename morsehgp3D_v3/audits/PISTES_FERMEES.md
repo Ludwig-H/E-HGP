@@ -74,27 +74,27 @@ Nouveau théorème de complétude, fixture qui falsifie le motif d'abandon sans
 casser les contre-exemples, architecture sans structure globale interdite, porte
 de coût distincte. Un bon rappel empirique ne suffit jamais.
 
-## `h_a` par région au lieu d'auto-jointure — 15 août 2026
+## Boule d'apex unique pour `h_a` — 15 août 2026
 
 **L'idée.** Le contre-audit du préfiltre combiné demandait de remplacer les
 auto-jointures ponctuelles `A x A` et `B x B`, de coût annoncé
 `O(|A|^2 + |B|^2)`, par des requêtes de région hiérarchiques (question Q23).
 
-**Ce qui a été construit.** La région exacte de `h_a` est un **cône d'apex `a`**
-de demi-ouverture `gamma_q = theta'_q - arcsin((r_B + 2 r_A)/D)`, et non la
-boule du cœur — celle-ci est centrée à l'équateur du fuseau, loin de `A`. La
-boule inscrite dans ce cône est en forme close, prouvée, gravée par deux
-fixtures et trois mutants, et sûre : `oracle_faux_morts = 0`.
+**Ce qui a été construit.** Une boule inscrite dans le **cône suffisant**
+d'apex `a`, de demi-ouverture
+`gamma_q = theta'_q-arcsin((r_B+2r_A)/D)`. Ce cône n'est pas la région exacte
+de `h_a` : `|z-a|` a été remplacé par son majorant `2r_A`. Le chemin est
+compilé et ses portes à `separation=6` sont vertes.
 
-**Ce qui l'a fermée.** La prémisse. L'auto-jointure sort dès `h_q <= 10`
-atteint, donc elle coûte `O(|A| h_q)` et non `O(|A|^2)` : ces deux postes ne
-pèsent que `14,6 %` du travail sur `uniform`, la famille la plus lente. La
-boule réduit le travail de `28 %` sur `terrain` mais l'augmente de `20 %` sur
-`uniform`, le temps de paroi est plus mauvais dans les trois cas, et la
-fermeture q4 tombe de `61,3 %` à `50,1 %` sur `eight_clusters`.
+**Ce qui ferme cette variante unique.** Sur les trois mesures `n=4000,s=6`,
+elle est plus lente et perd jusqu'à `11` points de fermeture q4. Elle contient
+en outre un P0 hors de ces portes : le carré de `sin(gamma_q)` oublie le signe,
+et une fixture u16 à `separation=1` donne `oracle_faux_morts=1`. Le correctif
+est `3W>N^2` en q3 et `2W>N^2` en q4 avant le carré.
 
-**Ce qui survit.** `spindle_core_ball.hpp` en entier, ses portes, et le chemin
-`--ha=boule` gardé compilé et exercé. Surtout : le compteur `travail_ha`, qui
-dit que le travail est dans la **descente du cœur** — `43` à `85 %` du total —
-et non dans les auto-jointures. C'est là qu'il faut optimiser.
-
+**Ce qui survit.** Le théorème du cône une fois le garde ajouté, son test `ALL`
+possible par huit coins, et le compteur `travail_ha`. La mesure ne prouve pas
+que l'auto-jointure vaut `O(|A|h_q)` : elle s'arrête après `h_q` succès, donc
+les échecs peuvent encore donner un pire cas quadratique. L'auto-jointure
+dual-tree à range-add, non implémentée, reste une piste active et ne doit pas
+être enterrée avec la boule unique.

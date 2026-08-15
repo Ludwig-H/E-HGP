@@ -1,6 +1,6 @@
 # Proposition consolidée MorseHGP3D v3
 
-Date : 14 août 2026 UTC.
+Date : 15 août 2026 UTC.
 
 Cadre : `phase=exploration_v3_hors_registre`,
 `backend=cpu_reference_bounded_oracles_and_g4_diagnostic`,
@@ -1715,10 +1715,13 @@ reste `not_claimed`.
 
 ### 6bis.1 L'énoncé
 
-Un support positif d'arité `q` est possédé par sa **paire diamétrale** `(a,b)`.
-Tout site strictement intérieur à sa miniboule appartient au fuseau
-`W_q(a,b)`, intersection de toutes les boules admissibles de cette ancre à
-cette arité. Le filtre d'ancre du contrat de source tue l'ancre dès que
+Un support positif d'arité `q` est possédé par son **arête maximale canonique**
+`(a,b)`. En q2 seulement, elle est aussi la paire antipodale et diamétrale de
+la miniboule. Le fuseau `W_q(a,b)` est l'intersection des intérieurs de toutes
+les miniboules admissibles de cette ancre à cette arité. Ainsi, la bonne
+implication est `z dans W_q(a,b) => z` strictement intérieur à chacune de ces
+miniboules ; la réciproque est fausse en q3/q4. Le filtre d'ancre du contrat de
+source tue l'ancre dès que
 `|P inter W_q(a,b)| >= h_q`, avec `h_q = s_max - q + 1` — soit `10 / 9 / 8` à
 `s_max = 11`, et `5 / 4 / 3` à `s_max = 6`. Il y a donc bien **un `h` par
 arité**, décroissant avec elle.
@@ -1754,9 +1757,11 @@ nombre d'ancres survivantes vaut donc
 
 `somme_{a dans A} |{ b dans B : h_b < h_q - h_coeur - h_a }|`
 
-et, tous les comptes étant écrêtés à `h_q <= 10`, un histogramme de `h_b` sur
-onze cases suffit. Le coût par rectangle est `O(|A| + |B|)` une fois les `h`
-connus, **jamais `O(|A| |B|)`** : aucune paire n'est matérialisée.
+et, à `s_max=11`, tous les comptes étant écrêtés à `h_q <= 10`, un histogramme
+de `h_b` sur onze cases suffit. Pour le domaine CLI `s_max<=32`, il est
+dimensionné par `s_max`. Le coût par rectangle est `O(|A| + |B|)` une fois les
+`h` connus, sans matérialiser `A x B`. Leur formation courante reste
+`O(|A|^2+|B|^2)` à cause des deux auto-jointures.
 
 ### 6bis.3 Les bornes, et pourquoi les sommets suffisent
 
@@ -1829,6 +1834,151 @@ régime différent mais à ce que le témoin y était une **boîte** et non un p
 Ces chiffres sont `counter-only` et ne promeuvent rien : la route par défaut
 reste `Hmin/Ximax`, la substitution attend sa réception, et la campagne des
 trente-six configurations n'est pas régénérée.
+
+### 6bis.3ter Cœur-boule : théorème corrigé et rôle algorithmique
+
+Pour une ancre ponctuelle, la plus grande boule centrée au milieu de `[a,b]`
+et incluse dans le fuseau **ouvert** vaut
+
+`B°((a+b)/2, kappa_q |ab|)`, avec
+
+`kappa_2=1/2`, `kappa_3=1/(2 sqrt(3))` et `kappa_4=sin(15°)`.
+
+La coquille tangente est exclue. Toute requête emploie donc une comparaison
+stricte `<R`, jamais `<=R`.
+
+Supposons maintenant les endpoints contenus dans
+`Ball(c_A,r_A)` et `Ball(c_B,r_B)`. Posons `d=|c_B-c_A|`,
+`r=r_A+r_B` et `m=(c_A+c_B)/2`. Deux rayons sûrs sont :
+
+```text
+R_dec,q  = kappa_q(d-r)-r/2,
+R_coup,q = kappa_q d
+           - sqrt((4 kappa_q^2+1)(r_A^2+r_B^2)/2).
+```
+
+Alors
+
+`B°(m,max(0,R_dec,q,R_coup,q))`
+
+est incluse dans `W_q(a,b)` pour tout `(a,b)` des deux boules. La première
+borne sépare déplacement du milieu et perte de longueur. Pour la seconde,
+écrire `p=(u+v)/2`, `w=(v-u)/2` ; l'identité
+`|p|^2+|w|^2=(|u|^2+|v|^2)/2` et Cauchy donnent
+`2 kappa_q|w|+|p| <=
+sqrt((4 kappa_q^2+1)(r_A^2+r_B^2)/2)`. La borne couplée est plus forte dans le
+cas équilibré et ne coûte aucune boucle supplémentaire.
+
+Plus précisément, si `x=|v-u|`, `C=2(r_A^2+r_B^2)` et `S=r_A+r_B`, la perte
+est majorée par le maximum sur `[0,S]` de
+`kappa_q x+(1/2)sqrt(C-x^2)`. Son maximiseur
+`x*=2 kappa_q sqrt(C)/sqrt(1+4 kappa_q^2)` appartient à `[0,S]` pour
+`kappa_q<=1/2`, et redonne exactement `R_coup`. Lorsque
+`r_A=r_B=r` et `d>=x*` — notamment dans le régime WSPD séparé —, cette borne
+est la plus grande boule commune centrée en `m` :
+`R*_q=kappa_q d-r sqrt(1+4 kappa_q^2)`. Sous
+`d-r_A-r_B>=s max(r_A,r_B)`, ses seuils continus équilibrés sont
+`2sqrt(2)-2`, `2` et `2,351...` pour q2/q3/q4. Ils ne sont ni des équivalences
+par rectangle, ni les seuils du plancher entier courant.
+
+La convention WSPD effective est
+
+`d-r_A-r_B >= s max(r_A,r_B)`.
+
+Le pire cas équilibré de la borne simple donne donc
+`R_dec,q/r >= kappa_q s/2-1/2`, et un seuil de garantie uniforme
+`s>1/kappa_q`. Ce n'est pas une équivalence par rectangle.
+
+Avec `sphere_of(box)`, les boules d'endpoints circonscrivent les AABB. Le
+cœur-boule est alors un **sous-certificat de Corner64**. Il sert de voie `ALL`
+bon marché pour créditer un sous-arbre de témoins ; tout le complément doit
+encore passer par Corner512/Corner64. Un nœud disjoint de la boule est
+`UNKNOWN` pour le fuseau, jamais `NONE`. Une sphère qui englobe seulement les
+PointId du nœud, sans englober toute son AABB, peut en revanche apporter des
+crédits complémentaires ; leur union se fait par ledger d'IDs et par lane.
+
+À endpoint `a` fixé, pour `z != a`, et partenaire contenu dans `Ball(c,r)`, la région
+universelle exacte pour cette relaxation sphérique est plus grande que la
+boule midpoint. Poser `e=z-a`, `u=e/|e|`, `t0=c-z`,
+`s=u.t0`, `rho=sqrt(|t0|^2-s^2)`, et
+`alpha_2=90°`, `alpha_3=60°`, `alpha_4=acos(1/sqrt(3))`. Alors :
+
+```text
+forall b in Ball(c,r), z in W_q(a,b)
+ssi s sin(alpha_q)-rho cos(alpha_q) > r.
+```
+
+C'est la distance signée du centre au complément du cône admissible. Elle est
+l'autorité continue-sphère pour `h_a/h_b`. Avec `J=e.t0`, `E=|e|^2` et
+`Q=E|t0|^2-J^2`, elle s'écrit sans normalisation
+`J>r sqrt(E)` en q2,
+`sqrt(3)J-sqrt(Q)>2r sqrt(E)` en q3 et
+`sqrt(2)J-sqrt(Q)>sqrt(3)r sqrt(E)` en q4. La boule midpoint n'est qu'un fast
+path. Pour conserver les valeurs ponctuelles actuelles, toute requête de boule
+est suivie d'un fallback exact 8/64 coins sur les IDs non crédités, restreint au
+pool `A` ou `B` correspondant.
+
+La factorisation qui évite les couples déjà certifiés conserve la granularité
+par point : une auto-jointure ordonnée et disjointe traite
+`U(anchor) x Z(witness)`. Si `corner512_all_lane(U,B,Z)>=q`, elle range-add
+`|Z|` à chaque ancre de `U`; sinon elle scinde `U` ou `Z`. Les deux orientations
+sont traitées et la diagonale est supprimée. Le pire cas reste quadratique,
+mais chaque bloc `ALL` retire son produit sans remplacer `h_a(a)` par un compte
+uniforme de bloc.
+
+L'arithmétique de ces rayons est dirigée : sous-approché de `kappa_q`, distance
+centrale minorée, rayons d'endpoints majorés, et tests sphère--boîte stricts.
+Un `double` non encadré ne décide aucun crédit. Contrat, contre-fixtures et
+route de réception :
+[`audits/AUDIT_REAUDIT_PREFILTRE_COMBINE_COEUR_BOULE_41DFD2C_20260815.md`](audits/AUDIT_REAUDIT_PREFILTRE_COMBINE_COEUR_BOULE_41DFD2C_20260815.md).
+
+`6220ea3` implémente ainsi `R_dec` par sous-approchés rationnels et reçoit la
+parité range-count/balayage direct. Il n'implémente pas encore `R_coup` ni le
+raccord combiné. Le plancher du rayon est obligatoire : contrairement à une
+première note, ajouter une unité peut accepter une norme de grille
+irrationnelle située au-dessus du vrai rayon. Les fixtures q3
+`a=(0,0,0), b=(14,0,0), z=(7,1,4)` et q4
+`a=(0,0,0), b=(8,0,0), z=(4,1,2)` tuent exactement ce relâchement.
+
+« Obligatoire » signifie ici que le code entier courant ne doit jamais
+remplacer `floor` par `ceil`; il n'oblige pas à perdre la fraction. Une version
+fixe sans perte finale prend `D=2^30`,
+`A_q=floor((2 kappa_q)D)` et `T_q=A_q L2-S2D`, puis décide une boîte par
+`far2 D^2<T_q^2` avec `T_q>0`. Sous u16, comparaisons et carrés tiennent en
+`i128`. Les preuves compilables des constantes sont
+`3A_3^2<D^2` et, avec `X=2D^2-A_4^2`,
+`X>0 && X^2>3D^4`. Pour `R_coup`, encadrer séparément le terme positif et la
+racine soustraite dans le sens conservateur.
+
+`66b4f0c` ajoute une boule d'apex optionnelle pour `h_a/h_b`. Poser
+`u=c_B-a`, `D=|u|`, `e=z-a` et `N=r_B+2r_A`. Le cône **suffisant**
+
+`angle(e,u)<gamma_q=theta'_q-arcsin(N/D)`
+
+est sûr seulement si `gamma_q>0`. Il n'est pas la région exacte de `h_a` : le
+remplacement de `|e|` par `2r_A` est un minorant uniforme. Dans les unités du
+code, avec `U=|ud|^2` et `W=U-N^2`, mettre le sinus au carré exige donc au
+préalable
+
+```text
+q3 : 3W>N^2,
+q4 : 2W>N^2.
+```
+
+Ces gardes manquent au commit. À `separation=1`, une fixture u16 satisfait
+`d2-rA2-rB2=696>=695`; `apex_ball` crédite pourtant un site q4 pour lequel
+`3H^2-ET=-12 493 898 044`. Avec `smax=4`, ce crédit unique ferme effectivement
+une ancre dont le vrai compte vaut zéro. La route `--ha=boule` n'est donc pas
+fail-open sur tout son domaine CLI et reste bloquée, même si elle n'est pas la
+route par défaut.
+
+Une boule unique est de toute façon strictement plus petite que ce cône. Pour
+conserver l'idée sans cette perte, tester les huit coins de chaque boîte de
+témoins contre le cône convexe certifie `ALL`, puis descendre sur `UNKNOWN`.
+Pour conserver les valeurs exactes AABB de `h_a/h_b`, l'auto-jointure dual-tree
+à range-add décrite plus haut reste la solution : la mesure de la boule unique
+ne l'a pas exercée. Enfin, sortir après `h_q` succès ne borne pas le nombre
+d'échecs ; l'auto-jointure ponctuelle reste quadratique au pire cas.
 
 ### 6bis.4 Ce que la descente doit borner
 

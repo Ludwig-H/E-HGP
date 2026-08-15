@@ -6,6 +6,17 @@ Cadre : `phase=exploration_v3_hors_registre`, `backend=cpu_reference`,
 `profile=quantized_u16_input_only`, `mode=reparation_et_questions`,
 `public_status=not_claimed`.
 
+> [!IMPORTANT]
+> **Statut après les commits suivants.** P0.2--P0.5, encore ouverts au moment
+> d'écrire la section 2, sont désormais implémentés et reçus dans le domaine
+> u16. Q21--Q25 et les limites du nouveau cœur-boule reçoivent une réponse
+> consolidée dans
+> [`AUDIT_REAUDIT_PREFILTRE_COMBINE_COEUR_BOULE_41DFD2C_20260815.md`](AUDIT_REAUDIT_PREFILTRE_COMBINE_COEUR_BOULE_41DFD2C_20260815.md).
+> Restent notamment la vraie garde `--coord`, le cap effectif de `--oracle` et
+> la non-vacuité explicite de `oracle_paires`. Le chemin apex ajouté au
+> `66b4f0c` reste optionnel et n'est pas reçu : faux témoin à
+> `separation=1` faute de tester `gamma_q>0`.
+
 Réponse à
 [`AUDIT_PREFILTRE_COMBINE_HMAX_Q2_Q3_Q4_20260815.md`](AUDIT_PREFILTRE_COMBINE_HMAX_Q2_Q3_Q4_20260815.md).
 Le verdict est accepté sans réserve sur les trois points de fond. Cette note

@@ -28,14 +28,19 @@ ancienne phrase imposant le rejet global des positions dupliquées est périmée
 
 - [`AUDIT_ETAT_COURANT.md`](AUDIT_ETAT_COURANT.md) : unique verdict mutable,
   pin, worktree, tests et blocages.
+- [`AUDIT_REAUDIT_PREFILTRE_COMBINE_COEUR_BOULE_41DFD2C_20260815.md`](AUDIT_REAUDIT_PREFILTRE_COMBINE_COEUR_BOULE_41DFD2C_20260815.md) :
+  verdict live du préfiltre au `66b4f0c`. Il reçoit la réparation q2,
+  Corner64 et la primitive ouverte du cœur-boule dans leur périmètre, corrige la convention de
+  séparation, prouve une borne de rayon couplée plus forte, donne l'autorité
+  exacte cône--boule pour `h_a/h_b` et une auto-jointure qui conserve les
+  comptes ponctuels. Il bloque aussi la garde `--coord` hors u16 et le chemin
+  apex de `66b4f0c`, faux à `separation=1` faute de tester le signe de `gamma`.
 - [`AUDIT_PREFILTRE_COMBINE_HMAX_Q2_Q3_Q4_20260815.md`](AUDIT_PREFILTRE_COMBINE_HMAX_Q2_Q3_Q4_20260815.md) :
-  contre-audit mathématique et logiciel du préfiltre
+  contre-audit historique au pin fautif du préfiltre
   `h_coeur+h_a+h_b`. Il reçoit les fuseaux, les seuils et les trois ensembles
-  universels maximaux sous les pools imposés, mais grave le double crédit q2
-  qui ferme des ancres vivantes et invalide les chiffres q2 du reçu. Il réfute
-  aussi les claims de maximalité q3/q4 par quatre boîtes u16 et renvoie aux
-  autorités existantes `all_lane_of_box` et `corner512_all_lane` à
-  8/64/512 coins.
+  universels maximaux sous les pools imposés et grave le double crédit q2 qui
+  invalidait les chiffres q2 du reçu. Ce P0 est désormais résolu ; ses
+  contre-exemples de maximalité q3/q4 et de coût restent actifs.
 - [`NOTE_CLAUDE_REPARATION_PREFILTRE_P0_20260815.md`](NOTE_CLAUDE_REPARATION_PREFILTRE_P0_20260815.md) :
   réponse au contre-audit. Le double crédit q2 est réparé par un masque de
   lanes par frame et vérifié contre les chiffres de l'auditeur. Q21 et Q22 y
@@ -44,12 +49,14 @@ ancienne phrase imposant le rejet global des positions dupliquées est périmée
   théorème — et sa spécialisation `corner64` au témoin ponctuel retire `38` à
   `46 %` du résiduel q4 pour `+18 %` de temps.
 - [`NOTE_CLAUDE_COEUR_BOULE_FORME_CLOSE_20260815.md`](NOTE_CLAUDE_COEUR_BOULE_FORME_CLOSE_20260815.md) :
-  changement de primitive, **spécification avant mesure**. Les trois fuseaux
-  sont des lieux angulaires ; la boule inscrite y est tangente donc optimale
-  (`kappa_2 = 1/2`, `kappa_3 = sqrt(3)/6`, `kappa_4 = sin(15°)`), et le cœur
-  d'un rectangle s'écrit en une soustraction. La forme close explique le
-  facteur six entre `s=6` et `s=8` du reçu, transforme `h_coeur` en une requête
-  `k`-NN avec `k = h_q`, et clôt Q23. Elle ne mesure rien.
+  proposition de changement de primitive, conservée **avant mesure** avec une
+  bannière de ré-audit. Les constantes midpoint sont justes, mais la boule
+  doit être ouverte ; son tableau WSPD, sa comparaison à Corner64 et la clôture
+  annoncée de Q23 sont supersédés par le ré-audit ci-dessus. La primitive
+  ouverte de `6220ea3` est reçue séparément ; son claim d'arrondi supérieur
+  d'une unité est réfuté sans affecter le chemin nominal par plancher. La
+  section Q23 ajoutée au `66b4f0c` est elle aussi supersédée : cône seulement
+  suffisant, pire cas toujours quadratique et garde `gamma>0` manquante.
 - [`NOTE_SOLUTION_CONTRAT_SOURCE_AIGUE_20260814.md`](NOTE_SOLUTION_CONTRAT_SOURCE_AIGUE_20260814.md) :
   autorité contractuelle mathématique, sans réception logicielle : réponse
   négative à Q14, théorème exact des fuseaux `W2/W3/W4` et contrat de

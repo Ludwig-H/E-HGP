@@ -125,8 +125,9 @@ Trois propriétés font l'intérêt du montage :
 
 1. **La décision ne touche jamais une paire.** `h_coeur` ne dépend que du
    rectangle, `h_a` que de `a`, `h_b` que de `b` ; le compte des survivantes se
-   lit sur un histogramme de `h_b` à onze cases. Coût `O(|A|+|B|)`, jamais
-   `O(|A||B|)`.
+   lit sur un histogramme de `h_b` à onze cases à `s_max=11`. Une fois les `h`
+   connus, coût `O(|A|+|B|)` sans matérialiser `A x B`. Leur calcul courant
+   reste `O(|A|^2+|B|^2)` à cause des deux auto-jointures.
 2. **`H` est exact, `Xi` ne l'est pas.** `H` est bilinéaire par axe, son minimum
    est à un des quatre coins du rectangle plan — c'est exact. Pour `Xi`, la
    convexité en `a` — car `(b-a) x (z-a) = b x z - b x a - a x z` est affine, le
@@ -157,54 +158,62 @@ section 6bis.
 
 ## Cœur-boule — le changement de primitive du 15 août 2026
 
-Raisonner par AABB ne rend pas seulement la borne plus lâche : cela fait
-résoudre le mauvais problème. Une boîte ne sait poser que « ce site est-il
-témoin », donc on visite les sites ; la question réelle est « combien de
-témoins », un **comptage dans une région**.
-
 Les trois fuseaux sont des lieux angulaires — `W_q = { z : angle(a,z,b) >
 theta_q }` avec `90°`, `120°`, `125,264°` — et la boule centrée au milieu de
-`[a,b]` de rayon `kappa_q |ab|` y est inscrite **tangentiellement**, donc
+`[a,b]` de rayon `kappa_q |ab|` y est inscrite **ouverte** et tangentiellement,
+donc
 optimale : `kappa_2 = 1/2`, `kappa_3 = sqrt(3)/6`, `kappa_4 = sin(15°)`. Le cœur
-d'un rectangle s'en déduit en une soustraction, sans coins ni `i128` :
+d'un rectangle admet le rayon sûr :
 
 `R_q = kappa_q (d - r_A - r_B) - (r_A + r_B)/2`.
 
-Non vide dès que `s > 1/kappa_q`, soit `2,000 / 3,464 / 3,864` — la séparation
-du dossier portant sur l'**écart** des boules et non sur la distance des
-centres. Le probe grave ce seuil à environ un centième près.
+Ce rayon décorrèle deux pires cas. Sans boucle supplémentaire, la borne
+couplée plus grande est
+`kappa_q d-sqrt((4kappa_q^2+1)(r_A^2+r_B^2)/2)` ; dans le régime séparé, elle
+est exacte parmi les boules de même centre lorsque `r_A=r_B`. Elle n'est pas
+encore implémentée.
 
-### `h_a` par boule d'apex : construite, sûre, non adoptée
+La séparation du dossier porte sur l'écart
+`d-r_A-r_B >= s max(r_A,r_B)`. Le seuil `s>1/kappa_q`, soit
+`2,000 / 3,464 / 3,864`, est une garantie uniforme au pire cas, pas une
+équivalence pour chaque rectangle.
 
-La région de `h_a` n'est pas la boule du cœur mais un **cône d'apex `a`** de
-demi-ouverture `gamma_q = theta'_q - arcsin((r_B + 2 r_A)/D)` ; la boule qui y
-est inscrite est en forme close et gravée. Elle est sûre — elle minore `h_a`
-exact, donc le filtre reste fail-open, et `oracle_faux_morts = 0`.
+### `h_a` par boule d'apex : verte à `s=6`, fausse à `s=1`, non adoptée
 
-Elle n'est pourtant pas la route : l'auto-jointure qu'elle devait remplacer sort
-dès `h_q <= 10` atteint, donc coûte `O(|A| h_q)` et non `O(|A|^2)`. Ces deux
-postes ne pèsent que `14,6 %` du travail sur `uniform`, et le remplacement perd
-`11` points de fermeture q4 sur `eight_clusters` pour un temps plus mauvais.
-Détail dans [`../audits/PISTES_FERMEES.md`](../audits/PISTES_FERMEES.md).
+Le chemin `--ha=boule` inscrit une boule dans le **cône suffisant** d'apex `a`
+de demi-ouverture
+`gamma_q = theta'_q - arcsin((r_B + 2 r_A)/D)`. Ce cône n'est pas la région
+exacte de `h_a` : le remplacement de `|z-a|` par `2r_A` le rétrécit. Les portes
+à `s=6` donnent `oracle_faux_morts=0`, mais la preuve doit aussi tester
+explicitement `gamma_q>0` avant de mettre son sinus au carré.
 
-Le compteur `travail_ha` est ce qui reste de plus utile : il dit que le travail
-est dans la **descente du cœur**, `43` à `85 %` du total.
+La mesure `n=4000,s=6` rend ce chemin plus lent et lui fait perdre jusqu'à
+`11` points de fermeture q4 sur `eight_clusters`; il reste donc non adopté.
+Elle ne change pas la borne de pire cas : sortir après `h_q` **succès** ne borne
+pas le nombre d'échecs, et l'auto-jointure reste `O(|A|^2)` dans le pire cas.
+Le compteur `travail_ha` compare en outre des visites de nœuds à des tests de
+paires; seul le temps de paroi est homogène. Détail et verdict dans le ré-audit
+lié plus bas.
 
-Deux fautes envisagées n'en sont pas, et c'est inscrit dans l'en-tête :
-arrondir la division rationnelle vers le haut d'une unité est absorbé par
-l'inégalité stricte, et écrire la disjonction avec `>=` décide exactement
-pareil. S'y ajoutent deux autres du côté apex : la longueur `l` est un
-**paramètre libre** que la sûreté ne contraint pas, et l'arrondi bas de la
-racine soustraite n'est atteignable que si `r_A` est comparable à `D`, donc
-jamais sous séparation. Les gater aurait produit des portes ne mordant sur
-aucun nuage.
+`spindle_core_ball.hpp` implémente un sous-approché rationnel du rayon et les
+deux primitives sphère--boîte strictes. `core_ball_probe.cpp` reçoit la sûreté
+du certificat et la parité descente/balayage direct sur trois petits nuages.
+Ce n'est pas encore son intégration dans `h_coeur+h_a+h_b`.
 
-`h_coeur` devient une requête `k`-NN avec `k = h_q` : l'ancre meurt si et
-seulement si le `h_q`-ième plus proche voisin du centre est dans le cœur. Aucun
-kd-tree n'est ajouté — l'octree Morton porte déjà des intervalles
-`[first, last]`, donc le compte d'un sous-arbre est en `O(1)` ; il ne manquait
-que les deux primitives sphère–boîte. Spécification :
-[`../audits/NOTE_CLAUDE_COEUR_BOULE_FORME_CLOSE_20260815.md`](../audits/NOTE_CLAUDE_COEUR_BOULE_FORME_CLOSE_20260815.md).
+Le plancher nominal est sûr, mais le commentaire selon lequel `+1` serait
+absorbé par la stricte est faux : une distance de grille est une racine carrée
+d'entier, pas nécessairement un entier. La solution sans perte finale est un
+rayon fixe sous-approché (Q30) comparé par carrés en `i128`, jamais un plafond.
+
+Avec les sphères circonscrites aux AABB utilisées par le probe, le cœur-boule
+est un sous-certificat de Corner64 : il peut créditer en bloc, mais un nœud
+hors de la boule doit encore passer par Corner512/Corner64. Le test
+`h_q`-ième voisin strictement à l'intérieur signifie seulement que le
+cœur-boule suffit à tuer uniformément le rectangle ; ce n'est pas une
+équivalence avec toute mort d'ancre. La petite boule ne conserve pas non plus
+les valeurs de `h_a/h_b` sans fallback. Ré-audit, rayon couplé plus fort,
+autorité cône--boule et auto-jointure constructive :
+[`../audits/AUDIT_REAUDIT_PREFILTRE_COMBINE_COEUR_BOULE_41DFD2C_20260815.md`](../audits/AUDIT_REAUDIT_PREFILTRE_COMBINE_COEUR_BOULE_41DFD2C_20260815.md).
 
 ## Réfutations gravées dans le code
 

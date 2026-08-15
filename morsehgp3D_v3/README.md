@@ -394,7 +394,9 @@ la population retenue, et la chaîne par ancre matérialise `6,09` milliards de
 paires de lentille pour `21,4` millions de candidats à `50 000` points. Tant que
 ce rapport est à quatre chiffres, aucune optimisation constante ne compte.
 
-**L'idée.** Chaque support est possédé par sa **paire diamétrale**. Une ancre
+**L'idée.** Chaque support est possédé par son **arête maximale canonique**.
+En q2 seulement, cette arête est aussi la paire antipodale et diamétrale de la
+miniboule. Une ancre
 `(a,b)` ne porte aucun support d'arité `q` dès que `|P inter W_q(a,b)| >= h_q`,
 avec `h_q = s_max - q + 1` — un seuil par arité, décroissant. Compter ce cardinal
 exactement coûte une requête par paire ; on le **minore** par trois comptes
@@ -412,16 +414,17 @@ fail-open : il ne ferme jamais à tort.
 
 **Pourquoi c'est bon marché.** `h_coeur` ne dépend que du rectangle, `h_a` que
 de `a`, `h_b` que de `b`. Le nombre d'ancres survivantes se lit alors sur un
-histogramme de `h_b` à onze cases : le coût par rectangle est `O(|A|+|B|)`,
-**jamais `O(|A| |B|)`**, et aucune paire n'est matérialisée.
+histogramme de `h_b` à onze cases à `s_max=11` : **une fois les trois comptes
+connus**, la décision coûte `O(|A|+|B|)` et ne matérialise pas `A x B`. Leur
+formation courante coûte encore `O(|A|^2+|B|^2)` à cause des auto-jointures.
 
 **Les optimisations qui ont fait la différence**, dans l'ordre de leur gain :
 
 1. **`Xi` est convexe en `a`**, car `(b-a) x (z-a) = b x z - b x a - a x z` est
-   affine — le terme `a x a` étant nul. Son maximum sur une boîte est donc à un
-   **sommet**, et le tester ainsi est exact. Passer d'une enveloppe
-   d'intervalles aux sommets fait bondir la fermeture q4 de `47,6 %` à
-   `91,0 %` ;
+   affine — le terme `a x a` étant nul. Son maximum en `a` est donc à un
+   sommet. Mais `xi_max_over_box` maximise ensuite ses composantes séparément :
+   c'est un majorant sûr, pas le maximum corrélé. `corner64_all_lane` est
+   l'autorité exacte sur l'enveloppe AABB continue au témoin ponctuel ;
 2. élaguer la descente sur `max_z min_{a,b} H` et non sur `max H`, qui couvrait
    toute l'union des boules diamétrales du rectangle ;
 3. une seule descente pour les trois lanes, les fuseaux étant emboîtés
@@ -440,6 +443,14 @@ de plus ; pour q4, un seed dans la même région puis le théorème axial, qui d
 Statut : `counter-only`, `public_status=not_claimed`. Le probe compte des
 **ancres**, jamais des supports, et un rectangle non décidé compte toutes ses
 paires comme survivantes — la mesure majore donc le résiduel.
+
+Le double crédit q2 de la première campagne est réparé, mais son reçu q2
+historique reste invalide. La primitive cœur-boule ouverte de `6220ea3` est
+reçue comme sous-certificat borné ; son intégration doit rester un fast path
+devant Corner64 avec la sphère AABB courante. La boule d'apex optionnelle de
+`66b4f0c` reste bloquée : elle oublie le signe de `gamma_q` et ferme à tort à
+`separation=1`. Verdict et solutions :
+[`audits/AUDIT_REAUDIT_PREFILTRE_COMBINE_COEUR_BOULE_41DFD2C_20260815.md`](audits/AUDIT_REAUDIT_PREFILTRE_COMBINE_COEUR_BOULE_41DFD2C_20260815.md).
 
 ## Contrat d'identité
 

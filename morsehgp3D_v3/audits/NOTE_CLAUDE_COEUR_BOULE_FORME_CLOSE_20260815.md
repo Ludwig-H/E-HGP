@@ -6,6 +6,29 @@ Cadre : `phase=exploration_v3_hors_registre`, `backend=cpu_reference`,
 `profile=quantized_u16_input_only`, `mode=conception_avant_mesure`,
 `public_status=not_claimed`. GCP non utilisé.
 
+> [!CAUTION]
+> **Ré-audit au `HEAD=66b4f0c` : ne pas prolonger cette note telle quelle.**
+> La boule tangentielle doit être **ouverte** ; la convention WSPD effective
+> est `d-r_A-r_B >= s max(r_A,r_B)` ; avec `sphere_of(box)` le cœur-boule est
+> dominé par Corner64, et le plan ball-only diminue `h_a/h_b`. Les formules
+> corrigées, une borne couplée plus forte, l'autorité exacte cône--boule et
+> l'auto-jointure qui conserve les comptes ponctuels sont données dans
+> [`AUDIT_REAUDIT_PREFILTRE_COMBINE_COEUR_BOULE_41DFD2C_20260815.md`](AUDIT_REAUDIT_PREFILTRE_COMBINE_COEUR_BOULE_41DFD2C_20260815.md).
+> La primitive ouverte ajoutée au `6220ea3` est reçue comme sous-certificat ;
+> les claims architecturaux de la note ne sont pas une autorité active. En
+> particulier, le « non-mutant » rayon arrondi d'une unité vers le haut est
+> faux pour une norme de grille irrationnelle ; le chemin nominal par plancher
+> reste sûr. Pour ne pas perdre la fraction, employer le test fixe Q30 par
+> carrés décrit dans le ré-audit, jamais un plafond entier.
+>
+> La section Q23 ajoutée au `66b4f0c` n'est pas reçue non plus. Son cône est un
+> sous-certificat obtenu par `|e|<=2r_A`, pas la région exacte de `h_a` ;
+> l'auto-jointure reste quadratique au pire cas. Surtout, `apex_sin2` met le
+> sinus au carré sans vérifier `gamma_q>0` : à `separation=1`, une fixture u16
+> produit `oracle_faux_morts=1`. Ajouter `3W>N^2` en q3 et `2W>N^2` en q4.
+> La mesure suffit à ne pas adopter cette boule unique, mais ne ferme pas la
+> route dual-tree qui n'a pas été testée.
+
 Fait suite à
 [`NOTE_CLAUDE_REPARATION_PREFILTRE_P0_20260815.md`](NOTE_CLAUDE_REPARATION_PREFILTRE_P0_20260815.md).
 Cette note **change de primitive** et réordonne le plan. Rien n'y est mesuré :
@@ -22,9 +45,10 @@ visite les sites. Le problème réel est « combien de témoins », c'est-à-dir
 **comptage dans une région**, qui est précisément ce qu'un index spatial sait
 faire sans énumérer.
 
-Le passage aux boules ne rend pas la borne meilleure partout — la section 6
-montre que les deux certificats sont incomparables. Il rend la **question**
-bonne.
+Le passage aux boules rend possible un comptage en bloc. Avec
+`sphere_of(box)`, il ne rend toutefois pas le certificat plus grand : la
+sphère circonscrit l'AABB, donc son intersection universelle est incluse dans
+celle de Corner64. Il change la **forme du calcul**, pas l'ensemble certifié.
 
 ## 2. Les trois fuseaux sont des lieux angulaires
 
@@ -64,8 +88,8 @@ La valeur q4 mérite d'être écrite exactement : avec `phi = arccos(1/sqrt(3))`
 `kappa_4 = (1/2) tan(phi/2) = (sqrt(3)-1)/(2 sqrt(2))`, qui vaut `sin(15°)`
 après rationalisation.
 
-**La boule `B(m, kappa_q L)` est incluse dans `W_q(a,b)`, et tangente
-intérieurement.** Preuve : dans le plan méridien, la lentille est
+**La boule ouverte `B°(m, kappa_q L)` est incluse dans `W_q(a,b)`, et sa
+frontière est tangente à celle du fuseau.** Preuve : dans le plan méridien, la lentille est
 `D(k) inter D(-k)` avec `R = L/(2 sin theta_q)` et `k = sqrt(R^2 - L^2/4)` ; un
 point à distance `kappa_q L` de l'origine est à distance au plus
 `kappa_q L + k` du centre `(0,-k)`, et le calcul donne exactement `R`. La boule
@@ -83,11 +107,12 @@ Soit `A` de boule englobante `(c_A, r_A)`, `B` de `(c_B, r_B)`, et
 
 D'où, par la section 3 :
 
-**`B(m, R_q)` est incluse dans `W_q(a,b)` pour TOUT `(a,b)` de `A x B`, avec
+**`B°(m, R_q)` est incluse dans `W_q(a,b)` pour TOUT `(a,b)` de `A x B`, avec
 `R_q = kappa_q (d - r_A - r_B) - (r_A + r_B)/2`.**
 
-Une soustraction. Aucun coin, aucune énumération, aucun `i128` : les quantités
-sont des distances. C'est le cœur commun du rectangle, en forme close.
+Une soustraction au niveau mathématique. L'implémentation exacte exige ensuite
+des arrondis dirigés et une largeur prouvée. C'est un cœur commun du rectangle,
+en forme close.
 
 ## 5. Le seuil de séparation — première rédaction fausse, corrigée
 
@@ -106,8 +131,10 @@ Donc `L2 = d2 - S2 >= s r_max` directement, et avec `S2 <= 2 r_max` :
 
 `R4 = 2 kappa_q L2 - S2 >= 2 r_max (kappa_q s - 1)`.
 
-Le cœur est donc non vide dans le pire cas **si et seulement si**
-`s > 1 / kappa_q` :
+Le cœur est donc uniformément garanti non vide dans le pire cas continu si
+`s > 1 / kappa_q`. C'est une condition suffisante uniforme, pas un « si et
+seulement si » pour chaque rectangle ; le plancher entier décale en outre les
+petites échelles :
 
 | lane | `s` minimal | `R_q / r_max` à `s=6` | à `s=8` | à `s=10` |
 | --- | ---: | ---: | ---: | ---: |
@@ -126,9 +153,10 @@ substantiel à `s = 6`. La mesure confirme le seuil et son ordre : sur
 | `3` | `100 %` | `97,6 %` | `93,3 %` |
 | `4` | `100 %` | `100 %` | `100 %` |
 
-q2 bascule exactement à `2`, q3 et q4 entre `3` et `4`, et q3 — de seuil `3,464`
-contre `3,864` — est plus proche de la complétude à `s = 3`. C'est l'ordre que
-la forme close prédit.
+Sur ce nuage q2 atteint `100 %` à `s=2`, q3 et q4 entre `3` et `4`, et q3 — de
+seuil continu uniforme `3,464` contre `3,864` — est plus proche de la
+complétude à `s=3`. C'est un constat empirique compatible avec l'ordre des
+constantes, pas une équivalence rectangle par rectangle.
 
 Le seuil corrigé est gravé par la fixture `seuil` du probe, dix lignes exactes
 dont deux serrent les constantes à environ un centième : à `s = 3,4` le vrai q3
@@ -150,34 +178,36 @@ englobante minimale des points du nœud serait souvent bien plus petite. Ce
 `r` trop grand est de la marge laissée sur la table, et il entre linéairement
 dans `R_q`.
 
-## 6. Boule et boîte ne se dominent pas
+## 6. Correction : la boule AABB est dominée par Corner64
 
 Le cœur-boule relaxe les nœuds par leurs boules englobantes ; `corner64` les
-relaxe par leurs AABB. Une AABB n'est incluse ni dans la boule englobante ni
-l'inverse : **les deux certificats sont incomparables**, et aucun ne remplace
-l'autre. Le montage correct les compose — la boule pour l'élagage et les crédits
-en bloc, `corner64` sur les feuilles de la frontière. La fermeture est alors
-supérieure ou égale à `corner64` seul, à une fraction du coût.
-
-C'est aussi ce qui interdit de retirer `corner64` : ce serait échanger une
-fermeture contre une autre sans preuve d'inclusion.
+relaxe par leurs AABB. Pour `sphere_of(box)`, l'AABB est incluse dans sa sphère
+circonscrite. L'intersection universelle sur les sphères est donc incluse dans
+l'intersection sur les AABB : le cœur-boule ne peut jamais gagner un témoin
+sur Corner64. Le montage correct l'emploie pour les crédits en bloc, puis
+applique Corner512/Corner64 à **tout le complément**. Un nœud disjoint de la
+boule reste `UNKNOWN` pour Corner64 et ne peut pas être élagué sur ce seul
+motif. Une vraie complémentarité exige une sphère englobant les PointId mais
+pas nécessairement toute l'AABB, plus un ledger d'IDs par lane.
 
 ## 7. Ce que ça change algorithmiquement
 
-`h_coeur` devient : **compter les points de `B(m, R_q)`, hors `A` et hors `B`,
-plafonné à `h_q`**. Comme `h_q = s_max - q + 1` ne dépasse jamais une dizaine,
-c'est une requête `k` plus proches voisins avec `k = h_q` :
+Le sous-certificat de `h_coeur` devient : **compter les points de la boule
+ouverte `B°(m,R_q)`, hors `A` et hors `B`, plafonné à `h_q`**. Pour
+`s_max=11`, `h_q` ne dépasse pas dix ; le test uniforme du rectangle est :
 
-> l'ancre meurt pour la lane `q` si et seulement si le `h_q`-ième plus proche
-> voisin de `m` est à distance au plus `R_q`.
+> si le `h_q`-ième vrai PointId hors `A union B` est à distance strictement
+> inférieure à `R_q`, alors toutes les ancres du rectangle meurent pour ce
+> certificat.
 
-Une descente d'index, pas soixante-quatre prédicats par site.
+Ce n'est pas un « si et seulement si » pour la mort d'une ancre : `h_a+h_b`
+peut compléter le seuil, et les fuseaux contiennent des témoins hors de cette
+boule.
 
-`h_a` suit le même schéma : à `a` fixé, `b` parcourant `(c_B, r_B)`, le cœur est
-encore une boule en forme close. **Le self-join `O(|A|^2)` devient `|A|`
-requêtes de boule.** C'est la réponse à Q23 de la note précédente, et elle prend
-la seconde branche que j'y décrivais — le filtre est inchangé, seul le coût
-baisse — donc sans perdre la granularité par point dont dépend l'histogramme.
+`h_a` ne suit pas le même schéma : la boule midpoint peut perdre des témoins
+proches du pôle `a`. La boule d'apex de la section 11 est seulement un
+minorant ; préserver les valeurs demande un fallback exact ou l'auto-jointure
+dual-tree à range-add du ré-audit.
 
 ## 8. Faut-il un kd-tree ?
 
@@ -186,13 +216,14 @@ servais mal**. L'octree Morton porte des intervalles `[first, last]`, donc le
 compte d'un sous-arbre est en `O(1)`. Ce qui manque n'est pas l'arbre, ce sont
 deux primitives sphère–boîte :
 
-- « boîte entièrement dans la boule » — crédit en bloc **exact**, à la place de
-  mon test aux coins, et sans le double crédit qui a causé le P0 puisque la
-  décision porte sur des populations disjointes par construction de l'octree ;
-- « boîte disjointe de la boule » — élagage.
+- « boîte entièrement dans la boule » — crédit en bloc **exact**, avec retrait
+  de la lane du masque transmis aux enfants pour interdire tout double crédit ;
+- « boîte disjointe de la boule » — élagage de cette branche boule seulement,
+  jamais de Corner512/Corner64.
 
-Le coût devient celui de la **surface** de la sphère dans l'arbre, pas de son
-volume, avec arrêt dès `h_q` atteint.
+Le coût observé peut suivre la frontière de la sphère, mais ce n'est pas une
+borne : une requête octree peut visiter `Theta(n)` nœuds, avec arrêt dès
+`h_q` succès seulement.
 
 Un kd-tree ne se justifierait que si l'octree se révélait mauvais sur
 `eight_clusters` — la famille dure, celle dont les cellules atteignent `492`
@@ -202,12 +233,12 @@ chiffre serait exactement le genre de décision que le dossier reproche ailleurs
 
 ## 9. Plan révisé
 
-1. **Cœur-boule en forme close** plus les deux primitives sphère–boîte sur
-   l'octree existant. Jugé par le harnais apparié déjà en place, qui rend
-   `gagne / perd / faux` contre `corner64` et contre la force brute. Attendu :
-   `perd != 0` dans les deux sens, puisque les certificats sont incomparables —
-   ce n'est pas un défaut, c'est ce qui motive la composition.
-2. **`h_a` et `h_b` par requêtes de boule**, ce qui clôt Q23.
+1. **Cœur-boule en forme close** comme fast path, puis Corner512/Corner64 sur
+   tout le complément. Le harnais doit vérifier `ball => corner` avec la
+   sphère AABB courante, plus `direct==descente` par lane.
+2. **`h_a` et `h_b` par dual-tree à range-add**, avec cône/boule en fast path
+   et fallback exact ; Q23 reste ouverte tant que cette route n'est pas
+   implémentée et mesurée.
 3. **L'écart au vrai vivant à grande taille**, par échantillonnage d'ancres
    décidées exactement en `O(n)` chacune. Inchangé, et toujours la mesure qui
    décide s'il faut continuer à serrer ou passer à autre chose.
@@ -224,11 +255,11 @@ coïncident. Sur Q24 je garde la voie rapide comme pure optimisation de parcours
 doublée d'une porte vérifiant l'égalité des comptes avec et sans elle — l'option
 falsifiable, celle que je défendais.
 
-## 10. Ce que le point 1 a produit, et deux non-mutants
+## 10. Ce que le point 1 a produit, puis la correction du rayon `+1`
 
-Le point 1 du plan est fait : `prototype/spindle_core_ball.hpp` et sa porte
-`mhgp3v_core_ball_*`, dix-huit CTests verts. Aucune mesure de fermeture n'a été
-prise — la note s'y engageait, et l'ordre est tenu.
+Le point 1 du plan historique a produit `prototype/spindle_core_ball.hpp` et
+sa porte `mhgp3v_core_ball_*`, dix-huit CTests verts. À cette étape seulement,
+aucune mesure de fermeture n'avait encore été prise.
 
 **La tangence est vérifiée par un juge sans constante.** La fixture confronte
 les six points entiers au fuseau exact en entiers, qui n'emploie ni `kappa`, ni
@@ -243,22 +274,20 @@ reconfrontés au fuseau sur toutes les paires de leur rectangle : `faux = 0`.
 C'est la porte qui manquait au préfiltre de ce matin — un élagage trop gourmand
 perd des témoins sans jamais mentir, donc aucune porte de sûreté ne le verrait.
 
-**Deux fautes envisagées n'en sont pas, et le dire est un résultat.** Arrondir
-la division rationnelle vers le haut d'une unité est **absorbé** par l'inégalité
-stricte : avec `f = floor(vrai)`, les distances admises passent de `f-1` à `f`,
-et `f <= vrai`. De même, écrire la disjonction avec `>=` au lieu de `>` décide
-exactement pareil, puisqu'une boîte dont le point le plus proche est à distance
-`R4` n'a aucun point à distance `< R4`. Les deux auraient donné des portes qui
-ne mordent sur aucun nuage — le défaut même que votre contre-audit a trouvé
-ailleurs. Ils sont documentés comme non-mutants dans l'en-tête, et remplacés par
-deux fautes atteignables : `boule-rayon-plus-deux` et `boule-disjoint-centre`.
+**Correction du ré-audit.** La disjonction `>=` est bien équivalente pour une
+boule ouverte. En revanche, `+1` sur le rayon n'est pas absorbé : une distance
+de grille est une racine carrée d'entier, pas nécessairement un entier. La
+fixture q3 `a=(0,0,0), b=(7,0,0), z=(3,2,0)` est acceptée par le rayon `9`
+alors que le vrai rayon quadruplé vaut `14/sqrt(3)=8,083...` et que le fuseau
+refuse. `rayon-plus-un` doit donc être un mutant causal ; le plancher nominal
+reste sûr.
 
-## 11. Q23, fermée — et sa prémisse est fausse
+## 11. Q23 — boule unique non adoptée, route générale encore ouverte
 
 Le point 2 du plan est fait. Il donne une réponse que je n'attendais pas, et
 elle est négative.
 
-### 11.1 La région de `h_a` est un cône, pas la boule du cœur
+### 11.1 Un cône suffisant pour `h_a`, pas sa région exacte
 
 `h_a` compte les points `z` de `A` témoins de `(a,b)` pour tout `b`, à `a`
 fixé. La boule du cœur n'y sert à rien : elle est centrée à l'équateur du
@@ -271,24 +300,26 @@ du fuseau est garantie dès que
 
 `angle(e,u) < gamma_q = theta'_q - arcsin((r_B + 2 r_A)/D)`,
 
-en majorant `|e| <= 2 r_A`, ce que tout `z` de `A` vérifie automatiquement. La
-région est donc un **cône d'apex `a`**, et la boule demandée est celle qui y est
-**inscrite**, de centre `a + l u^` et de rayon `l sin(gamma_q)`. En unités
+en majorant `|e| <= 2 r_A`, ce que tout `z` de `A` vérifie automatiquement. On
+obtient donc un **cône suffisant d'apex `a`**, strictement plus petit que la
+région exacte, et la boule demandée est celle qui y est **inscrite**, de centre
+`a + l u^` et de rayon `l sin(gamma_q)`. En unités
 doublées le `U` se simplifie et le test tient en une comparaison d'entiers :
 `den |G ed - l ud|^2 < l^2 num`.
 
 `l` s'avère être un **paramètre libre** : la sûreté ne le contraint pas, tout
 `z` de `A` vérifiant `|e| <= 2 r_A` par définition du diamètre. C'est le
-troisième non-mutant du fichier, après l'arrondi et la disjonction large.
+paramètre de position de la boule inscrite ; contrairement au rayon `+1`, le
+doubler ne relâche pas l'ouverture angulaire.
 
 ### 11.2 Ce que la boule coûte, mesuré
 
 Fixtures, `B` réduit à un point donc juge exact et complet : la boule capte
-`95,0 %` des vrais témoins en configuration éloignée, `81,1 %` en configuration
-serrée, avec `faux = 0`. En production c'est bien pire, et la géométrie le
-prédit : à `s = 6`, `(r_B + 2 r_A)/D` vaut environ `3/s = 0,5`, donc
-`arcsin = 30°` et `gamma_4 = 24,7°` contre `theta'_4 = 54,7°` — le rayon est
-divisé par deux. Sur `n=4000`, `s=6`, `K=10` :
+`95,0 %` des vrais témoins en configuration éloignée et `81,1 %` en agrégat
+des trois lanes dans la configuration serrée, avec `faux = 0`; q4 seul n'y
+capte que `71,258 %`. La correction angulaire doit être calculée à partir de
+`D>=s max(r_A,r_B)+r_B` — `3/s` n'est pas une égalité. Sur
+`n=4000`, `s=6`, `K=10` :
 
 | famille | `ha_somme` jointure | par boule | fermeture q4 |
 | --- | ---: | ---: | --- |
@@ -299,7 +330,7 @@ divisé par deux. Sur `n=4000`, `s=6`, `K=10` :
 À `s = 8` la correction est plus petite et la perte se réduit — `72,80 -> 68,33`
 sur `eight_clusters` — sans jamais s'annuler.
 
-### 11.3 La prémisse de Q23 ne tient pas
+### 11.3 Ce que la mesure établit — et ce qu'elle n'établit pas
 
 Vous demandiez de remplacer les auto-jointures ponctuelles au motif d'un coût
 `O(|A|^2 + |B|^2)`. Le compteur dédié dit ce que ces deux postes pèsent
@@ -311,10 +342,11 @@ réellement dans le travail total :
 | `eight_clusters` | `35,3 %` | `31,0 %` |
 | `terrain` | `56,9 %` | `48,7 %` |
 
-**L'auto-jointure n'est pas quadratique en pratique.** Elle sort dès que le
-seuil `h_q <= 10` est atteint, donc elle coûte `O(|A| h_q)` et non `O(|A|^2)` —
-et `uniform`, la famille la plus lente, est celle où ces postes pèsent le
-moins. La boule réduit le travail de `28 %` sur `terrain`, mais l'**augmente**
+L'auto-jointure sort dès que le seuil `h_q <= 10` est atteint, ce qui aide sur
+ces données. Cela ne donne pas `O(|A|h_q)` : l'arrêt porte sur les **succès** et
+une suite d'échecs conserve le pire cas `O(|A|^2)`. `uniform`, la famille la
+plus lente, est celle où ces postes pèsent le moins. La boule réduit le travail
+de `28 %` sur `terrain`, mais l'**augmente**
 de `20 %` sur `uniform`, et le temps de paroi est plus mauvais dans les trois
 cas — `+6` à `+14 %` — chaque unité de travail par boule coûtant un `i128` et
 une racine entière là où l'auto-jointure ne fait qu'un produit scalaire.
@@ -325,12 +357,12 @@ l'optimisation ait payé jusqu'ici.
 
 ### 11.4 Ce que je fais du chemin
 
-Je le garde, compilé, exercé et gardé — trois portes vérifient
-`oracle_faux_morts=0` sur les trois familles, la boule minorant `h_a` exact donc
-le filtre restant fail-open. Mais **il n'est pas la route par défaut**, et je ne
-demande pas sa réception. Q23 est close par la mesure, pas par le choix entre
-vos deux branches : ni le minorant par bloc ni le calcul accéléré ne valent, sur
-ces tailles de cellule, ce qu'ils coûtent en fermeture.
+Je le garde compilé mais **il n'est pas la route par défaut**. Les trois portes
+à `s=6` ne suffisent pas : à `separation=1`, le signe de `gamma_q` perdu par le
+carré produit une fausse fermeture. Après correction, la mesure justifie de ne
+pas adopter cette **boule unique** sur ces tailles. Elle ne ferme pas
+l'auto-jointure dual-tree à range-add proposée par l'audit, qui n'a pas été
+implémentée.
 
 Si vous voyez une erreur dans l'attribution du coût — le compteur
 `travail_ha` compte les visites de nœud côté boule et les paires testées côté
@@ -340,8 +372,8 @@ qui m'a fait conclure.
 
 ## 12. Ce que cette note ne revendique pas
 
-Aucune mesure. Aucune promotion de statut : le préfiltre reste `counter-only` et
-ferme des **ancres**, pas des supports. La section 3 est une preuve
-géométrique — l'inclusion et la tangence — mais elle ne devient un fait du
-dossier qu'avec sa fixture gravée et sa porte à code, qui n'existent pas encore
-au moment d'écrire. Le point 1 du plan les produit avant toute mesure.
+Les chiffres de la section 11 sont des diagnostics `counter-only`, sans brut
+chronométrique versionné ; ils ne promeuvent aucun statut. Le préfiltre ferme
+des **ancres**, pas des supports. Les fixtures du cœur ont été ajoutées au
+`6220ea3` et celles de l'apex au `66b4f0c`, mais le ré-audit ci-dessus bloque
+les claims `+1`, l'exactitude du cône et la sûreté apex à `separation=1`.

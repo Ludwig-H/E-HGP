@@ -10,6 +10,20 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `mode=audit_independant_math_and_architecture`,
 `public_status=not_claimed`.
 
+> [!IMPORTANT]
+> **Statut au `HEAD=66b4f0c` : audit historique partiellement supersédé.**
+> Le P0 de double crédit q2 décrit ci-dessous est réparé par `3bf1bf3` : masque
+> de lanes par frame, fixture de cinq IDs, mutant causal, oracle par `PairId`
+> et couverture WSPD sont reçus dans le domaine u16. Le diagnostic au pin
+> `4cd1f82` et l'invalidation du reçu q2 historique restent vrais ; les lignes
+> déjà produites doivent toujours être régénérées. Les conclusions abstraites
+> sur les ensembles maximaux, le sens de l'implication, le coût total et la
+> non-maximalité q3/q4 restent actives. Le verdict live, les solutions et
+> l'audit du nouveau cœur-boule sont dans
+> [`AUDIT_REAUDIT_PREFILTRE_COMBINE_COEUR_BOULE_41DFD2C_20260815.md`](AUDIT_REAUDIT_PREFILTRE_COMBINE_COEUR_BOULE_41DFD2C_20260815.md).
+> Le chemin apex optionnel ajouté ensuite n'est pas reçu : il ferme à tort à
+> `separation=1` faute de tester `gamma_q>0` avant son carré.
+
 ## Verdict
 
 Le schéma mathématique est bon, mais son implémentation et sa revendication de
