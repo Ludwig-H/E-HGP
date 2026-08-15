@@ -4580,3 +4580,77 @@ mhgp3v_add_expected_code_test_for(mhgp3v_directional_dominance_probe
 mhgp3v_add_expected_code_test_for(mhgp3v_directional_dominance_probe
   mhgp3v_dominance_plancher_ferme "plancher de fermeture q4" 3
   --points=200 --family=uniform --seed=3 --min-closed-q4=1)
+
+# ---------------------------------------------------------------------------
+# PREFILTRE COMBINE : COEUR + DOMINANCE PAR EXTREMITE.
+#
+# Proposition de l'utilisateur du 15 aout 2026. Trois comptes de temoins,
+# PROUVES DEUX A DEUX DISJOINTS — le coeur exclut `A` et `B`, `h_a` vit dans
+# `A`, `h_b` dans `B`, et `A inter B` est vide par construction CK — dont la
+# somme minore `|P inter W_q(a,b)|`. L'ancre meurt des que cette somme atteint
+# `h_q`. La decision porte sur un histogramme de `h_b`, jamais sur une paire :
+# le cout par rectangle est `O(|A|+|B|)` et non `O(|A||B|)`.
+#
+# Le juge borne verifie la seule chose qui compte : le minorant ne depasse
+# JAMAIS le compte vrai. Un depassement serait une fermeture a tort, donc une
+# perte de support.
+# ---------------------------------------------------------------------------
+add_executable(mhgp3v_combined_prefilter_probe prototype/combined_prefilter_probe.cpp)
+target_include_directories(mhgp3v_combined_prefilter_probe PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(mhgp3v_combined_prefilter_probe PRIVATE mhgp)
+target_compile_options(mhgp3v_combined_prefilter_probe PRIVATE -Wall -Wextra -Werror)
+
+# La partition est la premiere porte : sans elle, tout pourcentage est faux.
+add_test(NAME mhgp3v_combined_partition
+  COMMAND mhgp3v_combined_prefilter_probe --points=2000 --family=uniform --seed=3
+          --separation=8 --min-rectangles=2000)
+set_tests_properties(mhgp3v_combined_partition PROPERTIES
+  PASS_REGULAR_EXPRESSION "ledger masse_attendue=1999000 ecart=0 recouvrements=0")
+
+add_test(NAME mhgp3v_combined_juge_uniform
+  COMMAND mhgp3v_combined_prefilter_probe --points=160 --family=uniform --seed=3
+          --separation=6 --juge=160)
+set_tests_properties(mhgp3v_combined_juge_uniform PROPERTIES
+  PASS_REGULAR_EXPRESSION "desaccords=0")
+
+add_test(NAME mhgp3v_combined_juge_amas
+  COMMAND mhgp3v_combined_prefilter_probe --points=160 --family=eight_clusters --seed=5
+          --separation=8 --juge=160)
+set_tests_properties(mhgp3v_combined_juge_amas PROPERTIES
+  PASS_REGULAR_EXPRESSION "desaccords=0")
+
+add_test(NAME mhgp3v_combined_juge_terrain
+  COMMAND mhgp3v_combined_prefilter_probe --points=160 --family=terrain --seed=7
+          --separation=6 --juge=160)
+set_tests_properties(mhgp3v_combined_juge_terrain PROPERTIES
+  PASS_REGULAR_EXPRESSION "desaccords=0")
+
+# PORTES NEGATIVES A CODE EXACT.
+mhgp3v_add_expected_code_test_for(mhgp3v_combined_prefilter_probe
+  mhgp3v_combined_refus_famille "REFUS : famille inconnue" 2
+  --points=100 --family=inexistante)
+mhgp3v_add_expected_code_test_for(mhgp3v_combined_prefilter_probe
+  mhgp3v_combined_refus_inconnu "REFUS : argument inconnu" 2
+  --points=100 --nawak)
+mhgp3v_add_expected_code_test_for(mhgp3v_combined_prefilter_probe
+  mhgp3v_combined_refus_profil "REFUS : n hors profil u16" 2
+  --points=70000)
+mhgp3v_add_expected_code_test_for(mhgp3v_combined_prefilter_probe
+  mhgp3v_combined_refus_smax "REFUS : smax hors domaine" 2
+  --points=100 --smax=3)
+mhgp3v_add_expected_code_test_for(mhgp3v_combined_prefilter_probe
+  mhgp3v_combined_refus_juge_non_borne "REFUS : juge non borne" 2
+  --points=500 --juge=500)
+mhgp3v_add_expected_code_test_for(mhgp3v_combined_prefilter_probe
+  mhgp3v_combined_refus_mutant_sans_juge "REFUS : un mutant sans juge ne prouve rien" 2
+  --points=100 --inject=largeur-i64)
+mhgp3v_add_expected_code_test_for(mhgp3v_combined_prefilter_probe
+  mhgp3v_combined_plancher_rectangles "PLANCHER" 3
+  --points=200 --family=uniform --seed=3 --separation=8 --min-rectangles=1000000)
+# `coeur-intervalle-xi` n'est PAS une porte : l'enveloppe d'intervalles est
+# sure, seulement plus lache. Elle reste accessible par `--inject` pour mesurer
+# l'ecart entre les deux majorants, jamais pour prouver une mort.
+mhgp3v_add_expected_code_test_for(mhgp3v_combined_prefilter_probe
+  mhgp3v_combined_mutant_centre "MUTANT TUE" 4
+  --points=160 --family=eight_clusters --seed=5 --separation=8 --juge=160
+  --inject=coeur-centre-seul)

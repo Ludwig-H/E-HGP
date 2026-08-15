@@ -1707,6 +1707,103 @@ positivité géométrique doit appartenir au générateur principal. La fixture
 porte une masse quadratique dans quelques `RectKey`, puis exige zéro carrier
 aigu et zéro sweep sans tableau de `PairId`.
 
+## 6bis. Préfiltre d'ancre combiné : cœur, `h_a`, `h_b`
+
+Cette section formalise la proposition du 15 août 2026 et rapporte sa mesure.
+Elle ne reçoit aucun logiciel et ne promeut aucun statut ; `public_status`
+reste `not_claimed`.
+
+### 6bis.1 L'énoncé
+
+Un support positif d'arité `q` est possédé par sa **paire diamétrale** `(a,b)`.
+Tout site strictement intérieur à sa miniboule appartient au fuseau
+`W_q(a,b)`, intersection de toutes les boules admissibles de cette ancre à
+cette arité. Le filtre d'ancre du contrat de source tue l'ancre dès que
+`|P inter W_q(a,b)| >= h_q`, avec `h_q = s_max - q + 1` — soit `10 / 9 / 8` à
+`s_max = 11`, et `5 / 4 / 3` à `s_max = 6`. Il y a donc bien **un `h` par
+arité**, décroissant avec elle.
+
+Compter `|P inter W_q|` exactement coûte une requête par paire. On le **minore**
+par trois comptes, calculés une fois par rectangle `A x B` de la partition
+Callahan--Kosaraju :
+
+- `h_coeur` — témoins universels sur **tout** le rectangle, pris hors `A` et
+  hors `B` ;
+- `h_a` — témoins de `A` universels sur `{a} x B`, un compte par `a` ;
+- `h_b` — témoins de `B` universels sur `A x {b}`, un compte par `b`.
+
+**Théorème de disjonction.** Les trois ensembles sont deux à deux disjoints, et
+la disjonction est acquise deux fois. Par construction `h_coeur` exclut
+`A union B`, `h_a` vit dans `A`, `h_b` dans `B`, et `A inter B` est vide par
+définition de la partition CK. Mais elle est aussi **automatique** : pour `z`
+dans `A`, le choix `a = z` donne `H = 0`, donc `z` n'est jamais certifié témoin
+universel du rectangle. Aucune hypothèse géométrique n'est requise, et en
+particulier aucune séparation minimale.
+
+**Corollaire.** `|P inter W_q(a,b)| >= h_coeur + h_a + h_b`, donc l'ancre meurt
+dès que cette somme atteint `h_q`. Le filtre est fail-open : il ne ferme jamais
+à tort.
+
+C'est l'**union commune** que le contre-audit de la gate à trois voies
+réclamait, et que sa juxtaposition de trois mesures ne fournissait pas.
+
+### 6bis.2 La décision ne touche jamais une paire
+
+`h_coeur` ne dépend que du rectangle, `h_a` que de `a`, `h_b` que de `b`. Le
+nombre d'ancres survivantes vaut donc
+
+`somme_{a dans A} |{ b dans B : h_b < h_q - h_coeur - h_a }|`
+
+et, tous les comptes étant écrêtés à `h_q <= 10`, un histogramme de `h_b` sur
+onze cases suffit. Le coût par rectangle est `O(|A| + |B|)` une fois les `h`
+connus, **jamais `O(|A| |B|)`** : aucune paire n'est matérialisée.
+
+### 6bis.3 Les bornes, et pourquoi les sommets suffisent
+
+Pour `w = z-a` et `d = b-a` : `H = d.w - |w|^2` et `Xi = |d x w|^2`, avec
+`W_2 : H>0`, `W_3 : H>0 et 3H^2>Xi`, `W_4 : H>0 et 2H^2>Xi`.
+
+`H` s'écrit `somme_i [ z_i (a_i + b_i) - a_i b_i ] - |z|^2`. Le crochet est
+**séparable par axe** et bilinéaire en `(a_i,b_i)` : son minimum sur le
+rectangle plan est à l'un de ses quatre coins. Trois axes, quatre coins : le
+minimum obtenu est **exact** sur le produit des deux boîtes.
+
+Pour `Xi` la réponse est moins évidente et une première lecture la donne
+fausse. En développant,
+
+`(b-a) x (z-a) = b x z - b x a - a x z + a x a = b x z - b x a - a x z`,
+
+le terme `a x a` étant nul : le produit vectoriel est **affine en `a`**. Donc
+`Xi = |affine(a)|^2` est **convexe** en `a`, et son maximum sur une boîte est
+atteint à un **sommet**. Tester les huit sommets est donc exact, et c'est le
+majorant le plus serré possible — donc le `h` le plus grand qui reste
+rigoureux. Une enveloppe d'intervalles serait sûre également, mais plus lâche :
+elle est conservée comme mutant de mesure, et l'écart est considérable — sur
+`uniform,n=8000,s=6,K=10`, la fermeture q4 passe de `47,6 %` par intervalles à
+`91,0 %` par sommets.
+
+### 6bis.4 Ce que la descente doit borner
+
+Élaguer la recherche du cœur sur `max H` est beaucoup trop lâche : l'ensemble
+`{z : max_{a,b} H > 0}` est en gros l'**union** des boules diamétrales du
+rectangle. Ce qu'il faut borner est `max_{z dans Z} min_{a,b} H`, la quantité
+qui décide, majorée par l'inégalité minimax `max_z min_c f_c <= min_c max_z f_c`.
+S'y ajoute une voie rapide : si `min H` sur `A x B x Z` est positif, **tout**
+point de `Z` est témoin q2 et sa population est créditée sans descendre.
+
+Les trois lanes partagent une seule descente, les fuseaux étant emboîtés
+`W_4 < W_3 < W_2` : un nœud élagué pour q2 l'est pour les trois. Et `(H, Xi)`
+ne dépendant pas de l'arité, une seule évaluation par point sert les trois
+compteurs.
+
+### 6bis.5 Ce que la mesure ne dit pas
+
+Le probe compte des **ancres survivantes**. Ce n'est pas un nombre de supports,
+ni un débit, ni une pente reçue. Un rectangle dont une extrémité dépasse le cap
+n'est pas décidé et toutes ses paires sont comptées survivantes : la mesure
+**majore** donc toujours le résiduel. Aucun circumcentre n'est formé, aucun
+rang n'est décidé.
+
 ## 7. q4 : générateur autonome et sélection axiale extrémale
 
 La route active ne forme plus `OwnedCK-WST4`, `CellPair`, `Sym2` ou

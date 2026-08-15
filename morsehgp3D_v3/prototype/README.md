@@ -52,7 +52,8 @@ Contrat et preuves : [`../audits/NOTE_SOLUTION_CONTRAT_SOURCE_AIGUE_20260814.md`
 | **certificats de bloc** | `midball_block.hpp`, `corner8_ball.hpp`, `block_jung_dual.hpp`, `soc64_rect.hpp`, `spindle_cone.hpp` | prédicats `ALL` exacts ou suffisants ; deux sont exacts, aucun ne décide `NONE` |
 | **device** | `axis_device_*`, `anchor_source_kernel.cu`, `faceowner_device_*` | mêmes fonctions compilées pour deux cibles ; la parité est une propriété de construction, pas un accord à espérer |
 | **dimensionnement** | `lane_source_scale_probe.cpp`, `caps_admissible_probe.cpp` | mesure de l'objet (J0) |
-| **dominance 432** | `directional_dominance.hpp`, `directional_dominance_probe.cpp` | préfiltre d'ancre par sous-cône et hauteur — le seul certificat dont la fermeture **croît** avec `n` |
+| **dominance 432** | `directional_dominance.hpp`, `directional_dominance_probe.cpp` | préfiltre d'ancre par sous-cône et hauteur — fermeture croissante avec `n` |
+| **préfiltre combiné** | `combined_prefilter_probe.cpp` | `h_coeur + h_a + h_b` sur un rectangle CK ; trois comptes prouvés disjoints, décision par histogramme et non par paire |
 | **oracles et juges** | `../oracle/*`, `q4_brute_oracle.cpp`, `anchored_catalogue.hpp` | arithmétique volontairement différente de la production |
 
 ## Ce qui reste, et qui porte encore une idée fermée
@@ -103,6 +104,42 @@ taille du nuage, ce qu'aucun autre certificat du dossier ne fait :
 
 Ces chiffres sont un diagnostic `counter-only`, sans reçu épinglé ni pente à
 trois points. Ils ne qualifient rien ; ils justifient de rouvrir la piste.
+
+## Préfiltre combiné — le chantier ouvert le 15 août 2026
+
+`combined_prefilter_probe.cpp` mesure la proposition suivante : minorer
+`|P inter W_q(a,b)|` par la somme de trois comptes de témoins **prouvés
+disjoints**, calculés une fois par rectangle de la partition CK.
+
+- `h_coeur` — témoins universels du rectangle entier, hors `A` et hors `B` ;
+- `h_a` — témoins de `A` universels sur `{a} x B` ;
+- `h_b` — témoins de `B` universels sur `A x {b}`.
+
+La disjonction est acquise deux fois : par convention, et automatiquement,
+puisque pour `z` dans `A` le choix `a = z` donne `H = 0` — un point de `A` n'est
+donc jamais certifié témoin du cœur. La somme minore le compte vrai, le filtre
+est fail-open, et l'ancre meurt dès qu'elle atteint `h_q`.
+
+Trois propriétés font l'intérêt du montage :
+
+1. **La décision ne touche jamais une paire.** `h_coeur` ne dépend que du
+   rectangle, `h_a` que de `a`, `h_b` que de `b` ; le compte des survivantes se
+   lit sur un histogramme de `h_b` à onze cases. Coût `O(|A|+|B|)`, jamais
+   `O(|A||B|)`.
+2. **Les bornes sont exactes, pas conservatrices.** `H` est bilinéaire par axe,
+   son minimum est à un des quatre coins du rectangle plan. Et `Xi` est
+   **convexe en `a`** — car `(b-a) x (z-a) = b x z - b x a - a x z` est affine,
+   le terme `a x a` étant nul — donc son maximum est à un **sommet**. C'est ce
+   qui donne le `h` le plus grand qui reste rigoureux : par enveloppe
+   d'intervalles la fermeture q4 tombe de `91,0 %` à `47,6 %`.
+3. **Une seule descente pour les trois lanes**, les fuseaux étant emboîtés, et
+   une seule évaluation de `(H, Xi)` par point, ni l'un ni l'autre ne dépendant
+   de l'arité.
+
+Le probe est `counter-only` : il compte des ancres survivantes, jamais des
+supports. Un rectangle non décidé compte toutes ses paires comme survivantes,
+donc la mesure **majore** le résiduel. Contrat et preuves : `../PROPOSITION.md`
+section 6bis.
 
 ## Réfutations gravées dans le code
 
