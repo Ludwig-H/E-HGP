@@ -1798,47 +1798,60 @@ compteurs.
 
 ### 6bis.5 Mesure du 15 août 2026
 
-Campagne `counter-only`, graine `3`, profil u16, ledger bouclant exactement sur
-`C(n,2)` à chaque point. Fermeture des **ancres** en pourcentage de `C(n,2)`.
-Ce ne sont ni des supports, ni un débit, ni une pente reçue.
+Campagne `counter-only`, graine `3`, profil u16, `35` configurations sur `36`.
+Le ledger boucle exactement sur `C(n,2)` à chaque ligne. Provenance, brut et
+commande de rejeu :
+[`receipts/prefiltre_combine_20260815/`](receipts/prefiltre_combine_20260815/README.md).
 
-`uniform` :
+Fermeture des **ancres** q4, en pourcentage de `C(n,2)` :
 
-| `n` | `s` | `K` | rect. | cell. max | q2 | q3 | q4 | q4 survivantes |
-| ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| `8 000` | `6` | `5` | `2,46 M` | `48` | `99,57 %` | `97,86 %` | `97,55 %` | `782 638` |
-| `8 000` | `6` | `10` | `2,46 M` | `48` | `99,22 %` | `93,95 %` | `90,98 %` | `2 886 951` |
-| `8 000` | `8` | `5` | `3,99 M` | `46` | `99,59 %` | `98,49 %` | `98,50 %` | `480 817` |
-| `8 000` | `8` | `10` | `3,99 M` | `46` | `99,29 %` | `96,30 %` | `95,41 %` | `1 467 542` |
-| `16 000` | `6` | `5` | `5,59 M` | `116` | `99,78 %` | `98,87 %` | `98,69 %` | `1 674 232` |
+| famille | `s` | `K` | `n=8 000` | `n=16 000` | `n=32 000` |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| `uniform` | `6` | `5` | `97,55 %` | `98,69 %` | `99,31 %` |
+| `uniform` | `6` | `10` | `90,98 %` | `94,90 %` | `97,23 %` |
+| `uniform` | `8` | `5` | `98,50 %` | `99,22 %` | `99,59 %` |
+| `uniform` | `8` | `10` | `95,41 %` | `97,54 %` | *en cours* |
+| `eight_clusters` | `6` | `5` | `91,17 %` | `94,38 %` | `97,32 %` |
+| `eight_clusters` | `6` | `10` | `76,52 %` | `85,00 %` | `92,44 %` |
+| `eight_clusters` | `8` | `5` | `93,77 %` | `96,18 %` | `97,51 %` |
+| `eight_clusters` | `8` | `10` | `84,13 %` | `89,66 %` | `93,59 %` |
+| `terrain` | `6` | `5` | `99,02 %` | `98,99 %` | `88,70 %` |
+| `terrain` | `6` | `10` | `97,22 %` | `97,98 %` | `88,13 %` |
+| `terrain` | `8` | `5` | `99,33 %` | `99,58 %` | `98,39 %` |
+| `terrain` | `8` | `10` | `98,30 %` | `98,99 %` | `98,04 %` |
 
-Trois lectures, et aucune n'est une extrapolation.
+**La fermeture croît avec `n` sur la famille difficile.** Sur `eight_clusters`,
+les quatre séries sont monotones croissantes ; en q4 à `s=6, K=10`,
+`76,52 -> 85,00 -> 92,44 %`. C'est la famille qui a résisté au cœur commun, au
+fuseau sur rectangle et aux cinq certificats de bloc. Trois points ne prouvent
+aucune asymptotique, mais aucun certificat antérieur du dossier ne se renforçait
+avec la taille du nuage.
 
-**`s = 8` domine `s = 6` à `K` égal.** En q4, `95,41 %` contre `90,98 %`, soit
-**deux fois moins d'ancres survivantes**, pour `1,62` fois plus de rectangles.
-Le compromis est donc favorable dans ce régime, ce qui n'allait pas de soi :
-augmenter `s` rétrécit `A` et `B`, donc appauvrit `h_a` et `h_b`, mais enrichit
-le cœur plus vite qu'il ne les appauvrit.
+**`s = 8` domine `s = 6` partout, et l'écart devient critique à grande taille.**
+Sur `terrain,n=32000` il vaut `88,13 %` contre `98,04 %` — un facteur **six** sur
+le résiduel. Le mécanisme se lit dans le brut : à `s=6` les cellules atteignent
+`482` points, et une cellule large affaiblit tous les tests uniformes à la fois,
+puisque `H` doit rester positif sur **toute** la boîte. Ce n'est pas un artefact
+de rectangles non décidés : `cellule_max = 482` reste sous le cap `512`, donc
+toutes les paires sont jugées.
 
-**`K = 5` ferme davantage que `K = 10`**, mécaniquement : les seuils passent de
-`10/9/8` à `5/4/3`. L'écart en q4 est de `90,98 %` à `97,55 %` à `s = 6`.
+Ce résultat tranche un arbitrage qui n'était pas évident. Augmenter `s`
+rétrécit `A` et `B`, donc appauvrit `h_a` et `h_b` ; mais il enrichit le cœur
+et resserre les bornes uniformes plus vite qu'il ne les appauvrit. Le
+compromis penche donc vers `s` grand, et d'autant plus que `n` croît.
 
-**La fermeture ne se dégrade pas avec `n`** sur cette famille : de `n=8 000` à
-`n=16 000` à `s=6, K=5`, q4 passe de `97,55 %` à `98,69 %`. Deux points ne font
-pas une pente ; c'est J0 qui tranchera.
+**`K = 5` ferme davantage que `K = 10`**, mécaniquement, les seuils passant de
+`10/9/8` à `5/4/3`. L'écart est le plus grand là où la fermeture est la plus
+faible : `+14,7` points sur `eight_clusters,n=8000,s=6`.
 
-Le résiduel absolu reste le seul chiffre qui compte pour le contrat : à
-`n=8 000, s=8, K=10`, il reste `1,47` million d'ancres q4, soit `184` par
-point — à comparer aux `428` supports par point mesurés à `n=50 000`. Le
-préfiltre ramène donc le candidat dans le même ordre de grandeur que la sortie,
-ce qui n'était pas acquis. Il ne le rend pas *output-sensitive* pour autant :
-`184` ancres par point n'est pas `428` supports par point, et chaque ancre reste
-à instruire.
+**Le résiduel absolu reste le chiffre qui compte.** À
+`eight_clusters,n=32000,s=8,K=10`, il reste `32,8` millions d'ancres, soit
+`1 026` par point — à comparer aux `428` supports par point mesurés à
+`n=50 000`. Le préfiltre retire une part importante du travail ; il ne retire
+pas l'ordre de grandeur, et ne rend donc pas le producteur *output-sensitive*.
 
-**Campagnes restant à rendre** : `eight_clusters` et `terrain`, et les tailles
-`32 000`. C'est `eight_clusters` qui décide — la famille a résisté au cœur
-commun, au fuseau sur rectangle et aux cinq certificats de bloc — et aucune
-conclusion de famille obligatoire ne sera tirée avant.
+Aucune pente n'est publiée : la règle du plan de test exige trois exposants
+successifs par arité, et ce reçu ne les calcule pas.
 
 ### 6bis.6 De l'ancre survivante aux supports
 

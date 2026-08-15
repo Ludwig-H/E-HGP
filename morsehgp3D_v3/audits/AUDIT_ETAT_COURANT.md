@@ -401,6 +401,24 @@ muet que les trois vraies morts, ce que le commentaire de la ligne 625 interdit
 explicitement. Arbitrer entre code 2 et code 3 modifie une sortie que des portes
 lisent au regex ; la décision n'appartient pas à l'auditeur.
 
+**Mesure du préfiltre, trois familles, 35 configurations sur 36.** Reçu épinglé
+[`../receipts/prefiltre_combine_20260815/`](../receipts/prefiltre_combine_20260815/README.md),
+ELF `b1472270`, source `3e135334`, commit `2c3eee3`. Trois faits, aucun reçu
+comme pente :
+
+- sur `eight_clusters` — la famille qui a résisté au cœur commun, au fuseau sur
+  rectangle et aux cinq certificats de bloc — la fermeture q4 **croît avec `n`**
+  sur les quatre séries : `76,52 -> 85,00 -> 92,44 %` à `s=6, K=10`. Aucun
+  certificat antérieur du dossier ne se renforçait avec la taille ;
+- `s=8` domine `s=6` partout, et l'écart devient critique à grande taille : sur
+  `terrain,n=32000`, `98,04 %` contre `88,13 %`, soit un facteur six sur le
+  résiduel. Ce n'est pas un artefact de rectangles non décidés — `cellule_max`
+  vaut `482` sous le cap `512` ;
+- le résiduel absolu reste l'obstacle : `1 026` ancres q4 par point à
+  `eight_clusters,n=32000,s=8,K=10`, contre `428` supports par point à
+  `n=50 000`. Le préfiltre retire une part importante du travail, pas l'ordre de
+  grandeur.
+
 **État vérifié** : `761` CTests enregistrés, `760` passent hors la cible
 ci-dessus. Le seul autre échec est `mhgp3v_arith_selftest`, qui refuse
 correctement de qualifier sans GMP, absent du conteneur.
