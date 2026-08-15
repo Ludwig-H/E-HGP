@@ -5377,6 +5377,31 @@ set_tests_properties(mhgp3v_two_lines_etages_separes PROPERTIES
 # alternés de `{0,2}^3`, arêtes toutes égales à `8` — a ses deux faces
 # incidentes aiguës. Le total `1 + 2 = 3` est le plancher ; `4` signifierait que
 # le facteur deux est revenu, `2` que la fixture ne voit plus le cas régulier.
+# ---------------------------------------------------------------------------
+# LES FRONTIÈRES EXACTES DE `pair_lane`, ET LES PAIRES `D = 0`.
+#
+# Priorité 2 de l'ordre d'exécution. Les trois lanes sont séparées par des
+# ÉGALITÉS — `H = 0`, `4H^2 = ET`, `3H^2 = ET` — et une égalité ne se teste pas
+# par un nuage aléatoire : il faut des coordonnées entières qui la réalisent.
+# Dix cas gravés, décalés de `+1000` pour rester dans le profil u16 :
+#
+#   H_nul         `H = 0`, ET = 486        -> lane 0, non porteur (angle DROIT)
+#   q4_frontiere  `3H^2 = ET = 243`        -> lane 3, q4 refusé à l'égalité
+#   q3_frontiere  `4H^2 = ET = 324`        -> lane 2, q3 refusé à l'égalité
+#   q4_strict     `3H^2 = 2187 > 729`      -> lane 4
+#   q3_strict     `243 < 297 < 324`        -> lane 3
+#   q2_strict     `3H^2 = 432 < ET = 594 < 4H^2 = 576`? non : `594 > 576` -> lane 2
+#   z_egale_a / z_egale_b / a_egale_b      -> lane 0, aucun témoin
+#   porteur       `H = -7`, dans la lentille -> porteur aigu
+#
+# Sans les intérieurs stricts la fixture ne distinguerait pas `>` de `>=` ; sans
+# les `D = 0` elle laisserait passer les doublons quantifiés. Planchers : les
+# quatre lanes `0/2/3/4` doivent toutes apparaître, et au moins un porteur.
+add_test(NAME mhgp3v_frontieres_lanes_et_d0
+  COMMAND mhgp3v_combined_prefilter_probe --fixture=frontieres)
+set_tests_properties(mhgp3v_frontieres_lanes_et_d0 PROPERTIES
+  PASS_REGULAR_EXPRESSION "frontiere cas=10 faux=0 lanes_couvertes=4 porteurs=1")
+
 add_test(NAME mhgp3v_owner_facteur_deux_refute
   COMMAND mhgp3v_combined_prefilter_probe --fixture=owner-porteurs)
 set_tests_properties(mhgp3v_owner_facteur_deux_refute PROPERTIES

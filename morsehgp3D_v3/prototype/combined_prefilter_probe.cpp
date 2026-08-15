@@ -998,6 +998,7 @@ int main(int argc, char** argv) {
   bool seeds = false;           // contraction W-vivant -> seeds aigus
   bool seed_juge = false;       // confronter le certificat O(1) aux huit coins
   bool fixture_owner = false;   // le facteur deux des faces incidentes, refute
+  bool fixture_frontieres = false;  // egalites exactes des lanes, et `D = 0`
   long long seed = 3, coord = 0;
   CloudFamily family = CloudFamily::kUniform;
   Mutant mutant = Mutant::kNone;
@@ -1071,6 +1072,7 @@ int main(int argc, char** argv) {
     if (eat("--oracle", &tmp)) { borne("--oracle", 0, 200); oracle_n = (int)tmp; continue; }
     if (a == "--fixture=coeur5") { fixture = true; continue; }
     if (a == "--fixture=owner-porteurs") { fixture_owner = true; continue; }
+    if (a == "--fixture=frontieres") { fixture_frontieres = true; continue; }
     if (a == "--compare-corner512") { compare512 = true; continue; }
     if (a == "--ha=boule") { ha_boule = true; ha_fusion = false; continue; }
     if (a == "--ha=corner8") { ha_corner8 = true; ha_fusion = false; continue; }
@@ -1251,6 +1253,68 @@ int main(int argc, char** argv) {
     }
     std::printf("owner total_faces_incidentes_aigues=%d facteur_deux=REFUTE\n",
                 total_aigues_incidentes);
+    return 0;
+  }
+  // ---- LES FRONTIERES EXACTES DE `pair_lane`, ET LES PAIRES `D = 0`.
+  //
+  // Priorite 2 de l'ordre d'execution de l'auditeur. Les trois lanes sont
+  // separees par des EGALITES — `H = 0`, `4H^2 = ET`, `3H^2 = ET` — et une
+  // egalite ne se teste pas par un nuage aleatoire : il faut des coordonnees
+  // entieres qui la realisent exactement. En voici six, decalees de `+1000`
+  // pour rester dans le profil u16, avec de part et d'autre un temoin
+  // STRICTEMENT interieur a chaque regime — sans quoi la fixture ne
+  // distinguerait pas `>` de `>=`.
+  //
+  // Le cas `H = 0` est double : c'est la frontiere q2, ET c'est l'angle droit
+  // qui n'est PAS un porteur aigu. Les deux predicats y sont testes ensemble.
+  //
+  // Les paires `D = 0` ferment la liste : `z == a`, `z == b`, et `a == b`. Une
+  // coincidence de coordonnees ne cree ni temoin ni ancre.
+  if (fixture_frontieres) {
+    struct Cas {
+      const char* nom; P3 a, z, b; int lane; bool seed;
+    };
+    const Cas cs[] = {
+        // frontieres, atteintes exactement
+        {"H_nul",        {1000,1000,1000},{997,997,997},{994,997,1000}, 0, false},
+        {"q4_frontiere", {1000,1000,1000},{997,997,997},{994,997,997},  3, false},
+        {"q3_frontiere", {1000,1000,1000},{997,997,1000},{994,997,997}, 2, false},
+        // interieurs stricts, pour que `>` se distingue de `>=`
+        {"q4_strict",    {1000,1000,1000},{997,997,997},{994,994,994},  4, false},
+        {"q3_strict",    {1000,1000,1000},{997,997,997},{994,996,998},  3, false},
+        {"q2_strict",    {1000,1000,1000},{997,997,997},{994,994,999},  2, false},
+        // `D = 0` et coincidences : ni temoin, ni porteur
+        {"z_egale_a",    {1000,1000,1000},{1000,1000,1000},{994,994,994}, 0, false},
+        {"z_egale_b",    {1000,1000,1000},{994,994,994},{994,994,994},   0, false},
+        {"a_egale_b",    {1000,1000,1000},{997,997,997},{1000,1000,1000},0, false},
+        // porteur aigu : dans la lentille et `H < 0`
+        {"porteur",      {1000,1000,1000},{1003,1004,1000},{1006,1000,1000}, 0, true},
+    };
+    int ko = 0, lanes_vues = 0, porteurs = 0;
+    for (const Cas& c : cs) {
+      const int L2 = pair_lane(c.a, c.b, c.z);
+      const bool S = est_seed(c.a, c.b, c.z);
+      const i64 e[3] = {(i64)c.z.x - c.a.x, (i64)c.z.y - c.a.y, (i64)c.z.z - c.a.z};
+      const i64 t[3] = {(i64)c.b.x - c.z.x, (i64)c.b.y - c.z.y, (i64)c.b.z - c.z.z};
+      const i64 H = e[0]*t[0] + e[1]*t[1] + e[2]*t[2];
+      const i64 ET = (e[0]*e[0]+e[1]*e[1]+e[2]*e[2]) * (t[0]*t[0]+t[1]*t[1]+t[2]*t[2]);
+      std::printf("frontiere cas=%s H=%lld 3H2=%lld 4H2=%lld ET=%lld lane=%d seed=%d\n",
+                  c.nom, (long long)H, (long long)(3*H*H), (long long)(4*H*H),
+                  (long long)ET, L2, S ? 1 : 0);
+      if (L2 != c.lane || S != c.seed) ++ko;
+      lanes_vues |= 1 << L2;
+      if (S) ++porteurs;
+    }
+    // PLANCHERS : les quatre lanes `0/2/3/4` doivent toutes apparaitre, et au
+    // moins un porteur, sans quoi la fixture serait verte par vacuite.
+    const int attendu = (1 << 0) | (1 << 2) | (1 << 3) | (1 << 4);
+    if (ko > 0 || lanes_vues != attendu || porteurs < 1) {
+      std::fprintf(stderr, "PLANCHER : %d cas faux, lanes=%#x attendu=%#x porteurs=%d\n",
+                   ko, lanes_vues, attendu, porteurs);
+      return 3;
+    }
+    std::printf("frontiere cas=%d faux=0 lanes_couvertes=4 porteurs=%d\n",
+                (int)(sizeof(cs) / sizeof(cs[0])), porteurs);
     return 0;
   }
   std::vector<P3> pts;
