@@ -5,14 +5,19 @@ Cadre : `phase=exploration_v3_hors_registre`,
 `public_status=not_claimed`.
 
 Ce fichier existe pour une raison précise : **tout ce qui compile n'est pas sur
-la route.** Les quatre-vingt-quinze sources de ce dossier sont toutes
-atteignables depuis le build et toutes couvertes par des CTests, mais une
-dizaine d'entre elles mesurent une question déjà tranchée ou implémentent une
-idée abandonnée. Elles sont conservées — leurs fixtures et leurs réfutations ont
-de la valeur — mais il ne faut pas les lire comme l'état de l'art du chantier.
+la route.** Les sources de ce dossier sont toutes atteignables depuis le build
+et couvertes par des CTests ; cela ne dit rien de leur actualité.
+
+Neuf sources qui ne mesuraient plus qu'une question tranchée ont été supprimées
+le 15 août 2026, avec leurs cibles et leurs trente CTests : les trois du portage
+GPU du parcours order-k, les deux profils de volume d'arrangement
+(`scale_profile`, `flats_scale_probe`), le préflight de masse des cellules de
+centres, les deux probes de groupes coniques et le cœur commun de Jung. Leur
+substance est dans [`../audits/PISTES_FERMEES.md`](../audits/PISTES_FERMEES.md),
+le reste dans l'historique Git.
 
 L'autorité reste [`../audits/AUDIT_ETAT_COURANT.md`](../audits/AUDIT_ETAT_COURANT.md).
-Le registre des pistes fermées est [`../audits/archive/README.md`](../audits/archive/README.md).
+Le mémo des pistes fermées est [`../audits/PISTES_FERMEES.md`](../audits/PISTES_FERMEES.md).
 
 ## La route courante, en un paragraphe
 
@@ -38,30 +43,14 @@ Contrat et preuves : [`../audits/NOTE_SOLUTION_CONTRAT_SOURCE_AIGUE_20260814.md`
 | **dimensionnement** | `lane_source_scale_probe.cpp`, `caps_admissible_probe.cpp` | mesure de l'objet (J0) |
 | **oracles et juges** | `../oracle/*`, `q4_brute_oracle.cpp`, `anchored_catalogue.hpp` | arithmétique volontairement différente de la production |
 
-## Idées périmées encore compilées
+## Ce qui reste, et qui porte encore une idée fermée
 
-Ces onze fichiers passent leurs portes et restent au build. Ils ne sont **pas**
-une proposition courante. Ne pas les étendre sans rouvrir la piste selon la
-règle de réouverture du registre.
+Deux fichiers seulement, et ils sont gardés pour une raison chacun.
 
-| fichier | idée qu'il porte | pourquoi elle est fermée |
+| fichier | idée qu'il porte | pourquoi il reste |
 | --- | --- | --- |
-| `order_k_bfs.hpp` | parcours de l'arrangement relevé par BFS | **Ses trois énoncés fondateurs sont faux hors position simple** — « niveau(voisin) = niveau(courant) ± 1 », germe de niveau zéro par décret sur une face de l'enveloppe, arêtes indexées par les `C(m,3)` triplets de la coquille. `order_k_flats.hpp` le remplace ; il survit uniquement comme **sujet** de `../oracle/oracle_main.cpp`, jamais comme autorité |
-| `flats_scale_probe.cpp` | mesurer le volume de l'arrangement relevé pour décider si son parcours est une route | Le volume est quadratique là où la sortie normative est linéaire, théorème de séparation à l'appui. Question tranchée |
-| `scale_profile.cpp` | profil à densité fixe du même arrangement | `1 270` sommets d'arrangement par point à `n=800` pour `300` sphères. Le chiffre est acquis ; **seule cible sans aucun CTest** |
-| `device_wavefront_job.hpp` | portage GPU du parcours order-k | Le parcours n'étant plus la route, il ne reste que le débit `sm_120` et la parité bit à bit |
-| `device_wavefront_kernel.cu` | transport CUDA du même parcours | idem |
-| `device_wavefront_qualification.cpp` | différentiel hôte/device du même parcours | idem — les fixtures de refus restent utiles |
-| `cell_source_mass_probe.cpp` | préflight de masse à 50 k de la source par cellules de centres | Pentes `> 1,35` sur quatre compteurs ; la source de production est passée à `CKPairTape` |
-| `center_cover_mass_probe.cpp` | prune de masse par « huit témoins universels par patch » | Pentes `2,104` puis `1,896`, NO-GO avant G4. Son juge déterminantal q4 borné reste réutilisable |
-| `conic_groups.hpp` | énumération de groupes par triples `C(m,3)` et par paire | Remplacée par les crédits cellulaires **sans triples**, l'inclusion conique se décidant par enveloppe convexe projective |
-| `conic_groups_probe.cpp` | empaquetage glouton de triples coniques | Mesure faite, voie reprise sans triples |
-| `common_core_probe.cpp` | cœur commun de Jung par blocs comme fermeture de masse | **`98,74 %` de cœurs vides** sur `eight_clusters`, et le probe rescanne les `n` points par bloc. Seul le théorème survit |
-
-Un motif les relie presque toutes : **le parcours de l'arrangement relevé**. Six
-des onze en sont des mesures, des portages ou des préflights. C'est la piste que
-la mesure de volume a fermée, et c'est elle qui a fait basculer la route vers la
-décomposition CK/WST.
+| `order_k_bfs.hpp` | parcours de l'arrangement relevé par BFS, dont **les trois énoncés fondateurs sont faux hors position simple** — « niveau(voisin) = niveau(courant) ± 1 », germe de niveau zéro par décret sur une face de l'enveloppe, arêtes indexées par les `C(m,3)` triplets de la coquille | `order_k_flats.hpp` le remplace comme autorité, mais il reste le **sujet** de `../oracle/oracle_main.cpp`, qui en tire `OrderKStatistics` et `order_k_catalogue`. Le supprimer casse le juge |
+| `center_cover_mass_probe.cpp` | prune de masse par « huit témoins universels par patch » : pentes `2,104` puis `1,896`, NO-GO avant G4 | le binaire héberge toute la suite `p1a_*` — fixtures, oracles bornés et mutants — qui n'a rien à voir avec la piste fermée |
 
 ## Réfutations gravées dans le code
 

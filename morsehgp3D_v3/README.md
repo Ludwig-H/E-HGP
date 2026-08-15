@@ -992,7 +992,7 @@ doit suivre exclusivement les scripts gardés et les coupe-circuits décrits par
   verdict mutable ;
 - [`audits/README.md`](audits/README.md) : index court des audits actifs et des
   dépendances historiques encore citées par le logiciel ;
-- [`audits/archive/README.md`](audits/archive/README.md) : registre des pistes
+- [`audits/PISTES_FERMEES.md`](audits/PISTES_FERMEES.md) : mémo court des tentatives
   fermées — pour chacune, l'idée en une phrase, la mesure ou la contre-fixture
   qui l'a tuée, et ce qui en survit. Rien n'y est une autorité ;
 - `oracle/` : juges bornés indépendants ;

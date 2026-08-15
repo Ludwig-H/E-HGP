@@ -12,11 +12,11 @@ les dépendances historiques encore citées directement ou transitivement par le
 logiciel, un reçu ou une autorité conservée.
 
 Les propositions abandonnées, questions résolues et audits absorbés sont
-**archivés**, non supprimés : ils vivent dans
-[`archive/`](archive/README.md), dont le registre condense en une ligne l'idée
-de chaque piste, la mesure ou la contre-fixture qui l'a tuée, et ce qui en
-survit. Un fichier de `archive/` n'est jamais une autorité et ne doit jamais
-être cité comme une réception.
+**supprimés**, et condensés dans
+[`PISTES_FERMEES.md`](PISTES_FERMEES.md) : pour chaque tentative, l'idée, la
+mesure ou la contre-fixture qui l'a tuée, et ce qui en survit dans le code.
+Ce mémo n'est jamais une autorité et ne doit jamais être cité comme une
+réception ; le texte intégral reste dans l'historique Git.
 
 Règle de supersession globale pour les textes historiques : seule une paire
 endpoint de distance `D=0` est filtrée. Une géométrie peut bucketiser une
@@ -273,19 +273,21 @@ Un fichier daté ne devient jamais live. Avant toute conclusion :
 2. comparer son `HEAD` et son worktree au dépôt ;
 3. distinguer sujet, oracle, mutant, provenance et payload ;
 4. conserver toute contradiction mathématique comme fixture ;
-5. mettre à jour la proposition consolidée, puis **archiver** la note absorbée
-   dans [`archive/`](archive/README.md) en lui écrivant sa ligne de registre —
-   jamais la supprimer, et jamais la laisser traîner ici sans être déclarée.
+5. mettre à jour la proposition consolidée, puis **évacuer** la note absorbée
+   en lui écrivant sa ligne dans [`PISTES_FERMEES.md`](PISTES_FERMEES.md) —
+   jamais la laisser traîner ici sans être déclarée.
 
-## Archive
+## Pistes fermées
 
-[`archive/`](archive/README.md) contient vingt-neuf textes retirés du dossier
-vivant le 15 août 2026, avec le registre qui condense chaque piste. Le critère
-d'archivage est mécanique et vérifiable : n'est archivé qu'un fichier qui n'est
-ni une autorité active, ni une dépendance historique gardée, ni cité par
+[`PISTES_FERMEES.md`](PISTES_FERMEES.md) condense les tentatives menées, mesurées
+puis abandonnées. Leurs textes ont été supprimés le 15 août 2026 : ils étaient
+absorbés ou réfutés, et les garder entiers coûtait plus qu'ils n'apprenaient.
+
+Le critère est mécanique et rejouable : n'est évacué qu'un fichier qui n'est ni
+une autorité active, ni une dépendance historique gardée, ni cité par
 `CMakeLists.txt`, un prototype, un oracle, un reçu, `../PROPOSITION.md`,
 `../README.md` ou `AUDIT_ETAT_COURANT.md`.
 
 Tout fichier de ce dossier doit apparaître dans exactement une des sections
-ci-dessus, ou descendre dans `archive/`. Un fichier déclaré nulle part est un
-défaut d'index, pas un fichier neutre.
+ci-dessus. Un fichier déclaré nulle part est un défaut d'index, pas un fichier
+neutre.

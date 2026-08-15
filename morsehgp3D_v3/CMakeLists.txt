@@ -75,24 +75,7 @@ target_include_directories(mhgp3v_first_incidence PRIVATE ${CMAKE_CURRENT_SOURCE
 target_link_libraries(mhgp3v_first_incidence PRIVATE mhgp)
 target_compile_options(mhgp3v_first_incidence PRIVATE -Wall -Wextra -Werror)
 
-# LE FRONT D'ONDE. Le meme corps est compile pour l'hote et, si CUDA est demande,
-# pour sm_120. Sans CUDA le binaire qualifie le lot, le recu et la comparaison au
-# chemin non borne ; avec CUDA il exige EN PLUS l'egalite bit a bit avec le kernel.
-# Tout ce qui peut etre falsifie sans GPU l'est sans GPU.
-add_executable(mhgp3v_device_wavefront prototype/device_wavefront_qualification.cpp)
-target_include_directories(mhgp3v_device_wavefront PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(mhgp3v_device_wavefront PRIVATE mhgp)
-# Les avertissements C++ ne doivent pas fuir dans la compilation CUDA : nvcc
-# recoit -Werror comme une option a valeur et refuse alors --fmad=false.
-target_compile_options(mhgp3v_device_wavefront PRIVATE
-  $<$<COMPILE_LANGUAGE:CXX>:-Wall;-Wextra;-Werror>)
 
-# LA MESURE QUI DECIDE. A densite FIXE, le terrain croit-il ? La reponse est le
-# seul chiffre qui dise si 100 ms est atteignable a 50 000 points.
-add_executable(mhgp3v_scale_profile prototype/scale_profile.cpp)
-target_include_directories(mhgp3v_scale_profile PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(mhgp3v_scale_profile PRIVATE mhgp)
-target_compile_options(mhgp3v_scale_profile PRIVATE -Wall -Wextra -Werror)
 
 # LA SELECTIVITE DU LEMME DU DEMI-BOULE. Le budget du generateur direct depend d'une
 # quantite que sa propre specification declare NON BORNEE : la taille de l'univers
@@ -291,13 +274,6 @@ target_include_directories(mhgp3v_cell_prune_gate PRIVATE ${CMAKE_CURRENT_SOURCE
 target_link_libraries(mhgp3v_cell_prune_gate PRIVATE mhgp)
 target_compile_options(mhgp3v_cell_prune_gate PRIVATE -Wall -Wextra -Werror)
 
-# LA SONDE DE MASSE DE LA SOURCE PAR CELLULES DE CENTRES (reponse 20260811) :
-# theoreme cellule--candidat, temoins top-t_q par anneaux, dilations exactes —
-# le prealable de decision 50 k, sans former un seul tuple.
-add_executable(mhgp3v_cell_source_mass_probe prototype/cell_source_mass_probe.cpp)
-target_include_directories(mhgp3v_cell_source_mass_probe PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(mhgp3v_cell_source_mass_probe PRIVATE mhgp Threads::Threads)
-target_compile_options(mhgp3v_cell_source_mass_probe PRIVATE -Wall -Wextra -Werror)
 
 option(MHGP3V_ENABLE_CUDA "Compiler le kernel de front d'onde pour sm_120" OFF)
 if(MHGP3V_ENABLE_CUDA)
@@ -305,8 +281,6 @@ if(MHGP3V_ENABLE_CUDA)
   if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
     set(CMAKE_CUDA_ARCHITECTURES 120-real)
   endif()
-  target_sources(mhgp3v_device_wavefront PRIVATE prototype/device_wavefront_kernel.cu)
-  target_compile_definitions(mhgp3v_device_wavefront PRIVATE MHGP3V_WAVEFRONT_CUDA)
   target_sources(mhgp3v_faceowner_device_qualification PRIVATE
     prototype/faceowner_device_kernel.cu)
   target_compile_definitions(mhgp3v_faceowner_device_qualification PRIVATE
@@ -320,17 +294,6 @@ if(MHGP3V_ENABLE_CUDA)
   # Meme hygiene numerique que le front d'onde : le chemin est entier, la
   # discipline le garde reproductible face a l'oracle CPU.
   target_compile_options(mhgp3v_faceowner_device_qualification PRIVATE
-    $<$<COMPILE_LANGUAGE:CUDA>:--fmad=false;--ftz=false;--prec-div=true;--prec-sqrt=true>)
-  set_target_properties(mhgp3v_device_wavefront PROPERTIES
-    CUDA_ARCHITECTURES "${CMAKE_CUDA_ARCHITECTURES}"
-    CUDA_STANDARD 20
-    CUDA_STANDARD_REQUIRED ON
-    CUDA_EXTENSIONS OFF
-    CUDA_SEPARABLE_COMPILATION OFF)
-  # Meme hygiene numerique que morsehgp3d : aucun FMA contracte, aucun
-  # flush-to-zero, division et racine exactes. Le chemin est entier, mais la
-  # discipline reste la meme et le rend reproductible face a l'oracle CPU.
-  target_compile_options(mhgp3v_device_wavefront PRIVATE
     $<$<COMPILE_LANGUAGE:CUDA>:--fmad=false;--ftz=false;--prec-div=true;--prec-sqrt=true>)
   message(STATUS "mhgp3v : kernel de front d'onde active pour ${CMAKE_CUDA_ARCHITECTURES}")
   # SOURCE PAR ANCRE MAXIMALE, PARITE HOTE/DEVICE.
@@ -1055,20 +1018,6 @@ mhgp3v_add_expected_code_test_for(mhgp3v_prefix_mass_probe
 mhgp3v_add_expected_code_test_for(mhgp3v_prefix_mass_probe
   mhgp3v_prefix_mass_probe_reject_hybrid_threshold "baseline t=1" 2
   --mask hybrid --threshold 2)
-# LA SONDE CELLULES : l'identite de dilation (marche par anneaux == balayage
-# complet) est verifiee cellule par cellule sur un petit nuage de chaque
-# famille ; la CLI hostile est refusee avant tout calcul.
-add_test(NAME mhgp3v_cell_source_mass_terrain COMMAND mhgp3v_cell_source_mass_probe
-         --points 400 --smax 11 --seed 20260810 --family terrain --verify-bruteforce 1)
-set_tests_properties(mhgp3v_cell_source_mass_terrain PROPERTIES
-  PASS_REGULAR_EXPRESSION "OK : sonde de masse de la source par cellules terminee")
-add_test(NAME mhgp3v_cell_source_mass_scanline COMMAND mhgp3v_cell_source_mass_probe
-         --points 400 --smax 11 --seed 20260810 --family scanline_overlap_multiecho
-         --verify-bruteforce 1)
-set_tests_properties(mhgp3v_cell_source_mass_scanline PROPERTIES
-  PASS_REGULAR_EXPRESSION "OK : sonde de masse de la source par cellules terminee")
-mhgp3v_add_expected_code_test_for(mhgp3v_cell_source_mass_probe
-  mhgp3v_cell_source_mass_reject_unknown "argument inconnu" 2 --inexistant 1)
 # LA SONDE SELF-JOIN q2 (portes 4-5 de l'audit delta cbac109) : ledger de fate par
 # paire (partition, multiplicite un, inclusion non compensable des non-inertes
 # dans les microtuiles), planchers anti vert-par-vacuite, fixtures gravees et
@@ -1892,42 +1841,6 @@ mhgp3v_add_expected_code_test_for(mhgp3v_first_incidence
   mhgp3v_first_incidence_reject_descent_floor "plancher de descente non atteint" 3
   --clouds 2 --points 8 --coord 20 --k 3 --min-descent-steps 1000000)
 
-# LE LOT DU FRONT D'ONDE, qualifie sans GPU. Le corps evalue par le noyau borne doit
-# rendre exactement les verdicts du chemin CPU non borne, sommet par sommet et bit
-# par bit. C'est la porte qui rend la session GPU courte : elle n'aura plus qu'a
-# montrer que le MEME corps donne les MEMES bits sur sm_120.
-#
-# LES PLANCHERS SONT SEPARES, ET C'EST LA CORRECTION DU P0.
-#
-# Un plancher agrege se satisfait d'un seul chiffre. La porte precedente n'avait
-# que `--min-refused`, qui prouvait que la BRANCHE de refus avait ete prise, et
-# jamais que son resultat avait ete conserve : un mutant refusant TOUS les
-# sommets rendait zero flat, zero couple, zero desaccord et `OK`.
-add_test(NAME mhgp3v_device_wavefront_host COMMAND mhgp3v_device_wavefront
-         --clouds 6 --points 24 --coord 4000 --smax 8 --seed 20260809
-         --min-clouds 6 --min-accepted 15000 --min-flats 60000 --min-couples 40000
-         --min-kernels 6)
-add_test(NAME mhgp3v_device_wavefront_degenerate COMMAND mhgp3v_device_wavefront
-         --clouds 6 --points 14 --coord 5 --smax 8 --seed 31337
-         --min-clouds 6 --min-accepted 3000 --min-flats 12000 --min-couples 7000
-         --min-kernels 6)
-# Le chemin de REFUS doit etre exerce ET REJOUE. Le plancher de rejeu est le
-# nouveau : sans lui, un refus reste une statistique et non un jugement.
-add_test(NAME mhgp3v_device_wavefront_refusal COMMAND mhgp3v_device_wavefront
-         --clouds 4 --points 20 --coord 3 --smax 12 --seed 11
-         --min-refused 10 --min-replayed 10 --min-clouds 4 --min-accepted 2000
-         --min-flats 12000 --min-couples 5000 --min-kernels 4)
-mhgp3v_add_expected_code_test_for(mhgp3v_device_wavefront
-  mhgp3v_device_wavefront_reject_absurd "campagne absurde" 2 --points 2)
-# LE MUTANT VIT DANS LE BINAIRE, ET IL DOIT ROUGIR. `--force-refuse-all` refuse
-# chaque sommet a l'admission : le ledger balance encore et la masse est encore
-# conservee — rejouer TOUT est correct, simplement inutile — mais les planchers
-# d'acceptation, de flats et de couples tombent a zero.
-mhgp3v_add_expected_code_test_for(mhgp3v_device_wavefront
-  mhgp3v_device_wavefront_reject_all_refused "sommets acceptes" 3
-  --clouds 4 --points 20 --coord 3 --smax 12 --seed 11 --force-refuse-all 1
-  --min-refused 10 --min-replayed 10 --min-clouds 4 --min-accepted 2000
-  --min-flats 12000 --min-couples 5000 --min-kernels 4)
 
 # Interface fail-closed du juge lui-meme.
 mhgp3v_add_expected_code_test_for(mhgp3v_flats_differential
@@ -2246,29 +2159,7 @@ mhgp3v_add_expected_code_test_for(mhgp3v_ball_front
   mhgp3v_ball_front_reject_judge_too_large "juge exhaustif" 2
   --points=500 --k=1 --judge)
 
-# ---------------------------------------------------------------------------
-# SONDE D'ECHELLE de l'arrangement shallow : le VOLUME, que le differentiel
-# exhaustif ne peut pas mesurer. Elle instrumente `reverse_search_stream` sur
-# des nuages realistes et publie sommets, densite, rang ferme, high-water de la
-# pile et travail d'index. Elle ne juge rien et ne mesure aucun SLO.
-add_executable(mhgp3v_flats_scale prototype/flats_scale_probe.cpp)
-target_include_directories(mhgp3v_flats_scale PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(mhgp3v_flats_scale PRIVATE mhgp)
-target_compile_options(mhgp3v_flats_scale PRIVATE -Wall -Wextra -Werror)
 
-# PLANCHER CONTRE LE VERT PAR VACUITE : une sonde qui n'enumere rien passerait
-# sans lui. La valeur est tenue tres en dessous de la mesure observee pour ne
-# pas graver une densite qui n'est pas un theoreme.
-add_test(NAME mhgp3v_flats_scale_uniform COMMAND mhgp3v_flats_scale
-         --points=120 --smax=6 --family=uniform --seed=101 --min-vertices=5000)
-add_test(NAME mhgp3v_flats_scale_multiecho COMMAND mhgp3v_flats_scale
-         --points=120 --smax=6 --family=scanline_overlap_multiecho --seed=101
-         --min-vertices=2000)
-mhgp3v_add_expected_code_test_for(mhgp3v_flats_scale
-  mhgp3v_flats_scale_reject_unknown_argument "argument inconnu" 2 --sujet-inexistant)
-mhgp3v_add_expected_code_test_for(mhgp3v_flats_scale
-  mhgp3v_flats_scale_reject_floor "PLANCHER non atteint" 3
-  --points=40 --smax=4 --min-vertices=100000000)
 
 # ---------------------------------------------------------------------------
 # SOURCE PAR LISTES IMBRIQUEES DE CELLULES DE CENTRES.
@@ -3618,160 +3509,13 @@ mhgp3v_add_expected_code_test_for(mhgp3v_directional_dominance_probe
   mhgp3v_dominance_plancher_ferme "plancher de fermeture q4" 3
   --points=200 --family=uniform --seed=3 --min-closed-q4=1)
 
-# ---------------------------------------------------------------------------
-# GROUPES CONIQUES : CE QU'AUCUN TEMOIN SEUL NE VOIT.
-#
-# Specification : audits/AUDIT_DEBLOCAGE_COLLECTIF_APRES_FENETRE_20260813.md
-# section 4 — deuxieme des trois voies mises en concurrence.
-#
-# Un temoin PONCTUEL doit etre interieur a toute sphere admissible. Sur une
-# ancre inter-amas, le milieu est vide et aucun site ne tient seul cette
-# contrainte. Un GROUPE de trois peut couvrir tout le pinceau, chaque sphere
-# etant servie par un membre different, et huit groupes DEUX A DEUX DISJOINTS
-# donnent alors huit interieurs distincts dans chaque sphere : la lane q4 meurt.
-#
-# LA MESURE QUI DECIDE est `groupes_seuls` — les candidatures fermees par des
-# groupes et par AUCUN temoin ponctuel. A `n=150`, `eight_clusters` : `1 919` en
-# q4 et `1 282` en q3. Sur `terrain` elle tombe a `9` : les deux certificats
-# sont COMPLEMENTAIRES, la dominance 432 etant la plus forte precisement la ou
-# les groupes ne servent pas.
-# ---------------------------------------------------------------------------
-add_executable(mhgp3v_conic_groups_probe
-  prototype/conic_groups_probe.cpp
-  prototype/spindle_cone_oracle.cpp)
-target_include_directories(mhgp3v_conic_groups_probe PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(mhgp3v_conic_groups_probe PRIVATE mhgp)
-target_compile_options(mhgp3v_conic_groups_probe PRIVATE -Wall -Wextra -Werror)
 
-# La fixture gravee du contre-audit : a=(100,100,100), b=(120,100,100),
-# s1=(2,3,0), s2=(2,-3,3), s3=(2,-3,-3). Le barycentre pondere (1/2,1/4,1/4) est
-# parallele a `d`, donc le groupe couvre ; et AUCUN des trois n'est temoin
-# universel q4. C'est exactement le cas que le certificat ponctuel manque.
-add_test(NAME mhgp3v_groupes_fixture COMMAND mhgp3v_conic_groups_probe --fixture)
-set_tests_properties(mhgp3v_groupes_fixture PROPERTIES
-  PASS_REGULAR_EXPRESSION "fixtures accord=OUI refutees=0")
 
-# LE FALSIFICATEUR PORTE SUR LA CONCLUSION, PAS SUR L'HYPOTHESE. Verifier
-# Cramer ne teste que `d` dans le cone positif. Le theoreme affirme davantage :
-# `G` groupes disjoints donnent `G` interieurs distincts dans CHAQUE sphere
-# admissible. Les centres admissibles sont `(a+b)/2 + t` avec `t.d=0` ; la porte
-# en echantillonne le long de la base entiere du plan, magnitudes de `0` a
-# `1009` et signes des deux cotes, et compte les interieurs stricts. Une seule
-# sphere portant moins de `G` interieurs refuterait le theoreme.
-add_test(NAME mhgp3v_groupes_amas COMMAND mhgp3v_conic_groups_probe
-         --points=120 --family=eight_clusters --seed=3 --judge
-         --min-groupes-seuls=900 --min-triples=30000 --min-ponctuel-seul=900)
-add_test(NAME mhgp3v_groupes_uniform COMMAND mhgp3v_conic_groups_probe
-         --points=120 --family=uniform --seed=3 --judge
-         --min-groupes-seuls=500 --min-triples=30000)
-# Sur `terrain` les groupes n'apportent presque rien : le plancher est ici sur
-# le certificat PONCTUEL, pour que la complementarite soit une porte et non une
-# phrase.
-add_test(NAME mhgp3v_groupes_terrain COMMAND mhgp3v_conic_groups_probe
-         --points=120 --family=terrain --seed=3 --judge
-         --min-triples=20000 --min-ponctuel-seul=3000)
 
-# MUTANTS ARMES. Chacun casse une hypothese du theoreme et le falsificateur des
-# spheres le voit.
-mhgp3v_add_expected_code_test_for(mhgp3v_conic_groups_probe
-  mhgp3v_groupes_mutant_espace_lineaire "MUTANT TUE" 4
-  --points=100 --family=eight_clusters --seed=3 --judge --inject=groupe-espace-lineaire)
-mhgp3v_add_expected_code_test_for(mhgp3v_conic_groups_probe
-  mhgp3v_groupes_mutant_axe_seul "MUTANT TUE" 4
-  --points=100 --family=eight_clusters --seed=3 --judge --inject=groupe-axe-seul)
-mhgp3v_add_expected_code_test_for(mhgp3v_conic_groups_probe
-  mhgp3v_groupes_mutant_determinant_nul "MUTANT TUE" 4
-  --points=100 --family=eight_clusters --seed=3 --judge --inject=groupe-determinant-nul)
 
-# Refus contractuels.
-mhgp3v_add_expected_code_test_for(mhgp3v_conic_groups_probe
-  mhgp3v_groupes_reject_mutant_sans_juge "un mutant sans juge ne prouve rien" 2
-  --points=100 --inject=groupe-axe-seul)
-mhgp3v_add_expected_code_test_for(mhgp3v_conic_groups_probe
-  mhgp3v_groupes_reject_smax "--smax hors du domaine d'enveloppe" 2
-  --points=100 --smax=9223372036854775807)
-mhgp3v_add_expected_code_test_for(mhgp3v_conic_groups_probe
-  mhgp3v_groupes_reject_inconnu "argument inconnu" 2 --points=100 --turbo)
-mhgp3v_add_expected_code_test_for(mhgp3v_conic_groups_probe
-  mhgp3v_groupes_plancher_seuls "plancher de fermetures par groupes seuls" 3
-  --points=100 --family=terrain --seed=3 --min-groupes-seuls=100000000)
 
-# ---------------------------------------------------------------------------
-# COEUR COMMUN DE JUNG PAR BLOCS : LA TROISIEME VOIE, ET SON VERDICT.
-#
-# Specification : audits/AUDIT_DEBLOCAGE_COLLECTIF_APRES_FENETRE_20260813.md
-# section 5, corrigee par la reponse Q7 de
-# audits/AUDIT_REPONSES_CLAUDE_GEOMETRIE_3D_20260813.md.
-#
-# `d > 3S` construit un coeur commun a toutes les paires d'un bloc. Il ne
-# fournit AUCUN temoin : le bloc n'est ferme que si le coeur contient `h`
-# PointId distincts.
-#
-# TROIS CORRECTIONS DU CONTRE-AUDIT SONT INTEGREES ICI.
-#
-# 1. `coeurs_vides` comptait `occupants-2 < 8`, donc des coeurs SOUS-PLEINS sous
-#    une soustraction de deux INJUSTIFIEE. Les endpoints sont strictement hors
-#    du coeur, et cela se demontre : pour `a` dans `A`, sa distance a `m_0` vaut
-#    au moins `d/2 - S`, contre un rayon de coeur `(d-3S)/4`, et
-#    `d/2 - S - (d-3S)/4 = (d-S)/4 > 0` des que `d > 3S`. La soustraction ne
-#    protegeait de rien et COUTAIT des fermetures : `terrain` passe de `784` a
-#    `2 240` paires dirigees. Le vide et la sous-plenitude sont desormais deux
-#    compteurs distincts.
-# 2. L'identite scalaire `paires_couvertes = C(n,2)` est NECESSAIRE mais pas
-#    suffisante : une omission peut etre compensee par un doublon. La porte
-#    verifie donc une multiplicite EXACTEMENT UN par `PairId`, et qu'aucune
-#    paire n'est laissee sans bloc.
-# 3. Deux mutants sont RETIRES parce qu'ils sont SOUND. `separation-deux`
-#    arrete plus tot en gardant le numerateur `d-3S` : il perd des descendants
-#    sans jamais fermer a tort. `compte-sans-distinction` retirait la
-#    soustraction de deux, qui etait elle-meme injustifiee. Un mutant sound
-#    n'est pas un mutant.
-#
-# Verdict conserve : cette voie n'est PAS un certificat de couverture. Sur
-# `eight_clusters n=600` elle emet `2 306` blocs dont `2 277` ont un coeur
-# reellement VIDE, et ferme zero paire. Elle reste un fast path POSITIF
-# opportuniste — un echec n'y refute jamais rien, il est fail-open.
-#
-# CE QUI RESTE UNE VRAIE PORTE est l'identite de couverture. Une premiere
-# decomposition traitait `A x A` en poussant `(gauche,A)` et `(droite,A)` : les
-# blocs etaient IMBRIQUES, la decomposition ne partitionnait plus les paires, et
-# le ledger divergeait sans qu'aucun invariant ne l'annonce. La recursion
-# correcte traite `A x A` par `(A_g,A_g)`, `(A_d,A_d)` et `(A_g,A_d)`. La porte
-# exige desormais `paires_couvertes == C(n,2)` exactement.
-# ---------------------------------------------------------------------------
-add_executable(mhgp3v_common_core_probe
-  prototype/common_core_probe.cpp
-  prototype/spindle_cone_oracle.cpp)
-target_include_directories(mhgp3v_common_core_probe PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(mhgp3v_common_core_probe PRIVATE mhgp)
-target_compile_options(mhgp3v_common_core_probe PRIVATE -Wall -Wextra -Werror)
 
-add_test(NAME mhgp3v_coeur_uniform COMMAND mhgp3v_common_core_probe
-         --points=600 --family=uniform --seed=3 --leaf=8 --judge
-         --min-blocs=1000 --min-closed-q4=200 --min-coeurs-vides=1500
-         --min-residuel=300000)
-add_test(NAME mhgp3v_coeur_terrain COMMAND mhgp3v_common_core_probe
-         --points=600 --family=terrain --seed=3 --leaf=8 --judge
-         --min-blocs=1500 --min-closed-q4=2000 --min-coeurs-vides=2000
-         --min-residuel=300000)
-# LA PORTE QUI COMPTE POUR LES AMAS : elle exige que le certificat ECHOUE, et
-# que cet echec soit total. Q7 le predit, la mesure le confirme, et sans cette
-# porte la prediction resterait une phrase.
-add_test(NAME mhgp3v_coeur_amas_tous_vides COMMAND mhgp3v_common_core_probe
-         --points=600 --family=eight_clusters --seed=3 --leaf=8 --judge
-         --min-blocs=2000 --min-coeurs-vides=2000 --min-residuel=359400)
 
-mhgp3v_add_expected_code_test_for(mhgp3v_common_core_probe
-  mhgp3v_coeur_reject_mutant_sans_juge "un mutant sans juge ne prouve rien" 2
-  --points=200 --inject=coeur-bord-interieur)
-mhgp3v_add_expected_code_test_for(mhgp3v_common_core_probe
-  mhgp3v_coeur_reject_smax "--smax hors du domaine d'enveloppe" 2
-  --points=200 --smax=9223372036854775807)
-mhgp3v_add_expected_code_test_for(mhgp3v_common_core_probe
-  mhgp3v_coeur_reject_inconnu "argument inconnu" 2 --points=200 --turbo)
-mhgp3v_add_expected_code_test_for(mhgp3v_common_core_probe
-  mhgp3v_coeur_plancher_ferme "plancher de fermeture q4" 3
-  --points=600 --family=eight_clusters --seed=3 --leaf=8 --min-closed-q4=1)
 
 # ---------------------------------------------------------------------------
 # CREDITS CELLULAIRES : LE GROUPE SANS ENUMERATION DE TRIPLES PAR PAIRE.
