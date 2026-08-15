@@ -1840,7 +1840,84 @@ ce qui n'était pas acquis. Il ne le rend pas *output-sensitive* pour autant :
 commun, au fuseau sur rectangle et aux cinq certificats de bloc — et aucune
 conclusion de famille obligatoire ne sera tirée avant.
 
-### 6bis.6 Ce que la mesure ne dit pas
+### 6bis.6 De l'ancre survivante aux supports
+
+Le préfiltre rend des **ancres**. Cette sous-section fixe ce qu'il reste à faire
+pour chacune, et dans quel ordre. Poser `d = b-a`, `D2 = d.d`, `m = (a+b)/2`.
+
+**Le domaine, une fois pour toutes.** `(a,b)` étant l'arête maximale, tout
+sommet du support vit dans la **lentille** `B(a,D) inter B(b,D)`, et tout
+intérieur strict est à distance au plus `0,966 D` de `m`. Une seule requête
+`B(m,D)` fournit donc sommets **et** intérieurs, sans approximation.
+
+**q3 — quatre étapes, dont trois quasi gratuites.**
+
+1. `x` dans la lentille : `|x-a|^2 <= D2` et `|x-b|^2 <= D2`, deux comparaisons
+   `i64` ;
+2. **acuité, et elle vaut positivité.** `(a,b)` étant maximale, le triangle est
+   strictement aigu **si et seulement si** l'angle en `x` l'est — les deux
+   autres sont automatiques. Et cet angle se lit sur `V2 > D2` avec
+   `V = ||2x-a-b||`, **exactement la quantité du test de boule de milieu q2, au
+   signe près**. Comme la positivité q3 est précisément « les trois angles
+   strictement aigus », l'étape de positivité est **subsumée** : elle ne coûte
+   rien de plus. Le porteur vit donc dans `lentille(ab)` **privée de la boule
+   diamétrale**, région de diamètre `sqrt(3) D` ;
+3. owner canonique : `(a,b)` doit rester l'arête maximale de `{a,b,x}`, avec
+   tie-break par le plus petit couple de vrais `PointId` ;
+4. circumcentre par Cramer en `i128`, puis **census**.
+
+Coût par ancre : `O(|lentille|)`, et le seul poste cher est le census.
+
+**q4 — le produit est supprimé, pas réduit.**
+
+L'ancienne voie formait les `binom(m_e,2)` couples de la lentille. Deux énoncés
+la remplacent.
+
+*Lemme du préfixe ternaire.* Tout q4 bien centré d'arête maximale `ab` possède
+**au moins un** préfixe `abx` ou `aby` strictement aigu, **jamais nécessairement
+deux**. Le seed se cherche donc dans `lentille \ boule diamétrale`, mais le
+quatrième sommet doit être cherché dans la **lentille entière** : exiger les
+deux perdrait des supports. La contre-fixture est gravée, et l'attention est
+d'autant plus nécessaire que « tétraèdre bien centré » et « à faces aiguës »
+sont deux notions **distinctes**, chacune réfutant l'autre.
+
+*Théorème `Q4SeedAxisExtremalCompletion-r4`.* À `Q4Seed3 = (a,b,x)` fixé, le
+centre parcourt la droite normale au préfixe issue de son circumcentre, et la
+puissance d'un site y est **affine** : chaque site a au plus **une** racine, et
+« peu profond » devient « extrémal ». Avec `u = x-a`, `E = u.u`, `F = d.u`,
+`G = D2 E - F^2` :
+
+`T2 = D2 (G - 2 (E-F)^2)`, et `J_f = { tau : 2 tau^2 <= T2 }`
+
+**est** la borne de Jung en dimension trois pour un support de diamètre `|ab|` —
+pas une heuristique. Un préfixe owner strictement aigu a toujours `T2 > 0`, ce
+qui équivaut à `sin^2 C > 2/3`.
+
+Pour un préfixe à `p` intérieurs permanents, tout quatrième point régulier
+shallow est parmi les `8-p` premières racines entrantes ou les `8-p` dernières
+sortantes : **au plus seize groupes**, avec reconstruction exacte de `I_B` et
+`U_B`. La borne par arête owner devient `16 m_e^acute`, et non `binom(m_e,2)`.
+Mesuré : `59x` moins de propositions à `n=6 000`.
+
+Puis, pour chaque candidat `y` : `|x-y|^2 <= D2` (owner), positivité par les
+quatre poids de Cramer sans former le centre, et census.
+
+**Ce que le domaine aigu rapporte, chiffré.** La lentille de deux boules de
+rayon `D` à distance `D` a pour volume `(pi/12)(4D+d)(2D-d)^2 = 5 pi D^3/12`,
+soit `1,309 D^3` ; la boule diamétrale, de rayon `D/2`, vaut `pi D^3/6`, soit
+`0,524 D^3`, et elle est **incluse** dans la lentille. Le rapport vaut `0,400` :
+la région aiguë ne fait que **60 %** de la lentille, donc restreindre le seed
+n'y gagne qu'un facteur `1,67`. C'est cohérent avec le gain mesuré du filtre
+d'acuité au niveau des blocs — `1,00x`, et `99,998 %` des blocs conservés à
+`n = 50 000`. **Le levier n'est pas le domaine du seed, c'est le théorème
+axial** : le premier gagne un facteur, le second retire un ordre.
+
+**Ce qui n'est pas optimisé, et le reste.** Le census. C'est un test de rang
+ambiant en dimension trois, par `BallKey` et après `RLE`, et le contrat le dit
+sans détour : c'est lui, et non l'énumération des aigus, qui reste à rendre
+sous-quadratique.
+
+### 6bis.7 Ce que la mesure ne dit pas
 
 Le probe compte des **ancres survivantes**. Ce n'est pas un nombre de supports,
 ni un débit, ni une pente reçue. Un rectangle dont une extrémité dépasse le cap

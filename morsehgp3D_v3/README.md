@@ -386,6 +386,61 @@ runs sont scellés, triés et mergés par niveau exact avant le premier commit
 d'un lot. « Streamé » signifie mémoire résidente bornée, jamais fold en ligne
 sur une source non scellée.
 
+## La voie explorée le 15 août 2026 : tuer l'ancre avant de l'instruire
+
+Cette voie ne remplace pas la séquence ci-dessus ; elle attaque le poste qui la
+domine. Le constat de départ est chiffré : la masse candidate vaut `6 914` fois
+la population retenue, et la chaîne par ancre matérialise `6,09` milliards de
+paires de lentille pour `21,4` millions de candidats à `50 000` points. Tant que
+ce rapport est à quatre chiffres, aucune optimisation constante ne compte.
+
+**L'idée.** Chaque support est possédé par sa **paire diamétrale**. Une ancre
+`(a,b)` ne porte aucun support d'arité `q` dès que `|P inter W_q(a,b)| >= h_q`,
+avec `h_q = s_max - q + 1` — un seuil par arité, décroissant. Compter ce cardinal
+exactement coûte une requête par paire ; on le **minore** par trois comptes
+calculés une fois par rectangle de la partition Callahan--Kosaraju :
+
+- `h_coeur` — témoins universels de tout le rectangle, hors `A` et hors `B` ;
+- `h_a` — témoins de `A` universels sur `{a} x B` ;
+- `h_b` — témoins de `B` universels sur `A x {b}`.
+
+**Pourquoi la somme est licite.** Les trois ensembles sont deux à deux
+disjoints, et la disjonction est acquise deux fois : par convention, et
+automatiquement, puisque pour `z` dans `A` le choix `a = z` donne `H = 0` — un
+point de `A` n'est donc jamais certifié témoin du cœur. Le minorant est
+fail-open : il ne ferme jamais à tort.
+
+**Pourquoi c'est bon marché.** `h_coeur` ne dépend que du rectangle, `h_a` que
+de `a`, `h_b` que de `b`. Le nombre d'ancres survivantes se lit alors sur un
+histogramme de `h_b` à onze cases : le coût par rectangle est `O(|A|+|B|)`,
+**jamais `O(|A| |B|)`**, et aucune paire n'est matérialisée.
+
+**Les optimisations qui ont fait la différence**, dans l'ordre de leur gain :
+
+1. **`Xi` est convexe en `a`**, car `(b-a) x (z-a) = b x z - b x a - a x z` est
+   affine — le terme `a x a` étant nul. Son maximum sur une boîte est donc à un
+   **sommet**, et le tester ainsi est exact. Passer d'une enveloppe
+   d'intervalles aux sommets fait bondir la fermeture q4 de `47,6 %` à
+   `91,0 %` ;
+2. élaguer la descente sur `max_z min_{a,b} H` et non sur `max H`, qui couvrait
+   toute l'union des boules diamétrales du rectangle ;
+3. une seule descente pour les trois lanes, les fuseaux étant emboîtés
+   `W_4 < W_3 < W_2` ;
+4. une seule évaluation de `(H, Xi)` par point, ni l'un ni l'autre ne dépendant
+   de l'arité.
+
+Ensemble, elles ramènent `n=8 000` de `5 min 08` à `57 s` à résultat identique.
+
+**Ce qu'il reste à faire sur une ancre survivante** est détaillé en section
+6bis.6 de [`PROPOSITION.md`](PROPOSITION.md) : pour q3, une requête sur
+`lentille \ boule diamétrale` où l'acuité **vaut** positivité et ne coûte rien
+de plus ; pour q4, un seed dans la même région puis le théorème axial, qui donne
+**au plus seize** quatrièmes sommets au lieu de `binom(m_e,2)`.
+
+Statut : `counter-only`, `public_status=not_claimed`. Le probe compte des
+**ancres**, jamais des supports, et un rectangle non décidé compte toutes ses
+paires comme survivantes — la mesure majore donc le résiduel.
+
 ## Contrat d'identité
 
 Les couches restent distinctes :
