@@ -1798,55 +1798,59 @@ compteurs.
 
 ### 6bis.5 Mesure du 15 août 2026
 
-Campagne `counter-only`, graine `3`, profil u16, `35` configurations sur `36`.
+Campagne `counter-only`, graine `3`, profil u16, **trente-six configurations**.
 Le ledger boucle exactement sur `C(n,2)` à chaque ligne. Provenance, brut et
 commande de rejeu :
 [`receipts/prefiltre_combine_20260815/`](receipts/prefiltre_combine_20260815/README.md).
 
 Fermeture des **ancres** q4, en pourcentage de `C(n,2)` :
 
-| famille | `s` | `K` | `n=8 000` | `n=16 000` | `n=32 000` |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| `uniform` | `6` | `5` | `97,55 %` | `98,69 %` | `99,31 %` |
-| `uniform` | `6` | `10` | `90,98 %` | `94,90 %` | `97,23 %` |
-| `uniform` | `8` | `5` | `98,50 %` | `99,22 %` | `99,59 %` |
-| `uniform` | `8` | `10` | `95,41 %` | `97,54 %` | *en cours* |
-| `eight_clusters` | `6` | `5` | `91,17 %` | `94,38 %` | `97,32 %` |
-| `eight_clusters` | `6` | `10` | `76,52 %` | `85,00 %` | `92,44 %` |
-| `eight_clusters` | `8` | `5` | `93,77 %` | `96,18 %` | `97,51 %` |
-| `eight_clusters` | `8` | `10` | `84,13 %` | `89,66 %` | `93,59 %` |
-| `terrain` | `6` | `5` | `99,02 %` | `98,99 %` | `88,70 %` |
-| `terrain` | `6` | `10` | `97,22 %` | `97,98 %` | `88,13 %` |
-| `terrain` | `8` | `5` | `99,33 %` | `99,58 %` | `98,39 %` |
-| `terrain` | `8` | `10` | `98,30 %` | `98,99 %` | `98,04 %` |
+| famille | `s` | `K` | `n=8 000` | `n=16 000` | `n=32 000` | monotone |
+| --- | ---: | ---: | ---: | ---: | ---: | :---: |
+| `uniform` | `6` | `5` | `97,55 %` | `98,69 %` | `99,31 %` | oui |
+| `uniform` | `6` | `10` | `90,98 %` | `94,89 %` | `97,23 %` | oui |
+| `uniform` | `8` | `5` | `98,50 %` | `99,22 %` | `99,59 %` | oui |
+| `uniform` | `8` | `10` | `95,41 %` | `97,54 %` | `98,69 %` | oui |
+| `eight_clusters` | `6` | `5` | `91,17 %` | `94,38 %` | `97,32 %` | oui |
+| `eight_clusters` | `6` | `10` | `76,52 %` | `85,00 %` | `92,44 %` | oui |
+| `eight_clusters` | `8` | `5` | `93,77 %` | `96,18 %` | `97,51 %` | oui |
+| `eight_clusters` | `8` | `10` | `84,13 %` | `89,66 %` | `93,59 %` | oui |
+| `terrain` | `6` | `5` | `99,02 %` | `98,99 %` | `88,70 %` | **non** |
+| `terrain` | `6` | `10` | `97,22 %` | `97,98 %` | `88,13 %` | **non** |
+| `terrain` | `8` | `5` | `99,33 %` | `99,58 %` | `98,39 %` | **non** |
+| `terrain` | `8` | `10` | `98,30 %` | `98,99 %` | `98,04 %` | **non** |
 
-**La fermeture croît avec `n` sur la famille difficile.** Sur `eight_clusters`,
-les quatre séries sont monotones croissantes ; en q4 à `s=6, K=10`,
-`76,52 -> 85,00 -> 92,44 %`. C'est la famille qui a résisté au cœur commun, au
-fuseau sur rectangle et aux cinq certificats de bloc. Trois points ne prouvent
-aucune asymptotique, mais aucun certificat antérieur du dossier ne se renforçait
-avec la taille du nuage.
+**Huit séries sur douze croissent avec `n`, et pas celles de `terrain`.** Les
+quatre séries `uniform` et les quatre `eight_clusters` sont strictement
+croissantes. C'est notable sur `eight_clusters`, famille qui a résisté au cœur
+commun, au fuseau sur rectangle et aux cinq certificats de bloc, et parce
+qu'aucun certificat antérieur du dossier ne se renforçait avec la taille du
+nuage. Mais les quatre séries `terrain` **déclinent** à `n=32 000` : l'énoncé
+« la fermeture croît avec `n` » est donc **faux en général**, et trois points ne
+font de toute façon pas une pente.
 
-**`s = 8` domine `s = 6` partout, et l'écart devient critique à grande taille.**
-Sur `terrain,n=32000` il vaut `88,13 %` contre `98,04 %` — un facteur **six** sur
-le résiduel. Le mécanisme se lit dans le brut : à `s=6` les cellules atteignent
-`482` points, et une cellule large affaiblit tous les tests uniformes à la fois,
-puisque `H` doit rester positif sur **toute** la boîte. Ce n'est pas un artefact
-de rectangles non décidés : `cellule_max = 482` reste sous le cap `512`, donc
-toutes les paires sont jugées.
+**L'effondrement de `terrain` à `s=6, n=32 000` n'est pas un artefact.**
+`88,70 %` contre `98,99 %` à `n=16 000`, et le cap n'est pas en cause :
+`cellule_max = 482` reste sous `512`, donc toutes les paires sont jugées. C'est
+la séparation qui devient insuffisante pour ce nuage à cette densité — une
+cellule large affaiblit tous les tests uniformes à la fois, puisque `H` doit
+rester positif sur **toute** la boîte.
 
-Ce résultat tranche un arbitrage qui n'était pas évident. Augmenter `s`
-rétrécit `A` et `B`, donc appauvrit `h_a` et `h_b` ; mais il enrichit le cœur
-et resserre les bornes uniformes plus vite qu'il ne les appauvrit. Le
-compromis penche donc vers `s` grand, et d'autant plus que `n` croît.
+**`s = 8` domine `s = 6` partout**, et l'écart devient critique à grande
+taille : sur `terrain,n=32000`, `98,04 %` contre `88,13 %`, soit un facteur
+**six** sur le résiduel. L'arbitrage n'était pas évident — augmenter `s`
+rétrécit `A` et `B`, donc appauvrit `h_a` et `h_b` — mais il resserre les bornes
+uniformes plus vite qu'il ne les appauvrit. Son coût est réel : `1,76x` en
+rectangles sur `uniform` à `n=32 000`, où la WSPD en produit déjà `22,4`
+millions, soit `700` par point.
 
 **`K = 5` ferme davantage que `K = 10`**, mécaniquement, les seuils passant de
-`10/9/8` à `5/4/3`. L'écart est le plus grand là où la fermeture est la plus
-faible : `+14,7` points sur `eight_clusters,n=8000,s=6`.
+`10/9/8` à `5/4/3` ; `+14,7` points sur `eight_clusters,n=8000,s=6`.
 
 **Le résiduel absolu reste le chiffre qui compte.** À
-`eight_clusters,n=32000,s=8,K=10`, il reste `32,8` millions d'ancres, soit
-`1 026` par point — à comparer aux `428` supports par point mesurés à
+`eight_clusters,n=32000,s=8,K=10` il reste `32,8` millions d'ancres, soit
+`1 026` par point ; à `uniform` dans la même configuration, `6,68` millions,
+soit `209` par point — à comparer aux `428` supports par point mesurés à
 `n=50 000`. Le préfiltre retire une part importante du travail ; il ne retire
 pas l'ordre de grandeur, et ne rend donc pas le producteur *output-sensitive*.
 

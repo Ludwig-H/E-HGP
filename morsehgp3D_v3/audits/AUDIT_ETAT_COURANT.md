@@ -406,14 +406,16 @@ lisent au regex ; la décision n'appartient pas à l'auditeur.
 ELF `b1472270`, source `3e135334`, commit `2c3eee3`. Trois faits, aucun reçu
 comme pente :
 
-- sur `eight_clusters` — la famille qui a résisté au cœur commun, au fuseau sur
-  rectangle et aux cinq certificats de bloc — la fermeture q4 **croît avec `n`**
-  sur les quatre séries : `76,52 -> 85,00 -> 92,44 %` à `s=6, K=10`. Aucun
-  certificat antérieur du dossier ne se renforçait avec la taille ;
+- la fermeture q4 **croît avec `n` sur huit séries sur douze** — les quatre
+  `uniform` et les quatre `eight_clusters`, dont `76,52 -> 85,00 -> 92,44 %` à
+  `s=6, K=10` sur la famille qui a résisté au cœur commun, au fuseau sur
+  rectangle et aux cinq certificats de bloc. Mais les quatre séries `terrain`
+  **déclinent** à `n=32 000` : l'énoncé général est faux, et trois points ne font
+  pas une pente ;
 - `s=8` domine `s=6` partout, et l'écart devient critique à grande taille : sur
   `terrain,n=32000`, `98,04 %` contre `88,13 %`, soit un facteur six sur le
   résiduel. Ce n'est pas un artefact de rectangles non décidés — `cellule_max`
-  vaut `482` sous le cap `512` ;
+  vaut `482` sous le cap `512`. Son coût est de `1,76x` en rectangles ;
 - le résiduel absolu reste l'obstacle : `1 026` ancres q4 par point à
   `eight_clusters,n=32000,s=8,K=10`, contre `428` supports par point à
   `n=50 000`. Le préfiltre retire une part importante du travail, pas l'ordre de
