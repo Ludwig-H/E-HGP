@@ -429,6 +429,33 @@ inline int pair_lane(const P3& a, const P3& b, const P3& z) {
 // sans ecart sur 8005 ancres :
 //
 //   #seeds(a,b) = |P inter L| - |P inter L inter {H >= 0}|.
+// ---------------------------------------------------------------------------
+// L'OWNER CANONIQUE — longueur maximale, PUIS `EdgeKey` minimale.
+//
+// `est_seed` ne teste que `E <= D` et `X <= D`, donc il accepte les EGALITES :
+// un triangle equilateral quantifie est compte sous ses TROIS aretes. Le
+// contre-audit `9a4b219` le releve, et le tetraedre regulier le chiffre —
+// `12` porteurs sous owner maximal faible contre `2` sous owner canonique.
+//
+// La regle du contrat : l'arete owner est celle de longueur maximale ; a
+// egalite, celle de plus petite `EdgeKey = (min(PointId), max(PointId))`. Il
+// faut donc transporter les VRAIS `PointId` a travers le tri Morton — `order[i]`
+// les porte — et non l'indice trie, qui n'est pas l'identifiant du contrat.
+inline bool edgekey_moins(int u1, int v1, int u2, int v2) {
+  const int a1 = u1 < v1 ? u1 : v1, b1 = u1 < v1 ? v1 : u1;
+  const int a2 = u2 < v2 ? u2 : v2, b2 = u2 < v2 ? v2 : u2;
+  return a1 != a2 ? a1 < a2 : b1 < b2;
+}
+
+// `(a,b)` est-elle l'owner canonique du triangle `{a,b,x}` ?
+inline bool owner_canonique(i64 D, i64 E, i64 X, int pa, int pb, int px) {
+  // face `(a,x)` de longueur `E`, face `(b,x)` de longueur `X`.
+  if (E > D || X > D) return false;                       // `(a,b)` non maximale
+  if (E == D && !edgekey_moins(pa, pb, pa, px)) return false;  // egalite : cle
+  if (X == D && !edgekey_moins(pa, pb, pb, px)) return false;
+  return true;
+}
+
 inline bool est_seed(const P3& a, const P3& b, const P3& x) {
   const i64 ex = x.x - a.x, ey = x.y - a.y, ez = x.z - a.z;
   const i64 tx = b.x - x.x, ty = b.y - x.y, tz = b.z - x.z;
@@ -439,6 +466,23 @@ inline bool est_seed(const P3& a, const P3& b, const P3& x) {
   const i64 ab2 = dx * dx + dy * dy + dz * dz;
   if (ax2 > ab2 || bx2 > ab2) return false;  // hors lentille : `(a,b)` non maximale
   return ex * tx + ey * ty + ez * tz < 0;    // STRICTE : `H = 0` est l'angle droit
+}
+
+// La version qui applique l'owner canonique. `est_seed` en est la relaxation
+// « owner maximal FAIBLE » : elle compte un triangle sous chacune de ses aretes
+// maximales ex aequo. Les deux coexistent pour que la fixture puisse chiffrer
+// l'ecart, et le compteur relaxe s'appelle `C4_carrier_weak_owner`.
+inline bool est_seed_owner(const P3& a, const P3& b, const P3& x,
+                           int pa, int pb, int px) {
+  const i64 ex = x.x - a.x, ey = x.y - a.y, ez = x.z - a.z;
+  const i64 tx = b.x - x.x, ty = b.y - x.y, tz = b.z - x.z;
+  const i64 E = ex * ex + ey * ey + ez * ez;
+  const i64 X = tx * tx + ty * ty + tz * tz;
+  if (E == 0 || X == 0) return false;
+  const i64 dx = b.x - a.x, dy = b.y - a.y, dz = b.z - a.z;
+  const i64 D = dx * dx + dy * dy + dz * dz;
+  if (!owner_canonique(D, E, X, pa, pb, px)) return false;
+  return ex * tx + ey * ty + ez * tz < 0;
 }
 
 // AUTORITE DE BLOC POUR L'ELAGAGE DES SEEDS. Certifie qu'AUCUN `x` de `Box X`
@@ -983,6 +1027,19 @@ struct Ledger {
   long long seed_ecarts = 0;        // reference != elagage : DOIT rester nul
   long long seed_juges = 0;         // certificats confrontes aux deux chemins
   long long seed_desaccords_certif = 0;  // O(1) != huit coins : DOIT rester nul
+  // ---- LES TROIS ETAGES, ET LEURS NOMS EXACTS.
+  //
+  // `S4` = paires retenues par le MINORANT `h_coeur + h_a + h_b < h_4`. C'est
+  //        un SURENSEMBLE fail-open, pas l'objet exact.
+  // `V4` = celles dont le compte EXACT `|P inter W_4|` est sous le seuil. Le
+  //        contre-audit `9a4b219` a raison : j'imprimais `S4` sous le nom `V4`,
+  //        et `two_lines` le cachait parce que son mou vaut exactement un.
+  // `C4` = porteurs aigus sous OWNER CANONIQUE ; `C4_weak` sous owner maximal
+  //        faible, qui compte un triangle sous chacune de ses aretes ex aequo.
+  long long seed_S4 = 0;
+  long long seed_V4 = 0;
+  long long seed_V4_sans_carrier = 0;
+  long long seed_C4_weak = 0;
 };
 
 struct Rect {
@@ -1238,9 +1295,48 @@ int main(int argc, char** argv) {
         if (aigue(oi, oj, k)) ++inc;
       }
       total_aigues_incidentes += inc;
+      // ---- LES DEUX OWNERS, CHIFFRES COTE A COTE.
+      //
+      // Owner maximal FAIBLE : `(a,b,x)` compte sous CHAQUE arete de longueur
+      // maximale. Sur le tetraedre regulier les six aretes sont ex aequo, donc
+      // `6 x 2 = 12` incidences pour un seul objet.
+      // Owner CANONIQUE : longueur maximale puis `EdgeKey` minimale — une seule
+      // arete gagne, et elle porte `2` apex. Le contre-audit `9a4b219` donne ces
+      // deux nombres ; les voici calcules plutot que repris.
+      auto Pt = [&](int i) {
+        return P3{(short)t.p[i][0], (short)t.p[i][1], (short)t.p[i][2]};
+      };
+      //
+      // TROIS NOMBRES, ET NON DEUX. Le contre-audit annonce `12` et `2` sur le
+      // regulier. Le `12` est exact ; le `2` porte sur une AUTRE quantite que
+      // celle que je calculais, et les deux sont justes :
+      //
+      //   `porteurs_weak`      toutes les incidences (arete maximale, apex),
+      //                        aretes ex aequo comptees chacune  -> 12
+      //   `porteurs_canon`     une incidence par FACE aigue, sous l'owner
+      //                        canonique de cette face             -> 4
+      //   `porteurs_owner_tetra` les seuls porteurs de l'arete qui possede le
+      //                        TETRAEDRE                            -> 2
+      //
+      // Le `4` compte les quatre faces aigues du regulier, chacune possedee une
+      // fois ; le `2` compte les apex de la seule arete `(0,1)`. Confondre les
+      // deux, c'est confondre « porteurs produits par la source » et « porteurs
+      // d'une ancre donnee ».
+      int weak = 0, canon = 0, owner_tetra = 0;
+      for (int i = 0; i < 4; ++i)
+        for (int j = i + 1; j < 4; ++j)
+          for (int k = 0; k < 4; ++k) {
+            if (k == i || k == j) continue;
+            if (est_seed(Pt(i), Pt(j), Pt(k))) ++weak;
+            if (est_seed_owner(Pt(i), Pt(j), Pt(k), i, j, k)) {
+              ++canon;
+              if ((i == oi && j == oj) || (i == oj && j == oi)) ++owner_tetra;
+            }
+          }
       std::printf("owner tetra=%s arete_max=%lld owner=(%d,%d) multiplicite=%d "
-                  "faces_incidentes_aigues=%d\n",
-                  t.nom, (long long)mx, oi, oj, mult, inc);
+                  "faces_incidentes_aigues=%d porteurs_weak=%d porteurs_canon=%d "
+                  "porteurs_owner_tetra=%d\n",
+                  t.nom, (long long)mx, oi, oj, mult, inc, weak, canon, owner_tetra);
     }
     // LE PLANCHER DE NON-VACUITE : `1` pour l'auditeur, `2` pour le regulier.
     // Un total de `3` atteste que la fixture voit bien les deux regimes ; un
@@ -1353,7 +1449,13 @@ int main(int argc, char** argv) {
   });
   std::vector<unsigned long long> sorted_keys(n);
   std::vector<P3> sorted_pts(n);
-  for (int i = 0; i < n; ++i) { sorted_keys[i] = keys[order[i]]; sorted_pts[i] = pts[order[i]]; }
+  // `pid[i]` EST LE VRAI `PointId` du i-eme point trie. L'indice trie n'est pas
+  // l'identifiant du contrat : l'owner canonique se decide sur `EdgeKey`,
+  // construite sur les `PointId` d'origine, et `order` les porte.
+  std::vector<int> pid(n);
+  for (int i = 0; i < n; ++i) {
+    sorted_keys[i] = keys[order[i]]; sorted_pts[i] = pts[order[i]]; pid[i] = order[i];
+  }
   std::vector<WfNode> nodes = mhgp3v::wf_build(sorted_keys);
   {
     // `wf_tight_boxes` prend des triplets bruts ; on lui donne la meme vue.
@@ -2150,14 +2252,31 @@ int main(int argc, char** argv) {
           if (ai == bi) continue;
           const P3& b = sorted_pts[bi];
           if (a.x == b.x && a.y == b.y && a.z == b.z) continue;  // `D = 0`
+          // ---- UN SEUL BALAYAGE, TROIS ETAGES.
+          //
+          // `S4` est la paire retenue par le minorant. Le meme parcours de `z`
+          // decide ensuite l'appartenance a `W_4` — `pair_lane >= 4` — et la
+          // qualite de porteur. On obtient donc `V4` EXACT et `C4` sur la meme
+          // passe, ce que le contre-audit `9a4b219` reclame : la chaine publiee
+          // devient `S4 -> V4 -> C4` et non plus `S4` deguise en `V4`.
+          ++L.seed_S4;
           ++L.seed_ancres;
-          long long cref = 0;
+          long long cref = 0, cweak = 0, w4 = 0;
           for (int x = 0; x < n; ++x) {
             if (x == ai || x == bi) continue;
             ++L.seed_travail_ref;
-            if (est_seed(a, b, sorted_pts[x])) ++cref;
+            const P3& px = sorted_pts[x];
+            if (pair_lane(a, b, px) >= 4) ++w4;
+            if (est_seed(a, b, px)) ++cweak;
+            if (est_seed_owner(a, b, px, pid[ai], pid[bi], pid[x])) ++cref;
+          }
+          const bool v4 = (w4 < h_q[2]);  // le compte EXACT, pas le minorant
+          if (v4) {
+            ++L.seed_V4;
+            if (cref == 0) ++L.seed_V4_sans_carrier;
           }
           L.seed_total_ref += cref;
+          L.seed_C4_weak += cweak;
           if (cref == 0) ++L.seed_ancres_sans;
 
           // Descente elaguee, meme resultat par un autre chemin.
@@ -2221,7 +2340,8 @@ int main(int argc, char** argv) {
               const int x = pf;
               if (x == ai || x == bi) continue;
               ++L.seed_travail_elag;
-              if (est_seed(a, b, sorted_pts[x])) ++celag;
+              if (est_seed_owner(a, b, sorted_pts[x], pid[ai], pid[bi], pid[x]))
+                ++celag;
               continue;
             }
             st.push_back(nodes[h].left);
@@ -2567,14 +2687,27 @@ int main(int argc, char** argv) {
     const double gain = L.seed_travail_elag > 0
                             ? (double)L.seed_travail_ref / (double)L.seed_travail_elag
                             : 0.0;
-    std::printf("etages V4_pair_walive=%lld ancres_sans_carrier=%lld contraction=%.4f "
-                "C4_carrier=%lld C4_carrier_elag=%lld ecarts=%lld travail_ref=%lld "
-                "travail_elag=%lld gain=%.3f blocs_elagues=%lld points_elagues=%lld "
-                "certif_juges=%lld certif_desaccords=%lld\n",
-                L.seed_ancres, L.seed_ancres_sans, contraction, L.seed_total_ref,
-                L.seed_total_elag, L.seed_ecarts, L.seed_travail_ref,
-                L.seed_travail_elag, gain, L.seed_blocs_elagues,
-                L.seed_points_elagues, L.seed_juges, L.seed_desaccords_certif);
+    // LA CHAINE, AVEC UN NOM PAR ETAGE. `S4` est le surensemble fail-open du
+    // prefiltre ; `V4` le compte EXACT des `W4`-vivantes ; `C4_carrier` les
+    // porteurs sous owner CANONIQUE ; `C4_carrier_weak_owner` sous owner
+    // maximal faible, qui compte un triangle sous chacune de ses aretes ex
+    // aequo. La contraction qui a un sens est `V4_sans_carrier / V4`.
+    const double contraction_v4 =
+        L.seed_V4 > 0 ? (double)L.seed_V4_sans_carrier / (double)L.seed_V4 : 0.0;
+    std::printf("etages S4_prefilter_survivor=%lld V4_pair_walive_exact=%lld "
+                "V4_sans_carrier=%lld contraction_V4=%.4f mou_S4_sur_V4=%.3f "
+                "S4_sans_carrier=%lld contraction_S4=%.4f "
+                "C4_carrier=%lld C4_carrier_weak_owner=%lld C4_carrier_elag=%lld "
+                "ecarts=%lld travail_ref=%lld travail_elag=%lld gain=%.3f "
+                "blocs_elagues=%lld points_elagues=%lld certif_juges=%lld "
+                "certif_desaccords=%lld\n",
+                L.seed_S4, L.seed_V4, L.seed_V4_sans_carrier, contraction_v4,
+                L.seed_V4 > 0 ? (double)L.seed_S4 / (double)L.seed_V4 : 0.0,
+                L.seed_ancres_sans, contraction,
+                L.seed_total_ref, L.seed_C4_weak, L.seed_total_elag,
+                L.seed_ecarts, L.seed_travail_ref, L.seed_travail_elag, gain,
+                L.seed_blocs_elagues, L.seed_points_elagues, L.seed_juges,
+                L.seed_desaccords_certif);
     // LES DEUX CERTIFICATS N'ONT AUCUNE PRIMITIVE COMMUNE : l'un enumere des
     // coins et evalue `e.t`, l'autre compare des distances a un centre. Un
     // desaccord est donc un desaccord de juge, pas un avertissement.

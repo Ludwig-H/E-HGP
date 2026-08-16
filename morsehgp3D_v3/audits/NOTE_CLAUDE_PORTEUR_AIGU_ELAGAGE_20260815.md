@@ -36,20 +36,59 @@ diamétrale ouverte, donc la lentille se **partitionne** en non-porteurs
 (`H >= 0`) et porteurs (`H < 0`). Un témoin q2 est exactement un non-porteur.
 Le même parcours rend les deux ; j'en jetais la moitié.
 
-## 2. Les étages, séparés et renommés
+## 2. Les étages, séparés — et une première version où `S4` s'appelait `V4`
 
-Le compteur que j'appelais `q4` ne mesure que des **paires-ancrages**. Renommé.
-À `n=400`, `s=8` :
+> [!CAUTION]
+> **Les contractions de la première version de cette note étaient fausses.**
+> Le contre-audit
+> [`AUDIT_CONTRE_RECEPTION_PORTEUR_AIGU_207B542_20260815.md`](AUDIT_CONTRE_RECEPTION_PORTEUR_AIGU_207B542_20260815.md)
+> l'a vu : dans le mode `--seeds` je sélectionnais les paires par le **minorant**
+> `h_coeur + h_a + h_b < h_4`, donc je comptais `S4`, le survivant du préfiltre,
+> et je l'imprimais sous le nom `V4_pair_walive`. `two_lines` cachait l'erreur
+> parce que son mou vaut exactement un. Le compte exact de `W_4` est désormais
+> **fusionné dans le même balayage de `z`**, et la chaîne publiée est bien
+> `S4 -> V4 -> C4`.
 
-| famille | `V4_pair_walive` | `C4_carrier` | contraction |
-| --- | ---: | ---: | ---: |
-| `two_lines` | `43 128` | **`0`** | **`1,0000`** |
-| `terrain` | `16 536` | `136 926` | `0,0767` |
-| `uniform` | `38 070` | `1 172 715` | `0,0263` |
-| `eight_clusters` | `56 633` | `3 428 909` | `0,0170` |
+À `n=400`, `s=8`, owner canonique :
 
-`two_lines` : la positivité retire **la totalité** des ancres. C'est le fait
-architectural, et il ne dépend d'aucun certificat de témoins.
+| famille | `S4` | `V4` exact | mou | `V4_sans_carrier` | contraction `V4` | contraction `S4` (fausse) |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| `two_lines` | `43 128` | `43 128` | `1,000` | `43 128` | **`1,0000`** | `1,0000` |
+| `terrain` | `16 536` | `12 212` | `1,354` | `1 328` | `0,1087` | `0,0767` |
+| `uniform` | `38 070` | `27 390` | `1,390` | `1 016` | `0,0371` | `0,0267` |
+| `eight_clusters` | `56 633` | `26 264` | `2,156` | `981` | `0,0374` | `0,0174` |
+
+L'écart va jusqu'à `2,15x` sur `eight_clusters` : mes chiffres publiés
+mélangeaient le mou du préfiltre et l'absence de porteur, exactement comme le
+contre-audit le dit. `two_lines` reste à `1,0000` — la positivité y retire la
+totalité des ancres, et c'est le seul cas où les deux lectures coïncident.
+
+## 2bis. L'owner canonique, et trois nombres au lieu de deux
+
+`est_seed` ne testait que `E <= D` et `X <= D`, donc il acceptait les **égalités**
+et comptait un triangle sous chacune de ses arêtes maximales ex aequo. L'owner
+canonique — longueur maximale, puis `EdgeKey = (min PointId, max PointId)`
+minimale — est maintenant appliqué, avec les **vrais** `PointId` transportés à
+travers le tri Morton par `order[i]`.
+
+Effet sur les familles : `-0,71 %` de porteurs sur `terrain`, `-0,20 %` sur
+`uniform`, `-0,034 %` sur `eight_clusters`. Petit, mais réel.
+
+Sur le tétraèdre régulier, le contre-audit annonce `12` puis `2`. **Le `12` est
+exact ; le `2` porte sur une autre quantité que celle que je calculais, et les
+deux sont justes.** Il en faut trois :
+
+| quantité | régulier | tétraèdre de l'auditeur |
+| --- | ---: | ---: |
+| `porteurs_weak` — toute incidence (arête maximale, apex) | `12` | `2` |
+| `porteurs_canon` — une par **face** aiguë, sous l'owner de cette face | `4` | `2` |
+| `porteurs_owner_tetra` — les seuls porteurs de l'arête qui possède le **tétraèdre** | `2` | `1` |
+
+Le `4` compte les quatre faces aiguës du régulier, chacune possédée une fois ;
+le `2` compte les apex de la seule arête `(0,1)`. Confondre les deux, c'est
+confondre « porteurs produits par la source » et « porteurs d'une ancre
+donnée » — et c'est le genre de confusion qui a déjà coûté un facteur deux
+imaginaire dans cette même note.
 
 ## 3. Deux réfutations, gardées parce qu'elles coûtent cher à redécouvrir
 

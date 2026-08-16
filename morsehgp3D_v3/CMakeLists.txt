@@ -5328,7 +5328,8 @@ add_test(NAME mhgp3v_two_lines_etages_separes
           --separation=8 --smax=11 --verifie-seed)
 set_tests_properties(mhgp3v_two_lines_etages_separes PROPERTIES
   PASS_REGULAR_EXPRESSION
-  "V4_pair_walive=43128 ancres_sans_carrier=43128 contraction=1\\.0000 C4_carrier=0 C4_carrier_elag=0 ecarts=0")
+  "S4_prefilter_survivor=43128 V4_pair_walive_exact=43128 V4_sans_carrier=43128 contraction_V4=1\\.0000 mou_S4_sur_V4=1\\.000(.|
+)*C4_carrier=0 C4_carrier_weak_owner=0 C4_carrier_elag=0 ecarts=0")
 
 # ---------------------------------------------------------------------------
 # L'ÉLAGAGE PAR BLOC : deux disjoints, et je note ce que j'ai réfuté en route.
