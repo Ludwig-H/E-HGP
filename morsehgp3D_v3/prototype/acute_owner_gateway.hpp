@@ -339,6 +339,35 @@ inline VerdictConjoint classifie_conjoint(const Extrema& e, long long L4_open,
   return VerdictConjoint::kMixed;
 }
 
+// ---------------------------------------------------------------------------
+// LE THEOREME QUI DEBLOQUE LE COUT : `DEAD` EST MONOTONE-STABLE.
+//
+// `Phi_max`, `Delta_E,max` et `Delta_X,max` sont des MAXIMA sur le produit
+// `A x B x C`. Raffiner `A` ou `B` retrecit ce produit, donc chacun de ces trois
+// maxima ne peut que DECROITRE ou rester egal. Les trois causes de mort etant
+// `Phi_max <= 0`, `Delta_E,max < 0` et `Delta_X,max < 0`, un bloc mort le reste
+// pour TOUS les descendants de `(A,B)`.
+//
+// `ALL_STRICT` est stable pour la raison SYMETRIQUE : il repose sur des MINIMA,
+// `Phi_min > 0` et `Delta_min > 0`, qui ne peuvent que CROITRE sous
+// raffinement. Un bloc entierement porteur le reste donc aussi.
+//
+// Consequence operationnelle, et c'est elle qui compte : un sous-arbre `C`
+// DECIDE — mort ou entierement porteur — n'a jamais a etre re-teste pour les
+// sous-rectangles de `(A,B)`. La frontiere `C` s'herite exactement comme le
+// ledger `W_4`, et redescendre depuis la racine a chaque scission de `(A,B)`
+// est du travail PUR.
+//
+// MESURE QUI L'IMPOSE. Sans cet heritage, `terrain` a `n=800` coûte `3,42`
+// MILLIARDS de nœuds, et le schema a deux fronts n'y change rien — les
+// rectangles residuels SONT les rectangles chers, donc un seuil binaire sur
+// « quand raffiner » ne peut rien. La faute n'est pas le CHOIX de raffiner,
+// c'est de repartir de la racine apres l'avoir fait.
+inline bool decide_stable_sous_raffinement(Verdict v) {
+  return v == Verdict::kDeadPhi || v == Verdict::kDeadOwnerE ||
+         v == Verdict::kDeadOwnerX || v == Verdict::kAllStrict;
+}
+
 }  // namespace acute
 }  // namespace mhgp3v
 

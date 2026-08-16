@@ -4649,6 +4649,45 @@ target_link_libraries(mhgp3v_acute_owner_gateway_probe PRIVATE mhgp)
 # `|y-c0|^2 = 16/3` contre un rayon `(|ab|/4)^2 = 1/2`, facteur `32/3`. Le cœur
 # tue un seed par INTERIEURS PERMANENTS ; l'apex vit sur le SHELL d'une sphere.
 # Ma ligne « `y <- requete sur le cœur de Jung` » etait fausse.
+# ---------------------------------------------------------------------------
+# `(A,B)` FIGE CONTRE `(A,B)` SCINDABLE : les deux extremes, chiffres.
+#
+# Ma refutation du certificat au niveau rectangle datait du `53815f`. Elle est
+# INVALIDE : elle precedait le correctif `tlo/thi`, donc elle jugeait le
+# certificat sur des cellules de Morton alignees, bien plus larges que les
+# boites serrees. Refaite proprement, `terrain` a `n=800` :
+#
+#   `(A,B)` scindable   3 416 M nœuds, exposant 2,95 -> 4,73, ZERO residuel
+#   `(A,B)` fige           54 M nœuds, exposant 2,68 -> 1,39, mais 47,7 % des
+#                          paires residuelles, et 65,9 % sur `eight_clusters`
+#
+# Figer coûte 63 fois moins et laisse la moitie des paires ; scinder tue tout et
+# explose. AUCUN DES DEUX NE MARCHE SEUL.
+#
+# LE SCHEMA A DEUX FRONTS EST REFUTE PAR LA MESURE. Figer d'abord, puis ne
+# raffiner que les rectangles residuels, donne `3,42` MILLIARDS de nœuds a
+# `n=800` — identique au front unique. Les rectangles residuels SONT les
+# rectangles chers ; un seuil binaire sur « quand raffiner » ne peut donc rien.
+#
+# LA VRAIE FAUTE, ET LE THEOREME QUI LA CORRIGE. Quand `(A,B)` se scinde, la
+# descente de `C` repart de la RACINE. Or les trois causes de mort sont des
+# MAXIMA sur `A x B x C`, qui decroissent sous raffinement de `(A,B)` : un
+# sous-arbre `C` mort le reste pour tous les descendants. `ALL_STRICT` est
+# stable pour la raison symetrique, ses conditions etant des MINIMA. La
+# frontiere `C` s'herite donc, exactement comme le ledger `W_4`.
+# Voir `decide_stable_sous_raffinement` dans `prototype/acute_owner_gateway.hpp`.
+#
+# Cette porte grave les deux regimes pour que la comparaison ne se reperde pas.
+add_test(NAME mhgp3v_gateway_ab_fige
+  COMMAND mhgp3v_acute_owner_gateway_probe --brute --ab-fige --family=terrain --points=120)
+set_tests_properties(mhgp3v_gateway_ab_fige PROPERTIES
+  PASS_REGULAR_EXPRESSION "blocs_faux=0(.|\n)*residuel_rects=[1-9][0-9]*")
+
+add_test(NAME mhgp3v_gateway_deux_fronts
+  COMMAND mhgp3v_acute_owner_gateway_probe --brute --deux-fronts --family=terrain --points=120)
+set_tests_properties(mhgp3v_gateway_deux_fronts PROPERTIES
+  PASS_REGULAR_EXPRESSION "blocs_faux=0(.|\n)*residuel_rects=0 residuel_paires=0 front2_rects=[1-9][0-9]*")
+
 add_test(NAME mhgp3v_gateway_contre_fixtures
   COMMAND mhgp3v_acute_owner_gateway_probe --fixtures)
 set_tests_properties(mhgp3v_gateway_contre_fixtures PROPERTIES

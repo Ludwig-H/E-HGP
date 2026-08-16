@@ -227,6 +227,10 @@ struct BilanSparse {
   long long pending = 0;            // debordements : jamais `DEAD`
   long long l4_credits = 0;         // credits `W_4` acquis en bloc
   long long rectangles = 0;         // rectangles WSPD, la vraie source
+  long long residuel_blocs = 0;     // blocs `MIXED` a exactifier par arete
+  long long residuel_rects = 0;     // ... et rectangles DISTINCTS concernes
+  long long front2_rects = 0;       // rectangles relances au second front
+  long long residuel_paires = 0;    // et leur masse de paires
   long long frontiere_max = 0;      // plus grande frontiere indecise portee
 };
 
@@ -238,6 +242,7 @@ int main(int argc, char** argv) {
   std::string famille = "two_lines";
   bool mode_oracle = false, mode_sparse = false, mode_brute = false, biais = false;
   bool mode_fixture = false;
+  bool ab_fige = false, deux_fronts = false;
   long long max_pairid = -1, min_carriers = -1, min_noeuds = 0;
   int r4 = 8;   // seuil de rejet q4, `h_4 = s_max - 3`
   int sep = 8;  // separation WSPD
@@ -261,6 +266,8 @@ int main(int argc, char** argv) {
     const std::string a = argv[i];
     long long t = 0;
     if (a == "--fixtures") { mode_fixture = true; continue; }
+    if (a == "--ab-fige") { ab_fige = true; continue; }
+    if (a == "--deux-fronts") { ab_fige = true; deux_fronts = true; continue; }
     if (a == "--oracle") { mode_oracle = true; continue; }
     if (a == "--oracle-biais") { mode_oracle = true; biais = true; continue; }
     if (a == "--sparse") { mode_sparse = true; continue; }
@@ -560,6 +567,8 @@ int main(int argc, char** argv) {
       bool ab_neuf;
       long long U4;
       bool tronquee;
+      int rect;  // rectangle WSPD d'origine, pour compter les residuels UNE fois
+      bool front2;  // second front : le raffinement de `(A,B)` est autorise
     };
     std::vector<Tache> st;
     const int racine = nodes.empty() ? -1 : 0;
@@ -585,7 +594,7 @@ int main(int argc, char** argv) {
         const bool fu = feuille(r.u), fv = feuille(r.v);
         if (separes(sphere_de(boite(r.u)), sphere_de(boite(r.v)), sep) || (fu && fv)) {
           ++rectangles;
-          Tache t0{r.u, r.v, racine, 0, {}, true, 0, false};
+          Tache t0{r.u, r.v, racine, 0, {}, true, 0, false, (int)rectangles - 1, false};
           t0.frontiere.push_back(racine);
           st.push_back(std::move(t0));
           continue;
@@ -600,6 +609,15 @@ int main(int argc, char** argv) {
         }
       }
     }
+    std::vector<unsigned char> rect_residuel((size_t)rectangles, 0);
+    bool front2_fait = false;
+    // ---- COMPTABILITE PAR RECTANGLE, POUR DEFALQUER.
+    //
+    // Le front 1 emet des porteurs pour des rectangles qui se reveleront
+    // RESIDUELS, et que le front 2 rejouera : sans defalcation, ils sont
+    // comptes deux fois. L'exces passait de `1,180` a `1,674` sur `terrain`,
+    // et c'est le juge qui l'a montre.
+    std::vector<long long> carr_par_rect((size_t)rectangles, 0);
     // Cap de frontiere : un depassement rend `PENDING`, jamais `DEAD`.
     const int kCapFrontiere = 64;
     // ---- L'AUTO-JOINTURE EN PAS CADENCE, ET POURQUOI ELLE EST NECESSAIRE.
@@ -620,6 +638,7 @@ int main(int argc, char** argv) {
     // scinder `A == B` en TROIS — `(A.g,A.g)`, `(A.g,A.d)`, `(A.d,A.d)`, la
     // diagonale inverse etant omise — le preserve, et chaque paire non ordonnee
     // n'est alors visitee qu'une fois.
+  boucle:
     while (!st.empty()) {
       const Tache t = std::move(st.back());
       st.pop_back();
@@ -707,6 +726,7 @@ int main(int argc, char** argv) {
                          : (long long)pop(t.A) * pop(t.B) * pop(t.C);
         g.masse_all_strict += masse;
         g.carriers_symboliques += masse;
+        carr_par_rect[(size_t)t.rect] += masse;
         if (mode_brute) {
           // VERIFICATION DU BLOC, point par point. Elle ne sert qu'au juge : un
           // bloc `ALL_STRICT` doit etre integralement porteur, et un ecart ici
@@ -750,35 +770,87 @@ int main(int argc, char** argv) {
             pid[ia] < pid[ib]
                 ? porteur_canonique(pts[ia], pts[ib], pts[ic], pid[ia], pid[ib], pid[ic])
                 : porteur_canonique(pts[ib], pts[ia], pts[ic], pid[ib], pid[ia], pid[ic]);
-        if (porte) ++g.carriers;
+        if (porte) { ++g.carriers; carr_par_rect[(size_t)t.rect] += 1; }
         continue;
       }
       // On coupe la PLUS GROSSE des trois, ce qui fait decroitre le produit des
       // populations et garantit la terminaison.
       const int pa = fa ? 1 : pop(t.A), pb = fb ? 1 : pop(t.B), pc = fc ? 1 : pop(t.C);
+      // ---- `(A,B)` FIGE : le rectangle WSPD EST deja la partition des paires.
+      //
+      // Le raffiner a nouveau refait le travail de la WSPD, et cela se multiplie
+      // avec la descente de `C` : exposant `noeuds` `2,95` puis `4,73` sur
+      // `terrain`. Ce mode l'interdit, et ne descend que `C`.
+      //
+      // J'avais REFUTE cette voie au `53815f` — « le certificat au niveau
+      // rectangle n'elague que des feuilles, `1,1` point par bloc ». Cette
+      // mesure est INVALIDE : elle datait d'avant le correctif `tlo/thi`, donc
+      // elle jugeait le certificat sur des cellules de Morton alignees, bien
+      // plus larges que les boites serrees. Il fallait la refaire.
+      //
+      // Un bloc `MIXED` dont `A` ou `B` n'est pas une feuille ne peut alors plus
+      // etre decide : il devient un RESIDUEL, compte a part, que la phase
+      // d'exactification par arete traitera. C'est la structure a deux fronts de
+      // la section 8 de l'audit.
+      // ---- DEUX FRONTS : figer d'abord, ne raffiner que le residuel.
+      //
+      // Les deux extremes sont mesures, et aucun ne marche seul :
+      //
+      //   `(A,B)` scindable  `terrain n=800` : `3 416 M` nœuds, exposant `4,73`,
+      //                      mais `two_lines` tue TOUT sans une paire ;
+      //   `(A,B)` fige       `54 M` nœuds, exposant `1,39` — soit `63x` moins —
+      //                      mais `47,7 %` des paires restent residuelles, et
+      //                      `65,9 %` sur `eight_clusters`.
+      //
+      // Le premier front fige `(A,B)` et ne descend que `C` : il tue `63` a
+      // `82 %` des rectangles pour un coût sous-quadratique. Le second ne
+      // raffine `(A,B)` que sur les rectangles qui ont SURVECU au premier. Le
+      // coût du raffinement n'est donc paye que la ou il rapporte, ce qui est le
+      // critere de scission de la section 3.4 de l'audit, sous sa forme la plus
+      // simple : un seuil binaire au lieu d'un ratio continu.
+      if (ab_fige && !(fa && fb) && !t.front2) {
+        if (!fc) {
+          st.push_back({t.A, t.B, nodes[t.C].left, L4, frontiere, false, U4, tronquee, t.rect, t.front2});
+          st.push_back({t.A, t.B, nodes[t.C].right, L4, frontiere, false, U4, tronquee, t.rect, t.front2});
+        } else {
+          // `C` epuise et `(A,B)` non ponctuel : residuel a exactifier.
+          //
+          // LE COMPTE DOIT ETRE PAR RECTANGLE DISTINCT. Ma premiere version
+          // ajoutait `|A| |B|` a chaque bloc residuel, donc le meme rectangle
+          // etait compte une fois par feuille `C` atteinte : `residuel_paires`
+          // valait `123 fois` `C(n,2)`, un nombre sans aucun sens.
+          ++g.residuel_blocs;
+          if (!rect_residuel[t.rect]) {
+            rect_residuel[t.rect] = 1;
+            ++g.residuel_rects;
+            g.residuel_paires += (long long)pop(t.A) * pop(t.B);
+          }
+        }
+        continue;
+      }
       if (t.A == t.B && !fa) {
         // LA DIAGONALE, DEPLIEE EN TROIS. `(A.d, A.g)` est omise : c'est la
         // meme paire non ordonnee que `(A.g, A.d)`.
         const int g1 = nodes[t.A].left, d1 = nodes[t.A].right;
-        st.push_back({g1, g1, t.C, L4, frontiere, true, U4, tronquee});
-        st.push_back({g1, d1, t.C, L4, frontiere, true, U4, tronquee});
-        st.push_back({d1, d1, t.C, L4, frontiere, true, U4, tronquee});
+        st.push_back({g1, g1, t.C, L4, frontiere, true, U4, tronquee, t.rect, t.front2});
+        st.push_back({g1, d1, t.C, L4, frontiere, true, U4, tronquee, t.rect, t.front2});
+        st.push_back({d1, d1, t.C, L4, frontiere, true, U4, tronquee, t.rect, t.front2});
       } else if (t.A == t.B) {
         // `A == B` feuille : la seule paire possible est `(a,a)`, degeneree.
         // Il ne reste qu'a descendre `C`, ou a s'arreter.
         if (!fc) {
-          st.push_back({t.A, t.B, nodes[t.C].left, L4, frontiere, false, U4, tronquee});
-          st.push_back({t.A, t.B, nodes[t.C].right, L4, frontiere, false, U4, tronquee});
+          st.push_back({t.A, t.B, nodes[t.C].left, L4, frontiere, false, U4, tronquee, t.rect, t.front2});
+          st.push_back({t.A, t.B, nodes[t.C].right, L4, frontiere, false, U4, tronquee, t.rect, t.front2});
         }
       } else if (!fa && pa >= pb && pa >= pc) {
-        st.push_back({nodes[t.A].left, t.B, t.C, L4, frontiere, true, U4, tronquee});
-        st.push_back({nodes[t.A].right, t.B, t.C, L4, frontiere, true, U4, tronquee});
+        st.push_back({nodes[t.A].left, t.B, t.C, L4, frontiere, true, U4, tronquee, t.rect, t.front2});
+        st.push_back({nodes[t.A].right, t.B, t.C, L4, frontiere, true, U4, tronquee, t.rect, t.front2});
       } else if (!fb && pb >= pc) {
-        st.push_back({t.A, nodes[t.B].left, t.C, L4, frontiere, true, U4, tronquee});
-        st.push_back({t.A, nodes[t.B].right, t.C, L4, frontiere, true, U4, tronquee});
+        st.push_back({t.A, nodes[t.B].left, t.C, L4, frontiere, true, U4, tronquee, t.rect, t.front2});
+        st.push_back({t.A, nodes[t.B].right, t.C, L4, frontiere, true, U4, tronquee, t.rect, t.front2});
       } else if (!fc) {
-        st.push_back({t.A, t.B, nodes[t.C].left, L4, frontiere, false, U4, tronquee});
-        st.push_back({t.A, t.B, nodes[t.C].right, L4, frontiere, false, U4, tronquee});
+        st.push_back({t.A, t.B, nodes[t.C].left, L4, frontiere, false, U4, tronquee, t.rect, t.front2});
+        st.push_back({t.A, t.B, nodes[t.C].right, L4, frontiere, false, U4, tronquee, t.rect, t.front2});
       }
     }
     // ---- L'ORACLE AU NIVEAU NUAGE, qui juge la recursion entiere.
@@ -826,17 +898,68 @@ int main(int argc, char** argv) {
           }
         }
     }
+    // ---- SECOND FRONT : on relance les seuls rectangles residuels, avec le
+    // raffinement de `(A,B)` autorise.
+    // UNE SEULE FOIS. Sans ce garde le `goto` se re-arme et la boucle ne
+    // termine jamais : elle a tourne dix minutes avant que je le voie.
+    if (ab_fige && deux_fronts && !front2_fait) {
+      front2_fait = true;
+      g.front2_rects = g.residuel_rects;
+      // DEFALCATION : tout ce que le front 1 a emis pour un rectangle residuel
+      // est retire, puisque le front 2 va le recalculer entierement.
+      for (size_t i = 0; i < rect_residuel.size(); ++i)
+        if (rect_residuel[i]) {
+          g.carriers_symboliques -= carr_par_rect[i];
+          carr_par_rect[i] = 0;
+        }
+      // Les porteurs de feuilles sont dans `carriers`, pas dans
+      // `carriers_symboliques` ; on les a defalques ensemble ci-dessus, donc on
+      // recale en reportant tout sur le symbolique — le total seul est juge.
+      g.carriers = 0;
+      std::vector<Tache> st2;
+      {
+        struct R { int u, v; };
+        std::vector<R> pile;
+        for (size_t i = 0; i < nodes.size(); ++i) pile.push_back({nodes[i].left, nodes[i].right});
+        long long idx = 0;
+        while (!pile.empty()) {
+          const R r = pile.back();
+          pile.pop_back();
+          const bool fu = feuille(r.u), fv = feuille(r.v);
+          if (separes(sphere_de(boite(r.u)), sphere_de(boite(r.v)), sep) || (fu && fv)) {
+            if (rect_residuel[(size_t)idx]) {
+              Tache t0{r.u, r.v, racine, 0, {}, true, 0, false, (int)idx, true};
+              t0.frontiere.push_back(racine);
+              st2.push_back(std::move(t0));
+            }
+            ++idx;
+            continue;
+          }
+          const bool su = !fu && (fv || pop(r.u) >= pop(r.v));
+          if (su) { pile.push_back({nodes[r.u].left, r.v}); pile.push_back({nodes[r.u].right, r.v}); }
+          else { pile.push_back({r.u, nodes[r.v].left}); pile.push_back({r.u, nodes[r.v].right}); }
+        }
+      }
+      st.swap(st2);
+      g.residuel_blocs = 0;
+      g.residuel_rects = 0;
+      g.residuel_paires = 0;
+      std::fill(rect_residuel.begin(), rect_residuel.end(), 0);
+      goto boucle;
+    }
     std::printf("sparse famille=%s n=%d noeuds=%lld dead_phi=%lld dead_owner_e=%lld "
                 "dead_owner_x=%lld all_strict=%lld masse_all_strict=%lld "
                 "feuilles=%lld pairid_expanded=%lld carriers=%lld "
                 "carriers_symboliques=%lld blocs_faux=%lld dead_w4=%lld active_edge=%lld "
                 "seed3_emitted=%lld pending=%lld l4_credits=%lld frontiere_max=%lld "
-                "rectangles=%lld\n",
+                "rectangles=%lld residuel_blocs=%lld residuel_rects=%lld residuel_paires=%lld "
+                "front2_rects=%lld\n",
                 famille.c_str(), n, g.noeuds, g.dead_phi, g.dead_e, g.dead_x,
                 g.all_strict, g.masse_all_strict, g.feuilles, g.pairid_expanded,
                 g.carriers, g.carriers_symboliques, g.blocs_faux, g.dead_w4,
                 g.active_edge, g.seed3_emitted, g.pending, g.l4_credits,
-                g.frontiere_max, rectangles);
+                g.frontiere_max, rectangles, g.residuel_blocs, g.residuel_rects,
+                g.residuel_paires, g.front2_rects);
     if (mode_brute) {
       const long long total = g.carriers + g.carriers_symboliques;
       // ---- LE SENS DE L'ECART, ET POURQUOI IL N'EST PLUS ZERO.

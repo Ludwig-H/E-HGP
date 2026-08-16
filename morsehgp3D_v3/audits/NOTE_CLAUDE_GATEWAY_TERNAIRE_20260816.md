@@ -359,3 +359,62 @@ puis `Q4SeedAxisTopR4-LBVH` pour l'apex, parmi les premières et dernières
 racines axiales.
 
 Les deux fixtures sont permanentes sous `mhgp3v_gateway_contre_fixtures`.
+
+---
+
+## 10. Le verrou de coût : deux extrêmes chiffrés, une synthèse réfutée, un théorème
+
+### Ma réfutation du certificat au niveau rectangle était invalide
+
+Au `53815f` j'avais écrit que le certificat aigu à `(A,B)` fixé « n'élague que
+des feuilles, `1,1` point par bloc ». **Cette mesure précédait le correctif
+`tlo/thi`** : elle jugeait donc le certificat sur des cellules de Morton
+alignées, bien plus larges que les boîtes serrées. Refaite proprement,
+`terrain` à `n=800` :
+
+| régime | `noeuds` | exposant | paires résiduelles / `C(n,2)` |
+| --- | ---: | ---: | ---: |
+| `(A,B)` scindable | `3 416 M` | `2,95 -> 4,73` | `0` |
+| `(A,B)` figé | `54 M` | `2,68 -> 1,39` | **`47,7 %`** |
+
+Sur `eight_clusters`, figé laisse `65,9 %` des paires. Figer coûte `63` fois
+moins et laisse la moitié du travail ; scinder tue tout et explose. **Aucun des
+deux ne marche seul.**
+
+### Le schéma à deux fronts, que j'ai proposé puis réfuté moi-même
+
+Figer d'abord, puis ne raffiner que les rectangles résiduels : la correction
+tient (`ecart > 0`, `blocs_faux = 0`, excès `1,173` inchangé après défalcation
+du double comptage entre fronts), et `residuel_rects` tombe à zéro.
+
+Mais le coût ne bouge pas : `3,42` **milliards** de nœuds à `n=800` sur
+`terrain`, contre `3,416` milliards pour le front unique. **Les rectangles
+résiduels sont les rectangles chers.** Un seuil binaire sur « quand raffiner »
+ne peut donc rien, et le critère de ratio de la section 3.4 de l'audit ne le
+pourra pas davantage tant que la cause reste en place.
+
+### La cause, et le théorème qui la corrige
+
+Quand `(A,B)` se scinde, ma descente de `C` **repart de la racine**.
+
+Or les trois causes de mort — `Phi_max <= 0`, `Delta_E,max < 0`,
+`Delta_X,max < 0` — sont des **maxima** sur le produit `A x B x C`. Raffiner
+`A` ou `B` rétrécit ce produit, donc chacun de ces maxima ne peut que décroître.
+**Un sous-arbre `C` mort le reste pour tous les descendants de `(A,B)`.**
+
+`ALL_STRICT` est stable pour la raison symétrique : ses conditions sont des
+**minima**, `Phi_min > 0` et `Delta_min > 0`, qui ne peuvent que croître.
+
+Donc la frontière `C` s'hérite exactement comme le ledger `W_4` : on ne
+re-teste que les **indécis**. Redescendre depuis la racine après chaque
+scission est du travail pur — et c'est exactement l'erreur que j'avais déjà
+faite sur le ledger, où l'hériter avait divisé le coût par `2` à `2,4`.
+
+C'est aussi, mot pour mot, le « cover partagé par arête, construit une fois et
+réutilisé » de la section 8.1 de l'audit LBVH. Les deux raisonnements
+convergent.
+
+`decide_stable_sous_raffinement` porte l'énoncé dans
+`prototype/acute_owner_gateway.hpp`. **L'implémentation de l'héritage de la
+frontière `C` n'est pas faite** — c'est le prochain commit, et son critère de
+réception est l'exposant `noeuds` sous `2` sur les trois familles denses.
