@@ -4627,6 +4627,34 @@ target_link_libraries(mhgp3v_acute_owner_gateway_probe PRIVATE mhgp)
 # erreur de categorie. Le plancher `--min-dead=400` les separe exactement :
 # `416` blocs morts sans mutant, `351` avec — la graine etant fixee, ces deux
 # nombres sont reproductibles a l'unite.
+# ---------------------------------------------------------------------------
+# DEUX CONTRE-FIXTURES QUI REFUTENT DEUX DE MES PHRASES.
+#
+# L'ANNEAU. Une ancre `W_4`-VIVANTE peut porter `Theta(n)` porteurs. Dans le plan
+# mediateur de `a=(1000,1000,1000)`, `b=(1020,1000,1000)`, on a `E = X = R^2+s`
+# et `H = R^2-s` avec `R=10` : pour `R^2 < s < 3R^2`, l'arete est maximale
+# stricte et le triangle est aigu, mais `H < 0` place `x` HORS de la boule
+# diametrale, donc hors de `W_2` et de `W_4`.
+#
+# Les deux regions sont GEOMETRIQUEMENT DISJOINTES — `W_4` du cote `H>0`, un
+# porteur du cote `H<0`. Le rapport `|L|/|W_4| = 10,86` controle donc une
+# MOYENNE sous homogeneite et ne domine aucune cardinalite : ma phrase
+# « porteurs = `O(h)` » etait une borne en esperance deguisee en borne
+# deterministe. Mesure : `632` points, `632` porteurs, `0` temoin.
+#
+# Elle tue trois reglages : un cap de porteurs proportionnel a `h`, une moyenne
+# utilisee comme cap, et « ancre vivante implique degre local borne ».
+#
+# LE TETRAEDRE REGULIER. Le cœur de Jung ne contient PAS le quatrieme sommet :
+# `|y-c0|^2 = 16/3` contre un rayon `(|ab|/4)^2 = 1/2`, facteur `32/3`. Le cœur
+# tue un seed par INTERIEURS PERMANENTS ; l'apex vit sur le SHELL d'une sphere.
+# Ma ligne « `y <- requete sur le cœur de Jung` » etait fausse.
+add_test(NAME mhgp3v_gateway_contre_fixtures
+  COMMAND mhgp3v_acute_owner_gateway_probe --fixtures)
+set_tests_properties(mhgp3v_gateway_contre_fixtures PROPERTIES
+  PASS_REGULAR_EXPRESSION
+  "anneau points=632 carriers=632 W2=0 W3=0 W4=0(.|\n)*apex_hors_coeur=1(.|\n)*borne_O_h=REFUTEE")
+
 add_test(NAME mhgp3v_gateway_oracle_boites
   COMMAND mhgp3v_acute_owner_gateway_probe --oracle --tours=20000 --etendue=1 --min-dead=400)
 set_tests_properties(mhgp3v_gateway_oracle_boites PROPERTIES
@@ -5423,11 +5451,18 @@ mhgp3v_add_expected_code_test_for(mhgp3v_combined_prefilter_probe
 # CE QUE `two_lines` IMPOSE. `Theta(n^2)` paires `W4`-vivantes, et **zéro**
 # porteur. La contraction doit valoir exactement `1`.
 # ---------------------------------------------------------------------------
-# PORTEURS D'UNE ANCRE VIVANTE : `O(h)`, ET NON `O(n)`.
+# PORTEURS D'UNE ANCRE VIVANTE : petite moyenne sur les familles testées ;
+# `O(h)` EN ESPERANCE HOMOGENE, **non borné déterministement**.
 #
-# Une ancre `W_4`-vivante a moins de `h_4 = 8` points dans son fuseau ; le
-# rapport lentille/`W_4` valant `10,86`, elle ne peut porter que quelques
-# dizaines de porteurs sous densité locale uniforme. Mesuré, `s=8` :
+# > RETRACTATION. Le titre de cette section disait « `O(h)` et non `O(n)` ».
+# > C'est faux comme borne deterministe, et la contre-fixture `anneau` le montre
+# > a l'unite : `632` porteurs pour `0` temoin de fuseau. Les regions `W_4` et
+# > carrier sont GEOMETRIQUEMENT DISJOINTES — `H>0` contre `H<0` — donc le
+# > rapport de volumes ne domine aucune cardinalite. Voir
+# > `mhgp3v_gateway_contre_fixtures`.
+#
+# La mesure ci-dessous reste juste ; c'est son interprétation qui était fausse.
+# Mesuré, `s=8` :
 #
 #   famille          n=200   n=400   n=800    max a n=800
 #   terrain           4,99    5,39    5,86        99

@@ -308,3 +308,54 @@ La sortie est-elle un critère de scission qui n'autorise le raffinement de
 faut-il une autre structure entre les deux ? Je penche pour le premier, avec le
 ratio évalué sur `masse classée / tâches enfants`, mais je n'ai pas mesuré s'il
 suffit à ramener l'exposant sous `2`.
+
+
+---
+
+## 9. Deux rétractations, vérifiées avant d'être admises
+
+L'audit
+[`AUDIT_CONSTRUCTIF_FC634_F614_JONCTION_WSPD_LBVH_20260816.md`](AUDIT_CONSTRUCTIF_FC634_F614_JONCTION_WSPD_LBVH_20260816.md)
+réfute deux de mes phrases. J'ai vérifié ses deux contre-exemples en
+arithmétique exacte avant de les recevoir ; les deux tiennent.
+
+### `#carriers = O(h)` est faux comme borne déterministe
+
+Dans le plan médiateur de `a=(-R,0,0)`, `b=(R,0,0)`, tout `x=(0,u,v)` avec
+`s = u²+v²` vérifie `E = X = R²+s` et `H = R²-s`. Pour `R² < s < 3R²` :
+`E < D`, `X < D`, `H < 0` — arête maximale stricte, triangle aigu. Et `H < 0`
+place `x` **hors** de la boule diamétrale, donc hors de `W_2`, donc hors de
+`W_4`.
+
+Fixture u16 gravée, `a=(1000,1000,1000)`, `b=(1020,1000,1000)`,
+`100 < u²+v² < 300` : **`632` points, `632` porteurs, `0` témoin `W_2`/`W_3`/`W_4`**.
+
+Les deux régions sont **géométriquement disjointes** — `W_4` du côté `H > 0`, un
+porteur du côté `H < 0`. Le rapport `|L|/|W_4| = 10,86` contrôle donc une
+**moyenne sous homogénéité** et ne domine aucune cardinalité. J'avais transformé
+une borne en espérance en borne déterministe : c'est la même erreur de
+quantificateur que celle qui m'avait déjà coûté le facteur `6,4` et les
+exposants.
+
+L'énoncé correct : `O(h)` en espérance sous Poisson homogène, avec la constante
+`29,335` par paire vivante à `h_4 = 8` ; `Theta(n)` dans le pire cas. Une
+version déterministe exige une hypothèse de régularité locale de type Ahlfors,
+qui n'appartient pas au contrat.
+
+### Le cœur de Jung ne génère pas le quatrième sommet
+
+Ma ligne `y <- requête sur le cœur de Jung B(c0,|ab|/4)` était fausse si `y`
+désigne l'apex. Le cœur est contenu dans **toutes** les boules q4 admissibles :
+ses points sont des **intérieurs permanents**, l'objet qui fait mourir le seed à
+huit IDs. Un sommet de support vit sur le **shell** d'une sphère particulière.
+
+Vérifié sur le tétraèdre régulier — quatre sommets alternés de `{0,2}³`, seed
+`(a,b,x)`, circumcentre plan `c0 = (2/3, 2/3, 4/3)` :
+
+`|y - c0|² = 16/3` contre `(|ab|/4)² = 1/2`, soit un facteur `32/3`.
+
+La route correcte est : cœur de Jung pour la mort par intérieurs permanents,
+puis `Q4SeedAxisTopR4-LBVH` pour l'apex, parmi les premières et dernières
+racines axiales.
+
+Les deux fixtures sont permanentes sous `mhgp3v_gateway_contre_fixtures`.

@@ -237,6 +237,7 @@ int main(int argc, char** argv) {
   long long seed = 12345;
   std::string famille = "two_lines";
   bool mode_oracle = false, mode_sparse = false, mode_brute = false, biais = false;
+  bool mode_fixture = false;
   long long max_pairid = -1, min_carriers = -1, min_noeuds = 0;
   int r4 = 8;   // seuil de rejet q4, `h_4 = s_max - 3`
   int sep = 8;  // separation WSPD
@@ -259,6 +260,7 @@ int main(int argc, char** argv) {
   for (int i = 1; i < argc; ++i) {
     const std::string a = argv[i];
     long long t = 0;
+    if (a == "--fixtures") { mode_fixture = true; continue; }
     if (a == "--oracle") { mode_oracle = true; continue; }
     if (a == "--oracle-biais") { mode_oracle = true; biais = true; continue; }
     if (a == "--sparse") { mode_sparse = true; continue; }
@@ -286,8 +288,84 @@ int main(int argc, char** argv) {
     std::fprintf(stderr, "REFUS : argument inconnu %s\n", a.c_str());
     return 2;
   }
+  // ---- DEUX CONTRE-FIXTURES GRAVEES, ET ELLES REFUTENT MES DEUX PHRASES.
+  //
+  // 1. L'ANNEAU : une ancre `W_4`-vivante peut porter `Theta(n)` porteurs.
+  //
+  //    `a = (1000,1000,1000)`, `b = (1020,1000,1000)`, et tous les entiers
+  //    `x = (1010, 1000+u, 1000+v)` avec `100 < u^2+v^2 < 300`. Dans le plan
+  //    mediateur, `E = X = R^2 + s` et `H = R^2 - s` avec `R = 10` : pour
+  //    `R^2 < s < 3R^2` on a `E < D`, `X < D` et `H < 0`. Donc `ab` est l'arete
+  //    maximale STRICTE et `abx` est un porteur aigu — mais `H < 0` place `x`
+  //    HORS de la boule diametrale, donc hors de `W_2`, donc hors de `W_4`.
+  //
+  //    Les deux regions sont GEOMETRIQUEMENT DISJOINTES : `W_4` vit du cote
+  //    `H > 0`, un porteur du cote `H < 0`. Le rapport de volumes
+  //    `|L|/|W_4| = 10,86` controle donc une MOYENNE sous homogeneite, et ne
+  //    domine aucune cardinalite. Ma phrase « porteurs = `O(h)` » etait une
+  //    borne en esperance deguisee en borne deterministe.
+  //
+  //    Mesure : `632` points, `632` porteurs, `0` temoin `W_2`/`W_3`/`W_4`.
+  //
+  // 2. LE TETRAEDRE REGULIER : le cœur de Jung ne contient PAS le quatrieme
+  //    sommet. Sur les quatre sommets alternes de `{0,2}^3`, le seed `(a,b,x)`
+  //    a pour circumcentre plan `c0 = (2/3, 2/3, 4/3)` et
+  //    `|y - c0|^2 = 16/3`, contre un rayon de cœur `(|ab|/4)^2 = 1/2` — un
+  //    facteur `32/3`. Le cœur sert a tuer un seed par INTERIEURS PERMANENTS,
+  //    jamais a produire l'apex, qui vit sur le SHELL d'une sphere.
+  if (mode_fixture) {
+    const i64 a[3] = {1000, 1000, 1000}, b[3] = {1020, 1000, 1000};
+    i64 D = 0;
+    for (int k = 0; k < 3; ++k) D += (a[k] - b[k]) * (a[k] - b[k]);
+    long long pts_anneau = 0, porteurs = 0, w2 = 0, w3 = 0, w4 = 0;
+    for (i64 u = -20; u <= 20; ++u)
+      for (i64 v = -20; v <= 20; ++v) {
+        const i64 sq = u * u + v * v;
+        if (!(sq > 100 && sq < 300)) continue;
+        ++pts_anneau;
+        const i64 x[3] = {1010, 1000 + u, 1000 + v};
+        i64 E = 0, X = 0, H = 0;
+        for (int k = 0; k < 3; ++k) {
+          E += (x[k] - a[k]) * (x[k] - a[k]);
+          X += (b[k] - x[k]) * (b[k] - x[k]);
+          H += (x[k] - a[k]) * (b[k] - x[k]);
+        }
+        if (E <= D && X <= D && H < 0) ++porteurs;
+        if (H > 0) {
+          ++w2;
+          if ((i128)4 * H * H > (i128)E * X) ++w3;
+          if ((i128)3 * H * H > (i128)E * X) ++w4;
+        }
+      }
+    std::printf("anneau points=%lld carriers=%lld W2=%lld W3=%lld W4=%lld\n",
+                pts_anneau, porteurs, w2, w3, w4);
+    // Le tetraedre regulier, en entiers quadruples pour eviter les fractions :
+    // `c0 = (2/3,2/3,4/3)` donc `3 c0 = (2,2,4)`, et on compare
+    // `|3y - 3c0|^2` a `9 (|ab|/4)^2 = 9 D / 16`.
+    {
+      const i64 y3[3] = {6, 6, 0}, c3[3] = {2, 2, 4};  // `3y` et `3 c0`
+      i64 dd = 0;
+      for (int k = 0; k < 3; ++k) dd += (y3[k] - c3[k]) * (y3[k] - c3[k]);
+      const i64 Dt = 8;  // `|ab|^2` du tetraedre regulier
+      // `|y-c0|^2 > (|ab|/4)^2`  <=>  `16 dd > 9 Dt`
+      std::printf("tetra_regulier 16_dy2=%lld 9_D=%lld apex_hors_coeur=%d\n",
+                  (long long)(16 * dd), (long long)(9 * Dt), 16 * dd > 9 * Dt ? 1 : 0);
+      if (!(16 * dd > 9 * Dt)) {
+        std::fprintf(stderr, "PLANCHER : l'apex du tetraedre regulier serait dans le cœur\n");
+        return 3;
+      }
+    }
+    if (pts_anneau != 632 || porteurs != 632 || w2 != 0 || w3 != 0 || w4 != 0) {
+      std::fprintf(stderr, "PLANCHER : anneau %lld pts, %lld carriers, W4=%lld\n",
+                   pts_anneau, porteurs, w4);
+      return 3;
+    }
+    std::printf("contre_fixtures ancre_vivante_carriers=632 temoins_W4=0 "
+                "apex_hors_coeur=1 borne_O_h=REFUTEE\n");
+    return 0;
+  }
   if (!mode_oracle && !mode_sparse) {
-    std::fprintf(stderr, "REFUS : choisir --oracle ou --sparse\n");
+    std::fprintf(stderr, "REFUS : choisir --fixtures, --oracle ou --sparse\n");
     return 2;
   }
   // L'oracle est CUBIQUE en la masse des boites : `(2e+1)^9` triplets au pire.
