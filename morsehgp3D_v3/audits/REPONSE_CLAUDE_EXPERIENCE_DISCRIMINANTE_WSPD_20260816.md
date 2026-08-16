@@ -192,3 +192,70 @@ serait contredire Callahan-Kosaraju, et la lecture la plus probable reste que
 `n = 16 000` est toujours dans la transition, le rapport à `s^{3} n` valant
 `0,94` puis `1,17`. Le point `n = 32 000` à emprise fixe est en cours et
 tranchera. Je le verserai dès qu'il sera là, quelle que soit sa direction.
+
+---
+
+## 8. La matrice complète — `36` points, `4` familles, `3` tailles, `3` séparations
+
+Toutes les exécutions rendent `ecart=0` sur le ledger de masse : chaque
+partition couvre exactement `C(n,2)`.
+
+| famille | `s` | `n=8000` | `n=16000` | `n=32000` | exp. `8k→16k` | exp. `16k→32k` | rect/pt à `32k` | `d` estimé à `32k` |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| `eight_clusters` | `6` | `1 318 319` | `3 399 832` | `7 947 899` | `1.37` | `1.23` | `248.4` | `3.08` |
+| `eight_clusters` | `8` | `1 944 388` | `5 216 527` | `12 583 384` | `1.42` | `1.27` | `393.2` | `2.87` |
+| `eight_clusters` | `10` | `2 624 373` | `7 258 640` | `17 869 750` | `1.47` | `1.30` | `558.4` | `2.75` |
+| `scanline_single_pass` | `6` | `377 007` | `801 363` | `1 659 389` | `1.09` | `1.05` | `51.9` | `2.20` |
+| `scanline_single_pass` | `8` | `580 421` | `1 241 999` | `2 595 906` | `1.10` | `1.06` | `81.1` | `2.11` |
+| `scanline_single_pass` | `10` | `813 373` | `1 756 144` | `3 698 899` | `1.11` | `1.07` | `115.6` | `2.06` |
+| `terrain` | `6` | `621 946` | `1 506 898` | `3 591 439` | `1.28` | `1.25` | `112.2` | `2.63` |
+| `terrain` | `8` | `948 005` | `2 291 578` | `5 535 416` | `1.27` | `1.27` | `173.0` | `2.48` |
+| `terrain` | `10` | `1 312 284` | `3 163 428` | `7 720 807` | `1.27` | `1.29` | `241.3` | `2.38` |
+| `uniform` | `6` | `2 440 769` | `5 545 073` | `12 616 686` | `1.18` | `1.19` | `394.3` | `3.34` |
+| `uniform` | `8` | `3 957 383` | `9 473 939` | `22 247 725` | `1.26` | `1.23` | `695.2` | `3.15` |
+| `uniform` | `10` | `5 669 146` | `14 198 380` | `34 435 529` | `1.32` | `1.28` | `1076.1` | `3.03` |
+
+### Ce que la matrice établit
+
+**Le comportement est bien celui d'un WSPD.** La dimension estimée à
+`n = 32 000`, `d = log(\text{rect}/n) / log(s)`, converge vers la dimension
+géométrique quand `s` croît — `3,34 -> 3,15 -> 3,03` pour `uniform`,
+`2,20 -> 2,11 -> 2,06` pour `scanline`. Le biais à petit `s` vient d'un terme
+additif : le modèle est `\text{rect}/n \approx A + B s^{d}`, pas `s^{d}` pur.
+
+**Seule `scanline_single_pass` est convergée** : exposant `1,05` à `1,07`, et
+`51,9` à `115,6` rectangles par point selon `s`. C'est la famille de plus basse
+dimension effective, `d = 2,06`.
+
+**Les trois autres ne le sont pas à `32 000`**, et l'exposant **croît avec `s`** :
+
+```text
+uniform          1,19  1,23  1,28   (s = 6, 8, 10)
+eight_clusters   1,23  1,27  1,30
+terrain          1,25  1,27  1,29
+```
+
+C'est cohérent avec une transition non terminée : le régime asymptotique exige
+`n \gg s^{d}`, et à `s = 10` en dimension `3` cela fait `n \gg 1000`, soit un
+rapport de `32` seulement à `n = 32 000`. `eight_clusters` et `uniform` montrent
+d'ailleurs une décroissance de l'exposant entre les deux doublements — `1,47`
+puis `1,30`, `1,32` puis `1,28` — donc une convergence lente. `terrain` seul
+reste **plat à `1,27`** sur les deux doublements, et c'est le cas que je ne sais
+pas expliquer.
+
+### Le fait pratique, qui ne dépend d'aucune de ces subtilités
+
+À `n = 32 000`, `s = 8` :
+
+| famille | rectangles | par point |
+|---|---:|---:|
+| `uniform` | `22 247 725` | `695,2` |
+| `eight_clusters` | `12 583 384` | `393,2` |
+| `terrain` | `5 535 416` | `173,0` |
+| `scanline_single_pass` | `2 595 906` | `81,1` |
+
+Contre `656 652` arêtes q2 vivantes. Le rapport va de `4` sur `scanline` à `34`
+sur `uniform`, et corriger la scission par diamètre l'améliore de `16` à `28 %`
+sans changer l'ordre de grandeur.
+
+Données brutes : `audits/donnees/wspd_rampe_20260816.txt`.

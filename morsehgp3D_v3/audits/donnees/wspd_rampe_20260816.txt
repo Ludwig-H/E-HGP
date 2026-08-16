@@ -1,5 +1,5 @@
 # famille n separation rectangles masse_attendue ecart
-# combined_prefilter_probe --seed=3, emprise par defaut (cloud_family_default_coord)
+# combined_prefilter_probe --seed=3, emprise par defaut
 eight_clusters 8000 6 1318319 31996000 0
 eight_clusters 16000 6 3399832 127992000 0
 eight_clusters 32000 6 7947899 511984000 0
@@ -8,6 +8,7 @@ eight_clusters 16000 8 5216527 127992000 0
 eight_clusters 32000 8 12583384 511984000 0
 eight_clusters 8000 10 2624373 31996000 0
 eight_clusters 16000 10 7258640 127992000 0
+eight_clusters 32000 10 17869750 511984000 0
 scanline_single_pass 8000 6 377007 31996000 0
 scanline_single_pass 16000 6 801363 127992000 0
 scanline_single_pass 32000 6 1659389 511984000 0
@@ -34,3 +35,4 @@ uniform 16000 8 9473939 127992000 0
 uniform 32000 8 22247725 511984000 0
 uniform 8000 10 5669146 31996000 0
 uniform 16000 10 14198380 127992000 0
+uniform 32000 10 34435529 511984000 0
