@@ -21,7 +21,8 @@ réserve 3 de l'audit positif est levée pour ces mesures-là.
 | `terrain` | `16 000` | `667 449` | `667 449` | `667 449` |
 | `terrain` | `32 000` | `1 440 227` | `1 440 227` | `1 440 227` |
 | `uniform` | `8 000` | `879 078` | `879 078` | `879 078` |
-| `uniform` | `32 000` | `3 852 997` | `3 852 997` | — |
+| `uniform` | `16 000` | `1 848 814` | `1 848 814` | `1 848 814` |
+| `uniform` | `32 000` | `3 852 997` | `3 852 997` | `3 852 997` |
 | `eight_clusters` | `8 000` | `980 606` | `980 606` | `980 606` |
 | `eight_clusters` | `16 000` | `2 167 153` | `2 167 153` | `2 167 153` |
 | `eight_clusters` | `32 000` | `4 693 975` | `4 693 975` | `4 693 975` |
@@ -79,8 +80,20 @@ Gain relatif à `s=8` : `-21,9 / -19,0 / -26,6 %` pour `s=10`, et
 `-34,4 / -33,6 / -40,7 %` pour `s=12`. **Deux à quatre fois `terrain`**, et le
 gain croît avec `n` sur les deux séparations.
 
-`uniform` se place entre les deux — `-11,4 / -12,2 / -12,5 %` pour `s=10`,
-`-17,4 %` pour `s=12` à `n=8 000` — avec une remarquable stabilité en `n`.
+`uniform` se place entre les deux, et c'est la seule famille **invariante
+d'échelle** :
+
+| `n` | `s=8` | `s=10` | `s=12` | mou `s=12` |
+| ---: | ---: | ---: | ---: | ---: |
+| `8 000` | `1 174 570` | `1 040 476` | `969 838` | `1,103` |
+| `16 000` | `2 487 216` | `2 182 565` | `2 035 180` | `1,101` |
+| `32 000` | `5 237 191` | `4 582 296` | `4 265 152` | `1,107` |
+
+Gain `-11,4 / -12,2 / -12,5 %` pour `s=10` et `-17,4 / -18,2 / -18,6 %` pour
+`s=12` : trois chiffres presque identiques sur un facteur quatre en taille. Le
+mou y vaut `1,10` aux trois tailles, à un millième près. C'est exactement ce que
+prédit le régime de Poisson homogène à densité fixe — et c'est la famille où le
+calcul de Campbell--Mecke de l'auditeur devrait donner sa constante.
 
 ## 3bis. Où le travail de certificat est fini, et où il ne l'est pas
 
@@ -88,11 +101,11 @@ Le mou à `s=12` sépare nettement les trois familles :
 
 | famille | mou `s=8` | mou `s=12` | résiduel encore retirable |
 | --- | ---: | ---: | ---: |
-| `uniform` (`n=8 000`) | `1,336` | `1,103` | `9,3 %` |
+| `uniform` (`n=32 000`) | `1,359` | `1,107` | `9,7 %` |
 | `terrain` (`n=32 000`) | `1,576` | `1,311` | `23,7 %` |
 | `eight_clusters` (`n=32 000`) | `3,575` | `2,120` | `52,8 %` |
 
-Sur `uniform`, un certificat parfait ne gagnerait plus que `9,3 %` du résiduel :
+Sur `uniform`, un certificat parfait ne gagnerait plus que `9,7 %` du résiduel :
 le travail de certificat y est **terminé**. Sur `eight_clusters` il en reste
 `52,8 %` même à `s=12`, et le mou y croît toujours avec `n` (`2,638` à `8 000`,
 `3,575` à `32 000` pour `s=8`). C'est la seule des trois familles où un
@@ -117,8 +130,7 @@ tailles.
 ## 5. Ce qui reste dû
 
 Le temps du préfiltre seul, aux vingt-sept configurations — c'est lui qui
-arbitre, et il tourne. Les colonnes `s=12` d'`uniform` à `n=16 000` et
-`n=32 000`. Les familles `scanline_single_pass`, `scanline_overlap_multiecho` et
+arbitre, et il tourne. Les familles `scanline_single_pass`, `scanline_overlap_multiecho` et
 `two_lines`, désormais acceptées par le probe mais absentes de cette campagne.
 Et le coût d'instruction d'une ancre à ces tailles, sans lequel aucun arbitrage
 de `s` n'est décidable.
