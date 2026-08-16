@@ -251,6 +251,86 @@ dans `pair_frame_probe`, pas dans le vieux probe, pour la même raison.
 
 ---
 
+## 8 bis. L'arbitrage `9739e3c`, reçu et appliqué
+
+Il est arrivé pendant que j'écrivais. Quatre points m'ont fait corriger du code
+déjà écrit, dont un défaut de **sûreté** dans l'ABI que je venais de publier.
+
+### 8 bis.1 Le majorant saturé est un piège — § 3.3
+
+Vous avez raison, et je ne l'avais pas vu. Saturer `lower` est sûr : un état qui
+atteint `h_q` est terminal, il n'en redescend jamais. Saturer `upper` ne l'est
+pas. Vrai majorant `100`, écrêté à `10` ; la masse chute de `5`, vrai majorant
+`95`, valeur maintenue `10 - 5 = 5 < h` — **`CORE_CLEAR` est déclaré sur un bloc
+dont une paire atteint le seuil**. C'est une perte de support, pas une
+inefficacité.
+
+`CoreDepthLedger` porte donc désormais votre champ :
+
+```text
+uint8_t  lower_open_sat
+uint32_t frontier_candidate_mass_exact
+upper_open_sat() = min(h_q, lower_open_sat + frontier_candidate_mass_exact)
+```
+
+Le majorant est **dérivé, jamais stocké**. Et la faute est devenue un mutant,
+`upper-sature-incremental`, qui maintient l'écrêté de façon incrémentale : il
+meurt sur le juge de résultat et sur la reprise croisée, **jamais** sur les
+fixtures ni sur l'ABI exhaustive, parce que la faute n'apparaît qu'au *maintien*.
+C'est le sixième mutant, et le premier que je n'aurais pas trouvé seul.
+
+### 8 bis.2 Le second rescan quadratique — § 2
+
+Reçu, et il n'était déjà pas dans `pair_frame_probe` : `lower`, la masse
+candidate, la largeur et le nombre de spans sont maintenus **incrémentalement**
+à chaque scission — retrait de `m(C)`, ajout de `m(D)` par enfant selon sa
+classe. Aucun `for (h : frontiere) mf += population(h)`. C'est ce qui fait
+tomber le travail de `22 336` à `1 333` unités sur `prefixe`, indépendamment du
+sélecteur.
+
+### 8 bis.3 Les buckets ne sont pas dans l'ABI de preuve — § 4.2
+
+Ils vivent dans l'état de la sonde, jamais dans `CoreDepthLedger` ni dans
+`CoreContinuation`, qui ne portent que des spans plats. Votre gate forte est
+armée :
+
+```text
+caper sous A -> reprendre sous B == non capé sous C
+```
+
+`mhgp3v_pairframe_reprise_politique_croisee_*`, huit couples `(capture,
+reprise)` — `buckets`/`plus-gros`, `buckets`/`feuilles`, `plus-petit`/`buckets`,
+`premier`/`buckets`, `feuilles`/`buckets` — sur quatre familles, `ecart=0`
+partout. `policy_version` est enregistré dans le record mais n'entre ni dans la
+correction ni dans la sémantique : la porte le prouve en reprenant sous une
+autre.
+
+### 8 bis.4 Le raffinement par lot — § 5
+
+`PolitiqueV0::witness_batch` autorise `SPLIT_WITNESS_BATCH(état, spans[0:B])`,
+avec `B = 0` pour « tous les mixtes ». Deux des huit couples croisés capturent à
+`B = 4` et `B = 8`, et la porte exige `lot_max_global >= 2` : sans lot
+strictement supérieur à un, le champ serait certifié par vacuité.
+
+Votre lemme est celui que j'utilise : les parents d'une antichaîne sont deux à
+deux incomparables, donc les remplacer simultanément préserve l'antichaîne, la
+partition de masse et `L <= N <= U`, sans dépendre d'aucun ordre.
+
+### 8 bis.5 Les résidus du § 8
+
+`U4_closed` est devenu `U4_open` et `kActiveAll` est devenu
+`kAllCarrierCoreClear`. Le premier nom évoquait la boule fermée et le shell
+alors qu'il ne borne que le compte dans le fuseau **ouvert** — c'était la porte
+d'entrée du raisonnement « `CORE_CLEAR` donc vivant ». Les commentaires portent
+maintenant la distinction.
+
+Restent ouverts, et je ne les revendique pas : la fusion de `pending` et
+`cap_hits` dans un type de continuation commun **côté vieux probe** (§ 8.6), et
+`NONE_W3`/`NONE_W4` (§ 7), que je place après q2 de bout en bout comme votre
+séquence du § 7 le propose.
+
+---
+
 ## 9. Deux questions
 
 **Q1 — le cap de tuile et la lane.** J'ai posé `exact_tile_cap` sur

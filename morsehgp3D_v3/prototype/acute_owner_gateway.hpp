@@ -310,7 +310,12 @@ inline bool bloc_aucun_w2(const Extrema& e) { return e.phi_min >= 0; }
 enum class VerdictConjoint {
   kDeadW4,          // `L4_open >= r4` : toutes les paires du bloc sont mortes
   kDeadNoCarrier,   // le gateway aigu tue : aucun porteur possible
-  kActiveAll,       // `U4_closed < r4` ET `ALL_STRICT` : bloc entierement actif
+  // `U4_open < r4` ET `ALL_STRICT`. LE NOM EST QUALIFIE PAR L'ARBITRAGE
+  // `9739e3c` § 8.2 : `ACTIVE_ALL` laissait croire a une vivacite exacte. Ce
+  // verdict dit deux choses et deux seulement — tout le bloc porte un carrier,
+  // et le cœur UNIVERSEL `W_q` n'y tue personne. Pour q3/q4 le census de la
+  // vraie circumboule reste entier ; seul q2 identifie fuseau et miniboule.
+  kAllCarrierCoreClear,
   kMixed
 };
 
@@ -318,27 +323,31 @@ inline const char* verdict_conjoint_nom(VerdictConjoint v) {
   switch (v) {
     case VerdictConjoint::kDeadW4: return "DEAD_W4";
     case VerdictConjoint::kDeadNoCarrier: return "DEAD_NO_CARRIER";
-    case VerdictConjoint::kActiveAll: return "ACTIVE_ALL";
+    case VerdictConjoint::kAllCarrierCoreClear: return "ALL_CARRIER_CORE_CLEAR";
     case VerdictConjoint::kMixed: return "MIXED";
   }
   return "?";
 }
 
 // `L4_open` : IDs universellement interieurs a `W_4` pour TOUTE paire du bloc.
-// `U4_closed` : `L4_open` plus la frontiere encore indecise — le majorant.
+// `U4_open` : `L4_open` plus la frontiere encore indecise — le majorant OUVERT.
+// Il s'appelait `U4_closed`, ce qui evoquait la boule FERMEE et le shell ; or il
+// ne borne que le compte dans le fuseau ouvert. Le shell d'une circumboule est
+// une notion de census, pas de cœur universel, et confondre les deux etait la
+// porte d'entree du raisonnement « `CORE_CLEAR` donc vivant ».
 //
 // LA CONJONCTION NE SE SEPARE PAS, et c'est le point de la section 3.1 : « il
 // existe une paire vivante » et « il existe une paire portant un carrier »
 // peuvent etre realisees par des paires DIFFERENTES. `ACTIVE_ALL` exige donc les
 // deux pour TOUTES les paires du bloc a la fois, pas leur simple coexistence.
 inline VerdictConjoint classifie_conjoint(const Extrema& e, long long L4_open,
-                                          long long U4_closed, int r4,
+                                          long long U4_open, int r4,
                                           GwMutant mu = GwMutant::kNone) {
   if (L4_open >= r4) return VerdictConjoint::kDeadW4;
   const Verdict v = classifie(e, mu);
   if (v == Verdict::kDeadPhi || v == Verdict::kDeadOwnerE || v == Verdict::kDeadOwnerX)
     return VerdictConjoint::kDeadNoCarrier;
-  if (v == Verdict::kAllStrict && U4_closed < r4) return VerdictConjoint::kActiveAll;
+  if (v == Verdict::kAllStrict && U4_open < r4) return VerdictConjoint::kAllCarrierCoreClear;
   return VerdictConjoint::kMixed;
 }
 

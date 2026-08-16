@@ -961,7 +961,7 @@ int main(int argc, char** argv) {
       if (v == Verdict::kDeadPhi) { ++g.dead_phi; continue; }
       if (v == Verdict::kDeadOwnerE) { ++g.dead_e; continue; }
       if (v == Verdict::kDeadOwnerX) { ++g.dead_x; continue; }
-      if (vc == VerdictConjoint::kActiveAll) {
+      if (vc == VerdictConjoint::kAllCarrierCoreClear) {
         // `ActiveOwnerEdgeBlock` : ni `PairId`, ni face materialisee.
         ++g.active_edge;
       }

@@ -4996,9 +4996,9 @@ set_tests_properties(mhgp3v_pairframe_abi_exhaustif PROPERTIES
 # deux octets au lieu de deux entiers dependant de `n`. Le plancher exige des
 # comptes bruts au-dela de `255`, sinon la troncature a huit bits survivrait.
 add_test(NAME mhgp3v_pairframe_saturation
-  COMMAND mhgp3v_pair_frame_probe --saturation --min-grands=72)
+  COMMAND mhgp3v_pair_frame_probe --saturation --min-grands=228)
 set_tests_properties(mhgp3v_pairframe_saturation PROPERTIES
-  PASS_REGULAR_EXPRESSION "abi saturation cas=540 grands=72 desaccords=0")
+  PASS_REGULAR_EXPRESSION "abi saturation cas=540 grands=228 desaccords=0")
 
 # Le juge par famille, caps etrangles pour que les continuations existent, et
 # reprise PAR LES OCTETS : rien de l'etat en memoire ne survit au cap.
@@ -5008,21 +5008,21 @@ add_test(NAME mhgp3v_pairframe_descente_prefixe
           --min-pending=1 --min-reprises=1 --min-scissions=1 --min-morts=1 --min-vivantes=1)
 set_tests_properties(mhgp3v_pairframe_descente_prefixe PROPERTIES
   PASS_REGULAR_EXPRESSION
-  "pending_state_count=9 pending_pair_mass=9 pending_span_count=27 resume_count=1 continuation_octets=540(.|\n)*morts=26 vivantes=38 ecart=0")
+  "pending_state_count=9 pending_pair_mass=9 pending_span_count=27 resume_count=1 continuation_octets=603(.|\n)*morts=26 vivantes=38 ecart=0")
 add_test(NAME mhgp3v_pairframe_descente_aleatoire
   COMMAND mhgp3v_pair_frame_probe --descente --famille=aleatoire --paires=64
           --temoins=16 --seuil=10 --cap=2 --front-cap=3 --reprise=octets
           --min-pending=1 --min-reprises=1 --min-scissions=1 --min-morts=1 --min-vivantes=1)
 set_tests_properties(mhgp3v_pairframe_descente_aleatoire PROPERTIES
   PASS_REGULAR_EXPRESSION
-  "pending_state_count=55 pending_pair_mass=55 pending_span_count=165 resume_count=1 continuation_octets=3300(.|\n)*morts=21 vivantes=43 ecart=0")
+  "pending_state_count=55 pending_pair_mass=55 pending_span_count=165 resume_count=1 continuation_octets=3685(.|\n)*morts=21 vivantes=43 ecart=0")
 add_test(NAME mhgp3v_pairframe_descente_damier
   COMMAND mhgp3v_pair_frame_probe --descente --famille=damier --paires=64
           --temoins=16 --seuil=10 --cap=2 --front-cap=3 --reprise=octets
           --min-pending=1 --min-reprises=1 --min-scissions=1 --min-morts=1 --min-vivantes=1)
 set_tests_properties(mhgp3v_pairframe_descente_damier PROPERTIES
   PASS_REGULAR_EXPRESSION
-  "pending_state_count=20 pending_pair_mass=20 pending_span_count=60 resume_count=1 continuation_octets=1200(.|\n)*morts=44 vivantes=20 ecart=0")
+  "pending_state_count=20 pending_pair_mass=20 pending_span_count=60 resume_count=1 continuation_octets=1340(.|\n)*morts=44 vivantes=20 ecart=0")
 
 # LA CONTRE-FAMILLE DE TRAVAIL (G3 du contre-audit) : un temoin sur deux est
 # vrai avec une phase qui depend de la paire, donc AUCUN sous-arbre n'est jamais
@@ -5145,13 +5145,13 @@ mhgp3v_add_expected_code_test_for(mhgp3v_pair_frame_probe
   --inject=sature-tronque)
 mhgp3v_add_expected_code_test_for(mhgp3v_pair_frame_probe
   mhgp3v_pairframe_mutant_sature_tronque "MUTANT TUE" 4
-  --saturation --min-grands=72 --inject=sature-tronque)
+  --saturation --min-grands=228 --inject=sature-tronque)
 mhgp3v_add_expected_code_test_for(mhgp3v_pair_frame_probe
   mhgp3v_pairframe_mutant_pruned_large "la mort a l'egalite est perdue" 4
   --fixtures --inject=pruned-large)
 mhgp3v_add_expected_code_test_for(mhgp3v_pair_frame_probe
   mhgp3v_pairframe_mutant_pruned_large_saturation "MUTANT TUE" 4
-  --saturation --min-grands=72 --inject=pruned-large)
+  --saturation --min-grands=228 --inject=pruned-large)
 mhgp3v_add_expected_code_test_for(mhgp3v_pair_frame_probe
   mhgp3v_pairframe_mutant_cap_avant_verdict "TERMINAL et fate_terminal divergent" 4
   --exhaustif --min-par-action=400 --inject=cap-avant-verdict)
@@ -5160,6 +5160,59 @@ mhgp3v_add_expected_code_test_for(mhgp3v_pair_frame_probe
   "plancher de fermetures universelles non atteint" 4
   --descente --famille=pleine --paires=64 --temoins=16 --seuil=10 --cap=4096
   --min-pruned=1 --max-tuiles=0 --inject=cap-avant-verdict)
+
+# ---------------------------------------------------------------------------
+# LA REPRISE CROISEE, § 4.2 de l'arbitrage `9739e3c`, dans sa forme forte :
+#
+#   caper sous la politique A -> reprendre sous la politique B
+#   == non cape sous la politique C
+#
+# Huit couples (capture, reprise) — `buckets`/`plus-gros`, `buckets`/`feuilles`,
+# `plus-petit`/`buckets`, `premier`/`buckets`, `feuilles`/`buckets` — plus deux
+# couples a LOT de temoins quatre et huit. Si cette porte passe, une politique
+# ne peut pas s'etre glissee dans l'ABI de preuve sans qu'on s'en apercoive :
+# un record qui dependrait de la politique qui l'a produit ne se reprendrait pas
+# sous une autre.
+#
+# `lot_max_global >= 2` est exige : sans lot strictement superieur a un,
+# `SPLIT_WITNESS_BATCH` ne serait qu'un champ d'ABI jamais exerce, et la porte
+# le certifierait par vacuite. Le lemme du § 5 de l'arbitrage est sûr parce que
+# les parents d'une antichaine sont deux a deux incomparables — les remplacer
+# simultanement preserve l'antichaine, la partition de masse et `L <= N <= U`,
+# sans dependre d'aucun ordre.
+foreach(fam prefixe aleatoire damier adversaire)
+  add_test(NAME mhgp3v_pairframe_reprise_politique_croisee_${fam}
+    COMMAND mhgp3v_pair_frame_probe --reprise-croisee --famille=${fam} --paires=64
+            --temoins=16 --seuil=10)
+  set_tests_properties(mhgp3v_pairframe_reprise_politique_croisee_${fam} PROPERTIES
+    PASS_REGULAR_EXPRESSION
+    "abi croisee nb=8 divergences=0 pending_total=[1-9][0-9]* reprises_total=[1-9] lot_max_global=8")
+endforeach()
+
+# LE MAJORANT SATURE EST UN PIEGE, ET C'EST UNE FAUTE DE SURETE.
+#
+# Saturer `lower` est sûr : un etat qui atteint `h_q` est terminal, il n'en
+# redescend jamais. Saturer `upper` ne l'est pas. Vrai majorant `100`, ecrete a
+# `10` ; la masse chute de `5`, vrai majorant `95`, valeur maintenue `5 < h` —
+# `CORE_CLEAR` est declare sur un bloc dont une paire atteint le seuil.
+#
+# D'ou l'ABI : `CoreDepthLedger` porte `frontier_candidate_mass_exact` sur
+# trente-deux bits et DERIVE `upper_open_sat = min(h_q, lower_open_sat + masse)`.
+# Le mutant maintient au contraire l'ecrete de facon incrementale ; il meurt sur
+# le juge de resultat, jamais sur les fixtures ni sur l'ABI exhaustive, parce
+# que la faute n'apparait qu'au MAINTIEN.
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_frame_probe
+  mhgp3v_pairframe_mutant_upper_sature_incremental "MUTANT TUE" 4
+  --politiques --famille=adversaire --paires=64 --temoins=16 --seuil=10
+  --inject=upper-sature-incremental)
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_frame_probe
+  mhgp3v_pairframe_mutant_upper_sature_croisee "MUTANT TUE" 4
+  --reprise-croisee --famille=prefixe --paires=64 --temoins=16 --seuil=10
+  --inject=upper-sature-incremental)
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_frame_probe
+  mhgp3v_pairframe_mutant_upper_sature_256 "la descente contredit la force brute" 4
+  --descente --famille=adversaire --paires=32 --temoins=256 --seuil=10 --cap=8
+  --inject=upper-sature-incremental)
 
 # Les refus avant tout calcul.
 mhgp3v_add_expected_code_test_for(mhgp3v_pair_frame_probe
@@ -5184,6 +5237,8 @@ mhgp3v_add_expected_code_test_for(mhgp3v_pair_frame_probe
   --descente --temoins=12)
 mhgp3v_add_expected_code_test_for(mhgp3v_pair_frame_probe
   mhgp3v_pairframe_refus_mutant "mutant inconnu" 2 --fixtures --inject=inexistant)
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_frame_probe
+  mhgp3v_pairframe_refus_lot "lot de temoins hors de" 2 --descente --lot=9999)
 
 add_executable(mhgp3v_combined_prefilter_probe prototype/combined_prefilter_probe.cpp)
 target_include_directories(mhgp3v_combined_prefilter_probe PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

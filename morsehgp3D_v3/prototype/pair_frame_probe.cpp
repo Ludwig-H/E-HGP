@@ -184,6 +184,7 @@ struct Compteurs {
   long long frontier_span_count_peak = 0, frontier_candidate_mass_peak = 0;
   long long pending_state_count = 0, pending_pair_mass = 0, pending_span_count = 0;
   long long resume_count = 0, etats = 0, spans_elimines = 0;
+  long long witness_batches = 0, witness_batch_max = 0;
   long long pruned = 0, clear = 0;
   long long continuation_octets = 0;
 };
@@ -207,6 +208,7 @@ struct Etat {
   std::vector<std::vector<int>> buckets;  // mixtes non-feuilles, par `floor(log2)`
   std::uint32_t masque = 0;
   long long lower = 0, upper = 0;
+  long long upper_sat_incr = -1;      // le majorant ecrete que le mutant maintient
   long long largeur = 0;              // `frontier_span_count`
   long long masse_candidate = 0;      // `frontier_candidate_mass`
   long long iterations = 0;
@@ -270,6 +272,10 @@ void retire_du_bucket(Etat& e, int b, int n) {
   --e.largeur;
   e.masse_candidate -= taille(n);
   e.upper -= taille(n);
+  // LA FAUTE DU § 3.3, EXECUTEE. Le mutant decremente un majorant DEJA ECRETE
+  // au lieu de recalculer depuis la masse exacte ; c'est le seul endroit ou
+  // elle peut se produire, et elle est de surete.
+  if (e.upper_sat_incr >= 0) e.upper_sat_incr -= taille(n);
 }
 
 void scinde_temoin(Etat& e, int n, int b) {
@@ -281,6 +287,37 @@ void scinde_temoin(Etat& e, int n, int b) {
   ++g_c.witness_splits;
 }
 
+// SPLIT_WITNESS_BATCH. Les parents choisis sont deux a deux incomparables — ils
+// appartiennent a une antichaine —, donc les remplacer simultanement preserve
+// l'antichaine, la partition de masse et l'invariant `L <= N <= U`, sans
+// dependre d'aucun ordre. `B = 0` signifie « tous les mixtes non-feuilles ».
+long long scinde_lot(Etat& e, const std::string& heur, std::uint32_t B,
+                     std::uint64_t front_cap) {
+  std::vector<std::pair<int, int>> lot;  // (nœud, bucket)
+  if (heur == "buckets" && B == 1) {
+    int b = -1;
+    const int n = selectionne(e, heur, &b);
+    if (n < 0) return 0;
+    lot.push_back(std::make_pair(n, b));
+  } else {
+    g_c.selector_scan_items += (heur == "buckets") ? 1 : e.largeur;
+    for (int b = 15; b >= 0; --b)
+      for (std::size_t i = 0; i < e.buckets[(std::size_t)b].size(); ++i) {
+        if (B != 0 && lot.size() >= (std::size_t)B) break;
+        lot.push_back(std::make_pair(e.buckets[(std::size_t)b][i], b));
+      }
+  }
+  long long faits = 0;
+  for (std::size_t i = 0; i < lot.size(); ++i) {
+    if ((std::uint64_t)(e.largeur + 1) > front_cap && faits > 0) break;
+    scinde_temoin(e, lot[i].first, lot[i].second);
+    ++faits;
+  }
+  ++g_c.witness_batches;
+  if (faits > g_c.witness_batch_max) g_c.witness_batch_max = faits;
+  return faits;
+}
+
 // L'HERITAGE SOUS RAFFINEMENT D'EXTREMITE. Un span `ALL` reste `ALL` et un span
 // `NONE` reste `NONE` quand `P` retrecit — c'est le theoreme de monotonie. Seuls
 // les mixtes sont reclassifies, et c'est exactement l'economie que le theoreme
@@ -288,6 +325,7 @@ void scinde_temoin(Etat& e, int n, int b) {
 Etat restreint(const Etat& e, int p0, int p1) {
   Etat r;
   r.p0 = p0; r.p1 = p1;
+  r.upper_sat_incr = e.upper_sat_incr;  // l'ecrete se propage : la faute aussi
   for (std::size_t i = 0; i < e.spans_all.size(); ++i) r.ajoute(e.spans_all[i], kAll);
   for (std::size_t i = 0; i < e.mixtes_feuilles.size(); ++i) {
     ++g_c.reclassifications;
@@ -319,7 +357,9 @@ std::vector<std::uint8_t> serialise(const Etat& e, const CoreContinuation& k) {
   ecrire32(b, (std::uint32_t)k.a_node);
   ecrire32(b, (std::uint32_t)k.b_node);
   b.push_back(k.lane); b.push_back(k.threshold);
-  b.push_back(k.lower_open_sat); b.push_back(k.upper_open_sat);
+  b.push_back(k.lower_open_sat);
+  ecrire32(b, k.frontier_candidate_mass_exact);
+  ecrire32(b, k.schema_version);
   ecrire32(b, k.policy_version);
   ecrire32(b, k.cloud_epoch);
   ecrire32(b, (std::uint32_t)(k.pair_mass & 0xffffffffu));
@@ -343,7 +383,9 @@ Etat deserialise(const std::vector<std::uint8_t>& b, CoreContinuation& k) {
   k.a_node = (int)lire32(b, o);
   k.b_node = (int)lire32(b, o);
   k.lane = b[o++]; k.threshold = b[o++];
-  k.lower_open_sat = b[o++]; k.upper_open_sat = b[o++];
+  k.lower_open_sat = b[o++];
+  k.frontier_candidate_mass_exact = lire32(b, o);
+  k.schema_version = lire32(b, o);
   k.policy_version = lire32(b, o);
   k.cloud_epoch = lire32(b, o);
   { const std::uint64_t lo = lire32(b, o); const std::uint64_t hi = lire32(b, o);
@@ -370,7 +412,14 @@ struct Sortie {
 
 Sortie descente(int h, std::uint64_t cap, std::uint64_t front_cap,
                 long long budget_temoins, const std::string& heur,
-                bool cap_sur_masse, bool via_octets) {
+                bool cap_sur_masse, bool via_octets,
+                std::uint32_t lot_temoins = 1, int politique_id = 1,
+                const std::string& heur_reprise = std::string()) {
+  // LA REPRISE PEUT CHANGER DE POLITIQUE. Une continuation capee sous une
+  // politique doit se reprendre sous une AUTRE et rendre les memes identites :
+  // c'est le § 4.2 de l'arbitrage, et c'est ce qui interdit a la bucketisation
+  // d'entrer dans l'ABI de preuve. `heur_courante` bascule des la vague 2.
+  std::string heur_courante = heur;
   Sortie s;
   s.dec.assign((std::size_t)g_nP, -1);
   std::vector<Etat> vague, suivante;
@@ -406,7 +455,12 @@ Sortie descente(int h, std::uint64_t cap, std::uint64_t front_cap,
 
         CoreDepthLedger L;
         L.reject_threshold = (std::uint8_t)h;
-        L.sature(e.lower, e.upper, g_mu);
+        L.sature(e.lower, e.upper - e.lower, g_mu);
+        if (g_mu == PfMutant::kUpperSatureIncr) {
+          if (e.upper_sat_incr < 0)  // premiere vue : on ecrete, et c'est la faute
+            e.upper_sat_incr = (e.upper > h) ? h : e.upper;
+          L.upper_sat_mutant = (std::uint8_t)(e.upper_sat_incr < 0 ? 0 : e.upper_sat_incr);
+        }
         L.frontier_width = (std::uint32_t)e.largeur;  // scalaire : aucun `O(F)` par vague
         PairFrame F;
         F.rect_id = 0; F.a_node = 0; F.b_node = 0;
@@ -415,6 +469,7 @@ Sortie descente(int h, std::uint64_t cap, std::uint64_t front_cap,
         pol.exact_tile_cap = cap_v;
         pol.frontier_cap = front_cap_v;
         pol.cap_sur_masse_seule = cap_sur_masse;
+        pol.witness_batch = lot_temoins;
         pol.witness_budget_available = (budget > 0);
 
         ++g_c.terminal_checks;
@@ -467,8 +522,10 @@ Sortie descente(int h, std::uint64_t cap, std::uint64_t front_cap,
           CoreContinuation k;
           k.rect_id = F.rect_id; k.a_node = F.a_node; k.b_node = F.b_node;
           k.lane = 4; k.threshold = (std::uint8_t)h;
-          k.lower_open_sat = L.lower_open_sat; k.upper_open_sat = L.upper_open_sat;
-          k.policy_version = 1; k.cloud_epoch = 1; k.pair_mass = F.pair_mass;
+          k.lower_open_sat = L.lower_open_sat;
+          k.frontier_candidate_mass_exact = L.frontier_candidate_mass_exact;
+          k.policy_version = politique_id; k.schema_version = 1;
+          k.cloud_epoch = 1; k.pair_mass = F.pair_mass;
           const std::vector<std::uint8_t> octets = serialise(e, k);
           g_c.continuation_octets += (long long)octets.size();
           if (via_octets) {
@@ -517,32 +574,15 @@ Sortie descente(int h, std::uint64_t cap, std::uint64_t front_cap,
         }
 
         if (a == Action::kSplitWitness) {
-          if (heur == "feuilles") {
-            // Terme de comparaison G1 : tous les mixtes non-feuilles d'un coup.
-            g_c.selector_scan_items += e.largeur;
-            std::vector<int> a_scinder;
-            for (int b = 0; b < 16; ++b)
-              for (std::size_t i = 0; i < e.buckets[(std::size_t)b].size(); ++i)
-                a_scinder.push_back(e.buckets[(std::size_t)b][i]);
-            long long faits = 0;
-            for (std::size_t i = 0; i < a_scinder.size(); ++i) {
-              const int n = a_scinder[i];
-              if ((std::uint64_t)(e.largeur + 1) > front_cap_v && faits > 0) break;
-              scinde_temoin(e, n, bucket_de(taille(n)));
-              ++faits;
-            }
-            budget -= faits;
-            continue;
-          }
-          int b = -1;
-          const int n = selectionne(e, heur, &b);
-          if (n < 0) {
+          // Terme de comparaison G1 : `feuilles` est le lot de taille infinie.
+          const std::uint32_t B = (heur_courante == "feuilles") ? 0u : pol.witness_batch;
+          const long long faits = scinde_lot(e, heur_courante, B, front_cap_v);
+          if (faits <= 0) {
             s.faute = 3;
             s.diag = "SPLIT_WITNESS sans span mixte non-feuille : l'ABI ment sur son etat";
             return s;
           }
-          scinde_temoin(e, n, b);
-          --budget;
+          budget -= faits;
           continue;
         }
 
@@ -559,6 +599,7 @@ Sortie descente(int h, std::uint64_t cap, std::uint64_t front_cap,
       ++g_c.resume_count;
       cap_v = cap_v * 2 + 1;
       front_cap_v = front_cap_v * 2 + 1;
+      if (!heur_reprise.empty()) heur_courante = heur_reprise;
     }
   }
 
@@ -618,7 +659,8 @@ int mode_exhaustif(long long min_par_action) {
                   CoreDepthLedger L;
                   L.reject_threshold = (std::uint8_t)h;
                   L.lower_open_sat = (std::uint8_t)lo;
-                  L.upper_open_sat = (std::uint8_t)up;
+                  L.frontier_candidate_mass_exact = (std::uint32_t)(up - lo);
+                  L.upper_sat_mutant = (std::uint8_t)up;  // identique hors maintien
                   L.frontier_width = (std::uint32_t)(1 + (im % 3));
                   PairFrame F; F.pair_mass = masses[im];
                   PolitiqueV0 p; p.exact_tile_cap = caps[ic];
@@ -673,9 +715,10 @@ int mode_saturation(long long min_grands) {
         if (up < lo) continue;
         CoreDepthLedger L;
         L.reject_threshold = (std::uint8_t)h;
-        L.sature(lo, up, g_mu);
+        L.sature(lo, up - lo, g_mu);           // le ledger prend la MASSE
+        L.upper_sat_mutant = (std::uint8_t)(up > h ? h : up);
         ++cas;
-        if (lo > 255) ++grands;
+        if (lo > 255 || up - lo > 255) ++grands;
         if (est_pruned(L, g_mu) != (lo >= h))
           return sortie(1, "la saturation a change la decision de mort");
         if (est_core_clear(L, g_mu) != (up < h))
@@ -696,9 +739,9 @@ struct Planchers {
 
 int mode_descente(int h, std::uint64_t cap, std::uint64_t front_cap, long long budget,
                   bool cap_sur_masse, bool octets, const std::string& heur,
-                  const Planchers& pl) {
+                  const Planchers& pl, std::uint32_t lot) {
   g_c = Compteurs();
-  Sortie s = descente(h, cap, front_cap, budget, heur, cap_sur_masse, octets);
+  Sortie s = descente(h, cap, front_cap, budget, heur, cap_sur_masse, octets, lot);
   if (s.faute) return sortie(s.faute, s.diag);
   const std::vector<int> vrai = juge(h);
   long long ecart = 0, morts = 0, vivantes = 0;
@@ -810,13 +853,71 @@ int mode_politiques(int h, long long min_ecart_travail, long long facteur_scan) 
 }
 
 // ---------------------------------------------------------------------------
+// LA PORTE DE REPRISE CROISEE, § 4.2 de l'arbitrage, dans sa forme forte :
+//
+//   caper sous la politique A
+//   reprendre sous la politique B
+//   == non cape sous la politique C
+//
+// Si cette porte passe, la bucketisation ne peut pas etre entree dans l'ABI de
+// preuve sans qu'on s'en apercoive : un record qui dependrait de la politique
+// qui l'a produit ne se reprendrait pas sous une autre.
+int mode_reprise_croisee(int h) {
+  struct Croisee { const char* a; const char* b; std::uint64_t cap, fcap; std::uint32_t lot; };
+  const Croisee cas[8] = {
+    {"buckets", "plus-gros", 2, 3, 1},
+    {"buckets", "feuilles", 2, 3, 1},
+    {"plus-petit", "buckets", 2, 3, 1},
+    {"premier", "buckets", 2, 4, 1},
+    {"buckets", "plus-gros", 2, 3, 4},   // lot de quatre a la capture
+    {"feuilles", "buckets", 2, 3, 1},
+    {"buckets", "plus-gros", 2, 64, 4},  // frontiere large : le lot depasse un
+    {"buckets", "buckets", 2, 64, 8},
+  };
+  g_c = Compteurs();
+  Sortie libre = descente(h, 1000000, 1000000, 1000000000, "feuilles", false, false, 0);
+  if (libre.faute) return sortie(libre.faute, libre.diag);
+  const std::vector<int> vrai = juge(h);
+  long long d0 = 0;
+  for (int p = 0; p < g_nP; ++p) if (libre.dec[(std::size_t)p] != vrai[(std::size_t)p]) ++d0;
+  if (d0) return sortie(1, "la course non capee contredit deja la force brute");
+  long long pend_total = 0, reprises = 0;
+  long long lot_max_global = 0;
+  for (int i = 0; i < 8; ++i) {
+    g_c = Compteurs();
+    Sortie s = descente(h, cas[i].cap, cas[i].fcap, 1000000000, cas[i].a, false, true,
+                        cas[i].lot, 100 + i, cas[i].b);
+    if (s.faute) return sortie(s.faute, s.diag);
+    pend_total += g_c.pending_state_count;
+    reprises += g_c.resume_count;
+    if (g_c.witness_batch_max > lot_max_global) lot_max_global = g_c.witness_batch_max;
+    long long d = 0;
+    for (int p = 0; p < g_nP; ++p) if (s.dec[(std::size_t)p] != libre.dec[(std::size_t)p]) ++d;
+    std::printf("abi croisee %d capture=%s reprise=%s lot=%u pending=%lld reprises=%lld"
+                " lots=%lld lot_max=%lld ecart=%lld\n",
+                i, cas[i].a, cas[i].b, cas[i].lot, g_c.pending_state_count,
+                g_c.resume_count, g_c.witness_batches, g_c.witness_batch_max, d);
+    if (d) return sortie(1, "une reprise sous une autre politique change le resultat");
+  }
+  std::printf("abi croisee nb=8 divergences=0 pending_total=%lld reprises_total=%lld"
+              " lot_max_global=%lld\n", pend_total, reprises, lot_max_global);
+  if (pend_total <= 0) return sortie(3, "aucune continuation capturee : la porte croisee serait vide");
+  if (reprises <= 0) return sortie(3, "aucune reprise exercee : la porte croisee serait vide");
+  // Sans lot strictement superieur a un, `SPLIT_WITNESS_BATCH` ne serait qu'un
+  // champ d'ABI jamais exerce, et la porte le certifierait par vacuite.
+  if (lot_max_global < 2) return sortie(3, "aucun lot de temoins au-dela de un : le batch serait vide");
+  return 0;
+}
+
+// ---------------------------------------------------------------------------
 int mode_fixtures() {
   long long n = 0;
   auto pose = [&](int h, int lo, int up) {
     CoreDepthLedger L;
     L.reject_threshold = (std::uint8_t)h;
     L.lower_open_sat = (std::uint8_t)lo;
-    L.upper_open_sat = (std::uint8_t)up;
+    L.frontier_candidate_mass_exact = (std::uint32_t)(up - lo);
+    L.upper_sat_mutant = (std::uint8_t)up;
     ++n;
     return L;
   };
@@ -884,6 +985,7 @@ int main(int argc, char** argv) {
   long long budget = 1000000000;
   bool cap_sur_masse = false, octets = false;
   long long min_par_action = 1, min_grands = 1, min_ecart_travail = 0, facteur_scan = 0;
+  std::uint32_t lot = 1;
   Planchers pl;
   g_nP = 64; g_nW = 16;
 
@@ -891,7 +993,8 @@ int main(int argc, char** argv) {
     const std::string a = argv[i];
     auto val = [&](const char* pref) { return a.substr(std::strlen(pref)); };
     if (a == "--exhaustif" || a == "--saturation" || a == "--descente" ||
-        a == "--politiques" || a == "--fixtures") mode = a.substr(2);
+        a == "--politiques" || a == "--fixtures" || a == "--reprise-croisee")
+      mode = a.substr(2);
     else if (a == "--reprise=octets") octets = true;
     else if (a == "--reprise=memoire") octets = false;
     else if (a == "--cap-sur=masse") cap_sur_masse = true;
@@ -918,6 +1021,7 @@ int main(int argc, char** argv) {
     else if (a.rfind("--max-scan=", 0) == 0) pl.max_scan = std::atoll(val("--max-scan=").c_str());
     else if (a.rfind("--min-ecart-travail=", 0) == 0) min_ecart_travail = std::atoll(val("--min-ecart-travail=").c_str());
     else if (a.rfind("--facteur-scan=", 0) == 0) facteur_scan = std::atoll(val("--facteur-scan=").c_str());
+    else if (a.rfind("--lot=", 0) == 0) lot = (std::uint32_t)std::atoll(val("--lot=").c_str());
     else if (a.rfind("--inject=", 0) == 0) {
       const std::string m = val("--inject=");
       g_inject = true;
@@ -926,11 +1030,15 @@ int main(int argc, char** argv) {
       else if (m == "pruned-large") g_mu = PfMutant::kPrunedLarge;
       else if (m == "pending-pruned") g_mu = PfMutant::kPendingPruned;
       else if (m == "cap-avant-verdict") g_mu = PfMutant::kCapAvantVerdict;
+      else if (m == "upper-sature-incremental") g_mu = PfMutant::kUpperSatureIncr;
       else return refus("mutant inconnu");
     } else return refus("argument inconnu");
   }
 
-  if (mode.empty()) return refus("aucun mode : --exhaustif --saturation --descente --politiques --fixtures");
+  if (mode.empty())
+    return refus("aucun mode : --exhaustif --saturation --descente --politiques"
+                 " --fixtures --reprise-croisee");
+  if (lot > 4096) return refus("lot de temoins hors de [0,4096]");
   if (h < 1 || h > 60) return refus("seuil hors de [1,60] : h_q=0 tuerait tout par construction");
   if (cap < 1) return refus("cap nul : aucune tuile exacte ne pourrait terminer la descente");
   if (front_cap < 1) return refus("front_cap nul : la frontiere ne pourrait jamais exister");
@@ -951,5 +1059,6 @@ int main(int argc, char** argv) {
 
   if (mode == "fixtures") return mode_fixtures();
   if (mode == "politiques") return mode_politiques(h, min_ecart_travail, facteur_scan);
-  return mode_descente(h, cap, front_cap, budget, cap_sur_masse, octets, heur, pl);
+  if (mode == "reprise-croisee") return mode_reprise_croisee(h);
+  return mode_descente(h, cap, front_cap, budget, cap_sur_masse, octets, heur, pl, lot);
 }

@@ -108,13 +108,21 @@ inline const char* core_fate_nom(CoreFate f) {
 //                      tuile exacte redecide juste, donc le juge ne peut pas le
 //                      voir. Il se tue au PLAFOND DE TRAVAIL, et il faut le
 //                      dire ainsi plutot que de faire semblant.
+//   `kUpperSatureIncr`  maintient un MAJORANT SATURE de facon incrementale au
+//                       lieu de la masse exacte. Faute de surete, et c'est le
+//                       § 3.3 de l'arbitrage : une fois `upper` ecrete a `h_q`,
+//                       il ne peut plus redescendre juste. Vrai majorant `100`,
+//                       stocke `10` ; la masse chute de `5`, vrai `95`, stocke
+//                       `5 < h` — `CORE_CLEAR` est declare sur un bloc dont une
+//                       paire atteint le seuil.
 enum class PfMutant : std::uint8_t {
   kNone = 0,
   kSatureTronque,
   kClearLarge,
   kPrunedLarge,
   kPendingPruned,
-  kCapAvantVerdict
+  kCapAvantVerdict,
+  kUpperSatureIncr
 };
 
 // ---------------------------------------------------------------------------
@@ -129,7 +137,13 @@ enum class PfMutant : std::uint8_t {
 struct CoreDepthLedger {
   std::uint8_t reject_threshold = 0;   // `h_q = s_max - q + 1`
   std::uint8_t lower_open_sat = 0;     // `min(h_q, lower_open)`
-  std::uint8_t upper_open_sat = 0;     // `min(h_q, upper_open)`
+  // LA MASSE EST EXACTE, LE MAJORANT EST DERIVE. Saturer `lower` est sûr — un
+  // etat qui l'atteint est terminal, il n'en redescend jamais. Saturer `upper`
+  // ne l'est PAS : apres une scission qui prouve beaucoup de `NONE`, il faut
+  // pouvoir redescendre de `h_q` vers une valeur strictement inferieure, ce
+  // qu'une valeur ecretee ne permet plus. C'est le § 3.3 de l'arbitrage, et le
+  // mutant `upper-sature-incremental` montre que la faute est de SURETE.
+  std::uint32_t frontier_candidate_mass_exact = 0;
   // LA LARGEUR EST UN SCALAIRE, PAS UN `size()`. Un CTA ne materialise pas sa
   // frontiere pour savoir combien de spans il porte, et une politique qui
   // devrait appeler `size()` a chaque vague paierait `O(F)` la ou elle annonce
@@ -141,7 +155,21 @@ struct CoreDepthLedger {
   std::uint64_t continuation_mass = 0;  // masse laissee indecise par un cap
   CoreFate fate = CoreFate::kMixedCore;
 
-  void sature(long long lower, long long upper, PfMutant mu = PfMutant::kNone);
+  // `upper_open_sat = min(h_q, lower_open_sat + masse)`. Derive, jamais stocke.
+  std::uint8_t upper_open_sat() const {
+    const std::uint32_t h = reject_threshold;
+    const std::uint64_t u = (std::uint64_t)lower_open_sat + frontier_candidate_mass_exact;
+    return (std::uint8_t)(u > h ? h : u);
+  }
+
+  void sature(long long lower, long long masse, PfMutant mu = PfMutant::kNone);
+
+  // Le majorant sature stocke que le mutant maintient a la place de la masse.
+  // Il n'existe QUE pour rendre la faute du § 3.3 exprimable et executable.
+  std::uint8_t upper_sat_mutant = 0;
+  std::uint8_t upper_effectif(PfMutant mu) const {
+    return (mu == PfMutant::kUpperSatureIncr) ? upper_sat_mutant : upper_open_sat();
+  }
 };
 
 // La SATURATION EST UN THEOREME, pas une commodite. Pour tout `h >= 1` et tous
@@ -155,15 +183,16 @@ struct CoreDepthLedger {
 // de le saturer. Il survit a tout `n` petit et meurt des que `lower` franchit
 // `256` : un bloc archi-mort redevient vivant. C'est exactement la faute que la
 // saturation existe pour interdire.
-inline void CoreDepthLedger::sature(long long lower, long long upper, PfMutant mu) {
+inline void CoreDepthLedger::sature(long long lower, long long masse, PfMutant mu) {
   const long long h = reject_threshold;
+  const long long m = masse < 0 ? 0 : masse;
   if (mu == PfMutant::kSatureTronque) {
     lower_open_sat = (std::uint8_t)(lower < 0 ? 0 : lower);
-    upper_open_sat = (std::uint8_t)(upper < 0 ? 0 : upper);
+    frontier_candidate_mass_exact = (std::uint32_t)(std::uint8_t)m;
     return;
   }
   lower_open_sat = (std::uint8_t)(lower > h ? h : (lower < 0 ? 0 : lower));
-  upper_open_sat = (std::uint8_t)(upper > h ? h : (upper < 0 ? 0 : upper));
+  frontier_candidate_mass_exact = (std::uint32_t)m;
 }
 
 // ---------------------------------------------------------------------------
@@ -220,9 +249,17 @@ inline const char* action_nom(Action a) {
 // coûte plus que le cap ne peut alors ni se fermer, ni se scinder, ni
 // s'exactifier : il rend une CONTINUATION, l'hote re-dispatche avec plus de
 // place, et le resultat final est inchange. C'est le contrat du cap.
+//
+// `witness_batch` autorise `SPLIT_WITNESS_BATCH(etat, spans[0:B])` : remplacer
+// simultanement plusieurs parents mixtes deux a deux incomparables preserve
+// l'antichaine, la partition de masse et l'invariant `L <= N <= U`, et ne
+// depend d'aucun ordre entre les scissions (§ 5 de l'arbitrage). L'ABI doit
+// l'autoriser des maintenant : sans lui, une famille a `Theta(n)` scissions
+// imposerait `Theta(n)` synchronisations globales sur GPU.
 struct PolitiqueV0 {
   std::uint64_t exact_tile_cap = 64;
   std::uint64_t frontier_cap = 64;   // `kCapRacines` d'un CTA
+  std::uint32_t witness_batch = 1;   // `B` ; `0` signifie « tous les mixtes »
   bool witness_budget_available = true;
   bool cap_sur_masse_seule = false;  // reproduit la section 9 a la lettre
 };
@@ -233,8 +270,9 @@ inline bool est_pruned(const CoreDepthLedger& L, PfMutant mu = PfMutant::kNone) 
 }
 
 inline bool est_core_clear(const CoreDepthLedger& L, PfMutant mu = PfMutant::kNone) {
-  return (mu == PfMutant::kClearLarge) ? (L.upper_open_sat <= L.reject_threshold)
-                                       : (L.upper_open_sat < L.reject_threshold);
+  const std::uint8_t u = L.upper_effectif(mu);
+  return (mu == PfMutant::kClearLarge) ? (u <= L.reject_threshold)
+                                       : (u < L.reject_threshold);
 }
 
 // Le coût d'une tuile exacte : autant d'evaluations que de paires fois la
@@ -304,8 +342,15 @@ struct CoreContinuation {
   std::uint8_t lane = 0;            // 2, 3 ou 4
   std::uint8_t threshold = 0;       // `h_q`
   std::uint8_t lower_open_sat = 0;
-  std::uint8_t upper_open_sat = 0;
+  // La MASSE EXACTE, pas un majorant ecrete — meme raison qu'au ledger.
+  std::uint32_t frontier_candidate_mass_exact = 0;
+  // `policy_version` est enregistre pour la reproductibilite des PERFORMANCES.
+  // Il n'entre ni dans la correction ni dans la semantique du record : une
+  // continuation capee sous une politique doit se reprendre sous une autre et
+  // rendre les memes identites. C'est le § 4.2 de l'arbitrage, et la porte
+  // `mhgp3v_pairframe_reprise_politique_croisee` l'exige.
   std::uint32_t policy_version = 0;
+  std::uint32_t schema_version = 1;
   std::uint32_t cloud_epoch = 0;
   std::uint64_t pair_mass = 0;
   std::vector<NodeHandle> decided_spans;   // spans ALL : ils portent le minorant
