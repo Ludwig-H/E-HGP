@@ -1,4 +1,4 @@
-# Note de l’auditeur — utiliser le LBVH pour la source sparse q3/q4
+# Note de l’auditeur — source sparse q3/q4 par LBVH et top-k axial
 
 Date : 16 août 2026 UTC.  
 Pin fonctionnel relu : `53815f53207176cb421f30c61b967721d6cc4478`.  
@@ -23,17 +23,15 @@ Cadre : `phase=exploration_v3_hors_registre`,
 > [!IMPORTANT]
 > **Verdict.** Oui : la structure spatiale pertinente existe déjà. Ce n’est pas
 > un octree 8-aire à pointeurs, mais un **LBVH radix binaire sur clés Morton**,
-> avec AABB exactes et plages contiguës de `PointId`. C’est même préférable sur
-> GPU.
+> avec AABB exactes et plages contiguës de `PointId`. C’est préférable sur GPU.
 >
 > Elle doit être utilisée pour trouver le quatrième sommet q4, mais pas comme
-> une simple requête sphérique répétée pour chaque seed. La bonne primitive est
-> une **sélection axiale top-k par branch-and-bound sur les nœuds du LBVH**,
-> partagée entre les seeds d’une même arête owner.
+> une requête de voisinage euclidien répétée pour chaque seed. Le quatrième
+> sommet utile est une **racine extrémale de puissance affine**. La bonne
+> primitive est donc un top-k axial par branch-and-bound sur les nœuds du LBVH,
+> partagé entre les seeds d’une même arête owner.
 >
-> Avant cela, le dernier commit de Claude impose une correction architecturale :
-> le gateway aigu seul énumère un objet cubique. Il faut fusionner au même niveau
-> de blocs :
+> Avant cela, le commit `53815f` impose de fusionner au niveau bloc :
 >
 > ```text
 > ancre possiblement W4-vivante
@@ -41,8 +39,15 @@ Cadre : `phase=exploration_v3_hors_registre`,
 > existence d’un carrier aigu owner.
 > ```
 >
-> Sans cette fusion, le LBVH accélérerait la recherche du quatrième point pour
-> une masse de seeds qui n’aurait jamais dû être produite.
+> Le gateway aigu seul est exact mais énumère un objet cubique. Le LBVH ne doit
+> pas accélérer des seeds qui n’auraient jamais dû être produits.
+
+> [!CAUTION]
+> Cette version corrige une phrase de la première publication du document : les
+> huit coins d’une AABB suffisent à certifier un **maximum** négatif d’une
+> puissance convexe, donc un nœud permanent. Ils ne suffisent pas à certifier un
+> **minimum** positif. Le prune `NO_ROOT_ALL_POSITIVE` est retiré du v0 tant que
+> son minimum algébrique exact n’est pas implémenté.
 
 ---
 
@@ -68,10 +73,10 @@ pairid_expanded=0,
 carriers=0.
 ```
 
-La contre-mesure est néanmoins tout aussi importante : sans filtre de vivacité
-de l’ancre, la masse des carriers aigus croît comme `n³`. À `uniform,n=800`,
-elle représente déjà environ 46 % de tous les triples. Le gateway n’est pas
-faux ; il énumère exactement le mauvais sur-objet.
+La mesure négative est tout aussi utile : sans filtre de vivacité de l’ancre,
+la masse des carriers aigus croît comme `n³`. À `uniform,n=800`, elle représente
+environ 46 % de tous les triples. Le gateway n’est pas faux ; il énumère
+exactement le mauvais sur-objet.
 
 Conclusion reçue :
 
@@ -79,7 +84,7 @@ Conclusion reçue :
 
 ---
 
-## 2. L’« octree » déjà présent
+## 2. La structure spatiale déjà présente
 
 `MortonLbvh` fournit :
 
@@ -91,17 +96,17 @@ plage contiguë [begin,end),
 enfants left/right.
 ```
 
-C’est une hiérarchie spatiale octree-like. Pour le device, le LBVH linéaire est
+C’est une hiérarchie octree-like. Pour le device, le LBVH linéaire est
 préférable à un octree classique à pointeurs :
 
 - tableaux SoA contigus ;
-- construction par radix/Karras possible ;
+- construction par radix/Karras ;
 - parcours stackless ou à petite pile ;
 - cohérence Morton ;
-- subdivision binaire sans listes d’enfants irrégulières.
+- subdivision binaire régulière.
 
-La classe CPU actuelle calcule encore les AABB en rescannant les plages durant
-la récursion. Ce n’est pas la construction produit. Le port GPU devra employer :
+La classe CPU actuelle recalcule encore les AABB en rescannant les plages. Le
+port produit devra employer :
 
 ```text
 radix sort (MortonKey,PointId)
@@ -109,46 +114,44 @@ radix sort (MortonKey,PointId)
  -> réduction bottom-up des AABB.
 ```
 
-Il n’est pas nécessaire de créer un deuxième index spatial.
-
-Un overlay `BVH8` peut ensuite regrouper trois niveaux binaires pour réduire la
-profondeur et tester huit enfants par ballot de warp. C’est une optimisation,
-jamais une nouvelle autorité géométrique.
+Il n’est pas nécessaire de créer un deuxième index. Un overlay `BVH8` regroupant
+trois niveaux binaires peut être testé ensuite pour réduire la profondeur et
+utiliser les ballots de warp.
 
 ---
 
-## 3. P0 : fusionner W4-vivacité et carrier aigu au niveau bloc
+## 3. P0 : jointure corrélée W4-vivacité × carrier aigu
 
-### 3.1 Pourquoi la conjonction doit rester corrélée
+### 3.1 Pourquoi les deux clauses ne se séparent pas
 
-Pour un bloc de paires `A×B`, deux faits séparés ne suffisent pas :
+Pour un bloc `A×B`, les deux assertions suivantes ne suffisent pas :
 
 ```text
-il existe une paire W4-vivante dans A×B,
-il existe une paire avec carrier aigu dans A×B.
+il existe une paire W4-vivante,
+il existe une paire possédant un carrier aigu.
 ```
 
-Ils peuvent être réalisés par deux paires différentes. La source doit raffiner
-jusqu’à prouver ou rejouer la conjonction pour les mêmes paires.
+Elles peuvent être réalisées par des paires différentes. La source doit
+raffiner jusqu’à prouver ou rejouer la conjonction pour les mêmes paires.
 
-### 3.2 État du ledger pair-level
+### 3.2 Ledger de vivacité
 
-Chaque tâche `A×B` doit porter pour la lane q4 :
+Chaque tâche `A×B` porte pour q4 :
 
 ```text
-L4_open  = nombre d’IDs universellement W4-intérieurs,
-U4_closed = cardinalité de l’union fixe des IDs encore possiblement W4,
+L4_open   : nombre d’IDs universellement W4-intérieurs,
+U4_closed : cardinalité de l’union fixe encore possiblement W4,
 credit_spans disjoints,
 none_spans,
 frontier MIXED,
 continuation.
 ```
 
-Avec le seuil de mort `r4=8` :
+Avec le seuil de rejet `r4=8` :
 
 ```text
-L4_open >= 8  -> toutes les paires du bloc sont mortes ;
-U4_closed <= 7 -> toutes les paires du bloc sont W4-vivantes ;
+L4_open >= 8   -> toutes les paires sont mortes ;
+U4_closed <= 7 -> toutes les paires sont W4-vivantes ;
 sinon          -> vivacité MIXED.
 ```
 
@@ -168,31 +171,30 @@ DEAD_NO_CARRIER
 ACTIVE_ALL
   si U4_closed <= 7
   et AcuteOwnerGateway = ALL_STRICT
-  et le facteur C contient au moins un vrai PointId relationnellement admissible ;
+  et C contient un vrai PointId relationnellement admissible ;
 
 MIXED
   sinon.
 ```
 
-Un `ACTIVE_ALL(A,B,C)` ne matérialise ni les `PairId`, ni les faces. Il produit
-un `ActiveOwnerEdgeBlock(A,B)` avec un handle de preuve carrier. Les tâches
-`MIXED` peuvent scinder `A`, `B`, `C` ou la frontier witness W4. Fixer toujours
-`C` reproduirait l’ablation déjà réfutée.
+`ACTIVE_ALL(A,B,C)` ne matérialise ni `PairId` ni face. Il produit un
+`ActiveOwnerEdgeBlock(A,B)` avec handle de preuve carrier. Une tâche `MIXED`
+peut scinder `A`, `B`, `C` ou la frontier witness W4. Fixer toujours `C`
+reproduirait l’ablation déjà réfutée.
 
-### 3.4 Politique de split GPU-compatible
+### 3.4 Split GPU-compatible
 
-Éviter une optimisation continue compliquée. Tester virtuellement un niveau de
-split pour les facteurs admissibles, puis choisir celui qui maximise :
+Tester virtuellement un niveau de split pour les facteurs admissibles, puis
+choisir celui qui maximise :
 
 ```text
 masse immédiatement classée DEAD ou ACTIVE
 ------------------------------------------------
-nombre de tâches enfants + coût fixe des extrema
+nombre de tâches enfants + coût fixe des extrema.
 ```
 
-Cette décision ne manipule que quelques entiers et peut être prise par warp.
-Le tie-break est déterministe : `W4-frontier`, puis `A`, `B`, `C`, ou tout ordre
-fixé et versionné.
+Le tie-break est déterministe et versionné. Cette décision ne manipule que
+quelques entiers et peut être prise par warp.
 
 ### 3.5 Gate bloquante
 
@@ -207,7 +209,7 @@ ActiveEdge_cross = 0,
 pending = 0.
 ```
 
-Sur `uniform/terrain/eight_clusters`, publier séparément :
+Sur les autres familles, publier séparément :
 
 ```text
 pair blocks physiques,
@@ -220,7 +222,7 @@ bytes et HWM.
 
 ---
 
-## 4. Localiser tout ce qui peut compter pour une arête owner
+## 4. Cover LBVH exact d’une arête owner
 
 Fixer une arête exacte `e={a,b}` et poser :
 
@@ -236,7 +238,7 @@ R² <= 3D/8,
 ||c-m||² <= D/8.
 ```
 
-Tout sommet, intérieur ou point de shell de sa sphère vérifie alors :
+Tout sommet, intérieur ou point de shell vérifie :
 
 ```text
 ||z-m||
@@ -245,29 +247,28 @@ Tout sommet, intérieur ou point de shell de sa sphère vérifie alors :
  < sqrt(D).
 ```
 
-Donc une seule requête LBVH exacte :
+Donc la requête entière :
 
 ```text
 ||2z-a-b||² <= 4D
 ```
 
-contient **tous** les sites pouvant affecter le q4 : apex, intérieurs et shell.
+contient tous les sites pouvant affecter le q4 : apex, intérieurs et shell.
 
-Pour être un sommet sous owner `e`, le point doit en plus appartenir à la
-lentille :
+Pour être un sommet sous owner `e`, le point doit en plus être dans la lentille :
 
 ```text
 ||z-a||² <= D,
 ||z-b||² <= D,
 ```
 
-ce qui implique la borne plus forte :
+ce qui implique :
 
 ```text
 ||2z-a-b||² <= 3D.
 ```
 
-Chaque nœud du cover reçoit donc un masque :
+Chaque nœud du cover reçoit un masque :
 
 ```text
 DEPTH_ONLY       : peut affecter le census, jamais être apex owner ;
@@ -276,12 +277,12 @@ APEX_ALL         : entièrement dans la lentille, hors ties non résolus ;
 OUTSIDE          : rejeté.
 ```
 
-Le cover doit être une antichaîne de nœuds LBVH, pas une liste de tous les IDs.
-Il est partagé par tous les seeds de la même arête.
+Le cover est une antichaîne de nœuds LBVH, jamais une liste de tous les IDs. Il
+est construit une fois par arête et partagé par ses seeds.
 
 ---
 
-## 5. Le quatrième point n’est pas un voisin métrique : c’est une racine extrémale
+## 5. Le quatrième point est une racine extrémale
 
 Pour un seed `T=(a,b,x)`, `Q4SeedAxisTopR4` paramètre les centres par :
 
@@ -298,13 +299,13 @@ A_z = G||z-a||²-W·(z-a),
 B_z = n·(z-a).
 ```
 
-La racine est :
+Lorsque `B_z!=0`, sa racine est :
 
 ```text
-rho_z = A_z/B_z,
+rho_z=A_z/B_z.
 ```
 
-lorsque `B_z!=0`. Le théorème top-r4 demande uniquement :
+Le théorème top-r4 demande seulement :
 
 ```text
 les k premières racines B>0,
@@ -314,40 +315,32 @@ k=8-p,
 
 avec tous les IDs à égalité.
 
-Ainsi, une requête « voisins les plus proches de x » serait sans rapport avec
-l’ordre utile. Le LBVH doit faire du **branch-and-bound sur la racine**, avec la
-métrique spatiale seulement comme premier prune.
+Une requête de plus proches voisins de `x` serait donc sans rapport avec l’ordre
+utile. Le LBVH doit faire du branch-and-bound sur `rho`, la métrique spatiale ne
+servant que de premier prune.
 
 ---
 
 ## 6. Bornes exactes par nœud LBVH
 
-### 6.1 Bornes de `B_z`
+### 6.1 `B_z`
 
-`B_z=n·(z-a)` est affine. Sur une AABB :
-
-```text
-B_lo, B_hi
-```
-
-sont exacts en choisissant, axe par axe, l’extrémité dictée par le signe de
-`n_i`.
-
-Fates :
+`B_z=n·(z-a)` est affine. Sur une AABB, `B_lo,B_hi` sont exacts en choisissant
+l’extrémité dictée par le signe de `n_i`.
 
 ```text
-B_lo>0  -> nœud entrant homogène ;
-B_hi<0  -> nœud sortant homogène ;
-B_lo=B_hi=0 -> constant ;
-sinon -> split nécessaire.
+B_lo>0       -> entrant homogène ;
+B_hi<0       -> sortant homogène ;
+B_lo=B_hi=0  -> constant ;
+sinon        -> split.
 ```
 
-### 6.2 Bornes de `A_z`
+### 6.2 `A_z`
 
 `A_z` est séparable :
 
 ```text
-A_z = sum_i [G s_i²-W_i s_i],
+A_z=sum_i [G s_i²-W_i s_i],
 s_i=z_i-a_i.
 ```
 
@@ -357,41 +350,65 @@ s_i=z_i-a_i.
 - le minimum entier est à l’un des deux entiers voisins de `W_i/(2G)`, clippés à
   l’intervalle.
 
-On obtient des bornes `A_lo,A_hi` exactes sur le réseau u16 de l’AABB. Les
-produits sont formés après promotion ; `i128` suffit pour `A`, tandis que les
-comparaisons de racines conservent `BigInt<4>`.
+On obtient `A_lo,A_hi` exacts sur le réseau u16 de l’AABB. Les comparaisons de
+racines conservent `BigInt<4>`.
 
-### 6.3 Cœur permanent rapide
+### 6.3 Permanents
 
-Avant toute recherche de racines :
-
-1. appliquer `SeedCoreQuarter` ;
-2. si nécessaire, `SeedJungPermanent16`.
-
-Pour le premier :
+Appliquer d’abord `SeedCoreQuarter` :
 
 ```text
 v(z)=2G(z-a)-W,
-4 max_Z ||v(z)||² <= D G²
+4 max_Z ||v(z)||² <= D G².
 ```
 
-certifie tout le nœud permanent. Les trois IDs du seed sont masqués et les
+Il certifie tout le nœud permanent. Les trois IDs du seed sont masqués et les
 spans crédités forment une antichaîne. Dès huit IDs distincts :
 
 ```text
 DEAD_PERMANENT,
-root comparisons = 0.
+root comparisons=0.
 ```
 
-### 6.4 Prune exact contre le seuil courant
+Le certificateur plus fort `SeedJungPermanent16` vérifie les huit coins aux
+deux bouts de Jung. Cette utilisation est correcte : pour un bout fixé,
+`P_z(tau)` est convexe en `z`; son **maximum** sur une boîte est atteint à un
+coin. Si les seize valeurs sont strictement négatives, tout le nœud est
+permanent.
 
-Supposons un nœud entrant `B_z>0` et une racine seuil :
+### 6.4 Correction importante : pas de prune positif par les coins
+
+Pour prouver qu’un nœud est strictement extérieur à toutes les sphères de
+`J_f`, il faudrait montrer :
 
 ```text
-rho_* = A_*/B_*,  B_*>0.
+min_z P_z(-tau_max)>0
+et
+min_z P_z(+tau_max)>0.
 ```
 
-Pour prouver que toutes les racines du nœud sont pires ou égales :
+La puissance étant convexe, ce minimum peut être intérieur. Les huit coins ne
+suffisent donc pas.
+
+Le v0 doit choisir l’une des deux solutions sûres :
+
+1. **ne pas utiliser ce prune** et descendre ;
+2. implémenter le minimum séparable exact de
+   `G s_i²-(W_i±tau_max n_i)s_i` avec comparaison algébrique exacte pour les
+   entiers voisins du minimiseur.
+
+La première est recommandée pour fermer rapidement l’oracle. La seconde est une
+optimisation ultérieure.
+
+### 6.5 Prune exact contre le seuil courant
+
+Supposons un nœud entrant `B_z>0` et le seuil :
+
+```text
+rho_*=A_*/B_*, B_*>0.
+```
+
+Alors :
 
 ```text
 A_z/B_z >= A_*/B_*
@@ -399,15 +416,13 @@ A_z/B_z >= A_*/B_*
 F_*(z)=B_* A_z-A_* B_z >= 0.
 ```
 
-`F_*` est encore une somme de quadratiques convexes séparables. Son minimum
-entier exact sur l’AABB se calcule comme pour `A_z`.
-
-Donc :
+`F_*` est une somme de quadratiques convexes séparables. Son minimum entier exact
+sur l’AABB se calcule comme pour `A_z`.
 
 ```text
-min F_*>0  -> nœud strictement pire, prune ;
-min F_*=0  -> peut contenir le groupe d’égalité, descendre ;
-min F_*<0  -> peut améliorer le top-k, descendre.
+min F_*>0 -> nœud strictement pire, prune ;
+min F_*=0 -> groupe d’égalité possible, descendre ;
+min F_*<0 -> amélioration possible, descendre.
 ```
 
 Pour `B_z<0`, réfléchir le paramètre :
@@ -416,43 +431,24 @@ Pour `B_z<0`, réfléchir le paramètre :
 eta=-rho=A_z/(-B_z).
 ```
 
-La recherche des dernières racines en `rho` devient la même recherche des
-premières racines en `eta`.
-
-Cette comparaison au seuil est nettement plus forte qu’un simple intervalle
-`[A_lo,A_hi]/[B_lo,B_hi]`, car elle conserve la corrélation de `A_z` et `B_z`.
-L’intervalle indépendant reste utile comme clé grossière de priorité.
-
-### 6.5 Nœuds sans racine dans Jung
-
-Un nœud peut aussi être pruné si toutes ses puissances sont strictement
-positives aux deux bouts de `J_f` : l’affinité en `tau` les rend alors positives
-partout. Un nœud entièrement négatif aux deux bouts est permanent.
-
-Pour un endpoint fixé, la puissance en `z` est une quadratique convexe
-séparable avec coefficient algébrique. La version robuste déjà proposée est :
-
-```text
-8 coins de l’AABB × 2 bouts de Jung,
-```
-
-avec `sgn_A_moins_Ytau`. Elle coûte seize signes exacts ; elle doit rester après
-les prunes spatiaux et le cœur rationnel, pas au sommet de chaque traversal.
+Chercher les dernières racines en `rho` devient chercher les premières en
+`eta`. Ce prune conserve la corrélation de `A_z` et `B_z`; il est plus fort et
+plus sûr qu’une division d’intervalles indépendante.
 
 ---
 
 ## 7. Algorithme `Q4SeedAxisTopR4-LBVH`
 
-### 7.1 Première passe : seuils
+### 7.1 Passe seuil
 
 Pour chaque seed :
 
 ```text
-p = permanents bulk,
-k = 8-p.
+p=permanents bulk,
+k=8-p.
 ```
 
-Si `k<=0`, mourir. Sinon lancer deux recherches best-first sur le cover LBVH de
+Si `k<=0`, mourir. Sinon lancer deux recherches best-first sur le cover de
 l’arête :
 
 ```text
@@ -463,29 +459,28 @@ sortant : B_hi<0, minimum de eta=-rho.
 Chaque recherche maintient :
 
 ```text
-frontier de nœuds,
+petite frontier de nœuds,
 top-k fixe de racines,
 seuil courant,
-compteur de nœuds et continuation.
+continuation en cas de spill.
 ```
 
-Les feuilles évaluent `SitePower` exactement. Une fois `k` racines trouvées,
-le prune `F_*` élimine les nœuds strictement pires.
+Les feuilles évaluent `SitePower` exactement. Une fois `k` racines trouvées, le
+prune `F_*` élimine les nœuds strictement pires.
 
-### 7.2 Deuxième passe : groupes d’égalité
+### 7.2 Passe égalités
 
 Rejouer le cover avec le seuil reçu :
 
 ```text
-racine meilleure ou égale au seuil -> conserver,
-racine strictement pire -> prune,
+racine meilleure ou égale -> conserver,
+racine strictement pire   -> prune.
 ```
 
-et émettre tous les vrais `PointId` du groupe frontière. Une égalité peut avoir
-plus de `k` IDs ; la capacité de sortie est préflightée ou devient une
-continuation, jamais une troncature.
+Tous les vrais `PointId` du groupe frontière sont émis. Une égalité peut contenir
+plus de `k` IDs : capacité préflightée ou continuation, jamais troncature.
 
-### 7.3 Replay final
+### 7.3 Replay
 
 Pour chaque apex retenu :
 
@@ -500,62 +495,54 @@ I_B/U_B depuis le reçu axial,
 RLE/fold.
 ```
 
-Le LBVH ne décide jamais la positivité q4 à la place de l’autorité Gram-Cramer.
-
 ---
 
 ## 8. Ordonnance GPU
 
-### 8.1 Ne pas garder « un thread par seed »
+### 8.1 Changer l’unité de kernel
 
-Le kernel actuel affecte un thread à chaque seed. Le noyau appelle ensuite
-`select_axis_topr4` qui balaie plusieurs fois le CSR de tous ses sites. Le code
-lui-même identifie ce balayage comme le mur de temps.
+Le kernel actuel affecte un thread par seed et `select_axis_topr4` balaie
+plusieurs fois son CSR de sites. Le code identifie déjà ce balayage comme le mur
+de temps.
 
-Pour le LBVH, l’unité correcte est :
+L’unité correcte devient :
 
 ```text
 un CTA par arête owner ou microtuile d’arêtes,
 plusieurs warps pour les seeds de cette arête.
 ```
 
-Le cover spatial de l’arête est construit une fois et réutilisé.
+Le cover spatial est construit une fois et réutilisé.
 
-### 8.2 Disposition suggérée
+### 8.2 Disposition
 
 ```text
-warp 0 : traversal LBVH spatial et production des NodeHandle du cover ;
-warps 1..w : seeds x de l’arête, top-k axial ;
-shared memory : petite frontier, cover courant, top-k et seuils ;
-global queue : spills/continuations seulement.
+warp 0      : traversal spatial et NodeHandle du cover ;
+warps 1..w  : seeds x, top-k axial ;
+shared      : frontier, cover courant, top-k, seuils ;
+global      : spills/continuations seulement.
 ```
 
 Deux variantes doivent être mesurées :
 
-1. **warp par seed** : faible divergence dans les comparaisons BigInt ;
-2. **warp par nœud, lanes=seeds** : un nœud chargé une fois, plusieurs axes
-   évalués en parallèle.
+1. warp par seed ;
+2. warp par nœud, lanes représentant plusieurs seeds.
 
-La seconde est souvent meilleure lorsque une arête possède de nombreux
-carriers ; la première lorsque les covers divergent vite.
+La seconde partage mieux les lectures lorsque une arête possède beaucoup de
+carriers; la première diverge moins lorsque les axes se séparent vite.
 
-### 8.3 Capacités fixes et continuations
-
-Utiliser :
+### 8.3 Capacités et SoA
 
 ```text
-top-k de taille <=8 par côté,
+top-k <=8 par côté,
 frontier locale 32 ou 64 nœuds,
 égalité locale bornée,
-spill explicite vers une queue globale.
+spill explicite.
 ```
 
-Un overflow local rend `PENDING_RESOURCE` avec continuation. Il ne change aucun
-verdict mathématique.
+Un overflow local rend `PENDING_RESOURCE`, jamais `DEAD`.
 
-### 8.4 SoA et coalescence
-
-Stocker séparément :
+Stockage SoA :
 
 ```text
 node_lo_x/y/z,
@@ -566,39 +553,45 @@ point_x/y/z,
 PointId.
 ```
 
-Trier les jobs par :
+Trier les jobs par niveau Morton, classe de diamètre et `RectId` pour améliorer
+la cohérence.
+
+### 8.4 Pas de CSR de sites par seed
+
+Remplacer :
 
 ```text
-niveau Morton de l’arête,
-classe de diamètre,
-RectId,
+site_offset par seed,
+site_id par seed
 ```
 
-pour que des CTA voisins interrogent des régions voisines.
-
-### 8.5 `count -> scan -> fill`
-
-Première vague :
+par :
 
 ```text
-compter seeds, continuations, groupes racines et BallRuns.
+edge_cover_offset,
+edge_cover_node,
+seed_to_edge.
 ```
 
-Puis preflight, prefix-scan et fill atomique. Aucun `cudaMalloc` par lot et
-aucun tableau CSR de tous les sites par seed.
+Le point n’est développé qu’à la feuille terminale.
+
+### 8.5 Transaction
+
+```text
+count -> preflight -> scan -> fill -> validate -> publish.
+```
+
+Aucun `cudaMalloc` par vague et aucun payload partiel.
 
 ---
 
-## 9. Partage par arête et backend hybride
+## 9. Backend hybride
 
-L’axe par seed reste excellent lorsque le nombre local de carriers `c_e` et le
-cover `m_e` sont petits. Il répète néanmoins une partie du travail pour tous les
-seeds de la même arête.
-
-Employer deux backends sous un contrat unique :
+Le top-k axial LBVH est le premier choix lorsque `c_e`, nombre de carriers d’une
+arête, et `m_e`, taille de son cover, sont modérés.
 
 ```text
-si c_e * m_e <= budget_axis :
+si c_e*m_e <= budget_axis :
     Q4SeedAxisTopR4-LBVH ;
 
 sinon :
@@ -606,8 +599,8 @@ sinon :
 ```
 
 Le second backend construit collectivement les premiers niveaux de l’arrangement
-de droites dans le plan médiateur. Le LBVH demeure utile : il fournit les
-`candidate_line` et `witness_only` par nœuds et alimente les cellules de centres.
+de droites dans le plan médiateur. Le LBVH continue de fournir les blocs
+`candidate_line` et `witness_only`.
 
 Le switch se choisit par mesure :
 
@@ -619,8 +612,8 @@ root groups,
 wall time.
 ```
 
-Il ne doit jamais changer le résultat. Les deux backends sont comparés sur
-`SupportKey`, `BallKey`, owner, primary, positivité, `I_B/U_B` et fates.
+Les deux backends doivent rendre exactement les mêmes `SupportKey`, `BallKey`,
+owner, primary, positivité, `I_B/U_B` et fates.
 
 ---
 
@@ -630,38 +623,28 @@ La même infrastructure sert q3 sans faire de Lane3 une source pour Lane4.
 
 Pour une arête q3 active :
 
-1. le cover LBVH de la lentille produit les carriers `x` par blocs ;
+1. le cover de lentille produit les carriers `x` par blocs ;
 2. chaque `x` définit une unique circumsphère q3 ;
 3. un parcours AABB-sphère exact compte les intérieurs avec arrêt au neuvième ;
-4. le shell est reporté complètement lorsque le support survit.
+4. le shell est reporté complètement si le support survit.
 
-Pour petit `c_e`, cette requête par carrier est simple et GPU-friendly. Pour un
-`c_e` élevé, la vue q3 de l’arrangement de centres traite collectivement les
-pieds des droites dans l’ellipse `||t||²<=D/12`.
+Pour petit `c_e`, cette requête par carrier est simple. Pour grand `c_e`, la vue
+q3 de l’arrangement traite collectivement les pieds des droites dans l’ellipse
+`||t||²<=D/12`.
 
-La géométrie neutre peut être partagée :
-
-```text
-LBVH cover,
-base du plan médiateur,
-coefficient de droite,
-classification des nœuds.
-```
-
-Les ledgers et seuils restent séparés :
+La géométrie neutre peut être partagée : cover LBVH, base du plan médiateur,
+coefficients de droite et bornes de nœuds. Les seuils et ledgers restent séparés :
 
 ```text
-q3 : mort à 9 intérieurs,
-q4 : mort à 8 intérieurs.
+q3 : rejet à 9 intérieurs,
+q4 : rejet à 8 intérieurs.
 ```
 
 ---
 
-## 11. Gates demandées
+## 11. Gates
 
 ### 11.1 Parité axiale
-
-Sur chaque fixture existante :
 
 ```text
 select_axis_topr4 scan complet
@@ -669,12 +652,10 @@ select_axis_topr4 scan complet
 select_axis_topr4_lbvh
 ```
 
-champ par champ : verdict, permanents, `k`, entrants, sortants, groupes égaux,
+champ par champ : verdict, permanents, `k`, entrants, sortants, égalités,
 profondeur min et census.
 
-### 11.2 Prune de seuil causal
-
-Mutants :
+### 11.2 Mutants causaux
 
 ```text
 axis-node-utilise-Alo/Bhi-sans-signe,
@@ -682,12 +663,13 @@ axis-node-oublie-correlation-F,
 axis-node-prune-egalite,
 axis-node-melange-B-positif-negatif,
 axis-node-oublie-depth-only,
-axis-node-core-parent-enfant.
+axis-node-core-parent-enfant,
+axis-node-coins-certifient-minimum-positif.
 ```
 
 ### 11.3 `two_lines`
 
-La famille doit mourir au front conjoint W4/carrier :
+La famille meurt au front conjoint W4/carrier :
 
 ```text
 axis_jobs=0,
@@ -698,15 +680,15 @@ pending=0.
 
 ### 11.4 Dense mais profond
 
-Construire une arête avec beaucoup de racines dont tous les candidats q4 ont
+Construire une arête avec beaucoup de racines dont tous les candidats ont
 profondeur au moins huit. Le scan complet lit tous les sites ; le LBVH doit les
-fermer par permanents, seuils ou nœuds sans racine avant les feuilles.
+fermer par permanents et seuils avant les feuilles.
 
-### 11.5 Dense et réellement shallow
+### 11.5 Dense réellement shallow
 
 Construire une famille avec beaucoup de groupes réellement shallow. La source
-doit préflight, streamer ou rendre `resource_exhausted`; elle ne prétend pas
-faire disparaître une vraie sortie dense.
+préflight, streame ou rend `resource_exhausted`; elle ne prétend pas supprimer
+une vraie sortie dense.
 
 ### 11.6 Plateaux
 
@@ -716,25 +698,24 @@ faire disparaître une vraie sortie dense.
 égalité non tronquée,
 PointId distincts conservés,
 aucun support D=0,
-owner canonique stable sous permutation de stockage.
+owner stable sous permutation de stockage.
 ```
 
 ---
 
-## 12. Ordre d’implémentation recommandé à Claude
+## 12. Ordre d’implémentation à Claude
 
-### P0 — immédiatement
+### P0
 
-Modifier le gateway actuel pour porter et raffiner simultanément :
+Fusionner dans le gateway actuel :
 
 ```text
 W4 ledger + AcuteOwnerGateway.
 ```
 
-La campagne doit mesurer la masse de la **conjonction**, pas la masse des
-triangles aigus globaux.
+Mesurer la conjonction, pas les triangles aigus globaux.
 
-### P1 — bornes LBVH autonomes
+### P1
 
 Créer :
 
@@ -753,45 +734,32 @@ prune F_* contre seuil,
 égalité.
 ```
 
-### P2 — remplacement du scan complet
+Le prune positif aux bouts de Jung est absent du v0.
 
-Créer :
+### P2
 
-```text
-q4seed_axis_lbvh_probe.cpp
-```
+Créer `q4seed_axis_lbvh_probe.cpp`, puis comparer bit à bit au scan actuel.
 
-sur une arête/seed explicite, puis comparer bit à bit au noyau actuel.
+### P3
 
-### P3 — cover partagé par arête
+Construire le cover partagé par arête et remplacer le CSR de sites par des
+`NodeHandle`.
 
-Remplacer le CSR `site_id` par :
+### P4
 
-```text
-edge_cover_offset,
-edge_cover_node,
-seed_to_edge.
-```
+Porter le traversal et le top-k en CTA par arête, avec continuations. Garder le
+kernel actuel comme autorité device différentielle.
 
-Le point n’est développé qu’à la feuille terminale.
+### P5
 
-### P4 — kernel CTA par arête
-
-Porter le traversal et le top-k avec continuations. Conserver le kernel actuel
-comme autorité device différentielle.
-
-### P5 — backend collectif seulement si nécessaire
-
-Si les mesures montrent `c_e*m_e` trop élevé, brancher
-`EdgeCenterShallowCut`. Ne pas commencer par cette brique plus complexe alors
-que le LBVH possède déjà exactement les prunes spatiaux et axiaux nécessaires.
+Brancher `EdgeCenterShallowCut` uniquement si les mesures montrent que
+`c_e*m_e` reste trop élevé.
 
 ---
 
 ## 13. Décision
 
-La réponse à la question « utiliser l’octree pour trouver le quatrième point ? »
-est :
+La réponse à « utiliser l’octree pour trouver le quatrième point ? » est :
 
 > **Oui, absolument, mais en recherchant les racines extrémales de la puissance
 > affine, pas un quatrième voisin euclidien.**
@@ -806,8 +774,7 @@ jointure factorisée W4-vivant ∧ carrier aigu
  -> fallback arrangement 2D seulement pour les arêtes localement denses.
 ```
 
-Elle est exacte, output-sensitive dans les régimes favorables, compatible avec
-les preuves existantes, et bien plus GPU-friendly qu’un nouvel octree à
-pointeurs ou qu’un arrangement 4D global. Elle retire le scan de tous les sites
-que le code identifie déjà comme le terme dominant, sans reformer le produit
-`carrier × apex` que `Q4SeedAxisTopR4` avait précisément éliminé.
+Elle est exacte, GPU-friendly et compatible avec les preuves existantes. Elle
+retire le scan de tous les sites que le code identifie déjà comme le terme
+dominant, sans reformer le produit `carrier × apex` que `Q4SeedAxisTopR4` avait
+précisément éliminé.
