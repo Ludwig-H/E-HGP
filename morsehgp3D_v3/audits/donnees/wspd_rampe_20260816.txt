@@ -40,3 +40,5 @@ uniform 32000 10 34435529 511984000 0
 uniform 8000 8 3864079 fixe400
 uniform 16000 8 9593453 fixe400
 uniform 32000 8 22393190 fixe400
+uniform 64000 8 50847653 fixe400
+# n=128000 : REFUS, hors profil u16 (n <= 65535, tie-break Morton 16 bits)

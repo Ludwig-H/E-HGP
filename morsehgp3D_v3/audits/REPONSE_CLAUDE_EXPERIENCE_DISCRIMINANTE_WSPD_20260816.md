@@ -331,3 +331,72 @@ n'a rien à réparer. Elle est en cours à `n = 64 000` et `128 000`, `uniform`,
 `s = 8`, emprise fixe. Je verserai le résultat quel qu'il soit — c'est la
 troisième fois dans cette campagne qu'une de mes explications tombe, et je
 préfère l'écrire que de l'oublier.
+
+---
+
+## 10. Le verdict : la question est indécidable par la mesure sous ce profil
+
+La rampe est prolongée jusqu'à la dernière taille que le dossier autorise.
+`uniform`, `s = 8`, emprise fixe `400` :
+
+| `n` | rectangles | rect/point | exposant | Δ rect/point |
+|---:|---:|---:|---:|---:|
+| `8 000` | `3 864 079` | `483,0` | — | — |
+| `16 000` | `9 593 453` | `599,6` | `1,312` | `+116,6` |
+| `32 000` | `22 393 190` | `699,8` | `1,223` | `+100,2` |
+| `64 000` | `50 847 653` | `794,5` | **`1,183`** | `+94,7` |
+
+**L'exposant décroît sans discontinuer** : `1,312 -> 1,223 -> 1,183`. Il n'y a
+donc pas de pente superlinéaire stable, et Callahan-Kosaraju n'est contredit
+nulle part.
+
+**Mais les deux lectures restent compatibles avec ces quatre points.** Un
+ajustement `\text{rect}/n = A + B \log_2 n` donne `A = -863`, `B = 103,8` et
+reproduit les mesures à `2,2 \%` près au pire. Les incréments par doublement —
+`+116,6`, `+100,2`, `+94,7` — décroissent lentement mais ne s'annulent pas.
+Convergence lente vers un régime linéaire et croissance en `n \log n` prédisent
+la même chose sur l'intervalle mesuré.
+
+Elles se séparent à `n = 128 000` :
+
+```text
+modele n log n   ->  898 rect/point,  115,0 M
+modele lineaire  ->  794 rect/point,  101,7 M
+```
+
+`13 \%` d'écart, largement mesurable. **Et cette mesure est impossible :**
+
+```text
+$ combined_prefilter_probe --points=128000 ...
+REFUS : n hors profil u16
+```
+
+Le profil quantifié u16 borne `n` à `65 535` — le tie-break de Morton par index
+tient sur seize bits. `n = 64 000` est la dernière taille que ce dossier permet
+d'observer, et je l'ai atteinte.
+
+### Ce que je conclus, et ce que je refuse de conclure
+
+**Je conclus** que le front n'a aucun défaut mesurable : l'exposant décroît, la
+partition est exacte à toutes les tailles, et les deux inexactitudes de
+structure que j'ai trouvées — l'aspect non unitaire de l'arbre radix, la
+séparation testée sur boîte serrée — ne coûtent qu'une constante, l'une par
+dégradation bornée de l'empilement, l'autre en sens favorable.
+
+**Je refuse de conclure** que la taille de sortie est linéaire *ou* qu'elle est
+en `n \log n`. Les données ne le disent pas, et la mesure qui trancherait est
+interdite par le profil. Prétendre l'un ou l'autre serait exactement le genre
+d'extrapolation que cette campagne a passé son temps à défaire — trois de mes
+explications sont déjà tombées.
+
+Deux voies existent pour trancher, et aucune ne m'appartient : un **argument
+théorique** sur l'arbre radix binaire à boîtes serrées, qui dirait si la preuve
+d'empilement s'y transporte sans terme logarithmique ; ou **lever le profil
+u16**, ce qui est hors périmètre et changerait l'objet.
+
+### Le fait pratique ne dépend d'aucune de ces subtilités
+
+`50 847 653` rectangles à `n = 64 000`, soit `794` par point. La sortie q2
+vivante, elle, reste de l'ordre de `2n`. Que le front soit linéaire avec une
+grosse constante ou légèrement superlinéaire ne change ni l'ordre de grandeur ni
+la conclusion : **il est aveugle à la sortie**, et c'est là qu'est le levier.
