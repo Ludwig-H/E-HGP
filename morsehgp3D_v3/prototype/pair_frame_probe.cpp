@@ -185,6 +185,8 @@ struct Compteurs {
   long long pending_state_count = 0, pending_pair_mass = 0, pending_span_count = 0;
   long long resume_count = 0, etats = 0, spans_elimines = 0;
   long long witness_batches = 0, witness_batch_max = 0;
+  long long bucket_mask_probes = 0, selected_span_handles = 0, batch_build_items = 0;
+  long long exact_point_predicate_evaluations = 0;
   long long pruned = 0, clear = 0;
   long long continuation_octets = 0;
 };
@@ -209,6 +211,7 @@ struct Etat {
   std::uint32_t masque = 0;
   long long lower = 0, upper = 0;
   long long upper_sat_incr = -1;      // le majorant ecrete que le mutant maintient
+  long long seuil_courant = 0;        // `h_q`, pour l'ecretage du mutant
   long long largeur = 0;              // `frontier_span_count`
   long long masse_candidate = 0;      // `frontier_candidate_mass`
   long long iterations = 0;
@@ -218,9 +221,23 @@ struct Etat {
   void ajoute(int n, std::uint8_t e) {
     if (e == kNone) { ++g_c.spans_elimines; return; }
     ++largeur;
-    masse_candidate += taille(n);
     if (e == kAll) { spans_all.push_back(n); lower += taille(n); upper += taille(n); return; }
+    // LA MASSE CANDIDATE EST CELLE DES MIXTES SEULS. Elle etait incrementee
+    // avant de connaitre la classe, donc elle mesurait la population retenue
+    // par tout span non-`NONE` — les preuves `ALL` comprises. P2.1 de l'audit
+    // `08b7007` : ce n'est pas la meme quantite, et c'est elle qui borne le
+    // coût ponctuel d'une tuile.
+    masse_candidate += taille(n);
     upper += taille(n);
+    // Le mutant CAUSAL rajoute la population possible de l'enfant, exactement
+    // comme le ferait un maintien plausible. Sans cela il mourait pour avoir
+    // OUBLIE les enfants — faute bien plus grossiere que le piege de
+    // saturation, et P1 de reception de l'audit `08b7007`.
+    if (upper_sat_incr >= 0) {
+      const long long h = seuil_courant;
+      upper_sat_incr += taille(n);
+      if (upper_sat_incr > h) upper_sat_incr = h;
+    }
     if (feuille(n)) { mixtes_feuilles.push_back(n); return; }
     const int b = bucket_de(taille(n));
     buckets[(std::size_t)b].push_back(n);
@@ -243,6 +260,8 @@ struct Etat {
 // entiere a chaque iteration, et le compteur `selector_scan_items` le montre.
 int selectionne(Etat& e, const std::string& heur, int* bucket_sortie) {
   if (heur == "buckets") {
+    ++g_c.bucket_mask_probes;
+    ++g_c.selected_span_handles;
     g_c.selector_scan_items += 1;
     int b = 15;
     while (b >= 0 && ((e.masque >> b) & 1u) == 0u) --b;
@@ -292,18 +311,35 @@ void scinde_temoin(Etat& e, int n, int b) {
 // l'antichaine, la partition de masse et l'invariant `L <= N <= U`, sans
 // dependre d'aucun ordre. `B = 0` signifie « tous les mixtes non-feuilles ».
 long long scinde_lot(Etat& e, const std::string& heur, std::uint32_t B,
-                     std::uint64_t front_cap) {
+                     std::uint64_t front_cap, long long budget_restant) {
+  // `B_effectif = min(B demande, budget restant, spans scindables)`. Un budget
+  // BOOLEEN ne suffit plus des que l'action est batchee : `budget = 1` avec
+  // `B = 8` produisait huit scissions et un budget negatif.
+  std::uint32_t scindables = 0;
+  for (int b = 0; b < 16; ++b) scindables += (std::uint32_t)e.buckets[(std::size_t)b].size();
+  const std::uint32_t Beff = lot_effectif(B, budget_restant, scindables);
+  if (Beff == 0u) return 0;
+
   std::vector<std::pair<int, int>> lot;  // (nœud, bucket)
-  if (heur == "buckets" && B == 1) {
+  if (heur == "buckets" && Beff == 1u) {
     int b = -1;
     const int n = selectionne(e, heur, &b);
     if (n < 0) return 0;
     lot.push_back(std::make_pair(n, b));
   } else {
-    g_c.selector_scan_items += (heur == "buckets") ? 1 : e.largeur;
+    // Le coût annonce est `O(mots de bucket non vides + B)`, pas `O(1)` : le
+    // selecteur ENUMERE un lot de taille `B`, et la telemetrie ne doit pas
+    // pretendre le contraire (P2.3 de l'audit `08b7007`).
+    ++g_c.bucket_mask_probes;
+    long long mots = 0;
+    for (int b = 0; b < 16; ++b) if (!e.buckets[(std::size_t)b].empty()) ++mots;
+    g_c.selector_scan_items += (heur == "buckets") ? mots : e.largeur;
     for (int b = 15; b >= 0; --b)
       for (std::size_t i = 0; i < e.buckets[(std::size_t)b].size(); ++i) {
-        if (B != 0 && lot.size() >= (std::size_t)B) break;
+        if (lot.size() >= (std::size_t)Beff) break;
+        ++g_c.batch_build_items;
+        ++g_c.selected_span_handles;
+        g_c.selector_scan_items += 1;
         lot.push_back(std::make_pair(e.buckets[(std::size_t)b][i], b));
       }
   }
@@ -325,6 +361,7 @@ long long scinde_lot(Etat& e, const std::string& heur, std::uint32_t B,
 Etat restreint(const Etat& e, int p0, int p1) {
   Etat r;
   r.p0 = p0; r.p1 = p1;
+  r.seuil_courant = e.seuil_courant;
   r.upper_sat_incr = e.upper_sat_incr;  // l'ecrete se propage : la faute aussi
   for (std::size_t i = 0; i < e.spans_all.size(); ++i) r.ajoute(e.spans_all[i], kAll);
   for (std::size_t i = 0; i < e.mixtes_feuilles.size(); ++i) {
@@ -340,66 +377,41 @@ Etat restreint(const Etat& e, int p0, int p1) {
 }
 
 // ---------------------------------------------------------------------------
+// LE DOMAINE QUE LE CODEC NE CONNAIT PAS. Il ne doit pas pouvoir croire sur
+// parole ce qu'il decode : c'est l'appelant qui repond « ce handle existe-t-il »
+// et « celui-ci est-il ancetre de celui-la ».
+std::uint32_t pf_population(const void*, NodeHandle h) {
+  return (std::uint32_t)taille((int)h);
+}
+bool pf_ancetre_ou_egal(const void*, NodeHandle u, NodeHandle v) {
+  return g_arbre[(std::size_t)u].lo <= g_arbre[(std::size_t)v].lo &&
+         g_arbre[(std::size_t)v].hi <= g_arbre[(std::size_t)u].hi;
+}
+ContexteDecodage contexte_paires(int h) {
+  ContexteDecodage c;
+  c.nb_noeuds = (std::uint32_t)g_arbre.size();
+  c.nb_endpoints = (std::uint32_t)g_nP;   // `p0`/`p1` vivent dans les paires
+  c.cloud_epoch = 1;
+  c.threshold = (std::uint8_t)h;
+  c.arbre = nullptr;
+  c.population = &pf_population;
+  c.est_ancetre_ou_egal = &pf_ancetre_ou_egal;
+  return c;
+}
+
+// ---------------------------------------------------------------------------
 // LA CONTINUATION, SERIALISEE POUR DE VRAI. Un compteur ne prouve rien ; un
 // tampon d'octets relu qui redonne le meme resultat, si.
-void ecrire32(std::vector<std::uint8_t>& b, std::uint32_t v) {
-  for (int i = 0; i < 4; ++i) b.push_back((std::uint8_t)((v >> (8 * i)) & 0xffu));
-}
-std::uint32_t lire32(const std::vector<std::uint8_t>& b, std::size_t& o) {
-  std::uint32_t v = 0;
-  for (int i = 0; i < 4; ++i) v |= (std::uint32_t)b[o++] << (8 * i);
-  return v;
-}
-
-std::vector<std::uint8_t> serialise(const Etat& e, const CoreContinuation& k) {
-  std::vector<std::uint8_t> b;
-  ecrire32(b, (std::uint32_t)k.rect_id);
-  ecrire32(b, (std::uint32_t)k.a_node);
-  ecrire32(b, (std::uint32_t)k.b_node);
-  b.push_back(k.lane); b.push_back(k.threshold);
-  b.push_back(k.lower_open_sat);
-  ecrire32(b, k.frontier_candidate_mass_exact);
-  ecrire32(b, k.schema_version);
-  ecrire32(b, k.policy_version);
-  ecrire32(b, k.cloud_epoch);
-  ecrire32(b, (std::uint32_t)(k.pair_mass & 0xffffffffu));
-  ecrire32(b, (std::uint32_t)(k.pair_mass >> 32));
-  ecrire32(b, (std::uint32_t)e.p0);
-  ecrire32(b, (std::uint32_t)e.p1);
-  ecrire32(b, (std::uint32_t)e.spans_all.size());
-  for (std::size_t i = 0; i < e.spans_all.size(); ++i) ecrire32(b, (std::uint32_t)e.spans_all[i]);
-  std::vector<int> mixtes = e.mixtes_feuilles;
-  for (int t = 0; t < 16; ++t)
-    for (std::size_t i = 0; i < e.buckets[(std::size_t)t].size(); ++i)
-      mixtes.push_back(e.buckets[(std::size_t)t][i]);
-  ecrire32(b, (std::uint32_t)mixtes.size());
-  for (std::size_t i = 0; i < mixtes.size(); ++i) ecrire32(b, (std::uint32_t)mixtes[i]);
-  return b;
-}
-
-Etat deserialise(const std::vector<std::uint8_t>& b, CoreContinuation& k) {
-  std::size_t o = 0;
-  k.rect_id = (int)lire32(b, o);
-  k.a_node = (int)lire32(b, o);
-  k.b_node = (int)lire32(b, o);
-  k.lane = b[o++]; k.threshold = b[o++];
-  k.lower_open_sat = b[o++];
-  k.frontier_candidate_mass_exact = lire32(b, o);
-  k.schema_version = lire32(b, o);
-  k.policy_version = lire32(b, o);
-  k.cloud_epoch = lire32(b, o);
-  { const std::uint64_t lo = lire32(b, o); const std::uint64_t hi = lire32(b, o);
-    k.pair_mass = lo | (hi << 32); }
+// L'etat reconstruit depuis une continuation DECODEE. Le `p0`/`p1` voyage dans
+// `rect_id` : le modele abstrait n'a pas de rectangle LBVH, l'etat endpoint EST
+// l'intervalle de paires. En production ce sont `a_node` et `b_node`.
+Etat etat_depuis(const CoreContinuation& k, int h) {
   Etat e;
-  e.p0 = (int)lire32(b, o);
-  e.p1 = (int)lire32(b, o);
-  const std::uint32_t na = lire32(b, o);
-  for (std::uint32_t i = 0; i < na; ++i) e.ajoute((int)lire32(b, o), kAll);
-  const std::uint32_t nm = lire32(b, o);
-  for (std::uint32_t i = 0; i < nm; ++i) {
-    const int n = (int)lire32(b, o);
-    e.ajoute(n, kMixte);
-  }
+  e.p0 = k.a_node;
+  e.p1 = k.b_node;
+  e.seuil_courant = h;
+  for (std::size_t i = 0; i < k.decided_spans.size(); ++i) e.ajoute(k.decided_spans[i], kAll);
+  for (std::size_t i = 0; i < k.mixed_spans.size(); ++i) e.ajoute(k.mixed_spans[i], kMixte);
   return e;
 }
 
@@ -426,6 +438,7 @@ Sortie descente(int h, std::uint64_t cap, std::uint64_t front_cap,
   {
     Etat r;
     r.p0 = 0; r.p1 = g_nP;
+    r.seuil_courant = h;
     ++g_c.child_classifications;
     r.ajoute(0, classifie_span(0, g_nP, 0));
     vague.push_back(r);
@@ -526,18 +539,33 @@ Sortie descente(int h, std::uint64_t cap, std::uint64_t front_cap,
           k.frontier_candidate_mass_exact = L.frontier_candidate_mass_exact;
           k.policy_version = politique_id; k.schema_version = 1;
           k.cloud_epoch = 1; k.pair_mass = F.pair_mass;
-          const std::vector<std::uint8_t> octets = serialise(e, k);
+          for (std::size_t i = 0; i < e.spans_all.size(); ++i)
+            k.decided_spans.push_back(e.spans_all[i]);
+          for (std::size_t i = 0; i < e.mixtes_feuilles.size(); ++i)
+            k.mixed_spans.push_back(e.mixtes_feuilles[i]);
+          for (int t = 0; t < 16; ++t)
+            for (std::size_t i = 0; i < e.buckets[(std::size_t)t].size(); ++i)
+              k.mixed_spans.push_back(e.buckets[(std::size_t)t][i]);
+          // `p0`/`p1` voyagent dans les deux handles d'extremite du cadre.
+          k.a_node = e.p0;
+          k.b_node = e.p1;
+          const std::vector<std::uint8_t> octets = encode_continuation(k);
           g_c.continuation_octets += (long long)octets.size();
           if (via_octets) {
-            // LA REPRISE PASSE PAR LES OCTETS. Rien de l'etat en memoire ne
-            // survit : seul le tampon relu redemarre le calcul.
-            CoreContinuation k2;
-            Etat e2 = deserialise(octets, k2);
-            if (k2.threshold != k.threshold || k2.pair_mass != k.pair_mass ||
-                k2.rect_id != k.rect_id || k2.policy_version != k.policy_version ||
-                e2.p0 != e.p0 || e2.p1 != e.p1 ||
-                e2.lower != e.lower || e2.upper != e.upper ||
-                e2.largeur != e.largeur) {
+            // LE CODEC FAIL-CLOSED EST SUR LE CHEMIN NORMAL. S'il ne l'etait
+            // pas, les portes negatives ne testeraient qu'un code mort.
+            CoreContinuation kv;
+            const DecodeError err = decode_continuation(
+                octets.empty() ? nullptr : &octets[0], octets.size(),
+                contexte_paires(h), &kv);
+            if (err != DecodeError::kOk) {
+              s.faute = 3;
+              s.diag = "le codec refuse une continuation qu'il vient d'ecrire";
+              return s;
+            }
+            Etat e2 = etat_depuis(kv, h);
+            if (kv.pair_mass != k.pair_mass || e2.p0 != e.p0 || e2.p1 != e.p1 ||
+                e2.lower != e.lower || e2.upper != e.upper || e2.largeur != e.largeur) {
               s.faute = 3;
               s.diag = "la continuation relue ne restitue pas son cadre";
               return s;
@@ -552,8 +580,8 @@ Sortie descente(int h, std::uint64_t cap, std::uint64_t front_cap,
         if (a == Action::kExactifyTile) {
           ++g_c.exact_tiles;
           for (int p = e.p0; p < e.p1; ++p) {
-            long long n = 0;
-            for (std::size_t i = 0; i < e.spans_all.size(); ++i) n += taille(e.spans_all[i]);
+            long long n = e.lower;  // les spans ALL ne sont JAMAIS rescannes
+            g_c.exact_point_predicate_evaluations += e.masse_candidate;
             for (std::size_t i = 0; i < e.mixtes_feuilles.size(); ++i)
               for (int w = g_arbre[e.mixtes_feuilles[i]].lo; w < g_arbre[e.mixtes_feuilles[i]].hi; ++w)
                 if (statut(p, w)) ++n;
@@ -576,13 +604,20 @@ Sortie descente(int h, std::uint64_t cap, std::uint64_t front_cap,
         if (a == Action::kSplitWitness) {
           // Terme de comparaison G1 : `feuilles` est le lot de taille infinie.
           const std::uint32_t B = (heur_courante == "feuilles") ? 0u : pol.witness_batch;
-          const long long faits = scinde_lot(e, heur_courante, B, front_cap_v);
+          const long long faits = scinde_lot(e, heur_courante, B, front_cap_v, budget);
           if (faits <= 0) {
             s.faute = 3;
             s.diag = "SPLIT_WITNESS sans span mixte non-feuille : l'ABI ment sur son etat";
             return s;
           }
           budget -= faits;
+          // G2 de l'audit `08b7007` : le budget ne devient JAMAIS negatif. Un
+          // booleen ne suffisait pas des que l'action est batchee.
+          if (budget < 0) {
+            s.faute = 3;
+            s.diag = "le lot a depasse le budget de scissions restant";
+            return s;
+          }
           continue;
         }
 
@@ -640,6 +675,151 @@ void imprime_compteurs(const char* etiq) {
               etiq, g_c.pending_state_count, g_c.pending_pair_mass,
               g_c.pending_span_count, g_c.resume_count, g_c.continuation_octets);
   std::printf("%s pruned=%lld clear=%lld\n", etiq, g_c.pruned, g_c.clear);
+}
+
+// ---------------------------------------------------------------------------
+// LE CODEC FAIL-CLOSED, MIS SOUS TENSION. Section 4.5 de l'audit `08b7007` :
+// pour un record valide, tronquer a chaque frontiere de champ, corrompre les
+// cardinalites, injecter un handle hors domaine, dupliquer un span, inserer un
+// parent et son descendant, changer l'epoque ou le schema, ajouter des octets
+// finaux. TOUS doivent rendre une erreur TYPEE, sans lecture hors limites ni
+// publication partielle.
+//
+// La liste est exhaustive sur les frontieres : la troncature est essayee a
+// CHAQUE octet du tampon, pas seulement aux bornes de champ.
+int mode_codec(int h, long long min_cas) {
+  if (g_arbre.size() < 8u) return refus("arbre trop petit pour la campagne codec");
+  CoreContinuation k;
+  k.rect_id = 7;
+  k.a_node = 0;
+  k.b_node = g_nP;
+  k.lane = 4;
+  k.threshold = (std::uint8_t)h;
+  k.lower_open_sat = (std::uint8_t)(h - 1);
+  k.policy_version = 3;
+  k.cloud_epoch = 1;
+  k.pair_mass = 1234;
+  // Une antichaine reelle : les deux enfants de la racine, puis deux petits-fils
+  // de l'un d'eux — jamais un ancetre et son descendant ensemble.
+  const int g = g_arbre[0].g, d = g_arbre[0].d;
+  k.decided_spans.push_back(g_arbre[(std::size_t)g].g);
+  k.mixed_spans.push_back(g_arbre[(std::size_t)g].d);
+  k.mixed_spans.push_back(d);
+  std::uint64_t masse = 0;
+  for (std::size_t i = 0; i < k.mixed_spans.size(); ++i) masse += (std::uint64_t)taille(k.mixed_spans[i]);
+  k.frontier_candidate_mass_exact = (std::uint32_t)masse;
+
+  const ContexteDecodage ctx = contexte_paires(h);
+  const std::vector<std::uint8_t> bon = encode_continuation(k);
+  CoreContinuation sortie_ok;
+  if (decode_continuation(&bon[0], bon.size(), ctx, &sortie_ok) != DecodeError::kOk)
+    return sortie(3, "le codec refuse un record qu'il vient d'ecrire");
+  if (sortie_ok.rect_id != k.rect_id || sortie_ok.pair_mass != k.pair_mass ||
+      sortie_ok.decided_spans.size() != k.decided_spans.size() ||
+      sortie_ok.mixed_spans.size() != k.mixed_spans.size() ||
+      sortie_ok.frontier_candidate_mass_exact != k.frontier_candidate_mass_exact)
+    return sortie(3, "l'aller-retour ne restitue pas le record");
+
+  long long cas = 0, refus_types = 0;
+  auto attend = [&](std::vector<std::uint8_t> b, DecodeError e, const char* quoi) {
+    ++cas;
+    CoreContinuation r;
+    const DecodeError got = decode_continuation(b.empty() ? nullptr : &b[0], b.size(), ctx, &r);
+    if (got == DecodeError::kOk) {
+      std::printf("codec ACCEPTE a tort : %s\n", quoi);
+      return false;
+    }
+    if (got != e) {
+      std::printf("codec erreur %s au lieu de %s : %s\n", decode_error_nom(got),
+                  decode_error_nom(e), quoi);
+      return false;
+    }
+    ++refus_types;
+    return true;
+  };
+
+  // TRONCATURE A CHAQUE OCTET, sans exception.
+  for (std::size_t t = 0; t < bon.size(); ++t) {
+    std::vector<std::uint8_t> b(bon.begin(), bon.begin() + (long)t);
+    const DecodeError att = (t < kContinuationHeaderBytes) ? DecodeError::kTropCourt
+                                                           : DecodeError::kLongueur;
+    if (!attend(b, att, "troncature")) return sortie(1, "troncature acceptee ou mal typee");
+  }
+  { std::vector<std::uint8_t> b = bon; b.push_back(0); b.push_back(0); b.push_back(0); b.push_back(0);
+    if (!attend(b, DecodeError::kLongueur, "octets finaux"))
+      return sortie(1, "des octets finaux sont acceptes"); }
+  { std::vector<std::uint8_t> b = bon; b[0] ^= 0xffu;
+    if (!attend(b, DecodeError::kMagic, "magic")) return sortie(1, "magic corrompu accepte"); }
+  { std::vector<std::uint8_t> b = bon; b[4] = 9;
+    if (!attend(b, DecodeError::kSchema, "schema")) return sortie(1, "schema inconnu accepte"); }
+  { std::vector<std::uint8_t> b = bon; b[8] = 99;
+    if (!attend(b, DecodeError::kEnTete, "header_bytes")) return sortie(1, "en-tete corrompu accepte"); }
+  { std::vector<std::uint8_t> b = bon; b[12] = (std::uint8_t)(b[12] + 4u);
+    if (!attend(b, DecodeError::kLongueur, "payload_bytes")) return sortie(1, "longueur corrompue acceptee"); }
+  { std::vector<std::uint8_t> b = bon; b[kContinuationHeaderBytes] ^= 0x01u;
+    if (!attend(b, DecodeError::kSomme, "charge utile")) return sortie(1, "charge corrompue acceptee"); }
+  { std::vector<std::uint8_t> b = bon; b[20] = (std::uint8_t)(b[20] + 1u);
+    if (!attend(b, DecodeError::kEpoque, "epoque")) return sortie(1, "epoque etrangere acceptee"); }
+  { std::vector<std::uint8_t> b = bon; b[28] = (std::uint8_t)(b[28] + 1u);
+    if (!attend(b, DecodeError::kSeuil, "seuil")) return sortie(1, "seuil etranger accepte"); }
+
+  // CARDINALITES fabriquees : c'est le cas qui provoquait une lecture hors
+  // limites, et il doit maintenant tomber au preflight.
+  const std::size_t o_na = kContinuationHeaderBytes + 36;
+  for (std::uint32_t faux : {2u, 9u, 4000000000u}) {
+    CoreContinuation kk = k;
+    std::vector<std::uint8_t> b = encode_continuation(kk);
+    for (int i = 0; i < 4; ++i) b[o_na + (std::size_t)i] = (std::uint8_t)((faux >> (8 * i)) & 0xffu);
+    const std::uint32_t nl = (std::uint32_t)((b.size() - kContinuationHeaderBytes) / 4u);
+    (void)nl;
+    b[40] = 0; b[41] = 0; b[42] = 0; b[43] = 0;
+    const std::uint32_t s2 = crc32(&b[kContinuationHeaderBytes], b.size() - kContinuationHeaderBytes);
+    for (int i = 0; i < 4; ++i) b[40 + (std::size_t)i] = (std::uint8_t)((s2 >> (8 * i)) & 0xffu);
+    if (!attend(b, DecodeError::kResidu, "cardinalite fabriquee"))
+      return sortie(1, "une cardinalite fabriquee est acceptee");
+  }
+
+  auto avec_spans = [&](std::vector<NodeHandle> dec, std::vector<NodeHandle> mix) {
+    CoreContinuation kk = k;
+    kk.decided_spans = dec;
+    kk.mixed_spans = mix;
+    std::uint64_t m = 0;
+    for (std::size_t i = 0; i < mix.size(); ++i)
+      if (mix[i] >= 0 && (std::size_t)mix[i] < g_arbre.size()) m += (std::uint64_t)taille(mix[i]);
+    kk.frontier_candidate_mass_exact = (std::uint32_t)m;
+    return encode_continuation(kk);
+  };
+  { std::vector<NodeHandle> dec, mix;
+    dec.push_back(g_arbre[(std::size_t)g].g);
+    mix.push_back((int)g_arbre.size() + 5);
+    if (!attend(avec_spans(dec, mix), DecodeError::kHandleHorsDomaine, "handle hors domaine"))
+      return sortie(1, "un handle hors domaine est accepte"); }
+  { std::vector<NodeHandle> dec, mix;
+    dec.push_back(d); mix.push_back(d);
+    if (!attend(avec_spans(dec, mix), DecodeError::kDoublon, "doublon"))
+      return sortie(1, "un span duplique est accepte"); }
+  { std::vector<NodeHandle> dec, mix;
+    dec.push_back(g); mix.push_back(g_arbre[(std::size_t)g].d);
+    if (!attend(avec_spans(dec, mix), DecodeError::kAncetre, "parent et descendant"))
+      return sortie(1, "un parent et son descendant sont acceptes"); }
+  { CoreContinuation kk = k;
+    kk.frontier_candidate_mass_exact = kk.frontier_candidate_mass_exact + 1u;
+    if (!attend(encode_continuation(kk), DecodeError::kMasse, "masse fausse"))
+      return sortie(1, "une masse fausse est acceptee"); }
+  { CoreContinuation kk = k; kk.lane = 7;
+    if (!attend(encode_continuation(kk), DecodeError::kEpoque, "lane inconnue"))
+      return sortie(1, "une lane inconnue est acceptee"); }
+  { CoreContinuation kk = k; kk.a_node = g_nP + 3;
+    if (!attend(encode_continuation(kk), DecodeError::kHandleHorsDomaine, "endpoint hors domaine"))
+      return sortie(1, "un endpoint hors domaine est accepte"); }
+  { CoreContinuation kk = k; kk.lower_open_sat = (std::uint8_t)h;
+    if (!attend(encode_continuation(kk), DecodeError::kSeuil, "lower deja terminal"))
+      return sortie(1, "un etat deja terminal est accepte comme continuation"); }
+
+  std::printf("abi codec octets=%zu cas=%lld refus_types=%lld acceptes_a_tort=0\n",
+              bon.size(), cas, refus_types);
+  if (cas < min_cas) return sortie(3, "plancher de cas de corruption non atteint");
+  return 0;
 }
 
 // ---------------------------------------------------------------------------
@@ -803,7 +983,7 @@ int mode_politiques(int h, long long min_ecart_travail, long long facteur_scan) 
   const int nconf = 12;
   std::vector<int> ref;
   long long travail_min = -1, travail_max = -1, pend_total = 0, reprises = 0;
-  long long scan_buckets = -1, scan_vecteur = -1, splits_buckets = -1;
+  long long scan_buckets = -1, scan_vecteur = -1, splits_buckets = -1, checks_buckets = -1;
   long long octets_total = 0;
   for (int i = 0; i < nconf; ++i) {
     g_c = Compteurs();
@@ -816,7 +996,11 @@ int mode_politiques(int h, long long min_ecart_travail, long long facteur_scan) 
     const long long trav = g_c.child_classifications + g_c.reclassifications;
     if (travail_min < 0 || trav < travail_min) travail_min = trav;
     if (trav > travail_max) travail_max = trav;
-    if (i == 0) { scan_buckets = g_c.selector_scan_items; splits_buckets = g_c.witness_splits; }
+    if (i == 0) {
+      scan_buckets = g_c.selector_scan_items;
+      splits_buckets = g_c.witness_splits;
+      checks_buckets = g_c.terminal_checks;  // du MEME run, pas du dernier
+    }
     if (i == 1) scan_vecteur = g_c.selector_scan_items;
     std::printf("abi politique %d cap=%llu front_cap=%llu budget=%lld scission=%s"
                 " reprise=%s splits=%lld scan=%lld travail=%lld pending=%lld reprises=%lld\n",
@@ -845,7 +1029,9 @@ int mode_politiques(int h, long long min_ecart_travail, long long facteur_scan) 
     return sortie(3, "les politiques ne se distinguent pas en travail : porte vide");
   // G4 : le selecteur a buckets coûte UNE unite par scission ; le selecteur
   // vectoriel rescanne la frontiere entiere. La porte exige les deux faits.
-  if (scan_buckets > splits_buckets + g_c.terminal_checks)
+  // `g_c` porte les compteurs de la DERNIERE politique executee : comparer avec
+  // lui aurait melange deux executions. P2.2 de l'audit `08b7007`.
+  if (scan_buckets > splits_buckets + checks_buckets)
     return sortie(3, "le selecteur a buckets n'est pas en O(1) par scission");
   if (facteur_scan > 0 && scan_vecteur < scan_buckets * facteur_scan)
     return sortie(3, "le selecteur vectoriel ne coûte pas plus : la porte de coût serait vide");
@@ -931,20 +1117,39 @@ int mode_fixtures() {
     return sortie(3, "fixture upper==h-1 : la clarte est perdue");
   if (fate_terminal(pose(10, 0, 10), g_mu) != CoreFate::kMixedCore)
     return sortie(3, "fixture upper==h : une clarte est inventee");
-  // Le cap porte sur `pair_mass * |frontiere|` : frontiere 4, bascule a 16.
+  // LE CAP PORTE SUR LES EVALUATIONS PONCTUELLES. Fixture exacte du P0 de
+  // l'audit `08b7007` : `pair_mass = 64`, UN span mixte de population `256`,
+  // largeur `1`, cap `64`. Un cap sur la largeur calcule `64` et accepterait la
+  // tuile ; la boucle executerait `16 384` lectures.
   {
     CoreDepthLedger L = pose(10, 0, 10);
-    L.frontier_width = 4;
+    L.frontier_width = 1;
+    L.frontier_candidate_mass_exact = 256;
     PolitiqueV0 p; p.exact_tile_cap = 64; p.frontier_cap = 8;
-    PairFrame F; F.pair_mass = 16;
-    if (cout_tuile(L, F, p) != 64)
-      return sortie(3, "fixture coût de tuile : le produit masse x frontiere est faux");
+    PairFrame F; F.pair_mass = 64;
+    if (evaluations_tuile(L, F) != 64ull * 256ull)
+      return sortie(3, "fixture P0 : le coût ponctuel n'est pas masse x candidats");
+    if (choisir_action(L, F, true, true, p, g_mu) == Action::kExactifyTile)
+      return sortie(3, "fixture P0 : une tuile de 16384 lectures est acceptee sous un cap de 64");
+    ++n;
+    // Le basculement EXACT : `pair_mass * masse == cap` passe, au-dela non. La
+    // masse doit rester `>= h`, sinon le bloc serait `CORE_CLEAR` et l'action
+    // terminale avant meme d'atteindre le cap.
+    L.frontier_candidate_mass_exact = 16;
+    F.pair_mass = 4;                        // `4 * 16 = 64 == cap`
     if (choisir_action(L, F, true, true, p, g_mu) != Action::kExactifyTile)
       return sortie(3, "fixture coût==cap : la tuile exacte n'est pas prise");
-    F.pair_mass = 17;
+    F.pair_mass = 5;                        // `5 * 16 = 80 > cap`
     if (choisir_action(L, F, true, true, p, g_mu) != Action::kSplitWitness)
-      return sortie(3, "fixture coût==cap+4 : la tuile exacte est prise a tort");
-    p.frontier_cap = 4;
+      return sortie(3, "fixture coût au-dela du cap : la tuile exacte est prise a tort");
+    // La comparaison passe par une DIVISION : aucun produit ne deborde.
+    if (!tuile_tient(1ull << 40, 0u, 8))
+      return sortie(3, "fixture masse nulle : une tuile sans candidat doit toujours tenir");
+    if (tuile_tient(1ull << 40, 1u << 20, 8))
+      return sortie(3, "fixture debordement : un produit enorme est declare sous le cap");
+    ++n;
+    // Frontiere saturee : la scission de temoin est interdite meme avec budget.
+    p.frontier_cap = 1;
     if (choisir_action(L, F, true, true, p, g_mu) != Action::kSplitOneEndpoint)
       return sortie(3, "fixture frontiere saturee : un temoin est scinde au-dela du cap");
     if (choisir_action(L, F, true, false, p, g_mu) != Action::kPending)
@@ -957,12 +1162,56 @@ int mode_fixtures() {
       return sortie(3, "fixture section 9 : le cap sur la masse seule devrait toujours exactifier");
     ++n;
   }
+  // LE LOT EFFECTIF NE DEPASSE JAMAIS LE BUDGET RESTANT.
+  {
+    if (lot_effectif(8, 1, 5) != 1u) return sortie(3, "fixture lot : le budget n'est pas respecte");
+    if (lot_effectif(0, 1, 5) != 1u) return sortie(3, "fixture lot tous : le budget n'est pas respecte");
+    if (lot_effectif(0, 9, 5) != 5u) return sortie(3, "fixture lot tous : les scindables ne bornent pas");
+    if (lot_effectif(3, 9, 5) != 3u) return sortie(3, "fixture lot : la demande n'est pas honoree");
+    if (lot_effectif(8, 0, 5) != 0u) return sortie(3, "fixture lot : un budget nul scinde quand meme");
+    if (lot_effectif(8, 9, 0) != 0u) return sortie(3, "fixture lot : sans span scindable on scinde");
+    ++n;
+  }
+  // G5 : `lower`, MASSE CANDIDATE et MASSE RETENUE sont trois quantites
+  // distinctes. Une racine qui se separe en un `ALL` de population `100` et un
+  // `MIXTE` de `3` doit donner `lower = 100`, `candidate = 3`, `retenue = 103`.
+  // Confondre les deux dernieres etait la faute P2.1, et c'est celle qui
+  // faisait ensuite sous-estimer le coût d'une tuile.
+  {
+    const long long L = 100, M = 3;
+    CoreDepthLedger W;
+    W.reject_threshold = 120;              // au-dessus, pour rester indecis
+    W.sature(L, M, PfMutant::kNone);
+    if (W.lower_open_sat != 100)
+      return sortie(3, "fixture G5 : le minorant ne vaut pas la population ALL");
+    if (W.frontier_candidate_mass_exact != 3u)
+      return sortie(3, "fixture G5 : la masse candidate inclut la preuve ALL");
+    if (W.upper_open_sat() != 103)
+      return sortie(3, "fixture G5 : la masse retenue n'est pas lower + candidate");
+    PairFrame Fg; Fg.pair_mass = 7;
+    if (evaluations_tuile(W, Fg) != 21u)
+      return sortie(3, "fixture G5 : le coût ponctuel compte les spans ALL");
+    ++n;
+  }
+  // LA FIXTURE CAUSALE DU MAJORANT SATURE, § 5 de l'audit `08b7007`. `h = 10`,
+  // deux candidats : `C0` de population `20` reste mixte, `C1` de `5` devient
+  // entierement `NONE`. Vrai majorant `25 -> 20 >= h` ; majorant ecrete maintenu
+  // `10 -> 5 < h`, donc `CORE_CLEAR` faussement declare. La faute vient
+  // UNIQUEMENT de l'information cachee au-dessus de `h`, pas d'un oubli
+  // d'enfants — c'est la distinction que l'audit demandait.
   {
     CoreDepthLedger L;
     L.reject_threshold = 10;
-    L.sature(256, 100000, g_mu);
-    if (!est_pruned(L, g_mu))
-      return sortie(3, "fixture lower=256 : un bloc archi-mort est revenu a la vie");
+    L.sature(0, 25, PfMutant::kNone);
+    if (est_core_clear(L, PfMutant::kNone))
+      return sortie(3, "fixture causale : masse 25 sous seuil 10 devrait rester indecise");
+    L.sature(0, 20, PfMutant::kNone);
+    if (est_core_clear(L, PfMutant::kNone))
+      return sortie(3, "fixture causale : masse 20 sous seuil 10 devrait rester indecise");
+    CoreDepthLedger M = L;
+    M.upper_sat_mutant = (std::uint8_t)(10 - 5);   // `min(h,25) - 5` : le maintien fautif
+    if (!est_core_clear(M, PfMutant::kUpperSatureIncr))
+      return sortie(3, "fixture causale : le maintien ecrete devrait declarer CORE_CLEAR a tort");
     ++n;
   }
   // Le bucket est `floor(log2(pop))` : la frontiere entre deux buckets est une
@@ -986,6 +1235,7 @@ int main(int argc, char** argv) {
   bool cap_sur_masse = false, octets = false;
   long long min_par_action = 1, min_grands = 1, min_ecart_travail = 0, facteur_scan = 0;
   std::uint32_t lot = 1;
+  long long min_cas_codec = 1;
   Planchers pl;
   g_nP = 64; g_nW = 16;
 
@@ -993,7 +1243,8 @@ int main(int argc, char** argv) {
     const std::string a = argv[i];
     auto val = [&](const char* pref) { return a.substr(std::strlen(pref)); };
     if (a == "--exhaustif" || a == "--saturation" || a == "--descente" ||
-        a == "--politiques" || a == "--fixtures" || a == "--reprise-croisee")
+        a == "--politiques" || a == "--fixtures" || a == "--reprise-croisee" ||
+        a == "--codec")
       mode = a.substr(2);
     else if (a == "--reprise=octets") octets = true;
     else if (a == "--reprise=memoire") octets = false;
@@ -1022,6 +1273,7 @@ int main(int argc, char** argv) {
     else if (a.rfind("--min-ecart-travail=", 0) == 0) min_ecart_travail = std::atoll(val("--min-ecart-travail=").c_str());
     else if (a.rfind("--facteur-scan=", 0) == 0) facteur_scan = std::atoll(val("--facteur-scan=").c_str());
     else if (a.rfind("--lot=", 0) == 0) lot = (std::uint32_t)std::atoll(val("--lot=").c_str());
+    else if (a.rfind("--min-cas-codec=", 0) == 0) min_cas_codec = std::atoll(val("--min-cas-codec=").c_str());
     else if (a.rfind("--inject=", 0) == 0) {
       const std::string m = val("--inject=");
       g_inject = true;
@@ -1030,6 +1282,7 @@ int main(int argc, char** argv) {
       else if (m == "pruned-large") g_mu = PfMutant::kPrunedLarge;
       else if (m == "pending-pruned") g_mu = PfMutant::kPendingPruned;
       else if (m == "cap-avant-verdict") g_mu = PfMutant::kCapAvantVerdict;
+      else if (m == "cout-tuile-largeur") g_mu = PfMutant::kCoutTuileLargeur;
       else if (m == "upper-sature-incremental") g_mu = PfMutant::kUpperSatureIncr;
       else return refus("mutant inconnu");
     } else return refus("argument inconnu");
@@ -1037,7 +1290,7 @@ int main(int argc, char** argv) {
 
   if (mode.empty())
     return refus("aucun mode : --exhaustif --saturation --descente --politiques"
-                 " --fixtures --reprise-croisee");
+                 " --fixtures --reprise-croisee --codec");
   if (lot > 4096) return refus("lot de temoins hors de [0,4096]");
   if (h < 1 || h > 60) return refus("seuil hors de [1,60] : h_q=0 tuerait tout par construction");
   if (cap < 1) return refus("cap nul : aucune tuile exacte ne pourrait terminer la descente");
@@ -1057,6 +1310,7 @@ int main(int argc, char** argv) {
   g_arbre.clear();
   construire(0, g_nW);
 
+  if (mode == "codec") return mode_codec(h, min_cas_codec);
   if (mode == "fixtures") return mode_fixtures();
   if (mode == "politiques") return mode_politiques(h, min_ecart_travail, facteur_scan);
   if (mode == "reprise-croisee") return mode_reprise_croisee(h);

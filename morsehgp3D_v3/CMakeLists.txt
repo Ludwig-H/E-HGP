@@ -4980,7 +4980,7 @@ target_compile_options(mhgp3v_pair_frame_probe PRIVATE -Wall -Wextra -Werror)
 # `>=` et `>` se separent, donc la seule ou les mutants de bord sont visibles.
 add_test(NAME mhgp3v_pairframe_fixtures COMMAND mhgp3v_pair_frame_probe --fixtures)
 set_tests_properties(mhgp3v_pairframe_fixtures PROPERTIES
-  PASS_REGULAR_EXPRESSION "abi fixtures gravees=8 desaccords=0")
+  PASS_REGULAR_EXPRESSION "abi fixtures gravees=12 desaccords=0")
 
 # L'espace d'etats de l'ABI en entier, avec un plancher par action contre le
 # vert-par-vacuite : sans lui, une action jamais prise laisserait passer
@@ -4989,7 +4989,7 @@ add_test(NAME mhgp3v_pairframe_abi_exhaustif
   COMMAND mhgp3v_pair_frame_probe --exhaustif --min-par-action=400)
 set_tests_properties(mhgp3v_pairframe_abi_exhaustif PROPERTIES
   PASS_REGULAR_EXPRESSION
-  "etats=43584 terminal=36096 exactify=2496 witness=468 endpoint=2262 pending=2262(.|\n)*desaccords=0")
+  "etats=43584 terminal=36096 exactify=2368 witness=464 endpoint=2328 pending=2328(.|\n)*desaccords=0")
 
 # LA SATURATION EST UN THEOREME : pour tout `h >= 1`, la decision ne depend de
 # `(lower, upper)` que par `(min(h,lower), min(h,upper))`. C'est ce qui autorise
@@ -5008,21 +5008,21 @@ add_test(NAME mhgp3v_pairframe_descente_prefixe
           --min-pending=1 --min-reprises=1 --min-scissions=1 --min-morts=1 --min-vivantes=1)
 set_tests_properties(mhgp3v_pairframe_descente_prefixe PROPERTIES
   PASS_REGULAR_EXPRESSION
-  "pending_state_count=9 pending_pair_mass=9 pending_span_count=27 resume_count=1 continuation_octets=603(.|\n)*morts=26 vivantes=38 ecart=0")
+  "pending_state_count=9 pending_pair_mass=9 pending_span_count=27 resume_count=1 continuation_octets=936(.|\n)*morts=26 vivantes=38 ecart=0")
 add_test(NAME mhgp3v_pairframe_descente_aleatoire
   COMMAND mhgp3v_pair_frame_probe --descente --famille=aleatoire --paires=64
           --temoins=16 --seuil=10 --cap=2 --front-cap=3 --reprise=octets
           --min-pending=1 --min-reprises=1 --min-scissions=1 --min-morts=1 --min-vivantes=1)
 set_tests_properties(mhgp3v_pairframe_descente_aleatoire PROPERTIES
   PASS_REGULAR_EXPRESSION
-  "pending_state_count=55 pending_pair_mass=55 pending_span_count=165 resume_count=1 continuation_octets=3685(.|\n)*morts=21 vivantes=43 ecart=0")
+  "pending_state_count=85 pending_pair_mass=85 pending_span_count=351 resume_count=2 continuation_octets=9224(.|\n)*morts=21 vivantes=43 ecart=0")
 add_test(NAME mhgp3v_pairframe_descente_damier
   COMMAND mhgp3v_pair_frame_probe --descente --famille=damier --paires=64
           --temoins=16 --seuil=10 --cap=2 --front-cap=3 --reprise=octets
           --min-pending=1 --min-reprises=1 --min-scissions=1 --min-morts=1 --min-vivantes=1)
 set_tests_properties(mhgp3v_pairframe_descente_damier PROPERTIES
   PASS_REGULAR_EXPRESSION
-  "pending_state_count=20 pending_pair_mass=20 pending_span_count=60 resume_count=1 continuation_octets=1340(.|\n)*morts=44 vivantes=20 ecart=0")
+  "pending_state_count=20 pending_pair_mass=20 pending_span_count=60 resume_count=1 continuation_octets=2080(.|\n)*morts=44 vivantes=20 ecart=0")
 
 # LA CONTRE-FAMILLE DE TRAVAIL (G3 du contre-audit) : un temoin sur deux est
 # vrai avec une phase qui depend de la paire, donc AUCUN sous-arbre n'est jamais
@@ -5035,7 +5035,7 @@ add_test(NAME mhgp3v_pairframe_descente_adversaire
           --min-pending=1 --min-reprises=1 --min-scissions=1 --min-vivantes=1)
 set_tests_properties(mhgp3v_pairframe_descente_adversaire PROPERTIES
   PASS_REGULAR_EXPRESSION
-  "pending_state_count=64 pending_pair_mass=64 pending_span_count=192 resume_count=1(.|\n)*pruned=0 clear=0(.|\n)*morts=0 vivantes=64 ecart=0")
+  "pending_state_count=128 pending_pair_mass=128 pending_span_count=640 resume_count=2(.|\n)*pruned=0 clear=0(.|\n)*morts=0 vivantes=64 ecart=0")
 
 # LA PORTE DIFFERENTIELLE : G1 (ciblee contre feuilles), G2 (invariance a la
 # politique), G4 (coût du selecteur) et G5 (cap atteint, reprise serialisee) en
@@ -5053,7 +5053,7 @@ foreach(fam prefixe aleatoire damier adversaire)
             --temoins=16 --seuil=10 --min-ecart-travail=400 --facteur-scan=8)
   set_tests_properties(mhgp3v_pairframe_politiques_${fam} PROPERTIES
     PASS_REGULAR_EXPRESSION
-    "nb=12 divergences=0 juge_ecart=0 pending_total=[1-9][0-9]* reprises_total=[1-9](.|\n)*buckets_scan=15 buckets_splits=15 vecteur_scan=120")
+    "nb=12 divergences=0 juge_ecart=0 pending_total=[1-9][0-9]* reprises_total=[1-9](.|\n)*buckets_scan=15 buckets_splits=15 vecteur_scan=135")
 endforeach()
 
 # G1 DU CONTRE-AUDIT : la PROFONDEUR STRUCTURALE et le NOMBRE D'ITERATIONS sont
@@ -5082,14 +5082,14 @@ add_test(NAME mhgp3v_pairframe_selecteur_vectoriel_quadratique
           --temoins=256 --seuil=10 --cap=8 --scission=plus-gros --min-scissions=1)
 set_tests_properties(mhgp3v_pairframe_selecteur_vectoriel_quadratique PROPERTIES
   PASS_REGULAR_EXPRESSION
-  "witness_splits=2431 endpoint_splits=31 exact_tiles=0 child_classifications=4863(.|\n)*selector_scan_items=238560(.|\n)*ecart=0")
+  "witness_splits=2431 endpoint_splits=31 exact_tiles=0 child_classifications=4863(.|\n)*selector_scan_items=240991(.|\n)*ecart=0")
 
 # La racine deja decidee doit se FERMER, jamais s'exactifier : `--max-tuiles=0`.
 add_test(NAME mhgp3v_pairframe_racine_fermee_sans_tuile
   COMMAND mhgp3v_pair_frame_probe --descente --famille=pleine --paires=64
           --temoins=16 --seuil=10 --cap=4096 --min-pruned=1 --max-tuiles=0)
 set_tests_properties(mhgp3v_pairframe_racine_fermee_sans_tuile PROPERTIES
-  PASS_REGULAR_EXPRESSION "exact_tiles=0(.|\n)*pruned=1 clear=0(.|\n)*ecart=0")
+  PASS_REGULAR_EXPRESSION "witness_splits=0 endpoint_splits=0 exact_tiles=0(.|\n)*pruned=1 clear=0(.|\n)*ecart=0")
 
 # ---------------------------------------------------------------------------
 # PORTES NEGATIVES A CODE DE SORTIE EXACT.
@@ -5161,6 +5161,47 @@ mhgp3v_add_expected_code_test_for(mhgp3v_pair_frame_probe
   --descente --famille=pleine --paires=64 --temoins=16 --seuil=10 --cap=4096
   --min-pruned=1 --max-tuiles=0 --inject=cap-avant-verdict)
 
+# G2 DE L'AUDIT `08b7007` : `budget = 1` avec un lot de `8` ne doit jamais
+# produire huit scissions. Le budget etait transforme en BOOLEEN — `budget > 0`
+# —, puis `budget -= faits` appliqué apres coup, donc un lot pouvait le rendre
+# negatif. `lot_effectif` le borne desormais a la source, et l'invariant
+# `budget >= 0` est arme dans la boucle : le violer rend le code `3`.
+add_test(NAME mhgp3v_pairframe_budget_borne_le_lot
+  COMMAND mhgp3v_pair_frame_probe --descente --famille=adversaire --paires=64
+          --temoins=16 --seuil=10 --cap=2 --front-cap=3 --budget-temoins=1 --lot=8
+          --min-scissions=1 --min-vivantes=1)
+set_tests_properties(mhgp3v_pairframe_budget_borne_le_lot PROPERTIES
+  PASS_REGULAR_EXPRESSION "morts=0 vivantes=64 ecart=0")
+
+# ---------------------------------------------------------------------------
+# LE CODEC FAIL-CLOSED, § 4 de l'audit `08b7007`.
+#
+# L'aller-retour sur tampon VALIDE ne prouvait rien : le parseur lisait `na` et
+# `nm` sans preflight, donc un entier fabrique provoquait une lecture hors
+# limites au lieu d'un refus type. `ValidContinuationRoundTrip-v0` n'etait pas
+# `FailClosedContinuationCodec-v1`, et il fallait le dire.
+#
+# Le decodeur preflighte magic, schema, taille d'en-tete, taille de charge
+# utile, somme de controle, puis cardinalites contre les octets RESTANTS, avant
+# la moindre lecture utile ou allocation. Il valide ensuite la semantique :
+# domaine des handles — les extremites et les temoins vivant dans deux domaines
+# DISTINCTS —, antichaine, doublons, masse recalculee, seuil, epoque, lane, et
+# refuse tout octet residuel.
+#
+# `122` corruptions, `122` refus TYPES, zero accepte a tort : troncature a
+# CHAQUE octet du tampon, cardinalites fabriquees jusqu'a `4 000 000 000`,
+# handle hors domaine, doublon, parent et descendant ensemble, masse fausse,
+# lane inconnue, endpoint hors domaine, etat deja terminal, octets finaux.
+#
+# Le codec est sur le CHEMIN NORMAL de la reprise : sans cela, ces portes
+# negatives ne testeraient qu'un code mort.
+add_test(NAME mhgp3v_pairframe_codec_fail_closed
+  COMMAND mhgp3v_pair_frame_probe --codec --paires=64 --temoins=16 --seuil=10
+          --min-cas-codec=100)
+set_tests_properties(mhgp3v_pairframe_codec_fail_closed PROPERTIES
+  PASS_REGULAR_EXPRESSION
+  "abi codec octets=104 cas=122 refus_types=122 acceptes_a_tort=0")
+
 # ---------------------------------------------------------------------------
 # LA REPRISE CROISEE, § 4.2 de l'arbitrage `9739e3c`, dans sa forme forte :
 #
@@ -5186,7 +5227,7 @@ foreach(fam prefixe aleatoire damier adversaire)
             --temoins=16 --seuil=10)
   set_tests_properties(mhgp3v_pairframe_reprise_politique_croisee_${fam} PROPERTIES
     PASS_REGULAR_EXPRESSION
-    "abi croisee nb=8 divergences=0 pending_total=[1-9][0-9]* reprises_total=[1-9] lot_max_global=8")
+    "abi croisee nb=8 divergences=0 pending_total=[1-9][0-9]* reprises_total=[1-9][0-9]* lot_max_global=8")
 endforeach()
 
 # LE MAJORANT SATURE EST UN PIEGE, ET C'EST UNE FAUTE DE SURETE.
@@ -5203,8 +5244,8 @@ endforeach()
 # que la faute n'apparait qu'au MAINTIEN.
 mhgp3v_add_expected_code_test_for(mhgp3v_pair_frame_probe
   mhgp3v_pairframe_mutant_upper_sature_incremental "MUTANT TUE" 4
-  --politiques --famille=adversaire --paires=64 --temoins=16 --seuil=10
-  --inject=upper-sature-incremental)
+  --descente --famille=aleatoire --paires=64 --temoins=16 --seuil=10 --cap=2
+  --front-cap=3 --inject=upper-sature-incremental)
 mhgp3v_add_expected_code_test_for(mhgp3v_pair_frame_probe
   mhgp3v_pairframe_mutant_upper_sature_croisee "MUTANT TUE" 4
   --reprise-croisee --famille=prefixe --paires=64 --temoins=16 --seuil=10
@@ -5239,6 +5280,273 @@ mhgp3v_add_expected_code_test_for(mhgp3v_pair_frame_probe
   mhgp3v_pairframe_refus_mutant "mutant inconnu" 2 --fixtures --inject=inexistant)
 mhgp3v_add_expected_code_test_for(mhgp3v_pair_frame_probe
   mhgp3v_pairframe_refus_lot "lot de temoins hors de" 2 --descente --lot=9999)
+
+# ---------------------------------------------------------------------------
+# q2 DE BOUT EN BOUT : `PairFrame -> W_2 -> identites d'aretes`.
+#
+# Etape 3 de l'ordre de l'auditeur. Geometrie REELLE : nuage u16, ordre de
+# Morton, arbre binaire a boites SERREES, partition exacte des paires, et le
+# `CoreDepthLedger` de `pair_frame.hpp` sans une ligne de modification. Le juge
+# est une force brute `O(n^3)` par paire, bornee a `400` points.
+#
+# POURQUOI q2 EST LE BON BANC D'ESSAI. `W_2(a,b)` est la boule diametrale
+# OUVERTE, et avec `Phi(a,b,z) = (a-z).(b-z)` on a `z dans W_2 <=> Phi < 0`.
+# C'est la SEULE lane ou le fuseau est la miniboule du support : `CORE_CLEAR` y
+# equivaut a la vivacite exacte, et aucun census de circumboule n'est requis.
+#
+# ---------------------------------------------------------------------------
+# LE MASQUE ENDPOINT RELATIONNEL EST UN THEOREME, PAS UN MECANISME
+#
+# C'est le resultat de cette etape, et il n'etait pas testable sur le modele
+# abstrait faute d'analogue a « `z` appartient a `A` ».
+#
+#   THEOREME. Si les intervalles de Morton de `C` et de `A` se recouvrent, le
+#   span `C` n'est JAMAIS classe `ALL`.
+#
+#   PREUVE. Soit `p` dans `A inter C`. Alors `p` est dans la boite de `A` comme
+#   dans celle de `C`, donc le triplet `(a = p, b, z = p)` appartient au produit
+#   des trois boites et donne `Phi = (p-p).(b-p) = 0`. Donc `Phi_max >= 0` et le
+#   test `Phi_max < 0` echoue. Symetrique pour `B`.
+#
+# Il n'y a donc pas de mecanisme separe a ecrire : il y a une inegalite STRICTE
+# a ne pas relacher. La porte `mhgp3v_q2_masque_endpoint_*` balaie tous les
+# rectangles contre tous les nœuds de l'arbre — `11 368` spans endpoint,
+# `relation_all=0` — et le mutant `credit-large` la tue immediatement.
+#
+# Ce que le masque exige encore, c'est la CONSERVATION : un span endpoint n'est
+# pas creditable, mais le jeter perd les temoins qui redeviennent ordinaires des
+# que `A` ne les contient plus. C'est le mutant `endpoint-jete`, et il est letal.
+add_executable(mhgp3v_q2_pairframe_probe prototype/q2_pairframe_probe.cpp)
+target_include_directories(mhgp3v_q2_pairframe_probe PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(mhgp3v_q2_pairframe_probe PRIVATE mhgp)
+target_compile_options(mhgp3v_q2_pairframe_probe PRIVATE -Wall -Wextra -Werror)
+
+# LE JUGE D'IDENTITES PAR FAMILLE. `manquantes` = arete gardee a tort,
+# `fausses` = arete tuee a tort, donc support PERDU. Les deux doivent etre nuls,
+# et `indecises` aussi : une paire sans decision est une partition cassee.
+add_test(NAME mhgp3v_q2_juge_uniform
+  COMMAND mhgp3v_q2_pairframe_probe --juge --famille=uniform --points=120 --seed=3
+          --cap=8 --cap-rect=16 --min-pruned=1 --min-clear=1 --min-tuiles=1
+          --min-scissions=1 --min-mortes=1 --min-vivantes=1)
+set_tests_properties(mhgp3v_q2_juge_uniform PROPERTIES
+  PASS_REGULAR_EXPRESSION
+  "masse=7140 attendue=7140 ecart=0(.|\n)*pruned=37 core_clear=70 spans_elimines=14353(.|\n)*mortes=4546 vivantes=2594 indecises=0 manquantes=0 fausses=0")
+add_test(NAME mhgp3v_q2_juge_terrain
+  COMMAND mhgp3v_q2_pairframe_probe --juge --famille=terrain --points=120 --seed=3
+          --cap=8 --cap-rect=16 --min-pruned=1 --min-clear=1 --min-tuiles=1
+          --min-scissions=1 --min-mortes=1 --min-vivantes=1)
+set_tests_properties(mhgp3v_q2_juge_terrain PROPERTIES
+  PASS_REGULAR_EXPRESSION
+  "pruned=168 core_clear=76 spans_elimines=9157(.|\n)*mortes=5300 vivantes=1840 indecises=0 manquantes=0 fausses=0")
+add_test(NAME mhgp3v_q2_juge_amas
+  COMMAND mhgp3v_q2_pairframe_probe --juge --famille=eight_clusters --points=120 --seed=3
+          --cap=8 --cap-rect=16 --min-pruned=1 --min-clear=1 --min-tuiles=1
+          --min-scissions=1 --min-mortes=1 --min-vivantes=1)
+set_tests_properties(mhgp3v_q2_juge_amas PROPERTIES
+  PASS_REGULAR_EXPRESSION
+  "pruned=48 core_clear=73(.|\n)*mortes=5054 vivantes=2086 indecises=0 manquantes=0 fausses=0")
+add_test(NAME mhgp3v_q2_juge_scanline
+  COMMAND mhgp3v_q2_pairframe_probe --juge --famille=scanline_single_pass --points=120
+          --seed=3 --cap=8 --cap-rect=16 --min-pruned=1 --min-clear=1 --min-tuiles=1
+          --min-scissions=1 --min-mortes=1 --min-vivantes=1)
+set_tests_properties(mhgp3v_q2_juge_scanline PROPERTIES
+  PASS_REGULAR_EXPRESSION
+  "pruned=219 core_clear=84(.|\n)*mortes=5249 vivantes=1891 indecises=0 manquantes=0 fausses=0")
+
+# L'INVARIANT DU MASQUE, ARME ET NON SEULEMENT OBSERVE. Le plancher interdit la
+# vacuite : sans spans endpoint balayes, `relation_all=0` ne prouverait rien.
+foreach(fam uniform terrain eight_clusters)
+  add_test(NAME mhgp3v_q2_masque_endpoint_${fam}
+    COMMAND mhgp3v_q2_pairframe_probe --masque --famille=${fam} --points=120 --seed=3
+            --cap-rect=16 --min-relation=10000)
+  set_tests_properties(mhgp3v_q2_masque_endpoint_${fam} PROPERTIES
+    PASS_REGULAR_EXPRESSION "q2 masque relation_spans=11368 relation_all=0")
+endforeach()
+
+# L'INVARIANCE A LA POLITIQUE SUR GEOMETRIE REELLE, et la porte de coût du
+# selecteur avec elle. Six politiques — trois heuristiques, trois caps de tuile,
+# deux caps de frontiere, trois lots — rendent le MEME ensemble d'aretes.
+#
+# Sur `terrain` a `n=100` : le selecteur a buckets coûte `23 731` unites de scan
+# pour `23 731` scissions, soit exactement une par scission ; le selecteur
+# vectoriel en coûte `473 444`, facteur vingt, pour un travail geometrique
+# equivalent. Le lot de quatre amortit encore, a `6 825`.
+foreach(fam uniform terrain)
+  add_test(NAME mhgp3v_q2_politiques_${fam}
+    COMMAND mhgp3v_q2_pairframe_probe --politiques --famille=${fam} --points=100
+            --seed=3 --cap-rect=16)
+  set_tests_properties(mhgp3v_q2_politiques_${fam} PROPERTIES
+    PASS_REGULAR_EXPRESSION
+    "q2 politiques nb=6 divergences=0 pending_total=[1-9][0-9]* buckets_scan=[1-9][0-9]*")
+endforeach()
+
+# ---------------------------------------------------------------------------
+# LES MUTANTS DE q2. Cinq sur sept meurent sur le juge d'identites ; les deux
+# autres sont diagnostiques et je le dis plutot que de les calibrer.
+#
+#   `credit-large`    `Phi_max <= 0` : credite `z = a` comme temoin de `(a,b)`.
+#                     Tue par le juge ET par l'invariant du masque.
+#   `endpoint-jete`   jette les spans endpoint au lieu de les conserver : les
+#                     temoins qui redeviendraient ordinaires sont perdus.
+#   `none-deux-axes`  `Phi_min` somme sur deux axes au lieu de trois — la faute
+#                     d'ecriture `k < 2`. Le minorant devient trop GRAND, donc
+#                     des spans portant de vrais temoins sont declares `NONE`.
+#   `mort-large`      `lower > h` : rate la mort a l'egalite.
+#   `boite-cellule`   cellule de Morton au lieu de boite serree. CONSERVATEUR
+#                     sous profil u16 — la cellule contient la boite serree —,
+#                     donc invisible au juge ; il detruit en revanche tout
+#                     pouvoir de decision (`pruned=0`, `core_clear=0`,
+#                     `spans_elimines=0`, `118 632` classifications au lieu de
+#                     `93 828`) et meurt sur le plancher de fermetures. Hors
+#                     profil u16 il redevient letal, mais l'entree est refusee
+#                     avant calcul, donc cette porte-la n'existe pas ici.
+#
+# Un mutant que j'ai RETIRE : `none-large`, qui relachait `Phi_min >= 0` en
+# `>= -1`. Sur des coordonnees u16 a l'echelle `49`, `Phi_min = -1` ne se
+# produit jamais : il aurait ete vert par vacuite. Un mutant calibre pour mourir
+# n'est pas un mutant, c'est un decor.
+# LE P0 DE L'AUDIT `08b7007`, DES DEUX COTES. Un cap sur `pair_mass * largeur`
+# accepte une tuile dont le coût ponctuel vaut `pair_mass * population du span` :
+# un span mixte de population `256` et de largeur `1` fait dépasser le cap d'un
+# facteur `256`, et jusqu'a `50 000` sur la cible. Le cap porte donc desormais
+# sur `pair_mass * frontier_candidate_mass_exact`, la comparaison passe par une
+# DIVISION pour ne pas deborder, et l'exactificateur initialise `compte = lower`
+# au lieu de rescanner les spans `ALL`.
+#
+# Le contrat est arme des deux cotes : la fixture d'ABI le refuse a priori, et
+# le compteur `exact_point_predicate_evaluations` verifie a posteriori qu'aucune
+# tuile acceptee n'a depasse le cap qu'elle a invoque pour etre acceptee.
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_frame_probe
+  mhgp3v_pairframe_mutant_cout_tuile_largeur
+  "une tuile de 16384 lectures est acceptee sous un cap de 64" 4
+  --fixtures --inject=cout-tuile-largeur)
+mhgp3v_add_expected_code_test_for(mhgp3v_q2_pairframe_probe
+  mhgp3v_q2_mutant_cout_tuile_largeur
+  "une tuile acceptee a depasse le cap d'evaluations ponctuelles" 4
+  --juge --famille=uniform --points=120 --seed=3 --cap=8 --cap-rect=16
+  --inject=cout-tuile-largeur)
+
+mhgp3v_add_expected_code_test_for(mhgp3v_q2_pairframe_probe
+  mhgp3v_q2_mutant_credit_large "la descente contredit la force brute" 4
+  --juge --famille=uniform --points=120 --seed=3 --cap=8 --cap-rect=16
+  --inject=credit-large)
+mhgp3v_add_expected_code_test_for(mhgp3v_q2_pairframe_probe
+  mhgp3v_q2_mutant_credit_large_masque
+  "un span endpoint a ete credite" 4
+  --masque --famille=uniform --points=120 --seed=3 --cap-rect=16 --min-relation=10000
+  --inject=credit-large)
+mhgp3v_add_expected_code_test_for(mhgp3v_q2_pairframe_probe
+  mhgp3v_q2_mutant_endpoint_jete "la descente contredit la force brute" 4
+  --juge --famille=uniform --points=120 --seed=3 --cap=8 --cap-rect=16
+  --inject=endpoint-jete)
+mhgp3v_add_expected_code_test_for(mhgp3v_q2_pairframe_probe
+  mhgp3v_q2_mutant_none_deux_axes "la descente contredit la force brute" 4
+  --juge --famille=uniform --points=120 --seed=3 --cap=8 --cap-rect=16
+  --inject=none-deux-axes)
+mhgp3v_add_expected_code_test_for(mhgp3v_q2_pairframe_probe
+  mhgp3v_q2_mutant_mort_large "la descente contredit la force brute" 4
+  --juge --famille=terrain --points=120 --seed=3 --cap=8 --cap-rect=16
+  --inject=mort-large)
+mhgp3v_add_expected_code_test_for(mhgp3v_q2_pairframe_probe
+  mhgp3v_q2_mutant_boite_cellule "plancher de fermetures universelles non atteint" 4
+  --juge --famille=uniform --points=120 --seed=3 --cap=8 --cap-rect=16 --min-pruned=1
+  --inject=boite-cellule)
+
+# Les deux mutants d'ABI de `pair_frame.hpp` doivent aussi mourir SUR LA
+# GEOMETRIE, pas seulement sur le modele abstrait : c'est ce qui atteste que le
+# ledger est bien celui qui decide ici.
+mhgp3v_add_expected_code_test_for(mhgp3v_q2_pairframe_probe
+  mhgp3v_q2_mutant_upper_sature "la descente contredit la force brute" 4
+  --juge --famille=uniform --points=120 --seed=3 --cap=8 --cap-rect=16
+  --inject=upper-sature-incremental)
+mhgp3v_add_expected_code_test_for(mhgp3v_q2_pairframe_probe
+  mhgp3v_q2_mutant_upper_sature_terrain "la descente contredit la force brute" 4
+  --juge --famille=terrain --points=120 --seed=3 --cap=8 --cap-rect=16
+  --inject=upper-sature-incremental)
+mhgp3v_add_expected_code_test_for(mhgp3v_q2_pairframe_probe
+  mhgp3v_q2_mutant_clear_large "la descente contredit la force brute" 4
+  --juge --famille=uniform --points=120 --seed=3 --cap=8 --cap-rect=16
+  --inject=clear-large)
+
+# `two_lines` est la famille anisotrope extreme — deux droites gauches — et le
+# juge doit y passer comme ailleurs. J'avais ecrit dans un commentaire qu'elle
+# sortait du profil u16 : c'est FAUX pour la famille generee, dont l'emprise est
+# `65536` et les coordonnees dans `[0, 65535]`. Le controle de profil reste en
+# entree comme garde-fou, mais aucune famille declaree ne le declenche
+# aujourd'hui, et je grave le fait mesure plutot que ma supposition.
+add_test(NAME mhgp3v_q2_juge_deux_droites
+  COMMAND mhgp3v_q2_pairframe_probe --juge --famille=two_lines --points=60
+          --cap=8 --cap-rect=16 --min-clear=1 --min-mortes=1 --min-vivantes=1)
+set_tests_properties(mhgp3v_q2_juge_deux_droites PROPERTIES
+  PASS_REGULAR_EXPRESSION
+  "masse=1770 attendue=1770 ecart=0(.|\n)*mortes=1225 vivantes=545 indecises=0 manquantes=0 fausses=0")
+
+# ---------------------------------------------------------------------------
+# LE SHELL q2 : `NONE_OPEN` N'EST PAS `OUTSIDE_CLOSED`.
+#
+# `W_2` est l'INTERIEUR de la boule diametrale et `H = 0` en est le shell. Un
+# certificat `H_max <= 0` prouve `NONE_OPEN` mais PAS `OUTSIDE_CLOSED` : le span
+# peut contenir des points exactement cospheriques. J'appliquais « `NONE_OPEN`
+# est supprime » uniformement ; pour le compte OUVERT c'est sans consequence,
+# mais le `BallCensusLedger` q2 doit distinguer `I_B` de `U_B`, et un span jete
+# la emporte l'information de cospherie avec lui.
+#
+# Architecture B du § 3.3 de l'arbitrage `f62d986`, avec `Phi = -H` :
+#
+#   `Phi_min > 0`   -> OUTSIDE_CLOSED, eliminable sans reserve
+#   `Phi_min == 0`  -> SHELL_POSSIBLE, transfere, JAMAIS jete
+#
+# CE N'EST PAS UN CAS THEORIQUE. Sur u16 quantifie la cospherie exacte est
+# abondante : `711` triplets sur `uniform`, `1 314` sur `terrain`, `3 019` sur
+# `scanline_single_pass` a `n=120`. J'aurais jete tout cela.
+#
+# `--verifie-shell` verifie EXHAUSTIVEMENT que tout span elimine comme
+# `OUTSIDE_CLOSED` ne contient, pour aucune paire du rectangle, un point
+# cospherique. Le juge d'identites ne peut PAS le faire : un point de shell ne
+# compte pas dans le fuseau ouvert, donc le mutant `shell-jete` y est invisible
+# — il passe `manquantes=0 fausses=0`. C'est la porte de shell, et elle seule,
+# qui le tue.
+foreach(fam uniform terrain eight_clusters scanline_single_pass)
+  add_test(NAME mhgp3v_q2_shell_conserve_${fam}
+    COMMAND mhgp3v_q2_pairframe_probe --juge --famille=${fam} --points=120 --seed=3
+            --cap=8 --cap-rect=16 --verifie-shell --min-shell=100)
+  set_tests_properties(mhgp3v_q2_shell_conserve_${fam} PROPERTIES
+    PASS_REGULAR_EXPRESSION
+    "q2 shell spans_conserves=[1-9][0-9]* masse=[1-9][0-9]* outside_verifies=[1-9][0-9]* perdus=0 total_cospheriques=[1-9][0-9]*")
+endforeach()
+
+# `two_lines` est le TEMOIN NEGATIF : deux droites gauches n'ont aucun triplet
+# cospherique exact (`total_cospheriques=0`). Sans lui, un plancher partout
+# non nul laisserait croire que la cospherie est universelle.
+add_test(NAME mhgp3v_q2_shell_vide_deux_droites
+  COMMAND mhgp3v_q2_pairframe_probe --juge --famille=two_lines --points=60
+          --cap=8 --cap-rect=16 --verifie-shell)
+set_tests_properties(mhgp3v_q2_shell_vide_deux_droites PROPERTIES
+  PASS_REGULAR_EXPRESSION "perdus=0 total_cospheriques=0")
+
+foreach(fam uniform terrain scanline_single_pass)
+  mhgp3v_add_expected_code_test_for(mhgp3v_q2_pairframe_probe
+    mhgp3v_q2_mutant_shell_jete_${fam}
+    "un span elimine contenait des points cospheriques" 4
+    --juge --famille=${fam} --points=120 --seed=3 --cap=8 --cap-rect=16
+    --verifie-shell --min-shell=100 --inject=shell-jete)
+endforeach()
+
+# Les refus avant tout calcul.
+mhgp3v_add_expected_code_test_for(mhgp3v_q2_pairframe_probe
+  mhgp3v_q2_refus_juge_non_borne "bornee a 400 points" 2 --juge --points=1000)
+mhgp3v_add_expected_code_test_for(mhgp3v_q2_pairframe_probe
+  mhgp3v_q2_refus_famille "famille inconnue" 2 --juge --famille=inexistante)
+mhgp3v_add_expected_code_test_for(mhgp3v_q2_pairframe_probe
+  mhgp3v_q2_refus_argument "REFUS : argument inconnu" 2 --juge --nawak)
+mhgp3v_add_expected_code_test_for(mhgp3v_q2_pairframe_probe
+  mhgp3v_q2_refus_mutant "mutant inconnu" 2 --juge --inject=inexistant)
+mhgp3v_add_expected_code_test_for(mhgp3v_q2_pairframe_probe
+  mhgp3v_q2_plancher_shell_vide "plancher de points cospheriques non atteint" 3
+  --juge --famille=two_lines --points=60 --cap=8 --cap-rect=16 --verifie-shell
+  --min-shell=1)
+mhgp3v_add_expected_code_test_for(mhgp3v_q2_pairframe_probe
+  mhgp3v_q2_refus_cap_rect "cap-rect nul" 2 --juge --cap-rect=0)
 
 add_executable(mhgp3v_combined_prefilter_probe prototype/combined_prefilter_probe.cpp)
 target_include_directories(mhgp3v_combined_prefilter_probe PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

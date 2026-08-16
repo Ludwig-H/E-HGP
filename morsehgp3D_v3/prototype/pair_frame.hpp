@@ -122,7 +122,8 @@ enum class PfMutant : std::uint8_t {
   kPrunedLarge,
   kPendingPruned,
   kCapAvantVerdict,
-  kUpperSatureIncr
+  kUpperSatureIncr,
+  kCoutTuileLargeur   // cap sur `pair_mass * largeur` : le P0 de `08b7007`
 };
 
 // ---------------------------------------------------------------------------
@@ -275,29 +276,83 @@ inline bool est_core_clear(const CoreDepthLedger& L, PfMutant mu = PfMutant::kNo
                                        : (u < L.reject_threshold);
 }
 
-// Le coût d'une tuile exacte : autant d'evaluations que de paires fois la
-// largeur de frontiere. C'est ce produit que le cap borne.
-inline std::uint64_t cout_tuile(const CoreDepthLedger& L, const PairFrame& F,
-                                const PolitiqueV0& p) {
-  if (p.cap_sur_masse_seule) return F.pair_mass;
-  const std::uint64_t w = (L.frontier_width == 0u) ? 1u : (std::uint64_t)L.frontier_width;
-  return F.pair_mass * w;
+// ---------------------------------------------------------------------------
+// LE COUT D'UNE TUILE EXACTE SE COMPTE EN EVALUATIONS PONCTUELLES, PAS EN
+// HANDLES. C'est le P0 de l'audit `08b7007`, et le contre-exemple est direct :
+//
+//   `pair_mass = 64`, UN span mixte de population `256`, `frontier_width = 1`,
+//   `exact_tile_cap = 64`.
+//
+// Un cap sur `pair_mass * frontier_width` calcule `64` et accepte la tuile ; la
+// boucle execute `64 * 256 = 16 384` lectures. Le cap est depasse d'un facteur
+// egal a la POPULATION du span, soit jusqu'a `50 000` sur la cible. Ce n'est pas
+// une objection asymptotique : la fonction de coût et la boucle qu'elle pretend
+// borner ne parlaient pas de la meme chose.
+//
+// Les spans `ALL` n'ont pas a etre rescannes : l'exactificateur initialise
+// `compte = lower` et ne parcourt que les candidats mixtes. Le coût ponctuel
+// vaut alors EXACTEMENT `pair_mass * frontier_candidate_mass_exact`.
+//
+// DEUX RESSOURCES, DEUX CAPS. `frontier_cap` borne les handles residents ;
+// `exact_tile_cap` borne les evaluations ponctuelles. Les confondre etait la
+// faute.
+inline std::uint64_t evaluations_tuile(const CoreDepthLedger& L, const PairFrame& F) {
+  return F.pair_mass * (std::uint64_t)L.frontier_candidate_mass_exact;
+}
+
+// La comparaison passe par une DIVISION, jamais par le produit : une ABI de cap
+// n'a aucune raison d'introduire un debordement la ou une division suffit.
+inline bool tuile_tient(std::uint64_t pair_mass, std::uint32_t masse_candidate,
+                        std::uint64_t cap) {
+  if (masse_candidate == 0u) return true;   // rien de mixte : la tuile est libre
+  return pair_mass <= cap / (std::uint64_t)masse_candidate;
+}
+
+inline bool cout_tuile_tient(const CoreDepthLedger& L, const PairFrame& F,
+                             const PolitiqueV0& p, PfMutant mu = PfMutant::kNone) {
+  if (p.cap_sur_masse_seule) return F.pair_mass <= p.exact_tile_cap;
+  if (mu == PfMutant::kCoutTuileLargeur) {
+    const std::uint64_t w = (L.frontier_width == 0u) ? 1u : (std::uint64_t)L.frontier_width;
+    return F.pair_mass * w <= p.exact_tile_cap;  // la faute du P0, rejouee
+  }
+  return tuile_tient(F.pair_mass, L.frontier_candidate_mass_exact, p.exact_tile_cap);
 }
 
 inline Action choisir_action(const CoreDepthLedger& L, const PairFrame& F,
                              bool span_mixte_non_feuille, bool endpoint_scindable,
                              const PolitiqueV0& p, PfMutant mu = PfMutant::kNone) {
-  const std::uint64_t cout = cout_tuile(L, F, p);
-  if (mu == PfMutant::kCapAvantVerdict && cout <= p.exact_tile_cap)
-    return Action::kExactifyTile;
+  const bool tient = cout_tuile_tient(L, F, p, mu);
+  if (mu == PfMutant::kCapAvantVerdict && tient) return Action::kExactifyTile;
   if (est_pruned(L, mu)) return Action::kTerminal;      // PRUNED_BY_UNIVERSAL_DEPTH
   if (est_core_clear(L, mu)) return Action::kTerminal;  // CORE_CLEAR
-  if (cout <= p.exact_tile_cap) return Action::kExactifyTile;
+  if (tient) return Action::kExactifyTile;
   if (p.witness_budget_available && span_mixte_non_feuille &&
       (std::uint64_t)L.frontier_width < p.frontier_cap)
     return Action::kSplitWitness;
   if (endpoint_scindable) return Action::kSplitOneEndpoint;
   return Action::kPending;
+}
+
+// ---------------------------------------------------------------------------
+// LE LOT EFFECTIF. Un budget booleen ne suffit plus des que l'action est
+// batchee : `budget = 1` avec `witness_batch = 8` produisait huit scissions et
+// un budget negatif. Le batch est mathematiquement sûr — les parents d'une
+// antichaine sont deux a deux incomparables —, mais le CONTRAT DE RESSOURCE ne
+// l'etait pas. C'est le P1 de l'audit `08b7007`.
+//
+// `B = 0` signifie « tous les spans scindables », borne par le budget restant.
+struct ActionRecord {
+  Action kind = Action::kPending;
+  std::uint32_t witness_count = 0;
+};
+
+inline std::uint32_t lot_effectif(std::uint32_t demande, long long budget_restant,
+                                  std::uint32_t spans_scindables) {
+  if (budget_restant <= 0 || spans_scindables == 0u) return 0u;
+  std::uint32_t b = (demande == 0u) ? spans_scindables : demande;
+  if (b > spans_scindables) b = spans_scindables;
+  if ((long long)b > budget_restant) b = (std::uint32_t)budget_restant;
+  return b;
 }
 
 // Le fate qui accompagne une action terminale.
@@ -357,6 +412,221 @@ struct CoreContinuation {
   std::vector<NodeHandle> mixed_spans;     // spans encore indecis
   std::vector<NodeHandle> relation_spans;  // spans endpoint, rejoues apres restriction
 };
+
+// ---------------------------------------------------------------------------
+// LE CODEC FAIL-CLOSED. Section 4 de l'audit `08b7007`.
+//
+// L'aller-retour sur tampon VALIDE ne prouve rien contre un tampon tronque ou
+// un champ de taille corrompu : le parseur precedent lisait `na` et `nm` sans
+// preflight, donc un entier fabrique provoquait une lecture hors limites au lieu
+// d'un refus type. `ValidContinuationRoundTrip-v0` n'est pas
+// `FailClosedContinuationCodec-v1`, et il fallait le dire.
+//
+// Le decodeur ci-dessous PREFLIGHTE tout avant la moindre lecture utile ou
+// allocation : magic, schema, taille d'en-tete, taille de charge utile, somme de
+// controle, puis cardinalites contre les octets restants. Ensuite seulement il
+// valide la SEMANTIQUE — domaine des handles, antichaine, doublons, disjonction
+// des trois plages, masse recalculee, seuil, epoque — et refuse tout octet
+// residuel.
+enum class DecodeError : std::uint8_t {
+  kOk = 0,
+  kTropCourt,          // moins que l'en-tete
+  kMagic,              // signature absente
+  kSchema,             // version de schema inconnue de l'execution
+  kEnTete,             // `header_bytes` incoherent
+  kLongueur,           // `payload_bytes` ne colle pas au tampon
+  kSomme,              // somme de controle
+  kCardinalite,        // `na`/`nm`/`nr` ne tiennent pas dans la charge utile
+  kHandleHorsDomaine,  // un `NodeHandle` sort de l'arbre actif
+  kDoublon,            // un span apparait deux fois
+  kAncetre,            // un span est ancetre d'un autre : ce n'est plus une antichaine
+  kMasse,              // la masse stockee ne vaut pas la masse recalculee
+  kSeuil,              // `lower_open_sat` a deja atteint `h_q` : l'etat serait terminal
+  kEpoque,             // epoque, lane ou rectangle etrangers a l'execution
+  kResidu              // octets finaux inattendus
+};
+
+inline const char* decode_error_nom(DecodeError e) {
+  switch (e) {
+    case DecodeError::kOk: return "OK";
+    case DecodeError::kTropCourt: return "TROP_COURT";
+    case DecodeError::kMagic: return "MAGIC";
+    case DecodeError::kSchema: return "SCHEMA";
+    case DecodeError::kEnTete: return "EN_TETE";
+    case DecodeError::kLongueur: return "LONGUEUR";
+    case DecodeError::kSomme: return "SOMME";
+    case DecodeError::kCardinalite: return "CARDINALITE";
+    case DecodeError::kHandleHorsDomaine: return "HANDLE_HORS_DOMAINE";
+    case DecodeError::kDoublon: return "DOUBLON";
+    case DecodeError::kAncetre: return "ANCETRE";
+    case DecodeError::kMasse: return "MASSE";
+    case DecodeError::kSeuil: return "SEUIL";
+    case DecodeError::kEpoque: return "EPOQUE";
+    case DecodeError::kResidu: return "RESIDU";
+  }
+  return "?";
+}
+
+constexpr std::uint32_t kContinuationMagic = 0x50464331u;  // "PFC1"
+constexpr std::uint32_t kContinuationSchema = 1u;
+constexpr std::uint32_t kContinuationHeaderBytes = 44u;
+
+// CRC32 sans table : court, deterministe, et suffisant pour detecter une
+// corruption de champ. Ce n'est pas une signature — l'audit demande une somme
+// de controle, pas une authentification.
+inline std::uint32_t crc32(const std::uint8_t* p, std::size_t n) {
+  std::uint32_t c = 0xffffffffu;
+  for (std::size_t i = 0; i < n; ++i) {
+    c ^= p[i];
+    for (int k = 0; k < 8; ++k) c = (c >> 1) ^ (0xedb88320u & (0u - (c & 1u)));
+  }
+  return ~c;
+}
+
+// L'appelant fournit le domaine : le codec ne connait ni l'arbre ni le nuage, et
+// c'est voulu — il ne doit pas pouvoir croire sur parole ce qu'il decode.
+struct ContexteDecodage {
+  std::uint32_t nb_noeuds = 0;      // domaine des spans temoins
+  // Les extremites `A`/`B` viennent de la partition des PAIRES, les spans de
+  // l'arbre des TEMOINS : deux domaines distincts, et les confondre relacherait
+  // la validation du plus petit des deux. `0` signifie « meme domaine ».
+  std::uint32_t nb_endpoints = 0;
+  std::uint32_t cloud_epoch = 0;
+  std::uint8_t threshold = 0;
+  const void* arbre = nullptr;
+  std::uint32_t (*population)(const void*, NodeHandle) = nullptr;
+  bool (*est_ancetre_ou_egal)(const void*, NodeHandle, NodeHandle) = nullptr;
+};
+
+inline void pf_ecrire32(std::vector<std::uint8_t>* b, std::uint32_t v) {
+  for (int i = 0; i < 4; ++i) b->push_back((std::uint8_t)((v >> (8 * i)) & 0xffu));
+}
+inline std::uint32_t pf_lire32(const std::uint8_t* b, std::size_t o) {
+  std::uint32_t v = 0;
+  for (int i = 0; i < 4; ++i) v |= (std::uint32_t)b[o + (std::size_t)i] << (8 * i);
+  return v;
+}
+
+inline std::vector<std::uint8_t> encode_continuation(const CoreContinuation& k) {
+  std::vector<std::uint8_t> charge;
+  pf_ecrire32(&charge, (std::uint32_t)k.rect_id);
+  pf_ecrire32(&charge, (std::uint32_t)k.a_node);
+  pf_ecrire32(&charge, (std::uint32_t)k.b_node);
+  pf_ecrire32(&charge, (std::uint32_t)k.lane);
+  pf_ecrire32(&charge, (std::uint32_t)k.lower_open_sat);
+  pf_ecrire32(&charge, k.frontier_candidate_mass_exact);
+  pf_ecrire32(&charge, k.policy_version);
+  pf_ecrire32(&charge, (std::uint32_t)(k.pair_mass & 0xffffffffu));
+  pf_ecrire32(&charge, (std::uint32_t)(k.pair_mass >> 32));
+  pf_ecrire32(&charge, (std::uint32_t)k.decided_spans.size());
+  pf_ecrire32(&charge, (std::uint32_t)k.mixed_spans.size());
+  pf_ecrire32(&charge, (std::uint32_t)k.relation_spans.size());
+  for (std::size_t i = 0; i < k.decided_spans.size(); ++i)
+    pf_ecrire32(&charge, (std::uint32_t)k.decided_spans[i]);
+  for (std::size_t i = 0; i < k.mixed_spans.size(); ++i)
+    pf_ecrire32(&charge, (std::uint32_t)k.mixed_spans[i]);
+  for (std::size_t i = 0; i < k.relation_spans.size(); ++i)
+    pf_ecrire32(&charge, (std::uint32_t)k.relation_spans[i]);
+
+  std::vector<std::uint8_t> b;
+  pf_ecrire32(&b, kContinuationMagic);
+  pf_ecrire32(&b, kContinuationSchema);
+  pf_ecrire32(&b, kContinuationHeaderBytes);
+  pf_ecrire32(&b, (std::uint32_t)charge.size());
+  pf_ecrire32(&b, 0u);
+  pf_ecrire32(&b, k.cloud_epoch);
+  pf_ecrire32(&b, 0u);
+  pf_ecrire32(&b, (std::uint32_t)k.threshold);
+  pf_ecrire32(&b, 0u);
+  pf_ecrire32(&b, 0u);
+  pf_ecrire32(&b, charge.empty() ? 0u : crc32(&charge[0], charge.size()));
+  b.insert(b.end(), charge.begin(), charge.end());
+  return b;
+}
+
+inline DecodeError decode_continuation(const std::uint8_t* buf, std::size_t n,
+                                       const ContexteDecodage& c,
+                                       CoreContinuation* out) {
+  // ---- PREFLIGHT. Rien n'est lu au-dela de ce qui a ete prouve present.
+  if (buf == nullptr || n < kContinuationHeaderBytes) return DecodeError::kTropCourt;
+  if (pf_lire32(buf, 0) != kContinuationMagic) return DecodeError::kMagic;
+  if (pf_lire32(buf, 4) != kContinuationSchema) return DecodeError::kSchema;
+  if (pf_lire32(buf, 8) != kContinuationHeaderBytes) return DecodeError::kEnTete;
+  const std::uint32_t charge_octets = pf_lire32(buf, 12);
+  if ((std::uint64_t)kContinuationHeaderBytes + charge_octets != (std::uint64_t)n)
+    return DecodeError::kLongueur;
+  if (charge_octets % 4u != 0u) return DecodeError::kLongueur;
+  const std::uint8_t* charge = buf + kContinuationHeaderBytes;
+  const std::uint32_t somme = pf_lire32(buf, 40);
+  if ((charge_octets == 0u ? 0u : crc32(charge, charge_octets)) != somme)
+    return DecodeError::kSomme;
+  if (pf_lire32(buf, 20) != c.cloud_epoch) return DecodeError::kEpoque;
+  if (pf_lire32(buf, 28) != (std::uint32_t)c.threshold) return DecodeError::kSeuil;
+  const std::uint32_t mots = charge_octets / 4u;
+  if (mots < 12u) return DecodeError::kCardinalite;
+  const std::uint32_t na = pf_lire32(charge, 36), nm = pf_lire32(charge, 40),
+                      nr = pf_lire32(charge, 44);
+  // Les cardinalites sont confrontees aux octets RESTANTS avant toute
+  // allocation : c'est le seul moment ou un entier fabrique est inoffensif.
+  const std::uint64_t attendus = 12ull + (std::uint64_t)na + nm + nr;
+  if (attendus != (std::uint64_t)mots) return DecodeError::kResidu;
+
+  CoreContinuation k;
+  k.rect_id = (int)pf_lire32(charge, 0);
+  k.a_node = (int)pf_lire32(charge, 4);
+  k.b_node = (int)pf_lire32(charge, 8);
+  k.lane = (std::uint8_t)pf_lire32(charge, 12);
+  k.lower_open_sat = (std::uint8_t)pf_lire32(charge, 16);
+  k.frontier_candidate_mass_exact = pf_lire32(charge, 20);
+  k.policy_version = pf_lire32(charge, 24);
+  k.pair_mass = (std::uint64_t)pf_lire32(charge, 28) |
+                ((std::uint64_t)pf_lire32(charge, 32) << 32);
+  k.threshold = c.threshold;
+  k.cloud_epoch = c.cloud_epoch;
+  k.schema_version = kContinuationSchema;
+  if (k.lane != 2u && k.lane != 3u && k.lane != 4u) return DecodeError::kEpoque;
+  if (k.lower_open_sat >= c.threshold) return DecodeError::kSeuil;
+
+  std::size_t o = 48;
+  std::vector<NodeHandle>* cibles[3] = {&k.decided_spans, &k.mixed_spans,
+                                        &k.relation_spans};
+  const std::uint32_t tailles[3] = {na, nm, nr};
+  for (int t = 0; t < 3; ++t)
+    for (std::uint32_t i = 0; i < tailles[t]; ++i, o += 4) {
+      const int h = (int)pf_lire32(charge, o);
+      if (h < 0 || (std::uint32_t)h >= c.nb_noeuds) return DecodeError::kHandleHorsDomaine;
+      cibles[t]->push_back(h);
+    }
+  const std::uint32_t dom_ep = (c.nb_endpoints == 0u) ? c.nb_noeuds : c.nb_endpoints;
+  if (k.a_node < 0 || (std::uint32_t)k.a_node >= dom_ep ||
+      k.b_node < 0 || (std::uint32_t)k.b_node > dom_ep)
+    return DecodeError::kHandleHorsDomaine;
+
+  // ---- SEMANTIQUE. Les trois plages forment ensemble une antichaine : aucun
+  // doublon, aucune relation ancetre-descendant. Un parent et son descendant
+  // compteraient deux fois la meme population.
+  std::vector<NodeHandle> tous;
+  tous.insert(tous.end(), k.decided_spans.begin(), k.decided_spans.end());
+  tous.insert(tous.end(), k.mixed_spans.begin(), k.mixed_spans.end());
+  tous.insert(tous.end(), k.relation_spans.begin(), k.relation_spans.end());
+  for (std::size_t i = 0; i < tous.size(); ++i)
+    for (std::size_t j = i + 1; j < tous.size(); ++j) {
+      if (tous[i] == tous[j]) return DecodeError::kDoublon;
+      if (c.est_ancetre_ou_egal != nullptr &&
+          (c.est_ancetre_ou_egal(c.arbre, tous[i], tous[j]) ||
+           c.est_ancetre_ou_egal(c.arbre, tous[j], tous[i])))
+        return DecodeError::kAncetre;
+    }
+  if (c.population != nullptr) {
+    std::uint64_t masse = 0;
+    for (std::size_t i = 0; i < k.mixed_spans.size(); ++i)
+      masse += c.population(c.arbre, k.mixed_spans[i]);
+    if (masse != (std::uint64_t)k.frontier_candidate_mass_exact)
+      return DecodeError::kMasse;
+  }
+  if (out != nullptr) *out = k;
+  return DecodeError::kOk;
+}
 
 // ---------------------------------------------------------------------------
 // LES TROIS ETATS DE LANE. Ils ne partagent QUE le `PairFrame`.
