@@ -418,3 +418,68 @@ convergent.
 `prototype/acute_owner_gateway.hpp`. **L'implémentation de l'héritage de la
 frontière `C` n'est pas faite** — c'est le prochain commit, et son critère de
 réception est l'exposant `noeuds` sous `2` sur les trois familles denses.
+
+---
+
+## 11. Commit 1 de l'audit `79e73b6` : l'oracle avant l'optimisation
+
+Les deux P0 étaient réels. Je les ai corrigés dans cet ordre, et le premier
+**améliore** la source au lieu de la ralentir.
+
+### P0.1 — le masque endpoint est relationnel, pas géométrique
+
+Ma version supprimait **définitivement** un span témoin dès qu'il recouvrait `A`
+ou `B`. C'est faux : un `z` de `A` est endpoint pour **certaines** paires de
+`A x B`, mais reste un témoin possible pour toute paire `(a,b)` avec `a != z`.
+Après restriction de `A` à un enfant qui ne le contient plus, il doit
+**redevenir** un témoin ordinaire.
+
+Règle correcte : jamais crédité au minorant, **conservé** dans le majorant,
+**rejoué** après toute restriction de `A` ou `B`.
+
+| | avant | après |
+| --- | ---: | ---: |
+| `dead_w4`, `terrain` | `7 393` | **`8 262`** |
+| excès, `terrain` | `1,173` | **`1,126`** |
+| excès, `uniform` | `1,114` | **`1,092`** |
+| excès, `eight_clusters` | `1,121` | **`1,092`** |
+
+Garder les spans pour rejeu rend le ledger plus précis : c'est une correction
+qui paie deux fois.
+
+### P0.2 — le juge par cardinal ne prouve rien
+
+`sparse >= brute` accepte qu'une incidence **vraie manquante** soit compensée
+par une surnuméraire venue d'une ancre morte. Le juge compare désormais les
+**ensembles** de clés `(EdgeKey(a,b), PointId(x))`, et sépare quatre quantités :
+
+| quantité | sens | verdict |
+| --- | --- | --- |
+| `manquantes` | incidence vraie absente | fermeture fausse, code `1` |
+| `doublons` | même clé émise deux fois | exact-once cassé, code `1` |
+| `fausses` | clé émise qui n'est pas porteur | certificat menteur, code `1` |
+| `surcouverture` | porteur **réel** d'ancre morte | publié, **pas** une faute |
+
+Mesuré sur les quatre familles : `manquantes = 0`, `doublons = 0`,
+`fausses = 0`, et `cles_sparse == uniques` — aucune double émission. L'excès est
+**intégralement** de la surcouverture : `1 758` / `5 847` / `8 329`.
+
+C'est un résultat plus fort que le cardinal : il ne dit plus « le compte tombe »,
+il dit **quelles** incidences sont émises.
+
+### Le mutant qui prouve que le nouveau juge est strictement plus fort
+
+`juge-compense` omet un porteur vrai et émet une clé bidon à la place. Le
+**cardinal reste exact** — une omission, une surprise — donc l'ancien juge
+passe. Le juge par identités rend `manquantes=1 fausses=1` et le tue, code `4`.
+
+Sans ce mutant, rien ne distinguerait les deux juges, et j'aurais pu croire
+avoir renforcé quelque chose sans l'avoir fait.
+
+### Ce qui reste du Commit 1
+
+Le juge exhaustif de la partition des `PairId`, **indépendant du gateway**. Mon
+`doublons = 0` sur les clés ternaires en est une forme forte — chaque
+`(arête, apex)` est émis une fois exactement — mais ce n'est pas encore
+l'énoncé « chaque paire non ordonnée apparaît dans exactement un état
+terminal », qui doit se tester sans passer par les porteurs.

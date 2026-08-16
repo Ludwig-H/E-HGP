@@ -4678,6 +4678,52 @@ target_link_libraries(mhgp3v_acute_owner_gateway_probe PRIVATE mhgp)
 # Voir `decide_stable_sous_raffinement` dans `prototype/acute_owner_gateway.hpp`.
 #
 # Cette porte grave les deux regimes pour que la comparaison ne se reperde pas.
+# ---------------------------------------------------------------------------
+# LE COMMIT 1 DE L'AUDIT `79e73b6` : FIABILISER L'ORACLE AVANT TOUTE OPTIMISATION.
+#
+# P0.1 — LE MASQUE ENDPOINT EST RELATIONNEL, PAS GEOMETRIQUE. Ma version
+# supprimait DEFINITIVEMENT un span temoin des qu'il recouvrait `A` ou `B`. Faux :
+# un `z` de `A` est endpoint pour CERTAINES paires de `A x B`, mais reste temoin
+# possible pour toute paire `(a,b)` avec `a != z`. Apres restriction de `A` a un
+# enfant qui ne le contient plus, il doit REDEVENIR temoin. La regle correcte :
+# jamais credite au minorant, conserve dans le majorant, rejoue apres toute
+# restriction.
+#
+# Effet mesure — le correctif AMELIORE la source, il ne la ralentit pas :
+# `dead_w4` passe de `7 393` a `8 262` sur `terrain`, et l'exces tombe de
+# `1,173` a `1,126`, de `1,114` a `1,092` sur `uniform`, de `1,121` a `1,092`
+# sur `eight_clusters`.
+#
+# P0.2 — LE JUGE PAR CARDINAL EST INSUFFISANT. `sparse >= brute` accepte qu'une
+# incidence VRAIE manquante soit compensee par une surnumeraire venue d'une ancre
+# morte. Le juge compare desormais les ENSEMBLES de cles
+# `(EdgeKey(a,b), PointId(x))`, et separe quatre quantites :
+#
+#   `manquantes`    incidence vraie absente        FERMETURE FAUSSE, code 1
+#   `doublons`      meme cle emise deux fois       exact-once casse, code 1
+#   `fausses`       cle emise qui n'est pas porteur  certificat menteur, code 1
+#   `surcouverture` porteur reel d'ancre MORTE     publie, PAS une faute
+#
+# Mesure : `manquantes = 0`, `doublons = 0`, `fausses = 0` sur les quatre
+# familles, et l'exces est INTEGRALEMENT de la surcouverture — `1 758` sur
+# `terrain`, `5 847` sur `uniform`, `8 329` sur `eight_clusters`. Le nombre de
+# cles emises egale le nombre de cles UNIQUES : aucune double emission.
+#
+# LE MUTANT QUI PROUVE QUE LE NOUVEAU JUGE EST STRICTEMENT PLUS FORT.
+# `juge-compense` omet un porteur vrai et emet une cle bidon a la place : le
+# CARDINAL reste exact, donc l'ancien juge passe. Le juge par identites rend
+# `manquantes=1 fausses=1` et le tue, code 4.
+foreach(fam two_lines terrain uniform eight_clusters)
+  add_test(NAME mhgp3v_gateway_identites_${fam}
+    COMMAND mhgp3v_acute_owner_gateway_probe --brute --family=${fam} --points=120)
+  set_tests_properties(mhgp3v_gateway_identites_${fam} PROPERTIES
+    PASS_REGULAR_EXPRESSION "manquantes=0 doublons=0 fausses=0")
+endforeach()
+
+mhgp3v_add_expected_code_test_for(mhgp3v_acute_owner_gateway_probe
+  mhgp3v_gateway_mutant_juge_compense "MUTANT TUE : manquantes=1" 4
+  --brute --family=terrain --points=120 --inject=juge-compense)
+
 add_test(NAME mhgp3v_gateway_ab_fige
   COMMAND mhgp3v_acute_owner_gateway_probe --brute --ab-fige --family=terrain --points=120)
 set_tests_properties(mhgp3v_gateway_ab_fige PROPERTIES
@@ -4733,12 +4779,13 @@ endforeach()
 # demande la mort pour TOUTES les paires du bloc, donc un bloc peut contenir des
 # ancres mortes sans etre tue. `sparse >= brute` est la propriete ; l'inegalite
 # inverse serait une fermeture fausse. L'exces mesure le mou du classifieur
-# conjoint : `1,180` sur `terrain`, `1,116` sur `uniform`, `1,121` sur
-# `eight_clusters`.
+# conjoint : `1,126` sur `terrain`, `1,092` sur `uniform` et sur
+# `eight_clusters`, et il est INTEGRALEMENT de la surcouverture d'ancres mortes,
+# ce que le juge par identites etablit.
 add_test(NAME mhgp3v_gateway_ledger_actif
   COMMAND mhgp3v_acute_owner_gateway_probe --sparse --family=terrain --points=120)
 set_tests_properties(mhgp3v_gateway_ledger_actif PROPERTIES
-  PASS_REGULAR_EXPRESSION "dead_w4=7393 active_edge=3161 seed3_emitted=323")
+  PASS_REGULAR_EXPRESSION "dead_w4=8262 active_edge=1969 seed3_emitted=310")
 
 # `two_lines` : ZERO paire materialisee, et zero porteur. C'est l'exigence
 # exacte de l'ordre d'execution de l'auditeur.

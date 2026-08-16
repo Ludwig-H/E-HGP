@@ -209,7 +209,10 @@ enum class GwMutant {
   kNone,
   kPhiLarge,      // `Phi_max < 0` au lieu de `<= 0` : declare MIXED des blocs morts
   kDeadLarge,     // `Delta_max <= 0` : tue des blocs qui portent
-  kAllStrictLache // `ALL_STRICT` sans la stricte sur les `Delta` : owner faux
+  kAllStrictLache, // `ALL_STRICT` sans la stricte sur les `Delta` : owner faux
+  kJugeCompense    // OMET un porteur vrai et EMET une cle bidon : le cardinal
+                   // reste juste, seul un juge par IDENTITES le voit. C'est lui
+                   // qui prouve que le nouveau juge est strictement plus fort.
 };
 
 inline Verdict classifie(const Extrema& e, GwMutant mu = GwMutant::kNone) {

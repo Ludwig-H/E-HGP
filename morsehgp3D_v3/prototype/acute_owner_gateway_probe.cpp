@@ -230,6 +230,7 @@ struct BilanSparse {
   long long residuel_blocs = 0;     // blocs `MIXED` a exactifier par arete
   long long residuel_rects = 0;     // ... et rectangles DISTINCTS concernes
   long long front2_rects = 0;       // rectangles relances au second front
+  long long relation_spans = 0;     // spans endpoint CONSERVES pour rejeu
   long long residuel_paires = 0;    // et leur masse de paires
   long long frontiere_max = 0;      // plus grande frontiere indecise portee
 };
@@ -289,6 +290,7 @@ int main(int argc, char** argv) {
       if (m == "phi-large") mu = GwMutant::kPhiLarge;
       else if (m == "dead-large") mu = GwMutant::kDeadLarge;
       else if (m == "all-strict-lache") mu = GwMutant::kAllStrictLache;
+      else if (m == "juge-compense") mu = GwMutant::kJugeCompense;
       else { std::fprintf(stderr, "REFUS : mutant inconnu %s\n", m.c_str()); return 2; }
       continue;
     }
@@ -618,6 +620,21 @@ int main(int argc, char** argv) {
     // comptes deux fois. L'exces passait de `1,180` a `1,674` sur `terrain`,
     // et c'est le juge qui l'a montre.
     std::vector<long long> carr_par_rect((size_t)rectangles, 0);
+    // ---- LES CLES, POUR UN JUGE PAR IDENTITES ET NON PAR CARDINAL.
+    //
+    // `sparse >= brute` accepte qu'une incidence VRAIE manquante soit compensee
+    // par une incidence surnumeraire venue d'une ancre morte. L'audit `79e73b6`
+    // a raison de le refuser. On collecte donc la cle
+    // `(EdgeKey(a,b), PointId(x))` des deux cotes et on compare les ENSEMBLES.
+    //
+    // L'expansion des blocs symboliques n'a lieu QUE dans ce mode : le juge a le
+    // droit d'etre cher, le chemin nominal non.
+    std::vector<long long> cles_sparse;
+    auto cle_de = [&](int ia, int ib, int ic) {
+      const long long u = pid[ia] < pid[ib] ? pid[ia] : pid[ib];
+      const long long v = pid[ia] < pid[ib] ? pid[ib] : pid[ia];
+      return (u * 100000LL + v) * 100000LL + pid[ic];
+    };
     // Cap de frontiere : un depassement rend `PENDING`, jamais `DEAD`.
     const int kCapFrontiere = 64;
     // ---- L'AUTO-JOINTURE EN PAS CADENCE, ET POURQUOI ELLE EST NECESSAIRE.
@@ -664,13 +681,30 @@ int main(int argc, char** argv) {
           const int h = pile.back();
           pile.pop_back();
           const int pf = premier(h), pl = dernier(h);
-          // Disjonction : un point de `A` ou de `B` n'est jamais temoin du cœur.
-          if (!(pl < premier(t.A) || pf > dernier(t.A))) {
-            if (!feuille(h)) { pile.push_back(nodes[h].left); pile.push_back(nodes[h].right); }
-            continue;
-          }
-          if (!(pl < premier(t.B) || pf > dernier(t.B))) {
-            if (!feuille(h)) { pile.push_back(nodes[h].left); pile.push_back(nodes[h].right); }
+          // ---- LE MASQUE ENDPOINT EST RELATIONNEL, PAS GEOMETRIQUE.
+          //
+          // Ma version precedente SUPPRIMAIT definitivement un span des qu'il
+          // recouvrait `A` ou `B`. C'est faux, et l'audit `79e73b6` a raison :
+          // un `z` de `A` est endpoint pour CERTAINES paires de `A x B`, mais
+          // il reste un temoin possible pour toute paire `(a,b)` avec `a != z`.
+          // Apres restriction de `A` a un enfant qui ne le contient plus, il
+          // doit REDEVENIR un temoin ordinaire.
+          //
+          // La regle correcte : jamais credite au minorant, CONSERVE dans le
+          // majorant, et rejoue apres toute restriction de `A` ou de `B`. On
+          // garde donc le span avec son masque au lieu de le jeter.
+          const bool ov_a = !(pl < premier(t.A) || pf > dernier(t.A));
+          const bool ov_b = !(pl < premier(t.B) || pf > dernier(t.B));
+          if (ov_a || ov_b) {
+            if (!feuille(h)) {
+              pile.push_back(nodes[h].left);
+              pile.push_back(nodes[h].right);
+            } else {
+              // Feuille endpoint : elle n'est PAS creditee, mais elle reste
+              // dans la frontiere pour etre rejouee chez les enfants.
+              ++g.relation_spans;
+              frontiere.push_back(h);
+            }
             continue;
           }
           const BoxI BZ = boite(h);
@@ -728,6 +762,14 @@ int main(int argc, char** argv) {
         g.carriers_symboliques += masse;
         carr_par_rect[(size_t)t.rect] += masse;
         if (mode_brute) {
+          for (int ia = premier(t.A); ia <= dernier(t.A); ++ia)
+            for (int ib = premier(t.B); ib <= dernier(t.B); ++ib) {
+              if (t.A == t.B && ia >= ib) continue;
+              for (int ic = premier(t.C); ic <= dernier(t.C); ++ic)
+                cles_sparse.push_back(cle_de(ia, ib, ic));
+            }
+        }
+        if (mode_brute) {
           // VERIFICATION DU BLOC, point par point. Elle ne sert qu'au juge : un
           // bloc `ALL_STRICT` doit etre integralement porteur, et un ecart ici
           // LOCALISE la faute bien mieux qu'un total qui ne tombe pas.
@@ -770,7 +812,23 @@ int main(int argc, char** argv) {
             pid[ia] < pid[ib]
                 ? porteur_canonique(pts[ia], pts[ib], pts[ic], pid[ia], pid[ib], pid[ic])
                 : porteur_canonique(pts[ib], pts[ia], pts[ic], pid[ib], pid[ia], pid[ic]);
-        if (porte) { ++g.carriers; carr_par_rect[(size_t)t.rect] += 1; }
+        if (porte) {
+          // ---- LE MUTANT QUI PROUVE LA FORCE DU JUGE.
+          //
+          // `juge-compense` OMET le premier porteur de feuille et EMET a la
+          // place une cle bidon. Le CARDINAL reste exact — une omission, une
+          // surprise — donc l'ancien juge `sparse >= brute` passe. Seul un juge
+          // par IDENTITES voit `manquantes = 1` et `fausses = 1`.
+          if (mu == GwMutant::kJugeCompense && g.carriers == 0 && mode_brute) {
+            ++g.carriers;
+            carr_par_rect[(size_t)t.rect] += 1;
+            cles_sparse.push_back(cle_de(ia, ib, ic) + 1);  // cle decalee : bidon
+            continue;
+          }
+          ++g.carriers;
+          carr_par_rect[(size_t)t.rect] += 1;
+          if (mode_brute) cles_sparse.push_back(cle_de(ia, ib, ic));
+        }
         continue;
       }
       // On coupe la PLUS GROSSE des trois, ce qui fait decroitre le produit des
@@ -863,6 +921,7 @@ int main(int argc, char** argv) {
     //
     // Coût `C(n,3)`, donc borne a petit `n` : c'est un juge, pas un chemin.
     long long ref_brute = -1;
+    std::vector<long long> cles_brute;
     if (mode_brute) {
       ref_brute = 0;
       // ---- LE JUGE MESURE LA CONJONCTION, ET C'EST TOUT L'INTERET.
@@ -893,8 +952,10 @@ int main(int argc, char** argv) {
           if (w4 >= r4) continue;  // ancre morte : ses porteurs ne comptent pas
           for (int k = 0; k < m; ++k) {
             if (k == ia || k == ib) continue;
-            if (porteur_canonique(pts[ia], pts[ib], pts[k], pid[ia], pid[ib], pid[k]))
+            if (porteur_canonique(pts[ia], pts[ib], pts[k], pid[ia], pid[ib], pid[k])) {
               ++ref_brute;
+              cles_brute.push_back(cle_de(ia, ib, k));
+            }
           }
         }
     }
@@ -953,13 +1014,13 @@ int main(int argc, char** argv) {
                 "carriers_symboliques=%lld blocs_faux=%lld dead_w4=%lld active_edge=%lld "
                 "seed3_emitted=%lld pending=%lld l4_credits=%lld frontiere_max=%lld "
                 "rectangles=%lld residuel_blocs=%lld residuel_rects=%lld residuel_paires=%lld "
-                "front2_rects=%lld\n",
+                "front2_rects=%lld relation_spans=%lld\n",
                 famille.c_str(), n, g.noeuds, g.dead_phi, g.dead_e, g.dead_x,
                 g.all_strict, g.masse_all_strict, g.feuilles, g.pairid_expanded,
                 g.carriers, g.carriers_symboliques, g.blocs_faux, g.dead_w4,
                 g.active_edge, g.seed3_emitted, g.pending, g.l4_credits,
                 g.frontiere_max, rectangles, g.residuel_blocs, g.residuel_rects,
-                g.residuel_paires, g.front2_rects);
+                g.residuel_paires, g.front2_rects, g.relation_spans);
     if (mode_brute) {
       const long long total = g.carriers + g.carriers_symboliques;
       // ---- LE SENS DE L'ECART, ET POURQUOI IL N'EST PLUS ZERO.
@@ -970,6 +1031,62 @@ int main(int argc, char** argv) {
       // contrat. Le juge exige `sparse >= brute` — l'inegalite inverse serait
       // une fermeture fausse, le defaut le plus grave possible — et publie
       // l'exces, qui mesure le mou du classifieur conjoint.
+      // ---- LE JUGE PAR IDENTITES.
+      //
+      // Trois fautes distinctes, qu'un cardinal confond :
+      //   `manquantes` : une incidence VRAIE absente du sparse — FERMETURE
+      //                  FAUSSE, la faute la plus grave ;
+      //   `doublons`   : la meme cle emise deux fois — le recouvrement exact-once
+      //                  est casse ;
+      //   `fausses`    : une cle emise qui n'est PAS un porteur — le certificat
+      //                  symbolique ment.
+      // Et une quantite qui n'est PAS une faute, publiee a part :
+      //   `surcouverture` : un porteur reel dont l'ancre est morte. La source
+      //                  etant fail-open au niveau bloc, elle en emet.
+      std::sort(cles_sparse.begin(), cles_sparse.end());
+      long long doublons = 0;
+      for (size_t i = 1; i < cles_sparse.size(); ++i)
+        if (cles_sparse[i] == cles_sparse[i - 1]) ++doublons;
+      std::vector<long long> uniq = cles_sparse;
+      uniq.erase(std::unique(uniq.begin(), uniq.end()), uniq.end());
+      long long manquantes = 0;
+      for (long long k : cles_brute)
+        if (!std::binary_search(uniq.begin(), uniq.end(), k)) ++manquantes;
+      std::sort(cles_brute.begin(), cles_brute.end());
+      long long fausses = 0, surcouverture = 0;
+      for (long long k : uniq) {
+        if (std::binary_search(cles_brute.begin(), cles_brute.end(), k)) continue;
+        // Hors de la verite conjointe : porteur d'ancre morte, ou pas porteur ?
+        const int px = (int)(k % 100000);
+        const long long e = k / 100000;
+        const int pv = (int)(e % 100000), pu = (int)(e / 100000);
+        int ia = -1, ib = -1, ic = -1;
+        for (int i = 0; i < m; ++i) {
+          if (pid[i] == pu) ia = i;
+          if (pid[i] == pv) ib = i;
+          if (pid[i] == px) ic = i;
+        }
+        if (ia >= 0 && ib >= 0 && ic >= 0 &&
+            porteur_canonique(pts[ia], pts[ib], pts[ic], pid[ia], pid[ib], pid[ic]))
+          ++surcouverture;
+        else
+          ++fausses;
+      }
+      std::printf("identites cles_sparse=%zu uniques=%zu cles_brute=%zu "
+                  "manquantes=%lld doublons=%lld fausses=%lld surcouverture=%lld\n",
+                  cles_sparse.size(), uniq.size(), cles_brute.size(),
+                  manquantes, doublons, fausses, surcouverture);
+      if (manquantes > 0 || doublons > 0 || fausses > 0) {
+        if (mu != GwMutant::kNone) {
+          std::fprintf(stderr, "MUTANT TUE : manquantes=%lld doublons=%lld fausses=%lld\n",
+                       manquantes, doublons, fausses);
+          return 4;
+        }
+        std::fprintf(stderr,
+                     "DESACCORD DU JUGE : manquantes=%lld doublons=%lld fausses=%lld\n",
+                     manquantes, doublons, fausses);
+        return 1;
+      }
       const double exces = ref_brute > 0 ? (double)total / (double)ref_brute : 0.0;
       std::printf("juge brute=%lld sparse=%lld ecart=%lld exces=%.3f\n",
                   ref_brute, total, total - ref_brute, exces);
