@@ -4732,6 +4732,47 @@ target_link_libraries(mhgp3v_acute_owner_gateway_probe PRIVATE mhgp)
 # et le recouvrement doit rester exact — l'ordre Morton organise le calcul,
 # `EdgeKey` reste definie par les vrais `PointId`, et aucune deduplication
 # geometrique n'est permise. Verifie a `K = 0`, `5` et `40`.
+# ---------------------------------------------------------------------------
+# LES TROIS REGIMES D'ANTICHAINE — ma question Q1, tranchee par la mesure.
+#
+# L'audit demandait de remplacer la descente jusqu'aux feuilles par une
+# antichaine GROSSIERE, `upper = lower + somme des populations`, avec saturation
+# au seuil. Mesure a `n=120`, juge par identites propre dans les trois cas :
+#
+#   regime      terrain nœuds   dead_w4   active_edge   surcouverture
+#   feuilles      1 901 072       8 262        1 969           1 758
+#   grossiere     3 461 098       3 120          447          61 276
+#   ciblee        1 578 364       8 262        1 969           1 758
+#
+# LA GROSSIERE EST REFUTEE. Sans descente, la frontiere garde le nuage entier
+# comme un seul span : `front_masse_max = 120 = n`, donc `U4 = n`, donc
+# `U4 < r4` ne tire JAMAIS. `active_edge` est divise par quatorze et `dead_w4`
+# par sept — sur `uniform`, `330` contre `22 818`. La saturation ne sauve rien
+# parce qu'elle n'arrive pas.
+#
+# LA DESCENTE AUX FEUILLES decide bien, mais reconstitue un CSR de points : c'est
+# l'objection de l'audit, et elle est juste.
+#
+# LA CIBLEE est la sortie, et ce n'est aucune des deux options que j'avais
+# posees. On ne descend QUE le plus gros span indecis, et on s'arrete des que
+# `L4 >= r4` (mort) ou `L4 + somme des populations < r4` (entierement vivant).
+# Elle rend les MEMES decisions que les feuilles sur `terrain` pour `17 %` de
+# nœuds en moins, et `25 %` en moins sur `uniform` avec une surcouverture PLUS
+# FAIBLE. Son critere d'arret est `r4` : la profondeur est gouvernee par le
+# SEUIL, pas par `n`. C'est le defaut.
+add_test(NAME mhgp3v_gateway_antichaine_grossiere_refutee
+  COMMAND mhgp3v_acute_owner_gateway_probe --brute --antichaine=grossiere
+          --family=uniform --points=120)
+set_tests_properties(mhgp3v_gateway_antichaine_grossiere_refutee PROPERTIES
+  PASS_REGULAR_EXPRESSION
+  "dead_w4=330(.|\n)*manquantes=0 doublons=0 fausses=0 surcouverture=62437")
+
+add_test(NAME mhgp3v_gateway_antichaine_ciblee
+  COMMAND mhgp3v_acute_owner_gateway_probe --brute --family=terrain --points=120)
+set_tests_properties(mhgp3v_gateway_antichaine_ciblee PROPERTIES
+  PASS_REGULAR_EXPRESSION
+  "dead_w4=8262 active_edge=1969(.|\n)*manquantes=0 doublons=0 fausses=0 surcouverture=1758")
+
 foreach(fam two_lines terrain uniform eight_clusters)
   add_test(NAME mhgp3v_gateway_partition_${fam}
     COMMAND mhgp3v_acute_owner_gateway_probe --partition --family=${fam} --points=200)

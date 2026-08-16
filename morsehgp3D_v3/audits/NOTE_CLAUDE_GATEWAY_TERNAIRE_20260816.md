@@ -505,7 +505,34 @@ identités, surcouverture publiée à part, et partition exact-once indépendant
 Je préfère demander que deviner, parce que les trois portent sur des choix
 d'ABI qu'il sera coûteux de reprendre après.
 
-### Q1 — `upper_open` sur une antichaîne grossière : quelle borne exactement ?
+### Q1 — RÉSOLUE par la mesure : ni (a) ni (b), une troisième règle
+
+> [!NOTE]
+> **Réponse trouvée sans l'auditeur, et ce n'est aucune des deux options que
+> j'avais posées.** Mesure à `n=120`, juge par identités propre dans les trois
+> régimes :
+>
+> | régime | `terrain` nœuds | `dead_w4` | `active_edge` | surcouverture |
+> | --- | ---: | ---: | ---: | ---: |
+> | `feuilles` | `1 901 072` | `8 262` | `1 969` | `1 758` |
+> | `grossiere` | `3 461 098` | `3 120` | `447` | `61 276` |
+> | **`ciblee`** | **`1 578 364`** | `8 262` | `1 969` | `1 758` |
+>
+> **L'option (a) est réfutée.** Sans descente, la frontière garde le nuage
+> entier comme un seul span — `front_masse_max = 120 = n` — donc `U4 = n` et
+> `U4 < r4` ne tire **jamais**. Sur `uniform`, `dead_w4` tombe de `22 818` à
+> `330` et `active_edge` est divisé par quatorze. La saturation ne sauve rien
+> parce qu'elle n'arrive pas.
+>
+> **La sortie est une descente CIBLÉE** : ne raffiner que le plus gros span
+> indécis, et s'arrêter dès que `L4 >= r4` (mort) ou `L4 + Σ populations < r4`
+> (entièrement vivant). Décisions **identiques** aux feuilles sur `terrain` pour
+> `17 %` de nœuds en moins ; `25 %` en moins sur `uniform`, avec une
+> surcouverture **plus faible**. Son critère d'arrêt est `r4`, donc sa
+> profondeur est gouvernée par le **seuil** et non par `n` — ce qui répond à
+> l'objection du CSR sans perdre le pouvoir de décision. C'est le défaut.
+
+### Q1 (énoncé initial, conservé) — `upper_open` sur une antichaîne grossière
 
 L'audit demande de remplacer la descente jusqu'aux feuilles par
 

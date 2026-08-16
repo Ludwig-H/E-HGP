@@ -231,6 +231,7 @@ struct BilanSparse {
   long long residuel_rects = 0;     // ... et rectangles DISTINCTS concernes
   long long front2_rects = 0;       // rectangles relances au second front
   long long relation_spans = 0;     // spans endpoint CONSERVES pour rejeu
+  long long front_masse_max = 0;    // plus grande masse de frontiere portee
   long long residuel_paires = 0;    // et leur masse de paires
   long long frontiere_max = 0;      // plus grande frontiere indecise portee
 };
@@ -244,6 +245,26 @@ int main(int argc, char** argv) {
   bool mode_oracle = false, mode_sparse = false, mode_brute = false, biais = false;
   bool mode_fixture = false;
   bool ab_fige = false, deux_fronts = false, mode_partition = false;
+  // ---- LA DESCENTE CIBLEE EST LE DEFAUT (reponse a ma question Q1).
+  //
+  // Les trois regimes sont mesures, `n=120`, juge par identites propre
+  // partout :
+  //
+  //   feuilles   terrain 1 901 072 nœuds  dead 8 262  surcouv 1 758
+  //   grossiere  terrain 3 461 098 nœuds  dead 3 120  surcouv 61 276
+  //   ciblee     terrain 1 578 364 nœuds  dead 8 262  surcouv 1 758
+  //
+  // La GROSSIERE est refutee : elle garde le nuage entier comme un seul
+  // span, donc `U4 = n`, donc `U4 < r4` ne tire JAMAIS — `active_edge`
+  // divise par quatorze — et la saturation ne sauve rien puisqu'elle
+  // n'arrive pas. La descente aux FEUILLES decide bien mais reconstitue un
+  // CSR de points, ce que l'audit refuse a juste titre.
+  //
+  // La CIBLEE rend les MEMES decisions que les feuilles sur `terrain` pour
+  // `17 %` de nœuds en moins, et `25 %` en moins sur `uniform` avec une
+  // surcouverture plus faible. Son critere d'arret est `r4`, donc sa
+  // profondeur est gouvernee par le SEUIL et non par `n`.
+  bool antichaine_grossiere = true, antichaine_ciblee = true;
   long long max_pairid = -1, min_carriers = -1, min_noeuds = 0;
   int r4 = 8;   // seuil de rejet q4, `h_4 = s_max - 3`
   int force_doublons = 0;  // positions dupliquees imposees, IDs distincts
@@ -268,6 +289,9 @@ int main(int argc, char** argv) {
     const std::string a = argv[i];
     long long t = 0;
     if (a == "--fixtures") { mode_fixture = true; continue; }
+    if (a == "--antichaine=grossiere") { antichaine_grossiere = true; antichaine_ciblee = false; continue; }
+    if (a == "--antichaine=ciblee") { antichaine_grossiere = true; antichaine_ciblee = true; continue; }
+    if (a == "--antichaine=feuilles") { antichaine_grossiere = false; antichaine_ciblee = false; continue; }
     if (a == "--partition") { mode_sparse = true; mode_partition = true; continue; }
     if (a == "--ab-fige") { ab_fige = true; continue; }
     if (a == "--deux-fronts") { ab_fige = true; deux_fronts = true; continue; }
@@ -799,9 +823,69 @@ int main(int argc, char** argv) {
           const BoxI BZ = boite(h);
           if (bloc_tout_w4(BA, BB, BZ, &g.noeuds)) { L4 += pl - pf + 1; ++g.l4_credits; continue; }
           if (bloc_aucun_w2(extrema(BA, BB, BZ))) continue;  // hors `W_2`, donc hors `W_4`
-          if (feuille(h)) { frontiere.push_back(h); continue; }
+          // ---- LES DEUX REGIMES D'ANTICHAINE (question Q1 a l'auditeur).
+          //
+          // `feuilles`  : on descend jusqu'aux feuilles, donc `U4 = L4 + |F|`
+          //               compte des POINTS et le majorant est serre. Mais cela
+          //               reconstitue un CSR de points et ne passe pas a
+          //               l'echelle — c'est l'objection de l'audit.
+          // `grossiere` : on garde le span ENTIER des qu'il est indecis, et
+          //               `U4 = L4 + somme des populations`. Aucune descente,
+          //               mais le majorant est lache : un gros span compte pour
+          //               toute sa population alors que quelques points
+          //               seulement seraient dans `W_4`.
+          //
+          // La question est de savoir si la saturation a `h_q` suffit a rendre
+          // `upper < h_q` exploitable malgre la lachete. On mesure au lieu de
+          // supposer.
+          if (feuille(h) || antichaine_grossiere) { frontiere.push_back(h); continue; }
           pile.push_back(nodes[h].left);
           pile.push_back(nodes[h].right);
+          (void)0;
+        }
+        // ---- ANTICHAINE CIBLEE : on ne descend QUE ce qui peut changer le verdict.
+        //
+        // La decision ne demande que deux choses : `L4 >= r4` (mort) ou
+        // `L4 + masse de la frontiere < r4` (bloc entierement vivant). Tant
+        // qu'aucune des deux ne tient, un seul span doit etre raffine — le PLUS
+        // GROS, puisque c'est lui qui porte l'incertitude. Des que l'une tient,
+        // la descente s'arrete.
+        //
+        // C'est la sortie de l'alternative de ma question Q1 : la frontiere
+        // grossiere ne decide jamais — mesure `dead_w4` a `330` contre `22 818`
+        // et `active_edge` divise par quatorze — et la descente aux feuilles
+        // reconstitue un CSR. Le critere d'arret est `r4`, donc la profondeur
+        // est gouvernee par le SEUIL et non par `n`.
+        if (antichaine_ciblee) {
+          for (;;) {
+            if (L4 >= r4) break;  // mort : plus rien a raffiner
+            long long mf = 0;
+            for (int h : frontiere) mf += dernier(h) - premier(h) + 1;
+            if (L4 + mf < r4) break;  // entierement vivant : plus rien a raffiner
+            // Le plus gros span indecis, s'il en reste un a scinder.
+            int best = -1, bestp = 1;
+            for (size_t i = 0; i < frontiere.size(); ++i) {
+              const int h = frontiere[i];
+              if (feuille(h)) continue;
+              const int pp = dernier(h) - premier(h) + 1;
+              if (pp > bestp) { bestp = pp; best = (int)i; }
+            }
+            if (best < 0) break;  // que des feuilles : on ne peut plus affiner
+            const int h = frontiere[(size_t)best];
+            frontiere.erase(frontiere.begin() + best);
+            for (int c = 0; c < 2; ++c) {
+              const int e = c ? nodes[h].right : nodes[h].left;
+              const int pf2 = premier(e), pl2 = dernier(e);
+              const bool oa = !(pl2 < premier(t.A) || pf2 > dernier(t.A));
+              const bool ob = !(pl2 < premier(t.B) || pf2 > dernier(t.B));
+              if (oa || ob) { frontiere.push_back(e); ++g.relation_spans; continue; }
+              const BoxI BE = boite(e);
+              if (bloc_tout_w4(BA, BB, BE, &g.noeuds)) { L4 += pl2 - pf2 + 1; ++g.l4_credits; continue; }
+              if (bloc_aucun_w2(extrema(BA, BB, BE))) continue;
+              frontiere.push_back(e);
+            }
+            if ((int)frontiere.size() > 4 * kCapFrontiere) break;  // garde-fou
+          }
         }
         if (!pile.empty()) {
           // ---- FRONTIERE TRONQUEE : ON NE PERD RIEN.
@@ -821,10 +905,15 @@ int main(int argc, char** argv) {
         g.frontiere_max = (long long)frontiere.size();
       // Frontiere tronquee : `U4` est INCONNU, donc majore par l'infini —
       // `ACTIVE_ALL` ne peut pas se declencher, et rien n'est tue pour autant.
+      // `U4` compte les POPULATIONS des spans, pas leur nombre : un span garde
+      // entier represente tous ses points. En regime `feuilles` les deux
+      // coincident, chaque span valant un point.
+      long long masse_front = 0;
+      for (int h : frontiere) masse_front += dernier(h) - premier(h) + 1;
       const long long U4 = t.ab_neuf
-                               ? (tronquee ? (long long)1 << 60
-                                           : L4 + (long long)frontiere.size())
+                               ? (tronquee ? (long long)1 << 60 : L4 + masse_front)
                                : t.U4;
+      if (masse_front > g.front_masse_max) g.front_masse_max = masse_front;
 
       const Extrema ex = extrema(BA, BB, BC);
       const VerdictConjoint vc = classifie_conjoint(ex, L4, U4, r4, mu);
@@ -1103,13 +1192,14 @@ int main(int argc, char** argv) {
                 "carriers_symboliques=%lld blocs_faux=%lld dead_w4=%lld active_edge=%lld "
                 "seed3_emitted=%lld pending=%lld l4_credits=%lld frontiere_max=%lld "
                 "rectangles=%lld residuel_blocs=%lld residuel_rects=%lld residuel_paires=%lld "
-                "front2_rects=%lld relation_spans=%lld\n",
+                "front2_rects=%lld relation_spans=%lld front_masse_max=%lld\n",
                 famille.c_str(), n, g.noeuds, g.dead_phi, g.dead_e, g.dead_x,
                 g.all_strict, g.masse_all_strict, g.feuilles, g.pairid_expanded,
                 g.carriers, g.carriers_symboliques, g.blocs_faux, g.dead_w4,
                 g.active_edge, g.seed3_emitted, g.pending, g.l4_credits,
                 g.frontiere_max, rectangles, g.residuel_blocs, g.residuel_rects,
-                g.residuel_paires, g.front2_rects, g.relation_spans);
+                g.residuel_paires, g.front2_rects, g.relation_spans,
+                g.front_masse_max);
     if (mode_brute) {
       const long long total = g.carriers + g.carriers_symboliques;
       // ---- LE SENS DE L'ECART, ET POURQUOI IL N'EST PLUS ZERO.
