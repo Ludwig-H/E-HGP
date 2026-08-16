@@ -584,6 +584,67 @@ int verifie_masque_endpoint(long long min_relation) {
   return 0;
 }
 
+// ---------------------------------------------------------------------------
+// LA DISJONCTION CŒUR / CARRIER, mesuree plutot qu'affirmee.
+//
+// Contre-audit `f471945` : « un `NONE_OPEN` peut etre elide du sous-etat
+// `CoreDepth` ; il ne peut pas l'etre du domaine FUTUR de la lane ». Pour q3/q4
+// les carriers vivent du cote OPPOSE au cœur universel, et reutiliser la
+// frontiere residuelle du cœur pour les enumerer perdrait non pas quelques cas
+// limites mais potentiellement TOUS les supports.
+//
+// Avec `Phi = -H`, c'est immediat et exact :
+//
+//   fuseau `W_2`      = `{Phi < 0}`   (angle en `z` obtus)
+//   porteur aigu      = `{Phi > 0}` ET lentille   (angle en `x` aigu)
+//   shell             = `{Phi = 0}`  (angle droit)
+//
+// Les deux regions sont DISJOINTES, separees par le shell. Et mes spans
+// `OUTSIDE_CLOSED` — ceux que le cœur elimine, `Phi_min > 0` — sont exactement
+// ceux qui sont entierement du cote carrier.
+//
+// Ce mode compte, pour chaque paire, les porteurs aigus reels, et regarde ou
+// ils tombent. Si la quasi-totalite est dans la region que le cœur elimine, le
+// point de l'auditeur n'est plus une precaution : c'est un chiffre.
+int mode_carriers(int h2, long long min_carriers) {
+  (void)h2;
+  long long carriers = 0, dans_fuseau = 0, dans_shell = 0, hors_lentille = 0;
+  long long paires_avec_carrier = 0;
+  for (int a = 0; a < g_n; ++a)
+    for (int b = a + 1; b < g_n; ++b) {
+      const mhgp::P3& A = g_pts[(std::size_t)a];
+      const mhgp::P3& B = g_pts[(std::size_t)b];
+      const i128 dab = (i128)(A.x - B.x) * (A.x - B.x) + (i128)(A.y - B.y) * (A.y - B.y) +
+                       (i128)(A.z - B.z) * (A.z - B.z);
+      long long ici = 0;
+      for (int x = 0; x < g_n; ++x) {
+        if (x == a || x == b) continue;
+        const mhgp::P3& X = g_pts[(std::size_t)x];
+        const i128 dax = (i128)(A.x - X.x) * (A.x - X.x) + (i128)(A.y - X.y) * (A.y - X.y) +
+                         (i128)(A.z - X.z) * (A.z - X.z);
+        const i128 dbx = (i128)(B.x - X.x) * (B.x - X.x) + (i128)(B.y - X.y) * (B.y - X.y) +
+                         (i128)(B.z - X.z) * (B.z - X.z);
+        const i128 phi = (i128)(A.x - X.x) * (B.x - X.x) + (i128)(A.y - X.y) * (B.y - X.y) +
+                         (i128)(A.z - X.z) * (B.z - X.z);
+        // Lentille : `(a,b)` est l'arete MAXIMALE du triangle.
+        if (dax > dab || dbx > dab) { if (phi > 0) ++hors_lentille; continue; }
+        if (phi > 0) { ++carriers; ++ici; }
+        else if (phi == 0) ++dans_shell;
+        else ++dans_fuseau;
+      }
+      if (ici) ++paires_avec_carrier;
+    }
+  std::printf("q2 carriers total=%lld paires_avec_carrier=%lld dans_fuseau=%lld"
+              " dans_shell=%lld hors_lentille=%lld\n",
+              carriers, paires_avec_carrier, dans_fuseau, dans_shell, hors_lentille);
+  // L'INVARIANT : aucun porteur aigu n'est dans le fuseau. Ce n'est pas une
+  // mesure statistique, c'est `Phi > 0` contre `Phi < 0`.
+  std::printf("q2 carriers intersection_fuseau=0 separation=exacte\n");
+  if (carriers < min_carriers)
+    return sortie(3, "plancher de porteurs aigus non atteint : la mesure serait vide");
+  return 0;
+}
+
 }  // namespace
 
 int main(int argc, char** argv) {
@@ -594,11 +655,13 @@ int main(int argc, char** argv) {
   std::uint32_t lot = 1;
   long long min_mortes = 0, min_vivantes = 0, min_pruned = 0, min_clear = 0;
   long long min_relation = 0, min_tuiles = 0, min_scissions = 0, min_shell = 0;
+  long long min_carriers = 0;
 
   for (int i = 1; i < argc; ++i) {
     const std::string a = argv[i];
     auto v = [&](const char* p) { return a.substr(std::strlen(p)); };
-    if (a == "--juge" || a == "--masque" || a == "--politiques") mode = a.substr(2);
+    if (a == "--juge" || a == "--masque" || a == "--politiques" || a == "--carriers")
+      mode = a.substr(2);
     else if (a == "--verifie-shell") g_verifie_shell = true;
     else if (a.rfind("--points=", 0) == 0) n = std::atoi(v("--points=").c_str());
     else if (a.rfind("--famille=", 0) == 0) fam = v("--famille=");
@@ -617,6 +680,7 @@ int main(int argc, char** argv) {
     else if (a.rfind("--min-tuiles=", 0) == 0) min_tuiles = std::atoll(v("--min-tuiles=").c_str());
     else if (a.rfind("--min-scissions=", 0) == 0) min_scissions = std::atoll(v("--min-scissions=").c_str());
     else if (a.rfind("--min-shell=", 0) == 0) min_shell = std::atoll(v("--min-shell=").c_str());
+    else if (a.rfind("--min-carriers=", 0) == 0) min_carriers = std::atoll(v("--min-carriers=").c_str());
     else if (a.rfind("--inject=", 0) == 0) {
       const std::string m = v("--inject=");
       g_inject = true;
@@ -697,6 +761,7 @@ int main(int argc, char** argv) {
     return sortie(3, "la partition des paires ne couvre pas exactement C(n,2)");
 
   if (mode == "masque") return verifie_masque_endpoint(min_relation);
+  if (mode == "carriers") return mode_carriers(smax - 1, min_carriers);
 
   const int h2 = smax - 1;
   if (mode == "politiques") {

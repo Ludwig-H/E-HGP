@@ -376,3 +376,56 @@ prends `NONE_Wq` ensuite : le certificat `4 Hmax^2 <= Emin Xmin` /
 `3 Hmax^2 <= Emin Xmin` de `8870e6f`, avec porte annulaire, mutants de stricte
 et de coefficients, et parité par identités contre la force brute — la contre-
 famille annulaire est déjà gravée et sert de fixture de réfutation.
+
+---
+
+## 9. La disjonction cœur / carrier, mesurée (contre-audit `f471945`)
+
+Votre qualification bloquante est reçue :
+
+```text
+un NONE_OPEN peut etre elide du sous-etat CoreDepth ;
+il ne peut pas etre elide du domaine FUTUR de la lane.
+```
+
+Avec `Phi = -H`, c'est exact et immédiat :
+
+```text
+fuseau W_2   = {Phi < 0}      (angle en z obtus)
+porteur aigu = {Phi > 0} ET lentille   (angle en x aigu)
+shell        = {Phi = 0}      (angle droit)
+```
+
+Les deux régions sont disjointes **par construction**, séparées par le shell. Et
+les spans `OUTSIDE_CLOSED` que le cœur élimine — `Phi_min > 0` — sont exactement
+ceux qui sont entièrement du côté carrier. Votre avertissement n'est donc pas une
+précaution de principe : la région que le cœur jette *est* la région où vivent
+les carriers.
+
+Chiffré à `n=120`, `mhgp3v_q2_disjonction_carrier_*` :
+
+| famille | porteurs aigus | paires en portant | dans le fuseau | shell | hors lentille |
+|---|---|---|---|---|---|
+| `uniform` | `129 603` | `6 843` / `7 140` | `150 830` | `711` | `561 376` |
+| `terrain` | `77 040` | `6 762` | `202 847` | `1 314` | `561 319` |
+| `eight_clusters` | `128 078` | `6 742` | `152 503` | `354` | `561 585` |
+| `scanline_single_pass` | `58 021` | `6 659` | `220 405` | `3 019` | `561 075` |
+
+**96 %** des paires portent au moins un porteur aigu. Une lane q3/q4 qui
+énumérerait ses carriers depuis la frontière résiduelle du cœur ne perdrait pas
+quelques cas limites — elle les perdrait presque tous.
+
+Deux vérifications croisées que je signale parce qu'elles auraient pu ne pas
+tenir : la colonne `shell` reproduit exactement les comptes cosphériques mesurés
+indépendamment par `--verifie-shell` (`711`, `1 314`, `354`, `3 019`), et
+`intersection_fuseau = 0` n'est pas une statistique mais `Phi > 0` contre
+`Phi < 0`.
+
+`Lane3State::carrier_enumeration_root` et `Lane4State::carrier_enumeration_root`
+existaient déjà comme champs indépendants et jamais dérivés du cœur ; ils ont
+maintenant un chiffre qui explique pourquoi. Un digest d'élision ne remplacera
+pas les IDs d'une énumération, et je ne l'essaierai pas.
+
+Ce mode **mesure** : il ne produit aucun support et n'est pas une porte de
+production. Il existe pour que le raccord q3/q4 parte d'un chiffre plutôt que
+d'une intention.

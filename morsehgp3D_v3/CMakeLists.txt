@@ -5295,6 +5295,43 @@ mhgp3v_add_expected_code_test_for(mhgp3v_pair_frame_probe
 # equivaut a la vivacite exacte, et aucun census de circumboule n'est requis.
 #
 # ---------------------------------------------------------------------------
+# LA DISJONCTION CŒUR / CARRIER, MESUREE — contre-audit `f471945`.
+#
+# « Un `NONE_OPEN` peut etre elide du sous-etat `CoreDepth` ; il ne peut pas
+# l'etre du domaine FUTUR de la lane. » Avec `Phi = -H` c'est exact et immediat :
+#
+#   fuseau `W_2` = `{Phi < 0}`    porteur aigu = `{Phi > 0}` ET lentille
+#
+# Les deux regions sont disjointes, separees par le shell `{Phi = 0}` — et les
+# spans `OUTSIDE_CLOSED` (`Phi_min > 0`), ceux que le cœur elimine, sont
+# exactement ceux qui sont entierement du cote carrier.
+#
+# CE QUE COUTERAIT DE L'OUBLIER, en chiffres a `n=120` : `129 603` porteurs
+# aigus sur `uniform`, et `96 %` des paires en portent au moins un. Une lane
+# q3/q4 qui enumererait ses carriers depuis la frontiere residuelle du cœur ne
+# perdrait pas quelques cas limites — elle les perdrait presque tous.
+#
+# D'ou `Lane3State::carrier_enumeration_root` et
+# `Lane4State::carrier_enumeration_root`, independants et jamais derives du
+# cœur. Un digest d'elision ne peut pas remplacer les IDs d'une enumeration.
+#
+# Ce mode MESURE ; il ne produit aucun support et n'est pas une porte de
+# production. Il existe pour que le raccord q3/q4 parte d'un chiffre.
+foreach(fam uniform terrain eight_clusters scanline_single_pass)
+  add_test(NAME mhgp3v_q2_disjonction_carrier_${fam}
+    COMMAND mhgp3v_q2_pairframe_probe --carriers --famille=${fam} --points=120
+            --seed=3 --min-carriers=10000)
+  set_tests_properties(mhgp3v_q2_disjonction_carrier_${fam} PROPERTIES
+    PASS_REGULAR_EXPRESSION
+    "q2 carriers total=[1-9][0-9]* paires_avec_carrier=[1-9][0-9]*(.|\n)*intersection_fuseau=0 separation=exacte")
+endforeach()
+
+# Le plancher n'est pas decoratif : sans porteur aigu, la mesure serait vide.
+mhgp3v_add_expected_code_test_for(mhgp3v_q2_pairframe_probe
+  mhgp3v_q2_plancher_carriers "plancher de porteurs aigus non atteint" 3
+  --carriers --famille=uniform --points=120 --seed=3 --min-carriers=999999999)
+
+# ---------------------------------------------------------------------------
 # LE MASQUE ENDPOINT RELATIONNEL EST UN THEOREME, PAS UN MECANISME
 #
 # C'est le resultat de cette etape, et il n'etait pas testable sur le modele
