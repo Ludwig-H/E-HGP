@@ -5391,6 +5391,37 @@ mhgp3v_add_expected_code_test_for(mhgp3v_combined_prefilter_probe
 #
 # CE QUE `two_lines` IMPOSE. `Theta(n^2)` paires `W4`-vivantes, et **zéro**
 # porteur. La contraction doit valoir exactement `1`.
+# ---------------------------------------------------------------------------
+# PORTEURS D'UNE ANCRE VIVANTE : `O(h)`, ET NON `O(n)`.
+#
+# Une ancre `W_4`-vivante a moins de `h_4 = 8` points dans son fuseau ; le
+# rapport lentille/`W_4` valant `10,86`, elle ne peut porter que quelques
+# dizaines de porteurs sous densité locale uniforme. Mesuré, `s=8` :
+#
+#   famille          n=200   n=400   n=800    max a n=800
+#   terrain           4,99    5,39    5,86        99
+#   uniform          16,10   18,58   21,49       136
+#   eight_clusters   23,21   35,67   48,52       430
+#
+# et `C4` restreint aux ancres VIVANTES croît en `n^1,23` / `n^1,47` / `n^1,70`
+# — SOUS-QUADRATIQUE sur les trois familles.
+#
+# CE QUE CELA CORRIGE. Le `n^3,01` mesuré par le gateway ternaire ne venait pas
+# de ce que « les triangles aigus seraient cubiques en général », mais de ce que
+# ce probe-la n'a AUCUN filtre d'ancre — ni exact, ni même le préfiltre. Avec le
+# seul préfiltre, `C4` est déjà en `n^1,30`.
+#
+# CE QUI N'EST PAS BORNE, et qu'un kernel GPU doit traiter : la moyenne croît
+# lentement (`23,2` à `48,5` sur `eight_clusters`) et le MAXIMUM croît à peu
+# près linéairement (`110`, `222`, `430`). Un buffer dimensionné sur la moyenne
+# déborderait ; il faut un cap déclaré par seed et un chemin de débordement.
+add_test(NAME mhgp3v_porteurs_par_ancre_vivante
+  COMMAND mhgp3v_combined_prefilter_probe --points=400 --family=terrain --seed=3
+          --separation=8 --smax=11 --seeds)
+set_tests_properties(mhgp3v_porteurs_par_ancre_vivante PROPERTIES
+  PASS_REGULAR_EXPRESSION
+  "C4_sur_V4=65881 C4_sur_V4_moy=5\\.39 C4_sur_V4_max=51 C4_sur_morts=70073 C4_sur_morts_max=59")
+
 foreach(fam two_lines uniform terrain eight_clusters)
   add_test(NAME mhgp3v_seed_elagage_exact_${fam}
     COMMAND mhgp3v_combined_prefilter_probe --points=400 --family=${fam} --seed=3
@@ -5406,7 +5437,7 @@ add_test(NAME mhgp3v_two_lines_etages_separes
 set_tests_properties(mhgp3v_two_lines_etages_separes PROPERTIES
   PASS_REGULAR_EXPRESSION
   "S4_prefilter_survivor=43128 V4_pair_walive_exact=43128 V4_sans_carrier=43128 contraction_V4=1\\.0000 mou_S4_sur_V4=1\\.000(.|
-)*C4_carrier=0 C4_carrier_weak_owner=0 C4_carrier_elag=0 ecarts=0")
+)*C4_carrier=0 C4_sur_V4=0 C4_sur_V4_moy=0\\.00 C4_sur_V4_max=0 C4_sur_morts=0 C4_sur_morts_max=0 C4_carrier_weak_owner=0 C4_carrier_elag=0 ecarts=0")
 
 # ---------------------------------------------------------------------------
 # L'ÉLAGAGE PAR BLOC : deux disjoints, et je note ce que j'ai réfuté en route.

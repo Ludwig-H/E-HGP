@@ -1040,6 +1040,8 @@ struct Ledger {
   long long seed_V4 = 0;
   long long seed_V4_sans_carrier = 0;
   long long seed_C4_weak = 0;
+  long long C4_sur_V4 = 0, C4_sur_V4_max = 0;      // porteurs des ancres VIVANTES
+  long long C4_sur_morts = 0, C4_sur_morts_max = 0;  // ... et des ancres mortes
 };
 
 struct Rect {
@@ -2274,6 +2276,23 @@ int main(int argc, char** argv) {
           if (v4) {
             ++L.seed_V4;
             if (cref == 0) ++L.seed_V4_sans_carrier;
+            // ---- LA QUESTION QUI DECIDE DE LA SPARSITE.
+            //
+            // Une ancre `W_4`-VIVANTE a moins de `h_4 = 8` points dans son
+            // fuseau. Le rapport lentille/`W_4` valant `10,86`, sous densite
+            // locale uniforme elle ne devrait porter que quelques dizaines de
+            // porteurs — `O(h)`, pas `O(n)`. Mon exposant cubique venait
+            // d'avoir compte les porteurs de TOUTES les ancres, mortes
+            // comprises : une ancre morte a un fuseau plein, donc un `D` enorme,
+            // donc une lentille qui contient une fraction constante du nuage.
+            //
+            // On separe donc les deux, et on publie aussi le MAXIMUM : c'est la
+            // queue qui decide, pas la moyenne.
+            L.C4_sur_V4 += cref;
+            if (cref > L.C4_sur_V4_max) L.C4_sur_V4_max = cref;
+          } else {
+            L.C4_sur_morts += cref;
+            if (cref > L.C4_sur_morts_max) L.C4_sur_morts_max = cref;
           }
           L.seed_total_ref += cref;
           L.seed_C4_weak += cweak;
@@ -2697,14 +2716,19 @@ int main(int argc, char** argv) {
     std::printf("etages S4_prefilter_survivor=%lld V4_pair_walive_exact=%lld "
                 "V4_sans_carrier=%lld contraction_V4=%.4f mou_S4_sur_V4=%.3f "
                 "S4_sans_carrier=%lld contraction_S4=%.4f "
-                "C4_carrier=%lld C4_carrier_weak_owner=%lld C4_carrier_elag=%lld "
+                "C4_carrier=%lld C4_sur_V4=%lld C4_sur_V4_moy=%.2f C4_sur_V4_max=%lld "
+                "C4_sur_morts=%lld C4_sur_morts_max=%lld "
+                "C4_carrier_weak_owner=%lld C4_carrier_elag=%lld "
                 "ecarts=%lld travail_ref=%lld travail_elag=%lld gain=%.3f "
                 "blocs_elagues=%lld points_elagues=%lld certif_juges=%lld "
                 "certif_desaccords=%lld\n",
                 L.seed_S4, L.seed_V4, L.seed_V4_sans_carrier, contraction_v4,
                 L.seed_V4 > 0 ? (double)L.seed_S4 / (double)L.seed_V4 : 0.0,
                 L.seed_ancres_sans, contraction,
-                L.seed_total_ref, L.seed_C4_weak, L.seed_total_elag,
+                L.seed_total_ref, L.C4_sur_V4,
+                L.seed_V4 > 0 ? (double)L.C4_sur_V4 / (double)L.seed_V4 : 0.0,
+                L.C4_sur_V4_max, L.C4_sur_morts, L.C4_sur_morts_max,
+                L.seed_C4_weak, L.seed_total_elag,
                 L.seed_ecarts, L.seed_travail_ref, L.seed_travail_elag, gain,
                 L.seed_blocs_elagues, L.seed_points_elagues, L.seed_juges,
                 L.seed_desaccords_certif);

@@ -112,6 +112,39 @@ Il est exact, il est sûr, il tient `two_lines` sans une paire — et il n'est p
 encore sparse sur un nuage ordinaire, parce qu'il compte autre chose que ce
 qu'il faut compter.
 
+## 4bis. Correction — le cubique venait de l'absence de filtre, pas de l'objet
+
+> [!CAUTION]
+> **La lecture de la section 4 était trop pessimiste, et l'utilisateur l'a vu
+> avant moi.** Une ancre `W_4`-vivante a moins de `h_4 = 8` points dans son
+> fuseau ; le rapport lentille/`W_4` valant `10,86`, elle ne peut porter que
+> quelques dizaines de porteurs. Le `n^3,01` ne vient donc pas de l'objet, mais
+> de ce que le gateway n'a **aucun** filtre d'ancre — ni exact, ni même le
+> préfiltre.
+
+Mesuré, en séparant les porteurs des ancres vivantes de ceux des ancres mortes :
+
+| famille | `n=200` | `n=400` | `n=800` | max à `n=800` | exposant de `C4` sur `V4` |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| `terrain` | `4,99` | `5,39` | `5,86` | `99` | `n^1,23` |
+| `uniform` | `16,10` | `18,58` | `21,49` | `136` | `n^1,47` |
+| `eight_clusters` | `23,21` | `35,67` | `48,52` | `430` | `n^1,70` |
+
+**Sous-quadratique sur les trois familles.** Avec le seul préfiltre — sans même
+le test exact — `C4` est déjà en `n^1,30`. Le `10,86` prédit bien l'ordre de
+grandeur : `terrain` est très en dessous, `eight_clusters` au-dessus, comme pour
+la lentille.
+
+Ce qui n'est **pas** borné, et qu'un kernel GPU doit traiter explicitement : la
+moyenne croît lentement — `23,2` à `48,5` sur `eight_clusters` — et le
+**maximum croît à peu près linéairement**, `110`, `222`, `430`. Un buffer
+dimensionné sur la moyenne déborderait. Il faut un cap déclaré par seed et un
+chemin de débordement, jamais une moyenne.
+
+`two_lines` reste hors de ce raisonnement : ses ancres croisées sont vivantes
+avec un `|ab|` énorme. C'est là que le gateway par blocs reste nécessaire — les
+deux mécanismes sont complémentaires, pas concurrents.
+
 ## 5. Ce qu'il reste à faire, et qui est maintenant clair
 
 Le gateway doit porter **les deux** filtres au même niveau de bloc :
@@ -123,6 +156,20 @@ Le gateway doit porter **les deux** filtres au même niveau de bloc :
 Un bloc `A x B x C` doit mourir si **l'une ou l'autre** tombe. C'est cette
 fusion, et non un certificat géométrique de plus, qui rendra la source
 sous-quadratique sur les familles denses.
+
+Et le pipeline entièrement sparse se lit alors ainsi, chaque étage étant une
+requête octree à sortie **bornée et mesurée** :
+
+    pour chaque `a`  (un point par thread ou par warp)
+      `b` <- candidats locaux, la vivacité de l'ancre bornant `|ab|`
+      `x` <- requête sur `L(a,b)` privée de `B(m, |ab|/2)`   5 à 49 points
+      `y` <- requête sur le cœur de Jung `B(c0, |ab|/4)`     au plus 8 avant mort
+
+La région pour `x` est une intersection de deux boules privée d'une troisième :
+trois tests sphère--boîte par nœud, entiers et `O(1)`, primitives déjà présentes
+dans `spindle_core_ball.hpp`. L'octree rend un surensemble par boîtes, le
+prédicat exact `Phi`/`Delta` filtre ensuite — c'est exactement la « génération
+sparse avant vérification exacte ».
 
 ## 6. Les portes, et les deux espèces de mutants
 
