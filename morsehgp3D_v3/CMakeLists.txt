@@ -4762,9 +4762,19 @@ target_link_libraries(mhgp3v_acute_owner_gateway_probe PRIVATE mhgp)
 #
 # > RETRACTATION. J'avais ecrit « la profondeur est gouvernee par le SEUIL, pas
 # > par `n` ». C'est trop fort, et mes propres compteurs le refutent :
-# > `frontier_peak` vaut `0,99 n` a `1,00 n` sur les quatre familles, et
-# > `refine_depth_max` atteint `100` a `n=120` sur `uniform`, soit `0,83 n`,
-# > pour un seuil `r4 = 8`.
+# > `frontier_candidate_mass_peak` vaut `0,99 n` a `1,00 n` sur les quatre
+# > familles, et `state_refine_iterations_max` atteint `100` a `n=120` sur
+# > `uniform` pour un seuil `r4 = 8`.
+# >
+# > CE QUE CES DEUX CHIFFRES NE DISENT PAS — contre-audit `a6171d`, sections 2
+# > et 3. Le premier est une MASSE de points candidats, pas une frontiere
+# > physique : un unique span racine donne `masse = n` avec un seul handle
+# > stocke, donc c'est un diagnostic de selectivite et non une HWM memoire. Le
+# > second compte les ITERATIONS de la boucle pour un etat, pas une chaine
+# > ancetre-descendant ; le radix LBVH u16 a une profondeur interne bornee par
+# > `48 + 16 = 64` bits de cle plus tie-break, donc il ne PEUT pas avoir un
+# > chemin de cent niveaux a `n=120`. J'avais ecrit « profondeur `0,83 n` » :
+# > c'est faux, et le nom du compteur en etait la cause.
 # >
 # > La raison est donnee par l'audit `288032` section 6.1 : sept temoins dans
 # > `W_4` et les autres points arranges de part et d'autre de la frontiere
@@ -4773,9 +4783,12 @@ target_link_libraries(mhgp3v_acute_owner_gateway_probe PRIVATE mhgp)
 # >
 # > Enonce correct : raffinement PILOTE par le seuil, arret anticipe des qu'un
 # > verdict est prouve, AUCUNE borne deterministe independante de `n` au pire
-# > cas. Le coût s'exprime en `O(spans classes + scissions endpoint)`, et cinq
-# > compteurs le rendent mesurable : `frontier_peak`, `refine_steps`,
-# > `cap_hits`, `continuation_mass`, `refine_depth_max`.
+# > cas. Le coût N'EST PAS non plus `O(spans classes + scissions endpoint)` pour
+# > ce probe : le selecteur rescanne la frontiere entiere a chaque iteration,
+# > donc il paie `somme des F_t`, potentiellement quadratique. C'est le coût du
+# > FUTUR ordonnanceur, sous reserve du selecteur a buckets — mesure dans
+# > `pair_frame_probe`, ou le rescan tombe de `238 560` a `2 431` unites pour un
+# > travail geometrique identique.
 #
 # ET `CORE_CLEAR` N'EST PAS `LIVE_EXACT`. `L4 + masse_front < r4` prouve
 # seulement qu'AUCUNE paire du bloc n'est tuee par le cœur universel `W_q`. Pour
@@ -4786,7 +4799,7 @@ add_test(NAME mhgp3v_gateway_profondeur_non_bornee_par_le_seuil
   COMMAND mhgp3v_acute_owner_gateway_probe --brute --family=uniform --points=120)
 set_tests_properties(mhgp3v_gateway_profondeur_non_bornee_par_le_seuil PROPERTIES
   PASS_REGULAR_EXPRESSION
-  "frontier_peak=112 refine_steps=213187 cap_hits=0 continuation_mass=0 refine_depth_max=100")
+  "frontier_candidate_mass_peak=112 refine_steps=213187 cap_hits=0 pending_state_point_incidence_mass=0 state_refine_iterations_max=100")
 add_test(NAME mhgp3v_gateway_antichaine_grossiere_refutee
   COMMAND mhgp3v_acute_owner_gateway_probe --brute --antichaine=grossiere
           --family=uniform --points=120)
@@ -4920,6 +4933,257 @@ mhgp3v_add_expected_code_test_for(mhgp3v_acute_owner_gateway_probe
 mhgp3v_add_expected_code_test_for(mhgp3v_acute_owner_gateway_probe
   mhgp3v_gateway_refus_brute_non_bornee "--brute borne a 400 points" 2
   --brute --points=1000)
+
+# ---------------------------------------------------------------------------
+# L'ABI `PairFrame + CoreDepthLedger` — l'ORDONNANCEUR, et rien d'autre.
+#
+# CE QUE CES PORTES COUVRENT. Le modele remplace le fuseau `W_q` par une matrice
+# de statuts declaree, mais il garde EXACTEMENT la structure des bornes du
+# gateway ternaire : un span entierement vrai credite le minorant, un span
+# entierement faux ne credite pas le majorant. Les deux bornes encadrent le
+# compte de chaque paire du bloc et sont monotones sous raffinement — les deux
+# seules proprietes dont l'ordonnanceur depend. Le juge est une force brute par
+# paire, calculee sans jamais passer par le ledger.
+#
+# CE QU'ELLES NE COUVRENT PAS, ET IL FAUT LE DIRE : ni les predicats
+# geometriques, ni le masque endpoint relationnel — un temoin `z` appartenant a
+# `A` ou `B` n'a aucun analogue dans un modele abstrait —, ni le census de
+# circumboule. Ces trois-la appartiennent a « recevoir q2 de bout en bout ».
+#
+# ---------------------------------------------------------------------------
+# LES DEUX CORRECTIONS QUE CES PORTES ONT IMPOSEES
+#
+# 1. LE CAP DE LA SECTION 9 NE PEUT PAS SE DECLENCHER. Pose sur `pair_mass`,
+#    `PENDING_RESOURCE` est INATTEIGNABLE : la branche exige `pair_mass > cap`,
+#    aucun span mixte scindable et aucun endpoint scindable ; or un endpoint non
+#    scindable signifie `A` et `B` tous deux feuilles, donc `pair_mass = 1 <=
+#    cap`. Contradiction. Le defaut est apparu parce que le plancher de
+#    couverture a refuse la porte avec `pending_total=0`, pas en relisant le
+#    code. La ressource qui deborde vraiment est la LARGEUR DE FRONTIERE, et le
+#    coût d'une tuile est `pair_mass * |frontiere|`. La porte
+#    `mhgp3v_pairframe_cap_section9_sans_continuation` grave le defaut a code
+#    exact plutot que de le laisser disparaitre dans un correctif silencieux.
+#
+# 2. LE SELECTEUR VECTORIEL COUTE QUADRATIQUE, ET C'EST MESURE. Le contre-audit
+#    `a6171d` l'annoncait ; a `256` temoins, les deux selecteurs font un travail
+#    geometrique IDENTIQUE — `witness_splits=2431`, `child_classifications=4863`,
+#    memes pics, meme resultat — pour `2431` unites de scan en buckets contre
+#    `238560` en vectoriel, facteur `98`. Le selecteur a buckets est desormais
+#    la politique PAR DEFAUT, et son invariant `scan <= splits + verifications`
+#    est arme en permanence, sans option.
+add_executable(mhgp3v_pair_frame_probe prototype/pair_frame_probe.cpp)
+target_include_directories(mhgp3v_pair_frame_probe PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_compile_options(mhgp3v_pair_frame_probe PRIVATE -Wall -Wextra -Werror)
+
+# Les fixtures sont TOUTES aux egalites exactes : `lower == h`, `upper == h-1`,
+# `coût == cap`, `floor(log2)` aux puissances de deux. C'est la seule region ou
+# `>=` et `>` se separent, donc la seule ou les mutants de bord sont visibles.
+add_test(NAME mhgp3v_pairframe_fixtures COMMAND mhgp3v_pair_frame_probe --fixtures)
+set_tests_properties(mhgp3v_pairframe_fixtures PROPERTIES
+  PASS_REGULAR_EXPRESSION "abi fixtures gravees=8 desaccords=0")
+
+# L'espace d'etats de l'ABI en entier, avec un plancher par action contre le
+# vert-par-vacuite : sans lui, une action jamais prise laisserait passer
+# n'importe quel mutant sur sa branche.
+add_test(NAME mhgp3v_pairframe_abi_exhaustif
+  COMMAND mhgp3v_pair_frame_probe --exhaustif --min-par-action=400)
+set_tests_properties(mhgp3v_pairframe_abi_exhaustif PROPERTIES
+  PASS_REGULAR_EXPRESSION
+  "etats=43584 terminal=36096 exactify=2496 witness=468 endpoint=2262 pending=2262(.|\n)*desaccords=0")
+
+# LA SATURATION EST UN THEOREME : pour tout `h >= 1`, la decision ne depend de
+# `(lower, upper)` que par `(min(h,lower), min(h,upper))`. C'est ce qui autorise
+# deux octets au lieu de deux entiers dependant de `n`. Le plancher exige des
+# comptes bruts au-dela de `255`, sinon la troncature a huit bits survivrait.
+add_test(NAME mhgp3v_pairframe_saturation
+  COMMAND mhgp3v_pair_frame_probe --saturation --min-grands=72)
+set_tests_properties(mhgp3v_pairframe_saturation PROPERTIES
+  PASS_REGULAR_EXPRESSION "abi saturation cas=540 grands=72 desaccords=0")
+
+# Le juge par famille, caps etrangles pour que les continuations existent, et
+# reprise PAR LES OCTETS : rien de l'etat en memoire ne survit au cap.
+add_test(NAME mhgp3v_pairframe_descente_prefixe
+  COMMAND mhgp3v_pair_frame_probe --descente --famille=prefixe --paires=64
+          --temoins=16 --seuil=10 --cap=2 --front-cap=3 --reprise=octets
+          --min-pending=1 --min-reprises=1 --min-scissions=1 --min-morts=1 --min-vivantes=1)
+set_tests_properties(mhgp3v_pairframe_descente_prefixe PROPERTIES
+  PASS_REGULAR_EXPRESSION
+  "pending_state_count=9 pending_pair_mass=9 pending_span_count=27 resume_count=1 continuation_octets=540(.|\n)*morts=26 vivantes=38 ecart=0")
+add_test(NAME mhgp3v_pairframe_descente_aleatoire
+  COMMAND mhgp3v_pair_frame_probe --descente --famille=aleatoire --paires=64
+          --temoins=16 --seuil=10 --cap=2 --front-cap=3 --reprise=octets
+          --min-pending=1 --min-reprises=1 --min-scissions=1 --min-morts=1 --min-vivantes=1)
+set_tests_properties(mhgp3v_pairframe_descente_aleatoire PROPERTIES
+  PASS_REGULAR_EXPRESSION
+  "pending_state_count=55 pending_pair_mass=55 pending_span_count=165 resume_count=1 continuation_octets=3300(.|\n)*morts=21 vivantes=43 ecart=0")
+add_test(NAME mhgp3v_pairframe_descente_damier
+  COMMAND mhgp3v_pair_frame_probe --descente --famille=damier --paires=64
+          --temoins=16 --seuil=10 --cap=2 --front-cap=3 --reprise=octets
+          --min-pending=1 --min-reprises=1 --min-scissions=1 --min-morts=1 --min-vivantes=1)
+set_tests_properties(mhgp3v_pairframe_descente_damier PROPERTIES
+  PASS_REGULAR_EXPRESSION
+  "pending_state_count=20 pending_pair_mass=20 pending_span_count=60 resume_count=1 continuation_octets=1200(.|\n)*morts=44 vivantes=20 ecart=0")
+
+# LA CONTRE-FAMILLE DE TRAVAIL (G3 du contre-audit) : un temoin sur deux est
+# vrai avec une phase qui depend de la paire, donc AUCUN sous-arbre n'est jamais
+# homogene avant les feuilles et aucune fermeture precoce n'est possible. Ni
+# `pruned` ni `clear` n'y valent quoi que ce soit — tout se decide par tuile
+# exacte, et c'est le pire cas du schema.
+add_test(NAME mhgp3v_pairframe_descente_adversaire
+  COMMAND mhgp3v_pair_frame_probe --descente --famille=adversaire --paires=64
+          --temoins=16 --seuil=10 --cap=2 --front-cap=3 --reprise=octets
+          --min-pending=1 --min-reprises=1 --min-scissions=1 --min-vivantes=1)
+set_tests_properties(mhgp3v_pairframe_descente_adversaire PROPERTIES
+  PASS_REGULAR_EXPRESSION
+  "pending_state_count=64 pending_pair_mass=64 pending_span_count=192 resume_count=1(.|\n)*pruned=0 clear=0(.|\n)*morts=0 vivantes=64 ecart=0")
+
+# LA PORTE DIFFERENTIELLE : G1 (ciblee contre feuilles), G2 (invariance a la
+# politique), G4 (coût du selecteur) et G5 (cap atteint, reprise serialisee) en
+# un seul passage. Douze politiques — cinq heuristiques de selection, trois caps
+# de tuile, deux caps de frontiere, trois budgets de temoin, reprise en memoire
+# et par octets — doivent rendre le MEME vecteur de decisions, et ce vecteur
+# doit egaler la force brute. Le travail, lui, varie d'un facteur mille.
+#
+# `--facteur-scan=8` interdit a la porte de coût d'etre vide : si le selecteur
+# vectoriel ne coûtait pas au moins huit fois le selecteur a buckets, la
+# comparaison ne mesurerait rien.
+foreach(fam prefixe aleatoire damier adversaire)
+  add_test(NAME mhgp3v_pairframe_politiques_${fam}
+    COMMAND mhgp3v_pair_frame_probe --politiques --famille=${fam} --paires=64
+            --temoins=16 --seuil=10 --min-ecart-travail=400 --facteur-scan=8)
+  set_tests_properties(mhgp3v_pairframe_politiques_${fam} PROPERTIES
+    PASS_REGULAR_EXPRESSION
+    "nb=12 divergences=0 juge_ecart=0 pending_total=[1-9][0-9]* reprises_total=[1-9](.|\n)*buckets_scan=15 buckets_splits=15 vecteur_scan=120")
+endforeach()
+
+# G1 DU CONTRE-AUDIT : la PROFONDEUR STRUCTURALE et le NOMBRE D'ITERATIONS sont
+# deux choses sans rapport, et cette porte les met cote a cote. Soixante-seize
+# iterations de raffinement pour un arbre dont la profondeur interne vaut huit :
+# le compteur que j'appelais `refine_depth_max` ne mesurait jamais une
+# profondeur, et le nom corrige le dit.
+#
+# G2 DU CONTRE-AUDIT : `frontier_span_count_peak=128` contre
+# `frontier_candidate_mass_peak=256`. La masse candidate n'est pas une HWM
+# memoire ; c'est un diagnostic de selectivite. Les deux compteurs sont
+# desormais publies separement et cette porte interdit de les reconfondre.
+add_test(NAME mhgp3v_pairframe_profondeur_contre_iterations
+  COMMAND mhgp3v_pair_frame_probe --descente --famille=adversaire --paires=32
+          --temoins=256 --seuil=10 --cap=8 --scission=buckets --min-scissions=1)
+set_tests_properties(mhgp3v_pairframe_profondeur_contre_iterations PROPERTIES
+  PASS_REGULAR_EXPRESSION
+  "selector_scan_items=2431 terminal_checks=2526 state_refine_iterations_max=76(.|\n)*frontier_span_count_peak=128 frontier_candidate_mass_peak=256 spans_elimines=320 lbvh_internal_depth_max=8(.|\n)*ecart=0")
+
+# G4 DU CONTRE-AUDIT, la moitie couteuse : MEME travail geometrique exactement
+# — `witness_splits=2431`, `child_classifications=4863` —, `238560` unites de
+# scan au lieu de `2431`. Le selecteur vectoriel est conserve UNIQUEMENT comme
+# terme de comparaison ; ce reçu est ce qui justifie de ne pas le porter.
+add_test(NAME mhgp3v_pairframe_selecteur_vectoriel_quadratique
+  COMMAND mhgp3v_pair_frame_probe --descente --famille=adversaire --paires=32
+          --temoins=256 --seuil=10 --cap=8 --scission=plus-gros --min-scissions=1)
+set_tests_properties(mhgp3v_pairframe_selecteur_vectoriel_quadratique PROPERTIES
+  PASS_REGULAR_EXPRESSION
+  "witness_splits=2431 endpoint_splits=31 exact_tiles=0 child_classifications=4863(.|\n)*selector_scan_items=238560(.|\n)*ecart=0")
+
+# La racine deja decidee doit se FERMER, jamais s'exactifier : `--max-tuiles=0`.
+add_test(NAME mhgp3v_pairframe_racine_fermee_sans_tuile
+  COMMAND mhgp3v_pair_frame_probe --descente --famille=pleine --paires=64
+          --temoins=16 --seuil=10 --cap=4096 --min-pruned=1 --max-tuiles=0)
+set_tests_properties(mhgp3v_pairframe_racine_fermee_sans_tuile PROPERTIES
+  PASS_REGULAR_EXPRESSION "exact_tiles=0(.|\n)*pruned=1 clear=0(.|\n)*ecart=0")
+
+# ---------------------------------------------------------------------------
+# PORTES NEGATIVES A CODE DE SORTIE EXACT.
+#
+# Celle-ci grave un DEFAUT DE LA SPECIFICATION, pas une faute d'implementation :
+# aux memes parametres, `--cap-sur=tuile` rend des continuations et
+# `--cap-sur=masse` — la section 9 a la lettre — en rend zero. Les deux donnent
+# la meme reponse : un cap ne change jamais le resultat. Mais sous le cap de la
+# section 9, la branche `PENDING_RESOURCE` est du code mort.
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_frame_probe
+  mhgp3v_pairframe_cap_section9_sans_continuation
+  "plancher de continuations non atteint" 3
+  --descente --famille=prefixe --paires=64 --temoins=16 --seuil=10
+  --cap=2 --front-cap=3 --cap-sur=masse --min-pending=1)
+
+# LES MUTANTS. Chacun est designe avec la porte qui le tue. Deux d'entre eux
+# sont CONSERVATEURS — ils degradent le travail sans fausser le resultat — et
+# aucun juge de resultat ne peut les voir ; le dire est plus utile que de
+# pretendre une couverture qui n'existe pas.
+#
+#   `clear-large`       `upper <= h` : FAUTE DE SURETE, un support survit a tort.
+#                       Tue par le juge de resultat ET par les fixtures.
+#   `pending-pruned`    une continuation devient un verdict. Tue par le juge des
+#                       que la sonde AGIT sur le fate rendu — la neutraliser
+#                       silencieusement rendait ce mutant inerte, et la porte
+#                       mesurait alors le vide.
+#   `sature-tronque`    huit bits tronques : invisible tant que les comptes
+#                       restent sous `256`. Tue par la saturation, qui va
+#                       jusqu'a `10^9`, et par la descente a `256` temoins ou un
+#                       majorant de `256` devient `0` et libere tout le bloc.
+#   `pruned-large`      `lower > h` : CONSERVATEUR, la tuile exacte redecide
+#                       juste. Tue par la fixture d'egalite et la saturation.
+#   `cap-avant-verdict` exactifie un bloc deja ferme : CONSERVATEUR aussi. Tue
+#                       par l'invariant `TERMINAL <=> verdict` et par le plafond
+#                       de tuiles sur une racine deja decidee.
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_frame_probe
+  mhgp3v_pairframe_mutant_clear_large "MUTANT TUE" 4
+  --politiques --famille=adversaire --paires=64 --temoins=16 --seuil=10
+  --inject=clear-large)
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_frame_probe
+  mhgp3v_pairframe_mutant_clear_large_fixture "MUTANT TUE" 4
+  --fixtures --inject=clear-large)
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_frame_probe
+  mhgp3v_pairframe_mutant_pending_pruned "MUTANT TUE" 4
+  --politiques --famille=adversaire --paires=64 --temoins=16 --seuil=10
+  --inject=pending-pruned)
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_frame_probe
+  mhgp3v_pairframe_mutant_pending_pruned_abi "un depassement de cap a produit un verdict" 4
+  --exhaustif --min-par-action=400 --inject=pending-pruned)
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_frame_probe
+  mhgp3v_pairframe_mutant_sature_tronque_256 "la descente contredit la force brute" 4
+  --descente --famille=adversaire --paires=32 --temoins=256 --seuil=10 --cap=8
+  --inject=sature-tronque)
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_frame_probe
+  mhgp3v_pairframe_mutant_sature_tronque "MUTANT TUE" 4
+  --saturation --min-grands=72 --inject=sature-tronque)
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_frame_probe
+  mhgp3v_pairframe_mutant_pruned_large "la mort a l'egalite est perdue" 4
+  --fixtures --inject=pruned-large)
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_frame_probe
+  mhgp3v_pairframe_mutant_pruned_large_saturation "MUTANT TUE" 4
+  --saturation --min-grands=72 --inject=pruned-large)
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_frame_probe
+  mhgp3v_pairframe_mutant_cap_avant_verdict "TERMINAL et fate_terminal divergent" 4
+  --exhaustif --min-par-action=400 --inject=cap-avant-verdict)
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_frame_probe
+  mhgp3v_pairframe_mutant_cap_avant_verdict_tuile
+  "plancher de fermetures universelles non atteint" 4
+  --descente --famille=pleine --paires=64 --temoins=16 --seuil=10 --cap=4096
+  --min-pruned=1 --max-tuiles=0 --inject=cap-avant-verdict)
+
+# Les refus avant tout calcul.
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_frame_probe
+  mhgp3v_pairframe_refus_argument "REFUS : argument inconnu" 2 --nawak)
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_frame_probe
+  mhgp3v_pairframe_refus_mode "aucun mode" 2 --paires=64)
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_frame_probe
+  mhgp3v_pairframe_refus_famille "famille inconnue" 2
+  --descente --famille=inexistante)
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_frame_probe
+  mhgp3v_pairframe_refus_scission "heuristique de scission inconnue" 2
+  --descente --scission=inexistante)
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_frame_probe
+  mhgp3v_pairframe_refus_seuil_nul "h_q=0 tuerait tout par construction" 2
+  --descente --seuil=0)
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_frame_probe
+  mhgp3v_pairframe_refus_cap_nul "cap nul" 2 --descente --cap=0)
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_frame_probe
+  mhgp3v_pairframe_refus_front_cap_nul "front_cap nul" 2 --descente --front-cap=0)
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_frame_probe
+  mhgp3v_pairframe_refus_temoins_non_puissance "puissance de deux" 2
+  --descente --temoins=12)
+mhgp3v_add_expected_code_test_for(mhgp3v_pair_frame_probe
+  mhgp3v_pairframe_refus_mutant "mutant inconnu" 2 --fixtures --inject=inexistant)
 
 add_executable(mhgp3v_combined_prefilter_probe prototype/combined_prefilter_probe.cpp)
 target_include_directories(mhgp3v_combined_prefilter_probe PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

@@ -231,13 +231,27 @@ struct BilanSparse {
   long long residuel_rects = 0;     // ... et rectangles DISTINCTS concernes
   long long front2_rects = 0;       // rectangles relances au second front
   long long relation_spans = 0;     // spans endpoint CONSERVES pour rejeu
-  long long front_masse_max = 0;    // `frontier_peak` : plus grande masse portee
-  long long refine_steps = 0;       // iterations de la descente ciblee
-  long long cap_hits = 0;           // garde-fou de frontiere atteint
-  long long continuation_mass = 0;  // masse laissee indecise quand le cap tombe
-  long long refine_depth_max = 0;   // plus longue chaine de raffinements
-  long long residuel_paires = 0;    // et leur masse de paires
-  long long frontiere_max = 0;      // plus grande frontiere indecise portee
+  // NOMS CORRIGES PAR LE CONTRE-AUDIT `a6171d`. Les trois anciens mentaient :
+  //
+  //   `frontier_peak`      annoncait une frontiere, mesurait une MASSE de
+  //                        points candidats. Un unique span racine donne
+  //                        `masse = n` avec UN SEUL handle stocke : c'est un
+  //                        diagnostic de selectivite, jamais une HWM memoire.
+  //   `refine_depth_max`   annoncait une profondeur, comptait les ITERATIONS
+  //                        successives de la boucle ciblee pour un etat. Deux
+  //                        iterations voisines peuvent raffiner deux branches
+  //                        sans relation ancetre-descendant.
+  //   `continuation_mass`  annoncait une continuation, ne fournissait qu'une
+  //                        somme. Une vraie continuation est un objet
+  //                        serialisable et reprenable ; voir `pair_frame.hpp`,
+  //                        ou elle existe et ou une porte la relit par octets.
+  long long frontier_candidate_mass_peak = 0;  // masse de points candidats
+  long long refine_steps = 0;                  // iterations de la descente ciblee
+  long long cap_hits = 0;                      // garde-fou de frontiere atteint
+  long long pending_state_point_incidence_mass = 0;  // somme, PAS une continuation
+  long long state_refine_iterations_max = 0;   // iterations, PAS une profondeur
+  long long residuel_paires = 0;               // et leur masse de paires
+  long long frontier_span_count_peak = 0;      // handles stockes : la vraie HWM
 };
 
 }  // namespace
@@ -266,8 +280,15 @@ int main(int argc, char** argv) {
   //
   // La CIBLEE rend les MEMES decisions que les feuilles sur `terrain` pour
   // `17 %` de nœuds en moins, et `25 %` en moins sur `uniform` avec une
-  // surcouverture plus faible. Son critere d'arret est `r4`, donc sa
-  // profondeur est gouvernee par le SEUIL et non par `n`.
+  // surcouverture plus faible. Son critere d'arret est `r4` : le RAFFINEMENT
+  // est pilote par le seuil, mais AUCUNE BORNE DU TRAVAIL TOTAL ne s'en deduit.
+  // Mes propres compteurs le refutent, et le contre-audit `a6171d` precise ce
+  // qui peut etre lineaire en `n` : le nombre de nœuds temoins ouverts, le
+  // nombre de scissions successives pour un etat, le nombre de spans presents
+  // simultanement, et la masse encore indecise. La profondeur STRUCTURALE du
+  // radix LBVH, elle, est bornee par le nombre de bits de cle plus le
+  // tie-break — environ `64` sous le profil u16 — et n'a rien a voir avec le
+  // compteur d'iterations.
   bool antichaine_grossiere = true, antichaine_ciblee = true;
   long long max_pairid = -1, min_carriers = -1, min_noeuds = 0;
   int r4 = 8;   // seuil de rejet q4, `h_4 = s_max - 3`
@@ -858,8 +879,8 @@ int main(int argc, char** argv) {
         // C'est la sortie de l'alternative de ma question Q1 : la frontiere
         // grossiere ne decide jamais — mesure `dead_w4` a `330` contre `22 818`
         // et `active_edge` divise par quatorze — et la descente aux feuilles
-        // reconstitue un CSR. Le critere d'arret est `r4`, donc la profondeur
-        // est gouvernee par le SEUIL et non par `n`.
+        // reconstitue un CSR. Le critere d'arret est `r4` : raffinement pilote
+        // par le seuil, aucune borne du travail total par le seul seuil.
         if (antichaine_ciblee) {
           long long pas = 0;
           for (;;) {
@@ -899,11 +920,11 @@ int main(int argc, char** argv) {
             }
             if ((int)frontiere.size() > 4 * kCapFrontiere) {
               ++g.cap_hits;
-              for (int hh : frontiere) g.continuation_mass += dernier(hh) - premier(hh) + 1;
+              for (int hh : frontiere) g.pending_state_point_incidence_mass += dernier(hh) - premier(hh) + 1;
               break;  // garde-fou : la masse restante est publiee, jamais jetee
             }
           }
-          if (pas > g.refine_depth_max) g.refine_depth_max = pas;
+          if (pas > g.state_refine_iterations_max) g.state_refine_iterations_max = pas;
         }
         if (!pile.empty()) {
           // ---- FRONTIERE TRONQUEE : ON NE PERD RIEN.
@@ -919,8 +940,8 @@ int main(int argc, char** argv) {
           tronquee = true;
         }
       }
-      if ((long long)frontiere.size() > g.frontiere_max)
-        g.frontiere_max = (long long)frontiere.size();
+      if ((long long)frontiere.size() > g.frontier_span_count_peak)
+        g.frontier_span_count_peak = (long long)frontiere.size();
       // Frontiere tronquee : `U4` est INCONNU, donc majore par l'infini —
       // `ACTIVE_ALL` ne peut pas se declencher, et rien n'est tue pour autant.
       // `U4` compte les POPULATIONS des spans, pas leur nombre : un span garde
@@ -931,7 +952,7 @@ int main(int argc, char** argv) {
       const long long U4 = t.ab_neuf
                                ? (tronquee ? (long long)1 << 60 : L4 + masse_front)
                                : t.U4;
-      if (masse_front > g.front_masse_max) g.front_masse_max = masse_front;
+      if (masse_front > g.frontier_candidate_mass_peak) g.frontier_candidate_mass_peak = masse_front;
 
       const Extrema ex = extrema(BA, BB, BC);
       const VerdictConjoint vc = classifie_conjoint(ex, L4, U4, r4, mu);
@@ -1208,19 +1229,19 @@ int main(int argc, char** argv) {
                 "dead_owner_x=%lld all_strict=%lld masse_all_strict=%lld "
                 "feuilles=%lld pairid_expanded=%lld carriers=%lld "
                 "carriers_symboliques=%lld blocs_faux=%lld dead_w4=%lld active_edge=%lld "
-                "seed3_emitted=%lld pending=%lld l4_credits=%lld frontiere_max=%lld "
+                "seed3_emitted=%lld pending=%lld l4_credits=%lld frontier_span_count_peak=%lld "
                 "rectangles=%lld residuel_blocs=%lld residuel_rects=%lld residuel_paires=%lld "
-                "front2_rects=%lld relation_spans=%lld frontier_peak=%lld "
-                "refine_steps=%lld cap_hits=%lld continuation_mass=%lld "
-                "refine_depth_max=%lld\n",
+                "front2_rects=%lld relation_spans=%lld frontier_candidate_mass_peak=%lld "
+                "refine_steps=%lld cap_hits=%lld pending_state_point_incidence_mass=%lld "
+                "state_refine_iterations_max=%lld\n",
                 famille.c_str(), n, g.noeuds, g.dead_phi, g.dead_e, g.dead_x,
                 g.all_strict, g.masse_all_strict, g.feuilles, g.pairid_expanded,
                 g.carriers, g.carriers_symboliques, g.blocs_faux, g.dead_w4,
                 g.active_edge, g.seed3_emitted, g.pending, g.l4_credits,
-                g.frontiere_max, rectangles, g.residuel_blocs, g.residuel_rects,
+                g.frontier_span_count_peak, rectangles, g.residuel_blocs, g.residuel_rects,
                 g.residuel_paires, g.front2_rects, g.relation_spans,
-                g.front_masse_max, g.refine_steps, g.cap_hits,
-                g.continuation_mass, g.refine_depth_max);
+                g.frontier_candidate_mass_peak, g.refine_steps, g.cap_hits,
+                g.pending_state_point_incidence_mass, g.state_refine_iterations_max);
     if (mode_brute) {
       const long long total = g.carriers + g.carriers_symboliques;
       // ---- LE SENS DE L'ECART, ET POURQUOI IL N'EST PLUS ZERO.
