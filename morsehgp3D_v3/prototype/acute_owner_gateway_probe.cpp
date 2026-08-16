@@ -172,6 +172,42 @@ BilanOracle oracle(int tours, int etendue, GwMutant mu, bool biais) {
   return g;
 }
 
+// ---- SEPARATION, portee depuis le prefiltre combine. Le ledger `W_4` n'a de
+// sens que sur des rectangles ou `A` et `B` sont SEPARES : depuis la racine,
+// aucun nœud n'est jamais disjoint de `A`, donc aucun point n'est jamais temoin
+// universel et `L4_open` reste a zero.
+i64 isqrt_plancher(i128 v) {
+  if (v <= 0) return 0;
+  i64 x = (i64)1 << 40;
+  while ((i128)x * x > v) x >>= 1;
+  for (i64 b = x; b > 0; b >>= 1)
+    while ((i128)(x + b) * (x + b) <= v) x += b;
+  return x;
+}
+struct Sph { i64 c2[3]; i64 r2; };
+Sph sphere_de(const BoxI& b) {
+  Sph s{};
+  i128 acc = 0;
+  for (int i = 0; i < 3; ++i) {
+    s.c2[i] = b.ax[i].lo + b.ax[i].hi;
+    const i64 e = b.ax[i].hi - b.ax[i].lo;
+    acc += (i128)e * e;
+  }
+  s.r2 = isqrt_plancher(acc);
+  if ((i128)s.r2 * s.r2 < acc) ++s.r2;  // le VRAI plafond
+  return s;
+}
+bool separes(const Sph& A, const Sph& B, i64 sep) {
+  i128 acc = 0;
+  for (int i = 0; i < 3; ++i) {
+    const i64 e = B.c2[i] - A.c2[i];
+    acc += (i128)e * e;
+  }
+  const i64 d = isqrt_plancher(acc);
+  const i64 rmax = A.r2 > B.r2 ? A.r2 : B.r2;
+  return (i128)d - A.r2 - B.r2 >= (i128)sep * rmax;
+}
+
 // ---------------------------------------------------------------------------
 // PARTIE 2 : LA RECURSION TERNAIRE SUR UN VRAI NUAGE.
 struct BilanSparse {
@@ -190,6 +226,7 @@ struct BilanSparse {
   long long seed3_emitted = 0;      // seeds ternaires reellement materialises
   long long pending = 0;            // debordements : jamais `DEAD`
   long long l4_credits = 0;         // credits `W_4` acquis en bloc
+  long long rectangles = 0;         // rectangles WSPD, la vraie source
   long long frontiere_max = 0;      // plus grande frontiere indecise portee
 };
 
@@ -201,7 +238,8 @@ int main(int argc, char** argv) {
   std::string famille = "two_lines";
   bool mode_oracle = false, mode_sparse = false, mode_brute = false, biais = false;
   long long max_pairid = -1, min_carriers = -1, min_noeuds = 0;
-  int r4 = 8;  // seuil de rejet q4, `h_4 = s_max - 3`
+  int r4 = 8;   // seuil de rejet q4, `h_4 = s_max - 3`
+  int sep = 8;  // separation WSPD
   GwMutant mu = GwMutant::kNone;
 
   auto entier = [&](const std::string& a, const char* cle, long long* out) {
@@ -235,6 +273,7 @@ int main(int argc, char** argv) {
     if (entier(a, "--min-carriers=", &t)) { min_carriers = t; continue; }
     if (entier(a, "--min-noeuds=", &t)) { min_noeuds = t; continue; }
     if (entier(a, "--r4=", &t)) { r4 = (int)t; continue; }
+    if (entier(a, "--separation=", &t)) { sep = (int)t; continue; }
     if (a.rfind("--family=", 0) == 0) { famille = a.substr(9); continue; }
     if (a.rfind("--inject=", 0) == 0) {
       const std::string m = a.substr(9);
@@ -431,13 +470,57 @@ int main(int argc, char** argv) {
       int A, B, C;
       long long L4;
       std::vector<int> frontiere;
+      // ---- LE LEDGER NE DEPEND QUE DE `(A,B)`.
+      //
+      // Scinder `C` ne change ni `L4_open`, ni la frontiere : refaire la passe
+      // ledger dans ce cas est du travail PUR. Ma premiere version le faisait, et
+      // le coût passait de `47,9 M` a `158 M` nœuds sur `terrain` a `n=800`.
+      // `ab_neuf` dit si `A` ou `B` vient de changer ; sinon on herite tel quel.
+      //
+      // C'est aussi la forme GPU que l'audit demande : le cover spatial est
+      // construit UNE FOIS par arete owner et partage par ses seeds.
+      bool ab_neuf;
+      long long U4;
+      bool tronquee;
     };
     std::vector<Tache> st;
     const int racine = nodes.empty() ? -1 : 0;
+    // ---- LA SOURCE EST LA PARTITION WSPD, PAS LA RACINE.
+    //
+    // Partir de `(racine, racine, racine)` rendait le ledger structurellement
+    // inerte : la racine contient `A`, donc aucun point n'est jamais disjoint de
+    // `A` et de `B`, donc `L4_open` reste a zero. On construit donc d'abord les
+    // rectangles SEPARES — la meme descente que le prefiltre combine — et on
+    // lance une recursion ternaire par rectangle, `C` partant de la racine.
+    //
+    // Le recouvrement reste exact : la WSPD couvre chaque paire d'indices
+    // exactement une fois, et le juge par force brute le verifie.
+    long long rectangles = 0;
     {
-      Tache t0{racine, racine, racine, 0, {}};
-      t0.frontiere.push_back(racine);
-      st.push_back(std::move(t0));
+      struct R { int u, v; };
+      std::vector<R> pile;
+      for (size_t i = 0; i < nodes.size(); ++i) pile.push_back({nodes[i].left, nodes[i].right});
+      if (nodes.empty() && m == 1) { /* un point : aucune paire */ }
+      while (!pile.empty()) {
+        const R r = pile.back();
+        pile.pop_back();
+        const bool fu = feuille(r.u), fv = feuille(r.v);
+        if (separes(sphere_de(boite(r.u)), sphere_de(boite(r.v)), sep) || (fu && fv)) {
+          ++rectangles;
+          Tache t0{r.u, r.v, racine, 0, {}, true, 0, false};
+          t0.frontiere.push_back(racine);
+          st.push_back(std::move(t0));
+          continue;
+        }
+        const bool su = !fu && (fv || pop(r.u) >= pop(r.v));
+        if (su) {
+          pile.push_back({nodes[r.u].left, r.v});
+          pile.push_back({nodes[r.u].right, r.v});
+        } else {
+          pile.push_back({r.u, nodes[r.v].left});
+          pile.push_back({r.u, nodes[r.v].right});
+        }
+      }
     }
     // Cap de frontiere : un depassement rend `PENDING`, jamais `DEAD`.
     const int kCapFrontiere = 64;
@@ -465,10 +548,20 @@ int main(int argc, char** argv) {
       ++g.noeuds;
       const BoxI BA = boite(t.A), BB = boite(t.B), BC = boite(t.C);
 
-      // ---- PASSE LEDGER : on rafraichit la frontiere pour CE rectangle.
+      // ---- PASSE LEDGER : SEULEMENT SI `(A,B)` A CHANGE.
       long long L4 = t.L4;
+      bool tronquee = t.tronquee;
       std::vector<int> frontiere;
-      {
+      if (!t.ab_neuf) {
+        frontiere = t.frontiere;  // herite tel quel : `C` seul a bouge
+      } else {
+        // LA TRONCATURE SE REEVALUE. Elle etait COLLANTE dans ma premiere
+        // version : une fois vraie, `U4` restait infini pour toute la
+        // descendance, `ALL_STRICT` ne pouvait plus se declencher et la
+        // recursion descendait jusqu'aux feuilles — `3,4` milliards de nœuds a
+        // `n=800` sur `terrain`, contre `158` millions. Raffiner `(A,B)` reduit
+        // la frontiere ; il n'y a aucune raison de garder l'aveu d'ignorance.
+        tronquee = false;
         std::vector<int> pile = t.frontiere;
         while (!pile.empty() && (int)frontiere.size() <= kCapFrontiere) {
           const int h = pile.back();
@@ -491,15 +584,27 @@ int main(int argc, char** argv) {
           pile.push_back(nodes[h].right);
         }
         if (!pile.empty()) {
-          // Frontiere trop large : on rend la tache PENDING plutot que de
-          // decider a tort. `PENDING` n'est jamais `DEAD` — c'est la regle.
+          // ---- FRONTIERE TRONQUEE : ON NE PERD RIEN.
+          //
+          // Ma premiere version abandonnait la tache. C'etait une PERTE SECHE de
+          // porteurs — le juge l'a lue en `ecart` negatif. Or les credits deja
+          // acquis restent VRAIS (`L4_open` est un minorant certain), et il
+          // suffit de rendre `U4` inconnu pour interdire `ACTIVE_ALL` sans
+          // jamais tuer. On reverse donc le reste de la pile dans la frontiere
+          // et on continue : `PENDING` compte l'evenement, il ne jette plus.
           ++g.pending;
-          continue;
+          for (int h : pile) frontiere.push_back(h);
+          tronquee = true;
         }
       }
       if ((long long)frontiere.size() > g.frontiere_max)
         g.frontiere_max = (long long)frontiere.size();
-      const long long U4 = L4 + (long long)frontiere.size();
+      // Frontiere tronquee : `U4` est INCONNU, donc majore par l'infini —
+      // `ACTIVE_ALL` ne peut pas se declencher, et rien n'est tue pour autant.
+      const long long U4 = t.ab_neuf
+                               ? (tronquee ? (long long)1 << 60
+                                           : L4 + (long long)frontiere.size())
+                               : t.U4;
 
       const Extrema ex = extrema(BA, BB, BC);
       const VerdictConjoint vc = classifie_conjoint(ex, L4, U4, r4, mu);
@@ -512,6 +617,8 @@ int main(int argc, char** argv) {
         // `ActiveOwnerEdgeBlock` : ni `PairId`, ni face materialisee.
         ++g.active_edge;
       }
+      // Une ancre du bloc peut etre morte sans que le bloc entier le soit :
+      // `MIXED` doit alors descendre, et c'est le cas nominal.
       if (v == Verdict::kAllStrict) {
         // CARRIER BLOCK SYMBOLIQUE : on retient `(A,B,C)`, pas ses triplets.
         ++g.all_strict;
@@ -575,25 +682,25 @@ int main(int argc, char** argv) {
         // LA DIAGONALE, DEPLIEE EN TROIS. `(A.d, A.g)` est omise : c'est la
         // meme paire non ordonnee que `(A.g, A.d)`.
         const int g1 = nodes[t.A].left, d1 = nodes[t.A].right;
-        st.push_back({g1, g1, t.C, L4, frontiere});
-        st.push_back({g1, d1, t.C, L4, frontiere});
-        st.push_back({d1, d1, t.C, L4, frontiere});
+        st.push_back({g1, g1, t.C, L4, frontiere, true, U4, tronquee});
+        st.push_back({g1, d1, t.C, L4, frontiere, true, U4, tronquee});
+        st.push_back({d1, d1, t.C, L4, frontiere, true, U4, tronquee});
       } else if (t.A == t.B) {
         // `A == B` feuille : la seule paire possible est `(a,a)`, degeneree.
         // Il ne reste qu'a descendre `C`, ou a s'arreter.
         if (!fc) {
-          st.push_back({t.A, t.B, nodes[t.C].left, L4, frontiere});
-          st.push_back({t.A, t.B, nodes[t.C].right, L4, frontiere});
+          st.push_back({t.A, t.B, nodes[t.C].left, L4, frontiere, false, U4, tronquee});
+          st.push_back({t.A, t.B, nodes[t.C].right, L4, frontiere, false, U4, tronquee});
         }
       } else if (!fa && pa >= pb && pa >= pc) {
-        st.push_back({nodes[t.A].left, t.B, t.C, L4, frontiere});
-        st.push_back({nodes[t.A].right, t.B, t.C, L4, frontiere});
+        st.push_back({nodes[t.A].left, t.B, t.C, L4, frontiere, true, U4, tronquee});
+        st.push_back({nodes[t.A].right, t.B, t.C, L4, frontiere, true, U4, tronquee});
       } else if (!fb && pb >= pc) {
-        st.push_back({t.A, nodes[t.B].left, t.C, L4, frontiere});
-        st.push_back({t.A, nodes[t.B].right, t.C, L4, frontiere});
+        st.push_back({t.A, nodes[t.B].left, t.C, L4, frontiere, true, U4, tronquee});
+        st.push_back({t.A, nodes[t.B].right, t.C, L4, frontiere, true, U4, tronquee});
       } else if (!fc) {
-        st.push_back({t.A, t.B, nodes[t.C].left, L4, frontiere});
-        st.push_back({t.A, t.B, nodes[t.C].right, L4, frontiere});
+        st.push_back({t.A, t.B, nodes[t.C].left, L4, frontiere, false, U4, tronquee});
+        st.push_back({t.A, t.B, nodes[t.C].right, L4, frontiere, false, U4, tronquee});
       }
     }
     // ---- L'ORACLE AU NIVEAU NUAGE, qui juge la recursion entiere.
@@ -608,41 +715,73 @@ int main(int argc, char** argv) {
     long long ref_brute = -1;
     if (mode_brute) {
       ref_brute = 0;
+      // ---- LE JUGE MESURE LA CONJONCTION, ET C'EST TOUT L'INTERET.
+      //
+      // Ma premiere version comptait TOUS les triangles aigus. Le classifieur
+      // conjoint retire a dessein ceux des ancres `W_4`-MORTES, donc les deux ne
+      // comparaient pas le meme objet et l'ecart etait negatif par construction.
+      // Le juge applique donc lui aussi le filtre de vivacite, exactement :
+      // `|P inter W_4(a,b)| < r4`, compte sur tous les points.
       for (int i = 0; i < m; ++i)
-        for (int j = i + 1; j < m; ++j)
-          for (int k = 0; k < m; ++k) {
-            if (k == i || k == j) continue;
-            // Meme convention d'orientation que les feuilles : `pid` croissant.
-            if (pid[i] < pid[j]) {
-              if (porteur_canonique(pts[i], pts[j], pts[k], pid[i], pid[j], pid[k])) ++ref_brute;
-            } else {
-              if (porteur_canonique(pts[j], pts[i], pts[k], pid[j], pid[i], pid[k])) ++ref_brute;
-            }
+        for (int j = i + 1; j < m; ++j) {
+          const int ia = pid[i] < pid[j] ? i : j, ib = pid[i] < pid[j] ? j : i;
+          // Compte EXACT des temoins `W_4` de l'ancre.
+          int w4 = 0;
+          for (int k = 0; k < m && w4 < r4; ++k) {
+            if (k == ia || k == ib) continue;
+            const i64 e[3] = {(i64)pts[k].x - pts[ia].x, (i64)pts[k].y - pts[ia].y,
+                              (i64)pts[k].z - pts[ia].z};
+            const i64 t2[3] = {(i64)pts[ib].x - pts[k].x, (i64)pts[ib].y - pts[k].y,
+                               (i64)pts[ib].z - pts[k].z};
+            const i64 e2 = e[0] * e[0] + e[1] * e[1] + e[2] * e[2];
+            if (e2 == 0) continue;
+            const i64 h = e[0] * t2[0] + e[1] * t2[1] + e[2] * t2[2];
+            if (h <= 0) continue;
+            const i64 tt = t2[0] * t2[0] + t2[1] * t2[1] + t2[2] * t2[2];
+            if ((i128)3 * (i128)h * (i128)h > (i128)e2 * (i128)tt) ++w4;
           }
+          if (w4 >= r4) continue;  // ancre morte : ses porteurs ne comptent pas
+          for (int k = 0; k < m; ++k) {
+            if (k == ia || k == ib) continue;
+            if (porteur_canonique(pts[ia], pts[ib], pts[k], pid[ia], pid[ib], pid[k]))
+              ++ref_brute;
+          }
+        }
     }
     std::printf("sparse famille=%s n=%d noeuds=%lld dead_phi=%lld dead_owner_e=%lld "
                 "dead_owner_x=%lld all_strict=%lld masse_all_strict=%lld "
                 "feuilles=%lld pairid_expanded=%lld carriers=%lld "
                 "carriers_symboliques=%lld blocs_faux=%lld dead_w4=%lld active_edge=%lld "
-                "seed3_emitted=%lld pending=%lld l4_credits=%lld frontiere_max=%lld\n",
+                "seed3_emitted=%lld pending=%lld l4_credits=%lld frontiere_max=%lld "
+                "rectangles=%lld\n",
                 famille.c_str(), n, g.noeuds, g.dead_phi, g.dead_e, g.dead_x,
                 g.all_strict, g.masse_all_strict, g.feuilles, g.pairid_expanded,
                 g.carriers, g.carriers_symboliques, g.blocs_faux, g.dead_w4,
                 g.active_edge, g.seed3_emitted, g.pending, g.l4_credits,
-                g.frontiere_max);
+                g.frontiere_max, rectangles);
     if (mode_brute) {
       const long long total = g.carriers + g.carriers_symboliques;
-      std::printf("juge brute=%lld sparse=%lld ecart=%lld\n", ref_brute, total, total - ref_brute);
-      if (total != ref_brute || g.blocs_faux > 0) {
+      // ---- LE SENS DE L'ECART, ET POURQUOI IL N'EST PLUS ZERO.
+      //
+      // La source conjointe est FAIL-OPEN : `L4_open >= r4` exige la mort pour
+      // TOUTES les paires du bloc, donc un bloc peut contenir des ancres mortes
+      // sans etre tue. Elle rend donc un MAJORANT du compte vrai, et c'est le
+      // contrat. Le juge exige `sparse >= brute` — l'inegalite inverse serait
+      // une fermeture fausse, le defaut le plus grave possible — et publie
+      // l'exces, qui mesure le mou du classifieur conjoint.
+      const double exces = ref_brute > 0 ? (double)total / (double)ref_brute : 0.0;
+      std::printf("juge brute=%lld sparse=%lld ecart=%lld exces=%.3f\n",
+                  ref_brute, total, total - ref_brute, exces);
+      if (total < ref_brute || g.blocs_faux > 0) {
         // CONVENTION v3 : un ecart SOUS MUTANT est un mutant tue (4), un ecart
         // sans mutant est un desaccord du juge (1).
         if (mu != GwMutant::kNone) {
-          std::fprintf(stderr, "MUTANT TUE : ecart %lld, blocs_faux %lld\n",
+          std::fprintf(stderr, "MUTANT TUE : manque %lld porteurs, blocs_faux %lld\n",
                        total - ref_brute, g.blocs_faux);
           return 4;
         }
-        std::fprintf(stderr, "DESACCORD DU JUGE : recursion %lld contre force brute %lld,"
-                     " blocs_faux %lld\n", total, ref_brute, g.blocs_faux);
+        std::fprintf(stderr, "DESACCORD DU JUGE : FERMETURE FAUSSE — recursion %lld sous la"
+                     " force brute %lld, blocs_faux %lld\n", total, ref_brute, g.blocs_faux);
         return 1;
       }
       if (mu != GwMutant::kNone && mu != GwMutant::kPhiLarge) {

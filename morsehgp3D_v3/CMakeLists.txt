@@ -4644,32 +4644,34 @@ set_tests_properties(mhgp3v_gateway_oracle_all_strict_atteint PROPERTIES
 foreach(fam two_lines terrain uniform eight_clusters)
   add_test(NAME mhgp3v_gateway_juge_${fam}
     COMMAND mhgp3v_acute_owner_gateway_probe --brute --family=${fam} --points=120)
+  # `blocs_faux=0` reste exigible ; l'egalite ne l'est plus, la source etant
+  # fail-open. Le binaire rend 1 des que `sparse < brute` — c'est la porte reelle,
+  # la regex ne fait que constater qu'un juge a bien tourne.
   set_tests_properties(mhgp3v_gateway_juge_${fam} PROPERTIES
-    PASS_REGULAR_EXPRESSION "blocs_faux=0(.|\n)*ecart=0")
+    PASS_REGULAR_EXPRESSION "blocs_faux=0(.|\n)*juge brute=[0-9]+ sparse=[0-9]+")
 endforeach()
 
 # ---------------------------------------------------------------------------
-# LE LEDGER `W_4` EST INERTE DEPUIS LA RACINE — et c'est un fait de structure,
-# pas un reglage.
+# LE LEDGER `W_4` EST ACTIF — la source part des rectangles WSPD.
 #
-# La recursion ternaire part de `(racine, racine, racine)`. Or la racine
-# CONTIENT toujours `A` : aucun nœud n'est jamais disjoint de `A` et de `B` a ce
-# niveau, donc aucun point ne peut etre certifie temoin universel du cœur, donc
-# `L4_open` reste a zero et `DEAD_W4` ne se declenche jamais.
+# Partir de `(racine, racine, racine)` le rendait structurellement INERTE : la
+# racine contient `A`, donc aucun nœud n'est jamais disjoint de `A` et de `B`,
+# donc aucun point n'est jamais temoin universel et `L4_open` restait a zero.
 #
-# Ce n'est pas un bug du ledger : c'est que le ledger n'a de sens QUE sur des
-# rectangles ou `A` et `B` sont deja SEPARES. C'est exactement ce que la
-# partition WSPD fournit, et ou `h_coeur` est deja calcule et mesure par
-# `mhgp3v_combined_prefilter_probe`.
+# La source est desormais la partition WSPD — les memes rectangles SEPARES que
+# le prefiltre combine — et le ledger se declenche : `dead_w4 = 7 393` sur
+# `terrain` a `n=120`.
 #
-# CONCLUSION D'ARCHITECTURE : les deux probes ne doivent pas rester separes. Le
-# gateway aigu doit tourner A L'INTERIEUR des rectangles WSPD, pas depuis la
-# racine. Cette porte grave l'inertie pour qu'elle ne soit pas prise pour un
-# succes ; elle devra devenir `dead_w4=[1-9]` quand la jonction sera faite.
-add_test(NAME mhgp3v_gateway_ledger_inerte_depuis_racine
+# LA SOURCE EST FAIL-OPEN, et le juge l'exige dans ce sens : `L4_open >= r4`
+# demande la mort pour TOUTES les paires du bloc, donc un bloc peut contenir des
+# ancres mortes sans etre tue. `sparse >= brute` est la propriete ; l'inegalite
+# inverse serait une fermeture fausse. L'exces mesure le mou du classifieur
+# conjoint : `1,180` sur `terrain`, `1,116` sur `uniform`, `1,121` sur
+# `eight_clusters`.
+add_test(NAME mhgp3v_gateway_ledger_actif
   COMMAND mhgp3v_acute_owner_gateway_probe --sparse --family=terrain --points=120)
-set_tests_properties(mhgp3v_gateway_ledger_inerte_depuis_racine PROPERTIES
-  PASS_REGULAR_EXPRESSION "dead_w4=0 active_edge=[1-9][0-9]* seed3_emitted=[1-9][0-9]* pending=0")
+set_tests_properties(mhgp3v_gateway_ledger_actif PROPERTIES
+  PASS_REGULAR_EXPRESSION "dead_w4=7393 active_edge=3161 seed3_emitted=323")
 
 # `two_lines` : ZERO paire materialisee, et zero porteur. C'est l'exigence
 # exacte de l'ordre d'execution de l'auditeur.
@@ -4678,11 +4680,16 @@ add_test(NAME mhgp3v_gateway_two_lines_sans_pairid
           --max-pairid=0)
 set_tests_properties(mhgp3v_gateway_two_lines_sans_pairid PROPERTIES
   PASS_REGULAR_EXPRESSION
-  "pairid_expanded=0 carriers=0 carriers_symboliques=0 blocs_faux=0 dead_w4=0 active_edge=0 seed3_emitted=0 pending=0(.|\n)*ecart=0")
+  "pairid_expanded=0 carriers=0 carriers_symboliques=0 blocs_faux=0 dead_w4=[1-9][0-9]* active_edge=0 seed3_emitted=0(.|\n)*ecart=0")
 
+# `dead-large` se tue sur l'ORACLE DE BOITES, pas sur le nuage : il rend le
+# classifieur FAUX (des `DEAD` qui portent), et l'oracle voit cette faute
+# directement. Sur un nuage, la source etant desormais fail-open et surcomptant
+# de `11` a `18 %`, sa perte est masquee par l'exces — le juge nuage ne peut plus
+# le detecter, et c'est un fait a connaitre, pas a contourner.
 mhgp3v_add_expected_code_test_for(mhgp3v_acute_owner_gateway_probe
   mhgp3v_gateway_mutant_dead_large "MUTANT TUE" 4
-  --brute --family=terrain --points=120 --inject=dead-large)
+  --oracle --tours=3000 --etendue=2 --inject=dead-large)
 mhgp3v_add_expected_code_test_for(mhgp3v_acute_owner_gateway_probe
   mhgp3v_gateway_mutant_all_strict_lache "MUTANT TUE" 4
   --brute --family=terrain --points=120 --inject=all-strict-lache)

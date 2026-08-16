@@ -239,3 +239,72 @@ prochain commit.
 
 Ce que je ne prétends donc pas : le P0 de l'audit n'est **pas** fermé. Le code
 de la conjonction existe et est correct ; il est branché au mauvais endroit.
+
+---
+
+## 8. P0 fermé sur la correction, ouvert sur le coût — et une question
+
+Le ledger est **actif** : la source part désormais des rectangles WSPD, les
+mêmes que le préfiltre combiné, et non plus de la racine.
+
+| famille | `dead_w4` | `active_edge` | `seed3_emitted` | `pairid_expanded` | `brute` | `sparse` | excès |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| `two_lines` | `371` | `0` | `0` | **`0`** | `0` | `0` | — |
+| `terrain` | `7 393` | `3 161` | `323` | `323` | `13 912` | `16 411` | `1,180` |
+| `uniform` | `20 338` | `9 339` | `404` | `404` | `63 714` | `71 113` | `1,116` |
+| `eight_clusters` | `14 934` | `5 761` | `168` | `168` | `90 113` | `101 039` | `1,121` |
+
+`two_lines` tient la gate bloquante de l'audit : `carrier exact = 0`,
+`PairId_cross_expanded = 0`, `Seed3_cross_emitted = 0`, `ActiveEdge_cross = 0`.
+Et son coût est devenu **sous-linéaire** — exposant `noeuds` `0,86` mesuré sur
+`100 -> 200 -> 400` — contre `1,994` avant l'amorçage WSPD.
+
+### Le juge a changé de sens, et c'est correct
+
+La source conjointe est **fail-open** : `L4_open >= r4` exige la mort pour
+**toutes** les paires du bloc, donc un bloc peut contenir des ancres mortes sans
+être tué. Elle rend un **majorant**. Le juge exige donc `sparse >= brute` —
+l'inégalité inverse serait une fermeture fausse — et publie l'excès, qui mesure
+le mou du classifieur conjoint : `11` à `18 %`.
+
+J'ai dû corriger le juge lui-même : il comparait la conjonction à **tous** les
+triangles aigus, donc son écart était négatif par construction. Il applique
+maintenant le filtre de vivacité exact, `|P inter W_4(a,b)| < r4`.
+
+### Deux corrections trouvées en route
+
+**La troncature était collante.** Une fois `tronquee` vrai, `U4` restait infini
+pour toute la descendance, `ALL_STRICT` ne pouvait plus se déclencher et la
+récursion descendait jusqu'aux feuilles : `3,4` milliards de nœuds à `n=800` sur
+`terrain`. Elle se réévalue à chaque rafraîchissement.
+
+**Le ledger était recalculé pour rien.** Il ne dépend que de `(A,B)` ; scinder
+`C` ne le change pas. L'hériter divise le coût par `2` à `2,4`.
+
+### Ce qui n'est PAS résolu, et je ne le maquille pas
+
+Sur les familles denses, le coût reste **inacceptable** : exposant `noeuds`
+`2,95` puis `4,73` sur `terrain` entre `n=100`, `200` et `400`. Cause
+identifiée : je scinde encore `A` et `B` **à l'intérieur** d'un rectangle WSPD,
+alors que le rectangle *est* déjà la partition des paires. Chaque rectangle
+refait donc le travail de la WSPD, et cela se multiplie avec la descente de `C`.
+
+`two_lines` y échappe parce que ses rectangles meurent haut, avant tout
+raffinement.
+
+### La question à l'auditeur
+
+Deux lectures s'opposent, et je n'ai pas d'argument décisif :
+
+1. **`(A,B)` figé dans un rectangle WSPD.** Le rectangle est la partition des
+   paires ; seul `C` descend. Le coût redevient `rectangles x arbre`. Mais j'ai
+   mesuré au `53815f` qu'un certificat aigu à `(A,B)` fixé n'élague presque que
+   des feuilles — `1,1` point par bloc.
+2. **`(A,B)` raffinable.** Le certificat devient assez fort pour tuer, mais le
+   coût explose comme ci-dessus.
+
+La sortie est-elle un critère de scission qui n'autorise le raffinement de
+`(A,B)` que lorsque le gain certifié le paie — le ratio de la section 3.4 — ou
+faut-il une autre structure entre les deux ? Je penche pour le premier, avec le
+ratio évalué sur `masse classée / tâches enfants`, mais je n'ai pas mesuré s'il
+suffit à ramener l'exposant sous `2`.
