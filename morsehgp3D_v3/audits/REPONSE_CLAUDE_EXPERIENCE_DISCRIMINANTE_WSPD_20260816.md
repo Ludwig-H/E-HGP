@@ -261,3 +261,73 @@ sur `uniform`, et corriger la scission par diamètre l'améliore de `16` à `28 
 sans changer l'ordre de grandeur.
 
 Données brutes : `audits/donnees/wspd_rampe_20260816.txt`.
+
+---
+
+## 9. Rétractation — ma réfutation du `fair split tree` était invalide
+
+L'énoncé exact du théorème m'a été rappelé :
+
+```text
+WSPD bien implemente :  O(n log n + s^d n)
+```
+
+Le `n log n` est le temps de **construction** ; la **taille de sortie** est
+`O(s^d n)`, donc linéaire. C'est bien le nombre de rectangles que je mesure, et
+c'est bien à `1` que son exposant devrait tendre.
+
+**Je retire ma réfutation de la section 2.** J'y écrivais que l'hypothèse du
+`fair split tree` tombait parce que la corrélation était inverse — `scanline`
+ayant le plus de nœuds stagnants et le moins de rectangles. Cette comparaison
+était **invalide** : je mesurais les nœuds stagnants de *mon* arbre, celui de
+`q2_pairframe_probe` qui coupe à la médiane du rang, et je les confrontais aux
+rectangles produits par *un autre* arbre, celui de `wspd_wavefront.hpp`. Deux
+structures différentes, aucune conclusion possible.
+
+### Ce que la lecture du code dit vraiment
+
+`wspd_wavefront.hpp` construit un **arbre radix de Karras** sur les clés de
+Morton, et son en-tête justifie ce choix ainsi :
+
+> La borne de Callahan-Kosaraju ne demande pas le `fair split tree` : elle vaut
+> pour un OCTREE COMPRIME. […] les nœuds y sont des CELLULES ALIGNEES de côté
+> `2^k`, donc de rapport d'aspect exactement UN.
+
+La première phrase est **juste** : un octree comprimé suffit, et c'est un
+résultat classique.
+
+La seconde est **fausse**, et c'est une inexactitude à corriger dans le
+commentaire. Un arbre radix **binaire** a un nœud par longueur de préfixe en
+*bits*, pas par groupe de trois bits. Seuls les nœuds dont le préfixe a une
+longueur multiple de `3` sont des cubes ; les autres sont des boîtes de rapport
+d'aspect `2` ou `4`. L'arbre n'est donc pas un octree comprimé, il en est le
+déroulé binaire.
+
+**Mais cela ne peut pas expliquer un exposant.** L'argument d'empilement dégrade
+d'un facteur borné — au pire `8^{d}` — quand le rapport d'aspect passe de `1` à
+`4`. C'est une constante, pas une pente.
+
+### Le second candidat, écarté aussi
+
+Le front teste la séparation sur la **boîte serrée**, pas sur la cellule de
+Morton. J'ai d'abord cru y voir la faille, parce que l'argument d'empilement de
+la preuve raisonne sur des cellules disjointes de taille comparable. Mais le
+sens de l'inégalité sauve la borne : un test plus permissif fait s'arrêter la
+récursion **plus tôt**, donc produit **moins** de paires. Le front à boîtes
+serrées est majoré par le front à cellules, et la borne tient a fortiori. Le
+commentaire du fichier a raison sur ce point, et il chiffre même le gain à
+`6,5`.
+
+### Ce qui reste
+
+Aucune des deux inexactitudes de structure n'explique un exposant `> 1`. Il ne
+reste que l'hypothèse de la transition, et elle est cohérente avec la seule
+mesure à géométrie strictement fixée dont je dispose : l'exposant **décroît**,
+`1,31` puis `1,22`.
+
+La mesure qui tranche est de prolonger la rampe au-delà de `32 000` : si
+l'exposant continue de tomber vers `1`, la transition est la réponse et le front
+n'a rien à réparer. Elle est en cours à `n = 64 000` et `128 000`, `uniform`,
+`s = 8`, emprise fixe. Je verserai le résultat quel qu'il soit — c'est la
+troisième fois dans cette campagne qu'une de mes explications tombe, et je
+préfère l'écrire que de l'oublier.

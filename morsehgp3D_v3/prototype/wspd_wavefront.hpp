@@ -3,13 +3,24 @@
 // Transcription CPU du kernel GPU vise. Les trois obstacles de la construction
 // classique tombent chacun sur une primitive GPU connue :
 //
-//  1. L'ARBRE. La borne de Callahan-Kosaraju ne demande pas le `fair split
-//     tree` : elle vaut pour un OCTREE COMPRIME. Celui-la se construit par tri
-//     radix des codes de Morton puis arbre radix de Karras — un thread par
-//     nœud interne, aucune recursion. Bonus decisif : les nœuds y sont des
-//     CELLULES ALIGNEES de cote `2^k`, donc de rapport d'aspect exactement UN,
-//     ce que l'argument d'empilement reclame et que le fair split ne garantit
-//     pas aussi simplement.
+//  1. L'ARBRE. La borne de Callahan-Kosaraju — `O(n log n + s^d n)`, le
+//     `n log n` etant le TEMPS de construction et `s^d n` la TAILLE de sortie —
+//     ne demande pas le `fair split tree` : elle vaut pour un OCTREE COMPRIME.
+//     Celui-la se construit par tri radix des codes de Morton puis arbre radix
+//     de Karras — un thread par nœud interne, aucune recursion.
+//
+//     PRECISION, parce que la version precedente de ce commentaire etait
+//     FAUSSE. Elle affirmait que les nœuds sont « des cellules alignees de cote
+//     `2^k`, donc de rapport d'aspect exactement UN ». Un arbre radix BINAIRE a
+//     un nœud par longueur de prefixe en BITS, pas par groupe de trois bits :
+//     seuls les nœuds dont le prefixe est de longueur multiple de `3` sont des
+//     cubes, les autres ont un rapport d'aspect `2` ou `4`. L'arbre n'est donc
+//     pas un octree comprime, il en est le DEROULE BINAIRE.
+//
+//     Cela ne casse pas la borne : l'argument d'empilement se degrade d'un
+//     facteur borne — au pire `8^d` — quand le rapport d'aspect passe de `1` a
+//     `4`. C'est une CONSTANTE, jamais une pente. Mais il ne faut pas invoquer
+//     un aspect unitaire que la structure ne fournit pas.
 //
 //  2. LE CAS DIAGONAL. `WSPD(v,v) -> {(L,L),(R,R),(L,R)}` se DEROULE : une fois
 //     deplie, il n'est rien d'autre que « pour chaque nœud interne `v`, emettre
