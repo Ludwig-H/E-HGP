@@ -932,6 +932,12 @@ inline i64 isqrt_floor(i128 v) {
   return r;
 }
 
+// Les quatre variantes de l'experience discriminante de l'arbitrage `dabf816`.
+enum class WspdMode { kHistorique, kSansCap, kCapDiametre, kPur };
+static long long L_pure_wspd_terminals = 0;
+static long long L_capacity_refined_tiles = 0;
+static long long L_population_split_terminals = 0;
+
 struct Sphere {
   i64 c2[3];  // centre double
   i64 r2;     // rayon double, majore
@@ -1052,6 +1058,7 @@ struct Rect {
 
 int main(int argc, char** argv) {
   int n = 8000, smax = 11, sep = 8, cap = 512, judge = 0, min_rect = 0;
+  WspdMode mode_wspd = WspdMode::kHistorique;
   bool cap_scission = true;     // raffiner plutot que refuser : voir l'en-tete
   bool refuse_doublons = false; // positions dupliquees : refus explicite
   bool seeds = false;           // contraction W-vivant -> seeds aigus
@@ -1120,6 +1127,10 @@ int main(int argc, char** argv) {
     if (a == "--seeds") { seeds = true; continue; }
     if (a == "--verifie-seed") { seeds = true; seed_juge = true; continue; }
     if (a == "--refuse-doublons") { refuse_doublons = true; continue; }
+    if (a == "--wspd=historique") { mode_wspd = WspdMode::kHistorique; continue; }
+    if (a == "--wspd=sans-cap") { mode_wspd = WspdMode::kSansCap; continue; }
+    if (a == "--wspd=cap-diametre") { mode_wspd = WspdMode::kCapDiametre; continue; }
+    if (a == "--wspd=pur") { mode_wspd = WspdMode::kPur; continue; }
     if (a == "--cap=scission") { cap_scission = true; continue; }
     if (a == "--cap=refus") { cap_scission = false; continue; }
     if (eat("--seed", &seed)) continue;
@@ -1493,16 +1504,47 @@ int main(int argc, char** argv) {
       // raffiner : le recouvrement est le meme, les sous-rectangles sont
       // re-testes pour la separation, et l'arret sur deux feuilles borne la
       // recursion — une feuille est un point, donc toujours sous le cap.
-      const bool sous_cap = cap_scission
+      // ---------------------------------------------------------------------
+      // DEUX DECISIONS FONT SORTIR CE FRONT DE LA BORNE DE CALLAHAN-KOSARAJU,
+      // et l'arbitrage `dabf816` les nomme toutes les deux.
+      //
+      // 1. LE CAP DANS LE CRITERE TERMINAL. Si tout terminal verifie
+      //    `|A|,|B| <= C`, alors `C(n,2) = somme |A||B| <= #R C^2`, donc
+      //    `#R >= C(n,2)/C^2` : un PLANCHER quadratique, par construction.
+      //    C'est moi qui l'ai introduit avec `--cap=scission`, en croyant
+      //    n'ecrire qu'une condition d'acceptation.
+      //
+      // 2. LA SCISSION PAR POPULATION. La preuve de packing de
+      //    Callahan-Kosaraju repose sur la decroissance du DIAMETRE ; scinder
+      //    le facteur le plus PEUPLE retire cet invariant. Retirer le cap sans
+      //    corriger la scission ne suffit donc pas.
+      //
+      // `--wspd=` isole les quatre variantes pour mesurer laquelle domine.
+      const bool applique_cap = (mode_wspd == WspdMode::kHistorique ||
+                                 mode_wspd == WspdMode::kCapDiametre);
+      const bool sous_cap = (applique_cap && cap_scission)
                                 ? (h_pop(r.u) <= cap && h_pop(r.v) <= cap)
                                 : true;
-      if (sous_cap && separated(h_sphere(r.u), h_sphere(r.v), sep)) {
+      const bool bien_separe = separated(h_sphere(r.u), h_sphere(r.v), sep);
+      if (bien_separe) ++L_pure_wspd_terminals;
+      if (sous_cap && bien_separe) {
         rects.push_back(r);
         continue;
       }
+      if (bien_separe && !sous_cap) ++L_capacity_refined_tiles;
       const bool u_int = !h_leaf(r.u), v_int = !h_leaf(r.v);
       if (!u_int && !v_int) { rects.push_back(r); continue; }  // deux feuilles
-      const bool split_u = u_int && (!v_int || h_pop(r.u) >= h_pop(r.v));
+      const bool par_diametre = (mode_wspd == WspdMode::kCapDiametre ||
+                                 mode_wspd == WspdMode::kPur);
+      bool split_u;
+      if (par_diametre) {
+        // Le facteur de plus grand DIAMETRE, l'invariant de la preuve.
+        const Sphere Su = h_sphere(r.u), Sv = h_sphere(r.v);
+        split_u = u_int && (!v_int || Su.r2 >= Sv.r2);
+      } else {
+        split_u = u_int && (!v_int || h_pop(r.u) >= h_pop(r.v));
+        if (split_u || v_int) ++L_population_split_terminals;
+      }
       if (split_u) {
         stack.push_back({nodes[r.u].left, r.v});
         stack.push_back({nodes[r.u].right, r.v});
@@ -2661,6 +2703,13 @@ int main(int argc, char** argv) {
     std::fprintf(stderr, "REFUS : %lld paires de positions dupliquees\n", paires_d0);
     return 2;
   }
+  std::printf("wspd mode=%s pure_wspd_terminals=%lld capacity_refined_tiles=%lld"
+              " population_split_terminals=%lld rectangles=%lld\n",
+              mode_wspd == WspdMode::kHistorique ? "historique"
+              : mode_wspd == WspdMode::kSansCap ? "sans-cap"
+              : mode_wspd == WspdMode::kCapDiametre ? "cap-diametre" : "pur",
+              L_pure_wspd_terminals, L_capacity_refined_tiles,
+              L_population_split_terminals, L.rectangles);
   std::printf("ledger masse_attendue=%lld ecart=%lld recouvrements=%lld travail_h=%lld "
               "travail_ha=%lld\n",
               total, L.masse_totale - total, L.recouvrements, L.travail_h, L.travail_ha);
