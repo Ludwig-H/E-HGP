@@ -135,3 +135,60 @@ le raffiner.
 
 Je ne l'écris pas seul : un tel certificat qui se tromperait du mauvais côté
 perdrait des supports en silence.
+
+---
+
+## 6. Confirmation à `n = 8000`, et un chiffre que je dois corriger
+
+Les quatre variantes tournées à la taille d'intérêt, `s = 8`, `cap = 512` :
+
+| famille | `historique` | `sans-cap` | `cap-diametre` | `pur` |
+|---|---:|---:|---:|---:|
+| `uniform` | `3 957 383` | `3 957 383` | `3 330 705` | `3 330 705` |
+| `terrain` | `948 005` | `948 005` | `682 478` | `682 478` |
+
+**Le cap ne mord toujours pas** : identique à l'unité près, à `n = 2000` comme à
+`n = 8000`. Le résultat tient sur deux tailles et deux familles.
+
+**Mais le gain de la scission par diamètre est plus grand que je ne l'ai
+annoncé.** J'avais écrit `14,7 %` d'après le seul `n = 2000` sur `uniform` :
+
+```text
+uniform   -15,8 %
+terrain   -28,0 %
+```
+
+Sur `terrain`, corriger la scission enlève plus du quart des rectangles. Votre
+seconde décision est donc nettement plus coûteuse que ma première mesure ne le
+laissait croire, et elle l'est d'autant plus que la famille est anisotrope —
+ce qui est cohérent avec votre analyse : c'est exactement là que population et
+diamètre se désalignent le plus.
+
+Je maintiens en revanche la conclusion : `682 478` rectangles pour `8 000`
+points sur `terrain`, c'est encore `85` par point, et `3 330 705` sur `uniform`,
+soit `416` par point. La correction est réelle et à prendre ; elle ne change pas
+l'ordre de grandeur.
+
+---
+
+## 7. Le facteur confondant, contrôlé — et il ne sauve pas la linéarité
+
+J'avais signalé que `cloud_family_default_coord` fait varier l'emprise avec `n`,
+donc que les familles ne sont pas auto-similaires et que l'exposant mesuré
+mélangeait deux effets. Contrôle à **emprise fixe** (`--coord=400`), `uniform`,
+`s = 8` :
+
+| | `n = 8000` | `n = 16000` | exposant |
+|---|---:|---:|---:|
+| emprise fixe `400` | `3 864 079` | `9 593 453` | **`1,31`** |
+| emprise variable | `3 957 383` | `9 473 939` | `1,26` |
+
+L'exposant reste de l'ordre de `1,3` dans les deux cas. **Le facteur confondant
+existe mais il ne l'explique pas** : à géométrie strictement fixée, le compte
+croît encore nettement plus vite que `n`.
+
+Je ne conclus pas encore que le régime asymptotique est superlinéaire — ce
+serait contredire Callahan-Kosaraju, et la lecture la plus probable reste que
+`n = 16 000` est toujours dans la transition, le rapport à `s^{3} n` valant
+`0,94` puis `1,17`. Le point `n = 32 000` à emprise fixe est en cours et
+tranchera. Je le verserai dès qu'il sera là, quelle que soit sa direction.
