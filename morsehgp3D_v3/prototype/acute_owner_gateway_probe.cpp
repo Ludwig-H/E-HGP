@@ -184,6 +184,13 @@ struct BilanSparse {
   long long carriers = 0;           // porteurs sous owner canonique
   long long carriers_symboliques = 0;
   long long blocs_faux = 0;  // triples d'un `ALL_STRICT` qui ne portent pas
+  // ---- LEDGER CONJOINT (audit `1d9425d`, section 3).
+  long long dead_w4 = 0;            // blocs morts par vivacite, avant tout aigu
+  long long active_edge = 0;        // `ActiveOwnerEdgeBlock` emis
+  long long seed3_emitted = 0;      // seeds ternaires reellement materialises
+  long long pending = 0;            // debordements : jamais `DEAD`
+  long long l4_credits = 0;         // credits `W_4` acquis en bloc
+  long long frontiere_max = 0;      // plus grande frontiere indecise portee
 };
 
 }  // namespace
@@ -194,6 +201,7 @@ int main(int argc, char** argv) {
   std::string famille = "two_lines";
   bool mode_oracle = false, mode_sparse = false, mode_brute = false, biais = false;
   long long max_pairid = -1, min_carriers = -1, min_noeuds = 0;
+  int r4 = 8;  // seuil de rejet q4, `h_4 = s_max - 3`
   GwMutant mu = GwMutant::kNone;
 
   auto entier = [&](const std::string& a, const char* cle, long long* out) {
@@ -226,6 +234,7 @@ int main(int argc, char** argv) {
     if (entier(a, "--max-pairid=", &t)) { max_pairid = t; continue; }
     if (entier(a, "--min-carriers=", &t)) { min_carriers = t; continue; }
     if (entier(a, "--min-noeuds=", &t)) { min_noeuds = t; continue; }
+    if (entier(a, "--r4=", &t)) { r4 = (int)t; continue; }
     if (a.rfind("--family=", 0) == 0) { famille = a.substr(9); continue; }
     if (a.rfind("--inject=", 0) == 0) {
       const std::string m = a.substr(9);
@@ -403,10 +412,35 @@ int main(int argc, char** argv) {
     // au seul endroit ou une paire `(a,b)` existe reellement en memoire. C'est
     // le compteur que `two_lines` doit laisser a zero.
     BilanSparse g;
-    struct Tri { int A, B, C; };
-    std::vector<Tri> st;
+    // ---- LA TACHE PORTE SON LEDGER, ET C'EST CE QUI EVITE DE TOUT RECALCULER.
+    //
+    // `L4` est le nombre d'IDs universellement `W_4`-interieurs pour TOUTE paire
+    // du rectangle `A x B`. Raffiner `A` ou `B` AFFAIBLIT le « pour toute
+    // paire », donc `L4` ne peut que CROITRE : le credit acquis est definitif et
+    // s'herite. Seule la FRONTIERE indecise se re-teste chez les enfants.
+    //
+    // `U4 = L4 + masse de la frontiere` majore le compte vrai. D'ou les deux
+    // seuils de la section 3.2 de l'audit :
+    //
+    //   `L4 >= r4`  -> toutes les paires du bloc sont mortes ;
+    //   `U4 <  r4`  -> toutes les paires du bloc sont `W_4`-vivantes.
+    //
+    // La frontiere est une liste de handles de nœuds, jamais de points : c'est
+    // elle qui remplace le CSR de sites par seed que l'audit refuse.
+    struct Tache {
+      int A, B, C;
+      long long L4;
+      std::vector<int> frontiere;
+    };
+    std::vector<Tache> st;
     const int racine = nodes.empty() ? -1 : 0;
-    st.push_back({racine, racine, racine});
+    {
+      Tache t0{racine, racine, racine, 0, {}};
+      t0.frontiere.push_back(racine);
+      st.push_back(std::move(t0));
+    }
+    // Cap de frontiere : un depassement rend `PENDING`, jamais `DEAD`.
+    const int kCapFrontiere = 64;
     // ---- L'AUTO-JOINTURE EN PAS CADENCE, ET POURQUOI ELLE EST NECESSAIRE.
     //
     // Partir de `(racine, racine, racine)` sans precaution fait visiter chaque
@@ -426,14 +460,58 @@ int main(int argc, char** argv) {
     // diagonale inverse etant omise — le preserve, et chaque paire non ordonnee
     // n'est alors visitee qu'une fois.
     while (!st.empty()) {
-      const Tri t = st.back();
+      const Tache t = std::move(st.back());
       st.pop_back();
       ++g.noeuds;
       const BoxI BA = boite(t.A), BB = boite(t.B), BC = boite(t.C);
-      const Verdict v = classifie(extrema(BA, BB, BC), mu);
+
+      // ---- PASSE LEDGER : on rafraichit la frontiere pour CE rectangle.
+      long long L4 = t.L4;
+      std::vector<int> frontiere;
+      {
+        std::vector<int> pile = t.frontiere;
+        while (!pile.empty() && (int)frontiere.size() <= kCapFrontiere) {
+          const int h = pile.back();
+          pile.pop_back();
+          const int pf = premier(h), pl = dernier(h);
+          // Disjonction : un point de `A` ou de `B` n'est jamais temoin du cœur.
+          if (!(pl < premier(t.A) || pf > dernier(t.A))) {
+            if (!feuille(h)) { pile.push_back(nodes[h].left); pile.push_back(nodes[h].right); }
+            continue;
+          }
+          if (!(pl < premier(t.B) || pf > dernier(t.B))) {
+            if (!feuille(h)) { pile.push_back(nodes[h].left); pile.push_back(nodes[h].right); }
+            continue;
+          }
+          const BoxI BZ = boite(h);
+          if (bloc_tout_w4(BA, BB, BZ, &g.noeuds)) { L4 += pl - pf + 1; ++g.l4_credits; continue; }
+          if (bloc_aucun_w2(extrema(BA, BB, BZ))) continue;  // hors `W_2`, donc hors `W_4`
+          if (feuille(h)) { frontiere.push_back(h); continue; }
+          pile.push_back(nodes[h].left);
+          pile.push_back(nodes[h].right);
+        }
+        if (!pile.empty()) {
+          // Frontiere trop large : on rend la tache PENDING plutot que de
+          // decider a tort. `PENDING` n'est jamais `DEAD` — c'est la regle.
+          ++g.pending;
+          continue;
+        }
+      }
+      if ((long long)frontiere.size() > g.frontiere_max)
+        g.frontiere_max = (long long)frontiere.size();
+      const long long U4 = L4 + (long long)frontiere.size();
+
+      const Extrema ex = extrema(BA, BB, BC);
+      const VerdictConjoint vc = classifie_conjoint(ex, L4, U4, r4, mu);
+      if (vc == VerdictConjoint::kDeadW4) { ++g.dead_w4; continue; }
+      const Verdict v = classifie(ex, mu);
       if (v == Verdict::kDeadPhi) { ++g.dead_phi; continue; }
       if (v == Verdict::kDeadOwnerE) { ++g.dead_e; continue; }
       if (v == Verdict::kDeadOwnerX) { ++g.dead_x; continue; }
+      if (vc == VerdictConjoint::kActiveAll) {
+        // `ActiveOwnerEdgeBlock` : ni `PairId`, ni face materialisee.
+        ++g.active_edge;
+      }
       if (v == Verdict::kAllStrict) {
         // CARRIER BLOCK SYMBOLIQUE : on retient `(A,B,C)`, pas ses triplets.
         ++g.all_strict;
@@ -482,6 +560,7 @@ int main(int argc, char** argv) {
         // le juge a lu `-196`, `-157` et `-45` porteurs manquants. On ORDONNE
         // l'appel au lieu de filtrer.
         ++g.pairid_expanded;
+        ++g.seed3_emitted;
         const bool porte =
             pid[ia] < pid[ib]
                 ? porteur_canonique(pts[ia], pts[ib], pts[ic], pid[ia], pid[ib], pid[ic])
@@ -496,25 +575,25 @@ int main(int argc, char** argv) {
         // LA DIAGONALE, DEPLIEE EN TROIS. `(A.d, A.g)` est omise : c'est la
         // meme paire non ordonnee que `(A.g, A.d)`.
         const int g1 = nodes[t.A].left, d1 = nodes[t.A].right;
-        st.push_back({g1, g1, t.C});
-        st.push_back({g1, d1, t.C});
-        st.push_back({d1, d1, t.C});
+        st.push_back({g1, g1, t.C, L4, frontiere});
+        st.push_back({g1, d1, t.C, L4, frontiere});
+        st.push_back({d1, d1, t.C, L4, frontiere});
       } else if (t.A == t.B) {
         // `A == B` feuille : la seule paire possible est `(a,a)`, degeneree.
         // Il ne reste qu'a descendre `C`, ou a s'arreter.
         if (!fc) {
-          st.push_back({t.A, t.B, nodes[t.C].left});
-          st.push_back({t.A, t.B, nodes[t.C].right});
+          st.push_back({t.A, t.B, nodes[t.C].left, L4, frontiere});
+          st.push_back({t.A, t.B, nodes[t.C].right, L4, frontiere});
         }
       } else if (!fa && pa >= pb && pa >= pc) {
-        st.push_back({nodes[t.A].left, t.B, t.C});
-        st.push_back({nodes[t.A].right, t.B, t.C});
+        st.push_back({nodes[t.A].left, t.B, t.C, L4, frontiere});
+        st.push_back({nodes[t.A].right, t.B, t.C, L4, frontiere});
       } else if (!fb && pb >= pc) {
-        st.push_back({t.A, nodes[t.B].left, t.C});
-        st.push_back({t.A, nodes[t.B].right, t.C});
+        st.push_back({t.A, nodes[t.B].left, t.C, L4, frontiere});
+        st.push_back({t.A, nodes[t.B].right, t.C, L4, frontiere});
       } else if (!fc) {
-        st.push_back({t.A, t.B, nodes[t.C].left});
-        st.push_back({t.A, t.B, nodes[t.C].right});
+        st.push_back({t.A, t.B, nodes[t.C].left, L4, frontiere});
+        st.push_back({t.A, t.B, nodes[t.C].right, L4, frontiere});
       }
     }
     // ---- L'ORACLE AU NIVEAU NUAGE, qui juge la recursion entiere.
@@ -544,10 +623,13 @@ int main(int argc, char** argv) {
     std::printf("sparse famille=%s n=%d noeuds=%lld dead_phi=%lld dead_owner_e=%lld "
                 "dead_owner_x=%lld all_strict=%lld masse_all_strict=%lld "
                 "feuilles=%lld pairid_expanded=%lld carriers=%lld "
-                "carriers_symboliques=%lld blocs_faux=%lld\n",
+                "carriers_symboliques=%lld blocs_faux=%lld dead_w4=%lld active_edge=%lld "
+                "seed3_emitted=%lld pending=%lld l4_credits=%lld frontiere_max=%lld\n",
                 famille.c_str(), n, g.noeuds, g.dead_phi, g.dead_e, g.dead_x,
                 g.all_strict, g.masse_all_strict, g.feuilles, g.pairid_expanded,
-                g.carriers, g.carriers_symboliques, g.blocs_faux);
+                g.carriers, g.carriers_symboliques, g.blocs_faux, g.dead_w4,
+                g.active_edge, g.seed3_emitted, g.pending, g.l4_credits,
+                g.frontiere_max);
     if (mode_brute) {
       const long long total = g.carriers + g.carriers_symboliques;
       std::printf("juge brute=%lld sparse=%lld ecart=%lld\n", ref_brute, total, total - ref_brute);

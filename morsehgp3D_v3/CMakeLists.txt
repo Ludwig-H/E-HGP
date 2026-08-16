@@ -4648,13 +4648,37 @@ foreach(fam two_lines terrain uniform eight_clusters)
     PASS_REGULAR_EXPRESSION "blocs_faux=0(.|\n)*ecart=0")
 endforeach()
 
+# ---------------------------------------------------------------------------
+# LE LEDGER `W_4` EST INERTE DEPUIS LA RACINE — et c'est un fait de structure,
+# pas un reglage.
+#
+# La recursion ternaire part de `(racine, racine, racine)`. Or la racine
+# CONTIENT toujours `A` : aucun nœud n'est jamais disjoint de `A` et de `B` a ce
+# niveau, donc aucun point ne peut etre certifie temoin universel du cœur, donc
+# `L4_open` reste a zero et `DEAD_W4` ne se declenche jamais.
+#
+# Ce n'est pas un bug du ledger : c'est que le ledger n'a de sens QUE sur des
+# rectangles ou `A` et `B` sont deja SEPARES. C'est exactement ce que la
+# partition WSPD fournit, et ou `h_coeur` est deja calcule et mesure par
+# `mhgp3v_combined_prefilter_probe`.
+#
+# CONCLUSION D'ARCHITECTURE : les deux probes ne doivent pas rester separes. Le
+# gateway aigu doit tourner A L'INTERIEUR des rectangles WSPD, pas depuis la
+# racine. Cette porte grave l'inertie pour qu'elle ne soit pas prise pour un
+# succes ; elle devra devenir `dead_w4=[1-9]` quand la jonction sera faite.
+add_test(NAME mhgp3v_gateway_ledger_inerte_depuis_racine
+  COMMAND mhgp3v_acute_owner_gateway_probe --sparse --family=terrain --points=120)
+set_tests_properties(mhgp3v_gateway_ledger_inerte_depuis_racine PROPERTIES
+  PASS_REGULAR_EXPRESSION "dead_w4=0 active_edge=[1-9][0-9]* seed3_emitted=[1-9][0-9]* pending=0")
+
 # `two_lines` : ZERO paire materialisee, et zero porteur. C'est l'exigence
 # exacte de l'ordre d'execution de l'auditeur.
 add_test(NAME mhgp3v_gateway_two_lines_sans_pairid
   COMMAND mhgp3v_acute_owner_gateway_probe --brute --family=two_lines --points=200
           --max-pairid=0)
 set_tests_properties(mhgp3v_gateway_two_lines_sans_pairid PROPERTIES
-  PASS_REGULAR_EXPRESSION "pairid_expanded=0 carriers=0 carriers_symboliques=0(.|\n)*ecart=0")
+  PASS_REGULAR_EXPRESSION
+  "pairid_expanded=0 carriers=0 carriers_symboliques=0 blocs_faux=0 dead_w4=0 active_edge=0 seed3_emitted=0 pending=0(.|\n)*ecart=0")
 
 mhgp3v_add_expected_code_test_for(mhgp3v_acute_owner_gateway_probe
   mhgp3v_gateway_mutant_dead_large "MUTANT TUE" 4

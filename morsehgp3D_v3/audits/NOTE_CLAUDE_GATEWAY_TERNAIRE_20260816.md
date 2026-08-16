@@ -196,3 +196,46 @@ contre `416`, sous un plancher à `400`.
 parce que sa faute — admettre l'égalité `E = D`, donc une arête maximale ex
 aequo — n'apparaît que sous l'**owner canonique**, que des boîtes ne connaissent
 pas. Seul le juge au niveau nuage le tue.
+
+
+---
+
+## 7. P0 tenté : le ledger `W_4` est **inerte depuis la racine**
+
+Date de l'ajout : 16 août 2026 UTC. Répond au P0 de
+[`NOTE_AUDITEUR_LBVH_SPARSE_Q3_Q4_APRES_53815F_20260816.md`](NOTE_AUDITEUR_LBVH_SPARSE_Q3_Q4_APRES_53815F_20260816.md).
+
+Le classifieur conjoint est écrit — `DEAD_W4`, `DEAD_NO_CARRIER`, `ACTIVE_ALL`,
+`MIXED` — avec le ledger porté par la tâche et hérité au lieu d'être recalculé.
+La monotonie qui le justifie tient : raffiner `A` ou `B` **affaiblit** le « pour
+toute paire », donc `L4_open` ne peut que croître et le crédit acquis est
+définitif.
+
+**Et il ne se déclenche jamais.** Mesuré, `n=120`, quatre familles :
+
+```
+dead_w4 = 0        pending = 0        ecart = 0        blocs_faux = 0
+```
+
+La cause est structurelle, pas un réglage. La récursion part de
+`(racine, racine, racine)`, et la racine **contient** toujours `A`. Aucun nœud
+n'est donc jamais disjoint de `A` et de `B` à ce niveau ; aucun point ne peut
+être certifié témoin universel du cœur ; `L4_open` reste à zéro.
+
+Le ledger n'a de sens que sur des rectangles où `A` et `B` sont déjà
+**séparés** — c'est-à-dire exactement ce que la partition WSPD fournit, et où
+`h_coeur` est déjà calculé et mesuré par `combined_prefilter_probe`.
+
+**Conclusion d'architecture, et elle vaut mieux qu'un P0 à moitié fait :** les
+deux probes ne doivent pas rester séparés. Le gateway aigu doit tourner **à
+l'intérieur** des rectangles WSPD, pas depuis la racine. Le préfiltre fournit la
+séparation et le ledger ; le gateway fournit la clause de porteur ; la
+conjonction se prend là où les deux sont définis.
+
+La porte `mhgp3v_gateway_ledger_inerte_depuis_racine` grave cette inertie pour
+qu'elle ne puisse pas être prise pour un succès. Elle devra devenir
+`dead_w4 >= 1` quand la jonction sera faite — c'est le critère de réception du
+prochain commit.
+
+Ce que je ne prétends donc pas : le P0 de l'audit n'est **pas** fermé. Le code
+de la conjonction existe et est correct ; il est branché au mauvais endroit.

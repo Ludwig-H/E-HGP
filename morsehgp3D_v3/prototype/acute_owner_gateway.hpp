@@ -238,6 +238,107 @@ inline Verdict classifie(const Extrema& e, GwMutant mu = GwMutant::kNone) {
   return Verdict::kMixed;
 }
 
+// ---------------------------------------------------------------------------
+// LE LEDGER DE VIVACITE `W_4`, AU NIVEAU BLOC.
+//
+// Le gateway aigu seul est exact mais enumere un objet CUBIQUE : un triangle
+// aigu quelconque n'est pas une source q4. Il faut la CONJONCTION — l'ancre doit
+// aussi etre `W_4`-vivante, c'est-a-dire que son fuseau contienne moins de
+// `r4 = 8` points.
+//
+// `W_4(a,b) = { z : H > 0 et 3H^2 > |e|^2 |t|^2 }` avec `e = z-a`, `t = b-z`.
+// Noter que `H = -Phi` : le meme produit scalaire sert aux deux clauses, avec le
+// signe oppose. Un temoin q2 est un non-porteur, et reciproquement.
+//
+// DEUX TESTS DE BLOC, ET UNE MONOTONIE QUI EVITE DE TOUT RECALCULER.
+//
+//   `bloc_tout_w4`   : TOUT `z` de `Z` est dans `W_4(a,b)` pour TOUTE paire du
+//                      rectangle -> on credite `|Z|` d'un coup.
+//   `bloc_aucun_w2`  : AUCUN `z` de `Z` n'est meme dans `W_2` -> on jette `Z`.
+//                      C'est `H_max <= 0`, soit `Phi_min >= 0` : le meme
+//                      extremum que le gateway aigu calcule deja.
+//
+// MONOTONIE. Raffiner `A` ou `B` AFFAIBLIT le « pour toute paire », donc
+// `L4_open` ne peut que CROITRE. Le credit acquis est donc definitif, et seule
+// la frontiere indecise se re-teste chez les enfants. C'est ce qui rend le
+// ledger heritable au lieu d'etre recalcule a chaque nœud.
+//
+// `bloc_tout_w4` enumere les coins : `H` est concave en `z` et affine en `a` et
+// `b`, donc son MINIMUM sur le produit est en un sommet ; et la lane est decidee
+// exactement par le meme argument en trois temps que `block_lane`.
+inline bool bloc_tout_w4(const BoxI& A, const BoxI& B, const BoxI& Z, long long* ev) {
+  i64 ca[8][3], cb[8][3], cz[8][3];
+  auto coins = [](const Interval ax[3], i64 out[8][3]) {
+    int nx = 0;
+    for (int i = 0; i < (ax[0].lo == ax[0].hi ? 1 : 2); ++i)
+      for (int j = 0; j < (ax[1].lo == ax[1].hi ? 1 : 2); ++j)
+        for (int k = 0; k < (ax[2].lo == ax[2].hi ? 1 : 2); ++k) {
+          out[nx][0] = i ? ax[0].hi : ax[0].lo;
+          out[nx][1] = j ? ax[1].hi : ax[1].lo;
+          out[nx][2] = k ? ax[2].hi : ax[2].lo;
+          ++nx;
+        }
+    return nx;
+  };
+  const int na = coins(A.ax, ca), nb = coins(B.ax, cb), nz = coins(Z.ax, cz);
+  for (int iz = 0; iz < nz; ++iz)
+    for (int ia = 0; ia < na; ++ia) {
+      const i64 e[3] = {cz[iz][0] - ca[ia][0], cz[iz][1] - ca[ia][1], cz[iz][2] - ca[ia][2]};
+      const i64 e2 = e[0] * e[0] + e[1] * e[1] + e[2] * e[2];
+      if (e2 == 0) return false;  // `z` confondu avec une ancre : jamais temoin
+      for (int ib = 0; ib < nb; ++ib) {
+        if (ev) ++*ev;
+        const i64 t[3] = {cb[ib][0] - cz[iz][0], cb[ib][1] - cz[iz][1], cb[ib][2] - cz[iz][2]};
+        const i64 h = e[0] * t[0] + e[1] * t[1] + e[2] * t[2];
+        if (h <= 0) return false;
+        const i64 t2 = t[0] * t[0] + t[1] * t[1] + t[2] * t[2];
+        // q4 : `3 H^2 > |e|^2 |t|^2`. STRICTE : l'egalite est la frontiere.
+        if (!((i128)3 * (i128)h * (i128)h > (i128)e2 * (i128)t2)) return false;
+      }
+    }
+  return true;
+}
+
+// `H_max <= 0` sur tout le bloc : aucun `z` n'est dans `W_2`, donc a fortiori
+// pas dans `W_4`. `H = -Phi`, donc c'est `Phi_min >= 0`.
+inline bool bloc_aucun_w2(const Extrema& e) { return e.phi_min >= 0; }
+
+// Le verdict conjoint que l'audit `1d9425d` specifie en section 3.3.
+enum class VerdictConjoint {
+  kDeadW4,          // `L4_open >= r4` : toutes les paires du bloc sont mortes
+  kDeadNoCarrier,   // le gateway aigu tue : aucun porteur possible
+  kActiveAll,       // `U4_closed < r4` ET `ALL_STRICT` : bloc entierement actif
+  kMixed
+};
+
+inline const char* verdict_conjoint_nom(VerdictConjoint v) {
+  switch (v) {
+    case VerdictConjoint::kDeadW4: return "DEAD_W4";
+    case VerdictConjoint::kDeadNoCarrier: return "DEAD_NO_CARRIER";
+    case VerdictConjoint::kActiveAll: return "ACTIVE_ALL";
+    case VerdictConjoint::kMixed: return "MIXED";
+  }
+  return "?";
+}
+
+// `L4_open` : IDs universellement interieurs a `W_4` pour TOUTE paire du bloc.
+// `U4_closed` : `L4_open` plus la frontiere encore indecise — le majorant.
+//
+// LA CONJONCTION NE SE SEPARE PAS, et c'est le point de la section 3.1 : « il
+// existe une paire vivante » et « il existe une paire portant un carrier »
+// peuvent etre realisees par des paires DIFFERENTES. `ACTIVE_ALL` exige donc les
+// deux pour TOUTES les paires du bloc a la fois, pas leur simple coexistence.
+inline VerdictConjoint classifie_conjoint(const Extrema& e, long long L4_open,
+                                          long long U4_closed, int r4,
+                                          GwMutant mu = GwMutant::kNone) {
+  if (L4_open >= r4) return VerdictConjoint::kDeadW4;
+  const Verdict v = classifie(e, mu);
+  if (v == Verdict::kDeadPhi || v == Verdict::kDeadOwnerE || v == Verdict::kDeadOwnerX)
+    return VerdictConjoint::kDeadNoCarrier;
+  if (v == Verdict::kAllStrict && U4_closed < r4) return VerdictConjoint::kActiveAll;
+  return VerdictConjoint::kMixed;
+}
+
 }  // namespace acute
 }  // namespace mhgp3v
 
