@@ -171,29 +171,31 @@ l'ordre de grandeur.
 
 ---
 
-## 7. Le facteur confondant, contrôlé — et il ne sauve pas la linéarité
+## 7. Le facteur confondant, contrôlé jusqu'au bout — il est négligeable
 
 J'avais signalé que `cloud_family_default_coord` fait varier l'emprise avec `n`,
 donc que les familles ne sont pas auto-similaires et que l'exposant mesuré
-mélangeait deux effets. Contrôle à **emprise fixe** (`--coord=400`), `uniform`,
-`s = 8` :
+mélangeait deux effets. Le contrôle est maintenant complet sur les trois tailles,
+`uniform`, `s = 8` :
 
-| | `n = 8000` | `n = 16000` | exposant |
-|---|---:|---:|---:|
-| emprise fixe `400` | `3 864 079` | `9 593 453` | **`1,31`** |
-| emprise variable | `3 957 383` | `9 473 939` | `1,26` |
+| | `n=8000` | `n=16000` | `n=32000` | exp. `8k→16k` | exp. `16k→32k` |
+|---|---:|---:|---:|---:|---:|
+| emprise **fixe** `400` | `3 864 079` | `9 593 453` | `22 393 190` | `1,31` | **`1,22`** |
+| emprise variable | `3 957 383` | `9 473 939` | `22 247 725` | `1,26` | **`1,23`** |
 
-L'exposant reste de l'ordre de `1,3` dans les deux cas. **Le facteur confondant
-existe mais il ne l'explique pas** : à géométrie strictement fixée, le compte
-croît encore nettement plus vite que `n`.
+Écart entre les deux séries : `+2,4 %`, `-1,2 %`, `-0,6 %`. **Les deux courbes
+sont la même courbe.** Ma précaution méthodologique était fondée — on ne mesure
+pas une pente sur des nuages non auto-similaires sans le vérifier — mais l'effet
+est nul, et je le dis plutôt que de laisser planer un doute que j'ai levé.
 
-Je ne conclus pas encore que le régime asymptotique est superlinéaire — ce
-serait contredire Callahan-Kosaraju, et la lecture la plus probable reste que
-`n = 16 000` est toujours dans la transition, le rapport à `s^{3} n` valant
-`0,94` puis `1,17`. Le point `n = 32 000` à emprise fixe est en cours et
-tranchera. Je le verserai dès qu'il sera là, quelle que soit sa direction.
+Ce qui compte davantage : **à emprise strictement fixée, l'exposant décroît lui
+aussi**, `1,31` puis `1,22`. C'est la signature d'une convergence lente vers le
+régime linéaire, pas d'une pente stable. Callahan-Kosaraju n'est donc contredit
+nulle part, et mon inquiétude de la section précédente tombe — pour `uniform`.
 
----
+Elle ne tombe pas pour `terrain`, qui reste plat à `1,25 / 1,27 / 1,27 / 1,29`
+selon `s`, sans aucune décroissance sur deux doublements. C'est le seul cas
+ouvert de toute la campagne, et je le laisse ouvert.
 
 ## 8. La matrice complète — `36` points, `4` familles, `3` tailles, `3` séparations
 
