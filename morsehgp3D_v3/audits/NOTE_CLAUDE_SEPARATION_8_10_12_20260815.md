@@ -15,11 +15,16 @@ réserve 3 de l'audit positif est levée pour ces mesures-là.
 
 `V4_pair_walive` est **identique** pour les trois séparations, à `n` fixé :
 
-| `n` | `s=8` | `s=10` | `s=12` |
-| ---: | ---: | ---: | ---: |
-| `8 000` | `313 806` | `313 806` | `313 806` |
-| `16 000` | `667 449` | `667 449` | `667 449` |
-| `32 000` | `1 440 227` | `1 440 227` | `1 440 227` |
+| famille | `n` | `s=8` | `s=10` | `s=12` |
+| --- | ---: | ---: | ---: | ---: |
+| `terrain` | `8 000` | `313 806` | `313 806` | `313 806` |
+| `terrain` | `16 000` | `667 449` | `667 449` | `667 449` |
+| `terrain` | `32 000` | `1 440 227` | `1 440 227` | `1 440 227` |
+| `uniform` | `8 000` | `879 078` | `879 078` | `879 078` |
+| `uniform` | `32 000` | `3 852 997` | `3 852 997` | — |
+| `eight_clusters` | `8 000` | `980 606` | `980 606` | `980 606` |
+| `eight_clusters` | `16 000` | `2 167 153` | `2 167 153` | `2 167 153` |
+| `eight_clusters` | `32 000` | `4 693 975` | `4 693 975` | `4 693 975` |
 
 C'est ce qu'il fallait : l'ensemble `W`-vivant est une propriété du **nuage**,
 pas de la partition. Seule la finesse du préfiltre change. Une divergence ici
@@ -62,16 +67,37 @@ une dérive de l'ordre du point de pourcentage par doublement.
 | ---: | ---: | ---: | ---: | ---: |
 | `8 000` | `8` | `2 586 460` | `91,916 %` | `2,638` |
 | `8 000` | `10` | `2 020 565` | `93,685 %` | `2,061` |
+| `8 000` | `12` | `1 697 882` | `94,693 %` | `1,731` |
 | `16 000` | `8` | `6 531 556` | `94,897 %` | `3,014` |
 | `16 000` | `10` | `5 290 669` | `95,866 %` | `2,441` |
+| `16 000` | `12` | `4 339 835` | `96,609 %` | `2,003` |
 | `32 000` | `8` | `16 779 180` | `96,723 %` | `3,575` |
+| `32 000` | `10` | `12 315 068` | `97,595 %` | `2,624` |
+| `32 000` | `12` | `9 949 312` | `98,057 %` | `2,120` |
 
-`-21,9 %` à `n=8 000`, `-19,0 %` à `n=16 000` : le double de `terrain`. Le mou
-y reste très supérieur à un (`2,4` à `3,6`), donc c'est aussi la famille où un
-resserrement de certificat aurait encore de la marge — contrairement à
-`terrain` et `uniform`, où il tombe sous `1,35`.
+Gain relatif à `s=8` : `-21,9 / -19,0 / -26,6 %` pour `s=10`, et
+`-34,4 / -33,6 / -40,7 %` pour `s=12`. **Deux à quatre fois `terrain`**, et le
+gain croît avec `n` sur les deux séparations.
 
-`uniform` se place entre les deux : `-11,4 %` à `n=8 000`.
+`uniform` se place entre les deux — `-11,4 / -12,2 / -12,5 %` pour `s=10`,
+`-17,4 %` pour `s=12` à `n=8 000` — avec une remarquable stabilité en `n`.
+
+## 3bis. Où le travail de certificat est fini, et où il ne l'est pas
+
+Le mou à `s=12` sépare nettement les trois familles :
+
+| famille | mou `s=8` | mou `s=12` | résiduel encore retirable |
+| --- | ---: | ---: | ---: |
+| `uniform` (`n=8 000`) | `1,336` | `1,103` | `9,3 %` |
+| `terrain` (`n=32 000`) | `1,576` | `1,311` | `23,7 %` |
+| `eight_clusters` (`n=32 000`) | `3,575` | `2,120` | `52,8 %` |
+
+Sur `uniform`, un certificat parfait ne gagnerait plus que `9,3 %` du résiduel :
+le travail de certificat y est **terminé**. Sur `eight_clusters` il en reste
+`52,8 %` même à `s=12`, et le mou y croît toujours avec `n` (`2,638` à `8 000`,
+`3,575` à `32 000` pour `s=8`). C'est la seule des trois familles où un
+resserrement garde une marge réelle — et c'est aussi celle qui ressemble le plus
+à un nuage LiDAR.
 
 ## 4. Ce que je ne conclus pas, et pourquoi
 
@@ -83,14 +109,16 @@ arbitre `s` est celui du préfiltre **seul**, et je le mesure séparément ; tan
 qu'il n'est pas rendu, je ne publie aucun verdict de temps.
 
 Ce que la campagne établit sans réserve, c'est le côté **résiduel** :
-`s=10` retire `9` à `22 %` du résiduel de `s=8` pour `1,38x` de rectangles, et
-`s=12` en retire `14` à `17 %` pour `1,80x`. La décision dépend donc entièrement
+`s=10` retire `9` à `27 %` du résiduel de `s=8` pour `1,38x` à `1,55x` de
+rectangles, et `s=12` en retire `14` à `41 %` pour `1,80x` à `1,89x`. La décision dépend donc entièrement
 du coût d'instruction d'une ancre survivante, qui n'est pas encore mesuré à ces
 tailles.
 
 ## 5. Ce qui reste dû
 
-Le temps du préfiltre seul, aux neuf configurations. Les colonnes `s=12` pour
-`uniform` et `eight_clusters`, et `s=10`/`s=12` à `n=32 000` pour
-`eight_clusters` — la campagne tourne encore. Les familles `scanline_*` et
+Le temps du préfiltre seul, aux vingt-sept configurations — c'est lui qui
+arbitre, et il tourne. Les colonnes `s=12` d'`uniform` à `n=16 000` et
+`n=32 000`. Les familles `scanline_single_pass`, `scanline_overlap_multiecho` et
 `two_lines`, désormais acceptées par le probe mais absentes de cette campagne.
+Et le coût d'instruction d'une ancre à ces tailles, sans lequel aucun arbitrage
+de `s` n'est décidable.
