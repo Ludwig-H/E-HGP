@@ -4713,6 +4713,42 @@ target_link_libraries(mhgp3v_acute_owner_gateway_probe PRIVATE mhgp)
 # `juge-compense` omet un porteur vrai et emet une cle bidon a la place : le
 # CARDINAL reste exact, donc l'ancien juge passe. Le juge par identites rend
 # `manquantes=1 fausses=1` et le tue, code 4.
+# ---------------------------------------------------------------------------
+# LE JUGE DE PARTITION, INDEPENDANT DU GATEWAY.
+#
+# L'audit exige, HORS de toute question de porteur : chaque paire non ordonnee
+# de vrais `PointId` doit apparaitre dans EXACTEMENT UN etat terminal. Mon
+# `doublons = 0` sur les cles ternaires en etait une forme forte, mais il passait
+# par les porteurs — il ne pouvait donc rien dire des paires qu'aucun porteur ne
+# touche.
+#
+# Ce juge ne consulte AUCUNE geometrie : il retraverse la WSPD et compte.
+# `masse` doit valoir exactement `C(n,2)`, `absentes` et `doubles` doivent etre
+# nuls.
+#
+# LA PORTE DES DOUBLONS N'EST PAS VACUE. Aucune famille du generateur ne produit
+# deux `PointId` a la meme position, donc `--force-doublons=K` en fabrique : les
+# `K` derniers points recopient le premier. Les identifiants restent DISTINCTS,
+# et le recouvrement doit rester exact — l'ordre Morton organise le calcul,
+# `EdgeKey` reste definie par les vrais `PointId`, et aucune deduplication
+# geometrique n'est permise. Verifie a `K = 0`, `5` et `40`.
+foreach(fam two_lines terrain uniform eight_clusters)
+  add_test(NAME mhgp3v_gateway_partition_${fam}
+    COMMAND mhgp3v_acute_owner_gateway_probe --partition --family=${fam} --points=200)
+  set_tests_properties(mhgp3v_gateway_partition_${fam} PROPERTIES
+    PASS_REGULAR_EXPRESSION
+    "paires_attendues=19900 couvertes=19900 absentes=0 doubles=0 masse=19900")
+endforeach()
+
+foreach(k 5 40)
+  add_test(NAME mhgp3v_gateway_partition_doublons_${k}
+    COMMAND mhgp3v_acute_owner_gateway_probe --partition --family=terrain --points=200
+            --force-doublons=${k})
+  set_tests_properties(mhgp3v_gateway_partition_doublons_${k} PROPERTIES
+    PASS_REGULAR_EXPRESSION
+    "couvertes=19900 absentes=0 doubles=0 masse=19900 positions_dupliquees=${k}")
+endforeach()
+
 foreach(fam two_lines terrain uniform eight_clusters)
   add_test(NAME mhgp3v_gateway_identites_${fam}
     COMMAND mhgp3v_acute_owner_gateway_probe --brute --family=${fam} --points=120)

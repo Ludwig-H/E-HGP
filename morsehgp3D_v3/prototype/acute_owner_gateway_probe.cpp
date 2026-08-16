@@ -243,9 +243,10 @@ int main(int argc, char** argv) {
   std::string famille = "two_lines";
   bool mode_oracle = false, mode_sparse = false, mode_brute = false, biais = false;
   bool mode_fixture = false;
-  bool ab_fige = false, deux_fronts = false;
+  bool ab_fige = false, deux_fronts = false, mode_partition = false;
   long long max_pairid = -1, min_carriers = -1, min_noeuds = 0;
   int r4 = 8;   // seuil de rejet q4, `h_4 = s_max - 3`
+  int force_doublons = 0;  // positions dupliquees imposees, IDs distincts
   int sep = 8;  // separation WSPD
   GwMutant mu = GwMutant::kNone;
 
@@ -267,6 +268,7 @@ int main(int argc, char** argv) {
     const std::string a = argv[i];
     long long t = 0;
     if (a == "--fixtures") { mode_fixture = true; continue; }
+    if (a == "--partition") { mode_sparse = true; mode_partition = true; continue; }
     if (a == "--ab-fige") { ab_fige = true; continue; }
     if (a == "--deux-fronts") { ab_fige = true; deux_fronts = true; continue; }
     if (a == "--oracle") { mode_oracle = true; continue; }
@@ -283,6 +285,7 @@ int main(int argc, char** argv) {
     if (entier(a, "--min-carriers=", &t)) { min_carriers = t; continue; }
     if (entier(a, "--min-noeuds=", &t)) { min_noeuds = t; continue; }
     if (entier(a, "--r4=", &t)) { r4 = (int)t; continue; }
+    if (entier(a, "--force-doublons=", &t)) { force_doublons = (int)t; continue; }
     if (entier(a, "--separation=", &t)) { sep = (int)t; continue; }
     if (a.rfind("--family=", 0) == 0) { famille = a.substr(9); continue; }
     if (a.rfind("--inject=", 0) == 0) {
@@ -482,10 +485,20 @@ int main(int argc, char** argv) {
       std::fprintf(stderr, "REFUS : le generateur a rendu %d points pour --points=%d\n", m, n);
       return 2;
     }
+    // ---- DOUBLONS FORCES, POUR QUE LA PORTE NE SOIT PAS VACUE.
+    //
+    // Aucune famille du generateur ne produit deux `PointId` a la meme position,
+    // donc la porte « coordonnees dupliquees » passerait sans rien tester. On en
+    // fabrique : les `K` derniers points recopient le premier. Les identifiants
+    // restent DISTINCTS, et le recouvrement des `PairId` doit rester exact —
+    // l'ordre Morton organise le calcul, `EdgeKey` reste definie par les vrais
+    // `PointId`, et aucune deduplication geometrique n'est permise.
+    std::vector<mhgp::P3> brut2(brut.begin(), brut.end());
+    for (int k = 0; k < force_doublons && k < m - 1; ++k) brut2[(size_t)(m - 1 - k)] = brut2[0];
     std::vector<unsigned long long> keys(m);
     std::vector<int> order(m);
     for (int i = 0; i < m; ++i) {
-      keys[i] = mhgp3v::wf_morton48(brut[i].x, brut[i].y, brut[i].z);
+      keys[i] = mhgp3v::wf_morton48(brut2[i].x, brut2[i].y, brut2[i].z);
       order[i] = i;
     }
     std::sort(order.begin(), order.end(), [&](int i, int j) {
@@ -496,7 +509,7 @@ int main(int argc, char** argv) {
     std::vector<int> pid(m);
     for (int i = 0; i < m; ++i) {
       sk[i] = keys[order[i]];
-      pts[i] = P3{(short)brut[order[i]].x, (short)brut[order[i]].y, (short)brut[order[i]].z};
+      pts[i] = P3{(short)brut2[order[i]].x, (short)brut2[order[i]].y, (short)brut2[order[i]].z};
       pid[i] = order[i];
     }
     std::vector<WfNode> nodes = mhgp3v::wf_build(sk);
@@ -527,6 +540,82 @@ int main(int argc, char** argv) {
       }
       return B;
     };
+
+    // ---- LE JUGE DE PARTITION, INDEPENDANT DU GATEWAY.
+    //
+    // L'audit exige, hors de toute question de porteur : chaque paire NON
+    // ORDONNEE de vrais `PointId` doit apparaitre dans EXACTEMENT UN etat
+    // terminal. Mon `doublons = 0` sur les cles ternaires en etait une forme
+    // forte, mais il passait par les porteurs — donc il ne pouvait rien dire des
+    // paires qu'aucun porteur ne touche.
+    //
+    // Ce juge-ci ne consulte aucune geometrie : il retraverse la WSPD et compte.
+    // Il doit rester vrai en presence de coordonnees dupliquees, l'ordre Morton
+    // organisant le calcul tandis que `EdgeKey` reste definie par les vrais
+    // `PointId`.
+    if (mode_partition) {
+      std::vector<int> occ((size_t)m * m, 0);
+      long long masse = 0;
+      {
+        struct R { int u, v; };
+        std::vector<R> pile;
+        for (size_t i = 0; i < nodes.size(); ++i) pile.push_back({nodes[i].left, nodes[i].right});
+        while (!pile.empty()) {
+          const R r = pile.back();
+          pile.pop_back();
+          const bool fu = feuille(r.u), fv = feuille(r.v);
+          if (separes(sphere_de(boite(r.u)), sphere_de(boite(r.v)), sep) || (fu && fv)) {
+            for (int i = premier(r.u); i <= dernier(r.u); ++i)
+              for (int j = premier(r.v); j <= dernier(r.v); ++j) {
+                if (i == j) continue;
+                const int a = pid[i] < pid[j] ? pid[i] : pid[j];
+                const int b = pid[i] < pid[j] ? pid[j] : pid[i];
+                ++occ[(size_t)a * m + b];
+                ++masse;
+              }
+            continue;
+          }
+          const bool su = !fu && (fv || pop(r.u) >= pop(r.v));
+          if (su) { pile.push_back({nodes[r.u].left, r.v}); pile.push_back({nodes[r.u].right, r.v}); }
+          else { pile.push_back({r.u, nodes[r.v].left}); pile.push_back({r.u, nodes[r.v].right}); }
+        }
+      }
+      long long absentes = 0, doubles = 0, couvertes = 0;
+      for (int a = 0; a < m; ++a)
+        for (int b = a + 1; b < m; ++b) {
+          const int c = occ[(size_t)a * m + b];
+          if (c == 0) ++absentes;
+          else if (c > 1) ++doubles;
+          else ++couvertes;
+        }
+      // Positions dupliquees : elles ne changent RIEN au recouvrement des
+      // `PairId`. Une geometrie peut bucketiser une position, les identifiants
+      // restent distincts et leurs paires restent couvertes.
+      long long pos_dupliquees = 0;
+      {
+        std::vector<P3> tri(pts);
+        std::sort(tri.begin(), tri.end(), [](const P3& u, const P3& v) {
+          if (u.x != v.x) return u.x < v.x;
+          if (u.y != v.y) return u.y < v.y;
+          return u.z < v.z;
+        });
+        for (size_t i = 1; i < tri.size(); ++i)
+          if (tri[i].x == tri[i-1].x && tri[i].y == tri[i-1].y && tri[i].z == tri[i-1].z)
+            ++pos_dupliquees;
+      }
+      std::printf("partition paires_attendues=%lld couvertes=%lld absentes=%lld "
+                  "doubles=%lld masse=%lld positions_dupliquees=%lld\n",
+                  (long long)m * (m - 1) / 2, couvertes, absentes, doubles, masse,
+                  pos_dupliquees);
+      if (absentes > 0 || doubles > 0 || masse != (long long)m * (m - 1) / 2) {
+        std::fprintf(stderr,
+                     "DESACCORD DU JUGE : partition absentes=%lld doubles=%lld masse=%lld\n",
+                     absentes, doubles, masse);
+        return 1;
+      }
+      std::printf("OK : partition exact-once\n");
+      return 0;
+    }
 
     // ---- LA RECURSION TERNAIRE.
     //

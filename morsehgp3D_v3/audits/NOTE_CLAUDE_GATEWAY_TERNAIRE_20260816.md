@@ -483,3 +483,67 @@ Le juge exhaustif de la partition des `PairId`, **indépendant du gateway**. Mon
 `(arête, apex)` est émis une fois exactement — mais ce n'est pas encore
 l'énoncé « chaque paire non ordonnée apparaît dans exactement un état
 terminal », qui doit se tester sans passer par les porteurs.
+
+### Le juge de partition, indépendant du gateway — fait
+
+`masse = C(n,2)` exactement, `absentes = 0`, `doubles = 0` sur les quatre
+familles à `n=200`. Il ne consulte **aucune** géométrie : il retraverse la WSPD
+et compte.
+
+Et la porte des doublons n'est pas vacue : aucune famille du générateur ne
+produit deux `PointId` à la même position, donc `--force-doublons=K` en fabrique.
+Vérifié à `K = 0`, `5`, `40` — aucune perte, aucune déduplication géométrique,
+`EdgeKey` restant définie par les vrais `PointId`.
+
+Le Commit 1 de l'audit est donc **fermé** : masque relationnel, replay,
+identités, surcouverture publiée à part, et partition exact-once indépendante.
+
+---
+
+## 12. Trois questions à l'auditeur, avant `PairFrame`
+
+Je préfère demander que deviner, parce que les trois portent sur des choix
+d'ABI qu'il sera coûteux de reprendre après.
+
+### Q1 — `upper_open` sur une antichaîne grossière : quelle borne exactement ?
+
+L'audit demande de remplacer la descente jusqu'aux feuilles par
+
+`upper = lower + somme des populations des spans encore possibles`
+
+avec saturation au seuil. Mais un span « encore possible » contient des points
+dont certains sont dans `W_q` et d'autres non ; sa population entière est donc
+un majorant **très** lâche dès que le span est gros.
+
+Ma question : faut-il (a) accepter cette lâcheté et compter sur la saturation à
+`h_q`, ou (b) exiger que la frontière soit raffinée jusqu'à ce que
+`upper - lower < h_q`, ce qui est une condition d'arrêt et non une borne ?
+
+L'option (b) me paraît la seule qui rende `upper_open < h_q` exploitable, mais
+elle réintroduit une descente dont je ne sais pas borner la profondeur.
+
+### Q2 — la distinction `upper_open` / `upper_closed` et les égalités
+
+`U_q^\circ` compte les témoins **strictement** intérieurs, `U_q^\bullet` ajoute
+le shell. Sur une AABB, décider « strictement intérieur » et « intérieur ou
+shell » demande deux tests distincts — mais mon `bloc_tout_w4` teste
+`3H^2 > E X`, donc déjà le strict. Pour le fermé il faudrait `>=`.
+
+Ma question : le shell d'un fuseau `W_q` avec `q >= 3` est-il un objet que le
+contrat manipule vraiment, ou est-ce seulement `W_2` — la boule diamétrale — qui
+a un shell pertinent, parce que c'est la seule miniboule du support ? Autrement
+dit, `upper_closed` a-t-il un sens pour q3/q4, ou est-ce une notion q2 que je
+transposerais à tort ?
+
+### Q3 — le split endpoint décidé « une fois pour toute la paire »
+
+En pair-major, la scission de `A` doit être décidée une fois, pas par branche
+témoin. Mais le bon choix dépend de ce que la frontière témoin révèle, qui
+n'est connu qu'après avoir descendu `C`.
+
+Ma question : le critère de la section 3.4 se calcule-t-il (a) avant toute
+descente de `C`, sur les seules populations et boîtes, ou (b) après une passe de
+classification de la frontière courante, donc au prix d'une passe supplémentaire
+par candidat de scission ? La formule donnée — masse classée sur tâches enfants
+— suppose de connaître la masse classée, donc (b) ; mais (b) coûte autant que ce
+qu'il économise si l'on teste les trois facteurs.
