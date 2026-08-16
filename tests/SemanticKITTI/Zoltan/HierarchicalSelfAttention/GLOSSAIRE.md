@@ -1,154 +1,184 @@
 # Glossaire
 
-Tous les termes du dossier, une ou deux lignes chacun. Les définitions mathématiques normatives sont dans [CONTRAT_HGP.md](archive/CONTRAT_HGP.md) et [THEOREMES.md](archive/THEOREMES.md) ; ici, on cherche à comprendre vite.
+## Objets et données
 
-Trois symboles à ne **jamais** confondre, c'est la confusion la plus fréquente du dossier :
+**Arbre complet**  
+Arbre contenant tous les événements de naissance et de fusion utiles, et non seulement quelques coupes choisies.
 
-| Symbole | Ce que c'est |
-|---|---|
-| $K$ | l'**ordre HGP** : le nombre de points qui doivent être simultanément proches |
-| $d_{\mathrm{geo}}$ | la **distance géométrique** utilisée pour la filtration |
-| $k_{\mathrm{local}}$ | le **budget de voisins du backbone** neuronal, sans rapport avec $K$ |
+**Branche**  
+Suite d'états d'une même composante entre sa naissance et sa fusion dans un parent.
 
----
+**Carrier**  
+Réalisation géométrique associée à une cellule ou un nœud. Toujours préciser lequel ; le mot « polyèdre » seul ne suffit pas dans les tests numériques.
 
-## Clustering hiérarchique : le socle
+**Cellule / facette élémentaire**  
+Unité minimale sérialisée et token de feuille du réseau principal.
 
-| Terme | Définition |
-|---|---|
-| **Single-Linkage** | Relie deux points dès qu'ils sont à distance $\leq 2r$, fait croître $r$, et prend les composantes connexes. C'est HGP à $K=1$. |
-| **Effet de chaînage** | Défaut du Single-Linkage en dimension $\geq2$ : une chaîne de points de bruit soude prématurément deux amas distincts. Motivation centrale de la thèse. |
-| **DBSCAN** | Single-Linkage restreint aux points « cœurs », ayant assez de voisins dans un rayon fixé ; gère explicitement une frontière et du bruit. |
-| **Robust Single-Linkage** | Variante qui n'autorise la liaison qu'entre points de densité suffisante. Moteur de HDBSCAN. |
-| **HDBSCAN** | État de l'art usuel : Robust Single-Linkage, condensation de l'arbre par `min_cluster_size`, sélection par excès de masse. |
-| **Modèle de Hartigan** | Cadre statistique où les clusters sont les composantes connexes des ensembles de niveau $\lbrace f\geq\lambda\rbrace$ d'une densité $f$. |
-| **Estimateur $K$-NN** | Estimation de densité par la distance $r_K(y)$ au $K$-ième plus proche voisin. Plus $r_K$ est petit, plus la densité est élevée. |
-| **Amas de forte densité** | Composante connexe d'un ensemble de niveau supérieur. Sa version **discrète** est l'ensemble des points couverts par cette composante. |
-| **Filtration** | Famille croissante d'objets indexée par le rayon ou le niveau. Les clusters ne peuvent que croître et fusionner. |
-| **Excès de masse** | Critère de sélection de clusters dans une hiérarchie, favorisant ceux qui persistent longtemps avec beaucoup de masse. |
-| **Naissance, mort, persistance** | Niveau d'apparition d'un nœud, niveau de sa fusion dans son parent, et leur écart. |
+**Coface**  
+Cellule d'ordre supérieur reliant plusieurs facettes. Elle peut devenir un hyperedge dans l'encodeur d'incidences.
 
----
+**Événement de fusion**  
+Lot simultané dans lequel plusieurs branches deviennent un même parent. Il est traité comme un ensemble, sans ordre arbitraire entre enfants.
 
-## HGP : l'objet propre à cette thèse
+**Feuille**  
+Token minimal de l'arbre. Dans le modèle principal, une feuille est une facette, jamais un point.
 
-| Terme | Définition |
-|---|---|
-| **HGP-Clusterer** | *Hypergraphe-Percol'*. Généralise le Single-Linkage en faisant percoler des simplexes au lieu de points. |
-| **Complexe de Čech** $\check{C}(X,r)$ | Ensemble des sous-ensembles de points dont les boules de rayon $r$ ont une intersection commune non vide. |
-| **$(K-1)$-simplexe** | Groupe de $K$ points formant une cellule du complexe. Pour $K=2$, une arête ; pour $K=3$, un triangle. |
-| **Facette** | Dans le vocabulaire du dossier, un $(K-1)$-simplexe actif, c'est-à-dire de cardinal $K$ et né avant le niveau considéré. |
-| **Coface** | Cellule de cardinal $K+1$ qui **connecte** deux facettes. C'est elle qui porte l'adjacence. |
-| **Région témoin** $T_r(\sigma)$ | $\bigcap_{x\in\sigma}\overline{B}(x,r)$ : l'ensemble des centres de boules de rayon $r$ attrapant tous les points de $\sigma$. Convexe compact. |
-| **$\Gamma_K$** | Graphe dont les sommets sont les facettes et les arêtes l'adjacence. C'est **exactement** le graphe d'intersection des régions témoins. |
-| **$\Gamma_K^{\mathrm{full}}$ / $\Gamma_K^{\mathrm{elem}}$** | Version complète et version restreinte aux cofaces élémentaires. Elles ont les mêmes composantes, **pas** les mêmes arêtes. |
-| **$K$-polyèdre** | Ensemble des points apparaissant dans une composante connexe de $\Gamma_K$. C'est le cluster de HGP. |
-| **Recouvrement** | Pour $K\geq2$, un même point peut appartenir à plusieurs $K$-polyèdres d'un même niveau. La sortie n'est **pas** une partition. |
-| **Clique percolation** | Nom usuel de ce mécanisme dans la littérature des réseaux ; voisin de la $q$-connectivité d'Atkin (1972). |
-| **Percolation** | Apparition d'une composante géante sous contraintes locales. Outil d'analyse des performances asymptotiques. |
-| **Vitesse de percolation** | Indice de la thèse comparant les algorithmes par la fraction d'un amas récupérable avant fusion parasite. |
-| **Mosaïque de Delaunay d'ordre $K$** | Structure géométrique qui porte les simplexes candidats, sans énumérer $\binom{n}{K+1}$ possibilités. |
-| **Simplexe de Gabriel** | Simplexe dont la **plus petite boule englobante** ne contient aucun autre point. Condition nécessaire pour être séparant. |
-| **Miniball** | Plus petite boule englobante d'un ensemble ; son rayon est le niveau de naissance du simplexe. À ne pas confondre avec la boule circonscrite. |
-| **$K$-MST** | Arbre couvrant minimal du graphe de Gabriel, qui contient toute l'information de la hiérarchie. L'objet réellement calculé. |
-| **Vietoris–Rips** | Complexe de drapeau du graphe seuil : un simplexe dès que tous ses sommets sont deux à deux proches. Voie de repli parallélisable. |
-| **$\alpha_p$** | Constante d'intercalage $\sqrt{2p/(p+1)}$ du théorème de Jung. Vaut $\approx1{,}22$ en dimension 3 : c'est le prix en exactitude de Vietoris–Rips. |
+**Filtration**  
+Famille emboîtée d'objets indexée par un niveau `λ`.
 
----
+**Hiérarchie polyédrique**  
+Feuilles, incidences, composantes et arbre de fusion produits hors gradient.
 
-## Les quatre carriers, à ne jamais confondre
+**Nœud**  
+État persistant regroupant un ensemble de feuilles à un intervalle de niveaux.
 
-Un **carrier** est l'objet géométrique qu'un nœud « occupe ». Il y en a quatre, et aucun théorème ne se transfère de l'un à l'autre.
+**Niveau physique**  
+Valeur de filtration ayant une interprétation géométrique ou statistique commune entre scans, par opposition à un simple numéro de couche ou nombre de clusters.
 
-| Notation | Nom | Ce que c'est | Support |
-|---|---|---|---|
-| $V_v$ | $K$-polyèdre source | l'ensemble des **observations** du nœud | référence |
-| $C_v^{F}$ | carrier PL des facettes | $\bigcup_F\mathrm{conv}(F)$ | **égal** à celui de $V_v$ |
-| $C_v^{Q}$ | carrier PL des cofaces | $\bigcup_Q\mathrm{conv}(Q)$ | égal si les cofaces couvrent $V_v$ |
-| $W_v(a)$ | union témoin canonique | $\bigcup_F T_a(F)$, composante exacte du niveau de densité | **différent** en général |
+**Ordre `K`**  
+Ordre d'interaction utilisé pour construire la structure. Les comparaisons multi-ordre restent une extension.
 
-$W_v$ vit dans l'espace des **centres de boules** : ce n'est ni un polytope, ni une surface LiDAR reconstruite.
+**Persistance**  
+Durée de vie d'une branche dans le paramètre de filtration, de préférence mesurée en différence logarithmique lorsque cela est pertinent.
 
-| Terme | Définition |
-|---|---|
-| **`payload_kind`** | Nature des données sérialisées ; `marked_incidence` pour l'objet HGP marqué. |
-| **`carrier_kind`** | Lequel des quatre carriers est visé : `source_points`, `facet_pl`, `coface_pl`, `witness_union`. |
-| **`authority`** | Force du certificat : `incidence_complete`, `pl_complete`, `witness_exact`, `witness_approx` (avec $\varepsilon_W$), `h0_only`. |
-| **`cut_policy` / `cut_level` / `cut_side`** | Comment on fige un nœud persistant, qui évolue entre sa naissance et sa fusion. La baseline lit chaque branche juste avant sa fusion au parent. |
+**Reprojection**  
+Application linéaire des logits de feuilles vers les points originaux avec poids positifs sommant à un.
 
----
+**Thinning**  
+Suppression contrôlée de retours LiDAR pour simuler une densité plus faible ou une autre configuration de capteur.
 
-## Descripteurs de nœud
+## Canaux
 
-Détail et démonstrations dans [DESCRIPTEURS_DE_NOEUD.md](archive/DESCRIPTEURS_DE_NOEUD.md).
+**Canal `shape`**  
+Descripteurs de forme normalisés : Gram, spectre, support, CDF projetée, moments et masques de dégénérescence.
 
-| Terme | Définition |
-|---|---|
-| **Fonction support** $h_A(u)$ | $\max_{x\in A}\left\langle u,x\right\rangle$ : où se pose le plan d'appui dans la direction $u$. Décrit **exactement** l'enveloppe convexe. |
-| **Direction $u$** | Un **vecteur unitaire** de $S^2$, pas un plan. Mais ses lignes de niveau sont des plans : $u$ désigne une famille de plans parallèles, $(u,t)$ en désigne un. |
-| **Fonction radiale** $\rho_{\mathrm{out}}$ | Dernière sortie du carrier le long du rayon issu du centre. Décrit l'**enveloppe étoilée**. |
-| **Première entrée** $\rho_{\mathrm{in}}$ | Premier contact le long du rayon. Vacue si le centre est dans le carrier ; interprétable comme **surface visible** si le centre est le capteur. |
-| **Épaisseur** | $\rho_{\mathrm{out}}-\rho_{\mathrm{in}}$ : ce qui sépare un mur d'un buisson. |
-| **Étoilement** | Propriété d'être visible en ligne droite depuis le centre. La reconstruction radiale est exacte **si et seulement si** le carrier est étoilé. |
-| **CDF projetée** $F(u,t)$ | Fraction des points dont la projection sur $u$ est $\leq t$. Garde toute la **masse**, pas seulement l'extremum. |
-| **Cramér–Wold** | Théorème garantissant que la collection de **toutes** les projections 1-D détermine la mesure. Justifie la complétude asymptotique du canal CDF. |
-| **ECT / WECT** | Transformée de caractéristique d'Euler : même filtration directionnelle, mais on résume la **topologie** au lieu de la masse. |
-| **Log-sum-exp** | Version adoucie du $\max$, $\beta^{-1}\log\sum e^{\beta\cdot}$. Exactement fusionnable elle aussi, et distribue le gradient sur plus d'un point. |
-| **PointNet / DeepSets** | Encodeurs d'ensembles par $\max$-pooling et par somme. Un $\max$ ne peut pas approcher une moyenne : c'est pourquoi il faut un canal de masse. |
-| **Grille de Fibonacci / icosphère** | Deux façons d'échantillonner uniformément les directions sur la sphère. |
-| **Antipode** | Pour le support, $u$ et $-u$ portent des informations **différentes** ; pour la CDF, ils sont **redondants**. |
-| **$\Delta_v(u)$** | $h_{V_v}(u)-h_{W_v(a)}(u)$ : de combien il faut rentrer avant que la condition d'ordre $K$ soit satisfaite. Densité de bord directionnelle, propre à HGP. |
+**Canal `metric`**  
+Grandeurs physiques : dimensions, aire/volume, centre, hauteur, pose et portée.
 
----
+**Canal `filtration`**  
+Naissance, mort, persistance, écarts de niveau, rang et croissance de masse.
 
-## Arbre et opérateur
+**Canal `sensor`**  
+Rémission, anneaux, couverture angulaire, incidence estimée et masques de retours manquants.
 
-| Terme | Définition |
-|---|---|
-| **Arbre de fusion** | Arbre décrivant qui fusionne avec qui, et à quel niveau, le long de la filtration. |
-| **Laminaire** | Se dit d'une famille d'ensembles où deux membres sont soit disjoints, soit emboîtés. Condition requise par HSA. L'arbre HGP **l'est déjà**, sur les facettes : le recouvrement n'existe que dans la projection vers les points. |
-| **Laminarisation** | Durcissement du recouvrement en une partition stricte des points. Sa perte est mesurable par la marge du vote pondéré. |
-| **$S_\tau$** | Score local d'une facette, $\sum_{\sigma\supset\tau,\left|\sigma\right|=K+1}\psi\left(\rho(\sigma)\right)$ avec $\psi(t)=1/t^{p}$. Reflète la densité de naissance. |
-| **$T_x$** | Normalisateur d'un point, $\sum_{\tau\ni x}S_\tau$. Empêche qu'un point incident à beaucoup de faces soit surpondéré. |
-| **Partition de l'unité $w_{x\tau}$** | $S_\tau/T_x$ : chaque point distribue une masse totale de $1$ entre les facettes qui le contiennent. C'est l'ownership que l'architecture exigeait, et le manuscrit le fournit (§ 9.1). |
-| **Masse de nœud $m_\tau$** | $S_\tau\sum_{x\in\tau}1/T_x$. Remplace le comptage de faces dans `min_cluster_size`. |
-| **Vote pondéré** | $V_x(c)=\sum_{\tau\ni x,\ \ell(\tau)=c}w_{x\tau}$, puis $\arg\max_c$. Conversion en partition stricte (Proposition 7). Sa relaxation différentiable est $p(x)=\sum_\tau w_{x\tau}p_\tau$. |
-| **DAG de recouvrement** | Attention définie directement sur les appartenances multiples, sans passer par les facettes comme feuilles. C'est T6, désormais une extension et non une condition d'existence. |
-| **Antichaîne** | Ensemble de nœuds deux à deux non emboîtés couvrant tous les points. C'est une « coupe » de la hiérarchie. |
-| **Condensation** | Élagage de l'arbre pour supprimer les longues chaînes de fusions ponctuelles. Condition d'existence de HSA sur GPU, pas une optimisation. |
-| **HSA** | *Hierarchical Self-Attention*, NeurIPS 2025. Attention dont les scores sont constants par blocs entre sous-arbres frères. |
-| **Contrainte de blocs** | Le cœur de HSA : tous les couples entre deux sous-arbres frères partagent un même coefficient. |
-| **QC-HSA** | Variante proposée par ce dossier, conservant une ligne d'attention propre à chaque feuille requête. |
-| **Embedding positionnel** | Le seul point d'entrée du descripteur dans HSA fidèle : un scalaire de biais par couple de frères. |
+**Fonction support**  
+Pour une direction `u`, maximum du produit scalaire avec les points d'un ensemble. Elle résume l'enveloppe convexe, pas la masse intérieure.
 
----
+**CDF projetée**  
+Distribution empirique des projections d'une cellule selon plusieurs directions. Contrairement au support, elle conserve une information sur la masse intérieure.
 
-## Évaluation
+**Gram normalisé**  
+Matrice des produits scalaires entre vecteurs d'une cellule après normalisation. Elle donne un descripteur invariant aux permutations et aux rotations si utilisée par invariants spectraux.
 
-| Terme | Définition |
-|---|---|
-| **mIoU** | Moyenne **non pondérée** des IoU sur les 19 classes. Chaque classe pèse $1/19$, d'où le poids décisif des classes rares. |
-| **PQ** | *Panoptic Quality*, métrique de la segmentation panoptique, produit d'un terme de reconnaissance et d'un terme de segmentation. |
-| **LSTQ** | Métrique 4D combinant qualité de classification et qualité d'association temporelle. |
-| **Séquence 08** | La séquence de validation de SemanticKITTI. Le test (11–21) est caché et son serveur ne doit jamais servir à régler un hyperparamètre. |
-| **Mono-scan** | Un seul balayage, sans accumulation temporelle. Régime du dossier. |
-| **TTA** | *Test-Time Augmentation* : moyenner les prédictions sur plusieurs transformations à l'inférence. Change de régime, donc de comparabilité. |
-| **Oracle de partition** | mIoU obtenu en étiquetant chaque région par sa classe majoritaire. Plafond atteignable avec cette partition. |
-| **Pureté** | Fraction des points d'une région appartenant à sa classe majoritaire. |
-| **Superpoint** | Région d'une sur-segmentation géométrique, utilisée comme unité de calcul. SPG, SSP, SPT, SuperCluster, EZ-SP en sont la lignée. |
-| **ALPINE** | Baseline d'instance sans entraînement dont le clusterer est du Single-Linkage en BEV. C'est HGP à $K=1$ avec un rayon par classe. |
-| **Backbone** | Le réseau local qui produit les features de point ; MinkUNet, WaffleIron, PTv3, SphereFormer. |
+**Masque de dégénérescence**  
+Bit indiquant qu'un axe, une normale ou un rapport spectral est mal défini. Le masque évite de présenter une valeur numérique arbitraire comme une mesure fiable.
 
----
+**RPE — Relative Positional Encoding**  
+Encodage d'une relation entre deux tokens, injecté dans les requêtes, clés, valeurs ou logits d'attention.
 
-## Statuts et vocabulaire du dépôt
+## Graphes et relations
 
-| Terme | Définition |
-|---|---|
-| **`public_status`** | Statut public d'un résultat. Ici : `not_claimed`. Aucun benchmark ne peut promouvoir vers `exact`. |
-| **`exploration_v3_hors_registre`** | Phase de l'exploration v3, sans statut public ni claim produit. |
-| **Fixture** | Cas minimal gravé aux coordonnées exactes, conservé de façon permanente dès qu'il a invalidé un claim. |
-| **Porte** | Condition d'entrée ou de sortie d'une phase, vérifiée automatiquement. |
-| **No-go** | Règle d'arrêt écrite **à l'avance**, qui déclenche un pivot ou l'abandon d'une piste. |
-| **Plancher de couverture** | Seuil `--min-*` qui empêche une porte de passer au vert par vacuité. |
-| **Mutant** | Défaut injecté volontairement, qu'une porte doit détecter. |
+**Arête horizontale**  
+Relation entre cellules ou nœuds d'un même niveau, généralement issue d'une incidence ou d'une proximité d'interface.
+
+**Arête verticale**  
+Relation enfant→parent ou parent→enfant dans la hiérarchie.
+
+**Graphe dual**  
+Graphe dont les sommets sont les facettes et dont les arêtes représentent leurs incidences ou connexions élémentaires.
+
+**Hyperedge**  
+Relation reliant plus de deux tokens. Une coface ou un événement simultané peut être traité comme hyperedge.
+
+**Fratrie**  
+Ensemble des enfants d'un même événement de fusion.
+
+**Weighted Jaccard**  
+Score de recouvrement pondéré utilisé pour apparier des nœuds de deux vues : somme des minima divisée par somme des maxima des poids d'appartenance.
+
+## Modèles
+
+**PolyTreeFormer**  
+Nom de travail de la famille de modèles polyèdre-only. Ce nom n'est pas un claim de nouveauté.
+
+**`PolyTreeFormer-Nano`**  
+Premier porteur : adaptation du mode `nano` de Superpoint Transformer à quatre niveaux de la structure.
+
+**`PolyTreeFormer-Full`**  
+Modèle cible opérant sur l'arbre complet avec attention parent–enfants, fratrie et arêtes latérales.
+
+**SPT — Superpoint Transformer**  
+Architecture hiérarchique de régions 3D. Son mode `nano` retire l'étage point-wise.
+
+**Sequoia-fixed**  
+Adaptation de Sequoia où la hiérarchie est fournie par le prétraitement plutôt qu'apprise.
+
+**HSA — Hierarchical Self-Attention**  
+Attention dérivée mathématiquement sous contrainte hiérarchique. Utilisée comme opérateur comparatif après les baselines simples.
+
+**AllSet-incidence**  
+Extension où les messages passent par les multiensembles d'incidences ou cofaces avec un Set Transformer.
+
+**MeanTree**  
+Baseline sans attention : agrégation parent–enfants par moyenne/somme et MLP.
+
+**Inducing tokens**  
+Petit ensemble de latents servant d'intermédiaires dans une grande fratrie afin d'éviter une attention quadratique complète.
+
+## Apprentissage
+
+**JEPA — Joint-Embedding Predictive Architecture**  
+Cadre auto-supervisé dans lequel le contexte prédit la représentation latente d'une cible plutôt que son entrée brute.
+
+**Range-Hierarchy JEPA**  
+Pré-entraînement du projet : un student traite une vue LiDAR dégradée et prédit les embeddings teacher de branches appariées dans la vue complète.
+
+**Teacher EMA**  
+Encodeur cible dont les paramètres sont une moyenne exponentielle de ceux du student ; il ne reçoit pas de gradient direct.
+
+**Observable-only**  
+Une cible ou une loss n'est calculée que lorsque l'unité est effectivement observable dans la vue student, pour éviter les fuites de position ou d'identité.
+
+**Softmap**  
+Distribution douce sur des prototypes, plus riche qu'un indice de prototype dur.
+
+**Anti-effondrement**  
+Régularisation empêchant tous les embeddings de devenir identiques : variance minimale, décorrélation ou normalisation contrôlée.
+
+**Channel dropout**  
+Masquage aléatoire d'une famille de canaux, notamment `sensor`, pour réduire les raccourcis.
+
+**Linear probing**  
+Évaluation où l'encodeur est gelé et seule une tête linéaire est entraînée.
+
+**Fine-tuning**  
+Entraînement supervisé de tout ou partie du modèle pré-entraîné.
+
+## Protocole
+
+**Oracle de feuilles**  
+Meilleure prédiction possible si chaque feuille connaît sa distribution GT. Il mesure le plafond de la tokenisation et de la reprojection.
+
+**Arbre aléatoire apparié**  
+Contrôle dont profondeur, degrés et masses ressemblent à l'arbre réel, mais dont les associations sont aléatoires.
+
+**Niveaux permutés**  
+Null test conservant la topologie mais détruisant le sens du paramètre de filtration.
+
+**Graine**  
+Initialisation et ordre aléatoires d'un entraînement. Les résultats principaux sont moyennés sur au moins trois graines.
+
+**mIoU**  
+Moyenne des intersections-sur-union des 19 classes SemanticKITTI.
+
+**F-score de frontière**  
+Mesure diagnostique de précision et rappel des frontières après reprojection.
+
+**mCE / mRR**  
+Métriques de robustesse aux corruptions utilisées dans Robo3D : erreur moyenne relative et taux de résilience.
+
+**TTA — Test-Time Augmentation**  
+Moyenne ou vote de plusieurs inférences augmentées. Exclue du résultat principal strict.
+
+**Track strict**  
+SemanticKITTI uniquement, un scan, LiDAR seul, sans TTA ni ensemble.

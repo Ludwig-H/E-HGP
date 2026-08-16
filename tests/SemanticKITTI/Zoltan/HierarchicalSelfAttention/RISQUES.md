@@ -1,408 +1,259 @@
-# Risques, réfutations et décisions go/no-go
+# Risques et réfutations
 
-## Verdict initial
+Ce document ne recense pas tout ce qui pourrait mal tourner. Il isole les échecs capables d'invalider la thèse scientifique ou de rendre le système impraticable.
 
-| Proposition | Évaluation actuelle |
-|---|---|
-| Support normalisé seul + proportions sans décodeur point-wise atteint le SOTA | probabilité faible |
-| Support + composante HGP complète incidence-aware est une hypothèse cohérente | oui, gain et coût non démontrés |
-| HGP apporte un signal utile à un backbone local fort | plausible, non démontré |
-| HSA ou QC-HSA est le meilleur opérateur sur HGP | ouvert, preuve 3D absente |
-| Alimenter HSA impose une laminarisation destructrice, donc la voie $K\geq2$ est bloquée | non, l'arbre est déjà laminaire sur les facettes ; ce qui reste est un coût à mesurer |
-| Un modèle hybride HGP + local peut être compétitif | crédible mais à haut risque |
-| SemanticKITTI seul suffit pour ICML/NeurIPS | improbable |
-| Instance doit être travaillée maintenant | non, phase fermée |
-| Le descripteur de nœud est le levier décisif | non, le plus faible des trois d'après les ablations publiées |
-| « HGP bat les contrôles sur l'oracle de partition » suffit à justifier le programme | non, porte de réfutation seulement |
-| Utiliser une hiérarchie de densité comme structure auto-supervisée est nouveau | non en soi : déjà fait hors LiDAR ; seul le cluster tree conservé en LiDAR reste libre |
+## 1. Carte des risques
 
-Cette appréciation est volontairement sévère : le papier HSA n'a aucune expérience 3D dense, et le papier HGP sur SemanticKITTI utilise la sémantique de vérité terrain pour une tâche de regroupement. Aucun des deux ne constitue une preuve directe du modèle proposé.
+| ID | Risque | Gravité | Test précoce | Réponse |
+|---|---|---:|---|---|
+| R1 | l'invariance à la portée n'existe pas sur les données réelles | critique | G2 | réduire ou abandonner le claim |
+| R2 | les facettes détruisent les frontières sémantiques | critique | G1 | raffiner les feuilles |
+| R3 | le modèle sans points n'apprend pas assez de texture locale | critique | G3 | enrichir les canaux, puis comparer à l'hybride |
+| R4 | la hiérarchie n'apporte rien au-delà d'un graphe de régions | critique | G4 | publication recentrée ou arrêt |
+| R5 | les canaux capteur deviennent des raccourcis | élevé | G5 | dropout, permutation et adversarial probe |
+| R6 | les arbres des deux vues ne sont pas appariables | élevé | G2/G6 | JEPA intra-arbre ou matching partiel |
+| R7 | trop de feuilles ou de fusions de haut degré | élevé | audit système | compression contrôlée / inducing tokens |
+| R8 | le repère local est instable | élevé | tests synthétiques | invariants + masques de dégénérescence |
+| R9 | le prétraitement interdit les augmentations utiles | moyen | audit data loader | reconstruire la structure ou limiter l'augmentation |
+| R10 | l'opérateur sophistiqué masque l'effet de la représentation | moyen | ablations appariées | ordre strict des modèles |
+| R11 | le gain dépend d'un split, d'une graine ou d'une recette | élevé | trois graines + transfert | réduire le claim |
+| R12 | le coût end-to-end annule l'intérêt | élevé | profiling G0–G3 | cache, sérialisation et simplification |
 
-## R1 — La hiérarchie de densité encode le capteur, pas la sémantique
+## 2. R1 — Invariance seulement idéale
 
-### Mécanisme
+Sous une dilution homogène, multiplier la densité par une constante reparamètre les niveaux sans changer l'arbre idéal. Un LiDAR réel applique plutôt une modulation spatiale :
 
-La densité d'un LiDAR décroît avec la portée et dépend de l'angle, de l'occultation et de la surface. HGP peut séparer le même objet à longue distance et fusionner le sol proche, même si son modèle de densité est mathématiquement fondé.
+```math
+q(x) = q(R(x),\theta(x),\text{anneau},\text{matériau},\text{occultation}).
+```
 
-Une observation plus lointaine n'est pas une homothétie du nuage métrique : l'échantillonnage angulaire s'amincit, des retours disparaissent et les occultations changent. L'invariance d'échelle du descripteur ne réfute donc pas ce risque.
+La topologie peut donc changer, notamment aux extrémités fines et derrière les occultations.
 
-La correction range-aware n'est pas non plus acquise, et un signal contraire publié l'interdit explicitement : l'ablation d'ALPINE (Sautier et al., 3DV 2026) montre qu'un seuil proportionnel à la portée, à la manière de LESS, donne $75{,}9$ PQ contre $76{,}3$ pour le seuil constant par classe, malgré l'optimisation de son coefficient à l'échelle du jeu de données. Une correction de portée naïve dégrade donc leur clustering. Le transfert n'est pas immédiat — leur seuil est un rayon de liaison et non un niveau de densité $K$-NN — mais la correction doit être mesurée, et non supposée, avec ce résultat négatif cité.
+### Test
 
-### Test de réfutation
+Comparer scan original et vues dégradées sous quatre familles distinctes :
 
-- comparer statistiques HGP et pureté par distance ;
-- déplacer/rééchantillonner des patches ou objets à plusieurs portées ;
-- thinning aléatoire et structuré ;
-- comparer métrique brute, correction range-aware et hiérarchie géométrique témoin ;
-- mesurer la stabilité des ancêtres, niveaux et prédictions.
+1. thinning uniforme ;
+2. thinning dépendant de la portée ;
+3. suppression d'anneaux ;
+4. occultation angulaire.
 
-### No-go
+Mesurer le matching des nœuds, les relations ancêtre–descendant et la persistance, pas seulement une corrélation globale de descripteurs.
 
-Si la variation intra-objet due à la portée est du même ordre que la séparation interclasse et qu'une correction simple ne la réduit pas, ne pas défendre HGP comme hiérarchie sémantique universelle. Pivoter vers une hiérarchie conditionnée par le capteur ou vers HGP comme régulariseur secondaire.
+### Décision
 
-## R2 — Le canal complet est ambigu, coûteux ou mal sérialisé
+- stabilité sur les quatre familles : claim d'invariance approchée défendable ;
+- stabilité uniquement au thinning uniforme : claim limité à l'équivariant d'échantillonnage ;
+- instabilité générale : abandonner l'argument central avant d'entraîner un gros modèle.
 
-La convexification du support ne réfute pas `support + objet HGP complet`. Le second canal peut conserver les incidences et la non-convexité que le premier perd. Le risque réel est de nommer « polyèdre » plusieurs objets incompatibles : le $K$-polyèdre discret $V_v$, le carrier des facettes $C_v^{F}$, le carrier des cofaces $C_v^{Q}$ ou l'union témoin $W_v$, composante exacte du niveau de multicoverture.
+## 3. R2 — Plafond de résolution insuffisant
 
-### Mécanisme
+Une prédiction par facette ne peut pas séparer deux classes qui traversent systématiquement la même feuille. Aucun Transformer ne répare une information supprimée en amont, même avec beaucoup de têtes et une figure particulièrement colorée.
 
-Le support de $C_v^{F}$ est exactement celui de ses sommets, mais le carrier complet conserve encore ses cellules et incidences. Cette redondance concerne les données source/PL qui conservent ces sommets, jamais le support de $W_v$, qui n'est en général pas celui des observations. Confondre ces identités invaliderait l'interprétation des ablations. Un graphe $\Gamma_K^{\mathrm{elem}}$ seul perd les incidences point--facette ; une liste de cellules sans cofaces perd les connexions marquées ; un certificat seulement $H_0$ ne reconstruit aucun de ces carriers.
+### Test
 
-La fonction radiale extérieure reste une compression distincte. Elle remplit les lacunes si la forme n'est pas étoilée et ne doit jamais remplacer silencieusement le canal complet.
+Oracle de facettes : attribuer à chaque feuille sa distribution GT exacte, reprojeter et évaluer mIoU et frontières.
 
-### Test de réfutation
+### Atténuations, dans cet ordre
 
-- fixer `payload_kind=marked_incidence`, `carrier_kind` parmi `source_points`, `facet_pl`, `coface_pl`, `witness_union`, et `authority` parmi `incidence_complete`, `pl_complete`, `witness_exact`, `witness_approx`, `h0_only` ;
-- sérialiser et rejouer `cut_policy`, `cut_level`, `cut_side` et les `deltas` sans ambiguïté aux événements de même niveau ;
-- mêmes points, support et marques, mais incidences différentes ;
-- carrier des facettes contre carrier des cofaces contre $W_v$ ;
-- objet complet seul contre support + objet complet ;
-- points seuls, accès à $\Gamma_K^{\mathrm{elem}}$ avec tokens précalculés, sac des mêmes tokens sans messages et incidence complète ; ces contrôles restreignent l'accès calculatoire et ne prétendent pas effacer une information reconstruisible depuis les tokens ;
-- deux exports sparse équivalents, puis un mutant `h0_only` qui doit être refusé ;
-- appariement strict de RAM, VRAM, paramètres, prétraitement et latence ;
-- pour `witness_union`, $N_W$ ventilé par requêtes, patches et échantillons, $\varepsilon_W$, temps et mémoire ;
-- rayon extérieur seulement comme ablation lossy.
+1. conserver toutes les feuilles élémentaires plutôt qu'une coupe grossière ;
+2. raffiner uniquement les feuilles mixtes selon une règle sans label à l'inférence ;
+3. utiliser plusieurs ordres ou plusieurs structures de feuilles ;
+4. ajouter un décodeur de sous-facettes ;
+5. en dernier recours, ouvrir une variante hybride comme plafond.
 
-### No-go
+Une subdivision apprise avec les labels dans le prétraitement est interdite pour le modèle principal.
 
-Refuser le résultat si le payload ne permet pas de reconstruire le carrier annoncé, si son contenu dépend de l'ordre des records, si sa coupe change au round-trip ou si une équivalence seulement $H_0$ est présentée comme géométrique. `witness_approx` sans $\varepsilon_W$ est également refusé. Retirer le raccourci de support source si `complexe seul` l'égale ; ne jamais conclure de cette redondance à une identité avec le support de `witness_union`. Retirer la branche complète si points/Deep Sets de même budget l'égalent avec un meilleur coût. Une branche valide mais dominée reste un résultat négatif, pas une réfutation mathématique de l'idée.
+## 4. R3 — Perte d'information locale
 
-## R3 — La normalisation supprime une information sémantique utile
+Des descripteurs fixes peuvent manquer :
 
-### Mécanisme
+- une texture de rémission fine ;
+- un motif d'échantillonnage discriminant ;
+- la courbure interne d'une grande feuille ;
+- des détails non captés par l'enveloppe convexe.
 
-La taille, la hauteur et la portée aident à distinguer voiture/camion, personne, poteau/tronc ou végétation/terrain. Un rayon maximal est en outre contaminé par un outlier.
+### Test
 
-### Test de réfutation
+Comparer à budget égal :
 
-- probe classe à partir de `log(R)`, dimensions et position seules ;
-- support brut contre normalisé, puis normalisé + side channels ;
-- centre moyen contre médiane géométrique ;
-- rayon max, RMS, q95 et q99 ;
-- analyse par classe thing et par portée.
+- moments et Gram ;
+- fonction support ;
+- CDF/quantiles projetés ;
+- petit Deep Sets sur les sommets, utilisé **hors backbone point-wise** ;
+- encodeur d'incidences.
 
-### No-go
+Le petit Deep Sets est admissible comme encodeur de cellule si sa sortie seule est conservée et si aucune feature par point ne circule entre les cellules. Il teste si les canaux analytiques, et non le paradigme polyèdre-only, constituent le goulot.
 
-Si réinjecter l'échelle produit un gain clair, le claim « la normalisation tue la question d'échelle » est abandonné. Le bon claim devient une factorisation forme normalisée / échelle métrique.
+## 5. R4 — Hiérarchie inutile
 
-## R4 — La normalisation casse la cohérence parent–enfant
+Un graphe dual local peut déjà suffire. Un gain obtenu par davantage de couches ou de paramètres ne prouve rien sur l'arbre.
 
-### Mécanisme
+### Contrôles obligatoires
 
-Le support d'une union est le max des supports seulement dans un repère commun. Deux enfants renormalisés indépendamment ne décrivent ni leur écart ni leur échelle relative. Pour le canal complet, fusionner des listes sans dédupliquer les identifiants peut dupliquer points et cellules ; fusionner seulement les embeddings peut perdre les cofaces nouvelles qui réalisent la fusion.
+- graphe dual seul ;
+- même modèle avec arbre aléatoire apparié ;
+- octree ;
+- HDBSCAN/RSL complet ;
+- niveaux permutés ;
+- hiérarchie réelle.
 
-### Test de réfutation
+Les distributions de profondeur, degré, nombre de nœuds et budget de calcul doivent être appariées autant que possible.
 
-- reconstruire le support parent direct à partir des enfants ;
-- comparer sans géométrie relative, avec déplacement relatif, puis déplacement + ratio d'échelle ;
-- rejouer l'union canonique des tables de points, facettes, cofaces et incidences dans plusieurs ordres ;
-- ajouter séparément les cellules du lot de fusion et vérifier les carriers reconstruits ;
-- mesurer erreur de reconstruction et mIoU ;
-- conserver une fixture de deux enfants identiques déplacés différemment.
+### Décision
 
-### No-go
+Si l'arbre réel n'améliore ni segmentation ni robustesse, le modèle peut rester utile comme réseau de régions, mais la contribution hiérarchique tombe.
 
-Si les transformations relatives sont nécessaires, elles deviennent contractuelles. Une architecture de seuls vecteurs normalisés indépendants est éliminée. Aucun résumé de taille fixe n'est déclaré lossless sans théorème de composition sur la classe considérée.
+## 6. R5 — Raccourcis capteur
 
-## R5 — Les proportions ne localisent pas les classes
+Portée, anneau et rémission sont corrélés aux classes dans SemanticKITTI. Un réseau peut gagner en validation en mémorisant ces corrélations puis échouer sur un autre capteur.
 
-### Mécanisme
+### Défenses
 
-Un cluster peut et doit représenter exactement son mélange par un vecteur de proportions. Toutefois, ce vecteur est invariant à toute permutation des labels entre les points du cluster : il conserve les masses mais pas leur localisation. Une condensation sans features ni décodeur point-wise peut donc perdre définitivement les frontières et les petites structures.
+- séparation explicite du canal `sensor` ;
+- channel dropout pendant l'entraînement ;
+- permutation du canal entre scans comme null test ;
+- probe linéaire de la portée, de l'anneau et du taux de thinning ;
+- adversarial head avec gradient reversal en ablation ;
+- transfert vers un second capteur.
 
-### Test de réfutation
+Le but n'est pas de supprimer toute information capteur, ce qui serait artificiel, mais de vérifier qu'elle ne porte pas seule le résultat.
 
-- erreur des proportions prédites, entropie des cibles et cohérence massique parent–enfants ;
-- capacité d'un décodeur point-wise à relocaliser les classes depuis une même proportion de cluster ;
-- baseline majoritaire uniquement comme contrôle artificiel d'une sortie dure cluster-constante ;
-- borne supérieure relaxée par classe par union de tokens, uniquement comme diagnostic de localisation ;
-- détail par classes rares, portée et frontières ;
-- comparaison points feuilles, micro-voxels et clusters terminaux ;
-- décodeur point-fin avec et sans skip.
+## 7. R6 — Matching teacher–student biaisé
 
-### No-go
+En `Range-Hierarchy JEPA`, les deux vues ont des arbres différents. Ne garder que les nœuds faciles à apparier peut sélectionner les grandes surfaces proches et ignorer exactement les petits objets difficiles.
 
-Si les proportions sont bien estimées mais que le décodeur ne relocalise pas les classes, garder les points comme feuilles ou renforcer le chemin local. Le vote majoritaire ne constitue ni le modèle proposé ni un plafond mIoU. Ce no-go n'élimine pas la hiérarchie ou ses distributions comme contexte.
+### Mesures obligatoires
 
-## R6 — HGP n'est pas meilleur qu'un arbre simple
+- taux d'appariement par classe, portée, masse et dimension intrinsèque ;
+- histogramme des scores de Weighted Jaccard ;
+- taux de rejet ;
+- couverture des classes fines ;
+- comparaison matching symétrique / asymétrique.
 
-### Mécanisme
+### Plans de repli
 
-Un octree, une hiérarchie de voxels, RSL ou des superpoints peuvent suffire. Le backbone peut exploiter seulement la connectivité globale, pas les niveaux de l'estimateur $K$-NN/HGP.
+1. loss uniquement sur les facettes survivantes et leurs ancêtres partiels ;
+2. transport optimal sparse entre ensembles de feuilles ;
+3. teacher et student sur le même arbre, avec masquage d'attributs plutôt que reconstruction indépendante ;
+4. pré-entraînement intra-arbre sans claim d'invariance inter-vues.
 
-### Test de réfutation
+Le plan 3 est moins pur mais beaucoup plus diagnostiquable.
 
-Même backbone, descripteur, opérateur, nombre de nœuds, budget et seeds ; échanger seulement l'arbre. Ajouter arbre aléatoire contrôlé et permutation comme null tests.
+## 8. R7 — Explosion combinatoire et degré élevé
 
-### No-go
+Le nombre de facettes peut dépasser le nombre de points. Les fusions simultanées peuvent également créer des familles très larges, rendant l'attention entre frères quadratique.
 
-Suspendre le claim HGP si le gain contre le meilleur contrôle est inférieur à environ +0,5 mIoU et si l'intervalle apparié à 95 % recouvre zéro. Continuer seulement si HGP gagne sur un autre axe pré-déclaré, par exemple robustesse ou coût. En supervision complète, le plancher de bruit de R17 s'applique en plus de ce seuil apparié.
+### Contrat système
 
-## R7 — HSA et QC-HSA n'apportent rien au-delà du pooling
+Rapporter pour chaque scan :
 
-### Mécanisme
+```text
+N_points, N_leaves, N_nodes, N_lateral_edges,
+max_degree, P95_degree, tree_depth, bytes_on_disk.
+```
 
-La hiérarchie peut être utile tandis que l'attention à blocs est trop contrainte ou trop difficile à optimiser. Les théorèmes KL portent sur l'approximation d'une attention donnée, pas sur la justesse des labels. `QC-HSA` peut aussi payer un coût $\mathcal{O}(N\log N)$ sans gain utile.
+### Réponses possibles
 
-### Test de réfutation
+- stockage global des cellules et références par nœud ;
+- deltas entre niveaux, jamais copie complète par ancêtre ;
+- attention parent–enfants linéaire ;
+- un petit nombre d'`inducing tokens` pour les fratries de haut degré ;
+- découpage par composante racine ;
+- gradient checkpointing et batching par budget de tokens.
 
-Sur le même arbre et les mêmes features, comparer pooling+MLP, message passing, HSA, `QC-HSA`, Sequoia et attention locale supplémentaire. Appareiller paramètres, profondeur et seeds. Sur petits scans, mesurer aussi le reverse-KL à une même attention plate $P$ gelée, avec mêmes scores et masque, puis vérifier la solution contre une optimisation dense. Les KL de modèles entraînés séparément ne sont pas causalement comparables.
+La binarisation arbitraire d'une fusion simultanée est déconseillée : elle invente un ordre absent de la filtration et peut créer un faux signal positionnel.
 
-### No-go
+## 9. R8 — Repères locaux instables
 
-Si aucun opérateur hiérarchique n'améliore précision, robustesse ou Pareto système, retirer l'attention du claim principal. Si `QC-HSA` domine seulement en KL mais pas en segmentation, sa proposition reste une propriété d'approximation en appendice. La relaxation peut aussi généraliser moins bien en supprimant les égalités entre lignes qui agissent comme régularisation. Ne pas introduire des tokens internes tout en continuant à invoquer les résultats HSA/QC-HSA.
+Un repère PCA change de signe et permute ses axes lorsque deux valeurs propres sont proches. Une petite perturbation du scan peut donc produire une grande variation du token.
 
-## R8 — La contrainte de blocs propage les erreurs d'arbre
+### Baseline retenue
 
-### Mécanisme
+- invariants de Gram et rapports spectraux ;
+- directions globales : gravité, radial capteur, tangente azimutale ;
+- masques de dégénérescence lorsque les axes ne sont pas définis.
 
-Tous les couples de feuilles entre deux branches partagent une interaction structurée. Une mauvaise séparation ou le chaining peut donc contaminer de nombreux points.
+La PCA orientée n'est qu'une ablation. Toute règle de signe doit être déterministe et testée près des cas dégénérés.
 
-### Test de réfutation
+## 10. R9 — Prétraitement et augmentations incompatibles
 
-- performance selon pureté de l'ancêtre ;
-- arbres volontairement perturbés ;
-- gate résiduel, têtes locales et arêtes de frontière ;
-- cartes d'attention et influence des branches ;
-- calibration de l'incertitude aux frontières.
+Une rotation rigide transporte la structure. Un crop, un elastic distortion ou un dropout de points peuvent la changer.
 
-### No-go
+### Règle
 
-Si les voies de correction doivent devenir aussi coûteuses qu'une attention locale/plate complète, ne plus revendiquer un bénéfice structurel ou d'efficacité HSA.
+Chaque augmentation appartient à une classe explicite :
 
-## R9 — La structure n'est pas un arbre propre
+- `transportable` : topologie conservée, attributs transformés analytiquement ;
+- `rebuild_required` : structure reconstruite ;
+- `forbidden_main` : incompatible avec le claim ou trop coûteuse.
 
-### Mécanisme
+Ne jamais appliquer un crop après prétraitement en prétendant que la forêt restreinte est la hiérarchie exacte du crop.
 
-Ce risque ne disparaît pas, mais il change de nature, et la formulation antérieure était fausse. Pour $K>1$, les composantes facettées induisent bien des unions de points qui se chevauchent, et HSA suppose bien une partition imbriquée ; il n'en résulte pourtant aucun blocage. Le manuscrit de thèse, Partie II, § 9.1, « Et lorsqu'on impose une partition stricte des données ? », page 96, énonce que « pour $K \geq 2$, l'objet naturel n'est pas une partition de $X$, mais un recouvrement de $X$ (ou bien une partition des $(K-1)$-simplexes) ». L'arbre de fusion est donc déjà laminaire, non sur les points mais sur $F_{K}$, l'ensemble des $(K-1)$-simplexes effectivement construits — les sommets du graphe dual, c'est-à-dire les simplexes de Gabriel dans la version standard — dont il forme une partition à chaque niveau. Le recouvrement n'apparaît que dans la projection vers les points, un point appartenant à plusieurs facettes.
+## 11. R10 — Mauvais ordre des innovations
 
-La conséquence architecturale est directe : si les feuilles sont les facettes et non les points, l'hypothèse de HSA est satisfaite sans aucun bricolage, puisque son lemme de sous-structure optimale porte sur une partition des feuilles, ce qui est exactement le cas ici. Rien n'est détruit au niveau de l'arbre.
+Le risque expérimental classique consiste à changer en même temps :
 
-La partition de l'unité que ce document réclamait sans l'avoir existe déjà, et elle est celle du manuscrit. À chaque facette $\tau$ est associé un score local positif $S_{\tau} = \sum_{\sigma \supset \tau, |\sigma| = K+1} \psi(\rho(\sigma))$, où $\rho(\sigma)$ est le rayon de naissance du $K$-simplexe $\sigma$ dans la filtration et $\psi(t) = 1/t^{p}$ ; $\psi$ peut être toute fonction de poids décroissante, le choix uniforme $\psi = 1$ restant possible, mais $1/t^{p}$ « reflète plus exactement la densité locale ». Chaque point normalise par $T_{x} = \sum_{\tau \ni x} S_{\tau}$, avec la convention $1/T_{x} = 0$ lorsque $T_{x} = 0$. En posant $w_{x\tau} = S_{\tau}/T_{x}$, on obtient $w_{x\tau} \geq 0$ et $\sum_{\tau \ni x} w_{x\tau} = 1$ : « lorsqu'un point appartient à au moins une face, il distribue une masse totale égale à 1 entre les faces qui le contiennent ». C'est l'instanciation explicite de l'application $w_{iv}$ dont l'absence était présentée ici comme un obstacle.
+- la tokenisation ;
+- les canaux ;
+- l'opérateur ;
+- la loss ;
+- les augmentations.
 
-La conservation de la masse en découle en une ligne. Pour toute antichaîne, en posant $w_{x \to v} = \sum_{\tau \in v} w_{x\tau}$, on a $\sum_{v} w_{x \to v} = 1$. Il n'y a donc pas de double comptage, et le canal de masse additif — la CDF projetée — redevient exact dès que chaque point est pondéré par $w_{x \to v}$ : le comptage brut $n_{v}$ doit être remplacé partout par cette masse pondérée. La masse d'un nœud suit la même définition, $m_{\tau} = S_{\tau} \sum_{x \in \tau} 1/T_{x}$, et le manuscrit précise que « c'est ce poids $m_{\tau}$, et non le simple comptage des faces, qui est utilisé par le seuil `min_cluster_size` dans l'arbre condensé ».
+Un échec devient alors parfaitement inexpliqué, cette forme très contemporaine de connaissance négative.
 
-La conversion en partition stricte est la Proposition 7 du manuscrit : $V_{x}(c) = \sum_{\tau \ni x, \ell(\tau) = c} S_{\tau}/T_{x}$, puis $\mathrm{label}(x) \in \arg\max_{c} V_{x}(c)$. Elle garantit une partition disjointe, avec une classe $-1$ pour les points non classés, sous une règle déterministe de départage des égalités. Pour $K = 1$, les faces sont les points eux-mêmes, le vote est trivial et restitue exactement le single-linkage. Pour un réseau, il suffit de remplacer l'argmax par la combinaison convexe $p(x) = \sum_{\tau \ni x} w_{x\tau} p_{\tau}$, où $p_{\tau}$ est la distribution prédite sur la facette : c'est la Proposition 7 avant durcissement, donc différentiable, et chaque point conserve une prédiction propre puisque les poids dépendent de lui. L'argmax redevient la version d'inférence si une partition stricte est exigée.
+### Ordre imposé
 
-Le programme n'est donc plus bloqué : ce qui était écrit ici comme une condition d'existence est devenu un coût à mesurer, sur trois axes. Premièrement, le coût du passage aux facettes comme feuilles : les facettes sont plus nombreuses que les points, donc prendre les facettes comme feuilles augmente la taille de l'arbre, et profondeur, degré et nombre de feuilles sont à mesurer avant d'en faire la baseline. Deuxièmement, la perte au durcissement : le passage à la partition stricte perd de l'information, mais cette perte est mesurable par la marge $V_{x}^{(1)} - V_{x}^{(2)}$ entre les deux premiers clusters, et la fraction de points à vote contesté est le coût exact de la laminarisation. Troisièmement, à $K = 1$, HGP est le single-linkage : la configuration la plus simple n'apporte aucune nouveauté structurelle, et ne peut donc pas porter seule le claim.
+1. oracle et stabilité ;
+2. MLP de feuilles ;
+3. graphe dual ;
+4. `PolyTreeFormer-Nano` supervisé ;
+5. modèle d'arbre complet ;
+6. JEPA ;
+7. HSA, AllSet et multi-ordre.
 
-T6 — l'attention directement sur le DAG de recouvrement, sans passer par les facettes comme feuilles — n'est plus une condition d'existence mais une extension. Il reste le seul endroit où un budget de nouveauté d'opérateur serait bien placé, mais le programme n'est plus bloqué sans lui.
+## 12. R11 — Surapprentissage expérimental
 
-### Test de réfutation
+SemanticKITTI ne contient qu'une séquence de validation standard. Des ajustements répétés sur `08` deviennent un entraînement indirect.
 
-- mesurer la fraction de points à vote contesté et la distribution complète de la marge $V_{x}^{(1)} - V_{x}^{(2)}$, et rapporter cette fraction comme diagnostic du coût de la laminarisation ;
-- comparer nombre de feuilles, profondeur et degré avec les facettes comme feuilles contre les points comme feuilles, sur les mêmes scans, avant de fixer la baseline ;
-- vérifier numériquement $\sum_{\tau \ni x} w_{x\tau} = 1$, puis $\sum_{v} w_{x \to v} = 1$ sur toute antichaîne, y compris sur les points où $T_{x} = 0$ ;
-- vérifier que la masse pondérée remplace bien le comptage brut $n_{v}$ partout, et que $m_{\tau}$ pilote effectivement `min_cluster_size` dans l'arbre condensé ;
-- validation de laminarité sur $F_{K}$ et comptage des multi-appartenances point--facette ;
-- comparer, à budget égal, le vote pondéré durci et la combinaison convexe différentiable ;
-- contrôle $K = 1$ obligatoire, où la voie doit restituer exactement le single-linkage ;
-- comparer arbre natif sur facettes et projection laminaire auditée ; le modèle multi-arbre/DAG reste une extension.
+### Défenses
 
-### No-go
+- sous-splits internes dans les séquences d'entraînement pour le développement ;
+- `08` réservée aux jalons gelés ;
+- trois graines ;
+- différences appariées par scan ;
+- second dataset avant claim général ;
+- test caché après gel complet uniquement.
 
-Si la fraction de points à vote contesté est élevée et que le passage aux facettes comme feuilles fait exploser la taille de l'arbre, la voie $K \geq 2$ n'est pas exploitable avec cet opérateur : revenir à $K = 1$ en assumant qu'il n'y a alors aucune nouveauté structurelle par rapport au single-linkage, ou ouvrir T6 comme extension avec ses propres preuves. Refuser tout résultat dont la projection dépend de l'ordre d'itération, dont la règle de départage des égalités n'est ni déterministe ni déclarée, ou qui ne vérifie pas $\sum_{\tau \ni x} w_{x\tau} = 1$ sur un domaine déclaré. Ne présenter aucun gain $K \geq 2$ sans rapporter en regard la fraction de points contestés et la taille de l'arbre.
+## 13. R12 — Coût end-to-end
 
-## R10 — Le coût théorique ne devient pas un gain GPU
+Un réseau compact peut être inutile si la construction géométrique prend plusieurs secondes ou si la structure occupe des centaines de mégaoctets par scan.
 
-### Mécanisme
+### Mesure
 
-Les traversées par profondeur, kernels sparse et batches irréguliers peuvent être plus lents que PTv3 ou FlashAttention. Une chaîne HGP augmente le nombre de lancements ; un nœud multifurqué augmente le coût quadratique local.
+Séparer :
 
-### Test de réfutation
+1. construction hors ligne ;
+2. sérialisation ;
+3. lecture disque ;
+4. transfert GPU ;
+5. forward ;
+6. reprojection.
 
-- profiler construction, sérialisation, transfert, kernels et reprojection ;
-- P50/P95 sur scans réels ;
-- distribution des degrés/profondeurs ;
-- comparaison avec PTv3, octree et pooling ;
-- scaling en nombre de points et de nœuds ;
-- latence réseau seule et end-to-end.
+Deux régimes doivent être annoncés honnêtement :
 
-### No-go
+- **offline hierarchy** pour l'étude scientifique ;
+- **online end-to-end** seulement lorsque le prétraitement est intégré et profilé.
 
-Ne pas revendiquer « linéaire » ou « GPU-friendly » si le débit et la mémoire ne le montrent pas. Un gain accuracy substantiel peut rester publiable, mais le claim d'efficacité est retiré.
+## 14. Critères d'abandon du paradigme strict
 
-## R11 — Surapprentissage à la séquence 08
+La voie polyèdre-only stricte doit être arrêtée ou reléguée si deux des conditions suivantes sont observées après réglages raisonnables :
 
-### Mécanisme
+- oracle à moins de `5` points du meilleur modèle appris ;
+- instabilité forte dès un thinning `1/4` ;
+- écart supérieur à `8` points avec une baseline point-wise forte ;
+- absence de gain de la hiérarchie sur le graphe dual ;
+- coût mémoire supérieur au nuage brut sans gain mesurable ;
+- transfert fortement négatif vers un second capteur.
 
-Une seule séquence sert de validation standard et ses frames sont temporellement corrélées. Une large recherche d'hyperparamètres peut produire un gain non généralisable.
-
-### Test de réfutation
-
-- hypothèses et matrice pré-enregistrées ;
-- seeds appariées ;
-- bootstrap de blocs temporels avec agrégation des matrices de confusion avant recalcul du mIoU ;
-- validation auxiliaire par séquence pendant les phases exploratoires ;
-- second dataset avant le claim général ;
-- test caché utilisé après gel seulement.
-
-### No-go
-
-Un gain sur 08 qui disparaît entre seeds, blocs temporels ou second dataset n'est pas une contribution générale.
-
-## R12 — La nouveauté est insuffisante pour ICML/NeurIPS
-
-### Mécanisme
-
-SPT, SP2T, EZ-SP, SPCNet, Sequoia, OctFormer et SSTNet occupent déjà l'espace hiérarchie + attention/proxies/superpoints. Les réseaux simpliciaux, cellulaires, Hodge et incidence-aware occupent déjà l'encodage de complexes. LitePT formalise le motif convolutions précoces puis attention tardive. Fast Multipole Attention, H-Transformer, MRA et HKT occupent l'attention hiérarchique/multi-résolution. Fonction support, ECT/WECT et projections KL sont classiques.
-
-### Test de réfutation
-
-Avant rédaction, auditer l'encodeur du carrier contre les réseaux simpliciaux/cellulaires et `QC-HSA` contre les attentions multi-échelles. Identifier une proposition générale testable parmi T3--T6 : stabilité filtrée et range-aware, composition sparse certifiée, raffinement piloté par le carrier ou opérateur sur recouvrements. Tester sur au moins deux datasets/capteurs.
-
-### No-go
-
-Si le seul résultat est `réseau simplicial existant + HGP + HSA` avec un petit gain SemanticKITTI, viser une venue 3D/appliquée ou publier une étude négative solide, pas sur-vendre une contribution ML générale.
-
-## R13 — Le payload complet n'existe pas encore dans la voie v3
-
-### Mécanisme
-
-Le cadre v3 courant reste `public_status=not_claimed`, son audit live est antérieur au `HEAD`, et sa voie produit ne persiste pas un payload composante-local complet de facettes, cofaces et incidences. Une forêt réduite et une union de points ne suffisent pas à reconstruire le carrier complet. L'oracle Gamma exhaustif borné ne peut pas devenir l'architecture d'entraînement.
-
-### Test de réfutation
-
-- spécifier les trois axes exacts : `payload_kind=marked_incidence`, `carrier_kind` parmi `source_points`, `facet_pl`, `coface_pl`, `witness_union`, et `authority` parmi `incidence_complete`, `pl_complete`, `witness_exact`, `witness_approx`, `h0_only` ;
-- pour `witness_approx`, borner $\varepsilon_W$ et compter $N_W$ par requêtes, patches et échantillons ;
-- produire un export composante-local avec identifiants partagés, marques et hash canonique ;
-- comparer deux producteurs ou deux présentations sparse certifiées du même objet ;
-- mesurer taille, temps de construction et réutilisation des cellules entre ancêtres ;
-- vérifier qu'aucune arène n'est dimensionnée par le complexe de Čech ambiant.
-
-### No-go
-
-Ne pas entraîner ni publier la branche complète si son entrée provient d'une reconstruction heuristique non déclarée depuis la forêt. Si aucun exporteur sparse certifié n'est viable, limiter l'étude à un oracle borné ou revenir à un canal de points explicitement approximatif.
-
-## R14 — Les structures filiformes sont sous-segmentées par la connexité d'ordre supérieur
-
-### Mécanisme
-
-C'est le risque le plus spécifique du dossier, et il faut le dire : il oppose l'avantage revendiqué de HGP au profil exact des classes qui décident de la métrique visée. Il est écrit dans le manuscrit lui-même, § 9.3, sur le jeu `birch2` : HDBSCAN à $k=100$ obtient un ARI de $0{,}996$ et classe $99{,}7\,\%$ des points, tandis que HGP-Clusterer à $k=84$ obtient un ARI de $0{,}441$ et classe $83{,}9\,\%$ des points. La cause avancée par le manuscrit est explicite : « les clusters sont essentiellement filiformes et sont donc mieux identifiés avec de simples graphes ».
-
-Le mécanisme est structurel et non anecdotique. La connexité d'ordre $K$ exige que $K$ points soient simultanément proches. Le long d'une structure filiforme ou d'une surface mince échantillonnée de façon éparse, cette condition n'est satisfaite qu'à un rayon nettement plus grand que celui qui suffirait à une connexité par arêtes. L'objet fin naît donc tard dans la filtration, et à ce niveau tardif ses voisines l'ont déjà rejoint. Le résultat observable est une sous-segmentation des objets fins, et non une fragmentation : HGP achète sa résistance au chaînage en retardant la naissance des objets minces.
-
-Or la marge de progression du mIoU SemanticKITTI porte exactement sur ces classes-là — `pole`, `traffic-sign`, `bicycle`, `person`, `bicyclist`, `motorcyclist`, `fence` — les classes volumiques plafonnant déjà très haut. Le manuscrit suggère une atténuation, observée sur `birch2` : changer d'estimateur, $\hat{\rho}=1/r^{2}$. Une atténuation testable ne dispense pas de mesurer d'abord l'ampleur du problème. Le développement complet de ce point figure dans [VOIES.md](VOIES.md).
-
-### Test de réfutation
-
-- mIoU-oracle stratifié par dimension intrinsèque estimée du nœud, à partir des valeurs propres de la covariance de ses points, en séparant régimes linéaire, planaire et volumique ;
-- même oracle stratifié par classe fine contre classe volumique, avec les classes rares rapportées séparément ;
-- comparer la portée des niveaux de naissance des objets fins contre HDBSCAN au même $K$, sur les mêmes points et à taux de compression apparié ;
-- mesurer, pour chaque objet fin de la vérité terrain, le niveau auquel il naît et le niveau auquel il est absorbé par un voisin ;
-- rejouer l'ensemble avec l'estimateur $\hat{\rho}=1/r^{2}$ et rapporter séparément l'effet de ce changement d'estimateur ;
-- croiser avec la portée, la sous-segmentation attendue et l'amincissement angulaire étant corrélés.
-
-### No-go
-
-Si la sous-segmentation des classes fines est du même ordre que le gain obtenu sur les classes volumiques, HGP ne peut pas être défendu comme hiérarchie pour une métrique moyennée par classe, et le claim doit être retiré ou restreint à un régime déclaré. Si l'atténuation par changement d'estimateur ne réduit pas l'écart sans détruire le gain sur le reste, il faut soit publier ce constat comme résultat négatif, soit changer de métrique cible en l'annonçant, soit conditionner la filtration au capteur. Ne présenter aucun gain agrégé sans la ventilation fin/volumique qui montre d'où il vient.
-
-## R15 — Le goulot n'est pas la partition
-
-### Mécanisme
-
-L'hypothèse implicite du programme est « meilleure partition, donc meilleure segmentation ». La littérature superpoint publie déjà l'oracle qui la teste, et son verdict lui est défavorable. SPG (CVPR 2018), table 5, S3DIS 6-fold : l'oracle « Perfect » atteint $88{,}2$ mIoU et $92{,}7$ mAcc pour un modèle à $62{,}1$. SPT (ICCV 2023) écrit que « the performance of SPT is more than 20 points below the oracle, suggesting that the partition does not strongly limit its performance », soit un oracle supérieur ou égal à $89$ pour un modèle à $68{,}9$ sur Area 5. SuperCluster (3DV 2024) constate que « the high performance of this oracle ($93{,}4$ PQ) indicates that very little precision is lost by working with superpoints », son second oracle de clustering restant à $83{,}6$ PQ.
-
-Ces méthodes laissent donc déjà environ vingt points d'oracle non convertis. Améliorer le plafond d'une partition qui n'est pas saturée ne peut pas produire de gain, et un diagnostic d'oracle favorable à HGP est une porte de réfutation, jamais une porte de promotion : le perdre tue le programme, le gagner ne prouve presque rien.
-
-Les ablations publiées sur cette famille exacte de modèles confirment la même hiérarchie des priorités. SPT : retirer toutes les features handcrafted de nœud coûte $-0{,}7$ mIoU sur S3DIS 6-fold, $-4{,}1$ sur KITTI-360 et $-1{,}4$ sur DALES ; retirer l'encodage d'adjacence coûte $-6{,}3$, $-5{,}4$ et $-3{,}0$ ; passer à un seul niveau de partition coûte $-8{,}4$, $-5{,}1$ et $-0{,}9$. EZ-SP (ICRA 2026) va plus loin : remplacer les features handcrafted par un petit réseau appris change le résultat de $\pm0{,}1$ mIoU. Le descripteur de nœud est le levier le plus faible des trois ; l'adjacence et le nombre de niveaux dominent. Ce constat borne directement l'enjeu du débat de [DESCRIPTEURS_DE_NOEUD.md](archive/DESCRIPTEURS_DE_NOEUD.md), et l'ordre de mesure qui en découle est celui de [VOIES.md](VOIES.md).
-
-### Test de réfutation
-
-- mesurer l'écart entre le modèle entraîné et l'oracle de sa propre partition, à budget de régions apparié, sur le même dataset et les mêmes seeds ;
-- rapporter en parallèle l'oracle de coupes à niveau fixé, convention de la littérature superpoint, pour permettre la comparaison directe avec les chiffres publiés ;
-- reproduire les trois ablations de SPT sur la partition HGP — descripteur de nœud, encodage d'adjacence, nombre de niveaux — et vérifier si leur ordre de grandeur relatif se retrouve ;
-- comparer descripteur handcrafted et descripteur appris de même budget, comme contrôle du constat EZ-SP ;
-- rapporter la courbe oracle contre nombre de régions pour HGP et pour chaque contrôle, plutôt qu'un point unique.
-
-### No-go
-
-Si l'écart entre le modèle et l'oracle de sa propre partition dépasse dix points, la valeur de HGP ne peut plus être revendiquée sur la qualité des régions : améliorer un plafond déjà non atteint ne peut pas payer. Elle doit alors venir d'ailleurs — niveaux de densité interprétables, théorie de récupérabilité, recouvrement pour $K\geq2$ — et le papier doit le dire ainsi plutôt que « notre arbre est meilleur ». Si l'écart au propre oracle reste au contraire faible, c'est cette mesure, et non le gain de plafond, qui devient l'argument à défendre.
-
-## R16 — La nouveauté revendiquée est déjà prise
-
-### Mécanisme
-
-Le seul point de nouveauté qui tienne est étroit : dans la littérature LiDAR consultée, personne n'utilise le cluster tree lui-même, toutes les méthodes condensant la hiérarchie de densité en une partition plate. Conserver les nœuds internes, la relation parent--enfant et les niveaux comme signal reste libre en LiDAR — mais pas ailleurs, et les deux arguments habituels de démarcation ne démarquent rien.
-
-| Antériorité | Ce qu'elle occupe déjà | Ce qu'elle laisse |
-|---|---|---|
-| cTree (Sharma & Kaul, NeurIPS 2020, arXiv 2009.14168) | deux tâches prétexte prédisant la décomposition hiérarchique | hiérarchie métrique par cover tree, pas de densité ; échelle objet, pas scène LiDAR |
-| HASSL (arXiv 2607.04353, 7 juillet 2026) | hiérarchie HDBSCAN multi-niveaux comme structure SSL, prototypes par niveau | microscopie cellule unique, pas LiDAR |
-| Part2Object (ECCV 2024) | instance non supervisée par décomposition hiérarchique | pas de tâche prétexte de représentation LiDAR |
-| Superpoint Transformer (ICCV 2023, déjà cité en R12) | partition hiérarchique multi-niveaux | supervisée, issue de cut-pursuit, pas de densité |
-
-| Argument de démarcation | Pourquoi il ne démarque pas |
-|---|---|
-| « sans caméra » | TARL, SegContrast, BEVContrast, ALSO, STSSL et ALPINE sont sans caméra ; seuls Seal et HilDA sont caméra |
-| « nous utilisons la densité » | HDBSCAN est le producteur de segments standard du LiDAR depuis TARL |
-
-L'argument « exact », vraie singularité du dépôt, est orthogonal à cette littérature : personne n'y exige l'exactitude de la hiérarchie, HDBSCAN heuristique suffit.
-
-
-Antériorité la plus dangereuse, et elle est récente : **PointINS** (Bosch, mars 2026) a déjà démontré que des unités structurées non annotées paient sur SemanticKITTI — $+3{,}2$ PQ contre DOS, et $52{,}8$ contre $49{,}6$ en probing panoptique. Son pipeline est plat et ad hoc ($k$-means, graphe $k$-NN, composantes connexes par parcours en largeur), sans garantie de correction ni de stabilité, mais la revendication « des unités structurées valent mieux que des unités aléatoires » est **prise**. Ce qui reste libre est exactement : hiérarchie **non condensée**, **exacte**, à **niveaux prédits**.
-
-### Test de réfutation
-
-Audit d'antériorité daté et versionné avant rédaction, puis l'ablation à quatre bras qui décide de tout, à architecture, budget, graines et augmentations identiques :
-
-| Bras | Ce qu'il isole |
-|---|---|
-| (i) HGP exact | la revendication complète |
-| (ii) HDBSCAN, hiérarchie conservée | l'apport propre de l'exactitude |
-| (iii) HDBSCAN condensé plat, protocole TARL | l'apport propre de la hiérarchie |
-| (iv) arbre aléatoire | le plancher structurel |
-
-### No-go
-
-Si (ii) égale (i), la contribution se réduit à « utiliser une hiérarchie », déjà publiée par cTree et HASSL : il faut alors soit démontrer qu'une hiérarchie exacte change une métrique aval — sinon un relecteur répondra qu'HDBSCAN approché suffit et coûte moins cher —, soit changer de revendication. Si (iii) égale (i) et (ii), c'est la hiérarchie elle-même qui ne porte rien, et le programme SSL tombe. Ne jamais présenter « sans caméra » ou « fondé sur la densité » comme la nouveauté.
-
-## R17 — Le gain revendiqué est sous le plancher de bruit
-
-### Mécanisme
-
-Sur SemanticKITTI, la dispersion des conditions d'entraînement dépasse l'écart que le programme espère mesurer, et le facteur dominant est la recette d'augmentation, pas l'architecture.
-
-| Source de variation | Amplitude mesurée |
-|---|---|
-| graine, backend TorchSparse (avertissement mmdetection3d) | environ $1{,}5$ mIoU |
-| nombre de GPU et taille de batch (Pointcept, issue #556) | de $66{,}5$ à $69{,}3$ sur la même configuration |
-| LaserMix + PolarMix sur MinkUNet | $+3{,}5$ (de $66{,}9$ à $70{,}4$) |
-| instance CutMix + PolarMix sur WaffleIron | $+4{,}3$ (de $62{,}5$ à $66{,}8$) |
-| TTA | $+1{,}4$ MinkUNet, $+2{,}4$ Cylinder3D, $+1{,}2$ SphereFormer |
-
-Un gain supervisé d'un point n'est donc ni mesurable ni attribuable : il est indistinguable du bruit de graine et plus petit que l'effet d'augmentation. Corollaire opérationnel : Pointcept n'implémente ni LaserMix ni PolarMix, donc un bras HGP entraîné sous Pointcept contre un bras concurrent entraîné avec ces augmentations mesure la recette, pas la structure.
-
-### Test de réfutation
-
-- trois graines minimum par bras, moyenne et intervalle de confiance rapportés, jamais un run unique ;
-- augmentations strictement appariées entre bras, énumérées dans le papier ;
-- TTA activée ou désactivée des deux côtés, jamais un chiffre nu contre un chiffre augmenté ;
-- baseline reproduite localement et rapportée comme telle, jamais recopiée d'un papier.
-
-### No-go
-
-Si l'effet reste sous $1{,}5$ point après appariement des recettes, ne pas le revendiquer en supervision complète. Se reporter au régime à peu d'étiquettes, où les écarts sont d'un autre ordre : entre `scratch` et le meilleur SSL publié, l'écart vaut $9{,}7$ points à $0{,}1\,\%$ d'étiquettes (de $30{,}0$ à $39{,}7$) contre $1{,}4$ point à $100\,\%$ (de $62{,}7$ à $64{,}1$). Les baselines à battre y sont TARL ($37{,}9$ / $52{,}5$ / $61{,}2$ / $63{,}4$ / $63{,}7$) et BEVContrast ($39{,}7$ / $53{,}8$ / $61{,}4$ / $63{,}4$ / $64{,}1$) aux fractions $0{,}1$ / $1$ / $10$ / $50$ / $100\,\%$.
-
-## Tableau de décision global
-
-| Porte | Go | Revise | Stop/Pivot |
-|---|---|---|---|
-| G0 contrat | forêt déterministe et carrier marqué reconstructible, sans fuite | projection laminaire et complétude relative documentées | payload `h0_only` présenté comme complexe complet |
-| G1 structure | HGP bat les contrôles ou apporte robustesse claire | points feuilles, correction range-aware | aucune valeur contre arbres simples |
-| G2 descripteur | objet complet incidence-aware informatif à budget égal | support shortcut retiré ou carrier changé | objet complet dominé, ambigu ou non reconstructible |
-| G3 opérateur | HSA ou QC-HSA gagne en qualité ou Pareto | agrégateur simple | opérateurs hiérarchiques dominés partout |
-| G4 validation | gain apparié, multi-seeds, classes/distance expliquées | retravailler frontières/recette | effet non reproductible |
-| G5 système | coût complet soutenable et honnête | claim précision seulement | ni précision ni coût compétitif |
-| G6 généralité | second dataset confirme le mécanisme | contribution SemanticKITTI bornée | surapprentissage dataset |
-
-## Pivots scientifiquement valables
-
-- **HGP utile, HSA inutile** : publier une étude de priors hiérarchiques avec agrégateur simple.
-- **Objet marqué utile, support source redondant** : retirer le shortcut si le payload source/PL conserve déjà les sommets ; ne pas transférer ce constat au support propre de `witness_union`.
-- **Support utile, complexe dominé** : garder le résumé convexe et documenter le résultat négatif incidence-aware.
-- **Union témoin trop coûteuse** : tester le carrier PL déclaré, sans lui transférer l'identité avec $L_K(a)$.
-- **HGP brut sensible à la portée** : développer une hiérarchie ou métrique range-aware et en analyser la stabilité.
-- **Arbre trop contraignant** : passer à un mélange de plusieurs arbres ou un DAG, en assumant une nouvelle théorie.
-- **Accuracy neutre, robustesse positive** : recentrer sur thinning, longue distance et changement de capteur.
-- **Aucun effet sémantique** : arrêter avant la phase instance ; ne pas chercher à sauver le projet avec un post-traitement panoptique.
+Dans ce cas, la variante hybride devient un diagnostic, pas une manière discrète de renommer le même projet.

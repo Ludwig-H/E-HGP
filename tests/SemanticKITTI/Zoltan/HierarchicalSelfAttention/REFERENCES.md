@@ -1,101 +1,258 @@
-# Références primaires
+# Références retenues
 
-Veille effectuée le 13 août 2026. Les liens privilégient les pages officielles des benchmarks, les actes, OpenReview, les éditeurs et les dépôts des auteurs. Les chiffres de leaderboard sont des instantanés datés.
+Cette bibliographie est volontairement courte. Chaque entrée doit justifier une décision de conception, une baseline ou un protocole. Les articles simplement voisins ne sont pas empilés pour donner au dossier l'apparence rassurante d'une revue systématique qu'il ne serait pas.
 
-## SemanticKITTI et évaluations
+## 1. Sources internes normatives
 
-- Behley et al., *SemanticKITTI: A Dataset for Semantic Scene Understanding of LiDAR Sequences*, ICCV 2019. [Actes CVF](https://openaccess.thecvf.com/content_ICCV_2019/html/Behley_SemanticKITTI_A_Dataset_for_Semantic_Scene_Understanding_of_LiDAR_Sequences_ICCV_2019_paper.html).
-- Site officiel, [dataset et format](https://semantic-kitti.org/dataset.html). Les labels `uint32` encodent la classe dans les 16 bits bas et l'instance dans les 16 bits hauts.
-- Site officiel, [définition des tâches et métriques](https://semantic-kitti.org/tasks.html).
-- PRBonn, [SemanticKITTI API et configuration officielle](https://github.com/PRBonn/semantic-kitti-api), notamment `config/semantic-kitti.yaml`.
-- CodaBench, [compétition single-scan actuelle](https://www.codabench.org/competitions/12448/) et [API du leaderboard](https://www.codabench.org/api/phases/20274/get_leaderboard/?page=1&page_size=100). Au 13 août 2026, la première ligne vaut 75,2 sous un compte pseudonyme sans fiche méthode ; elle ne constitue pas un résultat publié attribuable.
-- CodaLab, [archive de l'ancien leaderboard](https://codalab.lisn.upsaclay.fr/competitions/6280/results/9324) et [export officiel](https://codalab.lisn.upsaclay.fr/competitions/6280/results/9324/data).
-- Site officiel, [JSON des résultats publiés single-scan](https://semantic-kitti.org/data/semantic_single.json), `last_modified=2025-06-02`. Cette liste est incomplète et rapporte les nombres des papiers.
-- Behley et al., *A Benchmark for LiDAR-based Panoptic Segmentation based on KITTI*, ICRA 2021. [PDF auteurs](https://www.ipb.uni-bonn.de/pdfs/behley2021icra.pdf). Référence pour la future extension, pas pour la phase sémantique active.
+### Manuscrit
 
-## HGP, cluster trees et hiérarchies de densité
+Louis Hauseux, *Manuscrit de thèse*, parties I et II.
 
-- Hauseux, Avrachenkov et Zerubia, *Generalization of single-linkage with higher-order interactions*, Applied Network Science, 2026. [Article éditeur](https://link.springer.com/article/10.1007/s41109-025-00756-1), [PDF](https://link.springer.com/content/pdf/10.1007/s41109-025-00756-1.pdf). La définition source fait du $K$-polyèdre l'union des points portés par une composante de $\Gamma^{K}$ ; conserver facettes, cofaces de connexion et niveaux est un contrat enrichi du présent projet, pas un solide déjà fourni par la définition.
-- Chaudhuri et Dasgupta, *Rates of Convergence for the Cluster Tree*, NeurIPS 2010. [Actes NeurIPS](https://proceedings.neurips.cc/paper_files/paper/2010/hash/b534ba68236ba543ae44b22bd110a1d6-Abstract.html). Fondement de Robust Single Linkage et de la consistance Hartigan.
-- Campello, Moulavi et Sander, *Density-Based Clustering Based on Hierarchical Density Estimates*, PAKDD 2013. [DOI](https://doi.org/10.1007/978-3-642-37456-2_14). Source primaire de HDBSCAN et de sa sélection de clusters par stabilité.
-- Balakrishnan et al., *Cluster Trees on Manifolds*, NeurIPS 2013. [PDF NeurIPS](https://papers.neurips.cc/paper/4984-cluster-trees-on-manifolds.pdf).
-- Eldridge, Belkin et Wang, *Beyond Hartigan Consistency: Merge Distortion Metric for Hierarchical Clustering*, COLT 2015. [PMLR](https://proceedings.mlr.press/v40/Eldridge15.html). Référence pour distinguer consistance de Hartigan, minimalité/séparation et proximité quantitative des niveaux de fusion.
-- Biau et Devroye, *Lectures on the Nearest Neighbor Method*, Springer, 2015. [DOI](https://doi.org/10.1007/978-3-319-25388-6). Référence pour les régimes asymptotiques des estimateurs aux plus proches voisins ; le dossier ne suppose pas qu'un ordre $K$ fixe donne une estimation populationnelle consistante.
+- fichier : [`../../../../docs/references/MANUSCRIT_THESE_HAUSEUX.pdf`](../../../../docs/references/MANUSCRIT_THESE_HAUSEUX.pdf) ;
+- rôle : définition de la filtration, des objets polyédriques, de l'arbre et de la reprojection pondérée ;
+- le présent dossier n'en répète que les interfaces nécessaires au réseau.
 
-## Attention hiérarchique
+### Hierarchical Self-Attention
 
-- Amizadeh et al., *Hierarchical Self-Attention: Generalizing Neural Attention Mechanics to Multi-Scale Problems*, NeurIPS 2025. [Page officielle](https://proceedings.neurips.cc/paper_files/paper/2025/hash/0480adaf62a918405a5e3b1031e0c056-Abstract-Conference.html), [PDF officiel](https://proceedings.neurips.cc/paper_files/paper/2025/file/0480adaf62a918405a5e3b1031e0c056-Paper-Conference.pdf), [copie locale](NeurIPS-2025-hierarchical-self-attention-generalizing-neural-attention-mechanics-to-multi-scale-problems-Paper-Conference.pdf). La copie locale et le PDF officiel ont le SHA-256 `3658cec3bd1dacbe63c6daaf61ebed3a79f0c621bc9a28a30f52889d576c0aa1` lors de la vérification.
-- Trang et al., *Scalable Hierarchical Self-Attention with Learnable Hierarchy for Long-Range Interactions*, TMLR 2024. [OpenReview](https://openreview.net/forum?id=qH4YFMyhce), [code auteurs](https://github.com/HySonLab/HierAttention).
-- Cirrincione, *Hierarchical Kernel Transformer: Multi-Scale Attention with an Information-Theoretic Approximation Analysis*, prépublication arXiv, 2026. [arXiv](https://arxiv.org/abs/2604.08829). Concurrent théorique récent sur séquences ; pas de point cloud ni d'arbre HGP.
-- Kang, Tran et De Sterck, *Fast Multipole Attention: A Scalable Multilevel Attention Mechanism for Text and Images*, prépublication arXiv, version 4 de 2025. [arXiv](https://arxiv.org/abs/2310.11960). Précédent le plus proche d'interactions requête fine–groupes cibles multi-échelles.
-- Zhu et Soricut, *H-Transformer-1D: Fast One-Dimensional Hierarchical Attention for Sequences*, ACL-IJCNLP 2021. [ACL Anthology](https://aclanthology.org/2021.acl-long.294/). Attention à structure H-matrix et complexité linéaire sur séquences.
-- Zeng et al., *Multi Resolution Analysis (MRA) for Approximate Self-Attention*, ICML 2022. [PMLR](https://proceedings.mlr.press/v162/zeng22a.html). Approximation et raffinement multi-résolution de l'attention.
-- Csiszár, *I-Divergence Geometry of Probability Distributions and Minimization Problems*, Annals of Probability, 1975. [DOI](https://doi.org/10.1214/aop/1176996454). Fondement classique des projections en divergence ; la seule utilisation d'une projection KL n'est pas une nouveauté.
-- Hoeffding, *Probability Inequalities for Sums of Bounded Random Variables*, JASA 1963. [DOI](https://doi.org/10.1080/01621459.1963.10500830). Source de la borne exponentielle utilisée pour contrôler le défaut intra-bloc.
-- Fedotov, Harremoës et Topsøe, *Refinements of Pinsker's Inequality*, IEEE Transactions on Information Theory, 2003. [DOI](https://doi.org/10.1109/TIT.2003.813506). Référence pour le passage KL–variation totale.
-- Chou, Lookabaugh et Gray, *Optimal Pruning with Applications to Tree-Structured Source Coding and Modeling*, IEEE Transactions on Information Theory, 1989. [DOI](https://doi.org/10.1109/18.32124). Antériorité pour l'élagage débit–distorsion d'un arbre.
-- Lin, Storer et Cohn, *Optimal Pruning for Tree-Structured Vector Quantization*, Information Processing & Management, 1992. [DOI](https://doi.org/10.1016/0306-4573(92)90064-7). Complexité de l'élagage optimal sous différents budgets.
+S. Amizadeh, S. Abdali, Y. Li, K. Koishida, “Hierarchical Self-Attention: Generalizing Neural Attention Mechanics to Multi-Scale Problems,” NeurIPS 2025.
 
-## Réseaux simpliciaux et topologiques
+- [page officielle](https://proceedings.neurips.cc/paper_files/paper/2025/hash/0480adaf62a918405a5e3b1031e0c056-Abstract-Conference.html) ;
+- copie locale : [`NeurIPS-2025-hierarchical-self-attention-generalizing-neural-attention-mechanics-to-multi-scale-problems-Paper-Conference.pdf`](NeurIPS-2025-hierarchical-self-attention-generalizing-neural-attention-mechanics-to-multi-scale-problems-Paper-Conference.pdf) ;
+- rôle : opérateur hiérarchique dérivé et baseline théorique ;
+- statut : **pas** le premier modèle à implémenter.
 
-- Bodnar et al., *Weisfeiler and Lehman Go Topological: Message Passing Simplicial Networks*, ICML 2021. [PMLR](https://proceedings.mlr.press/v139/bodnar21a.html). Introduit MPSN et Simplicial Weisfeiler–Lehman ; antériorité directe pour le message passing et l'expressivité sur complexes simpliciaux.
-- Bodnar et al., *Weisfeiler and Lehman Go Cellular: CW Networks*, NeurIPS 2021. [Page officielle](https://proceedings.neurips.cc/paper_files/paper/2021/hash/157792e4abb490f99dbd738483e0d2d4-Abstract.html). Étend le message passing à des complexes cellulaires réguliers ; antériorité pertinente si le carrier HGP est présenté avec des cellules non simpliciales.
-- Roddenberry, Glaze et Segarra, *Principled Simplicial Neural Networks for Trajectory Prediction*, ICML 2021. [PMLR](https://proceedings.mlr.press/v139/roddenberry21a.html). Formalise équivariance aux permutations, aux orientations et conscience simpliciale, propriétés minimales à tester pour la branche HGP.
-- Eijkelboom, Hesselink et Bekkers, *E$(n)$ Equivariant Message Passing Simplicial Networks*, ICML 2023. [PMLR](https://proceedings.mlr.press/v202/eijkelboom23a.html). Combine géométrie équivariante et interactions simpliciales sur graphes géométriques et nuages de points.
-- Goh, Bodnar et Liò, *Simplicial Attention Networks*, GTRL 2022. [OpenReview](https://openreview.net/forum?id=ScfRNWkpec). Antériorité pour une attention entre simplexes voisins et sa variante orientation-équivariante ; atelier, pas validation LiDAR.
-- Verma, Souza et Garg, *Topological Neural Networks go Persistent, Equivariant, and Continuous*, ICML 2024. [PMLR](https://proceedings.mlr.press/v235/verma24a.html). TopNets combine message passing d'ordre supérieur et descripteurs persistants, avec extensions continues et $\mathrm{E}(n)$-équivariantes.
-- Grande et Schaub, *Topological Point Cloud Clustering*, ICML 2023. [PMLR](https://proceedings.mlr.press/v202/grande23a.html). Exploite les spectres d'une famille de Laplaciens de Hodge d'un complexe construit sur le nuage ; contrôle conceptuel pour attribuer un gain aux interactions topologiques plutôt qu'au seul clustering.
+## 2. Segmentation sur hiérarchies de régions
 
-## Segmentation sémantique LiDAR forte
+### Superpoint Transformer
 
-- Li et al., *RAPiD-Seg: Range-Aware Pointwise Distance Distribution Networks for 3D LiDAR Segmentation*, ECCV 2024. [Page ECVA](https://www.ecva.net/papers/eccv_2024/papers_ECCV/html/1129_ECCV_2024_paper.php), [PDF](https://www.ecva.net/papers/eccv_2024/papers_ECCV/papers/01129.pdf), [code auteurs](https://github.com/l1997i/rapid_seg). Rapporte 76,1 mIoU SemanticKITTI avec deux inférences séquentielles, la première produisant les pseudo-labels de la seconde ; l'absence de TTA/ensemble n'est pas explicitement documentée.
-- Feng et al., *LSK3DNet: Towards Effective and Efficient 3D Perception with Large Sparse Kernels*, CVPR 2024. [Actes CVF](https://openaccess.thecvf.com/content/CVPR2024/html/Feng_LSK3DNet_Towards_Effective_and_Efficient_3D_Perception_with_Large_Sparse_CVPR_2024_paper.html), [arXiv](https://arxiv.org/abs/2403.15173). Rapporte 75,6 mIoU test single-scan avec instance CutMix, TTA et davantage d'époques dans la recette de soumission au test.
-- Wu et al., *TASeg: Temporal Aggregation Network for LiDAR Semantic Segmentation*, CVPR 2024. [PDF CVF](https://openaccess.thecvf.com/content/CVPR2024/papers/Wu_TASeg_Temporal_Aggregation_Network_for_LiDAR_Semantic_Segmentation_CVPR_2024_paper.pdf). Rapporte 76,5 mIoU, avec entrées temporelles LiDAR et image.
-- Wu et al., *Point Transformer V3: Simpler, Faster, Stronger*, CVPR 2024. [Actes CVF](https://openaccess.thecvf.com/content/CVPR2024/html/Wu_Point_Transformer_V3_Simpler_Faster_Stronger_CVPR_2024_paper.html), [code Pointcept](https://github.com/Pointcept/PointTransformerV3). Rapporte 74,2 test pour PTv3 sur SemanticKITTI dans le supplément ; le dépôt officiel ne fournit pas actuellement un paquet SemanticKITTI complet config+poids+résultat.
-- Wu et al., *Towards Large-scale 3D Representation Learning with Multi-dataset Point Prompt Training*, CVPR 2024. [PDF CVF](https://openaccess.thecvf.com/content/CVPR2024/papers/Wu_Towards_Large-scale_3D_Representation_Learning_with_Multi-dataset_Point_Prompt_Training_CVPR_2024_paper.pdf). PTv3+PPT rapporte 75,5 avec entraînement multi-datasets.
-- Wan et al., *SP2T: Sparse Proxy Attention for Dual-stream Point Transformer*, ICCV 2025. [Actes CVF](https://openaccess.thecvf.com/content/ICCV2025/html/Wan_SP2T_Sparse_Proxy_Attention_for_Dual-stream_Point_Transformer_ICCV_2025_paper.html), [supplément](https://openaccess.thecvf.com/content/ICCV2025/supplemental/Wan_SP2T_Sparse_Proxy_ICCV_2025_supplemental.pdf), [code auteurs](https://github.com/WallelWan/SP2T). Rapporte 71,7 validation et 75,4 test sur SemanticKITTI ; le supplément applique rotation, scaling, flip et jitter au test, donc ce score relève du track TTA.
-- Li et al., *RWAFormer: a Lightweight Road LiDAR Point Cloud Segmentation Network Based on Transformer*, Frontiers in Computer Science, 2025. [DOI](https://doi.org/10.3389/fcomp.2025.1542813). Le papier appelle la séquence 08 « independent test set » ; son 75,3 ne doit donc pas être confondu avec le test caché 11–21.
-- Lai et al., *Spherical Transformer for LiDAR-Based 3D Recognition*, CVPR 2023. [Actes CVF](https://openaccess.thecvf.com/content/CVPR2023/html/Lai_Spherical_Transformer_for_LiDAR-Based_3D_Recognition_CVPR_2023_paper.html). La méthode SphereFormer rapporte 74,8 test.
-- Liu et al., *UniSeg: A Unified Multi-Modal LiDAR Segmentation Network and the OpenPCSeg Codebase*, ICCV 2023. [Actes CVF](https://openaccess.thecvf.com/content/ICCV2023/html/Liu_UniSeg_A_Unified_Multi-Modal_LiDAR_Segmentation_Network_and_the_OpenPCSeg_ICCV_2023_paper.html), [code primaire PCSeg](https://github.com/PJLab-ADG/PCSeg). Le dépôt a depuis été transféré/redirigé vers OpenPCSeg. UniSeg rapporte 75,2 test et utilise RGB/point/voxel/range.
-- Liu et al., *Multi-Space Alignments Towards Universal LiDAR Segmentation*, CVPR 2024. [PDF CVF](https://openaccess.thecvf.com/content/CVPR2024/papers/Liu_Multi-Space_Alignments_Towards_Universal_LiDAR_Segmentation_CVPR_2024_paper.pdf). Rapporte 75,1 avec entraînement joint SemanticKITTI/nuScenes/Waymo.
-- Knaebel et al., *DINO in the Room: Leveraging 2D Foundation Models for 3D Segmentation*, 3DV 2026. [arXiv](https://arxiv.org/abs/2503.18944). Le modèle DITR rapporte 74,4 avec une branche image DINOv2 ; aucune valeur test image-free correspondante n'est fournie.
-- Peng et al., *OA-CNNs: Omni-Adaptive Sparse CNNs for 3D Semantic Segmentation*, CVPR 2024. [Actes CVF](https://openaccess.thecvf.com/content/CVPR2024/html/Peng_OA-CNNs_Omni-Adaptive_Sparse_CNNs_for_3D_Semantic_Segmentation_CVPR_2024_paper.html). Rapporte 70,6 sur validation SemanticKITTI et sert de rappel qu'un CNN sparse adaptatif peut être plus efficace qu'un Transformer.
-- Yang et al., *FLARES: Fast and Accurate LiDAR Multi-Range Semantic Segmentation*, WACV 2026. [Actes CVF](https://openaccess.thecvf.com/content/WACV2026/html/Yang_FLARES_Fast_and_Accurate_LiDAR_Multi-Range_Semantic_Segmentation_WACV_2026_paper.html). Référence récente sur le traitement range-view, la recette de données et la vitesse.
-- Yue et al., *LitePT: Lighter Yet Stronger Point Transformer*, CVPR 2026. [Actes CVF](https://openaccess.thecvf.com/content/CVPR2026/html/Yue_LitePT_Lighter_Yet_Stronger_Point_Transformer_CVPR_2026_paper.html). Contrôle architectural direct pour le motif convolutions précoces, attention tardive et PointROPE ; aucun score SemanticKITTI n'est rapporté.
-- Puy et al., *Vanilla ViT for Automotive Point Cloud Semantic Segmentation*, prépublication arXiv, 2026. [arXiv](https://arxiv.org/abs/2605.31177), [code auteurs](https://github.com/valeoai/VaViT). VaViT rapporte 68,0 sur la validation 08 sans TTA ; aucun score test caché n'est fourni.
+D. Robert, H. Raguet, L. Landrieu, “Efficient 3D Semantic Segmentation with Superpoint Transformer,” ICCV 2023.
 
-## Hiérarchies, superpoints et Transformers 3D
+- [papier CVF](https://openaccess.thecvf.com/content/ICCV2023/html/Robert_Efficient_3D_Semantic_Segmentation_with_Superpoint_Transformer_ICCV_2023_paper.html) ;
+- [code officiel](https://github.com/drprojects/superpoint_transformer) ;
+- rôle : porteur de départ, représentation hiérarchique `NAG`, attention horizontale/verticale, mode `nano` sans étage point-wise.
 
-- Robert et al., *Efficient 3D Semantic Segmentation with Superpoint Transformer*, ICCV 2023. [Actes CVF](https://openaccess.thecvf.com/content/ICCV2023/html/Robert_Efficient_3D_Semantic_Segmentation_with_Superpoint_Transformer_ICCV_2023_paper.html), [code auteurs](https://github.com/drprojects/superpoint_transformer).
-- Geist, Landrieu et Robert, *EZ-SP: Fast and Lightweight Superpoint-Based 3D Segmentation*, ICRA 2026. [arXiv](https://arxiv.org/abs/2512.00385).
-- Lu et al., *Serialization based Point Cloud Oversegmentation*, ICCV 2025. [Actes CVF](https://openaccess.thecvf.com/content/ICCV2025/html/Lu_Serialization_based_Point_Cloud_Oversegmentation_ICCV_2025_paper.html), [code auteurs](https://github.com/CHL-glitch/SPCNet). Oversegmentation apprise, cross-attention point–superpoint et hiérarchie à deux niveaux, évaluées notamment sur SemanticKITTI.
-- Wang, *OctFormer: Octree-based Transformers for 3D Point Clouds*, SIGGRAPH 2023. [arXiv](https://arxiv.org/abs/2305.03045), [code auteur](https://github.com/octree-nn/octformer).
-- Feng et al., *Clustering based Point Cloud Representation Learning for 3D Analysis*, ICCV 2023. [Actes CVF](https://openaccess.thecvf.com/content/ICCV2023/html/Feng_Clustering_based_Point_Cloud_Representation_Learning_for_3D_Analysis_ICCV_2023_paper.html).
-- Robert, Raguet et Landrieu, *Scalable 3D Panoptic Segmentation As Superpoint Graph Clustering*, 3DV 2024. [arXiv](https://arxiv.org/abs/2401.06704).
-- Liang et al., *Instance Segmentation in 3D Scenes using Semantic Superpoint Tree Networks*, ICCV 2021. [Actes CVF](https://openaccess.thecvf.com/content/ICCV2021/html/Liang_Instance_Segmentation_in_3D_Scenes_Using_Semantic_Superpoint_Tree_Networks_ICCV_2021_paper.html).
-- Qin et al., *Unified 3D Segmenter As Prototypical Classifiers*, NeurIPS 2023. [Page officielle](https://papers.neurips.cc/paper_files/paper/2023/hash/916cb4e1aeafaa0757953c9bacd17337-Abstract-Conference.html).
+### Superpoint Graph
 
-## Fonction support, robustesse et descripteurs 3D
+L. Landrieu, M. Simonovsky, “Large-scale Point Cloud Semantic Segmentation with Superpoint Graphs,” CVPR 2018.
 
-- Cramér et Wold, *Some Theorems on Distribution Functions*, Journal of the London Mathematical Society, 1936. [DOI](https://doi.org/10.1112/jlms/s1-11.4.290). La totalité des distributions projetées en une dimension détermine une mesure de probabilité ; une grille finie de directions et de bins reste seulement un sketch.
-- Schneider, *Convex Bodies: The Brunn–Minkowski Theory*, Cambridge University Press. [DOI](https://doi.org/10.1017/CBO9780511526282). Référence pour support, reconstruction convexe et distance de Hausdorff.
-- Turner et al., *Persistent Homology Transform for Modeling Shapes and Surfaces*, Information and Inference, 2014. [Article éditeur](https://academic.oup.com/imaiai/article/3/4/310/724811), [arXiv](https://arxiv.org/abs/1310.1030). Injectivité de PHT pour des complexes finis dans $\mathbb{R}^{3}$ et introduction de l'ECT ; antériorité directe pour une représentation directionnelle topologique.
-- Curry, Mukherjee et Turner, *How Many Directions Determine a Shape and Other Sufficiency Results for Two Topological Transforms*, Transactions of the AMS, Series B 9, 2022, 1006–1043. [DOI](https://doi.org/10.1090/btran/122), [arXiv](https://arxiv.org/abs/1805.09782). Injectivité d'ECT/PHT ; le résultat en directions finies porte sur une classe PL géométriquement bornée et une sélection adaptée, pas sur une grille fixe arbitraire.
-- Jiang et al., *The Weighted Euler Curve Transform for Shape and Image Analysis*, CVPR Workshops 2020. [Actes CVF](https://openaccess.thecvf.com/content_CVPRW_2020/html/w50/Jiang_The_Weighted_Euler_Curve_Transform_for_Shape_and_Image_Analysis_CVPRW_2020_paper.html). Antériorité pour l'ajout de poids aux courbes d'Euler.
-- Röell et Rieck, *Differentiable Euler Characteristic Transforms for Shape Classification*, ICLR 2024. [PDF officiel](https://proceedings.iclr.cc/paper_files/paper/2024/file/c1fdec0d7ea1affa15bd09dd0fd3af05-Paper-Conference.pdf), [code auteurs](https://github.com/aidos-lab/DECT). ECT différentiable et apprise sur graphes, nuages de points et maillages.
-- Simon-Gabriel et Schölkopf, *Kernel Distribution Embeddings: Universal Kernels, Characteristic Kernels and Kernel Metrics on Distributions*, JMLR 2018. [JMLR](https://jmlr.org/papers/v19/16-291.html). Les embeddings de mesures par noyaux caractéristiques sont classiques ; une version HGP doit apporter une composition ou une borne nouvelle.
-- Chazal et al., *Robust Topological Inference: Distance To a Measure and Kernel Distance*, JMLR 2018. [JMLR](https://jmlr.csail.mit.edu/papers/v18/15-484.html). Contrôle robuste aux outliers pour toute variante topologique fondée sur la distance.
-- Bronshtein et Ivanov, *The Approximation of Convex Sets by Polyhedra*, Siberian Mathematical Journal, 1975. [Math-Net](https://www.mathnet.ru/eng/smj4199), [DOI](https://doi.org/10.1007/BF00967115). Les taux optimaux adaptatifs ne sont pas une garantie directe pour une grille arbitraire de directions fixes.
-- Brauchart et al., *Covering of Spheres by Spherical Caps and Worst-Case Error for Equal Weight Cubature in Sobolev Spaces*, JMAA 2015. [arXiv](https://arxiv.org/abs/1407.8311), [DOI](https://doi.org/10.1016/j.jmaa.2015.05.079).
-- Kong et Mizera, *Quantile Tomography: Using Quantiles with Multivariate Data*, Statistica Sinica 2012. [arXiv](https://arxiv.org/abs/0805.0056), [DOI](https://doi.org/10.5705/ss.2010.224). Référence pour quantiles directionnels et régions de profondeur.
-- Nesterov, *Smooth Minimization of Non-smooth Functions*, Mathematical Programming 2005. [DOI](https://doi.org/10.1007/s10107-004-0552-5). Référence pour le lissage log-sum-exp.
-- Osada et al., *Shape Distributions*, ACM TOG 2002. [Page auteurs](https://gfx.cs.princeton.edu/pubs/Osada_2002_SD/index.php).
-- Kazhdan, Funkhouser et Rusinkiewicz, *Rotation Invariant Spherical Harmonic Representation of 3D Shape Descriptors*, SGP 2003. [Page auteurs](https://gfx.cs.princeton.edu/pubs/Kazhdan_2003_RIS/index.php).
-- Qi et al., *PointNet: Deep Learning on Point Sets for 3D Classification and Segmentation*, CVPR 2017. [Actes CVF](https://openaccess.thecvf.com/content_cvpr_2017/html/Qi_PointNet_Deep_Learning_CVPR_2017_paper.html).
-- Wu et al., *PointConv: Deep Convolutional Networks on 3D Point Clouds*, CVPR 2019. [PDF CVF](https://openaccess.thecvf.com/content_CVPR_2019/papers/Wu_PointConv_Deep_Convolutional_Networks_on_3D_Point_Clouds_CVPR_2019_paper.pdf).
-- Thomas et al., *Tensor Field Networks: Rotation- and Translation-Equivariant Neural Networks for 3D Point Clouds*, 2018. [arXiv](https://arxiv.org/abs/1802.08219).
-- Fuchs et al., *SE(3)-Transformers: 3D Roto-Translation Equivariant Attention Networks*, NeurIPS 2020. [Page officielle](https://papers.neurips.cc/paper/2020/hash/15231a7ce4ba789d13b722cc5c955834-Abstract.html).
+- [papier CVF](https://openaccess.thecvf.com/content_cvpr_2018/html/Landrieu_Large-Scale_Point_Cloud_CVPR_2018_paper.html) ;
+- rôle : origine du paradigme région→graphe→reprojection et des oracles de partition.
 
-## Instance future
+### Oversegmentation LiDAR apprise
 
-- Sautier et al., *Is clustering enough for LiDAR instance segmentation? A state-of-the-art training-free baseline*, 3DV 2026. [arXiv](https://arxiv.org/abs/2503.13203), [PDF OpenReview](https://openreview.net/pdf?id=ymClQqU3is), [code auteurs](https://github.com/valeoai/Alpine). À utiliser seulement après validation sémantique, avec logits gelés identiques.
+L. Hui, L. Tang, Y. Dai, J. Xie, J. Yang, “Efficient LiDAR Point Cloud Oversegmentation Network,” ICCV 2023.
+
+- [papier CVF](https://openaccess.thecvf.com/content/ICCV2023/html/Hui_Efficient_LiDAR_Point_Cloud_Oversegmentation_Network_ICCV_2023_paper.html) ;
+- rôle : contrôle d'une tokenisation LiDAR en superpoints apprise ;
+- limite : la partition dépend d'un encodeur point-wise et n'est pas l'objet principal ici.
+
+## 3. Transformers hiérarchiques et structurés
+
+### Sequoia
+
+T. Trang et al., “Scalable Hierarchical Self-Attention with Learnable Hierarchy for Long-Range Interactions,” TMLR 2024.
+
+- [papier OpenReview](https://openreview.net/forum?id=qH4YFMyhce) ;
+- [code officiel](https://github.com/HySonLab/HierAttention) ;
+- rôle : attention sparse limitée aux parents, enfants et frères ; modèle conceptuel du `PolyTreeFormer-Full`.
+
+### Tree-Structured Transformer
+
+W. Wang et al., “Learning Program Representations with a Tree-Structured Transformer,” 2022.
+
+- [arXiv](https://arxiv.org/abs/2208.08643) ;
+- rôle : propagation bidirectionnelle parent–enfants et attention entre frères ; antériorité générale hors 3D.
+
+### Graphormer
+
+C. Ying et al., “Do Transformers Really Perform Bad for Graph Representation?” NeurIPS 2021.
+
+- [papier NeurIPS](https://proceedings.neurips.cc/paper/2021/hash/f1c1592588411002af340cbaedd6fc33-Abstract.html) ;
+- rôle : biais structurels additifs dans l'attention ; antériorité pour les encodages d'arêtes et de distance.
+
+### Set Transformer
+
+J. Lee et al., “Set Transformer: A Framework for Attention-based Permutation-Invariant Neural Networks,” ICML 2019.
+
+- [PMLR](https://proceedings.mlr.press/v97/lee19d.html) ;
+- rôle : attention permutation-invariante et inducing points pour familles de haut degré.
+
+## 4. Hypergraphes et incidences
+
+### AllSet
+
+E. Chien, C. Pan, J. Peng, O. Milenkovic, “You Are AllSet: A Multiset Function Framework for Hypergraph Neural Networks,” ICLR 2022.
+
+- [OpenReview](https://openreview.net/forum?id=hpBTIv2uy_E) ;
+- [code officiel](https://github.com/jianhao2016/AllSet) ;
+- rôle : extension `AllSet-incidence` si le graphe dual perd les interactions d'ordre supérieur.
+
+### HEAT
+
+D. Georgiev, M. Brockschmidt, M. Allamanis, “HEAT: Hyperedge Attention Networks,” TMLR 2022.
+
+- [page auteur](https://miltos.allamanis.com/publications/2022heat/) ;
+- rôle : hyperarêtes typées et qualifiées ; référence si les rôles dans les incidences doivent être explicités.
+
+### Cell complexes
+
+C. Bodnar et al., “Weisfeiler and Lehman Go Cellular: CW Networks,” NeurIPS 2021.
+
+- [papier NeurIPS](https://proceedings.neurips.cc/paper/2021/hash/157792e4abb490f99dbd738483e0d2d4-Abstract.html) ;
+- rôle : baseline de réseaux cellulaires ; non prioritaire tant qu'un graphe typé suffit.
+
+## 5. Pré-entraînement latent
+
+### I-JEPA
+
+M. Assran et al., “Self-Supervised Learning from Images with a Joint-Embedding Predictive Architecture,” CVPR 2023.
+
+- [papier CVF](https://openaccess.thecvf.com/content/CVPR2023/html/Assran_Self-Supervised_Learning_From_Images_With_a_Joint-Embedding_Predictive_Architecture_CVPR_2023_paper.html) ;
+- rôle : target encoder EMA, prédiction latente et importance de masques de grande échelle.
+
+### Point-JEPA
+
+A. Saito, P. Kudeshia, J. Poovvancheri, “Point-JEPA: A Joint Embedding Predictive Architecture for Self-Supervised Learning on Point Cloud,” WACV 2025.
+
+- [arXiv](https://arxiv.org/abs/2404.16432) ;
+- [code officiel](https://github.com/Ayumu-J-S/Point-JEPA) ;
+- rôle : précédent direct pour une JEPA 3D sans reconstruction de coordonnées.
+
+### AD-L-JEPA
+
+H. Zhu et al., “Self-Supervised Representation Learning with Joint Embedding Predictive Architecture for Automotive LiDAR Object Detection.”
+
+- [page projet](https://ad-l-jepa.github.io/) ;
+- rôle : JEPA en LiDAR automobile et masquage BEV ;
+- statut : prépublication à utiliser comme voisin récent, non comme preuve établie.
+
+### VICReg
+
+A. Bardes, J. Ponce, Y. LeCun, “VICReg: Variance-Invariance-Covariance Regularization for Self-Supervised Learning,” ICLR 2022.
+
+- [OpenReview](https://openreview.net/forum?id=xm6YD62D1Ub) ;
+- rôle : régularisation anti-effondrement sans négatifs.
+
+## 6. Auto-supervision LiDAR
+
+### DOS
+
+M. Abdelsamad et al., “DOS: Distilling Observable Softmaps of Zipfian Prototypes for Self-Supervised Point Representation,” AAAI 2026.
+
+- [article officiel](https://ojs.aaai.org/index.php/AAAI/article/view/39030) ;
+- rôle : distillation uniquement sur éléments observables et softmaps de prototypes ; comparaison prioritaire pour le fine-tuning complet.
+
+### TARL
+
+S. Nunes et al., “TARL: A Temporal Representation Learning Framework for Large-scale Point Clouds,” 2023.
+
+- [arXiv](https://arxiv.org/abs/2201.04695) ;
+- rôle : SSL LiDAR outdoor et cohérence de régions à travers scans ; régime temporel à ne pas mélanger au mono-scan strict.
+
+### BEVContrast
+
+H. Sautier et al., “BEVContrast: Self-Supervision in BEV Space for Automotive LiDAR Point Clouds,” 3DV 2024.
+
+- [arXiv](https://arxiv.org/abs/2310.17281) ;
+- rôle : baseline SSL automobile fondée sur une représentation BEV.
+
+## 7. Prépublications 2026 à surveiller
+
+### Utonia
+
+Y. Zhang et al., “Utonia: Toward One Encoder for All Point Clouds,” 2026.
+
+- [arXiv](https://arxiv.org/abs/2603.03283) ;
+- rôle : baseline de représentation 3D multi-domaines et de transfert ;
+- statut : prépublication récente, protocole et budget à réauditer avant comparaison.
+
+### PointINS
+
+B. Yang et al., “Towards Foundation Models for 3D Scene Understanding: Instance-Aware Self-Supervised Learning for Point Clouds,” 2026.
+
+- [arXiv](https://arxiv.org/abs/2603.25165) ;
+- rôle : SSL géométrique orienté instances et panoptic outdoor ; voisin direct pour le positionnement fondation.
+
+### HilDA
+
+M. Wozniak et al., “HilDA: Hierarchical Distillation with Diffusion for Advancing Self-Supervised LiDAR Pre-training,” 2026.
+
+- [arXiv](https://arxiv.org/abs/2606.20189) ;
+- rôle : distillation LiDAR hiérarchique, cross-modale et temporelle ;
+- différence : sa hiérarchie porte sur les couches et le contexte du teacher, non sur une filtration géométrique.
+
+### HASSL
+
+J. Riel et al., “HASSL: Hierarchy-Aware Self-Supervised Learning Framework for Single Cell Microscopy,” 2026.
+
+- [arXiv](https://arxiv.org/abs/2607.04353) ;
+- rôle : antériorité explicite pour une loss hiérarchique fondée sur HDBSCAN et des prototypes multi-niveaux ;
+- différence : arbre latent recalculé sur les embeddings de batch en microscopie.
+
+Ces quatre travaux sont des prépublications mouvantes. Ils doivent être relus dans leur version la plus récente à la date de soumission.
+
+## 8. Domaine capteur et robustesse
+
+### LiDomAug
+
+K. Ryu, S. Hwang, J. Park, “Instant Domain Augmentation for LiDAR Semantic Segmentation,” CVPR 2023.
+
+- [papier CVF](https://openaccess.thecvf.com/content/CVPR2023/html/Ryu_Instant_Domain_Augmentation_for_LiDAR_Semantic_Segmentation_CVPR_2023_paper.html) ;
+- rôle : simulation de capteurs, mouvement et occultations ; source pour les dégradations physiques.
+
+### SemanticKITTI-C
+
+X. Yan et al., “Benchmarking the Robustness of LiDAR Semantic Segmentation Models,” 2023.
+
+- [arXiv](https://arxiv.org/abs/2301.00970) ;
+- [page benchmark](https://yanx27.github.io/RobustLidarSeg/) ;
+- rôle : corruptions de mesure, météo et changement de capteur.
+
+### Robo3D
+
+L. Kong et al., “Robo3D: Towards Robust and Reliable 3D Perception against Corruptions,” ICCV 2023.
+
+- [arXiv](https://arxiv.org/abs/2303.17597) ;
+- [code et benchmark](https://github.com/worldbench/Robo3D) ;
+- rôle : métriques `mCE`, `mRR` et entraînement insensible à la densité.
+
+### Point-to-Voxel Distillation
+
+Y. Hou et al., “Point-to-Voxel Knowledge Distillation for LiDAR Semantic Segmentation,” CVPR 2022.
+
+- [arXiv](https://arxiv.org/abs/2206.02099) ;
+- rôle : importance explicite des objets lointains et de la densité variable dans la distillation.
+
+## 9. Dataset et évaluation
+
+### SemanticKITTI
+
+J. Behley et al., “SemanticKITTI: A Dataset for Semantic Scene Understanding of LiDAR Sequences,” ICCV 2019.
+
+- [site officiel](https://semantic-kitti.org/) ;
+- [papier](https://arxiv.org/abs/1904.01416) ;
+- [API](https://github.com/PRBonn/semantic-kitti-api) ;
+- rôle : splits, labels et évaluateur officiel.
+
+Le site officiel annonce le transfert des compétitions vers CodaBench le 31 janvier 2026. Les anciens classements CodaLab ne doivent pas être utilisés comme source unique d'un claim actuel.
+
+### nuScenes
+
+H. Caesar et al., “nuScenes: A Multimodal Dataset for Autonomous Driving,” CVPR 2020.
+
+- [site officiel](https://www.nuscenes.org/) ;
+- [papier CVF](https://openaccess.thecvf.com/content_CVPR_2020/html/Caesar_nuScenes_A_Multimodal_Dataset_for_Autonomous_Driving_CVPR_2020_paper.html) ;
+- rôle : second capteur et transfert.
+
+## 10. Règle de citation
+
+Une méthode n'entre dans la comparaison principale que si les éléments suivants sont vérifiables :
+
+- type d'entrée à l'inférence ;
+- nombre de scans ;
+- données de pré-entraînement ;
+- TTA et ensemble ;
+- split et métrique ;
+- code ou configuration suffisamment précise.
+
+À défaut, elle reste dans le contexte bibliographique sans être placée dans une table numérique appariée.

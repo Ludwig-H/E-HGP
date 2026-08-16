@@ -1,564 +1,262 @@
-# Guide — comprendre ce projet de bout en bout
+# Guide du projet
 
-Ce document est le **parcours d'entrée** du dossier. Il ne remplace aucun contrat : il explique, dans l'ordre, ce qu'on cherche à faire, pourquoi ça pourrait marcher, pourquoi ça pourrait échouer, et ce qu'il faut mesurer avant de coder. Les documents normatifs sont plus précis et plus sévères ; ce guide sert à y entrer sans se perdre.
+## 1. Idée en une phrase
 
-Chaque chapitre se lit seul et se termine par ce qu'il faut en retenir. Les termes techniques sont définis dans le [glossaire](GLOSSAIRE.md).
+Le réseau ne segmente pas directement un nuage de points. Il segmente une **structure polyédrique multi-échelle** construite hors gradient, puis reporte ses prédictions vers les points par une application linéaire conservant la masse.
 
----
-
-## Chapitre 0 — La question, en une phrase
-
-> Une hiérarchie de clusters construite sur la densité — et non sur l'apprentissage — peut-elle donner à un réseau un meilleur contexte multi-échelle pour segmenter sémantiquement un scan LiDAR ?
-
-Trois objets se combinent :
-
-1. **HGP-Clusterer**, l'algorithme de la thèse, qui produit une hiérarchie de clusters à partir de la densité locale, avec une garantie mathématique exacte ;
-2. **un descripteur** qui résume chaque nœud de cette hiérarchie en un vecteur de taille fixe ;
-3. **un opérateur d'attention hiérarchique**, qui fait circuler l'information entre les nœuds.
-
-Et une cible : le mIoU sur SemanticKITTI.
-
-**À retenir.** Ce dossier n'est pas un rapport de résultats. Au moment où ces lignes sont écrites, **aucune expérience apprise n'a été réalisée**. Tout ce qui suit est de la conception et de la falsification.
-
----
-
-## Chapitre 1 — Le problème, et où se trouve la marge
-
-SemanticKITTI demande, pour chaque point d'un scan LiDAR, une classe parmi 19. La métrique officielle est le **mIoU** : on calcule l'intersection sur union pour chaque classe, puis on fait la **moyenne non pondérée sur les 19 classes**.
-
-Ce détail décide de tout. Chaque classe pèse $1/19$, qu'elle contienne un million de points ou trois mille. Ordres de grandeur pour un modèle fort sur le test, à réauditer avant toute citation :
-
-| Groupe de classes | IoU typique | Marge restante |
-|---|---|---|
-| `car`, `road`, `building`, `vegetation` | 87–96 | quasi nulle |
-| `sidewalk`, `terrain`, `parking`, `trunk`, `fence`, `pole` | 60–85 | modérée |
-| `bicycle`, `motorcycle`, `motorcyclist`, `other-vehicle`, `traffic-sign` | 25–60 | **toute la marge** |
-
-Les classes `person` et `bicyclist` varient fortement entre validation et test, ce qui les rend peu fiables comme repère.
-
-Autrement dit : **le mIoU se gagne sur des objets petits, fins et rares.** Un poteau ou un panneau, c'est quelques dizaines de points ; un deux-roues lointain, moins encore.
-
-Gardez ce tableau en tête : il réapparaîtra à chaque chapitre, et c'est lui qui condamne ou sauve la plupart des idées séduisantes.
-
-**À retenir.** Toute proposition doit être évaluée en se demandant : *est-ce que ça aide sur un objet de 30 points ?* Si la réponse est non, l'effet sur le mIoU sera faible même si l'idée est bonne.
-
----
-
-## Chapitre 2 — HGP en dix minutes
-
-### 2.1 D'où ça vient : le Single-Linkage et son défaut
-
-Le **Single-Linkage** relie deux points dès qu'ils sont à distance $\leq 2r$, et fait croître $r$. Les clusters sont les composantes connexes du graphe obtenu. C'est simple, c'est optimal à plusieurs égards — et ça a un défaut fatal en dimension $\geq 2$ : **l'effet de chaînage**. Une seule chaîne de points de bruit suffit à souder deux amas distincts, bien avant que chacun soit complet.
-
-### 2.2 La réponse habituelle, et pourquoi elle est bancale
-
-DBSCAN, HDBSCAN et le Robust Single-Linkage ajoutent une notion de **densité locale** fondée sur les $K$ plus proches voisins : un point ne compte que s'il a $K$ voisins assez proches.
-
-La critique centrale de la thèse tient en une phrase : **ces algorithmes imposent une condition d'ordre $K$ aux points, mais propagent la connexité à l'ordre 1**, c'est-à-dire par arêtes, deux points à la fois. Il y a une incohérence entre la condition et la propagation.
-
-### 2.3 L'idée de HGP : faire percoler des simplexes, pas des points
-
-HGP remplace le graphe géométrique par le **complexe de Čech**. Pour un ordre $K$ fixé :
-
-- les objets élémentaires ne sont plus les points, mais les **$(K-1)$-simplexes** — des groupes de $K$ points dont les boules de rayon $r$ ont une intersection commune non vide ;
-- deux simplexes sont **adjacents** quand leur réunion est encore un simplexe du complexe ;
-- un **$K$-polyèdre** est l'ensemble des points apparaissant dans une composante connexe de ce graphe de simplexes.
-
-Pour $K=1$, on retrouve exactement le Single-Linkage.
-
-### 2.4 L'exemple à six points, tiré du manuscrit
-
-Six points $A,B,C,D,E,F$. À un certain rayon, le complexe de Čech contient les triangles $ABC$ et $DEF$, plus l'arête isolée $CD$. Le graphe $\Gamma_2$ a pour **sommets les arêtes** et pour **arêtes les triangles** :
-
-```mermaid
-graph LR
-  subgraph un["polyèdre A B C"]
-    AB --- AC
-    AC --- BC
-    BC --- AB
-  end
-  subgraph deux["polyèdre C D"]
-    CD
-  end
-  subgraph trois["polyèdre D E F"]
-    DE --- DF
-    DF --- EF
-    EF --- DE
-  end
+```text
+scan LiDAR
+   │
+   ├─ prétraitement géométrique
+   │      ├─ facettes élémentaires
+   │      ├─ graphe dual / incidences
+   │      ├─ arbre complet de fusion
+   │      └─ descripteurs fusionnables
+   │
+   └─ PolyTreeFormer
+          ├─ attention locale entre facettes
+          ├─ attention parent–enfants
+          ├─ contexte descendant
+          └─ logits par facette
+                    │
+                    └─ reprojection pondérée → logits par point
 ```
 
-Trois composantes, donc trois $2$-polyèdres : $\lbrace A,B,C\rbrace$, $\lbrace C,D\rbrace$, $\lbrace D,E,F\rbrace$.
+Les coordonnées des points ne sont pas introduites sous forme de tokens. Elles ne servent qu'à calculer les objets géométriques, leurs attributs et la reprojection finale.
 
-**Regardez $C$ et $D$ : ils appartiennent chacun à deux polyèdres.** Ce n'est pas un artefact. C'est le phénomène central de HGP :
+## 2. Pourquoi ce choix peut être utile au LiDAR
 
-> Pour $K\geq2$, les $K$-polyèdres **se recouvrent**. La sortie n'est pas une partition.
+L'échantillonnage d'une même surface change fortement avec la portée. Un réseau point-wise doit apprendre à reconnaître qu'un objet dense à courte distance et le même objet très clairsemé au loin représentent la même structure.
 
-Ce point reviendra au chapitre 5, et il coûte cher.
+Dans le modèle idéal où la densité observée est multipliée par un facteur positif `q`, les ensembles de niveau vérifient
 
-### 2.5 Le théorème qui justifie tout
-
-Ce que HGP achète, c'est une **correspondance exacte**. Notons $L_K(r)$ l'ensemble des positions $y$ de l'espace ayant au moins $K$ observations à distance $\leq r$ — c'est-à-dire l'ensemble de niveau supérieur de l'estimateur de densité aux $K$ plus proches voisins. Alors :
-
-> Les $K$-polyèdres du complexe de Čech sont **exactement** les amas discrets de forte densité $K$-NN, à tout niveau de la filtration.
-
-La mécanique de la preuve est simple et vaut la peine d'être comprise, parce que le vocabulaire qui en sort sert partout dans le dossier. À chaque simplexe $\sigma$ on associe sa **région témoin** $T_r(\sigma)=\bigcap_{x\in\sigma}\overline{B}(x,r)$ : l'ensemble des centres de boules de rayon $r$ qui attrapent tous les points de $\sigma$. C'est une intersection finie de boules, donc un convexe compact. Deux faits :
-
-- $L_K(r)$ est **exactement** la réunion de toutes ces régions témoins ;
-- $\Gamma_K$ est **exactement** leur graphe d'intersection, puisque $T_r(\sigma)\cap T_r(\tau)=T_r(\sigma\cup\tau)$.
-
-Des convexes qui se recouvrent : les composantes de la réunion correspondent aux composantes du graphe d'intersection. D'où le théorème.
-
-**À retenir.** HGP n'est pas « encore un algorithme de clustering ». C'est le seul dont la hiérarchie coïncide **niveau par niveau** avec un modèle statistique explicite (Hartigan avec estimateur $K$-NN). C'est son actif principal — et [le seul que personne d'autre ne possède](archive/STRATEGIE_PUBLICATION.md).
-
----
-
-## Chapitre 3 — Pourquoi une hiérarchie pourrait aider, et les trois effets à séparer
-
-Un réseau de segmentation LiDAR voit essentiellement local : quelques mètres de contexte. Une hiérarchie de clusters offre gratuitement une structure multi-échelle exogène — « ce point est dans ce petit amas, qui est dans ce plus gros amas, qui est dans cette région ». L'espoir est que ce contexte aide là où le local échoue : objets lointains, classes rares, frontières ambiguës.
-
-Mais si l'on mesure un gain, **trois causes différentes peuvent l'expliquer**, et il faut les séparer sous peine de ne rien pouvoir conclure :
-
-```mermaid
-graph TD
-  G["Gain de mIoU observé"] --> A["Effet ARBRE<br/>HGP vs octree, HDBSCAN,<br/>superpoints, arbre aléatoire<br/><i>même opérateur, même descripteur</i>"]
-  G --> B["Effet REPRÉSENTATION<br/>quel descripteur par nœud<br/><i>même arbre, même opérateur</i>"]
-  G --> C["Effet OPÉRATEUR<br/>attention vs pooling vs message passing<br/><i>même arbre, même descripteur</i>"]
+```math
+\{\rho_q \geq \lambda\}=\{\rho \geq \lambda/q\}.
 ```
 
-Un gain global sans cette décomposition ne convaincra aucun relecteur, et surtout ne vous apprendra rien.
+L'arbre des composantes reste donc identique et seuls les niveaux sont reparamétrés. En coordonnées logarithmiques, cette reparamétrisation devient une translation. Les quantités
 
-### Que prédit un nœud ?
-
-Question naturelle, et la réponse évite un piège. **Un cluster ne reçoit jamais un label unique** : sa cible est le vecteur des **proportions** des 19 classes parmi ses points. Les feuilles prédisent une distribution $p_i$, et un nœud en déduit la moyenne pondérée par les masses de ses enfants — exactement, sans tête supplémentaire.
-
-Le piège serait de croire que ces proportions suffisent. Elles ne **localisent** pas les classes à l'intérieur d'un cluster mixte : savoir qu'un nœud contient $70\,\%$ de route et $30\,\%$ de trottoir ne dit pas *où*. **La sortie officielle reste une prédiction par point** ; les proportions sont un état multi-échelle cohérent et une cible auxiliaire, jamais un label diffusé uniformément.
-
-### Le squelette du modèle
-
-1. un encodeur local point/voxel calcule des features haute résolution ;
-2. une passe ascendante construit les descripteurs et les états de chaque nœud ;
-3. un ou deux blocs hiérarchiques propagent le contexte entre nœuds ;
-4. une passe descendante ramène ce contexte aux feuilles ;
-5. un décodeur combine ce contexte avec un raccourci local, qui protège les frontières ;
-6. une tête produit 19 logits par point, dans l'ordre exact du fichier d'entrée.
-
-La règle qui compte : **l'objectif d'entraînement doit être exactement celui de la baseline reproduite** dans toutes les variantes comparées. Une loss auxiliaire sur les proportions ne s'ouvre qu'après l'ablation de la structure, sinon on confond gain architectural et recette d'entraînement.
-
-**À retenir.** Trois expériences, pas une. Et l'ordre dans lequel on les fait n'est pas neutre : voir [VOIES.md](VOIES.md).
-
----
-
-## Chapitre 4 — Décrire un nœud
-
-C'est le chapitre le plus technique, et celui où les intuitions trompent le plus. Le détail complet est dans [DESCRIPTEURS_DE_NOEUD.md](archive/DESCRIPTEURS_DE_NOEUD.md) ; voici la carte.
-
-### 4.1 Une seule construction, trois lectures
-
-Presque tous les descripteurs directionnels envisageables reposent sur **la même** opération : prendre une direction $u$, projeter les points dessus, regarder le sous-niveau $\left\langle u,x\right\rangle\leq t$.
-
-Attention à la géométrie, c'est une source de confusion fréquente : $u$ est un **vecteur unitaire**, pas un plan. Mais les fibres de $x\mapsto\left\langle u,x\right\rangle$ **sont** les plans orthogonaux à $u$. Donc $u$ désigne une **famille de plans parallèles**, et le couple $(u,t)$ désigne **un** plan. Vérification : $(u,t)\in S^2\times\mathbb{R}$, soit 3 paramètres, exactement la dimension de l'espace des plans orientés de $\mathbb{R}^3$.
-
-Ce qui change d'un descripteur à l'autre, c'est **ce qu'on résume** de ce balayage par plans :
-
-| Lecture | Descripteur | Agrégation | Ce qu'il voit | Dimension |
-|---|---|---|---|---|
-| l'**extremum** | fonction support $h$ | $\max$ | l'enveloppe convexe, rien d'autre | $D$ |
-| la **masse** | CDF projetée $F$ | $+$ | la distribution des points | $D\times B$ |
-| la **topologie** | ECT / WECT | $\chi$ | trous et composantes | $D\times B$ |
-
-### 4.2 La fonction support n'est pas un choix, elle est forcée
-
-Résultat démontré dans [DESCRIPTEURS_DE_NOEUD.md](archive/DESCRIPTEURS_DE_NOEUD.md) : si l'on exige d'un canal qu'il soit à la fois
-
-- **exactement agrégeable** le long de l'arbre de fusion,
-- **exactement recentrable** en forme close,
-- et continu,
-
-alors c'est **nécessairement** une reparamétrisation croissante d'une valeur de la fonction support. Il n'y a pas d'alternative.
-
-La forme utile de ce résultat est sa **forme négative** :
-
-> $D(A;c)=D\left(\mathrm{conv}(A);c\right)$ : un tel canal ne voit **rien** de $A$ hormis un hyperplan d'appui de son enveloppe convexe.
-
-Donc tout descripteur réellement sensible à la non-convexité doit **renoncer** à l'une des trois propriétés. C'est un arbitrage, pas un problème d'ingénierie.
-
-Attention à ne pas survendre ce lemme : il **justifie** un choix d'architecture, il ne **contribue** pas. La fonction support échantillonnée est littéralement un PointNet à première couche linéaire, et l'agrégation par $\max$ sur les enfants d'un arbre de partition est déjà publiée (Superpoint Transformer, ICCV 2023).
-
-### 4.3 Les canaux radiaux, et le choix du centre
-
-L'idée naturelle pour voir la non-convexité : pour chaque direction, la **dernière sortie** $\rho_{\mathrm{out}}$ et la **première entrée** $\rho_{\mathrm{in}}$ du carrier le long du rayon.
-
-Ce qui les distingue de la fonction support n'est **pas** la continuité — le rayon extérieur non binné est parfaitement continu — mais le **recentrage**. Raison géométrique, et elle est jolie :
-
-- support et CDF balaient par des **plans parallèles**. Translater l'ensemble décale la cote du plan de $\left\langle u,\delta\right\rangle$ : **le même décalage pour tous les points**, un simple scalaire ;
-- les canaux radiaux balaient par des **rayons issus d'un centre**. Translater déforme la géométrie des rayons de façon non uniforme : un point proche change beaucoup d'angle, un point lointain presque pas.
-
-D'où la recommandation, qui change la proposition en profondeur : **prendre l'origine capteur comme centre unique**, et non le barycentre du nœud.
-
-Autour du barycentre, $\rho_{\mathrm{in}}$ est soit vacu (identiquement nul si le centre est dans le carrier), soit instable. Autour du capteur :
-
-- les canaux se fusionnent **exactement** en une seule passe ascendante ;
-- $\rho_{\mathrm{in}}$ devient la **surface visible**, $\rho_{\mathrm{out}}-\rho_{\mathrm{in}}$ l'**épaisseur en profondeur** — ce qui sépare un mur d'un buisson ;
-- un scan mono-retour donne **au plus un point par faisceau**, donc le nuage est déjà exactement étoilé autour du capteur.
-
-Cette dernière remarque est à double tranchant, et il faut la dire : à résolution angulaire fine, ces canaux **sont** une image de portée, c'est-à-dire les données brutes ré-encodées en polaire. Le canal radial est donc soit une compression incontrôlée (barycentre), soit un ré-encodage sans perte (capteur). Il n'y a pas de régime intermédiaire miraculeux.
-
-### 4.4 Le canal qui manque : la masse
-
-$h$, $\rho_{\mathrm{in}}$ et $\rho_{\mathrm{out}}$ sont **tous les trois des extrema**. Or un max-pooling ne peut pas approcher une moyenne — c'est la séparation classique PointNet / DeepSets. Ils ne voient donc :
-
-- ni le nombre de retours,
-- ni leur répartition,
-- ni la densité — qui est pourtant le signal LiDAR le plus fort.
-
-Deux objets aux mêmes enveloppes et aux intérieurs totalement différents sont indiscernables : le cube plein et sa frontière, la haie et la clôture, deux voitures accolées et une camionnette.
-
-Le remède est le **canal de masse** : la CDF projetée. Elle est additive, donc **exactement fusionnable** elle aussi, et strictement plus expressive. Par Cramér–Wold, la collection de toutes les projections détermine la mesure.
-
-Deux économies pratiques :
-
-- pour la CDF, $u$ et $-u$ sont **redondants** ($F(-u,t)=1-F(u,(-t)^-)$), donc une demi-sphère suffit — deux fois moins de directions que pour le support, où les antipodes ne le sont pas ;
-- la fonction support est **le bord du domaine de la CDF** : on ne paie le facteur $B$ que pour ce qu'il y a avant ce bord.
-
-### 4.5 Faut-il calculer sur les points ou sur le polyèdre reconstruit ?
-
-| Canal | Points ou carrier ? |
-|---|---|
-| support $h$ | **aucune différence** : $h_{C_v^{F}}=h_{V_v}$ est une identité exacte |
-| support de $W_v(a)$ | **vraie différence**, la seule reconstruction qui paye |
-| CDF / masse | **vrai choix**, et c'est exactement le débat de la portée |
-| radial depuis le capteur | **points** ; le carrier n'ajoute que de l'interpolation entre faisceaux |
-
-La seule reconstruction qui apporte une grandeur nouvelle est l'union témoin $W_v(a)$, via l'écart
-
-$\Delta_v(u)=h_{V_v}(u)-h_{W_v(a)}(u)\geq0$
-
-qui mesure **de combien il faut rentrer, dans la direction $u$, avant que la condition d'ordre $K$ soit satisfaite** : une densité de bord directionnelle, propre à HGP. Elle se calcule sans énumérer les facettes, par dichotomie sur la cote du plan avec un test $K$-NN. Mais elle dépend du niveau, donc **elle ne se compose pas** le long de l'arbre : c'est un recalcul par nœud.
-
-**À retenir.** Trois canaux gratuits et exactement composables en une passe (support, CDF, radial capteur), et **un seul** canal qui justifie de reconstruire quoi que ce soit ($\Delta_v$), au prix de la composabilité.
-
----
-
-## Chapitre 5 — Faire circuler l'information : HSA et ses goulots
-
-L'opérateur envisagé est **HSA** (Hierarchical Self-Attention, NeurIPS 2025) : une attention dont les scores sont contraints à être constants par blocs entre sous-arbres frères, dérivée comme la projection KL-optimale de l'attention plate sous cette contrainte.
-
-Il faut comprendre trois choses avant de s'engager.
-
-**1. Mécaniquement, HSA est une attention sur des moyennes.** Sous LayerNorm, l'énergie d'interaction ne dépend que des moyennes pondérées par la taille des requêtes et des clés de chaque sous-arbre. C'est cette réduction qui produit tout le gain de complexité. Sa nouveauté est la **dérivation**, pas le calcul — et il est donc *a priori* très proche du contrôle « bottom-up/top-down `mean` + MLP » déjà prévu dans la matrice d'ablation.
-
-**2. Votre descripteur y entre par un scalaire.** Dans HSA fidèle, la géométrie n'intervient que par $\varepsilon(A')^{\top}\varepsilon(B')$ : **un seul nombre de biais par couple de frères**. Raffiner le descripteur sans changer ce goulot ne peut rien produire. Le faire entrer dans la voie des valeurs sort du théorème et doit être annoncé comme variante.
-
-**3. La profondeur est un problème de calcul.** L'algorithme demande $D$ produits matrice creuse–vecteur **séquentiels**, où $D$ est la profondeur de la hiérarchie. Un arbre de fusion issu d'une filtration est typiquement très déséquilibré, avec de longues chaînes de fusions ponctuelles. La **condensation** de l'arbre n'est donc pas une optimisation optionnelle : c'est une condition d'existence sur GPU — et elle modifie l'objet, donc elle doit être versionnée et ablatée.
-
-### La laminarité : le problème est plus petit qu'il n'y paraît, et le manuscrit le résout
-
-HSA exige un arbre **strictement laminaire** : son lemme de sous-structure optimale est énoncé sur une *partition*, avec des ensembles de feuilles disjoints. Et on a vu au chapitre 2 que pour $K\geq2$ les $K$-polyèdres **se recouvrent**. On pourrait en conclure que HSA force à détruire ce qui distingue HGP. Ce serait faux, et le § 9.1 du manuscrit le dit explicitement :
-
-> « pour $K\geq2$, l'objet naturel n'est pas une partition de $X$, mais un recouvrement de $X$ **(ou bien une partition des $(K-1)$-simplexes)** »
-
-Autrement dit : **la hiérarchie est déjà laminaire — sur les facettes.** L'arbre de fusion est construit sur $\mathcal{F}_K$, l'ensemble des facettes, et il en est une partition à chaque niveau. Le recouvrement n'apparaît **que** lorsqu'on projette vers les points, parce qu'un point appartient à plusieurs facettes.
-
-```mermaid
-graph LR
-  P["points x"] -->|"incidence<br/>un point est dans<br/>plusieurs facettes"| F["facettes τ<br/><b>l'arbre vit ici</b><br/>et il est laminaire"]
-  F --> N["nœuds = composantes<br/>de facettes"]
-  N --> H["HSA<br/>sans laminarisation ad hoc"]
+```math
+\Delta\log\lambda,
+\qquad
+\log\lambda_{\mathrm{mort}}-\log\lambda_{\mathrm{naissance}},
+\qquad
+\log(m_p/m_v)
 ```
 
-Le bon choix architectural est donc : **les feuilles sont les facettes, pas les points.** L'arbre est alors exactement laminaire, HSA s'applique sans bricolage, et rien n'est détruit au niveau de l'arbre.
+sont alors naturelles.
 
-### La partition de l'unité, déjà écrite dans la thèse
+Le LiDAR réel ne suit pas exactement ce modèle : la dilution varie avec la portée, l'angle d'incidence, l'occultation, les anneaux et la réflectivité. Le projet ne suppose donc pas l'invariance ; il la **mesure** et entraîne explicitement le modèle à la conserver lorsque la sémantique n'a pas changé.
 
-Reste à relier les points aux facettes. Le § 9.1 fournit exactement l'objet que l'architecture réclamait sans l'avoir.
+## 3. Ce que signifie « polyèdre-only »
 
-Chaque facette $\tau$ reçoit un score local $S_\tau=\sum_{\sigma\supset\tau,\,|\sigma|=K+1}\psi\left(\rho(\sigma)\right)$ avec $\psi(t)=1/t^{p}$, où $\rho(\sigma)$ est le rayon de naissance. Chaque point normalise par $T_x=\sum_{\tau\ni x}S_\tau$, et l'on pose
+### Autorisé
 
-$w_{x\tau}=\frac{S_\tau}{T_x},\qquad w_{x\tau}\geq0,\qquad \sum_{\tau\ni x}w_{x\tau}=1.$
+- utiliser les points hors réseau pour construire les facettes et les descripteurs ;
+- calculer des statistiques de rémission ou de géométrie sur les sommets d'une facette ;
+- calculer la loss officielle après reprojection vers les points ;
+- utiliser les identifiants de points survivants pour apparier deux vues synthétiques en pré-entraînement.
 
-C'est une **partition de l'unité** : « lorsqu'un point appartient à au moins une face, il distribue une masse totale égale à $1$ entre les faces qui le contiennent ». Elle est pondérée par la densité de naissance, donc pas arbitraire.
+### Interdit dans le modèle principal
 
-Trois conséquences, et elles débloquent plusieurs points ouverts du dossier.
+- un backbone PointNet, sparse convolution ou Point Transformer ;
+- un token par point ;
+- un voisinage point-wise appris en parallèle ;
+- des features point-wise cachées dans les tokens de facettes ;
+- une correction finale par un réseau sur les points.
 
-1. **Conservation de la masse, gratuitement.** Pour toute antichaîne, en posant $w_{x\to v}=\sum_{\tau\in v}w_{x\tau}$, on a $\sum_v w_{x\to v}=1$. Aucun double comptage : c'est la condition que [ARCHITECTURE.md](archive/ARCHITECTURE.md) exigeait avant d'autoriser $K\geq2$.
-2. **Le canal de masse devient correct.** La CDF additive double-comptait pour $K\geq2$ ; il suffit de pondérer chaque point par $w_{x\to v}$ et l'additivité redevient exacte.
-3. **La masse d'un nœud n'est plus son cardinal.** Le manuscrit définit $m_\tau=S_\tau\sum_{x\in\tau}1/T_x$, et c'est cette masse — pas un comptage de faces — qui alimente `min_cluster_size` dans l'arbre condensé.
+Cette séparation doit rester testable dans le code. Une variante hybride pourra servir de plafond, mais elle ne doit pas être confondue avec la proposition principale.
 
-### Rendre le vote différentiable
+## 4. Unités apprises
 
-La thèse convertit en partition stricte par **vote pondéré** : $V_x(c)=\sum_{\tau\ni x,\ \ell(\tau)=c}w_{x\tau}$, puis $\hat\ell(x)\in\arg\max_c V_x(c)$ (Proposition 7). Pour $K=1$ le vote est trivial et redonne le Single-Linkage.
+### 4.1 Feuilles
 
-Pour un réseau, il suffit de **remplacer l'argmax par la combinaison convexe** : si $p_\tau$ est la distribution prédite sur la facette $\tau$, la prédiction du point est
+Les feuilles sont les facettes élémentaires effectivement sérialisées. Elles forment l'unité minimale de prédiction. Chaque feuille reçoit :
 
-$p(x)=\sum_{\tau\ni x}w_{x\tau}\,p_\tau.$
+- une géométrie intrinsèque ;
+- une pose dans le repère capteur et le repère gravitaire ;
+- des statistiques d'acquisition ;
+- un niveau de filtration ;
+- ses incidences et voisins dans le graphe dual.
 
-C'est exactement la Proposition 7 avant le durcissement, donc différentiable, et chaque point garde une prédiction propre puisque les $w_{x\tau}$ dépendent de $x$. L'argmax redevient la version d'inférence si une partition stricte est demandée.
+### 4.2 Nœuds internes
 
-**Ce qui reste vraiment perdu.** Uniquement au moment du durcissement, et c'est mesurable : la marge $V_x^{(1)}-V_x^{(2)}$ entre les deux premiers clusters. La fraction de points à vote contesté **est** le coût de la laminarisation, et c'est un diagnostic à rapporter, pas une inquiétude abstraite.
+Chaque nœud interne représente l'union des feuilles de sa branche avant un événement de fusion. Ses attributs ne sont pas recalculés par une boucle sur les points pendant l'entraînement. Ils sont obtenus par agrégation exacte ou contrôlée :
 
-**Ce que ça coûte.** Les facettes sont plus nombreuses que les points, donc l'arbre a plus de feuilles — à mesurer avant de conclure, avec la profondeur et le degré (voir le goulot n° 3 ci-dessus).
+- `max` pour les fonctions support ;
+- somme pour masses, moments et histogrammes ;
+- composition pour les statistiques de filtration ;
+- union d'incidences sous forme sparse.
 
-**À retenir.** HSA reste une baseline, pas une contribution. Mais l'objection « il faut laminariser, donc on perd HGP » tombe : l'arbre est laminaire sur les facettes, la partition de l'unité existe déjà, et le vote de la thèse a une relaxation différentiable immédiate.
+### 4.3 Points de sortie
 
----
+Une facette `τ` prédit une distribution `p_τ`. Pour un point `x`,
 
-## Chapitre 6 — Les six façons dont ce projet peut mourir
+```math
+p_x=\sum_{\tau\ni x} w_{x\tau}p_\tau,
+\qquad
+w_{x\tau}\geq0,
+\qquad
+\sum_{\tau\ni x}w_{x\tau}=1.
+```
 
-Classées par ce que je crois être leur probabilité décroissante. Chacune renvoie au risque numéroté correspondant.
+La sortie demeure point-wise, sans réintroduire de token point.
 
-### 6.1 Le goulot n'est pas la partition
+## 5. Les quatre familles de canaux
 
-C'est le fait le plus dérangeant, et il est publié. Dans la littérature superpoint, **l'oracle de partition est déjà très loin devant les modèles** :
+Le modèle ne doit pas mélanger une invariance souhaitée avec une suppression aveugle de l'information.
 
-| Travail | Modèle | Oracle de sa propre partition | Écart |
-|---|---|---|---|
-| SPG, CVPR 2018 | 62,1 mIoU | 88,2 mIoU | 26,1 |
-| SPT, ICCV 2023 | 68,9 mIoU (Area 5) | $\gtrsim 89$ | « more than 20 points » |
-| SuperCluster, 3DV 2024 | — | 93,4 PQ | « very little precision is lost » |
+### A. Forme normalisée
 
-Environ **vingt points d'oracle sont déjà non convertis**. Améliorer le plafond d'une partition qui n'est pas saturée ne peut pas payer.
+But : reconnaître une structure malgré une variation globale d'échelle ou de densité.
 
-Conséquence méthodologique majeure : un diagnostic d'oracle est une **porte de réfutation, pas de promotion**. Le perdre tue le programme ; le gagner ne prouve presque rien.
+- Gram normalisé de la cellule ;
+- rapports de valeurs propres ;
+- support directionnel normalisé ;
+- quantiles ou CDF de projections ;
+- moments centraux normalisés ;
+- masques de dégénérescence.
 
-### 6.2 HGP sous-segmente les objets fins
+Le support seul ne suffit pas : il ne voit que l'enveloppe convexe. Les statistiques de masse projetée et les incidences conservent l'information intérieure et non convexe.
 
-Objection la plus spécifique, et elle vient du manuscrit lui-même. Sur le jeu `birch2` :
+### B. Grandeurs physiques
 
-| Algorithme | ARI | Points classés |
-|---|---|---|
-| HDBSCAN, $k=100$ | 0,996 | 99,7 % |
-| HGP-Clusterer, $k=84$ | 0,441 | 83,9 % |
+But : distinguer des objets de même forme mais de taille ou de position différentes.
 
-Cause citée : « les clusters sont essentiellement filiformes et sont donc mieux identifiés avec de simples graphes ».
+- dimensions métriques ;
+- hauteur absolue et hauteur au sol ;
+- centre dans le repère ego ;
+- orientation par rapport à la gravité ;
+- portée et direction radiale.
 
-Le mécanisme est structurel. La connexité d'ordre $K$ exige $K$ points **simultanément** proches. Le long d'une structure fine échantillonnée de façon éparse, cette condition n'est satisfaite qu'à un rayon nettement plus grand — l'objet fin **naît tard** dans la filtration, et à ce niveau ses voisines l'ont déjà rejoint. Résultat : sous-segmentation.
+Ces canaux ne sont pas normalisés avec la forme.
 
-Or, chapitre 1 : la marge de mIoU est sur `pole`, `traffic-sign`, `bicycle`, `person`, `bicyclist`. **HGP achète sa résistance au chaînage en pénalisant exactement les classes qui décident de la métrique.**
+### C. Filtration et croissance
 
-### 6.3 La densité encode le capteur, pas la sémantique
+But : encoder la trajectoire multi-échelle.
 
-Le modèle de Hartigan suppose un échantillon d'une densité $f$ sur $\mathbb{R}^3$. Un scan LiDAR est un échantillonnage de **surfaces** à densité angulaire fixée : la densité locale y est d'abord fonction de la portée, de l'angle d'incidence et de l'occultation. L'hypothèse statistique qui fonde HGP n'est pas satisfaite telle quelle.
+- écarts de niveaux logarithmiques ;
+- persistance ;
+- rang ou quantile du niveau dans le scan ;
+- rapports de masse parent–enfant ;
+- type et degré de fusion ;
+- âge relatif dans la branche.
 
-Signal contraire à consigner honnêtement : dans l'ablation d'ALPINE, un seuil proportionnel à la portée **dégrade** le clustering ($75{,}9$ contre $76{,}3$ PQ) malgré l'optimisation de son coefficient. La correction range-aware doit donc être mesurée, pas supposée.
+Le niveau brut peut être conservé comme canal diagnostique, mais il ne doit pas être le seul encodage.
 
-### 6.4 Le descripteur est le levier le plus faible
+### D. Acquisition
 
-Ablations publiées sur exactement cette famille d'architectures :
+But : exploiter sans subir le capteur.
 
-| Ce qu'on retire | S3DIS 6-fold | KITTI-360 | DALES |
-|---|---|---|---|
-| toutes les features de nœud | $-0{,}7$ | $-4{,}1$ | $-1{,}4$ |
-| l'encodage d'adjacence | $-6{,}3$ | $-5{,}4$ | $-3{,}0$ |
-| un seul niveau de partition | $-8{,}4$ | $-5{,}1$ | $-0{,}9$ |
+- rémission : moyenne, dispersion et quantiles ;
+- nombre et étendue des anneaux ;
+- couverture angulaire ;
+- fraction de sommets ou cellules manquants ;
+- angle d'incidence estimé ;
+- masque de disponibilité de chaque statistique.
 
-Et EZ-SP : remplacer les features handcrafted par un réseau appris change le résultat de $\pm0{,}1$.
+Ces canaux sont soumis à dropout et à des tests de raccourci. Un modèle qui prédit surtout la portée ou l'anneau n'a pas appris l'invariance recherchée.
 
-Le descripteur — donc tout le chapitre 4 — vaut quelques points au mieux. L'adjacence et la profondeur dominent.
+## 6. Quel Transformer utiliser
 
-### 6.5 Le terrain est celui que la famille a concédé
+### Premier porteur : SPT-nano adapté
 
-**Aucune méthode de la lignée superpoint ne publie SemanticKITTI mono-scan** : ni SPG, ni SSP, ni SPNet, ni SPT, ni SuperCluster, ni EZ-SP. Toutes rapportent S3DIS, ScanNet, DALES ou KITTI-360 *accumulé*.
+Superpoint Transformer fournit déjà :
 
-Lecture à double tranchant : créneau libre, mais très probablement parce qu'un scan unique offre trop peu de points par région pour qu'une partition soit informative.
+- un encodeur-décodeur multi-niveaux ;
+- des graphes d'adjacence à chaque niveau ;
+- des arêtes verticales parent–enfant ;
+- des encodages relatifs sur clés, requêtes et valeurs ;
+- un mode `nano` sans étage point-wise.
 
-### 6.6 Le coût
+C'est le meilleur point de départ pour tester rapidement la faisabilité. Le partitionnement SPT est remplacé par la hiérarchie fournie ; les descripteurs SPT sont remplacés par les canaux définis ici ; la sortie est portée par les facettes.
 
-La voie exacte — Čech, mosaïque de Delaunay d'ordre $K$, graphe de Gabriel — est chère, et le manuscrit ne donne aucune borne de complexité pour la mosaïque d'ordre $K$ en dimension 3.
+### Modèle cible : attention de famille sur l'arbre complet
 
-Mais il fournit lui-même la sortie : le complexe de **Vietoris–Rips**, avec l'encadrement $\check{C}(X,r)\subseteq\mathrm{VR}(X,r)\subseteq\check{C}(X,\alpha_p r)$ et $\alpha_p=\sqrt{2p/(p+1)}$, soit $\alpha_3\approx1{,}22$ seulement en dimension 3. Cette voie se réduit à quatre opérations de graphe massivement parallélisables, et pour $K=2$ à une énumération de triangles.
+Une fois le prototype validé, le modèle doit consommer tous les événements de fusion, pas seulement trois coupes arbitraires. Chaque nœud échange avec :
 
-**Le prix n'est donc pas le temps, c'est l'exactitude** : sous Vietoris–Rips, le théorème du chapitre 2 ne tient plus qu'à $22\,\%$ près sur le rayon. C'est un arbitrage à décider, pas à subir.
+- ses enfants ;
+- son parent ;
+- éventuellement ses frères par une attention de set ;
+- quelques voisins géométriques latéraux au même niveau.
 
-**À retenir.** Les deux risques les plus dangereux (6.1 et 6.2) n'étaient dans aucune version antérieure du dossier, et **aucun des deux ne concerne le descripteur ni l'opérateur**.
+Ce schéma reprend l'idée sparse de Sequoia. Il est linéaire dans le nombre d'arêtes si l'attention entre frères n'est pas quadratique sur les gros événements.
 
----
+### HSA : opérateur comparatif
 
-## Chapitre 7 — Que mesurer d'abord
+HSA offre une dérivation mathématique propre de l'attention sous contrainte hiérarchique et un algorithme dynamique. Il devient pertinent une fois établis :
 
-Le dossier contient une spécification plus complète que la plupart des sections méthodes publiées, et **aucune mesure**. Le rendement marginal d'une ligne de spécification supplémentaire est donc proche de zéro.
+1. une bonne tokenisation ;
+2. des canaux utiles ;
+3. un gain provenant réellement de l'arbre.
 
-Trois diagnostics, aucun ne demande d'entraînement. Détail dans [VOIES.md](VOIES.md).
+Il n'est pas la baseline initiale, car il n'existe pas encore de validation 3D comparable et son coût dépend du carré du branchement maximal.
 
-### M1 — L'arbre est-il aligné sur la sémantique ?
+### Encodeur d'incidences complet : extension
 
-Construire la forêt HGP sur la séquence 08, choisir une antichaîne, étiqueter chaque nœud par sa classe majoritaire, rapporter le mIoU. Comparer à HDBSCAN, octree, superpoints et arbre aléatoire à compression égale.
+Si le graphe dual perd une information mesurable, une couche de type AllSetTransformer peut traiter les incidences sommet–facette–coface comme des applications multiensemble. Cette extension est reportée : elle augmente fortement le coût et complique l'attribution du gain.
 
-**Piège à éviter** : le mIoU n'est pas additif sur les régions, donc « la meilleure antichaîne au sens du mIoU » n'est pas un problème d'optimisation bien posé. La version correcte minimise l'**impureté totale** $\sum_v n_v H(\pi_v)$, critère additif qui admet une programmation dynamique exacte sur l'arbre, puis rapporte le mIoU obtenu comme descripteur et non comme optimum.
+## 7. Comment entraîner le modèle
 
-Et se rappeler 6.1 : porte de réfutation seulement.
+### Supervision directe
 
-### M2 — Les niveaux survivent-ils à la portée ?
+Le réseau prédit des logits par facette. La loss principale est calculée après reprojection vers les points. Des cibles molles par facette et par nœud fournissent une supervision auxiliaire sans imposer un label majoritaire faux aux régions mixtes.
 
-Transporter des objets à plusieurs portées, rééchantillonner selon un modèle capteur déclaré, mesurer la dérive des niveaux de naissance/mort et de l'ancêtre commun. Tester en même temps la correction par normalisation de la densité d'échantillonnage attendue.
+### Pré-entraînement de portée
 
-### M3 — Le raccourci qui donne un nombre publiable le plus vite
+Une vue enseignante utilise le scan complet. Une vue étudiante est produite par une dégradation LiDAR réaliste : réduction d'anneaux, thinning angulaire et radial, occultation par secteurs, point drop et bruit radiométrique. La hiérarchie est reconstruite indépendamment sur les deux vues.
 
-Le clusterer d'ALPINE est **littéralement du Single-Linkage** : graphe $k$-NN en BEV par classe, coupe des arêtes au-delà d'un seuil tiré de dimensions d'objets, composantes connexes, plus un découpage de boîtes. C'est **HGP à $K=1$** avec un rayon par classe. Et son mode d'échec déclaré est le **chaînage** — la motivation centrale de toute la thèse.
+Le réseau étudiant prédit les représentations des branches appariées de l'enseignant. La supervision ne porte que sur des éléments observables par l'étudiant, selon le principe qui s'est montré décisif dans DOS ; aucun token masqué ne révèle sa position.
 
-D'où une expérience à une seule variable : reprendre le pipeline ALPINE tel quel, mêmes logits sémantiques gelés, mêmes seuils, même découpage, et **remplacer uniquement les composantes connexes par les $K$-polyèdres à $K=2,3$**.
+Les objectifs initiaux sont :
 
-Le cadre chiffré est connu, et il est à double tranchant :
+- prédiction latente des branches appariées ;
+- prédiction des écarts de fusion et de la persistance ;
+- cohérence parent–enfants ;
+- régularisation anti-effondrement.
 
-| Fait | Valeur | Lecture |
-|---|---|---|
-| écart imputable au seul clusterer | $10{,}4$ PQ | le clusterer compte |
-| HDBSCAN dans ce comparatif | $55{,}1$ PQ, bon dernier | HGP en est le correctif de principe |
-| ALPINE | $65{,}5$ PQ à $14{,}4$ Hz, un cœur CPU | la barre, et la contrainte de temps |
-| plafond de l'oracle d'instance | $+4{,}3$ PQ | la marge totale |
-| pipeline HGP historique | $\sim1$ s/trame | un ordre de grandeur à combler |
+Le masquage porte sur des sous-arbres ou secteurs angulaires, pas sur des cellules indépendantes dispersées au hasard.
 
-Aucun entraînement, une baseline publiée, un plafond publié, et l'hypothèse exacte de la thèse.
+## 8. Ce qui doit être démontré avant de viser le classement
 
-### M4 — six scalaires par point, et la seule porte qui puisse dire « oui »
+1. **Résolution.** La représentation par facettes doit avoir un oracle point-wise très supérieur au score visé.
+2. **Stabilité.** La hiérarchie doit mieux résister au thinning que les contrôles.
+3. **Apprenabilité.** Un modèle sans tokens points doit atteindre une performance raisonnablement proche d'un backbone point-wise.
+4. **Spécificité.** La hiérarchie réelle doit battre un arbre aléatoire, un octree et HDBSCAN à budget égal.
+5. **Utilité du niveau.** Les écarts de filtration doivent apporter plus qu'une simple topologie d'arbre.
+6. **Transfert.** L'effet doit survivre à un second capteur ou dataset.
 
-M1 ne peut que réfuter, M2 diagnostique, M3 promeut sur une autre tâche. Il manquait donc une **porte de promotion bon marché sur la tâche visée**.
+Une réussite sur le seul score SemanticKITTI ne suffit pas à démontrer l'invariance. Inversement, une belle stabilité d'arbre sans performance aval ne suffit pas à publier une méthode de segmentation. Il faut les deux, cette exigence absurde que les idées soient à la fois vraies et utiles.
 
-La plus petite expérience qui puisse produire un signal positif ne demande ni descripteur, ni opérateur, ni attention : concaténer à l'entrée d'un backbone standard **six scalaires par point** tirés de la hiérarchie — niveau de naissance, niveau de fusion, persistance, profondeur, masse du nœud contenant, et la marge du vote pondéré qui dit à quel point l'appartenance du point est contestée.
+## 9. Configuration minimale recommandée
 
-Même backbone, même recette, mêmes graines, avec et sans. Deux entraînements appariés.
+```yaml
+model:
+  leaf_dim: 128
+  hidden_dim: 192
+  num_levels: 4
+  local_blocks: 2
+  hierarchy_blocks_per_level: 2
+  heads: 6
+  ffn_ratio: 4
+  drop_path: 0.10
 
-Elle teste exactement la bonne question, et elle la teste seule : **la hiérarchie porte-t-elle une information que le backbone local ne reconstruit pas déjà ?** Un gain, et le programme est vivant. Rien, et il est peu probable qu'un descripteur sphérique plus une attention hiérarchique fassent apparaître ce qui n'était pas là.
+channels:
+  gram: true
+  eig_ratios: true
+  support_directions: 42
+  projection_quantiles: 9
+  physical_scale: true
+  filtration_relative: true
+  acquisition: true
 
-Précaution : ces canaux encodent partiellement la portée. Stratifier par distance, et vérifier qu'un contrôle trivial — la portée, la densité brute, le rayon au $K$-ième voisin — ne reproduit pas le gain.
+training:
+  batch_by_token_budget: true
+  optimizer: adamw
+  base_lr: 0.0002
+  weight_decay: 0.05
+  warmup_epochs: 10
+  precision: bf16
+```
 
-### La tension qui vaut peut-être plus que tout le reste
-
-Le chapitre 7 du manuscrit mesure la **vitesse de percolation**, c'est-à-dire ce qu'on peut récupérer d'un amas avant qu'il ne fusionne par erreur. En dimension 3, pour HGP : $0{,}646$ à $K=2$, puis $0{,}690$, $0{,}714$, $0{,}732$. La théorie prédit une amélioration **monotone en $K$**.
-
-Or l'étude HGP sur SemanticKITTI trouvait $K=2$ meilleur que $K=1$ **et** que $K=3$. Sur données réelles, l'optimum est tout de suite, pas au bout.
-
-Ce désaccord n'est pas un embarras, c'est le sujet. Les vitesses sont mesurées sur un processus de Poisson homogène ; un scan LiDAR échantillonne des surfaces avec une densité qui dépend de la portée. **L'écart entre la prédiction et l'observation est exactement l'effet du capteur, et il se mesure.** Détail et protocole dans [VOIES.md](VOIES.md).
-
-**À retenir.** Si HGP ne bat pas du Single-Linkage sur la tâche que la thèse a conçue pour lui, il est peu probable qu'il apporte quoi que ce soit à la segmentation sémantique. Et si six scalaires n'apportent rien, une architecture entière n'apportera pas davantage.
-
----
-
-## Chapitre 8 — Quel papier, quelle venue
-
-### La barre réelle
-
-D'abord, une définition qui piège tout le monde : **« mono-scan » ne désigne qu'un jeu d'étiquettes** — 19 classes au lieu de 25, les objets mobiles fusionnés avec leurs homologues statiques. **Ce n'est pas une contrainte sur l'entrée.** L'organisateur du benchmark l'écrit lui-même : « You can also take more scans, we don't care. Since we only see the results of scan 245. » TASeg, en tête à $76{,}5$, utilise 16 trames passées **et** la caméra.
-
-Trois régimes, à ne jamais mélanger :
-
-| Régime | Meilleur chiffre | Ce que c'est |
-|---|---|---|
-| **val, une trame, LiDAR seul, sans TTA** — le nôtre | **$70{,}3$** MinkUNet34v2 (mmdetection3d), $70{,}0$ MinkowskiNet (OpenPCSeg) | config, poids et log publiés — c'est **la barre à battre** |
-| val, avec pré-entraînement ou multi-jeux | Sonata $72{,}6$ ; Volt-B $72{,}5$ | autre régime : ces modèles ont vu d'autres données |
-| test, tout permis | TASeg $76{,}5$ (LiDAR + caméra + temps) ; RAPiD-Seg $76{,}1$ (LiDAR seul) | un autre monde |
-
-Trois pièges à connaître :
-
-- **le $70{,}8$ val de PTv3 n'est reproductible par personne** : $66{,}2$ sans TTA, $68{,}3$, $68{,}8$, $69{,}1$ selon les équipes, et Pointcept ne publie **aucune** config SemanticKITTI pour PTv3 ;
-- **« mono-trame » ne vaut qu'à l'inférence** : toutes les méthodes de tête mélangent des scans à l'entraînement (CutMix, LaserMix, PolarMix) ;
-- **le rang 1 historique, $76{,}5$, s'appelle `SimpleSeg` et n'a aucune publication** — non citable. Et le classement curaté de `semantic-kitti.org` est aujourd'hui **vide**.
-
-Ces chiffres sont des **instantanés à réauditer avant soumission**. Détail complet dans [CONCURRENCE.md](CONCURRENCE.md).
-
-### Le vrai terrain n'est pas la supervision complète
-
-Deux chiffres décident de la stratégie.
-
-| Régime | Marge disponible | Plancher de bruit |
-|---|---|---|
-| supervision complète | ~1 point | **±1,5 mIoU** de variance de graine |
-| **peu d'étiquettes** | **10,3 points** — linear probing 62,0 contre supervisé 72,3 | écarts d'un autre ordre |
-
-En supervision complète, **un gain d'un point n'est pas mesurable**. Ce n'est pas du confort : la variance de graine sur SemanticKITTI vaut $1{,}5$ point, et la recette d'augmentation vaut plus que l'écart entre la plupart des architectures publiées — $+3{,}5$ sur MinkUNet, $+4{,}3$ sur WaffleIron. Un effet sous ce seuil n'est ni mesurable ni attribuable.
-
-### L'angle mort de l'auto-supervision 3D
-
-Les trois modèles dominants de la lignée Pointcept, sur SemanticKITTI val :
-
-| | linéaire | décodeur | fine-tuning | coût de pré-entraînement |
-|---|---|---|---|---|
-| Sonata (CVPR'25) | 62,0 | 68,4 | 72,6 | 32 GPU, poids outdoor **non publiés** |
-| Concerto (NeurIPS'25) | 66,6 | 69,3 | 71,2 | 85 h × 16 H20 |
-| Utonia (ICML'26) | **67,7** | **70,0** | 72,0 | 64 H20 |
-| **DOS** (hors lignée) | 67,5 | — | **73,5** | **2 A100 × 20 h** |
-
-Trois observations, et la troisième est l'ouverture.
-
-1. **Le fine-tuning sature** autour de 72–73 ; c'est le *probing* qui sépare. C'est l'argument même de Sonata sur ce qui mesure une représentation — donc c'est le probing qu'il faut rapporter.
-2. **DOS bat toute la lignée sur SemanticKITTI pour deux ordres de grandeur de calcul en moins.** Une meilleure idée bat plus de calcul sur ce benchmark : c'est ce qui rend le programme finançable.
-3. **Aucun de ces modèles ne dérive de structure depuis la géométrie du nuage.** Sonata en fait une doctrine explicite — aucun « algorithme conçu par l'humain », aucune segmentation pré-calculée. Concerto a bien de la structure, mais **importée de l'image** (patchs DINOv2) : sans couleur, il tombe de $77{,}0$ à $36{,}8$ mIoU, c'est-à-dire précisément sur du LiDAR nu. Utonia a de la structure, mais elle vient de la **trajectoire du capteur**, pas de la scène.
-
-### La revendication, après audit d'antériorité
-
-J'ai porté un temps la formule « ne pas condenser ». Un audit l'a fermée : « hiérarchie de clusters comme structure d'auto-supervision » est **9/10 occupé** — HCSC (CVPR 2022, arbres de prototypes parent–enfant), MHCCL (AAAI 2023), HASSL (juillet 2026, HDBSCAN + distillation, microscopie). Et « arbre à niveaux indexés par un rayon sur nuage 3D comme tâche prétexte » est **8/10 occupé** par Sharma & Kaul, **NeurIPS 2020**.
-
-Ce qui reste entier est plus étroit, et c'est le résultat le plus utile de tout l'audit :
-
-> Chez **tous** les antécédents, l'axe de supervision est un **nombre de clusters** — PCL $25\,000$ ; HCSC $3000$–$2000$–$1000$ ; MHCCL des partitions successives. **Jamais un paramètre de filtration.**
-
-D'où la revendication :
-
-> **Superviser sur le niveau de filtration, pas sur un nombre de clusters.** HGP rend ce niveau signifiant — il *est* le niveau de densité $K$-NN — et la percolation dit lequel choisir. Occupation : $1/10$.
-
-**Et quelqu'un est déjà entré dans l'angle mort voisin.** PointINS (Bosch, mars 2026) construit des pseudo-instances sans annotation — $k$-means, graphe $k$-NN, composantes connexes — et gagne $+3{,}2$ PQ sur SemanticKITTI contre DOS. « Des unités structurées valent mieux que des unités aléatoires » est donc **pris**. Ce qui reste : non condensé, exact, à niveaux prédits.
-
-**Un avertissement sur HASSL, qui joue dans les deux sens.** Il occupe l'idée, mais sa propre ablation ne crédite la composante hiérarchique que de $+0{,}3$ à $+0{,}6$ point — l'essentiel de son gain vient de son enseignant de segmentation. C'est une antériorité pour la formulation, **pas une preuve que le mécanisme fonctionne**.
-
-### Pourquoi HGP plutôt que l'arbre condensé de HDBSCAN
-
-C'est la première question qu'on posera. La chaîne est courte :
-
-> ne pas condenser → **les niveaux servent** → un niveau doit avoir un sens → l'exactitude de HGP le lui donne → la percolation prédit lesquels sont utilisables.
-
-L'exactitude de la thèse ne devient porteuse **que** parce qu'on utilise les niveaux — ce que personne ne fait. Mais il faudra le **démontrer** : dans cette littérature, personne n'exige l'exactitude, HDBSCAN heuristique suffit et coûte moins cher.
-
-D'où l'ablation qui décide de tout, à architecture et budget identiques :
-
-| Bras | Ce qu'il teste |
-|---|---|
-| HGP exact | la proposition |
-| **HDBSCAN, hiérarchie conservée** | **sépare l'exactitude de la hiérarchie** |
-| HDBSCAN condensé plat | le protocole TARL |
-| arbre aléatoire | le contrôle |
-
-Si le deuxième bras égale le premier, la contribution se réduit à « utiliser une hiérarchie » — déjà pris.
-
-### Le classement honnête des actifs
-
-| Actif | Force | Pourquoi |
-|---|---|---|
-| **exactitude des niveaux + percolation** | **fort** | c'est ce que personne d'autre n'a, et c'est ce qui rend « ne pas condenser » défendable |
-| la hiérarchie elle-même | moyen | déjà utilisée ailleurs (cTree, HASSL, PointINS) |
-| le descripteur de nœud | faible | les ablations publiées le placent loin derrière l'adjacence et la profondeur |
-| HSA | faible | opérateur d'une autre équipe, aucune expérience 3D, aucun paramètre apprenable |
-
-### La conclusion de venue
-
-Un gain de mIoU en supervision complète est un papier **CVPR/ICCV/ECCV**, et il y sera jugé sur l'ingénierie du backbone — avec un effet sous le plancher de bruit.
-
-Une revendication sur **ce qui structure l'auto-supervision**, validée en régime à peu d'étiquettes où les écarts sont d'un autre ordre, adossée à une théorie qui prédit les niveaux au lieu de les régler, est une soumission **NeurIPS/ICML** plausible sans exiger le premier rang d'un classement.
-
-**Risque de nouveauté à citer, pas à ignorer.** HASSL (juillet 2026) fait déjà hiérarchie HDBSCAN multi-niveaux comme structure d'auto-supervision, avec prototypes par niveau — en microscopie cellule unique. Le principe est publié dans un autre domaine ; il faut se positionner comme transfert **et** exactification, pas comme invention.
-
-**Licences.** Les poids de Sonata, Concerto et Utonia sont tous **CC-BY-NC 4.0**. Seul le code de Sonata est Apache 2.0. À tracer comme `HGP-old/`.
-
-## Chapitre 9 — Où en est-on
-
-| Élément | État |
-|---|---|
-| Spécification | très complète |
-| Mesures | **aucune** |
-| Payload HGP marqué complet | non livré par v3, dépendance de recherche |
-| Hiérarchie sur scan LiDAR | supposée disponible, coût non mesuré de bout en bout |
-| Statut public | `not_claimed` |
-
-Les mots « exact », « temps réel », « GPU-friendly » et « état de l'art » ne doivent apparaître comme **résultats** que soutenus par le protocole correspondant.
-
----
-
-## Où aller ensuite
-
-| Vous voulez… | Lisez |
-|---|---|
-| le détail des descripteurs, avec les démonstrations | [DESCRIPTEURS_DE_NOEUD.md](archive/DESCRIPTEURS_DE_NOEUD.md) |
-| savoir quoi faire lundi matin | [VOIES.md](VOIES.md) |
-| la définition d'un terme | [GLOSSAIRE.md](GLOSSAIRE.md) |
-| le modèle et ses contrats d'entrée | [ARCHITECTURE.md](archive/ARCHITECTURE.md) |
-| ce qu'un relecteur exigeant répondrait | [STRATEGIE_PUBLICATION.md](archive/STRATEGIE_PUBLICATION.md) |
-| les risques chiffrés et les règles d'arrêt | [RISQUES.md](RISQUES.md) |
-| la concurrence | [CONCURRENCE.md](CONCURRENCE.md) |
+Cette configuration est un point de départ. Les premières ablations doivent réduire le modèle, pas l'agrandir.
