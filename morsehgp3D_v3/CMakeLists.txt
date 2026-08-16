@@ -4595,6 +4595,83 @@ mhgp3v_add_expected_code_test_for(mhgp3v_directional_dominance_probe
 # JAMAIS le compte vrai. Un depassement serait une fermeture a tort, donc une
 # perte de support.
 # ---------------------------------------------------------------------------
+add_executable(mhgp3v_acute_owner_gateway_probe prototype/acute_owner_gateway_probe.cpp)
+target_include_directories(mhgp3v_acute_owner_gateway_probe PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(mhgp3v_acute_owner_gateway_probe PRIVATE mhgp)
+
+# ---------------------------------------------------------------------------
+# LE GATEWAY `A x B x C` — la source ternaire, sans expansion de paires.
+#
+# `Phi = (a-x).(b-x)`, `Delta_E = D - E`, `Delta_X = D - X` sont SEPARABLES PAR
+# AXE : leurs extrema exacts sur trois AABB sont la somme de trois extrema
+# d'intervalles, donc `O(1)`, et la separabilite PRESERVE la correlation par
+# `a_k` que des bornes independantes sur `D` et `E` detruiraient. Les six
+# formules ont ete verifiees contre l'enumeration exhaustive de tous les entiers
+# de six mille triplets d'intervalles, sans un ecart.
+#
+# CE QUE LES PORTES EXIGENT, ET DANS QUEL ORDRE :
+#
+#   `--oracle`        surete sur boites aleatoires : `dead_faux=0`, `all_faux=0`.
+#   `--oracle-biais`  boites FABRIQUEES pour atteindre `ALL_STRICT`. Sans elles
+#                     la branche n'etait jamais prise (`all_strict=0`) et le
+#                     mutant `all-strict-lache` survivait par VACUITE.
+#   `--brute`         le juge au niveau NUAGE : la recursion entiere contre
+#                     `C(n,3)` sous owner canonique. C'est lui qui a trouve mes
+#                     trois fautes — cellule Morton au lieu de boite serree,
+#                     double comptage `(A,B)`/`(B,A)`, et filtre `pid` en trop.
+#
+# TROIS MUTANTS, DE DEUX ESPECES. `dead-large` et `all-strict-lache` rendent le
+# classifieur FAUX et meurent au juge (code 4). `phi-large` ne ment pas — il
+# rend `MIXED` la ou `DEAD` etait justifie — donc il reste SUR et se tue par
+# PERTE DE COUVERTURE, sous le plancher de `dead`. Les confondre serait une
+# erreur de categorie. Le plancher `--min-dead=400` les separe exactement :
+# `416` blocs morts sans mutant, `351` avec — la graine etant fixee, ces deux
+# nombres sont reproductibles a l'unite.
+add_test(NAME mhgp3v_gateway_oracle_boites
+  COMMAND mhgp3v_acute_owner_gateway_probe --oracle --tours=20000 --etendue=1 --min-dead=400)
+set_tests_properties(mhgp3v_gateway_oracle_boites PROPERTIES
+  PASS_REGULAR_EXPRESSION "dead_faux=0 all_faux=0(.|\n)*verdict=SUR planchers=OK")
+
+add_test(NAME mhgp3v_gateway_oracle_all_strict_atteint
+  COMMAND mhgp3v_acute_owner_gateway_probe --oracle-biais --tours=3000 --etendue=1
+          --min-all-strict=1000 --min-dead=1)
+# Le plancher `--min-all-strict=1000` est PORTE PAR LE BINAIRE, qui rend 3 s'il
+# n'est pas tenu : une regex ne peut pas exprimer « au moins mille » sans
+# quantificateur, et le quantificateur est interdit ici a juste titre.
+set_tests_properties(mhgp3v_gateway_oracle_all_strict_atteint PROPERTIES
+  PASS_REGULAR_EXPRESSION "dead_faux=0 all_faux=0(.|\n)*verdict=SUR planchers=OK")
+
+foreach(fam two_lines terrain uniform eight_clusters)
+  add_test(NAME mhgp3v_gateway_juge_${fam}
+    COMMAND mhgp3v_acute_owner_gateway_probe --brute --family=${fam} --points=120)
+  set_tests_properties(mhgp3v_gateway_juge_${fam} PROPERTIES
+    PASS_REGULAR_EXPRESSION "blocs_faux=0(.|\n)*ecart=0")
+endforeach()
+
+# `two_lines` : ZERO paire materialisee, et zero porteur. C'est l'exigence
+# exacte de l'ordre d'execution de l'auditeur.
+add_test(NAME mhgp3v_gateway_two_lines_sans_pairid
+  COMMAND mhgp3v_acute_owner_gateway_probe --brute --family=two_lines --points=200
+          --max-pairid=0)
+set_tests_properties(mhgp3v_gateway_two_lines_sans_pairid PROPERTIES
+  PASS_REGULAR_EXPRESSION "pairid_expanded=0 carriers=0 carriers_symboliques=0(.|\n)*ecart=0")
+
+mhgp3v_add_expected_code_test_for(mhgp3v_acute_owner_gateway_probe
+  mhgp3v_gateway_mutant_dead_large "MUTANT TUE" 4
+  --brute --family=terrain --points=120 --inject=dead-large)
+mhgp3v_add_expected_code_test_for(mhgp3v_acute_owner_gateway_probe
+  mhgp3v_gateway_mutant_all_strict_lache "MUTANT TUE" 4
+  --brute --family=terrain --points=120 --inject=all-strict-lache)
+mhgp3v_add_expected_code_test_for(mhgp3v_acute_owner_gateway_probe
+  mhgp3v_gateway_mutant_phi_large "MUTANT TUE : phi-large" 4
+  --oracle --tours=20000 --etendue=1 --min-dead=400 --inject=phi-large)
+mhgp3v_add_expected_code_test_for(mhgp3v_acute_owner_gateway_probe
+  mhgp3v_gateway_refus_etendue "l'oracle serait non borne" 2
+  --oracle --etendue=9)
+mhgp3v_add_expected_code_test_for(mhgp3v_acute_owner_gateway_probe
+  mhgp3v_gateway_refus_brute_non_bornee "--brute borne a 400 points" 2
+  --brute --points=1000)
+
 add_executable(mhgp3v_combined_prefilter_probe prototype/combined_prefilter_probe.cpp)
 target_include_directories(mhgp3v_combined_prefilter_probe PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(mhgp3v_combined_prefilter_probe PRIVATE mhgp)

@@ -108,6 +108,16 @@ ancienne phrase imposant le rejet global des positions dupliquées est périmée
   `39 %` de la séparation qu'exige la décorrélée et trouve `4` à `21 %` de
   témoins en plus ; l'écart étant en `O(r)` et non en `O(d)`, le gain s'estompe
   quand la séparation dépasse le seuil.
+- [`NOTE_CLAUDE_GATEWAY_TERNAIRE_20260816.md`](NOTE_CLAUDE_GATEWAY_TERNAIRE_20260816.md) :
+  le gateway `A x B x C`, exact et sûr — `Phi`, `Delta_E` et `Delta_X` sont
+  séparables par axe, donc leurs extrema sur trois AABB coûtent `O(1)` et
+  gardent la corrélation par `a_k` ; les comptes `24` et `12` retrouvés
+  indépendamment de l'auditeur, et les six formules vérifiées sans écart contre
+  l'énumération exhaustive. `two_lines` meurt avec `pairid_expanded = 0`. Le
+  juge au niveau nuage y a trouvé **quatre** fautes de récursion que l'oracle
+  sur boîtes ne pouvait pas voir. Et la mesure de croissance **réfute** la
+  sparsité annoncée : la masse des porteurs croît en `n^3`, parce que j'énumère
+  les triangles aigus **sans** le filtre de vivacité d'ancre.
 - [`NOTE_CLAUDE_PORTEUR_AIGU_ELAGAGE_20260815.md`](NOTE_CLAUDE_PORTEUR_AIGU_ELAGAGE_20260815.md) :
   le porteur aigu tient dans un signe — `x` porteur de `(a,b)` ssi `x` est dans
   la lentille et `H < 0`, avec le `H` du fuseau. Vérifié à `331 857` triplets
