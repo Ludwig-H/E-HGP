@@ -231,7 +231,11 @@ struct BilanSparse {
   long long residuel_rects = 0;     // ... et rectangles DISTINCTS concernes
   long long front2_rects = 0;       // rectangles relances au second front
   long long relation_spans = 0;     // spans endpoint CONSERVES pour rejeu
-  long long front_masse_max = 0;    // plus grande masse de frontiere portee
+  long long front_masse_max = 0;    // `frontier_peak` : plus grande masse portee
+  long long refine_steps = 0;       // iterations de la descente ciblee
+  long long cap_hits = 0;           // garde-fou de frontiere atteint
+  long long continuation_mass = 0;  // masse laissee indecise quand le cap tombe
+  long long refine_depth_max = 0;   // plus longue chaine de raffinements
   long long residuel_paires = 0;    // et leur masse de paires
   long long frontiere_max = 0;      // plus grande frontiere indecise portee
 };
@@ -857,11 +861,20 @@ int main(int argc, char** argv) {
         // reconstitue un CSR. Le critere d'arret est `r4`, donc la profondeur
         // est gouvernee par le SEUIL et non par `n`.
         if (antichaine_ciblee) {
+          long long pas = 0;
           for (;;) {
+            ++g.refine_steps;
+            ++pas;
             if (L4 >= r4) break;  // mort : plus rien a raffiner
             long long mf = 0;
             for (int h : frontiere) mf += dernier(h) - premier(h) + 1;
-            if (L4 + mf < r4) break;  // entierement vivant : plus rien a raffiner
+            // `CORE_CLEAR`, ET NON `LIVE_EXACT`. Ce test prouve seulement
+            // qu'AUCUNE paire du bloc n'est tuee par le cœur universel `W_q`.
+            // Pour q3/q4 le fuseau n'est pas la miniboule du support : son bord
+            // n'est pas la sphere finale, et le census de la vraie circumboule
+            // reste obligatoire. Seul q2 identifie les deux, la boule
+            // diametrale etant la miniboule du support.
+            if (L4 + mf < r4) break;  // CORE_CLEAR : plus rien a raffiner
             // Le plus gros span indecis, s'il en reste un a scinder.
             int best = -1, bestp = 1;
             for (size_t i = 0; i < frontiere.size(); ++i) {
@@ -884,8 +897,13 @@ int main(int argc, char** argv) {
               if (bloc_aucun_w2(extrema(BA, BB, BE))) continue;
               frontiere.push_back(e);
             }
-            if ((int)frontiere.size() > 4 * kCapFrontiere) break;  // garde-fou
+            if ((int)frontiere.size() > 4 * kCapFrontiere) {
+              ++g.cap_hits;
+              for (int hh : frontiere) g.continuation_mass += dernier(hh) - premier(hh) + 1;
+              break;  // garde-fou : la masse restante est publiee, jamais jetee
+            }
           }
+          if (pas > g.refine_depth_max) g.refine_depth_max = pas;
         }
         if (!pile.empty()) {
           // ---- FRONTIERE TRONQUEE : ON NE PERD RIEN.
@@ -1192,14 +1210,17 @@ int main(int argc, char** argv) {
                 "carriers_symboliques=%lld blocs_faux=%lld dead_w4=%lld active_edge=%lld "
                 "seed3_emitted=%lld pending=%lld l4_credits=%lld frontiere_max=%lld "
                 "rectangles=%lld residuel_blocs=%lld residuel_rects=%lld residuel_paires=%lld "
-                "front2_rects=%lld relation_spans=%lld front_masse_max=%lld\n",
+                "front2_rects=%lld relation_spans=%lld frontier_peak=%lld "
+                "refine_steps=%lld cap_hits=%lld continuation_mass=%lld "
+                "refine_depth_max=%lld\n",
                 famille.c_str(), n, g.noeuds, g.dead_phi, g.dead_e, g.dead_x,
                 g.all_strict, g.masse_all_strict, g.feuilles, g.pairid_expanded,
                 g.carriers, g.carriers_symboliques, g.blocs_faux, g.dead_w4,
                 g.active_edge, g.seed3_emitted, g.pending, g.l4_credits,
                 g.frontiere_max, rectangles, g.residuel_blocs, g.residuel_rects,
                 g.residuel_paires, g.front2_rects, g.relation_spans,
-                g.front_masse_max);
+                g.front_masse_max, g.refine_steps, g.cap_hits,
+                g.continuation_mass, g.refine_depth_max);
     if (mode_brute) {
       const long long total = g.carriers + g.carriers_symboliques;
       // ---- LE SENS DE L'ECART, ET POURQUOI IL N'EST PLUS ZERO.

@@ -574,3 +574,76 @@ classification de la frontière courante, donc au prix d'une passe supplémentai
 par candidat de scission ? La formule donnée — masse classée sur tâches enfants
 — suppose de connaître la masse classée, donc (b) ; mais (b) coûte autant que ce
 qu'il économise si l'on teste les trois facteurs.
+
+
+---
+
+## 13. Deux rétractations de plus, et Q2/Q3 répondues
+
+L'audit
+[`AUDIT_POSITIF_DESCENTE_CIBLEE_PAIRFRAME_288032_20260816.md`](AUDIT_POSITIF_DESCENTE_CIBLEE_PAIRFRAME_288032_20260816.md)
+reçoit la descente ciblée comme sûre, et refuse deux formulations plus fortes.
+Les deux sont miennes, et **mes propres compteurs les réfutent**.
+
+### La profondeur n'est pas gouvernée par le seuil
+
+J'avais écrit « le critère d'arrêt est `r4`, donc la profondeur est gouvernée
+par le seuil et non par `n` ». C'est faux. Mesuré, `n=120` :
+
+| famille | `frontier_peak` | `refine_depth_max` | `cap_hits` |
+| --- | ---: | ---: | ---: |
+| `terrain` | `112` (`0,93 n`) | `77` | `0` |
+| `uniform` | `112` | `100` (`0,83 n`) | `0` |
+| `two_lines` | `112` | `41` | `0` |
+
+Et sur les quatre familles à `n=800`, `frontier_peak` vaut `0,99 n` à `1,00 n`.
+La frontière atteint **tout le nuage**, pour un seuil `r4 = 8`.
+
+La raison est celle que l'audit donne : sept témoins dans `W_4` et les autres
+points arrangés de part et d'autre de la frontière suffisent à garder
+`L < r4 <= U` sur tout nœud interne — et prouver `U < r4` demande alors de
+résoudre presque tous les points extérieurs. Le seuil fixe le **verdict
+recherché**, pas la complexité de la frontière.
+
+Énoncé correct : raffinement **piloté** par le seuil, arrêt anticipé dès qu'un
+verdict est prouvé, **aucune** borne déterministe indépendante de `n` au pire
+cas. Le coût s'exprime en `O(spans classés + scissions endpoint)`, et cinq
+compteurs le rendent mesurable au lieu d'affirmé.
+
+C'est la quatrième fois que je transforme une borne conditionnelle en énoncé
+universel — après le facteur `6,4`, les exposants, et `#carriers = O(h)`. Le
+motif est constant : je lis un mécanisme de contrôle comme une garantie.
+
+### `CORE_CLEAR` n'est pas `LIVE_EXACT`
+
+`L4 + masse_front < r4` prouve seulement qu'**aucune paire du bloc n'est tuée
+par le cœur universel** `W_q`. Pour q3/q4 le fuseau n'est pas la miniboule du
+support : son bord n'est pas la sphère finale, et le census de la vraie
+circumboule reste obligatoire. Seul q2 identifie les deux, la boule diamétrale
+étant la miniboule du support. Le commentaire disait « entièrement vivant » ;
+corrigé.
+
+### Q2 — répondue, et elle simplifie l'ABI
+
+`upper_closed` est **supersédé** pour q3/q4. Le contrat est :
+
+```
+CoreDepthLedger q3/q4 :  lower_open, upper_open
+BallCensusLedger d'un support fixé :  intérieur strict I_B, shell U_B
+```
+
+Mon intuition était donc la bonne : le shell est une notion **q2**, parce que
+c'est la seule lane où le fuseau *est* la miniboule. `PairLaneState` n'a pas
+besoin de porter deux majorants — un bit « extérieur même à la fermeture » peut
+rester comme optimisation locale du classifieur, sans devenir une provenance de
+shell HGP.
+
+### Q3 — répondue
+
+Classifier la frontière **courante** une fois, réduire par état, choisir **une**
+action. Ne pas classifier les enfants hypothétiques des trois candidats de
+scission pour en jeter deux. Et les preuves `ALL`/`NONE` de la frontière
+courante sont **héritables**, donc cette passe n'est pas perdue après un split
+endpoint — ce qui rejoint le théorème de monotonie de la section 10.
+
+Les deux questions bloquantes sont donc levées : je peux commencer `PairFrame`.

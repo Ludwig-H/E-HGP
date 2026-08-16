@@ -4758,8 +4758,35 @@ target_link_libraries(mhgp3v_acute_owner_gateway_probe PRIVATE mhgp)
 # `L4 >= r4` (mort) ou `L4 + somme des populations < r4` (entierement vivant).
 # Elle rend les MEMES decisions que les feuilles sur `terrain` pour `17 %` de
 # nœuds en moins, et `25 %` en moins sur `uniform` avec une surcouverture PLUS
-# FAIBLE. Son critere d'arret est `r4` : la profondeur est gouvernee par le
-# SEUIL, pas par `n`. C'est le defaut.
+# FAIBLE. C'est le defaut.
+#
+# > RETRACTATION. J'avais ecrit « la profondeur est gouvernee par le SEUIL, pas
+# > par `n` ». C'est trop fort, et mes propres compteurs le refutent :
+# > `frontier_peak` vaut `0,99 n` a `1,00 n` sur les quatre familles, et
+# > `refine_depth_max` atteint `100` a `n=120` sur `uniform`, soit `0,83 n`,
+# > pour un seuil `r4 = 8`.
+# >
+# > La raison est donnee par l'audit `288032` section 6.1 : sept temoins dans
+# > `W_4` et les autres points arranges de part et d'autre de la frontiere
+# > suffisent a garder `L < r4 <= U` sur tout nœud interne, auquel cas prouver
+# > `U < r4` demande de resoudre presque tous les points exterieurs.
+# >
+# > Enonce correct : raffinement PILOTE par le seuil, arret anticipe des qu'un
+# > verdict est prouve, AUCUNE borne deterministe independante de `n` au pire
+# > cas. Le coût s'exprime en `O(spans classes + scissions endpoint)`, et cinq
+# > compteurs le rendent mesurable : `frontier_peak`, `refine_steps`,
+# > `cap_hits`, `continuation_mass`, `refine_depth_max`.
+#
+# ET `CORE_CLEAR` N'EST PAS `LIVE_EXACT`. `L4 + masse_front < r4` prouve
+# seulement qu'AUCUNE paire du bloc n'est tuee par le cœur universel `W_q`. Pour
+# q3/q4 le fuseau n'est pas la miniboule du support : son bord n'est pas la
+# sphere finale, et le census de la vraie circumboule reste obligatoire. Seul q2
+# identifie les deux, la boule diametrale etant la miniboule du support.
+add_test(NAME mhgp3v_gateway_profondeur_non_bornee_par_le_seuil
+  COMMAND mhgp3v_acute_owner_gateway_probe --brute --family=uniform --points=120)
+set_tests_properties(mhgp3v_gateway_profondeur_non_bornee_par_le_seuil PROPERTIES
+  PASS_REGULAR_EXPRESSION
+  "frontier_peak=112 refine_steps=213187 cap_hits=0 continuation_mass=0 refine_depth_max=100")
 add_test(NAME mhgp3v_gateway_antichaine_grossiere_refutee
   COMMAND mhgp3v_acute_owner_gateway_probe --brute --antichaine=grossiere
           --family=uniform --points=120)
