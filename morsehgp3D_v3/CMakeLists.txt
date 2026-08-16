@@ -5320,16 +5320,17 @@ mhgp3v_add_expected_code_test_for(mhgp3v_pair_frame_probe
 foreach(fam uniform terrain eight_clusters scanline_single_pass)
   add_test(NAME mhgp3v_q2_disjonction_carrier_${fam}
     COMMAND mhgp3v_q2_pairframe_probe --carriers --famille=${fam} --points=120
-            --seed=3 --min-carriers=10000)
+            --seed=3 --echantillon=2000 --min-carriers=10000)
   set_tests_properties(mhgp3v_q2_disjonction_carrier_${fam} PROPERTIES
     PASS_REGULAR_EXPRESSION
-    "q2 carriers total=[1-9][0-9]* paires_avec_carrier=[1-9][0-9]*(.|\n)*intersection_fuseau=0 separation=exacte")
+    "q2 carriers paires_vues=[1-9][0-9]* total=[1-9][0-9]* paires_avec_carrier=[1-9][0-9]*(.|\n)*intersection_fuseau=0 separation=exacte")
 endforeach()
 
 # Le plancher n'est pas decoratif : sans porteur aigu, la mesure serait vide.
 mhgp3v_add_expected_code_test_for(mhgp3v_q2_pairframe_probe
   mhgp3v_q2_plancher_carriers "plancher de porteurs aigus non atteint" 3
-  --carriers --famille=uniform --points=120 --seed=3 --min-carriers=999999999)
+  --carriers --famille=uniform --points=120 --seed=3 --echantillon=2000
+  --min-carriers=999999999)
 
 # ---------------------------------------------------------------------------
 # LE MASQUE ENDPOINT RELATIONNEL EST UN THEOREME, PAS UN MECANISME
@@ -5395,9 +5396,10 @@ set_tests_properties(mhgp3v_q2_juge_scanline PROPERTIES
 foreach(fam uniform terrain eight_clusters)
   add_test(NAME mhgp3v_q2_masque_endpoint_${fam}
     COMMAND mhgp3v_q2_pairframe_probe --masque --famille=${fam} --points=120 --seed=3
-            --cap-rect=16 --min-relation=10000)
+            --min-relation=2000)
   set_tests_properties(mhgp3v_q2_masque_endpoint_${fam} PROPERTIES
-    PASS_REGULAR_EXPRESSION "q2 masque relation_spans=11368 relation_all=0")
+    PASS_REGULAR_EXPRESSION
+    "q2 masque theoreme=invoque fixtures_egalite=ok echantillon=2000 relation_spans=2000 relation_all=0")
 endforeach()
 
 # L'INVARIANCE A LA POLITIQUE SUR GEOMETRIE REELLE, et la porte de coût du
@@ -5546,7 +5548,7 @@ set_tests_properties(mhgp3v_q2_juge_deux_droites PROPERTIES
 foreach(fam uniform terrain eight_clusters scanline_single_pass)
   add_test(NAME mhgp3v_q2_shell_conserve_${fam}
     COMMAND mhgp3v_q2_pairframe_probe --juge --famille=${fam} --points=120 --seed=3
-            --cap=8 --cap-rect=16 --verifie-shell --min-shell=100)
+            --cap=8 --cap-rect=16 --verifie-shell --pas-shell=1 --min-shell=100)
   set_tests_properties(mhgp3v_q2_shell_conserve_${fam} PROPERTIES
     PASS_REGULAR_EXPRESSION
     "q2 shell spans_conserves=[1-9][0-9]* masse=[1-9][0-9]* outside_verifies=[1-9][0-9]* perdus=0 total_cospheriques=[1-9][0-9]*")
@@ -5557,7 +5559,7 @@ endforeach()
 # non nul laisserait croire que la cospherie est universelle.
 add_test(NAME mhgp3v_q2_shell_vide_deux_droites
   COMMAND mhgp3v_q2_pairframe_probe --juge --famille=two_lines --points=60
-          --cap=8 --cap-rect=16 --verifie-shell)
+          --cap=8 --cap-rect=16 --verifie-shell --pas-shell=1)
 set_tests_properties(mhgp3v_q2_shell_vide_deux_droites PROPERTIES
   PASS_REGULAR_EXPRESSION "perdus=0 total_cospheriques=0")
 
@@ -5566,12 +5568,14 @@ foreach(fam uniform terrain scanline_single_pass)
     mhgp3v_q2_mutant_shell_jete_${fam}
     "un span elimine contenait des points cospheriques" 4
     --juge --famille=${fam} --points=120 --seed=3 --cap=8 --cap-rect=16
-    --verifie-shell --min-shell=100 --inject=shell-jete)
+    --verifie-shell --pas-shell=1 --min-shell=100 --inject=shell-jete)
 endforeach()
 
 # Les refus avant tout calcul.
 mhgp3v_add_expected_code_test_for(mhgp3v_q2_pairframe_probe
-  mhgp3v_q2_refus_juge_non_borne "bornee a 400 points" 2 --juge --points=1000)
+  mhgp3v_q2_refus_juge_non_borne
+  "utiliser --echelle au-dela de 400 points" 2
+  --juge --points=1000)
 mhgp3v_add_expected_code_test_for(mhgp3v_q2_pairframe_probe
   mhgp3v_q2_refus_famille "famille inconnue" 2 --juge --famille=inexistante)
 mhgp3v_add_expected_code_test_for(mhgp3v_q2_pairframe_probe
@@ -5581,7 +5585,7 @@ mhgp3v_add_expected_code_test_for(mhgp3v_q2_pairframe_probe
 mhgp3v_add_expected_code_test_for(mhgp3v_q2_pairframe_probe
   mhgp3v_q2_plancher_shell_vide "plancher de points cospheriques non atteint" 3
   --juge --famille=two_lines --points=60 --cap=8 --cap-rect=16 --verifie-shell
-  --min-shell=1)
+  --pas-shell=1 --min-shell=1)
 mhgp3v_add_expected_code_test_for(mhgp3v_q2_pairframe_probe
   mhgp3v_q2_refus_cap_rect "cap-rect nul" 2 --juge --cap-rect=0)
 

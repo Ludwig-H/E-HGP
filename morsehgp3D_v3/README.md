@@ -1035,6 +1035,19 @@ Le détail live, les hashes, les reçus G4 et le worktree ne sont maintenus que
 dans [`audits/AUDIT_ETAT_COURANT.md`](audits/AUDIT_ETAT_COURANT.md). Les
 paragraphes ci-dessus bornent les non-claims et les obligations mathématiques.
 
+## Tailles de nuage d'intérêt
+
+`n = 8000`, `16000`, `32000` — inscrit normativement dans `docs/TEST_PLAN_MORSEHGP3D.md` § 3.1.
+
+Toute conclusion sur le coût, la sélectivité, la mémoire ou une pente s'y mesure. Une campagne à quelques centaines de points ne la remplace pas : elle établit la **correction** et rien d'autre. Les deux rôles sont disjoints et aucun ne subsume l'autre.
+
+| rôle | tailles | établit | n'établit pas |
+|---|---|---|---|
+| oracle | `n <= 400` | identités exactes, mutants tués | coût, mémoire, pente |
+| échelle | `8000`, `16000`, `32000` | coût, sélectivité, mémoire | correction |
+
+Un juge exhaustif en `O(n^3)` vaut `5.10^11` opérations à `n = 8000` : il est hors de portée par construction, pas par budget. À l'échelle on vérifie par **invariants globaux** — masse de partition exactement `C(n,2)`, aucune paire sans décision, aucun dépassement de cap, aucun point de shell perdu — et par un **juge d'échantillon** exact sur `K` paires tirées de façon déterministe, en `O(Kn)`. Une matrice indexée par paire est également exclue : `10^9` octets à `n = 32000`.
+
 ## Construire et tester
 
 Depuis la racine du dépôt :

@@ -100,6 +100,40 @@ Les tests sont répartis en sept niveaux. Un niveau ne devient bloquant qu'aprè
 
 Une optimisation GPU ne peut être fusionnée si elle modifie une sortie canonique T1–T4 sans que le changement soit justifié dans la spécification mathématique.
 
+### 3.1 Tailles de nuage d'intérêt
+
+Les tailles de nuage qui comptent pour ce dossier sont **$n = 8\,000$, $n = 16\,000$ et $n = 32\,000$**. Toute campagne dont la conclusion porte sur le coût, la sélectivité, la mémoire ou l'échelle doit être exécutée à ces tailles, et une mesure faite à quelques centaines de points ne les remplace pas.
+
+Cette règle ne supprime pas les petites tailles, elle leur assigne un rôle distinct et unique. Un oracle exhaustif est borné par sa propre combinatoire — $n \leq 12$ à $14$ pour l'énumération de catalogue, quelques centaines pour un juge en $O(n^{3})$ — et il reste la **vérité terrain**. Il ne devient jamais une mesure d'échelle. Les deux rôles sont :
+
+| rôle | tailles | ce qui est établi | ce qui ne l'est pas |
+|---|---|---|---|
+| oracle | $n \leq 400$ | correction exacte, identités, mutants tués | aucune pente, aucun coût, aucune mémoire |
+| échelle | $8\,000$, $16\,000$, $32\,000$ | coût, sélectivité, mémoire, pentes | la correction, qui vient de l'oracle |
+
+Deux conséquences opérationnelles, à traiter comme des contraintes et non comme des préférences.
+
+Un juge exhaustif en $O(n^{3})$ vaut $5\cdot10^{11}$ opérations à $n = 8\,000$ : il est **hors de portée par construction**, pas par budget. À l'échelle, la vérification se fait par **invariants globaux** — masse de partition exactement $\binom{n}{2}$, aucune paire sans décision, aucun dépassement de cap, aucun point de shell perdu — et par un **juge d'échantillon** qui vérifie exactement $K$ paires tirées de façon déterministe, en $O(Kn)$.
+
+Une structure indexée par paire est également hors de portée : une matrice $n \times n$ vaut $10^{9}$ octets à $n = 32\,000$. Les campagnes d'échelle publient des compteurs agrégés et un échantillon suivi, jamais un tableau de décisions.
+
+Une campagne d'échelle qui n'atteint pas $8\,000$ doit déclarer pourquoi, et le refus doit être un code de sortie, pas un commentaire.
+
+### 3.2 Pas de vérification exhaustive
+
+**Aucune porte ne vérifie exhaustivement ce qu'un théorème garantit déjà.** Quand la complétude du générateur est démontrée, elle est *invoquée*, pas re-parcourue : ce qui reste à tester est la faute d'implémentation, et une faute d'implémentation se voit sur un échantillon, un invariant global ou un mutant — pas sur une énumération.
+
+La règle vaut à toutes les tailles, et elle n'est pas un aveu de budget. Une porte qui balaie tous les rectangles contre tous les nœuds, ou toutes les paires contre tous les points, mesure trois choses à la fois — le théorème, l'implémentation et sa propre patience — et ne sait plus laquelle a échoué. Elle devient de surcroît inexécutable exactement là où le résultat compte, c'est-à-dire aux tailles du § 3.1.
+
+Ce qui remplace l'énumération, par ordre de force :
+
+1. **Le théorème**, avec ses *fixtures d'égalité* — les cas où l'inégalité stricte se sépare de la large. C'est là que la preuve se casse si elle se casse, et une poignée de cas gravés y valent mieux que des millions de cas intérieurs.
+2. **Les invariants globaux**, vérifiables en mémoire constante à toute taille : masse de partition exactement $\binom{n}{2}$, aucune décision en double, aucun dépassement de cap déclaré.
+3. **Le juge d'échantillon**, exact sur $K$ tirages déterministes, en $O(Kn)$.
+4. **Les mutants**, qui restent la seule mesure de ce qu'une porte voit réellement.
+
+Les oracles exhaustifs bornés du niveau T2 — $n\leq12$, étendu à $n\leq14$ — ne relèvent pas de cette règle et sont conservés : ils ne vérifient pas un théorème, ils **sont** la vérité terrain d'une combinatoire trop petite pour en avoir un. La distinction est entre *établir* une vérité et *re-vérifier* une vérité déjà établie.
+
 ## 4. Oracle exhaustif indépendant
 
 ### 4.1 Périmètre

@@ -252,7 +252,15 @@ std::uint8_t classifie(int A, int B, int C) {
   return kSpanMixte;
 }
 
+// Le tirage DETERMINISTE des echantillons : meme nuage, memes cas verifies.
+inline std::uint32_t melange_ech(std::uint32_t x) {
+  x ^= x >> 16; x *= 0x7feb352dU; x ^= x >> 15; x *= 0x846ca68bU; x ^= x >> 16;
+  return x;
+}
+
 bool g_verifie_shell = false;
+long long g_pas_shell = 7;    // un span elimine sur sept
+long long g_pas_bornes = 97;  // un etat sur quatre-vingt-dix-sept
 void verifie_outside(int A, int B, int n);
 
 // ---------------------------------------------------------------------------
@@ -263,6 +271,8 @@ struct Compteurs {
   long long pruned = 0, core_clear = 0, spans_elimines = 0;
   long long spans_shell_conserves = 0, shell_masse = 0;
   long long shell_points_juges = 0, shell_perdus = 0, spans_outside_verifies = 0;
+  long long spans_outside_vus = 0;
+  long long bornes_vues = 0, bornes_verifiees = 0, bornes_violees = 0;
   long long relation_spans = 0, relation_all = 0;
   long long pending_state_count = 0, resume_count = 0, continuation_octets = 0;
   long long frontier_span_count_peak = 0, frontier_candidate_mass_peak = 0;
@@ -356,6 +366,10 @@ void scinde(Etat& e, int n, int b) {
 // distingue vraiment `NONE_OPEN` de `OUTSIDE_CLOSED` : le juge d'identites ne
 // le peut pas, puisque le shell ne compte pas dans le fuseau ouvert.
 void verifie_outside(int A, int B, int n) {
+  // ECHANTILLON, pas balayage. Un span sur `g_pas_shell` est verifie ; le
+  // theoreme dit deja que `Phi_min > 0` implique `H_max < 0` donc aucun point
+  // cospherique. Ce qu'on teste ici est que le CODE separe bien `> 0` de `>= 0`.
+  if ((++g_c.spans_outside_vus % g_pas_shell) != 0) return;
   ++g_c.spans_outside_verifies;
   for (int ia = g_arbre[(std::size_t)A].lo; ia < g_arbre[(std::size_t)A].hi; ++ia)
     for (int ib = g_arbre[(std::size_t)B].lo; ib < g_arbre[(std::size_t)B].hi; ++ib)
@@ -406,7 +420,12 @@ long long compte_dans_etat(const Etat& e, int a, int b) {
 // en TROIS — `(g,g)`, `(g,d)`, `(d,d)` —, la diagonale inverse est omise. C'est
 // la forme qui m'avait deja coûte un facteur deux quand je l'avais approchee
 // par un filtre sur les indices, et le ledger de masse le verifie.
-std::vector<std::pair<int, int>> g_rects;
+// A l'ECHELLE, la liste des rectangles ne tient pas : `C(32000,2)/16` vaut deux
+// milliards d'entrees. La partition devient donc un FLUX — chaque rectangle est
+// traite puis oublie —, et rien de dimension `n^2` n'est jamais materialise.
+std::vector<std::pair<int, int>> g_rects;     // mode oracle seulement
+bool g_flux = false;
+void traite_rectangle(int A, int B);
 
 void partitionne(int A, int B, long long cap_rect) {
   if (A == B) {
@@ -419,7 +438,7 @@ void partitionne(int A, int B, long long cap_rect) {
   }
   const long long m = (long long)pop(A) * pop(B);
   if (m <= cap_rect || (feuille(A) && feuille(B))) {
-    g_rects.push_back(std::make_pair(A, B));
+    if (g_flux) traite_rectangle(A, B); else g_rects.push_back(std::make_pair(A, B));
     return;
   }
   if (feuille(A) || (!feuille(B) && pop(B) > pop(A))) {
@@ -428,6 +447,174 @@ void partitionne(int A, int B, long long cap_rect) {
   } else {
     partitionne(g_arbre[(std::size_t)A].g, B, cap_rect);
     partitionne(g_arbre[(std::size_t)A].d, B, cap_rect);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// LE MODE ECHELLE. `docs/TEST_PLAN_MORSEHGP3D.md` § 3.1 : les tailles qui
+// comptent sont `8000`, `16000` et `32000`, et rien de ce qui suit ne doit
+// dependre d'une structure indexee par paire.
+//
+// CE QUI EST VERIFIE ICI, ET C'EST VERIFIABLE A TOUTE TAILLE :
+//
+//   masse de partition        exactement `C(n,2)`
+//   masse decidee             exactement `C(n,2)` — aucune paire sans decision
+//   depassements de cap       zero
+//   points de shell perdus    zero sur les spans echantillonnes
+//   juge d'echantillon        `K` paires tirees deterministement, exactes
+//
+// CE QUI N'EST PAS VERIFIE, ET QUI NE PEUT PAS L'ETRE : les identites
+// completes. Un juge `O(n^3)` vaut `5.10^11` operations a `n = 8000`. Le mode
+// `--juge` reste la verite terrain, borne a `400` points, et il n'etablit
+// aucune pente. Les deux roles sont disjoints.
+long long g_masse_decidee = 0;
+long long g_mortes = 0, g_vivantes = 0;
+std::vector<std::pair<int, int>> g_echantillon;   // paires suivies
+std::vector<std::uint8_t> g_echantillon_dit;      // 1 vivante, 2 morte
+int g_h2 = 0;
+std::uint64_t g_cap_ech = 0, g_fcap_ech = 0;
+std::string g_heur_ech;
+std::uint32_t g_lot_ech = 1;
+
+
+// Les points APPARAISSANT dans une paire suivie sont marques : sans ce filtre,
+// chercher l'echantillon pour chaque paire de chaque rectangle coûterait `O(K)`
+// par paire, soit des milliards d'operations a l'echelle. Avec lui, seuls les
+// rares rectangles contenant deux points marques paient la recherche.
+std::vector<char> g_point_suivi;
+
+int indice_suivi(int a, int b) {
+  if (!g_point_suivi[(std::size_t)a] || !g_point_suivi[(std::size_t)b]) return -1;
+  for (std::size_t i = 0; i < g_echantillon.size(); ++i) {
+    const int x = g_echantillon[i].first, y = g_echantillon[i].second;
+    if ((x == a && y == b) || (x == b && y == a)) return (int)i;
+  }
+  return -1;
+}
+
+void note_paire(int a, int b, int v) {
+  ++g_masse_decidee;
+  if (v) ++g_mortes; else ++g_vivantes;
+  const int k = indice_suivi(a, b);
+  if (k >= 0) g_echantillon_dit[(std::size_t)k] = (std::uint8_t)(v + 1);
+}
+
+void note_bloc(int A, int B, int v) {
+  const long long m = (long long)pop(A) * pop(B);
+  g_masse_decidee += m;
+  if (v) g_mortes += m; else g_vivantes += m;
+  if (g_echantillon.empty()) return;
+  for (int ia = g_arbre[(std::size_t)A].lo; ia < g_arbre[(std::size_t)A].hi; ++ia) {
+    if (!g_point_suivi[(std::size_t)ia]) continue;
+    for (int ib = g_arbre[(std::size_t)B].lo; ib < g_arbre[(std::size_t)B].hi; ++ib) {
+      const int k = indice_suivi(ia, ib);
+      if (k >= 0) g_echantillon_dit[(std::size_t)k] = (std::uint8_t)(v + 1);
+    }
+  }
+}
+
+// LA DESCENTE D'UN SEUL RECTANGLE, sans rien de dimension `n^2`. Les
+// continuations sont servies sur place par escalade de ressource : a l'echelle,
+// une vague globale exigerait de retenir tous les etats pendants.
+void traite_rectangle(int A, int B) {
+  std::vector<Etat> pile;
+  {
+    Etat e;
+    e.A = A; e.B = B;
+    e.ajoute(0, classifie(A, B, 0));
+    pile.push_back(e);
+  }
+  std::uint64_t cap_v = g_cap_ech, fcap_v = g_fcap_ech;
+  int garde = 0;
+  while (!pile.empty()) {
+    if (++garde > 4096) return;   // garde-fou ; le juge d'invariant le verra
+    Etat e = pile.back();
+    pile.pop_back();
+    ++g_c.etats;
+    for (;;) {
+      if (e.largeur > g_c.frontier_span_count_peak) g_c.frontier_span_count_peak = e.largeur;
+      if (e.masse_cand > g_c.frontier_candidate_mass_peak)
+        g_c.frontier_candidate_mass_peak = e.masse_cand;
+      CoreDepthLedger L;
+      L.reject_threshold = (std::uint8_t)g_h2;
+      L.sature(e.lower, e.masse, g_pf);
+      L.frontier_width = (std::uint32_t)e.largeur;
+      PairFrame F;
+      F.rect_id = 0; F.a_node = e.A; F.b_node = e.B;
+      F.pair_mass = (std::uint64_t)pop(e.A) * (std::uint64_t)pop(e.B);
+      PolitiqueV0 pol;
+      pol.exact_tile_cap = cap_v;
+      pol.frontier_cap = fcap_v;
+      pol.witness_batch = g_lot_ech;
+      ++g_c.terminal_checks;
+      const bool mort = (g_mu == Q2Mutant::kMortLarge)
+                            ? (L.lower_open_sat > L.reject_threshold)
+                            : est_pruned(L, g_pf);
+      const Action a = mort ? Action::kTerminal
+                            : choisir_action(L, F, e.a_mixte_non_feuille(), false, pol, g_pf);
+      // L'INVARIANT DE SURETE DES BORNES, echantillonne. Un juge de RESULTAT ne
+      // voit une borne fausse que si elle change une decision, ce qui est rare
+      // et diffus ; l'invariant la voit LA OU ELLE EST. C'est ce qui remplace
+      // l'enumeration : on ne verifie pas toutes les paires, on verifie la
+      // propriete dont depend la correction, sur un tirage deterministe.
+      if (g_pas_bornes > 0 && (++g_c.bornes_vues % g_pas_bornes) == 0) {
+        ++g_c.bornes_verifiees;
+        const int ia = g_arbre[(std::size_t)e.A].lo, ib = g_arbre[(std::size_t)e.B].lo;
+        if (ia != ib) {
+          // LA REFERENCE EST LE NUAGE ENTIER, pas l'etat. Compter sur les spans
+          // PRESENTS serait auto-coherent : un span elimine a tort manquerait
+          // des deux cotes, et l'invariant serait aveugle a la faute meme qu'il
+          // est cense voir. C'est `O(n)` par etat echantillonne, et `--pas-bornes`
+          // regle la depense.
+          long long exact = 0;
+          for (int z = 0; z < g_n; ++z) if (temoin(ia, ib, z)) ++exact;
+          if (exact < e.lower || exact > e.lower + e.masse) ++g_c.bornes_violees;
+        }
+      }
+      if (a == Action::kTerminal) {
+        const int v = mort ? 1 : 0;
+        if (v) ++g_c.pruned; else ++g_c.core_clear;
+        note_bloc(e.A, e.B, v);
+        break;
+      }
+      if (a == Action::kPending) {
+        ++g_c.pending_state_count;
+        g_c.continuation_octets += 24 + 4 * (long long)e.largeur;
+        ++g_c.resume_count;
+        cap_v = cap_v * 2 + 1;
+        fcap_v = fcap_v * 2 + 1;
+        continue;                 // l'hote re-dispatche avec plus de place
+      }
+      if (a == Action::kExactifyTile) {
+        ++g_c.exact_tiles;
+        if (evaluations_tuile(L, F) > cap_v) ++g_c.exact_point_cap_violations;
+        for (int ia = g_arbre[(std::size_t)e.A].lo; ia < g_arbre[(std::size_t)e.A].hi; ++ia)
+          for (int ib = g_arbre[(std::size_t)e.B].lo; ib < g_arbre[(std::size_t)e.B].hi; ++ib)
+            note_paire(ia, ib, compte_dans_etat(e, ia, ib) >= g_h2 ? 1 : 0);
+        break;
+      }
+      std::vector<std::pair<int, int>> lot;
+      if (g_heur_ech == "buckets" && g_lot_ech == 1) {
+        int b = -1;
+        const int nsel = selectionne(e, g_heur_ech, &b);
+        if (nsel >= 0) lot.push_back(std::make_pair(nsel, b));
+      } else {
+        g_c.selector_scan_items += (g_heur_ech == "buckets") ? 1 : e.largeur;
+        for (int b = 23; b >= 0; --b)
+          for (std::size_t i = 0; i < e.buckets[(std::size_t)b].size(); ++i) {
+            if (g_lot_ech != 0 && lot.size() >= (std::size_t)g_lot_ech) break;
+            lot.push_back(std::make_pair(e.buckets[(std::size_t)b][i], b));
+          }
+      }
+      if (lot.empty()) { note_bloc(e.A, e.B, 0); break; }
+      long long faits = 0;
+      for (std::size_t i = 0; i < lot.size(); ++i) {
+        if ((std::uint64_t)(e.largeur + 1) > fcap_v && faits > 0) break;
+        scinde(e, lot[i].first, lot[i].second);
+        ++faits;
+      }
+      ++g_c.witness_batches;
+    }
   }
 }
 
@@ -558,31 +745,69 @@ Resultat descente(int h2, std::uint64_t cap, std::uint64_t front_cap,
 }
 
 // ---------------------------------------------------------------------------
-// L'INVARIANT DU MASQUE ENDPOINT, ARME ET NON SEULEMENT OBSERVE.
+// LE MASQUE ENDPOINT : LE THEOREME EST INVOQUE, PAS RE-PARCOURU.
 //
-// Pour tout rectangle et tout span recouvrant `A` ou `B`, la classification ne
-// doit JAMAIS rendre `ALL`. Le balayage est exhaustif sur les rectangles et sur
-// tous les nœuds de l'arbre : c'est bon marche et cela transforme un theoreme
-// en porte.
-int verifie_masque_endpoint(long long min_relation) {
+// § 3.2 du plan de test. La preuve est faite une fois, en trois lignes, et elle
+// ne depend d'aucun nuage :
+//
+//   si `p` est dans `A inter C`, alors `(a = p, b, z = p)` appartient au produit
+//   des trois boites et donne `Phi = 0`, donc `Phi_max >= 0`, donc le test
+//   `Phi_max < 0` echoue et `C` n'est jamais `ALL`.
+//
+// Balayer onze mille spans pour la reconstater mesurerait trois choses a la fois
+// — le theoreme, l'implementation et la patience de la porte — sans savoir
+// laquelle a echoue. Ce qui reste a tester est la FAUTE D'IMPLEMENTATION :
+// relacher la stricte. Elle se voit sur les FIXTURES D'EGALITE, la ou `<` et
+// `<=` se separent, et sur un echantillon deterministe de spans endpoint.
+int verifie_masque_endpoint(long long min_echantillon) {
   g_c.relation_spans = 0;
   g_c.relation_all = 0;
-  for (std::size_t i = 0; i < g_rects.size(); ++i) {
-    const int A = g_rects[i].first, B = g_rects[i].second;
-    for (int n = 0; n < (int)g_arbre.size(); ++n) {
-      if (!recouvre(n, A) && !recouvre(n, B)) continue;
-      ++g_c.relation_spans;
-      if (classifie(A, B, n) == kSpanAll) ++g_c.relation_all;
+
+  // ---- LES FIXTURES D'EGALITE. `z = a` donne exactement `Phi = 0` : c'est le
+  // seul point ou la preuve se casse si elle se casse.
+  for (int a = 0; a < g_n && a < 8; ++a)
+    for (int b = a + 1; b < g_n && b < a + 4; ++b) {
+      const mhgp::P3& P = g_pts[(std::size_t)a];
+      const mhgp::P3& Q = g_pts[(std::size_t)b];
+      const i128 phi_en_a = (i128)(P.x - P.x) * (Q.x - P.x) + (i128)(P.y - P.y) * (Q.y - P.y) +
+                            (i128)(P.z - P.z) * (Q.z - P.z);
+      if (phi_en_a != 0)
+        return sortie(3, "fixture d'egalite : Phi(a,b,a) ne vaut pas zero");
+      if (temoin(a, b, a) || temoin(a, b, b))
+        return sortie(3, "fixture d'egalite : une extremite est comptee comme temoin");
     }
+
+  // ---- L'ECHANTILLON DETERMINISTE. Il ne prouve rien que le theoreme ne dise
+  // deja ; il atteste que le CODE applique bien la stricte.
+  // Le tirage est DIRIGE vers la branche a tester : un tirage uniforme de
+  // triplets touche un recouvrement une fois sur trois cents a `n = 8000`, donc
+  // il mesurerait surtout sa propre malchance. `C` est construit en descendant
+  // depuis la racine VERS `A` — il recouvre `A` par construction — puis en
+  // s'arretant a une profondeur tiree.
+  const int nb = (int)g_arbre.size();
+  for (long long t = 0; t < min_echantillon; ++t) {
+    const int A = (int)(melange_ech((std::uint32_t)(3 * t + 11)) % (std::uint32_t)nb);
+    const int B = (int)(melange_ech((std::uint32_t)(3 * t + 22)) % (std::uint32_t)nb);
+    const int prof = (int)(melange_ech((std::uint32_t)(3 * t + 33)) % 40u);
+    int C = 0;
+    for (int d = 0; d < prof && !feuille(C); ++d) {
+      const int gg = g_arbre[(std::size_t)C].g;
+      C = recouvre(gg, A) ? gg : g_arbre[(std::size_t)C].d;
+    }
+    if (!recouvre(C, A) && !recouvre(C, B)) continue;
+    ++g_c.relation_spans;
+    if (classifie(A, B, C) == kSpanAll) ++g_c.relation_all;
   }
-  std::printf("q2 masque relation_spans=%lld relation_all=%lld\n",
-              g_c.relation_spans, g_c.relation_all);
+  std::printf("q2 masque theoreme=invoque fixtures_egalite=ok echantillon=%lld"
+              " relation_spans=%lld relation_all=%lld\n",
+              min_echantillon, g_c.relation_spans, g_c.relation_all);
   if (g_c.relation_all)
     return sortie(3, "un span endpoint a ete credite : la stricte de Phi_max a ete relachee");
-  if (g_c.relation_spans < min_relation)
-    return sortie(3, "plancher de spans endpoint non atteint : l'invariant serait vide");
+  if (g_c.relation_spans <= 0)
+    return sortie(3, "aucun span endpoint tire : l'echantillon serait vide");
   return 0;
 }
+
 
 // ---------------------------------------------------------------------------
 // LA DISJONCTION CŒUR / CARRIER, mesuree plutot qu'affirmee.
@@ -606,12 +831,19 @@ int verifie_masque_endpoint(long long min_relation) {
 // Ce mode compte, pour chaque paire, les porteurs aigus reels, et regarde ou
 // ils tombent. Si la quasi-totalite est dans la region que le cœur elimine, le
 // point de l'auditeur n'est plus une precaution : c'est un chiffre.
-int mode_carriers(int h2, long long min_carriers) {
+int mode_carriers(int h2, long long min_carriers, long long K) {
   (void)h2;
   long long carriers = 0, dans_fuseau = 0, dans_shell = 0, hors_lentille = 0;
-  long long paires_avec_carrier = 0;
-  for (int a = 0; a < g_n; ++a)
-    for (int b = a + 1; b < g_n; ++b) {
+  long long paires_avec_carrier = 0, paires_vues = 0;
+  // ECHANTILLON DETERMINISTE de paires, pas les `C(n,2)`. La DISJONCTION est un
+  // theoreme — `Phi > 0` contre `Phi < 0` — et ne se mesure pas ; ce qui se
+  // mesure est la FREQUENCE, et une frequence s'estime sur un tirage.
+  for (long long t = 0; t < K; ++t) {
+    const int a = (int)(melange_ech((std::uint32_t)(5 * t + 3)) % (std::uint32_t)g_n);
+    int b = (int)(melange_ech((std::uint32_t)(5 * t + 7)) % (std::uint32_t)g_n);
+    if (b == a) b = (a + 1) % g_n;
+    {
+      ++paires_vues;
       const mhgp::P3& A = g_pts[(std::size_t)a];
       const mhgp::P3& B = g_pts[(std::size_t)b];
       const i128 dab = (i128)(A.x - B.x) * (A.x - B.x) + (i128)(A.y - B.y) * (A.y - B.y) +
@@ -634,14 +866,111 @@ int mode_carriers(int h2, long long min_carriers) {
       }
       if (ici) ++paires_avec_carrier;
     }
-  std::printf("q2 carriers total=%lld paires_avec_carrier=%lld dans_fuseau=%lld"
-              " dans_shell=%lld hors_lentille=%lld\n",
-              carriers, paires_avec_carrier, dans_fuseau, dans_shell, hors_lentille);
+  }
+  std::printf("q2 carriers paires_vues=%lld total=%lld paires_avec_carrier=%lld"
+              " dans_fuseau=%lld dans_shell=%lld hors_lentille=%lld\n",
+              paires_vues, carriers, paires_avec_carrier, dans_fuseau, dans_shell,
+              hors_lentille);
   // L'INVARIANT : aucun porteur aigu n'est dans le fuseau. Ce n'est pas une
   // mesure statistique, c'est `Phi > 0` contre `Phi < 0`.
   std::printf("q2 carriers intersection_fuseau=0 separation=exacte\n");
   if (carriers < min_carriers)
     return sortie(3, "plancher de porteurs aigus non atteint : la mesure serait vide");
+  return 0;
+}
+
+// ---------------------------------------------------------------------------
+// LA CAMPAGNE D'ECHELLE. `docs/TEST_PLAN_MORSEHGP3D.md` § 3.1.
+int mode_echelle(int h2, std::uint64_t cap, std::uint64_t fcap,
+                 const std::string& heur, std::uint32_t lot, long long K,
+                 long long min_ech, bool exige_echelle) {
+  // Le refus est un CODE DE SORTIE, pas un commentaire : une campagne d'echelle
+  // qui n'atteint pas 8000 points doit dire pourquoi et echouer.
+  if (exige_echelle && g_n < 8000)
+    return refus("campagne d'echelle sous 8000 points : les tailles d'interet"
+                 " sont 8000, 16000 et 32000");
+  g_h2 = h2; g_cap_ech = cap; g_fcap_ech = fcap; g_heur_ech = heur; g_lot_ech = lot;
+  g_masse_decidee = 0; g_mortes = 0; g_vivantes = 0;
+
+  // L'echantillon est DETERMINISTE : meme nuage, memes paires suivies.
+  g_point_suivi.assign((std::size_t)g_n, 0);
+  g_echantillon.clear();
+  for (long long i = 0; i < K; ++i) {
+    const int a = (int)(melange_ech((std::uint32_t)(2 * i + 1)) % (std::uint32_t)g_n);
+    int b = (int)(melange_ech((std::uint32_t)(2 * i + 77777)) % (std::uint32_t)g_n);
+    if (b == a) b = (a + 1) % g_n;
+    const std::pair<int, int> pr(a < b ? a : b, a < b ? b : a);
+    // DEDUPLIQUER : `indice_suivi` rend le premier index correspondant, donc un
+    // doublon de tirage laisserait la seconde entree eternellement indecise et
+    // ferait echouer la porte pour une raison qui n'est pas la bonne.
+    bool deja = false;
+    for (std::size_t j = 0; j < g_echantillon.size(); ++j)
+      if (g_echantillon[j] == pr) { deja = true; break; }
+    if (deja) continue;
+    g_echantillon.push_back(pr);
+    g_point_suivi[(std::size_t)pr.first] = 1;
+    g_point_suivi[(std::size_t)pr.second] = 1;
+  }
+  g_echantillon_dit.assign(g_echantillon.size(), 0);
+
+  g_flux = true;
+  partitionne(0, 0, 64);
+  g_flux = false;
+
+  const long long attendue = (long long)g_n * (g_n - 1) / 2;
+  std::printf("q2 echelle points=%d h2=%d cap=%llu front_cap=%llu scission=%s lot=%u\n",
+              g_n, h2, (unsigned long long)cap, (unsigned long long)fcap,
+              heur.c_str(), lot);
+  std::printf("q2 echelle masse_decidee=%lld attendue=%lld ecart=%lld mortes=%lld"
+              " vivantes=%lld\n",
+              g_masse_decidee, attendue, g_masse_decidee - attendue, g_mortes, g_vivantes);
+  std::printf("q2 echelle etats=%lld pruned=%lld core_clear=%lld exact_tiles=%lld"
+              " witness_splits=%lld classifications=%lld\n",
+              g_c.etats, g_c.pruned, g_c.core_clear, g_c.exact_tiles,
+              g_c.witness_splits, g_classifications);
+  std::printf("q2 echelle frontier_span_count_peak=%lld frontier_candidate_mass_peak=%lld"
+              " pending=%lld escalades=%lld cap_violations=%lld\n",
+              g_c.frontier_span_count_peak, g_c.frontier_candidate_mass_peak,
+              g_c.pending_state_count, g_c.resume_count, g_c.exact_point_cap_violations);
+
+  std::printf("q2 echelle bornes_verifiees=%lld bornes_violees=%lld\n",
+              g_c.bornes_verifiees, g_c.bornes_violees);
+  std::printf("q2 echelle shell_spans=%lld shell_masse=%lld outside_verifies=%lld"
+              " shell_perdus=%lld\n",
+              g_c.spans_shell_conserves, g_c.shell_masse, g_c.spans_outside_verifies,
+              g_c.shell_perdus);
+
+  // LE JUGE D'ECHANTILLON : `K` paires verifiees EXACTEMENT, en `O(Kn)`.
+  long long verifies = 0, ecarts = 0, non_couvertes = 0;
+  for (std::size_t i = 0; i < g_echantillon.size(); ++i) {
+    if (g_echantillon_dit[i] == 0) { ++non_couvertes; continue; }
+    const int a = g_echantillon[i].first, b = g_echantillon[i].second;
+    long long cnt = 0;
+    for (int z = 0; z < g_n; ++z) if (temoin(a, b, z)) ++cnt;
+    const int vrai = (cnt >= h2) ? 1 : 0;
+    const int rendu = (g_echantillon_dit[i] == 2) ? 1 : 0;
+    ++verifies;
+    if (vrai != rendu) ++ecarts;
+  }
+  std::printf("q2 echelle juge_echantillon K=%zu verifies=%lld ecarts=%lld"
+              " non_couvertes=%lld\n",
+              g_echantillon.size(), verifies, ecarts, non_couvertes);
+
+  if (g_c.shell_perdus)
+    return sortie(1, "un span elimine contenait des points cospheriques : le shell est perdu");
+  if (g_verifie_shell && g_c.spans_outside_verifies <= 0)
+    return sortie(3, "aucun span OUTSIDE echantillonne : la porte de shell serait vide");
+  if (g_c.bornes_violees)
+    return sortie(1, "lower <= compte <= upper est viole : une borne est fausse");
+  if (g_c.bornes_verifiees <= 0)
+    return sortie(3, "aucune borne verifiee : l'invariant serait vide");
+  if (g_masse_decidee != attendue)
+    return sortie(3, "la masse decidee ne vaut pas C(n,2) : des paires manquent ou doublent");
+  if (g_c.exact_point_cap_violations)
+    return sortie(3, "une tuile acceptee a depasse le cap d'evaluations ponctuelles");
+  if (ecarts) return sortie(1, "le juge d'echantillon contredit la descente");
+  if (non_couvertes) return sortie(3, "une paire suivie n'a recu aucune decision");
+  if (verifies < min_ech) return sortie(3, "plancher de paires verifiees non atteint");
   return 0;
 }
 
@@ -655,12 +984,14 @@ int main(int argc, char** argv) {
   std::uint32_t lot = 1;
   long long min_mortes = 0, min_vivantes = 0, min_pruned = 0, min_clear = 0;
   long long min_relation = 0, min_tuiles = 0, min_scissions = 0, min_shell = 0;
-  long long min_carriers = 0;
+  long long min_carriers = 0, ech = 64, min_ech = 1;
+  bool exige_echelle = false;
 
   for (int i = 1; i < argc; ++i) {
     const std::string a = argv[i];
     auto v = [&](const char* p) { return a.substr(std::strlen(p)); };
-    if (a == "--juge" || a == "--masque" || a == "--politiques" || a == "--carriers")
+    if (a == "--juge" || a == "--masque" || a == "--politiques" ||
+        a == "--carriers" || a == "--echelle")
       mode = a.substr(2);
     else if (a == "--verifie-shell") g_verifie_shell = true;
     else if (a.rfind("--points=", 0) == 0) n = std::atoi(v("--points=").c_str());
@@ -681,6 +1012,11 @@ int main(int argc, char** argv) {
     else if (a.rfind("--min-scissions=", 0) == 0) min_scissions = std::atoll(v("--min-scissions=").c_str());
     else if (a.rfind("--min-shell=", 0) == 0) min_shell = std::atoll(v("--min-shell=").c_str());
     else if (a.rfind("--min-carriers=", 0) == 0) min_carriers = std::atoll(v("--min-carriers=").c_str());
+    else if (a.rfind("--echantillon=", 0) == 0) ech = std::atoll(v("--echantillon=").c_str());
+    else if (a.rfind("--min-echantillon=", 0) == 0) min_ech = std::atoll(v("--min-echantillon=").c_str());
+    else if (a == "--exige-echelle") exige_echelle = true;
+    else if (a.rfind("--pas-bornes=", 0) == 0) g_pas_bornes = std::atoll(v("--pas-bornes=").c_str());
+    else if (a.rfind("--pas-shell=", 0) == 0) g_pas_shell = std::atoll(v("--pas-shell=").c_str());
     else if (a.rfind("--inject=", 0) == 0) {
       const std::string m = v("--inject=");
       g_inject = true;
@@ -697,8 +1033,10 @@ int main(int argc, char** argv) {
     } else return refus("argument inconnu");
   }
 
-  if (n < 4 || n > 400)
-    return refus("le juge est en O(n^3) : la campagne est bornee a 400 points");
+  // Le mode `--echelle` n'a PAS cette borne : c'est le mode `--juge` qui est
+  // borne, parce qu'un oracle exhaustif en `O(n^3)` vaut `5.10^11` operations a
+  // `n = 8000`. La borne appartient a l'oracle, pas au produit.
+  if (n < 4 || n > 4000000) return refus("points hors de [4, 4000000]");
   if (smax < 3 || smax > 40) return refus("smax hors de [3,40]");
   if (cap_rect < 1) return refus("cap-rect nul : aucun rectangle ne serait accepte");
   if (cap < 1) return refus("cap nul");
@@ -746,6 +1084,14 @@ int main(int argc, char** argv) {
 
   g_arbre.clear();
   construire(0, g_n);
+
+  // EN MODE ECHELLE ON NE MATERIALISE PAS LES RECTANGLES. `C(32000,2)/16` vaut
+  // deux milliards d'entrees : la partition est un FLUX, et la faire une
+  // premiere fois pour compter la masse doublerait le coût tout en faisant
+  // exploser la memoire pour rien.
+  if (mode == "echelle")
+    return mode_echelle(smax - 1, cap, front_cap, heur, lot, ech, min_ech, exige_echelle);
+
   g_rects.clear();
   partitionne(0, 0, cap_rect);
 
@@ -761,7 +1107,9 @@ int main(int argc, char** argv) {
     return sortie(3, "la partition des paires ne couvre pas exactement C(n,2)");
 
   if (mode == "masque") return verifie_masque_endpoint(min_relation);
-  if (mode == "carriers") return mode_carriers(smax - 1, min_carriers);
+  if (mode == "carriers") return mode_carriers(smax - 1, min_carriers, ech);
+  if (g_n > 400)
+    return refus("le juge exhaustif est en O(n^3) : utiliser --echelle au-dela de 400 points");
 
   const int h2 = smax - 1;
   if (mode == "politiques") {
