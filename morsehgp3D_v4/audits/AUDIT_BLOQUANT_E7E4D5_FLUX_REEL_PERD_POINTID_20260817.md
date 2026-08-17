@@ -1,8 +1,7 @@
 # Audit bloquant après `e7e4d5` — le flux réel remplace encore les `PointId` par les indices denses
 
 Date : 17 août 2026.  
-Pin de code audité : `e7e4d5e58dbc8d0c1b57137b1eba2a9706029328`.  
-HEAD documentaire au moment de la note : `ae9383b45afecdd4ba7058eadeb06f6bc2512f82`.
+Pin de code audité : `e7e4d5e58dbc8d0c1b57137b1eba2a9706029328`.
 
 ## Verdict
 
@@ -45,18 +44,28 @@ Le nouveau fold perd ce raccord au dernier moment.
 
 ## 2. Conséquence mathématique
 
-Une simple permutation des records d'entrée, à positions et vrais IDs inchangés, peut modifier :
+La forêt produite est nommée dans un espace artificiel
 
 ```text
-FacetKey,
-ordre canonique des facettes,
-partition finale sérialisée,
-identité des enfants du dendrogramme,
-cartes verticales futures,
-Delta F et rendu par facette.
+0,1,...,n_unique-1
 ```
 
-La géométrie et les `BallKey` restent identiques, mais la forêt change de noms parce qu'elle reçoit l'ordre interne comme identité.
+attaché aux positions dans l'ordre Morton, et non dans l'espace des `PointId` fournis par l'appelant.
+
+Elle ne conserve donc pas :
+
+```text
+FacetKey en vrais IDs,
+identité des enfants du dendrogramme,
+cartes verticales,
+Delta F,
+rendu par facette,
+provenance après concaténation de scans ou d'epochs.
+```
+
+Nuance importante : sous positions distinctes et Morton u16 injectif, une simple permutation physique des mêmes couples `(id,position)` peut conserver le même ordre dense géométrique. Deux permutations peuvent donc produire le **même mauvais résultat**. La propriété décisive n'est pas seulement l'invariance à la permutation, mais l'**équivariance à un relabeling des vrais PointId**.
+
+Si l'on applique une bijection `pi` aux IDs en gardant les positions fixes, la géométrie et les BallKeys restent inchangées, tandis que chaque FacetKey de sortie doit devenir `pi(FacetKey)`. Le code courant ne change rien : il continue de publier les rangs Morton.
 
 Cela viole le contrat fondamental :
 
@@ -64,11 +73,9 @@ Cela viole le contrat fondamental :
 PointId != SiteIndex != rang Morton.
 ```
 
-Le défaut devient encore plus visible avec des IDs clairsemés ou supérieurs au bit 31.
-
 ---
 
-## 3. Pourquoi le juge 0/0 ne le détecte pas
+## 3. Pourquoi le juge `0/0` ne le détecte pas
 
 Le juge de `forest_probe` :
 
@@ -136,7 +143,7 @@ Un cast silencieux `SiteIndex -> PointId` ne doit pas compiler.
 
 ---
 
-## 5. L'API d'entrée doit enfin porter les vrais IDs
+## 5. L'API d'entrée doit porter les vrais IDs
 
 Le générateur de benchmark peut continuer à créer des IDs artificiels. Le chemin de bibliothèque doit recevoir :
 
@@ -154,31 +161,37 @@ avec :
 - tri spatial qui déplace les records sans réécrire `id` ;
 - `bucket_ids` qui conserve ces identités.
 
-Sans cette API, la porte de permutation ne peut tester qu'un renommage fabriqué par le probe lui-même.
+Sans cette API, le code ne peut pas démontrer qu'il préserve une identité choisie par l'appelant.
 
 ---
 
 ## 6. Portes permanentes
 
-### 6.1 Permutation à IDs conservés
+### 6.1 Relabeling équivariant
 
-Créer un petit nuage contenant des événements q2/q3/q4 et des plateaux, avec des IDs explicites non consécutifs, par exemple :
+Créer un petit nuage contenant des événements q2/q3/q4 et un plateau. Lui attribuer des IDs explicites non consécutifs, par exemple :
 
 ```text
 3, 17, 9001, 2^31+5, 2^32-2, ...
 ```
 
-Exécuter deux ordres physiques différents des mêmes records. Exiger, après tri canonique :
+Choisir une bijection non monotone `pi` de ces IDs, sans déplacer les positions. Exiger :
 
 ```text
-mêmes BallKeys,
-mêmes ForestEvents en vrais PointId,
-mêmes FacetKeys,
-mêmes partitions finales,
-mêmes mises à jour de composantes.
+BallKeys inchangées,
+niveaux inchangés,
+ForestEvents relabelés exactement par pi,
+FacetKeys relabelées exactement par pi,
+partitions et mises à jour de composantes transportées par pi.
 ```
 
-### 6.2 Mutant
+Le test doit comparer aux IDs attendus, pas seulement comparer deux sorties entre elles.
+
+### 6.2 Permutation physique
+
+Permuter ensuite les records tout en conservant chaque couple `(id,position)`. La sortie en vrais IDs doit rester identique. Cette porte vérifie le tri spatial, mais elle ne remplace pas la porte de relabeling ci-dessus.
+
+### 6.3 Mutant
 
 Ajouter :
 
@@ -186,9 +199,9 @@ Ajouter :
 dense-index-as-pointid
 ```
 
-qui rétablit les deux casts actuels. La permutation doit le tuer.
+qui rétablit les deux casts actuels. La porte de relabeling doit le tuer : sa sortie resterait figée dans `0..n-1` au lieu de suivre `pi`.
 
-### 6.3 Juge
+### 6.4 Juge
 
 Le juge reçoit lui aussi les `InputPoint{id,position}` et construit ses simplexes/facettes avec `id`, jamais avec le rang de boucle. L'ordre de boucle reste un index d'accès seulement.
 
@@ -196,8 +209,8 @@ Le juge reçoit lui aussi les `InputPoint{id,position}` et construit ses simplex
 
 ## 7. Ordre utile
 
-1. Corriger cette frontière d'identité et graver la porte métamorphique.
-2. Étendre ensuite la forêt conformément à `AUDIT_CIBLE_5A08AB_NAISSANCES_CROISSANCES_ET_DELTAS` : naissances, croissances et facettes nées par composante.
+1. Corriger cette frontière d'identité et graver la porte de relabeling.
+2. Étendre ensuite la forêt conformément aux audits convergents sur les naissances, croissances et facettes nées par composante.
 3. Ouvrir seulement après le rendu § 9.1 et les cartes verticales.
 4. Revenir ensuite au préfiltre de profondeur, puisque les 7,6 millions de boules à `n=400` rendent la question de coût assez peu subtile.
 
