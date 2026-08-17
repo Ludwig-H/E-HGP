@@ -107,3 +107,11 @@ mhgp4_expect_code(mhgp4_q3_events_judge_uniform 0 mhgp4_q3_events_probe
     "--family=uniform --n=400 --s=8 --seed=3 --judge --min-events=100")
 mhgp4_expect_code(mhgp4_q3_events_judge_clusters 0 mhgp4_q3_events_probe
     "--family=eight_clusters --n=400 --s=8 --seed=3 --judge --min-events=100")
+
+# Oracle rationnel independant q3 (obigint 384 bits, ecrit a neuf) : accord
+# total exige sur tous les triangles des petits nuages + fixtures cosphere et
+# tetraedre regulier ; mutants sign-p et prune-ge tues.
+add_executable(mhgp4_q3_oracle tests/q3_oracle_test.cpp)
+mhgp4_expect_code(mhgp4_q3_oracle_accord 0 mhgp4_q3_oracle "")
+mhgp4_expect_code(mhgp4_q3_oracle_mutant_sign 4 mhgp4_q3_oracle "--inject=sign-p")
+mhgp4_expect_code(mhgp4_q3_oracle_mutant_prune 4 mhgp4_q3_oracle "--inject=prune-ge")

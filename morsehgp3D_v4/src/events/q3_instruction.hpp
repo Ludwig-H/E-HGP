@@ -99,8 +99,11 @@ inline i128 axis_max(const Q3Form& f, int i, i64 lo, i64 hi) {
 // ecretee a `cap`, support {ua, ub, ux} exclu. Descente exacte : un nœud
 // dont le minimum de reseau de P est >= 0 est elague ; un nœud dont le
 // maximum est < 0 est credite en bloc.
+// `mutant_prune_ge` : reintroduit l'elagage laxiste `mn >= 0` (celui qui
+// saute des coquilles) pour la porte qui le tue. Jamais actif en production.
 inline u64 q3_ball_depth(const CloudIndex& ix, const Q3Form& f, i32 ua, i32 ub,
-                         i32 ux, u64 cap, u64* shell_extra = nullptr) {
+                         i32 ux, u64 cap, u64* shell_extra = nullptr,
+                         bool mutant_prune_ge = false) {
   if (ix.nodes.empty()) return 0;
   u64 count = 0;
   std::vector<NodeRef> stack{0};
@@ -118,7 +121,7 @@ inline u64 q3_ball_depth(const CloudIndex& ix, const Q3Form& f, i32 ua, i32 ub,
     // Elagage STRICT : `mn > 0` seulement. Un nœud a `mn == 0` peut porter
     // des points de coquille (P = 0) que le refus transactionnel des
     // extra-shell doit voir — il descend.
-    if (mn > 0) continue;
+    if (mutant_prune_ge ? (mn >= 0) : (mn > 0)) continue;
     const auto skip_support = [&](i32 u) { return u == ua || u == ub || u == ux; };
     if (mx < 0 && z >= 0) {
       // Tout le sous-arbre est strictement interieur.
