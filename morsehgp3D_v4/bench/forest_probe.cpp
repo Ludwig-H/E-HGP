@@ -805,7 +805,16 @@ int main(int argc, char** argv) {
   // 1. Generateurs WSPD -> RLE par BallKey (arite minimale d'abord).
   std::vector<BallCandidate> cands;
   BallStreamStats st;
-  collect_rle(ix, a.s, smax_eff, a.inj_rle_drop, &cands, &st);
+  collect_candidate_balls(ix, a.s, smax_eff, &cands, &st);
+  const auto t0b = std::chrono::steady_clock::now();
+  std::stable_sort(cands.begin(), cands.end(), ball_candidate_less);
+  if (!a.inj_rle_drop)  // MUTANT : dedupe saute, boules re-censusees
+    cands.erase(std::unique(cands.begin(), cands.end(),
+                            [](const BallCandidate& x, const BallCandidate& y) {
+                              return x.key == y.key;
+                            }),
+                cands.end());
+  st.unique_balls = cands.size();
   const auto t1 = std::chrono::steady_clock::now();
 
   // 2. PASSE 1 count-only (seuil h_qmin par arite minimale), puis PASSE 2
@@ -1034,8 +1043,8 @@ int main(int argc, char** argv) {
       "boules_uniques=%llu mortes_profondeur=%llu prefiltre_feuilles=%llu "
       "prefiltre_range_add=%llu census_keys=%llu census_int=%llu "
       "census_shell=%llu evenements=%llu fusions=%llu noeuds=%llu "
-      "desaccords=%llu t_flux_ms=%.1f t_prefiltre_ms=%.1f t_census_ms=%.1f "
-      "t_fold_ms=%.1f t_juge_ms=%.1f\n",
+      "desaccords=%llu t_gen_ms=%.1f t_tri_ms=%.1f t_prefiltre_ms=%.1f "
+      "t_census_ms=%.1f t_fold_ms=%.1f t_juge_ms=%.1f\n",
       cloud_family_name(a.family), pts.size(), (long long)a.s,
       (unsigned long long)smax_eff, a.seed, (unsigned long long)st.candidates[0],
       (unsigned long long)st.candidates[1], (unsigned long long)st.candidates[2],
@@ -1047,7 +1056,8 @@ int main(int argc, char** argv) {
       (unsigned long long)st.census_interior, (unsigned long long)st.census_shell,
       (unsigned long long)events_total, (unsigned long long)fusions_total,
       (unsigned long long)nodes_total, (unsigned long long)disagreements,
-      ms(t1 - t0), ms(t1b - t1), ms(t2 - t1b), ms(t3 - t2), ms(t4 - t3));
+      ms(t0b - t0), ms(t1 - t0b), ms(t1b - t1), ms(t2 - t1b), ms(t3 - t2),
+      ms(t4 - t3));
 
   if (a.inj_rle_drop || a.inj_census_nonstrict || a.inj_dense_pointid ||
       a.inj_threshold_minus_one || a.inj_range_add_le || a.inj_skip_full) {

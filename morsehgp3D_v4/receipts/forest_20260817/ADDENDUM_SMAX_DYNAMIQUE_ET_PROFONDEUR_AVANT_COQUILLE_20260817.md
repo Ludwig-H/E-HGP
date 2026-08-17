@@ -64,3 +64,12 @@ Compteur ajouté : `prefilter_nodes` (avec `prefilter_leaf_tests`,
 candidats q4 à la génération (question aux auditeurs pendante), puis
 les campagnes n = 8000/16000/32000 — désormais mesurables sur les DEUX
 profils contractuels (K=10 <100 ms G4, K=5 <1 s).
+
+## Post-scriptum — le tri ne se cache plus derrière le flux
+
+Séparation supplémentaire publiée (`t_gen` / `t_tri`), n=400 uniform :
+génération 10 314 ms, tri RLE 6 463 ms, passe count-only 27 060 ms,
+census complet 562 ms, fold 1 935 ms. Chaque poste restant est
+proportionnel aux 7,6 M de candidats (~1,4 / 0,9 / 3,6 µs par candidat) :
+le levier d'un filtre de candidats à la GÉNÉRATION est ~4,8 µs par
+candidat évité — il coupe les trois postes à la fois.
