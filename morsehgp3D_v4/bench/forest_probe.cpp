@@ -1180,7 +1180,7 @@ int main(int argc, char** argv) {
       "boules_uniques=%llu mortes_profondeur=%llu prefiltre_feuilles=%llu "
       "prefiltre_range_add=%llu census_keys=%llu census_int=%llu "
       "census_shell=%llu evenements=%llu fusions=%llu noeuds=%llu "
-      "desaccords=%llu t_gen_ms=%.1f t_tri_ms=%.1f t_prefiltre_ms=%.1f "
+      "juge=%s desaccords=%s t_gen_ms=%.1f t_tri_ms=%.1f t_prefiltre_ms=%.1f "
       "t_census_ms=%.1f t_fold_ms=%.1f t_juge_ms=%.1f\n",
       cloud_family_name(a.family), pts.size(), (long long)a.s,
       (unsigned long long)smax_eff, a.seed, (unsigned long long)st.candidates[0],
@@ -1197,7 +1197,11 @@ int main(int argc, char** argv) {
       (unsigned long long)st.full_census_keys,
       (unsigned long long)st.census_interior, (unsigned long long)st.census_shell,
       (unsigned long long)events_total, (unsigned long long)fusions_total,
-      (unsigned long long)nodes_total, (unsigned long long)disagreements,
+      (unsigned long long)nodes_total, a.judge ? "on" : "off",
+      // Format machine (audit « campagne transactionnelle » § 4) : hors
+      // regime juge, desaccords=NA — jamais un zero qu'un parseur de
+      // campagne prendrait pour un accord verifie.
+      a.judge ? std::to_string(disagreements).c_str() : "NA",
       ms(t0b - t0), ms(t1 - t0b), ms(t1b - t1), ms(t2 - t1b), ms(t3 - t2),
       ms(t4 - t3));
 
