@@ -351,6 +351,12 @@ mhgp4_expect_code(mhgp4_forest_probe_par_gate 0 mhgp4_forest_probe
     "--par-gate")
 mhgp4_expect_code(mhgp4_forest_probe_par_mutant_drop 4 mhgp4_forest_probe
     "--par-gate --inject=par-drop-shard")
+# L'AVAL est parallele lui aussi (prefiltre par candidat, census par
+# survivante, expansion par tranche de boules, folds par K — fusions en
+# ordre de tranche, bit-identiques au sequentiel). Le mutant qui oublie
+# une tranche de census a la fusion doit mourir sur la comparaison AVAL.
+mhgp4_expect_code(mhgp4_forest_probe_par_mutant_chunk 4 mhgp4_forest_probe
+    "--par-gate --inject=par-drop-ball-chunk")
 
 # La lane q2 productrice : W_2 est la boule diametrale ouverte, le census
 # est une requete de cover a coefficient 1. Juge brut toutes-paires sur

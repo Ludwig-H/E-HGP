@@ -73,6 +73,7 @@ struct Args {
   bool par_gate = false;
   int threads = 1;
   bool inj_par_drop = false;
+  bool inj_par_drop_census = false;
   u32 inj_axial = 0;  // masque kAxial* des mutants du chemin axial
   u64 min_balls = 0;
   u64 min_fusions = 0;
@@ -134,6 +135,8 @@ Args parse(int argc, char** argv) {
     else if (arg == "--par-gate") a.par_gate = true;
     else if (const char* v = val("--threads=")) a.threads = std::atoi(v);
     else if (arg == "--inject=par-drop-shard") a.inj_par_drop = true;
+    else if (arg == "--inject=par-drop-ball-chunk")
+      a.inj_par_drop_census = true;
     else if (arg == "--inject=axial-short-group") a.inj_axial |= kAxialShortGroup;
     else if (arg == "--inject=axial-drop-ties") a.inj_axial |= kAxialDropTies;
     else if (arg == "--inject=axial-first-rep") a.inj_axial |= kAxialFirstRep;
@@ -187,24 +190,58 @@ struct Survivor {
   u64 depth;  // compte EXACT des interieurs stricts (recoupe en passe 2)
 };
 
+// PARALLELISME DE L'AVAL : decoupage en TRANCHES CONTIGUES d'indices —
+// la fusion en ordre de tranche rend la sortie BIT-IDENTIQUE au
+// sequentiel quel que soit le nombre de fils (le prefiltre est
+// independant par candidat, le census par survivante, l'expansion par
+// boule, les folds par K). threads <= 1 : chemin sequentiel pur.
+template <typename Fn>
+void parallel_ranges(size_t n, int threads, Fn&& fn) {
+  const size_t T =
+      n == 0 ? 1 : std::min((size_t)std::max(threads, 1), n);
+  if (T <= 1) {
+    fn((size_t)0, n, (size_t)0);
+    return;
+  }
+  std::vector<std::thread> pool;
+  for (size_t t = 0; t < T; ++t) {
+    const size_t b = n * t / T, e = n * (t + 1) / T;
+    pool.emplace_back([&fn, b, e, t] { fn(b, e, t); });
+  }
+  for (auto& th : pool) th.join();
+}
+
 void prefilter_balls(const CloudIndex& ix,
                      const std::vector<BallCandidate>& cands, u64 smax_eff,
                      bool inj_threshold_minus_one, bool inj_range_add_le,
-                     std::vector<Survivor>* survivors, BallStreamStats* st) {
-  survivors->reserve(cands.size() / 8 + 16);
-  for (size_t i = 0; i < cands.size(); ++i) {
-    const BallCandidate& bc = cands[i];
-    // Mort a |I_B| >= smax_eff + 1 - q_min (audit « smax dynamique » :
-    // le parametre qui definit l'objet en amont existe aussi en aval).
-    // Au profil maximal smax=11 : 10/9/8 interieurs pour q2/q3/q4.
-    u64 h = smax_eff + 1 - (u64)bc.arity;
-    if (inj_threshold_minus_one) --h;  // MUTANT
-    u64 depth = 0;
-    if (ball_depth_at_least(ix, bc.key, h, &depth, inj_range_add_le, st)) {
-      ++st->balls_dead_depth;
-      continue;
+                     std::vector<Survivor>* survivors, BallStreamStats* st,
+                     int threads = 1) {
+  const size_t T = cands.empty()
+                       ? 1
+                       : std::min((size_t)std::max(threads, 1), cands.size());
+  std::vector<std::vector<Survivor>> lsv(T);
+  std::vector<BallStreamStats> lst(T);
+  parallel_ranges(cands.size(), threads, [&](size_t b, size_t e, size_t t) {
+    for (size_t i = b; i < e; ++i) {
+      const BallCandidate& bc = cands[i];
+      // Mort a |I_B| >= smax_eff + 1 - q_min (audit « smax dynamique » :
+      // le parametre qui definit l'objet en amont existe aussi en aval).
+      // Au profil maximal smax=11 : 10/9/8 interieurs pour q2/q3/q4.
+      u64 h = smax_eff + 1 - (u64)bc.arity;
+      if (inj_threshold_minus_one) --h;  // MUTANT
+      u64 depth = 0;
+      if (ball_depth_at_least(ix, bc.key, h, &depth, inj_range_add_le,
+                              &lst[t])) {
+        ++lst[t].balls_dead_depth;
+        continue;
+      }
+      lsv[t].push_back({i, depth});
     }
-    survivors->push_back({i, depth});
+  });
+  survivors->reserve(cands.size() / 8 + 16);
+  for (size_t t = 0; t < T; ++t) {
+    survivors->insert(survivors->end(), lsv[t].begin(), lsv[t].end());
+    st->add_from(lst[t]);
   }
 }
 
@@ -216,43 +253,69 @@ int census_balls(const CloudIndex& ix, const std::vector<BallCandidate>& cands,
                  const std::vector<Survivor>& survivors, u64 smax_eff,
                  size_t shell_cap, bool inj_census_nonstrict,
                  bool inj_skip_full, std::vector<BallData>* balls,
-                 BallStreamStats* st) {
-  balls->reserve(survivors.size());
-  for (const Survivor& sv : survivors) {
-    const BallCandidate& bc = cands[sv.idx];
-    BallData b;
-    b.key = bc.key;
-    b.level = bc.level;
-    if (inj_skip_full) {  // MUTANT
-      balls->push_back(std::move(b));
-      continue;
+                 BallStreamStats* st, int threads = 1,
+                 bool inj_drop_chunk = false) {
+  const size_t T =
+      survivors.empty()
+          ? 1
+          : std::min((size_t)std::max(threads, 1), survivors.size());
+  std::vector<std::vector<BallData>> lb(T);
+  std::vector<BallStreamStats> lst(T);
+  // Un refus/invariant arrete la tranche ; le verdict fusionne est celui
+  // de la tranche d'indices la plus BASSE (deterministe — la meme boule
+  // qu'aurait vue le sequentiel), message imprime une seule fois.
+  std::vector<int> lrc(T, 0);
+  parallel_ranges(survivors.size(), threads, [&](size_t b, size_t e,
+                                                 size_t t) {
+    for (size_t i = b; i < e; ++i) {
+      const Survivor& sv = survivors[i];
+      const BallCandidate& bc = cands[sv.idx];
+      BallData bd;
+      bd.key = bc.key;
+      bd.level = bc.level;
+      if (inj_skip_full) {  // MUTANT
+        lb[t].push_back(std::move(bd));
+        continue;
+      }
+      ++lst[t].full_census_keys;
+      bool overflow = false;
+      if (!ball_census(ix, bc.key, (size_t)(smax_eff - bc.arity), shell_cap,
+                       &bd.interior, &bd.shell, &overflow)) {
+        lrc[t] = overflow ? 2 : 3;
+        return;
+      }
+      if (bd.interior.size() != (size_t)sv.depth) {
+        lrc[t] = 3;
+        return;
+      }
+      if (inj_census_nonstrict) {
+        // MUTANT : la coquille comptee interieure (P <= 0).
+        for (const i32 u : bd.shell) bd.interior.push_back(u);
+        bd.shell.clear();
+      }
+      lst[t].census_interior += bd.interior.size();
+      lst[t].census_shell += bd.shell.size();
+      lb[t].push_back(std::move(bd));
     }
-    ++st->full_census_keys;
-    bool overflow = false;
-    if (!ball_census(ix, bc.key, (size_t)(smax_eff - bc.arity), shell_cap,
-                     &b.interior, &b.shell, &overflow)) {
-      if (overflow) {
+  });
+  for (size_t t = 0; t < T; ++t)
+    if (lrc[t] != 0) {
+      if (lrc[t] == 2)
         std::fprintf(stderr,
                      "REFUS resource_exhausted : coquille > %zu (plafond "
                      "explicite, jamais de troncature)\n",
                      shell_cap);
-        return 2;
-      }
-      std::fprintf(stderr, "INVARIANT : census contredit la passe count-only\n");
-      return 3;
+      else
+        std::fprintf(stderr,
+                     "INVARIANT : census contredit la passe count-only ou "
+                     "le compte passe1 != passe2\n");
+      return lrc[t];
     }
-    if (b.interior.size() != (size_t)sv.depth) {
-      std::fprintf(stderr, "INVARIANT : compte interieur passe1 != passe2\n");
-      return 3;
-    }
-    if (inj_census_nonstrict) {
-      // MUTANT : la coquille comptee interieure (P <= 0).
-      for (const i32 u : b.shell) b.interior.push_back(u);
-      b.shell.clear();
-    }
-    st->census_interior += b.interior.size();
-    st->census_shell += b.shell.size();
-    balls->push_back(std::move(b));
+  balls->reserve(survivors.size());
+  for (size_t t = 0; t < T; ++t) {
+    if (inj_drop_chunk && T > 1 && t == 0) continue;  // MUTANT
+    for (auto& bd : lb[t]) balls->push_back(std::move(bd));
+    st->add_from(lst[t]);
   }
   return 0;
 }
@@ -264,40 +327,63 @@ int forests_from_balls(const std::vector<BallData>& balls,
                        const std::vector<P3>& pos,
                        const std::vector<PointId>& pid_of, u64 kmax_eff,
                        u64 per_k_events[11], ForestResult per_k_result[11],
-                       std::vector<std::vector<ForestEvent>>* events_out = nullptr) {
-  std::vector<std::vector<ForestEvent>> ev_k(11);
-  std::vector<PlateauEvent> pevents;
-  for (const BallData& b : balls) {
-    const BallRat c = ball_center(b.key);
-    pevents.clear();
-    expand_plateau(c, pos, b.interior, b.shell, (size_t)(kmax_eff + 1), &pevents);
-    for (const PlateauEvent& pe : pevents) {
-      const size_t K = pe.tpart.size() + pe.ipart.size() - 1;
-      if (K < 1 || K > (size_t)kmax_eff) continue;
-      ForestEvent ev;
-      ev.q = (u8)pe.tpart.size();
-      ev.d = (u8)pe.ipart.size();
-      ev.active_mask = pe.active_mask;
-      // Conversion GeometryIndex -> PointId ICI et seulement ici. L'ordre de
-      // `support` reste celui de T (aligne sur active_mask — ne jamais le
-      // retrier independamment du masque ; facet_minus trie les FacetKey).
-      for (size_t t = 0; t < pe.tpart.size(); ++t)
-        ev.support[t] = pid_of[(size_t)pe.tpart[t]];
-      for (size_t t = 0; t < pe.ipart.size(); ++t)
-        ev.interior[t] = pid_of[(size_t)pe.ipart[t]];
-      ev.level = b.level;
-      ev_k[K].push_back(ev);
+                       std::vector<std::vector<ForestEvent>>* events_out = nullptr,
+                       int threads = 1) {
+  // PHASE A — expansion des plateaux, par TRANCHES de boules : chaque
+  // ouvrier remplit ses propres listes par K, la fusion en ordre de
+  // tranche restitue EXACTEMENT l'ordre sequentiel des evenements.
+  const size_t T =
+      balls.empty() ? 1 : std::min((size_t)std::max(threads, 1), balls.size());
+  std::vector<std::vector<std::vector<ForestEvent>>> lev(
+      T, std::vector<std::vector<ForestEvent>>(11));
+  parallel_ranges(balls.size(), threads, [&](size_t bg, size_t en, size_t t) {
+    std::vector<PlateauEvent> pevents;
+    for (size_t bi = bg; bi < en; ++bi) {
+      const BallData& b = balls[bi];
+      const BallRat c = ball_center(b.key);
+      pevents.clear();
+      expand_plateau(c, pos, b.interior, b.shell, (size_t)(kmax_eff + 1),
+                     &pevents);
+      for (const PlateauEvent& pe : pevents) {
+        const size_t K = pe.tpart.size() + pe.ipart.size() - 1;
+        if (K < 1 || K > (size_t)kmax_eff) continue;
+        ForestEvent ev;
+        ev.q = (u8)pe.tpart.size();
+        ev.d = (u8)pe.ipart.size();
+        ev.active_mask = pe.active_mask;
+        // Conversion GeometryIndex -> PointId ICI et seulement ici.
+        // L'ordre de `support` reste celui de T (aligne sur active_mask —
+        // ne jamais le retrier independamment du masque ; facet_minus trie
+        // les FacetKey).
+        for (size_t tt = 0; tt < pe.tpart.size(); ++tt)
+          ev.support[tt] = pid_of[(size_t)pe.tpart[tt]];
+        for (size_t tt = 0; tt < pe.ipart.size(); ++tt)
+          ev.interior[tt] = pid_of[(size_t)pe.ipart[tt]];
+        ev.level = b.level;
+        lev[t][K].push_back(ev);
+      }
     }
-  }
-  for (int K = 1; K <= (int)kmax_eff; ++K) {
-    per_k_events[K] = ev_k[(size_t)K].size();
-    per_k_result[K] = build_forest(ev_k[(size_t)K]);
+  });
+  std::vector<std::vector<ForestEvent>> ev_k(11);
+  for (size_t t = 0; t < T; ++t)
+    for (size_t K = 1; K <= (size_t)kmax_eff; ++K)
+      ev_k[K].insert(ev_k[K].end(), lev[t][K].begin(), lev[t][K].end());
+  // PHASE B — folds INDEPENDANTS par K (chaque K possede son build_forest
+  // et son resultat ; le rapport de violation reste au plus petit K).
+  parallel_ranges((size_t)kmax_eff, threads, [&](size_t bg, size_t en,
+                                                 size_t) {
+    for (size_t k0 = bg; k0 < en; ++k0) {
+      const int K = (int)k0 + 1;
+      per_k_events[K] = ev_k[(size_t)K].size();
+      per_k_result[K] = build_forest(ev_k[(size_t)K]);
+    }
+  });
+  for (int K = 1; K <= (int)kmax_eff; ++K)
     if (per_k_result[K].attach_violations != 0 ||
         per_k_result[K].birth_violations != 0) {
       std::fprintf(stderr, "INVARIANT : violations de roles (K=%d)\n", K);
       return 3;
     }
-  }
   if (events_out) *events_out = std::move(ev_k);
   return 0;
 }
@@ -773,7 +859,7 @@ int run_kmax_gate(bool inj_kmax10) {
 // Les deux chemins (baseline et axial) sont couverts. MUTANT
 // par-drop-shard : la fusion oublie le premier ouvrier — les compteurs
 // le voient toujours, le jeu de cles souvent.
-int run_par_gate(bool inj_drop) {
+int run_par_gate(bool inj_drop, bool inj_drop_chunk) {
   u64 bad = 0;
   for (const CloudFamily fam :
        {CloudFamily::kUniform, CloudFamily::kEightClusters}) {
@@ -823,9 +909,73 @@ int run_par_gate(bool inj_drop) {
         ++bad;
       }
     }
+    // AVAL : prefiltre + census + expansion + folds, 1 fil CONTRE 4 —
+    // survivantes identiques (idx, profondeur), evenements BIT-EXACTS
+    // par K (q, d, masque, support, interieurs, representation de
+    // niveau), resumes de foret identiques (fusions, nœuds, lots). Le
+    // mutant par-drop-ball-chunk (une tranche de census oubliee a la
+    // fusion) est applique au seul cote 4 fils.
+    {
+      std::vector<BallCandidate> cs;
+      BallStreamStats ss;
+      collect_candidate_balls(ix, 8, 11, &cs, &ss);
+      std::stable_sort(cs.begin(), cs.end(), ball_candidate_less);
+      cs.erase(std::unique(cs.begin(), cs.end(),
+                           [](const BallCandidate& x, const BallCandidate& y) {
+                             return x.key == y.key;
+                           }),
+               cs.end());
+      std::vector<PointId> pid_of((size_t)ix.unique_count());
+      for (size_t u = 0; u < pid_of.size(); ++u)
+        pid_of[u] = ix.point_id((i32)u);
+      bool down_ok = true;
+      std::vector<Survivor> sv1, sv4;
+      BallStreamStats d1, d4;
+      prefilter_balls(ix, cs, 11, false, false, &sv1, &d1, 1);
+      prefilter_balls(ix, cs, 11, false, false, &sv4, &d4, 4);
+      down_ok = down_ok && sv1.size() == sv4.size();
+      for (size_t i = 0; down_ok && i < sv1.size(); ++i)
+        down_ok = sv1[i].idx == sv4[i].idx && sv1[i].depth == sv4[i].depth;
+      std::vector<BallData> b1, b4;
+      if (census_balls(ix, cs, sv1, 11, 12, false, false, &b1, &d1, 1,
+                       false) != 0)
+        return 3;
+      if (census_balls(ix, cs, sv4, 11, 12, false, false, &b4, &d4, 4,
+                       inj_drop_chunk) != 0)
+        return 3;
+      down_ok = down_ok && b1.size() == b4.size();
+      u64 e1[11] = {}, e4[11] = {};
+      ForestResult r1[11], r4[11];
+      std::vector<std::vector<ForestEvent>> k1, k4;
+      if (forests_from_balls(b1, ix.upos, pid_of, 10, e1, r1, &k1, 1) != 0)
+        return 3;
+      if (forests_from_balls(b4, ix.upos, pid_of, 10, e4, r4, &k4, 4) != 0)
+        return 3;
+      for (int K = 1; K <= 10 && down_ok; ++K) {
+        down_ok = e1[K] == e4[K] && r1[K].fusions == r4[K].fusions &&
+                  r1[K].nodes.size() == r4[K].nodes.size() &&
+                  r1[K].batches == r4[K].batches &&
+                  k1[(size_t)K].size() == k4[(size_t)K].size();
+        for (size_t i = 0; down_ok && i < k1[(size_t)K].size(); ++i) {
+          const ForestEvent &x = k1[(size_t)K][i], &y = k4[(size_t)K][i];
+          down_ok = x.q == y.q && x.d == y.d &&
+                    x.active_mask == y.active_mask &&
+                    same_level_representation(x.level, y.level);
+          for (int t = 0; down_ok && t < x.q; ++t)
+            down_ok = x.support[t] == y.support[t];
+          for (int t = 0; down_ok && t < x.d; ++t)
+            down_ok = x.interior[t] == y.interior[t];
+        }
+      }
+      if (!down_ok) {
+        std::fprintf(stderr, "PAR : divergence AVAL 1 fil / 4 fils (%s)\n",
+                     cloud_family_name(fam));
+        ++bad;
+      }
+    }
   }
   std::printf("par_gate violations=%llu\n", (unsigned long long)bad);
-  if (inj_drop) {
+  if (inj_drop || inj_drop_chunk) {
     if (bad > 0) {
       std::printf("MUTANT TUE\n");
       return 4;
@@ -1232,7 +1382,8 @@ int main(int argc, char** argv) {
   if (a.kmax_gate) return run_kmax_gate(a.inj_fold_kmax10);
   if (a.axial_sweep_gate) return run_axial_sweep_gate(a.inj_axial);
   if (a.axial_pair_gate) return run_axial_pair_gate(a.inj_axial);
-  if (a.par_gate) return run_par_gate(a.inj_par_drop);
+  if (a.par_gate)
+    return run_par_gate(a.inj_par_drop, a.inj_par_drop_census);
   if (a.guard != 0) return run_guard_gate(a.guard);
   const std::vector<P3> pts = make_family_cloud(
       a.family, a.n,
@@ -1279,7 +1430,8 @@ int main(int argc, char** argv) {
                           a.inj_dense_pointid || a.inj_threshold_minus_one ||
                           a.inj_range_add_le || a.inj_skip_full ||
                           a.inj_fold_kmax10 || a.inj_genfilter_nonstrict ||
-                          a.inj_axial != 0 || a.inj_par_drop;
+                          a.inj_axial != 0 || a.inj_par_drop ||
+                          a.inj_par_drop_census;
   // LE PARAMETRE QUI DEFINIT L'OBJET EN AMONT EXISTE EN AVAL (audit « smax
   // dynamique ») : caps de census par arite, expansion, folds et totaux
   // suivent tous smax_eff — plus jamais les constantes 9/11/10 (MUTANT
@@ -1288,13 +1440,13 @@ int main(int argc, char** argv) {
   const u64 kmax_eff = a.inj_fold_kmax10 ? 10 : smax_eff - 1;
   std::vector<Survivor> surv;
   prefilter_balls(ix, cands, smax_caps, a.inj_threshold_minus_one,
-                  a.inj_range_add_le, &surv, &st);
+                  a.inj_range_add_le, &surv, &st, a.threads);
   const auto t1b = std::chrono::steady_clock::now();
   std::vector<BallData> balls;
   {
     const int rc = census_balls(ix, cands, surv, smax_caps, a.shell_cap,
                                 a.inj_census_nonstrict, a.inj_skip_full,
-                                &balls, &st);
+                                &balls, &st, a.threads, a.inj_par_drop_census);
     if (rc == 3 && any_inject) {
       std::printf("MUTANT TUE\n");
       return 4;
@@ -1312,8 +1464,8 @@ int main(int argc, char** argv) {
   ForestResult sres[11];
   std::vector<std::vector<ForestEvent>> sevk;
   {
-    const int rc =
-        forests_from_balls(balls, ix.upos, pid_of, kmax_eff, sev, sres, &sevk);
+    const int rc = forests_from_balls(balls, ix.upos, pid_of, kmax_eff, sev,
+                                      sres, &sevk, a.threads);
     if (rc == 3 && any_inject) {
       std::printf("MUTANT TUE\n");
       return 4;
