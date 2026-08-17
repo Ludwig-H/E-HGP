@@ -1,43 +1,33 @@
 #!/usr/bin/env bash
 # Session G4 — CAMPAGNE D'ECHELLE v4 : les tailles contractuelles sur les
-# deux profils, moteur CPU de reference. VERSION TRANSACTIONNELLE (audit
-# « campagne G4 transactionnelle » apres 1a0640).
+# deux profils, moteur CPU de reference. VERSION TRANSACTIONNELLE, PINNEE
+# ET ROBUSTE AUX RUPTURES (audits « campagne transactionnelle »,
+# « pin source et RSS », « rapatriement apres rupture SSH »).
 #
 # Cette session utilise EXCLUSIVEMENT les scripts gardes du depot pour le
 # demarrage et l'arret. Elle ne cree aucune VM, ne modifie aucune garde et
 # certifie TERMINATED sur exactement la generation qu'elle a demarree.
 #
-# ---------------------------------------------------------------------------
-# CE QU'ELLE MESURE, ET CE QU'ELLE NE REVENDIQUE PAS
-#
-# La v4 n'a pas de cible CUDA : la G4 sert de RESSOURCE CPU (48 vCPU,
-# 180 Go) et de materiel contractuel des recus de cout. Aucun debit GPU
-# revendique, aucun SLO ; aucun benchmark ne promeut public_status=exact —
-# les invariants sont etablis par les portes CTest, REJOUEES sur la VM
-# avant toute mesure. Hors regime juge le probe imprime desormais
-# `juge=off desaccords=NA` : un zero machine ne passera jamais pour un
-# accord verifie.
-#
-# DEUX CAMPAGNES SEPAREES (audit § 2) :
-#   1. LATENCE ISOLEE (timing_scope=isolated_latency) : un seul run a la
-#      fois, taskset sur cœur fixe, OMP_NUM_THREADS=1, pic RSS enregistre —
-#      uniform smax=11 n=8000 (×2, mediane), 16000, 32000. Ce sont les
-#      points comparables aux pentes locales 400/800/1600.
-#   2. COUVERTURE CONTENDUE (timing_scope=contended_throughput) : la
-#      matrice 4 familles × 3 tailles × 2 profils par VAGUES a concurrence
-#      PILOTEE PAR LA MEMOIRE (audit § 3) : la concurrence de chaque taille
-#      est min(cap_prudent, floor(0.75·RAM / pic_RSS_mesure_en_phase_1)) —
-#      les temps de cette phase ne servent JAMAIS aux pentes de latence.
-#
-# TRANSACTIONNEL (audit § 1) : chaque run ecrit DEUX fichiers atomiques
-# (payload .txt + .status avec code/duree/pic RSS/timing_scope), errexit
-# desarme localement autour du run — un timeout, un OOM-kill ou un refus
-# n'effacent jamais leur marqueur. Apres rapatriement, une VALIDATION
-# LOCALE exige l'ensemble exact des fichiers, code=0 partout, la ligne de
-# compteurs presente et aucune ligne REFUS/INVARIANT/PLANCHER/Killed/
-# bad_alloc ; sinon le reçu porte campaign_status=partial_or_failed et la
-# session sort NON NULLE — apres rapatriement, jamais avant. Le mot
-# COMPLETE est reserve au cas valide.
+# GARANTIES DE PROTOCOLE :
+#  - PIN DE SOURCE : refus si l'arbre morsehgp3D_v4 differe de HEAD
+#    (index, worktree, non-suivis) ; le payload est produit par
+#    `git archive` depuis le COMMIT (jamais l'etat du disque) ; le couple
+#    (source_commit, source_tar_sha256) est journalise avant demarrage,
+#    verifie sur la VM, grave dans CHAQUE .status et exige identique par
+#    le validateur ;
+#  - GNU time OBLIGATOIRE sur la VM (verifie au build, avant les pilotes) —
+#    le repli VmHWM qui mesurait le wrapper est supprime ;
+#  - deux campagnes (latence isolee / couverture contendue), concurrence
+#    pilotee par la memoire, pilotes VALIDES avant toute vague (script
+#    distant : gcp-migration/v4_campaign_remote.sh) ;
+#  - RAPATRIEMENT TOUJOURS : le retour SSH de campagne est capture SANS
+#    declencher le trap, puis le scp est tente trois fois — une rupture
+#    SSH ne peut plus eteindre la VM avant la recolte des statuts ;
+#  - la VALIDATION LOCALE (gcp-migration/validate_v4_campaign.py) seule
+#    decide de campaign_status ; `complete` exige aussi remote_rc=0 et
+#    scp_rc=0 ; sinon partial_or_failed et sortie NON NULLE — apres
+#    rapatriement, jamais avant.
+# Porte transactionnelle a faux probe : gcp-migration/selftest_campagne_v4.sh.
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -55,6 +45,25 @@ WORK="$(mktemp -d /tmp/ehgp-v4scale-session.XXXXXXXX)"
 HANDOFF="${WORK}/handoff.json"
 LOG="${WORK}/session.log"
 echo "session dans ${WORK}"
+
+# ---- 0. PIN DE SOURCE, avant toute mutation GCP (audit « pin source »).
+SOURCE_COMMIT="$(git rev-parse HEAD)"
+if ! git diff --quiet -- morsehgp3D_v4 || ! git diff --cached --quiet -- morsehgp3D_v4; then
+  echo "REFUS : morsehgp3D_v4 differe de HEAD — committer avant la campagne" >&2
+  exit 2
+fi
+if [ -n "$(git ls-files --others --exclude-standard -- morsehgp3D_v4)" ]; then
+  echo "REFUS : fichiers non suivis dans morsehgp3D_v4" >&2
+  exit 2
+fi
+TAR="${WORK}/v4.tgz"
+git archive --format=tar.gz --prefix=morsehgp3D_v4/ \
+  -o "${TAR}" "${SOURCE_COMMIT}:morsehgp3D_v4"
+SOURCE_TAR_SHA256="$(sha256sum "${TAR}" | awk '{print $1}')"
+{
+  echo "source_commit=${SOURCE_COMMIT}"
+  echo "source_tar_sha256=${SOURCE_TAR_SHA256}"
+} | tee -a "${LOG}"
 
 gcloud config set project "${GCP_PROJECT_ID}" >/dev/null
 
@@ -83,6 +92,8 @@ GENERATION="$(python3 -c "import json,sys; print(json.load(open('${HANDOFF}'))['
 echo "generation verrouillee : ${GENERATION}" | tee -a "${LOG}"
 
 # ---- Arret certifie quoi qu'il arrive, sur EXACTEMENT cette generation.
+# Le trap ne se declenche qu'APRES les tentatives de rapatriement : les
+# blocs campagne et scp capturent leurs codes sans errexit.
 SESSION_RC=0
 cleanup() {
   local rc=$?
@@ -105,183 +116,71 @@ trap cleanup EXIT
 SSH=(gcloud compute ssh "${GCP_INSTANCE_NAME}" --project="${GCP_PROJECT_ID}"
      --zone="${GCP_ZONE}" --ssh-key-file="${GCP_SSH_KEY_FILE}"
      --ssh-key-expiration="${GCP_SSH_KEY_EXPIRATION_UTC}" --quiet --command)
+SCP=(gcloud compute scp --project="${GCP_PROJECT_ID}" --zone="${GCP_ZONE}"
+     --quiet --ssh-key-file="${GCP_SSH_KEY_FILE}"
+     --ssh-key-expiration="${GCP_SSH_KEY_EXPIRATION_UTC}")
 
-# ---- 4. Envoi des sources (v4 seul, l'arbre est autonome).
-TAR="${WORK}/v4.tgz"
-tar czf "${TAR}" --exclude=build --exclude=.git morsehgp3D_v4
-gcloud compute scp "${TAR}" "${GCP_INSTANCE_NAME}:/tmp/v4.tgz" \
-  --project="${GCP_PROJECT_ID}" --zone="${GCP_ZONE}" --quiet \
-  --ssh-key-file="${GCP_SSH_KEY_FILE}" \
-  --ssh-key-expiration="${GCP_SSH_KEY_EXPIRATION_UTC}" 2>&1 | tee -a "${LOG}"
+# ---- 4. Envoi du payload PINNE + du script distant.
+"${SCP[@]}" "${TAR}" gcp-migration/v4_campaign_remote.sh \
+  "${GCP_INSTANCE_NAME}:/tmp/" 2>&1 | tee -a "${LOG}"
 
-# ---- 5. Build Release + REJEU INDEPENDANT des portes. Un echec ARRETE la
-# session avant toute mesure : pas de campagne sur un build non conforme.
+# ---- 5. Build Release + preconditions + REJEU INDEPENDANT des portes.
+# Un echec ARRETE la session avant toute mesure : pas de campagne sur un
+# build non conforme, une integrite de payload non verifiee ou sans GNU time.
 "${SSH[@]}" 'set -euo pipefail
   export PATH=$HOME/.local/bin:$PATH
+  test -x /usr/bin/time || { echo "REFUS : GNU time absent de la VM" >&2; exit 2; }
   python3 -m pip install --user --quiet --upgrade cmake >/dev/null 2>&1 || true
   export PATH=$HOME/.local/bin:$PATH
   rm -rf ~/v4scale && mkdir -p ~/v4scale && cd ~/v4scale
+  echo "'"${SOURCE_TAR_SHA256}"'  /tmp/v4.tgz" | sha256sum -c -
   tar xzf /tmp/v4.tgz
+  cp /tmp/v4_campaign_remote.sh .
   echo "coeurs=$(nproc)"; grep MemTotal /proc/meminfo; cmake --version | head -1
-  git -C '"${REPO_ROOT}"' rev-parse HEAD 2>/dev/null || true
   cmake -S morsehgp3D_v4 -B build -DCMAKE_BUILD_TYPE=Release
   cmake --build build -j48
   ctest --test-dir build --output-on-failure -j24 2>&1 | tail -4
 ' 2>&1 | tee -a "${LOG}"
 
-# ---- 6. LES DEUX CAMPAGNES, transactionnelles.
-"${SSH[@]}" 'set -euo pipefail
-  export PATH=$HOME/.local/bin:$PATH
+# ---- 6. LA CAMPAGNE. Le retour SSH est CAPTURE sans declencher le trap
+# (audit « rupture SSH ») : quoi qu'il rende, le rapatriement suit.
+REMOTE_CAMPAIGN_RC=0
+set +e
+"${SSH[@]}" "set -euo pipefail
+  export PATH=\$HOME/.local/bin:\$PATH
   cd ~/v4scale
-  P=./build/mhgp4_forest_probe
-  mkdir -p out
-  export OMP_NUM_THREADS=1
+  bash v4_campaign_remote.sh ${SOURCE_COMMIT} ${SOURCE_TAR_SHA256}
+" 2>&1 | tee -a "${LOG}"
+REMOTE_CAMPAIGN_RC=${PIPESTATUS[0]}
+set -e
+printf 'remote_campaign_rc=%d\n' "${REMOTE_CAMPAIGN_RC}" | tee -a "${LOG}"
 
-  # run_one : DEUX fichiers atomiques par run ; errexit desarme autour du
-  # run — timeout/OOM/refus n ecrasent jamais leur marqueur (audit § 1).
-  run_one() {
-    local name="$1" scope="$2" cpu="$3"; shift 3
-    local out="out/${name}.txt" status="out/${name}.status"
-    local rc=0 t0 t1 hwm=""
-    t0=$(date +%s)
-    if command -v /usr/bin/time >/dev/null 2>&1; then
-      /usr/bin/time -v -o "${status}.time" \
-        timeout 10800 taskset -c "${cpu}" "$P" "$@" >"${out}" 2>&1 || rc=$?
-      hwm=$(grep -oE "Maximum resident set size[^0-9]*[0-9]+" "${status}.time" | grep -oE "[0-9]+$" || true)
-    else
-      timeout 10800 taskset -c "${cpu}" "$P" "$@" >"${out}" 2>&1 & local pp=$!
-      # Echantillonner le VRAI processus : timeout est le parent, le probe
-      # son enfant (taskset s execute dedans) — /proc du parent ne mesure
-      # que quelques Mo de bash (leçon locale : 4 972 kB pour un run a 3 Go).
-      local target=""
-      while kill -0 ${pp} 2>/dev/null; do
-        [ -z "${target}" ] && target=$(pgrep -P ${pp} 2>/dev/null | head -1) || true
-        local h=""
-        [ -n "${target}" ] && h=$(grep VmHWM /proc/${target}/status 2>/dev/null | awk "{print \$2}") || true
-        [ -n "${h}" ] && hwm=${h}
-        sleep 3
-      done
-      wait ${pp} || rc=$?
-    fi
-    t1=$(date +%s)
-    {
-      printf "code=%d\n" "${rc}"
-      printf "duree_s=%d\n" "$((t1 - t0))"
-      printf "peak_rss_kb=%s\n" "${hwm:-inconnu}"
-      printf "timing_scope=%s\n" "${scope}"
-      printf "finished=1\n"
-    } > "${status}.tmp"
-    mv "${status}.tmp" "${status}"
-    echo "--- fini ${name} (code=${rc}, $((t1 - t0))s, rss=${hwm:-?}kB)"
-    return 0
-  }
-
-  # PHASE 1 — LATENCE ISOLEE (un run a la fois, cœur fixe). Les pics RSS
-  # mesures ici PILOTENT la concurrence de la phase 2.
-  run_one lat_uniform_n8000_smax11_rep1 isolated_latency 2 \
-    --family=uniform --n=8000 --s=8 --smax=11 --seed=3 --min-balls=10000 --min-fusions=1000
-  run_one lat_uniform_n8000_smax11_rep2 isolated_latency 2 \
-    --family=uniform --n=8000 --s=8 --smax=11 --seed=3 --min-balls=10000 --min-fusions=1000
-  run_one lat_uniform_n16000_smax11 isolated_latency 2 \
-    --family=uniform --n=16000 --s=8 --smax=11 --seed=3 --min-balls=10000 --min-fusions=1000
-  run_one lat_uniform_n32000_smax11 isolated_latency 2 \
-    --family=uniform --n=32000 --s=8 --smax=11 --seed=3 --min-balls=10000 --min-fusions=1000
-
-  # Concurrence par taille : min(cap prudent, 0.75*RAM/pic) — audit § 3.
-  conc_for() {
-    local status="$1" cap="$2"
-    local kb mem
-    kb=$(grep -oE "^peak_rss_kb=[0-9]+" "${status}" | grep -oE "[0-9]+$" || true)
-    mem=$(grep MemTotal /proc/meminfo | awk "{print \$2}")
-    if [ -z "${kb}" ]; then echo 1; return; fi
-    local c=$(( (mem * 3 / 4) / kb ))
-    [ "${c}" -lt 1 ] && c=1
-    [ "${c}" -gt "${cap}" ] && c=${cap}
-    echo "${c}"
-  }
-  C8=$(conc_for out/lat_uniform_n8000_smax11_rep1.status 8)
-  C16=$(conc_for out/lat_uniform_n16000_smax11.status 4)
-  C32=$(conc_for out/lat_uniform_n32000_smax11.status 2)
-  echo "concurrences pilotees par la memoire : n8000=${C8} n16000=${C16} n32000=${C32}"
-
-  # PHASE 2 — COUVERTURE CONTENDUE, par vagues de taille croissante ; les
-  # gros runs ne demarrent jamais tous au meme instant.
-  wave() {
-    local n="$1" conc="$2"
-    local i=0 cpu
-    for fam in uniform terrain eight_clusters scanline_overlap_multiecho; do
-      for smax in 11 6; do
-        cpu=$(( 4 + (i % conc) * 2 ))
-        run_one "cov_${fam}_n${n}_smax${smax}" contended_throughput "${cpu}" \
-          --family=${fam} --n=${n} --s=8 --smax=${smax} --seed=3 \
-          --min-balls=10000 --min-fusions=1000 &
-        i=$((i + 1))
-        if [ $((i % conc)) -eq 0 ]; then wait; fi
-      done
-    done
-    wait
-  }
-  wave 8000 "${C8}"
-  wave 16000 "${C16}"
-  wave 32000 "${C32}"
-  echo "=== fin des runs (la validation decide du statut, pas cette ligne) ==="
-' 2>&1 | tee -a "${LOG}"
-
-# ---- 7. Rapatriement TOUJOURS, puis VALIDATION LOCALE (audit § 1) : le
-# statut de campagne est calcule ici, jamais declare par le lanceur.
+# ---- 7. RAPATRIEMENT TOUJOURS, avec reprises bornees.
 mkdir -p "${WORK}/out"
-gcloud compute scp --recurse "${GCP_INSTANCE_NAME}:~/v4scale/out" "${WORK}/" \
-  --project="${GCP_PROJECT_ID}" --zone="${GCP_ZONE}" --quiet \
-  --ssh-key-file="${GCP_SSH_KEY_FILE}" \
-  --ssh-key-expiration="${GCP_SSH_KEY_EXPIRATION_UTC}" 2>&1 | tee -a "${LOG}"
+SCP_RC=1
+for attempt in 1 2 3; do
+  set +e
+  "${SCP[@]}" --recurse "${GCP_INSTANCE_NAME}:~/v4scale/out" "${WORK}/" \
+    2>&1 | tee -a "${LOG}"
+  rc=${PIPESTATUS[0]}
+  set -e
+  if [ "${rc}" -eq 0 ]; then
+    SCP_RC=0
+    break
+  fi
+  echo "scp tentative ${attempt} echouee (rc=${rc})" | tee -a "${LOG}"
+  sleep $((5 * attempt))
+done
+printf 'scp_rc=%d\n' "${SCP_RC}" | tee -a "${LOG}"
 
-python3 - "${WORK}/out" <<'PYEOF' 2>&1 | tee -a "${LOG}" || SESSION_RC=65
-import os, re, sys
-
-out = sys.argv[1]
-expected = []
-for rep in (1, 2):
-    expected.append(f"lat_uniform_n8000_smax11_rep{rep}")
-expected += ["lat_uniform_n16000_smax11", "lat_uniform_n32000_smax11"]
-for fam in ("uniform", "terrain", "eight_clusters", "scanline_overlap_multiecho"):
-    for n in (8000, 16000, 32000):
-        for smax in (11, 6):
-            expected.append(f"cov_{fam}_n{n}_smax{smax}")
-
-forbidden = re.compile(r"REFUS|INVARIANT|PLANCHER|Killed|bad_alloc")
-counters = re.compile(r"boules_uniques=\d+.*evenements=\d+.*juge=off desaccords=NA")
-bad = []
-for name in expected:
-    txt = os.path.join(out, name + ".txt")
-    status = os.path.join(out, name + ".status")
-    if not os.path.exists(status):
-        bad.append(f"{name}: .status ABSENT")
-        continue
-    st = open(status).read()
-    if "finished=1" not in st:
-        bad.append(f"{name}: status incomplet")
-    m = re.search(r"code=(\d+)", st)
-    if not m or m.group(1) != "0":
-        bad.append(f"{name}: code={m.group(1) if m else '?'}")
-    if not os.path.exists(txt):
-        bad.append(f"{name}: .txt ABSENT")
-        continue
-    body = open(txt, errors="replace").read()
-    if forbidden.search(body):
-        bad.append(f"{name}: motif interdit ({forbidden.search(body).group(0)})")
-    if not counters.search(body):
-        bad.append(f"{name}: ligne de compteurs absente ou juge ambigu")
-for f in sorted(os.listdir(out)):
-    if f.endswith(".txt") and f[:-4] not in expected:
-        bad.append(f"{f}: fichier inattendu")
-if bad:
-    print("campaign_status=partial_or_failed")
-    for b in bad:
-        print("  -", b)
-    sys.exit(1)
-print(f"campaign_status=complete ({len(expected)} runs valides)")
-print("=== CAMPAGNE COMPLETE ===")
-PYEOF
+# ---- 8. VALIDATION LOCALE : seule autorite du statut de campagne.
+set +e
+python3 gcp-migration/validate_v4_campaign.py "${WORK}/out" \
+  "${SOURCE_COMMIT}" "${SOURCE_TAR_SHA256}" \
+  "${REMOTE_CAMPAIGN_RC}" "${SCP_RC}" 2>&1 | tee -a "${LOG}"
+VALIDATE_RC=${PIPESTATUS[0]}
+set -e
+if [ "${VALIDATE_RC}" -ne 0 ]; then SESSION_RC=65; fi
 
 echo "session terminee ; l arret certifie est declenche par le trap"
-echo "recette : coller ${WORK}/out/*.txt et *.status dans un reçu"
+echo "recette : coller ${WORK}/out/*.txt et *.status dans un reçu, avec le pin"
