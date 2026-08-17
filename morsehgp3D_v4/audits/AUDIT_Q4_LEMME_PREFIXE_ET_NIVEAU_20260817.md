@@ -1,7 +1,8 @@
 # Audit q4 ciblé : lemme du préfixe et représentation du niveau
 
 Date : 17 août 2026.  
-Pin de code audité : `8d52000147d846f282c4e676e30cf0c6e444b7bb`.  
+Pin de baseline audité : `8d52000147d846f282c4e676e30cf0c6e444b7bb`.  
+Oracle q4 audité en post-scriptum : `6fcc8ddc44ec7446fa23aac3391594c49ed5136a`.  
 Contre-audit pris en compte : `1cecc23695665d4a538b7cfc22b530358c35941c`.
 
 ## Verdict
@@ -139,12 +140,26 @@ q4-seeds-from-q3-live,
 q4-seeds-from-q3-events.
 ```
 
-## Ordre utile de la suite
+## 4. Post-scriptum : oracle q4 `6fcc8dd`
 
-1. verser la preuve ci-dessus dans le dossier mathématique ;
+L'oracle indépendant est arrivé pendant cet audit. Sa voie est suffisamment distincte pour recevoir la géométrie ponctuelle q4 :
+
+- Cramer 3×3 complet en `OBig`, contre l'adjugée relative i128 du sujet ;
+- test des quatre orientations en arithmétique indépendante ;
+- puissance par distances rationnelles homogènes, contre `q4_power` ;
+- `BallKey` comparée projectivement ;
+- niveau comparé par identité croisée, sans supposer une fraction réduite ;
+- primitives vectorielles locales et entrée `InputPoint{id,pos}`.
+
+Je n'ai trouvé aucune incohérence dans ces formules. La correction apportée au mutant de retenue est également pertinente : les deux membres du juge ne doivent pas employer les mêmes couples d'opérandes, sous peine de subir la même corruption et de rester égaux avec une sérénité assez typique des tests mal indépendants.
+
+L'étape « construire l'oracle q4 » est donc déjà accomplie. Elle ne nécessite pas une nouvelle note.
+
+## Ordre utile restant
+
+1. verser la preuve du lemme dans le dossier mathématique ;
 2. renforcer la fixture conformément à `1cecc23` ;
-3. construire l'oracle q4 indépendant contre la baseline énumérée actuelle ;
-4. ajouter `U320` et l'égalité sémantique des niveaux ;
-5. recevoir ensuite la sélection axiale contre cette baseline.
+3. ajouter `U320` et l'égalité sémantique des niveaux ;
+4. recevoir ensuite la sélection axiale contre la baseline énumérée et l'oracle q4.
 
-Il n'y a pas lieu de rouvrir q3 ni d'ajouter une nouvelle optimisation avant ces étapes. La baseline q4 est saine ; le prochain travail utile est de lui donner une vérité indépendante, puis de remplacer l'énumération par l'accélérateur axial sans changer les records.
+Il n'y a pas lieu de rouvrir q3 ni d'ajouter une nouvelle optimisation avant ces étapes. La baseline q4 et son oracle sont sains ; le prochain travail utile est désormais de remplacer l'énumération par l'accélérateur axial sans changer les records ni les plateaux de niveau.
