@@ -160,8 +160,11 @@ un champ issu du census) ; `I_B/U_B` appartiennent à l'événement.
 - [x] trois lanes q2/q3/q4 sur une seule vague, masque de lanes, boule-cœur
       par arité (constantes point-fixe prouvées par static_assert), autorité
       64 coins aux feuilles (sens ALL seulement), juge `in_spindle`
+- [ ] boule-cœur : passer au rayon `max(R_dec, R_coup)` (la borne couplée
+      donne +71 % de rayon à s=6 q4, mesure v3) — R_dec seul est implémenté
 - [ ] h_a/h_b dual-tree à range-add (cutoff ~256, coins distincts, masques)
-      + histogramme de fermeture
+      + histogramme de fermeture ; piste « dominance directionnelle 432 »
+      (seul certificat v3 dont la fermeture croît avec n) à re-mesurer
 - [ ] instruction q3 (lentille + acuité) et q4 (seed + axial)
 - [ ] BallKey/RLE/census, événements
 - [ ] dix forêts + juge `gamma_forest` indépendant
