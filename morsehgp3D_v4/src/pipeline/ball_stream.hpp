@@ -78,6 +78,26 @@ struct BallStreamStats {
   u64 axial_sites = 0;
   u64 axial_seeds_dead_perm = 0;
   u64 axial_groups_emitted = 0;
+  // Sweep a DEUX COTES (contre-audit 63d364a) : morts bilaterales — groupes
+  // tues par la profondeur exacte d_j AVANT valid_completion/q4_form, ET
+  // racines exclues par le seuil du cote OPPOSE (positive sous L : >= k
+  // negatifs strictement au-dessus ; negative sur U : >= k positifs
+  // strictement en dessous — d >= h_4 exact dans les deux cas). Les
+  // exclusions par leur PROPRE cote (positive sur U, negative sous L) ne
+  // comptent pas : elles existaient deja dans le sweep unilateral.
+  u64 axial_groups_killed_two_sided = 0;
+  u64 axial_verify_mismatch = 0;
+};
+
+// Drapeaux du chemin axial (mutants + verification de reception).
+enum : u32 {
+  kAxialShortGroup = 1u,     // MUTANT : k-1 (prefixe trop court)
+  kAxialDropTies = 2u,       // MUTANT : ties de frontiere supprimes
+  kAxialFirstRep = 4u,       // MUTANT : premier representant valide
+  kAxialIgnoreOpposite = 8u, // MUTANT : d_j sans le cote oppose
+  kAxialDepthNonstrict = 16u,// MUTANT : le groupe compte sa propre coquille
+  kAxialReverseNeg = 32u,    // MUTANT : suffixe negatif remplace par prefixe
+  kAxialVerify = 64u,        // reception : d_j recoupe par le scan complet
 };
 
 // Site axial d'un seed : A = puissance q3, B = normale·(z−a), mu = A/B.
@@ -214,9 +234,7 @@ inline void collect_candidate_balls(const CloudIndex& ix, i64 s, u64 smax_eff,
                                     BallStreamStats* st,
                                     bool mutant_genfilter_nonstrict = false,
                                     bool axial_bounded = false,
-                                    bool mutant_axial_short = false,
-                                    bool mutant_axial_drop_ties = false,
-                                    bool mutant_axial_first_rep = false) {
+                                    u32 axial_flags = 0) {
   out->clear();
   const u64 h_of[3] = {lane_h(Lane::kQ2, smax_eff), lane_h(Lane::kQ3, smax_eff),
                        lane_h(Lane::kQ4, smax_eff)};
@@ -422,7 +440,7 @@ inline void collect_candidate_balls(const CloudIndex& ix, i64 s, u64 smax_eff,
             continue;
           }
           u64 kk = h_of[2] - p_perm;
-          if (mutant_axial_short && kk > 1) --kk;  // MUTANT : groupe trop court
+          if ((axial_flags & kAxialShortGroup) && kk > 1) --kk;  // MUTANT
           // Balayage 2 : seuils bornes des deux cotes. Cote negatif
           // normalise (−A, −B) : mu INCHANGE (−A/−B = A/B) mais B > 0 pour
           // le comparateur — la selection y est DESCENDANTE (interieur ssi
@@ -452,57 +470,134 @@ inline void collect_candidate_balls(const CloudIndex& ix, i64 s, u64 smax_eff,
             if (sz.B > 0) push_bounded(sz, 0);
             else push_bounded(AxialSite{-sz.A, -sz.B, sz.u}, 1);
           }
-          // Balayage 3 : groupes retenus, TIES DE FRONTIERE INCLUS (<= ;
-          // le mutant drop-ties retablit < et perd le groupe ex aequo).
-          // Au plus kk groupes distincts par cote ; UNE emission par groupe
-          // de mu exact = une sphere, representant MINIMUM canonique des
-          // membres valides (mutant first-rep : premier membre valide).
-          for (int side = 0; side < 2; ++side) {
-            const size_t nn = side_n[side];
-            if (nn == 0) continue;
-            const AxialSite& th = side_arr[side][nn - 1];
-            std::vector<std::pair<AxialSite, std::vector<i32>>> groups;
-            for (const AxialSite& s0 : axial) {
-              if (side == 0 ? (s0.B < 0) : (s0.B > 0)) continue;
-              const AxialSite sz =
-                  side == 0 ? s0 : AxialSite{-s0.A, -s0.B, s0.u};
-              if (nn == (size_t)kk) {
-                const int c = dcmp(side, sz, th);
-                if (mutant_axial_drop_ties ? c >= 0 : c > 0) continue;
+          // Balayage 3 — SWEEP A DEUX COTES (contre-audit 63d364a) : la
+          // profondeur stricte sur le cover se LIT dans les deux ordres
+          // axiaux, exactement :
+          //   d_cover(mu) = p + #{B>0, mu_z < mu} + #{B<0, mu_z > mu}.
+          // Les racines viables vivent dans [L, U] (U = k-ieme plus petite
+          // mu positive, L = k-ieme plus grande negative, multiplicites
+          // comprises ; un cote a moins de k racines => seuil infini).
+          // TABLE UNIQUE de groupes de mu exacts fusionnant les DEUX
+          // signes (une meme sphere a coquille bilaterale n'est plus emise
+          // deux fois), prefixes positifs / suffixes negatifs, et mort du
+          // groupe AVANT valid_completion/q4_form — le scan depth_dead du
+          // chemin axial est SUPPRIME (assertion de reception kAxialVerify
+          // : d_j == scan complet). TIES DE FRONTIERE INCLUS (le mutant
+          // drop-ties les perd) ; representant MINIMUM canonique des
+          // membres valides (mutant first-rep : premier valide).
+          const bool has_U = side_n[0] == (size_t)kk;
+          const bool has_L = side_n[1] == (size_t)kk;
+          const AxialSite Uth = has_U ? side_arr[0][kk - 1] : AxialSite{};
+          const AxialSite Lth = has_L ? side_arr[1][kk - 1] : AxialSite{};
+          struct MuGroup {
+            AxialSite head;  // normalise (B > 0)
+            u64 npos = 0, nneg = 0;
+            std::vector<i32> members;
+          };
+          std::vector<MuGroup> groups;
+          u64 pos_lt_L = 0, neg_gt_U = 0;
+          for (const AxialSite& s0 : axial) {
+            const bool pos = s0.B > 0;
+            const AxialSite sz = pos ? s0 : AxialSite{-s0.A, -s0.B, s0.u};
+            const int cL =
+                has_L ? cmp_mu_same_side(sz.A, sz.B, Lth.A, Lth.B) : 1;
+            const int cU =
+                has_U ? cmp_mu_same_side(sz.A, sz.B, Uth.A, Uth.B) : -1;
+            const bool below =
+                (axial_flags & kAxialDropTies) ? cL <= 0 : cL < 0;  // MUTANT
+            const bool above =
+                (axial_flags & kAxialDropTies) ? cU >= 0 : cU > 0;  // MUTANT
+            if (below) {
+              // Racine positive sous L : morte par le cote OPPOSE (>= k
+              // negatifs strictement au-dessus => d >= h_4) ; elle reste un
+              // site du prefixe positif des groupes survivants.
+              if (pos) {
+                ++pos_lt_L;
+                ++st->axial_groups_killed_two_sided;
               }
-              bool placed = false;
-              for (auto& g : groups)
-                if (cmp_mu_same_side(sz.A, sz.B, g.first.A, g.first.B) == 0) {
-                  g.second.push_back(sz.u);
-                  placed = true;
-                  break;
-                }
-              if (!placed) groups.push_back({sz, {sz.u}});
+              continue;
             }
-            for (auto& g : groups) {
-              bool have = false;
-              BallCandidate best{};
-              Q4Form bestf4{};
-              for (const i32 uy : g.second) {
-                BallCandidate cand;
-                Q4Form f4;
-                if (!valid_completion(uy, &cand, &f4)) continue;
-                if (!have || ball_candidate_less(cand, best)) {
-                  best = cand;
-                  bestf4 = f4;
-                  have = true;
-                }
-                if (mutant_axial_first_rep && have) break;  // MUTANT
+            if (above) {
+              // Racine negative sur U : morte par le cote OPPOSE (>= k
+              // positifs strictement en dessous) ; elle reste un site du
+              // suffixe negatif des groupes survivants.
+              if (!pos) {
+                ++neg_gt_U;
+                ++st->axial_groups_killed_two_sided;
               }
-              if (!have) continue;
-              if (depth_dead(bestf4)) {
-                ++st->gen_depth_killed[2];
-                continue;
-              }
-              out->push_back(best);
-              ++st->candidates[2];
-              ++st->axial_groups_emitted;
+              continue;
             }
+            bool placed = false;
+            for (auto& g : groups)
+              if (cmp_mu_same_side(sz.A, sz.B, g.head.A, g.head.B) == 0) {
+                if (pos) ++g.npos;
+                else ++g.nneg;
+                g.members.push_back(sz.u);
+                placed = true;
+                break;
+              }
+            if (!placed) {
+              groups.push_back(MuGroup{sz, pos ? 1u : 0u, pos ? 0u : 1u, {sz.u}});
+            }
+          }
+          // Tri des groupes par mu croissante (<= 2k, insertion).
+          std::sort(groups.begin(), groups.end(),
+                    [](const MuGroup& x, const MuGroup& y) {
+                      return cmp_mu_same_side(x.head.A, x.head.B, y.head.A,
+                                              y.head.B) < 0;
+                    });
+          // Prefixes positifs et suffixes negatifs, puis d_j exact.
+          const size_t ng = groups.size();
+          u64 pref = pos_lt_L;
+          std::vector<u64> pos_before(ng), neg_after(ng);
+          for (size_t j = 0; j < ng; ++j) {
+            pos_before[j] = pref;
+            pref += groups[j].npos;
+          }
+          u64 suff = neg_gt_U;
+          for (size_t j = ng; j-- > 0;) {
+            neg_after[j] = suff;
+            suff += groups[j].nneg;
+          }
+          for (size_t j = 0; j < ng; ++j) {
+            u64 dj = p_perm + pos_before[j];
+            if (!(axial_flags & kAxialIgnoreOpposite))  // MUTANT : cote oppose
+              dj += (axial_flags & kAxialReverseNeg)
+                        ? (suff - neg_after[j] - groups[j].nneg)  // MUTANT
+                        : neg_after[j];
+            if (axial_flags & kAxialDepthNonstrict)  // MUTANT : sa coquille
+              dj += groups[j].npos + groups[j].nneg;
+            if (dj >= h_of[2]) {
+              ++st->axial_groups_killed_two_sided;
+              continue;
+            }
+            bool have = false;
+            BallCandidate best{};
+            Q4Form bestf4{};
+            for (const i32 uy : groups[j].members) {
+              BallCandidate cand;
+              Q4Form f4;
+              if (!valid_completion(uy, &cand, &f4)) continue;
+              if (!have || ball_candidate_less(cand, best)) {
+                best = cand;
+                bestf4 = f4;
+                have = true;
+              }
+              if ((axial_flags & kAxialFirstRep) && have) break;  // MUTANT
+            }
+            if (!have) continue;
+            if (axial_flags & kAxialVerify) {
+              // Assertion de reception : d_j est EXACTEMENT le compte du
+              // scan q4_power < 0 sur le cover (identite a deux cotes).
+              u64 scan = 0;
+              for (const CoverPoint& cz : cover)
+                if (q4_power(bestf4, ix.upos[(size_t)cz.u]) < 0) ++scan;
+              if (scan != p_perm + pos_before[j] + neg_after[j])
+                ++st->axial_verify_mismatch;
+            }
+            out->push_back(best);
+            ++st->candidates[2];
+            ++st->axial_groups_emitted;
           }
         }
       }

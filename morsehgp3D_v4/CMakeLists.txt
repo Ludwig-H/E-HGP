@@ -299,6 +299,19 @@ mhgp4_expect_code(mhgp4_forest_probe_axial_mutant_ties 4 mhgp4_forest_probe
     "--axial-pair-gate --inject=axial-drop-ties")
 mhgp4_expect_code(mhgp4_forest_probe_axial_mutant_first 4 mhgp4_forest_probe
     "--axial-pair-gate --inject=axial-first-rep")
+# Sweep a DEUX COTES (contre-audit 63d364a) : d_cover exact lu dans les deux
+# ordres axiaux, mort du groupe AVANT valid_completion, assertion de
+# reception d_j == scan complet (kAxialVerify) sur chaque run de la porte,
+# et fixture § 5 (sphere 1513/49 : trois interieurs tous du cote OPPOSE au
+# completeur — absente a smax=6, presente au bon niveau a smax=7). Mutants :
+# d_j sans le cote oppose, suffixe negatif inverse, profondeur non stricte
+# (le groupe compte sa propre coquille).
+mhgp4_expect_code(mhgp4_forest_probe_axial_mutant_opposite 4 mhgp4_forest_probe
+    "--axial-pair-gate --inject=axial-ignore-opposite-side")
+mhgp4_expect_code(mhgp4_forest_probe_axial_mutant_reverse 4 mhgp4_forest_probe
+    "--axial-pair-gate --inject=axial-reverse-negative")
+mhgp4_expect_code(mhgp4_forest_probe_axial_mutant_nonstrict 4 mhgp4_forest_probe
+    "--axial-pair-gate --inject=axial-depth-nonstrict")
 
 # La lane q2 productrice : W_2 est la boule diametrale ouverte, le census
 # est une requete de cover a coefficient 1. Juge brut toutes-paires sur

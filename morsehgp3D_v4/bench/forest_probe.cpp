@@ -69,9 +69,7 @@ struct Args {
   bool inj_genfilter_nonstrict = false;
   bool axial_on = false;  // opt-in GPU-oriente ; production CPU = baseline
   bool axial_pair_gate = false;
-  bool inj_axial_short = false;
-  bool inj_axial_drop_ties = false;
-  bool inj_axial_first_rep = false;
+  u32 inj_axial = 0;  // masque kAxial* des mutants du chemin axial
   u64 min_balls = 0;
   u64 min_fusions = 0;
 };
@@ -128,9 +126,15 @@ Args parse(int argc, char** argv) {
       a.inj_genfilter_nonstrict = true;
     else if (arg == "--axial-on") a.axial_on = true;
     else if (arg == "--axial-pair-gate") a.axial_pair_gate = true;
-    else if (arg == "--inject=axial-short-group") a.inj_axial_short = true;
-    else if (arg == "--inject=axial-drop-ties") a.inj_axial_drop_ties = true;
-    else if (arg == "--inject=axial-first-rep") a.inj_axial_first_rep = true;
+    else if (arg == "--inject=axial-short-group") a.inj_axial |= kAxialShortGroup;
+    else if (arg == "--inject=axial-drop-ties") a.inj_axial |= kAxialDropTies;
+    else if (arg == "--inject=axial-first-rep") a.inj_axial |= kAxialFirstRep;
+    else if (arg == "--inject=axial-ignore-opposite-side")
+      a.inj_axial |= kAxialIgnoreOpposite;
+    else if (arg == "--inject=axial-depth-nonstrict")
+      a.inj_axial |= kAxialDepthNonstrict;
+    else if (arg == "--inject=axial-reverse-negative")
+      a.inj_axial |= kAxialReverseNeg;
     else {
       std::fprintf(stderr, "argument inconnu : %s\n", arg.c_str());
       a.family_ok = false;
@@ -751,15 +755,20 @@ int run_kmax_gate(bool inj_kmax10) {
   return bad ? 3 : 0;
 }
 
-// PORTE APPARIEE DE LA SELECTION AXIALE (audit « axial borne » § 6.1) :
-// baseline enumeree CONTRE axial borne, comparees apres tri/RLE — cles,
-// arite et REPRESENTATION de niveau a l'identique (jamais les candidats
-// bruts : le but est precisement de ne plus les produire). Mutants tues
-// ici : short-group et drop-ties PERDENT des cles (prefixe trop court /
-// groupe ex aequo de frontiere supprime) ; first-rep emet un representant
-// non canonique et change la REPRESENTATION post-RLE. Le chemin --axial-off
-// n'est pas un mutant : c'est cette baseline.
-int run_axial_pair_gate(bool inj_short, bool inj_ties, bool inj_first) {
+// PORTE APPARIEE DE LA SELECTION AXIALE (audit « axial borne » § 6.1,
+// etendue par le contre-audit 63d364a « sweep a deux cotes ») : baseline
+// enumeree CONTRE axial borne, comparees apres tri/RLE — cles, arite et
+// REPRESENTATION de niveau a l'identique (jamais les candidats bruts : le
+// but est precisement de ne plus les produire). Chaque run axial porte
+// kAxialVerify : d_j est recoupe par le scan q4_power complet sur chaque
+// groupe emis, et tout desaccord est une violation. Mutants tues ici :
+// short-group et drop-ties PERDENT des cles ; first-rep emet un
+// representant non canonique (discrimine PRE-RLE) ; ignore-opposite-side
+// et reverse-negative manquent la mort bilaterale de la FIXTURE § 5
+// (sphere 1513/49, trois interieurs tous du cote oppose au completeur) ;
+// depth-nonstrict tue a tort cette meme sphere a smax=7. Le chemin
+// --axial-off n'est pas un mutant : c'est cette baseline.
+int run_axial_pair_gate(u32 inj) {
   u64 bad = 0;
   u64 base_candidates = 0, axial_candidates = 0, groups = 0;
   // Trois nuages : deux familles + la SPHERE COSPHERIQUE R²=50 (84 points
@@ -797,12 +806,18 @@ int run_axial_pair_gate(bool inj_short, bool inj_ties, bool inj_first) {
     std::vector<BallCandidate> cb, ca;
     BallStreamStats sb, sa;
     collect_candidate_balls(ix, 8, 11, &cb, &sb, false, false);
-    collect_candidate_balls(ix, 8, 11, &ca, &sa, false, true, inj_short,
-                            inj_ties, inj_first);
+    collect_candidate_balls(ix, 8, 11, &ca, &sa, false, true,
+                            inj | kAxialVerify);
     base_candidates += sb.candidates[2];
     axial_candidates += sa.candidates[2];
     groups += sa.axial_groups_emitted;
-    if (inj_first) {
+    if (sa.axial_verify_mismatch != 0) {
+      std::fprintf(stderr,
+                   "AXIAL : d_j != scan complet sur %llu groupes (n=%zu)\n",
+                   (unsigned long long)sa.axial_verify_mismatch, pts.size());
+      ++bad;
+    }
+    if (inj & kAxialFirstRep) {
       // Le mutant first-rep est masque post-RLE par la re-canonicalisation
       // inter-seeds (le minimum global d'une cle revient par un autre
       // seed). Discrimination PRE-RLE : les emissions brutes du mutant
@@ -811,8 +826,8 @@ int run_axial_pair_gate(bool inj_short, bool inj_ties, bool inj_first) {
       // appariee (hors mutant) prouve qu'il est le bon.
       std::vector<BallCandidate> cn;
       BallStreamStats sn;
-      collect_candidate_balls(ix, 8, 11, &cn, &sn, false, true, inj_short,
-                              inj_ties, false);
+      collect_candidate_balls(ix, 8, 11, &cn, &sn, false, true,
+                              (inj & ~(u32)kAxialFirstRep) | kAxialVerify);
       std::vector<BallCandidate> ra = ca, rn = cn;
       std::stable_sort(ra.begin(), ra.end(), ball_candidate_less);
       std::stable_sort(rn.begin(), rn.end(), ball_candidate_less);
@@ -847,6 +862,85 @@ int run_axial_pair_gate(bool inj_short, bool inj_ties, bool inj_first) {
       ++bad;
     }
   }
+  // FIXTURE § 5 (contre-audit 63d364a) — la mort NE se lit que sur le cote
+  // OPPOSE au completeur. Sphere circonscrite de {a,b,x,y} : centre
+  // (15, 82/7, 82/7), niveau R² = 1513/49. Les trois z_i en sont
+  // strictement interieurs, hors W_4 de l'ancre (2H² = 450 < Xi = 1000),
+  // et tous du cote B < 0 de l'axe du seed (a,b,x) (plan z=10) tandis que
+  // le completeur y est du cote B > 0 : d_cover = 3 vient du SEUL suffixe
+  // negatif. A smax=6 (h4=3) la cle doit etre ABSENTE (emissions brutes)
+  // et la mort bilaterale comptee ; a smax=7 (h4=4) la cle doit etre
+  // PRESENTE au niveau semantique 1513/49. Les mutants ignore-opposite et
+  // reverse-negative la laissent survivre a smax=6 ; depth-nonstrict la
+  // tue a tort a smax=7.
+  {
+    const std::vector<P3> fx = {{10, 10, 10}, {20, 10, 10}, {15, 17, 10},
+                                {15, 10, 17}, {15, 13, 9},  {14, 13, 9},
+                                {16, 13, 9}};
+    const CloudIndex ix = build_cloud_index(fx);
+    if ((size_t)ix.unique_count() != fx.size()) return 3;
+    const Q4Form f4 = q4_form(fx[0], fx[1], fx[2], fx[3]);
+    const Q3BallKey key = q3_ball_key_reduce(q4_ball_form(f4));
+    const Q4Level lvl = q4_level_raw(f4);
+    for (const u64 sm : {u64(6), u64(7)}) {
+      std::vector<BallCandidate> cb, ca;
+      BallStreamStats sb, sa;
+      collect_candidate_balls(ix, 8, sm, &cb, &sb, false, false);
+      collect_candidate_balls(ix, 8, sm, &ca, &sa, false, true,
+                              inj | kAxialVerify);
+      if (sa.axial_verify_mismatch != 0) {
+        std::fprintf(stderr,
+                     "AXIAL fixture : d_j != scan complet (smax=%llu)\n",
+                     (unsigned long long)sm);
+        ++bad;
+      }
+      bool present = false, lvl_ok = false;
+      for (const BallCandidate& c : ca)
+        if (c.key == key) {
+          present = true;
+          lvl_ok = compare_exact_level(c.level, lvl) == 0;
+          break;
+        }
+      if (sm == 6) {
+        if (present) {
+          std::fprintf(stderr,
+                       "AXIAL fixture : sphere 1513/49 emise a smax=6\n");
+          ++bad;
+        }
+        if (sa.axial_groups_killed_two_sided == 0) {
+          std::fprintf(stderr,
+                       "AXIAL fixture : aucune mort bilaterale a smax=6\n");
+          ++bad;
+        }
+      } else if (!present || !lvl_ok) {
+        std::fprintf(stderr,
+                     "AXIAL fixture : sphere 1513/49 %s a smax=7\n",
+                     present ? "au mauvais niveau" : "absente");
+        ++bad;
+      }
+      const auto rle = [](std::vector<BallCandidate>* v) {
+        std::stable_sort(v->begin(), v->end(), ball_candidate_less);
+        v->erase(
+            std::unique(v->begin(), v->end(),
+                        [](const BallCandidate& x, const BallCandidate& y) {
+                          return x.key == y.key;
+                        }),
+            v->end());
+      };
+      rle(&cb);
+      rle(&ca);
+      bool same = cb.size() == ca.size();
+      for (size_t i = 0; same && i < cb.size(); ++i)
+        same = cb[i].key == ca[i].key && cb[i].arity == ca[i].arity &&
+               same_level_representation(cb[i].level, ca[i].level);
+      if (!same) {
+        std::fprintf(stderr,
+                     "AXIAL fixture : divergence baseline/borne (smax=%llu)\n",
+                     (unsigned long long)sm);
+        ++bad;
+      }
+    }
+  }
   if (axial_candidates > base_candidates || axial_candidates == 0) {
     std::fprintf(stderr, "AXIAL : plancher de reduction viole\n");
     ++bad;
@@ -855,7 +949,7 @@ int run_axial_pair_gate(bool inj_short, bool inj_ties, bool inj_first) {
       "axial_pair_gate base=%llu axial=%llu groupes=%llu violations=%llu\n",
       (unsigned long long)base_candidates, (unsigned long long)axial_candidates,
       (unsigned long long)groups, (unsigned long long)bad);
-  if (inj_short || inj_ties || inj_first) {
+  if (inj != 0) {
     if (bad > 0) {
       std::printf("MUTANT TUE\n");
       return 4;
@@ -909,9 +1003,7 @@ int main(int argc, char** argv) {
     return run_depth_gate(a.inj_threshold_minus_one, a.inj_range_add_le,
                           a.inj_shell_first);
   if (a.kmax_gate) return run_kmax_gate(a.inj_fold_kmax10);
-  if (a.axial_pair_gate)
-    return run_axial_pair_gate(a.inj_axial_short, a.inj_axial_drop_ties,
-                               a.inj_axial_first_rep);
+  if (a.axial_pair_gate) return run_axial_pair_gate(a.inj_axial);
   if (a.guard != 0) return run_guard_gate(a.guard);
   const std::vector<P3> pts = make_family_cloud(
       a.family, a.n,
@@ -937,9 +1029,7 @@ int main(int argc, char** argv) {
   std::vector<BallCandidate> cands;
   BallStreamStats st;
   collect_candidate_balls(ix, a.s, smax_eff, &cands, &st,
-                          a.inj_genfilter_nonstrict, a.axial_on,
-                          a.inj_axial_short, a.inj_axial_drop_ties,
-                          a.inj_axial_first_rep);
+                          a.inj_genfilter_nonstrict, a.axial_on, a.inj_axial);
   const auto t0b = std::chrono::steady_clock::now();
   std::stable_sort(cands.begin(), cands.end(), ball_candidate_less);
   if (!a.inj_rle_drop)  // MUTANT : dedupe saute, boules re-censusees
@@ -959,8 +1049,7 @@ int main(int argc, char** argv) {
                           a.inj_dense_pointid || a.inj_threshold_minus_one ||
                           a.inj_range_add_le || a.inj_skip_full ||
                           a.inj_fold_kmax10 || a.inj_genfilter_nonstrict ||
-                          a.inj_axial_short || a.inj_axial_drop_ties ||
-                          a.inj_axial_first_rep;
+                          a.inj_axial != 0;
   // LE PARAMETRE QUI DEFINIT L'OBJET EN AMONT EXISTE EN AVAL (audit « smax
   // dynamique ») : caps de census par arite, expansion, folds et totaux
   // suivent tous smax_eff — plus jamais les constantes 9/11/10 (MUTANT
@@ -1177,7 +1266,8 @@ int main(int argc, char** argv) {
   std::printf(
       "famille=%s n=%zu s=%lld smax=%llu seed=%lld candidats=%llu/%llu/%llu "
       "gen_tues=%llu/%llu ancres_w4=%llu seeds=%llu groupes=%llu "
-      "boules_uniques=%llu mortes_profondeur=%llu prefiltre_feuilles=%llu "
+      "morts_bilat=%llu boules_uniques=%llu mortes_profondeur=%llu "
+      "prefiltre_feuilles=%llu "
       "prefiltre_range_add=%llu census_keys=%llu census_int=%llu "
       "census_shell=%llu evenements=%llu fusions=%llu noeuds=%llu "
       "juge=%s desaccords=%s t_gen_ms=%.1f t_tri_ms=%.1f t_prefiltre_ms=%.1f "
@@ -1190,6 +1280,7 @@ int main(int argc, char** argv) {
       (unsigned long long)st.anchors_killed_w4,
       (unsigned long long)st.axial_seeds,
       (unsigned long long)st.axial_groups_emitted,
+      (unsigned long long)st.axial_groups_killed_two_sided,
       (unsigned long long)st.unique_balls,
       (unsigned long long)st.balls_dead_depth,
       (unsigned long long)st.prefilter_leaf_tests,
