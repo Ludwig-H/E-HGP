@@ -58,6 +58,7 @@ struct Args {
   bool inj_rle_drop = false;
   bool inj_census_nonstrict = false;
   bool inj_dense_pointid = false;
+  bool inj_prefilter_nonstrict = false;
   u64 min_balls = 0;
   u64 min_fusions = 0;
 };
@@ -100,6 +101,8 @@ Args parse(int argc, char** argv) {
     else if (arg == "--inject=rle-drop") a.inj_rle_drop = true;
     else if (arg == "--inject=census-nonstrict") a.inj_census_nonstrict = true;
     else if (arg == "--inject=dense-pointid") a.inj_dense_pointid = true;
+    else if (arg == "--inject=prefilter-nonstrict")
+      a.inj_prefilter_nonstrict = true;
     else {
       std::fprintf(stderr, "argument inconnu : %s\n", arg.c_str());
       a.family_ok = false;
@@ -128,12 +131,20 @@ void collect_rle(const CloudIndex& ix, i64 s, u64 smax_eff, bool inj_rle_drop,
   st->unique_balls = cands->size();
 }
 
-// UN census exact par cle (I_B et U_B complets). 0 ou code de refus.
+// UN census exact par cle (I_B et U_B complets), precede du PRE-FILTRE de
+// profondeur (descente comptante, boites strictement interieures avalees
+// en O(1)) qui tue exactement les boules que le census aurait tuees en
+// |I_B| > 9 — sans payer la collecte. 0 ou code de refus.
 int census_balls(const CloudIndex& ix, const std::vector<BallCandidate>& cands,
                  size_t shell_cap, bool inj_census_nonstrict,
-                 std::vector<BallData>* balls, BallStreamStats* st) {
+                 bool inj_prefilter_nonstrict, std::vector<BallData>* balls,
+                 BallStreamStats* st) {
   balls->reserve(cands.size());
   for (const BallCandidate& bc : cands) {
+    if (ball_depth_exceeds(ix, bc.key, 9, inj_prefilter_nonstrict)) {
+      ++st->balls_dead_depth;
+      continue;
+    }
     BallData b;
     b.key = bc.key;
     b.level = bc.level;
@@ -246,7 +257,8 @@ int run_gate_chain(const std::vector<InputPoint>& in, bool dense_mutant,
   BallStreamStats st;
   collect_rle(ix, 8, std::min<u64>(11, in.size()), false, &cands, &st);
   std::vector<BallData> balls;
-  if (const int rc = census_balls(ix, cands, 12, false, &balls, &st)) return rc;
+  if (const int rc = census_balls(ix, cands, 12, false, false, &balls, &st))
+    return rc;
   for (const BallData& b : balls) out->keys.push_back(b.key);
   std::vector<PointId> pid((size_t)ix.unique_count());
   for (size_t u = 0; u < pid.size(); ++u)
@@ -495,8 +507,8 @@ int main(int argc, char** argv) {
   // 2. UN census exact par cle (I_B et U_B complets).
   std::vector<BallData> balls;
   {
-    const int rc =
-        census_balls(ix, cands, a.shell_cap, a.inj_census_nonstrict, &balls, &st);
+    const int rc = census_balls(ix, cands, a.shell_cap, a.inj_census_nonstrict,
+                                a.inj_prefilter_nonstrict, &balls, &st);
     if (rc) return rc;
   }
   const auto t2 = std::chrono::steady_clock::now();
@@ -701,7 +713,8 @@ int main(int argc, char** argv) {
       (unsigned long long)nodes_total, (unsigned long long)disagreements,
       ms(t1 - t0), ms(t2 - t1), ms(t3 - t2), ms(t4 - t3));
 
-  if (a.inj_rle_drop || a.inj_census_nonstrict || a.inj_dense_pointid) {
+  if (a.inj_rle_drop || a.inj_census_nonstrict || a.inj_dense_pointid ||
+      a.inj_prefilter_nonstrict) {
     if (a.judge && disagreements > 0) {
       std::printf("MUTANT TUE\n");
       return 4;

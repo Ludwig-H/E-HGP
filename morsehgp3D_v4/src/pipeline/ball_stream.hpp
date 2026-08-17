@@ -261,6 +261,66 @@ inline void collect_candidate_balls(const CloudIndex& ix, i64 s, u64 smax_eff,
 // Retourne false si |I_B| depasse `interior_cap` (boule sans K <= K_max) OU
 // si |U_B| depasse `shell_cap` (a traiter en resource_exhausted par
 // l'appelant — jamais une troncature silencieuse).
+// PRE-FILTRE DE PROFONDEUR (reçu flux reels : 98 % des boules uniques
+// meurent en |I_B| > cap APRES avoir paye leur census complet — le census
+// sortait tot mais feuille par feuille). Descente COMPTANTE : une boite
+// entierement STRICTEMENT interieure (max P < 0 sur la boite) est avalee
+// en O(1) par son compte de positions uniques — une boule profonde meurt
+// en quelques visites, sans allocation. EXACT : un point de coquille
+// (P == 0) n'est jamais compte (une feuille a mn == mx ; a 0 elle est
+// coquille et passe), donc le filtre tue exactement les boules que le
+// census aurait tuees. MUTANT nonstrict : les boites a max P <= 0
+// comptees interieures — des boules a coquille meurent a tort, le juge
+// le voit (evenements manquants).
+inline bool ball_depth_exceeds(const CloudIndex& ix, const Q3BallKey& k,
+                               size_t cap, bool mutant_nonstrict = false) {
+  if (ix.nodes.empty()) return false;
+  const auto axis_val = [&](int i, i64 t) { return k.a * ((i128)t * t) + k.b[i] * t; };
+  const auto axis_min = [&](int i, i64 lo, i64 hi) {
+    const i128 num = -k.b[i];
+    const i128 den = 2 * k.a;
+    i128 q = num / den;
+    if (num % den != 0 && ((num < 0) != (den < 0))) --q;
+    const i64 t1 = (i64)q;
+    i128 best = 0;
+    bool first = true;
+    for (const i64 cand : {t1, t1 + 1, lo, hi}) {
+      const i64 c = std::min(std::max(cand, lo), hi);
+      const i128 v = axis_val(i, c);
+      if (first || v < best) best = v, first = false;
+    }
+    return best;
+  };
+  const auto axis_max = [&](int i, i64 lo, i64 hi) {
+    return std::max(axis_val(i, lo), axis_val(i, hi));
+  };
+  size_t count = 0;
+  std::vector<NodeRef> stack{0};
+  while (!stack.empty()) {
+    const NodeRef z = stack.back();
+    stack.pop_back();
+    const AxisBox bz = box_of_node(ix, z);
+    i128 mn = k.c, mx = k.c;
+    for (int i = 0; i < 3; ++i) {
+      mn += axis_min(i, bz.lo[i], bz.hi[i]);
+      mx += axis_max(i, bz.lo[i], bz.hi[i]);
+    }
+    if (mn > 0) continue;
+    if (mx < 0 || (mutant_nonstrict && mx <= 0)) {
+      count += (z < 0)
+                   ? 1
+                   : (size_t)(ix.nodes[(size_t)z].last -
+                              ix.nodes[(size_t)z].first + 1);
+      if (count > cap) return true;
+      continue;
+    }
+    if (z < 0) continue;  // feuille mn <= 0 <= mx : exactement la coquille
+    stack.push_back(ix.nodes[(size_t)z].left);
+    stack.push_back(ix.nodes[(size_t)z].right);
+  }
+  return false;
+}
+
 inline bool ball_census(const CloudIndex& ix, const Q3BallKey& k,
                         size_t interior_cap, size_t shell_cap,
                         std::vector<i32>* interior, std::vector<i32>* shell,

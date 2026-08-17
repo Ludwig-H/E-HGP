@@ -233,6 +233,12 @@ mhgp4_expect_code(mhgp4_forest_probe_relabel_gate 0 mhgp4_forest_probe
     "--relabel-gate")
 mhgp4_expect_code(mhgp4_forest_probe_mutant_dense_pointid 4 mhgp4_forest_probe
     "--relabel-gate --inject=dense-pointid")
+# Pre-filtre de profondeur : descente comptante EXACTE (boites strictement
+# interieures avalees en O(1)) avant le census — tue exactement les boules
+# |I_B| > 9. Le mutant nonstrict (coquilles comptees interieures) tue des
+# boules a plateau a tort : le juge voit les evenements manquants.
+mhgp4_expect_code(mhgp4_forest_probe_mutant_prefilter 4 mhgp4_forest_probe
+    "--family=uniform --n=120 --s=8 --seed=3 --judge --inject=prefilter-nonstrict")
 
 # La lane q2 productrice : W_2 est la boule diametrale ouverte, le census
 # est une requete de cover a coefficient 1. Juge brut toutes-paires sur
