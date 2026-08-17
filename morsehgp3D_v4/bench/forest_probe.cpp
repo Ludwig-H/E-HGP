@@ -56,6 +56,7 @@ struct Args {
   bool judge = false;
   bool relabel_gate = false;
   bool depth_gate = false;
+  bool kmax_gate = false;
   int guard = 0;  // 1 = dup-id, 2 = coord-range
   bool inj_rle_drop = false;
   bool inj_census_nonstrict = false;
@@ -63,6 +64,8 @@ struct Args {
   bool inj_threshold_minus_one = false;
   bool inj_range_add_le = false;
   bool inj_skip_full = false;
+  bool inj_shell_first = false;
+  bool inj_fold_kmax10 = false;
   u64 min_balls = 0;
   u64 min_fusions = 0;
 };
@@ -103,6 +106,7 @@ Args parse(int argc, char** argv) {
     else if (arg == "--judge") a.judge = true;
     else if (arg == "--relabel-gate") a.relabel_gate = true;
     else if (arg == "--depth-gate") a.depth_gate = true;
+    else if (arg == "--kmax-gate") a.kmax_gate = true;
     else if (arg == "--guard=dup-id") a.guard = 1;
     else if (arg == "--guard=coord-range") a.guard = 2;
     else if (arg == "--inject=rle-drop") a.inj_rle_drop = true;
@@ -112,6 +116,8 @@ Args parse(int argc, char** argv) {
       a.inj_threshold_minus_one = true;
     else if (arg == "--inject=range-add-max-le-zero") a.inj_range_add_le = true;
     else if (arg == "--inject=skip-full-census") a.inj_skip_full = true;
+    else if (arg == "--inject=shell-cap-before-depth") a.inj_shell_first = true;
+    else if (arg == "--inject=fold-hardcodes-kmax10") a.inj_fold_kmax10 = true;
     else {
       std::fprintf(stderr, "argument inconnu : %s\n", arg.c_str());
       a.family_ok = false;
@@ -155,18 +161,19 @@ struct Survivor {
 };
 
 void prefilter_balls(const CloudIndex& ix,
-                     const std::vector<BallCandidate>& cands,
+                     const std::vector<BallCandidate>& cands, u64 smax_eff,
                      bool inj_threshold_minus_one, bool inj_range_add_le,
                      std::vector<Survivor>* survivors, BallStreamStats* st) {
   survivors->reserve(cands.size() / 8 + 16);
   for (size_t i = 0; i < cands.size(); ++i) {
     const BallCandidate& bc = cands[i];
-    u64 h = 12u - (u64)bc.arity;  // K_max=10 : mort a 10/9/8 interieurs
+    // Mort a |I_B| >= smax_eff + 1 - q_min (audit « smax dynamique » :
+    // le parametre qui definit l'objet en amont existe aussi en aval).
+    // Au profil maximal smax=11 : 10/9/8 interieurs pour q2/q3/q4.
+    u64 h = smax_eff + 1 - (u64)bc.arity;
     if (inj_threshold_minus_one) --h;  // MUTANT
     u64 depth = 0;
-    if (ball_depth_at_least(ix, bc.key, h, &depth, inj_range_add_le,
-                            &st->prefilter_leaf_tests,
-                            &st->prefilter_range_add_mass)) {
+    if (ball_depth_at_least(ix, bc.key, h, &depth, inj_range_add_le, st)) {
       ++st->balls_dead_depth;
       continue;
     }
@@ -179,9 +186,10 @@ void prefilter_balls(const CloudIndex& ix,
 // MUTANT skip-full-census : la passe count-only pretend suffire (I_B/U_B
 // vides) — elle ne connait pas U_B, le juge voit les evenements manquants.
 int census_balls(const CloudIndex& ix, const std::vector<BallCandidate>& cands,
-                 const std::vector<Survivor>& survivors, size_t shell_cap,
-                 bool inj_census_nonstrict, bool inj_skip_full,
-                 std::vector<BallData>* balls, BallStreamStats* st) {
+                 const std::vector<Survivor>& survivors, u64 smax_eff,
+                 size_t shell_cap, bool inj_census_nonstrict,
+                 bool inj_skip_full, std::vector<BallData>* balls,
+                 BallStreamStats* st) {
   balls->reserve(survivors.size());
   for (const Survivor& sv : survivors) {
     const BallCandidate& bc = cands[sv.idx];
@@ -194,7 +202,7 @@ int census_balls(const CloudIndex& ix, const std::vector<BallCandidate>& cands,
     }
     ++st->full_census_keys;
     bool overflow = false;
-    if (!ball_census(ix, bc.key, (size_t)(11u - bc.arity), shell_cap,
+    if (!ball_census(ix, bc.key, (size_t)(smax_eff - bc.arity), shell_cap,
                      &b.interior, &b.shell, &overflow)) {
       if (overflow) {
         std::fprintf(stderr,
@@ -227,18 +235,18 @@ int census_balls(const CloudIndex& ix, const std::vector<BallCandidate>& cands,
 // d'identite. `events_out` (optionnel) : evenements par K, en PointId.
 int forests_from_balls(const std::vector<BallData>& balls,
                        const std::vector<P3>& pos,
-                       const std::vector<PointId>& pid_of, u64 per_k_events[11],
-                       ForestResult per_k_result[11],
+                       const std::vector<PointId>& pid_of, u64 kmax_eff,
+                       u64 per_k_events[11], ForestResult per_k_result[11],
                        std::vector<std::vector<ForestEvent>>* events_out = nullptr) {
   std::vector<std::vector<ForestEvent>> ev_k(11);
   std::vector<PlateauEvent> pevents;
   for (const BallData& b : balls) {
     const BallRat c = ball_center(b.key);
     pevents.clear();
-    expand_plateau(c, pos, b.interior, b.shell, 11, &pevents);
+    expand_plateau(c, pos, b.interior, b.shell, (size_t)(kmax_eff + 1), &pevents);
     for (const PlateauEvent& pe : pevents) {
       const size_t K = pe.tpart.size() + pe.ipart.size() - 1;
-      if (K < 1 || K > 10) continue;
+      if (K < 1 || K > (size_t)kmax_eff) continue;
       ForestEvent ev;
       ev.q = (u8)pe.tpart.size();
       ev.d = (u8)pe.ipart.size();
@@ -254,7 +262,7 @@ int forests_from_balls(const std::vector<BallData>& balls,
       ev_k[K].push_back(ev);
     }
   }
-  for (int K = 1; K <= 10; ++K) {
+  for (int K = 1; K <= (int)kmax_eff; ++K) {
     per_k_events[K] = ev_k[(size_t)K].size();
     per_k_result[K] = build_forest(ev_k[(size_t)K]);
     if (per_k_result[K].attach_violations != 0 ||
@@ -306,17 +314,18 @@ int run_gate_chain(const std::vector<InputPoint>& in, bool dense_mutant,
   BallStreamStats st;
   collect_rle(ix, 8, std::min<u64>(11, in.size()), false, &cands, &st);
   std::vector<Survivor> surv;
-  prefilter_balls(ix, cands, false, false, &surv, &st);
+  prefilter_balls(ix, cands, 11, false, false, &surv, &st);
   std::vector<BallData> balls;
   if (const int rc =
-          census_balls(ix, cands, surv, 12, false, false, &balls, &st))
+          census_balls(ix, cands, surv, 11, 12, false, false, &balls, &st))
     return rc;
   for (const BallData& b : balls) out->keys.push_back(b.key);
   std::vector<PointId> pid((size_t)ix.unique_count());
   for (size_t u = 0; u < pid.size(); ++u)
     pid[u] = dense_mutant ? (PointId)u : ix.point_id((i32)u);
   u64 ev[11] = {};
-  return forests_from_balls(balls, ix.upos, pid, ev, out->res, &out->events);
+  return forests_from_balls(balls, ix.upos, pid, 10, ev, out->res,
+                            &out->events);
 }
 
 bool gate_same_event(const ForestEvent& x, const ForestEvent& y) {
@@ -523,7 +532,7 @@ int run_relabel_gate(bool dense_mutant) {
 // avec le compte exact. Mutants : threshold-minus-one (les jumelles
 // meurent a tort), range-add-max-le-zero (les coquilles comptent).
 // ------------------------------------------------------------------
-int run_depth_gate(bool inj_thr, bool inj_le) {
+int run_depth_gate(bool inj_thr, bool inj_le, bool inj_shell_first) {
   u64 bad = 0;
   const auto expect = [&](bool cond, const char* what) {
     if (!cond) {
@@ -605,8 +614,120 @@ int run_depth_gate(bool inj_thr, bool inj_le) {
     expect(!dead && c == 9,
            "coquille : points SUR la sphere jamais comptes (survit a 9)");
   }
+  {
+    // DOUBLE DEBORDEMENT (audit « profondeur avant coquille ») : 10
+    // interieurs (Morton bas) ET 15 points de coquille (Morton haut) sur
+    // la boule R²=50 centree (100,100,100). Le verdict est dead_depth PAR
+    // LA PASSE 1 — jamais resource_exhausted, quel que soit l'ordre des
+    // sous-arbres. Le mutant shell-cap-before-depth (l'ancien census a
+    // une passe, DFS droite d'abord = Morton decroissant) rencontre la
+    // 13e coquille avant le 10e interieur et rend le mauvais statut.
+    std::vector<P3> pts;
+    const i64 sh[15][3] = {{5, 5, 0}, {5, 0, 5}, {0, 5, 5}, {7, 1, 0},
+                           {7, 0, 1}, {1, 7, 0}, {0, 7, 1}, {1, 0, 7},
+                           {0, 1, 7}, {5, 4, 3}, {5, 3, 4}, {4, 5, 3},
+                           {3, 5, 4}, {4, 3, 5}, {3, 4, 5}};
+    for (const auto& s : sh) pts.push_back(P3{100 + s[0], 100 + s[1], 100 + s[2]});
+    for (i64 kk = 0; kk <= 6; ++kk) pts.push_back(P3{100 - kk, 99, 100});
+    pts.push_back(P3{99, 98, 100});
+    pts.push_back(P3{98, 98, 100});
+    pts.push_back(P3{97, 98, 100});
+    const CloudIndex ix = build_cloud_index(pts);
+    if ((size_t)ix.unique_count() != pts.size()) return 3;
+    const Q3BallKey key{1, {-200, -200, -200}, (i128)100 * 100 * 3 - 50};
+    u64 c = 0;
+    const bool dead = ball_depth_at_least(ix, key, h_eff(10), &c, inj_le);
+    if (inj_shell_first) {
+      std::vector<i32> in_, sh_;
+      bool over = false;
+      const bool ok = ball_census(ix, key, 9, 12, &in_, &sh_, &over);
+      expect(ok || !over,
+             "double debordement : dead_depth attendu, resource_exhausted "
+             "rendu par le census-d'abord");
+      (void)dead;
+    } else {
+      expect(dead, "double debordement : mort par profondeur en passe 1");
+    }
+    // Variante : profondeur 9 (< h) mais coquille 15 (> cap 12) — la
+    // SURVIVANTE doit rendre resource_exhausted en passe 2.
+    pts.pop_back();
+    const CloudIndex ix2 = build_cloud_index(pts);
+    if ((size_t)ix2.unique_count() != pts.size()) return 3;
+    u64 c2 = 0;
+    const bool dead2 = ball_depth_at_least(ix2, key, h_eff(10), &c2, inj_le);
+    std::vector<i32> in2, sh2;
+    bool over2 = false;
+    const bool ok2 =
+        dead2 ? true : ball_census(ix2, key, 9, 12, &in2, &sh2, &over2);
+    expect(!dead2 && !ok2 && over2,
+           "profondeur survivante + coquille > cap : resource_exhausted");
+  }
   std::printf("depth_gate violations=%llu\n", (unsigned long long)bad);
-  if (inj_thr || inj_le) {
+  if (inj_thr || inj_le || inj_shell_first) {
+    if (bad > 0) {
+      std::printf("MUTANT TUE\n");
+      return 4;
+    }
+    std::fprintf(stderr, "PORTE INEFFICACE : mutant non discrimine\n");
+    return 3;
+  }
+  return bad ? 3 : 0;
+}
+
+// FIXTURE DE FRONTIERE K_max=5/6 (audit « smax dynamique » § 4) : la boule
+// diametrale de ab (R²=100) a CINQ interieurs — son evenement est
+// exactement d'ordre K=6. smax=6 (K_max=5) : la boule meurt au prefiltre
+// (5 >= 6+1-2), aucune sortie K=6 ; smax=7 (K_max=6) : l'evenement K=6
+// est present au niveau 100. Le mutant fold-hardcodes-kmax10 retablit les
+// constantes 9/11/10 de l'aval : K=6 apparait sous smax=6, tue. La porte
+// est posee directement sur BallData -> expansion -> fold, sans dependre
+// d'un certificat WSPD sur cette petite geometrie.
+int run_kmax_gate(bool inj_kmax10) {
+  u64 bad = 0;
+  const auto expect = [&](bool cond, const char* what) {
+    if (!cond) {
+      std::fprintf(stderr, "KMAX : %s\n", what);
+      ++bad;
+    }
+  };
+  const std::vector<P3> pts = {P3{0, 10, 10}, P3{20, 10, 10}, P3{10, 10, 10},
+                               P3{10, 11, 10}, P3{10, 9, 10},  P3{9, 10, 10},
+                               P3{11, 10, 10}};
+  const CloudIndex ix = build_cloud_index(pts);
+  if ((size_t)ix.unique_count() != pts.size()) return 3;
+  const std::vector<BallCandidate> cands = {BallCandidate{
+      q2_ball_key(pts[0], pts[1]),
+      promote_q3_level(q2_exact_level(p3_norm2(p3_sub(pts[1], pts[0])))), 2}};
+  std::vector<PointId> pid((size_t)ix.unique_count());
+  for (size_t u = 0; u < pid.size(); ++u) pid[u] = ix.point_id((i32)u);
+  for (int cas = 0; cas < 2; ++cas) {
+    const u64 smax_eff = (cas == 0) ? 6 : 7;
+    const u64 smax_caps = inj_kmax10 ? 11 : smax_eff;  // MUTANT
+    const u64 kmax_eff = inj_kmax10 ? 10 : smax_eff - 1;
+    BallStreamStats st;
+    std::vector<Survivor> surv;
+    prefilter_balls(ix, cands, smax_caps, false, false, &surv, &st);
+    std::vector<BallData> balls;
+    if (census_balls(ix, cands, surv, smax_caps, 12, false, false, &balls,
+                     &st))
+      return 3;
+    u64 ev[11] = {};
+    ForestResult res[11];
+    if (forests_from_balls(balls, ix.upos, pid, kmax_eff, ev, res)) return 3;
+    const u64 k6 = (kmax_eff >= 6) ? ev[6] : 0;
+    if (cas == 0) {
+      expect(st.balls_dead_depth == 1 && k6 == 0,
+             "smax=6 : boule ecartee au 5e interieur, aucune sortie K=6");
+    } else {
+      const bool lvl_ok =
+          k6 == 1 && res[6].batch_levels.size() == 1 &&
+          compare_exact_level(res[6].batch_levels[0],
+                              promote_q3_level(q2_exact_level(400))) == 0;
+      expect(lvl_ok, "smax=7 : evenement K=6 present au niveau R²=100");
+    }
+  }
+  std::printf("kmax_gate violations=%llu\n", (unsigned long long)bad);
+  if (inj_kmax10) {
     if (bad > 0) {
       std::printf("MUTANT TUE\n");
       return 4;
@@ -657,7 +778,9 @@ int main(int argc, char** argv) {
   }
   if (a.relabel_gate) return run_relabel_gate(a.inj_dense_pointid);
   if (a.depth_gate)
-    return run_depth_gate(a.inj_threshold_minus_one, a.inj_range_add_le);
+    return run_depth_gate(a.inj_threshold_minus_one, a.inj_range_add_le,
+                          a.inj_shell_first);
+  if (a.kmax_gate) return run_kmax_gate(a.inj_fold_kmax10);
   if (a.guard != 0) return run_guard_gate(a.guard);
   const std::vector<P3> pts = make_family_cloud(
       a.family, a.n,
@@ -691,14 +814,21 @@ int main(int argc, char** argv) {
   // passe2, roles) EST la mise a mort — convention du selftest.
   const bool any_inject = a.inj_rle_drop || a.inj_census_nonstrict ||
                           a.inj_dense_pointid || a.inj_threshold_minus_one ||
-                          a.inj_range_add_le || a.inj_skip_full;
+                          a.inj_range_add_le || a.inj_skip_full ||
+                          a.inj_fold_kmax10;
+  // LE PARAMETRE QUI DEFINIT L'OBJET EN AMONT EXISTE EN AVAL (audit « smax
+  // dynamique ») : caps de census par arite, expansion, folds et totaux
+  // suivent tous smax_eff — plus jamais les constantes 9/11/10 (MUTANT
+  // fold-hardcodes-kmax10, tue par la porte de frontiere K_max=5/6).
+  const u64 smax_caps = a.inj_fold_kmax10 ? 11 : smax_eff;
+  const u64 kmax_eff = a.inj_fold_kmax10 ? 10 : smax_eff - 1;
   std::vector<Survivor> surv;
-  prefilter_balls(ix, cands, a.inj_threshold_minus_one, a.inj_range_add_le,
-                  &surv, &st);
+  prefilter_balls(ix, cands, smax_caps, a.inj_threshold_minus_one,
+                  a.inj_range_add_le, &surv, &st);
   const auto t1b = std::chrono::steady_clock::now();
   std::vector<BallData> balls;
   {
-    const int rc = census_balls(ix, cands, surv, a.shell_cap,
+    const int rc = census_balls(ix, cands, surv, smax_caps, a.shell_cap,
                                 a.inj_census_nonstrict, a.inj_skip_full,
                                 &balls, &st);
     if (rc == 3 && any_inject) {
@@ -718,7 +848,8 @@ int main(int argc, char** argv) {
   ForestResult sres[11];
   std::vector<std::vector<ForestEvent>> sevk;
   {
-    const int rc = forests_from_balls(balls, ix.upos, pid_of, sev, sres, &sevk);
+    const int rc =
+        forests_from_balls(balls, ix.upos, pid_of, kmax_eff, sev, sres, &sevk);
     if (rc == 3 && any_inject) {
       std::printf("MUTANT TUE\n");
       return 4;
@@ -826,7 +957,7 @@ int main(int argc, char** argv) {
                         bc.key.b[1] * p.y + bc.key.b[2] * p.z + bc.key.c;
         if (pw < 0) {
           b.interior.push_back(u);
-          if (b.interior.size() > 9) dead = true;
+          if (b.interior.size() > (size_t)(smax_caps - 2)) dead = true;
         } else if (pw == 0) {
           b.shell.push_back(u);
           if (b.shell.size() > a.shell_cap) over = true;
@@ -843,10 +974,11 @@ int main(int argc, char** argv) {
     ForestResult jres[11];
     std::vector<std::vector<ForestEvent>> jevk;
     {
-      const int rc = forests_from_balls(jballs, ix.upos, jpid, jev, jres, &jevk);
+      const int rc = forests_from_balls(jballs, ix.upos, jpid, kmax_eff, jev,
+                                        jres, &jevk);
       if (rc) return rc;
     }
-    for (int K = 1; K <= 10; ++K) {
+    for (int K = 1; K <= (int)kmax_eff; ++K) {
       const bool same_nodes = [&] {
         std::vector<std::pair<u64, u64>> sn, jn;
         for (const ForestNode& nd : sres[K].nodes) sn.push_back({nd.batch, nd.absorbed});
@@ -892,7 +1024,7 @@ int main(int argc, char** argv) {
            1000.0;
   };
   u64 events_total = 0, fusions_total = 0, nodes_total = 0;
-  for (int K = 1; K <= 10; ++K) {
+  for (int K = 1; K <= (int)kmax_eff; ++K) {
     events_total += sev[K];
     fusions_total += sres[K].fusions;
     nodes_total += sres[K].nodes.size();

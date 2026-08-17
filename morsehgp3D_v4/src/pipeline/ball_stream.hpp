@@ -60,6 +60,7 @@ struct BallStreamStats {
   // Passe count-only (audit « prefiltre exact par boule ») : ses couts,
   // separes de ceux du census complet — un gain de census ne doit jamais
   // dissimuler un tri ou une passe qui mange le gain.
+  u64 prefilter_nodes = 0;
   u64 prefilter_leaf_tests = 0;
   u64 prefilter_range_add_mass = 0;
   u64 full_census_keys = 0;
@@ -295,8 +296,7 @@ inline void collect_candidate_balls(const CloudIndex& ix, i64 s, u64 smax_eff,
 inline bool ball_depth_at_least(const CloudIndex& ix, const Q3BallKey& k,
                                 u64 h, u64* count_out,
                                 bool mutant_range_add_le = false,
-                                u64* leaf_tests = nullptr,
-                                u64* range_add_mass = nullptr) {
+                                BallStreamStats* st = nullptr) {
   *count_out = 0;
   if (ix.nodes.empty()) return h == 0;
   const auto axis_val = [&](int i, i64 t) { return k.a * ((i128)t * t) + k.b[i] * t; };
@@ -323,6 +323,7 @@ inline bool ball_depth_at_least(const CloudIndex& ix, const Q3BallKey& k,
   while (!stack.empty()) {
     const NodeRef z = stack.back();
     stack.pop_back();
+    if (st) ++st->prefilter_nodes;
     const AxisBox bz = box_of_node(ix, z);
     i128 mn = k.c, mx = k.c;
     for (int i = 0; i < 3; ++i) {
@@ -334,7 +335,7 @@ inline bool ball_depth_at_least(const CloudIndex& ix, const Q3BallKey& k,
       const u64 w = (z < 0) ? 1
                             : (u64)(ix.nodes[(size_t)z].last -
                                     ix.nodes[(size_t)z].first + 1);
-      if (range_add_mass) *range_add_mass += w;
+      if (st) st->prefilter_range_add_mass += w;
       count += w;
       if (count >= h) return true;
       continue;
@@ -342,7 +343,7 @@ inline bool ball_depth_at_least(const CloudIndex& ix, const Q3BallKey& k,
     if (z < 0) {
       // Test exact au point (la boite serree d'une feuille rend mn == mx,
       // mais le test ne SUPPOSE pas cette etroitesse).
-      if (leaf_tests) ++(*leaf_tests);
+      if (st) ++st->prefilter_leaf_tests;
       const P3& p = ix.upos[(size_t)(-1 - z)];
       const i128 pw = k.a * p3_norm2(p) + k.b[0] * p.x + k.b[1] * p.y +
                       k.b[2] * p.z + k.c;

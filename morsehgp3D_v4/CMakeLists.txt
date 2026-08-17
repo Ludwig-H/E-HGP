@@ -258,6 +258,23 @@ mhgp4_expect_code(mhgp4_probe_guard_dup_id 2 mhgp4_forest_probe
     "--guard=dup-id")
 mhgp4_expect_code(mhgp4_probe_guard_coord_range 2 mhgp4_forest_probe
     "--guard=coord-range")
+# Profondeur AVANT coquille (audit e7e4d5) : au double debordement le
+# verdict est dead_depth par la passe 1, jamais resource_exhausted — le
+# mutant shell-cap-before-depth (census a une passe) rencontre la coquille
+# d'abord et rend le mauvais statut.
+mhgp4_expect_code(mhgp4_forest_probe_depth_mutant_shell_first 4
+    mhgp4_forest_probe "--depth-gate --inject=shell-cap-before-depth")
+# smax DYNAMIQUE (audit e7e4d5) : le parametre amont existe en aval — caps
+# de census par arite smax_eff - q, expansion, folds et totaux. Fixture de
+# frontiere K_max=5/6 (evenement q2 de profondeur cinq, exactement K=6) ;
+# mutant fold-hardcodes-kmax10 (constantes 9/11/10 retablies) tue ; profil
+# dynamique juge de bout en bout a smax=6.
+mhgp4_expect_code(mhgp4_forest_probe_kmax_gate 0 mhgp4_forest_probe
+    "--kmax-gate")
+mhgp4_expect_code(mhgp4_forest_probe_kmax_mutant 4 mhgp4_forest_probe
+    "--kmax-gate --inject=fold-hardcodes-kmax10")
+mhgp4_expect_code(mhgp4_forest_probe_judge_smax6 0 mhgp4_forest_probe
+    "--family=uniform --n=120 --s=8 --smax=6 --seed=3 --judge --min-balls=100 --min-fusions=100")
 
 # La lane q2 productrice : W_2 est la boule diametrale ouverte, le census
 # est une requete de cover a coefficient 1. Juge brut toutes-paires sur
