@@ -33,6 +33,7 @@
 #include "../src/cloud/families.hpp"
 #include "../src/events/acute_seed.hpp"
 #include "../src/events/edge_cover.hpp"
+#include "../src/events/q4_axial.hpp"
 #include "../src/events/q4_event.hpp"
 #include "../src/events/witness_count.hpp"
 #include "../src/wspd/wavefront.hpp"
@@ -52,10 +53,13 @@ struct Args {
   u64 smax = 11;
   bool judge = false;
   bool exact_mode = false;
+  bool axial = false;
+  bool fixture_tight = false;
   bool inj_seeds_q3 = false;
   bool inj_seeds_q3_events = false;
   bool inj_cover3 = false;
   bool inj_no_canonical = false;
+  bool inj_axial_cut = false;
   u64 min_events = 0;
 };
 
@@ -84,6 +88,9 @@ Args parse(int argc, char** argv) {
       return arg.compare(0, l, prefix) == 0 ? arg.c_str() + l : nullptr;
     };
     if (arg == "--fixture") a.fixture = true;
+    else if (arg == "--fixture-tight") a.fixture_tight = true;
+    else if (arg == "--axial") a.axial = true;
+    else if (arg == "--inject=axial-rank-cut") a.inj_axial_cut = true;
     else if (const char* v = val("--family=")) a.family_ok = parse_family(v, &a.family);
     else if (const char* v = val("--n=")) a.n = std::atoi(v);
     else if (const char* v = val("--coord=")) a.coord = std::atoi(v);
@@ -124,6 +131,25 @@ std::vector<P3> fixture23() {
   return pts;
 }
 
+// Fixture de JUSTESSE de la borne de rang axiale : les 13 points de
+// bc5b05d + sept interieurs (195+k, 215, 285), k = 0..6 (ids 13..19) — tous
+// du MEME cote du plan de la face abx que y (5(z_y-300)+7(z_z-300) < 0) et
+// strictement interieurs a la boule q4 (dist² <= 475 << 14900). L'evenement
+// {0,1,2,3} a donc profondeur EXACTEMENT h_4 - 1 = 7 et, pour la completion
+// y vue du seed x, sept predecesseurs stricts du meme cote : la coupe saine
+// le garde (p + preds = 7 <= h_4 - 1), le mutant a un groupe de moins le
+// perd. Les sept points ont H < 0 ou 2H² << Xi vis-a-vis de ab : n4(ab)
+// reste 0, l'ancre seme toujours.
+std::vector<P3> fixture_tight20() {
+  std::vector<P3> pts = {
+      {100, 300, 300}, {300, 300, 300}, {200, 160, 400}, {200, 160, 200},
+      {200, 355, 300}, {200, 354, 310}, {200, 353, 315}, {200, 352, 320},
+      {200, 351, 323}, {200, 350, 325}, {200, 356, 305}, {200, 355, 312},
+      {200, 354, 317}};
+  for (i64 k = 0; k < 7; ++k) pts.push_back(P3{195 + k, 215, 285});
+  return pts;
+}
+
 Q4Event make_event4(const SupportKey4& sk, const EdgeKey& ek,
                     const Q3BallKey& bk, const Q4Level& lv,
                     const i32* interior_u, u64 n_interior,
@@ -161,11 +187,14 @@ int main(int argc, char** argv) {
     return 2;
   }
   const std::vector<P3> pts =
-      a.fixture ? fixture23()
-                : make_family_cloud(a.family, a.n,
-                                    a.coord > 0 ? a.coord
-                                                : cloud_family_default_coord(a.family, a.n),
-                                    a.seed);
+      a.fixture_tight
+          ? fixture_tight20()
+          : (a.fixture ? fixture23()
+                       : make_family_cloud(
+                             a.family, a.n,
+                             a.coord > 0 ? a.coord
+                                         : cloud_family_default_coord(a.family, a.n),
+                             a.seed));
   const u64 smax_eff = std::min<u64>(a.smax, pts.size());
   if (smax_eff < 5) {
     std::fprintf(stderr, "REFUS : s_max effectif trop petit\n");
@@ -229,7 +258,7 @@ int main(int argc, char** argv) {
   u64 anchors_seen = 0, anchors_killed_ha = 0, seeds_seen = 0,
       completions_tried = 0, coplanar_skips = 0, center_outside = 0,
       shell_refused = 0, power_tests = 0, rect_cover_nodes = 0,
-      anchor_point_visits = 0;
+      anchor_point_visits = 0, axial_candidates = 0;
   std::vector<PointId> pid_of((size_t)ix.unique_count());
   for (size_t u = 0; u < pid_of.size(); ++u)
     pid_of[u] = ix.bucket_ids[ix.bucket_start[u]];
@@ -353,87 +382,133 @@ int main(int argc, char** argv) {
           seeds.push_back(cp.u);
         }
         seeds_seen += seeds.size();
-        // Completions : quatrieme sommet y dans la lentille ENTIERE.
+        // Corps de completion PARTAGE entre la baseline enumeree et la
+        // selection axiale : les records sont identiques par construction,
+        // seule la liste des candidats change. Retour : 0 = poursuivre,
+        // sinon code de sortie a propager.
+        const auto try_completion = [&](i32 ux, const P3& px, i64 l_ax,
+                                        i64 l_bx, i32 uy) -> int {
+          if (uy == ux || uy == ua || uy == ub) return 0;
+          const P3& py = ix.upos[(size_t)uy];
+          const i64 l_ay = p3_norm2(p3_sub(py, pa));
+          const i64 l_by = p3_norm2(p3_sub(py, pb));
+          if (l_ay > D2 || l_by > D2) return 0;  // lentille
+          const i64 l_xy = p3_norm2(p3_sub(py, px));
+          if (l_xy > D2) return 0;
+          ++completions_tried;
+          if (!tetra_owned_by(D2, l_ax, l_ay, l_bx, l_by, l_xy, pid(ua),
+                              pid(ub), pid(ux), pid(uy)))
+            return 0;
+          // Exact-once : carrier canonique = plus petit PointId parmi les
+          // faces incidentes a (a,b) strictement aigues du tetraedre.
+          if (!a.inj_no_canonical) {
+            const P3 vy{2 * py.x - pa.x - pb.x, 2 * py.y - pa.y - pb.y,
+                        2 * py.z - pa.z - pb.z};
+            const bool acute_y = p3_norm2(vy) > D2;
+            if (acute_y && pid(uy) < pid(ux)) return 0;
+          }
+          const Q4Form f4 = q4_form(pa, pb, px, py);
+          if (f4.det == 0) {
+            ++coplanar_skips;
+            return 0;
+          }
+          if (!q4_center_strictly_inside(f4, pa, pb, px, py)) {
+            ++center_outside;
+            return 0;
+          }
+          // Census : paquet en prefixe, cover coefficient 4.
+          u64 depth = base;
+          bool shell = false;
+          i32 interior_u[16];
+          u8 ni = 0;
+          for (const CoverPoint& wz : cover) {
+            if (depth >= hq) break;
+            const i32 uz = wz.u;
+            if (uz == ua || uz == ub || uz == ux || uz == uy || in_packet(uz))
+              continue;
+            ++power_tests;
+            const i128 pw = q4_power(f4, ix.upos[(size_t)uz]);
+            if (pw < 0) {
+              if (ni < 8) interior_u[ni++] = uz;
+              ++depth;
+            } else if (pw == 0) {
+              shell = true;
+            }
+          }
+          if (depth >= hq) return 0;
+          if (shell) {
+            if (a.exact_mode) {
+              std::fprintf(stderr,
+                           "unsupported_degeneracy : extra-shell sur une "
+                           "boule q4 survivante\n");
+              return 2;
+            }
+            ++shell_refused;
+            return 0;
+          }
+          i32 all_interior[16];
+          u64 n_interior = 0;
+          for (u64 t = 0; t < base; ++t) all_interior[n_interior++] = packet_ids[t];
+          for (u8 t = 0; t < ni; ++t) all_interior[n_interior++] = interior_u[t];
+          if (n_interior != depth) {
+            std::fprintf(stderr,
+                         "INVARIANT : interieurs=%llu != profondeur=%llu\n",
+                         (unsigned long long)n_interior,
+                         (unsigned long long)depth);
+            return 3;
+          }
+          records.push_back(make_event4(
+              support_key4(pid(ua), pid(ub), pid(ux), pid(uy)),
+              edge_key(pid(ua), pid(ub)),
+              q3_ball_key_reduce(q4_ball_form(f4)), q4_level_raw(f4),
+              all_interior, n_interior, pid_of));
+          return 0;
+        };
+        // Completions : quatrieme sommet y dans la lentille ENTIERE —
+        // enumere (baseline) ou filtre par la borne de rang axiale
+        // (MATHEMATIQUES.md § 4.6, fail-open, juge inchange).
         for (const i32 ux : seeds) {
           const P3& px = ix.upos[(size_t)ux];
           const i64 l_ax = p3_norm2(p3_sub(px, pa));
           const i64 l_bx = p3_norm2(p3_sub(px, pb));
-          for (const CoverPoint& cy : cover) {
-            const i32 uy = cy.u;
-            if (uy == ux || uy == ua || uy == ub) continue;
-            const P3& py = ix.upos[(size_t)uy];
-            const i64 l_ay = p3_norm2(p3_sub(py, pa));
-            const i64 l_by = p3_norm2(p3_sub(py, pb));
-            if (l_ay > D2 || l_by > D2) continue;  // lentille
-            const i64 l_xy = p3_norm2(p3_sub(py, px));
-            if (l_xy > D2) continue;
-            ++completions_tried;
-            if (!tetra_owned_by(D2, l_ax, l_ay, l_bx, l_by, l_xy, pid(ua),
-                                pid(ub), pid(ux), pid(uy)))
-              continue;
-            // Exact-once : carrier canonique = plus petit PointId parmi les
-            // faces incidentes a (a,b) strictement aigues du tetraedre.
-            if (!a.inj_no_canonical) {
-              const P3 vy{2 * py.x - pa.x - pb.x, 2 * py.y - pa.y - pb.y,
-                          2 * py.z - pa.z - pb.z};
-              const bool acute_y = p3_norm2(vy) > D2;
-              if (acute_y && pid(uy) < pid(ux)) continue;
-            }
-            const Q4Form f4 = q4_form(pa, pb, px, py);
-            if (f4.det == 0) {
-              ++coplanar_skips;
-              continue;
-            }
-            if (!q4_center_strictly_inside(f4, pa, pb, px, py)) {
-              ++center_outside;
-              continue;
-            }
-            // Census : paquet en prefixe, cover coefficient 4.
-            u64 depth = base;
-            bool shell = false;
-            i32 interior_u[16];
-            u8 ni = 0;
-            for (const CoverPoint& wz : cover) {
-              if (depth >= hq) break;
-              const i32 uz = wz.u;
-              if (uz == ua || uz == ub || uz == ux || uz == uy || in_packet(uz))
+          if (a.axial) {
+            const Q3Form f3 = q3_form(pa, pb, px);
+            const P3 nv = p3_cross(p3_sub(pb, pa), p3_sub(px, pa));
+            std::vector<AxialSite> pos, neg;
+            u64 p_perm = 0;
+            for (const CoverPoint& cp : cover) {
+              const i32 u = cp.u;
+              if (u == ua || u == ub || u == ux) continue;
+              const P3& pz = ix.upos[(size_t)u];
+              const i64 Bz = p3_dot(nv, p3_sub(pz, pa));
+              const i128 Az = q3_power(f3, pz);
+              if (Bz == 0) {
+                // Az < 0 : interieur permanent ; Az == 0 : sur le CERCLE
+                // (coquille de toute completion — ne compte nulle part).
+                if (Az < 0) ++p_perm;
                 continue;
-              ++power_tests;
-              const i128 pw = q4_power(f4, ix.upos[(size_t)uz]);
-              if (pw < 0) {
-                if (ni < 8) interior_u[ni++] = uz;
-                ++depth;
-              } else if (pw == 0) {
-                shell = true;
               }
+              (Bz > 0 ? pos : neg).push_back(AxialSite{u, Az, Bz});
             }
-            if (depth >= hq) continue;
-            if (shell) {
-              if (a.exact_mode) {
-                std::fprintf(stderr,
-                             "unsupported_degeneracy : extra-shell sur une "
-                             "boule q4 survivante\n");
-                return 2;
-              }
-              ++shell_refused;
-              continue;
+            std::sort(pos.begin(), pos.end(), axial_mu_less);
+            std::sort(neg.begin(), neg.end(),
+                      [](const AxialSite& s1, const AxialSite& s2) {
+                        return axial_mu_less(s2, s1);
+                      });
+            std::vector<i32> cands;
+            const u64 slack = a.inj_axial_cut ? 1 : 0;  // MUTANT : un groupe
+            axial_rank_cut(pos, p_perm, hq, slack, &cands);
+            axial_rank_cut(neg, p_perm, hq, slack, &cands);
+            axial_candidates += cands.size();
+            for (const i32 uy : cands) {
+              const int rc = try_completion(ux, px, l_ax, l_bx, uy);
+              if (rc) return rc;
             }
-            i32 all_interior[16];
-            u64 n_interior = 0;
-            for (u64 t = 0; t < base; ++t) all_interior[n_interior++] = packet_ids[t];
-            for (u8 t = 0; t < ni; ++t) all_interior[n_interior++] = interior_u[t];
-            if (n_interior != depth) {
-              std::fprintf(stderr,
-                           "INVARIANT : interieurs=%llu != profondeur=%llu\n",
-                           (unsigned long long)n_interior,
-                           (unsigned long long)depth);
-              return 3;
+          } else {
+            for (const CoverPoint& cy : cover) {
+              const int rc = try_completion(ux, px, l_ax, l_bx, cy.u);
+              if (rc) return rc;
             }
-            records.push_back(make_event4(
-                support_key4(pid(ua), pid(ub), pid(ux), pid(uy)),
-                edge_key(pid(ua), pid(ub)),
-                q3_ball_key_reduce(q4_ball_form(f4)), q4_level_raw(f4),
-                all_interior, n_interior, pid_of));
           }
         }
       }
@@ -526,15 +601,18 @@ int main(int argc, char** argv) {
   };
   std::printf(
       "source=%s n=%zu s=%lld smax=%llu seed=%lld lane=%s coef=%lld "
+      "axial=%d candidats_axiaux=%llu "
       "rect_vivants=%zu ancres_vues=%llu ancres_tuees_ha=%llu seeds=%llu "
       "completions=%llu coplanaires=%llu centre_hors=%llu evenements=%zu "
       "doublons=%llu ballkeys_uniques=%zu tests_puissance=%llu "
       "noeuds_cover=%llu visites_filtre=%llu shell_refus=%llu "
       "juge_manquants=%llu juge_en_trop=%llu t_wspd_ms=%.1f "
       "t_instruction_ms=%.1f t_juge_ms=%.1f\n",
-      a.fixture ? "fixture23" : cloud_family_name(a.family), pts.size(),
-      (long long)a.s, (unsigned long long)smax_eff, a.seed,
-      a.inj_seeds_q3 ? "q3(MUTANT)" : "q4", (long long)coef, alive.size(),
+      a.fixture_tight ? "fixture_tight20"
+                      : (a.fixture ? "fixture23" : cloud_family_name(a.family)),
+      pts.size(), (long long)a.s, (unsigned long long)smax_eff, a.seed,
+      a.inj_seeds_q3 ? "q3(MUTANT)" : "q4", (long long)coef, (int)a.axial,
+      (unsigned long long)axial_candidates, alive.size(),
       (unsigned long long)anchors_seen, (unsigned long long)anchors_killed_ha,
       (unsigned long long)seeds_seen, (unsigned long long)completions_tried,
       (unsigned long long)coplanar_skips, (unsigned long long)center_outside,
@@ -544,6 +622,38 @@ int main(int argc, char** argv) {
       (unsigned long long)shell_refused, (unsigned long long)missing,
       (unsigned long long)extra, ms(t1 - t0), ms(t2 - t1), ms(t3 - t2));
 
+  // Fixture de justesse axiale : l'evenement {0,1,2,3} a profondeur
+  // EXACTEMENT h_4 - 1 = 7, ses sept interieurs (ids 13..19) tous du meme
+  // cote que la completion — la coupe saine le garde, le mutant a un
+  // groupe de moins le perd.
+  if (a.fixture_tight) {
+    const SupportKey4 want = support_key4(0, 1, 2, 3);
+    const Q4Event* found = nullptr;
+    for (const Q4Event& e : records)
+      if (e.support == want) found = &e;
+    bool ok = found && found->owner.lo == 0 && found->owner.hi == 1 &&
+              found->depth == 7;
+    if (ok)
+      for (int t = 0; t < 7; ++t)
+        if (found->interior[(size_t)t] != (PointId)(13 + t)) ok = false;
+    if (a.inj_axial_cut) {
+      if (!a.axial) {
+        std::fprintf(stderr, "REFUS : axial-rank-cut exige --axial\n");
+        return 2;
+      }
+      if (!ok) {
+        std::printf("MUTANT TUE : la coupe de rang perd l'evenement limite\n");
+        return 4;
+      }
+      std::fprintf(stderr, "PORTE INEFFICACE : mutant non discrimine\n");
+      return 3;
+    }
+    if (!ok) {
+      std::fprintf(stderr,
+                   "FIXTURE : evenement limite {0,1,2,3} absent ou altere\n");
+      return 3;
+    }
+  }
   // Fixture gravee : l'evenement {0,1,2,3} avec owner (0,1), profondeur 1,
   // interieur {22} (le point z, visible du seul cover coefficient 4).
   if (a.fixture) {
@@ -574,8 +684,9 @@ int main(int argc, char** argv) {
     std::fprintf(stderr, "PORTE INEFFICACE : mutant non discrimine\n");
     return 3;
   }
-  if (a.inj_seeds_q3 || a.inj_seeds_q3_events || a.inj_cover3) {
-    // Ces mutants ne se jugent que sur la fixture gravee.
+  if (a.inj_seeds_q3 || a.inj_seeds_q3_events || a.inj_cover3 ||
+      a.inj_axial_cut) {
+    // Ces mutants ne se jugent que sur une fixture gravee.
     std::fprintf(stderr, "PORTE INEFFICACE : mutant sans fixture\n");
     return 3;
   }

@@ -453,6 +453,39 @@ via `mul_level_192`, précondition `< 2^146` respectée), `den = det² <
 2^260` → **cinq mots (U320)** ; q3/q4 mixte < `2^218`. La canonisation
 pgcd 192 bits est DIFFÉRÉE (question Q12).
 
+### 4.6 Sélection axiale (`derive_v4`, re-dérivation de la piste v3 § 4)
+
+À seed aigu `(a,b,x)` fixé, les sphères passant par le cercle circonscrit
+de la face forment un FAISCEAU : en formes entières,
+`Phi(z ; mu) = P_3(z) − mu·pi(z)`, où `P_3` est la forme de Gram q3 du
+triangle (coefficient de tête `G > 0`) et `pi(z) = n·(z−a)` la forme du
+plan (`n = (b−a)×(x−a)`). Pour tout `mu`, `Phi(z) < 0` ⟺ `z` strictement
+intérieur à la sphère du faisceau — le signe est bien normalisé par
+`G > 0`. Une complétion `y` (hors du plan, `pi(y) ≠ 0`) détermine
+`mu_y = P_3(y)/pi(y)`, et le test intérieur EXACT d'un site `z` dans la
+boule de `y` est `sign(P_3(z)·pi(y) − P_3(y)·pi(z)) · sign(pi(y)) < 0`.
+
+**Classification par site** : `A = P_3(z)` (i128, `< 2^106`),
+`B = pi(z)` (i64, `< 2^55`). `B = 0` : permanent (intérieur si `A < 0`,
+sur le CERCLE si `A = 0` — coquille de toute complétion) ; `B > 0` : côté
+positif ; `B < 0` : côté négatif. Dans un même côté, `mu_1 < mu_2` ⟺
+`A_1·B_2 < A_2·B_1` (produits `< 2^161` → comparaison en U192 signée).
+
+**Borne de rang (le théorème de la sélection)** : pour une complétion `y`
+du côté positif, tout site `w` du même côté avec `mu_w < mu_y` (strict)
+est STRICTEMENT intérieur à la boule de `y` ; idem côté négatif avec
+`mu_w > mu_y`. Donc `depth(y) >= p + preds(y)` où `p` compte les
+permanents intérieurs et `preds(y)` les prédécesseurs stricts de `y` dans
+son côté. Un événement exige `depth < h_4` : les candidats vivent dans les
+premiers groupes du côté positif (ordre `mu` croissant) et les derniers du
+côté négatif, tant que `p + preds <= h_4 − 1` — au plus `2·(h_4 − p)`
+groupes par seed (« seize groupes » à `p = 0`, `h_4 = 8`). La borne est un
+MINORANT (elle ignore l'autre côté) : le filtre est fail-open, jamais une
+autorité — le census exact et les contrôles owner/arité restent inchangés
+sur chaque candidat retenu, et le juge brut vérifie qu'aucun record ne
+bouge. Sites hors cover : ils ne peuvent qu'affaiblir `preds`, donc
+élargir la sélection — sûr.
+
 Arithmétique : toutes les décisions en entiers dimensionnés (i64 sous 2^34,
 i128 au-delà ; largeurs déclarées par prédicat) ; les rationnels du centre ne
 sont jamais gonflés (`A = den, B = −2N, C = 2N·p − den‖p‖²`) ; la positivité

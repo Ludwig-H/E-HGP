@@ -169,6 +169,23 @@ mhgp4_expect_code(mhgp4_q4_mutant_coef3 4 mhgp4_q4_events_probe
 mhgp4_expect_code(mhgp4_q4_mutant_no_canonical 4 mhgp4_q4_events_probe
     "--family=uniform --n=120 --s=8 --seed=3 --inject=no-canonical")
 
+# Selection axiale (MATHEMATIQUES.md § 4.6) : accelerateur RECU contre la
+# baseline enumeree — memes records exiges par le meme juge brut sur les
+# trois sources, fixture de justesse au bord du rang (profondeur h_4 - 1,
+# sept predecesseurs du meme cote), mutant a un groupe de moins tue.
+mhgp4_expect_code(mhgp4_q4_axial_fixture 0 mhgp4_q4_events_probe
+    "--fixture --s=8 --axial --judge --min-events=1")
+mhgp4_expect_code(mhgp4_q4_axial_judge_uniform 0 mhgp4_q4_events_probe
+    "--family=uniform --n=120 --s=8 --seed=3 --axial --judge --min-events=5")
+mhgp4_expect_code(mhgp4_q4_axial_judge_clusters 0 mhgp4_q4_events_probe
+    "--family=eight_clusters --n=120 --s=8 --seed=3 --axial --judge --min-events=5")
+mhgp4_expect_code(mhgp4_q4_axial_tight 0 mhgp4_q4_events_probe
+    "--fixture-tight --s=8 --axial --judge --min-events=1")
+mhgp4_expect_code(mhgp4_q4_axial_tight_baseline 0 mhgp4_q4_events_probe
+    "--fixture-tight --s=8 --judge --min-events=1")
+mhgp4_expect_code(mhgp4_q4_axial_mutant_rank 4 mhgp4_q4_events_probe
+    "--fixture-tight --s=8 --axial --inject=axial-rank-cut")
+
 # Ordre SEMANTIQUE des niveaux q4 (audit « lemme prefixe et niveau » § 2) :
 # U320 contre l'oracle 384 bits, plancher de plateaux semantiques a
 # representations DIFFERENTES (la grande cosphere les garantit — le cas que
