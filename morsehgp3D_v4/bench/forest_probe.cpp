@@ -135,6 +135,8 @@ Args parse(int argc, char** argv) {
       a.inj_axial |= kAxialDepthNonstrict;
     else if (arg == "--inject=axial-reverse-negative")
       a.inj_axial |= kAxialReverseNeg;
+    else if (arg == "--inject=seed-core-nonstrict")
+      a.inj_axial |= kAxialSeedCoreNonstrict;
     else {
       std::fprintf(stderr, "argument inconnu : %s\n", arg.c_str());
       a.family_ok = false;
@@ -862,6 +864,53 @@ int run_axial_pair_gate(u32 inj) {
       ++bad;
     }
   }
+  // FIXTURE-CŒUR (audit « axial arbre et cœur de seed » § 4.2) : la
+  // frontiere du cœur seed-local n'est PAS comptee. Six points sur le
+  // cercle R² = 25 du plan z = 10 (centre (15,10)) : le seed (a,b,x) est
+  // strictement aigu (arcs 90°/126,87°/143,13°), c1,c2,c3 sont
+  // COCIRCULAIRES au seed (P = 0, B = 0 : sur toute sphere du faisceau —
+  // le cas d'egalite 2P² = J·B²), et y = (15,10,16) complete la sphere
+  // R² = 3721/144 dont les c_i sont des points de COQUILLE (aucun
+  // interieur strict dans le nuage). AUCUNE paire antipodale parmi les
+  // six points du cercle (216,87°, 0°, 90°, 143,13°, 53,13°, 126,87°) :
+  // un diametre + y donnerait un grand cercle de la MEME sphere et la
+  // lane q3 emettrait la cle en secours — c'est arrive avec c1 a 36,87°,
+  // l'antipode de a. Regle stricte : aucun temoin, la cle est emise a
+  // smax=6 par les DEUX chemins. Mutant seed-core-nonstrict : les
+  // cocirculaires hors seed comptent (0 >= 0), tout seed porte par le
+  // cercle meurt, et l'exact-once (pid(y) maximal — y dernier point)
+  // comme le centre hors tetraedre interdisent toute emission de secours
+  // par un seed hors du plan : la cle disparait du chemin axial.
+  {
+    const std::vector<P3> fx = {{11, 7, 10},  {20, 10, 10}, {15, 15, 10},
+                                {11, 13, 10}, {18, 14, 10}, {12, 14, 10},
+                                {15, 10, 16}};
+    const CloudIndex ix = build_cloud_index(fx);
+    if ((size_t)ix.unique_count() != fx.size()) return 3;
+    const Q4Form f4 = q4_form(fx[0], fx[1], fx[2], fx[6]);
+    const Q3BallKey key = q3_ball_key_reduce(q4_ball_form(f4));
+    std::vector<BallCandidate> cb, ca;
+    BallStreamStats sb, sa;
+    collect_candidate_balls(ix, 8, 6, &cb, &sb, false, false);
+    collect_candidate_balls(ix, 8, 6, &ca, &sa, false, true,
+                            inj | kAxialVerify);
+    if (sa.axial_verify_mismatch != 0) {
+      std::fprintf(stderr, "AXIAL fixture-cœur : d_j != scan complet\n");
+      ++bad;
+    }
+    const auto has_key = [&](const std::vector<BallCandidate>& v) {
+      for (const BallCandidate& c : v)
+        if (c.key == key) return true;
+      return false;
+    };
+    if (!has_key(cb) || !has_key(ca)) {
+      std::fprintf(stderr,
+                   "AXIAL fixture-cœur : sphere 3721/144 absente "
+                   "(base=%d axial=%d)\n",
+                   (int)has_key(cb), (int)has_key(ca));
+      ++bad;
+    }
+  }
   // FIXTURE § 5 (contre-audit 63d364a) — la mort NE se lit que sur le cote
   // OPPOSE au completeur. Sphere circonscrite de {a,b,x,y} : centre
   // (15, 82/7, 82/7), niveau R² = 1513/49. Les trois z_i en sont
@@ -873,10 +922,23 @@ int run_axial_pair_gate(u32 inj) {
   // PRESENTE au niveau semantique 1513/49. Les mutants ignore-opposite et
   // reverse-negative la laissent survivre a smax=6 ; depth-nonstrict la
   // tue a tort a smax=7.
-  {
-    const std::vector<P3> fx = {{10, 10, 10}, {20, 10, 10}, {15, 17, 10},
-                                {15, 10, 17}, {15, 13, 9},  {14, 13, 9},
-                                {16, 13, 9}};
+  // Deux variantes d'interieurs : (0) le triplet GRAVE par le contre-audit
+  // — z_i si profonds (|mu| = 1770 > racine(J/2) ~ 433) qu'ils sont
+  // temoins UNIVERSELS : c'est le cœur de seed qui tue, avant tout
+  // tableau axial ; (1) un triplet NON universel dans la bande admissible
+  // (mu = 400, 400, 320 dans (mu_y = 240, 433]) : le cœur ne compte rien
+  // et c'est la lecture bilaterale du sweep qui tue. Les deux variantes
+  // partagent la meme sphere 1513/49 (absente a smax=6, presente au bon
+  // niveau a smax=7).
+  for (int variant = 0; variant < 2; ++variant) {
+    const std::vector<P3> fx =
+        variant == 0
+            ? std::vector<P3>{{10, 10, 10}, {20, 10, 10}, {15, 17, 10},
+                              {15, 10, 17}, {15, 13, 9},  {14, 13, 9},
+                              {16, 13, 9}}
+            : std::vector<P3>{{10, 10, 10}, {20, 10, 10}, {15, 17, 10},
+                              {15, 10, 17}, {19, 14, 9},  {11, 14, 9},
+                              {17, 15, 8}};
     const CloudIndex ix = build_cloud_index(fx);
     if ((size_t)ix.unique_count() != fx.size()) return 3;
     const Q4Form f4 = q4_form(fx[0], fx[1], fx[2], fx[3]);
@@ -904,18 +966,24 @@ int run_axial_pair_gate(u32 inj) {
       if (sm == 6) {
         if (present) {
           std::fprintf(stderr,
-                       "AXIAL fixture : sphere 1513/49 emise a smax=6\n");
+                       "AXIAL fixture : sphere 1513/49 emise a smax=6 (v%d)\n",
+                       variant);
           ++bad;
         }
-        if (sa.axial_groups_killed_two_sided == 0) {
+        const bool killed = variant == 0
+                                ? sa.seeds_killed_seed_core > 0
+                                : sa.axial_groups_killed_two_sided > 0;
+        if (!killed) {
           std::fprintf(stderr,
-                       "AXIAL fixture : aucune mort bilaterale a smax=6\n");
+                       "AXIAL fixture : aucune mort %s a smax=6 (v%d)\n",
+                       variant == 0 ? "au cœur de seed" : "bilaterale",
+                       variant);
           ++bad;
         }
       } else if (!present || !lvl_ok) {
         std::fprintf(stderr,
-                     "AXIAL fixture : sphere 1513/49 %s a smax=7\n",
-                     present ? "au mauvais niveau" : "absente");
+                     "AXIAL fixture : sphere 1513/49 %s a smax=7 (v%d)\n",
+                     present ? "au mauvais niveau" : "absente", variant);
         ++bad;
       }
       const auto rle = [](std::vector<BallCandidate>* v) {
@@ -1271,7 +1339,9 @@ int main(int argc, char** argv) {
       "prefiltre_range_add=%llu census_keys=%llu census_int=%llu "
       "census_shell=%llu evenements=%llu fusions=%llu noeuds=%llu "
       "juge=%s desaccords=%s t_gen_ms=%.1f t_tri_ms=%.1f t_prefiltre_ms=%.1f "
-      "t_census_ms=%.1f t_fold_ms=%.1f t_juge_ms=%.1f\n",
+      "t_census_ms=%.1f t_fold_ms=%.1f t_juge_ms=%.1f seeds_core=%llu "
+      "noeuds_core=%llu t_core_ms=%.1f t_ab_ms=%.1f t_reduce_ms=%.1f "
+      "t_emit_ms=%.1f\n",
       cloud_family_name(a.family), pts.size(), (long long)a.s,
       (unsigned long long)smax_eff, a.seed, (unsigned long long)st.candidates[0],
       (unsigned long long)st.candidates[1], (unsigned long long)st.candidates[2],
@@ -1294,7 +1364,9 @@ int main(int argc, char** argv) {
       // campagne prendrait pour un accord verifie.
       a.judge ? std::to_string(disagreements).c_str() : "NA",
       ms(t0b - t0), ms(t1 - t0b), ms(t1b - t1), ms(t2 - t1b), ms(t3 - t2),
-      ms(t4 - t3));
+      ms(t4 - t3), (unsigned long long)st.seeds_killed_seed_core,
+      (unsigned long long)st.seed_core_nodes, st.t_seed_core_ms,
+      st.t_axial_ab_ms, st.t_reduce_ms, st.t_emit_ms);
 
   if (any_inject) {
     if (a.judge && disagreements > 0) {

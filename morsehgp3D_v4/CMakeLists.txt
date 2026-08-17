@@ -312,6 +312,16 @@ mhgp4_expect_code(mhgp4_forest_probe_axial_mutant_reverse 4 mhgp4_forest_probe
     "--axial-pair-gate --inject=axial-reverse-negative")
 mhgp4_expect_code(mhgp4_forest_probe_axial_mutant_nonstrict 4 mhgp4_forest_probe
     "--axial-pair-gate --inject=axial-depth-nonstrict")
+# Cœur universel du seed (audit « axial arbre et cœur de seed » § 1) :
+# 2·mu² <= J = D(3G−2EX) par Jung — un site P < 0, 2P² > J·B² est
+# strictement interieur a toute sphere admissible du seed ; compte sur
+# l'antichaine (ALL/NONE par boite, U320), arret a h_4, commun aux deux
+# chemins. La fixture-cœur (six points cocirculaires R²=25, sphere
+# 3721/144) grave la frontiere : l'egalite 2P² = J·B² (points du faisceau
+# P=0, B=0) n'est PAS comptee — le mutant qui la compte tue le seed et
+# perd la cle.
+mhgp4_expect_code(mhgp4_forest_probe_axial_mutant_seed_core 4 mhgp4_forest_probe
+    "--axial-pair-gate --inject=seed-core-nonstrict")
 
 # La lane q2 productrice : W_2 est la boule diametrale ouverte, le census
 # est une requete de cover a coefficient 1. Juge brut toutes-paires sur

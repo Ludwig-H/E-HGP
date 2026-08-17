@@ -25,6 +25,7 @@
 #pragma once
 
 #include <algorithm>
+#include <chrono>
 #include <vector>
 
 #include "../events/acute_seed.hpp"
@@ -87,6 +88,18 @@ struct BallStreamStats {
   // comptent pas : elles existaient deja dans le sweep unilateral.
   u64 axial_groups_killed_two_sided = 0;
   u64 axial_verify_mismatch = 0;
+  // Cœur universel du seed (audit « axial arbre et cœur de seed » § 1) :
+  // seeds tues par >= h_4 temoins seed-universels (ou J < 0 : aucun
+  // tetraedre admissible), et nœuds visites par la descente du compte.
+  u64 seeds_killed_seed_core = 0;
+  u64 seed_core_nodes = 0;
+  // Decomposition de t_gen exigee par l'audit § 3 (chemin axial) :
+  // cœur de seed, materialisation A,B des sites, reduction a deux cotes
+  // (seuils + groupes + prefixes + d_j), emission (valid_completion +
+  // q4_form + verify). En millisecondes ; le cœur est aussi chronometre
+  // sur le chemin baseline.
+  double t_seed_core_ms = 0, t_axial_ab_ms = 0, t_reduce_ms = 0,
+         t_emit_ms = 0;
 };
 
 // Drapeaux du chemin axial (mutants + verification de reception).
@@ -98,6 +111,7 @@ enum : u32 {
   kAxialDepthNonstrict = 16u,// MUTANT : le groupe compte sa propre coquille
   kAxialReverseNeg = 32u,    // MUTANT : suffixe negatif remplace par prefixe
   kAxialVerify = 64u,        // reception : d_j recoupe par le scan complet
+  kAxialSeedCoreNonstrict = 128u,  // MUTANT : egalites comptees au cœur
 };
 
 // Site axial d'un seed : A = puissance q3, B = normale·(z−a), mu = A/B.
@@ -106,6 +120,99 @@ struct AxialSite {
   i64 B;
   i32 u;
 };
+
+// Comparaison exacte 2·P² <=> J·B² (cœur de seed). Sous u16 les produits
+// atteignent ~212 bits (audit § 1) : U320, jamais i128. Preconditions :
+// P <= 0, J >= 0 ; produits < 2^260 (contrat de mul_192_128_to_320).
+inline int cmp_2p2_jb2(i128 P, i128 J, i64 B) {
+  const u128 ap = (u128)(-P);
+  const u64 pw[3] = {(u64)ap, (u64)(ap >> 64), 0};
+  U320 lhs = mul_192_128_to_320(pw, ap);  // P² < 2^209
+  u64 carry = 0;                          // ×2 : decalage d'un bit, sans
+  for (int i = 0; i < 5; ++i) {           // debordement (2P² < 2^210)
+    const u64 nc = lhs.w[i] >> 63;
+    lhs.w[i] = (lhs.w[i] << 1) | carry;
+    carry = nc;
+  }
+  const u128 ju = (u128)J;
+  const u64 jw[3] = {(u64)ju, (u64)(ju >> 64), 0};
+  const u128 b2 = (u128)((i128)B * B);
+  return cmp_u320(lhs, mul_192_128_to_320(jw, b2));  // J·B² < 2^210
+}
+
+// ---- Cœur universel du seed (audit « axial arbre et cœur de seed » § 1).
+// Jung : tout tetraedre ACCEPTE par la production (six aretes <= D,
+// centre strictement interieur => circumboule = miniboule) verifie
+// R² <= 3D/8, donc sa racine axiale verifie 2·mu² <= J = D·(3G − 2EX)
+// (avec R_mu² = DEX/(4G) + mu²/(4G) et |n|² = G). Un site z tel que
+// P(z) < 0 et 2·P(z)² > J·B(z)² est STRICTEMENT interieur a TOUTE sphere
+// admissible du seed : Phi_mu(z) = P − mu·B <= P + racine(J/2)·|B| < 0.
+// L'egalite 2P² = J·B² n'est PAS comptee (le site peut etre SUR la
+// sphere extremale — mutant seed-core-nonstrict, qui compte aussi les
+// points du faisceau P = 0, B = 0). J < 0 : aucun tetraedre admissible
+// (R3² > 3D/8 deja sur le cercle du seed) — le seed meurt sans temoin.
+// Compte sur l'antichaine de l'ancre, descente ALL/NONE par boite
+// (ALL : Pmax < 0 et 2·Pmax² > J·Babs² ; NONE : Pmin >= 0), arret a h.
+// FAIL-OPEN : ne tue que sur des interieurs stricts certifies du nuage ;
+// les temoins hors de l'antichaine sont simplement omis. EXACT pour la
+// sortie post-RLE : une emission q4 supprimee appartient a un groupe qui
+// meurt de toute facon (>= h_4 interieurs si le label q_min est 4 ; si
+// une emission d'arite inferieure partage la cle, le groupe subsiste par
+// elle, inchange) — meme argument que depth_dead et le filtre W_4.
+inline bool seed_core_kills(const CloudIndex& ix,
+                            const std::vector<NodeRef>& handles,
+                            const Q3Form& f3s, const P3& nrm, i128 J, u64 h,
+                            i32 ua, i32 ub, i32 ux, bool nonstrict,
+                            BallStreamStats* st) {
+  if (J < 0) return true;
+  const i64 nn[3] = {nrm.x, nrm.y, nrm.z};
+  const i64 aa[3] = {f3s.a.x, f3s.a.y, f3s.a.z};
+  u64 count = 0;
+  std::vector<NodeRef> stack(handles.begin(), handles.end());
+  while (!stack.empty() && count < h) {
+    const NodeRef z = stack.back();
+    stack.pop_back();
+    ++st->seed_core_nodes;
+    if (z < 0) {
+      const i32 u = -1 - z;
+      if (u == ua || u == ub || u == ux) continue;
+      const P3& pz = ix.upos[(size_t)u];
+      const i128 P = q3_power(f3s, pz);
+      if (nonstrict ? (P > 0) : (P >= 0)) continue;
+      const i64 B = p3_dot(nrm, p3_sub(pz, f3s.a));
+      const int c = cmp_2p2_jb2(P, J, B);
+      if (nonstrict ? (c >= 0) : (c > 0)) count += ix.range_weight(u, u);
+      continue;
+    }
+    const AxisBox bz = box_of_node(ix, z);
+    i128 pmn = 0, pmx = 0;
+    i64 bmn = 0, bmx = 0;
+    for (int i = 0; i < 3; ++i) {
+      const i64 lo = bz.lo[i] - aa[i];
+      const i64 hi = bz.hi[i] - aa[i];
+      pmn += detail_q3::axis_min(f3s, i, lo, hi);
+      pmx += detail_q3::axis_max(f3s, i, lo, hi);
+      bmn += nn[i] >= 0 ? nn[i] * lo : nn[i] * hi;
+      bmx += nn[i] >= 0 ? nn[i] * hi : nn[i] * lo;
+    }
+    if (nonstrict ? (pmn > 0) : (pmn >= 0)) continue;  // NONE
+    if (nonstrict ? (pmx <= 0) : (pmx < 0)) {
+      // ALL possible : |P| >= |Pmax| et |B| <= Babs sur tout le nœud.
+      const i64 babs = bmx > -bmn ? bmx : -bmn;
+      const int c = cmp_2p2_jb2(pmx, J, babs);
+      if (nonstrict ? (c >= 0) : (c > 0)) {
+        // a, b, x ont P = 0 : un nœud ALL strict ne peut pas les contenir
+        // (sous mutant l'excedent tue PLUS de seeds, jamais moins).
+        const NodeRange r = range_of(ix, z);
+        count += ix.range_weight(r.first, r.last);
+        continue;
+      }
+    }
+    stack.push_back(ix.nodes[(size_t)z].left);
+    stack.push_back(ix.nodes[(size_t)z].right);
+  }
+  return count >= h;
+}
 
 namespace detail_bs {
 
@@ -362,6 +469,28 @@ inline void collect_candidate_balls(const CloudIndex& ix, i64 s, u64 smax_eff,
           if (!is_acute_seed(pa, pb, px, D2, pid(ua), pid(ub), pid(cx.u))) continue;
           const i64 l_ax = p3_norm2(p3_sub(px, pa));
           const i64 l_bx = p3_norm2(p3_sub(px, pb));
+          // Cœur universel du seed (audit « axial arbre et cœur de seed »)
+          // — COMMUN aux deux chemins : la porte appariee reste appariee,
+          // et le juge des petits n protege la regle elle-meme (un temoin
+          // est un interieur strict de toute sphere admissible, la sortie
+          // post-RLE est inchangee — argument depth_dead/W_4 en tete de
+          // seed_core_kills).
+          const Q3Form f3s = q3_form(pa, pb, px);
+          const P3 nrm = p3_cross(p3_sub(pb, pa), p3_sub(px, pa));
+          {
+            const auto c0 = std::chrono::steady_clock::now();
+            const i128 Jb = (i128)D2 * (3 * f3s.g - 2 * (i128)l_ax * l_bx);
+            const bool dead = seed_core_kills(
+                ix, handles, f3s, nrm, Jb, h_of[2], ua, ub, cx.u,
+                (axial_flags & kAxialSeedCoreNonstrict) != 0, st);
+            st->t_seed_core_ms += std::chrono::duration<double, std::milli>(
+                                      std::chrono::steady_clock::now() - c0)
+                                      .count();
+            if (dead) {
+              ++st->seeds_killed_seed_core;
+              continue;
+            }
+          }
           // Predicats du chemin de base pour UNE completion : lentille,
           // owner 6 aretes, exact-once du seed, det, centre strict. Rend
           // true et remplit le candidat si la completion est valide.
@@ -418,8 +547,7 @@ inline void collect_candidate_balls(const CloudIndex& ix, i64 s, u64 smax_eff,
           }
           // --- SELECTION AXIALE BORNEE (en-tete de fonction). ---
           ++st->axial_seeds;
-          const Q3Form f3s = q3_form(pa, pb, px);
-          const P3 nrm = p3_cross(p3_sub(pb, pa), p3_sub(px, pa));
+          const auto ta0 = std::chrono::steady_clock::now();
           // Balayage 1 : A,B caches (SoA seed-local), permanents p.
           axial.clear();
           u64 p_perm = 0;
@@ -470,6 +598,9 @@ inline void collect_candidate_balls(const CloudIndex& ix, i64 s, u64 smax_eff,
             if (sz.B > 0) push_bounded(sz, 0);
             else push_bounded(AxialSite{-sz.A, -sz.B, sz.u}, 1);
           }
+          const auto ta1 = std::chrono::steady_clock::now();
+          st->t_axial_ab_ms +=
+              std::chrono::duration<double, std::milli>(ta1 - ta0).count();
           // Balayage 3 — SWEEP A DEUX COTES (contre-audit 63d364a) : la
           // profondeur stricte sur le cover se LIT dans les deux ordres
           // axiaux, exactement :
@@ -559,6 +690,9 @@ inline void collect_candidate_balls(const CloudIndex& ix, i64 s, u64 smax_eff,
             neg_after[j] = suff;
             suff += groups[j].nneg;
           }
+          const auto ta2 = std::chrono::steady_clock::now();
+          st->t_reduce_ms +=
+              std::chrono::duration<double, std::milli>(ta2 - ta1).count();
           for (size_t j = 0; j < ng; ++j) {
             u64 dj = p_perm + pos_before[j];
             if (!(axial_flags & kAxialIgnoreOpposite))  // MUTANT : cote oppose
@@ -599,6 +733,9 @@ inline void collect_candidate_balls(const CloudIndex& ix, i64 s, u64 smax_eff,
             ++st->candidates[2];
             ++st->axial_groups_emitted;
           }
+          st->t_emit_ms += std::chrono::duration<double, std::milli>(
+                               std::chrono::steady_clock::now() - ta2)
+                               .count();
         }
       }
   }
