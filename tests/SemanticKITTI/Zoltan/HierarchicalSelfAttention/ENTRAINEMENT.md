@@ -1,246 +1,376 @@
-# Entraînement
+# Entraînement et pré-entraînement
 
-## 1. Ordre des régimes
+## 1. Principe
 
-L'entraînement est ouvert par étapes. Chaque étape doit produire un résultat interprétable avant d'ajouter la suivante.
+Le projet ne doit pas commencer par une loss compliquée sur deux arbres mal appariés. L'entraînement est ouvert par étapes, chacune répondant à une question identifiable :
 
-1. **supervisé minimal** : vérifier que les tokens portent la sémantique ;
-2. **supervisé hiérarchique** : ajouter les cibles molles internes ;
-3. **pré-entraînement de portée** : apprendre l'invariance au thinning ;
-4. **softmaps/prototypes** : seulement si la distillation latente fonctionne ;
-5. **multi-ordre ou incidence complète** : seulement après gain robuste.
+1. le tokenizer conserve-t-il la géométrie et la sémantique ?
+2. le modèle plat apprend-il sur les polyèdres ?
+3. l'espace d'échelle HGP apporte-t-il une information supplémentaire ?
+4. peut-on apprendre une invariance à l'acquisition sans effacer taille et pose ?
+5. les représentations transfèrent-elles entre capteurs, datasets et tâches ?
 
-## 2. Supervision sémantique
+## 2. Décomposition du latent
 
-### 2.1 Cibles par facette
-
-Pour une facette `τ`, la cible est une distribution pondérée :
+Chaque polyèdre produit des sous-espaces explicites :
 
 ```math
-\pi_\tau(c)=
+z_v=
+ z_v^{\mathrm{shape}}
+ \oplus z_v^{\mathrm{metric}}
+ \oplus z_v^{\mathrm{hier}}
+ \oplus z_v^{\mathrm{sensor}}.
+```
+
+- `shape` : géométrie normalisée et contenu sémantique ;
+- `metric` : taille, pose et localisation ;
+- `hier` : croissance, persistance et rôle dans l'arbre ;
+- `sensor` : qualité de mesure et caractéristiques d'acquisition.
+
+Les losses d'invariance ne s'appliquent pas au token complet. Une voiture observée plus loin doit garder une forme proche, mais sa position, son incidence et son incertitude peuvent légitimement changer.
+
+## 3. Étape A — autoencodage diagnostique de la surface
+
+Avant toute sémantique, évaluer la capacité des représentations candidates à reconstruire `Σ_v`.
+
+### Cibles
+
+- mesure surfacique normalisée ou grille sphéro-radiale basse fréquence ;
+- points de surface échantillonnés par aire ;
+- normales ;
+- bords ;
+- multiplicité radiale ;
+- scalaires de connectivité.
+
+### Loss
+
+```math
+\mathcal L_{\mathrm{repr}}
+=
+\lambda_{\mathrm{grid}}\mathcal L_{\mathrm{grid}}
++
+\lambda_{\mathrm{Chamfer}}\mathcal L_{\mathrm{Chamfer}}^{A}
++
+\lambda_{\mathrm{normal}}\mathcal L_{\mathrm{normal}}
++
+\lambda_{\mathrm{boundary}}\mathcal L_{\mathrm{boundary}}.
+```
+
+Le Chamfer est pondéré par l'aire afin qu'une triangulation dense n'obtienne pas davantage de voix qu'une triangulation sobre de la même surface.
+
+Cette étape sert à tracer la frontière taux–distorsion. Elle ne constitue pas le pré-entraînement final : reconstruire parfaitement les détails d'acquisition peut encourager le raccourci géométrique identifié dans les travaux récents de SSL 3D.
+
+## 4. Étape B — supervision SemanticKITTI
+
+### 4.1 Cibles par facette
+
+Pour une facette `τ` :
+
+```math
+\pi_\tau(c)
+=
 \frac{\sum_{x\in\tau}w_{x\tau}\mathbf 1[y_x=c]}
 {\sum_{x\in\tau}w_{x\tau}}.
 ```
 
-Un label majoritaire n'est utilisé que pour les métriques auxiliaires. Les facettes mixtes ne sont pas forcées à prétendre qu'une frontière n'existe pas.
+Les facettes mixtes reçoivent une distribution douce. Le label majoritaire est réservé aux métriques auxiliaires.
 
-### 2.2 Cibles par nœud
+### 4.2 Cibles par polyèdre
 
-Pour un nœud `v`,
+Pour un polyèdre `v` :
 
 ```math
-\pi_v(c)=
-\frac{\sum_x w_{x\to v}\mathbf 1[y_x=c]}
-{m_v}.
+\pi_v(c)
+=
+\frac{\sum_x w_{x\to v}\mathbf 1[y_x=c]}{m_v}.
 ```
 
-La supervision interne est normalisée pour qu'un point ne soit pas compté une fois par ancêtre. Une option simple consiste à tirer un seul niveau interne par scan et par itération.
+La supervision interne ne doit pas compter le même point une fois par ancêtre sans correction. Trois options :
 
-### 2.3 Loss principale
+- échantillonner un seul niveau par branche et par itération ;
+- normaliser par le nombre d'ancêtres supervisés ;
+- superviser uniquement les événements persistants.
+
+### 4.3 Loss principale
 
 ```math
-\mathcal L_{\mathrm{sup}}=
+\mathcal L_{\mathrm{sup}}
+=
 \mathcal L_{\mathrm{CE,point}}
-+\lambda_{\mathrm{Lovasz}}\mathcal L_{\mathrm{Lovasz,point}}
-+\lambda_{\mathrm{leaf}}\mathcal L_{\mathrm{CE,soft,leaf}}
-+\lambda_{\mathrm{node}}\mathcal L_{\mathrm{CE,soft,node}}
-+\lambda_{\mathrm{bdry}}\mathcal L_{\mathrm{boundary}}.
++
+\mathcal L_{\mathrm{Lovasz,point}}
++
+0.2\mathcal L_{\mathrm{soft,facet}}
++
+0.05\mathcal L_{\mathrm{soft,poly}}
++
+0.1\mathcal L_{\mathrm{boundary}}.
 ```
 
-Point de départ :
+La loss de frontière est désactivée dans l'ablation principale de la hiérarchie, afin de ne pas attribuer à l'arbre un gain fourni par une tête auxiliaire.
 
-```yaml
-lambda_lovasz: 1.0
-lambda_leaf: 0.2
-lambda_node: 0.05
-lambda_boundary: 0.1
-```
+## 5. Étape C — `Surface-JEPA`
 
-La loss de frontière est une BCE sur les arêtes latérales : deux facettes sont-elles séparées par une frontière sémantique ? Elle est désactivée lors de l'ablation principale de l'arbre afin de ne pas attribuer à la hiérarchie un gain fourni par une tête auxiliaire.
+### 5.1 Masquage
 
-## 3. Augmentations supervisées
+Masquer des régions cohérentes :
 
-La hiérarchie est calculée avant l'entraînement. Une augmentation n'est autorisée que si elle peut être transportée exactement ou si la hiérarchie est reconstruite.
+- secteur contigu sur la sphère ;
+- intervalle radial ;
+- bloc `S²×R` ;
+- groupe connecté de facettes ;
+- partie entière de la surface visible.
 
-### Transport analytique
+Éviter le masquage indépendant de cases dispersées, trop facile à interpoler localement et peu lié à une notion de partie.
 
-- rotation en lacet ;
-- translation ;
-- symétrie horizontale ;
-- homothétie, avec transformation cohérente des tailles et niveaux ;
-- bruit ou dropout de rémission ;
-- dropout de canaux ;
-- dropout de sous-arbres.
+### 5.2 Teacher–student
 
-### Reconstruction obligatoire
+- même `SurfaceEncoder` ;
+- teacher mis à jour par EMA ;
+- teacher reçoit la surface complète ou moins dégradée ;
+- student reçoit les secteurs visibles ;
+- predictor présent seulement côté student ;
+- stop-gradient sur le teacher.
 
-- crop arbitraire pouvant couper une composante ;
-- déformation élastique ;
-- suppression structurée de points ou d'anneaux ;
-- simulation d'occultation ;
-- mélange de scans.
-
-Réutiliser la hiérarchie du scan complet après une augmentation qui change sa connectivité produirait un objet commode, mais faux. Ce genre de raccourci donne parfois de bons scores, puis de très longues discussions avec les reviewers.
-
-## 4. Pré-entraînement principal : `Range-Hierarchy JEPA`
-
-### 4.1 Deux vues physiques
-
-Pour chaque scan non annoté :
-
-- **teacher view** : scan complet ou faiblement perturbé ;
-- **student view** : scan dégradé comme s'il provenait d'une portée ou d'un capteur moins favorable.
-
-La vue étudiante combine aléatoirement :
-
-1. **beam drop** : conservation d'un sous-ensemble cohérent d'anneaux ;
-2. **angular thinning** : suppression selon azimut et élévation ;
-3. **range-dependent drop** : probabilité de conservation décroissante avec la portée simulée ;
-4. **sector occlusion** : secteurs angulaires continus masqués ;
-5. **local point drop** : absorption ou occultation locale ;
-6. **radiometric corruption** : bruit et dropout de rémission.
-
-Les paramètres sont inspirés des perturbations de LiDomAug, LiDAR Distillation et SemanticKITTI-C, puis calibrés sur les statistiques réelles des scans. Un thinning Bernoulli uniforme reste un contrôle, pas la vue principale.
-
-Les deux hiérarchies sont reconstruites indépendamment. Cela teste la propriété réellement requise à l'inférence ; restreindre l'arbre dense aux points survivants rendrait la tâche artificiellement facile.
-
-### 4.2 Appariement sans labels
-
-Pour les vues synthétiques, les identifiants des retours survivants sont connus. Deux nœuds `u` et `v` sont appariés par recouvrement pondéré :
+### 5.3 Objectif latent
 
 ```math
-J_w(u,v)=
-\frac{\sum_x\min(w_{x\to u},w_{x\to v})}
-{\sum_x\max(w_{x\to u},w_{x\to v})}.
+\mathcal L_{\mathrm{surfJEPA}}
+=
+1-
+\cos
+\left(
+P(z_{v,\mathrm{visible}}^{S,\mathrm{shape}}),
+\operatorname{sg}(z_{v}^{T,\mathrm{shape}})
+\right).
+```
+
+Une petite reconstruction basse fréquence de la grille de mesure peut stabiliser le départ, mais la cible principale reste latente.
+
+## 6. Étape D — apprentissage de l'espace d'échelle
+
+### 6.1 Prédiction parent depuis enfants
+
+Pour un événement `p←{c_i}` :
+
+```math
+\widehat z_p
+=
+\operatorname{MergePredictor}
+\{z_{c_i}^{\mathrm{end}},e_{c_ip}\},
+```
+
+```math
+\mathcal L_{\mathrm{parent}}
+=
+1-
+\cos
+\left(
+\widehat z_p^{\mathrm{shape}},
+\operatorname{sg}(z_p^{T,\mathrm{shape}})
+\right).
+```
+
+La taille et la pose ne sont pas contraintes à être identiques à une moyenne des enfants. Elles sont prédites par des têtes métriques séparées.
+
+### 6.2 Prédiction des innovations
+
+Lorsque les deltas de facettes sont disponibles, masquer `ΔF_t` et prédire son embedding teacher. Sinon, prédire l'innovation latente définie dans [ARCHITECTURE.md](ARCHITECTURE.md).
+
+### 6.3 Trajectoire de branche
+
+Masquer un intervalle de niveaux et prédire :
+
+- embedding du segment ;
+- prochain `Δlogλ` ;
+- persistance restante ;
+- gain de masse ou d'aire ;
+- type du prochain événement.
+
+```math
+\mathcal L_{\mathrm{event}}
+=
+\mathcal L_{\mathrm{latent}}
++
+\operatorname{Huber}(\widehat{\Delta\log\lambda},\Delta\log\lambda)
++
+\operatorname{Huber}(\widehat{\Delta\log m},\Delta\log m)
++
+\operatorname{CE}(\widehat{\mathrm{type}},\mathrm{type}).
+```
+
+La partie événementielle reste auxiliaire. Un réseau capable de prédire le prochain artefact d'anneau n'a pas nécessairement compris un objet.
+
+## 7. Étape E — `Cross-Range PolyJEPA`
+
+### 7.1 Deux observations
+
+Teacher :
+
+```math
+\mathcal H^T=\operatorname{HGP}(X).
+```
+
+Student :
+
+```math
+\mathcal H^S=\operatorname{HGP}(\mathcal A(X)),
+```
+
+où `A` simule une acquisition différente :
+
+- suppression cohérente d'anneaux ;
+- thinning azimutal et vertical ;
+- conservation dépendante de la portée ;
+- occultation par secteurs ;
+- bruit et dropout de rémission ;
+- incidence dégradée ;
+- changement de pattern LiDAR.
+
+Les deux hiérarchies sont reconstruites indépendamment. Restreindre l'arbre dense aux retours survivants reste un contrôle optimiste, jamais la condition principale.
+
+### 7.2 Matching des polyèdres
+
+Pour les vues synthétiques, les retours survivants fournissent une correspondance partielle. Le score combine :
+
+```math
+J_w(u,v),
+\quad
+\operatorname{overlap}_{\mathrm{surface}},
+\quad
+\operatorname{dist}_{\mathrm{measure}},
+\quad
+\operatorname{coherence}_{\mathrm{tree}}.
 ```
 
 Conserver les couples satisfaisant :
 
-- `J_w ≥ τ_match` ;
-- rapport de masses dans un intervalle déclaré ;
-- cohérence de branche parent–enfant ;
-- appariement mutuel ou solution bipartite sans collision.
+- recouvrement minimal ;
+- rapport d'aire et d'échelle admissible ;
+- cohérence parent–enfant ;
+- matching mutuel ou transport optimal sparse ;
+- couverture suffisante du student.
 
-Le seuil est choisi sur le train à partir de la précision d'appariement géométrique, jamais à partir des labels sémantiques.
+Rapporter le taux d'appariement par classe, portée, taille, multiplicité radiale et persistance. Une loss qui baisse parce que tous les petits objets ont été rejetés n'est pas un progrès.
 
-### 4.3 Architecture teacher–student
+### 7.3 Alignement partiel
 
-- même encodeur PolyTreeFormer ;
-- teacher mis à jour par EMA ;
-- teacher reçoit le contexte complet ;
-- student reçoit uniquement les tokens réellement observés ;
-- un prédicteur MLP ou deux blocs Transformer légers n'existe que côté student ;
-- stop-gradient sur les cibles teacher.
-
-Le coefficient EMA suit un cosinus de `0.996` vers `0.9999`.
-
-### 4.4 Objectif latent
-
-Pour un couple apparié `(u, v)` :
+Pour un couple `(u,v)` :
 
 ```math
-\mathcal L_{\mathrm{JEPA}}=
-\sum_{(u,v)}\omega_{uv}
-\left[1-
-\cos\left(P(h_v^S),\operatorname{sg}(h_u^T)\right)
+\mathcal L_{\mathrm{range}}
+=
+\omega_{uv}
+\left[
+1-
+\cos
+\left(
+P(z_v^{S,\mathrm{shape}}),
+\operatorname{sg}(z_u^{T,\mathrm{shape}})
+\right)
 \right].
 ```
 
-Les poids `ω` dépendent du score d'appariement et de la racine carrée de la masse, puis sont normalisés par scène.
+La pondération dépend de la qualité du matching et de la masse observée, avec plafonnement pour empêcher les routes et bâtiments de monopoliser l'objectif.
 
-La prédiction porte sur plusieurs profondeurs. Une seule racine géante ne doit pas absorber la loss.
+Ajouter une loss de cohérence des sous-espaces :
 
-### 4.5 Objectif de trajectoire
+- `shape` aligné fortement ;
+- `hier` aligné lorsque les événements correspondent ;
+- `metric` prédit mais non invariant ;
+- `sensor` décorrélé partiellement du `shape` par adversarial probe ou covariance penalty en ablation.
 
-Masquer un segment de branche et prédire :
+## 8. Étape F — supervision temporelle
 
-- son embedding teacher ;
-- les prochains écarts `Δ log λ` ;
-- la persistance résiduelle ;
-- le rapport de masse au prochain événement ;
-- le degré du prochain lot de fusion.
+Les séquences LiDAR donnent des observations naturelles de la même géométrie à des portées différentes.
+
+Pipeline :
+
+1. compensation de l'ego-motion ;
+2. exclusion ou traitement séparé des objets mobiles ;
+3. appariement surfacique entre scans ;
+4. matching de branches HGP ;
+5. teacher utilisant éventuellement un agrégat temporel plus dense ;
+6. student limité à un scan mono-scan.
+
+Objectifs :
+
+- cohérence de forme ;
+- recherche cross-range ;
+- prédiction de parties occultées ;
+- stabilité des instances ;
+- calibration d'incertitude.
+
+Le teacher temporel est autorisé au pré-entraînement mais doit être déclaré séparément. L'inférence principale reste mono-scan.
+
+## 9. Étape G — distillation 2D et langage
+
+Après validation de la géométrie :
+
+1. projeter chaque facette dans les images synchronisées ;
+2. agréger les features d'un modèle visuel sur le polyèdre ;
+3. distiller vers `z^{shape}` et `z^{sem}` ;
+4. aligner éventuellement avec un espace texte pour l'open vocabulary.
+
+Cette étape ne doit pas précéder la preuve de valeur du tokenizer. Un teacher 2D puissant peut fournir d'excellents scores tout en transformant la hiérarchie HGP en décoration coûteuse.
+
+## 10. Anti-effondrement et prototypes
+
+Baseline : variance–invariance–covariance sur des polyèdres échantillonnés par strates de masse et de niveau.
 
 ```math
-\mathcal L_{\mathrm{event}}=
-\operatorname{Huber}(\widehat{\Delta\log\lambda},\Delta\log\lambda)
-+\operatorname{Huber}(\widehat{\log m},\log m)
-+\operatorname{CE}(\widehat d,d).
-```
-
-Les valeurs de niveau sont relatives. Prédire le niveau absolu encouragerait le réseau à apprendre la densité du capteur plutôt que la structure.
-
-### 4.6 Cohérence parent–enfants
-
-Le parent teacher est prédit à partir des enfants student :
-
-```math
-\widehat h_p=\operatorname{SetAgg}
-\{(h_v,m_v/m_p):v\in\operatorname{ch}(p)\},
-```
-
-```math
-\mathcal L_{\mathrm{parent}}=
-1-\cos(\widehat h_p,\operatorname{sg}(h_p^T)).
-```
-
-Cet objectif teste directement l'information portée par la fusion. Il n'est utile que si les familles ne sont pas triviales.
-
-### 4.7 Anti-effondrement
-
-La baseline utilise une régularisation de variance et covariance de type VICReg sur les embeddings de nœuds échantillonnés :
-
-```math
-\mathcal L_{\mathrm{reg}}=
-\mathcal L_{\mathrm{variance}}+
+\mathcal L_{\mathrm{reg}}
+=
+\mathcal L_{\mathrm{variance}}
++
 \eta\mathcal L_{\mathrm{covariance}}.
 ```
 
-Les négatifs contrastifs ne sont pas la première option : deux branches distinctes d'une scène peuvent partager la même sémantique, en particulier route, végétation et bâtiment.
+Les prototypes doux ne sont ouverts qu'après succès du JEPA latent. Leur distribution doit être auditée par taille, portée, classe et niveau ; sinon un prototype peut devenir un élégant synonyme d'anneau LiDAR.
 
-### 4.8 Loss totale SSL
+## 11. Loss totale par étape
+
+### Pilote géométrique
 
 ```math
-\mathcal L_{\mathrm{SSL}}=
-\mathcal L_{\mathrm{JEPA}}
-+0.25\mathcal L_{\mathrm{event}}
-+0.10\mathcal L_{\mathrm{parent}}
+\mathcal L_A=\mathcal L_{\mathrm{repr}}.
+```
+
+### Pré-entraînement surface
+
+```math
+\mathcal L_C
+=
+\mathcal L_{\mathrm{surfJEPA}}
++0.05\mathcal L_{\mathrm{repr,lowfreq}}
 +0.05\mathcal L_{\mathrm{reg}}.
 ```
 
-Ces poids sont des valeurs initiales. Le premier balayage ne dépasse pas trois configurations.
+### Pré-entraînement hiérarchique
 
-## 5. Variante DOS sur tokens polyédriques
+```math
+\mathcal L_D
+=
+\mathcal L_C
++0.20\mathcal L_{\mathrm{parent}}
++0.10\mathcal L_{\mathrm{event}}.
+```
 
-DOS montre que l'observable self-distillation et les softmaps spatiales peuvent dépasser la simple régression de features sur des backbones point-wise. La transposition proposée est :
+### Pré-entraînement cross-range
 
-- prototypes appliqués aux facettes ou nœuds observables ;
-- normalisation de chaque prototype sur les tokens d'une scène ;
-- teacher complet, student aminci ;
-- KL entre softmaps sur les couples appariés ;
-- prior uniforme, puis Zipf, comme ablation séparée.
+```math
+\mathcal L_E
+=
+\mathcal L_{\mathrm{range}}
++0.20\mathcal L_{\mathrm{surfJEPA}}
++0.10\mathcal L_{\mathrm{parent}}
++0.05\mathcal L_{\mathrm{event}}
++0.05\mathcal L_{\mathrm{reg}}.
+```
 
-Cette variante n'est ouverte qu'après succès de `Range-Hierarchy JEPA`. Les correspondances entre deux arbres étant plus fragiles qu'entre deux copies voxelisées du même scan, commencer directement avec prototypes, Sinkhorn et hiérarchie variable rendrait l'échec presque impossible à diagnostiquer.
+Ces coefficients sont des valeurs initiales. Le premier sweep reste limité et chaque loss doit disposer d'une ablation.
 
-## 6. Masquage
-
-### Bon masquage
-
-- sous-arbre complet ;
-- segment continu d'une branche ;
-- secteur angulaire ;
-- groupe de facettes adjacentes ;
-- lot d'anneaux.
-
-### Mauvais masquage principal
-
-- facettes indépendantes uniformément tirées ;
-- tokens masqués conservant un encodage de position exact ;
-- masque construit après calcul des cibles à partir des features student ;
-- suppression si forte qu'elle modifie la classe ou fait disparaître tout l'objet.
-
-La force du masque est adaptée à la taille de l'objet et au taux d'appariement. Les paires sans correspondance fiable ne contribuent pas à la loss JEPA.
-
-## 7. Optimisation
+## 12. Optimisation
 
 ### Pilote supervisé
 
@@ -261,53 +391,44 @@ layer_decay: 0.85
 ```yaml
 optimizer: AdamW
 base_lr: 0.0004
-weight_decay: [0.04, 0.20]  # cosinus
+weight_decay_start: 0.04
+weight_decay_end: 0.20
 schedule: cosine
 warmup_epochs: 10
 pilot_epochs: 50
 full_epochs: 200
+teacher_ema_start: 0.996
+teacher_ema_end: 0.9999
 precision: bf16
 grad_clip: 1.0
-ema_start: 0.996
-ema_end: 0.9999
 ```
 
-Les learning rates sont redimensionnés selon le nombre effectif de tokens, pas seulement selon le nombre de scans.
+Le learning rate est redimensionné selon le nombre effectif de polyèdres et de cellules de la grille surfacique, pas uniquement selon le nombre de scans.
 
-### Fine-tuning
+## 13. Curriculum vers le modèle de fondation
 
-- initialiser l'encodeur depuis le SSL ;
-- réinitialiser les têtes sémantiques ;
-- learning rate du backbone `3–5×` plus faible que celui des têtes ;
-- layer-wise decay `0.8–0.9` ;
-- 80 à 120 époques ;
-- même recette d'augmentation pour toutes les baselines appariées.
-
-## 8. Curriculum expérimental
-
-| Étape | Modèle | Objectif | Question |
+| Phase | Données | Objectif | Critère |
 |---|---|---|---|
-| T0 | MLP par facette | supervisé | les canaux suffisent-ils localement ? |
-| T1 | graphe dual | supervisé | l'adjacence locale aide-t-elle ? |
-| T2 | SPT-nano adapté | supervisé | la hiérarchie aide-t-elle ? |
-| T3 | arbre complet | supervisé | les événements fins valent-ils mieux que quatre coupes ? |
-| T4 | arbre complet | Range-JEPA | l'invariance peut-elle être apprise ? |
-| T5 | arbre complet | softmaps observables | gain supplémentaire ? |
-| T6 | multi-ordre/incidence | meilleur objectif | extension seulement si T4/T5 réussissent |
+| F0 | polyèdres d'un dataset | fidélité / remeshing | tokenizer valide |
+| F1 | SemanticKITTI | supervisé | backbone apprenable |
+| F2 | SemanticKITTI non annoté | Surface-JEPA | probing positif |
+| F3 | vues simulées | Cross-Range PolyJEPA | robustesse densité |
+| F4 | séquences réelles | temporel | retrieval cross-range |
+| F5 | plusieurs LiDAR | multi-capteurs | transfert sans retokeniser |
+| F6 | LiDAR + images | distillation 2D | sémantique et low-shot |
+| F7 | multi-tâches | adaptation | statut fondation défendable |
 
-## 9. Journalisation obligatoire
+## 14. Journalisation obligatoire
 
 Pour chaque run :
 
-- hash du code et des hiérarchies ;
-- version du schéma de données ;
-- statistiques de tokens et d'arêtes ;
-- graine, matériel, précision et batch effectif ;
-- loss par profondeur, masse, portée et taux de thinning ;
-- taux et score moyen d'appariement teacher–student ;
-- variance des embeddings et utilisation des prototypes ;
-- mIoU global et par classe ;
-- résultats par portée et classe filiforme ;
-- coût complet prétraitement + réseau + reprojection.
-
-Une loss SSL qui baisse pendant que le taux d'appariement s'effondre n'est pas une victoire. C'est le réseau qui apprend sur les rares cas faciles restants.
+- hash du code, du schéma HGP et des mesures et grilles surfaciques ;
+- représentation, ancre, échelle, `M`, `B` et canaux ;
+- distributions de radialité et de multiplicité ;
+- nombre de polyèdres, facettes, événements et arêtes ;
+- taux de matching teacher–student ;
+- pertes par masse, portée, classe diagnostique et niveau ;
+- variance des sous-espaces latents ;
+- probes sémantique, portée, anneau, capteur et thinning ;
+- mIoU, frontières, détection/instance selon la tâche ;
+- latence et mémoire de chaque étage.
