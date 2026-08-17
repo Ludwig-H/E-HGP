@@ -79,3 +79,21 @@ lanes = porteurs » de la cible CUDA).
   léger surcoût de boucle, payé par le payload (1 292 638 identités
   intérieures collectées, ~5,2/événement) et la structure GPU ; l'arbre de
   centres (version A) viendra comme accélérateur jugé contre cette baseline.
+
+## Addendum 4 — cover rectangulaire (une traversée haute par rectangle)
+
+Boîte des sommes S_AB par axe, élagage `dist(2Box(Z), S_AB)² > 3·Dmax²`
+(i64), antichaîne de handles (nœuds ≤ 32 uniques), filtre exact
+`|2z−(a+b)|² ≤ 3D²` par ancre depuis les handles, seaux radiaux par counting
+sort (l'ordre n'est pas contractuel — les tests de puissance varient de
+±0,2 % avec l'ordre, les événements sont identiques au bit près).
+
+| famille | n | site-major racine | cover rectangulaire | gain |
+|---|---:|---:|---:|---:|
+| eight_clusters | 2000 | 26,7 s | **12,7 s** | 2,1× |
+| uniform | 2000 | ~3,0 s | 2,5 s | 1,2× |
+
+Cumul eight_clusters n=2000 depuis l'origine du probe : 475 s → 12,7 s
+(≈ 37×). Juge 0/0, mutant `cover-dmin` (Dmax remplacé par Dmin, perd des
+témoins) tué. Compteurs causaux publiés (nœuds de traversée rectangle,
+visites du filtre, tests de puissance) comme demandé par l'audit.

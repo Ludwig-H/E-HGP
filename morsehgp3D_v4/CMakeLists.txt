@@ -123,3 +123,10 @@ mhgp4_expect_code(mhgp4_q3_packet_off_judge 0 mhgp4_q3_events_probe
     "--family=uniform --n=400 --s=8 --seed=3 --judge --packet=off --min-events=100")
 mhgp4_expect_code(mhgp4_q3_packet_mutant 4 mhgp4_q3_events_probe
     "--family=uniform --n=400 --s=8 --seed=3 --judge --inject=packet-no-exclude")
+
+# Cover rectangulaire (une traversee haute par rectangle, boite des sommes,
+# filtre exact par ancre) : porte appariee cover=root et mutant Dmin tue.
+mhgp4_expect_code(mhgp4_q3_cover_root_judge 0 mhgp4_q3_events_probe
+    "--family=uniform --n=400 --s=8 --seed=3 --judge --cover=root --min-events=100")
+mhgp4_expect_code(mhgp4_q3_cover_dmin_mutant 4 mhgp4_q3_events_probe
+    "--family=uniform --n=400 --s=8 --seed=3 --judge --inject=cover-dmin")

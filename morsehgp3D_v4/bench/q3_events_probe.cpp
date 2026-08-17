@@ -41,6 +41,8 @@ struct Args {
   bool exact_mode = false;  // premier extra-shell => unsupported_degeneracy
   bool census_cover = true;  // --census=tree : descente par porteur (appariee)
   bool packet = true;        // --packet=off : porte causale appariee
+  bool cover_rect = true;    // --cover=root : requete d'arbre par ancre
+  bool inject_cover_dmin = false;  // mutant : Dmax remplace par Dmin
   bool inject_no_exclude = false;  // mutant : packet non exclu du scan
   u64 min_events = 0;
 };
@@ -83,6 +85,9 @@ Args parse(int argc, char** argv) {
     else if (arg == "--packet=on") a.packet = true;
     else if (arg == "--packet=off") a.packet = false;
     else if (arg == "--inject=packet-no-exclude") a.inject_no_exclude = true;
+    else if (arg == "--cover=rectangle") a.cover_rect = true;
+    else if (arg == "--cover=root") a.cover_rect = false;
+    else if (arg == "--inject=cover-dmin") a.inject_cover_dmin = true;
     else {
       std::fprintf(stderr, "argument inconnu : %s\n", arg.c_str());
       a.family_ok = false;
@@ -166,6 +171,94 @@ void cover_query(const CloudIndex& ix, const P3& pa, const P3& pb, i64 D2,
             });
 }
 
+// COVER RECTANGULAIRE (audit du 17 aout, reponse apres ebc823) : une seule
+// traversee haute de l'arbre PAR RECTANGLE vivant. Boite des sommes
+// S_AB = [A.lo+B.lo, A.hi+B.hi] par axe ; un nœud temoin Z est elague une
+// fois pour toutes si dist(2Box(Z), S_AB)² > 3·Dmax², ou Dmax² majore la
+// longueur d'ancre sur le rectangle (coins opposes). Le resultat est une
+// ANTICHAINE de handles ; chaque ancre part des handles, jamais de la
+// racine, et applique le filtre exact |2z-(a+b)|² <= 3·|a-b|².
+void rect_cover_handles(const CloudIndex& ix, const AxisBox& A, const AxisBox& B,
+                        bool mutant_dmin, std::vector<NodeRef>* out,
+                        u64* tree_nodes) {
+  out->clear();
+  if (ix.nodes.empty()) return;
+  i64 slo[3], shi[3], dmax2 = 0, dmin2 = 0;
+  for (int i = 0; i < 3; ++i) {
+    slo[i] = A.lo[i] + B.lo[i];
+    shi[i] = A.hi[i] + B.hi[i];
+    const i64 e1 = A.hi[i] - B.lo[i];
+    const i64 e2 = B.hi[i] - A.lo[i];
+    const i64 w = std::max(std::llabs(e1), std::llabs(e2));
+    dmax2 += w * w;
+    i64 lo = 0;
+    if (B.lo[i] > A.hi[i]) lo = B.lo[i] - A.hi[i];
+    else if (A.lo[i] > B.hi[i]) lo = A.lo[i] - B.hi[i];
+    dmin2 += lo * lo;
+  }
+  const i64 bound = 3 * (mutant_dmin ? dmin2 : dmax2);
+  std::vector<NodeRef> stack{0};
+  while (!stack.empty()) {
+    const NodeRef z = stack.back();
+    stack.pop_back();
+    ++*tree_nodes;
+    const AxisBox bz = box_of_node(ix, z);
+    i64 gap2 = 0;
+    for (int i = 0; i < 3; ++i) {
+      i64 g = 0;
+      if (2 * bz.lo[i] > shi[i]) g = 2 * bz.lo[i] - shi[i];
+      else if (2 * bz.hi[i] < slo[i]) g = slo[i] - 2 * bz.hi[i];
+      gap2 += g * g;
+    }
+    if (gap2 > bound) continue;
+    if (z < 0) {
+      out->push_back(z);
+      continue;
+    }
+    const NodeRange r = range_of(ix, z);
+    if (r.last - r.first + 1 <= 32) {
+      out->push_back(z);
+      continue;
+    }
+    stack.push_back(ix.nodes[(size_t)z].left);
+    stack.push_back(ix.nodes[(size_t)z].right);
+  }
+}
+
+// Filtre exact d'une ancre depuis les handles, puis SEAUX radiaux stables
+// (32 seaux par counting sort — l'ordre n'est pas contractuel, audit § 6.1).
+void anchor_cover_from_handles(const CloudIndex& ix,
+                               const std::vector<NodeRef>& handles, const P3& pa,
+                               const P3& pb, i64 D2, std::vector<CoverPoint>* out,
+                               u64* point_visits) {
+  out->clear();
+  const i64 m2[3] = {pa.x + pb.x, pa.y + pb.y, pa.z + pb.z};
+  const i64 bound = 3 * D2;
+  for (const NodeRef h : handles) {
+    const NodeRange r = range_of(ix, h);
+    for (i32 u = r.first; u <= r.last; ++u) {
+      ++*point_visits;
+      const P3& p = ix.upos[(size_t)u];
+      const i64 t0 = 2 * p.x - m2[0];
+      const i64 t1 = 2 * p.y - m2[1];
+      const i64 t2 = 2 * p.z - m2[2];
+      const i64 d2 = t0 * t0 + t1 * t1 + t2 * t2;
+      if (d2 <= bound) out->push_back(CoverPoint{u, d2});
+    }
+  }
+  // Counting sort en 32 seaux sur dist2q (stable, sans tri par ancre).
+  constexpr int kBins = 32;
+  u32 cnt[kBins + 1] = {};
+  const auto bin_of = [&](i64 d2) {
+    return (int)((i128)kBins * d2 / (bound + 1));
+  };
+  for (const CoverPoint& cp : *out) ++cnt[bin_of(cp.dist2q) + 1];
+  for (int b = 1; b <= kBins; ++b) cnt[b] += cnt[b - 1];
+  std::vector<CoverPoint> tmp(out->size());
+  for (const CoverPoint& cp : *out) tmp[cnt[bin_of(cp.dist2q)]++] = cp;
+  out->swap(tmp);
+}
+
 }  // namespace
 
 int main(int argc, char** argv) {
@@ -231,7 +324,8 @@ int main(int argc, char** argv) {
   // exact-once visible, refus transactionnel des coquilles en mode --exact.
   std::vector<Key3> events;
   u64 anchors_seen = 0, anchors_killed_ha = 0, carriers_seen = 0,
-      shell_refused = 0, raw_events = 0, power_tests = 0, interior_ids_total = 0;
+      shell_refused = 0, raw_events = 0, power_tests = 0, interior_ids_total = 0,
+      rect_cover_nodes = 0, anchor_point_visits = 0;
   const auto pid = [&](i32 u) { return ix.bucket_ids[ix.bucket_start[(size_t)u]]; };
   std::vector<CoverPoint> cover;
   std::vector<u64> ha, hb;
@@ -263,6 +357,10 @@ int main(int argc, char** argv) {
     // Paquets d'IDs certifies (audit § 5.1) : cœur du rectangle une fois,
     // h_a/h_b par extremite pendant les boucles ci-dessus re-executees en
     // mode collecte. Rectangle vivant => cœur < h_3 <= 9 : tampons de 8.
+    std::vector<NodeRef> handles;
+    if (a.cover_rect)
+      rect_cover_handles(ix, boxA, boxB, a.inject_cover_dmin, &handles,
+                         &rect_cover_nodes);
     i32 core_ids[8];
     const u64 core_n =
         a.packet ? collect_universal_ids_q3(ix, ar.r.a, ar.r.b, 8, core_ids) : 0;
@@ -295,7 +393,11 @@ int main(int argc, char** argv) {
         const P3& pb = ix.upos[(size_t)ub];
         const i64 D2 = p3_norm2(p3_sub(pb, pa));
         if (D2 == 0) continue;
-        cover_query(ix, pa, pb, D2, &cover);
+        if (a.cover_rect)
+          anchor_cover_from_handles(ix, handles, pa, pb, D2, &cover,
+                                    &anchor_point_visits);
+        else
+          cover_query(ix, pa, pb, D2, &cover);
         cover_points += cover.size();
         // Paquet de l'ancre : cœur ∪ ha(a) ∪ hb(b), disjoints par theoreme,
         // total < h_3 (l'ancre a surveccu). Chaque ID est STRICTEMENT
@@ -461,7 +563,7 @@ int main(int argc, char** argv) {
       "famille=%s n=%d coord=%d s=%lld smax=%llu seed=%lld mode=%s "
       "rect_vivants_q3=%zu ancres_vues=%llu ancres_tuees_ha=%llu "
       "porteurs=%llu evenements=%zu doublons=%llu ev_par_point=%.1f "
-      "tests_puissance=%llu ids_interieurs=%llu "
+      "tests_puissance=%llu ids_interieurs=%llu noeuds_cover_rect=%llu visites_filtre=%llu "
       "cover_pts=%llu shell_refus=%llu juge_manquants=%llu juge_en_trop=%llu "
       "t_wspd_ms=%.1f t_instruction_ms=%.1f t_juge_ms=%.1f\n",
       cloud_family_name(a.family), a.n, coord, (long long)a.s,
@@ -471,10 +573,19 @@ int main(int argc, char** argv) {
       (unsigned long long)carriers_seen, events.size(),
       (unsigned long long)duplicate_supports,
       (double)events.size() / (double)pts.size(), (unsigned long long)power_tests,
-      (unsigned long long)interior_ids_total,
+      (unsigned long long)interior_ids_total, (unsigned long long)rect_cover_nodes,
+      (unsigned long long)anchor_point_visits,
       (unsigned long long)cover_points, (unsigned long long)shell_refused, (unsigned long long)missing,
       (unsigned long long)extra, ms(t1 - t0), ms(t2 - t1), ms(t3 - t2));
 
+  if (a.inject_cover_dmin) {
+    if (a.judge && (missing > 0 || extra > 0)) {
+      std::printf("MUTANT TUE : cover-dmin perd des temoins\n");
+      return 4;
+    }
+    std::fprintf(stderr, "PORTE INEFFICACE : cover-dmin non discrimine\n");
+    return 3;
+  }
   if (a.inject_no_exclude) {
     if (a.judge && (missing > 0 || extra > 0)) {
       std::printf("MUTANT TUE : packet-no-exclude altere les evenements\n");
