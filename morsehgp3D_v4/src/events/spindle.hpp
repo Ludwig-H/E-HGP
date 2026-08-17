@@ -29,7 +29,10 @@ namespace mhgp4 {
 
 enum class Lane : int { kQ2 = 2, kQ3 = 3, kQ4 = 4 };
 
-inline u64 lane_h(Lane q, u64 smax) { return smax - (u64)(int)q + 1; }
+// Precondition contractuelle : smax >= q (sinon la lane n'existe pas).
+inline u64 lane_h(Lane q, u64 smax) {
+  return smax >= (u64)(int)q ? smax - (u64)(int)q + 1 : 0;
+}
 
 // Test ponctuel exact d'appartenance a W_q(a,b). i128 : Xi < 2^72, 3H² < 2^74.
 inline bool in_spindle(Lane q, const P3& a, const P3& b, const P3& z) {

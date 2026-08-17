@@ -105,6 +105,28 @@ opérationnelle : quelles facettes entrent dans `F_K`, voir § 6, Q4).
 
 ## 2. La réduction v4 : événements-boules et taxonomie q2/q3/q4
 
+### 2.0 Contrats gravés par l'audit du 17 août (ETAT_COURANT)
+
+- **Sites distincts** : le profil exact d'autorité travaille sur des
+  positions distinctes ; les positions dupliquées sont **refusées**
+  (`unsupported_degeneracy`) tant qu'un HGP pondéré n'est pas défini et
+  prouvé. La bucketisation reste une commodité d'index, pas une sémantique.
+- **Seuils effectifs** : `K_eff = min(K_max, n)`, `s_max = min(K_eff+1, n)` ;
+  la constante 11 vaut pour la cible `n ≥ 11, K_max = 10`, jamais comme
+  vérité générale (les petits oracles ne reçoivent pas 11 par défaut).
+- **Niveau public = rayon AU CARRÉ exact** (q2 : `‖ab‖²/4` ; q3/q4 :
+  fraction rationnelle canonique). Une variable interne peut rester un
+  rayon, elle ne contamine jamais `ExactLevel`.
+- **Un événement critique est une hyperarête/multifusion** sur tous ses
+  bras : un chemin couvrant compresse la connectivité, il n'autorise pas à
+  binariser la chronologie d'un plateau. Deux BallKeys distinctes de même
+  niveau se traitent simultanément (contraction des durées nulles).
+- **La sortie complète conserve les applications verticales entre ordres** :
+  dix forêts indépendantes ne représentent pas seules la tour ordre-échelle.
+- **`F_K` du rendu § 9.1 = TOUTES les facettes distinctes des événements**
+  (`F_K^render`), pas seulement les actives (`F_K^conn`, suffisantes pour la
+  connectivité seule) ; une variante active-only est une heuristique nommée.
+
 ### 2.1 Boule-événement ≡ simplexe de Gabriel
 
 **Énoncé (`derive_v4` — à auditer, Q1).** Sous position générale (Déf. 26),
@@ -194,15 +216,17 @@ re-déclarées ici comme fondation v4) :
   u16 sont `u·u < D²` (q2, rayon D/2), `3(u·u) < D²` (q3, rayon `D/√12`),
   `15(u·u) < 4D²` (q4, rayon `D/√15`) ; en marge `g = D²−u·u` : `g > 0`,
   `3g > 2D²`, `15g > 11D²`. `g = 0` est l'extra-shell q2. Aucun décimal ne
-  décide ; seules ces formes entières sont l'autorité. **Attention** : ces
-  rayons du 12 août (`D/√12`, `D/√15`) et les `κ_q` du théorème corrigé du
-  15 août (`1/(2√3)`, `sin 15°`) diffèrent — ensembles admissibles
-  distincts. Re-dérivation v4 (`derive_v4`, à contre-vérifier — Q6) : sous
-  « (a,b) arête maximale + borne de Jung », le centre vérifie `w = c−m ⊥ d`
-  et `‖w‖ ≤ κ'·D` (`κ' = 1/(2√3)` q3, `1/(2√2)` q4), et le minimum de
-  `R−‖w‖ = √(D²/4+‖w‖²)−‖w‖` est atteint au bord : `D/(2√3)` (q3) et
-  `D(√3−1)/(2√2) = D·sin 15°` (q4) — les `κ_q` du 15 août sont confirmés
-  pour CET ensemble admissible.
+  décide ; seules ces formes entières sont l'autorité. **Rectificatif reçu
+  par l'audit du 17 août (ETAT_COURANT § 6)** : `D/√12 = D/(2√3)` est LE
+  rayon q3 exact (mes deux « familles » n'en étaient qu'une) ; `D/√15`
+  (test `15U < 4L`) est une **sous-approximation sûre mais stricte** du cœur
+  q4 exact `D·sin 15°` (car `4/15 < 2−√3` ; test exact : `Y = 2L−U`,
+  `Y > 0` et `Y² > 3L²`). Fixture discriminante gravée :
+  `a=(10000,10000,0)`, `b=(20000,10000,0)`, `z=(15000,12585,0)` — dans le
+  cœur exact q4, hors de `15U < 4L`. Les dérivations de `W_3/W_4`, des
+  `κ_q` (atteints, disques de Jung réalisables) et de la borne couplée
+  `R_coup` sont désormais **prouvées dans l'audit** — statut relevé de
+  piste à énoncé reçu.
 - **Cœur-boule** (rayons sûrs autour du milieu, `theoreme_v3` corrigé) :
   la plus grande boule centrée en m incluse dans le fuseau ouvert d'une ancre
   ponctuelle est `B̊(m, κ_q ‖ab‖)` avec `κ_2 = 1/2`, `κ_3 = 1/(2√3)`,

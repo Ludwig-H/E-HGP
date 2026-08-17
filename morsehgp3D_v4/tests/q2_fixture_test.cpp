@@ -16,11 +16,42 @@
 #include <cstdio>
 #include <cstring>
 
+#include "../src/events/spindle.hpp"
 #include "../src/events/q2_witness_count.hpp"
+
+// Fixture discriminante du rayon q4 (audit du 17 aout, § 6) :
+// z est dans le cœur EXACT q4 (`2H² > Xi`) mais echoue au test conservateur
+// `15U < 4L` (rayon D/√15 < D·sin 15°). Le test exact est
+// `Y = 2L−U, Y > 0 et Y² > 3L²`.
+static int check_q4_radius_fixture() {
+  using namespace mhgp4;
+  const P3 a{10000, 10000, 0}, b{20000, 10000, 0}, z{15000, 12585, 0};
+  if (!in_spindle(Lane::kQ4, a, b, z)) {
+    std::fprintf(stderr, "fixture rayon q4 : z devrait etre dans W_4\n");
+    return 3;
+  }
+  const P3 u{2 * z.x - a.x - b.x, 2 * z.y - a.y - b.y, 2 * z.z - a.z - b.z};
+  const i64 U = p3_norm2(u);
+  const i64 L = p3_norm2(p3_sub(b, a));
+  if (15 * U < 4 * L) {
+    std::fprintf(stderr, "fixture rayon q4 : 15U<4L devrait echouer ici\n");
+    return 3;
+  }
+  const i64 Y = 2 * L - U;
+  if (!(Y > 0 && (i128)Y * Y > (i128)3 * L * L)) {
+    std::fprintf(stderr, "fixture rayon q4 : le test exact Y devrait accepter\n");
+    return 3;
+  }
+  return 0;
+}
 
 int main(int argc, char** argv) {
   using namespace mhgp4;
   const bool mutant = argc > 1 && std::strcmp(argv[1], "--inject=radius-ceil") == 0;
+  if (!mutant) {
+    const int rc = check_q4_radius_fixture();
+    if (rc != 0) return rc;
+  }
 
   const std::vector<P3> pts = {{0, 0, 0}, {3, 1, 0}, {2, 2, 0}, {1, 0, 0}};
   const CloudIndex ix = build_cloud_index(pts);

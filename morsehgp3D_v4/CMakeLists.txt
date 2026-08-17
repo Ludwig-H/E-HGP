@@ -78,8 +78,11 @@ mhgp4_expect_code(mhgp4_q2_prune_judge_terrain 0 mhgp4_q2_prune_probe
     "--family=terrain --n=1500 --s=8 --seed=3 --true-alive --min-dead-pct=50")
 
 # Trois lanes, une vague : ledgers exacts par lane + juge in_spindle sur les
-# blocs morts. La contre-famille two_lines doit rendre zero mort q3/q4 a tort
-# (aucun triangle aigu) tout en fermant q2 massivement.
+# blocs morts. Sur two_lines les TEMOINS de fuseau existent bel et bien pour
+# les trois lanes (un point collineaire entre a et b a Xi=0 et H>0 : il est
+# dans W_4) — ce sont les PORTEURS aigus qui n'existent pas ; la porte ne
+# verifie donc que les invariants et le juge, pas une vacuite de lane
+# (rectificatif de l'audit du 17 aout).
 mhgp4_expect_code(mhgp4_q234_judge_uniform 0 mhgp4_q234_prune_probe
     "--family=uniform --n=1200 --s=8 --seed=3 --min-dead-pct=25")
 mhgp4_expect_code(mhgp4_q234_judge_two_lines 0 mhgp4_q234_prune_probe

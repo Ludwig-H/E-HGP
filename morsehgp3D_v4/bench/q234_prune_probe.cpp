@@ -131,8 +131,6 @@ int main(int argc, char** argv) {
     std::fprintf(stderr, "REFUS : arguments invalides\n");
     return 2;
   }
-  const u64 h_of[3] = {lane_h(Lane::kQ2, a.smax), lane_h(Lane::kQ3, a.smax),
-                       lane_h(Lane::kQ4, a.smax)};
   const int coord = a.coord > 0 ? a.coord : cloud_family_default_coord(a.family, a.n);
   const std::vector<P3> pts = make_family_cloud(a.family, a.n, coord, a.seed);
   const bool counter_family =
@@ -143,8 +141,24 @@ int main(int argc, char** argv) {
     return 2;
   }
 
+  // Seuils effectifs (audit 17 aout) : s_max = min(K_eff+1, n), K_eff = min(K_max, n).
+  const u64 smax_eff = std::min<u64>(a.smax, pts.size());
+  if (smax_eff < 5) {
+    std::fprintf(stderr, "REFUS : s_max effectif %llu < 5\n",
+                 (unsigned long long)smax_eff);
+    return 2;
+  }
+  const u64 h_of[3] = {lane_h(Lane::kQ2, smax_eff), lane_h(Lane::kQ3, smax_eff),
+                       lane_h(Lane::kQ4, smax_eff)};
   const auto t0 = std::chrono::steady_clock::now();
   const CloudIndex ix = build_cloud_index(pts);
+  // Contrat de l'audit du 17 aout : le profil exact travaille sur des sites
+  // distincts ; les positions dupliquees sont refusees tant qu'un HGP
+  // pondere n'est pas prouve.
+  if ((size_t)ix.unique_count() != pts.size()) {
+    std::fprintf(stderr, "REFUS unsupported_degeneracy : positions dupliquees\n");
+    return 2;
+  }
   const auto t1 = std::chrono::steady_clock::now();
 
   WitnessCountOpts cheap;

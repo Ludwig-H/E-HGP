@@ -95,7 +95,8 @@ inline bool separated(const NodeView& a, const NodeView& b, i64 p, i64 q) {
   }
   const i64 r2 = std::max(box_w2(a), box_w2(b));
   const i64 k = p + 2 * q;
-  return (i128)(q * q) * d2 >= (i128)(k * k) * r2;
+  // Elargir AVANT les carres : p/q viennent de la CLI, i64*i64 deborderait.
+  return ((i128)q * q) * d2 >= ((i128)k * k) * r2;
 }
 
 inline u64 node_weight(const CloudIndex& ix, NodeRef v) {
