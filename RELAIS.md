@@ -19,12 +19,18 @@ SDK Google Cloud 532.0.0 installé depuis le tarball officiel (`storage.googleap
 
 ## url-oauth
 
-(en attente — flux `gcloud auth login --no-launch-browser` en cours de lancement, URL publiée dans la prochaine mise à jour)
+Flux `gcloud auth login --no-launch-browser` lancé (FIFO + porteur d'écriture en tâche de fond du harnais). **URL à transmettre à l'utilisateur** — il doit s'y connecter avec son compte Google, puis renvoyer le code de vérification via la session principale sous la forme « CODE AUTH: <code> » :
+
+```
+https://accounts.google.com/o/oauth2/auth?response_type=code&client_id=32555940559.apps.googleusercontent.com&redirect_uri=https%3A%2F%2Fsdk.cloud.google.com%2Fauthcode.html&scope=openid+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fcloud-platform+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fappengine.admin+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fsqlservice.login+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fcompute+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Faccounts.reauth&state=if8XU3Dj2lGD3GQjV5Tc6o1W9m7kcb&prompt=consent&token_usage=remote&access_type=offline&code_challenge=mTFNj2na47TtDwF9l-wrLqgiA8e1EJfzg_k6x-GJMJU&code_challenge_method=S256
+```
+
+(Cette URL est publique par construction — PKCE, elle n'ouvre rien sans la connexion Google de l'utilisateur. Le code de vérification, lui, ne sera jamais écrit ici.)
 
 ## état
 
 - [x] Étape 1 — sonde réseau : **OK**
-- [ ] Étape 2 — flux OAuth : URL à publier, puis attente du message « CODE AUTH: … »
+- [~] Étape 2 — flux OAuth : URL publiée ci-dessus, **en attente du message « CODE AUTH: … »**
 - [ ] Étape 3 — test de caviardage (lecture seule) : GO / NO-GO
 - [ ] Étape 4 — campagne `session_campagne_v4_scale_g4.sh` (seulement si GO)
 
