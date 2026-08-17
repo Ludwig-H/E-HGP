@@ -233,12 +233,31 @@ mhgp4_expect_code(mhgp4_forest_probe_relabel_gate 0 mhgp4_forest_probe
     "--relabel-gate")
 mhgp4_expect_code(mhgp4_forest_probe_mutant_dense_pointid 4 mhgp4_forest_probe
     "--relabel-gate --inject=dense-pointid")
-# Pre-filtre de profondeur : descente comptante EXACTE (boites strictement
-# interieures avalees en O(1)) avant le census — tue exactement les boules
-# |I_B| > 9. Le mutant nonstrict (coquilles comptees interieures) tue des
-# boules a plateau a tort : le juge voit les evenements manquants.
-mhgp4_expect_code(mhgp4_forest_probe_mutant_prefilter 4 mhgp4_forest_probe
-    "--family=uniform --n=120 --s=8 --seed=3 --judge --inject=prefilter-nonstrict")
+# Prefiltre EXACT par boule (audit ec683b) : passe count-only au seuil
+# h_qmin par arite minimale (10/9/8 interieurs pour q2/q3/q4), boites
+# strictement interieures avalees en O(1), coquilles jamais comptees ;
+# census complet sur les seules survivantes, compte recoupe. Porte de
+# profondeur : mort exacte au seuil par arite SANS census, jumelles a h-1
+# survivantes au compte exact. Mutants : threshold-minus-one (jumelles
+# tuees a tort), range-add-max-le-zero (coquilles comptees), et au flux
+# juge : range-add (boules a plateau perdues) et skip-full-census (la
+# passe 1 ne connait pas U_B et ne remplace jamais la passe 2).
+mhgp4_expect_code(mhgp4_forest_probe_depth_gate 0 mhgp4_forest_probe
+    "--depth-gate")
+mhgp4_expect_code(mhgp4_forest_probe_depth_mutant_threshold 4 mhgp4_forest_probe
+    "--depth-gate --inject=threshold-minus-one")
+mhgp4_expect_code(mhgp4_forest_probe_depth_mutant_range_add 4 mhgp4_forest_probe
+    "--depth-gate --inject=range-add-max-le-zero")
+mhgp4_expect_code(mhgp4_forest_probe_mutant_range_add_judged 4 mhgp4_forest_probe
+    "--family=uniform --n=120 --s=8 --seed=3 --judge --inject=range-add-max-le-zero")
+mhgp4_expect_code(mhgp4_forest_probe_mutant_skip_census 4 mhgp4_forest_probe
+    "--family=uniform --n=120 --s=8 --seed=3 --judge --inject=skip-full-census")
+# Garde d'entree (audit § 5) : PointId dupliques et coordonnees hors u16
+# refuses (invalid_input) AVANT la construction de l'arbre.
+mhgp4_expect_code(mhgp4_probe_guard_dup_id 2 mhgp4_forest_probe
+    "--guard=dup-id")
+mhgp4_expect_code(mhgp4_probe_guard_coord_range 2 mhgp4_forest_probe
+    "--guard=coord-range")
 
 # La lane q2 productrice : W_2 est la boule diametrale ouverte, le census
 # est une requete de cover a coefficient 1. Juge brut toutes-paires sur

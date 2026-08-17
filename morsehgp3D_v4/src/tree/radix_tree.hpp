@@ -128,12 +128,31 @@ inline void cell_of_prefix(u64 key, int p, RadixNode* node) {
 // permutation physique des couples (id, position).
 inline CloudIndex build_cloud_index(const std::vector<InputPoint>& pts) {
   CloudIndex ix;
+  ix.bucket_start = {0};
+  ix.wsum = {0};
   const size_t n = pts.size();
-  if (n == 0) {
-    ix.bucket_start = {0};
-    ix.wsum = {0};
-    return ix;
+  if (n == 0) return ix;
+
+  // GARDE D'ENTREE (audit « prefiltre exact par boule » § 5), AVANT toute
+  // construction : coordonnees dans le profil u16 (morton_spread3 masque a
+  // seize bits — une coordonnee hors profil serait placee dans une cellule
+  // qui ne la contient pas et invaliderait les elagages) et PointId
+  // uniques (deux positions au meme id rendraient les FacetKey non
+  // injectives). Refus explicite invalid_input : index VIDE, que tout
+  // appelant detecte (unique_count() != n).
+  for (const InputPoint& p : pts)
+    if ((u64)p.position.x > 65535 || (u64)p.position.y > 65535 ||
+        (u64)p.position.z > 65535)
+      return ix;
+  {
+    std::vector<PointId> ids(n);
+    for (size_t i = 0; i < n; ++i) ids[i] = pts[i].id;
+    std::sort(ids.begin(), ids.end());
+    for (size_t i = 1; i < n; ++i)
+      if (ids[i] == ids[i - 1]) return ix;
   }
+  ix.bucket_start.clear();
+  ix.wsum.clear();
 
   // 1. TRI par (cle, PointId externe) — l'id secondaire rend l'ordre des
   // buckets deterministe sous permutation physique des enregistrements.

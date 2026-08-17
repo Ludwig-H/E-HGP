@@ -55,10 +55,14 @@ struct Args {
   size_t shell_cap = 12;
   bool judge = false;
   bool relabel_gate = false;
+  bool depth_gate = false;
+  int guard = 0;  // 1 = dup-id, 2 = coord-range
   bool inj_rle_drop = false;
   bool inj_census_nonstrict = false;
   bool inj_dense_pointid = false;
-  bool inj_prefilter_nonstrict = false;
+  bool inj_threshold_minus_one = false;
+  bool inj_range_add_le = false;
+  bool inj_skip_full = false;
   u64 min_balls = 0;
   u64 min_fusions = 0;
 };
@@ -98,11 +102,16 @@ Args parse(int argc, char** argv) {
     else if (const char* v = val("--min-fusions=")) a.min_fusions = (u64)std::atoll(v);
     else if (arg == "--judge") a.judge = true;
     else if (arg == "--relabel-gate") a.relabel_gate = true;
+    else if (arg == "--depth-gate") a.depth_gate = true;
+    else if (arg == "--guard=dup-id") a.guard = 1;
+    else if (arg == "--guard=coord-range") a.guard = 2;
     else if (arg == "--inject=rle-drop") a.inj_rle_drop = true;
     else if (arg == "--inject=census-nonstrict") a.inj_census_nonstrict = true;
     else if (arg == "--inject=dense-pointid") a.inj_dense_pointid = true;
-    else if (arg == "--inject=prefilter-nonstrict")
-      a.inj_prefilter_nonstrict = true;
+    else if (arg == "--inject=threshold-minus-one")
+      a.inj_threshold_minus_one = true;
+    else if (arg == "--inject=range-add-max-le-zero") a.inj_range_add_le = true;
+    else if (arg == "--inject=skip-full-census") a.inj_skip_full = true;
     else {
       std::fprintf(stderr, "argument inconnu : %s\n", arg.c_str());
       a.family_ok = false;
@@ -131,26 +140,62 @@ void collect_rle(const CloudIndex& ix, i64 s, u64 smax_eff, bool inj_rle_drop,
   st->unique_balls = cands->size();
 }
 
-// UN census exact par cle (I_B et U_B complets), precede du PRE-FILTRE de
-// profondeur (descente comptante, boites strictement interieures avalees
-// en O(1)) qui tue exactement les boules que le census aurait tuees en
-// |I_B| > 9 — sans payer la collecte. 0 ou code de refus.
-int census_balls(const CloudIndex& ix, const std::vector<BallCandidate>& cands,
-                 size_t shell_cap, bool inj_census_nonstrict,
-                 bool inj_prefilter_nonstrict, std::vector<BallData>* balls,
-                 BallStreamStats* st) {
-  balls->reserve(cands.size());
-  for (const BallCandidate& bc : cands) {
-    if (ball_depth_exceeds(ix, bc.key, 9, inj_prefilter_nonstrict)) {
+// PASSE 1 (audit « prefiltre exact par boule ») : count-only par cle,
+// seuil de mort h_qmin = 12 - q_min par ARITE MINIMALE du groupe RLE
+// (le premier candidat du groupe porte q_min : le tri met l'arite avant
+// la representation). La regle par arite est JUGEE, pas supposee : le
+// juge brut garde ses boules au plafond uniforme et les expanse — un
+// label q_min faux (completude de lane violee) donnerait des evenements
+// que le sujet n'a pas. MUTANTS : threshold-minus-one (mort a h-1 :
+// perd les evenements de bord K=10), range-add-max-le-zero (coquilles
+// comptees interieures : boules a plateau tuees a tort).
+struct Survivor {
+  size_t idx;
+  u64 depth;  // compte EXACT des interieurs stricts (recoupe en passe 2)
+};
+
+void prefilter_balls(const CloudIndex& ix,
+                     const std::vector<BallCandidate>& cands,
+                     bool inj_threshold_minus_one, bool inj_range_add_le,
+                     std::vector<Survivor>* survivors, BallStreamStats* st) {
+  survivors->reserve(cands.size() / 8 + 16);
+  for (size_t i = 0; i < cands.size(); ++i) {
+    const BallCandidate& bc = cands[i];
+    u64 h = 12u - (u64)bc.arity;  // K_max=10 : mort a 10/9/8 interieurs
+    if (inj_threshold_minus_one) --h;  // MUTANT
+    u64 depth = 0;
+    if (ball_depth_at_least(ix, bc.key, h, &depth, inj_range_add_le,
+                            &st->prefilter_leaf_tests,
+                            &st->prefilter_range_add_mass)) {
       ++st->balls_dead_depth;
       continue;
     }
+    survivors->push_back({i, depth});
+  }
+}
+
+// PASSE 2 : census complet I_B/U_B sur les SEULES survivantes, avec
+// recoupement du compte de la passe 1 (invariant : passe1 == passe2).
+// MUTANT skip-full-census : la passe count-only pretend suffire (I_B/U_B
+// vides) — elle ne connait pas U_B, le juge voit les evenements manquants.
+int census_balls(const CloudIndex& ix, const std::vector<BallCandidate>& cands,
+                 const std::vector<Survivor>& survivors, size_t shell_cap,
+                 bool inj_census_nonstrict, bool inj_skip_full,
+                 std::vector<BallData>* balls, BallStreamStats* st) {
+  balls->reserve(survivors.size());
+  for (const Survivor& sv : survivors) {
+    const BallCandidate& bc = cands[sv.idx];
     BallData b;
     b.key = bc.key;
     b.level = bc.level;
+    if (inj_skip_full) {  // MUTANT
+      balls->push_back(std::move(b));
+      continue;
+    }
+    ++st->full_census_keys;
     bool overflow = false;
-    if (!ball_census(ix, bc.key, 9, shell_cap, &b.interior, &b.shell,
-                     &overflow)) {
+    if (!ball_census(ix, bc.key, (size_t)(11u - bc.arity), shell_cap,
+                     &b.interior, &b.shell, &overflow)) {
       if (overflow) {
         std::fprintf(stderr,
                      "REFUS resource_exhausted : coquille > %zu (plafond "
@@ -158,8 +203,12 @@ int census_balls(const CloudIndex& ix, const std::vector<BallCandidate>& cands,
                      shell_cap);
         return 2;
       }
-      ++st->balls_dead_depth;  // |I_B| > 9 : aucun K <= 10
-      continue;
+      std::fprintf(stderr, "INVARIANT : census contredit la passe count-only\n");
+      return 3;
+    }
+    if (b.interior.size() != (size_t)sv.depth) {
+      std::fprintf(stderr, "INVARIANT : compte interieur passe1 != passe2\n");
+      return 3;
     }
     if (inj_census_nonstrict) {
       // MUTANT : la coquille comptee interieure (P <= 0).
@@ -256,8 +305,11 @@ int run_gate_chain(const std::vector<InputPoint>& in, bool dense_mutant,
   std::vector<BallCandidate> cands;
   BallStreamStats st;
   collect_rle(ix, 8, std::min<u64>(11, in.size()), false, &cands, &st);
+  std::vector<Survivor> surv;
+  prefilter_balls(ix, cands, false, false, &surv, &st);
   std::vector<BallData> balls;
-  if (const int rc = census_balls(ix, cands, 12, false, false, &balls, &st))
+  if (const int rc =
+          census_balls(ix, cands, surv, 12, false, false, &balls, &st))
     return rc;
   for (const BallData& b : balls) out->keys.push_back(b.key);
   std::vector<PointId> pid((size_t)ix.unique_count());
@@ -464,6 +516,132 @@ int run_relabel_gate(bool dense_mutant) {
   return bad ? 3 : 0;
 }
 
+// ------------------------------------------------------------------
+// PORTE DE PROFONDEUR (audit « prefiltre exact par boule » § 4) : mort
+// EXACTE au seuil par arite, sans appeler le census complet ; les
+// coquilles ne comptent jamais ; les jumelles a h-1 interieurs survivent
+// avec le compte exact. Mutants : threshold-minus-one (les jumelles
+// meurent a tort), range-add-max-le-zero (les coquilles comptent).
+// ------------------------------------------------------------------
+int run_depth_gate(bool inj_thr, bool inj_le) {
+  u64 bad = 0;
+  const auto expect = [&](bool cond, const char* what) {
+    if (!cond) {
+      std::fprintf(stderr, "PROFONDEUR : %s\n", what);
+      ++bad;
+    }
+  };
+  const auto h_eff = [&](u64 h) { return inj_thr ? h - 1 : h; };  // MUTANT
+  {
+    // q2 (h=10) : boule diametrale (0,0,0)-(40,0,0), R²=400 ; EXACTEMENT
+    // 10 interieurs (20+k,1,0), k=-4..5.
+    std::vector<P3> pts = {P3{0, 0, 0}, P3{40, 0, 0}};
+    for (i64 kk = -4; kk <= 5; ++kk) pts.push_back(P3{20 + kk, 1, 0});
+    const CloudIndex ix = build_cloud_index(pts);
+    if ((size_t)ix.unique_count() != pts.size()) return 3;
+    const Q3BallKey key = q2_ball_key(pts[0], pts[1]);
+    u64 c = 0;
+    expect(ball_depth_at_least(ix, key, h_eff(10), &c, inj_le),
+           "q2 : 10 interieurs, morte a h=10 sans census");
+    pts.pop_back();
+    const CloudIndex ix2 = build_cloud_index(pts);
+    u64 c2 = 0;
+    const bool dead2 = ball_depth_at_least(ix2, key, h_eff(10), &c2, inj_le);
+    expect(!dead2 && c2 == 9, "q2 : 9 interieurs, survit avec compte exact 9");
+  }
+  {
+    // q3 (h=9) : circonscrite du triangle strictement aigu
+    // (0,0,10),(40,0,10),(20,30,10) — centre (20,25/3,10), R²=4225/9 ;
+    // EXACTEMENT 9 interieurs (20,8,10+z), z=-4..4 (dist² <= 145/9 ; le
+    // plan est a z=10 pour rester dans le profil u16, garde d'entree).
+    std::vector<P3> pts = {P3{0, 0, 10}, P3{40, 0, 10}, P3{20, 30, 10}};
+    for (i64 zz = -4; zz <= 4; ++zz) pts.push_back(P3{20, 8, 10 + zz});
+    const CloudIndex ix = build_cloud_index(pts);
+    if ((size_t)ix.unique_count() != pts.size()) return 3;
+    const Q3BallKey key = q3_ball_key(q3_form(pts[0], pts[1], pts[2]));
+    u64 c = 0;
+    expect(ball_depth_at_least(ix, key, h_eff(9), &c, inj_le),
+           "q3 : 9 interieurs, morte a h=9 sans census");
+    pts.pop_back();
+    const CloudIndex ix2 = build_cloud_index(pts);
+    u64 c2 = 0;
+    const bool dead2 = ball_depth_at_least(ix2, key, h_eff(9), &c2, inj_le);
+    expect(!dead2 && c2 == 8, "q3 : 8 interieurs, survit avec compte exact 8");
+  }
+  {
+    // q4 (h=8) : circonscrite du tetraedre regulier (coins alternes du
+    // cube 10..30) — centre (20,20,20), R²=300 ; EXACTEMENT 8 interieurs
+    // (20+k,20,20), k=-3..4.
+    std::vector<P3> pts = {P3{30, 30, 30}, P3{10, 10, 30}, P3{10, 30, 10},
+                           P3{30, 10, 10}};
+    for (i64 kk = -3; kk <= 4; ++kk) pts.push_back(P3{20 + kk, 20, 20});
+    const CloudIndex ix = build_cloud_index(pts);
+    if ((size_t)ix.unique_count() != pts.size()) return 3;
+    const Q4Form f4 = q4_form(pts[0], pts[1], pts[2], pts[3]);
+    if (f4.det == 0) return 3;
+    const Q3BallKey key = q3_ball_key_reduce(q4_ball_form(f4));
+    u64 c = 0;
+    expect(ball_depth_at_least(ix, key, h_eff(8), &c, inj_le),
+           "q4 : 8 interieurs, morte a h=8 sans census");
+    pts.pop_back();
+    const CloudIndex ix2 = build_cloud_index(pts);
+    u64 c2 = 0;
+    const bool dead2 = ball_depth_at_least(ix2, key, h_eff(8), &c2, inj_le);
+    expect(!dead2 && c2 == 7, "q4 : 7 interieurs, survit avec compte exact 7");
+  }
+  {
+    // Coquille jamais comptee : boule du diametre (110,100,100)-(90,100,100)
+    // (R²=100), DEUX points SUR la sphere et 9 interieurs (100+k,101,100),
+    // k=-4..4 — survit a h=10 avec compte 9. Le mutant range-add-max-le-zero
+    // compte les coquilles et la tue a tort.
+    std::vector<P3> pts = {P3{110, 100, 100}, P3{90, 100, 100},
+                           P3{100, 110, 100}, P3{100, 90, 100}};
+    for (i64 kk = -4; kk <= 4; ++kk) pts.push_back(P3{100 + kk, 101, 100});
+    const CloudIndex ix = build_cloud_index(pts);
+    if ((size_t)ix.unique_count() != pts.size()) return 3;
+    const Q3BallKey key = q2_ball_key(pts[0], pts[1]);
+    u64 c = 0;
+    const bool dead = ball_depth_at_least(ix, key, h_eff(10), &c, inj_le);
+    expect(!dead && c == 9,
+           "coquille : points SUR la sphere jamais comptes (survit a 9)");
+  }
+  std::printf("depth_gate violations=%llu\n", (unsigned long long)bad);
+  if (inj_thr || inj_le) {
+    if (bad > 0) {
+      std::printf("MUTANT TUE\n");
+      return 4;
+    }
+    std::fprintf(stderr, "PORTE INEFFICACE : mutant non discrimine\n");
+    return 3;
+  }
+  return bad ? 3 : 0;
+}
+
+// GARDE D'ENTREE (audit § 5) : ids dupliques et coordonnees hors u16
+// refuses AVANT la construction de l'arbre (refus = index vide).
+int run_guard_gate(int mode) {
+  if (mode == 1) {
+    const std::vector<InputPoint> in = {{7, P3{1, 2, 3}}, {7, P3{4, 5, 6}},
+                                        {9, P3{2, 2, 2}}};
+    if ((size_t)build_cloud_index(in).unique_count() != in.size()) {
+      std::fprintf(stderr, "REFUS invalid_input : PointId duplique\n");
+      return 2;
+    }
+    std::fprintf(stderr, "GARDE INEFFICACE : doublon d'id accepte\n");
+    return 3;
+  }
+  const std::vector<InputPoint> hi = {{1, P3{70000, 2, 3}}, {2, P3{4, 5, 6}}};
+  const std::vector<InputPoint> neg = {{1, P3{-1, 2, 3}}, {2, P3{4, 5, 6}}};
+  const bool r_hi = (size_t)build_cloud_index(hi).unique_count() != hi.size();
+  const bool r_neg = (size_t)build_cloud_index(neg).unique_count() != neg.size();
+  if (r_hi && r_neg) {
+    std::fprintf(stderr, "REFUS invalid_input : coordonnee hors u16\n");
+    return 2;
+  }
+  std::fprintf(stderr, "GARDE INEFFICACE : coordonnee hors profil acceptee\n");
+  return 3;
+}
+
 }  // namespace
 
 int main(int argc, char** argv) {
@@ -478,6 +656,9 @@ int main(int argc, char** argv) {
     return 2;
   }
   if (a.relabel_gate) return run_relabel_gate(a.inj_dense_pointid);
+  if (a.depth_gate)
+    return run_depth_gate(a.inj_threshold_minus_one, a.inj_range_add_le);
+  if (a.guard != 0) return run_guard_gate(a.guard);
   const std::vector<P3> pts = make_family_cloud(
       a.family, a.n,
       a.coord > 0 ? a.coord : cloud_family_default_coord(a.family, a.n), a.seed);
@@ -504,11 +685,26 @@ int main(int argc, char** argv) {
   collect_rle(ix, a.s, smax_eff, a.inj_rle_drop, &cands, &st);
   const auto t1 = std::chrono::steady_clock::now();
 
-  // 2. UN census exact par cle (I_B et U_B complets).
+  // 2. PASSE 1 count-only (seuil h_qmin par arite minimale), puis PASSE 2
+  // census complet I_B/U_B sur les seules survivantes — temps SEPARES.
+  // Sous mutant, un invariant qui se declenche (recoupement passe1 !=
+  // passe2, roles) EST la mise a mort — convention du selftest.
+  const bool any_inject = a.inj_rle_drop || a.inj_census_nonstrict ||
+                          a.inj_dense_pointid || a.inj_threshold_minus_one ||
+                          a.inj_range_add_le || a.inj_skip_full;
+  std::vector<Survivor> surv;
+  prefilter_balls(ix, cands, a.inj_threshold_minus_one, a.inj_range_add_le,
+                  &surv, &st);
+  const auto t1b = std::chrono::steady_clock::now();
   std::vector<BallData> balls;
   {
-    const int rc = census_balls(ix, cands, a.shell_cap, a.inj_census_nonstrict,
-                                a.inj_prefilter_nonstrict, &balls, &st);
+    const int rc = census_balls(ix, cands, surv, a.shell_cap,
+                                a.inj_census_nonstrict, a.inj_skip_full,
+                                &balls, &st);
+    if (rc == 3 && any_inject) {
+      std::printf("MUTANT TUE\n");
+      return 4;
+    }
     if (rc) return rc;
   }
   const auto t2 = std::chrono::steady_clock::now();
@@ -523,6 +719,10 @@ int main(int argc, char** argv) {
   std::vector<std::vector<ForestEvent>> sevk;
   {
     const int rc = forests_from_balls(balls, ix.upos, pid_of, sev, sres, &sevk);
+    if (rc == 3 && any_inject) {
+      std::printf("MUTANT TUE\n");
+      return 4;
+    }
     if (rc) return rc;
   }
   const auto t3 = std::chrono::steady_clock::now();
@@ -699,22 +899,26 @@ int main(int argc, char** argv) {
   }
   std::printf(
       "famille=%s n=%zu s=%lld smax=%llu seed=%lld candidats=%llu/%llu/%llu "
-      "boules_uniques=%llu mortes_profondeur=%llu census_int=%llu "
+      "boules_uniques=%llu mortes_profondeur=%llu prefiltre_feuilles=%llu "
+      "prefiltre_range_add=%llu census_keys=%llu census_int=%llu "
       "census_shell=%llu evenements=%llu fusions=%llu noeuds=%llu "
-      "desaccords=%llu t_flux_ms=%.1f t_census_ms=%.1f t_fold_ms=%.1f "
-      "t_juge_ms=%.1f\n",
+      "desaccords=%llu t_flux_ms=%.1f t_prefiltre_ms=%.1f t_census_ms=%.1f "
+      "t_fold_ms=%.1f t_juge_ms=%.1f\n",
       cloud_family_name(a.family), pts.size(), (long long)a.s,
       (unsigned long long)smax_eff, a.seed, (unsigned long long)st.candidates[0],
       (unsigned long long)st.candidates[1], (unsigned long long)st.candidates[2],
       (unsigned long long)st.unique_balls,
       (unsigned long long)st.balls_dead_depth,
+      (unsigned long long)st.prefilter_leaf_tests,
+      (unsigned long long)st.prefilter_range_add_mass,
+      (unsigned long long)st.full_census_keys,
       (unsigned long long)st.census_interior, (unsigned long long)st.census_shell,
       (unsigned long long)events_total, (unsigned long long)fusions_total,
       (unsigned long long)nodes_total, (unsigned long long)disagreements,
-      ms(t1 - t0), ms(t2 - t1), ms(t3 - t2), ms(t4 - t3));
+      ms(t1 - t0), ms(t1b - t1), ms(t2 - t1b), ms(t3 - t2), ms(t4 - t3));
 
   if (a.inj_rle_drop || a.inj_census_nonstrict || a.inj_dense_pointid ||
-      a.inj_prefilter_nonstrict) {
+      a.inj_threshold_minus_one || a.inj_range_add_le || a.inj_skip_full) {
     if (a.judge && disagreements > 0) {
       std::printf("MUTANT TUE\n");
       return 4;

@@ -56,7 +56,13 @@ struct BallStreamStats {
   u64 unique_balls = 0;
   u64 census_interior = 0;
   u64 census_shell = 0;
-  u64 balls_dead_depth = 0;  // |I_B| > K_max - 1 : aucun K <= K_max
+  u64 balls_dead_depth = 0;  // |I_B| >= h_qmin : aucun K <= K_max
+  // Passe count-only (audit « prefiltre exact par boule ») : ses couts,
+  // separes de ceux du census complet — un gain de census ne doit jamais
+  // dissimuler un tri ou une passe qui mange le gain.
+  u64 prefilter_leaf_tests = 0;
+  u64 prefilter_range_add_mass = 0;
+  u64 full_census_keys = 0;
 };
 
 namespace detail_bs {
@@ -261,20 +267,38 @@ inline void collect_candidate_balls(const CloudIndex& ix, i64 s, u64 smax_eff,
 // Retourne false si |I_B| depasse `interior_cap` (boule sans K <= K_max) OU
 // si |U_B| depasse `shell_cap` (a traiter en resource_exhausted par
 // l'appelant — jamais une troncature silencieuse).
-// PRE-FILTRE DE PROFONDEUR (reçu flux reels : 98 % des boules uniques
-// meurent en |I_B| > cap APRES avoir paye leur census complet — le census
-// sortait tot mais feuille par feuille). Descente COMPTANTE : une boite
-// entierement STRICTEMENT interieure (max P < 0 sur la boite) est avalee
-// en O(1) par son compte de positions uniques — une boule profonde meurt
-// en quelques visites, sans allocation. EXACT : un point de coquille
-// (P == 0) n'est jamais compte (une feuille a mn == mx ; a 0 elle est
-// coquille et passe), donc le filtre tue exactement les boules que le
-// census aurait tuees. MUTANT nonstrict : les boites a max P <= 0
-// comptees interieures — des boules a coquille meurent a tort, le juge
-// le voit (evenements manquants).
-inline bool ball_depth_exceeds(const CloudIndex& ix, const Q3BallKey& k,
-                               size_t cap, bool mutant_nonstrict = false) {
-  if (ix.nodes.empty()) return false;
+// PASSE COUNT-ONLY DE PROFONDEUR (audit « prefiltre exact par boule ») :
+// decide `|I_B| >= h` AVANT toute materialisation de I_B/U_B.
+//
+// SEUIL EXACT PAR ARITE MINIMALE (audit § 1) : apres le RLE, q_min =
+// arite du premier candidat du groupe (le tri met l'arite avant la
+// representation) est la cardinalite minimale d'un support de la
+// miniboule — tout T d'un evenement du plateau contient un support
+// minimal, donc |T| >= q_min, et un evenement utile a K <= K_max exige
+// |I_B| <= K_max + 1 - q_min. Regle de mort : |I_B| >= h_qmin =
+// K_max + 2 - q_min (10/9/8 interieurs pour q_min = 2/3/4). La regle
+// s'appuie sur la completude par lane (en-tete) : une boule au label
+// q_min = 4 mais de support reel 2 serait NON pertinente pour q2 (sinon
+// la lane q2 l'aurait emise) — la tuer plus tot est exact.
+//
+// Decisions de descente (les inegalites comptent) :
+//   mn >= 0 : aucun point strictement interieur — ELAGUE, y compris les
+//             regions de coquille pure (mn == 0) que le census, lui,
+//             doit descendre ;
+//   mx <  0 : tout le nœud est strictement interieur — range-add sature
+//             en O(1), sans allocation. STRICT : a mx == 0 une coquille
+//             serait comptee interieure (MUTANT range-add-max-le-zero,
+//             tue : des boules a plateau meurent a tort) ;
+//   sinon    scission ; a la feuille, test exact (mn == mx).
+// Rend true des que count atteint h ; sinon false et *count_out = compte
+// EXACT des interieurs stricts (recoupe par la passe census, invariant).
+inline bool ball_depth_at_least(const CloudIndex& ix, const Q3BallKey& k,
+                                u64 h, u64* count_out,
+                                bool mutant_range_add_le = false,
+                                u64* leaf_tests = nullptr,
+                                u64* range_add_mass = nullptr) {
+  *count_out = 0;
+  if (ix.nodes.empty()) return h == 0;
   const auto axis_val = [&](int i, i64 t) { return k.a * ((i128)t * t) + k.b[i] * t; };
   const auto axis_min = [&](int i, i64 lo, i64 hi) {
     const i128 num = -k.b[i];
@@ -294,7 +318,7 @@ inline bool ball_depth_exceeds(const CloudIndex& ix, const Q3BallKey& k,
   const auto axis_max = [&](int i, i64 lo, i64 hi) {
     return std::max(axis_val(i, lo), axis_val(i, hi));
   };
-  size_t count = 0;
+  u64 count = 0;
   std::vector<NodeRef> stack{0};
   while (!stack.empty()) {
     const NodeRef z = stack.back();
@@ -305,19 +329,30 @@ inline bool ball_depth_exceeds(const CloudIndex& ix, const Q3BallKey& k,
       mn += axis_min(i, bz.lo[i], bz.hi[i]);
       mx += axis_max(i, bz.lo[i], bz.hi[i]);
     }
-    if (mn > 0) continue;
-    if (mx < 0 || (mutant_nonstrict && mx <= 0)) {
-      count += (z < 0)
-                   ? 1
-                   : (size_t)(ix.nodes[(size_t)z].last -
-                              ix.nodes[(size_t)z].first + 1);
-      if (count > cap) return true;
+    if (mn >= 0) continue;  // rien de STRICTEMENT interieur (coquille incluse)
+    if (mx < 0 || (mutant_range_add_le && mx <= 0)) {
+      const u64 w = (z < 0) ? 1
+                            : (u64)(ix.nodes[(size_t)z].last -
+                                    ix.nodes[(size_t)z].first + 1);
+      if (range_add_mass) *range_add_mass += w;
+      count += w;
+      if (count >= h) return true;
       continue;
     }
-    if (z < 0) continue;  // feuille mn <= 0 <= mx : exactement la coquille
+    if (z < 0) {
+      // Test exact au point (la boite serree d'une feuille rend mn == mx,
+      // mais le test ne SUPPOSE pas cette etroitesse).
+      if (leaf_tests) ++(*leaf_tests);
+      const P3& p = ix.upos[(size_t)(-1 - z)];
+      const i128 pw = k.a * p3_norm2(p) + k.b[0] * p.x + k.b[1] * p.y +
+                      k.b[2] * p.z + k.c;
+      if (pw < 0 && ++count >= h) return true;
+      continue;
+    }
     stack.push_back(ix.nodes[(size_t)z].left);
     stack.push_back(ix.nodes[(size_t)z].right);
   }
+  *count_out = count;
   return false;
 }
 
