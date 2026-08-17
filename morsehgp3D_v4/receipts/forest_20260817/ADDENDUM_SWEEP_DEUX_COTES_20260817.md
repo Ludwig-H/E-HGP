@@ -110,3 +110,18 @@ Exploration hors registre, `public_status=not_claimed` ; le chemin
 axial reste opt-in, la production CPU reste la baseline. La campagne
 G4 (couverture) décidera de la promotion éventuelle, eight_clusters
 smax=11 restant un run À RISQUE.
+
+## Post-scriptum (audit « sweep reçu et kernel sans alloc » § 3)
+
+Correction d'une causalité trop forte dans ce reçu : la fixture
+1513/49 tue son complèteur à la CLASSIFICATION (racine sous $L$), un
+étage que les mutants `ignore-opposite-side` et `reverse-negative`
+d'alors — limités à $d_j$ en fenêtre — ne touchaient pas. Ils
+mouraient sur les nuages généraux de la porte, pas par la fixture,
+contrairement à ce que le paragraphe « Portes » affirme. Réparé au
+commit suivant : `ignore-opposite` est devenu causal (il saute aussi
+le seuil croisé — la fixture l'isole désormais vraiment), et la
+causalité de `reverse-negative` est établie par la primitive extraite
+`axial_two_sided_sweep` et sa porte synthétique à multisets gravés
+(`--axial-sweep-gate`), la fixture géométrique restant la porte
+d'intégration.

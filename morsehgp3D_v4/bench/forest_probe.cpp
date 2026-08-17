@@ -69,6 +69,7 @@ struct Args {
   bool inj_genfilter_nonstrict = false;
   bool axial_on = false;  // opt-in GPU-oriente ; production CPU = baseline
   bool axial_pair_gate = false;
+  bool axial_sweep_gate = false;
   u32 inj_axial = 0;  // masque kAxial* des mutants du chemin axial
   u64 min_balls = 0;
   u64 min_fusions = 0;
@@ -126,6 +127,7 @@ Args parse(int argc, char** argv) {
       a.inj_genfilter_nonstrict = true;
     else if (arg == "--axial-on") a.axial_on = true;
     else if (arg == "--axial-pair-gate") a.axial_pair_gate = true;
+    else if (arg == "--axial-sweep-gate") a.axial_sweep_gate = true;
     else if (arg == "--inject=axial-short-group") a.inj_axial |= kAxialShortGroup;
     else if (arg == "--inject=axial-drop-ties") a.inj_axial |= kAxialDropTies;
     else if (arg == "--inject=axial-first-rep") a.inj_axial |= kAxialFirstRep;
@@ -757,19 +759,95 @@ int run_kmax_gate(bool inj_kmax10) {
   return bad ? 3 : 0;
 }
 
+// PORTE SYNTHETIQUE DE LA PRIMITIVE DE SWEEP (audit « sweep reçu et
+// kernel sans alloc » § 3) : multisets de racines SANS geometrie — la
+// causalite des mutants de fenetre et de d_j s'etablit ICI (la fixture
+// geometrique 1513/49 tue son completeur a la classification, elle ne
+// peut pas isoler ignore-opposite/reverse-negative a elle seule) ; la
+// fixture geometrique reste la porte d'integration vers les BallKey.
+int run_axial_sweep_gate(u32 inj) {
+  u64 bad = 0;
+  // Multiset grave par l'audit : une positive mu=0, trois negatives
+  // mu=1,2,3, p=0, h=3. Normal : la positive est rejetee par le cote
+  // OPPOSE (sous L=1), le groupe mu=1 meurt en fenetre (d_j=3), mu=2 et
+  // mu=3 vivent. ignore-opposite : la positive ne lit plus L et survit ;
+  // reverse-negative : les verdicts de mu=1 et mu=3 s'INVERSENT.
+  {
+    const AxialSite sites[4] = {
+        {0, 1, 10}, {-1, -1, 11}, {-2, -1, 12}, {-3, -1, 13}};
+    u8 gid[4];
+    const AxialSweepResult r =
+        axial_two_sided_sweep(sites, 4, 0, 3, inj, gid);
+    const bool ok = r.roots_pruned_cross == 1 && r.ngroups == 3 &&
+                    !r.groups[0].alive && r.groups[0].dj == 3 &&
+                    r.groups[1].alive && r.groups[2].alive &&
+                    r.groups_killed_depth == 1 && gid[0] == 0xff &&
+                    !r.overflow;
+    if (!ok) {
+      std::fprintf(stderr, "SWEEP : multiset 0 | 1,2,3 devie\n");
+      ++bad;
+    }
+  }
+  // Groupe MIXTE : une meme mu exacte portee par les DEUX signes ne
+  // forme qu'un groupe (npos=1, nneg=1), fenetre [0,5] pleine, aucune
+  // racine croisee, tous vivants.
+  {
+    const AxialSite sites[4] = {{2, 1, 1}, {5, 1, 2}, {-2, -1, 3}, {0, -1, 4}};
+    u8 gid[4];
+    const AxialSweepResult r =
+        axial_two_sided_sweep(sites, 4, 0, 2, inj, gid);
+    const bool ok = r.ngroups == 3 && r.roots_pruned_cross == 0 &&
+                    r.groups[1].npos == 1 && r.groups[1].nneg == 1 &&
+                    r.groups[0].alive && r.groups[1].alive &&
+                    r.groups[2].alive && gid[0] == gid[2];
+    if (!ok) {
+      std::fprintf(stderr, "SWEEP : multiset mixte devie\n");
+      ++bad;
+    }
+  }
+  // Ties AU seuil : U=2 porte par deux racines egales — les deux restent
+  // en fenetre (drop-ties les perd), p=1 compte dans d_j.
+  {
+    const AxialSite sites[3] = {{1, 1, 1}, {2, 1, 2}, {2, 1, 3}};
+    u8 gid[3];
+    const AxialSweepResult r =
+        axial_two_sided_sweep(sites, 3, 1, 3, inj, gid);
+    const bool ok = r.ngroups == 2 && r.groups[1].npos == 2 &&
+                    r.groups[0].alive && r.groups[1].alive &&
+                    r.groups[1].dj == 2;
+    if (!ok) {
+      std::fprintf(stderr, "SWEEP : multiset ties devie\n");
+      ++bad;
+    }
+  }
+  std::printf("axial_sweep_gate violations=%llu\n", (unsigned long long)bad);
+  if (inj != 0) {
+    if (bad > 0) {
+      std::printf("MUTANT TUE\n");
+      return 4;
+    }
+    std::fprintf(stderr, "PORTE INEFFICACE : mutant non discrimine\n");
+    return 3;
+  }
+  return bad ? 3 : 0;
+}
+
 // PORTE APPARIEE DE LA SELECTION AXIALE (audit « axial borne » § 6.1,
 // etendue par le contre-audit 63d364a « sweep a deux cotes ») : baseline
 // enumeree CONTRE axial borne, comparees apres tri/RLE — cles, arite et
 // REPRESENTATION de niveau a l'identique (jamais les candidats bruts : le
 // but est precisement de ne plus les produire). Chaque run axial porte
-// kAxialVerify : d_j est recoupe par le scan q4_power complet sur chaque
-// groupe emis, et tout desaccord est une violation. Mutants tues ici :
-// short-group et drop-ties PERDENT des cles ; first-rep emet un
-// representant non canonique (discrimine PRE-RLE) ; ignore-opposite-side
-// et reverse-negative manquent la mort bilaterale de la FIXTURE § 5
-// (sphere 1513/49, trois interieurs tous du cote oppose au completeur) ;
-// depth-nonstrict tue a tort cette meme sphere a smax=7. Le chemin
-// --axial-off n'est pas un mutant : c'est cette baseline.
+// kAxialVerify : d_j est recoupe par le scan q4_power complet sur TOUS
+// les groupes en fenetre (morts compris — audit « sweep reçu » § 3), et
+// tout desaccord est une violation. Mutants tues ici : short-group et
+// drop-ties PERDENT des cles ; first-rep emet un representant non
+// canonique (discrimine PRE-RLE) ; ignore-opposite-side, devenu CAUSAL
+// (il saute aussi le seuil croise), fait survivre la sphere 1513/49 de
+// la FIXTURE § 5 a smax=6 ; depth-nonstrict la tue a tort a smax=7 ;
+// reverse-negative, qui ne touche que d_j en fenetre, est isole
+// causalement par la porte synthetique --axial-sweep-gate et meurt ici
+// sur les nuages generaux. Le chemin --axial-off n'est pas un mutant :
+// c'est cette baseline.
 int run_axial_pair_gate(u32 inj) {
   u64 bad = 0;
   u64 base_candidates = 0, axial_candidates = 0, groups = 0;
@@ -918,10 +996,14 @@ int run_axial_pair_gate(u32 inj) {
   // et tous du cote B < 0 de l'axe du seed (a,b,x) (plan z=10) tandis que
   // le completeur y est du cote B > 0 : d_cover = 3 vient du SEUL suffixe
   // negatif. A smax=6 (h4=3) la cle doit etre ABSENTE (emissions brutes)
-  // et la mort bilaterale comptee ; a smax=7 (h4=4) la cle doit etre
-  // PRESENTE au niveau semantique 1513/49. Les mutants ignore-opposite et
-  // reverse-negative la laissent survivre a smax=6 ; depth-nonstrict la
-  // tue a tort a smax=7.
+  // et la mort par le cote oppose comptee ; a smax=7 (h4=4) la cle doit
+  // etre PRESENTE au niveau semantique 1513/49. CAUSALITE (audit « sweep
+  // reçu » § 3) : la mort se produit ici a la CLASSIFICATION (racine du
+  // completeur sous L), donc seul ignore-opposite — qui saute le seuil
+  // croise — fait survivre la sphere a smax=6 ; depth-nonstrict la tue a
+  // tort a smax=7 ; reverse-negative ne touche que d_j en fenetre et
+  // n'est PAS isole par cette fixture : sa causalite vit dans la porte
+  // synthetique --axial-sweep-gate (inversion des verdicts mu=1/mu=3).
   // Deux variantes d'interieurs : (0) le triplet GRAVE par le contre-audit
   // — z_i si profonds (|mu| = 1770 > racine(J/2) ~ 433) qu'ils sont
   // temoins UNIVERSELS : c'est le cœur de seed qui tue, avant tout
@@ -972,7 +1054,7 @@ int run_axial_pair_gate(u32 inj) {
         }
         const bool killed = variant == 0
                                 ? sa.seeds_killed_seed_core > 0
-                                : sa.axial_groups_killed_two_sided > 0;
+                                : sa.axial_roots_pruned_cross > 0;
         if (!killed) {
           std::fprintf(stderr,
                        "AXIAL fixture : aucune mort %s a smax=6 (v%d)\n",
@@ -1071,6 +1153,7 @@ int main(int argc, char** argv) {
     return run_depth_gate(a.inj_threshold_minus_one, a.inj_range_add_le,
                           a.inj_shell_first);
   if (a.kmax_gate) return run_kmax_gate(a.inj_fold_kmax10);
+  if (a.axial_sweep_gate) return run_axial_sweep_gate(a.inj_axial);
   if (a.axial_pair_gate) return run_axial_pair_gate(a.inj_axial);
   if (a.guard != 0) return run_guard_gate(a.guard);
   const std::vector<P3> pts = make_family_cloud(
@@ -1334,7 +1417,8 @@ int main(int argc, char** argv) {
   std::printf(
       "famille=%s n=%zu s=%lld smax=%llu seed=%lld candidats=%llu/%llu/%llu "
       "gen_tues=%llu/%llu ancres_w4=%llu seeds=%llu groupes=%llu "
-      "morts_bilat=%llu boules_uniques=%llu mortes_profondeur=%llu "
+      "racines_croisees=%llu groupes_fenetre=%llu groupes_tues_dj=%llu "
+      "appels_completion=%llu boules_uniques=%llu mortes_profondeur=%llu "
       "prefiltre_feuilles=%llu "
       "prefiltre_range_add=%llu census_keys=%llu census_int=%llu "
       "census_shell=%llu evenements=%llu fusions=%llu noeuds=%llu "
@@ -1350,7 +1434,10 @@ int main(int argc, char** argv) {
       (unsigned long long)st.anchors_killed_w4,
       (unsigned long long)st.axial_seeds,
       (unsigned long long)st.axial_groups_emitted,
-      (unsigned long long)st.axial_groups_killed_two_sided,
+      (unsigned long long)st.axial_roots_pruned_cross,
+      (unsigned long long)st.axial_groups_in_window,
+      (unsigned long long)st.axial_groups_killed_depth,
+      (unsigned long long)st.axial_completion_calls,
       (unsigned long long)st.unique_balls,
       (unsigned long long)st.balls_dead_depth,
       (unsigned long long)st.prefilter_leaf_tests,

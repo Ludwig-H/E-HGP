@@ -322,6 +322,24 @@ mhgp4_expect_code(mhgp4_forest_probe_axial_mutant_nonstrict 4 mhgp4_forest_probe
 # perd la cle.
 mhgp4_expect_code(mhgp4_forest_probe_axial_mutant_seed_core 4 mhgp4_forest_probe
     "--axial-pair-gate --inject=seed-core-nonstrict")
+# Primitive du sweep extraite et testable seule (audit « sweep reçu et
+# kernel sans alloc » § 3) : multisets synthetiques graves — la CAUSALITE
+# des mutants de fenetre et de d_j s'etablit ici (une positive mu=0 sous
+# L doit etre conservee par un vrai ignore-opposite ; reverse-negative
+# inverse les verdicts de mu=1 et mu=3), la fixture geometrique 1513/49
+# restant la porte d'integration.
+mhgp4_expect_code(mhgp4_forest_probe_sweep_gate 0 mhgp4_forest_probe
+    "--axial-sweep-gate")
+mhgp4_expect_code(mhgp4_forest_probe_sweep_mutant_short 4 mhgp4_forest_probe
+    "--axial-sweep-gate --inject=axial-short-group")
+mhgp4_expect_code(mhgp4_forest_probe_sweep_mutant_ties 4 mhgp4_forest_probe
+    "--axial-sweep-gate --inject=axial-drop-ties")
+mhgp4_expect_code(mhgp4_forest_probe_sweep_mutant_opposite 4 mhgp4_forest_probe
+    "--axial-sweep-gate --inject=axial-ignore-opposite-side")
+mhgp4_expect_code(mhgp4_forest_probe_sweep_mutant_reverse 4 mhgp4_forest_probe
+    "--axial-sweep-gate --inject=axial-reverse-negative")
+mhgp4_expect_code(mhgp4_forest_probe_sweep_mutant_nonstrict 4 mhgp4_forest_probe
+    "--axial-sweep-gate --inject=axial-depth-nonstrict")
 
 # La lane q2 productrice : W_2 est la boule diametrale ouverte, le census
 # est une requete de cover a coefficient 1. Juge brut toutes-paires sur
