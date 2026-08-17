@@ -1,91 +1,102 @@
-# PolyTreeFormer — segmentation LiDAR sur hiérarchie polyédrique
+# HGP-PolyFM — vers un modèle de fondation sur espace d'échelle polyédrique
 
-> **Question de recherche.** Peut-on remplacer les points comme unités apprises par la hiérarchie fine de facettes et de polyèdres issue de la filtration de densité, afin d'obtenir une représentation plus stable à la portée du capteur tout en conservant une sortie sémantique par point ?
+> **Question centrale.** Une hiérarchie fine de surfaces polyédriques, construite par niveaux de densité, peut-elle devenir un meilleur espace natif d'apprentissage que les points, voxels et superpoints pour la perception 3D ?
 
-## Décision scientifique
+## Changement de paradigme
 
-La voie principale est désormais **polyèdre-only** :
+Le modèle n'apprend pas d'abord sur les retours LiDAR. Il apprend sur les **polyèdres HGP** : des recollements de facettes décrivant les surfaces effectivement observées par le capteur, organisés par leur croissance et leurs fusions le long de la filtration de densité.
 
-- les points servent au prétraitement géométrique et à la reprojection finale ;
-- aucun point n'est un token du réseau ;
-- les tokens élémentaires sont les facettes sérialisées ;
-- les tokens internes sont les nœuds de l'arbre de fusion ;
-- l'apprentissage combine le graphe d'incidence local, l'évolution le long des branches et les fusions multi-échelles.
+```text
+retours LiDAR
+    │
+    └─ hiérarchie HGP supposée disponible
+          │
+          ├─ surfaces polyédriques à chaque nœud
+          ├─ trajectoires de croissance le long des branches
+          ├─ événements de fusion
+          └─ voisinages spatiaux entre branches
+                    │
+                    ▼
+              HGP-PolyFM
+                    │
+          ├─ segmentation sémantique
+          ├─ segmentation d'instance / panoptique
+          ├─ détection et localisation
+          ├─ recherche de régions
+          └─ transfert cross-capteur
+```
 
-Le nom de travail du modèle est **PolyTreeFormer**. Il ne constitue pas une revendication de nouveauté.
+Les points restent nécessaires pour construire la géométrie et pour la sortie officielle, mais ils ne sont pas les tokens du backbone principal.
 
-## Hypothèse centrale
+## Décision de représentation
 
-Sous une dilution approximativement multiplicative de l'échantillonnage LiDAR, une hiérarchie de densité idéale est préservée à une reparamétrisation monotone du niveau près. Le réseau doit donc privilégier :
+Une fonction radiale monocouche est trop restrictive : un polyèdre peut être ouvert, concave ou multicouche depuis un centre donné. L'objet principal est donc la **mesure surfacique attribuée normalisée** du polyèdre. Sa discrétisation compacte utilise une grille sphéro-radiale douce, qui conserve toute la masse de surface, y compris plusieurs intersections dans une même direction.
 
-- les différences de niveaux logarithmiques ;
-- la persistance et les rapports de masse ;
-- la forme normalisée ;
-- la combinatoire d'incidence et de fusion.
+La connectivité des facettes reste un canal séparé. Des résumés topologiques légers complètent le code compact ; une branche de graphe surfacique, puis un encodeur natif du maillage, servent de corrections et de plafonds si la compression détruit une information utile.
 
-La taille physique, la hauteur, la pose, la portée et la rémission restent disponibles dans des canaux séparés. L'objectif n'est pas de rendre le modèle aveugle au monde physique, seulement moins dépendant du nombre accidentel de retours.
+Voir [REPRESENTATION_POLYEDRIQUE.md](REPRESENTATION_POLYEDRIQUE.md).
 
-Cette invariance est une **hypothèse à falsifier**, pas un résultat acquis : occultations, angle d'incidence, anneaux et retours manquants produisent une dilution non homogène.
+## Architecture cible
 
-## Architecture retenue
+Le modèle cible n'est pas une simple adaptation de Superpoint Transformer.
 
-La première implémentation ne part pas d'un Transformer inventé pour l'occasion. Elle adapte le mode **`nano` de Superpoint Transformer**, qui supprime déjà l'étage point-wise et traite uniquement une hiérarchie de régions.
+1. **Surface encoder** : un code fixe par polyèdre à partir de la mesure surfacique normalisée, de sa grille sphéro-radiale et d'un résumé de connectivité, avec branche maillée sous condition.
+2. **Branch encoder** : évolution de la forme le long d'une branche, indexée par les écarts de niveau de densité.
+3. **Merge-event encoder** : agrégation permutation-invariante des enfants et de la géométrie nouvellement apparue.
+4. **Lateral context** : échanges entre polyèdres spatialement voisins appartenant à des branches différentes.
+5. **Facet decoder** : les facettes reçoivent le contexte de leurs ancêtres puis produisent les logits reprojetés vers les points.
 
-1. **Encodeur local sparse** sur le graphe dual des facettes.
-2. **Encodeur-décodeur hiérarchique** parent–enfants avec arêtes latérales.
-3. **Prédiction par facette**, puis reprojection massique vers les points.
-4. **Pré-entraînement teacher–student** entre scan complet et scan physiquement aminci.
-5. **HSA** et l'attention de type Sequoia sont des opérateurs comparatifs, ouverts seulement après validation de la tokenisation et des canaux.
+SPT-nano, Sequoia et HSA restent des comparateurs utiles ; aucun n'est supposé être le cœur naturel du nouveau paradigme.
 
-La description précise est dans [ARCHITECTURE.md](ARCHITECTURE.md) et [ENTRAINEMENT.md](ENTRAINEMENT.md).
+## Ce qui doit être démontré
+
+Le projet n'est confirmé que si les résultats établissent successivement :
+
+1. **fidélité** : les surfaces sont représentées avec une faible distorsion à budget fixe ;
+2. **stabilité** : le code varie moins que les représentations points/superpoints sous portée, thinning, remeshing et changement de capteur ;
+3. **suffisance sémantique** : les polyèdres conservent les frontières et les petites classes ;
+4. **apport de la hiérarchie** : l'arbre réel bat les contrôles plats, aléatoires et concurrents ;
+5. **transfert** : le pré-entraînement améliore linear probing, faible supervision et plusieurs tâches sur plusieurs capteurs.
+
+Un bon score sur SemanticKITTI seul établit un backbone spécialisé. Le terme **modèle de fondation** n'est utilisé qu'après pré-entraînement multi-datasets et transfert multi-tâches.
 
 ## Ordre des travaux
 
-| Porte | Question | Décision |
-|---|---|---|
-| G0 | la sérialisation conserve-t-elle masse, incidences et ordre des points ? | sinon arrêt |
-| G1 | l'oracle facette permet-il encore largement le score visé ? | sinon raffiner les feuilles |
-| G2 | l'arbre reste-t-il stable sous thinning réaliste ? | sinon l'argument d'invariance tombe |
-| G3 | un SPT-nano adapté apprend-il utilement sans tokens points ? | sinon abandon du polyèdre-only strict |
-| G4 | la hiérarchie réelle bat-elle arbres aléatoires, octree et HDBSCAN à budget égal ? | sinon la structure spécifique n'aide pas |
-| G5 | les canaux de filtration apportent-ils plus que les raccourcis capteur ? | sinon réduire le claim |
-| G6 | le pré-entraînement de portée améliore-t-il probing et fine-tuning sur trois graines ? | sinon ne pas complexifier |
-| G7 | le gain se transfère-t-il à un second capteur ? | requis pour une revendication générale |
+```text
+P0  audit géométrique du tokenizer
+P1  benchmark des représentations de surface
+P2  modèle plat sur polyèdres
+P3  modèle complet sur l'espace d'échelle HGP
+P4  pré-entraînement géométrique et cross-range
+P5  pré-entraînement temporel et multi-capteurs
+P6  distillation 2D / langage sous condition
+P7  évaluation fondation multi-tâches
+```
 
-Les seuils, contrôles et règles d'arrêt sont détaillés dans [PROTOCOLE.md](PROTOCOLE.md).
+Les portes et règles d'arrêt sont définies dans [PROTOCOLE.md](PROTOCOLE.md) et [VOIES.md](VOIES.md).
 
 ## Lecture du dossier
 
 | Document | Rôle |
 |---|---|
-| [GUIDE.md](GUIDE.md) | vue pédagogique de bout en bout |
-| [ARCHITECTURE.md](ARCHITECTURE.md) | tokens, canaux, graphes et Transformers |
-| [ENTRAINEMENT.md](ENTRAINEMENT.md) | supervision, pré-entraînement et optimisation |
-| [PROTOCOLE.md](PROTOCOLE.md) | expériences, métriques, contrôles et portes |
-| [RISQUES.md](RISQUES.md) | difficultés techniques et scientifiques |
-| [CONCURRENCE.md](CONCURRENCE.md) | positionnement par rapport aux travaux existants |
-| [VOIES.md](VOIES.md) | feuille de route exécutable |
-| [REFERENCES.md](REFERENCES.md) | sources primaires retenues |
-| [GLOSSAIRE.md](GLOSSAIRE.md) | vocabulaire ML et implémentation |
+| [GUIDE.md](GUIDE.md) | vue pédagogique du changement de paradigme |
+| [REPRESENTATION_POLYEDRIQUE.md](REPRESENTATION_POLYEDRIQUE.md) | radialité, alternatives et tokenizer retenu |
+| [ARCHITECTURE.md](ARCHITECTURE.md) | modèle natif surface × hiérarchie |
+| [ENTRAINEMENT.md](ENTRAINEMENT.md) | pré-entraînement géométrique, temporel et cross-capteur |
+| [PROTOCOLE.md](PROTOCOLE.md) | quantification, baselines et critères de décision |
+| [RISQUES.md](RISQUES.md) | réfutations possibles et plans de repli |
+| [CONCURRENCE.md](CONCURRENCE.md) | état de l'art et revendication défendable |
+| [VOIES.md](VOIES.md) | feuille de route de recherche |
+| [REFERENCES.md](REFERENCES.md) | sources primaires |
+| [GLOSSAIRE.md](GLOSSAIRE.md) | définitions normatives |
 
 Le dossier [`archive/`](archive/) conserve les formulations antérieures. Il n'est plus normatif.
 
-## Périmètre expérimental principal
-
-- SemanticKITTI, segmentation sémantique **mono-scan** ;
-- LiDAR seul à l'inférence ;
-- entrée brute : `(x, y, z, remission)` ;
-- entraînement : séquences `00–07, 09, 10` ;
-- validation : séquence `08` ;
-- sans TTA ni ensemble pour le résultat principal ;
-- sortie : 19 logits dans l'ordre exact des points du fichier `.bin`.
-
-Les chiffres de concurrence changent plus vite que la géométrie. Aucun score n'est déclaré « état de l'art » sans réaudit du régime, du split et des données utilisées.
-
 ## Statut
 
-`research_status = design_and_falsification`
+```text
+research_status = representation_falsification
+foundation_claim = not_yet_earned
+```
 
-Aucun résultat appris n'est revendiqué à ce stade. La première contribution attendue est une réponse expérimentale nette à la question suivante :
-
-> Une hiérarchie polyédrique fine conserve-t-elle suffisamment d'information sémantique et suffisamment de stabilité sous changement de densité pour devenir l'espace principal d'apprentissage ?
+La première victoire attendue n'est pas un gros Transformer. C'est la démonstration qu'une surface polyédrique HGP fournit un **meilleur alphabet géométrique** qu'un échantillon ponctuel à budget comparable.
