@@ -7,19 +7,30 @@
 // expansion des plateaux (§ 5.3bis, roles § 5.2) -> ForestEvents par K ->
 // build_forest (macro-lots same_exact_level).
 //
+// FRONTIERE D'IDENTITE (audits e7e4d5e) : le census, l'arbre et le plateau
+// vivent en GeometryIndex (rangs denses de `upos`, ordre Morton) ; la foret
+// combinatoire vit en PointId EXTERNES. La conversion a lieu une seule fois,
+// a l'entree de `forests_from_balls`, via la table `pid_of` — jamais par un
+// cast du rang. La generation est aveugle aux ids (BallKey primitive) : la
+// porte --relabel-gate le VERIFIE (equivariance au relabeling π, invariance
+// a la permutation physique, aucune cle publique hors des ids fournis).
+//
 // JUGE (--judge, borne) : la MEME semantique depuis une enumeration brute
 // aux predicats de production (toutes paires / triangles aigus / tetraedres
 // centres) avec census brut point a point — il juge la COMPLETUDE WSPD, le
-// census d'arbre et le RLE. Compare par K : nombre d'evenements, lots,
-// multiensemble des nœuds, attachements nes au lot, partitions apres
-// chaque lot.
+// census d'arbre et le RLE. Sa table geometry_index -> id est reconstruite
+// INDEPENDAMMENT depuis les enregistrements d'entree (position -> id), sans
+// appeler la conversion du sujet. Compare par K : nombre d'evenements, lots,
+// multiensemble des nœuds, deltas de composantes, attachements nes au lot,
+// partition finale.
 // Codes : 0 conforme, 1 desaccord, 2 refus (dont resource_exhausted),
-// 3 invariant/plancher, 4 mutant tue (--inject=rle-drop |
-// census-nonstrict).
+// 3 invariant/plancher, 4 mutant tue (--inject=rle-drop | census-nonstrict |
+// dense-pointid).
 #include <algorithm>
 #include <chrono>
 #include <cstdio>
 #include <cstring>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -42,8 +53,10 @@ struct Args {
   u64 smax = 11;
   size_t shell_cap = 12;
   bool judge = false;
+  bool relabel_gate = false;
   bool inj_rle_drop = false;
   bool inj_census_nonstrict = false;
+  bool inj_dense_pointid = false;
   u64 min_balls = 0;
   u64 min_fusions = 0;
 };
@@ -82,8 +95,10 @@ Args parse(int argc, char** argv) {
     else if (const char* v = val("--min-balls=")) a.min_balls = (u64)std::atoll(v);
     else if (const char* v = val("--min-fusions=")) a.min_fusions = (u64)std::atoll(v);
     else if (arg == "--judge") a.judge = true;
+    else if (arg == "--relabel-gate") a.relabel_gate = true;
     else if (arg == "--inject=rle-drop") a.inj_rle_drop = true;
     else if (arg == "--inject=census-nonstrict") a.inj_census_nonstrict = true;
+    else if (arg == "--inject=dense-pointid") a.inj_dense_pointid = true;
     else {
       std::fprintf(stderr, "argument inconnu : %s\n", arg.c_str());
       a.family_ok = false;
@@ -92,17 +107,68 @@ Args parse(int argc, char** argv) {
   return a;
 }
 
-// Foret par K depuis une liste de boules censusees : expansion + fold.
-// Retourne 0 ou un code de sortie. `per_k_events` compte les evenements.
 struct BallData {
   Q3BallKey key;
   Q4Level level;
   std::vector<i32> interior, shell;
 };
 
+// Generateurs WSPD -> tri -> RLE par BallKey (arite minimale d'abord).
+void collect_rle(const CloudIndex& ix, i64 s, u64 smax_eff, bool inj_rle_drop,
+                 std::vector<BallCandidate>* cands, BallStreamStats* st) {
+  collect_candidate_balls(ix, s, smax_eff, cands, st);
+  std::stable_sort(cands->begin(), cands->end(), ball_candidate_less);
+  if (!inj_rle_drop)  // MUTANT : dedupe saute, boules re-censusees
+    cands->erase(std::unique(cands->begin(), cands->end(),
+                             [](const BallCandidate& x, const BallCandidate& y) {
+                               return x.key == y.key;
+                             }),
+                 cands->end());
+  st->unique_balls = cands->size();
+}
+
+// UN census exact par cle (I_B et U_B complets). 0 ou code de refus.
+int census_balls(const CloudIndex& ix, const std::vector<BallCandidate>& cands,
+                 size_t shell_cap, bool inj_census_nonstrict,
+                 std::vector<BallData>* balls, BallStreamStats* st) {
+  balls->reserve(cands.size());
+  for (const BallCandidate& bc : cands) {
+    BallData b;
+    b.key = bc.key;
+    b.level = bc.level;
+    bool overflow = false;
+    if (!ball_census(ix, bc.key, 9, shell_cap, &b.interior, &b.shell,
+                     &overflow)) {
+      if (overflow) {
+        std::fprintf(stderr,
+                     "REFUS resource_exhausted : coquille > %zu (plafond "
+                     "explicite, jamais de troncature)\n",
+                     shell_cap);
+        return 2;
+      }
+      ++st->balls_dead_depth;  // |I_B| > 9 : aucun K <= 10
+      continue;
+    }
+    if (inj_census_nonstrict) {
+      // MUTANT : la coquille comptee interieure (P <= 0).
+      for (const i32 u : b.shell) b.interior.push_back(u);
+      b.shell.clear();
+    }
+    st->census_interior += b.interior.size();
+    st->census_shell += b.shell.size();
+    balls->push_back(std::move(b));
+  }
+  return 0;
+}
+
+// Foret par K depuis une liste de boules censusees : expansion + fold.
+// `pid_of` : table GeometryIndex -> PointId externe — LA frontiere
+// d'identite. `events_out` (optionnel) : evenements par K, en PointId.
 int forests_from_balls(const std::vector<BallData>& balls,
-                       const std::vector<P3>& pos, u64 per_k_events[11],
-                       ForestResult per_k_result[11]) {
+                       const std::vector<P3>& pos,
+                       const std::vector<PointId>& pid_of, u64 per_k_events[11],
+                       ForestResult per_k_result[11],
+                       std::vector<std::vector<ForestEvent>>* events_out = nullptr) {
   std::vector<std::vector<ForestEvent>> ev_k(11);
   std::vector<PlateauEvent> pevents;
   for (const BallData& b : balls) {
@@ -116,10 +182,13 @@ int forests_from_balls(const std::vector<BallData>& balls,
       ev.q = (u8)pe.tpart.size();
       ev.d = (u8)pe.ipart.size();
       ev.active_mask = pe.active_mask;
+      // Conversion GeometryIndex -> PointId ICI et seulement ici. L'ordre de
+      // `support` reste celui de T (aligne sur active_mask — ne jamais le
+      // retrier independamment du masque ; facet_minus trie les FacetKey).
       for (size_t t = 0; t < pe.tpart.size(); ++t)
-        ev.support[t] = (PointId)pe.tpart[t];
+        ev.support[t] = pid_of[(size_t)pe.tpart[t]];
       for (size_t t = 0; t < pe.ipart.size(); ++t)
-        ev.interior[t] = (PointId)pe.ipart[t];
+        ev.interior[t] = pid_of[(size_t)pe.ipart[t]];
       ev.level = b.level;
       ev_k[K].push_back(ev);
     }
@@ -133,7 +202,253 @@ int forests_from_balls(const std::vector<BallData>& balls,
       return 3;
     }
   }
+  if (events_out) *events_out = std::move(ev_k);
   return 0;
+}
+
+// ------------------------------------------------------------------
+// PORTE DE RELABELING (audits e7e4d5e § 6) : la sortie publique vit dans
+// l'espace des PointId fournis par l'appelant, jamais dans les rangs Morton.
+// Trois runs sur la MEME geometrie : ids brouilles A (non monotones, au-dela
+// du bit 31), ids π(A) (bijection non monotone, positions fixes), permutation
+// physique des couples (id, position). Exigences :
+//   - BallKeys et niveaux inchanges (la generation est aveugle aux ids) ;
+//   - ForestEvents de run1 = π(ForestEvents de run0), point a point ;
+//   - blocs de la partition finale transportes par π (les REPRESENTANTS
+//     canoniques sont des minima de FacetKey : equivariants par blocs,
+//     pas point a point — on compare les blocs) ;
+//   - deltas : multiensemble (lot, |parents|, facettes nees transportees) ;
+//   - toute cle publique appartient a l'ensemble d'ids fourni ;
+//   - le run permute est BIT-IDENTIQUE a run0.
+// Le mutant dense-pointid (cast du rang, l'ancien code) doit mourir ici.
+// ------------------------------------------------------------------
+
+// Bijections u32 (multiplication impaire puis xor : inversibles, non
+// monotones ; des valeurs au-dessus de 2^31 apparaissent).
+u32 gate_base_id(u32 i) { return (i + 1u) * 0x9E3779B9u ^ 0x5A5A5A5Au; }
+u32 gate_pi(u32 v) { return v * 0x85EBCA6Bu ^ 0xC2B2AE35u; }
+
+struct GateOut {
+  std::vector<Q3BallKey> keys;                   // apres RLE (ordre canonique)
+  std::vector<std::vector<ForestEvent>> events;  // par K, en PointId
+  ForestResult res[11];
+};
+
+int run_gate_chain(const std::vector<InputPoint>& in, bool dense_mutant,
+                   GateOut* out) {
+  const CloudIndex ix = build_cloud_index(in);
+  if ((size_t)ix.unique_count() != in.size()) {
+    std::fprintf(stderr, "REFUS unsupported_degeneracy : positions dupliquees\n");
+    return 2;
+  }
+  std::vector<BallCandidate> cands;
+  BallStreamStats st;
+  collect_rle(ix, 8, std::min<u64>(11, in.size()), false, &cands, &st);
+  std::vector<BallData> balls;
+  if (const int rc = census_balls(ix, cands, 12, false, &balls, &st)) return rc;
+  for (const BallData& b : balls) out->keys.push_back(b.key);
+  std::vector<PointId> pid((size_t)ix.unique_count());
+  for (size_t u = 0; u < pid.size(); ++u)
+    pid[u] = dense_mutant ? (PointId)u : ix.point_id((i32)u);
+  u64 ev[11] = {};
+  return forests_from_balls(balls, ix.upos, pid, ev, out->res, &out->events);
+}
+
+bool gate_same_event(const ForestEvent& x, const ForestEvent& y) {
+  if (x.q != y.q || x.d != y.d || x.active_mask != y.active_mask) return false;
+  for (int t = 0; t < (int)x.q; ++t)
+    if (x.support[t] != y.support[t]) return false;
+  for (int t = 0; t < (int)x.d; ++t)
+    if (x.interior[t] != y.interior[t]) return false;
+  return same_level_representation(x.level, y.level);
+}
+
+FacetKey gate_pi_facet(FacetKey f) {
+  for (int t = 0; t < (int)f.k; ++t) f.p[(size_t)t] = gate_pi(f.p[(size_t)t]);
+  for (int t = 1; t < (int)f.k; ++t) {  // tri par insertion (tableau fixe)
+    const PointId v = f.p[(size_t)t];
+    int j = t - 1;
+    while (j >= 0 && f.p[(size_t)j] > v) {
+      f.p[(size_t)(j + 1)] = f.p[(size_t)j];
+      --j;
+    }
+    f.p[(size_t)(j + 1)] = v;
+  }
+  return f;
+}
+
+// Blocs d'une partition facette -> racine, comme ensemble d'ensembles.
+std::set<std::vector<FacetKey>> gate_blocks(
+    const std::map<FacetKey, FacetKey>& fp) {
+  std::map<FacetKey, std::vector<FacetKey>> by_root;
+  for (const auto& kv : fp) by_root[kv.second].push_back(kv.first);
+  std::set<std::vector<FacetKey>> out;
+  for (auto& kv : by_root) out.insert(kv.second);  // deja triees (ordre map)
+  return out;
+}
+
+int run_relabel_gate(bool dense_mutant) {
+  // Nuage : uniforme n=36 decale en x (+64), plus le carre cocirculaire
+  // {(0,0,0),(6,0,0),(0,6,0),(6,6,0)} — evenements q2/q3/q4 ET un plateau
+  // spherique garantis (les deux diagonales partagent la boule R²=18).
+  std::vector<P3> pts = make_family_cloud(CloudFamily::kUniform, 36, 40, 7);
+  for (P3& p : pts) p.x += 64;
+  pts.push_back(P3{0, 0, 0});
+  pts.push_back(P3{6, 0, 0});
+  pts.push_back(P3{0, 6, 0});
+  pts.push_back(P3{6, 6, 0});
+  const size_t n = pts.size();
+
+  std::vector<InputPoint> in0(n), in1(n), in2(n);
+  std::set<PointId> ids0, ids1;
+  for (size_t i = 0; i < n; ++i) {
+    const PointId base = gate_base_id((u32)i);
+    in0[i] = {base, pts[i]};
+    in1[i] = {gate_pi(base), pts[i]};  // relabeling π, positions fixes
+    ids0.insert(base);
+    ids1.insert(gate_pi(base));
+  }
+  if (ids0.size() != n || ids1.size() != n) {
+    std::fprintf(stderr, "PLANCHER : ids de porte non distincts\n");
+    return 3;
+  }
+  // Permutation physique deterministe des couples (id, position) de run0.
+  for (size_t i = 0; i < n; ++i) in2[i] = in0[(i * 17 + 5) % n];
+
+  GateOut o0, o1, o2;
+  if (const int rc = run_gate_chain(in0, dense_mutant, &o0)) return rc;
+  if (const int rc = run_gate_chain(in1, dense_mutant, &o1)) return rc;
+  if (const int rc = run_gate_chain(in2, dense_mutant, &o2)) return rc;
+
+  u64 bad = 0;
+  const auto fail = [&](const char* what) {
+    std::fprintf(stderr, "RELABEL : %s\n", what);
+    ++bad;
+  };
+
+  // 1. Les BallKeys ne dependent pas des ids (generation aveugle).
+  if (!(o0.keys == o1.keys)) fail("BallKeys changees par le relabeling");
+  if (!(o0.keys == o2.keys)) fail("BallKeys changees par la permutation");
+
+  // 2. Toute cle publique de run0 est un id fourni ; couverture > 2^31.
+  PointId max_seen = 0;
+  bool all_in = true;
+  for (int K = 1; K <= 10; ++K) {
+    for (const ForestEvent& e : o0.events[(size_t)K]) {
+      for (int t = 0; t < (int)e.q; ++t) {
+        all_in = all_in && ids0.count(e.support[t]) != 0;
+        max_seen = std::max(max_seen, e.support[t]);
+      }
+      for (int t = 0; t < (int)e.d; ++t)
+        all_in = all_in && ids0.count(e.interior[t]) != 0;
+    }
+    for (const auto& kv : o0.res[K].final_partition)
+      for (int t = 0; t < (int)kv.first.k; ++t)
+        all_in = all_in && ids0.count(kv.first.p[(size_t)t]) != 0;
+    for (const ComponentDelta& cd : o0.res[K].deltas) {
+      for (int t = 0; t < (int)cd.output.k; ++t)
+        all_in = all_in && ids0.count(cd.output.p[(size_t)t]) != 0;
+      for (const FacetKey& f : cd.born)
+        for (int t = 0; t < (int)f.k; ++t)
+          all_in = all_in && ids0.count(f.p[(size_t)t]) != 0;
+    }
+  }
+  if (!all_in) fail("cle publique hors de l'ensemble d'ids fourni");
+  if (max_seen < 0x80000000u) fail("aucun id au-dessus du bit 31 exerce");
+
+  // 3. Evenements : run1 = π(run0) point a point (l'ordre est geometrique,
+  //    identique entre runs) ; run2 = run0 exactement.
+  for (int K = 1; K <= 10; ++K) {
+    const auto &e0 = o0.events[(size_t)K], &e1 = o1.events[(size_t)K],
+               &e2 = o2.events[(size_t)K];
+    if (e0.size() != e1.size() || e0.size() != e2.size()) {
+      fail("nombre d'evenements change");
+      continue;
+    }
+    for (size_t i = 0; i < e0.size(); ++i) {
+      ForestEvent t = e0[i];
+      for (int v = 0; v < (int)t.q; ++v) t.support[v] = gate_pi(t.support[v]);
+      for (int v = 0; v < (int)t.d; ++v) t.interior[v] = gate_pi(t.interior[v]);
+      if (!gate_same_event(t, e1[i])) fail("evenement non transporte par π");
+      if (!gate_same_event(e0[i], e2[i])) fail("evenement change par permutation");
+    }
+  }
+
+  // 4. Partitions finales : blocs transportes par π ; run2 bit-identique.
+  //    (Les representants canoniques sont des minima : compares via blocs.)
+  for (int K = 1; K <= 10; ++K) {
+    std::set<std::vector<FacetKey>> b0t;
+    for (const std::vector<FacetKey>& blk : gate_blocks(o0.res[K].final_partition)) {
+      std::vector<FacetKey> t;
+      t.reserve(blk.size());
+      for (const FacetKey& f : blk) t.push_back(gate_pi_facet(f));
+      std::sort(t.begin(), t.end());
+      b0t.insert(t);
+    }
+    if (b0t != gate_blocks(o1.res[K].final_partition))
+      fail("blocs de partition non transportes par π");
+    if (!(o0.res[K].final_partition == o2.res[K].final_partition))
+      fail("partition changee par permutation");
+    if (!(o0.res[K].deltas == o2.res[K].deltas))
+      fail("deltas changes par permutation");
+  }
+
+  // 5. Deltas : multiensemble (lot, |parents|, nees transportees) preserve.
+  for (int K = 1; K <= 10; ++K) {
+    using DSig = std::pair<std::pair<u64, size_t>, std::vector<FacetKey>>;
+    std::vector<DSig> d0, d1;
+    for (const ComponentDelta& cd : o0.res[K].deltas) {
+      std::vector<FacetKey> born;
+      born.reserve(cd.born.size());
+      for (const FacetKey& f : cd.born) born.push_back(gate_pi_facet(f));
+      std::sort(born.begin(), born.end());
+      d0.push_back({{cd.batch, cd.parents.size()}, std::move(born)});
+    }
+    for (const ComponentDelta& cd : o1.res[K].deltas)
+      d1.push_back({{cd.batch, cd.parents.size()}, cd.born});
+    std::sort(d0.begin(), d0.end());
+    std::sort(d1.begin(), d1.end());
+    if (d0 != d1) fail("deltas non transportes par π");
+  }
+
+  // 6. Planchers contre le vert-par-vacuite : les trois arites, un plateau
+  //    (facette d'attachement), une naissance, une fusion, une facette nee.
+  u64 nq[5] = {}, attach_ev = 0, births = 0, merges = 0, borns = 0;
+  for (int K = 1; K <= 10; ++K) {
+    for (const ForestEvent& e : o0.events[(size_t)K]) {
+      if (e.q >= 2 && e.q <= 4) ++nq[e.q];
+      if (__builtin_popcount((unsigned)e.active_mask) < (int)e.q) ++attach_ev;
+    }
+    for (const ComponentDelta& cd : o0.res[K].deltas) {
+      if (cd.parents.empty()) ++births;
+      if (cd.parents.size() >= 2) ++merges;
+      borns += cd.born.size();
+    }
+  }
+  const bool floors_ok = nq[2] > 0 && nq[3] > 0 && nq[4] > 0 &&
+                         attach_ev > 0 && births > 0 && merges > 0 && borns > 0;
+
+  std::printf(
+      "relabel_gate n=%zu boules=%zu q2=%llu q3=%llu q4=%llu attach=%llu "
+      "naissances=%llu fusions=%llu nees=%llu violations=%llu\n",
+      n, o0.keys.size(), (unsigned long long)nq[2], (unsigned long long)nq[3],
+      (unsigned long long)nq[4], (unsigned long long)attach_ev,
+      (unsigned long long)births, (unsigned long long)merges,
+      (unsigned long long)borns, (unsigned long long)bad);
+
+  if (dense_mutant) {
+    if (bad > 0) {
+      std::printf("MUTANT TUE\n");
+      return 4;
+    }
+    std::fprintf(stderr, "PORTE INEFFICACE : mutant non discrimine\n");
+    return 3;
+  }
+  if (!floors_ok) {
+    std::fprintf(stderr, "PLANCHER : couverture insuffisante\n");
+    return 3;
+  }
+  return bad ? 3 : 0;
 }
 
 }  // namespace
@@ -149,16 +464,22 @@ int main(int argc, char** argv) {
     std::fprintf(stderr, "REFUS : profil K_max<=10 (smax<=11)\n");
     return 2;
   }
+  if (a.relabel_gate) return run_relabel_gate(a.inj_dense_pointid);
   const std::vector<P3> pts = make_family_cloud(
       a.family, a.n,
       a.coord > 0 ? a.coord : cloud_family_default_coord(a.family, a.n), a.seed);
+  // Enregistrements explicites {id, position} : le probe fabrique id = index
+  // d'entree (commodite) — le noyau n'en deduit rien, la porte --relabel-gate
+  // le garantit.
+  std::vector<InputPoint> inputs(pts.size());
+  for (size_t i = 0; i < pts.size(); ++i) inputs[i] = {(PointId)i, pts[i]};
   const u64 smax_eff = std::min<u64>(a.smax, pts.size());
   if (smax_eff < 5) {
     std::fprintf(stderr, "REFUS : s_max effectif trop petit\n");
     return 2;
   }
   const auto t0 = std::chrono::steady_clock::now();
-  const CloudIndex ix = build_cloud_index(pts);
+  const CloudIndex ix = build_cloud_index(inputs);
   if ((size_t)ix.unique_count() != pts.size()) {
     std::fprintf(stderr, "REFUS unsupported_degeneracy : positions dupliquees\n");
     return 2;
@@ -167,53 +488,27 @@ int main(int argc, char** argv) {
   // 1. Generateurs WSPD -> RLE par BallKey (arite minimale d'abord).
   std::vector<BallCandidate> cands;
   BallStreamStats st;
-  collect_candidate_balls(ix, a.s, smax_eff, &cands, &st);
-  std::stable_sort(cands.begin(), cands.end(), ball_candidate_less);
-  if (!a.inj_rle_drop)  // MUTANT : dedupe saute, boules re-censusees
-    cands.erase(std::unique(cands.begin(), cands.end(),
-                            [](const BallCandidate& x, const BallCandidate& y) {
-                              return x.key == y.key;
-                            }),
-                cands.end());
-  st.unique_balls = cands.size();
+  collect_rle(ix, a.s, smax_eff, a.inj_rle_drop, &cands, &st);
   const auto t1 = std::chrono::steady_clock::now();
 
   // 2. UN census exact par cle (I_B et U_B complets).
   std::vector<BallData> balls;
-  balls.reserve(cands.size());
-  for (const BallCandidate& bc : cands) {
-    BallData b;
-    b.key = bc.key;
-    b.level = bc.level;
-    bool overflow = false;
-    if (!ball_census(ix, bc.key, 9, a.shell_cap, &b.interior, &b.shell,
-                     &overflow)) {
-      if (overflow) {
-        std::fprintf(stderr,
-                     "REFUS resource_exhausted : coquille > %zu (plafond "
-                     "explicite, jamais de troncature)\n",
-                     a.shell_cap);
-        return 2;
-      }
-      ++st.balls_dead_depth;  // |I_B| > 9 : aucun K <= 10
-      continue;
-    }
-    if (a.inj_census_nonstrict) {
-      // MUTANT : la coquille comptee interieure (P <= 0).
-      for (const i32 u : b.shell) b.interior.push_back(u);
-      b.shell.clear();
-    }
-    st.census_interior += b.interior.size();
-    st.census_shell += b.shell.size();
-    balls.push_back(std::move(b));
+  {
+    const int rc =
+        census_balls(ix, cands, a.shell_cap, a.inj_census_nonstrict, &balls, &st);
+    if (rc) return rc;
   }
   const auto t2 = std::chrono::steady_clock::now();
 
-  // 3. Expansion + fold par K.
+  // 3. Expansion + fold par K, en PointId externes (frontiere d'identite).
+  std::vector<PointId> pid_of((size_t)ix.unique_count());
+  for (size_t u = 0; u < pid_of.size(); ++u)
+    pid_of[u] = a.inj_dense_pointid ? (PointId)u  // MUTANT : le rang casté
+                                    : ix.point_id((i32)u);
   u64 sev[11] = {};
   ForestResult sres[11];
   {
-    const int rc = forests_from_balls(balls, ix.upos, sev, sres);
+    const int rc = forests_from_balls(balls, ix.upos, pid_of, sev, sres);
     if (rc) return rc;
   }
   const auto t3 = std::chrono::steady_clock::now();
@@ -224,6 +519,23 @@ int main(int argc, char** argv) {
   u64 disagreements = 0;
   if (a.judge) {
     const int m = ix.unique_count();
+    // Table independante geometry_index -> id externe : reconstruite depuis
+    // les enregistrements d'entree (position -> id), PAS via ix.point_id.
+    std::vector<PointId> jpid((size_t)m);
+    for (i32 u = 0; u < m; ++u) {
+      const P3& q = ix.upos[(size_t)u];
+      bool found = false;
+      for (const InputPoint& p : inputs)
+        if (p.position.x == q.x && p.position.y == q.y && p.position.z == q.z) {
+          jpid[(size_t)u] = p.id;
+          found = true;
+          break;
+        }
+      if (!found) {
+        std::fprintf(stderr, "INVARIANT : position unique sans enregistrement\n");
+        return 3;
+      }
+    }
     std::vector<BallCandidate> jcands;
     for (i32 i = 0; i < m; ++i)
       for (i32 j = i + 1; j < m; ++j) {
@@ -316,7 +628,7 @@ int main(int argc, char** argv) {
     u64 jev[11] = {};
     ForestResult jres[11];
     {
-      const int rc = forests_from_balls(jballs, ix.upos, jev, jres);
+      const int rc = forests_from_balls(jballs, ix.upos, jpid, jev, jres);
       if (rc) return rc;
     }
     for (int K = 1; K <= 10; ++K) {
@@ -328,8 +640,15 @@ int main(int argc, char** argv) {
         std::sort(jn.begin(), jn.end());
         return sn == jn;
       }();
+      const bool same_deltas = [&] {
+        std::vector<ComponentDelta> sd = sres[K].deltas, jd = jres[K].deltas;
+        std::sort(sd.begin(), sd.end());
+        std::sort(jd.begin(), jd.end());
+        return sd == jd;
+      }();
       if (sev[K] != jev[K] || sres[K].batches != jres[K].batches ||
-          !same_nodes || sres[K].new_attachments != jres[K].new_attachments ||
+          !same_nodes || !same_deltas ||
+          sres[K].new_attachments != jres[K].new_attachments ||
           sres[K].final_partition != jres[K].final_partition) {
         std::fprintf(stderr, "DESACCORD foret K=%d (flux WSPD contre brut)\n", K);
         ++disagreements;
@@ -364,7 +683,7 @@ int main(int argc, char** argv) {
       (unsigned long long)nodes_total, (unsigned long long)disagreements,
       ms(t1 - t0), ms(t2 - t1), ms(t3 - t2), ms(t4 - t3));
 
-  if (a.inj_rle_drop || a.inj_census_nonstrict) {
+  if (a.inj_rle_drop || a.inj_census_nonstrict || a.inj_dense_pointid) {
     if (a.judge && disagreements > 0) {
       std::printf("MUTANT TUE\n");
       return 4;

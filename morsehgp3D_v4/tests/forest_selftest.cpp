@@ -253,6 +253,7 @@ struct JForest {
   u64 attach_violations = 0;
   std::vector<std::map<FacetKey, FacetKey>> parts;  // partition apres chaque lot
   std::vector<std::pair<u64, u64>> nodes;           // (lot, absorbees)
+  std::vector<ComponentDelta> deltas;               // payload complet du juge
   std::vector<const JSimplex*> batch_first;         // niveau de chaque lot
 };
 
@@ -268,7 +269,7 @@ FacetKey jfacet(const std::vector<i32>& pts, size_t drop) {
 int main(int argc, char** argv) {
   using namespace mhgp4;
   bool inj_binary = false, inj_repr = false, inj_drop_shell = false,
-       inj_attach_prebatch = false;
+       inj_attach_prebatch = false, inj_drop_nonmerge = false;
   for (int i = 1; i < argc; ++i) {
     if (std::strcmp(argv[i], "--inject=binary-ties") == 0) inj_binary = true;
     else if (std::strcmp(argv[i], "--inject=repr-ties") == 0) inj_repr = true;
@@ -276,9 +277,11 @@ int main(int argc, char** argv) {
       inj_drop_shell = true;
     else if (std::strcmp(argv[i], "--inject=attach-prebatch") == 0)
       inj_attach_prebatch = true;
+    else if (std::strcmp(argv[i], "--inject=drop-nonmerge") == 0)
+      inj_drop_nonmerge = true;
   }
-  const bool mutant =
-      inj_binary || inj_repr || inj_drop_shell || inj_attach_prebatch;
+  const bool mutant = inj_binary || inj_repr || inj_drop_shell ||
+                      inj_attach_prebatch || inj_drop_nonmerge;
 
   std::vector<std::vector<P3>> clouds;
   // Fixture du plateau ternaire (K=1) : deux aretes de niveau 1 en un lot.
@@ -308,6 +311,12 @@ int main(int argc, char** argv) {
   // ({a,z},{b,z}, nees a 5/4) et UNE facette nee au lot ({a,b}, niveau 4)
   // — le nœud correct a absorbed = 2, jamais 3.
   clouds.push_back({{0, 0, 0}, {4, 0, 0}, {2, 1, 0}});
+  // Fixture q2_unary_component_growth (audit « naissances et
+  // croissances » § 3) : au niveau 13/4, azw et bzw fusionnent les
+  // singletons az/zw/bz (3 parents) en faisant naitre aw et bw ; au niveau
+  // 4, l'evenement {a,b,z} ne fusionne RIEN (1 parent) mais fait naitre la
+  // facette ab : une CROISSANCE pure, invisible d'un squelette de fusions.
+  clouds.push_back({{8, 10, 10}, {12, 10, 10}, {10, 11, 10}, {10, 13, 10}});
   clouds.push_back(make_family_cloud(CloudFamily::kUniform, 12,
                                      cloud_family_default_coord(CloudFamily::kUniform, 12), 3));
   clouds.push_back(make_family_cloud(CloudFamily::kEightClusters, 12,
@@ -315,7 +324,8 @@ int main(int argc, char** argv) {
 
   u64 total_events = 0, total_fusions = 0, plateaus_multi = 0;
   bool collinear_checked = false, tie_checked = false;
-  bool square_checked = false, attach_checked = false;
+  bool square_checked = false, attach_checked = false,
+       growth_checked = false;
   for (size_t ci = 0; ci < clouds.size(); ++ci) {
     const std::vector<P3>& pts = clouds[ci];
     const int m = (int)pts.size();
@@ -510,8 +520,9 @@ int main(int argc, char** argv) {
 
       // SUJET : foret a macro-lots, avec instantanes de partition.
       std::vector<std::map<FacetKey, FacetKey>> sparts;
-      const ForestResult sr = build_forest(sevents, inj_binary, inj_repr,
-                                           &sparts, inj_attach_prebatch);
+      const ForestResult sr =
+          build_forest(sevents, inj_binary, inj_repr, &sparts,
+                       inj_attach_prebatch, inj_drop_nonmerge);
       total_fusions += sr.fusions;
       if (sr.attach_violations != 0 || sr.birth_violations != 0) {
         // Sous mutant, le detecteur qui se declenche EST la mise a mort ;
@@ -536,12 +547,22 @@ int main(int argc, char** argv) {
                        });
       detail_forest::UnionFind juf;
       std::map<FacetKey, i32> jid;
+      std::vector<FacetKey> jcanon;
       const auto jfid = [&](const FacetKey& f) {
         const auto it = jid.find(f);
         if (it != jid.end()) return it->second;
         const i32 v = juf.add();
         jid.emplace(f, v);
+        jcanon.push_back(f);
         return v;
+      };
+      const auto junite = [&](i32 a, i32 b) {
+        const i32 ra = juf.find(a), rb = juf.find(b);
+        if (ra == rb) return false;
+        const FacetKey mn = std::min(jcanon[(size_t)ra], jcanon[(size_t)rb]);
+        juf.unite(ra, rb);
+        jcanon[(size_t)juf.find(ra)] = mn;
+        return true;
       };
       JForest jf;
       size_t e0 = 0;
@@ -584,16 +605,39 @@ int main(int argc, char** argv) {
         }
         for (auto& kv : jroles) kv.second.id = jfid(kv.first);
         std::map<i32, u64> pre;
+        std::map<i32, FacetKey> jpre_canon;
         for (const auto& kv : jroles)
-          if (kv.second.active || kv.second.existed)
-            pre[juf.find(kv.second.id)] = 0;
+          if (kv.second.active || kv.second.existed) {
+            const i32 root = juf.find(kv.second.id);
+            pre[root] = 0;
+            jpre_canon.emplace(root, jcanon[(size_t)root]);
+          }
         for (auto& evf : ev_facets)
           for (size_t w = 1; w < evf.size(); ++w)
-            juf.unite(jroles[evf[0]].id, jroles[evf[w]].id);
-        std::map<i32, u64> absorbed;
-        for (const auto& pr : pre) ++absorbed[juf.find(pr.first)];
-        for (const auto& ab : absorbed)
-          if (ab.second >= 2) jf.nodes.push_back({jf.batches, ab.second});
+            junite(jroles[evf[0]].id, jroles[evf[w]].id);
+        // Deltas du juge : parents pre-lot + facettes nees, par racine
+        // post-lot — construits depuis SES roles (voie distincte).
+        std::map<i32, ComponentDelta> jtouched;
+        for (const auto& pr : pre)
+          jtouched[juf.find(pr.first)].parents.push_back(jpre_canon[pr.first]);
+        for (const auto& kv : jroles)
+          if (kv.second.attach && !kv.second.existed)
+            jtouched[juf.find(kv.second.id)].born.push_back(kv.first);
+        for (auto& tc : jtouched) {
+          ComponentDelta& cd = tc.second;
+          std::sort(cd.parents.begin(), cd.parents.end());
+          std::sort(cd.born.begin(), cd.born.end());
+          if (cd.parents.size() >= 2)
+            jf.nodes.push_back({jf.batches, cd.parents.size()});
+          if (cd.parents.size() == 1 && cd.born.empty()) continue;
+          cd.batch = jf.batches;
+          // Le niveau reste par defaut : le juge ne reproduit pas le
+          // representant du sujet (support d'arite 4 non unique sur les
+          // cospheriques) — les niveaux de lots sont verifies a part, par
+          // produit croise OBig contre SES boules.
+          cd.output = jcanon[(size_t)juf.find(tc.first)];
+          jf.deltas.push_back(cd);
+        }
         jf.batch_first.push_back(jev[e0]);
         // Instantane de partition (canonique : plus petite facette du bloc).
         std::map<FacetKey, FacetKey> part;
@@ -630,6 +674,38 @@ int main(int argc, char** argv) {
         fail("attachements nes au lot", K);
         continue;
       }
+      {
+        // Deltas : compares SANS le champ niveau (le juge est independant
+        // du representant) ; les niveaux de lots sont verifies ci-dessous.
+        std::vector<ComponentDelta> sd = sr.deltas, jd = jf.deltas;
+        for (auto& d : sd) d.level = Q4Level{};
+        std::sort(sd.begin(), sd.end());
+        std::sort(jd.begin(), jd.end());
+        if (!(sd == jd)) {
+          fail("deltas (naissances/croissances/fusions)", K);
+          continue;
+        }
+      }
+      // Niveaux de lots : sujet (num/den promus) contre boule du juge, par
+      // produit croise en OBig : num·cden² == dist²(ref)·den.
+      {
+        bool ok = sr.batch_levels.size() == jf.batch_first.size();
+        for (size_t b = 0; ok && b < sr.batch_levels.size(); ++b) {
+          const Q4Level& lv = sr.batch_levels[b];
+          const JBall& jb = jf.batch_first[b]->ball;
+          OB numo;
+          numo.w[0] = lv.num[0];
+          numo.w[1] = lv.num[1];
+          numo.w[2] = lv.num[2];
+          const OB lhs = numo * (ob(jb.cden) * ob(jb.cden));
+          const OB rhs = jdist2(jb, jb.ref) * ob(lv.den);
+          if (cmp(lhs, rhs) != 0) ok = false;
+        }
+        if (!ok) {
+          fail("niveaux de lots", K);
+          continue;
+        }
+      }
       if (jf.attach_violations != 0) {
         std::fprintf(stderr, "INVARIANT (juge) : attach_violations\n");
         return 3;
@@ -664,7 +740,13 @@ int main(int argc, char** argv) {
         // q2_one_interior_attachment (attente MATHEMATIQUE explicite,
         // audit § 2) : le nœud du lot R²=4 absorbe EXACTEMENT les deux
         // facettes actives {a,z} et {b,z} ; {a,b} nait au lot.
-        if (sr.nodes.size() != 1 || sr.nodes[0].absorbed != 2 ||
+        bool delta_ok = sr.deltas.size() == 1 &&
+                        sr.deltas[0].parents.size() == 2 &&
+                        sr.deltas[0].born.size() == 1 &&
+                        sr.deltas[0].born[0].k == 2 &&
+                        sr.deltas[0].born[0].p[0] == 0 &&
+                        sr.deltas[0].born[0].p[1] == 1;
+        if (!delta_ok || sr.nodes.size() != 1 || sr.nodes[0].absorbed != 2 ||
             sr.new_attachments != 1) {
           std::fprintf(stderr,
                        "FIXTURE attachement : nœuds=%zu absorbees=%llu "
@@ -676,6 +758,26 @@ int main(int argc, char** argv) {
           return 3;
         }
         attach_checked = true;
+      }
+      if (ci == 4 && K == 2 && !mutant) {
+        // q2_unary_component_growth : lot 13/4 = multifusion (3 parents,
+        // 2 nees aw/bw) ; lot 4 = CROISSANCE pure (1 parent, 1 nee ab) —
+        // invisible d'un squelette de fusions.
+        std::vector<ComponentDelta> ds = sr.deltas;
+        std::sort(ds.begin(), ds.end());
+        const bool ok =
+            ds.size() == 2 && ds[0].parents.size() == 3 &&
+            ds[0].born.size() == 2 && ds[1].parents.size() == 1 &&
+            ds[1].born.size() == 1 && ds[1].born[0].k == 2 &&
+            ds[1].born[0].p[0] == 0 && ds[1].born[0].p[1] == 1;
+        if (!ok) {
+          std::fprintf(stderr,
+                       "FIXTURE croissance : deltas=%zu (attendus fusion 3+2 "
+                       "puis croissance 1+1)\n",
+                       ds.size());
+          return 3;
+        }
+        growth_checked = true;
       }
       if (ci == 2 && !mutant) {
         // square_cospherical_K2_plateau (audits § 1 et « facettes nees dans
@@ -697,6 +799,15 @@ int main(int argc, char** argv) {
                          K, sr.nodes.size(), (unsigned long long)want_nodes,
                          (unsigned long long)want_absorbed);
             return 3;
+          }
+          if (K == 3) {
+            // NAISSANCE (audit « naissances ») : un delta a 0 parent et
+            // QUATRE facettes nees — la composante apparait entiere.
+            if (sr.deltas.size() != 1 || !sr.deltas[0].parents.empty() ||
+                sr.deltas[0].born.size() != 4) {
+              std::fprintf(stderr, "FIXTURE carre : naissance K=3 attendue\n");
+              return 3;
+            }
           }
           if (K == 2) square_checked = true;
         }
@@ -723,7 +834,8 @@ int main(int argc, char** argv) {
   }
   if (g_fail > 0) return 1;
   if (!collinear_checked || !tie_checked || !square_checked ||
-      !attach_checked || plateaus_multi == 0 || total_fusions == 0) {
+      !attach_checked || !growth_checked || plateaus_multi == 0 ||
+      total_fusions == 0) {
     std::fprintf(stderr, "PLANCHER : fixtures ou fusions manquantes\n");
     return 3;
   }

@@ -2,7 +2,7 @@
 //
 // Memes standards que l'oracle q3 durci (audit ebc8236) : arithmetique
 // obigint 384 bits, primitives dot/cross/norm2/sub REECRITES localement,
-// points recus en InputPoint{id,pos}. Pour TOUS les 4-sous-ensembles des
+// points recus en OraclePoint{id,pos}. Pour TOUS les 4-sous-ensembles des
 // petits nuages et des fixtures u16 extremes, l'oracle recalcule :
 //   - l'owner par les six longueurs (EdgeKey minimale aux ex aequo) ;
 //   - le circumcentre par Cramer 3×3 direct sur
@@ -186,7 +186,7 @@ std::vector<P3> near_right_cloud(const P3& t) {
           {t.x + 1000, t.y + 19000, t.z + 2000}};
 }
 
-struct InputPoint {
+struct OraclePoint {
   PointId id;
   P3 pos;
 };
@@ -219,8 +219,8 @@ int main(int argc, char** argv) {
 
   u64 tetras = 0, supports = 0, supports_with_extra_shell = 0;
   for (const std::vector<P3>& pts : clouds) {
-    std::vector<InputPoint> ipts(pts.size());
-    for (size_t p = 0; p < pts.size(); ++p) ipts[p] = InputPoint{(PointId)p, pts[p]};
+    std::vector<OraclePoint> ipts(pts.size());
+    for (size_t p = 0; p < pts.size(); ++p) ipts[p] = OraclePoint{(PointId)p, pts[p]};
     const size_t m = ipts.size();
     for (size_t i0 = 0; i0 < m; ++i0)
       for (size_t i1 = i0 + 1; i1 < m; ++i1)

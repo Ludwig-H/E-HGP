@@ -61,10 +61,40 @@ struct ForestEvent {
 };
 
 // Fusion enregistree : un nœud de dendrogramme par racine de lot ayant
-// absorbe `absorbed` composantes pre-lot (>= 2).
+// absorbe `absorbed` composantes pre-lot (>= 2). VUE DERIVEE des seuls
+// deltas a >= 2 parents — le payload hierarchique complet est ComponentDelta.
 struct ForestNode {
   u64 batch = 0;      // index du macro-lot (niveaux croissants)
   u64 absorbed = 0;   // composantes pre-lot fusionnees dans ce nœud
+};
+
+// TRANSITION COMPLETE d'une composante dans un macro-lot (audits
+// « naissances et croissances ») :
+//   parents vide      -> NAISSANCE (la composante apparait entiere) ;
+//   1 parent          -> CROISSANCE (le polyedre absorbe des facettes) ;
+//   >= 2 parents      -> (MULTI)FUSION, eventuellement avec facettes nees.
+// `output` et `parents` : identifiants canoniques deterministes = plus
+// petite FacetKey de la composante (post-lot / pre-lot). `born` : les
+// facettes nees exactement dans ce lot (attachment ∧ !existed ∧ !active),
+// membres pleins de F_K^render. Le niveau EXACT est conserve (representant
+// canonique par boule — comparable en representation).
+struct ComponentDelta {
+  u64 batch = 0;
+  Q4Level level{};
+  FacetKey output;
+  std::vector<FacetKey> parents;  // tries
+  std::vector<FacetKey> born;     // triees
+  bool operator==(const ComponentDelta& o) const {
+    return batch == o.batch && level == o.level && output == o.output &&
+           parents == o.parents && born == o.born;
+  }
+  bool operator<(const ComponentDelta& o) const {
+    if (batch != o.batch) return batch < o.batch;
+    if (!(output == o.output)) return output < o.output;
+    if (parents != o.parents) return parents < o.parents;
+    if (born != o.born) return born < o.born;
+    return level < o.level;
+  }
 };
 
 struct ForestResult {
@@ -75,6 +105,8 @@ struct ForestResult {
   u64 new_attachments = 0;    // facettes nees au lot, hors enfants du nœud
   u64 batches = 0;            // macro-lots traites
   std::vector<ForestNode> nodes;
+  std::vector<ComponentDelta> deltas;  // le payload hierarchique complet
+  std::vector<Q4Level> batch_levels;   // niveau exact de chaque lot
   std::vector<u64> batch_of_event;  // lot de chaque evenement (ordre trie)
   // Partition FINALE canonique (facette -> plus petite facette de sa
   // composante) : O(facettes), toujours remplie. Les instantanes par lot
@@ -135,7 +167,8 @@ inline ForestResult build_forest(
     std::vector<ForestEvent> events, bool mutant_binary_ties = false,
     bool mutant_repr_equality = false,
     std::vector<std::map<FacetKey, FacetKey>>* snapshots = nullptr,
-    bool mutant_attach_prebatch = false) {
+    bool mutant_attach_prebatch = false,
+    bool mutant_drop_nonmerge = false) {
   ForestResult r;
   std::stable_sort(events.begin(), events.end(),
                    [](const ForestEvent& x, const ForestEvent& y) {
@@ -143,13 +176,25 @@ inline ForestResult build_forest(
                    });
   detail_forest::UnionFind uf;
   std::map<FacetKey, i32> id_of;
+  // Identifiant canonique de composante : plus petite FacetKey, maintenu
+  // incrementalement (creation + union).
+  std::vector<FacetKey> canon_of;
   const auto facet_id = [&](const FacetKey& f) {
     const auto it = id_of.find(f);
     if (it != id_of.end()) return it->second;
     const i32 v = uf.add();
     id_of.emplace(f, v);
+    canon_of.push_back(f);
     ++r.facets;
     return v;
+  };
+  const auto unite_canon = [&](i32 a, i32 b) {
+    const i32 ra = uf.find(a), rb = uf.find(b);
+    if (ra == rb) return false;
+    const FacetKey mn = std::min(canon_of[(size_t)ra], canon_of[(size_t)rb]);
+    uf.unite(ra, rb);
+    canon_of[(size_t)uf.find(ra)] = mn;
+    return true;
   };
   r.batch_of_event.assign(events.size(), 0);
   size_t e0 = 0;
@@ -206,6 +251,10 @@ inline ForestResult build_forest(
     for (const auto& kv : roles)
       if (mutant_attach_prebatch || kv.second.active || kv.second.existed)
         prebatch_roots[uf.find(kv.second.id)] = 0;
+    // Canoniques PRE-LOT des racines gelees (avant toute union du lot).
+    std::map<i32, FacetKey> pre_canon;
+    for (const auto& pr : prebatch_roots)
+      pre_canon.emplace(pr.first, canon_of[(size_t)pr.first]);
     // Unions du lot : chemin sur les K+1 facettes de chaque evenement.
     for (size_t e = e0; e < e1; ++e) {
       const ForestEvent& ev = events[e];
@@ -213,20 +262,42 @@ inline ForestResult build_forest(
       for (int s = 0; s < (int)ev.q; ++s) {
         const i32 v = roles[detail_forest::facet_minus(ev, s, -1)].id;
         if (first < 0) first = v;
-        else if (uf.unite(first, v)) ++r.fusions;
+        else if (unite_canon(first, v)) ++r.fusions;
       }
       for (int z = 0; z < (int)ev.d; ++z) {
         const i32 v = roles[detail_forest::facet_minus(ev, -1, z)].id;
-        if (uf.unite(first, v)) ++r.fusions;
+        if (unite_canon(first, v)) ++r.fusions;
       }
     }
-    // Nœuds du lot : une racine finale ayant absorbe >= 2 racines pre-lot
-    // donne UN nœud (jamais une chaine binaire).
-    std::map<i32, u64> absorbed;  // racine post-lot -> composantes pre-lot
-    for (const auto& pr : prebatch_roots)
-      ++absorbed[uf.find(pr.first)];
-    for (const auto& ab : absorbed)
-      if (ab.second >= 2) r.nodes.push_back(ForestNode{r.batches, ab.second});
+    // DELTAS du lot (le payload complet) : par racine post-lot touchee,
+    // parents = canoniques pre-lot distincts, born = facettes nees
+    // (attachment ∧ !existed ∧ !active) de cette composante. Emission des
+    // que parents != 1 ou born non vide : naissance (0 parent), croissance
+    // (1 parent + nees), (multi)fusion (>= 2). MUTANT drop-nonmerge :
+    // l'ancienne sortie squelette (fusions seules).
+    std::map<i32, ComponentDelta> touched;
+    for (const auto& pr : prebatch_roots) {
+      ComponentDelta& cd = touched[uf.find(pr.first)];
+      cd.parents.push_back(pre_canon[pr.first]);
+    }
+    for (const auto& kv : roles)
+      if (kv.second.attach && !kv.second.existed && !kv.second.active)
+        touched[uf.find(kv.second.id)].born.push_back(kv.first);
+    // Nœuds (vue derivee) : >= 2 parents.
+    for (auto& tc : touched) {
+      ComponentDelta& cd = tc.second;
+      std::sort(cd.parents.begin(), cd.parents.end());
+      std::sort(cd.born.begin(), cd.born.end());
+      if (cd.parents.size() >= 2)
+        r.nodes.push_back(ForestNode{r.batches, cd.parents.size()});
+      if (cd.parents.size() == 1 && cd.born.empty()) continue;  // continuation
+      if (mutant_drop_nonmerge && cd.parents.size() < 2) continue;
+      cd.batch = r.batches;
+      cd.level = events[e0].level;
+      cd.output = canon_of[(size_t)uf.find(tc.first)];
+      r.deltas.push_back(cd);
+    }
+    r.batch_levels.push_back(events[e0].level);
     if (snapshots) {
       std::map<FacetKey, FacetKey> part;
       std::map<i32, FacetKey> canon;

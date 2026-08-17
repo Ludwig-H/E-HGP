@@ -3,7 +3,7 @@
 // Exige par l'audit du 17 aout (Q11), durci par l'audit oracle ebc8236.
 // Pour de petits nuages et TOUS les triangles {p<q<r}, l'oracle recalcule de
 // facon INDEPENDANTE (obigint signe-magnitude 384 bits, primitives dot/
-// cross/norm2 REECRITES LOCALEMENT, points recus en InputPoint{id,pos} sans
+// cross/norm2 REECRITES LOCALEMENT, points recus en OraclePoint{id,pos} sans
 // dependre du renommage de CloudIndex) :
 //   - acuite par les TROIS produits scalaires d'angles (pas V² > D²) ;
 //   - circumcentre par Cramer 3×3 direct sur le systeme
@@ -187,9 +187,9 @@ std::vector<P3> near_right_cloud(const P3& t) {
           {t.x + 1000, t.y + 19000, t.z + 2000}};
 }
 
-// InputPoint : l'oracle recoit des points deja formes (audit § 4.2) — l'id
+// OraclePoint : l'oracle recoit des points deja formes (audit § 4.2) — l'id
 // est le rang dans le nuage d'origine, jamais le renommage de CloudIndex.
-struct InputPoint {
+struct OraclePoint {
   PointId id;
   P3 pos;
 };
@@ -266,14 +266,14 @@ int main(int argc, char** argv) {
   u64 triangles = 0, events_seen = 0, supports_with_extra_shell = 0;
   std::set<Q3BallKey> degenerate_ballkeys;
   for (const std::vector<P3>& pts : clouds) {
-    // Sujet : index de production. Oracle : liste InputPoint independante.
+    // Sujet : index de production. Oracle : liste OraclePoint independante.
     const CloudIndex ix = build_cloud_index(pts);
     const int m = ix.unique_count();
     if ((size_t)m != pts.size()) return 3;  // fixtures a sites distincts
-    std::vector<InputPoint> ipts(pts.size());
+    std::vector<OraclePoint> ipts(pts.size());
     std::vector<i32> uidx(pts.size());  // rang d'origine -> index unique sujet
     for (size_t p = 0; p < pts.size(); ++p) {
-      ipts[p] = InputPoint{(PointId)p, pts[p]};
+      ipts[p] = OraclePoint{(PointId)p, pts[p]};
       i32 u = -1;
       for (i32 v = 0; v < m; ++v)
         if (ix.upos[(size_t)v].x == pts[p].x && ix.upos[(size_t)v].y == pts[p].y &&
@@ -327,7 +327,7 @@ int main(int argc, char** argv) {
           if (!o_acute) continue;
 
           // Profondeur et coquille : sujet contre oracle. L'oracle parcourt
-          // SA liste InputPoint, jamais l'ordre interne du sujet.
+          // SA liste OraclePoint, jamais l'ordre interne du sujet.
           const OracleBall bl = oracle_circumball(*v0, *v1, *apex);
           if (bl.det.is_zero()) {
             report("degenerescence inattendue", da, db, dx);

@@ -44,6 +44,14 @@ namespace mhgp4 {
 // Reference de nœud : >= 0 nœud interne, < 0 feuille `-1 - u` (position unique u).
 using NodeRef = i32;
 
+// Point d'entree de la bibliotheque : identite externe STABLE + position.
+// Contrat v4 (audit e7e4d5e) : PointId != index dense != rang Morton — le
+// noyau ne deduit JAMAIS l'identite de l'ordre physique des enregistrements.
+struct InputPoint {
+  PointId id = 0;
+  P3 position{};
+};
+
 struct RadixNode {
   // < 0 : feuille, encodee `-1 - u` ou `u` est l'index de position unique.
   i32 left = 0, right = 0;
@@ -78,6 +86,13 @@ struct CloudIndex {
   u64 range_weight(i32 first, i32 last) const {
     return wsum[(size_t)last + 1] - wsum[(size_t)first];
   }
+  // FRONTIERE D'IDENTITE : identite externe de la position unique u (rang
+  // Morton dense). Univoque sous le refus des positions dupliquees ; la
+  // conversion GeometryIndex -> PointId n'a lieu qu'a travers cet accesseur,
+  // jamais par un cast du rang.
+  PointId point_id(i32 u) const {
+    return bucket_ids[bucket_start[(size_t)u]];
+  }
 };
 
 namespace detail {
@@ -105,10 +120,13 @@ inline void cell_of_prefix(u64 key, int p, RadixNode* node) {
 
 }  // namespace detail
 
-// Construit l'index complet. Refus explicite (retour vide) si le nuage est
-// vide ; une seule position unique donne un arbre sans nœud interne, cas que
-// tout consommateur doit accepter.
-inline CloudIndex build_cloud_index(const std::vector<P3>& pts) {
+// Construit l'index complet depuis des enregistrements {id externe, position}.
+// Refus explicite (retour vide) si le nuage est vide ; une seule position
+// unique donne un arbre sans nœud interne, cas que tout consommateur doit
+// accepter. Le tri spatial DEPLACE les enregistrements sans reecrire `id` :
+// la sortie est equivariante a un relabeling des PointId et invariante a une
+// permutation physique des couples (id, position).
+inline CloudIndex build_cloud_index(const std::vector<InputPoint>& pts) {
   CloudIndex ix;
   const size_t n = pts.size();
   if (n == 0) {
@@ -117,20 +135,29 @@ inline CloudIndex build_cloud_index(const std::vector<P3>& pts) {
     return ix;
   }
 
-  // 1. TRI par (cle, PointId) — le PointId secondaire rend l'ordre des
-  // buckets determinist e sous permutation d'entree des doublons.
-  std::vector<std::pair<u64, PointId>> order(n);
-  for (size_t i = 0; i < n; ++i)
-    order[i] = {morton48((u64)pts[i].x, (u64)pts[i].y, (u64)pts[i].z), (PointId)i};
-  std::sort(order.begin(), order.end());
+  // 1. TRI par (cle, PointId externe) — l'id secondaire rend l'ordre des
+  // buckets deterministe sous permutation physique des enregistrements.
+  struct Rec {
+    u64 key;
+    PointId id;
+    P3 pos;
+  };
+  std::vector<Rec> order(n);
+  for (size_t i = 0; i < n; ++i) {
+    const P3& p = pts[i].position;
+    order[i] = {morton48((u64)p.x, (u64)p.y, (u64)p.z), pts[i].id, p};
+  }
+  std::sort(order.begin(), order.end(), [](const Rec& a, const Rec& b) {
+    return a.key != b.key ? a.key < b.key : a.id < b.id;
+  });
 
   // 2. BUCKETISATION des positions dupliquees.
   ix.bucket_ids.resize(n);
   for (size_t i = 0; i < n; ++i) {
-    ix.bucket_ids[i] = order[i].second;
-    if (i == 0 || order[i].first != order[i - 1].first) {
-      ix.keys.push_back(order[i].first);
-      ix.upos.push_back(pts[order[i].second]);
+    ix.bucket_ids[i] = order[i].id;
+    if (i == 0 || order[i].key != order[i - 1].key) {
+      ix.keys.push_back(order[i].key);
+      ix.upos.push_back(order[i].pos);
       ix.bucket_start.push_back((u32)i);
     }
   }
@@ -211,6 +238,15 @@ inline CloudIndex build_cloud_index(const std::vector<P3>& pts) {
     }
   }
   return ix;
+}
+
+// Commodite de test : id = index d'entree. Le chemin de bibliotheque recoit
+// des InputPoint{id, position} explicites — le noyau n'a pas le droit de
+// deduire de cette commodite que l'ordre physique est l'identite.
+inline CloudIndex build_cloud_index(const std::vector<P3>& pts) {
+  std::vector<InputPoint> in(pts.size());
+  for (size_t i = 0; i < pts.size(); ++i) in[i] = {(PointId)i, pts[i]};
+  return build_cloud_index(in);
 }
 
 }  // namespace mhgp4

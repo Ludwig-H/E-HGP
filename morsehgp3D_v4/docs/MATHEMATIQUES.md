@@ -531,6 +531,51 @@ invariants de cohérence du flux (portes : 0) : un attachement déjà vu
 dans un lot antérieur (`attach_violations`), une facette à la fois active
 et attachement au même niveau (`birth_violations`).
 
+### 5.2bis Le payload hiérarchique complet : `ComponentDelta` (audits
+« naissances et croissances »)
+
+Une vue merge-only ne suffit pas : un K-polyèdre est une composante
+**comme ensemble de K-facettes**, et ajouter une facette sans fusionner
+modifie le polyèdre. Pour un niveau exact `lambda` et une composante
+finale `C` touchée par le lot, avec `P(C)` les composantes distinctes
+présentes juste avant `lambda` aboutissant dans `C` et `N(C)` les
+facettes nées exactement à `lambda` dans `C`, trois transitions
+structurelles existent :
+
+```text
+|P(C)| = 0, N(C) non vide  -> NAISSANCE (la composante apparaît entière) ;
+|P(C)| = 1, N(C) non vide  -> CROISSANCE (le polyèdre absorbe des facettes) ;
+|P(C)| >= 2                -> (MULTI)FUSION, éventuellement avec facettes nées.
+```
+
+L'ABI émise par `build_forest` pour chaque racine post-lot touchée dès
+que `parents.size() != 1 || !born.empty()` :
+
+```cpp
+struct ComponentDelta {
+  u64 batch;                     // index du macro-lot
+  Q4Level level;                 // niveau EXACT conservé (représentant canonique)
+  FacetKey output;               // identifiant canonique post-lot
+  std::vector<FacetKey> parents; // racines canoniques pré-lot (actives ∨ préexistantes)
+  std::vector<FacetKey> born;    // facettes nées AU niveau (attachment ∧ !existed ∧ !active)
+};
+```
+
+L'identifiant canonique d'une composante est **la plus petite `FacetKey`**
+de la composante, maintenue incrémentalement à travers les unions
+(déterministe, indépendante de l'ordre interne du lot — mais équivariante
+par BLOCS sous un relabeling des `PointId`, pas point à point : un minimum
+ne commute pas avec une bijection non monotone). `ForestNode{batch,
+absorbed}` devient une VUE DÉRIVÉE des seuls deltas à `>= 2` parents ;
+les facettes nées sont membres pleins du futur `F_K^render`. Fixtures
+gravées : le carré cocyclique en K=3 est une NAISSANCE (0 parent, 4
+nées), `q2_one_interior_attachment` une fusion à 2 parents + 1 née, et la
+croissance unaire `{(8,10,10), (12,10,10), (10,11,10), (10,13,10)}` donne
+au niveau 4 un delta à 1 parent + 1 née (`{a,b}`) sans aucun nœud de
+fusion. Le mutant `drop-nonmerge` (émettre seulement les fusions —
+l'ancien `ForestResult`) laisse les partitions justes et meurt sur les
+fixtures de naissance et de croissance.
+
 ### 5.3 Macro-lots (contrat gravé, audit « lemme préfixe et niveau »)
 
 Les événements sont triés par niveau EXACT (`compare_exact_level` U320
@@ -606,10 +651,41 @@ point externe SUR la sphère ⟹ σ écarté (le même refus transactionnel que
 la production) ; puis le K-graphe du manuscrit (cliques COMPLÈTES) et un
 Kruskal propre à lots. Comparaison : ensembles de sommets, partition
 après CHAQUE lot, nombre de nœuds par lot, et égalité des niveaux de lot
-en arithmétique croisée du juge. Le sujet à petit n est l'énumération aux
+en arithmétique croisée du juge. Le juge construit aussi ses PROPRES
+`ComponentDelta` (rôles par rayons de naissance indépendants, canon par
+minimum, unions propres) et les compare au sujet SANS le champ de niveau
+(le représentant de niveau n'est pas re-dérivable indépendamment sur un
+plateau) — les niveaux de lot sont recoupés séparément en arithmétique
+croisée ; sur le flux réel, sa table `geometry_index -> id` est
+reconstruite indépendamment depuis les enregistrements d'entrée
+(position → id), sans appeler la conversion du sujet. Le sujet à petit n est l'énumération aux
 prédicats de production (équivalente aux pipelines WSPD, prouvée par les
 portes par lane) ; le raccord du flux WSPD réel à la forêt est l'étape
 suivante déclarée.
+
+### 5.5 La frontière d'identité : `PointId` contre rang géométrique
+(audits bloquants `e7e4d5e`)
+
+Contrat fondamental : `PointId != index dense != rang Morton`. Le census,
+l'arbre radix et l'expansion des plateaux vivent en indices de positions
+uniques (`GeometryIndex`, ordre Morton de `upos`) ; la forêt combinatoire
+vit en `PointId` EXTERNES fournis par l'appelant
+(`InputPoint{id, position}`). La conversion a lieu UNE fois, à la
+frontière événement → forêt, via `CloudIndex::point_id(u)` (le
+représentant du bucket CSR) — jamais par un cast du rang. Le tri spatial
+déplace les enregistrements sans réécrire `id` : la sortie publique est
+**équivariante à un relabeling** `pi` des ids à positions fixes (les
+`BallKey` primitives sont aveugles aux ids ; chaque clé publique devient
+`pi(cle)`) et **invariante à une permutation physique** des couples
+`(id, position)`. La propriété décisive est le relabeling, pas la seule
+permutation : sous positions distinctes une permutation physique peut
+conserver le même ordre dense et masquer le défaut. Porte permanente
+(`--relabel-gate`) : ids brouillés non monotones dépassant le bit 31,
+bijection `pi` non monotone, permutation physique, et AUCUNE clé publique
+hors de l'ensemble d'ids fourni ; le mutant `dense-pointid` (le cast du
+rang — l'ancien code) meurt. L'ordre du tableau `support` d'un événement
+reste celui de `T` (aligné sur `active_mask`) ; `facet_minus` trie les
+`FacetKey` produites.
 
 Statut : `derive_v4` sur le squelette `theoreme_manuscrit` (Déf. 29,
 Prop. 6, Théorème 5) ; la spécification opérationnelle (clés, lanes,

@@ -191,6 +191,11 @@ mhgp4_expect_code(mhgp4_forest_mutant_drop_shell 4 mhgp4_forest_selftest
 # convention (tout le lot en pre-lot) gonfle les arites et meurt.
 mhgp4_expect_code(mhgp4_forest_mutant_attach 4 mhgp4_forest_selftest
     "--inject=attach-prebatch")
+# Audits « naissances et croissances » : le payload complet (ComponentDelta)
+# porte naissances, croissances et fusions avec identites — le mutant qui
+# retablit le squelette de fusions (deltas non-merge supprimes) meurt.
+mhgp4_expect_code(mhgp4_forest_mutant_nonmerge 4 mhgp4_forest_selftest
+    "--inject=drop-nonmerge")
 
 # La foret sur FLUX REELS : WSPD -> RLE par BallKey inter-lanes -> un census
 # par cle (SpherePlateau d'echelle) -> expansion -> fold. Le juge borne
@@ -207,6 +212,15 @@ mhgp4_expect_code(mhgp4_forest_probe_mutant_rle 4 mhgp4_forest_probe
     "--family=uniform --n=120 --s=8 --seed=3 --judge --inject=rle-drop")
 mhgp4_expect_code(mhgp4_forest_probe_mutant_census 4 mhgp4_forest_probe
     "--family=uniform --n=120 --s=8 --seed=3 --judge --inject=census-nonstrict")
+# FRONTIERE D'IDENTITE (audits e7e4d5e) : PointId != index dense != rang
+# Morton. Porte de relabeling : ids brouilles (> 2^31), bijection π sur les
+# ids a positions fixes (sortie transportee par π), permutation physique des
+# couples (id, position) (sortie bit-identique), aucune cle publique hors des
+# ids fournis. Le mutant dense-pointid (cast du rang — l'ancien code) meurt.
+mhgp4_expect_code(mhgp4_forest_probe_relabel_gate 0 mhgp4_forest_probe
+    "--relabel-gate")
+mhgp4_expect_code(mhgp4_forest_probe_mutant_dense_pointid 4 mhgp4_forest_probe
+    "--relabel-gate --inject=dense-pointid")
 
 # La lane q2 productrice : W_2 est la boule diametrale ouverte, le census
 # est une requete de cover a coefficient 1. Juge brut toutes-paires sur
