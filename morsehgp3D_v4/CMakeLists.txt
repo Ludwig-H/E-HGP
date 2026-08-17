@@ -144,6 +144,25 @@ mhgp4_expect_code(mhgp4_q4_source_independante 0 mhgp4_q4_source_fixture "")
 mhgp4_expect_code(mhgp4_q4_source_mutant 4 mhgp4_q4_source_fixture
     "--inject=q4-seeds-from-q3-live")
 
+# La lane q4 productrice (MATHEMATIQUES.md § 4.5) : juge brut C(n,4) sur
+# records complets, fixture 13+1 points bout en bout (ancre q3-morte/
+# q4-vivante, tetraedre profondeur 1 dont l'interieur n'est visible que du
+# cover coefficient 4), mutants du branchement interdit / du coefficient /
+# de l'exact-once.
+add_executable(mhgp4_q4_events_probe bench/q4_events_probe.cpp)
+mhgp4_expect_code(mhgp4_q4_fixture_bout_en_bout 0 mhgp4_q4_events_probe
+    "--fixture --s=8 --judge --min-events=1")
+mhgp4_expect_code(mhgp4_q4_events_judge_uniform 0 mhgp4_q4_events_probe
+    "--family=uniform --n=120 --s=8 --seed=3 --judge --min-events=5")
+mhgp4_expect_code(mhgp4_q4_events_judge_clusters 0 mhgp4_q4_events_probe
+    "--family=eight_clusters --n=120 --s=8 --seed=3 --judge --min-events=5")
+mhgp4_expect_code(mhgp4_q4_mutant_source_q3 4 mhgp4_q4_events_probe
+    "--fixture --s=8 --inject=seeds-from-q3-live")
+mhgp4_expect_code(mhgp4_q4_mutant_coef3 4 mhgp4_q4_events_probe
+    "--fixture --s=8 --inject=cover-coef3")
+mhgp4_expect_code(mhgp4_q4_mutant_no_canonical 4 mhgp4_q4_events_probe
+    "--family=uniform --n=120 --s=8 --seed=3 --inject=no-canonical")
+
 # Le juge du juge (audit ebc8236 P0.2) : selftest de l'arithmetique OBig
 # contre boost::multiprecision::cpp_int, troisieme autorite, tests uniquement.
 # Enregistre seulement si Boost est present (meme precedent que le temoin GMP

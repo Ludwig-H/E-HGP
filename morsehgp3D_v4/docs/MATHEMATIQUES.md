@@ -366,6 +366,78 @@ Pour chaque ancre survivante (a,b), par arité :
   survivante → jonction I_B/U_B (`census_calls = unique_BallKeys`, jamais un
   census par support).
 
+### 4.5 q4 exact, chemin de réception v4 (`derive_v4`, baseline jugée)
+
+La sélection axiale § 4 (seize groupes par seed) est l'accélérateur d'échelle
+(`theoreme_v3`, à re-recevoir). La *réception* v4 passe d'abord par la
+complétion énumérée dans le cover, jugée par force brute — même philosophie
+que le scan site-major reçu avant l'arbre de centres.
+
+**Source (audit du 17 août, `bc5b05d`)** : la lane q4 du front partagé,
+JAMAIS le flux q3 (fixture 13 points gravée : ancre q3-morte/q4-vivante avec
+tétraèdre de profondeur 0). Rectangles q4 vivants → ancres survivantes par
+`h_coeur,4 + h_a,4 + h_b,4 < h_4` (le § 2.5 est indépendant de la lane) →
+seeds aigus canoniques → complétions.
+
+**Forme du circumcentre** (Cramer 3×3 relatif). Lignes `M = (2(b−a),
+2(x−a), 2(y−a))`, second membre `r = (|b−a|², |x−a|², |y−a|²)` ; alors
+`M·(c−a) = r`, `c−a = N'/det` avec `N' = adj(M)·r`. **Canonisation
+d'orientation** : si `det < 0`, négation simultanée `(det, N') →
+(−det, −N')` — le centre est inchangé, `det > 0` gravé. `det = 0` (quatre
+points coplanaires) : jamais un support q4, le candidat est ignoré.
+
+**Puissance affine** (le carré est évité, comme pour la forme de Gram q3) :
+avec `dz = z−a`, `P_4(z) = det·|dz|² − 2·N'·dz = det·(|z−c|² − R²)` ; sous
+`det > 0` : `P_4 < 0` intérieur strict, `= 0` coquille, `> 0` extérieur.
+Largeurs u16 : `|det| < 6·2^54 < 2^57` ; `|N'_i| ≤ 3·2·2^36·(3·2^32) <
+2^72` ; `det·|dz|² < 2^57·(3·2^34) < 2^93` ; `2|N'·dz| < 2^92` → **i128**.
+
+**Arité 4 stricte (centre strictement intérieur)** : pour chaque face
+`(p,q,r)` de sommet opposé `s`, le signe de `det3(q−p, r−p, N'−det·(p−a))`
+doit être NON NUL et égal à celui de `det3(q−p, r−p, s−p)` (l'égalité
+`c−p = (N'−det·(p−a))/det` et `det > 0` rendent le test homogène). Un zéro
+⟹ le centre est sur une face ⟹ le support retombe à l'arité ≤ 3 : le
+candidat q4 est ignoré (il appartient à une autre lane). Largeurs :
+`|N'−det·(p−a)| < 2^75` ; `det3(2^17, 2^17, 2^75) < 6·2^109 < 2^112` →
+**i128**.
+
+**Owner (6 arêtes)** : `ab` doit être maximale parmi les six longueurs
+carrées, tout ex æquo départagé par la plus petite EdgeKey — la
+généralisation directe de `anchor_owns_q3` (cinq comparaisons).
+
+**Exact-once du seed (lemme du préfixe ternaire, `theoreme_v3`)** : tout q4
+bien centré d'arête maximale `ab` a AU MOINS UNE face `abv` strictement
+aiguë (v ∈ {x,y}), jamais nécessairement deux. Le seed canonique est le
+carrier de plus petit PointId parmi les faces incidentes aiguës du tétraèdre
+FORMÉ ; une complétion n'émet que si son seed est ce minimum — vérification
+en temps constant, sans sort/unique global (audit § 3.2).
+
+**Cover census à coefficient 4** (audit § 3.4, preuve v4 par Jung) : le
+support étant l'arité 4, la circum-boule EST la miniball du tétraèdre, donc
+`R ≤ √(3/8)·D` (Jung 3D, diamètre ≤ D car ab est maximale). Le centre est
+sur le plan médiateur de `ab` : `|c−m|² = R² − D²/4`. Tout point intérieur
+ou de coquille vérifie `|z−m| ≤ R + √(R²−D²/4) ≤ (√(3/8)+√(1/8))·D < D`,
+soit `|2z−(a+b)|² ≤ 4·D²` — le même cover rectangulaire paramétré par le
+coefficient 4 au lieu de 3 (les SOMMETS restent dans la lentille, coefficient
+3). Le paquet `base_4 = h_coeur,4 + h_a,4(a) + h_b,4(b)` initialise la
+profondeur : chaque ID certifié est dans `W_4(a,b)`, donc strictement
+intérieur à toute circum-boule q4 possédée par l'ancre (même preuve que q3,
+fuseaux emboîtés).
+
+**BallKey q4** : la forme développée `det·|z|² − 2(det·a + N')·z +
+(det·|a|² + 2N'·a)` donne `(A, B, C) = (det, −2(det·a+N'), det|a|²+2N'·a)`,
+`A > 0`, largeurs `A < 2^57`, `|B_i| < 2^74`, `|C| < 2^90` → i128, réduite
+pgcd/signe : le MÊME gabarit à cinq coefficients que la `Q3BallKey` (une
+boule est une boule).
+
+**Niveau q4 — la largeur dépasse i128** : `R² = |N'|²/det²` avec
+`|N'|² < 3·2^144 < 2^146` : le numérateur ne tient PAS en i128 (le carré
+q3 restait sous `2^104`). Représentation v4 : `num` en trois mots (U192,
+via `mul_level_192`, précondition `< 2^146` respectée), `den = det² <
+2^114` en i128. La comparaison croisée q4/q4 demande `2^146 × 2^114 =
+2^260` → **cinq mots (U320)** ; q3/q4 mixte < `2^218`. La canonisation
+pgcd 192 bits est DIFFÉRÉE (question Q12).
+
 Arithmétique : toutes les décisions en entiers dimensionnés (i64 sous 2^34,
 i128 au-delà ; largeurs déclarées par prédicat) ; les rationnels du centre ne
 sont jamais gonflés (`A = den, B = −2N, C = 2N·p − den‖p‖²`) ; la positivité
@@ -418,3 +490,14 @@ détaillée v4 (clés, lanes, statuts transactionnels) est dans
   (cosphéricités u16) : refus global (`unsupported_degeneracy`) ou quotient
   local prouvé ? La v3 a documenté le refus ; la v4 reprend le refus tant
   qu'aucun quotient complet n'est reçu.
+- (Q6–Q11 : posées et traitées dans les notes `audits/` — census q3, bord
+  torique, oracle indépendant.)
+- **Q12 (forme canonique du niveau q4).** § 4.5 : `R² = |N'|²/det²` a un
+  numérateur en `2^146` — hors i128. Deux représentants possibles : (a) la
+  fraction pgcd-réduite, mais le pgcd et la division doivent alors être
+  écrits en 192 bits ; (b) le représentant NON réduit `(|N'|² en U192,
+  det² en i128)` avec égalité et ordre par produits croisés U320 — aucune
+  division, mais deux événements de même niveau portent des représentants
+  différents et l'égalité coûte un produit croisé. La v4 part sur (b) avec
+  l'égalité par produit croisé (l'invariant `ballkeys_uniques` reste la
+  vraie identité de boule) ; contester si la forêt exige (a).

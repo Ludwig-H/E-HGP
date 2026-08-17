@@ -227,19 +227,19 @@ inline FusedCounts count_universal_witnesses_234(const CloudIndex& ix, NodeRef a
   return fc;
 }
 
-// COLLECTE DES IDS DU CŒUR q3 D'UN RECTANGLE VIVANT (audit du 17 aout,
-// § 5.1 : « paquets d'identites bornes »). Meme autorite que la phase pleine
-// de la lane q3 (boule-cœur + 64 coins aux feuilles) mais rend les INDEX de
-// positions uniques certifies universels, hors A∪B. Precondition : le
-// rectangle a surveccu (compte < h_3 <= 9), donc la collecte tient dans un
-// petit tampon ; `cap` la borne par contrat.
-inline u64 collect_universal_ids_q3(const CloudIndex& ix, NodeRef a, NodeRef b,
-                                    u64 cap, i32* out_ids) {
+// COLLECTE DES IDS DU CŒUR D'UN RECTANGLE VIVANT (audit du 17 aout, § 5.1 :
+// « paquets d'identites bornes »), PAR LANE — les fuseaux etant emboites,
+// la meme autorite (boule-cœur de la lane + 64 coins aux feuilles) sert q3
+// et q4. Rend les INDEX de positions uniques certifies universels, hors
+// A∪B. Precondition : le rectangle a surveccu (compte < h_q <= 9), donc la
+// collecte tient dans un petit tampon ; `cap` la borne par contrat.
+inline u64 collect_universal_ids(Lane q, const CloudIndex& ix, NodeRef a,
+                                 NodeRef b, u64 cap, i32* out_ids) {
   const AxisBox boxA = box_of_node(ix, a);
   const AxisBox boxB = box_of_node(ix, b);
   const NodeRange ra = range_of(ix, a);
   const NodeRange rb = range_of(ix, b);
-  const CoreBall cb = core_ball(Lane::kQ3, boxA, boxB);
+  const CoreBall cb = core_ball(q, boxA, boxB);
   u64 count = 0;
   const auto push_range = [&](i32 f, i32 l) {
     for (i32 u = f; u <= l && count < cap; ++u) {
@@ -267,7 +267,7 @@ inline u64 collect_universal_ids_q3(const CloudIndex& ix, NodeRef a, NodeRef b,
       const i32 u = -1 - z;
       const bool in_ab =
           (u >= ra.first && u <= ra.last) || (u >= rb.first && u <= rb.last);
-      if (!in_ab && corner64_universal(Lane::kQ3, boxA, boxB, ix.upos[(size_t)u]))
+      if (!in_ab && corner64_universal(q, boxA, boxB, ix.upos[(size_t)u]))
         out_ids[count++] = u;
       continue;
     }

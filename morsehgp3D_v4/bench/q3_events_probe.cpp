@@ -29,6 +29,8 @@
 #include <vector>
 
 #include "../src/cloud/families.hpp"
+#include "../src/events/acute_seed.hpp"
+#include "../src/events/edge_cover.hpp"
 #include "../src/events/q3_event.hpp"
 #include "../src/events/q3_instruction.hpp"
 #include "../src/events/witness_count.hpp"
@@ -129,148 +131,10 @@ Q3Event make_event(const SupportKey3& sk, const EdgeKey& ek, const Q3BallKey& bk
   return e;
 }
 
-// COVER PARTAGE PAR ANCRE (audit du 17 aout, § 6.2) : tout porteur ET tout
-// point interieur d'une circum-boule q3 pertinente de l'ancre (a,b) verifie
-// |z-m| <= (sqrt(3)/2)·D, soit |2z-(a+b)|² <= 3·D² (ferme, i64). Une seule
-// requete sert la lentille et le census ; la liste est TRIEE par distance
-// croissante au milieu, pour que le scan temoin par porteur atteigne h_3 au
-// plus vite (les points proches du milieu sont interieurs a la plupart des
-// circum-boules).
-struct CoverPoint {
-  i32 u;
-  i64 dist2q;  // |2z-(a+b)|²
-};
-
-void cover_query(const CloudIndex& ix, const P3& pa, const P3& pb, i64 D2,
-                 std::vector<CoverPoint>* out) {
-  out->clear();
-  if (ix.nodes.empty()) return;
-  const i64 m2[3] = {pa.x + pb.x, pa.y + pb.y, pa.z + pb.z};
-  const i64 bound = 3 * D2;
-  const auto box_min_dist2q = [&](const AxisBox& b) {
-    i64 s = 0;
-    for (int i = 0; i < 3; ++i) {
-      i64 d = 0;
-      if (2 * b.lo[i] > m2[i]) d = 2 * b.lo[i] - m2[i];
-      else if (2 * b.hi[i] < m2[i]) d = m2[i] - 2 * b.hi[i];
-      s += d * d;
-    }
-    return s;
-  };
-  std::vector<NodeRef> stack{0};
-  while (!stack.empty()) {
-    const NodeRef z = stack.back();
-    stack.pop_back();
-    const AxisBox bz = box_of_node(ix, z);
-    if (box_min_dist2q(bz) > bound) continue;
-    if (z < 0) {
-      const i32 u = -1 - z;
-      const P3& p = ix.upos[(size_t)u];
-      i64 d2 = 0;
-      const i64 c[3] = {p.x, p.y, p.z};
-      for (int i = 0; i < 3; ++i) {
-        const i64 t = 2 * c[i] - m2[i];
-        d2 += t * t;
-      }
-      if (d2 <= bound) out->push_back(CoverPoint{u, d2});
-      continue;
-    }
-    stack.push_back(ix.nodes[(size_t)z].left);
-    stack.push_back(ix.nodes[(size_t)z].right);
-  }
-  std::sort(out->begin(), out->end(),
-            [](const CoverPoint& x, const CoverPoint& y) {
-              return x.dist2q != y.dist2q ? x.dist2q < y.dist2q : x.u < y.u;
-            });
-}
-
-// COVER RECTANGULAIRE (audit du 17 aout, reponse apres ebc823) : une seule
-// traversee haute de l'arbre PAR RECTANGLE vivant. Boite des sommes
-// S_AB = [A.lo+B.lo, A.hi+B.hi] par axe ; un nœud temoin Z est elague une
-// fois pour toutes si dist(2Box(Z), S_AB)² > 3·Dmax², ou Dmax² majore la
-// longueur d'ancre sur le rectangle (coins opposes). Le resultat est une
-// ANTICHAINE de handles ; chaque ancre part des handles, jamais de la
-// racine, et applique le filtre exact |2z-(a+b)|² <= 3·|a-b|².
-void rect_cover_handles(const CloudIndex& ix, const AxisBox& A, const AxisBox& B,
-                        bool mutant_dmin, std::vector<NodeRef>* out,
-                        u64* tree_nodes) {
-  out->clear();
-  if (ix.nodes.empty()) return;
-  i64 slo[3], shi[3], dmax2 = 0, dmin2 = 0;
-  for (int i = 0; i < 3; ++i) {
-    slo[i] = A.lo[i] + B.lo[i];
-    shi[i] = A.hi[i] + B.hi[i];
-    const i64 e1 = A.hi[i] - B.lo[i];
-    const i64 e2 = B.hi[i] - A.lo[i];
-    const i64 w = std::max(std::llabs(e1), std::llabs(e2));
-    dmax2 += w * w;
-    i64 lo = 0;
-    if (B.lo[i] > A.hi[i]) lo = B.lo[i] - A.hi[i];
-    else if (A.lo[i] > B.hi[i]) lo = A.lo[i] - B.hi[i];
-    dmin2 += lo * lo;
-  }
-  const i64 bound = 3 * (mutant_dmin ? dmin2 : dmax2);
-  std::vector<NodeRef> stack{0};
-  while (!stack.empty()) {
-    const NodeRef z = stack.back();
-    stack.pop_back();
-    ++*tree_nodes;
-    const AxisBox bz = box_of_node(ix, z);
-    i64 gap2 = 0;
-    for (int i = 0; i < 3; ++i) {
-      i64 g = 0;
-      if (2 * bz.lo[i] > shi[i]) g = 2 * bz.lo[i] - shi[i];
-      else if (2 * bz.hi[i] < slo[i]) g = slo[i] - 2 * bz.hi[i];
-      gap2 += g * g;
-    }
-    if (gap2 > bound) continue;
-    if (z < 0) {
-      out->push_back(z);
-      continue;
-    }
-    const NodeRange r = range_of(ix, z);
-    if (r.last - r.first + 1 <= 32) {
-      out->push_back(z);
-      continue;
-    }
-    stack.push_back(ix.nodes[(size_t)z].left);
-    stack.push_back(ix.nodes[(size_t)z].right);
-  }
-}
-
-// Filtre exact d'une ancre depuis les handles, puis SEAUX radiaux stables
-// (32 seaux par counting sort — l'ordre n'est pas contractuel, audit § 6.1).
-void anchor_cover_from_handles(const CloudIndex& ix,
-                               const std::vector<NodeRef>& handles, const P3& pa,
-                               const P3& pb, i64 D2, std::vector<CoverPoint>* out,
-                               u64* point_visits) {
-  out->clear();
-  const i64 m2[3] = {pa.x + pb.x, pa.y + pb.y, pa.z + pb.z};
-  const i64 bound = 3 * D2;
-  for (const NodeRef h : handles) {
-    const NodeRange r = range_of(ix, h);
-    for (i32 u = r.first; u <= r.last; ++u) {
-      ++*point_visits;
-      const P3& p = ix.upos[(size_t)u];
-      const i64 t0 = 2 * p.x - m2[0];
-      const i64 t1 = 2 * p.y - m2[1];
-      const i64 t2 = 2 * p.z - m2[2];
-      const i64 d2 = t0 * t0 + t1 * t1 + t2 * t2;
-      if (d2 <= bound) out->push_back(CoverPoint{u, d2});
-    }
-  }
-  // Counting sort en 32 seaux sur dist2q (stable, sans tri par ancre).
-  constexpr int kBins = 32;
-  u32 cnt[kBins + 1] = {};
-  const auto bin_of = [&](i64 d2) {
-    return (int)((i128)kBins * d2 / (bound + 1));
-  };
-  for (const CoverPoint& cp : *out) ++cnt[bin_of(cp.dist2q) + 1];
-  for (int b = 1; b <= kBins; ++b) cnt[b] += cnt[b - 1];
-  std::vector<CoverPoint> tmp(out->size());
-  for (const CoverPoint& cp : *out) tmp[cnt[bin_of(cp.dist2q)]++] = cp;
-  out->swap(tmp);
-}
+// Le cover d'arete (une traversee haute par rectangle + filtre exact par
+// ancre, ou la requete par ancre appariee) vit desormais dans
+// src/events/edge_cover.hpp, partage avec la lane q4 et parametre par le
+// coefficient (3 pour q3 : porteurs ET interieurs dans |2z-(a+b)|² <= 3D²).
 
 }  // namespace
 
@@ -383,11 +247,12 @@ int main(int argc, char** argv) {
     // mode collecte. Rectangle vivant => cœur < h_3 <= 9 : tampons de 8.
     std::vector<NodeRef> handles;
     if (a.cover_rect)
-      rect_cover_handles(ix, boxA, boxB, a.inject_cover_dmin, &handles,
+      rect_cover_handles(ix, boxA, boxB, 3, a.inject_cover_dmin, &handles,
                          &rect_cover_nodes);
     i32 core_ids[8];
     const u64 core_n =
-        a.packet ? collect_universal_ids_q3(ix, ar.r.a, ar.r.b, 8, core_ids) : 0;
+        a.packet ? collect_universal_ids(Lane::kQ3, ix, ar.r.a, ar.r.b, 8, core_ids)
+                 : 0;
     if (a.packet && core_n != ar.core) {
       // INVARIANT (audit § 2) : le collecteur du cœur doit rendre exactement
       // h_cœur IDs — une divergence compteur/collecteur modifie l'objet.
@@ -425,10 +290,10 @@ int main(int argc, char** argv) {
         const i64 D2 = p3_norm2(p3_sub(pb, pa));
         if (D2 == 0) continue;
         if (a.cover_rect)
-          anchor_cover_from_handles(ix, handles, pa, pb, D2, &cover,
+          anchor_cover_from_handles(ix, handles, pa, pb, D2, 3, &cover,
                                     &anchor_point_visits);
         else
-          cover_query(ix, pa, pb, D2, &cover);
+          cover_query(ix, pa, pb, D2, 3, &cover);
         cover_points += cover.size();
         // Paquet de l'ancre : cœur ∪ ha(a) ∪ hb(b), disjoints par theoreme,
         // total < h_3 (l'ancre a surveccu). Chaque ID est STRICTEMENT
@@ -493,14 +358,9 @@ int main(int argc, char** argv) {
           const i32 ux = cp.u;
           if (ux == ua || ux == ub) continue;
           const P3& px = ix.upos[(size_t)ux];
-          if (p3_norm2(p3_sub(px, pa)) > D2 || p3_norm2(p3_sub(px, pb)) > D2)
-            continue;
-          const P3 v{2 * px.x - pa.x - pb.x, 2 * px.y - pa.y - pb.y,
-                     2 * px.z - pa.z - pb.z};
-          if (p3_norm2(v) <= D2) continue;
-          const i64 l_ax = p3_norm2(p3_sub(px, pa));
-          const i64 l_bx = p3_norm2(p3_sub(px, pb));
-          if (!anchor_owns_q3(D2, l_ax, l_bx, pid(ua), pid(ub), pid(ux)))
+          // Detection partagee du seed aigu (acute_seed.hpp, audit § 3.1) :
+          // lentille + acuite stricte + owner — le meme predicat seme q4.
+          if (!is_acute_seed(pa, pb, px, D2, pid(ua), pid(ub), pid(ux)))
             continue;
           ++carriers_seen;
           Carrier c{ux,
