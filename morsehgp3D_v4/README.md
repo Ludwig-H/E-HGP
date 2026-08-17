@@ -5,10 +5,13 @@ Cadre : `phase=exploration_v4_hors_registre`, `backend=cpu_reference`,
 `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`.
 
 La v4 remplace `morsehgp3D_v3/` comme chantier actif. Elle repart de zéro sur
-le code, pas sur les leçons : les théorèmes v3 relus, les bugs documentés
-(WSPD quadratique par cap, scission par population, tie-break Morton 16 bits)
-et les fixtures gravées sont repris comme fondations — voir
-`docs/MATHEMATIQUES.md` § statuts et `docs/ARCHITECTURE.md` § 2.2.
+le code ; l'héritage v3 (théorèmes, bugs documentés, voies déclarées
+ouvertes ou fermées) est traité comme un **ensemble de pistes, jamais comme
+un acquis** : la v3 a commis et rétracté de nombreuses erreurs, et rien de ce
+qu'elle affirme n'est pris pour argent comptant sans re-dérivation ou fixture
+v4 — voir `docs/MATHEMATIQUES.md` § statuts et `docs/ARCHITECTURE.md` § 2.2.
+Seules les contre-fixtures gravées (coordonnées exactes, re-vérifiables en un
+calcul) sont reprises telles quelles.
 
 ## Contrats
 

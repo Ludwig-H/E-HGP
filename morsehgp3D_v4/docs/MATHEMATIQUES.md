@@ -12,8 +12,11 @@ Ce document est la source unique de l'aspect mathématique de la v4. Chaque
 - `theoreme_manuscrit` — énoncé et prouvé dans le manuscrit (référence exacte,
   pages PDF = pages imprimées + 26) ; il est *invoqué*, jamais re-vérifié
   exhaustivement (plan de test § 3.2) ;
-- `theoreme_v3` — établi pendant l'exploration v3, preuve relue dans les
-  audits cités ; les fixtures d'égalité v3 sont reprises ;
+- `theoreme_v3` — énoncé pendant l'exploration v3. **Ce statut n'est pas un
+  acquis** : la v3 a commis et rétracté de nombreuses erreurs ; tout énoncé
+  `theoreme_v3` est une piste étayée dont la preuve doit être re-déroulée
+  (par l'auditeur ou par une fixture v4) avant d'être invoquée sans garde.
+  Les fixtures d'égalité v3 sont reprises, elles ;
 - `derive_v4` — dérivé ici même ; **à faire valider par l'auditeur** avant
   toute promotion ;
 - `mesure` — fait empirique chiffré, jamais une garantie ;
