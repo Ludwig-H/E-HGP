@@ -1,204 +1,247 @@
-# Positionnement et choix des modèles
+# État de l'art et positionnement
 
-Ce document ne cherche pas à établir un classement figé. Il répond à trois questions :
+## 1. Règle de lecture
 
-1. quels travaux fournissent déjà les briques nécessaires ;
-2. ce qui reste réellement distinct dans le projet ;
-3. quel code reprendre plutôt que réinventer.
+Le projet ne peut pas revendiquer séparément :
 
-Les scores SemanticKITTI et les régimes de données doivent être réaudités avant toute soumission : le serveur officiel a été transféré vers CodaBench en janvier 2026, et les tableaux historiques mélangent souvent mono-scan, multi-scan, caméra, TTA et pré-entraînement externe.
+- une représentation radiale ;
+- des moments sphériques ;
+- l'apprentissage sur maillages ou polyèdres ;
+- un Transformer hiérarchique ;
+- un JEPA 3D ;
+- une distillation LiDAR–image ;
+- un pré-entraînement multi-datasets.
 
-## 1. Carte des antécédents
+Toutes ces briques ont des antécédents. La question est de savoir si leur articulation autour des **surfaces polyédriques HGP et de leur espace d'échelle de densité** constitue un objet distinct et utile.
 
-| Famille | Travail de référence | Ce qu'il apporte | Limite pour ce projet |
+Cette revue est ciblée sur les décisions de conception. Elle ne remplace pas une recherche d'antériorité exhaustive au moment de la soumission.
+
+## 2. Représentations de surfaces
+
+### 2.1 Descripteurs radiaux, sphériques et distributions de forme
+
+Les fonctions radiales de corps étoilés, les descripteurs par harmoniques sphériques, les moments de Zernike et les shape distributions précèdent largement l'apprentissage profond. Ils montrent qu'un objet 3D peut être résumé par des fonctions directionnelles ou des moments invariants.
+
+**Conséquence.** Le projet ne doit jamais revendiquer comme nouveauté :
+
+> « représenter une forme par des distances depuis un centre »
+
+ni :
+
+> « projeter une surface sur une base sphéro-radiale ».
+
+La contribution possible est plus étroite : utiliser une **mesure de surface observée, ouverte et potentiellement multicouche**, à tous les nœuds d'une filtration HGP, puis apprendre sa stabilité inter-capteurs.
+
+### 2.2 Représentations par rayons
+
+[RayDF, NeurIPS 2023](https://proceedings.neurips.cc/paper_files/paper/2023/hash/4f86833d5cc98ec32e470ef1c8cb82e3-Abstract-Conference.html) et les directed distance fields représentent une géométrie par des requêtes de rayon et une distance à la surface.
+
+**Proximité.** Les deux approches prennent au sérieux l'information portée le long d'une direction.
+
+**Différence.** HGP-PolyFM part d'une surface explicite déjà calculée, n'apprend pas un champ de rendu et doit encoder simultanément toutes les couches, les bords, la confiance et la trajectoire de densité.
+
+### 2.3 Atlas de cartes
+
+[AtlasNet, CVPR 2018](https://openaccess.thecvf.com/content_cvpr_2018/html/Groueix_A_Papier-Mache_Approach_CVPR_2018_paper.html), [Surface Networks via General Covers, ICCV 2019](https://openaccess.thecvf.com/content_ICCV_2019/html/Haim_Surface_Networks_via_General_Covers_ICCV_2019_paper.html), les [atlas métriquement cohérents, ICCV 2021](https://openaccess.thecvf.com/content/ICCV2021/html/Bednarik_Temporally-Coherent_Surface_Reconstruction_via_Metric-Consistent_Atlases_ICCV_2021_paper.html) et [MAtCha, CVPR 2025](https://openaccess.thecvf.com/content/CVPR2025/html/Guedon_MAtCha_Gaussians_Atlas_of_Charts_for_High-Quality_Geometry_and_Photorealism_CVPR_2025_paper.html) démontrent la puissance des atlas pour les surfaces générales.
+
+**Leçon.** L'atlas est la meilleure solution de repli lorsque la projection globale est mal conditionnée.
+
+**Pourquoi il n'est pas le premier choix.** Les coutures, ancres et correspondances peuvent changer sous thinning ; apprendre l'atlas en même temps que le backbone rendrait l'effet du tokenizer difficile à isoler.
+
+### 2.4 Champs implicites pour surfaces ouvertes
+
+[GIFS, CVPR 2022](https://openaccess.thecvf.com/content/CVPR2022/html/Ye_GIFS_Neural_Implicit_Function_for_General_Shape_Representation_CVPR_2022_paper.html), [NeuralUDF, CVPR 2023](https://openaccess.thecvf.com/content/CVPR2023/html/Long_NeuralUDF_Learning_Unsigned_Distance_Fields_for_Multi-View_Reconstruction_of_Surfaces_CVPR_2023_paper.html) et les UDF différentiables représentent des surfaces ouvertes et de topologie générale.
+
+**Leçon.** La difficulté monocouche n'impose ni surface fermée ni SDF.
+
+**Pourquoi ce n'est pas la voie principale.** Ajuster un champ neural à chaque polyèdre explicite serait coûteux et redondant. Les UDF sont plus pertinentes comme décodeurs de complétion que comme tokens d'entrée.
+
+### 2.5 Apprentissage natif sur polyèdres et maillages
+
+[PolyhedronNet, ICLR 2025](https://proceedings.iclr.cc/paper_files/paper/2025/hash/d551343f85fcf5e1a230fd393406306e-Abstract-Conference.html) construit un surface-attributed graph reliant sommets, arêtes et faces, puis apprend une représentation globale de polyèdres. [MGM-AE, WACV 2024](https://openaccess.thecvf.com/content/WACV2024/html/Yang_MGM-AE_Self-Supervised_Learning_on_3D_Shape_Using_Mesh_Graph_Masked_WACV_2024_paper.html) masque des graphes de faces pour l'auto-supervision de formes maillées.
+
+Ce sont les antécédents les plus importants pour le tokenizer local.
+
+**Différences du projet.**
+
+- surfaces partielles issues d'un LiDAR, non objets CAD complets ;
+- chaque scène contient une forêt de polyèdres à toutes les échelles ;
+- niveaux de densité et événements de fusion ;
+- sortie dense de segmentation ;
+- pré-entraînement entre acquisitions donnant des surfaces et des arbres différents.
+
+**Conséquence.** `SurfaceGraph` doit être une baseline forte. Une grille sphéro-radiale qui ne la bat sur aucun compromis ne mérite pas d'être protégée par son élégance mathématique.
+
+## 3. Encodeurs sphériques
+
+Les CNN sphériques et [Icosahedral CNN, ICML 2019](https://proceedings.mlr.press/v97/cohen19d.html) fournissent des opérateurs équivariants pour des signaux sur la sphère.
+
+Ils justifient l'implémentation de la grille angulaire, mais ne constituent pas la contribution. Le projet doit comparer :
+
+- repère gravité–capteur ;
+- augmentation de lacet ;
+- invariance par moments ;
+- équivariance `SO(3)`.
+
+Le régime outdoor n'exige pas automatiquement d'effacer la gravité et la direction du capteur.
+
+## 4. Hiérarchies de régions et Transformers structurés
+
+### 4.1 Superpoint Transformer
+
+[Superpoint Transformer, ICCV 2023](https://openaccess.thecvf.com/content/ICCV2023/html/Robert_Efficient_3D_Semantic_Segmentation_with_Superpoint_Transformer_ICCV_2023_paper.html) apprend sur une hiérarchie de régions et propose un mode sans étage point-wise.
+
+**Ce qu'il prouve.** Une sortie point-wise peut être obtenue depuis des tokens de régions.
+
+**Ce qu'il ne couvre pas.** Les régions restent des agrégats de points ; les nœuds n'ont pas une surface explicite normalisée ni une trajectoire de densité physique.
+
+SPT-nano devient une baseline d'architecture et de partition, non le modèle conceptuel principal.
+
+### 4.2 Sequoia, Tree Transformers et Set Transformer
+
+[Sequoia, TMLR 2024](https://openreview.net/forum?id=qH4YFMyhce), les Tree-Structured Transformers et [Set Transformer, ICML 2019](https://proceedings.mlr.press/v97/lee19d.html) fournissent les primitives parent–enfants–frères et l'agrégation permutation-invariante.
+
+Ils motivent le `MergeEventEncoder`. La spécificité HGP réside dans les surfaces directement observées à chaque nœud, les deltas géométriques et le niveau de densité.
+
+### 4.3 Hierarchical Self-Attention
+
+[HSA, NeurIPS 2025](https://proceedings.neurips.cc/paper_files/paper/2025/hash/0480adaf62a918405a5e3b1031e0c056-Abstract-Conference.html) dérive une projection de l'attention Softmax sous une contrainte hiérarchique de blocs.
+
+**Limite pour ce projet.** Dans la formulation publiée, les nœuds internes servent surtout à factoriser un signal porté par les feuilles. Ici, chaque nœud HGP possède sa propre surface observée. Ajouter ces surfaces change le modèle mathématique ; le théorème HSA ne s'étend pas automatiquement.
+
+HSA est donc :
+
+- une baseline théorique sur les feuilles ;
+- éventuellement une extension à redériver ;
+- pas le socle initial.
+
+## 5. Auto-supervision et modèles de fondation 3D
+
+### 5.1 Qualité de représentation
+
+[Sonata, CVPR 2025](https://openaccess.thecvf.com/content/CVPR2025/html/Wu_Sonata_Self-Supervised_Learning_of_Reliable_Point_Representations_CVPR_2025_paper.html) montre que les modèles 3D auto-supervisés peuvent exploiter un raccourci géométrique et paraître solides en fine-tuning tout en donnant de mauvais linear probes.
+
+[NOMAE, CVPR 2025](https://openaccess.thecvf.com/content/CVPR2025/html/Abdelsamad_Multi-Scale_Neighborhood_Occupancy_Masked_Autoencoder_for_Self-Supervised_Learning_in_LiDAR_CVPR_2025_paper.html) reconstruit l'occupation dans des voisinages multi-échelles sans traiter indistinctement espace vide et non observé.
+
+**Leçons pour HGP-PolyFM.**
+
+- frozen probing obligatoire ;
+- reconstruction brute seulement en diagnostic ;
+- masques surfaciques cohérents ;
+- supervision sur les unités observables ;
+- séparation forme / capteur.
+
+### 5.2 2D–3D et grande échelle
+
+[Concerto, NeurIPS 2025](https://proceedings.neurips.cc/paper_files/paper/2025/hash/649a31f2cb31a73b92c68b15bbf44442-Abstract-Conference.html) joint auto-distillation 3D et alignement 2D–3D. Les pré-entraînements LiDAR multi-datasets et multimodaux fixent une barre élevée pour toute revendication de modèle de fondation.
+
+La caméra est une extension puissante, mais elle ne doit être ouverte qu'après démonstration du gain géométrique. Sinon le teacher 2D peut transformer les polyèdres en simple support de pooling.
+
+### 5.3 Un encodeur pour plusieurs domaines
+
+[Utonia, 2026](https://arxiv.org/abs/2603.03283) pré-entraîne un encodeur point Transformer unique sur des domaines très hétérogènes : outdoor LiDAR, indoor RGB-D, CAD, télédétection et points issus de vidéos.
+
+**Conséquence.** Un modèle SemanticKITTI seul n'est plus crédiblement nommé « foundation model ». Le seuil minimal pour HGP-PolyFM est un encodeur LiDAR multi-capteurs et multi-tâches ; un claim 3D général exige des domaines beaucoup plus variés.
+
+## 6. Carte des antécédents
+
+| Axe | Antécédent le plus proche | Couvert | Manquant par rapport au projet |
 |---|---|---|---|
-| hiérarchie de régions 3D | [Superpoint Transformer, ICCV 2023](https://openaccess.thecvf.com/content/ICCV2023/html/Robert_Efficient_3D_Semantic_Segmentation_with_Superpoint_Transformer_ICCV_2023_paper.html) | U-Net de superpoints, arêtes horizontales/verticales, RPE, mode sans points | partitions apprises/heuristiques, niveaux non physiques |
-| attention de famille | [Sequoia, TMLR 2024](https://openreview.net/forum?id=qH4YFMyhce) | attention sparse parent–enfants–frères, interactions longues | hiérarchie généralement apprise ; pas de LiDAR outdoor |
-| attention hiérarchique dérivée | [HSA, NeurIPS 2025](https://proceedings.neurips.cc/paper_files/paper/2025/hash/0480adaf62a918405a5e3b1031e0c056-Abstract-Conference.html) | opérateur optimal sous contrainte hiérarchique, programmation dynamique | opérateur plus lourd, validation 3D non comparable à SemanticKITTI |
-| hypergraphe / incidences | [AllSet, ICLR 2022](https://openreview.net/forum?id=hpBTIv2uy_E) | Set Transformer sur multiensembles nœud↔hyperarête | ignore par défaut la filtration et l'arbre de fusion |
-| SSL latent | [I-JEPA, CVPR 2023](https://openaccess.thecvf.com/content/CVPR2023/html/Assran_Self-Supervised_Learning_From_Images_With_a_Joint-Embedding_Predictive_Architecture_CVPR_2023_paper.html) | prédiction dans l'espace latent, target encoder EMA, masques sémantiques | construit pour images |
-| SSL point cloud | [Point-JEPA, WACV 2025](https://arxiv.org/abs/2404.16432) | JEPA sur patches 3D sans reconstruction brute | objets centrés ; pas d'arbre de densité outdoor |
-| SSL LiDAR | [DOS, AAAI 2026](https://ojs.aaai.org/index.php/AAAI/article/view/39030) | distillation de softmaps observables, prototypes Zipfiens | backbone point/voxel et correspondance fixe des observations |
-| invariance capteur | [LiDomAug, CVPR 2023](https://openaccess.thecvf.com/content/CVPR2023/html/Ryu_Instant_Domain_Augmentation_for_LiDAR_Semantic_Segmentation_CVPR_2023_paper.html) | simulation de configurations LiDAR et occultations | augmentation, pas représentation hiérarchique |
+| code de polyèdre | PolyhedronNet | surface-attributed graph | LiDAR partiel, densité, scène, transfert |
+| masquage de maillage | MGM-AE | SSL de faces | arbres variables, cross-range |
+| code radial / rayon | RayDF, DDF | distance le long des rayons | mesure explicite, couches, hiérarchie |
+| atlas de surface | AtlasNet / MAtCha | surfaces générales | tokenizer stable inter-capteurs |
+| surface ouverte implicite | GIFS / NeuralUDF | topologie générale | surface explicite déjà disponible |
+| hiérarchie 3D | SPT | régions et reprojection | surfaces polyédriques, niveaux physiques |
+| attention d'arbre | Sequoia / HSA | interactions hiérarchiques | descripteur surfacique à chaque nœud |
+| SSL LiDAR | Sonata / NOMAE / DOS | représentation point/voxel | polyèdres et matching inter-arbres |
+| fondation 3D | Concerto / Utonia | multi-données, multi-domaines | tokenizer de surface HGP |
 
-## 2. Le précédent le plus proche : Superpoint Transformer
+## 7. Revendication défendable
 
-SPT est la base d'implémentation la plus raisonnable pour le premier prototype.
+La proposition n'est pas :
 
-Son dépôt officiel fournit :
+> « nous appliquons un Transformer à une hiérarchie »
 
-- une structure hiérarchique de régions ;
-- des graphes d'adjacence à chaque niveau ;
-- des arêtes verticales vers les parents ;
-- un encodeur-décodeur de type U-Net ;
-- des encodages relatifs injectables dans `Q`, `K` et `V` ;
-- un mode `nano=True` qui retire explicitement l'étage point-wise.
+ni :
 
-Ce dernier point est décisif : `SPT-nano` montre qu'un modèle de segmentation 3D entièrement porté par des régions n'est pas une impossibilité logicielle. Il ne prouve évidemment pas que les facettes proposées sont les bonnes unités ni que le modèle atteindra le meilleur score sur SemanticKITTI.
+> « nous décrivons un objet par des rayons ».
 
-### Ce qui peut être repris
+La revendication défendable est :
 
-- les objets `NAG` et la logique de batching hiérarchique ;
-- les `DownNFuseStage` et `UpNFuseStage` ;
-- l'attention sparse sur les arêtes latérales ;
-- les MLP d'arêtes verticales et horizontales ;
-- les losses et outils de reprojection région→point, après vérification des poids.
+> **Nous remplaçons les retours ponctuels comme unités apprises par des mesures de surfaces polyédriques explicites, organisées dans un espace d'échelle de densité HGP ; nous modélisons leurs innovations et fusions, puis pré-entraînons le code de forme à rester cohérent entre acquisitions qui reconstruisent des surfaces et des arbres différents.**
 
-### Ce qui doit être remplacé
+Cette revendication exige cinq résultats :
 
-- le partitionneur de superpoints ;
-- les niveaux par nombre de régions ;
-- les features artisanales propres à SPT ;
-- l'unpooling par simple index si les feuilles se recouvrent ;
-- toute hypothèse qu'un point appartient à une unique région.
+1. meilleur taux–distorsion qu'un code point/superpoint pertinent ;
+2. stabilité au remeshing et au changement de densité ;
+3. avantage de l'arbre HGP sur les contrôles ;
+4. transfert cross-capteur ;
+5. gain sur plusieurs tâches ou faibles régimes de labels.
 
-### Ce qui doit être conservé comme contrôle
+## 8. Matrice de comparaison
 
-- SPT-nano officiel avec sa partition ;
-- même architecture avec la structure polyédrique ;
-- même structure avec un MLP ou message passing sans attention.
+| Méthode | Primitive principale | Surface explicite | Hiérarchie physique | Nœuds internes observés | SSL cross-range | Multi-tâches |
+|---|---|---:|---:|---:|---:|---:|
+| PTv3 / Sonata | points | non | non | non | partiel | oui |
+| sparse voxel / NOMAE | voxels | non | pyramidale | non | partiel | oui |
+| SPT | superpoints | non | non | oui, régions | non | surtout segmentation |
+| PolyhedronNet | polyèdre CAD | oui | non | non | non | classification/retrieval |
+| MGM-AE | maillage d'objet | oui | non | non | non | forme |
+| HSA | signal hiérarchique | dépend | générique | structurels | non | générique |
+| **HGP-PolyFM** | surface HGP | **oui** | **oui** | **oui, surfaces** | **oui** | **objectif** |
 
-Cette triple comparaison sépare représentation, hiérarchie et opérateur.
+La dernière ligne est un contrat expérimental, pas un résultat acquis.
 
-## 3. Sequoia : meilleur modèle conceptuel pour l'arbre complet
+## 9. Baselines obligatoires
 
-Sequoia contraint chaque token à interagir avec sa famille immédiate : parent, enfants et frères. Cette topologie correspond mieux à un arbre événementiel complet qu'une succession de quatre partitions grossières.
+### Primitives
 
-### Adaptation proposée
+- Point Transformer V3 ou équivalent ;
+- sparse voxel backbone ;
+- SPT / SPT-nano ;
+- SurfaceGraph de type PolyhedronNet ;
+- quadrature d'aire + Set Encoder.
 
-- hiérarchie fixée par le prétraitement, non apprise ;
-- un token par nœud persistant ;
-- attention enfants→parent puis parent→enfants ;
-- attention entre frères au sein d'un événement de fusion ;
-- arêtes latérales géométriques en parallèle ;
-- encodage relatif des écarts de niveau, masse, pose et interface.
+### Structures
 
-### Pourquoi ne pas commencer par Sequoia
+- plat ;
+- graphe latéral ;
+- arbre aléatoire ;
+- octree ;
+- HDBSCAN/RSL ;
+- HGP sans niveaux ;
+- HGP complet.
 
-Le code et les kernels ne sont pas conçus pour les recouvrements de facettes, les poids de reprojection et les événements simultanés du projet. L'adaptation est une seconde étape. `PolyTreeFormer-Nano` doit d'abord démontrer que les tokens et canaux fonctionnent.
+### SSL
 
-## 4. HSA : comparaison théorique, pas socle initial
+- from scratch ;
+- reconstruction ;
+- Surface-JEPA ;
+- SSL point/voxel récent ;
+- Cross-Range PolyJEPA ;
+- distillation 2D à teacher identique.
 
-HSA dérive une attention incorporant une hiérarchie comme projection optimale de l'attention Softmax sous les contraintes du modèle multi-échelle. C'est le contrôle théorique le plus propre lorsque l'arbre est donné.
+## 10. Positionnement de publication
 
-Il doit être testé après les baselines simples, car :
+### Contribution représentation / robustesse
 
-- sa programmation dynamique suit la profondeur de l'arbre ;
-- son coût dépend du branchement ;
-- il est moins trivial à intégrer aux arêtes latérales ;
-- un échec simultané de la tokenisation et de HSA serait impossible à diagnostiquer.
+Une soumission majeure est crédible si le projet démontre :
 
-L'ordre expérimental est donc :
+- nouvelle unité de calcul surfacique ;
+- théorie simple d'invariance et de remeshing ;
+- benchmark de radialité et taux–distorsion ;
+- gain de segmentation ou de robustesse ;
+- transfert vers un second capteur.
 
-```text
-MeanTree → SPT-nano adapté → Sequoia-fixed → HSA.
-```
+### Contribution fondation
 
-HSA devient une contribution utile seulement s'il bat un opérateur sparse plus simple à budget apparié ou apporte une propriété mesurable de robustesse.
+Il faut en plus :
 
-## 5. AllSet et réseaux de complexes
+- pré-entraînement multi-datasets ;
+- frozen probing et faible supervision ;
+- plusieurs tâches ;
+- courbes de scaling ;
+- comparaison aux fondations points/voxels contemporaines.
 
-Le graphe dual réduit chaque incidence à une relation par paire. Il peut perdre l'identité d'une coface ou d'un événement d'ordre supérieur.
-
-`AllSetTransformer` est la première extension à tester si cette perte devient visible :
-
-```text
-sommet/facette → multiensemble de la coface → facette/sommet.
-```
-
-Un encodeur d'incidences complet n'est pas prioritaire parce qu'il augmente fortement le nombre de tokens et de messages. Il est justifié seulement si :
-
-- deux structures de même graphe dual mais d'incidences différentes doivent être distinguées ;
-- le null test `incidence-shuffled` dégrade les résultats ;
-- la mémoire reste compatible avec un scan complet.
-
-## 6. Pré-entraînement : pourquoi JEPA avant reconstruction
-
-La reconstruction de coordonnées ou de descripteurs bas niveau favorise les détails d'acquisition. Or le but est précisément d'abstraire la dilution du capteur.
-
-I-JEPA et Point-JEPA fournissent le principe adapté : prédire l'embedding d'une cible à partir d'un contexte, sans reconstruire l'entrée brute. Le projet ajoute une difficulté absente de ces travaux : les deux vues peuvent avoir des arbres différents.
-
-DOS fournit deux leçons pratiques :
-
-1. ne superviser que les unités réellement observables afin d'éviter une fuite d'information ;
-2. une distribution douce de prototypes peut être plus informative qu'une cible dure.
-
-La recette retenue est donc progressive :
-
-1. JEPA latent sur nœuds appariés ;
-2. prédiction des événements de la trajectoire ;
-3. softmaps observables seulement après validation du matching.
-
-## 7. Travaux d'augmentation LiDAR
-
-LiDomAug montre qu'il faut simuler la physique du capteur, pas seulement supprimer des points uniformément. La banque de transformations doit couvrir :
-
-- nombre et position des anneaux ;
-- résolution azimutale ;
-- portée ;
-- occultations ;
-- mouvement du capteur et des objets ;
-- bruit et rémission.
-
-Pour le pré-entraînement principal, seule une sous-partie contrôlée est utilisée au départ. Ajouter immédiatement toutes les corruptions rendrait l'appariement des arbres trop rare.
-
-## 8. Paysage 2026 à surveiller
-
-Quatre prépublications récentes empêchent de présenter le projet comme une simple première utilisation de hiérarchie ou de SSL en 3D :
-
-| Travail | Signal pour le projet | Différence essentielle |
-|---|---|---|
-| [Utonia](https://arxiv.org/abs/2603.03283) | les encodeurs point cloud unifiés deviennent une baseline de transfert ambitieuse | backbone point Transformer multi-domaines, pas structure polyédrique exogène |
-| [PointINS](https://arxiv.org/abs/2603.25165) | le SSL 3D se déplace vers les propriétés d'instance et la géométrie aval | offsets et pseudo-instances, pas filtration de densité |
-| [HilDA](https://arxiv.org/abs/2606.20189) | le mot « hiérarchique » est déjà utilisé en distillation LiDAR | hiérarchie des couches du teacher et objectif temporel/cross-modal |
-| [HASSL](https://arxiv.org/abs/2607.04353) | une loss SSL fondée sur une hiérarchie HDBSCAN existe désormais | arbre latent de batch en microscopie, pas arbre géométrique fixé par scan |
-
-La formulation défendable n'est donc pas « hierarchy-aware SSL ». Elle est plus étroite : **prédiction latente entre deux réalisations capteur d'une même filtration géométrique exogène, avec matching explicite des branches et sortie polyèdre-only**.
-
-## 9. Ce qui est réellement distinct
-
-La nouveauté ne peut pas être revendiquée sur les briques suivantes prises isolément :
-
-- segmenter des superpoints ;
-- utiliser un Transformer hiérarchique ;
-- injecter des biais relatifs ;
-- prédire des embeddings masqués ;
-- simuler un autre capteur LiDAR.
-
-La proposition spécifique est leur articulation :
-
-> **apprendre uniquement sur les feuilles et événements d'une filtration polyédrique fine, en séparant forme normalisée, métrique physique, niveau relatif et acquisition, puis pré-entraîner la représentation à conserver les branches sémantiques sous dégradation LiDAR.**
-
-Cette revendication ne tient que si quatre résultats sont obtenus :
-
-1. oracle de feuilles élevé ;
-2. stabilité mesurée sous dilution ;
-3. gain de la vraie hiérarchie sur les contrôles ;
-4. transfert à un second capteur.
-
-## 10. Matrice de comparaison pour le papier
-
-| Méthode | Tokens points | Structure donnée | Niveaux physiques | Recouvrement | SSL portée | Sortie point-wise |
-|---|---:|---:|---:|---:|---:|---:|
-| PTv3 / DOS | oui | non | non | non | partiel | oui |
-| SPT | optionnel | hiérarchie de superpoints | non | non | non | oui |
-| Sequoia | dépend de la tâche | apprise ou fixée | non | non | non | dépend |
-| HSA | dépend de la tâche | oui | générique | générique | non | dépend |
-| AllSet | non requis | hypergraphe | non | oui | non | dépend |
-| **PolyTreeFormer** | **non** | **oui** | **oui** | **oui** | **oui** | **oui** |
-
-La dernière ligne est un objectif de conception, pas une preuve de supériorité.
-
-## 11. Baselines de score
-
-Le projet doit reproduire au moins :
-
-- un backbone point/voxel moderne sur SemanticKITTI ;
-- SPT-nano ou une adaptation fidèle ;
-- DOS lorsque le budget le permet ;
-- le graphe dual sans hiérarchie.
-
-Le meilleur score public n'est pas une cible stable tant que les entrées, données de pré-entraînement, TTA et ensembles ne sont pas harmonisés. Le dossier maintient donc deux tableaux séparés :
-
-1. **comparaison scientifique stricte**, même données et même inférence ;
-2. **contexte leaderboard**, réaudité à la date de soumission.
+Le premier résultat peut viser ICCV, NeurIPS ou ICML sans prétendre avoir déjà terminé le second programme.
