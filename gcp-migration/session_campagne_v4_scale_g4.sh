@@ -46,24 +46,17 @@ HANDOFF="${WORK}/handoff.json"
 LOG="${WORK}/session.log"
 echo "session dans ${WORK}"
 
-# ---- 0. PIN DE SOURCE, avant toute mutation GCP (audit « pin source »).
-SOURCE_COMMIT="$(git rev-parse HEAD)"
-if ! git diff --quiet -- morsehgp3D_v4 || ! git diff --cached --quiet -- morsehgp3D_v4; then
-  echo "REFUS : morsehgp3D_v4 differe de HEAD — committer avant la campagne" >&2
-  exit 2
-fi
-if [ -n "$(git ls-files --others --exclude-standard -- morsehgp3D_v4)" ]; then
-  echo "REFUS : fichiers non suivis dans morsehgp3D_v4" >&2
-  exit 2
-fi
-TAR="${WORK}/v4.tgz"
-git archive --format=tar.gz --prefix=morsehgp3D_v4/ \
-  -o "${TAR}" "${SOURCE_COMMIT}:morsehgp3D_v4"
-SOURCE_TAR_SHA256="$(sha256sum "${TAR}" | awk '{print $1}')"
-{
-  echo "source_commit=${SOURCE_COMMIT}"
-  echo "source_tar_sha256=${SOURCE_TAR_SHA256}"
-} | tee -a "${LOG}"
+# ---- 0. PIN DU PROTOCOLE, avant toute mutation GCP (audits « pin
+# source » puis « pin du protocole ») : le moteur ET le protocole qui
+# choisit les runs et les juge (lanceur, runner, validateur) doivent
+# correspondre a HEAD ; bundle et scripts epingles sont materialises
+# depuis le COMMIT — le worktree n'intervient plus apres cette etape.
+PIN_OUT="$(./gcp-migration/v4_campaign_pin.sh "${WORK}")"
+echo "${PIN_OUT}" | tee -a "${LOG}"
+SOURCE_COMMIT="$(printf '%s\n' "${PIN_OUT}" | sed -n 's/^source_commit=//p')"
+SOURCE_PAYLOAD_SHA256="$(printf '%s\n' "${PIN_OUT}" | sed -n 's/^source_payload_sha256=//p')"
+PROTOCOL_MANIFEST_SHA256="$(printf '%s\n' "${PIN_OUT}" | sed -n 's/^protocol_manifest_sha256=//p')"
+BUNDLE="${WORK}/bundle.tgz"
 
 gcloud config set project "${GCP_PROJECT_ID}" >/dev/null
 
@@ -120,9 +113,10 @@ SCP=(gcloud compute scp --project="${GCP_PROJECT_ID}" --zone="${GCP_ZONE}"
      --quiet --ssh-key-file="${GCP_SSH_KEY_FILE}"
      --ssh-key-expiration="${GCP_SSH_KEY_EXPIRATION_UTC}")
 
-# ---- 4. Envoi du payload PINNE + du script distant.
-"${SCP[@]}" "${TAR}" gcp-migration/v4_campaign_remote.sh \
-  "${GCP_INSTANCE_NAME}:/tmp/" 2>&1 | tee -a "${LOG}"
+# ---- 4. Envoi du BUNDLE pinne (moteur + runner + validateur, depuis le
+# commit) — aucun script du worktree n'est transfere.
+"${SCP[@]}" "${BUNDLE}" "${GCP_INSTANCE_NAME}:/tmp/v4bundle.tgz" \
+  2>&1 | tee -a "${LOG}"
 
 # ---- 5. Build Release + preconditions + REJEU INDEPENDANT des portes.
 # Un echec ARRETE la session avant toute mesure : pas de campagne sur un
@@ -133,9 +127,8 @@ SCP=(gcloud compute scp --project="${GCP_PROJECT_ID}" --zone="${GCP_ZONE}"
   python3 -m pip install --user --quiet --upgrade cmake >/dev/null 2>&1 || true
   export PATH=$HOME/.local/bin:$PATH
   rm -rf ~/v4scale && mkdir -p ~/v4scale && cd ~/v4scale
-  echo "'"${SOURCE_TAR_SHA256}"'  /tmp/v4.tgz" | sha256sum -c -
-  tar xzf /tmp/v4.tgz
-  cp /tmp/v4_campaign_remote.sh .
+  echo "'"${SOURCE_PAYLOAD_SHA256}"'  /tmp/v4bundle.tgz" | sha256sum -c -
+  tar xzf /tmp/v4bundle.tgz
   echo "coeurs=$(nproc)"; grep MemTotal /proc/meminfo; cmake --version | head -1
   cmake -S morsehgp3D_v4 -B build -DCMAKE_BUILD_TYPE=Release
   cmake --build build -j48
@@ -149,7 +142,7 @@ set +e
 "${SSH[@]}" "set -euo pipefail
   export PATH=\$HOME/.local/bin:\$PATH
   cd ~/v4scale
-  bash v4_campaign_remote.sh ${SOURCE_COMMIT} ${SOURCE_TAR_SHA256}
+  bash gcp-migration/v4_campaign_remote.sh ${SOURCE_COMMIT} ${SOURCE_PAYLOAD_SHA256} ${PROTOCOL_MANIFEST_SHA256}
 " 2>&1 | tee -a "${LOG}"
 REMOTE_CAMPAIGN_RC=${PIPESTATUS[0]}
 set -e
@@ -173,10 +166,11 @@ for attempt in 1 2 3; do
 done
 printf 'scp_rc=%d\n' "${SCP_RC}" | tee -a "${LOG}"
 
-# ---- 8. VALIDATION LOCALE : seule autorite du statut de campagne.
+# ---- 8. VALIDATION LOCALE par le validateur EPINGLE (jamais le worktree) :
+# seule autorite du statut de campagne.
 set +e
-python3 gcp-migration/validate_v4_campaign.py "${WORK}/out" \
-  "${SOURCE_COMMIT}" "${SOURCE_TAR_SHA256}" \
+python3 "${WORK}/pinned/gcp-migration/validate_v4_campaign.py" "${WORK}/out" \
+  "${SOURCE_COMMIT}" "${SOURCE_PAYLOAD_SHA256}" "${PROTOCOL_MANIFEST_SHA256}" \
   "${REMOTE_CAMPAIGN_RC}" "${SCP_RC}" 2>&1 | tee -a "${LOG}"
 VALIDATE_RC=${PIPESTATUS[0]}
 set -e

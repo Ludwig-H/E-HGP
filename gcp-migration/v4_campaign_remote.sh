@@ -3,8 +3,9 @@
 # gardee (ou localement par le selftest transactionnel, avec un faux
 # probe). Il ne demarre ni n'arrete rien : la session locale detient les
 # gardes. $1 = source_commit, $2 = source_tar_sha256 — graves dans CHAQUE
-# .status (audit « pin source » : le reçu doit savoir quel code exact a
-# produit ses compteurs).
+# .status avec $3 = protocol_manifest_sha256 (audit « pin du protocole » :
+# le reçu doit savoir quel code exact ET quel protocole exact ont produit
+# ses compteurs).
 #
 # TRANSACTIONNEL : chaque run ecrit deux fichiers atomiques (.txt payload,
 # .status code/duree/pic RSS/scope/pin), errexit desarme autour du run.
@@ -17,7 +18,8 @@
 set -euo pipefail
 
 SOURCE_COMMIT="${1:?source_commit requis}"
-SOURCE_TAR_SHA256="${2:?source_tar_sha256 requis}"
+SOURCE_PAYLOAD_SHA256="${2:?source_payload_sha256 requis}"
+PROTOCOL_MANIFEST_SHA256="${3:?protocol_manifest_sha256 requis}"
 PROBE_BIN="${PROBE_BIN:-./build/mhgp4_forest_probe}"
 OUT_DIR="${OUT_DIR:-out}"
 RUN_TIMEOUT="${RUN_TIMEOUT:-10800}"
@@ -49,7 +51,8 @@ run_one() {
     printf 'peak_rss_kb=%s\n' "${hwm:-inconnu}"
     printf 'timing_scope=%s\n' "${scope}"
     printf 'source_commit=%s\n' "${SOURCE_COMMIT}"
-    printf 'source_tar_sha256=%s\n' "${SOURCE_TAR_SHA256}"
+    printf 'source_payload_sha256=%s\n' "${SOURCE_PAYLOAD_SHA256}"
+    printf 'protocol_manifest_sha256=%s\n' "${PROTOCOL_MANIFEST_SHA256}"
     printf 'finished=1\n'
   } > "${status}.tmp"
   mv "${status}.tmp" "${status}"

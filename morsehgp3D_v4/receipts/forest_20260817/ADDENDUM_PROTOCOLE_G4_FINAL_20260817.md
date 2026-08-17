@@ -64,3 +64,21 @@ payé : elle a attrapé un `taskset -c` hors bornes sur petit poste
 raison d'empêcher la campagne G4 » ; le prochain chantier de code est le
 fold sort/reduce (112 s sur 324 à n=8000, pente ×2,8), en parallèle de
 la campagne que l'opérateur lancera.
+
+## Post-scriptum — le protocole lui-même est pinné (audit « pin du protocole G4 »)
+
+Dernier raccord exécuté : le tar de calcul était pinné, pas le
+chronométreur ni le greffier. Désormais (`v4_campaign_pin.sh`, chemin
+normatif AUTO-INCLUS) : la garde de propreté couvre moteur + lanceur +
+runner + validateur + le script de pin ; le BUNDLE transféré et les
+scripts exécutés (runner sur la VM, validateur en local sous
+`${WORK}/pinned/`) sont matérialisés par `git archive`/`git show` depuis
+le COMMIT — le worktree n'intervient plus après le calcul du pin. Chaque
+`.status` porte le triplet `source_commit` / `source_payload_sha256` /
+`protocol_manifest_sha256` (digest des versions Git exactes des trois
+scripts), exigé identique sur les 28 runs par le validateur épinglé.
+Deux scénarios causaux ajoutés à la porte : un runner ou un validateur
+modifié non commité est REFUSÉ avant toute action GCP (y compris le
+validateur toujours-zéro) ; un statut sans manifeste n'est jamais
+`complete`. PROTOCOLE CONFORME (6 scénarios). L'auditeur : « après
+cela, rien ne justifie de retarder la campagne G4 ».

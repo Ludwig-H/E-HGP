@@ -71,7 +71,7 @@ run_campaign() {
   ( cd "${WORK}" && env "$@" \
       PROBE_BIN="${WORK}/fake_probe" TIME_BIN="${WORK}/fake_time" \
       OUT_DIR="${out}" RUN_TIMEOUT=2 SLEEP_S=0 \
-      bash "${HERE}/v4_campaign_remote.sh" cafedeca beefbeef ) \
+      bash "${HERE}/v4_campaign_remote.sh" cafedeca beefbeef feedf00d ) \
     > "${out}.log" 2>&1 || rc=$?
   echo "${rc}"
 }
@@ -83,7 +83,7 @@ RC1=$(run_campaign "${WORK}/out1")
   fail "scenario 1 : 28 statuts attendus"
 grep -L '^source_commit=cafedeca$' "${WORK}/out1"/*.status | grep -q . &&
   fail "scenario 1 : pin source absent d'un statut"
-if ! python3 "${HERE}/validate_v4_campaign.py" "${WORK}/out1" cafedeca beefbeef 0 0 \
+if ! python3 "${HERE}/validate_v4_campaign.py" "${WORK}/out1" cafedeca beefbeef feedf00d 0 0 \
      > "${WORK}/v1.log" 2>&1; then
   fail "scenario 1 : validateur a refuse un happy path ($(cat "${WORK}/v1.log"))"
 fi
@@ -98,7 +98,7 @@ grep -q '^code=7$' "${WORK}/out2/cov_terrain_n8000_smax11.status" 2>/dev/null ||
   fail "scenario 2 : code=7 non materialise"
 grep -q '^code=124$' "${WORK}/out2/cov_eight_clusters_n8000_smax11.status" 2>/dev/null ||
   fail "scenario 2 : code=124 (timeout) non materialise"
-if python3 "${HERE}/validate_v4_campaign.py" "${WORK}/out2" cafedeca beefbeef 0 0 \
+if python3 "${HERE}/validate_v4_campaign.py" "${WORK}/out2" cafedeca beefbeef feedf00d 0 0 \
      > "${WORK}/v2.log" 2>&1; then
   fail "scenario 2 : le validateur devait refuser"
 fi
@@ -114,9 +114,40 @@ grep -q '^code=9$' "${WORK}/out3/lat_uniform_n16000_smax11.status" 2>/dev/null |
   fail "scenario 3 : le statut du pilote avorte doit etre conserve"
 
 # ---- Scenario 4 : un code de session non nul interdit complete.
-if python3 "${HERE}/validate_v4_campaign.py" "${WORK}/out1" cafedeca beefbeef 255 0 \
+if python3 "${HERE}/validate_v4_campaign.py" "${WORK}/out1" cafedeca beefbeef feedf00d 255 0 \
      > "${WORK}/v4.log" 2>&1; then
   fail "scenario 4 : remote_rc=255 devait refuser complete"
+fi
+
+# ---- Scenario 5 : PIN DU PROTOCOLE (audit « pin du protocole G4 ») —
+# un runner ou un validateur modifie mais non commite doit etre REFUSE
+# avant toute action GCP ; le champ manifeste doit etre exige partout.
+PINREPO="${WORK}/pinrepo"
+mkdir -p "${PINREPO}/gcp-migration" "${PINREPO}/morsehgp3D_v4"
+cp "${HERE}/session_campagne_v4_scale_g4.sh" "${HERE}/v4_campaign_remote.sh" \
+   "${HERE}/validate_v4_campaign.py" "${HERE}/v4_campaign_pin.sh" \
+   "${PINREPO}/gcp-migration/"
+echo "stub" > "${PINREPO}/morsehgp3D_v4/README.md"
+( cd "${PINREPO}" && git init -q && git add -A &&
+  git -c user.email=t@t -c user.name=t commit -qm pin )
+pin_run() { ( cd "${PINREPO}" && mkdir -p w && ./gcp-migration/v4_campaign_pin.sh "$(pwd)/w" ); }
+pin_run > "${WORK}/pin1.log" 2>&1 || fail "scenario 5 : pin propre refuse"
+grep -q '^protocol_manifest_sha256=' "${WORK}/pin1.log" ||
+  fail "scenario 5 : manifeste absent de la sortie du pin"
+echo "# graine modifiee" >> "${PINREPO}/gcp-migration/v4_campaign_remote.sh"
+pin_run > "${WORK}/pin2.log" 2>&1 && fail "scenario 5 : runner modifie ACCEPTE"
+grep -q 'REFUS' "${WORK}/pin2.log" || fail "scenario 5 : refus runner sans message"
+( cd "${PINREPO}" && git checkout -q -- gcp-migration/v4_campaign_remote.sh )
+printf '#!/usr/bin/env python3\nprint("campaign_status=complete")\n' \
+  > "${PINREPO}/gcp-migration/validate_v4_campaign.py"
+pin_run > "${WORK}/pin3.log" 2>&1 && fail "scenario 5 : validateur toujours-zero ACCEPTE"
+
+# ---- Scenario 6 : un statut sans manifeste de protocole -> jamais complete.
+cp -r "${WORK}/out1" "${WORK}/out6"
+sed -i '/^protocol_manifest_sha256=/d' "${WORK}/out6/cov_uniform_n8000_smax11.status"
+if python3 "${HERE}/validate_v4_campaign.py" "${WORK}/out6" cafedeca beefbeef feedf00d 0 0 \
+     > "${WORK}/v6.log" 2>&1; then
+  fail "scenario 6 : manifeste absent d'un statut devait refuser"
 fi
 
 echo "selftest_campagne_v4 : violations=${BAD}"
