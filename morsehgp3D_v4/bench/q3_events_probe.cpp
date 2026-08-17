@@ -21,6 +21,7 @@
 #include <vector>
 
 #include "../src/cloud/families.hpp"
+#include "../src/events/q3_event.hpp"
 #include "../src/events/q3_instruction.hpp"
 #include "../src/events/witness_count.hpp"
 #include "../src/wspd/wavefront.hpp"
@@ -323,6 +324,7 @@ int main(int argc, char** argv) {
   // AVANT l'expansion des ancres (autorite 8 coins, disjonction prouvee),
   // exact-once visible, refus transactionnel des coquilles en mode --exact.
   std::vector<Key3> events;
+  std::vector<Q3BallKey> ball_keys;
   u64 anchors_seen = 0, anchors_killed_ha = 0, carriers_seen = 0,
       shell_refused = 0, raw_events = 0, power_tests = 0, interior_ids_total = 0,
       rect_cover_nodes = 0, anchor_point_visits = 0;
@@ -493,6 +495,12 @@ int main(int argc, char** argv) {
           }
           ++raw_events;
           interior_ids_total += base + c.ni;
+          ball_keys.push_back(q3_ball_key(c.f));
+          const Q3Level lv = q3_exact_level(pa, pb, ix.upos[(size_t)c.ux]);
+          if (lv.num <= 0 || lv.den <= 0) {
+            std::fprintf(stderr, "INVARIANT : niveau non positif\n");
+            return 3;
+          }
           events.push_back(make_key((i32)pid(ua), (i32)pid(ub), (i32)pid(c.ux)));
         }
       }
@@ -500,6 +508,9 @@ int main(int argc, char** argv) {
   std::sort(events.begin(), events.end());
   events.erase(std::unique(events.begin(), events.end()), events.end());
   const u64 duplicate_supports = raw_events - events.size();
+  std::sort(ball_keys.begin(), ball_keys.end());
+  ball_keys.erase(std::unique(ball_keys.begin(), ball_keys.end()), ball_keys.end());
+  const u64 unique_ballkeys = ball_keys.size();
   const auto t2 = std::chrono::steady_clock::now();
 
   // 3. Juge par identites (oracle borne).
@@ -563,7 +574,7 @@ int main(int argc, char** argv) {
       "famille=%s n=%d coord=%d s=%lld smax=%llu seed=%lld mode=%s "
       "rect_vivants_q3=%zu ancres_vues=%llu ancres_tuees_ha=%llu "
       "porteurs=%llu evenements=%zu doublons=%llu ev_par_point=%.1f "
-      "tests_puissance=%llu ids_interieurs=%llu noeuds_cover_rect=%llu visites_filtre=%llu "
+      "tests_puissance=%llu ids_interieurs=%llu ballkeys_uniques=%llu noeuds_cover_rect=%llu visites_filtre=%llu "
       "cover_pts=%llu shell_refus=%llu juge_manquants=%llu juge_en_trop=%llu "
       "t_wspd_ms=%.1f t_instruction_ms=%.1f t_juge_ms=%.1f\n",
       cloud_family_name(a.family), a.n, coord, (long long)a.s,
@@ -573,7 +584,8 @@ int main(int argc, char** argv) {
       (unsigned long long)carriers_seen, events.size(),
       (unsigned long long)duplicate_supports,
       (double)events.size() / (double)pts.size(), (unsigned long long)power_tests,
-      (unsigned long long)interior_ids_total, (unsigned long long)rect_cover_nodes,
+      (unsigned long long)interior_ids_total, (unsigned long long)unique_ballkeys,
+      (unsigned long long)rect_cover_nodes,
       (unsigned long long)anchor_point_visits,
       (unsigned long long)cover_points, (unsigned long long)shell_refused, (unsigned long long)missing,
       (unsigned long long)extra, ms(t1 - t0), ms(t2 - t1), ms(t3 - t2));
@@ -592,6 +604,13 @@ int main(int argc, char** argv) {
       return 4;
     }
     std::fprintf(stderr, "PORTE INEFFICACE : packet-no-exclude non discrimine\n");
+    return 3;
+  }
+  // Regime regulier : BallKeys uniques ⟺ evenements (un partage de sphere
+  // entre deux supports serait une cospherite deja refusee).
+  if (unique_ballkeys != events.size()) {
+    std::fprintf(stderr, "INVARIANT : %llu BallKeys pour %zu evenements\n",
+                 (unsigned long long)unique_ballkeys, events.size());
     return 3;
   }
   if (duplicate_supports > 0) {

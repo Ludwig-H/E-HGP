@@ -97,3 +97,15 @@ Cumul eight_clusters n=2000 depuis l'origine du probe : 475 s → 12,7 s
 (≈ 37×). Juge 0/0, mutant `cover-dmin` (Dmax remplacé par Dmin, perd des
 témoins) tué. Compteurs causaux publiés (nœuds de traversée rectangle,
 visites du filtre, tests de puissance) comme demandé par l'audit.
+
+## Addendum 5 — l'événement q3 transactionnel complet
+
+Chaque événement porte désormais : `SupportKey` (vrais PointId),
+`BallKey` (cinq coefficients primitifs de `G‖z‖²+B·z+C`, réduits pgcd,
+signe A>0, formés AVANT tout census), `ExactLevel = D·E·X/(4G)` (rayon AU
+CARRÉ, fraction canonique — le niveau public gravé par l'audit), et ses
+`InteriorIds` (paquet certifié + collecte du scan). Invariant gravé en porte :
+`ballkeys_uniques == evenements` en régime régulier (un partage de sphère
+entre deux supports serait une cosphéricité déjà refusée) — vérifié sur
+48 965 (uniform n=400) et 249 093 (eight_clusters n=2000) événements ;
+l'égalité croisée du niveau est déjà couverte par l'oracle indépendant.
