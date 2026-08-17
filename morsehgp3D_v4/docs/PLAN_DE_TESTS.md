@@ -54,6 +54,8 @@ conventions v3 ; ce fichier fixe leur application v4.
 | événements | `ballkeys_uniques == evenements` (régime régulier) ; niveau exact > 0 ; fixtures q3/q4 gravées (v3 § 10) | `mhgp4_q3_events_judge_*` |
 | oracle q3 | accord total sujet/oracle sur tous les triangles (acuité, profondeur, coquille, niveau exact ET niveau public) ; fixtures u16 extrêmes ; plancher de limbes (produit du niveau ≥ limbe 3) ; débordement = statut fail-closed, jamais un signal | `mhgp4_q3_oracle_*` |
 | arithmétique oracle | le juge du juge : `OBig` contre `cpp_int` (troisième autorité, si Boost présent) — paires add/sub/mul/cmp, distributivité (plancher 1 000 triplets), frontière exacte du 7e limbe en statut | `mhgp4_obig_*` |
+| ordre des niveaux | `compare_level` U192 (produits croisés < 2 puissance 171) contre l'oracle 384 bits sur toutes les paires récoltées ; antisymétrie ; canonicité (égalité ⟺ mêmes fractions réduites) ; plancher de plateaux (cas des macro-lots) ; fixture de largeur mot-haut | `mhgp4_q3_level_cmp_*` |
+| source q4 | fixture bloquante 13 points : ancre q3-morte (n3=9) mais q4-vivante (n4=0), tétraèdre q4 de profondeur 0, owner EdgeKey(0,1) — le découplage des lanes est gravé ; mutant `q4-seeds-from-q3-live` tué | `mhgp4_q4_source_*` |
 | forêts | K=1 ≡ single-linkage (MST de référence) ; juge `gamma_forest` indépendant sur n ≤ 12–14 ; égalité Théorème 2 (second chemin par L_K(r) + couverture) | à venir |
 
 ## 4. Fixtures permanentes reprises de la v3

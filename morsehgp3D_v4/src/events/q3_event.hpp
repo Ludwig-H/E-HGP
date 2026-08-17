@@ -216,4 +216,49 @@ inline Q3Level q3_exact_level(const P3& a, const P3& b, const P3& x) {
   return q3_level_reduce(q3_level_raw(a, b, x));
 }
 
+// ---- ORDRE EXACT DES NIVEAUX (contre-audit 489c617, § 2). La foret exige
+// `num1·den2 ? num2·den1` ; sous u16, num < 2^101 (D·E·X < 27·2^96) et
+// den = 4G < 2^70 (G < 9·2^64), donc chaque produit croise est < 2^171 :
+// un entier NON SIGNE de 192 bits suffit avec marge nette, i128 ne suffit
+// pas. L'egalite de niveaux se lit directement sur les couples reduits.
+struct U192 {
+  u64 w[3];  // lo, mid, hi
+};
+
+// Produit 128×128 -> 192 bits. PRECONDITION (prouvee ci-dessus, testee
+// contre l'oracle 384 bits) : le produit tient dans 192 bits.
+// `mutant_trunc_hi` : tronque le mot haut — la porte qui le tue prouve que
+// les comparaisons traversent reellement les bits >= 128.
+inline U192 mul_level_192(u128 x, u128 y, bool mutant_trunc_hi = false) {
+  const u64 x0 = (u64)x, x1 = (u64)(x >> 64);
+  const u64 y0 = (u64)y, y1 = (u64)(y >> 64);
+  const u128 p00 = (u128)x0 * y0;
+  const u128 p01 = (u128)x0 * y1;
+  const u128 p10 = (u128)x1 * y0;
+  const u128 p11 = (u128)x1 * y1;
+  U192 r;
+  r.w[0] = (u64)p00;
+  const u128 mid = (p00 >> 64) + (u64)p01 + (u64)p10;
+  r.w[1] = (u64)mid;
+  r.w[2] = (u64)((mid >> 64) + (p01 >> 64) + (p10 >> 64) + p11);
+  if (mutant_trunc_hi) r.w[2] = 0;  // MUTANT
+  return r;
+}
+
+inline int cmp_u192(const U192& a, const U192& b) {
+  for (int i = 2; i >= 0; --i)
+    if (a.w[i] != b.w[i]) return a.w[i] < b.w[i] ? -1 : 1;
+  return 0;
+}
+
+// -1 / 0 / +1 selon x <=> y (niveaux positifs, den > 0). Les evenements de
+// meme niveau (0) devront etre traites dans UN MEME MACRO-LOT par la foret :
+// racines gelees avant le lot, toutes les multifusions du plateau ensemble,
+// aucune chronologie binaire artificielle (contrat grave, foret a venir).
+inline int compare_level(const Q3Level& x, const Q3Level& y,
+                         bool mutant_trunc_hi = false) {
+  return cmp_u192(mul_level_192((u128)x.num, (u128)y.den, mutant_trunc_hi),
+                  mul_level_192((u128)y.num, (u128)x.den, mutant_trunc_hi));
+}
+
 }  // namespace mhgp4

@@ -126,6 +126,24 @@ mhgp4_expect_code(mhgp4_q3_oracle_mutant_cramer 4 mhgp4_q3_oracle "--inject=cram
 mhgp4_expect_code(mhgp4_q3_oracle_mutant_level4g 4 mhgp4_q3_oracle "--inject=level-4g")
 mhgp4_expect_code(mhgp4_q3_oracle_mutant_carry 4 mhgp4_q3_oracle "--inject=mul-carry-lost")
 
+# Ordre exact des niveaux q3 (contre-audit 489c617 § 2) : U192 contre
+# l'oracle 384 bits sur toutes les paires de niveaux recoltes, plancher de
+# plateaux (le cas des futurs macro-lots), fixture de largeur gravee ;
+# mutant mot-haut-tronque tue.
+add_executable(mhgp4_q3_level_cmp tests/q3_level_compare_test.cpp)
+mhgp4_expect_code(mhgp4_q3_level_cmp_accord 0 mhgp4_q3_level_cmp "")
+mhgp4_expect_code(mhgp4_q3_level_cmp_mutant 4 mhgp4_q3_level_cmp
+    "--inject=level-trunc-hi")
+
+# Fixture bloquante avant q4 (audit bc5b05d § 2) : l'ancre (a,b) est q3-morte
+# (n3=9>=h3) mais q4-vivante (n4=0<h4=8) et porte un tetraedre q4 de
+# profondeur zero — une source q4 branchee apres le filtre q3 le perd. Le
+# mutant q4-seeds-from-q3-live grave ce decouplage architectural.
+add_executable(mhgp4_q4_source_fixture tests/q4_source_fixture_test.cpp)
+mhgp4_expect_code(mhgp4_q4_source_independante 0 mhgp4_q4_source_fixture "")
+mhgp4_expect_code(mhgp4_q4_source_mutant 4 mhgp4_q4_source_fixture
+    "--inject=q4-seeds-from-q3-live")
+
 # Le juge du juge (audit ebc8236 P0.2) : selftest de l'arithmetique OBig
 # contre boost::multiprecision::cpp_int, troisieme autorite, tests uniquement.
 # Enregistre seulement si Boost est present (meme precedent que le temoin GMP
