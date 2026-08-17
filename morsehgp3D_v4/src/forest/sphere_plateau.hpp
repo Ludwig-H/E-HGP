@@ -99,6 +99,46 @@ inline bool tetra_closed(const BallRat& c, const P3& t0, const P3& t1,
 // c ∈ conv(T) FERME, par Caratheodory : une paire diametrale, un triangle
 // ferme ou un tetraedre ferme de T contient c.
 inline bool center_in_conv(const BallRat& c, const std::vector<P3>& pts,
+                           const std::vector<i32>& T);
+
+// Expansion d'un plateau : tous les σ = I_B ∪ T, T ⊆ U_B (coquille
+// COMPLETE, supports inclus), |σ| <= kmax + 1, c ∈ conv(T) ferme — avec le
+// masque des bras actifs (retrait de v ∈ T actif ssi c ∉ conv(T∖{v})).
+// Regime regulier (|U_B| = arite du support minimal) : exactement UN σ par
+// K, la regle classique. `pos` : positions indexees par les ids.
+struct PlateauEvent {
+  std::vector<i32> tpart, ipart;
+  u16 active_mask = 0;
+};
+
+inline void expand_plateau(const BallRat& c, const std::vector<P3>& pos,
+                           const std::vector<i32>& interior,
+                           const std::vector<i32>& shell_all, size_t kmax_plus1,
+                           std::vector<PlateauEvent>* out) {
+  const u32 nu = (u32)shell_all.size();
+  for (u32 tm = 1; tm < (1u << nu); ++tm) {
+    const int nt = __builtin_popcount(tm);
+    if (nt < 2 || interior.size() + (size_t)nt > kmax_plus1) continue;
+    std::vector<i32> T;
+    for (u32 b = 0; b < nu; ++b)
+      if (tm & (1u << b)) T.push_back(shell_all[(size_t)b]);
+    if (!center_in_conv(c, pos, T)) continue;
+    std::sort(T.begin(), T.end());
+    PlateauEvent ev;
+    ev.tpart = T;
+    ev.ipart = interior;
+    for (size_t v = 0; v < T.size(); ++v) {
+      std::vector<i32> trest;
+      for (size_t w = 0; w < T.size(); ++w)
+        if (w != v) trest.push_back(T[w]);
+      const bool same_ball = trest.size() >= 2 && center_in_conv(c, pos, trest);
+      if (!same_ball) ev.active_mask |= (u16)(1u << v);
+    }
+    out->push_back(std::move(ev));
+  }
+}
+
+inline bool center_in_conv(const BallRat& c, const std::vector<P3>& pts,
                            const std::vector<i32>& T) {
   const size_t n = T.size();
   for (size_t i = 0; i < n; ++i)

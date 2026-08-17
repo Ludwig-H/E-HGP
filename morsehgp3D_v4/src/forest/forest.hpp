@@ -76,6 +76,11 @@ struct ForestResult {
   u64 batches = 0;            // macro-lots traites
   std::vector<ForestNode> nodes;
   std::vector<u64> batch_of_event;  // lot de chaque evenement (ordre trie)
+  // Partition FINALE canonique (facette -> plus petite facette de sa
+  // composante) : O(facettes), toujours remplie. Les instantanes par lot
+  // (parametre `snapshots`) restent reserves aux petits n — ils coutent
+  // O(lots × facettes).
+  std::map<FacetKey, FacetKey> final_partition;
 };
 
 namespace detail_forest {
@@ -234,6 +239,15 @@ inline ForestResult build_forest(
     }
     ++r.batches;
     e0 = e1;
+  }
+  {
+    std::map<i32, FacetKey> canon;
+    for (const auto& kv : id_of) {
+      const i32 root = uf.find(kv.second);
+      if (canon.find(root) == canon.end()) canon.emplace(root, kv.first);
+    }
+    for (const auto& kv : id_of)
+      r.final_partition[kv.first] = canon[uf.find(kv.second)];
   }
   return r;
 }

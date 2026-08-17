@@ -387,26 +387,10 @@ int main(int argc, char** argv) {
         return;
       }
       const BallRat c = ball_center(key);
-      const u32 nu = (u32)shell_all.size();
-      for (u32 tm = 1; tm < (1u << nu); ++tm) {
-        const int nt = __builtin_popcount(tm);
-        if (nt < 2 || interior.size() + (size_t)nt > 11) continue;
-        std::vector<i32> T;
-        for (u32 b = 0; b < nu; ++b)
-          if (tm & (1u << b)) T.push_back(shell_all[(size_t)b]);
-        if (!center_in_conv(c, pts, T)) continue;
-        std::sort(T.begin(), T.end());
-        u16 amask = 0;
-        for (size_t v = 0; v < T.size(); ++v) {
-          std::vector<i32> trest;
-          for (size_t w = 0; w < T.size(); ++w)
-            if (w != v) trest.push_back(T[w]);
-          const bool same_ball =
-              trest.size() >= 2 && center_in_conv(c, pts, trest);
-          if (!same_ball) amask |= (u16)(1u << v);
-        }
-        subj.push_back(SubjEvent{T, interior, lvl, amask});
-      }
+      std::vector<PlateauEvent> pevents;
+      expand_plateau(c, pts, interior, shell_all, 11, &pevents);
+      for (auto& pe : pevents)
+        subj.push_back(SubjEvent{pe.tpart, pe.ipart, lvl, pe.active_mask});
     };
     // q2 : toutes les paires (le milieu est toujours un support valide).
     for (i32 i = 0; i < m; ++i)

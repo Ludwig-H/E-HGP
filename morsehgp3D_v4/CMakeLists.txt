@@ -192,6 +192,22 @@ mhgp4_expect_code(mhgp4_forest_mutant_drop_shell 4 mhgp4_forest_selftest
 mhgp4_expect_code(mhgp4_forest_mutant_attach 4 mhgp4_forest_selftest
     "--inject=attach-prebatch")
 
+# La foret sur FLUX REELS : WSPD -> RLE par BallKey inter-lanes -> un census
+# par cle (SpherePlateau d'echelle) -> expansion -> fold. Le juge borne
+# refait la meme semantique en brut (completude WSPD + census d'arbre + RLE
+# juges) ; mutants rle-drop et census-nonstrict tues.
+add_executable(mhgp4_forest_probe bench/forest_probe.cpp)
+mhgp4_expect_code(mhgp4_forest_probe_judge_uniform 0 mhgp4_forest_probe
+    "--family=uniform --n=120 --s=8 --seed=3 --judge --min-balls=100 --min-fusions=100")
+mhgp4_expect_code(mhgp4_forest_probe_judge_clusters 0 mhgp4_forest_probe
+    "--family=eight_clusters --n=120 --s=8 --seed=3 --judge --min-balls=100 --min-fusions=100")
+mhgp4_expect_code(mhgp4_forest_probe_smoke_n400 0 mhgp4_forest_probe
+    "--family=uniform --n=400 --s=8 --seed=3 --min-balls=1000 --min-fusions=1000")
+mhgp4_expect_code(mhgp4_forest_probe_mutant_rle 4 mhgp4_forest_probe
+    "--family=uniform --n=120 --s=8 --seed=3 --judge --inject=rle-drop")
+mhgp4_expect_code(mhgp4_forest_probe_mutant_census 4 mhgp4_forest_probe
+    "--family=uniform --n=120 --s=8 --seed=3 --judge --inject=census-nonstrict")
+
 # La lane q2 productrice : W_2 est la boule diametrale ouverte, le census
 # est une requete de cover a coefficient 1. Juge brut toutes-paires sur
 # records complets ; fixture a coquille exacte gravee et mutant sign-le
