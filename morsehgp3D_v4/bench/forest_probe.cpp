@@ -36,6 +36,7 @@
 
 #include "../src/cloud/families.hpp"
 #include "../src/forest/forest.hpp"
+#include "../src/forest/render.hpp"
 #include "../src/forest/sphere_plateau.hpp"
 #include "../src/pipeline/ball_stream.hpp"
 
@@ -507,8 +508,9 @@ int main(int argc, char** argv) {
                                     : ix.point_id((i32)u);
   u64 sev[11] = {};
   ForestResult sres[11];
+  std::vector<std::vector<ForestEvent>> sevk;
   {
-    const int rc = forests_from_balls(balls, ix.upos, pid_of, sev, sres);
+    const int rc = forests_from_balls(balls, ix.upos, pid_of, sev, sres, &sevk);
     if (rc) return rc;
   }
   const auto t3 = std::chrono::steady_clock::now();
@@ -627,8 +629,9 @@ int main(int argc, char** argv) {
     }
     u64 jev[11] = {};
     ForestResult jres[11];
+    std::vector<std::vector<ForestEvent>> jevk;
     {
-      const int rc = forests_from_balls(jballs, ix.upos, jpid, jev, jres);
+      const int rc = forests_from_balls(jballs, ix.upos, jpid, jev, jres, &jevk);
       if (rc) return rc;
     }
     for (int K = 1; K <= 10; ++K) {
@@ -646,8 +649,23 @@ int main(int argc, char** argv) {
         std::sort(jd.begin(), jd.end());
         return sd == jd;
       }();
+      // RENDU § 9.1 : F_K^render et multiplicites d'incidence, flux WSPD
+      // contre brut (le juge paye ses propres evenements).
+      const bool same_render = [&] {
+        const RenderResult a = build_render(sevk[(size_t)K]);
+        const RenderResult b = build_render(jevk[(size_t)K]);
+        if (a.facets.size() != b.facets.size() ||
+            a.incidences != b.incidences ||
+            a.batch_levels.size() != b.batch_levels.size())
+          return false;
+        for (size_t i = 0; i < a.facets.size(); ++i)
+          if (!(a.facets[i].facet == b.facets[i].facet) ||
+              a.facets[i].per_batch != b.facets[i].per_batch)
+            return false;
+        return true;
+      }();
       if (sev[K] != jev[K] || sres[K].batches != jres[K].batches ||
-          !same_nodes || !same_deltas ||
+          !same_nodes || !same_deltas || !same_render ||
           sres[K].new_attachments != jres[K].new_attachments ||
           sres[K].final_partition != jres[K].final_partition) {
         std::fprintf(stderr, "DESACCORD foret K=%d (flux WSPD contre brut)\n", K);

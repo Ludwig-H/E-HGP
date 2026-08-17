@@ -37,6 +37,7 @@
 #include "../src/events/q2_event.hpp"
 #include "../src/events/q4_event.hpp"
 #include "../src/forest/forest.hpp"
+#include "../src/forest/render.hpp"
 #include "../src/forest/sphere_plateau.hpp"
 
 namespace {
@@ -269,7 +270,9 @@ FacetKey jfacet(const std::vector<i32>& pts, size_t drop) {
 int main(int argc, char** argv) {
   using namespace mhgp4;
   bool inj_binary = false, inj_repr = false, inj_drop_shell = false,
-       inj_attach_prebatch = false, inj_drop_nonmerge = false;
+       inj_attach_prebatch = false, inj_drop_nonmerge = false,
+       inj_render_active = false, inj_render_collapse = false,
+       inj_birth_events = false;
   for (int i = 1; i < argc; ++i) {
     if (std::strcmp(argv[i], "--inject=binary-ties") == 0) inj_binary = true;
     else if (std::strcmp(argv[i], "--inject=repr-ties") == 0) inj_repr = true;
@@ -279,9 +282,17 @@ int main(int argc, char** argv) {
       inj_attach_prebatch = true;
     else if (std::strcmp(argv[i], "--inject=drop-nonmerge") == 0)
       inj_drop_nonmerge = true;
+    else if (std::strcmp(argv[i], "--inject=render-active-only") == 0)
+      inj_render_active = true;
+    else if (std::strcmp(argv[i], "--inject=render-collapse-mult") == 0)
+      inj_render_collapse = true;
+    else if (std::strcmp(argv[i], "--inject=birth-from-events") == 0)
+      inj_birth_events = true;
   }
   const bool mutant = inj_binary || inj_repr || inj_drop_shell ||
-                      inj_attach_prebatch || inj_drop_nonmerge;
+                      inj_attach_prebatch || inj_drop_nonmerge ||
+                      inj_render_active || inj_render_collapse ||
+                      inj_birth_events;
 
   std::vector<std::vector<P3>> clouds;
   // Fixture du plateau ternaire (K=1) : deux aretes de niveau 1 en un lot.
@@ -322,10 +333,11 @@ int main(int argc, char** argv) {
   clouds.push_back(make_family_cloud(CloudFamily::kEightClusters, 12,
                                      cloud_family_default_coord(CloudFamily::kEightClusters, 12), 3));
 
-  u64 total_events = 0, total_fusions = 0, plateaus_multi = 0;
+  u64 total_events = 0, total_fusions = 0, plateaus_multi = 0,
+      total_incidences = 0;
   bool collinear_checked = false, tie_checked = false;
   bool square_checked = false, attach_checked = false,
-       growth_checked = false;
+       growth_checked = false, render_checked = false, birth_checked = false;
   for (size_t ci = 0; ci < clouds.size(); ++ci) {
     const std::vector<P3>& pts = clouds[ci];
     const int m = (int)pts.size();
@@ -565,6 +577,9 @@ int main(int argc, char** argv) {
         return true;
       };
       JForest jf;
+      // RENDU du juge (§ 9.1) : incidences facette -> (lot, multiplicite)
+      // accumulees depuis SES simplexes — chaque K-simplexe incident compte.
+      std::map<FacetKey, std::map<u64, u64>> jrender;
       size_t e0 = 0;
       while (e0 < jev.size()) {
         size_t e1 = e0 + 1;
@@ -612,6 +627,8 @@ int main(int argc, char** argv) {
             pre[root] = 0;
             jpre_canon.emplace(root, jcanon[(size_t)root]);
           }
+        for (auto& evf : ev_facets)
+          for (const FacetKey& f : evf) ++jrender[f][jf.batches];
         for (auto& evf : ev_facets)
           for (size_t w = 1; w < evf.size(); ++w)
             junite(jroles[evf[0]].id, jroles[evf[w]].id);
@@ -713,6 +730,74 @@ int main(int argc, char** argv) {
       for (const ForestNode& nd : sr.nodes)
         if (nd.absorbed >= 3) ++plateaus_multi;
 
+      // ---- RENDU § 9.1 : F_K^render + multiplicites, sujet contre juge.
+      const RenderResult srn =
+          build_render(sevents, inj_render_active, inj_render_collapse);
+      total_incidences += srn.incidences;
+      {
+        // Coherence interne : memes lots que la foret (meme tri stable).
+        bool ok = srn.batch_levels.size() == sr.batch_levels.size();
+        for (size_t b = 0; ok && b < srn.batch_levels.size(); ++b)
+          ok = same_level_representation(srn.batch_levels[b],
+                                         sr.batch_levels[b]);
+        if (!ok) {
+          fail("lots du rendu contre lots de la foret", K);
+          continue;
+        }
+      }
+      {
+        std::map<FacetKey, std::map<u64, u64>> srmap;
+        for (const FacetIncidences& fi : srn.facets) {
+          auto& mm = srmap[fi.facet];
+          for (const auto& bm : fi.per_batch) mm[bm.first] = bm.second;
+        }
+        if (srmap != jrender) {
+          fail("rendu (F_K^render, multiplicites)", K);
+          continue;
+        }
+      }
+      // ---- Table de naissance des facettes : rho(facette)² par MINIBOULE
+      // EXACTE de production, jugee par jminiball (voie OBig distincte).
+      // Jamais « la facette est un evenement d'ordre inferieur » : le
+      // mutant birth-from-events (niveau de la premiere incidence) meurt
+      // sur toute facette active nee strictement avant (cotes du carre).
+      {
+        bool ok = true;
+        for (const FacetIncidences& fi : srn.facets) {
+          if (fi.facet.k < 2) continue;  // facette-point : rho = 0, hors table
+          P3 fp[10];
+          for (int t = 0; t < (int)fi.facet.k; ++t)
+            fp[t] = pts[(size_t)fi.facet.p[(size_t)t]];
+          Q4Level bl{};
+          if (inj_birth_events) {
+            bl = srn.batch_levels[fi.per_batch[0].first];  // MUTANT
+          } else if (!facet_birth_level(fp, (int)fi.facet.k, &bl)) {
+            std::fprintf(stderr, "INVARIANT : miniboule de facette absente\n");
+            return 3;
+          }
+          std::vector<i32> fsub;
+          for (int t = 0; t < (int)fi.facet.k; ++t)
+            fsub.push_back((i32)fi.facet.p[(size_t)t]);
+          JBall fb;
+          std::vector<i32> fsup;
+          if (!jminiball(pts, fsub, &fb, &fsup)) return 3;
+          OB numo;
+          numo.w[0] = bl.num[0];
+          numo.w[1] = bl.num[1];
+          numo.w[2] = bl.num[2];
+          const OB lhs = numo * (ob(fb.cden) * ob(fb.cden));
+          const OB rhs = jdist2(fb, fb.ref) * ob(bl.den);
+          if (cmp(lhs, rhs) != 0) {
+            ok = false;
+            break;
+          }
+        }
+        if (!ok) {
+          fail("niveaux de naissance des facettes", K);
+          continue;
+        }
+      }
+
       // Fixtures gravees.
       if (ci == 0 && K == 1 && !mutant) {
         if (sr.batches < 1 || sr.nodes.size() != 1 || sr.nodes[0].absorbed != 3) {
@@ -808,8 +893,55 @@ int main(int argc, char** argv) {
               std::fprintf(stderr, "FIXTURE carre : naissance K=3 attendue\n");
               return 3;
             }
+            // render_keeps_batch_born_facets (audit « rendu ») : les quatre
+            // triangles, tous attachements nes au lot, sont membres PLEINS
+            // de F_3^render — un rendu active-only serait vide ici.
+            if (srn.facets.size() != 4 || srn.incidences != 4) {
+              std::fprintf(stderr, "FIXTURE carre : F_3^render = 4 triangles\n");
+              return 3;
+            }
           }
-          if (K == 2) square_checked = true;
+          if (K == 2) {
+            // plateau_render_multiplicity (audit « rendu ») : les quatre
+            // triangles rectangles donnent EXACTEMENT 2 incidences a chaque
+            // cote ET chaque diagonale (6 facettes, 12 incidences, un lot).
+            bool rok = srn.facets.size() == 6 && srn.incidences == 12 &&
+                       srn.batch_levels.size() == 1;
+            for (const FacetIncidences& fi : srn.facets)
+              rok = rok && fi.per_batch.size() == 1 &&
+                    fi.per_batch[0].second == 2;
+            if (!rok) {
+              std::fprintf(stderr,
+                           "FIXTURE carre : multiplicites K=2 (6 aretes × 2)\n");
+              return 3;
+            }
+            render_checked = true;
+            // Naissances gravees : cote {0,1} a rho² = 50 (D²=200), diagonale
+            // {0,2} a rho² = 100 (D²=400) — PAS le niveau d'incidence (100
+            // pour les deux) : ce que le mutant birth-from-events confond.
+            FacetKey side{}, diag{};
+            side.k = 2;
+            side.p[0] = 0;
+            side.p[1] = 1;
+            diag.k = 2;
+            diag.p[0] = 0;
+            diag.p[1] = 2;
+            P3 sp[2] = {pts[0], pts[1]}, dp[2] = {pts[0], pts[2]};
+            Q4Level bs{}, bd{};
+            if (!facet_birth_level(sp, 2, &bs) ||
+                !facet_birth_level(dp, 2, &bd) ||
+                compare_exact_level(
+                    bs, promote_q3_level(q2_exact_level(200))) != 0 ||
+                compare_exact_level(
+                    bd, promote_q3_level(q2_exact_level(400))) != 0) {
+              std::fprintf(stderr,
+                           "FIXTURE carre : naissances 50 (cote) / 100 "
+                           "(diagonale) attendues\n");
+              return 3;
+            }
+            birth_checked = true;
+            square_checked = true;
+          }
         }
       }
     }
@@ -821,9 +953,10 @@ int main(int argc, char** argv) {
   }
   std::printf(
       "forest_selftest : %llu evenements, %llu fusions, "
-      "plateaux_multi=%llu, desaccords=%d\n",
+      "plateaux_multi=%llu, incidences=%llu, desaccords=%d\n",
       (unsigned long long)total_events, (unsigned long long)total_fusions,
-      (unsigned long long)plateaus_multi, g_fail);
+      (unsigned long long)plateaus_multi, (unsigned long long)total_incidences,
+      g_fail);
   if (mutant) {
     if (g_fail > 0) {
       std::printf("MUTANT TUE\n");
@@ -834,8 +967,9 @@ int main(int argc, char** argv) {
   }
   if (g_fail > 0) return 1;
   if (!collinear_checked || !tie_checked || !square_checked ||
-      !attach_checked || !growth_checked || plateaus_multi == 0 ||
-      total_fusions == 0) {
+      !attach_checked || !growth_checked || !render_checked ||
+      !birth_checked || plateaus_multi == 0 || total_fusions == 0 ||
+      total_incidences == 0) {
     std::fprintf(stderr, "PLANCHER : fixtures ou fusions manquantes\n");
     return 3;
   }

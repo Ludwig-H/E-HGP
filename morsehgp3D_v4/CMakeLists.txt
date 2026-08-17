@@ -196,6 +196,18 @@ mhgp4_expect_code(mhgp4_forest_mutant_attach 4 mhgp4_forest_selftest
 # retablit le squelette de fusions (deltas non-merge supprimes) meurt.
 mhgp4_expect_code(mhgp4_forest_mutant_nonmerge 4 mhgp4_forest_selftest
     "--inject=drop-nonmerge")
+# Audit « rendu § 9.1 » : F_K^render = TOUTES les facettes (nees au lot
+# comprises), multiplicite = CHAQUE K-simplexe incident, naissance d'une
+# facette = sa miniboule exacte. Trois mutants : rendu active-only (vide a
+# la naissance du carre K=3), multiplicites ecrasees a 1 (compression par
+# arbre couvrant — fausse pour S_tau), naissance lue sur la premiere
+# incidence (50 contre 100 sur les cotes du carre K=2).
+mhgp4_expect_code(mhgp4_forest_mutant_render_active 4 mhgp4_forest_selftest
+    "--inject=render-active-only")
+mhgp4_expect_code(mhgp4_forest_mutant_render_collapse 4 mhgp4_forest_selftest
+    "--inject=render-collapse-mult")
+mhgp4_expect_code(mhgp4_forest_mutant_birth_events 4 mhgp4_forest_selftest
+    "--inject=birth-from-events")
 
 # La foret sur FLUX REELS : WSPD -> RLE par BallKey inter-lanes -> un census
 # par cle (SpherePlateau d'echelle) -> expansion -> fold. Le juge borne

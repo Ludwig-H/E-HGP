@@ -687,6 +687,50 @@ rang — l'ancien code) meurt. L'ordre du tableau `support` d'un événement
 reste celui de `T` (aligné sur `active_mask`) ; `facet_minus` trie les
 `FacetKey` produites.
 
+### 5.6 Le rendu § 9.1 : `F_K^render`, multiplicités, naissances de
+facettes (audit « naissances, croissances et rendu »)
+
+Contrat gravé (§ 2.0) : `F_K^render` = TOUTES les facettes distinctes de
+tous les événements — les attachements nés au lot en sont membres pleins
+(le carré K=3 : quatre triangles, tous attachements ; un rendu
+active-only serait VIDE alors qu'un K-polyèdre vient de naître) ;
+`F_K^conn` = la compression suffisante pour la connectivité. La
+connectivité (`build_forest`) et le rendu (`build_render`) sont deux
+consommateurs distincts du même flux d'événements, aux macro-lots
+identiques (même tri stable, même égalité sémantique U320).
+
+**Multiplicités.** `S_tau` somme la contribution de CHAQUE K-simplexe
+incident : pour une boule `B`, `mult_B(tau)` est le nombre de
+`T ⊆ U_B` avec `|T| = K+1−|I_B|`, `c ∈ conv(T)` et `tau` facette de
+`I_B ∪ T` ; la contribution du plateau est
+`Delta S_tau = mult_B(tau) · psi(r_B)`. Une compression par arbre
+couvrant est exacte pour `F_K^conn` mais FAUSSE pour le § 9.1 (mutant
+`render-collapse-mult`). Le flux de plateaux énumère déjà chaque
+simplexe une fois : le rendu conserve l'objet symbolique
+`facette -> (lot, multiplicité)` dont tout `psi` décroissant se déduit
+en aval (`S_tau`, `T_x`, `m_tau`, votes — Prop. 7). Fixture gravée
+`plateau_render_multiplicity` : sur le carré K=2, les quatre triangles
+rectangles donnent EXACTEMENT 2 incidences à chaque côté et chaque
+diagonale (6 facettes, 12 incidences, un lot).
+
+**Naissances de facettes.** Le niveau de naissance d'une facette ne se
+résume PAS au bit actif ni au niveau de sa première incidence : table
+`FacetKey -> rho(facette)²` par MINIBOULE EXACTE de ses `<= 10` points
+(`facet_birth_level`) — ne jamais supposer qu'une facette est elle-même
+un événement de Gabriel de l'ordre inférieur. Théorème utilisé : la
+miniboule a un support de 2 à 4 points dont elle est la boule
+circonscrite, et toute candidate CONTENANTE a un niveau supérieur ou
+égal — le minimum sur les candidates contenantes suffit, sans test de
+convexité. Les candidates énumérées la couvrent toujours : paires
+(diamétrales, toutes) ; triplets STRICTEMENT aigus seulement (un support
+rectangle a sa circonscrite égale à la diamétrale de l'hypoténuse,
+couverte par la paire ; un obtus n'est jamais support) ; quadruplets non
+coplanaires (un support coplanaire cocirculaire est couvert par un
+triplet aigu ou une paire). Fixture gravée : côté du carré à
+`rho² = 50`, diagonale à `100` — le mutant `birth-from-events` (niveau
+de la première incidence : 100 pour les deux) meurt. Le juge recoupe
+chaque naissance par `jminiball` (voie OBig distincte).
+
 Statut : `derive_v4` sur le squelette `theoreme_manuscrit` (Déf. 29,
 Prop. 6, Théorème 5) ; la spécification opérationnelle (clés, lanes,
 statuts transactionnels) est dans `ARCHITECTURE.md`.
