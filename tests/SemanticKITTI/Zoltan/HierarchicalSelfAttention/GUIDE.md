@@ -1,262 +1,221 @@
 # Guide du projet
 
-## 1. Idée en une phrase
+## 1. L'idée en une phrase
 
-Le réseau ne segmente pas directement un nuage de points. Il segmente une **structure polyédrique multi-échelle** construite hors gradient, puis reporte ses prédictions vers les points par une application linéaire conservant la masse.
+Au lieu de demander à un réseau de reconstruire mentalement des objets à partir d'un échantillon LiDAR irrégulier, on lui fournit directement une hiérarchie de **surfaces polyédriques observées**, puis on apprend comment ces surfaces se ressemblent, croissent et fusionnent.
+
+Le changement proposé est donc celui de l'unité de calcul :
 
 ```text
-scan LiDAR
-   │
-   ├─ prétraitement géométrique
-   │      ├─ facettes élémentaires
-   │      ├─ graphe dual / incidences
-   │      ├─ arbre complet de fusion
-   │      └─ descripteurs fusionnables
-   │
-   └─ PolyTreeFormer
-          ├─ attention locale entre facettes
-          ├─ attention parent–enfants
-          ├─ contexte descendant
-          └─ logits par facette
-                    │
-                    └─ reprojection pondérée → logits par point
+points / voxels / superpoints
+          ↓
+polyèdres HGP porteurs d'une surface explicite
 ```
 
-Les coordonnées des points ne sont pas introduites sous forme de tokens. Elles ne servent qu'à calculer les objets géométriques, leurs attributs et la reprojection finale.
+Une facette est un élément de discrétisation. Un polyèdre HGP est le recollement de facettes qui forme l'objet géométrique appris. La hiérarchie décrit l'évolution de ces objets lorsque le niveau de densité varie.
 
-## 2. Pourquoi ce choix peut être utile au LiDAR
+## 2. Pourquoi cela peut être supérieur aux points
 
-L'échantillonnage d'une même surface change fortement avec la portée. Un réseau point-wise doit apprendre à reconnaître qu'un objet dense à courte distance et le même objet très clairsemé au loin représentent la même structure.
+À grande portée, une voiture fournit moins de retours, des trous différents et des facettes plus grossières. Un modèle point-wise doit apprendre simultanément :
 
-Dans le modèle idéal où la densité observée est multipliée par un facteur positif `q`, les ensembles de niveau vérifient
+- la géométrie de la voiture ;
+- le motif du capteur ;
+- la densité d'échantillonnage ;
+- les occultations ;
+- la sémantique.
+
+La construction HGP vise à factoriser une partie de ce travail :
+
+```text
+échantillonnage variable
+      → surface polyédrique
+      → code de taille fixe
+```
+
+Le code de forme est normalisé ; la taille physique, la pose et la qualité d'acquisition restent disponibles dans des canaux séparés. Le modèle n'est donc pas aveugle au monde métrique, simplement moins dépendant du nombre accidentel de retours.
+
+## 3. Ce qu'un polyèdre doit contenir
+
+Pour un nœud `v`, le réseau reçoit conceptuellement :
+
+```text
+Σ_v       surface = recollement de facettes
+λ_v       niveau de densité
+m_v       masse / aire / nombre de retours
+p(v)      parent dans la hiérarchie
+ch(v)     enfants lors de la fusion
+N(v)      voisins spatiaux latéraux
+A_v       attributs capteur et confiance
+```
+
+Le polyèdre peut être ouvert, non convexe et partiellement occulté. Rien n'autorise à le remplacer silencieusement par son enveloppe convexe.
+
+## 4. Pourquoi une simple fonction radiale ne suffit pas toujours
+
+Depuis un centre `c`, une direction peut :
+
+- ne rencontrer aucune facette ;
+- rencontrer une seule couche ;
+- rencontrer plusieurs couches.
+
+Une fonction `ρ(u)` ne décrit que le deuxième cas. Elle reste une bonne baseline lorsque la surface est quasi étoilée, mais pas une définition universelle.
+
+La représentation principale commence par la **mesure surfacique attribuée normalisée** dans un repère propre au polyèdre. Elle est ensuite projetée dans une base douce direction–rayon, c'est-à-dire sur
 
 ```math
-\{\rho_q \geq \lambda\}=\{\rho \geq \lambda/q\}.
+\mathbb S^2\times\mathbb R.
 ```
 
-L'arbre des composantes reste donc identique et seuls les niveaux sont reparamétrés. En coordonnées logarithmiques, cette reparamétrisation devient une translation. Les quantités
+La mesure conserve toute la surface, sans sélectionner une couche par direction. Sa discrétisation accepte donc naturellement les trous et les intersections multiples, puis devient un tenseur fixe encodé par un réseau sphérique/radial.
 
-```math
-\Delta\log\lambda,
-\qquad
-\log\lambda_{\mathrm{mort}}-\log\lambda_{\mathrm{naissance}},
-\qquad
-\log(m_p/m_v)
-```
+Voir [REPRESENTATION_POLYEDRIQUE.md](REPRESENTATION_POLYEDRIQUE.md).
 
-sont alors naturelles.
+## 5. Les cinq informations à ne pas confondre
 
-Le LiDAR réel ne suit pas exactement ce modèle : la dilution varie avec la portée, l'angle d'incidence, l'occultation, les anneaux et la réflectivité. Le projet ne suppose donc pas l'invariance ; il la **mesure** et entraîne explicitement le modèle à la conserver lorsque la sémantique n'a pas changé.
+### Forme normalisée
 
-## 3. Ce que signifie « polyèdre-only »
+Ce qui doit rester stable sous translation, changement d'échelle et rééchantillonnage :
 
-### Autorisé
+- mesure surfacique normalisée et sa projection sphéro-radiale ;
+- normales et bords normalisés ;
+- connectivité ou résumé spectral ;
+- confiance géométrique.
 
-- utiliser les points hors réseau pour construire les facettes et les descripteurs ;
-- calculer des statistiques de rémission ou de géométrie sur les sommets d'une facette ;
-- calculer la loss officielle après reprojection vers les points ;
-- utiliser les identifiants de points survivants pour apparier deux vues synthétiques en pré-entraînement.
+### Grandeurs physiques
 
-### Interdit dans le modèle principal
-
-- un backbone PointNet, sparse convolution ou Point Transformer ;
-- un token par point ;
-- un voisinage point-wise appris en parallèle ;
-- des features point-wise cachées dans les tokens de facettes ;
-- une correction finale par un réseau sur les points.
-
-Cette séparation doit rester testable dans le code. Une variante hybride pourra servir de plafond, mais elle ne doit pas être confondue avec la proposition principale.
-
-## 4. Unités apprises
-
-### 4.1 Feuilles
-
-Les feuilles sont les facettes élémentaires effectivement sérialisées. Elles forment l'unité minimale de prédiction. Chaque feuille reçoit :
-
-- une géométrie intrinsèque ;
-- une pose dans le repère capteur et le repère gravitaire ;
-- des statistiques d'acquisition ;
-- un niveau de filtration ;
-- ses incidences et voisins dans le graphe dual.
-
-### 4.2 Nœuds internes
-
-Chaque nœud interne représente l'union des feuilles de sa branche avant un événement de fusion. Ses attributs ne sont pas recalculés par une boucle sur les points pendant l'entraînement. Ils sont obtenus par agrégation exacte ou contrôlée :
-
-- `max` pour les fonctions support ;
-- somme pour masses, moments et histogrammes ;
-- composition pour les statistiques de filtration ;
-- union d'incidences sous forme sparse.
-
-### 4.3 Points de sortie
-
-Une facette `τ` prédit une distribution `p_τ`. Pour un point `x`,
-
-```math
-p_x=\sum_{\tau\ni x} w_{x\tau}p_\tau,
-\qquad
-w_{x\tau}\geq0,
-\qquad
-\sum_{\tau\ni x}w_{x\tau}=1.
-```
-
-La sortie demeure point-wise, sans réintroduire de token point.
-
-## 5. Les quatre familles de canaux
-
-Le modèle ne doit pas mélanger une invariance souhaitée avec une suppression aveugle de l'information.
-
-### A. Forme normalisée
-
-But : reconnaître une structure malgré une variation globale d'échelle ou de densité.
-
-- Gram normalisé de la cellule ;
-- rapports de valeurs propres ;
-- support directionnel normalisé ;
-- quantiles ou CDF de projections ;
-- moments centraux normalisés ;
-- masques de dégénérescence.
-
-Le support seul ne suffit pas : il ne voit que l'enveloppe convexe. Les statistiques de masse projetée et les incidences conservent l'information intérieure et non convexe.
-
-### B. Grandeurs physiques
-
-But : distinguer des objets de même forme mais de taille ou de position différentes.
+Ce qui ne doit pas être normalisé hors d'existence :
 
 - dimensions métriques ;
-- hauteur absolue et hauteur au sol ;
-- centre dans le repère ego ;
-- orientation par rapport à la gravité ;
-- portée et direction radiale.
+- centre, hauteur et orientation ;
+- aire et épaisseur ;
+- position dans la scène.
 
-Ces canaux ne sont pas normalisés avec la forme.
+### Filtration
 
-### C. Filtration et croissance
+Ce qui décrit l'espace d'échelle :
 
-But : encoder la trajectoire multi-échelle.
-
+- naissance, mort et persistance ;
 - écarts de niveaux logarithmiques ;
-- persistance ;
-- rang ou quantile du niveau dans le scan ;
-- rapports de masse parent–enfant ;
-- type et degré de fusion ;
-- âge relatif dans la branche.
+- rang ou quantile du niveau ;
+- gain de masse ;
+- degré et type de fusion.
 
-Le niveau brut peut être conservé comme canal diagnostique, mais il ne doit pas être le seul encodage.
+### Acquisition
 
-### D. Acquisition
+Ce qui décrit la qualité de la mesure :
 
-But : exploiter sans subir le capteur.
+- portée et incidence ;
+- anneaux et couverture angulaire ;
+- rémission ;
+- trous, occultation et confiance.
 
-- rémission : moyenne, dispersion et quantiles ;
-- nombre et étendue des anneaux ;
-- couverture angulaire ;
-- fraction de sommets ou cellules manquants ;
-- angle d'incidence estimé ;
-- masque de disponibilité de chaque statistique.
+### Sémantique apprise
 
-Ces canaux sont soumis à dropout et à des tests de raccourci. Un modèle qui prédit surtout la portée ou l'anneau n'a pas appris l'invariance recherchée.
+Ce qui doit transférer entre observations :
 
-## 6. Quel Transformer utiliser
+- identité géométrique ;
+- partie d'objet ;
+- classe ;
+- frontière et relation fonctionnelle.
 
-### Premier porteur : SPT-nano adapté
+Le pré-entraînement aligne principalement le sous-espace sémantique et de forme. Il ne force pas la taille, la pose et les attributs capteur à devenir identiques.
 
-Superpoint Transformer fournit déjà :
+## 6. Architecture en trois échelles
 
-- un encodeur-décodeur multi-niveaux ;
-- des graphes d'adjacence à chaque niveau ;
-- des arêtes verticales parent–enfant ;
-- des encodages relatifs sur clés, requêtes et valeurs ;
-- un mode `nano` sans étage point-wise.
+### À l'intérieur d'un polyèdre
 
-C'est le meilleur point de départ pour tester rapidement la faisabilité. Le partitionnement SPT est remplacé par la hiérarchie fournie ; les descripteurs SPT sont remplacés par les canaux définis ici ; la sortie est portée par les facettes.
+Un `SurfaceEncoder` lit la projection sphéro-radiale de la mesure de surface et produit un ou quelques tokens. Une petite branche de graphe de facettes conserve explicitement la connectivité et les bords ; son poids est audité à budget égal.
 
-### Modèle cible : attention de famille sur l'arbre complet
+### Le long d'une branche
 
-Une fois le prototype validé, le modèle doit consommer tous les événements de fusion, pas seulement trois coupes arbitraires. Chaque nœud échange avec :
+Un même objet HGP évolue avec le niveau de densité. Le `BranchEncoder` traite la suite de ses états en utilisant les vrais écarts de niveau, et non de simples indices `0,1,2,3`.
 
-- ses enfants ;
-- son parent ;
-- éventuellement ses frères par une attention de set ;
-- quelques voisins géométriques latéraux au même niveau.
+### Aux fusions et dans la scène
 
-Ce schéma reprend l'idée sparse de Sequoia. Il est linéaire dans le nombre d'arêtes si l'attention entre frères n'est pas quadratique sur les gros événements.
+Un `MergeEventEncoder` combine les enfants comme un ensemble. Des arêtes latérales relient les polyèdres voisins qui ne sont pas encore réunis dans l'arbre. Quelques latents globaux peuvent apporter le contexte de scène si l'arbre seul crée un goulot d'étranglement.
 
-### HSA : opérateur comparatif
-
-HSA offre une dérivation mathématique propre de l'attention sous contrainte hiérarchique et un algorithme dynamique. Il devient pertinent une fois établis :
-
-1. une bonne tokenisation ;
-2. des canaux utiles ;
-3. un gain provenant réellement de l'arbre.
-
-Il n'est pas la baseline initiale, car il n'existe pas encore de validation 3D comparable et son coût dépend du carré du branchement maximal.
-
-### Encodeur d'incidences complet : extension
-
-Si le graphe dual perd une information mesurable, une couche de type AllSetTransformer peut traiter les incidences sommet–facette–coface comme des applications multiensemble. Cette extension est reportée : elle augmente fortement le coût et complique l'attribution du gain.
-
-## 7. Comment entraîner le modèle
-
-### Supervision directe
-
-Le réseau prédit des logits par facette. La loss principale est calculée après reprojection vers les points. Des cibles molles par facette et par nœud fournissent une supervision auxiliaire sans imposer un label majoritaire faux aux régions mixtes.
-
-### Pré-entraînement de portée
-
-Une vue enseignante utilise le scan complet. Une vue étudiante est produite par une dégradation LiDAR réaliste : réduction d'anneaux, thinning angulaire et radial, occultation par secteurs, point drop et bruit radiométrique. La hiérarchie est reconstruite indépendamment sur les deux vues.
-
-Le réseau étudiant prédit les représentations des branches appariées de l'enseignant. La supervision ne porte que sur des éléments observables par l'étudiant, selon le principe qui s'est montré décisif dans DOS ; aucun token masqué ne révèle sa position.
-
-Les objectifs initiaux sont :
-
-- prédiction latente des branches appariées ;
-- prédiction des écarts de fusion et de la persistance ;
-- cohérence parent–enfants ;
-- régularisation anti-effondrement.
-
-Le masquage porte sur des sous-arbres ou secteurs angulaires, pas sur des cellules indépendantes dispersées au hasard.
-
-## 8. Ce qui doit être démontré avant de viser le classement
-
-1. **Résolution.** La représentation par facettes doit avoir un oracle point-wise très supérieur au score visé.
-2. **Stabilité.** La hiérarchie doit mieux résister au thinning que les contrôles.
-3. **Apprenabilité.** Un modèle sans tokens points doit atteindre une performance raisonnablement proche d'un backbone point-wise.
-4. **Spécificité.** La hiérarchie réelle doit battre un arbre aléatoire, un octree et HDBSCAN à budget égal.
-5. **Utilité du niveau.** Les écarts de filtration doivent apporter plus qu'une simple topologie d'arbre.
-6. **Transfert.** L'effet doit survivre à un second capteur ou dataset.
-
-Une réussite sur le seul score SemanticKITTI ne suffit pas à démontrer l'invariance. Inversement, une belle stabilité d'arbre sans performance aval ne suffit pas à publier une méthode de segmentation. Il faut les deux, cette exigence absurde que les idées soient à la fois vraies et utiles.
-
-## 9. Configuration minimale recommandée
-
-```yaml
-model:
-  leaf_dim: 128
-  hidden_dim: 192
-  num_levels: 4
-  local_blocks: 2
-  hierarchy_blocks_per_level: 2
-  heads: 6
-  ffn_ratio: 4
-  drop_path: 0.10
-
-channels:
-  gram: true
-  eig_ratios: true
-  support_directions: 42
-  projection_quantiles: 9
-  physical_scale: true
-  filtration_relative: true
-  acquisition: true
-
-training:
-  batch_by_token_budget: true
-  optimizer: adamw
-  base_lr: 0.0002
-  weight_decay: 0.05
-  warmup_epochs: 10
-  precision: bf16
+```text
+mesure + grille de chaque surface
+        │
+        ▼
+SurfaceEncoder partagé
+        │
+        ├─ BranchEncoder : évolution en densité
+        ├─ MergeEventEncoder : fusions
+        └─ LateralEncoder : voisinage spatial
+                    │
+                    ▼
+             tokens polyédriques
+                    │
+                    ▼
+       décodeur par facette → points
 ```
 
-Cette configuration est un point de départ. Les premières ablations doivent réduire le modèle, pas l'agrandir.
+## 7. Pourquoi les facettes restent utiles
+
+Les facettes ne sont plus l'unité principale du backbone, mais elles restent :
+
+- le support exact de la surface ;
+- le support des attributs locaux ;
+- la résolution de décodage ;
+- l'interface de reprojection vers les points.
+
+Pour une facette `τ`, le décodeur lit son embedding local et les embeddings des polyèdres ancêtres qui la contiennent. Il produit des logits par facette, puis
+
+```math
+\ell_x=\sum_{\tau\ni x}w_{x\tau}\ell_\tau.
+```
+
+Aucun token point n'est nécessaire dans le modèle principal.
+
+## 8. Comment le modèle apprend sans labels
+
+### Masquage surfacique
+
+Masquer des secteurs contigus dans la grille `S²×R` ou des groupes de facettes, puis prédire l'embedding teacher de la partie cachée.
+
+### Changement de densité
+
+Construire indépendamment :
+
+```text
+teacher : scan dense
+student : même scan avec capteur simulé plus pauvre
+```
+
+Apparier uniquement les polyèdres réellement correspondants et aligner leur code de forme.
+
+### Temps
+
+Les séquences LiDAR observent la même géométrie depuis plusieurs distances. Après compensation du mouvement, elles fournissent la supervision naturelle la plus forte pour l'invariance à la portée.
+
+### Images
+
+Dans une phase ultérieure, projeter les features d'un modèle visuel sur les facettes et les distiller vers les polyèdres. Les caméras restent absentes à l'inférence LiDAR-only.
+
+## 9. Comment savoir si l'idée est vraie
+
+Il faut répondre positivement à cinq questions distinctes :
+
+1. **Radialité.** Quelle part des surfaces est monocouche ?
+2. **Fidélité.** Peut-on reconstruire la surface depuis le code à budget raisonnable ?
+3. **Stabilité.** Le code change-t-il moins que les points et superpoints sous thinning et remeshing ?
+4. **Sémantique.** Un probe simple sépare-t-il les classes et les parties ?
+5. **Hiérarchie.** La trajectoire HGP apporte-t-elle plus que le meilleur polyèdre isolé ?
+
+Ces questions sont testées avant les campagnes coûteuses. La taille du modèle n'est pas une sixième métrique scientifique, malgré l'enthousiasme administratif qu'elle semble parfois susciter.
+
+## 10. Ce qui constituerait un modèle de fondation
+
+Un modèle entraîné sur SemanticKITTI seul reste un backbone spécialisé. Le statut fondation exige :
+
+- pré-entraînement sur plusieurs datasets et capteurs ;
+- linear probing et faible supervision ;
+- transfert sans modifier le tokenizer ;
+- plusieurs tâches : sémantique, instance, détection, complétion ou recherche ;
+- amélioration avec l'échelle des données ;
+- comparaison à des pré-entraînements point/voxel modernes.
+
+La nouveauté visée est alors précise :
+
+> apprendre des représentations générales sur un espace d'échelle de surfaces polyédriques explicites, plutôt que sur l'échantillon ponctuel fourni par un capteur particulier.
