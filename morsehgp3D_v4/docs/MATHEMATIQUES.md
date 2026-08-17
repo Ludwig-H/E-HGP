@@ -506,18 +506,30 @@ rendue comme suite de (multi)fusions de composantes avec niveaux. Le
 `K_max <= 10` du profil borne `d` par lane exactement comme les seuils
 `h_q = s_max − q + 1` (q2 : `K = d+1`, q3 : `d+2`, q4 : `d+3`).
 
-### 5.2 Bras actifs, attachements MESURÉS
+### 5.2 Rôles des facettes : actives contre attachements (audit « facettes
+nées dans le lot »)
 
-Les `q` **facettes actives** de σ sont `I ∪ (S∖{s})`, `s ∈ S`
-(`ρ` décroît strictement en retirant un point du support — Fait 12) ; les
-`d` facettes `σ∖{z}`, `z ∈ I`, naissent AU niveau `ρ(σ)` même. La piste
-v3/audit (« relier les actives par un chemin suffit, les autres
-n'apportent aucune fusion ») n'est PAS supposée : la v4 unionne les
-`K+1` facettes (chemin sur toutes — équivalent clique pour la
-connectivité, conforme au manuscrit) et COMPTE séparément les fusions
-apportées par un bras non actif (`attach_fusions`). L'invariant mesuré
-`attach_fusions = 0` est une porte : s'il casse un jour, la contradiction
-devient fixture et la piste est réfutée — jamais l'inverse.
+Une facette de σ est **active** ssi son rayon de naissance est STRICTEMENT
+inférieur à `ρ(σ)`. Règle exacte (plateaux compris) : pour `σ = I ∪ T`,
+retirer un intérieur `z ∈ I` garde la même miniboule — la facette naît AU
+niveau (**attachement**) ; retirer `v ∈ T` est actif ssi
+`c ∉ conv(T∖{v})` (sinon la boule est conservée et la facette naît au
+niveau aussi). Sous position générale (`T = S` support minimal) : les `q`
+retraits de support sont actifs (Fait 12), les `d` retraits d'intérieur
+des attachements.
+
+**Chronologie du dendrogramme** : les enfants d'un nœud de fusion sont
+les composantes présentes JUSTE AVANT le niveau — donc les racines des
+facettes `actives ∨ préexistantes` seulement. Une facette née dans le lot
+reste dans la fermeture union-find (elle appartient à la composante) mais
+n'est JAMAIS un enfant absorbé : compter autrement gonfle les arités et
+fabrique des nœuds fantômes alors que les partitions restent justes
+(contre-fixture `q2_one_interior_attachment` : `{(0,0,0), (4,0,0),
+(2,1,0)}`, K=2, nœud correct à 2 enfants, jamais 3). La v4 unionne les
+`K+1` facettes (équivalent clique, conforme à la Déf. 29) et MESURE deux
+invariants de cohérence du flux (portes : 0) : un attachement déjà vu
+dans un lot antérieur (`attach_violations`), une facette à la fois active
+et attachement au même niveau (`birth_violations`).
 
 ### 5.3 Macro-lots (contrat gravé, audit « lemme préfixe et niveau »)
 

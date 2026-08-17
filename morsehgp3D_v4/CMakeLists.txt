@@ -186,6 +186,11 @@ mhgp4_expect_code(mhgp4_forest_mutant_repr 4 mhgp4_forest_selftest
 # refus doit mourir sur la fixture square_cospherical_K2_plateau.
 mhgp4_expect_code(mhgp4_forest_mutant_drop_shell 4 mhgp4_forest_selftest
     "--inject=drop-shell-plateau")
+# Audit « facettes nees dans le lot » : les attachements nes au niveau ne
+# sont jamais des enfants du nœud — le mutant qui retablit l'ancienne
+# convention (tout le lot en pre-lot) gonfle les arites et meurt.
+mhgp4_expect_code(mhgp4_forest_mutant_attach 4 mhgp4_forest_selftest
+    "--inject=attach-prebatch")
 
 # La lane q2 productrice : W_2 est la boule diametrale ouverte, le census
 # est une requete de cover a coefficient 1. Juge brut toutes-paires sur

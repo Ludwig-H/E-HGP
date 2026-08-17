@@ -49,6 +49,12 @@ struct FacetKey {
 struct ForestEvent {
   u8 q = 0;  // |T| <= 11
   u8 d = 0;  // |I| <= 9
+  // Bit t : la facette σ∖{T[t]} est ACTIVE (nee STRICTEMENT avant le
+  // niveau — sa miniboule retrecit : c ∉ conv(T∖{v})). Un bit a 0 = la
+  // facette garde la meme boule et nait AU niveau (attachement). Les
+  // retraits d'interieur sont toujours des attachements. Regime regulier
+  // (T = support minimal) : tous les bits a 1.
+  u16 active_mask = 0;
   PointId support[11] = {};
   PointId interior[9] = {};
   Q4Level level{};
@@ -64,7 +70,9 @@ struct ForestNode {
 struct ForestResult {
   u64 facets = 0;             // sommets du K-graphe effectivement vus
   u64 fusions = 0;            // unions effectives (toutes facettes)
-  u64 attach_violations = 0;  // bras non actif ne dans un lot ANTERIEUR (: 0)
+  u64 attach_violations = 0;  // attachement DEJA vu dans un lot anterieur (: 0)
+  u64 birth_violations = 0;   // facette active ET attachement au meme lot (: 0)
+  u64 new_attachments = 0;    // facettes nees au lot, hors enfants du nœud
   u64 batches = 0;            // macro-lots traites
   std::vector<ForestNode> nodes;
   std::vector<u64> batch_of_event;  // lot de chaque evenement (ordre trie)
@@ -121,7 +129,8 @@ inline FacetKey facet_minus(const ForestEvent& e, int drop_support,
 inline ForestResult build_forest(
     std::vector<ForestEvent> events, bool mutant_binary_ties = false,
     bool mutant_repr_equality = false,
-    std::vector<std::map<FacetKey, FacetKey>>* snapshots = nullptr) {
+    std::vector<std::map<FacetKey, FacetKey>>* snapshots = nullptr,
+    bool mutant_attach_prebatch = false) {
   ForestResult r;
   std::stable_sort(events.begin(), events.end(),
                    [](const ForestEvent& x, const ForestEvent& y) {
@@ -129,13 +138,11 @@ inline ForestResult build_forest(
                    });
   detail_forest::UnionFind uf;
   std::map<FacetKey, i32> id_of;
-  std::vector<u64> born_in_batch;  // lot de creation de chaque facette
   const auto facet_id = [&](const FacetKey& f) {
     const auto it = id_of.find(f);
     if (it != id_of.end()) return it->second;
     const i32 v = uf.add();
     id_of.emplace(f, v);
-    born_in_batch.push_back(r.batches);
     ++r.facets;
     return v;
   };
@@ -144,7 +151,7 @@ inline ForestResult build_forest(
   while (e0 < events.size()) {
     // Macro-lot [e0, e1) : niveaux semantiquement egaux. MUTANTS : ties
     // binaires (lot force a un seul evenement) ou egalite de
-    // REPRESENTATION (le pieche grave par l'audit : deux representants
+    // REPRESENTATION (le piege grave par l'audit : deux representants
     // differents du meme rationnel brisent le lot a tort).
     size_t e1 = e0 + 1;
     while (e1 < events.size()) {
@@ -155,36 +162,57 @@ inline ForestResult build_forest(
       if (mutant_binary_ties || !same) break;
       ++e1;
     }
-    // Racines PRE-LOT de toutes les facettes touchees par le lot.
-    std::vector<std::pair<i32, i32>> arms;  // (racine pre-lot, id facette)
-    std::map<i32, u64> prebatch_roots;      // racine pre-lot -> compte
+    // ROLES agreges par facette sur TOUT le lot, AVANT toute creation d'ID
+    // (audit « facettes nees dans le lot ») : une facette n'est un enfant
+    // du nœud que si elle est ACTIVE (nee strictement avant le niveau) ou
+    // PREEXISTANTE ; les attachements nes au lot restent dans la fermeture
+    // union-find mais jamais dans `absorbed`.
+    struct Role {
+      bool existed = false, active = false, attach = false;
+      i32 id = -1;
+    };
+    std::map<FacetKey, Role> roles;
     for (size_t e = e0; e < e1; ++e) {
       r.batch_of_event[e] = r.batches;
       const ForestEvent& ev = events[e];
       for (int s = 0; s < (int)ev.q; ++s) {
-        const i32 v = facet_id(detail_forest::facet_minus(ev, s, -1));
-        arms.push_back({uf.find(v), v});
+        Role& ro = roles[detail_forest::facet_minus(ev, s, -1)];
+        if ((ev.active_mask >> s) & 1u) ro.active = true;
+        else ro.attach = true;
+      }
+      for (int z = 0; z < (int)ev.d; ++z)
+        roles[detail_forest::facet_minus(ev, -1, z)].attach = true;
+    }
+    for (auto& kv : roles) {
+      kv.second.existed = id_of.find(kv.first) != id_of.end();
+      // Invariants (audit § 3) : un attachement deja vu, ou une facette a
+      // la fois active et attachement au meme niveau, refutent la
+      // coherence des rayons de naissance du flux.
+      if (kv.second.attach && kv.second.existed) ++r.attach_violations;
+      if (kv.second.attach && kv.second.active) ++r.birth_violations;
+      if (kv.second.attach && !kv.second.existed && !kv.second.active)
+        ++r.new_attachments;
+    }
+    for (auto& kv : roles) kv.second.id = facet_id(kv.first);
+    // Racines PRE-LOT : actives (leur rayon de naissance est strictement
+    // inferieur, meme jamais rencontrees) OU preexistantes. MUTANT
+    // attach-prebatch : l'ancienne convention fausse (tout le lot).
+    std::map<i32, u64> prebatch_roots;
+    for (const auto& kv : roles)
+      if (mutant_attach_prebatch || kv.second.active || kv.second.existed)
+        prebatch_roots[uf.find(kv.second.id)] = 0;
+    // Unions du lot : chemin sur les K+1 facettes de chaque evenement.
+    for (size_t e = e0; e < e1; ++e) {
+      const ForestEvent& ev = events[e];
+      i32 first = -1;
+      for (int s = 0; s < (int)ev.q; ++s) {
+        const i32 v = roles[detail_forest::facet_minus(ev, s, -1)].id;
+        if (first < 0) first = v;
+        else if (uf.unite(first, v)) ++r.fusions;
       }
       for (int z = 0; z < (int)ev.d; ++z) {
-        const i32 v = facet_id(detail_forest::facet_minus(ev, -1, z));
-        // Invariant des rayons de naissance : une facette non active nait
-        // AU niveau du lot — la voir nee dans un lot ANTERIEUR refuterait
-        // la coherence des niveaux du flux.
-        if (born_in_batch[(size_t)v] < r.batches) ++r.attach_violations;
-        arms.push_back({uf.find(v), v});
-      }
-    }
-    for (auto& a : arms) prebatch_roots[a.first] = 0;
-    // Unions du lot : chemin sur les K+1 facettes de chaque evenement.
-    {
-      size_t t = 0;
-      for (size_t e = e0; e < e1; ++e) {
-        const ForestEvent& ev = events[e];
-        const size_t arms_n = (size_t)ev.q + ev.d;
-        const i32 first = arms[t].second;
-        for (size_t w = 1; w < arms_n; ++w)
-          if (uf.unite(first, arms[t + w].second)) ++r.fusions;
-        t += arms_n;
+        const i32 v = roles[detail_forest::facet_minus(ev, -1, z)].id;
+        if (uf.unite(first, v)) ++r.fusions;
       }
     }
     // Nœuds du lot : une racine finale ayant absorbe >= 2 racines pre-lot

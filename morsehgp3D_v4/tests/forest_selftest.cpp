@@ -191,6 +191,48 @@ bool jball4(const P3& p, const P3& q, const P3& r, const P3& s, JBall* out) {
   return true;
 }
 
+// Miniboule d'un sous-ensemble par recherche de support (propre au juge) :
+// plus petite boule valide contenant le sous-ensemble.
+bool jminiball(const std::vector<P3>& pts, const std::vector<i32>& sub,
+               JBall* out, std::vector<i32>* out_sup) {
+  JBall best{};
+  std::vector<i32> best_sup;
+  bool have = false;
+  const auto consider = [&](JBall& b, std::vector<i32> sup) {
+    for (const i32 u : sub) {
+      bool in_sup = false;
+      for (const i32 su : sup)
+        if (su == u) in_sup = true;
+      if (in_sup) continue;
+      if (jside(b, pts[(size_t)u]) > 0) return;  // hors boule : invalide
+    }
+    if (!have || jcmp_r2(b, best) < 0) {
+      best = b;
+      best_sup = sup;
+      have = true;
+    }
+  };
+  for (size_t s1 = 0; s1 < sub.size(); ++s1)
+    for (size_t s2 = s1 + 1; s2 < sub.size(); ++s2) {
+      JBall b;
+      if (jball2(pts[(size_t)sub[s1]], pts[(size_t)sub[s2]], &b))
+        consider(b, {sub[s1], sub[s2]});
+      for (size_t s3 = s2 + 1; s3 < sub.size(); ++s3) {
+        if (jball3(pts[(size_t)sub[s1]], pts[(size_t)sub[s2]],
+                   pts[(size_t)sub[s3]], &b))
+          consider(b, {sub[s1], sub[s2], sub[s3]});
+        for (size_t s4 = s3 + 1; s4 < sub.size(); ++s4)
+          if (jball4(pts[(size_t)sub[s1]], pts[(size_t)sub[s2]],
+                     pts[(size_t)sub[s3]], pts[(size_t)sub[s4]], &b))
+            consider(b, {sub[s1], sub[s2], sub[s3], sub[s4]});
+      }
+    }
+  if (!have) return false;
+  *out = best;
+  *out_sup = best_sup;
+  return true;
+}
+
 int g_fail = 0;
 void fail(const char* what, int K) {
   std::fprintf(stderr, "DESACCORD foret K=%d : %s\n", K, what);
@@ -207,6 +249,8 @@ struct JSimplex {
 
 struct JForest {
   u64 batches = 0;
+  u64 new_attachments = 0;
+  u64 attach_violations = 0;
   std::vector<std::map<FacetKey, FacetKey>> parts;  // partition apres chaque lot
   std::vector<std::pair<u64, u64>> nodes;           // (lot, absorbees)
   std::vector<const JSimplex*> batch_first;         // niveau de chaque lot
@@ -223,14 +267,18 @@ FacetKey jfacet(const std::vector<i32>& pts, size_t drop) {
 
 int main(int argc, char** argv) {
   using namespace mhgp4;
-  bool inj_binary = false, inj_repr = false, inj_drop_shell = false;
+  bool inj_binary = false, inj_repr = false, inj_drop_shell = false,
+       inj_attach_prebatch = false;
   for (int i = 1; i < argc; ++i) {
     if (std::strcmp(argv[i], "--inject=binary-ties") == 0) inj_binary = true;
     else if (std::strcmp(argv[i], "--inject=repr-ties") == 0) inj_repr = true;
     else if (std::strcmp(argv[i], "--inject=drop-shell-plateau") == 0)
       inj_drop_shell = true;
+    else if (std::strcmp(argv[i], "--inject=attach-prebatch") == 0)
+      inj_attach_prebatch = true;
   }
-  const bool mutant = inj_binary || inj_repr || inj_drop_shell;
+  const bool mutant =
+      inj_binary || inj_repr || inj_drop_shell || inj_attach_prebatch;
 
   std::vector<std::vector<P3>> clouds;
   // Fixture du plateau ternaire (K=1) : deux aretes de niveau 1 en un lot.
@@ -255,6 +303,11 @@ int main(int argc, char** argv) {
   // mourir ici.
   clouds.push_back({{110, 100, 100}, {100, 110, 100}, {90, 100, 100},
                     {100, 90, 100}});
+  // Fixture q2_one_interior_attachment (audit « facettes nees dans le
+  // lot ») : l'evenement K=2 de niveau 4 a deux facettes ACTIVES
+  // ({a,z},{b,z}, nees a 5/4) et UNE facette nee au lot ({a,b}, niveau 4)
+  // — le nœud correct a absorbed = 2, jamais 3.
+  clouds.push_back({{0, 0, 0}, {4, 0, 0}, {2, 1, 0}});
   clouds.push_back(make_family_cloud(CloudFamily::kUniform, 12,
                                      cloud_family_default_coord(CloudFamily::kUniform, 12), 3));
   clouds.push_back(make_family_cloud(CloudFamily::kEightClusters, 12,
@@ -262,7 +315,7 @@ int main(int argc, char** argv) {
 
   u64 total_events = 0, total_fusions = 0, plateaus_multi = 0;
   bool collinear_checked = false, tie_checked = false;
-  bool square_checked = false;
+  bool square_checked = false, attach_checked = false;
   for (size_t ci = 0; ci < clouds.size(); ++ci) {
     const std::vector<P3>& pts = clouds[ci];
     const int m = (int)pts.size();
@@ -276,41 +329,10 @@ int main(int argc, char** argv) {
       std::vector<i32> sub;
       for (int t = 0; t < m; ++t)
         if (mask & (1u << t)) sub.push_back(t);
-      // Miniboule par recherche de support : plus petite boule valide
-      // contenant le sous-ensemble.
       JBall best{};
       std::vector<i32> best_sup;
-      bool have = false;
-      const auto consider = [&](JBall& b, std::vector<i32> sup) {
-        for (const i32 u : sub) {
-          bool in_sup = false;
-          for (const i32 su : sup)
-            if (su == u) in_sup = true;
-          if (in_sup) continue;
-          if (jside(b, pts[(size_t)u]) > 0) return;  // hors boule : invalide
-        }
-        if (!have || jcmp_r2(b, best) < 0) {
-          best = b;
-          best_sup = sup;
-          have = true;
-        }
-      };
-      for (size_t s1 = 0; s1 < sub.size(); ++s1)
-        for (size_t s2 = s1 + 1; s2 < sub.size(); ++s2) {
-          JBall b;
-          if (jball2(pts[(size_t)sub[s1]], pts[(size_t)sub[s2]], &b))
-            consider(b, {sub[s1], sub[s2]});
-          for (size_t s3 = s2 + 1; s3 < sub.size(); ++s3) {
-            if (jball3(pts[(size_t)sub[s1]], pts[(size_t)sub[s2]],
-                       pts[(size_t)sub[s3]], &b))
-              consider(b, {sub[s1], sub[s2], sub[s3]});
-            for (size_t s4 = s3 + 1; s4 < sub.size(); ++s4)
-              if (jball4(pts[(size_t)sub[s1]], pts[(size_t)sub[s2]],
-                         pts[(size_t)sub[s3]], pts[(size_t)sub[s4]], &b))
-                consider(b, {sub[s1], sub[s2], sub[s3], sub[s4]});
-          }
-        }
-      if (!have) continue;  // sous-ensemble degenere (colineaire...)
+      if (!jminiball(pts, sub, &best, &best_sup))
+        continue;  // sous-ensemble degenere (colineaire...)
       // Def. 28 PURE (§ 5.3bis) : seule la boule OUVERTE doit etre vide de
       // X∖σ — un point SUR la sphere (membre de σ au-dela du support, ou
       // externe) est PERMIS : c'est le regime des plateaux.
@@ -344,6 +366,7 @@ int main(int argc, char** argv) {
     struct SubjEvent {
       std::vector<i32> tpart, ipart;
       Q4Level level;
+      u16 amask = 0;  // bit t : facette σ∖{T[t]} ACTIVE (c ∉ conv(T∖{v}))
     };
     std::vector<SubjEvent> subj;
     std::set<Q3BallKey> seen_balls;
@@ -373,7 +396,16 @@ int main(int argc, char** argv) {
           if (tm & (1u << b)) T.push_back(shell_all[(size_t)b]);
         if (!center_in_conv(c, pts, T)) continue;
         std::sort(T.begin(), T.end());
-        subj.push_back(SubjEvent{T, interior, lvl});
+        u16 amask = 0;
+        for (size_t v = 0; v < T.size(); ++v) {
+          std::vector<i32> trest;
+          for (size_t w = 0; w < T.size(); ++w)
+            if (w != v) trest.push_back(T[w]);
+          const bool same_ball =
+              trest.size() >= 2 && center_in_conv(c, pts, trest);
+          if (!same_ball) amask |= (u16)(1u << v);
+        }
+        subj.push_back(SubjEvent{T, interior, lvl, amask});
       }
     };
     // q2 : toutes les paires (le milieu est toujours un support valide).
@@ -482,6 +514,7 @@ int main(int argc, char** argv) {
         ForestEvent ev;
         ev.q = (u8)se.tpart.size();
         ev.d = (u8)se.ipart.size();
+        ev.active_mask = se.amask;
         for (size_t t = 0; t < se.tpart.size(); ++t)
           ev.support[t] = (PointId)se.tpart[t];
         for (size_t t = 0; t < se.ipart.size(); ++t)
@@ -493,13 +526,20 @@ int main(int argc, char** argv) {
 
       // SUJET : foret a macro-lots, avec instantanes de partition.
       std::vector<std::map<FacetKey, FacetKey>> sparts;
-      const ForestResult sr =
-          build_forest(sevents, inj_binary, inj_repr, &sparts);
+      const ForestResult sr = build_forest(sevents, inj_binary, inj_repr,
+                                           &sparts, inj_attach_prebatch);
       total_fusions += sr.fusions;
-      if (sr.attach_violations != 0) {
-        std::fprintf(stderr, "INVARIANT : attach_violations=%llu (K=%d)\n",
-                     (unsigned long long)sr.attach_violations, K);
-        return 3;
+      if (sr.attach_violations != 0 || sr.birth_violations != 0) {
+        // Sous mutant, le detecteur qui se declenche EST la mise a mort ;
+        // hors mutant c'est une violation d'invariant du flux.
+        if (mutant) {
+          ++g_fail;
+        } else {
+          std::fprintf(stderr, "INVARIANT : attach=%llu birth=%llu (K=%d)\n",
+                       (unsigned long long)sr.attach_violations,
+                       (unsigned long long)sr.birth_violations, K);
+          return 3;
+        }
       }
 
       // JUGE : cliques completes, Kruskal a lots (arithmetique OBig).
@@ -523,19 +563,49 @@ int main(int argc, char** argv) {
       size_t e0 = 0;
       while (e0 < jev.size()) {
         size_t e1 = e0 + 1;
-        while (e1 < jev.size() &&
-               jcmp_r2(jev[e1]->ball, jev[e0]->ball) == 0)
+        while (e1 < jev.size() && jcmp_r2(jev[e1]->ball, jev[e0]->ball) == 0)
           ++e1;
-        std::map<i32, u64> pre;
-        std::vector<std::vector<i32>> ids(e1 - e0);
+        // ROLES du juge, par une VOIE DISTINCTE (audit § 4) : le rayon de
+        // naissance de chaque facette est recalcule par SA miniboule et
+        // compare au niveau du lot — active ssi strictement inferieur.
+        struct JRole {
+          bool existed = false, active = false, attach = false;
+          i32 id = -1;
+        };
+        std::map<FacetKey, JRole> jroles;
+        std::vector<std::vector<FacetKey>> ev_facets(e1 - e0);
         for (size_t e = e0; e < e1; ++e)
           for (size_t drop = 0; drop < jev[e]->pts.size(); ++drop) {
-            const i32 v = jfid(jfacet(jev[e]->pts, drop));
-            ids[e - e0].push_back(v);
-            pre[juf.find(v)] = 0;
+            const FacetKey f = jfacet(jev[e]->pts, drop);
+            ev_facets[e - e0].push_back(f);
+            JRole& ro = jroles[f];
+            if (ro.active || ro.attach) continue;  // rayon deja calcule
+            std::vector<i32> fsub;
+            for (size_t t = 0; t < jev[e]->pts.size(); ++t)
+              if (t != drop) fsub.push_back(jev[e]->pts[t]);
+            bool active = true;  // facette-point : rayon 0
+            if (fsub.size() >= 2) {
+              JBall fb;
+              std::vector<i32> fsup;
+              if (!jminiball(pts, fsub, &fb, &fsup)) return 3;
+              active = jcmp_r2(fb, jev[e]->ball) < 0;
+            }
+            if (active) ro.active = true;
+            else ro.attach = true;
           }
-        for (auto& evi : ids)  // clique = chemin depuis la premiere facette
-          for (size_t w = 1; w < evi.size(); ++w) juf.unite(evi[0], evi[w]);
+        for (auto& kv : jroles) {
+          kv.second.existed = jid.find(kv.first) != jid.end();
+          if (kv.second.attach && kv.second.existed) ++jf.attach_violations;
+          if (kv.second.attach && !kv.second.existed) ++jf.new_attachments;
+        }
+        for (auto& kv : jroles) kv.second.id = jfid(kv.first);
+        std::map<i32, u64> pre;
+        for (const auto& kv : jroles)
+          if (kv.second.active || kv.second.existed)
+            pre[juf.find(kv.second.id)] = 0;
+        for (auto& evf : ev_facets)
+          for (size_t w = 1; w < evf.size(); ++w)
+            juf.unite(jroles[evf[0]].id, jroles[evf[w]].id);
         std::map<i32, u64> absorbed;
         for (const auto& pr : pre) ++absorbed[juf.find(pr.first)];
         for (const auto& ab : absorbed)
@@ -572,6 +642,14 @@ int main(int argc, char** argv) {
         fail("nœuds (lot, absorbees)", K);
         continue;
       }
+      if (!mutant && sr.new_attachments != jf.new_attachments) {
+        fail("attachements nes au lot", K);
+        continue;
+      }
+      if (jf.attach_violations != 0) {
+        std::fprintf(stderr, "INVARIANT (juge) : attach_violations\n");
+        return 3;
+      }
       for (const ForestNode& nd : sr.nodes)
         if (nd.absorbed >= 3) ++plateaus_multi;
 
@@ -598,24 +676,41 @@ int main(int argc, char** argv) {
         }
         tie_checked = true;
       }
+      if (ci == 3 && K == 2 && !mutant) {
+        // q2_one_interior_attachment (attente MATHEMATIQUE explicite,
+        // audit § 2) : le nœud du lot R²=4 absorbe EXACTEMENT les deux
+        // facettes actives {a,z} et {b,z} ; {a,b} nait au lot.
+        if (sr.nodes.size() != 1 || sr.nodes[0].absorbed != 2 ||
+            sr.new_attachments != 1) {
+          std::fprintf(stderr,
+                       "FIXTURE attachement : nœuds=%zu absorbees=%llu "
+                       "nes_au_lot=%llu (attendus 1/2/1)\n",
+                       sr.nodes.size(),
+                       sr.nodes.empty() ? 0ull
+                                        : (unsigned long long)sr.nodes[0].absorbed,
+                       (unsigned long long)sr.new_attachments);
+          return 3;
+        }
+        attach_checked = true;
+      }
       if (ci == 2 && !mutant) {
-        // square_cospherical_K2_plateau (audit bloquant § 1) : K=1, un
-        // nœud quaternaire au niveau 50 (les quatre cotes) puis les
-        // diagonales sans fusion ; K=2, UN nœud a SIX facettes-aretes au
-        // niveau 100 (les quatre triangles rectangles du plateau) ; K=3,
-        // un nœud a quatre facettes-triangles.
-        const u64 want_nodes = 1;
-        const u64 want_absorbed = (K == 1) ? 4 : (K == 2) ? 6 : (K == 3) ? 4 : 0;
+        // square_cospherical_K2_plateau (audits § 1 et « facettes nees dans
+        // le lot ») : K=1, un nœud quaternaire au niveau 50 puis les
+        // diagonales sans fusion ; K=2, UN nœud a QUATRE enfants (les
+        // quatre COTES actifs — les deux diagonales naissent au lot et
+        // sont des attachements, jamais des enfants) ; K=3, AUCUN nœud
+        // (les quatre facettes-triangles naissent toutes au lot : la
+        // composante nait entiere, sans fusion de composantes pre-lot).
         if (K >= 1 && K <= 3) {
-          if (sr.nodes.size() != want_nodes ||
-              sr.nodes[0].absorbed != want_absorbed) {
+          const u64 want_nodes = (K == 3) ? 0 : 1;
+          const u64 want_absorbed = (K == 3) ? 0 : 4;
+          const bool ok =
+              sr.nodes.size() == want_nodes &&
+              (want_nodes == 0 || sr.nodes[0].absorbed == want_absorbed);
+          if (!ok) {
             std::fprintf(stderr,
-                         "FIXTURE carre : K=%d nœuds=%zu absorbees=%llu "
-                         "(attendus 1/%llu)\n",
-                         K, sr.nodes.size(),
-                         sr.nodes.empty()
-                             ? 0ull
-                             : (unsigned long long)sr.nodes[0].absorbed,
+                         "FIXTURE carre : K=%d nœuds=%zu (attendus %llu/%llu)\n",
+                         K, sr.nodes.size(), (unsigned long long)want_nodes,
                          (unsigned long long)want_absorbed);
             return 3;
           }
@@ -644,7 +739,7 @@ int main(int argc, char** argv) {
   }
   if (g_fail > 0) return 1;
   if (!collinear_checked || !tie_checked || !square_checked ||
-      plateaus_multi == 0 || total_fusions == 0) {
+      !attach_checked || plateaus_multi == 0 || total_fusions == 0) {
     std::fprintf(stderr, "PLANCHER : fixtures ou fusions manquantes\n");
     return 3;
   }
