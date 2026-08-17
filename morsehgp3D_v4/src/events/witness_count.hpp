@@ -227,6 +227,56 @@ inline FusedCounts count_universal_witnesses_234(const CloudIndex& ix, NodeRef a
   return fc;
 }
 
+// COLLECTE DES IDS DU CŒUR q3 D'UN RECTANGLE VIVANT (audit du 17 aout,
+// § 5.1 : « paquets d'identites bornes »). Meme autorite que la phase pleine
+// de la lane q3 (boule-cœur + 64 coins aux feuilles) mais rend les INDEX de
+// positions uniques certifies universels, hors A∪B. Precondition : le
+// rectangle a surveccu (compte < h_3 <= 9), donc la collecte tient dans un
+// petit tampon ; `cap` la borne par contrat.
+inline u64 collect_universal_ids_q3(const CloudIndex& ix, NodeRef a, NodeRef b,
+                                    u64 cap, i32* out_ids) {
+  const AxisBox boxA = box_of_node(ix, a);
+  const AxisBox boxB = box_of_node(ix, b);
+  const NodeRange ra = range_of(ix, a);
+  const NodeRange rb = range_of(ix, b);
+  const CoreBall cb = core_ball(Lane::kQ3, boxA, boxB);
+  u64 count = 0;
+  const auto push_range = [&](i32 f, i32 l) {
+    for (i32 u = f; u <= l && count < cap; ++u) {
+      if ((u >= ra.first && u <= ra.last) || (u >= rb.first && u <= rb.last))
+        continue;
+      out_ids[count++] = u;
+    }
+  };
+  if (ix.nodes.empty()) return 0;
+  std::vector<NodeRef> stack{0};
+  while (!stack.empty() && count < cap) {
+    const NodeRef z = stack.back();
+    stack.pop_back();
+    const AxisBox bz = box_of_node(ix, z);
+    if (hmax4_boxes(boxA, boxB, bz) <= 0) continue;
+    if (cb.radius4 > 0) {
+      const int side = node_vs_ball(bz, cb);
+      if (side > 0) {
+        const NodeRange rz = range_of(ix, z);
+        push_range(rz.first, rz.last);
+        continue;
+      }
+    }
+    if (z < 0) {
+      const i32 u = -1 - z;
+      const bool in_ab =
+          (u >= ra.first && u <= ra.last) || (u >= rb.first && u <= rb.last);
+      if (!in_ab && corner64_universal(Lane::kQ3, boxA, boxB, ix.upos[(size_t)u]))
+        out_ids[count++] = u;
+      continue;
+    }
+    stack.push_back(ix.nodes[(size_t)z].left);
+    stack.push_back(ix.nodes[(size_t)z].right);
+  }
+  return count;
+}
+
 // Juge ponctuel trois-lanes : |P ∩ W_q(a,b)| exact, ecrete a h, par test
 // `in_spindle` point a point sous elagage H (W_q ⊆ W_2).
 inline u64 true_spindle_count(Lane q, const CloudIndex& ix, i32 ua, i32 ub, u64 h) {

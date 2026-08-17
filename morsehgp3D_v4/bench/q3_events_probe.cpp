@@ -13,6 +13,7 @@
 // comparaison PAR IDENTITES (SupportKey) : manquants, en trop, en accord.
 // Codes : 0 conforme, 1 desaccord d'identites, 2 refus, 3 invariant.
 #include <algorithm>
+#include <array>
 #include <chrono>
 #include <cstdio>
 #include <cstring>
@@ -39,6 +40,8 @@ struct Args {
   bool judge = false;
   bool exact_mode = false;  // premier extra-shell => unsupported_degeneracy
   bool census_cover = true;  // --census=tree : descente par porteur (appariee)
+  bool packet = true;        // --packet=off : porte causale appariee
+  bool inject_no_exclude = false;  // mutant : packet non exclu du scan
   u64 min_events = 0;
 };
 
@@ -77,6 +80,9 @@ Args parse(int argc, char** argv) {
     else if (arg == "--exact") a.exact_mode = true;
     else if (arg == "--census=cover") a.census_cover = true;
     else if (arg == "--census=tree") a.census_cover = false;
+    else if (arg == "--packet=on") a.packet = true;
+    else if (arg == "--packet=off") a.packet = false;
+    else if (arg == "--inject=packet-no-exclude") a.inject_no_exclude = true;
     else {
       std::fprintf(stderr, "argument inconnu : %s\n", arg.c_str());
       a.family_ok = false;
@@ -225,7 +231,7 @@ int main(int argc, char** argv) {
   // exact-once visible, refus transactionnel des coquilles en mode --exact.
   std::vector<Key3> events;
   u64 anchors_seen = 0, anchors_killed_ha = 0, carriers_seen = 0,
-      shell_refused = 0, raw_events = 0;
+      shell_refused = 0, raw_events = 0, power_tests = 0, interior_ids_total = 0;
   const auto pid = [&](i32 u) { return ix.bucket_ids[ix.bucket_start[(size_t)u]]; };
   std::vector<CoverPoint> cover;
   std::vector<u64> ha, hb;
@@ -254,6 +260,30 @@ int main(int argc, char** argv) {
                                    boxA, ix.upos[(size_t)(rb.first + iz)]))
           ++hb[(size_t)ib];
       }
+    // Paquets d'IDs certifies (audit § 5.1) : cœur du rectangle une fois,
+    // h_a/h_b par extremite pendant les boucles ci-dessus re-executees en
+    // mode collecte. Rectangle vivant => cœur < h_3 <= 9 : tampons de 8.
+    i32 core_ids[8];
+    const u64 core_n =
+        a.packet ? collect_universal_ids_q3(ix, ar.r.a, ar.r.b, 8, core_ids) : 0;
+    std::vector<std::array<i32, 8>> ha_ids((size_t)na), hb_ids((size_t)nb);
+    std::vector<u8> ha_idn((size_t)na, 0), hb_idn((size_t)nb, 0);
+    if (a.packet) {
+      for (int ia = 0; ia < na; ++ia)
+        for (int iz = 0; iz < na && ha_idn[(size_t)ia] < 8; ++iz) {
+          if (iz == ia) continue;
+          if (universal_over_corners(Lane::kQ3, ix.upos[(size_t)(ra.first + ia)],
+                                     boxB, ix.upos[(size_t)(ra.first + iz)]))
+            ha_ids[(size_t)ia][ha_idn[(size_t)ia]++] = ra.first + iz;
+        }
+      for (int ib = 0; ib < nb; ++ib)
+        for (int iz = 0; iz < nb && hb_idn[(size_t)ib] < 8; ++iz) {
+          if (iz == ib) continue;
+          if (universal_over_corners(Lane::kQ3, ix.upos[(size_t)(rb.first + ib)],
+                                     boxA, ix.upos[(size_t)(rb.first + iz)]))
+            hb_ids[(size_t)ib][hb_idn[(size_t)ib]++] = rb.first + iz;
+        }
+    }
     for (i32 ua = ra.first; ua <= ra.last; ++ua)
       for (i32 ub = rb.first; ub <= rb.last; ++ub) {
         ++anchors_seen;
@@ -267,51 +297,101 @@ int main(int argc, char** argv) {
         if (D2 == 0) continue;
         cover_query(ix, pa, pb, D2, &cover);
         cover_points += cover.size();
+        // Paquet de l'ancre : cœur ∪ ha(a) ∪ hb(b), disjoints par theoreme,
+        // total < h_3 (l'ancre a surveccu). Chaque ID est STRICTEMENT
+        // interieur a toute circum-boule de l'ancre : profondeur de base.
+        i32 packet_ids[26];
+        u64 base = 0;
+        if (a.packet) {
+          for (u64 t = 0; t < core_n; ++t) packet_ids[base++] = core_ids[t];
+          const u8 nha = ha_idn[(size_t)(ua - ra.first)];
+          for (u8 t = 0; t < nha; ++t)
+            packet_ids[base++] = ha_ids[(size_t)(ua - ra.first)][t];
+          const u8 nhb = hb_idn[(size_t)(ub - rb.first)];
+          for (u8 t = 0; t < nhb; ++t)
+            packet_ids[base++] = hb_ids[(size_t)(ub - rb.first)][t];
+        }
+        const auto in_packet = [&](i32 u) {
+          if (a.inject_no_exclude) return false;  // MUTANT : double compte
+          for (u64 t = 0; t < base; ++t)
+            if (packet_ids[t] == u) return true;
+          return false;
+        };
+        // Porteurs de l'ancre (SoA), puis scan SITE-MAJOR : chaque site du
+        // cover defile devant tous les porteurs actifs (audit § 6) — memes
+        // predicats, saturation par masque, InteriorIds collectes.
+        struct Carrier {
+          i32 ux;
+          Q3Form f;
+          u64 depth;
+          u8 ni;
+          bool alive, shell;
+          i32 interior[8];
+        };
+        std::vector<Carrier> carriers;
         for (const CoverPoint& cp : cover) {
           const i32 ux = cp.u;
           if (ux == ua || ux == ub) continue;
           const P3& px = ix.upos[(size_t)ux];
-          // Lentille : les deux distances a a et b bornees par D².
           if (p3_norm2(p3_sub(px, pa)) > D2 || p3_norm2(p3_sub(px, pb)) > D2)
             continue;
           const P3 v{2 * px.x - pa.x - pb.x, 2 * px.y - pa.y - pb.y,
                      2 * px.z - pa.z - pb.z};
-          if (p3_norm2(v) <= D2) continue;  // acuite stricte
+          if (p3_norm2(v) <= D2) continue;
           const i64 l_ax = p3_norm2(p3_sub(px, pa));
           const i64 l_bx = p3_norm2(p3_sub(px, pb));
           if (!anchor_owns_q3(D2, l_ax, l_bx, pid(ua), pid(ub), pid(ux)))
             continue;
           ++carriers_seen;
-          const Q3Form f = q3_form(pa, pb, px);
-          u64 shell = 0;
-          u64 depth = 0;
-          if (a.census_cover) {
-            // Scan plat du cover trie : early-exit a h_3, coquilles vues.
-            for (const CoverPoint& wz : cover) {
-              if (wz.u == ua || wz.u == ub || wz.u == ux) continue;
-              const i128 pw = q3_power(f, ix.upos[(size_t)wz.u]);
+          carriers.push_back(
+              Carrier{ux, q3_form(pa, pb, px), base, 0, true, false, {}});
+        }
+        u64 active = carriers.size();
+        if (a.census_cover) {
+          for (const CoverPoint& wz : cover) {
+            if (active == 0) break;
+            if (wz.u == ua || wz.u == ub || in_packet(wz.u)) continue;
+            const P3& pz = ix.upos[(size_t)wz.u];
+            for (Carrier& c : carriers) {
+              if (!c.alive || c.ux == wz.u) continue;
+              ++power_tests;
+              const i128 pw = q3_power(c.f, pz);
               if (pw < 0) {
-                if (++depth >= h3) break;
+                if (c.ni < 8) c.interior[c.ni++] = wz.u;
+                if (++c.depth >= h3) {
+                  c.alive = false;
+                  --active;
+                }
               } else if (pw == 0) {
-                ++shell;
+                c.shell = true;
               }
             }
-          } else {
-            depth = q3_ball_depth(ix, f, ua, ub, ux, h3, &shell);
           }
-          if (depth >= h3) continue;
-          if (shell > 0) {
+        } else {
+          for (Carrier& c : carriers) {
+            u64 shell = 0;
+            const u64 extra =
+                q3_ball_depth(ix, c.f, ua, ub, c.ux, h3, &shell);
+            c.depth = extra;  // reference sans paquet : profondeur complete
+            c.alive = extra < h3;
+            c.shell = shell > 0;
+          }
+        }
+        for (const Carrier& c : carriers) {
+          if (!c.alive) continue;
+          if (c.shell) {
             if (a.exact_mode) {
               std::fprintf(stderr,
                            "unsupported_degeneracy : extra-shell sur une boule "
                            "survivante (aucune publication partielle)\n");
               return 2;
             }
-            ++shell_refused;  // mode regular_subset_diagnostic
+            ++shell_refused;
             continue;
           }
           ++raw_events;
-          events.push_back(make_key((i32)pid(ua), (i32)pid(ub), (i32)pid(ux)));
+          interior_ids_total += base + c.ni;
+          events.push_back(make_key((i32)pid(ua), (i32)pid(ub), (i32)pid(c.ux)));
         }
       }
   }
@@ -381,6 +461,7 @@ int main(int argc, char** argv) {
       "famille=%s n=%d coord=%d s=%lld smax=%llu seed=%lld mode=%s "
       "rect_vivants_q3=%zu ancres_vues=%llu ancres_tuees_ha=%llu "
       "porteurs=%llu evenements=%zu doublons=%llu ev_par_point=%.1f "
+      "tests_puissance=%llu ids_interieurs=%llu "
       "cover_pts=%llu shell_refus=%llu juge_manquants=%llu juge_en_trop=%llu "
       "t_wspd_ms=%.1f t_instruction_ms=%.1f t_juge_ms=%.1f\n",
       cloud_family_name(a.family), a.n, coord, (long long)a.s,
@@ -389,10 +470,19 @@ int main(int argc, char** argv) {
       (unsigned long long)anchors_seen, (unsigned long long)anchors_killed_ha,
       (unsigned long long)carriers_seen, events.size(),
       (unsigned long long)duplicate_supports,
-      (double)events.size() / (double)pts.size(),
+      (double)events.size() / (double)pts.size(), (unsigned long long)power_tests,
+      (unsigned long long)interior_ids_total,
       (unsigned long long)cover_points, (unsigned long long)shell_refused, (unsigned long long)missing,
       (unsigned long long)extra, ms(t1 - t0), ms(t2 - t1), ms(t3 - t2));
 
+  if (a.inject_no_exclude) {
+    if (a.judge && (missing > 0 || extra > 0)) {
+      std::printf("MUTANT TUE : packet-no-exclude altere les evenements\n");
+      return 4;
+    }
+    std::fprintf(stderr, "PORTE INEFFICACE : packet-no-exclude non discrimine\n");
+    return 3;
+  }
   if (duplicate_supports > 0) {
     std::fprintf(stderr, "EXACT-ONCE VIOLE : %llu supports dupliques\n",
                  (unsigned long long)duplicate_supports);

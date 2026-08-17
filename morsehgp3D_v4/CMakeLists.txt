@@ -115,3 +115,11 @@ add_executable(mhgp4_q3_oracle tests/q3_oracle_test.cpp)
 mhgp4_expect_code(mhgp4_q3_oracle_accord 0 mhgp4_q3_oracle "")
 mhgp4_expect_code(mhgp4_q3_oracle_mutant_sign 4 mhgp4_q3_oracle "--inject=sign-p")
 mhgp4_expect_code(mhgp4_q3_oracle_mutant_prune 4 mhgp4_q3_oracle "--inject=prune-ge")
+
+# Paquets de temoins certifies + scan site-major (audit du 17 aout) : la
+# porte causale packet=off passe par le meme juge d'identites ; le mutant
+# packet-no-exclude (double compte des IDs du paquet) est tue.
+mhgp4_expect_code(mhgp4_q3_packet_off_judge 0 mhgp4_q3_events_probe
+    "--family=uniform --n=400 --s=8 --seed=3 --judge --packet=off --min-events=100")
+mhgp4_expect_code(mhgp4_q3_packet_mutant 4 mhgp4_q3_events_probe
+    "--family=uniform --n=400 --s=8 --seed=3 --judge --inject=packet-no-exclude")

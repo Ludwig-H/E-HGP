@@ -60,3 +60,22 @@ cover lui-même (237,6 M de points collectés/triés, ~594 par ancre sur la
 famille adversariale) — c'est ce que la version A de l'audit (arbre 2D des
 porteurs + range-add au niveau des blocs) doit amortir, avec l'arithmétique
 i192 des T_x prouvée avant le kernel.
+
+## Addendum 3 — paquets de témoins certifiés + scan site-major (audits du 17 août)
+
+Le préfiltre ne jette plus ses certificats : les IDs du cœur, de h_a(a) et de
+h_b(b) (disjoints par théorème, < h_3 au total sur une ancre survivante)
+initialisent la profondeur de chaque porteur (`depth = base`) et sont exclus
+du scan — et deviennent le préfixe des `InteriorIds` de chaque événement.
+Le census passe en site-major (chaque site du cover défile devant tous les
+porteurs actifs, masques saturés, SoA — la structure « un CTA par ancre,
+lanes = porteurs » de la cible CUDA).
+
+- Juge d'identités : 0/0 inchangé (packet on ET off) ; mutant
+  `packet-no-exclude` (double compte) tué par le juge (code 4).
+- Tests de puissance : 3,91 M (packet on) contre 7,63 M (off) à n=400 —
+  le paquet retire ~49 % des prédicats.
+- eight_clusters n=2000 : 26,7 s site-major contre 24,2 s carrier-major —
+  léger surcoût de boucle, payé par le payload (1 292 638 identités
+  intérieures collectées, ~5,2/événement) et la structure GPU ; l'arbre de
+  centres (version A) viendra comme accélérateur jugé contre cette baseline.
