@@ -25,7 +25,9 @@
 #pragma once
 
 #include <algorithm>
+#include <atomic>
 #include <chrono>
+#include <thread>
 #include <vector>
 
 #include "../events/acute_seed.hpp"
@@ -103,6 +105,42 @@ struct BallStreamStats {
   // sur le chemin baseline.
   double t_seed_core_ms = 0, t_axial_ab_ms = 0, t_reduce_ms = 0,
          t_emit_ms = 0;
+  // Fusion des statistiques d'un ouvrier parallele : addition membre a
+  // membre — les champs non touches par la generation valent zero chez
+  // l'ouvrier, l'addition est donc toujours sure. Les chronos deviennent
+  // du temps CPU CUMULE (somme des fils), plus du temps mural.
+  void add_from(const BallStreamStats& o) {
+    for (int i = 0; i < 3; ++i) {
+      rect_alive[i] += o.rect_alive[i];
+      anchors[i] += o.anchors[i];
+      candidates[i] += o.candidates[i];
+      gen_depth_killed[i] += o.gen_depth_killed[i];
+    }
+    unique_balls += o.unique_balls;
+    census_interior += o.census_interior;
+    census_shell += o.census_shell;
+    balls_dead_depth += o.balls_dead_depth;
+    prefilter_nodes += o.prefilter_nodes;
+    prefilter_leaf_tests += o.prefilter_leaf_tests;
+    prefilter_range_add_mass += o.prefilter_range_add_mass;
+    full_census_keys += o.full_census_keys;
+    anchors_killed_w4 += o.anchors_killed_w4;
+    axial_seeds += o.axial_seeds;
+    axial_sites += o.axial_sites;
+    axial_seeds_dead_perm += o.axial_seeds_dead_perm;
+    axial_groups_emitted += o.axial_groups_emitted;
+    axial_roots_pruned_cross += o.axial_roots_pruned_cross;
+    axial_groups_in_window += o.axial_groups_in_window;
+    axial_groups_killed_depth += o.axial_groups_killed_depth;
+    axial_completion_calls += o.axial_completion_calls;
+    axial_verify_mismatch += o.axial_verify_mismatch;
+    seeds_killed_seed_core += o.seeds_killed_seed_core;
+    seed_core_nodes += o.seed_core_nodes;
+    t_seed_core_ms += o.t_seed_core_ms;
+    t_axial_ab_ms += o.t_axial_ab_ms;
+    t_reduce_ms += o.t_reduce_ms;
+    t_emit_ms += o.t_emit_ms;
+  }
 };
 
 // Drapeaux du chemin axial (mutants + verification de reception).
@@ -513,26 +551,74 @@ inline void corner_histograms(const CloudIndex& ix, Lane lane, const AliveRect& 
 // frontiere de profondeur), axial-drop-ties (< au lieu de <= : perd le
 // groupe ex aequo), axial-first-rep (premier membre valide au lieu du
 // minimum canonique : la representation de niveau post-RLE change).
+// PARALLELISME PAR RECTANGLE (directive utilisateur « paralléliser ») :
+// les rectangles vivants d'une lane sont independants — chaque ouvrier a
+// son brouillon (LaneScratch), son vecteur d'emissions et ses stats,
+// fusionnes a la fin. L'EXACTITUDE ne depend pas de l'ordre : le
+// MULTIENSEMBLE des emissions est identique quel que soit le decoupage,
+// et le tri stable + RLE en aval canonise l'ordre — la porte
+// --par-gate exige l'egalite au bit pres post-RLE entre 1 et N fils.
+// num_threads = 1 (defaut) : chemin sequentiel historique, sans fil.
 inline void collect_candidate_balls(const CloudIndex& ix, i64 s, u64 smax_eff,
                                     std::vector<BallCandidate>* out,
                                     BallStreamStats* st,
                                     bool mutant_genfilter_nonstrict = false,
                                     bool axial_bounded = false,
-                                    u32 axial_flags = 0) {
+                                    u32 axial_flags = 0, int num_threads = 1,
+                                    bool mutant_par_drop_shard = false) {
   out->clear();
   const u64 h_of[3] = {lane_h(Lane::kQ2, smax_eff), lane_h(Lane::kQ3, smax_eff),
                        lane_h(Lane::kQ4, smax_eff)};
   std::vector<detail_bs::AliveRect> alive;
-  std::vector<u64> ha, hb;
-  std::vector<CoverPoint> cover;
-  std::vector<AxialSite> axial;
-  std::vector<u8> axial_gid;
-  std::vector<NodeRef> handles;
-  u64 cover_nodes = 0, visits = 0;
+  struct LaneScratch {
+    std::vector<u64> ha, hb;
+    std::vector<CoverPoint> cover;
+    std::vector<AxialSite> axial;
+    std::vector<u8> axial_gid;
+    std::vector<NodeRef> handles;
+    u64 cover_nodes = 0, visits = 0;
+  };
+  // Chaque lane : sequentiel a 1 fil, sinon tirage dynamique des
+  // rectangles (compteur atomique) — les gros rectangles ne bloquent pas
+  // la fin de vague. MUTANT par-drop-shard : la fusion oublie le premier
+  // ouvrier (la porte --par-gate doit le voir).
+  const auto run_rects = [&](auto&& body) {
+    const size_t nrect = alive.size();
+    if (num_threads <= 1 || nrect <= 1) {
+      LaneScratch sc;
+      for (size_t i = 0; i < nrect; ++i) body(alive[i], sc, out, st);
+      return;
+    }
+    const size_t T = std::min((size_t)num_threads, nrect);
+    std::vector<std::vector<BallCandidate>> louts(T);
+    std::vector<BallStreamStats> lst(T);
+    std::atomic<size_t> next{0};
+    std::vector<std::thread> pool;
+    for (size_t t = 0; t < T; ++t)
+      pool.emplace_back([&, t] {
+        LaneScratch sc;
+        for (;;) {
+          const size_t i = next.fetch_add(1);
+          if (i >= nrect) break;
+          body(alive[i], sc, &louts[t], &lst[t]);
+        }
+      });
+    for (auto& th : pool) th.join();
+    for (size_t t = 0; t < T; ++t) {
+      if (mutant_par_drop_shard && t == 0) continue;  // MUTANT
+      out->insert(out->end(), louts[t].begin(), louts[t].end());
+      st->add_from(lst[t]);
+    }
+  };
   // ---- q2.
   detail_bs::wspd_alive(ix, s, h_of, 0, 0b001, h_of[0], &alive);
   st->rect_alive[0] = alive.size();
-  for (const auto& ar : alive) {
+  run_rects([&](const detail_bs::AliveRect& ar, LaneScratch& sc,
+                std::vector<BallCandidate>* lout, BallStreamStats* lst) {
+    auto& ha = sc.ha;
+    auto& hb = sc.hb;
+    auto* out = lout;
+    auto* st = lst;
     detail_bs::corner_histograms(ix, Lane::kQ2, ar, &ha, &hb);
     const NodeRange ra = range_of(ix, ar.r.a);
     const NodeRange rb = range_of(ix, ar.r.b);
@@ -550,11 +636,20 @@ inline void collect_candidate_balls(const CloudIndex& ix, i64 s, u64 smax_eff,
                                      promote_q3_level(q2_exact_level(D2)), 2});
         ++st->candidates[0];
       }
-  }
+  });
   // ---- q3.
   detail_bs::wspd_alive(ix, s, h_of, 1, 0b010, h_of[1], &alive);
   st->rect_alive[1] = alive.size();
-  for (const auto& ar : alive) {
+  run_rects([&](const detail_bs::AliveRect& ar, LaneScratch& sc,
+                std::vector<BallCandidate>* lout, BallStreamStats* lst) {
+    auto& ha = sc.ha;
+    auto& hb = sc.hb;
+    auto& cover = sc.cover;
+    auto& handles = sc.handles;
+    auto& cover_nodes = sc.cover_nodes;
+    auto& visits = sc.visits;
+    auto* out = lout;
+    auto* st = lst;
     detail_bs::corner_histograms(ix, Lane::kQ3, ar, &ha, &hb);
     const NodeRange ra = range_of(ix, ar.r.a);
     const NodeRange rb = range_of(ix, ar.r.b);
@@ -600,11 +695,22 @@ inline void collect_candidate_balls(const CloudIndex& ix, i64 s, u64 smax_eff,
           ++st->candidates[1];
         }
       }
-  }
+  });
   // ---- q4.
   detail_bs::wspd_alive(ix, s, h_of, 2, 0b100, h_of[2], &alive);
   st->rect_alive[2] = alive.size();
-  for (const auto& ar : alive) {
+  run_rects([&](const detail_bs::AliveRect& ar, LaneScratch& sc,
+                std::vector<BallCandidate>* lout, BallStreamStats* lst) {
+    auto& ha = sc.ha;
+    auto& hb = sc.hb;
+    auto& cover = sc.cover;
+    auto& axial = sc.axial;
+    auto& axial_gid = sc.axial_gid;
+    auto& handles = sc.handles;
+    auto& cover_nodes = sc.cover_nodes;
+    auto& visits = sc.visits;
+    auto* out = lout;
+    auto* st = lst;
     detail_bs::corner_histograms(ix, Lane::kQ4, ar, &ha, &hb);
     const NodeRange ra = range_of(ix, ar.r.a);
     const NodeRange rb = range_of(ix, ar.r.b);
@@ -822,7 +928,7 @@ inline void collect_candidate_balls(const CloudIndex& ix, i64 s, u64 smax_eff,
                                .count();
         }
       }
-  }
+  });
 }
 
 // Census EXACT d'une boule par sa forme primitive : interieurs stricts et

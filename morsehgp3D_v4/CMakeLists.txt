@@ -214,6 +214,8 @@ mhgp4_expect_code(mhgp4_forest_mutant_birth_events 4 mhgp4_forest_selftest
 # refait la meme semantique en brut (completude WSPD + census d'arbre + RLE
 # juges) ; mutants rle-drop et census-nonstrict tues.
 add_executable(mhgp4_forest_probe bench/forest_probe.cpp)
+find_package(Threads REQUIRED)
+target_link_libraries(mhgp4_forest_probe PRIVATE Threads::Threads)
 mhgp4_expect_code(mhgp4_forest_probe_judge_uniform 0 mhgp4_forest_probe
     "--family=uniform --n=120 --s=8 --seed=3 --judge --min-balls=100 --min-fusions=100")
 mhgp4_expect_code(mhgp4_forest_probe_judge_clusters 0 mhgp4_forest_probe
@@ -340,6 +342,15 @@ mhgp4_expect_code(mhgp4_forest_probe_sweep_mutant_reverse 4 mhgp4_forest_probe
     "--axial-sweep-gate --inject=axial-reverse-negative")
 mhgp4_expect_code(mhgp4_forest_probe_sweep_mutant_nonstrict 4 mhgp4_forest_probe
     "--axial-sweep-gate --inject=axial-depth-nonstrict")
+# Parallelisme par rectangle (directive « paralléliser ») : l'objet
+# post-RLE et les compteurs de generation sont INDEPENDANTS du decoupage
+# — egalite au bit pres 1 fil / 4 fils sur les deux chemins. Le mutant
+# par-drop-shard (la fusion oublie un ouvrier) prouve que la porte
+# compare pour de vrai.
+mhgp4_expect_code(mhgp4_forest_probe_par_gate 0 mhgp4_forest_probe
+    "--par-gate")
+mhgp4_expect_code(mhgp4_forest_probe_par_mutant_drop 4 mhgp4_forest_probe
+    "--par-gate --inject=par-drop-shard")
 
 # La lane q2 productrice : W_2 est la boule diametrale ouverte, le census
 # est une requete de cover a coefficient 1. Juge brut toutes-paires sur

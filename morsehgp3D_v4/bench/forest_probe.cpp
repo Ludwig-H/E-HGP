@@ -70,6 +70,9 @@ struct Args {
   bool axial_on = false;  // opt-in GPU-oriente ; production CPU = baseline
   bool axial_pair_gate = false;
   bool axial_sweep_gate = false;
+  bool par_gate = false;
+  int threads = 1;
+  bool inj_par_drop = false;
   u32 inj_axial = 0;  // masque kAxial* des mutants du chemin axial
   u64 min_balls = 0;
   u64 min_fusions = 0;
@@ -128,6 +131,9 @@ Args parse(int argc, char** argv) {
     else if (arg == "--axial-on") a.axial_on = true;
     else if (arg == "--axial-pair-gate") a.axial_pair_gate = true;
     else if (arg == "--axial-sweep-gate") a.axial_sweep_gate = true;
+    else if (arg == "--par-gate") a.par_gate = true;
+    else if (const char* v = val("--threads=")) a.threads = std::atoi(v);
+    else if (arg == "--inject=par-drop-shard") a.inj_par_drop = true;
     else if (arg == "--inject=axial-short-group") a.inj_axial |= kAxialShortGroup;
     else if (arg == "--inject=axial-drop-ties") a.inj_axial |= kAxialDropTies;
     else if (arg == "--inject=axial-first-rep") a.inj_axial |= kAxialFirstRep;
@@ -759,6 +765,77 @@ int run_kmax_gate(bool inj_kmax10) {
   return bad ? 3 : 0;
 }
 
+// PORTE DE PARALLELISME (directive « paralléliser ») : l'objet post-RLE
+// est INDEPENDANT du decoupage. collect a 1 fil CONTRE 4 fils — egalite
+// au bit pres des cles/arites/representations apres tri+RLE, ET egalite
+// des compteurs de generation (sommes independantes de l'ordre :
+// candidats, ancres, morts de profondeur, W4, cœur, groupes axiaux).
+// Les deux chemins (baseline et axial) sont couverts. MUTANT
+// par-drop-shard : la fusion oublie le premier ouvrier — les compteurs
+// le voient toujours, le jeu de cles souvent.
+int run_par_gate(bool inj_drop) {
+  u64 bad = 0;
+  for (const CloudFamily fam :
+       {CloudFamily::kUniform, CloudFamily::kEightClusters}) {
+    const int n = 400;
+    const std::vector<P3> pts =
+        make_family_cloud(fam, n, cloud_family_default_coord(fam, n), 3);
+    const CloudIndex ix = build_cloud_index(pts);
+    if ((size_t)ix.unique_count() != pts.size()) return 3;
+    for (int axial = 0; axial < 2; ++axial) {
+      std::vector<BallCandidate> c1, c4;
+      BallStreamStats s1, s4;
+      collect_candidate_balls(ix, 8, 11, &c1, &s1, false, axial != 0, 0, 1,
+                              false);
+      collect_candidate_balls(ix, 8, 11, &c4, &s4, false, axial != 0, 0, 4,
+                              inj_drop);
+      const auto rle = [](std::vector<BallCandidate>* v) {
+        std::stable_sort(v->begin(), v->end(), ball_candidate_less);
+        v->erase(
+            std::unique(v->begin(), v->end(),
+                        [](const BallCandidate& x, const BallCandidate& y) {
+                          return x.key == y.key;
+                        }),
+            v->end());
+      };
+      rle(&c1);
+      rle(&c4);
+      bool same = c1.size() == c4.size();
+      for (size_t i = 0; same && i < c1.size(); ++i)
+        same = c1[i].key == c4[i].key && c1[i].arity == c4[i].arity &&
+               same_level_representation(c1[i].level, c4[i].level);
+      bool counters = true;
+      for (int i = 0; i < 3; ++i)
+        counters = counters && s1.candidates[i] == s4.candidates[i] &&
+                   s1.anchors[i] == s4.anchors[i] &&
+                   s1.gen_depth_killed[i] == s4.gen_depth_killed[i];
+      counters = counters && s1.anchors_killed_w4 == s4.anchors_killed_w4 &&
+                 s1.seeds_killed_seed_core == s4.seeds_killed_seed_core &&
+                 s1.seed_core_nodes == s4.seed_core_nodes &&
+                 s1.axial_groups_emitted == s4.axial_groups_emitted &&
+                 s1.axial_roots_pruned_cross == s4.axial_roots_pruned_cross &&
+                 s1.axial_groups_killed_depth == s4.axial_groups_killed_depth;
+      if (!same || !counters) {
+        std::fprintf(stderr,
+                     "PAR : divergence 1 fil / 4 fils (%s, axial=%d, "
+                     "cles=%d compteurs=%d)\n",
+                     cloud_family_name(fam), axial, (int)same, (int)counters);
+        ++bad;
+      }
+    }
+  }
+  std::printf("par_gate violations=%llu\n", (unsigned long long)bad);
+  if (inj_drop) {
+    if (bad > 0) {
+      std::printf("MUTANT TUE\n");
+      return 4;
+    }
+    std::fprintf(stderr, "PORTE INEFFICACE : mutant non discrimine\n");
+    return 3;
+  }
+  return bad ? 3 : 0;
+}
+
 // PORTE SYNTHETIQUE DE LA PRIMITIVE DE SWEEP (audit « sweep reçu et
 // kernel sans alloc » § 3) : multisets de racines SANS geometrie — la
 // causalite des mutants de fenetre et de d_j s'etablit ICI (la fixture
@@ -1155,6 +1232,7 @@ int main(int argc, char** argv) {
   if (a.kmax_gate) return run_kmax_gate(a.inj_fold_kmax10);
   if (a.axial_sweep_gate) return run_axial_sweep_gate(a.inj_axial);
   if (a.axial_pair_gate) return run_axial_pair_gate(a.inj_axial);
+  if (a.par_gate) return run_par_gate(a.inj_par_drop);
   if (a.guard != 0) return run_guard_gate(a.guard);
   const std::vector<P3> pts = make_family_cloud(
       a.family, a.n,
@@ -1180,7 +1258,8 @@ int main(int argc, char** argv) {
   std::vector<BallCandidate> cands;
   BallStreamStats st;
   collect_candidate_balls(ix, a.s, smax_eff, &cands, &st,
-                          a.inj_genfilter_nonstrict, a.axial_on, a.inj_axial);
+                          a.inj_genfilter_nonstrict, a.axial_on, a.inj_axial,
+                          a.threads, a.inj_par_drop);
   const auto t0b = std::chrono::steady_clock::now();
   std::stable_sort(cands.begin(), cands.end(), ball_candidate_less);
   if (!a.inj_rle_drop)  // MUTANT : dedupe saute, boules re-censusees
@@ -1200,7 +1279,7 @@ int main(int argc, char** argv) {
                           a.inj_dense_pointid || a.inj_threshold_minus_one ||
                           a.inj_range_add_le || a.inj_skip_full ||
                           a.inj_fold_kmax10 || a.inj_genfilter_nonstrict ||
-                          a.inj_axial != 0;
+                          a.inj_axial != 0 || a.inj_par_drop;
   // LE PARAMETRE QUI DEFINIT L'OBJET EN AMONT EXISTE EN AVAL (audit « smax
   // dynamique ») : caps de census par arite, expansion, folds et totaux
   // suivent tous smax_eff — plus jamais les constantes 9/11/10 (MUTANT
