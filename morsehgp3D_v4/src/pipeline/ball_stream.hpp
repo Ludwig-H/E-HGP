@@ -95,9 +95,9 @@ struct BallStreamStats {
   u64 axial_verify_mismatch = 0;
   // Cœur universel du seed (audit « axial arbre et cœur de seed » § 1) :
   // seeds tues par >= h_4 temoins seed-universels (ou J < 0 : aucun
-  // tetraedre admissible), et nœuds visites par la descente du compte.
+  // tetraedre admissible), et sites du cover examines par le compte.
   u64 seeds_killed_seed_core = 0;
-  u64 seed_core_nodes = 0;
+  u64 seed_core_sites = 0;
   // Decomposition de t_gen exigee par l'audit § 3 (chemin axial) :
   // cœur de seed, materialisation A,B des sites, reduction a deux cotes
   // (seuils + groupes + prefixes + d_j), emission (valid_completion +
@@ -135,7 +135,7 @@ struct BallStreamStats {
     axial_completion_calls += o.axial_completion_calls;
     axial_verify_mismatch += o.axial_verify_mismatch;
     seeds_killed_seed_core += o.seeds_killed_seed_core;
-    seed_core_nodes += o.seed_core_nodes;
+    seed_core_sites += o.seed_core_sites;
     t_seed_core_ms += o.t_seed_core_ms;
     t_axial_ab_ms += o.t_axial_ab_ms;
     t_reduce_ms += o.t_reduce_ms;
@@ -215,69 +215,17 @@ inline int cmp_2p2_jb2(i128 P, i128 J, i64 B) {
 // meurt de toute facon (>= h_4 interieurs si le label q_min est 4 ; si
 // une emission d'arite inferieure partage la cle, le groupe subsiste par
 // elle, inchange) — meme argument que depth_dead et le filtre W_4.
-// (Deux variantes essayees et REVERTIES apres mesure — voir le reçu
-// « kernel sans alloc », post-scriptum micro-optimisations : le budget
-// d'atteignabilite (borne superieure count + poids de pile, abandon des
-// que budget < h) est NEUTRE (−0,06 % de nœuds : il ne mord qu'en fin
-// de descente), et l'ordre de visite par P au milieu de boite est
-// NEGATIF (+22 % de t_core : deux evaluations par nœud interne coutent
-// plus que les visites economisees). La constante restante est
-// l'independance des descentes par seed — leviers reels : traitement
-// groupe par ancre, parallelisation.)
-inline bool seed_core_kills(const CloudIndex& ix,
-                            const std::vector<NodeRef>& handles,
-                            const Q3Form& f3s, const P3& nrm, i128 J, u64 h,
-                            i32 ua, i32 ub, i32 ux, bool nonstrict,
-                            BallStreamStats* st) {
-  if (J < 0) return true;
-  const i64 nn[3] = {nrm.x, nrm.y, nrm.z};
-  const i64 aa[3] = {f3s.a.x, f3s.a.y, f3s.a.z};
-  u64 count = 0;
-  std::vector<NodeRef> stack(handles.begin(), handles.end());
-  while (!stack.empty() && count < h) {
-    const NodeRef z = stack.back();
-    stack.pop_back();
-    ++st->seed_core_nodes;
-    if (z < 0) {
-      const i32 u = -1 - z;
-      if (u == ua || u == ub || u == ux) continue;
-      const P3& pz = ix.upos[(size_t)u];
-      const i128 P = q3_power(f3s, pz);
-      if (nonstrict ? (P > 0) : (P >= 0)) continue;
-      const i64 B = p3_dot(nrm, p3_sub(pz, f3s.a));
-      const int c = cmp_2p2_jb2(P, J, B);
-      if (nonstrict ? (c >= 0) : (c > 0)) count += ix.range_weight(u, u);
-      continue;
-    }
-    const AxisBox bz = box_of_node(ix, z);
-    i128 pmn = 0, pmx = 0;
-    i64 bmn = 0, bmx = 0;
-    for (int i = 0; i < 3; ++i) {
-      const i64 lo = bz.lo[i] - aa[i];
-      const i64 hi = bz.hi[i] - aa[i];
-      pmn += detail_q3::axis_min(f3s, i, lo, hi);
-      pmx += detail_q3::axis_max(f3s, i, lo, hi);
-      bmn += nn[i] >= 0 ? nn[i] * lo : nn[i] * hi;
-      bmx += nn[i] >= 0 ? nn[i] * hi : nn[i] * lo;
-    }
-    if (nonstrict ? (pmn > 0) : (pmn >= 0)) continue;  // NONE
-    if (nonstrict ? (pmx <= 0) : (pmx < 0)) {
-      // ALL possible : |P| >= |Pmax| et |B| <= Babs sur tout le nœud.
-      const i64 babs = bmx > -bmn ? bmx : -bmn;
-      const int c = cmp_2p2_jb2(pmx, J, babs);
-      if (nonstrict ? (c >= 0) : (c > 0)) {
-        // a, b, x ont P = 0 : un nœud ALL strict ne peut pas les contenir
-        // (sous mutant l'excedent tue PLUS de seeds, jamais moins).
-        const NodeRange r = range_of(ix, z);
-        count += ix.range_weight(r.first, r.last);
-        continue;
-      }
-    }
-    stack.push_back(ix.nodes[(size_t)z].left);
-    stack.push_back(ix.nodes[(size_t)z].right);
-  }
-  return count >= h;
-}
+// HISTORIQUE DES VARIANTES DU COMPTE (toutes tranchees PAR LA MESURE,
+// sorties identiques a chaque fois) : (1) descente de l'antichaine avec
+// tests ALL/NONE par boite (axis_min/axis_max i128 par nœud) — PERDANTE
+// par ×12 contre le scan aplati du cover (t_core 27,0 -> 2,2 s sur
+// eight_clusters n=1000 ; kills STRICTEMENT identiques sur les deux
+// familles : les temoins vivaient tous dans le cover de l'ancre, le
+// sur-univers des handles n'ajoutait rien) ; (2) budget
+// d'atteignabilite : neutre (−0,06 % de nœuds) ; (3) ordre de visite
+// par P au milieu de boite : negatif (+22 %). Le compte retenu est le
+// scan du cover aplati avec sortie anticipee a h_4 — il vit dans la
+// boucle de seed de collect_candidate_balls.
 
 // ---- PRIMITIVE DU SWEEP A DEUX COTES, extraite et testable SEULE (audit
 // « sweep reçu et kernel sans alloc » § 3) : aucune geometrie, AUCUNE
@@ -764,9 +712,28 @@ inline void collect_candidate_balls(const CloudIndex& ix, i64 s, u64 smax_eff,
           {
             const auto c0 = std::chrono::steady_clock::now();
             const i128 Jb = (i128)D2 * (3 * f3s.g - 2 * (i128)l_ax * l_bx);
-            const bool dead = seed_core_kills(
-                ix, handles, f3s, nrm, Jb, h_of[2], ua, ub, cx.u,
-                (axial_flags & kAxialSeedCoreNonstrict) != 0, st);
+            const bool nonstrict =
+                (axial_flags & kAxialSeedCoreNonstrict) != 0;
+            // Compte des temoins sur le COVER APLATI de l'ancre (variante
+            // gagnante — en-tete « historique des variantes ») : minorant
+            // fail-open (un sous-compte ne tue jamais a tort), sortie
+            // anticipee a h_4, ~une puissance q3 par site examine.
+            bool dead = Jb < 0;
+            if (!dead) {
+              u64 fcount = 0;
+              for (const CoverPoint& cz : cover) {
+                if (cz.u == ua || cz.u == ub || cz.u == cx.u) continue;
+                ++st->seed_core_sites;
+                const P3& pz = ix.upos[(size_t)cz.u];
+                const i128 Pz = q3_power(f3s, pz);
+                if (nonstrict ? (Pz > 0) : (Pz >= 0)) continue;
+                const i64 Bz = p3_dot(nrm, p3_sub(pz, f3s.a));
+                const int c = cmp_2p2_jb2(Pz, Jb, Bz);
+                if ((nonstrict ? (c >= 0) : (c > 0)) && ++fcount >= h_of[2])
+                  break;
+              }
+              dead = fcount >= h_of[2];
+            }
             st->t_seed_core_ms += std::chrono::duration<double, std::milli>(
                                       std::chrono::steady_clock::now() - c0)
                                       .count();

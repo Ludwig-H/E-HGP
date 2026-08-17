@@ -811,7 +811,7 @@ int run_par_gate(bool inj_drop) {
                    s1.gen_depth_killed[i] == s4.gen_depth_killed[i];
       counters = counters && s1.anchors_killed_w4 == s4.anchors_killed_w4 &&
                  s1.seeds_killed_seed_core == s4.seeds_killed_seed_core &&
-                 s1.seed_core_nodes == s4.seed_core_nodes &&
+                 s1.seed_core_sites == s4.seed_core_sites &&
                  s1.axial_groups_emitted == s4.axial_groups_emitted &&
                  s1.axial_roots_pruned_cross == s4.axial_roots_pruned_cross &&
                  s1.axial_groups_killed_depth == s4.axial_groups_killed_depth;
@@ -1503,7 +1503,7 @@ int main(int argc, char** argv) {
       "census_shell=%llu evenements=%llu fusions=%llu noeuds=%llu "
       "juge=%s desaccords=%s t_gen_ms=%.1f t_tri_ms=%.1f t_prefiltre_ms=%.1f "
       "t_census_ms=%.1f t_fold_ms=%.1f t_juge_ms=%.1f seeds_core=%llu "
-      "noeuds_core=%llu t_core_ms=%.1f t_ab_ms=%.1f t_reduce_ms=%.1f "
+      "sites_core=%llu t_core_ms=%.1f t_ab_ms=%.1f t_reduce_ms=%.1f "
       "t_emit_ms=%.1f\n",
       cloud_family_name(a.family), pts.size(), (long long)a.s,
       (unsigned long long)smax_eff, a.seed, (unsigned long long)st.candidates[0],
@@ -1531,7 +1531,7 @@ int main(int argc, char** argv) {
       a.judge ? std::to_string(disagreements).c_str() : "NA",
       ms(t0b - t0), ms(t1 - t0b), ms(t1b - t1), ms(t2 - t1b), ms(t3 - t2),
       ms(t4 - t3), (unsigned long long)st.seeds_killed_seed_core,
-      (unsigned long long)st.seed_core_nodes, st.t_seed_core_ms,
+      (unsigned long long)st.seed_core_sites, st.t_seed_core_ms,
       st.t_axial_ab_ms, st.t_reduce_ms, st.t_emit_ms);
 
   if (any_inject) {
