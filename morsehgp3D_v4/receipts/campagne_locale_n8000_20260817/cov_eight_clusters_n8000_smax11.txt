@@ -1,0 +1,1 @@
+TIMEOUT — aucune ligne de compteurs (le probe n'imprime qu'en fin de run)
