@@ -189,6 +189,20 @@ re-déclarées ici comme fondation v4) :
   (contre-exemple v3 : arête vivante joignant a à son 1001-ième voisin) —
   aucune source kNN de petit préfixe n'est complète (fixture 50 000 points
   gravée, PROPOSITION § 10).
+- **Boules de milieu universelles, formes entières** (piste v3, audits du
+  12 août) : avec `u = 2z−a−b` et `D² = ‖ab‖²`, les tests témoins i64 sous
+  u16 sont `u·u < D²` (q2, rayon D/2), `3(u·u) < D²` (q3, rayon `D/√12`),
+  `15(u·u) < 4D²` (q4, rayon `D/√15`) ; en marge `g = D²−u·u` : `g > 0`,
+  `3g > 2D²`, `15g > 11D²`. `g = 0` est l'extra-shell q2. Aucun décimal ne
+  décide ; seules ces formes entières sont l'autorité. **Attention** : ces
+  rayons du 12 août (`D/√12`, `D/√15`) et les `κ_q` du théorème corrigé du
+  15 août (`1/(2√3)`, `sin 15°`) diffèrent — ensembles admissibles
+  distincts. Re-dérivation v4 (`derive_v4`, à contre-vérifier — Q6) : sous
+  « (a,b) arête maximale + borne de Jung », le centre vérifie `w = c−m ⊥ d`
+  et `‖w‖ ≤ κ'·D` (`κ' = 1/(2√3)` q3, `1/(2√2)` q4), et le minimum de
+  `R−‖w‖ = √(D²/4+‖w‖²)−‖w‖` est atteint au bord : `D/(2√3)` (q3) et
+  `D(√3−1)/(2√2) = D·sin 15°` (q4) — les `κ_q` du 15 août sont confirmés
+  pour CET ensemble admissible.
 - **Cœur-boule** (rayons sûrs autour du milieu, `theoreme_v3` corrigé) :
   la plus grande boule centrée en m incluse dans le fuseau ouvert d'une ancre
   ponctuelle est `B̊(m, κ_q ‖ab‖)` avec `κ_2 = 1/2`, `κ_3 = 1/(2√3)`,
