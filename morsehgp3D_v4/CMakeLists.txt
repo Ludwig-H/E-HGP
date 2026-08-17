@@ -169,6 +169,19 @@ mhgp4_expect_code(mhgp4_q4_mutant_coef3 4 mhgp4_q4_events_probe
 mhgp4_expect_code(mhgp4_q4_mutant_no_canonical 4 mhgp4_q4_events_probe
     "--family=uniform --n=120 --s=8 --seed=3 --inject=no-canonical")
 
+# La foret HGP (MATHEMATIQUES.md § 5) : union-find a macro-lots
+# `same_exact_level`, juge par miniboule INDEPENDANTE (recherche de support
+# propre, OBig) + cliques completes du manuscrit + Kruskal propre a lots ;
+# invariant des rayons de naissance (attach_violations = 0) ; fixtures du
+# nœud ternaire colineaire et du tie q4/q2 a representants differents ;
+# mutants chronologie-binaire et egalite-de-representation tues.
+add_executable(mhgp4_forest_selftest tests/forest_selftest.cpp)
+mhgp4_expect_code(mhgp4_forest_accord 0 mhgp4_forest_selftest "")
+mhgp4_expect_code(mhgp4_forest_mutant_binaire 4 mhgp4_forest_selftest
+    "--inject=binary-ties")
+mhgp4_expect_code(mhgp4_forest_mutant_repr 4 mhgp4_forest_selftest
+    "--inject=repr-ties")
+
 # La lane q2 productrice : W_2 est la boule diametrale ouverte, le census
 # est une requete de cover a coefficient 1. Juge brut toutes-paires sur
 # records complets ; fixture a coquille exacte gravee et mutant sign-le

@@ -495,22 +495,60 @@ q3/q4 se décide sur les numérateurs barycentriques Gram–Cramer.
 
 ## 5. Reconstruction de la forêt
 
-Le flux d'événements (support S, profondeur d, niveau ρ, facettes actives
-`σ∖{s}`) alimente, pour chaque K = 1..K_max, un Kruskal/Borůvka sur les
-facettes hachées (clé = K-uplet trié de PointId) :
+### 5.1 L'objet et les clés
 
-- seuls les événements de profondeur `d = K+1−q` servent la forêt K ;
-- relier les facettes actives par un chemin suffit (Prop. 6) ; les facettes
-  nées au niveau même (retrait d'un intérieur) n'apportent aucune fusion ;
-- les égalités de niveau se décident exactement (comparaison de rationnels/
-  entiers), l'ordre total est reproductible ; hors position générale → refus.
-- oracle : `gamma_forest_judge` indépendant (arithmétique distincte), et
-  l'équivalence Théorème 2 (composantes de `L_K(r)` + couverture) comme
-  second chemin de vérité sur petits n.
+Pour chaque `K = 1..K_max` : les sommets du K-graphe de Gabriel (Déf. 29)
+sont les **facettes** (K-uplets triés de `PointId` — la `FacetKey`) des
+K-simplexes de Gabriel ; chaque événement `σ = S ∪ I` (support d'arité
+`q`, `|I| = d = K+1−q` intérieurs, niveau exact `ρ(σ)²` en fraction) y met
+une clique au poids `ρ(σ)`. La forêt HGP = le K-MST élagué (Théorème 5),
+rendue comme suite de (multi)fusions de composantes avec niveaux. Le
+`K_max <= 10` du profil borne `d` par lane exactement comme les seuils
+`h_q = s_max − q + 1` (q2 : `K = d+1`, q3 : `d+2`, q4 : `d+3`).
 
-Statut : squelette `theoreme_manuscrit` + conventions v3 ; la spécification
-détaillée v4 (clés, lanes, statuts transactionnels) est dans
-`ARCHITECTURE.md`.
+### 5.2 Bras actifs, attachements MESURÉS
+
+Les `q` **facettes actives** de σ sont `I ∪ (S∖{s})`, `s ∈ S`
+(`ρ` décroît strictement en retirant un point du support — Fait 12) ; les
+`d` facettes `σ∖{z}`, `z ∈ I`, naissent AU niveau `ρ(σ)` même. La piste
+v3/audit (« relier les actives par un chemin suffit, les autres
+n'apportent aucune fusion ») n'est PAS supposée : la v4 unionne les
+`K+1` facettes (chemin sur toutes — équivalent clique pour la
+connectivité, conforme au manuscrit) et COMPTE séparément les fusions
+apportées par un bras non actif (`attach_fusions`). L'invariant mesuré
+`attach_fusions = 0` est une porte : s'il casse un jour, la contradiction
+devient fixture et la piste est réfutée — jamais l'inverse.
+
+### 5.3 Macro-lots (contrat gravé, audit « lemme préfixe et niveau »)
+
+Les événements sont triés par niveau EXACT (`compare_exact_level` U320
+après promotion — jamais l'égalité de représentation). Un **macro-lot** =
+un groupe maximal de niveaux sémantiquement égaux : racines gelées avant
+le lot, toutes les unions du lot appliquées ensemble, puis UN nœud de
+dendrogramme par racine finale ayant absorbé plusieurs composantes
+pré-lot — aucune chronologie binaire artificielle. La partition résultante
+est indépendante de l'ordre interne (clôture d'union-find) ; le nombre de
+nœuds par lot aussi (groupes de racines).
+
+### 5.4 Le juge indépendant
+
+Sur petits nuages (`n <= 14`, coordonnées bornées documentées — le régime
+oracle T2) : énumération de TOUS les sous-ensembles `σ`, miniboule par
+recherche de support propre (paires/triplets/quadruplets, centre dans
+l'enveloppe, plus petite boule contenante — arithmétique rationnelle
+i128, code distinct de la production), Gabriel = boule ouverte vide, un
+point externe SUR la sphère ⟹ σ écarté (le même refus transactionnel que
+la production) ; puis le K-graphe du manuscrit (cliques COMPLÈTES) et un
+Kruskal propre à lots. Comparaison : ensembles de sommets, partition
+après CHAQUE lot, nombre de nœuds par lot, et égalité des niveaux de lot
+en arithmétique croisée du juge. Le sujet à petit n est l'énumération aux
+prédicats de production (équivalente aux pipelines WSPD, prouvée par les
+portes par lane) ; le raccord du flux WSPD réel à la forêt est l'étape
+suivante déclarée.
+
+Statut : `derive_v4` sur le squelette `theoreme_manuscrit` (Déf. 29,
+Prop. 6, Théorème 5) ; la spécification opérationnelle (clés, lanes,
+statuts transactionnels) est dans `ARCHITECTURE.md`.
 
 ---
 
