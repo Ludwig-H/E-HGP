@@ -150,8 +150,14 @@ gcloud compute scp "${TAR}" "${GCP_INSTANCE_NAME}:/tmp/v4.tgz" \
       hwm=$(grep -oE "Maximum resident set size[^0-9]*[0-9]+" "${status}.time" | grep -oE "[0-9]+$" || true)
     else
       timeout 10800 taskset -c "${cpu}" "$P" "$@" >"${out}" 2>&1 & local pp=$!
+      # Echantillonner le VRAI processus : timeout est le parent, le probe
+      # son enfant (taskset s execute dedans) — /proc du parent ne mesure
+      # que quelques Mo de bash (leçon locale : 4 972 kB pour un run a 3 Go).
+      local target=""
       while kill -0 ${pp} 2>/dev/null; do
-        local h; h=$(grep VmHWM /proc/${pp}/status 2>/dev/null | awk "{print \$2}") || true
+        [ -z "${target}" ] && target=$(pgrep -P ${pp} 2>/dev/null | head -1) || true
+        local h=""
+        [ -n "${target}" ] && h=$(grep VmHWM /proc/${target}/status 2>/dev/null | awk "{print \$2}") || true
         [ -n "${h}" ] && hwm=${h}
         sleep 3
       done

@@ -55,3 +55,22 @@ matériel contractuel des reçus — aucun débit GPU revendiqué, aucun
 benchmark ne promeut `public_status=exact`. Ce conteneur n'a ni
 `gcloud` ni identifiants (le README GCP impose le terminal local) : le
 script est prêt à lancer par l'opérateur.
+
+## Post-scriptum — pic RSS isolé et lanceur rendu transactionnel (audit 1a0640)
+
+Pic mémoire mesuré (VmHWM, run isolé n=8000 uniform smax=11) :
+**6 786 612 kB ≈ 6,8 Go**. Extrapolation par la pente des événements :
+~16 Go à n=16000, ~35-40 Go à n=32000 — la matrice complète exige la
+G4 (180 Go) ; les caps prudents 8/4/2 de l'audit dominent la formule
+`0.75·RAM/pic` aux deux premières tailles. Leçon de mesure payée deux
+fois : échantillonner le VRAI processus (la première mesure lisait le
+sous-shell parent — 4 972 kB pour un run à 6,8 Go ; le repli VmHWM du
+lanceur G4 vise désormais l'enfant de `timeout` via pgrep -P).
+
+Le lanceur `session_campagne_v4_scale_g4.sh` est TRANSACTIONNEL depuis
+l'audit « campagne G4 transactionnelle » : statuts atomiques par run,
+deux campagnes séparées (latence isolée / couverture contendue),
+concurrence pilotée par la mémoire, validation locale post-scp qui
+seule décide de `campaign_status` ; et le probe imprime
+`juge=off desaccords=NA` hors régime jugé — plus jamais un zéro machine
+qu'un parseur prendrait pour un accord vérifié.
