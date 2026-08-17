@@ -174,20 +174,76 @@ inline ForestResult build_forest(
                    [](const ForestEvent& x, const ForestEvent& y) {
                      return compare_exact_level(x.level, y.level) < 0;
                    });
+  // LOTS d'abord (independants des unions) : plages de niveaux
+  // semantiquement egaux. MUTANTS : ties binaires (lot force a un seul
+  // evenement) ou egalite de REPRESENTATION (le piege grave par l'audit :
+  // deux representants differents du meme rationnel brisent le lot a tort).
+  r.batch_of_event.assign(events.size(), 0);
+  std::vector<std::pair<size_t, size_t>> batch_bounds;
+  {
+    size_t b0 = 0;
+    while (b0 < events.size()) {
+      size_t b1 = b0 + 1;
+      while (b1 < events.size()) {
+        const bool same =
+            mutant_repr_equality
+                ? same_level_representation(events[b1].level, events[b0].level)
+                : same_exact_level(events[b1].level, events[b0].level);
+        if (mutant_binary_ties || !same) break;
+        ++b1;
+      }
+      for (size_t e = b0; e < b1; ++e)
+        r.batch_of_event[e] = batch_bounds.size();
+      batch_bounds.push_back({b0, b1});
+      b0 = b1;
+    }
+  }
+  // INTERNEMENT GLOBAL PAR TRI (fold sort/reduce : les std::map chauds —
+  // id_of global et roles par lot — portaient la pente ×2,8/doublement du
+  // fold ; un tri unique des (facette, evenement, slot) les remplace).
+  // Les fid sont attribues en ordre de FacetKey croissante ; first_batch
+  // rend `existed` = « vue dans un lot STRICTEMENT anterieur » en O(1).
+  struct FRec {
+    FacetKey f;
+    u32 e;
+    u8 slot;  // < q : retrait de support ; >= q : retrait d'interieur
+  };
+  std::vector<FRec> recs;
+  {
+    size_t total = 0;
+    for (const ForestEvent& ev : events) total += (size_t)ev.q + ev.d;
+    recs.reserve(total);
+  }
+  for (size_t e = 0; e < events.size(); ++e) {
+    const ForestEvent& ev = events[e];
+    for (int s = 0; s < (int)ev.q; ++s)
+      recs.push_back({detail_forest::facet_minus(ev, s, -1), (u32)e, (u8)s});
+    for (int z = 0; z < (int)ev.d; ++z)
+      recs.push_back(
+          {detail_forest::facet_minus(ev, -1, z), (u32)e, (u8)(ev.q + z)});
+  }
+  std::stable_sort(recs.begin(), recs.end(),
+                   [](const FRec& x, const FRec& y) { return x.f < y.f; });
+  std::vector<FacetKey> keys;          // fid -> FacetKey (ordre croissant)
+  std::vector<u32> first_batch;        // fid -> premier lot d'apparition
+  std::vector<u32> ev_fid(events.size() * 11);  // (e, slot) -> fid
+  for (size_t i = 0; i < recs.size(); ++i) {
+    if (i == 0 || !(recs[i].f == recs[i - 1].f)) {
+      keys.push_back(recs[i].f);
+      first_batch.push_back(UINT32_MAX);
+    }
+    const u32 fid = (u32)keys.size() - 1;
+    ev_fid[(size_t)recs[i].e * 11 + recs[i].slot] = fid;
+    first_batch.back() =
+        std::min(first_batch.back(), (u32)r.batch_of_event[recs[i].e]);
+  }
+  const size_t nfid = keys.size();
+  r.facets = nfid;
   detail_forest::UnionFind uf;
-  std::map<FacetKey, i32> id_of;
+  for (size_t i = 0; i < nfid; ++i) uf.add();
   // Identifiant canonique de composante : plus petite FacetKey, maintenu
   // incrementalement (creation + union).
-  std::vector<FacetKey> canon_of;
-  const auto facet_id = [&](const FacetKey& f) {
-    const auto it = id_of.find(f);
-    if (it != id_of.end()) return it->second;
-    const i32 v = uf.add();
-    id_of.emplace(f, v);
-    canon_of.push_back(f);
-    ++r.facets;
-    return v;
-  };
+  std::vector<FacetKey> canon_of = keys;
   const auto unite_canon = [&](i32 a, i32 b) {
     const i32 ra = uf.find(a), rb = uf.find(b);
     if (ra == rb) return false;
@@ -196,61 +252,54 @@ inline ForestResult build_forest(
     canon_of[(size_t)uf.find(ra)] = mn;
     return true;
   };
-  r.batch_of_event.assign(events.size(), 0);
-  size_t e0 = 0;
-  while (e0 < events.size()) {
-    // Macro-lot [e0, e1) : niveaux semantiquement egaux. MUTANTS : ties
-    // binaires (lot force a un seul evenement) ou egalite de
-    // REPRESENTATION (le piege grave par l'audit : deux representants
-    // differents du meme rationnel brisent le lot a tort).
-    size_t e1 = e0 + 1;
-    while (e1 < events.size()) {
-      const bool same =
-          mutant_repr_equality
-              ? same_level_representation(events[e1].level, events[e0].level)
-              : same_exact_level(events[e1].level, events[e0].level);
-      if (mutant_binary_ties || !same) break;
-      ++e1;
-    }
-    // ROLES agreges par facette sur TOUT le lot, AVANT toute creation d'ID
-    // (audit « facettes nees dans le lot ») : une facette n'est un enfant
-    // du nœud que si elle est ACTIVE (nee strictement avant le niveau) ou
-    // PREEXISTANTE ; les attachements nes au lot restent dans la fermeture
-    // union-find mais jamais dans `absorbed`.
-    struct Role {
-      bool existed = false, active = false, attach = false;
-      i32 id = -1;
-    };
-    std::map<FacetKey, Role> roles;
-    for (size_t e = e0; e < e1; ++e) {
-      r.batch_of_event[e] = r.batches;
-      const ForestEvent& ev = events[e];
-      for (int s = 0; s < (int)ev.q; ++s) {
-        Role& ro = roles[detail_forest::facet_minus(ev, s, -1)];
-        if ((ev.active_mask >> s) & 1u) ro.active = true;
-        else ro.attach = true;
+  // Roles par lot en tableaux a EPOQUE (jamais une map par facette).
+  constexpr u8 kActive = 1, kAttach = 2;
+  std::vector<u32> role_epoch(nfid, UINT32_MAX);
+  std::vector<u8> role_bits(nfid, 0);
+  std::vector<u32> touched_fids;
+  for (size_t b = 0; b < batch_bounds.size(); ++b) {
+    const size_t e0 = batch_bounds[b].first, e1 = batch_bounds[b].second;
+    // ROLES agreges par facette sur TOUT le lot (audit « facettes nees
+    // dans le lot ») : une facette n'est un enfant du nœud que si elle est
+    // ACTIVE (nee strictement avant le niveau) ou PREEXISTANTE ; les
+    // attachements nes au lot restent dans la fermeture union-find mais
+    // jamais dans `absorbed`.
+    touched_fids.clear();
+    const auto touch = [&](u32 fid, u8 bit) {
+      if (role_epoch[fid] != (u32)b) {
+        role_epoch[fid] = (u32)b;
+        role_bits[fid] = 0;
+        touched_fids.push_back(fid);
       }
+      role_bits[fid] |= bit;
+    };
+    for (size_t e = e0; e < e1; ++e) {
+      const ForestEvent& ev = events[e];
+      for (int s = 0; s < (int)ev.q; ++s)
+        touch(ev_fid[e * 11 + (size_t)s],
+              ((ev.active_mask >> s) & 1u) ? kActive : kAttach);
       for (int z = 0; z < (int)ev.d; ++z)
-        roles[detail_forest::facet_minus(ev, -1, z)].attach = true;
+        touch(ev_fid[e * 11 + (size_t)(ev.q + z)], kAttach);
     }
-    for (auto& kv : roles) {
-      kv.second.existed = id_of.find(kv.first) != id_of.end();
+    for (const u32 fid : touched_fids) {
+      const bool existed = first_batch[fid] < (u32)b;
+      const bool active = role_bits[fid] & kActive;
+      const bool attach = role_bits[fid] & kAttach;
       // Invariants (audit § 3) : un attachement deja vu, ou une facette a
       // la fois active et attachement au meme niveau, refutent la
       // coherence des rayons de naissance du flux.
-      if (kv.second.attach && kv.second.existed) ++r.attach_violations;
-      if (kv.second.attach && kv.second.active) ++r.birth_violations;
-      if (kv.second.attach && !kv.second.existed && !kv.second.active)
-        ++r.new_attachments;
+      if (attach && existed) ++r.attach_violations;
+      if (attach && active) ++r.birth_violations;
+      if (attach && !existed && !active) ++r.new_attachments;
     }
-    for (auto& kv : roles) kv.second.id = facet_id(kv.first);
     // Racines PRE-LOT : actives (leur rayon de naissance est strictement
     // inferieur, meme jamais rencontrees) OU preexistantes. MUTANT
     // attach-prebatch : l'ancienne convention fausse (tout le lot).
     std::map<i32, u64> prebatch_roots;
-    for (const auto& kv : roles)
-      if (mutant_attach_prebatch || kv.second.active || kv.second.existed)
-        prebatch_roots[uf.find(kv.second.id)] = 0;
+    for (const u32 fid : touched_fids)
+      if (mutant_attach_prebatch || (role_bits[fid] & kActive) ||
+          first_batch[fid] < (u32)b)
+        prebatch_roots[uf.find((i32)fid)] = 0;
     // Canoniques PRE-LOT des racines gelees (avant toute union du lot).
     std::map<i32, FacetKey> pre_canon;
     for (const auto& pr : prebatch_roots)
@@ -260,12 +309,12 @@ inline ForestResult build_forest(
       const ForestEvent& ev = events[e];
       i32 first = -1;
       for (int s = 0; s < (int)ev.q; ++s) {
-        const i32 v = roles[detail_forest::facet_minus(ev, s, -1)].id;
+        const i32 v = (i32)ev_fid[e * 11 + (size_t)s];
         if (first < 0) first = v;
         else if (unite_canon(first, v)) ++r.fusions;
       }
       for (int z = 0; z < (int)ev.d; ++z) {
-        const i32 v = roles[detail_forest::facet_minus(ev, -1, z)].id;
+        const i32 v = (i32)ev_fid[e * 11 + (size_t)(ev.q + z)];
         if (unite_canon(first, v)) ++r.fusions;
       }
     }
@@ -280,46 +329,40 @@ inline ForestResult build_forest(
       ComponentDelta& cd = touched[uf.find(pr.first)];
       cd.parents.push_back(pre_canon[pr.first]);
     }
-    for (const auto& kv : roles)
-      if (kv.second.attach && !kv.second.existed && !kv.second.active)
-        touched[uf.find(kv.second.id)].born.push_back(kv.first);
+    for (const u32 fid : touched_fids)
+      if ((role_bits[fid] & kAttach) && !(role_bits[fid] & kActive) &&
+          first_batch[fid] >= (u32)b)
+        touched[uf.find((i32)fid)].born.push_back(keys[fid]);
     // Nœuds (vue derivee) : >= 2 parents.
     for (auto& tc : touched) {
       ComponentDelta& cd = tc.second;
       std::sort(cd.parents.begin(), cd.parents.end());
       std::sort(cd.born.begin(), cd.born.end());
       if (cd.parents.size() >= 2)
-        r.nodes.push_back(ForestNode{r.batches, cd.parents.size()});
+        r.nodes.push_back(ForestNode{(u64)b, cd.parents.size()});
       if (cd.parents.size() == 1 && cd.born.empty()) continue;  // continuation
       if (mutant_drop_nonmerge && cd.parents.size() < 2) continue;
-      cd.batch = r.batches;
+      cd.batch = (u64)b;
       cd.level = events[e0].level;
       cd.output = canon_of[(size_t)uf.find(tc.first)];
       r.deltas.push_back(cd);
     }
     r.batch_levels.push_back(events[e0].level);
     if (snapshots) {
+      // Instantane (petits n seulement) : les facettes DEJA VUES jusqu'au
+      // lot courant inclus (first_batch <= b), en ordre de FacetKey — le
+      // canonique du bloc est le min, deja maintenu dans canon_of.
       std::map<FacetKey, FacetKey> part;
-      std::map<i32, FacetKey> canon;
-      for (const auto& kv : id_of) {
-        const i32 root = uf.find(kv.second);
-        if (canon.find(root) == canon.end()) canon.emplace(root, kv.first);
-      }
-      for (const auto& kv : id_of) part[kv.first] = canon[uf.find(kv.second)];
+      for (size_t fid = 0; fid < nfid; ++fid)
+        if (first_batch[fid] <= (u32)b)
+          part[keys[fid]] = canon_of[(size_t)uf.find((i32)fid)];
       snapshots->push_back(std::move(part));
     }
     ++r.batches;
-    e0 = e1;
   }
-  {
-    std::map<i32, FacetKey> canon;
-    for (const auto& kv : id_of) {
-      const i32 root = uf.find(kv.second);
-      if (canon.find(root) == canon.end()) canon.emplace(root, kv.first);
-    }
-    for (const auto& kv : id_of)
-      r.final_partition[kv.first] = canon[uf.find(kv.second)];
-  }
+  for (size_t fid = 0; fid < nfid; ++fid)
+    r.final_partition.emplace_hint(r.final_partition.end(), keys[fid],
+                                   canon_of[(size_t)uf.find((i32)fid)]);
   return r;
 }
 

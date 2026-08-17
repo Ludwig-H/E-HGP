@@ -62,7 +62,19 @@ inline RenderResult build_render(std::vector<ForestEvent> events,
                    [](const ForestEvent& x, const ForestEvent& y) {
                      return compare_exact_level(x.level, y.level) < 0;
                    });
-  std::map<FacetKey, std::map<u64, u64>> acc;
+  // Agregation par TRI (fold sort/reduce) : un enregistrement (facette,
+  // lot) par incidence, tries puis reduits par plages — l'ancienne
+  // map<FacetKey, map<u64, u64>> portait la pente ×2,8 du fold.
+  struct RRec {
+    FacetKey f;
+    u64 batch;
+  };
+  std::vector<RRec> recs;
+  {
+    size_t total = 0;
+    for (const ForestEvent& ev : events) total += (size_t)ev.q + ev.d;
+    recs.reserve(total);
+  }
   size_t e0 = 0;
   u64 batch = 0;
   while (e0 < events.size()) {
@@ -74,29 +86,39 @@ inline RenderResult build_render(std::vector<ForestEvent> events,
       const ForestEvent& ev = events[e];
       for (int s = 0; s < (int)ev.q; ++s) {
         if (mutant_active_only && !((ev.active_mask >> s) & 1u)) continue;
-        ++acc[detail_forest::facet_minus(ev, s, -1)][batch];
+        recs.push_back({detail_forest::facet_minus(ev, s, -1), batch});
       }
       // Les retraits d'interieur sont toujours des attachements : le mutant
       // active-only les exclut aussi.
       if (!mutant_active_only)
         for (int z = 0; z < (int)ev.d; ++z)
-          ++acc[detail_forest::facet_minus(ev, -1, z)][batch];
+          recs.push_back({detail_forest::facet_minus(ev, -1, z), batch});
     }
     r.batch_levels.push_back(events[e0].level);
     ++batch;
     e0 = e1;
   }
-  r.facets.reserve(acc.size());
-  for (auto& kv : acc) {
+  std::stable_sort(recs.begin(), recs.end(), [](const RRec& x, const RRec& y) {
+    if (!(x.f == y.f)) return x.f < y.f;
+    return x.batch < y.batch;
+  });
+  for (size_t i = 0; i < recs.size();) {
     FacetIncidences fi;
-    fi.facet = kv.first;
-    fi.per_batch.reserve(kv.second.size());
-    for (const auto& bm : kv.second) {
-      const u64 m = mutant_collapse_mult ? 1 : bm.second;
-      fi.per_batch.push_back({bm.first, m});
+    fi.facet = recs[i].f;
+    size_t j = i;
+    while (j < recs.size() && recs[j].f == fi.facet) {
+      const u64 bt = recs[j].batch;
+      u64 m = 0;
+      while (j < recs.size() && recs[j].f == fi.facet && recs[j].batch == bt) {
+        ++m;
+        ++j;
+      }
+      if (mutant_collapse_mult) m = 1;
+      fi.per_batch.push_back({bt, m});
       r.incidences += m;
     }
     r.facets.push_back(std::move(fi));
+    i = j;
   }
   return r;
 }
