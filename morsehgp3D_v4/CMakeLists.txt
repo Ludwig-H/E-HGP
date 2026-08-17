@@ -28,6 +28,7 @@ add_executable(mhgp4_tree_selftest tests/tree_selftest.cpp)
 add_executable(mhgp4_wspd_scaling_probe bench/wspd_scaling_probe.cpp)
 add_executable(mhgp4_q2_fixture tests/q2_fixture_test.cpp)
 add_executable(mhgp4_q2_prune_probe bench/q2_prune_probe.cpp)
+add_executable(mhgp4_q234_prune_probe bench/q234_prune_probe.cpp)
 
 # ---- Portes ----------------------------------------------------------------
 
@@ -75,6 +76,14 @@ mhgp4_expect_code(mhgp4_q2_prune_judge_clusters 0 mhgp4_q2_prune_probe
     "--family=eight_clusters --n=1500 --s=8 --seed=3 --true-alive --min-dead-pct=30")
 mhgp4_expect_code(mhgp4_q2_prune_judge_terrain 0 mhgp4_q2_prune_probe
     "--family=terrain --n=1500 --s=8 --seed=3 --true-alive --min-dead-pct=50")
+
+# Trois lanes, une vague : ledgers exacts par lane + juge in_spindle sur les
+# blocs morts. La contre-famille two_lines doit rendre zero mort q3/q4 a tort
+# (aucun triangle aigu) tout en fermant q2 massivement.
+mhgp4_expect_code(mhgp4_q234_judge_uniform 0 mhgp4_q234_prune_probe
+    "--family=uniform --n=1200 --s=8 --seed=3 --min-dead-pct=25")
+mhgp4_expect_code(mhgp4_q234_judge_two_lines 0 mhgp4_q234_prune_probe
+    "--family=two_lines --n=1200 --s=8")
 
 # Refus avant calcul : famille inconnue, n insuffisant.
 mhgp4_expect_code(mhgp4_wspd_refus_famille 2 mhgp4_wspd_scaling_probe

@@ -136,6 +136,9 @@ inline u64 count_universal_witnesses_q2(const CloudIndex& ix, NodeRef a, NodeRef
 // diamétrale de (a,b), écrêté à `h`. C'est l'équivalence exacte du fuseau
 // q2 ; il sert de vérité pour les portes fail-open. `a`, `b` sont des index
 // de positions uniques.
+//
+// (La version trois-lanes — W_3/W_4 par test ponctuel exact — est
+// `true_spindle_count` dans witness_count.hpp.)
 inline u64 true_interior_count_q2(const CloudIndex& ix, i32 ua, i32 ub, u64 h) {
   const P3& pa = ix.upos[(size_t)ua];
   const P3& pb = ix.upos[(size_t)ub];

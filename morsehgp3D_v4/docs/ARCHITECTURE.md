@@ -154,9 +154,14 @@ un champ issu du census) ; `I_B/U_B` appartiennent à l'événement.
       équivariance par permutation)
 - [x] `src/wspd/` front par vagues binaire (séparé/scindé), ledger de masse
       exact, mutants `drop-rect` et `cap-terminal` tués
-- [ ] descente ternaire q2 (h_coeur par Hmin exact + early-exit) — prochaine
-      étape ; oracle « vrai vivant » par requête de milieu à petit n
-- [ ] h_a/h_b dual-tree à cutoff + histogramme de fermeture
+- [x] descente ternaire q2 (boule-cœur dirigée + Hmin exact + borne minimax),
+      juge fail-open par équivalence `r_{h_2}(m) <= ‖ab‖/2`, mutant
+      `radius-ceil` tué sur fixture gravée ; reçus 12 configurations
+- [x] trois lanes q2/q3/q4 sur une seule vague, masque de lanes, boule-cœur
+      par arité (constantes point-fixe prouvées par static_assert), autorité
+      64 coins aux feuilles (sens ALL seulement), juge `in_spindle`
+- [ ] h_a/h_b dual-tree à range-add (cutoff ~256, coins distincts, masques)
+      + histogramme de fermeture
 - [ ] instruction q3 (lentille + acuité) et q4 (seed + axial)
 - [ ] BallKey/RLE/census, événements
 - [ ] dix forêts + juge `gamma_forest` indépendant
