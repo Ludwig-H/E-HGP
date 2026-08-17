@@ -1,0 +1,4 @@
+famille=eight_clusters n=8000 coord=400 s=8 smax=11 seed=3 morte_q2_pct=98.74 morte_q3_pct=91.59 morte_q4_pct=88.09 morts_int=447849/507893/448246 morts_term=41215/400943/484125 rect_vivants=625634 masse=EXACTE juge=4660542 fausses_morts=0 t_index_ms=1.8 t_descente_ms=22261.5 t_juge_ms=10560.5
+  ha: ancres_vivantes_q2=341739 (84.8%) q3=2009889 (74.7%) q4=2723504 (71.5%) par_point_q4=340.4 evals=12279672 rect_passes=0 juge_ancres=5000 fausses_tueries=0 t_ha_ms=462.0
+famille=uniform n=8000 coord=200 s=8 smax=11 seed=3 morte_q2_pct=98.99 morte_q3_pct=96.57 morte_q4_pct=95.99 morts_int=623944/1127548/1161450 morts_term=32482/471943/632174 rect_vivants=743548 masse=EXACTE juge=8099082 fausses_morts=0 t_index_ms=2.5 t_descente_ms=28144.2 t_juge_ms=20357.2
+  ha: ancres_vivantes_q2=313095 (96.7%) q3=1057410 (96.2%) q4=1233234 (96.1%) par_point_q4=154.2 evals=1965772 rect_passes=0 juge_ancres=5000 fausses_tueries=0 t_ha_ms=230.0
