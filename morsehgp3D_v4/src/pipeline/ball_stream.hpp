@@ -177,6 +177,15 @@ inline int cmp_2p2_jb2(i128 P, i128 J, i64 B) {
 // meurt de toute facon (>= h_4 interieurs si le label q_min est 4 ; si
 // une emission d'arite inferieure partage la cle, le groupe subsiste par
 // elle, inchange) — meme argument que depth_dead et le filtre W_4.
+// (Deux variantes essayees et REVERTIES apres mesure — voir le reçu
+// « kernel sans alloc », post-scriptum micro-optimisations : le budget
+// d'atteignabilite (borne superieure count + poids de pile, abandon des
+// que budget < h) est NEUTRE (−0,06 % de nœuds : il ne mord qu'en fin
+// de descente), et l'ordre de visite par P au milieu de boite est
+// NEGATIF (+22 % de t_core : deux evaluations par nœud interne coutent
+// plus que les visites economisees). La constante restante est
+// l'independance des descentes par seed — leviers reels : traitement
+// groupe par ancre, parallelisation.)
 inline bool seed_core_kills(const CloudIndex& ix,
                             const std::vector<NodeRef>& handles,
                             const Q3Form& f3s, const P3& nrm, i128 J, u64 h,

@@ -89,6 +89,27 @@ supprimé 90 % de ses fidèles ; l'audit ayant été écrit au pin
 qu'il voyait. Le gain de forme (kernel fixe, GPU-prêt, compteurs
 propres) reste acquis.
 
+## Post-scriptum — deux micro-optimisations du cœur essayées et reverties
+
+Mesurées sur eight_clusters n=1000 axial, décision par le chiffre :
+
+1. **Budget d'atteignabilité** (borne supérieure exacte
+   `count + poids de pile`, abandon dès `budget < h`) : NEUTRE —
+   562,27 → 561,95 M nœuds (−0,06 %). La borne ne mord qu'en toute fin
+   de descente : un survivant a déjà payé presque tout quand elle
+   tombe sous $h = 8$.
+2. **Ordre de visite par $P$ au milieu de boîte** (enfant le plus
+   intérieur d'abord) : NÉGATIF — −3 % de nœuds mais `t_core`
+   26,5 → 32,3 s (+22 %) : deux évaluations `q3_power` par nœud interne
+   coûtent plus que les visites économisées ; les témoins denses se
+   trouvent vite dans n'importe quel ordre.
+
+Les deux sont reverties (le commentaire de `seed_core_kills` en garde
+la trace). Leçon : la constante restante n'est pas dans la descente
+individuelle mais dans l'INDÉPENDANCE des descentes par seed — les
+leviers réels sont le traitement groupé par ancre (b8c4a4d § 3) et la
+parallélisation (directive utilisateur).
+
 ## Conséquence pour la suite (§ « ordre utile », point 5)
 
 `t_core = 27 s` sur `t_gen = 35 s` : le poste dominant est la descente
