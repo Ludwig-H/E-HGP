@@ -54,3 +54,31 @@ tri stable par tranches + fusion stable préserve l'ordre). C'est le
 dernier étage séquentiel significatif du pipeline.
 
 `public_status=not_claimed` ; rien de tout ceci n'est une promotion.
+
+## Post-scriptum — le tri du fold hors de cause : profil gravé, expérience revertie
+
+Tentative suivante mesurée puis REVERTIE : `parallel_stable_sort`
+(tranches + `inplace_merge` stables, bit-identique au séquentiel) sur
+les deux tris de `build_forest`, avec folds séquentiels entre K pour
+donner tous les fils au K dominant. Résultat : t_fold 56,1 → 60,4 s —
+PIRE, car la sérialisation entre K perd le recouvrement des phases de
+réduction, que les tris parallèles ne compensent pas. Profil de
+`build_forest` à n=8000 (somme des K, `--threads=4`) :
+
+| étage interne | temps |
+|---|---|
+| tri des événements (U320) | 0,9 s |
+| découpe en lots | 0,1 s |
+| construction des enregistrements (facet_minus) | 5,3 s |
+| tri des enregistrements (déjà parallèle ici) | 5,0 s |
+| internement (fid, first_batch) | 9,4 s |
+| **boucle de réduction + final_partition (non instrumenté)** | **~40 s** |
+
+Le vrai cœur du fold est la RÉDUCTION : union-find, rôles par lot,
+construction des deltas (vecteurs triés par delta), et
+`final_partition` en `std::map` (des millions de nœuds alloués par K).
+C'est un chantier d'internes du fold — candidat : `final_partition` en
+vecteur trié, deltas à tampons réutilisés — qui touche l'ABI auditée
+du fold sort/reduce : il mérite sa propre note d'audit avant de coder.
+L'état committé reste celui du tableau ci-dessus (folds par K en
+parallèle, tris séquentiels).
