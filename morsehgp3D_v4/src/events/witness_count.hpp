@@ -132,12 +132,19 @@ inline FusedCounts count_universal_witnesses_234(const CloudIndex& ix, NodeRef a
     NodeRef z;
     u8 open;
   };
+  // Gain gratuit (audit § 1.2) : sans autorite de feuille, une lane q3/q4 a
+  // boule de rayon nul ne peut rien crediter — inutile de traverser pour elle.
+  u8 mask_eff = mask_in;
+  if (!with_corners) {
+    if ((mask_eff & 0b010) && balls[1].radius4 == 0) mask_eff &= (u8)~0b010;
+    if ((mask_eff & 0b100) && balls[2].radius4 == 0) mask_eff &= (u8)~0b100;
+  }
   const NodeRef root = ix.nodes.empty() ? (NodeRef)(-1) : 0;
-  std::vector<Entry> stack{{root, mask_in}};
+  std::vector<Entry> stack{{root, mask_eff}};
   const auto counting = [&]() {
     u8 m = 0;
     for (int li = 0; li < 3; ++li)
-      if ((mask_in & (1u << li)) && fc.c[li] < h[li]) m |= (u8)(1u << li);
+      if ((mask_eff & (1u << li)) && fc.c[li] < h[li]) m |= (u8)(1u << li);
     return m;
   };
   while (!stack.empty()) {

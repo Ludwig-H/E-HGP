@@ -160,11 +160,27 @@ un champ issu du census) ; `I_B/U_B` appartiennent à l'événement.
 - [x] trois lanes q2/q3/q4 sur une seule vague, masque de lanes, boule-cœur
       par arité (constantes point-fixe prouvées par static_assert), autorité
       64 coins aux feuilles (sens ALL seulement), juge `in_spindle`
-- [ ] boule-cœur : passer au rayon `max(R_dec, R_coup)` (la borne couplée
-      donne +71 % de rayon à s=6 q4, mesure v3) — R_dec seul est implémenté
-- [ ] h_a/h_b dual-tree à range-add (cutoff ~256, coins distincts, masques)
-      + histogramme de fermeture ; piste « dominance directionnelle 432 »
-      (seul certificat v3 dont la fermeture croît avec n) à re-mesurer
+- [x] boule-cœur `max(R_dec, R_coup)` (borne couplée prouvée par l'audit),
+      descente fusionnée trois-lanes (une pile, masques par sous-arbre,
+      `(H,Ξ)` partagés aux feuilles), gain gratuit des lanes à rayon nul
+- [x] h_a/h_b par autorité 8 coins (prouvée exacte sur l'enveloppe continue,
+      audit § 2) : histogramme dans le probe trois-lanes, filtre par ancre
+      branché AVANT l'instruction q3
+- [x] instruction q3 exacte : lentille → acuité ≡ positivité → owner
+      `EdgeKey` sur vrais `PointId` → profondeur de circum-boule (Gram,
+      élagage strict `mn > 0`) ; juge PAR IDENTITÉS 0/0 contre l'oracle brut
+      C(n,3) ; exact-once visible ; refus transactionnel des coquilles en
+      mode `--exact` (défaut : `regular_subset_diagnostic` déclaré)
+- [ ] census q3 partagé par ancre (réponse Q9 de l'audit : niveaux peu
+      profonds de droites dans le plan médiateur, formes affines `ℓ_z(T)`,
+      version A = arbre 2D des porteurs + range-add ; cover `√3·D/2`)
+- [ ] oracle rationnel indépendant (n ≤ 40–60, arithmétique réécrite) —
+      exigé par l'audit AVANT q4
+- [ ] porte torique (cible bêta incomplète exacte, réponse § 3.3)
+- [ ] WSPD : cellules de préfixe binaire exactes (aspect ≤ 2) pour la preuve,
+      boîtes serrées conservées comme arrêt supplémentaire (audit § 4)
+- [ ] événement q3 complet : `ExactCenter`, `ExactLevel = D·E·X/(4G)`,
+      `BallForm`/`BallKey`, paquet d'intérieurs ≤ 8 par handles ALL
 - [ ] instruction q3 (lentille + acuité) et q4 (seed + axial)
 - [ ] BallKey/RLE/census, événements
 - [ ] dix forêts + juge `gamma_forest` indépendant

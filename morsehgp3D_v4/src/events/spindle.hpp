@@ -145,4 +145,23 @@ inline bool corner64_universal(Lane q, const AxisBox& A, const AxisBox& B,
   return true;
 }
 
+// h_a(z ∈ S) sur {s}×Box(T) : z est temoin universel de l'ancre partielle s
+// ssi W_q(s, t) vaut aux coins DISTINCTS de Box(T) — autorite 8 coins,
+// prouvee EXACTE sur l'enveloppe continue par l'audit du 17 aout (§ 2 :
+// cone convexe en t, symetrie en (a,b)).
+inline bool universal_over_corners(Lane q, const P3& s, const AxisBox& T,
+                                   const P3& z) {
+  P3 t{};
+  for (int it = 0; it < 8; ++it) {
+    t.x = (it & 1) ? T.hi[0] : T.lo[0];
+    t.y = (it & 2) ? T.hi[1] : T.lo[1];
+    t.z = (it & 4) ? T.hi[2] : T.lo[2];
+    if (((it & 1) && T.hi[0] == T.lo[0]) || ((it & 2) && T.hi[1] == T.lo[1]) ||
+        ((it & 4) && T.hi[2] == T.lo[2]))
+      continue;
+    if (!in_spindle(q, s, t, z)) return false;
+  }
+  return true;
+}
+
 }  // namespace mhgp4

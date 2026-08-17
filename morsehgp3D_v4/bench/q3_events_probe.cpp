@@ -37,6 +37,7 @@ struct Args {
   i64 s = 8;
   u64 smax = 11;
   bool judge = false;
+  bool exact_mode = false;  // premier extra-shell => unsupported_degeneracy
   u64 min_events = 0;
 };
 
@@ -72,6 +73,7 @@ Args parse(int argc, char** argv) {
     else if (const char* v = val("--smax=")) a.smax = (u64)std::atoll(v);
     else if (const char* v = val("--min-events=")) a.min_events = (u64)std::atoll(v);
     else if (arg == "--judge") a.judge = true;
+    else if (arg == "--exact") a.exact_mode = true;
     else {
       std::fprintf(stderr, "argument inconnu : %s\n", arg.c_str());
       a.family_ok = false;
@@ -160,7 +162,8 @@ int main(int argc, char** argv) {
   }
 
   // 1. WSPD ternaire, lane q3 seulement : blocs morts / rectangles vivants.
-  std::vector<WspdRect> alive;
+  struct AliveQ3 { WspdRect r; u64 core; };
+  std::vector<AliveQ3> alive;
   if (!ix.nodes.empty()) {
     std::vector<WspdRect> wave, next;
     for (const RadixNode& n : ix.nodes) wave.push_back(WspdRect{n.left, n.right});
@@ -176,7 +179,7 @@ int main(int argc, char** argv) {
         if (detail::separated(va, vb, a.s, 1)) {
           const FusedCounts ff =
               count_universal_witnesses_234(ix, r.a, r.b, h_of, 0b010, true);
-          if (ff.c[1] < h3) alive.push_back(r);
+          if (ff.c[1] < h3) alive.push_back(AliveQ3{r, ff.c[1]});
           continue;
         }
         const i64 w2a = detail::box_w2(va);
@@ -192,16 +195,47 @@ int main(int argc, char** argv) {
   }
   const auto t1 = std::chrono::steady_clock::now();
 
-  // 2. Instruction : chaque ancre du rectangle vivant, porteurs, evenements.
+  // 2. Instruction. Raccords de l'audit du 17 aout : vrais PointId (apres
+  // refus des doublons, un par position unique), filtre h_coeur+h_a+h_b
+  // AVANT l'expansion des ancres (autorite 8 coins, disjonction prouvee),
+  // exact-once visible, refus transactionnel des coquilles en mode --exact.
   std::vector<Key3> events;
-  u64 anchors_seen = 0, carriers_seen = 0, shell_refused = 0;
+  u64 anchors_seen = 0, anchors_killed_ha = 0, carriers_seen = 0,
+      shell_refused = 0, raw_events = 0;
+  const auto pid = [&](i32 u) { return ix.bucket_ids[ix.bucket_start[(size_t)u]]; };
   std::vector<i32> lens;
-  for (const WspdRect& r : alive) {
-    const NodeRange ra = range_of(ix, r.a);
-    const NodeRange rb = range_of(ix, r.b);
+  std::vector<u64> ha, hb;
+  for (const AliveQ3& ar : alive) {
+    const NodeRange ra = range_of(ix, ar.r.a);
+    const NodeRange rb = range_of(ix, ar.r.b);
+    const AxisBox boxA = box_of_node(ix, ar.r.a);
+    const AxisBox boxB = box_of_node(ix, ar.r.b);
+    const int na = ra.last - ra.first + 1;
+    const int nb = rb.last - rb.first + 1;
+    const u64 need = h3 - ar.core;
+    ha.assign((size_t)na, 0);
+    hb.assign((size_t)nb, 0);
+    for (int ia = 0; ia < na; ++ia)
+      for (int iz = 0; iz < na; ++iz) {
+        if (iz == ia) continue;
+        if (universal_over_corners(Lane::kQ3, ix.upos[(size_t)(ra.first + ia)],
+                                   boxB, ix.upos[(size_t)(ra.first + iz)]))
+          ++ha[(size_t)ia];
+      }
+    for (int ib = 0; ib < nb; ++ib)
+      for (int iz = 0; iz < nb; ++iz) {
+        if (iz == ib) continue;
+        if (universal_over_corners(Lane::kQ3, ix.upos[(size_t)(rb.first + ib)],
+                                   boxA, ix.upos[(size_t)(rb.first + iz)]))
+          ++hb[(size_t)ib];
+      }
     for (i32 ua = ra.first; ua <= ra.last; ++ua)
       for (i32 ub = rb.first; ub <= rb.last; ++ub) {
         ++anchors_seen;
+        if (ha[(size_t)(ua - ra.first)] + hb[(size_t)(ub - rb.first)] >= need) {
+          ++anchors_killed_ha;
+          continue;
+        }
         const P3& pa = ix.upos[(size_t)ua];
         const P3& pb = ix.upos[(size_t)ub];
         const i64 D2 = p3_norm2(p3_sub(pb, pa));
@@ -210,14 +244,12 @@ int main(int argc, char** argv) {
         for (const i32 ux : lens) {
           if (ux == ua || ux == ub) continue;
           const P3& px = ix.upos[(size_t)ux];
-          // Acuite stricte en x : V² > D² avec V = 2x-a-b.
           const P3 v{2 * px.x - pa.x - pb.x, 2 * px.y - pa.y - pb.y,
                      2 * px.z - pa.z - pb.z};
           if (p3_norm2(v) <= D2) continue;
           const i64 l_ax = p3_norm2(p3_sub(px, pa));
           const i64 l_bx = p3_norm2(p3_sub(px, pb));
-          if (!anchor_owns_q3(D2, l_ax, l_bx, (PointId)ua, (PointId)ub,
-                              (PointId)ux))
+          if (!anchor_owns_q3(D2, l_ax, l_bx, pid(ua), pid(ub), pid(ux)))
             continue;
           ++carriers_seen;
           const Q3Form f = q3_form(pa, pb, px);
@@ -225,15 +257,23 @@ int main(int argc, char** argv) {
           const u64 depth = q3_ball_depth(ix, f, ua, ub, ux, h3, &shell);
           if (depth >= h3) continue;
           if (shell > 0) {
-            ++shell_refused;  // refus transactionnel (position generale)
+            if (a.exact_mode) {
+              std::fprintf(stderr,
+                           "unsupported_degeneracy : extra-shell sur une boule "
+                           "survivante (aucune publication partielle)\n");
+              return 2;
+            }
+            ++shell_refused;  // mode regular_subset_diagnostic
             continue;
           }
-          events.push_back(make_key(ua, ub, ux));
+          ++raw_events;
+          events.push_back(make_key((i32)pid(ua), (i32)pid(ub), (i32)pid(ux)));
         }
       }
   }
   std::sort(events.begin(), events.end());
   events.erase(std::unique(events.begin(), events.end()), events.end());
+  const u64 duplicate_supports = raw_events - events.size();
   const auto t2 = std::chrono::steady_clock::now();
 
   // 3. Juge par identites (oracle borne).
@@ -273,7 +313,9 @@ int main(int argc, char** argv) {
           const u64 depth = q3_ball_depth(ix, f, (i32)es[best].x, (i32)es[best].y,
                                           es[best].apex, h3, &shell);
           if (depth >= h3 || shell > 0) continue;
-          truth.push_back(make_key(i, j, k));
+          truth.push_back(make_key((i32)ix.bucket_ids[ix.bucket_start[(size_t)i]],
+                                   (i32)ix.bucket_ids[ix.bucket_start[(size_t)j]],
+                                   (i32)ix.bucket_ids[ix.bucket_start[(size_t)k]]));
         }
     std::sort(truth.begin(), truth.end());
     std::vector<Key3> diff;
@@ -292,17 +334,26 @@ int main(int argc, char** argv) {
            1000.0;
   };
   std::printf(
-      "famille=%s n=%d coord=%d s=%lld smax=%llu seed=%lld rect_vivants_q3=%zu "
-      "ancres_vues=%llu porteurs=%llu evenements=%zu ev_par_point=%.1f "
+      "famille=%s n=%d coord=%d s=%lld smax=%llu seed=%lld mode=%s "
+      "rect_vivants_q3=%zu ancres_vues=%llu ancres_tuees_ha=%llu "
+      "porteurs=%llu evenements=%zu doublons=%llu ev_par_point=%.1f "
       "shell_refus=%llu juge_manquants=%llu juge_en_trop=%llu "
       "t_wspd_ms=%.1f t_instruction_ms=%.1f t_juge_ms=%.1f\n",
       cloud_family_name(a.family), a.n, coord, (long long)a.s,
-      (unsigned long long)smax_eff, a.seed, alive.size(),
-      (unsigned long long)anchors_seen, (unsigned long long)carriers_seen,
-      events.size(), (double)events.size() / (double)pts.size(),
+      (unsigned long long)smax_eff, a.seed,
+      a.exact_mode ? "exact" : "regular_subset_diagnostic", alive.size(),
+      (unsigned long long)anchors_seen, (unsigned long long)anchors_killed_ha,
+      (unsigned long long)carriers_seen, events.size(),
+      (unsigned long long)duplicate_supports,
+      (double)events.size() / (double)pts.size(),
       (unsigned long long)shell_refused, (unsigned long long)missing,
       (unsigned long long)extra, ms(t1 - t0), ms(t2 - t1), ms(t3 - t2));
 
+  if (duplicate_supports > 0) {
+    std::fprintf(stderr, "EXACT-ONCE VIOLE : %llu supports dupliques\n",
+                 (unsigned long long)duplicate_supports);
+    return 3;
+  }
   if (a.judge && (missing > 0 || extra > 0)) return 1;
   if (events.size() < a.min_events) {
     std::fprintf(stderr, "PLANCHER : %zu evenements < %llu\n", events.size(),

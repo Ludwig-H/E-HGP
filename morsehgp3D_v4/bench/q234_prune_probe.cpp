@@ -107,23 +107,6 @@ struct AliveRect {
   u64 core[3];  // compte cœur (ecrete a h_q) par lane encore vivante
 };
 
-// h_a(z ∈ S) sur {s}×Box(T) : z est temoin universel de l'ancre partielle s
-// ssi W_q(s, t) vaut aux coins de Box(T) — autorite 8 coins (exacte sur
-// l'enveloppe continue en t, PISTE v3 P1.9, sens suffisant consomme).
-bool universal_over_corners(Lane q, const P3& s, const AxisBox& T, const P3& z) {
-  P3 t{};
-  for (int it = 0; it < 8; ++it) {
-    t.x = (it & 1) ? T.hi[0] : T.lo[0];
-    t.y = (it & 2) ? T.hi[1] : T.lo[1];
-    t.z = (it & 4) ? T.hi[2] : T.lo[2];
-    if (((it & 1) && T.hi[0] == T.lo[0]) || ((it & 2) && T.hi[1] == T.lo[1]) ||
-        ((it & 4) && T.hi[2] == T.lo[2]))
-      continue;
-    if (!in_spindle(q, s, t, z)) return false;
-  }
-  return true;
-}
-
 }  // namespace
 
 int main(int argc, char** argv) {
