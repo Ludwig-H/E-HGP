@@ -1,184 +1,247 @@
-# Glossaire
+# Glossaire normatif
 
-## Objets et données
+## Objets géométriques
 
-**Arbre complet**  
-Arbre contenant tous les événements de naissance et de fusion utiles, et non seulement quelques coupes choisies.
+**Facette**  
+Cellule surfacique élémentaire de la construction HGP. Elle porte géométrie, aire, normale ou projecteur normal, attributs et incidences. Elle sert de discrétisation et de résolution de sortie, pas de token principal du backbone.
 
-**Branche**  
-Suite d'états d'une même composante entre sa naissance et sa fusion dans un parent.
+**Polyèdre HGP**  
+Recollement de facettes associé à un nœud ou un état de branche de la filtration. Il représente une surface effectivement observée, éventuellement ouverte, non convexe, multicouche ou non-manifold. Dans ce dossier, il ne désigne ni une enveloppe convexe ni un simple cluster de points.
+
+**Surface observée**  
+Support géométrique fourni par les facettes pour une acquisition donnée. Elle peut différer de la surface physique complète de l'objet à cause des occultations et de la géométrie du capteur.
 
 **Carrier**  
-Réalisation géométrique associée à une cellule ou un nœud. Toujours préciser lequel ; le mot « polyèdre » seul ne suffit pas dans les tests numériques.
+Réalisation géométrique exacte portée par une cellule, un ensemble de facettes ou un nœud. Toujours préciser le carrier utilisé dans une métrique.
 
-**Cellule / facette élémentaire**  
-Unité minimale sérialisée et token de feuille du réseau principal.
+**Bord**  
+Arête de facette incidente à une seule face dans le sous-complexe considéré, ou frontière explicitement déclarée. Les bords peuvent être géométriques, d'occultation ou de troncature.
 
-**Coface**  
-Cellule d'ordre supérieur reliant plusieurs facettes. Elle peut devenir un hyperedge dans l'encodeur d'incidences.
+**Remeshing**  
+Modification de la triangulation conservant approximativement la même surface géométrique. L'invariance au remeshing est une propriété centrale du tokenizer de surface.
 
-**Événement de fusion**  
-Lot simultané dans lequel plusieurs branches deviennent un même parent. Il est traité comme un ensemble, sans ordre arbitraire entre enfants.
+**Surface non-manifold**  
+Surface dont certaines arêtes ou certains sommets ne possèdent pas un voisinage de variété 2D. Elle n'est pas automatiquement rejetée, mais reçoit des indicateurs de validité et d'incertitude.
 
-**Feuille**  
-Token minimal de l'arbre. Dans le modèle principal, une feuille est une facette, jamais un point.
+## Hiérarchie HGP
 
 **Filtration**  
-Famille emboîtée d'objets indexée par un niveau `λ`.
+Famille emboîtée de surfaces ou sous-complexes indexée par un niveau de densité `λ`.
 
-**Hiérarchie polyédrique**  
-Feuilles, incidences, composantes et arbre de fusion produits hors gradient.
+**Niveau de densité**  
+Valeur physique ou statistique de la filtration. Elle est distincte d'un numéro de couche ou d'un nombre de clusters.
 
-**Nœud**  
-État persistant regroupant un ensemble de feuilles à un intervalle de niveaux.
+**Nœud HGP**  
+État persistant de la hiérarchie portant sa propre surface polyédrique, ses attributs et ses relations. Un nœud interne n'est pas seulement un objet auxiliaire de pooling.
 
-**Niveau physique**  
-Valeur de filtration ayant une interprétation géométrique ou statistique commune entre scans, par opposition à un simple numéro de couche ou nombre de clusters.
+**Branche**  
+Suite ordonnée d'états d'une même composante entre sa naissance et sa fusion. Elle décrit une trajectoire de surface en fonction de la densité.
 
-**Ordre `K`**  
-Ordre d'interaction utilisé pour construire la structure. Les comparaisons multi-ordre restent une extension.
+**Événement de fusion**  
+Événement où plusieurs branches deviennent un parent commun. Les enfants forment un ensemble non ordonné.
 
 **Persistance**  
-Durée de vie d'une branche dans le paramètre de filtration, de préférence mesurée en différence logarithmique lorsque cela est pertinent.
+Étendue de vie d'une branche dans le paramètre de filtration. Le dossier distingue persistance en rang, en quantile et en différence logarithmique de niveau.
 
-**Reprojection**  
-Application linéaire des logits de feuilles vers les points originaux avec poids positifs sommant à un.
+**Delta de facettes**  
+Ensemble
 
-**Thinning**  
-Suppression contrôlée de retours LiDAR pour simuler une densité plus faible ou une autre configuration de capteur.
+```math
+\Delta F_t=F_{t+1}\setminus F_t
+```
 
-## Canaux
+des facettes activées entre deux états emboîtés. Il représente une innovation géométrique exacte lorsqu'il est disponible.
+
+**Innovation latente**  
+Différence apprise entre le code directement observé d'un parent et sa prédiction depuis les enfants. Elle n'est pas appelée quantité géométrique exacte.
+
+**Arête latérale**  
+Relation spatiale entre polyèdres de branches différentes à des niveaux compatibles.
+
+**Arbre aléatoire apparié**  
+Null test conservant approximativement profondeur, degrés et masses de l'arbre réel tout en randomisant les associations.
+
+## Représentation de surface
+
+**Ancre**  
+Point `c_v` servant à centrer la surface. Son choix est déterministe, sans labels, et sa sensibilité est mesurée.
+
+**Échelle robuste**  
+Scalaire `s_v>0` utilisé pour normaliser la surface. La taille physique reste disponible dans un canal séparé.
+
+**Mesure surfacique attribuée normalisée**  
+Mesure de référence
+
+```math
+\mu_v
+=
+(T_{c_v,s_v})_\#
+\left(
+\frac{w_v(x)}{s_v^2}
+\,d\mathcal H^2_{\mid\Sigma_v}(x)
+\right),
+\qquad
+T_{c,s}(x)=\frac{x-c}{s}.
+```
+
+Elle encode toute la masse de surface et ses attributs, sans choisir une intersection par direction. Elle est invariante aux translations et homothéties, et équivariante aux rotations.
+
+**Carte radiale monocouche**  
+Fonction `ρ(u)` donnant l'unique rayon d'intersection d'une surface avec une direction. Elle n'est définie que lorsque la multiplicité radiale vaut un.
+
+**Multiplicité radiale**  
+Nombre
+
+```math
+N_{\Sigma,c}(u)
+=
+|\{r>0:c+ru\in\Sigma\}|.
+```
+
+Il peut valoir zéro, un ou davantage.
+
+**Radialité**  
+Propriété empirique d'une surface pour laquelle une grande part des directions utiles possède une intersection unique et stable. Elle est mesurée, jamais supposée universelle.
+
+**Radial-`K`**  
+Représentation stockant les `K` premières intersections ordonnées par direction, avec masques.
+
+**Grille sphéro-radiale de mesure**  
+Discrétisation douce de la mesure surfacique sur des cellules angulaires et une base radiale. Elle peut contenir plusieurs couches dans une même direction.
+
+**Moments sphéro-radiaux**  
+Coefficients obtenus en projetant la mesure sur des bases radiales et des harmoniques sphériques. Les moments de Zernike et descripteurs harmoniques sont des antécédents importants.
+
+**Quadrature d'aire**  
+Ensemble pondéré de sites échantillonnés ou intégrés selon l'aire de la surface. Ces sites proviennent du polyèdre, pas des retours LiDAR bruts.
+
+**Atlas multi-cartes**  
+Collection de paramétrisations locales 2D couvrant la surface. C'est une solution générale mais plus difficile à stabiliser entre acquisitions.
+
+**SurfaceGraph**  
+Encodeur du graphe des facettes, arêtes et sommets, pondéré par l'aire et conçu pour conserver connectivité et bords.
+
+**Projecteur normal**  
+Matrice `nnᵀ` représentant une normale sans choisir son signe. Utilisée lorsque l'orientation des faces n'est pas globalement fiable.
+
+**Taux–distorsion**  
+Courbe reliant erreur géométrique ou sémantique au nombre d'octets, de coefficients, de tokens ou de FLOPs.
+
+## Canaux du token
 
 **Canal `shape`**  
-Descripteurs de forme normalisés : Gram, spectre, support, CDF projetée, moments et masques de dégénérescence.
+Forme normalisée issue de la mesure surfacique, de sa grille et du résidu de connectivité.
 
 **Canal `metric`**  
-Grandeurs physiques : dimensions, aire/volume, centre, hauteur, pose et portée.
+Taille, aire physique, centre, hauteur, pose et localisation.
 
-**Canal `filtration`**  
-Naissance, mort, persistance, écarts de niveau, rang et croissance de masse.
+**Canal `filter`**  
+Niveau, rang, quantile, persistance, croissance et type d'événement.
 
 **Canal `sensor`**  
-Rémission, anneaux, couverture angulaire, incidence estimée et masques de retours manquants.
+Portée, anneaux, rémission, incidence, couverture, occultation et confiance.
 
-**Fonction support**  
-Pour une direction `u`, maximum du produit scalaire avec les points d'un ensemble. Elle résume l'enveloppe convexe, pas la masse intérieure.
+**Canal `topo`**  
+Résumé de la connectivité : composantes, bords, degrés, indicateurs non-manifold et spectre du graphe dual.
 
-**CDF projetée**  
-Distribution empirique des projections d'une cellule selon plusieurs directions. Contrairement au support, elle conserve une information sur la masse intérieure.
+**Repère gravité–capteur–tangent**  
+Repère local utilisant la gravité, la direction horizontale du capteur vers le polyèdre et leur orthogonale. Il conserve une orientation physiquement utile pour le LiDAR outdoor.
 
-**Gram normalisé**  
-Matrice des produits scalaires entre vecteurs d'une cellule après normalisation. Elle donne un descripteur invariant aux permutations et aux rotations si utilisée par invariants spectraux.
+## Architecture
 
-**Masque de dégénérescence**  
-Bit indiquant qu'un axe, une normale ou un rapport spectral est mal défini. Le masque évite de présenter une valeur numérique arbitraire comme une mesure fiable.
+**`HGP-PolyFM`**  
+Nom de travail du modèle natif des surfaces polyédriques et de leur espace d'échelle. Le nom ne constitue pas un claim de nouveauté ni de statut fondation.
 
-**RPE — Relative Positional Encoding**  
-Encodage d'une relation entre deux tokens, injecté dans les requêtes, clés, valeurs ou logits d'attention.
+**`SurfaceEncoder`**  
+Encodeur local partagé produisant un code fixe depuis la mesure de surface, sa grille et les informations de connectivité.
 
-## Graphes et relations
+**`BranchEncoder`**  
+Encodeur de la trajectoire de surface le long d'une branche, positionné par les vrais écarts de niveau.
 
-**Arête horizontale**  
-Relation entre cellules ou nœuds d'un même niveau, généralement issue d'une incidence ou d'une proximité d'interface.
+**`MergeEventEncoder`**  
+Agrégateur permutation-invariant des enfants, relations et innovations d'un événement de fusion.
 
-**Arête verticale**  
-Relation enfant→parent ou parent→enfant dans la hiérarchie.
+**`LateralGraph`**  
+Message passing spatial entre polyèdres voisins de branches différentes.
 
-**Graphe dual**  
-Graphe dont les sommets sont les facettes et dont les arêtes représentent leurs incidences ou connexions élémentaires.
+**Décodeur par facette**  
+Tête combinant une feature locale de facette et les tokens de ses ancêtres pour produire des logits ensuite reprojetés vers les points.
 
-**Hyperedge**  
-Relation reliant plus de deux tokens. Une coface ou un événement simultané peut être traité comme hyperedge.
-
-**Fratrie**  
-Ensemble des enfants d'un même événement de fusion.
-
-**Weighted Jaccard**  
-Score de recouvrement pondéré utilisé pour apparier des nœuds de deux vues : somme des minima divisée par somme des maxima des poids d'appartenance.
-
-## Modèles
-
-**PolyTreeFormer**  
-Nom de travail de la famille de modèles polyèdre-only. Ce nom n'est pas un claim de nouveauté.
-
-**`PolyTreeFormer-Nano`**  
-Premier porteur : adaptation du mode `nano` de Superpoint Transformer à quatre niveaux de la structure.
-
-**`PolyTreeFormer-Full`**  
-Modèle cible opérant sur l'arbre complet avec attention parent–enfants, fratrie et arêtes latérales.
-
-**SPT — Superpoint Transformer**  
-Architecture hiérarchique de régions 3D. Son mode `nano` retire l'étage point-wise.
+**SPT-nano-poly**  
+Adaptation de Superpoint Transformer servant de baseline de hiérarchie U-Net sur la structure polyédrique.
 
 **Sequoia-fixed**  
-Adaptation de Sequoia où la hiérarchie est fournie par le prétraitement plutôt qu'apprise.
+Baseline parent–enfants–frères utilisant la hiérarchie HGP fixée hors gradient.
 
-**HSA — Hierarchical Self-Attention**  
-Attention dérivée mathématiquement sous contrainte hiérarchique. Utilisée comme opérateur comparatif après les baselines simples.
-
-**AllSet-incidence**  
-Extension où les messages passent par les multiensembles d'incidences ou cofaces avec un Set Transformer.
+**HSA**  
+Hierarchical Self-Attention. Baseline théorique sous contrainte hiérarchique ; son théorème publié ne couvre pas automatiquement des features surfaciques propres à tous les nœuds internes.
 
 **MeanTree**  
-Baseline sans attention : agrégation parent–enfants par moyenne/somme et MLP.
-
-**Inducing tokens**  
-Petit ensemble de latents servant d'intermédiaires dans une grande fratrie afin d'éviter une attention quadratique complète.
+Baseline sans attention utilisant moyenne ou somme pondérée et MLP.
 
 ## Apprentissage
 
-**JEPA — Joint-Embedding Predictive Architecture**  
-Cadre auto-supervisé dans lequel le contexte prédit la représentation latente d'une cible plutôt que son entrée brute.
+**`Surface-JEPA`**  
+Prédiction latente de parties ou secteurs masqués d'une même surface polyédrique.
 
-**Range-Hierarchy JEPA**  
-Pré-entraînement du projet : un student traite une vue LiDAR dégradée et prédit les embeddings teacher de branches appariées dans la vue complète.
-
-**Teacher EMA**  
-Encodeur cible dont les paramètres sont une moyenne exponentielle de ceux du student ; il ne reçoit pas de gradient direct.
+**`Cross-Range PolyJEPA`**  
+Pré-entraînement teacher–student entre deux acquisitions dont les surfaces et hiérarchies HGP sont reconstruites indépendamment.
 
 **Observable-only**  
-Une cible ou une loss n'est calculée que lorsque l'unité est effectivement observable dans la vue student, pour éviter les fuites de position ou d'identité.
+Règle selon laquelle une cible inter-vues contribue seulement si une correspondance géométrique suffisamment fiable existe.
 
-**Softmap**  
-Distribution douce sur des prototypes, plus riche qu'un indice de prototype dur.
+**Teacher EMA**  
+Encodeur cible mis à jour par moyenne exponentielle des paramètres du student.
 
-**Anti-effondrement**  
-Régularisation empêchant tous les embeddings de devenir identiques : variance minimale, décorrélation ou normalisation contrôlée.
+**Sous-espace `shape`**  
+Partie du latent fortement alignée entre acquisitions.
 
-**Channel dropout**  
-Masquage aléatoire d'une famille de canaux, notamment `sensor`, pour réduire les raccourcis.
+**Sous-espace `sensor`**  
+Partie conservant qualité et conditions de mesure ; elle n'est pas forcée à être invariante.
 
-**Linear probing**  
-Évaluation où l'encodeur est gelé et seule une tête linéaire est entraînée.
+**Probe sémantique**  
+Tête simple entraînée sur des embeddings gelés pour mesurer l'information sémantique.
 
-**Fine-tuning**  
-Entraînement supervisé de tout ou partie du modèle pré-entraîné.
+**Probe capteur**  
+Tête diagnostique prédisant portée, anneau, capteur ou thinning. Elle révèle les raccourcis d'acquisition.
 
-## Protocole
+**Frozen probing**  
+Évaluation où le backbone est gelé et seules des têtes légères sont entraînées.
 
-**Oracle de feuilles**  
-Meilleure prédiction possible si chaque feuille connaît sa distribution GT. Il mesure le plafond de la tokenisation et de la reprojection.
+**Faible supervision**  
+Fine-tuning avec une faible fraction des labels, typiquement `0.1 %`, `1 %` ou `10 %`.
 
-**Arbre aléatoire apparié**  
-Contrôle dont profondeur, degrés et masses ressemblent à l'arbre réel, mais dont les associations sont aléatoires.
+## Évaluation
 
-**Niveaux permutés**  
-Null test conservant la topologie mais détruisant le sens du paramètre de filtration.
+**Oracle de facettes**  
+Meilleure sortie possible lorsque chaque facette connaît sa distribution GT.
 
-**Graine**  
-Initialisation et ordre aléatoires d'un entraînement. Les résultats principaux sont moyennés sur au moins trois graines.
+**Oracle de polyèdres**  
+Meilleure sortie possible lorsque chaque polyèdre connaît sa distribution GT.
 
-**mIoU**  
-Moyenne des intersections-sur-union des 19 classes SemanticKITTI.
+**Oracle multi-ancêtres**  
+Plafond utilisant plusieurs nœuds de la branche pour chaque facette.
 
-**F-score de frontière**  
-Mesure diagnostique de précision et rappel des frontières après reprojection.
+**Retrieval cross-range**  
+Recherche d'une même surface ou partie observée à une autre portée ou avec un autre capteur.
 
-**mCE / mRR**  
-Métriques de robustesse aux corruptions utilisées dans Robo3D : erreur moyenne relative et taux de résilience.
+**Invariance au remeshing**  
+Stabilité du token lorsque la triangulation change mais que la surface reste la même.
 
-**TTA — Test-Time Augmentation**  
-Moyenne ou vote de plusieurs inférences augmentées. Exclue du résultat principal strict.
+**Robustesse à la portée**  
+Stabilité sous la modification réelle de l'acquisition liée à la distance : densité, incidence, trous et occultations. Elle est distincte de l'invariance à l'homothétie.
+
+**Frontière de Pareto**  
+Ensemble des représentations non dominées simultanément en fidélité, invariance, sémantique et coût.
 
 **Track strict**  
-SemanticKITTI uniquement, un scan, LiDAR seul, sans TTA ni ensemble.
+SemanticKITTI mono-scan, LiDAR seul, sans TTA, ensemble ni accumulation temporelle à l'inférence.
+
+**Backbone spécialisé**  
+Encodeur entraîné et évalué principalement sur un dataset ou une tâche.
+
+**Foundation model LiDAR outdoor**  
+Encodeur pré-entraîné sur plusieurs datasets et capteurs LiDAR, transférable à plusieurs tâches avec peu de labels et sans modifier le tokenizer.
+
+**Foundation model 3D général**  
+Claim plus large exigeant plusieurs domaines 3D, orientations, densités et modalités. Il n'est pas ouvert par SemanticKITTI seul.
