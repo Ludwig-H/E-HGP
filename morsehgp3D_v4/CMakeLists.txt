@@ -108,13 +108,35 @@ mhgp4_expect_code(mhgp4_q3_events_judge_uniform 0 mhgp4_q3_events_probe
 mhgp4_expect_code(mhgp4_q3_events_judge_clusters 0 mhgp4_q3_events_probe
     "--family=eight_clusters --n=400 --s=8 --seed=3 --judge --min-events=100")
 
-# Oracle rationnel independant q3 (obigint 384 bits, ecrit a neuf) : accord
-# total exige sur tous les triangles des petits nuages + fixtures cosphere et
-# tetraedre regulier ; mutants sign-p et prune-ge tues.
+# Oracle rationnel independant q3 (obigint 384 bits, ecrit a neuf, durci par
+# l'audit ebc8236) : accord total exige sur tous les triangles des petits
+# nuages + fixtures cosphere/tetraedre + fixtures u16 EXTREMES (equilateral
+# M=65535, presque-rectangle aigu, grande cosphere, rejeu translate au bord),
+# plancher de limbes (le produit du niveau traverse le limbe 3) ; mutants
+# sign-p, prune-ge, cramer-swap, level-4g et mul-carry-lost tues.
 add_executable(mhgp4_q3_oracle tests/q3_oracle_test.cpp)
 mhgp4_expect_code(mhgp4_q3_oracle_accord 0 mhgp4_q3_oracle "")
 mhgp4_expect_code(mhgp4_q3_oracle_mutant_sign 4 mhgp4_q3_oracle "--inject=sign-p")
 mhgp4_expect_code(mhgp4_q3_oracle_mutant_prune 4 mhgp4_q3_oracle "--inject=prune-ge")
+mhgp4_expect_code(mhgp4_q3_oracle_mutant_cramer 4 mhgp4_q3_oracle "--inject=cramer-swap")
+mhgp4_expect_code(mhgp4_q3_oracle_mutant_level4g 4 mhgp4_q3_oracle "--inject=level-4g")
+mhgp4_expect_code(mhgp4_q3_oracle_mutant_carry 4 mhgp4_q3_oracle "--inject=mul-carry-lost")
+
+# Le juge du juge (audit ebc8236 P0.2) : selftest de l'arithmetique OBig
+# contre boost::multiprecision::cpp_int, troisieme autorite, tests uniquement.
+# Enregistre seulement si Boost est present (meme precedent que le temoin GMP
+# optionnel de v3) ; l'oracle geometrique reste garde sans lui.
+find_path(MHGP4_BOOST_INCLUDE boost/multiprecision/cpp_int.hpp)
+if(MHGP4_BOOST_INCLUDE)
+  add_executable(mhgp4_obig_selftest tests/obig_selftest.cpp)
+  target_include_directories(mhgp4_obig_selftest SYSTEM PRIVATE ${MHGP4_BOOST_INCLUDE})
+  mhgp4_expect_code(mhgp4_obig_selftest_gate 0 mhgp4_obig_selftest "")
+  mhgp4_expect_code(mhgp4_obig_mutant_carry 4 mhgp4_obig_selftest
+      "--inject=mul-carry-lost")
+else()
+  message(WARNING "mhgp4 : boost/multiprecision/cpp_int.hpp introuvable — "
+      "selftest OBig (le juge du juge) non enregistre.")
+endif()
 
 # Paquets de temoins certifies + scan site-major (audit du 17 aout) : la
 # porte causale packet=off passe par le meme juge d'identites ; le mutant

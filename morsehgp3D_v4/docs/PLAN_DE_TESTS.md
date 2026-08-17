@@ -51,7 +51,9 @@ conventions v3 ; ce fichier fixe leur application v4.
 | WSPD mutants | rectangle perdu → ledger (code 4) ; cap dans le critère terminal → discrimination appariée (code 4, sur `two_lines` — « le cap ne mord pas » sur uniform n=2000, constat v3 reproduit) | `mhgp4_wspd_mutant_*` |
 | descente ternaire | `masse_morte + masse_vivante = masse_totale` exact ; fail-open : `vivantes_probe ⊇ vivantes_vraies` (juge d'échantillon par requête au milieu) ; vrai vivant invariant de la partition (même compte aux trois s) | à venir |
 | h_a/h_b | porte métamorphique `direct == dual-tree` par ancre et lane ; masque de lanes (mutant `dual-sans-masque` en régime tendu s_max=32, séparation=1) | à venir |
-| événements | `census_calls = unique_BallKeys` ; deux supports pour une clé ; fixtures q3/q4 gravées (v3 § 10) | à venir |
+| événements | `ballkeys_uniques == evenements` (régime régulier) ; niveau exact > 0 ; fixtures q3/q4 gravées (v3 § 10) | `mhgp4_q3_events_judge_*` |
+| oracle q3 | accord total sujet/oracle sur tous les triangles (acuité, profondeur, coquille, niveau exact ET niveau public) ; fixtures u16 extrêmes ; plancher de limbes (produit du niveau ≥ limbe 3) ; débordement = statut fail-closed, jamais un signal | `mhgp4_q3_oracle_*` |
+| arithmétique oracle | le juge du juge : `OBig` contre `cpp_int` (troisième autorité, si Boost présent) — paires add/sub/mul/cmp, distributivité (plancher 1 000 triplets), frontière exacte du 7e limbe en statut | `mhgp4_obig_*` |
 | forêts | K=1 ≡ single-linkage (MST de référence) ; juge `gamma_forest` indépendant sur n ≤ 12–14 ; égalité Théorème 2 (second chemin par L_K(r) + couverture) | à venir |
 
 ## 4. Fixtures permanentes reprises de la v3
