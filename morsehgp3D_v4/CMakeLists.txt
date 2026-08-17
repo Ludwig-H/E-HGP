@@ -163,6 +163,19 @@ mhgp4_expect_code(mhgp4_q4_mutant_coef3 4 mhgp4_q4_events_probe
 mhgp4_expect_code(mhgp4_q4_mutant_no_canonical 4 mhgp4_q4_events_probe
     "--family=uniform --n=120 --s=8 --seed=3 --inject=no-canonical")
 
+# Oracle rationnel independant q4 (memes standards que q3 : obigint,
+# primitives locales, fixtures u16 extremes dont le tetraedre regulier a
+# M=65535 et la grande cosphere, compteurs de limbes) ; mutants cramer-swap,
+# mul-carry-lost et sign-p4 tues.
+add_executable(mhgp4_q4_oracle tests/q4_oracle_test.cpp)
+mhgp4_expect_code(mhgp4_q4_oracle_accord 0 mhgp4_q4_oracle "")
+mhgp4_expect_code(mhgp4_q4_oracle_mutant_cramer 4 mhgp4_q4_oracle
+    "--inject=cramer-swap")
+mhgp4_expect_code(mhgp4_q4_oracle_mutant_carry 4 mhgp4_q4_oracle
+    "--inject=mul-carry-lost")
+mhgp4_expect_code(mhgp4_q4_oracle_mutant_sign 4 mhgp4_q4_oracle
+    "--inject=sign-p4")
+
 # Le juge du juge (audit ebc8236 P0.2) : selftest de l'arithmetique OBig
 # contre boost::multiprecision::cpp_int, troisieme autorite, tests uniquement.
 # Enregistre seulement si Boost est present (meme precedent que le temoin GMP

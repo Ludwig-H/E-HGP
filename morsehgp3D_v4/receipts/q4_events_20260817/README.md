@@ -71,6 +71,30 @@ d'arité stricte est LE grand filtre (67 %) ; la sélection axiale § 4
 reçue CONTRE cette baseline, comme le veut la discipline des accélérateurs
 jugés.
 
-43 portes CTest vertes. Reste (note aux auditeurs) : oracle indépendant q4
-(Cramer 4 points en OBig), U320 pour l'ordre mixte q3/q4, sélection
-axiale, forêt.
+## Addendum — l'oracle indépendant q4 (même séance)
+
+`tests/q4_oracle_test.cpp`, mêmes standards que l'oracle q3 durci :
+obigint 384 bits, primitives locales, `InputPoint`, Cramer 3×3 PLEIN
+(quatre points : pas de contrainte de plan), centre-intérieur par quatre
+orientations OBig confronté à `q4_center_strictly_inside`, profondeur/
+coquille/intérieurs, BallKey projective, niveau par produits croisés.
+
+| mesure (7 nuages, dont tétraèdre régulier entier à M=65535 et grande cosphère) | valeur |
+|---|---|
+| tétraèdres jugés | 59 825 |
+| supports q4 (centre strictement intérieur) | 4 880 |
+| `supports_with_extra_shell` | 2 076 |
+| désaccords | 0 |
+| limbes max : det / num / niveau | 0 / 1 / 3 (plancher ≥ 3) |
+| mutants `cramer-swap`, `mul-carry-lost`, `sign-p4` | tués (code 4) |
+
+Leçon de porte notable : l'identité de niveau q4 met les MÊMES valeurs
+entières des deux côtés (`|N'|² = Rnum`, `det_o² = den`) — une corruption
+structurelle de la multiplication frappait les deux membres à l'identique
+et le mutant carry passait. Le membre gauche est désormais calculé par
+l'associativité `(num·det)·det` : les paires d'opérandes ne coïncident
+plus, le mutant meurt. Gravé en commentaire : deux côtés d'un juge ne
+doivent jamais partager leurs paires d'opérandes.
+
+47 portes CTest vertes. Reste : U320 pour l'ordre mixte q3/q4, sélection
+axiale (contre cette baseline), forêt (macro-lots compris).

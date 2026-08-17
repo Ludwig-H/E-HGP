@@ -47,3 +47,18 @@ q3 : fixtures u16 extrêmes, mutants) ; (ii) U320 et l'ordre mixte q3/q4 ;
 (iii) sélection axiale § 4 reçue CONTRE cette baseline ; (iv) la forêt
 (macro-lots compris). Sauf avis contraire, je commence par (i) — la
 symétrie avec la discipline q3 l'impose avant toute optimisation.
+
+## Post-scriptum (même séance) : (i) est fait
+
+`tests/q4_oracle_test.cpp` : 59 825 tétraèdres sur 7 nuages (dont le
+tétraèdre RÉGULIER entier à `M = 65535` — les quatre premiers points
+d'equilateral_max — et la grande cosphère, qui fournit 2 076 supports à
+extra-shell), 4 880 supports, 0 désaccord, mutants `cramer-swap`,
+`mul-carry-lost`, `sign-p4` tués. Une leçon de porte à verser au dossier
+commun : l'identité de niveau q4 met les MÊMES valeurs entières des deux
+côtés (`|N'|² = Rnum`, `det_o² = den`) — le mutant carry frappait les
+deux membres à l'identique et passait inaperçu. Corrigé par
+l'associativité `(num·det)·det` côté gauche : les paires d'opérandes ne
+coïncident plus. Règle gravée : deux côtés d'un juge ne doivent jamais
+partager leurs paires d'opérandes. Reste donc (ii) U320, (iii) axial,
+(iv) forêt.
