@@ -67,6 +67,10 @@ struct BallStreamStats {
   // Filtre de profondeur A LA GENERATION (par lane) : candidats tues par
   // le minorant certifie sur le cover, AVANT toute emission.
   u64 gen_depth_killed[3] = {0, 0, 0};
+  // Ancres q4 tuees par le compte W_4 exact (reponse auditeur « minorant
+  // q4 et axial streaming » § 1) : W_4 est le plus grand cœur anchor-only
+  // (owner + Jung) — n4 >= h_4 rend l'ancre inutile AVANT seed × completion.
+  u64 anchors_killed_w4 = 0;
 };
 
 namespace detail_bs {
@@ -254,6 +258,24 @@ inline void collect_candidate_balls(const CloudIndex& ix, i64 s, u64 smax_eff,
         const i64 D2 = p3_norm2(p3_sub(pb, pa));
         if (D2 == 0) continue;
         anchor_cover_from_handles(ix, handles, pa, pb, D2, 3, &cover, &visits);
+        // COMPTE W_4 EXACT PAR ANCRE : tout z ∈ W_4(a,b) est strictement
+        // interieur a TOUTE boule q4 possedee par l'ancre (cœur universel
+        // owner + Jung — il n'y a pas de region anchor-only plus grande).
+        // n4 >= h_4 tue l'ANCRE entiere avant les boucles seed × completion ;
+        // W_4 ⊆ W_2 ⊆ cover coef 3, et un sous-compte ne tue jamais a tort.
+        {
+          u64 n4 = 0;
+          for (const CoverPoint& cz : cover) {
+            if (cz.u == ua || cz.u == ub) continue;
+            if (in_spindle(Lane::kQ4, pa, pb, ix.upos[(size_t)cz.u]) &&
+                ++n4 >= h_of[2])
+              break;
+          }
+          if (n4 >= h_of[2]) {
+            ++st->anchors_killed_w4;
+            continue;
+          }
+        }
         const auto pid = [&](i32 u) { return ix.bucket_ids[ix.bucket_start[(size_t)u]]; };
         for (const CoverPoint& cx : cover) {
           if (cx.u == ua || cx.u == ub) continue;

@@ -1044,7 +1044,7 @@ int main(int argc, char** argv) {
   }
   std::printf(
       "famille=%s n=%zu s=%lld smax=%llu seed=%lld candidats=%llu/%llu/%llu "
-      "gen_tues=%llu/%llu "
+      "gen_tues=%llu/%llu ancres_w4=%llu "
       "boules_uniques=%llu mortes_profondeur=%llu prefiltre_feuilles=%llu "
       "prefiltre_range_add=%llu census_keys=%llu census_int=%llu "
       "census_shell=%llu evenements=%llu fusions=%llu noeuds=%llu "
@@ -1055,6 +1055,7 @@ int main(int argc, char** argv) {
       (unsigned long long)st.candidates[1], (unsigned long long)st.candidates[2],
       (unsigned long long)st.gen_depth_killed[1],
       (unsigned long long)st.gen_depth_killed[2],
+      (unsigned long long)st.anchors_killed_w4,
       (unsigned long long)st.unique_balls,
       (unsigned long long)st.balls_dead_depth,
       (unsigned long long)st.prefilter_leaf_tests,

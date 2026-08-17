@@ -56,3 +56,18 @@ Le poste « nombre de candidats » est fermé à n=400 (105 k boules pour
 **89 portes CTest vertes** (la suite entière passe de 200 s à 155 s).
 Les campagnes n = 8000/16000/32000 deviennent abordables : c'est la
 prochaine étape, sur les deux profils contractuels.
+
+## Post-scriptum — le compte W₄ exact par ancre (réponse auditeur, § 1)
+
+Exécuté dans la foulée : `in_spindle(kQ4)` compté sur le cover (arrêt à
+`h_4`), l'ANCRE entière meurt avant les boucles seed × complétion —
+W₄ est le plus grand cœur anchor-only (owner + Jung), tout point de W₄
+est intérieur à TOUTE boule q4 de l'ancre, et un sous-compte ne tue
+jamais à tort. n=400 : 7 486 ancres tuées, candidats q4 évalués
+6,81 M → 2,43 M, `t_gen` 6 174 → 2 903 ms — pipeline sujet total
+~5,7 s (~8× depuis la baseline de la veille). Sorties identiques,
+0 désaccord jugé, 89 portes vertes. Compteur `ancres_w4` publié.
+Restent, des réponses auditeurs : la boule intérieure candidate
+`B(m, R−δ)` (test O(1), fixtures entières, mutant midball-nonstrict)
+et le préfixe axial streaming (≤ 16 groupes par seed) — tâches
+ouvertes, pentes n=400/800/1600 d'abord.
