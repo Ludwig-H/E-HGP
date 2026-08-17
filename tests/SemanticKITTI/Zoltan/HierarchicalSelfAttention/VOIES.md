@@ -1,349 +1,428 @@
 # Feuille de route de recherche
 
-Une seule voie principale est retenue : **segmentation polyèdre-only sur arbre complet**, avec une montée en complexité strictement conditionnée par les résultats intermédiaires.
+## 1. Voie principale
 
-## 0. Résultat visé
+Une seule voie principale est retenue :
 
-Le projet doit répondre, dans cet ordre, à trois questions :
+```text
+hiérarchie HGP disponible
+    → surfaces polyédriques explicites
+    → mesure surfacique attribuée normalisée
+    → token fixe par polyèdre
+    → trajectoires et fusions de densité
+    → pré-entraînement cross-range
+    → transfert multi-capteurs et multi-tâches
+```
 
-1. **représentation** : les feuilles et leur reprojection conservent-elles l'information sémantique ?
-2. **inductive bias** : la hiérarchie améliore-t-elle vraiment le graphe local ?
-3. **apprentissage invariant** : le pré-entraînement rend-il les embeddings plus stables à la portée et au capteur ?
+La fonction radiale monocouche est une baseline. Elle n'est plus une hypothèse constitutive. Le projet doit survivre à son éventuelle réfutation.
 
-Le classement SemanticKITTI n'est ouvert qu'après une réponse positive aux trois.
+Le modèle cible est `HGP-PolyFM`. Le nom reste provisoire et ne vaut pas brevet de nouveauté délivré par autocongratulation.
 
-## 1. WP0 — Contrat de données
+## 2. Résultat scientifique visé
+
+Le projet doit établir quatre propositions, dans cet ordre :
+
+1. **tokenizer** : une surface polyédrique fournit un code plus stable et plus efficace qu'un échantillon de points ;
+2. **espace d'échelle** : la trajectoire HGP apporte plus qu'un polyèdre isolé ou une hiérarchie générique ;
+3. **invariance apprise** : le code de forme survit à la portée, au thinning et au changement de capteur ;
+4. **fondation** : le même encodeur transfère entre datasets et tâches avec peu de labels.
+
+Un SOTA SemanticKITTI est une cible utile, mais il ne remplace aucune de ces preuves.
+
+## 3. WP0 — Schéma de données après HGP
 
 ### Travail
 
-- définir le schéma sérialisé de [ARCHITECTURE.md](ARCHITECTURE.md) ;
-- exporter les feuilles, nœuds, niveaux, arêtes et poids de reprojection ;
-- versionner les paramètres de construction ;
-- écrire les loaders CPU/GPU ;
-- construire les structures de contrôle.
+Sérialiser :
+
+```text
+facets
+polyhedra
+polyhedron_facets
+parent / children
+branch_next
+merge_events
+facet_birth_level
+lateral_edges
+facet_point_index / weight
+```
+
+Calculer les attributs de surface sans labels : aire, normales ou projecteurs, bords, confiance, rémission et statistiques d'acquisition.
 
 ### Livrables
 
 ```text
-schema_version.json
-scan_<id>.pt ou .safetensors
-validate_structure.py
-profile_dataset.py
+poly_schema_version.json
+validate_poly_surface.py
+build_surface_measure.py
+profile_poly_dataset.py
 ```
 
 ### Tests
 
+- permutation ;
+- remeshing ;
+- surfaces ouvertes et multicouches ;
+- orientation de normale ;
 - conservation de masse ;
-- permutation des identifiants ;
-- reconstruction exacte de l'ordre des points ;
-- absence de cycle ;
-- déterminisme bit-à-bit du prétraitement ;
-- cohérence des statistiques parent–enfants.
+- exactitude de reprojection ;
+- cohérence des deltas de facettes.
 
 ### Porte
 
-Aucun entraînement avant G0. Les réseaux compensent volontiers les erreurs de données jusqu'au moment où il faut expliquer le résultat, ce qui est une stratégie assez peu compatible avec la science.
+Aucun réseau avant G0. Une erreur dans les incidences peut produire une loss parfaitement lisse, ce qui est une qualité esthétique mais pas scientifique.
 
-## 2. WP1 — Oracle et stabilité
+## 4. WP1 — Audit géométrique de la radialité
 
-### 2.1 Oracle des feuilles
+### Travail
 
-Pour plusieurs granularités et ordres :
+Pour chaque polyèdre et plusieurs ancres :
 
-- distribution GT par feuille ;
-- reprojection pondérée ;
-- mIoU, IoU par classe et frontières ;
-- courbes oracle contre nombre de feuilles et mémoire.
+- lancer les rayons ;
+- mesurer couverture et multiplicité ;
+- identifier les tangences et instabilités ;
+- stratifier par classe, portée, persistance et géométrie ;
+- visualiser les pires cas.
 
-### 2.2 Stabilité sous thinning
+### Livrables
 
-Construire les vues dégradées depuis les identifiants des points originaux :
+```text
+radiality.parquet
+radiality_by_class.csv
+radiality_report.md
+worst_cases/
+```
 
-- uniforme ;
-- dépendant de la portée ;
-- suppression d'anneaux ;
-- secteurs occultés.
+### Décision
 
-Apparier les nœuds et mesurer la conservation de l'arbre.
+- `K=1` quasi universel et stable : carte radiale conservée comme baseline forte ;
+- faible multiplicité bornée : ouvrir `K=2/4` ;
+- multiplicité ou centre instables : aucune tentative de sauver artificiellement `ρ(u)` ; passer à la mesure surfacique.
 
-### 2.3 Contrôles
+Ce WP ne peut tuer que la carte radiale, pas le paradigme polyédrique.
 
-- HDBSCAN/RSL ;
-- octree ;
-- partition SPT ;
-- single-linkage ;
-- arbre aléatoire seulement pour les métriques structurelles pertinentes.
+## 5. WP2 — Benchmark du tokenizer de surface
+
+### Représentations
+
+1. `Analytic` : moments, spectre, distributions ;
+2. `Radial-1` ;
+3. `Radial-K` ;
+4. `Spectral-SR` : moments sphéro-radiaux ;
+5. `MeasureGrid` : grille douce de mesure ;
+6. `MeasureGrid-MA` : multi-ancre ;
+7. `SurfaceSet` : quadrature d'aire + Set Encoder ;
+8. `SurfaceAtlas` ;
+9. `SurfaceGraph`.
+
+### Tâches
+
+- autoencodage de surface ;
+- classification ou probe des labels de polyèdres ;
+- retrieval du même support sous remeshing et thinning ;
+- prédiction de bords ;
+- reconstruction de couches multiples.
+
+### Courbes obligatoires
+
+```text
+fidélité vs octets
+fidélité vs FLOPs
+probe sémantique vs dimension latente
+invariance vs distorsion
+```
 
 ### Porte
 
-Continuer si :
+Retenir une représentation compacte et un plafond riche :
 
-- l'oracle conserve une marge d'au moins `10` points au-dessus de la cible apprise ;
-- le matching reste exploitable au thinning `1/4` ;
-- la stabilité n'est pas entièrement expliquée par de grandes régions planes proches.
+```text
+voie compacte : MeasureGrid ou Spectral-SR
+plafond       : SurfaceGraph
+```
 
-## 3. WP2 — Baseline polyèdre-only locale
+La configuration cible initiale est `MeasureGrid + topo scalars`. Ajouter la branche `SurfaceGraph` seulement si son gain dépasse son coût à budget apparié.
+
+## 6. WP3 — Oracle et sortie sémantique
+
+### Travail
+
+- oracle par facette ;
+- oracle par polyèdre à différents niveaux ;
+- oracle multi-ancêtres ;
+- oracle de branche ;
+- métriques de frontières et petites classes ;
+- courbe qualité contre nombre de polyèdres.
+
+### Décodeur pilote
+
+Pour chaque facette :
+
+```text
+feature locale de facette
++ tokens des ancêtres persistants
++ événements de fusion proches
+→ logits facette
+→ reprojection point-wise
+```
+
+### Porte
+
+Continuer si l'oracle possède une marge suffisante et si le décodeur peut séparer les frontières que le token global ne localise pas.
+
+Si l'oracle polyèdre est faible mais l'oracle facette élevé, le paradigme reste viable avec un backbone polyédrique et un décodeur fin.
+
+## 7. WP4 — Modèles plats sur polyèdres
 
 ### Modèles
 
-1. `Leaf-MLP` : aucun graphe ;
-2. `Dual-GNN` : message passing sur le graphe dual ;
-3. `Dual-Transformer` : attention sparse avec RPE.
-
-### Canaux ouverts
-
-Commencer par :
-
-```text
-shape_min = Gram + spectre + support_42 + masques
-metric_min = taille + centre + hauteur + pose
-sensor_min = rémission + portée
-```
-
-Le canal de filtration n'est pas encore utilisé : il n'existe pas de hiérarchie dans ce WP.
+1. `Analytic-MLP` ;
+2. `SurfaceGraph` ;
+3. `Measure-Flat` ;
+4. `Measure+Topo` ;
+5. `Measure-Lateral`.
 
 ### But
 
-Établir :
+Établir avant l'arbre :
 
-- qu'un token de feuille est apprenable ;
-- quels descripteurs sont utiles ;
-- le coût minimal de la reprojection ;
-- le plafond du graphe local.
+- l'apprenabilité du token ;
+- le gain de la mesure normalisée ;
+- la valeur de la connectivité ;
+- le plafond du graphe spatial ;
+- le coût d'abandonner les tokens points.
 
-### Porte
+### Comparaisons
 
-Le `Dual-Transformer` doit battre `Leaf-MLP` et réduire l'écart à la baseline point-wise. Sinon, revoir les feuilles et les canaux avant toute attention hiérarchique.
-
-## 4. WP3 — `PolyTreeFormer-Nano`
-
-### Implémentation
-
-Fork minimal du dépôt SPT :
-
-1. conserver le mode `nano` ;
-2. remplacer le `NAG` par les niveaux sélectionnés de l'arbre ;
-3. injecter les canaux de feuilles et d'arêtes ;
-4. remplacer l'unpooling dur par la reprojection massique ;
-5. garder quatre niveaux seulement au premier essai.
-
-### Configuration pilote
-
-```yaml
-levels: 4
-widths: [96, 128, 192, 256]
-heads: [3, 4, 6, 8]
-blocks_down: [2, 2, 3, 3]
-blocks_up: [1, 1, 2]
-ffn_ratio: 4
-pre_norm: true
-drop_path: 0.10
-```
-
-### Ablations
-
-- pooling moyen + MLP ;
-- message passing sans attention ;
-- SPT attention ;
-- mêmes niveaux avec arbre aléatoire ;
-- niveaux bruts contre relatifs.
+- point/voxel backbone moderne ;
+- superpoints SPT ;
+- même nombre de tokens ;
+- mêmes paramètres ;
+- même FLOPs ;
+- même volume d'entrée.
 
 ### Porte
 
-La hiérarchie doit améliorer le graphe dual sur trois graines. Sans cela, ne pas coder l'arbre complet.
+`Measure+Topo` doit battre les descripteurs analytiques et montrer au moins un avantage net : segmentation, faible supervision, portée, robustesse ou qualité–coût.
 
-## 5. WP4 — `PolyTreeFormer-Full`
+Sans signal positif, ne pas coder un Transformer hiérarchique pour créer artificiellement de l'espoir.
 
-### Objectif
+## 8. WP5 — Architecture native de l'espace d'échelle
 
-Utiliser tous les événements pertinents, sans réduire la filtration à quatre coupes arbitraires.
+### Composants
 
-### Bloc
+- `SurfaceEncoder` partagé ;
+- tokens d'état et deltas de facettes ;
+- `BranchEncoder` indexé par `Δlogλ` et rangs ;
+- `MergeEventEncoder` permutation-invariant ;
+- graphe latéral ;
+- décodeur par facette ;
+- latents globaux seulement si nécessaires.
 
-Chaque itération combine :
+### Ordre d'ouverture
 
-1. agrégation enfants→parent ;
-2. attention dans la fratrie d'un événement ;
-3. diffusion parent→enfants ;
-4. attention latérale géométrique ;
-5. FFN et résidus.
+1. branche seule ;
+2. branche + deltas ;
+3. événements de fusion ;
+4. graphe latéral ;
+5. contexte global.
 
-### Gestion du degré
+### Baselines
 
-- attention exacte sous un seuil `d_max` ;
-- `m` inducing tokens au-delà ;
-- mêmes paramètres pour toutes les familles ;
-- aucun ordre artificiel entre enfants simultanés.
-
-### Trajectoires
-
-Ajouter un Transformer 1D partagé le long des états d'une branche seulement si le bloc de famille fonctionne. Les positions sont des `Δlogλ`, pas des indices de profondeur.
-
-### Comparateurs
-
+- quatre coupes SPT-nano ;
+- `MeanTree` ;
 - `Sequoia-fixed` ;
-- HSA ;
-- SPT-Nano quatre niveaux ;
-- `MeanTree`.
+- HSA fidèle au régime publié ;
+- arbre aléatoire ;
+- octree ;
+- HDBSCAN/RSL ;
+- niveaux HGP permutés.
 
 ### Porte
 
-Le modèle complet doit apporter soit :
+La hiérarchie doit améliorer au moins deux axes parmi mIoU, portée, faible supervision, instance, robustesse et qualité–coût.
 
-- un gain de mIoU ;
-- un gain net sur les classes lointaines ;
-- une meilleure robustesse au thinning ;
-- ou un meilleur compromis paramètres/qualité.
+Le gain doit venir de la vraie structure ou des vrais niveaux, pas seulement du nombre de couches.
 
-Une architecture plus lente et strictement égale reste une ablation, pas le modèle final.
+## 9. WP6 — `Surface-JEPA`
 
-## 6. WP5 — `Range-Hierarchy JEPA`
+### Phase 1 — même surface
 
-### Phase 1 — même arbre
+- teacher complet ;
+- student avec secteurs de grille ou facettes masqués ;
+- prédiction latente ;
+- régularisation de variance/covariance ;
+- reconstruction basse fréquence auxiliaire.
 
-Avant d'apparier deux arbres :
+### Phase 2 — espace d'échelle
 
-- teacher et student utilisent la même structure ;
-- le student reçoit des sous-arbres ou attributs masqués ;
-- il prédit les embeddings teacher des cibles ;
-- EMA et variance regularization.
-
-Cette phase valide l'objectif et le predictor.
-
-### Phase 2 — deux arbres reconstruits
-
-- teacher : scan complet ;
-- student : scan aminci ;
-- reconstruction indépendante des structures ;
-- matching par Weighted Jaccard des identifiants survivants ;
-- loss seulement sur les correspondances fiables.
-
-### Phase 3 — événements
-
-Prédire en plus :
-
-- prochaine variation de niveau ;
-- persistance restante ;
-- rapport de masse parent/enfants ;
-- degré de fusion.
-
-### Phase 4 — softmaps observables
-
-Ajouter la distillation de distributions de prototypes seulement si :
-
-- le matching couvre les petites classes ;
-- l'embedding ne s'effondre pas ;
-- la régression latente améliore déjà le probing.
+- masquer un delta de facettes ;
+- prédire le parent depuis les enfants ;
+- prédire un segment de branche ;
+- prédire persistance et prochain événement en auxiliaire.
 
 ### Porte
 
-Continuer vers une campagne coûteuse si le pilote produit `+0.5` mIoU en probing ou fine-tuning et améliore explicitement la stabilité des branches appariées.
+Continuer si le frozen probing et le faible régime de labels progressent. Une loss qui descend sans gain de probing n'est qu'une activité GPU bien organisée.
 
-## 7. WP6 — Multi-ordre et incidences
+## 10. WP7 — `Cross-Range PolyJEPA`
 
-Ce WP n'est pas sur le chemin critique initial.
+### Phase 1 — vues synthétiques
 
-### Multi-ordre
+Teacher et student utilisent des HGP reconstruits indépendamment sous :
 
-Ouvrir `K=1/2/3` si un ordre unique échoue de façon complémentaire :
+- suppression d'anneaux ;
+- thinning angulaire ;
+- portée simulée ;
+- occultation ;
+- bruit et rémission.
 
-- `K=1` sur structures linéaires ;
-- `K=2` sur surfaces ;
-- `K=3` sur régions épaisses.
+Le matching combine support commun, mesure surfacique et cohérence d'arbre.
 
-Fusion par gate dépendant de :
+### Phase 2 — séquences réelles
 
-- forme intrinsèque ;
-- portée ;
-- persistance ;
-- incertitude ;
-- masse.
+- compensation de l'ego-motion ;
+- traitement des objets mobiles ;
+- matching de surfaces réelles à plusieurs distances ;
+- teacher temporel plus dense ;
+- student mono-scan.
 
-Le gate doit être audité pour vérifier qu'il ne se réduit pas à une table portée→ordre.
+### Audit
 
-### Incidences complètes
-
-Tester `AllSet-incidence` si le graphe dual est insuffisant. Comparer :
-
-- incidences exactes ;
-- incidences mélangées ;
-- mêmes cellules sans arêtes ;
-- même budget sur graphe dual.
-
-## 8. WP7 — Campagne SemanticKITTI
-
-### Étapes
-
-1. développer sur sous-splits internes du train ;
-2. geler la recette pilote ;
-3. lancer trois graines sur `08` ;
-4. analyser par classe, portée et frontière ;
-5. comparer au meilleur backbone reproduit ;
-6. seulement ensuite lancer train+val et test caché.
-
-### Résultat minimum publiable
-
-Même sans SOTA, un papier peut être sérieux si les résultats démontrent :
-
-- un oracle polyédrique élevé ;
-- une invariance structurelle mesurée ;
-- une architecture polyèdre-only compétitive ;
-- un gain causé par les niveaux relatifs ;
-- une amélioration sous changement de densité.
-
-### Résultat pour conférence majeure
-
-Il faut en plus :
-
-- gain robuste sur SemanticKITTI ;
-- transfert vers un second capteur ;
-- avantage au-delà d'une SPT-nano adaptée ;
-- analyse de coût ;
-- contribution méthodologique générale, probablement le JEPA inter-arbres ou l'attention événementielle.
-
-## 9. WP8 — Transfert
-
-Choix recommandé : nuScenes, puis éventuellement Waymo.
-
-### Protocole
-
-- conserver le code et les dimensions ;
-- recalibrer les statistiques sans labels ;
-- ne pas retoucher les canaux pour chaque capteur ;
-- mesurer zero-shot des embeddings, linear probing et fine-tuning ;
-- tester un modèle pré-entraîné conjointement sur plusieurs capteurs.
+- couverture des matches ;
+- biais par classe et portée ;
+- retrieval cross-range ;
+- probes capteur et sémantique ;
+- mIoU par distance.
 
 ### Porte
 
-Un gain SemanticKITTI qui disparaît complètement sur nuScenes doit être présenté comme spécifique au capteur, pas comme invariance générale.
+Le SSL doit améliorer à la fois représentation et robustesse sur au moins deux datasets. Un gain seulement sur les grandes routes proches ne valide pas l'idée.
 
-## 10. Dépendances entre lots
+## 11. WP8 — Pré-entraînement multi-capteurs
+
+### Données
+
+Commencer par plusieurs LiDAR outdoor dont les patterns diffèrent. Conserver :
+
+- même `SurfaceEncoder` ;
+- mêmes dimensions de grille ;
+- même règle d'ancre ;
+- mêmes canaux ;
+- normalisation statistique globale ou adaptative sans labels.
+
+### Évaluations
+
+- frozen cross-dataset ;
+- `0.1 %`, `1 %`, `10 %` labels ;
+- adaptation complète ;
+- capteur tenu hors pré-entraînement ;
+- courbes de scaling avec le nombre de scans et capteurs.
+
+### Porte
+
+Un gain multi-capteurs stable autorise le terme **foundation model LiDAR outdoor**. Le terme **foundation model 3D général** reste fermé.
+
+## 12. WP9 — Multi-tâches et instances
+
+### Tâches
+
+- sémantique ;
+- instance / panoptique ;
+- détection ;
+- frontières ;
+- retrieval ;
+- reconstruction ou complétion.
+
+Les branches persistantes fournissent des candidats naturels d'instance, mais elles ne sont jamais supposées égales aux instances GT. Mesurer fragmentation, fusion et stabilité temporelle.
+
+### Architecture
+
+Le backbone est partagé. Les têtes consomment :
+
+- tokens de polyèdres ;
+- deltas ;
+- événements ;
+- features de facettes.
+
+### Porte
+
+Le pré-entraînement doit améliorer plusieurs tâches, en particulier une tâche de localisation. Une représentation uniquement sémantique ne suffit pas au claim fondation.
+
+## 13. WP10 — Distillation 2D et langage
+
+Ouvrir seulement après WP7/WP8.
+
+### Travail
+
+- projeter les facettes dans les images ;
+- agréger les features vision sur les polyèdres ;
+- distiller vers le sous-espace sémantique ;
+- comparer au même teacher distillé vers points, voxels et superpoints ;
+- ouvrir l'alignement texte pour l'open vocabulary.
+
+### Règle
+
+La géométrie-only reste une table principale. Un teacher 2D ne doit pas rendre impossible l'attribution du gain au tokenizer.
+
+## 14. WP11 — Campagne de publication
+
+### Papier 1 : nouvelle représentation
+
+Contributions minimales :
+
+1. surfaces polyédriques HGP comme unités perceptives ;
+2. mesure surfacique normalisée et encodeur compact ;
+3. analyse radialité / multicouches / remeshing ;
+4. benchmark taux–distorsion ;
+5. segmentation et robustesse cross-range ;
+6. second capteur.
+
+Ce papier peut viser ICCV, NeurIPS ou ICML sans modèle de fondation complet si l'analyse causale et les résultats sont forts.
+
+### Papier 2 ou version étendue : fondation
+
+- pré-entraînement multi-datasets ;
+- temps et multimodalité ;
+- plusieurs tâches ;
+- low-shot et frozen probing ;
+- courbes de scaling ;
+- open vocabulary éventuel.
+
+Empiler les deux ambitions dans une première soumission peut fonctionner, mais réduit la capacité à expliquer proprement quelle idée a produit quel résultat.
+
+## 15. Graphe de dépendances
 
 ```mermaid
 graph LR
-  WP0[WP0 contrat] --> WP1[WP1 oracle & stabilité]
-  WP1 --> WP2[WP2 graphe local]
-  WP2 --> WP3[WP3 Nano]
-  WP3 --> WP4[WP4 arbre complet]
-  WP3 --> WP5[WP5 JEPA]
-  WP4 --> WP7[WP7 SemanticKITTI]
-  WP5 --> WP7
-  WP7 --> WP8[WP8 transfert]
-  WP4 -. sous condition .-> WP6[WP6 multi-ordre/incidences]
+  W0[WP0 contrat] --> W1[WP1 radialité]
+  W0 --> W2[WP2 tokenizer]
+  W2 --> W3[WP3 oracle]
+  W2 --> W4[WP4 modèle plat]
+  W3 --> W4
+  W4 --> W5[WP5 espace HGP]
+  W4 --> W6[WP6 Surface-JEPA]
+  W5 --> W7[WP7 Cross-Range]
+  W6 --> W7
+  W7 --> W8[WP8 multi-capteurs]
+  W5 --> W9[WP9 multi-tâches]
+  W8 --> W9
+  W8 --> W10[WP10 2D/langage]
+  W9 --> W11[WP11 publication]
+  W10 --> W11
 ```
 
-## 11. Priorité pratique
+## 16. Priorités immédiates
 
-| Priorité | Tâche | Pourquoi |
+| Priorité | Travail | Décision obtenue |
 |---:|---|---|
-| 1 | G0/G1/G2 | tue rapidement les mauvaises hypothèses |
-| 2 | SPT-nano adapté | code existant, baseline crédible |
-| 3 | canaux et RPE | levier principal avant nouvel opérateur |
-| 4 | JEPA même arbre | valide l'entraînement sans matching fragile |
-| 5 | JEPA deux arbres | contribution la plus originale |
-| 6 | arbre complet / Sequoia | gain potentiel, coût d'ingénierie élevé |
-| 7 | HSA / AllSet / multi-ordre | seulement après preuve du socle |
+| 1 | radialité + multiplicité + ancres | tuer ou conserver `ρ(u)` |
+| 2 | benchmark taux–distorsion du tokenizer | choisir MeasureGrid / SurfaceGraph |
+| 3 | oracle facette/polyèdre/branche | valider la sortie |
+| 4 | modèle plat `Measure+Topo` | valider l'unité polyédrique |
+| 5 | branches + deltas | valider l'espace d'échelle |
+| 6 | Cross-Range PolyJEPA | valider l'invariance apprise |
+| 7 | second capteur | valider le transfert |
+| 8 | multi-tâches / 2D | gagner le statut fondation |
 
-## 12. Règle générale
-
-Chaque WP produit une table de résultats et une décision `continue / revise / stop`. Aucune étape suivante ne doit servir à sauver rétrospectivement une étape précédente non concluante.
+La prochaine ligne de code utile n'est donc pas HSA. C'est le benchmark de représentation de surface et ses courbes de radialité, remeshing, taux–distorsion et retrieval cross-range.
