@@ -101,12 +101,22 @@ inline i128 axis_max(const Q3Form& f, int i, i64 lo, i64 hi) {
 // maximum est < 0 est credite en bloc.
 // `mutant_prune_ge` : reintroduit l'elagage laxiste `mn >= 0` (celui qui
 // saute des coquilles) pour la porte qui le tue. Jamais actif en production.
+// COLLECTEUR (audit cible 5964214, § 1) : si `interior_out` est fourni
+// (tampon de 8, profil K_max <= 10, sites distincts), les index uniques
+// strictement interieurs sont enumeres — y compris dans les blocs credites,
+// qui sont alors parcourus feuille a feuille. Le compte, lui, ne change pas.
 inline u64 q3_ball_depth(const CloudIndex& ix, const Q3Form& f, i32 ua, i32 ub,
                          i32 ux, u64 cap, u64* shell_extra = nullptr,
-                         bool mutant_prune_ge = false) {
+                         bool mutant_prune_ge = false, i32* interior_out = nullptr,
+                         u8* interior_n = nullptr) {
   if (ix.nodes.empty()) return 0;
   u64 count = 0;
   std::vector<NodeRef> stack{0};
+  const auto skip_support = [&](i32 u) { return u == ua || u == ub || u == ux; };
+  const auto record = [&](i32 u) {
+    if (interior_out && interior_n && *interior_n < 8)
+      interior_out[(*interior_n)++] = u;
+  };
   while (!stack.empty() && count < cap) {
     const NodeRef z = stack.back();
     stack.pop_back();
@@ -122,22 +132,33 @@ inline u64 q3_ball_depth(const CloudIndex& ix, const Q3Form& f, i32 ua, i32 ub,
     // des points de coquille (P = 0) que le refus transactionnel des
     // extra-shell doit voir — il descend.
     if (mutant_prune_ge ? (mn >= 0) : (mn > 0)) continue;
-    const auto skip_support = [&](i32 u) { return u == ua || u == ub || u == ux; };
     if (mx < 0 && z >= 0) {
       // Tout le sous-arbre est strictement interieur.
       const NodeRange r = range_of(ix, z);
-      u64 w = ix.range_weight(r.first, r.last);
-      for (const i32 u : {ua, ub, ux})
-        if (u >= r.first && u <= r.last) w -= ix.range_weight(u, u);
-      count += w;
+      if (interior_out) {
+        for (i32 u = r.first; u <= r.last; ++u) {
+          if (skip_support(u)) continue;
+          record(u);
+          count += ix.range_weight(u, u);
+        }
+      } else {
+        u64 w = ix.range_weight(r.first, r.last);
+        for (const i32 u : {ua, ub, ux})
+          if (u >= r.first && u <= r.last) w -= ix.range_weight(u, u);
+        count += w;
+      }
       continue;
     }
     if (z < 0) {
       const i32 u = -1 - z;
       if (skip_support(u)) continue;
       const i128 p = q3_power(f, ix.upos[(size_t)u]);
-      if (p < 0) count += ix.range_weight(u, u);
-      else if (p == 0 && shell_extra) ++*shell_extra;
+      if (p < 0) {
+        record(u);
+        count += ix.range_weight(u, u);
+      } else if (p == 0 && shell_extra) {
+        ++*shell_extra;
+      }
       continue;
     }
     stack.push_back(ix.nodes[(size_t)z].left);

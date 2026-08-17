@@ -92,10 +92,14 @@ mhgp4_expect_code(mhgp4_q234_judge_two_lines 0 mhgp4_q234_prune_probe
 mhgp4_expect_code(mhgp4_q234_ha_clusters 0 mhgp4_q234_prune_probe
     "--family=eight_clusters --n=1200 --s=8 --seed=3 --ha")
 
-# Refus avant calcul : famille inconnue, n insuffisant.
+# Refus avant calcul : famille inconnue, n insuffisant, profil de capacite
+# (K_max <= 10 ⟺ smax <= 11 : les tampons de certificats et d'interieurs
+# sont dimensionnes h_3-1 <= 8 — refus explicite, jamais une troncature).
 mhgp4_expect_code(mhgp4_wspd_refus_famille 2 mhgp4_wspd_scaling_probe
     "--family=inconnue")
 mhgp4_expect_code(mhgp4_wspd_refus_n 2 mhgp4_wspd_scaling_probe "--n=1")
+mhgp4_expect_code(mhgp4_q3_refus_smax 2 mhgp4_q3_events_probe
+    "--family=uniform --n=400 --s=8 --smax=12")
 
 # Instruction q3 : ancres survivantes -> evenements, juge PAR IDENTITES
 # contre l'oracle brut borne (tous les triangles). Le juge partage encore le

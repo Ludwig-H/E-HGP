@@ -213,6 +213,41 @@ int main(int argc, char** argv) {
                       inj_level4g || inj_carry;
   mhgp4_oracle::inject_mul_carry_lost() = inj_carry;
 
+  // Fixture owner AU-DESSUS DU BIT 31 (audit cible 5964214, § 3) : triangle
+  // equilateral entier (0,0,0), (1,1,0), (1,0,1) — trois aretes de longueur
+  // carree 2, l'owner est donc choisi PAR la seule EdgeKey minimale sur les
+  // vrais PointId. Plusieurs affectations d'IDs, dont au-dessus du bit 31 :
+  // un PointId signe i32 y inverserait l'ordre et deplacerait l'owner.
+  {
+    const PointId H = (PointId)1u << 31;
+    struct OwnerCase {
+      PointId ia, ib, ix2;
+      int owner;  // 0 = arete ab, 1 = ax, 2 = bx
+    };
+    const OwnerCase cases[] = {
+        {7, 3, 5, 2},               // (3,5) minimale : bx
+        {H + 7, H + 3, 5, 2},       // (5, 2^31+3) minimale : bx
+        {5, H + 3, H + 7, 0},       // (5, 2^31+3) minimale : ab
+        {0xFFFFFFFEu, 1, 0xFFFFFFFFu, 0},  // (1, 2^32-2) minimale : ab
+    };
+    for (const OwnerCase& c : cases) {
+      const bool owns[3] = {anchor_owns_q3(2, 2, 2, c.ia, c.ib, c.ix2),
+                            anchor_owns_q3(2, 2, 2, c.ia, c.ix2, c.ib),
+                            anchor_owns_q3(2, 2, 2, c.ib, c.ix2, c.ia)};
+      int owner = -1, count = 0;
+      for (int t = 0; t < 3; ++t)
+        if (owns[t]) { owner = t; ++count; }
+      if (count != 1 || owner != c.owner) {
+        std::fprintf(stderr,
+                     "FIXTURE owner bit31 : ids (%u,%u,%u) -> owner %d "
+                     "(attendu %d, %d gagnants)\n",
+                     (unsigned)c.ia, (unsigned)c.ib, (unsigned)c.ix2, owner,
+                     c.owner, count);
+        return 3;
+      }
+    }
+  }
+
   const int small_pat[3] = {3, 4, 0};
   const int big_pat[3] = {12000, 16000, 0};
   std::vector<std::vector<P3>> clouds;
@@ -299,15 +334,22 @@ int main(int argc, char** argv) {
             continue;
           }
           u64 o_depth = 0, o_shell = 0;
+          std::vector<PointId> o_interior;  // tries : boucle croissante en id
           for (size_t u = 0; u < ipts.size(); ++u) {
             if (u == p || u == q || u == r) continue;
             const int sg = oracle_power_sign(bl, *v0, ipts[u].pos);
-            if (sg < 0) ++o_depth;
-            else if (sg == 0) ++o_shell;
+            if (sg < 0) {
+              ++o_depth;
+              if (o_depth <= 8) o_interior.push_back(ipts[u].id);
+            } else if (sg == 0) {
+              ++o_shell;
+            }
           }
           const Q3Form f = q3_form(*v0, *v1, *apex);
           u64 s_shell = 0;
           u64 s_depth;
+          i32 s_interior_u[8];
+          u8 s_ni = 0;
           if (inj_sign_p) {
             // MUTANT : P <= 0 compte la coquille comme interieur.
             s_depth = 0;
@@ -318,7 +360,8 @@ int main(int argc, char** argv) {
             s_shell = o_shell;  // le mutant ne les distingue plus
           } else {
             s_depth = q3_ball_depth(ix, f, uidx[o0], uidx[o1], uidx[oapex],
-                                    (u64)m, &s_shell, inj_prune_ge);
+                                    (u64)m, &s_shell, inj_prune_ge, s_interior_u,
+                                    &s_ni);
           }
           if (s_depth != o_depth) {
             report("profondeur", da, db, dx);
@@ -327,6 +370,21 @@ int main(int argc, char** argv) {
           if (s_shell != o_shell) {
             report("coquille", da, db, dx);
             continue;
+          }
+          // Liste des interieurs (audit cible 5964214, § 1) : les IDs
+          // EXTERNES du collecteur sujet, tries, contre la liste oracle —
+          // seulement quand elle tient dans le contrat (profondeur <= 8).
+          if (!inj_sign_p && o_depth <= 8) {
+            std::vector<PointId> s_int;
+            for (u8 t = 0; t < s_ni; ++t) {
+              const i32 u = s_interior_u[t];
+              s_int.push_back(ix.bucket_ids[ix.bucket_start[(size_t)u]]);
+            }
+            std::sort(s_int.begin(), s_int.end());
+            if (s_int != o_interior) {
+              report("interieurs", da, db, dx);
+              continue;
+            }
           }
           if (o_depth < h3 && o_shell == 0) {
             ++events_seen;
@@ -351,6 +409,24 @@ int main(int argc, char** argv) {
             const OB s_lhs = ob(lv.num) * (bl.det * bl.det);
             const OB s_rhs = ob(lv.den) * dist2_a;
             if (cmp(s_lhs, s_rhs) != 0) report("niveau public", da, db, dx);
+            // BallKey primitive du sujet contre la forme oracle (audit cible
+            // 5964214, § 1) : A_o = det², B_o = -2·det·num, C_o = |num|² -
+            // |a·det - N|², comparees PROJECTIVEMENT (produits croises ; les
+            // deux formes ont un coefficient de tete > 0, la primitivite du
+            // sujet fait le reste). Largeurs : A_o·b < 2^234, a·B_o < 2^252,
+            // A_o·c < 2^252, a·C_o < 2^286 — tout < 2^384.
+            const Q3BallKey bk = q3_ball_key(f);
+            const OB A_o = bl.det * bl.det;
+            bool ball_ok = true;
+            OB nn = ob(0);
+            for (int t = 0; t < 3; ++t) {
+              const OB B_ot = ob(-2) * (bl.det * bl.num[t]);
+              if (cmp(A_o * ob(bk.b[t]), ob(bk.a) * B_ot) != 0) ball_ok = false;
+              nn = nn + bl.num[t] * bl.num[t];
+            }
+            const OB C_o = nn - dist2_a;
+            if (cmp(A_o * ob(bk.c), ob(bk.a) * C_o) != 0) ball_ok = false;
+            if (!ball_ok) report("ballkey", da, db, dx);
           }
           if (o_shell > 0) {
             ++supports_with_extra_shell;

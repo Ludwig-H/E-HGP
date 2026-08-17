@@ -8,10 +8,18 @@
 //   depth <= h_3 - 1 -> EVENEMENT q3 ; shell supplementaire -> refus
 //   transactionnel compte a part (audit du 17 aout, Q5.2).
 //
+// ENREGISTREMENT UNIQUE (audit cible 5964214) : chaque evenement est UN
+// record Q3Event{support, owner, ball, level, depth, interior tries} ;
+// support/owner/ball/level sont formes AVANT le census (candidat), le census
+// n'ajoute que depth et les interieurs. CONTRAT DE CAPACITE : profil
+// K_max <= 10 — smax > 11 est REFUSE (code 2), jamais tronque.
+//
 // JUGE (--judge, oracle borne petit n) : enumeration brute de TOUS les
-// triangles {i<j<k} — owner par longueur/EdgeKey, acuite, profondeur — et
-// comparaison PAR IDENTITES (SupportKey) : manquants, en trop, en accord.
-// Codes : 0 conforme, 1 desaccord d'identites, 2 refus, 3 invariant.
+// triangles {i<j<k} — owner par longueur/EdgeKey sur les VRAIS PointId,
+// acuite, profondeur, interieurs — et comparaison des RECORDS COMPLETS
+// (multiensemble) : un record qui differe par un seul champ compte a la fois
+// en manquant et en trop. Codes : 0 conforme, 1 desaccord, 2 refus,
+// 3 invariant.
 #include <algorithm>
 #include <array>
 #include <chrono>
@@ -97,24 +105,28 @@ Args parse(int argc, char** argv) {
   return a;
 }
 
-// SupportKey q3 : triplet trie d'index de positions uniques (sites
-// distincts, donc PointId ↔ position unique apres refus des doublons).
-struct Key3 {
-  i32 u[3];
-  bool operator<(const Key3& o) const {
-    for (int i = 0; i < 3; ++i)
-      if (u[i] != o.u[i]) return u[i] < o.u[i];
-    return false;
+// Publie un record complet : interieurs convertis en PointId puis tries.
+Q3Event make_event(const SupportKey3& sk, const EdgeKey& ek, const Q3BallKey& bk,
+                   const Q3Level& lv, const i32* interior_u, u64 n_interior,
+                   const std::vector<PointId>& pid_of) {
+  Q3Event e;
+  e.support = sk;
+  e.owner = ek;
+  e.ball = bk;
+  e.level = lv;
+  n_interior = std::min<u64>(n_interior, e.interior.size());  // borne prouvable
+  e.depth = (u8)n_interior;
+  for (u64 t = 0; t < n_interior; ++t)
+    e.interior[t] = pid_of[(size_t)interior_u[t]];
+  // Tri par insertion (n <= 8) : evite l'introsort generique et son faux
+  // positif -Warray-bounds de GCC 13 sur les sous-intervalles de tableau fixe.
+  for (u64 t = 1; t < n_interior; ++t) {
+    const PointId v = e.interior[t];
+    u64 w = t;
+    for (; w > 0 && e.interior[w - 1] > v; --w) e.interior[w] = e.interior[w - 1];
+    e.interior[w] = v;
   }
-  bool operator==(const Key3& o) const {
-    return u[0] == o.u[0] && u[1] == o.u[1] && u[2] == o.u[2];
-  }
-};
-
-Key3 make_key(i32 x, i32 y, i32 z) {
-  Key3 k{{x, y, z}};
-  std::sort(k.u, k.u + 3);
-  return k;
+  return e;
 }
 
 // COVER PARTAGE PAR ANCRE (audit du 17 aout, § 6.2) : tout porteur ET tout
@@ -271,6 +283,14 @@ int main(int argc, char** argv) {
   }
   const int coord = a.coord > 0 ? a.coord : cloud_family_default_coord(a.family, a.n);
   const std::vector<P3> pts = make_family_cloud(a.family, a.n, coord, a.seed);
+  if (a.smax > 11) {
+    // Contrat de capacite (audit cible 5964214, § 2) : profil K_max <= 10,
+    // tampons de certificats et d'interieurs dimensionnes h_3 - 1 <= 8.
+    // Refus explicite plutot qu'une troncature silencieuse des paquets.
+    std::fprintf(stderr, "REFUS : profil K_max<=10 (smax<=11) — smax=%llu\n",
+                 (unsigned long long)a.smax);
+    return 2;
+  }
   const u64 smax_eff = std::min<u64>(a.smax, pts.size());
   if (smax_eff < 5) {
     std::fprintf(stderr, "REFUS : s_max effectif trop petit\n");
@@ -323,12 +343,14 @@ int main(int argc, char** argv) {
   // refus des doublons, un par position unique), filtre h_coeur+h_a+h_b
   // AVANT l'expansion des ancres (autorite 8 coins, disjonction prouvee),
   // exact-once visible, refus transactionnel des coquilles en mode --exact.
-  std::vector<Key3> events;
-  std::vector<Q3BallKey> ball_keys;
+  std::vector<Q3Event> records;
   u64 anchors_seen = 0, anchors_killed_ha = 0, carriers_seen = 0,
       shell_refused = 0, raw_events = 0, power_tests = 0, interior_ids_total = 0,
       rect_cover_nodes = 0, anchor_point_visits = 0;
-  const auto pid = [&](i32 u) { return ix.bucket_ids[ix.bucket_start[(size_t)u]]; };
+  std::vector<PointId> pid_of((size_t)ix.unique_count());
+  for (size_t u = 0; u < pid_of.size(); ++u)
+    pid_of[u] = ix.bucket_ids[ix.bucket_start[u]];
+  const auto pid = [&](i32 u) { return pid_of[(size_t)u]; };
   std::vector<CoverPoint> cover;
   std::vector<u64> ha, hb;
   u64 cover_points = 0;
@@ -366,6 +388,13 @@ int main(int argc, char** argv) {
     i32 core_ids[8];
     const u64 core_n =
         a.packet ? collect_universal_ids_q3(ix, ar.r.a, ar.r.b, 8, core_ids) : 0;
+    if (a.packet && core_n != ar.core) {
+      // INVARIANT (audit § 2) : le collecteur du cœur doit rendre exactement
+      // h_cœur IDs — une divergence compteur/collecteur modifie l'objet.
+      std::fprintf(stderr, "INVARIANT : core_ids=%llu != h_coeur=%llu\n",
+                   (unsigned long long)core_n, (unsigned long long)ar.core);
+      return 3;
+    }
     std::vector<std::array<i32, 8>> ha_ids((size_t)na), hb_ids((size_t)nb);
     std::vector<u8> ha_idn((size_t)na, 0), hb_idn((size_t)nb, 0);
     if (a.packet) {
@@ -407,13 +436,33 @@ int main(int argc, char** argv) {
         i32 packet_ids[26];
         u64 base = 0;
         if (a.packet) {
-          for (u64 t = 0; t < core_n; ++t) packet_ids[base++] = core_ids[t];
           const u8 nha = ha_idn[(size_t)(ua - ra.first)];
+          const u8 nhb = hb_idn[(size_t)(ub - rb.first)];
+          // INVARIANTS (audit § 2) : sur une ancre SURVIVANTE, les
+          // collecteurs h_a/h_b n'ont pas pu saturer leur tampon — ils
+          // doivent rendre exactement les comptes de l'histogramme, et le
+          // paquet est sans doublon (theoreme de disjonction, verifie).
+          if (nha != ha[(size_t)(ua - ra.first)] ||
+              nhb != hb[(size_t)(ub - rb.first)]) {
+            std::fprintf(stderr, "INVARIANT : collecteur ha/hb != histogramme\n");
+            return 3;
+          }
+          for (u64 t = 0; t < core_n; ++t) packet_ids[base++] = core_ids[t];
           for (u8 t = 0; t < nha; ++t)
             packet_ids[base++] = ha_ids[(size_t)(ua - ra.first)][t];
-          const u8 nhb = hb_idn[(size_t)(ub - rb.first)];
           for (u8 t = 0; t < nhb; ++t)
             packet_ids[base++] = hb_ids[(size_t)(ub - rb.first)][t];
+          if (base != core_n + nha + nhb || base >= h3) {
+            std::fprintf(stderr, "INVARIANT : taille de paquet %llu\n",
+                         (unsigned long long)base);
+            return 3;
+          }
+          for (u64 t = 0; t < base; ++t)
+            for (u64 t2 = t + 1; t2 < base; ++t2)
+              if (packet_ids[t] == packet_ids[t2]) {
+                std::fprintf(stderr, "INVARIANT : doublon dans le paquet\n");
+                return 3;
+              }
         }
         const auto in_packet = [&](i32 u) {
           if (a.inject_no_exclude) return false;  // MUTANT : double compte
@@ -424,9 +473,16 @@ int main(int argc, char** argv) {
         // Porteurs de l'ancre (SoA), puis scan SITE-MAJOR : chaque site du
         // cover defile devant tous les porteurs actifs (audit § 6) — memes
         // predicats, saturation par masque, InteriorIds collectes.
+        // CANDIDAT COMPLET (audit cible 5964214, § 1) : support, owner,
+        // BallKey et niveau sont formes ICI, AVANT tout census — le census
+        // n'ajoutera que la profondeur et la liste des interieurs.
         struct Carrier {
           i32 ux;
           Q3Form f;
+          SupportKey3 support;
+          EdgeKey owner;
+          Q3BallForm ball_raw;  // forme pre-census ; canonisee a la publication
+          Q3Level level_raw;
           u64 depth;
           u8 ni;
           bool alive, shell;
@@ -447,8 +503,24 @@ int main(int argc, char** argv) {
           if (!anchor_owns_q3(D2, l_ax, l_bx, pid(ua), pid(ub), pid(ux)))
             continue;
           ++carriers_seen;
-          carriers.push_back(
-              Carrier{ux, q3_form(pa, pb, px), base, 0, true, false, {}});
+          Carrier c{ux,
+                    q3_form(pa, pb, px),
+                    support_key3(pid(ua), pid(ub), pid(ux)),
+                    edge_key(pid(ua), pid(ub)),
+                    Q3BallForm{},
+                    Q3Level{},
+                    base,
+                    0,
+                    true,
+                    false,
+                    {}};
+          c.ball_raw = q3_ball_form(c.f);
+          c.level_raw = q3_level_raw(pa, pb, px);
+          if (c.level_raw.num <= 0 || c.level_raw.den <= 0) {
+            std::fprintf(stderr, "INVARIANT : niveau non positif\n");
+            return 3;
+          }
+          carriers.push_back(c);
         }
         u64 active = carriers.size();
         if (a.census_cover) {
@@ -474,8 +546,9 @@ int main(int argc, char** argv) {
         } else {
           for (Carrier& c : carriers) {
             u64 shell = 0;
-            const u64 extra =
-                q3_ball_depth(ix, c.f, ua, ub, c.ux, h3, &shell);
+            c.ni = 0;
+            const u64 extra = q3_ball_depth(ix, c.f, ua, ub, c.ux, h3, &shell,
+                                            false, c.interior, &c.ni);
             c.depth = extra;  // reference sans paquet : profondeur complete
             c.alive = extra < h3;
             c.shell = shell > 0;
@@ -494,29 +567,52 @@ int main(int argc, char** argv) {
             continue;
           }
           ++raw_events;
-          interior_ids_total += base + c.ni;
-          ball_keys.push_back(q3_ball_key(c.f));
-          const Q3Level lv = q3_exact_level(pa, pb, ix.upos[(size_t)c.ux]);
-          if (lv.num <= 0 || lv.den <= 0) {
-            std::fprintf(stderr, "INVARIANT : niveau non positif\n");
+          // Interieurs du record : prefixe = paquet certifie (census=cover),
+          // vide en census=tree ou le collecteur a tout enumere lui-meme.
+          // Tampon 16 : un mutant peut gonfler base+ni au-dela de 8 ; c'est
+          // l'invariant ci-dessous qui rejette, jamais un debordement.
+          i32 interior_u[16];
+          u64 n_interior = 0;
+          if (a.census_cover)
+            for (u64 t = 0; t < base; ++t) interior_u[n_interior++] = packet_ids[t];
+          for (u8 t = 0; t < c.ni; ++t) interior_u[n_interior++] = c.interior[t];
+          if (n_interior != c.depth) {
+            // INVARIANT (audit § 2) : la liste d'interieurs EST la
+            // profondeur — toute divergence modifie l'objet mathematique.
+            std::fprintf(stderr,
+                         "INVARIANT : interieurs=%llu != profondeur=%llu\n",
+                         (unsigned long long)n_interior,
+                         (unsigned long long)c.depth);
             return 3;
           }
-          events.push_back(make_key((i32)pid(ua), (i32)pid(ub), (i32)pid(c.ux)));
+          interior_ids_total += n_interior;
+          records.push_back(make_event(c.support, c.owner,
+                                       q3_ball_key_reduce(c.ball_raw),
+                                       q3_level_reduce(c.level_raw), interior_u,
+                                       n_interior, pid_of));
         }
       }
   }
-  std::sort(events.begin(), events.end());
-  events.erase(std::unique(events.begin(), events.end()), events.end());
-  const u64 duplicate_supports = raw_events - events.size();
+  // stable_sort : contourne un faux positif -Warray-bounds du heapsort de
+  // GCC 13 sur les structs larges ; l'ordre d'un multiensemble est le meme.
+  std::stable_sort(records.begin(), records.end());
+  u64 duplicate_supports = 0;
+  for (size_t t = 1; t < records.size(); ++t)
+    if (records[t].support == records[t - 1].support) ++duplicate_supports;
+  std::vector<Q3BallKey> ball_keys;
+  ball_keys.reserve(records.size());
+  for (const Q3Event& e : records) ball_keys.push_back(e.ball);
   std::sort(ball_keys.begin(), ball_keys.end());
   ball_keys.erase(std::unique(ball_keys.begin(), ball_keys.end()), ball_keys.end());
   const u64 unique_ballkeys = ball_keys.size();
   const auto t2 = std::chrono::steady_clock::now();
 
-  // 3. Juge par identites (oracle borne).
+  // 3. Juge par RECORDS COMPLETS (oracle borne) : owner sur les vrais
+  // PointId (audit cible 5964214, § 3 — plus jamais les rangs Morton), puis
+  // support/owner/ball/level/profondeur/interieurs compares en multiensemble.
   u64 missing = 0, extra = 0;
   if (a.judge) {
-    std::vector<Key3> truth;
+    std::vector<Q3Event> truth;
     const int m = ix.unique_count();
     for (i32 i = 0; i < m; ++i)
       for (i32 j = i + 1; j < m; ++j)
@@ -526,17 +622,16 @@ int main(int argc, char** argv) {
           const i64 l12 = p3_norm2(p3_sub(p2, p1));
           const i64 l13 = p3_norm2(p3_sub(p3v, p1));
           const i64 l23 = p3_norm2(p3_sub(p3v, p2));
-          // Owner brut : arete de longueur max, tie par EdgeKey minimale.
-          struct E { i64 l; PointId x, y; i32 apex; };
-          E es[3] = {{l12, (PointId)i, (PointId)j, k},
-                     {l13, (PointId)i, (PointId)k, j},
-                     {l23, (PointId)j, (PointId)k, i}};
+          // Owner brut : arete de longueur max, tie par EdgeKey minimale
+          // sur les PIDS EXTERNES.
+          struct E { i64 l; i32 x, y, apex; };
+          E es[3] = {{l12, i, j, k}, {l13, i, k, j}, {l23, j, k, i}};
           int best = 0;
           for (int e = 1; e < 3; ++e) {
             if (es[e].l > es[best].l ||
                 (es[e].l == es[best].l &&
-                 edge_key_less(edge_key(es[e].x, es[e].y),
-                               edge_key(es[best].x, es[best].y))))
+                 edge_key_less(edge_key(pid(es[e].x), pid(es[e].y)),
+                               edge_key(pid(es[best].x), pid(es[best].y)))))
               best = e;
           }
           const P3& oa = ix.upos[(size_t)es[best].x];
@@ -547,20 +642,28 @@ int main(int argc, char** argv) {
           if (p3_norm2(vv) <= es[best].l) continue;  // pas strictement aigu
           const Q3Form f = q3_form(oa, ob, ox);
           u64 shell = 0;
-          const u64 depth = q3_ball_depth(ix, f, (i32)es[best].x, (i32)es[best].y,
-                                          es[best].apex, h3, &shell);
+          i32 interior_u[8];
+          u8 ni = 0;
+          const u64 depth = q3_ball_depth(ix, f, es[best].x, es[best].y,
+                                          es[best].apex, h3, &shell, false,
+                                          interior_u, &ni);
           if (depth >= h3 || shell > 0) continue;
-          truth.push_back(make_key((i32)ix.bucket_ids[ix.bucket_start[(size_t)i]],
-                                   (i32)ix.bucket_ids[ix.bucket_start[(size_t)j]],
-                                   (i32)ix.bucket_ids[ix.bucket_start[(size_t)k]]));
+          if ((u64)ni != depth) {
+            std::fprintf(stderr, "INVARIANT (juge) : collecteur != profondeur\n");
+            return 3;
+          }
+          truth.push_back(make_event(
+              support_key3(pid(es[best].x), pid(es[best].y), pid(es[best].apex)),
+              edge_key(pid(es[best].x), pid(es[best].y)), q3_ball_key(f),
+              q3_exact_level(oa, ob, ox), interior_u, depth, pid_of));
         }
-    std::sort(truth.begin(), truth.end());
-    std::vector<Key3> diff;
-    std::set_difference(truth.begin(), truth.end(), events.begin(), events.end(),
+    std::stable_sort(truth.begin(), truth.end());
+    std::vector<Q3Event> diff;
+    std::set_difference(truth.begin(), truth.end(), records.begin(), records.end(),
                         std::back_inserter(diff));
     missing = diff.size();
     diff.clear();
-    std::set_difference(events.begin(), events.end(), truth.begin(), truth.end(),
+    std::set_difference(records.begin(), records.end(), truth.begin(), truth.end(),
                         std::back_inserter(diff));
     extra = diff.size();
   }
@@ -581,9 +684,9 @@ int main(int argc, char** argv) {
       (unsigned long long)smax_eff, a.seed,
       a.exact_mode ? "exact" : "regular_subset_diagnostic", alive.size(),
       (unsigned long long)anchors_seen, (unsigned long long)anchors_killed_ha,
-      (unsigned long long)carriers_seen, events.size(),
+      (unsigned long long)carriers_seen, records.size(),
       (unsigned long long)duplicate_supports,
-      (double)events.size() / (double)pts.size(), (unsigned long long)power_tests,
+      (double)records.size() / (double)pts.size(), (unsigned long long)power_tests,
       (unsigned long long)interior_ids_total, (unsigned long long)unique_ballkeys,
       (unsigned long long)rect_cover_nodes,
       (unsigned long long)anchor_point_visits,
@@ -608,9 +711,9 @@ int main(int argc, char** argv) {
   }
   // Regime regulier : BallKeys uniques ⟺ evenements (un partage de sphere
   // entre deux supports serait une cospherite deja refusee).
-  if (unique_ballkeys != events.size()) {
+  if (unique_ballkeys != records.size()) {
     std::fprintf(stderr, "INVARIANT : %llu BallKeys pour %zu evenements\n",
-                 (unsigned long long)unique_ballkeys, events.size());
+                 (unsigned long long)unique_ballkeys, records.size());
     return 3;
   }
   if (duplicate_supports > 0) {
@@ -619,8 +722,8 @@ int main(int argc, char** argv) {
     return 3;
   }
   if (a.judge && (missing > 0 || extra > 0)) return 1;
-  if (events.size() < a.min_events) {
-    std::fprintf(stderr, "PLANCHER : %zu evenements < %llu\n", events.size(),
+  if (records.size() < a.min_events) {
+    std::fprintf(stderr, "PLANCHER : %zu evenements < %llu\n", records.size(),
                  (unsigned long long)a.min_events);
     return 3;
   }
