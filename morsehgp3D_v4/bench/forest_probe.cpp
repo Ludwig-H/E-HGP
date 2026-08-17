@@ -67,6 +67,11 @@ struct Args {
   bool inj_shell_first = false;
   bool inj_fold_kmax10 = false;
   bool inj_genfilter_nonstrict = false;
+  bool axial_on = false;  // opt-in GPU-oriente ; production CPU = baseline
+  bool axial_pair_gate = false;
+  bool inj_axial_short = false;
+  bool inj_axial_drop_ties = false;
+  bool inj_axial_first_rep = false;
   u64 min_balls = 0;
   u64 min_fusions = 0;
 };
@@ -121,6 +126,11 @@ Args parse(int argc, char** argv) {
     else if (arg == "--inject=fold-hardcodes-kmax10") a.inj_fold_kmax10 = true;
     else if (arg == "--inject=genfilter-nonstrict")
       a.inj_genfilter_nonstrict = true;
+    else if (arg == "--axial-on") a.axial_on = true;
+    else if (arg == "--axial-pair-gate") a.axial_pair_gate = true;
+    else if (arg == "--inject=axial-short-group") a.inj_axial_short = true;
+    else if (arg == "--inject=axial-drop-ties") a.inj_axial_drop_ties = true;
+    else if (arg == "--inject=axial-first-rep") a.inj_axial_first_rep = true;
     else {
       std::fprintf(stderr, "argument inconnu : %s\n", arg.c_str());
       a.family_ok = false;
@@ -741,6 +751,121 @@ int run_kmax_gate(bool inj_kmax10) {
   return bad ? 3 : 0;
 }
 
+// PORTE APPARIEE DE LA SELECTION AXIALE (audit « axial borne » § 6.1) :
+// baseline enumeree CONTRE axial borne, comparees apres tri/RLE — cles,
+// arite et REPRESENTATION de niveau a l'identique (jamais les candidats
+// bruts : le but est precisement de ne plus les produire). Mutants tues
+// ici : short-group et drop-ties PERDENT des cles (prefixe trop court /
+// groupe ex aequo de frontiere supprime) ; first-rep emet un representant
+// non canonique et change la REPRESENTATION post-RLE. Le chemin --axial-off
+// n'est pas un mutant : c'est cette baseline.
+int run_axial_pair_gate(bool inj_short, bool inj_ties, bool inj_first) {
+  u64 bad = 0;
+  u64 base_candidates = 0, axial_candidates = 0, groups = 0;
+  // Trois nuages : deux familles + la SPHERE COSPHERIQUE R²=50 (84 points
+  // de reseau, centre (100,100,100)) — un meme groupe de mu y possede de
+  // NOMBREUX membres valides aux representations differentes : c'est elle
+  // qui discrimine le mutant first-rep (le minimum canonique doit gagner).
+  std::vector<std::vector<P3>> clouds;
+  for (const CloudFamily fam :
+       {CloudFamily::kUniform, CloudFamily::kEightClusters})
+    clouds.push_back(
+        make_family_cloud(fam, 120, cloud_family_default_coord(fam, 120), 3));
+  {
+    std::vector<P3> sph;
+    const i64 offs[3][3] = {{5, 5, 0}, {7, 1, 0}, {5, 4, 3}};
+    for (const auto& o : offs) {
+      i64 v[3] = {o[0], o[1], o[2]};
+      std::sort(v, v + 3);
+      do {
+        for (int sx = -1; sx <= 1; sx += 2)
+          for (int sy = -1; sy <= 1; sy += 2)
+            for (int sz = -1; sz <= 1; sz += 2) {
+              const P3 p{100 + sx * v[0], 100 + sy * v[1], 100 + sz * v[2]};
+              bool seen = false;
+              for (const P3& q : sph)
+                seen = seen || (q.x == p.x && q.y == p.y && q.z == p.z);
+              if (!seen) sph.push_back(p);
+            }
+      } while (std::next_permutation(v, v + 3));
+    }
+    clouds.push_back(std::move(sph));
+  }
+  for (const std::vector<P3>& pts : clouds) {
+    const CloudIndex ix = build_cloud_index(pts);
+    if ((size_t)ix.unique_count() != pts.size()) return 3;
+    std::vector<BallCandidate> cb, ca;
+    BallStreamStats sb, sa;
+    collect_candidate_balls(ix, 8, 11, &cb, &sb, false, false);
+    collect_candidate_balls(ix, 8, 11, &ca, &sa, false, true, inj_short,
+                            inj_ties, inj_first);
+    base_candidates += sb.candidates[2];
+    axial_candidates += sa.candidates[2];
+    groups += sa.axial_groups_emitted;
+    if (inj_first) {
+      // Le mutant first-rep est masque post-RLE par la re-canonicalisation
+      // inter-seeds (le minimum global d'une cle revient par un autre
+      // seed). Discrimination PRE-RLE : les emissions brutes du mutant
+      // doivent differer de celles du chemin normal quelque part — cela
+      // prouve que le choix du minimum canonique est exerce, et l'egalite
+      // appariee (hors mutant) prouve qu'il est le bon.
+      std::vector<BallCandidate> cn;
+      BallStreamStats sn;
+      collect_candidate_balls(ix, 8, 11, &cn, &sn, false, true, inj_short,
+                              inj_ties, false);
+      std::vector<BallCandidate> ra = ca, rn = cn;
+      std::stable_sort(ra.begin(), ra.end(), ball_candidate_less);
+      std::stable_sort(rn.begin(), rn.end(), ball_candidate_less);
+      bool raw_same = ra.size() == rn.size();
+      for (size_t i = 0; raw_same && i < ra.size(); ++i)
+        raw_same = ra[i].key == rn[i].key &&
+                   same_level_representation(ra[i].level, rn[i].level);
+      if (!raw_same) {
+        std::fprintf(stderr,
+                     "AXIAL : first-rep devie du minimum canonique (n=%zu)\n",
+                     pts.size());
+        ++bad;
+      }
+    }
+    const auto rle = [](std::vector<BallCandidate>* v) {
+      std::stable_sort(v->begin(), v->end(), ball_candidate_less);
+      v->erase(std::unique(v->begin(), v->end(),
+                           [](const BallCandidate& x, const BallCandidate& y) {
+                             return x.key == y.key;
+                           }),
+               v->end());
+    };
+    rle(&cb);
+    rle(&ca);
+    bool same = cb.size() == ca.size();
+    for (size_t i = 0; same && i < cb.size(); ++i)
+      same = cb[i].key == ca[i].key && cb[i].arity == ca[i].arity &&
+             same_level_representation(cb[i].level, ca[i].level);
+    if (!same) {
+      std::fprintf(stderr, "AXIAL : divergence baseline/borne (n=%zu)\n",
+                   pts.size());
+      ++bad;
+    }
+  }
+  if (axial_candidates > base_candidates || axial_candidates == 0) {
+    std::fprintf(stderr, "AXIAL : plancher de reduction viole\n");
+    ++bad;
+  }
+  std::printf(
+      "axial_pair_gate base=%llu axial=%llu groupes=%llu violations=%llu\n",
+      (unsigned long long)base_candidates, (unsigned long long)axial_candidates,
+      (unsigned long long)groups, (unsigned long long)bad);
+  if (inj_short || inj_ties || inj_first) {
+    if (bad > 0) {
+      std::printf("MUTANT TUE\n");
+      return 4;
+    }
+    std::fprintf(stderr, "PORTE INEFFICACE : mutant non discrimine\n");
+    return 3;
+  }
+  return bad ? 3 : 0;
+}
+
 // GARDE D'ENTREE (audit § 5) : ids dupliques et coordonnees hors u16
 // refuses AVANT la construction de l'arbre (refus = index vide).
 int run_guard_gate(int mode) {
@@ -784,6 +909,9 @@ int main(int argc, char** argv) {
     return run_depth_gate(a.inj_threshold_minus_one, a.inj_range_add_le,
                           a.inj_shell_first);
   if (a.kmax_gate) return run_kmax_gate(a.inj_fold_kmax10);
+  if (a.axial_pair_gate)
+    return run_axial_pair_gate(a.inj_axial_short, a.inj_axial_drop_ties,
+                               a.inj_axial_first_rep);
   if (a.guard != 0) return run_guard_gate(a.guard);
   const std::vector<P3> pts = make_family_cloud(
       a.family, a.n,
@@ -809,7 +937,9 @@ int main(int argc, char** argv) {
   std::vector<BallCandidate> cands;
   BallStreamStats st;
   collect_candidate_balls(ix, a.s, smax_eff, &cands, &st,
-                          a.inj_genfilter_nonstrict);
+                          a.inj_genfilter_nonstrict, a.axial_on,
+                          a.inj_axial_short, a.inj_axial_drop_ties,
+                          a.inj_axial_first_rep);
   const auto t0b = std::chrono::steady_clock::now();
   std::stable_sort(cands.begin(), cands.end(), ball_candidate_less);
   if (!a.inj_rle_drop)  // MUTANT : dedupe saute, boules re-censusees
@@ -828,7 +958,9 @@ int main(int argc, char** argv) {
   const bool any_inject = a.inj_rle_drop || a.inj_census_nonstrict ||
                           a.inj_dense_pointid || a.inj_threshold_minus_one ||
                           a.inj_range_add_le || a.inj_skip_full ||
-                          a.inj_fold_kmax10 || a.inj_genfilter_nonstrict;
+                          a.inj_fold_kmax10 || a.inj_genfilter_nonstrict ||
+                          a.inj_axial_short || a.inj_axial_drop_ties ||
+                          a.inj_axial_first_rep;
   // LE PARAMETRE QUI DEFINIT L'OBJET EN AMONT EXISTE EN AVAL (audit « smax
   // dynamique ») : caps de census par arite, expansion, folds et totaux
   // suivent tous smax_eff — plus jamais les constantes 9/11/10 (MUTANT
@@ -1044,7 +1176,7 @@ int main(int argc, char** argv) {
   }
   std::printf(
       "famille=%s n=%zu s=%lld smax=%llu seed=%lld candidats=%llu/%llu/%llu "
-      "gen_tues=%llu/%llu ancres_w4=%llu "
+      "gen_tues=%llu/%llu ancres_w4=%llu seeds=%llu groupes=%llu "
       "boules_uniques=%llu mortes_profondeur=%llu prefiltre_feuilles=%llu "
       "prefiltre_range_add=%llu census_keys=%llu census_int=%llu "
       "census_shell=%llu evenements=%llu fusions=%llu noeuds=%llu "
@@ -1056,6 +1188,8 @@ int main(int argc, char** argv) {
       (unsigned long long)st.gen_depth_killed[1],
       (unsigned long long)st.gen_depth_killed[2],
       (unsigned long long)st.anchors_killed_w4,
+      (unsigned long long)st.axial_seeds,
+      (unsigned long long)st.axial_groups_emitted,
       (unsigned long long)st.unique_balls,
       (unsigned long long)st.balls_dead_depth,
       (unsigned long long)st.prefilter_leaf_tests,

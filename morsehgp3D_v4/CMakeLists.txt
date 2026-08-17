@@ -282,6 +282,23 @@ mhgp4_expect_code(mhgp4_forest_probe_judge_smax6 0 mhgp4_forest_probe
 # plateau a tort — le juge voit les evenements manquants.
 mhgp4_expect_code(mhgp4_forest_probe_mutant_genfilter 4 mhgp4_forest_probe
     "--family=uniform --n=120 --s=8 --seed=3 --judge --inject=genfilter-nonstrict")
+# Selection axiale bornee (reponse auditeur « axial borne ») : baseline
+# enumeree CONTRE axial borne apres tri/RLE — cles, arite et REPRESENTATION
+# identiques sur deux familles + la sphere cospherique R²=50 (84 points).
+# Resultat CPU honnete : NEGATIF (+7 % t_gen a n=1600, la lentille baseline
+# rejette en 3 operations la ou le balayage axial paye tous les sites) —
+# production CPU = baseline, chemin axial OPT-IN pour le port GPU (travail
+# borne regulier). Mutants du chemin axial : prefixe trop court, ties de
+# frontiere supprimes, premier representant au lieu du minimum canonique
+# (discrimine PRE-RLE : la re-canonicalisation inter-seeds le masque apres).
+mhgp4_expect_code(mhgp4_forest_probe_axial_pair 0 mhgp4_forest_probe
+    "--axial-pair-gate")
+mhgp4_expect_code(mhgp4_forest_probe_axial_mutant_short 4 mhgp4_forest_probe
+    "--axial-pair-gate --inject=axial-short-group")
+mhgp4_expect_code(mhgp4_forest_probe_axial_mutant_ties 4 mhgp4_forest_probe
+    "--axial-pair-gate --inject=axial-drop-ties")
+mhgp4_expect_code(mhgp4_forest_probe_axial_mutant_first 4 mhgp4_forest_probe
+    "--axial-pair-gate --inject=axial-first-rep")
 
 # La lane q2 productrice : W_2 est la boule diametrale ouverte, le census
 # est une requete de cover a coefficient 1. Juge brut toutes-paires sur

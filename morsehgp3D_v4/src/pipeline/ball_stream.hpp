@@ -71,6 +71,20 @@ struct BallStreamStats {
   // q4 et axial streaming » § 1) : W_4 est le plus grand cœur anchor-only
   // (owner + Jung) — n4 >= h_4 rend l'ancre inutile AVANT seed × completion.
   u64 anchors_killed_w4 = 0;
+  // Selection axiale bornee (compteurs exiges par l'audit « axial borne ») :
+  // seeds traites, sites balayes, seeds morts par permanents (p >= h_4),
+  // groupes de mu emis.
+  u64 axial_seeds = 0;
+  u64 axial_sites = 0;
+  u64 axial_seeds_dead_perm = 0;
+  u64 axial_groups_emitted = 0;
+};
+
+// Site axial d'un seed : A = puissance q3, B = normale·(z−a), mu = A/B.
+struct AxialSite {
+  i128 A;
+  i64 B;
+  i32 u;
 };
 
 namespace detail_bs {
@@ -143,6 +157,21 @@ inline void corner_histograms(const CloudIndex& ix, Lane lane, const AliveRect& 
 
 // Collecte les boules candidates des trois lanes (generateurs seulement —
 // AUCUN census ici : il se fait une fois par cle unique, en aval).
+// Comparaison exacte de mu = A/B entre sites du MEME cote (B1, B2 > 0
+// exiges — l'appelant normalise) : signe de A1·B2 − A2·B1. Largeurs u16 :
+// |A| < 2^107 (puissance q3), |B| < 2^54 (normale × ecart) — produits
+// croises < 2^161 < 2^192, U192 suffit.
+inline int cmp_mu_same_side(i128 A1, i64 B1, i128 A2, i64 B2) {
+  const int s1 = A1 < 0 ? -1 : (A1 > 0 ? 1 : 0);
+  const int s2 = A2 < 0 ? -1 : (A2 > 0 ? 1 : 0);
+  if (s1 != s2) return s1 < s2 ? -1 : 1;
+  if (s1 == 0) return 0;
+  const U192 m1 = mul_level_192(detail_ev::uabs(A1), (u128)(u64)B2);
+  const U192 m2 = mul_level_192(detail_ev::uabs(A2), (u128)(u64)B1);
+  const int c = cmp_u192(m1, m2);
+  return s1 > 0 ? c : -c;
+}
+
 // FILTRE DE PROFONDEUR A LA GENERATION (reponse a la question du minorant
 // par boule) : le cover de l'ancre est un SOUS-ENSEMBLE du nuage, donc
 // #{z ∈ cover : P_B(z) < 0} MINORE |I_B| — un minorant qui atteint h_q tue
@@ -153,16 +182,48 @@ inline void corner_histograms(const CloudIndex& ix, Lane lane, const AliveRect& 
 // tue jamais a tort. MUTANT genfilter-nonstrict : P <= 0 compte la
 // coquille (et les supports memes) — des boules a plateau meurent a tort,
 // le juge voit les evenements manquants.
+//
+// SELECTION AXIALE BORNEE (lane q4, reponse auditeur « axial borne ») : le
+// faisceau des spheres par le seed (a,b,x) est parametre par
+// mu_z = A_z/B_z (A = puissance q3, B = normale·(z−a)) ; cote B > 0, tout
+// predecesseur STRICT de mu_y est interieur strict a la sphere de y (cote
+// B < 0 : successeur) ; les permanents (B = 0, A < 0) sont interieurs a
+// TOUTE la famille. Une completion utile appartient donc au prefixe borne
+// p + preds <= h_4 − 1 : trois balayages lineaires du cover (p ; seuils
+// bornes k = h_4 − p <= 8 par cote, multiplicites comptees ; retenue TIES
+// INCLUS — eliminer les egalites de frontiere selon l'ordre memoire serait
+// faux), puis UNE emission par groupe exact de mu — un groupe de meme mu
+// est une seule sphere, l'aval consomme des BallKeys. Le representant emis
+// est le MINIMUM ball_candidate_less des membres VALIDES du groupe (les
+// predicats de support ne sont jamais l'autorite sur un seul representant).
+// Les deux chemins rendent le MEME objet post-RLE (porte appariee, egalite
+// cles + arite + representation). RESULTAT NEGATIF HONNETE (reçu axial
+// borne) : sur CPU, la baseline rejette la plupart des completions a la
+// LENTILLE (~3 operations i64) tandis que le balayage axial paye A,B sur
+// TOUS les sites de TOUS les seeds — mesure : t_gen +7 % a n=1600 malgre
+// 18,8 M -> 0,8 M d'evaluations q4 ; les deux postes croissent au meme
+// rythme, pas de croisement CPU. Le chemin axial reste OPT-IN pour le port
+// GPU (travail borne regulier, sans sorties anticipees divergentes) — la
+// production CPU est la baseline (axial_bounded = false par defaut).
+// MUTANTS du chemin axial : axial-short-group (k−1 : perd la boule de
+// frontiere de profondeur), axial-drop-ties (< au lieu de <= : perd le
+// groupe ex aequo), axial-first-rep (premier membre valide au lieu du
+// minimum canonique : la representation de niveau post-RLE change).
 inline void collect_candidate_balls(const CloudIndex& ix, i64 s, u64 smax_eff,
                                     std::vector<BallCandidate>* out,
                                     BallStreamStats* st,
-                                    bool mutant_genfilter_nonstrict = false) {
+                                    bool mutant_genfilter_nonstrict = false,
+                                    bool axial_bounded = false,
+                                    bool mutant_axial_short = false,
+                                    bool mutant_axial_drop_ties = false,
+                                    bool mutant_axial_first_rep = false) {
   out->clear();
   const u64 h_of[3] = {lane_h(Lane::kQ2, smax_eff), lane_h(Lane::kQ3, smax_eff),
                        lane_h(Lane::kQ4, smax_eff)};
   std::vector<detail_bs::AliveRect> alive;
   std::vector<u64> ha, hb;
   std::vector<CoverPoint> cover;
+  std::vector<AxialSite> axial;
   std::vector<NodeRef> handles;
   u64 cover_nodes = 0, visits = 0;
   // ---- q2.
@@ -283,43 +344,165 @@ inline void collect_candidate_balls(const CloudIndex& ix, i64 s, u64 smax_eff,
           if (!is_acute_seed(pa, pb, px, D2, pid(ua), pid(ub), pid(cx.u))) continue;
           const i64 l_ax = p3_norm2(p3_sub(px, pa));
           const i64 l_bx = p3_norm2(p3_sub(px, pb));
-          for (const CoverPoint& cy : cover) {
-            const i32 uy = cy.u;
-            if (uy == cx.u || uy == ua || uy == ub) continue;
+          // Predicats du chemin de base pour UNE completion : lentille,
+          // owner 6 aretes, exact-once du seed, det, centre strict. Rend
+          // true et remplit le candidat si la completion est valide.
+          const auto valid_completion = [&](i32 uy, BallCandidate* cand,
+                                            Q4Form* f4out) {
+            if (uy == cx.u || uy == ua || uy == ub) return false;
             const P3& py = ix.upos[(size_t)uy];
             const i64 l_ay = p3_norm2(p3_sub(py, pa));
             const i64 l_by = p3_norm2(p3_sub(py, pb));
-            if (l_ay > D2 || l_by > D2) continue;
+            if (l_ay > D2 || l_by > D2) return false;
             const i64 l_xy = p3_norm2(p3_sub(py, px));
-            if (l_xy > D2) continue;
+            if (l_xy > D2) return false;
             if (!tetra_owned_by(D2, l_ax, l_ay, l_bx, l_by, l_xy, pid(ua),
                                 pid(ub), pid(cx.u), pid(uy)))
-              continue;
+              return false;
             // Exact-once du seed (le RLE dedupliquerait de toute facon ;
             // ceci borne le flux de candidats).
             const P3 vy{2 * py.x - pa.x - pb.x, 2 * py.y - pa.y - pb.y,
                         2 * py.z - pa.z - pb.z};
-            if (p3_norm2(vy) > D2 && pid(uy) < pid(cx.u)) continue;
+            if (p3_norm2(vy) > D2 && pid(uy) < pid(cx.u)) return false;
             const Q4Form f4 = q4_form(pa, pb, px, py);
-            if (f4.det == 0) continue;
-            if (!q4_center_strictly_inside(f4, pa, pb, px, py)) continue;
+            if (f4.det == 0) return false;
+            if (!q4_center_strictly_inside(f4, pa, pb, px, py)) return false;
+            *cand = BallCandidate{q3_ball_key_reduce(q4_ball_form(f4)),
+                                  q4_level_raw(f4), 4};
+            *f4out = f4;
+            return true;
+          };
+          const auto depth_dead = [&](const Q4Form& f4) {
             u64 depth = 0;
-            bool deep = false;
             for (const CoverPoint& cz : cover) {
               const i128 pw = q4_power(f4, ix.upos[(size_t)cz.u]);
               if ((pw < 0 || (mutant_genfilter_nonstrict && pw <= 0)) &&
-                  ++depth >= h_of[2]) {
-                deep = true;
-                break;
-              }
+                  ++depth >= h_of[2])
+                return true;
             }
-            if (deep) {
-              ++st->gen_depth_killed[2];
+            return false;
+          };
+          if (!axial_bounded) {
+            // BASELINE APPARIEE : enumeration de toutes les completions —
+            // meme objet post-RLE, seulement plus de candidats evalues.
+            for (const CoverPoint& cy : cover) {
+              BallCandidate cand;
+              Q4Form f4;
+              if (!valid_completion(cy.u, &cand, &f4)) continue;
+              if (depth_dead(f4)) {
+                ++st->gen_depth_killed[2];
+                continue;
+              }
+              out->push_back(cand);
+              ++st->candidates[2];
+            }
+            continue;
+          }
+          // --- SELECTION AXIALE BORNEE (en-tete de fonction). ---
+          ++st->axial_seeds;
+          const Q3Form f3s = q3_form(pa, pb, px);
+          const P3 nrm = p3_cross(p3_sub(pb, pa), p3_sub(px, pa));
+          // Balayage 1 : A,B caches (SoA seed-local), permanents p.
+          axial.clear();
+          u64 p_perm = 0;
+          for (const CoverPoint& cz : cover) {
+            if (cz.u == ua || cz.u == ub || cz.u == cx.u) continue;
+            const P3& pz = ix.upos[(size_t)cz.u];
+            const i128 A = q3_power(f3s, pz);
+            const i64 B = p3_dot(nrm, p3_sub(pz, pa));
+            if (B == 0) {
+              if (A < 0) ++p_perm;  // interieur de TOUTE la famille
               continue;
             }
-            out->push_back(BallCandidate{q3_ball_key_reduce(q4_ball_form(f4)),
-                                         q4_level_raw(f4), 4});
-            ++st->candidates[2];
+            axial.push_back(AxialSite{A, B, cz.u});
+          }
+          st->axial_sites += axial.size();
+          if (p_perm >= h_of[2]) {
+            ++st->axial_seeds_dead_perm;
+            continue;
+          }
+          u64 kk = h_of[2] - p_perm;
+          if (mutant_axial_short && kk > 1) --kk;  // MUTANT : groupe trop court
+          // Balayage 2 : seuils bornes des deux cotes. Cote negatif
+          // normalise (−A, −B) : mu INCHANGE (−A/−B = A/B) mais B > 0 pour
+          // le comparateur — la selection y est DESCENDANTE (interieur ssi
+          // mu_z > mu_y : garder les k plus GRANDES mu ; cote positif,
+          // interieur ssi mu_z < mu_y : les k plus petites). Tableau fixe
+          // trie dans l'ordre de la direction, k <= 8 ; plein : remplacer
+          // l'extremum si STRICTEMENT meilleur (l'egalite au seuil ne
+          // change pas la k-ieme valeur).
+          AxialSite side_arr[2][10];
+          size_t side_n[2] = {0, 0};
+          const auto dcmp = [&](int side, const AxialSite& x, const AxialSite& y) {
+            const int c = cmp_mu_same_side(x.A, x.B, y.A, y.B);
+            return side == 0 ? c : -c;
+          };
+          const auto push_bounded = [&](const AxialSite& sx, int side) {
+            AxialSite* arr = side_arr[side];
+            size_t& n = side_n[side];
+            if (n == (size_t)kk && dcmp(side, sx, arr[n - 1]) >= 0) return;
+            size_t i = (n < (size_t)kk) ? n++ : (size_t)kk - 1;
+            while (i > 0 && dcmp(side, sx, arr[i - 1]) < 0) {
+              arr[i] = arr[i - 1];
+              --i;
+            }
+            arr[i] = sx;
+          };
+          for (const AxialSite& sz : axial) {
+            if (sz.B > 0) push_bounded(sz, 0);
+            else push_bounded(AxialSite{-sz.A, -sz.B, sz.u}, 1);
+          }
+          // Balayage 3 : groupes retenus, TIES DE FRONTIERE INCLUS (<= ;
+          // le mutant drop-ties retablit < et perd le groupe ex aequo).
+          // Au plus kk groupes distincts par cote ; UNE emission par groupe
+          // de mu exact = une sphere, representant MINIMUM canonique des
+          // membres valides (mutant first-rep : premier membre valide).
+          for (int side = 0; side < 2; ++side) {
+            const size_t nn = side_n[side];
+            if (nn == 0) continue;
+            const AxialSite& th = side_arr[side][nn - 1];
+            std::vector<std::pair<AxialSite, std::vector<i32>>> groups;
+            for (const AxialSite& s0 : axial) {
+              if (side == 0 ? (s0.B < 0) : (s0.B > 0)) continue;
+              const AxialSite sz =
+                  side == 0 ? s0 : AxialSite{-s0.A, -s0.B, s0.u};
+              if (nn == (size_t)kk) {
+                const int c = dcmp(side, sz, th);
+                if (mutant_axial_drop_ties ? c >= 0 : c > 0) continue;
+              }
+              bool placed = false;
+              for (auto& g : groups)
+                if (cmp_mu_same_side(sz.A, sz.B, g.first.A, g.first.B) == 0) {
+                  g.second.push_back(sz.u);
+                  placed = true;
+                  break;
+                }
+              if (!placed) groups.push_back({sz, {sz.u}});
+            }
+            for (auto& g : groups) {
+              bool have = false;
+              BallCandidate best{};
+              Q4Form bestf4{};
+              for (const i32 uy : g.second) {
+                BallCandidate cand;
+                Q4Form f4;
+                if (!valid_completion(uy, &cand, &f4)) continue;
+                if (!have || ball_candidate_less(cand, best)) {
+                  best = cand;
+                  bestf4 = f4;
+                  have = true;
+                }
+                if (mutant_axial_first_rep && have) break;  // MUTANT
+              }
+              if (!have) continue;
+              if (depth_dead(bestf4)) {
+                ++st->gen_depth_killed[2];
+                continue;
+              }
+              out->push_back(best);
+              ++st->candidates[2];
+              ++st->axial_groups_emitted;
+            }
           }
         }
       }
