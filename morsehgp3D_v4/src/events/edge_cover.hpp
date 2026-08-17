@@ -22,6 +22,8 @@
 #include <vector>
 
 #include "../tree/radix_tree.hpp"
+#include "q2_witness_count.hpp"  // NodeRange, range_of
+#include "spindle_q2.hpp"        // AxisBox, box_of_node
 
 namespace mhgp4 {
 

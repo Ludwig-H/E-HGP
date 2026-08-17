@@ -169,6 +169,20 @@ mhgp4_expect_code(mhgp4_q4_mutant_coef3 4 mhgp4_q4_events_probe
 mhgp4_expect_code(mhgp4_q4_mutant_no_canonical 4 mhgp4_q4_events_probe
     "--family=uniform --n=120 --s=8 --seed=3 --inject=no-canonical")
 
+# La lane q2 productrice : W_2 est la boule diametrale ouverte, le census
+# est une requete de cover a coefficient 1. Juge brut toutes-paires sur
+# records complets ; fixture a coquille exacte gravee et mutant sign-le
+# (coquille comptee interieure => publication a tort) tue.
+add_executable(mhgp4_q2_events_probe bench/q2_events_probe.cpp)
+mhgp4_expect_code(mhgp4_q2_events_judge_uniform 0 mhgp4_q2_events_probe
+    "--family=uniform --n=400 --s=8 --seed=3 --judge --min-events=100")
+mhgp4_expect_code(mhgp4_q2_events_judge_clusters 0 mhgp4_q2_events_probe
+    "--family=eight_clusters --n=400 --s=8 --seed=3 --judge --min-events=100")
+mhgp4_expect_code(mhgp4_q2_fixture_coquille 0 mhgp4_q2_events_probe
+    "--fixture --s=8 --judge")
+mhgp4_expect_code(mhgp4_q2_mutant_sign_le 4 mhgp4_q2_events_probe
+    "--fixture --s=8 --inject=sign-le")
+
 # Selection axiale (MATHEMATIQUES.md § 4.6) : accelerateur RECU contre la
 # baseline enumeree — memes records exiges par le meme juge brut sur les
 # trois sources, fixture de justesse au bord du rang (profondeur h_4 - 1,
