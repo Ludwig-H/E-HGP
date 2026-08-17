@@ -96,3 +96,14 @@ mhgp4_expect_code(mhgp4_q234_ha_clusters 0 mhgp4_q234_prune_probe
 mhgp4_expect_code(mhgp4_wspd_refus_famille 2 mhgp4_wspd_scaling_probe
     "--family=inconnue")
 mhgp4_expect_code(mhgp4_wspd_refus_n 2 mhgp4_wspd_scaling_probe "--n=1")
+
+# Instruction q3 : ancres survivantes -> evenements, juge PAR IDENTITES
+# contre l'oracle brut borne (tous les triangles). Le juge partage encore le
+# predicat de profondeur du sujet (limite declaree : il valide l'enumeration,
+# l'owner et la completude, pas l'arithmetique — l'oracle a arithmetique
+# independante viendra avec oracle/).
+add_executable(mhgp4_q3_events_probe bench/q3_events_probe.cpp)
+mhgp4_expect_code(mhgp4_q3_events_judge_uniform 0 mhgp4_q3_events_probe
+    "--family=uniform --n=400 --s=8 --seed=3 --judge --min-events=100")
+mhgp4_expect_code(mhgp4_q3_events_judge_clusters 0 mhgp4_q3_events_probe
+    "--family=eight_clusters --n=400 --s=8 --seed=3 --judge --min-events=100")
