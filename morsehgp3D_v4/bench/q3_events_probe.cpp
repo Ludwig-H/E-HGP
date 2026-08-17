@@ -38,6 +38,7 @@ struct Args {
   u64 smax = 11;
   bool judge = false;
   bool exact_mode = false;  // premier extra-shell => unsupported_degeneracy
+  bool census_cover = true;  // --census=tree : descente par porteur (appariee)
   u64 min_events = 0;
 };
 
@@ -74,6 +75,8 @@ Args parse(int argc, char** argv) {
     else if (const char* v = val("--min-events=")) a.min_events = (u64)std::atoll(v);
     else if (arg == "--judge") a.judge = true;
     else if (arg == "--exact") a.exact_mode = true;
+    else if (arg == "--census=cover") a.census_cover = true;
+    else if (arg == "--census=tree") a.census_cover = false;
     else {
       std::fprintf(stderr, "argument inconnu : %s\n", arg.c_str());
       a.family_ok = false;
@@ -102,19 +105,31 @@ Key3 make_key(i32 x, i32 y, i32 z) {
   return k;
 }
 
-// Requete de lentille : positions uniques x avec |x-a|² <= D² ET |x-b|² <= D².
-void lens_query(const CloudIndex& ix, const P3& pa, const P3& pb, i64 D2,
-                std::vector<i32>* out) {
+// COVER PARTAGE PAR ANCRE (audit du 17 aout, § 6.2) : tout porteur ET tout
+// point interieur d'une circum-boule q3 pertinente de l'ancre (a,b) verifie
+// |z-m| <= (sqrt(3)/2)·D, soit |2z-(a+b)|² <= 3·D² (ferme, i64). Une seule
+// requete sert la lentille et le census ; la liste est TRIEE par distance
+// croissante au milieu, pour que le scan temoin par porteur atteigne h_3 au
+// plus vite (les points proches du milieu sont interieurs a la plupart des
+// circum-boules).
+struct CoverPoint {
+  i32 u;
+  i64 dist2q;  // |2z-(a+b)|²
+};
+
+void cover_query(const CloudIndex& ix, const P3& pa, const P3& pb, i64 D2,
+                 std::vector<CoverPoint>* out) {
   out->clear();
   if (ix.nodes.empty()) return;
-  const auto box_min_dist2 = [](const AxisBox& b, const P3& p) {
-    i128 s = 0;
-    const i64 c[3] = {p.x, p.y, p.z};
+  const i64 m2[3] = {pa.x + pb.x, pa.y + pb.y, pa.z + pb.z};
+  const i64 bound = 3 * D2;
+  const auto box_min_dist2q = [&](const AxisBox& b) {
+    i64 s = 0;
     for (int i = 0; i < 3; ++i) {
       i64 d = 0;
-      if (c[i] < b.lo[i]) d = b.lo[i] - c[i];
-      else if (c[i] > b.hi[i]) d = c[i] - b.hi[i];
-      s += (i128)d * d;
+      if (2 * b.lo[i] > m2[i]) d = 2 * b.lo[i] - m2[i];
+      else if (2 * b.hi[i] < m2[i]) d = m2[i] - 2 * b.hi[i];
+      s += d * d;
     }
     return s;
   };
@@ -123,17 +138,26 @@ void lens_query(const CloudIndex& ix, const P3& pa, const P3& pb, i64 D2,
     const NodeRef z = stack.back();
     stack.pop_back();
     const AxisBox bz = box_of_node(ix, z);
-    if (box_min_dist2(bz, pa) > D2 || box_min_dist2(bz, pb) > D2) continue;
+    if (box_min_dist2q(bz) > bound) continue;
     if (z < 0) {
       const i32 u = -1 - z;
       const P3& p = ix.upos[(size_t)u];
-      if (p3_norm2(p3_sub(p, pa)) <= D2 && p3_norm2(p3_sub(p, pb)) <= D2)
-        out->push_back(u);
+      i64 d2 = 0;
+      const i64 c[3] = {p.x, p.y, p.z};
+      for (int i = 0; i < 3; ++i) {
+        const i64 t = 2 * c[i] - m2[i];
+        d2 += t * t;
+      }
+      if (d2 <= bound) out->push_back(CoverPoint{u, d2});
       continue;
     }
     stack.push_back(ix.nodes[(size_t)z].left);
     stack.push_back(ix.nodes[(size_t)z].right);
   }
+  std::sort(out->begin(), out->end(),
+            [](const CoverPoint& x, const CoverPoint& y) {
+              return x.dist2q != y.dist2q ? x.dist2q < y.dist2q : x.u < y.u;
+            });
 }
 
 }  // namespace
@@ -203,8 +227,9 @@ int main(int argc, char** argv) {
   u64 anchors_seen = 0, anchors_killed_ha = 0, carriers_seen = 0,
       shell_refused = 0, raw_events = 0;
   const auto pid = [&](i32 u) { return ix.bucket_ids[ix.bucket_start[(size_t)u]]; };
-  std::vector<i32> lens;
+  std::vector<CoverPoint> cover;
   std::vector<u64> ha, hb;
+  u64 cover_points = 0;
   for (const AliveQ3& ar : alive) {
     const NodeRange ra = range_of(ix, ar.r.a);
     const NodeRange rb = range_of(ix, ar.r.b);
@@ -240,13 +265,18 @@ int main(int argc, char** argv) {
         const P3& pb = ix.upos[(size_t)ub];
         const i64 D2 = p3_norm2(p3_sub(pb, pa));
         if (D2 == 0) continue;
-        lens_query(ix, pa, pb, D2, &lens);
-        for (const i32 ux : lens) {
+        cover_query(ix, pa, pb, D2, &cover);
+        cover_points += cover.size();
+        for (const CoverPoint& cp : cover) {
+          const i32 ux = cp.u;
           if (ux == ua || ux == ub) continue;
           const P3& px = ix.upos[(size_t)ux];
+          // Lentille : les deux distances a a et b bornees par D².
+          if (p3_norm2(p3_sub(px, pa)) > D2 || p3_norm2(p3_sub(px, pb)) > D2)
+            continue;
           const P3 v{2 * px.x - pa.x - pb.x, 2 * px.y - pa.y - pb.y,
                      2 * px.z - pa.z - pb.z};
-          if (p3_norm2(v) <= D2) continue;
+          if (p3_norm2(v) <= D2) continue;  // acuite stricte
           const i64 l_ax = p3_norm2(p3_sub(px, pa));
           const i64 l_bx = p3_norm2(p3_sub(px, pb));
           if (!anchor_owns_q3(D2, l_ax, l_bx, pid(ua), pid(ub), pid(ux)))
@@ -254,7 +284,21 @@ int main(int argc, char** argv) {
           ++carriers_seen;
           const Q3Form f = q3_form(pa, pb, px);
           u64 shell = 0;
-          const u64 depth = q3_ball_depth(ix, f, ua, ub, ux, h3, &shell);
+          u64 depth = 0;
+          if (a.census_cover) {
+            // Scan plat du cover trie : early-exit a h_3, coquilles vues.
+            for (const CoverPoint& wz : cover) {
+              if (wz.u == ua || wz.u == ub || wz.u == ux) continue;
+              const i128 pw = q3_power(f, ix.upos[(size_t)wz.u]);
+              if (pw < 0) {
+                if (++depth >= h3) break;
+              } else if (pw == 0) {
+                ++shell;
+              }
+            }
+          } else {
+            depth = q3_ball_depth(ix, f, ua, ub, ux, h3, &shell);
+          }
           if (depth >= h3) continue;
           if (shell > 0) {
             if (a.exact_mode) {
@@ -337,7 +381,7 @@ int main(int argc, char** argv) {
       "famille=%s n=%d coord=%d s=%lld smax=%llu seed=%lld mode=%s "
       "rect_vivants_q3=%zu ancres_vues=%llu ancres_tuees_ha=%llu "
       "porteurs=%llu evenements=%zu doublons=%llu ev_par_point=%.1f "
-      "shell_refus=%llu juge_manquants=%llu juge_en_trop=%llu "
+      "cover_pts=%llu shell_refus=%llu juge_manquants=%llu juge_en_trop=%llu "
       "t_wspd_ms=%.1f t_instruction_ms=%.1f t_juge_ms=%.1f\n",
       cloud_family_name(a.family), a.n, coord, (long long)a.s,
       (unsigned long long)smax_eff, a.seed,
@@ -346,7 +390,7 @@ int main(int argc, char** argv) {
       (unsigned long long)carriers_seen, events.size(),
       (unsigned long long)duplicate_supports,
       (double)events.size() / (double)pts.size(),
-      (unsigned long long)shell_refused, (unsigned long long)missing,
+      (unsigned long long)cover_points, (unsigned long long)shell_refused, (unsigned long long)missing,
       (unsigned long long)extra, ms(t1 - t0), ms(t2 - t1), ms(t3 - t2));
 
   if (duplicate_supports > 0) {

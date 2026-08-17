@@ -38,3 +38,25 @@ Confirmation de la prédiction d'audit : les ancres tuées sont
 préférentiellement les LONGUES (17 % des ancres portent 47 % du coût sur la
 famille adversariale). Le poste restant est le census partagé par ancre
 (plan médiateur, réponse Q9) — prochaine primitive.
+
+## Addendum 2 — cover partagé trié par ancre (borne √3·D/2 de l'audit)
+
+Une seule requête `B(m, √3·D/2)` par ancre (elle couvre lentille ET témoins,
+inclusion prouvée par l'audit § 6.2), liste TRIÉE par distance croissante au
+milieu, scan plat par porteur avec early-exit à h_3 (les points proches du
+milieu sont intérieurs à la plupart des circum-boules : les boules profondes
+meurent en ~h_3 tests). Mesure appariée `--census=tree|cover`, événements
+identiques, juges 0/0 sur les deux chemins :
+
+| famille | n | t_instruction tree | t_instruction cover | gain |
+|---|---:|---:|---:|---:|
+| uniform | 400 | 2 652 ms | 290 ms | 9,1× |
+| uniform | 2000 | 25 965 ms | 2 995 ms | 8,7× |
+| eight_clusters | 2000 | 253 272 ms | **24 214 ms** | **10,5×** |
+
+Cumul sur eight_clusters n=2000 : 475 s (origine) → 24,2 s (filtre h_a/h_b
+puis cover partagé), soit ≈ 20×. Poste dominant restant : la collecte du
+cover lui-même (237,6 M de points collectés/triés, ~594 par ancre sur la
+famille adversariale) — c'est ce que la version A de l'audit (arbre 2D des
+porteurs + range-add au niveau des blocs) doit amortir, avec l'arithmétique
+i192 des T_x prouvée avant le kernel.
