@@ -530,6 +530,59 @@ pré-lot — aucune chronologie binaire artificielle. La partition résultante
 est indépendante de l'ordre interne (clôture d'union-find) ; le nombre de
 nœuds par lot aussi (groupes de racines).
 
+### 5.3bis Plateaux sphériques hors position générale (Q5 TRANCHÉE)
+
+(Audit bloquant du 17 août « coquilles u16 avant forêt » — reçu intégral.)
+
+**Le refus ne suffit pas.** Supprimer les événements à coquille puis
+construire la forêt sur le sous-flux régulier NE rend PAS la hiérarchie
+exacte : contre-fixture du carré cocyclique
+`(110,100,100), (100,110,100), (90,100,100), (100,90,100)` (sphère de
+centre `(100,100,100)`, `R² = 100`). Les quatre triangles rectangles y
+sont de Gabriel (Déf. 28 : la boule OUVERTE est vide — un point externe
+SUR la sphère est permis) et fusionnent les quatre côtés de `Gamma_2` au
+niveau 100 ; le sous-flux régulier n'émet rien (supports q2 à coquille
+refusés, aucun triangle aigu) et laisse quatre composantes. Le défaut
+change les composantes HGP, pas une convention de rendu.
+
+**Théorème du plateau (audit § 2).** Pour une boule `B` de centre `c`,
+`I_B = X ∩ int(B)`, `U_B = X ∩ ∂B` : les K-simplexes de Gabriel de
+miniboule EXACTEMENT `B` sont les `σ = I_B ∪ T` avec `T ⊆ U_B`,
+`|T| = K+1−|I_B|` et `c ∈ conv(T)` (fermé). *Preuve* : Gabriel force
+`I_B ⊆ σ` ; les autres sommets sont sur la coquille ; une boule est la
+miniboule de son ensemble ssi son centre est dans l'enveloppe convexe des
+points de bord ; réciproque directe. Sous position générale `U_B = S`
+(le support minimal, `q <= 4`) et la règle `K = |I_B| + q − 1` des lanes
+est retrouvée. Par Carathéodory (dimension 3), `c ∈ conv(T)` ⟺ `T`
+contient un support minimal de cardinal 2, 3 ou 4 : **les lanes q2/q3/q4
+restent les générateurs locaux**, mais publient un QUOTIENT commun par
+boule, jamais des événements isolés qui ignorent le reste de la coquille.
+
+**Q5 tranchée — option A** : l'objet normatif EST le nuage u16 (le profil
+gravé `quantized_u16_input_only` l'impose ; l'option B — coordonnées de
+vérité plus fines, u16 réduit à l'index — serait un AUTRE profil d'entrée
+à nommer et re-dimensionner, non retenu ici). Conséquences :
+
+- l'ABI commune est le **`SpherePlateau`** : `BallKey`, niveau exact,
+  `I_B` complet, `U_B` COMPLET (supports inclus), supports minimaux ;
+  une seule passe de census par `BallKey` (sort/RLE), collectant `I_B`
+  ET `U_B` — plus jamais un booléen `shell > 0` ;
+- régime régulier (`|U_B| = q`) : le chemin rapide actuel inchangé ;
+- régime dégénéré : le plateau est traité SIMULTANÉMENT pour chaque `K`
+  par la formule ci-dessus — oracle borné d'abord (énumération des
+  `T ⊆ U_B`, plafond explicite de coquille avec `resource_exhausted`
+  au-delà, jamais une troncature), compression par supports minimaux
+  ensuite ;
+- le fold gèle les composantes avant le niveau puis applique ENSEMBLE
+  tous les simplexes du plateau (le macro-lot § 5.3 le fait déjà : même
+  boule ⟹ même niveau exact) ; un ordre binaire entre cosphériques
+  serait aussi faux que leur suppression ;
+- tant que la porte dégénérée n'est pas complète à l'échelle, toute
+  sortie construite sur le sous-flux régulier porte le statut
+  **`complete_regular_only`**, jamais `exact` (les reçus q2 mesurent 837
+  coquilles dès `uniform n=400` : la position générale n'est pas une
+  précondition pratique du profil u16).
+
 ### 5.4 Le juge indépendant
 
 Sur petits nuages (`n <= 14`, coordonnées bornées documentées — le régime
@@ -572,10 +625,11 @@ statuts transactionnels) est dans `ARCHITECTURE.md`.
   non-actives (nées au niveau du simplexe) dans `F_K` pour `S_τ`/`T_x` ? Le
   manuscrit laisse la définition opérationnelle. Proposition v4 : les
   facettes actives seulement, convention à graver et à déclarer.
-- **Q5 (ex æquo).** Politique exacte des événements de même niveau
-  (cosphéricités u16) : refus global (`unsupported_degeneracy`) ou quotient
-  local prouvé ? La v3 a documenté le refus ; la v4 reprend le refus tant
-  qu'aucun quotient complet n'est reçu.
+- **Q5 (ex æquo) — TRANCHÉE** (audit bloquant du 17 août) : le quotient
+  local est PROUVÉ (théorème du plateau, § 5.3bis) et l'option A (u16
+  normatif) retenue ; le refus global reste le statut des chemins qui
+  n'ont pas encore la porte dégénérée (`complete_regular_only`), jamais
+  une sémantique exacte.
 - (Q6–Q11 : posées et traitées dans les notes `audits/` — census q3, bord
   torique, oracle indépendant.)
 - **Q12 (forme canonique du niveau q4) — TRANCHÉE** (audit du 17 août

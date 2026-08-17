@@ -39,13 +39,18 @@ struct FacetKey {
   bool operator==(const FacetKey& o) const { return k == o.k && p == o.p; }
 };
 
-// Evenement de foret : σ = support (q points) ∪ interieurs (d points),
-// K = q + d - 1, niveau exact promu (rayon au carre).
+// Evenement de foret : σ = part T (q points de coquille portant le centre,
+// c ∈ conv(T)) ∪ interieurs I (d points), K = q + d - 1, niveau exact
+// promu (rayon au carre). Sous position generale T est le support minimal
+// (q <= 4) ; sur un PLATEAU spherique (§ 5.3bis) T peut monter a 11 —
+// les bras de retrait d'un point de T peuvent naitre plus tot ou au meme
+// niveau, ceux de retrait d'un interieur naissent AU niveau (invariant des
+// rayons de naissance).
 struct ForestEvent {
-  u8 q = 0;
-  u8 d = 0;
-  PointId support[4] = {0, 0, 0, 0};
-  PointId interior[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+  u8 q = 0;  // |T| <= 11
+  u8 d = 0;  // |I| <= 9
+  PointId support[11] = {};
+  PointId interior[9] = {};
   Q4Level level{};
 };
 

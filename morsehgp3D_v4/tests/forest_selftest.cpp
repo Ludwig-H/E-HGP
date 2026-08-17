@@ -37,6 +37,7 @@
 #include "../src/events/q2_event.hpp"
 #include "../src/events/q4_event.hpp"
 #include "../src/forest/forest.hpp"
+#include "../src/forest/sphere_plateau.hpp"
 
 namespace {
 
@@ -222,12 +223,14 @@ FacetKey jfacet(const std::vector<i32>& pts, size_t drop) {
 
 int main(int argc, char** argv) {
   using namespace mhgp4;
-  bool inj_binary = false, inj_repr = false;
+  bool inj_binary = false, inj_repr = false, inj_drop_shell = false;
   for (int i = 1; i < argc; ++i) {
     if (std::strcmp(argv[i], "--inject=binary-ties") == 0) inj_binary = true;
     else if (std::strcmp(argv[i], "--inject=repr-ties") == 0) inj_repr = true;
+    else if (std::strcmp(argv[i], "--inject=drop-shell-plateau") == 0)
+      inj_drop_shell = true;
   }
-  const bool mutant = inj_binary || inj_repr;
+  const bool mutant = inj_binary || inj_repr || inj_drop_shell;
 
   std::vector<std::vector<P3>> clouds;
   // Fixture du plateau ternaire (K=1) : deux aretes de niveau 1 en un lot.
@@ -244,6 +247,14 @@ int main(int argc, char** argv) {
                     {2244, 2008, 2000},
                     {2122, 2004, 2010},
                     {2122, 2004, 1990}});
+  // Fixture bloquante square_cospherical_K2_plateau (audit § 1) : quatre
+  // points cocycliques, centre (100,100,100), R² = 100. La filtration
+  // fusionne les quatre cotes de Gamma_2 au niveau 100 via les quatre
+  // triangles RECTANGLES (Gabriel au sens pur : boule ouverte vide) ; le
+  // sous-flux regulier n'emet rien — le mutant drop-shell-plateau doit
+  // mourir ici.
+  clouds.push_back({{110, 100, 100}, {100, 110, 100}, {90, 100, 100},
+                    {100, 90, 100}});
   clouds.push_back(make_family_cloud(CloudFamily::kUniform, 12,
                                      cloud_family_default_coord(CloudFamily::kUniform, 12), 3));
   clouds.push_back(make_family_cloud(CloudFamily::kEightClusters, 12,
@@ -251,6 +262,7 @@ int main(int argc, char** argv) {
 
   u64 total_events = 0, total_fusions = 0, plateaus_multi = 0;
   bool collinear_checked = false, tie_checked = false;
+  bool square_checked = false;
   for (size_t ci = 0; ci < clouds.size(); ++ci) {
     const std::vector<P3>& pts = clouds[ci];
     const int m = (int)pts.size();
@@ -299,21 +311,20 @@ int main(int argc, char** argv) {
           }
         }
       if (!have) continue;  // sous-ensemble degenere (colineaire...)
-      // Refus transactionnel : un point de σ SUR la sphere hors support,
-      // ou un point externe sur la sphere, ecarte σ ; un externe interieur
-      // strict nie Gabriel.
-      bool refused = false, is_gabriel = true;
+      // Def. 28 PURE (§ 5.3bis) : seule la boule OUVERTE doit etre vide de
+      // X∖σ — un point SUR la sphere (membre de σ au-dela du support, ou
+      // externe) est PERMIS : c'est le regime des plateaux.
+      bool is_gabriel = true;
       for (i32 u = 0; u < m; ++u) {
         bool in_sup = false, in_sub = (mask >> u) & 1u;
         for (const i32 su : best_sup)
           if (su == u) in_sup = true;
         if (in_sup) continue;
         const int sg = jside(best, pts[(size_t)u]);
-        if (sg == 0) refused = true;
-        else if (sg < 0 && !in_sub) is_gabriel = false;
+        if (sg < 0 && !in_sub) is_gabriel = false;
         else if (sg > 0 && in_sub) return 3;  // impossible : miniboule
       }
-      if (refused || !is_gabriel) continue;
+      if (!is_gabriel) continue;
       JSimplex js;
       js.pts = sub;
       js.support = best_sup;
@@ -321,139 +332,163 @@ int main(int argc, char** argv) {
       gabriel.push_back(js);
     }
 
-    // ---- Par K : sujet (bijection production) contre juge (cliques).
-    for (int K = 1; K <= 10; ++K) {
-      // SUJET : les evenements sont exactement les simplexes de Gabriel du
-      // juge ? Non — le sujet les DERIVE des predicats de production via
-      // la bijection : support q + interieurs stricts de la boule.
-      std::vector<ForestEvent> sevents;
-      // q2 : paires.
-      for (i32 i = 0; i < m; ++i)
-        for (i32 j = i + 1; j < m; ++j) {
-          const i64 D2 = p3_norm2(p3_sub(pts[(size_t)j], pts[(size_t)i]));
-          if (D2 == 0) return 3;
-          const i64 s2[3] = {pts[(size_t)i].x + pts[(size_t)j].x,
-                             pts[(size_t)i].y + pts[(size_t)j].y,
-                             pts[(size_t)i].z + pts[(size_t)j].z};
-          ForestEvent ev;
-          ev.q = 2;
-          ev.support[0] = (PointId)i;
-          ev.support[1] = (PointId)j;
-          bool shell = false;
-          for (i32 u = 0; u < m && ev.d <= 9; ++u) {
-            if (u == i || u == j) continue;
-            const i64 t0 = 2 * pts[(size_t)u].x - s2[0];
-            const i64 t1 = 2 * pts[(size_t)u].y - s2[1];
-            const i64 t2 = 2 * pts[(size_t)u].z - s2[2];
-            const i64 d2 = t0 * t0 + t1 * t1 + t2 * t2;
-            if (d2 < D2) {
-              if (ev.d < 9) ev.interior[ev.d] = (PointId)u;
-              ++ev.d;
-            } else if (d2 == D2) {
-              shell = true;
-            }
-          }
-          if (shell || (int)ev.q + ev.d - 1 != K) continue;
-          ev.level = promote_q3_level(q2_exact_level(D2));
-          sevents.push_back(ev);
+    // ---- SUJET : boules candidates depuis les GENERATEURS de lanes
+    // (paire ; triangle strictement aigu d'arete maximale ; tetraedre
+    // strictement centre), dedupe par BallKey primitive (commune aux trois
+    // lanes : une boule est une boule), census I_B / U_B COMPLET par la
+    // forme du generateur, puis EXPANSION du plateau (§ 5.3bis) : tous les
+    // σ = I_B ∪ T, T ⊆ U_B, c ∈ conv(T) ferme. Oracle borne : plafond de
+    // coquille explicite (resource_exhausted au-dela, jamais de
+    // troncature). Le mutant drop-shell-plateau retablit l'ancien refus
+    // des boules a extra-coquille : il perd les fusions du carre.
+    struct SubjEvent {
+      std::vector<i32> tpart, ipart;
+      Q4Level level;
+    };
+    std::vector<SubjEvent> subj;
+    std::set<Q3BallKey> seen_balls;
+    int subj_rc = 0;
+    const auto expand_ball = [&](const Q3BallKey& key, const Q4Level& lvl,
+                                 const std::vector<i32>& interior,
+                                 const std::vector<i32>& extra_shell,
+                                 const std::vector<i32>& gen_support) {
+      if (subj_rc) return;
+      if (inj_drop_shell && !extra_shell.empty()) return;  // MUTANT
+      if (!seen_balls.insert(key).second) return;
+      std::vector<i32> shell_all = extra_shell;
+      for (const i32 su : gen_support) shell_all.push_back(su);
+      if (shell_all.size() > 12) {
+        std::fprintf(stderr, "REFUS resource_exhausted : coquille %zu\n",
+                     shell_all.size());
+        subj_rc = 3;
+        return;
+      }
+      const BallRat c = ball_center(key);
+      const u32 nu = (u32)shell_all.size();
+      for (u32 tm = 1; tm < (1u << nu); ++tm) {
+        const int nt = __builtin_popcount(tm);
+        if (nt < 2 || interior.size() + (size_t)nt > 11) continue;
+        std::vector<i32> T;
+        for (u32 b = 0; b < nu; ++b)
+          if (tm & (1u << b)) T.push_back(shell_all[(size_t)b]);
+        if (!center_in_conv(c, pts, T)) continue;
+        std::sort(T.begin(), T.end());
+        subj.push_back(SubjEvent{T, interior, lvl});
+      }
+    };
+    // q2 : toutes les paires (le milieu est toujours un support valide).
+    for (i32 i = 0; i < m; ++i)
+      for (i32 j = i + 1; j < m; ++j) {
+        const P3 &pa = pts[(size_t)i], &pb = pts[(size_t)j];
+        const i64 D2 = p3_norm2(p3_sub(pb, pa));
+        if (D2 == 0) return 3;
+        const i64 s2[3] = {pa.x + pb.x, pa.y + pb.y, pa.z + pb.z};
+        std::vector<i32> interior, extra_shell;
+        for (i32 u = 0; u < m; ++u) {
+          if (u == i || u == j) continue;
+          const i64 t0 = 2 * pts[(size_t)u].x - s2[0];
+          const i64 t1 = 2 * pts[(size_t)u].y - s2[1];
+          const i64 t2 = 2 * pts[(size_t)u].z - s2[2];
+          const i64 d2 = t0 * t0 + t1 * t1 + t2 * t2;
+          if (d2 < D2) interior.push_back(u);
+          else if (d2 == D2) extra_shell.push_back(u);
         }
-      // q3 : triangles aigus d'arete maximale owner.
-      for (i32 i = 0; i < m; ++i)
-        for (i32 j = i + 1; j < m; ++j)
-          for (i32 k = j + 1; k < m; ++k) {
-            const i32 vs[3] = {i, j, k};
-            int bu = 0, bv = 1;
+        expand_ball(q2_ball_key(pa, pb), promote_q3_level(q2_exact_level(D2)),
+                    interior, extra_shell, {i, j});
+      }
+    // q3 : triangles strictement aigus (etiquetage arete maximale).
+    for (i32 i = 0; i < m; ++i)
+      for (i32 j = i + 1; j < m; ++j)
+        for (i32 k = j + 1; k < m; ++k) {
+          const i32 vs[3] = {i, j, k};
+          int bu = 0, bv = 1;
+          i64 bl2 = -1;
+          for (int s0 = 0; s0 < 3; ++s0)
+            for (int s1 = s0 + 1; s1 < 3; ++s1) {
+              const i64 l2 = p3_norm2(
+                  p3_sub(pts[(size_t)vs[s1]], pts[(size_t)vs[s0]]));
+              if (l2 > bl2 ||
+                  (l2 == bl2 &&
+                   edge_key_less(edge_key((PointId)vs[s0], (PointId)vs[s1]),
+                                 edge_key((PointId)vs[bu], (PointId)vs[bv]))))
+                bl2 = l2, bu = s0, bv = s1;
+            }
+          const i32 ia = vs[bu], ib = vs[bv];
+          i32 ix = -1;
+          for (const i32 u : vs)
+            if (u != ia && u != ib) ix = u;
+          const P3 &pa = pts[(size_t)ia], &pb = pts[(size_t)ib],
+                   &px = pts[(size_t)ix];
+          const P3 vv{2 * px.x - pa.x - pb.x, 2 * px.y - pa.y - pb.y,
+                      2 * px.z - pa.z - pb.z};
+          if (p3_norm2(vv) <= bl2) continue;  // pas strictement aigu
+          const Q3Form f3 = q3_form(pa, pb, px);
+          std::vector<i32> interior, extra_shell;
+          for (i32 u = 0; u < m; ++u) {
+            if (u == i || u == j || u == k) continue;
+            const i128 pw = q3_power(f3, pts[(size_t)u]);
+            if (pw < 0) interior.push_back(u);
+            else if (pw == 0) extra_shell.push_back(u);
+          }
+          expand_ball(q3_ball_key(f3),
+                      promote_q3_level(q3_exact_level(pa, pb, px)), interior,
+                      extra_shell, {ia, ib, ix});
+        }
+    // q4 : tetraedres strictement centres (etiquetage arete maximale).
+    for (i32 i = 0; i < m; ++i)
+      for (i32 j = i + 1; j < m; ++j)
+        for (i32 k = j + 1; k < m; ++k)
+          for (i32 l = k + 1; l < m; ++l) {
+            const i32 vs[4] = {i, j, k, l};
+            i32 bu = -1, bv = -1;
             i64 bl2 = -1;
-            for (int s0 = 0; s0 < 3; ++s0)
-              for (int s1 = s0 + 1; s1 < 3; ++s1) {
-                const i64 l2 = p3_norm2(p3_sub(pts[(size_t)vs[s1]],
-                                               pts[(size_t)vs[s0]]));
+            for (int s0 = 0; s0 < 4; ++s0)
+              for (int s1 = s0 + 1; s1 < 4; ++s1) {
+                const i64 l2 = p3_norm2(
+                    p3_sub(pts[(size_t)vs[s1]], pts[(size_t)vs[s0]]));
                 if (l2 > bl2 ||
                     (l2 == bl2 &&
                      edge_key_less(edge_key((PointId)vs[s0], (PointId)vs[s1]),
-                                   edge_key((PointId)vs[bu], (PointId)vs[bv]))))
-                  bl2 = l2, bu = s0, bv = s1;
+                                   edge_key((PointId)bu, (PointId)bv))))
+                  bl2 = l2, bu = vs[s0], bv = vs[s1];
               }
-            const i32 ia = vs[bu], ib = vs[bv];
-            i32 ix = -1;
+            i32 ox = -1, oy = -1;
             for (const i32 u : vs)
-              if (u != ia && u != ib) ix = u;
-            const P3 &pa = pts[(size_t)ia], &pb = pts[(size_t)ib],
-                     &px = pts[(size_t)ix];
-            const P3 vv{2 * px.x - pa.x - pb.x, 2 * px.y - pa.y - pb.y,
-                        2 * px.z - pa.z - pb.z};
-            if (p3_norm2(vv) <= bl2) continue;  // pas strictement aigu
-            const Q3Form f3 = q3_form(pa, pb, px);
-            ForestEvent ev;
-            ev.q = 3;
-            ev.support[0] = (PointId)ia;
-            ev.support[1] = (PointId)ib;
-            ev.support[2] = (PointId)ix;
-            bool shell = false;
-            for (i32 u = 0; u < m && ev.d <= 9; ++u) {
-              if (u == i || u == j || u == k) continue;
-              const i128 pw = q3_power(f3, pts[(size_t)u]);
-              if (pw < 0) {
-                if (ev.d < 9) ev.interior[ev.d] = (PointId)u;
-                ++ev.d;
-              } else if (pw == 0) {
-                shell = true;
-              }
+              if (u != bu && u != bv) (ox < 0 ? ox : oy) = u;
+            const Q4Form f4 = q4_form(pts[(size_t)bu], pts[(size_t)bv],
+                                      pts[(size_t)ox], pts[(size_t)oy]);
+            if (f4.det == 0) continue;
+            if (!q4_center_strictly_inside(f4, pts[(size_t)bu],
+                                           pts[(size_t)bv], pts[(size_t)ox],
+                                           pts[(size_t)oy]))
+              continue;
+            std::vector<i32> interior, extra_shell;
+            for (i32 u = 0; u < m; ++u) {
+              if (u == i || u == j || u == k || u == l) continue;
+              const i128 pw = q4_power(f4, pts[(size_t)u]);
+              if (pw < 0) interior.push_back(u);
+              else if (pw == 0) extra_shell.push_back(u);
             }
-            if (shell || (int)ev.q + ev.d - 1 != K) continue;
-            ev.level = promote_q3_level(q3_exact_level(pa, pb, px));
-            sevents.push_back(ev);
+            expand_ball(q3_ball_key_reduce(q4_ball_form(f4)), q4_level_raw(f4),
+                        interior, extra_shell, {bu, bv, ox, oy});
           }
-      // q4 : tetraedres bien centres d'arete maximale owner.
-      for (i32 i = 0; i < m; ++i)
-        for (i32 j = i + 1; j < m; ++j)
-          for (i32 k = j + 1; k < m; ++k)
-            for (i32 l = k + 1; l < m; ++l) {
-              const i32 vs[4] = {i, j, k, l};
-              i32 bu = -1, bv = -1;
-              i64 bl2 = -1;
-              for (int s0 = 0; s0 < 4; ++s0)
-                for (int s1 = s0 + 1; s1 < 4; ++s1) {
-                  const i64 l2 = p3_norm2(p3_sub(pts[(size_t)vs[s1]],
-                                                 pts[(size_t)vs[s0]]));
-                  if (l2 > bl2 ||
-                      (l2 == bl2 &&
-                       edge_key_less(
-                           edge_key((PointId)vs[s0], (PointId)vs[s1]),
-                           edge_key((PointId)bu, (PointId)bv))))
-                    bl2 = l2, bu = vs[s0], bv = vs[s1];
-                }
-              i32 ox = -1, oy = -1;
-              for (const i32 u : vs)
-                if (u != bu && u != bv) (ox < 0 ? ox : oy) = u;
-              const Q4Form f4 = q4_form(pts[(size_t)bu], pts[(size_t)bv],
-                                        pts[(size_t)ox], pts[(size_t)oy]);
-              if (f4.det == 0) continue;
-              if (!q4_center_strictly_inside(f4, pts[(size_t)bu],
-                                             pts[(size_t)bv], pts[(size_t)ox],
-                                             pts[(size_t)oy]))
-                continue;
-              ForestEvent ev;
-              ev.q = 4;
-              ev.support[0] = (PointId)bu;
-              ev.support[1] = (PointId)bv;
-              ev.support[2] = (PointId)ox;
-              ev.support[3] = (PointId)oy;
-              bool shell = false;
-              for (i32 u = 0; u < m && ev.d <= 9; ++u) {
-                if (u == i || u == j || u == k || u == l) continue;
-                const i128 pw = q4_power(f4, pts[(size_t)u]);
-                if (pw < 0) {
-                  if (ev.d < 9) ev.interior[ev.d] = (PointId)u;
-                  ++ev.d;
-                } else if (pw == 0) {
-                  shell = true;
-                }
-              }
-              if (shell || (int)ev.q + ev.d - 1 != K) continue;
-              ev.level = q4_level_raw(f4);
-              sevents.push_back(ev);
-            }
+    if (subj_rc) return subj_rc;
+
+    // ---- Par K : sujet (plateaux inclus) contre juge (cliques Def. 28).
+    for (int K = 1; K <= 10; ++K) {
+      std::vector<ForestEvent> sevents;
+      for (const SubjEvent& se : subj) {
+        if ((int)(se.tpart.size() + se.ipart.size()) != K + 1) continue;
+        ForestEvent ev;
+        ev.q = (u8)se.tpart.size();
+        ev.d = (u8)se.ipart.size();
+        for (size_t t = 0; t < se.tpart.size(); ++t)
+          ev.support[t] = (PointId)se.tpart[t];
+        for (size_t t = 0; t < se.ipart.size(); ++t)
+          ev.interior[t] = (PointId)se.ipart[t];
+        ev.level = se.level;
+        sevents.push_back(ev);
+      }
       total_events += sevents.size();
 
       // SUJET : foret a macro-lots, avec instantanes de partition.
@@ -563,6 +598,30 @@ int main(int argc, char** argv) {
         }
         tie_checked = true;
       }
+      if (ci == 2 && !mutant) {
+        // square_cospherical_K2_plateau (audit bloquant § 1) : K=1, un
+        // nœud quaternaire au niveau 50 (les quatre cotes) puis les
+        // diagonales sans fusion ; K=2, UN nœud a SIX facettes-aretes au
+        // niveau 100 (les quatre triangles rectangles du plateau) ; K=3,
+        // un nœud a quatre facettes-triangles.
+        const u64 want_nodes = 1;
+        const u64 want_absorbed = (K == 1) ? 4 : (K == 2) ? 6 : (K == 3) ? 4 : 0;
+        if (K >= 1 && K <= 3) {
+          if (sr.nodes.size() != want_nodes ||
+              sr.nodes[0].absorbed != want_absorbed) {
+            std::fprintf(stderr,
+                         "FIXTURE carre : K=%d nœuds=%zu absorbees=%llu "
+                         "(attendus 1/%llu)\n",
+                         K, sr.nodes.size(),
+                         sr.nodes.empty()
+                             ? 0ull
+                             : (unsigned long long)sr.nodes[0].absorbed,
+                         (unsigned long long)want_absorbed);
+            return 3;
+          }
+          if (K == 2) square_checked = true;
+        }
+      }
     }
   }
 
@@ -584,8 +643,8 @@ int main(int argc, char** argv) {
     return 3;
   }
   if (g_fail > 0) return 1;
-  if (!collinear_checked || !tie_checked || plateaus_multi == 0 ||
-      total_fusions == 0) {
+  if (!collinear_checked || !tie_checked || !square_checked ||
+      plateaus_multi == 0 || total_fusions == 0) {
     std::fprintf(stderr, "PLANCHER : fixtures ou fusions manquantes\n");
     return 3;
   }

@@ -181,6 +181,11 @@ mhgp4_expect_code(mhgp4_forest_mutant_binaire 4 mhgp4_forest_selftest
     "--inject=binary-ties")
 mhgp4_expect_code(mhgp4_forest_mutant_repr 4 mhgp4_forest_selftest
     "--inject=repr-ties")
+# Audit bloquant « coquilles u16 » : supprimer les boules a coquille change
+# les composantes HGP (carre cocyclique) — le mutant qui retablit l'ancien
+# refus doit mourir sur la fixture square_cospherical_K2_plateau.
+mhgp4_expect_code(mhgp4_forest_mutant_drop_shell 4 mhgp4_forest_selftest
+    "--inject=drop-shell-plateau")
 
 # La lane q2 productrice : W_2 est la boule diametrale ouverte, le census
 # est une requete de cover a coefficient 1. Juge brut toutes-paires sur
