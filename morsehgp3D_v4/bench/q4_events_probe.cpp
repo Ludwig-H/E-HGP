@@ -8,17 +8,21 @@
 //   forme) -> arite 4 stricte (centre strictement interieur) -> census de
 //   circum-boule (cover coefficient 4, paquet base_4 en prefixe) ->
 //   Q4Event{support, owner, ball, level, depth, interior}.
-// LA SOURCE EST LA LANE q4, JAMAIS q3 : les survies sont incomparables
-// (fixture 13+1 points : ancre q3-morte/q4-vivante, tetraedre profondeur 1).
+// LA SOURCE EST LA LANE q4, JAMAIS q3 : les survies sont incomparables ET
+// le flux des evenements q3 est aveugle (fixture RENFORCEE 22+1 points de
+// l'audit apres f6b29e1 : les quatre faces du tetraedre sont q3-profondes,
+// les deux ancres maximales ab/xy sont q3-mortes/q4-vivantes, l'evenement
+// q4 a profondeur 1 — son interieur z n'est visible que du coefficient 4).
 //
 // JUGE (--judge, oracle borne petit n) : enumeration brute de TOUS les
 // 4-sous-ensembles — owner 6 aretes sur les vrais PointId, arite stricte,
 // census — et comparaison des RECORDS COMPLETS en multiensemble.
 // Codes : 0 conforme, 1 desaccord, 2 refus, 3 invariant, 4 mutant tue.
-// Mutants : --inject=seeds-from-q3-live (la source passe par le filtre q3 :
-// perd le tetraedre de la fixture), --inject=cover-coef3 (census borne a
-// 3D² : perd l'interieur lointain z de la fixture), --inject=no-canonical
-// (exact-once saute : supports dupliques).
+// Mutants : --inject=seeds-from-q3-live (ancres q3-vivantes seulement),
+// --inject=seeds-from-q3-events (faces peu profondes seulement — le flux
+// q3), --inject=cover-coef3 (census borne a 3D²), --inject=no-canonical
+// (exact-once saute) — les trois premiers perdent ou alterent l'evenement
+// grave de la fixture, le dernier duplique des supports.
 #include <algorithm>
 #include <chrono>
 #include <cstdio>
@@ -49,6 +53,7 @@ struct Args {
   bool judge = false;
   bool exact_mode = false;
   bool inj_seeds_q3 = false;
+  bool inj_seeds_q3_events = false;
   bool inj_cover3 = false;
   bool inj_no_canonical = false;
   u64 min_events = 0;
@@ -89,6 +94,7 @@ Args parse(int argc, char** argv) {
     else if (arg == "--judge") a.judge = true;
     else if (arg == "--exact") a.exact_mode = true;
     else if (arg == "--inject=seeds-from-q3-live") a.inj_seeds_q3 = true;
+    else if (arg == "--inject=seeds-from-q3-events") a.inj_seeds_q3_events = true;
     else if (arg == "--inject=cover-coef3") a.inj_cover3 = true;
     else if (arg == "--inject=no-canonical") a.inj_no_canonical = true;
     else {
@@ -99,16 +105,23 @@ Args parse(int argc, char** argv) {
   return a;
 }
 
-// La fixture de l'audit bc5b05d (13 points) + z = (200,109,300) : interieur
-// de la circum-boule du tetraedre {a,b,x,y} (|z-c|² = 14641 < 14900) MAIS
-// hors du cover coefficient 3 (|2z-(a+b)|² = 145924 > 3D² = 120000, <= 4D²
-// = 160000) — il tue le mutant cover-coef3 ; H < 0 : z n'est temoin
-// d'aucun fuseau, les survies q3-morte/q4-vivante sont inchangees.
-std::vector<P3> fixture14() {
-  return {{100, 300, 300}, {300, 300, 300}, {200, 160, 400}, {200, 160, 200},
-          {200, 355, 300}, {200, 354, 310}, {200, 353, 315}, {200, 352, 320},
-          {200, 351, 323}, {200, 350, 325}, {200, 356, 305}, {200, 355, 312},
-          {200, 354, 317}, {200, 109, 300}};
+// La fixture RENFORCEE de l'audit apres f6b29e1 : 13 points de bc5b05d +
+// les neuf w_j = (196+j, 105, 300) (ids 13..21) qui rendent les faces
+// axy/bxy q3-profondes (le flux des evenements q3 devient aveugle au
+// tetraedre) et l'ancre xy q3-morte/q4-vivante, + z = (200,109,300)
+// (id 22) : interieur de la circum-boule q4 (|z-c|² = 14641 < 14900) MAIS
+// hors du cover coefficient 3 (|2z-(a+b)|² = 145924 > 3D² = 120000,
+// <= 4D² = 160000) — il tue le mutant cover-coef3 ; H < 0 vis-a-vis de
+// ab : les survies de l'audit sont inchangees.
+std::vector<P3> fixture23() {
+  std::vector<P3> pts = {
+      {100, 300, 300}, {300, 300, 300}, {200, 160, 400}, {200, 160, 200},
+      {200, 355, 300}, {200, 354, 310}, {200, 353, 315}, {200, 352, 320},
+      {200, 351, 323}, {200, 350, 325}, {200, 356, 305}, {200, 355, 312},
+      {200, 354, 317}};
+  for (i64 j = 0; j < 9; ++j) pts.push_back(P3{196 + j, 105, 300});
+  pts.push_back(P3{200, 109, 300});  // id 22
+  return pts;
 }
 
 Q4Event make_event4(const SupportKey4& sk, const EdgeKey& ek,
@@ -148,7 +161,7 @@ int main(int argc, char** argv) {
     return 2;
   }
   const std::vector<P3> pts =
-      a.fixture ? fixture14()
+      a.fixture ? fixture23()
                 : make_family_cloud(a.family, a.n,
                                     a.coord > 0 ? a.coord
                                                 : cloud_family_default_coord(a.family, a.n),
@@ -324,9 +337,20 @@ int main(int argc, char** argv) {
         std::vector<i32> seeds;
         for (const CoverPoint& cp : cover) {
           if (cp.u == ua || cp.u == ub) continue;
-          if (is_acute_seed(pa, pb, ix.upos[(size_t)cp.u], D2, pid(ua), pid(ub),
-                            pid(cp.u)))
-            seeds.push_back(cp.u);
+          if (!is_acute_seed(pa, pb, ix.upos[(size_t)cp.u], D2, pid(ua), pid(ub),
+                             pid(cp.u)))
+            continue;
+          if (a.inj_seeds_q3_events) {
+            // MUTANT : seul le FLUX des evenements q3 seme — une face
+            // q3-profonde ne produit plus de seed. Sur la fixture, les
+            // quatre faces du tetraedre sont profondes : il est perdu.
+            const Q3Form f3 = q3_form(pa, pb, ix.upos[(size_t)cp.u]);
+            u64 sh = 0;
+            const u64 dq3 =
+                q3_ball_depth(ix, f3, ua, ub, cp.u, h3_exact, &sh);
+            if (dq3 >= h3_exact) continue;
+          }
+          seeds.push_back(cp.u);
         }
         seeds_seen += seeds.size();
         // Completions : quatrieme sommet y dans la lentille ENTIERE.
@@ -508,7 +532,7 @@ int main(int argc, char** argv) {
       "noeuds_cover=%llu visites_filtre=%llu shell_refus=%llu "
       "juge_manquants=%llu juge_en_trop=%llu t_wspd_ms=%.1f "
       "t_instruction_ms=%.1f t_juge_ms=%.1f\n",
-      a.fixture ? "fixture14" : cloud_family_name(a.family), pts.size(),
+      a.fixture ? "fixture23" : cloud_family_name(a.family), pts.size(),
       (long long)a.s, (unsigned long long)smax_eff, a.seed,
       a.inj_seeds_q3 ? "q3(MUTANT)" : "q4", (long long)coef, alive.size(),
       (unsigned long long)anchors_seen, (unsigned long long)anchors_killed_ha,
@@ -521,15 +545,15 @@ int main(int argc, char** argv) {
       (unsigned long long)extra, ms(t1 - t0), ms(t2 - t1), ms(t3 - t2));
 
   // Fixture gravee : l'evenement {0,1,2,3} avec owner (0,1), profondeur 1,
-  // interieur {13} (le point z du cover coefficient 4).
+  // interieur {22} (le point z, visible du seul cover coefficient 4).
   if (a.fixture) {
     const SupportKey4 want = support_key4(0, 1, 2, 3);
     const Q4Event* found = nullptr;
     for (const Q4Event& e : records)
       if (e.support == want) found = &e;
     const bool ok = found && found->owner.lo == 0 && found->owner.hi == 1 &&
-                    found->depth == 1 && found->interior[0] == 13;
-    if (a.inj_seeds_q3 || a.inj_cover3) {
+                    found->depth == 1 && found->interior[0] == 22;
+    if (a.inj_seeds_q3 || a.inj_seeds_q3_events || a.inj_cover3) {
       if (!ok) {
         std::printf("MUTANT TUE : le tetraedre grave est perdu ou altere\n");
         return 4;
@@ -550,7 +574,7 @@ int main(int argc, char** argv) {
     std::fprintf(stderr, "PORTE INEFFICACE : mutant non discrimine\n");
     return 3;
   }
-  if (a.inj_seeds_q3 || a.inj_cover3) {
+  if (a.inj_seeds_q3 || a.inj_seeds_q3_events || a.inj_cover3) {
     // Ces mutants ne se jugent que sur la fixture gravee.
     std::fprintf(stderr, "PORTE INEFFICACE : mutant sans fixture\n");
     return 3;

@@ -135,14 +135,18 @@ mhgp4_expect_code(mhgp4_q3_level_cmp_accord 0 mhgp4_q3_level_cmp "")
 mhgp4_expect_code(mhgp4_q3_level_cmp_mutant 4 mhgp4_q3_level_cmp
     "--inject=level-trunc-hi")
 
-# Fixture bloquante avant q4 (audit bc5b05d § 2) : l'ancre (a,b) est q3-morte
-# (n3=9>=h3) mais q4-vivante (n4=0<h4=8) et porte un tetraedre q4 de
-# profondeur zero — une source q4 branchee apres le filtre q3 le perd. Le
-# mutant q4-seeds-from-q3-live grave ce decouplage architectural.
+# Fixture bloquante avant q4, RENFORCEE (audit bc5b05d § 2 puis audit apres
+# f6b29e1) : 22 points — les quatre faces du tetraedre sont q3-profondes,
+# les deux ancres maximales ab/xy sont q3-mortes mais q4-vivantes, et le
+# tetraedre q4 garde profondeur zero. Une source q4 branchee sur les ancres
+# q3 vivantes OU sur le flux des evenements q3 le perd : les deux mutants
+# gravent le decouplage complet des lanes.
 add_executable(mhgp4_q4_source_fixture tests/q4_source_fixture_test.cpp)
 mhgp4_expect_code(mhgp4_q4_source_independante 0 mhgp4_q4_source_fixture "")
 mhgp4_expect_code(mhgp4_q4_source_mutant 4 mhgp4_q4_source_fixture
     "--inject=q4-seeds-from-q3-live")
+mhgp4_expect_code(mhgp4_q4_source_mutant_events 4 mhgp4_q4_source_fixture
+    "--inject=q4-seeds-from-q3-events")
 
 # La lane q4 productrice (MATHEMATIQUES.md § 4.5) : juge brut C(n,4) sur
 # records complets, fixture 13+1 points bout en bout (ancre q3-morte/
@@ -158,6 +162,8 @@ mhgp4_expect_code(mhgp4_q4_events_judge_clusters 0 mhgp4_q4_events_probe
     "--family=eight_clusters --n=120 --s=8 --seed=3 --judge --min-events=5")
 mhgp4_expect_code(mhgp4_q4_mutant_source_q3 4 mhgp4_q4_events_probe
     "--fixture --s=8 --inject=seeds-from-q3-live")
+mhgp4_expect_code(mhgp4_q4_mutant_source_events 4 mhgp4_q4_events_probe
+    "--fixture --s=8 --inject=seeds-from-q3-events")
 mhgp4_expect_code(mhgp4_q4_mutant_coef3 4 mhgp4_q4_events_probe
     "--fixture --s=8 --inject=cover-coef3")
 mhgp4_expect_code(mhgp4_q4_mutant_no_canonical 4 mhgp4_q4_events_probe
