@@ -405,12 +405,27 @@ candidat q4 est ignoré (il appartient à une autre lane). Largeurs :
 carrées, tout ex æquo départagé par la plus petite EdgeKey — la
 généralisation directe de `anchor_owns_q3` (cinq comparaisons).
 
-**Exact-once du seed (lemme du préfixe ternaire, `theoreme_v3`)** : tout q4
-bien centré d'arête maximale `ab` a AU MOINS UNE face `abv` strictement
-aiguë (v ∈ {x,y}), jamais nécessairement deux. Le seed canonique est le
-carrier de plus petit PointId parmi les faces incidentes aiguës du tétraèdre
-FORMÉ ; une complétion n'émet que si son seed est ce minimum — vérification
-en temps constant, sans sort/unique global (audit § 3.2).
+**Exact-once du seed — lemme du préfixe ternaire (PROUVÉ, audit du 17 août
+« lemme préfixe et niveau », reprend et clôt le statut `theoreme_v3`)** :
+tout q4 bien centré d'arête maximale `ab` a AU MOINS UNE face `abv`
+strictement aiguë (v ∈ {x,y}), jamais nécessairement deux.
+*Preuve (auditeur).* Centre à l'origine : `u = a-c`, `v = b-c`, `p = x-c`,
+`q = y-c`, tous de norme `R`. Centre strictement intérieur ⟹ il existe
+`alpha, beta, gamma, delta > 0` de somme 1 avec
+`alpha·u + beta·v + gamma·p + delta·q = 0`. Si les deux faces sont non
+aiguës, l'angle fautif est opposé à `ab` (arête maximale), donc
+`(u-p)·(v-p) <= 0` et `(u-q)·(v-q) <= 0`. Avec `s = u+v` et
+`tau = R² + u·v = |s|²/2 >= 0`, ces inégalités donnent `p·s >= tau` et
+`q·s >= tau`, tandis que `u·s = v·s = tau`. Le produit scalaire de la
+relation barycentrique par `s` donne `0 >= tau`, donc `tau = 0`, `s = 0`,
+`v = -u` : le centre serait le milieu de `ab`, sur le bord du tétraèdre —
+contradiction avec l'intériorité stricte. L'angle opposé à `ab` d'une des
+deux faces est donc strictement aigu, et `ab` y étant maximale, la face
+entière est strictement aiguë. CQFD.
+La source par `AcuteSeed` est donc COMPLÈTE sans aucun héritage q3. Le seed
+canonique est le carrier de plus petit PointId parmi les faces incidentes
+aiguës du tétraèdre FORMÉ ; une complétion n'émet que si son seed est ce
+minimum — vérification en temps constant, sans sort/unique global.
 
 **Cover census à coefficient 4** (audit § 3.4, preuve v4 par Jung) : le
 support étant l'arité 4, la circum-boule EST la miniball du tétraèdre, donc
@@ -492,12 +507,15 @@ détaillée v4 (clés, lanes, statuts transactionnels) est dans
   qu'aucun quotient complet n'est reçu.
 - (Q6–Q11 : posées et traitées dans les notes `audits/` — census q3, bord
   torique, oracle indépendant.)
-- **Q12 (forme canonique du niveau q4).** § 4.5 : `R² = |N'|²/det²` a un
-  numérateur en `2^146` — hors i128. Deux représentants possibles : (a) la
-  fraction pgcd-réduite, mais le pgcd et la division doivent alors être
-  écrits en 192 bits ; (b) le représentant NON réduit `(|N'|² en U192,
-  det² en i128)` avec égalité et ordre par produits croisés U320 — aucune
-  division, mais deux événements de même niveau portent des représentants
-  différents et l'égalité coûte un produit croisé. La v4 part sur (b) avec
-  l'égalité par produit croisé (l'invariant `ballkeys_uniques` reste la
-  vraie identité de boule) ; contester si la forêt exige (a).
+- **Q12 (forme canonique du niveau q4) — TRANCHÉE** (audit du 17 août
+  « lemme préfixe et niveau ») : l'option (b) est reçue — représentant NON
+  réduit `(|N'|² en U192, det² en i128)`, ordre et plateaux par produits
+  croisés U320 (`< 2^260`), le même comparateur recevant q3 (et q2) après
+  promotion. CONTRAT INDISPENSABLE gravé : `Q4Level::operator==` n'est
+  qu'une égalité de REPRÉSENTATION — deux boules distinctes de même rayon
+  portent des couples différents ; la seule égalité sémantique autorisée
+  pour les macro-lots est `same_exact_level(x,y) := compare_exact_level ==
+  0` ; jamais un groupement par `operator==` ni par hash du couple brut.
+  La réduction pgcd 192 bits n'est requise qu'à une éventuelle
+  sérialisation canonique des seuls survivants — jamais sur le chemin des
+  candidats.

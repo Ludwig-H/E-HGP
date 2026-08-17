@@ -169,6 +169,16 @@ mhgp4_expect_code(mhgp4_q4_mutant_coef3 4 mhgp4_q4_events_probe
 mhgp4_expect_code(mhgp4_q4_mutant_no_canonical 4 mhgp4_q4_events_probe
     "--family=uniform --n=120 --s=8 --seed=3 --inject=no-canonical")
 
+# Ordre SEMANTIQUE des niveaux q4 (audit « lemme prefixe et niveau » § 2) :
+# U320 contre l'oracle 384 bits, plancher de plateaux semantiques a
+# representations DIFFERENTES (la grande cosphere les garantit — le cas que
+# operator== raterait et que les macro-lots doivent grouper), coherence de
+# la promotion q3, fixture de largeur w[4] ; mutant tronque tue.
+add_executable(mhgp4_q4_level_cmp tests/q4_level_compare_test.cpp)
+mhgp4_expect_code(mhgp4_q4_level_cmp_accord 0 mhgp4_q4_level_cmp "")
+mhgp4_expect_code(mhgp4_q4_level_cmp_mutant 4 mhgp4_q4_level_cmp
+    "--inject=level320-trunc-hi")
+
 # Oracle rationnel independant q4 (memes standards que q3 : obigint,
 # primitives locales, fixtures u16 extremes dont le tetraedre regulier a
 # M=65535 et la grande cosphere, compteurs de limbes) ; mutants cramer-swap,
