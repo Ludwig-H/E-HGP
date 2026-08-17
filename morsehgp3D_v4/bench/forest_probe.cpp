@@ -66,6 +66,7 @@ struct Args {
   bool inj_skip_full = false;
   bool inj_shell_first = false;
   bool inj_fold_kmax10 = false;
+  bool inj_genfilter_nonstrict = false;
   u64 min_balls = 0;
   u64 min_fusions = 0;
 };
@@ -118,6 +119,8 @@ Args parse(int argc, char** argv) {
     else if (arg == "--inject=skip-full-census") a.inj_skip_full = true;
     else if (arg == "--inject=shell-cap-before-depth") a.inj_shell_first = true;
     else if (arg == "--inject=fold-hardcodes-kmax10") a.inj_fold_kmax10 = true;
+    else if (arg == "--inject=genfilter-nonstrict")
+      a.inj_genfilter_nonstrict = true;
     else {
       std::fprintf(stderr, "argument inconnu : %s\n", arg.c_str());
       a.family_ok = false;
@@ -805,7 +808,8 @@ int main(int argc, char** argv) {
   // 1. Generateurs WSPD -> RLE par BallKey (arite minimale d'abord).
   std::vector<BallCandidate> cands;
   BallStreamStats st;
-  collect_candidate_balls(ix, a.s, smax_eff, &cands, &st);
+  collect_candidate_balls(ix, a.s, smax_eff, &cands, &st,
+                          a.inj_genfilter_nonstrict);
   const auto t0b = std::chrono::steady_clock::now();
   std::stable_sort(cands.begin(), cands.end(), ball_candidate_less);
   if (!a.inj_rle_drop)  // MUTANT : dedupe saute, boules re-censusees
@@ -824,7 +828,7 @@ int main(int argc, char** argv) {
   const bool any_inject = a.inj_rle_drop || a.inj_census_nonstrict ||
                           a.inj_dense_pointid || a.inj_threshold_minus_one ||
                           a.inj_range_add_le || a.inj_skip_full ||
-                          a.inj_fold_kmax10;
+                          a.inj_fold_kmax10 || a.inj_genfilter_nonstrict;
   // LE PARAMETRE QUI DEFINIT L'OBJET EN AMONT EXISTE EN AVAL (audit « smax
   // dynamique ») : caps de census par arite, expansion, folds et totaux
   // suivent tous smax_eff — plus jamais les constantes 9/11/10 (MUTANT
@@ -1040,6 +1044,7 @@ int main(int argc, char** argv) {
   }
   std::printf(
       "famille=%s n=%zu s=%lld smax=%llu seed=%lld candidats=%llu/%llu/%llu "
+      "gen_tues=%llu/%llu "
       "boules_uniques=%llu mortes_profondeur=%llu prefiltre_feuilles=%llu "
       "prefiltre_range_add=%llu census_keys=%llu census_int=%llu "
       "census_shell=%llu evenements=%llu fusions=%llu noeuds=%llu "
@@ -1048,6 +1053,8 @@ int main(int argc, char** argv) {
       cloud_family_name(a.family), pts.size(), (long long)a.s,
       (unsigned long long)smax_eff, a.seed, (unsigned long long)st.candidates[0],
       (unsigned long long)st.candidates[1], (unsigned long long)st.candidates[2],
+      (unsigned long long)st.gen_depth_killed[1],
+      (unsigned long long)st.gen_depth_killed[2],
       (unsigned long long)st.unique_balls,
       (unsigned long long)st.balls_dead_depth,
       (unsigned long long)st.prefilter_leaf_tests,
@@ -1059,8 +1066,7 @@ int main(int argc, char** argv) {
       ms(t0b - t0), ms(t1 - t0b), ms(t1b - t1), ms(t2 - t1b), ms(t3 - t2),
       ms(t4 - t3));
 
-  if (a.inj_rle_drop || a.inj_census_nonstrict || a.inj_dense_pointid ||
-      a.inj_threshold_minus_one || a.inj_range_add_le || a.inj_skip_full) {
+  if (any_inject) {
     if (a.judge && disagreements > 0) {
       std::printf("MUTANT TUE\n");
       return 4;

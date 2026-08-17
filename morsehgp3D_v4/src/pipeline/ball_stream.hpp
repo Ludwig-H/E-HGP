@@ -64,6 +64,9 @@ struct BallStreamStats {
   u64 prefilter_leaf_tests = 0;
   u64 prefilter_range_add_mass = 0;
   u64 full_census_keys = 0;
+  // Filtre de profondeur A LA GENERATION (par lane) : candidats tues par
+  // le minorant certifie sur le cover, AVANT toute emission.
+  u64 gen_depth_killed[3] = {0, 0, 0};
 };
 
 namespace detail_bs {
@@ -136,9 +139,20 @@ inline void corner_histograms(const CloudIndex& ix, Lane lane, const AliveRect& 
 
 // Collecte les boules candidates des trois lanes (generateurs seulement —
 // AUCUN census ici : il se fait une fois par cle unique, en aval).
+// FILTRE DE PROFONDEUR A LA GENERATION (reponse a la question du minorant
+// par boule) : le cover de l'ancre est un SOUS-ENSEMBLE du nuage, donc
+// #{z ∈ cover : P_B(z) < 0} MINORE |I_B| — un minorant qui atteint h_q tue
+// le candidat exactement comme la passe count-only l'aurait fait, mais
+// AVANT l'emission (ni tri, ni descente d'arbre par boule ; le scan sort
+// des l'atteinte du seuil, quelques dizaines de nanosecondes par candidat
+// profond). La completude du cover n'est PAS requise : un sous-compte ne
+// tue jamais a tort. MUTANT genfilter-nonstrict : P <= 0 compte la
+// coquille (et les supports memes) — des boules a plateau meurent a tort,
+// le juge voit les evenements manquants.
 inline void collect_candidate_balls(const CloudIndex& ix, i64 s, u64 smax_eff,
                                     std::vector<BallCandidate>* out,
-                                    BallStreamStats* st) {
+                                    BallStreamStats* st,
+                                    bool mutant_genfilter_nonstrict = false) {
   out->clear();
   const u64 h_of[3] = {lane_h(Lane::kQ2, smax_eff), lane_h(Lane::kQ3, smax_eff),
                        lane_h(Lane::kQ4, smax_eff)};
@@ -198,6 +212,20 @@ inline void collect_candidate_balls(const CloudIndex& ix, i64 s, u64 smax_eff,
                              ix.bucket_ids[ix.bucket_start[(size_t)cp.u]]))
             continue;
           const Q3Form f3 = q3_form(pa, pb, px);
+          u64 depth = 0;
+          bool deep = false;
+          for (const CoverPoint& cz : cover) {
+            const i128 pw = q3_power(f3, ix.upos[(size_t)cz.u]);
+            if ((pw < 0 || (mutant_genfilter_nonstrict && pw <= 0)) &&
+                ++depth >= h_of[1]) {
+              deep = true;
+              break;
+            }
+          }
+          if (deep) {
+            ++st->gen_depth_killed[1];
+            continue;
+          }
           out->push_back(BallCandidate{q3_ball_key(f3),
                                        promote_q3_level(q3_exact_level(pa, pb, px)),
                                        3});
@@ -253,6 +281,20 @@ inline void collect_candidate_balls(const CloudIndex& ix, i64 s, u64 smax_eff,
             const Q4Form f4 = q4_form(pa, pb, px, py);
             if (f4.det == 0) continue;
             if (!q4_center_strictly_inside(f4, pa, pb, px, py)) continue;
+            u64 depth = 0;
+            bool deep = false;
+            for (const CoverPoint& cz : cover) {
+              const i128 pw = q4_power(f4, ix.upos[(size_t)cz.u]);
+              if ((pw < 0 || (mutant_genfilter_nonstrict && pw <= 0)) &&
+                  ++depth >= h_of[2]) {
+                deep = true;
+                break;
+              }
+            }
+            if (deep) {
+              ++st->gen_depth_killed[2];
+              continue;
+            }
             out->push_back(BallCandidate{q3_ball_key_reduce(q4_ball_form(f4)),
                                          q4_level_raw(f4), 4});
             ++st->candidates[2];

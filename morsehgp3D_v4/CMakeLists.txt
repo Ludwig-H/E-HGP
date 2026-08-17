@@ -275,6 +275,13 @@ mhgp4_expect_code(mhgp4_forest_probe_kmax_mutant 4 mhgp4_forest_probe
     "--kmax-gate --inject=fold-hardcodes-kmax10")
 mhgp4_expect_code(mhgp4_forest_probe_judge_smax6 0 mhgp4_forest_probe
     "--family=uniform --n=120 --s=8 --smax=6 --seed=3 --judge --min-balls=100 --min-fusions=100")
+# Filtre de profondeur A LA GENERATION : #{z ∈ cover : P_B(z) < 0} MINORE
+# |I_B| (le cover est un sous-ensemble — un sous-compte ne tue jamais a
+# tort) ; atteindre h_q tue le candidat AVANT l'emission. Le mutant
+# nonstrict (P <= 0 : coquilles et supports comptes) tue des boules a
+# plateau a tort — le juge voit les evenements manquants.
+mhgp4_expect_code(mhgp4_forest_probe_mutant_genfilter 4 mhgp4_forest_probe
+    "--family=uniform --n=120 --s=8 --seed=3 --judge --inject=genfilter-nonstrict")
 
 # La lane q2 productrice : W_2 est la boule diametrale ouverte, le census
 # est une requete de cover a coefficient 1. Juge brut toutes-paires sur
