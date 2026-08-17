@@ -41,6 +41,7 @@ struct Args {
   double min_dead_pct = 0.0;
   bool inject_radius_ceil = false;
   bool with_ha = false;
+  bool true_alive = false;
   int ha_cap = 512;
 };
 
@@ -78,6 +79,7 @@ Args parse(int argc, char** argv) {
     else if (const char* v = val("--min-dead-pct=")) a.min_dead_pct = std::atof(v);
     else if (arg == "--inject=radius-ceil") a.inject_radius_ceil = true;
     else if (arg == "--ha") a.with_ha = true;
+    else if (arg == "--true-alive") a.true_alive = true;
     else if (const char* v = val("--ha-cap=")) a.ha_cap = std::atoi(v);
     else {
       std::fprintf(stderr, "argument inconnu : %s\n", arg.c_str());
@@ -161,15 +163,10 @@ int main(int argc, char** argv) {
   }
   const auto t1 = std::chrono::steady_clock::now();
 
-  WitnessCountOpts cheap;
-  cheap.use_descent = false;
-  cheap.mutant_ceil_distance = a.inject_radius_ceil;
-  WitnessCountOpts full;
-  full.mutant_ceil_distance = a.inject_radius_ceil;
-
   u128 dead_mass[3] = {0, 0, 0}, alive_mass[3] = {0, 0, 0};
   u64 dead_inner[3] = {0, 0, 0}, dead_terminal[3] = {0, 0, 0};
-  u64 alive_rects = 0;
+  u64 alive_rects = 0, alive_rects_lane[3] = {0, 0, 0};
+  u64 nodes_visited = 0, corner_evals = 0;
   std::vector<DeadBlock> dead_blocks;
   std::vector<AliveRect> alive_list;
 
@@ -184,11 +181,15 @@ int main(int argc, char** argv) {
         const u64 wb = detail::node_weight(ix, r.b);
         const u128 mass = (u128)wa * wb;
         u8 mask = r.mask;
-        // 1. Mort bon marche par lane vivante (boule-cœur de l'arite).
-        for (int li = 0; li < 3 && mask; ++li) {
-          if (!(mask & (1u << li))) continue;
-          if (count_universal_witnesses(kLanes[li], ix, r.a, r.b, h_of[li], cheap) >=
-              h_of[li]) {
+        // 1. Mort bon marche : UNE descente fusionnee (Hmin q2 + boules
+        // q3/q4, sans autorite de feuille), trois compteurs.
+        {
+          const FusedCounts fc = count_universal_witnesses_234(
+              ix, r.a, r.b, h_of, mask, /*with_corners=*/false,
+              a.inject_radius_ceil);
+          nodes_visited += fc.nodes_visited;
+          for (int li = 0; li < 3; ++li) {
+            if (!(mask & (1u << li)) || fc.c[li] < h_of[li]) continue;
             mask &= (u8)~(1u << li);
             dead_mass[li] += mass;
             ++dead_inner[li];
@@ -202,18 +203,22 @@ int main(int argc, char** argv) {
         const auto vb = detail::node_view(ix, r.b, buf_b);
         if (detail::separated(va, vb, a.s, 1)) {
           AliveRect ar{r.a, r.b, 0, {0, 0, 0}};
+          const FusedCounts fc = count_universal_witnesses_234(
+              ix, r.a, r.b, h_of, mask, /*with_corners=*/true,
+              a.inject_radius_ceil);
+          nodes_visited += fc.nodes_visited;
+          corner_evals += fc.corner_evals;
           for (int li = 0; li < 3; ++li) {
             if (!(mask & (1u << li))) continue;
-            const u64 c =
-                count_universal_witnesses(kLanes[li], ix, r.a, r.b, h_of[li], full);
-            if (c >= h_of[li]) {
+            if (fc.c[li] >= h_of[li]) {
               dead_mass[li] += mass;
               ++dead_terminal[li];
               dead_blocks.push_back(DeadBlock{r.a, r.b, li});
             } else {
               alive_mass[li] += mass;
+              ++alive_rects_lane[li];
               ar.mask |= (u8)(1u << li);
-              ar.core[li] = c;
+              ar.core[li] = fc.c[li];
             }
           }
           if (ar.mask) {
@@ -340,6 +345,24 @@ int main(int argc, char** argv) {
         ++false_deaths;
     }
   }
+  // Oracle borne (--true-alive) : vrai vivant exhaustif par lane, confronte
+  // aux constantes de Poisson de l'audit (E[V_h]/n -> 2*pi*h/(3*v_q), soit
+  // ~40 / 123,8 / 139,1 paires vivantes par point en regime homogene).
+  if (a.true_alive) {
+    u128 tv[3] = {0, 0, 0};
+    const int m = ix.unique_count();
+    for (i32 ua = 0; ua < m; ++ua)
+      for (i32 ub = ua + 1; ub < m; ++ub)
+        for (int li = 0; li < 3; ++li)
+          if (true_spindle_count(kLanes[li], ix, ua, ub, h_of[li]) < h_of[li])
+            tv[li] += 1;
+    std::printf(
+        "  vrai_vivant: q2=%llu (%.1f/pt, poisson 40,0) q3=%llu (%.1f/pt, "
+        "poisson 123,8) q4=%llu (%.1f/pt, poisson 139,1)\n",
+        (unsigned long long)(u64)tv[0], (double)(u64)tv[0] / (double)m,
+        (unsigned long long)(u64)tv[1], (double)(u64)tv[1] / (double)m,
+        (unsigned long long)(u64)tv[2], (double)(u64)tv[2] / (double)m);
+  }
   const auto t3 = std::chrono::steady_clock::now();
 
   const double total_d = (double)(u64)expected;
@@ -353,7 +376,7 @@ int main(int argc, char** argv) {
   std::printf(
       "famille=%s n=%d coord=%d s=%lld smax=%llu seed=%lld "
       "morte_q2_pct=%.2f morte_q3_pct=%.2f morte_q4_pct=%.2f "
-      "morts_int=%llu/%llu/%llu morts_term=%llu/%llu/%llu rect_vivants=%llu "
+      "morts_int=%llu/%llu/%llu morts_term=%llu/%llu/%llu rect_vivants=%llu rect_vivants_lane=%llu/%llu/%llu noeuds_temoins=%llu coins=%llu "
       "masse=%s juge=%llu fausses_morts=%llu t_index_ms=%.1f t_descente_ms=%.1f "
       "t_juge_ms=%.1f\n",
       cloud_family_name(a.family), a.n, coord, (long long)a.s,
@@ -362,7 +385,9 @@ int main(int argc, char** argv) {
       (unsigned long long)dead_inner[1], (unsigned long long)dead_inner[2],
       (unsigned long long)dead_terminal[0], (unsigned long long)dead_terminal[1],
       (unsigned long long)dead_terminal[2], (unsigned long long)alive_rects,
-      mass_ok ? "EXACTE" : "ECART", (unsigned long long)judged,
+      (unsigned long long)alive_rects_lane[0], (unsigned long long)alive_rects_lane[1],
+      (unsigned long long)alive_rects_lane[2], (unsigned long long)nodes_visited,
+      (unsigned long long)corner_evals, mass_ok ? "EXACTE" : "ECART", (unsigned long long)judged,
       (unsigned long long)false_deaths, ms(t1 - t0), ms(t2 - t1), ms(t3 - t2b));
   if (a.with_ha) {
     const auto ppct = [&](int li) {
