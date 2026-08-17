@@ -24,14 +24,19 @@ struct WitnessCountOpts {
 };
 
 inline u64 count_universal_witnesses(Lane q, const CloudIndex& ix, NodeRef a,
+                                     NodeRef b, u64 h, const WitnessCountOpts& opts);
+
+namespace detail_wc {
+// Descente Hmin exacte de la lane q2, reprise du delegue historique.
+inline u64 q2_hmin_phase(const CloudIndex& ix, NodeRef a, NodeRef b, u64 h) {
+  Q2CountOpts o;
+  o.use_core_ball = false;
+  return count_universal_witnesses_q2(ix, a, b, h, o);
+}
+}  // namespace detail_wc
+
+inline u64 count_universal_witnesses(Lane q, const CloudIndex& ix, NodeRef a,
                                      NodeRef b, u64 h, const WitnessCountOpts& opts) {
-  if (q == Lane::kQ2) {
-    Q2CountOpts o;
-    o.use_core_ball = opts.use_core_ball;
-    o.use_hmin = opts.use_descent;
-    o.mutant_ceil_distance = opts.mutant_ceil_distance;
-    return count_universal_witnesses_q2(ix, a, b, h, o);
-  }
   const AxisBox boxA = box_of_node(ix, a);
   const AxisBox boxB = box_of_node(ix, b);
   const NodeRange ra = range_of(ix, a);
@@ -69,6 +74,7 @@ inline u64 count_universal_witnesses(Lane q, const CloudIndex& ix, NodeRef a,
   }
 
   if (!opts.use_descent) return ball_count;
+  if (q == Lane::kQ2) return detail_wc::q2_hmin_phase(ix, a, b, h);
   // Descente : elagage H commun, credit feuille par 64 coins. Compte repris
   // de zero (la region 64-coins contient la boule-cœur).
   u64 count = 0;

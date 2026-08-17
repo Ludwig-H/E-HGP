@@ -40,6 +40,8 @@ struct Args {
   int judge_pairs_per_block = 4;
   double min_dead_pct = 0.0;
   bool inject_radius_ceil = false;
+  bool with_ha = false;
+  int ha_cap = 512;
 };
 
 bool parse_family(const char* name, CloudFamily* out) {
@@ -75,6 +77,8 @@ Args parse(int argc, char** argv) {
     else if (const char* v = val("--judge-pairs=")) a.judge_pairs_per_block = std::atoi(v);
     else if (const char* v = val("--min-dead-pct=")) a.min_dead_pct = std::atof(v);
     else if (arg == "--inject=radius-ceil") a.inject_radius_ceil = true;
+    else if (arg == "--ha") a.with_ha = true;
+    else if (const char* v = val("--ha-cap=")) a.ha_cap = std::atoi(v);
     else {
       std::fprintf(stderr, "argument inconnu : %s\n", arg.c_str());
       a.family_ok = false;
@@ -94,6 +98,29 @@ struct DeadBlock {
   NodeRef a, b;
   int lane_ix;
 };
+
+struct AliveRect {
+  NodeRef a, b;
+  u8 mask;
+  u64 core[3];  // compte cœur (ecrete a h_q) par lane encore vivante
+};
+
+// h_a(z ∈ S) sur {s}×Box(T) : z est temoin universel de l'ancre partielle s
+// ssi W_q(s, t) vaut aux coins de Box(T) — autorite 8 coins (exacte sur
+// l'enveloppe continue en t, PISTE v3 P1.9, sens suffisant consomme).
+bool universal_over_corners(Lane q, const P3& s, const AxisBox& T, const P3& z) {
+  P3 t{};
+  for (int it = 0; it < 8; ++it) {
+    t.x = (it & 1) ? T.hi[0] : T.lo[0];
+    t.y = (it & 2) ? T.hi[1] : T.lo[1];
+    t.z = (it & 4) ? T.hi[2] : T.lo[2];
+    if (((it & 1) && T.hi[0] == T.lo[0]) || ((it & 2) && T.hi[1] == T.lo[1]) ||
+        ((it & 4) && T.hi[2] == T.lo[2]))
+      continue;
+    if (!in_spindle(q, s, t, z)) return false;
+  }
+  return true;
+}
 
 }  // namespace
 
@@ -130,6 +157,7 @@ int main(int argc, char** argv) {
   u64 dead_inner[3] = {0, 0, 0}, dead_terminal[3] = {0, 0, 0};
   u64 alive_rects = 0;
   std::vector<DeadBlock> dead_blocks;
+  std::vector<AliveRect> alive_list;
 
   if (!ix.nodes.empty()) {
     std::vector<MaskedRect> wave, next;
@@ -159,20 +187,25 @@ int main(int argc, char** argv) {
         const auto va = detail::node_view(ix, r.a, buf_a);
         const auto vb = detail::node_view(ix, r.b, buf_b);
         if (detail::separated(va, vb, a.s, 1)) {
-          bool any_alive = false;
+          AliveRect ar{r.a, r.b, 0, {0, 0, 0}};
           for (int li = 0; li < 3; ++li) {
             if (!(mask & (1u << li))) continue;
-            if (count_universal_witnesses(kLanes[li], ix, r.a, r.b, h_of[li], full) >=
-                h_of[li]) {
+            const u64 c =
+                count_universal_witnesses(kLanes[li], ix, r.a, r.b, h_of[li], full);
+            if (c >= h_of[li]) {
               dead_mass[li] += mass;
               ++dead_terminal[li];
               dead_blocks.push_back(DeadBlock{r.a, r.b, li});
             } else {
               alive_mass[li] += mass;
-              any_alive = true;
+              ar.mask |= (u8)(1u << li);
+              ar.core[li] = c;
             }
           }
-          if (any_alive) ++alive_rects;
+          if (ar.mask) {
+            ++alive_rects;
+            alive_list.push_back(ar);
+          }
           continue;
         }
         // 3. Scission du facteur de plus grand diametre, masque herite.
@@ -190,6 +223,85 @@ int main(int argc, char** argv) {
     }
   }
   const auto t2 = std::chrono::steady_clock::now();
+
+  // Phase h_a/h_b (--ha) : sur chaque rectangle vivant, comptes par
+  // extremite via l'autorite 8 coins, decision par HISTOGRAMME de h_b ecrete
+  // a need = h_q - h_coeur — jamais une paire materialisee (theoreme de
+  // disjonction : cœur hors A∪B, h_a dans A, h_b dans B). Un rectangle plus
+  // large que --ha-cap est passe (toutes ancres comptees vivantes,
+  // conservateur, compte publie).
+  u128 anchors_alive[3] = {0, 0, 0};
+  u128 anchors_total[3] = {0, 0, 0};
+  u64 ha_evals = 0, ha_skipped = 0, judge_anchors = 0, false_kills = 0;
+  if (a.with_ha) {
+    for (const AliveRect& ar : alive_list) {
+      const NodeRange ra = range_of(ix, ar.a);
+      const NodeRange rb = range_of(ix, ar.b);
+      const AxisBox boxA = box_of_node(ix, ar.a);
+      const AxisBox boxB = box_of_node(ix, ar.b);
+      const int na = ra.last - ra.first + 1;
+      const int nb = rb.last - rb.first + 1;
+      const u128 rect_mass =
+          (u128)ix.range_weight(ra.first, ra.last) * ix.range_weight(rb.first, rb.last);
+      for (int li = 0; li < 3; ++li) {
+        if (!(ar.mask & (1u << li))) continue;
+        anchors_total[li] += rect_mass;
+        if (na > a.ha_cap || nb > a.ha_cap) {
+          ++ha_skipped;
+          anchors_alive[li] += rect_mass;
+          continue;
+        }
+        const Lane q = kLanes[li];
+        const u64 need = h_of[li] - ar.core[li];  // >= 1 sur un rect vivant
+        std::vector<u64> ha((size_t)na, 0), hb((size_t)nb, 0);
+        for (int ia = 0; ia < na; ++ia)
+          for (int iz = 0; iz < na; ++iz) {
+            if (iz == ia) continue;
+            ++ha_evals;
+            if (universal_over_corners(q, ix.upos[(size_t)(ra.first + ia)], boxB,
+                                       ix.upos[(size_t)(ra.first + iz)]))
+              ha[(size_t)ia] += ix.range_weight(ra.first + iz, ra.first + iz);
+          }
+        for (int ib = 0; ib < nb; ++ib)
+          for (int iz = 0; iz < nb; ++iz) {
+            if (iz == ib) continue;
+            ++ha_evals;
+            // W_q est symetrique en (a,b) : H et Xi sont invariants par
+            // echange des extremites.
+            if (universal_over_corners(q, ix.upos[(size_t)(rb.first + ib)], boxA,
+                                       ix.upos[(size_t)(rb.first + iz)]))
+              hb[(size_t)ib] += ix.range_weight(rb.first + iz, rb.first + iz);
+          }
+        // Histogramme de h_b ecrete, pondere ; cum[t] = poids des b : h_b < t.
+        std::vector<u64> hist(need + 1, 0);
+        for (int ib = 0; ib < nb; ++ib)
+          hist[(size_t)std::min<u64>(hb[(size_t)ib], need)] +=
+              ix.range_weight(rb.first + ib, rb.first + ib);
+        std::vector<u64> cum(need + 2, 0);
+        for (u64 t = 1; t <= need + 1; ++t) cum[t] = cum[t - 1] + hist[t - 1];
+        for (int ia = 0; ia < na; ++ia) {
+          const u64 wa2 = ix.range_weight(ra.first + ia, ra.first + ia);
+          const u64 hav = std::min<u64>(ha[(size_t)ia], need);
+          anchors_alive[li] += (u128)wa2 * cum[need - hav];
+        }
+        // Juge fail-open : l'ancre (argmax h_a, argmax h_b), si tuee par la
+        // somme, doit avoir un vrai compte >= h_q.
+        int best_a = 0, best_b = 0;
+        for (int ia = 1; ia < na; ++ia)
+          if (ha[(size_t)ia] > ha[(size_t)best_a]) best_a = ia;
+        for (int ib = 1; ib < nb; ++ib)
+          if (hb[(size_t)ib] > hb[(size_t)best_b]) best_b = ib;
+        if (ar.core[li] + ha[(size_t)best_a] + hb[(size_t)best_b] >= h_of[li] &&
+            judge_anchors < 5000) {
+          ++judge_anchors;
+          if (true_spindle_count(q, ix, ra.first + best_a, rb.first + best_b,
+                                 h_of[li]) < h_of[li])
+            ++false_kills;
+        }
+      }
+    }
+  }
+  const auto t2b = std::chrono::steady_clock::now();
 
   const u128 expected = expected_pair_mass(ix);
   bool mass_ok = true;
@@ -237,7 +349,25 @@ int main(int argc, char** argv) {
       (unsigned long long)dead_terminal[0], (unsigned long long)dead_terminal[1],
       (unsigned long long)dead_terminal[2], (unsigned long long)alive_rects,
       mass_ok ? "EXACTE" : "ECART", (unsigned long long)judged,
-      (unsigned long long)false_deaths, ms(t1 - t0), ms(t2 - t1), ms(t3 - t2));
+      (unsigned long long)false_deaths, ms(t1 - t0), ms(t2 - t1), ms(t3 - t2b));
+  if (a.with_ha) {
+    const auto ppct = [&](int li) {
+      return anchors_total[li] > 0
+                 ? 100.0 * (double)(u64)anchors_alive[li] / (double)(u64)anchors_total[li]
+                 : 0.0;
+    };
+    std::printf(
+        "  ha: ancres_vivantes_q2=%.0f (%.1f%%) q3=%.0f (%.1f%%) q4=%.0f (%.1f%%) "
+        "par_point_q4=%.1f evals=%llu rect_passes=%llu juge_ancres=%llu "
+        "fausses_tueries=%llu t_ha_ms=%.1f\n",
+        (double)(u64)anchors_alive[0], ppct(0), (double)(u64)anchors_alive[1], ppct(1),
+        (double)(u64)anchors_alive[2], ppct(2),
+        (double)(u64)anchors_alive[2] / (double)pts.size(),
+        (unsigned long long)ha_evals, (unsigned long long)ha_skipped,
+        (unsigned long long)judge_anchors, (unsigned long long)false_kills,
+        ms(t2b - t2));
+    if (false_kills > 0) return 1;
+  }
 
   if (false_deaths > 0) return a.inject_radius_ceil ? 4 : 1;
   if (a.inject_radius_ceil) {

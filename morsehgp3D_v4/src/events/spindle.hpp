@@ -60,8 +60,27 @@ static_assert(((i128)2 * kSpindleD * kSpindleD - (i128)kA4 * kA4) *
                   (i128)3 * kSpindleD * kSpindleD * kSpindleD * kSpindleD,
               "kA4 doit sous-approcher 2*sin(15 degres)*2^30");
 
-// Boule-cœur d'arite q : rayon quadruple 4R = A_q·(d2u - r2u)/D - r2u,
-// division PLANCHER, clamp a zero. Redonne core_ball_q2 pour q = 2.
+// Sur-approximations entieres de (4κ_q²+1), echelle E = 2^20 (terme
+// SOUSTRAIT de R_coup : majorer). q2 : exactement 2E ; q3 : 4/3 ;
+// q4 : 3-√3 ≈ 1,26795.
+inline constexpr i64 kCoupE = 1ll << 20;
+inline constexpr i64 kC2 = 2 * kCoupE;
+inline constexpr i64 kC3 = (4 * kCoupE + 2) / 3;  // ceil(4E/3)
+inline constexpr i64 kC4 = 1329545;               // > (3-√3)·2^20 = 1329541,06...
+static_assert(3 * kC3 >= 4 * kCoupE, "kC3 doit majorer 4/3");
+// kC4 > (3-√3)E ⟺ (3E-kC4)² < 3E² (les deux membres positifs).
+static_assert((i128)(3 * kCoupE - kC4) * (3 * kCoupE - kC4) <
+                  (i128)3 * kCoupE * kCoupE,
+              "kC4 doit majorer (3-sqrt(3))*2^20");
+
+// Boule-cœur d'arite q, rayon quadruple = max des deux bornes v3 re-derivees
+// (derive_v4 : identite du parallelogramme |p|²+|w|²=(|u'|²+|v'|²)/2 puis
+// Cauchy-Schwarz sur 2κ_q|w|+|p|) :
+//   4R_dec  = A_q·(d2u - r2u)/D - r2u                (deplacement + perte)
+//   4R_coup = A_q·d2u/D - ceil_sqrt(2·C_q·S2/E)      (borne couplee, S2 =
+//             somme des carres des diagonales — plus forte en cas equilibre)
+// Divisions PLANCHER, distance minoree, rayons majores, clamp a zero.
+// Redonne core_ball_q2 pour q = 2 sur la branche R_dec.
 inline CoreBall core_ball(Lane q, const AxisBox& A, const AxisBox& B,
                           bool mutant_ceil_distance = false) {
   CoreBall cb{};
@@ -78,11 +97,20 @@ inline CoreBall core_ball(Lane q, const AxisBox& A, const AxisBox& B,
     w2b += wb * wb;
   }
   const i64 d2u = mutant_ceil_distance ? ceil_sqrt(d2q) : floor_sqrt(d2q);
-  const i64 r2u = ceil_sqrt(w2a) + ceil_sqrt(w2b);
+  const i64 ra2u = ceil_sqrt(w2a);
+  const i64 rb2u = ceil_sqrt(w2b);
+  const i64 r2u = ra2u + rb2u;
   const i64 aq = (q == Lane::kQ2) ? kA2 : (q == Lane::kQ3) ? kA3 : kA4;
+  const i64 cq = (q == Lane::kQ2) ? kC2 : (q == Lane::kQ3) ? kC3 : kC4;
+  i64 r4 = 0;
   const i64 gap = d2u - r2u;
-  if (gap <= 0) return cb;
-  const i64 r4 = (i64)(((i128)aq * gap) / kSpindleD) - r2u;
+  if (gap > 0)
+    r4 = (i64)(((i128)aq * gap) / kSpindleD) - r2u;
+  // Borne couplee : S2 = (2r_A)² + (2r_B)² majore ; 2·C_q·S2/E < 2^38.
+  const i64 s2 = ra2u * ra2u + rb2u * rb2u;
+  const i64 sub2 = (2 * cq * s2 + kCoupE - 1) / kCoupE;  // ceil
+  const i64 coup = (i64)(((i128)aq * d2u) / kSpindleD) - ceil_sqrt(sub2);
+  r4 = std::max(r4, coup);
   cb.radius4 = std::max<i64>(0, r4);
   return cb;
 }

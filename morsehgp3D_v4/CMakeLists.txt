@@ -84,6 +84,10 @@ mhgp4_expect_code(mhgp4_q234_judge_uniform 0 mhgp4_q234_prune_probe
     "--family=uniform --n=1200 --s=8 --seed=3 --min-dead-pct=25")
 mhgp4_expect_code(mhgp4_q234_judge_two_lines 0 mhgp4_q234_prune_probe
     "--family=two_lines --n=1200 --s=8")
+# Phase h_a/h_b : histogramme + juge des ancres tuees par la somme des trois
+# comptes (theoreme de disjonction) — la famille adversariale des temoins.
+mhgp4_expect_code(mhgp4_q234_ha_clusters 0 mhgp4_q234_prune_probe
+    "--family=eight_clusters --n=1200 --s=8 --seed=3 --ha")
 
 # Refus avant calcul : famille inconnue, n insuffisant.
 mhgp4_expect_code(mhgp4_wspd_refus_famille 2 mhgp4_wspd_scaling_probe
