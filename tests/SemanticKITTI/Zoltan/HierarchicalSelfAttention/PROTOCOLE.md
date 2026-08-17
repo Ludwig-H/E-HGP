@@ -1,264 +1,420 @@
 # Protocole expérimental
 
-## 1. Tâche principale
+## 1. Hypothèse de travail
 
-Segmentation sémantique SemanticKITTI à partir d'un **scan unique**, LiDAR seul.
+La hiérarchie HGP est supposée disponible, exacte au niveau déclaré et assez peu coûteuse pour ne pas être le verrou du projet. Le protocole commence **après** sa construction.
 
-- entrée : `(x, y, z, remission)` et attributs déterministes dérivés ;
-- train : `00–07, 09, 10` ;
-- validation : `08` ;
-- test : `11–21`, seulement après gel complet ;
-- 19 classes après fusion moving/non-moving ;
-- métrique principale : mIoU point-wise officielle ;
-- résultat principal : sans TTA, ensemble, caméra ni contexte temporel.
+L'objet étudié est donc :
 
-La construction de la hiérarchie n'utilise jamais les labels.
+```text
+hiérarchie de surfaces polyédriques HGP
+        + niveaux de densité
+        + incidences et trajectoires
+        + reprojection vers les retours LiDAR
+```
 
-## 2. Régimes à ne pas mélanger
+Le but n'est pas seulement d'obtenir un bon score SemanticKITTI. Il faut déterminer si cette structure fournit un meilleur **alphabet géométrique** que les points, voxels et superpoints, puis si cet alphabet peut soutenir un pré-entraînement transférable.
 
-| Track | Données d'entraînement | Inférence |
-|---|---|---|
-| A — strict | SemanticKITTI uniquement | un scan, LiDAR seul |
-| B — pré-entraînement externe | autres LiDAR non annotés autorisés | un scan, LiDAR seul |
-| C — multimodal ou temporel | caméra, poses ou séquences | régime séparé |
-| D — TTA / ensemble | quelconque | régime séparé |
+## 2. Questions causales
 
-Un chiffre n'est comparable que si son track, ses augmentations de test et ses données sont explicités.
+Le programme répond dans cet ordre à six questions :
 
-## 3. Préparation des données
+1. **surface** : les polyèdres conservent-ils la géométrie observée et les frontières sémantiques ?
+2. **tokenizer** : quelle représentation fixe de la surface offre le meilleur taux–distorsion ?
+3. **robustesse** : le token polyédrique est-il plus stable sous rééchantillonnage et changement de capteur ?
+4. **hiérarchie** : les trajectoires et fusions HGP ajoutent-elles de l'information au polyèdre isolé ?
+5. **auto-supervision** : le pré-entraînement cross-range améliore-t-il probing, faible supervision et robustesse ?
+6. **fondation** : le même encodeur transfère-t-il entre datasets, capteurs et tâches sans modifier le tokenizer ?
 
-Pour chaque scan :
+Chaque porte a une conclusion `continue`, `revise` ou `stop`. Une étape ultérieure ne sert pas à maquiller l'échec d'une étape antérieure avec davantage de paramètres, cette vieille coutume de la discipline.
 
-1. construire la structure polyédrique sans labels ;
-2. sérialiser feuilles, nœuds, arêtes et attributs ;
-3. sérialiser les poids facette→point ;
-4. enregistrer un hash du scan, des paramètres et du schéma ;
-5. produire les mêmes structures de contrôle : HDBSCAN/RSL, octree, arbre aléatoire apparié.
+## 3. Régimes d'évaluation
 
-Les fichiers sont immuables pendant une campagne. Toute modification du prétraitement crée une nouvelle version de dataset.
+| Track | Pré-entraînement | Inférence | Claim permis |
+|---|---|---|---|
+| A — SemanticKITTI strict | SemanticKITTI seulement | mono-scan, LiDAR seul | backbone spécialisé |
+| B — LiDAR multi-datasets | LiDAR non annotés multiples | mono-scan, LiDAR seul | fondation LiDAR de domaine |
+| C — temporel | séquences et poses | mono-scan au test | invariance temporelle apprise |
+| D — multimodal | images / vision-language au train | LiDAR seul ou multimodal déclaré | transfert sémantique / open vocabulary |
+| E — TTA / ensemble | quelconque | augmenté | contexte leaderboard séparé |
 
-## 4. Portes de validation
+Les résultats principaux n'agrègent jamais des tracks différents dans une même ligne.
 
-### G0 — intégrité du contrat
+## 4. Données et splits
 
-Tests sur tous les scans :
+### SemanticKITTI
 
-- aucune incidence invalide ;
-- forêt acyclique ;
+- train : séquences `00–07, 09, 10` ;
+- validation finale : séquence `08` ;
+- test : `11–21` après gel ;
+- développement : sous-splits internes des séquences d'entraînement ;
+- 19 classes, sortie point-wise officielle ;
+- résultat strict sans TTA, ensemble, caméra ni accumulation temporelle.
+
+### Transfert minimal
+
+- nuScenes-lidarseg ou autre capteur outdoor ;
+- un troisième jeu si le claim devient « modèle de fondation LiDAR » ;
+- mêmes dimensions, mêmes bases de surface et mêmes règles de normalisation ;
+- recalibration statistique non supervisée autorisée, adaptation du tokenizer par dataset interdite dans le résultat principal.
+
+### Tâches minimales pour un claim fondation
+
+- segmentation sémantique ;
+- segmentation d'instance ou panoptique ;
+- détection ou localisation ;
+- recherche de régions / retrieval cross-range ;
+- une tâche géométrique : complétion, reconstruction ou estimation de frontières.
+
+## 5. Porte G0 — intégrité géométrique
+
+### Vérifications
+
+Pour chaque polyèdre :
+
+- facettes valides, aire positive et attributs finis ;
+- incidences et bords cohérents ;
+- surface identique après permutation des identifiants ;
+- masse de mesure cohérente avec l'aire normalisée ;
+- orientation des normales déclarée ou remplacée par un projecteur non orienté ;
+- poids de reprojection positifs sommant à un ;
 - ordre des points restauré exactement ;
-- conservation de masse à `1e-5` relatif ;
-- invariance à la permutation ;
-- aucune statistique non finie ;
-- points non couverts comptés et rapportés.
+- deltas de facettes cohérents le long des branches lorsqu'ils sont fournis.
 
-**Arrêt** si une correction heuristique dépend de l'ordre d'itération ou des labels.
+### Tests synthétiques
 
-### G1 — oracle de représentation
+- plan ouvert ;
+- sphère triangulée ;
+- tore ou surface concave ;
+- deux couches parallèles ;
+- surface non-manifold contrôlée ;
+- même support avec plusieurs remeshings.
 
-Attribuer à chaque facette sa distribution GT, reprojeter, puis calculer le mIoU. Répéter pour plusieurs granularités.
+**Arrêt** si le descripteur dépend de l'ordre des facettes, de l'orientation arbitraire des normales ou d'une triangulation particulière sans que cette dépendance soit explicitement voulue.
+
+## 6. Porte G1 — validité des représentations de surface
+
+### 6.1 Diagnostic radial
+
+Mesurer pour chaque ancre :
+
+- couverture `C(c)` ;
+- unicité `U(c)` ;
+- histogramme de multiplicité `N_c(u)` ;
+- masse d'aire en régime `N=0`, `N=1`, `N≥2` ;
+- sensibilité de ces quantités à l'ancre et au thinning.
+
+Ce diagnostic décide seulement si la carte radiale simple est admissible. Il ne décide pas de la validité du paradigme polyédrique.
+
+### 6.2 Compétition du tokenizer
+
+À dimension latente, paramètres et données comparables :
+
+| ID | Représentation |
+|---|---|
+| P0 | moments, covariance, shape distributions |
+| P1 | carte radiale monocouche |
+| P2 | carte radiale `K` couches |
+| P3 | moments sphéro-radiaux / Zernike-like |
+| P4 | grille douce de mesure sphéro-radiale |
+| P5 | P4 multi-ancre |
+| P6 | quadrature d'aire + Set Encoder |
+| P7 | atlas multi-cartes |
+| P8 | SurfaceGraph / PolyhedronNet-like |
+
+### 6.3 Métriques de fidélité
+
+- Chamfer symétrique pondérée par l'aire ;
+- Hausdorff et quantiles `95/99 %` ;
+- cohérence des normales ;
+- rappel et précision des bords ;
+- erreur de masse par cellule ;
+- erreur de reconstruction des surfaces multicouches ;
+- invariance au remeshing ;
+- sensibilité à l'ancre ;
+- octets, FLOPs, VRAM et latence.
+
+Tracer :
+
+```math
+\text{distorsion}
+\quad\text{en fonction de}\quad
+\text{octets, tokens et FLOPs}.
+```
+
+**Succès.** La représentation retenue doit appartenir à la frontière de Pareto et ne pas échouer systématiquement sur les classes fines ou les surfaces ouvertes.
+
+**Révision.** Si la grille compacte perd surtout la connectivité, ajouter le résidu `SurfaceGraph`.
+
+**Repli.** Si elle reste dominée, le backbone devient mesh-native. Le paradigme polyédrique survit ; la revendication d'un code sphéro-radial supérieur tombe.
+
+## 7. Porte G2 — plafond sémantique des polyèdres
+
+### Oracles
+
+1. logits parfaits par facette ;
+2. logits parfaits par polyèdre à plusieurs niveaux ;
+3. meilleur choix par point parmi les ancêtres disponibles ;
+4. oracle de branche persistante ;
+5. oracle avec et sans bords de facettes.
 
 Rapporter :
 
-- mIoU oracle global ;
-- IoU oracle des 19 classes ;
+- mIoU global et par classe ;
 - F-score de frontière ;
 - résultats par portée ;
-- fraction de facettes mixtes ;
-- ambiguïté de reprojection.
+- fraction d'éléments mixtes ;
+- ambiguïté de reprojection ;
+- courbe oracle contre nombre de polyèdres et mémoire.
 
-**Règle d'arrêt.** L'oracle retenu doit dépasser le meilleur score point-wise visé d'au moins `10` points de mIoU et ne perdre aucune classe fine de manière catastrophique. Sinon, le problème est la tokenisation, pas le Transformer.
+**Succès.** L'oracle doit garder une marge substantielle au-dessus de la cible apprise et ne pas détruire les petites classes. Une marge de `8–10` points de mIoU est un objectif de sécurité raisonnable, pas une loi cosmique.
 
-### G2 — stabilité sous densité
+**Arrêt ou révision de la sortie** si les polyèdres mélangent irrémédiablement des classes que le décodeur par facette ne peut séparer.
 
-Créer des vues à taux de conservation approximatifs `1, 1/2, 1/4, 1/8`, avec :
+## 8. Porte G3 — stabilité à la portée et au capteur
 
-- thinning uniforme ;
+### 8.1 Vues contrôlées
+
+Construire des acquisitions de même scène sous :
+
+- thinning uniforme `1, 1/2, 1/4, 1/8` ;
 - suppression d'anneaux ;
 - thinning dépendant de la portée ;
+- changement de résolution azimutale ;
 - occultation par secteurs ;
-- corruption SemanticKITTI-C pertinente.
+- bruit de mesure et rémission ;
+- remeshing contrôlé de la même surface.
 
-Mesurer :
+### 8.2 Vues réelles
 
-- rappel et précision des nœuds appariés ;
-- Weighted Jaccard moyen ;
+À partir des séquences :
+
+- compensation de l'ego-motion ;
+- retrait ou traitement séparé des objets mobiles ;
+- appariements de surfaces observées à plusieurs portées ;
+- comparaison cross-capteur lorsque disponible.
+
+### 8.3 Métriques
+
+Pour des paires positives `(i,i')` et négatives `(i,j)` :
+
+```math
+I_{\mathrm{range}}
+=
+1-
+\frac{\mathbb E\,d(z_i,z_{i'})}
+{\mathbb E\,d(z_i,z_j)}.
+```
+
+Ajouter :
+
+- Recall@1/5 en retrieval cross-range ;
+- précision de matching des polyèdres ;
+- stabilité des mesures et des embeddings ;
 - conservation des relations ancêtre–descendant ;
 - corrélation des persistances ;
-- variation de profondeur et de branchement ;
-- distance entre embeddings analytiques ;
-- dispersion inter-scan des courbes niveau–masse.
+- performance par portée et taux de thinning ;
+- probe sémantique ;
+- probes portée, anneau, capteur et thinning.
 
-Comparer à HDBSCAN/RSL, octree et partitions SPT.
+### Baselines
 
-**Règle d'arrêt.** La structure proposée doit dominer au moins un contrôle pertinent avec intervalle bootstrap excluant zéro, et ne pas s'effondrer au thinning `1/4`. Une invariance visible uniquement à `1/2` sur les routes proches ne justifie pas le projet.
+- retours bruts sous encodeur point moderne ;
+- voxels / sparse convolution ;
+- superpoints SPT ;
+- quadrature d'aire sans hiérarchie ;
+- polyèdres avec descripteurs analytiques ;
+- polyèdres avec tokenizer retenu.
 
-### G3 — apprenabilité polyèdre-only
+**Succès central.** À budget comparable, le token polyédrique doit améliorer soit le retrieval cross-range, soit la pente de performance avec la distance, soit le compromis sémantique–invariance, sur plusieurs classes et pas uniquement les grandes surfaces planes.
 
-Entraîner successivement :
+L'invariance à l'homothétie mathématique et la robustesse à la portée sont rapportées séparément. Les confondre produirait une jolie équation et une mauvaise conclusion.
 
-1. MLP sur les facettes ;
-2. Transformer du graphe dual ;
-3. `PolyTreeFormer-Nano` ;
-4. modèle sur arbre complet.
+## 9. Porte G4 — apprenabilité du polyèdre isolé
 
-**Règle d'arrêt.** Le modèle hiérarchique doit :
+Entraîner :
 
-- améliorer le graphe dual sur trois graines ;
-- rester à moins de `5` points d'une baseline point-wise forte reproduite dans le même régime lors du pilote ;
-- ne pas dégrader systématiquement les classes fines.
+1. `Analytic-MLP` ;
+2. `Radial-Flat` ;
+3. `Measure-Flat` ;
+4. `SurfaceGraph` ;
+5. `Measure+Topo` ;
+6. baseline point/voxel forte.
 
-Un écart supérieur à `8` points après réglages raisonnables rend la route SOTA polyèdre-only très improbable.
+Régimes :
 
-### G4 — effet propre de la hiérarchie
+- supervised full ;
+- linear probe sur autoencodeur de surface ;
+- `0.1 %`, `1 %`, `10 %` des labels ;
+- cross-dataset frozen probe.
 
-À architecture et budget appariés :
+**Succès.** `Measure+Topo` doit battre les descripteurs analytiques et être compétitif avec les représentations de points à budget de tokens comparable. Un écart complet peut rester acceptable si l'avantage cross-range et low-shot est net ; un modèle inférieur partout n'est pas une révolution incomprise, seulement un modèle inférieur.
+
+## 10. Porte G5 — effet propre de la hiérarchie HGP
+
+À tokenizer, paramètres et budget appariés :
 
 | Bras | Structure |
 |---|---|
-| H0 | aucune hiérarchie, graphe dual seul |
-| H1 | arbre aléatoire conservant profondeur et degrés |
-| H2 | octree / voxel tree |
-| H3 | HDBSCAN/RSL complet |
-| H4 | hiérarchie proposée, niveaux permutés |
-| H5 | hiérarchie proposée complète |
+| H0 | polyèdres indépendants |
+| H1 | graphe latéral seulement |
+| H2 | arbre aléatoire apparié en profondeur, degrés et masses |
+| H3 | octree / voxel tree |
+| H4 | HDBSCAN/RSL |
+| H5 | niveaux HGP permutés |
+| H6 | topologie HGP sans valeurs de niveau |
+| H7 | trajectoires HGP complètes |
+| H8 | H7 + événements + graphe latéral |
 
-**Succès.** `H5` doit battre `H1–H4` en moyenne sur trois graines et améliorer la robustesse sous thinning. Si `H3 = H5`, la hiérarchie générique suffit ; la revendication doit être réduite en conséquence.
+Ablations spécifiques :
 
-### G5 — utilité des canaux
+- états complets contre deltas de facettes ;
+- branche contre quatre coupes ;
+- rangs contre `Δlogλ` ;
+- fusion moyenne contre Set Attention ;
+- HSA, Sequoia-fixed et `MeanTree` à coût apparié.
 
-Ablations cumulatives :
+**Succès.** La hiérarchie réelle doit améliorer au moins deux axes parmi :
 
-1. forme normalisée ;
-2. `+` grandeurs physiques ;
-3. `+` filtration relative ;
-4. `+` acquisition ;
-5. support remplacé par moments/CDF ;
-6. niveaux relatifs remplacés par niveaux bruts ;
-7. canaux capteur permutés entre scans.
+- mIoU ;
+- performance lointaine ;
+- faible supervision ;
+- robustesse au thinning ;
+- instance / panoptique ;
+- qualité–coût.
 
-**Succès central.** Le canal de filtration relative doit améliorer soit le mIoU, soit la robustesse à densité à budget identique. Si seuls la portée et la rémission expliquent le gain, l'hypothèse scientifique n'est pas confirmée.
+Si `H6≈H7`, les valeurs de densité n'apportent rien. Si `H4≈H7`, une hiérarchie générique suffit. Si `H1≈H8`, le graphe spatial explique tout. Ces résultats restent publiables comme réfutation, mais pas sous le claim prévu.
 
-### G6 — pré-entraînement
+## 11. Porte G6 — pré-entraînement
 
-Comparer :
+### Bras
 
-| Bras | Objectif |
+| ID | Objectif |
 |---|---|
-| S0 | entraînement supervisé from scratch |
-| S1 | masked reconstruction de descripteurs |
-| S2 | feature regression teacher–student |
-| S3 | Range-Hierarchy JEPA |
-| S4 | S3 + événements |
-| S5 | softmaps observables |
+| S0 | from scratch |
+| S1 | reconstruction de surface |
+| S2 | Surface-JEPA même polyèdre |
+| S3 | prédiction parent / innovations |
+| S4 | Cross-Range PolyJEPA simulé |
+| S5 | S4 + séquences réelles |
+| S6 | S5 + distillation 2D |
+| S7 | S6 + prototypes / langage |
 
-Évaluer :
+### Évaluation
 
-- linear probing ;
-- fine-tuning à `0.1 %`, `1 %`, `10 %`, `100 %` des labels ;
-- trois graines en supervision complète ;
-- robustesse aux vues amincies.
+- frozen linear probing ;
+- fine-tuning `0.1 %`, `1 %`, `10 %`, `100 %` ;
+- retrieval cross-range ;
+- robustesse corruption ;
+- calibration ;
+- transfert de dataset ;
+- trois graines pour toute conclusion principale.
 
-**Règle de continuation.** Le pré-entraînement retenu doit produire au moins `+0.5` mIoU en probing ou fine-tuning préliminaire, puis un gain moyen positif avec intervalle de confiance raisonnable sur trois graines. Pour une revendication SOTA, viser `+1` point robuste au-dessus de la meilleure recette reproduite.
+### Matching audit
 
-### G7 — transfert
+Rapporter par classe, portée, aire, persistance et multiplicité :
 
-Rejouer au minimum sur nuScenes ou un autre capteur outdoor.
+- taux d'appariement ;
+- précision estimée ;
+- score moyen ;
+- taux de rejet ;
+- contribution à la loss.
 
-- même architecture ;
-- mêmes canaux ;
-- niveaux recalibrés sans labels ;
-- protocole de thinning comparable.
+**Succès.** Le pré-entraînement doit améliorer clairement le probing ou le faible régime de labels sur au moins deux datasets, tout en augmentant la stabilité cross-range. Un gain uniquement en fine-tuning complet peut relever d'une meilleure initialisation, pas d'une représentation fondation.
 
-Sans transfert, la conclusion doit rester limitée à SemanticKITTI.
+## 12. Porte G7 — statut fondation
 
-## 5. Métriques
+Le terme `foundation model` n'est ouvert que si le même encodeur :
 
-### Segmentation
+- est pré-entraîné sur plusieurs datasets et capteurs ;
+- garde le même tokenizer ;
+- transfère vers plusieurs tâches ;
+- améliore frozen probing et faible supervision ;
+- bénéficie de l'augmentation du volume de pré-entraînement ;
+- reste compétitif face aux pré-entraînements points/voxels modernes.
 
-- mIoU et IoU des 19 classes ;
-- mAcc et accuracy globale en secondaire ;
-- matrice de confusion ;
-- thing/stuff ;
-- F-score de frontière sur graphe 16-NN diagnostique ;
-- NLL, Brier et ECE.
+Tracer des courbes de scaling :
 
-### Strates obligatoires
+```math
+\operatorname{Perf}(N_{\rm scans}),
+\qquad
+\operatorname{Perf}(N_{\rm capteurs}),
+\qquad
+\operatorname{Perf}(N_{\rm tâches}).
+```
 
-- portée : `0–10`, `10–20`, `20–30`, `30–40`, `40–50`, `>50 m` ;
-- classes fines : `pole`, `traffic-sign`, `bicycle`, `person`, `bicyclist`, `motorcyclist`, `fence` ;
-- linéarité, planarité et diffusion locale ;
-- masse et degré des nœuds ;
-- profondeur de la hiérarchie ;
-- taux de thinning ;
-- pureté GT des nœuds, uniquement pour diagnostic.
+Un modèle uniquement fine-tuné sur SemanticKITTI est nommé `HGP-PolyFM backbone`, pas modèle de fondation. Les mots sont gratuits, les preuves beaucoup moins.
 
-### Stabilité et raccourcis
+## 13. Plan factoriel de l'apport
 
-- capacité d'un probe linéaire à prédire portée, anneau et taux de thinning depuis les embeddings ;
-- invariance des embeddings de branches appariées ;
-- taux de correspondances rejetées ;
-- sensibilité à la permutation des niveaux ;
-- performance avec canal `sensor` masqué.
+La table principale doit isoler :
 
-### Système
+| Facteur | Contrôle | Proposition |
+|---|---|---|
+| primitive | points / superpoints | surfaces polyédriques |
+| code local | moments / mesh graph | mesure surfacique compacte |
+| structure | modèle plat | espace d'échelle HGP |
+| objectif | supervisé / SSL standard | Cross-Range PolyJEPA |
+| contexte | local | branches + fusions + latéral |
 
-- paramètres, FLOPs/MACs avec convention ;
-- VRAM et RAM maximales ;
-- temps P50/P95 ;
-- prétraitement, chargement, forward et reprojection séparés ;
-- débit en scans/s et tokens/s ;
-- `N_leaf`, `N_node`, `N_edge` et distributions de degrés ;
-- taille disque de la structure ;
-- latence end-to-end incluant la hiérarchie.
+Estimer les effets :
 
-## 6. Baselines
+```math
+\Delta_{\rm poly},
+\quad
+\Delta_{\rm measure},
+\quad
+\Delta_{\rm HGP},
+\quad
+\Delta_{\rm SSL},
+```
 
-### Point-wise
+et les interactions importantes :
 
-- PTv3 ou backbone moderne reproduit ;
-- DOS avec le même jeu de pré-entraînement lorsque possible ;
-- MinkUNet ou SPUNet comme contrôle sparse plus simple.
+```math
+\Delta_{\rm poly\times HGP},
+\qquad
+\Delta_{\rm HGP\times SSL}.
+```
 
-Ces modèles ne sont pas des composants de PolyTreeFormer. Ils mesurent le coût de renoncer aux tokens points.
+Les budgets sont appariés par paramètres, FLOPs, octets d'entrée et nombre de tokens. Aucun unique appariement n'est parfait ; rapporter les quatre évite de choisir celui qui flatte la méthode.
 
-### Région / hiérarchie
+## 14. Métriques système
 
-- SPT et SPT-nano ;
-- graphe dual sans hiérarchie ;
-- HDBSCAN/RSL ;
-- octree ;
-- arbre aléatoire apparié ;
-- hiérarchie réelle avec niveaux permutés.
+Même si la hiérarchie HGP est supposée peu coûteuse, le modèle doit rapporter :
 
-### Opérateurs
+- nombre de polyèdres, facettes, événements et arêtes ;
+- taille de la grille de surface ;
+- temps de tokenization de surface ;
+- temps du `SurfaceEncoder`, de l'arbre et du décodeur ;
+- VRAM / RAM ;
+- débit en scans, polyèdres et facettes par seconde ;
+- taille disque ;
+- latence end-to-end avec et sans cache HGP.
 
-- mean/max + MLP ;
-- message passing parent–enfants ;
-- SPT attention ;
-- Sequoia-fixed ;
-- HSA ;
-- attention locale de même budget sans arbre.
+Le coût de construction HGP n'est pas un critère d'arrêt dans ce dossier, mais il n'est pas effacé des tableaux publics.
 
-## 7. Statistiques et sélection
+## 15. Statistiques
 
-- trois graines pour toute conclusion principale ;
+- trois graines pour les résultats principaux ;
 - moyenne, écart-type et différences appariées par scan ;
-- bootstrap par scan pour métriques de stabilité ;
-- hyperparamètres choisis uniquement sur train/val ;
-- aucun balayage sur le serveur test ;
-- une configuration gelée avant soumission.
+- bootstrap par séquence ou scène pour les métriques de stabilité ;
+- intervalles de confiance des gains ;
+- sous-splits de développement internes ;
+- `08` réservée aux jalons gelés ;
+- serveur test utilisé après gel complet seulement.
 
-Le meilleur run isolé est rapporté en annexe, jamais comme résultat principal. Les GPU ont déjà assez de privilèges sans leur accorder le droit de choisir la graine qui raconte l'histoire.
-
-## 8. Tableau de décision final
+## 16. Tableau de décision
 
 | Observation | Conclusion |
 |---|---|
-| oracle faible | raffiner les feuilles ou arrêter |
-| stabilité faible | abandonner le claim d'invariance |
-| modèle nano faible, oracle fort | problème d'encodeur/canaux |
-| arbre réel = arbre aléatoire | contexte global générique seulement |
-| HDBSCAN = structure proposée | exactitude sans effet aval |
-| SSL améliore probing mais pas fine-tuning | contribution représentation, pas SOTA |
-| gain SemanticKITTI sans transfert | résultat dataset-spécifique |
-| gain robuste + transfert + stabilité | dossier crédible pour conférence majeure |
+| oracle faible | sortie polyédrique insuffisante, raffiner ou arrêter |
+| radialité faible mais mesure compacte forte | abandon de `ρ(u)`, paradigme conservé |
+| mesure compacte dominée par SurfaceGraph | backbone mesh-native |
+| polyèdres stables mais sémantique faible | tokenizer géométrique, pas perceptif |
+| polyèdres > superpoints en robustesse seulement | papier robustesse / transfert, pas SOTA pur |
+| arbre HGP = arbre aléatoire | hiérarchie non démontrée |
+| arbre HGP > flat mais niveaux inutiles | topologie utile, calibration de densité non démontrée |
+| SSL améliore probing sur plusieurs capteurs | représentation générale crédible |
+| gain sur un seul dataset | claim dataset-spécifique |
+| multi-dataset + multi-tâche + scaling | statut fondation défendable |
