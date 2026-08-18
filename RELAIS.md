@@ -3,6 +3,36 @@
 Campagne d'échelle MorseHGP3D v4 sur g4-standard-48 SPOT. Base : `main@772a8d9`.
 Dernière mise à jour : 2026-08-18 (session principale).
 
+## ⇒ GO FINAL (18 août, le plus récent) — pin `main@ed28a89`
+
+L'utilisateur a dit « Go ! (Et vérifie qu'aucune VM ne tourne avant
+d'en lancer) ». Un troisième audit ciblé (66886c0) est arrivé et a été
+EXÉCUTÉ avant dépense : le validateur lie désormais chaque nom de run à
+son argv (hash NUL recalculé) ET à l'identité imprimée par le probe,
+exige les workers MESURÉS au point de création des threads et le schéma
+complet `digest_balls + K1..10 + all` / `cardinalites K=1..10` ;
+selftest PROTOCOLE CONFORME (12 refus causaux), CTest 128/128.
+
+**Tirer `origin/main >= ed28a89` avant de lancer** (le pin de protocole
+hache script + validateur depuis le commit — un arbre plus vieux refuse).
+
+La directive « aucune VM ne tourne » est dans le protocole :
+`session_scale_threads_g4.sh` fait un inventaire LECTURE SEULE de
+toutes les instances du projet avant toute mutation et REFUSE (code 2)
+si l'une n'est pas `TERMINATED` — cible, repli `-ai1a` ou autre. En cas
+de refus : publier l'inventaire ici, ne rien arrêter soi-même.
+
+Séquence (inchangée par ailleurs, sections ci-dessous) :
+
+1. Étape A — `gcloud auth list` (si vide : publier « NO-AUTH », stop).
+2. Session A : `PHASE=n32000 ./gcp-migration/session_scale_threads_g4.sh`
+3. Publier ici : pin + `campaign_status` + chaque ligne de `.status` +
+   certification `TERMINATED`.
+4. Session B : `PHASE=n64000 ./gcp-migration/session_scale_threads_g4.sh`
+   puis publication idem.
+5. Session C (`session_campagne_v4_scale_g4.sh`) seulement si A et B
+   sont complètes et le budget de la journée le permet.
+
 ## DÉCISION — voie OAuth FERMÉE, voie compte de service ADOPTÉE
 
 La session principale entérine le refus du pilote : **plus jamais de flux
