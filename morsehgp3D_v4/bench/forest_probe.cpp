@@ -80,6 +80,7 @@ struct Args {
   u64 max_output_bytes = 0;  // 0 = pas de plafond ; sinon refus AVANT ev_k
   bool fold_compact_gate = false;
   bool inj_canon_root = false;
+  bool float_gate = false;
   u32 inj_axial = 0;  // masque kAxial* des mutants du chemin axial
   u64 min_balls = 0;
   u64 min_fusions = 0;
@@ -150,6 +151,9 @@ Args parse(int argc, char** argv) {
       a.max_output_bytes = (u64)std::atoll(v);
     else if (arg == "--fold-compact-gate") a.fold_compact_gate = true;
     else if (arg == "--inject=canonical-is-uf-root") a.inj_canon_root = true;
+    else if (arg == "--float-gate") a.float_gate = true;
+    else if (arg == "--inject=float-threshold-too-small")
+      a.inj_axial |= kFloatSmallThreshold;
     else if (arg == "--inject=axial-short-group") a.inj_axial |= kAxialShortGroup;
     else if (arg == "--inject=axial-drop-ties") a.inj_axial |= kAxialDropTies;
     else if (arg == "--inject=axial-first-rep") a.inj_axial |= kAxialFirstRep;
@@ -975,6 +979,65 @@ int run_q2_birth_gate(bool inj_dup) {
   return (violations == 0 && floors) ? 0 : 3;
 }
 
+// PORTE DE L'ETAGE FLOTTANT (audit « filtre flottant et q3 demi-plans »
+// § 1.4) : sous kFloatVerify, CHAQUE signe certifie est recoupe par
+// l'exact — zero desaccord exige. Plancher de replis garanti par la
+// fixture-cœur cocirculaire MISE A L'ECHELLE ×2048 (coordonnees jusqu'a
+// ~41000 : G ~ 2^56 et W ~ 2^67 deviennent INEXACTS en binaire64, le
+// bruit d'arrondi des sites P = 0 est reel ~2^29 — sous la borne 2^58,
+// donc repli obligatoire) ; planchers de certification des deux signes
+// sur les familles. MUTANT float-threshold-too-small (borne 2^20) : les
+// P = 0 cocirculaires sortent de la bande retrecie et sont certifies
+// avec le signe du bruit contre un exact NUL -> desaccords comptes.
+int run_float_gate(bool inj_small) {
+  u64 neg = 0, pos = 0, fb = 0, mm = 0;
+  const u32 flags = kFloatVerify | (inj_small ? kFloatSmallThreshold : 0u);
+  std::vector<std::pair<std::vector<P3>, u64>> clouds;
+  for (const CloudFamily fam :
+       {CloudFamily::kUniform, CloudFamily::kEightClusters}) {
+    const int n = fam == CloudFamily::kUniform ? 300 : 200;
+    clouds.push_back(
+        {make_family_cloud(fam, n, cloud_family_default_coord(fam, n), 3),
+         11});
+  }
+  {
+    std::vector<P3> fx = {{11, 7, 10},  {20, 10, 10}, {15, 15, 10},
+                          {11, 13, 10}, {18, 14, 10}, {12, 14, 10},
+                          {15, 10, 16}};
+    for (P3& p : fx) {
+      p.x *= 1999;
+      p.y *= 1999;
+      p.z *= 1999;
+    }
+    clouds.push_back({std::move(fx), 6});
+  }
+  for (const auto& cl : clouds) {
+    const CloudIndex ix = build_cloud_index(cl.first);
+    if ((size_t)ix.unique_count() != cl.first.size()) return 3;
+    std::vector<BallCandidate> cs;
+    BallStreamStats ss;
+    collect_candidate_balls(ix, 8, cl.second, &cs, &ss, false, false, flags);
+    neg += ss.float_cert_neg;
+    pos += ss.float_cert_pos;
+    fb += ss.float_fallback;
+    mm += ss.float_mismatch;
+  }
+  const bool floors = neg > 0 && pos > 0 && fb > 0;
+  std::printf("float_gate certifies_neg=%llu certifies_pos=%llu replis=%llu "
+              "desaccords=%llu planchers=%d\n",
+              (unsigned long long)neg, (unsigned long long)pos,
+              (unsigned long long)fb, (unsigned long long)mm, (int)floors);
+  if (inj_small) {
+    if (mm > 0) {
+      std::printf("MUTANT TUE\n");
+      return 4;
+    }
+    std::fprintf(stderr, "PORTE INEFFICACE : mutant non discrimine\n");
+    return 3;
+  }
+  return (mm == 0 && floors) ? 0 : 3;
+}
+
 // PORTE A DEUX BACKENDS DU FOLD COMPACT (reponse d'audit « fold
 // compact » § 2) : le backend FIGE build_forest_legacy CONTRE le fold
 // compact (canonique par min-fid, tables a epoque), sur le pipeline
@@ -1607,6 +1670,8 @@ int main(int argc, char** argv) {
     return run_par_gate(a.inj_par_drop, a.inj_par_drop_census);
   if (a.q2_birth_gate) return run_q2_birth_gate(a.inj_birth_dup);
   if (a.fold_compact_gate) return run_fold_compact_gate(a.inj_canon_root);
+  if (a.float_gate)
+    return run_float_gate((a.inj_axial & kFloatSmallThreshold) != 0);
   if (a.guard != 0) return run_guard_gate(a.guard);
   const std::vector<P3> pts = make_family_cloud(
       a.family, a.n,
@@ -1971,7 +2036,7 @@ int main(int argc, char** argv) {
       "juge=%s desaccords=%s t_gen_ms=%.1f t_tri_ms=%.1f t_prefiltre_ms=%.1f "
       "t_census_ms=%.1f t_fold_ms=%.1f t_juge_ms=%.1f seeds_core=%llu "
       "sites_core=%llu t_core_ms=%.1f t_ab_ms=%.1f t_reduce_ms=%.1f "
-      "t_emit_ms=%.1f\n",
+      "t_emit_ms=%.1f flottant=%llu/%llu/%llu\n",
       cloud_family_name(a.family), pts.size(), (long long)a.s,
       (unsigned long long)smax_eff, a.seed, (unsigned long long)st.candidates[0],
       (unsigned long long)st.candidates[1], (unsigned long long)st.candidates[2],
@@ -1999,7 +2064,10 @@ int main(int argc, char** argv) {
       ms(t0b - t0), ms(t1 - t0b), ms(t1b - t1), ms(t2 - t1b), ms(t3 - t2),
       ms(t4 - t3), (unsigned long long)st.seeds_killed_seed_core,
       (unsigned long long)st.seed_core_sites, st.t_seed_core_ms,
-      st.t_axial_ab_ms, st.t_reduce_ms, st.t_emit_ms);
+      st.t_axial_ab_ms, st.t_reduce_ms, st.t_emit_ms,
+      (unsigned long long)st.float_cert_neg,
+      (unsigned long long)st.float_cert_pos,
+      (unsigned long long)st.float_fallback);
   // TROIS CARDINALITES PAR K (contre-audits Poisson, § 6.2) : evenements
   // generes / facettes nees uniques (sommets du K-graphe vus) / deltas
   // critiques emis. Le rapport deltas/evenements mesure le gain encore
