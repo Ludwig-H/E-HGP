@@ -408,6 +408,15 @@ mhgp4_expect_code(mhgp4_forest_probe_q3_affine_gate 0 mhgp4_forest_probe
     "--q3-affine-gate")
 mhgp4_expect_code(mhgp4_forest_probe_q3_affine_mutant_small 4 mhgp4_forest_probe
     "--q3-affine-gate --inject=float-threshold-too-small")
+# Etage d'intervalles de Jung (audit § 1.2) : sur un site certifie
+# P < 0, inf(2[P]²) > sup([J][B²]) certifie le temoin, sup < inf le
+# refute, sinon repli cmp_2p2_jb2 — les egalites tombent TOUJOURS dans
+# le repli (la semantique du mutant seed-core-nonstrict vit dans
+# l'exact). Temoin a cheval grave (J·B² = 2^117 dans la fenetre de
+# [2P²]) : le mutant jung-swap-bounds (kill teste le mauvais bout de
+# l'intervalle) certifie au lieu de replier -> tue.
+mhgp4_expect_code(mhgp4_forest_probe_q3_affine_mutant_jung 4 mhgp4_forest_probe
+    "--q3-affine-gate --inject=jung-swap-bounds")
 # Garde d'arrondi executable (contre-audit 04c71a2 § 4) : sous
 # FE_UPWARD le filtre se desactive seul (zero certification, sortie
 # inchangee), sous FE_TONEAREST il certifie ; le mutant qui ignore la

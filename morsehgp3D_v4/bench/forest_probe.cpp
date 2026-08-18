@@ -84,6 +84,7 @@ struct Args {
   bool float_gate = false;
   bool q3_affine_gate = false;
   bool float_rounding_gate = false;
+  bool inj_jung_swap = false;
   u32 inj_axial = 0;  // masque kAxial* des mutants du chemin axial
   u64 min_balls = 0;
   u64 min_fusions = 0;
@@ -157,6 +158,7 @@ Args parse(int argc, char** argv) {
     else if (arg == "--float-gate") a.float_gate = true;
     else if (arg == "--q3-affine-gate") a.q3_affine_gate = true;
     else if (arg == "--float-rounding-gate") a.float_rounding_gate = true;
+    else if (arg == "--inject=jung-swap-bounds") a.inj_jung_swap = true;
     else if (arg == "--inject=float-ignore-rounding")
       a.inj_axial |= kFloatIgnoreRounding;
     else if (arg == "--inject=float-threshold-too-small")
@@ -998,7 +1000,7 @@ int run_q2_birth_gate(bool inj_dup) {
 // P = 0 cocirculaires sortent de la bande retrecie et sont certifies
 // avec le signe du bruit contre un exact NUL -> desaccords comptes.
 int run_float_gate(bool inj_small) {
-  u64 neg = 0, pos = 0, fb = 0, mm = 0;
+  u64 neg = 0, pos = 0, fb = 0, mm = 0, jk = 0, js = 0, jf = 0;
   const u32 flags = kFloatVerify | (inj_small ? kFloatSmallThreshold : 0u);
   std::vector<std::pair<std::vector<P3>, u64>> clouds;
   for (const CloudFamily fam :
@@ -1029,12 +1031,21 @@ int run_float_gate(bool inj_small) {
     pos += ss.float_cert_pos;
     fb += ss.float_fallback;
     mm += ss.float_mismatch;
+    jk += ss.jung_cert_kill;
+    js += ss.jung_cert_skip;
+    jf += ss.jung_fallback;
   }
-  const bool floors = neg > 0 && pos > 0 && fb > 0;
+  // Planchers de l'etage d'intervalles de Jung : les DEUX certifications
+  // (temoin et non-temoin) et le repli doivent exister — chaque
+  // certification est recoupee par l'exact sous kFloatVerify (desaccords
+  // dans mm).
+  const bool floors = neg > 0 && pos > 0 && fb > 0 && jk > 0 && js > 0;
   std::printf("float_gate certifies_neg=%llu certifies_pos=%llu replis=%llu "
-              "desaccords=%llu planchers=%d\n",
+              "desaccords=%llu jung=%llu/%llu/%llu planchers=%d\n",
               (unsigned long long)neg, (unsigned long long)pos,
-              (unsigned long long)fb, (unsigned long long)mm, (int)floors);
+              (unsigned long long)fb, (unsigned long long)mm,
+              (unsigned long long)jk, (unsigned long long)js,
+              (unsigned long long)jf, (int)floors);
   if (inj_small) {
     if (mm > 0) {
       std::printf("MUTANT TUE\n");
@@ -1071,7 +1082,7 @@ int run_float_gate(bool inj_small) {
 //     (E ~ 2^55) declare INCERTAIN les deux ; la borne retrecie du
 //     mutant (E·2^-20 ~ 2^35 < |bruit|) certifie le signe du bruit pour
 //     les DEUX variantes, en desaccord avec au moins un exact -> tue.
-int run_q3_affine_gate(bool inj_small) {
+int run_q3_affine_gate(bool inj_small, bool inj_jung_swap) {
   u64 ids = 0, viol = 0, cneg = 0, cpos = 0, fb = 0, mm = 0;
   std::vector<std::pair<std::vector<P3>, const char*>> clouds;
   clouds.push_back({make_family_cloud(CloudFamily::kUniform, 40,
@@ -1187,16 +1198,51 @@ int run_q3_affine_gate(bool inj_small) {
       }
     }
   }
+  // TEMOIN D'INTERVALLES DE JUNG, constantes GRAVEES : lh = -2^60,
+  // e = 2^55 => P ∈ [-(2^58+2^53), -(2^58-2^53)] (2P² ∈
+  // [~2^116,91 ; ~2^117,09]) ;
+  //   (1) J = 2^40, B = 2^20 : J·B² = 2^80  << inf(2P²) -> +1 (kill) ;
+  //   (2) J = 2^80, B = 2^25 : J·B² = 2^130 >> sup(2P²) -> -1 (skip) ;
+  //   (3) J = 2^59, B = 2^29 : J·B² = 2^117 A CHEVAL   -> 0 (repli).
+  // Le mutant jung-swap-bounds teste 2·Pl² au kill : (3) rend +1 au
+  // lieu du repli obligatoire -> tue.
+  u64 jw_bad = 0, jw_mut = 0;
+  {
+    const double lh = -0x1p60, e = 0x1p55;
+    const struct { double j; i64 b; int want; } jw[3] = {
+        {0x1p40, (i64)1 << 20, 1},
+        {0x1p80, (i64)1 << 25, -1},
+        {0x1p59, (i64)1 << 29, 0},
+    };
+    for (const auto& w : jw) {
+      const double jlo = w.j * (1.0 - kJungGuard);
+      const double jhi = w.j * (1.0 + kJungGuard);
+      if (jung_interval_sign(lh, e, jlo, jhi, w.b, false) != w.want)
+        ++jw_bad;
+      if (inj_jung_swap &&
+          jung_interval_sign(lh, e, jlo, jhi, w.b, true) != w.want)
+        ++jw_mut;
+    }
+  }
   const bool floors = ids >= 1000000 && cneg >= 100 && cpos >= 100 && fb >= 1;
   std::printf(
       "q3_affine_gate identites=%llu violations=%llu certifies_neg=%llu "
       "certifies_pos=%llu replis=%llu desaccords=%llu temoin_incertains=%llu "
-      "temoin_desaccords=%llu planchers=%d\n",
+      "temoin_desaccords=%llu jung_temoin_faux=%llu planchers=%d\n",
       (unsigned long long)ids, (unsigned long long)viol,
       (unsigned long long)cneg, (unsigned long long)cpos,
       (unsigned long long)fb, (unsigned long long)mm,
-      (unsigned long long)wit_unc, (unsigned long long)wit_mm, (int)floors);
+      (unsigned long long)wit_unc, (unsigned long long)wit_mm,
+      (unsigned long long)jw_bad, (int)floors);
   if (!wit_fixture_ok) return 3;
+  if (inj_jung_swap) {
+    if (jw_mut > 0) {
+      std::printf("MUTANT TUE\n");
+      return 4;
+    }
+    std::fprintf(stderr, "PORTE INEFFICACE : mutant non discrimine\n");
+    return 3;
+  }
   if (inj_small) {
     if (mm + wit_mm > 0) {
       std::printf("MUTANT TUE\n");
@@ -1205,7 +1251,9 @@ int run_q3_affine_gate(bool inj_small) {
     std::fprintf(stderr, "PORTE INEFFICACE : mutant non discrimine\n");
     return 3;
   }
-  return (viol == 0 && mm == 0 && wit_unc == 2 && floors) ? 0 : 3;
+  return (viol == 0 && mm == 0 && wit_unc == 2 && jw_bad == 0 && floors)
+             ? 0
+             : 3;
 }
 
 // PORTE DE LA GARDE D'ARRONDI (contre-audit 04c71a2 § 4) : sous un mode
@@ -1890,7 +1938,8 @@ int main(int argc, char** argv) {
   if (a.float_gate)
     return run_float_gate((a.inj_axial & kFloatSmallThreshold) != 0);
   if (a.q3_affine_gate)
-    return run_q3_affine_gate((a.inj_axial & kFloatSmallThreshold) != 0);
+    return run_q3_affine_gate((a.inj_axial & kFloatSmallThreshold) != 0,
+                              a.inj_jung_swap);
   if (a.float_rounding_gate)
     return run_float_rounding_gate((a.inj_axial & kFloatIgnoreRounding) != 0);
   if (a.guard != 0) return run_guard_gate(a.guard);
@@ -2257,7 +2306,7 @@ int main(int argc, char** argv) {
       "juge=%s desaccords=%s t_gen_ms=%.1f t_tri_ms=%.1f t_prefiltre_ms=%.1f "
       "t_census_ms=%.1f t_fold_ms=%.1f t_juge_ms=%.1f seeds_core=%llu "
       "sites_core=%llu t_core_ms=%.1f t_ab_ms=%.1f t_reduce_ms=%.1f "
-      "t_emit_ms=%.1f flottant=%llu/%llu/%llu\n",
+      "t_emit_ms=%.1f flottant=%llu/%llu/%llu jung=%llu/%llu/%llu\n",
       cloud_family_name(a.family), pts.size(), (long long)a.s,
       (unsigned long long)smax_eff, a.seed, (unsigned long long)st.candidates[0],
       (unsigned long long)st.candidates[1], (unsigned long long)st.candidates[2],
@@ -2288,7 +2337,10 @@ int main(int argc, char** argv) {
       st.t_axial_ab_ms, st.t_reduce_ms, st.t_emit_ms,
       (unsigned long long)st.float_cert_neg,
       (unsigned long long)st.float_cert_pos,
-      (unsigned long long)st.float_fallback);
+      (unsigned long long)st.float_fallback,
+      (unsigned long long)st.jung_cert_kill,
+      (unsigned long long)st.jung_cert_skip,
+      (unsigned long long)st.jung_fallback);
   // TROIS CARDINALITES PAR K (contre-audits Poisson, § 6.2) : evenements
   // generes / facettes nees uniques (sommets du K-graphe vus) / deltas
   // critiques emis. Le rapport deltas/evenements mesure le gain encore

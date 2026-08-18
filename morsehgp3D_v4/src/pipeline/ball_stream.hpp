@@ -109,6 +109,14 @@ struct BallStreamStats {
   u64 float_cert_pos = 0;
   u64 float_fallback = 0;
   u64 float_mismatch = 0;
+  // Etage d'INTERVALLES de Jung (audit § 1.2 / contre-audit 04c71a2
+  // § 6) : sur un site certifie P < 0, si [2P²] et [J][B²] se separent,
+  // temoin certifie (kill) ou non-temoin certifie (skip) SANS exact ;
+  // sinon repli cmp_2p2_jb2. Les certifications sont recoupees sous
+  // kFloatVerify (desaccords dans float_mismatch).
+  u64 jung_cert_kill = 0;
+  u64 jung_cert_skip = 0;
+  u64 jung_fallback = 0;
   // Decomposition de t_gen exigee par l'audit § 3 (chemin axial) :
   // cœur de seed, materialisation A,B des sites, reduction a deux cotes
   // (seuils + groupes + prefixes + d_j), emission (valid_completion +
@@ -151,6 +159,9 @@ struct BallStreamStats {
     float_cert_pos += o.float_cert_pos;
     float_fallback += o.float_fallback;
     float_mismatch += o.float_mismatch;
+    jung_cert_kill += o.jung_cert_kill;
+    jung_cert_skip += o.jung_cert_skip;
+    jung_fallback += o.jung_fallback;
     t_seed_core_ms += o.t_seed_core_ms;
     t_axial_ab_ms += o.t_axial_ab_ms;
     t_reduce_ms += o.t_reduce_ms;
@@ -250,6 +261,41 @@ inline double affine_l_bound(double gd, double nd0, double nd1, double nd2,
          std::fma(gd, qmax,
                   2.0 * (std::fabs(nd0) + std::fabs(nd1) + std::fabs(nd2)) *
                       umax);
+}
+// ---- ETAGE D'INTERVALLES DE JUNG (audit § 1.2, contre-audit 04c71a2
+// § 6 : « jamais le seuil de P mis au carre — intervalle sortant sur
+// [P], puis propagation dans 2P² vs J·B² »). PRECONDITIONS : L < 0
+// certifie (lh < -e, donc P ∈ [(lh-e)/4, (lh+e)/4] avec borne sup
+// < 0) et J >= 0 (J < 0 : le seed meurt avant). Toutes les erreurs
+// sont RELATIVES (aucune annulation : lh±e garde le signe, produits de
+// termes de meme signe ; l'addition IEEE a une erreur relative <= u
+// meme proche de zero) : conversions de J et B (<= u chacune),
+// (lh±e) (u), carre (u), produits (u) — < 8u par cote. Le facteur de
+// garde 2^-40 = 2^13·u les absorbe avec ×1000 de marge :
+//   inf(2[P]²) > sup([J][B]²)  =>  2P² > J·B² STRICT : temoin certifie
+//   (compte sous la regle stricte ET sous le mutant nonstrict) ;
+//   sup(2[P]²) < inf([J][B]²)  =>  2P² < J·B² : non-temoin certifie
+//   (exclu sous les deux regles) ; sinon repli exact (les egalites
+//   tombent TOUJOURS dans le repli — la semantique du mutant
+//   seed-core-nonstrict vit dans l'exact, jamais dans l'intervalle).
+// MUTANT jung-swap-bounds : le kill teste 2·Pl² (le mauvais bout de
+// l'intervalle) — le temoin a cheval grave dans --q3-affine-gate le
+// voit.
+constexpr double kJungGuard = 0x1p-40;
+inline int jung_interval_sign(double lh, double e, double jlo, double jhi,
+                              i64 b, bool mutant_swap = false) {
+  const double bd = (double)b;
+  const double b2 = bd * bd;
+  const double pu = (lh + e) * 0.25;  // borne sup de P (la plus pres de 0)
+  const double pl = (lh - e) * 0.25;  // borne inf de P
+  const double pk = mutant_swap ? pl : pu;  // MUTANT : mauvais bout
+  const double lhs_min = 2.0 * (pk * pk) * (1.0 - kJungGuard);
+  const double rhs_max = jhi * (b2 * (1.0 + kJungGuard));
+  if (lhs_min > rhs_max) return 1;
+  const double lhs_max = 2.0 * (pl * pl) * (1.0 + kJungGuard);
+  const double rhs_min = jlo * (b2 * (1.0 - kJungGuard));
+  if (lhs_max < rhs_min) return -1;
+  return 0;
 }
 constexpr double kFloatMutantShrink = 0x1p-20;  // MUTANT : borne /2^20
 // CONDITIONS DE COMPILATION/EXECUTION EXECUTABLES (contre-audit 04c71a2
@@ -905,6 +951,10 @@ inline void collect_candidate_balls(const CloudIndex& ix, i64 s, u64 smax_eff,
                            : std::numeric_limits<double>::infinity();
               if (axial_flags & kFloatSmallThreshold)
                 fbnd2 *= kFloatMutantShrink;  // MUTANT
+              // Intervalle de J par seed (J >= 0 ici : J < 0 a deja tue).
+              const double Jd = (double)Jb;
+              const double Jlo = Jd * (1.0 - kJungGuard);
+              const double Jhi = Jd * (1.0 + kJungGuard);
               const auto exact_L = [&](size_t iz) {
                 return f3s.g * (i128)sc.sq[iz] -
                        2 * ((i128)sc.su0[iz] * N0 + (i128)sc.su1[iz] * N1 +
@@ -924,12 +974,39 @@ inline void collect_candidate_balls(const CloudIndex& ix, i64 s, u64 smax_eff,
                     ++st->float_mismatch;
                   continue;  // P > 0 certifie : jamais temoin
                 }
-                const bool cert_neg = Lh < -fbnd2;
-                if (cert_neg) ++st->float_cert_neg;
-                else ++st->float_fallback;
+                if (Lh < -fbnd2) {
+                  // P < 0 certifie : etage d'INTERVALLES de Jung — un
+                  // site separe ne paie NI l'affine i128 NI le U320.
+                  ++st->float_cert_neg;
+                  const P3& pz = ix.upos[(size_t)cz.u];
+                  const i64 Bz = p3_dot(nrm, p3_sub(pz, f3s.a));
+                  const int js = jung_interval_sign(Lh, fbnd2, Jlo, Jhi, Bz);
+                  if (js != 0) {
+                    if (axial_flags & kFloatVerify) {
+                      const i128 Pz = exact_L(iz) / 4;
+                      const int c = (Pz < 0) ? cmp_2p2_jb2(Pz, Jb, Bz) : -2;
+                      if ((js > 0) != (c > 0)) ++st->float_mismatch;
+                    }
+                    if (js > 0) {
+                      ++st->jung_cert_kill;
+                      if (++fcount >= h_of[2]) break;
+                    } else {
+                      ++st->jung_cert_skip;
+                    }
+                    continue;
+                  }
+                  ++st->jung_fallback;
+                  const i128 Pz = exact_L(iz) / 4;
+                  if ((axial_flags & kFloatVerify) && !(Pz < 0))
+                    ++st->float_mismatch;
+                  const int c = cmp_2p2_jb2(Pz, Jb, Bz);
+                  if ((nonstrict ? (c >= 0) : (c > 0)) && ++fcount >= h_of[2])
+                    break;
+                  continue;
+                }
+                // Bande d'incertitude du signe : chemin exact integral.
+                ++st->float_fallback;
                 const i128 Pz = exact_L(iz) / 4;
-                if ((axial_flags & kFloatVerify) && cert_neg && !(Pz < 0))
-                  ++st->float_mismatch;
                 if (nonstrict ? (Pz > 0) : (Pz >= 0)) continue;
                 const P3& pz = ix.upos[(size_t)cz.u];
                 const i64 Bz = p3_dot(nrm, p3_sub(pz, f3s.a));
