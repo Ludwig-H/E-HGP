@@ -129,4 +129,31 @@ wave() {
 wave 8000 "${C8}"
 wave 16000 "${C16}"
 wave 32000 "${C32}"
+
+# PHASE 3 — ECHELLE DE FILS (directive utilisateur du 18 aout : « les
+# vrais tests qui decident de l'architecture doivent etre sur des nuages
+# massifs n=8000,16000,32000,64000 » et « privilegie des structures qui
+# se paralleliseront bien »). Runs ISOLES, sequentiels, sur TOUTE la
+# machine (pas d'epinglage a un cœur) : t8 = 8 fils fixes (comparable
+# d'une machine a l'autre), tmax = nproc fils (48 sur la G4). n=64000
+# n'est couru QU'EN tmax : en mono-fil il depasserait le timeout — c'est
+# precisement la taille qui n'existe qu'avec le parallelisme.
+ALLCPU="0-$((NCPU - 1))"
+run_one thr_uniform_n32000_smax11_t8 scale_threads "${ALLCPU}" \
+  --family=uniform --n=32000 --s=8 --smax=11 --seed=3 \
+  --min-balls=10000 --min-fusions=1000 --threads=8
+run_one thr_eight_clusters_n32000_smax11_t8 scale_threads "${ALLCPU}" \
+  --family=eight_clusters --n=32000 --s=8 --smax=11 --seed=3 \
+  --min-balls=10000 --min-fusions=1000 --threads=8
+run_one thr_uniform_n32000_smax11_tmax scale_threads "${ALLCPU}" \
+  --family=uniform --n=32000 --s=8 --smax=11 --seed=3 \
+  --min-balls=10000 --min-fusions=1000 --threads="${NCPU}"
+run_one thr_eight_clusters_n32000_smax11_tmax scale_threads "${ALLCPU}" \
+  --family=eight_clusters --n=32000 --s=8 --smax=11 --seed=3 \
+  --min-balls=10000 --min-fusions=1000 --threads="${NCPU}"
+for fam in uniform terrain eight_clusters scanline_overlap_multiecho; do
+  run_one "thr_${fam}_n64000_smax11_tmax" scale_threads "${ALLCPU}" \
+    --family=${fam} --n=64000 --s=8 --smax=11 --seed=3 \
+    --min-balls=10000 --min-fusions=1000 --threads="${NCPU}"
+done
 echo "=== fin des runs (la validation locale decide du statut, jamais cette ligne) ==="

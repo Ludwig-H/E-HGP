@@ -5,7 +5,7 @@
 # Il execute LE MEME script distant (v4_campaign_remote.sh) et LE MEME
 # validateur (validate_v4_campaign.py) que la session, avec un faux probe
 # et un faux GNU time, et exige :
-#   1. HAPPY PATH : 28 statuts, tous code=0, pin present partout,
+#   1. HAPPY PATH : 36 statuts (4 pilotes + 24 couverture + 8 echelle de fils), tous code=0, pin present partout,
 #      validateur -> complete (rc 0) ;
 #   2. RUNS EN ECHEC : le faux probe rend 7 sur terrain et depasse le
 #      timeout sur eight_clusters — les .status MATERIALISENT code=7 et
@@ -79,8 +79,8 @@ run_campaign() {
 # ---- Scenario 1 : happy path -> complete.
 RC1=$(run_campaign "${WORK}/out1")
 [ "${RC1}" -eq 0 ] || fail "scenario 1 : script distant rc=${RC1}"
-[ "$(ls "${WORK}/out1"/*.status 2>/dev/null | wc -l)" -eq 28 ] ||
-  fail "scenario 1 : 28 statuts attendus"
+[ "$(ls "${WORK}/out1"/*.status 2>/dev/null | wc -l)" -eq 36 ] ||
+  fail "scenario 1 : 36 statuts attendus"
 grep -L '^source_commit=cafedeca$' "${WORK}/out1"/*.status | grep -q . &&
   fail "scenario 1 : pin source absent d'un statut"
 if ! python3 "${HERE}/validate_v4_campaign.py" "${WORK}/out1" cafedeca beefbeef feedf00d 0 0 \

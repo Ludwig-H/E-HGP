@@ -23,6 +23,14 @@ def expected_names():
         for n in (8000, 16000, 32000):
             for smax in (11, 6):
                 names.append(f"cov_{fam}_n{n}_smax{smax}")
+    # Phase 3 — echelle de fils (n massifs, directive du 18 aout) :
+    # n=64000 n'existe qu'en tmax (mono-fil : hors timeout).
+    for fam in ("uniform", "eight_clusters"):
+        for t in ("t8", "tmax"):
+            names.append(f"thr_{fam}_n32000_smax11_{t}")
+    for fam in ("uniform", "terrain", "eight_clusters",
+                "scanline_overlap_multiecho"):
+        names.append(f"thr_{fam}_n64000_smax11_tmax")
     return names
 
 
