@@ -62,23 +62,29 @@ Rôles à accorder au compte de service, **au niveau du projet** :
 4. Redémarrer la session pilote (nouveau conteneur) et dire « c'est en
    place ».
 
-## ⚠ HOLD PARTIEL (18 août, après audits bloquants 9223888 / b3a6eb4)
+## HOLD LEVÉ (18 août) — protocole corrigé poussé : main@db2f4f2
 
-NE PAS lancer la campagne depuis main@a694496+ : la phase 3 « échelle
-de fils » y est BLOQUÉE par deux audits (budget temporel : 8 × 3 h de
-timeouts séquentiels dans une session de 6 h ; équivalence t8/tmax non
-prouvée — pas de digest canonique ni de métadonnées de fils). La
-session principale scinde la campagne en trois sessions pinnées :
+Les deux audits bloquants (9223888 / b3a6eb4) sont exécutés. **Tirer
+origin/main >= db2f4f2**, puis lancer dans CET ordre (celui des
+audits — la décision d'architecture d'abord) :
 
-- Session C (couverture historique 28 runs) : sera relançable dès que
-  le retrait de la phase 3 du script historique est poussé ;
-- Session A (scale_threads n=32000, t1/t8/tmax appariés par digest) et
-  Session B (n=64000 tmax) : nouveaux scripts + validateurs + préflight
-  de budget en cours — attendre le prochain message ici avec les pins.
+1. **Session A (prioritaire)** :
+   `PHASE=n32000 ./gcp-migration/session_scale_threads_g4.sh`
+   — uniform t1/t8/tmax + eight_clusters t8/tmax, appariés par digest
+   canonique ; préflight de budget intégré (refus code 2 si le budget
+   ne tient pas — ne pas le contourner) ; ~5,75 h de budget, session
+   25 200 s.
+2. **Session B** : `PHASE=n64000 ./gcp-migration/session_scale_threads_g4.sh`
+   — 4 familles à nproc fils (~4,75 h).
+3. **Session C (si encore utile après A/B)** :
+   `./gcp-migration/session_campagne_v4_scale_g4.sh` — la couverture
+   historique 28 runs, restaurée à l'identique.
 
-D'ici là : étapes A (auth) et B (préflight lecture seule) restent
-vertes et UTILES — les faire et publier le résultat ici. Aucune
-mutation GCP (étape C) avant les pins corrigés.
+Chaque session : son pin, son validateur épinglé, son reçu, sa
+certification TERMINATED — publier ici après CHAQUE session (pin +
+campaign_status + la ligne de chaque .status). Une session A complète
+vaut reçu même si B est préemptée. Préalable inchangé : auth de
+l'étape A vérifiée (`gcloud auth list`).
 
 ## FEU VERT UTILISATEUR (18 août, plus récent)
 
