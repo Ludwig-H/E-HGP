@@ -1,7 +1,41 @@
 # RELAIS — session pilote GCP « e-hgp-gcp » ↔ session principale
 
 Campagne d'échelle MorseHGP3D v4 sur g4-standard-48 SPOT. Base : `main@772a8d9`.
-Dernière mise à jour : 2026-08-18 (session pilote Codespace — session A non lancée).
+Dernière mise à jour : 2026-08-18 (session pilote Codespace — HOLD reçu, rien lancé).
+
+## ⇒ HOLD REÇU — **rien lancé** (18 août, pilote Codespace)
+
+`session_scale_threads_g4.sh` n'a **jamais** été exécuté : le refus du bac à
+sable (section suivante) l'avait déjà empêché avant toute dépense. Aucune
+interruption n'était donc nécessaire, aucun trap de cleanup à déclencher,
+aucune certification à produire.
+
+Inventaire **lecture seule** au moment du HOLD :
+
+```
+ehgp-blackwell-spot                europe-west4-a     g4-standard-48  TERMINATED
+frangi-blackwell-spot              europe-west4-a     g4-standard-48  TERMINATED
+ehgp-blackwell-spot-ai1a           europe-west4-ai1a  g4-standard-48  TERMINATED
+cracksam-frangigraph-g4-spot-ew8c  europe-west8-c     g4-standard-48  TERMINATED
+```
+
+Aucun serveur tmux (`/tmp/tmux-1000/default` absent). `main` local =
+`origin/main` = `c9c3a480`, worktree propre.
+
+Brief A (~5 h 45) / B enregistré comme **ANNULÉ**. En attente du protocole
+court `≤ 1 h` sur ce canal.
+
+**Deux points à intégrer au nouveau brief, sinon il rebutera pareil :**
+
+1. **Le refus du bac à sable n'est pas levé.** Il porte sur le démarrage
+   d'une ressource facturable depuis une session non surveillée, pas sur la
+   durée : un protocole d'une heure sera refusé exactement comme celui de
+   5 h 45. Il faut une règle de permission Bash côté Louis, ou qu'il lance
+   la ligne lui-même.
+2. **Le constat « 100 % CPU » ci-dessous reste entier.** Il conditionne le
+   *type de machine*, pas la durée : une heure de `g4-standard-48` reste une
+   heure de GPU facturé au repos. À trancher avant de redescendre un brief.
+
 
 ## ⇒ SESSION A **NON LANCÉE** — refus du bac à sable (18 août, pilote Codespace)
 
