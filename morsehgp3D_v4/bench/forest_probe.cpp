@@ -74,6 +74,9 @@ struct Args {
   int threads = 1;
   bool inj_par_drop = false;
   bool inj_par_drop_census = false;
+  bool preflight = false;      // compter la sortie sans la materialiser
+  bool q2_birth_gate = false;  // oracle Poisson : injection des facettes
+  bool inj_birth_dup = false;
   u32 inj_axial = 0;  // masque kAxial* des mutants du chemin axial
   u64 min_balls = 0;
   u64 min_fusions = 0;
@@ -137,6 +140,9 @@ Args parse(int argc, char** argv) {
     else if (arg == "--inject=par-drop-shard") a.inj_par_drop = true;
     else if (arg == "--inject=par-drop-ball-chunk")
       a.inj_par_drop_census = true;
+    else if (arg == "--output-preflight-only") a.preflight = true;
+    else if (arg == "--q2-birth-gate") a.q2_birth_gate = true;
+    else if (arg == "--inject=birth-dup-tau") a.inj_birth_dup = true;
     else if (arg == "--inject=axial-short-group") a.inj_axial |= kAxialShortGroup;
     else if (arg == "--inject=axial-drop-ties") a.inj_axial |= kAxialDropTies;
     else if (arg == "--inject=axial-first-rep") a.inj_axial |= kAxialFirstRep;
@@ -851,6 +857,109 @@ int run_kmax_gate(bool inj_kmax10) {
   return bad ? 3 : 0;
 }
 
+// PORTE q2_birth_lower_bound (contre-audits Poisson q2, § portes) :
+// ORACLE exhaustif borne (n = 200, O(n³) — la regle « jamais de
+// verification exhaustive » exclut explicitement les oracles bornes qui
+// ETABLISSENT la verite). Pour chaque paire {a,b} : j = interieurs
+// STRICTS de la boule diametral ouverte (|2z−(a+b)|² < |b−a|², exact
+// entier). Verifications de l'argument d'INJECTION du contre-audit,
+// pour 1 <= j <= 9 : (a) {a,b} est le diametre unique de chaque
+// tau_z = sigma∖{z} (toute autre paire de tau_z strictement plus
+// courte ; une egalite exacte — hors position generale, possible sur
+// entiers — est comptee degeneree et exclue de l'assertion, jamais un
+// echec silencieux) ; (b) les tau_z propres sont globalement DISTINCTES
+// (l'application (sigma, z) -> tau_z est injective) ; (c) planchers
+// N_0, N_1, N_2 >= 1 contre le vert-par-vacuite ; (d) distinction K=1 :
+// N_0 >= 2(n−1) — le nombre de certificats de Gabriel n'est pas le
+// nombre d'aretes critiques (asymptote 4n contre n−1 au MST). MUTANT
+// birth-dup-tau : un tau duplique est injecte dans le verificateur de
+// distinction, qui doit le voir.
+int run_q2_birth_gate(bool inj_dup) {
+  const int n = 200;
+  const std::vector<P3> pts = make_family_cloud(
+      CloudFamily::kUniform, n, cloud_family_default_coord(CloudFamily::kUniform, n), 3);
+  const CloudIndex ix = build_cloud_index(pts);
+  const int m = ix.unique_count();
+  if (m < 3) return 3;
+  u64 nj[10] = {};
+  u64 degenerate = 0, violations = 0;
+  std::set<std::vector<i32>> taus;
+  std::vector<i32> inter;
+  for (i32 i = 0; i < m; ++i)
+    for (i32 j2 = i + 1; j2 < m; ++j2) {
+      const P3 &pa = ix.upos[(size_t)i], &pb = ix.upos[(size_t)j2];
+      const i64 D2 = p3_norm2(p3_sub(pb, pa));
+      if (D2 == 0) continue;
+      const i64 c2[3] = {pa.x + pb.x, pa.y + pb.y, pa.z + pb.z};
+      inter.clear();
+      for (i32 z = 0; z < m && inter.size() <= 10; ++z) {
+        if (z == i || z == j2) continue;
+        const P3& pz = ix.upos[(size_t)z];
+        const i64 dx = 2 * pz.x - c2[0], dy = 2 * pz.y - c2[1],
+                  dz = 2 * pz.z - c2[2];
+        if (dx * dx + dy * dy + dz * dz < D2) inter.push_back(z);
+      }
+      const size_t jj = inter.size();
+      if (jj <= 9) ++nj[jj];
+      if (jj < 1 || jj > 9) continue;
+      // sigma = {a, b} ∪ inter ; pour chaque z omis : tau_z.
+      for (size_t oz = 0; oz < jj; ++oz) {
+        std::vector<i32> tau;
+        tau.push_back(i);
+        tau.push_back(j2);
+        for (size_t t = 0; t < jj; ++t)
+          if (t != oz) tau.push_back(inter[t]);
+        // (a) diametre unique : toute autre paire de tau STRICTEMENT
+        // plus courte que D2 (egalite = degenerescence comptee).
+        bool unique_diam = true, degen = false;
+        for (size_t u = 0; u < tau.size() && unique_diam; ++u)
+          for (size_t v = u + 1; v < tau.size(); ++v) {
+            if (tau[u] == i && tau[v] == j2) continue;
+            const i64 l2 = p3_norm2(
+                p3_sub(ix.upos[(size_t)tau[v]], ix.upos[(size_t)tau[u]]));
+            if (l2 > D2) {
+              unique_diam = false;  // contredit l'argument : violation
+              break;
+            }
+            if (l2 == D2) degen = true;
+          }
+        if (!unique_diam) {
+          ++violations;
+          continue;
+        }
+        if (degen) {
+          ++degenerate;
+          continue;
+        }
+        // (b) injection : tau propre jamais vue.
+        std::sort(tau.begin(), tau.end());
+        if (!taus.insert(tau).second) ++violations;
+      }
+    }
+  if (inj_dup && !taus.empty()) {
+    // MUTANT : un tau deja emis est re-presente au verificateur.
+    if (!taus.insert(*taus.begin()).second) ++violations;
+  }
+  const bool floors = nj[0] >= 1 && nj[1] >= 1 && nj[2] >= 1 &&
+                      nj[0] >= 2 * ((u64)m - 1);
+  std::printf(
+      "q2_birth_gate N0..4=%llu/%llu/%llu/%llu/%llu taus=%zu degeneres=%llu "
+      "violations=%llu planchers=%d\n",
+      (unsigned long long)nj[0], (unsigned long long)nj[1],
+      (unsigned long long)nj[2], (unsigned long long)nj[3],
+      (unsigned long long)nj[4], taus.size(), (unsigned long long)degenerate,
+      (unsigned long long)violations, (int)floors);
+  if (inj_dup) {
+    if (violations > 0) {
+      std::printf("MUTANT TUE\n");
+      return 4;
+    }
+    std::fprintf(stderr, "PORTE INEFFICACE : mutant non discrimine\n");
+    return 3;
+  }
+  return (violations == 0 && floors) ? 0 : 3;
+}
+
 // PORTE DE PARALLELISME (directive « paralléliser ») : l'objet post-RLE
 // est INDEPENDANT du decoupage. collect a 1 fil CONTRE 4 fils — egalite
 // au bit pres des cles/arites/representations apres tri+RLE, ET egalite
@@ -1384,6 +1493,7 @@ int main(int argc, char** argv) {
   if (a.axial_pair_gate) return run_axial_pair_gate(a.inj_axial);
   if (a.par_gate)
     return run_par_gate(a.inj_par_drop, a.inj_par_drop_census);
+  if (a.q2_birth_gate) return run_q2_birth_gate(a.inj_birth_dup);
   if (a.guard != 0) return run_guard_gate(a.guard);
   const std::vector<P3> pts = make_family_cloud(
       a.family, a.n,
@@ -1460,6 +1570,60 @@ int main(int argc, char** argv) {
   for (size_t u = 0; u < pid_of.size(); ++u)
     pid_of[u] = a.inj_dense_pointid ? (PointId)u  // MUTANT : le rang casté
                                     : ix.point_id((i32)u);
+  if (a.preflight) {
+    // PREFLIGHT DE SORTIE (contre-audits Poisson, § actions minimales) :
+    // compter la sortie SANS la materialiser — expansion par tranches de
+    // boules, evenements liberes aussitot comptes ; compteurs u64 par K
+    // (evenements, incidences = q + d, octets projetes au format
+    // ForestEvent resident). Aucun ev_k, aucun fold : le preflight dit
+    // ce que couterait la materialisation AVANT de la payer.
+    const size_t Tpf =
+        balls.empty()
+            ? 1
+            : std::min((size_t)std::max(a.threads, 1), balls.size());
+    std::vector<std::array<u64, 11>> lev(Tpf), linc(Tpf);
+    for (auto& x : lev) x.fill(0);
+    for (auto& x : linc) x.fill(0);
+    parallel_ranges(balls.size(), a.threads,
+                    [&](size_t bg, size_t en, size_t t) {
+                      std::vector<PlateauEvent> pev;
+                      for (size_t bi = bg; bi < en; ++bi) {
+                        const BallData& b = balls[bi];
+                        const BallRat c = ball_center(b.key);
+                        pev.clear();
+                        expand_plateau(c, ix.upos, b.interior, b.shell,
+                                       (size_t)(kmax_eff + 1), &pev);
+                        for (const PlateauEvent& pe : pev) {
+                          const size_t K =
+                              pe.tpart.size() + pe.ipart.size() - 1;
+                          if (K < 1 || K > (size_t)kmax_eff) continue;
+                          ++lev[t][K];
+                          linc[t][K] +=
+                              (u64)pe.tpart.size() + pe.ipart.size();
+                        }
+                      }
+                    });
+    u64 tot_ev = 0, tot_inc = 0;
+    for (int K = 1; K <= (int)kmax_eff; ++K) {
+      u64 e = 0, inc = 0;
+      for (size_t t = 0; t < Tpf; ++t) {
+        e += lev[t][(size_t)K];
+        inc += linc[t][(size_t)K];
+      }
+      tot_ev += e;
+      tot_inc += inc;
+      std::printf("preflight K=%d evenements=%llu incidences=%llu "
+                  "octets_resident=%llu\n",
+                  K, (unsigned long long)e, (unsigned long long)inc,
+                  (unsigned long long)(e * sizeof(ForestEvent)));
+    }
+    std::printf("preflight total evenements=%llu incidences=%llu "
+                "octets_resident=%llu boules=%zu\n",
+                (unsigned long long)tot_ev, (unsigned long long)tot_inc,
+                (unsigned long long)(tot_ev * sizeof(ForestEvent)),
+                balls.size());
+    return 0;
+  }
   u64 sev[11] = {};
   ForestResult sres[11];
   std::vector<std::vector<ForestEvent>> sevk;
@@ -1685,6 +1849,19 @@ int main(int argc, char** argv) {
       ms(t4 - t3), (unsigned long long)st.seeds_killed_seed_core,
       (unsigned long long)st.seed_core_sites, st.t_seed_core_ms,
       st.t_axial_ab_ms, st.t_reduce_ms, st.t_emit_ms);
+  // TROIS CARDINALITES PAR K (contre-audits Poisson, § 6.2) : evenements
+  // generes / facettes nees uniques (sommets du K-graphe vus) / deltas
+  // critiques emis. Le rapport deltas/evenements mesure le gain encore
+  // possible (RNG-HGP, Boruvka) ; facettes/evenements la part
+  // incompressible d'une sortie au niveau des facettes.
+  for (int K = 1; K <= (int)kmax_eff; ++K)
+    std::printf("cardinalites K=%d evenements=%llu facettes=%llu "
+                "deltas=%llu attachements=%llu fusions=%llu\n",
+                K, (unsigned long long)sev[K],
+                (unsigned long long)sres[K].facets,
+                (unsigned long long)sres[K].deltas.size(),
+                (unsigned long long)sres[K].new_attachments,
+                (unsigned long long)sres[K].fusions);
 
   if (any_inject) {
     if (a.judge && disagreements > 0) {

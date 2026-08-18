@@ -357,6 +357,18 @@ mhgp4_expect_code(mhgp4_forest_probe_par_mutant_drop 4 mhgp4_forest_probe
 # une tranche de census a la fusion doit mourir sur la comparaison AVAL.
 mhgp4_expect_code(mhgp4_forest_probe_par_mutant_chunk 4 mhgp4_forest_probe
     "--par-gate --inject=par-drop-ball-chunk")
+# Contre-audits Poisson q2 (contrat de sortie 30M) : la porte
+# q2_birth_lower_bound ETABLIT sur un nuage reel l'argument d'injection
+# (diametre unique de chaque tau_z, distinction globale des tau) avec
+# planchers N_0..N_2 et la distinction K=1 (N_0 >= 2(n−1) : le nombre de
+# certificats de Gabriel n'est pas le nombre d'aretes critiques) ; le
+# preflight compte la sortie sans la materialiser (fumee : code 0).
+mhgp4_expect_code(mhgp4_forest_probe_q2_birth_gate 0 mhgp4_forest_probe
+    "--q2-birth-gate")
+mhgp4_expect_code(mhgp4_forest_probe_q2_birth_mutant_dup 4 mhgp4_forest_probe
+    "--q2-birth-gate --inject=birth-dup-tau")
+mhgp4_expect_code(mhgp4_forest_probe_preflight_smoke 0 mhgp4_forest_probe
+    "--family=uniform --n=400 --s=8 --seed=3 --output-preflight-only")
 
 # La lane q2 productrice : W_2 est la boule diametrale ouverte, le census
 # est une requete de cover a coefficient 1. Juge brut toutes-paires sur
