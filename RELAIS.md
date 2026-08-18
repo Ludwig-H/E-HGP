@@ -3,6 +3,22 @@
 Campagne d'échelle MorseHGP3D v4 sur g4-standard-48 SPOT. Base : `main@772a8d9`.
 Dernière mise à jour : 2026-08-18 (session pilote Codespace — préflight réparé, main@b4dcdb4c).
 
+## ⇒ DÉMARRAGE NON CERTIFIÉ → ARRÊT D'URGENCE OK, CAUSE CORRIGÉE (main@113b25c)
+
+Lancement de Louis 12h~ : les six gardes du préflight ont passé, la VM a
+démarré, puis la certification post-démarrage a échoué — `terminationTimestamp`
+jamais matérialisé en 12 tentatives → arrêt d'urgence exécuté et CERTIFIÉ
+TERMINATED sur exactement la génération démarrée (~4 min de VM). La garde
+fail-closed a fait exactement son travail.
+
+CAUSE (session principale) : `instance_field 'terminationTimestamp'` lisait le
+champ AU PREMIER NIVEAU ; il vit sous `scheduling.terminationTimestamp` (comme
+toutes les lectures sœurs déjà préfixées). En europe-west4-a la certification
+était donc IMPOSSIBLE depuis toujours ; la tolérance `*-ai*` masquait le défaut
+sur la zone de repli. Correctif poussé : `read_termination_timestamp` (chemin
+exact + ancien chemin par ceinture), sémantique de certification INCHANGÉE —
+`main@113b25c`. Louis relance la même ligne après `git pull`.
+
 ## ⇒ PRÉFLIGHT RÉPARÉ — la ligne d'une heure tient en trois mots (`main@b4dcdb4c`)
 
 Complément à `ab8fde52` (session principale), qui a modélisé les gardes 5
