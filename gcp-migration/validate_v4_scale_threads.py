@@ -42,7 +42,20 @@ def expected(phase):
         return {fam: [(f"thr_{fam}_n64000_smax11_tmax", "max")]
                 for fam in ("uniform", "terrain", "eight_clusters",
                             "scanline_overlap_multiecho")}
+    if phase == "court1h":
+        # Directive <= 1 h : paires t8/tmax a n=32000, sans t1.
+        return {
+            "uniform": [("thr_uniform_n32000_smax11_t8", "8"),
+                        ("thr_uniform_n32000_smax11_tmax", "max")],
+            "eight_clusters": [("thr_eight_clusters_n32000_smax11_t8", "8"),
+                               ("thr_eight_clusters_n32000_smax11_tmax",
+                                "max")],
+        }
     raise SystemExit(f"phase inconnue : {phase}")
+
+
+def phase_n(phase):
+    return {"n32000": 32000, "n64000": 64000, "court1h": 32000}[phase]
 
 
 def contract_argv(family, n, threads):
@@ -65,7 +78,7 @@ def main():
     out, commit, payload_sha, manifest_sha, remote_rc, scp_rc, phase = \
         sys.argv[1:8]
     groups = expected(phase)
-    n_of_phase = int(phase[1:])
+    n_of_phase = phase_n(phase)
     forbidden = re.compile(r"REFUS|INVARIANT|PLANCHER|Killed|bad_alloc")
     counters = re.compile(
         r"boules_uniques=\d+.*evenements=\d+.*juge=off desaccords=NA")
@@ -210,8 +223,9 @@ def main():
         return 1
     # Etiquetage honnete (66886c0 § 4) : seule n32000 prouve
     # l'equivalence inter-fils ; n64000 grave une empreinte non appariee.
-    claim = ("thread_equivalence_checked" if phase == "n32000"
-             else "digest_recorded_unpaired")
+    claim = {"n32000": "thread_equivalence_checked",
+             "court1h": "thread_equivalence_checked_t8_tmax",
+             "n64000": "digest_recorded_unpaired"}[phase]
     print(f"campaign_status=complete (phase {phase}, {len(known)} runs, "
           f"{claim}, source_commit={commit[:12]})")
     print("=== CAMPAGNE SCALE_THREADS COMPLETE ===")

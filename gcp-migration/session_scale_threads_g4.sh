@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 # Session G4 — SCALE_THREADS v4 (audits bloquants 9223888 / b3a6eb4) :
 # l'experience qui decide de l'architecture, dans une session dont le
-# BUDGET TEMPOREL contient la somme des timeouts. Deux phases, UNE
-# session chacune : PHASE=n32000 (defaut) ou PHASE=n64000.
+# BUDGET TEMPOREL contient la somme des timeouts. Trois phases, UNE
+# session chacune : PHASE=n32000 (defaut), PHASE=n64000, ou
+# PHASE=court1h (directive du 18 aout : session <= 1 h — paires t8/tmax
+# a n=32000, avec MAX_RUN_SECONDS=3600 et les marges reduites
+# correspondantes passees en environnement).
 #
 # Memes garanties que session_campagne_v4_scale_g4.sh (pin de source et
 # de protocole, GNU time, rapatriement toujours, validation locale seule

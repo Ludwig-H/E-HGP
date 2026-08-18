@@ -44,8 +44,19 @@ phase_runs() {
         "thr_eight_clusters_n64000_smax11_tmax|eight_clusters|max" \
         "thr_scanline_overlap_multiecho_n64000_smax11_tmax|scanline_overlap_multiecho|max"
       ;;
+    court1h)
+      # Directive utilisateur du 18 aout : UNE session <= 1 h — les deux
+      # paires d'equivalence t8/tmax a n=32000, sans le run t1 (le
+      # mono-fil ne tient pas dans l'heure ; l'equivalence est etablie
+      # sur les paires presentes, l'etiquette du validateur le dit).
+      printf '%s\n' \
+        "thr_uniform_n32000_smax11_t8|uniform|8" \
+        "thr_uniform_n32000_smax11_tmax|uniform|max" \
+        "thr_eight_clusters_n32000_smax11_t8|eight_clusters|8" \
+        "thr_eight_clusters_n32000_smax11_tmax|eight_clusters|max"
+      ;;
     *)
-      echo "REFUS : phase inconnue '$1' (n32000|n64000)" >&2
+      echo "REFUS : phase inconnue '$1' (n32000|n64000|court1h)" >&2
       return 2
       ;;
   esac
@@ -61,7 +72,7 @@ fi
 SOURCE_COMMIT="${1:?source_commit requis}"
 SOURCE_PAYLOAD_SHA256="${2:?source_payload_sha256 requis}"
 PROTOCOL_MANIFEST_SHA256="${3:?protocol_manifest_sha256 requis}"
-PHASE="${4:?phase requise (n32000|n64000)}"
+PHASE="${4:?phase requise (n32000|n64000|court1h)}"
 DEADLINE_EPOCH="${5:?deadline_epoch requis (refus de demarrage au-dela)}"
 PROBE_BIN="${PROBE_BIN:-./build/mhgp4_forest_probe}"
 OUT_DIR="${OUT_DIR:-out}"
@@ -74,7 +85,12 @@ test -x "${TIME_BIN}" || {
 phase_runs "${PHASE}" >/dev/null
 mkdir -p "${OUT_DIR}"
 NCPU=$(nproc)
-N_OF_PHASE="${PHASE#n}"
+case "${PHASE}" in
+  n32000) N_OF_PHASE=32000 ;;
+  n64000) N_OF_PHASE=64000 ;;
+  court1h) N_OF_PHASE=32000 ;;
+  *) echo "REFUS : phase inconnue '${PHASE}'" >&2; exit 2 ;;
+esac
 CPU_SET="0-$((NCPU - 1))"
 
 

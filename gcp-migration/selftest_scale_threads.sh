@@ -205,6 +205,19 @@ for c in "FAKE_OMIT_DIGEST_K7=1:omit-digest-K7:digest forest_K7" \
     fail "scenario 9 (${label}) : motif « ${motif} » attendu"
 done
 
+# ---- Scenario 10 : phase courte court1h (directive <= 1 h) — 4 runs,
+# paires t8/tmax, etiquette d'equivalence restreinte honnete.
+env PROBE_BIN="${WORK}/fake_probe" TIME_BIN="${WORK}/fake_time" \
+  OUT_DIR="${WORK}/out10" RUN_TIMEOUT=60 RETRIEVE_MARGIN=10 \
+  bash gcp-migration/v4_scale_threads_remote.sh c0mm1t payl0ad man1fest \
+  court1h "${FUTURE}" >/dev/null || fail "scenario 10 : runner rc"
+[ "$(ls "${WORK}/out10"/*.status | wc -l)" -eq 4 ] || fail "scenario 10 : 4 statuts attendus"
+python3 gcp-migration/validate_v4_scale_threads.py "${WORK}/out10" c0mm1t \
+  payl0ad man1fest 0 0 court1h > "${WORK}/v10.log" 2>&1 ||
+  fail "scenario 10 : happy path court1h refuse ($(cat "${WORK}/v10.log"))"
+grep -q 'thread_equivalence_checked_t8_tmax' "${WORK}/v10.log" ||
+  fail "scenario 10 : etiquette t8_tmax attendue"
+
 echo "selftest_scale_threads : violations=${BAD}"
 [ "${BAD}" -eq 0 ] || exit 1
 echo "PROTOCOLE CONFORME"
