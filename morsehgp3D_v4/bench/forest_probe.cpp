@@ -97,9 +97,14 @@ struct Args {
   bool digest_gate = false;
   int inj_fold_capacity = 0;  // 1 = u32-event-wrap, 2 = i32-fid-wrap,
                               // 3 = epoch-sentinel-collision
+  int inj_fold_intern = 0;    // 1 = fid en ordre de rencontre,
+                              // 2 = empreinte sans verification de cle,
+                              // 3 = dernier lot au lieu du premier
   u32 inj_axial = 0;  // masque kAxial* des mutants du chemin axial
   u64 min_balls = 0;
   u64 min_fusions = 0;
+  bool intern_bench = false;  // banc d'alternance des deux internements
+  int bench_repeat = 5;
 };
 
 bool parse_family(const char* name, CloudFamily* out) {
@@ -184,6 +189,11 @@ Args parse(int argc, char** argv) {
     else if (arg == "--inject=fold-i32-fid-wrap") a.inj_fold_capacity = 2;
     else if (arg == "--inject=fold-epoch-sentinel-collision")
       a.inj_fold_capacity = 3;
+    else if (arg == "--fold-intern-bench") a.intern_bench = true;
+    else if (const char* v = val("--bench-repeat=")) a.bench_repeat = std::atoi(v);
+    else if (arg == "--inject=intern-fid-first-seen") a.inj_fold_intern = 1;
+    else if (arg == "--inject=intern-hash-no-verify") a.inj_fold_intern = 2;
+    else if (arg == "--inject=intern-first-batch-last") a.inj_fold_intern = 3;
     else if (arg == "--inject=float-ignore-rounding")
       a.inj_axial |= kFloatIgnoreRounding;
     else if (arg == "--inject=float-threshold-too-small")
@@ -1762,8 +1772,146 @@ int run_float_rounding_gate(bool inj_ignore) {
 // canonique suit la racine union-find au lieu du minimum — les unions
 // generiques placent la racine ailleurs que le minimum, partition et
 // deltas divergent.
-int run_fold_compact_gate(bool inj_root) {
+// BANC D'ALTERNANCE DES DEUX INTERNEMENTS (mesure, pas une porte).
+// Motif : sur ce conteneur, `t_fold` du MEME binaire varie de ±40 %
+// d'un processus a l'autre (allocations a l'echelle du Go), si bien
+// qu'une comparaison entre processus ne departage rien. Ici les deux
+// modes tournent dans le MEME processus, sur les MEMES evenements,
+// alternes R fois, et chaque temps est publie — jamais une moyenne
+// seule. La porte a trois backends garantit par ailleurs que les deux
+// modes rendent le meme objet : le banc ne mesure donc qu'un cout.
+int run_intern_bench(const Args& a) {
+  const std::vector<P3> pts = make_family_cloud(
+      a.family, a.n,
+      a.coord ? a.coord : cloud_family_default_coord(a.family, a.n), a.seed);
+  const CloudIndex ix = build_cloud_index(pts);
+  if ((size_t)ix.unique_count() != pts.size()) return 3;
+  std::vector<BallCandidate> cs;
+  BallStreamStats ss;
+  collect_candidate_balls(ix, a.s, a.smax, &cs, &ss, false, false, 0,
+                          a.threads);
+  std::stable_sort(cs.begin(), cs.end(), ball_candidate_less);
+  cs.erase(std::unique(cs.begin(), cs.end(),
+                       [](const BallCandidate& x, const BallCandidate& y) {
+                         return x.key == y.key;
+                       }),
+           cs.end());
+  std::vector<Survivor> sv;
+  BallStreamStats ds;
+  prefilter_balls(ix, cs, a.smax, false, false, &sv, &ds, a.threads);
+  std::vector<BallData> balls;
+  if (census_balls(ix, cs, sv, a.smax, a.shell_cap, false, false, &balls, &ds,
+                   a.threads, false) != 0)
+    return 3;
+  std::vector<PointId> pid_of((size_t)ix.unique_count());
+  for (size_t u = 0; u < pid_of.size(); ++u) pid_of[u] = ix.point_id((i32)u);
+  u64 e1[11] = {};
+  ForestResult rr[11];
+  std::vector<std::vector<ForestEvent>> evk;
+  const u64 kmax = std::min<u64>(10, a.smax ? a.smax - 1 : 10);
+  if (forests_from_balls(balls, ix.upos, pid_of, kmax, e1, rr, &evk, 1,
+                         false) != 0)
+    return 3;
+  // Le K le plus lourd porte l'essentiel des incidences : c'est lui que
+  // le banc mesure (les petits K ne discriminent rien).
+  int kbest = 1;
+  u64 best = 0, recs_best = 0;
+  for (int K = 1; K <= (int)kmax; ++K) {
+    u64 rc = 0;
+    for (const ForestEvent& ev : evk[(size_t)K]) rc += (u64)ev.q + ev.d;
+    if (rc > best) best = rc, kbest = K, recs_best = rc;
+  }
+  if (recs_best == 0) return 3;
+  std::printf("intern_bench famille=%s n=%d s=%lld smax=%llu K=%d "
+              "evenements=%zu incidences=%llu\n",
+              cloud_family_name(a.family), a.n, (long long)a.s,
+              (unsigned long long)a.smax, kbest, evk[(size_t)kbest].size(),
+              (unsigned long long)recs_best);
+  std::vector<double> tri, stream;
+  u64 facets_ref = 0;
+  bool same = true;
+  for (int i = 0; i < a.bench_repeat; ++i) {
+    for (int mode = 1; mode >= 0; --mode) {  // tri puis streaming
+      const ForestResult rres =
+          build_forest(evk[(size_t)kbest], false, false, nullptr, false, false,
+                       false, false, 0, 0, 0, 0, 0, mode);
+      const double t = rres.t_intern_ms;
+      (mode == 1 ? tri : stream).push_back(t);
+      if (facets_ref == 0) facets_ref = rres.facets;
+      else same = same && rres.facets == facets_ref;
+      std::printf("  repet=%d mode=%s t_intern_ms=%.1f t_scan_ms=%.1f "
+                  "t_sort_ms=%.1f t_remap_ms=%.1f facettes=%llu\n",
+                  i, mode == 1 ? "tri" : "streaming", t,
+                  rres.t_intern_scan_ms, rres.t_intern_sort_ms,
+                  rres.t_intern_remap_ms, (unsigned long long)rres.facets);
+    }
+  }
+  const auto median = [](std::vector<double> v) {
+    std::sort(v.begin(), v.end());
+    return v.empty() ? 0.0 : v[v.size() / 2];
+  };
+  const double mt = median(tri), msr = median(stream);
+  std::printf("intern_bench mediane_tri_ms=%.1f mediane_streaming_ms=%.1f "
+              "rapport=%.3f facettes_identiques=%s\n",
+              mt, msr, mt > 0 ? msr / mt : 0.0, same ? "oui" : "NON");
+  return same ? 0 : 3;
+}
+
+int run_fold_compact_gate(bool inj_root, int inj_intern) {
   u64 bad = 0;
+  // PLANCHERS DE NON-VACUITE (doctrine : jamais de vert par vacuite) :
+  // la porte ne prouve l'internement que si elle DEDOUBLONNE vraiment
+  // (incidences > facettes uniques), si elle voit plusieurs lots et si
+  // les facettes se comptent en centaines de milliers.
+  u64 tot_recs = 0, tot_facets = 0, tot_batches = 0;
+  // FIXTURE DE FLUX INCOHERENT (permanente, coordonnees symboliques) :
+  // deux evenements K=2 dont la MEME facette {1,2} est un ATTACHEMENT
+  // dans deux lots distincts. L'invariant des rayons de naissance
+  // (MATHEMATIQUES § 5.2) l'interdit sur un flux geometrique — c'est
+  // precisement ce que compte `attach_violations`, et RIEN jusqu'ici ne
+  // prouvait que ce detecteur puisse se declencher : tous les tests ne
+  // verifiaient que sa nullite (vert par vacuite du compteur lui-meme).
+  //
+  // Elle grave AUSSI la semantique de `first_batch` : sur un flux
+  // coherent, `existed` est REDONDANT avec `active` (une facette deja
+  // vue est active au lot suivant, sinon elle serait une violation),
+  // donc le minimum des lots n'est observable QUE sur un flux
+  // incoherent. C'est le seul endroit ou le mutant
+  // intern-first-batch-last peut mourir — mesure du 18 aout : sur les
+  // familles geometriques il ne change AUCUNE sortie.
+  {
+    std::vector<ForestEvent> fx(2);
+    for (int i = 0; i < 2; ++i) {
+      fx[(size_t)i].q = 2;
+      fx[(size_t)i].d = 1;
+      fx[(size_t)i].active_mask = 0x3;  // les deux retraits de support
+      fx[(size_t)i].support[0] = 1;
+      fx[(size_t)i].support[1] = 2;
+      fx[(size_t)i].interior[0] = (PointId)(3 + i);
+      fx[(size_t)i].level = promote_q3_level(q2_exact_level(i == 0 ? 100 : 400));
+    }
+    const ForestResult lg = build_forest_legacy(fx);
+    if (lg.batches != 2 || lg.attach_violations != 1 ||
+        lg.new_attachments != 1) {
+      std::fprintf(stderr,
+                   "FIXTURE : flux incoherent non detecte (lots=%llu "
+                   "attach=%llu nees=%llu)\n",
+                   (unsigned long long)lg.batches,
+                   (unsigned long long)lg.attach_violations,
+                   (unsigned long long)lg.new_attachments);
+      return 3;
+    }
+    const ForestResult cp =
+        build_forest(fx, false, false, nullptr, false, false, inj_root, true,
+                     0, 0, 0, 0, inj_intern);
+    if (cp.attach_violations != lg.attach_violations ||
+        cp.new_attachments != lg.new_attachments ||
+        cp.batches != lg.batches || cp.deltas.size() != lg.deltas.size() ||
+        !(cp.final_partition == lg.final_partition)) {
+      std::fprintf(stderr, "FIXTURE : divergence legacy/dense (flux ×2)\n");
+      ++bad;
+    }
+  }
   for (const CloudFamily fam :
        {CloudFamily::kUniform, CloudFamily::kEightClusters}) {
     const int n = fam == CloudFamily::kUniform ? 300 : 120;
@@ -1800,7 +1948,34 @@ int run_fold_compact_gate(bool inj_root) {
       const ForestResult lg = build_forest_legacy(evk[(size_t)K]);
       const ForestResult cp = build_forest(evk[(size_t)K], false, false,
                                            nullptr, false, false, inj_root,
-                                           true);
+                                           true, 0, 0, 0, 0, inj_intern);
+      for (const ForestEvent& ev : evk[(size_t)K])
+        tot_recs += (u64)ev.q + ev.d;
+      tot_facets += lg.facets;
+      tot_batches += lg.batches;
+      // TROISIEME BACKEND : le meme fold compact avec l'internement par
+      // TRI GLOBAL (mode 1), conserve comme comparande mesurable. Les
+      // deux internements doivent rendre des sorties IDENTIQUES — c'est
+      // la porte qui autorise `--fold-intern-bench` a les alterner dans
+      // un meme processus sans changer l'objet.
+      {
+        const ForestResult tr =
+            build_forest(evk[(size_t)K], false, false, nullptr, false, false,
+                         inj_root, true, 0, 0, 0, 0, inj_intern, 1);
+        if (tr.facets != cp.facets || tr.fusions != cp.fusions ||
+            tr.batches != cp.batches ||
+            tr.new_attachments != cp.new_attachments ||
+            tr.attach_violations != cp.attach_violations ||
+            tr.deltas.size() != cp.deltas.size() ||
+            !(tr.final_partition == cp.final_partition) ||
+            tr.facet_keys != cp.facet_keys ||
+            tr.final_canon_fid != cp.final_canon_fid) {
+          std::fprintf(stderr,
+                       "FOLD : divergence tri/streaming (%s, K=%d)\n",
+                       cloud_family_name(fam), K);
+          ++bad;
+        }
+      }
       bool same = lg.facets == cp.facets && lg.fusions == cp.fusions &&
                   lg.batches == cp.batches &&
                   lg.new_attachments == cp.new_attachments &&
@@ -1835,8 +2010,12 @@ int run_fold_compact_gate(bool inj_root) {
       }
     }
   }
-  std::printf("fold_compact_gate violations=%llu\n", (unsigned long long)bad);
-  if (inj_root) {
+  std::printf("fold_compact_gate violations=%llu incidences=%llu "
+              "facettes=%llu lots=%llu\n",
+              (unsigned long long)bad, (unsigned long long)tot_recs,
+              (unsigned long long)tot_facets,
+              (unsigned long long)tot_batches);
+  if (inj_root || inj_intern) {
     if (bad > 0) {
       std::printf("MUTANT TUE\n");
       return 4;
@@ -1844,7 +2023,17 @@ int run_fold_compact_gate(bool inj_root) {
     std::fprintf(stderr, "PORTE INEFFICACE : mutant non discrimine\n");
     return 3;
   }
-  return bad ? 3 : 0;
+  if (bad) return 3;
+  // Planchers : sans dedoublonnage effectif ni pluralite de lots, la
+  // porte ne dirait rien de l'internement.
+  if (tot_facets < 200000 || tot_recs <= tot_facets || tot_batches < 1000) {
+    std::fprintf(stderr,
+                 "PLANCHER : incidences=%llu facettes=%llu lots=%llu\n",
+                 (unsigned long long)tot_recs, (unsigned long long)tot_facets,
+                 (unsigned long long)tot_batches);
+    return 3;
+  }
+  return 0;
 }
 
 // PORTE DE PARALLELISME (directive « paralléliser ») : l'objet post-RLE
@@ -2381,7 +2570,9 @@ int main(int argc, char** argv) {
   if (a.par_gate)
     return run_par_gate(a.inj_par_drop, a.inj_par_drop_census);
   if (a.q2_birth_gate) return run_q2_birth_gate(a.inj_birth_dup);
-  if (a.fold_compact_gate) return run_fold_compact_gate(a.inj_canon_root);
+  if (a.intern_bench) return run_intern_bench(a);
+  if (a.fold_compact_gate)
+    return run_fold_compact_gate(a.inj_canon_root, a.inj_fold_intern);
   if (a.float_gate)
     return run_float_gate((a.inj_axial & kFloatSmallThreshold) != 0);
   if (a.q3_affine_gate)
@@ -2847,16 +3038,21 @@ int main(int argc, char** argv) {
   // Chronos GROSSIERS du fold, sommes sur les K (temps CPU cumule a
   // N fils — audit « fold compact » § 1.4).
   {
-    double tb = 0, ti = 0, trd = 0, tp = 0;
+    double tb = 0, ti = 0, trd = 0, tp = 0, tis = 0, tit = 0, tir = 0;
     for (int K = 1; K <= (int)kmax_eff; ++K) {
       tb += sres[K].t_batching_ms;
       ti += sres[K].t_intern_ms;
       trd += sres[K].t_reduce_ms;
       tp += sres[K].t_partition_ms;
+      tis += sres[K].t_intern_scan_ms;
+      tit += sres[K].t_intern_sort_ms;
+      tir += sres[K].t_intern_remap_ms;
     }
     std::printf("fold_phases t_batching_ms=%.1f t_intern_ms=%.1f "
                 "t_reduce_ms=%.1f t_partition_ms=%.1f\n",
                 tb, ti, trd, tp);
+    std::printf("fold_intern t_scan_ms=%.1f t_sort_ms=%.1f t_remap_ms=%.1f\n",
+                tis, tit, tir);
   }
 
   if (any_inject) {

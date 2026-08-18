@@ -21,6 +21,7 @@
 #pragma once
 
 #include <algorithm>
+#include <array>
 #include <chrono>
 #include <map>
 #include <string>
@@ -134,6 +135,12 @@ struct ForestResult {
   // separation roles/unions/deltas n'est volontairement pas mesuree).
   double t_batching_ms = 0, t_intern_ms = 0, t_reduce_ms = 0,
          t_partition_ms = 0;
+  // Sous-postes de l'internement (trois marques par fold, jamais par
+  // lot) : balayage streaming, tri des cles UNIQUES, retour des
+  // identifiants temporaires vers les fid. Le tri porte exactement sur
+  // la sortie — c'est le plancher incompressible tant que la partition
+  // dense publie des facettes triees.
+  double t_intern_scan_ms = 0, t_intern_sort_ms = 0, t_intern_remap_ms = 0;
 };
 
 namespace detail_forest {
@@ -160,6 +167,50 @@ struct UnionFind {
   }
 };
 
+// COMPARATEUR D'INTERNEMENT : dans une foret K donnee, toutes les
+// facettes ont k = K, et les entrees au-dela de k sont NULLES par
+// construction (`facet_minus` part d'une cle value-initialisee et
+// remplit exactement k mots). Comparer `k` puis les k premiers mots est
+// donc STRICTEMENT l'ordre de `FacetKey::operator<` (qui compare les dix
+// mots), sans parcourir les mots morts — a K = 1 ou 2, l'ordre generique
+// paie 10 comparaisons pour 1 ou 2 utiles.
+inline bool facet_less_k(const FacetKey& x, const FacetKey& y) {
+  if (x.k != y.k) return x.k < y.k;
+  for (u8 i = 0; i < x.k; ++i)
+    if (x.p[i] != y.p[i]) return x.p[i] < y.p[i];
+  return false;
+}
+
+inline bool facet_equal_k(const FacetKey& x, const FacetKey& y) {
+  if (x.k != y.k) return false;
+  for (u8 i = 0; i < x.k; ++i)
+    if (x.p[i] != y.p[i]) return false;
+  return true;
+}
+
+// Empreinte 64 bits de la facette (splitmix64 sur k et les k mots). Elle
+// ne sert QU'A l'adressage de la table d'internement : l'appartenance est
+// toujours tranchee par une comparaison EXACTE de cle, et l'ordre des fid
+// vient du tri final des cles uniques — aucune sortie ne depend du
+// hachage.
+inline u64 facet_fingerprint(const FacetKey& f) {
+  // Polynome a multiplicateur impair (deux operations par mot, l'ordre
+  // des points compte) puis finalisation splitmix : les bits hauts, qui
+  // servent d'etiquette de case, dependent de TOUS les mots. Le cout par
+  // incidence est le poste chaud — une ronde de melange complete par mot
+  // couterait cinq fois plus pour aucune propriete utile ici, la
+  // comparaison de cle restant l'autorite.
+  u64 h = 0x9E3779B97F4A7C15ull ^ (u64)f.k;
+  for (u8 i = 0; i < f.k; ++i)
+    h = (h + (u64)f.p[i]) * 0x9E3779B97F4A7C15ull;
+  h ^= h >> 31;
+  h *= 0xBF58476D1CE4E5B9ull;
+  h ^= h >> 27;
+  h *= 0x94D049BB133111EBull;
+  h ^= h >> 31;
+  return h;
+}
+
 inline FacetKey facet_minus(const ForestEvent& e, int drop_support,
                             int drop_interior) {
   FacetKey f;
@@ -177,6 +228,88 @@ inline FacetKey facet_minus(const ForestEvent& e, int drop_support,
   }
   return f;
 }
+
+// TABLE D'INTERNEMENT EN STREAMING (reponse d'audit « fold compact »
+// § 3, contrat d'echelle) : adressage ouvert, sondage lineaire, charge
+// <= 1/2, capacite en puissance de deux. Chaque case tient sur 64 bits
+// (empreinte tronquee a 32 bits << 32 | tid+1 ; 0 = vide) : l'empreinte
+// evite de toucher le pool sur collision, la comparaison EXACTE de cle
+// tranche l'appartenance. AUCUN tableau de records (facette, evenement,
+// slot) n'est materialise — c'etait 52 octets par incidence, double par
+// le tampon de fusion de `stable_sort`.
+//
+// INDEPENDANCE AU HACHAGE (invariant public) : les tid sont attribues
+// dans l'ordre de RENCONTRE, mais les fid publies viennent du tri des
+// cles UNIQUES — l'ordre `fid croissant <=> FacetKey croissante`, dont
+// depend le canonique min-fid, ne doit rien a l'empreinte ni au
+// sondage.
+struct FacetIntern {
+  static constexpr u64 kTag = 0xFFFFFFFF00000000ull;
+  std::vector<u64> table;                      // cases
+  std::vector<std::pair<FacetKey, u32>> pool;  // tid -> (cle, tid)
+  std::vector<u32> batch;                      // tid -> premier lot
+  size_t mask = 0;
+  // MUTANTS (chacun degrade UNE garantie) : `no_verify` decide
+  // l'appartenance sur huit bits d'empreinte SANS comparer la cle ;
+  // `batch_last` garde le DERNIER lot au lieu du premier.
+  bool no_verify = false, batch_last = false;
+
+  // DIMENSIONNEMENT UNE FOIS POUR TOUTES a partir du nombre d'incidences
+  // (majorant EXACT du nombre de facettes uniques : l'internement
+  // dedoublonne, jamais n'ajoute) : la table ne rehache JAMAIS et les
+  // trois tableaux ne se reallouent jamais. Le rehachage par doublement
+  // coutait deux fois le nombre de facettes en sondages aleatoires
+  // supplementaires — mesure du 18 aout — pour une capacite finale
+  // identique. `reserve` ne touche pas les pages : le RSS suit les
+  // facettes reellement internees, pas le majorant.
+  explicit FacetIntern(size_t incidences) {
+    size_t cap = 1024;
+    while (cap < incidences * 2 + 2) cap <<= 1;
+    table.assign(cap, 0);
+    mask = cap - 1;
+    pool.reserve(incidences);
+    batch.reserve(incidences);
+  }
+
+  // Prefetch de la case visee : la table depasse largement les caches
+  // (134 Mo a n=8000, K=10), donc chaque sondage est un defaut de cache
+  // ET de TLB. Le pipeline logiciel de l'appelant precharge un bloc de
+  // cases pendant qu'il calcule les cles suivantes.
+  void prefetch(u64 h) const {
+#if defined(__GNUC__) || defined(__clang__)
+    __builtin_prefetch(&table[(size_t)h & mask], 1, 1);
+#else
+    (void)h;
+#endif
+  }
+
+  u32 intern(const FacetKey& f, u32 b) {
+    return intern_hashed(f, facet_fingerprint(f), b);
+  }
+
+  u32 intern_hashed(const FacetKey& f, u64 h, u32 b) {
+    const u64 tag = h & kTag;
+    size_t i = (size_t)h & mask;
+    while (table[i] != 0) {
+      const u32 tid = (u32)(table[i] & 0xFFFFFFFFull) - 1;
+      const bool hit =
+          no_verify ? (((table[i] ^ tag) & (0xFFull << 32)) == 0)
+                    : ((table[i] & kTag) == tag &&
+                       facet_equal_k(pool[(size_t)tid].first, f));
+      if (hit) {
+        batch[(size_t)tid] =
+            batch_last ? b : std::min(batch[(size_t)tid], b);
+        return tid;
+      }
+      i = (i + 1) & mask;
+    }
+    const u32 tid = (u32)pool.size();
+    pool.push_back({f, tid});
+    batch.push_back(b);
+    table[i] = tag | (u64)(tid + 1);
+    return tid;
+  }
+};
 
 }  // namespace detail_forest
 
@@ -406,7 +539,7 @@ inline ForestResult build_forest(
     bool mutant_drop_nonmerge = false, bool mutant_canon_root = false,
     bool fill_legacy_partition = true, u64 cap_base_events = 0,
     u64 cap_base_recs = 0, u64 cap_base_batches = 0,
-    int mutant_capacity = 0) {
+    int mutant_capacity = 0, int mutant_intern = 0, int intern_mode = 0) {
   ForestResult r;
   // GARDE DE CAPACITE TRANSACTIONNELLE (contre-audit 5d274a1 § 7) : les
   // index LOCAUX du fold sont volontairement etroits (FRec::e en u32,
@@ -419,8 +552,8 @@ inline ForestResult build_forest(
   // sentinelle UINT32_MAX des tableaux a epoque. Les bases cap_base_*
   // (fictives, portes seulement) approchent les limites sans allocation
   // geante ; les trois mutants degradent chacun UNE comparaison.
+  u64 total_recs = 0;
   {
-    u64 total_recs = 0;
     for (const ForestEvent& ev : events) total_recs += (u64)ev.q + ev.d;
     const u64 nev = cap_base_events + (u64)events.size();
     const u64 nrec = cap_base_recs + total_recs;
@@ -474,48 +607,150 @@ inline ForestResult build_forest(
     }
   }
   mark(&r.t_batching_ms);
-  // INTERNEMENT GLOBAL PAR TRI (fold sort/reduce : les std::map chauds —
-  // id_of global et roles par lot — portaient la pente ×2,8/doublement du
-  // fold ; un tri unique des (facette, evenement, slot) les remplace).
-  // Les fid sont attribues en ordre de FacetKey croissante ; first_batch
-  // rend `existed` = « vue dans un lot STRICTEMENT anterieur » en O(1).
-  struct FRec {
-    FacetKey f;
-    u32 e;
-    u8 slot;  // < q : retrait de support ; >= q : retrait d'interieur
-  };
-  std::vector<FRec> recs;
-  {
-    size_t total = 0;
-    for (const ForestEvent& ev : events) total += (size_t)ev.q + ev.d;
-    recs.reserve(total);
-  }
-  for (size_t e = 0; e < events.size(); ++e) {
-    const ForestEvent& ev = events[e];
-    for (int s = 0; s < (int)ev.q; ++s)
-      recs.push_back({detail_forest::facet_minus(ev, s, -1), (u32)e, (u8)s});
-    for (int z = 0; z < (int)ev.d; ++z)
-      recs.push_back(
-          {detail_forest::facet_minus(ev, -1, z), (u32)e, (u8)(ev.q + z)});
-  }
-  std::stable_sort(recs.begin(), recs.end(),
-                   [](const FRec& x, const FRec& y) { return x.f < y.f; });
+  // INTERNEMENT EN STREAMING (reponse d'audit « fold compact » § 3 —
+  // remplace le tri global des (facette, evenement, slot)). Le tableau
+  // de records pesait 52 octets par incidence et `stable_sort` en
+  // reclamait autant en tampon de fusion : a n=8000 c'etait 26,65 M
+  // records pour 19,47 M facettes uniques (facteur de dedoublonnage
+  // 1,37 seulement) — on payait 2 x 52 octets de trafic memoire par
+  // incidence pour trier 1,37 fois plus d'elements que la sortie n'en
+  // contient. Ici chaque facette est internee A LA VOLEE (table
+  // d'adressage ouvert, comparaison EXACTE de cle), puis les cles
+  // UNIQUES — et elles seules — sont triees : le tri porte exactement
+  // sur la sortie, et aucun tampon de records n'existe.
+  //
+  // INVARIANT PUBLIC INCHANGE ET INDEPENDANT DU HACHAGE : les fid sont
+  // attribues en ordre de FacetKey croissante (le tri final est la
+  // seule autorite d'ordre — l'empreinte et le sondage n'entrent dans
+  // aucune sortie) ; first_batch rend `existed` = « vue dans un lot
+  // STRICTEMENT anterieur » en O(1). MUTANTS : 1 = fid en ordre de
+  // rencontre (le tri saute) ; 2 = appartenance sur huit bits
+  // d'empreinte sans comparaison de cle ; 3 = dernier lot au lieu du
+  // premier.
   std::vector<FacetKey> keys;          // fid -> FacetKey (ordre croissant)
   std::vector<u32> first_batch;        // fid -> premier lot d'apparition
   std::vector<u32> ev_fid(events.size() * 11);  // (e, slot) -> fid
-  for (size_t i = 0; i < recs.size(); ++i) {
-    if (i == 0 || !(recs[i].f == recs[i - 1].f)) {
-      keys.push_back(recs[i].f);
-      first_batch.push_back(UINT32_MAX);
+  if (intern_mode == 1) {
+    // MODE 1 — INTERNEMENT PAR TRI GLOBAL (l'historique, conserve comme
+    // COMPARANDE mesurable dans le MEME processus). Il materialise un
+    // record de 52 octets par incidence et `stable_sort` en reclame
+    // autant en tampon de fusion ; son acces est sequentiel, celui du
+    // mode 0 est aleatoire — sur un conteneur ou le fold varie de ±40 %
+    // d'un processus a l'autre, seule une alternance intra-processus
+    // (`--fold-intern-bench`) permet de les departager. Les deux modes
+    // doivent produire des sorties IDENTIQUES (porte a trois backends).
+    struct FRec {
+      FacetKey f;
+      u32 e;
+      u8 slot;
+    };
+    std::vector<FRec> recs;
+    recs.reserve((size_t)total_recs);
+    for (size_t e = 0; e < events.size(); ++e) {
+      const ForestEvent& ev = events[e];
+      for (int s = 0; s < (int)ev.q; ++s)
+        recs.push_back({detail_forest::facet_minus(ev, s, -1), (u32)e, (u8)s});
+      for (int z = 0; z < (int)ev.d; ++z)
+        recs.push_back(
+            {detail_forest::facet_minus(ev, -1, z), (u32)e, (u8)(ev.q + z)});
     }
-    const u32 fid = (u32)keys.size() - 1;
-    ev_fid[(size_t)recs[i].e * 11 + recs[i].slot] = fid;
-    first_batch.back() =
-        std::min(first_batch.back(), (u32)r.batch_of_event[recs[i].e]);
+    std::stable_sort(recs.begin(), recs.end(),
+                     [](const FRec& x, const FRec& y) { return x.f < y.f; });
+    mark(&r.t_intern_scan_ms);
+    for (size_t i = 0; i < recs.size(); ++i) {
+      if (i == 0 || !(recs[i].f == recs[i - 1].f)) {
+        keys.push_back(recs[i].f);
+        first_batch.push_back(UINT32_MAX);
+      }
+      const u32 fid = (u32)keys.size() - 1;
+      ev_fid[(size_t)recs[i].e * 11 + recs[i].slot] = fid;
+      first_batch.back() =
+          std::min(first_batch.back(), (u32)r.batch_of_event[recs[i].e]);
+    }
+    mark(&r.t_intern_remap_ms);
+  } else {
+    detail_forest::FacetIntern in((size_t)total_recs);
+    in.no_verify = mutant_intern == 2;
+    in.batch_last = mutant_intern == 3;
+    // PIPELINE LOGICIEL : un bloc de 48 incidences calcule d'abord ses
+    // cles et ses empreintes (tout tient en L1) en PRECHARGEANT les
+    // cases visees, puis sonde. Sans lui le balayage est une chaine de
+    // defauts de cache et de TLB dependants ; la capacite de la table
+    // etant figee a l'entree, l'adresse prechargee est celle qui sera
+    // sondee. La semantique est inchangee : meme suite d'appels, meme
+    // ordre.
+    {
+      constexpr size_t kBlock = 48;
+      struct Pending {
+        FacetKey f;
+        u64 h;
+        u32 b;
+        size_t pos;  // e*11+slot : jamais un u32 (e va jusqu'a UINT32_MAX)
+      };
+      std::array<Pending, kBlock> pend{};
+      size_t np = 0;
+      const auto flush = [&]() {
+        for (size_t i = 0; i < np; ++i)
+          ev_fid[pend[i].pos] = in.intern_hashed(pend[i].f, pend[i].h,
+                                                 pend[i].b);
+        np = 0;
+      };
+      const auto push = [&](const FacetKey& f, u32 b, size_t pos) {
+        Pending& p = pend[np];
+        p.f = f;
+        p.h = detail_forest::facet_fingerprint(f);
+        p.b = b;
+        p.pos = pos;
+        in.prefetch(p.h);
+        if (++np == kBlock) flush();
+      };
+      for (size_t e = 0; e < events.size(); ++e) {
+        const ForestEvent& ev = events[e];
+        const u32 b = (u32)r.batch_of_event[e];
+        for (int s = 0; s < (int)ev.q; ++s)
+          push(detail_forest::facet_minus(ev, s, -1), b, e * 11 + (size_t)s);
+        for (int z = 0; z < (int)ev.d; ++z)
+          push(detail_forest::facet_minus(ev, -1, z), b,
+               e * 11 + (size_t)(ev.q + z));
+      }
+      flush();
+    }
+    mark(&r.t_intern_scan_ms);
+    // Table liberee AVANT le tri : le pic memoire du fold ne cumule
+    // jamais l'index d'internement et la sortie.
+    std::vector<u64>().swap(in.table);
+    if (mutant_intern != 1)
+      std::sort(in.pool.begin(), in.pool.end(),
+                [](const std::pair<FacetKey, u32>& x,
+                   const std::pair<FacetKey, u32>& y) {
+                  return detail_forest::facet_less_k(x.first, y.first);
+                });
+    mark(&r.t_intern_sort_ms);
+    const size_t np = in.pool.size();
+    keys.resize(np);
+    first_batch.resize(np);
+    std::vector<u32> rank(np);
+    for (size_t i = 0; i < np; ++i) {
+      keys[i] = in.pool[i].first;
+      first_batch[i] = in.batch[(size_t)in.pool[i].second];
+      rank[(size_t)in.pool[i].second] = (u32)i;
+    }
+    std::vector<std::pair<FacetKey, u32>>().swap(in.pool);
+    std::vector<u32>().swap(in.batch);
+    // Retour des identifiants temporaires vers les fid publies.
+    for (size_t e = 0; e < events.size(); ++e) {
+      const ForestEvent& ev = events[e];
+      for (int t = 0; t < (int)ev.q + (int)ev.d; ++t) {
+        u32& slot = ev_fid[e * 11 + (size_t)t];
+        slot = rank[(size_t)slot];
+      }
+    }
   }
   const size_t nfid = keys.size();
   r.facets = nfid;
-  mark(&r.t_intern_ms);
+  mark(&r.t_intern_remap_ms);
+  r.t_intern_ms =
+      r.t_intern_scan_ms + r.t_intern_sort_ms + r.t_intern_remap_ms;
   detail_forest::UnionFind uf;
   for (size_t i = 0; i < nfid; ++i) uf.add();
   // CANONIQUE PAR MIN-FID (fold compact § 1.1) : les fid sont attribues

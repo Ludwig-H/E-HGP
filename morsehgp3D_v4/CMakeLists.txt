@@ -388,6 +388,25 @@ mhgp4_expect_code(mhgp4_forest_probe_fold_compact_gate 0 mhgp4_forest_probe
     "--fold-compact-gate")
 mhgp4_expect_code(mhgp4_forest_probe_fold_mutant_canon_root 4 mhgp4_forest_probe
     "--fold-compact-gate --inject=canonical-is-uf-root")
+# INTERNEMENT EN STREAMING (reponse d'audit « fold compact » § 3) : le
+# backend FIGE build_forest_legacy garde le tri global des (facette,
+# evenement, slot) — il est donc le TEMOIN de l'internement a la volee
+# du fold compact, et la porte a deux backends ci-dessus le compare deja
+# sur tout (compteurs, niveaux, nœuds, deltas, partition map ET dense).
+# Trois mutants, chacun degradant UNE garantie : fid en ordre de
+# RENCONTRE (le tri des cles uniques saute : l'ordre des fid ne suit plus
+# celui des FacetKey, donc le canonique min-fid n'est plus le minimum),
+# appartenance decidee sur huit bits d'EMPREINTE sans comparaison de cle
+# (des facettes distinctes fusionnent), et DERNIER lot au lieu du
+# premier (le drapeau `existed` bascule, naissances et croissances
+# faussees). Les planchers de la porte (incidences > facettes, >= 200 000
+# facettes, >= 1000 lots) interdisent le vert par vacuite.
+mhgp4_expect_code(mhgp4_forest_probe_intern_mutant_first_seen 4
+    mhgp4_forest_probe "--fold-compact-gate --inject=intern-fid-first-seen")
+mhgp4_expect_code(mhgp4_forest_probe_intern_mutant_no_verify 4
+    mhgp4_forest_probe "--fold-compact-gate --inject=intern-hash-no-verify")
+mhgp4_expect_code(mhgp4_forest_probe_intern_mutant_batch_last 4
+    mhgp4_forest_probe "--fold-compact-gate --inject=intern-first-batch-last")
 # Etage flottant certifie du signe de P (reçu « filtre flottant » —
 # enregistrement CTest REPARE : la porte existait sans etre cablee) puis
 # KERNEL AFFINE par ancre (audit « filtre certifie et niveaux q3 » § 1) :
