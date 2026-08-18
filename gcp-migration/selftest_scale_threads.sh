@@ -183,6 +183,23 @@ if MAX_RUN_SECONDS=30000 GUEST_SHUTDOWN_MINUTES=520 SSH_KEY_TTL_MINUTES=540 \
   fail "scenario 6c : session > 8 h acceptee a tort"
 fi
 grep -q 'REFUS : MAX_RUN_SECONDS > 8 h' "${WORK}/s6c.log" || fail "scenario 6c : garde 8 h attendue"
+# 6d : la garde 5 de start_and_verify (invite + 300 s <= maxRunDuration)
+# est modelisee AU preflight — le refus du 18 aout (57 min @ 3600 s)
+# doit tomber ICI, avant toute action GCP.
+if MAX_RUN_SECONDS=3600 GUEST_SHUTDOWN_MINUTES=57 SSH_KEY_TTL_MINUTES=68 \
+     RUN_TIMEOUT=600 BUILD_MARGIN=480 RETRIEVE_MARGIN=300 PHASE=n64000 \
+     bash gcp-migration/session_scale_threads_g4.sh > "${WORK}/s6d.log" 2>&1; then
+  fail "scenario 6d : invite 57 min @ 3600 s accepte a tort"
+fi
+grep -q 'garde 5' "${WORK}/s6d.log" || fail "scenario 6d : motif garde 5 attendu"
+# 6e : la garde 6 (fenetre de TTL des DEUX cotes) — un TTL trop long est
+# refuse autant qu'un trop court.
+if MAX_RUN_SECONDS=3600 GUEST_SHUTDOWN_MINUTES=55 SSH_KEY_TTL_MINUTES=75 \
+     RUN_TIMEOUT=600 BUILD_MARGIN=480 RETRIEVE_MARGIN=300 PHASE=n64000 \
+     bash gcp-migration/session_scale_threads_g4.sh > "${WORK}/s6e.log" 2>&1; then
+  fail "scenario 6e : TTL 75 min @ 3600 s accepte a tort"
+fi
+grep -q 'garde 6' "${WORK}/s6e.log" || fail "scenario 6e : motif garde 6 attendu"
 
 # ---- Scenario 7 : la mauvaise experience sous le bon nom (66886c0 § 1).
 for c in "FAKE_WRONG_N=16000:wrong-n" "FAKE_WRONG_FAMILY=uniform:wrong-family" \

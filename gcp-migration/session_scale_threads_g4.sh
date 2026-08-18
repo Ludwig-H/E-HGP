@@ -14,11 +14,22 @@
 #  - PREFLIGHT DE BUDGET (audit b3a6eb4 § 2-3) : avant TOUTE mutation
 #    GCP, required = build_margin + somme des timeouts sequentiels
 #    (imprimee par le runner lui-meme : source de verite UNIQUE,
-#    `--print-budget`) + marge de rapatriement, et l'on exige
-#      MAX_RUN_SECONDS        >= required,
-#      60*GUEST_SHUTDOWN_MIN  >  required,
-#      60*SSH_KEY_TTL_MIN     >  60*GUEST_SHUTDOWN_MIN + 600,
-#      MAX_RUN_SECONDS        <= 28800 (garde AGENTS.md : jamais > 8 h).
+#    `--print-budget`) + marge de rapatriement, et l'on exige les SIX
+#    gardes — les quatre de l'enveloppe ET les deux de
+#    start_and_verify.sh, modelisees ici depuis le refus du 18 aout (un
+#    refus tardif, apres mutation de maxRunDuration, n'est pas un
+#    preflight) :
+#      1. MAX_RUN_SECONDS        >= required,
+#      2. 60*GUEST_SHUTDOWN_MIN  >  required,
+#      3. 60*SSH_KEY_TTL_MIN     >  60*GUEST_SHUTDOWN_MIN + 600,
+#      4. MAX_RUN_SECONDS        <= 28800 (garde AGENTS.md : jamais > 8 h),
+#      5. 60*GUEST_SHUTDOWN_MIN + 300 <= MAX_RUN_SECONDS
+#         (start_and_verify:527 — l'invite + sa tolerance tiennent dans
+#         le coupe-circuit GCE),
+#      6. 60*SSH_KEY_TTL_MIN dans [MAX_RUN_SECONDS+120, MAX_RUN_SECONDS+600]
+#         (start_and_verify:531 exige une expiration RESTANTE dans
+#         [maxRunDuration, +660 s] au moment de la verification ; les
+#         120/600 absorbent le delai creation->verification).
 #    Un defaut = REFUS avant start_and_verify, code 2.
 #  - DEADLINE AU RUNNER : le guest recoit une deadline epoch derivee de
 #    l'arret invite ; il refuse de DEMARRER un run qui ne tient plus
@@ -40,7 +51,10 @@ RETRIEVE_MARGIN="${RETRIEVE_MARGIN:-900}"
 BUILD_MARGIN="${BUILD_MARGIN:-1800}"
 MAX_RUN_SECONDS="${MAX_RUN_SECONDS:-25200}"
 GUEST_SHUTDOWN_MINUTES="${GUEST_SHUTDOWN_MINUTES:-400}"
-SSH_KEY_TTL_MINUTES="${SSH_KEY_TTL_MINUTES:-420}"
+# 427 min : dans la fenetre de la garde 6 pour MAX_RUN_SECONDS=25200
+# (l'ancien defaut 420 = exactement maxRunDuration violait la borne
+# basse de start_and_verify — expiration restante < maxRunDuration).
+SSH_KEY_TTL_MINUTES="${SSH_KEY_TTL_MINUTES:-427}"
 
 # ---- 0a. PREFLIGHT DE BUDGET, avant toute action GCP. La somme des
 # timeouts vient du RUNNER (la meme liste de runs que le guest executera,
@@ -65,6 +79,15 @@ if [ $((GUEST_SHUTDOWN_MINUTES * 60)) -le "${REQUIRED}" ]; then
 fi
 if [ $((SSH_KEY_TTL_MINUTES * 60)) -le $((GUEST_SHUTDOWN_MINUTES * 60 + 600)) ]; then
   echo "REFUS : TTL de la cle SSH trop court pour l'arret invite + marge" >&2
+  exit 2
+fi
+if [ $((GUEST_SHUTDOWN_MINUTES * 60 + 300)) -gt "${MAX_RUN_SECONDS}" ]; then
+  echo "REFUS : arret invite + 300 s > maxRunDuration (garde 5 de start_and_verify)" >&2
+  exit 2
+fi
+if [ $((SSH_KEY_TTL_MINUTES * 60)) -lt $((MAX_RUN_SECONDS + 120)) ] || \
+   [ $((SSH_KEY_TTL_MINUTES * 60)) -gt $((MAX_RUN_SECONDS + 600)) ]; then
+  echo "REFUS : TTL de la cle hors fenetre [maxRunDuration+120, maxRunDuration+600] (garde 6 de start_and_verify)" >&2
   exit 2
 fi
 
