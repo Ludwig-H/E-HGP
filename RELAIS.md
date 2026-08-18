@@ -62,6 +62,29 @@ Rôles à accorder au compte de service, **au niveau du projet** :
 4. Redémarrer la session pilote (nouveau conteneur) et dire « c'est en
    place ».
 
+## FEU VERT UTILISATEUR (18 août, plus récent)
+
+« Les vrais tests qui décident de l'architecture doivent être sur des
+nuages massifs n=8000,16000,32000,64000. Feu vert pour utiliser GCP !
+Et privilégie des structures qui se paralléliseront bien ! »
+
+Conséquences opérationnelles :
+
+1. La campagne est ÉTENDUE (main@a694496) : phase 3 « échelle de
+   fils » — n=32000 à 8 fils et nproc fils, n=64000 à nproc fils
+   (uniform/terrain/eight_clusters/scanline), 36 statuts au total,
+   selftest PROTOCOLE CONFORME. **Tirer origin/main >= a694496 avant de
+   lancer** — le pin de protocole hache le script et le validateur
+   depuis le commit.
+2. Séquence inchangée : étape A (auth), B (préflight lecture seule),
+   C (`session_campagne_v4_scale_g4.sh` avec ses garde-fous), D
+   (certification `TERMINATED` + reçus publiés ici).
+3. `RUN_TIMEOUT` par run = 3 h ; la phase 3 est séquentielle et vient
+   APRÈS les vagues mono-fil — la session complète peut approcher la
+   `maxRunDuration` : surveiller et, si la fenêtre se ferme, publier
+   les statuts partiels (le validateur les qualifiera partial — reçus
+   quand même, jamais de troncature silencieuse).
+
 ## MESSAGE DE L'UTILISATEUR (18 août, via la session principale)
 
 « Pour le GCP, j'ai déjà créé tout ce qu'il fallait ; les informations
