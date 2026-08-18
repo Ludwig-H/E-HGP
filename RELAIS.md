@@ -1,39 +1,79 @@
-# RELAIS — session pilote GCP « e-hgp-gcp » → session principale
+# RELAIS — session pilote GCP « e-hgp-gcp » ↔ session principale
 
 Campagne d'échelle MorseHGP3D v4 sur g4-standard-48 SPOT. Base : `main@772a8d9`.
-Dernière mise à jour : 2026-08-18 ~01h55 UTC.
+Dernière mise à jour : 2026-08-18 (session principale).
 
-**⚠ URL OAUTH RÉGÉNÉRÉE** : la première URL (2026-08-17) a expiré au bout de 6 h sans code (le processus `gcloud` est mort sur EOF). Un nouveau flux a été relancé — utiliser **uniquement** l'URL ci-dessous (section « url-oauth »), valable ~6 h à partir de 01h55 UTC. Si elle expire encore, je relancerai et republierai.
+## DÉCISION — voie OAuth FERMÉE, voie compte de service ADOPTÉE
 
-## sonde
+La session principale entérine le refus du pilote : **plus jamais de flux
+`gcloud auth login` interactif dans le bac à sable** (URL + relais de code =
+chaîne de captation de justificatif, jeton `cloud-platform` du compte
+personnel entier — refusé même sur ordre). L'URL OAuth précédemment publiée
+ici est caduque et ne sera pas régénérée.
 
-Réseau complet confirmé (proxy agent non sélectif, `selective:false`) :
+La voie retenue : **compte de service GCP attaché à l'environnement remote**
+(paramètres de l'environnement Claude Code, cf.
+`code.claude.com/docs/en/claude-code-on-the-web`). Le justificatif ne
+transite ni par le chat, ni par ce dépôt, ni par ce fichier.
 
-| Endpoint | Code HTTP | Verdict |
-|---|---|---|
-| https://dl.google.com/ | 302 | ouvert |
-| https://accounts.google.com/ | 302 | ouvert |
-| https://oauth2.googleapis.com/ | 404 | ouvert (404 attendu sur la racine) |
-| https://compute.googleapis.com/ | 404 | ouvert (404 attendu sur la racine) |
-| https://storage.googleapis.com/ | 400 | ouvert (400 attendu sur la racine) |
+## Rôles minimaux (dérivés des scripts gardés, session principale)
 
-SDK Google Cloud 532.0.0 installé depuis le tarball officiel (`storage.googleapis.com`), `gcloud --version` OK.
+Verbes réellement utilisés par `session_campagne_v4_scale_g4.sh` →
+`start_and_verify.sh` / `stop_and_verify.sh` / `deploy.sh` :
+`instances start|stop|create|describe|list|set-scheduling`,
+`disks list`, `images describe-from-family`, `regions describe`,
+`project-info describe`, `os-login ssh-keys add|remove`,
+`os-login describe-profile`, `compute ssh|scp` (OS Login, `sudo -n` côté
+invité pour le garde d'extinction), `beta quotas info describe` (préflight).
+`deploy.sh` crée la VM avec `--no-service-account --no-scopes` (aucun
+`actAs` requis par défaut).
 
-## url-oauth
+Rôles à accorder au compte de service, **au niveau du projet** :
 
-Flux `gcloud auth login --no-launch-browser` lancé (FIFO + porteur d'écriture en tâche de fond du harnais). **URL à transmettre à l'utilisateur** — il doit s'y connecter avec son compte Google, puis renvoyer le code de vérification via la session principale sous la forme « CODE AUTH: <code> » :
+1. `roles/compute.instanceAdmin.v1` — cycle de vie de la VM (start/stop/
+   create/describe/set-scheduling, disques, images, régions).
+2. `roles/compute.osAdminLogin` — SSH par OS Login **avec sudo** (le garde
+   invité exécute `sudo -n`), et gestion des clés de son propre profil
+   OS Login.
+3. (Optionnel, préflight quotas : `roles/cloudquotas.viewer` — sinon
+   `check_quotas.sh` échouera proprement et peut être sauté.)
+4. (Seulement si `RUNTIME_SERVICE_ACCOUNT` est un jour utilisé dans
+   `deploy.sh` : `roles/iam.serviceAccountUser` sur ce compte-là — pas
+   nécessaire aujourd'hui.)
 
-```
-https://accounts.google.com/o/oauth2/auth?response_type=code&client_id=32555940559.apps.googleusercontent.com&redirect_uri=https%3A%2F%2Fsdk.cloud.google.com%2Fauthcode.html&scope=openid+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fcloud-platform+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fappengine.admin+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fsqlservice.login+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fcompute+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Faccounts.reauth&state=u9T4AyOllRMPH7hDfsX7rCIapVSOTq&prompt=consent&token_usage=remote&access_type=offline&code_challenge=YL_Tm0n7JDofNcQ9mkqwwkgpH10SfcB0g85ZPwlWs0A&code_challenge_method=S256
-```
+## Marche à suivre pour l'utilisateur (aucun terminal requis)
 
-(Cette URL est publique par construction — PKCE, elle n'ouvre rien sans la connexion Google de l'utilisateur. Le code de vérification, lui, ne sera jamais écrit ici.)
+1. Console GCP → IAM & Admin → Comptes de service → créer
+   `e-hgp-g4@<PROJET>.iam.gserviceaccount.com` ; accorder les rôles 1–2
+   (± 3) ci-dessus au niveau du projet.
+2. Créer une **clé JSON** pour ce compte (à révoquer après la campagne).
+3. claude.ai/code → paramètres de l'**environnement** de la session pilote →
+   variables d'environnement (secret) : `GCP_SA_KEY_JSON` = contenu du JSON ;
+   et script de setup de l'environnement :
 
-## état
+   ```bash
+   umask 077
+   printf '%s' "$GCP_SA_KEY_JSON" > "$HOME/.gcp-sa.json"
+   gcloud auth activate-service-account --key-file="$HOME/.gcp-sa.json"
+   gcloud config set project <PROJET>
+   export GOOGLE_APPLICATION_CREDENTIALS="$HOME/.gcp-sa.json"
+   ```
 
-- [x] Étape 1 — sonde réseau : **OK**
-- [~] Étape 2 — flux OAuth : URL publiée ci-dessus, **en attente du message « CODE AUTH: … »**
-- [ ] Étape 3 — test de caviardage (lecture seule) : GO / NO-GO
-- [ ] Étape 4 — campagne `session_campagne_v4_scale_g4.sh` (seulement si GO)
+4. Redémarrer la session pilote (nouveau conteneur) et dire « c'est en
+   place ».
 
-Rappel : aucune mutation GCP avant le GO de l'étape 3 ; aucun jeton ni code ne sera écrit dans ce fichier.
+## Étapes côté pilote (après « c'est en place »)
+
+- [ ] Étape A — `gcloud auth list` + `gcloud config get-value project`
+      (lecture seule) : le compte de service actif est confirmé ici.
+- [ ] Étape B — préflight lecture seule (`check_quotas.sh` si le rôle 3 est
+      accordé, sinon `instances describe`).
+- [ ] Étape C — campagne `gcp-migration/session_campagne_v4_scale_g4.sh`
+      (garde-fous inchangés : SPOT, label `project=e-hgp`, double
+      coupe-circuit, `maxRunDuration`).
+- [ ] Étape D — **certification `TERMINATED`** sur exactement la cible,
+      publiée ici avec les reçus de campagne.
+
+Rappels inchangés : aucune mutation GCP hors scripts gardés ; aucun jeton,
+code ou clé ne sera jamais écrit dans ce fichier ni dans le dépôt ; après
+la campagne, l'utilisateur supprime la clé JSON du compte de service.
