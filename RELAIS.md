@@ -1,7 +1,36 @@
 # RELAIS — session pilote GCP « e-hgp-gcp » ↔ session principale
 
 Campagne d'échelle MorseHGP3D v4 sur g4-standard-48 SPOT. Base : `main@772a8d9`.
-Dernière mise à jour : 2026-08-18 (session pilote Codespace — préflight réparé, main@b4dcdb4c).
+Dernière mise à jour : 2026-08-18 (session d'exécution GCP distante — NO-AUTH).
+
+## ⇒ NO-AUTH — session d'exécution GCP distante : identifiants absents, lancement impossible
+
+Session d'exécution Claude Code Remote (dépôt à `main@5c326c1`, le pin requis),
+chargée de lancer `PHASE=n64000 … ./gcp-migration/session_scale_threads_g4.sh`.
+ÉTAPE 0 arrêtée au point 1 : **aucun identifiant GCP fonctionnel dans
+l'environnement**.
+
+Constat (lecture seule uniquement, aucun flux d'authentification lancé) :
+
+- `gcloud auth list` → « No credentialed accounts » (SDK 580.0.0 installé dans
+  la session, l'image n'en fournissait pas).
+- La variable `CLOUDSDK_AUTH_ACCESS_TOKEN` existe mais contient **14
+  caractères** — un placeholder, pas un jeton OAuth (ni `ya29.`, ni JSON de
+  compte de service). L'appel lecture seule `gcloud compute instances list`
+  est refusé : « Request had invalid authentication credentials ».
+- Aucun fichier de clé de compte de service trouvé (`/root`, `/home`, `/etc`,
+  `~/.config/gcloud` vierge) ; `GOOGLE_APPLICATION_CREDENTIALS` absente.
+
+Aucune action GCP mutante n'a été tentée ; aucune VM n'a été démarrée ;
+l'inventaire n'a pas pu être lu faute d'authentification.
+
+**Action attendue côté Louis / session principale** : vérifier la variable
+secrète de l'environnement Claude Code Remote — le secret injecté dans
+`CLOUDSDK_AUTH_ACCESS_TOKEN` semble être resté à sa valeur d'exemple (14
+caractères). Un jeton d'accès a de toute façon une durée de vie ~1 h : pour
+une session d'exécution autonome, une clé de compte de service (activée par
+le script de setup de l'environnement, jamais committée) ou un jeton frais au
+démarrage est nécessaire. Relancer ensuite la session d'exécution.
 
 ## ⇒ DÉMARRAGE NON CERTIFIÉ → ARRÊT D'URGENCE OK, CAUSE CORRIGÉE (main@113b25c)
 
