@@ -251,6 +251,23 @@ instance_field() {
         --format="value(${field})"
 }
 
+# Le champ vit sous scheduling.terminationTimestamp dans l'API GCE — la
+# lecture historique au premier niveau rendait TOUJOURS vide hors zones
+# -ai (défaut observé le 18 août : démarrage jamais certifiable en
+# europe-west4-a, arrêt d'urgence systématique après 12 tentatives ;
+# toutes les lectures sœurs utilisent déjà le préfixe scheduling.). On
+# lit le chemin exact, puis l'ancien chemin par ceinture ; la sémantique
+# de certification (cohérence avec start + maxRunDuration, exigence de
+# présence hors zones -ai) est INCHANGÉE.
+read_termination_timestamp() {
+    local value
+    value="$(instance_field 'scheduling.terminationTimestamp')" || return 1
+    if [[ -z "${value}" ]]; then
+        value="$(instance_field 'terminationTimestamp')" || return 1
+    fi
+    printf '%s' "${value}"
+}
+
 verify_static_guard() {
     local action automatic_restart configured_seconds label machine_type
     local maintenance_policy provisioning_model
@@ -291,7 +308,7 @@ verify_running_guard() {
     maintenance_policy="$(instance_field 'scheduling.onHostMaintenance')" || return 1
     provisioning_model="$(instance_field 'scheduling.provisioningModel')" || return 1
     start_timestamp="$(instance_field 'lastStartTimestamp')" || return 1
-    termination_timestamp="$(instance_field 'terminationTimestamp')" || return 1
+    termination_timestamp="$(read_termination_timestamp)" || return 1
 
     [[ "${status}" == "RUNNING" && "${action}" == "STOP" ]] || return 1
     [[ "${automatic_restart,,}" == "false" ]] || return 1
@@ -608,7 +625,7 @@ while ((running_guard_attempt < TERMINATION_TIMESTAMP_MAX_ATTEMPTS && SECONDS < 
         "La génération démarrée est devenue illisible pendant la certification post-démarrage."
     [[ "${status}" == "RUNNING" ]] || fail_started_generation \
         "La génération ${TARGET_LAST_START_TIMESTAMP} a quitté RUNNING pendant la certification post-démarrage."
-    termination_timestamp="$(instance_field 'terminationTimestamp')" || fail_started_generation \
+    termination_timestamp="$(read_termination_timestamp)" || fail_started_generation \
         "terminationTimestamp est devenu illisible pendant la certification post-démarrage."
     [[ "${termination_timestamp}" != *$'\n'* && \
         "${termination_timestamp}" != *$'\r'* ]] || fail_started_generation \
