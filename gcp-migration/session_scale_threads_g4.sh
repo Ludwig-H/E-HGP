@@ -63,10 +63,39 @@ RETRIEVE_MARGIN="${RETRIEVE_MARGIN:-900}"
 BUILD_MARGIN="${BUILD_MARGIN:-1800}"
 MAX_RUN_SECONDS="${MAX_RUN_SECONDS:-25200}"
 GUEST_SHUTDOWN_MINUTES="${GUEST_SHUTDOWN_MINUTES:-400}"
-# Constantes des gardes 5 et 6 : LUES dans start_and_verify.sh, jamais
-# recopiees — source de verite UNIQUE. Une derive de la source doit
-# deplacer la fenetre ici, pas passer inapercue ; illisible = fail-closed.
-START_AND_VERIFY="gcp-migration/start_and_verify.sh"
+# ---- 0. PIN DU PROTOCOLE, AVANT le preflight (audit bloquant 9d19ede
+# § 3.3). Le pin est une operation purement locale, sans mutation GCP :
+# il doit donc preceder la lecture des constantes de garde, sans quoi le
+# preflight decide de l'enveloppe a partir d'octets qui ne sont dans
+# aucun manifeste. Ordre : WORK -> pin et materialisation depuis HEAD ->
+# constantes lues dans le start_and_verify PINNE -> six gardes ->
+# seulement ensuite GCP.
+WORK="$(mktemp -d /tmp/ehgp-v4thr-session.XXXXXXXX)"
+HANDOFF="${WORK}/handoff.json"
+LOG="${WORK}/session.log"
+PIN_OUT="$(./gcp-migration/v4_scale_threads_pin.sh "${WORK}")"
+SOURCE_COMMIT="$(printf '%s\n' "${PIN_OUT}" | sed -n 's/^source_commit=//p')"
+SOURCE_PAYLOAD_SHA256="$(printf '%s\n' "${PIN_OUT}" | sed -n 's/^source_payload_sha256=//p')"
+PROTOCOL_MANIFEST_SHA256="$(printf '%s\n' "${PIN_OUT}" | sed -n 's/^protocol_manifest_sha256=//p')"
+BUNDLE="${WORK}/bundle.tgz"
+# Les gardes locales ne sont plus JAMAIS lues ni executees depuis le
+# worktree : seule la copie extraite du commit fait foi (fenetre TOCTOU
+# fermee). start_and_verify appelant stop_and_verify relativement a son
+# propre BASH_SOURCE, le chemin d'urgence est pinne lui aussi.
+PINNED_GCP="${WORK}/pinned/gcp-migration"
+SET_MAX_RUN_DURATION="${PINNED_GCP}/set_max_run_duration_and_verify.sh"
+START_AND_VERIFY="${PINNED_GCP}/start_and_verify.sh"
+STOP_AND_VERIFY="${PINNED_GCP}/stop_and_verify.sh"
+PINNED_RUNNER="${PINNED_GCP}/v4_scale_threads_remote.sh"
+for f in "${SET_MAX_RUN_DURATION}" "${START_AND_VERIFY}" "${STOP_AND_VERIFY}" \
+         "${PINNED_RUNNER}"; do
+  [ -x "${f}" ] || { echo "REFUS : garde pinnee absente : ${f}" >&2; exit 2; }
+done
+
+# Constantes des gardes 5 et 6 : LUES dans le start_and_verify PINNE,
+# jamais recopiees — source de verite UNIQUE. Une derive de la source
+# doit deplacer la fenetre ici, pas passer inapercue ; illisible =
+# fail-closed.
 GUEST_MARGIN_SECONDS="$(sed -n 's/^readonly TIMESTAMP_TOLERANCE_SECONDS=\([0-9][0-9]*\).*$/\1/p' "${START_AND_VERIFY}" | head -1)"
 SSH_TTL_SLACK_SECONDS="$(sed -n 's/^readonly SSH_KEY_TTL_SLACK_SECONDS=\([0-9][0-9]*\).*$/\1/p' "${START_AND_VERIFY}" | head -1)"
 case "${GUEST_MARGIN_SECONDS}|${SSH_TTL_SLACK_SECONDS}" in
@@ -85,7 +114,7 @@ SSH_KEY_TTL_MINUTES="${SSH_KEY_TTL_MINUTES:-$(( (MAX_RUN_SECONDS + (GUEST_MARGIN
 # timeouts vient du RUNNER (la meme liste de runs que le guest executera,
 # avec le meme RUN_TIMEOUT exporte — jamais une constante commentee).
 export RUN_TIMEOUT RETRIEVE_MARGIN
-SEQ_BUDGET="$(bash gcp-migration/v4_scale_threads_remote.sh --print-budget "${PHASE}")"
+SEQ_BUDGET="$(bash "${PINNED_RUNNER}" --print-budget "${PHASE}")"
 REQUIRED=$((BUILD_MARGIN + SEQ_BUDGET + RETRIEVE_MARGIN))
 echo "budget : phase=${PHASE} somme_timeouts=${SEQ_BUDGET}s requis=${REQUIRED}s" \
      "max_run=${MAX_RUN_SECONDS}s guest=$((GUEST_SHUTDOWN_MINUTES * 60))s" \
@@ -122,18 +151,8 @@ if [ "${CHECK_ENVELOPE}" -eq 1 ]; then
   exit 0
 fi
 
-WORK="$(mktemp -d /tmp/ehgp-v4thr-session.XXXXXXXX)"
-HANDOFF="${WORK}/handoff.json"
-LOG="${WORK}/session.log"
 echo "session scale_threads ${PHASE} dans ${WORK}"
-
-# ---- 0b. PIN DU PROTOCOLE, avant toute mutation GCP.
-PIN_OUT="$(./gcp-migration/v4_scale_threads_pin.sh "${WORK}")"
 echo "${PIN_OUT}" | tee -a "${LOG}"
-SOURCE_COMMIT="$(printf '%s\n' "${PIN_OUT}" | sed -n 's/^source_commit=//p')"
-SOURCE_PAYLOAD_SHA256="$(printf '%s\n' "${PIN_OUT}" | sed -n 's/^source_payload_sha256=//p')"
-PROTOCOL_MANIFEST_SHA256="$(printf '%s\n' "${PIN_OUT}" | sed -n 's/^protocol_manifest_sha256=//p')"
-BUNDLE="${WORK}/bundle.tgz"
 
 gcloud config set project "${GCP_PROJECT_ID}" >/dev/null
 
@@ -156,7 +175,7 @@ fi
 echo "inventaire projet : aucune instance en cours d'execution"
 
 # ---- 1. Borne de duree persistee sur l'instance ARRETEE.
-./gcp-migration/set_max_run_duration_and_verify.sh --yes \
+"${SET_MAX_RUN_DURATION}" --yes \
   --max-run-duration-seconds "${MAX_RUN_SECONDS}" 2>&1 | tee -a "${LOG}"
 
 # ---- 2. Cle OS Login ephemere, TTL borne par le preflight.
@@ -175,7 +194,7 @@ gcloud compute os-login ssh-keys add --key-file="${GCP_SSH_KEY_FILE}.pub" \
 # invite est l'horizon dur ; le runner garde sa propre marge.
 SESSION_START_EPOCH="$(date +%s)"
 DEADLINE_EPOCH=$((SESSION_START_EPOCH + GUEST_SHUTDOWN_MINUTES * 60))
-./gcp-migration/start_and_verify.sh --yes \
+"${START_AND_VERIFY}" --yes \
   --guest-shutdown-minutes "${GUEST_SHUTDOWN_MINUTES}" \
   --handoff-file "${HANDOFF}" 2>&1 | tee -a "${LOG}"
 
@@ -188,7 +207,7 @@ cleanup() {
   if [ "${SESSION_RC}" -ne 0 ]; then rc="${SESSION_RC}"; fi
   echo "--- arret certifie (rc=${rc}) ---" | tee -a "${LOG}"
   local stop_rc=0
-  ./gcp-migration/stop_and_verify.sh --yes \
+  "${STOP_AND_VERIFY}" --yes \
     --expected-last-start-timestamp "${GENERATION}" 2>&1 | tee -a "${LOG}" || stop_rc=$?
   echo "journal complet : ${LOG}"
   echo "resultats rapatries : ${WORK}/out (si l'etape scp a ete atteinte)"
