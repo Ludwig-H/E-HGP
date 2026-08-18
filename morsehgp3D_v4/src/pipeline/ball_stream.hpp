@@ -130,6 +130,15 @@ struct BallStreamStats {
   // comprises), et boucle de completion q4 hors cœur.
   double t_hist_ms = 0, t_rect_cover_ms = 0, t_anchor_cover_ms = 0,
          t_q3_scan_ms = 0;
+  // Distribution des SITES effectivement scannes par le scan q3, par
+  // taille de cover de l'ancre (buckets : <256, <1024, <4096, >=4096) —
+  // decide si l'index par couches convexes (ancres denses) a une
+  // assiette. Compte les sites VISITES (sortie anticipee comprise).
+  u64 q3_scan_sites_by_cover[4] = {0, 0, 0, 0};
+  // Poste depth_dead de la lane q4 (scan q4_power exact par completion
+  // candidate) et boucle de completion elle-meme.
+  double t_q4_depth_ms = 0, t_q4_completion_ms = 0;
+  u64 q4_depth_sites = 0;
   // Fusion des statistiques d'un ouvrier parallele : addition membre a
   // membre — les champs non touches par la generation valent zero chez
   // l'ouvrier, l'addition est donc toujours sure. Les chronos deviennent
@@ -176,6 +185,11 @@ struct BallStreamStats {
     t_rect_cover_ms += o.t_rect_cover_ms;
     t_anchor_cover_ms += o.t_anchor_cover_ms;
     t_q3_scan_ms += o.t_q3_scan_ms;
+    for (int i = 0; i < 4; ++i)
+      q3_scan_sites_by_cover[i] += o.q3_scan_sites_by_cover[i];
+    t_q4_depth_ms += o.t_q4_depth_ms;
+    t_q4_completion_ms += o.t_q4_completion_ms;
+    q4_depth_sites += o.q4_depth_sites;
   }
 };
 
@@ -655,6 +669,14 @@ inline void collect_candidate_balls(const CloudIndex& ix, i64 s, u64 smax_eff,
   struct LaneScratch {
     std::vector<u64> ha, hb;
     std::vector<CoverPoint> cover, cover_tmp;
+    // LENTILLE DE L'ANCRE (lane q4) : {y ∈ cover : |y-a|² <= D² et
+    // |y-b|² <= D²} — le test ne depend QUE de l'ancre, il est paye UNE
+    // fois (paresseusement, au premier seed survivant) au lieu d'une
+    // fois par (seed × site). Toute completion valide est dans la
+    // lentille (six aretes <= D) : l'enumeration sur la lentille rend
+    // le MEME ensemble de candidats, valid_completion inchange reste
+    // l'unique definition semantique.
+    std::vector<CoverPoint> lens;
     std::vector<AxialSite> axial;
     std::vector<u8> axial_gid;
     std::vector<NodeRef> handles;
@@ -833,7 +855,9 @@ inline void collect_candidate_balls(const CloudIndex& ix, i64 s, u64 smax_eff,
           };
           u64 depth = 0;
           bool deep = false;
+          size_t scanned = 0;
           for (size_t iz = 0; iz < cover.size(); ++iz) {
+            ++scanned;
             const double Lh = affine_l_hat(
                 Gd, Nd0, Nd1, Nd2, (double)sc.su0[iz], (double)sc.su1[iz],
                 (double)sc.su2[iz], (double)sc.sq[iz]);
@@ -858,6 +882,10 @@ inline void collect_candidate_balls(const CloudIndex& ix, i64 s, u64 smax_eff,
               break;
             }
           }
+          const int cb = cover.size() < 256 ? 0
+                         : cover.size() < 1024 ? 1
+                         : cover.size() < 4096 ? 2 : 3;
+          st->q3_scan_sites_by_cover[cb] += (u64)scanned;
           if (deep) {
             ++st->gen_depth_killed[1];
             continue;
@@ -936,10 +964,20 @@ inline void collect_candidate_balls(const CloudIndex& ix, i64 s, u64 smax_eff,
         }
         // Sites affines partages par tous les seeds de l'ancre —
         // remplissage PARESSEUX au premier cœur de seed effectif (une
-        // ancre tuee par W_4 ou sans seed aigu ne paie rien).
+        // ancre tuee par W_4 ne paie rien). La LENTILLE, elle, est
+        // construite ICI (apres le tueur W_4) : tout seed aigu verifie
+        // l_ax <= D² et l_bx <= D², la boucle des seeds n'enumere donc
+        // que la lentille — memes seeds, moins de sites testes.
         bool affine_filled = false;
+        sc.lens.clear();
+        for (const CoverPoint& cz : cover) {
+          const P3& pz = ix.upos[(size_t)cz.u];
+          if (p3_norm2(p3_sub(pz, pa)) <= D2 &&
+              p3_norm2(p3_sub(pz, pb)) <= D2)
+            sc.lens.push_back(cz);
+        }
         const auto pid = [&](i32 u) { return ix.bucket_ids[ix.bucket_start[(size_t)u]]; };
-        for (const CoverPoint& cx : cover) {
+        for (const CoverPoint& cx : sc.lens) {
           if (cx.u == ua || cx.u == ub) continue;
           const P3& px = ix.upos[(size_t)cx.u];
           if (!is_acute_seed(pa, pb, px, D2, pid(ua), pid(ub), pid(cx.u))) continue;
@@ -1090,19 +1128,29 @@ inline void collect_candidate_balls(const CloudIndex& ix, i64 s, u64 smax_eff,
             return true;
           };
           const auto depth_dead = [&](const Q4Form& f4) {
+            const auto td0 = std::chrono::steady_clock::now();
             u64 depth = 0;
+            bool dead = false;
             for (const CoverPoint& cz : cover) {
+              ++st->q4_depth_sites;
               const i128 pw = q4_power(f4, ix.upos[(size_t)cz.u]);
               if ((pw < 0 || (mutant_genfilter_nonstrict && pw <= 0)) &&
-                  ++depth >= h_of[2])
-                return true;
+                  ++depth >= h_of[2]) {
+                dead = true;
+                break;
+              }
             }
-            return false;
+            st->t_q4_depth_ms += std::chrono::duration<double, std::milli>(
+                                     std::chrono::steady_clock::now() - td0)
+                                     .count();
+            return dead;
           };
           if (!axial_bounded) {
-            // BASELINE APPARIEE : enumeration de toutes les completions —
-            // meme objet post-RLE, seulement plus de candidats evalues.
-            for (const CoverPoint& cy : cover) {
+            // BASELINE APPARIEE : enumeration des completions sur la
+            // LENTILLE de l'ancre — meme objet post-RLE (toute
+            // completion valide y est), moins de sites enumeres.
+            const auto tc0 = std::chrono::steady_clock::now();
+            for (const CoverPoint& cy : sc.lens) {
               BallCandidate cand;
               Q4Form f4;
               if (!valid_completion(cy.u, &cand, &f4)) continue;
@@ -1113,6 +1161,10 @@ inline void collect_candidate_balls(const CloudIndex& ix, i64 s, u64 smax_eff,
               out->push_back(cand);
               ++st->candidates[2];
             }
+            st->t_q4_completion_ms +=
+                std::chrono::duration<double, std::milli>(
+                    std::chrono::steady_clock::now() - tc0)
+                    .count();
             continue;
           }
           // --- SELECTION AXIALE BORNEE (en-tete de fonction). ---

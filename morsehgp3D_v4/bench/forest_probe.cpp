@@ -2461,6 +2461,15 @@ int main(int argc, char** argv) {
       "t_q3_scan_ms=%.1f t_core_ms=%.1f\n",
       st.t_hist_ms, st.t_rect_cover_ms, st.t_anchor_cover_ms, st.t_q3_scan_ms,
       st.t_seed_core_ms);
+  std::printf("profil_q4 t_completion_ms=%.1f t_depth_ms=%.1f sites_depth=%llu\n",
+              st.t_q4_completion_ms, st.t_q4_depth_ms,
+              (unsigned long long)st.q4_depth_sites);
+  std::printf("q3_scan_sites_par_cover <256=%llu <1024=%llu <4096=%llu "
+              ">=4096=%llu\n",
+              (unsigned long long)st.q3_scan_sites_by_cover[0],
+              (unsigned long long)st.q3_scan_sites_by_cover[1],
+              (unsigned long long)st.q3_scan_sites_by_cover[2],
+              (unsigned long long)st.q3_scan_sites_by_cover[3]);
   // TROIS CARDINALITES PAR K (contre-audits Poisson, § 6.2) : evenements
   // generes / facettes nees uniques (sommets du K-graphe vus) / deltas
   // critiques emis. Le rapport deltas/evenements mesure le gain encore
