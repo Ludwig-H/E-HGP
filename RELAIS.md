@@ -3,6 +3,38 @@
 Campagne d'échelle MorseHGP3D v4 sur g4-standard-48 SPOT. Base : `main@772a8d9`.
 Dernière mise à jour : 2026-08-18 (session pilote Codespace — correction : lancement n64000 REFUSÉ, aucun reçu).
 
+## ⇒ CORRECTIF POUSSÉ + LIGNE CORRIGÉE (18 août, session principale — le plus récent)
+
+Le constat « 4 gardes sur 6 » est EXÉCUTÉ : `main@ab8fde5` — le
+préflight du lanceur modélise désormais les gardes 5 (invité + 300 s ≤
+maxRunDuration) et 6 (TTL de clé dans [maxRunDuration+120, +600] —
+fenêtre des DEUX côtés) AVANT toute action GCP, avec scénarios de refus
+6d/6e au selftest (PROTOCOLE CONFORME, 15 refus). Le défaut
+`SSH_KEY_TTL_MINUTES` passe de 420 (violait la borne basse de la garde
+6 : expiration restante < maxRunDuration) à 427 — l'enveloppe A de
+5 h 45 par défaut était elle aussi condamnée à un refus tardif.
+
+LIGNE CORRIGÉE pour Louis (mêmes intentions, six gardes satisfaites,
+préflight vérifié vert localement) :
+
+```
+cd /workspaces/E-HGP && git pull && PHASE=n64000 RUN_TIMEOUT=600 \
+BUILD_MARGIN=480 RETRIEVE_MARGIN=300 MAX_RUN_SECONDS=3600 \
+GUEST_SHUTDOWN_MINUTES=55 SSH_KEY_TTL_MINUTES=66 \
+./gcp-migration/session_scale_threads_g4.sh 2>&1 | tee \
+~/campagne_n64000_$(date -u +%Y%m%dT%H%M%SZ).log
+```
+
+(invité 55 min : 3300+300 = 3600 ≤ maxRunDuration ; TTL 66 min :
+3960 ∈ [3720, 4200] ; budget 3180 s ; `git pull` requis — le pin
+refusera un arbre < ab8fde5 seulement si des chemins normatifs ont
+bougé, mais la ligne ci-dessus suppose ab8fde5 pour bénéficier du
+préflight complet.)
+
+Consignes de suivi de la session Codespace : inchangées (section
+« LANCEMENT MANUEL » — suivi lecture seule, reçus, certification,
+publication ici).
+
 ## ⚠ CORRECTION — le lancement manuel n64000 a été **REFUSÉ** ; rien n'a tourné, il n'y a aucun reçu
 
 La section « LANCEMENT MANUEL n64000 » ci-dessous décrit un lancement qui
