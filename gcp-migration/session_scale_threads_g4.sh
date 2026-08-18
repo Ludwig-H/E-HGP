@@ -46,15 +46,40 @@ export GCP_PROJECT_ID="${GCP_PROJECT_ID:-devpod-gpu-exploration}"
 export GCP_ZONE="${GCP_ZONE:-europe-west4-a}"
 export GCP_INSTANCE_NAME="${GCP_INSTANCE_NAME:-ehgp-blackwell-spot}"
 PHASE="${PHASE:-n32000}"
+CHECK_ENVELOPE=0
+if [ "${1:-}" = "--check-envelope" ]; then CHECK_ENVELOPE=1; shift; fi
+# La phase court1h EST une enveloppe d'une heure (directive du 18 aout) :
+# ses defauts le disent, sinon `PHASE=court1h` seul armerait une session de
+# sept heures et le nom mentirait. L'environnement prime toujours.
+if [ "${PHASE}" = "court1h" ]; then
+  RUN_TIMEOUT="${RUN_TIMEOUT:-600}"
+  RETRIEVE_MARGIN="${RETRIEVE_MARGIN:-300}"
+  BUILD_MARGIN="${BUILD_MARGIN:-420}"
+  MAX_RUN_SECONDS="${MAX_RUN_SECONDS:-3600}"
+  GUEST_SHUTDOWN_MINUTES="${GUEST_SHUTDOWN_MINUTES:-54}"
+fi
 RUN_TIMEOUT="${RUN_TIMEOUT:-3600}"
 RETRIEVE_MARGIN="${RETRIEVE_MARGIN:-900}"
 BUILD_MARGIN="${BUILD_MARGIN:-1800}"
 MAX_RUN_SECONDS="${MAX_RUN_SECONDS:-25200}"
 GUEST_SHUTDOWN_MINUTES="${GUEST_SHUTDOWN_MINUTES:-400}"
-# 427 min : dans la fenetre de la garde 6 pour MAX_RUN_SECONDS=25200
-# (l'ancien defaut 420 = exactement maxRunDuration violait la borne
-# basse de start_and_verify — expiration restante < maxRunDuration).
-SSH_KEY_TTL_MINUTES="${SSH_KEY_TTL_MINUTES:-427}"
+# Constantes des gardes 5 et 6 : LUES dans start_and_verify.sh, jamais
+# recopiees — source de verite UNIQUE. Une derive de la source doit
+# deplacer la fenetre ici, pas passer inapercue ; illisible = fail-closed.
+START_AND_VERIFY="gcp-migration/start_and_verify.sh"
+GUEST_MARGIN_SECONDS="$(sed -n 's/^readonly TIMESTAMP_TOLERANCE_SECONDS=\([0-9][0-9]*\).*$/\1/p' "${START_AND_VERIFY}" | head -1)"
+SSH_TTL_SLACK_SECONDS="$(sed -n 's/^readonly SSH_KEY_TTL_SLACK_SECONDS=\([0-9][0-9]*\).*$/\1/p' "${START_AND_VERIFY}" | head -1)"
+case "${GUEST_MARGIN_SECONDS}|${SSH_TTL_SLACK_SECONDS}" in
+  *[!0-9\|]*|'|'*|*'|')
+    echo "REFUS : constantes de garde illisibles dans ${START_AND_VERIFY}" >&2
+    exit 2
+    ;;
+esac
+# Le TTL est DERIVE de MAX_RUN_SECONDS et non fige : un defaut constant
+# (420 hier, 427 aujourd'hui) n'est valide que pour UNE valeur du plafond
+# et condamne toute autre enveloppe — c'est ce qui a coute deux
+# lancements. Vise le milieu de la fenetre de la garde 6.
+SSH_KEY_TTL_MINUTES="${SSH_KEY_TTL_MINUTES:-$(( (MAX_RUN_SECONDS + (GUEST_MARGIN_SECONDS + SSH_TTL_SLACK_SECONDS) / 2 + 59) / 60 ))}"
 
 # ---- 0a. PREFLIGHT DE BUDGET, avant toute action GCP. La somme des
 # timeouts vient du RUNNER (la meme liste de runs que le guest executera,
@@ -81,14 +106,20 @@ if [ $((SSH_KEY_TTL_MINUTES * 60)) -le $((GUEST_SHUTDOWN_MINUTES * 60 + 600)) ];
   echo "REFUS : TTL de la cle SSH trop court pour l'arret invite + marge" >&2
   exit 2
 fi
-if [ $((GUEST_SHUTDOWN_MINUTES * 60 + 300)) -gt "${MAX_RUN_SECONDS}" ]; then
-  echo "REFUS : arret invite + 300 s > maxRunDuration (garde 5 de start_and_verify)" >&2
+if [ $((GUEST_SHUTDOWN_MINUTES * 60 + GUEST_MARGIN_SECONDS)) -gt "${MAX_RUN_SECONDS}" ]; then
+  echo "REFUS : arret invite ($((GUEST_SHUTDOWN_MINUTES * 60))s) + ${GUEST_MARGIN_SECONDS}s > maxRunDuration (${MAX_RUN_SECONDS}s) (garde 5 de start_and_verify) ; GUEST_SHUTDOWN_MINUTES <= $(( (MAX_RUN_SECONDS - GUEST_MARGIN_SECONDS) / 60 ))" >&2
   exit 2
 fi
-if [ $((SSH_KEY_TTL_MINUTES * 60)) -lt $((MAX_RUN_SECONDS + 120)) ] || \
-   [ $((SSH_KEY_TTL_MINUTES * 60)) -gt $((MAX_RUN_SECONDS + 600)) ]; then
-  echo "REFUS : TTL de la cle hors fenetre [maxRunDuration+120, maxRunDuration+600] (garde 6 de start_and_verify)" >&2
+TTL_MIN_SECONDS=$((MAX_RUN_SECONDS + GUEST_MARGIN_SECONDS))
+TTL_MAX_SECONDS=$((MAX_RUN_SECONDS + SSH_TTL_SLACK_SECONDS))
+if [ $((SSH_KEY_TTL_MINUTES * 60)) -lt "${TTL_MIN_SECONDS}" ] || \
+   [ $((SSH_KEY_TTL_MINUTES * 60)) -gt "${TTL_MAX_SECONDS}" ]; then
+  echo "REFUS : TTL de la cle ($((SSH_KEY_TTL_MINUTES * 60))s) hors fenetre [${TTL_MIN_SECONDS}, ${TTL_MAX_SECONDS}]s (garde 6 de start_and_verify) ; SSH_KEY_TTL_MINUTES entre $(( (TTL_MIN_SECONDS + 59) / 60 )) et $((TTL_MAX_SECONDS / 60))" >&2
   exit 2
+fi
+if [ "${CHECK_ENVELOPE}" -eq 1 ]; then
+  echo "enveloppe conforme aux six gardes (aucune action GCP)"
+  exit 0
 fi
 
 WORK="$(mktemp -d /tmp/ehgp-v4thr-session.XXXXXXXX)"

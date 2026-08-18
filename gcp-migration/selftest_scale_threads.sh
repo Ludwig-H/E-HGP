@@ -18,7 +18,13 @@
 #      (66886c0 § 1) -> refuses ;
 #   8. args_sha256 trafique dans un statut -> refuse (hash recalcule) ;
 #   9. SCHEMA : omit-digest-K7 / duplicate-digest-K3 / omit-cardinality-K9
-#      (66886c0 § 3) -> refuses.
+#      (66886c0 § 3) -> refuses ;
+#  12. NON-REGRESSION DES DEFAUTS : les trois phases passent les six
+#      gardes sans rien poser en environnement, et court1h arme bien une
+#      heure (l'ancien defaut TTL=420 == MAX_RUN_SECONDS condamnait
+#      TOUTE session au demarrage, preflight aveugle) ;
+#  13. MUTANT DE DERIVE : les constantes des gardes 5-6 sont LUES dans
+#      start_and_verify.sh — mutee, la fenetre bouge ; illisible, refus.
 set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 WORK="$(mktemp -d /tmp/ehgp-thrselftest.XXXXXXXX)"
@@ -260,6 +266,42 @@ if validate "${WORK}/out11" > "${WORK}/v11.log" 2>&1; then
 fi
 grep -q 'affinite effective' "${WORK}/v11.log" ||
   fail "scenario 11 : motif d'affinite attendu"
+
+# ---- Scenario 12 : NON-REGRESSION DES DEFAUTS. Le defaut livre
+# SSH_KEY_TTL_MINUTES=420 valait exactement MAX_RUN_SECONDS : AUCUNE
+# session n'etait lancable, quelle que soit la phase, et le preflight ne
+# le voyait pas. Un defaut fige ne vaut que pour UNE valeur du plafond,
+# d'ou la derivation ; cette porte l'exige pour les trois phases.
+for ph in n32000 n64000 court1h; do
+  PHASE="${ph}" bash gcp-migration/session_scale_threads_g4.sh --check-envelope \
+    > "${WORK}/s12_${ph}.log" 2>&1 ||
+    fail "scenario 12 (${ph}) : l'enveloppe PAR DEFAUT doit passer les six gardes ($(cat "${WORK}/s12_${ph}.log"))"
+  grep -q 'enveloppe conforme aux six gardes' "${WORK}/s12_${ph}.log" ||
+    fail "scenario 12 (${ph}) : confirmation d'enveloppe attendue"
+done
+# court1h EST l'enveloppe d'une heure : si ses defauts arment sept heures,
+# le nom ment et la directive du 18 aout est trahie en silence.
+grep -q 'max_run=3600s' "${WORK}/s12_court1h.log" ||
+  fail "scenario 12 : court1h doit armer une heure par defaut"
+
+# ---- Scenario 13 : MUTANT DE DERIVE. Les constantes des gardes 5 et 6
+# viennent de start_and_verify.sh ; recopiees dans le lanceur, une
+# mutation de la source passerait inapercue.
+cp -r gcp-migration "${WORK}/gcp-migration"
+sed -i 's/^readonly SSH_KEY_TTL_SLACK_SECONDS=.*/readonly SSH_KEY_TTL_SLACK_SECONDS=0/' \
+  "${WORK}/gcp-migration/start_and_verify.sh"
+if PHASE=court1h bash "${WORK}/gcp-migration/session_scale_threads_g4.sh" \
+     --check-envelope > "${WORK}/s13a.log" 2>&1; then
+  fail "scenario 13a : constante recopiee au lieu d'etre lue (fenetre TTL vide acceptee)"
+fi
+sed -i 's/^readonly SSH_KEY_TTL_SLACK_SECONDS=.*/readonly SSH_KEY_TTL_SLACK_SECONDS=nan/' \
+  "${WORK}/gcp-migration/start_and_verify.sh"
+if PHASE=court1h bash "${WORK}/gcp-migration/session_scale_threads_g4.sh" \
+     --check-envelope > "${WORK}/s13b.log" 2>&1; then
+  fail "scenario 13b : constante illisible acceptee a tort"
+fi
+grep -q 'constantes de garde illisibles' "${WORK}/s13b.log" ||
+  fail "scenario 13b : refus fail-closed attendu"
 
 echo "selftest_scale_threads : violations=${BAD}"
 [ "${BAD}" -eq 0 ] || exit 1
