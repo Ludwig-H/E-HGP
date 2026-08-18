@@ -82,6 +82,9 @@ jobs:
       - name: Validate implementation phase register
         run: python tools/check_implementation_status.py
 
+      - name: Validate the v4 handover roadmap freshness
+        run: python tools/check_passation.py
+
   gcp_lifecycle_safety:
     name: gcp-lifecycle-safety
     runs-on: ubuntu-latest

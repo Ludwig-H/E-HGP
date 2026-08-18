@@ -140,6 +140,12 @@ résultat identique, trois mutants tués (`fold-u32-event-wrap`,
 `fold-i32-fid-wrap`, `fold-epoch-sentinel-collision`). Reçu :
 `ADDENDUM_GARDE_CAPACITE_FOLD_20260818.md`.
 
+Distinction exigée par l'audit `dd0d4a6` § 1, à ne pas perdre :
+**DONE** = garde des index locaux u32/i32 (plus aucune troncature
+silencieuse) ; **OPEN** = le tuilage/streaming qui permettrait de
+DÉPASSER ces limites au lieu de refuser. La sécurité est fermée, la
+capacité ne l'est pas.
+
 ### 2.9 Étage d'intervalles de Jung (LIVRÉ, `4df9a39`)
 
 `jung_interval_sign` : sur un site certifié `P < 0`, la séparation des
@@ -206,67 +212,113 @@ re-vérification de ce qu'un théorème garantit.
 | uniform | ~56-62 s | stable |
 | eight_clusters | ~123-130 s | 2 658 325 événements ; jamais atteint avant v4 |
 
-`t_fold` 38,3 s (batching 2, intern 21,5, reduce 17,8, partition 0,7).
-Le cœur de seed domine la génération dense (~8,5 G d'évaluations i128
-pour les sites certifiés négatifs — Jung exige l'exact). Le kernel
-affine est CPU-neutre (bande ±3 s) : adopté pour la STRUCTURE (identité
-gravée, contrat d'erreur serré, forme GPU warp-par-seed), pas pour la
-constante — reçu `ADDENDUM_KERNEL_AFFINE` § mesures.
+⚠ **Ces chiffres sont antérieurs aux intervalles de Jung** (`4df9a39`)
+et ne doivent plus servir à désigner un poste dominant. Après les
+intervalles, le cœur de seed q4 ne fait plus 8,5 G d'évaluations
+exactes : il tombe à **80 replis** (eight_clusters) et **145**
+(uniform) — l'essentiel est certifié en flottant. Le poste dominant de
+`t_gen` est désormais le **scan de profondeur q3** (structurel), pas
+l'arithmétique de Jung.
+
+Le kernel affine est CPU-neutre (bande ±3 s) : adopté pour la
+STRUCTURE (identité gravée, contrat d'erreur serré, forme GPU
+warp-par-seed), pas pour la constante — reçu
+`ADDENDUM_KERNEL_AFFINE` § mesures.
+
+⚠ **Variance du conteneur.** Mesuré le 18 août : `t_fold` du MÊME
+binaire varie de ±40 % d'un processus à l'autre (allocations à
+l'échelle du Go), alors que `t_gen` du même run ne bouge pas. Aucune
+comparaison de constante entre deux processus ne conclut ; les
+comparaisons de représentation se font par alternance INTRA-processus
+(`--fold-intern-bench` en est l'instrument). Profil du fold à n=8000
+mesuré ce jour, pour mémoire et non comme référence :
+batching ~3 s, intern ~29 s, reduce ~21 s, partition ~1 s.
 
 ## 5. Chantiers ouverts, par priorité
 
 Les trois premiers de la rédaction initiale sont LIVRÉS (§ 2.8, § 2.9,
 § 2.10). Ce qui reste, dans l'ordre :
 
-1. **Schéma L/U à deux bornes et `cmp_mu`** (audits E573888 § 1.3/§ 5,
-   04c71a2 § 5). ⚠ Ce n'est PAS un multiplicateur CPU mesuré : `cmp_mu`
-   sert le chemin axial, qui est `--axial-on` (opt-in, orienté GPU), et
-   le schéma L/U est le cadre du port device. À traiter AVEC le GPU,
-   pas avant lui — le reçu `ADDENDUM_INTERVALLES_JUNG` § « ce qui
-   reste » le dit explicitement.
-2. **GPU** (`src/gpu/device_compile_witness.cu` — compile-only,
-   jamais encore compilé faute de nvcc ; plans
-   `NOTE_CLAUDE_PLAN_GPU` + `NOTE_CLAUDE_PLAN_PARALLELISME_V2` :
-   warp-par-seed, saturation par ballot, compaction vers passe exacte
-   device ; l'oracle et le juge ne sont JAMAIS portés).
-3. **Couches convexes q3** (`Q3ShallowHalfplaneIndex`) : DIFFÉRÉ par
-   l'audit e27acfa § 2.3 — seulement si q3 domine encore après
-   affine + intervalles, et sur les seules ancres lourdes. Le reçu
-   Jung désigne DÉJÀ le scan de profondeur q3 comme poste dominant de
-   `t_gen` : la condition de réouverture est donc satisfaite côté
-   mesure ; il reste à la restreindre aux ancres lourdes.
-4. **Préflight réellement streaming** (audit `57523a` § 3, non
-   exécuté) : le chemin actuel est honnêtement
-   `event_expansion_preflight_after_census` (il matérialise `cands`,
-   `balls` avant de brancher) ; le champ `octets_resident` ne compte
-   que `evenements * sizeof(ForestEvent)` et doit devenir
-   `bytes_forest_events` + bornes par tampon. L'internement en
-   streaming (§ 2.10) vient de supprimer le plus gros de ces tampons
-   (`bytes_facet_incidence_records`), ce qui rend le reste chiffrable.
-5. **Deltas en CSR** (audit `57523a` § 1.3) : conditionné à la mesure —
-   `t_partition` vaut ~1 s sur 58 s de fold, la matérialisation des
-   deltas n'est pas visible ; à rouvrir seulement si elle le devient.
-6. Boule intérieure candidate $B(m, R-\delta)$ (réponse d'auditeur,
-   dormant).
+L'ordre ci-dessous est celui de l'audit `dd0d4a6` § 3, adopté tel quel.
+
+1. **Scan q3 et construction des covers** — le poste dominant mesuré de
+   `t_gen`. Décider, **sur les seules ancres lourdes**, entre scan plat
+   parallèle/GPU et index exact par couches convexes
+   (`Q3ShallowHalfplaneIndex`, différé par l'audit e27acfa § 2.3 : la
+   condition de réouverture — « seulement si q3 domine encore après
+   affine + intervalles » — est désormais satisfaite côté mesure, mais
+   l'assiette doit être justifiée par des compteurs de charge, pas
+   supposée).
+2. **Internement du fold et streaming.** L'internement lui-même est
+   LIVRÉ (§ 2.10) ; ce qui reste est la matérialisation résidente
+   globale en amont : préflight réellement streaming (audit `57523a`
+   § 3 — le chemin actuel est honnêtement
+   `event_expansion_preflight_after_census`, il matérialise `cands` et
+   `balls` avant de brancher ; `octets_resident` ne compte que
+   `evenements * sizeof(ForestEvent)` et doit devenir
+   `bytes_forest_events` + bornes par tampon), en cohérence avec la
+   borne Poisson de taille de sortie.
+3. **Produit public 30M** : distinguer flux symbolique complet,
+   hiérarchie de connectivité et requêtes/labels ciblés — c'est aussi
+   ce qui lèvera le refus `resource_exhausted` de la garde de capacité
+   (§ 2.8, partie OPEN) au lieu de le contourner.
+4. **Port GPU exact** : compiler le témoin device sous `nvcc`
+   (`src/gpu/device_compile_witness.cu`, jamais encore compilé), porter
+   les filtres certifiés, puis compacter les replis exacts — plans
+   `NOTE_CLAUDE_PLAN_GPU` + `NOTE_CLAUDE_PLAN_PARALLELISME_V2`
+   (warp-par-seed, saturation par ballot). L'oracle et le juge ne sont
+   JAMAIS portés. Le **schéma L/U à deux bornes** (audit E573888 § 5)
+   appartient à ce chantier : il évite une file de repli de taille
+   imprévisible sur device, pas une constante CPU.
+5. **Ordre axial `cmp_mu`** (borne propre ~$2^{114}$) : seulement si le
+   chemin axial (`--axial-on`) redevient actif ou devient utile sur
+   GPU. Ce n'est pas un multiplicateur CPU mesuré.
+
+Conditionnels, à ne pas promouvoir sans les compteurs de charge qui les
+justifient : **deltas en CSR** (audit `57523a` § 1.3 — `t_partition`
+vaut ~1 s sur ~54 s de fold, donc invisible aujourd'hui) et **boule
+intérieure candidate** $B(m, R-\delta)$ (réponse d'auditeur, dormante).
+
+**Règle de fraîcheur de cette liste** (audit `dd0d4a6` § 5) : un item
+OPEN ne doit jamais nommer un reçu qui, ailleurs dans ce document, est
+cité comme exécution complète ; s'il en cite un, il doit porter
+explicitement la partie résiduelle encore ouverte (le § 2.8 le fait
+pour la garde de capacité, le n° 2 ci-dessus pour l'internement).
+`python tools/check_passation.py` refuse le contraire.
 
 ## 6. La campagne G4 « scale_threads » — protocole prêt, zéro reçu
 
-Protocole (audits `9223888`/`b3a6eb4`/`66886c0`/`7d921ff`/`c9c3a48`,
-tous EXÉCUTÉS) : `gcp-migration/session_scale_threads_g4.sh` →
-préflight SIX gardes (dont les deux de `start_and_verify` modélisées,
-constantes lues à la source, TTL dérivé du plafond, `--check-envelope`)
-→ pin du protocole → inventaire « aucune VM » → démarrage gardé →
+Protocole (audits `9223888`/`b3a6eb4`/`66886c0`/`7d921ff`/`c9c3a48`/
+`9d19ede`, tous EXÉCUTÉS) : `gcp-migration/session_scale_threads_g4.sh`
+→ **pin du protocole D'ABORD** (fermeture transitive : les trois gardes
+locales `set_max_run_duration_and_verify` / `start_and_verify` /
+`stop_and_verify` sont dans les chemins normatifs ET matérialisées
+depuis le commit ; la session n'exécute plus que
+`${WORK}/pinned/gcp-migration/`) → préflight SIX gardes (dont les deux
+de `start_and_verify` modélisées, constantes lues dans la copie
+PINNÉE, TTL dérivé du plafond, `--check-envelope`) → inventaire
+« aucune VM » → démarrage gardé →
 runner `v4_scale_threads_remote.sh` (argv haché NUL, workers mesurés,
 digest canonique complet K=1..10) → validateur épinglé
 `validate_v4_scale_threads.py` (SEULE autorité : liaison nom→argv→
 identité imprimée, affinité effective, appariement par digest) →
 arrêt certifié TERMINATED. Porte transactionnelle :
-`selftest_scale_threads.sh` (15 refus causaux). Phases : `n32000`
-(équivalence t1/t8/tmax), `n64000` (échelle, non appariée),
-`court1h` (≤ 1 h, paires t8/tmax).
+`selftest_scale_threads.sh` (15 scénarios, dont
+`uncommitted-local-guard` et `helper-from-worktree-after-pin`) — elle
+n'est PAS câblée dans la CI GitHub (elle invoque le lanceur, et
+`tools/check_gcp_workflows.py` interdit à la CI toute indirection vers
+un script de cycle de vie) : elle se lance à la main avant toute
+session payante. Phases : `n32000` (équivalence t1/t8/tmax), `n64000`
+(échelle, non appariée), `court1h` (≤ 1 h, paires t8/tmax).
 
-**Journal du 18 août** : cinq tentatives, zéro campagne exécutée,
-CHAQUE VM certifiée TERMINATED — détail dans
+Chaîne de provenance (audit `9d19ede` § 5) : **DONE** = identité du
+moteur, du runner, du validateur ET des trois gardes locales (pin +
+matérialisation, fenêtre TOCTOU fermée) ; **OPEN** = rien sur ce point.
+
+**Journal du 18 août** : six tentatives, zéro campagne exécutée ;
+tentatives 2, 3 et 5 avec lecture d'arrêt certifiée, 1 et 4 refusées
+avant toute VM, 6 garantie par son double coupe-circuit certifié sans
+lecture finale conservée — détail dans
 `receipts/campagne_scale_threads_20260818/JOURNAL_TENTATIVES.md`.
 Leçons durcies dans le code : préflight 4→6 gardes ; TTL dérivé ;
 `terminationTimestamp` lu sous `resourceStatus.scheduling` ;

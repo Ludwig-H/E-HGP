@@ -1,11 +1,26 @@
 # Journal des tentatives — campagne scale_threads G4, 18 août 2026
 
-Reçu HONNÊTE : cinq tentatives de lancement, ZÉRO campagne exécutée,
-zéro reçu de mesure. Chaque VM démarrée a été arrêtée et certifiée
-`TERMINATED` sur exactement sa génération. Coût VM total ≈ 12 minutes
-de g4-standard-48 SPOT (GPU au repos accepté ≤ 1 h par directive
+Reçu HONNÊTE : **six** tentatives de lancement, ZÉRO campagne de
+mesure, zéro reçu de mesure. Coût VM total ≈ 12 minutes de
+g4-standard-48 SPOT (GPU au repos accepté ≤ 1 h par directive
 explicite de l'utilisateur). Chaque échec a produit un correctif
 poussé sur `main` — le protocole en sort plus dur qu'il n'est entré.
+
+Statut d'arrêt, à la lettre de ce qui est conservé (correction du
+18 août, audit `dd0d4a6` § 4 — la rédaction initiale annonçait « cinq
+tentatives » alors que la table en porte six, et affirmait que
+**chaque** VM avait été certifiée `TERMINATED`) :
+
+- tentatives 2, 3 et 5 : arrêt d'urgence exécuté ET lecture d'état
+  certifiée dans leur log ;
+- tentatives 1 et 4 : refus AVANT toute création de VM — il n'y a rien
+  à certifier ;
+- tentative 6 : arrêt déclenché par le trap et **double coupe-circuit
+  certifié** dans son log (`terminationTimestamp=13:43:52Z`, invité
+  55 min), mais **aucune lecture finale explicite n'est conservée**
+  dans ce reçu. La garantie y est celle du coupe-circuit, pas celle
+  d'une observation — c'est pourquoi la PREMIÈRE action de la prochaine
+  session GCP reste un inventaire en lecture seule.
 
 | # | Heure UTC | Poste | Cause d'échec | Étape atteinte | Correctif poussé |
 |---|---|---|---|---|---|
@@ -19,11 +34,11 @@ poussé sur `main` — le protocole en sort plus dur qu'il n'est entré.
 Vérification finale de séance (12h44 UTC, lecture seule) : les quatre
 instances du projet (`ehgp-blackwell-spot`, `frangi-blackwell-spot`,
 `ehgp-blackwell-spot-ai1a`, `cracksam-frangigraph-g4-spot-ew8c`)
-étaient `TERMINATED`. La tentative 6 s'est terminée après cette
+étaient `TERMINATED`. La tentative 6 s'est terminée APRÈS cette
 vérification : son extinction est garantie par le double coupe-circuit
 certifié dans son log (GCE 3600 s → 13h44 UTC au plus tard, invité
-55 min) ; la PREMIÈRE action de la prochaine session GCP reste un
-inventaire lecture seule.
+55 min), et **par rien d'autre dans ce reçu** ; la PREMIÈRE action de
+la prochaine session GCP reste un inventaire lecture seule.
 
 Ce qui est PROUVÉ au terme de la journée : préflight six gardes
 (refus code 2 avant toute action), pin/inventaire/`set-scheduling`/
