@@ -5,6 +5,14 @@ trois plans — mathématique, implémentation, opérationnel — et pointe
 vers les sources qui font foi. Rien ici ne remplace un document
 normatif ; tout y renvoie. Pin de rédaction : `main@5c326c1`.
 
+> **ERRATUM du 18 août (session de reprise).** La rédaction initiale
+> déclarait ouverts deux chantiers déjà livrés dans `main` :
+> la garde de capacité du fold (`093abed`, porte `--fold-capacity-gate`,
+> trois mutants) et l'étage d'intervalles de Jung (`4df9a39`, porte
+> `--q3-affine-gate` étendue, mutant `jung-swap-bounds`). Le § 2.7 et
+> le § 5 ci-dessous sont corrigés en conséquence. Le compte de CTests
+> était 128, pas 130.
+
 ## 0. Où commencer, dans l'ordre
 
 1. `AGENTS.md` (racine) puis `CLAUDE.md` — règles absolues (jamais de
@@ -118,8 +126,43 @@ $E[N_j]/n \to 4$ par profondeur ; ~$2K(K{-}1)n$ facettes nées ;
 `--q2-birth-gate` (l'égalité du second diamètre est un impossible-
 théorème, donc une violation). Preflight `--output-preflight-only` +
 plafond transactionnel `--max-output-bytes` (refus code 2 AVANT
-allocation). ⚠ La GARDE DE CAPACITÉ du fold (casts u32/i32, audit
-`5d274a1` § 7) reste À FAIRE — voir § 5.1.
+allocation).
+
+### 2.8 Garde de capacité du fold (LIVRÉE, `093abed`)
+
+Refus `resource_exhausted/requires_tiling` AVANT tout cast et toute
+allocation du fold : `evenements <= UINT32_MAX` (`FRec::e`/`ev_fid` en
+u32), `Σ(q_e + d_e) <= INT32_MAX` (majorant de `nfid`, union-find i32),
+`lots < UINT32_MAX` (sentinelle des tables à époque). Porte
+`--fold-capacity-gate` : bases FICTIVES près des limites (jamais
+d'allocation géante), 4 refus / 4, 3 cas juste sous la limite au
+résultat identique, trois mutants tués (`fold-u32-event-wrap`,
+`fold-i32-fid-wrap`, `fold-epoch-sentinel-collision`). Reçu :
+`ADDENDUM_GARDE_CAPACITE_FOLD_20260818.md`.
+
+### 2.9 Étage d'intervalles de Jung (LIVRÉ, `4df9a39`)
+
+`jung_interval_sign` : sur un site certifié `P < 0`, la séparation des
+intervalles flottants certifie `2P² > J B²` ou son contraire sans
+i128/U320 ; les égalités tombent TOUJOURS dans le repli exact. Mesure :
+les ~1,35 G de `cmp_2p2_jb2` U320 du cœur q4 tombent à 80 replis
+(eight_clusters) et 145 (uniform) ; `t_gen` 127,0 → 123,1 s
+(eight_clusters), 57,3 → 55,5 s (uniform). Mutant `jung-swap-bounds`
+tué par un témoin GRAVÉ à cheval sur la fenêtre. Reçu :
+`ADDENDUM_INTERVALLES_JUNG_20260818.md`.
+
+### 2.10 Internement du fold en streaming (LIVRÉ, session du 18 août)
+
+`build_forest` n'alloue plus le tableau des incidences (facette,
+événement, slot) ni le tampon de fusion de `stable_sort` : chaque
+facette est internée à la volée (table d'adressage ouvert, comparaison
+EXACTE de clé, dimensionnée une fois sur le majorant des incidences),
+puis les clés UNIQUES seules sont triées. L'invariant public — fid
+croissant ⟺ FacetKey croissante, donc canonique = min-fid — ne dépend
+PAS du hachage : le tri final est la seule autorité d'ordre. Le backend
+FIGÉ `build_forest_legacy` garde le tri global et sert de témoin
+(`--fold-compact-gate`, planchers d'incidences/facettes/lots). Reçu :
+`ADDENDUM_INTERNEMENT_STREAMING_20260818.md`.
 
 ## 3. Carte de l'implémentation
 
@@ -172,25 +215,37 @@ constante — reçu `ADDENDUM_KERNEL_AFFINE` § mesures.
 
 ## 5. Chantiers ouverts, par priorité
 
-1. **Garde de capacité du fold** (audit `5d274a1` § 7, ACCEPTÉ non
-   exécuté) : refus `resource_exhausted` avant casts u32/i32
-   (`events ≤ UINT32_MAX`, lots ≤ UINT32_MAX — sentinelle —, `nfid ≤
-   INT32_MAX`), mutants `fold-u32-event-wrap`/`fold-i32-fid-wrap`/
-   `fold-epoch-sentinel-collision` par bases artificielles.
-2. **Intervalles de Jung** (audits E573888 § 1.2, 04c71a2 § 6) :
-   certifier $\inf(2[P]^2) > \sup([J][B]^2)$ en flottant, repli
-   `cmp_2p2_jb2` — le multiplicateur mesuré suivant (les 8,5 G
-   d'i128). Puis schéma L/U à deux bornes (§ 5) et `cmp_mu` (borne
-   propre ~$2^{114}$, l'ordre reste exact et transitif).
-3. **Internement du fold en streaming** (~21 s à n=8000).
-4. **GPU** (`src/gpu/device_compile_witness.cu` — compile-only,
+Les trois premiers de la rédaction initiale sont LIVRÉS (§ 2.8, § 2.9,
+§ 2.10). Ce qui reste, dans l'ordre :
+
+1. **Schéma L/U à deux bornes et `cmp_mu`** (audits E573888 § 1.3/§ 5,
+   04c71a2 § 5). ⚠ Ce n'est PAS un multiplicateur CPU mesuré : `cmp_mu`
+   sert le chemin axial, qui est `--axial-on` (opt-in, orienté GPU), et
+   le schéma L/U est le cadre du port device. À traiter AVEC le GPU,
+   pas avant lui — le reçu `ADDENDUM_INTERVALLES_JUNG` § « ce qui
+   reste » le dit explicitement.
+2. **GPU** (`src/gpu/device_compile_witness.cu` — compile-only,
    jamais encore compilé faute de nvcc ; plans
    `NOTE_CLAUDE_PLAN_GPU` + `NOTE_CLAUDE_PLAN_PARALLELISME_V2` :
    warp-par-seed, saturation par ballot, compaction vers passe exacte
    device ; l'oracle et le juge ne sont JAMAIS portés).
-5. **Couches convexes q3** (`Q3ShallowHalfplaneIndex`) : DIFFÉRÉ par
+3. **Couches convexes q3** (`Q3ShallowHalfplaneIndex`) : DIFFÉRÉ par
    l'audit e27acfa § 2.3 — seulement si q3 domine encore après
-   affine + intervalles, et sur les seules ancres lourdes.
+   affine + intervalles, et sur les seules ancres lourdes. Le reçu
+   Jung désigne DÉJÀ le scan de profondeur q3 comme poste dominant de
+   `t_gen` : la condition de réouverture est donc satisfaite côté
+   mesure ; il reste à la restreindre aux ancres lourdes.
+4. **Préflight réellement streaming** (audit `57523a` § 3, non
+   exécuté) : le chemin actuel est honnêtement
+   `event_expansion_preflight_after_census` (il matérialise `cands`,
+   `balls` avant de brancher) ; le champ `octets_resident` ne compte
+   que `evenements * sizeof(ForestEvent)` et doit devenir
+   `bytes_forest_events` + bornes par tampon. L'internement en
+   streaming (§ 2.10) vient de supprimer le plus gros de ces tampons
+   (`bytes_facet_incidence_records`), ce qui rend le reste chiffrable.
+5. **Deltas en CSR** (audit `57523a` § 1.3) : conditionné à la mesure —
+   `t_partition` vaut ~1 s sur 58 s de fold, la matérialisation des
+   deltas n'est pas visible ; à rouvrir seulement si elle le devient.
 6. Boule intérieure candidate $B(m, R-\delta)$ (réponse d'auditeur,
    dormant).
 
