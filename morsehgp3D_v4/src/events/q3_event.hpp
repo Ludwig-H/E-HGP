@@ -57,7 +57,7 @@ struct Q3Level {
 
 namespace detail_ev {
 
-inline u128 uabs(i128 v) { return v < 0 ? (u128)(-(v + 1)) + 1 : (u128)v; }
+MHGP4_HD inline u128 uabs(i128 v) { return v < 0 ? (u128)(-(v + 1)) + 1 : (u128)v; }
 
 inline u64 ugcd64(u64 x, u64 y) {
   while (y) {

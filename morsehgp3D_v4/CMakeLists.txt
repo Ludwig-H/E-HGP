@@ -376,6 +376,18 @@ mhgp4_expect_code(mhgp4_forest_probe_max_output_refus 2 mhgp4_forest_probe
     "--family=uniform --n=400 --s=8 --seed=3 --min-balls=100 --min-fusions=100 --max-output-bytes=4096")
 mhgp4_expect_code(mhgp4_forest_probe_max_output_passe 0 mhgp4_forest_probe
     "--family=uniform --n=400 --s=8 --seed=3 --min-balls=100 --min-fusions=100 --max-output-bytes=1000000000")
+# Fold COMPACT (reponse d'audit « fold compact » § 1-2) : canonique par
+# min-fid u32, tables a epoque pour les racines pre/post-lot, partition
+# finale DENSE (facet_keys + final_canon_fid, invariants structurels
+# permanents), vue map de compatibilite sur demande. La porte a deux
+# backends compare le fold compact au backend FIGE build_forest_legacy
+# (compteurs, niveaux, nœuds, deltas paire a paire, partition map ET vue
+# dense) ; le mutant canonical-is-uf-root (canonique = racine UF au lieu
+# du minimum) doit diverger.
+mhgp4_expect_code(mhgp4_forest_probe_fold_compact_gate 0 mhgp4_forest_probe
+    "--fold-compact-gate")
+mhgp4_expect_code(mhgp4_forest_probe_fold_mutant_canon_root 4 mhgp4_forest_probe
+    "--fold-compact-gate --inject=canonical-is-uf-root")
 
 # La lane q2 productrice : W_2 est la boule diametrale ouverte, le census
 # est une requete de cover a coefficient 1. Juge brut toutes-paires sur

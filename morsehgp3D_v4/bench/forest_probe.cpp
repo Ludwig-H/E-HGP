@@ -78,6 +78,8 @@ struct Args {
   bool q2_birth_gate = false;  // oracle Poisson : injection des facettes
   bool inj_birth_dup = false;
   u64 max_output_bytes = 0;  // 0 = pas de plafond ; sinon refus AVANT ev_k
+  bool fold_compact_gate = false;
+  bool inj_canon_root = false;
   u32 inj_axial = 0;  // masque kAxial* des mutants du chemin axial
   u64 min_balls = 0;
   u64 min_fusions = 0;
@@ -146,6 +148,8 @@ Args parse(int argc, char** argv) {
     else if (arg == "--inject=birth-dup-tau") a.inj_birth_dup = true;
     else if (const char* v = val("--max-output-bytes="))
       a.max_output_bytes = (u64)std::atoll(v);
+    else if (arg == "--fold-compact-gate") a.fold_compact_gate = true;
+    else if (arg == "--inject=canonical-is-uf-root") a.inj_canon_root = true;
     else if (arg == "--inject=axial-short-group") a.inj_axial |= kAxialShortGroup;
     else if (arg == "--inject=axial-drop-ties") a.inj_axial |= kAxialDropTies;
     else if (arg == "--inject=axial-first-rep") a.inj_axial |= kAxialFirstRep;
@@ -337,7 +341,7 @@ int forests_from_balls(const std::vector<BallData>& balls,
                        const std::vector<PointId>& pid_of, u64 kmax_eff,
                        u64 per_k_events[11], ForestResult per_k_result[11],
                        std::vector<std::vector<ForestEvent>>* events_out = nullptr,
-                       int threads = 1) {
+                       int threads = 1, bool legacy_partition = true) {
   // PHASE A — expansion des plateaux, par TRANCHES de boules : chaque
   // ouvrier remplit ses propres listes par K, la fusion en ordre de
   // tranche restitue EXACTEMENT l'ordre sequentiel des evenements.
@@ -379,18 +383,25 @@ int forests_from_balls(const std::vector<BallData>& balls,
       ev_k[K].insert(ev_k[K].end(), lev[t][K].begin(), lev[t][K].end());
   // PHASE B — folds INDEPENDANTS par K (chaque K possede son build_forest
   // et son resultat ; le rapport de violation reste au plus petit K).
+  // `legacy_partition` : la vue map n'est remplie que pour les
+  // consommateurs qui la lisent (juge, portes) — le chemin d'echelle
+  // vit sur la representation dense facet_keys + final_canon_fid.
   parallel_ranges((size_t)kmax_eff, threads, [&](size_t bg, size_t en,
                                                  size_t) {
     for (size_t k0 = bg; k0 < en; ++k0) {
       const int K = (int)k0 + 1;
       per_k_events[K] = ev_k[(size_t)K].size();
-      per_k_result[K] = build_forest(ev_k[(size_t)K]);
+      per_k_result[K] = build_forest(ev_k[(size_t)K], false, false, nullptr,
+                                     false, false, false, legacy_partition);
     }
   });
   for (int K = 1; K <= (int)kmax_eff; ++K)
     if (per_k_result[K].attach_violations != 0 ||
-        per_k_result[K].birth_violations != 0) {
-      std::fprintf(stderr, "INVARIANT : violations de roles (K=%d)\n", K);
+        per_k_result[K].birth_violations != 0 ||
+        per_k_result[K].partition_violations != 0) {
+      std::fprintf(stderr,
+                   "INVARIANT : violations de roles ou de partition (K=%d)\n",
+                   K);
       return 3;
     }
   if (events_out) *events_out = std::move(ev_k);
@@ -867,10 +878,11 @@ int run_kmax_gate(bool inj_kmax10) {
 // STRICTS de la boule diametral ouverte (|2z−(a+b)|² < |b−a|², exact
 // entier). Verifications de l'argument d'INJECTION du contre-audit,
 // pour 1 <= j <= 9 : (a) {a,b} est le diametre unique de chaque
-// tau_z = sigma∖{z} (toute autre paire de tau_z strictement plus
-// courte ; une egalite exacte — hors position generale, possible sur
-// entiers — est comptee degeneree et exclue de l'assertion, jamais un
-// echec silencieux) ; (b) les tau_z propres sont globalement DISTINCTES
+// tau_z = sigma∖{z} — toute autre paire de tau_z est STRICTEMENT plus
+// courte, et c'est un THEOREME (durcissement d'audit) : les autres
+// points vivent dans la boule OUVERTE de rayon D/2, une egalite exacte
+// est donc impossible et toute occurrence est une VIOLATION ;
+// (b) les tau_z propres sont globalement DISTINCTES
 // (l'application (sigma, z) -> tau_z est injective) ; (c) planchers
 // N_0, N_1, N_2 >= 1 contre le vert-par-vacuite ; (d) distinction K=1 :
 // N_0 >= 2(n−1) — le nombre de certificats de Gabriel n'est pas le
@@ -885,7 +897,7 @@ int run_q2_birth_gate(bool inj_dup) {
   const int m = ix.unique_count();
   if (m < 3) return 3;
   u64 nj[10] = {};
-  u64 degenerate = 0, violations = 0;
+  u64 violations = 0;
   std::set<std::vector<i32>> taus;
   std::vector<i32> inter;
   for (i32 i = 0; i < m; ++i)
@@ -913,25 +925,25 @@ int run_q2_birth_gate(bool inj_dup) {
         for (size_t t = 0; t < jj; ++t)
           if (t != oz) tau.push_back(inter[t]);
         // (a) diametre unique : toute autre paire de tau STRICTEMENT
-        // plus courte que D2 (egalite = degenerescence comptee).
-        bool unique_diam = true, degen = false;
+        // plus courte que D2. Le durcissement d'audit (reponse « fold
+        // compact » § 3) PROUVE qu'une egalite est IMPOSSIBLE : tous
+        // les autres points sont strictement dans la boule OUVERTE de
+        // rayon D/2, donc toute autre distance est strictement < D —
+        // une egalite observee est une VIOLATION, jamais une
+        // degenerescence a exclure.
+        bool unique_diam = true;
         for (size_t u = 0; u < tau.size() && unique_diam; ++u)
           for (size_t v = u + 1; v < tau.size(); ++v) {
             if (tau[u] == i && tau[v] == j2) continue;
             const i64 l2 = p3_norm2(
                 p3_sub(ix.upos[(size_t)tau[v]], ix.upos[(size_t)tau[u]]));
-            if (l2 > D2) {
-              unique_diam = false;  // contredit l'argument : violation
+            if (l2 >= D2) {
+              unique_diam = false;  // contredit le theoreme : violation
               break;
             }
-            if (l2 == D2) degen = true;
           }
         if (!unique_diam) {
           ++violations;
-          continue;
-        }
-        if (degen) {
-          ++degenerate;
           continue;
         }
         // (b) injection : tau propre jamais vue.
@@ -946,11 +958,11 @@ int run_q2_birth_gate(bool inj_dup) {
   const bool floors = nj[0] >= 1 && nj[1] >= 1 && nj[2] >= 1 &&
                       nj[0] >= 2 * ((u64)m - 1);
   std::printf(
-      "q2_birth_gate N0..4=%llu/%llu/%llu/%llu/%llu taus=%zu degeneres=%llu "
+      "q2_birth_gate N0..4=%llu/%llu/%llu/%llu/%llu taus=%zu "
       "violations=%llu planchers=%d\n",
       (unsigned long long)nj[0], (unsigned long long)nj[1],
       (unsigned long long)nj[2], (unsigned long long)nj[3],
-      (unsigned long long)nj[4], taus.size(), (unsigned long long)degenerate,
+      (unsigned long long)nj[4], taus.size(),
       (unsigned long long)violations, (int)floors);
   if (inj_dup) {
     if (violations > 0) {
@@ -961,6 +973,103 @@ int run_q2_birth_gate(bool inj_dup) {
     return 3;
   }
   return (violations == 0 && floors) ? 0 : 3;
+}
+
+// PORTE A DEUX BACKENDS DU FOLD COMPACT (reponse d'audit « fold
+// compact » § 2) : le backend FIGE build_forest_legacy CONTRE le fold
+// compact (canonique par min-fid, tables a epoque), sur le pipeline
+// reel de deux familles — egalite des compteurs (facettes, fusions,
+// lots), des niveaux de lot, des nœuds, des DELTAS paire a paire
+// (operator==) et de la partition (map legacy contre map compacte ET
+// contre la vue dense facet_keys/final_canon_fid) ; les invariants
+// structurels denses sont verifies par build_forest lui-meme
+// (partition_violations == 0). MUTANT canonical-is-uf-root : le
+// canonique suit la racine union-find au lieu du minimum — les unions
+// generiques placent la racine ailleurs que le minimum, partition et
+// deltas divergent.
+int run_fold_compact_gate(bool inj_root) {
+  u64 bad = 0;
+  for (const CloudFamily fam :
+       {CloudFamily::kUniform, CloudFamily::kEightClusters}) {
+    const int n = fam == CloudFamily::kUniform ? 300 : 120;
+    const std::vector<P3> pts =
+        make_family_cloud(fam, n, cloud_family_default_coord(fam, n), 3);
+    const CloudIndex ix = build_cloud_index(pts);
+    if ((size_t)ix.unique_count() != pts.size()) return 3;
+    std::vector<BallCandidate> cs;
+    BallStreamStats ss;
+    collect_candidate_balls(ix, 8, 11, &cs, &ss);
+    std::stable_sort(cs.begin(), cs.end(), ball_candidate_less);
+    cs.erase(std::unique(cs.begin(), cs.end(),
+                         [](const BallCandidate& x, const BallCandidate& y) {
+                           return x.key == y.key;
+                         }),
+             cs.end());
+    std::vector<Survivor> sv;
+    BallStreamStats ds;
+    prefilter_balls(ix, cs, 11, false, false, &sv, &ds, 1);
+    std::vector<BallData> balls;
+    if (census_balls(ix, cs, sv, 11, 12, false, false, &balls, &ds, 1,
+                     false) != 0)
+      return 3;
+    std::vector<PointId> pid_of((size_t)ix.unique_count());
+    for (size_t u = 0; u < pid_of.size(); ++u)
+      pid_of[u] = ix.point_id((i32)u);
+    u64 e1[11] = {};
+    ForestResult rr[11];
+    std::vector<std::vector<ForestEvent>> evk;
+    if (forests_from_balls(balls, ix.upos, pid_of, 10, e1, rr, &evk, 1,
+                           true) != 0)
+      return 3;
+    for (int K = 1; K <= 10; ++K) {
+      const ForestResult lg = build_forest_legacy(evk[(size_t)K]);
+      const ForestResult cp = build_forest(evk[(size_t)K], false, false,
+                                           nullptr, false, false, inj_root,
+                                           true);
+      bool same = lg.facets == cp.facets && lg.fusions == cp.fusions &&
+                  lg.batches == cp.batches &&
+                  lg.new_attachments == cp.new_attachments &&
+                  lg.nodes.size() == cp.nodes.size() &&
+                  lg.deltas.size() == cp.deltas.size() &&
+                  lg.batch_levels.size() == cp.batch_levels.size() &&
+                  lg.final_partition == cp.final_partition &&
+                  cp.partition_violations == 0 &&
+                  cp.facet_keys.size() == cp.final_canon_fid.size();
+      for (size_t i = 0; same && i < lg.nodes.size(); ++i)
+        same = lg.nodes[i].batch == cp.nodes[i].batch &&
+               lg.nodes[i].absorbed == cp.nodes[i].absorbed;
+      for (size_t i = 0; same && i < lg.deltas.size(); ++i)
+        same = lg.deltas[i] == cp.deltas[i];
+      for (size_t i = 0; same && i < lg.batch_levels.size(); ++i)
+        same = same_level_representation(lg.batch_levels[i],
+                                         cp.batch_levels[i]);
+      // Vue dense contre map legacy, paire a paire.
+      size_t fid = 0;
+      for (const auto& kv : lg.final_partition) {
+        same = same && fid < cp.facet_keys.size() &&
+               kv.first == cp.facet_keys[fid] &&
+               kv.second ==
+                   cp.facet_keys[(size_t)cp.final_canon_fid[fid]];
+        ++fid;
+      }
+      if (!same) {
+        std::fprintf(stderr,
+                     "FOLD COMPACT : divergence legacy/dense (%s, K=%d)\n",
+                     cloud_family_name(fam), K);
+        ++bad;
+      }
+    }
+  }
+  std::printf("fold_compact_gate violations=%llu\n", (unsigned long long)bad);
+  if (inj_root) {
+    if (bad > 0) {
+      std::printf("MUTANT TUE\n");
+      return 4;
+    }
+    std::fprintf(stderr, "PORTE INEFFICACE : mutant non discrimine\n");
+    return 3;
+  }
+  return bad ? 3 : 0;
 }
 
 // PORTE DE PARALLELISME (directive « paralléliser ») : l'objet post-RLE
@@ -1497,6 +1606,7 @@ int main(int argc, char** argv) {
   if (a.par_gate)
     return run_par_gate(a.inj_par_drop, a.inj_par_drop_census);
   if (a.q2_birth_gate) return run_q2_birth_gate(a.inj_birth_dup);
+  if (a.fold_compact_gate) return run_fold_compact_gate(a.inj_canon_root);
   if (a.guard != 0) return run_guard_gate(a.guard);
   const std::vector<P3> pts = make_family_cloud(
       a.family, a.n,
@@ -1618,16 +1728,35 @@ int main(int argc, char** argv) {
       tot_inc += inc;
       if (a.preflight)
         std::printf("preflight K=%d evenements=%llu incidences=%llu "
-                    "octets_resident=%llu\n",
+                    "bytes_forest_events=%llu\n",
                     K, (unsigned long long)e, (unsigned long long)inc,
                     (unsigned long long)(e * sizeof(ForestEvent)));
     }
     if (a.preflight) {
+      // NOM HONNETE (reponse d'audit « fold compact » § 3) : ce chemin
+      // est un event_expansion_preflight_after_census — il evite ev_k
+      // et le fold, mais cands et balls ont ete materialises ; le
+      // preflight PAR TUILE DE CLES (aucun vecteur global de BallData)
+      // viendra avec le contrat product/max_output_bytes. Bornes par
+      // buffer du fold (jamais le seul flux d'evenements) :
+      // unique_facets_upper <= incidences suffit avant internement.
+      const u64 uf_upper = tot_inc;
       std::printf("preflight total evenements=%llu incidences=%llu "
-                  "octets_resident=%llu boules=%zu\n",
+                  "bytes_forest_events=%llu boules=%zu\n",
                   (unsigned long long)tot_ev, (unsigned long long)tot_inc,
                   (unsigned long long)(tot_ev * sizeof(ForestEvent)),
                   balls.size());
+      std::printf(
+          "preflight buffers bytes_facet_incidence_records=%llu "
+          "bytes_event_to_fid=%llu bytes_unique_facets_upper=%llu "
+          "bytes_union_find=%llu bytes_deltas_upper=%llu "
+          "bytes_partition_upper=%llu portee=event_expansion_after_census\n",
+          (unsigned long long)(tot_inc * (sizeof(FacetKey) + 8)),
+          (unsigned long long)(tot_ev * 11 * sizeof(u32)),
+          (unsigned long long)(uf_upper * sizeof(FacetKey)),
+          (unsigned long long)(uf_upper * sizeof(u32)),
+          (unsigned long long)(tot_ev * 64),
+          (unsigned long long)(uf_upper * (sizeof(FacetKey) + sizeof(u32))));
       return 0;
     }
     // PLAFOND TRANSACTIONNEL (audit bloquant C829 § 5.3) : le compte
@@ -1651,7 +1780,7 @@ int main(int argc, char** argv) {
   std::vector<std::vector<ForestEvent>> sevk;
   {
     const int rc = forests_from_balls(balls, ix.upos, pid_of, kmax_eff, sev,
-                                      sres, &sevk, a.threads);
+                                      sres, &sevk, a.threads, a.judge);
     if (rc == 3 && any_inject) {
       std::printf("MUTANT TUE\n");
       return 4;
@@ -1884,6 +2013,20 @@ int main(int argc, char** argv) {
                 (unsigned long long)sres[K].deltas.size(),
                 (unsigned long long)sres[K].new_attachments,
                 (unsigned long long)sres[K].fusions);
+  // Chronos GROSSIERS du fold, sommes sur les K (temps CPU cumule a
+  // N fils — audit « fold compact » § 1.4).
+  {
+    double tb = 0, ti = 0, trd = 0, tp = 0;
+    for (int K = 1; K <= (int)kmax_eff; ++K) {
+      tb += sres[K].t_batching_ms;
+      ti += sres[K].t_intern_ms;
+      trd += sres[K].t_reduce_ms;
+      tp += sres[K].t_partition_ms;
+    }
+    std::printf("fold_phases t_batching_ms=%.1f t_intern_ms=%.1f "
+                "t_reduce_ms=%.1f t_partition_ms=%.1f\n",
+                tb, ti, trd, tp);
+  }
 
   if (any_inject) {
     if (a.judge && disagreements > 0) {
