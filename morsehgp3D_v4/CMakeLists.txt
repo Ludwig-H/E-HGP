@@ -438,6 +438,12 @@ mhgp4_expect_code(mhgp4_forest_probe_fold_capacity_mutant_fid 4
 mhgp4_expect_code(mhgp4_forest_probe_fold_capacity_mutant_epoch 4
     mhgp4_forest_probe
     "--fold-capacity-gate --inject=fold-epoch-sentinel-collision")
+# Signature canonique (audit 9223888 § 2.2) : fumee du digest — le
+# validateur des campagnes scale_threads compare ces lignes entre runs
+# apparies ; l'invariance par fils est etablie par --par-gate (memes
+# candidats au bit pres) et re-verifiee par la campagne elle-meme.
+mhgp4_expect_code(mhgp4_forest_probe_digest_smoke 0 mhgp4_forest_probe
+    "--family=uniform --n=300 --s=8 --seed=3 --min-balls=100 --min-fusions=100 --digest")
 
 # La lane q2 productrice : W_2 est la boule diametrale ouverte, le census
 # est une requete de cover a coefficient 1. Juge brut toutes-paires sur

@@ -103,12 +103,19 @@ def main() -> int:
                     f"{path.relative_to(ROOT)}: superseded product identifier "
                     f"{identifier}"
                 )
+    # Citations HISTORIQUES explicites autorisees : une ligne qui pointe
+    # l'histoire par un chemin git ancre a un commit (`<sha>^:...` ou
+    # `<sha>:...`) peut nommer un prototype retire — c'est la maniere
+    # sanctionnee de referencer le passe sans le rouvrir (audit 9a4b219
+    # cite `075a575^:perg_hgp/...`). L'exemption est par LIGNE et exige
+    # l'ancre de commit ; un nom nu reste banni partout.
+    historical_ref = re.compile(r"\b[0-9a-f]{7,40}\^?:")
     for path in active_markdown():
         if not path.is_file() or path.resolve() == HISTORY.resolve():
             continue
         for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
             for name, pattern in BANNED.items():
-                if pattern.search(line):
+                if pattern.search(line) and not historical_ref.search(line):
                     errors.append(
                         f"{path.relative_to(ROOT)}:{number}: superseded scope {name}"
                     )
