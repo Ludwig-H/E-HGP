@@ -29,6 +29,7 @@
 #include <array>
 #include <utility>
 
+#include "../gpu/device_compat.hpp"
 #include "q3_instruction.hpp"
 
 namespace mhgp4 {
@@ -229,7 +230,7 @@ struct U192 {
 // contre l'oracle 384 bits) : le produit tient dans 192 bits.
 // `mutant_trunc_hi` : tronque le mot haut — la porte qui le tue prouve que
 // les comparaisons traversent reellement les bits >= 128.
-inline U192 mul_level_192(u128 x, u128 y, bool mutant_trunc_hi = false) {
+MHGP4_HD inline U192 mul_level_192(u128 x, u128 y, bool mutant_trunc_hi = false) {
   const u64 x0 = (u64)x, x1 = (u64)(x >> 64);
   const u64 y0 = (u64)y, y1 = (u64)(y >> 64);
   const u128 p00 = (u128)x0 * y0;
@@ -245,7 +246,7 @@ inline U192 mul_level_192(u128 x, u128 y, bool mutant_trunc_hi = false) {
   return r;
 }
 
-inline int cmp_u192(const U192& a, const U192& b) {
+MHGP4_HD inline int cmp_u192(const U192& a, const U192& b) {
   for (int i = 2; i >= 0; --i)
     if (a.w[i] != b.w[i]) return a.w[i] < b.w[i] ? -1 : 1;
   return 0;

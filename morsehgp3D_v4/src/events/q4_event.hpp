@@ -15,6 +15,7 @@
 // boule reste portee par la BallKey primitive, jamais par le niveau.
 #pragma once
 
+#include "../gpu/device_compat.hpp"
 #include "q3_event.hpp"
 #include "q4_instruction.hpp"
 
@@ -61,7 +62,7 @@ inline bool same_level_representation(const Q4Level& x, const Q4Level& y) {
 
 // |N'|² par trois carres 128×128 -> 192 additionnes (aucun debordement :
 // somme < 3·2^144 < 2^192).
-inline Q4Level q4_level_raw(const Q4Form& f) {
+MHGP4_HD inline Q4Level q4_level_raw(const Q4Form& f) {
   Q4Level l{{0, 0, 0}, f.det * f.det};
   for (int i = 0; i < 3; ++i) {
     const u128 m = detail_ev::uabs(f.np[i]);
@@ -86,7 +87,7 @@ struct U320 {
 // Produit (U192 en trois mots) × (u128) -> U320. Precondition prouvee :
 // produit < 2^260 < 2^320. `mutant_trunc_hi` tronque le mot w[4] — la
 // porte qui le tue prouve que les comparaisons traversent les bits >= 256.
-inline U320 mul_192_128_to_320(const u64 n[3], u128 d,
+MHGP4_HD inline U320 mul_192_128_to_320(const u64 n[3], u128 d,
                                bool mutant_trunc_hi = false) {
   const u64 d0 = (u64)d, d1 = (u64)(d >> 64);
   const u128 p00 = (u128)n[0] * d0;
@@ -108,7 +109,7 @@ inline U320 mul_192_128_to_320(const u64 n[3], u128 d,
   return r;
 }
 
-inline int cmp_u320(const U320& a, const U320& b) {
+MHGP4_HD inline int cmp_u320(const U320& a, const U320& b) {
   for (int i = 4; i >= 0; --i)
     if (a.w[i] != b.w[i]) return a.w[i] < b.w[i] ? -1 : 1;
   return 0;
@@ -116,19 +117,19 @@ inline int cmp_u320(const U320& a, const U320& b) {
 
 // -1 / 0 / +1 : l'ORDRE EXACT des niveaux (rayons carres), et la SEULE
 // egalite semantique autorisee pour les macro-lots de la foret.
-inline int compare_exact_level(const Q4Level& x, const Q4Level& y,
+MHGP4_HD inline int compare_exact_level(const Q4Level& x, const Q4Level& y,
                                bool mutant_trunc_hi = false) {
   return cmp_u320(mul_192_128_to_320(x.num, (u128)y.den, mutant_trunc_hi),
                   mul_192_128_to_320(y.num, (u128)x.den, mutant_trunc_hi));
 }
 
-inline bool same_exact_level(const Q4Level& x, const Q4Level& y) {
+MHGP4_HD inline bool same_exact_level(const Q4Level& x, const Q4Level& y) {
   return compare_exact_level(x, y) == 0;
 }
 
 // Promotion d'un niveau q3 (fraction i128 canonique) vers le representant
 // commun : le comparateur U320 ordonne alors q3 et q4 ensemble.
-inline Q4Level promote_q3_level(const Q3Level& l) {
+MHGP4_HD inline Q4Level promote_q3_level(const Q3Level& l) {
   Q4Level r{{0, 0, 0}, l.den};
   const u128 n = (u128)l.num;  // num > 0 (niveau public)
   r.num[0] = (u64)n;

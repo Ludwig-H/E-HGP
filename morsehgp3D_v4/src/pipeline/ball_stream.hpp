@@ -166,7 +166,7 @@ struct AxialSite {
 // exiges — l'appelant normalise) : signe de A1·B2 − A2·B1. Largeurs u16 :
 // |A| < 2^107 (puissance q3), |B| < 2^54 (normale × ecart) — produits
 // croises < 2^161 < 2^192, U192 suffit.
-inline int cmp_mu_same_side(i128 A1, i64 B1, i128 A2, i64 B2) {
+MHGP4_HD inline int cmp_mu_same_side(i128 A1, i64 B1, i128 A2, i64 B2) {
   const int s1 = A1 < 0 ? -1 : (A1 > 0 ? 1 : 0);
   const int s2 = A2 < 0 ? -1 : (A2 > 0 ? 1 : 0);
   if (s1 != s2) return s1 < s2 ? -1 : 1;
@@ -180,7 +180,7 @@ inline int cmp_mu_same_side(i128 A1, i64 B1, i128 A2, i64 B2) {
 // Comparaison exacte 2·P² <=> J·B² (cœur de seed). Sous u16 les produits
 // atteignent ~212 bits (audit § 1) : U320, jamais i128. Preconditions :
 // P <= 0, J >= 0 ; produits < 2^260 (contrat de mul_192_128_to_320).
-inline int cmp_2p2_jb2(i128 P, i128 J, i64 B) {
+MHGP4_HD inline int cmp_2p2_jb2(i128 P, i128 J, i64 B) {
   const u128 ap = (u128)(-P);
   const u64 pw[3] = {(u64)ap, (u64)(ap >> 64), 0};
   U320 lhs = mul_192_128_to_320(pw, ap);  // P² < 2^209
