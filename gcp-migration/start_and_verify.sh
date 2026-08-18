@@ -251,21 +251,27 @@ instance_field() {
         --format="value(${field})"
 }
 
-# Le champ vit sous scheduling.terminationTimestamp dans l'API GCE — la
-# lecture historique au premier niveau rendait TOUJOURS vide hors zones
-# -ai (défaut observé le 18 août : démarrage jamais certifiable en
-# europe-west4-a, arrêt d'urgence systématique après 12 tentatives ;
-# toutes les lectures sœurs utilisent déjà le préfixe scheduling.). On
-# lit le chemin exact, puis l'ancien chemin par ceinture ; la sémantique
-# de certification (cohérence avec start + maxRunDuration, exigence de
+# L'horodatage de terminaison CALCULÉ à l'exécution vit sous
+# resourceStatus.scheduling.terminationTimestamp dans l'API GCE (le bloc
+# scheduling ne porte que la CONFIGURATION maxRunDuration ; le premier
+# niveau n'a jamais existé — deux lancements du 18 août l'ont montré :
+# lecture toujours vide, arrêt d'urgence systématique, la tolérance -ai
+# masquant le défaut sur le repli). On lit les trois chemins du plus
+# probable au plus ancien, premier non vide gagnant ; la sémantique de
+# certification (cohérence avec start + maxRunDuration, exigence de
 # présence hors zones -ai) est INCHANGÉE.
 read_termination_timestamp() {
-    local value
-    value="$(instance_field 'scheduling.terminationTimestamp')" || return 1
-    if [[ -z "${value}" ]]; then
-        value="$(instance_field 'terminationTimestamp')" || return 1
-    fi
-    printf '%s' "${value}"
+    local value path
+    for path in 'resourceStatus.scheduling.terminationTimestamp' \
+                'scheduling.terminationTimestamp' \
+                'terminationTimestamp'; do
+        value="$(instance_field "${path}")" || return 1
+        if [[ -n "${value}" ]]; then
+            printf '%s' "${value}"
+            return 0
+        fi
+    done
+    printf ''
 }
 
 verify_static_guard() {
