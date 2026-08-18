@@ -1,0 +1,11 @@
+famille=terrain n=8000 s=8 smax=11 seed=3 candidats=182330/374500/45389 gen_tues=9834296/2188875 ancres_w4=138565 seeds=0 groupes=0 racines_croisees=0 groupes_fenetre=0 groupes_tues_dj=0 appels_completion=0 boules_uniques=601714 mortes_profondeur=21065 prefiltre_feuilles=0 prefiltre_range_add=3132055 census_keys=580649 census_int=2914949 census_shell=1651356 evenements=605870 fusions=3652025 noeuds=374603 juge=off desaccords=NA t_gen_ms=10474.2 t_tri_ms=277.9 t_prefiltre_ms=902.4 t_census_ms=2006.3 t_fold_ms=7979.2 t_juge_ms=0.0 seeds_core=4480239 sites_core=145795466 t_core_ms=2906.5 t_ab_ms=0.0 t_reduce_ms=0.0 t_emit_ms=0.0
+cardinalites K=1 evenements=18376 facettes=8000 deltas=6594 attachements=0 fusions=7999
+cardinalites K=2 evenements=27539 facettes=36173 deltas=15184 attachements=18313 fusions=36158
+cardinalites K=3 evenements=36689 facettes=83425 deltas=25060 attachements=54285 fusions=83340
+cardinalites K=4 evenements=46139 facettes=150010 deltas=33795 attachements=109170 fusions=149794
+cardinalites K=5 evenements=55419 facettes=234824 deltas=42556 attachements=181622 fusions=234480
+cardinalites K=6 evenements=64764 facettes=339048 deltas=51638 attachements=272937 fusions=338586
+cardinalites K=7 evenements=74621 facettes=464626 deltas=61292 attachements=385594 fusions=464053
+cardinalites K=8 evenements=84084 facettes=607180 deltas=70922 attachements=514783 fusions=606508
+cardinalites K=9 evenements=94012 facettes=772654 deltas=80536 attachements=666529 fusions=771906
+cardinalites K=10 evenements=104227 facettes=960043 deltas=90269 attachements=840172 fusions=959201

@@ -369,6 +369,13 @@ mhgp4_expect_code(mhgp4_forest_probe_q2_birth_mutant_dup 4 mhgp4_forest_probe
     "--q2-birth-gate --inject=birth-dup-tau")
 mhgp4_expect_code(mhgp4_forest_probe_preflight_smoke 0 mhgp4_forest_probe
     "--family=uniform --n=400 --s=8 --seed=3 --output-preflight-only")
+# Plafond transactionnel (audit bloquant C829 § 5.3) : count -> preflight
+# -> fill — un plafond minuscule refuse (code 2) AVANT toute allocation
+# d'ev_k ; un plafond genereux laisse le run aboutir a l'identique.
+mhgp4_expect_code(mhgp4_forest_probe_max_output_refus 2 mhgp4_forest_probe
+    "--family=uniform --n=400 --s=8 --seed=3 --min-balls=100 --min-fusions=100 --max-output-bytes=4096")
+mhgp4_expect_code(mhgp4_forest_probe_max_output_passe 0 mhgp4_forest_probe
+    "--family=uniform --n=400 --s=8 --seed=3 --min-balls=100 --min-fusions=100 --max-output-bytes=1000000000")
 
 # La lane q2 productrice : W_2 est la boule diametrale ouverte, le census
 # est une requete de cover a coefficient 1. Juge brut toutes-paires sur

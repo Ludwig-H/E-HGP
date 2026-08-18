@@ -77,6 +77,7 @@ struct Args {
   bool preflight = false;      // compter la sortie sans la materialiser
   bool q2_birth_gate = false;  // oracle Poisson : injection des facettes
   bool inj_birth_dup = false;
+  u64 max_output_bytes = 0;  // 0 = pas de plafond ; sinon refus AVANT ev_k
   u32 inj_axial = 0;  // masque kAxial* des mutants du chemin axial
   u64 min_balls = 0;
   u64 min_fusions = 0;
@@ -143,6 +144,8 @@ Args parse(int argc, char** argv) {
     else if (arg == "--output-preflight-only") a.preflight = true;
     else if (arg == "--q2-birth-gate") a.q2_birth_gate = true;
     else if (arg == "--inject=birth-dup-tau") a.inj_birth_dup = true;
+    else if (const char* v = val("--max-output-bytes="))
+      a.max_output_bytes = (u64)std::atoll(v);
     else if (arg == "--inject=axial-short-group") a.inj_axial |= kAxialShortGroup;
     else if (arg == "--inject=axial-drop-ties") a.inj_axial |= kAxialDropTies;
     else if (arg == "--inject=axial-first-rep") a.inj_axial |= kAxialFirstRep;
@@ -1570,13 +1573,14 @@ int main(int argc, char** argv) {
   for (size_t u = 0; u < pid_of.size(); ++u)
     pid_of[u] = a.inj_dense_pointid ? (PointId)u  // MUTANT : le rang casté
                                     : ix.point_id((i32)u);
-  if (a.preflight) {
-    // PREFLIGHT DE SORTIE (contre-audits Poisson, § actions minimales) :
-    // compter la sortie SANS la materialiser — expansion par tranches de
-    // boules, evenements liberes aussitot comptes ; compteurs u64 par K
-    // (evenements, incidences = q + d, octets projetes au format
-    // ForestEvent resident). Aucun ev_k, aucun fold : le preflight dit
-    // ce que couterait la materialisation AVANT de la payer.
+  if (a.preflight || a.max_output_bytes > 0) {
+    // PREFLIGHT DE SORTIE (contre-audits Poisson + audit bloquant C829,
+    // § actions minimales) : compter la sortie SANS la materialiser —
+    // expansion par tranches de boules, evenements liberes aussitot
+    // comptes ; compteurs u64 par K (evenements, incidences = q + d,
+    // octets projetes au format ForestEvent resident). Aucun ev_k,
+    // aucun fold : le preflight dit ce que couterait la materialisation
+    // AVANT de la payer.
     const size_t Tpf =
         balls.empty()
             ? 1
@@ -1612,17 +1616,35 @@ int main(int argc, char** argv) {
       }
       tot_ev += e;
       tot_inc += inc;
-      std::printf("preflight K=%d evenements=%llu incidences=%llu "
-                  "octets_resident=%llu\n",
-                  K, (unsigned long long)e, (unsigned long long)inc,
-                  (unsigned long long)(e * sizeof(ForestEvent)));
+      if (a.preflight)
+        std::printf("preflight K=%d evenements=%llu incidences=%llu "
+                    "octets_resident=%llu\n",
+                    K, (unsigned long long)e, (unsigned long long)inc,
+                    (unsigned long long)(e * sizeof(ForestEvent)));
     }
-    std::printf("preflight total evenements=%llu incidences=%llu "
-                "octets_resident=%llu boules=%zu\n",
-                (unsigned long long)tot_ev, (unsigned long long)tot_inc,
-                (unsigned long long)(tot_ev * sizeof(ForestEvent)),
-                balls.size());
-    return 0;
+    if (a.preflight) {
+      std::printf("preflight total evenements=%llu incidences=%llu "
+                  "octets_resident=%llu boules=%zu\n",
+                  (unsigned long long)tot_ev, (unsigned long long)tot_inc,
+                  (unsigned long long)(tot_ev * sizeof(ForestEvent)),
+                  balls.size());
+      return 0;
+    }
+    // PLAFOND TRANSACTIONNEL (audit bloquant C829 § 5.3) : le compte
+    // precede le remplissage — count -> preflight -> fill — et le refus
+    // tombe AVANT toute allocation d'ev_k ; jamais un reserve optimiste
+    // sur des milliards d'enregistrements. Le contrat porte sur les
+    // octets residents projetes du flux d'evenements.
+    const u64 projected = tot_ev * (u64)sizeof(ForestEvent);
+    if (projected > a.max_output_bytes) {
+      std::fprintf(stderr,
+                   "REFUS resource_exhausted : sortie projetee %llu octets "
+                   "(%llu evenements) > plafond max_output_bytes=%llu — "
+                   "aucune materialisation\n",
+                   (unsigned long long)projected, (unsigned long long)tot_ev,
+                   (unsigned long long)a.max_output_bytes);
+      return 2;
+    }
   }
   u64 sev[11] = {};
   ForestResult sres[11];

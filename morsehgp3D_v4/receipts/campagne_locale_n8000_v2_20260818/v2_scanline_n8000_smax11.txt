@@ -1,0 +1,11 @@
+famille=scanline_overlap_multiecho n=8000 s=8 smax=11 seed=3 candidats=234406/527910/263534 gen_tues=72707397/13657659 ancres_w4=431215 seeds=0 groupes=0 racines_croisees=0 groupes_fenetre=0 groupes_tues_dj=0 appels_completion=0 boules_uniques=1014471 mortes_profondeur=46341 prefiltre_feuilles=0 prefiltre_range_add=5439361 census_keys=968130 census_int=4957304 census_shell=3073803 evenements=1094377 fusions=6807533 noeuds=573050 juge=off desaccords=NA t_gen_ms=25070.6 t_tri_ms=775.6 t_prefiltre_ms=1872.5 t_census_ms=3730.0 t_fold_ms=16592.7 t_juge_ms=0.0 seeds_core=20232333 sites_core=652573544 t_core_ms=11624.1 t_ab_ms=0.0 t_reduce_ms=0.0 t_emit_ms=0.0
+cardinalites K=1 evenements=24863 facettes=8000 deltas=3552 attachements=0 fusions=7999
+cardinalites K=2 evenements=37044 facettes=42722 deltas=9185 attachements=22082 fusions=42712
+cardinalites K=3 evenements=51037 facettes=108813 deltas=21132 attachements=73529 fusions=108756
+cardinalites K=4 evenements=68966 facettes=214797 deltas=34329 attachements=156274 fusions=214633
+cardinalites K=5 evenements=91251 facettes=372796 deltas=49167 attachements=289437 fusions=372481
+cardinalites K=6 evenements=113373 facettes=574867 deltas=67205 attachements=457868 fusions=574319
+cardinalites K=7 evenements=138556 facettes=840552 deltas=88748 attachements=689495 fusions=839705
+cardinalites K=8 evenements=163297 facettes=1153394 deltas=110968 attachements=960203 fusions=1152235
+cardinalites K=9 evenements=189375 facettes=1529547 deltas=137358 attachements=1293432 fusions=1527978
+cardinalites K=10 evenements=216615 facettes=1968746 deltas=162122 attachements=1682550 fusions=1966715
