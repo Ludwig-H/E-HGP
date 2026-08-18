@@ -388,6 +388,34 @@ mhgp4_expect_code(mhgp4_forest_probe_fold_compact_gate 0 mhgp4_forest_probe
     "--fold-compact-gate")
 mhgp4_expect_code(mhgp4_forest_probe_fold_mutant_canon_root 4 mhgp4_forest_probe
     "--fold-compact-gate --inject=canonical-is-uf-root")
+# Etage flottant certifie du signe de P (reçu « filtre flottant » —
+# enregistrement CTest REPARE : la porte existait sans etre cablee) puis
+# KERNEL AFFINE par ancre (audit « filtre certifie et niveaux q3 » § 1) :
+# sous kFloatVerify chaque signe certifie est recoupe par l'exact (zero
+# desaccord), planchers des deux signes et du repli (fixture-cœur
+# cocirculaire ×1999). La porte affine grave EN PLUS l'identite
+# L = 4·q3_power et la divisibilite L ≡ 0 (mod 4) sur TOUS les triples
+# de petits nuages (y compris z ∈ {a, b, x}), et le temoin de forte
+# annulation ± (§ 6.1) aux constantes gravees (deux termes ~2^102
+# s'annulent a ±petit : la borne saine declare incertain les deux
+# variantes, la borne retrecie certifie le bruit contre l'exact). Le
+# mutant float-threshold-too-small (borne /2^20) meurt dans les DEUX.
+mhgp4_expect_code(mhgp4_forest_probe_float_gate 0 mhgp4_forest_probe
+    "--float-gate")
+mhgp4_expect_code(mhgp4_forest_probe_float_mutant_small 4 mhgp4_forest_probe
+    "--float-gate --inject=float-threshold-too-small")
+mhgp4_expect_code(mhgp4_forest_probe_q3_affine_gate 0 mhgp4_forest_probe
+    "--q3-affine-gate")
+mhgp4_expect_code(mhgp4_forest_probe_q3_affine_mutant_small 4 mhgp4_forest_probe
+    "--q3-affine-gate --inject=float-threshold-too-small")
+# Garde d'arrondi executable (contre-audit 04c71a2 § 4) : sous
+# FE_UPWARD le filtre se desactive seul (zero certification, sortie
+# inchangee), sous FE_TONEAREST il certifie ; le mutant qui ignore la
+# garde certifie sous FE_UPWARD et meurt.
+mhgp4_expect_code(mhgp4_forest_probe_float_rounding_gate 0 mhgp4_forest_probe
+    "--float-rounding-gate")
+mhgp4_expect_code(mhgp4_forest_probe_float_rounding_mutant 4 mhgp4_forest_probe
+    "--float-rounding-gate --inject=float-ignore-rounding")
 
 # La lane q2 productrice : W_2 est la boule diametrale ouverte, le census
 # est une requete de cover a coefficient 1. Juge brut toutes-paires sur

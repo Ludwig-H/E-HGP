@@ -27,6 +27,7 @@
 // 3 invariant/plancher, 4 mutant tue (--inject=rle-drop | census-nonstrict |
 // dense-pointid).
 #include <algorithm>
+#include <cfenv>
 #include <chrono>
 #include <cstdio>
 #include <cstring>
@@ -81,6 +82,8 @@ struct Args {
   bool fold_compact_gate = false;
   bool inj_canon_root = false;
   bool float_gate = false;
+  bool q3_affine_gate = false;
+  bool float_rounding_gate = false;
   u32 inj_axial = 0;  // masque kAxial* des mutants du chemin axial
   u64 min_balls = 0;
   u64 min_fusions = 0;
@@ -152,6 +155,10 @@ Args parse(int argc, char** argv) {
     else if (arg == "--fold-compact-gate") a.fold_compact_gate = true;
     else if (arg == "--inject=canonical-is-uf-root") a.inj_canon_root = true;
     else if (arg == "--float-gate") a.float_gate = true;
+    else if (arg == "--q3-affine-gate") a.q3_affine_gate = true;
+    else if (arg == "--float-rounding-gate") a.float_rounding_gate = true;
+    else if (arg == "--inject=float-ignore-rounding")
+      a.inj_axial |= kFloatIgnoreRounding;
     else if (arg == "--inject=float-threshold-too-small")
       a.inj_axial |= kFloatSmallThreshold;
     else if (arg == "--inject=axial-short-group") a.inj_axial |= kAxialShortGroup;
@@ -982,9 +989,10 @@ int run_q2_birth_gate(bool inj_dup) {
 // PORTE DE L'ETAGE FLOTTANT (audit « filtre flottant et q3 demi-plans »
 // § 1.4) : sous kFloatVerify, CHAQUE signe certifie est recoupe par
 // l'exact — zero desaccord exige. Plancher de replis garanti par la
-// fixture-cœur cocirculaire MISE A L'ECHELLE ×2048 (coordonnees jusqu'a
-// ~41000 : G ~ 2^56 et W ~ 2^67 deviennent INEXACTS en binaire64, le
-// bruit d'arrondi des sites P = 0 est reel ~2^29 — sous la borne 2^58,
+// fixture-cœur cocirculaire MISE A L'ECHELLE ×1999 (pas une puissance
+// de 2 — reçu « filtre flottant », piege grave : ×2048 laissait les
+// mantisses EXACTES ; a ×1999 les conversions de G et N deviennent
+// inexactes, le bruit des sites P = 0 est reel et reste sous la borne,
 // donc repli obligatoire) ; planchers de certification des deux signes
 // sur les familles. MUTANT float-threshold-too-small (borne 2^20) : les
 // P = 0 cocirculaires sortent de la bande retrecie et sont certifies
@@ -1036,6 +1044,215 @@ int run_float_gate(bool inj_small) {
     return 3;
   }
   return (mm == 0 && floors) ? 0 : 3;
+}
+
+// PORTE PERMANENTE DU KERNEL AFFINE (audit « filtre certifie et niveaux
+// q3 » § 1 + 6). Deux volets :
+// (1) IDENTITE EXHAUSTIVE : pour TOUTE ancre (a,b), TOUT seed x et TOUT
+//     site z de petits nuages (y compris z ∈ {a, b, x} : u_a = a−b,
+//     q_a = 0 et d·N = d·W − G·D2 = 0 par P(b) = 0, donc L(a) = 0),
+//     L = G·q_z − 2·u_z·N — les MEMES formules que la production —
+//     verifie L == 4·q3_power(f3, z) ET L ≡ 0 (mod 4) : la division
+//     P = L/4 du cœur de seed est exacte, pas une approximation.
+//     Chaque decision flottante (affine_l_hat / affine_l_bound, les
+//     fonctions de production) certifiee est recoupee contre le signe
+//     exact. Nuages : uniform/eight_clusters aux coordonnees par defaut
+//     (arithmetique double EXACTE : decisions toujours justes),
+//     uniform a coord=50000 (G et N inexacts en binaire64 : la borne
+//     travaille aux grandeurs reelles) et la fixture-cœur cocirculaire
+//     ×1999 (sites a L = 0 exact, bruit reel sous la borne : plancher
+//     de replis, et sous mutant le bruit certifie contredit l'exact).
+// (2) TEMOIN DE FORTE ANNULATION ± (audit § 6.1), constantes GRAVEES :
+//     G = 2^67 − 12345, u = (131071, 0, 0), q = 2^35 + 7,
+//     N0 = floor(G·q / (2·u0)) — deux termes ~2^102 s'annulent a
+//     L = (G·q) mod (2·u0) = +216577 ; variante N0 + 1 :
+//     L − 2·u0 = −45565. binaire64 rend le MEME L^ (bruit ~ −2^49,
+//     (double)N0 == (double)(N0+1)) pour les deux : la borne saine
+//     (E ~ 2^55) declare INCERTAIN les deux ; la borne retrecie du
+//     mutant (E·2^-20 ~ 2^35 < |bruit|) certifie le signe du bruit pour
+//     les DEUX variantes, en desaccord avec au moins un exact -> tue.
+int run_q3_affine_gate(bool inj_small) {
+  u64 ids = 0, viol = 0, cneg = 0, cpos = 0, fb = 0, mm = 0;
+  std::vector<std::pair<std::vector<P3>, const char*>> clouds;
+  clouds.push_back({make_family_cloud(CloudFamily::kUniform, 40,
+                                      cloud_family_default_coord(
+                                          CloudFamily::kUniform, 40),
+                                      3),
+                    "uniform40"});
+  clouds.push_back({make_family_cloud(CloudFamily::kEightClusters, 32,
+                                      cloud_family_default_coord(
+                                          CloudFamily::kEightClusters, 32),
+                                      3),
+                    "eight32"});
+  clouds.push_back(
+      {make_family_cloud(CloudFamily::kUniform, 28, 50000, 5), "uniform28g"});
+  {
+    std::vector<P3> fx = {{11, 7, 10},  {20, 10, 10}, {15, 15, 10},
+                          {11, 13, 10}, {18, 14, 10}, {12, 14, 10},
+                          {15, 10, 16}};
+    for (P3& p : fx) {
+      p.x *= 1999;
+      p.y *= 1999;
+      p.z *= 1999;
+    }
+    clouds.push_back({std::move(fx), "cocirc1999"});
+  }
+  std::vector<i64> su0, su1, su2, sq;
+  std::vector<double> sud0, sud1, sud2, sqd;
+  for (const auto& cl : clouds) {
+    const CloudIndex ix = build_cloud_index(cl.first);
+    const size_t m = (size_t)ix.unique_count();
+    if (m != cl.first.size()) return 3;
+    su0.resize(m); su1.resize(m); su2.resize(m); sq.resize(m);
+    sud0.resize(m); sud1.resize(m); sud2.resize(m); sqd.resize(m);
+    for (size_t ua = 0; ua + 1 < m; ++ua)
+      for (size_t ub = ua + 1; ub < m; ++ub) {
+        const P3& pa = ix.upos[ua];
+        const P3& pb = ix.upos[ub];
+        const i64 D2 = p3_norm2(p3_sub(pb, pa));
+        if (D2 == 0) continue;
+        // Sites affines de l'ancre — memes formules que fill_affine_sites.
+        i64 qmax = 1, umax = 1;
+        const i64 sx = pa.x + pb.x, sy = pa.y + pb.y, sz = pa.z + pb.z;
+        for (size_t i = 0; i < m; ++i) {
+          const P3& pz = ix.upos[i];
+          const i64 u0 = 2 * pz.x - sx, u1 = 2 * pz.y - sy,
+                    u2 = 2 * pz.z - sz;
+          const i64 qz = u0 * u0 + u1 * u1 + u2 * u2 - D2;
+          su0[i] = u0; su1[i] = u1; su2[i] = u2; sq[i] = qz;
+          sud0[i] = (double)u0; sud1[i] = (double)u1; sud2[i] = (double)u2;
+          sqd[i] = (double)qz;
+          const i64 qa = qz < 0 ? -qz : qz;
+          if (qa > qmax) qmax = qa;
+          for (const i64 uu : {u0 < 0 ? -u0 : u0, u1 < 0 ? -u1 : u1,
+                               u2 < 0 ? -u2 : u2})
+            if (uu > umax) umax = uu;
+        }
+        for (size_t x = 0; x < m; ++x) {
+          if (x == ua || x == ub) continue;
+          const Q3Form f3 = q3_form(pa, pb, ix.upos[x]);
+          const i128 N0 = f3.w[0] - f3.g * (i128)(pb.x - pa.x);
+          const i128 N1 = f3.w[1] - f3.g * (i128)(pb.y - pa.y);
+          const i128 N2 = f3.w[2] - f3.g * (i128)(pb.z - pa.z);
+          const double Gd = (double)f3.g;
+          const double Nd0 = (double)N0, Nd1 = (double)N1,
+                       Nd2 = (double)N2;
+          double bnd = affine_l_bound(Gd, Nd0, Nd1, Nd2, (double)qmax,
+                                      (double)umax);
+          if (inj_small) bnd *= kFloatMutantShrink;  // MUTANT
+          for (size_t iz = 0; iz < m; ++iz) {
+            const i128 L = f3.g * (i128)sq[iz] -
+                           2 * ((i128)su0[iz] * N0 + (i128)su1[iz] * N1 +
+                                (i128)su2[iz] * N2);
+            ++ids;
+            if (L != 4 * q3_power(f3, ix.upos[iz])) ++viol;
+            if (((u64)(u128)L & 3u) != 0) ++viol;
+            const double Lh = affine_l_hat(Gd, Nd0, Nd1, Nd2, sud0[iz],
+                                           sud1[iz], sud2[iz], sqd[iz]);
+            if (Lh < -bnd) {
+              ++cneg;
+              if (!(L < 0)) ++mm;
+            } else if (Lh > bnd) {
+              ++cpos;
+              if (!(L > 0)) ++mm;
+            } else {
+              ++fb;
+            }
+          }
+        }
+      }
+  }
+  u64 wit_unc = 0, wit_mm = 0;
+  bool wit_fixture_ok = true;
+  {
+    const i128 gw = ((i128)1 << 67) - 12345;
+    const i64 u0 = 131071, qw = (1LL << 35) + 7;
+    const i128 n0 = (gw * (i128)qw) / (2 * (i128)u0);
+    for (int variant = 0; variant < 2; ++variant) {
+      const i128 nv = n0 + variant;
+      const i128 L = gw * (i128)qw - 2 * (i128)u0 * nv;
+      if (L != (variant ? (i128)-45565 : (i128)216577))
+        wit_fixture_ok = false;  // constantes gravees : toute derive casse
+      const double gd = (double)gw, nd = (double)nv;
+      const double lh = affine_l_hat(gd, nd, 0.0, 0.0, (double)u0, 0.0, 0.0,
+                                     (double)qw);
+      double bnd = affine_l_bound(gd, nd, 0.0, 0.0, (double)qw, (double)u0);
+      if (inj_small) bnd *= kFloatMutantShrink;  // MUTANT
+      if (lh < -bnd) {
+        if (!(L < 0)) ++wit_mm;
+      } else if (lh > bnd) {
+        if (!(L > 0)) ++wit_mm;
+      } else {
+        ++wit_unc;
+      }
+    }
+  }
+  const bool floors = ids >= 1000000 && cneg >= 100 && cpos >= 100 && fb >= 1;
+  std::printf(
+      "q3_affine_gate identites=%llu violations=%llu certifies_neg=%llu "
+      "certifies_pos=%llu replis=%llu desaccords=%llu temoin_incertains=%llu "
+      "temoin_desaccords=%llu planchers=%d\n",
+      (unsigned long long)ids, (unsigned long long)viol,
+      (unsigned long long)cneg, (unsigned long long)cpos,
+      (unsigned long long)fb, (unsigned long long)mm,
+      (unsigned long long)wit_unc, (unsigned long long)wit_mm, (int)floors);
+  if (!wit_fixture_ok) return 3;
+  if (inj_small) {
+    if (mm + wit_mm > 0) {
+      std::printf("MUTANT TUE\n");
+      return 4;
+    }
+    std::fprintf(stderr, "PORTE INEFFICACE : mutant non discrimine\n");
+    return 3;
+  }
+  return (viol == 0 && mm == 0 && wit_unc == 2 && floors) ? 0 : 3;
+}
+
+// PORTE DE LA GARDE D'ARRONDI (contre-audit 04c71a2 § 4) : sous un mode
+// d'arrondi != FE_TONEAREST la preuve de la borne ne tient plus — le
+// filtre doit se desactiver SEUL (zero certification, tout en repli
+// exact, sortie inchangee). Sous FE_TONEAREST il doit certifier (le
+// meme nuage donne des certifications > 0 : la garde n'est pas un
+// interrupteur toujours-off). MUTANT float-ignore-rounding : la garde
+// est ignoree — des certifications apparaissent sous FE_UPWARD, la
+// porte le voit et tue.
+int run_float_rounding_gate(bool inj_ignore) {
+  const std::vector<P3> pts = make_family_cloud(
+      CloudFamily::kUniform, 300,
+      cloud_family_default_coord(CloudFamily::kUniform, 300), 3);
+  const CloudIndex ix = build_cloud_index(pts);
+  if ((size_t)ix.unique_count() != pts.size()) return 3;
+  const u32 flags = inj_ignore ? kFloatIgnoreRounding : 0u;
+  std::vector<BallCandidate> cs_up, cs_near;
+  BallStreamStats ss_up, ss_near;
+  if (std::fesetround(FE_UPWARD) != 0) return 3;
+  collect_candidate_balls(ix, 8, 11, &cs_up, &ss_up, false, false, flags);
+  if (std::fesetround(FE_TONEAREST) != 0) return 3;
+  collect_candidate_balls(ix, 8, 11, &cs_near, &ss_near, false, false, flags);
+  const u64 cert_up = ss_up.float_cert_neg + ss_up.float_cert_pos;
+  const u64 cert_near = ss_near.float_cert_neg + ss_near.float_cert_pos;
+  const bool same_out =
+      cs_up.size() == cs_near.size() &&
+      std::equal(cs_up.begin(), cs_up.end(), cs_near.begin(),
+                 [](const BallCandidate& x, const BallCandidate& y) {
+                   return x.key == y.key && x.arity == y.arity;
+                 });
+  std::printf("float_rounding_gate certifies_upward=%llu "
+              "certifies_nearest=%llu replis_upward=%llu sortie_identique=%d\n",
+              (unsigned long long)cert_up, (unsigned long long)cert_near,
+              (unsigned long long)ss_up.float_fallback, (int)same_out);
+  if (inj_ignore) {
+    if (cert_up > 0) {
+      std::printf("MUTANT TUE\n");
+      return 4;
+    }
+    std::fprintf(stderr, "PORTE INEFFICACE : mutant non discrimine\n");
+    return 3;
+  }
+  return (cert_up == 0 && ss_up.float_fallback > 0 && cert_near > 0 &&
+          same_out)
+             ? 0
+             : 3;
 }
 
 // PORTE A DEUX BACKENDS DU FOLD COMPACT (reponse d'audit « fold
@@ -1672,6 +1889,10 @@ int main(int argc, char** argv) {
   if (a.fold_compact_gate) return run_fold_compact_gate(a.inj_canon_root);
   if (a.float_gate)
     return run_float_gate((a.inj_axial & kFloatSmallThreshold) != 0);
+  if (a.q3_affine_gate)
+    return run_q3_affine_gate((a.inj_axial & kFloatSmallThreshold) != 0);
+  if (a.float_rounding_gate)
+    return run_float_rounding_gate((a.inj_axial & kFloatIgnoreRounding) != 0);
   if (a.guard != 0) return run_guard_gate(a.guard);
   const std::vector<P3> pts = make_family_cloud(
       a.family, a.n,

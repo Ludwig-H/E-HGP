@@ -26,8 +26,10 @@
 
 #include <algorithm>
 #include <atomic>
+#include <cfenv>
 #include <chrono>
 #include <cmath>
+#include <limits>
 #include <thread>
 #include <vector>
 
@@ -168,6 +170,7 @@ enum : u32 {
   kAxialSeedCoreNonstrict = 128u,  // MUTANT : egalites comptees au cœur
   kFloatSmallThreshold = 256u,  // MUTANT : borne flottante trop petite
   kFloatVerify = 512u,          // reception : signes certifies recoupes
+  kFloatIgnoreRounding = 1024u,  // MUTANT : garde d'arrondi ignoree
 };
 
 // Site axial d'un seed : A = puissance q3, B = normale·(z−a), mu = A/B.
@@ -211,65 +214,60 @@ MHGP4_HD inline int cmp_2p2_jb2(i128 P, i128 J, i64 B) {
   return cmp_u320(lhs, mul_192_128_to_320(jw, b2));  // J·B² < 2^210
 }
 
-// ---- ETAGE FLOTTANT CERTIFIE DU SIGNE DE P (audit « filtre flottant et
-// q3 demi-plans » § 1.1). Conditions GRAVEES : round-to-nearest, jamais
-// de fast-math, sequence en fma FIGEE ci-dessous, S = |v|² calcule en
-// ENTIER (S < 2^36, exactement representable en binaire64), G et W
-// convertis UNE FOIS par forme depuis les valeurs exactes (erreurs de
-// conversion < 2^15 et < 2^33, contributions < 2^51 et < 2^50 apres
-// produit). Borne globale conservatrice |P_hat − P| < 2^58 — le seuil
-// LACHE cree des replis exacts, jamais une fausse decision :
-//   P_hat < −2^58  =>  P < 0 certifie ;
-//   P_hat > +2^58  =>  P > 0 certifie ;
-//   sinon          =>  repli q3_power exact (i128).
-// Jung (2P² vs JB²) et cmp_mu N'utilisent PAS ce seuil : leurs bornes
-// propres (§ 1.2/1.3) sont des chantiers distincts.
-struct Q3FormF {
-  double g;
-  double w[3];
-};
-
-inline Q3FormF q3_form_float(const Q3Form& f) {
-  Q3FormF r;
-  r.g = (double)f.g;
-  r.w[0] = (double)f.w[0];
-  r.w[1] = (double)f.w[1];
-  r.w[2] = (double)f.w[2];
-  return r;
+// ---- ETAGE FLOTTANT CERTIFIE DU SIGNE DE P — FORME AFFINE PAR ANCRE
+// (audits « filtre flottant » § 1.1 puis « filtre certifie et niveaux
+// q3 » § 1 + 3). L'etage vit DANS les lanes q3 et q4 (memes cinq fma,
+// donnees partagees) ; conditions GRAVEES : round-to-nearest, jamais de
+// fast-math, sequence FIGEE
+//   t  = fma(N2, u2, fma(N1, u1, N0·u0)) ;
+//   L^ = fma(G, q, −(t + t)) ;
+// sur les SITES AFFINES de l'ancre u = 2z−a−b, q = |u|²−D2 (entiers
+// < 2^36, donc EXACTS en binaire64 — l'erreur de conversion des sites
+// disparait), et le seed N = W − G·d (|N| < 2^87), G < 2^68. Seules les
+// conversions de G et N (ulp) et les cinq arrondis contribuent, toutes
+// RELATIVES aux grandeurs : |L^ − L| <= ~8·2^-53·(G·|q| + 2·Σ|N_i u_i|),
+// majore une fois PAR SEED par E = 2^-48·(G_d·qmax + 2·|N|_1·umax) avec
+// qmax/umax les majorants de l'ancre (calcules par fill_affine_sites).
+// Le facteur 2^-48 laisse ×4 de marge et absorbe les arrondis du calcul
+// de E lui-meme — volontairement LACHE : des replis exacts, jamais une
+// fausse decision. Decision : L^ < −E => L < 0 certifie ; L^ > +E =>
+// L > 0 certifie ; sinon repli AFFINE EXACT i128 (|L| < 2^105), et
+// P = L/4 est exact (identite L = 4·q3_power et divisibilite gravees par
+// la porte --q3-affine-gate). Jung (2P² vs JB²) et cmp_mu N'utilisent
+// PAS ce seuil : leurs bornes propres (§ 1.2/1.3) sont des chantiers
+// distincts.
+// Sequence FIGEE et borne par seed — PARTAGEES par les lanes q3/q4 et
+// par la porte --q3-affine-gate (le temoin de forte annulation teste CES
+// fonctions, jamais une copie).
+inline double affine_l_hat(double gd, double nd0, double nd1, double nd2,
+                           double u0, double u1, double u2, double q) {
+  const double t = std::fma(nd2, u2, std::fma(nd1, u1, nd0 * u0));
+  return std::fma(gd, q, -(t + t));
 }
-
-// -1 : P < 0 certifie ; +1 : P > 0 certifie ; 0 : indecidable (repli).
-inline int q3_power_float_sign(const Q3FormF& ff, const P3& z, const P3& a,
-                               double bound) {
-  const i64 vx = z.x - a.x, vy = z.y - a.y, vz = z.z - a.z;
-  const double S = (double)(vx * vx + vy * vy + vz * vz);  // entier exact
-  const double t = std::fma(ff.w[2], (double)vz,
-                            std::fma(ff.w[1], (double)vy,
-                                     ff.w[0] * (double)vx));
-  const double ph = std::fma(ff.g, S, -t);
-  if (ph < -bound) return -1;
-  if (ph > bound) return 1;
-  return 0;
-}
-
-// BORNE DYNAMIQUE PAR FORME : toutes les erreurs (conversions de G et
-// des W_i, ~8 arrondis de la sequence figee) sont RELATIVES aux
-// grandeurs des termes — |P_hat − P| <= ~10·2^-53·(G·S + Σ|W_i v_i|).
-// On majore une fois par forme : E_f = 2^-48·(G_d·Smax + |W|_1·vmax),
-// Smax = 2·D2 (cover coef 3 : |z−m|² <= 0,75·D2 et |a−m| = D/2 donnent
-// |z−a|² <= 1,87·D2 < 2·D2), vmax = racine(Smax)+1. Le facteur 2^-48
-// laisse ×3 de marge sur la derivation ET absorbe les arrondis du
-// calcul de E_f lui-meme — volontairement LACHE : des replis exacts,
-// jamais une fausse decision. La borne absolue 2^58 de l'audit est
-// l'instance du profil u16 plein (G ~ 2^68, S ~ 2^36) de cette formule.
-inline double q3_float_bound(const Q3FormF& ff, i64 smax_cover) {
-  const double S = (double)smax_cover;
-  const double vmax = std::sqrt(S) + 1.0;
-  const double w1 =
-      std::fabs(ff.w[0]) + std::fabs(ff.w[1]) + std::fabs(ff.w[2]);
-  return 0x1p-48 * std::fma(ff.g, S, w1 * vmax);
+inline double affine_l_bound(double gd, double nd0, double nd1, double nd2,
+                             double qmax, double umax) {
+  return 0x1p-48 *
+         std::fma(gd, qmax,
+                  2.0 * (std::fabs(nd0) + std::fabs(nd1) + std::fabs(nd2)) *
+                      umax);
 }
 constexpr double kFloatMutantShrink = 0x1p-20;  // MUTANT : borne /2^20
+// CONDITIONS DE COMPILATION/EXECUTION EXECUTABLES (contre-audit 04c71a2
+// § 4) : la preuve de la borne suppose binaire64, round-to-nearest,
+// aucune reassociation. Sous __FAST_MATH__ le filtre est desactive A LA
+// COMPILATION ; a l'execution, un mode d'arrondi != FE_TONEAREST le
+// desactive aussi (borne = +inf => repli exact integral ; la CORRECTION
+// ne depend jamais du filtre, seul le debit change). Les fils crees
+// demarrent dans l'environnement flottant par defaut (nearest) — la
+// verification au fil principal ne peut que sur-desactiver.
+#if defined(__FAST_MATH__)
+constexpr bool kFloatFilterCompileEnabled = false;
+#else
+constexpr bool kFloatFilterCompileEnabled = true;
+#endif
+inline bool float_filter_runtime_enabled() {
+  return kFloatFilterCompileEnabled && std::fegetround() == FE_TONEAREST;
+}
 
 // ---- Cœur universel du seed (audit « axial arbre et cœur de seed » § 1).
 // Jung : tout tetraedre ACCEPTE par la production (six aretes <= D,
@@ -590,6 +588,11 @@ inline void collect_candidate_balls(const CloudIndex& ix, i64 s, u64 smax_eff,
                                     u32 axial_flags = 0, int num_threads = 1,
                                     bool mutant_par_drop_shard = false) {
   out->clear();
+  // Garde d'arrondi (contre-audit 04c71a2 § 4) : evaluee UNE FOIS au fil
+  // appelant ; false => bornes +inf, tout passe par le repli exact.
+  const bool float_on = (axial_flags & kFloatIgnoreRounding)
+                            ? true  // MUTANT : garde ignoree
+                            : float_filter_runtime_enabled();
   const u64 h_of[3] = {lane_h(Lane::kQ2, smax_eff), lane_h(Lane::kQ3, smax_eff),
                        lane_h(Lane::kQ4, smax_eff)};
   std::vector<detail_bs::AliveRect> alive;
@@ -600,6 +603,38 @@ inline void collect_candidate_balls(const CloudIndex& ix, i64 s, u64 smax_eff,
     std::vector<u8> axial_gid;
     std::vector<NodeRef> handles;
     u64 cover_nodes = 0, visits = 0;
+    // DONNEES DE SITE AFFINES par ancre (audit e27acfa § 1) :
+    // u = 2z − a − b, q = |u|² − D2 — entiers < 2^36, donc EXACTS en
+    // binaire64 (plus aucune erreur de conversion cote site). Calculees
+    // UNE FOIS par ancre et partagees par TOUS ses seeds ; l'identite
+    // L(z,x) = G_x·q_z − 2·u_z·N_x = 4·q3_power(f_x, z) est gravee par
+    // la porte --q3-affine-gate. qmax/umax : majorants de l'ancre pour
+    // la borne flottante par seed.
+    // Un seul jeu de tableaux ENTIERS : la conversion i64 -> double d'un
+    // entier < 2^36 est EXACTE et vaut une instruction — la faire au vol
+    // dans la boucle divise par deux le trafic memoire du remplissage.
+    std::vector<i64> su0, su1, su2, sq;
+    double qmax_d = 1.0, umax_d = 1.0;
+    void fill_affine_sites(const CloudIndex& ix, const P3& pa, const P3& pb,
+                           i64 D2) {
+      const size_t nc = cover.size();
+      su0.resize(nc); su1.resize(nc); su2.resize(nc); sq.resize(nc);
+      i64 qmax = 1, umax = 1;
+      const i64 sx = pa.x + pb.x, sy = pa.y + pb.y, sz = pa.z + pb.z;
+      for (size_t i = 0; i < nc; ++i) {
+        const P3& pz = ix.upos[(size_t)cover[i].u];
+        const i64 u0 = 2 * pz.x - sx, u1 = 2 * pz.y - sy, u2 = 2 * pz.z - sz;
+        const i64 qz = u0 * u0 + u1 * u1 + u2 * u2 - D2;
+        su0[i] = u0; su1[i] = u1; su2[i] = u2; sq[i] = qz;
+        const i64 qa = qz < 0 ? -qz : qz;
+        if (qa > qmax) qmax = qa;
+        for (const i64 uu : {u0 < 0 ? -u0 : u0, u1 < 0 ? -u1 : u1,
+                             u2 < 0 ? -u2 : u2})
+          if (uu > umax) umax = uu;
+      }
+      qmax_d = (double)qmax;
+      umax_d = (double)umax;
+    }
   };
   // Chaque lane : sequentiel a 1 fil, sinon tirage dynamique des
   // rectangles (compteur atomique) — les gros rectangles ne bloquent pas
@@ -690,6 +725,9 @@ inline void collect_candidate_balls(const CloudIndex& ix, i64 s, u64 smax_eff,
         const i64 D2 = p3_norm2(p3_sub(pb, pa));
         if (D2 == 0) continue;
         anchor_cover_from_handles(ix, handles, pa, pb, D2, 3, &cover, &visits);
+        // Remplissage PARESSEUX des sites affines : au premier seed aigu
+        // seulement — une ancre sans seed ne paie pas l'O(cover).
+        bool affine_filled = false;
         for (const CoverPoint& cp : cover) {
           if (cp.u == ua || cp.u == ub) continue;
           const P3& px = ix.upos[(size_t)cp.u];
@@ -697,34 +735,55 @@ inline void collect_candidate_balls(const CloudIndex& ix, i64 s, u64 smax_eff,
                              ix.bucket_ids[ix.bucket_start[(size_t)ub]],
                              ix.bucket_ids[ix.bucket_start[(size_t)cp.u]]))
             continue;
+          if (!affine_filled) {
+            sc.fill_affine_sites(ix, pa, pb, D2);
+            affine_filled = true;
+          }
           const Q3Form f3 = q3_form(pa, pb, px);
-          // ETAGE FLOTTANT CERTIFIE (en-tete q3_power_float_sign) : le
-          // signe est decide en double quand la borne 2^58 l'autorise,
-          // l'exact n'arbitre que la bande d'incertitude — semantique
-          // STRICTEMENT identique (P = 0 tombe toujours dans le repli).
-          const Q3FormF f3f = q3_form_float(f3);
-          double fbnd = q3_float_bound(f3f, 2 * D2);
+          // KERNEL AFFINE PAR ANCRE (audit e27acfa § 1) : N = W − G·d une
+          // fois par seed, interaction = un produit scalaire sur les
+          // donnees de site partagees ; etage flottant certifie sur sites
+          // EXACTS (seules les conversions de G et N et cinq arrondis
+          // contribuent — borne par seed E = 2^-48·(G·qmax + 2|N|₁·umax),
+          // derivation au reçu « filtre flottant »), repli = affine exact
+          // i128 (< 2^105). Semantique STRICTEMENT identique : L = 4P.
+          const i128 N0 = f3.w[0] - f3.g * (i128)(pb.x - pa.x);
+          const i128 N1 = f3.w[1] - f3.g * (i128)(pb.y - pa.y);
+          const i128 N2 = f3.w[2] - f3.g * (i128)(pb.z - pa.z);
+          const double Gd = (double)f3.g;
+          const double Nd0 = (double)N0, Nd1 = (double)N1, Nd2 = (double)N2;
+          double fbnd =
+              float_on ? affine_l_bound(Gd, Nd0, Nd1, Nd2, sc.qmax_d,
+                                        sc.umax_d)
+                       : std::numeric_limits<double>::infinity();
           if (axial_flags & kFloatSmallThreshold)
             fbnd *= kFloatMutantShrink;  // MUTANT
+          const auto exact_L = [&](size_t iz) {
+            return f3.g * (i128)sc.sq[iz] -
+                   2 * ((i128)sc.su0[iz] * N0 + (i128)sc.su1[iz] * N1 +
+                        (i128)sc.su2[iz] * N2);
+          };
           u64 depth = 0;
           bool deep = false;
-          for (const CoverPoint& cz : cover) {
-            const P3& pz = ix.upos[(size_t)cz.u];
-            const int fs = q3_power_float_sign(f3f, pz, f3.a, fbnd);
+          for (size_t iz = 0; iz < cover.size(); ++iz) {
+            const double Lh = affine_l_hat(
+                Gd, Nd0, Nd1, Nd2, (double)sc.su0[iz], (double)sc.su1[iz],
+                (double)sc.su2[iz], (double)sc.sq[iz]);
             bool interior;
-            if (fs == 0) {
-              ++st->float_fallback;
-              const i128 pw = q3_power(f3, pz);
-              interior = pw < 0 || (mutant_genfilter_nonstrict && pw <= 0);
+            if (Lh < -fbnd) {
+              ++st->float_cert_neg;
+              if ((axial_flags & kFloatVerify) && !(exact_L(iz) < 0))
+                ++st->float_mismatch;
+              interior = true;
+            } else if (Lh > fbnd) {
+              ++st->float_cert_pos;
+              if ((axial_flags & kFloatVerify) && !(exact_L(iz) > 0))
+                ++st->float_mismatch;
+              interior = false;
             } else {
-              if (fs < 0) ++st->float_cert_neg;
-              else ++st->float_cert_pos;
-              if (axial_flags & kFloatVerify) {
-                const i128 pw = q3_power(f3, pz);
-                const int es = pw < 0 ? -1 : (pw > 0 ? 1 : 0);
-                if (es != fs) ++st->float_mismatch;
-              }
-              interior = fs < 0;
+              ++st->float_fallback;
+              const i128 L = exact_L(iz);
+              interior = L < 0 || (mutant_genfilter_nonstrict && L <= 0);
             }
             if (interior && ++depth >= h_of[1]) {
               deep = true;
@@ -792,6 +851,10 @@ inline void collect_candidate_balls(const CloudIndex& ix, i64 s, u64 smax_eff,
             continue;
           }
         }
+        // Sites affines partages par tous les seeds de l'ancre —
+        // remplissage PARESSEUX au premier cœur de seed effectif (une
+        // ancre tuee par W_4 ou sans seed aigu ne paie rien).
+        bool affine_filled = false;
         const auto pid = [&](i32 u) { return ix.bucket_ids[ix.bucket_start[(size_t)u]]; };
         for (const CoverPoint& cx : cover) {
           if (cx.u == ua || cx.u == ub) continue;
@@ -818,34 +881,57 @@ inline void collect_candidate_balls(const CloudIndex& ix, i64 s, u64 smax_eff,
             // anticipee a h_4, ~une puissance q3 par site examine.
             bool dead = Jb < 0;
             if (!dead) {
-              // Garde flottante du signe de P (meme borne, meme
-              // semantique) : P > 0 certifie => jamais temoin, sans
-              // payer l'i128 ; sinon P exact (requis par Jung de toute
-              // facon — la borne propre de 2P² vs JB² est un chantier
-              // distinct, audit § 1.2).
-              const Q3FormF f3sf = q3_form_float(f3s);
-              double fbnd2 = q3_float_bound(f3sf, 2 * D2);
+              if (!affine_filled) {
+                sc.fill_affine_sites(ix, pa, pb, D2);
+                affine_filled = true;
+              }
+              // KERNEL AFFINE (audit e27acfa § 1), meme forme que la lane
+              // q3 : N = W − G·d une fois par seed, sites (u,q) partages
+              // de l'ancre, borne par seed E = 2^-48·(G·qmax + 2|N|₁·umax).
+              // P > 0 certifie => jamais temoin, sans payer l'i128 ; sinon
+              // repli affine exact, P = L/4 EXACT (divisibilite et identite
+              // L = 4·q3_power gravees par --q3-affine-gate) — requis par
+              // Jung (la borne d'intervalles de 2P² vs JB² est le chantier
+              // suivant, audit § 1.2).
+              const i128 N0 = f3s.w[0] - f3s.g * (i128)(pb.x - pa.x);
+              const i128 N1 = f3s.w[1] - f3s.g * (i128)(pb.y - pa.y);
+              const i128 N2 = f3s.w[2] - f3s.g * (i128)(pb.z - pa.z);
+              const double Gd = (double)f3s.g;
+              const double Nd0 = (double)N0, Nd1 = (double)N1,
+                           Nd2 = (double)N2;
+              double fbnd2 =
+                  float_on ? affine_l_bound(Gd, Nd0, Nd1, Nd2, sc.qmax_d,
+                                            sc.umax_d)
+                           : std::numeric_limits<double>::infinity();
               if (axial_flags & kFloatSmallThreshold)
                 fbnd2 *= kFloatMutantShrink;  // MUTANT
+              const auto exact_L = [&](size_t iz) {
+                return f3s.g * (i128)sc.sq[iz] -
+                       2 * ((i128)sc.su0[iz] * N0 + (i128)sc.su1[iz] * N1 +
+                            (i128)sc.su2[iz] * N2);
+              };
               u64 fcount = 0;
-              for (const CoverPoint& cz : cover) {
+              for (size_t iz = 0; iz < cover.size(); ++iz) {
+                const CoverPoint& cz = cover[iz];
                 if (cz.u == ua || cz.u == ub || cz.u == cx.u) continue;
                 ++st->seed_core_sites;
-                const P3& pz = ix.upos[(size_t)cz.u];
-                const int fs = q3_power_float_sign(f3sf, pz, f3s.a, fbnd2);
-                if (fs > 0) {
+                const double Lh = affine_l_hat(
+                    Gd, Nd0, Nd1, Nd2, (double)sc.su0[iz], (double)sc.su1[iz],
+                    (double)sc.su2[iz], (double)sc.sq[iz]);
+                if (Lh > fbnd2) {
                   ++st->float_cert_pos;
-                  if (axial_flags & kFloatVerify) {
-                    if (!(q3_power(f3s, pz) > 0)) ++st->float_mismatch;
-                  }
+                  if ((axial_flags & kFloatVerify) && !(exact_L(iz) > 0))
+                    ++st->float_mismatch;
                   continue;  // P > 0 certifie : jamais temoin
                 }
-                if (fs == 0) ++st->float_fallback;
-                else ++st->float_cert_neg;
-                const i128 Pz = q3_power(f3s, pz);
-                if ((axial_flags & kFloatVerify) && fs < 0 && !(Pz < 0))
+                const bool cert_neg = Lh < -fbnd2;
+                if (cert_neg) ++st->float_cert_neg;
+                else ++st->float_fallback;
+                const i128 Pz = exact_L(iz) / 4;
+                if ((axial_flags & kFloatVerify) && cert_neg && !(Pz < 0))
                   ++st->float_mismatch;
                 if (nonstrict ? (Pz > 0) : (Pz >= 0)) continue;
+                const P3& pz = ix.upos[(size_t)cz.u];
                 const i64 Bz = p3_dot(nrm, p3_sub(pz, f3s.a));
                 const int c = cmp_2p2_jb2(Pz, Jb, Bz);
                 if ((nonstrict ? (c >= 0) : (c > 0)) && ++fcount >= h_of[2])
