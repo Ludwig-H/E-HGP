@@ -37,6 +37,43 @@ court `≤ 1 h` sur ce canal.
    heure de GPU facturé au repos. À trancher avant de redescendre un brief.
 
 
+## ⇒ LANCEMENT MANUEL n64000 (18 août, session principale — le plus récent)
+
+Louis a tranché en LANÇANT LUI-MÊME dans le terminal du Codespace :
+
+```
+PHASE=n64000 RUN_TIMEOUT=600 BUILD_MARGIN=480 RETRIEVE_MARGIN=300 \
+MAX_RUN_SECONDS=3600 GUEST_SHUTDOWN_MINUTES=57 SSH_KEY_TTL_MINUTES=70 \
+./gcp-migration/session_scale_threads_g4.sh
+```
+
+- C'est l'autorisation vivante qui manquait (lancement à la main), et
+  cela tranche de fait le conflit GPU pour CETTE session : GPU au repos
+  accepté pour ≤ 1 h (`maxRunDuration=3600s`, arrêt invité 57 min,
+  double coupe-circuit). Directive « une seule session ≤ 1 h » : tenue.
+- Pin de la session : `c9c3a480` — cohérent en interne (probe et
+  validateur du même commit). Les raccords 7d921ff/c9c3a48 (workers par
+  lane + affinité effective) et la phase `court1h` sont poussés DEPUIS :
+  `main@ed6a798` — pour toute session ULTÉRIEURE, jamais rétroactif.
+- Budget vérifié : requis 3180 s ≤ 3600 ; invité 3420 > 3180 ;
+  TTL 4200 > 4020. Étiquette attendue du validateur n64000 :
+  `digest_recorded_unpaired` (pas d'appariement de fils dans cette
+  phase — c'est la mesure d'échelle).
+
+### À faire par la session Codespace à la fin du run (~1 h)
+
+1. Lire la fin du log (`~/campagne_n64000_*.log`) : verdict du
+   validateur (`campaign_status=...`) et certification `TERMINATED`.
+2. Vérifier en LECTURE SEULE l'inventaire : toutes les instances
+   `TERMINATED`. Si une VM tourne encore après la fin du script :
+   alerter Louis immédiatement ici, ne rien arrêter soi-même.
+3. Committer les reçus (OUT_DIR + .status + extrait de log avec la
+   certification) dans
+   `morsehgp3D_v4/receipts/campagne_scale_threads_n64000_20260818/`
+   + RECU.md (pin, statuts, verdict, mention « GPU au repos accepté
+   ≤ 1 h par lancement manuel ») et pousser sur main.
+4. Publier ici le verdict + chaque ligne de .status.
+
 ## ⇒ SESSION A **NON LANCÉE** — refus du bac à sable (18 août, pilote Codespace)
 
 **État GCP : inchangé. Aucune commande GCP mutante émise, aucune VM créée
