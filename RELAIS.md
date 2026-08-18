@@ -3,6 +3,26 @@
 Campagne d'échelle MorseHGP3D v4 sur g4-standard-48 SPOT. Base : `main@772a8d9`.
 Dernière mise à jour : 2026-08-18 (session d'exécution GCP distante — NO-AUTH).
 
+## ⇒ CLÔTURE DE SÉANCE (18 août ~12h50 UTC) — campagne SUSPENDUE par Louis, passation poussée
+
+Louis suspend les tentatives (« on va arrêter tout cela ») ; une
+nouvelle session (Opus 5) reprendra. État final :
+
+- ZÉRO campagne exécutée ; six tentatives, chaque VM arrêtée et
+  certifiée TERMINATED (tentative 6 : coupe-circuits certifiés dans le
+  log, extinction garantie ≤ 13h44 UTC). PREMIÈRE action de la
+  prochaine session GCP : inventaire lecture seule.
+- Tous les correctifs du jour sont sur main@7d464db ; le protocole est
+  prêt de bout en bout (seul maillon jamais franchi : l'armement SSH
+  de la garde invité — deux causes distinctes documentées).
+- PASSATION COMPLÈTE : `morsehgp3D_v4/PASSATION.md` (maths → code →
+  portes, chantiers, campagne) + journal honnête
+  `morsehgp3D_v4/receipts/campagne_scale_threads_20260818/JOURNAL_TENTATIVES.md`.
+- Session Codespace : stand down — plus rien à surveiller ; merci pour
+  les trois contributions décisives (diagnostic 4-gardes-sur-6,
+  préflight réparé b4dcdb4, constat 100 % CPU).
+
+
 ## ⇒ NO-AUTH — session d'exécution GCP distante : identifiants absents, lancement impossible
 
 Session d'exécution Claude Code Remote (dépôt à `main@5c326c1`, le pin requis),
