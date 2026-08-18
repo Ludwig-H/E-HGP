@@ -69,7 +69,22 @@ echo "famille=${fam} n=${n} s=${s} smax=${smax} seed=${seed} boules_uniques=1000
 gen="${thr}"
 [ -n "${FAKE_ONE_WORKER:-}" ] && gen=1
 fold=$(( thr < 10 ? thr : 10 ))
-echo "execution threads_requested=${thr} gen_workers_max=${gen} prefilter_workers=${thr} census_workers=${thr} expansion_workers=${thr} fold_workers_max=${fold}"
+# Affinite REELLE du processus (le runner nous lance sous taskset -c
+# CPU_SET, donc masque == contractuel) ; mutant cpu-set-one-core : une
+# experience « N fils » enfermee sur un cœur.
+AFFMASK="$(taskset -pc $$ 2>/dev/null | sed 's/.*: //')"
+AFFN="$(python3 -c "
+n = 0
+for p in '${AFFMASK}'.split(','):
+    if '-' in p:
+        a, b = p.split('-')
+        n += int(b) - int(a) + 1
+    else:
+        n += 1
+print(n)
+")"
+if [ -n "${FAKE_ONE_CORE_AFFINITY:-}" ]; then AFFN=1; AFFMASK=0; fi
+echo "execution threads_requested=${thr} gen_workers_q2=${gen} gen_workers_q3=${gen} gen_workers_q4=${gen} gen_workers_max=${gen} prefilter_workers=${thr} census_workers=${thr} expansion_workers=${thr} fold_workers_max=${fold} affinity_cpus_effective=${AFFN} affinity_mask=${AFFMASK}"
 for k in $(seq 1 10); do
   if [ "${k}" = "9" ] && [ -n "${FAKE_OMIT_CARD_K9:-}" ]; then continue; fi
   echo "cardinalites K=${k} evenements=10 facettes=10 deltas=5 attachements=0 fusions=9"
@@ -130,7 +145,7 @@ run_campaign "${WORK}/out3" "${FUTURE}" FAKE_ONE_WORKER=1 >/dev/null ||
 if validate "${WORK}/out3" > "${WORK}/v3.log" 2>&1; then
   fail "scenario 3 : gen_workers_max=1 accepte a tort"
 fi
-grep -q 'gen_workers_max' "${WORK}/v3.log" || fail "scenario 3 : motif gen_workers_max attendu"
+grep -q 'gen_workers_q' "${WORK}/v3.log" || fail "scenario 3 : motif gen_workers_q attendu"
 
 # ---- Scenario 4 : nproc supprime d'un statut.
 run_campaign "${WORK}/out4" "${FUTURE}" >/dev/null || fail "scenario 4 : runner rc"
@@ -217,6 +232,17 @@ python3 gcp-migration/validate_v4_scale_threads.py "${WORK}/out10" c0mm1t \
   fail "scenario 10 : happy path court1h refuse ($(cat "${WORK}/v10.log"))"
 grep -q 'thread_equivalence_checked_t8_tmax' "${WORK}/v10.log" ||
   fail "scenario 10 : etiquette t8_tmax attendue"
+
+# ---- Scenario 11 : cpu-set-one-core (audit c9c3a48 § 3) — workers et
+# digests corrects, mais l'affinite effective publiee vaut 1 : le
+# validateur doit refuser avec un motif d'affinite explicite.
+run_campaign "${WORK}/out11" "${FUTURE}" FAKE_ONE_CORE_AFFINITY=1 >/dev/null ||
+  fail "scenario 11 : runner rc"
+if validate "${WORK}/out11" > "${WORK}/v11.log" 2>&1; then
+  fail "scenario 11 : affinite un cœur acceptee a tort"
+fi
+grep -q 'affinite effective' "${WORK}/v11.log" ||
+  fail "scenario 11 : motif d'affinite attendu"
 
 echo "selftest_scale_threads : violations=${BAD}"
 [ "${BAD}" -eq 0 ] || exit 1

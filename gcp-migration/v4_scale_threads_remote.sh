@@ -84,14 +84,29 @@ test -x "${TIME_BIN}" || {
 }
 phase_runs "${PHASE}" >/dev/null
 mkdir -p "${OUT_DIR}"
-NCPU=$(nproc)
 case "${PHASE}" in
   n32000) N_OF_PHASE=32000 ;;
   n64000) N_OF_PHASE=64000 ;;
   court1h) N_OF_PHASE=32000 ;;
   *) echo "REFUS : phase inconnue '${PHASE}'" >&2; exit 2 ;;
 esac
-CPU_SET="0-$((NCPU - 1))"
+# Affinite REELLE du runner (audit c9c3a48 § 2) : CPU_SET est derive de
+# l'affinite autorisee du processus — jamais fabrique 0..nproc-1 — et
+# NCPU est le CARDINAL de ce masque. Le probe republie son affinite
+# effective (sched_getaffinity) et le validateur exige l'egalite des
+# deux, nombre ET masque.
+CPU_SET="$(taskset -pc $$ | sed 's/.*: //')"
+NCPU="$(python3 -c "
+n = 0
+for p in '${CPU_SET}'.split(','):
+    if '-' in p:
+        a, b = p.split('-')
+        n += int(b) - int(a) + 1
+    else:
+        n += 1
+print(n)
+")"
+[ "${NCPU}" -ge 1 ] || { echo "REFUS : affinite illisible" >&2; exit 2; }
 
 
 run_one() {

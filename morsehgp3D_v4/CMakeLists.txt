@@ -457,6 +457,14 @@ mhgp4_expect_code(mhgp4_forest_probe_workers_gate 0 mhgp4_forest_probe
     "--workers-gate")
 mhgp4_expect_code(mhgp4_forest_probe_workers_mutant_one 4 mhgp4_forest_probe
     "--workers-gate --inject=parallel-hardcodes-one-worker")
+# Audit 7d921ff : l'aval publie la valeur RETOURNEE par parallel_ranges
+# (le mutant serialise la primitive sans toucher CLI ni digests), et la
+# generation est recue PAR LANE (le mutant q3-one-worker laisse
+# gen_workers_max intact — seule la lane le trahit).
+mhgp4_expect_code(mhgp4_forest_probe_workers_mutant_ranges 4 mhgp4_forest_probe
+    "--workers-gate --inject=parallel-ranges-one-worker")
+mhgp4_expect_code(mhgp4_forest_probe_workers_mutant_q3 4 mhgp4_forest_probe
+    "--workers-gate --inject=q3-one-worker")
 
 # La lane q2 productrice : W_2 est la boule diametrale ouverte, le census
 # est une requete de cover a coefficient 1. Juge brut toutes-paires sur

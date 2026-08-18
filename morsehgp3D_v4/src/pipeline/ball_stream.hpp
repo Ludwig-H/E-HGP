@@ -121,7 +121,8 @@ struct BallStreamStats {
   // creation des std::thread, jamais depuis la CLI — la campagne
   // scale_threads verifie que le nombre demande a ete APPLIQUE, etage
   // par etage (le fold plafonne legitimement a K_max).
-  u64 gen_workers_max = 0;
+  u64 gen_workers_max = 0;   // resume — jamais l'autorite de reception
+  u64 gen_workers[3] = {0, 0, 0};  // PAR LANE q2/q3/q4 (audit 7d921ff § 3)
   u64 prefilter_workers = 0;
   u64 census_workers = 0;
   u64 expansion_workers = 0;
@@ -187,6 +188,8 @@ struct BallStreamStats {
     jung_cert_skip += o.jung_cert_skip;
     jung_fallback += o.jung_fallback;
     gen_workers_max = std::max(gen_workers_max, o.gen_workers_max);
+    for (int l = 0; l < 3; ++l)
+      gen_workers[l] = std::max(gen_workers[l], o.gen_workers[l]);
     prefilter_workers = std::max(prefilter_workers, o.prefilter_workers);
     census_workers = std::max(census_workers, o.census_workers);
     expansion_workers = std::max(expansion_workers, o.expansion_workers);
@@ -671,7 +674,8 @@ inline void collect_candidate_balls(const CloudIndex& ix, i64 s, u64 smax_eff,
                                     bool axial_bounded = false,
                                     u32 axial_flags = 0, int num_threads = 1,
                                     bool mutant_par_drop_shard = false,
-                                    bool mutant_par_one_worker = false) {
+                                    bool mutant_par_one_worker = false,
+                                    bool mutant_q3_one_worker = false) {
   out->clear();
   // Garde d'arrondi (contre-audit 04c71a2 § 4) : evaluee UNE FOIS au fil
   // appelant ; false => bornes +inf, tout passe par le repli exact.
@@ -733,22 +737,27 @@ inline void collect_candidate_balls(const CloudIndex& ix, i64 s, u64 smax_eff,
   // rectangles (compteur atomique) — les gros rectangles ne bloquent pas
   // la fin de vague. MUTANT par-drop-shard : la fusion oublie le premier
   // ouvrier (la porte --par-gate doit le voir).
-  const auto run_rects = [&](auto&& body) {
+  const auto run_rects = [&](int lane, auto&& body) {
     const size_t nrect = alive.size();
     if (num_threads <= 1 || nrect <= 1) {
       LaneScratch sc;
-      if (nrect > 0)
+      if (nrect > 0) {
         st->gen_workers_max = std::max<u64>(st->gen_workers_max, 1);
+        st->gen_workers[lane] = std::max<u64>(st->gen_workers[lane], 1);
+      }
       for (size_t i = 0; i < nrect; ++i) body(alive[i], sc, out, st);
       return;
     }
-    // MUTANT parallel-hardcodes-one-worker (audit 66886c0 § 2) : la CLI
-    // et les digests restent identiques, seule la metadonnee MESUREE au
-    // point de creation le trahit.
-    const size_t T = mutant_par_one_worker
-                         ? 1
-                         : std::min((size_t)num_threads, nrect);
+    // MUTANTS parallel-hardcodes-one-worker (66886c0 § 2) et
+    // q3-hardcodes-one-worker (7d921ff § 4.2) : CLI et digests
+    // identiques, seule la metadonnee PAR LANE mesuree au point de
+    // creation les trahit (gen_workers_max reste volontairement aveugle
+    // au second — il n'est plus l'autorite).
+    size_t T = mutant_par_one_worker ? 1
+                                     : std::min((size_t)num_threads, nrect);
+    if (mutant_q3_one_worker && lane == 1) T = 1;
     st->gen_workers_max = std::max<u64>(st->gen_workers_max, (u64)T);
+    st->gen_workers[lane] = std::max<u64>(st->gen_workers[lane], (u64)T);
     std::vector<std::vector<BallCandidate>> louts(T);
     std::vector<BallStreamStats> lst(T);
     std::atomic<size_t> next{0};
@@ -772,7 +781,7 @@ inline void collect_candidate_balls(const CloudIndex& ix, i64 s, u64 smax_eff,
   // ---- q2.
   detail_bs::wspd_alive(ix, s, h_of, 0, 0b001, h_of[0], &alive);
   st->rect_alive[0] = alive.size();
-  run_rects([&](const detail_bs::AliveRect& ar, LaneScratch& sc,
+  run_rects(0, [&](const detail_bs::AliveRect& ar, LaneScratch& sc,
                 std::vector<BallCandidate>* lout, BallStreamStats* lst) {
     auto& ha = sc.ha;
     auto& hb = sc.hb;
@@ -799,7 +808,7 @@ inline void collect_candidate_balls(const CloudIndex& ix, i64 s, u64 smax_eff,
   // ---- q3.
   detail_bs::wspd_alive(ix, s, h_of, 1, 0b010, h_of[1], &alive);
   st->rect_alive[1] = alive.size();
-  run_rects([&](const detail_bs::AliveRect& ar, LaneScratch& sc,
+  run_rects(1, [&](const detail_bs::AliveRect& ar, LaneScratch& sc,
                 std::vector<BallCandidate>* lout, BallStreamStats* lst) {
     auto& ha = sc.ha;
     auto& hb = sc.hb;
@@ -926,7 +935,7 @@ inline void collect_candidate_balls(const CloudIndex& ix, i64 s, u64 smax_eff,
   // ---- q4.
   detail_bs::wspd_alive(ix, s, h_of, 2, 0b100, h_of[2], &alive);
   st->rect_alive[2] = alive.size();
-  run_rects([&](const detail_bs::AliveRect& ar, LaneScratch& sc,
+  run_rects(2, [&](const detail_bs::AliveRect& ar, LaneScratch& sc,
                 std::vector<BallCandidate>* lout, BallStreamStats* lst) {
     auto& ha = sc.ha;
     auto& hb = sc.hb;

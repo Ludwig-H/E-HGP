@@ -26,6 +26,8 @@
 // Codes : 0 conforme, 1 desaccord, 2 refus (dont resource_exhausted),
 // 3 invariant/plancher, 4 mutant tue (--inject=rle-drop | census-nonstrict |
 // dense-pointid).
+#include <sched.h>
+
 #include <algorithm>
 #include <cfenv>
 #include <chrono>
@@ -90,6 +92,8 @@ struct Args {
   bool digest = false;  // signature canonique (audit 9223888 § 2.2)
   bool workers_gate = false;
   bool inj_par_one_worker = false;
+  bool inj_ranges_one_worker = false;
+  bool inj_q3_one_worker = false;
   bool digest_gate = false;
   int inj_fold_capacity = 0;  // 1 = u32-event-wrap, 2 = i32-fid-wrap,
                               // 3 = epoch-sentinel-collision
@@ -173,6 +177,9 @@ Args parse(int argc, char** argv) {
     else if (arg == "--digest-gate") a.digest_gate = true;
     else if (arg == "--inject=parallel-hardcodes-one-worker")
       a.inj_par_one_worker = true;
+    else if (arg == "--inject=parallel-ranges-one-worker")
+      a.inj_ranges_one_worker = true;
+    else if (arg == "--inject=q3-one-worker") a.inj_q3_one_worker = true;
     else if (arg == "--inject=fold-u32-event-wrap") a.inj_fold_capacity = 1;
     else if (arg == "--inject=fold-i32-fid-wrap") a.inj_fold_capacity = 2;
     else if (arg == "--inject=fold-epoch-sentinel-collision")
@@ -239,20 +246,65 @@ struct Survivor {
 // sequentiel quel que soit le nombre de fils (le prefiltre est
 // independant par candidat, le census par survivante, l'expansion par
 // boule, les folds par K). threads <= 1 : chemin sequentiel pur.
+// Plan du decoupage (dimensionne les tampons des appelants) — la
+// primitive elle-meme RETOURNE le nombre de workers reellement crees
+// (audit 7d921ff § 2) : les stats publient la valeur retournee, jamais
+// le plan. MUTANT parallel-ranges-hardcodes-one-worker : la primitive
+// serialise tout l'aval sans toucher CLI ni digests (les tranches
+// vides des tampons plans fusionnent a l'identique) — seule la mesure
+// le trahit.
+inline size_t planned_workers(size_t n, int requested) {
+  return n == 0 ? 1 : std::min((size_t)std::max(requested, 1), n);
+}
+bool g_inj_parallel_ranges_one = false;  // MUTANT (7d921ff § 4.1)
+
+// Affinite CPU EFFECTIVE du processus (audit c9c3a48) : mesuree par le
+// processus lui-meme via sched_getaffinity — jamais recopiee d'une
+// intention (cpu_set du runner). Rend le nombre de CPU autorises et le
+// masque canonique en plages ("0-47", "0-3,5"). -1 si illisible.
+int effective_affinity(std::string* mask_out) {
+  cpu_set_t m;
+  CPU_ZERO(&m);
+  if (sched_getaffinity(0, sizeof(m), &m) != 0) return -1;
+  int count = 0;
+  std::string txt;
+  int run_start = -1;
+  for (int c = 0; c <= CPU_SETSIZE; ++c) {
+    const bool on = c < CPU_SETSIZE && CPU_ISSET(c, &m);
+    if (on) {
+      ++count;
+      if (run_start < 0) run_start = c;
+    } else if (run_start >= 0) {
+      if (!txt.empty()) txt += ',';
+      txt += std::to_string(run_start);
+      if (c - 1 > run_start) {
+        txt += '-';
+        txt += std::to_string(c - 1);
+      }
+      run_start = -1;
+    }
+  }
+  *mask_out = txt;
+  return count;
+}
+
 template <typename Fn>
-void parallel_ranges(size_t n, int threads, Fn&& fn) {
-  const size_t T =
-      n == 0 ? 1 : std::min((size_t)std::max(threads, 1), n);
+size_t parallel_ranges(size_t n, int threads, Fn&& fn) {
+  size_t T = planned_workers(n, threads);
+  if (g_inj_parallel_ranges_one) T = 1;  // MUTANT
   if (T <= 1) {
     fn((size_t)0, n, (size_t)0);
-    return;
+    return n == 0 ? 0 : 1;
   }
   std::vector<std::thread> pool;
+  pool.reserve(T);
   for (size_t t = 0; t < T; ++t) {
     const size_t b = n * t / T, e = n * (t + 1) / T;
     pool.emplace_back([&fn, b, e, t] { fn(b, e, t); });
   }
+  const size_t actual = pool.size();
   for (auto& th : pool) th.join();
+  return actual;
 }
 
 void prefilter_balls(const CloudIndex& ix,
@@ -260,13 +312,12 @@ void prefilter_balls(const CloudIndex& ix,
                      bool inj_threshold_minus_one, bool inj_range_add_le,
                      std::vector<Survivor>* survivors, BallStreamStats* st,
                      int threads = 1) {
-  const size_t T = cands.empty()
-                       ? 1
-                       : std::min((size_t)std::max(threads, 1), cands.size());
-  st->prefilter_workers = std::max(st->prefilter_workers, (u64)T);
+  const size_t T = planned_workers(cands.size(), threads);
   std::vector<std::vector<Survivor>> lsv(T);
   std::vector<BallStreamStats> lst(T);
-  parallel_ranges(cands.size(), threads, [&](size_t b, size_t e, size_t t) {
+  const size_t actual_pf =
+      parallel_ranges(cands.size(), threads,
+                      [&](size_t b, size_t e, size_t t) {
     for (size_t i = b; i < e; ++i) {
       const BallCandidate& bc = cands[i];
       // Mort a |I_B| >= smax_eff + 1 - q_min (audit « smax dynamique » :
@@ -283,6 +334,7 @@ void prefilter_balls(const CloudIndex& ix,
       lsv[t].push_back({i, depth});
     }
   });
+  st->prefilter_workers = std::max(st->prefilter_workers, (u64)actual_pf);
   survivors->reserve(cands.size() / 8 + 16);
   for (size_t t = 0; t < T; ++t) {
     survivors->insert(survivors->end(), lsv[t].begin(), lsv[t].end());
@@ -300,19 +352,15 @@ int census_balls(const CloudIndex& ix, const std::vector<BallCandidate>& cands,
                  bool inj_skip_full, std::vector<BallData>* balls,
                  BallStreamStats* st, int threads = 1,
                  bool inj_drop_chunk = false) {
-  const size_t T =
-      survivors.empty()
-          ? 1
-          : std::min((size_t)std::max(threads, 1), survivors.size());
-  st->census_workers = std::max(st->census_workers, (u64)T);
+  const size_t T = planned_workers(survivors.size(), threads);
   std::vector<std::vector<BallData>> lb(T);
   std::vector<BallStreamStats> lst(T);
   // Un refus/invariant arrete la tranche ; le verdict fusionne est celui
   // de la tranche d'indices la plus BASSE (deterministe — la meme boule
   // qu'aurait vue le sequentiel), message imprime une seule fois.
   std::vector<int> lrc(T, 0);
-  parallel_ranges(survivors.size(), threads, [&](size_t b, size_t e,
-                                                 size_t t) {
+  const size_t actual_cs = parallel_ranges(
+      survivors.size(), threads, [&](size_t b, size_t e, size_t t) {
     for (size_t i = b; i < e; ++i) {
       const Survivor& sv = survivors[i];
       const BallCandidate& bc = cands[sv.idx];
@@ -344,6 +392,7 @@ int census_balls(const CloudIndex& ix, const std::vector<BallCandidate>& cands,
       lb[t].push_back(std::move(bd));
     }
   });
+  st->census_workers = std::max(st->census_workers, (u64)actual_cs);
   for (size_t t = 0; t < T; ++t)
     if (lrc[t] != 0) {
       if (lrc[t] == 2)
@@ -379,12 +428,11 @@ int forests_from_balls(const std::vector<BallData>& balls,
   // PHASE A — expansion des plateaux, par TRANCHES de boules : chaque
   // ouvrier remplit ses propres listes par K, la fusion en ordre de
   // tranche restitue EXACTEMENT l'ordre sequentiel des evenements.
-  const size_t T =
-      balls.empty() ? 1 : std::min((size_t)std::max(threads, 1), balls.size());
-  if (wst) wst->expansion_workers = std::max(wst->expansion_workers, (u64)T);
+  const size_t T = planned_workers(balls.size(), threads);
   std::vector<std::vector<std::vector<ForestEvent>>> lev(
       T, std::vector<std::vector<ForestEvent>>(11));
-  parallel_ranges(balls.size(), threads, [&](size_t bg, size_t en, size_t t) {
+  const size_t actual_ex = parallel_ranges(
+      balls.size(), threads, [&](size_t bg, size_t en, size_t t) {
     std::vector<PlateauEvent> pevents;
     for (size_t bi = bg; bi < en; ++bi) {
       const BallData& b = balls[bi];
@@ -412,6 +460,8 @@ int forests_from_balls(const std::vector<BallData>& balls,
       }
     }
   });
+  if (wst)
+    wst->expansion_workers = std::max(wst->expansion_workers, (u64)actual_ex);
   std::vector<std::vector<ForestEvent>> ev_k(11);
   for (size_t t = 0; t < T; ++t)
     for (size_t K = 1; K <= (size_t)kmax_eff; ++K)
@@ -421,15 +471,8 @@ int forests_from_balls(const std::vector<BallData>& balls,
   // `legacy_partition` : la vue map n'est remplie que pour les
   // consommateurs qui la lisent (juge, portes) — le chemin d'echelle
   // vit sur la representation dense facet_keys + final_canon_fid.
-  if (wst) {
-    const size_t tf = kmax_eff == 0
-                          ? 1
-                          : std::min((size_t)std::max(threads, 1),
-                                     (size_t)kmax_eff);
-    wst->fold_workers_max = std::max(wst->fold_workers_max, (u64)tf);
-  }
-  parallel_ranges((size_t)kmax_eff, threads, [&](size_t bg, size_t en,
-                                                 size_t) {
+  const size_t actual_fd = parallel_ranges(
+      (size_t)kmax_eff, threads, [&](size_t bg, size_t en, size_t) {
     for (size_t k0 = bg; k0 < en; ++k0) {
       const int K = (int)k0 + 1;
       per_k_events[K] = ev_k[(size_t)K].size();
@@ -437,6 +480,8 @@ int forests_from_balls(const std::vector<BallData>& balls,
                                      false, false, false, legacy_partition);
     }
   });
+  if (wst)
+    wst->fold_workers_max = std::max(wst->fold_workers_max, (u64)actual_fd);
   for (int K = 1; K <= (int)kmax_eff; ++K)
     if (!per_k_result[K].refusal.empty()) {
       // Refus transactionnel de capacite (contre-audit 5d274a1 § 7) :
@@ -1472,11 +1517,17 @@ int run_digest_gate() {
   return bad == 0 ? 0 : 3;
 }
 
-// PORTE DES WORKERS MESURES (audit 66886c0 § 2) : a threads=4 sur un
-// nuage a taches abondantes, chaque etage doit avoir CREE 4 ouvriers
-// (fold : min(4, K_max) = 4). Le mutant parallel-hardcodes-one-worker
-// garde la CLI et les digests mais est trahi par la mesure.
-int run_workers_gate(bool inj_one) {
+// PORTE DES WORKERS MESURES (audits 66886c0 § 2, 7d921ff, c9c3a48) :
+// a threads=4 sur un nuage a taches abondantes, chaque etage doit avoir
+// CREE 4 ouvriers — generation PAR LANE (q2/q3/q4), aval publie par la
+// VALEUR RETOURNEE de parallel_ranges, fold min(4, K_max) = 4 — et
+// l'affinite effective du processus doit etre lisible et coherente.
+// Trois mutants, tous a CLI et digests inchanges, tues par la mesure :
+// parallel-hardcodes-one-worker (run_rects), parallel-ranges-one-worker
+// (la primitive aval serialise tout), q3-one-worker (seule la lane
+// dominante serialise — gen_workers_max reste aveugle, la porte lit la
+// lane).
+int run_workers_gate(bool inj_one, bool inj_ranges_one, bool inj_q3_one) {
   const std::vector<P3> pts = make_family_cloud(
       CloudFamily::kUniform, 300, cloud_family_default_coord(
                                       CloudFamily::kUniform, 300), 3);
@@ -1484,8 +1535,9 @@ int run_workers_gate(bool inj_one) {
   if ((size_t)ix.unique_count() != pts.size()) return 3;
   std::vector<BallCandidate> cs;
   BallStreamStats ss;
+  g_inj_parallel_ranges_one = inj_ranges_one;  // MUTANT primitive aval
   collect_candidate_balls(ix, 8, 11, &cs, &ss, false, false, 0, 4, false,
-                          inj_one);
+                          inj_one, inj_q3_one);
   std::stable_sort(cs.begin(), cs.end(), ball_candidate_less);
   cs.erase(std::unique(cs.begin(), cs.end(),
                        [](const BallCandidate& x, const BallCandidate& y) {
@@ -1507,13 +1559,20 @@ int run_workers_gate(bool inj_one) {
   if (forests_from_balls(balls, ix.upos, pid_of, 10, e1, rr, &evk, 4, true,
                          &ss) != 0)
     return 3;
-  std::printf("workers_gate gen=%llu prefiltre=%llu census=%llu "
-              "expansion=%llu fold=%llu\n",
-              (unsigned long long)ss.gen_workers_max,
+  std::string aff_mask;
+  const int aff = effective_affinity(&aff_mask);
+  std::printf("workers_gate gen_q2=%llu gen_q3=%llu gen_q4=%llu "
+              "prefiltre=%llu census=%llu expansion=%llu fold=%llu "
+              "affinite=%d masque=%s\n",
+              (unsigned long long)ss.gen_workers[0],
+              (unsigned long long)ss.gen_workers[1],
+              (unsigned long long)ss.gen_workers[2],
               (unsigned long long)ss.prefilter_workers,
               (unsigned long long)ss.census_workers,
               (unsigned long long)ss.expansion_workers,
-              (unsigned long long)ss.fold_workers_max);
+              (unsigned long long)ss.fold_workers_max, aff,
+              aff_mask.empty() ? "?" : aff_mask.c_str());
+  g_inj_parallel_ranges_one = false;
   if (inj_one) {
     if (ss.gen_workers_max == 1) {
       std::printf("MUTANT TUE\n");
@@ -1522,9 +1581,29 @@ int run_workers_gate(bool inj_one) {
     std::fprintf(stderr, "PORTE INEFFICACE : mutant non discrimine\n");
     return 3;
   }
-  return (ss.gen_workers_max == 4 && ss.prefilter_workers == 4 &&
+  if (inj_ranges_one) {
+    if (ss.prefilter_workers == 1 && ss.census_workers == 1 &&
+        ss.expansion_workers == 1 && ss.fold_workers_max == 1 &&
+        ss.gen_workers_max == 4) {
+      std::printf("MUTANT TUE\n");
+      return 4;
+    }
+    std::fprintf(stderr, "PORTE INEFFICACE : mutant non discrimine\n");
+    return 3;
+  }
+  if (inj_q3_one) {
+    if (ss.gen_workers[1] == 1 && ss.gen_workers[0] == 4 &&
+        ss.gen_workers_max == 4) {
+      std::printf("MUTANT TUE\n");
+      return 4;
+    }
+    std::fprintf(stderr, "PORTE INEFFICACE : mutant non discrimine\n");
+    return 3;
+  }
+  return (ss.gen_workers[0] == 4 && ss.gen_workers[1] == 4 &&
+          ss.gen_workers[2] == 4 && ss.prefilter_workers == 4 &&
           ss.census_workers == 4 && ss.expansion_workers == 4 &&
-          ss.fold_workers_max == 4)
+          ss.fold_workers_max == 4 && aff >= 1)
              ? 0
              : 3;
 }
@@ -2311,7 +2390,9 @@ int main(int argc, char** argv) {
   if (a.float_rounding_gate)
     return run_float_rounding_gate((a.inj_axial & kFloatIgnoreRounding) != 0);
   if (a.fold_capacity_gate) return run_fold_capacity_gate(a.inj_fold_capacity);
-  if (a.workers_gate) return run_workers_gate(a.inj_par_one_worker);
+  if (a.workers_gate)
+    return run_workers_gate(a.inj_par_one_worker, a.inj_ranges_one_worker,
+                            a.inj_q3_one_worker);
   if (a.digest_gate) return run_digest_gate();
   if (a.guard != 0) return run_guard_gate(a.guard);
   const std::vector<P3> pts = make_family_cloud(
@@ -2722,17 +2803,27 @@ int main(int argc, char** argv) {
   std::printf("profil_q4 t_completion_ms=%.1f t_depth_ms=%.1f sites_depth=%llu\n",
               st.t_q4_completion_ms, st.t_q4_depth_ms,
               (unsigned long long)st.q4_depth_sites);
-  // Metadonnees d'execution (audits 9223888 § 2.1 puis 66886c0 § 2) :
-  // les workers sont MESURES au point de creation des std::thread —
-  // jamais recopies depuis la CLI. Le fold plafonne a K_max.
-  std::printf("execution threads_requested=%d gen_workers_max=%llu "
-              "prefilter_workers=%llu census_workers=%llu "
-              "expansion_workers=%llu fold_workers_max=%llu\n",
-              a.threads, (unsigned long long)st.gen_workers_max,
+  // Metadonnees d'execution (audits 9223888 § 2.1, 66886c0 § 2,
+  // 7d921ff, c9c3a48) : workers MESURES au point de creation des
+  // std::thread (generation PAR LANE — gen_workers_max n'est qu'un
+  // resume), et affinite CPU EFFECTIVE publiee par le processus mesure.
+  std::string aff_mask;
+  const int aff = effective_affinity(&aff_mask);
+  std::printf("execution threads_requested=%d gen_workers_q2=%llu "
+              "gen_workers_q3=%llu gen_workers_q4=%llu "
+              "gen_workers_max=%llu prefilter_workers=%llu "
+              "census_workers=%llu expansion_workers=%llu "
+              "fold_workers_max=%llu affinity_cpus_effective=%d "
+              "affinity_mask=%s\n",
+              a.threads, (unsigned long long)st.gen_workers[0],
+              (unsigned long long)st.gen_workers[1],
+              (unsigned long long)st.gen_workers[2],
+              (unsigned long long)st.gen_workers_max,
               (unsigned long long)st.prefilter_workers,
               (unsigned long long)st.census_workers,
               (unsigned long long)st.expansion_workers,
-              (unsigned long long)st.fold_workers_max);
+              (unsigned long long)st.fold_workers_max, aff,
+              aff_mask.empty() ? "?" : aff_mask.c_str());
   if (a.digest) print_canonical_digests(cands, sres, kmax_eff);
   std::printf("q3_scan_sites_par_cover <256=%llu <1024=%llu <4096=%llu "
               ">=4096=%llu\n",

@@ -149,21 +149,33 @@ def main():
                   or ident.group(5) != "3"):
                 bad.append(f"{name}: identite imprimee "
                            f"({'/'.join(ident.groups())}) != nom du run")
-            # WORKERS MESURES (66886c0 § 2).
+            # WORKERS MESURES (66886c0 § 2, durci par 7d921ff : la
+            # generation est recue PAR LANE et l'aval par la valeur
+            # RETOURNEE de parallel_ranges) + AFFINITE CPU EFFECTIVE
+            # (c9c3a48 : publiee par le processus mesure via
+            # sched_getaffinity — cpu_set seul est une intention
+            # auto-declaree).
             ex = re.search(
-                r"^execution threads_requested=(\d+) gen_workers_max=(\d+) "
-                r"prefilter_workers=(\d+) census_workers=(\d+) "
-                r"expansion_workers=(\d+) fold_workers_max=(\d+)$",
+                r"^execution threads_requested=(\d+) gen_workers_q2=(\d+) "
+                r"gen_workers_q3=(\d+) gen_workers_q4=(\d+) "
+                r"gen_workers_max=(\d+) prefilter_workers=(\d+) "
+                r"census_workers=(\d+) expansion_workers=(\d+) "
+                r"fold_workers_max=(\d+) affinity_cpus_effective=(\d+) "
+                r"affinity_mask=(\S+)$",
                 body, re.M)
             if not ex:
-                bad.append(f"{name}: ligne execution (workers mesures) "
-                           f"absente")
+                bad.append(f"{name}: ligne execution (workers mesures + "
+                           f"affinite) absente")
             else:
-                tr, gen, pre, cen, exp, fld = (int(g) for g in ex.groups())
+                (tr, gq2, gq3, gq4, _gmax, pre, cen, exp, fld,
+                 aff) = (int(g) for g in ex.groups()[:10])
+                aff_mask = ex.group(11)
                 if tr != want_t:
                     bad.append(f"{name}: threads_requested imprime {tr} != "
                                f"{want_t}")
-                for label, v in (("gen_workers_max", gen),
+                for label, v in (("gen_workers_q2", gq2),
+                                 ("gen_workers_q3", gq3),
+                                 ("gen_workers_q4", gq4),
                                  ("prefilter_workers", pre),
                                  ("census_workers", cen),
                                  ("expansion_workers", exp)):
@@ -174,6 +186,15 @@ def main():
                 if fld != min(want_t, KMAX):
                     bad.append(f"{name}: fold_workers_max={fld} != "
                                f"min({want_t}, {KMAX})")
+                cpu_set = re.search(r"^cpu_set=(\S+)$", st, re.M)
+                if aff != nproc_v:
+                    bad.append(f"{name}: affinite effective {aff} != nproc "
+                               f"{nproc_v} — les fils seraient assis sur "
+                               f"moins de chaises que declare")
+                if cpu_set and aff_mask != cpu_set.group(1):
+                    bad.append(f"{name}: masque d'affinite effectif "
+                               f"{aff_mask} != cpu_set contractuel "
+                               f"{cpu_set.group(1)}")
             # SCHEMA COMPLET (66886c0 § 3) : une occurrence exacte de
             # chaque ligne attendue, ni plus ni moins.
             digest_lines = re.findall(
