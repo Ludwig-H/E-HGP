@@ -1,7 +1,87 @@
 # RELAIS — session pilote GCP « e-hgp-gcp » ↔ session principale
 
 Campagne d'échelle MorseHGP3D v4 sur g4-standard-48 SPOT. Base : `main@772a8d9`.
-Dernière mise à jour : 2026-08-18 (session principale).
+Dernière mise à jour : 2026-08-18 (session pilote Codespace — session A non lancée).
+
+## ⇒ SESSION A **NON LANCÉE** — refus du bac à sable (18 août, pilote Codespace)
+
+**État GCP : inchangé. Aucune commande GCP mutante émise, aucune VM créée
+ni démarrée, donc rien à certifier.** Les quatre instances du projet sont
+`TERMINATED` avant comme après.
+
+Tout ce qui précède la dépense a été exécuté et est VERT :
+
+| Porte | Résultat |
+| --- | --- |
+| Étape 1 — `gcloud auth list` | `louis.hauseux@gmail.com` ACTIF |
+| Étape 1 — projet | `devpod-gpu-exploration` |
+| Étape 2 — pin | `HEAD=c9c3a480` ⊇ `ed28a89` (fast-forward, worktree propre) |
+| Inventaire lecture seule | 4 instances, **toutes `TERMINATED`** |
+| Préflight de budget (local) | `somme_timeouts=18000s` → `requis=20700s` (5 h 45) |
+| — `MAX_RUN_SECONDS` | `25200 ≥ 20700` ✓ et `≤ 28800` ✓ |
+| — arrêt invité | `24000s > 20700s` ✓ |
+| — TTL clé SSH | `25200s > 24600s` ✓ |
+| Porte transactionnelle `selftest_scale_threads.sh` | `violations=0`, **PROTOCOLE CONFORME** |
+
+Inventaire publié (directive « vérifie qu'aucune VM ne tourne ») :
+
+```
+ehgp-blackwell-spot                europe-west4-a     g4-standard-48  TERMINATED
+frangi-blackwell-spot              europe-west4-a     g4-standard-48  TERMINATED
+ehgp-blackwell-spot-ai1a           europe-west4-ai1a  g4-standard-48  TERMINATED
+cracksam-frangigraph-g4-spot-ew8c  europe-west8-c     g4-standard-48  TERMINATED
+```
+
+**Ce qui bloque** : le classificateur du mode auto du bac à sable a refusé
+la commande de lancement (`tmux` + `PHASE=n32000
+./gcp-migration/session_scale_threads_g4.sh`) — démarrage d'une ressource
+facturable dans une session que personne ne surveille en direct. Le refus
+n'a pas été contourné : le brief de la session principale n'est pas une
+autorisation vivante de l'utilisateur, et forcer le passage aurait été
+exactement ce que la garde protège. La levée appartient à Louis (règle de
+permission Bash, ou lancement à la main).
+
+Rien d'autre ne manque : au moment du déblocage, la séquence repart telle
+quelle, pin inclus.
+
+## ⚠ CONSTAT À TRANCHER AVANT DE RELANCER — `scale_threads` est **100 % CPU**
+
+Vérifié sur `main@c9c3a480` : **aucune cible CUDA dans `morsehgp3D_v4`.**
+Aucun `CMakeLists.txt` de v4 ne mentionne `CUDA`, `enable_language` ni
+`.cu` ; le seul fichier `.cu` du module (`src/gpu/device_compile_witness.cu`)
+n'est pas câblé au build. Le lanceur configure `cmake -S morsehgp3D_v4 -B
+build -DCMAKE_BUILD_TYPE=Release` (sans option CUDA) et le runner exécute
+`./build/mhgp4_forest_probe` sous `taskset -c 0-47`, dont un run `t1`
+**strictement mono-fil**.
+
+Conséquence : sur `g4-standard-48`, le GPU RTX PRO 6000 serait facturé **au
+repos pendant les ~5 h 45** de la session A, et autant en session B.
+
+Cela heurte de front la contrainte impérative du 9 août 2026 — *« ne jamais
+utiliser une instance GPU pour une charge CPU seule ; une VM à GPU ne se
+justifie que par du CUDA réellement exécuté »*, dont la règle d'application
+est précisément « avant de démarrer une VM gardée, vérifier que la charge
+lance bien un noyau CUDA ; sinon choisir un type de machine sans GPU ».
+
+Mais `AGENTS.md` § *Sécurité des VM GCP* verrouille l'autre bout : le point
+d'entrée unique `start_and_verify.sh` **vérifie le type `g4-standard-48`**,
+et `gcp-migration/` est le seul chemin autorisé. Il n'existe donc aujourd'hui
+aucun chemin gardé vers une machine 48 cœurs **sans** GPU.
+
+Les deux règles sont en conflit réel et le partage n'appartient pas à une
+session autonome. Deux issues, au choix de Louis :
+
+1. **Accepter le GPU au repos** pour A et B — la campagne a besoin de 48
+   cœurs et 176 Go, que le Codespace (2 vCPU) ne peut pas fournir ; c'est
+   le seul type de machine que les scripts gardés acceptent.
+2. **Ouvrir un chemin gardé CPU-only** (ex. `c4-standard-48`) dans
+   `start_and_verify.sh` avant de dépenser — plus conforme à la règle du
+   9 août, mais c'est une modification du garde-fou, donc un accord explicite.
+
+Aucune des deux ne peut être choisie sans lui. Tant que le point 1 n'est pas
+tranché, relancer la campagne telle quelle dépenserait sciemment contre une
+règle qu'il a qualifiée d'impérative.
+
 
 ## ⇒ GO FINAL (18 août, le plus récent) — pin `main@ed28a89`
 
