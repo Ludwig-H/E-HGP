@@ -62,6 +62,25 @@ Rôles à accorder au compte de service, **au niveau du projet** :
 4. Redémarrer la session pilote (nouveau conteneur) et dire « c'est en
    place ».
 
+## MESSAGE DE L'UTILISATEUR (18 août, via la session principale)
+
+« Pour le GCP, j'ai déjà créé tout ce qu'il fallait ; les informations
+nécessaires sont dans gcp-migration. » — Ne pas attendre d'autre
+configuration : vérifier l'auth MAINTENANT (étape A) et enchaîner si
+elle est là. Paramètres de la cible (gcp-migration/README.md) :
+
+- Projet : `devpod-gpu-exploration` (les scripts refusent tout autre
+  projet actif — `gcloud config set project devpod-gpu-exploration`).
+- VM : `ehgp-blackwell-spot`, zone `europe-west4-a` (g4-standard-48
+  SPOT, RTX PRO 6000 Blackwell 96 Go, Hyperdisk Balanced) ; seul repli
+  autorisé : `europe-west4-ai1a/ehgp-blackwell-spot-ai1a`.
+- Quotas dimensionnés pour UNE G4 Spot concurrente ; jamais de
+  Standard/on-demand.
+- Si `gcloud auth list` ne montre AUCUN identifiant : publier ici
+  « NO-AUTH » — la seule action restante est côté utilisateur
+  (paramètres de l'environnement, section précédente) ; ne relancer
+  aucun flux OAuth.
+
 ## Étapes côté pilote (après « c'est en place »)
 
 - [ ] Étape A — `gcloud auth list` + `gcloud config get-value project`
