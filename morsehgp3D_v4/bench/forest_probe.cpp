@@ -2454,6 +2454,13 @@ int main(int argc, char** argv) {
       (unsigned long long)st.jung_cert_kill,
       (unsigned long long)st.jung_cert_skip,
       (unsigned long long)st.jung_fallback);
+  // Profil grossier des lanes (cumule CPU en multi-fils) — decompose
+  // t_gen pour designer le POSTE dominant avant toute optimisation.
+  std::printf(
+      "profil_gen t_hist_ms=%.1f t_rect_cover_ms=%.1f t_anchor_cover_ms=%.1f "
+      "t_q3_scan_ms=%.1f t_core_ms=%.1f\n",
+      st.t_hist_ms, st.t_rect_cover_ms, st.t_anchor_cover_ms, st.t_q3_scan_ms,
+      st.t_seed_core_ms);
   // TROIS CARDINALITES PAR K (contre-audits Poisson, § 6.2) : evenements
   // generes / facettes nees uniques (sommets du K-graphe vus) / deltas
   // critiques emis. Le rapport deltas/evenements mesure le gain encore

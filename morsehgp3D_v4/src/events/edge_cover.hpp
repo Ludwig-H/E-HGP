@@ -124,11 +124,15 @@ inline void rect_cover_handles(const CloudIndex& ix, const AxisBox& A,
   }
 }
 
+// `scratch` optionnel : tampon reutilise du counting sort — sans lui,
+// chaque ancre paie une allocation (mesure : poste visible du profil).
 inline void anchor_cover_from_handles(const CloudIndex& ix,
                                       const std::vector<NodeRef>& handles,
                                       const P3& pa, const P3& pb, i64 D2,
                                       i64 coef, std::vector<CoverPoint>* out,
-                                      u64* point_visits) {
+                                      u64* point_visits,
+                                      std::vector<CoverPoint>* scratch =
+                                          nullptr) {
   out->clear();
   const i64 m2[3] = {pa.x + pb.x, pa.y + pb.y, pa.z + pb.z};
   const i64 bound = coef * D2;
@@ -152,7 +156,9 @@ inline void anchor_cover_from_handles(const CloudIndex& ix,
   };
   for (const CoverPoint& cp : *out) ++cnt[bin_of(cp.dist2q) + 1];
   for (int b = 1; b <= kBins; ++b) cnt[b] += cnt[b - 1];
-  std::vector<CoverPoint> tmp(out->size());
+  std::vector<CoverPoint> local;
+  std::vector<CoverPoint>& tmp = scratch ? *scratch : local;
+  tmp.resize(out->size());
   for (const CoverPoint& cp : *out) tmp[cnt[bin_of(cp.dist2q)]++] = cp;
   out->swap(tmp);
 }

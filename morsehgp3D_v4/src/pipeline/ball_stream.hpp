@@ -124,6 +124,12 @@ struct BallStreamStats {
   // sur le chemin baseline.
   double t_seed_core_ms = 0, t_axial_ab_ms = 0, t_reduce_ms = 0,
          t_emit_ms = 0;
+  // Decomposition GROSSIERE de t_gen (profil des lanes ; cumule CPU en
+  // multi-fils) : histogrammes de coin, antichaine du rectangle,
+  // cover par ancre (+ sites affines), scan de profondeur q3 (formes
+  // comprises), et boucle de completion q4 hors cœur.
+  double t_hist_ms = 0, t_rect_cover_ms = 0, t_anchor_cover_ms = 0,
+         t_q3_scan_ms = 0;
   // Fusion des statistiques d'un ouvrier parallele : addition membre a
   // membre — les champs non touches par la generation valent zero chez
   // l'ouvrier, l'addition est donc toujours sure. Les chronos deviennent
@@ -166,6 +172,10 @@ struct BallStreamStats {
     t_axial_ab_ms += o.t_axial_ab_ms;
     t_reduce_ms += o.t_reduce_ms;
     t_emit_ms += o.t_emit_ms;
+    t_hist_ms += o.t_hist_ms;
+    t_rect_cover_ms += o.t_rect_cover_ms;
+    t_anchor_cover_ms += o.t_anchor_cover_ms;
+    t_q3_scan_ms += o.t_q3_scan_ms;
   }
 };
 
@@ -644,7 +654,7 @@ inline void collect_candidate_balls(const CloudIndex& ix, i64 s, u64 smax_eff,
   std::vector<detail_bs::AliveRect> alive;
   struct LaneScratch {
     std::vector<u64> ha, hb;
-    std::vector<CoverPoint> cover;
+    std::vector<CoverPoint> cover, cover_tmp;
     std::vector<AxialSite> axial;
     std::vector<u8> axial_gid;
     std::vector<NodeRef> handles;
@@ -754,12 +764,19 @@ inline void collect_candidate_balls(const CloudIndex& ix, i64 s, u64 smax_eff,
     auto& visits = sc.visits;
     auto* out = lout;
     auto* st = lst;
+    const auto tq0 = std::chrono::steady_clock::now();
     detail_bs::corner_histograms(ix, Lane::kQ3, ar, &ha, &hb);
     const NodeRange ra = range_of(ix, ar.r.a);
     const NodeRange rb = range_of(ix, ar.r.b);
     const AxisBox boxA = box_of_node(ix, ar.r.a);
     const AxisBox boxB = box_of_node(ix, ar.r.b);
+    const auto tq1 = std::chrono::steady_clock::now();
     rect_cover_handles(ix, boxA, boxB, 3, false, &handles, &cover_nodes);
+    const auto tq2 = std::chrono::steady_clock::now();
+    st->t_hist_ms +=
+        std::chrono::duration<double, std::milli>(tq1 - tq0).count();
+    st->t_rect_cover_ms +=
+        std::chrono::duration<double, std::milli>(tq2 - tq1).count();
     const u64 need = h_of[1] - ar.core;
     for (i32 ua = ra.first; ua <= ra.last; ++ua)
       for (i32 ub = rb.first; ub <= rb.last; ++ub) {
@@ -770,7 +787,12 @@ inline void collect_candidate_balls(const CloudIndex& ix, i64 s, u64 smax_eff,
         const P3& pb = ix.upos[(size_t)ub];
         const i64 D2 = p3_norm2(p3_sub(pb, pa));
         if (D2 == 0) continue;
-        anchor_cover_from_handles(ix, handles, pa, pb, D2, 3, &cover, &visits);
+        const auto ta0 = std::chrono::steady_clock::now();
+        anchor_cover_from_handles(ix, handles, pa, pb, D2, 3, &cover, &visits,
+                                  &sc.cover_tmp);
+        const auto ta1 = std::chrono::steady_clock::now();
+        st->t_anchor_cover_ms +=
+            std::chrono::duration<double, std::milli>(ta1 - ta0).count();
         // Remplissage PARESSEUX des sites affines : au premier seed aigu
         // seulement — une ancre sans seed ne paie pas l'O(cover).
         bool affine_filled = false;
@@ -845,6 +867,9 @@ inline void collect_candidate_balls(const CloudIndex& ix, i64 s, u64 smax_eff,
                                        3});
           ++st->candidates[1];
         }
+        st->t_q3_scan_ms += std::chrono::duration<double, std::milli>(
+                                std::chrono::steady_clock::now() - ta1)
+                                .count();
       }
   });
   // ---- q4.
@@ -862,12 +887,19 @@ inline void collect_candidate_balls(const CloudIndex& ix, i64 s, u64 smax_eff,
     auto& visits = sc.visits;
     auto* out = lout;
     auto* st = lst;
+    const auto tq0 = std::chrono::steady_clock::now();
     detail_bs::corner_histograms(ix, Lane::kQ4, ar, &ha, &hb);
     const NodeRange ra = range_of(ix, ar.r.a);
     const NodeRange rb = range_of(ix, ar.r.b);
     const AxisBox boxA = box_of_node(ix, ar.r.a);
     const AxisBox boxB = box_of_node(ix, ar.r.b);
+    const auto tq1 = std::chrono::steady_clock::now();
     rect_cover_handles(ix, boxA, boxB, 3, false, &handles, &cover_nodes);
+    const auto tq2 = std::chrono::steady_clock::now();
+    st->t_hist_ms +=
+        std::chrono::duration<double, std::milli>(tq1 - tq0).count();
+    st->t_rect_cover_ms +=
+        std::chrono::duration<double, std::milli>(tq2 - tq1).count();
     const u64 need = h_of[2] - ar.core;
     for (i32 ua = ra.first; ua <= ra.last; ++ua)
       for (i32 ub = rb.first; ub <= rb.last; ++ub) {
@@ -878,7 +910,12 @@ inline void collect_candidate_balls(const CloudIndex& ix, i64 s, u64 smax_eff,
         const P3& pb = ix.upos[(size_t)ub];
         const i64 D2 = p3_norm2(p3_sub(pb, pa));
         if (D2 == 0) continue;
-        anchor_cover_from_handles(ix, handles, pa, pb, D2, 3, &cover, &visits);
+        const auto tw0 = std::chrono::steady_clock::now();
+        anchor_cover_from_handles(ix, handles, pa, pb, D2, 3, &cover, &visits,
+                                  &sc.cover_tmp);
+        st->t_anchor_cover_ms += std::chrono::duration<double, std::milli>(
+                                     std::chrono::steady_clock::now() - tw0)
+                                     .count();
         // COMPTE W_4 EXACT PAR ANCRE : tout z ∈ W_4(a,b) est strictement
         // interieur a TOUTE boule q4 possedee par l'ancre (cœur universel
         // owner + Jung — il n'y a pas de region anchor-only plus grande).
