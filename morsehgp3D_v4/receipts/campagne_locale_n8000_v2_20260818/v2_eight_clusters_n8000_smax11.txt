@@ -1,0 +1,11 @@
+famille=eight_clusters n=8000 s=8 smax=11 seed=3 candidats=341739/1232786/1149988 gen_tues=797486301/40718405 ancres_w4=1742898 seeds=0 groupes=0 racines_croisees=0 groupes_fenetre=0 groupes_tues_dj=0 appels_completion=0 boules_uniques=2723973 mortes_profondeur=84087 prefiltre_feuilles=0 prefiltre_range_add=14445715 census_keys=2639886 census_int=13570567 census_shell=8831046 evenements=2658325 fusions=16518960 noeuds=1723449 juge=off desaccords=NA t_gen_ms=142587.5 t_tri_ms=1391.3 t_prefiltre_ms=5640.7 t_census_ms=8515.8 t_fold_ms=44167.8 t_juge_ms=0.0 seeds_core=80758279 sites_core=3695113672 t_core_ms=69423.7 t_ab_ms=0.0 t_reduce_ms=0.0 t_emit_ms=0.0
+cardinalites K=1 evenements=28716 facettes=8000 deltas=6897 attachements=0 fusions=7999
+cardinalites K=2 evenements=58543 facettes=59336 deltas=28120 attachements=28370 fusions=59327
+cardinalites K=3 evenements=97867 facettes=184636 deltas=77448 attachements=115315 fusions=184611
+cardinalites K=4 evenements=145957 facettes=410988 deltas=126121 attachements=288528 fusions=410933
+cardinalites K=5 evenements=202201 facettes=763007 deltas=182595 attachements=572788 fusions=762885
+cardinalites K=6 evenements=266441 facettes=1264452 deltas=246590 attachements=993315 fusions=1264265
+cardinalites K=7 evenements=338605 facettes=1939042 deltas=319075 attachements=1573513 fusions=1938759
+cardinalites K=8 evenements=417830 facettes=2805190 deltas=398652 attachements=2332026 fusions=2804776
+cardinalites K=9 evenements=504452 facettes=3886879 deltas=485869 attachements=3293293 fusions=3886300
+cardinalites K=10 evenements=597713 facettes=5199895 deltas=579318 attachements=4473404 fusions=5199105
