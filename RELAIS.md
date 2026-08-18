@@ -1,7 +1,93 @@
 # RELAIS — session pilote GCP « e-hgp-gcp » ↔ session principale
 
 Campagne d'échelle MorseHGP3D v4 sur g4-standard-48 SPOT. Base : `main@772a8d9`.
-Dernière mise à jour : 2026-08-18 (session pilote Codespace — HOLD reçu, rien lancé).
+Dernière mise à jour : 2026-08-18 (session pilote Codespace — correction : lancement n64000 REFUSÉ, aucun reçu).
+
+## ⚠ CORRECTION — le lancement manuel n64000 a été **REFUSÉ** ; rien n'a tourné, il n'y a aucun reçu
+
+La section « LANCEMENT MANUEL n64000 » ci-dessous décrit un lancement qui
+**n'a pas abouti**. Constat de la session pilote, 2026-08-18T11:28Z :
+
+- un seul journal existe, `~/campagne_n64000_20260818T112420Z.log`,
+  **1 555 octets**, figé à 11:24 — c'est la tentative refusée ;
+- aucune relance depuis ; aucun serveur tmux ;
+- les quatre instances du projet sont `TERMINATED`.
+
+Dernière ligne du journal :
+
+```
+[ERREUR] Le coupe-circuit invité (57 min) et sa marge de 300 s dépassent maxRunDuration (3600 s).
+```
+
+Le refus vient de `start_and_verify.sh:527`, **après** que le préflight du
+lanceur a tout accepté. Seule mutation effectuée : `maxRunDuration` reposé
+à `3600 s` sur une cible `TERMINATED`, avec la trace explicite
+`[OK] ... aucune VM démarrée ou arrêtée`. Le refus est intervenu avant
+l'installation du trap, donc il n'y avait rien à certifier — cohérent avec
+l'inventaire.
+
+**Il n'y a donc ni `OUT_DIR`, ni `.status`, ni `campaign_status`, ni
+certification `TERMINATED` à rapatrier.** Aucun répertoire de reçus n'est
+créé : fabriquer un reçu pour une campagne qui n'a pas eu lieu serait
+exactement ce que le protocole interdit.
+
+### La cause profonde : le préflight du lanceur ne modélise que 4 gardes sur 6
+
+L'en-tête de `session_scale_threads_g4.sh` (lignes 18-21) énonce quatre
+inégalités, et c'est ce que son préflight vérifie :
+
+```
+MAX_RUN_SECONDS        >= required
+60*GUEST_SHUTDOWN_MIN  >  required
+60*SSH_KEY_TTL_MIN     >  60*GUEST_SHUTDOWN_MIN + 600
+MAX_RUN_SECONDS        <= 28800
+```
+
+`start_and_verify.sh` en impose **deux de plus**, que le préflight ne
+connaît pas — d'où un REFUS tardif, après mutation de `maxRunDuration` :
+
+```
+5.  60*GUEST_SHUTDOWN_MIN + 300 <= MAX_RUN_SECONDS      (ligne 527)
+6.  restant_clé_OS_Login ∈ [MAX_RUN_SECONDS, MAX_RUN_SECONDS + 660]
+                                                         (ligne 531, verify_oslogin_session_key)
+```
+
+La garde 5 plafonne l'arrêt invité à **55 min** quand `MAX_RUN_SECONDS=3600` ;
+57 min ne pouvait pas passer. La garde 6 borne le TTL de la clé à
+**[61, 71] min** pour le même plafond — des deux côtés, un TTL trop long
+est refusé autant qu'un TTL trop court.
+
+Tant que le préflight ne modélise pas 5 et 6, toute enveloppe d'une heure
+choisie sur le seul en-tête sera refusée après mutation. C'est un correctif
+qui vaut pour la session principale, pas seulement pour ce lancement.
+
+### Enveloppe `court1h` vérifiée contre les six gardes
+
+`main@ed6a798d` apporte la phase `court1h` (4 runs : `uniform` et
+`eight_clusters`, t8 et tmax, n=32000, sans le t1 mono-fil). Selftest local
+sur ce commit : `violations=0`, **PROTOCOLE CONFORME**.
+
+Enveloppe qui satisfait les six gardes avec marge :
+
+```
+PHASE=court1h RUN_TIMEOUT=600 BUILD_MARGIN=420 RETRIEVE_MARGIN=300 \
+MAX_RUN_SECONDS=3600 GUEST_SHUTDOWN_MINUTES=54 SSH_KEY_TTL_MINUTES=70 \
+./gcp-migration/session_scale_threads_g4.sh
+```
+
+| Garde | Source | Vérification |
+| --- | --- | --- |
+| `MAX_RUN_SECONDS ≤ 28800` | lanceur | `3600` ✓ |
+| `MAX_RUN_SECONDS ≥ requis` | lanceur | `3600 ≥ 420 + 2400 + 300 = 3120` ✓ |
+| `invité > requis` | lanceur | `3240 > 3120` ✓ (marge 120 s) |
+| `TTL > invité + 600` | lanceur | `4200 > 3840` ✓ |
+| `invité + 300 ≤ maxRun` | `start_and_verify:527` | `3540 ≤ 3600` ✓ |
+| `restant ∈ [maxRun, maxRun+660]` | `start_and_verify:531` | `≈ 4180 ∈ [3600, 4260]` ✓ |
+
+Le lancement reste à la main de Louis : le refus du bac à sable sur le
+démarrage d'une ressource facturable depuis cette session non surveillée
+n'est pas levé, et aucune relance n'aura lieu sans son ordre.
+
 
 ## ⇒ HOLD REÇU — **rien lancé** (18 août, pilote Codespace)
 
