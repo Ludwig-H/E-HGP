@@ -85,6 +85,9 @@ struct Args {
   bool q3_affine_gate = false;
   bool float_rounding_gate = false;
   bool inj_jung_swap = false;
+  bool fold_capacity_gate = false;
+  int inj_fold_capacity = 0;  // 1 = u32-event-wrap, 2 = i32-fid-wrap,
+                              // 3 = epoch-sentinel-collision
   u32 inj_axial = 0;  // masque kAxial* des mutants du chemin axial
   u64 min_balls = 0;
   u64 min_fusions = 0;
@@ -159,6 +162,11 @@ Args parse(int argc, char** argv) {
     else if (arg == "--q3-affine-gate") a.q3_affine_gate = true;
     else if (arg == "--float-rounding-gate") a.float_rounding_gate = true;
     else if (arg == "--inject=jung-swap-bounds") a.inj_jung_swap = true;
+    else if (arg == "--fold-capacity-gate") a.fold_capacity_gate = true;
+    else if (arg == "--inject=fold-u32-event-wrap") a.inj_fold_capacity = 1;
+    else if (arg == "--inject=fold-i32-fid-wrap") a.inj_fold_capacity = 2;
+    else if (arg == "--inject=fold-epoch-sentinel-collision")
+      a.inj_fold_capacity = 3;
     else if (arg == "--inject=float-ignore-rounding")
       a.inj_axial |= kFloatIgnoreRounding;
     else if (arg == "--inject=float-threshold-too-small")
@@ -408,6 +416,14 @@ int forests_from_balls(const std::vector<BallData>& balls,
                                      false, false, false, legacy_partition);
     }
   });
+  for (int K = 1; K <= (int)kmax_eff; ++K)
+    if (!per_k_result[K].refusal.empty()) {
+      // Refus transactionnel de capacite (contre-audit 5d274a1 § 7) :
+      // avant tout calcul du fold, code 2 — jamais une troncature.
+      std::fprintf(stderr, "REFUS fold K=%d : %s\n", K,
+                   per_k_result[K].refusal.c_str());
+      return 2;
+    }
   for (int K = 1; K <= (int)kmax_eff; ++K)
     if (per_k_result[K].attach_violations != 0 ||
         per_k_result[K].birth_violations != 0 ||
@@ -1256,6 +1272,102 @@ int run_q3_affine_gate(bool inj_small, bool inj_jung_swap) {
              : 3;
 }
 
+
+// PORTE DE LA GARDE DE CAPACITE DU FOLD (contre-audit 5d274a1 § 7) :
+// les bases FICTIVES cap_base_* approchent les limites des index locaux
+// sans allocation geante. Quatre cas AU-DESSUS (evenements > u32,
+// nfid-majorant > i32 au bord et par enroulement u32, lots atteignant
+// la sentinelle UINT32_MAX) doivent etre REFUSES avant calcul ; trois
+// cas JUSTE SOUS la limite doivent etre acceptes avec un resultat
+// IDENTIQUE a la base (la garde est une pure verification). Chaque
+// mutant degrade UNE comparaison : u32-event-wrap (le compte
+// d'evenements passe par u32 : jamais de refus), i32-fid-wrap (le
+// majorant de fid s'enroule : 2^32 + r accepte a tort),
+// epoch-sentinel-collision (<= au lieu de < : le lot sentinelle passe).
+int run_fold_capacity_gate(int mutant) {
+  const std::vector<P3> pts = make_family_cloud(
+      CloudFamily::kEightClusters, 120,
+      cloud_family_default_coord(CloudFamily::kEightClusters, 120), 3);
+  const CloudIndex ix = build_cloud_index(pts);
+  if ((size_t)ix.unique_count() != pts.size()) return 3;
+  std::vector<BallCandidate> cs;
+  BallStreamStats ss;
+  collect_candidate_balls(ix, 8, 11, &cs, &ss);
+  std::stable_sort(cs.begin(), cs.end(), ball_candidate_less);
+  cs.erase(std::unique(cs.begin(), cs.end(),
+                       [](const BallCandidate& x, const BallCandidate& y) {
+                         return x.key == y.key;
+                       }),
+           cs.end());
+  std::vector<Survivor> sv;
+  BallStreamStats ds;
+  prefilter_balls(ix, cs, 11, false, false, &sv, &ds, 1);
+  std::vector<BallData> balls;
+  if (census_balls(ix, cs, sv, 11, 12, false, false, &balls, &ds, 1, false) !=
+      0)
+    return 3;
+  std::vector<PointId> pid_of((size_t)ix.unique_count());
+  for (size_t u = 0; u < pid_of.size(); ++u)
+    pid_of[u] = ix.point_id((i32)u);
+  u64 e1[11] = {};
+  ForestResult rr[11];
+  std::vector<std::vector<ForestEvent>> evk;
+  if (forests_from_balls(balls, ix.upos, pid_of, 10, e1, rr, &evk, 1, true) !=
+      0)
+    return 3;
+  const std::vector<ForestEvent>& ev = evk[10];
+  u64 total = 0;
+  for (const ForestEvent& e : ev) total += (u64)e.q + e.d;
+  const u64 nev = ev.size();
+  if (nev == 0 || total == 0) return 3;
+  const ForestResult base = build_forest(ev);
+  const auto run = [&](u64 be, u64 br, u64 bb) {
+    return build_forest(ev, false, false, nullptr, false, false, false, true,
+                        be, br, bb, mutant);
+  };
+  struct Case {
+    u64 be, br, bb;
+  };
+  const Case over[4] = {{(u64)UINT32_MAX + 1 - nev, 0, 0},
+                        {0, (u64)INT32_MAX + 1 - total, 0},
+                        {0, (u64)1 << 32, 0},
+                        {0, 0, (u64)UINT32_MAX - nev}};
+  u64 refused = 0, accepted_wrong = 0;
+  for (const Case& c : over) {
+    const ForestResult t = run(c.be, c.br, c.bb);
+    if (!t.refusal.empty())
+      ++refused;
+    else
+      ++accepted_wrong;
+  }
+  const Case under[3] = {{(u64)UINT32_MAX - nev, 0, 0},
+                         {0, (u64)INT32_MAX - total, 0},
+                         {0, 0, (u64)UINT32_MAX - 1 - nev}};
+  u64 under_bad = 0;
+  for (const Case& c : under) {
+    const ForestResult t = run(c.be, c.br, c.bb);
+    if (!t.refusal.empty() || t.facets != base.facets ||
+        t.fusions != base.fusions || t.deltas.size() != base.deltas.size() ||
+        !(t.final_partition == base.final_partition))
+      ++under_bad;
+  }
+  std::printf(
+      "fold_capacity_gate evenements=%llu recs=%llu refus=%llu/4 "
+      "acceptes_a_tort=%llu sous_limite_ko=%llu\n",
+      (unsigned long long)nev, (unsigned long long)total,
+      (unsigned long long)refused, (unsigned long long)accepted_wrong,
+      (unsigned long long)under_bad);
+  if (mutant != 0) {
+    if (accepted_wrong > 0) {
+      std::printf("MUTANT TUE\n");
+      return 4;
+    }
+    std::fprintf(stderr, "PORTE INEFFICACE : mutant non discrimine\n");
+    return 3;
+  }
+  return (refused == 4 && under_bad == 0) ? 0 : 3;
+}
+
 // PORTE DE LA GARDE D'ARRONDI (contre-audit 04c71a2 § 4) : sous un mode
 // d'arrondi != FE_TONEAREST la preuve de la borne ne tient plus — le
 // filtre doit se desactiver SEUL (zero certification, tout en repli
@@ -1942,6 +2054,7 @@ int main(int argc, char** argv) {
                               a.inj_jung_swap);
   if (a.float_rounding_gate)
     return run_float_rounding_gate((a.inj_axial & kFloatIgnoreRounding) != 0);
+  if (a.fold_capacity_gate) return run_fold_capacity_gate(a.inj_fold_capacity);
   if (a.guard != 0) return run_guard_gate(a.guard);
   const std::vector<P3> pts = make_family_cloud(
       a.family, a.n,

@@ -425,6 +425,19 @@ mhgp4_expect_code(mhgp4_forest_probe_float_rounding_gate 0 mhgp4_forest_probe
     "--float-rounding-gate")
 mhgp4_expect_code(mhgp4_forest_probe_float_rounding_mutant 4 mhgp4_forest_probe
     "--float-rounding-gate --inject=float-ignore-rounding")
+# Garde de capacite du fold (contre-audit 5d274a1 § 7) : refus
+# transactionnel resource_exhausted/requires_tiling AVANT les casts
+# u32/i32 et la sentinelle d'epoque — bases fictives pres des limites,
+# jamais d'allocation geante ; sous la limite, resultat IDENTIQUE.
+mhgp4_expect_code(mhgp4_forest_probe_fold_capacity_gate 0 mhgp4_forest_probe
+    "--fold-capacity-gate")
+mhgp4_expect_code(mhgp4_forest_probe_fold_capacity_mutant_event 4
+    mhgp4_forest_probe "--fold-capacity-gate --inject=fold-u32-event-wrap")
+mhgp4_expect_code(mhgp4_forest_probe_fold_capacity_mutant_fid 4
+    mhgp4_forest_probe "--fold-capacity-gate --inject=fold-i32-fid-wrap")
+mhgp4_expect_code(mhgp4_forest_probe_fold_capacity_mutant_epoch 4
+    mhgp4_forest_probe
+    "--fold-capacity-gate --inject=fold-epoch-sentinel-collision")
 
 # La lane q2 productrice : W_2 est la boule diametrale ouverte, le census
 # est une requete de cover a coefficient 1. Juge brut toutes-paires sur

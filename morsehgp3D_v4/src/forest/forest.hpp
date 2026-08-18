@@ -23,6 +23,7 @@
 #include <algorithm>
 #include <chrono>
 #include <map>
+#include <string>
 #include <vector>
 
 #include "../events/q4_event.hpp"
@@ -125,6 +126,10 @@ struct ForestResult {
   std::vector<FacetKey> facet_keys;
   std::vector<u32> final_canon_fid;
   u64 partition_violations = 0;
+  // GARDE DE CAPACITE (contre-audit 5d274a1 § 7) : non vide = entree
+  // REFUSEE avant allocation (resource_exhausted / requires_tiling),
+  // jamais une troncature — tous les autres champs sont alors vides.
+  std::string refusal;
   // Chronos GROSSIERS (§ 1.4 — jamais un steady_clock par lot ; la
   // separation roles/unions/deltas n'est volontairement pas mesuree).
   double t_batching_ms = 0, t_intern_ms = 0, t_reduce_ms = 0,
@@ -399,8 +404,41 @@ inline ForestResult build_forest(
     std::vector<std::map<FacetKey, FacetKey>>* snapshots = nullptr,
     bool mutant_attach_prebatch = false,
     bool mutant_drop_nonmerge = false, bool mutant_canon_root = false,
-    bool fill_legacy_partition = true) {
+    bool fill_legacy_partition = true, u64 cap_base_events = 0,
+    u64 cap_base_recs = 0, u64 cap_base_batches = 0,
+    int mutant_capacity = 0) {
   ForestResult r;
+  // GARDE DE CAPACITE TRANSACTIONNELLE (contre-audit 5d274a1 § 7) : les
+  // index LOCAUX du fold sont volontairement etroits (FRec::e en u32,
+  // fid compatible i32 pour l'union-find, epoques u32 a SENTINELLE
+  // UINT32_MAX) — c'est le bon choix pour les futures tuiles, mais toute
+  // entree qui ne tient pas doit etre REFUSEE avant les casts et les
+  // allocations, jamais tronquee. Majorants VERIFIABLES A L'ENTREE :
+  // nfid <= Σ(q_e + d_e) (l'internement dedoublonne, jamais n'ajoute) et
+  // lots <= evenements ; le lot b doit rester STRICTEMENT sous la
+  // sentinelle UINT32_MAX des tableaux a epoque. Les bases cap_base_*
+  // (fictives, portes seulement) approchent les limites sans allocation
+  // geante ; les trois mutants degradent chacun UNE comparaison.
+  {
+    u64 total_recs = 0;
+    for (const ForestEvent& ev : events) total_recs += (u64)ev.q + ev.d;
+    const u64 nev = cap_base_events + (u64)events.size();
+    const u64 nrec = cap_base_recs + total_recs;
+    const u64 nbat = cap_base_batches + (u64)events.size();
+    // MUTANTS 1 et 2 : le compte passe par u32 AVANT la comparaison
+    // (enroulement) — la verification elle-meme reste la meme.
+    const u64 nev_eff = mutant_capacity == 1 ? (u64)(u32)nev : nev;
+    const u64 nrec_eff = mutant_capacity == 2 ? (u64)(u32)nrec : nrec;
+    const bool ok_events = nev_eff <= (u64)UINT32_MAX;
+    const bool ok_fid = nrec_eff <= (u64)INT32_MAX;
+    const bool ok_batches = mutant_capacity == 3
+                                ? nbat <= (u64)UINT32_MAX  // MUTANT : == ok
+                                : nbat < (u64)UINT32_MAX;
+    if (!ok_events || !ok_fid || !ok_batches) {
+      r.refusal = "resource_exhausted/requires_tiling";
+      return r;
+    }
+  }
   auto tf = std::chrono::steady_clock::now();
   const auto mark = [&](double* out) {
     const auto now = std::chrono::steady_clock::now();
