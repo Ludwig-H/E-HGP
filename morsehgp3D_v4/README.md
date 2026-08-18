@@ -23,6 +23,11 @@ Aucun claim tant que les portes ne le prouvent pas : `public_status` reste
 
 ## Parcours de lecture
 
+0. [`PASSATION.md`](PASSATION.md) — **commencer ici** : l'état complet
+   au 18 août 2026 (résultats acquis théorème → code → porte, carte de
+   l'implémentation réelle, chantiers ouverts par priorité, protocole
+   et journal de la campagne G4). `docs/ARCHITECTURE.md` décrit le plan
+   initial ; la passation fait foi pour l'état courant.
 1. [`docs/MATHEMATIQUES.md`](docs/MATHEMATIQUES.md) — l'objet (manuscrit,
    Défs 20–31, Théorèmes 2–7), la réduction événements-boules q2/q3/q4, les
    fuseaux `W_q`, l'élagage `h_coeur/h_a/h_b`, les statuts de chaque énoncé,
