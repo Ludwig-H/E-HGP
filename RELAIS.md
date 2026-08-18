@@ -1,7 +1,52 @@
 # RELAIS — session pilote GCP « e-hgp-gcp » ↔ session principale
 
 Campagne d'échelle MorseHGP3D v4 sur g4-standard-48 SPOT. Base : `main@772a8d9`.
-Dernière mise à jour : 2026-08-18 (session pilote Codespace — correction : lancement n64000 REFUSÉ, aucun reçu).
+Dernière mise à jour : 2026-08-18 (session pilote Codespace — préflight réparé, main@b4dcdb4c).
+
+## ⇒ PRÉFLIGHT RÉPARÉ — la ligne d'une heure tient en trois mots (`main@b4dcdb4c`)
+
+Complément à `ab8fde52` (session principale), qui a modélisé les gardes 5
+et 6 en parallèle. Trois points qu'une constante figée laissait ouverts :
+
+1. **Le TTL figé à 427 min ne marche que pour un plafond de 7 h.** Avec
+   `MAX_RUN_SECONDS=3600`, 427 min = 25620 s tombe très au-dessus de
+   `[3900, 4260]` → session refusée. Même faute de forme que l'ancien 420 :
+   un défaut constant n'est valide que pour UNE valeur du plafond. Le TTL
+   est désormais **dérivé** de `MAX_RUN_SECONDS`, au milieu de la fenêtre.
+2. **Les constantes des gardes sont maintenant LUES dans
+   `start_and_verify.sh`** au lieu d'être recopiées (300 / 120 / 600) —
+   source de vérité unique, refus fail-closed si illisibles. La borne basse
+   passe de 120 s à `TIMESTAMP_TOLERANCE_SECONDS` (300 s) : le délai
+   création→vérification contient un SSH en mode batch qui peut retenter,
+   et 120 s ne le couvrent pas.
+3. **`PHASE=court1h` armait encore sept heures** alors que la phase EST
+   l'enveloppe d'une heure. Ses défauts le disent maintenant.
+
+S'y ajoute **`--check-envelope`** : joue le préflight, sort 0 ou 2, ne
+touche ni GCP ni le disque.
+
+```
+$ PHASE=court1h ./gcp-migration/session_scale_threads_g4.sh --check-envelope
+budget : phase=court1h somme_timeouts=2400s requis=3120s max_run=3600s guest=3240s ttl=4080s
+enveloppe conforme aux six gardes (aucune action GCP)
+```
+
+La ligne de lancement est donc réduite à sa phase :
+
+```
+PHASE=court1h ./gcp-migration/session_scale_threads_g4.sh
+```
+
+Selftest : scénarios 12 (les trois phases passent les six gardes **sans
+rien poser en environnement**, et court1h arme bien une heure) et 13
+(mutant de dérive des constantes) ; les 6d/6e amont sont conservés.
+**Trois mutants vérifiés tueurs, code 1** : TTL refigé à 427, constantes
+recopiées, court1h privé de son plafond. `PROTOCOLE CONFORME`,
+`violations=0` ; les sept contrôles `tools/` passent.
+
+Inventaire inchangé : quatre instances `TERMINATED`, aucune action GCP
+mutante depuis cette session.
+
 
 ## ⇒ CORRECTIF POUSSÉ + LIGNE CORRIGÉE (18 août, session principale — le plus récent)
 
