@@ -1,46 +1,71 @@
 #!/usr/bin/env python3
-# Validateur LOCAL des sessions SCALE_THREADS (audits bloquants 9223888 /
-# b3a6eb4) : seule autorite du statut. Au-dela des exigences historiques
-# (statuts finis, code=0, pins, motifs interdits), il exige :
-#   - les METADONNEES d'execution : threads_requested coherent avec le
-#     suffixe du nom (t1/t8/tmax), nproc > 0, tmax == nproc, cpu_set et
-#     args_sha256 presents, et la ligne `execution threads_effective=N`
-#     du probe EGALE a threads_requested (le nom d'un run ne prouve pas
-#     le nombre de fils reellement applique — audit § 2.1) ;
-#   - la SIGNATURE CANONIQUE : lignes digest_balls / digest_forest_K* /
-#     digest_all presentes, et EGALITE STRICTE de l'ensemble des lignes
-#     digest + cardinalites entre les runs apparies d'une meme famille
-#     (t1/t8/tmax a n=32000) — deux forets differentes a fils differents
-#     ne peuvent plus etre declarees `complete` (audit § 2.2) ;
-#   - aucun statut not_run_budget (un refus de budget est un resultat
-#     honnete mais une campagne PARTIELLE).
+# Validateur LOCAL des sessions SCALE_THREADS (audits 9223888 / b3a6eb4,
+# durci par 66886c0) : seule autorite du statut. Exigences :
+#   - LIAISON NOM -> EXPERIENCE (66886c0 § 1) : pour chaque run, le
+#     validateur RECONSTRUIT l'argv contractuel depuis le nom (famille,
+#     n, s=8, smax=11, seed=3, fils) et exige (1) args_sha256 == SHA-256
+#     de cette serialisation NUL, (2) la ligne d'identite du probe
+#     (famille/n/s/smax/seed) CONFORME au nom, (3) threads_requested
+#     conforme au suffixe (tmax == nproc du statut) ;
+#   - WORKERS MESURES (66886c0 § 2) : la ligne `execution ...` publie
+#     des comptes alimentes au point de creation des std::thread —
+#     gen/prefiltre/census/expansion == threads_requested (les taches
+#     sont abondantes aux tailles de campagne), fold == min(threads, 10) ;
+#   - SCHEMA COMPLET (66886c0 § 3) : exactement UNE occurrence de
+#     digest_balls, digest_forest_K1..K10, digest_all et de
+#     cardinalites K=1..10 — ni doublon ni ordre manquant ;
+#   - APPARIEMENT : egalite stricte digests + cardinalites au sein d'une
+#     famille (t1/t8/tmax a n=32000) ; la phase n64000 est etiquetee
+#     honnetement digest_recorded_unpaired (66886c0 § 4) ;
+#   - aucun statut not_run_budget ; pins ; motifs interdits.
 # Usage : validate_v4_scale_threads.py OUT COMMIT PAYLOAD_SHA MANIFEST_SHA
 #         REMOTE_RC SCP_RC PHASE
+import hashlib
 import os
 import re
 import sys
+
+KMAX = 10
 
 
 def expected(phase):
     if phase == "n32000":
         return {
-            "uniform": ["thr_uniform_n32000_smax11_t1",
-                        "thr_uniform_n32000_smax11_t8",
-                        "thr_uniform_n32000_smax11_tmax"],
-            "eight_clusters": ["thr_eight_clusters_n32000_smax11_t8",
-                               "thr_eight_clusters_n32000_smax11_tmax"],
+            "uniform": [("thr_uniform_n32000_smax11_t1", "1"),
+                        ("thr_uniform_n32000_smax11_t8", "8"),
+                        ("thr_uniform_n32000_smax11_tmax", "max")],
+            "eight_clusters": [("thr_eight_clusters_n32000_smax11_t8", "8"),
+                               ("thr_eight_clusters_n32000_smax11_tmax",
+                                "max")],
         }
     if phase == "n64000":
-        return {fam: [f"thr_{fam}_n64000_smax11_tmax"]
+        return {fam: [(f"thr_{fam}_n64000_smax11_tmax", "max")]
                 for fam in ("uniform", "terrain", "eight_clusters",
                             "scanline_overlap_multiecho")}
     raise SystemExit(f"phase inconnue : {phase}")
+
+
+def contract_argv(family, n, threads):
+    # L'argv EXACT que le runner passe au probe — toute derive du runner
+    # ou du validateur casse le hash, dans les deux sens.
+    return [f"--family={family}", f"--n={n}", "--s=8", "--smax=11",
+            "--seed=3", "--min-balls=10000", "--min-fusions=1000",
+            f"--threads={threads}", "--digest"]
+
+
+def argv_sha256(argv):
+    h = hashlib.sha256()
+    for a in argv:
+        h.update(a.encode())
+        h.update(b"\0")
+    return h.hexdigest()
 
 
 def main():
     out, commit, payload_sha, manifest_sha, remote_rc, scp_rc, phase = \
         sys.argv[1:8]
     groups = expected(phase)
+    n_of_phase = int(phase[1:])
     forbidden = re.compile(r"REFUS|INVARIANT|PLANCHER|Killed|bad_alloc")
     counters = re.compile(
         r"boules_uniques=\d+.*evenements=\d+.*juge=off desaccords=NA")
@@ -51,7 +76,7 @@ def main():
         bad.append(f"rapatriement : scp_rc={scp_rc}")
     signatures = {}
     for fam, names in groups.items():
-        for name in names:
+        for name, tlabel in names:
             status_p = os.path.join(out, name + ".status")
             txt_p = os.path.join(out, name + ".txt")
             if not os.path.exists(status_p):
@@ -78,15 +103,19 @@ def main():
                 bad.append(f"{name}: threads_requested/nproc absents")
                 continue
             treq_v, nproc_v = int(treq.group(1)), int(nproc.group(1))
-            suffix = name.rsplit("_", 1)[1]
-            want_t = nproc_v if suffix == "tmax" else int(suffix[1:])
+            want_t = nproc_v if tlabel == "max" else int(tlabel)
             if treq_v != want_t:
                 bad.append(f"{name}: threads_requested={treq_v} incoherent "
-                           f"avec le suffixe {suffix} (attendu {want_t})")
+                           f"avec le nom (attendu {want_t})")
             if not re.search(r"^cpu_set=\S+$", st, re.M):
                 bad.append(f"{name}: cpu_set absent")
-            if not re.search(r"^args_sha256=[0-9a-f]{64}$", st, re.M):
-                bad.append(f"{name}: args_sha256 absent")
+            # LIAISON NOM -> ARGV (66886c0 § 1) : hash recalcule, jamais
+            # seulement present.
+            want_sha = argv_sha256(contract_argv(fam, n_of_phase, want_t))
+            got_sha = re.search(r"^args_sha256=([0-9a-f]{64})$", st, re.M)
+            if not got_sha or got_sha.group(1) != want_sha:
+                bad.append(f"{name}: args_sha256 absent ou DIFFERENT de "
+                           f"l'argv contractuel du nom")
             if not os.path.exists(txt_p):
                 bad.append(f"{name}: .txt ABSENT")
                 continue
@@ -96,28 +125,81 @@ def main():
                 bad.append(f"{name}: motif interdit ({fb.group(0)})")
             if not counters.search(body):
                 bad.append(f"{name}: ligne de compteurs absente")
-            te = re.search(r"^execution threads_effective=(\d+)$", body, re.M)
-            if not te:
-                bad.append(f"{name}: threads_effective absent de la sortie")
-            elif int(te.group(1)) != treq_v:
-                bad.append(f"{name}: threads_effective={te.group(1)} != "
-                           f"threads_requested={treq_v}")
-            digests = sorted(re.findall(
-                r"^(digest_(?:balls|forest_K\d+|all)=[0-9a-f]{64})$", body,
-                re.M))
-            if len(digests) < 3:
-                bad.append(f"{name}: lignes digest absentes ou incompletes")
-            cards = sorted(re.findall(r"^(cardinalites K=\d+ .*)$", body, re.M))
-            signatures[name] = (tuple(digests), tuple(cards))
-    # Appariement : au sein d'une famille, TOUS les runs presents doivent
-    # porter exactement les memes digests et les memes cardinalites.
+            # LIAISON NOM -> IDENTITE IMPRIMEE (66886c0 § 1).
+            ident = re.search(
+                r"^famille=(\S+) n=(\d+) s=(\d+) smax=(\d+) seed=(\d+)",
+                body, re.M)
+            if not ident:
+                bad.append(f"{name}: ligne d'identite absente")
+            elif (ident.group(1) != fam or int(ident.group(2)) != n_of_phase
+                  or ident.group(3) != "8" or ident.group(4) != "11"
+                  or ident.group(5) != "3"):
+                bad.append(f"{name}: identite imprimee "
+                           f"({'/'.join(ident.groups())}) != nom du run")
+            # WORKERS MESURES (66886c0 § 2).
+            ex = re.search(
+                r"^execution threads_requested=(\d+) gen_workers_max=(\d+) "
+                r"prefilter_workers=(\d+) census_workers=(\d+) "
+                r"expansion_workers=(\d+) fold_workers_max=(\d+)$",
+                body, re.M)
+            if not ex:
+                bad.append(f"{name}: ligne execution (workers mesures) "
+                           f"absente")
+            else:
+                tr, gen, pre, cen, exp, fld = (int(g) for g in ex.groups())
+                if tr != want_t:
+                    bad.append(f"{name}: threads_requested imprime {tr} != "
+                               f"{want_t}")
+                for label, v in (("gen_workers_max", gen),
+                                 ("prefilter_workers", pre),
+                                 ("census_workers", cen),
+                                 ("expansion_workers", exp)):
+                    if v != want_t:
+                        bad.append(f"{name}: {label}={v} != fils demandes "
+                                   f"{want_t} (taches abondantes a n="
+                                   f"{n_of_phase})")
+                if fld != min(want_t, KMAX):
+                    bad.append(f"{name}: fold_workers_max={fld} != "
+                               f"min({want_t}, {KMAX})")
+            # SCHEMA COMPLET (66886c0 § 3) : une occurrence exacte de
+            # chaque ligne attendue, ni plus ni moins.
+            digest_lines = re.findall(
+                r"^digest_(balls|forest_K(\d+)|all)=([0-9a-f]{64})$", body,
+                re.M)
+            seen = {}
+            for kind, knum, hexv in digest_lines:
+                key = kind if not knum else f"forest_K{knum}"
+                seen[key] = seen.get(key, 0) + 1
+            want_keys = (["balls"] +
+                         [f"forest_K{k}" for k in range(1, KMAX + 1)] +
+                         ["all"])
+            for k in want_keys:
+                if seen.get(k, 0) != 1:
+                    bad.append(f"{name}: digest {k} present "
+                               f"{seen.get(k, 0)} fois (attendu 1)")
+            for k in seen:
+                if k not in want_keys:
+                    bad.append(f"{name}: digest inattendu {k}")
+            card_ks = re.findall(r"^cardinalites K=(\d+) ", body, re.M)
+            for k in range(1, KMAX + 1):
+                c = card_ks.count(str(k))
+                if c != 1:
+                    bad.append(f"{name}: cardinalites K={k} presente {c} "
+                               f"fois (attendu 1)")
+            digests = tuple(sorted(
+                f"{kind if not knum else 'forest_K' + knum}={hexv}"
+                for kind, knum, hexv in digest_lines))
+            cards = tuple(sorted(
+                re.findall(r"^(cardinalites K=\d+ .*)$", body, re.M)))
+            signatures[name] = (digests, cards)
+    # Appariement au sein d'une famille.
     for fam, names in groups.items():
-        sigs = [(n, signatures[n]) for n in names if n in signatures]
+        sigs = [(n, signatures[n]) for n, _ in names if n in signatures]
         for i in range(1, len(sigs)):
             if sigs[i][1] != sigs[0][1]:
                 bad.append(f"{fam}: OBJETS DIFFERENTS entre {sigs[0][0]} et "
                            f"{sigs[i][0]} (digests ou cardinalites)")
-    known = {n for names in groups.values() for n in names}
+    known = {n for names in groups.values() for n, _ in names}
     for f in sorted(os.listdir(out)) if os.path.isdir(out) else []:
         if f.endswith(".txt") and f[:-4] not in known:
             bad.append(f"{f}: fichier inattendu")
@@ -126,8 +208,12 @@ def main():
         for b in bad:
             print("  -", b)
         return 1
-    print(f"campaign_status=complete (phase {phase}, {len(known)} runs "
-          f"apparies par digest, source_commit={commit[:12]})")
+    # Etiquetage honnete (66886c0 § 4) : seule n32000 prouve
+    # l'equivalence inter-fils ; n64000 grave une empreinte non appariee.
+    claim = ("thread_equivalence_checked" if phase == "n32000"
+             else "digest_recorded_unpaired")
+    print(f"campaign_status=complete (phase {phase}, {len(known)} runs, "
+          f"{claim}, source_commit={commit[:12]})")
     print("=== CAMPAGNE SCALE_THREADS COMPLETE ===")
     return 0
 

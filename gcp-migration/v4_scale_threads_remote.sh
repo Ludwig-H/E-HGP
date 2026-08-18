@@ -82,7 +82,9 @@ run_one() {
   local name="$1" treq="$2"; shift 2
   local out="${OUT_DIR}/${name}.txt" status="${OUT_DIR}/${name}.status"
   local rc=0 t0 t1 hwm="" args_sha
-  args_sha=$(printf '%s' "$*" | sha256sum | awk '{print $1}')
+  # Serialisation SANS ambiguite (audit 66886c0 § 1) : arguments separes
+  # par NUL — le validateur recalcule ce hash depuis le NOM du run.
+  args_sha=$(printf '%s\0' "$@" | sha256sum | awk '{print $1}')
   t0=$(date +%s)
   # REFUS DE DEMARRAGE (audit b3a6eb4 § 3) : le run n'est pas lance si
   # son timeout ne tient plus avant la deadline — statut explicite.

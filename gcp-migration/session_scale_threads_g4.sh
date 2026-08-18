@@ -80,6 +80,24 @@ BUNDLE="${WORK}/bundle.tgz"
 
 gcloud config set project "${GCP_PROJECT_ID}" >/dev/null
 
+# ---- 0c. INVENTAIRE LECTURE SEULE du projet (directive utilisateur du
+# 18 aout : « verifie qu'aucune VM ne tourne avant d'en lancer ») : le
+# quota est dimensionne pour UNE G4 Spot concurrente — toute instance du
+# projet (cible, repli -ai1a ou autre) qui n'est pas TERMINATED est un
+# REFUS code 2. Jamais d'arret automatique d'une instance qu'une autre
+# session possede peut-etre : constater, refuser, publier.
+INVENTORY="$(gcloud compute instances list --project="${GCP_PROJECT_ID}"   --format='value(name,zone,status)')" || {
+  echo "REFUS : inventaire des instances du projet illisible" >&2
+  exit 2
+}
+if [ -n "${INVENTORY}" ] &&    printf '%s\n' "${INVENTORY}" | awk 'NF && $3 != "TERMINATED" {found=1} END {exit found ? 0 : 1}'; then
+  echo "REFUS : une instance du projet n'est pas TERMINATED — aucune" >&2
+  echo "session tant qu'une VM tourne :" >&2
+  printf '%s\n' "${INVENTORY}" >&2
+  exit 2
+fi
+echo "inventaire projet : aucune instance en cours d'execution"
+
 # ---- 1. Borne de duree persistee sur l'instance ARRETEE.
 ./gcp-migration/set_max_run_duration_and_verify.sh --yes \
   --max-run-duration-seconds "${MAX_RUN_SECONDS}" 2>&1 | tee -a "${LOG}"

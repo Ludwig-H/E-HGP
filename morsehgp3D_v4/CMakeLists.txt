@@ -444,6 +444,19 @@ mhgp4_expect_code(mhgp4_forest_probe_fold_capacity_mutant_epoch 4
 # candidats au bit pres) et re-verifiee par la campagne elle-meme.
 mhgp4_expect_code(mhgp4_forest_probe_digest_smoke 0 mhgp4_forest_probe
     "--family=uniform --n=300 --s=8 --seed=3 --min-balls=100 --min-fusions=100 --digest")
+# Sensibilite du serialiseur (audit 66886c0 § 3) : une BallKey, un
+# final_canon_fid, une facette de delta modifies changent EXACTEMENT les
+# digests attendus (balls ; K + all ; K + all) et rien d'autre.
+mhgp4_expect_code(mhgp4_forest_probe_digest_sensibilite 0 mhgp4_forest_probe
+    "--digest-gate")
+# Workers MESURES au point de creation des std::thread (audit 66886c0
+# § 2) : a threads=4, chaque etage en a cree 4 (fold = min(4, K_max)).
+# Le mutant parallel-hardcodes-one-worker garde CLI et digests mais est
+# trahi par la mesure.
+mhgp4_expect_code(mhgp4_forest_probe_workers_gate 0 mhgp4_forest_probe
+    "--workers-gate")
+mhgp4_expect_code(mhgp4_forest_probe_workers_mutant_one 4 mhgp4_forest_probe
+    "--workers-gate --inject=parallel-hardcodes-one-worker")
 
 # La lane q2 productrice : W_2 est la boule diametrale ouverte, le census
 # est une requete de cover a coefficient 1. Juge brut toutes-paires sur

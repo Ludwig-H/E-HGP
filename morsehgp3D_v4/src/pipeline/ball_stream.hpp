@@ -117,6 +117,15 @@ struct BallStreamStats {
   u64 jung_cert_kill = 0;
   u64 jung_cert_skip = 0;
   u64 jung_fallback = 0;
+  // WORKERS REELLEMENT CREES (audit 66886c0 § 2) : alimentes au point de
+  // creation des std::thread, jamais depuis la CLI — la campagne
+  // scale_threads verifie que le nombre demande a ete APPLIQUE, etage
+  // par etage (le fold plafonne legitimement a K_max).
+  u64 gen_workers_max = 0;
+  u64 prefilter_workers = 0;
+  u64 census_workers = 0;
+  u64 expansion_workers = 0;
+  u64 fold_workers_max = 0;
   // Decomposition de t_gen exigee par l'audit § 3 (chemin axial) :
   // cœur de seed, materialisation A,B des sites, reduction a deux cotes
   // (seuils + groupes + prefixes + d_j), emission (valid_completion +
@@ -177,6 +186,11 @@ struct BallStreamStats {
     jung_cert_kill += o.jung_cert_kill;
     jung_cert_skip += o.jung_cert_skip;
     jung_fallback += o.jung_fallback;
+    gen_workers_max = std::max(gen_workers_max, o.gen_workers_max);
+    prefilter_workers = std::max(prefilter_workers, o.prefilter_workers);
+    census_workers = std::max(census_workers, o.census_workers);
+    expansion_workers = std::max(expansion_workers, o.expansion_workers);
+    fold_workers_max = std::max(fold_workers_max, o.fold_workers_max);
     t_seed_core_ms += o.t_seed_core_ms;
     t_axial_ab_ms += o.t_axial_ab_ms;
     t_reduce_ms += o.t_reduce_ms;
@@ -656,7 +670,8 @@ inline void collect_candidate_balls(const CloudIndex& ix, i64 s, u64 smax_eff,
                                     bool mutant_genfilter_nonstrict = false,
                                     bool axial_bounded = false,
                                     u32 axial_flags = 0, int num_threads = 1,
-                                    bool mutant_par_drop_shard = false) {
+                                    bool mutant_par_drop_shard = false,
+                                    bool mutant_par_one_worker = false) {
   out->clear();
   // Garde d'arrondi (contre-audit 04c71a2 § 4) : evaluee UNE FOIS au fil
   // appelant ; false => bornes +inf, tout passe par le repli exact.
@@ -722,10 +737,18 @@ inline void collect_candidate_balls(const CloudIndex& ix, i64 s, u64 smax_eff,
     const size_t nrect = alive.size();
     if (num_threads <= 1 || nrect <= 1) {
       LaneScratch sc;
+      if (nrect > 0)
+        st->gen_workers_max = std::max<u64>(st->gen_workers_max, 1);
       for (size_t i = 0; i < nrect; ++i) body(alive[i], sc, out, st);
       return;
     }
-    const size_t T = std::min((size_t)num_threads, nrect);
+    // MUTANT parallel-hardcodes-one-worker (audit 66886c0 § 2) : la CLI
+    // et les digests restent identiques, seule la metadonnee MESUREE au
+    // point de creation le trahit.
+    const size_t T = mutant_par_one_worker
+                         ? 1
+                         : std::min((size_t)num_threads, nrect);
+    st->gen_workers_max = std::max<u64>(st->gen_workers_max, (u64)T);
     std::vector<std::vector<BallCandidate>> louts(T);
     std::vector<BallStreamStats> lst(T);
     std::atomic<size_t> next{0};

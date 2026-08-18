@@ -88,6 +88,9 @@ struct Args {
   bool inj_jung_swap = false;
   bool fold_capacity_gate = false;
   bool digest = false;  // signature canonique (audit 9223888 § 2.2)
+  bool workers_gate = false;
+  bool inj_par_one_worker = false;
+  bool digest_gate = false;
   int inj_fold_capacity = 0;  // 1 = u32-event-wrap, 2 = i32-fid-wrap,
                               // 3 = epoch-sentinel-collision
   u32 inj_axial = 0;  // masque kAxial* des mutants du chemin axial
@@ -166,6 +169,10 @@ Args parse(int argc, char** argv) {
     else if (arg == "--inject=jung-swap-bounds") a.inj_jung_swap = true;
     else if (arg == "--fold-capacity-gate") a.fold_capacity_gate = true;
     else if (arg == "--digest") a.digest = true;
+    else if (arg == "--workers-gate") a.workers_gate = true;
+    else if (arg == "--digest-gate") a.digest_gate = true;
+    else if (arg == "--inject=parallel-hardcodes-one-worker")
+      a.inj_par_one_worker = true;
     else if (arg == "--inject=fold-u32-event-wrap") a.inj_fold_capacity = 1;
     else if (arg == "--inject=fold-i32-fid-wrap") a.inj_fold_capacity = 2;
     else if (arg == "--inject=fold-epoch-sentinel-collision")
@@ -256,6 +263,7 @@ void prefilter_balls(const CloudIndex& ix,
   const size_t T = cands.empty()
                        ? 1
                        : std::min((size_t)std::max(threads, 1), cands.size());
+  st->prefilter_workers = std::max(st->prefilter_workers, (u64)T);
   std::vector<std::vector<Survivor>> lsv(T);
   std::vector<BallStreamStats> lst(T);
   parallel_ranges(cands.size(), threads, [&](size_t b, size_t e, size_t t) {
@@ -296,6 +304,7 @@ int census_balls(const CloudIndex& ix, const std::vector<BallCandidate>& cands,
       survivors.empty()
           ? 1
           : std::min((size_t)std::max(threads, 1), survivors.size());
+  st->census_workers = std::max(st->census_workers, (u64)T);
   std::vector<std::vector<BallData>> lb(T);
   std::vector<BallStreamStats> lst(T);
   // Un refus/invariant arrete la tranche ; le verdict fusionne est celui
@@ -365,12 +374,14 @@ int forests_from_balls(const std::vector<BallData>& balls,
                        const std::vector<PointId>& pid_of, u64 kmax_eff,
                        u64 per_k_events[11], ForestResult per_k_result[11],
                        std::vector<std::vector<ForestEvent>>* events_out = nullptr,
-                       int threads = 1, bool legacy_partition = true) {
+                       int threads = 1, bool legacy_partition = true,
+                       BallStreamStats* wst = nullptr) {
   // PHASE A — expansion des plateaux, par TRANCHES de boules : chaque
   // ouvrier remplit ses propres listes par K, la fusion en ordre de
   // tranche restitue EXACTEMENT l'ordre sequentiel des evenements.
   const size_t T =
       balls.empty() ? 1 : std::min((size_t)std::max(threads, 1), balls.size());
+  if (wst) wst->expansion_workers = std::max(wst->expansion_workers, (u64)T);
   std::vector<std::vector<std::vector<ForestEvent>>> lev(
       T, std::vector<std::vector<ForestEvent>>(11));
   parallel_ranges(balls.size(), threads, [&](size_t bg, size_t en, size_t t) {
@@ -410,6 +421,13 @@ int forests_from_balls(const std::vector<BallData>& balls,
   // `legacy_partition` : la vue map n'est remplie que pour les
   // consommateurs qui la lisent (juge, portes) — le chemin d'echelle
   // vit sur la representation dense facet_keys + final_canon_fid.
+  if (wst) {
+    const size_t tf = kmax_eff == 0
+                          ? 1
+                          : std::min((size_t)std::max(threads, 1),
+                                     (size_t)kmax_eff);
+    wst->fold_workers_max = std::max(wst->fold_workers_max, (u64)tf);
+  }
   parallel_ranges((size_t)kmax_eff, threads, [&](size_t bg, size_t en,
                                                  size_t) {
     for (size_t k0 = bg; k0 < en; ++k0) {
@@ -1312,8 +1330,13 @@ struct CanonicalDigest {
   }
 };
 
-void print_canonical_digests(const std::vector<BallCandidate>& cands,
-                             const ForestResult* res, u64 kmax_eff) {
+// Rend les digests dans l'ordre : [0]=balls, [1..kmax]=forest_K,
+// [kmax+1]=all. La porte de SENSIBILITE (--digest-gate) et l'impression
+// consomment le MEME calcul.
+void compute_canonical_digests(const std::vector<BallCandidate>& cands,
+                               const ForestResult* res, u64 kmax_eff,
+                               std::vector<std::string>* out) {
+  out->clear();
   {
     CanonicalDigest d;
     d.tag("mhgp4-digest-v1:balls");
@@ -1325,7 +1348,7 @@ void print_canonical_digests(const std::vector<BallCandidate>& cands,
       d.level(c.level);
       d.u8v(c.arity);
     }
-    std::printf("digest_balls=%s\n", d.h.hex().c_str());
+    out->push_back(d.h.hex());
   }
   CanonicalDigest all;
   all.tag("mhgp4-digest-v1:all");
@@ -1349,11 +1372,161 @@ void print_canonical_digests(const std::vector<BallCandidate>& cands,
       for (const FacetKey& f : cd.born) d.facet(f);
     }
     const std::string hx = d.h.hex();
-    std::printf("digest_forest_K%llu=%s\n", (unsigned long long)K,
-                hx.c_str());
     all.h.update(hx.data(), hx.size());
+    out->push_back(hx);
   }
-  std::printf("digest_all=%s\n", all.h.hex().c_str());
+  out->push_back(all.h.hex());
+}
+
+void print_canonical_digests(const std::vector<BallCandidate>& cands,
+                             const ForestResult* res, u64 kmax_eff) {
+  std::vector<std::string> dg;
+  compute_canonical_digests(cands, res, kmax_eff, &dg);
+  std::printf("digest_balls=%s\n", dg[0].c_str());
+  for (u64 K = 1; K <= kmax_eff; ++K)
+    std::printf("digest_forest_K%llu=%s\n", (unsigned long long)K,
+                dg[(size_t)K].c_str());
+  std::printf("digest_all=%s\n", dg[(size_t)kmax_eff + 1].c_str());
+}
+
+// PORTE DE SENSIBILITE DU SERIALISEUR (audit 66886c0 § 3) : modifier une
+// BallKey, un final_canon_fid et une facette de delta doit changer
+// respectivement digest_balls, le digest du BON K (et digest_all), et
+// rien d'autre. Protege contre un serialiseur qui ignore un champ.
+int run_digest_gate() {
+  const std::vector<P3> pts = make_family_cloud(
+      CloudFamily::kEightClusters, 120,
+      cloud_family_default_coord(CloudFamily::kEightClusters, 120), 3);
+  const CloudIndex ix = build_cloud_index(pts);
+  if ((size_t)ix.unique_count() != pts.size()) return 3;
+  std::vector<BallCandidate> cs;
+  BallStreamStats ss;
+  collect_candidate_balls(ix, 8, 11, &cs, &ss);
+  std::stable_sort(cs.begin(), cs.end(), ball_candidate_less);
+  cs.erase(std::unique(cs.begin(), cs.end(),
+                       [](const BallCandidate& x, const BallCandidate& y) {
+                         return x.key == y.key;
+                       }),
+           cs.end());
+  std::vector<Survivor> sv;
+  BallStreamStats ds;
+  prefilter_balls(ix, cs, 11, false, false, &sv, &ds, 1);
+  std::vector<BallData> balls;
+  if (census_balls(ix, cs, sv, 11, 12, false, false, &balls, &ds, 1, false) !=
+      0)
+    return 3;
+  std::vector<PointId> pid_of((size_t)ix.unique_count());
+  for (size_t u = 0; u < pid_of.size(); ++u)
+    pid_of[u] = ix.point_id((i32)u);
+  u64 e1[11] = {};
+  ForestResult rr[11];
+  std::vector<std::vector<ForestEvent>> evk;
+  if (forests_from_balls(balls, ix.upos, pid_of, 10, e1, rr, &evk, 1, true) !=
+      0)
+    return 3;
+  if (cs.empty() || rr[10].final_canon_fid.empty() || rr[10].deltas.empty())
+    return 3;
+  std::vector<std::string> base;
+  compute_canonical_digests(cs, rr, 10, &base);
+  u64 bad = 0;
+  const auto diff_count = [&](const std::vector<std::string>& v,
+                              std::vector<size_t>* idx) {
+    idx->clear();
+    for (size_t i = 0; i < base.size(); ++i)
+      if (v[i] != base[i]) idx->push_back(i);
+  };
+  std::vector<size_t> idx;
+  {
+    // (a) une BallKey modifiee -> digest_balls change, forets inchangees
+    // (digest_all ne chaine que les forets : inchange).
+    std::vector<BallCandidate> cs2 = cs;
+    cs2[0].key.c += 1;
+    std::vector<std::string> d2;
+    compute_canonical_digests(cs2, rr, 10, &d2);
+    diff_count(d2, &idx);
+    if (!(idx.size() == 1 && idx[0] == 0)) ++bad;
+  }
+  {
+    // (b) un final_canon_fid de K=10 -> digest_forest_K10 ET digest_all.
+    ForestResult rr2[11];
+    for (int k = 0; k <= 10; ++k) rr2[k] = rr[k];
+    rr2[10].final_canon_fid[0] ^= 1u;
+    std::vector<std::string> d2;
+    compute_canonical_digests(cs, rr2, 10, &d2);
+    diff_count(d2, &idx);
+    if (!(idx.size() == 2 && idx[0] == 10 && idx[1] == 11)) ++bad;
+  }
+  {
+    // (c) une facette de delta de K=3 -> digest_forest_K3 ET digest_all.
+    ForestResult rr2[11];
+    for (int k = 0; k <= 10; ++k) rr2[k] = rr[k];
+    if (rr2[3].deltas.empty()) return 3;
+    rr2[3].deltas[0].output.p[0] += 1;
+    std::vector<std::string> d2;
+    compute_canonical_digests(cs, rr2, 10, &d2);
+    diff_count(d2, &idx);
+    if (!(idx.size() == 2 && idx[0] == 3 && idx[1] == 11)) ++bad;
+  }
+  std::printf("digest_gate mutations_invisibles=%llu\n",
+              (unsigned long long)bad);
+  return bad == 0 ? 0 : 3;
+}
+
+// PORTE DES WORKERS MESURES (audit 66886c0 § 2) : a threads=4 sur un
+// nuage a taches abondantes, chaque etage doit avoir CREE 4 ouvriers
+// (fold : min(4, K_max) = 4). Le mutant parallel-hardcodes-one-worker
+// garde la CLI et les digests mais est trahi par la mesure.
+int run_workers_gate(bool inj_one) {
+  const std::vector<P3> pts = make_family_cloud(
+      CloudFamily::kUniform, 300, cloud_family_default_coord(
+                                      CloudFamily::kUniform, 300), 3);
+  const CloudIndex ix = build_cloud_index(pts);
+  if ((size_t)ix.unique_count() != pts.size()) return 3;
+  std::vector<BallCandidate> cs;
+  BallStreamStats ss;
+  collect_candidate_balls(ix, 8, 11, &cs, &ss, false, false, 0, 4, false,
+                          inj_one);
+  std::stable_sort(cs.begin(), cs.end(), ball_candidate_less);
+  cs.erase(std::unique(cs.begin(), cs.end(),
+                       [](const BallCandidate& x, const BallCandidate& y) {
+                         return x.key == y.key;
+                       }),
+           cs.end());
+  std::vector<Survivor> sv;
+  prefilter_balls(ix, cs, 11, false, false, &sv, &ss, 4);
+  std::vector<BallData> balls;
+  if (census_balls(ix, cs, sv, 11, 12, false, false, &balls, &ss, 4, false) !=
+      0)
+    return 3;
+  std::vector<PointId> pid_of((size_t)ix.unique_count());
+  for (size_t u = 0; u < pid_of.size(); ++u)
+    pid_of[u] = ix.point_id((i32)u);
+  u64 e1[11] = {};
+  ForestResult rr[11];
+  std::vector<std::vector<ForestEvent>> evk;
+  if (forests_from_balls(balls, ix.upos, pid_of, 10, e1, rr, &evk, 4, true,
+                         &ss) != 0)
+    return 3;
+  std::printf("workers_gate gen=%llu prefiltre=%llu census=%llu "
+              "expansion=%llu fold=%llu\n",
+              (unsigned long long)ss.gen_workers_max,
+              (unsigned long long)ss.prefilter_workers,
+              (unsigned long long)ss.census_workers,
+              (unsigned long long)ss.expansion_workers,
+              (unsigned long long)ss.fold_workers_max);
+  if (inj_one) {
+    if (ss.gen_workers_max == 1) {
+      std::printf("MUTANT TUE\n");
+      return 4;
+    }
+    std::fprintf(stderr, "PORTE INEFFICACE : mutant non discrimine\n");
+    return 3;
+  }
+  return (ss.gen_workers_max == 4 && ss.prefilter_workers == 4 &&
+          ss.census_workers == 4 && ss.expansion_workers == 4 &&
+          ss.fold_workers_max == 4)
+             ? 0
+             : 3;
 }
 
 // PORTE DE LA GARDE DE CAPACITE DU FOLD (contre-audit 5d274a1 § 7) :
@@ -2138,6 +2311,8 @@ int main(int argc, char** argv) {
   if (a.float_rounding_gate)
     return run_float_rounding_gate((a.inj_axial & kFloatIgnoreRounding) != 0);
   if (a.fold_capacity_gate) return run_fold_capacity_gate(a.inj_fold_capacity);
+  if (a.workers_gate) return run_workers_gate(a.inj_par_one_worker);
+  if (a.digest_gate) return run_digest_gate();
   if (a.guard != 0) return run_guard_gate(a.guard);
   const std::vector<P3> pts = make_family_cloud(
       a.family, a.n,
@@ -2311,7 +2486,7 @@ int main(int argc, char** argv) {
   std::vector<std::vector<ForestEvent>> sevk;
   {
     const int rc = forests_from_balls(balls, ix.upos, pid_of, kmax_eff, sev,
-                                      sres, &sevk, a.threads, a.judge);
+                                      sres, &sevk, a.threads, a.judge, &st);
     if (rc == 3 && any_inject) {
       std::printf("MUTANT TUE\n");
       return 4;
@@ -2547,9 +2722,17 @@ int main(int argc, char** argv) {
   std::printf("profil_q4 t_completion_ms=%.1f t_depth_ms=%.1f sites_depth=%llu\n",
               st.t_q4_completion_ms, st.t_q4_depth_ms,
               (unsigned long long)st.q4_depth_sites);
-  // Metadonnee d'execution exigee par l'audit 9223888 § 2.1 : le nombre
-  // de fils REELLEMENT applique (le nom du run ne prouve rien).
-  std::printf("execution threads_effective=%d\n", a.threads);
+  // Metadonnees d'execution (audits 9223888 § 2.1 puis 66886c0 § 2) :
+  // les workers sont MESURES au point de creation des std::thread —
+  // jamais recopies depuis la CLI. Le fold plafonne a K_max.
+  std::printf("execution threads_requested=%d gen_workers_max=%llu "
+              "prefilter_workers=%llu census_workers=%llu "
+              "expansion_workers=%llu fold_workers_max=%llu\n",
+              a.threads, (unsigned long long)st.gen_workers_max,
+              (unsigned long long)st.prefilter_workers,
+              (unsigned long long)st.census_workers,
+              (unsigned long long)st.expansion_workers,
+              (unsigned long long)st.fold_workers_max);
   if (a.digest) print_canonical_digests(cands, sres, kmax_eff);
   std::printf("q3_scan_sites_par_cover <256=%llu <1024=%llu <4096=%llu "
               ">=4096=%llu\n",
