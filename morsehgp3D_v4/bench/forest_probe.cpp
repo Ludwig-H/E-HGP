@@ -98,6 +98,10 @@ struct Args {
   bool inj_ranges_one_worker = false;
   bool inj_q3_one_worker = false;
   bool inj_wspd_one_worker = false;
+  bool q4_eq_prefilter = true;  // prefiltre par puissance equatoriale
+  bool q4_eq_gate = false;
+  bool q4_prefilter_bench = false;
+  bool inj_q4_eq_wrong = false;
   bool digest_gate = false;
   int inj_fold_capacity = 0;  // 1 = u32-event-wrap, 2 = i32-fid-wrap,
                               // 3 = epoch-sentinel-collision
@@ -194,6 +198,10 @@ Args parse(int argc, char** argv) {
       a.inj_ranges_one_worker = true;
     else if (arg == "--inject=q3-one-worker") a.inj_q3_one_worker = true;
     else if (arg == "--inject=wspd-one-worker") a.inj_wspd_one_worker = true;
+    else if (arg == "--q4-no-eq-prefilter") a.q4_eq_prefilter = false;
+    else if (arg == "--q4-eq-gate") a.q4_eq_gate = true;
+    else if (arg == "--q4-prefilter-bench") a.q4_prefilter_bench = true;
+    else if (arg == "--inject=q4-eq-wrong-length") a.inj_q4_eq_wrong = true;
     else if (arg == "--inject=fold-u32-event-wrap") a.inj_fold_capacity = 1;
     else if (arg == "--inject=fold-i32-fid-wrap") a.inj_fold_capacity = 2;
     else if (arg == "--inject=fold-epoch-sentinel-collision")
@@ -1949,6 +1957,91 @@ int run_float_rounding_gate(bool inj_ignore) {
 // canonique suit la racine union-find au lieu du minimum — les unions
 // generiques placent la racine ailleurs que le minimum, partition et
 // deltas divergent.
+// PORTE DU PREFILTRE PAR PUISSANCE EQUATORIALE (reponse d'audit
+// `5b89bc6`) : le prefiltre court-circuite `q4_form` sur les paires
+// (seed, y) que la seule face `abx` suffit a rejeter. Comme chaque face
+// est une condition NECESSAIRE du bien-centrage — caracterisation
+// prouvee et recue par l'oracle q4 — l'objet ne doit pas bouger d'un
+// bit. La porte compare les DEUX chemins dans le MEME processus, sur
+// les memes nuages, apres tri et RLE, et exige : flux identique, aucun
+// FAUX REJET sur le flux reel (le cablage face/sommet, que l'oracle ne
+// teste pas), et un plancher de rejets (sans quoi elle serait verte par
+// vacuite). MUTANT `q4-eq-wrong-face` : la puissance est evaluee sur la
+// face `aby` au lieu de `abx` tout en gardant le sommet oppose y — un
+// prefiltre qui n'est plus une condition necessaire de ce qu'il filtre.
+int run_q4_eq_gate(bool inj_wrong_face) {
+  u64 bad = 0, tot_reject = 0, tot_false = 0;
+  for (const CloudFamily fam :
+       {CloudFamily::kUniform, CloudFamily::kEightClusters,
+        CloudFamily::kTerrain}) {
+    const int n = fam == CloudFamily::kUniform ? 300 : 200;
+    const std::vector<P3> pts =
+        make_family_cloud(fam, n, cloud_family_default_coord(fam, n), 3);
+    const CloudIndex ix = build_cloud_index(pts);
+    if ((size_t)ix.unique_count() != pts.size()) return 3;
+    std::vector<BallCandidate> con, coff;
+    BallStreamStats son, soff;
+    // Le prefiltre est evalue SANS court-circuit dans ce run : on veut
+    // que Cramer tranche chaque paire pour pouvoir compter les FAUX
+    // REJETS du prefiltre sur le flux reel (avec court-circuit, une
+    // paire faussement rejetee ne serait jamais confrontee a Cramer).
+    collect_candidate_balls(ix, 8, 11, &con, &son, false, false, 0, 1, false,
+                            false, false, false, /*q4_eq_prefilter=*/false,
+                            /*mutant_q4_eq_swap=*/inj_wrong_face);
+    // Chemin de production : court-circuit actif, sans mutant. Son flux
+    // doit etre celui du run precedent, au bit pres.
+    collect_candidate_balls(ix, 8, 11, &coff, &soff, false, false, 0, 1, false,
+                            false, false, true);
+    const auto compact = [](std::vector<BallCandidate>* c) {
+      std::stable_sort(c->begin(), c->end(), ball_candidate_less);
+      c->erase(std::unique(c->begin(), c->end(),
+                           [](const BallCandidate& x, const BallCandidate& y) {
+                             return x.key == y.key;
+                           }),
+               c->end());
+    };
+    compact(&con);
+    compact(&coff);
+    bool same = con.size() == coff.size() &&
+                son.candidates[2] == soff.candidates[2] &&
+                son.q4_reach_depth == soff.q4_reach_depth;
+    for (size_t i = 0; same && i < con.size(); ++i)
+      same = con[i].key == coff[i].key && con[i].arity == coff[i].arity &&
+             compare_exact_level(con[i].level, coff[i].level) == 0;
+    if (!same) {
+      std::fprintf(stderr, "PREFILTRE q4 : flux different (%s)\n",
+                   cloud_family_name(fam));
+      ++bad;
+    }
+    if (son.q4_eq_false_reject != 0) {
+      std::fprintf(stderr, "PREFILTRE q4 : %llu faux rejets (%s)\n",
+                   (unsigned long long)son.q4_eq_false_reject,
+                   cloud_family_name(fam));
+      ++bad;
+    }
+    tot_reject += son.q4_eq_reject;
+    tot_false += son.q4_eq_false_reject;
+  }
+  std::printf("q4_eq_gate violations=%llu rejets=%llu faux_rejets=%llu\n",
+              (unsigned long long)bad, (unsigned long long)tot_reject,
+              (unsigned long long)tot_false);
+  if (inj_wrong_face) {
+    if (bad > 0) {
+      std::printf("MUTANT TUE\n");
+      return 4;
+    }
+    std::fprintf(stderr, "PORTE INEFFICACE : mutant non discrimine\n");
+    return 3;
+  }
+  if (bad) return 3;
+  if (tot_reject < 100000) {
+    std::fprintf(stderr, "PLANCHER : rejets=%llu\n",
+                 (unsigned long long)tot_reject);
+    return 3;
+  }
+  return 0;
+}
+
 // BANC D'ALTERNANCE DES DEUX INTERNEMENTS (mesure, pas une porte).
 // Motif : sur ce conteneur, `t_fold` du MEME binaire varie de ±40 %
 // d'un processus a l'autre (allocations a l'echelle du Go), si bien
@@ -2212,6 +2305,97 @@ int run_schedule_bench(const Args& a) {
     return 3;
   }
   return 0;
+}
+
+// BANC APPARIE DU PREFILTRE q4 (reponse d'audit `5b89bc6` § 5.4 : « son
+// cout apparie intra-processus »). Meme discipline que le banc
+// d'internement : echauffement non chronometre, ordre ABBA, plan refuse
+// si `--bench-repeat` est impair ou < 4, signature du flux verifiee a
+// chaque execution, mediane des rapports APPARIES comme estimateur.
+int run_q4_prefilter_bench(const Args& a) {
+  if (!bench_schedule_ok(a.bench_repeat)) {
+    std::fprintf(stderr,
+                 "REFUS : --bench-repeat=%d — le contrebalancement exige "
+                 "un nombre PAIR de paires >= 4\n",
+                 a.bench_repeat);
+    return 2;
+  }
+  const std::vector<P3> pts = make_family_cloud(
+      a.family, a.n,
+      a.coord ? a.coord : cloud_family_default_coord(a.family, a.n), a.seed);
+  const CloudIndex ix = build_cloud_index(pts);
+  if ((size_t)ix.unique_count() != pts.size()) return 3;
+  struct Run {
+    double ms = 0;
+    u64 sig = 0;
+    u64 rejects = 0, tested = 0;
+  };
+  const auto one = [&](bool prefilter) {
+    std::vector<BallCandidate> cs;
+    BallStreamStats ss;
+    const auto t0 = std::chrono::steady_clock::now();
+    collect_candidate_balls(ix, a.s, a.smax, &cs, &ss, false, false, 0,
+                            a.threads, false, false, false, false, prefilter);
+    const double ms = std::chrono::duration<double, std::milli>(
+                          std::chrono::steady_clock::now() - t0).count();
+    std::stable_sort(cs.begin(), cs.end(), ball_candidate_less);
+    cs.erase(std::unique(cs.begin(), cs.end(),
+                         [](const BallCandidate& x, const BallCandidate& y) {
+                           return x.key == y.key;
+                         }),
+             cs.end());
+    u64 h = 1469598103934665603ull;
+    const auto mix = [&](u64 v) { h ^= v; h *= 1099511628211ull; };
+    mix(cs.size());
+    for (const BallCandidate& c : cs) {
+      mix((u64)c.arity);
+      mix((u64)(c.key.a & 0xFFFFFFFFFFFFFFFFull));
+      mix((u64)(c.key.c & 0xFFFFFFFFFFFFFFFFull));
+    }
+    return Run{ms, h, ss.q4_eq_reject, ss.q4_eq_tested};
+  };
+  const Run warm_on = one(true), warm_off = one(false);
+  if (warm_on.sig != warm_off.sig) {
+    std::fprintf(stderr, "BANC : les deux chemins ne rendent pas le meme flux\n");
+    return 3;
+  }
+  std::printf("q4_prefilter_bench famille=%s n=%d s=%lld smax=%llu "
+              "paires_testees=%llu rejets=%llu\n",
+              cloud_family_name(a.family), a.n, (long long)a.s,
+              (unsigned long long)a.smax,
+              (unsigned long long)warm_off.tested,
+              (unsigned long long)warm_off.rejects);
+  std::vector<BenchPair> pairs;
+  bool same = true;
+  for (int i = 0; i < a.bench_repeat; ++i) {
+    const bool off_first = (i % 2) == 0;  // « tri » = sans prefiltre
+    BenchPair bp;
+    bp.tri_first = off_first;
+    for (int k = 0; k < 2; ++k) {
+      const bool prefilter = (k == 0) != off_first;
+      const Run r = one(prefilter);
+      (prefilter ? bp.stream : bp.tri) = r.ms;
+      same = same && r.sig == warm_on.sig;
+      std::printf("  repet=%d position=%d prefiltre=%s t_gen_ms=%.1f\n", i, k,
+                  prefilter ? "oui" : "non", r.ms);
+    }
+    pairs.push_back(bp);
+  }
+  const PairedReport rep = paired_report(pairs);
+  std::printf("q4_prefilter_bench_paires");
+  for (const BenchPair& bp : pairs)
+    std::printf(" %.4f", bp.tri > 0 ? bp.stream / bp.tri : 0.0);
+  std::printf("\n");
+  std::printf("q4_prefilter_bench mediane_appariee=%.4f mediane_log=%.4f "
+              "rapport_de_medianes=%.4f victoires_prefiltre=%llu/%llu "
+              "ordre_sans_premier=%llu/%llu flux_identique=%s\n",
+              rep.median_ratio, rep.median_log_diff, rep.ratio_of_medians,
+              (unsigned long long)rep.wins_stream,
+              (unsigned long long)(rep.wins_stream + rep.wins_tri),
+              (unsigned long long)rep.pairs_tri_first,
+              (unsigned long long)rep.pairs_stream_first,
+              same ? "oui" : "NON");
+  return same ? 0 : 3;
 }
 
 int run_intern_bench(const Args& a) {
@@ -3017,6 +3201,8 @@ int main(int argc, char** argv) {
   if (a.par_gate)
     return run_par_gate(a.inj_par_drop, a.inj_par_drop_census);
   if (a.q2_birth_gate) return run_q2_birth_gate(a.inj_birth_dup);
+  if (a.q4_eq_gate) return run_q4_eq_gate(a.inj_q4_eq_wrong);
+  if (a.q4_prefilter_bench) return run_q4_prefilter_bench(a);
   if (a.bench_report_gate) return run_bench_report_gate();
   if (a.schedule_bench) return run_schedule_bench(a);
   if (a.intern_bench) return run_intern_bench(a);
@@ -3061,7 +3247,8 @@ int main(int argc, char** argv) {
   BallStreamStats st;
   collect_candidate_balls(ix, a.s, smax_eff, &cands, &st,
                           a.inj_genfilter_nonstrict, a.axial_on, a.inj_axial,
-                          a.threads, a.inj_par_drop);
+                          a.threads, a.inj_par_drop, false, false, false,
+                          a.q4_eq_prefilter);
   const auto t0b = std::chrono::steady_clock::now();
   std::stable_sort(cands.begin(), cands.end(), ball_candidate_less);
   if (!a.inj_rle_drop)  // MUTANT : dedupe saute, boules re-censusees
@@ -3467,6 +3654,14 @@ int main(int argc, char** argv) {
               (unsigned long long)st.q4_rej_det,
               (unsigned long long)st.q4_rej_center,
               (unsigned long long)st.q4_reach_depth);
+  std::printf("q4_puissance_equatoriale testees=%llu rejets=%llu "
+              "part_des_rejets_centre=%.1f%% faux_rejets=%llu\n",
+              (unsigned long long)st.q4_eq_tested,
+              (unsigned long long)st.q4_eq_reject,
+              st.q4_rej_center ? 100.0 * (double)st.q4_eq_reject /
+                                     (double)st.q4_rej_center
+                               : 0.0,
+              (unsigned long long)st.q4_eq_false_reject);
   std::printf("profil_q4 t_completion_ms=%.1f t_depth_ms=%.1f sites_depth=%llu\n",
               st.t_q4_completion_ms, st.t_q4_depth_ms,
               (unsigned long long)st.q4_depth_sites);

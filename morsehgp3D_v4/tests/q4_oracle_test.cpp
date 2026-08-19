@@ -209,8 +209,28 @@ int main(int argc, char** argv) {
     else if (std::strcmp(argv[i], "--inject=q4-center-parity") == 0)
       inj_center_parity = true;
   }
+  bool inj_eq_nonstrict = false, inj_eq_drop_cross = false,
+       inj_eq_flip = false;
+  for (int i = 1; i < argc; ++i) {
+    if (std::strcmp(argv[i], "--inject=q4-equatorial-nonstrict") == 0)
+      inj_eq_nonstrict = true;
+    else if (std::strcmp(argv[i], "--inject=q4-equatorial-drop-cross") == 0)
+      inj_eq_drop_cross = true;
+    else if (std::strcmp(argv[i], "--inject=q4-equatorial-opposite-sign") == 0)
+      inj_eq_flip = true;
+  }
   const bool mutant =
-      g_inj_cramer_swap || inj_carry || inj_sign_p4 || inj_center_parity;
+      g_inj_cramer_swap || inj_carry || inj_sign_p4 || inj_center_parity ||
+      inj_eq_nonstrict || inj_eq_drop_cross || inj_eq_flip;
+  // PORTE DES PUISSANCES EQUATORIALES (reponse d'audit `5b89bc6`) : la
+  // conjonction des quatre puissances est EQUIVALENTE au test des
+  // orientations de Cramer. Planchers de non-vacuite exiges : centres
+  // interieurs, centres exterieurs, FRONTIERE (une puissance nulle =
+  // centre dans le plan d'une face, que le contrat strict refuse), et
+  // les deux configurations que les fixtures v3 opposent — faces toutes
+  // aigues sans bien-centrage, et bien-centrage avec une face obtuse.
+  u64 eq_inside = 0, eq_outside = 0, eq_boundary = 0, eq_mismatch = 0,
+      eq_acute_not_centered = 0, eq_obtuse_but_centered = 0;
   mhgp4_oracle::inject_mul_carry_lost() = inj_carry;
 
   const int small_pat[3] = {3, 4, 0};
@@ -279,6 +299,44 @@ int main(int argc, char** argv) {
             if (o_inside != s_inside) {
               report("centre interieur", da, db, dc, dd);
               continue;
+            }
+            // EQUIVALENCE des puissances equatoriales avec l'autorite
+            // Cramer, sur le MEME quadruplet et dans l'ordre canonique
+            // (ab, ac, ad, bc, bd, cd).
+            {
+              const i64 l_ab = p3_norm2(p3_sub(pb, pa));
+              const i64 l_ac = p3_norm2(p3_sub(px, pa));
+              const i64 l_ad = p3_norm2(p3_sub(py, pa));
+              const i64 l_bc = p3_norm2(p3_sub(px, pb));
+              const i64 l_bd = p3_norm2(p3_sub(py, pb));
+              const i64 l_cd = p3_norm2(p3_sub(py, px));
+              const bool p_inside = q4_center_inside_by_powers(
+                  l_ab, l_ac, l_ad, l_bc, l_bd, l_cd, inj_eq_nonstrict,
+                  inj_eq_drop_cross, inj_eq_flip);
+              if (p_inside != s_inside) {
+                ++eq_mismatch;
+                report("puissances equatoriales", da, db, dc, dd);
+              }
+              const i128 n0 = equatorial_power4(l_ab, l_ac, l_ad, l_bc, l_bd,
+                                                l_cd);
+              const i128 n1 = equatorial_power4(l_ab, l_ad, l_ac, l_bd, l_bc,
+                                                l_cd);
+              const i128 n2 = equatorial_power4(l_ac, l_ad, l_ab, l_cd, l_bc,
+                                                l_bd);
+              const i128 n3 = equatorial_power4(l_bc, l_bd, l_ab, l_cd, l_ac,
+                                                l_ad);
+              if (n0 == 0 || n1 == 0 || n2 == 0 || n3 == 0) ++eq_boundary;
+              if (s_inside) ++eq_inside; else ++eq_outside;
+              // Faces toutes aigues ? (angle en un sommet aigu ssi la
+              // somme des deux carres adjacents depasse le carre oppose.)
+              const auto tri_acute = [](i64 u, i64 v, i64 w) {
+                return u + v > w && v + w > u && w + u > v;
+              };
+              const bool all_acute =
+                  tri_acute(l_ab, l_ac, l_bc) && tri_acute(l_ab, l_ad, l_bd) &&
+                  tri_acute(l_ac, l_ad, l_cd) && tri_acute(l_bc, l_bd, l_cd);
+              if (all_acute && !s_inside) ++eq_acute_not_centered;
+              if (!all_acute && s_inside) ++eq_obtuse_but_centered;
             }
             if (!o_inside) continue;
             ++supports;
@@ -360,6 +418,14 @@ int main(int argc, char** argv) {
       (unsigned long long)supports_with_extra_shell, g_disagreements);
   std::printf("limbes max (0..5) : det=%d num=%d niveau=%d\n", g_limb_det,
               g_limb_num, g_limb_niveau);
+  std::printf("puissances_equatoriales interieurs=%llu exterieurs=%llu "
+              "frontiere=%llu aigus_non_centres=%llu obtus_centres=%llu "
+              "desaccords=%llu\n",
+              (unsigned long long)eq_inside, (unsigned long long)eq_outside,
+              (unsigned long long)eq_boundary,
+              (unsigned long long)eq_acute_not_centered,
+              (unsigned long long)eq_obtuse_but_centered,
+              (unsigned long long)eq_mismatch);
   if (mutant) {
     if (g_disagreements > 0) {
       std::printf("MUTANT TUE\n");
@@ -377,6 +443,22 @@ int main(int argc, char** argv) {
     std::fprintf(stderr, "PLANCHER : supports=%llu, coquilles=%llu\n",
                  (unsigned long long)supports,
                  (unsigned long long)supports_with_extra_shell);
+    return 3;
+  }
+  // PLANCHERS des puissances equatoriales : sans configuration de
+  // FRONTIERE (une puissance nulle), le mutant nonstrict serait vert par
+  // vacuite ; sans les deux configurations opposees (faces aigues non
+  // centrees, bien centre a face obtuse), la porte ne dirait rien de la
+  // distinction que les fixtures v3 exigent.
+  if (eq_inside == 0 || eq_outside == 0 || eq_boundary == 0 ||
+      eq_acute_not_centered == 0 || eq_obtuse_but_centered == 0) {
+    std::fprintf(stderr,
+                 "PLANCHER puissances equatoriales : int=%llu ext=%llu "
+                 "frontiere=%llu aigus_non_centres=%llu obtus_centres=%llu\n",
+                 (unsigned long long)eq_inside, (unsigned long long)eq_outside,
+                 (unsigned long long)eq_boundary,
+                 (unsigned long long)eq_acute_not_centered,
+                 (unsigned long long)eq_obtuse_but_centered);
     return 3;
   }
   if (g_limb_niveau < 3) {

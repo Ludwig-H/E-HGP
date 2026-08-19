@@ -582,6 +582,39 @@ mhgp4_expect_code(mhgp4_q4_oracle_mutant_sign 4 mhgp4_q4_oracle
 # inverse la parite et doit faire diverger l'oracle rationnel independant.
 mhgp4_expect_code(mhgp4_q4_oracle_mutant_center_parity 4 mhgp4_q4_oracle
     "--inject=q4-center-parity")
+# PUISSANCES EQUATORIALES (reponse d'audit `5b89bc6`) : un tetraedre est
+# strictement bien centre SSI chacun de ses sommets est strictement
+# exterieur a la boule equatoriale de la face opposee — caracterisation
+# exacte, en seules LONGUEURS CARREES, sans centre ni division. Chaque
+# face prise seule est une condition NECESSAIRE, donc un prefiltre
+# valide avant `q4_form`. La porte exige l'equivalence stricte avec
+# l'autorite Cramer sur tous les tetraedres des petits nuages, avec des
+# planchers : frontiere (puissance nulle = centre dans le plan d'une
+# face), faces toutes aigues SANS bien-centrage, et bien-centrage AVEC
+# face obtuse — les deux configurations que les fixtures v3 opposent.
+# Trois mutants : `nonstrict` (>= 0 : la frontiere passerait),
+# `drop-cross` (C2² retire du Gram), `opposite-sign` (une puissance
+# inversee).
+mhgp4_expect_code(mhgp4_q4_oracle_mutant_eq_nonstrict 4 mhgp4_q4_oracle
+    "--inject=q4-equatorial-nonstrict")
+mhgp4_expect_code(mhgp4_q4_oracle_mutant_eq_drop_cross 4 mhgp4_q4_oracle
+    "--inject=q4-equatorial-drop-cross")
+mhgp4_expect_code(mhgp4_q4_oracle_mutant_eq_flip 4 mhgp4_q4_oracle
+    "--inject=q4-equatorial-opposite-sign")
+# CABLAGE du prefiltre dans le pipeline (l'oracle recoit la PRIMITIVE ;
+# cette porte recoit son BRANCHEMENT). Deux runs dans le MEME processus
+# sur trois familles : l'un laisse Cramer trancher chaque paire pour
+# compter les FAUX REJETS du prefiltre sur le flux reel, l'autre est le
+# chemin de production avec court-circuit. Exigences : flux identique
+# apres tri et RLE, zero faux rejet, et un plancher de rejets (sans quoi
+# la porte serait verte par vacuite). MUTANT `q4-eq-wrong-length` : deux
+# des six longueurs echangees — le predicat n'est plus la puissance
+# d'aucune face, donc plus une condition necessaire, et il tue des paires
+# que Cramer garde (91 282 faux rejets mesures).
+mhgp4_expect_code(mhgp4_forest_probe_q4_eq_gate 0 mhgp4_forest_probe
+    "--q4-eq-gate")
+mhgp4_expect_code(mhgp4_forest_probe_q4_eq_mutant 4 mhgp4_forest_probe
+    "--q4-eq-gate --inject=q4-eq-wrong-length")
 
 # Le juge du juge (audit ebc8236 P0.2) : selftest de l'arithmetique OBig
 # contre boost::multiprecision::cpp_int, troisieme autorite, tests uniquement.

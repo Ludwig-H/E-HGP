@@ -133,6 +133,87 @@ inline bool q4_center_strictly_inside(const Q4Form& f, const P3& a, const P3& b,
   return true;
 }
 
+// PUISSANCE EQUATORIALE D'UNE FACE (reponse d'audit `5b89bc6`) — un
+// prefiltre EXACT du bien-centrage, en seules LONGUEURS CARREES.
+//
+// Lemme. Face (a,b,c), sommet oppose d ; `o_F` le circumcentre de la
+// face dans son plan, `R_F` son rayon, `n` la normale unitaire. Le
+// circumcentre `o` du tetraedre vit sur la droite `o_F + t n`, et
+// `d = pi_F(d) + h n` avec `h != 0`. De `|o-d|² = |o-a|² = R_F² + t²`
+// il vient
+//     |o_F - pi_F(d)|² + (t-h)² = R_F² + t²
+//  => |d - o_F|² - 2 t h = R_F²
+//  => 2 t h = |d - o_F|² - R_F² = Pow_F(d).
+// Donc `o` et `d` sont STRICTEMENT du meme cote de la face ssi
+// `Pow_F(d) > 0`. Le centre est strictement interieur au tetraedre ssi
+// c'est vrai pour les QUATRE faces : la conjonction est une
+// CARACTERISATION, chaque face prise seule est une condition
+// NECESSAIRE — donc un prefiltre valide avant `q4_form`.
+//
+// Ce n'est PAS l'acuite des faces : on teste la puissance du sommet
+// oppose a la boule equatoriale, pas les angles. La confusion que les
+// fixtures v3 interdisent (« bien centre » et « a faces aigues » se
+// refutent mutuellement) ne se pose pas ici.
+//
+// Forme entiere sans centre ni division. Avec `p = b-a`, `q = c-a`,
+// `r = d-a`, `A = |p|²`, `B = |q|²`, `C = p·q`, `D = p·r`, `E = q·r`,
+// `F = |r|²`, le Gram vaut `Delta = AB - C² > 0` et
+//     o_F - a = alpha p + beta q,  alpha = B(A-C)/(2 Delta),
+//                                  beta  = A(B-C)/(2 Delta),
+//     Pow_F(d) = F - 2 r·(o_F - a) = F - (B(A-C)D + A(B-C)E)/Delta.
+// Le signe est celui de `Delta F - B(A-C)D - A(B-C)E`. En doublant les
+// produits scalaires pour rester entier (`C2 = 2C` etc., reconstruits
+// par la loi des cosinus depuis les six longueurs carrees), quatre fois
+// ce nombre s'ecrit
+//     (4AB - C2²) F - B(2A - C2) D2 - A(2B - C2) E2.
+//
+// Largeurs, profil u16 (|Delta coord| <= 65535, longueur carree
+// <= 3·65535² < 2^33,6) : |C2| < 2^34,6, |4AB - C2²| < 2^70,2, chaque
+// produit < 2^103,8, la somme < 2^105,4 — **i128**, avec plus de vingt
+// bits de marge.
+//
+// MUTANTS : `nonstrict` (>= 0 au lieu de > 0 : la frontiere N = 0 est
+// exactement « centre dans le plan de la face », que le contrat strict
+// doit REFUSER) ; `drop_cross` (C2² retire de H) ; `flip` (signe
+// inverse).
+inline i128 equatorial_power4(i64 l_ab, i64 l_ac, i64 l_ad, i64 l_bc,
+                              i64 l_bd, i64 l_cd, bool mutant_drop_cross = false,
+                              bool mutant_flip = false) {
+  const i128 A = l_ab, B = l_ac, F = l_ad;
+  const i128 C2 = A + B - (i128)l_bc;
+  const i128 D2 = A + F - (i128)l_bd;
+  const i128 E2 = B + F - (i128)l_cd;
+  const i128 H = mutant_drop_cross ? 4 * A * B : 4 * A * B - C2 * C2;
+  const i128 U = B * (2 * A - C2);
+  const i128 V = A * (2 * B - C2);
+  const i128 n = H * F - U * D2 - V * E2;
+  return mutant_flip ? -n : n;
+}
+
+// Bien-centrage par les QUATRE puissances equatoriales : equivalent au
+// test des orientations de `q4_center_strictly_inside` (porte
+// d'equivalence dans l'oracle q4). Les six longueurs carrees sont
+// celles du tetraedre {a,b,c,d} dans cet ordre.
+inline bool q4_center_inside_by_powers(i64 l_ab, i64 l_ac, i64 l_ad, i64 l_bc,
+                                       i64 l_bd, i64 l_cd,
+                                       bool mutant_nonstrict = false,
+                                       bool mutant_drop_cross = false,
+                                       bool mutant_flip = false) {
+  // Face (a,b,c) / sommet d ; puis (a,b,d)/c, (a,c,d)/b, (b,c,d)/a.
+  const i128 n[4] = {
+      equatorial_power4(l_ab, l_ac, l_ad, l_bc, l_bd, l_cd, mutant_drop_cross,
+                        mutant_flip),
+      equatorial_power4(l_ab, l_ad, l_ac, l_bd, l_bc, l_cd, mutant_drop_cross,
+                        false),
+      equatorial_power4(l_ac, l_ad, l_ab, l_cd, l_bc, l_bd, mutant_drop_cross,
+                        false),
+      equatorial_power4(l_bc, l_bd, l_ab, l_cd, l_ac, l_ad, mutant_drop_cross,
+                        false)};
+  for (int i = 0; i < 4; ++i)
+    if (mutant_nonstrict ? (n[i] < 0) : (n[i] <= 0)) return false;
+  return true;
+}
+
 // (a,b) est-elle l'arete owner du tetraedre {a,b,x,y} ? ab maximale parmi
 // les six longueurs carrees, ex aequo departages par plus petite EdgeKey.
 inline bool tetra_owned_by(i64 l_ab, i64 l_ax, i64 l_ay, i64 l_bx, i64 l_by,

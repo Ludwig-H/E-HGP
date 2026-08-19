@@ -199,6 +199,18 @@ struct BallStreamStats {
   u64 q4_rej_det = 0;      // quatre points coplanaires
   u64 q4_rej_center = 0;   // centre non strictement interieur
   u64 q4_reach_depth = 0;  // paires ayant atteint le test de profondeur
+  // PREFILTRE PAR PUISSANCE EQUATORIALE (reponse d'audit `5b89bc6`),
+  // INSTRUMENTE SEULEMENT : la face `abx` est fixe pendant toute la
+  // boucle des complétions d'un seed, donc ses coefficients s'amortissent
+  // une fois par seed et il ne reste que trois produits i128 par paire.
+  // Chaque face est une condition NECESSAIRE du bien-centrage : un
+  // rejet est certain. On COMPTE le rendement avant de decider de
+  // court-circuiter `q4_form` — et on verifie sur le flux reel que
+  // jamais un rejet ne contredit l'autorite Cramer (le cablage, pas la
+  // primitive : celle-ci est prouvee equivalente par l'oracle q4).
+  u64 q4_eq_tested = 0;        // paires soumises au test
+  u64 q4_eq_reject = 0;        // paires que la face abx suffit a tuer
+  u64 q4_eq_false_reject = 0;  // rejet contredit par Cramer (: 0)
   // Fusion des statistiques d'un ouvrier parallele : addition membre a
   // membre — les champs non touches par la generation valent zero chez
   // l'ouvrier, l'addition est donc toujours sure. Les chronos deviennent
@@ -282,6 +294,9 @@ struct BallStreamStats {
     q4_rej_det += o.q4_rej_det;
     q4_rej_center += o.q4_rej_center;
     q4_reach_depth += o.q4_reach_depth;
+    q4_eq_tested += o.q4_eq_tested;
+    q4_eq_reject += o.q4_eq_reject;
+    q4_eq_false_reject += o.q4_eq_false_reject;
   }
 };
 
@@ -814,7 +829,9 @@ inline void collect_candidate_balls(const CloudIndex& ix, i64 s, u64 smax_eff,
                                     bool mutant_par_drop_shard = false,
                                     bool mutant_par_one_worker = false,
                                     bool mutant_q3_one_worker = false,
-                                    bool mutant_wspd_one_worker = false) {
+                                    bool mutant_wspd_one_worker = false,
+                                    bool q4_eq_prefilter = true,
+                                    bool mutant_q4_eq_swap = false) {
   out->clear();
   // Garde d'arrondi (contre-audit 04c71a2 § 4) : evaluee UNE FOIS au fil
   // appelant ; false => bornes +inf, tout passe par le repli exact.
@@ -1200,6 +1217,13 @@ inline void collect_candidate_balls(const CloudIndex& ix, i64 s, u64 smax_eff,
           if (!is_acute_seed(pa, pb, px, D2, pid(ua), pid(ub), pid(cx.u))) continue;
           const i64 l_ax = p3_norm2(p3_sub(px, pa));
           const i64 l_bx = p3_norm2(p3_sub(px, pb));
+          // Coefficients de la puissance equatoriale de la face `abx`,
+          // AMORTIS sur toute la boucle des complétions de ce seed.
+          const i128 eqA = D2, eqB = l_ax;
+          const i128 eqC2 = eqA + eqB - (i128)l_bx;
+          const i128 eqH = 4 * eqA * eqB - eqC2 * eqC2;
+          const i128 eqU = eqB * (2 * eqA - eqC2);
+          const i128 eqV = eqA * (2 * eqB - eqC2);
           // Cœur universel du seed (audit « axial arbre et cœur de seed »)
           // — COMMUN aux deux chemins : la porte appariee reste appariee,
           // et le juge des petits n protege la regle elle-meme (un temoin
@@ -1320,7 +1344,8 @@ inline void collect_candidate_balls(const CloudIndex& ix, i64 s, u64 smax_eff,
           // owner 6 aretes, exact-once du seed, det, centre strict. Rend
           // true et remplit le candidat si la completion est valide.
           u64 f_pairs = 0, f_self = 0, f_lens = 0, f_owner = 0, f_once = 0,
-              f_det = 0, f_center = 0, f_depth = 0;
+              f_det = 0, f_center = 0, f_depth = 0, f_eq_tested = 0,
+              f_eq_reject = 0, f_eq_false = 0;
           const auto valid_completion = [&](i32 uy, BallCandidate* cand,
                                             Q4Form* f4out) {
             ++f_pairs;
@@ -1340,10 +1365,39 @@ inline void collect_candidate_balls(const CloudIndex& ix, i64 s, u64 smax_eff,
                         2 * py.z - pa.z - pb.z};
             if (p3_norm2(vy) > D2 && pid(uy) < pid(cx.u))
               return ++f_once, false;
+            // PUISSANCE EQUATORIALE de la face `abx`, sommet oppose y :
+            // trois produits i128 sur des longueurs deja calculees.
+            // N <= 0 => le centre ne peut PAS etre strictement interieur.
+            // MUTANT q4-eq-wrong-length : `l_by` et `l_xy` echanges — le
+            // resultat n'est plus la puissance equatoriale d'AUCUNE face,
+            // donc plus une condition necessaire : des paires que Cramer
+            // garde sont tuees, et le compteur de FAUX REJETS le voit sur
+            // le flux reel (ce que l'oracle, qui teste la primitive et non
+            // son cablage, ne peut pas voir).
+            const i128 eqF = l_ay;
+            const i64 eq_l1 = mutant_q4_eq_swap ? l_xy : l_by;
+            const i64 eq_l2 = mutant_q4_eq_swap ? l_by : l_xy;
+            const i128 eqN = eqH * eqF - eqU * (eqA + eqF - (i128)eq_l1) -
+                             eqV * (eqB + eqF - (i128)eq_l2);
+            ++f_eq_tested;
+            const bool eq_kill = eqN <= 0;
+            if (eq_kill) ++f_eq_reject;
+            // COURT-CIRCUIT : la face `abx` suffit a conclure, `q4_form`
+            // n'est jamais construit. Rendement mesure a n=800 :
+            // 81,2 % (uniform), 63,7 % (eight_clusters), 85,9 %
+            // (terrain) des rejets du centre, zero faux rejet sur le flux
+            // reel. Desactivable pour le banc apparie, jamais pour la
+            // production : les deux chemins rendent le MEME objet.
+            if (q4_eq_prefilter && eq_kill) return ++f_center, false;
             const Q4Form f4 = q4_form(pa, pb, px, py);
             if (f4.det == 0) return ++f_det, false;
-            if (!q4_center_strictly_inside(f4, pa, pb, px, py))
+            if (!q4_center_strictly_inside(f4, pa, pb, px, py)) {
               return ++f_center, false;
+            }
+            // Le cablage est verifie sur le flux REEL : un rejet de la
+            // puissance qui survit a Cramer serait une faute de face ou
+            // de sommet, pas une faute de la primitive.
+            if (eq_kill) ++f_eq_false;
             ++f_depth;
             *cand = BallCandidate{q3_ball_key_reduce(q4_ball_form(f4)),
                                   q4_level_raw(f4), 4};
@@ -1396,6 +1450,9 @@ inline void collect_candidate_balls(const CloudIndex& ix, i64 s, u64 smax_eff,
             st->q4_rej_det += f_det;
             st->q4_rej_center += f_center;
             st->q4_reach_depth += f_depth;
+            st->q4_eq_tested += f_eq_tested;
+            st->q4_eq_reject += f_eq_reject;
+            st->q4_eq_false_reject += f_eq_false;
             continue;
           }
           // --- SELECTION AXIALE BORNEE (en-tete de fonction). ---

@@ -217,6 +217,26 @@ de construction contre 351 sites scannés par ancre, et les ancres à
 ≥ 128 seeds ne portent que 4 % du travail. Reçu :
 `ADDENDUM_DESCENTE_WSPD_ET_CHARGE_Q3_20260819.md`.
 
+### 2.13 Préfiltre q4 par puissance équatoriale (LIVRÉ, 19 août)
+
+Un tétraèdre est strictement bien centré **ssi** chacun de ses sommets
+est strictement extérieur à la boule équatoriale de la face opposée
+(réponse d'audit `5b89bc6`, lemme redéroulé au reçu). Chaque face prise
+seule est donc une condition **nécessaire** — un préfiltre exact, en
+seules longueurs carrées, sans centre ni division, en i128
+(`< 2^105,4`, borne dérivée ici).
+
+Seule la face `abx` est branchée : ses coefficients s'amortissent une
+fois par seed, il ne reste que trois produits i128 par paire, et elle
+capture **80,7 %** des rejets du centre à n=8000 (81,2 / 63,7 / 85,9 %
+selon la famille à n=800), **zéro faux rejet**. Coût apparié
+contrebalancé, n=8000, dix paires : **×1,042 sur `t_gen`**, dix
+victoires sur dix, flux identique. Portes : équivalence à l'oracle
+rationnel avec planchers de frontière et des deux configurations que les
+fixtures v3 opposent, plus une porte de **câblage** sur le flux réel
+(faux rejets) — quatre mutants tués. Reçu :
+`ADDENDUM_PREFILTRE_Q4_EQUATORIAL_20260819.md`.
+
 ## 3. Carte de l'implémentation
 
 ```
