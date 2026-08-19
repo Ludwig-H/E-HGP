@@ -22,7 +22,8 @@
 // bord. Compteurs de limbes publies, plancher niveau >= limbe 3.
 //
 // Codes : 0 accord ; 1 desaccord ; 3 invariant/plancher/refus numerique ;
-// 4 mutant tue (--inject=cramer-swap | mul-carry-lost | sign-p4).
+// 4 mutant tue (--inject=cramer-swap | mul-carry-lost | sign-p4 |
+//   q4-center-parity).
 #include <cstdio>
 #include <cstring>
 #include <set>
@@ -195,13 +196,21 @@ struct OraclePoint {
 
 int main(int argc, char** argv) {
   using namespace mhgp4;
-  bool inj_sign_p4 = false, inj_carry = false;
+  bool inj_sign_p4 = false, inj_carry = false, inj_center_parity = false;
   for (int i = 1; i < argc; ++i) {
     if (std::strcmp(argv[i], "--inject=cramer-swap") == 0) g_inj_cramer_swap = true;
     else if (std::strcmp(argv[i], "--inject=mul-carry-lost") == 0) inj_carry = true;
     else if (std::strcmp(argv[i], "--inject=sign-p4") == 0) inj_sign_p4 = true;
+    // MUTANT q4-center-parity : le test d'arite 4 stricte ne recalcule
+    // plus quatre fois le volume du tetraedre — il derive les quatre
+    // orientations d'UN determinant par la parite (-V, +V, -V, +V,
+    // prouvee en tete de q4_instruction.hpp). Inverser cette parite doit
+    // faire diverger l'oracle rationnel independant.
+    else if (std::strcmp(argv[i], "--inject=q4-center-parity") == 0)
+      inj_center_parity = true;
   }
-  const bool mutant = g_inj_cramer_swap || inj_carry || inj_sign_p4;
+  const bool mutant =
+      g_inj_cramer_swap || inj_carry || inj_sign_p4 || inj_center_parity;
   mhgp4_oracle::inject_mul_carry_lost() = inj_carry;
 
   const int small_pat[3] = {3, 4, 0};
@@ -265,7 +274,8 @@ int main(int argc, char** argv) {
             }
             if (o_degenerate) continue;
             const bool o_inside = oracle_center_inside(bl, pa, pb, px, py);
-            const bool s_inside = q4_center_strictly_inside(f4, pa, pb, px, py);
+            const bool s_inside =
+                q4_center_strictly_inside(f4, pa, pb, px, py, inj_center_parity);
             if (o_inside != s_inside) {
               report("centre interieur", da, db, dc, dd);
               continue;

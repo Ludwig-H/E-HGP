@@ -78,7 +78,37 @@ inline i128 q4_power(const Q4Form& f, const P3& z) {
 // stricte ; un zero => centre sur une face => le support retombe a une
 // autre arite.) Precondition : det > 0.
 inline bool q4_center_strictly_inside(const Q4Form& f, const P3& a, const P3& b,
-                                      const P3& x, const P3& y) {
+                                      const P3& x, const P3& y,
+                                      bool mutant_parity = false) {
+  // LE VOLUME NE SE CALCULE QU'UNE FOIS (mesure du 19 aout : ce test tue
+  // 42 % des paires (seed, y) de la complétion q4, premier poste CPU du
+  // pipeline — et il recalculait quatre fois le meme determinant).
+  //
+  // Preuve. Posons u = b-a, p = x-a, q = y-a et V = det3(u, p, q).
+  // L'orientation du sommet oppose a la face s est
+  //   s=3 (face abx, oppose y) : det3(b-a, x-a, y-a)            = V ;
+  //   s=2 (face aby, oppose x) : det3(b-a, y-a, x-a)            = -V
+  //        (echange des deux dernieres lignes) ;
+  //   s=1 (face axy, oppose b) : det3(x-a, y-a, b-a)            = V
+  //        (permutation CYCLIQUE de (u,p,q), donc paire) ;
+  //   s=0 (face bxy, oppose a) : det3(x-b, y-b, a-b)
+  //        = det3(p-u, q-u, -u) = -det3(p-u, q-u, u) = -det3(p, q, u) = -V
+  //        (multilinearite : les trois autres termes portent deux fois u).
+  // Les quatre signes sont donc (-V, +V, -V, +V) : un seul determinant
+  // suffit, et il tient en i64 (coordonnees u16, differences < 2^17,
+  // det3 < 6·2^51). Seules les quatre orientations du CENTRE dependent
+  // vraiment de la face et restent en i128.
+  //
+  // `V != 0` est garanti par la precondition : det = 8·V, et l'appelant
+  // a deja refuse det == 0 (quatre points coplanaires).
+  //
+  // MUTANT q4-center-parity : parite inversee — le test devient faux sur
+  // la moitie des faces.
+  const i64 ux = b.x - a.x, uy = b.y - a.y, uz = b.z - a.z;
+  const i64 px = x.x - a.x, py = x.y - a.y, pz = x.z - a.z;
+  const i64 qx = y.x - a.x, qy = y.y - a.y, qz = y.z - a.z;
+  const i64 vol = ux * (py * qz - pz * qy) - uy * (px * qz - pz * qx) +
+                  uz * (px * qy - py * qx);
   const P3* v[4] = {&a, &b, &x, &y};
   for (int s = 0; s < 4; ++s) {
     // Face = les trois sommets != s, sommet oppose = v[s].
@@ -90,15 +120,15 @@ inline bool q4_center_strictly_inside(const Q4Form& f, const P3& a, const P3& b,
     const P3 e2 = p3_sub(*fp[2], *fp[0]);
     const i64 r0[3] = {e1.x, e1.y, e1.z};
     const i64 r1[3] = {e2.x, e2.y, e2.z};
-    const P3 es = p3_sub(*v[s], *fp[0]);
-    const i128 rs[3] = {es.x, es.y, es.z};
     const P3 dp = p3_sub(*fp[0], f.a);
     const i128 rc[3] = {f.np[0] - f.det * dp.x, f.np[1] - f.det * dp.y,
                         f.np[2] - f.det * dp.z};
-    const i128 side_s = detail_q4::det3_i128(r0, r1, rs);
+    const bool even_face = (s % 2) == 0;
+    const bool side_s_pos =
+        (even_face != mutant_parity) ? (vol < 0) : (vol > 0);
     const i128 side_c = detail_q4::det3_i128(r0, r1, rc);
-    if (side_c == 0) return false;                      // centre sur la face
-    if ((side_c > 0) != (side_s > 0)) return false;     // hors du tetraedre
+    if (side_c == 0) return false;                   // centre sur la face
+    if ((side_c > 0) != side_s_pos) return false;    // hors du tetraedre
   }
   return true;
 }

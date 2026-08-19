@@ -574,6 +574,14 @@ mhgp4_expect_code(mhgp4_q4_oracle_mutant_carry 4 mhgp4_q4_oracle
     "--inject=mul-carry-lost")
 mhgp4_expect_code(mhgp4_q4_oracle_mutant_sign 4 mhgp4_q4_oracle
     "--inject=sign-p4")
+# ARITE 4 STRICTE : le volume du tetraedre ne se calcule plus qu'UNE
+# fois, les quatre orientations de sommet s'en deduisent par la parite
+# (-V, +V, -V, +V — preuve en tete de q4_instruction.hpp). Ce test tue
+# 42 % des paires (seed, y) de la complétion q4, premier poste CPU du
+# pipeline : il recalculait quatre fois le meme determinant. Le mutant
+# inverse la parite et doit faire diverger l'oracle rationnel independant.
+mhgp4_expect_code(mhgp4_q4_oracle_mutant_center_parity 4 mhgp4_q4_oracle
+    "--inject=q4-center-parity")
 
 # Le juge du juge (audit ebc8236 P0.2) : selftest de l'arithmetique OBig
 # contre boost::multiprecision::cpp_int, troisieme autorite, tests uniquement.

@@ -155,7 +155,64 @@ cœurs.
   faut regarder ensuite — après avoir mesuré ce qu'elle fait
   réellement, et non en supposant.
 
-## 6. Reproduction
+## 6. Le poste suivant, mesuré et non supposé : l'entonnoir de la complétion q4
+
+Le premier poste CPU après la parallélisation est la complétion q4
+(22,6 s). Avant d'y toucher, un entonnoir : où meurent les paires
+(seed, y) énumérées sur la lentille de l'ancre ? Les compteurs sont
+locaux à la boucle et versés une fois par seed — aucun coût par paire
+au-delà d'un incrément de registre.
+
+n=8000, uniform : **173 001 161 paires**.
+
+| filtre | paires tuées | part | coût du prédicat |
+|---|---|---|---|
+| `y` confondu avec seed ou ancre | 15 515 943 | 9,0 % | comparaison |
+| une des trois longueurs > D | 37 740 455 | 21,8 % | trois i64 |
+| owner (ab arête maximale) | 272 904 | 0,2 % | six comparaisons |
+| exact-once du seed | 31 972 100 | 18,5 % | une i64 |
+| `det = 0` (coplanaires) | 29 688 | 0,02 % | déterminant i128 |
+| **centre non strictement intérieur** | **70 989 328** | **41,0 %** | **`q4_form` + 4 signes i128** |
+| atteignent le test de profondeur | 16 480 743 | 9,5 % | — |
+
+L'entonnoir est **inversé** : le prédicat le plus cher est celui qui
+tue le plus. Le même rapport se retrouve à n=800 (42,0 %), donc ce
+n'est pas un effet de taille.
+
+**Ce qui a été fait, et ce qui n'est pas mesurable.** Le test d'arité 4
+stricte recalculait **quatre fois** le même déterminant : l'orientation
+du sommet opposé à la face `s` vaut `(-V, +V, -V, +V)` pour
+`V = det3(b-a, x-a, y-a)` — preuve complète en tête de
+`q4_instruction.hpp` (permutation cyclique pour `s=1`, échange de
+lignes pour `s=2`, multilinéarité pour `s=0`). Un seul déterminant
+suffit, et il tient en **i64** (différences de u16 < 2^17, `det3` <
+6·2^51) ; seules les quatre orientations du CENTRE dépendent vraiment
+de la face et restent en i128. On passe donc de huit déterminants i128
+à quatre i128 plus un i64.
+
+**Aucun gain temporel n'est revendiqué** : `t_q4_completion` mesure
+22 638,5 ms après contre 22 454,9 ms avant, soit un écart largement
+sous le bruit du conteneur (±10 à 15 % entre processus). La sortie
+anticipée sur la première face fautive fait qu'un rejet ne payait déjà
+pas les huit déterminants. Le gain est **structurel** — une identité
+prouvée à la place d'un calcul répété — et il faudrait un banc apparié
+intra-processus, comme celui de l'internement, pour trancher la
+constante. Il n'a pas été construit ici.
+
+Porte : mutant `q4-center-parity` (parité inversée) tué par l'oracle
+rationnel indépendant `mhgp4_q4_oracle`, code 4. C'est l'oracle, pas
+une re-vérification exhaustive, qui reçoit l'identité.
+
+**Ce que l'entonnoir désigne pour la suite** : 41 % des paires paient
+`q4_form` (un déterminant i128) et les signes du centre pour rien. La
+question ouverte est s'il existe un prédicat **nécessaire** et bon
+marché — en longueurs carrées i64 — qui écarte une partie de ces
+paires avant la forme de Cramer. Le manuscrit interdit le raccourci
+évident : « tétraèdre bien centré » et « à faces aiguës » sont deux
+notions distinctes, chacune réfutant l'autre (fixtures v3 gravées). La
+recherche d'un tel prédicat est posée, pas résolue.
+
+## 7. Reproduction
 
 ```bash
 cmake -S morsehgp3D_v4 -B build/v4 -DCMAKE_BUILD_TYPE=Release
@@ -163,6 +220,8 @@ cmake --build build/v4 -j
 ctest --test-dir build/v4 --output-on-failure          # 135 tests
 ./build/v4/mhgp4_forest_probe --workers-gate
 ./build/v4/mhgp4_forest_probe --workers-gate --inject=wspd-one-worker  # code 4
+./build/v4/mhgp4_q4_oracle --inject=q4-center-parity                   # code 4
 ./build/v4/mhgp4_forest_probe --family=uniform --n=8000 --s=8 --seed=3 \
-    --smax=11 --threads=4     # lignes profil_wspd, profil_gen, q3_charge*
+    --smax=11 --threads=4     # profil_wspd, profil_gen, q3_charge*,
+                              # q4_entonnoir
 ```

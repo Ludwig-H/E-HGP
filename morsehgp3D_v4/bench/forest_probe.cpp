@@ -3456,6 +3456,17 @@ int main(int argc, char** argv) {
               (unsigned long long)st.wspd_workers[0],
               (unsigned long long)st.wspd_workers[1],
               (unsigned long long)st.wspd_workers[2]);
+  // ENTONNOIR DE LA COMPLETION q4 : ou meurent les paires (seed, y).
+  std::printf("q4_entonnoir paires=%llu self=%llu lentille=%llu owner=%llu "
+              "exact_once=%llu det=%llu centre=%llu atteint_profondeur=%llu\n",
+              (unsigned long long)st.q4_pairs,
+              (unsigned long long)st.q4_rej_self,
+              (unsigned long long)st.q4_rej_lens,
+              (unsigned long long)st.q4_rej_owner,
+              (unsigned long long)st.q4_rej_once,
+              (unsigned long long)st.q4_rej_det,
+              (unsigned long long)st.q4_rej_center,
+              (unsigned long long)st.q4_reach_depth);
   std::printf("profil_q4 t_completion_ms=%.1f t_depth_ms=%.1f sites_depth=%llu\n",
               st.t_q4_completion_ms, st.t_q4_depth_ms,
               (unsigned long long)st.q4_depth_sites);

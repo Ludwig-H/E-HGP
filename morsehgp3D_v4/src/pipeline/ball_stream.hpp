@@ -183,6 +183,22 @@ struct BallStreamStats {
   // candidate) et boucle de completion elle-meme.
   double t_q4_depth_ms = 0, t_q4_completion_ms = 0;
   u64 q4_depth_sites = 0;
+  // ENTONNOIR DE LA COMPLETION q4 (premier poste CPU apres la
+  // parallelisation de la descente : 22,5 s a n=8000). Avant de toucher
+  // quoi que ce soit, savoir OU les paires (seed, y) meurent — chaque
+  // filtre a un cout tres different (les trois longueurs sont des i64,
+  // l'owner six comparaisons, `q4_form` un determinant i128, le centre
+  // strict quatre signes i128). Les compteurs sont locaux a la boucle et
+  // verses une fois par seed : aucun cout par paire au-dela d'un
+  // increment de registre.
+  u64 q4_pairs = 0;        // paires (seed, y) enumerees sur la lentille
+  u64 q4_rej_self = 0;     // y confondu avec le seed ou l'ancre
+  u64 q4_rej_lens = 0;     // une des trois longueurs depasse D
+  u64 q4_rej_owner = 0;    // ab n'est pas l'arete maximale canonique
+  u64 q4_rej_once = 0;     // exact-once du seed
+  u64 q4_rej_det = 0;      // quatre points coplanaires
+  u64 q4_rej_center = 0;   // centre non strictement interieur
+  u64 q4_reach_depth = 0;  // paires ayant atteint le test de profondeur
   // Fusion des statistiques d'un ouvrier parallele : addition membre a
   // membre — les champs non touches par la generation valent zero chez
   // l'ouvrier, l'addition est donc toujours sure. Les chronos deviennent
@@ -258,6 +274,14 @@ struct BallStreamStats {
     t_q4_depth_ms += o.t_q4_depth_ms;
     t_q4_completion_ms += o.t_q4_completion_ms;
     q4_depth_sites += o.q4_depth_sites;
+    q4_pairs += o.q4_pairs;
+    q4_rej_self += o.q4_rej_self;
+    q4_rej_lens += o.q4_rej_lens;
+    q4_rej_owner += o.q4_rej_owner;
+    q4_rej_once += o.q4_rej_once;
+    q4_rej_det += o.q4_rej_det;
+    q4_rej_center += o.q4_rej_center;
+    q4_reach_depth += o.q4_reach_depth;
   }
 };
 
@@ -1295,26 +1319,32 @@ inline void collect_candidate_balls(const CloudIndex& ix, i64 s, u64 smax_eff,
           // Predicats du chemin de base pour UNE completion : lentille,
           // owner 6 aretes, exact-once du seed, det, centre strict. Rend
           // true et remplit le candidat si la completion est valide.
+          u64 f_pairs = 0, f_self = 0, f_lens = 0, f_owner = 0, f_once = 0,
+              f_det = 0, f_center = 0, f_depth = 0;
           const auto valid_completion = [&](i32 uy, BallCandidate* cand,
                                             Q4Form* f4out) {
-            if (uy == cx.u || uy == ua || uy == ub) return false;
+            ++f_pairs;
+            if (uy == cx.u || uy == ua || uy == ub) return ++f_self, false;
             const P3& py = ix.upos[(size_t)uy];
             const i64 l_ay = p3_norm2(p3_sub(py, pa));
             const i64 l_by = p3_norm2(p3_sub(py, pb));
-            if (l_ay > D2 || l_by > D2) return false;
+            if (l_ay > D2 || l_by > D2) return ++f_lens, false;
             const i64 l_xy = p3_norm2(p3_sub(py, px));
-            if (l_xy > D2) return false;
+            if (l_xy > D2) return ++f_lens, false;
             if (!tetra_owned_by(D2, l_ax, l_ay, l_bx, l_by, l_xy, pid(ua),
                                 pid(ub), pid(cx.u), pid(uy)))
-              return false;
+              return ++f_owner, false;
             // Exact-once du seed (le RLE dedupliquerait de toute facon ;
             // ceci borne le flux de candidats).
             const P3 vy{2 * py.x - pa.x - pb.x, 2 * py.y - pa.y - pb.y,
                         2 * py.z - pa.z - pb.z};
-            if (p3_norm2(vy) > D2 && pid(uy) < pid(cx.u)) return false;
+            if (p3_norm2(vy) > D2 && pid(uy) < pid(cx.u))
+              return ++f_once, false;
             const Q4Form f4 = q4_form(pa, pb, px, py);
-            if (f4.det == 0) return false;
-            if (!q4_center_strictly_inside(f4, pa, pb, px, py)) return false;
+            if (f4.det == 0) return ++f_det, false;
+            if (!q4_center_strictly_inside(f4, pa, pb, px, py))
+              return ++f_center, false;
+            ++f_depth;
             *cand = BallCandidate{q3_ball_key_reduce(q4_ball_form(f4)),
                                   q4_level_raw(f4), 4};
             *f4out = f4;
@@ -1358,6 +1388,14 @@ inline void collect_candidate_balls(const CloudIndex& ix, i64 s, u64 smax_eff,
                 std::chrono::duration<double, std::milli>(
                     std::chrono::steady_clock::now() - tc0)
                     .count();
+            st->q4_pairs += f_pairs;
+            st->q4_rej_self += f_self;
+            st->q4_rej_lens += f_lens;
+            st->q4_rej_owner += f_owner;
+            st->q4_rej_once += f_once;
+            st->q4_rej_det += f_det;
+            st->q4_rej_center += f_center;
+            st->q4_reach_depth += f_depth;
             continue;
           }
           // --- SELECTION AXIALE BORNEE (en-tete de fonction). ---
