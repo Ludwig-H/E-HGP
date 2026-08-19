@@ -36,6 +36,26 @@ def active_markdown() -> list[Path]:
         ROOT / "gcp-migration" / "README.md",
     ]
     paths.extend(sorted((ROOT / "docs").rglob("*.md")))
+    # Le chantier v4 porte aujourd'hui toute la mathematique active, et la
+    # regle « une equation par ligne physique, accolades explicites, pas de
+    # \operatorname » n'y etait verifiee par personne : le controleur ne
+    # regardait que `docs/`. Une regle que rien ne verifie n'est pas une
+    # regle.
+    #
+    # PERIMETRE : la passation, les recus et les notes ECRITES ICI. Les
+    # `AUDIT_*` / `CONTRE_AUDIT_*` / `HARMONISATION_*` et les lectures en
+    # sont exclus a dessein — ce sont les mots des auditeurs, un registre
+    # que l'on ne reformate pas pour faire passer un linter. (Ils portent
+    # d'ailleurs des `\operatorname` et des `\frac` sans accolades : c'est
+    # leur affaire, pas la ligne de production.)
+    v4 = ROOT / "morsehgp3D_v4"
+    paths.extend(p for p in (v4 / "PASSATION.md", v4 / "README.md") if p.is_file())
+    paths.extend(sorted((v4 / "receipts").rglob("*.md")))
+    paths.extend(
+        p
+        for p in sorted((v4 / "audits").rglob("*.md"))
+        if p.name.startswith(("REPONSE_CLAUDE_", "NOTE_CLAUDE_", "REPONSE_APRES_"))
+    )
     return list(dict.fromkeys(paths))
 
 

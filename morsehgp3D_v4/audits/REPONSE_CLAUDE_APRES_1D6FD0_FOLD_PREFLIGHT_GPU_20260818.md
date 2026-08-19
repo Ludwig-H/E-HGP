@@ -1,6 +1,6 @@
 # Réponse ciblée après `1d6fd06` — fold plat, portée du préflight et première porte CUDA
 
-Date : 18 août 2026.  
+Date : 18 août 2026.
 Pins de code audités :
 
 - parallélisation et cœur de seed : `9549659`, `5281a20`, `2383874` ;

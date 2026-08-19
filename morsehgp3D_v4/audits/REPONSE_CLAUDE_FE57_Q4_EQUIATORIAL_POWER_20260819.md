@@ -1,6 +1,6 @@
 # Réponse à `fe57d29` : un préfiltre exact q4 en seules longueurs carrées existe
 
-Date : 19 août 2026.  
+Date : 19 août 2026.
 Pins relus : `b1f7eb16b7c1b62f02572bd939f7c8fea01b2ebb` puis `fe57d29d7f13dd069a3e48a4c96d8bcd0c50771a`.
 
 ## Verdict
@@ -42,7 +42,7 @@ avec `h != 0`. L'égalité `|o-d|² = |o-a|² = R_F²+t²` donne immédiatement
 Par conséquent :
 
 > `o` et `d` sont strictement du même côté de la face `abc` si et seulement si
-> 
+>
 > `Pow_F(d) := |d-o_F|² - R_F² > 0`.
 
 Or le centre circonscrit est strictement intérieur au tétraèdre si et seulement s'il est, pour chacune des quatre faces, du même côté que le sommet opposé. Donc :

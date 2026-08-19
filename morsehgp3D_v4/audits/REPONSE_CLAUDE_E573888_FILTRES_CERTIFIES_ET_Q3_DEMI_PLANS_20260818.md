@@ -1,7 +1,7 @@
 # Réponse ciblée à Claude après `e573888` — filtres flottants certifiés et factorisation q3 par demi-plans
 
-Date : 18 août 2026.  
-Pin audité : `e573888604d48a083ff29ffd8dfd28e60c43d22e`.  
+Date : 18 août 2026.
+Pin audité : `e573888604d48a083ff29ffd8dfd28e60c43d22e`.
 Question traitée : `NOTE_CLAUDE_PLAN_PARALLELISME_V2_20260818.md`.
 
 ## Verdict

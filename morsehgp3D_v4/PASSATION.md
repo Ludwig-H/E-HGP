@@ -278,6 +278,38 @@ Reçus : `ADDENDUM_PREFILTRE_Q4_EQUATORIAL_20260819.md` (le lemme, l'oracle
 et les planchers ; son § 5 est retiré par le suivant) puis
 `ADDENDUM_FRONTIERE_STRICTE_ET_ETAGE_I64_20260819.md`.
 
+### 2.14 Plafond de sortie sur le pic projeté (LIVRÉ, 19 août)
+
+Le plafond `--max-output-bytes` décidait sur
+`evenements * sizeof(ForestEvent)` **seul**, alors que le préflight
+publiait déjà des bornes par tampon cinq à six fois plus grosses. À
+n=8000 : **450 Mo** de flux contre **2,60 Go** de pic — un plafond réglé
+à 600 Mo passait, puis le fold réservait tout. Une garantie de mémoire
+fausse d'un facteur **5,77** est pire qu'aucune garde, parce qu'elle se
+lit comme une garde.
+
+Le plafond porte désormais sur
+
+$$B_{\text{ev}} + \min\left(\max(\text{budget}, \max_K m_K), \; \sum_K m_K\right),$$
+
+où $m_K$ est **la même** borne que celle de l'ordonnanceur à budget,
+factorisée en forme comptée `fold_bytes_upper_from_counts(E, W)` —
+calculable au préflight, avant qu'un événement soit matérialisé. Les
+deux bouts du `min`/`max` sortent des deux règles d'admission de
+`run_folds_budgeted` (`fits` ⟹ `reserve <= budget` ; `alone` ⟹
+`reserve == m_K` et plus aucune admission), et le `min` par la somme
+n'est pas cosmétique : sans lui un petit nuage se verrait imputer les
+2 Gio du budget et le plafond refuserait à tort — c'est le test
+`max_output_passe` préexistant qui l'a montré.
+
+Porte de **décision**, sans allocation : un plafond menteur ne plante
+pas, ne change aucune sortie et n'apparaît sur aucun chrono. Comptes
+gravés, relevés du préflight réel à n=8000. Quatre cas, planchers sur
+les trois rôles plus un plancher sur le facteur lui-même, mutant
+`budget-events-only` (le comportement d'avant) tué en code 4, et le
+câblage vérifié bout en bout à n=400. Reçu :
+`ADDENDUM_PLAFOND_SUR_LE_PIC_PROJETE_20260819.md`.
+
 ## 3. Carte de l'implémentation
 
 ```
@@ -299,7 +331,7 @@ bench/forest_probe.cpp      pipeline aval (RLE → préfiltre → census →
                             digest canonique, preflight
 oracle/                     juge indépendant (arithmétique propre)
 tests/                      selftests unitaires (obig, tree, forest…)
-CMakeLists.txt              144 CTests — dont ~la moitié de portes
+CMakeLists.txt              147 CTests — dont ~la moitié de portes
                             négatives à code EXACT (1/2/3/4)
 ```
 
@@ -375,15 +407,15 @@ L'ordre ci-dessous est celui de l'audit `dd0d4a6` § 3, adopté tel quel.
    `ADDENDUM_DESCENTE_WSPD_ET_CHARGE_Q3_20260819.md`.
    **OPEN restant** : la **complétion q4** est désormais le premier
    poste CPU (22,5 s) — à mesurer avant de la toucher.
-2. **Internement du fold et streaming.** L'internement lui-même est
-   LIVRÉ (§ 2.10) ; ce qui reste est la matérialisation résidente
-   globale en amont : préflight réellement streaming (audit `57523a`
-   § 3 — le chemin actuel est honnêtement
+2. **Internement du fold et streaming.** L'internement est LIVRÉ
+   (§ 2.10) et la **comptabilité du plafond** l'est aussi (§ 2.14 : le
+   contrat porte désormais sur le pic projeté, tampons du fold compris,
+   et non plus sur le seul flux d'événements). **OPEN restant** : le
+   **préflight par tuile de clés** — le chemin est honnêtement
    `event_expansion_preflight_after_census`, il matérialise `cands` et
-   `balls` avant de brancher ; `octets_resident` ne compte que
-   `evenements * sizeof(ForestEvent)` et doit devenir
-   `bytes_forest_events` + bornes par tampon), en cohérence avec la
-   borne Poisson de taille de sortie.
+   `balls` avant de brancher, et le pic ne les compte pas (il le dit,
+   il ne les remplace pas). À faire en cohérence avec la borne Poisson
+   de taille de sortie.
 3. **Produit public 30M** : distinguer flux symbolique complet,
    hiérarchie de connectivité et requêtes/labels ciblés — c'est aussi
    ce qui lèvera le refus `resource_exhausted` de la garde de capacité

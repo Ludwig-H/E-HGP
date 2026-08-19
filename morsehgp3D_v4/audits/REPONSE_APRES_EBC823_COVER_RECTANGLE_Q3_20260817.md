@@ -1,8 +1,8 @@
 # Réponse constructive après `a047460` / `ebc8236` : cover q3 reçu, oracle reçu, cover commun par rectangle
 
-Date : 17 août 2026.  
-Pin de code audité : **`ebc82368bab03f93c2b8a480f810a93e3a8aeb74` inclus**.  
-Pins documentaires contre-audités : `a6ab575`, `ce64844`, `4470106`, `12d750a`.  
+Date : 17 août 2026.
+Pin de code audité : **`ebc82368bab03f93c2b8a480f810a93e3a8aeb74` inclus**.
+Pins documentaires contre-audités : `a6ab575`, `ce64844`, `4470106`, `12d750a`.
 Cadre : `phase=exploration_v4_hors_registre`, `public_status=not_claimed`.
 
 ## 0. Verdict

@@ -113,6 +113,8 @@ struct Args {
   // contre « sans »), 3 = puissance de face seule (« avec l'etage i64 »
   // contre « sans l'etage i64 » — la question de reception `6a2bc96`).
   int q4_bench_control = 0;
+  bool output_budget_gate = false;
+  bool inj_budget_events_only = false;
   bool digest_gate = false;
   int inj_fold_capacity = 0;  // 1 = u32-event-wrap, 2 = i32-fid-wrap,
                               // 3 = epoch-sentinel-collision
@@ -218,6 +220,9 @@ Args parse(int argc, char** argv) {
     else if (arg == "--inject=seed-i64-vertex-y-drop-factor")
       a.inj_q4_i64_y = true;
     else if (arg == "--inject=seed-i64-pair-xy-min") a.inj_q4_i64_xy = true;
+    else if (arg == "--output-budget-gate") a.output_budget_gate = true;
+    else if (arg == "--inject=budget-events-only")
+      a.inj_budget_events_only = true;
     else if (arg == "--q4-i64-stage-bench") {
       a.q4_prefilter_bench = true;
       a.q4_bench_control = 3;
@@ -371,10 +376,12 @@ size_t parallel_ranges(size_t n, int threads, Fn&& fn) {
 // MAJORANT DES OCTETS TEMPORAIRES d'un fold, calculable AVANT lancement
 // (toutes les tailles internes sont majorees par le nombre d'incidences
 // W, puisque l'internement dedoublonne : nfid <= W).
-u64 fold_bytes_upper(const std::vector<ForestEvent>& ev) {
-  u64 W = 0;
-  for (const ForestEvent& e : ev) W += (u64)e.q + e.d;
-  const u64 E = (u64)ev.size();
+// Forme COMPTEE du majorant : elle ne demande que le nombre
+// d'evenements E et le nombre d'incidences W = Sigma (q_e + d_e), donc
+// elle est calculable au PREFLIGHT, avant que le moindre evenement soit
+// materialise. C'est la meme borne que celle de l'ordonnanceur — une
+// seule borne pour les deux usages, jamais deux qui pourraient diverger.
+u64 fold_bytes_upper_from_counts(u64 E, u64 W) {
   u64 cap = 1024;
   while (cap < W * 2 + 2) cap <<= 1;
   const u64 kf = (u64)sizeof(FacetKey);
@@ -388,6 +395,217 @@ u64 fold_bytes_upper(const std::vector<ForestEvent>& ev) {
        + W * (4 + 1 + 4 + 4 + 4 + 4)  // epoques et roles
        + W                       // seen
        + W * (kf + 4);           // sortie dense
+}
+
+u64 fold_bytes_upper(const std::vector<ForestEvent>& ev) {
+  u64 W = 0;
+  for (const ForestEvent& e : ev) W += (u64)e.q + e.d;
+  return fold_bytes_upper_from_counts((u64)ev.size(), W);
+}
+
+// ---- PIC DE RESIDENCE PROJETE (le plafond transactionnel) ------------
+// LA FAUTE QUE CECI CORRIGE. Le plafond `--max-output-bytes` decidait
+// sur `evenements * sizeof(ForestEvent)` SEUL. A n=8000 ce terme vaut
+// 450 Mo tandis que les tampons du fold, que le preflight publiait
+// pourtant deja, valent 1,39 Go rien que pour les enregistrements
+// d'incidence : un plafond a 600 Mo passait, puis le fold reservait
+// ~2,6 Go. La garantie annoncee (« borner la memoire ») etait donc
+// fausse d'un facteur ~5,8 — le refus tombait au mauvais endroit, pas
+// nulle part, ce qui est pire qu'aucune garde parce que ca se lit comme
+// une garde.
+//
+// CE QUE LE PIC COUVRE, et rien d'autre : ce que la MATERIALISATION
+// ajouterait. Les `cands` et `balls` amont sont deja residents quand le
+// preflight s'execute (le chemin s'appelle honnetement
+// `event_expansion_preflight_after_census`) — ils sont mesurables, pas
+// projetes, et ne sont pas dans ce compte.
+//
+// LES DEUX TERMES.
+//   1. `ev_k` porte les evenements de TOUS les K a la fois : les folds
+//      sont lances apres l'expansion complete. Le terme est donc la
+//      somme sur K, pas un maximum.
+//   2. Les folds, eux, sont ordonnances SOUS BUDGET, et leur reserve
+//      simultanee obeit a
+//
+//        reserve <= min( max(budget, max_K m_K), Sigma_K m_K ).
+//
+//      Preuve, sur les deux regles d'admission de `run_folds_budgeted` :
+//      une tache admise par `fits` laisse `reserve <= budget` ; une
+//      tache admise par `alone` l'est avec `running == 0`, donc
+//      `reserve == 0` avant, donc `reserve == m_K <= max_K m_K` apres —
+//      et tant qu'elle tourne `running != 0` interdit toute autre
+//      admission. D'ou le `max`. Et trivialement la reserve ne depasse
+//      jamais la somme de TOUTES les taches, d'ou le `min`.
+//
+//      Le `min` n'est pas cosmetique : sans lui, un petit nuage dont les
+//      dix folds tiennent dans 20 Mo se verrait imputer les 2 Gio du
+//      budget, et le plafond refuserait un run qui tient largement. Un
+//      majorant qui refuse a tort est une faute au meme titre qu'un
+//      majorant qui accepte a tort.
+struct OutputBudget {
+  u64 bytes_events = 0;     // Sigma_K E_K * sizeof(ForestEvent)
+  u64 bytes_fold_sum = 0;   // Sigma_K m_K
+  u64 bytes_fold_max = 0;   // max_K m_K
+  int fold_max_k = 0;       // son argmax
+  u64 bytes_fold_peak = 0;  // min(max(budget, max_K m_K), Sigma_K m_K)
+  u64 bytes_peak = 0;       // le pic projete
+};
+
+// `mutant_events_only` restaure exactement l'ancien comportement : le
+// terme du fold disparait. C'est le mutant CAUSAL de cette garde — il ne
+// casse rien d'observable a l'execution, il rend seulement le plafond
+// menteur, et seule une porte de DECISION peut le voir.
+OutputBudget project_output_budget(const u64* E, const u64* W, int kmax,
+                                   u64 fold_budget,
+                                   bool mutant_events_only = false) {
+  OutputBudget b;
+  for (int K = 1; K <= kmax; ++K) {
+    b.bytes_events += E[K] * (u64)sizeof(ForestEvent);
+    const u64 m = fold_bytes_upper_from_counts(E[K], W[K]);
+    b.bytes_fold_sum += m;
+    if (m > b.bytes_fold_max) {
+      b.bytes_fold_max = m;
+      b.fold_max_k = K;
+    }
+  }
+  b.bytes_fold_peak = std::max(fold_budget, b.bytes_fold_max);
+  if (b.bytes_fold_sum < b.bytes_fold_peak)
+    b.bytes_fold_peak = b.bytes_fold_sum;
+  if (mutant_events_only) b.bytes_fold_peak = 0;
+  b.bytes_peak = b.bytes_events + b.bytes_fold_peak;
+  return b;
+}
+
+// ---- PORTE DU PLAFOND DE SORTIE --------------------------------------
+// UNE PORTE DE DECISION, pas d'execution : elle n'alloue rien et ne fait
+// tourner aucun fold. C'est le seul type de porte qui puisse voir cette
+// faute — un plafond menteur ne plante pas, ne change aucune sortie, et
+// ne se voit donc ni sur un flux, ni sur un chrono, ni sur un pic RSS
+// (le pic reel, lui, est atteint : c'est la GARANTIE qui est fausse, pas
+// le calcul). Elle compare la DECISION accepter/refuser a ce que la
+// borne comptee impose.
+//
+// LES COMPTES SONT GRAVES, et ils ne sont pas synthetiques : ce sont
+// ceux du preflight reel a n=8000 (`uniform`, s=8, smax=11, seed=3),
+// releves le 19 aout. Une fixture tiree du regime d'interet vaut mieux
+// qu'une fixture inventee : si la forme par K changeait au point de
+// rendre le terme du fold negligeable, la porte le dirait.
+int run_output_budget_gate(bool inj_events_only) {
+  static const u64 kE[11] = {0,      30581,  64097,  109455, 165548, 232523,
+                             310254, 397786, 495262, 602212, 718440};
+  static const u64 kW[11] = {0,       61162,   192291,  437820,  827740,
+                             1395138, 2171778, 3182288, 4457358, 6022120,
+                             7902840};
+  const u64 budget = 2ull << 30;  // le defaut de `--fold-memory-budget`
+  const OutputBudget ob = project_output_budget(kE, kW, 10, budget,
+                                                inj_events_only);
+  const OutputBudget ref = project_output_budget(kE, kW, 10, budget, false);
+  u64 bad = 0, refus_par_le_fold = 0, acceptations = 0, pics_par_k = 0;
+  const auto accepte = [](const OutputBudget& b, u64 ceiling) {
+    return b.bytes_peak <= ceiling;
+  };
+  // CAS 1 — LE CAS DISCRIMINANT : un plafond STRICTEMENT entre le flux
+  // d'evenements et le pic. La garde honnete refuse, la garde d'avant
+  // acceptait puis laissait le fold reserver ~5,8 fois le plafond.
+  {
+    const u64 ceiling = (ref.bytes_events + ref.bytes_peak) / 2;
+    if (!(ref.bytes_events <= ceiling && ceiling < ref.bytes_peak)) {
+      std::fprintf(stderr, "FIXTURE : le plafond median n'encadre plus\n");
+      ++bad;
+    } else {
+      ++refus_par_le_fold;
+      if (accepte(ob, ceiling)) {
+        std::fprintf(stderr,
+                     "PLAFOND : pic %llu accepte sous un plafond de %llu\n",
+                     (unsigned long long)ref.bytes_peak,
+                     (unsigned long long)ceiling);
+        ++bad;
+      }
+    }
+  }
+  // CAS 2 — PLANCHER D'ACCEPTATION : au-dessus du pic, la garde doit
+  // laisser passer. Sans lui, « refuser toujours » serait vert.
+  {
+    const u64 ceiling = ref.bytes_peak + 1;
+    if (!accepte(ob, ceiling)) {
+      std::fprintf(stderr, "PLAFOND : refus au-dessus du pic projete\n");
+      ++bad;
+    } else {
+      ++acceptations;
+    }
+  }
+  // CAS 3 — L'ANCIENNE GARANTIE N'EST PAS PERDUE : sous le flux
+  // d'evenements seul, le refus doit tomber comme avant.
+  {
+    const u64 ceiling = ref.bytes_events - 1;
+    if (accepte(ob, ceiling)) {
+      std::fprintf(stderr, "PLAFOND : acceptation sous le flux d'evenements\n");
+      ++bad;
+    }
+  }
+  // CAS 4 — LE TERME DU FOLD EST UN MAXIMUM, PAS LE BUDGET : un seul K
+  // dont la borne depasse le budget doit dominer le pic (garde
+  // anti-blocage de `run_folds_budgeted` : une tache hors budget est
+  // admise SEULE, donc la reserve peut valoir sa propre borne).
+  {
+    u64 gE[11], gW[11];
+    for (int K = 0; K <= 10; ++K) {
+      gE[K] = kE[K];
+      gW[K] = kW[K];
+    }
+    gW[10] = 30000000;  // grave : la borne de K=10 passe au-dessus de 2 Gio
+    const OutputBudget big = project_output_budget(gE, gW, 10, budget,
+                                                   inj_events_only);
+    const OutputBudget bigref = project_output_budget(gE, gW, 10, budget,
+                                                      false);
+    if (bigref.fold_max_k != 10 || bigref.bytes_fold_peak <= budget) {
+      std::fprintf(stderr, "FIXTURE : K=10 ne domine plus le budget\n");
+      ++bad;
+    } else {
+      ++pics_par_k;
+      if (big.bytes_peak != bigref.bytes_peak) {
+        std::fprintf(stderr, "PLAFOND : pic %llu au lieu de %llu (K=%d)\n",
+                     (unsigned long long)big.bytes_peak,
+                     (unsigned long long)bigref.bytes_peak,
+                     bigref.fold_max_k);
+        ++bad;
+      }
+    }
+  }
+  std::printf("output_budget_gate violations=%llu bytes_evenements=%llu "
+              "bytes_fold_somme=%llu bytes_fold_max=%llu(K=%d) "
+              "bytes_pic=%llu facteur=%.2f refus_par_le_fold=%llu "
+              "acceptations=%llu pics_par_k=%llu\n",
+              (unsigned long long)bad, (unsigned long long)ref.bytes_events,
+              (unsigned long long)ref.bytes_fold_sum,
+              (unsigned long long)ref.bytes_fold_max, ref.fold_max_k,
+              (unsigned long long)ref.bytes_peak,
+              (double)ref.bytes_peak / (double)ref.bytes_events,
+              (unsigned long long)refus_par_le_fold,
+              (unsigned long long)acceptations,
+              (unsigned long long)pics_par_k);
+  if (inj_events_only) {
+    if (bad > 0) {
+      std::printf("MUTANT TUE\n");
+      return 4;
+    }
+    std::fprintf(stderr, "PORTE INEFFICACE : mutant non discrimine\n");
+    return 3;
+  }
+  if (bad) return 3;
+  // PLANCHERS : chacun des trois roles doit avoir ete exerce au moins
+  // une fois, sans quoi la porte serait verte par vacuite.
+  if (refus_par_le_fold < 1 || acceptations < 1 || pics_par_k < 1) return 3;
+  // Le facteur mesure EST la faute : si le pic cessait d'exceder
+  // franchement le flux, cette porte perdrait son objet et il faudrait
+  // le savoir plutot que de la garder verte.
+  if (ref.bytes_peak < ref.bytes_events * 2) {
+    std::fprintf(stderr, "PLANCHER : pic %llu < 2x flux %llu\n",
+                 (unsigned long long)ref.bytes_peak,
+                 (unsigned long long)ref.bytes_events);
+    return 3;
+  }
+  return 0;
 }
 
 // Pic de RSS du processus, et remise a zero du compteur (Linux) : le
@@ -3280,6 +3498,8 @@ int main(int argc, char** argv) {
   if (a.par_gate)
     return run_par_gate(a.inj_par_drop, a.inj_par_drop_census);
   if (a.q2_birth_gate) return run_q2_birth_gate(a.inj_birth_dup);
+  if (a.output_budget_gate)
+    return run_output_budget_gate(a.inj_budget_events_only);
   if (a.q4_eq_gate)
     return run_q4_eq_gate(a.inj_q4_eq_nonstrict, a.inj_q4_eq_sign,
                           a.inj_q4_i64_y, a.inj_q4_i64_xy);
@@ -3414,6 +3634,7 @@ int main(int argc, char** argv) {
                       }
                     });
     u64 tot_ev = 0, tot_inc = 0;
+    u64 kev[11] = {}, kinc[11] = {};
     for (int K = 1; K <= (int)kmax_eff; ++K) {
       u64 e = 0, inc = 0;
       for (size_t t = 0; t < Tpf; ++t) {
@@ -3422,6 +3643,8 @@ int main(int argc, char** argv) {
       }
       tot_ev += e;
       tot_inc += inc;
+      kev[K] = e;
+      kinc[K] = inc;
       if (a.preflight)
         std::printf("preflight K=%d evenements=%llu incidences=%llu "
                     "bytes_forest_events=%llu\n",
@@ -3453,20 +3676,41 @@ int main(int argc, char** argv) {
           (unsigned long long)(uf_upper * sizeof(u32)),
           (unsigned long long)(tot_ev * 64),
           (unsigned long long)(uf_upper * (sizeof(FacetKey) + sizeof(u32))));
+      const OutputBudget ob =
+          project_output_budget(kev, kinc, (int)kmax_eff, a.fold_budget);
+      std::printf("preflight pic_projete bytes_evenements=%llu "
+                  "bytes_fold_somme=%llu bytes_fold_max=%llu fold_max_k=%d "
+                  "bytes_fold_pic=%llu bytes_pic=%llu budget_fold=%llu\n",
+                  (unsigned long long)ob.bytes_events,
+                  (unsigned long long)ob.bytes_fold_sum,
+                  (unsigned long long)ob.bytes_fold_max, ob.fold_max_k,
+                  (unsigned long long)ob.bytes_fold_peak,
+                  (unsigned long long)ob.bytes_peak,
+                  (unsigned long long)a.fold_budget);
       return 0;
     }
     // PLAFOND TRANSACTIONNEL (audit bloquant C829 § 5.3) : le compte
     // precede le remplissage — count -> preflight -> fill — et le refus
     // tombe AVANT toute allocation d'ev_k ; jamais un reserve optimiste
-    // sur des milliards d'enregistrements. Le contrat porte sur les
-    // octets residents projetes du flux d'evenements.
-    const u64 projected = tot_ev * (u64)sizeof(ForestEvent);
-    if (projected > a.max_output_bytes) {
+    // sur des milliards d'enregistrements. Le contrat porte sur le PIC
+    // DE RESIDENCE PROJETE (flux d'evenements + tampons du fold), et non
+    // plus sur le seul flux : voir `project_output_budget` pour la faute
+    // que cela corrige et pour la portee exacte du pic.
+    const OutputBudget ob =
+        project_output_budget(kev, kinc, (int)kmax_eff, a.fold_budget,
+                              a.inj_budget_events_only);
+    if (ob.bytes_peak > a.max_output_bytes) {
       std::fprintf(stderr,
-                   "REFUS resource_exhausted : sortie projetee %llu octets "
-                   "(%llu evenements) > plafond max_output_bytes=%llu — "
-                   "aucune materialisation\n",
-                   (unsigned long long)projected, (unsigned long long)tot_ev,
+                   "REFUS resource_exhausted : pic projete %llu octets "
+                   "(evenements %llu + fold %llu ; somme des folds %llu, "
+                   "plus gros fold %llu a K=%d ; %llu evenements) > plafond "
+                   "max_output_bytes=%llu — aucune materialisation\n",
+                   (unsigned long long)ob.bytes_peak,
+                   (unsigned long long)ob.bytes_events,
+                   (unsigned long long)ob.bytes_fold_peak,
+                   (unsigned long long)ob.bytes_fold_sum,
+                   (unsigned long long)ob.bytes_fold_max, ob.fold_max_k,
+                   (unsigned long long)tot_ev,
                    (unsigned long long)a.max_output_bytes);
       return 2;
     }

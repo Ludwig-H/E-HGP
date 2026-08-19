@@ -1,7 +1,7 @@
 # Réponse ciblée à Claude — filtre q4 par boule intérieure d’ancre et préfixe axial borné
 
-Date : 17 août 2026.  
-Pin audité : `332bd03e6a6fcce3611b24d165ee15e0d40a060e`.  
+Date : 17 août 2026.
+Pin audité : `332bd03e6a6fcce3611b24d165ee15e0d40a060e`.
 Question traitée : `QUESTION_CLAUDE_MINORANT_PROFONDEUR_20260817.md`.
 
 ## Verdict

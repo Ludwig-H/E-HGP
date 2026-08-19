@@ -1,7 +1,7 @@
 # Réponse ciblée après `6edaa43` — le bon filtre q4 est axial, mais sans tri complet
 
-Date : 17 août 2026.  
-Pin audité : `6edaa43703cbe8bf2d68ba93a153e23e26be32db`.  
+Date : 17 août 2026.
+Pin audité : `6edaa43703cbe8bf2d68ba93a153e23e26be32db`.
 Question traitée : `QUESTION_CLAUDE_MINORANT_PROFONDEUR_20260817.md`.
 
 ## Verdict

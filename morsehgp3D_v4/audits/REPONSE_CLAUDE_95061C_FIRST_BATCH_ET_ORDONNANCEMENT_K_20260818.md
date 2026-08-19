@@ -1,6 +1,6 @@
 # Réponse ciblée après `95061c1` — `first_batch` peut sortir de la sémantique, mais pas le contrôle mémoire
 
-Date : 18 août 2026.  
+Date : 18 août 2026.
 Pin audité : `95061c1fa54c59d72e03a4eafb3938bb57dc0289`.
 
 ## Verdict

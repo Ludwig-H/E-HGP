@@ -376,6 +376,42 @@ mhgp4_expect_code(mhgp4_forest_probe_max_output_refus 2 mhgp4_forest_probe
     "--family=uniform --n=400 --s=8 --seed=3 --min-balls=100 --min-fusions=100 --max-output-bytes=4096")
 mhgp4_expect_code(mhgp4_forest_probe_max_output_passe 0 mhgp4_forest_probe
     "--family=uniform --n=400 --s=8 --seed=3 --min-balls=100 --min-fusions=100 --max-output-bytes=1000000000")
+# LE PLAFOND PORTAIT SUR LA MAUVAISE GRANDEUR (executes le 19 aout). Il
+# decidait sur `evenements * sizeof(ForestEvent)` seul, alors que le
+# preflight publiait deja des tampons de fold cinq a six fois plus gros :
+# a n=8000, 450 Mo de flux contre 2,60 Go de pic. Un plafond regle entre
+# les deux passait, puis le fold reservait tout. Une garantie de memoire
+# fausse d'un facteur ~5,8 est pire qu'aucune garde, parce qu'elle se lit
+# comme une garde. Le plafond porte desormais sur le PIC PROJETE
+# `bytes_evenements + min(max(budget, max_K m_K), Sigma_K m_K)`, ou m_K
+# est LA MEME borne que celle de l'ordonnanceur a budget (une seule
+# borne, jamais deux qui divergeraient) et ou les deux bouts du
+# `min`/`max` sortent des deux regles d'admission de
+# `run_folds_budgeted`.
+#
+# PORTE DE DECISION, sans aucune allocation : un plafond menteur ne
+# plante pas, ne change aucune sortie et n'apparait sur aucun chrono —
+# seule la DECISION accepter/refuser le trahit. Comptes GRAVES, et
+# releves du regime d'interet (preflight reel a n=8000, `uniform`, s=8,
+# smax=11, seed=3) plutot qu'inventes. Quatre cas : plafond entre le
+# flux et le pic (refus exige), au-dessus du pic (acceptation exigee,
+# sans quoi « refuser toujours » serait vert), sous le flux (l'ancienne
+# garantie n'est pas perdue), et un K dont la borne depasse le budget
+# (le terme est bien un max, pas le budget). Planchers sur les trois
+# roles, plus un plancher sur le FACTEUR lui-meme : si le pic cessait de
+# valoir au moins deux fois le flux, la porte perdrait son objet et
+# doit le dire. MUTANT `budget-events-only` : le terme du fold retire,
+# c'est-a-dire exactement le comportement d'avant.
+mhgp4_expect_code(mhgp4_forest_probe_output_budget_gate 0 mhgp4_forest_probe
+    "--output-budget-gate")
+mhgp4_expect_code(mhgp4_forest_probe_output_budget_mutant 4 mhgp4_forest_probe
+    "--output-budget-gate --inject=budget-events-only")
+# Et le CABLAGE, sur le chemin reel : a n=400 le flux vaut 15,1 Mo et le
+# pic 191,2 Mo. Un plafond de 100 Mo doit refuser (code 2) — l'ancienne
+# comptabilite l'acceptait (code 0), ce qui se verifie a la main avec
+# `--inject=budget-events-only` sur cette meme ligne.
+mhgp4_expect_code(mhgp4_forest_probe_max_output_refus_fold 2 mhgp4_forest_probe
+    "--family=uniform --n=400 --s=8 --seed=3 --min-balls=100 --min-fusions=100 --max-output-bytes=100000000")
 # Fold COMPACT (reponse d'audit « fold compact » § 1-2) : canonique par
 # min-fid u32, tables a epoque pour les racines pre/post-lot, partition
 # finale DENSE (facet_keys + final_canon_fid, invariants structurels
