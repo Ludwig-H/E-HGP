@@ -127,6 +127,12 @@ struct BallStreamStats {
   u64 census_workers = 0;
   u64 expansion_workers = 0;
   u64 fold_workers_max = 0;
+  // Ordonnancement des folds sous budget memoire (reponse d'audit
+  // `95061c1` § 3) : le plafond declare et le maximum reellement
+  // reserve. Publies sur leur PROPRE ligne — la ligne `execution` est
+  // ancree ^...$ par le validateur de campagne.
+  u64 fold_budget_bytes = 0;
+  u64 fold_reserved_max = 0;
   // Decomposition de t_gen exigee par l'audit § 3 (chemin axial) :
   // cœur de seed, materialisation A,B des sites, reduction a deux cotes
   // (seuils + groupes + prefixes + d_j), emission (valid_completion +

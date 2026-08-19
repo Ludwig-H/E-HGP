@@ -393,20 +393,44 @@ mhgp4_expect_code(mhgp4_forest_probe_fold_mutant_canon_root 4 mhgp4_forest_probe
 # evenement, slot) — il est donc le TEMOIN de l'internement a la volee
 # du fold compact, et la porte a deux backends ci-dessus le compare deja
 # sur tout (compteurs, niveaux, nœuds, deltas, partition map ET dense).
-# Trois mutants, chacun degradant UNE garantie : fid en ordre de
-# RENCONTRE (le tri des cles uniques saute : l'ordre des fid ne suit plus
-# celui des FacetKey, donc le canonique min-fid n'est plus le minimum),
-# appartenance decidee sur huit bits d'EMPREINTE sans comparaison de cle
-# (des facettes distinctes fusionnent), et DERNIER lot au lieu du
-# premier (le drapeau `existed` bascule, naissances et croissances
-# faussees). Les planchers de la porte (incidences > facettes, >= 200 000
-# facettes, >= 1000 lots) interdisent le vert par vacuite.
+# Deux mutants de l'internement, chacun degradant UNE garantie : fid en
+# ordre de RENCONTRE (le tri des cles uniques saute : l'ordre des fid ne
+# suit plus celui des FacetKey, donc le canonique min-fid n'est plus le
+# minimum) et appartenance decidee sur huit bits d'EMPREINTE sans
+# comparaison de cle (des facettes distinctes fusionnent). Les planchers
+# de la porte (incidences > facettes, >= 200 000 facettes, >= 1000 lots)
+# interdisent le vert par vacuite.
 mhgp4_expect_code(mhgp4_forest_probe_intern_mutant_first_seen 4
     mhgp4_forest_probe "--fold-compact-gate --inject=intern-fid-first-seen")
 mhgp4_expect_code(mhgp4_forest_probe_intern_mutant_no_verify 4
     mhgp4_forest_probe "--fold-compact-gate --inject=intern-hash-no-verify")
-mhgp4_expect_code(mhgp4_forest_probe_intern_mutant_batch_last 4
-    mhgp4_forest_probe "--fold-compact-gate --inject=intern-first-batch-last")
+# DETECTEUR SEPARE DE LA SEMANTIQUE (reponse d'audit `95061c1` § 2) : le
+# fold ne lit plus `first_batch` — sur un flux sans attach_violations,
+# `S_b(f) => A_b(f)`, donc `active ∨ existed = active`. Ce qui reste est
+# un bit `seen` mis a jour APRES le lot, qui n'alimente que les deux
+# compteurs. Deux mutants, deux portes distinctes : detecteur desactive
+# (la fixture de flux incoherent le tue — c'est le seul endroit ou le
+# compteur peut etre non nul) et `seen` marque AVANT le controle (tous
+# les premiers attachements sont signales a tort : les familles
+# geometriques regulieres le tuent).
+mhgp4_expect_code(mhgp4_forest_probe_detector_mutant_disabled 4
+    mhgp4_forest_probe "--fold-compact-gate --inject=attach-detector-disabled")
+mhgp4_expect_code(mhgp4_forest_probe_detector_mutant_seen_before 4
+    mhgp4_forest_probe "--fold-compact-gate --inject=seen-before-check")
+# RAPPORTEUR DU BANC APPARIE (contre-audit 21e617d § 2-3) : le banc
+# mesure les deux internements DANS LE MEME processus, donc le plan est
+# APPARIE — l'estimateur est la mediane des rapports par paire, jamais le
+# rapport de deux medianes marginales (sur les cinq paires du 18 aout les
+# deux divergent : 0,843 contre 0,926). Porte SYNTHETIQUE, temps fictifs,
+# aucun calcul reel : elle verifie que la mediane appariee est bien
+# calculee, que le jeu SEPARE les deux statistiques, que les victoires et
+# l'equilibre des positions sont publies, et que le plan refuse un
+# `--bench-repeat` impair ou < 4 (contrebalancement ABBA impossible).
+mhgp4_expect_code(mhgp4_forest_probe_bench_report_gate 0 mhgp4_forest_probe
+    "--bench-report-gate")
+# Le banc lui-meme refuse AVANT calcul un plan non contrebalancable.
+mhgp4_expect_code(mhgp4_forest_probe_bench_refus_plan 2 mhgp4_forest_probe
+    "--fold-intern-bench --family=uniform --n=200 --s=8 --smax=11 --seed=3 --bench-repeat=5")
 # Etage flottant certifie du signe de P (reçu « filtre flottant » —
 # enregistrement CTest REPARE : la porte existait sans etre cablee) puis
 # KERNEL AFFINE par ancre (audit « filtre certifie et niveaux q3 » § 1) :

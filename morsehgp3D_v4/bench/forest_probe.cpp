@@ -29,6 +29,9 @@
 #include <sched.h>
 
 #include <algorithm>
+#include <cmath>
+#include <condition_variable>
+#include <mutex>
 #include <cfenv>
 #include <chrono>
 #include <cstdio>
@@ -98,13 +101,17 @@ struct Args {
   int inj_fold_capacity = 0;  // 1 = u32-event-wrap, 2 = i32-fid-wrap,
                               // 3 = epoch-sentinel-collision
   int inj_fold_intern = 0;    // 1 = fid en ordre de rencontre,
-                              // 2 = empreinte sans verification de cle,
-                              // 3 = dernier lot au lieu du premier
+                              // 2 = empreinte sans verification de cle
+  int inj_detector = 0;       // 1 = detecteur desactive,
+                              // 2 = `seen` marque AVANT le controle
   u32 inj_axial = 0;  // masque kAxial* des mutants du chemin axial
   u64 min_balls = 0;
   u64 min_fusions = 0;
   bool intern_bench = false;  // banc d'alternance des deux internements
-  int bench_repeat = 5;
+  bool bench_report_gate = false;
+  bool schedule_bench = false;
+  u64 fold_budget = 2ull << 30;  // 2 Gio par defaut
+  int bench_repeat = 10;
 };
 
 bool parse_family(const char* name, CloudFamily* out) {
@@ -190,10 +197,15 @@ Args parse(int argc, char** argv) {
     else if (arg == "--inject=fold-epoch-sentinel-collision")
       a.inj_fold_capacity = 3;
     else if (arg == "--fold-intern-bench") a.intern_bench = true;
+    else if (arg == "--bench-report-gate") a.bench_report_gate = true;
+    else if (arg == "--fold-schedule-bench") a.schedule_bench = true;
+    else if (const char* v = val("--fold-memory-budget="))
+      a.fold_budget = (u64)std::atoll(v);
     else if (const char* v = val("--bench-repeat=")) a.bench_repeat = std::atoi(v);
     else if (arg == "--inject=intern-fid-first-seen") a.inj_fold_intern = 1;
     else if (arg == "--inject=intern-hash-no-verify") a.inj_fold_intern = 2;
-    else if (arg == "--inject=intern-first-batch-last") a.inj_fold_intern = 3;
+    else if (arg == "--inject=attach-detector-disabled") a.inj_detector = 1;
+    else if (arg == "--inject=seen-before-check") a.inj_detector = 2;
     else if (arg == "--inject=float-ignore-rounding")
       a.inj_axial |= kFloatIgnoreRounding;
     else if (arg == "--inject=float-threshold-too-small")
@@ -317,6 +329,133 @@ size_t parallel_ranges(size_t n, int threads, Fn&& fn) {
   return actual;
 }
 
+// ---- ORDONNANCEMENT DES DIX FOLDS (reponse d'audit `95061c1` § 3) ----
+// Les folds par K ont des couts tres inegaux : a n=8000 les incidences
+// se repartissent en 0,2 / 0,7 / 1,6 / 3,1 / 5,2 / 8,1 / 11,9 / 16,7 /
+// 22,6 / 29,7 % pour K=1..10. Le decoupage CONTIGU de `parallel_ranges`
+// donne alors {1,2} / {3,4,5} / {6,7} / {8,9,10} : un ouvrier porte 69 %
+// du travail. Mais lancer naivement les quatre K les plus lourds
+// ensemble est incompatible avec le contrat memoire — d'ou un
+// ordonnanceur A BUDGET, et non un choix binaire.
+//
+// MAJORANT DES OCTETS TEMPORAIRES d'un fold, calculable AVANT lancement
+// (toutes les tailles internes sont majorees par le nombre d'incidences
+// W, puisque l'internement dedoublonne : nfid <= W).
+u64 fold_bytes_upper(const std::vector<ForestEvent>& ev) {
+  u64 W = 0;
+  for (const ForestEvent& e : ev) W += (u64)e.q + e.d;
+  const u64 E = (u64)ev.size();
+  u64 cap = 1024;
+  while (cap < W * 2 + 2) cap <<= 1;
+  const u64 kf = (u64)sizeof(FacetKey);
+  return cap * 8                 // table d'internement (TOUCHEE)
+       + 4 * 11 * E              // ev_fid
+       + W * (kf + 4)            // pool (cle, tid)
+       + W * 4                   // rank
+       + W * kf                  // keys
+       + W * 4                   // union-find
+       + W * 4                   // canon_fid
+       + W * (4 + 1 + 4 + 4 + 4 + 4)  // epoques et roles
+       + W                       // seen
+       + W * (kf + 4);           // sortie dense
+}
+
+// Pic de RSS du processus, et remise a zero du compteur (Linux) : le
+// noyau ne fait que MONTER VmHWM, donc comparer trois modes dans le meme
+// processus exige de le remettre au RSS courant entre les modes.
+u64 peak_rss_kib() {
+  std::FILE* f = std::fopen("/proc/self/status", "r");
+  if (!f) return 0;
+  char line[256];
+  u64 v = 0;
+  while (std::fgets(line, sizeof(line), f))
+    if (std::strncmp(line, "VmHWM:", 6) == 0) {
+      v = (u64)std::strtoull(line + 6, nullptr, 10);
+      break;
+    }
+  std::fclose(f);
+  return v;
+}
+void reset_peak_rss() {
+  std::FILE* f = std::fopen("/proc/self/clear_refs", "w");
+  if (!f) return;
+  std::fputs("5\n", f);
+  std::fclose(f);
+}
+
+// Ordonnanceur a BUDGET MEMOIRE : taches par W decroissant (departage
+// deterministe par K), un ouvrier ne demarre une tache que si son
+// majorant tient dans le budget restant. GARDE ANTI-BLOCAGE explicite :
+// une tache seule plus grosse que le budget entier s'execute quand rien
+// d'autre ne tourne — refuser serait un interblocage, tronquer serait un
+// mensonge.
+struct FoldSchedule {
+  size_t workers = 0;
+  double wall_ms = 0;
+  u64 peak_rss_kib_after = 0;
+  u64 max_reserved = 0;
+};
+template <typename Fn>
+FoldSchedule run_folds_budgeted(const std::vector<u64>& weights,
+                                const std::vector<u64>& bytes, int threads,
+                                u64 budget, Fn&& fn) {
+  FoldSchedule out;
+  std::vector<size_t> order(weights.size());
+  for (size_t i = 0; i < order.size(); ++i) order[i] = i;
+  std::stable_sort(order.begin(), order.end(), [&](size_t x, size_t y) {
+    if (weights[x] != weights[y]) return weights[x] > weights[y];
+    return x < y;
+  });
+  size_t T = planned_workers(order.size(), threads);
+  if (g_inj_parallel_ranges_one) T = 1;  // MUTANT (meme primitive aval)
+  if (T < 1) T = 1;
+  std::mutex m;
+  std::condition_variable cv;
+  size_t next = 0;
+  u64 reserved = 0, running = 0;
+  const auto t0 = std::chrono::steady_clock::now();
+  std::vector<std::thread> pool;
+  pool.reserve(T);
+  for (size_t t = 0; t < T; ++t)
+    pool.emplace_back([&] {
+      for (;;) {
+        size_t idx = 0;
+        {
+          std::unique_lock<std::mutex> lk(m);
+          for (;;) {
+            if (next >= order.size()) return;
+            idx = order[next];
+            const bool fits = reserved + bytes[idx] <= budget;
+            const bool alone = running == 0;  // garde anti-blocage
+            if (fits || alone) {
+              ++next;
+              reserved += bytes[idx];
+              ++running;
+              if (reserved > out.max_reserved) out.max_reserved = reserved;
+              break;
+            }
+            cv.wait(lk);
+          }
+        }
+        fn(idx);
+        {
+          std::lock_guard<std::mutex> lk(m);
+          reserved -= bytes[idx];
+          --running;
+        }
+        cv.notify_all();
+      }
+    });
+  out.workers = pool.size();
+  for (auto& th : pool) th.join();
+  out.wall_ms = std::chrono::duration<double, std::milli>(
+                    std::chrono::steady_clock::now() - t0)
+                    .count();
+  out.peak_rss_kib_after = peak_rss_kib();
+  return out;
+}
+
+
 void prefilter_balls(const CloudIndex& ix,
                      const std::vector<BallCandidate>& cands, u64 smax_eff,
                      bool inj_threshold_minus_one, bool inj_range_add_le,
@@ -434,7 +573,8 @@ int forests_from_balls(const std::vector<BallData>& balls,
                        u64 per_k_events[11], ForestResult per_k_result[11],
                        std::vector<std::vector<ForestEvent>>* events_out = nullptr,
                        int threads = 1, bool legacy_partition = true,
-                       BallStreamStats* wst = nullptr) {
+                       BallStreamStats* wst = nullptr,
+                       u64 fold_budget = 2ull << 30) {
   // PHASE A — expansion des plateaux, par TRANCHES de boules : chaque
   // ouvrier remplit ses propres listes par K, la fusion en ordre de
   // tranche restitue EXACTEMENT l'ordre sequentiel des evenements.
@@ -481,17 +621,34 @@ int forests_from_balls(const std::vector<BallData>& balls,
   // `legacy_partition` : la vue map n'est remplie que pour les
   // consommateurs qui la lisent (juge, portes) — le chemin d'echelle
   // vit sur la representation dense facet_keys + final_canon_fid.
-  const size_t actual_fd = parallel_ranges(
-      (size_t)kmax_eff, threads, [&](size_t bg, size_t en, size_t) {
-    for (size_t k0 = bg; k0 < en; ++k0) {
-      const int K = (int)k0 + 1;
-      per_k_events[K] = ev_k[(size_t)K].size();
-      per_k_result[K] = build_forest(ev_k[(size_t)K], false, false, nullptr,
-                                     false, false, false, legacy_partition);
-    }
-  });
-  if (wst)
-    wst->fold_workers_max = std::max(wst->fold_workers_max, (u64)actual_fd);
+  // ORDONNANCEMENT A BUDGET MEMOIRE (reponse d'audit `95061c1` § 3,
+  // adopte APRES la comparaison intra-processus exigee — banc
+  // `--fold-schedule-bench`, mesures au recu). Le decoupage contigu
+  // donnait a un ouvrier 69 % du travail ; l'ordre decroissant sans
+  // borne divise la latence par 2,80 mais reserve 4,32 Go, soit deux
+  // fois le budget. Sous budget de 2 Gio : latence /1,40 pour +0,4 % de
+  // pic RSS, et la reserve reste sous le plafond. Les sorties sont
+  // INDEPENDANTES de l'ordonnancement (signature identique aux trois
+  // modes) : seule la latence et le pic bougent.
+  std::vector<u64> fold_w((size_t)kmax_eff, 0), fold_m((size_t)kmax_eff, 0);
+  for (size_t i = 0; i < (size_t)kmax_eff; ++i) {
+    for (const ForestEvent& e : ev_k[i + 1]) fold_w[i] += (u64)e.q + e.d;
+    fold_m[i] = fold_bytes_upper(ev_k[i + 1]);
+  }
+  const FoldSchedule fsched =
+      run_folds_budgeted(fold_w, fold_m, threads, fold_budget, [&](size_t i) {
+        const int K = (int)i + 1;
+        per_k_events[K] = ev_k[(size_t)K].size();
+        per_k_result[K] = build_forest(ev_k[(size_t)K], false, false, nullptr,
+                                       false, false, false, legacy_partition);
+      });
+  if (wst) {
+    wst->fold_workers_max =
+        std::max(wst->fold_workers_max, (u64)fsched.workers);
+    wst->fold_budget_bytes = fold_budget;
+    wst->fold_reserved_max =
+        std::max(wst->fold_reserved_max, fsched.max_reserved);
+  }
   for (int K = 1; K <= (int)kmax_eff; ++K)
     if (!per_k_result[K].refusal.empty()) {
       // Refus transactionnel de capacite (contre-audit 5d274a1 § 7) :
@@ -1780,7 +1937,147 @@ int run_float_rounding_gate(bool inj_ignore) {
 // alternes R fois, et chaque temps est publie — jamais une moyenne
 // seule. La porte a trois backends garantit par ailleurs que les deux
 // modes rendent le meme objet : le banc ne mesure donc qu'un cout.
-int run_intern_bench(const Args& a) {
+// ---- RAPPORTEUR DU BANC APPARIE (contre-audit 21e617d § 2) -----------
+// Les deux modes sont mesures DANS LE MEME processus, donc le plan est
+// APPARIE : la statistique pertinente est la mediane des rapports
+// r_i = t_streaming_i / t_tri_i, jamais le rapport de deux medianes
+// marginales. Sur les cinq paires publiees le 18 aout, les deux
+// divergent : rapport de medianes 0,843 (« x1,19 ») contre mediane
+// appariee 0,926 (« x1,08 »). Le rapport de medianes reste publie, en
+// second, parce qu'il permet de relire les anciens recus — jamais comme
+// estimateur principal.
+struct BenchPair {
+  double tri = 0, stream = 0;
+  bool tri_first = false;  // ordre d'execution REEL de la paire
+};
+struct PairedReport {
+  double median_ratio = 0;      // mediane des r_i (ESTIMATEUR PRINCIPAL)
+  double median_log_diff = 0;   // mediane de ln(stream) - ln(tri)
+  double ratio_of_medians = 0;  // second, pour relire les anciens recus
+  u64 wins_stream = 0, wins_tri = 0;
+  u64 pairs_tri_first = 0, pairs_stream_first = 0;
+};
+
+double median_of(std::vector<double> v) {
+  if (v.empty()) return 0.0;
+  std::sort(v.begin(), v.end());
+  const size_t m = v.size() / 2;
+  return (v.size() % 2) ? v[m] : 0.5 * (v[m - 1] + v[m]);
+}
+
+PairedReport paired_report(const std::vector<BenchPair>& pairs) {
+  PairedReport rep;
+  std::vector<double> ratios, logs, tri, stream;
+  for (const BenchPair& p : pairs) {
+    if (p.tri <= 0 || p.stream <= 0) continue;
+    ratios.push_back(p.stream / p.tri);
+    logs.push_back(std::log(p.stream) - std::log(p.tri));
+    tri.push_back(p.tri);
+    stream.push_back(p.stream);
+    if (p.stream < p.tri) ++rep.wins_stream; else ++rep.wins_tri;
+    if (p.tri_first) ++rep.pairs_tri_first; else ++rep.pairs_stream_first;
+  }
+  rep.median_ratio = median_of(ratios);
+  rep.median_log_diff = median_of(logs);
+  const double mt = median_of(tri);
+  rep.ratio_of_medians = mt > 0 ? median_of(stream) / mt : 0.0;
+  return rep;
+}
+
+// Le contrebalancement exige un nombre PAIR de paires (bloc ABBA) et au
+// moins quatre : en deca, aucune conclusion ne tient (le test des signes
+// unilateral sur cinq paires donne deja P = 0,1875 pour quatre
+// victoires). Refus AVANT calcul, code 2.
+bool bench_schedule_ok(int repeat) { return repeat >= 4 && (repeat % 2) == 0; }
+
+// Signature du resultat COMPLET, hors chronometrage : le banc doit
+// prouver que l'objet massif qu'il mesure reste identique au fil de la
+// session, pas seulement sur les fixtures de la porte.
+u64 forest_signature(const ForestResult& r) {
+  u64 h = 1469598103934665603ull;
+  const auto mix = [&](u64 v) {
+    h ^= v;
+    h *= 1099511628211ull;
+  };
+  mix(r.facets); mix(r.fusions); mix(r.batches);
+  mix(r.new_attachments); mix(r.attach_violations); mix(r.birth_violations);
+  mix(r.deltas.size()); mix(r.nodes.size()); mix(r.partition_violations);
+  for (const u32 c : r.final_canon_fid) mix(c);
+  for (const FacetKey& k : r.facet_keys) {
+    mix(k.k);
+    for (u8 i = 0; i < k.k; ++i) mix(k.p[i]);
+  }
+  return h;
+}
+
+// PORTE SYNTHETIQUE DU RAPPORTEUR (contre-audit § 3) : des temps
+// FICTIFS suffisent a verifier que le banc publie bien la statistique
+// appariee et refuse un plan non contrebalance — aucun calcul reel,
+// aucune fixture geometrique.
+int run_bench_report_gate() {
+  u64 bad = 0;
+  // Jeu construit pour que les deux statistiques DIVERGENT : le rapport
+  // de medianes vaut 1,0 alors que le streaming gagne trois paires sur
+  // quatre (mediane appariee 0,75).
+  const std::vector<BenchPair> pairs = {
+      {100.0, 75.0, true}, {200.0, 150.0, false},
+      {50.0, 200.0, true}, {400.0, 300.0, false}};
+  const PairedReport rep = paired_report(pairs);
+  // Rapports {0,75 ; 0,75 ; 4,0 ; 0,75} -> tries {0,75 ; 0,75 ; 0,75 ;
+  // 4,0}, mediane paire = 0,75. Rapport de medianes : 175/150 = 1,1667.
+  // (Premiere ecriture de cette fixture : 0,875 — la porte a refuse
+  // AVANT tout banc, exactement son travail.)
+  const double want_ratio = 0.75;
+  if (std::fabs(rep.median_ratio - want_ratio) > 1e-12) {
+    std::fprintf(stderr, "RAPPORTEUR : mediane appariee %.6f (attendu %.6f)\n",
+                 rep.median_ratio, want_ratio);
+    ++bad;
+  }
+  if (std::fabs(rep.ratio_of_medians - rep.median_ratio) < 1e-9) {
+    std::fprintf(stderr,
+                 "PORTE INEFFICACE : le jeu ne separe pas les deux "
+                 "statistiques\n");
+    ++bad;
+  }
+  if (rep.wins_stream != 3 || rep.wins_tri != 1) {
+    std::fprintf(stderr, "RAPPORTEUR : victoires %llu/%llu\n",
+                 (unsigned long long)rep.wins_stream,
+                 (unsigned long long)rep.wins_tri);
+    ++bad;
+  }
+  if (rep.pairs_tri_first != rep.pairs_stream_first) {
+    std::fprintf(stderr, "RAPPORTEUR : ordre non equilibre %llu/%llu\n",
+                 (unsigned long long)rep.pairs_tri_first,
+                 (unsigned long long)rep.pairs_stream_first);
+    ++bad;
+  }
+  for (const int r : {1, 2, 3, 5, 7}) {
+    if (bench_schedule_ok(r)) {
+      std::fprintf(stderr, "PLAN : repeat=%d accepte a tort\n", r);
+      ++bad;
+    }
+  }
+  for (const int r : {4, 6, 10}) {
+    if (!bench_schedule_ok(r)) {
+      std::fprintf(stderr, "PLAN : repeat=%d refuse a tort\n", r);
+      ++bad;
+    }
+  }
+  std::printf("bench_report_gate violations=%llu mediane_appariee=%.4f "
+              "rapport_de_medianes=%.4f victoires=%llu/%llu ordre=%llu/%llu\n",
+              (unsigned long long)bad, rep.median_ratio, rep.ratio_of_medians,
+              (unsigned long long)rep.wins_stream,
+              (unsigned long long)rep.wins_tri,
+              (unsigned long long)rep.pairs_tri_first,
+              (unsigned long long)rep.pairs_stream_first);
+  return bad == 0 ? 0 : 3;
+}
+
+// Construction commune aux deux bancs : le flux WSPD reel jusqu'aux
+// evenements par K. Aucune mesure ici — seulement de quoi mesurer.
+int build_events_for_bench(const Args& a,
+                           std::vector<std::vector<ForestEvent>>* evk,
+                           u64* kmax_out) {
   const std::vector<P3> pts = make_family_cloud(
       a.family, a.n,
       a.coord ? a.coord : cloud_family_default_coord(a.family, a.n), a.seed);
@@ -1807,11 +2104,100 @@ int run_intern_bench(const Args& a) {
   for (size_t u = 0; u < pid_of.size(); ++u) pid_of[u] = ix.point_id((i32)u);
   u64 e1[11] = {};
   ForestResult rr[11];
+  *kmax_out = std::min<u64>(10, a.smax ? a.smax - 1 : 10);
+  return forests_from_balls(balls, ix.upos, pid_of, *kmax_out, e1, rr, evk, 1,
+                            false);
+}
+
+// BANC D'ORDONNANCEMENT DES FOLDS (reponse d'audit `95061c1` § 3) : les
+// TROIS modes sont confrontes DANS LE MEME processus, sur les MEMES
+// evenements — `contiguous_reference` (le defaut historique),
+// `LPT_unbounded` (borne de latence, JAMAIS un defaut : il fait tourner
+// ensemble les K les plus lourds) et `memory_budgeted_LPT`. Chacun
+// publie latence, pic RSS et signature ; la signature doit etre
+// IDENTIQUE aux trois, sans quoi le banc ne mesure pas le meme objet.
+int run_schedule_bench(const Args& a) {
   std::vector<std::vector<ForestEvent>> evk;
-  const u64 kmax = std::min<u64>(10, a.smax ? a.smax - 1 : 10);
-  if (forests_from_balls(balls, ix.upos, pid_of, kmax, e1, rr, &evk, 1,
-                         false) != 0)
+  u64 kmax = 0;
+  if (build_events_for_bench(a, &evk, &kmax) != 0) return 3;
+  const size_t nk = (size_t)kmax;
+  if (nk == 0) return 3;
+  std::vector<u64> W(nk, 0), M(nk, 0);
+  u64 wtot = 0, mtot = 0;
+  for (size_t i = 0; i < nk; ++i) {
+    for (const ForestEvent& e : evk[i + 1]) W[i] += (u64)e.q + e.d;
+    M[i] = fold_bytes_upper(evk[i + 1]);
+    wtot += W[i];
+    mtot += M[i];
+  }
+  for (size_t i = 0; i < nk; ++i)
+    std::printf("fold_cout K=%zu evenements=%zu incidences=%llu "
+                "part_pct=%.1f octets_majorant=%llu\n",
+                i + 1, evk[i + 1].size(), (unsigned long long)W[i],
+                wtot ? 100.0 * (double)W[i] / (double)wtot : 0.0,
+                (unsigned long long)M[i]);
+  std::printf("fold_cout total_incidences=%llu total_octets_majorant=%llu "
+              "budget=%llu\n",
+              (unsigned long long)wtot, (unsigned long long)mtot,
+              (unsigned long long)a.fold_budget);
+
+  std::vector<ForestResult> res(nk + 1);
+  const auto one_fold = [&](size_t idx) {
+    res[idx + 1] = build_forest(evk[idx + 1], false, false, nullptr, false,
+                                false, false, false);
+  };
+  const auto signature_all = [&]() {
+    u64 h = 0;
+    for (size_t i = 1; i <= nk; ++i) h = h * 1099511628211ull ^
+                                         forest_signature(res[i]);
+    return h;
+  };
+  u64 sig_ref = 0;
+  bool same = true;
+  // 1. Reference contigue (le defaut actuel).
+  reset_peak_rss();
+  const auto t0 = std::chrono::steady_clock::now();
+  const size_t w_ref = parallel_ranges(nk, a.threads,
+                                       [&](size_t bg, size_t en, size_t) {
+    for (size_t i = bg; i < en; ++i) one_fold(i);
+  });
+  const double ms_ref = std::chrono::duration<double, std::milli>(
+                            std::chrono::steady_clock::now() - t0).count();
+  const u64 rss_ref = peak_rss_kib();
+  sig_ref = signature_all();
+  std::printf("ordonnancement mode=contiguous_reference ouvriers=%zu "
+              "latence_ms=%.1f pic_rss_kio=%llu octets_reserves_max=0 "
+              "signature=%llx\n",
+              w_ref, ms_ref, (unsigned long long)rss_ref,
+              (unsigned long long)sig_ref);
+  // 2 et 3. LPT sans borne, puis LPT sous budget.
+  const struct { const char* name; u64 budget; } modes[2] = {
+      {"LPT_unbounded", UINT64_MAX}, {"memory_budgeted_LPT", a.fold_budget}};
+  for (const auto& md : modes) {
+    for (size_t i = 1; i <= nk; ++i) res[i] = ForestResult{};
+    reset_peak_rss();
+    const FoldSchedule fs =
+        run_folds_budgeted(W, M, a.threads, md.budget, one_fold);
+    const u64 sig = signature_all();
+    same = same && sig == sig_ref;
+    std::printf("ordonnancement mode=%s ouvriers=%zu latence_ms=%.1f "
+                "pic_rss_kio=%llu octets_reserves_max=%llu signature=%llx\n",
+                md.name, fs.workers, fs.wall_ms,
+                (unsigned long long)fs.peak_rss_kib_after,
+                (unsigned long long)fs.max_reserved,
+                (unsigned long long)sig);
+  }
+  if (!same) {
+    std::fprintf(stderr, "ORDONNANCEMENT : signature differente entre modes\n");
     return 3;
+  }
+  return 0;
+}
+
+int run_intern_bench(const Args& a) {
+  std::vector<std::vector<ForestEvent>> evk;
+  u64 kmax = 0;
+  if (build_events_for_bench(a, &evk, &kmax) != 0) return 3;
   // Le K le plus lourd porte l'essentiel des incidences : c'est lui que
   // le banc mesure (les petits K ne discriminent rien).
   int kbest = 1;
@@ -1827,37 +2213,67 @@ int run_intern_bench(const Args& a) {
               cloud_family_name(a.family), a.n, (long long)a.s,
               (unsigned long long)a.smax, kbest, evk[(size_t)kbest].size(),
               (unsigned long long)recs_best);
-  std::vector<double> tri, stream;
-  u64 facets_ref = 0;
+  if (!bench_schedule_ok(a.bench_repeat)) {
+    std::fprintf(stderr,
+                 "REFUS : --bench-repeat=%d — le contrebalancement exige "
+                 "un nombre PAIR de paires >= 4\n",
+                 a.bench_repeat);
+    return 2;
+  }
+  const auto run_mode = [&](int mode) {
+    return build_forest(evk[(size_t)kbest], false, false, nullptr, false,
+                        false, false, false, 0, 0, 0, 0, 0, mode);
+  };
+  // ECHAUFFEMENT : un passage NON chronometre de chaque mode, pour que la
+  // premiere paire ne porte pas seule le cout de demarrage (pages,
+  // frequence, code chaud).
+  const u64 sig = forest_signature(run_mode(1));
+  if (forest_signature(run_mode(0)) != sig) {
+    std::fprintf(stderr, "BANC : les deux modes ne rendent pas le meme objet\n");
+    return 3;
+  }
+  // ORDRE CONTREBALANCE (contre-audit § 1) : bloc ABBA — paire paire =
+  // tri puis streaming, paire impaire = streaming puis tri. Chaque mode
+  // occupe alors autant de fois chaque position, et l'etat laisse par le
+  // premier passage ne peut plus favoriser systematiquement le second.
+  std::vector<BenchPair> pairs;
   bool same = true;
   for (int i = 0; i < a.bench_repeat; ++i) {
-    for (int mode = 1; mode >= 0; --mode) {  // tri puis streaming
-      const ForestResult rres =
-          build_forest(evk[(size_t)kbest], false, false, nullptr, false, false,
-                       false, false, 0, 0, 0, 0, 0, mode);
-      const double t = rres.t_intern_ms;
-      (mode == 1 ? tri : stream).push_back(t);
-      if (facets_ref == 0) facets_ref = rres.facets;
-      else same = same && rres.facets == facets_ref;
-      std::printf("  repet=%d mode=%s t_intern_ms=%.1f t_scan_ms=%.1f "
-                  "t_sort_ms=%.1f t_remap_ms=%.1f facettes=%llu\n",
-                  i, mode == 1 ? "tri" : "streaming", t,
+    const bool tri_first = (i % 2) == 0;
+    BenchPair bp;
+    bp.tri_first = tri_first;
+    for (int k = 0; k < 2; ++k) {
+      const int mode = (k == 0) == tri_first ? 1 : 0;
+      const ForestResult rres = run_mode(mode);
+      (mode == 1 ? bp.tri : bp.stream) = rres.t_intern_ms;
+      same = same && forest_signature(rres) == sig;
+      std::printf("  repet=%d position=%d mode=%s t_intern_ms=%.1f "
+                  "t_scan_ms=%.1f t_sort_ms=%.1f t_remap_ms=%.1f "
+                  "facettes=%llu\n",
+                  i, k, mode == 1 ? "tri" : "streaming", rres.t_intern_ms,
                   rres.t_intern_scan_ms, rres.t_intern_sort_ms,
                   rres.t_intern_remap_ms, (unsigned long long)rres.facets);
     }
+    pairs.push_back(bp);
   }
-  const auto median = [](std::vector<double> v) {
-    std::sort(v.begin(), v.end());
-    return v.empty() ? 0.0 : v[v.size() / 2];
-  };
-  const double mt = median(tri), msr = median(stream);
-  std::printf("intern_bench mediane_tri_ms=%.1f mediane_streaming_ms=%.1f "
-              "rapport=%.3f facettes_identiques=%s\n",
-              mt, msr, mt > 0 ? msr / mt : 0.0, same ? "oui" : "NON");
+  const PairedReport rep = paired_report(pairs);
+  std::printf("intern_bench_paires");
+  for (const BenchPair& bp : pairs)
+    std::printf(" %.4f", bp.tri > 0 ? bp.stream / bp.tri : 0.0);
+  std::printf("\n");
+  std::printf("intern_bench mediane_appariee=%.4f mediane_log=%.4f "
+              "rapport_de_medianes=%.4f victoires_streaming=%llu/%llu "
+              "ordre_tri_premier=%llu/%llu objet_identique=%s\n",
+              rep.median_ratio, rep.median_log_diff, rep.ratio_of_medians,
+              (unsigned long long)rep.wins_stream,
+              (unsigned long long)(rep.wins_stream + rep.wins_tri),
+              (unsigned long long)rep.pairs_tri_first,
+              (unsigned long long)rep.pairs_stream_first,
+              same ? "oui" : "NON");
   return same ? 0 : 3;
 }
 
-int run_fold_compact_gate(bool inj_root, int inj_intern) {
+int run_fold_compact_gate(bool inj_root, int inj_intern, int inj_det) {
   u64 bad = 0;
   // PLANCHERS DE NON-VACUITE (doctrine : jamais de vert par vacuite) :
   // la porte ne prouve l'internement que si elle DEDOUBLONNE vraiment
@@ -1903,12 +2319,21 @@ int run_fold_compact_gate(bool inj_root, int inj_intern) {
     }
     const ForestResult cp =
         build_forest(fx, false, false, nullptr, false, false, inj_root, true,
-                     0, 0, 0, 0, inj_intern);
-    if (cp.attach_violations != lg.attach_violations ||
-        cp.new_attachments != lg.new_attachments ||
-        cp.batches != lg.batches || cp.deltas.size() != lg.deltas.size() ||
-        !(cp.final_partition == lg.final_partition)) {
-      std::fprintf(stderr, "FIXTURE : divergence legacy/dense (flux ×2)\n");
+                     0, 0, 0, 0, inj_intern, 0, inj_det);
+    // Ce que la fixture exige ICI est le DETECTEUR, pas l'egalite des
+    // sorties : le flux viole par construction l'hypothese du theoreme
+    // (`attach_violations = 0`) sous laquelle les deux backends sont
+    // prouves egaux. Depuis la reponse d'audit `95061c1`, le fold ne lit
+    // plus `first_batch` dans sa semantique — donc hors hypothese, le
+    // backend fige et le fold compact classent legitimement `{1,2}`
+    // differemment. Exiger leur egalite ici reviendrait a graver un
+    // comportement hors contrat.
+    if (cp.batches != lg.batches || cp.attach_violations != 1) {
+      std::fprintf(stderr,
+                   "FIXTURE : detecteur muet ou lots faux (lots=%llu "
+                   "attach=%llu)\n",
+                   (unsigned long long)cp.batches,
+                   (unsigned long long)cp.attach_violations);
       ++bad;
     }
   }
@@ -1961,7 +2386,7 @@ int run_fold_compact_gate(bool inj_root, int inj_intern) {
       {
         const ForestResult tr =
             build_forest(evk[(size_t)K], false, false, nullptr, false, false,
-                         inj_root, true, 0, 0, 0, 0, inj_intern, 1);
+                         inj_root, true, 0, 0, 0, 0, inj_intern, 1, inj_det);
         if (tr.facets != cp.facets || tr.fusions != cp.fusions ||
             tr.batches != cp.batches ||
             tr.new_attachments != cp.new_attachments ||
@@ -1979,6 +2404,8 @@ int run_fold_compact_gate(bool inj_root, int inj_intern) {
       bool same = lg.facets == cp.facets && lg.fusions == cp.fusions &&
                   lg.batches == cp.batches &&
                   lg.new_attachments == cp.new_attachments &&
+                  lg.attach_violations == cp.attach_violations &&
+                  lg.birth_violations == cp.birth_violations &&
                   lg.nodes.size() == cp.nodes.size() &&
                   lg.deltas.size() == cp.deltas.size() &&
                   lg.batch_levels.size() == cp.batch_levels.size() &&
@@ -2015,7 +2442,7 @@ int run_fold_compact_gate(bool inj_root, int inj_intern) {
               (unsigned long long)bad, (unsigned long long)tot_recs,
               (unsigned long long)tot_facets,
               (unsigned long long)tot_batches);
-  if (inj_root || inj_intern) {
+  if (inj_root || inj_intern || inj_det) {
     if (bad > 0) {
       std::printf("MUTANT TUE\n");
       return 4;
@@ -2570,9 +2997,12 @@ int main(int argc, char** argv) {
   if (a.par_gate)
     return run_par_gate(a.inj_par_drop, a.inj_par_drop_census);
   if (a.q2_birth_gate) return run_q2_birth_gate(a.inj_birth_dup);
+  if (a.bench_report_gate) return run_bench_report_gate();
+  if (a.schedule_bench) return run_schedule_bench(a);
   if (a.intern_bench) return run_intern_bench(a);
   if (a.fold_compact_gate)
-    return run_fold_compact_gate(a.inj_canon_root, a.inj_fold_intern);
+    return run_fold_compact_gate(a.inj_canon_root, a.inj_fold_intern,
+                                 a.inj_detector);
   if (a.float_gate)
     return run_float_gate((a.inj_axial & kFloatSmallThreshold) != 0);
   if (a.q3_affine_gate)
@@ -3015,6 +3445,12 @@ int main(int argc, char** argv) {
               (unsigned long long)st.expansion_workers,
               (unsigned long long)st.fold_workers_max, aff,
               aff_mask.empty() ? "?" : aff_mask.c_str());
+  // Ordonnancement des folds : plafond declare et reserve maximale
+  // effectivement atteinte (ligne SEPAREE — le validateur de campagne
+  // ancre `execution` de ^ a $).
+  std::printf("fold_ordonnancement budget_octets=%llu reserves_max_octets=%llu\n",
+              (unsigned long long)st.fold_budget_bytes,
+              (unsigned long long)st.fold_reserved_max);
   if (a.digest) print_canonical_digests(cands, sres, kmax_eff);
   std::printf("q3_scan_sites_par_cover <256=%llu <1024=%llu <4096=%llu "
               ">=4096=%llu\n",

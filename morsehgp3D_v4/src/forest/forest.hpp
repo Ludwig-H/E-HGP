@@ -247,28 +247,25 @@ struct FacetIntern {
   static constexpr u64 kTag = 0xFFFFFFFF00000000ull;
   std::vector<u64> table;                      // cases
   std::vector<std::pair<FacetKey, u32>> pool;  // tid -> (cle, tid)
-  std::vector<u32> batch;                      // tid -> premier lot
   size_t mask = 0;
-  // MUTANTS (chacun degrade UNE garantie) : `no_verify` decide
-  // l'appartenance sur huit bits d'empreinte SANS comparer la cle ;
-  // `batch_last` garde le DERNIER lot au lieu du premier.
-  bool no_verify = false, batch_last = false;
+  // MUTANT : `no_verify` decide l'appartenance sur huit bits d'empreinte
+  // SANS comparer la cle.
+  bool no_verify = false;
 
   // DIMENSIONNEMENT UNE FOIS POUR TOUTES a partir du nombre d'incidences
   // (majorant EXACT du nombre de facettes uniques : l'internement
-  // dedoublonne, jamais n'ajoute) : la table ne rehache JAMAIS et les
-  // trois tableaux ne se reallouent jamais. Le rehachage par doublement
-  // coutait deux fois le nombre de facettes en sondages aleatoires
-  // supplementaires — mesure du 18 aout — pour une capacite finale
-  // identique. `reserve` ne touche pas les pages : le RSS suit les
-  // facettes reellement internees, pas le majorant.
+  // dedoublonne, jamais n'ajoute) : la table ne rehache JAMAIS et le
+  // pool ne se realloue jamais. Le rehachage par doublement coutait deux
+  // fois le nombre de facettes en sondages aleatoires supplementaires —
+  // mesure du 18 aout — pour une capacite finale identique. `reserve` ne
+  // touche pas les pages : le RSS suit les facettes reellement
+  // internees, pas le majorant.
   explicit FacetIntern(size_t incidences) {
     size_t cap = 1024;
     while (cap < incidences * 2 + 2) cap <<= 1;
     table.assign(cap, 0);
     mask = cap - 1;
     pool.reserve(incidences);
-    batch.reserve(incidences);
   }
 
   // Prefetch de la case visee : la table depasse largement les caches
@@ -283,11 +280,9 @@ struct FacetIntern {
 #endif
   }
 
-  u32 intern(const FacetKey& f, u32 b) {
-    return intern_hashed(f, facet_fingerprint(f), b);
-  }
+  u32 intern(const FacetKey& f) { return intern_hashed(f, facet_fingerprint(f)); }
 
-  u32 intern_hashed(const FacetKey& f, u64 h, u32 b) {
+  u32 intern_hashed(const FacetKey& f, u64 h) {
     const u64 tag = h & kTag;
     size_t i = (size_t)h & mask;
     while (table[i] != 0) {
@@ -296,16 +291,11 @@ struct FacetIntern {
           no_verify ? (((table[i] ^ tag) & (0xFFull << 32)) == 0)
                     : ((table[i] & kTag) == tag &&
                        facet_equal_k(pool[(size_t)tid].first, f));
-      if (hit) {
-        batch[(size_t)tid] =
-            batch_last ? b : std::min(batch[(size_t)tid], b);
-        return tid;
-      }
+      if (hit) return tid;
       i = (i + 1) & mask;
     }
     const u32 tid = (u32)pool.size();
     pool.push_back({f, tid});
-    batch.push_back(b);
     table[i] = tag | (u64)(tid + 1);
     return tid;
   }
@@ -532,14 +522,19 @@ inline ForestResult build_forest_legacy(
 // `snapshots` (optionnel) : partition canonique apres CHAQUE macro-lot
 // (facette -> plus petite facette de sa composante), pour le juge.
 inline ForestResult build_forest(
-    std::vector<ForestEvent> events, bool mutant_binary_ties = false,
+    const std::vector<ForestEvent>& events, bool mutant_binary_ties = false,
     bool mutant_repr_equality = false,
     std::vector<std::map<FacetKey, FacetKey>>* snapshots = nullptr,
     bool mutant_attach_prebatch = false,
     bool mutant_drop_nonmerge = false, bool mutant_canon_root = false,
     bool fill_legacy_partition = true, u64 cap_base_events = 0,
     u64 cap_base_recs = 0, u64 cap_base_batches = 0,
-    int mutant_capacity = 0, int mutant_intern = 0, int intern_mode = 0) {
+    int mutant_capacity = 0, int mutant_intern = 0, int intern_mode = 0,
+    int mutant_detector = 0) {
+  // Mutants du DETECTEUR (reponse d'audit `95061c1` § 2) : 1 = detecteur
+  // desactive ; 2 = `seen` marque AVANT le controle du lot.
+  const bool mutant_no_detector = mutant_detector == 1;
+  const bool mutant_seen_before = mutant_detector == 2;
   ForestResult r;
   // GARDE DE CAPACITE TRANSACTIONNELLE (contre-audit 5d274a1 § 7) : les
   // index LOCAUX du fold sont volontairement etroits (FRec::e en u32,
@@ -578,10 +573,22 @@ inline ForestResult build_forest(
     *out += std::chrono::duration<double, std::milli>(now - tf).count();
     tf = now;
   };
-  std::stable_sort(events.begin(), events.end(),
-                   [](const ForestEvent& x, const ForestEvent& y) {
-                     return compare_exact_level(x.level, y.level) < 0;
-                   });
+  // PERMUTATION COMPACTE plutot qu'une copie des enregistrements
+  // (reponse d'audit `95061c1` § 3, etape prealable) : `build_forest`
+  // recevait ses evenements PAR VALEUR pour les trier, donc chaque fold
+  // concurrent payait une copie complete de `ForestEvent` (~130 octets
+  // par evenement, ~400 Mo cumules a n=8000). Un tableau d'indices u32
+  // suffit : le contrat public est intact — `batch_of_event` et `ev_fid`
+  // restent indexes par la POSITION DANS L'ORDRE TRIE, exactement comme
+  // avant.
+  std::vector<u32> order(events.size());
+  for (size_t i = 0; i < order.size(); ++i) order[i] = (u32)i;
+  std::stable_sort(order.begin(), order.end(), [&](u32 x, u32 y) {
+    return compare_exact_level(events[x].level, events[y].level) < 0;
+  });
+  const auto evt = [&](size_t i) -> const ForestEvent& {
+    return events[(size_t)order[i]];
+  };
   // LOTS d'abord (independants des unions) : plages de niveaux
   // semantiquement egaux. MUTANTS : ties binaires (lot force a un seul
   // evenement) ou egalite de REPRESENTATION (le piege grave par l'audit :
@@ -595,8 +602,8 @@ inline ForestResult build_forest(
       while (b1 < events.size()) {
         const bool same =
             mutant_repr_equality
-                ? same_level_representation(events[b1].level, events[b0].level)
-                : same_exact_level(events[b1].level, events[b0].level);
+                ? same_level_representation(evt(b1).level, evt(b0).level)
+                : same_exact_level(evt(b1).level, evt(b0).level);
         if (mutant_binary_ties || !same) break;
         ++b1;
       }
@@ -622,13 +629,20 @@ inline ForestResult build_forest(
   // INVARIANT PUBLIC INCHANGE ET INDEPENDANT DU HACHAGE : les fid sont
   // attribues en ordre de FacetKey croissante (le tri final est la
   // seule autorite d'ordre — l'empreinte et le sondage n'entrent dans
-  // aucune sortie) ; first_batch rend `existed` = « vue dans un lot
-  // STRICTEMENT anterieur » en O(1). MUTANTS : 1 = fid en ordre de
-  // rencontre (le tri saute) ; 2 = appartenance sur huit bits
-  // d'empreinte sans comparaison de cle ; 3 = dernier lot au lieu du
-  // premier.
+  // aucune sortie). MUTANTS : 1 = fid en ordre de rencontre (le tri
+  // saute) ; 2 = appartenance sur huit bits d'empreinte sans
+  // comparaison de cle.
+  //
+  // L'internement ne porte PLUS le premier lot de chaque facette
+  // (reponse d'audit `95061c1` § 2) : sur un flux sans
+  // `attach_violations`, `S_b(f) => A_b(f)`, donc `active ∨ existed =
+  // active` et `attach ∧ ¬active ∧ ¬existed = attach ∧ ¬active` — la
+  // semantique n'a jamais eu besoin de cette donnee. Elle est remplacee
+  // par un bit `seen` EN LIGNE, mis a jour APRES le lot, qui ne sert
+  // qu'au detecteur. Gain concret : un u32 par facette unique
+  // (74 MiB touches a n=8000) et une ecriture ALEATOIRE de moins par
+  // sondage reussi du chemin chaud.
   std::vector<FacetKey> keys;          // fid -> FacetKey (ordre croissant)
-  std::vector<u32> first_batch;        // fid -> premier lot d'apparition
   std::vector<u32> ev_fid(events.size() * 11);  // (e, slot) -> fid
   if (intern_mode == 1) {
     // MODE 1 — INTERNEMENT PAR TRI GLOBAL (l'historique, conserve comme
@@ -647,7 +661,7 @@ inline ForestResult build_forest(
     std::vector<FRec> recs;
     recs.reserve((size_t)total_recs);
     for (size_t e = 0; e < events.size(); ++e) {
-      const ForestEvent& ev = events[e];
+      const ForestEvent& ev = evt(e);
       for (int s = 0; s < (int)ev.q; ++s)
         recs.push_back({detail_forest::facet_minus(ev, s, -1), (u32)e, (u8)s});
       for (int z = 0; z < (int)ev.d; ++z)
@@ -658,20 +672,13 @@ inline ForestResult build_forest(
                      [](const FRec& x, const FRec& y) { return x.f < y.f; });
     mark(&r.t_intern_scan_ms);
     for (size_t i = 0; i < recs.size(); ++i) {
-      if (i == 0 || !(recs[i].f == recs[i - 1].f)) {
-        keys.push_back(recs[i].f);
-        first_batch.push_back(UINT32_MAX);
-      }
-      const u32 fid = (u32)keys.size() - 1;
-      ev_fid[(size_t)recs[i].e * 11 + recs[i].slot] = fid;
-      first_batch.back() =
-          std::min(first_batch.back(), (u32)r.batch_of_event[recs[i].e]);
+      if (i == 0 || !(recs[i].f == recs[i - 1].f)) keys.push_back(recs[i].f);
+      ev_fid[(size_t)recs[i].e * 11 + recs[i].slot] = (u32)keys.size() - 1;
     }
     mark(&r.t_intern_remap_ms);
   } else {
     detail_forest::FacetIntern in((size_t)total_recs);
     in.no_verify = mutant_intern == 2;
-    in.batch_last = mutant_intern == 3;
     // PIPELINE LOGICIEL : un bloc de 48 incidences calcule d'abord ses
     // cles et ses empreintes (tout tient en L1) en PRECHARGEANT les
     // cases visees, puis sonde. Sans lui le balayage est une chaine de
@@ -684,33 +691,29 @@ inline ForestResult build_forest(
       struct Pending {
         FacetKey f;
         u64 h;
-        u32 b;
         size_t pos;  // e*11+slot : jamais un u32 (e va jusqu'a UINT32_MAX)
       };
       std::array<Pending, kBlock> pend{};
       size_t np = 0;
       const auto flush = [&]() {
         for (size_t i = 0; i < np; ++i)
-          ev_fid[pend[i].pos] = in.intern_hashed(pend[i].f, pend[i].h,
-                                                 pend[i].b);
+          ev_fid[pend[i].pos] = in.intern_hashed(pend[i].f, pend[i].h);
         np = 0;
       };
-      const auto push = [&](const FacetKey& f, u32 b, size_t pos) {
+      const auto push = [&](const FacetKey& f, size_t pos) {
         Pending& p = pend[np];
         p.f = f;
         p.h = detail_forest::facet_fingerprint(f);
-        p.b = b;
         p.pos = pos;
         in.prefetch(p.h);
         if (++np == kBlock) flush();
       };
       for (size_t e = 0; e < events.size(); ++e) {
-        const ForestEvent& ev = events[e];
-        const u32 b = (u32)r.batch_of_event[e];
+        const ForestEvent& ev = evt(e);
         for (int s = 0; s < (int)ev.q; ++s)
-          push(detail_forest::facet_minus(ev, s, -1), b, e * 11 + (size_t)s);
+          push(detail_forest::facet_minus(ev, s, -1), e * 11 + (size_t)s);
         for (int z = 0; z < (int)ev.d; ++z)
-          push(detail_forest::facet_minus(ev, -1, z), b,
+          push(detail_forest::facet_minus(ev, -1, z),
                e * 11 + (size_t)(ev.q + z));
       }
       flush();
@@ -728,18 +731,15 @@ inline ForestResult build_forest(
     mark(&r.t_intern_sort_ms);
     const size_t np = in.pool.size();
     keys.resize(np);
-    first_batch.resize(np);
     std::vector<u32> rank(np);
     for (size_t i = 0; i < np; ++i) {
       keys[i] = in.pool[i].first;
-      first_batch[i] = in.batch[(size_t)in.pool[i].second];
       rank[(size_t)in.pool[i].second] = (u32)i;
     }
     std::vector<std::pair<FacetKey, u32>>().swap(in.pool);
-    std::vector<u32>().swap(in.batch);
     // Retour des identifiants temporaires vers les fid publies.
     for (size_t e = 0; e < events.size(); ++e) {
-      const ForestEvent& ev = events[e];
+      const ForestEvent& ev = evt(e);
       for (int t = 0; t < (int)ev.q + (int)ev.d; ++t) {
         u32& slot = ev_fid[e * 11 + (size_t)t];
         slot = rank[(size_t)slot];
@@ -783,6 +783,9 @@ inline ForestResult build_forest(
   // le brouillon de deltas est REUTILISE entre les lots (capacites
   // conservees — les seules allocations restantes sont celles des
   // deltas effectivement EMIS, CSR en reserve si la mesure l'exige).
+  // Bit `seen` : facette rencontree dans un lot STRICTEMENT anterieur.
+  // Instrument du detecteur, jamais une entree du calcul.
+  std::vector<u8> seen(nfid, 0);
   std::vector<u32> pre_epoch(nfid, UINT32_MAX), post_epoch(nfid, UINT32_MAX);
   std::vector<u32> pre_canon_fid(nfid), post_slot(nfid);
   std::vector<i32> pre_list, post_list;
@@ -804,31 +807,43 @@ inline ForestResult build_forest(
       role_bits[fid] |= bit;
     };
     for (size_t e = e0; e < e1; ++e) {
-      const ForestEvent& ev = events[e];
+      const ForestEvent& ev = evt(e);
       for (int s = 0; s < (int)ev.q; ++s)
         touch(ev_fid[e * 11 + (size_t)s],
               ((ev.active_mask >> s) & 1u) ? kActive : kAttach);
       for (int z = 0; z < (int)ev.d; ++z)
         touch(ev_fid[e * 11 + (size_t)(ev.q + z)], kAttach);
     }
+    // DETECTEUR SEPARE DE LA SEMANTIQUE (reponse d'audit `95061c1` § 2).
+    // `seen` n'entre dans AUCUNE decision du fold : il ne sert qu'aux
+    // deux compteurs, et il est mis a jour APRES le lot (le lot courant
+    // n'est pas « anterieur »). MUTANTS : `attach-detector-disabled`
+    // (le detecteur ne compte plus rien — la fixture de flux incoherent
+    // le tue) ; `seen-before-check` (mise a jour AVANT le controle —
+    // tous les premiers attachements sont alors signales a tort, et les
+    // familles geometriques regulieres le tuent).
+    if (mutant_seen_before)
+      for (const u32 fid : touched_fids) seen[fid] = 1;
     for (const u32 fid : touched_fids) {
-      const bool existed = first_batch[fid] < (u32)b;
       const bool active = role_bits[fid] & kActive;
       const bool attach = role_bits[fid] & kAttach;
       // Invariants (audit § 3) : un attachement deja vu, ou une facette a
       // la fois active et attachement au meme niveau, refutent la
       // coherence des rayons de naissance du flux.
-      if (attach && existed) ++r.attach_violations;
-      if (attach && active) ++r.birth_violations;
-      if (attach && !existed && !active) ++r.new_attachments;
+      if (!mutant_no_detector) {
+        if (attach && seen[fid]) ++r.attach_violations;
+        if (attach && active) ++r.birth_violations;
+      }
+      if (attach && !active) ++r.new_attachments;
     }
-    // Racines PRE-LOT : actives (leur rayon de naissance est strictement
-    // inferieur, meme jamais rencontrees) OU preexistantes. MUTANT
-    // attach-prebatch : l'ancienne convention fausse (tout le lot).
+    // Racines PRE-LOT : les ACTIVES, point (leur rayon de naissance est
+    // strictement inferieur, meme jamais rencontrees). Le terme
+    // « preexistante » etait redondant : sans `attach_violations`,
+    // `S_b(f) => A_b(f)`. MUTANT attach-prebatch : l'ancienne convention
+    // fausse (tout le lot).
     pre_list.clear();
     for (const u32 fid : touched_fids)
-      if (mutant_attach_prebatch || (role_bits[fid] & kActive) ||
-          first_batch[fid] < (u32)b) {
+      if (mutant_attach_prebatch || (role_bits[fid] & kActive)) {
         const i32 pr = uf.find((i32)fid);
         if (pre_epoch[(size_t)pr] != (u32)b) {
           pre_epoch[(size_t)pr] = (u32)b;
@@ -840,7 +855,7 @@ inline ForestResult build_forest(
     std::sort(pre_list.begin(), pre_list.end());
     // Unions du lot : chemin sur les K+1 facettes de chaque evenement.
     for (size_t e = e0; e < e1; ++e) {
-      const ForestEvent& ev = events[e];
+      const ForestEvent& ev = evt(e);
       i32 first = -1;
       for (int s = 0; s < (int)ev.q; ++s) {
         const i32 v = (i32)ev_fid[e * 11 + (size_t)s];
@@ -875,8 +890,7 @@ inline ForestResult build_forest(
     for (const i32 pr : pre_list)
       post_of(uf.find(pr)).parents.push_back(keys[pre_canon_fid[(size_t)pr]]);
     for (const u32 fid : touched_fids)
-      if ((role_bits[fid] & kAttach) && !(role_bits[fid] & kActive) &&
-          first_batch[fid] >= (u32)b)
+      if ((role_bits[fid] & kAttach) && !(role_bits[fid] & kActive))
         post_of(uf.find((i32)fid)).born.push_back(keys[fid]);
     // Emission en ordre de racine croissante (l'ordre observable
     // historique de la map) ; nœuds (vue derivee) : >= 2 parents.
@@ -890,18 +904,22 @@ inline ForestResult build_forest(
       if (cd.parents.size() == 1 && cd.born.empty()) continue;  // continuation
       if (mutant_drop_nonmerge && cd.parents.size() < 2) continue;
       cd.batch = (u64)b;
-      cd.level = events[e0].level;
+      cd.level = evt(e0).level;
       cd.output = keys[canon_fid[(size_t)uf.find(rt)]];
       r.deltas.push_back(cd);
     }
-    r.batch_levels.push_back(events[e0].level);
+    r.batch_levels.push_back(evt(e0).level);
+    // FIN DE LOT : le lot courant devient « anterieur ». `seen` ne
+    // gouverne rien avant ce point.
+    if (!mutant_seen_before)
+      for (const u32 fid : touched_fids) seen[fid] = 1;
     if (snapshots) {
       // Instantane (petits n seulement) : les facettes DEJA VUES jusqu'au
-      // lot courant inclus (first_batch <= b), en ordre de FacetKey — le
-      // canonique du bloc est le min, deja maintenu dans canon_of.
+      // lot courant INCLUS — `seen` vient d'etre mis a jour — en ordre de
+      // FacetKey ; le canonique du bloc est le min, deja maintenu.
       std::map<FacetKey, FacetKey> part;
       for (size_t fid = 0; fid < nfid; ++fid)
-        if (first_batch[fid] <= (u32)b)
+        if (seen[fid])
           part[keys[fid]] = keys[canon_fid[(size_t)uf.find((i32)fid)]];
       snapshots->push_back(std::move(part));
     }

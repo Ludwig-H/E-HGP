@@ -167,8 +167,34 @@ puis les clés UNIQUES seules sont triées. L'invariant public — fid
 croissant ⟺ FacetKey croissante, donc canonique = min-fid — ne dépend
 PAS du hachage : le tri final est la seule autorité d'ordre. Le backend
 FIGÉ `build_forest_legacy` garde le tri global et sert de témoin
-(`--fold-compact-gate`, planchers d'incidences/facettes/lots). Reçu :
-`ADDENDUM_INTERNEMENT_STREAMING_20260818.md`.
+(`--fold-compact-gate`, planchers d'incidences/facettes/lots).
+
+Gain **mesuré par banc apparié contrebalancé** (`--fold-intern-bench`,
+dix paires ABBA, échauffement, signature vérifiée) : médiane des
+rapports appariés **0,8769 → ×1,14** sur l'internement du K dominant à
+n=8000, dix victoires sur dix (`P = 1/1024`). Le rapport de médianes
+marginales n'est PAS l'estimateur (il donne ×1,13 ici, ×1,32 sur une
+autre série, ×1,08 sur les cinq paires biaisées du 18 août). Reçus :
+`ADDENDUM_INTERNEMENT_STREAMING_20260818.md` (structure et mémoire, ses
+facteurs temporels sont RETIRÉS) puis
+`ADDENDUM_BANC_APPARIE_ET_ORDONNANCEMENT_20260819.md` (protocole
+corrigé, chiffres retenus).
+
+### 2.11 `first_batch` hors sémantique, ordonnancement à budget (LIVRÉ, 19 août)
+
+`first_batch` n'était pas une entrée du calcul : sur un flux sans
+`attach_violations`, `S_b(f) ⟹ A_b(f)`. Il est supprimé (−74,3 Mio
+touchés et une écriture aléatoire de moins par sondage réussi) et
+remplacé par un bit `seen` mis à jour APRÈS le lot, qui n'alimente que
+les deux compteurs. Mutants `attach-detector-disabled` et
+`seen-before-check`. `build_forest` reçoit ses événements par
+référence et trie une permutation compacte d'indices (fin des ~400 Mo
+de copies cumulées). L'ordonnancement des dix folds passe de tranches
+contiguës (un ouvrier portait 69 % du travail) à `memory_budgeted_LPT` :
+latence /1,40 pour +0,4 % de pic RSS, réserve sous le plafond déclaré ;
+`LPT_unbounded` (/2,80) reste une BORNE, jamais un défaut — il réserve
+deux fois le budget. Signature identique aux trois modes. Reçu :
+`ADDENDUM_BANC_APPARIE_ET_ORDONNANCEMENT_20260819.md`.
 
 ## 3. Carte de l'implémentation
 
@@ -232,7 +258,10 @@ comparaison de constante entre deux processus ne conclut ; les
 comparaisons de représentation se font par alternance INTRA-processus
 (`--fold-intern-bench` en est l'instrument). Profil du fold à n=8000
 mesuré ce jour, pour mémoire et non comme référence :
-batching ~3 s, intern ~29 s, reduce ~21 s, partition ~1 s.
+batching ~3 s, intern ~29 s, reduce ~21 s, partition ~1 s. Depuis le
+19 août, toute comparaison de representations se fait par banc APPARIE
+CONTREBALANCE intra-processus (médiane des rapports par paire, jamais
+rapport de médianes) — voir § 2.10.
 
 ## 5. Chantiers ouverts, par priorité
 

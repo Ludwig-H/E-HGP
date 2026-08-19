@@ -1,5 +1,17 @@
 # Addendum — internement du fold en streaming (le tableau d'incidences disparaît)
 
+> **ERRATUM du 19 août (contre-audit `21e617d`).** Les facteurs
+> temporels de ce reçu — ×1,19 à n=8000, ×1,58 à n=4000 — et la phrase
+> « le gain décroît avec la taille » sont **RETIRÉS**. Le banc n'était
+> pas contrebalancé (le streaming était toujours le second de la paire,
+> donc bénéficiaire de l'état laissé par le premier) et publiait le
+> rapport de deux médianes marginales au lieu de la statistique du plan
+> APPARIÉ. Chiffres retenus après correction du protocole :
+> `ADDENDUM_BANC_APPARIE_ET_ORDONNANCEMENT_20260819.md` — médiane des
+> rapports appariés **0,8769 (×1,14)**, dix victoires sur dix. Ce qui
+> reste valide ici : l'exactitude, la structure, les portes, la mémoire
+> et la décomposition des sous-postes.
+
 Date : 18 août 2026. Exécute le § 3 et le n° 5 de l'« ordre
 recommandé » de la réponse d'audit `57523a` (« aucun vecteur global
 n'est nécessaire »), côté fold. Base de comparaison : `main@7d464db`.
