@@ -226,16 +226,57 @@ seule est donc une condition **nécessaire** — un préfiltre exact, en
 seules longueurs carrées, sans centre ni division, en i128
 (`< 2^105,4`, borne dérivée ici).
 
-Seule la face `abx` est branchée : ses coefficients s'amortissent une
-fois par seed, il ne reste que trois produits i128 par paire, et elle
-capture **80,7 %** des rejets du centre à n=8000 (81,2 / 63,7 / 85,9 %
-selon la famille à n=800), **zéro faux rejet**. Coût apparié
-contrebalancé, n=8000, dix paires : **×1,042 sur `t_gen`**, dix
-victoires sur dix, flux identique. Portes : équivalence à l'oracle
-rationnel avec planchers de frontière et des deux configurations que les
-fixtures v3 opposent, plus une porte de **câblage** sur le flux réel
-(faux rejets) — quatre mutants tués. Reçu :
-`ADDENDUM_PREFILTRE_Q4_EQUATORIAL_20260819.md`.
+Seule la face `abx` est branchée. **Elle n'a pas de primitive propre** :
+le contre-audit `7420355` a montré que $\mathrm{Pow}_{abx}(y) = 2 \lambda_y h^2$,
+donc que son signe **est** l'un des quatre signes barycentriques que
+`q4_center_strictly_inside` calcule déjà, et que `q3_power(f3s, y)` — la
+forme du seed, construite une fois par seed — le donne à un facteur
+$G > 0$ près. La formule en six longueurs écrite le 19 août est
+**rétrogradée en oracle croisé** (`equatorial_power4` dans
+`mhgp4_q4_oracle`), plus jamais sur le chemin de production.
+
+Devant elle, un **étage zéro purement i64** (addendum `6a2bc96`) :
+$2 \max(l_{ay}, l_{by}, l_{xy}) > D^2$ et
+$\max(l_{ax}+l_{ay}, l_{bx}+l_{by}) > D^2$, deux conséquences nécessaires
+du bien-centrage en `max/add/compare`.
+
+Rendement à n=8000 : sur **87 499 759** paires entrantes, l'étage i64 en
+retire **13 353 260** (15,3 %) avant tout `i128`, la puissance
+43 921 721 de plus ; total **57 274 981** = **80,65 %** des rejets du
+centre, **zéro faux rejet**.
+
+**Deux compteurs, parce que le contrat a deux moitiés** : `faux_rejets`
+voit une garde trop agressive ; seul `frontieres_manquees` voit une garde
+trop **permissive**, qui n'a rien tué à tort mais a omis de tuer la
+frontière $\mathrm{Pow}=0$ (« centre dans le plan de la face »). C'est ce
+second compteur qui a imposé un quatrième nuage de porte — 200 points
+dans $14^3$ sites, où les quadruples cosphériques sont fréquents ; sur
+les trois emprises par défaut la frontière n'apparaît que 17 fois et le
+mutant `nonstrict` n'était **pas** discriminé.
+
+Quatre mutants tués en code 4 : `seed-face-power-nonstrict` (1 524
+frontières manquées), `seed-face-power-sign` (657 986 faux rejets),
+`seed-i64-vertex-y-drop-factor`, `seed-i64-pair-xy-min`.
+
+**Le ×1,042 publié le 19 août est retiré** : le bras témoin du banc
+calculait le préfiltre puis jetait le résultat — « court-circuité »
+contre « calculé puis jeté », pas « avec » contre « sans ». Bancs
+appariés corrigés (n=8000, dix paires contrebalancées) :
+
+- **cascade complète contre aucun préfiltre** — médiane appariée
+  **0,9479 → ×1,055**, 9 victoires sur 10 ($P = 0{,}011$). Le préfiltre
+  vaut son coût, contre un chemin qui existerait sans lui.
+- **cascade complète contre puissance seule** (l'étage i64 vaut-il son
+  coût ?) — médiane appariée **1,0021**, 8 victoires sur 20 à vingt
+  paires. **Aucun gain de temps mesurable.** À dix paires le même banc
+  affichait ×1,013 et 8/10 : c'était du bruit. L'étage est conservé sur
+  un argument *compté* et non chronométré — il retire ~40 millions de
+  multiplications `i128` du chemin chaud, ressource rare du port GPU —
+  et un seul mode le supprime.
+
+Reçus : `ADDENDUM_PREFILTRE_Q4_EQUATORIAL_20260819.md` (le lemme, l'oracle
+et les planchers ; son § 5 est retiré par le suivant) puis
+`ADDENDUM_FRONTIERE_STRICTE_ET_ETAGE_I64_20260819.md`.
 
 ## 3. Carte de l'implémentation
 
@@ -258,7 +299,7 @@ bench/forest_probe.cpp      pipeline aval (RLE → préfiltre → census →
                             digest canonique, preflight
 oracle/                     juge indépendant (arithmétique propre)
 tests/                      selftests unitaires (obig, tree, forest…)
-CMakeLists.txt              130 CTests — dont ~la moitié de portes
+CMakeLists.txt              144 CTests — dont ~la moitié de portes
                             négatives à code EXACT (1/2/3/4)
 ```
 

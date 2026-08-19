@@ -98,10 +98,21 @@ struct Args {
   bool inj_ranges_one_worker = false;
   bool inj_q3_one_worker = false;
   bool inj_wspd_one_worker = false;
-  bool q4_eq_prefilter = true;  // prefiltre par puissance equatoriale
+  // Prefiltre q4 par puissance equatoriale. 0 = eteint, 1 = production
+  // (cascade complete, court-circuit), 2 = instrumente (sans
+  // court-circuit, frontieres comptees), 3 = puissance seule (etage i64
+  // saute). Details et justification : `ball_stream.hpp`.
+  int q4_eq_mode = 1;
   bool q4_eq_gate = false;
   bool q4_prefilter_bench = false;
-  bool inj_q4_eq_wrong = false;
+  bool inj_q4_eq_nonstrict = false;
+  bool inj_q4_eq_sign = false;
+  bool inj_q4_i64_y = false;
+  bool inj_q4_i64_xy = false;
+  // Mode du bras TEMOIN du banc apparie : 0 = rien du tout (« avec »
+  // contre « sans »), 3 = puissance de face seule (« avec l'etage i64 »
+  // contre « sans l'etage i64 » — la question de reception `6a2bc96`).
+  int q4_bench_control = 0;
   bool digest_gate = false;
   int inj_fold_capacity = 0;  // 1 = u32-event-wrap, 2 = i32-fid-wrap,
                               // 3 = epoch-sentinel-collision
@@ -198,10 +209,19 @@ Args parse(int argc, char** argv) {
       a.inj_ranges_one_worker = true;
     else if (arg == "--inject=q3-one-worker") a.inj_q3_one_worker = true;
     else if (arg == "--inject=wspd-one-worker") a.inj_wspd_one_worker = true;
-    else if (arg == "--q4-no-eq-prefilter") a.q4_eq_prefilter = false;
+    else if (arg == "--q4-no-eq-prefilter") a.q4_eq_mode = 0;
     else if (arg == "--q4-eq-gate") a.q4_eq_gate = true;
     else if (arg == "--q4-prefilter-bench") a.q4_prefilter_bench = true;
-    else if (arg == "--inject=q4-eq-wrong-length") a.inj_q4_eq_wrong = true;
+    else if (arg == "--inject=seed-face-power-nonstrict")
+      a.inj_q4_eq_nonstrict = true;
+    else if (arg == "--inject=seed-face-power-sign") a.inj_q4_eq_sign = true;
+    else if (arg == "--inject=seed-i64-vertex-y-drop-factor")
+      a.inj_q4_i64_y = true;
+    else if (arg == "--inject=seed-i64-pair-xy-min") a.inj_q4_i64_xy = true;
+    else if (arg == "--q4-i64-stage-bench") {
+      a.q4_prefilter_bench = true;
+      a.q4_bench_control = 3;
+    }
     else if (arg == "--inject=fold-u32-event-wrap") a.inj_fold_capacity = 1;
     else if (arg == "--inject=fold-i32-fid-wrap") a.inj_fold_capacity = 2;
     else if (arg == "--inject=fold-epoch-sentinel-collision")
@@ -1969,29 +1989,52 @@ int run_float_rounding_gate(bool inj_ignore) {
 // vacuite). MUTANT `q4-eq-wrong-face` : la puissance est evaluee sur la
 // face `aby` au lieu de `abx` tout en gardant le sommet oppose y — un
 // prefiltre qui n'est plus une condition necessaire de ce qu'il filtre.
-int run_q4_eq_gate(bool inj_wrong_face) {
-  u64 bad = 0, tot_reject = 0, tot_false = 0;
-  for (const CloudFamily fam :
-       {CloudFamily::kUniform, CloudFamily::kEightClusters,
-        CloudFamily::kTerrain}) {
-    const int n = fam == CloudFamily::kUniform ? 300 : 200;
-    const std::vector<P3> pts =
-        make_family_cloud(fam, n, cloud_family_default_coord(fam, n), 3);
+int run_q4_eq_gate(bool inj_nonstrict, bool inj_sign, bool inj_i64_y,
+                   bool inj_i64_xy) {
+  u64 bad = 0, tot_reject = 0, tot_false = 0, tot_bound = 0, tot_missed = 0;
+  struct GateCloud {
+    CloudFamily fam;
+    int n, coord;
+  };
+  // LA QUATRIEME EST LA SEULE QUI PORTE LA FRONTIERE. Les trois emprises
+  // par defaut sont trop larges : `Pow = 0` y est de codimension un sur
+  // des entiers a cinq chiffres, donc jamais atteint. L'emprise serree
+  // (200 points dans 14^3 = 2744 sites) rend les quadruples cospheriques
+  // frequents — c'est exactement la raison pour laquelle l'oracle q4
+  // travaille sur de petits nuages. Sans elle, le mutant `nonstrict` ne
+  // serait pas discrimine et la porte serait verte par vacuite sur la
+  // moitie de son contrat.
+  for (const GateCloud gc :
+       {GateCloud{CloudFamily::kUniform, 300,
+                  cloud_family_default_coord(CloudFamily::kUniform, 300)},
+        GateCloud{CloudFamily::kEightClusters, 200,
+                  cloud_family_default_coord(CloudFamily::kEightClusters, 200)},
+        GateCloud{CloudFamily::kTerrain, 200,
+                  cloud_family_default_coord(CloudFamily::kTerrain, 200)},
+        GateCloud{CloudFamily::kUniform, 200, 14}}) {
+    const CloudFamily fam = gc.fam;
+    const std::vector<P3> pts = make_family_cloud(fam, gc.n, gc.coord, 3);
     const CloudIndex ix = build_cloud_index(pts);
     if ((size_t)ix.unique_count() != pts.size()) return 3;
     std::vector<BallCandidate> con, coff;
     BallStreamStats son, soff;
-    // Le prefiltre est evalue SANS court-circuit dans ce run : on veut
-    // que Cramer tranche chaque paire pour pouvoir compter les FAUX
+    // Mode INSTRUMENTE : le prefiltre est deroule sans court-circuit, on
+    // veut que Cramer tranche chaque paire pour pouvoir compter les FAUX
     // REJETS du prefiltre sur le flux reel (avec court-circuit, une
-    // paire faussement rejetee ne serait jamais confrontee a Cramer).
+    // paire faussement rejetee ne serait jamais confrontee a Cramer), et
+    // que la puissance soit evaluee meme quand l'etage i64 a conclu —
+    // sans quoi la frontiere resterait invisible.
     collect_candidate_balls(ix, 8, 11, &con, &son, false, false, 0, 1, false,
-                            false, false, false, /*q4_eq_prefilter=*/false,
-                            /*mutant_q4_eq_swap=*/inj_wrong_face);
+                            false, false, false, /*q4_eq_mode=*/2,
+                            /*mutant_q4_eq_nonstrict=*/inj_nonstrict,
+                            /*mutant_q4_eq_sign=*/inj_sign,
+                            /*mutant_q4_i64_y=*/inj_i64_y,
+                            /*mutant_q4_i64_xy=*/inj_i64_xy);
     // Chemin de production : court-circuit actif, sans mutant. Son flux
     // doit etre celui du run precedent, au bit pres.
     collect_candidate_balls(ix, 8, 11, &coff, &soff, false, false, 0, 1, false,
-                            false, false, true);
+                            false, false, false, /*q4_eq_mode=*/1, false,
+                            false);
     const auto compact = [](std::vector<BallCandidate>* c) {
       std::stable_sort(c->begin(), c->end(), ball_candidate_less);
       c->erase(std::unique(c->begin(), c->end(),
@@ -2019,13 +2062,29 @@ int run_q4_eq_gate(bool inj_wrong_face) {
                    cloud_family_name(fam));
       ++bad;
     }
+    // SECOND VOLET DU CONTRAT, et il ne se voit pas dans les faux
+    // rejets : la garde doit etre STRICTE. `Pow = 0` place le centre
+    // dans le plan de la face, donc pas strictement a l'interieur, donc
+    // le contrat exige un rejet. Une garde trop permissive ne rejette
+    // rien a tort — elle OMET de rejeter ; seul `q4_eq_missed` la voit.
+    if (son.q4_eq_missed != 0) {
+      std::fprintf(stderr,
+                   "PREFILTRE q4 : %llu frontieres non rejetees (%s)\n",
+                   (unsigned long long)son.q4_eq_missed,
+                   cloud_family_name(fam));
+      ++bad;
+    }
     tot_reject += son.q4_eq_reject;
     tot_false += son.q4_eq_false_reject;
+    tot_bound += son.q4_eq_boundary;
+    tot_missed += son.q4_eq_missed;
   }
-  std::printf("q4_eq_gate violations=%llu rejets=%llu faux_rejets=%llu\n",
+  std::printf("q4_eq_gate violations=%llu rejets=%llu faux_rejets=%llu "
+              "frontieres=%llu frontieres_manquees=%llu\n",
               (unsigned long long)bad, (unsigned long long)tot_reject,
-              (unsigned long long)tot_false);
-  if (inj_wrong_face) {
+              (unsigned long long)tot_false, (unsigned long long)tot_bound,
+              (unsigned long long)tot_missed);
+  if (inj_nonstrict || inj_sign || inj_i64_y || inj_i64_xy) {
     if (bad > 0) {
       std::printf("MUTANT TUE\n");
       return 4;
@@ -2037,6 +2096,14 @@ int run_q4_eq_gate(bool inj_wrong_face) {
   if (tot_reject < 100000) {
     std::fprintf(stderr, "PLANCHER : rejets=%llu\n",
                  (unsigned long long)tot_reject);
+    return 3;
+  }
+  // PLANCHER DE FRONTIERE : sans configuration `Pow = 0`, la moitie du
+  // contrat (la strictitude) n'est pas exercee et le mutant `nonstrict`
+  // passerait. Ce plancher est ce qui a impose le quatrieme nuage.
+  if (tot_bound < 1000) {
+    std::fprintf(stderr, "PLANCHER : frontieres=%llu\n",
+                 (unsigned long long)tot_bound);
     return 3;
   }
   return 0;
@@ -2328,14 +2395,20 @@ int run_q4_prefilter_bench(const Args& a) {
   struct Run {
     double ms = 0;
     u64 sig = 0;
-    u64 rejects = 0, tested = 0;
+    u64 rejects = 0, tested = 0, i64 = 0;
   };
   const auto one = [&](bool prefilter) {
     std::vector<BallCandidate> cs;
     BallStreamStats ss;
     const auto t0 = std::chrono::steady_clock::now();
+    // TEMOIN VRAIMENT SANS PREFILTRE (mode 0) : le bras de controle ne
+    // paie plus l'etage i64 ni la puissance de face. Auparavant il les
+    // calculait sans en tirer profit — le banc mesurait alors « avec
+    // court-circuit » contre « calcule puis jete », ce qui n'est pas la
+    // question posee.
     collect_candidate_balls(ix, a.s, a.smax, &cs, &ss, false, false, 0,
-                            a.threads, false, false, false, false, prefilter);
+                            a.threads, false, false, false, false,
+                            prefilter ? 1 : a.q4_bench_control, false, false);
     const double ms = std::chrono::duration<double, std::milli>(
                           std::chrono::steady_clock::now() - t0).count();
     std::stable_sort(cs.begin(), cs.end(), ball_candidate_less);
@@ -2352,19 +2425,22 @@ int run_q4_prefilter_bench(const Args& a) {
       mix((u64)(c.key.a & 0xFFFFFFFFFFFFFFFFull));
       mix((u64)(c.key.c & 0xFFFFFFFFFFFFFFFFull));
     }
-    return Run{ms, h, ss.q4_eq_reject, ss.q4_eq_tested};
+    return Run{ms, h, ss.q4_eq_reject, ss.q4_eq_tested,
+               ss.q4_rej_i64_vertex_y + ss.q4_rej_i64_pair_xy};
   };
   const Run warm_on = one(true), warm_off = one(false);
   if (warm_on.sig != warm_off.sig) {
     std::fprintf(stderr, "BANC : les deux chemins ne rendent pas le meme flux\n");
     return 3;
   }
-  std::printf("q4_prefilter_bench famille=%s n=%d s=%lld smax=%llu "
-              "paires_testees=%llu rejets=%llu\n",
+  std::printf("q4_prefilter_bench temoin=%s famille=%s n=%d s=%lld smax=%llu "
+              "soumises_puissance=%llu rejets_puissance=%llu rejets_i64=%llu\n",
+              a.q4_bench_control == 3 ? "puissance_seule" : "aucun_prefiltre",
               cloud_family_name(a.family), a.n, (long long)a.s,
               (unsigned long long)a.smax,
-              (unsigned long long)warm_off.tested,
-              (unsigned long long)warm_off.rejects);
+              (unsigned long long)warm_on.tested,
+              (unsigned long long)warm_on.rejects,
+              (unsigned long long)warm_on.i64);
   std::vector<BenchPair> pairs;
   bool same = true;
   for (int i = 0; i < a.bench_repeat; ++i) {
@@ -2376,8 +2452,11 @@ int run_q4_prefilter_bench(const Args& a) {
       const Run r = one(prefilter);
       (prefilter ? bp.stream : bp.tri) = r.ms;
       same = same && r.sig == warm_on.sig;
-      std::printf("  repet=%d position=%d prefiltre=%s t_gen_ms=%.1f\n", i, k,
-                  prefilter ? "oui" : "non", r.ms);
+      std::printf("  repet=%d position=%d bras=%s t_gen_ms=%.1f\n", i, k,
+                  prefilter ? "cascade_complete"
+                            : (a.q4_bench_control == 3 ? "puissance_seule"
+                                                       : "aucun_prefiltre"),
+                  r.ms);
     }
     pairs.push_back(bp);
   }
@@ -3201,7 +3280,9 @@ int main(int argc, char** argv) {
   if (a.par_gate)
     return run_par_gate(a.inj_par_drop, a.inj_par_drop_census);
   if (a.q2_birth_gate) return run_q2_birth_gate(a.inj_birth_dup);
-  if (a.q4_eq_gate) return run_q4_eq_gate(a.inj_q4_eq_wrong);
+  if (a.q4_eq_gate)
+    return run_q4_eq_gate(a.inj_q4_eq_nonstrict, a.inj_q4_eq_sign,
+                          a.inj_q4_i64_y, a.inj_q4_i64_xy);
   if (a.q4_prefilter_bench) return run_q4_prefilter_bench(a);
   if (a.bench_report_gate) return run_bench_report_gate();
   if (a.schedule_bench) return run_schedule_bench(a);
@@ -3248,7 +3329,7 @@ int main(int argc, char** argv) {
   collect_candidate_balls(ix, a.s, smax_eff, &cands, &st,
                           a.inj_genfilter_nonstrict, a.axial_on, a.inj_axial,
                           a.threads, a.inj_par_drop, false, false, false,
-                          a.q4_eq_prefilter);
+                          a.q4_eq_mode, false, false);
   const auto t0b = std::chrono::steady_clock::now();
   std::stable_sort(cands.begin(), cands.end(), ball_candidate_less);
   if (!a.inj_rle_drop)  // MUTANT : dedupe saute, boules re-censusees
@@ -3654,7 +3735,10 @@ int main(int argc, char** argv) {
               (unsigned long long)st.q4_rej_det,
               (unsigned long long)st.q4_rej_center,
               (unsigned long long)st.q4_reach_depth);
-  std::printf("q4_puissance_equatoriale testees=%llu rejets=%llu "
+  std::printf("q4_etage_i64 sommet_y=%llu couple_xy=%llu\n",
+              (unsigned long long)st.q4_rej_i64_vertex_y,
+              (unsigned long long)st.q4_rej_i64_pair_xy);
+  std::printf("q4_puissance_equatoriale soumises=%llu rejets=%llu "
               "part_des_rejets_centre=%.1f%% faux_rejets=%llu\n",
               (unsigned long long)st.q4_eq_tested,
               (unsigned long long)st.q4_eq_reject,

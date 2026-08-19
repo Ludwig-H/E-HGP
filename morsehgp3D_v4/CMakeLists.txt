@@ -595,6 +595,14 @@ mhgp4_expect_code(mhgp4_q4_oracle_mutant_center_parity 4 mhgp4_q4_oracle
 # Trois mutants : `nonstrict` (>= 0 : la frontiere passerait),
 # `drop-cross` (C2² retire du Gram), `opposite-sign` (une puissance
 # inversee).
+# ROLE REVISE (contre-audit `7420355`) : la formule en six longueurs
+# `equatorial_power4` n'est PLUS sur le chemin de production — la
+# puissance de la face seed y est donnee, au facteur G > 0 pres, par
+# `q3_power`, primitive deja construite une fois par seed. Elle reste
+# ici en ORACLE CROISE : une seconde representation de la meme quantite,
+# volontairement differente de celle de la production, exactement comme
+# le selftest arithmetique oppose deux temoins. Ce qu'elle garde de
+# valeur est donc l'independance, pas la vitesse.
 mhgp4_expect_code(mhgp4_q4_oracle_mutant_eq_nonstrict 4 mhgp4_q4_oracle
     "--inject=q4-equatorial-nonstrict")
 mhgp4_expect_code(mhgp4_q4_oracle_mutant_eq_drop_cross 4 mhgp4_q4_oracle
@@ -603,18 +611,37 @@ mhgp4_expect_code(mhgp4_q4_oracle_mutant_eq_flip 4 mhgp4_q4_oracle
     "--inject=q4-equatorial-opposite-sign")
 # CABLAGE du prefiltre dans le pipeline (l'oracle recoit la PRIMITIVE ;
 # cette porte recoit son BRANCHEMENT). Deux runs dans le MEME processus
-# sur trois familles : l'un laisse Cramer trancher chaque paire pour
-# compter les FAUX REJETS du prefiltre sur le flux reel, l'autre est le
-# chemin de production avec court-circuit. Exigences : flux identique
-# apres tri et RLE, zero faux rejet, et un plancher de rejets (sans quoi
-# la porte serait verte par vacuite). MUTANT `q4-eq-wrong-length` : deux
-# des six longueurs echangees — le predicat n'est plus la puissance
-# d'aucune face, donc plus une condition necessaire, et il tue des paires
-# que Cramer garde (91 282 faux rejets mesures).
+# sur QUATRE nuages : l'un en mode instrumente, qui laisse Cramer
+# trancher chaque paire pour compter les FAUX REJETS du prefiltre sur le
+# flux reel, l'autre le chemin de production avec court-circuit.
+# Exigences : flux identique apres tri et RLE, zero faux rejet, un
+# plancher de rejets, et un plancher de FRONTIERES `Pow = 0`.
+#
+# DEUX COMPTEURS, PARCE QUE LE CONTRAT A DEUX MOITIES. Une garde trop
+# AGRESSIVE tue des paires que Cramer garde : `faux_rejets` la voit. Une
+# garde trop PERMISSIVE ne rejette rien a tort — elle OMET de rejeter la
+# frontiere `Pow = 0` (« centre dans le plan de la face », donc pas
+# strictement interieur) : seul `frontieres_manquees` la voit. C'est ce
+# second compteur qui a impose le quatrieme nuage — 200 points dans
+# 14^3 sites, ou les quadruples cospheriques sont frequents ; sur les
+# trois emprises par defaut la frontiere n'apparait que 17 fois et le
+# mutant `nonstrict` n'etait PAS discrimine.
+#
+# QUATRE MUTANTS, un par garantie degradee :
+#   `seed-face-power-nonstrict`      >= 0 accepte a tort -> 1 524 frontieres manquees
+#   `seed-face-power-sign`           signe inverse       -> 657 986 faux rejets
+#   `seed-i64-vertex-y-drop-factor`  facteur 2 oublie    -> 657 986 faux rejets
+#   `seed-i64-pair-xy-min`           min au lieu de max  -> 379 705 faux rejets
 mhgp4_expect_code(mhgp4_forest_probe_q4_eq_gate 0 mhgp4_forest_probe
     "--q4-eq-gate")
-mhgp4_expect_code(mhgp4_forest_probe_q4_eq_mutant 4 mhgp4_forest_probe
-    "--q4-eq-gate --inject=q4-eq-wrong-length")
+mhgp4_expect_code(mhgp4_forest_probe_q4_eq_mutant_nonstrict 4 mhgp4_forest_probe
+    "--q4-eq-gate --inject=seed-face-power-nonstrict")
+mhgp4_expect_code(mhgp4_forest_probe_q4_eq_mutant_sign 4 mhgp4_forest_probe
+    "--q4-eq-gate --inject=seed-face-power-sign")
+mhgp4_expect_code(mhgp4_forest_probe_q4_i64_mutant_vertex_y 4 mhgp4_forest_probe
+    "--q4-eq-gate --inject=seed-i64-vertex-y-drop-factor")
+mhgp4_expect_code(mhgp4_forest_probe_q4_i64_mutant_pair_xy 4 mhgp4_forest_probe
+    "--q4-eq-gate --inject=seed-i64-pair-xy-min")
 
 # Le juge du juge (audit ebc8236 P0.2) : selftest de l'arithmetique OBig
 # contre boost::multiprecision::cpp_int, troisieme autorite, tests uniquement.

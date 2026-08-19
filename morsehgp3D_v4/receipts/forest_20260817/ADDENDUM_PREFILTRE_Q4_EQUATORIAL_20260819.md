@@ -1,5 +1,23 @@
 # Addendum — préfiltre q4 par puissance équatoriale : exact, nécessaire, et mesuré
 
+> **ERRATUM du 19 août 2026, même journée.** Deux corrections apportées
+> par `ADDENDUM_FRONTIERE_STRICTE_ET_ETAGE_I64_20260819.md`, qu'il faut
+> lire avant de citer ce reçu :
+>
+> 1. **Le § 5 est retiré.** Le ×1,042 y était mesuré contre un bras
+>    témoin qui calculait le préfiltre puis jetait le résultat — donc
+>    « court-circuité » contre « calculé puis jeté », et non « avec »
+>    contre « sans ». La mesure corrigée, avec un témoin qui ne paie
+>    plus rien, donne ×1,055.
+> 2. **La primitive du § 1 n'est plus sur le chemin de production.** Le
+>    contre-audit `7420355` a montré que la puissance de la face `abx`
+>    est, au facteur $G > 0$ près, la primitive `q3_power` déjà
+>    construite une fois par seed. La formule en six longueurs reste,
+>    rétrogradée en **oracle croisé**.
+>
+> Le lemme du § 1, les bornes de largeur du § 1, la porte d'équivalence
+> du § 2 et les rendements du § 3 sont inchangés et restent valides.
+
 Date : 19 août 2026 UTC. Exécute la réponse d'audit `5b89bc6`
 (« un préfiltre exact q4 en seules longueurs carrées existe »), dans
 l'ordre qu'elle recommande.
