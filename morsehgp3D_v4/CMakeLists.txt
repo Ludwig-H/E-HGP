@@ -508,6 +508,18 @@ mhgp4_expect_code(mhgp4_forest_probe_workers_mutant_ranges 4 mhgp4_forest_probe
     "--workers-gate --inject=parallel-ranges-one-worker")
 mhgp4_expect_code(mhgp4_forest_probe_workers_mutant_q3 4 mhgp4_forest_probe
     "--workers-gate --inject=q3-one-worker")
+# DESCENTE WSPD PARALLELE (mesure du 19 aout) : `wspd_alive` produisait
+# les rectangles vivants de chaque lane en SEQUENTIEL et hors de tout
+# chrono — 52,5 s des 72,8 s de t_gen a n=8000, soit 72 %, quand le scan
+# de profondeur q3 qu'on croyait dominant en faisait 2,6 %. Le traitement
+# d'un rectangle est PUR : la vague se decoupe en tranches, chacune ecrit
+# ses tampons, et la concatenation EN ORDRE DE TRANCHE rend une sortie
+# bit-identique au chemin sequentiel (rectangles visites identiques,
+# `--par-gate` inchangee). Le mutant serialise la descente sans toucher
+# ni la CLI ni les digests : seule la mesure au point de creation le
+# trahit, les lanes restant a quatre ouvriers.
+mhgp4_expect_code(mhgp4_forest_probe_workers_mutant_wspd 4 mhgp4_forest_probe
+    "--workers-gate --inject=wspd-one-worker")
 
 # La lane q2 productrice : W_2 est la boule diametrale ouverte, le census
 # est une requete de cover a coefficient 1. Juge brut toutes-paires sur

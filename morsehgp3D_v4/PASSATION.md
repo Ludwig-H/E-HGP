@@ -118,7 +118,11 @@ PAR LANE alimentés au point de création des `std::thread` ; aval :
 publiée par `sched_getaffinity`. Sorties bit-identiques quel que soit
 le découpage (tri stable + RLE ; fusion en ordre de tranche). Portes :
 `--par-gate`, `--workers-gate` (mutants `parallel-hardcodes-one-worker`,
-`parallel-ranges-one-worker`, `q3-one-worker`), validateur de campagne.
+`parallel-ranges-one-worker`, `q3-one-worker`, `wspd-one-worker`),
+validateur de campagne. Depuis le 19 août, la **descente WSPD** est
+elle aussi parallèle et ses ouvriers sont mesurés par lane
+(`wspd_q2/q3/q4`) : elle était le poste dominant de `t_gen` (72 %) et
+n'était ni parallèle ni chronométrée — § 2.12.
 
 ### 2.7 Poisson q2 et contrat de sortie
 
@@ -196,6 +200,23 @@ latence /1,40 pour +0,4 % de pic RSS, réserve sous le plafond déclaré ;
 deux fois le budget. Signature identique aux trois modes. Reçu :
 `ADDENDUM_BANC_APPARIE_ET_ORDONNANCEMENT_20260819.md`.
 
+### 2.12 Descente WSPD parallèle (LIVRÉE, 19 août) et charge q3 mesurée
+
+`wspd_alive` produisait les rectangles vivants de chaque lane en
+SÉQUENTIEL, hors de tout chrono : **52,5 s des 72,8 s de `t_gen`** à
+n=8000. Le traitement d'un rectangle étant pur, la vague est découpée
+en **tranches ordonnées** — chaque tranche écrit ses tampons, la
+concaténation se fait en ordre de tranche, la sortie est bit-identique
+au séquentiel. Mesure : descente ×3,41, **`t_gen` 72,8 → 35,3 s
+(×2,06)**, `boules_uniques` et les dix cardinalités inchangées.
+
+Les compteurs de charge par ancre (`q3_charge*`) réfutent au passage
+l'index par couches convexes : le scan q3 évalue **10,3 sites par
+seed** (sortie anticipée à `h_3`), un index coûterait ~830 opérations
+de construction contre 351 sites scannés par ancre, et les ancres à
+≥ 128 seeds ne portent que 4 % du travail. Reçu :
+`ADDENDUM_DESCENTE_WSPD_ET_CHARGE_Q3_20260819.md`.
+
 ## 3. Carte de l'implémentation
 
 ```
@@ -238,13 +259,21 @@ re-vérification de ce qu'un théorème garantit.
 | uniform | ~56-62 s | stable |
 | eight_clusters | ~123-130 s | 2 658 325 événements ; jamais atteint avant v4 |
 
+⚠⚠ **Ces chiffres sont doublement périmés** : ils précèdent les
+intervalles de Jung ET la parallélisation de la descente WSPD du
+19 août, qui divise `t_gen` par 2,06 (72,8 → 35,3 s à n=8000). Le
+profil à jour est au reçu
+`ADDENDUM_DESCENTE_WSPD_ET_CHARGE_Q3_20260819.md` § 1 et § 3.
+
 ⚠ **Ces chiffres sont antérieurs aux intervalles de Jung** (`4df9a39`)
 et ne doivent plus servir à désigner un poste dominant. Après les
 intervalles, le cœur de seed q4 ne fait plus 8,5 G d'évaluations
 exactes : il tombe à **80 replis** (eight_clusters) et **145**
 (uniform) — l'essentiel est certifié en flottant. Le poste dominant de
 `t_gen` est désormais le **scan de profondeur q3** (structurel), pas
-l'arithmétique de Jung.
+l'arithmétique de Jung. ⚠ Cette dernière phrase est elle-même
+RÉFUTÉE par la mesure du 19 août : le scan q3 pesait 2,6 % du mur, la
+descente WSPD 72 %.
 
 Le kernel affine est CPU-neutre (bande ±3 s) : adopté pour la
 STRUCTURE (identité gravée, contrat d'erreur serré, forme GPU
@@ -270,14 +299,21 @@ Les trois premiers de la rédaction initiale sont LIVRÉS (§ 2.8, § 2.9,
 
 L'ordre ci-dessous est celui de l'audit `dd0d4a6` § 3, adopté tel quel.
 
-1. **Scan q3 et construction des covers** — le poste dominant mesuré de
-   `t_gen`. Décider, **sur les seules ancres lourdes**, entre scan plat
-   parallèle/GPU et index exact par couches convexes
-   (`Q3ShallowHalfplaneIndex`, différé par l'audit e27acfa § 2.3 : la
-   condition de réouverture — « seulement si q3 domine encore après
-   affine + intervalles » — est désormais satisfaite côté mesure, mais
-   l'assiette doit être justifiée par des compteurs de charge, pas
-   supposée).
+1. ~~**Scan q3 et construction des covers**~~ — **TRANCHÉ le 19 août
+   par la mesure**, et dans aucun des deux sens proposés. Les compteurs
+   de charge par ancre montrent que le scan q3 évalue **10,3 sites par
+   seed** (sortie anticipée à `h_3 = 9`), pas les 120 du cover : un
+   index par ancre coûterait ~830 opérations de construction contre 351
+   sites scannés pour l'ancre entière, et les ancres à ≥ 128 seeds ne
+   portent que **4 %** du travail — l'assiette n'existe pas. Le scan
+   plat reste, et c'est la forme que le GPU veut. Surtout, le scan q3
+   ne pesait que **2,6 % du mur** : le poste dominant était la
+   **descente WSPD**, séquentielle et hors de tout chrono (52,5 s sur
+   72,8 s). Parallélisée à tranches ordonnées (sortie bit-identique),
+   `t_gen` passe de **72,8 s à 35,3 s (×2,06)**. Reçu :
+   `ADDENDUM_DESCENTE_WSPD_ET_CHARGE_Q3_20260819.md`.
+   **OPEN restant** : la **complétion q4** est désormais le premier
+   poste CPU (22,5 s) — à mesurer avant de la toucher.
 2. **Internement du fold et streaming.** L'internement lui-même est
    LIVRÉ (§ 2.10) ; ce qui reste est la matérialisation résidente
    globale en amont : préflight réellement streaming (audit `57523a`

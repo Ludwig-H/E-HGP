@@ -97,6 +97,7 @@ struct Args {
   bool inj_par_one_worker = false;
   bool inj_ranges_one_worker = false;
   bool inj_q3_one_worker = false;
+  bool inj_wspd_one_worker = false;
   bool digest_gate = false;
   int inj_fold_capacity = 0;  // 1 = u32-event-wrap, 2 = i32-fid-wrap,
                               // 3 = epoch-sentinel-collision
@@ -192,6 +193,7 @@ Args parse(int argc, char** argv) {
     else if (arg == "--inject=parallel-ranges-one-worker")
       a.inj_ranges_one_worker = true;
     else if (arg == "--inject=q3-one-worker") a.inj_q3_one_worker = true;
+    else if (arg == "--inject=wspd-one-worker") a.inj_wspd_one_worker = true;
     else if (arg == "--inject=fold-u32-event-wrap") a.inj_fold_capacity = 1;
     else if (arg == "--inject=fold-i32-fid-wrap") a.inj_fold_capacity = 2;
     else if (arg == "--inject=fold-epoch-sentinel-collision")
@@ -1694,7 +1696,8 @@ int run_digest_gate() {
 // (la primitive aval serialise tout), q3-one-worker (seule la lane
 // dominante serialise — gen_workers_max reste aveugle, la porte lit la
 // lane).
-int run_workers_gate(bool inj_one, bool inj_ranges_one, bool inj_q3_one) {
+int run_workers_gate(bool inj_one, bool inj_ranges_one, bool inj_q3_one,
+                     bool inj_wspd_one) {
   const std::vector<P3> pts = make_family_cloud(
       CloudFamily::kUniform, 300, cloud_family_default_coord(
                                       CloudFamily::kUniform, 300), 3);
@@ -1704,7 +1707,7 @@ int run_workers_gate(bool inj_one, bool inj_ranges_one, bool inj_q3_one) {
   BallStreamStats ss;
   g_inj_parallel_ranges_one = inj_ranges_one;  // MUTANT primitive aval
   collect_candidate_balls(ix, 8, 11, &cs, &ss, false, false, 0, 4, false,
-                          inj_one, inj_q3_one);
+                          inj_one, inj_q3_one, inj_wspd_one);
   std::stable_sort(cs.begin(), cs.end(), ball_candidate_less);
   cs.erase(std::unique(cs.begin(), cs.end(),
                        [](const BallCandidate& x, const BallCandidate& y) {
@@ -1730,6 +1733,7 @@ int run_workers_gate(bool inj_one, bool inj_ranges_one, bool inj_q3_one) {
   const int aff = effective_affinity(&aff_mask);
   std::printf("workers_gate gen_q2=%llu gen_q3=%llu gen_q4=%llu "
               "prefiltre=%llu census=%llu expansion=%llu fold=%llu "
+              "wspd_q2=%llu wspd_q3=%llu wspd_q4=%llu "
               "affinite=%d masque=%s\n",
               (unsigned long long)ss.gen_workers[0],
               (unsigned long long)ss.gen_workers[1],
@@ -1737,7 +1741,10 @@ int run_workers_gate(bool inj_one, bool inj_ranges_one, bool inj_q3_one) {
               (unsigned long long)ss.prefilter_workers,
               (unsigned long long)ss.census_workers,
               (unsigned long long)ss.expansion_workers,
-              (unsigned long long)ss.fold_workers_max, aff,
+              (unsigned long long)ss.fold_workers_max,
+              (unsigned long long)ss.wspd_workers[0],
+              (unsigned long long)ss.wspd_workers[1],
+              (unsigned long long)ss.wspd_workers[2], aff,
               aff_mask.empty() ? "?" : aff_mask.c_str());
   g_inj_parallel_ranges_one = false;
   if (inj_one) {
@@ -1767,10 +1774,23 @@ int run_workers_gate(bool inj_one, bool inj_ranges_one, bool inj_q3_one) {
     std::fprintf(stderr, "PORTE INEFFICACE : mutant non discrimine\n");
     return 3;
   }
+  // MUTANT wspd-one-worker : la DESCENTE serialise (72 % de t_gen a
+  // n=8000 avant sa parallelisation), CLI et digests inchanges — seule
+  // la mesure au point de creation le trahit, et les lanes restent a 4.
+  if (inj_wspd_one) {
+    if (ss.wspd_workers[0] == 1 && ss.wspd_workers[1] == 1 &&
+        ss.wspd_workers[2] == 1 && ss.gen_workers_max == 4) {
+      std::printf("MUTANT TUE\n");
+      return 4;
+    }
+    std::fprintf(stderr, "PORTE INEFFICACE : mutant non discrimine\n");
+    return 3;
+  }
   return (ss.gen_workers[0] == 4 && ss.gen_workers[1] == 4 &&
           ss.gen_workers[2] == 4 && ss.prefilter_workers == 4 &&
           ss.census_workers == 4 && ss.expansion_workers == 4 &&
-          ss.fold_workers_max == 4 && aff >= 1)
+          ss.fold_workers_max == 4 && ss.wspd_workers[0] == 4 &&
+          ss.wspd_workers[1] == 4 && ss.wspd_workers[2] == 4 && aff >= 1)
              ? 0
              : 3;
 }
@@ -3013,7 +3033,7 @@ int main(int argc, char** argv) {
   if (a.fold_capacity_gate) return run_fold_capacity_gate(a.inj_fold_capacity);
   if (a.workers_gate)
     return run_workers_gate(a.inj_par_one_worker, a.inj_ranges_one_worker,
-                            a.inj_q3_one_worker);
+                            a.inj_q3_one_worker, a.inj_wspd_one_worker);
   if (a.digest_gate) return run_digest_gate();
   if (a.guard != 0) return run_guard_gate(a.guard);
   const std::vector<P3> pts = make_family_cloud(
@@ -3421,6 +3441,21 @@ int main(int argc, char** argv) {
       "t_q3_scan_ms=%.1f t_core_ms=%.1f\n",
       st.t_hist_ms, st.t_rect_cover_ms, st.t_anchor_cover_ms, st.t_q3_scan_ms,
       st.t_seed_core_ms);
+  // DESCENTE WSPD PAR LANE : sequentielle, et jusqu'ici hors de tout
+  // chrono — sans elle la somme des postes ne rendait pas compte de
+  // `t_gen`, et le « poste dominant » designe par les recus precedents
+  // etait une conclusion tiree d'un profil incomplet.
+  std::printf("profil_wspd t_q2_ms=%.1f t_q3_ms=%.1f t_q4_ms=%.1f "
+              "rects_q2=%llu rects_q3=%llu rects_q4=%llu "
+              "ouvriers_q2=%llu ouvriers_q3=%llu ouvriers_q4=%llu\n",
+              st.t_wspd_alive_ms[0], st.t_wspd_alive_ms[1],
+              st.t_wspd_alive_ms[2],
+              (unsigned long long)st.wspd_rects_visited[0],
+              (unsigned long long)st.wspd_rects_visited[1],
+              (unsigned long long)st.wspd_rects_visited[2],
+              (unsigned long long)st.wspd_workers[0],
+              (unsigned long long)st.wspd_workers[1],
+              (unsigned long long)st.wspd_workers[2]);
   std::printf("profil_q4 t_completion_ms=%.1f t_depth_ms=%.1f sites_depth=%llu\n",
               st.t_q4_completion_ms, st.t_q4_depth_ms,
               (unsigned long long)st.q4_depth_sites);
@@ -3452,6 +3487,55 @@ int main(int argc, char** argv) {
               (unsigned long long)st.fold_budget_bytes,
               (unsigned long long)st.fold_reserved_max);
   if (a.digest) print_canonical_digests(cands, sres, kmax_eff);
+  // CHARGE DU SCAN q3 PAR ANCRE : ce qui decide de l'assiette d'un index
+  // par ancre. Un index construit une fois par ancre s'amortit sur les
+  // seeds ; on publie donc la part CUMULEE du travail portee par les
+  // ancres d'au moins S seeds (amortissement possible) et par les ancres
+  // les plus lourdes (assiette). Les parts sont des FRACTIONS DU TRAVAIL,
+  // jamais des comptes d'ancres : une majorite d'ancres legeres ne dit
+  // rien du cout.
+  {
+    const double wt = (double)st.q3_work_total;
+    std::printf("q3_charge ancres_scannees=%llu seeds=%llu travail=%llu "
+                "cover_moyen=%.1f seeds_moyen=%.2f travail_moyen=%.1f\n",
+                (unsigned long long)st.q3_anchors_scanned,
+                (unsigned long long)st.q3_seeds_total,
+                (unsigned long long)st.q3_work_total,
+                st.q3_anchors_scanned
+                    ? (double)st.q3_cover_total / (double)st.q3_anchors_scanned
+                    : 0.0,
+                st.q3_anchors_scanned
+                    ? (double)st.q3_seeds_total / (double)st.q3_anchors_scanned
+                    : 0.0,
+                st.q3_anchors_scanned
+                    ? wt / (double)st.q3_anchors_scanned
+                    : 0.0);
+    std::printf("q3_charge_par_seeds");
+    for (int b = 0; b < 8; ++b) {
+      u64 w = 0, na = 0;
+      for (int i = b; i < 8; ++i) {
+        w += st.q3_work_by_seeds[i];
+        na += st.q3_anchors_by_seeds[i];
+      }
+      std::printf(" s>=%d:travail=%.1f%%,ancres=%llu", 1 << b,
+                  wt > 0 ? 100.0 * (double)w / wt : 0.0,
+                  (unsigned long long)na);
+    }
+    std::printf("\n");
+    std::printf("q3_charge_par_travail");
+    for (int b = 39; b >= 0; --b) {
+      if (st.q3_anchor_hist[b] == 0) continue;
+      u64 w = 0, na = 0;
+      for (int i = b; i < 40; ++i) {
+        w += st.q3_work_hist[i];
+        na += st.q3_anchor_hist[i];
+      }
+      std::printf(" w>=2^%d:travail=%.1f%%,ancres=%llu", b,
+                  wt > 0 ? 100.0 * (double)w / wt : 0.0,
+                  (unsigned long long)na);
+    }
+    std::printf("\n");
+  }
   std::printf("q3_scan_sites_par_cover <256=%llu <1024=%llu <4096=%llu "
               ">=4096=%llu\n",
               (unsigned long long)st.q3_scan_sites_by_cover[0],

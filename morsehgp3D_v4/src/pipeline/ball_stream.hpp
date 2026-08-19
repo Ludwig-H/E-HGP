@@ -151,6 +151,34 @@ struct BallStreamStats {
   // decide si l'index par couches convexes (ancres denses) a une
   // assiette. Compte les sites VISITES (sortie anticipee comprise).
   u64 q3_scan_sites_by_cover[4] = {0, 0, 0, 0};
+  // DESCENTE WSPD PAR LANE (`wspd_alive`) : elle produit les rectangles
+  // vivants en appelant `count_universal_witnesses_234` sur chaque
+  // rectangle du front, et elle est SEQUENTIELLE. Elle n'etait dans
+  // AUCUN chrono : la somme des postes profiles ne rendait donc pas
+  // compte du temps de generation, et designer un « poste dominant »
+  // sans elle n'avait pas de sens.
+  double t_wspd_alive_ms[3] = {0, 0, 0};
+  u64 wspd_rects_visited[3] = {0, 0, 0};
+  // Ouvriers MESURES au point de creation des std::thread de la descente
+  // (meme doctrine que les lanes : jamais la CLI, toujours la mesure).
+  u64 wspd_workers[3] = {0, 0, 0};
+  // CHARGE DU SCAN q3 PAR ANCRE (feuille de route corrigee § 1, audit
+  // `dd0d4a6` § 3 : « sur les seules ancres lourdes », et l'assiette doit
+  // etre JUSTIFIEE par des compteurs, pas supposee). Un index par ancre
+  // (couches convexes) se construit UNE fois et s'amortit sur les seeds :
+  // il ne peut payer que sur les ancres ou `seeds x cover` est grand ET
+  // `seeds` assez grand pour amortir la construction. On mesure donc, par
+  // ancre : le travail REELLEMENT scanne (sortie anticipee comprise), le
+  // nombre de seeds et la taille du cover — en histogrammes log2, soit
+  // quelques additions par ancre et JAMAIS par site.
+  u64 q3_work_hist[40] = {};      // travail cumule par bucket log2(travail)
+  u64 q3_anchor_hist[40] = {};    // ancres par bucket
+  u64 q3_work_by_seeds[8] = {};   // travail cumule par bucket log2(seeds)
+  u64 q3_anchors_by_seeds[8] = {};
+  u64 q3_work_total = 0;
+  u64 q3_anchors_scanned = 0;  // ancres ayant au moins un seed aigu
+  u64 q3_cover_total = 0;      // somme des |cover| de ces ancres
+  u64 q3_seeds_total = 0;
   // Poste depth_dead de la lane q4 (scan q4_power exact par completion
   // candidate) et boucle de completion elle-meme.
   double t_q4_depth_ms = 0, t_q4_completion_ms = 0;
@@ -210,6 +238,23 @@ struct BallStreamStats {
     t_q3_scan_ms += o.t_q3_scan_ms;
     for (int i = 0; i < 4; ++i)
       q3_scan_sites_by_cover[i] += o.q3_scan_sites_by_cover[i];
+    for (int i = 0; i < 3; ++i) {
+      t_wspd_alive_ms[i] += o.t_wspd_alive_ms[i];
+      wspd_rects_visited[i] += o.wspd_rects_visited[i];
+      wspd_workers[i] = std::max(wspd_workers[i], o.wspd_workers[i]);
+    }
+    for (int i = 0; i < 40; ++i) {
+      q3_work_hist[i] += o.q3_work_hist[i];
+      q3_anchor_hist[i] += o.q3_anchor_hist[i];
+    }
+    for (int i = 0; i < 8; ++i) {
+      q3_work_by_seeds[i] += o.q3_work_by_seeds[i];
+      q3_anchors_by_seeds[i] += o.q3_anchors_by_seeds[i];
+    }
+    q3_work_total += o.q3_work_total;
+    q3_anchors_scanned += o.q3_anchors_scanned;
+    q3_cover_total += o.q3_cover_total;
+    q3_seeds_total += o.q3_seeds_total;
     t_q4_depth_ms += o.t_q4_depth_ms;
     t_q4_completion_ms += o.t_q4_completion_ms;
     q4_depth_sites += o.q4_depth_sites;
@@ -566,32 +611,95 @@ struct AliveRect {
   u64 core;
 };
 
+// DESCENTE PAR VAGUES, PARALLELE PAR TRANCHES ORDONNEES.
+//
+// Mesure du 19 aout (n=8000, uniform, s=8, smax=11, 4 fils) : cette
+// descente pesait 52,5 s des 72,8 s de `t_gen` — 72 % — et elle etait
+// ENTIEREMENT sequentielle, hors de tout chrono. Les postes qu'on
+// designait jusqu'ici comme dominants (scan de profondeur q3 : 7,6 s
+// CPU, soit ~2,6 % du mur) ne l'etaient pas.
+//
+// Le traitement d'un rectangle du front est PUR (lecture seule de `ix`,
+// pile locale dans `count_universal_witnesses_234`) : la vague se
+// decoupe donc sans aucune synchronisation. L'ordre observable est
+// conserve EXACTEMENT — chaque tranche ecrit ses propres tampons et la
+// concatenation se fait en ORDRE DE TRANCHE, jamais en ordre
+// d'achevement. La sortie est donc bit-identique au chemin sequentiel,
+// quel que soit le nombre de fils, et le tirage dynamique ne porte que
+// sur l'ATTRIBUTION des tranches.
 inline void wspd_alive(const CloudIndex& ix, i64 s, const u64 h_of[3], int lane_idx,
-                       u8 mask, u64 h, std::vector<AliveRect>* out) {
+                       u8 mask, u64 h, std::vector<AliveRect>* out,
+                       u64* visited = nullptr, int threads = 1,
+                       u64* workers = nullptr) {
   out->clear();
   if (ix.nodes.empty()) return;
   std::vector<WspdRect> wave, next;
   for (const RadixNode& n : ix.nodes) wave.push_back(WspdRect{n.left, n.right});
+  std::vector<std::vector<AliveRect>> lout;
+  std::vector<std::vector<WspdRect>> lnext;
+  std::vector<u64> lvis;
   while (!wave.empty()) {
-    next.clear();
-    for (const WspdRect& r : wave) {
-      const FusedCounts fc = count_universal_witnesses_234(ix, r.a, r.b, h_of, mask, false);
-      if (fc.c[lane_idx] >= h) continue;
-      i64 ba[3], bb[3];
-      const auto va = detail::node_view(ix, r.a, ba);
-      const auto vb = detail::node_view(ix, r.b, bb);
-      if (detail::separated(va, vb, s, 1)) {
-        const FusedCounts ff = count_universal_witnesses_234(ix, r.a, r.b, h_of, mask, true);
-        if (ff.c[lane_idx] < h) out->push_back(AliveRect{r, ff.c[lane_idx]});
-        continue;
+    const size_t nw = wave.size();
+    // Les premieres vagues sont minuscules : les paralleliser coute plus
+    // que le travail lui-meme.
+    const size_t T = (threads <= 1 || nw < 256)
+                         ? 1
+                         : std::min((size_t)threads, nw);
+    if (workers) *workers = std::max(*workers, (u64)T);
+    const size_t chunk = std::max<size_t>(1, (nw + 8 * T - 1) / (8 * T));
+    const size_t nchunks = (nw + chunk - 1) / chunk;
+    lout.assign(nchunks, {});
+    lnext.assign(nchunks, {});
+    lvis.assign(nchunks, 0);
+    const auto do_chunk = [&](size_t c) {
+      const size_t b0 = c * chunk, b1 = std::min(nw, b0 + chunk);
+      std::vector<AliveRect>& co = lout[c];
+      std::vector<WspdRect>& cn = lnext[c];
+      for (size_t i = b0; i < b1; ++i) {
+        const WspdRect& r = wave[i];
+        ++lvis[c];
+        const FusedCounts fc =
+            count_universal_witnesses_234(ix, r.a, r.b, h_of, mask, false);
+        if (fc.c[lane_idx] >= h) continue;
+        i64 ba[3], bb[3];
+        const auto va = detail::node_view(ix, r.a, ba);
+        const auto vb = detail::node_view(ix, r.b, bb);
+        if (detail::separated(va, vb, s, 1)) {
+          const FusedCounts ff =
+              count_universal_witnesses_234(ix, r.a, r.b, h_of, mask, true);
+          if (ff.c[lane_idx] < h) co.push_back(AliveRect{r, ff.c[lane_idx]});
+          continue;
+        }
+        const i64 w2a = detail::box_w2(va);
+        const i64 w2b = detail::box_w2(vb);
+        const bool split_a = (r.a >= 0) && (r.b < 0 || w2a >= w2b);
+        const NodeRef keep = split_a ? r.b : r.a;
+        const RadixNode& n = ix.nodes[(size_t)(split_a ? r.a : r.b)];
+        cn.push_back(split_a ? WspdRect{n.left, keep} : WspdRect{keep, n.left});
+        cn.push_back(split_a ? WspdRect{n.right, keep} : WspdRect{keep, n.right});
       }
-      const i64 w2a = detail::box_w2(va);
-      const i64 w2b = detail::box_w2(vb);
-      const bool split_a = (r.a >= 0) && (r.b < 0 || w2a >= w2b);
-      const NodeRef keep = split_a ? r.b : r.a;
-      const RadixNode& n = ix.nodes[(size_t)(split_a ? r.a : r.b)];
-      next.push_back(split_a ? WspdRect{n.left, keep} : WspdRect{keep, n.left});
-      next.push_back(split_a ? WspdRect{n.right, keep} : WspdRect{keep, n.right});
+    };
+    if (T <= 1) {
+      for (size_t c = 0; c < nchunks; ++c) do_chunk(c);
+    } else {
+      std::atomic<size_t> nextc{0};
+      std::vector<std::thread> pool;
+      pool.reserve(T);
+      for (size_t t = 0; t < T; ++t)
+        pool.emplace_back([&] {
+          for (;;) {
+            const size_t c = nextc.fetch_add(1);
+            if (c >= nchunks) break;
+            do_chunk(c);
+          }
+        });
+      for (auto& th : pool) th.join();
+    }
+    next.clear();
+    for (size_t c = 0; c < nchunks; ++c) {
+      out->insert(out->end(), lout[c].begin(), lout[c].end());
+      next.insert(next.end(), lnext[c].begin(), lnext[c].end());
+      if (visited) *visited += lvis[c];
     }
     wave.swap(next);
   }
@@ -681,7 +789,8 @@ inline void collect_candidate_balls(const CloudIndex& ix, i64 s, u64 smax_eff,
                                     u32 axial_flags = 0, int num_threads = 1,
                                     bool mutant_par_drop_shard = false,
                                     bool mutant_par_one_worker = false,
-                                    bool mutant_q3_one_worker = false) {
+                                    bool mutant_q3_one_worker = false,
+                                    bool mutant_wspd_one_worker = false) {
   out->clear();
   // Garde d'arrondi (contre-audit 04c71a2 § 4) : evaluee UNE FOIS au fil
   // appelant ; false => bornes +inf, tout passe par le repli exact.
@@ -785,7 +894,16 @@ inline void collect_candidate_balls(const CloudIndex& ix, i64 s, u64 smax_eff,
     }
   };
   // ---- q2.
-  detail_bs::wspd_alive(ix, s, h_of, 0, 0b001, h_of[0], &alive);
+  {
+    const auto tw0 = std::chrono::steady_clock::now();
+    detail_bs::wspd_alive(ix, s, h_of, 0, 0b001, h_of[0], &alive,
+                          &st->wspd_rects_visited[0],
+                          mutant_wspd_one_worker ? 1 : num_threads,
+                          &st->wspd_workers[0]);
+    st->t_wspd_alive_ms[0] += std::chrono::duration<double, std::milli>(
+                                   std::chrono::steady_clock::now() - tw0)
+                                   .count();
+  }
   st->rect_alive[0] = alive.size();
   run_rects(0, [&](const detail_bs::AliveRect& ar, LaneScratch& sc,
                 std::vector<BallCandidate>* lout, BallStreamStats* lst) {
@@ -812,7 +930,16 @@ inline void collect_candidate_balls(const CloudIndex& ix, i64 s, u64 smax_eff,
       }
   });
   // ---- q3.
-  detail_bs::wspd_alive(ix, s, h_of, 1, 0b010, h_of[1], &alive);
+  {
+    const auto tw0 = std::chrono::steady_clock::now();
+    detail_bs::wspd_alive(ix, s, h_of, 1, 0b010, h_of[1], &alive,
+                          &st->wspd_rects_visited[1],
+                          mutant_wspd_one_worker ? 1 : num_threads,
+                          &st->wspd_workers[1]);
+    st->t_wspd_alive_ms[1] += std::chrono::duration<double, std::milli>(
+                                   std::chrono::steady_clock::now() - tw0)
+                                   .count();
+  }
   st->rect_alive[1] = alive.size();
   run_rects(1, [&](const detail_bs::AliveRect& ar, LaneScratch& sc,
                 std::vector<BallCandidate>* lout, BallStreamStats* lst) {
@@ -856,6 +983,7 @@ inline void collect_candidate_balls(const CloudIndex& ix, i64 s, u64 smax_eff,
         // Remplissage PARESSEUX des sites affines : au premier seed aigu
         // seulement — une ancre sans seed ne paie pas l'O(cover).
         bool affine_filled = false;
+        u64 anchor_seeds = 0, anchor_work = 0;
         for (const CoverPoint& cp : cover) {
           if (cp.u == ua || cp.u == ub) continue;
           const P3& px = ix.upos[(size_t)cp.u];
@@ -924,6 +1052,8 @@ inline void collect_candidate_balls(const CloudIndex& ix, i64 s, u64 smax_eff,
                          : cover.size() < 1024 ? 1
                          : cover.size() < 4096 ? 2 : 3;
           st->q3_scan_sites_by_cover[cb] += (u64)scanned;
+          ++anchor_seeds;
+          anchor_work += (u64)scanned;
           if (deep) {
             ++st->gen_depth_killed[1];
             continue;
@@ -936,10 +1066,35 @@ inline void collect_candidate_balls(const CloudIndex& ix, i64 s, u64 smax_eff,
         st->t_q3_scan_ms += std::chrono::duration<double, std::milli>(
                                 std::chrono::steady_clock::now() - ta1)
                                 .count();
+        // Charge de CETTE ancre : quelques additions, hors de toute
+        // boucle de site.
+        if (anchor_seeds != 0) {
+          ++st->q3_anchors_scanned;
+          st->q3_seeds_total += anchor_seeds;
+          st->q3_cover_total += (u64)cover.size();
+          st->q3_work_total += anchor_work;
+          int wb = 0;
+          while (wb + 1 < 40 && (anchor_work >> (wb + 1)) != 0) ++wb;
+          st->q3_work_hist[wb] += anchor_work;
+          ++st->q3_anchor_hist[wb];
+          int sb = 0;
+          while (sb + 1 < 8 && (anchor_seeds >> (sb + 1)) != 0) ++sb;
+          st->q3_work_by_seeds[sb] += anchor_work;
+          ++st->q3_anchors_by_seeds[sb];
+        }
       }
   });
   // ---- q4.
-  detail_bs::wspd_alive(ix, s, h_of, 2, 0b100, h_of[2], &alive);
+  {
+    const auto tw0 = std::chrono::steady_clock::now();
+    detail_bs::wspd_alive(ix, s, h_of, 2, 0b100, h_of[2], &alive,
+                          &st->wspd_rects_visited[2],
+                          mutant_wspd_one_worker ? 1 : num_threads,
+                          &st->wspd_workers[2]);
+    st->t_wspd_alive_ms[2] += std::chrono::duration<double, std::milli>(
+                                   std::chrono::steady_clock::now() - tw0)
+                                   .count();
+  }
   st->rect_alive[2] = alive.size();
   run_rects(2, [&](const detail_bs::AliveRect& ar, LaneScratch& sc,
                 std::vector<BallCandidate>* lout, BallStreamStats* lst) {
