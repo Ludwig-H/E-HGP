@@ -118,6 +118,47 @@ production (corps partagé, cœur shaped, kernel `k_q4_core` avec ballots par
 morceau) — à 8000 `eight_clusters` (ratio local) : complétions atteignant la
 profondeur 23,8 M → 5,1 M, rectangles q4 22,3 s → 18,8 s ; à recevoir sur G4.
 
+**Session 9 (pin `5c777be3` : tests d'ancre + morceaux de corde + prétests
+avant le cover sur les candidats diamétraux du rectangle ; reçu
+`campagne_g4_v5_20260827_corde_pretests`, campagne complète, 31 runs,
+validateur du pin rejoué)** — comparaison appariée avec la session 8 (CPU 48
+fils) : `eight_clusters` 50 k **162 → 82 s** (gen 24 s : q3 5,0, q4 9,6),
+100 k **440 → 185 s**, 200 k **1457 → 443 s** (gen 175 s : q3 45, q4 84) ;
+`uniform` 50 k 78 s, 100 k 166 → 164 s, 200 k 353 → 346 s ; `terrain` 50 k
+22 s ; `scanline` 50 k 16 s, 100 k 89 → 57 s, 200 k 503 → **499 s** (gen 465
+s dont q4 438 s). Contrats `--gpu` 50 k : 81 / 24 / 85 / 18 s, adaptatif 256 :
+84 / 18 s — deux digests identiques au CPU partout, toujours à parité (aucun
+gain net). Trois lectures :
+
+1. Sur `uniform` et `eight_clusters`, la génération n'est plus le poste
+   dominant : à 200 k, le **fold** (`reduce` 139–144 s séquentiel par ordre,
+   lié à la latence mémoire : 562 M facettes cumulées, ~1,6 µs par événement)
+   et le digest (63 s) font plus de la moitié du mur ; la mémoire de pointe
+   (65 Go à 200 k `uniform`) borne l'échelle avant le temps. Le device ne
+   peut prendre que le corps de la lane (cœur + corde + complétions ≈ 47 % de
+   la lane q4 au profil 8000, soit ~5 s sur 82 s à 50 k) : **la livraison 7
+   (lane par rectangle) n'a pas de gain à démontrer à 50 k ; elle reste
+   subordonnée.** Le chemin device prouvé (deux digests, mutant tué) est
+   conservé comme exécuteur non autoritaire.
+2. Sur `scanline`, la lane q4 croît en $n^{2{,}9}$ (10 G → 59 G → 431 G
+   itérations du balayage cœur/corde de 50 k à 200 k ; ancres q4 examinées en
+   $n^{1{,}86}$ ; itérations par seed mort 83 → 122 → 218) alors que l'objet
+   (candidats q3/q4) est linéaire. La cause est mathématique, pas un débit :
+   sur une ancre entre deux lignes de balayage, la boule diamétrale ne
+   contient aucun point, donc aucun secteur (tous contiennent l'apex $v=0$)
+   n'a de témoin universel et l'ancre survit alors que tous ses seeds meurent.
+   C'est le chantier suivant (tests d'ancre sans apex : disque intérieur +
+   secteurs annulaires, ou index dual $(	heta, t)$ des sites par ancre) —
+   avant tout kernel, parce qu'un device 50× plus rapide ne change pas un
+   exposant.
+3. Le noyau device tel qu'écrit mesure `kernel_ms` = mur d'un lot y compris
+   les boucles hôte entre les trois kernels (verdicts, offsets de paires,
+   compaction des étages octet par octet) ; 13 574 lancements à 50 k
+   `scanline` pour ~10 G itérations, soit ~1 G/s — deux ordres sous le débit
+   attendu. Toute reprise du point 2 commence par instrumenter ces trois
+   étapes séparément ; aucune conclusion de débit device n'est tirée de ce
+   reçu.
+
 ## 1. Ce que la mesure G4 a désigné (27 août 2026)
 
 Sur `g4-standard-48` à 48 fils, K = 1..10 exact (reçu

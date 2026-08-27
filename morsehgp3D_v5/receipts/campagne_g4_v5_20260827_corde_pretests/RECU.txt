@@ -1,0 +1,60 @@
+# Session G4 v5 — campagne d echelle (temoin, lanes device, conformite v4, contrats 50 000 CPU et --gpu)
+date_utc=2026-08-27T22:55:23+00:00
+source_commit=5c777be3cf599c7361c733654589cecf2afa4816
+head_local=94be8992e85546a59fd585f769b73d9b0086a89d
+source_payload_sha256=aef022a5835fd5227dddd6065f7cb9fcdb6d19f323df3b02c2611ef0cf06bcdd
+protocol_manifest_sha256=605ddc2d14bed68a1e5d4ab97aa84a0e42b52110d7c4e151f9e984dfd531f890
+machine=g4-standard-48 SPOT europe-west4-ai1a, 48 fils, RTX PRO 6000 Blackwell
+protocole=gcp-migration/session_campagne_v5_scale_g4.sh (pin, gardes, arret certifie)
+
+# note
+Session 9 : pin 5c777be3 = tests d ancre (W3 exact + secteurs) + test de seed q4 par morceaux de corde (theoreme 10.4) + pretests avant le cover sur les candidats diametraux du rectangle ; EXTRA_N=100000 200000 (uniform, eight_clusters, scanline_single_pass). Comparaison appariee avec la session 8 (pin ef5abbd5, campagne_g4_v5_20260827_extension) : eight_clusters 50k 162 -> 82 s, 100k 440 -> 185 s, 200k 1457 -> 443 s ; uniform 50k 78 s, 100k 166 -> 164 s, 200k 353 -> 346 s ; scanline 100k 89 -> 57 s, 200k 503 -> 499 s. Deux digests CPU/GPU identiques sur les quatre familles + adaptatif 256 ; les lanes device restent a parite (aucun gain net). Artefacts bruts dans out/ ; session.log joint.
+
+# run code duree_s peak_rss_kb
+conf_eight_clusters_n16000 0 21 5555788
+conf_eight_clusters_n32000 0 48 10787688
+conf_eight_clusters_n8000 0 9 2510968
+conf_scanline_single_pass_n16000 0 3 1076824
+conf_scanline_single_pass_n32000 0 9 1945492
+conf_scanline_single_pass_n8000 0 1 534632
+conf_terrain_n16000 0 4 1128156
+conf_terrain_n32000 0 11 2229540
+conf_terrain_n8000 0 2 543432
+conf_uniform_n16000 0 22 6242956
+conf_uniform_n32000 0 48 12665960
+conf_uniform_n8000 0 10 3031364
+contrat_eight_clusters_n100000 0 185 37597504
+contrat_eight_clusters_n200000 0 443 58909612
+contrat_eight_clusters_n50000 0 82 17900160
+contrat_gpu_eight_clusters_n50000 0 85 17408280
+contrat_gpu_scanline_single_pass_n50000 0 18 4870252
+contrat_gpu_terrain_n50000 0 24 4281776
+contrat_gpu_uniform_n50000 0 81 19643988
+contrat_gpuad_eight_clusters_n50000 0 84 17567588
+contrat_gpuad_scanline_single_pass_n50000 0 18 4745752
+contrat_scanline_single_pass_n100000 0 57 6257500
+contrat_scanline_single_pass_n200000 0 499 11808432
+contrat_scanline_single_pass_n50000 0 16 3088980
+contrat_terrain_n50000 0 22 3477212
+contrat_uniform_n100000 0 164 38953744
+contrat_uniform_n200000 0 346 65170380
+contrat_uniform_n50000 0 78 18907280
+gpu_lane 0 75 1828088
+gpu_mutant 4 2 872988
+gpu_witness 0 11 807456
+contrat_eight_clusters_n100000 digest_all=8f4190af21b4a2ba1bd2b3b9f15e198c19aa4ffa7bfe76d72aa04fd8682aadb7
+contrat_eight_clusters_n200000 digest_all=80d0a97c5384f640d181728ef653b94c0e1c30a8211893d2030ac6cce83c916e
+contrat_eight_clusters_n50000 digest_all=b65c2b510d5a5e09170086fc3429290f0b0e960c97d652a53c483e39037f2158
+contrat_gpu_eight_clusters_n50000 digest_all=b65c2b510d5a5e09170086fc3429290f0b0e960c97d652a53c483e39037f2158
+contrat_gpu_scanline_single_pass_n50000 digest_all=7cc339c0f01987b6a0cff9045a8e5f8bec264baba4f8229027bb45e7e4ec8b26
+contrat_gpu_terrain_n50000 digest_all=700dbbc067bbebce48173d9cc1d1b79cf10274a0773ef4075abf014976e8bbb5
+contrat_gpu_uniform_n50000 digest_all=5fc1fdef4f439028b2f956dfcba22a5f9736a94e83d05e13e0eb362918cda2c0
+contrat_gpuad_eight_clusters_n50000 digest_all=b65c2b510d5a5e09170086fc3429290f0b0e960c97d652a53c483e39037f2158
+contrat_gpuad_scanline_single_pass_n50000 digest_all=7cc339c0f01987b6a0cff9045a8e5f8bec264baba4f8229027bb45e7e4ec8b26
+contrat_scanline_single_pass_n100000 digest_all=c5c402035ef4bb0c55f45af07a0d8ba6036d5f1ab7f6d953d3a8ab191727ba45
+contrat_scanline_single_pass_n200000 digest_all=84e4d8219becc7bef33ae1202ebce9d805419d58b634fc92745d499cb377a505
+contrat_scanline_single_pass_n50000 digest_all=7cc339c0f01987b6a0cff9045a8e5f8bec264baba4f8229027bb45e7e4ec8b26
+contrat_terrain_n50000 digest_all=700dbbc067bbebce48173d9cc1d1b79cf10274a0773ef4075abf014976e8bbb5
+contrat_uniform_n100000 digest_all=48658dacd847d55d7ed535d1592576f6fa468670460b9dbd9c615c7c727bb8a2
+contrat_uniform_n200000 digest_all=e1938f542e9be1f433619040a13a913a04bd10357cde57e91bfc96cf6420bcbb
+contrat_uniform_n50000 digest_all=5fc1fdef4f439028b2f956dfcba22a5f9736a94e83d05e13e0eb362918cda2c0
