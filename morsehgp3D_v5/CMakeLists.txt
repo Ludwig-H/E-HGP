@@ -154,3 +154,10 @@ mhgp5_gate(mhgp5_par_mutant_one_worker 4 mhgp5_par_gate "--family=uniform --n=40
 mhgp5_executable(mhgp5_relabel_gate tests/relabel_gate.cpp)
 mhgp5_gate(mhgp5_relabel_gate 0 mhgp5_relabel_gate "--n=300")
 mhgp5_gate(mhgp5_relabel_mutant_dense 4 mhgp5_relabel_gate "--n=300 --inject=dense-pointid")
+
+# ---- Rendu § 9.1 -----------------------------------------------------------------
+mhgp5_executable(mhgp5_render_gate tests/render_gate.cpp)
+mhgp5_gate(mhgp5_render_gate 0 mhgp5_render_gate "")
+mhgp5_gate(mhgp5_render_mutant_active 4 mhgp5_render_gate "--inject=render-active-only")
+mhgp5_gate(mhgp5_render_mutant_collapse 4 mhgp5_render_gate "--inject=render-collapse-mult")
+mhgp5_gate(mhgp5_render_mutant_birth 4 mhgp5_render_gate "--inject=birth-from-events")

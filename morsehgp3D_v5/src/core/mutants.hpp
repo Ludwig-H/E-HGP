@@ -51,6 +51,8 @@ inline constexpr const char* kMutants[] = {
     "canonical-is-uf-root", "attach-detector-disabled",
     // parallelisme
     "par-drop-shard", "par-drop-ball-chunk", "parallel-one-worker",
+    // rendu
+    "render-active-only", "render-collapse-mult", "birth-from-events",
 };
 
 inline std::vector<std::string>& mutant_registry() {
