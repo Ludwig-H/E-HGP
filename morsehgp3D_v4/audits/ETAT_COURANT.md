@@ -1,296 +1,422 @@
-# État courant de l'audit mathématique de `morsehgp3D_v4`
+# État courant — audit complet de `morsehgp3D_v4`
 
-Date : 17 août 2026.  
-Pin audité : `bebdef2` inclus, donc commits `f775c98`, `7bd3281`, `e535af2`, `f3c5105`, `1f1ae0c`, `2437254`, `30e6ccc`, `bebdef2`.  
-Cadre : `phase=exploration_v4_hors_registre`, `public_status=not_claimed`.
+Date : 22 août 2026.
+Auteur : auditeur indépendant.
+Pin fonctionnel audité : `f2533b4e2c79d381381f9e6c0e7d9bb16310548b`.
+Branche : `main`.
+Cadre déclaré : `phase=exploration_v4_hors_registre`, `backend=cpu_reference`, `profile=quantized_u16_input_only`, `public_status=not_claimed`.
+GCP : non utilisé ; aucune ressource distante n'a été créée, démarrée ou modifiée.
 
-Périmètre contrôlé : totalité de l'arborescence courante de `morsehgp3D_v4`, les dix-neuf rapports de lecture versionnés couvrant les Parties I-II du manuscrit (pages PDF 35-134), `PROPOSITION.md`, les audits et le code v3 pertinents, ainsi que la documentation, le code, les tests et les reçus v4. Les rapports de lecture restent des notes, non des autorités ; les énoncés décisifs ci-dessous ont été recontrôlés sur les formulations mathématiques et le code v4. Les statuts GitHub ne publient aucun run CI pour le pin ; les mentions `17/17 CTest` sont donc des reçus de Claude, non une exécution indépendante de cet audit.
+## Verdict exécutif
 
-## Verdict
+`morsehgp3D_v4` est aujourd'hui une **référence CPU exacte et crédible sur un domaine borné**, avec une qualité de tests inhabituellement bonne pour un chantier de recherche. Ce n'est toutefois **ni une source HGP complète au sens du dépôt, ni une bibliothèque intégrable, ni un backend produit qualifié**. Le statut `public_status=not_claimed` est exact et doit être conservé.
 
-**Avis favorable sur le préfiltre de mort et sur la direction d'architecture.** Je n'ai trouvé aucune fausse mort mathématique dans la descente actuellement codée. Les ledgers par lane, les comparaisons strictes, les arrondis dirigés, le masque q2/q3/q4 et la reprise à zéro entre boule-cœur et autorité complète sont cohérents. Les reçus à `n=8000` sont donc de bons reçus d'exploration : ils montrent que tuer pendant la descente est utile, notamment sur `eight_clusters`, sans prétendre encore au SLO ni à une preuve par l'expérience.
+La conclusion n'est pas « jeter v4 ». Ses prédicats q2/q3/q4, ses comparateurs de niveaux, sa gestion des macro-lots, son oracle de forêt et plusieurs de ses filtres fail-open constituent un excellent socle d'oracle et de fixtures pour la source active. La conclusion est plus précise : **promouvoir v4 comme backend dense de production serait contraire aux objectifs actuels du dépôt ; la promouvoir comme oracle CPU borné serait cohérent et utile.**
 
-Quatre corrections contractuelles sont cependant nécessaires avant de parler d'exactitude HGP de bout en bout :
+Deux blocages sont immédiats :
 
-1. **le paragraphe ajouté par `1f1ae0c` distingue à tort deux rayons q3** : `D/sqrt(12) = D/(2sqrt(3))` exactement ; en q4, `D/sqrt(15)` est une sous-approximation sûre de `D sin(15°)`, et non le rayon provenant d'un autre ensemble admissible ;
-2. **le profil exact d'autorité prend des sites distincts** : la bucketisation des positions dupliquées est une extension non prouvée, qui ne peut pas être silencieusement promue comme sémantique du manuscrit ;
-3. **la sortie publique porte des niveaux de rayon au carré et des multifusions** : un chemin couvrant peut compresser le calcul, mais il doit conserver l'hyperarête complète, toutes les facettes utiles au rendu et, pour la sortie complète, les applications verticales entre ordres ;
-4. **les petites tailles utilisent `K_eff=min(K_max,n)` et `s_max=min(K_eff+1,n)`** : la constante 11 est correcte pour la cible `n>=11, K_max=10`, pas comme vérité générale de la bibliothèque.
+1. le commit `f2533b4e` annonce un plafond du « pic de résidence projeté », mais la formule oublie que les résultats des folds terminés restent résidents ; la garde peut donc accepter un calcul dont le seul état final connu dépasse déjà le pic annoncé ;
+2. le contrat local « forêt complète K=1..10 en moins de 100 ms, dizaines de millions de points » reste formulé comme une trace exhaustive résidente, alors qu'une borne q2 déjà reçue impose à 30 millions de points au moins 158,4 Go de seuls `PointId` pour les facettes nées, avant q3, q4, niveaux, arbres, verticales et surcoûts de conteneurs.
 
-En résumé : **préfiltre fail-open reçu ; formule couplée `R_coup` reçue mathématiquement ; source complète, census et forêts non encore reçus ; aucun statut public promu.**
+### Décision de promotion
 
-## 1. Réponse Q1 : bijection événements-boules
+| Objet évalué | Verdict | Motif principal |
+|---|---|---|
+| prédicats entiers q2/q3/q4 | **reçus sur le profil u16 borné** | oracles indépendants, mutants causaux et bords stricts bien couverts |
+| génération horizontale régulière | **reçue conditionnellement** | complète sur les petits juges et les hypothèses déclarées ; preuve de coût WSPD encore ouverte |
+| plateaux sphériques | **référence bornée seulement** | sémantique convaincante, mais explosion combinatoire et UB pour une coquille de taille 32 |
+| dix forêts horizontales | **reçues comme référence CPU** | macro-lots, naissances, croissances et multifusions vérifiés |
+| tour HGP complète | **non reçue** | aucune application verticale entre ordres, aucune campagne de naturalité |
+| rendu du chapitre 9 | **partiel, non publié** | agrégation testée, mais absente du chemin normal et payload final incomplet |
+| API producteur pour `morsehgp3d` | **absente** | aucun adaptateur vers `CertifiedTowerInput`, aucun reçu canonique de source |
+| plafond mémoire | **rejeté comme garantie** | résultats terminés non comptés dans la résidence cumulée |
+| GPU | **non implémenté** | aucun target CUDA ; témoin `.cu` jamais compilé |
+| 50 000 points / 100 ms | **non qualifié, très loin** | des dizaines de secondes sont encore mesurées à 8 000 points |
+| 10 M à 30 M transactionnels | **non implémentés** | catalogues et résultats globaux résidents, indices locaux sans tuilage |
+| statut public exact | **ne pas revendiquer** | la prudence actuelle est correcte |
 
-L'énoncé du § 2.1 est correct sous les hypothèses suivantes : `X` est un ensemble fini de sites distincts et il est en position générale au sens de la Définition 26 du manuscrit.
+## 1. Référentiel et méthode
 
-Soit `σ` un K-simplexe de Gabriel, `B_σ` sa miniboule et `S = σ ∩ ∂B_σ` son support minimal. La position générale implique qu'aucun point de `X \ σ` n'est sur `∂B_σ`, et Gabriel implique qu'aucun point de `X \ σ` n'est dans l'intérieur. Par conséquent :
+L'audit couvre l'intégralité de `morsehgp3D_v4` : documentation, CMake, environ 16 100 lignes C++/CUDA, tests, probes, reçus et historique Git. Il compare ce dossier à trois autorités, dans cet ordre :
 
-`σ = S ∪ (X ∩ int(B_σ))`.
+1. les parties I et II du manuscrit de thèse, pages PDF 35 à 134 ;
+2. le contrat courant du dépôt à la racine, notamment `README.md`, `docs/SPECIFICATION_MORSEHGP3D.md`, l'état de Phase 15 et l'API publique `morsehgp3d` ;
+3. les contrats locaux de v4 dans `README.md`, `docs/MATHEMATIQUES.md` et `PASSATION.md`.
 
-Réciproquement, si `S` supporte une miniboule `B` et si `σ = S ∪ (X ∩ int(B))`, alors `S ⊆ σ ⊆ B`, donc `ρ(σ) = ρ(S)` et la miniboule de `σ` est bien `B`. Aucun point extérieur à `σ` n'est intérieur à `B`, donc `σ` est Gabriel. La profondeur vaut `|X ∩ int(B)| = K+1-|S|`. La miniboule étant unique, cette correspondance est bijective.
+Les notes et anciens audits ont servi à retrouver les obligations et les contre-fixtures, jamais à remplacer une relecture du code. Les commits fonctionnels postérieurs au dernier audit reçu sont principalement :
 
-La réduction q2/q3/q4 en découle. Le seuil exact est `h_q=s_max-q+1`, avec `K_eff=min(K_max,n)` et `s_max=min(K_eff+1,n)`. Pour `K_max=10` et `n>=11`, on retrouve bien `h_2/h_3/h_4=10/9/8`; les petits oracles ne doivent pas recevoir 11 par défaut.
+| commit | objet | réception de cet audit |
+|---|---|---|
+| `d32e5944` | préfiltre q4 par puissance équatoriale | reçu comme condition nécessaire, sous oracle |
+| `c1af984e` | réemploi de `q3_power`, bord strict et deux étages i64 | reçu mathématiquement et par tests |
+| `f2533b4e` | plafond sur le pic projeté | intention reçue, garantie de résidence rejetée |
 
-### Blocage sur les doublons
+### Vérifications exécutées
 
-Le manuscrit et la spécification d'autorité travaillent avec un ensemble de sites distincts `X ⊂ R^3`. La v4 autorise plusieurs `PointId` au même site, mais une simple multiplicité de profondeur ne suffit pas à définir l'objet exact. Exemple : deux identités `a_1,a_2` au même point `a` et une identité `b` au point `b`. Le simplexe étiqueté `{a_1,a_2,b}` apparaît au rayon `|ab|/2`, mais sa miniboule porte plusieurs sommets du simplexe sur le même point de frontière. La taxonomie « support affine positif de taille 2 à 4 + points strictement intérieurs » ne code pas cette multiplicité de shell. En outre, `expected_pair_mass` retire les paires copositionnelles.
+- configuration et build Release avec GCC 13.3, `-Wall -Wextra -Wpedantic -Werror` : succès ;
+- CTest Release : **147/147 tests réussis** en 63,46 s ;
+- build Debug GCC avec ASan+UBSan : succès ;
+- CTest ASan+UBSan avec `detect_leaks=0` : **147/147 tests réussis** en 1 192,65 s ;
+- `tools/check_docs.py`, `check_passation.py`, `check_implementation_status.py`, `check_scope.py` et `check_references.py` : succès ;
+- reproduction UBSan indépendante sur une coquille cosphérique u16 de 32 points : échec déterministe à `src/forest/sphere_plateau.hpp:119` ;
+- inspection de la CI GitHub : le workflow racine ne configure ni ne teste `morsehgp3D_v4`.
 
-Recommandation immédiate : le chemin exact doit soit refuser les positions dupliquées avec `unsupported_degeneracy`, soit définir et prouver une version pondérée/étiquetée de HGP incluant les multiplicités de shell. Le refus est nettement plus simple pour la première version exacte.
+Deux portes optionnelles fondées sur Boost/OBig n'ont pas été enregistrées, l'en-tête Boost requis étant absent de l'environnement local. La suite compte donc 147 tests ici et 149 lorsque cette dépendance est disponible. Cette variabilité contredit les textes qui présentent 147 comme un total universel.
 
-Autre détail d'API : `build_cloud_index(const vector<P3>&)` pose actuellement `PointId = index d'entrée`. Avant l'owner canonique et les `SupportKey`, il faut accepter explicitement des enregistrements `{PointId, position}` et vérifier l'unicité des identités. Sinon l'identité dite « stable » dépend encore de l'ordre physique fourni par l'appelant.
+LeakSanitizer n'est pas exploitable dans ce conteneur à cause de l'interdiction de `ptrace` sur `/proc`. La campagne a donc été relancée avec la seule détection de fuites désactivée ; ASan et UBSan restent actifs. Clang et CUDA n'étaient pas disponibles localement. Ces limites sont des limites de preuve, pas des échecs attribués au code.
 
-## 2. Réponse Q2 : borne Poisson sur le mou
+## 2. Confrontation aux objectifs réels du dépôt
 
-Pour une ancre ponctuelle fixée `(a,b)`, soit `W_q(a,b)` le fuseau exact, `L(a,b) ⊆ W_q(a,b)` une région certifiée par le préfiltre, et `h = h_q`. Sous un processus de Poisson homogène d'intensité `λ`, les nombres de témoins dans ces régions suivent des lois de Poisson de paramètres `μ_W = λ |W_q|` et `μ_L = λ |L|`. En notant
+Le dépôt racine ne cherche pas seulement « dix forêts ». Il cherche une source géométrique sparse exacte, sans mosaïque de Delaunay d'ordre supérieur, capable d'alimenter une réduction aval avec :
 
-`F_h(μ) = exp(-μ) Σ_{j=0}^{h-1} μ^j/j!`,
+- les forêts horizontales de tous les ordres ;
+- les arêtes verticales entre ordres adjacents ;
+- les simplexes projectables et les niveaux de leurs cofaces incidentes ;
+- des reçus liant le payload à une source complète, exacte et non surrogate ;
+- un chemin transactionnel, budgeté puis streamé aux grandes tailles ;
+- une qualification `warm_e2e` à 50 000 points, p95 inférieur à 100 ms, avec une porte secondaire sous 1 s ;
+- ensuite 10 000 001 points et davantage, sans catalogue global incompatible avec la taille de sortie.
 
-on obtient exactement, pour cette géométrie fixée :
+L'API publique matérialise cette frontière dans `morsehgp3d/include/morsehgp3d/api/point_hierarchy.hpp`: `CertifiedTowerInput` contient nœuds, arêtes et simplexes projectables ; `TowerSourceReceipts` exige quatre identifiants canoniques et les drapeaux `all_orders_complete`, `vertical_maps_complete`, `projectable_incidences_complete`, `exact_source_certified`, avec `surrogate_source_used=false`.
 
-- probabilité que l'ancre survive au filtre : `F_h(μ_L)` ;
-- probabilité qu'elle soit réellement vivante : `F_h(μ_W)` ;
-- probabilité de faux survivant, sans aucune fausse mort : `F_h(μ_L) - F_h(μ_W)` ;
-- facteur de mou : `F_h(μ_L) / F_h(μ_W)`.
+V4 ne satisfait pas encore cette frontière :
 
-Pour une fenêtre d'observation `Ω`, Campbell-Mecke donne la forme intégrée
+| Objectif du dépôt | Réalité v4 au pin audité |
+|---|---|
+| éviter Delaunay d'ordre supérieur | oui ; la source WSPD et les boules exactes respectent cet interdit |
+| source sparse exacte | génération sparse en amont, puis événements, facettes et deltas globaux résidents en aval |
+| tour multi-ordre | dix folds horizontaux indépendants ; aucune verticale |
+| payload projectable | `RenderResult` de test, sans export vers l'API racine ni table publique complète des naissances |
+| source certifiée | aucun schéma de reçu compatible avec la racine |
+| API intégrable | seulement des exécutables CMake ; pas de `add_library`, `install`, en-tête public stable ou sérialiseur |
+| GPU exact | macros de préparation et un `.cu` orphelin ; aucune compilation device |
+| 50 k / 100 ms | aucune exécution complète à 50 k ; à 8 k, `t_gen` reste autour de 35,3 s et un fold budgeté autour de 21 s |
+| 10 M+ streamés | préflight après matérialisation de `cands` et `balls`, puis sorties résidentes |
 
-`E[N_surv] = λ²/2 ∫_{Ω×Ω} F_h(λ|L(a,b)|) da db`,
+Le `README.md` local promet encore « forêt HGP complète K=1..10 en moins de 100 ms sur une G4 » et « dizaines de millions ». Le `README.md` racine décrit désormais plus honnêtement une cible `warm_e2e` à 50 k, suivie d'un chemin transactionnel streamé. Ces deux formulations doivent être unifiées. Tant que « complet » signifie trace symbolique exhaustive, la latence doit être explicitement output-sensitive ; si 100 ms vise une requête chaude ou des labels depuis un index préconstruit, le contrat doit le dire et séparer `cold_build`, `full_symbolic_stream` et `warm_query`.
 
-et la même expression avec `W_q` pour le vrai vivant.
+## 3. Audit mathématique
 
-Il existe en outre un théorème asymptotique global simple, que je **reçois** du contre-audit v3. Si `|W_q(a,b)|=v_q |a-b|³` dans le régime homogène sans bord, alors le nombre `V_h` de paires réellement vivantes vérifie
+### 3.1 Objet HGP et réduction événements-boules
 
-`E[V_h]/E[n] -> 2πh/(3v_q)`.
+La lecture du manuscrit confirme le cœur utilisé par v4 : un événement Gabriel d'ordre `K` relie par une hyperarête les facettes de son simplexe au niveau exact de sa miniboule ; les composantes, traitées par niveaux fermés, donnent les polyèdres et leur hiérarchie. Une représentation finie correcte doit préserver les égalités de niveaux, les multifusions et la naturalité entre ordres.
 
-En effet, en coordonnées radiales autour du premier point, Campbell-Mecke donne un facteur `4πr²`; avec `t=λv_qr³`, on utilise `r²dr=dt/(3λv_q)` et
+Sous sites distincts et position générale, la réduction q2/q3/q4 est correcte. Pour un simplexe Gabriel `sigma`, sa miniboule possède un support de deux à quatre sites, et tous les autres sommets de `sigma` sont strictement intérieurs. Réciproquement, support plus intérieur complet reconstruit l'événement. Le seuil `h_q=s_max-q+1` donne bien `10/9/8` lorsque `K_max=10` et `n>=11`.
 
-`∫_0^∞ F_h(t) dt = Σ_{j=0}^{h-1} Γ(j+1)/j! = h`.
+Les implémentations respectent cette taxonomie :
 
-Pour `h_2/h_3/h_4=10/9/8`, cela donne respectivement environ `40`, `123,796` et `139,070` paires vivantes par point. Les anciens « oracles Poisson » sont donc des constantes théoriques sous homogénéité, pas de simples ajustements empiriques. Appliquée au cœur ponctuel de coefficient volumique `c_q`, la même preuve donne un facteur de mou global `v_q/c_q`, soit environ `1`, `1,511` et `1,659` pour q2/q3/q4.
+- q2 utilise la boule diamétrale et une profondeur stricte ;
+- q3 utilise l'acuité stricte, l'owner canonique, les formes de Gram/Cramer et des niveaux exacts comparés en U192 ;
+- q4 utilise le déterminant non nul, la positivité du centre, le census exact et des comparaisons croisées U320 ;
+- les égalités de niveaux sont sémantiques, et non des égalités de représentation binaire.
 
-La formule conditionnelle est rigoureuse pour une région `L` déterministe une fois les extrémités fixées. Une cellule WSPD construite avec le même nuage est corrélée au processus ; pour transformer le calcul bloc par bloc en théorème sur la WSPD aléatoire, il faut soit un argument de stabilisation, soit un arbre pilote indépendant. À défaut, cette dernière étape reste un modèle quantitatif, pas un oracle déguisé en lemme.
+Les limites de largeur sont documentées et les oracles extrêmes u16 exercent les carries, signes et parités. Je n'ai trouvé ni overflow signé sur le chemin normal du profil u16 ni comparaison de niveau en flottant.
 
-Pour une ancre de longueur `D`, les volumes normalisés sont :
+Réserve d'intégration : `Q4Level` est une représentation exacte interne, mais pas la fraction canonique `ExactLevel` de l'API racine. L'exactitude de comparaison est reçue ; la canonicalisation et la sérialisation inter-modules ne le sont pas.
 
-| lane | `|W_q|/D³` | volume de la boule-cœur ponctuelle `/D³` | fraction volumique |
-|---|---:|---:|---:|
-| q2 | 0,523599 | 0,523599 | 1 |
-| q3 | 0,152263 | 0,100767 | 0,66179 |
-| q4 | 0,120480 | 0,072624 | 0,60278 |
+### 3.2 Filtres q4 des commits du 19 août
 
-Cela explique deux faits observés : le cœur seul peut être presque parfait à forte intensité, grâce à la queue de Poisson, mais il possède un mou irréductible en q3/q4 ; `h_a/h_b` ne sont donc pas un luxe décoratif. Pour des blocs WSPD, `R_dec,q = κ_q(d-r)-r/2` converge vers le rayon ponctuel à perte relative `O(1/s)`. Le mou dû aux boîtes décroît donc en `O(1/s)`, tandis que le mou dû à la différence « boule-cœur contre fuseau » subsiste.
+Les deux filtres i64 exécutés avant `q3_power` sont des conditions nécessaires sûres pour un tétraèdre q4 admissible, avec `D2=|ab|²` :
 
-## 3. Réponse Q3 : complétude de la source WSPD
+- le test de sommet impose `2 max(l_ay,l_by,l_xy) > D2` ;
+- le test de paire impose `max(l_ax+l_ay,l_bx+l_by) > D2`.
 
-### Ce qui est reçu
+L'égalité est correctement rejetée sur la frontière non stricte. Les survivants passent ensuite au calcul exact de puissance de la face par la primitive q3 existante, puis à Cramer. Les oracles indépendants tuent les mutants de signe, de sommet, de paire, de frontière et de carry. Je n'ai trouvé aucune fausse mort dans ces étages.
 
-Chaque paire non ordonnée de positions distinctes possède un unique plus petit ancêtre commun dans l'arbre radix. Elle apparaît donc dans une unique graine `(left(v),right(v))`. Chaque scission partitionne exactement le rectangle parent. Le ledger n'est pas la preuve de ce fait, mais il en est une bonne porte contre les fautes d'implémentation.
+La mesure « 80,7 % des rejets de centre capturés avant Cramer » est reçue comme résultat d'ingénierie sur la fixture mesurée, pas comme constante universelle. Elle améliore le coût unitaire mais ne change ni la taille de sortie ni le statut produit.
 
-Soit maintenant `S` un support positif peu profond d'arête owner `(a,b)`. Tout point de `W_q(a,b)` est intérieur à toutes les miniboules admissibles de cette ancre, donc en particulier à la miniboule de `S`. Si `depth(B_S) ≤ h_q-1`, alors `|X ∩ W_q(a,b)| ≤ h_q-1`. Une paire de nœuds créditée par `h_q` témoins universels ne peut donc contenir l'owner d'aucun événement utile. La mort d'un bloc est fail-open et tout owner utile atteint un rectangle terminal vivant.
+### 3.3 WSPD et complétude de génération
 
-Cette partie de Q3 est donc **reçue**, sous le contrat « sites distincts ».
+Le ledger conserve exactement la masse des paires et les décisions de mort sont fail-open : une boîte ne meurt que par un certificat inférieur exact, et un doute descend. Les petits juges exhaustifs vérifient les événements par identité et les mutants `drop-rect`, `cap-terminal`, non-stricts et pertes de tranches sont tués. La complétude fonctionnelle sur le domaine testé est donc crédible.
 
-### Ce qui reste conditionnel
+La preuve de complexité annoncée ne ferme toutefois pas encore l'implémentation exacte. `docs/ARCHITECTURE.md` invoque une dégradation constante de Callahan-Kosaraju pour l'arbre de préfixes, tandis que le code choisit aussi les boîtes serrées et une règle de scission concrète. Le ledger prouve une partition sans perte ; il ne prouve pas à lui seul une borne `O(s^3 n)` sur le nombre de rectangles produits par cette variante. Il faut soit raccorder formellement le code à une décomposition dont la borne est établie, soit publier la complexité comme conditionnelle aux compteurs mesurés.
 
-La complétude de bout en bout ne sera établie qu'après implémentation et audit de l'instruction terminale :
+Cette réserve ne remet pas en cause l'exactitude des événements déjà jugés. Elle interdit de transformer une bonne campagne à `n=8000` en garantie asymptotique pour 30 M.
 
-- q3 : énumération complète des porteurs dans `lentille(ab) \ boule_diamétrale`, owner canonique, positivité et census ;
-- q4 : au moins un préfixe aigu, complétion axiale extrémale, positivité à quatre poids et census ;
-- déduplication par `BallKey`, plateaux et construction des forêts.
+### 3.4 Macro-lots, forêt et rendu
 
-Le préfiltre est donc une source exacte **de paires owner survivantes**, pas encore une source complète d'événements HGP.
+La partie forêt est la plus aboutie du dossier :
 
-### Statut de la borne `O(s³n)`
+- tri stable par niveau exact et regroupement par `same_exact_level` ;
+- racines pré-lot gelées avant les unions ;
+- une transition `ComponentDelta` pour naissance, croissance ou multifusion ;
+- identifiants canoniques par plus petite `FacetKey` ;
+- toutes les facettes conservées pour le rendu, y compris celles nées dans le lot ;
+- multiplicités d'incidence non écrasées ;
+- naissance d'une facette calculée par miniboule exacte, pas par première incidence.
 
-L'exactitude de la partition est indépendante de la borne de taille. En revanche, la preuve de `O(s³n)` n'est pas encore entièrement raccordée au code actuel. `cell_of_prefix` arrondit le préfixe binaire au cube d'octree de niveau `floor(used/3)`, tandis que la vague choisit le facteur à scinder avec la boîte serrée `tlo/thi`. L'argument antérieur « aspect borné, donc facteur constant » ne suffit pas à lui seul, car le choix de la branche scindée est lui aussi modifié.
+Le juge de forêt réénumère indépendamment les miniboules en grands entiers, construit les cliques du manuscrit puis compare les partitions, deltas, niveaux et rendus. Les fixtures de carré cosphérique, multifusion, croissance et naissance tuent les simplifications incorrectes. Sur le domaine borné, ce résultat est reçu.
 
-Deux routes propres :
+Deux distinctions restent impératives :
 
-1. utiliser la cellule de préfixe exacte, de rapport d'aspect 1, 2 ou 4, et piloter la scission par son diamètre, ce qui permet un raccord direct à une preuve de type compressed-quadtree/fair-split ;
-2. conserver les boîtes serrées et écrire un lemme de charging spécifique à l'arbre Morton, avec un nombre borné de stagnations par échelle sous le profil u16.
+1. `build_render` est appelé dans le chemin `--judge`, pas dans la production normale du probe ; le résultat imprimé n'est donc pas un payload du chapitre 9 ;
+2. dix forêts horizontales ne sont pas la tour HGP : aucune application verticale `K+1 -> K` n'est construite ou vérifiée.
 
-Les mesures ne contredisent pas Callahan-Kosaraju, mais elles ne remplacent pas ce raccord.
+Le `RenderResult` actuel contient les facettes, leurs multiplicités par lot et les niveaux de lot. Il ne publie pas, dans un objet final unique, les niveaux de naissance de facette, les objets `S_tau`, `T_x`, `m_tau`, les votes, les cartes verticales et les reçus exigés par le consommateur racine. `facet_birth_level` n'est qu'une primitive de test appelée ponctuellement.
 
-## 4. Réponse Q4 : convention exacte pour `F_K`
+### 3.5 Plateaux et dégénérescences
 
-Pour reproduire le § 9.1 du manuscrit, `F_K` doit contenir **toutes les facettes distinctes de chaque K-simplexe de Gabriel émis**, pas seulement les facettes actives.
+La règle `expand_plateau` est mathématiquement raisonnable pour l'oracle borné : elle énumère les sous-ensembles de coquille `T`, conserve ceux dont le centre appartient à l'enveloppe convexe fermée, puis marque comme actifs les retraits qui changent la miniboule. Cela récupère les événements perdus par une hypothèse de position générale trop stricte.
 
-Les facettes actives suffisent pour déterminer les fusions entre composantes déjà nées, comme le montrent le Théorème 4 et la Proposition 6. Les autres facettes naissent au niveau même de l'événement et ne créent pas une fusion supplémentaire entre anciens polyèdres. Elles existent néanmoins dans le K-graphe de Gabriel et contribuent aux quantités `S_τ`, `T_x`, `m_τ` et au vote final. Les supprimer change donc le rendu pondéré, même si l'union des points des composantes reste inchangée.
+Ce n'est pas une représentation produit. Le coût est exponentiel en la taille de coquille et le code contient un défaut défini :
 
-Je conseille de séparer explicitement :
+```cpp
+const u32 nu = (u32)shell_all.size();
+for (u32 tm = 1; tm < (1u << nu); ++tm) {
+```
 
-- `F_K^conn` : facettes et arêtes nécessaires au chemin de connexion minimal ;
-- `F_K^render` : toutes les facettes des événements, dédupliquées, avec leurs contributions `S_τ`.
+À `nu=32`, `1u << nu` est un décalage hors largeur. Le CLI accepte une valeur arbitraire de `--shell-cap`; une coquille valide de 32 sites distincts sur une sphère u16 atteint donc cette ligne si l'appelant relève le plafond. UBSan produit :
 
-Une facette non active peut être attachée à une facette active au même niveau, sans créer de nouvelle fusion inter-composantes. Une variante « active-only » peut exister comme heuristique nommée, mais ne doit pas être présentée comme le rendu exact du § 9.1.
+```text
+src/forest/sphere_plateau.hpp:119:29: runtime error:
+shift exponent 32 is too large for 32-bit type 'unsigned int'
+```
 
-Trois contrats supplémentaires ressortent de la chaîne d'autorité :
+Le défaut est masqué par le plafond par défaut 12, mais l'API ne l'encode pas comme précondition. Même `nu=31`, techniquement défini, demanderait plus de deux milliards de masques. Correction minimale : refuser explicitement `nu>=32` avant tout décalage et borner séparément le régime d'énumération supporté. Correction produit : définir une représentation comprimée des plateaux ou retourner `unsupported_degeneracy` sans commencer l'expansion.
 
-- le niveau public est un **rayon au carré** sous forme exacte. En q2, il vaut `||a-b||²/4`; en q3/q4, il faut publier la fraction rationnelle canonique du rayon carré. Une variable interne nommée `ρ` peut rester un rayon, mais elle ne doit pas contaminer `ExactLevel`;
-- un événement critique est sémantiquement une **hyperarête/multifusion** sur tous ses bras. Un chemin ou un arbre couvrant est une compression de connectivité, pas une autorisation de binariser la chronologie du plateau;
-- la sortie complète conserve les applications verticales entre les ordres. Dix forêts indépendantes ne suffisent donc pas à représenter seules la tour ordre-échelle.
+### 3.6 Sites distincts et identités
 
-## 5. Réponse Q5 : ex æquo et cosphéricités
+Le chemin principal de `forest_probe` refuse bien les positions dupliquées avant la géométrie exacte, conformément au manuscrit. Les `PointId` externes sont ensuite conservés à travers Morton, owners, supports et facettes ; les portes de relabeling sont solides.
 
-Il faut distinguer trois phénomènes que le mot « ex æquo » mélange trop facilement :
+La frontière n'est cependant pas encapsulée. `build_cloud_index` bucketise les doublons et renvoie un index utilisable ; `point_id(u)` choisit la première identité du bucket. Seul l'exécutable ajoute le refus `unique_count()==input.size()`. Une future réutilisation directe des en-têtes peut donc contourner le profil exact sans statut d'erreur. La bonne frontière est une façade qui valide identités, coordonnées et unicité avant d'exposer le moindre index géométrique ; le builder bas niveau peut rester interne.
 
-1. **Deux BallKeys distinctes de même rayon.** Ce n'est pas une dégénérescence. Il faut traiter toutes les arêtes du plateau simultanément, conserver l'incidence de l'hyperévénement, puis contracter les nœuds de durée nulle. Un ordre total déterministe dans Kruskal est acceptable pour choisir une forêt de calcul, mais pas pour inventer une chronologie stricte à l'intérieur du plateau.
-2. **Une BallKey avec des points supplémentaires sur le shell.** La position générale échoue et la bijection Q1 n'est plus directement applicable. Tant qu'un quotient local complet n'est pas prouvé, il faut refuser transactionnellement cette BallKey avec les identités témoins.
-3. **Des positions dupliquées.** C'est une dégénérescence structurelle distincte, à traiter comme indiqué en Q1.
+V4 utilise des `PointId` u32, ce qui convient à sa cible locale de dizaines de millions, tandis que l'API racine utilise des IDs u64. Ce n'est pas un bug arithmétique, mais un adaptateur v4 ne pourrait pas accepter tout le domaine public sans vérification et refus explicite. Les indices de facettes et d'union-find restent également u32/i32 et demandent un tuilage avant `2^32`, déjà reconnu dans la passation mais non implémenté.
 
-Le tie-break `EdgeKey` entre arêtes de même longueur à l'intérieur d'un support régulier est, lui, parfaitement sain : il choisit un owner sans modifier la géométrie.
+## 4. Blocage B0 — le plafond mémoire ne borne pas la résidence
 
-## 6. Réponse Q6 : dérivation de `W_3`, `W_4` et des rayons cœur
+### 4.1 Formule annoncée
 
-Posons `d=b-a`, `D=|d|`, `m=(a+b)/2`, `p=D/2` et `s=z-m`. Toute sphère passant par `a,b` a un centre `m+t`, avec `t ⟂ d`, et un rayon `R(t)=sqrt(p²+|t|²)`.
+`project_output_budget` calcule :
 
-Pour une ancre owner maximale, la fermeture du domaine des centres admissibles est :
+`bytes_peak = bytes_events + min(max(fold_budget, max_K m_K), sum_K m_K)`
 
-- en q3, le disque `|t| ≤ p/sqrt(3)` ;
-- en q4, le disque `|t| ≤ p/sqrt(2)`.
+où `m_K=fold_bytes_upper_from_counts(E_K,W_K)`. La preuve donnée est correcte pour la variable **d'ordonnancement** `reserved`: à tout instant, la somme des budgets des tâches actives reste sous cette borne, sauf une tâche hors budget admise seule.
 
-Ces bornes sont celles de Jung, et elles sont atteintes. Le point `t=0` correspond à la limite dégénérée d'arité inférieure, mais l'intersection des boules ouvertes ne change pas lorsqu'on prend la fermeture. Le disque n'est pas seulement une relaxation : en q3, tout `t ≠ 0` se réalise en construisant le troisième sommet dans le plan engendré par `d,t`; en q4, pour `t ≠ 0`, choisir un vecteur unitaire `e ⟂ d,t` et les deux sommets `x=m+2t+pe`, `y=m+2t-pe` donne un tétraèdre bien centré, de centre `m+t`, dont toutes les arêtes sont au plus `D` dès que `|t|≤p/sqrt(2)`.
+Le passage invalide est d'identifier `reserved` à la mémoire résidente du fold. Dans `run_folds_budgeted`, `reserved -= bytes[idx]` dès que la fonction de tâche retourne. Or la tâche a déplacé son résultat dans `per_k_result[K]` : `nodes`, `deltas`, `batch_levels`, `batch_of_event`, `facet_keys` et `final_canon_fid` restent vivants jusqu'à la fin des dix folds. Les résultats terminés s'accumulent alors que leur `m_K` est retiré de `reserved`.
 
-La condition `z ∈ int(B(m+t,R(t)))` s'écrit
+La formule mélange donc trois grandeurs :
 
-`p²-|s|²+2s·t > 0`.
+- les événements, tous résidents ;
+- les temporaires des folds actifs, réellement limités par l'ordonnanceur ;
+- les sorties persistantes des folds terminés, absentes du calcul du pic.
 
-En minimisant sur le disque des centres, avec `r=|proj_{d⊥}(s)|`, on obtient `H-2T_q r>0`, où `H=p²-|s|²`, `T_3=p/sqrt(3)` et `T_4=p/sqrt(2)`. Comme `Xi=D²r²=4p²r²`, cela donne exactement :
+### 4.2 Contre-preuve avec le reçu n=8000
 
-- `W_2 : H>0` ;
-- `W_3 : H>0 et 3H²>Xi` ;
-- `W_4 : H>0 et 2H²>Xi`.
+Le reçu `campagne_locale_n8000_v2_20260818/v2_uniform_n8000_smax11.txt` donne :
 
-La plus grande boule centrée en `m` incluse dans toutes ces sphères a pour rayon `min_{|t|≤T_q}(R(t)-|t|)`, minimum atteint au bord. On retrouve :
+| grandeur finale | compte |
+|---|---:|
+| événements | 3 126 158 |
+| facettes denses | 19 466 907 |
+| `ComponentDelta` | 2 791 148 |
+| facettes dans `born` | 16 177 847 |
+| nœuds | 1 974 086 |
 
-- `κ_2=1/2` ;
-- `κ_3=1/(2sqrt(3))=1/sqrt(12)` ;
-- `κ_4=(sqrt(3)-1)/(2sqrt(2))=sin(15°)`.
+Sur l'ABI GCC mesurée au pin, `sizeof(ForestEvent)=144`, `sizeof(FacetKey)=44`, `sizeof(ComponentDelta)=160` et `sizeof(ForestNode)=16`. Un minorant de l'état final, sans capacité excédentaire et sans aucun parent de delta, vaut :
 
-### Correction obligatoire de `1f1ae0c`
+| stockage nécessaire | octets |
+|---|---:|
+| événements | 450 166 752 |
+| `facet_keys` + `final_canon_fid` | 934 411 536 |
+| en-têtes de `deltas` | 446 583 680 |
+| clés des seuls vecteurs `born` | 711 825 268 |
+| nœuds | 31 585 376 |
+| `batch_of_event` | 25 009 264 |
+| **minorant final** | **2 599 581 876** |
 
-Avec `u=2z-a-b`, `U=u·u` et `L=D²`, les tests exacts de la boule-cœur ponctuelle sont :
+Le commit annonce `bytes_peak=2 597 650 400`. Le seul état final obligatoire le dépasse déjà de **1 931 476 octets**. Ce minorant exclut pourtant :
 
-- q2 : `U<L` ;
-- q3 : `3U<L` ;
-- q4 : poser `Y=2L-U`, puis tester `Y>0` et `Y²>3L²`.
+- tous les `parents` des deltas ;
+- `batch_levels`, capacités de vecteurs et fragmentation d'allocateur ;
+- temporaires du fold encore actif ;
+- candidats, boules, arbre, ordre Morton et piles, explicitement hors portée de la garde.
 
-Ainsi :
+La mesure appariée du scheduler rapporte d'ailleurs un pic processus de 4 952 616 Kio pour une réserve maximale de 2 140 153 484 octets. Ce chiffre inclut l'amont et n'est donc pas la preuve principale ; il est cohérent avec le défaut de modèle.
 
-- `D/sqrt(12)` et `D/(2sqrt(3))` sont **le même rayon q3** ;
-- `15U<4L`, soit le rayon `D/sqrt(15)`, est une sous-approximation sûre mais légèrement stricte du cœur q4 exact, car `4/15 < 2-sqrt(3)`.
+### 4.3 Action exigée
 
-Fixture discriminante q4 à graver :
+Jusqu'à séparation de `m_K` en sortie persistante et temporaires, le stopgap sûr est de décider sur `bytes_events + sum_K m_K`. Il peut refuser trop tôt, mais ne doit pas être nommé « pic résident précis ». Le modèle final doit suivre :
 
-`a=(10000,10000,0), b=(20000,10000,0), z=(15000,12585,0)`.
+`événements + sorties terminées + sortie en construction + temporaires des folds actifs + amont explicitement inclus ou publié séparément`.
 
-Elle appartient au cœur exact q4, donc satisfait `2H²>Xi`, mais elle échoue à `15U<4L`. Le code actuel avec `kA3/kA4` reste fail-open : ses constantes sont volontairement sous-approchées. C'est le commentaire mathématique, non la sûreté du code, qui doit être corrigé.
+La porte actuelle est auto-référentielle : elle compare la décision de la formule à la même formule gravée. Il faut une porte indépendante fondée au minimum sur les tailles réelles de `ForestResult` et une fixture où plusieurs folds terminés restent résidents. Un contrôle RSS peut compléter cette preuve, pas la remplacer.
 
-La robustification découplée par boîtes est également validée : le milieu réel se déplace d'au plus `(r_A+r_B)/2` et la longueur réelle est au moins `d-r_A-r_B`; d'où
+En l'état, `--max-output-bytes` peut protéger contre certaines allocations massives, mais **ne doit pas promettre une borne du pic de résidence**.
 
-`B(m_0, κ_q(d-r)-r/2) ⊆ B(m_ab, κ_q|ab|) ⊆ W_q(a,b)`.
+## 5. Blocage B0 — la trace exhaustive et le SLO sont incompatibles
 
-La borne couplée ajoutée comme prochaine étape par `30e6ccc` est elle aussi sûre :
+La borne Poisson q2 déjà reçue tranche le contrat de sortie, indépendamment de toute optimisation q3/q4. Dans un processus homogène sans bord, chaque profondeur `j=0..9` apporte asymptotiquement quatre événements q2 par point. À `K_max=10` :
 
-`R_coup,q = κ_q d - sqrt((4κ_q²+1)(r_A²+r_B²)/2)`.
+- 40 événements q2 par point ;
+- pour `j=1..9`, les retraits de points intérieurs injectent `4 sum j = 180` facettes nées distinctes par point ;
+- ces facettes portent `4 sum j(j+1) = 1320` identités `PointId` par point.
 
-Preuve courte. Écrivons `a=c_A+u`, `b=c_B+v`, `p=(u+v)/2` pour le déplacement du milieu et `w=(v-u)/2` pour l'erreur de demi-arête. Une boule centrée au milieu nominal de rayon
+À 30 millions de points, l'espérance impose donc déjà :
 
-`κ_q d - (2κ_q|w|+|p|)`
+| objet q2 seul | cardinalité / taille |
+|---|---:|
+| événements | 1,2 milliard |
+| facettes nées | 5,4 milliards |
+| incidences `PointId` u32 | 39,6 milliards |
+| seuls octets des IDs | **158,4 Go** |
+| événements avec l'ABI v4 à 144 octets | **172,8 Go** |
 
-est incluse dans le cœur réel. Par Cauchy puis l'identité du parallélogramme,
+Il s'agit d'un minorant théorique de la trace exhaustive attendue, avant les événements q3/q4, les facettes actives, les niveaux, les deltas, les verticales et les index. La campagne uniforme à 8 000 observe environ 391 événements tous ordres par point ; une extrapolation linéaire donnerait 11,7 milliards d'événements et environ 1,69 To avec l'enregistrement courant. Cette seconde valeur est une projection d'ingénierie, pas un théorème ; le minorant q2 suffit déjà.
 
-`2κ_q|w|+|p| ≤ sqrt((4κ_q²+1)(|w|²+|p|²))`
-`≤ sqrt((4κ_q²+1)(r_A²+r_B²)/2)`.
+Conséquence : le temps de production d'une trace exhaustive doit dépendre de la sortie, et le stockage doit être streamé ou externe. Le SLO de 100 ms ne peut être honnêtement attaché au même objet résident à 30 M. Le dépôt doit versionner au moins deux produits :
 
-Il est donc sûr de prendre `max(0,R_dec,q,R_coup,q)`. Pour l'implémentation entière, il faut minorer le terme `κ_q d`, majorer le terme d'érosion et arrondir la racine vers le haut; aucun `double` ne doit décider. Le gain « +71 % de rayon à s=6 en q4 » reste une mesure v3 à reproduire, pas une conséquence du théorème.
+1. `full_symbolic_stream`, exact, transactionnel, output-sensitive, possiblement construit à froid ;
+2. `warm_query` ou `labels`, depuis une représentation préconstruite et certifiée, seul candidat naturel au p95 de 100 ms.
 
-## 7. Réponse Q7 : preuve de l'autorité 64 coins
+La hiérarchie de connectivité implicite ne peut pas non plus prétendre être une trace de facettes si elle ne conserve qu'un quotient. Un quotient peut être un produit distinct, mais il doit déclarer exactement quelles requêtes, verticales et preuves il préserve.
 
-Pour un témoin ponctuel `z`, posons `u=z-a` et `v=b-z`. Alors `H=u·v` et `Xi=|u×v|²`. Les trois lanes équivalent à une contrainte angulaire :
+## 6. Architecture et implémentation
 
-- q2 : `angle(u,v)<90°` ;
-- q3 : `angle(u,v)<60°` ;
-- q4 : `angle(u,v)<acos(1/sqrt(3))`.
+### 6.1 Points forts réutilisables
 
-Pour `v` fixé, l'ensemble des `u` satisfaisant la contrainte est un cône circulaire ouvert convexe. La relation est symétrique en `u,v`.
+- une seule géométrie d'index, déterministe sous permutation ;
+- décisions critiques en entiers exacts, avec flottants seulement dans des filtres gardés et fail-open ;
+- owners et `SupportKey` fondés sur les vrais `PointId` ;
+- RLE par `BallKey` avant census, évitant des census répétés ;
+- préflight avant `ev_k`, même s'il arrive encore après `cands` et `balls` ;
+- parallélisme par tranches qui conserve l'ordre déterministe ;
+- fold sort/reduce plus approprié que les anciennes maps imbriquées ;
+- mutations causales, planchers anti-vacuité et petits oracles réellement indépendants.
 
-Si les 8×8 couples de sommets de `z-A` et `B-z` satisfont la lane, alors, pour chaque sommet `v_j`, la convexité donne la propriété pour tout `u` de la boîte. Fixons ensuite un tel `u`; par symétrie, tous les sommets `v_j` sont dans le cône convexe de `u`, donc toute la boîte `V` y est. La réciproque est triviale.
+Ces choix doivent être préservés dans un futur producteur sparse.
 
-Par conséquent, `corner64_universal` est **exact pour l'enveloppe AABB continue dans le sens ALL, et même équivalent**, y compris pour les boîtes plates après suppression des coins dupliqués. Cette preuve par cônes est préférable à une combinaison séparée de `Hmin` et `Ximax`, dont les extrema peuvent être atteints en des coins incompatibles.
+### 6.2 Ce qui empêche l'intégration
 
-Q7 est donc reçue. Le juge reste utile contre une faute de programmation, mais il ne porte plus la charge du théorème.
+Le `CMakeLists.txt` ne définit que des exécutables de test et de benchmark. Il n'existe ni cible bibliothèque, ni installation, ni namespace public stable, ni objet de résultat transactionnel. Le principal pipeline vit dans `bench/forest_probe.cpp`, fichier qui cumule CLI, scheduling, préflight, bancs, portes, production et rapport.
 
-## 8. Réponse Q8 : tuer à tous les niveaux et vraie fusion des lanes
+Cette concentration est acceptable pour un oracle de recherche, mais pas pour une source du dépôt : elle empêche de tester la frontière publique indépendamment du CLI, de substituer un backend CUDA et de lier le payload aux reçus racine.
 
-La phrase v3 « un certificat évalué à chaque nœud ne peut pas économiser plus de visites qu'il n'en coûte » n'est pas un théorème. Une mort interne évite tout le sous-arbre de rectangles descendants ; le gain apparié de 1,37× est donc parfaitement plausible et justifie la stratégie.
+La forme cible devrait séparer :
 
-Il faut toutefois nommer correctement l'état actuel : la vague `(A,B)` est partagée, mais chaque lane appelle séparément `count_universal_witnesses`, qui redescend depuis la racine de l'arbre des témoins. Au terminal, la boule-cœur puis l'autorité complète redémarrent encore la descente. Les évaluations `(H,Xi)` ne sont donc pas encore mutualisées.
+- une bibliothèque de prédicats et niveaux exacts ;
+- un producteur borné de fixtures de référence ;
+- une interface de source streamée, avec statuts et continuation ;
+- des exécutables de probe qui ne contiennent aucune logique scientifique exclusive.
 
-Étape d'implémentation recommandée :
+### 6.3 Mémoire de l'index
 
-1. écrire `count_universal_witnesses_234(A,B)` avec une seule pile de nœuds témoins, un masque de lanes et trois compteurs ;
-2. sur un nœud témoin, appliquer une fois l'élagage commun `Hmax`, créditer q2 par `Hmin`, créditer q3/q4 par leurs boules-cœur, puis à une feuille calculer un unique masque `corner64` à partir des mêmes `(H,Xi)` ;
-3. ne jamais recommencer le compte à zéro, puisqu'une seule traversée attribue chaque sous-arbre une seule fois ;
-4. intégrer `max(R_dec,R_coup)` dans ce parcours fusionné, avec arrondis dirigés;
-5. ensuite seulement, transporter entre parent et enfants `(A,B)` une frontière de nœuds témoins avec crédits hérités, afin de ne pas relancer depuis la racine.
+`docs/ARCHITECTURE.md` annonce environ 96 octets par position unique et 3,2 Go à 30 M. L'ABI CPU actuelle est plus lourde : un `RadixNode` mesure 120 octets et les tableaux persistants de `CloudIndex` représentent environ 168 octets par site unique avant capacités et allocateur : clé 8, position 24, deux index CSR 8, préfixe de poids 8 et nœud moyen 120. Cela donne environ 5,04 Go à 30 M, auxquels s'ajoutent environ 0,96 Go d'`InputPoint`, 1,2 Go d'ordre/CSR selon le chemin, les temporaires de construction et toute la sortie.
 
-Les compteurs utiles sont `witness_nodes_visited`, `corner_pairs_evaluated`, `AB_children_avoided`, `alive_rects_q2/q3/q4` et `alive_rects_union`. Le reçu actuel ne publie que l'union `rect_vivants`, insuffisante pour dimensionner les consommateurs de chaque lane.
+Ce n'est pas un blocage isolé : 5 Go peuvent être acceptables dans certains environnements. C'est en revanche une preuve que la documentation SoA compacte décrit une cible, pas le layout effectivement construit par le fallback CPU. Les budgets doivent utiliser `sizeof` du backend réel et publier séparément persistent, temporaire et sortie.
 
-## 9. Contre-audit des affirmations héritées
+### 6.4 GPU et performances
 
-### Affirmations confirmées
+Le projet CMake déclare seulement le langage `CXX`. `src/gpu/device_compile_witness.cu` n'est rattaché à aucune cible ; les annotations `MHGP4_HD` deviennent vides dans le build courant. Aucune primitive n'est donc compilée par un compilateur CUDA, et aucune divergence host/device ne peut être détectée. La campagne G4 documentée ne contient aucun reçu réussi de v4.
 
-- un cap de masse dans le critère terminal force un catalogue quadratique ;
-- la scission doit être géométrique, pas pilotée par la population ;
-- `Hmin` est exact et la borne minimax `Hmax` est sûre pour élaguer ;
-- les trois comptes `h_coeur`, `h_a`, `h_b` sont disjoints ;
-- le masque de lanes est nécessaire ;
-- `corner64` est une autorité ALL exacte;
-- la constante Campbell-Mecke `2πh/(3v_q)` et la borne couplée `R_coup` sont correctes.
+Les mesures CPU montrent des progrès réels : paralléliser la descente WSPD réduit `t_gen` d'environ 72,8 s à 35,3 s sur la cellule uniforme à 8 000 points ; le scheduler budgeté réduit aussi le fold. Cela reste plusieurs ordres de grandeur au-dessus de 100 ms avant passage à 50 k, et aucune extrapolation sérieuse ne permet de revendiquer le SLO.
 
-### Affirmations à rectifier
+Le bon ordre est : compiler d'abord un témoin device minimal, faire passer les oracles différentiels host/device, porter les filtres exacts sans changer l'objet, puis lancer une campagne G4 épinglée. Porter le pipeline dense actuel avant de trancher le produit de sortie déplacerait le goulet sans résoudre la taille fondamentale.
 
-- le « facteur borné `8^d` » ne constitue pas encore une preuve complète pour la récursion actuelle sur boîtes serrées ;
-- les rayons q3 prétendument distincts dans `1f1ae0c` sont identiques ;
-- `D/sqrt(15)` est une sous-approximation q4, pas une autre famille géométrique ;
-- « une seule vague, une seule évaluation `(H,Xi)` » décrit la cible, pas encore le code ;
-- le commentaire CMake sur `two_lines` confond porteurs et témoins : un point collinéaire entre `a,b` satisfait aussi W3 et W4 puisque `Xi=0` et `H>0`. La porte reste sûre, mais son commentaire doit être corrigé;
-- la « dominance directionnelle 432 » est une piste expérimentale prometteuse, pas encore un théorème de coût ni une autorité reçue;
-- la boule-cœur issue de la sphère circonscrite à l'AABB est géométriquement un sous-certificat de `corner64`; elle reste utile parce qu'elle crédite des sous-arbres témoins entiers à bien moindre coût, non parce qu'elle serait une autorité plus forte.
+## 7. Documentation, CI et gouvernance de preuve
 
-## 10. Portes prioritaires à ajouter
+### 7.1 CI
 
-1. **Rayon q4 exact** : graver la fixture ci-dessus. Elle doit être reconnue par le prédicat exact; `15U<4L` reste une baseline conservatrice, pas un mutant dangereux.
-2. **`R_coup`** : fixtures déséquilibrées et équilibrées vérifiant `max(R_dec,R_coup)` contre toutes les paires ponctuelles du petit bloc, avec coquille ouverte.
-3. **Corner64** : petites boîtes entières exhaustives q2/q3/q4, comparées à tous les couples de points de grille contenus dans les boîtes.
-4. **Juge exhaustif borné** : sur petits nuages, tester toutes les paires de chaque bloc mort, pas un échantillon.
-5. **Doublons** : fixture qui vérifie le refus explicite du profil exact, jusqu'à preuve d'une future sémantique pondérée.
-6. **Plateaux et multifusion** : deux BallKeys distinctes de même niveau doivent être traitées simultanément, sans nœud artificiel de durée positive et avec l'hyperincidence complète.
-7. **Identités externes** : permutation des enregistrements conservant les mêmes `PointId` et exactement les mêmes owners/SupportKeys.
-8. **Contrat public** : `ExactLevel` au carré, `s_max` effectif sur `n<11`, et une petite tour vérifiant les applications verticales.
+Le workflow `.github/workflows/ci.yml` construit la bibliothèque racine avec GCC, Clang et sanitizers, mais ne configure jamais `morsehgp3D_v4`. Les seuls contrôles qui touchent v4 sont documentaires. Une régression de ses 147 ou 149 portes peut donc être fusionnée sur `main` sans signal CI.
 
-Durcissements simples : vérifier `smax ≥ q` avant `lane_h`, caster avant `q*q` et `k*k` dans le prédicat WSPD, et affirmer en debug que les plages `A,B` sont disjointes avant les soustractions de `credit_weight`.
+Porte minimale à ajouter avant toute promotion de v4 :
 
-## 11. Réception commit par commit
+- GCC Release ;
+- Clang Release ;
+- ASan+UBSan ;
+- Boost/OBig obligatoire pour les deux juges optionnels ;
+- compilation CUDA du témoin lorsque le job dispose de l'outil, sans exiger encore un GPU d'exécution.
 
-- `f775c98` : **reçu comme socle d'exploration**, avec réserve sur les doublons, les IDs externes et la preuve de taille WSPD.
-- `7bd3281` : **reçu mathématiquement** pour la descente q2 et ses arrondis fail-open.
-- `e535af2` : **reçu pour la sûreté q2/q3/q4**; Q6 et Q7 sont désormais prouvées ci-dessus. La fusion des traversées témoins reste à faire.
-- `f3c5105` : **reçu empiriquement**. Les chiffres sont convaincants pour choisir la prochaine étape, mais ne qualifient ni le SLO ni une absence universelle de fausse mort.
-- `1f1ae0c` : **reçu sous réserve de correction documentaire**. La dérivation de `κ_3,κ_4` est correcte; l'interprétation de `D/sqrt(12)` et `D/sqrt(15)` ne l'est pas.
-- `2437254` : **reçu comme corpus de lecture**. Il améliore la traçabilité mais ne promeut aucun résultat v3 au rang de preuve v4.
-- `30e6ccc` : **`R_coup` reçu mathématiquement**; la dominance directionnelle 432 reste à requalifier par une définition, un ledger et des mesures appariées.
-- `bebdef2` : **reçu comme rappel de la chaîne d'autorité**. Il confirme notamment sites distincts, niveaux publics au carré, multifusions et applications verticales; aucun changement de code n'est à recevoir dans ce commit.
+### 7.2 Documentation sémantiquement périmée
 
-## Ordre de travail conseillé à Claude
+`PASSATION.md` est la meilleure carte de l'état réel, mais son titre et son pin restent datés du 18 août et sa section mémoire reprend la garantie erronée du dernier commit. Les autres documents ont davantage dérivé :
 
-1. corriger les rayons dans `MATHEMATIQUES.md` et graver les contrats `ExactLevel`, `K_eff/s_max` et multifusion;
-2. décider le refus des doublons et passer à des `PointId` externes avant toute émission de `SupportKey`;
-3. fusionner réellement la descente témoins q2/q3/q4, puis intégrer `max(R_dec,R_coup)`;
-4. publier les résiduels par lane; seulement ensuite arbitrer `h_a/h_b` et la dominance 432 sur le coût marginal réel;
-5. implémenter l'instruction q3 terminale, puis la q4 axiale, avec `BallKey/RLE/census` exact;
-6. séparer `F_K^conn` et `F_K^render`, conserver les hyperévénements et raccorder les applications verticales;
-7. raccorder une preuve de taille à la WSPD actuelle ou rapprocher le code d'une décomposition dont la preuve est standard.
+- `README.md` présente encore `src/events`, `src/forest` et `oracle` comme « à venir » ;
+- `docs/ARCHITECTURE.md` décrit une descente trois lanes partagée et un layout SoA compact qui ne correspondent pas entièrement au chemin courant ;
+- `docs/PLAN_DE_TESTS.md` ne reflète pas la suite de 147/149 portes ;
+- `docs/MATHEMATIQUES.md` laisse Q1–Q4 ouvertes alors que plusieurs sont tranchées, et une proposition de rendu actif seulement contredit la règle « toutes les facettes » reçue ailleurs ;
+- les commentaires de source emploient « temporaires » pour `fold_bytes_upper`, alors que la formule inclut une « sortie dense » persistante.
 
-La v4 est partie sur une base nettement plus saine que la v3 : les statuts sont prudents, les leçons négatives ont été réellement incorporées, et le premier verrou, tuer les ancres mortes avant de développer la WSPD, est levé de façon mathématiquement crédible. Le bon cap est maintenant de préserver exactement l'objet topologique pendant que l'implémentation devient réellement sparse.
+Les checkers actuels valident liens, fraîcheur et champs de statut, pas la cohérence sémantique entre documents. Après correction des deux blocages, une mise à jour documentaire unique doit retirer les états contradictoires plutôt qu'ajouter un nouvel addendum.
+
+## 8. Résultats de test et limites de preuve
+
+| campagne | résultat | interprétation |
+|---|---|---|
+| GCC Release, build strict | succès | aucune alerte compilateur sur le profil exercé |
+| CTest Release | **147/147** | toutes les portes enregistrées sont vertes |
+| GCC ASan+UBSan, `detect_leaks=0` | **147/147 en 1 192,65 s** | aucune erreur mémoire ou arithmétique sur les portes enregistrées |
+| UBSan plateau `nu=32` | **échec reproduit, code 1** | défaut réel hors profil par défaut mais accessible par option |
+| checkers du dépôt | tous verts | cohérence structurale, pas preuve sémantique |
+| Boost/OBig optionnel | non exécuté | dépendance absente localement |
+| Clang | non exécuté | compilateur absent localement |
+| CUDA | non exécuté | aucune cible v4 et outil absent |
+| G4 | non utilisé | aucune mesure distante produite par cet audit |
+
+Les 147 tests couvrent bien les erreurs que les auteurs ont anticipées. Ils ne couvrent pas le plafond résident par une autorité indépendante, `shell_cap>=32`, les verticales, l'adaptateur public, un run 50 k complet, le tuilage u32 ou un backend device. C'est précisément la frontière entre « référence CPU bien testée » et « produit qualifié ».
+
+## 9. Feuille de route recommandée
+
+### Priorité 0 — rendre les refus vrais
+
+1. retirer l'affirmation de pic résident de `--max-output-bytes` ou utiliser provisoirement `bytes_events + sum_K m_K` ;
+2. séparer dans la comptabilité sortie persistante, temporaires actifs et amont déjà résident ;
+3. ajouter une porte indépendante où plusieurs `ForestResult` terminés restent vivants ;
+4. valider `shell_cap` avant le décalage et refuser le régime combinatoire non supporté ;
+5. mettre v4 dans la CI avec Boost obligatoire.
+
+### Priorité 1 — décider l'objet produit
+
+Versionner explicitement les contrats `full_symbolic_stream`, `connectivity_index` et `warm_query_or_labels`. Pour chacun, fixer : contenu, complétude, verticales préservées, chronomètre, budget mémoire, reprise, sérialisation et statut public. Ne plus attacher le même « moins de 100 ms » à une trace dont la taille varie de plusieurs ordres de grandeur.
+
+### Priorité 2 — positionner v4 comme oracle
+
+Extraire le noyau exact dans une petite bibliothèque interne et faire de v4 le producteur de fixtures canoniques pour petits `n`. Ajouter une façade à statuts qui refuse doublons, IDs hors domaine, coquilles hors profil et capacités u32. Exporter les niveaux sous la forme canonique de l'API racine.
+
+### Priorité 3 — fermer la tour
+
+Sur des tailles bornées d'abord :
+
+- construire les applications verticales entre ordres adjacents ;
+- vérifier les carrés de naturalité à chaque niveau critique ;
+- publier les simplexes projectables avec les niveaux de cofaces ;
+- produire les quatre IDs de reçu et un digest canonique du payload ;
+- adapter le résultat à `CertifiedTowerInput` et faire passer la réduction publique sans drapeau surrogate.
+
+### Priorité 4 — rendre la source réellement streamée
+
+Déplacer le préflight avant les vecteurs globaux de candidats et de boules, partitionner par tuiles de clés, sceller chaque chunk, effectuer les tris/merges externes exacts puis libérer chaque tranche après consommation. Les IDs globaux restent u64 ; les indices locaux peuvent rester u32 avec une base de tuile et une garde vérifiée.
+
+### Priorité 5 — qualifier le GPU puis le SLO
+
+Compiler le témoin CUDA, porter les prédicats et filtres, comparer bit à bit au backend CPU sur les fixtures, puis exécuter une campagne G4 fraîche et épinglée. La porte 50 k doit couvrir le produit décidé à la priorité 1 ; une mesure de front, de composant isolé ou de préfiltre ne vaut pas `warm_e2e`.
+
+## 10. Portes de sortie proposées
+
+V4 ne devrait changer de statut que lorsque toutes les portes suivantes sont vertes :
+
+1. plafond mémoire validé contre une comptabilité indépendante et un RSS mesuré, sans résultat terminé oublié ;
+2. coquilles de tailles 12, 31 et 32 : succès borné ou refus explicite, jamais UB ni boucle impraticable ;
+3. suite v4 en CI GCC, Clang, ASan+UBSan et Boost/OBig ;
+4. petit oracle de tour complète, verticales et carrés de naturalité inclus ;
+5. round-trip canonique v4 vers `CertifiedTowerInput` avec reçus non nuls et source non surrogate ;
+6. run transactionnel interrompu/repris sur plusieurs tuiles, digest identique au run monolithique borné ;
+7. campagne G4 12 500 / 25 000 / 50 000 sur toutes les familles contractuelles, avec p95 et pic mémoire du produit complet choisi ;
+8. campagne 10 000 001 sans catalogue global, avec reprise et plafonds respectés.
+
+## Conclusion d'auditeur
+
+L'effort v4 a corrigé plusieurs erreurs profondes des versions précédentes : vraie identité des points, niveaux exacts, séparation des lanes q3/q4, traitement des égalités, plateau non supprimé, transitions de composantes complètes et rendu non réduit à un arbre couvrant. Les commits q4 les plus récents poursuivent cette trajectoire et sont reçus.
+
+La limite actuelle n'est plus principalement une formule locale. C'est l'écart entre un **oracle horizontal dense** et le **producteur sparse, vertical, transactionnel et certifié** que le dépôt demande. Le dernier commit mémoire illustre ce risque : une borne correcte pour l'ordonnanceur a été nommée borne de résidence sans compter la persistance des résultats.
+
+Statut honnête au pin audité :
+
+- `mathematical_predicates_u16 = received_bounded` ;
+- `horizontal_cpu_reference = received_conditional` ;
+- `complete_hgp_tower = not_implemented` ;
+- `product_backend = not_implemented` ;
+- `gpu_backend = not_compiled` ;
+- `performance_contract = not_qualified` ;
+- `public_status = not_claimed`, **correct**.
+
+La recommandation est de corriger d'abord les deux garanties fausses, puis de conserver v4 comme oracle de haute qualité pendant que la source produit se construit autour du contrat racine. C'est la voie la plus honnête vis-à-vis des objectifs du dépôt et celle qui réutilise le mieux le travail déjà solide.
