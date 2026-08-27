@@ -1,0 +1,148 @@
+```text
+phase=exploration_v5_hors_registre
+backend=cpu_reference
+profile=quantized_u16_input_only
+mode=audit_independant_math_and_architecture
+public_status=not_claimed
+GCP non utilisé
+```
+
+# Mort d'un seed q3 : caractérisation, tests d'ancre plus forts, mesures
+
+Rapport de mathématicien (sonde hors dépôt, aucun fichier du dépôt modifié). Toutes les affirmations ci-dessous sont soit prouvées, soit vérifiées par calcul entier sur les sondes citées ; les temps sont des mesures sur 8 CPU partagés (4 fils), jamais un claim.
+
+Sondes (compilées `g++ -std=c++20 -O2 -DMHGP5_TESTING=1`, en-têtes `morsehgp3D_v5/src`) :
+- `/tmp/claude-1000/-workspaces-E-HGP/051cd20e-5644-4cfc-b985-af6a4da2f73e/scratchpad/probe_q3_anchor.cpp` — identités algébriques (200 000 triangles u16 aléatoires) + statistiques par ancre q3 survivante à l'histogramme (m, sites ambigus, |W_3| exact, depth(0), seeds, candidats, évaluations du scan de production, grille de cellules sur le disque des centres, contrôle `k_cell <= profondeur <= c_cell`).
+- `.../scratchpad/probe_q3_w3kill.cpp` — lane q3 de production (`generate_detail::scan_anchor_q3`, corps réel) contre la même lane précédée d'une pré-mort d'ancre par compte exact de W_3 ; égalité post-RLE exigée, temps mur.
+- Sorties : `run_ec8000.txt`, `run_u8000.txt`, `run_t8000.txt`, `run_w3kill2.txt`, `run_grid_w3surv.txt` (même dossier).
+
+La sonde reproduit exactement les compteurs de production : `eight_clusters n=8000` → candidats q3 = 1 232 786 (reçu `receipts/campagne_g4_v5_20260827/out/conf_eight_clusters_n8000.txt` : 1 232 786), seeds = 798 719 087 = 797 486 301 tués + 1 232 786 émis.
+
+## 0. Résumé
+
+1. **La mort d'un seed q3 est un problème de profondeur dans un arrangement de demi-plans en 2D.** Pour l'ancre (a,b), chaque site z du cover définit un demi-plan ouvert H_z du plan bissecteur ; le seed x meurt ssi son centre v(x) est dans au moins h_3 demi-plans. Le kernel affine de production `L = G q − 2 u·N` est exactement ce test (N = 2G v, L = −G·f_z(v)). Prouvé et vérifié (§ 1).
+2. **Le test d'ancre uniforme W_3 est optimal parmi les tests « à ensemble fixe de h_3 sites »** (§ 3.3) ; le seul moyen de faire plus fort est de partitionner le disque des centres (cellules) ou de restreindre aux centres réalisés par les seeds.
+3. **Constat majeur : la lane q3 ne fait PAS le compte exact |W_3 ∩ cover| par ancre** (la lane q4 fait le compte W_4, `process_anchor_q4` ; la q3 n'a que l'histogramme de coin, même omission qu'en v4 `ball_stream.hpp`). Mesure à n = 8000 : ce test O(depth(0)) tue **57 % des ancres survivantes et 92,6 % des seeds** sur `eight_clusters` (25 % / 49 % `uniform`, 26 % / 63 % `terrain`), avec **égalité post-RLE** des candidats (prouvée § 3.4, vérifiée sur les trois familles) ; temps de la lane q3 divisé par **4,5 (après cover) à 6,2 (requête d'arbre avant cover)** sur `eight_clusters`, 1,4 sur `uniform`, 1,8 sur `terrain`.
+4. **Le scan par seed est déjà au plancher** : 9,6 évaluations par seed mort en moyenne pour h_3 = 9 (91 % des seeds morts meurent en ≤ 9 évaluations). Aucun ordre de scan ni aucune localisation dans l'arrangement (O(log m) ≈ 10 tests) ne peut gagner un facteur sur les seeds morts pris un à un ; seul un test qui **n'énumère pas** les seeds (mort d'ancre) ou qui les tue par **cellule** (une localisation exacte, aucun scan) gagne.
+5. **Test cellulaire** (grille entière sur le disque des centres, § 3.5) : parmi les ancres qui survivent au test W_3 exact, une grille 4×4 tue sans scan 94 % des seeds (`eight_clusters`) / 83 % (`uniform`), et tue l'ancre entière (toutes ses cellules à seeds mortes) dans 54 % / 48 % des cas. Contrôle `k_cell <= profondeur <= c_cell` : 0 violation sur 1,2 M seeds.
+6. **Ce qui est inhérent** : après ces deux tests, le poste dominant n'est plus le scan mais la **construction du cover par ancre** (plancher « histogrammes + covers seuls » = 16,0 s sur 110,7 s de lane à 8000 `eight_clusters`, 4 fils) — le prochain levier est au niveau du rectangle, pas du seed.
+
+## 1. Géométrie des centres (point 1)
+
+Notations : d = b − a, D² = |d|² (noté `D2` en code), m = (a+b)/2, p = D/2. Pour un site z : **u = 2z − a − b** (i64, |u_i| < 2^17), **q = |u|² − D²** (i64, |q| < 2^36) — ce sont exactement les « sites affines » `su0..su2, sq` de `AnchorScratch`.
+
+**Lemme 1.1 (centre).** Soit x un seed aigu de (a,b) (|x−a|², |x−b|² ≤ D², |2x−a−b|² > D²). Le centre c de la circumboule de abx est dans le plan bissecteur de ab ; avec v = c − m ⟂ d :
+R² = |v|² + D²/4.
+*Preuve.* |c−a| = |c−b| ⟹ c ∈ plan bissecteur ; a − m = −d/2 ⟂ v ⟹ R² = |c−a|² = |v|² + |d/2|². ∎
+
+**Lemme 1.2 (borne de Jung q3).** |v| = p·cot γ où γ est l'angle en x ; ab arête la plus longue ⟹ γ est le plus grand angle ⟹ γ ≥ 60° ; aigu ⟹ γ < 90°. Donc 0 < |v| ≤ p/√3 = D/(2√3), i.e. |v|² ≤ D²/12 (égalité : triangle équilatéral).
+*Preuve.* Loi des sinus D = 2R sin γ ⟹ R² = p²/sin²γ ⟹ |v|² = R² − p² = p² cot² γ ; cot est décroissante sur ]0, 90°[, cot 60° = 1/√3. ∎
+Forme entière : avec N = W − G d (le `N` de `AffineSeed`), N = 2G v (car c − a = W/(2G), c − m = (W − G d)/(2G)), et
+|v|² = D²(EX − G)/(4G), d'où **|N|² = D²·G·(EX − G)** et la borne ⟺ 3|N|² ≤ G²D². Vérifié sur 30 368 seeds aléatoires (0 échec ; N ⟂ d vérifié exactement).
+
+**Lemme 1.3 (formule explicite du centre).** Avec X = 2x − a − b :
+**8N = (D²·X − (X·d)·d)·(|X|² − D²)**, i.e. v(x) = (D²X − (X·d)d)(|X|² − D²)/(16G).
+Vérifié exactement en i128 sur les 30 368 seeds. (Interprétation : direction de v = projection de x sur le plan bissecteur ; |v| = (|x−m|² − p²)/(2·dist(x, droite ab)).)
+
+**Proposition 1.4 (demi-plan).** Pour v ⟂ d et z quelconque, avec w = z − m, w_∥ sa projection sur le plan bissecteur :
+z strictement intérieur à B(m+v, √(|v|²+p²)) ⟺ 2 w_∥·v > |w|² − p² ⟺ **4 u·v > q** ⟺ (avec N = 2Gv) **2 u·N > G q ⟺ L < 0**.
+*Preuve.* |w − v|² < |v|² + p² ⟺ |w|² − 2w·v < p² ; w·v = w_∥·v car v ⟂ d ; puis w = u/2, |w|² − p² = q/4. ∎
+Donc, **pour z fixé, l'ensemble des centres qui le rendent intérieur est le demi-plan ouvert H_z = {v ∈ d^⟂ : f_z(v) > 0}, f_z(v) := 4u·v − q**, et la lane de production calcule L = −G·f_z(v(x)) : vérifié L = 4·q3_power(z) et mêmes signes sur 121 472 paires (seed, z).
+Cas dégénérés : u_∥ = 0 (z sur la droite ab) ⟹ H_z = tout le plan si q < 0, vide sinon ; a et b eux-mêmes ont q = 0, u_∥ = 0 ⟹ jamais intérieurs (comportement de production confirmé dans `q3_scan_shaped.hpp`).
+
+**Corollaire 1.5 (mort d'un seed).** depth(v) := #{z ∈ cover ∖ {a,b} : v ∈ H_z}. Le seed x est tué à la génération ssi **depth(v(x)) ≥ h_3**, i.e. ssi v(x) est à profondeur ≥ h_3 dans l'arrangement des m droites ∂H_z. Le cover contenant tous les intérieurs possibles (§ 6.1 des maths), ce verdict est exact (pas seulement un minorant) pour la question « profondeur ≥ h_3 ».
+
+**Classification entière des sites** (toutes en i64/i128 ; X2 := |d × u|² < 2^70 ; |d × u| = D·|u_∥|) :
+- **universel** (z ∈ W_3, H_z ⊇ disque fermé |v| ≤ D/√12) ⟺ **q < 0 et 3q² > 4·X2** — c'est exactement `in_spindle(kQ3)` (H = −q/4, Ξ = X2/4) ; vérifié sur 800 000 sites : 0 désaccord ;
+- **jamais intérieur** pour aucun centre du disque ⟺ **q ≥ 0 et 3q² ≥ 4·X2** ;
+- **ambigu** sinon (la droite ∂H_z traverse le disque). Moyennes à n = 8000, ancres survivantes : `eight_clusters` m = 1403, ambigus 874 ; `uniform` 118 / 82 ; `terrain` 110 / 74. Environ 38 % des sites d'un cover ne peuvent jamais être intérieurs (ils sont scannés aujourd'hui, mais le scan sort avant de les atteindre : gain marginal).
+
+## 2. Test d'ancre exact (point 2)
+
+Soit Δ̄ le disque fermé {v ⟂ d : |v| ≤ D/√12}.
+
+**Proposition 2.1.** (i) L'ancre n'émet aucun candidat ssi depth(v(x)) ≥ h_3 pour tout seed x. (ii) Condition suffisante sans énumération des seeds : min_{v∈Δ̄} depth(v) ≥ h_3. (iii) Chaîne d'inégalités : **|W_3 ∩ P| ≤ min_{Δ̄} depth ≤ depth(0) = |P ∩ B°(m, D/2)|** (car 0 ∈ Δ̄ et H_z ∋ 0 ⟺ q < 0).
+Le test actuel « |W_3| ≥ h_3 » est le cas où chaque témoin couvre TOUT le disque ; (ii) autorise des témoins différents selon la région du disque.
+
+**Proposition 2.2 (le minimum est atteint sur un ensemble fini).** depth est semi-continue inférieurement (somme d'indicatrices d'ouverts), constante sur les faces ouvertes de l'arrangement ; en se déplaçant dans une face jusqu'à une droite ou au cercle, puis le long d'une droite jusqu'à un sommet ou au cercle, la profondeur ne peut que rester égale ou baisser. Donc min_{Δ̄} depth est atteint sur S = {sommets de l'arrangement dans Δ̄} ∪ {droites ∩ cercle}, ou est constant = |W_3| si S = ∅. Calcul exact O(m² log m) par ancre (balayage de chaque corde), ou O(m log m + m·h_3) par les algorithmes de (≤k)-niveau — trop cher en production (m ≈ 1400) : c'est un **juge**, pas une lane. La version production est la grille de § 3.5.
+
+**Exemple 2.3 (le test exact tue, W_3 ne tue pas) — entier, vérifié.** a = (0,0,0), b = (2000,0,0), h_3 = 9 ; 9 sites z⁺_e = (1000+e, 900, 0) et 9 sites z⁻_e = (1000+e, −900, 0), e = 0..8. Pour chacun : q = −760000 + 4e² < 0, X2 = (2000·1800)² ; 3q² ≈ 1,73·10¹² < 4·X2 ≈ 5,18·10¹³ ⟹ **|W_3| = 0** (aucun n'est universel), l'ancre survit au test actuel ; depth(0) = 18. Sur le disque (rayon 577,35) : f_{z⁺}(v) > 0 ⟺ v_y > −(760000−4e²)/7200 ≈ −105,5 ; f_{z⁻}(v) > 0 ⟺ v_y < 105,5. Donc depth = 18 dans la bande |v_y| < 105,5 et **9 ailleurs : min_{Δ̄} depth = 9 = h_3, l'ancre est morte** (vérifié par grille 801×801).
+
+**Exemple 2.4 (limite de tout test sur le disque fermé) — entier, vérifié.** Même ancre, 28 sites sur la sphère diamétrale : z = (1000, y, w) avec y² + w² = 1000² (triplets (600,800), (280,960), (352,936), (1000,0) et signes). Tous ont q = 0 : **depth(0) = 0, |W_3| = 0, min_{Δ̄} depth = 0** — le test exact sur le disque fermé ne tue pas ; pourtant **tout v ≠ 0 du disque a profondeur ≥ 13 ≥ h_3** (balayage angulaire exact : #{θ : cos(θ−φ) > 0} ≥ 13), donc tout seed (|v(x)| > 0, Lemme 1.2) est mort. Conclusion : le test d'ancre exact est nécessairement **restreint aux centres réalisés** ; en entiers, |v(x)|² = D²(EX−G)/(4G) ≥ D²/(4G) > 0 mais cette marge est inutilisable ; la bonne restriction est « cellules contenant au moins un seed » (§ 3.5), ce qui oblige à énumérer les seeds (O(1) chacun) mais pas à les scanner.
+
+## 3. Bornes bon marché (point 3)
+
+**3.1 depth(0) n'est ni un minorant ni un majorant de la profondeur d'un seed.** Contre-exemples : Exemple 2.4 (depth(0) = 0, seeds tous à profondeur ≥ 13) ; et à l'inverse h_3 points z avec u = −0,9D·e (dans la boule diamétrale, depth(0) = h_3) et un seed de centre v = (D/√12)·e : f_z(v) = 4u·v − q = −0,52D² + 0,19D² < 0, le seed est vivant. La relation vraie est la chaîne de 2.1(iii) : depth(0) < h_3 ⟹ aucun test sur le disque fermé ne tue ; depth(0) ≥ h_3 est **nécessaire** au test exact. Mesure (n = 8000) : depth(0) ≥ h_3 pour 88 % des ancres survivantes portant 99,8 % des seeds (`eight_clusters`), 76 % / 95 % (`uniform`).
+
+**3.2 Lemme du rayon.** Le long d'un rayon issu de 0, chaque site change d'état au plus une fois : les sites à q < 0 ne peuvent qu'être perdus, ceux à q ≥ 0 ne peuvent qu'être gagnés. Un site à q < 0 est perdu en v ssi 4u·v ≤ q, ce qui exige |u_∥|·|v| ≥ −q/4 ; sur le disque, ceux qui ne peuvent jamais être perdus sont exactement W_3. Donc depth(v) ≥ |W_3| + #{z : q < 0, z ∉ W_3, 4u·v > q} : rien de mieux que W_3 sans connaître v.
+
+**3.3 Proposition (optimalité de W_3 parmi les tests à ensemble fixe).** Pour un ensemble fixe Z de h_3 sites, « tout v ∈ Δ̄ est dans ≥ h_3 des H_z, z ∈ Z » ⟺ Z ⊆ W_3. Par conséquent tout certificat de mort d'ancre de la forme « il existe h_3 sites vérifiant une propriété individuelle » est équivalent à |W_3| ≥ h_3, et la « fonctionnelle » optimale est φ(z) = q + 2|u_∥|D/√3 = −min_{Δ̄} f_z (l'ancre est W_3-morte ssi la h_3-ième plus petite valeur de φ est < 0), dont la forme entière est exactement le test universel ci-dessus. Faire mieux exige de faire dépendre les témoins de la région de v (cellules) — il n'y a pas de « h_3 points combinés » plus fort.
+
+**3.4 Constat : le test O(m) W_3 est absent de la lane q3.** `scan_anchor_q3` ne compte pas W_3 ; `process_anchor_q4` compte W_4 (`anchors_killed_w4`). Preuve d'invariance de l'objet : W_3 ⊂ B°(m, D/2) ⊂ cover (coef 3) ; z ∈ W_3 est strictement intérieur à toute circumboule admissible de l'ancre (§ 4.1), donc chaque seed a ≥ h_3 intérieurs dans le cover et est déjà tué par le filtre de génération : **aucun candidat n'est émis par une ancre W_3-morte** (vérifié : 1 148 935 / 1 148 935 ancres W_3-mortes sans candidat à 8000 `eight_clusters`) ⟹ `digest_balls` (post-RLE) inchangé ; seuls les compteurs (seeds, `depth_killed`, `q3_cert`) changent.
+Mesures (n = 8000, ancres survivant à l'histogramme) :
+
+| famille | ancres surv. | tuées W_3 exact | seeds | seeds retirés | évaluations retirées |
+|---|---:|---:|---:|---:|---:|
+| eight_clusters | 2 009 889 | 57,2 % | 798,7 M | 92,6 % | 90,7 % |
+| uniform | 1 057 410 | 25,0 % | 35,4 M | 49,2 % | 43,1 % |
+| terrain | 405 332 | 25,9 % | 10,2 M | 63,5 % | 57,9 % |
+
+Le « mou » de l'histogramme (survivantes / vraiment W_3-vivantes) vaut 2,33 (`eight_clusters`), 1,33, 1,35. Temps de lane q3 (4 fils, 8000, égalité post-RLE = OUI dans tous les modes) :
+
+| mode | eight_clusters | uniform |
+|---|---:|---:|
+| production | 110,7 s (1×) | 4,07 s (1×) |
+| W_3 après le cover (seaux radiaux 0..10 seulement, sortie à h_3) | 24,4 s (4,5×) | 2,91 s (1,40×) |
+| W_3 par `cover_query` coef 1 AVANT le cover, cover seulement si survie | 17,9 s (6,2×) | 3,53 s (1,15×) |
+| histogrammes + covers seuls (plancher, aucun scan) | 16,0 s | 1,27 s |
+| histogrammes seuls | 0,27 s | 0,24 s |
+
+Coût du test : 45 M évaluations `in_spindle` pour 2,0 M ancres (≈ 22 par ancre) contre 7,7 G évaluations de scan. La forme « avant le cover » gagne sur les familles denses et perd légèrement sur `uniform` (la requête d'arbre par ancre coûte plus que le cover partagé) : choix de routage à trancher (verrou V2).
+
+**3.5 Test cellulaire (le « W_3 par région »), forme entière.** Repère entier du plan bissecteur : k = argmin |d_k|, E1 = d × e_k, E2 = d × E1 ; A1 = |E1|² = D² − d_k² ≥ 2D²/3 > 0, |E2|² = D²·A1, E1 ⟂ E2 ⟂ d. Coordonnées α = v·E1, β = v·E2 ; disque ⟺ 12(D²α² + β²) ≤ D⁴·A1. Sur-approximations entières fail-open â = ⌈√(D²A1/12)⌉, b̂ = ⌈√(D⁴A1/12)⌉ ; cellule (i,j) = [i·â/Gr, (i+1)·â/Gr] × [j·b̂/Gr, (j+1)·b̂/Gr], i, j ∈ [−Gr, Gr[ (cellules ≈ carrées de côté D/(√12·Gr)). Avec U1 = u·E1, U2 = u·E2 (i64) :
+- **sommet (i,j) intérieur à H_z** ⟺ **4(i·â·D²·U1 + j·b̂·U2) > Gr·q·D²·A1** (i128 : |â D² U1| < 2^103, |b̂ U2| < 2^105, membre droit < 2^108 pour Gr ≤ 16) ;
+- f_z affine ⟹ H_z ⊇ cellule ⟺ vrai aux 4 sommets ; H_z ∩ cellule ≠ ∅ ⟺ vrai à ≥ 1 sommet ;
+- **k_cell** = #{z : les 4 sommets}, **c_cell** = #{z : ≥ 1 sommet} ; pour tout v de la cellule fermée : **k_cell ≤ depth(v) ≤ c_cell** ;
+- **localisation d'un seed** : i = ⌊Gr·(N·E1)/(2G·â)⌋, j = ⌊Gr·(N·E2)/(2G·b̂)⌋ (division i128 à plancher ; |Gr·N·E2| < 2^126 — largeur la plus tendue, verrou V3) ;
+- **verdicts** : k_cell ≥ h_3 ⟹ tous les seeds de la cellule sont morts (identique à la production, puisque k_cell ≤ profondeur sur le cover) ; c_cell < h_3 ⟹ tous vivants, émission sans scan ; sinon scan de production (éventuellement restreint aux c_cell − k_cell sites ambigus de la cellule) ;
+- la cellule rencontre le disque ⟺ 12(D²·i_min²·â² + j_min²·b̂²) ≤ D⁴·A1·Gr² (i_min = distance entière de [i, i+1] à 0).
+Contrôle de la sonde : 0 violation de k ≤ depth ≤ c et de « cellule morte ⟹ seed mort en production » sur 1,2 M seeds (`eight_clusters`) et 283 k (`uniform`). Mesure **restreinte aux ancres survivant au test W_3 exact** (n = 8000, ancres échantillonnées) :
+
+| | eight_clusters (27 040 ancres, 1,80 M seeds, m = 347) | uniform (49 446 ancres, 1,12 M seeds, m = 80) |
+|---|---|---|
+| Gr = 2 (4×4) : seeds tués sans scan / vivants sans scan | 94,1 % / 0,7 % | 82,9 % / 2,7 % |
+| Gr = 4 (8×8) | 96,4 % / 1,1 % | 88,2 % / 4,2 % |
+| Gr = 8 (16×16) | 97,2 % / 1,4 % | 90,3 % / 5,2 % |
+| ancres dont toutes les cellules à seeds sont mortes (Gr = 2 / 8) | 54 % / 66 % | 48 % / 59 % |
+| ancres mortes sur le disque entier (Gr = 8) | 60,5 % | 55 % |
+| coût k (sommets, sortie à h_3, Gr = 2) vs évaluations de production | 5,5 M × 4 sommets vs 22,3 M | 7,0 M × 4 vs 12,9 M |
+
+Lecture : la grille est un gain net de **~4× sur les évaluations** à Gr = 2 pour `eight_clusters` (moins pour `uniform` où m est petit et le scan déjà court), plus l'économie du **setup par seed** (`AffineSeed` : conversions double, borne) que la localisation remplace par une `q3_form` et deux divisions ; le raffinement adaptatif (quadtree : ne raffiner que les cellules à seeds non décidées, hériter les sites universels/exclus du parent) est la forme à implémenter, pas une grille fixe.
+
+## 4. Transposition à q4 (point 4)
+
+Toute boule q4 admissible d'ancre (a,b) passe par a et b : son centre est dans le **même plan bissecteur**, le test d'intériorité est le **même demi-plan** f_z(t) = 4u·t − q > 0, le disque est plus grand (|t| ≤ p/√2 = D/(2√2), Jung ; en entiers : 8|t|² ≤ D²) et le seuil est h_4 = 8. Donc : (i) le compte W_4 exact existe déjà (`anchors_killed_w4`) ; (ii) le test cellulaire s'applique tel quel aux ancres q4 (remplacer 12 par 8 dans les extents : â₄ = ⌈√(D²A1/8)⌉, b̂₄ = ⌈√(D⁴A1/8)⌉).
+
+**Lemme 4.1 (la corde du seed).** Pour un seed (a,b,x), les centres du faisceau sont c_μ − m = v₃(x) + μ·n/(2G), n = d × (x−a) ⟂ d, |n|² = G, |μ| ≤ √(J/2), J = D²(3G − 2EX) : un **segment du plan bissecteur, perpendiculaire à v₃, dont les extrémités sont exactement sur le cercle de rayon p/√2** — car |v₃|² + J/(8G) = D²(EX−G)/(4G) + D²(3G−2EX)/(8G) = D²/8 (identité exacte). Le long de la corde, f_z(c_μ − m) = −4(P(z) − μB(z))/G, B(z) = n·(z−a) : le site z change d'état une seule fois, en μ_z = P(z)/B(z) (B(z) = 0 : état constant = signe de P).
+**Corollaire 4.2.** Le cœur de seed de Jung (« P < 0 et 2P² > J·B² ») est exactement « f_z > 0 aux deux extrémités de la corde » : c'est l'analogue 1D de W_3 (témoins uniformes sur la corde). Le **test exact de seed** est min_{μ∈[−μ*,μ*]} depth(μ) ≥ h_4, calculable par un balayage 1D exact : tri des rationnels μ_z = P(z)/B(z) (comparaisons P_z·B_w ⋛ P_w·B_z, ~2^140 : U192 de `wide.hpp`), extrémités par `cmp_2p2_jb2` (déjà exact) ; O(m log m) par seed, mais il **tue le seed sans énumérer les complétions** et rend les **intervalles de μ à profondeur < h_4**, dans lesquels une complétion y (μ_y = P(y)/B(y)) doit tomber pour survivre : le filtre de profondeur par complétion (716 M complétions tuées par profondeur à 50 k, chacune un scan du cover) devient une recherche O(log m). La conformité exige l'identité de signe entre `q4_power(f4, z)` (Cramer 4 points) et P(z) − μ_y B(z) (verrou V5).
+
+## 5. Ce qu'il faut mesurer, ce qui reste inhérent (point 5)
+
+Quantités à mesurer (agent de mesure ; `--threads=4`, n ≤ 8000 ici, puis 16 000/32 000 et 50 000 en session G4), par famille et par lane, sur les ancres survivant à l'histogramme :
+1. **|W_3 ∩ cover| exact ≥ h_3** : ancres, seeds, évaluations et temps retirés ; par n (8000/16000/32000) pour la pente — sur `eight_clusters` les seeds par ancre croissent avec n (195 à 2000, 397 à 8000, ~924 à 50 000 : les ancres inter-amas ont des calottes ∝ t²), donc la part des seeds tuables croît probablement avec n ; à mesurer, pas à extrapoler.
+2. **Temps du plancher « histogrammes + covers seuls »** vs lane : après le test W_3 il devient dominant (16 s sur 17,9 s à 8000 `eight_clusters`) ; mesurer `visits` par ancre (`anchor_cover_from_handles`) et le coût de `cover_query` coef 1 par ancre pour trancher « avant / après cover ».
+3. **Grille restreinte aux ancres W_3-vivantes** : fraction des seeds en cellules mortes (k ≥ h_3), vivantes (c < h_3), à scanner ; coût des sommets avec sortie anticipée ; profondeur de quadtree nécessaire ; par famille.
+4. Par seed : histogramme des évaluations (mort / vivant) — déjà : 9,6 par seed mort (plancher 9), 70 par seed vivant (`eight_clusters`, m = 1403 : les seeds vivants sont dans les petites ancres intra-amas).
+5. q4 : part des seeds tués par le cœur de Jung vs par le balayage de corde exact ; nombre de complétions tombant dans les intervalles survivants.
+
+Inhérent (borne de tout test d'ancre) : les ancres avec ≥ 1 candidat (12 % `eight_clusters`, 26 % `uniform`, 33 % `terrain` à 8000) portent 0,3 % / 6,6 % / 6,3 % des seeds ; leurs seeds vivants coûtent un scan complet (ou c_cell < h_3). Restent aussi : l'énumération O(1) des seeds sur la lentille (18,2 G × ~20 ns à 50 k ≈ 8 % de la lane actuelle) pour les ancres W_3-vivantes, et surtout la construction des covers par ancre. Les 18 G seeds ne « tombent de plusieurs ordres de grandeur » que par la mort d'ancres : le test W_3 exact en retire déjà ~92 % à 8000 sur `eight_clusters` (13,5× en seeds, 10,7× en évaluations, 4,5–6,2× en temps) ; la grille en retire ~94 % du reste ; au-delà, c'est le niveau rectangle (covers) qui borne.
+
+## 6. Verrous à poser à l'auditeur
+
+- **V1 (objet).** Recevoir la preuve § 3.4 : la pré-mort d'ancre q3 par |W_3 ∩ cover| ≥ h_3 ne change pas le multiensemble post-RLE (`digest_balls` épinglé inchangé) ; les compteurs `seeds[0]`, `depth_killed[1]`, `q3_cert` changent — quels compteurs sont contractuels pour les portes appariées (`q3_lane_batched`, device) ? Le test doit-il vivre dans `scan_anchor_q3` (corps partagé, donc égalité automatique hôte/lots/device) ? Mutant à graver : mort à h_3 − 1 (fausses morts ⟹ candidats perdus ⟹ digest différent ; porte à code 4 sur une fixture où une ancre a exactement h_3 − 1 témoins W_3 et un seed vivant).
+- **V2 (routage).** Test W_3 avant le cover (`cover_query` coef 1, 6,2× `eight_clusters`, 1,15× `uniform`) ou après (4,5× / 1,40×) ? Un routage par ancre change le coût, jamais l'objet : l'auditeur accepte-t-il un choix par famille/mesure, ou exige-t-il une seule forme ?
+- **V3 (test cellulaire).** Recevoir : le repère entier (A1 ≥ 2D²/3 > 0), l'arrondi vers le haut de â, b̂ (fail-open : agrandir la cellule ne peut que réduire k et augmenter c), les cellules fermées avec localisation par plancher, le lemme k_cell ≤ depth ≤ c_cell, l'égalité de verdict avec la production. Largeurs : |Gr·N·E2| < 2^126 — imposer Gr ≤ 16 par niveau (quadtree) ou passer en DI128 portable pour le device ? Cas d'égalité : f_z = 0 en un sommet (site sur la sphère d'un centre-sommet) n'est compté ni dans k ni dans c-strict — confirmer que c doit être compté avec f ≥ 0 (surestimation sûre) ou f > 0 (exact par affinité : un site à f = 0 sur tout un sommet et f > 0 sur un point intérieur de la cellule est compté par un autre sommet). Mutants : `q3-cell-three-vertices`, `q3-cell-kill-lt`.
+- **V4 (test d'ancre sur le disque fermé).** Confirmer la conclusion § 2.4 : le test exact « min sur Δ̄ » n'est jamais nécessaire, le test cellulaire restreint aux cellules à seeds le subsume (et tue Exemple 2.4 que le disque fermé ne tue pas). Faut-il néanmoins un juge O(m² log m) pour les portes ?
+- **V5 (q4).** Recevoir le Lemme 4.1 (extrémités de la corde sur le cercle de rayon p/√2, identité |N|² = D²G(EX−G)) et l'équivalence cœur de Jung ⟺ témoins uniformes sur la corde ; accepter le tri de rationnels P/B en U192 et la règle B(z) = 0 ; exiger une porte d'identité de signe entre `q4_power(f4, ·)` et P − μ_y B avant d'utiliser les intervalles pour les complétions ; le cover coef 3 (sous-ensemble) reste-t-il suffisant pour un verdict « vivant sans scan » (c_cell < h_4) ? — non : le census exact reste l'autorité, la génération n'est qu'un filtre fail-open ; à confirmer que « vivant sans scan » ne fait qu'émettre plus tôt.
+- **V6 (histogramme).** Le mou 2,33 de l'histogramme de coin sur `eight_clusters` (57 % d'ancres W_3-mortes survivantes) : est-ce une faiblesse attendue de h_coeur (témoins W_3 hors A∪B devant a, non crédités par la boule-cœur, feuilles testées seulement le long de la descente) ou une faute d'implémentation à auditer ? Un h_coeur plus fort éviterait aussi les covers (le plancher de 16 s).
+- **V7 (reçus).** Les reçus 50 k sont immuables et gravent seeds/tués_profondeur ; toute mise en production exige de nouveaux reçus appariés (digest identique, compteurs différents) et une révision des planchers `--min-seeds` / `--min-fallback` des portes (les seeds q3 chutent d'un ordre de grandeur).

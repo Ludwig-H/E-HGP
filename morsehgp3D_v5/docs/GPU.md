@@ -75,6 +75,23 @@ sinon elle est scannée sur l'hôte dans le même pipeline ; les deux exécuteur
 
 Ce qui n'a pas de reçu n'est pas reçu.
 
+**Recul mathématique (27 août 2026, `docs/MATHEMATIQUES.md` § 10,
+`docs/analyses/seeds_20260827/`)** : les 18,2 G seeds q3 d'`eight_clusters`
+50 k ne sont pas un coût inhérent — la lane q3 ne comptait pas les témoins
+universels $W_3$ (la q4 le faisait) ; le compte exact plus un test de
+**témoins sectoriels** (polygone circonscrit au disque des centres) tuent
+54–60 % des ancres survivantes et 92–94 % des seeds sans en énumérer un seul,
+objet inchangé (conformités v4 égales, fixtures F1–F3, mutants). Mesure
+locale à 8000 : lane q3 `eight_clusters` 33,0 s → 13,7 s, q4 31,0 → 22,3 s.
+**Conséquence pour le point 2** : la base de comparaison CPU (94 + 88 s à
+50 k) est périmée ; la lane q3 CPU à 48 fils est probablement de l'ordre de
+10–20 s (plancher = covers). Le gain device sur q3 n'est plus démontré et
+doit être **re-mesuré sur G4 contre la nouvelle lane CPU** avant tout kernel
+par rectangle ; tout étage hôte d'une lane device inclut désormais les tests
+d'ancre (ne jamais envoyer au device une ancre tuable en ~22 évaluations).
+Les compteurs des reçus 50 k antérieurs (seeds, `depth_killed`, `q3_cert`)
+sont périmés ; leurs digests ne le sont pas.
+
 ## 1. Ce que la mesure G4 a désigné (27 août 2026)
 
 Sur `g4-standard-48` à 48 fils, K = 1..10 exact (reçu

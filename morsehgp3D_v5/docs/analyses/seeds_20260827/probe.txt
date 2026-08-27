@@ -1,0 +1,93 @@
+## Rapport de mesure — où va le travail des lanes q3 et q4 (sonde CPU instrumentée)
+
+Cadre : `phase=exploration_v5_hors_registre`, `backend=cpu_reference`, `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`. GCP non utilisé. Aucun fichier du dépôt modifié ; sondes et sorties sous le scratchpad.
+
+Paramètres : coord par défaut, seed 3, s = 8, smax = 11 (h3 = 9, h4 = 8), float-filter actif. Les sondes réutilisent **les primitives de la bibliothèque** (`alive_rectangles`, `corner_histograms`, `rect_cover_handles`, `anchor_cover_from_handles`, `is_acute_seed`, `AffineSeed`, `in_spindle`, `jung_interval_sign`, `cmp_2p2_jb2`, prédicats q4) — aucune copie locale de prédicat. Fidélité : tous les compteurs communs avec la production (`ancres`, `tues_profondeur`, `candidats`, `ancres_w4`, `seeds_core_tues`, `jung`) sont **identiques** aux runs `mhgp5` sur les 4 configurations (sorties `prod_*.txt`). La boucle par ancre est séquentielle ; les rectangles vivants sont partagés entre fils avec accumulateurs par fil (sommes indépendantes du partage).
+
+### 1. Lane q3 — synthèse
+
+| | uniform 2000 | uniform 4000 | eight_clusters 2000 | eight_clusters 4000 |
+|---|---:|---:|---:|---:|
+| rectangles vivants q3 | 144 791 | 316 180 | 113 552 | 253 984 |
+| ancres (a∈A, b∈B) | 232 006 | 516 598 | 479 929 | 1 240 410 |
+| tuées par histogramme de coin | 7 741 (3,3 %) | 19 150 (3,7 %) | 81 390 (17,0 %) | 294 705 (23,8 %) |
+| ancres survivantes | 224 265 | 497 448 | 398 539 | 945 705 |
+| cover moyen / lentille moyenne | 105,5 / 51,7 | 114,4 / 55,4 | 596 / 302 | 993 / 453 |
+| seeds aigus | 6,70 M | 16,15 M | 77,5 M | 294,4 M |
+| seeds par ancre survivante | 29,9 | 32,5 | 194,6 | 311,3 |
+| seeds tués (profondeur ≥ h3) | 95,32 % | 95,81 % | 99,68 % | 99,81 % |
+| candidats émis | 313 591 | 676 503 | 249 130 | 561 057 |
+| seeds par candidat | 21,4 | 23,9 | 311 | 525 |
+| **ancres survivantes sans aucun candidat** («mortes par seeds») | 70,1 % | 71,6 % | 85,5 % | 86,8 % |
+| **part des seeds portée par ces ancres** | 92,45 % | 93,19 % | 99,38 % | 99,64 % |
+| ancres émettrices / part des seeds | 27,6 % / 7,55 % | 26,3 % / 6,81 % | 13,2 % / 0,62 % | 12,1 % / 0,36 % |
+| ancres sans seed aigu | 2,3 % | 2,1 % | 1,3 % | 1,1 % |
+| sites balayés (production, sortie anticipée) | 69,7 M | 166 M | 740 M | 2,80 G |
+| sites par seed / par seed tué | 10,4 / 9,3 | 10,3 / 9,3 | 9,5 / 9,4 | 9,5 / 9,4 |
+| sites par seed survivant (cover entier) | 32,8 | 33,4 | 56,4 | 63,1 |
+| production en % du scan complet (seeds × cover) | 5,95 % | 5,42 % | 0,69 % | 0,38 % |
+| seeds tués en 8–15 sites balayés | 98,76 % | 98,86 % | 97,99 % | 97,86 % |
+| seeds tués en < 10 % du cover | 82,0 % | 84,4 % | 98,9 % | 99,3 % |
+| repli exact i128 (part des sites) | 3,23 % | 3,09 % | 0,49 % | 0,37 % |
+| temps sonde rectangles (4 fils) | 1,5 s | 3,7 s | 105 s | 463 s |
+| temps production `rects q3` (4 fils, `mhgp5`) | 0,53 s | 1,27 s | 3,93 s | 15,2 s |
+
+Lecture : **la mort d'un seed coûte 9,4 sites** — c'est-à-dire que les 9 premiers sites du cover (classes radiales autour du milieu de ab) sont presque toujours intérieurs. Le kernel par seed est donc trivial (≈ 10 évaluations affines) ; le coût réel est **le nombre de seeds** (≈ n^1,9 sur eight_clusters : 77,5 M → 294 M entre n = 2000 et 4000, cohérent avec 18,2 G à 50 k) et le travail par seed hors scan (`is_acute_seed` sur tout le cover, `q3_form`, construction `AffineSeed`). Sur eight_clusters, les ancres à cover 1024–4095 (ancres inter-amas, milieu dans le vide : l'histogramme de coin ne les voit pas) portent 512–1023 seeds chacune et n'émettent rien.
+
+### 2. Lane q3 — profondeur en v = 0, |W_3| exact, profondeur minimale
+
+Forme entière de |W_3| (dérivée, sans division) : avec W = 2z−(a+b), d = b−a, D2 = |d|², A := |W|² − D2 (= `dist2q − D2`, déjà dans le cover), z ∈ W_3 ⟺ **A < 0 et 3·A² > 4·|W × d|²** (i128 : A² < 2^72, |W×d|² < 2^72). Vérification : A = −4H et |W×d|² = 4Ξ, donc 48H² > 16Ξ ⟺ 3H² > Ξ, la forme de `spindle.hpp`. La sonde évalue les deux formes sur chaque site : **0 désaccord** sur les 4 configurations. Remarque : l'étape « 4|w|² − D² < −2√3 |w_par| D » de l'énoncé porte un facteur erroné (4/√3 ≠ 2√3) ; et son « |w_par|² = |w|² − (w·d)²/D² » est en fait la composante **perpendiculaire** ; la condition correcte est celle ci-dessus.
+
+Tous les pourcentages ci-dessous sont sur les **ancres survivantes ayant ≥ 1 seed** ; « min » = min sur les seeds x du nombre exact d'intérieurs stricts de B(a,b,x) parmi le cover (scan prolongé au-delà de la mort tant qu'il peut abaisser le minimum courant ; plafond 288 = dernier seau, seulement pour eight_clusters 4000 — n'affecte aucun compte « ≥ h3 »).
+
+| | uniform 2000 | uniform 4000 | eight_clusters 2000 | eight_clusters 4000 |
+|---|---:|---:|---:|---:|
+| ancres avec ≥ 1 seed | 219 108 | 486 974 | 393 437 | 935 536 |
+| **min ≥ h3 (tous les seeds meurent)** — ancres / part des seeds | 71,7 % / 92,45 % | 73,1 % / 93,19 % | 86,7 % / 99,38 % | 87,8 % / 99,64 % |
+| **\|W_3\| ≥ h3** (tuables par un compte W_3 exact par ancre) — ancres / part des seeds | 23,6 % / 46,1 % | 25,5 % / 49,2 % | 56,9 % / 87,3 % | 59,4 % / 91,6 % |
+| min ≥ h3 mais \|W_3\| < h3 (mortes non vues par W_3) — ancres / seeds | 48,2 % / 46,3 % | 47,6 % / 44,0 % | 29,8 % / 12,1 % | 28,4 % / 8,1 % |
+| profondeur(v=0) ≥ h3 | 75,6 % | 76,9 % | 88,2 % | 89,3 % |
+| profondeur(v=0) ≥ h3 mais \|W_3\| < h3 (sur survivantes) | 50,8 % | 50,3 % | 31,0 % | 29,6 % |
+| min ≥ h3 et profondeur(v=0) < h3 | 18 (0,01 %) | 38 (0,01 %) | 36 (0,01 %) | 58 (0,01 %) |
+| **faux positifs de v=0** : profondeur(v=0) ≥ h3 mais un seed survit | 8 435 (3,85 %) | 18 233 (3,74 %) | 6 269 (1,59 %) | 14 398 (1,54 %) |
+| contrôles : \|W_3\| ≥ h3 & un seed survit ; min < \|W_3\| | 0 ; 0 | 0 ; 0 | 0 ; 0 | 0 ; 0 |
+
+Distribution de min (eight_clusters 4000, ancres à seeds) : 0–8 : 12,2 % ; 9–17 : 10,7 % ; 18–35 : 14,4 % ; 36–71 : 14,2 % ; 72–143 : 17,9 % ; 144–287 : 16,2 % ; ≥ 288 : 14,5 %. (uniform 2000 : 0–8 : 28,3 % ; 9–17 : 25,1 % ; 18–35 : 31,3 % ; 36–71 : 14,0 % ; ≥ 72 : 1,5 %.) Distribution de |W_3| (eight_clusters 4000) : < 9 : 40,6 % ; 9–17 : 19,4 % ; 18–35 : 20,6 % ; 36–71 : 15,0 % ; ≥ 72 : 4,4 %.
+
+Conclusions q3 :
+- La **profondeur en v = 0 n'est pas un test de mort valide** (la boule diamétrale n'est pas incluse dans la circumboule, t·D ≤ 0 seulement à t = 0) : 1,5–3,9 % des ancres à seeds seraient tuées à tort et perdraient des candidats. Elle est un excellent **prédicteur** (min ≥ h3 ⇒ profondeur(v=0) ≥ h3 sauf 18–58 ancres) mais jamais une autorité.
+- Le **compte exact |W_3| par ancre** (théorème de fuseau, déjà utilisé par la lane q4 sous la forme `anchors_killed_w4` mais **absent de la lane q3**) est valide (0 contradiction) et tue 57–59 % des ancres à seeds portant **87–92 % des seeds** sur eight_clusters, 24–26 % des ancres portant 46–49 % des seeds sur uniform. Coût ≤ |cover| par ancre avec sortie anticipée à h3, et fusionnable dans `anchor_cover_from_handles` (A = `dist2q − D2` y est déjà calculé ; le produit vectoriel n'est nécessaire que pour les sites à `dist2q < D2`). Ordre de grandeur sur eight_clusters 4000 : ≈ 3 000 évaluations de sites + 311 constructions de seed par ancre aujourd'hui, contre ≤ 1 000 tests W_3 + 8 % du reste après.
+- Le reliquat (min ≥ h3 mais |W_3| < h3) porte 8–12 % des seeds sur eight_clusters mais 44–46 % sur uniform : il reste à payer par le scan des seeds (ou par un certificat plus fin que W_3, à prouver — pas mesuré ici).
+- Pour la livraison 7 (device) : 98 % des seeds tués le sont en 8–15 sites, donc un kernel warp-par-seed fait **un** pas par seed ; le vrai coût est l'énumération des seeds (`is_acute_seed` sur tout le cover, 993 tests par ancre pour 311 seeds) et leur mise en forme, pas le balayage. Tuer les ancres par W_3 **avant** toute énumération de seeds réduit de ≈ 10× le volume sur eight_clusters.
+
+### 3. Lane q4 — synthèse
+
+| | uniform 2000 | uniform 4000 | eight_clusters 2000 | eight_clusters 4000 |
+|---|---:|---:|---:|---:|
+| ancres / tuées histogramme | 267 366 / 3,5 % | 600 476 / 3,9 % | 610 134 / 16,8 % | 1 647 615 / 23,4 % |
+| tuées par W_4 exact (% des ancres après histogramme) ; sites par ancre testée | 26,5 % ; 63,6 | 28,6 % ; 65,4 | 61,1 % ; 111 | 64,9 % ; 130 |
+| ancres survivantes ; cover / lentille | 189 767 ; 82,7 / 42,0 | 412 131 ; 87,3 / 43,8 | 197 563 ; 252 / 100 | 442 533 ; 331 / 113 |
+| seeds aigus (par ancre survivante) | 4,44 M (23,4) | 10,19 M (24,7) | 13,64 M (69,0) | 35,59 M (80,4) |
+| seeds tués au cœur de Jung (J < 0 immédiat) | 75,5 % (0) | 76,5 % (0) | 92,1 % (0) | 92,8 % (0) |
+| sites du scan de cœur : par seed tué / par seed vivant | 11,8 / 64,0 | 11,7 / 65,7 | 19,4 / 212 | 19,7 / 271 |
+| scan de cœur total (% du scan complet) | 109 M (19,5 %) | 249 M (18,3 %) | 473 M (3,7 %) | 1,34 G (2,4 %) |
+| … dont dépensé sur des seeds vivants | 64 % | 63 % | 49 % | 51 % |
+| complétions tentées (par seed vivant) | 31,9 M (29,4) | 71,6 M (29,9) | 74,2 M (68,5) | 187 M (73,3) |
+| rejets lentille / owner / once / i64 / face / det / centre (% des complétions) | 23 / 0,2 / 20 / 8,7 / 28 / 0 / 8,8 | 24 / 0,2 / 20 / 8,6 / 28 / 0 / 8,8 | 28 / 0,1 / 26 / 3,1 / 19 / 0 / 14,6 | 29 / 0,1 / 26 / 3,0 / 18 / 0 / 15,1 |
+| complétions atteignant le scan de profondeur ; tuées | 10,4 % ; 91,0 % | 10,4 % ; 91,2 % | 9,3 % ; 96,9 % | 8,8 % ; 96,9 % |
+| sites des scans de profondeur (par scan) | 39 M (11,8) | 88 M (11,8) | 85 M (12,2) | 197 M (12,0) |
+| candidats émis | 297 609 | 654 271 | 217 400 | 509 673 |
+| ancres : sans seed / tous seeds tués au cœur / seeds vivants sans candidat / émettrices | 2,7 / 26,8 / 45,5 / 25,0 % | 2,5 / 27,7 / 45,2 / 24,6 % | 2,6 / 31,9 / 46,0 / 19,5 % | 2,3 / 32,3 / 46,0 / 19,3 % |
+| part des seeds : tous-tués / vivants-sans-candidat / émettrices | 48,1 / 42,1 / 9,8 % | 49,5 / 41,3 / 9,3 % | 62,0 / 35,0 / 3,0 % | 64,3 / 33,1 / 2,6 % |
+| part des complétions dans des ancres sans candidat | 77,5 % | 78,0 % | 87,4 % | 88,5 % |
+| temps sonde (fils) ; production `rects q4` (4 fils) | 6,4 s (2) ; 1,18 s | 14,8 s (2) ; 2,79 s | 19,5 s (2) ; 4,16 s | 49,9 s (4) ; 13,3 s |
+
+Conclusions q4 : le compte W_4 exact par ancre fait déjà le gros du travail sur eight_clusters (65 % des ancres après histogramme). Le poste dominant en sites est le **scan de cœur de Jung**, dont la moitié est dépensée sur les seeds qui **survivent** au cœur (cover entier, sans sortie anticipée possible) ; ensuite les complétions (73 par seed vivant, 88,5 % d'entre elles dans des ancres qui n'émettront rien ; seulement 8,8 % arrivent au scan de profondeur, et 97 % y meurent). L'analogue du « min ≥ h4 » n'a pas été mesuré pour q4 (temps).
+
+### Annexe — fichiers (scratchpad, hors dépôt)
+
+- Sonde q3 : `/tmp/claude-1000/-workspaces-E-HGP/051cd20e-5644-4cfc-b985-af6a4da2f73e/scratchpad/sonde_seeds.cpp` (options `--family= --n= --coord= --seed= --s= --smax= --threads= --min-cap= --no-hist`) ; sorties complètes avec histogrammes : `sonde_uniform_2000.md`, `sonde_uniform_4000.md`, `sonde_eight_clusters_2000.md`, `sonde_eight_clusters_4000.md` (même dossier).
+- Sonde q4 : `.../scratchpad/sonde_q4.cpp` ; sorties `sonde_q4_uniform_2000.md`, `sonde_q4_uniform_4000.md`, `sonde_q4_eight_clusters_2000.md`, `sonde_q4_eight_clusters_4000.md`.
+- Runs de production de référence (`mhgp5 --threads=4`) : `.../scratchpad/prod_{uniform,eight_clusters}_{2000,4000}.txt`.
+- Compilation : `g++ -std=c++20 -O2 -Wall -Wextra -DMHGP5_TESTING=1 -I/workspaces/E-HGP/morsehgp3D_v5/src -pthread sonde_seeds.cpp -o sonde_seeds` (idem `sonde_q4.cpp`).
+- Le scratchpad contient aussi des fichiers d'une autre session (`probe_q3_w3kill.cpp`, `run_w3kill.txt`, `rect_probe.cpp`, …) : non lus, non touchés.

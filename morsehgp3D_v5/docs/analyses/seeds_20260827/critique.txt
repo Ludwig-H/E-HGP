@@ -1,0 +1,97 @@
+## Cadre
+
+```text
+phase=exploration_v5_hors_registre
+backend=cpu_reference
+profile=quantized_u16_input_only
+mode=audit_independant_math_and_architecture
+public_status=not_claimed
+GCP non utilisé
+```
+
+Sondes du contradicteur (hors dépôt, aucun fichier du dépôt touché) : `/tmp/claude-1000/-workspaces-E-HGP/051cd20e-5644-4cfc-b985-af6a4da2f73e/scratchpad/contra/verif.py` (identités en entiers exacts, exemples 2.3/2.4, pentes, largeurs), `.../contra/ex23.cpp` (Exemple 2.3 contre `scan_anchor_q3` **de production épinglé `10c46c87`**, arbre `src_pin/`), `.../contra/w3_vs_sect.cpp` (fixtures W3/secteurs/mutant contre l'arbre de travail courant).
+
+**Fait nouveau pendant l'audit** : le dépôt a bougé. Le commit `d76f502c` (« test d'ancre par secteurs », `receipts/mesures_secteurs_20260827`) et un diff non commité (`src/lanes/sector_kill.hpp`, insertion du test dans `scan_anchor_q3`, `process_anchor_q4`, `build_q3_batch`, `build_q4_batch`, mutant `sector-kill-nonstrict`, porte `mhgp5_sector_kill_fixture`) implémentent déjà une variante du « test cellulaire » des rapports. Les trois rapports ne le citent pas ; plusieurs de leurs verrous sont déjà tranchés ou déplacés par ce code.
+
+## 1. Verdict par thèse
+
+### Rapport mathématique
+
+| # | Thèse | Verdict | Raison |
+|---|---|---|---|
+| 1.1–1.5 | Centre dans le plan bissecteur, `R² = |v|² + D²/4`, `N = 2Gv`, `|N|² = G·D²·(EX−G)`, `8N = (D²X − (X·d)d)(|X|² − D²)`, demi-plan `f_z(v) = 4u·v − q`, `L = −G·f_z(v)`, `L = 4P` | **établi** | Refait en entiers exacts (Python, 2 953 seeds aigus aléatoires u16 : 0 échec sur chaque identité) ; `q = −4H`, `X2 = 4Ξ` donc `q<0 ∧ 3q² > 4X2` ⟺ `in_spindle(kQ3)` ; « jamais intérieur » ⟺ `q ≥ 0 ∧ 3q² ≥ 4X2` (max de `4u·v` sur le disque = `√(4X2/3)`) |
+| 1.2 | Borne `|v|² ≤ D²/12` | **établi** | Loi des sinus, γ ∈ [60°, 90°) ; égalité atteinte en entiers (triangle équilatéral existe sur Z³), donc le disque **fermé** est le bon domaine |
+| 2.1–2.2 | Chaîne `|W_3| ≤ min_Δ̄ depth ≤ depth(0)` ; min atteint sur sommets ∪ (droites ∩ cercle) | **établi** | depth est s.c.i. (indicatrices d'ouverts), constante sur les faces ; tout point de l'adhérence d'une face a une profondeur ≤ celle de la face ; si aucune droite ne coupe le disque, la face contient le disque |
+| 2.3 | Exemple « exact tue, W3 ne tue pas » | **établi et gravable** | Recalculé : `q_e = −760000+4e²`, `3q² = 1,73·10¹²`, `4X2 = 5,18·10¹³`, min sur le disque = 9 (grille 801²). **Contre le corps de production épinglé** (`ex23_pin`) : cover 26, `|W3| = 0`, 6 seeds, 6 tués, 0 candidat à h3 = 9 ; à h = 10 : 3 candidats |
+| 2.4 | Limite du test sur le disque fermé (28 sites sur la sphère diamétrale, tout `v ≠ 0` à profondeur ≥ 13) | **établi** | 28 directions reconstruites, min sur 3 600 angles = 13 |
+| 3.1 | depth(0) n'est ni minorant ni majorant ; nécessaire, pas suffisant | **établi** | Concorde avec le rapport de mesure (1,5–3,9 % de faux positifs). Coquille numérique : `4u·v = −1,039 D²`, pas `−0,52 D²` (voir § 2) |
+| 3.3 | W3 optimal parmi les tests « à ensemble fixe de h3 sites » | **établi (trivial)** | Chaque `H_z` doit contenir le disque fermé ; toute propriété individuelle sûre implique `z ∈ W_3` |
+| 3.4 | Le test `|W_3 ∩ cover| ≥ h3` est absent de q3, sûr, objet inchangé | **établi** | `W_3 ⊂ B°(m, D/2) ⊂ cover` ; tout `z ∈ W_3` est intérieur strict à toute circumboule de centre dans le disque (§ 4.1 des maths, T3 = D/√12) ⟹ chaque seed compte ≥ h3 intérieurs dans le cover ⟹ tué par le filtre de génération. Égalité post-RLE vérifiée 3 familles |
+| 3.4 | Temps ×4,5 (après cover) / ×6,2 (avant cover) sur `eight_clusters` 8000 | **plausible, non établi** | Machine partagée, sondes concurrentes (horodatages 19:05–19:22 se chevauchent) ; `run_w3kill.txt` (19:16) donne 157 s de production et ×3,0, `run_w3kill2.txt` (19:20) 110,7 s et ×4,5–6,2 : **42 % de dérive** sur le même code. L'ordre « avant > après cover » (17,9 vs 24,4 s) est dans le bruit |
+| 3.5 | Test cellulaire : `k_cell ≤ depth ≤ c_cell`, verdicts identiques à la production | **établi (math)** | Forme affine : min et max sur la cellule fermée aux sommets ; `x` n'est jamais compté dans `k` de sa propre cellule (`f_x(v(x)) = 0`) ; `a, b` ont `f ≡ 0`. Largeurs vérifiées : `|N| < 2^84`, `|Gr·N·E2| < 2^124` pour Gr ≤ 16 |
+| 3.5 | « gain net ~4× sur les évaluations » | **réfuté** | 5,5 M sites × **4 sommets** = 22 M tests i128 contre 22,3 M évaluations fma de production : parité, pas 4×. S'y ajoutent : précalcul par site de `t1, t2, rhs` (3 produits i128 sur **tout** le cover, 9,4 M sites pour l'échantillon, déjà > 22,3 M produits), et la localisation par seed (`q3_form` + 2 divisions i128 ≈ 100–200 ns) contre un scan de production à ~10 évaluations (~20–30 ns). Le rapport de mesure dit lui-même que le scan n'est pas le coût (« la mort d'un seed coûte 9,4 sites ») : **les deux rapports se contredisent** sur la métrique, et c'est le rapport de mesure qui a raison. Le test cellulaire ne vaut que s'il tue l'ancre entière — rôle déjà tenu, moins cher, par le test par secteurs de `d76f502c` |
+| 4.1–4.2 | Corde du seed q4, extrémités sur le cercle `p/√2`, cœur de Jung ⟺ témoins uniformes sur la corde | **établi** | Identité `|v3|² + J/(8G) = D²/8` vérifiée en rationnels exacts ; `f_z(c_μ − m) = −4(P − μB)/G` ; `u·n = 2B` car `d·n = 0`. Corollaire non dit dans le rapport : `J = G(D² − 8|v3|²) ≥ G·D²/3 > 0` pour tout seed aigu — la branche `Jb < 0` de `process_anchor_q4` est **inatteignable** (le « J<0 immédiat : 0 » du rapport de mesure est un théorème, pas une statistique) |
+| 4 | Test exact de seed q4 par tri des rationnels `P/B` (gain sur 716 M complétions « chacune un scan du cover ») | **math plausible, gain réfuté tel que présenté** | (i) les complétions tuées par profondeur meurent en ~12 sites (mesure), pas « un scan du cover » ; (ii) seules 8,8 % des complétions atteignent la profondeur ; (iii) le tri par seed vivant (~300 rationnels U192, O(m log m)) coûte ~50 µs × 48,5 M seeds vivants à 50 k ≈ 2 400 fil-s ≈ 50 s à 48 fils, l'ordre de grandeur de la lane q4 entière (88 s) ; (iv) il ne dispense d'aucun rejet lentille/owner/once/i64 ni de Cramer pour les émis. Identité de signe V5 : **prouvée ici** (voir § 2), donc le verrou peut être reçu, mais sans modèle de coût le chantier ne doit pas s'ouvrir |
+| 5–6 | Le mou 2,33 de l'histogramme est-il une faute ? | **structurel, pas une faute** | Près de `a`, `W_3` est le cône d'angle 60° autour de `d` (`3(d·w)² > D²|w_⊥|²` ⟺ `tan² < 3`). Avec s = 8, `Box(A)` est un petit morceau de l'amas : la plupart des témoins du cône sont hors `A ∪ B` **et** non universels sur tout `Box(A)×Box(B)` (le cône bascule quand `a` parcourt `Box(A)`), donc ni `h_coeur` ni `h_a` ne peuvent les créditer. Le compte W3 par ancre est le remède, pas un audit de `h_coeur` |
+
+### Rapport de mesure
+
+| Thèse | Verdict | Raison |
+|---|---|---|
+| Compteurs identiques à la production sur 4 configurations | **établi** | `prod_eight_clusters_4000.txt` : `tues_profondeur 293 814 473`, `candidats 561 057`, `ancres_w4 819 542`, `seeds_core_tues 33 031 064` = sonde |
+| Forme entière de `|W_3|`, remarque sur le facteur `4/√3` et sur la composante perpendiculaire | **établi** | `−q > 4|u_⊥|·D/√12 = 2|u_⊥|D/√3` avec `u = 2w` ⟹ `4|w|² − D² < −4|w_⊥|D/√3` ; le facteur `2√3` est faux, `|w|² − (w·d)²/D²` est bien la composante ⊥ |
+| depth(v=0) n'est pas une autorité (1,5–3,9 % de faux positifs) | **établi** | cohérent avec 3.1 du rapport math ; les 18–58 ancres « min ≥ h3 mais depth(0) < h3 » sont exactement des configurations de type Exemple 2.4 (pas une contradiction entre rapports) |
+| « seeds ≈ n^1,9 … cohérent avec 18,2 G à 50 k » | **imprécis** | Exposants effectifs : 1,93 (2k→4k), 1,44 (4k→8k), 1,71 (8k→50k), 1,70 (2k→50k). Depuis 4000 avec 1,9 on prédirait 36 G, pas 18,2 G |
+| W3 exact tue 57–59 % des ancres / 87–92 % des seeds (`eight_clusters`), 24–26 % / 46–49 % (`uniform`) | **établi** | concorde avec le rapport math à 8000 (57,2 % / 92,6 %) et avec ma sonde |
+| « ≤ 1 000 tests W3 par ancre » | **borne lâche** | mesuré ≈ 22 par ancre (45 M / 2,0 M) grâce au tri radial et à la sortie à h3 |
+| q4 : le scan de cœur domine, moitié dépensée sur les seeds vivants ; 8,8 % des complétions atteignent la profondeur | **établi** | cohérent avec les compteurs de production |
+
+### Conception device
+
+| Thèse | Verdict | Raison |
+|---|---|---|
+| Lane par lots fermée (1,8 To seeds + 2 To covers) | **établi (arithmétique)** | 18,2 G × 100 o ; 19,7 M × 3200 × 32 o |
+| « points par rectangle » ≈ 100 Go ; index résident ≈ 1 Go | **plausible** | ratio 0,100 mesuré à 4000 et 8000 ; extrapolation `cover ≈ 3200` cohérente avec `seeds/ancre = 924` et `seeds/cover ≈ 0,28` (0,33 → 0,31 → 0,28 : décroissant, donc 3200 est plutôt un minorant) |
+| `u` en i32, `q < 2^36`, conversions exactes | **établi** | `|u| ≤ 131 070`, `3·131070² < 2^36` |
+| Un pas de warp suffit pour ~99 % des seeds | **établi** | 99,6 % des seeds morts en ≤ 32 évaluations à 8000 |
+| `cert_neg q3 = 192,85 G − 28,87 G` ⟹ ≥ 9 par seed à 50 k | **établi** | reçu 50 k : `jung = 11 771 367 310 + 17 099 102 712 + 745` |
+| Estimation q3 8–14 s, q4 8–15 s | **plausible, non mesuré** | arithmétique cohérente (18,2 G × 120 instr ≈ 2,2 T warp-instr) ; mais la **base de comparaison (94 s) est obsolète** : voir incohérence majeure ci-dessous |
+| Compteurs de certification exigés égaux | **établi comme politique** | mais ils **changent** dès que le test par secteurs (diff non commité) est en production : toutes les portes appariées et les reçus 50 k ont des compteurs périmés ; l'objet (`digest_all`) ne bouge pas |
+| « 22 compteurs q4 » | **établi** | `tests/q4_lane_batched_gate.cpp` dit VINGT-DEUX ; `docs/GPU.md` (« dix-neuf ») est périmé |
+| sm_120 : 100 Ko/SM, 99 Ko/bloc | **non vérifié** | sans incidence (42 Ko × 2 tient dans tous les cas) |
+| « Σ pts handles/rect ≈ 35 à 50 k » | **optimiste** | 14,8 → 16,7 → 22,5 (×1,35 par doublement) ⟹ ~50 à 50 k ; transfert ≤ 1 Go de toute façon |
+
+### Incohérence majeure entre rapports
+
+Le rapport math montre qu'un test O(22 évaluations) par ancre retire 92,6 % des seeds à 8000 (et le commit concurrent `d76f502c` : 93,1 % à 4000 par secteurs) ; le rapport de mesure établit que le coût est le **nombre de seeds** (mise en forme + `is_acute_seed`), pas le scan. La conception device attaque pourtant les 18,2 G seeds **sans aucun test d'ancre dans son étage hôte** (§ 3.1) et compare son estimation (8–14 s) à une lane CPU de 94 s qui n'existe plus : avec W3 + secteurs, la lane CPU q3 à 48 fils est probablement à ~10–20 s (plancher covers ≈ 14 s + 7 % des seeds), soit l'ordre de grandeur du device. Le gain GPU sur q3 n'est plus démontré ; il doit être re-mesuré contre la **nouvelle** lane CPU avant d'écrire un kernel.
+
+### Ce que le code concurrent change
+
+Deux fixtures (`w3_vs_sect`) :
+- **W3-morte / secteurs-vivante** : `a=(0,0,0)`, `b=(2000,0,0)`, 9 sites `z_e = (1000+e, 550, 0)` (`u = (2e, 1100, 0)`, `−q = 2 790 000 > 4·1100·577,35`) : `|W3| = 9` (mort), `anchor_sector_kill` rend `wmin = 0` (vivant). **Le polygone circonscrit a ses sommets hors du disque : le test par secteurs K = 8 ne contient pas W3.** C'est mesurable dans les reçus : à `eight_clusters` 4000, W3 tue 58,75 % des ancres vivantes, les secteurs 54,2 % (mais 93,1 % des seeds contre 91,6 %). Les deux tests sont incomparables et doivent être **cumulés** (W3 avec sortie anticipée d'abord, secteurs sur les survivantes).
+- **Mutant « mort à h3−1 »** : Exemple 2.3 avec 8+8 sites : à h3 = 9, 3 seeds, 1 tué, **2 candidats émis** ; à h = 8 (mutant), l'ancre est tuée par secteurs (`wmin = 8`) et 0 candidat ⟹ digest différent, mutant tué (code 4).
+- Coût : `anchor_sector_kill` balaie **tout** le cover (m ≈ 1000–1400) avec 8 produits i128 par site, alors que seuls les sites à `|2w|² < D²` (seaux radiaux 0..10, ~11 % du cover sur `eight_clusters`) peuvent être témoins et que le cover est trié radialement : un `break` au premier `dist2q ≥ D2` divise le coût par 5–9 (le reçu donne 7,1 s de test pour 46,7 s de corps à 4000, 1 fil). Ses propres nombres se contredisent : `LISEZMOI.txt` dit 86,4 s / 15,1 s, `eight_clusters_n4000_q3.txt` dit 46,7 s / 7,1 s.
+
+## 2. Formules corrigées / complétées
+
+1. Rapport math § 3.1 : avec `u = −0,9D·e`, `v = (D/√12)·e` : `4u·v = −3,6/√12 · D² = −1,039 D²`, `q = −0,19 D²`, `f = −0,849 D² < 0` (conclusion inchangée ; `−0,52 D²` serait `2u·v`).
+2. « ~38 % des sites jamais intérieurs » : 36 % sur `eight_clusters` (1403 − 874 − 20,5 − 2), ~24 % sur `uniform` et `terrain`.
+3. Lemme 4.1, à ajouter : `J = D²(3G − 2EX) = G(D² − 8|v3|²) ≥ G·D²/3 > 0` pour tout seed aigu ⟹ `Jb < 0` inatteignable.
+4. Identité de signe V5 (prouvée, 2 953 tétraèdres aléatoires, 0 échec) : pour `y` non coplanaire (`B(y) ≠ 0`), `sign q4_power(f4, z) = sign(B(y)) · sign(P(z)·B(y) − P(y)·B(z))` ; largeurs `|P| < 2^103`, `|B| < 2^52` ⟹ produits < 2^156 (U192 suffit).
+5. Test cellulaire, cas d'égalité (V3) : `k` strict (`f > 0` aux 4 sommets ⟹ `f > 0` sur la cellule fermée, min d'une affine aux sommets) et `c` strict (`f > 0` en un point de la cellule fermée ⟹ `f > 0` en un sommet, max aux sommets) sont tous deux **exacts** ; `f ≥ 0` n'est pas nécessaire. Cas limite de la localisation : si `D²·A1/12` est un carré parfait et le seed équilatéral, `⌊Gr·α/â⌋ = Gr` sort de `[−Gr, Gr[` : écrêter (fail-closed).
+6. Largeurs cellulaires : `|N|² = G·D²·(EX−G) < 2^168` ⟹ `|N| < 2^84` ; `|N·E2| < 2^119,2`, `×16 < 2^123,2` ; `2G·b̂ < 2^117,6` — i128 tient pour Gr ≤ 16, pas au-delà.
+7. Pente des seeds `eight_clusters` : exposant effectif 1,7 (2k→50k), pas 1,9.
+8. Rapport de mesure, formule W3 avec `w = z − m` : `4|w|² − D² < −4|w_⊥|·D/√3` (facteur `4/√3`, composante perpendiculaire) — équivalent à `A < 0 ∧ 3A² > 4|W×d|²`.
+9. Test par secteurs (K = 8) ⊉ W3 : témoins universels sur le disque fermé mais pas sur les sommets du polygone (exemple : `z = (1000+e, 550, 0)`, demi-plan `v_y > −634`, disque de rayon 577, sommets du polygone à ~800).
+
+## 3. Verrous à poser à l'auditeur, par importance
+
+1. **Objet et contrat des tests d'ancre (W3 exact + secteurs), avant tout autre chantier.** Recevoir les deux preuves de suffisance (§ 3.4 du rapport math ; théorème de `sector_kill.hpp`) ; exiger qu'ils vivent dans les corps partagés `scan_anchor_q3` / `process_anchor_q4` (égalité automatique hôte / lots / device — c'est déjà la forme du diff non commité) ; **cumuler** W3 (sortie anticipée, seaux 0..10) et secteurs (sur les survivantes, avec `break` à `dist2q ≥ D2`) puisqu'aucun ne contient l'autre ; graver trois fixtures : Exemple 2.3 (18 sites, `|W3| = 0`, 0 candidat), Exemple 2.3 à 8+8 sites (mutant « mort à h−1 » → digest différent, code 4), « W3-morte / secteurs-vivante » (9 sites `(1000+e, 550, 0)`) ; fixer la liste des compteurs contractuels des portes appariées (`seeds`, `depth_killed`, `q3_cert`, `anchors_killed_sectors`, `q4_completions`, rejets) et **refaire les reçus** 8k/16k/32k/50k (digest identique, compteurs différents, planchers `--min-seeds`/`--min-fallback` révisés). Refuser tout reçu de temps produit sur la machine partagée.
+2. **Priorité GPU.** Exiger, avant l'écriture de `q3_rect_shaped`/kernels, une mesure G4 de la lane CPU **avec** W3 + secteurs à 16 k / 32 k / 50 k sur les quatre familles : si la lane q3 tombe sous ~20 s, le device n'a plus de gain démontré sur q3 ; l'étage hôte § 3.1 de la conception doit de toute façon inclure les tests d'ancre (ne jamais envoyer au device une ancre tuable en 22 évaluations).
+3. **Routage V2 (W3 avant / après cover).** Non décidable ici (dérive de 42 % entre deux runs du même code) ; choix par mesure G4, une seule forme par défaut, aucune sélection par famille sans reçu.
+4. **Test cellulaire V3.** Recevoir la mathématique (repère entier, `A1 ≥ 2D²/3`, arrondis fail-open, `k ≤ depth ≤ c`, strictness exacte), **ne pas** le recevoir comme lane : les évaluations ne sont pas le coût ; ne l'envisager que comme raffinement du polygone des secteurs (deux anneaux, K > 8) et seulement sur mesure de temps.
+5. **q4, V5.** Recevoir Lemme 4.1, Corollaire 4.2, `J ≥ G·D²/3 > 0` (branche `Jb < 0` morte : à documenter ou retirer), et l'identité de signe ci-dessus ; **refuser d'ouvrir** le chantier « tri des rationnels par seed » sans modèle de coût comparé aux 8,8 % de complétions qui atteignent une profondeur à ~12 sites.
+6. **V4.** Confirmer que le test exact « min sur le disque fermé » n'est jamais nécessaire (Exemple 2.4 ; le test par secteurs / par cellules le subsume) et qu'aucun juge O(m² log m) n'est requis : les fixtures + l'égalité de digest suffisent, le juge d'échantillon est l'énumération des seeds elle-même.
+7. **V6.** Classer le mou 2,33 comme structurel (cônes de 60° hors `Box(A)`, `Box(B)`), pas comme faute d'implémentation ; pas d'audit de `h_coeur`.
+8. **Conception device (si elle survit au point 2).** Recevoir : `di_to_double` = `__floattidf` (arrondi pair, cas à mi-chemin) avec porte ; égalité de cover **comme séquence** ; fail-closed `oversized` / rejeu ; mettre `docs/GPU.md` à jour (22 compteurs q4, pas 19) ; mesurer isolément le débit des complétions q4 avant toute estimation.
+9. **Hygiène de mesure.** Tous les temps des trois rapports et du reçu `mesures_secteurs_20260827` proviennent de 8 vCPU partagés avec sondes concurrentes ; exiger que les rapports distinguent « ratio dans un même run » (indicatif) de « temps » (jamais cité sans G4), et corriger le `LISEZMOI.txt` de ce reçu, dont les temps (86,4 / 15,1 s) contredisent ses fichiers (46,7 / 7,1 s).
