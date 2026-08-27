@@ -107,10 +107,13 @@ int main(int argc, char** argv) {
   }
   if (!inject.empty() && !mutants_enable(inject)) return 2;
   const bool m_h1 = MHGP5_MUTANT("anchor-kill-h-minus-one");
+  const bool m_ns = MHGP5_MUTANT("sector-kill-nonstrict");
+  bool f5_killed_by_mutant = false, f6_boundary_counted = false;
   // F1
   Fixture f1;
   f1.add(0, 0, 0); f1.add(2000, 0, 0);
   for (i64 e = 0; e < 9; ++e) { f1.add(1000 + e, 900, 0); f1.sites.push_back(P3{1000 + e, 900, 0}); f1.add(1000 + e, -900, 0); f1.sites.push_back(P3{1000 + e, -900, 0}); }
+  f1.add(1000, 1200, 0); f1.sites.push_back(P3{1000, 1200, 0});  // seed aigu (profondeur 9 : les 9 z⁺) — fixture non vacue cote produit
   const Verdict v1 = run(f1);
   std::printf("F1 : boules=%zu W3=%llu wmin=%llu W3-tue=%d secteurs-tue=%d cumule=%d\n", v1.balls, (unsigned long long)v1.w3,
               (unsigned long long)v1.wmin, v1.dead_by_w3, v1.dead_by_sectors, v1.kill);
@@ -149,6 +152,7 @@ int main(int argc, char** argv) {
   Fixture f3;
   f3.add(0, 0, 0); f3.add(2000, 0, 0);
   for (i64 e = 0; e < 9; ++e) { f3.add(1000 + e, 550, 0); f3.sites.push_back(P3{1000 + e, 550, 0}); }
+  f3.add(1000, 1200, 0); f3.sites.push_back(P3{1000, 1200, 0});  // seed aigu (profondeur 9) — non vacue
   const Verdict v3 = run(f3);
   std::printf("F3 : boules=%zu W3=%llu wmin=%llu W3-tue=%d secteurs-tue=%d cumule=%d\n", v3.balls, (unsigned long long)v3.w3,
               (unsigned long long)v3.wmin, v3.dead_by_w3, v3.dead_by_sectors, v3.kill);
@@ -156,6 +160,67 @@ int main(int argc, char** argv) {
   expect(!v3.dead_by_sectors, "F3 : le test par secteurs NE tue PAS (sommets du polygone hors du disque) : incomparables");
   expect(v3.balls == 0, "F3 : aucune boule emise (tout seed mort)");
   expect(v3.kill == 1, "F3 : le cumul tue par W_3");
+  // F5 « exemple 2.4 » : 28 sites EXACTEMENT sur la sphere diametrale (q = 0) plus le seed x = (1000, 1200, 0) :
+  // depth(0) = 0, |W_3| = 0, min sur le disque ferme = 0 — AUCUN test sur le disque ne tue — et pourtant tout seed
+  // est mort (x : >= 13 sites interieurs, ceux a y > 0) : les tests d'ancre ne sont jamais necessaires.
+  {
+    Fixture f5;
+    f5.add(0, 0, 0); f5.add(2000, 0, 0);
+    const i64 sph[][2] = {{600, 800}, {800, 600}, {280, 960}, {960, 280}, {352, 936}, {936, 352}, {1000, 0}};
+    for (const auto& p : sph) {  // (1000,0) : deux points seulement (±1000, 0), pas quatre
+      f5.add(1000, p[0], p[1]); f5.add(1000, -p[0], p[1]);
+      if (p[1] != 0) { f5.add(1000, p[0], -p[1]); f5.add(1000, -p[0], -p[1]); }
+    }
+    f5.add(1000, 1200, 0); f5.sites.push_back(P3{1000, 1200, 0});
+    const Verdict v5 = run(f5);
+    std::printf("F5 : boules=%zu W3=%llu wmin=%llu cumule=%d\n", v5.balls, (unsigned long long)v5.w3, (unsigned long long)v5.wmin, v5.kill);
+    expect(v5.balls == 0, "F5 : tout seed mort (aucune boule emise)");
+    if (!m_ns) expect(v5.w3 == 0 && v5.wmin == 0 && v5.kill == 0, "F5 : aucun test d'ancre ne tue (necessite refutee)");
+    else f5_killed_by_mutant = v5.kill != 0;  // non strict : les 28 sites de la sphere deviennent temoins
+  }
+  // F6 « frontiere des demi-plans seule » (primitive) : site S = (1000, 400, −200) strictement dans la boule
+  // diametrale (|2w|² = 800000 < D²) et EXACTEMENT sur la frontiere du demi-plan du sommet u = (0,0,2000) :
+  // 4 w2·u = −3 200 000 = |2w|² − D². Strict : S n'est pas temoin du secteur (u−v, u) ; non strict : il l'est.
+  {
+    const CloudIndex ix6 = build_cloud_index([] { Fixture f; f.add(0, 0, 0); f.add(2000, 0, 0); f.add(1000, 400, -200); return f.in; }());
+    const P3 pa{0, 1000, 1000}, pb{2000, 1000, 1000};
+    i32 ua = -1, ub = -1;
+    for (i32 u = 0; u < (i32)ix6.upos.size(); ++u) {
+      if (ix6.upos[(size_t)u].x == 0) ua = u;
+      if (ix6.upos[(size_t)u].x == 2000) ub = u;
+    }
+    std::vector<CoverPoint> cover;
+    cover_query(ix6, pa, pb, 4000000, 3, &cover);
+    u64 wmin = 0;
+    u32 cnt[8];
+    anchor_sector_kill(cover, ix6.upos, ua, ub, pa, pb, 4000000, 12, 1, &wmin, cnt);
+    std::printf("F6 : secteurs strict = %u %u %u %u %u %u %u %u\n", cnt[0], cnt[1], cnt[2], cnt[3], cnt[4], cnt[5], cnt[6], cnt[7]);
+    if (!m_ns) expect(cnt[7] == 0 && cnt[6] == 1, "F6 : frontiere du demi-plan (sommet u) : temoin strict du secteur 6 seulement");
+    else f6_boundary_counted = cnt[7] == 1;  // le mutant non strict compte la frontiere du demi-plan comme temoin
+  }
+  // F7 « secteurs q4 non vacus » : la configuration F1 (avec x) tuee aussi par les secteurs q4 (rho² = D²/8, h4 = 8) ?
+  {
+    const CloudIndex ix7 = build_cloud_index(f1.in);
+    const P3 pa{0, 1000, 1000}, pb{2000, 1000, 1000};
+    i32 ua = -1, ub = -1;
+    for (i32 u = 0; u < (i32)ix7.upos.size(); ++u) {
+      if (ix7.upos[(size_t)u].x == 0 && ix7.upos[(size_t)u].y == 1000) ua = u;
+      if (ix7.upos[(size_t)u].x == 2000) ub = u;
+    }
+    std::vector<CoverPoint> cover;
+    cover_query(ix7, pa, pb, 4000000, 3, &cover);
+    u64 wmin = 0;
+    const bool k4 = anchor_sector_kill(cover, ix7.upos, ua, ub, pa, pb, 4000000, 8, 8, &wmin);
+    std::printf("F7 : secteurs q4 sur F1 : wmin=%llu tue=%d\n", (unsigned long long)wmin, k4 ? 1 : 0);
+    expect(k4, "F7 : le test par secteurs q4 tue l'ancre de F1 (non-vacuite q4)");
+  }
+  if (m_ns) {
+    // Mutant non strict : F5 (frontiere diametrale, 28 sites a q = 0) tuee a tort ET F6 (frontiere des demi-plans)
+    // comptee — les deux frontieres sont exercees separement.
+    if (f5_killed_by_mutant && f6_boundary_counted && !failures) return 4;
+    std::printf("MUTANT NON TUE (F5 %d, F6 %d, echecs %d)\n", f5_killed_by_mutant ? 1 : 0, f6_boundary_counted ? 1 : 0, failures);
+    return 1;
+  }
   if (failures) return 1;
   std::printf("anchor_kill_fixture OK\n");
   return 0;

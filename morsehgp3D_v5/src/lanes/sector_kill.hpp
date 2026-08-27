@@ -74,7 +74,7 @@ inline bool anchor_universal_kill(const std::vector<CoverPoint>& cover, const st
 // 8 (q4) — rho² = D²/den. Compte dans `*witness_min` le minimum sur les
 // secteurs du nombre de temoins (mesure).
 inline bool anchor_sector_kill(const std::vector<CoverPoint>& cover, const std::vector<P3>& upos, i32 ua, i32 ub, const P3& pa,
-                               const P3& pb, i64 D2, i128 rho2_den, u64 h, u64* witness_min) {
+                               const P3& pb, i64 D2, i128 rho2_den, u64 h, u64* witness_min, u32* sector_counts = nullptr) {
   using sector_detail::sq;
   const bool nonstrict = MHGP5_MUTANT("sector-kill-nonstrict");
   const u64 hh = MHGP5_MUTANT("anchor-kill-h-minus-one") && h > 1 ? h - 1 : h;
@@ -127,6 +127,7 @@ inline bool anchor_sector_kill(const std::vector<CoverPoint>& cover, const std::
   }
   u32 mn = cnt[0];
   for (int k = 1; k < 8; ++k) mn = std::min(mn, cnt[k]);
+  if (sector_counts) for (int k = 0; k < 8; ++k) sector_counts[k] = cnt[k];
   *witness_min = mn;
   return (u64)mn >= hh;
 }

@@ -258,7 +258,7 @@ inline void build_q4_batch(const CloudIndex& ix, const AliveRect& ar, const u64 
       if (oversized) {
         const u64 seeds_before_h = ls->seeds[1];
         process_anchor_q4(ix, sc, ua, ub, pa, pb, D2, h_of[2], float_on, depth_nonstrict, core_nonstrict, no_canonical, lo, ls,
-                          /*anchor_tests=*/false);  // W_4 et secteurs deja appliques ci-dessus
+                          AnchorPretests::kAlreadyApplied);  // W_4 et secteurs deja appliques ci-dessus
         ++bs->anchors_host;
         ++bs->anchors_oversized;
         bs->seeds_host += ls->seeds[1] - seeds_before_h;

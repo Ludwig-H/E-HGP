@@ -31,6 +31,16 @@
 # Porte transactionnelle a faux probe : gcp-migration/selftest_campagne_v5.sh.
 set -euo pipefail
 
+# EXECUTION DEPUIS UNE COPIE : bash lit un script paresseusement ; une edition
+# du fichier pendant une session longue corrompt sa suite (session 7 du 27 aout
+# 2026 : rapatriement perdu). La copie est prise AVANT toute action GCP.
+if [ -z "${MHGP5_SESSION_SELF_COPY:-}" ]; then
+  _self_copy="$(mktemp /tmp/ehgp-v5session-copy.XXXXXXXX.sh)"
+  cp "$0" "${_self_copy}"
+  MHGP5_SESSION_SELF_COPY="${_self_copy}" exec bash "${_self_copy}" "$@"
+fi
+echo "session executee depuis la copie ${MHGP5_SESSION_SELF_COPY} (source : $0)"
+
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "${REPO_ROOT}"
 

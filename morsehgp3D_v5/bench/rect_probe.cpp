@@ -124,9 +124,13 @@ inline void sector_witness_min(const CloudIndex& ix, const std::vector<CoverPoin
 #ifndef MHGP5_PROBE_PIN
 #define MHGP5_PROBE_PIN "inconnu"
 #endif
+#ifndef MHGP5_PROBE_DIRTY
+#define MHGP5_PROBE_DIRTY "inconnu"
+#endif
 
 int main(int argc, char** argv) {
-  std::printf("rect_probe pin_execution=%s (git rev-parse HEAD au moment de la compilation ; worktree : voir le recu)\n", MHGP5_PROBE_PIN);
+  std::printf("rect_probe pin_configure=%s worktree_src_modifie=%s (HEAD et etat de src/ lus par CMake a la CONFIGURATION ; reconfigurer apres tout commit)\n",
+              MHGP5_PROBE_PIN, MHGP5_PROBE_DIRTY);
   CloudFamily family = CloudFamily::kUniform;
   int n = 2000, coord = 0, lane = 3;
   for (int i = 1; i < argc; ++i) {
@@ -153,7 +157,7 @@ int main(int argc, char** argv) {
   Q rect_points, rect_handles, rect_ab, rect_anchors_alive, rect_cover_sum, rect_seeds, rect_surv, anchor_cover, anchor_seeds;
   u64 anchors_total = 0, anchors_hist = 0, anchors_w4 = 0, anchors_alive_total = 0, seeds_total = 0, surv_total = 0;
   SectorKill sk;
-  u64 t_prod_ns = 0, t_sect_ns = 0, t_prod_killed_ns = 0;
+  u64 t_prod_ns = 0, t_sect_ns = 0, t_prodtest_ns = 0;
   const bool float_on = float_filter_runtime_enabled();
   for (const AliveRect& ar : alive) {
     generate_detail::corner_histograms(ix, L, ar.r, &sc.ha, &sc.hb);
@@ -193,8 +197,8 @@ int main(int argc, char** argv) {
         const auto tp0 = std::chrono::steady_clock::now();
         // CONTREFACTUEL : corps de production SANS les tests d'ancre (anchor_tests = false), sinon la mesure
         // de « seeds evites » et de « faux positifs » serait circulaire (la production applique deja les tests).
-        if (lane == 3) generate_detail::scan_anchor_q3(ix, sc, ua, ub, pa, pb, D2, h_of[1], float_on, false, &lo, &ls, false);
-        else generate_detail::process_anchor_q4(ix, sc, ua, ub, pa, pb, D2, h_of[2], float_on, false, false, false, &lo, &ls, false);
+        if (lane == 3) generate_detail::scan_anchor_q3(ix, sc, ua, ub, pa, pb, D2, h_of[1], float_on, false, &lo, &ls, generate_detail::AnchorPretests::kCounterfactual);
+        else generate_detail::process_anchor_q4(ix, sc, ua, ub, pa, pb, D2, h_of[2], float_on, false, false, false, &lo, &ls, generate_detail::AnchorPretests::kCounterfactual);
         t_prod_ns += (u64)std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now() - tp0).count();
         const u64 sd = (lane == 3 ? ls.seeds[0] : ls.seeds[1]) - s0;
         r_seeds += sd; r_surv += lo.size();
@@ -202,7 +206,8 @@ int main(int argc, char** argv) {
         // Test par secteurs (mesure) : une ancre tuee par secteurs ne doit JAMAIS avoir de survivant (sinon le test est faux).
         u64 m4 = 0, m8 = 0;
         const auto ts0 = std::chrono::steady_clock::now();
-        sector_witness_min(ix, sc.cover, ua, ub, pa, pb, D2, lane, &m4, &m8);
+        sector_witness_min(ix, sc.cover, ua, ub, pa, pb, D2, lane, &m4, &m8);  // variante de sonde (K=4 et K=8, losange/parallelogramme)
+        const auto ts1 = std::chrono::steady_clock::now();
         // Test de PRODUCTION (W_q exact cumule avec les secteurs de sector_kill.hpp) : verdict et seeds evites.
         {
           const int k = anchor_kill_cumulated(sc.cover, ix.upos, ua, ub, pa, pb, D2, lane == 3 ? Lane::kQ3 : Lane::kQ4,
@@ -210,8 +215,9 @@ int main(int argc, char** argv) {
           if (k != 0) { ++sk.killed_prod; sk.seeds_avoided_prod += sd; if (!lo.empty()) ++sk.wrong; }
           if (k == 1) ++sk.killed_w;
         }
-        t_sect_ns += (u64)std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now() - ts0).count();
-        if (m4 >= h_of[li]) t_prod_killed_ns += (u64)std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now() - tp0).count() - (u64)std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now() - ts0).count() * 0;
+        const auto ts2 = std::chrono::steady_clock::now();
+        t_sect_ns += (u64)std::chrono::duration_cast<std::chrono::nanoseconds>(ts1 - ts0).count();
+        t_prodtest_ns += (u64)std::chrono::duration_cast<std::chrono::nanoseconds>(ts2 - ts1).count();
         const u64 h = h_of[li];
         if (m4 >= h) { ++sk.killed4; sk.seeds_avoided4 += sd; if (!lo.empty()) ++sk.wrong; }
         if (m8 >= h) { ++sk.killed8; sk.seeds_avoided8 += sd; if (!lo.empty()) ++sk.wrong; }
@@ -246,9 +252,13 @@ int main(int argc, char** argv) {
               (unsigned long long)sk.killed_prod, anchors_alive_total ? 100.0 * (double)sk.killed_prod / (double)anchors_alive_total : 0.0,
               (unsigned long long)sk.killed_w, (unsigned long long)sk.seeds_avoided_prod,
               seeds_total ? 100.0 * (double)sk.seeds_avoided_prod / (double)seeds_total : 0.0);
-  std::printf("temps : corps de production par ancre (total) = %.1f ms ; test par secteurs (K=4 et 8 ensemble) = %.1f ms\n",
-              (double)t_prod_ns / 1e6, (double)t_sect_ns / 1e6);
-  (void)t_prod_killed_ns;
+  std::printf("temps (ratios dans ce run, 1 fil, machine partagee — jamais un temps citable) : corps de production contrefactuel = %.1f ms ; "
+              "variante de sonde K=4+K=8 = %.1f ms ; test de production (W_q + secteurs) = %.1f ms\n",
+              (double)t_prod_ns / 1e6, (double)t_sect_ns / 1e6, (double)t_prodtest_ns / 1e6);
+  if (sk.wrong) {
+    std::printf("FAUX POSITIF : une ancre tuee avait un survivant — theoreme contredit, code 1\n");
+    return 1;
+  }
   std::printf("ratio sum_covers_ancres / points_rectangles = %.2f ; ancres vivantes par rectangle = %.2f ; seeds par survivant = %.1f\n",
               rect_points.sum() ? (double)rect_cover_sum.sum() / (double)rect_points.sum() : 0.0,
               alive.empty() ? 0.0 : (double)anchors_alive_total / (double)alive.size(),

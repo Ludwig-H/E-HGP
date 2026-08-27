@@ -1,7 +1,9 @@
 // MorseHGP3D v5 — FIXTURE du test d'ancre par secteurs (src/lanes/sector_kill.hpp).
 // Configuration gravee : a = (0,0,0), b = (50,0,0) (D = 50, m = (25,0,0)) ;
-// 25 sites EXACTEMENT sur la sphere diametrale (|2z-(a+b)|² = D²), tous dans
-// le demi-espace z <= 0 ; un seed x = (25,0,30) (aigu, ab arete la plus
+// 37 sites EXACTEMENT sur la sphere diametrale (|2z-(a+b)|² = D²) — 25 dans
+// le demi-espace z < 0 ou sur l'equateur, plus 12 sur le cercle z = 0 — tous
+// a z <= 0 ; cette fixture exerce la FRONTIERE DIAMETRALE (|2w|² = D², sommet
+// 0) ; la frontiere des demi-plans seule est F6 de anchor_kill_fixture ; un seed x = (25,0,30) (aigu, ab arete la plus
 // longue) dont la boule circonscrite a son centre (25,0,55/12) : les sites de
 // la sphere diametrale y sont strictement interieurs ssi z > 0 — aucun ici —
 // donc x SURVIT et la production emet la boule {a,b,x}. Le test strict ne

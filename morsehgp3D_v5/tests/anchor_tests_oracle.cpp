@@ -48,15 +48,15 @@ void oracle_cloud(const CloudIndex& ix) {
         std::vector<BallCandidate> on, off;
         GenerateStats son, soff;
         if (lane == 3) {
-          generate_detail::scan_anchor_q3(ix, sc, ua, ub, pa, pb, D2, h3, float_on, false, &on, &son, true);
+          generate_detail::scan_anchor_q3(ix, sc, ua, ub, pa, pb, D2, h3, float_on, false, &on, &son, generate_detail::AnchorPretests::kApply);
           sc.affine_filled = false;
-          generate_detail::scan_anchor_q3(ix, sc, ua, ub, pa, pb, D2, h3, float_on, false, &off, &soff, false);
+          generate_detail::scan_anchor_q3(ix, sc, ua, ub, pa, pb, D2, h3, float_on, false, &off, &soff, generate_detail::AnchorPretests::kCounterfactual);
           killed_w3 += son.anchors_killed_w3;
           killed_s3 += son.anchors_killed_sectors[1];
         } else {
-          generate_detail::process_anchor_q4(ix, sc, ua, ub, pa, pb, D2, h4, float_on, false, false, false, &on, &son, true);
+          generate_detail::process_anchor_q4(ix, sc, ua, ub, pa, pb, D2, h4, float_on, false, false, false, &on, &son, generate_detail::AnchorPretests::kApply);
           sc.affine_filled = false;
-          generate_detail::process_anchor_q4(ix, sc, ua, ub, pa, pb, D2, h4, float_on, false, false, false, &off, &soff, false);
+          generate_detail::process_anchor_q4(ix, sc, ua, ub, pa, pb, D2, h4, float_on, false, false, false, &off, &soff, generate_detail::AnchorPretests::kCounterfactual);
           killed_s4 += son.anchors_killed_sectors[2];
           jneg += soff.invariant_jneg + son.invariant_jneg;
         }

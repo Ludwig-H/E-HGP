@@ -309,7 +309,13 @@ mhgp5_gate(mhgp5_parallel_exception 0 mhgp5_parallel_exception_gate "")
 # Sonde de mesure (jamais un claim) pour la lane par rectangle : tailles aplaties par rectangle, quantiles.
 mhgp5_executable(mhgp5_rect_probe bench/rect_probe.cpp)
 execute_process(COMMAND git rev-parse HEAD WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} OUTPUT_VARIABLE _mhgp5_probe_pin OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_QUIET)
-target_compile_definitions(mhgp5_rect_probe PRIVATE MHGP5_PROBE_PIN="${_mhgp5_probe_pin}")
+execute_process(COMMAND git status --porcelain -- src bench tests CMakeLists.txt WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} OUTPUT_VARIABLE _mhgp5_probe_dirty OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_QUIET)
+if(_mhgp5_probe_dirty STREQUAL "")
+  set(_mhgp5_probe_dirty "non")
+else()
+  set(_mhgp5_probe_dirty "OUI")
+endif()
+target_compile_definitions(mhgp5_rect_probe PRIVATE MHGP5_PROBE_PIN="${_mhgp5_probe_pin}" MHGP5_PROBE_DIRTY="${_mhgp5_probe_dirty}")
 
 # Test d'ancre par secteurs : un mutant non strict cree des faux positifs -> divergence des digests v4 (code 4).
 # Le mutant non strict est INVISIBLE en position generale (aucune egalite) : la fixture gravee
@@ -322,6 +328,7 @@ mhgp5_gate(mhgp5_anchor_tests_oracle 0 mhgp5_anchor_tests_oracle "" LABELS oracl
 mhgp5_executable(mhgp5_anchor_kill_fixture tests/anchor_kill_fixture.cpp)
 mhgp5_gate(mhgp5_anchor_kill_fixture 0 mhgp5_anchor_kill_fixture "")
 mhgp5_gate(mhgp5_anchor_kill_mutant_h1 4 mhgp5_anchor_kill_fixture "--inject=anchor-kill-h-minus-one")
+mhgp5_gate(mhgp5_anchor_kill_mutant_nonstrict 4 mhgp5_anchor_kill_fixture "--inject=sector-kill-nonstrict")
 
 # Contrat structurel du fold (P0 audit 9762daaf) : rejets permanents et limites positives.
 mhgp5_executable(mhgp5_fold_contract_gate tests/fold_contract_gate.cpp)

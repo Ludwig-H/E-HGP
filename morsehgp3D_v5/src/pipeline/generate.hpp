@@ -249,14 +249,17 @@ struct AffineSeed {
 // repli exact i128), emission. Partage par generate_candidates et par les
 // lanes par lots (routage hote : src/gpu/q3_lane_batched.hpp) — une seule
 // definition de la lane de production.
-// `anchor_tests` : appliquer les tests d'ancre (W_3 exact puis secteurs) — false
-// quand l'appelant les a DEJA appliques sur ce cover (route hote des lanes par
-// lots) ou pour mesurer le contrefactuel (sonde) ; jamais false en production.
+// Jeton TYPE des pretests d'ancre (W_q exact puis secteurs) : kApply (defaut,
+// production) ; kAlreadyApplied — l'appelant les a DEJA appliques sur ce cover
+// (route hote / ancre trop grande des lanes par lots) ; kCounterfactual — mesure
+// seulement (sondes, oracle ON/OFF), jamais en production.
+enum class AnchorPretests : u8 { kApply, kAlreadyApplied, kCounterfactual };
+
 inline void scan_anchor_q3(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i32 ub, const P3& pa, const P3& pb, i64 D2,
                            u64 h3, bool float_on, bool genfilter_nonstrict, std::vector<BallCandidate>* lo, GenerateStats* ls,
-                           bool anchor_tests = true) {
+                           AnchorPretests pretests = AnchorPretests::kApply) {
   // Tests d'ancre cumules (sector_kill.hpp) : W_3 exact puis secteurs — suffisants, l'objet est inchange.
-  if (anchor_tests) {
+  if (pretests == AnchorPretests::kApply) {
     const int k = anchor_kill_cumulated(sc.cover, ix.upos, ua, ub, pa, pb, D2, Lane::kQ3, 12, h3);
     if (k == 1) { ++ls->anchors_killed_w3; return; }
     if (k == 2) { ++ls->anchors_killed_sectors[1]; return; }
@@ -307,9 +310,10 @@ inline void scan_anchor_q3(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i32 
 // generate_candidates et par les lanes par lots (routage hote).
 inline void process_anchor_q4(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i32 ub, const P3& pa, const P3& pb, i64 D2,
                               u64 h4, bool float_on, bool genfilter_nonstrict, bool seed_core_nonstrict, bool no_canonical,
-                              std::vector<BallCandidate>* lo, GenerateStats* ls, bool anchor_tests = true) {
+                              std::vector<BallCandidate>* lo, GenerateStats* ls,
+                              AnchorPretests pretests = AnchorPretests::kApply) {
   // Compte W_4 exact par ancre : n4 >= h_4 tue l'ancre entiere ; puis secteurs.
-  if (anchor_tests) {
+  if (pretests == AnchorPretests::kApply) {
     u64 n4 = 0;
     for (const CoverPoint& cz : sc.cover) {
       if (cz.u == ua || cz.u == ub) continue;
