@@ -3,8 +3,9 @@
 - **Date :** 27 août 2026
 - **Auditeur :** Codex
 - **Pin fonctionnel audité :** `94464cfb3ba23d8c65d780d981808f8a8e50ffa5`
+- **Tip produit observé hors verdict :** `10c46c87bbda13a3fda697c9dedb94fead273faa` (factorisation et routage hôte poussés pendant le rejeu ; qualification interrompue pour sauvegarde)
 - **Reçu G4 le plus récent :** [`campagne_g4_v5_20260827_lane_q4_device`](../receipts/campagne_g4_v5_20260827_lane_q4_device/RECU.txt), source `2e75cb42c36c72ed90f931e0dbf49980e669d1d1`
-- **Worktree observé hors verdict :** refactorisation de `src/pipeline/generate.hpp` et des deux lanes par lots ; le probe racine `.codex_fold_contract_probe.cpp` appartient à un autre auditeur
+- **Worktree observé hors verdict :** le probe racine `.codex_fold_contract_probe.cpp` appartient à un autre auditeur
 - **Cadre :** `phase=exploration_v5_hors_registre`, `backend=cpu_reference`, `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`
 - **GCP :** non utilisé par l'auditeur ; la cible Spot de Claude est certifiée `TERMINATED` dans le reçu
 
@@ -66,9 +67,10 @@ le profil déclaré. Pour des coordonnées u16, les composantes affines vérifie
 `|u| < 2^17` et `|q| < 2^36` ; leur conversion en binary64 est donc exacte et
 la suite des FMA reçoit les mêmes bits. Le stockage par site passe de 64 à
 32 octets en Q3 et de 92 à 60 octets en Q4. Cela réduit la résidence et les
-transferts, mais pas le trafic i64 du scan par paire ; quatre conversions sont
-désormais répétées pour chaque seed/site. Ne revendiquer aucun gain de temps
-avant mesure device au même pin.
+transferts H2D, mais ne réduit pas nécessairement les 32 octets lus par paire
+sur le hot path : quatre lectures `double` deviennent quatre lectures i64 puis
+quatre conversions. Ne revendiquer aucun gain de temps avant mesure device au
+même pin.
 
 `q3_affine_gate` exerce déjà une emprise 50 000 et un témoin
 `u=131071, q=2^35+7`, mais les portes shaped/lots ne gravent pas directement
@@ -226,6 +228,8 @@ worktree partagé. Résultats exacts :
 cmake -S <archive-94464cfb> -B <build> -DCMAKE_BUILD_TYPE=Release : code 0
 cmake --build <build> --parallel 4 : code 0
 ctest --test-dir <build> --output-on-failure --parallel 4 -L gate : 156/156, 270.60 s
+ctest ciblé shaped/batch/lanes, exécution séquentielle : 36/36, 338.96 s
+ASan+UBSan ciblé shaped/batch/caps sites-paires : 10/10, 342.31 s
 bash gcp-migration/selftest_campagne_v5.sh : violations=0, PROTOCOLE CONFORME
 python tools/check_implementation_status.py : 20 phases validées
 ```
