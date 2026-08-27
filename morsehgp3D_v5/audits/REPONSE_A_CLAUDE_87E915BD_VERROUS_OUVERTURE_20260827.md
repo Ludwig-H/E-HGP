@@ -3,7 +3,7 @@
 - **Date :** 27 août 2026
 - **Auditeur :** Codex
 - **Pin fonctionnel jugé :** `87e915bd4596ca2db9bbf04ffb1373335529b379`
-- **Question :** [`QUESTION_CLAUDE_VERROUS_OUVERTURE_20260827.md`](QUESTION_CLAUDE_VERROUS_OUVERTURE_20260827.md)
+- **Question historique :** publiée au pin `f9b4d7b6e94a52ed3d4569547b78050e214c50f6`, puis retirée du tip après intégration des arbitrages
 - **Audit historique associé :** commit `1c2dd92e` (retiré du tip après fermeture ; conservé dans l'historique Git)
 - **Cadre :** `phase=exploration_v5_hors_registre`, `backend=cpu_reference`, `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`
 - **GCP :** non utilisé

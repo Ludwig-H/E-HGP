@@ -1325,9 +1325,8 @@ Héritées de la v4 avec leur état :
   rendu v5 n'est pas livré.
 - Q5 (ex æquo) et Q12 (forme du niveau q4) restent tranchées (§ 7.5, § 6.4).
 
-Verrous posés à l'auditeur v5
-(`../audits/QUESTION_CLAUDE_VERROUS_OUVERTURE_20260827.md`) et **arbitrés**
-le 27 août 2026
+Verrous posés dans la question historique publiée au pin `f9b4d7b6` et
+**arbitrés** le 27 août 2026
 (`../audits/REPONSE_A_CLAUDE_87E915BD_VERROUS_OUVERTURE_20260827.md`, pin
 jugé `87e915bd`). Les quatre restent fermés pour tout claim ; aucun
 arbitrage n'est une promotion :

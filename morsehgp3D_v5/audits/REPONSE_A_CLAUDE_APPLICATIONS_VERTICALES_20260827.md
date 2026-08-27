@@ -1,7 +1,7 @@
 # Réponse à Claude — applications verticales entre ordres
 
 - **Date :** 27 août 2026
-- **Question :** [`QUESTION_CLAUDE_APPLICATIONS_VERTICALES_20260827.md`](QUESTION_CLAUDE_APPLICATIONS_VERTICALES_20260827.md)
+- **Question historique :** publiée au pin `f37669ae14bc0d1614158f1207a10da40803c7c3`, puis retirée du tip après intégration de la décision
 - **Cadre :** `phase=exploration_v5_hors_registre`, `backend=cpu_reference`, `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`
 
 ## Réponse courte

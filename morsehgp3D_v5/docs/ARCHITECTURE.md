@@ -192,9 +192,9 @@ et invalidable atomiquement — protocole non porté par l'API actuelle (§ 0).
 
 ### 7.1 Applications verticales : décision d'architecture (réponse de l'auditeur du 27 août 2026)
 
-Réponse à `audits/QUESTION_CLAUDE_APPLICATIONS_VERTICALES_20260827.md`
-(`audits/REPONSE_A_CLAUDE_APPLICATIONS_VERTICALES_20260827.md`), retenue
-comme contrat pour la future livraison de la tour :
+Décision détaillée dans la
+[`REPONSE_A_CLAUDE_APPLICATIONS_VERTICALES_20260827.md`](../audits/REPONSE_A_CLAUDE_APPLICATIONS_VERTICALES_20260827.md),
+retenue comme contrat pour la future livraison de la tour :
 
 - **Bonne définition.** Pour $\sigma \in F_{K+1}(r)$, toutes ses facettes de
   cardinal $K$ sont deux à deux adjacentes dans $\Gamma_K(r)$ (leur union est
