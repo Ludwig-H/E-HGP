@@ -58,7 +58,7 @@ struct RunResult {
          t_fold_ms = 0, t_count_ms = 0, t_digest_ms = 0;
   double t_fold_sort_ms = 0, t_fold_intern_ms = 0, t_fold_merge_ms = 0, t_fold_reduce_ms = 0;
   double t_total_ms = 0;  // temps MUR de run_pipeline
-  u64 fold_workers = 0;
+  u64 fold_workers = 0, rle_workers = 0;
 };
 
 namespace run_detail {
@@ -131,7 +131,7 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
   rr.t_gen_ms = ms(t_g);
   const auto t_r = std::chrono::steady_clock::now();
   rr.emitted = cands.size();
-  rle_candidates(&cands);
+  rr.rle_workers = rle_candidates(&cands, opt.threads);
   rr.t_rle_ms = ms(t_r);
   rr.expand.unique_balls = cands.size();
 
@@ -303,11 +303,11 @@ inline void print_run(std::FILE* out, const char* family, int n, int coord, long
                (unsigned long long)gs.anchors_killed_w4, (unsigned long long)gs.seeds_killed_core,
                (unsigned long long)gs.float_cert_neg, (unsigned long long)gs.float_cert_pos, (unsigned long long)gs.float_fallback,
                (unsigned long long)gs.jung_cert_kill, (unsigned long long)gs.jung_cert_skip, (unsigned long long)gs.jung_fallback);
-  std::fprintf(out, "ouvriers wspd=%llu/%llu/%llu rects=%llu/%llu/%llu prefiltre=%llu census=%llu expansion=%llu fold=%llu\n",
+  std::fprintf(out, "ouvriers wspd=%llu/%llu/%llu rects=%llu/%llu/%llu rle=%llu prefiltre=%llu census=%llu expansion=%llu fold=%llu\n",
                (unsigned long long)gs.workers_wspd[0], (unsigned long long)gs.workers_wspd[1], (unsigned long long)gs.workers_wspd[2],
                (unsigned long long)gs.workers_rects[0], (unsigned long long)gs.workers_rects[1], (unsigned long long)gs.workers_rects[2],
-               (unsigned long long)es.workers_prefilter, (unsigned long long)es.workers_census, (unsigned long long)es.workers_expand,
-               (unsigned long long)rr.fold_workers);
+               (unsigned long long)rr.rle_workers, (unsigned long long)es.workers_prefilter, (unsigned long long)es.workers_census,
+               (unsigned long long)es.workers_expand, (unsigned long long)rr.fold_workers);
   std::fprintf(out,
                "temps_ms index=%.1f gen=%.1f (wspd %.1f/%.1f/%.1f rects %.1f/%.1f/%.1f) rle=%.1f prefiltre=%.1f "
                "census=%.1f comptage=%.1f expansion=%.1f fold=%.1f (tri %.1f intern %.1f fusion %.1f reduce %.1f) digest=%.1f\n",
