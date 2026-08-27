@@ -292,6 +292,13 @@ mhgp5_gate(mhgp5_q4_core_shaped_clusters 0 mhgp5_q4_core_shaped_gate "--family=e
 mhgp5_gate(mhgp5_q4_core_shaped_cocirc 0 mhgp5_q4_core_shaped_gate "--family=uniform --n=300 --coord=40 --min-seeds=500 --min-jung-fallback=20 --min-float-fallback=100")
 mhgp5_gate(mhgp5_q4_core_shaped_mutant_skip 4 mhgp5_q4_core_shaped_gate "--family=uniform --n=300 --coord=40 --min-seeds=500 --inject=q4-shaped-jung-skip-kills")
 
+# Completions q4 en forme de kernel (livraison 4c) : etage atteint et forme de Cramer identiques.
+mhgp5_executable(mhgp5_q4_completion_shaped_gate tests/q4_completion_shaped_gate.cpp)
+mhgp5_gate(mhgp5_q4_completion_shaped_uniform 0 mhgp5_q4_completion_shaped_gate "--family=uniform --n=400")
+mhgp5_gate(mhgp5_q4_completion_shaped_clusters 0 mhgp5_q4_completion_shaped_gate "--family=eight_clusters --n=400")
+mhgp5_gate(mhgp5_q4_completion_shaped_cocirc 0 mhgp5_q4_completion_shaped_gate "--family=uniform --n=300 --coord=40 --min-emit=200 --min-deep=20 --min-center=20")
+mhgp5_gate(mhgp5_q4_completion_shaped_mutant_once 4 mhgp5_q4_completion_shaped_gate "--family=uniform --n=400 --inject=q4-shaped-once-flip")
+
 # Lane q3 par lots (etage hote de la lane device) : egalite vecteur a vecteur avec la production.
 # Contrat structurel du fold (P0 audit 9762daaf) : rejets permanents et limites positives.
 mhgp5_executable(mhgp5_fold_contract_gate tests/fold_contract_gate.cpp)
