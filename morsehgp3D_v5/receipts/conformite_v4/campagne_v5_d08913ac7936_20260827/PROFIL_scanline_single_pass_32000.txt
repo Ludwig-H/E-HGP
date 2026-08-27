@@ -1,0 +1,7 @@
+# Profil d'etages — scanline_single_pass n=32000, mhgp5 --threads=8, HEAD 7990ec5a (fold parallele), machine partagee 8 vCPU
+# Mesure unique, aucun claim. La generation domine (154,4 s sur 165,7 s de mur).
+generation rect_alive=476009/687997/703699 ancres=983355/4526213/6951708 candidats=834351/1453745/146222 tues_profondeur=0/788738522/123467396 ancres_w4=2437548 seeds_core_tues=198140203 float_cert=15456369275/6137874758 repli=8384588 jung=1616946388/6733044132/843
+ouvriers wspd=8/8/8 rects=8/8/8 rle=8 prefiltre=8 census=8 expansion=8 fold=8
+temps_ms index=73.0 gen=154420.1 (wspd 3493.1/8324.6/2336.1 rects 362.4/62711.8/77191.9) rle=426.3 prefiltre=2878.1 census=2635.4 comptage=71.2 expansion=1049.2 fold=7591.0 (tri 521.6 intern 2590.4 fusion 723.2 reduce 4469.9)
+temps_mur_ms=165736.8
+rss_max_kb=1911952

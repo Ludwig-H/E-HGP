@@ -140,10 +140,59 @@ callbacks=… vertical_maps=…`).
 | `payload_kind` | forêts horizontales par ordre K = 1..K_max — **pas la tour** |
 | par K | `batch_levels` (niveaux exacts des lots), `deltas` (lot, niveau, parents, nées, représentant de sortie), partition finale dense (`facet_keys` strictement croissantes, `final_canon_fid` = plus petit fid de la composante) |
 | rétention des facettes | toutes (`F_K^render`), jamais un préfixe |
-| applications verticales | **aucune** (non livrées ; un objet « tour » sera un autre `payload_kind` versionné) |
+| applications verticales | **aucune** (non livrées ; un objet « tour » sera un autre `payload_kind` versionné — décision d'architecture ci-dessous) |
 | autorité | `RunResult::status` terminal ; les callbacks `on_forest` sont provisoires jusqu'à ce statut |
 | signature | `mhgp4-digest-v1` (balls, forest par K, all) — porte de conformité v4, pas une preuve d'exactitude |
 
 Une coupe ciblée ou une partition à un rayon donné sera un **autre** payload
 versionné (nom, objet reconstructible, autorité, politique de coupe) ; elle
 ne prouve pas que les forêts ont été matérialisées.
+
+### 7.1 Applications verticales : décision d'architecture (réponse de l'auditeur du 27 août 2026)
+
+Réponse à `audits/QUESTION_CLAUDE_APPLICATIONS_VERTICALES_20260827.md`
+(`audits/REPONSE_A_CLAUDE_APPLICATIONS_VERTICALES_20260827.md`), retenue
+comme contrat pour la future livraison de la tour :
+
+- **Bonne définition.** Pour $\sigma \in F_{K+1}(r)$, toutes ses facettes de
+  cardinal $K$ sont deux à deux adjacentes dans $\Gamma_K(r)$ (leur union est
+  $\sigma$) ; deux cofaces adjacents dans $\Gamma_{K+1}(r)$ ont toutes leurs
+  facettes dans une même composante inférieure (clôture par faces). D'où
+  $v_K^r : 	heta_{K+1}(r) 	o 	heta_K(r)$, bien définie sur le graphe
+  complet des intersections de témoins. Si le produit ne parcourt que les
+  cofaces élémentaires, on invoque séparément l'égalité des composantes
+  $H_0$ ; cela n'autorise pas à identifier les adjacences.
+- **État fermé, jamais « juste avant ».** À $r = ho(\sigma)$, les facettes
+  de $\sigma$ peuvent encore être réparties entre plusieurs composantes de
+  $\Gamma_K$ dans l'état strictement antérieur ; avec des niveaux ex æquo,
+  aucun ordre interne au plateau n'est canonique. La valeur verticale est
+  l'unique composante inférieure **après application de tout le macro-lot de
+  niveau $r$** : `cut_side=closed`. Un mutant `vertical-prebatch` (composante
+  pré-lot) doit mourir sur la fixture « naissance reliant plusieurs
+  composantes inférieures ».
+- **Dérivation sans complexe global.** Conserver par $K$ toutes les clés de
+  $F_K^{render}$ avec leur niveau de naissance exact ; savoir rejouer la
+  partition horizontale après chaque macro-lot fermé ; dériver de chaque clé
+  de $F_{K+1}^{render}$ ses $K+1$ facettes par suppression d'un sommet (jamais
+  par projection sur les points) ; associer la composante supérieure post-lot
+  à l'unique composante inférieure post-lot qui contient ces facettes ;
+  versionner `payload_kind`, `cut_level`, `cut_side=closed`. Indexation : un
+  événement de la forêt d'ordre $K+1$ est un coface de cardinal $K+2$ ; le
+  sommet de $\Gamma_{K+1}$ est la `FacetKey` de cardinal $K+1$, et c'est elle
+  qui porte l'incidence verticale.
+- **Oracle borné `vertical-oracle-v1`** ($n \leq 12$) : énumérer
+  indépendamment $F_K(r)$, les composantes complètes de $\Gamma_K(r)$ après
+  chaque niveau exact, toutes les valeurs $v_K^r$, puis les carrés de
+  naturalité entre niveaux consécutifs. Fixtures minimales : naissance reliant
+  plusieurs composantes pré-lot ; deux cofaces ex æquo ; réindexage des
+  points ; deux objets de mêmes sommets projetés et d'incidences différentes.
+- **Rendu § 9.1 indépendant de la tour**, mais pas du flux d'incidences :
+  $S_	au$ exige toutes les cofaces incidentes avec multiplicité et niveau
+  exact ; les seules clés distinctes et la partition finale ne le
+  reconstruisent pas. Un rendu **livré** demandera un payload de rendu
+  versionné (`facette -> (lot, multiplicité)`, niveau de naissance exact par
+  facette, autorité du statut terminal). Ordre de livraison retenu : rendu
+  par ordre d'abord, puis `vertical-oracle-v1` et dérivé CPU des payloads
+  horizontaux ; promotion en payload public seulement après les fixtures de
+  naturalité et la vérification de rétention des données de naissance et
+  d'incidence jusqu'au statut terminal.

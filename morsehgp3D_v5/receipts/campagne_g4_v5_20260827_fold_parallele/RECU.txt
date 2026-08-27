@@ -1,0 +1,43 @@
+# Session G4 v5 — campagne d echelle (conformite v4 puis contrat 50 000 points)
+date_utc=2026-08-27T15:05:33.769944Z
+source_commit=9762daaf092609a76ab976d9804f98ec03995084
+head_local=7990ec5a10379b2a2ba8f870af98816b2ce4b9da
+machine=g4-standard-48 SPOT europe-west4-ai1a, 48 fils
+protocole=gcp-migration/session_campagne_v5_scale_g4.sh (pin, gardes, arret certifie)
+
+source_payload_sha256=369621bae170db4d8bdac5aae9a842a821c9b83403f08eadebd21dec3417f26d
+protocol_manifest_sha256=a588fce216defb26d6d1e0073964f9b0399e606cfbe3108db1233fcfb4929ca6
+generation verrouillee : 2026-08-27T07:48:55.527-07:00
+remote_campaign_rc=0
+scp_rc=0
+campaign_status=partial_or_failed
+session_rc=65
+
+# run code duree_s peak_rss_kb
+conf_eight_clusters_n16000 0 42 5481944
+conf_eight_clusters_n32000 0 123 10862092
+conf_eight_clusters_n8000 0 13 2430608
+conf_scanline_single_pass_n16000 0 4 1011400
+conf_scanline_single_pass_n32000 0 15 1970436
+conf_scanline_single_pass_n8000 0 2 529152
+conf_terrain_n16000 0 4 1073224
+conf_terrain_n32000 0 11 2242628
+conf_terrain_n8000 0 2 543912
+conf_uniform_n16000 0 22 6279944
+conf_uniform_n32000 0 49 12911428
+conf_uniform_n8000 0 10 2996968
+contrat_eight_clusters_n50000 0 246 17529616
+contrat_scanline_single_pass_n50000 0 37 3089096
+contrat_terrain_n50000 0 22 3455676
+contrat_uniform_n50000 0 79 19959300
+gpu_witness 2 4 188160
+contrat_eight_clusters_n50000 digest_all=b65c2b510d5a5e09170086fc3429290f0b0e960c97d652a53c483e39037f2158
+contrat_scanline_single_pass_n50000 digest_all=7cc339c0f01987b6a0cff9045a8e5f8bec264baba4f8229027bb45e7e4ec8b26
+contrat_terrain_n50000 digest_all=700dbbc067bbebce48173d9cc1d1b79cf10274a0773ef4075abf014976e8bbb5
+contrat_uniform_n50000 digest_all=5fc1fdef4f439028b2f956dfcba22a5f9736a94e83d05e13e0eb362918cda2c0
+
+# arret certifie
+  état certifié       : TERMINATED
+[GARDE post-mutation] cible=devpod-gpu-exploration/europe-west4-ai1a/ehgp-blackwell-spot-ai1a état=TERMINATED machine=g4-standard-48 provisioning=SPOT action=STOP maxRunDuration=14400s.
+[OK] maxRunDuration=14400s recertifié sur la cible TERMINATED devpod-gpu-exploration/europe-west4-ai1a/ehgp-blackwell-spot-ai1a; aucune VM démarrée ou arrêtée.
+[OK] Cible ehgp-blackwell-spot-ai1a arrêtée et vérifiée (état GCE TERMINATED).
