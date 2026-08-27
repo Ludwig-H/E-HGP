@@ -306,6 +306,9 @@ mhgp5_executable(mhgp5_parallel_exception_gate tests/parallel_exception_gate.cpp
 mhgp5_gate(mhgp5_parallel_exception 0 mhgp5_parallel_exception_gate "")
 
 # Lane q3 par lots (etage hote de la lane device) : egalite vecteur a vecteur avec la production.
+# Sonde de mesure (jamais un claim) pour la lane par rectangle : tailles aplaties par rectangle, quantiles.
+mhgp5_executable(mhgp5_rect_probe bench/rect_probe.cpp)
+
 # Contrat structurel du fold (P0 audit 9762daaf) : rejets permanents et limites positives.
 mhgp5_executable(mhgp5_fold_contract_gate tests/fold_contract_gate.cpp)
 mhgp5_gate(mhgp5_fold_contract 0 mhgp5_fold_contract_gate "")

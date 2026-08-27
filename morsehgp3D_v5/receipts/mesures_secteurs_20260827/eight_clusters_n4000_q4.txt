@@ -1,0 +1,13 @@
+rect_probe famille=eight_clusters n=4000 lane=q4 rectangles=276555 ancres=1647615 tuees_hist=385540 tuees_w4=819542 vivantes=442533 seeds=35586214 survivants=509673
+rect_points(handles)   somme=111928888 p50=242 p90=908 p99=3802 max=4000
+rect_handles           somme=5077644 p50=11 p90=41 p99=175 max=185
+rect_|A|x|B|           somme=1647615 p50=1 p90=8 p99=104 max=960
+rect_ancres_vivantes   somme=442533 p50=1 p90=2 p99=12 max=161
+rect_sum_covers        somme=146288054 p50=61 p90=403 p99=8192 max=551492
+rect_seeds             somme=35586214 p50=16 p90=89 p99=1677 max=207339
+rect_survivants        somme=509673 p50=0 p90=6 p99=24 max=240
+ancre_cover            somme=146288054 p50=102 p90=701 p99=3322 max=3971
+ancre_seeds            somme=35586214 p50=24 p90=132 p99=1201 max=1829
+secteurs : K=4 tue 77702 ancres vivantes (17.6 %), seeds evites 22738230 (63.9 %) ; K=8 tue 79305 (17.9 %), seeds evites 22900640 (64.4 %) ; FAUX POSITIFS (ancre tuee avec survivant) = 0
+temps : corps de production par ancre (total) = 31377.3 ms ; test par secteurs (K=4 et 8 ensemble) = 961.4 ms
+ratio sum_covers_ancres / points_rectangles = 1.31 ; ancres vivantes par rectangle = 1.60 ; seeds par survivant = 69.8
