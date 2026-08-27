@@ -1,56 +1,41 @@
-# morsehgp3D_v5/audits — le dossier de l'auditeur
+# Audits de MorseHGP3D v5
 
-Ce dossier est le **seul** endroit où l'auditeur intervient. Il reprend le
-cycle documentaire des v3/v4 sans son inflation : moins de fichiers, datés,
-ancrés au hash court du commit jugé, et un état courant unique.
+Ce dossier est le canal de travail entre l'implémenteur et l'auditeur. Il reste
+volontairement court : un état courant mutable, les questions encore utiles et
+leurs réponses. Les incidents fermés et les mesures munies d'un reçu restent
+consultables dans l'historique Git ou dans `../receipts/` ; ils ne sont pas
+recopiés au tip.
 
-## État audité
+## Entrées actives
 
-- Verdict mutable : [`ETAT_COURANT.md`](ETAT_COURANT.md).
-- Audit bloquant du pin fonctionnel `87e915bd` :
-  [`AUDIT_BLOQUANT_87E915BD_SECURITE_CONFORMITE_PREUVES_20260827.md`](AUDIT_BLOQUANT_87E915BD_SECURITE_CONFORMITE_PREUVES_20260827.md).
-- Réponse aux verrous V1–V4 :
-  [`REPONSE_A_CLAUDE_87E915BD_VERROUS_OUVERTURE_20260827.md`](REPONSE_A_CLAUDE_87E915BD_VERROUS_OUVERTURE_20260827.md).
+- [`ETAT_COURANT.md`](ETAT_COURANT.md) : verdict courant et ordre de fermeture.
+- [`QUESTION_CLAUDE_APPLICATIONS_VERTICALES_20260827.md`](QUESTION_CLAUDE_APPLICATIONS_VERTICALES_20260827.md) et
+  [`REPONSE_A_CLAUDE_APPLICATIONS_VERTICALES_20260827.md`](REPONSE_A_CLAUDE_APPLICATIONS_VERTICALES_20260827.md) : définition de la tour.
+- [`QUESTION_CLAUDE_VERROUS_OUVERTURE_20260827.md`](QUESTION_CLAUDE_VERROUS_OUVERTURE_20260827.md) et
+  [`REPONSE_A_CLAUDE_87E915BD_VERROUS_OUVERTURE_20260827.md`](REPONSE_A_CLAUDE_87E915BD_VERROUS_OUVERTURE_20260827.md) : source des arbitrages V1–V4 désormais intégrés aux documents canoniques.
 
-## Rôles
+## Convention de fraîcheur
 
-- **L'auditeur** écrit ici : audits (`AUDIT_*`, `CONTRE_AUDIT_*`), arbitrages,
-  réponses (`REPONSE_*`), corrections. Il motive des corrections ; il ne
-  certifie rien — aucun audit ne promeut un statut public. Il pousse sur
-  `main`.
-- **Claude** (l'implémenteur) écrit ici : questions (`QUESTION_CLAUDE_*`),
-  notes (`NOTE_CLAUDE_*`), réponses aux audits (`REPONSE_CLAUDE_*`),
-  spécifications de solution (`NOTE_SOLUTION_*`). Chaque livraison a son reçu
-  **immuable** dans `../receipts/<chantier>_<date>/`, ancré au commit.
-- Tout fichier est daté (`_YYYYMMDD`) et, quand il juge du code, ancré au hash
-  court.
+`ETAT_COURANT.md` nomme le commit fonctionnel effectivement jugé et distingue
+les constats sur ce pin des observations sur un worktree sale. Le commit qui
+publie l'état peut naturellement être postérieur au pin jugé ; tout commit
+fonctionnel ultérieur rend le verdict périmé jusqu'à relecture. Un audit ne
+change jamais `public_status=not_claimed` et ne remplace ni un oracle ni un
+reçu reproductible.
 
-## Conventions
+Claude peut écrire ici une question ou une réponse. L'auditeur répond de façon
+actionnable, requalifie les corrections sur un pin propre et retire les échanges
+devenus inutiles après migration de leurs décisions vers `docs/` et de leurs
+preuves vers `receipts/`.
 
-- `ETAT_COURANT.md` : le verdict mutable unique — pas un fichier par jour. Il
-  nomme le pin fonctionnel complet effectivement jugé. Après livraison du
-  verdict, le dernier commit qui touche `ETAT_COURANT.md` doit être `HEAD` pour
-  qu'un claim, même borné, soit lisible ; tout commit fonctionnel ultérieur le
-  rend automatiquement périmé.
-- Un probe sur worktree sale est provisoire. Il conserve le SHA-256 du patch
-  suivi (`git diff --binary`) et un manifeste SHA-256 de chaque fichier non
-  suivi consommé. Il sépare toujours résultats du pin et résultats du
-  worktree. Un worktree sale ne soutient aucun claim.
-- `../docs/PISTES_FERMEES.md` est le chemin réservé au futur mémo append-only
-  des tentatives fermées ; il est absent du pin courant. Une piste fermée ne
-  se rouvre qu'avec un nouveau théorème + fixture, jamais sur un benchmark.
-- Toute contradiction mathématique devient une **fixture minimale
-  permanente** dans `../tests/` avant la poursuite du travail.
-- Un audit se **lit et s'exécute** (commandes reproduites, codes de sortie
-  comparés) avant toute réponse et avant toute dépense.
-- Équations : une seule ligne physique, accolades explicites, pas de
-  `\operatorname`, `\left\Vert` / `\left\lbrace`. Tant que
-  `tools/check_docs.py` n'inclut pas la v5, appeler directement sa fonction
-  `validate()` sur chaque Markdown de ce dossier.
+Les réponses auxquelles les documents canoniques renvoient restent de courts
+reçus de décision. Les longues notes d'incident, réponses de fermeture et
+mesures déjà reçues sont retirées du tip dès que `ETAT_COURANT.md` les a
+requalifiées ; leur historique Git demeure disponible.
 
-## Questions ouvertes au démarrage
-
-Les questions posées à l'auditeur vivent dans `QUESTION_CLAUDE_*`. Le chemin
-réservé aux questions mathématiques héritées de la v4 est
-`../docs/MATHEMATIQUES.md`, mais ce document est absent du pin courant et
-n'existe que comme proposition non suivie dans le worktree capturé.
+Les Markdown suivent les règles KaTeX du dépôt. `python tools/check_docs.py`
+contrôle les documents produit, reçus et écrits de Claude de la v5, mais exclut
+délibérément les mots de l'auditeur — dont `README.md`, `ETAT_COURANT.md` et
+`REPONSE_A_CLAUDE_*`. Ceux-ci doivent être passés explicitement à la fonction
+`validate()` du vérificateur ; aucun vert documentaire ne prouve la fraîcheur
+sémantique ni la conformité du code.

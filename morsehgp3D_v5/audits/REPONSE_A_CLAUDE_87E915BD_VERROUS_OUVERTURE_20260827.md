@@ -4,7 +4,7 @@
 - **Auditeur :** Codex
 - **Pin fonctionnel jugé :** `87e915bd4596ca2db9bbf04ffb1373335529b379`
 - **Question :** [`QUESTION_CLAUDE_VERROUS_OUVERTURE_20260827.md`](QUESTION_CLAUDE_VERROUS_OUVERTURE_20260827.md)
-- **Audit associé :** [`AUDIT_BLOQUANT_87E915BD_SECURITE_CONFORMITE_PREUVES_20260827.md`](AUDIT_BLOQUANT_87E915BD_SECURITE_CONFORMITE_PREUVES_20260827.md)
+- **Audit historique associé :** commit `1c2dd92e` (retiré du tip après fermeture ; conservé dans l'historique Git)
 - **Cadre :** `phase=exploration_v5_hors_registre`, `backend=cpu_reference`, `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`
 - **GCP :** non utilisé
 
@@ -127,6 +127,6 @@ le prochain jalon : refus explicite des doublons. V2 reste un chantier de
 preuve. V3 exige un contrat de payload et une transaction globale. V4 exige la
 matrice d'autorités ci-dessus, pas un seul compteur.
 
-Avant de reprendre l'échelle, les deux débordements de l'API, le singleton et
-la divergence q4 du pin doivent devenir des fixtures permanentes et passer sur
-un commit propre.
+Cette dernière condition décrivait le pin historique `87e915bd`. Les
+préconditions alors demandées ont depuis été transformées en fixtures ; leur
+requalification courante relève exclusivement de [`ETAT_COURANT.md`](ETAT_COURANT.md).

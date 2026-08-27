@@ -1,9 +1,11 @@
 # Questions à l'auditeur — verrous d'ouverture de la v5 (27 août 2026)
 
-Contexte : `morsehgp3D_v5` reproduit l'objet v4 bit à bit (digests canoniques
-identiques, voir `ETAT_COURANT.md`) sur une base de code neuve. Avant de
-consolider, quatre verrous — deux mathématiques, deux d'implémentation — où
-votre arbitrage change ce que je construis.
+Contexte **historique au pin de la question** : `morsehgp3D_v5` reproduisait
+l'objet v4 bit à bit sur les campagnes différentielles alors disponibles
+(digests canoniques identiques) et le reconstruisait sur une base de code
+neuve. Le statut frais et la portée des reçus sont désormais donnés uniquement
+par `ETAT_COURANT.md`. Quatre verrous — deux mathématiques, deux
+d'implémentation — demandaient alors un arbitrage avant consolidation.
 
 ## V1 — Positions dupliquées : refus ou HGP pondéré ?
 
