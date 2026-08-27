@@ -10,33 +10,55 @@ exécution conforme, mesure, pin du reçu) :
 | témoin device (DI128 + scan q3 warp) | `src/gpu/device_witness.cu` | oui | oui, 0 désaccord | — | `campagne_g4_v5_20260827_temoin_device` (`24b3f164`) |
 | lane q3 device | `src/gpu/q3_lane_device.cuh` | oui | oui, 1200 / 1200×4 fils / 8000×8 fils | temps kernel gravés, pas de banc apparié | idem |
 | lane q4 device | `src/gpu/q4_lane_device.cuh` | oui | oui, 1200 / 1200×4 fils / 8000×8 fils (157 M complétions, 0 désaccord) | temps kernel gravés | `campagne_g4_v5_20260827_lane_q4_device` (`2e75cb42`) |
-| pilote `mhgp5_cuda --gpu` (contrats 50 k) | `cli/mhgp5_cuda.cu` | oui | **quatre familles** + adaptatif `eight_clusters` : `digest_all` **identique** au contrat CPU (session `8f95df2e`, lots bornés) | GPU **plus lent partout** : `uniform` 89 s vs 78 s, `terrain` 44 vs 23, `scanline` 96 vs 38, `eight_clusters` **718 vs 246** (lane q3 : 527 s vs 94 s) ; adaptatif 256 : 713 s (les ancres y ont presque toutes ≥ 256 sites) | `campagne_g4_v5_20260827_adaptatif` (partielle : 24/25 runs, journal perdu — voir le reçu) |
+| pilote `mhgp5_cuda --gpu` (contrats 50 k) | `cli/mhgp5_cuda.cu` | oui | **quatre familles** + adaptatif `eight_clusters` : `digest_balls` et `digest_all` identiques au contrat CPU au pin `8f95df2e` (égalité bornée observée ; lots bornés en seeds/sites/paires à ce pin) | GPU **plus lent partout** : `uniform` 89 s vs 78 s, `terrain` 44 vs 23, `scanline` 96 vs 38, `eight_clusters` **718 vs 246** (lane q3 : 527 s vs 94 s) ; adaptatif 256 : 713 s (il envoie 70,7 % des ancres q3 et 31,6 % des ancres q4 au device, mais 99,1 % des seeds q3 et 91,3 % des seeds q4 — le seuil par taille de cover laisse presque tout le travail coûteux au device ; mesuré sur le layout `8f95df2e` à second lot hôte, pas sur la route hôte directe de `10c46c87`) | `campagne_g4_v5_20260827_adaptatif` (partielle : 24/25 runs, journal perdu — voir le reçu) |
 | mutant du témoin sur device | `--inject=witness-no-warp-correction` | oui | **tué** (code 4, run `gpu_mutant`) | — | idem |
 
 **Verdict de mesure (sessions `2e75cb42` et `8f95df2e`)** : la lane device
-par lots d'ancres est **exacte** (égalité de bout en bout à 50 000 points sur
-les quatre familles, mutant tué) et **plus lente que le CPU à 48 fils sur
-toutes les familles**. La cause n'est pas le kernel (111 s de kernel cumulés
+par lots d'ancres présente une **égalité bornée observée au pin `8f95df2e`**
+(`digest_balls` et `digest_all` identiques aux sorties CPU appariées sur les
+quatre familles à 50 000 points, mutant q3 tué sur device ; campagne
+partielle : 24/25 runs, journal perdu, validateur non exécuté — ce n'est pas
+« exacte en général ») et **plus lente que le CPU à 48 fils sur toutes les
+familles**. La cause n'est pas le kernel (111 s de kernel cumulés
 sur 48 exécuteurs pour `eight_clusters`, soit ~2,3 s par fil) mais la
 **matérialisation hôte** : 18,2 G seeds q3 (et 1,5 G seeds q4) à ~100 octets
 chacun, plus les covers de 19,7 M ancres à 32 octets par site, copiés et
 transférés — là où la lane CPU tue la plupart des seeds en quelques sites
-sans rien copier. Le routage par taille de cover ne sépare pas ce coût. Cette
-conception (lot = ancres matérialisées par l'hôte) est donc **fermée comme
-voie de gain** ; elle reste la preuve d'exactitude du chemin device et le
-banc de référence.
+sans rien copier. Le routage par taille de cover ne sépare pas ce coût. Ce qui est fermé comme
+voie de gain est précisément le **tout-device matérialisé au pin mesuré** ;
+l'adaptatif à route hôte directe (`10c46c87`, ancres hôte traitées par le
+corps de production sans matérialisation) n'a pas encore été mesuré sur G4.
+La lane par lots reste le banc de référence et la preuve d'égalité bornée du
+chemin device. `kernel_ms` est un cumul d'événements de 48 exécuteurs, pas un
+mur GPU : « matérialisation et orchestration probablement dominantes » tant
+que les murs préparation / H2D / kernel / D2H ne sont pas séparés.
 
-**Livraison 7 (conception)** : lane device **par rectangle** — l'hôte envoie
-une fois par rectangle vivant les *points du cover du rectangle* (positions,
-identifiants ; partagés par ses |A|×|B| ancres), et le device **énumère
-lui-même** les ancres (histogrammes de coin déjà connus), leur cover
-(lentille, `in_spindle`), les seeds aigus, les formes affines et les scans —
-tout cela est déjà écrit en fonctions `MHGP5_HD` (`is_acute_seed`,
-`q3_form_d`, `q4_*_d`, scans shaped) ; il ne rapatrie que les **survivants**
-(ancre, seed[, complétion]) dont l'hôte forme clé et niveau. Transfert :
-Σ covers de rectangles (≪ Σ covers d'ancres), aucun enregistrement par seed.
-Preuve sur CPU d'abord (forme shaped par rectangle égale à la production),
-puis kernel. Le fold et le reste du pipeline ne bougent pas.
+**Livraison 7 (conception, non mesurée)** : lane device **par rectangle**.
+Le candidat de cover issu de `rect_cover_handles` est un **sur-ensemble
+fail-open** de chaque cover d'ancre (antichaîne de handles de ≤ 32 positions),
+partagé par les |A|×|B| ancres du rectangle — mais le reçu `eight_clusters`
+ne montre qu'environ 4,7 ancres device par rectangle q3 et 1,6 en q4, donc le
+partage est faible et le claim « Σ covers de rectangles ≪ Σ covers d'ancres »
+n'est **pas mesuré**. Variante retenue à mesurer d'abord (auditeur) : un
+**tableau global O(n)** de positions et `PointId` résident sur le device,
+partagé entre exécuteurs (50 000 points = 1,6 Mo ; 10 M = 320 Mo), et par
+fenêtre de rectangles seulement les **plages de handles**, `|A|`, `|B|`, les
+histogrammes de coin et `need` ; le device énumère lui-même les ancres,
+reproduit le **filtre exact et l'ordre stable des 32 classes radiales** (les
+compteurs à sortie anticipée en dépendent ; le verdict mort/vivant non), les
+seeds aigus, les scans — fonctions `MHGP5_HD` déjà écrites — et ne rapatrie
+que les **survivants** (ancre, seed[, complétion]) dont l'hôte forme clé et
+niveau, plus les compteurs agrégés. Ni cover aplati conservé ni matrice
+rectangle × ancre × point ; précomptage / prefix-sum vérifiés, tuilage
+déterministe, retour des survivants borné ; conversions DI128 → binary64
+certifiées bit à bit aux frontières d'arrondi si `Gd`, `Nd`, `bound` sont
+formés sur device. Avant tout kernel : (1) mesurer somme et maximum des
+sites par rectangle, `|A|·|B|`, seeds, complétions, survivants aux tailles
+8 k à 50 k ; (2) établir sur CPU l'égalité **ensemble et ordre** de chaque
+cover reconstruit avec `cover_query`, puis l'égalité de la lane shaped par
+rectangle (post-RLE, verdicts, compteurs) ; (3) séparer les murs
+préparation / H2D / kernel / D2H. Le fold et le reste du pipeline ne bougent
+pas.
 
 Lecture de la session `2e75cb42` : le lotissement fait tomber les lancements
 q3 à 8000 de 645 636 à 542 (kernel 6,6 s → 24 ms) ; l'égalité de bout en bout

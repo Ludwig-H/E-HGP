@@ -30,7 +30,7 @@ class Q4DeviceExecutor {
   }
   Q4DeviceExecutor(const Q4DeviceExecutor&) = delete;
   Q4DeviceExecutor& operator=(const Q4DeviceExecutor&) = delete;
-  double kernel_ms_total = 0;
+  double kernel_ms_total = 0;  // mur des trois kernels et des transferts intermediaires du lot (evenements sur le flux)
   u64 launches = 0;  // kernels lances (q4 : jusqu'a trois par lot)
   u64 lots = 0;      // lots scannes
 
@@ -52,9 +52,8 @@ class Q4DeviceExecutor {
     up(d_seeds_, b->seeds.data(), nsd);
     up(d_anchors_, b->anchors.data(), na);
     const Q4SitesDev S{d_u0_, d_u1_, d_u2_, d_q_, d_px_, d_py_, d_pz_, d_pid_, d_lens_};
-    cudaEvent_t e0, e1;
-    cuda_check(cudaEventCreate(&e0), "event"); cuda_check(cudaEventCreate(&e1), "event");
-    cuda_check(cudaEventRecord(e0, stream_), "record");
+    CudaEvent e0, e1;
+    e0.record(stream_);
     // K1 : cœurs.
     {
       const unsigned threads = 256, wpb = threads / 32;
@@ -137,12 +136,9 @@ class Q4DeviceExecutor {
         }
       }
     }
-    cuda_check(cudaEventRecord(e1, stream_), "record");
+    e1.record(stream_);
     cuda_check(cudaStreamSynchronize(stream_), "sync fin");
-    float ms = 0;
-    cudaEventElapsedTime(&ms, e0, e1);
-    cudaEventDestroy(e0); cudaEventDestroy(e1);
-    kernel_ms_total += ms;
+    kernel_ms_total += CudaEvent::ms_between(e0, e1);
   }
 
  private:

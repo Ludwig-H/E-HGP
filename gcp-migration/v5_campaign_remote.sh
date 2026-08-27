@@ -126,7 +126,8 @@ done
 # et q4 device) : memes familles, memes options ; le validateur exige
 # digest_all IDENTIQUE au contrat CPU de la meme famille (egalite de bout en
 # bout a 50 k) et grave les temps (mesure, jamais un claim).
-if [ -x "${GPU_BIN:-/nonexistent}" ]; then
+# PRECONDITIONS de phase : lane device a code 0 et mutant du temoin tue (code 4).
+if [ -x "${GPU_BIN:-/nonexistent}" ] && grep -q '^code=0$' "${OUT_DIR}/gpu_lane.status" 2>/dev/null && grep -q '^code=4$' "${OUT_DIR}/gpu_mutant.status" 2>/dev/null; then
   for fam in ${FAMILIES}; do
     run_one "contrat_gpu_${fam}_n50000" contract_50k_gpu \
       "${GPU_BIN}" --gpu "--family=${fam}" --n=50000 --s=8 --smax=11 --seed=3 "--threads=${THREADS}" --digest
@@ -138,6 +139,6 @@ if [ -x "${GPU_BIN:-/nonexistent}" ]; then
       "${GPU_BIN}" --gpu --gpu-min-sites=256 "--family=${fam}" --n=50000 --s=8 --smax=11 --seed=3 "--threads=${THREADS}" --digest
   done
 else
-  echo "REFUS : pilote CUDA absent (${GPU_BIN:-}) — contrats device non executes"
+  echo "REFUS : pilote CUDA absent (${GPU_BIN:-}) ou lane device / mutant non conformes — contrats device non executes"
 fi
 echo "=== fin des runs (la validation locale decide du statut, jamais cette ligne) ==="

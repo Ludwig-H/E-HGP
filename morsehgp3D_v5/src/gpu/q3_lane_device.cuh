@@ -22,6 +22,21 @@ inline void cuda_check(cudaError_t e, const char* what) {
   if (e != cudaSuccess) throw std::runtime_error(std::string("cuda : ") + what + " : " + cudaGetErrorString(e));
 }
 
+// Evenement CUDA sous RAII (jamais fuite sur exception).
+struct CudaEvent {
+  cudaEvent_t e{};
+  CudaEvent() { cuda_check(cudaEventCreate(&e), "event"); }
+  ~CudaEvent() { cudaEventDestroy(e); }
+  CudaEvent(const CudaEvent&) = delete;
+  CudaEvent& operator=(const CudaEvent&) = delete;
+  void record(cudaStream_t s) { cuda_check(cudaEventRecord(e, s), "record"); }
+  static float ms_between(const CudaEvent& a, const CudaEvent& b) {
+    float ms = 0;
+    cuda_check(cudaEventElapsedTime(&ms, a.e, b.e), "elapsed");
+    return ms;
+  }
+};
+
 class Q3DeviceExecutor {
  public:
   Q3DeviceExecutor() { cuda_check(cudaStreamCreate(&stream_), "stream"); }
@@ -32,7 +47,8 @@ class Q3DeviceExecutor {
   Q3DeviceExecutor(const Q3DeviceExecutor&) = delete;
   Q3DeviceExecutor& operator=(const Q3DeviceExecutor&) = delete;
 
-  double kernel_ms_total = 0;
+  double kernel_ms_total = 0;  // mur kernel (evenements sur le flux de l'executeur)
+  double h2d_ms_total = 0, d2h_ms_total = 0;  // murs transferts, separes (audit : jamais un cumul indistinct)
   u64 launches = 0;  // kernels lances (q3 : un par lot)
   u64 lots = 0;      // lots scannes
 
@@ -48,24 +64,24 @@ class Q3DeviceExecutor {
     static_assert(sizeof(Q3BatchSeed) == sizeof(SeedJob), "Q3BatchSeed et SeedJob doivent avoir le meme layout");
     static_assert(sizeof(Q3BatchAnchor) == sizeof(AnchorRange), "layout des ancres");
     static_assert(sizeof(Q3BatchVerdict) == sizeof(SeedOut), "layout des verdicts");
+    CudaEvent e_h0, e_h1, e_k1, e_d1;
+    e_h0.record(stream_);
     up(d_u0_, b->u0.data(), ns); up(d_u1_, b->u1.data(), ns); up(d_u2_, b->u2.data(), ns); up(d_q_, b->q.data(), ns);
     up(d_jobs_, reinterpret_cast<const SeedJob*>(b->seeds.data()), nj);
     up(d_anchors_, reinterpret_cast<const AnchorRange*>(b->anchors.data()), na);
+    e_h1.record(stream_);
     const unsigned threads = 256, wpb = threads / 32;
     const unsigned blocks = (unsigned)((nj + wpb - 1) / wpb);
-    cudaEvent_t e0, e1;
-    cuda_check(cudaEventCreate(&e0), "event"); cuda_check(cudaEventCreate(&e1), "event");
-    cuda_check(cudaEventRecord(e0, stream_), "record");
     k_scan<<<blocks, threads, 0, stream_>>>(d_jobs_, (unsigned)nj, d_anchors_, d_u0_, d_u1_, d_u2_, d_q_, h3, false, nonstrict,
                                             d_out_);
     cuda_check(cudaGetLastError(), "lancement k_scan");
-    cuda_check(cudaEventRecord(e1, stream_), "record");
+    e_k1.record(stream_);
     cuda_check(cudaMemcpyAsync(b->verdicts.data(), d_out_, nj * sizeof(SeedOut), cudaMemcpyDeviceToHost, stream_), "verdicts");
+    e_d1.record(stream_);
     cuda_check(cudaStreamSynchronize(stream_), "synchronisation");
-    float ms = 0;
-    cudaEventElapsedTime(&ms, e0, e1);
-    cudaEventDestroy(e0); cudaEventDestroy(e1);
-    kernel_ms_total += ms;
+    h2d_ms_total += CudaEvent::ms_between(e_h0, e_h1);
+    kernel_ms_total += CudaEvent::ms_between(e_h1, e_k1);
+    d2h_ms_total += CudaEvent::ms_between(e_k1, e_d1);
     ++launches;
   }
 

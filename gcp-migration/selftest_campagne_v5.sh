@@ -53,6 +53,7 @@ done
 [ "${fam}" = "${FAIL_FAMILY:-}" ] && exit 7
 [ "${fam}" = "${HANG_FAMILY:-}" ] && sleep 30
 echo "famille=${fam} n=${n} coord=1 s=8 smax=11 seed=3 threads=1 emis=1 boules_uniques=42 mortes_profondeur=0 survivantes=42 census_int=1 census_shell=0 evenements=7 facettes=9 fusions=3 deltas=1 noeuds=1"
+echo "digest_balls=abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789"
 echo "digest_all=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
 EOS
 chmod +x "${WORK}/fake_probe"
@@ -61,11 +62,18 @@ chmod +x "${WORK}/fake_probe"
 # change le digest (doit etre refuse).
 cat > "${WORK}/fake_gpu" <<'EOS'
 #!/usr/bin/env bash
-fam=""; n=""
-for a in "$@"; do case "$a" in --family=*) fam="${a#--family=}";; --n=*) n="${a#--n=}";; esac; done
+fam=""; n=""; ms=1
+for a in "$@"; do case "$a" in --family=*) fam="${a#--family=}";; --n=*) n="${a#--n=}";; --gpu-min-sites=*) ms="${a#--gpu-min-sites=}";; esac; done
+echo "backend=override_experimental (executeur de lane externe : non autoritaire)"
 echo "famille=${fam} n=${n} coord=1 s=8 smax=11 seed=3 threads=1 emis=1 boules_uniques=42 mortes_profondeur=0 survivantes=42 census_int=1 census_shell=0 evenements=7 facettes=9 fusions=3 deltas=1 noeuds=1"
+echo "digest_balls=abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789"
 if [ "${GPU_DIGEST_MISM:-0}" = "1" ]; then echo "digest_all=ffff456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"; else echo "digest_all=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"; fi
-echo "gpu=1 kernel_ms=1.0 lancements=3 min_sites=1 routage_q3=1/0 ancres (seeds 1/0) routage_q4=1/0 ancres (seeds 1/0)"
+# Le faux pilote HONORE le seuil : routage mixte a 256, tout-device a 1 (GPU_IGNORE_THRESHOLD=1 : tout-device quel que soit le seuil).
+if [ "${ms}" = "1" ] || [ "${GPU_IGNORE_THRESHOLD:-0}" = "1" ]; then
+  echo "gpu=1 kernel_ms=1.0 lancements=3 min_sites=${ms} routage_q3=10/0 ancres (seeds 100/0) routage_q4=10/0 ancres (seeds 100/0)"
+else
+  echo "gpu=1 kernel_ms=1.0 lancements=3 min_sites=${ms} routage_q3=7/3 ancres (seeds 70/30) routage_q4=3/7 ancres (seeds 30/70)"
+fi
 EOS
 chmod +x "${WORK}/fake_gpu"
 
@@ -201,7 +209,9 @@ grep -q 'scan uniform' "${WORK}/v3c.log" || fail "scenario 3ter : le desaccord d
 
 # ---- Scenario 3quater : lane device en desaccord -> les phases CPU tournent (18 statuts) mais jamais complete.
 RC3d=$(run_campaign "${WORK}/out3d" LANE_MISM=1)
-[ "$(ls "${WORK}/out3d"/*.status 2>/dev/null | wc -l)" -eq 25 ] || fail "scenario 3quater : la lane device ne refuse pas les phases CPU"
+# Les phases CPU tournent (19 statuts : temoin, lane, mutant, 12 conformites, 4 contrats CPU) ; les contrats GPU sont REFUSES (precondition de phase).
+[ "$(ls "${WORK}/out3d"/*.status 2>/dev/null | wc -l)" -eq 19 ] || fail "scenario 3quater : la lane device ne refuse pas les phases CPU (ou n'a pas refuse les contrats GPU)"
+[ "$(ls "${WORK}/out3d"/contrat_gpu*.status 2>/dev/null | wc -l)" -eq 0 ] || fail "scenario 3quater : contrats GPU executes malgre une lane device en desaccord"
 if python3 "${HERE}/validate_v5_campaign.py" "${WORK}/out3d" cafedeca beefbeef feedf00d "${RC3d}" 0 > "${WORK}/v3d.log" 2>&1; then
   fail "scenario 3quater : une lane device en desaccord devait refuser complete"
 fi
@@ -220,6 +230,16 @@ if python3 "${HERE}/validate_v5_campaign.py" "${WORK}/out3f" cafedeca beefbeef f
   fail "scenario 3sexies : un mutant survivant devait refuser complete"
 fi
 grep -q 'gpu_mutant' "${WORK}/v3f.log" || fail "scenario 3sexies : le mutant doit etre nomme"
+
+# ---- Scenario 3septies : pilote GPU ignorant le seuil (adaptatif tout-device) -> refuse.
+RC3g=$(run_campaign "${WORK}/out3g" GPU_IGNORE_THRESHOLD=1)
+if python3 "${HERE}/validate_v5_campaign.py" "${WORK}/out3g" cafedeca beefbeef feedf00d "${RC3g}" 0 > "${WORK}/v3g.log" 2>&1; then
+  fail "scenario 3septies : un adaptatif sans route hote devait etre refuse"
+fi
+grep -q 'les deux routes' "${WORK}/v3g.log" || fail "scenario 3septies : la vacuite de route doit etre nommee"
+
+# ---- Scenario 3octies : mutant du temoin survivant -> les contrats GPU ne doivent PAS tourner (precondition de phase).
+[ "$(ls "${WORK}/out3f"/contrat_gpu*.status 2>/dev/null | wc -l)" -eq 0 ] || fail "scenario 3octies : contrats GPU executes malgre un mutant survivant"
 
 # ---- Scenario 4 : code de session non nul.
 if python3 "${HERE}/validate_v5_campaign.py" "${WORK}/out1" cafedeca beefbeef feedf00d 255 0 > "${WORK}/v4.log" 2>&1; then

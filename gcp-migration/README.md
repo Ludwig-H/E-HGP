@@ -624,10 +624,13 @@ code 4 sur le device ; phase 1 : conformité
 `morsehgp3D_v5/receipts/conformite_v4/digests_v4.txt` ; phase 2 : contrat
 50 000 points par `mhgp5 --digest`, 48 fils, RSS par GNU time — refusée si une
 conformité manque ; phase 3 : les mêmes contrats par `mhgp5_cuda --gpu`, puis les deux
-familles denses avec l'exécuteur adaptatif `--gpu-min-sites=256` ; chaque
-`digest_all` doit être identique au contrat CPU de la même famille) → rapatriement avec reprises → `validate_v5_campaign.py`
+familles denses avec l'exécuteur adaptatif `--gpu-min-sites=256` — phase
+conditionnée à `gpu_lane` code 0 et `gpu_mutant` code 4 ; chaque run `--gpu`
+s'annonce `backend=override_experimental`, ses `digest_balls` **et**
+`digest_all` doivent être identiques au contrat CPU de la même famille, et
+l'adaptatif doit avoir des seeds sur les deux routes) → rapatriement avec reprises → `validate_v5_campaign.py`
 (seule autorité du statut) → arrêt certifié `TERMINATED` par le trap. Porte
-transactionnelle sans GCP : `selftest_campagne_v5.sh` (onze scénarios, à
+transactionnelle sans GCP : `selftest_campagne_v5.sh` (treize scénarios, à
 lancer à la main avant toute session payante ; jamais depuis la CI), dont un
 témoin device en désaccord qui doit refuser `complete`.
 

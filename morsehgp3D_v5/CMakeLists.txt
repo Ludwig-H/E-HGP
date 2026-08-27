@@ -330,10 +330,17 @@ mhgp5_gate(mhgp5_q3_lane_batched_petit_lot 0 mhgp5_q3_lane_batched_gate "--famil
 mhgp5_gate(mhgp5_q4_lane_batched_petit_lot 0 mhgp5_q4_lane_batched_gate "--family=uniform --n=400 --threads=1 --seeds-per-launch=1000 --min-candidates=200 --min-flushes=100")
 mhgp5_gate(mhgp5_q3_lane_batched_seuil_zero 2 mhgp5_q3_lane_batched_gate "--family=uniform --n=400 --seeds-per-launch=0")
 mhgp5_gate(mhgp5_q4_lane_batched_seuil_negatif 2 mhgp5_q4_lane_batched_gate "--family=uniform --n=400 --seeds-per-launch=-1")
-# Routage adaptatif (executeur externe = hote shaped ici) : l'objet post-RLE ne depend pas de la politique.
-mhgp5_gate(mhgp5_q3_lane_batched_route_256 0 mhgp5_q3_lane_batched_gate "--family=uniform --n=1200 --threads=3 --device-min-sites=256")
-mhgp5_gate(mhgp5_q4_lane_batched_route_256 0 mhgp5_q4_lane_batched_gate "--family=eight_clusters --n=1200 --threads=3 --device-min-sites=256")
-mhgp5_gate(mhgp5_q4_lane_batched_route_tout_hote 0 mhgp5_q4_lane_batched_gate "--family=uniform --n=400 --threads=2 --device-min-sites=1000000000 --min-candidates=200 --min-flushes=0")
+# Routage adaptatif (executeur externe = hote shaped ici) : l'objet post-RLE ne depend pas de la politique ;
+# NON-VACUITE contractuelle des routes (--expect-route) et mutant route-ignore-threshold tue en code 4.
+mhgp5_gate(mhgp5_q3_lane_batched_route_256 0 mhgp5_q3_lane_batched_gate "--family=uniform --n=1200 --threads=3 --device-min-sites=256 --expect-route=mixed")
+mhgp5_gate(mhgp5_q4_lane_batched_route_256 0 mhgp5_q4_lane_batched_gate "--family=eight_clusters --n=1200 --threads=3 --device-min-sites=256 --expect-route=mixed")
+mhgp5_gate(mhgp5_q3_lane_batched_route_tout_hote 0 mhgp5_q3_lane_batched_gate "--family=uniform --n=400 --threads=2 --device-min-sites=1000000000 --min-candidates=200 --min-flushes=0 --expect-route=host")
+mhgp5_gate(mhgp5_q4_lane_batched_route_tout_hote 0 mhgp5_q4_lane_batched_gate "--family=uniform --n=400 --threads=2 --device-min-sites=1000000000 --min-candidates=200 --min-flushes=0 --expect-route=host")
+mhgp5_gate(mhgp5_q3_lane_batched_route_mutant 4 mhgp5_q3_lane_batched_gate "--family=uniform --n=1200 --threads=3 --device-min-sites=256 --expect-route=mixed --inject=route-ignore-threshold")
+mhgp5_gate(mhgp5_q4_lane_batched_route_mutant 4 mhgp5_q4_lane_batched_gate "--family=eight_clusters --n=1200 --threads=3 --device-min-sites=256 --expect-route=mixed --inject=route-ignore-threshold")
+# Ancre trop grande pour un lot (seuil de seeds minuscule) : corps hote, egalite conservee, anchors_oversized > 0.
+mhgp5_gate(mhgp5_q3_lane_batched_ancre_trop_grande 0 mhgp5_q3_lane_batched_gate "--family=eight_clusters --n=400 --threads=2 --seeds-per-launch=50 --min-candidates=200 --expect-route=device")
+mhgp5_gate(mhgp5_q4_lane_batched_ancre_trop_grande 0 mhgp5_q4_lane_batched_gate "--family=eight_clusters --n=400 --threads=2 --seeds-per-launch=50 --min-candidates=200 --expect-route=device")
 mhgp5_gate(mhgp5_q4_lane_batched_petit_lot_paires 0 mhgp5_q4_lane_batched_gate "--family=eight_clusters --n=400 --threads=2 --pairs-per-launch=200000 --min-candidates=200 --min-flushes=20")
 mhgp5_gate(mhgp5_q4_lane_batched_petit_lot_sites 0 mhgp5_q4_lane_batched_gate "--family=uniform --n=400 --threads=2 --sites-per-launch=20000 --min-candidates=200 --min-flushes=50")
 mhgp5_gate(mhgp5_q3_lane_batched_petit_lot_sites 0 mhgp5_q3_lane_batched_gate "--family=uniform --n=400 --threads=2 --sites-per-launch=20000 --min-candidates=200 --min-flushes=50")
@@ -385,8 +392,9 @@ if(MHGP5_ENABLE_CUDA)
   target_compile_options(mhgp5_cuda PRIVATE
     "$<$<COMPILE_LANGUAGE:CUDA>:-fmad=false;--expt-relaxed-constexpr;-Xcompiler=-Wall,-Wextra,-Werror>")
   target_link_libraries(mhgp5_cuda PRIVATE Threads::Threads)
-  mhgp5_gate(mhgp5_q4_lane_device_route_256 0 mhgp5_q4_lane_device_gate "--family=eight_clusters --n=1200 --threads=4 --device-min-sites=256" LABELS gpu)
-  mhgp5_gate(mhgp5_q3_lane_device_route_256 0 mhgp5_q3_lane_device_gate "--family=eight_clusters --n=1200 --threads=4 --device-min-sites=256" LABELS gpu)
+  mhgp5_gate(mhgp5_q4_lane_device_route_256 0 mhgp5_q4_lane_device_gate "--family=eight_clusters --n=1200 --threads=4 --device-min-sites=256 --expect-route=mixed" LABELS gpu)
+  mhgp5_gate(mhgp5_q3_lane_device_route_256 0 mhgp5_q3_lane_device_gate "--family=eight_clusters --n=1200 --threads=4 --device-min-sites=256 --expect-route=mixed" LABELS gpu)
+  mhgp5_gate(mhgp5_q3_lane_device_route_mutant 4 mhgp5_q3_lane_device_gate "--family=eight_clusters --n=1200 --threads=4 --device-min-sites=256 --expect-route=mixed --inject=route-ignore-threshold" LABELS gpu)
   mhgp5_gate(mhgp5_q3_lane_device_petit_lot 0 mhgp5_q3_lane_device_gate "--family=uniform --n=400 --seeds-per-launch=1000 --min-candidates=200 --min-flushes=100" LABELS gpu)
   mhgp5_gate(mhgp5_q3_lane_device_uniform_8000 0 mhgp5_q3_lane_device_gate "--family=uniform --n=8000 --threads=8 --min-candidates=100000" LABELS gpu scale8000 TIMEOUT 1800)
 endif()

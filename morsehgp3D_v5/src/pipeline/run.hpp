@@ -38,7 +38,11 @@ struct RunOptions {
   // fil d'arriere-plan du pipeline (un seul a la fois, dans l'ordre des K) —
   // PROVISOIRE jusqu'au statut terminal.
   std::function<void(u64 K, const std::vector<ForestEvent>& events, const ForestResult& r)> on_forest;
-  // Executeurs de lane externes (device) — vides : lanes integrees.
+  // Executeurs de lane externes (device) — vides : lanes integrees. BACKEND
+  // EXPERIMENTAL, NON AUTORITAIRE : un resultat obtenu avec un executeur
+  // externe est marque `backend_override` (imprime `backend=override_experimental`)
+  // et ne vaut que par son egalite prouvee avec le chemin integre (portes,
+  // campagnes appariees) — jamais par lui-meme.
   LaneOverride q3_override, q4_override;
 };
 
@@ -47,6 +51,7 @@ struct KCardinalities {
 };
 
 struct RunResult {
+  bool backend_override = false;  // un executeur de lane externe a ete employe (non autoritaire)
   PipelineStatus status = PipelineStatus::kCompleteRegular;
   std::string message;
   u64 smax_eff = 0, kmax_eff = 0;
@@ -136,6 +141,7 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
   GenerateOptions go;
   go.q3_override = opt.q3_override;
   go.q4_override = opt.q4_override;
+  rr.backend_override = (bool)opt.q3_override || (bool)opt.q4_override;
   go.s = opt.s;
   go.smax = rr.smax_eff;
   go.threads = opt.threads;
@@ -311,6 +317,7 @@ inline void print_run(std::FILE* out, const char* family, int n, int coord, long
   const ExpandStats& es = rr.expand;
   std::fprintf(out, "payload=%s authority=status_terminal callbacks=provisional vertical_maps=none\n",
                kForestPayloadVersion);
+  std::fprintf(out, "backend=%s\n", rr.backend_override ? "override_experimental (executeur de lane externe : non autoritaire)" : "cpu_reference");
   std::fprintf(out,
                "famille=%s n=%d coord=%d s=%lld smax=%llu seed=%lld threads=%d emis=%zu boules_uniques=%llu "
                "mortes_profondeur=%llu survivantes=%llu census_int=%llu census_shell=%llu evenements=%llu "

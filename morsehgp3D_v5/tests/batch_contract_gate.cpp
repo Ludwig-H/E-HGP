@@ -55,13 +55,13 @@ Q3Batch minimal3() {
 }
 Q4Batch minimal4() {
   Q4Batch b;
-  for (int i = 0; i < 3; ++i) {
+  for (int i = 0; i < 4; ++i) {
     b.u0.push_back(i); b.u1.push_back(i); b.u2.push_back(i); b.q.push_back(i);
     b.px.push_back(i); b.py.push_back(i); b.pz.push_back(i); b.pid.push_back((PointId)i);
   }
-  b.lens_sites = {0, 1, 2};
+  b.lens_sites = {0, 1, 2, 3};
   Q4BatchAnchor an;
-  an.begin = 0; an.count = 3; an.lens_begin = 0; an.lens_count = 3;
+  an.begin = 0; an.count = 4; an.lens_begin = 0; an.lens_count = 4;
   an.skip_a = 0; an.skip_b = 1;
   an.D2 = 1;
   b.anchors.push_back(an);
@@ -122,8 +122,8 @@ int main() {
   { Q4Batch b = minimal4(); b.pid.pop_back(); std::string w; expect(!validate_q4_batch(b, &w), "q4 SoA tronquee refusee"); }
   { Q4Batch b = minimal4(); b.lens_sites[1] = 7; std::string w; expect(!validate_q4_batch(b, &w), "q4 lentille hors sites refusee"); }
   { Q4Batch b = minimal4(); b.anchors[0].count = 2; b.lens_sites[2] = 2; std::string w; expect(!validate_q4_batch(b, &w), "q4 lentille hors tranche refusee"); }
-  { Q4Batch b = minimal4(); b.anchors[0].lens_count = 4; std::string w; expect(!validate_q4_batch(b, &w), "q4 tranche de lentille debordante refusee"); }
-  { Q4Batch b = minimal4(); b.seeds[0].x_site = 3; std::string w; expect(!validate_q4_batch(b, &w), "q4 x_site hors tranche refuse"); }
+  { Q4Batch b = minimal4(); b.anchors[0].lens_count = 5; std::string w; expect(!validate_q4_batch(b, &w), "q4 tranche de lentille debordante refusee"); }
+  { Q4Batch b = minimal4(); b.seeds[0].x_site = 4; std::string w; expect(!validate_q4_batch(b, &w), "q4 x_site hors tranche refuse"); }
   { Q4Batch b = minimal4(); b.anchors[0].skip_a = 5; std::string w; expect(!validate_q4_batch(b, &w), "q4 skip_a hors tranche refuse"); }
   { Q4Batch b = minimal4(); b.seeds[0].anchor = 3; std::string w; expect(!validate_q4_batch(b, &w), "q4 ancre de seed invalide refusee"); }
   {
@@ -135,23 +135,30 @@ int main() {
   {
     // Resultats : emissions.
     Q4Batch b = minimal4();
+    // a = site 0 (skip_a), b = site 1 (skip_b), x = site 2, y admissible = site 3.
     b.seeds[0].jneg = 0;
     b.verdicts.assign(1, Q4SeedVerdict{});
-    b.stages.completions = 2; b.stages.emit = 2;
-    b.emits = {Q4Emit{0, 0}, Q4Emit{0, 2}};
+    b.stages.completions = 1; b.stages.emit = 1;
+    b.emits = {Q4Emit{0, 3}};
     std::string w;
     expect(validate_q4_results(b, &w), "q4 resultats valides");
-    Q4Batch c = b; c.emits[1].seed = 1; expect(!validate_q4_results(c, &w), "q4 emission hors seeds refusee");
+    Q4Batch c = b; c.emits[0].seed = 1; expect(!validate_q4_results(c, &w), "q4 emission hors seeds refusee");
     Q4Batch d = b; d.verdicts[0].dead = 1; expect(!validate_q4_results(d, &w), "q4 emission d'un seed mort refusee");
-    Q4Batch f = b; f.emits[1].y_site = 3; expect(!validate_q4_results(f, &w), "q4 y_site hors tranche refuse");
-    Q4Batch g = b; g.emits = {Q4Emit{0, 2}, Q4Emit{0, 0}}; expect(!validate_q4_results(g, &w), "q4 emissions non ordonnees refusees");
-    Q4Batch h = b; h.emits = {Q4Emit{0, 2}, Q4Emit{0, 2}}; expect(!validate_q4_results(h, &w), "q4 emissions dupliquees refusees");
-    Q4Batch k = b; k.stages.completions = 3; expect(!validate_q4_results(k, &w), "q4 somme des etages != completions refusee");
+    Q4Batch f = b; f.emits[0].y_site = 4; expect(!validate_q4_results(f, &w), "q4 y_site hors tranche refuse");
+    Q4Batch g = b; g.emits = {Q4Emit{0, 3}, Q4Emit{0, 3}}; g.stages.emit = 2; g.stages.completions = 2;
+    expect(!validate_q4_results(g, &w), "q4 emissions dupliquees refusees");
+    Q4Batch h = b; h.stages.completions = 3; expect(!validate_q4_results(h, &w), "q4 somme des etages != completions refusee (bis)");
     Q4Batch m = b; m.verdicts.clear(); expect(!validate_q4_results(m, &w), "q4 verdict manquant refuse");
+    Q4Batch o = b; o.emits.clear(); expect(!validate_q4_results(o, &w), "q4 emission perdue (emit != n_emits) refusee");
+    Q4Batch q = b; q.emits[0].y_site = 2; expect(!validate_q4_results(q, &w), "q4 y = x refuse");
+    Q4Batch r = b; r.emits[0].y_site = 1; expect(!validate_q4_results(r, &w), "q4 y = skip_b refuse");
+    Q4Batch t = b; t.lens_sites = {0, 1, 2}; t.anchors[0].lens_count = 3; expect(!validate_q4_results(t, &w), "q4 y hors lentille refuse");
+    Q4Batch u = b; u.stages.lens = UINT64_MAX; expect(!validate_q4_results(u, &w), "q4 compteurs debordants refuses");
+    Q4BatchView nv = q4_batch_view(b); nv.emits = nullptr; expect(!validate_q4_results_view(nv, b.stages, &w), "q4 pointeur nul avec compte non nul refuse");
     bool thrown = false;
     std::vector<BallCandidate> lo; GenerateStats ls;
     try { emit_q4_batch(g, &lo, &ls); } catch (const std::invalid_argument&) { thrown = true; }
-    expect(thrown, "q4 emission non ordonnee leve invalid_argument");
+    expect(thrown, "q4 emission dupliquee leve invalid_argument");
     Q4Batch n = minimal4(); n.anchors[0].count = 9;
     thrown = false;
     try { scan_q4_batch_host(&n, 4, false, false, false); } catch (const std::invalid_argument&) { thrown = true; }

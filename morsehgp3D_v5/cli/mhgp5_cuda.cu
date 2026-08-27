@@ -42,7 +42,11 @@ int main(int argc, char** argv) {
     else if (const char* v = val("--shell-cap=")) opt.shell_cap = (size_t)std::atoll(v);
     else if (arg == "--digest") opt.digest = true;
     else if (arg == "--gpu") gpu = true;
-    else if (const char* v = val("--gpu-min-sites=")) gpu_min_sites = (size_t)std::atoll(v);
+    else if (const char* v = val("--gpu-min-sites=")) {
+      const long long m = std::atoll(v);
+      if (m < 1) ok = false;  // refus explicite (jamais une conversion silencieuse en SIZE_MAX)
+      else gpu_min_sites = (size_t)m;
+    }
     else {
       std::fprintf(stderr, "argument inconnu : %s\n", arg.c_str());
       ok = false;

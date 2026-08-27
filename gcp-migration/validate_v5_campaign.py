@@ -95,12 +95,30 @@ def main():
             if not re.search(r"^gpu=1 kernel_ms=", body, re.M):
                 bad.append(f"{name}: le run n'annonce pas gpu=1")
             cpu_txt = os.path.join(out, name.replace("contrat_gpuad_", "contrat_").replace("contrat_gpu_", "contrat_") + ".txt")
-            d_gpu = re.search(r"^digest_all=([0-9a-f]{64})$", body, re.M)
-            d_cpu = None
-            if os.path.exists(cpu_txt):
-                d_cpu = re.search(r"^digest_all=([0-9a-f]{64})$", open(cpu_txt, encoding="utf-8", errors="replace").read(), re.M)
-            if not d_gpu or not d_cpu or d_gpu.group(1) != d_cpu.group(1):
-                bad.append(f"{name}: digest_all DIFFERENT du contrat CPU de la meme famille (ou absent)")
+            cpu_body = open(cpu_txt, encoding="utf-8", errors="replace").read() if os.path.exists(cpu_txt) else ""
+            # Les DEUX digests (boules et forets) doivent etre identiques au contrat CPU.
+            for key in ("digest_balls", "digest_all"):
+                d_gpu = re.search(rf"^{key}=([0-9a-f]{{64}})$", body, re.M)
+                d_cpu = re.search(rf"^{key}=([0-9a-f]{{64}})$", cpu_body, re.M)
+                if not d_gpu or not d_cpu or d_gpu.group(1) != d_cpu.group(1):
+                    bad.append(f"{name}: {key} DIFFERENT du contrat CPU de la meme famille (ou absent)")
+            if not re.search(r"^backend=override_experimental", body, re.M):
+                bad.append(f"{name}: le run --gpu doit s'annoncer backend=override_experimental (non autoritaire)")
+            g = re.search(r"^gpu=1 kernel_ms=[0-9.]+ lancements=(\d+) min_sites=(\d+) routage_q3=(\d+)/(\d+) ancres \(seeds (\d+)/(\d+)\) routage_q4=(\d+)/(\d+) ancres \(seeds (\d+)/(\d+)\)", body, re.M)
+            if not g:
+                bad.append(f"{name}: ligne gpu= (lancements, min_sites, routage) absente ou mal formee")
+            else:
+                launches, min_sites = int(g.group(1)), int(g.group(2))
+                s3d, s3h, s4d, s4h = int(g.group(5)), int(g.group(6)), int(g.group(9)), int(g.group(10))
+                if launches < 1:
+                    bad.append(f"{name}: aucun lancement device")
+                if name.startswith("contrat_gpuad_"):
+                    if min_sites != 256:
+                        bad.append(f"{name}: adaptatif attendu a min_sites=256, vu {min_sites}")
+                    if s3d < 1 or s3h < 1 or s4d < 1 or s4h < 1:
+                        bad.append(f"{name}: adaptatif — les deux routes doivent avoir des seeds (q3 {s3d}/{s3h}, q4 {s4d}/{s4h})")
+                elif min_sites != 1:
+                    bad.append(f"{name}: tout-device attendu a min_sites=1, vu {min_sites}")
         if name == "gpu_lane":
             # Triples EXACTS famille/taille/fils, planchers (100000 candidats a
             # 8 k, seeds et morts non vides, lancements > 0), desaccords = 0,

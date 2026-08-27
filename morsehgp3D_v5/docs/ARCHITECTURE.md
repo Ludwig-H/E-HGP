@@ -229,7 +229,7 @@ retenue comme contrat pour la future livraison de la tour :
   plusieurs composantes pré-lot ; deux cofaces ex æquo ; réindexage des
   points ; deux objets de mêmes sommets projetés et d'incidences différentes.
 - **Rendu § 9.1 indépendant de la tour**, mais pas du flux d'incidences :
-  $S_	au$ exige toutes les cofaces incidentes avec multiplicité et niveau
+  $S_\tau$ exige toutes les cofaces incidentes avec multiplicité et niveau
   exact ; les seules clés distinctes et la partition finale ne le
   reconstruisent pas. Un rendu **livré** demandera un payload de rendu
   versionné (`facette -> (lot, multiplicité)`, niveau de naissance exact par

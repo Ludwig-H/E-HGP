@@ -140,16 +140,33 @@ inline bool validate_q4_batch_view(const Q4BatchView& v, std::string* why) {
 }
 inline bool validate_q4_batch(const Q4Batch& b, std::string* why) { return validate_q4_batch_view(q4_batch_view(b), why); }
 // Apres le scan.
-inline bool validate_q4_results_view(const Q4BatchView& v, const Q4StageCounts& st, std::string* why) {
+// `emit_eq` : en nominal, le nombre d'emissions doit valoir st.emit (le mutant
+// q4-batched-emit-deep, qui emet aussi les profonds, le desactive).
+inline bool validate_q4_results_view(const Q4BatchView& v, const Q4StageCounts& st, std::string* why, bool emit_eq = true) {
   if (v.n_verdicts != v.n_seeds) { *why = "lot q4 : un verdict par seed attendu apres le scan"; return false; }
-  const u64 sum = st.lens + st.owner + st.once + st.i64_ + st.face + st.det + st.center + st.deep + st.emit;
+  if ((v.n_verdicts && !v.verdicts) || (v.n_emits && !v.emits) || (v.n_seeds && !v.seeds) || (v.n_anchors && !v.anchors) ||
+      (v.n_lens && !v.lens_sites)) { *why = "lot q4 : pointeur nul avec un compte non nul"; return false; }
+  const u64 parts[9] = {st.lens, st.owner, st.once, st.i64_, st.face, st.det, st.center, st.deep, st.emit};
+  u64 sum = 0;
+  for (const u64 x : parts) {
+    if (sum > UINT64_MAX - x) { *why = "lot q4 : somme des etages debordante"; return false; }
+    sum += x;
+  }
   if (sum != st.completions) { *why = "lot q4 : la somme des etages ne vaut pas le nombre de completions"; return false; }
+  if (emit_eq && st.emit != v.n_emits) { *why = "lot q4 : nombre d'emissions different de l'etage emit"; return false; }
   for (size_t e = 0; e < v.n_emits; ++e) {
     const Q4Emit& em = v.emits[e];
     if (em.seed >= v.n_seeds) { *why = "lot q4 : emission hors des seeds"; return false; }
     if (v.verdicts[em.seed].dead) { *why = "lot q4 : emission d'un seed mort"; return false; }
-    const Q4BatchAnchor& an = v.anchors[v.seeds[em.seed].anchor];
+    const Q4BatchSeed& sd = v.seeds[em.seed];
+    const Q4BatchAnchor& an = v.anchors[sd.anchor];
     if (em.y_site >= an.count) { *why = "lot q4 : y_site hors de la tranche"; return false; }
+    if (em.y_site == sd.x_site || em.y_site == an.skip_a || em.y_site == an.skip_b) {
+      *why = "lot q4 : y_site egal a x, a ou b"; return false;
+    }
+    bool in_lens = false;
+    for (u32 li = an.lens_begin; li < an.lens_begin + an.lens_count && !in_lens; ++li) in_lens = v.lens_sites[li] == em.y_site;
+    if (!in_lens) { *why = "lot q4 : y_site hors de la lentille de son ancre"; return false; }
     if (e > 0) {
       const Q4Emit& pr = v.emits[e - 1];
       if (pr.seed > em.seed || (pr.seed == em.seed && pr.y_site >= em.y_site)) {
@@ -159,7 +176,9 @@ inline bool validate_q4_results_view(const Q4BatchView& v, const Q4StageCounts& 
   }
   return true;
 }
-inline bool validate_q4_results(const Q4Batch& b, std::string* why) { return validate_q4_results_view(q4_batch_view(b), b.stages, why); }
+inline bool validate_q4_results(const Q4Batch& b, std::string* why, bool emit_eq = true) {
+  return validate_q4_results_view(q4_batch_view(b), b.stages, why, emit_eq);
+}
 
 // Etage 1 : formation du lot (aucun verdict), AJOUT au lot courant ; `flush`
 // apres chaque ancre des que le lot atteint `threshold` seeds. Une ancre sans
@@ -187,7 +206,8 @@ inline void build_q4_batch(const CloudIndex& ix, const AliveRect& ar, const u64 
       const i64 D2 = p3_norm2(p3_sub(pb, pa));
       if (D2 == 0) continue;
       anchor_cover_from_handles(ix, sc.handles, pa, pb, D2, cover_coef, &sc.cover, &sc.visits, &sc.cover_tmp);
-      if (sc.cover.size() < lim.device_min_sites) {
+      const bool ignore_threshold = MHGP5_MUTANT("route-ignore-threshold");
+      if (sc.cover.size() < lim.device_min_sites && !ignore_threshold) {
         // Routage hote : lane de production par ancre, emission immediate.
         const u64 seeds_before_h = ls->seeds[1];
         process_anchor_q4(ix, sc, ua, ub, pa, pb, D2, h_of[2], float_on, depth_nonstrict, core_nonstrict, no_canonical, lo, ls);
@@ -221,10 +241,31 @@ inline void build_q4_batch(const CloudIndex& ix, const AliveRect& ar, const u64 
         if (ux == ua || ux == ub) continue;
         if (is_acute_seed(pa, pb, ix.upos[(size_t)ux], D2, ix.point_id(ua), ix.point_id(ub), ix.point_id(ux))) ++nseeds;
       }
+      // PREFLIGHT (avant toute ecriture) : sites, seeds, paires (arithmetique
+      // verifiee) ; ancre trop grande pour un lot -> corps de production ;
+      // sinon vidage AVANT l'ajout qui depasserait un seuil.
+      const u64 anchor_pairs_pre = (u64)nseeds * (u64)lens_idx.size();
+      const bool pairs_overflow = nseeds != 0 && anchor_pairs_pre / nseeds != lens_idx.size();
+      const bool oversized = nc > lim.sites || nseeds > lim.seeds || pairs_overflow || anchor_pairs_pre > lim.pairs ||
+                             nc > (size_t)UINT32_MAX || lens_idx.size() > (size_t)UINT32_MAX;
+      if (oversized) {
+        const u64 seeds_before_h = ls->seeds[1];
+        process_anchor_q4(ix, sc, ua, ub, pa, pb, D2, h_of[2], float_on, depth_nonstrict, core_nonstrict, no_canonical, lo, ls);
+        ++bs->anchors_host;
+        ++bs->anchors_oversized;
+        bs->seeds_host += ls->seeds[1] - seeds_before_h;
+        continue;
+      }
       ls->seeds[1] += nseeds;
-      if (nseeds == 0) continue;
-      sc.fill_affine_sites(ix, pa, pb, D2);
+      if (nseeds == 0) {
+        ++bs->anchors_host;  // rien a scanner ni a completer : comptee cote hote, jamais materialisee
+        continue;
+      }
       Q4Batch* b = bdev;
+      if (b->seeds.size() + nseeds > lim.seeds || b->u0.size() + nc > lim.sites ||
+          b->pairs_estimate > lim.pairs - anchor_pairs_pre)
+        flush();
+      sc.fill_affine_sites(ix, pa, pb, D2);
       const size_t seeds_before = b->seeds.size();
       Q4BatchAnchor an;
       an.begin = (u32)b->u0.size();
@@ -274,7 +315,8 @@ inline void build_q4_batch(const CloudIndex& ix, const AliveRect& ar, const u64 
         b->seeds.push_back(sd);
       }
       const u64 anchor_seeds = (u64)(b->seeds.size() - seeds_before);
-      const u64 anchor_pairs = anchor_seeds * (u64)an.lens_count;
+      const u64 anchor_pairs = anchor_seeds * (u64)an.lens_count;  // == anchor_pairs_pre (verifie sans debordement)
+      if (anchor_pairs != anchor_pairs_pre) throw std::logic_error("lot q4 : precomptage des paires incoherent");
       b->pairs_estimate += anchor_pairs;
       bs->max_anchor_seeds = std::max(bs->max_anchor_seeds, anchor_seeds);
       bs->max_anchor_sites = std::max(bs->max_anchor_sites, (u64)nc);
@@ -342,7 +384,8 @@ inline void scan_q4_batch_host(Q4Batch* b, u32 h4, bool core_nonstrict, bool dep
 // Etage 3 : compteurs et emission ordonnee (forme i128 recalculee par l'hote).
 inline void emit_q4_batch(const Q4Batch& b, std::vector<BallCandidate>* lo, GenerateStats* ls) {
   std::string why;
-  if (!validate_q4_batch(b, &why) || !validate_q4_results(b, &why)) throw std::invalid_argument(why);
+  if (!validate_q4_batch(b, &why) || !validate_q4_results(b, &why, !MHGP5_MUTANT("q4-batched-emit-deep")))
+    throw std::invalid_argument(why);
   for (const Q4SeedVerdict& v : b.verdicts) {
     if (v.dead) ++ls->seeds_killed_core;
     ls->float_cert_pos += v.c.cert_pos; ls->q4_cert[0] += v.c.cert_pos;

@@ -20,6 +20,7 @@ int main(int argc, char** argv) {
   int n = 1200, coord = 0, threads = 1;
   BatchLimits lim;
   u64 min_flushes = 1;
+  std::string expect_route = "device";  // device | mixed | host : contrat de NON-VACUITE des routes
   BatchStats bs;
   u64 min_candidates = 1000, min_killed = 10;
   for (int i = 1; i < argc; ++i) {
@@ -43,6 +44,7 @@ int main(int argc, char** argv) {
       if (v < 1) return 2;
       lim.sites = (size_t)v;
     } else if (arg.rfind("--min-flushes=", 0) == 0) min_flushes = (u64)std::atoll(arg.c_str() + 14);
+    else if (arg.rfind("--expect-route=", 0) == 0) expect_route = arg.substr(15);
     else return 2;
   }
   int ndev = 0;
@@ -94,10 +96,10 @@ int main(int argc, char** argv) {
   rle_candidates(&prod, 1);
   rle_candidates(&dev, 1);
   vec_mism += count_mism(prod, dev);
-  std::printf("q3_lane_device famille=%s n=%d fils=%d routage_min_sites=%zu ancres_device=%llu ancres_hote=%llu seeds_device=%llu seeds_hote=%llu vidages_hote=%llu seuil_seeds=%zu seuil_sites=%zu vidages=%llu max_lot_seeds=%llu max_ancre_seeds=%llu max_lot_sites=%llu max_ancre_sites=%llu candidats_q3=%zu seeds=%llu tues=%llu replis=%llu lancements=%llu "
+  std::printf("q3_lane_device famille=%s n=%d fils=%d routage_min_sites=%zu ancres_device=%llu ancres_hote=%llu ancres_trop_grandes=%llu seeds_device=%llu seeds_hote=%llu seuil_seeds=%zu seuil_sites=%zu vidages=%llu max_lot_seeds=%llu max_ancre_seeds=%llu max_lot_sites=%llu max_ancre_sites=%llu candidats_q3=%zu seeds=%llu tues=%llu replis=%llu lancements=%llu "
               "kernel_ms=%.1f desaccords_vecteur=%llu desaccords_compteurs=%llu\n",
-              cloud_family_name(family), n, threads, lim.device_min_sites, (unsigned long long)bs.anchors_device, (unsigned long long)bs.anchors_host,
-              (unsigned long long)bs.seeds_device, (unsigned long long)bs.seeds_host, (unsigned long long)bs.host_flushes, lim.seeds, lim.sites, (unsigned long long)bs.flushes, (unsigned long long)bs.max_lot_seeds,
+              cloud_family_name(family), n, threads, lim.device_min_sites, (unsigned long long)bs.anchors_device, (unsigned long long)bs.anchors_host, (unsigned long long)bs.anchors_oversized,
+              (unsigned long long)bs.seeds_device, (unsigned long long)bs.seeds_host, lim.seeds, lim.sites, (unsigned long long)bs.flushes, (unsigned long long)bs.max_lot_seeds,
               (unsigned long long)bs.max_anchor_seeds, (unsigned long long)bs.max_lot_sites, (unsigned long long)bs.max_anchor_sites, prod.size(), (unsigned long long)sp.seeds[0],
               (unsigned long long)sp.depth_killed[1], (unsigned long long)sp.q3_cert[2], (unsigned long long)launches,
               kernel_ms, (unsigned long long)vec_mism, (unsigned long long)bad);
@@ -105,8 +107,30 @@ int main(int argc, char** argv) {
     std::printf("PLANCHER\n");
     return 3;
   }
-  if (bs.max_lot_seeds > (u64)lim.seeds + bs.max_anchor_seeds || bs.max_lot_sites > (u64)lim.sites + bs.max_anchor_sites || bs.flushes + bs.host_flushes < min_flushes || (launches < 1 && bs.anchors_device > 0)) {
-    std::printf("LOTISSEMENT : borne ou vidages ou lancements hors contrat\n");
+  // Contrat de lotissement : BORNE DURE = les seuils eux-memes (preflight :
+  // vidage avant l'ajout qui depasserait ; ancre trop grande -> corps hote).
+  if (bs.max_lot_seeds > (u64)lim.seeds || bs.max_lot_sites > (u64)lim.sites || bs.flushes < min_flushes || (launches < 1 && bs.anchors_device > 0)) {
+    std::printf("LOTISSEMENT : borne (seeds %llu/%zu, sites %llu/%zu) ou vidages %llu < %llu hors contrat\n",
+                (unsigned long long)bs.max_lot_seeds, lim.seeds, (unsigned long long)bs.max_lot_sites, lim.sites,
+                (unsigned long long)bs.flushes, (unsigned long long)min_flushes);
+    return 1;
+  }
+  // Contrat de NON-VACUITE des routes (mutant route-ignore-threshold : tout au
+  // device -> seeds_hote = 0 -> code 4 sur une porte mixte).
+  const bool route_mut = MHGP5_MUTANT("route-ignore-threshold");
+  bool route_ok = true;
+  if (expect_route == "mixed") route_ok = bs.seeds_host > 0 && bs.seeds_device > 0 && bs.anchors_device > 0;
+  else if (expect_route == "host") route_ok = bs.seeds_device == 0 && bs.anchors_device == 0 && bs.seeds_host > 0;
+  else if (expect_route == "device") route_ok = bs.seeds_device > 0 && bs.anchors_device > 0 && (bs.seeds_host == 0 || bs.anchors_oversized > 0);
+  else return 2;
+  if (!route_ok) {
+    std::printf("ROUTAGE : contrat '%s' viole (seeds device %llu, hote %llu ; ancres device %llu, hote %llu, trop grandes %llu)\n",
+                expect_route.c_str(), (unsigned long long)bs.seeds_device, (unsigned long long)bs.seeds_host,
+                (unsigned long long)bs.anchors_device, (unsigned long long)bs.anchors_host, (unsigned long long)bs.anchors_oversized);
+    return route_mut ? 4 : 1;
+  }
+  if (route_mut) {
+    std::printf("MUTANT NON TUE (route-ignore-threshold)\n");
     return 1;
   }
   if (vec_mism || bad) return 1;

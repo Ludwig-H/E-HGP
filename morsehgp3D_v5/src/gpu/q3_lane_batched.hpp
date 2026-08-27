@@ -84,6 +84,7 @@ inline Q3BatchView q3_batch_view(const Q3Batch& b) {
 // sans debordement), ancre de chaque seed valide, un candidat par seed.
 inline bool validate_q3_batch_view(const Q3BatchView& v, std::string* why) {
   if (v.n_sites > (size_t)UINT32_MAX) { *why = "lot q3 : plus de 2^32 - 1 sites"; return false; }
+  if ((v.n_anchors && !v.anchors) || (v.n_seeds && !v.seeds)) { *why = "lot q3 : pointeur nul avec un compte non nul"; return false; }
   if (v.n_u1 != v.n_sites || v.n_u2 != v.n_sites || v.n_q != v.n_sites) { *why = "lot q3 : tailles SoA differentes"; return false; }
   if (v.n_emit != v.n_seeds) { *why = "lot q3 : un candidat par seed attendu"; return false; }
   if (v.n_anchors > (size_t)UINT32_MAX || v.n_seeds > (size_t)UINT32_MAX) { *why = "lot q3 : plus de 2^32 - 1 ancres ou seeds"; return false; }
@@ -104,15 +105,17 @@ inline bool validate_q3_verdicts(const Q3Batch& b, std::string* why) {
 
 // Seuil de vidage en seeds (livraison 5 : LOTISSEMENT multi-rectangles). Un
 // ouvrier traite ses rectangles en sequence et les AJOUTE au meme lot ; le
-// seuil est teste APRES CHAQUE ANCRE (l'unite atomique du lot), donc la
-// BORNE DURE d'un lot est seuil + (seeds de la plus grosse ancre) — mesuree et
-// gravee par les portes (max_lot_seeds, max_ancre_seeds). L'ordre LOCAL de
+// PREFLIGHT de chaque ancre (cover et seeds comptes avant toute ecriture) vide
+// le lot avant l'ajout qui le ferait depasser, et envoie au corps de
+// production toute ancre qui ne tient pas seule dans un lot : la BORNE DURE
+// d'un lot est le seuil lui-meme (mesuree et gravee : max_lot_seeds,
+// max_ancre_seeds, anchors_oversized). L'ordre LOCAL de
 // chaque ouvrier (rectangles, ancres, seeds) est preserve ; l'ordre brut
 // global a plusieurs fils n'est pas specifie (tirage dynamique, fusion par
 // ouvrier), seule la sortie post-RLE l'est. Un lot = un lancement device.
 inline constexpr size_t kSeedsPerLaunch = (size_t)1 << 16;
-// Seuil de vidage en SITES (memoire : q4 materialise ~96 octets par site, par
-// ouvrier) : borne dure d'un lot = seuil + sites de la plus grosse ancre.
+// Seuil de vidage en SITES (memoire : q4 materialise 60 octets par site — sept
+// i64 et un PointId — par ouvrier) : borne dure d'un lot = le seuil (preflight).
 inline constexpr size_t kSitesPerLaunch = (size_t)1 << 20;
 
 // Seuil de vidage en PAIRES (seed, y) pour q4 : le kernel de completion
@@ -141,11 +144,16 @@ struct BatchLimits {
 struct BatchStats {
   u64 flushes = 0, max_lot_seeds = 0, max_anchor_seeds = 0, max_lot_sites = 0, max_anchor_sites = 0;
   u64 max_lot_pairs = 0, max_anchor_pairs = 0;  // q4
-  u64 anchors_device = 0, anchors_host = 0, seeds_device = 0, seeds_host = 0, host_flushes = 0;  // routage (host_flushes : reserve)
+  // Routage : `anchors_device` = ancres MATERIALISEES dans un lot device (avec
+  // seeds) ; `anchors_host` = ancres traitees par le corps de production
+  // (cover sous le seuil, OU ancre trop grande pour un lot : `anchors_oversized`,
+  // OU sans seed en q4 : comptees dans `anchors_host`). `seeds_*` : seeds
+  // reellement traites de chaque cote (contrat de non-vacuite des portes).
+  u64 anchors_device = 0, anchors_host = 0, anchors_oversized = 0, seeds_device = 0, seeds_host = 0;
   void add_from(const BatchStats& o) {
     flushes += o.flushes;
-    anchors_device += o.anchors_device; anchors_host += o.anchors_host;
-    seeds_device += o.seeds_device; seeds_host += o.seeds_host; host_flushes += o.host_flushes;
+    anchors_device += o.anchors_device; anchors_host += o.anchors_host; anchors_oversized += o.anchors_oversized;
+    seeds_device += o.seeds_device; seeds_host += o.seeds_host;
     max_lot_seeds = std::max(max_lot_seeds, o.max_lot_seeds);
     max_anchor_seeds = std::max(max_anchor_seeds, o.max_anchor_seeds);
     max_lot_sites = std::max(max_lot_sites, o.max_lot_sites);
@@ -183,16 +191,35 @@ inline void build_q3_batch(const CloudIndex& ix, const AliveRect& ar, const u64 
       const i64 D2 = p3_norm2(p3_sub(pb, pa));
       if (D2 == 0) continue;
       anchor_cover_from_handles(ix, sc.handles, pa, pb, D2, 3, &sc.cover, &sc.visits, &sc.cover_tmp);
-      if (sc.cover.size() < lim.device_min_sites) {
+      // PREFLIGHT (avant toute ecriture) : taille du cover, nombre de seeds
+      // aigus ; une ancre sous le seuil de routage, ou TROP GRANDE pour un lot
+      // (cover > seuil de sites ou seeds > seuil de seeds), va au corps de
+      // production ; sinon le lot est vide AVANT l'ajout qui le ferait
+      // depasser (borne dure : un lot <= seuils, jamais seuil + ancre).
+      const size_t nc = sc.cover.size();
+      size_t nseeds = 0;
+      for (const CoverPoint& cp : sc.cover) {
+        if (cp.u == ua || cp.u == ub) continue;
+        if (is_acute_seed(pa, pb, ix.upos[(size_t)cp.u], D2, ix.point_id(ua), ix.point_id(ub), ix.point_id(cp.u))) ++nseeds;
+      }
+      const bool ignore_threshold = MHGP5_MUTANT("route-ignore-threshold");
+      const bool oversized = nc > lim.sites || nseeds > lim.seeds || nc > (size_t)UINT32_MAX;
+      if ((nc < lim.device_min_sites && !ignore_threshold) || oversized) {
         const u64 seeds_before_h = ls->seeds[0];
         scan_anchor_q3(ix, sc, ua, ub, pa, pb, D2, h_of[1], float_on, nonstrict, lo, ls);
         ++bs->anchors_host;
+        if (oversized) ++bs->anchors_oversized;
         bs->seeds_host += ls->seeds[0] - seeds_before_h;
         continue;
       }
+      if (nseeds == 0) {  // rien a scanner : ancre comptee cote hote (aucune materialisation)
+        ++bs->anchors_host;
+        continue;
+      }
+      Q3Batch* b = bdev;
+      if (b->seeds.size() + nseeds > lim.seeds || b->u0.size() + nc > lim.sites) flush();
       sc.affine_filled = false;
       u32 aidx = std::numeric_limits<u32>::max();
-      Q3Batch* b = bdev;
       const size_t seeds_before = b->seeds.size();
       for (const CoverPoint& cp : sc.cover) {
         if (cp.u == ua || cp.u == ub) continue;
@@ -201,7 +228,7 @@ inline void build_q3_batch(const CloudIndex& ix, const AliveRect& ar, const u64 
         ++ls->seeds[0];
         if (!sc.affine_filled) {
           // Sites de l'ancre : remplis au premier seed, comme en production, puis
-          // copies dans le lot (i64 et doubles exactes).
+          // copies dans le lot (i64 seulement ; les doubles sont derives a la volee).
           sc.fill_affine_sites(ix, pa, pb, D2);
           aidx = (u32)b->anchors.size();
           const u32 begin = (u32)b->u0.size();
@@ -226,7 +253,7 @@ inline void build_q3_batch(const CloudIndex& ix, const AliveRect& ar, const u64 
       if (aidx != std::numeric_limits<u32>::max()) {
         const u64 anchor_seeds = (u64)b->seeds.size() - seeds_before;
         bs->max_anchor_seeds = std::max(bs->max_anchor_seeds, anchor_seeds);
-        bs->max_anchor_sites = std::max(bs->max_anchor_sites, (u64)sc.cover.size());
+        bs->max_anchor_sites = std::max(bs->max_anchor_sites, (u64)nc);
         ++bs->anchors_device;
         bs->seeds_device += anchor_seeds;
         if (b->seeds.size() >= lim.seeds || b->u0.size() >= lim.sites) flush();
