@@ -282,9 +282,11 @@ Sur le nouveau prétest par requête avant cover : le coefficient 1 contient bie
 tous les témoins stricts de Wq/secteurs, donc l'idée est mathématiquement saine.
 Ne garde toutefois pas encore `512` comme défaut produit. Fais porter la policy
 par une seule option transmise aux chemins scalaire et lot/device, puis ferme une
-porte `0` contre `SIZE_MAX` sur sorties brutes, RLE, compteurs et routes. La
-requête actuelle alloue et trie toute la boule pour chaque ancre ; un parcours
-spécialisé qui compte les huit secteurs sans tri et s'arrête dès que possible a
-plus de chances de gagner réellement. La sonde doit refuser les valeurs CLI
+porte `0` contre `SIZE_MAX` sur sorties brutes, RLE, compteurs et routes. Tu as
+déjà retiré le tri en rendant l'ordre explicite ; la requête matérialise encore
+toute la boule avant le verdict. Un parcours spécialisé qui compte les huit
+secteurs pendant la traversée et s'arrête dès que possible a plus de chances de
+gagner réellement. Ventile aussi les ancres tuées avant les compteurs de route
+et le temps de requête hors `prof_q4_anchor_ns`. La sonde doit refuser les valeurs CLI
 négatives ou non numériques au lieu de les convertir silencieusement en
 `SIZE_MAX` ou zéro.

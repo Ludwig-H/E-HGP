@@ -333,22 +333,29 @@ Le même worktree ouvre un second levier : pour les rectangles dont les handles
 portent au moins 512 points, une requête d'arbre de coefficient 1 applique Wq et
 les secteurs avant de construire le cover complet. Aucun faux rejet nominal
 n'est visible statiquement : tous les témoins possibles vérifient
-`|2z-(a+b)|^2 < D2`, et `cover_query(..., 1)` les contient puis les trie. Mais
-l'activation par défaut est, elle aussi, en avance sur son autorité :
+`|2z-(a+b)|^2 < D2`, et `cover_query(..., 1)` les contient. La révision
+courante évite désormais le tri et transmet correctement
+`radially_sorted=false`, de sorte que les sorties de classe deviennent des
+`continue` et non des `break`. Mais l'activation par défaut est, elle aussi, en
+avance sur son autorité :
 
 - la policy est dupliquée dans `GenerateOptions` et `BatchLimits`; changer l'une
   peut rendre les chemins scalaire et lot/device causalement différents, et
   `RunOptions` ne la transporte pas ;
 - aucune porte n'apparie encore `pretest_query_min_points=0` et `SIZE_MAX` sur
   candidats bruts, RLE, compteurs et routes ;
-- `cover_query` alloue une pile et trie toute la boule par ancre. Un seuil fondé
-  seulement sur le nombre de points des handles ignore le nombre d'ancres et la
-  taille de sortie ; il peut déplacer le coût plutôt que le supprimer.
+- `cover_query` traverse l'arbre et matérialise encore toute la boule par ancre.
+  Un seuil fondé seulement sur le nombre de points des handles ignore le nombre
+  d'ancres, la sélectivité et la taille de sortie ; il peut déplacer le coût
+  plutôt que le supprimer ;
+- les morts précoces par requête se produisent hors du chronométrage
+  `prof_q4_anchor_ns` et, côté lot, avant les compteurs de route hôte/device :
+  ces dénominateurs ne sont pas comparables entre policies sans ventilation.
 
 Conserver ce chemin expérimental jusqu'à la porte appariée. Pour le rendre
 réellement léger, préférer une traversée spécialisée qui accumule directement
-les huit comptes et s'arrête dès que le verdict est acquis, sans matérialiser ni
-trier tout le cover de coefficient 1 ; choisir ensuite le seuil sur une courbe
+les huit comptes et s'arrête dès que le verdict est acquis, sans matérialiser
+tout le cover de coefficient 1 ; choisir ensuite le seuil sur une courbe
 par famille, pas sur un seul ratio local.
 
 Chemin court conseillé à Claude : séparer d'abord le mode corde des prétests
