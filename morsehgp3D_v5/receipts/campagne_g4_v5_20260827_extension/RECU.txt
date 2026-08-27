@@ -1,0 +1,60 @@
+# Session G4 v5 — campagne d echelle (temoin, lanes device, conformite v4, contrats 50 000 CPU et --gpu)
+date_utc=2026-08-27T22:06:31+00:00
+source_commit=ef5abbd5261763fc618692dd7cb9f6f24069dfea
+head_local=60c77ae74faa6bbde4a612a4af14b48f1ee985e1
+source_payload_sha256=52d557c3abc27b5220672e9729f250fd57949d8881bd1df402c6891709c0e0af
+protocol_manifest_sha256=605ddc2d14bed68a1e5d4ab97aa84a0e42b52110d7c4e151f9e984dfd531f890
+machine=g4-standard-48 SPOT europe-west4-ai1a, 48 fils, RTX PRO 6000 Blackwell
+protocole=gcp-migration/session_campagne_v5_scale_g4.sh (pin, gardes, arret certifie)
+
+# note
+Session 8 (pin ef5abbd5 : W_3 exact + secteurs en production ; avant les morceaux de corde et les pretests avant cover). Phases standard (temoin, lanes device, mutant, 12 conformites, 4 contrats CPU, 6 contrats --gpu) plus phase 2 bis EXTRA_N : contrats CPU a 100 000 et 200 000 points sur uniform, eight_clusters, scanline_single_pass (mesures : temps, RSS, digests graves comme reference v5 a ces tailles ; jamais un claim). Script de session execute depuis une copie.
+
+# run code duree_s peak_rss_kb
+conf_eight_clusters_n16000 0 29 5546504
+conf_eight_clusters_n32000 0 82 11154620
+conf_eight_clusters_n8000 0 11 2431236
+conf_scanline_single_pass_n16000 0 4 1095776
+conf_scanline_single_pass_n32000 0 11 1962924
+conf_scanline_single_pass_n8000 0 2 526124
+conf_terrain_n16000 0 4 1139864
+conf_terrain_n32000 0 10 2238484
+conf_terrain_n8000 0 1 527304
+conf_uniform_n16000 0 22 6317188
+conf_uniform_n32000 0 48 12664872
+conf_uniform_n8000 0 11 3263276
+contrat_eight_clusters_n100000 0 440 36834396
+contrat_eight_clusters_n200000 0 1457 59155832
+contrat_eight_clusters_n50000 0 232 17548092
+contrat_gpu_eight_clusters_n50000 0 173 17971872
+contrat_gpu_scanline_single_pass_n50000 0 24 5066932
+contrat_gpu_terrain_n50000 0 24 4780204
+contrat_gpu_uniform_n50000 0 82 18983236
+contrat_gpuad_eight_clusters_n50000 0 173 17424940
+contrat_gpuad_scanline_single_pass_n50000 0 24 4917596
+contrat_scanline_single_pass_n100000 0 89 6164212
+contrat_scanline_single_pass_n200000 0 503 11852660
+contrat_scanline_single_pass_n50000 0 23 3081872
+contrat_terrain_n50000 0 21 3416532
+contrat_uniform_n100000 0 166 40128708
+contrat_uniform_n200000 0 353 64659200
+contrat_uniform_n50000 0 79 19287424
+gpu_lane 0 76 1868632
+gpu_mutant 4 2 874396
+gpu_witness 0 12 872600
+contrat_eight_clusters_n100000 digest_all=8f4190af21b4a2ba1bd2b3b9f15e198c19aa4ffa7bfe76d72aa04fd8682aadb7
+contrat_eight_clusters_n200000 digest_all=80d0a97c5384f640d181728ef653b94c0e1c30a8211893d2030ac6cce83c916e
+contrat_eight_clusters_n50000 digest_all=b65c2b510d5a5e09170086fc3429290f0b0e960c97d652a53c483e39037f2158
+contrat_gpu_eight_clusters_n50000 digest_all=b65c2b510d5a5e09170086fc3429290f0b0e960c97d652a53c483e39037f2158
+contrat_gpu_scanline_single_pass_n50000 digest_all=7cc339c0f01987b6a0cff9045a8e5f8bec264baba4f8229027bb45e7e4ec8b26
+contrat_gpu_terrain_n50000 digest_all=700dbbc067bbebce48173d9cc1d1b79cf10274a0773ef4075abf014976e8bbb5
+contrat_gpu_uniform_n50000 digest_all=5fc1fdef4f439028b2f956dfcba22a5f9736a94e83d05e13e0eb362918cda2c0
+contrat_gpuad_eight_clusters_n50000 digest_all=b65c2b510d5a5e09170086fc3429290f0b0e960c97d652a53c483e39037f2158
+contrat_gpuad_scanline_single_pass_n50000 digest_all=7cc339c0f01987b6a0cff9045a8e5f8bec264baba4f8229027bb45e7e4ec8b26
+contrat_scanline_single_pass_n100000 digest_all=c5c402035ef4bb0c55f45af07a0d8ba6036d5f1ab7f6d953d3a8ab191727ba45
+contrat_scanline_single_pass_n200000 digest_all=84e4d8219becc7bef33ae1202ebce9d805419d58b634fc92745d499cb377a505
+contrat_scanline_single_pass_n50000 digest_all=7cc339c0f01987b6a0cff9045a8e5f8bec264baba4f8229027bb45e7e4ec8b26
+contrat_terrain_n50000 digest_all=700dbbc067bbebce48173d9cc1d1b79cf10274a0773ef4075abf014976e8bbb5
+contrat_uniform_n100000 digest_all=48658dacd847d55d7ed535d1592576f6fa468670460b9dbd9c615c7c727bb8a2
+contrat_uniform_n200000 digest_all=e1938f542e9be1f433619040a13a913a04bd10357cde57e91bfc96cf6420bcbb
+contrat_uniform_n50000 digest_all=5fc1fdef4f439028b2f956dfcba22a5f9736a94e83d05e13e0eb362918cda2c0

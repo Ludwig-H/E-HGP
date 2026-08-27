@@ -1,0 +1,9 @@
+code=0
+duree_s=89
+peak_rss_kb=6164212
+timing_scope=contract_extra
+threads=48
+source_commit=ef5abbd5261763fc618692dd7cb9f6f24069dfea
+source_payload_sha256=52d557c3abc27b5220672e9729f250fd57949d8881bd1df402c6891709c0e0af
+protocol_manifest_sha256=605ddc2d14bed68a1e5d4ab97aa84a0e42b52110d7c4e151f9e984dfd531f890
+finished=1

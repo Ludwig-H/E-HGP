@@ -103,7 +103,16 @@ conformités 8 k / 16 k / 32 k à code 0 (`eight_clusters` 32 k : 83 s contre
 d'ancre tuent avant matérialisation ; adaptatif 256 : 174 / 24 s. Lecture
 V8 : sur ce pin, ni le tout-device ni l'adaptatif n'ont de gain net à 50 k ;
 le résidu de la lane q3 CPU est la construction des covers, pas le scan.
-Après cette session, la lane q4 (65 s) domine : le **test de seed par
+**Session 8 (pin `ef5abbd5`, même code de génération que la 7, reçu
+`campagne_g4_v5_20260827_extension`, campagne complète, 31 runs)** —
+tailles d'extension CPU 48 fils : `uniform` 100 k **166 s** (40 Go),
+200 k **353 s** (65 Go) ; `eight_clusters` 100 k 440 s (gen 317 s : q3 90,
+q4 207), 200 k **1457 s** (gen 1188 s : q3 383, q4 758 ; 59 Go) ;
+`scanline` 100 k 89 s, 200 k 503 s (q4 379 s). Digests gravés comme
+référence v5 à ces tailles. Lecture : à l'échelle, la lane **q4** domine et
+croît plus vite que linéairement sur les familles denses — c'est ce que les
+morceaux de corde et les prétests avant cover (pins suivants) attaquent.
+Après la session 7, la lane q4 (65 s) domine : le **test de seed par
 morceaux de corde** (`MATHEMATIQUES.md` § 10, théorème 10.4) est entré en
 production (corps partagé, cœur shaped, kernel `k_q4_core` avec ballots par
 morceau) — à 8000 `eight_clusters` (ratio local) : complétions atteignant la

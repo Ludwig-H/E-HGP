@@ -1,0 +1,30 @@
+payload=mhgp5-forests-horizontal-v1 authority=status_terminal callbacks=provisional vertical_maps=none
+backend=cpu_reference
+famille=uniform n=200000 coord=584 s=8 smax=11 seed=3 threads=48 emis=90073254 boules_uniques=90053452 mortes_profondeur=901600 survivantes=89151852 census_int=464403283 census_shell=301315045 evenements=89779767 facettes=562339550 fusions=562299066 deltas=62826653 noeuds=50366416
+generation rect_alive=7114636/19524152/21798342 ancres=8892886/32805011/38927220 candidats=8594531/40576922/40901801 tues_profondeur=0/327666719/442602754 ancres_w4=11545898 ancres_w3=8473927 ancres_secteurs=4093894/7939941 seeds_core_tues=176939864 float_cert=7081234208/9583598745 repli=183167621 jung=2101010953/1815324847/3015
+ouvriers wspd=48/48/48 rects=48/48/48 rle=48 prefiltre=48 census=48 expansion=48 fold=48
+temps_ms index=34.0 gen=72675.5 (wspd 4347.0/19491.1/23139.4 rects 815.5/8760.6/16112.6) rle=8034.0 prefiltre=33958.8 census=18723.9 comptage=54.0 expansion=7966.7 fold=189696.1 (tri 8338.6 intern 28036.3 fusion 7909.2 reduce 144962.0) digest=64363.1
+temps_mur_ms=352833.5 (etages A et B du fold pipelines : fold+digest ci-dessus sont des cumuls par etage, pas le mur)
+cardinalites K=1 evenements=798730 facettes=200000 deltas=161097 attachements=0 fusions=199999 noeuds=161097
+cardinalites K=2 evenements=1728774 facettes=1664491 deltas=514473 attachements=813584 fusions=1664357 noeuds=454524
+cardinalites K=3 evenements=2994233 facettes=5480450 deltas=1391740 attachements=3465758 fusions=5480048 noeuds=1033753
+cardinalites K=4 evenements=4595796 facettes=12683753 deltas=2540507 attachements=8977342 fusions=12682767 noeuds=1920127
+cardinalites K=5 evenements=6531783 facettes=24287351 deltas=4011357 attachements=18355161 fusions=24285570 noeuds=3108199
+cardinalites K=6 evenements=8796137 facettes=41273893 deltas=5830179 attachements=32578751 fusions=41270815 noeuds=4594865
+cardinalites K=7 evenements=11387491 facettes=64627138 deltas=8001876 attachements=52634713 fusions=64622384 noeuds=6378474
+cardinalites K=8 evenements=14302521 facettes=95304458 deltas=10502082 attachements=79484921 fusions=95297506 noeuds=8447168
+cardinalites K=9 evenements=17541617 facettes=134287384 deltas=13352432 attachements=114108813 fusions=134277705 noeuds=10811528
+cardinalites K=10 evenements=21102685 facettes=182530632 deltas=16520910 attachements=157462157 fusions=182517915 noeuds=13456681
+digest_balls=5c1ebfde4005c1d180f1aee3d9b0f180f6552eb972d05a3aa6c7dcd53e06fb44
+digest_forest_K1=2814c99fe77777f50c06ae38c07a92a2c3f38417f9fbc0b09cf050d43e92db15
+digest_forest_K2=05a427edc4d5df0e3c83b5858d1486750be9f1d4c5f218ba77218a4d22144bd9
+digest_forest_K3=278294be21c41e8ddbf7b368f064cbf6ece736e1062ab2b70c796207814e5cd3
+digest_forest_K4=9a6027425ef08ab70e093d44f915c6104e4a41012e7335b803737a1d22bc60b9
+digest_forest_K5=2b6d5507f82a21c43c9599d6ebddb3ba1856a1235d2208a86ec277539f4dc0c3
+digest_forest_K6=446bbcd6be52dcdda658ff8eed7b2e03cff166af359267969cf7287ff4a61bbd
+digest_forest_K7=b38a69aaf77100efe884cad06d1bbb45d0ef781a1bbb2ebb0b4445bc8eedfad4
+digest_forest_K8=1d4aaf91cc01de895e392408e1f5f5adc70d15cf5477d397a9d21d6524ebc1f7
+digest_forest_K9=b92aa9b0060449a4f04f57e30a5472ef8f5afadfa86805722520845ecbff27ed
+digest_forest_K10=ab278034c96d48165da017a84013c52ad55622ef7aedfcb4217d5427b22195c9
+digest_all=e1938f542e9be1f433619040a13a913a04bd10357cde57e91bfc96cf6420bcbb
+rss_max_kb=64659200
