@@ -623,7 +623,8 @@ code 4 sur le device ; phase 1 : conformité
 `mhgp5_conformity_v4` aux tailles 8000/16000/32000 contre le reçu
 `morsehgp3D_v5/receipts/conformite_v4/digests_v4.txt` ; phase 2 : contrat
 50 000 points par `mhgp5 --digest`, 48 fils, RSS par GNU time — refusée si une
-conformité manque ; phase 3 : les mêmes contrats par `mhgp5_cuda --gpu`, dont
+conformité manque ; phase 3 : les mêmes contrats par `mhgp5_cuda --gpu`, puis les deux
+familles denses avec l'exécuteur adaptatif `--gpu-min-sites=256` ; chaque
 `digest_all` doit être identique au contrat CPU de la même famille) → rapatriement avec reprises → `validate_v5_campaign.py`
 (seule autorité du statut) → arrêt certifié `TERMINATED` par le trap. Porte
 transactionnelle sans GCP : `selftest_campagne_v5.sh` (onze scénarios, à

@@ -33,6 +33,10 @@ int main(int argc, char** argv) {
       const long long v = std::atoll(arg.c_str() + 19);
       if (v < 1) return 2;  // contrat : seuil >= 1
       lim.seeds = (size_t)v;
+    } else if (arg.rfind("--device-min-sites=", 0) == 0) {
+      const long long v = std::atoll(arg.c_str() + 19);
+      if (v < 1) return 2;
+      lim.device_min_sites = (size_t)v;
     } else if (arg.rfind("--sites-per-launch=", 0) == 0) {
       const long long v = std::atoll(arg.c_str() + 19);
       if (v < 1) return 2;
@@ -110,13 +114,14 @@ int main(int argc, char** argv) {
       if (!(a[i].key == b[i].key) || !(a[i].level == b[i].level) || a[i].arity != b[i].arity) ++m;
     return m;
   };
-  u64 vec_mism = threads == 1 ? count_mism(prod, batched) : 0;
+  u64 vec_mism = (threads == 1 && lim.device_min_sites == 1) ? count_mism(prod, batched) : 0;
   rle_candidates(&prod, 1);
   rle_candidates(&batched, 1);
   vec_mism += count_mism(prod, batched);
-  std::printf("q4_lane_batched famille=%s n=%d fils=%d seuil_seeds=%zu seuil_sites=%zu vidages=%llu max_lot_seeds=%llu max_ancre_seeds=%llu max_lot_sites=%llu max_ancre_sites=%llu max_lot_paires=%llu max_ancre_paires=%llu candidats_q4=%zu candidats_lots=%zu seeds=%llu coeur_tues=%llu completions=%llu "
+  std::printf("q4_lane_batched famille=%s n=%d fils=%d routage_min_sites=%zu ancres_device=%llu ancres_hote=%llu seeds_device=%llu seeds_hote=%llu vidages_hote=%llu seuil_seeds=%zu seuil_sites=%zu vidages=%llu max_lot_seeds=%llu max_ancre_seeds=%llu max_lot_sites=%llu max_ancre_sites=%llu max_lot_paires=%llu max_ancre_paires=%llu candidats_q4=%zu candidats_lots=%zu seeds=%llu coeur_tues=%llu completions=%llu "
               "profonds=%llu desaccords_vecteur=%llu desaccords_compteurs=%llu\n",
-              cloud_family_name(family), n, threads, lim.seeds, lim.sites, (unsigned long long)bs.flushes, (unsigned long long)bs.max_lot_seeds,
+              cloud_family_name(family), n, threads, lim.device_min_sites, (unsigned long long)bs.anchors_device, (unsigned long long)bs.anchors_host,
+              (unsigned long long)bs.seeds_device, (unsigned long long)bs.seeds_host, (unsigned long long)bs.host_flushes, lim.seeds, lim.sites, (unsigned long long)bs.flushes, (unsigned long long)bs.max_lot_seeds,
               (unsigned long long)bs.max_anchor_seeds, (unsigned long long)bs.max_lot_sites, (unsigned long long)bs.max_anchor_sites, (unsigned long long)bs.max_lot_pairs,
               (unsigned long long)bs.max_anchor_pairs, prod.size(), batched.size(), (unsigned long long)sp.seeds[1],
               (unsigned long long)sp.seeds_killed_core, (unsigned long long)sp.q4_completions,
@@ -127,7 +132,7 @@ int main(int argc, char** argv) {
   }
   // Contrat de lotissement : borne dure seuil + plus grosse ancre ; nombre de
   // vidages au moins min_flushes (un code ignorant le seuil resterait vert sinon).
-  if (bs.max_lot_seeds > (u64)lim.seeds + bs.max_anchor_seeds || bs.max_lot_sites > (u64)lim.sites + bs.max_anchor_sites || bs.max_lot_pairs > (u64)lim.pairs + bs.max_anchor_pairs || bs.flushes < min_flushes) {
+  if (bs.max_lot_seeds > (u64)lim.seeds + bs.max_anchor_seeds || bs.max_lot_sites > (u64)lim.sites + bs.max_anchor_sites || bs.max_lot_pairs > (u64)lim.pairs + bs.max_anchor_pairs || bs.flushes + bs.host_flushes < min_flushes) {
     std::printf("LOTISSEMENT : max_lot_seeds=%llu > seuil %zu + max_ancre %llu, ou vidages %llu < %llu\n",
                 (unsigned long long)bs.max_lot_seeds, lim.seeds, (unsigned long long)bs.max_anchor_seeds,
                 (unsigned long long)bs.flushes, (unsigned long long)min_flushes);

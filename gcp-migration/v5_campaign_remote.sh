@@ -131,6 +131,12 @@ if [ -x "${GPU_BIN:-/nonexistent}" ]; then
     run_one "contrat_gpu_${fam}_n50000" contract_50k_gpu \
       "${GPU_BIN}" --gpu "--family=${fam}" --n=50000 --s=8 --smax=11 --seed=3 "--threads=${THREADS}" --digest
   done
+  # Executeur ADAPTATIF (ancres de covers >= 256 sites au device, le reste a
+  # l'hote) sur les deux familles denses : meme digest exige.
+  for fam in eight_clusters scanline_single_pass; do
+    run_one "contrat_gpuad_${fam}_n50000" contract_50k_gpu_adaptive \
+      "${GPU_BIN}" --gpu --gpu-min-sites=256 "--family=${fam}" --n=50000 --s=8 --smax=11 --seed=3 "--threads=${THREADS}" --digest
+  done
 else
   echo "REFUS : pilote CUDA absent (${GPU_BIN:-}) — contrats device non executes"
 fi

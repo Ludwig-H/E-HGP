@@ -126,18 +126,29 @@ inline constexpr size_t kSitesPerLaunch = (size_t)1 << 20;
 inline constexpr size_t kPairsPerLaunch = (size_t)1 << 24;
 
 // Seuils de lot (seeds, sites, paires) — l'un ou l'autre declenche le vidage.
+// Politique de ROUTAGE par ancre (executeur adaptatif) : une ancre dont le
+// cover a au moins `device_min_sites` sites va au lot de l'executeur externe
+// (device) ; les autres vont a un second lot scanne par l'executeur HOTE aux
+// memes points de vidage. Les deux executeurs etant prouves egaux, l'objet
+// post-RLE ne depend pas de la politique (portes `route_*`) ; seul l'ordre
+// brut d'emission en depend (compare a un fil uniquement en routage nul).
+// 1 = tout au device (defaut) ; SIZE_MAX = tout a l'hote.
 struct BatchLimits {
   size_t seeds = kSeedsPerLaunch;
   size_t sites = kSitesPerLaunch;
   size_t pairs = kPairsPerLaunch;  // q4 seulement (estimation : seeds de l'ancre x sites de sa lentille)
+  size_t device_min_sites = 1;
 };
 
 // Mesures de lotissement d'une lane (par ouvrier, fusionnees par max/somme).
 struct BatchStats {
   u64 flushes = 0, max_lot_seeds = 0, max_anchor_seeds = 0, max_lot_sites = 0, max_anchor_sites = 0;
   u64 max_lot_pairs = 0, max_anchor_pairs = 0;  // q4
+  u64 anchors_device = 0, anchors_host = 0, seeds_device = 0, seeds_host = 0, host_flushes = 0;  // routage
   void add_from(const BatchStats& o) {
     flushes += o.flushes;
+    anchors_device += o.anchors_device; anchors_host += o.anchors_host;
+    seeds_device += o.seeds_device; seeds_host += o.seeds_host; host_flushes += o.host_flushes;
     max_lot_seeds = std::max(max_lot_seeds, o.max_lot_seeds);
     max_anchor_seeds = std::max(max_anchor_seeds, o.max_anchor_seeds);
     max_lot_sites = std::max(max_lot_sites, o.max_lot_sites);
@@ -152,8 +163,8 @@ struct BatchStats {
 // Compte anchors/anchors_killed_hist/seeds comme la lane de production.
 template <class Flush>
 inline void build_q3_batch(const CloudIndex& ix, const AliveRect& ar, const u64 h_of[3], bool float_on,
-                           generate_detail::AnchorScratch& sc, Q3Batch* b, GenerateStats* ls, const BatchLimits& lim,
-                           BatchStats* bs, Flush&& flush) {
+                           generate_detail::AnchorScratch& sc, Q3Batch* bdev, Q3Batch* bhost, GenerateStats* ls,
+                           const BatchLimits& lim, BatchStats* bs, Flush&& flush) {
   using namespace generate_detail;
   corner_histograms(ix, Lane::kQ3, ar.r, &sc.ha, &sc.hb);
   const NodeRange ra = ix.range_of(ar.r.a), rb = ix.range_of(ar.r.b);
@@ -173,6 +184,8 @@ inline void build_q3_batch(const CloudIndex& ix, const AliveRect& ar, const u64 
       anchor_cover_from_handles(ix, sc.handles, pa, pb, D2, 3, &sc.cover, &sc.visits, &sc.cover_tmp);
       sc.affine_filled = false;
       u32 aidx = std::numeric_limits<u32>::max();
+      const bool to_device = sc.cover.size() >= lim.device_min_sites;
+      Q3Batch* b = to_device ? bdev : bhost;
       const size_t seeds_before = b->seeds.size();
       for (const CoverPoint& cp : sc.cover) {
         if (cp.u == ua || cp.u == ub) continue;
@@ -209,7 +222,9 @@ inline void build_q3_batch(const CloudIndex& ix, const AliveRect& ar, const u64 
         const u64 anchor_seeds = (u64)b->seeds.size() - seeds_before;
         bs->max_anchor_seeds = std::max(bs->max_anchor_seeds, anchor_seeds);
         bs->max_anchor_sites = std::max(bs->max_anchor_sites, (u64)sc.cover.size());
-        if (b->seeds.size() >= lim.seeds || b->u0.size() >= lim.sites) flush();
+        if (to_device) { ++bs->anchors_device; bs->seeds_device += anchor_seeds; }
+        else { ++bs->anchors_host; bs->seeds_host += anchor_seeds; }
+        if (b->seeds.size() >= lim.seeds || b->u0.size() >= lim.sites) flush(to_device);
       }
     }
 }
@@ -282,21 +297,22 @@ inline void generate_q3_batched_with(const CloudIndex& ix, const GenerateOptions
   std::vector<std::vector<BallCandidate>> louts(T);
   std::vector<GenerateStats> lst(T);
   std::vector<AnchorScratch> lsc(T);
-  std::vector<Q3Batch> lb(T);
+  std::vector<Q3Batch> lb(T), lbh(T);  // lot device, lot hote (routage)
   std::vector<BatchStats> lbs(T);
-  const auto flush = [&](size_t t) {
-    if (lb[t].seeds.empty() && lb[t].anchors.empty()) return;
-    lbs[t].max_lot_seeds = std::max(lbs[t].max_lot_seeds, (u64)lb[t].seeds.size());
-    lbs[t].max_lot_sites = std::max(lbs[t].max_lot_sites, (u64)lb[t].u0.size());
-    ++lbs[t].flushes;
-    scan(&lb[t], (u32)h_of[1], nonstrict);
-    emit_q3_batch(lb[t], &louts[t], &lst[t]);
-    lb[t].clear();
+  const auto flush = [&](size_t t, bool device) {
+    Q3Batch& b = device ? lb[t] : lbh[t];
+    if (b.seeds.empty() && b.anchors.empty()) return;
+    lbs[t].max_lot_seeds = std::max(lbs[t].max_lot_seeds, (u64)b.seeds.size());
+    lbs[t].max_lot_sites = std::max(lbs[t].max_lot_sites, (u64)b.u0.size());
+    if (device) { ++lbs[t].flushes; scan(&b, (u32)h_of[1], nonstrict); }
+    else { ++lbs[t].host_flushes; scan_q3_batch_host(&b, (u32)h_of[1], nonstrict); }
+    emit_q3_batch(b, &louts[t], &lst[t]);
+    b.clear();
   };
   const size_t created = parallel_items(nrect, (int)T, [&](size_t i, size_t t) {
-    build_q3_batch(ix, alive[i], h_of, float_on, lsc[t], &lb[t], &lst[t], lim, &lbs[t], [&] { flush(t); });
+    build_q3_batch(ix, alive[i], h_of, float_on, lsc[t], &lb[t], &lbh[t], &lst[t], lim, &lbs[t], [&](bool dev) { flush(t, dev); });
   });
-  for (size_t t = 0; t < T; ++t) flush(t);
+  for (size_t t = 0; t < T; ++t) { flush(t, true); flush(t, false); }
   st->workers_rects[1] = std::max(st->workers_rects[1], (u64)created);
   const bool drop = MHGP5_MUTANT("par-drop-shard");
   for (size_t t = 0; t < T; ++t) {

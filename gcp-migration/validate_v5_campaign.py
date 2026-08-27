@@ -27,6 +27,8 @@ def expected_names():
         names.append(f"contrat_{fam}_n50000")
     for fam in FAMILIES:
         names.append(f"contrat_gpu_{fam}_n50000")
+    for fam in ("eight_clusters", "scanline_single_pass"):
+        names.append(f"contrat_gpuad_{fam}_n50000")
     return names
 
 
@@ -89,10 +91,10 @@ def main():
                     bad.append(f"{name}: scan {fam} absent, sous le plancher (1000 seeds) ou en desaccord")
             if "device_witness OK" not in body:
                 bad.append(f"{name}: temoin device non conforme")
-        if name.startswith("contrat_gpu_"):
+        if name.startswith("contrat_gpu_") or name.startswith("contrat_gpuad_"):
             if not re.search(r"^gpu=1 kernel_ms=", body, re.M):
                 bad.append(f"{name}: le run n'annonce pas gpu=1")
-            cpu_txt = os.path.join(out, name.replace("contrat_gpu_", "contrat_") + ".txt")
+            cpu_txt = os.path.join(out, name.replace("contrat_gpuad_", "contrat_").replace("contrat_gpu_", "contrat_") + ".txt")
             d_gpu = re.search(r"^digest_all=([0-9a-f]{64})$", body, re.M)
             d_cpu = None
             if os.path.exists(cpu_txt):
