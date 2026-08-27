@@ -37,6 +37,10 @@ int main(int argc, char** argv) {
       const long long v = std::atoll(arg.c_str() + 19);
       if (v < 1) return 2;
       lim.sites = (size_t)v;
+    } else if (arg.rfind("--pairs-per-launch=", 0) == 0) {
+      const long long v = std::atoll(arg.c_str() + 19);
+      if (v < 1) return 2;
+      lim.pairs = (size_t)v;
     } else if (arg.rfind("--min-flushes=", 0) == 0) min_flushes = (u64)std::atoll(arg.c_str() + 14);
     else return 2;
   }
@@ -110,10 +114,11 @@ int main(int argc, char** argv) {
   rle_candidates(&prod, 1);
   rle_candidates(&batched, 1);
   vec_mism += count_mism(prod, batched);
-  std::printf("q4_lane_batched famille=%s n=%d fils=%d seuil_seeds=%zu seuil_sites=%zu vidages=%llu max_lot_seeds=%llu max_ancre_seeds=%llu max_lot_sites=%llu max_ancre_sites=%llu candidats_q4=%zu candidats_lots=%zu seeds=%llu coeur_tues=%llu completions=%llu "
+  std::printf("q4_lane_batched famille=%s n=%d fils=%d seuil_seeds=%zu seuil_sites=%zu vidages=%llu max_lot_seeds=%llu max_ancre_seeds=%llu max_lot_sites=%llu max_ancre_sites=%llu max_lot_paires=%llu max_ancre_paires=%llu candidats_q4=%zu candidats_lots=%zu seeds=%llu coeur_tues=%llu completions=%llu "
               "profonds=%llu desaccords_vecteur=%llu desaccords_compteurs=%llu\n",
               cloud_family_name(family), n, threads, lim.seeds, lim.sites, (unsigned long long)bs.flushes, (unsigned long long)bs.max_lot_seeds,
-              (unsigned long long)bs.max_anchor_seeds, (unsigned long long)bs.max_lot_sites, (unsigned long long)bs.max_anchor_sites, prod.size(), batched.size(), (unsigned long long)sp.seeds[1],
+              (unsigned long long)bs.max_anchor_seeds, (unsigned long long)bs.max_lot_sites, (unsigned long long)bs.max_anchor_sites, (unsigned long long)bs.max_lot_pairs,
+              (unsigned long long)bs.max_anchor_pairs, prod.size(), batched.size(), (unsigned long long)sp.seeds[1],
               (unsigned long long)sp.seeds_killed_core, (unsigned long long)sp.q4_completions,
               (unsigned long long)sp.depth_killed[2], (unsigned long long)vec_mism, (unsigned long long)bad);
   if (sp.candidates[2] < min_candidates || sp.depth_killed[2] < min_deep || vacuous) {
@@ -122,7 +127,7 @@ int main(int argc, char** argv) {
   }
   // Contrat de lotissement : borne dure seuil + plus grosse ancre ; nombre de
   // vidages au moins min_flushes (un code ignorant le seuil resterait vert sinon).
-  if (bs.max_lot_seeds > (u64)lim.seeds + bs.max_anchor_seeds || bs.max_lot_sites > (u64)lim.sites + bs.max_anchor_sites || bs.flushes < min_flushes) {
+  if (bs.max_lot_seeds > (u64)lim.seeds + bs.max_anchor_seeds || bs.max_lot_sites > (u64)lim.sites + bs.max_anchor_sites || bs.max_lot_pairs > (u64)lim.pairs + bs.max_anchor_pairs || bs.flushes < min_flushes) {
     std::printf("LOTISSEMENT : max_lot_seeds=%llu > seuil %zu + max_ancre %llu, ou vidages %llu < %llu\n",
                 (unsigned long long)bs.max_lot_seeds, lim.seeds, (unsigned long long)bs.max_anchor_seeds,
                 (unsigned long long)bs.flushes, (unsigned long long)min_flushes);

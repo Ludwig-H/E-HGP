@@ -68,6 +68,7 @@ struct Q4StageCounts {
 };
 
 struct Q4Batch {
+  u64 pairs_estimate = 0;  // somme sur les ancres de (seeds x sites de lentille) : borne des paires du lot
   std::vector<i64> u0, u1, u2, q;
   std::vector<double> u0d, u1d, u2d, qd;
   std::vector<i64> px, py, pz;
@@ -79,6 +80,7 @@ struct Q4Batch {
   std::vector<Q4Emit> emits;            // executeur, ordre (seed, y)
   Q4StageCounts stages;                 // executeur
   void clear() {
+    pairs_estimate = 0;
     u0.clear(); u1.clear(); u2.clear(); q.clear();
     u0d.clear(); u1d.clear(); u2d.clear(); qd.clear();
     px.clear(); py.clear(); pz.clear(); pid.clear();
@@ -261,9 +263,13 @@ inline void build_q4_batch(const CloudIndex& ix, const AliveRect& ar, const u64 
         b->lens_sites.resize(lens_before);
         continue;
       }
-      bs->max_anchor_seeds = std::max(bs->max_anchor_seeds, (u64)(b->seeds.size() - seeds_before));
+      const u64 anchor_seeds = (u64)(b->seeds.size() - seeds_before);
+      const u64 anchor_pairs = anchor_seeds * (u64)an.lens_count;
+      b->pairs_estimate += anchor_pairs;
+      bs->max_anchor_seeds = std::max(bs->max_anchor_seeds, anchor_seeds);
       bs->max_anchor_sites = std::max(bs->max_anchor_sites, (u64)nc);
-      if (b->seeds.size() >= lim.seeds || b->u0.size() >= lim.sites) flush();
+      bs->max_anchor_pairs = std::max(bs->max_anchor_pairs, anchor_pairs);
+      if (b->seeds.size() >= lim.seeds || b->u0.size() >= lim.sites || b->pairs_estimate >= lim.pairs) flush();
     }
 }
 
@@ -360,7 +366,7 @@ inline void generate_q4_batched_with(const CloudIndex& ix, const GenerateOptions
                                      GenerateStats* st, Scan&& scan, BatchLimits lim = BatchLimits{},
                                      BatchStats* batch_stats = nullptr) {
   using namespace generate_detail;
-  if (lim.seeds < 1 || lim.sites < 1) throw std::invalid_argument("seuils de lot < 1");
+  if (lim.seeds < 1 || lim.sites < 1 || lim.pairs < 1) throw std::invalid_argument("seuils de lot < 1");
   const bool float_on = float_filter_runtime_enabled();
   const bool depth_nonstrict = MHGP5_MUTANT("genfilter-nonstrict");
   const bool core_nonstrict = MHGP5_MUTANT("q4-seed-core-nonstrict");
@@ -384,6 +390,7 @@ inline void generate_q4_batched_with(const CloudIndex& ix, const GenerateOptions
     if (lb[t].seeds.empty() && lb[t].anchors.empty()) return;
     lbs[t].max_lot_seeds = std::max(lbs[t].max_lot_seeds, (u64)lb[t].seeds.size());
     lbs[t].max_lot_sites = std::max(lbs[t].max_lot_sites, (u64)lb[t].u0.size());
+    lbs[t].max_lot_pairs = std::max(lbs[t].max_lot_pairs, lb[t].pairs_estimate);
     ++lbs[t].flushes;
     scan(&lb[t], (u32)h_of[2], core_nonstrict, depth_nonstrict, no_canonical);
     emit_q4_batch(lb[t], &louts[t], &lst[t]);

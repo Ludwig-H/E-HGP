@@ -1,0 +1,9 @@
+code=134
+duree_s=86
+peak_rss_kb=119629640
+timing_scope=contract_50k_gpu
+threads=48
+source_commit=2e75cb42c36c72ed90f931e0dbf49980e669d1d1
+source_payload_sha256=1b0fc85e7dffaeaee39eae8f939626f182ae2fb9a1c735c6fdd6df9d0abb16f3
+protocol_manifest_sha256=874282f984488012d2af54d61af30d4ec6cc6d81dd1f64a21b7a210818026df6
+finished=1

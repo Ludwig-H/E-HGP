@@ -9,9 +9,22 @@ exécution conforme, mesure, pin du reçu) :
 |---|---|---|---|---|---|
 | témoin device (DI128 + scan q3 warp) | `src/gpu/device_witness.cu` | oui | oui, 0 désaccord | — | `campagne_g4_v5_20260827_temoin_device` (`24b3f164`) |
 | lane q3 device | `src/gpu/q3_lane_device.cuh` | oui | oui, 1200 / 1200×4 fils / 8000×8 fils | temps kernel gravés, pas de banc apparié | idem |
-| lane q4 device | `src/gpu/q4_lane_device.cuh` | session `2e75cb42` (reçu à venir) | idem | idem | — |
-| pilote `mhgp5_cuda --gpu` (contrats 50 k) | `cli/mhgp5_cuda.cu` | session `2e75cb42` | `digest_all` = CPU exigé par le validateur | temps gravés | — |
+| lane q4 device | `src/gpu/q4_lane_device.cuh` | oui | oui, 1200 / 1200×4 fils / 8000×8 fils (157 M complétions, 0 désaccord) | temps kernel gravés | `campagne_g4_v5_20260827_lane_q4_device` (`2e75cb42`) |
+| pilote `mhgp5_cuda --gpu` (contrats 50 k) | `cli/mhgp5_cuda.cu` | oui | `uniform` et `terrain` : `digest_all` **identique** au contrat CPU ; `eight_clusters` et `scanline` : **abort** (`cudaMalloc : out of memory`, RSS 119 / 98 Go — paires q4 non bornées, corrigé en `a4e75d68`+, à recevoir) | GPU **plus lent** sur les familles régulières : `uniform` 87 s vs 78 s, `terrain` 41 s vs 23 s (génération 25,8 s vs 16,6 s, 31,4 s vs 13,7 s — coût hôte de matérialisation des lots ; kernels 15 s cumulés sur 48 fils) | idem (campagne `partial`) |
 | mutant du témoin sur device | `--inject=witness-no-warp-correction` | à recevoir (protocole : run `gpu_mutant`, code 4) | — | — | — |
+
+Lecture de la session `2e75cb42` : le lotissement fait tomber les lancements
+q3 à 8000 de 645 636 à 542 (kernel 6,6 s → 24 ms) ; l'égalité de bout en bout
+à 50 000 points avec les deux lanes device est établie sur `uniform` et
+`terrain` ; mais sur ces familles régulières le device **coûte** plus qu'il ne
+rapporte (les seeds y meurent tôt sur CPU, tandis que le lot copie tous les
+sites de toutes les ancres). Le gain attendu est sur les familles denses
+(`eight_clusters` : 94 + 88 s de lanes CPU à 48 fils), précisément celles qui
+ont manqué de mémoire — bornes en sites (`2^20`) et en paires (`2^24`)
+ajoutées, à mesurer. Suite prévue : un **exécuteur adaptatif** (une ancre va au
+device seulement si son travail estimé — seeds × sites — dépasse un seuil,
+sinon elle est scannée sur l'hôte dans le même pipeline ; les deux exécuteurs
+étant prouvés égaux, l'objet ne change pas) et le recouvrement des transferts.
 
 Ce qui n'a pas de reçu n'est pas reçu.
 

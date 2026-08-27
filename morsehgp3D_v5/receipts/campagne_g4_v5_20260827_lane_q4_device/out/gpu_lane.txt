@@ -1,0 +1,12 @@
+q3_lane_device famille=uniform n=1200 fils=1 candidats_q3=176245 seeds=3373964 tues=3197714 replis=768646 lancements=52 kernel_ms=1.7 desaccords_vecteur=0 desaccords_compteurs=0
+q3_lane_device OK
+q3_lane_device famille=eight_clusters n=1200 fils=4 candidats_q3=132902 seeds=25654567 tues=25521662 replis=747690 lancements=355 kernel_ms=11.9 desaccords_vecteur=0 desaccords_compteurs=0
+q3_lane_device OK
+q3_lane_device famille=uniform n=8000 fils=8 candidats_q3=1425821 seeds=35431544 tues=34005697 replis=6337898 lancements=542 kernel_ms=23.9 desaccords_vecteur=0 desaccords_compteurs=0
+q3_lane_device OK
+q4_lane_device famille=uniform n=1200 fils=1 candidats_q4=164256 lots=164256 seeds=2328769 coeur_tues=1730158 completions=17163965 profonds=1615939 lancements=108 kernel_ms=151.9 desaccords_vecteur=0 desaccords_compteurs=0
+q4_lane_device OK
+q4_lane_device famille=eight_clusters n=1200 fils=4 candidats_q4=111538 lots=111538 seeds=5971366 coeur_tues=5426407 completions=32673697 profonds=3012748 lancements=276 kernel_ms=279.7 desaccords_vecteur=0 desaccords_compteurs=0
+q4_lane_device OK
+q4_lane_device famille=uniform n=8000 fils=8 candidats_q4=1395536 lots=1395536 seeds=22495398 coeur_tues=17323417 completions=157485218 profonds=15084458 lancements=1038 kernel_ms=1615.4 desaccords_vecteur=0 desaccords_compteurs=0
+q4_lane_device OK

@@ -119,21 +119,31 @@ inline constexpr size_t kSeedsPerLaunch = (size_t)1 << 16;
 // ouvrier) : borne dure d'un lot = seuil + sites de la plus grosse ancre.
 inline constexpr size_t kSitesPerLaunch = (size_t)1 << 20;
 
-// Seuils de lot (seeds et sites) — l'un ou l'autre declenche le vidage.
+// Seuil de vidage en PAIRES (seed, y) pour q4 : le kernel de completion
+// ecrit un octet par paire (etage) et l'hote les rapatrie ; sans borne, un
+// lot de 2^16 seeds sur des lentilles de milliers de sites atteint des
+// centaines de Mo par ouvrier (session G4 2e75cb42 : 119 Go de RSS, abort).
+inline constexpr size_t kPairsPerLaunch = (size_t)1 << 24;
+
+// Seuils de lot (seeds, sites, paires) — l'un ou l'autre declenche le vidage.
 struct BatchLimits {
   size_t seeds = kSeedsPerLaunch;
   size_t sites = kSitesPerLaunch;
+  size_t pairs = kPairsPerLaunch;  // q4 seulement (estimation : seeds de l'ancre x sites de sa lentille)
 };
 
 // Mesures de lotissement d'une lane (par ouvrier, fusionnees par max/somme).
 struct BatchStats {
   u64 flushes = 0, max_lot_seeds = 0, max_anchor_seeds = 0, max_lot_sites = 0, max_anchor_sites = 0;
+  u64 max_lot_pairs = 0, max_anchor_pairs = 0;  // q4
   void add_from(const BatchStats& o) {
     flushes += o.flushes;
     max_lot_seeds = std::max(max_lot_seeds, o.max_lot_seeds);
     max_anchor_seeds = std::max(max_anchor_seeds, o.max_anchor_seeds);
     max_lot_sites = std::max(max_lot_sites, o.max_lot_sites);
     max_anchor_sites = std::max(max_anchor_sites, o.max_anchor_sites);
+    max_lot_pairs = std::max(max_lot_pairs, o.max_lot_pairs);
+    max_anchor_pairs = std::max(max_anchor_pairs, o.max_anchor_pairs);
   }
 };
 
@@ -254,7 +264,7 @@ inline void generate_q3_batched_with(const CloudIndex& ix, const GenerateOptions
                                      GenerateStats* st, Scan&& scan, BatchLimits lim = BatchLimits{},
                                      BatchStats* batch_stats = nullptr) {
   using namespace generate_detail;
-  if (lim.seeds < 1 || lim.sites < 1) throw std::invalid_argument("seuils de lot < 1");
+  if (lim.seeds < 1 || lim.sites < 1 || lim.pairs < 1) throw std::invalid_argument("seuils de lot < 1");
   const bool float_on = float_filter_runtime_enabled();
   const bool nonstrict = MHGP5_MUTANT("genfilter-nonstrict");
   const u64 h_of[3] = {lane_h(Lane::kQ2, opt.smax), lane_h(Lane::kQ3, opt.smax), lane_h(Lane::kQ4, opt.smax)};
