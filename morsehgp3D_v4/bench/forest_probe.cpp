@@ -128,7 +128,16 @@ struct Args {
   bool intern_bench = false;  // banc d'alternance des deux internements
   bool bench_report_gate = false;
   bool schedule_bench = false;
-  u64 fold_budget = 2ull << 30;  // 2 Gio par defaut
+  // 0 = A DERIVER de la memoire de la machine (resolu dans `main`, apres
+  // `derive_fold_budget`) ; non nul = impose par `--fold-memory-budget`.
+  u64 fold_budget = 0;
+  bool fold_budget_explicit = false;
+  u64 mem_available = 0;
+  bool inj_budget_ignore_host = false;
+  bool inj_budget_no_floor = false;
+  bool inj_budget_drop_finished = false;
+  bool fold_budget_gate = false;
+  bool fold_residency_gate = false;
   int bench_repeat = 10;
 };
 
@@ -234,8 +243,17 @@ Args parse(int argc, char** argv) {
     else if (arg == "--fold-intern-bench") a.intern_bench = true;
     else if (arg == "--bench-report-gate") a.bench_report_gate = true;
     else if (arg == "--fold-schedule-bench") a.schedule_bench = true;
-    else if (const char* v = val("--fold-memory-budget="))
+    else if (const char* v = val("--fold-memory-budget=")) {
       a.fold_budget = (u64)std::atoll(v);
+      a.fold_budget_explicit = true;
+    }
+    else if (arg == "--fold-budget-gate") a.fold_budget_gate = true;
+    else if (arg == "--fold-residency-gate") a.fold_residency_gate = true;
+    else if (arg == "--inject=budget-ignore-host")
+      a.inj_budget_ignore_host = true;
+    else if (arg == "--inject=budget-no-floor") a.inj_budget_no_floor = true;
+    else if (arg == "--inject=budget-drop-finished")
+      a.inj_budget_drop_finished = true;
     else if (const char* v = val("--bench-repeat=")) a.bench_repeat = std::atoi(v);
     else if (arg == "--inject=intern-fid-first-seen") a.inj_fold_intern = 1;
     else if (arg == "--inject=intern-hash-no-verify") a.inj_fold_intern = 2;
@@ -403,6 +421,71 @@ u64 fold_bytes_upper(const std::vector<ForestEvent>& ev) {
   return fold_bytes_upper_from_counts((u64)ev.size(), W);
 }
 
+// ---- BUDGET DU FOLD : DERIVE DE LA MACHINE, PAS UNE CONSTANTE --------
+// LA FAUTE QUE CECI CORRIGE, et elle visait droit sur la campagne G4.
+// Le budget etait ecrit en dur a 2 Gio. Ce chiffre n'est pas neutre :
+// c'est EXACTEMENT le huitieme des 16 Gio de RAM du conteneur ou il a
+// ete calibre. Ecrit en dur, il voyage avec le binaire et devient faux
+// des qu'on change de machine.
+//
+// Sur la `g4-standard-48` de la campagne (48 vCPU, 180 Go de RAM,
+// `gcp-migration/deploy.sh:210`), 2 Gio valent 1,1 % de la memoire. Or
+// la borne d'un SEUL fold depasse ce budget bien avant n=64000 —
+// MESURE, pas extrapole, au preflight :
+//
+//   n= 8000 : m_K max = 1,44 Gio        -> 0 fold force a etre seul
+//   n=16000 : m_K max = 3,02 Gio        -> K=9 et K=10 forces SEULS
+//   n=32000 : m_K max ~ 6,8 Gio         -> K=7..10 forces seuls
+//   n=64000 : m_K max ~ 14,2 Gio        -> K=5..10 forces seuls
+//
+// Et K=5..10 portent 94 % des incidences. A la phase `n64000` de la
+// campagne, la garde anti-blocage de `run_folds_budgeted` (« si ca ne
+// tient pas dans le budget, on l'admet SEUL ») aurait donc serialise
+// l'essentiel du fold — aujourd'hui le POSTE DOMINANT — sur une machine
+// a 48 coeurs louee pour mesurer la montee en fils. La campagne aurait
+// mesure le budget, pas la machine.
+//
+// LA REGLE : une FRACTION de la memoire disponible, lue UNE FOIS, avec
+// un PLANCHER a l'ancienne constante pour ne jamais degrader une petite
+// machine. Le quart est choisi pour que la SOMME des dix folds tienne
+// quand la machine le permet (46,8 Gio a n=64000 contre 45 Gio pour
+// 180 Go / 4), c'est-a-dire pour que la concurrence soit bornee par les
+// coeurs et non par une constante.
+//
+// CE QUE CELA NE CHANGE PAS : ni l'objet, ni les digests. La porte a
+// trois modes d'ordonnancement l'a etabli — signature identique aux
+// trois. Seules la latence et la reserve bougent. Et le budget retenu
+// est PUBLIE avec sa provenance sur la ligne `fold_ordonnancement`,
+// donc aucun recu ne peut etre relu sans savoir sous quel budget il a
+// ete obtenu.
+constexpr u64 kFoldBudgetFloor = 2ull << 30;  // l'ancienne constante
+constexpr u64 kFoldBudgetDivisor = 4;
+
+u64 host_mem_available_bytes() {
+  std::FILE* f = std::fopen("/proc/meminfo", "r");
+  if (!f) return 0;
+  char line[256];
+  u64 kib = 0;
+  while (std::fgets(line, sizeof(line), f))
+    if (std::strncmp(line, "MemAvailable:", 13) == 0) {
+      kib = (u64)std::strtoull(line + 13, nullptr, 10);
+      break;
+    }
+  std::fclose(f);
+  return kib * 1024;
+}
+
+// `mutant_ignore_host` = l'ancien comportement (constante seule) ;
+// `mutant_no_floor` supprime le plancher, ce qui ferait tomber une
+// petite machine SOUS le budget d'hier.
+u64 derive_fold_budget(u64 avail, bool mutant_ignore_host = false,
+                       bool mutant_no_floor = false) {
+  if (mutant_ignore_host) return kFoldBudgetFloor;
+  const u64 part = avail / kFoldBudgetDivisor;
+  if (mutant_no_floor) return part;
+  return part > kFoldBudgetFloor ? part : kFoldBudgetFloor;
+}
+
 // ---- PIC DE RESIDENCE PROJETE (le plafond transactionnel) ------------
 // LA FAUTE QUE CECI CORRIGE. Le plafond `--max-output-bytes` decidait
 // sur `evenements * sizeof(ForestEvent)` SEUL. A n=8000 ce terme vaut
@@ -442,13 +525,34 @@ u64 fold_bytes_upper(const std::vector<ForestEvent>& ev) {
 //      budget, et le plafond refuserait un run qui tient largement. Un
 //      majorant qui refuse a tort est une faute au meme titre qu'un
 //      majorant qui accepte a tort.
+//
+// CORRECTION APRES L'AUDIT `bab37b9` § 4 — CE QUI PRECEDE ETAIT FAUX.
+// La borne `min(max(budget, max_K m_K), Sigma_K m_K)` est correcte pour
+// la VARIABLE D'ORDONNANCEMENT `reserved`, et je l'avais identifiee a la
+// residence du fold. C'est invalide : `run_folds_budgeted` fait
+// `reserved -= bytes[idx]` des que la tache RETOURNE, alors que la tache
+// a deplace son resultat dans `per_k_result[K]` — `nodes`, `deltas`,
+// `batch_levels`, `batch_of_event`, `facet_keys` et `final_canon_fid`
+// restent VIVANTS jusqu'a la fin des dix folds. Les sorties terminees
+// s'accumulent pendant que leur `m_K` sort du compte.
+//
+// La contre-preuve de l'auditeur, sur le recu n=8000, est sans appel :
+// le seul etat final OBLIGATOIRE vaut 2 599 581 876 octets, alors que
+// j'annoncais un « pic » de 2 597 650 400. La garde acceptait donc un
+// calcul dont l'etat final connu depassait deja le plafond annonce.
+//
+// STOPGAP EXIGE (§ 4.3) : decider sur `bytes_events + Sigma_K m_K`. Il
+// peut refuser trop tot — il ne ment pas. Et il ne s'appelle plus un
+// pic : `bytes_borne` est un MAJORANT CONSERVATEUR DU TRAVAIL CUMULE,
+// pas une residence. Le modele final devra separer sortie persistante,
+// sortie en construction, temporaires des folds actifs et amont ; ce
+// n'est pas fait ici et le § « ce qui reste ouvert » le dit.
 struct OutputBudget {
-  u64 bytes_events = 0;     // Sigma_K E_K * sizeof(ForestEvent)
-  u64 bytes_fold_sum = 0;   // Sigma_K m_K
-  u64 bytes_fold_max = 0;   // max_K m_K
-  int fold_max_k = 0;       // son argmax
-  u64 bytes_fold_peak = 0;  // min(max(budget, max_K m_K), Sigma_K m_K)
-  u64 bytes_peak = 0;       // le pic projete
+  u64 bytes_events = 0;    // Sigma_K E_K * sizeof(ForestEvent)
+  u64 bytes_fold_sum = 0;  // Sigma_K m_K
+  u64 bytes_fold_max = 0;  // max_K m_K
+  int fold_max_k = 0;      // son argmax
+  u64 bytes_bound = 0;     // LA DECISION : bytes_events + Sigma_K m_K
 };
 
 // `mutant_events_only` restaure exactement l'ancien comportement : le
@@ -457,7 +561,8 @@ struct OutputBudget {
 // menteur, et seule une porte de DECISION peut le voir.
 OutputBudget project_output_budget(const u64* E, const u64* W, int kmax,
                                    u64 fold_budget,
-                                   bool mutant_events_only = false) {
+                                   bool mutant_events_only = false,
+                                   bool mutant_drop_finished = false) {
   OutputBudget b;
   for (int K = 1; K <= kmax; ++K) {
     b.bytes_events += E[K] * (u64)sizeof(ForestEvent);
@@ -468,12 +573,221 @@ OutputBudget project_output_budget(const u64* E, const u64* W, int kmax,
       b.fold_max_k = K;
     }
   }
-  b.bytes_fold_peak = std::max(fold_budget, b.bytes_fold_max);
-  if (b.bytes_fold_sum < b.bytes_fold_peak)
-    b.bytes_fold_peak = b.bytes_fold_sum;
-  if (mutant_events_only) b.bytes_fold_peak = 0;
-  b.bytes_peak = b.bytes_events + b.bytes_fold_peak;
+  // MUTANT `budget-drop-finished` : l'ancienne formule, celle que
+  // l'audit rejette — elle oublie les resultats deja termines.
+  const u64 terme = mutant_events_only
+                        ? 0
+                        : (mutant_drop_finished
+                               ? std::min(std::max(fold_budget, b.bytes_fold_max),
+                                          b.bytes_fold_sum)
+                               : b.bytes_fold_sum);
+  b.bytes_bound = b.bytes_events + terme;
   return b;
+}
+
+// Defini plus bas (il a besoin de tout l'amont du pipeline) ; declare
+// ici parce que la porte de residence en depend.
+int build_events_for_bench(const Args& a,
+                           std::vector<std::vector<ForestEvent>>* evk,
+                           u64* kmax_out);
+
+// ---- OCTETS PERSISTANTS D'UN RESULTAT DE FOLD ------------------------
+// Mesures sur l'OBJET VIVANT, a partir des `sizeof` reels des types
+// persistants — jamais a partir de la formule du plafond. C'est ce que
+// l'audit `bab37b9` § 4.3 appelle « une autorite independante fondee au
+// minimum sur les tailles reelles de `ForestResult` ».
+// C'est un MINORANT : il ignore la capacite excedentaire des vecteurs,
+// la fragmentation de l'allocateur et la vue `final_partition`.
+u64 forest_result_persistent_bytes(const ForestResult& r) {
+  u64 b = 0;
+  b += r.nodes.size() * (u64)sizeof(ForestNode);
+  b += r.deltas.size() * (u64)sizeof(ComponentDelta);
+  for (const ComponentDelta& d : r.deltas)
+    b += (d.parents.size() + d.born.size()) * (u64)sizeof(FacetKey);
+  b += r.batch_levels.size() * (u64)sizeof(Q4Level);
+  b += r.batch_of_event.size() * (u64)sizeof(u64);
+  b += r.facet_keys.size() * (u64)sizeof(FacetKey);
+  b += r.final_canon_fid.size() * (u64)sizeof(u32);
+  return b;
+}
+
+// ---- PORTE DE RESIDENCE SUR OBJETS VIVANTS ---------------------------
+// L'audit exige « une fixture ou plusieurs `ForestResult` termines
+// restent vivants ». C'est litteralement ce que fait cette porte : elle
+// deroule les dix folds, GARDE LES DIX RESULTATS, puis mesure ce qu'ils
+// pesent reellement. Aucune ligne de `project_output_budget` n'entre
+// dans la mesure ; la formule n'est que l'accusee.
+//
+// Ce qu'elle etablit, et que la porte gravee ne peut pas etablir :
+//   1. les sorties terminees s'ACCUMULENT — la somme des dix depasse
+//      largement le plus gros pris seul, donc oublier les termines n'est
+//      pas une approximation, c'est un changement d'ordre de grandeur ;
+//   2. la borne annoncee couvre `evenements + somme des dix` ;
+//   3. l'ancienne formule, elle, ne la couvre pas a cette taille.
+int run_fold_residency_gate(const Args& a, bool inj_drop_finished) {
+  std::vector<std::vector<ForestEvent>> evk;
+  u64 kmax = 0;
+  if (build_events_for_bench(a, &evk, &kmax) != 0) return 3;
+  const int nk = (int)kmax;
+  if (nk < 2) return 3;
+  u64 E[11] = {}, W[11] = {};
+  for (int K = 1; K <= nk; ++K) {
+    E[K] = evk[(size_t)K].size();
+    for (const ForestEvent& e : evk[(size_t)K]) W[K] += (u64)e.q + e.d;
+  }
+  // LES DIX RESULTATS RESTENT VIVANTS — c'est tout l'objet de la porte.
+  std::vector<ForestResult> res((size_t)nk + 1);
+  for (int K = 1; K <= nk; ++K)
+    res[(size_t)K] = build_forest(evk[(size_t)K], false, false, nullptr, false,
+                                  false, false, false);
+  u64 persist_total = 0, persist_max = 0, non_vides = 0;
+  for (int K = 1; K <= nk; ++K) {
+    const u64 b = forest_result_persistent_bytes(res[(size_t)K]);
+    persist_total += b;
+    if (b > persist_max) persist_max = b;
+    if (b > 0) ++non_vides;
+  }
+  const u64 budget = 2ull << 30;
+  const OutputBudget ob =
+      project_output_budget(E, W, nk, budget, false, inj_drop_finished);
+  const u64 requis = ob.bytes_events + persist_total;
+  u64 bad = 0;
+  if (ob.bytes_bound < requis) {
+    std::fprintf(stderr,
+                 "RESIDENCE VIVANTE : borne %llu < evenements %llu + dix "
+                 "resultats vivants %llu (manque %llu)\n",
+                 (unsigned long long)ob.bytes_bound,
+                 (unsigned long long)ob.bytes_events,
+                 (unsigned long long)persist_total,
+                 (unsigned long long)(requis - ob.bytes_bound));
+    ++bad;
+  }
+  // PLANCHERS : sans accumulation reelle, la porte ne dirait rien.
+  if (non_vides < 5 || persist_total < persist_max * 2) {
+    std::fprintf(stderr,
+                 "PLANCHER : %llu folds non vides, somme %llu vs plus gros "
+                 "%llu — pas d'accumulation a observer\n",
+                 (unsigned long long)non_vides,
+                 (unsigned long long)persist_total,
+                 (unsigned long long)persist_max);
+    ++bad;
+  }
+  std::printf("fold_residency_gate violations=%llu n=%d folds=%d "
+              "bytes_evenements=%llu persistants_somme=%llu "
+              "persistants_max=%llu requis=%llu bytes_borne=%llu "
+              "marge=%lld\n",
+              (unsigned long long)bad, a.n, nk,
+              (unsigned long long)ob.bytes_events,
+              (unsigned long long)persist_total,
+              (unsigned long long)persist_max, (unsigned long long)requis,
+              (unsigned long long)ob.bytes_bound,
+              (long long)((long long)ob.bytes_bound - (long long)requis));
+  if (inj_drop_finished) {
+    if (bad > 0) {
+      std::printf("MUTANT TUE\n");
+      return 4;
+    }
+    std::fprintf(stderr, "PORTE INEFFICACE : mutant non discrimine\n");
+    return 3;
+  }
+  return bad ? 3 : 0;
+}
+
+// ---- PORTE DU BUDGET DE FOLD -----------------------------------------
+// PORTE DE DECISION, sans allocation ni fold. Ce qu'elle garde n'est pas
+// une vitesse : c'est que le budget SUIVE LA MACHINE. Un budget ecrit en
+// dur ne plante pas, ne change aucun digest, et ne se voit sur aucun
+// chrono pris ici — il ne se voit que sur la machine de la campagne, ou
+// il serait trop tard.
+//
+// Les comptes par K sont GRAVES et MESURES au preflight reel a n=16000
+// (`uniform`, s=8, smax=11, seed=3), pas extrapoles : c'est la taille
+// d'interet mediane, et elle suffit deja a exhiber la faute.
+int run_fold_budget_gate(bool inj_ignore_host, bool inj_no_floor) {
+  static const u64 kE[10] = {61771,  131526,  225431,  343070,  483902,
+                             647302, 832534,  1039564, 1268964, 1520660};
+  static const u64 kW[10] = {123542,  394578,  901724,  1715350,  2903412,
+                             4531114, 6660272, 9356076, 12689640, 16727260};
+  const u64 G = 1ull << 30;
+  u64 bad = 0;
+  const auto seuls = [&](u64 budget) {
+    u64 c = 0;
+    for (int k = 0; k < 10; ++k)
+      if (fold_bytes_upper_from_counts(kE[k], kW[k]) > budget) ++c;
+    return c;
+  };
+  u64 somme = 0, plus_gros = 0;
+  for (int k = 0; k < 10; ++k) {
+    const u64 m = fold_bytes_upper_from_counts(kE[k], kW[k]);
+    somme += m;
+    if (m > plus_gros) plus_gros = m;
+  }
+  // CAS 1 — LA FIXTURE QUI PORTE LA FAUTE : sous l'ancienne constante,
+  // des folds de n=16000 depassent DEJA le budget a eux seuls, donc la
+  // garde anti-blocage les admet SEULS. Si ce constat cessait d'etre
+  // vrai, cette porte perdrait son objet et doit le dire.
+  const u64 seuls_plancher = seuls(kFoldBudgetFloor);
+  if (seuls_plancher < 1) {
+    std::fprintf(stderr,
+                 "FIXTURE : plus aucun fold de n=16000 ne depasse %llu\n",
+                 (unsigned long long)kFoldBudgetFloor);
+    ++bad;
+  }
+  // CAS 2 — SUR LA MACHINE DE LA CAMPAGNE, PLUS AUCUN. 180 Go de RAM
+  // (`gcp-migration/deploy.sh:210`) ; on exige que le budget derive
+  // couvre la SOMME des dix folds de n=16000, c'est-a-dire que la
+  // concurrence soit bornee par les coeurs et non par une constante.
+  const u64 ram_g4 = 180ull * G;
+  const u64 bud_g4 = derive_fold_budget(ram_g4, inj_ignore_host, inj_no_floor);
+  if (seuls(bud_g4) != 0 || bud_g4 < somme) {
+    std::fprintf(stderr,
+                 "BUDGET : sur 180 Go le budget derive vaut %llu ; %llu folds "
+                 "encore forces a etre seuls, somme=%llu\n",
+                 (unsigned long long)bud_g4, (unsigned long long)seuls(bud_g4),
+                 (unsigned long long)somme);
+    ++bad;
+  }
+  // CAS 3 — PLANCHER : une machine minuscule ne doit JAMAIS descendre
+  // sous l'ancienne constante. C'est ce qui garantit qu'aucun recu
+  // anterieur n'est invalide par ce changement.
+  for (const u64 petite : {256ull << 20, 1ull << 30, 4ull << 30}) {
+    if (derive_fold_budget(petite, inj_ignore_host, inj_no_floor) <
+        kFoldBudgetFloor) {
+      std::fprintf(stderr, "BUDGET : %llu Mo d'hote donnent moins que le "
+                           "plancher\n",
+                   (unsigned long long)(petite >> 20));
+      ++bad;
+    }
+  }
+  // CAS 4 — MONOTONIE : plus de memoire ne doit jamais donner moins de
+  // budget. Un mutant qui ignore l'hote la satisfait aussi (constante) —
+  // ce cas n'est donc pas discriminant, il est la pour interdire une
+  // derivation biscornue.
+  u64 prev = 0;
+  for (u64 ram = 1ull << 30; ram <= 512ull * G; ram <<= 1) {
+    const u64 b = derive_fold_budget(ram, inj_ignore_host, inj_no_floor);
+    if (b < prev) {
+      std::fprintf(stderr, "BUDGET : derivation non monotone\n");
+      ++bad;
+    }
+    prev = b;
+  }
+  std::printf("fold_budget_gate violations=%llu plancher=%llu somme_n16000=%llu "
+              "plus_gros_n16000=%llu seuls_sous_plancher=%llu budget_g4=%llu "
+              "seuls_sous_g4=%llu\n",
+              (unsigned long long)bad, (unsigned long long)kFoldBudgetFloor,
+              (unsigned long long)somme, (unsigned long long)plus_gros,
+              (unsigned long long)seuls_plancher, (unsigned long long)bud_g4,
+              (unsigned long long)seuls(bud_g4));
+  if (inj_ignore_host || inj_no_floor) {
+    if (bad > 0) {
+      std::printf("MUTANT TUE\n");
+      return 4;
+    }
+    std::fprintf(stderr, "PORTE INEFFICACE : mutant non discrimine\n");
+    return 3;
+  }
+  return bad ? 3 : 0;
 }
 
 // ---- PORTE DU PLAFOND DE SORTIE --------------------------------------
@@ -490,101 +804,111 @@ OutputBudget project_output_budget(const u64* E, const u64* W, int kmax,
 // releves le 19 aout. Une fixture tiree du regime d'interet vaut mieux
 // qu'une fixture inventee : si la forme par K changeait au point de
 // rendre le terme du fold negligeable, la porte le dirait.
-int run_output_budget_gate(bool inj_events_only) {
+int run_output_budget_gate(bool inj_events_only, bool inj_drop_finished) {
   static const u64 kE[11] = {0,      30581,  64097,  109455, 165548, 232523,
                              310254, 397786, 495262, 602212, 718440};
   static const u64 kW[11] = {0,       61162,   192291,  437820,  827740,
                              1395138, 2171778, 3182288, 4457358, 6022120,
                              7902840};
-  const u64 budget = 2ull << 30;  // le defaut de `--fold-memory-budget`
-  const OutputBudget ob = project_output_budget(kE, kW, 10, budget,
-                                                inj_events_only);
-  const OutputBudget ref = project_output_budget(kE, kW, 10, budget, false);
-  u64 bad = 0, refus_par_le_fold = 0, acceptations = 0, pics_par_k = 0;
+  const u64 budget = 2ull << 30;  // fige : une porte ne depend pas de la RAM
+  const OutputBudget ob =
+      project_output_budget(kE, kW, 10, budget, inj_events_only,
+                            inj_drop_finished);
+  const OutputBudget ref = project_output_budget(kE, kW, 10, budget);
+
+  // ---- L'AUTORITE INDEPENDANTE, ET ELLE N'EST PAS LA FORMULE ---------
+  // L'audit `bab37b9` § 4.3 reproche a la porte precedente d'etre
+  // AUTO-REFERENTIELLE : elle comparait la decision de la formule a la
+  // meme formule gravee. L'autorite est donc reconstruite ici a partir
+  // de comptes FINAUX du recu n=8000 et des `sizeof` REELS des types
+  // persistants — aucune ligne de `project_output_budget` n'y entre.
+  //
+  // Comptes du recu `campagne_locale_n8000_v2_20260818/` :
+  const u64 n_evenements = 3126158;
+  const u64 n_facettes_denses = 19466907;
+  const u64 n_deltas = 2791148;
+  const u64 n_facettes_born = 16177847;
+  const u64 n_noeuds = 1974086;
+  // MINORANT de l'etat final obligatoire : en-tetes de deltas sans
+  // AUCUN parent, cles des seuls vecteurs `born`, partition dense,
+  // nœuds, lot de chaque evenement, evenements. Il exclut volontairement
+  // les parents, `batch_levels`, les capacites excedentaires et l'amont.
+  const u64 minorant_final =
+      n_evenements * (u64)sizeof(ForestEvent) +
+      n_facettes_denses * ((u64)sizeof(FacetKey) + (u64)sizeof(u32)) +
+      n_deltas * (u64)sizeof(ComponentDelta) +
+      n_facettes_born * (u64)sizeof(FacetKey) +
+      n_noeuds * (u64)sizeof(ForestNode) +
+      n_evenements * (u64)sizeof(u64);
+  u64 bad = 0, acceptations = 0, refus = 0;
   const auto accepte = [](const OutputBudget& b, u64 ceiling) {
-    return b.bytes_peak <= ceiling;
+    return b.bytes_bound <= ceiling;
   };
-  // CAS 1 — LE CAS DISCRIMINANT : un plafond STRICTEMENT entre le flux
-  // d'evenements et le pic. La garde honnete refuse, la garde d'avant
-  // acceptait puis laissait le fold reserver ~5,8 fois le plafond.
-  {
-    const u64 ceiling = (ref.bytes_events + ref.bytes_peak) / 2;
-    if (!(ref.bytes_events <= ceiling && ceiling < ref.bytes_peak)) {
-      std::fprintf(stderr, "FIXTURE : le plafond median n'encadre plus\n");
-      ++bad;
-    } else {
-      ++refus_par_le_fold;
-      if (accepte(ob, ceiling)) {
-        std::fprintf(stderr,
-                     "PLAFOND : pic %llu accepte sous un plafond de %llu\n",
-                     (unsigned long long)ref.bytes_peak,
-                     (unsigned long long)ceiling);
-        ++bad;
-      }
-    }
+
+  // CAS 1 — LE CAS QUI A TUE LA VERSION PRECEDENTE. La borne annoncee
+  // doit couvrir le seul etat final OBLIGATOIRE. L'ancienne formule
+  // annoncait 2 597 650 400 pour un minorant de 2 599 581 876 : elle
+  // promettait moins que ce qu'il faut de toute facon.
+  if (ob.bytes_bound < minorant_final) {
+    std::fprintf(stderr,
+                 "RESIDENCE : borne annoncee %llu < minorant de l'etat "
+                 "final %llu (manque %llu)\n",
+                 (unsigned long long)ob.bytes_bound,
+                 (unsigned long long)minorant_final,
+                 (unsigned long long)(minorant_final - ob.bytes_bound));
+    ++bad;
   }
-  // CAS 2 — PLANCHER D'ACCEPTATION : au-dessus du pic, la garde doit
-  // laisser passer. Sans lui, « refuser toujours » serait vert.
+  // CAS 2 — LA FIXTURE PORTE BIEN LA FAUTE : sous l'ancienne formule le
+  // minorant est franchi. Si ce n'etait plus vrai, la porte perdrait son
+  // objet et doit le dire plutot que rester verte.
   {
-    const u64 ceiling = ref.bytes_peak + 1;
-    if (!accepte(ob, ceiling)) {
-      std::fprintf(stderr, "PLAFOND : refus au-dessus du pic projete\n");
-      ++bad;
-    } else {
-      ++acceptations;
-    }
-  }
-  // CAS 3 — L'ANCIENNE GARANTIE N'EST PAS PERDUE : sous le flux
-  // d'evenements seul, le refus doit tomber comme avant.
-  {
-    const u64 ceiling = ref.bytes_events - 1;
-    if (accepte(ob, ceiling)) {
-      std::fprintf(stderr, "PLAFOND : acceptation sous le flux d'evenements\n");
+    const OutputBudget vieux =
+        project_output_budget(kE, kW, 10, budget, false, true);
+    if (vieux.bytes_bound >= minorant_final) {
+      std::fprintf(stderr,
+                   "FIXTURE : l'ancienne formule ne franchit plus le "
+                   "minorant (%llu >= %llu)\n",
+                   (unsigned long long)vieux.bytes_bound,
+                   (unsigned long long)minorant_final);
       ++bad;
     }
   }
-  // CAS 4 — LE TERME DU FOLD EST UN MAXIMUM, PAS LE BUDGET : un seul K
-  // dont la borne depasse le budget doit dominer le pic (garde
-  // anti-blocage de `run_folds_budgeted` : une tache hors budget est
-  // admise SEULE, donc la reserve peut valoir sa propre borne).
-  {
-    u64 gE[11], gW[11];
-    for (int K = 0; K <= 10; ++K) {
-      gE[K] = kE[K];
-      gW[K] = kW[K];
-    }
-    gW[10] = 30000000;  // grave : la borne de K=10 passe au-dessus de 2 Gio
-    const OutputBudget big = project_output_budget(gE, gW, 10, budget,
-                                                   inj_events_only);
-    const OutputBudget bigref = project_output_budget(gE, gW, 10, budget,
-                                                      false);
-    if (bigref.fold_max_k != 10 || bigref.bytes_fold_peak <= budget) {
-      std::fprintf(stderr, "FIXTURE : K=10 ne domine plus le budget\n");
-      ++bad;
-    } else {
-      ++pics_par_k;
-      if (big.bytes_peak != bigref.bytes_peak) {
-        std::fprintf(stderr, "PLAFOND : pic %llu au lieu de %llu (K=%d)\n",
-                     (unsigned long long)big.bytes_peak,
-                     (unsigned long long)bigref.bytes_peak,
-                     bigref.fold_max_k);
-        ++bad;
-      }
-    }
+  // CAS 3 — PLANCHER D'ACCEPTATION : au-dessus de la borne, on passe.
+  // Sans lui, « refuser toujours » serait vert.
+  if (!accepte(ob, ref.bytes_bound + 1)) {
+    std::fprintf(stderr, "PLAFOND : refus au-dessus de la borne\n");
+    ++bad;
+  } else {
+    ++acceptations;
+  }
+  // CAS 4 — L'ANCIENNE GARANTIE N'EST PAS PERDUE : sous le seul flux
+  // d'evenements, le refus tombe comme avant.
+  if (accepte(ob, ref.bytes_events - 1)) {
+    std::fprintf(stderr, "PLAFOND : acceptation sous le flux d'evenements\n");
+    ++bad;
+  } else {
+    ++refus;
+  }
+  // CAS 5 — LE TERME DU FOLD EST UNE SOMME, PAS UN MAXIMUM NI UN
+  // BUDGET : la borne doit croitre si UN SEUL K grossit, et depasser
+  // strictement le plus gros fold pris seul.
+  if (ref.bytes_bound <= ref.bytes_events + ref.bytes_fold_max) {
+    std::fprintf(stderr, "PLAFOND : la borne ne somme pas les folds\n");
+    ++bad;
   }
   std::printf("output_budget_gate violations=%llu bytes_evenements=%llu "
               "bytes_fold_somme=%llu bytes_fold_max=%llu(K=%d) "
-              "bytes_pic=%llu facteur=%.2f refus_par_le_fold=%llu "
-              "acceptations=%llu pics_par_k=%llu\n",
+              "bytes_borne=%llu minorant_etat_final=%llu marge=%lld "
+              "acceptations=%llu refus=%llu\n",
               (unsigned long long)bad, (unsigned long long)ref.bytes_events,
               (unsigned long long)ref.bytes_fold_sum,
               (unsigned long long)ref.bytes_fold_max, ref.fold_max_k,
-              (unsigned long long)ref.bytes_peak,
-              (double)ref.bytes_peak / (double)ref.bytes_events,
-              (unsigned long long)refus_par_le_fold,
-              (unsigned long long)acceptations,
-              (unsigned long long)pics_par_k);
-  if (inj_events_only) {
+              (unsigned long long)ref.bytes_bound,
+              (unsigned long long)minorant_final,
+              (long long)((long long)ref.bytes_bound -
+                          (long long)minorant_final),
+              (unsigned long long)acceptations, (unsigned long long)refus);
+  if (inj_events_only || inj_drop_finished) {
     if (bad > 0) {
       std::printf("MUTANT TUE\n");
       return 4;
@@ -593,18 +917,7 @@ int run_output_budget_gate(bool inj_events_only) {
     return 3;
   }
   if (bad) return 3;
-  // PLANCHERS : chacun des trois roles doit avoir ete exerce au moins
-  // une fois, sans quoi la porte serait verte par vacuite.
-  if (refus_par_le_fold < 1 || acceptations < 1 || pics_par_k < 1) return 3;
-  // Le facteur mesure EST la faute : si le pic cessait d'exceder
-  // franchement le flux, cette porte perdrait son objet et il faudrait
-  // le savoir plutot que de la garder verte.
-  if (ref.bytes_peak < ref.bytes_events * 2) {
-    std::fprintf(stderr, "PLANCHER : pic %llu < 2x flux %llu\n",
-                 (unsigned long long)ref.bytes_peak,
-                 (unsigned long long)ref.bytes_events);
-    return 3;
-  }
+  if (acceptations < 1 || refus < 1) return 3;
   return 0;
 }
 
@@ -822,7 +1135,7 @@ int forests_from_balls(const std::vector<BallData>& balls,
                        std::vector<std::vector<ForestEvent>>* events_out = nullptr,
                        int threads = 1, bool legacy_partition = true,
                        BallStreamStats* wst = nullptr,
-                       u64 fold_budget = 2ull << 30) {
+                       u64 fold_budget = kFoldBudgetFloor) {
   // PHASE A — expansion des plateaux, par TRANCHES de boules : chaque
   // ouvrier remplit ses propres listes par K, la fusion en ordre de
   // tranche restitue EXACTEMENT l'ordre sequentiel des evenements.
@@ -2568,9 +2881,16 @@ int run_schedule_bench(const Args& a) {
               "signature=%llx\n",
               w_ref, ms_ref, (unsigned long long)rss_ref,
               (unsigned long long)sig_ref);
-  // 2 et 3. LPT sans borne, puis LPT sous budget.
-  const struct { const char* name; u64 budget; } modes[2] = {
-      {"LPT_unbounded", UINT64_MAX}, {"memory_budgeted_LPT", a.fold_budget}};
+  // 2 a 4. LPT sans borne, LPT sous l'ANCIEN plancher, LPT sous le
+  // budget effectif. Le mode `plancher_2Gio` est le temoin de la
+  // constante ecrite en dur : il tourne DANS LE MEME PROCESSUS, sur les
+  // MEMES evenements, ce qui est la seule facon de comparer deux budgets
+  // sur ce conteneur (le meme binaire varie de plus ou moins 40 % d'un
+  // processus a l'autre). `LPT_unbounded` borne le gain atteignable.
+  const struct { const char* name; u64 budget; } modes[3] = {
+      {"LPT_unbounded", UINT64_MAX},
+      {"plancher_2Gio", kFoldBudgetFloor},
+      {"memory_budgeted_LPT", a.fold_budget}};
   for (const auto& md : modes) {
     for (size_t i = 1; i <= nk; ++i) res[i] = ForestResult{};
     reset_peak_rss();
@@ -3479,7 +3799,14 @@ int run_guard_gate(int mode) {
 
 int main(int argc, char** argv) {
   using namespace mhgp4;
-  const Args a = parse(argc, argv);
+  Args a = parse(argc, argv);
+  // RESOLUTION DU BUDGET DE FOLD : ici et nulle part ailleurs, une seule
+  // fois, avant toute porte. Un budget impose l'emporte ; sinon il est
+  // derive de la memoire de l'hote (voir `derive_fold_budget`).
+  a.mem_available = host_mem_available_bytes();
+  if (!a.fold_budget_explicit)
+    a.fold_budget = derive_fold_budget(a.mem_available, a.inj_budget_ignore_host,
+                                       a.inj_budget_no_floor);
   if (!a.family_ok || a.n < 3 || a.s < 1) {
     std::fprintf(stderr, "REFUS : arguments invalides\n");
     return 2;
@@ -3498,8 +3825,13 @@ int main(int argc, char** argv) {
   if (a.par_gate)
     return run_par_gate(a.inj_par_drop, a.inj_par_drop_census);
   if (a.q2_birth_gate) return run_q2_birth_gate(a.inj_birth_dup);
+  if (a.fold_residency_gate)
+    return run_fold_residency_gate(a, a.inj_budget_drop_finished);
+  if (a.fold_budget_gate)
+    return run_fold_budget_gate(a.inj_budget_ignore_host, a.inj_budget_no_floor);
   if (a.output_budget_gate)
-    return run_output_budget_gate(a.inj_budget_events_only);
+    return run_output_budget_gate(a.inj_budget_events_only,
+                                  a.inj_budget_drop_finished);
   if (a.q4_eq_gate)
     return run_q4_eq_gate(a.inj_q4_eq_nonstrict, a.inj_q4_eq_sign,
                           a.inj_q4_i64_y, a.inj_q4_i64_xy);
@@ -3678,14 +4010,17 @@ int main(int argc, char** argv) {
           (unsigned long long)(uf_upper * (sizeof(FacetKey) + sizeof(u32))));
       const OutputBudget ob =
           project_output_budget(kev, kinc, (int)kmax_eff, a.fold_budget);
-      std::printf("preflight pic_projete bytes_evenements=%llu "
+      // NOM HONNETE (audit `bab37b9` § 4.3) : `borne_travail_cumule`, et
+      // surtout PAS « pic ». C'est un majorant conservateur de la somme
+      // des travaux, pas une residence : les sorties terminees et l'amont
+      // n'y sont pas separes.
+      std::printf("preflight borne_travail_cumule bytes_evenements=%llu "
                   "bytes_fold_somme=%llu bytes_fold_max=%llu fold_max_k=%d "
-                  "bytes_fold_pic=%llu bytes_pic=%llu budget_fold=%llu\n",
+                  "bytes_borne=%llu budget_fold=%llu\n",
                   (unsigned long long)ob.bytes_events,
                   (unsigned long long)ob.bytes_fold_sum,
                   (unsigned long long)ob.bytes_fold_max, ob.fold_max_k,
-                  (unsigned long long)ob.bytes_fold_peak,
-                  (unsigned long long)ob.bytes_peak,
+                  (unsigned long long)ob.bytes_bound,
                   (unsigned long long)a.fold_budget);
       return 0;
     }
@@ -3699,15 +4034,16 @@ int main(int argc, char** argv) {
     const OutputBudget ob =
         project_output_budget(kev, kinc, (int)kmax_eff, a.fold_budget,
                               a.inj_budget_events_only);
-    if (ob.bytes_peak > a.max_output_bytes) {
+    if (ob.bytes_bound > a.max_output_bytes) {
       std::fprintf(stderr,
-                   "REFUS resource_exhausted : pic projete %llu octets "
-                   "(evenements %llu + fold %llu ; somme des folds %llu, "
-                   "plus gros fold %llu a K=%d ; %llu evenements) > plafond "
-                   "max_output_bytes=%llu — aucune materialisation\n",
-                   (unsigned long long)ob.bytes_peak,
+                   "REFUS resource_exhausted : borne de travail cumule %llu "
+                   "octets (evenements %llu + somme des folds %llu ; plus "
+                   "gros fold %llu a K=%d ; %llu evenements) > plafond "
+                   "max_output_bytes=%llu — aucune materialisation. Cette "
+                   "borne est un MAJORANT CONSERVATEUR, pas un pic de "
+                   "residence : voir `project_output_budget`.\n",
+                   (unsigned long long)ob.bytes_bound,
                    (unsigned long long)ob.bytes_events,
-                   (unsigned long long)ob.bytes_fold_peak,
                    (unsigned long long)ob.bytes_fold_sum,
                    (unsigned long long)ob.bytes_fold_max, ob.fold_max_k,
                    (unsigned long long)tot_ev,
@@ -3719,8 +4055,16 @@ int main(int argc, char** argv) {
   ForestResult sres[11];
   std::vector<std::vector<ForestEvent>> sevk;
   {
+    // LE BUDGET EST PASSE ICI, ET SEULEMENT ICI. Il ne l'etait nulle
+    // part : `--fold-memory-budget` n'atteignait que le banc
+    // d'ordonnancement, et le CHEMIN DE PRODUCTION prenait le defaut de
+    // la signature — le drapeau etait mort sur le seul chemin qui
+    // compte. Les PORTES, elles, gardent volontairement le plancher :
+    // une porte dont le verdict dependrait de la RAM de la machine
+    // d'integration ne serait pas une porte.
     const int rc = forests_from_balls(balls, ix.upos, pid_of, kmax_eff, sev,
-                                      sres, &sevk, a.threads, a.judge, &st);
+                                      sres, &sevk, a.threads, a.judge, &st,
+                                      a.fold_budget);
     if (rc == 3 && any_inject) {
       std::printf("MUTANT TUE\n");
       return 4;
@@ -4017,9 +4361,15 @@ int main(int argc, char** argv) {
   // Ordonnancement des folds : plafond declare et reserve maximale
   // effectivement atteinte (ligne SEPAREE — le validateur de campagne
   // ancre `execution` de ^ a $).
-  std::printf("fold_ordonnancement budget_octets=%llu reserves_max_octets=%llu\n",
+  std::printf("fold_ordonnancement budget_octets=%llu reserves_max_octets=%llu "
+              "budget_source=%s memoire_disponible_octets=%llu\n",
               (unsigned long long)st.fold_budget_bytes,
-              (unsigned long long)st.fold_reserved_max);
+              (unsigned long long)st.fold_reserved_max,
+              a.fold_budget_explicit
+                  ? "explicite"
+                  : (a.fold_budget > kFoldBudgetFloor ? "memoire_hote"
+                                                      : "plancher"),
+              (unsigned long long)a.mem_available);
   if (a.digest) print_canonical_digests(cands, sres, kmax_eff);
   // CHARGE DU SCAN q3 PAR ANCRE : ce qui decide de l'assiette d'un index
   // par ancre. Un index construit une fois par ancre s'amortit sur les

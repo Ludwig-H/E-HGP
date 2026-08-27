@@ -376,43 +376,111 @@ mhgp4_expect_code(mhgp4_forest_probe_max_output_refus 2 mhgp4_forest_probe
     "--family=uniform --n=400 --s=8 --seed=3 --min-balls=100 --min-fusions=100 --max-output-bytes=4096")
 mhgp4_expect_code(mhgp4_forest_probe_max_output_passe 0 mhgp4_forest_probe
     "--family=uniform --n=400 --s=8 --seed=3 --min-balls=100 --min-fusions=100 --max-output-bytes=1000000000")
-# LE PLAFOND PORTAIT SUR LA MAUVAISE GRANDEUR (executes le 19 aout). Il
-# decidait sur `evenements * sizeof(ForestEvent)` seul, alors que le
-# preflight publiait deja des tampons de fold cinq a six fois plus gros :
-# a n=8000, 450 Mo de flux contre 2,60 Go de pic. Un plafond regle entre
-# les deux passait, puis le fold reservait tout. Une garantie de memoire
-# fausse d'un facteur ~5,8 est pire qu'aucune garde, parce qu'elle se lit
-# comme une garde. Le plafond porte desormais sur le PIC PROJETE
-# `bytes_evenements + min(max(budget, max_K m_K), Sigma_K m_K)`, ou m_K
-# est LA MEME borne que celle de l'ordonnanceur a budget (une seule
-# borne, jamais deux qui divergeraient) et ou les deux bouts du
-# `min`/`max` sortent des deux regles d'admission de
-# `run_folds_budgeted`.
+# LE PLAFOND A PORTE SUR LA MAUVAISE GRANDEUR DEUX FOIS DE SUITE.
 #
-# PORTE DE DECISION, sans aucune allocation : un plafond menteur ne
-# plante pas, ne change aucune sortie et n'apparait sur aucun chrono —
-# seule la DECISION accepter/refuser le trahit. Comptes GRAVES, et
-# releves du regime d'interet (preflight reel a n=8000, `uniform`, s=8,
-# smax=11, seed=3) plutot qu'inventes. Quatre cas : plafond entre le
-# flux et le pic (refus exige), au-dessus du pic (acceptation exigee,
-# sans quoi « refuser toujours » serait vert), sous le flux (l'ancienne
-# garantie n'est pas perdue), et un K dont la borne depasse le budget
-# (le terme est bien un max, pas le budget). Planchers sur les trois
-# roles, plus un plancher sur le FACTEUR lui-meme : si le pic cessait de
-# valoir au moins deux fois le flux, la porte perdrait son objet et
-# doit le dire. MUTANT `budget-events-only` : le terme du fold retire,
-# c'est-a-dire exactement le comportement d'avant.
+# PREMIERE FAUTE (corrigee le 19 aout) : il decidait sur
+# `evenements * sizeof(ForestEvent)` seul, alors que les tampons du fold
+# valent cinq a six fois plus. Une garantie de memoire fausse d'un
+# facteur ~5,8.
+#
+# SECONDE FAUTE, trouvee par l'audit `bab37b9` § 4 CONTRE LE CORRECTIF
+# LUI-MEME, et c'est la plus instructive. La borne
+# `min(max(budget, max_K m_K), Sigma_K m_K)` est exacte pour la VARIABLE
+# D'ORDONNANCEMENT `reserved` — et elle avait ete identifiee a la
+# residence. Invalide : `run_folds_budgeted` fait `reserved -= bytes[idx]`
+# des que la tache RETOURNE, mais la tache a deplace son resultat dans
+# `per_k_result[K]` ; `nodes`, `deltas`, `facet_keys`, `final_canon_fid`,
+# `batch_levels` et `batch_of_event` restent VIVANTS jusqu'au dernier
+# fold. Les sorties terminees s'accumulent pendant que leur `m_K` sort du
+# compte. La garde acceptait donc un calcul dont le seul etat final
+# connu depassait deja le plafond annonce.
+#
+# CORRECTIF (le stopgap exige au § 4.3) : la decision porte sur
+# `bytes_evenements + Sigma_K m_K`. Il peut refuser trop tot ; il ne ment
+# pas. Et il ne s'appelle plus un « pic » : `bytes_borne` est un majorant
+# conservateur du travail cumule. Le modele final — sortie persistante,
+# sortie en construction, temporaires actifs, amont — reste OUVERT et le
+# recu le dit.
+#
+# DEUX AUTORITES INDEPENDANTES, parce que l'audit reproche a bon droit a
+# la porte precedente d'avoir ete AUTO-REFERENTIELLE (elle comparait la
+# decision de la formule a la meme formule gravee) :
+#
+#   1. `--output-budget-gate` reconstruit un MINORANT de l'etat final a
+#      partir des comptes du recu n=8000 et des `sizeof` REELS de
+#      ForestEvent/FacetKey/ComponentDelta/ForestNode. Aucune ligne de
+#      `project_output_budget` n'y entre. L'ancienne formule annoncait
+#      2 597 650 400 contre un minorant de 2 599 581 876 : elle manque
+#      1 931 476 octets — le chiffre exact de l'auditeur, retrouve.
+#
+#   2. `--fold-residency-gate` deroule les dix folds et GARDE LES DIX
+#      RESULTATS VIVANTS, puis mesure ce qu'ils pesent reellement. A
+#      n=8000 les dix pesent 2 548 288 512 octets mesures — 18,6 % de
+#      plus que le minorant, qui excluait les `parents` et
+#      `batch_levels` — et l'ancienne formule manque alors 400 804 864
+#      octets, pas 1,9 Mo. C'est la « fixture ou plusieurs ForestResult
+#      termines restent vivants » exigee au § 4.3.
+#
+# A n=6000 l'ancienne formule COUVRE encore (marge +280 Mo) : la
+# divergence n'apparait qu'au-dela d'environ n=7000, quand la somme des
+# folds depasse le budget. La porte rapide tourne donc a n=6000 pour le
+# contrat, et le mutant est tue a n=8000, la ou la faute existe.
+#
+# TROIS MUTANTS : `budget-events-only` (le flux seul, la premiere faute),
+# `budget-drop-finished` (la formule du 19 aout, la seconde).
 mhgp4_expect_code(mhgp4_forest_probe_output_budget_gate 0 mhgp4_forest_probe
     "--output-budget-gate")
 mhgp4_expect_code(mhgp4_forest_probe_output_budget_mutant 4 mhgp4_forest_probe
     "--output-budget-gate --inject=budget-events-only")
-# Et le CABLAGE, sur le chemin reel : a n=400 le flux vaut 15,1 Mo et le
-# pic 191,2 Mo. Un plafond de 100 Mo doit refuser (code 2) — l'ancienne
-# comptabilite l'acceptait (code 0), ce qui se verifie a la main avec
-# `--inject=budget-events-only` sur cette meme ligne.
+mhgp4_expect_code(mhgp4_forest_probe_output_budget_mutant_finished 4 mhgp4_forest_probe
+    "--output-budget-gate --inject=budget-drop-finished")
+mhgp4_expect_code(mhgp4_forest_probe_fold_residency_gate 0 mhgp4_forest_probe
+    "--fold-residency-gate --family=uniform --n=6000 --s=8 --smax=11 --seed=3 --threads=4")
+mhgp4_expect_code(mhgp4_forest_probe_fold_residency_mutant 4 mhgp4_forest_probe
+    "--fold-residency-gate --family=uniform --n=8000 --s=8 --smax=11 --seed=3 --threads=4 --inject=budget-drop-finished")
+# Et le CABLAGE, sur le chemin reel : a n=400 le flux vaut 15,1 Mo et la
+# borne 191,2 Mo. Un plafond de 100 Mo doit refuser (code 2) —
+# l'ancienne comptabilite l'acceptait (code 0), ce qui se verifie a la
+# main avec `--inject=budget-events-only` sur cette meme ligne.
 mhgp4_expect_code(mhgp4_forest_probe_max_output_refus_fold 2 mhgp4_forest_probe
     "--family=uniform --n=400 --s=8 --seed=3 --min-balls=100 --min-fusions=100 --max-output-bytes=100000000")
-# Fold COMPACT (reponse d'audit « fold compact » § 1-2) : canonique par
+
+# BUDGET DU FOLD : DERIVE DE LA MACHINE, PAS UNE CONSTANTE.
+# Le budget de l'ordonnanceur etait ecrit en dur a 2 Gio — exactement le
+# huitieme des 16 Gio du conteneur ou il a ete calibre. Sur la
+# `g4-standard-48` de la campagne (48 vCPU, 180 Go, `deploy.sh:210`) il
+# vaut 1,1 % de la memoire, et la borne d'UN SEUL fold le depasse bien
+# avant n=64000 : MESURE au preflight, n=16000 donne deja 3,02 Gio pour
+# K=10, donc K=9 et K=10 admis SEULS par la garde anti-blocage ; a
+# n=64000 ce sont K=5..10, qui portent 94 % des incidences. La phase
+# `n64000` de la campagne aurait donc serialise le poste DOMINANT sur une
+# machine a 48 cœurs : elle aurait mesure le budget, pas la machine.
+#
+# Deuxieme defaut trouve en chemin : `--fold-memory-budget` n'atteignait
+# QUE le banc d'ordonnancement — le chemin de production prenait le
+# defaut de la signature. Le drapeau etait mort la ou il comptait.
+#
+# La regle est desormais `max(2 Gio, MemAvailable/4)`, lue une fois,
+# PUBLIEE avec sa provenance sur la ligne `fold_ordonnancement`. Le
+# plancher garantit qu'aucune petite machine ne regresse, donc qu'aucun
+# recu anterieur n'est invalide. Les PORTES gardent le plancher fige :
+# une porte dont le verdict dependrait de la RAM de la machine
+# d'integration ne serait pas une porte.
+#
+# Mesure intra-processus a n=8000, quatre modes, MEME signature
+# `ab003a59158fc7c8` (l'objet ne bouge pas) : contigu 21 477 ms,
+# plancher 2 Gio 15 593 ms, budget derive 3,73 Gio 6 959 ms, LPT sans
+# borne 9 177 ms. Le pic RSS ne monte pas (4,42 Go contre 4,14 Go).
+#
+# MUTANTS : `budget-ignore-host` (la constante seule, le comportement
+# d'hier) et `budget-no-floor` (le plancher retire, qui ferait regresser
+# une petite machine).
+mhgp4_expect_code(mhgp4_forest_probe_fold_budget_gate 0 mhgp4_forest_probe
+    "--fold-budget-gate")
+mhgp4_expect_code(mhgp4_forest_probe_fold_budget_mutant_host 4 mhgp4_forest_probe
+    "--fold-budget-gate --inject=budget-ignore-host")
+mhgp4_expect_code(mhgp4_forest_probe_fold_budget_mutant_floor 4 mhgp4_forest_probe
+    "--fold-budget-gate --inject=budget-no-floor")
 # min-fid u32, tables a epoque pour les racines pre/post-lot, partition
 # finale DENSE (facet_keys + final_canon_fid, invariants structurels
 # permanents), vue map de compatibilite sur demande. La porte a deux

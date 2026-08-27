@@ -278,7 +278,16 @@ Reçus : `ADDENDUM_PREFILTRE_Q4_EQUATORIAL_20260819.md` (le lemme, l'oracle
 et les planchers ; son § 5 est retiré par le suivant) puis
 `ADDENDUM_FRONTIERE_STRICTE_ET_ETAGE_I64_20260819.md`.
 
-### 2.14 Plafond de sortie sur le pic projeté (LIVRÉ, 19 août)
+### 2.14 Plafond de sortie — corrigé DEUX fois (19 août, puis 27 août)
+
+> **Le § ci-dessous est celui du 19 août. Il est FAUX et conservé pour
+> mémoire ; lire d'abord le § 2.15.** L'audit `bab37b9` § 4 a montré que
+> la borne `min(max(budget, max_K m_K), Sigma_K m_K)` est correcte pour
+> la variable d'ordonnancement `reserved` mais ne l'est pas pour la
+> résidence : les résultats des folds terminés restent vivants alors que
+> leur $m_K$ sort du compte.
+
+### 2.14bis Version du 19 août (rétractée)
 
 Le plafond `--max-output-bytes` décidait sur
 `evenements * sizeof(ForestEvent)` **seul**, alors que le préflight
@@ -310,6 +319,44 @@ les trois rôles plus un plancher sur le facteur lui-même, mutant
 câblage vérifié bout en bout à n=400. Reçu :
 `ADDENDUM_PLAFOND_SUR_LE_PIC_PROJETE_20260819.md`.
 
+### 2.15 Résidence et budget de fold (LIVRÉ, 27 août — exécute `bab37b9` P0)
+
+**La faute.** `run_folds_budgeted` fait `reserved -= bytes[idx]` au
+**retour** de la tâche, mais le résultat vient d'être déplacé dans
+`per_k_result[K]` et y reste jusqu'au dernier fold. Les sorties
+terminées s'accumulent hors du compte. À n=8000, le seul état final
+obligatoire vaut **2 599 581 876** octets contre un « pic » annoncé de
+**2 597 650 400** — et les dix `ForestResult` gardés vivants pèsent
+**2 548 288 512** octets mesurés, soit **400 804 864** de plus que ce que
+l'ancienne formule couvrait.
+
+**Le correctif** est le stopgap exigé au § 4.3 : la décision porte sur
+$B_{\text{ev}} + \sum_K m_K$, et surtout **ne s'appelle plus un pic** —
+`bytes_bound`, ligne `preflight borne_travail_cumule`, refus qui dit
+lui-même « majorant conservateur, pas un pic de résidence ». **OPEN** :
+la séparation en sortie persistante / sortie en construction /
+temporaires actifs / amont n'est pas faite.
+
+**Deux autorités indépendantes**, la précédente étant auto-référentielle :
+`--output-budget-gate` (minorant reconstruit depuis les `sizeof` réels et
+les comptes du reçu) et `--fold-residency-gate` (les dix résultats
+**gardés vivants**, puis mesurés). Trois mutants tués.
+
+**Second défaut, trouvé en préparant la G4.** Le budget de fold était
+figé à 2 Gio — exactement le huitième des 16 Gio de ce conteneur. Sur la
+`g4-standard-48` (48 vCPU, **180 Go**) il vaut 1,1 % de la mémoire, et la
+borne d'un seul fold le dépasse bien avant n=64000 : mesuré, **3,02 Gio**
+pour K=10 dès n=16000 ; à n=64000 ce sont K=5…10, qui portent **94 %**
+des incidences. La phase `n64000` **aurait sérialisé le poste dominant
+sur une machine à 48 cœurs**. En corrigeant, `--fold-memory-budget` s'est
+révélé **mort sur le chemin de production** (il n'atteignait que le banc).
+
+Règle : `max(2 Gio, MemAvailable/4)`, lue une fois, publiée avec sa
+provenance ; portes figées au plancher. Mesure intra-processus n=8000,
+**signature identique aux quatre modes** : plancher **15 593 ms** contre
+budget dérivé **6 959 ms**, pic RSS inchangé. Reçu :
+`ADDENDUM_RESIDENCE_ET_BUDGET_MACHINE_20260827.md`.
+
 ## 3. Carte de l'implémentation
 
 ```
@@ -331,7 +378,7 @@ bench/forest_probe.cpp      pipeline aval (RLE → préfiltre → census →
                             digest canonique, preflight
 oracle/                     juge indépendant (arithmétique propre)
 tests/                      selftests unitaires (obig, tree, forest…)
-CMakeLists.txt              147 CTests — dont ~la moitié de portes
+CMakeLists.txt              153 CTests — dont ~la moitié de portes
                             négatives à code EXACT (1/2/3/4)
 ```
 
@@ -444,7 +491,43 @@ explicitement la partie résiduelle encore ouverte (le § 2.8 le fait
 pour la garde de capacité, le n° 2 ci-dessus pour l'internement).
 `python tools/check_passation.py` refuse le contraire.
 
-## 6. La campagne G4 « scale_threads » — protocole prêt, zéro reçu
+## 6. La campagne G4 « scale_threads » — protocole prêt, PAS LANÇABLE EN L'ÉTAT
+
+> **État au 27 août 2026.** Le protocole local est prêt et sa porte
+> transactionnelle est verte (`selftest_scale_threads.sh` : 15 scénarios,
+> `violations=0`) ; l'enveloppe des six gardes passe sur la ligne exacte
+> ci-dessous (`--check-envelope` → `EXIT=0`, aucune action GCP) ; et le
+> schéma de sortie du probe satisfait toutes les expressions du
+> validateur, vérifié ligne à ligne après les commits des 19 et 27 août.
+>
+> **Trois blocages restent, et aucun n'est levable depuis ce conteneur :**
+>
+> 1. `gcloud` absent (`start_and_verify.sh:503`), et le jeton présent dans
+>    l'environnement fait 14 caractères — rejeté (`invalid_token`,
+>    `ACCESS_TOKEN_TYPE_UNSUPPORTED`). **L'inventaire lecture seule exigé
+>    avant tout geste GCP est donc impossible.**
+> 2. `ssh`, `ssh-keygen`, `scp` absents (`start_and_verify.sh:505`).
+> 3. Port 22 sortant bloqué — l'armement du coupe-circuit invité
+>    (`start_and_verify.sh:689-719`) ne peut jamais aboutir. C'est le
+>    maillon jamais franchi des six tentatives du 18 août, et il est
+>    **structurel** : l'API passe, SSH jamais.
+>
+> La campagne doit donc partir d'un poste avec auth gcloud + OpenSSH +
+> port 22 (Codespace utilisateur), ce que § 6 disait déjà.
+>
+> **Et deux blocages de fond, eux, sont dans le dépôt :**
+>
+> 4. L'audit `bab37b9` (22 août) classe la campagne G4 en **Priorité 5**,
+>    après le GPU et après la décision d'objet produit, et précise que la
+>    porte 50 k doit couvrir le produit décidé — « une mesure de front, de
+>    composant isolé ou de préfiltre ne vaut pas `warm_e2e` ». Le
+>    protocole `scale_threads` mesure la montée en fils du chemin dense,
+>    ce qui n'est pas cela.
+> 5. Le budget de fold était figé à 2 Gio : la phase `n64000` **aurait
+>    sérialisé le poste dominant** sur la machine à 48 cœurs (§ 2.15).
+>    Corrigé le 27 août — mais la correction doit être **committée et
+>    poussée** avant tout pin, puisque le pin refuse un worktree sale.
+
 
 Protocole (audits `9223888`/`b3a6eb4`/`66886c0`/`7d921ff`/`c9c3a48`/
 `9d19ede`, tous EXÉCUTÉS) : `gcp-migration/session_scale_threads_g4.sh`
