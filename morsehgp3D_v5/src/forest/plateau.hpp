@@ -17,6 +17,7 @@
 #pragma once
 
 #include <algorithm>
+#include <span>
 #include <vector>
 
 #include "../core/wide.hpp"
@@ -180,8 +181,8 @@ struct PlateauEvent {
 };
 
 // Tous les σ = I_B ∪ T, T ⊆ U_B, |σ| <= kmax + 1, c ∈ conv(T) ferme.
-inline void expand_plateau(const BallRat& c, const std::vector<P3>& pos, const std::vector<i32>& interior,
-                           const std::vector<i32>& shell, size_t kmax_plus1, std::vector<PlateauEvent>* out) {
+inline void expand_plateau(const BallRat& c, const std::vector<P3>& pos, std::span<const i32> interior,
+                           std::span<const i32> shell, size_t kmax_plus1, std::vector<PlateauEvent>* out) {
   const u32 nu = (u32)shell.size();
   for (u32 tm = 1; tm < (1u << nu); ++tm) {
     const int nt = __builtin_popcount(tm);
@@ -193,7 +194,7 @@ inline void expand_plateau(const BallRat& c, const std::vector<P3>& pos, const s
     std::sort(T.begin(), T.end());
     PlateauEvent ev;
     ev.tpart = T;
-    ev.ipart = interior;
+    ev.ipart.assign(interior.begin(), interior.end());
     for (size_t v = 0; v < T.size(); ++v) {
       std::vector<i32> trest;
       for (size_t w = 0; w < T.size(); ++w)

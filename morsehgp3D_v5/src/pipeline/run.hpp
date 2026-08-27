@@ -14,6 +14,7 @@
 #pragma once
 
 #include <chrono>
+#include <cstdio>
 #include <functional>
 #include <memory>
 #include <string>
@@ -73,11 +74,25 @@ struct RunResult {
          t_fold_ms = 0, t_count_ms = 0, t_digest_ms = 0;
   double t_fold_sort_ms = 0, t_fold_intern_ms = 0, t_fold_merge_ms = 0, t_fold_reduce_ms = 0;
   double t_fold_wall_ms = 0;  // mur des etages A et B (premier ordre expanse -> derniere publication)
+  double rss_mb[6] = {0, 0, 0, 0, 0, 0};  // paliers : apres generation, rle, prefiltre, census, max pendant le fold, fin
   double t_total_ms = 0;  // temps MUR de run_pipeline
   u64 fold_workers = 0, rle_workers = 0;
 };
 
 namespace run_detail {
+
+// Resident set courant en Mo (Linux : /proc/self/statm ; 0 ailleurs) — un
+// instrument de lecture des paliers memoire, jamais une garde.
+inline double rss_mb_now() {
+  std::FILE* f = std::fopen("/proc/self/statm", "r");
+  if (!f) return 0.0;
+  unsigned long long size = 0, resident = 0;
+  const int got = std::fscanf(f, "%llu %llu", &size, &resident);
+  std::fclose(f);
+  if (got != 2) return 0.0;
+  return (double)resident * 4096.0 / (1024.0 * 1024.0);
+}
+
 inline double ms(std::chrono::steady_clock::time_point t0) {
   return std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();
 }
@@ -106,7 +121,7 @@ inline constexpr const char* kForestPayloadVersion = "mhgp5-forests-horizontal-v
 // avec le statut contractuel — jamais un debordement.
 // Profil du plafond de coquille : 4 <= shell_cap <= 12 (arbitrage V2 ; une
 // coquille effectivement > 12 est resource_exhausted, jamais tronquee).
-inline constexpr size_t kShellCapProfile = 12;
+inline constexpr size_t kShellCapProfile = kBallShellMax;  // = tableau inline de BallData (expand.hpp)
 
 inline bool validate_run_options(const std::vector<InputPoint>& in, const RunOptions& opt, std::string* why) {
   if (in.size() < 2) { *why = "invalid_input : moins de deux points"; return false; }
@@ -155,6 +170,7 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
   go.threads = opt.threads;
   generate_candidates(ix, go, &cands, &rr.gen);
   rr.t_gen_ms = ms(t_g);
+  rr.rss_mb[0] = run_detail::rss_mb_now();
   if (rr.gen.invariant_jneg) {
     rr.status = PipelineStatus::kInvariantViolated;
     rr.message = "invariant : seed q4 aigu avec J < 0 (inatteignable par theoreme, MATHEMATIQUES § 10) : " +
@@ -165,12 +181,14 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
   rr.emitted = cands.size();
   rr.rle_workers = rle_candidates(&cands, opt.threads);
   rr.t_rle_ms = ms(t_r);
+  rr.rss_mb[1] = run_detail::rss_mb_now();
   rr.expand.unique_balls = cands.size();
 
   const auto t_p = std::chrono::steady_clock::now();
   std::vector<Survivor> surv;
   prefilter_balls(ix, cands, rr.smax_eff, opt.threads, &surv, &rr.expand);
   rr.t_prefilter_ms = ms(t_p);
+  rr.rss_mb[2] = run_detail::rss_mb_now();
   const auto t_c = std::chrono::steady_clock::now();
   std::vector<BallData> balls;
   const PipelineStatus cs = census_balls(ix, cands, surv, rr.smax_eff, opt.shell_cap, opt.threads, &balls, &rr.expand);
@@ -183,6 +201,7 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
   }
   std::vector<Survivor>().swap(surv);
   rr.t_census_ms = ms(t_c);
+  rr.rss_mb[3] = run_detail::rss_mb_now();
 
   // GARDES DE CAPACITE DE TOUS LES ORDRES AVANT TOUTE PUBLICATION (contrat
   // transactionnel) : un refus ne suit jamais un callback. Les comptes par K
@@ -347,6 +366,7 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
           rr.t_digest_ms += t_dg;
         }
         if (opt.on_forest) opt.on_forest(K, st->events, r);
+        rr.rss_mb[4] = std::max(rr.rss_mb[4], run_detail::rss_mb_now());
         next_publish = K + 1;
         lk.unlock();
         pub_cv.notify_all();
@@ -369,6 +389,7 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
   rr.t_fold_ms += t_prepare_total_ms;
   std::vector<BallData>().swap(balls);
   if (opt.digest) rr.digest_all = dg_all.hex();
+  rr.rss_mb[5] = run_detail::rss_mb_now();
   rr.t_total_ms = ms(t_all);
   return rr;
 }
@@ -417,6 +438,8 @@ inline void print_run(std::FILE* out, const char* family, int n, int coord, long
   std::fprintf(out, "temps_mur_ms=%.1f (etages A et B du fold pipelines : fold+digest ci-dessus sont des cumuls par etage, pas le mur)\n",
                rr.t_total_ms);
   std::fprintf(out, "temps_fold_mur_ms=%.1f (etages A et B, %d ordre(s) en vol)\n", rr.t_fold_wall_ms, std::max(1, opt.fold_inflight));
+  std::fprintf(out, "rss_mb apres_generation=%.0f apres_rle=%.0f apres_prefiltre=%.0f apres_census=%.0f max_fold=%.0f fin=%.0f\n",
+               rr.rss_mb[0], rr.rss_mb[1], rr.rss_mb[2], rr.rss_mb[3], rr.rss_mb[4], rr.rss_mb[5]);
   for (u64 K = 1; K <= rr.kmax_eff; ++K)
     std::fprintf(out, "cardinalites K=%llu evenements=%llu facettes=%llu deltas=%llu attachements=%llu fusions=%llu noeuds=%llu\n",
                  (unsigned long long)K, (unsigned long long)rr.cards[K].events, (unsigned long long)rr.cards[K].facets,

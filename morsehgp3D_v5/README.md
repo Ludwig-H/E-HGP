@@ -21,9 +21,17 @@ Les errances de fond relevées par l'audit du 22 août 2026
 
 - **résidence** : la v4 gardait les dix forêts résidentes (7,7 Go à n=8000,
   21 Go à 32000) et son plafond mémoire mentait ; la v5 **streame par ordre K**
-  (expansion, fold, signature, publication, libération — un seul K en
-  construction, les boules censusées comme seul amont résident) et nomme
-  ses rôles mémoire sans promettre de pic ;
+  (expansion, fold, signature, publication, libération — `fold_inflight` + 1
+  ordres résidents au plus, 3 par défaut, les boules censusées comme seul
+  amont résident) et nomme ses rôles mémoire sans promettre de pic : la ligne
+  `rss_mb` de chaque run lit les paliers (après génération, RLE, préfiltre,
+  census, maximum pendant le fold, fin). Mesuré à `uniform` 16 000 (8 fils) :
+  1,2 Go après génération, 2,6 Go après census (224 o par boule, listes de
+  census **inline** bornées par théorème — intérieur ≤ 9, coquille ≤ 12 —,
+  aucune allocation par boule), 4,7 Go au maximum du fold (trois ordres :
+  clés de facettes 44 o, état packé 32 o, internement) ; à 200 k sur G4, 65
+  Go de pic (reçu 9, avant ces deux mesures). `fold_inflight` échange de la
+  mémoire (un ordre de plus) contre du mur à haut nombre de fils ;
 - **monolithes** : `bench/forest_probe.cpp` (4 478 lignes, toutes les portes)
   et `ball_stream.hpp` (1 805 lignes) deviennent des modules nommés et une
   porte par thème dans `tests/` ;

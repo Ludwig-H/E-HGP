@@ -15,6 +15,7 @@
 #pragma once
 
 #include <algorithm>
+#include <span>
 #include <vector>
 
 #include "../forest/fold.hpp"
@@ -30,11 +31,23 @@ struct Survivor {
   u64 depth;
 };
 
+// Listes de census INLINE et bornees par theoreme et profil : interieur
+// <= smax − arite <= 9 (K_max <= 10 <=> smax <= 11, refus explicite au-dela),
+// coquille <= kBallShellMax = plafond du profil (run.hpp). Aucune allocation
+// par boule (deux std::vector par boule = ~400 o et deux mallocs par boule,
+// poste mesure a 16 000 : +2,6 Go de census pour 6,5 M boules).
+inline constexpr size_t kBallInteriorMax = 9;
+inline constexpr size_t kBallShellMax = 12;
+
 struct BallData {
   BallKey key;
   ExactLevel level;
-  u8 arity;
-  std::vector<i32> interior, shell;
+  u8 arity = 0;
+  u8 n_interior = 0, n_shell = 0;
+  i32 interior_ids[kBallInteriorMax] = {};
+  i32 shell_ids[kBallShellMax] = {};
+  std::span<const i32> interior() const { return std::span<const i32>(interior_ids, (size_t)n_interior); }
+  std::span<const i32> shell() const { return std::span<const i32>(shell_ids, (size_t)n_shell); }
 };
 
 struct ExpandStats {
@@ -115,7 +128,9 @@ inline PipelineStatus census_balls(const CloudIndex& ix, const std::vector<BallC
     lb.assign(dummy, {});
     lrc.assign(dummy, 0);
   }
+  if (shell_cap > kBallShellMax) return PipelineStatus::kInvalidInput;  // garde du profil (run.hpp la refuse en amont)
   const size_t created = expand_detail::chunked(survivors.size(), threads, &nchunks, [&](size_t c, size_t b, size_t e) {
+    std::vector<i32> in, sh;  // tampons de l'ouvrier, copies dans les tableaux inline
     for (size_t i = b; i < e; ++i) {
       const Survivor& sv = survivors[i];
       const BallCandidate& bc = cands[sv.idx];
@@ -124,13 +139,18 @@ inline PipelineStatus census_balls(const CloudIndex& ix, const std::vector<BallC
       bd.level = bc.level;
       bd.arity = bc.arity;
       if (m_skip_full) {
-        lb[c].push_back(std::move(bd));
+        lb[c].push_back(bd);
         continue;
       }
-      const CensusStatus cs = ball_census(ix, bc.key, (size_t)(smax - bc.arity), shell_cap, &bd.interior, &bd.shell);
+      const CensusStatus cs = ball_census(ix, bc.key, (size_t)(smax - bc.arity), shell_cap, &in, &sh);
       if (cs == CensusStatus::kShellOverflow) { lrc[c] = 2; return; }
-      if (cs == CensusStatus::kInteriorOverflow || bd.interior.size() != (size_t)sv.depth) { lrc[c] = 3; return; }
-      lb[c].push_back(std::move(bd));
+      if (cs == CensusStatus::kInteriorOverflow || in.size() != (size_t)sv.depth) { lrc[c] = 3; return; }
+      if (in.size() > kBallInteriorMax || sh.size() > kBallShellMax) { lrc[c] = 3; return; }  // inatteignable : bornes du profil
+      bd.n_interior = (u8)in.size();
+      bd.n_shell = (u8)sh.size();
+      std::copy(in.begin(), in.end(), bd.interior_ids);
+      std::copy(sh.begin(), sh.end(), bd.shell_ids);
+      lb[c].push_back(bd);
     }
   });
   st->workers_census = std::max(st->workers_census, (u64)created);
@@ -141,9 +161,9 @@ inline PipelineStatus census_balls(const CloudIndex& ix, const std::vector<BallC
   for (size_t c = 0; c < nchunks; ++c) {
     if (m_drop_chunk && nchunks > 1 && c == 0) continue;
     for (BallData& bd : lb[c]) {
-      st->census_interior += bd.interior.size();
-      st->census_shell += bd.shell.size();
-      balls->push_back(std::move(bd));
+      st->census_interior += bd.n_interior;
+      st->census_shell += bd.n_shell;
+      balls->push_back(bd);
     }
   }
   return PipelineStatus::kCompleteRegular;
@@ -179,7 +199,7 @@ inline std::vector<KCount> count_events_by_k(const CloudIndex& ix, const std::ve
     std::vector<KCount>& out = lc[c];
     for (size_t bi = b; bi < e; ++bi) {
       const BallData& bd = balls[bi];
-      const size_t q = bd.shell.size(), d = bd.interior.size();
+      const size_t q = bd.n_shell, d = bd.n_interior;
       if (q == (size_t)bd.arity) {  // regulier : un evenement, ordre q + d − 1
         const size_t K = q + d - 1;
         if (K >= 1 && K <= (size_t)kmax) {
@@ -189,7 +209,7 @@ inline std::vector<KCount> count_events_by_k(const CloudIndex& ix, const std::ve
         continue;
       }
       pevents.clear();
-      expand_plateau(ball_center(bd.key), ix.upos, bd.interior, bd.shell, (size_t)(kmax + 1), &pevents);
+      expand_plateau(ball_center(bd.key), ix.upos, bd.interior(), bd.shell(), (size_t)(kmax + 1), &pevents);
       for (const PlateauEvent& pe : pevents) {
         const size_t K = pe.tpart.size() + pe.ipart.size() - 1;
         if (K < 1 || K > (size_t)kmax) continue;
@@ -208,8 +228,8 @@ inline std::vector<KCount> count_events_by_k(const CloudIndex& ix, const std::ve
 }
 
 namespace expand_detail {
-inline ForestEvent make_event(const CloudIndex& ix, const BallData& bd, const std::vector<i32>& tpart,
-                              const std::vector<i32>& ipart, u16 active_mask, bool dense) {
+inline ForestEvent make_event(const CloudIndex& ix, const BallData& bd, std::span<const i32> tpart,
+                              std::span<const i32> ipart, u16 active_mask, bool dense) {
   ForestEvent ev;
   ev.q = (u8)tpart.size();
   ev.d = (u8)ipart.size();
@@ -237,7 +257,7 @@ inline void expand_events_k(const CloudIndex& ix, const std::vector<BallData>& b
     std::vector<PlateauEvent> pevents;
     for (size_t bi = b; bi < e; ++bi) {
       const BallData& bd = balls[bi];
-      const size_t q = bd.shell.size(), d = bd.interior.size();
+      const size_t q = bd.n_shell, d = bd.n_interior;
       if (q == (size_t)bd.arity) {
         if (q + d - 1 != (size_t)K) continue;
         // Regime regulier : tous les retraits de support sont actifs (le
@@ -246,13 +266,13 @@ inline void expand_events_k(const CloudIndex& ix, const std::vector<BallData>& b
         // MEME ordre de support que l'expansion de plateau (trie par index
         // unique) : l'ordre des unions d'un lot en depend, donc l'ordre
         // d'emission des deltas et le digest.
-        std::vector<i32> tsorted = bd.shell;
+        std::vector<i32> tsorted(bd.shell().begin(), bd.shell().end());
         std::sort(tsorted.begin(), tsorted.end());
-        lev[c].push_back(expand_detail::make_event(ix, bd, tsorted, bd.interior, (u16)((1u << q) - 1u), m_dense));
+        lev[c].push_back(expand_detail::make_event(ix, bd, tsorted, bd.interior(), (u16)((1u << q) - 1u), m_dense));
         continue;
       }
       pevents.clear();
-      expand_plateau(ball_center(bd.key), ix.upos, bd.interior, bd.shell, (size_t)(kmax + 1), &pevents);
+      expand_plateau(ball_center(bd.key), ix.upos, bd.interior(), bd.shell(), (size_t)(kmax + 1), &pevents);
       for (const PlateauEvent& pe : pevents) {
         if (pe.tpart.size() + pe.ipart.size() - 1 != (size_t)K) continue;
         lev[c].push_back(expand_detail::make_event(ix, bd, pe.tpart, pe.ipart, pe.active_mask, m_dense));
