@@ -53,7 +53,9 @@ fixe son application v5.
 | forêt | K = 1 ≡ single-linkage ; juge par miniboule indépendante + cliques + Kruskal à lots (n ≤ 14) ; fixtures plateau / attachement / croissance | `mhgp5_forest_judge` |
 | parallélisme | bit-identique 1 fil / N fils, ouvriers mesurés ; tri stable parallèle ≡ `std::stable_sort` ; SHA-256 accéléré ≡ portable | `mhgp5_par_gate`, `mhgp5_parallel_sort_gate`, `mhgp5_sha256_gate` |
 | coût (instrument) | banc apparié contrebalancé du fold, signature identique exigée, médiane des rapports par paire | `mhgp5_fold_bench` |
-| **conformité v4** | `digest_balls` et `digest_all` (format v4) identiques sur les mêmes entrées | `mhgp5_conformity_*` (n=400…2000 : `gate` ; 8000/16000/32000 : `scaleNNNN`) |
+| tests d'ancre | $W_q$ exact et témoins sectoriels suffisants : mêmes candidats avec les prétests ON et OFF sur **toutes** les paires $(a,b)$ de petits nuages ; $J > 0$ pour tout seed q4 aigu ; identité de signe $P/B$ ; non-vacuité de chaque test | `mhgp5_anchor_tests_oracle` (label `oracle`) ; fixtures gravées F1–F7 (`mhgp5_anchor_kill_fixture`), sphère diamétrale (`mhgp5_sector_kill_fixture`) ; mutants `sector-kill-nonstrict`, `anchor-kill-h-minus-one` (code 4) |
+| lanes par lots / device (point 2) | vecteur post-RLE et compteurs (7 q3, 22 q4, dont $W_3$/$W_4$/secteurs) identiques à la production ; ordre brut à un fil en routage nul ; bornes dures de lot ; non-vacuité des routes ; contrat structurel des lots ; exceptions jointes puis relancées | `mhgp5_q3/q4_lane_batched_*` (nominal, petit lot, ancre trop grande, routes, mutants `q3-batched-emit-dead`, `q4-batched-emit-deep`, `route-ignore-threshold`), `mhgp5_batch_contract`, `mhgp5_parallel_exception` ; device (label `gpu`, G4 seulement) : `mhgp5_device_witness`, `mhgp5_q3/q4_lane_device_*` |
+| **conformité v4** | `digest_balls` et `digest_all` (format v4) identiques sur les mêmes entrées — c'est aussi la preuve d'invariance de l'objet des tests d'ancre | `mhgp5_conformity_*` (n=400…2000 : `gate` ; 8000/16000/32000 : `scaleNNNN`) |
 
 ## 4. Fixtures permanentes reprises (coordonnées exactes)
 
@@ -67,6 +69,17 @@ boule diamétrale qui ne ferment pas q4 » (`a=(100,100,100)`, `b=(200,100,100)`
 `a=(0,0,0), b=(8,0,0), z=(4,1,2)` ; fixture q4 13 points (ancre q3-morte,
 q4-vivante) et sa version 22 points ; cœur q4 exact
 `a=(10000,10000,0), b=(20000,10000,0), z=(15000,12585,0)`.
+
+Tests d'ancre (`MATHEMATIQUES.md` § 10 ; ancre `a=(0,0,0)`, `b=(2000,0,0)`,
+$h_3 = 9$, translation `+1000` en $y$/$z$) : F1 `(1000+e, ±900, 0)`, $e = 0..8$,
+plus le seed `x=(1000,1200,0)` (secteurs tuent, $W_3$ non, aucune boule) ;
+F2 idem $e = 0..7$ plus `x` (profondeur 8 : boule émise, perdue par le mutant
+$h-1$ via les secteurs) ; F3 `(1000+e, 550, 0)`, $e = 0..8$, plus `x` ($W_3$
+tue, secteurs non) ; F4 idem $e = 0..7$ plus `x` (frontière $W_3$ à $h-1$) ;
+F5 28 sites sur la sphère diamétrale plus `x` (aucun test ne tue, tout seed
+mort : nécessité réfutée) ; F6 `(1000,400,−200)` exactement sur la frontière
+du demi-plan du sommet `u` ; F7 secteurs q4 sur F1 ; sphère diamétrale
+`a=(0,0,0)`, `b=(50,0,0)`, 37 sites (frontière diamétrale du mutant non strict).
 
 ## 5. Mesures d'échelle et reçus
 
