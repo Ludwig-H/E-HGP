@@ -237,6 +237,183 @@ struct AffineSeed {
   }
 };
 
+// CORPS PAR ANCRE de la lane q3 (le cover de l'ancre est deja dans sc.cover) :
+// seeds aigus, filtre de profondeur (kernel affine, etage flottant certifie,
+// repli exact i128), emission. Partage par generate_candidates et par les
+// lanes par lots (routage hote : src/gpu/q3_lane_batched.hpp) — une seule
+// definition de la lane de production.
+inline void scan_anchor_q3(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i32 ub, const P3& pa, const P3& pb, i64 D2,
+                           u64 h3, bool float_on, bool genfilter_nonstrict, std::vector<BallCandidate>* lo, GenerateStats* ls) {
+  sc.affine_filled = false;
+  for (const CoverPoint& cp : sc.cover) {
+    if (cp.u == ua || cp.u == ub) continue;
+    const P3& px = ix.upos[(size_t)cp.u];
+    if (!is_acute_seed(pa, pb, px, D2, ix.point_id(ua), ix.point_id(ub), ix.point_id(cp.u))) continue;
+    ++ls->seeds[0];
+    if (!sc.affine_filled) sc.fill_affine_sites(ix, pa, pb, D2);
+    const Q3Form f3 = q3_form(pa, pb, px);
+    const AffineSeed seed(f3, pa, pb, sc, float_on);
+    // Filtre de profondeur a la generation : minorant certifie.
+    u64 depth = 0;
+    bool deep = false;
+    for (size_t iz = 0; iz < sc.cover.size() && !deep; ++iz) {
+      const double lh = seed.l_hat(sc, iz);
+      bool interior;
+      if (lh < -seed.bound) {
+        ++ls->float_cert_neg;
+        ++ls->q3_cert[0];
+        interior = true;
+      } else if (lh > seed.bound) {
+        ++ls->float_cert_pos;
+        ++ls->q3_cert[1];
+        interior = false;
+      } else {
+        ++ls->float_fallback;
+        ++ls->q3_cert[2];
+        const i128 L = seed.l_exact(sc, iz);
+        interior = L < 0 || (genfilter_nonstrict && L <= 0);
+      }
+      if (interior && ++depth >= h3) deep = true;
+    }
+    if (deep) {
+      ++ls->depth_killed[1];
+      continue;
+    }
+    lo->push_back(BallCandidate{q3_ball_key(f3), promote_level(q3_exact_level(pa, pb, px)), 3});
+    ++ls->candidates[1];
+  }
+}
+
+// CORPS PAR ANCRE de la lane q4 (cover deja dans sc.cover) : W_4, lentille,
+// seeds aigus, cœur de seed de Jung, completions (owner, exact-once,
+// prefiltres, Cramer, centre strict, profondeur), emission. Partage par
+// generate_candidates et par les lanes par lots (routage hote).
+inline void process_anchor_q4(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i32 ub, const P3& pa, const P3& pb, i64 D2,
+                              u64 h4, bool float_on, bool genfilter_nonstrict, bool seed_core_nonstrict, bool no_canonical,
+                              std::vector<BallCandidate>* lo, GenerateStats* ls) {
+  // Compte W_4 exact par ancre : n4 >= h_4 tue l'ancre entiere.
+  {
+    u64 n4 = 0;
+    for (const CoverPoint& cz : sc.cover) {
+      if (cz.u == ua || cz.u == ub) continue;
+      if (in_spindle(Lane::kQ4, pa, pb, ix.upos[(size_t)cz.u]) && ++n4 >= h4) break;
+    }
+    if (n4 >= h4) {
+      ++ls->anchors_killed_w4;
+      return;
+    }
+  }
+  sc.affine_filled = false;
+  sc.lens.clear();
+  for (const CoverPoint& cz : sc.cover) {
+    const P3& pz = ix.upos[(size_t)cz.u];
+    if (p3_norm2(p3_sub(pz, pa)) <= D2 && p3_norm2(p3_sub(pz, pb)) <= D2) sc.lens.push_back(cz);
+  }
+  for (const CoverPoint& cx : sc.lens) {
+    if (cx.u == ua || cx.u == ub) continue;
+    const P3& px = ix.upos[(size_t)cx.u];
+    if (!is_acute_seed(pa, pb, px, D2, ix.point_id(ua), ix.point_id(ub), ix.point_id(cx.u))) continue;
+    ++ls->seeds[1];
+    const i64 l_ax = p3_norm2(p3_sub(px, pa));
+    const i64 l_bx = p3_norm2(p3_sub(px, pb));
+    const Q3Form f3s = q3_form(pa, pb, px);
+    const P3 nrm = p3_cross(p3_sub(pb, pa), p3_sub(px, pa));
+    // Cœur universel du seed (Jung) : J = D²(3G − 2 l_ax l_bx).
+    const i128 Jb = (i128)D2 * (3 * f3s.g - 2 * (i128)l_ax * l_bx);
+    bool dead = Jb < 0;
+    if (!dead) {
+      if (!sc.affine_filled) sc.fill_affine_sites(ix, pa, pb, D2);
+      const AffineSeed seed(f3s, pa, pb, sc, float_on);
+      const double Jd = (double)Jb;
+      const double Jlo = Jd * (1.0 - kJungGuard), Jhi = Jd * (1.0 + kJungGuard);
+      u64 fcount = 0;
+      for (size_t iz = 0; iz < sc.cover.size(); ++iz) {
+        const CoverPoint& cz = sc.cover[iz];
+        if (cz.u == ua || cz.u == ub || cz.u == cx.u) continue;
+        const double lh = seed.l_hat(sc, iz);
+        if (lh > seed.bound) {
+          ++ls->float_cert_pos;
+          ++ls->q4_cert[0];
+          continue;  // P > 0 certifie : jamais temoin
+        }
+        if (lh < -seed.bound) {
+          ++ls->float_cert_neg;
+          ++ls->q4_cert[1];
+          const P3& pz = ix.upos[(size_t)cz.u];
+          const i64 Bz = p3_dot(nrm, p3_sub(pz, f3s.a));
+          const int js = jung_interval_sign(lh, seed.bound, Jlo, Jhi, Bz);
+          if (js != 0) {
+            if (js > 0) {
+              ++ls->jung_cert_kill;
+              ++ls->q4_cert[2];
+              if (++fcount >= h4) break;
+            } else {
+              ++ls->jung_cert_skip;
+              ++ls->q4_cert[3];
+            }
+            continue;
+          }
+          ++ls->jung_fallback;
+          ++ls->q4_cert[4];
+          const i128 Pz = seed.l_exact(sc, iz) / 4;
+          const int c = cmp_2p2_jb2(Pz, Jb, Bz);
+          if ((seed_core_nonstrict ? (c >= 0) : (c > 0)) && ++fcount >= h4) break;
+          continue;
+        }
+        ++ls->float_fallback;
+        ++ls->q4_cert[5];
+        const i128 Pz = seed.l_exact(sc, iz) / 4;
+        if (seed_core_nonstrict ? (Pz > 0) : (Pz >= 0)) continue;
+        const P3& pz = ix.upos[(size_t)cz.u];
+        const i64 Bz = p3_dot(nrm, p3_sub(pz, f3s.a));
+        const int c = cmp_2p2_jb2(Pz, Jb, Bz);
+        if ((seed_core_nonstrict ? (c >= 0) : (c > 0)) && ++fcount >= h4) break;
+      }
+      dead = fcount >= h4;
+    }
+    if (dead) {
+      ++ls->seeds_killed_core;
+      continue;
+    }
+    // Completions y sur la lentille.
+    for (const CoverPoint& cy : sc.lens) {
+      const i32 uy = cy.u;
+      if (uy == cx.u || uy == ua || uy == ub) continue;
+      ++ls->q4_completions;
+      const P3& py = ix.upos[(size_t)uy];
+      const i64 l_ay = p3_norm2(p3_sub(py, pa));
+      const i64 l_by = p3_norm2(p3_sub(py, pb));
+      const i64 l_xy = p3_norm2(p3_sub(py, px));
+      if (l_ay > D2 || l_by > D2 || l_xy > D2) { ++ls->q4_rej_lens; continue; }
+      if (!tetra_owned_by(D2, l_ax, l_ay, l_bx, l_by, l_xy, ix.point_id(ua), ix.point_id(ub), ix.point_id(cx.u), ix.point_id(uy))) {
+        ++ls->q4_rej_owner;
+        continue;
+      }
+      // Exact-once du seed : le carrier est le plus petit PointId
+      // parmi les faces incidentes aigues (mutant q4-no-canonical :
+      // toutes les faces emettent ; le RLE masque, la porte compte).
+      const P3 vy{2 * py.x - pa.x - pb.x, 2 * py.y - pa.y - pb.y, 2 * py.z - pa.z - pb.z};
+      if (!no_canonical && p3_norm2(vy) > D2 && ix.point_id(uy) < ix.point_id(cx.u)) { ++ls->q4_rej_once; continue; }
+      // Prefiltres du bien-centrage : etage i64 puis puissance de face.
+      if (!q4_i64_prefilter(D2, l_ax, l_bx, l_ay, l_by, l_xy)) { ++ls->q4_rej_i64; continue; }
+      if (!q4_face_power_prefilter(f3s, py)) { ++ls->q4_rej_face_power; continue; }
+      const Q4Form f4 = q4_form(pa, pb, px, py);
+      if (f4.det == 0) { ++ls->q4_rej_det; continue; }
+      if (!q4_center_strictly_inside(f4, pa, pb, px, py)) { ++ls->q4_rej_center; continue; }
+      // Filtre de profondeur a la generation.
+      u64 depth = 0;
+      bool deep = false;
+      for (const CoverPoint& cz : sc.cover) {
+        const i128 pw = q4_power(f4, ix.upos[(size_t)cz.u]);
+        if ((pw < 0 || (genfilter_nonstrict && pw <= 0)) && ++depth >= h4) { deep = true; break; }
+      }
+      if (deep) { ++ls->depth_killed[2]; continue; }
+      lo->push_back(BallCandidate{ball_key_reduce(q4_ball_form(f4)), q4_level_raw(f4), 4});
+      ++ls->candidates[2];
+    }
+  }
+}
+
 }  // namespace generate_detail
 
 struct GenerateOptions;
@@ -289,7 +466,6 @@ inline void generate_candidates(const CloudIndex& ix, const GenerateOptions& opt
   // `digest_balls` (fixture q4_cover_fixture : la boule differentielle).
   const i64 q4_cover_coef = MHGP5_MUTANT("q4-cover-coef4") ? 4 : 3;
   const u64 h_of[3] = {lane_h(Lane::kQ2, opt.smax), lane_h(Lane::kQ3, opt.smax), lane_h(Lane::kQ4, opt.smax)};
-  const auto pid = [&](i32 u) { return ix.point_id(u); };
   std::vector<AliveRect> alive;
 
   // ---- q2.
@@ -347,44 +523,7 @@ inline void generate_candidates(const CloudIndex& ix, const GenerateOptions& opt
           const i64 D2 = p3_norm2(p3_sub(pb, pa));
           if (D2 == 0) continue;
           anchor_cover_from_handles(ix, sc.handles, pa, pb, D2, 3, &sc.cover, &sc.visits, &sc.cover_tmp);
-          sc.affine_filled = false;
-          for (const CoverPoint& cp : sc.cover) {
-            if (cp.u == ua || cp.u == ub) continue;
-            const P3& px = ix.upos[(size_t)cp.u];
-            if (!is_acute_seed(pa, pb, px, D2, pid(ua), pid(ub), pid(cp.u))) continue;
-            ++ls->seeds[0];
-            if (!sc.affine_filled) sc.fill_affine_sites(ix, pa, pb, D2);
-            const Q3Form f3 = q3_form(pa, pb, px);
-            const AffineSeed seed(f3, pa, pb, sc, float_on);
-            // Filtre de profondeur a la generation : minorant certifie.
-            u64 depth = 0;
-            bool deep = false;
-            for (size_t iz = 0; iz < sc.cover.size() && !deep; ++iz) {
-              const double lh = seed.l_hat(sc, iz);
-              bool interior;
-              if (lh < -seed.bound) {
-                ++ls->float_cert_neg;
-                ++ls->q3_cert[0];
-                interior = true;
-              } else if (lh > seed.bound) {
-                ++ls->float_cert_pos;
-                ++ls->q3_cert[1];
-                interior = false;
-              } else {
-                ++ls->float_fallback;
-                ++ls->q3_cert[2];
-                const i128 L = seed.l_exact(sc, iz);
-                interior = L < 0 || (genfilter_nonstrict && L <= 0);
-              }
-              if (interior && ++depth >= h_of[1]) deep = true;
-            }
-            if (deep) {
-              ++ls->depth_killed[1];
-              continue;
-            }
-            lo->push_back(BallCandidate{q3_ball_key(f3), promote_level(q3_exact_level(pa, pb, px)), 3});
-            ++ls->candidates[1];
-          }
+          scan_anchor_q3(ix, sc, ua, ub, pa, pb, D2, h_of[1], float_on, genfilter_nonstrict, lo, ls);
         }
     });
     st->t_rects_ms[1] += ms_since(t1);
@@ -428,127 +567,8 @@ inline void generate_candidates(const CloudIndex& ix, const GenerateOptions& opt
           // l'objet — mais changerait `digest_balls`, qui compte les candidats
           // profonds (docs/PROVENANCE.md, conformite).
           anchor_cover_from_handles(ix, sc.handles, pa, pb, D2, q4_cover_coef, &sc.cover, &sc.visits, &sc.cover_tmp);
-          // Compte W_4 exact par ancre : n4 >= h_4 tue l'ancre entiere.
-          {
-            u64 n4 = 0;
-            for (const CoverPoint& cz : sc.cover) {
-              if (cz.u == ua || cz.u == ub) continue;
-              if (in_spindle(Lane::kQ4, pa, pb, ix.upos[(size_t)cz.u]) && ++n4 >= h_of[2]) break;
-            }
-            if (n4 >= h_of[2]) {
-              ++ls->anchors_killed_w4;
-              continue;
-            }
-          }
-          sc.affine_filled = false;
-          sc.lens.clear();
-          for (const CoverPoint& cz : sc.cover) {
-            const P3& pz = ix.upos[(size_t)cz.u];
-            if (p3_norm2(p3_sub(pz, pa)) <= D2 && p3_norm2(p3_sub(pz, pb)) <= D2) sc.lens.push_back(cz);
-          }
-          for (const CoverPoint& cx : sc.lens) {
-            if (cx.u == ua || cx.u == ub) continue;
-            const P3& px = ix.upos[(size_t)cx.u];
-            if (!is_acute_seed(pa, pb, px, D2, pid(ua), pid(ub), pid(cx.u))) continue;
-            ++ls->seeds[1];
-            const i64 l_ax = p3_norm2(p3_sub(px, pa));
-            const i64 l_bx = p3_norm2(p3_sub(px, pb));
-            const Q3Form f3s = q3_form(pa, pb, px);
-            const P3 nrm = p3_cross(p3_sub(pb, pa), p3_sub(px, pa));
-            // Cœur universel du seed (Jung) : J = D²(3G − 2 l_ax l_bx).
-            const i128 Jb = (i128)D2 * (3 * f3s.g - 2 * (i128)l_ax * l_bx);
-            bool dead = Jb < 0;
-            if (!dead) {
-              if (!sc.affine_filled) sc.fill_affine_sites(ix, pa, pb, D2);
-              const AffineSeed seed(f3s, pa, pb, sc, float_on);
-              const double Jd = (double)Jb;
-              const double Jlo = Jd * (1.0 - kJungGuard), Jhi = Jd * (1.0 + kJungGuard);
-              u64 fcount = 0;
-              for (size_t iz = 0; iz < sc.cover.size(); ++iz) {
-                const CoverPoint& cz = sc.cover[iz];
-                if (cz.u == ua || cz.u == ub || cz.u == cx.u) continue;
-                const double lh = seed.l_hat(sc, iz);
-                if (lh > seed.bound) {
-                  ++ls->float_cert_pos;
-                  ++ls->q4_cert[0];
-                  continue;  // P > 0 certifie : jamais temoin
-                }
-                if (lh < -seed.bound) {
-                  ++ls->float_cert_neg;
-                  ++ls->q4_cert[1];
-                  const P3& pz = ix.upos[(size_t)cz.u];
-                  const i64 Bz = p3_dot(nrm, p3_sub(pz, f3s.a));
-                  const int js = jung_interval_sign(lh, seed.bound, Jlo, Jhi, Bz);
-                  if (js != 0) {
-                    if (js > 0) {
-                      ++ls->jung_cert_kill;
-                      ++ls->q4_cert[2];
-                      if (++fcount >= h_of[2]) break;
-                    } else {
-                      ++ls->jung_cert_skip;
-                      ++ls->q4_cert[3];
-                    }
-                    continue;
-                  }
-                  ++ls->jung_fallback;
-                  ++ls->q4_cert[4];
-                  const i128 Pz = seed.l_exact(sc, iz) / 4;
-                  const int c = cmp_2p2_jb2(Pz, Jb, Bz);
-                  if ((seed_core_nonstrict ? (c >= 0) : (c > 0)) && ++fcount >= h_of[2]) break;
-                  continue;
-                }
-                ++ls->float_fallback;
-                ++ls->q4_cert[5];
-                const i128 Pz = seed.l_exact(sc, iz) / 4;
-                if (seed_core_nonstrict ? (Pz > 0) : (Pz >= 0)) continue;
-                const P3& pz = ix.upos[(size_t)cz.u];
-                const i64 Bz = p3_dot(nrm, p3_sub(pz, f3s.a));
-                const int c = cmp_2p2_jb2(Pz, Jb, Bz);
-                if ((seed_core_nonstrict ? (c >= 0) : (c > 0)) && ++fcount >= h_of[2]) break;
-              }
-              dead = fcount >= h_of[2];
-            }
-            if (dead) {
-              ++ls->seeds_killed_core;
-              continue;
-            }
-            // Completions y sur la lentille.
-            for (const CoverPoint& cy : sc.lens) {
-              const i32 uy = cy.u;
-              if (uy == cx.u || uy == ua || uy == ub) continue;
-              ++ls->q4_completions;
-              const P3& py = ix.upos[(size_t)uy];
-              const i64 l_ay = p3_norm2(p3_sub(py, pa));
-              const i64 l_by = p3_norm2(p3_sub(py, pb));
-              const i64 l_xy = p3_norm2(p3_sub(py, px));
-              if (l_ay > D2 || l_by > D2 || l_xy > D2) { ++ls->q4_rej_lens; continue; }
-              if (!tetra_owned_by(D2, l_ax, l_ay, l_bx, l_by, l_xy, pid(ua), pid(ub), pid(cx.u), pid(uy))) {
-                ++ls->q4_rej_owner;
-                continue;
-              }
-              // Exact-once du seed : le carrier est le plus petit PointId
-              // parmi les faces incidentes aigues (mutant q4-no-canonical :
-              // toutes les faces emettent ; le RLE masque, la porte compte).
-              const P3 vy{2 * py.x - pa.x - pb.x, 2 * py.y - pa.y - pb.y, 2 * py.z - pa.z - pb.z};
-              if (!no_canonical && p3_norm2(vy) > D2 && pid(uy) < pid(cx.u)) { ++ls->q4_rej_once; continue; }
-              // Prefiltres du bien-centrage : etage i64 puis puissance de face.
-              if (!q4_i64_prefilter(D2, l_ax, l_bx, l_ay, l_by, l_xy)) { ++ls->q4_rej_i64; continue; }
-              if (!q4_face_power_prefilter(f3s, py)) { ++ls->q4_rej_face_power; continue; }
-              const Q4Form f4 = q4_form(pa, pb, px, py);
-              if (f4.det == 0) { ++ls->q4_rej_det; continue; }
-              if (!q4_center_strictly_inside(f4, pa, pb, px, py)) { ++ls->q4_rej_center; continue; }
-              // Filtre de profondeur a la generation.
-              u64 depth = 0;
-              bool deep = false;
-              for (const CoverPoint& cz : sc.cover) {
-                const i128 pw = q4_power(f4, ix.upos[(size_t)cz.u]);
-                if ((pw < 0 || (genfilter_nonstrict && pw <= 0)) && ++depth >= h_of[2]) { deep = true; break; }
-              }
-              if (deep) { ++ls->depth_killed[2]; continue; }
-              lo->push_back(BallCandidate{ball_key_reduce(q4_ball_form(f4)), q4_level_raw(f4), 4});
-              ++ls->candidates[2];
-            }
-          }
+          process_anchor_q4(ix, sc, ua, ub, pa, pb, D2, h_of[2], float_on, genfilter_nonstrict, seed_core_nonstrict,
+                            no_canonical, lo, ls);
         }
     });
     st->t_rects_ms[2] += ms_since(t1);

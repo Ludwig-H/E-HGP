@@ -167,8 +167,9 @@ inline bool validate_q4_results(const Q4Batch& b, std::string* why) { return val
 // anchors_killed_hist, anchors_killed_w4, seeds comme la lane de production.
 template <class Flush>
 inline void build_q4_batch(const CloudIndex& ix, const AliveRect& ar, const u64 h_of[3], bool float_on, i64 cover_coef,
-                           generate_detail::AnchorScratch& sc, Q4Batch* bdev, Q4Batch* bhost, GenerateStats* ls,
-                           const BatchLimits& lim, BatchStats* bs, Flush&& flush) {
+                           bool depth_nonstrict, bool core_nonstrict, bool no_canonical,
+                           generate_detail::AnchorScratch& sc, Q4Batch* bdev, std::vector<BallCandidate>* lo,
+                           GenerateStats* ls, const BatchLimits& lim, BatchStats* bs, Flush&& flush) {
   using namespace generate_detail;
   corner_histograms(ix, Lane::kQ4, ar.r, &sc.ha, &sc.hb);
   const NodeRange ra = ix.range_of(ar.r.a), rb = ix.range_of(ar.r.b);
@@ -186,6 +187,14 @@ inline void build_q4_batch(const CloudIndex& ix, const AliveRect& ar, const u64 
       const i64 D2 = p3_norm2(p3_sub(pb, pa));
       if (D2 == 0) continue;
       anchor_cover_from_handles(ix, sc.handles, pa, pb, D2, cover_coef, &sc.cover, &sc.visits, &sc.cover_tmp);
+      if (sc.cover.size() < lim.device_min_sites) {
+        // Routage hote : lane de production par ancre, emission immediate.
+        const u64 seeds_before_h = ls->seeds[1];
+        process_anchor_q4(ix, sc, ua, ub, pa, pb, D2, h_of[2], float_on, depth_nonstrict, core_nonstrict, no_canonical, lo, ls);
+        ++bs->anchors_host;
+        bs->seeds_host += ls->seeds[1] - seeds_before_h;
+        continue;
+      }
       {
         u64 n4 = 0;
         for (const CoverPoint& cz : sc.cover) {
@@ -215,8 +224,7 @@ inline void build_q4_batch(const CloudIndex& ix, const AliveRect& ar, const u64 
       ls->seeds[1] += nseeds;
       if (nseeds == 0) continue;
       sc.fill_affine_sites(ix, pa, pb, D2);
-      const bool to_device = nc >= lim.device_min_sites;
-      Q4Batch* b = to_device ? bdev : bhost;
+      Q4Batch* b = bdev;
       const size_t seeds_before = b->seeds.size();
       Q4BatchAnchor an;
       an.begin = (u32)b->u0.size();
@@ -271,9 +279,9 @@ inline void build_q4_batch(const CloudIndex& ix, const AliveRect& ar, const u64 
       bs->max_anchor_seeds = std::max(bs->max_anchor_seeds, anchor_seeds);
       bs->max_anchor_sites = std::max(bs->max_anchor_sites, (u64)nc);
       bs->max_anchor_pairs = std::max(bs->max_anchor_pairs, anchor_pairs);
-      if (to_device) { ++bs->anchors_device; bs->seeds_device += anchor_seeds; }
-      else { ++bs->anchors_host; bs->seeds_host += anchor_seeds; }
-      if (b->seeds.size() >= lim.seeds || b->u0.size() >= lim.sites || b->pairs_estimate >= lim.pairs) flush(to_device);
+      ++bs->anchors_device;
+      bs->seeds_device += anchor_seeds;
+      if (b->seeds.size() >= lim.seeds || b->u0.size() >= lim.sites || b->pairs_estimate >= lim.pairs) flush();
     }
 }
 
@@ -387,23 +395,24 @@ inline void generate_q4_batched_with(const CloudIndex& ix, const GenerateOptions
   std::vector<std::vector<BallCandidate>> louts(T);
   std::vector<GenerateStats> lst(T);
   std::vector<AnchorScratch> lsc(T);
-  std::vector<Q4Batch> lb(T), lbh(T);
+  std::vector<Q4Batch> lb(T);
   std::vector<BatchStats> lbs(T);
-  const auto flush = [&](size_t t, bool device) {
-    Q4Batch& b = device ? lb[t] : lbh[t];
+  const auto flush = [&](size_t t) {
+    Q4Batch& b = lb[t];
     if (b.seeds.empty() && b.anchors.empty()) return;
     lbs[t].max_lot_seeds = std::max(lbs[t].max_lot_seeds, (u64)b.seeds.size());
     lbs[t].max_lot_sites = std::max(lbs[t].max_lot_sites, (u64)b.u0.size());
     lbs[t].max_lot_pairs = std::max(lbs[t].max_lot_pairs, b.pairs_estimate);
-    if (device) { ++lbs[t].flushes; scan(&b, (u32)h_of[2], core_nonstrict, depth_nonstrict, no_canonical); }
-    else { ++lbs[t].host_flushes; scan_q4_batch_host(&b, (u32)h_of[2], core_nonstrict, depth_nonstrict, no_canonical); }
+    ++lbs[t].flushes;
+    scan(&b, (u32)h_of[2], core_nonstrict, depth_nonstrict, no_canonical);
     emit_q4_batch(b, &louts[t], &lst[t]);
     b.clear();
   };
   const size_t created = parallel_items(nrect, (int)T, [&](size_t i, size_t t) {
-    build_q4_batch(ix, alive[i], h_of, float_on, cover_coef, lsc[t], &lb[t], &lbh[t], &lst[t], lim, &lbs[t], [&](bool dev) { flush(t, dev); });
+    build_q4_batch(ix, alive[i], h_of, float_on, cover_coef, depth_nonstrict, core_nonstrict, no_canonical, lsc[t], &lb[t],
+                   &louts[t], &lst[t], lim, &lbs[t], [&] { flush(t); });
   });
-  for (size_t t = 0; t < T; ++t) { flush(t, true); flush(t, false); }
+  for (size_t t = 0; t < T; ++t) flush(t);
   st->workers_rects[2] = std::max(st->workers_rects[2], (u64)created);
   const bool drop = MHGP5_MUTANT("par-drop-shard");
   for (size_t t = 0; t < T; ++t) {

@@ -333,7 +333,7 @@ mhgp5_gate(mhgp5_q4_lane_batched_seuil_negatif 2 mhgp5_q4_lane_batched_gate "--f
 # Routage adaptatif (executeur externe = hote shaped ici) : l'objet post-RLE ne depend pas de la politique.
 mhgp5_gate(mhgp5_q3_lane_batched_route_256 0 mhgp5_q3_lane_batched_gate "--family=uniform --n=1200 --threads=3 --device-min-sites=256")
 mhgp5_gate(mhgp5_q4_lane_batched_route_256 0 mhgp5_q4_lane_batched_gate "--family=eight_clusters --n=1200 --threads=3 --device-min-sites=256")
-mhgp5_gate(mhgp5_q4_lane_batched_route_tout_hote 0 mhgp5_q4_lane_batched_gate "--family=uniform --n=400 --threads=2 --device-min-sites=1000000000 --min-candidates=200")
+mhgp5_gate(mhgp5_q4_lane_batched_route_tout_hote 0 mhgp5_q4_lane_batched_gate "--family=uniform --n=400 --threads=2 --device-min-sites=1000000000 --min-candidates=200 --min-flushes=0")
 mhgp5_gate(mhgp5_q4_lane_batched_petit_lot_paires 0 mhgp5_q4_lane_batched_gate "--family=eight_clusters --n=400 --threads=2 --pairs-per-launch=200000 --min-candidates=200 --min-flushes=20")
 mhgp5_gate(mhgp5_q4_lane_batched_petit_lot_sites 0 mhgp5_q4_lane_batched_gate "--family=uniform --n=400 --threads=2 --sites-per-launch=20000 --min-candidates=200 --min-flushes=50")
 mhgp5_gate(mhgp5_q3_lane_batched_petit_lot_sites 0 mhgp5_q3_lane_batched_gate "--family=uniform --n=400 --threads=2 --sites-per-launch=20000 --min-candidates=200 --min-flushes=50")
