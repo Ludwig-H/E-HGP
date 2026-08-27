@@ -19,7 +19,7 @@ FAMILIES = ("uniform", "terrain", "eight_clusters", "scanline_single_pass")
 
 
 def expected_names():
-    names = []
+    names = ["gpu_witness"]
     for n in (8000, 16000, 32000):
         for fam in FAMILIES:
             names.append(f"conf_{fam}_n{n}")
@@ -66,8 +66,10 @@ def main():
         fb = forbidden.search(body)
         if fb:
             bad.append(f"{name}: motif interdit ({fb.group(0)})")
-        if not counters.search(body):
+        if name != "gpu_witness" and not counters.search(body):
             bad.append(f"{name}: ligne de compteurs absente")
+        if name == "gpu_witness" and "device_witness OK" not in body:
+            bad.append(f"{name}: temoin device non conforme")
         if name.startswith("conf_") and not conformity.search(body):
             bad.append(f"{name}: conformite v4 non etablie")
         if name.startswith("contrat_") and not digest.search(body):

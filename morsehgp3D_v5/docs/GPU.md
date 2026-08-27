@@ -54,17 +54,32 @@ en blocs.
 ## 3. Ordre des livraisons
 
 1. **Arithmétique et formes portables** (CPU-vérifiables) : `dint.hpp`,
-   `device_forms.hpp`, `mhgp5_dint_gate` — en cours.
+   `device_forms.hpp`, `mhgp5_dint_gate` — **livré** (0 désaccord contre
+   `__int128`, mutant `dint-mulhi-dropped` tué).
 2. **Scan q3 « device-shaped »** sur CPU : une fonction qui, pour un
    rectangle vivant, prend les tableaux plats (sites affines de l'ancre,
    seeds) et rend les candidats q3 exactement comme la lane q3 de
    `generate.hpp`, mais écrite comme un kernel (indices explicites, aucune
    allocation, réductions explicites) ; porte d'égalité post-RLE avec la lane
-   de production à n = 400/1200.
+   de production à n = 400/1200 — **livré** (`src/gpu/q3_scan_shaped.hpp`,
+   `mhgp5_q3_scan_shaped_gate` : 0 désaccord, mutant `q3-shaped-strict-flip`
+   tué).
 3. **Option CMake `MHGP5_ENABLE_CUDA`** (OFF par défaut, sm_120 comme le
-   produit ; build exigeant un worktree propre), cible `mhgp5_device_witness`
-   (selftest arithmétique device : DI128 contre témoins remontés du CPU) et
-   première session G4 dédiée à la compilation et au témoin.
+   produit, `-fmad=false` pour qu'aucune contraction n'altère la séquence
+   figée du filtre flottant), cible `mhgp5_device_witness`
+   (`src/gpu/device_witness.cu`) — **écrit, pas encore compilé** : aucun
+   `nvcc` local, la compilation et l'exécution ont lieu sur G4 en **phase 0**
+   de `gcp-migration/v5_campaign_remote.sh` (run `gpu_witness`, exigé à
+   code 0 par `validate_v5_campaign.py` ; `nvcc` absent ⇒ code 2 gravé, jamais
+   un vert de complaisance). Le témoin exécute sur le device (a) 2^18 tirages
+   d'arithmétique DI128 plus les bords, (b) le scan q3 **warp-par-seed** (les
+   32 fils balaient les sites, `__ballot_sync`/`__popc` comptent les
+   intérieurs, la sortie anticipée à h3 est reproduite en retirant la
+   contribution des sites au-delà du h3-ième intérieur) sur toutes les seeds
+   des ancres survivantes d'`uniform` et `eight_clusters` à n = 400 ; les
+   verdicts mort/vivant et les compteurs de certification sont comparés bit
+   à bit au scan shaped CPU (lui-même égal à la lane de production).
+   Plancher : 1000 seeds par famille.
 4. **Kernel q3** (warp-par-seed) + porte d'égalité device/CPU post-RLE sur
    G4 ; puis **kernel q4** (W_4, cœur de seed avec repli CPU, complétions).
 5. Mesure par banc apparié CPU 48 fils / GPU sur `eight_clusters` 50 000 ;

@@ -66,6 +66,22 @@ run_one() {
   return 0
 }
 
+# PHASE 0 — TEMOIN DEVICE (docs/GPU.md, livraison 3) : build nvcc separe et
+# execution du temoin ; son statut est grave comme un run (code, duree, RSS).
+# NVCC_BIN vide => statut code=2 « nvcc absent » (jamais un vert de
+# complaisance) ; le validateur exige code=0 sur ce run.
+NVCC_BIN="${NVCC_BIN:-$(command -v nvcc 2>/dev/null || ls /usr/local/cuda*/bin/nvcc 2>/dev/null | head -1 || true)}"
+if [ -n "${NVCC_BIN}" ] && [ "${SKIP_GPU_WITNESS:-0}" != "1" ]; then
+  export PATH="$(dirname "${NVCC_BIN}"):${PATH}"
+  run_one gpu_witness device_witness bash -c "set -e; cmake -S morsehgp3D_v5 -B build-cuda -DCMAKE_BUILD_TYPE=Release -DMHGP5_ENABLE_CUDA=ON -DCMAKE_CUDA_COMPILER=${NVCC_BIN} > build-cuda.cmake.log 2>&1 && cmake --build build-cuda --target mhgp5_device_witness -j8 > build-cuda.build.log 2>&1 && ./build-cuda/mhgp5_device_witness"
+else
+  {
+    printf 'code=2\nduree_s=0\npeak_rss_kb=0\ntiming_scope=device_witness\nthreads=%s\n' "${THREADS}"
+    printf 'source_commit=%s\nsource_payload_sha256=%s\nprotocol_manifest_sha256=%s\nfinished=1\n' "${SOURCE_COMMIT}" "${SOURCE_PAYLOAD_SHA256}" "${PROTOCOL_MANIFEST_SHA256}"
+  } > "${OUT_DIR}/gpu_witness.status"
+  echo "REFUS : nvcc absent (temoin device non execute)" > "${OUT_DIR}/gpu_witness.txt"
+fi
+
 # PHASE 1 — conformite v4 aux tailles d'interet, un run a la fois.
 for n in 8000 16000 32000; do
   for fam in ${FAMILIES}; do

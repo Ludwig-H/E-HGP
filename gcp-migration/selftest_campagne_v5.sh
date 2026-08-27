@@ -76,11 +76,36 @@ EOS
 chmod +x "${WORK}/fake_conformity"
 echo "# faux reçu" > "${WORK}/recu.txt"
 
+# Faux nvcc : le temoin device est simule par NVCC_BIN pointant sur un script
+# dont le repertoire contient un `cmake` factice ; plus simplement, le run
+# gpu_witness est produit par le script distant via `bash -c` : on remplace
+# bash par... non — on force le chemin « nvcc present » avec un faux nvcc et
+# un PATH ou cmake est un faux qui reussit et cree un faux temoin.
+mkdir -p "${WORK}/fakebin"
+cat > "${WORK}/fakebin/nvcc" <<'EOS'
+#!/usr/bin/env bash
+echo "nvcc: faux"
+EOS
+cat > "${WORK}/fakebin/cmake" <<'EOS'
+#!/usr/bin/env bash
+# faux cmake : cree le faux temoin device au premier appel (-S), rien au build.
+for a in "$@"; do case "$a" in -B) shift; mkdir -p "$1/." ;; esac; done
+mkdir -p build-cuda
+cat > build-cuda/mhgp5_device_witness <<'EOT'
+#!/usr/bin/env bash
+[ "${WITNESS_FAIL:-0}" = "1" ] && { echo "DESACCORD device/hote"; exit 1; }
+echo "device=faux sm=12.0"; echo "arith cas=262144 desaccords=0"; echo "device_witness OK"
+EOT
+chmod +x build-cuda/mhgp5_device_witness
+exit 0
+EOS
+chmod +x "${WORK}/fakebin/nvcc" "${WORK}/fakebin/cmake"
+
 run_campaign() {
   local out="$1"; shift
   mkdir -p "${out}"
   local rc=0
-  ( cd "${WORK}" && env "$@" \
+  ( cd "${WORK}" && env "$@" PATH="${WORK}/fakebin:${PATH}" NVCC_BIN="${WORK}/fakebin/nvcc" \
       PROBE_BIN="${WORK}/fake_probe" CONFORMITY_BIN="${WORK}/fake_conformity" \
       RECEIPT="${WORK}/recu.txt" TIME_BIN="${WORK}/fake_time" THREADS=1 \
       OUT_DIR="${out}" RUN_TIMEOUT=2 \
@@ -92,7 +117,7 @@ run_campaign() {
 # ---- Scenario 1 : happy path -> complete.
 RC1=$(run_campaign "${WORK}/out1")
 [ "${RC1}" -eq 0 ] || fail "scenario 1 : script distant rc=${RC1}"
-[ "$(ls "${WORK}/out1"/*.status 2>/dev/null | wc -l)" -eq 16 ] || fail "scenario 1 : 16 statuts attendus"
+[ "$(ls "${WORK}/out1"/*.status 2>/dev/null | wc -l)" -eq 17 ] || fail "scenario 1 : 17 statuts attendus (temoin device + 12 conformites + 4 contrats)"
 grep -L '^source_commit=cafedeca$' "${WORK}/out1"/*.status | grep -q . && fail "scenario 1 : pin source absent d'un statut"
 if ! python3 "${HERE}/validate_v5_campaign.py" "${WORK}/out1" cafedeca beefbeef feedf00d 0 0 > "${WORK}/v1.log" 2>&1; then
   fail "scenario 1 : validateur a refuse un happy path ($(cat "${WORK}/v1.log"))"
@@ -117,6 +142,14 @@ grep -q '^code=1$' "${WORK}/out3/conf_scanline_single_pass_n16000.status" 2>/dev
 if python3 "${HERE}/validate_v5_campaign.py" "${WORK}/out3" cafedeca beefbeef feedf00d 3 0 > "${WORK}/v3.log" 2>&1; then
   fail "scenario 3 : le validateur devait refuser"
 fi
+
+# ---- Scenario 3bis : temoin device en desaccord -> jamais complete (statut code=1 conserve).
+RC3b=$(run_campaign "${WORK}/out3b" WITNESS_FAIL=1)
+grep -q '^code=1$' "${WORK}/out3b/gpu_witness.status" 2>/dev/null || fail "scenario 3bis : code=1 du temoin non materialise"
+if python3 "${HERE}/validate_v5_campaign.py" "${WORK}/out3b" cafedeca beefbeef feedf00d "${RC3b}" 0 > "${WORK}/v3b.log" 2>&1; then
+  fail "scenario 3bis : un temoin device en desaccord devait refuser complete"
+fi
+grep -q 'gpu_witness' "${WORK}/v3b.log" || fail "scenario 3bis : le temoin doit etre LISTE"
 
 # ---- Scenario 4 : code de session non nul.
 if python3 "${HERE}/validate_v5_campaign.py" "${WORK}/out1" cafedeca beefbeef feedf00d 255 0 > "${WORK}/v4.log" 2>&1; then
