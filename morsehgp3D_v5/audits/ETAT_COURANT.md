@@ -3,11 +3,12 @@
 - **Date :** 27 août 2026
 - **Auditeur :** Codex, avec relecture critique des audits concurrents
 - **Pin fonctionnel de référence relu statiquement :** `635951d654f466cfa7fe1e2297c19b9acb5393a9`
-- **Tip d'implémentation relu statiquement :** `ef5abbd5261763fc618692dd7cb9f6f24069dfea`
-- **Dernier audit concurrent critiqué :** `e0ac816617b5639117ca0b16e934803bc91539d3`
-- **Tip documentation/reçus relu et validé :** `e11ad8c7b66617d91c1cdcd74909a4970b5362b0`
-- **Worktree concurrent post-tip :** un probe Q4 et son inscription CMake sont en cours, hors verdict ; le probe racine non suivi appartient à un autre auditeur
+- **Tip d'implémentation relu statiquement :** `2b2bb4483103099ef539964bee15fe981acd2910`
+- **Dernier audit concurrent critiqué :** `4c06d045ed1ee0584e3c036d1cf6a3ece5ad4942`
+- **Reçu G4 relu :** `e11ad8c7b66617d91c1cdcd74909a4970b5362b0`
+- **Worktree concurrent post-tip :** instrumentation `q4_stage_probe` et politique de prétests par requête avant cover en cours dans CMake et `src/`, hors verdict ; le probe de phase et le probe racine sont non suivis
 - **Dernier pin avec sorties locales de sonde observées :** `635951d654f466cfa7fe1e2297c19b9acb5393a9`, reçu commité par `259fe21e`
+- **Dernière sonde Q4 et sorties suivies :** `f8f5b4ffe803c0d40657b1946892487d5c498bd1`, provenance d'exécution non fermée
 - **Dernier pin fonctionnel avec suite locale concurrente :** `635951d654f466cfa7fe1e2297c19b9acb5393a9`
 - **Pin du protocole `EXTRA_N` relu statiquement :** `d837adb2a4cad65b4bce51640df8124539bedf56`
 - **Pin d'activation initiale relu :** `a9a2f509428bbfebd9543579d16d1579a7591106`
@@ -30,7 +31,14 @@ durablement reçus.
 Sept de ces oracles appartiennent aussi à `gate` ;
 `mhgp5_anchor_tests_oracle` reste absent de la commande canonique `-L gate`.
 Les commits `259fe21e..e11ad8c7` ne changent ensuite que reçus et documentation ;
-`ef5abbd5` corrige ensuite la racine de l'auto-copie G4 sans toucher au moteur.
+`ef5abbd5` corrige ensuite la racine de l'auto-copie G4 sans toucher au moteur,
+`f8f5b4ff` ajoute la sonde Q4 et trois sorties exploratoires, puis `2b2bb448`
+active la corde dans le produit CPU, le lot hôte et le kernel CUDA.
+Ce dernier commit annonce 171/171 portes CPU, un stub CUDA vert, l'objet
+inchangé et un ratio local 22,3 vers 18,8 s. Aucun journal, reçu de conformité
+au pin, brut de mesure ou compilation NVCC de ce pin n'est suivi : ces résultats
+restent des sorties rapportées, pas une autorité. Le worktree postérieur ajoute
+une sonde de profilage encore non suivie, également hors verdict.
 L'annonce de commit « 170/170 portes CPU » ne correspond donc pas à
 l'enregistrement CTest courant et reste sans journal qualifié.
 
@@ -52,6 +60,8 @@ manque surtout :
 - une garde `J <= 0`, et non seulement `J < 0`, ainsi qu'une identité `P/B`
   calculée sans dépassement sur tout le profil u16 ;
 - une sémantique de routage Q4 indépendante du seuil ;
+- une activation de la corde Q4 isolée des prétests d'ancre, avec oracle brut
+  indépendant, parité device reçue et coût de bout en bout ON/OFF ;
 - un reçu de mesure réellement épinglé au binaire exécuté.
 
 Le dossier séparé `mesures_secteurs_635951d6_20260827/`, commité par
@@ -98,6 +108,8 @@ lancement GCP n'a été effectué par l'auditeur pour établir ces défauts.
 | ASan+UBSan Debug historique `6e8a6aba` | 11/11 portes ciblées | aucune généralisation à toute la suite |
 | ASan+UBSan RelWithDebInfo historique | échec de compilation dans `cloud_index.hpp:130-131` | warning GCC 13 `array-bounds` sous `-Werror`, pas un diagnostic sanitizer d'exécution |
 | G4 source `fa99b3f1` | **25/25 runs acceptés** par le validateur exact du pin rejoué avec `0 0`, deux digests CPU/GPU égaux | contenu reproductiblement complet ; RC de récupération injectés au rejeu mais absents du reçu, donc transaction non autoportante |
+| Sonde de corde Q4 suivie par `f8f5b4ff` | `wrong=0`, morts `K=2/4/8` agrégées monotones sur 3 familles à n=2000 | bruts sans pin, RC, temps ni RSS ; « complétions » = tentatives `y`, aucun terrain |
+| Activation corde `2b2bb448` | 171/171 CPU, stub CUDA, 23,8 M vers 5,1 M et 22,3 vers 18,8 s annoncés par le commit | aucun journal ni brut au pin ; aucun reçu NVCC ; conformité invoquée mais non reçue au pin |
 | G4 source `8f95df2e` | 4 couples CPU/GPU à 50 k, deux digests appariés | égalité bornée ; campagne partielle 24/25, non terminale |
 
 La sortie concurrente 166/166 rapporte une non-régression bornée du contenu
@@ -165,7 +177,7 @@ campagne ferme la décision V8 au niveau exploratoire : aucun kernel q3 par
 rectangle n'a de gain de bout en bout démontré. Elle ne mesure ni variance ni
 ablation causale, et ne justifie donc pas une généralisation de performance.
 
-### Sonde de corde Q4 en cours dans le worktree
+### Sonde de corde Q4 `f8f5b4ff` — signal reçu, mesure non recevable
 
 Le critère de `bench/q4_chord_probe.cpp` est mathématiquement prometteur. Les
 centres des complétions acceptables sont **contenus dans** la corde fermée
@@ -177,11 +189,15 @@ que la stricte comparaison `< 0` sont corrects. L'entier courant
 `isqrt(J/2)+1` sur-approxime toujours la corde et reste donc fail-open, mais il
 dépasse inutilement d'une unité les carrés parfaits et peut être très pessimiste
 pour les petits `J`. Employer le plus petit entier `r` tel que `2*r*r >= J`, ou
-publier le mou de sur-couverture. Ce code est cependant une sonde non suivie et
-ne doit pas encore devenir une lane ni une preuve :
+publier le mou de sur-couverture. Le code est maintenant suivi, mais reste une
+sonde et ne doit pas encore devenir une lane ni une preuve :
 
 - CMake ne lui transmet ni pin ni état dirty, et la sortie ne conserve ni
-  commande, toolchain, temps, RSS, hash du binaire ou code de sortie ;
+  commande, toolchain, temps, RSS, hash du binaire ou code de sortie. Les bruts
+  ont été générés **avant** le commit qui ajoute la sonde, puis placés dans
+  `mesures_secteurs_635951d6_20260827/` avec la mention « même pin », alors que
+  `q4_chord_probe.cpp` n'existe pas à `635951d6` ; les octets peuvent
+  correspondre au futur `f8f5b4ff`, mais rien dans le reçu ne le prouve ;
 - `wrong` est une alarme géométrique relative utile : toute `BallKey` produite
   que le seed déclaré mort peut engendrer contredit bien « toutes ses sphères
   admissibles sont profondes ». Elle n'est toutefois ni indépendante du corps
@@ -204,20 +220,144 @@ ne doit pas encore devenir une lane ni une preuve :
   de ratio, refuser les CLI permissives (`--n=abc` rend actuellement un run
   vide à code 0), vérifier le cardinal réellement généré et refuser `J <= 0`,
   conformément au théorème du seed aigu ;
-- la campagne locale en cours écrit directement dans les `.txt` et enchaîne
-  les probes par `;` sans graver ni bloquer sur chaque RC : un fichier a été
-  observé à zéro octet pendant le calcul et un `wrong != 0` n'empêcherait pas
-  les commandes suivantes ni le commit. Écrire vers un temporaire, vérifier le
-  RC, renommer atomiquement puis construire le résumé depuis les bruts.
+- la campagne locale a écrit directement dans les `.txt` et enchaîné les probes
+  sans bloquer le commit sur chaque RC : des fichiers à zéro octet ont été
+  observés pendant les calculs, puis remplacés par des bruts complets, mais les
+  RC affichés au terminal ne sont pas suivis. Écrire vers un temporaire,
+  vérifier le RC, renommer atomiquement puis construire le résumé depuis les
+  bruts ;
+- le cas `eight_clusters n=4000` a été abandonné après plus de dix minutes et
+  son brut vide supprimé. Cette observation de coût n'est pas reçue non plus,
+  mais confirme que le coût propre du certificat doit être isolé avant toute
+  décision de lane.
 
-La bonne prochaine forme est un probe reçu, pas une intégration produit : même
-pin, comparaison exacte par complétion, `wrong_K=0`, planchers, coûts séparés
-du tri/segmentation et du scan effectivement évité.
+Les trois bruts suivis à n=2000 donnent :
 
-Une compilation Release ciblée et cinq runs bornés (`n=200/400`, quatre
-familles) ont rendu `wrong=0` et des morts agrégées strictement monotones
-`K=2/4/8`. Ils falsifient utilement le brouillon, sans constituer un reçu ni une
-mesure de performance.
+| Famille | Seeds vivants tués K=4 | Tentatives `y` comptées évitées K=4 | `wrong` |
+|---|---:|---:|---:|
+| `eight_clusters` | 61,7 % | 82,5 % | 0 |
+| `uniform` | 57,9 % | 74,8 % | 0 |
+| `scanline_single_pass` | 34,9 % | 60,7 % | 0 |
+
+La non-vacuité est forte et le signal justifie de poursuivre le probe. Il ne
+prouve aucun gain : le coût des `K` scans n'est pas séparé, le compteur précède
+owner/canonicalisation/préfiltres, et terrain n'a pas été exécuté. La bonne
+prochaine forme est un reçu distinct au pin de la sonde, comparaison exacte par
+complétion, `wrong_K=0`, planchers, temps du certificat et scans réellement
+évités.
+
+Une passe concurrente rapporte une compilation Release ciblée et cinq runs
+bornés (`n=200/400`, quatre familles) avec `wrong=0` et des morts agrégées
+strictement monotones `K=2/4/8`. Ils falsifient utilement le brouillon, sans
+constituer un reçu ni une mesure de performance.
+
+### Intégration produit de la corde `2b2bb448` — bonne direction, activation non qualifiée
+
+La transcription en cours conserve deux choix d'architecture utiles. Elle
+réutilise le scan du cover déjà payé par le cœur au lieu d'ajouter quatre scans
+complets, et le test strict possède un filtre flottant avec repli i128. Sous le
+profil u16, les largeurs annoncées pour `J`, `mu_hat`, `B` et
+`L-c*mu_hat*B` tiennent dans i128. La logique de préfixe du kernel CUDA paraît
+aussi reproduire statiquement l'ordre scalaire : première lane où le cœur ou
+les quatre morceaux atteignent `h4`, priorité au cœur en cas d'égalité, puis
+masquage des compteurs après cette lane.
+
+Cela ne suffit pas pour qualifier l'activation déjà commise par défaut :
+
+- dans `q4_kernels.cuh`, chaque lane construit d'abord un `ChordPieces` inutilisé,
+  puis chaque site reconstruit un objet local et recalcule
+  `isqrt128_floor(J/2)`. Le CPU calcule cette racine une fois par seed. Sur GPU,
+  ce `sqrt` suivi de corrections i128 par site, les quatre ballots et la pression
+  de registres peuvent coûter davantage que les complétions retirées. Calculer
+  `mu_hat` une seule fois par seed — idéalement lors de la construction du lot —
+  puis exposer un helper pur qui rend le masque des morceaux d'un site ;
+- `generate.hpp`, `q4_core_shaped.hpp` et le kernel ignorent la corde dès que
+  `L > 0` est certifié. C'est fail-open, donc sans faux rejet, mais le commentaire
+  « jamais témoin d'aucun morceau » est faux : avec `L=4`, `mu_hat=2` et `B=2`,
+  les deux extrémités du morceau positif extrême donnent des valeurs strictement
+  négatives. La sonde `f8f5b4ff` testait tous les `P` ; ses ratios 61,7 % / 82,5 %
+  ne se transfèrent donc pas au prédicat produit. Retirer ce raccourci ou refaire
+  la mesure avec exactement le prédicat intégré ;
+- `seeds_killed_chord` ne signifie pas « vivant après le cœur complet ». Le scan
+  s'arrête quand la corde gagne la course avant le `h4`-ième témoin du cœur ; un
+  seed ainsi compté pourrait encore être tué par le cœur plus loin dans le
+  cover. Renommer ce compteur en cause du **premier arrêt** et réserver un
+  diagnostic hors produit aux morts additionnelles après cœur complet ;
+- `AnchorPretests::kCounterfactual`, documenté comme jeton des seuls tests
+  d'ancre, désactive maintenant aussi la corde. Cela change silencieusement le
+  sens de `rect_probe` et fait de `anchor_tests_oracle` une comparaison combinée
+  ancre+corde. Ajouter un réglage de corde séparé, explicite et par défaut
+  désactivé tant que la porte d'intégration n'est pas fermée ;
+- F8 tue utilement le mutant sur une frontière d'une primitive à un site, mais
+  ne construit aucun seed réel vivant après K1 et mort par K4. L'oracle ON/OFF
+  rappelle les mêmes corps produit puis applique RLE : une émission manquante
+  ou une multiplicité peut être masquée. Il faut une petite fixture indépendante
+  qui énumère les complétions et leurs profondeurs avant RLE, puis une porte
+  scalaire/lot/device où la mort par corde est non vide sur la route device ;
+- le mutant `chord-nonstrict` n'applique `<= 0` que lors du repli exact. Si une
+  égalité est certifiée positive, par exemple avec `E=0`, elle n'est pas comptée
+  par le mutant. Ce défaut P2 ne touche pas le nominal strict, mais F8 force le
+  repli avec `E=1` et ne qualifie donc pas toute la sémantique annoncée ;
+- les commentaires et impressions des gates Q4 annoncent encore 22 compteurs et
+  16 planchers, sans imprimer le nouveau compteur. Les CTests device restent
+  conditionnels CUDA, étiquetés `gpu`, et aucun mutant de routage Q4 device
+  n'est enregistré.
+
+Le texte de preuve commité doit aussi être resserré sans changer l'algorithme.
+Les centres des complétions admissibles sont **contenus dans** la corde, ils ne
+forment pas tout son continuum. Pour une forme affine, c'est son **maximum** qui
+doit être strictement négatif sur le morceau ; vérifier les deux extrémités le
+prouve, tandis que « minimum aux extrémités » n'est pas l'argument requis. Enfin,
+les bornes écrites dans `chord_kill.hpp`, prises littéralement, donnent une somme
+potentiellement inférieure à `2^111`, pas à `2^110` ; les bornes u16 plus serrées
+gardent largement i128 sûr, mais elles doivent être celles de la preuve publiée.
+
+Le claim « objet inchangé » du commit est prématuré. Les conformités v4 suivies
+sont antérieures à `2b2bb448`; l'oracle ON/OFF combine prétests d'ancre et corde,
+réutilise le corps produit puis compare après RLE; F8 n'exerce qu'une primitive
+à un site. En outre, aucun reçu CUDA ne couvre la nouvelle primitive HD : les
+risques de compilation `std::sqrt`/lambda device et son coût ne sont pas encore
+fermés. `README.md`, dont le dernier changement est `db757af4`, ne décrit pas
+l'activation ; avec `ETAT_COURANT.md` en cours et ce README non frais, le cadre
+du dépôt interdit de transformer ces annonces en claim.
+
+La sonde `q4_stage_probe` du worktree va dans la bonne direction pour isoler les
+phases, mais ne ferme pas encore l'A/B : elle n'a ni pin/dirty, mode corde OFF,
+commande, RC ou RSS, et appelle l'horloge autour de chaque seed et seed survivant.
+Des millions d'appels peuvent déformer les temps absolus ; `prof_q4_cover_ns`
+est déclaré mais jamais alimenté, et l'énumération lentille/acuité/J reste dans
+un résidu non nommé. Chronométrer des blocs plus grossiers ou calibrer ce coût,
+nommer le résidu et comparer ON/OFF dans le même exécutable reçu.
+
+Le même worktree ouvre un second levier : pour les rectangles dont les handles
+portent au moins 512 points, une requête d'arbre de coefficient 1 applique Wq et
+les secteurs avant de construire le cover complet. Aucun faux rejet nominal
+n'est visible statiquement : tous les témoins possibles vérifient
+`|2z-(a+b)|^2 < D2`, et `cover_query(..., 1)` les contient puis les trie. Mais
+l'activation par défaut est, elle aussi, en avance sur son autorité :
+
+- la policy est dupliquée dans `GenerateOptions` et `BatchLimits`; changer l'une
+  peut rendre les chemins scalaire et lot/device causalement différents, et
+  `RunOptions` ne la transporte pas ;
+- aucune porte n'apparie encore `pretest_query_min_points=0` et `SIZE_MAX` sur
+  candidats bruts, RLE, compteurs et routes ;
+- `cover_query` alloue une pile et trie toute la boule par ancre. Un seuil fondé
+  seulement sur le nombre de points des handles ignore le nombre d'ancres et la
+  taille de sortie ; il peut déplacer le coût plutôt que le supprimer.
+
+Conserver ce chemin expérimental jusqu'à la porte appariée. Pour le rendre
+réellement léger, préférer une traversée spécialisée qui accumule directement
+les huit comptes et s'arrête dès que le verdict est acquis, sans matérialiser ni
+trier tout le cover de coefficient 1 ; choisir ensuite le seuil sur une courbe
+par famille, pas sur un seul ratio local.
+
+Chemin court conseillé à Claude : séparer d'abord le mode corde des prétests
+d'ancre et revenir à un défaut expérimental OFF ; factoriser `mu_hat`/le masque par site ;
+fermer ensuite une fixture réelle K1-vivant/K4-mort et la parité de route ; enfin
+recevoir au même pin les murs CPU/GPU ON/OFF, les digests, les compteurs de
+premier arrêt et le nombre de scans de profondeur réellement supprimés. Les
+mesures G4 à 50 k sont toutes antérieures à cette intégration et restent sa
+baseline, pas son résultat.
 
 ## W3 et secteurs — ce qui est reçu
 
@@ -461,10 +601,10 @@ campaign_status=complete (25 runs valides, source_commit=fa99b3f127e0)
 === CAMPAGNE COMPLETE ===
 ```
 
-Cette passe n'a lancé aucun CTest, mais a compilé la cible Q4 en cours et lancé
-cinq probes bornés. Des sorties concurrentes du build partagé rapportent les
-portes CPU, les oracles et le selftest ; aucun journal CTest durable ni CUDA
-local n'est disponible. Les sorties G4
+Cet audit n'a lancé ni CTest ni probe. Une passe concurrente rapporte la
+compilation de la cible Q4 ensuite suivie par `f8f5b4ff` et cinq probes bornés ; d'autres sorties du
+build partagé rapportent les portes CPU, les oracles et le selftest. Aucun
+journal CTest durable ni CUDA local n'est disponible. Les sorties G4
 `.txt/.status` sont suivies, contrairement aux logs de session et fichiers
 `.status.time`. Le probe racine
 `.codex_fold_contract_probe.cpp` appartient à un autre auditeur ; il n'a été ni

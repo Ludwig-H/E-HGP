@@ -33,8 +33,8 @@ phase, et non recalculer les mêmes 25 runs.
 
 ## Réponse des auditeurs — 27 août 2026
 
-- **Relecture :** `a9a2f509` pour l'activation initiale, `fa99b3f1` pour les analyses, `7eb33608` pour F4 et le contrefactuel, `d837adb2` pour `EXTRA_N`, `7d94aee9` pour la gate ON/OFF, `635951d6` pour F1–F7/sonde/lanceur, `259fe21e` pour les mesures, `fabd75bd` pour le plan de tests, `77e143b2` pour la lecture GPU, `e11ad8c7` pour les artefacts G4 et `ef5abbd5` pour la correction de racine du lanceur
-- **Nature :** revue mathématique et statique par Codex ; aucun CTest, CUDA ni GCP lancé dans cette passe. La sonde Q4 non suivie a été compilée et exécutée sur cinq cas bornés ; des sorties concurrentes du build Release partagé, au contenu fonctionnel statiquement équivalent à `635951d6`, rapportent les autres résultats ci-dessous, sans journal CTest durable.
+- **Relecture :** `a9a2f509` pour l'activation initiale, `fa99b3f1` pour les analyses, `7eb33608` pour F4 et le contrefactuel, `d837adb2` pour `EXTRA_N`, `7d94aee9` pour la gate ON/OFF, `635951d6` pour F1–F7/sonde/lanceur, `259fe21e` pour les mesures, `fabd75bd` pour le plan de tests, `77e143b2` pour la lecture GPU, `e11ad8c7` pour les artefacts G4, `ef5abbd5` pour la correction de racine du lanceur, `f8f5b4ff` pour la sonde de corde Q4 et `2b2bb448` pour son activation produit
+- **Nature :** revue mathématique et statique par Codex ; aucun CTest, probe, CUDA ni GCP lancé dans cette passe. Une passe concurrente rapporte la compilation et cinq cas bornés de la sonde Q4 ensuite suivie par `f8f5b4ff` ; d'autres sorties du build Release partagé, au contenu fonctionnel statiquement équivalent à `635951d6`, rapportent les autres résultats ci-dessous, sans journal CTest durable.
 - **Verdict borné :** les preuves de suffisance W3 et secteurs sont reçues au niveau statique sous le profil u16. Aucun faux rejet nominal n'a été trouvé. Les sorties concurrentes rapportent 166/166 portes `gate` et 8/8 tests `oracle`, sans journal durable. L'activation n'est pas qualifiée : la porte réutilise les corps produit, n'énumère pas indépendamment les profondeurs, F5/F7 sur-promettent leur portée et l'oracle d'ancre est omis de `-L gate`. `ef5abbd5` répare la racine de l'auto-copie, mais pas encore les garde-fous de démarrage/arrêt.
 
 ### V7 — objet, compteurs et reçus
@@ -162,7 +162,7 @@ donc pas à appeler tous ces écarts « parité » ni à attribuer le rapprochem
 aux seuls tests d'ancre. Les lignes de phase donnent les rectangles q3/q4, pas
 une séparation interne cover/scan : le diagnostic sur les covers reste ouvert.
 
-### Conseil sur la sonde de corde Q4 en cours
+### Conseil sur la sonde de corde Q4 suivie par `f8f5b4ff`
 
 Les centres des complétions acceptables sont contenus dans la corde fermée
 `|mu| <= sqrt(J/2)` ; ils ne forment pas tout le continuum. Son découpage en
@@ -176,7 +176,9 @@ lane :
 
 - appliquer à `mhgp5_q4_chord_probe` le pin/dirty actuellement réservé à
   `mhgp5_rect_probe`, puis imprimer toute la configuration et recevoir la
-  commande, le binaire, le temps et la mémoire ;
+  commande, le binaire, le temps et la mémoire. Les trois bruts ont été produits
+  avant le commit de la sonde dans le dossier nommé `635951d6` ; « même pin »
+  est faux puisque ce fichier n'existe pas à ce pin ;
 - rendre bloquants des planchers d'ancres, seeds vivants, morts additionnels et
   scans réellement évités ; le code 0 actuel accepte une sonde entièrement
   vide ;
@@ -197,11 +199,92 @@ lane :
   flottant, pin et état du worktree ; `--n=abc` rend aujourd'hui un run vide à
   code 0 ;
 - écrire chaque brut vers un temporaire, bloquer sur son RC puis renommer. La
-  chaîne locale en cours emploie `;`, écrit directement le `.txt` et poursuivrait
-  après un code 1 ; un fichier zéro octet a déjà été visible pendant le calcul.
+  chaîne locale a écrit directement les `.txt` et n'a pas versionné les RC ;
+  des fichiers zéro octet ont été visibles pendant les calculs. Le n=4000
+  `eight_clusters` a été abandonné après plus de dix minutes puis supprimé.
 
 Cette sonde est une bonne prochaine falsification si elle reste distincte du
 chemin produit et si son coût propre est comparé au scan qu'elle prétend éviter.
-La compilation Release ciblée et cinq runs bornés (`n=200/400`, quatre
-familles) donnent `wrong=0` et des morts agrégées monotones `K=2/4/8` ; ce sont
-des observations exploratoires, pas un reçu.
+Une passe concurrente rapporte cinq runs bornés (`n=200/400`, quatre familles)
+avec `wrong=0` et des morts agrégées monotones `K=2/4/8` ; ce sont des
+observations exploratoires, pas un reçu.
+
+Les trois sorties suivies à n=2000 donnent K=4 : `eight_clusters` 61,7 % des
+seeds vivants et 82,5 % des tentatives `y`, `uniform` 57,9 % / 74,8 % et
+`scanline_single_pass` 34,9 % / 60,7 %, avec `wrong=0`. C'est un signal de
+travail potentiel non vide, pas une accélération : le coût des scans K n'est pas
+isolé, les « complétions » précèdent tous les rejets et terrain est absent.
+
+### Réponse immédiate sur l'intégration de la corde à `2b2bb448`
+
+Le bon choix est de cumuler le certificat avec le cœur pendant **le même scan**
+du cover : il évite de réimplémenter la sonde coûteuse comme quatre passes
+produit. Le repli exact et la logique de préfixe CUDA sont également sur la
+bonne trajectoire. Le commit a toutefois figé l'activation et revendiqué
+« objet inchangé » trop tôt : aucune conformité suivie ni preuve NVCC n'est au
+pin, l'oracle ON/OFF est combiné et post-RLE, et F8 ne porte que sur une
+primitive. Reviens à un mode expérimental OFF jusqu'à fermeture de ces portes.
+
+Les corrections les plus rentables sont, dans cet ordre :
+
+1. Dans le kernel, ne recalcule pas `isqrt128_floor(J/2)` dans le
+   `ChordPieces local` de chaque site. Précompute `mu_hat` une fois par seed et
+   fais rendre par un helper léger les quatre bits de morceaux du site. Le code
+   actuel ajoute un `sqrt` et ses corrections i128 dans toute la boucle GPU ;
+   c'est un candidat direct pour expliquer un GPU encore plus lent.
+2. Sépare le mode corde de `AnchorPretests`. `kCounterfactual` servait à retirer
+   Wq/secteurs ; il retire maintenant aussi la corde et change le sens de
+   `rect_probe` ainsi que de l'oracle ON/OFF. Garde un `ChordMode` explicite,
+   expérimental OFF jusqu'à réception.
+3. Décide si tu veux le prédicat complet de la sonde. Le raccourci `L > 0 =>`
+   aucun morceau est faux pour les morceaux extrêmes ; il est seulement
+   conservateur. Par exemple `L=4`, `mu_hat=2`, `B=2` témoigne strictement sur
+   le dernier morceau. Tant que le produit saute ces sites, ne réutilise pas les
+   ratios 61,7 % / 82,5 % de `f8f5b4ff`.
+4. Renomme `seeds_killed_chord` : il compte la corde quand elle atteint `h4`
+   avant le cœur dans l'ordre du scan, pas les seeds survivant à un cœur complet.
+   Ce premier-arrêt est utile pour la performance, mais ce n'est pas le même
+   dénominateur que la sonde.
+5. Ajoute une seule fixture décisive plutôt qu'une série de tests : un seed réel
+   vivant après K1, mort par K4, au moins une complétion structurellement valide
+   dans le bras OFF, toutes ses profondeurs énumérées indépendamment, comparaison
+   brute puis RLE, et passage effectif par le kernel device. F8 ne teste pour
+   l'instant que la primitive sur un site.
+6. Après cela seulement, mesure ON/OFF au même pin : mur total CPU et GPU, temps
+   du kernel, digests, premiers arrêts corde, vraies candidates de profondeur
+   supprimées. Les `78/81`, `21/25`, `162/174`, `23/24` secondes à 50 k sont la
+   baseline G4 pré-corde, pas une prédiction.
+
+Deux nettoyages peuvent attendre : en mode mutant, une égalité certifiée avec
+`E=0` échappe encore à `<= 0` parce que le non-strict n'est appliqué que dans le
+repli ; et les textes/prints des gates Q4 annoncent toujours 22 compteurs et 16
+planchers sans afficher la corde. Aucun de ces deux points ne rend le nominal
+strict faux, mais ils doivent être fermés avant de qualifier les mutants et la
+preuve device.
+
+Corrige aussi immédiatement la prose mathématique avant qu'elle ne devienne une
+fausse autorité : écrire « centres admissibles **contenus dans** la corde » et
+« maximum de l'affine atteint à une extrémité ; les deux extrémités strictement
+négatives impliquent tout le morceau négatif ». La borne i128 reste confortable
+sous u16, mais `|L|<2^105`, `mu_hat<2^54`, `|B|<2^54` ne permet pas à elle seule
+de conclure `|v|<2^110` après addition ; publie les bornes u16 serrées ou une
+borne finale plus large.
+
+La sonde de phase en cours ne constitue pas encore le reçu demandé : elle n'a
+pas de bras corde OFF ni de pin/dirty, et les deux appels à l'horloge par seed
+peuvent dominer les petites opérations mesurées. Chronomètre par blocs, nomme le
+résidu lentille/acuité/J, puis produis l'A/B ON/OFF dans le même run. Attention
+aussi au probe de corde existant : à ce HEAD, sa référence `emitted` appelle le
+produit avec la corde déjà ON ; un nouveau `wrong=0` serait circulaire tant que
+ce bras n'est pas explicitement OFF.
+
+Sur le nouveau prétest par requête avant cover : le coefficient 1 contient bien
+tous les témoins stricts de Wq/secteurs, donc l'idée est mathématiquement saine.
+Ne garde toutefois pas encore `512` comme défaut produit. Fais porter la policy
+par une seule option transmise aux chemins scalaire et lot/device, puis ferme une
+porte `0` contre `SIZE_MAX` sur sorties brutes, RLE, compteurs et routes. La
+requête actuelle alloue et trie toute la boule pour chaque ancre ; un parcours
+spécialisé qui compte les huit secteurs sans tri et s'arrête dès que possible a
+plus de chances de gagner réellement. La sonde doit refuser les valeurs CLI
+négatives ou non numériques au lieu de les convertir silencieusement en
+`SIZE_MAX` ou zéro.
