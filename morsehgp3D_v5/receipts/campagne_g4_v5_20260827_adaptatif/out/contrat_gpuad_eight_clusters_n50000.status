@@ -1,0 +1,9 @@
+code=0
+duree_s=713
+peak_rss_kb=18238752
+timing_scope=contract_50k_gpu_adaptive
+threads=48
+source_commit=8f95df2effd07ffa7a8aa7cf7fe79be1be9c7b2c
+source_payload_sha256=8d5b43aad5bc27721b33b9d09bbdf18fa8ac95570418067a51d68dbe69b14cc0
+protocol_manifest_sha256=09f10df6c43f949c57f31497442dd4c207bbbce055ff66c4a82625c66cdcdfa0
+finished=1

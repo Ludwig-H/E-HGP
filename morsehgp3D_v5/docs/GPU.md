@@ -10,8 +10,33 @@ exécution conforme, mesure, pin du reçu) :
 | témoin device (DI128 + scan q3 warp) | `src/gpu/device_witness.cu` | oui | oui, 0 désaccord | — | `campagne_g4_v5_20260827_temoin_device` (`24b3f164`) |
 | lane q3 device | `src/gpu/q3_lane_device.cuh` | oui | oui, 1200 / 1200×4 fils / 8000×8 fils | temps kernel gravés, pas de banc apparié | idem |
 | lane q4 device | `src/gpu/q4_lane_device.cuh` | oui | oui, 1200 / 1200×4 fils / 8000×8 fils (157 M complétions, 0 désaccord) | temps kernel gravés | `campagne_g4_v5_20260827_lane_q4_device` (`2e75cb42`) |
-| pilote `mhgp5_cuda --gpu` (contrats 50 k) | `cli/mhgp5_cuda.cu` | oui | `uniform` et `terrain` : `digest_all` **identique** au contrat CPU ; `eight_clusters` et `scanline` : **abort** (`cudaMalloc : out of memory`, RSS 119 / 98 Go — paires q4 non bornées, corrigé en `a4e75d68`+, à recevoir) | GPU **plus lent** sur les familles régulières : `uniform` 87 s vs 78 s, `terrain` 41 s vs 23 s (génération 25,8 s vs 16,6 s, 31,4 s vs 13,7 s — coût hôte de matérialisation des lots ; kernels 15 s cumulés sur 48 fils) | idem (campagne `partial`) |
-| mutant du témoin sur device | `--inject=witness-no-warp-correction` | à recevoir (protocole : run `gpu_mutant`, code 4) | — | — | — |
+| pilote `mhgp5_cuda --gpu` (contrats 50 k) | `cli/mhgp5_cuda.cu` | oui | **quatre familles** + adaptatif `eight_clusters` : `digest_all` **identique** au contrat CPU (session `8f95df2e`, lots bornés) | GPU **plus lent partout** : `uniform` 89 s vs 78 s, `terrain` 44 vs 23, `scanline` 96 vs 38, `eight_clusters` **718 vs 246** (lane q3 : 527 s vs 94 s) ; adaptatif 256 : 713 s (les ancres y ont presque toutes ≥ 256 sites) | `campagne_g4_v5_20260827_adaptatif` (partielle : 24/25 runs, journal perdu — voir le reçu) |
+| mutant du témoin sur device | `--inject=witness-no-warp-correction` | oui | **tué** (code 4, run `gpu_mutant`) | — | idem |
+
+**Verdict de mesure (sessions `2e75cb42` et `8f95df2e`)** : la lane device
+par lots d'ancres est **exacte** (égalité de bout en bout à 50 000 points sur
+les quatre familles, mutant tué) et **plus lente que le CPU à 48 fils sur
+toutes les familles**. La cause n'est pas le kernel (111 s de kernel cumulés
+sur 48 exécuteurs pour `eight_clusters`, soit ~2,3 s par fil) mais la
+**matérialisation hôte** : 18,2 G seeds q3 (et 1,5 G seeds q4) à ~100 octets
+chacun, plus les covers de 19,7 M ancres à 32 octets par site, copiés et
+transférés — là où la lane CPU tue la plupart des seeds en quelques sites
+sans rien copier. Le routage par taille de cover ne sépare pas ce coût. Cette
+conception (lot = ancres matérialisées par l'hôte) est donc **fermée comme
+voie de gain** ; elle reste la preuve d'exactitude du chemin device et le
+banc de référence.
+
+**Livraison 7 (conception)** : lane device **par rectangle** — l'hôte envoie
+une fois par rectangle vivant les *points du cover du rectangle* (positions,
+identifiants ; partagés par ses |A|×|B| ancres), et le device **énumère
+lui-même** les ancres (histogrammes de coin déjà connus), leur cover
+(lentille, `in_spindle`), les seeds aigus, les formes affines et les scans —
+tout cela est déjà écrit en fonctions `MHGP5_HD` (`is_acute_seed`,
+`q3_form_d`, `q4_*_d`, scans shaped) ; il ne rapatrie que les **survivants**
+(ancre, seed[, complétion]) dont l'hôte forme clé et niveau. Transfert :
+Σ covers de rectangles (≪ Σ covers d'ancres), aucun enregistrement par seed.
+Preuve sur CPU d'abord (forme shaped par rectangle égale à la production),
+puis kernel. Le fold et le reste du pipeline ne bougent pas.
 
 Lecture de la session `2e75cb42` : le lotissement fait tomber les lancements
 q3 à 8000 de 645 636 à 542 (kernel 6,6 s → 24 ms) ; l'égalité de bout en bout

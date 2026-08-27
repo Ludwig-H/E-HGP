@@ -1,0 +1,46 @@
+# Session G4 v5 — campagne d echelle (temoin, lanes device, conformite v4, contrats 50 000 CPU et --gpu)
+date_utc=2026-08-27T18:28:42+00:00
+source_commit=8f95df2effd07ffa7a8aa7cf7fe79be1be9c7b2c
+head_local=b79c001b0ca261f293c1f22de3b9b1050aa007e9
+source_payload_sha256=8d5b43aad5bc27721b33b9d09bbdf18fa8ac95570418067a51d68dbe69b14cc0
+protocol_manifest_sha256=09f10df6c43f949c57f31497442dd4c207bbbce055ff66c4a82625c66cdcdfa0
+machine=g4-standard-48 SPOT europe-west4-ai1a, 48 fils, RTX PRO 6000 Blackwell
+protocole=gcp-migration/session_campagne_v5_scale_g4.sh (pin, gardes, arret certifie)
+
+# note
+Session lancee a 17:25 UTC ; le conteneur local a redemarre pendant la campagne : journal de session (session.log) PERDU, script de session mort SANS son trap ; 24 runs sur 25 rapatries a 18:26 UTC par cle OS Login ephemere (lecture seule) — contrat_gpuad_scanline_single_pass_n50000 absent (non commence ou en cours) ; VM arretee et certifiee TERMINATED a 18:27 UTC par gcp-migration/stop_and_verify.sh (cible et generation exactes) apres ~60 min hors session, sous le plafond maxRunDuration de 4 h. Aucun validateur n execute : campagne PARTIELLE par construction (run absent) ; les 24 artefacts sont bruts.
+
+# run code duree_s peak_rss_kb
+conf_eight_clusters_n16000 0 40 5495868
+conf_eight_clusters_n32000 0 122 10569168
+conf_eight_clusters_n8000 0 13 2517316
+conf_scanline_single_pass_n16000 0 5 1019684
+conf_scanline_single_pass_n32000 0 16 1960348
+conf_scanline_single_pass_n8000 0 2 595708
+conf_terrain_n16000 0 4 1084936
+conf_terrain_n32000 0 11 2136688
+conf_terrain_n8000 0 2 535204
+conf_uniform_n16000 0 23 6318944
+conf_uniform_n32000 0 48 12648064
+conf_uniform_n8000 0 10 3048548
+contrat_eight_clusters_n50000 0 246 17606696
+contrat_gpu_eight_clusters_n50000 0 718 17488436
+contrat_gpu_scanline_single_pass_n50000 0 96 7246136
+contrat_gpu_terrain_n50000 0 44 5309076
+contrat_gpu_uniform_n50000 0 89 18966016
+contrat_gpuad_eight_clusters_n50000 0 713 18238752
+contrat_scanline_single_pass_n50000 0 38 3098764
+contrat_terrain_n50000 0 23 3676340
+contrat_uniform_n50000 0 78 19323092
+gpu_lane 0 82 1950512
+gpu_mutant 4 3 1061724
+gpu_witness 0 12 1061720
+contrat_eight_clusters_n50000 digest_all=b65c2b510d5a5e09170086fc3429290f0b0e960c97d652a53c483e39037f2158
+contrat_gpu_eight_clusters_n50000 digest_all=b65c2b510d5a5e09170086fc3429290f0b0e960c97d652a53c483e39037f2158
+contrat_gpu_scanline_single_pass_n50000 digest_all=7cc339c0f01987b6a0cff9045a8e5f8bec264baba4f8229027bb45e7e4ec8b26
+contrat_gpu_terrain_n50000 digest_all=700dbbc067bbebce48173d9cc1d1b79cf10274a0773ef4075abf014976e8bbb5
+contrat_gpu_uniform_n50000 digest_all=5fc1fdef4f439028b2f956dfcba22a5f9736a94e83d05e13e0eb362918cda2c0
+contrat_gpuad_eight_clusters_n50000 digest_all=b65c2b510d5a5e09170086fc3429290f0b0e960c97d652a53c483e39037f2158
+contrat_scanline_single_pass_n50000 digest_all=7cc339c0f01987b6a0cff9045a8e5f8bec264baba4f8229027bb45e7e4ec8b26
+contrat_terrain_n50000 digest_all=700dbbc067bbebce48173d9cc1d1b79cf10274a0773ef4075abf014976e8bbb5
+contrat_uniform_n50000 digest_all=5fc1fdef4f439028b2f956dfcba22a5f9736a94e83d05e13e0eb362918cda2c0
