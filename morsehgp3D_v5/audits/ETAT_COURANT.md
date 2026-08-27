@@ -2,25 +2,36 @@
 
 - **Date :** 27 août 2026
 - **Auditeur :** Codex, avec relecture critique des audits concurrents
-- **Tip produit relu statiquement :** `7d94aee9919a054cc8bb6a79e4b8f1afef58820a`
-- **Worktree concurrent post-tip :** relu statiquement et hors verdict ; fixtures F1/F3/F5/F6/F7, jeton `AnchorPretests`, sonde/provenance et auto-copie GCP en cours
-- **Dernier pin avec sorties locales observées :** `7eb33608180be1ece5444601c951dfb770c418df`
+- **Pin fonctionnel de référence relu statiquement :** `635951d654f466cfa7fe1e2297c19b9acb5393a9`
+- **Tip du dépôt relu statiquement :** `ef5abbd5261763fc618692dd7cb9f6f24069dfea`
+- **Tip documentation/reçus relu et validé :** `e11ad8c7b66617d91c1cdcd74909a4970b5362b0`
+- **Worktree concurrent post-tip :** un probe Q4 et son inscription CMake sont en cours, hors verdict ; le probe racine non suivi appartient à un autre auditeur
+- **Dernier pin avec sorties locales de sonde observées :** `635951d654f466cfa7fe1e2297c19b9acb5393a9`, reçu commité par `259fe21e`
+- **Dernier pin fonctionnel avec suite locale concurrente :** `635951d654f466cfa7fe1e2297c19b9acb5393a9`
 - **Pin du protocole `EXTRA_N` relu statiquement :** `d837adb2a4cad65b4bce51640df8124539bedf56`
 - **Pin d'activation initiale relu :** `a9a2f509428bbfebd9543579d16d1579a7591106`
-- **Pin documentaire relu :** `fa99b3f127e06aa686a301c084f8311e80d5c554`
-- **Reçu G4 le plus récent :** [`campagne_g4_v5_20260827_adaptatif`](../receipts/campagne_g4_v5_20260827_adaptatif/RECU.txt), source `8f95df2effd07ffa7a8aa7cf7fe79be1be9c7b2c`
+- **Pin documentaire précédent :** `fa99b3f127e06aa686a301c084f8311e80d5c554`
+- **Reçu G4 le plus récent :** [`campagne_g4_v5_20260827_tests_ancre`](../receipts/campagne_g4_v5_20260827_tests_ancre/RECU.txt), source `fa99b3f127e06aa686a301c084f8311e80d5c554`
 - **Cadre :** `phase=exploration_v5_hors_registre`, `backend=cpu_reference`, `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`
-- **GCP :** non utilisé par l'auditeur ; une session concurrente de Claude est en cours, sans résultat reçu ici et sans aucune mutation de notre part
+- **GCP :** non utilisé par l'auditeur ; après un premier échec fermé, la récupération gardée concurrente a copié 75 artefacts avec `scp_rc=0`, puis sa cible exacte `ehgp-blackwell-spot-ai1a` a été certifiée `TERMINATED`, sans aucune mutation de notre part
 
 ## Verdict
 
 La v5 reste **orange, avec un progrès fonctionnel réel mais une autorité encore
-incomplète**. Les dernières sorties locales observées portent sur le pin propre
-`7eb33608` : **165/165** CTests étiquetés `gate`, dont 7 oracles. Elles viennent
-du travail concurrent et n'ont pas été rejouées par cet audit. Le tip
-`7d94aee9` ajoute une gate qualifiée d'oracle, les comparaisons/planchers des
-nouveaux compteurs et un signal d'invariant Q4 ; il est reçu ici statiquement,
-pas comme nouveau résultat exécuté.
+incomplète**. Le pin fonctionnel `635951d6` intègre les fixtures non vacues
+F1/F3, F5/F6, le jeton typé `AnchorPretests`, les comptes sectoriels détaillés
+et une sonde plus honnête. Dans le build Release partagé, dont le contenu
+fonctionnel était statiquement équivalent à ce pin, des sorties concurrentes
+rapportent **166/166** CTests étiquetés `gate`, puis **8/8** tests étiquetés
+`oracle` ; cette passe statique ne les a pas relancés. Les journaux CTest ont
+depuis été écrasés : ces deux succès et leurs durées restent rapportés, pas
+durablement reçus.
+Sept de ces oracles appartiennent aussi à `gate` ;
+`mhgp5_anchor_tests_oracle` reste absent de la commande canonique `-L gate`.
+Les commits `259fe21e..e11ad8c7` ne changent ensuite que reçus et documentation ;
+`ef5abbd5` corrige ensuite la racine de l'auto-copie G4 sans toucher au moteur.
+L'annonce de commit « 170/170 portes CPU » ne correspond donc pas à
+l'enregistrement CTest courant et reste sans journal qualifié.
 
 La suffisance mathématique du compte `W3` et du certificat sectoriel est reçue
 statiquement sous le profil u16. F2 et F4 qualifient désormais séparément les
@@ -30,6 +41,9 @@ Q3 hôte et Q4 oversized. Aucun faux rejet nominal n'a été identifié.
 Cette réception ne qualifie pas encore l'activation comme autorité produit. Il
 manque surtout :
 
+- terminer la sûreté du lanceur G4 après la correction de racine : trap avant
+  démarrage, cleanup inconditionnel, scripts de sécurité épinglés et marqueurs
+  d'auto-copie authentifiés ;
 - une comparaison indépendante filtre ON/OFF de tous les supports owner et de
   leur profondeur exacte, avant **et** après RLE, sur de petits cas Q3 et Q4 ;
 - une fixture Q4 ciblée prouvant qu'une ancre sectoriellement morte possédait
@@ -39,44 +53,102 @@ manque surtout :
 - une sémantique de routage Q4 indépendante du seuil ;
 - un reçu de mesure réellement épinglé au binaire exécuté.
 
-Les chiffres sectoriels régénérés par `7eb33608` sont une exploration utile,
-pas un reçu : leurs fichiers déclarent `pin_execution=fa99b3f1` alors que ce
-pin ne contient ni leur sonde ni le bypass contrefactuel compilé. La mesure G4
-appariée proposée par Claude reste donc la bonne prochaine décision avant tout
-kernel q3 par rectangle.
+Le dossier séparé `mesures_secteurs_635951d6_20260827/`, commité par
+`259fe21e`, répare le faux pin principal : ses douze bruts affichent bien
+`635951d6`, `worktree_src_modifie=non`, trois timers séparés et zéro
+contradiction observée. Il reste une **mesure locale exploratoire**, pas un reçu
+reproductible : pin et état sont capturés à la configuration, sans hash du
+binaire/diff/entrées, commande, toolchain, RSS ni codes de sortie.
 
-### Alerte sur le worktree concurrent non commité
+### Lanceur G4 — racine fermée, sûreté encore incomplète
 
-Le correctif courant de `gcp-migration/session_campagne_v5_scale_g4.sh` ne doit
-pas être lancé en l'état. Il copie le script dans `/tmp`, l'y ré-exécute, puis
-calcule `REPO_ROOT` depuis `BASH_SOURCE[0]`. La racine obtenue est alors `/`,
-pas le dépôt, avant toute porte ou mutation GCP. Conserver dans l'environnement
-le chemin canonique du script source avant `exec`, dériver `REPO_ROOT` de ce
-chemin et ajouter au selftest une exécution depuis une copie. Aucun lancement
-GCP n'a été effectué pour établir ce défaut.
+`ef5abbd5` ferme le blocage immédiat : la première invocation calcule la racine
+avant `exec` et la transmet à la copie. Cette correction est cohérente sur le
+chemin nominal, mais le selftest n'exécute toujours pas l'orchestrateur local et
+quatre garde-fous restent à fermer avant un nouveau lancement :
+
+- installer le trap d'arrêt **avant** `start_and_verify.sh`. Aujourd'hui, une
+  erreur de pipeline ou de lecture du handoff entre le démarrage et la ligne
+  `trap cleanup EXIT` peut laisser la VM sans arrêt immédiat de l'orchestrateur ;
+- rendre le cleanup indépendant du journal : son premier `echo | tee` reste
+  soumis à `set -euo pipefail` et peut sortir avant `stop_and_verify.sh` si le
+  log devient indisponible ;
+- épingler et appeler par chemin absolu les scripts de durée, démarrage et
+  arrêt. Ils ne figurent pas dans `PROTOCOL_PATHS` et restent lus depuis le
+  worktree vivant, donc copier le seul orchestrateur ne ferme pas l'incident
+  d'édition concurrente.
+
+Refuser aussi une valeur ambiante arbitraire de `MHGP5_SESSION_SELF_COPY` : elle
+désactive actuellement la copie et permet aussi d'injecter une racine arbitraire
+sans contrôle. Vérifier avant toute mutation que la copie exécutée est l'octet
+du script hashé par le manifeste, puis supprimer la copie temporaire. Aucun
+lancement GCP n'a été effectué par l'auditeur pour établir ces défauts.
 
 ## Résultats exécutés
 
 | Périmètre | Résultat local | Portée exacte |
 |---|---:|---|
+| Build Release partagé, contenu fonctionnel `635951d6` | **166/166 gates**, 8/8 oracles, 254,07 s et 13,76 s rapportées | sorties concurrentes sans journal durable ; l'oracle d'ancre est hors label `gate` ; aucun CUDA |
+| Commit `635951d6` | **170/170 portes CPU**, registre 54, stub CUDA vert annoncés | auto-rapporté ; cardinal non reproduit par CTest, aucun journal CUDA reçu |
 | Tip `7d94aee9` | 18,8 M identités et 0 désaccord annoncés dans le commit | auto-rapporté, sans journal reçu ni rejeu par cet audit |
 | Release `7eb33608` | **165/165 gates**, 7 oracles, 105,73 s réelles | build canonique local ; aucun CUDA |
 | Archive propre `fa99b3f1` | **165/165 gates**, 7 oracles, 101,58 s réelles | requalifie le code de `a9a2f509` indépendamment du worktree |
 | Snapshot pré-commit devenu `7eb33608` | 10/10 fixtures et routes ciblées | F2/F4, non-strict, all-host, mixed et mutants ; subsumé par la suite complète |
 | ASan+UBSan Debug historique `6e8a6aba` | 11/11 portes ciblées | aucune généralisation à toute la suite |
 | ASan+UBSan RelWithDebInfo historique | échec de compilation dans `cloud_index.hpp:130-131` | warning GCC 13 `array-bounds` sous `-Werror`, pas un diagnostic sanitizer d'exécution |
+| G4 source `fa99b3f1` | 25 paires `.status`/`.txt` statiquement cohérentes, deux digests CPU/GPU égaux | `campaign_status=complete` déclaré mais non autoportant : transcript et `remote_campaign_rc` absents du reçu |
 | G4 source `8f95df2e` | 4 couples CPU/GPU à 50 k, deux digests appariés | égalité bornée ; campagne partielle 24/25, non terminale |
 
-Les 165 gates vertes établissent une non-régression bornée du pin précédent,
-pas l'exhaustivité du nouveau certificat. `7d94aee9` compare désormais ON/OFF
+La sortie concurrente 166/166 rapporte une non-régression bornée du contenu
+fonctionnel, pas une reconstruction propre du pin ni l'exhaustivité du nouveau
+certificat. `7d94aee9` compare désormais ON/OFF
 sur cinq nuages et impose des compteurs sectoriels Q4 non nuls, mais seulement
 après RLE et via les mêmes corps produit ; ce n'est pas encore le juge
-indépendant de profondeur demandé.
+indépendant de profondeur demandé. Le huitième oracle a été rapporté vert et le
+cardinal statique des labels vaut bien huit, mais son mauvais label permet
+toujours à la porte canonique de l'omettre.
 
-### Temps historiques à 50 000 points
+### Mesures à 50 000 points
 
-Le seul reçu G4 disponible reste la campagne partielle source `8f95df2e`. Les
-durées murales de ses couples à objet identique sont :
+La session concurrente la plus récente a exécuté les 25 runs prévus sur le
+bundle SHA-256 `efe87b9b...`, dont les fichiers produit sont identiques au pin
+`fa99b3f1` (donc à l'activation `a9a2f509`). Son stdout donne :
+
+| Famille | CPU | `--gpu` | Surcoût GPU brut |
+|---|---:|---:|---:|
+| `uniform` | 78 s | 81 s | +4 % |
+| `terrain` | 21 s | 25 s | +19 % |
+| `scanline_single_pass` | 23 s | 24 s | +4 % |
+| `eight_clusters` | 162 s | 174 s | +7 % |
+
+Les mesures et digests sont désormais suivis par `e11ad8c7`. La session initiale
+a atteint la ligne finale du runner puis fini en `session_rc=2` avant de graver
+`remote_campaign_rc`. Une mini-session gardée a localement copié 75 fichiers
+avec `scp_rc=0`, puis certifié la cible exacte `TERMINATED`. Le commit ne suit
+toutefois que les 25 `.status`, les 25 `.txt` et le résumé : les deux logs et
+les 25 `.status.time` restent ignorés. Les statuts suivis ont bien 24 codes 0,
+le code 4 attendu du mutant, `finished=1`, un triplet de pins commun et des RSS
+positives ; les deux digests CPU/GPU concordent pour chaque famille et pour les
+deux bras adaptatifs.
+
+Le contenu paraît donc **validable sous l'hypothèse** `remote_campaign_rc=0`,
+rendue plausible par la ligne finale distante, mais le statut transactionnel
+`campaign_status=complete` n'est pas autoportant dans le commit. `RECU.txt`
+annonce un rejeu « voir ci-dessous » sans conserver commande, arguments,
+`validator_rc` ni sortie ; le RC distant exact est inconnu, et le `scp_rc=0`
+n'existe que dans un log local ignoré. Corriger aussi « 24 runs, tous code 0 »
+en « 24 nominaux à code 0 plus le mutant attendu à code 4 ». Ne pas recalculer
+les 25 runs : versionner les pièces existantes et qualifier explicitement le RC
+distant d'inféré suffit à fermer honnêtement cette provenance.
+
+`GPU.md` dispose donc maintenant de la pièce qu'il anticipait. Les écarts
+CPU/`--gpu` observés vont cependant de +4 % à +19 % : « aucun gain net sur ce
+run » est reçu, tandis que **parité** exige une tolérance ou des répétitions.
+Ni l'attribution du rapprochement aux seuls tests d'ancre ni le diagnostic « le
+résidu q3 est la construction des covers » ne résultent de cette campagne, qui
+n'a pas d'ablation au même pin ni de temps cover/scan séparés.
+
+Le reçu G4 précédent, source `8f95df2e`, donnait les durées suivantes :
 
 | Famille | CPU | `--gpu` | Surcoût GPU |
 |---|---:|---:|---:|
@@ -85,11 +157,44 @@ durées murales de ses couples à objet identique sont :
 | `scanline_single_pass` | 38 s | 96 s | +153 % |
 | `eight_clusters` | 246 s | 718 s | +192 % |
 
-Ces chiffres ne se transfèrent pas à `7d94aee9`. Ils expliquent le verrou
-actuel : le chemin GPU historique accélère des kernels isolés, mais paie la
-matérialisation, les transferts, les très nombreux lancements et tout le reste
-du pipeline hôte. Une nouvelle campagne appariée doit mesurer le pin réellement
-exécuté avant toute conclusion de performance.
+Ces chiffres historiques ne se transfèrent pas à `fa99b3f1`. La nouvelle
+campagne ferme la décision V8 au niveau exploratoire : aucun kernel q3 par
+rectangle n'a de gain de bout en bout démontré. Elle ne mesure ni variance ni
+ablation causale, et ne justifie donc pas une généralisation de performance.
+
+### Sonde de corde Q4 en cours dans le worktree
+
+Le critère de `bench/q4_chord_probe.cpp` est mathématiquement prometteur : sur
+chaque sous-intervalle de la sur-corde entière, compter `h4` sites strictement
+intérieurs aux deux extrémités est une condition suffisante de mort du seed ;
+les témoins peuvent changer d'un morceau à l'autre. L'arrondi supérieur
+`floor(sqrt(floor(J/2))) + 1` reste conservatif. Ce code est cependant une
+sonde non suivie et ne doit pas encore devenir une lane ni une preuve :
+
+- CMake ne lui transmet ni pin ni état dirty, et la sortie ne conserve ni
+  commande, toolchain, temps, RSS, hash du binaire ou code de sortie ;
+- `wrong` compare à l'ensemble de boules **déjà émis par le même corps produit**.
+  Une omission produit peut donc masquer un faux rejet, tandis qu'une boule
+  émise par l'autre seed canonique peut faire accuser à tort un seed
+  non canonique ; conserver un verdict exact par seed/complétion et par `K` ;
+- le `std::set<BallKey>` masque les multiplicités et `wrong` peut compter le
+  même seed pour `K=2/4/8`. Exiger l'égalité brute puis post-RLE, des compteurs
+  séparés et la monotonie des morts quand `K` augmente ;
+- « complétions évitées » compte actuellement tous les `y` de la lentille,
+  avant owner, canonicalisation et préfiltres. C'est un nombre d'itérations de
+  boucle évitées, pas un nombre de scans de profondeur ni un temps économisé ;
+- aucune non-vacuité n'est bloquante : zéro ancre, seed, mort, complétion ou
+  émission rendrait encore le code 0. Ajouter des planchers avant toute lecture
+  de ratio et refuser `J <= 0`, conformément au théorème du seed aigu ;
+- la campagne locale en cours écrit directement dans les `.txt` et enchaîne
+  les probes par `;` sans graver ni bloquer sur chaque RC : un fichier a été
+  observé à zéro octet pendant le calcul et un `wrong != 0` n'empêcherait pas
+  les commandes suivantes ni le commit. Écrire vers un temporaire, vérifier le
+  RC, renommer atomiquement puis construire le résumé depuis les bruts.
+
+La bonne prochaine forme est un probe reçu, pas une intégration produit : même
+pin, comparaison exacte par complétion, `wrong_K=0`, planchers, coûts séparés
+du tri/segmentation et du scan effectivement évité.
 
 ## W3 et secteurs — ce qui est reçu
 
@@ -115,31 +220,43 @@ exécuté avant toute conclusion de performance.
 
 ### Fixtures et oracle
 
-Au tip, F1 et F3 établissent l'incomparabilité des deux **prédicats**, mais leur
-effet produit reste vacu. Le worktree ajoute `x=(1000,1200,0)` aux deux cas :
-la construction est statiquement cohérente, avec neuf intérieurs pour F1 et
-neuf témoins `W3` pour F3, mais elle reste hors verdict tant qu'elle n'est pas
-commise et reçue.
+`635951d6` ajoute `x=(1000,1200,0)` à F1 et F3. La géométrie est statiquement
+cohérente : F1 possède un seed aigu de profondeur 9, F3 un seed aigu et neuf
+témoins `W3`. Cela ferme la vacuité géométrique des prédicats, mais les
+assertions n'appellent pas directement le bras OFF et ne vérifient ni nombre de
+seeds ni profondeur par une autorité indépendante.
 
-Le même défaut touche l'exemple 2.4 publié. Le worktree en grave une version F5
-avec le même seed et treize intérieurs, ce qui rend l'idée non vacue. Corriger
-toutefois « 28 sites » : le tableau construit six quadruplets et une paire,
-soit **26** sites sur la sphère diamétrale. L'analyse canonique doit ensuite
-être alignée sur la fixture réellement retenue.
+F5 ne grave pas encore l'exemple 2.4 publié. Le commentaire, le commit et
+`PLAN_DE_TESTS.md` annoncent 28 sites, mais le tableau construit six
+quadruplets et une paire, soit **26** sites ; les deux directions
+`(y,z)=(0,+-1000)` manquent. Avec seulement treize paires antipodales, une
+direction orthogonale à une paire peut n'avoir que douze intérieurs : la
+propriété publiée « tout centre non nul a profondeur au moins 13 » ne suit
+plus. Le seed choisi `x` conserve bien treize intérieurs, donc la fixture porte
+un contre-exemple plus étroit. Ajouter les deux axes manquants et asserter
+explicitement seed aigu, seed OFF et profondeur plutôt que d'abaisser la
+documentation canonique à 26.
 
-Le worktree corrige le commentaire 25/37 et ajoute F6 pour isoler une égalité
-de demi-plan strictement à l'intérieur de la boule diamétrale. Cette séparation
-est mathématiquement cohérente ; le mutant reste à recevoir sur un pin propre.
+F6 isole correctement une égalité de demi-plan strictement à l'intérieur de la
+boule diamétrale. Elle n'asserte toutefois que les secteurs 6 et 7, alors que
+le message de commit revendique aussi 4 et 5 ; verrouiller tous les comptes
+annoncés si cette portée est conservée.
 
-Il n'existe encore aucune fixture SectorKill Q4 **non vacue côté produit**. F7
-dans le worktree réemploie F1, dont tous les points sont coplanaires : elle peut
-faire monter `wmin` Q4, mais aucune complétion Q4 n'existe dans ce nuage. Une
-construction minimale proposée à Claude utilise l'ancre
-`(0,0,0)`–`(2000,0,0)`, le support
-`x=(1000,1000,1000)`, `y=(1000,1000,-1000)` et sept paires
-`(1000+e,+-900,0)`, `e=0..6` : nominalement `W4=0`, `wmin=7` et le candidat
-Q4 survit ; le mutant `h-1` le perd par secteurs. Ajouter aussi les cas de
+F7 établit seulement le premier de trois niveaux de non-vacuité : le prédicat
+sectoriel Q4 s'active. F1 contient bien un seed aigu, donc un travail évité est
+plausible, mais F7 ne lance pas le bras OFF et ne l'asserte pas. Tous ses points
+sont coplanaires : aucune complétion ou candidate Q4 n'existe. Ajouter un cas
+non coplanaire et exiger, pour la même ancre tuée, `seeds OFF > 0`,
+`q4_completions OFF > 0` et l'égalité d'objet ON/OFF. Ajouter aussi les cas de
 borne équilatérale Q3, tétraèdre régulier Q4 et extrêmes u16.
+
+Une fermeture minimale a été vérifiée hors dépôt avec l'ancre
+`(0,0,0)`–`(2000,0,0)`, les supports `x=(1000,1000,1000)` et
+`y=(1000,1000,-1000)`, puis les paires `(1000+e,+-900,0)`. Pour `e=0..6`,
+`W4=0`, `wmin=7`, ON=OFF conserve un candidat et le bras OFF compte 2 seeds et
+30 complétions. Pour `e=0..7`, `wmin=8` tue nominalement l'ancre ; le bras OFF
+compte 2 seeds, 34 complétions, une mort en profondeur et zéro candidat. Graver
+les deux cas qualifie séparément la frontière `h4-1` et la non-vacuité produit.
 
 La porte d'autorité doit énumérer indépendamment tous les supports owner et
 leur profondeur exacte, comparer filtre ON/OFF avant et après RLE, puis imposer
@@ -168,7 +285,7 @@ brutes et ajouter un petit oracle structurel réellement indépendant.
 
 ### Intégration et compteurs
 
-Le booléen de `7eb33608` est remplacé dans le worktree par le jeton typé
+Le booléen de `7eb33608` est remplacé au pin `635951d6` par le jeton typé
 `AnchorPretests`. C'est un progrès de lisibilité, mais les valeurs
 `kAlreadyApplied` et `kCounterfactual` ont le même effet et restent publiquement
 sélectionnables dans le header produit. Un corps interne
@@ -202,39 +319,41 @@ paires.
 
 ## Sonde et provenance des mesures
 
-`7eb33608` corrige la circularité principale de la sonde : le corps
-contrefactuel s'exécute avec les tests d'ancre désactivés, puis le certificat de
-production est évalué séparément. Les nouvelles sorties permettent donc une
-exploration des populations. Elles ne sont toutefois pas un reçu :
+`259fe21e` sépare enfin la variante finale dans son propre dossier. Les douze
+bruts sont complets ; noms, familles, tailles, lanes et pin concordent, les
+identités de compteurs se ferment, K8 domine K4 sur cet échantillon et aucune
+contradiction n'est rapportée. La sonde bloque désormais sur `wrong` et sépare
+les trois timers. C'est une bonne mesure exploratoire de prévalence.
 
-- les anciens fichiers de `mesures_secteurs_20260827` ont été écrasés au lieu
-  de créer un dossier distinct pour la nouvelle variante ;
-- chaque brut annonce `pin_execution=fa99b3f1`, mais le binaire inclut le diff
-  devenu `7eb33608` ; `fa99b3f1` ne peut donc pas le reconstruire ;
-- `git rev-parse HEAD` est capturé à la **configuration** CMake, sans dépendance
-  à `.git/HEAD`, hash du diff ou hash binaire ; le worktree ajoute un marqueur
-  dirty configure-time utile mais toujours non reconstructible ;
-- `LISEZMOI.txt` conserve en tête `HEAD 312034ce + sonde`, contradictoire avec
-  les bruts ;
-- la cible emploie `mhgp5_executable` et compile donc `MHGP5_TESTING=1`, pas le
-  mode produit ;
-- au tip, `wrong` fusionne K4, K8 et le cumul puis le programme rend toujours 0,
-  et le timer mélange sonde et production. Le worktree rend désormais tout
-  `wrong` bloquant et sépare trois timers ; il reste à distinguer les familles
-  de contradiction dans le reçu ;
-- commande, toolchain, configuration complète, RSS, code de sortie, hash
-  binaire et manifeste d'entrée ne sont pas conservés.
+Elle ne démontre cependant ni un gain temporel produit ni une provenance de
+reçu complet :
 
-Le nouveau dossier devra être construit depuis un commit source propre, avec
-commande et toolchain, `git status --porcelain` vide, SHA-256 du binaire et des
-entrées, sorties, codes et manifeste. Le pin imprimé dans le binaire peut
-rester un contrôle secondaire, jamais l'autorité de provenance.
+- le pin et le bit dirty sont capturés à la **configuration** CMake ; une
+  édition après configuration peut laisser `worktree_src_modifie=non`, et un
+  échec de `git status` est aussi interprété comme propre ;
+- commande exacte, toolchain, configuration de build, hash binaire/entrées,
+  code de sortie, RSS et manifeste ne sont pas conservés ; la cible est en
+  outre compilée avec `MHGP5_TESTING=1` ;
+- la génération a été observée avec des `.txt` temporairement à zéro octet :
+  écrire vers un temporaire puis renommer éviterait qu'un collecteur lise un
+  reçu partiel ;
+- `wrong` peut compter jusqu'à trois fois la même ancre (production, K4, K8) :
+  le code de sortie est désormais bon, mais le cardinal imprimé n'est pas un
+  nombre d'ancres distinctes ;
+- en Q4, W4 est préfiltré avant le contrefactuel et hors des trois timers. La
+  ligne « production Wq exact + secteurs cumulés » mesure donc les secteurs
+  **après W4**, pas le coût total des prétests Q4 ; aucun bras ON de bout en
+  bout n'est chronométré ;
+- les ratios « candidat de rectangle / somme des covers » du `LISEZMOI` sont
+  ceux de Q3 seulement sans le préciser. Les ratios Q4 sont très différents ;
+- l'ancien dossier a retrouvé les fichiers communs à `a9a2f509`, mais conserve
+  trois sorties ajoutées après ce pin. Dire « contenu historique exact de
+  a9a2f509 » reste donc littéralement faux.
 
-La documentation doit aussi distinguer secteurs seuls et cumul. Les nouveaux
-bruts `eight_clusters` Q3 annoncent pour le cumul 64,5 % / 95,0 % à n=2000 et
-67,8 % / 97,1 % à n=4000, alors que `GPU.md` attribue encore 54–60 % / 92–94 %
-au cumul. Les temps locaux `33,0 -> 13,7 s` restent des
-`mesure_locale_non_recue`.
+Les bruts `eight_clusters` Q3 annoncent pour le cumul 64,5 % / 95,0 % à n=2000
+et 67,8 % / 97,1 % à n=4000. Ce sont des fractions de travail contrefactuel,
+pas un accéléré mesuré. `GPU.md` doit distinguer secteurs seuls, cumul et lane,
+et les temps locaux restent des `mesure_locale_non_recue`.
 
 ## Autres P1 encore ouverts au pin courant
 
@@ -258,8 +377,14 @@ au cumul. Les temps locaux `33,0 -> 13,7 s` restent des
   Enfin, placer les extras après les phases obligatoires ou leur donner un
   budget global : quatre timeouts de 7200 s précèdent actuellement la phase GPU
   dans une session bornée à 14400 s.
-- **Documentation :** corriger `GPU.md`, versionner le schéma des compteurs et
-  rendre le pin différentiel v4 reproductible avant d'augmenter son autorité.
+- **Documentation :** `fabd75bd` décrit F5 comme 28 sites alors que la fixture
+  en construit 26, présente F7 sans distinguer prédicat/seed/complétion et range
+  `mhgp5_anchor_tests_oracle` parmi les oracles bien qu'il réutilise les corps
+  produit. Le reçu `e11ad8c7` ferme le rapatriement anticipé par `77e143b2`,
+  mais `GPU.md` attribue encore le résidu q3 aux covers sans mesure cover/scan
+  séparée. `MATHEMATIQUES.md` décrit encore F1/F3 sans leur seed ajouté.
+  Corriger ces portées, le schéma des compteurs et le pin différentiel v4 avant
+  d'augmenter leur autorité.
 
 ## Réponse à Claude et ordre de fermeture
 
@@ -267,19 +392,26 @@ La réponse détaillée V7–V14 est conservée dans
 [`QUESTION_CLAUDE_TESTS_D_ANCRE_20260827.md`](QUESTION_CLAUDE_TESTS_D_ANCRE_20260827.md).
 Ordre conseillé :
 
-1. Recevoir la campagne G4 appariée CPU/`--gpu` au même pin, sur les quatre
-   familles, avant tout kernel q3 par rectangle. Mesurer murs par phase,
-   variance, RSS/VRAM et deux digests ; ne pas décider sur le seul seuil 20 s.
-   Les extras optionnels ne doivent ni masquer ni affamer ces phases.
-2. Transformer la gate ON/OFF de `7d94aee9` en porte d'autorité : comparaison
+1. Compléter d'abord le lanceur G4 après la correction de racine : scripts de
+   sécurité épinglés, trap posé avant démarrage, cleanup qui tente toujours
+   l'arrêt, environnement contrôlé et selftest de l'orchestrateur local. Aucun
+   nouveau démarrage avant cette fermeture.
+2. Rendre le reçu G4 autoportant : logs et `.status.time`, transcript/RC du
+   validateur, `scp_rc` durable et `remote_campaign_rc` explicitement inféré ;
+   ne pas recalculer les 25 runs. La décision V8 garde le kernel q3 par rectangle
+   fermé faute de gain net. Toute conclusion causale exige une ablation au même
+   pin et des temps cover/scan séparés.
+3. Recevoir la sonde de corde Q4 avant toute intégration : provenance complète,
+   non-vacuité bloquante, verdict exact par support et par `K`, monotonie et
+   temps du certificat comparé aux scans réellement évités.
+4. Transformer la gate ON/OFF de `7d94aee9` en porte d'autorité : comparaison
    brute et post-RLE, profondeur indépendante, `J <= 0`, produit large `P/B`,
-   F1/F3 non vacus et fixture Q4 avec seed OFF.
-3. Uniformiser le ledger Q4, remplacer le booléen de bypass et fermer les
-   bornes `size_t/u32` ainsi que les replis oversized.
-4. Publier un nouveau reçu sectoriel depuis un pin propre, sans écraser
-   l'historique, puis corriger `GPU.md`.
-5. Fermer ensuite le validateur Q4, le mutant CUDA, l'autorité des overrides et
-   le protocole de campagne.
+   F1/F3 avec bras OFF et fixture Q4 avec complétion OFF.
+5. Compléter F5 à 28 sites, qualifier les trois niveaux de F7, uniformiser le
+   ledger Q4 et fermer les bornes `size_t/u32` ainsi que les replis oversized.
+6. Compléter la provenance du reçu sectoriel, corriger ses libellés et les
+   documents, puis fermer le validateur Q4, le mutant CUDA, l'autorité des
+   overrides et le protocole `EXTRA_N`.
 
 Le test cellulaire reste une dérivation expérimentale, pas une lane ouverte.
 Une grille de cellules et un fan sectoriel à plus de huit secteurs sont deux
@@ -290,13 +422,20 @@ mais demeure une observation de famille/taille/pin, jamais un invariant.
 ## Reproduction et limites
 
 ```text
-sorties concurrentes au pin 7eb33608 : 165/165 gates, 7 oracles, 105,73 s
+build partagé, contenu fonctionnel 635951d6 : 166/166 gates, 254,07 s ; 8/8 oracles, 13,76 s — sorties rapportées, journaux écrasés
+selftest concurrent : violations=0, mais le wrapper de session n'est pas exécuté
+G4 fa99b3f1 : 25 paires statiquement cohérentes, deux digests appariés ; complete déclaré, RC distant/transcript absents
+sorties historiques 7eb33608 : 165/165 gates, 7 oracles, 105,73 s
 archive propre fa99b3f1 : 165/165 gates, 7 oracles, 101,58 s
-tip 7d94aee9 : non exécuté par cet audit
+reçus/docs 259fe21e..e11ad8c7 et lanceur ef5abbd5 : relus statiquement
 ```
 
-Aucun test n'a été lancé pour cette passe, conformément à la demande. Les
-journaux cités restent locaux et non versionnés. Le probe racine
+Cette passe n'a lancé aucun test. Des sorties concurrentes du build partagé
+rapportent la construction Release, les portes CPU, les oracles et le selftest ;
+aucun journal CTest durable ni CUDA local n'est disponible. Les sorties G4
+`.txt/.status` sont suivies, contrairement aux logs de session et fichiers
+`.status.time`. Le probe racine
 `.codex_fold_contract_probe.cpp` appartient à un autre auditeur ; il n'a été ni
-ouvert, ni modifié, ni inclus. GCP n'a pas été utilisé par l'auditeur ; la
-session concurrente de Claude n'a été ni interrogée ni mutée.
+modifié ni inclus. GCP n'a pas été utilisé par l'auditeur ; la récupération
+concurrente de Claude n'a été ni pilotée ni mutée. Après un premier échec fermé,
+elle a transféré les artefacts puis certifié sa cible exacte `TERMINATED`.

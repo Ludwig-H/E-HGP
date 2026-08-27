@@ -26,13 +26,16 @@ Les deux sont **incomparables** (fixtures F1 et F3) et cumulés. Invariance de l
 
 ## Ce que je fais en attendant
 
-Session G4 gardée mesurant la nouvelle lane CPU (et les contrats `--gpu` inchangés, pour l'égalité des deux digests) ; aucune écriture de kernel par rectangle avant votre réponse sur V8.
+La session G4 prévue a depuis été exécutée et ses artefacts suivis par
+`e11ad8c7`. Elle ferme la décision V8 au niveau exploratoire ; toute nouvelle
+campagne doit répondre à une autre question, par exemple variance ou temps de
+phase, et non recalculer les mêmes 25 runs.
 
 ## Réponse des auditeurs — 27 août 2026
 
-- **Relecture :** `a9a2f509` pour l'activation initiale, `fa99b3f1` pour les analyses, `7eb33608` pour F4 et le contrefactuel, `d837adb2` pour `EXTRA_N`, puis `7d94aee9` pour la gate ON/OFF, les compteurs et l'invariant J
-- **Nature :** revue mathématique et statique ; aucun test ni GCP lancé par les auditeurs dans cette passe ; les sorties 165/165 de `7eb33608` sont des résultats concurrents observés, pas un rejeu du tip
-- **Verdict borné :** les preuves de suffisance W3 et secteurs sont reçues au niveau statique sous le profil u16. Aucun faux rejet nominal n'a été trouvé. `7d94aee9` ajoute une comparaison ON/OFF post-RLE et des planchers sectoriels utiles, mais ne qualifie pas encore l'activation : la porte réutilise les corps produit, n'énumère pas indépendamment les profondeurs et les reçus courants restent mal épinglés.
+- **Relecture :** `a9a2f509` pour l'activation initiale, `fa99b3f1` pour les analyses, `7eb33608` pour F4 et le contrefactuel, `d837adb2` pour `EXTRA_N`, `7d94aee9` pour la gate ON/OFF, `635951d6` pour F1–F7/sonde/lanceur, `259fe21e` pour les mesures, `fabd75bd` pour le plan de tests, `77e143b2` pour la lecture GPU, `e11ad8c7` pour les artefacts G4 et `ef5abbd5` pour la correction de racine du lanceur
+- **Nature :** revue mathématique et statique par Codex ; aucun test, CUDA ni GCP lancé dans cette passe. Des sorties concurrentes du build Release partagé, au contenu fonctionnel statiquement équivalent à `635951d6`, rapportent les résultats ci-dessous ; leurs journaux ont depuis été écrasés.
+- **Verdict borné :** les preuves de suffisance W3 et secteurs sont reçues au niveau statique sous le profil u16. Aucun faux rejet nominal n'a été trouvé. Les sorties concurrentes rapportent 166/166 portes `gate` et 8/8 tests `oracle`, sans journal durable. L'activation n'est pas qualifiée : la porte réutilise les corps produit, n'énumère pas indépendamment les profondeurs, F5/F7 sur-promettent leur portée et l'oracle d'ancre est omis de `-L gate`. `ef5abbd5` répare la racine de l'auto-copie, mais pas encore les garde-fous de démarrage/arrêt.
 
 ### V7 — objet, compteurs et reçus
 
@@ -48,11 +51,11 @@ tandis que la même ancre au-dessus du seuil meurt avant routage. Appliquer les
 prétests avant toute décision de route, puis verrouiller une décomposition
 indépendante du seuil et `seeds = seeds_host + seeds_device`.
 
-Les anciens reçus restent immuables et leurs digests demeurent des contre-fixtures ; ne pas réécrire leurs compteurs. Il n'est pas nécessaire de reproduire toute l'histoire avant un premier probe, mais toute nouvelle conclusion de performance à 8 k–50 k exige un reçu distinct au pin courant. La prochaine campagne G4 peut donc être la campagne de décision actuelle, avec montée 16 k, 32 k puis 50 k et arrêt anticipé sur échec de capacité.
+Les anciens reçus restent immuables et leurs digests demeurent des contre-fixtures ; ne pas réécrire leurs compteurs. Il n'est pas nécessaire de reproduire toute l'histoire avant un premier probe, mais toute nouvelle conclusion de performance à 8 k–50 k exige un reçu distinct au pin courant. La campagne de décision est désormais exécutée ; une campagne ultérieure doit mesurer variance ou phases sur une question explicitement nouvelle.
 
 ### V8 — priorité GPU
 
-**Oui.** Subordonner tout kernel q3 par rectangle à une mesure appariée de la nouvelle CPU et du chemin `--gpu` courant, au même pin G4, mêmes entrées, mêmes fils et deux digests. La décision ne doit pas dépendre d'un seuil isolé de 20 s : recevoir les murs par phase, la variabilité, RSS/VRAM et le résidu réellement device. Si q3 n'offre plus de marge nette et reproductible, fermer q3 comme voie de gain et profiler q4 séparément.
+**Oui, et la décision bornée est maintenant reçue.** Le reçu `e11ad8c7`, source `fa99b3f1`, conserve les mêmes entrées, 48 fils, RSS, deux digests égaux et quatre couples CPU/`--gpu`. Le device reste plus lent de +4 % à +19 % ; aucun kernel q3 par rectangle n'a donc de gain de bout en bout démontré sur ce pin. Garder cette voie fermée. Une affirmation causale ou générale demanderait encore répétitions, ablation au même pin et séparation cover/scan ; profiler q4 séparément seulement à partir du résidu mesuré.
 
 ### V9 — W3 avant ou après cover
 
@@ -68,7 +71,7 @@ Les anciens reçus restent immuables et leurs digests demeurent des contre-fixtu
 
 ### V12 — nécessité et juge
 
-**Oui** : aucun calcul exact du minimum sur le disque fermé n'est requis dans la lane produit. **Non** : fixtures et égalité de digest ne suffisent pas à qualifier le certificat. L'exemple 2.4 publié est lui-même vacu côté produit : ses 28 points ont `q=0`, donc aucun n'est un seed aigu. Ajouter `x=(1000,1200,0)` conserve la profondeur nulle au centre, réalise un seed non nul et lui donne au moins 13 intérieurs. La nouvelle `mhgp5_anchor_tests_oracle` compare utilement ON/OFF, mais appelle les mêmes corps produit puis RLE avant comparaison : elle peut masquer les multiplicités brutes et n'énumère ni supports ni profondeurs par une autorité indépendante. Conserver cette porte comme différentiel borné et ajouter le petit juge structurel demandé. Ces extensions peuvent éviter l'arrangement continu en `O(m^2 log m)`.
+**Oui** : aucun calcul exact du minimum sur le disque fermé n'est requis dans la lane produit. **Non** : fixtures et égalité de digest ne suffisent pas à qualifier le certificat. `635951d6` ajoute bien `x=(1000,1200,0)`, seed aigu auquel les sites réalisés donnent treize intérieurs. Mais F5 annonce 28 sites et n'en construit que 26 : les directions `(y,z)=(0,+-1000)` manquent. La propriété publiée « tout centre non nul a profondeur au moins 13 » ne suit plus pour une direction orthogonale à l'une des treize paires. Compléter les deux axes et asserter seed OFF/profondeur ; ne pas réécrire l'exemple canonique comme une fixture à 26. `mhgp5_anchor_tests_oracle` compare utilement ON/OFF, mais appelle les mêmes corps produit puis RLE avant comparaison : elle peut masquer les multiplicités brutes et n'énumère ni supports ni profondeurs par une autorité indépendante. Conserver cette porte comme différentiel borné et ajouter le petit juge structurel demandé.
 
 ### V13 — mou de l'histogramme
 
@@ -76,15 +79,15 @@ Les anciens reçus restent immuables et leurs digests demeurent des contre-fixtu
 
 ### V14 — hygiène de mesure
 
-**Principe reçu, correction du reçu refusée en l'état.** Le `LISEZMOI` versionné par `a9a2f509` attribuait aux bruts historiques des valeurs absentes. `7eb33608` ajoute bien un contrefactuel filtre OFF et régénère les douze sorties, mais les réécrit dans le même dossier et toutes affichent `pin_execution=fa99b3f1` : CMake capture HEAD à la configuration, avant le diff devenu `7eb33608`, sans hash du worktree ni du binaire. Le résumé conserve aussi `HEAD 312034ce + sonde`. Restaurer au tip le contenu historique exact de ce dossier et placer la variante finale dans un nouveau reçu complet, après commit/reconfiguration. Les temps locaux `33,0 -> 13,7 s` restent non reçus. En revanche, la suite canonique a été rejouée directement : `7eb33608` passe 165/165 gates, pas les 168 annoncées dans le message précédent.
+**Principe reçu, mesure exploratoire acceptée, reçu reproductible non fermé.** `259fe21e` place la variante finale dans un dossier distinct ; ses douze sorties ont des en-têtes cohérents avec `635951d6`, des identités de compteurs fermées, trois timers séparés et zéro contradiction observée. Le pin/dirty reste toutefois capturé à la configuration, sans commande, toolchain, hash binaire/entrées, code de sortie ni RSS ; la génération a aussi été observée non atomique. En Q4, W4 est préfiltré hors timers, donc « production Wq + secteurs » désigne seulement l'étage incrémental après W4 et aucun bras ON de bout en bout n'est chronométré. Le dossier historique commun à `a9a2f509` est restauré, mais trois fichiers plus récents y restent : remplacer « contenu historique exact » par cette portée. Les temps locaux demeurent non citables comme performance produit.
 
 ### Corrections immédiates conseillées
 
-1. Le worktree rend maintenant `wrong` bloquant et sépare les timers contrefactuel, K4+K8 et production. Conserver ces corrections, distinguer encore la source des contradictions et publier les sorties dans un nouveau reçu correctement épinglé ; le marqueur dirty configure-time ne remplace ni hash du diff ni hash binaire.
-2. Le worktree ajoute le seed à F1/F3 et une F5 non vacue. Corriger son cardinal annoncé : six quadruplets plus une paire font 26 sites, pas 28. Compléter la gate de `7d94aee9` par une comparaison brute, une profondeur indépendante et une fixture sectorielle Q4 avec seed OFF ; lui rendre aussi le double label `oracle gate`, faute de quoi `ctest -L gate` l'ignore.
+1. `635951d6` rend `wrong` bloquant et sépare les timers contrefactuel, K4+K8 et production ; `259fe21e` publie les sorties séparément. Distinguer encore la source des contradictions, chronométrer le bras ON complet et compléter le manifeste ; le marqueur dirty configure-time ne remplace ni hash du diff ni hash binaire.
+2. `635951d6` ajoute le seed à F1/F3. F5 doit recevoir les deux axes manquants pour construire réellement 28 sites et préserver l'exemple 2.4. Remplacer F7 par le cas non coplanaire vérifié : ancre `(0,0,0)`–`(2000,0,0)`, supports `(1000,1000,+-1000)` et sept puis huit paires `(1000+e,+-900,0)`. Sept donne `wmin=7`, ON=OFF un candidat, 2 seeds et 30 complétions OFF ; huit donne `wmin=8`, ancre ON tuée, puis 2 seeds, 34 complétions et une mort en profondeur OFF. Compléter aussi la gate de `7d94aee9` par une comparaison brute et une profondeur indépendante ; lui rendre le double label `oracle gate`, faute de quoi `ctest -L gate` l'ignore.
 3. Les compteurs W3/secteurs sont maintenant comparés et planchés. Ajouter `invariant_jneg`, rendre les planchers optionnels par porte et le ledger Q4 indépendant du seuil de routage.
-4. Le worktree remplace le booléen par `AnchorPretests`, mais `kAlreadyApplied` et `kCounterfactual` restent deux bypass publics équivalents. Préférer un corps interne et limiter le contrefactuel aux builds de test.
-5. Refuser `J <= 0` à la source et remplacer les produits i128 de l'identité `P/B` par une arithmétique couvrant le profil u16. Le commentaire 25/37 et la frontière de demi-plan sont corrigés dans le worktree ; en revanche F7 reste vacue pour Q4, car son nuage F1 est coplanaire et ne contient aucune complétion Q4.
+4. `635951d6` remplace le booléen par `AnchorPretests`, mais `kAlreadyApplied` et `kCounterfactual` restent deux bypass publics équivalents. Préférer un corps interne et limiter le contrefactuel aux builds de test.
+5. Refuser `J <= 0` à la source et remplacer les produits i128 de l'identité `P/B` par une arithmétique couvrant le profil u16. F6 sépare bien la frontière de demi-plan ; verrouiller les secteurs 4/5 si leur portée reste revendiquée.
 
 ### Mise à jour du protocole `EXTRA_N` (`d837adb2`)
 
@@ -109,15 +112,79 @@ explicitement au validateur et placer ces extensions après les phases
 obligatoires, sous un budget global. Leur statut reste « mesure CPU
 exploratoire avec digest », pas « conformité v4 à 100 k/200 k ».
 
-### Alerte sur le worktree post-`7d94aee9`
+### Lanceur G4 au tip courant
 
-Le mécanisme d'auto-copie ajouté à
-`session_campagne_v5_scale_g4.sh` doit être corrigé avant commit : après
-`exec bash /tmp/ehgp-v5session-copy...`, `BASH_SOURCE[0]` désigne la copie dans
-`/tmp`. Le calcul courant `dirname(BASH_SOURCE[0])/..` fixe donc `REPO_ROOT` à
-`/`, et les chemins relatifs `gcp-migration/...` ne peuvent plus fonctionner.
-Calculer/graver le dépôt source **avant** l'`exec`, le passer dans une variable
-dédiée et le vérifier dans la copie. Cette correction future ne requalifie pas
-la session déjà lancée depuis le script vivant.
+`ef5abbd5` corrige le blocage initial de l'auto-copie : la première invocation
+calcule la racine avant `exec` et la transmet à la copie. La fermeture du chemin
+local reste toutefois incomplète.
 
-La session G4 gardée peut continuer pour la décision V8. Ces mesures ne ferment toutefois V7/V12 que si elles sont épinglées au code effectivement mesuré et accompagnées des autorités indépendantes ci-dessus.
+Fermer dans la même passe quatre trous de sécurité : installer le trap avant le
+démarrage, rendre son logging best-effort afin qu'un échec de `tee` ne précède
+jamais l'arrêt, et épingler les scripts `set_max_run_duration_and_verify.sh`,
+`start_and_verify.sh` et `stop_and_verify.sh`, actuellement relus depuis le
+worktree vivant. Refuser aussi une valeur ambiante qui désactive l'auto-copie
+ou injecte une racine sans contrôle, vérifier que la copie exécutée est l'octet
+hashé par le manifeste, et supprimer la copie temporaire. Le
+selftest actuel n'exécute pas l'orchestrateur et ne peut détecter aucun de ces
+défauts.
+
+Ne pas lancer de nouvelle campagne avant fermeture de ces garde-fous. La
+correction de racine ne requalifie pas rétroactivement la session calculée
+depuis le script vivant.
+
+Mise à jour de réception : la session source `fa99b3f1` a atteint la ligne
+finale de ses 25 runs, puis l'édition du script vivant a produit
+`session_rc=2` avant l'enregistrement de `remote_campaign_rc`. Après une
+première tentative échouée fermée, la récupération gardée a localement copié 75
+fichiers avec `scp_rc=0`, puis vérifié `ehgp-blackwell-spot-ai1a` `TERMINATED`.
+Les artefacts suivis par `e11ad8c7` annoncent en CPU/GPU à 50 k `78/81`,
+`21/25`, `162/174` et `23/24` s sur
+uniform/terrain/eight_clusters/scanline. Les 25 statuts partagent les trois
+pins, sont `finished=1`, portent 24 codes 0 et le code 4 attendu du mutant ; les
+deux digests CPU/GPU/adaptatif concordent.
+
+Le statut strict reste moins fort que sa prose : le commit suit seulement les
+25 `.status`, les 25 `.txt` et `RECU.txt`. Les logs de session/récupération et
+les 25 `.status.time` sont ignorés. `RECU.txt` promet le rejeu du validateur
+« ci-dessous », mais ne conserve ni commande, arguments, `validator_rc` ni
+sortie ; `remote_campaign_rc` est inconnu et `scp_rc=0` n'existe que dans le
+log local ignoré. Le contenu paraît validable en injectant `0 0`, mais cela ne
+rend pas `campaign_status=complete` autoportant. Versionner les pièces déjà
+acquises, noter le RC distant comme inféré et corriger « 24 runs tous code 0 » ;
+ne pas relancer les calculs. Le mini-script doit aussi refuser explicitement
+`scp_rc != 0` avant d'écrire `DONE`.
+
+`GPU.md` à `77e143b2` a anticipé cette récupération ; `e11ad8c7` fournit
+désormais la pièce. Les quatre murs établissent seulement que le chemin
+`--gpu` reste plus lent de +4 % à +19 % sur cette exécution. Ils ne suffisent
+donc pas à appeler tous ces écarts « parité » ni à attribuer le rapprochement
+aux seuls tests d'ancre. Les lignes de phase donnent les rectangles q3/q4, pas
+une séparation interne cover/scan : le diagnostic sur les covers reste ouvert.
+
+### Conseil sur la sonde de corde Q4 en cours
+
+Le découpage de la sur-corde en `K` intervalles est un certificat suffisant
+cohérent : `h4` témoins stricts aux deux extrémités de chaque intervalle tuent
+le seed, et l'arrondi entier supérieur reste fail-open. Avant de lire ses
+ratios ou d'en faire une lane :
+
+- appliquer à `mhgp5_q4_chord_probe` le pin/dirty actuellement réservé à
+  `mhgp5_rect_probe`, puis imprimer toute la configuration et recevoir la
+  commande, le binaire, le temps et la mémoire ;
+- rendre bloquants des planchers d'ancres, seeds vivants, morts additionnels et
+  scans réellement évités ; le code 0 actuel accepte une sonde entièrement
+  vide ;
+- comparer chaque support `(a,b,x,y)` et sa profondeur exacte, pas seulement un
+  `BallKey` déjà émis par le même corps produit. Le set masque les multiplicités
+  et peut confondre l'émission par l'autre seed canonique ;
+- séparer `wrong_K`, imposer la monotonie `K=2/4/8`, refuser `J <= 0` et borner
+  ou vérifier les agrégats `u64` ;
+- renommer le compteur courant en « tentatives `y` évitées » : il est incrémenté
+  avant owner, canonicalisation et préfiltres, donc ne mesure ni les scans de
+  profondeur évités ni un gain temporel ;
+- écrire chaque brut vers un temporaire, bloquer sur son RC puis renommer. La
+  chaîne locale en cours emploie `;`, écrit directement le `.txt` et poursuivrait
+  après un code 1 ; un fichier zéro octet a déjà été visible pendant le calcul.
+
+Cette sonde est une bonne prochaine falsification si elle reste distincte du
+chemin produit et si son coût propre est comparé au scan qu'elle prétend éviter.
