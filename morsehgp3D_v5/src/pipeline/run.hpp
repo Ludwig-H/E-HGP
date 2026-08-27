@@ -64,6 +64,20 @@ inline double ms(std::chrono::steady_clock::time_point t0) {
 // par K sont dimensionnes pour ce profil ; au-dela, refus explicite).
 inline constexpr u64 kSmaxProfile = 11;
 
+// CONTRAT DE PAYLOAD (arbitrage V3 de l'auditeur, 27 aout 2026) — version de
+// representation declaree, jamais cachee dans une graine :
+//   payload_kind      = forets horizontales par ordre K (pas la tour : aucune
+//                       application verticale entre ordres n'est livree) ;
+//   par K             = niveaux de lots (`batch_levels`), deltas avec parents,
+//                       naissances et representant de sortie (`deltas`),
+//                       partition finale dense (`facet_keys` strictement
+//                       croissantes + `final_canon_fid`) ;
+//   retention         = toutes les facettes (F_K^render), jamais un prefixe ;
+//   authority         = `RunResult::status` terminal ; les callbacks sont
+//                       PROVISOIRES jusqu'a ce statut ;
+//   canonical digest  = format `mhgp4-digest-v1` (conformite v4).
+inline constexpr const char* kForestPayloadVersion = "mhgp5-forests-horizontal-v1";
+
 // GARDES DE BIBLIOTHEQUE (pas seulement de CLI) : toute option hors profil et
 // toute entree qui ne definit pas l'objet sont refusees AVANT tout calcul,
 // avec le statut contractuel — jamais un debordement.
@@ -202,6 +216,8 @@ inline void print_run(std::FILE* out, const char* family, int n, int coord, long
                       const RunResult& rr) {
   const GenerateStats& gs = rr.gen;
   const ExpandStats& es = rr.expand;
+  std::fprintf(out, "payload=%s authority=status_terminal callbacks=provisional vertical_maps=none\n",
+               kForestPayloadVersion);
   std::fprintf(out,
                "famille=%s n=%d coord=%d s=%lld smax=%llu seed=%lld threads=%d emis=%zu boules_uniques=%llu "
                "mortes_profondeur=%llu survivantes=%llu census_int=%llu census_shell=%llu evenements=%llu "

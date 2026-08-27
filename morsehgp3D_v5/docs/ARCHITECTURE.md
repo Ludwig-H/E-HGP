@@ -116,3 +116,22 @@ Registre unique `src/core/mutants.hpp` : chaque défaut connu a un nom dans
 `kMutants`, exactement un point d'injection `MHGP5_MUTANT("nom")` dans `src/`,
 et une porte CTest à code 4. Les mutants ne sont jamais des options ; le
 registre est vide dans tout chemin nominal.
+
+## 7. Contrat de payload (arbitrage V3)
+
+Version de représentation déclarée : `mhgp5-forests-horizontal-v1`
+(`src/pipeline/run.hpp`, imprimée par le pilote : `payload=… authority=…
+callbacks=… vertical_maps=…`).
+
+| champ | valeur |
+|---|---|
+| `payload_kind` | forêts horizontales par ordre K = 1..K_max — **pas la tour** |
+| par K | `batch_levels` (niveaux exacts des lots), `deltas` (lot, niveau, parents, nées, représentant de sortie), partition finale dense (`facet_keys` strictement croissantes, `final_canon_fid` = plus petit fid de la composante) |
+| rétention des facettes | toutes (`F_K^render`), jamais un préfixe |
+| applications verticales | **aucune** (non livrées ; un objet « tour » sera un autre `payload_kind` versionné) |
+| autorité | `RunResult::status` terminal ; les callbacks `on_forest` sont provisoires jusqu'à ce statut |
+| signature | `mhgp4-digest-v1` (balls, forest par K, all) — porte de conformité v4, pas une preuve d'exactitude |
+
+Une coupe ciblée ou une partition à un rayon donné sera un **autre** payload
+versionné (nom, objet reconstructible, autorité, politique de coupe) ; elle
+ne prouve pas que les forêts ont été matérialisées.
