@@ -85,7 +85,10 @@ if [ -n "${NVCC_BIN}" ] && [ "${SKIP_GPU_WITNESS:-0}" != "1" ]; then
   # portes (uniform 1200, eight_clusters 1200 a 4 fils, uniform 8000 a 8 fils),
   # statut grave comme un run ; un echec ne refuse PAS les phases CPU (la lane
   # device n'est pas sur le chemin produit), mais le validateur l'exige a 0.
-  run_one gpu_lane device_lane bash -c "set -e; cmake --build build-cuda --target mhgp5_q3_lane_device_gate mhgp5_q4_lane_device_gate mhgp5_cuda -j8 2>&1 | grep -vE '^\[|^Scanning' | tail -60; test \${PIPESTATUS[0]} -eq 0; ./build-cuda/mhgp5_q3_lane_device_gate --family=uniform --n=1200; ./build-cuda/mhgp5_q3_lane_device_gate --family=eight_clusters --n=1200 --threads=4; ./build-cuda/mhgp5_q3_lane_device_gate --family=uniform --n=8000 --threads=8 --min-candidates=100000; ./build-cuda/mhgp5_q4_lane_device_gate --family=uniform --n=1200; ./build-cuda/mhgp5_q4_lane_device_gate --family=eight_clusters --n=1200 --threads=4; ./build-cuda/mhgp5_q4_lane_device_gate --family=uniform --n=8000 --threads=8 --min-candidates=100000"
+  run_one gpu_lane device_lane bash -c "set -e; cmake --build build-cuda --target mhgp5_q3_lane_device_gate mhgp5_q4_lane_device_gate mhgp5_cuda -j8 2>&1 | grep -vE '^\[|^Scanning' | tail -60; test \${PIPESTATUS[0]} -eq 0; ./build-cuda/mhgp5_q3_lane_device_gate --family=uniform --n=1200; ./build-cuda/mhgp5_q3_lane_device_gate --family=eight_clusters --n=1200 --threads=4; ./build-cuda/mhgp5_q3_lane_device_gate --family=uniform --n=8000 --threads=8 --min-candidates=100000; ./build-cuda/mhgp5_q4_lane_device_gate --family=uniform --n=1200; ./build-cuda/mhgp5_q4_lane_device_gate --family=eight_clusters --n=1200 --threads=4; ./build-cuda/mhgp5_q4_lane_device_gate --family=uniform --n=8000 --threads=8 --min-candidates=100000; ./build-cuda/mhgp5_q3_lane_device_gate --family=uniform --n=300 --coord=40 --min-candidates=200; ./build-cuda/mhgp5_q4_lane_device_gate --family=uniform --n=300 --coord=40 --min-candidates=200 --min-deep=20"
+  # Mutant du temoin sur le DEVICE : code 4 exige (la seule inscription CTest
+  # ne prouve pas qu'il a ete compile et tue sur la cible).
+  run_one gpu_mutant device_mutant ./build-cuda/mhgp5_device_witness --inject=witness-no-warp-correction
   GPU_BIN="${GPU_BIN:-./build-cuda/mhgp5_cuda}"
 else
   {

@@ -1,8 +1,19 @@
 # MorseHGP3D v5 — plan du port GPU (point 2)
 
-Cadre inchangé : `public_status=not_claimed`, aucune cible CUDA livrée à ce
-jour. Ce document dit **quoi** porter, dans **quel ordre**, et **comment on le
-prouve** ; rien n'y est un résultat.
+Cadre inchangé : `public_status=not_claimed`. Ce document dit **quoi** porter,
+dans **quel ordre**, et **comment on le prouve** ; une mesure y reste une
+mesure. **État par étape** (distinguer source présente, compilation `nvcc`,
+exécution conforme, mesure, pin du reçu) :
+
+| cible | source | compilée (`nvcc`) | exécutée conforme | mesurée | reçu (pin) |
+|---|---|---|---|---|---|
+| témoin device (DI128 + scan q3 warp) | `src/gpu/device_witness.cu` | oui | oui, 0 désaccord | — | `campagne_g4_v5_20260827_temoin_device` (`24b3f164`) |
+| lane q3 device | `src/gpu/q3_lane_device.cuh` | oui | oui, 1200 / 1200×4 fils / 8000×8 fils | temps kernel gravés, pas de banc apparié | idem |
+| lane q4 device | `src/gpu/q4_lane_device.cuh` | session `2e75cb42` (reçu à venir) | idem | idem | — |
+| pilote `mhgp5_cuda --gpu` (contrats 50 k) | `cli/mhgp5_cuda.cu` | session `2e75cb42` | `digest_all` = CPU exigé par le validateur | temps gravés | — |
+| mutant du témoin sur device | `--inject=witness-no-warp-correction` | à recevoir (protocole : run `gpu_mutant`, code 4) | — | — | — |
+
+Ce qui n'a pas de reçu n'est pas reçu.
 
 ## 1. Ce que la mesure G4 a désigné (27 août 2026)
 
@@ -26,25 +37,31 @@ en blocs.
 
 ## 2. Contraintes non négociables
 
-- **Même objet** : le multiensemble des candidats post-RLE (clés primitives,
-  représentants de niveau, arités) produit par le device doit être
-  **bit-identique** à celui du chemin CPU sur les mêmes entrées — c'est la
-  porte, et la seule.
-- **Exactitude** : toute décision reste entière ; le device n'a pas de
-  `__int128` → arithmétique 128 bits **portable** (`src/core/dint.hpp`,
-  limbes u64, prouvée égale à `__int128` sur CPU par `mhgp5_dint_gate`) ; les
-  formes q3/q4 sont dupliquées en variantes device (`src/lanes/device_forms.hpp`)
+- **Même objet** : l'objet comparé est le **vecteur post-RLE** des candidats
+  (trié par `ball_candidate_less`, dédoublonné par clé ; chaque élément = clé
+  primitive, niveau exact, arité) produit par la lane device, qui doit être
+  **égal élément par élément** à celui de la lane CPU sur les mêmes entrées ;
+  à un fil, l'ordre brut d'émission est comparé aussi ; les compteurs de la
+  lane (7 pour q3, 22 pour q4) doivent coïncider. C'est la porte, et la seule.
+- **Exactitude** : toute décision reste entière. Arithmétique 128 bits
+  **portable** (`src/core/dint.hpp`, limbes u64, prouvée égale à `__int128`
+  sur CPU par `mhgp5_dint_gate` et sur device par le témoin) pour les formes
+  et les scans ; `__int128` **est** employé en code device là où `wide.hpp`
+  l'emploie déjà (`cmp_2p2_jb2`, cœur de seed q4), nvcc 12.9 avec GCC hôte
+  le supportant — contrat de backend écrit dans `dint.hpp`. Les formes q3/q4
+  sont dupliquées en variantes device (`src/lanes/device_forms.hpp`)
   prouvées égales aux formes de production sur tous les triangles/tétraèdres
   de petits nuages et sur les fixtures u16 extrêmes.
 - **Le flottant reste un filtre** : la borne certifiée par seed et la séquence
   FMA figée valent sur device à condition d'imposer l'arrondi au plus proche
   et d'interdire toute contraction hors de la séquence (`-fmad=false` ou
   `__fmaf_rn`/`__fma_rn` explicites) ; le repli exact est obligatoire.
-- **Ce qui ne passe pas sur device (première version)** : les niveaux q4
-  exacts (U192/U320) et `cmp_2p2_jb2` — le device rend les **candidats** (clé
-  primitive + seed + complétion) ; le CPU forme le niveau q4 et exécute le
-  cœur de seed exact sur les seuls candidats remontés, ou bien le device
-  n'exécute que les filtres certifiés et laisse au CPU les replis.
+- **Ce qui reste à l'hôte** : les clés et niveaux exacts (réduction
+  rationnelle, U192) des candidats émis — le device rend les verdicts (q3 :
+  mort/vivant par seed ; q4 : cœur par seed, étage par complétion,
+  profondeur par candidate) et l'hôte forme clé et niveau à partir de la
+  forme recalculée. Le cœur de seed exact (`cmp_2p2_jb2`) s'exécute sur le
+  device.
 - **L'oracle n'est jamais porté.**
 - **Pas de nvcc ici** : les kernels ne se compilent et ne s'exécutent que sur
   la G4, par sessions gardées ; tout ce qui peut être vérifié sur CPU

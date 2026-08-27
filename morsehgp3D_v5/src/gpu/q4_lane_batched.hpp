@@ -15,6 +15,11 @@
 // tests/q4_lane_batched_gate.cpp : egalite post-RLE des candidats q4 et de
 // tous les compteurs de la lane avec generate.hpp. Mutant de porte
 // `q4-batched-emit-deep` : les candidats profonds sont emis (code 4).
+// CONTRAT DE SYNCHRONISME de l'executeur `scan` : il est SYNCHRONE — a son
+// retour, les verdicts (et pour q4 les emissions et etages) sont complets,
+// l'appelant les lit puis vide le lot. Un futur recouvrement asynchrone
+// exigerait des lots possedes ou double-bufferises et un handle de
+// completion explicite ; ce n'est pas le contrat actuel.
 #pragma once
 
 #include <limits>

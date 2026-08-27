@@ -14,6 +14,11 @@
 // tests/q3_lane_batched_gate.cpp exige l'egalite VECTEUR A VECTEUR (ordre
 // compris) des candidats q3 et l'egalite des compteurs avec generate.hpp.
 // Mutant `q3-batched-emit-dead` : les seeds morts sont emis (tue en code 4).
+// CONTRAT DE SYNCHRONISME de l'executeur `scan` : il est SYNCHRONE — a son
+// retour, les verdicts (et pour q4 les emissions et etages) sont complets,
+// l'appelant les lit puis vide le lot. Un futur recouvrement asynchrone
+// exigerait des lots possedes ou double-bufferises et un handle de
+// completion explicite ; ce n'est pas le contrat actuel.
 #pragma once
 
 #include <limits>

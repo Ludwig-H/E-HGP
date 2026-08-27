@@ -112,6 +112,7 @@ mkdir -p build-cuda
 cat > build-cuda/mhgp5_device_witness <<'EOT'
 #!/usr/bin/env bash
 [ "${WITNESS_FAIL:-0}" = "1" ] && { echo "DESACCORD device/hote"; exit 1; }
+for a in "$@"; do case "$a" in --inject=witness-no-warp-correction) [ "${MUTANT_SURVIVES:-0}" = "1" ] && { echo "MUTANT NON TUE"; exit 1; }; echo "DESACCORD device/hote"; exit 4;; esac; done
 echo "device=faux sm=12.0"; echo "arith cas=262144 desaccords=0"
 echo "scan famille=uniform ancres=10 seeds=728347 sites=100 morts=1 desaccords=${WITNESS_SCAN_MISM:-0} kernel_ms=1.000"
 echo "scan famille=eight_clusters ancres=10 seeds=2308366 sites=100 morts=1 desaccords=0 kernel_ms=1.000"
@@ -155,7 +156,7 @@ run_campaign() {
 # ---- Scenario 1 : happy path -> complete.
 RC1=$(run_campaign "${WORK}/out1")
 [ "${RC1}" -eq 0 ] || fail "scenario 1 : script distant rc=${RC1}"
-[ "$(ls "${WORK}/out1"/*.status 2>/dev/null | wc -l)" -eq 22 ] || fail "scenario 1 : 22 statuts attendus (temoin + lane device + 12 conformites + 4 contrats CPU + 4 contrats GPU)"
+[ "$(ls "${WORK}/out1"/*.status 2>/dev/null | wc -l)" -eq 23 ] || fail "scenario 1 : 23 statuts attendus (temoin + lane device + mutant + 12 conformites + 4 contrats CPU + 4 contrats GPU)"
 grep -L '^source_commit=cafedeca$' "${WORK}/out1"/*.status | grep -q . && fail "scenario 1 : pin source absent d'un statut"
 if ! python3 "${HERE}/validate_v5_campaign.py" "${WORK}/out1" cafedeca beefbeef feedf00d 0 0 > "${WORK}/v1.log" 2>&1; then
   fail "scenario 1 : validateur a refuse un happy path ($(cat "${WORK}/v1.log"))"
@@ -200,7 +201,7 @@ grep -q 'scan uniform' "${WORK}/v3c.log" || fail "scenario 3ter : le desaccord d
 
 # ---- Scenario 3quater : lane device en desaccord -> les phases CPU tournent (18 statuts) mais jamais complete.
 RC3d=$(run_campaign "${WORK}/out3d" LANE_MISM=1)
-[ "$(ls "${WORK}/out3d"/*.status 2>/dev/null | wc -l)" -eq 22 ] || fail "scenario 3quater : la lane device ne refuse pas les phases CPU"
+[ "$(ls "${WORK}/out3d"/*.status 2>/dev/null | wc -l)" -eq 23 ] || fail "scenario 3quater : la lane device ne refuse pas les phases CPU"
 if python3 "${HERE}/validate_v5_campaign.py" "${WORK}/out3d" cafedeca beefbeef feedf00d "${RC3d}" 0 > "${WORK}/v3d.log" 2>&1; then
   fail "scenario 3quater : une lane device en desaccord devait refuser complete"
 fi
@@ -212,6 +213,13 @@ if python3 "${HERE}/validate_v5_campaign.py" "${WORK}/out3e" cafedeca beefbeef f
   fail "scenario 3quinquies : un digest GPU different devait refuser complete"
 fi
 grep -q 'DIFFERENT du contrat CPU' "${WORK}/v3e.log" || fail "scenario 3quinquies : le desaccord de digest doit etre nomme"
+
+# ---- Scenario 3sexies : mutant du temoin survivant sur le device -> jamais complete.
+RC3f=$(run_campaign "${WORK}/out3f" MUTANT_SURVIVES=1)
+if python3 "${HERE}/validate_v5_campaign.py" "${WORK}/out3f" cafedeca beefbeef feedf00d "${RC3f}" 0 > "${WORK}/v3f.log" 2>&1; then
+  fail "scenario 3sexies : un mutant survivant devait refuser complete"
+fi
+grep -q 'gpu_mutant' "${WORK}/v3f.log" || fail "scenario 3sexies : le mutant doit etre nomme"
 
 # ---- Scenario 4 : code de session non nul.
 if python3 "${HERE}/validate_v5_campaign.py" "${WORK}/out1" cafedeca beefbeef feedf00d 255 0 > "${WORK}/v4.log" 2>&1; then

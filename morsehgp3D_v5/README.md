@@ -94,6 +94,11 @@ src/spindle   fuseaux W_q, boule-cœur, comptage de témoins (h_coeur/h_a/h_b)
 src/lanes     formes exactes q2/q3/q4, clés, niveaux, cover d'arête
 src/pipeline  génération → RLE → préfiltre → census → plateaux → flux
 src/forest    fold par K (macro-lots, deltas), rendu § 9.1
+src/gpu       point 2 : arithmétique portable DI128, scans « en forme de kernel » (q3, cœur et complétions q4)
+              prouvés égaux à la production sur CPU ; lanes q3/q4 par lots (étage hôte) ; kernels et
+              exécuteurs device (.cuh), témoin device (.cu) — compilés par nvcc sur G4 seulement ;
+              statut par étape (source / compilé / exécuté / mesuré / reçu) dans docs/GPU.md
+cli           mhgp5 (produit, CPU) et mhgp5_cuda (--gpu : lanes q3/q4 device ; sans mutants)
 oracle/       juge indépendant, arithmétique volontairement autre
 tests/        une porte par thème
 bench/        probes counter-only

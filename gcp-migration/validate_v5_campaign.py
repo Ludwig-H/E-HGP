@@ -19,7 +19,7 @@ FAMILIES = ("uniform", "terrain", "eight_clusters", "scanline_single_pass")
 
 
 def expected_names():
-    names = ["gpu_witness", "gpu_lane"]
+    names = ["gpu_witness", "gpu_lane", "gpu_mutant"]
     for n in (8000, 16000, 32000):
         for fam in FAMILIES:
             names.append(f"conf_{fam}_n{n}")
@@ -51,8 +51,9 @@ def main():
         if "finished=1" not in st:
             bad.append(f"{name}: status incomplet")
         m = re.search(r"^code=(\d+)$", st, re.M)
-        if not m or m.group(1) != "0":
-            bad.append(f"{name}: code={m.group(1) if m else '?'}")
+        want_code = "4" if name == "gpu_mutant" else "0"  # le mutant du temoin doit etre TUE (code 4)
+        if not m or m.group(1) != want_code:
+            bad.append(f"{name}: code={m.group(1) if m else '?'} (attendu {want_code})")
         kb = re.search(r"^peak_rss_kb=(\d+)$", st, re.M)
         if not kb or int(kb.group(1)) <= 0:
             bad.append(f"{name}: pic RSS absent ou nul")
@@ -68,7 +69,9 @@ def main():
         fb = forbidden.search(body)
         if fb:
             bad.append(f"{name}: motif interdit ({fb.group(0)})")
-        if name not in ("gpu_witness", "gpu_lane") and not counters.search(body):
+        if name == "gpu_mutant" and "DESACCORD device/hote" not in body:
+            bad.append(f"{name}: le mutant du temoin n'a pas ete tue sur le device")
+        if name not in ("gpu_witness", "gpu_lane", "gpu_mutant") and not counters.search(body):
             bad.append(f"{name}: ligne de compteurs absente")
         if name == "gpu_witness":
             if not re.search(r"^nvcc=\S+$", body, re.M) or "release 12.9" not in body:
@@ -100,7 +103,8 @@ def main():
             # Triples EXACTS famille/taille/fils, planchers (100000 candidats a
             # 8 k, seeds et morts non vides, lancements > 0), desaccords = 0,
             # et une occurrence unique de chaque triple.
-            want = {("uniform", "1200", "1"): 200, ("eight_clusters", "1200", "4"): 200, ("uniform", "8000", "8"): 100000}
+            want = {("uniform", "1200", "1"): 200, ("eight_clusters", "1200", "4"): 200, ("uniform", "8000", "8"): 100000,
+                    ("uniform", "300", "1"): 200}  # cocirculaire (coord=40) : replis exacts exerces
             for lane, cand_key in (("q3_lane_device", "candidats_q3"), ("q4_lane_device", "candidats_q4")):
                 rx = re.compile(rf"^{lane} famille=(\S+) n=(\d+) fils=(\d+) (.*) desaccords_vecteur=(\d+) desaccords_compteurs=(\d+)$", re.M)
                 seen = {}
@@ -120,8 +124,8 @@ def main():
                 for key in want:
                     if seen.get(key, 0) != 1:
                         bad.append(f"{name}: {lane} {key} — {seen.get(key, 0)} occurrence(s), une attendue")
-                if body.count(f"{lane} OK") != 3:
-                    bad.append(f"{name}: {lane} — trois OK attendus, {body.count(lane + ' OK')} vus")
+                if body.count(f"{lane} OK") != 4:
+                    bad.append(f"{name}: {lane} — quatre OK attendus, {body.count(lane + ' OK')} vus")
         if name.startswith("conf_") and not conformity.search(body):
             bad.append(f"{name}: conformite v4 non etablie")
         if name.startswith("contrat_") and not digest.search(body):

@@ -618,14 +618,15 @@ depuis le commit) → `set_max_run_duration_and_verify.sh` → clé OS Login
 absent ; un témoin non conforme **refuse** les phases suivantes ; puis la lane
 q3 device `mhgp5_q3_lane_device_gate` contre la production, run `gpu_lane`
 exigé à 0 désaccord par le validateur sans bloquer les phases CPU, portes q3
-et q4 ; phase 1 : conformité
+et q4 nominales, 8 k et cocirculaires, puis le mutant du témoin exigé en
+code 4 sur le device ; phase 1 : conformité
 `mhgp5_conformity_v4` aux tailles 8000/16000/32000 contre le reçu
 `morsehgp3D_v5/receipts/conformite_v4/digests_v4.txt` ; phase 2 : contrat
 50 000 points par `mhgp5 --digest`, 48 fils, RSS par GNU time — refusée si une
 conformité manque ; phase 3 : les mêmes contrats par `mhgp5_cuda --gpu`, dont
 `digest_all` doit être identique au contrat CPU de la même famille) → rapatriement avec reprises → `validate_v5_campaign.py`
 (seule autorité du statut) → arrêt certifié `TERMINATED` par le trap. Porte
-transactionnelle sans GCP : `selftest_campagne_v5.sh` (dix scénarios, à
+transactionnelle sans GCP : `selftest_campagne_v5.sh` (onze scénarios, à
 lancer à la main avant toute session payante ; jamais depuis la CI), dont un
 témoin device en désaccord qui doit refuser `complete`.
 

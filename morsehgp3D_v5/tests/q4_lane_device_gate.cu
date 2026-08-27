@@ -1,7 +1,7 @@
 // MorseHGP3D v5 — porte de la lane q4 DEVICE (src/gpu/q4_lane_device.cuh)
 // contre la lane q4 de production (generate_candidates, arite 4) : egalite
-// post-RLE des candidats (ordre brut a un fil) et de dix-neuf compteurs de la
-// lane q4. Planchers : --min-candidates, --min-deep. Mutant de porte
+// post-RLE des candidats (ordre brut a un fil) et de VINGT-DEUX compteurs de
+// la lane q4 (seize exiges non nuls : vacuite refusee, code 3). Planchers : --min-candidates, --min-deep. Mutant de porte
 // `q4-batched-emit-deep` : code 4. Codes : 0, 2, 3, 4.
 #include <cstdio>
 #include <string>
@@ -86,6 +86,28 @@ int main(int argc, char** argv) {
   cmp("candidates", sp.candidates[2], sb.candidates[2]);
   const char* cn[6] = {"q4_cert_pos", "q4_cert_neg", "q4_jung_kill", "q4_jung_skip", "q4_jung_fallback", "q4_float_fallback"};
   for (int i = 0; i < 6; ++i) cmp(cn[i], sp.q4_cert[i], sb.q4_cert[i]);
+  // VACUITE : les vingt-deux compteurs compares sont imprimes ; seize d'entre
+  // eux doivent etre NON NULS sur toute famille exercee (une egalite 0 = 0 ne
+  // prouve rien) — det et jung_fallback peuvent etre nuls en position generale
+  // et restent exiges par la seule famille cocirculaire (--min-deep, etc.).
+  const u64 must[16] = {sp.anchors[2], sp.anchors_killed_hist[2], sp.anchors_killed_w4, sp.seeds[1], sp.seeds_killed_core,
+                        sp.q4_completions, sp.q4_rej_lens, sp.q4_rej_owner, sp.q4_rej_once, sp.q4_rej_i64,
+                        sp.q4_rej_face_power, sp.q4_rej_center, sp.q4_cert[0], sp.q4_cert[1], sp.q4_cert[2], sp.q4_cert[3]};
+  const char* must_n[16] = {"anchors", "anchors_killed_hist", "anchors_killed_w4", "seeds", "seeds_killed_core", "completions",
+                            "rej_lens", "rej_owner", "rej_once", "rej_i64", "rej_face_power", "rej_center", "cert_pos",
+                            "cert_neg", "jung_kill", "jung_skip"};
+  u64 vacuous = 0;
+  for (int i = 0; i < 16; ++i)
+    if (must[i] == 0) { std::printf("VACUITE : %s = 0\n", must_n[i]); ++vacuous; }
+  std::printf("compteurs anchors=%llu hist=%llu w4=%llu seeds=%llu core=%llu compl=%llu lens=%llu owner=%llu once=%llu i64=%llu "
+              "face=%llu det=%llu centre=%llu profond=%llu cand=%llu cpos=%llu cneg=%llu jkill=%llu jskip=%llu jfb=%llu ffb=%llu\n",
+              (unsigned long long)sp.anchors[2], (unsigned long long)sp.anchors_killed_hist[2], (unsigned long long)sp.anchors_killed_w4,
+              (unsigned long long)sp.seeds[1], (unsigned long long)sp.seeds_killed_core, (unsigned long long)sp.q4_completions,
+              (unsigned long long)sp.q4_rej_lens, (unsigned long long)sp.q4_rej_owner, (unsigned long long)sp.q4_rej_once,
+              (unsigned long long)sp.q4_rej_i64, (unsigned long long)sp.q4_rej_face_power, (unsigned long long)sp.q4_rej_det,
+              (unsigned long long)sp.q4_rej_center, (unsigned long long)sp.depth_killed[2], (unsigned long long)sp.candidates[2],
+              (unsigned long long)sp.q4_cert[0], (unsigned long long)sp.q4_cert[1], (unsigned long long)sp.q4_cert[2],
+              (unsigned long long)sp.q4_cert[3], (unsigned long long)sp.q4_cert[4], (unsigned long long)sp.q4_cert[5]);
   auto count_mism = [](const std::vector<BallCandidate>& a, const std::vector<BallCandidate>& b) {
     u64 m = a.size() != b.size() ? 1 : 0;
     for (size_t i = 0; i < a.size() && i < b.size(); ++i)
@@ -102,7 +124,7 @@ int main(int argc, char** argv) {
               (unsigned long long)bs.max_anchor_seeds, prod.size(), batched.size(), (unsigned long long)sp.seeds[1],
               (unsigned long long)sp.seeds_killed_core, (unsigned long long)sp.q4_completions,
               (unsigned long long)sp.depth_killed[2], (unsigned long long)launches, kernel_ms, (unsigned long long)vec_mism, (unsigned long long)bad);
-  if (sp.candidates[2] < min_candidates || sp.depth_killed[2] < min_deep) {
+  if (sp.candidates[2] < min_candidates || sp.depth_killed[2] < min_deep || vacuous) {
     std::printf("PLANCHER\n");
     return 3;
   }
