@@ -148,7 +148,7 @@ gain net). Trois lectures :
    contient aucun point, donc aucun secteur (tous contiennent l'apex $v=0$)
    n'a de témoin universel et l'ancre survit alors que tous ses seeds meurent.
    C'est le chantier suivant (tests d'ancre sans apex : disque intérieur +
-   secteurs annulaires, ou index dual $(	heta, t)$ des sites par ancre) —
+   secteurs annulaires, ou index dual $(\theta, t)$ des sites par ancre) —
    avant tout kernel, parce qu'un device 50× plus rapide ne change pas un
    exposant.
 3. Le noyau device tel qu'écrit mesure `kernel_ms` = mur d'un lot y compris
