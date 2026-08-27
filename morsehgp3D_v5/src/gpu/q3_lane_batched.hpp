@@ -115,15 +115,25 @@ inline bool validate_q3_verdicts(const Q3Batch& b, std::string* why) {
 // global a plusieurs fils n'est pas specifie (tirage dynamique, fusion par
 // ouvrier), seule la sortie post-RLE l'est. Un lot = un lancement device.
 inline constexpr size_t kSeedsPerLaunch = (size_t)1 << 16;
+// Seuil de vidage en SITES (memoire : q4 materialise ~96 octets par site, par
+// ouvrier) : borne dure d'un lot = seuil + sites de la plus grosse ancre.
+inline constexpr size_t kSitesPerLaunch = (size_t)1 << 20;
+
+// Seuils de lot (seeds et sites) — l'un ou l'autre declenche le vidage.
+struct BatchLimits {
+  size_t seeds = kSeedsPerLaunch;
+  size_t sites = kSitesPerLaunch;
+};
 
 // Mesures de lotissement d'une lane (par ouvrier, fusionnees par max/somme).
 struct BatchStats {
-  u64 flushes = 0, max_lot_seeds = 0, max_anchor_seeds = 0, max_lot_sites = 0;
+  u64 flushes = 0, max_lot_seeds = 0, max_anchor_seeds = 0, max_lot_sites = 0, max_anchor_sites = 0;
   void add_from(const BatchStats& o) {
     flushes += o.flushes;
     max_lot_seeds = std::max(max_lot_seeds, o.max_lot_seeds);
     max_anchor_seeds = std::max(max_anchor_seeds, o.max_anchor_seeds);
     max_lot_sites = std::max(max_lot_sites, o.max_lot_sites);
+    max_anchor_sites = std::max(max_anchor_sites, o.max_anchor_sites);
   }
 };
 
@@ -132,7 +142,7 @@ struct BatchStats {
 // Compte anchors/anchors_killed_hist/seeds comme la lane de production.
 template <class Flush>
 inline void build_q3_batch(const CloudIndex& ix, const AliveRect& ar, const u64 h_of[3], bool float_on,
-                           generate_detail::AnchorScratch& sc, Q3Batch* b, GenerateStats* ls, size_t threshold,
+                           generate_detail::AnchorScratch& sc, Q3Batch* b, GenerateStats* ls, const BatchLimits& lim,
                            BatchStats* bs, Flush&& flush) {
   using namespace generate_detail;
   corner_histograms(ix, Lane::kQ3, ar.r, &sc.ha, &sc.hb);
@@ -188,7 +198,8 @@ inline void build_q3_batch(const CloudIndex& ix, const AliveRect& ar, const u64 
       if (aidx != std::numeric_limits<u32>::max()) {
         const u64 anchor_seeds = (u64)b->seeds.size() - seeds_before;
         bs->max_anchor_seeds = std::max(bs->max_anchor_seeds, anchor_seeds);
-        if (b->seeds.size() >= threshold) flush();
+        bs->max_anchor_sites = std::max(bs->max_anchor_sites, (u64)sc.cover.size());
+        if (b->seeds.size() >= lim.seeds || b->u0.size() >= lim.sites) flush();
       }
     }
 }
@@ -240,10 +251,10 @@ inline void emit_q3_batch(const Q3Batch& b, std::vector<BallCandidate>* lo, Gene
 // ajoutes a `out`, stats cumulees).
 template <class Scan>
 inline void generate_q3_batched_with(const CloudIndex& ix, const GenerateOptions& opt, std::vector<BallCandidate>* out,
-                                     GenerateStats* st, Scan&& scan, size_t seeds_per_launch = kSeedsPerLaunch,
+                                     GenerateStats* st, Scan&& scan, BatchLimits lim = BatchLimits{},
                                      BatchStats* batch_stats = nullptr) {
   using namespace generate_detail;
-  if (seeds_per_launch < 1) throw std::invalid_argument("seeds_per_launch < 1");
+  if (lim.seeds < 1 || lim.sites < 1) throw std::invalid_argument("seuils de lot < 1");
   const bool float_on = float_filter_runtime_enabled();
   const bool nonstrict = MHGP5_MUTANT("genfilter-nonstrict");
   const u64 h_of[3] = {lane_h(Lane::kQ2, opt.smax), lane_h(Lane::kQ3, opt.smax), lane_h(Lane::kQ4, opt.smax)};
@@ -273,7 +284,7 @@ inline void generate_q3_batched_with(const CloudIndex& ix, const GenerateOptions
     lb[t].clear();
   };
   const size_t created = parallel_items(nrect, (int)T, [&](size_t i, size_t t) {
-    build_q3_batch(ix, alive[i], h_of, float_on, lsc[t], &lb[t], &lst[t], seeds_per_launch, &lbs[t], [&] { flush(t); });
+    build_q3_batch(ix, alive[i], h_of, float_on, lsc[t], &lb[t], &lst[t], lim, &lbs[t], [&] { flush(t); });
   });
   for (size_t t = 0; t < T; ++t) flush(t);
   st->workers_rects[1] = std::max(st->workers_rects[1], (u64)created);
@@ -288,9 +299,9 @@ inline void generate_q3_batched_with(const CloudIndex& ix, const GenerateOptions
 }
 
 inline void generate_q3_batched(const CloudIndex& ix, const GenerateOptions& opt, std::vector<BallCandidate>* out,
-                                GenerateStats* st, size_t seeds_per_launch = kSeedsPerLaunch, BatchStats* bs = nullptr) {
+                                GenerateStats* st, BatchLimits lim = BatchLimits{}, BatchStats* bs = nullptr) {
   generate_q3_batched_with(ix, opt, out, st, [](Q3Batch* b, u32 h3, bool nonstrict) { scan_q3_batch_host(b, h3, nonstrict); },
-                           seeds_per_launch, bs);
+                           lim, bs);
 }
 
 }  // namespace mhgp5

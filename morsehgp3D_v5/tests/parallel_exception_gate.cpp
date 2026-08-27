@@ -61,7 +61,7 @@ int main() {
       generate_q3_batched_with(ix, opt, &out, &st, [&](Q3Batch* b, u32 h3, bool ns) {
         if (++lots == 2) throw std::runtime_error("executeur lot 2");
         scan_q3_batch_host(b, h3, ns);
-      }, 500);
+      }, BatchLimits{500, kSitesPerLaunch});
     } catch (const std::runtime_error& e) {
       caught = std::string(e.what()) == "executeur lot 2";
     }
@@ -77,7 +77,7 @@ int main() {
     bool caught = false;
     try {
       generate_q3_batched_with(ix, opt, &out, &st, [&](Q3Batch*, u32, bool) { throw std::runtime_error("vidage final"); },
-                               (size_t)1 << 40);
+                               BatchLimits{(size_t)1 << 40, (size_t)1 << 40});
     } catch (const std::runtime_error& e) {
       caught = std::string(e.what()) == "vidage final";
     }

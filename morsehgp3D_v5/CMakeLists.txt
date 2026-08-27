@@ -330,6 +330,8 @@ mhgp5_gate(mhgp5_q3_lane_batched_petit_lot 0 mhgp5_q3_lane_batched_gate "--famil
 mhgp5_gate(mhgp5_q4_lane_batched_petit_lot 0 mhgp5_q4_lane_batched_gate "--family=uniform --n=400 --threads=1 --seeds-per-launch=1000 --min-candidates=200 --min-flushes=100")
 mhgp5_gate(mhgp5_q3_lane_batched_seuil_zero 2 mhgp5_q3_lane_batched_gate "--family=uniform --n=400 --seeds-per-launch=0")
 mhgp5_gate(mhgp5_q4_lane_batched_seuil_negatif 2 mhgp5_q4_lane_batched_gate "--family=uniform --n=400 --seeds-per-launch=-1")
+mhgp5_gate(mhgp5_q4_lane_batched_petit_lot_sites 0 mhgp5_q4_lane_batched_gate "--family=uniform --n=400 --threads=2 --sites-per-launch=20000 --min-candidates=200 --min-flushes=50")
+mhgp5_gate(mhgp5_q3_lane_batched_petit_lot_sites 0 mhgp5_q3_lane_batched_gate "--family=uniform --n=400 --threads=2 --sites-per-launch=20000 --min-candidates=200 --min-flushes=50")
 mhgp5_gate(mhgp5_q3_lane_batched_uniform_8000 0 mhgp5_q3_lane_batched_gate "--family=uniform --n=8000 --threads=8 --min-candidates=100000" LABELS scale8000 TIMEOUT 1800)
 
 # ---- Temoin device (docs/GPU.md, livraison 3) — nvcc seulement -------------------------

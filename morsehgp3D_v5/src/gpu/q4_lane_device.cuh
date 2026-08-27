@@ -259,7 +259,7 @@ class Q4DeviceExecutor {
 };
 
 inline void generate_q4_device(const CloudIndex& ix, const GenerateOptions& opt, std::vector<BallCandidate>* out,
-                               GenerateStats* st, double* kernel_ms, u64* launches, size_t seeds_per_launch = kSeedsPerLaunch,
+                               GenerateStats* st, double* kernel_ms, u64* launches, BatchLimits lim = BatchLimits{},
                                BatchStats* bs = nullptr) {
   std::mutex mu;
   generate_q4_batched_with(ix, opt, out, st, [&](Q4Batch* b, u32 h4, bool cn, bool dn, bool nc) {
@@ -270,7 +270,7 @@ inline void generate_q4_device(const CloudIndex& ix, const GenerateOptions& opt,
     std::lock_guard<std::mutex> lk(mu);
     *kernel_ms += ex.kernel_ms_total - before_ms;
     *launches += ex.launches - before_l;
-  }, seeds_per_launch, bs);
+  }, lim, bs);
 }
 #endif  // __CUDACC__
 

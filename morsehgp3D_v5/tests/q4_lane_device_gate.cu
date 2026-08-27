@@ -15,7 +15,7 @@ using namespace mhgp5;
 int main(int argc, char** argv) {
   CloudFamily family = CloudFamily::kUniform;
   int n = 400, coord = 0, threads = 1;
-  size_t spl = kSeedsPerLaunch;
+  BatchLimits lim;
   u64 min_flushes = 1;
   BatchStats bs;
   u64 min_candidates = 1000, min_deep = 100;
@@ -32,7 +32,11 @@ int main(int argc, char** argv) {
     else if (arg.rfind("--seeds-per-launch=", 0) == 0) {
       const long long v = std::atoll(arg.c_str() + 19);
       if (v < 1) return 2;
-      spl = (size_t)v;
+      lim.seeds = (size_t)v;
+    } else if (arg.rfind("--sites-per-launch=", 0) == 0) {
+      const long long v = std::atoll(arg.c_str() + 19);
+      if (v < 1) return 2;
+      lim.sites = (size_t)v;
     } else if (arg.rfind("--min-flushes=", 0) == 0) min_flushes = (u64)std::atoll(arg.c_str() + 14);
     else return 2;
   }
@@ -56,7 +60,7 @@ int main(int argc, char** argv) {
   double kernel_ms = 0;
   u64 launches = 0;
   try {
-    gpu::generate_q4_device(ix, opt, &batched, &sb, &kernel_ms, &launches, spl, &bs);
+    gpu::generate_q4_device(ix, opt, &batched, &sb, &kernel_ms, &launches, lim, &bs);
   } catch (const std::exception& e) {
     std::fprintf(stderr, "REFUS : %s\n", e.what());
     return 2;
@@ -118,17 +122,17 @@ int main(int argc, char** argv) {
   rle_candidates(&prod, 1);
   rle_candidates(&batched, 1);
   vec_mism += count_mism(prod, batched);
-  std::printf("q4_lane_device famille=%s n=%d fils=%d seuil=%zu vidages=%llu max_lot_seeds=%llu max_ancre_seeds=%llu candidats_q4=%zu candidats_lots=%zu seeds=%llu coeur_tues=%llu completions=%llu "
+  std::printf("q4_lane_device famille=%s n=%d fils=%d seuil_seeds=%zu seuil_sites=%zu vidages=%llu max_lot_seeds=%llu max_ancre_seeds=%llu max_lot_sites=%llu max_ancre_sites=%llu candidats_q4=%zu candidats_lots=%zu seeds=%llu coeur_tues=%llu completions=%llu "
               "profonds=%llu lancements=%llu kernel_ms=%.1f desaccords_vecteur=%llu desaccords_compteurs=%llu\n",
-              cloud_family_name(family), n, threads, spl, (unsigned long long)bs.flushes, (unsigned long long)bs.max_lot_seeds,
-              (unsigned long long)bs.max_anchor_seeds, prod.size(), batched.size(), (unsigned long long)sp.seeds[1],
+              cloud_family_name(family), n, threads, lim.seeds, lim.sites, (unsigned long long)bs.flushes, (unsigned long long)bs.max_lot_seeds,
+              (unsigned long long)bs.max_anchor_seeds, (unsigned long long)bs.max_lot_sites, (unsigned long long)bs.max_anchor_sites, prod.size(), batched.size(), (unsigned long long)sp.seeds[1],
               (unsigned long long)sp.seeds_killed_core, (unsigned long long)sp.q4_completions,
               (unsigned long long)sp.depth_killed[2], (unsigned long long)launches, kernel_ms, (unsigned long long)vec_mism, (unsigned long long)bad);
   if (sp.candidates[2] < min_candidates || sp.depth_killed[2] < min_deep || vacuous) {
     std::printf("PLANCHER\n");
     return 3;
   }
-  if (bs.max_lot_seeds > (u64)spl + bs.max_anchor_seeds || bs.flushes < min_flushes || launches < 1) {
+  if (bs.max_lot_seeds > (u64)lim.seeds + bs.max_anchor_seeds || bs.max_lot_sites > (u64)lim.sites + bs.max_anchor_sites || bs.flushes < min_flushes || launches < 1) {
     std::printf("LOTISSEMENT : borne ou vidages ou lancements hors contrat\n");
     return 1;
   }

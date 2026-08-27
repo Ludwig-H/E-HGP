@@ -168,7 +168,7 @@ inline bool validate_q4_results(const Q4Batch& b, std::string* why) { return val
 // anchors_killed_hist, anchors_killed_w4, seeds comme la lane de production.
 template <class Flush>
 inline void build_q4_batch(const CloudIndex& ix, const AliveRect& ar, const u64 h_of[3], bool float_on, i64 cover_coef,
-                           generate_detail::AnchorScratch& sc, Q4Batch* b, GenerateStats* ls, size_t threshold,
+                           generate_detail::AnchorScratch& sc, Q4Batch* b, GenerateStats* ls, const BatchLimits& lim,
                            BatchStats* bs, Flush&& flush) {
   using namespace generate_detail;
   corner_histograms(ix, Lane::kQ4, ar.r, &sc.ha, &sc.hb);
@@ -262,7 +262,8 @@ inline void build_q4_batch(const CloudIndex& ix, const AliveRect& ar, const u64 
         continue;
       }
       bs->max_anchor_seeds = std::max(bs->max_anchor_seeds, (u64)(b->seeds.size() - seeds_before));
-      if (b->seeds.size() >= threshold) flush();
+      bs->max_anchor_sites = std::max(bs->max_anchor_sites, (u64)nc);
+      if (b->seeds.size() >= lim.seeds || b->u0.size() >= lim.sites) flush();
     }
 }
 
@@ -356,10 +357,10 @@ inline void emit_q4_batch(const Q4Batch& b, std::vector<BallCandidate>* lo, Gene
 
 template <class Scan>
 inline void generate_q4_batched_with(const CloudIndex& ix, const GenerateOptions& opt, std::vector<BallCandidate>* out,
-                                     GenerateStats* st, Scan&& scan, size_t seeds_per_launch = kSeedsPerLaunch,
+                                     GenerateStats* st, Scan&& scan, BatchLimits lim = BatchLimits{},
                                      BatchStats* batch_stats = nullptr) {
   using namespace generate_detail;
-  if (seeds_per_launch < 1) throw std::invalid_argument("seeds_per_launch < 1");
+  if (lim.seeds < 1 || lim.sites < 1) throw std::invalid_argument("seuils de lot < 1");
   const bool float_on = float_filter_runtime_enabled();
   const bool depth_nonstrict = MHGP5_MUTANT("genfilter-nonstrict");
   const bool core_nonstrict = MHGP5_MUTANT("q4-seed-core-nonstrict");
@@ -389,7 +390,7 @@ inline void generate_q4_batched_with(const CloudIndex& ix, const GenerateOptions
     lb[t].clear();
   };
   const size_t created = parallel_items(nrect, (int)T, [&](size_t i, size_t t) {
-    build_q4_batch(ix, alive[i], h_of, float_on, cover_coef, lsc[t], &lb[t], &lst[t], seeds_per_launch, &lbs[t], [&] { flush(t); });
+    build_q4_batch(ix, alive[i], h_of, float_on, cover_coef, lsc[t], &lb[t], &lst[t], lim, &lbs[t], [&] { flush(t); });
   });
   for (size_t t = 0; t < T; ++t) flush(t);
   st->workers_rects[2] = std::max(st->workers_rects[2], (u64)created);
@@ -404,10 +405,10 @@ inline void generate_q4_batched_with(const CloudIndex& ix, const GenerateOptions
 }
 
 inline void generate_q4_batched(const CloudIndex& ix, const GenerateOptions& opt, std::vector<BallCandidate>* out,
-                                GenerateStats* st, size_t seeds_per_launch = kSeedsPerLaunch, BatchStats* bs = nullptr) {
+                                GenerateStats* st, BatchLimits lim = BatchLimits{}, BatchStats* bs = nullptr) {
   generate_q4_batched_with(ix, opt, out, st, [](Q4Batch* b, u32 h4, bool cn, bool dn, bool nc) {
     scan_q4_batch_host(b, h4, cn, dn, nc);
-  }, seeds_per_launch, bs);
+  }, lim, bs);
 }
 
 }  // namespace mhgp5
