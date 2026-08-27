@@ -61,6 +61,7 @@ struct GenerateStats {
   u64 q4_completions = 0, q4_rej_lens = 0, q4_rej_owner = 0, q4_rej_once = 0, q4_rej_i64 = 0,
       q4_rej_face_power = 0, q4_rej_det = 0, q4_rej_center = 0;
   u64 float_cert_neg = 0, float_cert_pos = 0, float_fallback = 0;
+  u64 q3_cert[3] = {0, 0, 0};  // certifications de la lane q3 seule (neg, pos, repli) — contrat de la lane par lots
   u64 jung_cert_kill = 0, jung_cert_skip = 0, jung_fallback = 0;
   u64 workers_wspd[3] = {0, 0, 0};
   u64 workers_rects[3] = {0, 0, 0};
@@ -88,6 +89,7 @@ struct GenerateStats {
     float_cert_neg += o.float_cert_neg;
     float_cert_pos += o.float_cert_pos;
     float_fallback += o.float_fallback;
+    for (int i = 0; i < 3; ++i) q3_cert[i] += o.q3_cert[i];
     jung_cert_kill += o.jung_cert_kill;
     jung_cert_skip += o.jung_cert_skip;
     jung_fallback += o.jung_fallback;
@@ -348,12 +350,15 @@ inline void generate_candidates(const CloudIndex& ix, const GenerateOptions& opt
               bool interior;
               if (lh < -seed.bound) {
                 ++ls->float_cert_neg;
+                ++ls->q3_cert[0];
                 interior = true;
               } else if (lh > seed.bound) {
                 ++ls->float_cert_pos;
+                ++ls->q3_cert[1];
                 interior = false;
               } else {
                 ++ls->float_fallback;
+                ++ls->q3_cert[2];
                 const i128 L = seed.l_exact(sc, iz);
                 interior = L < 0 || (genfilter_nonstrict && L <= 0);
               }

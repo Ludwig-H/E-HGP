@@ -82,5 +82,19 @@ en blocs.
    Plancher : 1000 seeds par famille.
 4. **Kernel q3** (warp-par-seed) + porte d'égalité device/CPU post-RLE sur
    G4 ; puis **kernel q4** (W_4, cœur de seed avec repli CPU, complétions).
+   **Étage hôte livré** : `src/gpu/q3_lane_batched.hpp` — pour chaque
+   rectangle vivant, `build_q3_batch` forme les tableaux plats (sites SoA par
+   ancre survivante, seeds avec forme affine `SeedAffineD` et candidat prêt à
+   émettre), un *exécuteur* rend un verdict par seed (`scan_q3_batch_host`,
+   boucle plate sur `q3_scan_seed_shaped` ; le kernel `k_scan` du témoin
+   device remplit le même contrat), `emit_q3_batch` émet dans l'ordre.
+   `mhgp5_q3_lane_batched_gate` : égalité vecteur à vecteur avec la lane de
+   production (ordre brut à un fil, post-RLE à plusieurs fils) et égalité des
+   compteurs (`q3_cert[3]` ajoutés à `GenerateStats`, comptés par la lane q3
+   seule) sur `uniform`/`eight_clusters`/`terrain` 1200, cocirculaire 300 et
+   `uniform` 8000 (1 425 821 candidats, 35,4 M seeds, 0 désaccord) ; mutant
+   `q3-batched-emit-dead` tué. Ce qui reste : brancher `k_scan` comme
+   exécuteur (transferts par lots de rectangles, flux asynchrone) et prouver
+   l'égalité post-RLE device/hôte sur G4.
 5. Mesure par banc apparié CPU 48 fils / GPU sur `eight_clusters` 50 000 ;
    reçu ; jamais un claim.

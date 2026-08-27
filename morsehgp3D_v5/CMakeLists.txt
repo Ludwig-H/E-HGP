@@ -279,6 +279,15 @@ mhgp5_gate(mhgp5_q3_scan_shaped_clusters 0 mhgp5_q3_scan_shaped_gate "--family=e
 mhgp5_gate(mhgp5_q3_scan_shaped_cocirc 0 mhgp5_q3_scan_shaped_gate "--family=uniform --n=300 --coord=40 --min-seeds=500 --min-fallback=100")
 mhgp5_gate(mhgp5_q3_scan_shaped_mutant_flip 4 mhgp5_q3_scan_shaped_gate "--family=uniform --n=300 --coord=40 --inject=q3-shaped-strict-flip")
 
+# Lane q3 par lots (etage hote de la lane device) : egalite vecteur a vecteur avec la production.
+mhgp5_executable(mhgp5_q3_lane_batched_gate tests/q3_lane_batched_gate.cpp)
+mhgp5_gate(mhgp5_q3_lane_batched_uniform 0 mhgp5_q3_lane_batched_gate "--family=uniform --n=1200 --threads=3")
+mhgp5_gate(mhgp5_q3_lane_batched_clusters 0 mhgp5_q3_lane_batched_gate "--family=eight_clusters --n=1200 --threads=3")
+mhgp5_gate(mhgp5_q3_lane_batched_terrain 0 mhgp5_q3_lane_batched_gate "--family=terrain --n=1200 --threads=2")
+mhgp5_gate(mhgp5_q3_lane_batched_cocirc 0 mhgp5_q3_lane_batched_gate "--family=uniform --n=300 --coord=40 --min-candidates=200 --min-fallback=100")
+mhgp5_gate(mhgp5_q3_lane_batched_mutant_dead 4 mhgp5_q3_lane_batched_gate "--family=uniform --n=400 --min-candidates=200 --inject=q3-batched-emit-dead")
+mhgp5_gate(mhgp5_q3_lane_batched_uniform_8000 0 mhgp5_q3_lane_batched_gate "--family=uniform --n=8000 --threads=8 --min-candidates=100000" LABELS scale8000 TIMEOUT 1800)
+
 # ---- Temoin device (docs/GPU.md, livraison 3) — nvcc seulement -------------------------
 if(MHGP5_ENABLE_CUDA)
   if(MHGP5_ENABLE_SANITIZERS)
