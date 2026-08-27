@@ -84,8 +84,8 @@ Les verrous encore visibles sont les suivants :
   override vide peut rendre `complete_regular`, les callbacks restent
   publiables, et la sortie imprime à la fois `authority=status_terminal` et
   `backend=override_experimental (... non autoritaire)`. Définir une autorité
-  machine-readable unique, la propager aux callbacks et la faire vérifier par
-  les campagnes.
+  machine-readable unique, orthogonale au statut, la propager aux callbacks et
+  la faire vérifier par les campagnes.
 
 Ce commit n'a pas été compilé ni exécuté par cet audit, conformément à la
 consigne de ne pas lancer de tests. Il ne modifie donc pas encore le verdict du
@@ -214,10 +214,15 @@ conserve un bypass `emit_eq=false`. La revue statique ci-dessus est l'état à
 fermer ; ne pas dupliquer une seconde liste de mutants ici.
 
 À la frontière produit, les `LaneOverride` publics peuvent ne rien émettre et
-laisser malgré tout le pipeline atteindre un statut terminal. Sceller ces
-callbacks comme backend interne, ou rendre toute sortie externe explicitement
-expérimentale et non autoritative. Un callback vide ne doit pas pouvoir produire
-`complete_regular`.
+laisser malgré tout le pipeline atteindre un statut terminal. Décision pour la
+question de Claude : **pas de refus dur du seul fait qu'un override existe**.
+Conserver `PipelineStatus::kCompleteRegular` pour l'exécution transactionnelle,
+mais ajouter un axe distinct, par exemple
+`ResultAuthority::kCpuReference | kExperimentalOverride`. Un override vide peut
+donc terminer expérimentalement, mais jamais s'annoncer
+`authority=status_terminal/reference`. Propager cette autorité à `on_forest`
+ou employer un callback expérimental distinct ; le validateur de campagne
+compare les sorties sans les promouvoir en référence.
 
 ## P1 preuve — rendre la prochaine campagne terminale
 
