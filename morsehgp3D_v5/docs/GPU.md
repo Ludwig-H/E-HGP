@@ -64,37 +64,52 @@ en blocs.
    de production à n = 400/1200 — **livré** (`src/gpu/q3_scan_shaped.hpp`,
    `mhgp5_q3_scan_shaped_gate` : 0 désaccord, mutant `q3-shaped-strict-flip`
    tué).
-3. **Option CMake `MHGP5_ENABLE_CUDA`** (OFF par défaut, sm_120 comme le
-   produit, `-fmad=false` pour qu'aucune contraction n'altère la séquence
-   figée du filtre flottant), cible `mhgp5_device_witness`
-   (`src/gpu/device_witness.cu`) — **écrit, pas encore compilé** : aucun
-   `nvcc` local, la compilation et l'exécution ont lieu sur G4 en **phase 0**
-   de `gcp-migration/v5_campaign_remote.sh` (run `gpu_witness`, exigé à
-   code 0 par `validate_v5_campaign.py` ; `nvcc` absent ⇒ code 2 gravé, jamais
-   un vert de complaisance). Le témoin exécute sur le device (a) 2^18 tirages
-   d'arithmétique DI128 plus les bords, (b) le scan q3 **warp-par-seed** (les
-   32 fils balaient les sites, `__ballot_sync`/`__popc` comptent les
-   intérieurs, la sortie anticipée à h3 est reproduite en retirant la
-   contribution des sites au-delà du h3-ième intérieur) sur toutes les seeds
-   des ancres survivantes d'`uniform` et `eight_clusters` à n = 400 ; les
-   verdicts mort/vivant et les compteurs de certification sont comparés bit
-   à bit au scan shaped CPU (lui-même égal à la lane de production).
-   Plancher : 1000 seeds par famille.
-4. **Kernel q3** (warp-par-seed) + porte d'égalité device/CPU post-RLE sur
-   G4 ; puis **kernel q4** (W_4, cœur de seed avec repli CPU, complétions).
-   **Étage hôte livré** : `src/gpu/q3_lane_batched.hpp` — pour chaque
-   rectangle vivant, `build_q3_batch` forme les tableaux plats (sites SoA par
-   ancre survivante, seeds avec forme affine `SeedAffineD` et candidat prêt à
-   émettre), un *exécuteur* rend un verdict par seed (`scan_q3_batch_host`,
-   boucle plate sur `q3_scan_seed_shaped` ; le kernel `k_scan` du témoin
-   device remplit le même contrat), `emit_q3_batch` émet dans l'ordre.
-   `mhgp5_q3_lane_batched_gate` : égalité vecteur à vecteur avec la lane de
-   production (ordre brut à un fil, post-RLE à plusieurs fils) et égalité des
-   compteurs (`q3_cert[3]` ajoutés à `GenerateStats`, comptés par la lane q3
-   seule) sur `uniform`/`eight_clusters`/`terrain` 1200, cocirculaire 300 et
-   `uniform` 8000 (1 425 821 candidats, 35,4 M seeds, 0 désaccord) ; mutant
-   `q3-batched-emit-dead` tué. Ce qui reste : brancher `k_scan` comme
-   exécuteur (transferts par lots de rectangles, flux asynchrone) et prouver
-   l'égalité post-RLE device/hôte sur G4.
-5. Mesure par banc apparié CPU 48 fils / GPU sur `eight_clusters` 50 000 ;
-   reçu ; jamais un claim.
+3. **Option CMake `MHGP5_ENABLE_CUDA`** (OFF par défaut, sm_120 fixé avant
+   `enable_language`, `-fmad=false`, options GCC bornées à CXX et relayées par
+   `-Xcompiler`), cible `mhgp5_device_witness` (`src/gpu/device_witness.cu`)
+   — **prouvé sur G4** (session `24b3f164`, reçu
+   `receipts/campagne_g4_v5_20260827_temoin_device`, RTX PRO 6000 Blackwell
+   sm 12.0, CUDA 12.9.41, pilote 580.173) : 262 144 cas d'arithmétique DI128
+   + bords, 0 désaccord ; scan q3 **warp-par-seed** (`__ballot_sync`/`__popc`,
+   sortie anticipée à h3 reproduite jusque dans les compteurs des seeds
+   mortes) sur 728 347 seeds (`uniform` 400) et 2 308 366 seeds
+   (`eight_clusters` 400), 0 désaccord ; mutant `witness-no-warp-correction`
+   tué. Le protocole de campagne exécute ce témoin en **phase 0** et refuse
+   les phases CPU s'il n'est pas conforme ; le validateur exige les deux
+   familles, leurs planchers et `desaccords=0`. Les deux sessions
+   précédentes (`9762daaf`, `50fee05c`) ont été refusées — journaux non
+   rapatriés, puis erreurs de compilation réelles (ponts `__int128` cachés à
+   la passe device, `edge_key` hôte appelé depuis une fonction HD, sm_52 par
+   défaut) — et sont gravées comme telles.
+4. **Kernel q3** (`src/gpu/q3_scan_kernel.cuh`, partagé par le témoin et la
+   lane) + **lane q3 device** (`src/gpu/q3_lane_device.cuh` : exécuteur par
+   fil, tampons croissants, flux, un lancement par lot) — **prouvée égale à
+   la production sur G4** (`mhgp5_q3_lane_device_gate`, run `gpu_lane` du
+   même reçu) : `uniform` 1200 (176 245 candidats, 3,37 M seeds),
+   `eight_clusters` 1200 à 4 fils (25,65 M seeds), `uniform` 8000 à 8 fils
+   (1 425 821 candidats, 35,4 M seeds) — 0 désaccord vectoriel post-RLE, 0
+   désaccord de compteurs (`q3_cert`). **Pas encore rapide** : un lot = un
+   rectangle, soit 645 636 lancements pour 35,4 M seeds à 8000 (55 seeds par
+   lancement, 6,6 s de kernel) ; le lotissement multi-rectangles est la
+   livraison 5.
+   Étage hôte (CPU, prouvé) : `q3_lane_batched.hpp`
+   (`generate_q3_batched_with<Scan>`), `mhgp5_q3_lane_batched_gate`
+   (égalité vecteur à vecteur, ordre brut à un fil, post-RLE à plusieurs).
+   **q4 en forme de kernel, prouvé sur CPU** : `q4_core_shaped.hpp` (cœur de
+   seed de Jung : `mhgp5_q4_core_shaped_gate`, 0 désaccord par seed sur
+   508 979 / 936 824 / 326 836 seeds, replis exacts exercés par la famille
+   cocirculaire), `q4_completion_shaped.hpp` (complétions + Cramer +
+   bien-centrage + profondeur avec `Q4FormD` : `mhgp5_q4_completion_shaped_gate`,
+   0 désaccord d'étage sur 3,99 M / 6,25 M / 2,61 M paires, formes `det`/`N'`
+   identiques i128 ↔ DI128), `q4_lane_batched.hpp` (étage hôte complet :
+   `mhgp5_q4_lane_batched_gate`, égalité post-RLE et **dix-neuf compteurs**
+   avec la production, 1200 × trois familles, cocirculaire, ordre brut à un
+   fil, 8000 à 8 fils). Mutants tués : `q4-shaped-jung-skip-kills`,
+   `q4-shaped-once-flip`, `q4-batched-emit-deep`. Reste : l'exécuteur device
+   q4 (kernel cœur warp-par-seed ; complétions thread-par-paire avec
+   compaction ; profondeur warp-par-candidat) et sa porte sur G4.
+5. **Lotissement et mesure** : regrouper les rectangles d'un ouvrier en lots
+   de plusieurs dizaines de milliers de seeds par lancement (l'ordre
+   d'émission est préservé : un ouvrier traite ses rectangles en séquence),
+   flux asynchrone, puis banc apparié CPU 48 fils / GPU sur `eight_clusters`
+   et `scanline_single_pass` 50 000 ; reçu ; jamais un claim.

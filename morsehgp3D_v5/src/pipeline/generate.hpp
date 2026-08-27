@@ -62,6 +62,7 @@ struct GenerateStats {
       q4_rej_face_power = 0, q4_rej_det = 0, q4_rej_center = 0;
   u64 float_cert_neg = 0, float_cert_pos = 0, float_fallback = 0;
   u64 q3_cert[3] = {0, 0, 0};  // certifications de la lane q3 seule (neg, pos, repli) — contrat de la lane par lots
+  u64 q4_cert[6] = {0, 0, 0, 0, 0, 0};  // lane q4 seule : cert_pos, cert_neg, jung_kill, jung_skip, jung_fallback, float_fallback
   u64 jung_cert_kill = 0, jung_cert_skip = 0, jung_fallback = 0;
   u64 workers_wspd[3] = {0, 0, 0};
   u64 workers_rects[3] = {0, 0, 0};
@@ -90,6 +91,7 @@ struct GenerateStats {
     float_cert_pos += o.float_cert_pos;
     float_fallback += o.float_fallback;
     for (int i = 0; i < 3; ++i) q3_cert[i] += o.q3_cert[i];
+    for (int i = 0; i < 6; ++i) q4_cert[i] += o.q4_cert[i];
     jung_cert_kill += o.jung_cert_kill;
     jung_cert_skip += o.jung_cert_skip;
     jung_fallback += o.jung_fallback;
@@ -454,29 +456,35 @@ inline void generate_candidates(const CloudIndex& ix, const GenerateOptions& opt
                 const double lh = seed.l_hat(sc, iz);
                 if (lh > seed.bound) {
                   ++ls->float_cert_pos;
+                  ++ls->q4_cert[0];
                   continue;  // P > 0 certifie : jamais temoin
                 }
                 if (lh < -seed.bound) {
                   ++ls->float_cert_neg;
+                  ++ls->q4_cert[1];
                   const P3& pz = ix.upos[(size_t)cz.u];
                   const i64 Bz = p3_dot(nrm, p3_sub(pz, f3s.a));
                   const int js = jung_interval_sign(lh, seed.bound, Jlo, Jhi, Bz);
                   if (js != 0) {
                     if (js > 0) {
                       ++ls->jung_cert_kill;
+                      ++ls->q4_cert[2];
                       if (++fcount >= h_of[2]) break;
                     } else {
                       ++ls->jung_cert_skip;
+                      ++ls->q4_cert[3];
                     }
                     continue;
                   }
                   ++ls->jung_fallback;
+                  ++ls->q4_cert[4];
                   const i128 Pz = seed.l_exact(sc, iz) / 4;
                   const int c = cmp_2p2_jb2(Pz, Jb, Bz);
                   if ((seed_core_nonstrict ? (c >= 0) : (c > 0)) && ++fcount >= h_of[2]) break;
                   continue;
                 }
                 ++ls->float_fallback;
+                ++ls->q4_cert[5];
                 const i128 Pz = seed.l_exact(sc, iz) / 4;
                 if (seed_core_nonstrict ? (Pz > 0) : (Pz >= 0)) continue;
                 const P3& pz = ix.upos[(size_t)cz.u];

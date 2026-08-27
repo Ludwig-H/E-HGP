@@ -1,0 +1,6 @@
+q3_lane_device famille=uniform n=1200 fils=1 candidats_q3=176245 seeds=3373964 tues=3197714 replis=768646 lancements=76816 kernel_ms=491.4 desaccords_vecteur=0 desaccords_compteurs=0
+q3_lane_device OK
+q3_lane_device famille=eight_clusters n=1200 fils=4 candidats_q3=132902 seeds=25654567 tues=25521662 replis=747690 lancements=56463 kernel_ms=542.7 desaccords_vecteur=0 desaccords_compteurs=0
+q3_lane_device OK
+q3_lane_device famille=uniform n=8000 fils=8 candidats_q3=1425821 seeds=35431544 tues=34005697 replis=6337898 lancements=645636 kernel_ms=6568.7 desaccords_vecteur=0 desaccords_compteurs=0
+q3_lane_device OK

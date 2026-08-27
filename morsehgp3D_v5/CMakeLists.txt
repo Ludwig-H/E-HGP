@@ -310,6 +310,16 @@ mhgp5_gate(mhgp5_q3_lane_batched_clusters 0 mhgp5_q3_lane_batched_gate "--family
 mhgp5_gate(mhgp5_q3_lane_batched_terrain 0 mhgp5_q3_lane_batched_gate "--family=terrain --n=1200 --threads=2")
 mhgp5_gate(mhgp5_q3_lane_batched_cocirc 0 mhgp5_q3_lane_batched_gate "--family=uniform --n=300 --coord=40 --min-candidates=200 --min-fallback=100")
 mhgp5_gate(mhgp5_q3_lane_batched_mutant_dead 4 mhgp5_q3_lane_batched_gate "--family=uniform --n=400 --min-candidates=200 --inject=q3-batched-emit-dead")
+# Lane q4 par lots (etage hote de la lane q4 device) : egalite post-RLE et dix-neuf compteurs.
+mhgp5_executable(mhgp5_q4_lane_batched_gate tests/q4_lane_batched_gate.cpp)
+mhgp5_gate(mhgp5_q4_lane_batched_uniform 0 mhgp5_q4_lane_batched_gate "--family=uniform --n=1200 --threads=3")
+mhgp5_gate(mhgp5_q4_lane_batched_clusters 0 mhgp5_q4_lane_batched_gate "--family=eight_clusters --n=1200 --threads=3")
+mhgp5_gate(mhgp5_q4_lane_batched_terrain 0 mhgp5_q4_lane_batched_gate "--family=terrain --n=1200 --threads=2 --min-candidates=200")
+mhgp5_gate(mhgp5_q4_lane_batched_cocirc 0 mhgp5_q4_lane_batched_gate "--family=uniform --n=300 --coord=40 --min-candidates=200 --min-deep=20")
+mhgp5_gate(mhgp5_q4_lane_batched_ordre 0 mhgp5_q4_lane_batched_gate "--family=uniform --n=400 --threads=1 --min-candidates=200")
+mhgp5_gate(mhgp5_q4_lane_batched_mutant_deep 4 mhgp5_q4_lane_batched_gate "--family=uniform --n=400 --min-candidates=200 --inject=q4-batched-emit-deep")
+mhgp5_gate(mhgp5_q4_lane_batched_uniform_8000 0 mhgp5_q4_lane_batched_gate "--family=uniform --n=8000 --threads=8 --min-candidates=100000" LABELS scale8000 TIMEOUT 1800)
+
 mhgp5_gate(mhgp5_q3_lane_batched_uniform_8000 0 mhgp5_q3_lane_batched_gate "--family=uniform --n=8000 --threads=8 --min-candidates=100000" LABELS scale8000 TIMEOUT 1800)
 
 # ---- Temoin device (docs/GPU.md, livraison 3) — nvcc seulement -------------------------

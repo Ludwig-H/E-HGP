@@ -1,0 +1,91 @@
+// MorseHGP3D v5 — porte de la lane q4 PAR LOTS (src/gpu/q4_lane_batched.hpp)
+// contre la lane q4 de production (generate_candidates, arite 4) : egalite
+// post-RLE des candidats (ordre brut a un fil) et de dix-neuf compteurs de la
+// lane q4. Planchers : --min-candidates, --min-deep. Mutant de porte
+// `q4-batched-emit-deep` : code 4. Codes : 0, 2, 3, 4.
+#include <cstdio>
+#include <string>
+#include <vector>
+
+#include "../src/cloud/families.hpp"
+#include "../src/gpu/q4_lane_batched.hpp"
+
+using namespace mhgp5;
+
+int main(int argc, char** argv) {
+  CloudFamily family = CloudFamily::kUniform;
+  int n = 400, coord = 0, threads = 1;
+  u64 min_candidates = 1000, min_deep = 100;
+  std::string inject;
+  for (int i = 1; i < argc; ++i) {
+    const std::string arg = argv[i];
+    if (arg.rfind("--family=", 0) == 0) { if (!parse_cloud_family(arg.c_str() + 9, &family)) return 2; }
+    else if (arg.rfind("--n=", 0) == 0) n = std::atoi(arg.c_str() + 4);
+    else if (arg.rfind("--coord=", 0) == 0) coord = std::atoi(arg.c_str() + 8);
+    else if (arg.rfind("--threads=", 0) == 0) threads = std::atoi(arg.c_str() + 10);
+    else if (arg.rfind("--min-candidates=", 0) == 0) min_candidates = (u64)std::atoll(arg.c_str() + 17);
+    else if (arg.rfind("--min-deep=", 0) == 0) min_deep = (u64)std::atoll(arg.c_str() + 11);
+    else if (arg.rfind("--inject=", 0) == 0) inject = arg.substr(9);
+    else return 2;
+  }
+  if (!inject.empty() && !mutants_enable(inject)) return 2;
+  const bool mutant = MHGP5_MUTANT("q4-batched-emit-deep");
+  if (coord <= 0) coord = cloud_family_default_coord(family, n);
+  const CloudIndex ix = build_cloud_index(make_family_input(family, n, coord, 3));
+  if (!ix.valid || ix.has_duplicate_positions()) return 2;
+  GenerateOptions opt;
+  opt.threads = threads;
+  std::vector<BallCandidate> prod_all, prod, batched;
+  GenerateStats sp, sb;
+  generate_candidates(ix, opt, &prod_all, &sp);
+  for (const BallCandidate& c : prod_all)
+    if (c.arity == 4) prod.push_back(c);
+  generate_q4_batched(ix, opt, &batched, &sb);
+  u64 bad = 0;
+  auto cmp = [&](const char* what, u64 a, u64 b) {
+    if (a != b) {
+      std::printf("desaccord %s : production=%llu lots=%llu\n", what, (unsigned long long)a, (unsigned long long)b);
+      ++bad;
+    }
+  };
+  cmp("rect_alive", sp.rect_alive[2], sb.rect_alive[2]);
+  cmp("anchors", sp.anchors[2], sb.anchors[2]);
+  cmp("anchors_killed_hist", sp.anchors_killed_hist[2], sb.anchors_killed_hist[2]);
+  cmp("anchors_killed_w4", sp.anchors_killed_w4, sb.anchors_killed_w4);
+  cmp("seeds", sp.seeds[1], sb.seeds[1]);
+  cmp("seeds_killed_core", sp.seeds_killed_core, sb.seeds_killed_core);
+  cmp("q4_completions", sp.q4_completions, sb.q4_completions);
+  cmp("q4_rej_lens", sp.q4_rej_lens, sb.q4_rej_lens);
+  cmp("q4_rej_owner", sp.q4_rej_owner, sb.q4_rej_owner);
+  cmp("q4_rej_once", sp.q4_rej_once, sb.q4_rej_once);
+  cmp("q4_rej_i64", sp.q4_rej_i64, sb.q4_rej_i64);
+  cmp("q4_rej_face_power", sp.q4_rej_face_power, sb.q4_rej_face_power);
+  cmp("q4_rej_det", sp.q4_rej_det, sb.q4_rej_det);
+  cmp("q4_rej_center", sp.q4_rej_center, sb.q4_rej_center);
+  cmp("depth_killed", sp.depth_killed[2], sb.depth_killed[2]);
+  cmp("candidates", sp.candidates[2], sb.candidates[2]);
+  const char* cn[6] = {"q4_cert_pos", "q4_cert_neg", "q4_jung_kill", "q4_jung_skip", "q4_jung_fallback", "q4_float_fallback"};
+  for (int i = 0; i < 6; ++i) cmp(cn[i], sp.q4_cert[i], sb.q4_cert[i]);
+  auto count_mism = [](const std::vector<BallCandidate>& a, const std::vector<BallCandidate>& b) {
+    u64 m = a.size() != b.size() ? 1 : 0;
+    for (size_t i = 0; i < a.size() && i < b.size(); ++i)
+      if (!(a[i].key == b[i].key) || !(a[i].level == b[i].level) || a[i].arity != b[i].arity) ++m;
+    return m;
+  };
+  u64 vec_mism = threads == 1 ? count_mism(prod, batched) : 0;
+  rle_candidates(&prod, 1);
+  rle_candidates(&batched, 1);
+  vec_mism += count_mism(prod, batched);
+  std::printf("q4_lane_batched famille=%s n=%d fils=%d candidats_q4=%zu lots=%zu seeds=%llu coeur_tues=%llu completions=%llu "
+              "profonds=%llu desaccords_vecteur=%llu desaccords_compteurs=%llu\n",
+              cloud_family_name(family), n, threads, prod.size(), batched.size(), (unsigned long long)sp.seeds[1],
+              (unsigned long long)sp.seeds_killed_core, (unsigned long long)sp.q4_completions,
+              (unsigned long long)sp.depth_killed[2], (unsigned long long)vec_mism, (unsigned long long)bad);
+  if (sp.candidates[2] < min_candidates || sp.depth_killed[2] < min_deep) {
+    std::printf("PLANCHER\n");
+    return 3;
+  }
+  if (vec_mism || bad) return mutant ? 4 : 1;
+  if (mutant) { std::printf("MUTANT NON TUE\n"); return 1; }
+  return 0;
+}
