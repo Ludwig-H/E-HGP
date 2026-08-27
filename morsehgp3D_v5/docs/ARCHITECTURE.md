@@ -7,10 +7,11 @@ module : [`PROVENANCE.md`](PROVENANCE.md).
 
 ## 0. Contrats
 
-- **Objet** : la forêt HGP complète (K = 1..K_max, K_max = 10 au profil),
-  niveaux $\rho^2$ exacts, événements exacts (MATHEMATIQUES § 1–2). Une
-  optimisation ne modifie ni l'objet, ni les niveaux, ni les inclusions ; la
-  porte de conformité v4 ≡ v5 (digests canoniques au format v4) le grave.
+- **Objet** : les dix forêts horizontales HGP (K = 1..K_max, K_max = 10 au
+  profil), niveaux $\rho^2$ exacts, événements exacts (MATHEMATIQUES § 1–2).
+  Les applications verticales entre ordres (la tour) ne sont pas livrées.
+  Une optimisation ne modifie ni l'objet, ni les niveaux, ni les inclusions ;
+  la porte de conformité v4 ≡ v5 (digests canoniques au format v4) le grave.
 - **Profil d'entrée** : u16 quantifié seulement (grille $[0, 65536)^3$),
   `PointId` u32 arbitraires (≠ index dense ≠ rang Morton), dégénérescences →
   refus explicite, jamais de jitter. Les positions dupliquées sont refusées
@@ -21,8 +22,15 @@ module : [`PROVENANCE.md`](PROVENANCE.md).
   résident de tous les supports, aucun tableau indexé par toutes les paires /
   triplets / quadruplets ($\propto \binom{n}{k}$ interdit).
 - **Statuts transactionnels** : toute exécution termine dans
-  `complete_regular | unsupported_degeneracy | resource_exhausted | invalid_input | invariant_violated` ;
-  aucun préfixe de payload n'est publié sur un refus.
+  `complete_regular | unsupported_degeneracy | resource_exhausted | invalid_input | invariant_violated`.
+  Les refus (`invalid_input`, `unsupported_degeneracy`, `resource_exhausted`)
+  sont décidés **avant le premier callback** : les gardes d'entrée avant tout
+  calcul, les gardes de capacité de tous les ordres sur les comptes
+  (`count_events_by_k`) avant la première publication. Les callbacks
+  `on_forest` sont **provisoires** jusqu'au statut terminal : seule une
+  violation d'invariant (un défaut du calcul) peut encore invalider une
+  sortie déjà publiée, et le consommateur doit lire `RunResult::status`
+  avant de tenir la sortie pour publiable.
 - **Cibles** : portes d'invariants et de mesure à n = 8000, 16000, 32000 sur
   la machine de développement (8 cœurs, 31 Go) ; puis 50 000 points sur G4 ;
   puis des dizaines de millions de points. Aucun claim de temps ni de
@@ -53,9 +61,11 @@ les requêtes de cover. Il n'existe ni octree séparé ni second arbre.
 2  RLE par BallKey : arité minimale puis plus petite représentation    candidates.hpp
 3  préfiltre count-only : mort à |I_B| ≥ h_qmin                         census.hpp, expand.hpp
 4  census I_B / U_B complets des survivantes (plafond de coquille)
-5  expansion des plateaux → événements par K, en PointId externes      forest/plateau.hpp
-6  pour K = 1..K_max, STREAMÉ : fold (macro-lots, deltas, partition     forest/fold.hpp
-   dense) → signature → compteurs → libération
+5  comptage des événements par K (sans matérialisation) → gardes de       expand.hpp
+   capacité de TOUS les ordres avant toute publication
+6  pour K = 1..K_max, STREAMÉ : expansion des plateaux de l'ordre K      forest/plateau.hpp,
+   seulement → fold (macro-lots, deltas, partition dense) → signature    forest/fold.hpp
+   → compteurs → callback provisoire → libération
 ```
 
 Chaque étape parallèle découpe par tranches d'index et fusionne **en ordre de
@@ -82,8 +92,8 @@ jamais deux d'entre eux :
 
 | rôle | contenu | durée de vie |
 |---|---|---|
-| amont | index, candidats post-RLE, boules censusées | libérés dès que l'étape suivante n'en a plus besoin (`run.hpp` : `swap` explicites) |
-| en construction | événements du K courant, table d'internement, union-find, tables à époque | un seul K à la fois |
+| amont | index, candidats post-RLE (libérés après la signature), **boules censusées** (résidentes jusqu'au dernier K : le seul amont des expansions) | libérés dès que l'étape suivante n'en a plus besoin (`run.hpp` : `swap` explicites) |
+| en construction | événements du K courant (expansion par K), table d'internement, union-find, tables à époque | un seul K à la fois |
 | sortie persistante | ce que le consommateur **choisit** de garder dans `on_forest` (digest, cardinalités, ou la forêt) | décision de l'appelant, jamais du pipeline |
 | temporaires | brouillons par ouvrier (cover, sites affines, histogrammes) | par tâche |
 

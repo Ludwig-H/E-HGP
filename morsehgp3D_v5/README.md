@@ -5,9 +5,10 @@ Cadre : `phase=exploration_v5_hors_registre`, `backend=cpu_reference`,
 `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`.
 
 La v5 remplace `morsehgp3D_v4/` comme chantier actif. Elle calcule **le même
-objet** — la forêt HGP complète K = 1..10 du manuscrit (Défs 20–31, Théorèmes
-2–7), niveaux et événements exacts sur le profil u16 — avec **le même contrat
-de test** (fixtures gravées, mutants tués, codes de sortie exacts, planchers
+objet que la v4** — les **dix forêts horizontales** HGP K = 1..10 du manuscrit
+(Défs 20–31, Théorèmes 2–7), niveaux et événements exacts sur le profil u16 ;
+les applications verticales entre ordres (la « tour ») ne sont **pas**
+livrées — avec **le même contrat de test** (fixtures gravées, mutants tués, codes de sortie exacts, planchers
 de couverture, équivariance) et **une base de code neuve** : la v4 est un
 sujet différentiel et une source de contre-fixtures et de digests épinglés,
 jamais une base de code ni une autorité implicite. Tout port contractuel
@@ -19,9 +20,10 @@ Les errances de fond relevées par l'audit du 22 août 2026
 (`morsehgp3D_v4/audits/ETAT_COURANT.md`) sont traitées **dès la conception** :
 
 - **résidence** : la v4 gardait les dix forêts résidentes (7,7 Go à n=8000,
-  16000/32000 hors de portée d'une machine de développement) et son plafond
-  mémoire mentait ; la v5 **streame par ordre K** et sépare explicitement
-  sortie persistante, sortie en construction, temporaires et amont ;
+  21 Go à 32000) et son plafond mémoire mentait ; la v5 **streame par ordre K**
+  (expansion, fold, signature, publication, libération — un seul K en
+  construction, les boules censusées comme seul amont résident) et nomme
+  ses rôles mémoire sans promettre de pic ;
 - **monolithes** : `bench/forest_probe.cpp` (4 478 lignes, toutes les portes)
   et `ball_stream.hpp` (1 805 lignes) deviennent des modules nommés et une
   porte par thème dans `tests/` ;
@@ -35,11 +37,20 @@ Les errances de fond relevées par l'audit du 22 août 2026
 
 ## Contrats
 
-Forêt HGP complète K = 1..10, événements et niveaux exacts ; **portes
-d'invariants et de mesure à n = 8000, 16000, 32000** sur cette machine
-(8 cœurs, 31 Go), puis contrats à 50 000 points sur G4 via `gcp-migration/`,
-puis des dizaines de millions de points. Aucun claim tant que les portes ne
-le prouvent pas : `public_status` reste `not_claimed`.
+Dix forêts horizontales K = 1..10, événements et niveaux exacts, rendu § 9.1 ;
+**portes d'invariants et de mesure à n = 8000, 16000, 32000** sur cette
+machine (8 cœurs, 31 Go), puis contrats à 50 000 points sur G4 via
+`gcp-migration/`, puis des dizaines de millions de points. Aucun claim tant
+que les portes ne le prouvent pas : `public_status` reste `not_claimed`.
+L'état courant est le verdict de l'auditeur (`audits/ETAT_COURANT.md`) ;
+les réponses de l'implémenteur sont les `audits/REPONSE_CLAUDE_*`.
+
+**Conformité v4 ≡ v5** (digests canoniques au format v4, `digest_balls` et
+`digest_all`, sur les mêmes entrées) : porte `mhgp5_conformity_*`, reçu
+`receipts/conformite_v4/digests_v4.txt` calculé par la v4 ; les campagnes à
+manifeste sont dans `receipts/conformite_v4/`. Un digest égal prouve « même
+objet que la v4 », jamais l'exactitude HGP : celle-ci relève des oracles
+bornés (label `oracle`) et des preuves de `docs/MATHEMATIQUES.md`.
 
 ## Parcours de lecture
 
@@ -60,13 +71,17 @@ le prouvent pas : `public_status` reste `not_claimed`.
 cmake -S morsehgp3D_v5 -B build/v5 -DCMAKE_BUILD_TYPE=Release
 cmake --build build/v5 --parallel
 ctest --test-dir build/v5 --output-on-failure
-ctest --test-dir build/v5 --output-on-failure -L gate        # fixtures, mutants, invariants
-ctest --test-dir build/v5 --output-on-failure -L scale8000   # tailles d'interet
+ctest --test-dir build/v5 --output-on-failure -L gate        # fixtures, mutants, invariants (~5 min)
+ctest --test-dir build/v5 --output-on-failure -L oracle      # juges independants a petit n
+ctest --test-dir build/v5 --output-on-failure -L scale8000   # tailles d'interet (puis scale16000, scale32000)
+cmake -S morsehgp3D_v5 -B build/v5-asan -DCMAKE_BUILD_TYPE=Debug -DMHGP5_ENABLE_SANITIZERS=ON   # ASan + UBSan
 ```
 
 Préfixe des cibles et tests : `mhgp5_`. Portes à code de sortie exact
 (0 conforme, 1 juge, 2 refus, 3 invariant, 4 mutant tué), crash par signal
-refusé partout (`cmake/run_expect.cmake`).
+refusé partout (`cmake/run_expect.cmake`). Les mutants ne sont compilés que
+dans les cibles de test (`MHGP5_TESTING`) ; le pilote produit `mhgp5` n'en a
+aucun.
 
 ## Arborescence
 

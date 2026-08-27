@@ -130,24 +130,48 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
   std::vector<Survivor>().swap(surv);
   rr.t_census_ms = ms(t_c);
 
+  // GARDES DE CAPACITE DE TOUS LES ORDRES AVANT TOUTE PUBLICATION (contrat
+  // transactionnel) : un refus ne suit jamais un callback. Les comptes par K
+  // sont etablis sans materialiser les evenements.
   const auto t_e = std::chrono::steady_clock::now();
-  std::vector<std::vector<ForestEvent>> ev_k;
-  expand_events(ix, balls, rr.kmax_eff, opt.threads, &ev_k, &rr.expand);
-  std::vector<BallData>().swap(balls);
-  rr.t_expand_ms = ms(t_e);
+  const std::vector<KCount> kc = count_events_by_k(ix, balls, rr.kmax_eff);
+  for (u64 K = 1; K <= rr.kmax_eff; ++K) {
+    std::string why;
+    if (!fold_capacity_ok(kc[K].events, kc[K].incidences, &why)) {
+      rr.status = PipelineStatus::kResourceExhausted;
+      rr.message = "fold K=" + std::to_string(K) + " : " + why;
+      return rr;
+    }
+  }
+  rr.t_expand_ms += ms(t_e);
 
   if (opt.digest) rr.digest_balls = digest_balls_v4(cands);
   std::vector<BallCandidate>().swap(cands);
   DigestAll dg_all;
   rr.digest_forest.assign(rr.kmax_eff + 1, std::string());
   rr.cards.assign(rr.kmax_eff + 1, KCardinalities{});
+  rr.expand.events_by_k.assign(rr.kmax_eff + 1, 0);
+  // STREAMING PAR K : les evenements d'un ordre sont materialises, foldes,
+  // signes, publies (callback) puis liberes ; les boules censusees restent le
+  // seul objet amont resident. Les callbacks sont PROVISOIRES jusqu'au statut
+  // terminal : seule une violation d'invariant (un defaut, jamais un refus de
+  // capacite) peut encore invalider la sortie apres un callback.
+  std::vector<ForestEvent> events;
   for (u64 K = 1; K <= rr.kmax_eff; ++K) {
+    const auto t_k = std::chrono::steady_clock::now();
+    expand_events_k(ix, balls, K, rr.kmax_eff, opt.threads, &events, &rr.expand);
+    rr.t_expand_ms += ms(t_k);
+    if (events.size() != kc[K].events) {
+      rr.status = PipelineStatus::kInvariantViolated;
+      rr.message = "invariant : comptage par K != expansion (K=" + std::to_string(K) + ")";
+      return rr;
+    }
     const auto t_f = std::chrono::steady_clock::now();
-    ForestResult r = build_forest(ev_k[K]);
+    ForestResult r = build_forest(events);
     rr.t_fold_ms += ms(t_f);
-    if (!r.refusal.empty()) {
-      rr.status = PipelineStatus::kResourceExhausted;
-      rr.message = "fold K=" + std::to_string(K) + " : " + r.refusal;
+    if (!r.refusal.empty()) {  // impossible apres la garde amont ; traite en invariant
+      rr.status = PipelineStatus::kInvariantViolated;
+      rr.message = "invariant : refus de fold apres la garde de capacite (K=" + std::to_string(K) + ")";
       return rr;
     }
     if (r.attach_violations || r.birth_violations || r.partition_violations) {
@@ -155,8 +179,8 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
       rr.message = "invariant : violations de roles ou de partition (K=" + std::to_string(K) + ")";
       return rr;
     }
-    rr.cards[K] = KCardinalities{ev_k[K].size(), r.facets, r.deltas.size(), r.new_attachments, r.fusions, r.nodes};
-    rr.total_events += ev_k[K].size();
+    rr.cards[K] = KCardinalities{events.size(), r.facets, r.deltas.size(), r.new_attachments, r.fusions, r.nodes};
+    rr.total_events += events.size();
     rr.total_facets += r.facets;
     rr.total_fusions += r.fusions;
     rr.total_deltas += r.deltas.size();
@@ -165,9 +189,10 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
       rr.digest_forest[K] = digest_forest_v4((u32)K, r);
       dg_all.add(rr.digest_forest[K]);
     }
-    if (opt.on_forest) opt.on_forest(K, ev_k[K], r);
-    std::vector<ForestEvent>().swap(ev_k[K]);
+    if (opt.on_forest) opt.on_forest(K, events, r);
+    std::vector<ForestEvent>().swap(events);
   }
+  std::vector<BallData>().swap(balls);
   if (opt.digest) rr.digest_all = dg_all.hex();
   return rr;
 }

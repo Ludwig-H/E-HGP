@@ -56,6 +56,18 @@ def active_markdown() -> list[Path]:
         for p in sorted((v4 / "audits").rglob("*.md"))
         if p.name.startswith(("REPONSE_CLAUDE_", "NOTE_CLAUDE_", "REPONSE_APRES_"))
     )
+    # Chantier actif v5 (audit bloquant 87e915bd, P2 : « un vert hors
+    # perimetre ») : README, docs/, recus, et les notes/questions/reponses de
+    # l'implementeur ; memes exclusions que la v4 pour les mots des auditeurs.
+    v5 = ROOT / "morsehgp3D_v5"
+    paths.extend(p for p in (v5 / "README.md",) if p.is_file())
+    paths.extend(sorted((v5 / "docs").rglob("*.md")))
+    paths.extend(sorted((v5 / "receipts").rglob("*.md")))
+    paths.extend(
+        p
+        for p in sorted((v5 / "audits").rglob("*.md"))
+        if p.name.startswith(("REPONSE_CLAUDE_", "NOTE_CLAUDE_", "QUESTION_CLAUDE_", "NOTE_SOLUTION_"))
+    )
     return list(dict.fromkeys(paths))
 
 

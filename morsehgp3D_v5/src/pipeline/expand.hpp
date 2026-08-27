@@ -14,6 +14,7 @@
 // `par-drop-ball-chunk` : une tranche de census oubliee).
 #pragma once
 
+#include <algorithm>
 #include <vector>
 
 #include "../forest/fold.hpp"
@@ -148,48 +149,104 @@ inline PipelineStatus census_balls(const CloudIndex& ix, const std::vector<BallC
   return PipelineStatus::kCompleteRegular;
 }
 
-// Expansion des plateaux en evenements par K (1..kmax), en PointId externes.
-// PRECONDITION (V1 tranche par l'auditeur) : positions distinctes — l'index a
-// ete accepte par run_pipeline ; `kmax <= 10` (profil).
-inline void expand_events(const CloudIndex& ix, const std::vector<BallData>& balls, u64 kmax, int threads,
-                          std::vector<std::vector<ForestEvent>>* ev_k, ExpandStats* st) {
+// EXPANSION PAR ORDRE K (residence reelle par K, audit 87e915bd P1) : les
+// boules censusees sont le seul objet amont resident ; les evenements d'un
+// ordre sont materialises pour CE K seulement, puis liberes par l'appelant.
+// Regime regulier (|U_B| = arite du support minimal) : la boule donne UN
+// evenement, d'ordre K = |I_B| + |U_B| − 1, connu sans expansion. Plateau
+// (|U_B| > arite minimale) : expansion complete, filtree sur K.
+// PRECONDITIONS (V1 tranchee par l'auditeur) : positions distinctes ;
+// kmax <= 10 (profil) ; la conversion GeometryIndex -> PointId a lieu ICI et
+// seulement ici (mutant `dense-pointid` : cast du rang).
+
+// Comptage des evenements par K sans materialisation (pour les gardes de
+// capacite AVANT toute publication) : (evenements, incidences Σ(q+d)) par K.
+struct KCount {
+  u64 events = 0, incidences = 0;
+};
+
+inline std::vector<KCount> count_events_by_k(const CloudIndex& ix, const std::vector<BallData>& balls, u64 kmax) {
+  std::vector<KCount> out((size_t)kmax + 1);
+  std::vector<PlateauEvent> pevents;
+  for (const BallData& bd : balls) {
+    const size_t q = bd.shell.size(), d = bd.interior.size();
+    if (q == (size_t)bd.arity) {  // regulier : un evenement, ordre q + d − 1
+      const size_t K = q + d - 1;
+      if (K >= 1 && K <= (size_t)kmax) {
+        ++out[K].events;
+        out[K].incidences += q + d;
+      }
+      continue;
+    }
+    pevents.clear();
+    expand_plateau(ball_center(bd.key), ix.upos, bd.interior, bd.shell, (size_t)(kmax + 1), &pevents);
+    for (const PlateauEvent& pe : pevents) {
+      const size_t K = pe.tpart.size() + pe.ipart.size() - 1;
+      if (K < 1 || K > (size_t)kmax) continue;
+      ++out[K].events;
+      out[K].incidences += pe.tpart.size() + pe.ipart.size();
+    }
+  }
+  return out;
+}
+
+namespace expand_detail {
+inline ForestEvent make_event(const CloudIndex& ix, const BallData& bd, const std::vector<i32>& tpart,
+                              const std::vector<i32>& ipart, u16 active_mask, bool dense) {
+  ForestEvent ev;
+  ev.q = (u8)tpart.size();
+  ev.d = (u8)ipart.size();
+  ev.active_mask = active_mask;
+  for (size_t t = 0; t < tpart.size(); ++t) ev.support[t] = dense ? (PointId)tpart[t] : ix.point_id(tpart[t]);
+  for (size_t t = 0; t < ipart.size(); ++t) ev.interior[t] = dense ? (PointId)ipart[t] : ix.point_id(ipart[t]);
+  ev.level = bd.level;
+  return ev;
+}
+}  // namespace expand_detail
+
+// Evenements de l'ordre K seulement, en PointId externes, ordre des tranches
+// conserve (bit-identique au sequentiel).
+inline void expand_events_k(const CloudIndex& ix, const std::vector<BallData>& balls, u64 K, u64 kmax, int threads,
+                            std::vector<ForestEvent>* out, ExpandStats* st) {
   const bool m_dense = MHGP5_MUTANT("dense-pointid");
   size_t nchunks = 0;
-  std::vector<std::vector<std::vector<ForestEvent>>> lev;
+  std::vector<std::vector<ForestEvent>> lev;
   {
     size_t dummy = 0;
     expand_detail::chunked(balls.size(), threads, &dummy, [&](size_t, size_t, size_t) {});
-    lev.assign(dummy, std::vector<std::vector<ForestEvent>>((size_t)kmax + 1));
+    lev.assign(dummy, {});
   }
   const size_t created = expand_detail::chunked(balls.size(), threads, &nchunks, [&](size_t c, size_t b, size_t e) {
     std::vector<PlateauEvent> pevents;
     for (size_t bi = b; bi < e; ++bi) {
       const BallData& bd = balls[bi];
+      const size_t q = bd.shell.size(), d = bd.interior.size();
+      if (q == (size_t)bd.arity) {
+        if (q + d - 1 != (size_t)K) continue;
+        // Regime regulier : tous les retraits de support sont actifs (le
+        // support minimal retrecit la boule), les retraits d'interieur sont
+        // des attachements — la meme regle que l'expansion de plateau.
+        // MEME ordre de support que l'expansion de plateau (trie par index
+        // unique) : l'ordre des unions d'un lot en depend, donc l'ordre
+        // d'emission des deltas et le digest.
+        std::vector<i32> tsorted = bd.shell;
+        std::sort(tsorted.begin(), tsorted.end());
+        lev[c].push_back(expand_detail::make_event(ix, bd, tsorted, bd.interior, (u16)((1u << q) - 1u), m_dense));
+        continue;
+      }
       pevents.clear();
       expand_plateau(ball_center(bd.key), ix.upos, bd.interior, bd.shell, (size_t)(kmax + 1), &pevents);
       for (const PlateauEvent& pe : pevents) {
-        const size_t K = pe.tpart.size() + pe.ipart.size() - 1;
-        if (K < 1 || K > (size_t)kmax) continue;
-        ForestEvent ev;
-        ev.q = (u8)pe.tpart.size();
-        ev.d = (u8)pe.ipart.size();
-        ev.active_mask = pe.active_mask;
-        for (size_t t = 0; t < pe.tpart.size(); ++t)
-          ev.support[t] = m_dense ? (PointId)pe.tpart[t] : ix.point_id(pe.tpart[t]);
-        for (size_t t = 0; t < pe.ipart.size(); ++t)
-          ev.interior[t] = m_dense ? (PointId)pe.ipart[t] : ix.point_id(pe.ipart[t]);
-        ev.level = bd.level;
-        lev[c][K].push_back(ev);
+        if (pe.tpart.size() + pe.ipart.size() - 1 != (size_t)K) continue;
+        lev[c].push_back(expand_detail::make_event(ix, bd, pe.tpart, pe.ipart, pe.active_mask, m_dense));
       }
     }
   });
   st->workers_expand = std::max(st->workers_expand, (u64)created);
-  ev_k->assign((size_t)kmax + 1, {});
-  st->events_by_k.assign((size_t)kmax + 1, 0);
-  for (size_t c = 0; c < nchunks; ++c)
-    for (size_t K = 1; K <= (size_t)kmax; ++K)
-      (*ev_k)[K].insert((*ev_k)[K].end(), lev[c][K].begin(), lev[c][K].end());
-  for (size_t K = 1; K <= (size_t)kmax; ++K) st->events_by_k[K] = (*ev_k)[K].size();
+  out->clear();
+  for (size_t c = 0; c < nchunks; ++c) out->insert(out->end(), lev[c].begin(), lev[c].end());
+  if (st->events_by_k.size() < (size_t)kmax + 1) st->events_by_k.assign((size_t)kmax + 1, 0);
+  st->events_by_k[K] = out->size();
 }
 
 }  // namespace mhgp5

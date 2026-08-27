@@ -164,6 +164,16 @@ struct UnionFind {
 
 }  // namespace fold_detail
 
+// Garde de capacite transactionnelle, decidable AVANT toute allocation sur
+// les seuls comptes (evenements <= UINT32_MAX ; Σ(q+d) <= INT32_MAX pour les
+// fid de l'union-find i32 ; lots <= evenements < UINT32_MAX, sentinelle des
+// tables a epoque).
+inline bool fold_capacity_ok(u64 events, u64 incidences, std::string* why) {
+  if (events >= (u64)UINT32_MAX) { *why = "resource_exhausted/requires_tiling : evenements >= 2^32-1"; return false; }
+  if (incidences > (u64)INT32_MAX) { *why = "resource_exhausted/requires_tiling : incidences > 2^31-1"; return false; }
+  return true;
+}
+
 // `order` : permutation des evenements triee par niveau exact (calculee par
 // l'appelant, qui peut la partager avec le rendu).
 inline std::vector<u32> sort_events_by_level(const std::vector<ForestEvent>& events) {
@@ -184,13 +194,10 @@ inline ForestResult build_forest(const std::vector<ForestEvent>& events) {
   const bool m_canon_root = MHGP5_MUTANT("canonical-is-uf-root");
   const bool m_no_detector = MHGP5_MUTANT("attach-detector-disabled");
 
-  // Garde de capacite AVANT toute allocation.
+  // Garde de capacite AVANT toute allocation (la meme que fold_capacity_ok).
   u64 total_recs = 0;
   for (const ForestEvent& ev : events) total_recs += (u64)ev.q + ev.d;
-  if ((u64)events.size() > (u64)UINT32_MAX || total_recs > (u64)INT32_MAX || (u64)events.size() >= (u64)UINT32_MAX) {
-    r.refusal = "resource_exhausted/requires_tiling";
-    return r;
-  }
+  if (!fold_capacity_ok((u64)events.size(), total_recs, &r.refusal)) return r;
   const std::vector<u32> order = sort_events_by_level(events);
   const auto evt = [&](size_t i) -> const ForestEvent& { return events[(size_t)order[i]]; };
 
