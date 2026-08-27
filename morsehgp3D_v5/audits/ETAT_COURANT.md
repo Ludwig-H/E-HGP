@@ -106,21 +106,26 @@ casts vers `unsigned` et avant les multiplications d'octets.
 ### 4. Trancher l'architecture du repli exact Q4
 
 [`GPU.md`](../docs/GPU.md) impose actuellement « pas de `__int128` device » et
-prévoit que `cmp_2p2_jb2` reste sur CPU. Or
+prévoit que `cmp_2p2_jb2` reste sur CPU. Cette prémisse est elle-même périmée :
+le [guide officiel CUDA 12.9](https://docs.nvidia.com/cuda/archive/12.9.0/pdf/CUDA_C_Programming_Guide.pdf)
+autorise `__int128` en code device lorsque le compilateur hôte le supporte. Or
 [`q4_seed_core_shaped`](../src/gpu/q4_core_shaped.hpp) est marqué
 `MHGP5_HD`, reconvertit `DI128` vers `i128` et appelle précisément
 `cmp_2p2_jb2`, dont le chemin U320 utilise `u128`. Le commentaire local affirme
-au contraire que `nvcc` supporte ce chemin. Les deux architectures ne peuvent
-pas rester normatives simultanément.
+donc à juste titre que `nvcc` peut supporter ce chemin. Le code et le plan ne
+peuvent néanmoins pas garder deux contrats normatifs opposés.
 
-Deux fermetures cohérentes sont possibles :
+Trois fermetures cohérentes sont possibles :
 
 1. garder le repli au CPU et faire rendre au device un verdict ternaire
    `kill`, `skip`, `unresolved`, le CPU décidant chaque `unresolved` avant
    émission ;
 2. écrire une comparaison large entièrement en limbes
    `cmp_2p2_jb2_d(DI128, DI128, i64)` et la confronter à l'oracle hôte sur les
-   bords du profil avant son premier kernel.
+   bords du profil avant son premier kernel ;
+3. assumer `__int128` pour ce backend CUDA, mettre `GPU.md` et le contrat de
+   portabilité à jour, vérifier explicitement `__SIZEOF_INT128__`, puis mesurer
+   ce chemin exact sur le Blackwell avant de le retenir pour la lane.
 
 Une simple porte hôte « en forme de kernel » ne tranche pas ce choix et ne
 remplace pas une compilation `nvcc` réelle.
