@@ -54,6 +54,7 @@ int main(int argc, char** argv) {
     sc.handle_points = 0;
     for (const NodeRef h : sc.handles) { const NodeRange r = ix.range_of(h); sc.handle_points += (u64)(r.last - r.first + 1); }
     const bool by_query = sc.handle_points >= pretest_min;
+    if (by_query) { t0 = now(); rect_diametral_candidates(ix, ix.box_of(ar.r.a), ix.box_of(ar.r.b), &sc.query, &sc.cover_nodes); t_query += ns(t0); }
     const u64 need = h_of[2] - ar.core;
     for (i32 ua = ra.first; ua <= ra.last; ++ua)
       for (i32 ub = rb.first; ub <= rb.last; ++ub) {
@@ -66,7 +67,7 @@ int main(int argc, char** argv) {
         ++anchors;
         if (by_query) {
           t0 = now();
-          const int k = anchor_kill_from_query(ix, ua, ub, pa, pb, D2, Lane::kQ4, 8, h_of[2], &sc.query);
+          const int k = anchor_kill_from_candidates(sc.query, ix.upos, ua, ub, pa, pb, D2, Lane::kQ4, 8, h_of[2]);
           t_query += ns(t0);
           if (k == 1) { ++ls.anchors_killed_w4; continue; }
           if (k == 2) { ++ls.anchors_killed_sectors[2]; continue; }

@@ -62,6 +62,58 @@ inline void cover_query(const CloudIndex& ix, const P3& pa, const P3& pb, i64 D2
   });
 }
 
+// CANDIDATS DIAMETRAUX DU RECTANGLE (pretests d'ancre) : tous les points z tels
+// que dist(2z, Box(A) + Box(B))² <= Dmax² — un sur-ensemble de la boule
+// diametrale ouverte de CHAQUE ancre (a, b) du rectangle (|2z − (a+b)|² < D²
+// avec a+b dans la boite des sommes et D <= Dmax). Une traversee par
+// rectangle au lieu d'une requete par ancre ; les tests d'ancre filtrent
+// ensuite exactement (q < 0 / |2w|² < D²). Resultat non trie.
+inline void rect_diametral_candidates(const CloudIndex& ix, const AxisBox& A, const AxisBox& B, std::vector<CoverPoint>* out,
+                                      u64* tree_nodes) {
+  out->clear();
+  if (ix.unique_count() == 0) return;
+  i64 slo[3], shi[3], dmax2 = 0;
+  for (int i = 0; i < 3; ++i) {
+    slo[i] = A.lo[i] + B.lo[i];
+    shi[i] = A.hi[i] + B.hi[i];
+    const i64 e1 = A.hi[i] - B.lo[i];
+    const i64 e2 = B.hi[i] - A.lo[i];
+    const i64 w = std::max(std::llabs(e1), std::llabs(e2));
+    dmax2 += w * w;
+  }
+  std::vector<NodeRef> stack{ix.root()};
+  while (!stack.empty()) {
+    const NodeRef z = stack.back();
+    stack.pop_back();
+    ++*tree_nodes;
+    const AxisBox bz = ix.box_of(z);
+    i64 gap2 = 0;
+    for (int i = 0; i < 3; ++i) {
+      i64 g = 0;
+      if (2 * bz.lo[i] > shi[i]) g = 2 * bz.lo[i] - shi[i];
+      else if (2 * bz.hi[i] < slo[i]) g = slo[i] - 2 * bz.hi[i];
+      gap2 += g * g;
+    }
+    if (gap2 > dmax2) continue;
+    if (is_leaf(z)) {
+      const i32 u = leaf_index(z);
+      const P3& p = ix.upos[(size_t)u];
+      i64 d2 = 0;
+      for (int i = 0; i < 3; ++i) {
+        const i64 c = i == 0 ? p.x : (i == 1 ? p.y : p.z);
+        i64 g = 0;
+        if (2 * c > shi[i]) g = 2 * c - shi[i];
+        else if (2 * c < slo[i]) g = slo[i] - 2 * c;
+        d2 += g * g;
+      }
+      if (d2 <= dmax2) out->push_back(CoverPoint{u, d2});
+      continue;
+    }
+    stack.push_back(ix.nodes[(size_t)z].left);
+    stack.push_back(ix.nodes[(size_t)z].right);
+  }
+}
+
 inline void rect_cover_handles(const CloudIndex& ix, const AxisBox& A, const AxisBox& B, i64 coef,
                                std::vector<NodeRef>* out, u64* tree_nodes) {
   out->clear();

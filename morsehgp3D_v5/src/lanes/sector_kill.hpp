@@ -156,5 +156,14 @@ inline int anchor_kill_from_query(const CloudIndex& ix, i32 ua, i32 ub, const P3
   cover_query(ix, pa, pb, D2, 1, tmp, /*sorted=*/false);  // ordre indifferent pour les verdicts ; le tri dominait le cout
   return anchor_kill_cumulated(*tmp, ix.upos, ua, ub, pa, pb, D2, lane, rho2_den, h, /*radially_sorted=*/false);
 }
+// Variante par RECTANGLE : les candidats diametraux du rectangle
+// (rect_diametral_candidates, une traversee par rectangle) contiennent la boule
+// diametrale de chaque ancre ; le CoverPoint::dist2q qu'ils portent est la
+// distance a la boite des sommes, pas |2z − (a+b)|² : on la recalcule ici
+// (les tests ne lisent dist2q que pour la sortie anticipee, desactivee).
+inline int anchor_kill_from_candidates(const std::vector<CoverPoint>& cand, const std::vector<P3>& upos, i32 ua, i32 ub,
+                                       const P3& pa, const P3& pb, i64 D2, Lane lane, i128 rho2_den, u64 h) {
+  return anchor_kill_cumulated(cand, upos, ua, ub, pa, pb, D2, lane, rho2_den, h, /*radially_sorted=*/false);
+}
 
 }  // namespace mhgp5

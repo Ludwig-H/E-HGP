@@ -182,6 +182,7 @@ inline void build_q3_batch(const CloudIndex& ix, const AliveRect& ar, const u64 
   sc.handle_points = 0;
   for (const NodeRef h : sc.handles) { const NodeRange r = ix.range_of(h); sc.handle_points += (u64)(r.last - r.first + 1); }
   const bool pretest_by_query = sc.handle_points >= lim.pretest_query_min_points;
+  if (pretest_by_query) rect_diametral_candidates(ix, ix.box_of(ar.r.a), ix.box_of(ar.r.b), &sc.query, &sc.cover_nodes);
   const u64 need = h_of[1] - ar.core;
   for (i32 ua = ra.first; ua <= ra.last; ++ua)
     for (i32 ub = rb.first; ub <= rb.last; ++ub) {
@@ -195,7 +196,7 @@ inline void build_q3_batch(const CloudIndex& ix, const AliveRect& ar, const u64 
       const i64 D2 = p3_norm2(p3_sub(pb, pa));
       if (D2 == 0) continue;
       if (pretest_by_query) {
-        const int k = anchor_kill_from_query(ix, ua, ub, pa, pb, D2, Lane::kQ3, 12, h_of[1], &sc.query);
+        const int k = anchor_kill_from_candidates(sc.query, ix.upos, ua, ub, pa, pb, D2, Lane::kQ3, 12, h_of[1]);
         if (k == 1) { ++ls->anchors_killed_w3; continue; }
         if (k == 2) { ++ls->anchors_killed_sectors[1]; continue; }
       }
