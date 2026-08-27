@@ -161,3 +161,13 @@ mhgp5_gate(mhgp5_render_gate 0 mhgp5_render_gate "")
 mhgp5_gate(mhgp5_render_mutant_active 4 mhgp5_render_gate "--inject=render-active-only")
 mhgp5_gate(mhgp5_render_mutant_collapse 4 mhgp5_render_gate "--inject=render-collapse-mult")
 mhgp5_gate(mhgp5_render_mutant_birth 4 mhgp5_render_gate "--inject=birth-from-events")
+
+# ---- Garde d'arrondi du filtre flottant ------------------------------------------
+mhgp5_executable(mhgp5_float_rounding_gate tests/float_rounding_gate.cpp)
+mhgp5_gate(mhgp5_float_rounding_gate 0 mhgp5_float_rounding_gate "")
+
+# ---- Kernel affine et intervalles de Jung ----------------------------------------
+mhgp5_executable(mhgp5_q3_affine_gate tests/q3_affine_gate.cpp)
+mhgp5_gate(mhgp5_q3_affine_gate 0 mhgp5_q3_affine_gate "")
+mhgp5_gate(mhgp5_q3_affine_mutant_small 4 mhgp5_q3_affine_gate "--inject=float-small-threshold")
+mhgp5_gate(mhgp5_q3_affine_mutant_jung 4 mhgp5_q3_affine_gate "--inject=jung-swap-bounds")

@@ -47,8 +47,9 @@
 //   F2  fixtures synthetiques de largeur (preconditions declarees respectees,
 //       hors geometrie u16 — voir la borne ci-dessous) : produits croises qui
 //       ne different QUE dans le mot haut w[4] (U320) ou w[2] (U192) ;
-//   F3  cosphere : tout niveau q4 recolte sur la grande cosphere vaut
-//       400 000 000 exactement.
+//   F3  cosphere : tout niveau q4 d'un tetraedre forme de quatre points SUR
+//       la grande cosphere vaut 400 000 000 exactement (plancher : >= 1) ; les
+//       tetraedres touchant le centre ou le point interieur en sont exclus.
 // BORNE (constatee en ecrivant F2, a graver dans MATHEMATIQUES) : pour un
 // tetraedre BIEN CENTRE u16, le centre est dans l'enveloppe donc R² < 3M²
 // < 2^33,6 ; det <= 16M³ < 2^52 ; |N'|² = det²R² < 2^137,6 ; tout produit
@@ -193,6 +194,7 @@ std::vector<P3> near_right_cloud() {
 
 // Grande cosphere : permutations signees de (12000, 16000, 0) autour de
 // (cx, cx, cx), rayon 20000 ; plus le centre et un point interieur.
+inline constexpr size_t kCosphereOnSphere = 24;  // permutations signees distinctes de (12000, 16000, 0)
 std::vector<P3> cosphere_cloud(i64 cx, const P3& inner) {
   const i64 pat[3] = {12000, 16000, 0};
   const int perm[6][3] = {{0, 1, 2}, {0, 2, 1}, {1, 0, 2}, {1, 2, 0}, {2, 0, 1}, {2, 1, 0}};
@@ -276,7 +278,7 @@ int main(int argc, char** argv) {
 
   // ---- 1. Recolte --------------------------------------------------------------
   std::vector<Level> levels;
-  u64 q4_cosphere = 0;
+  u64 q4_cosphere = 0, q4_on_sphere = 0;
   {
     // Nuage de famille : sous-ensembles deterministes (premiers points).
     for (int i = 0; i < a.m2; ++i)
@@ -302,16 +304,25 @@ int main(int argc, char** argv) {
         for (size_t j = i + 1; j < m; ++j)
           for (size_t k = j + 1; k < m; ++k) harvest_q3(cloud, pts[i], pts[j], pts[k], &levels);
       std::vector<Level> q4;
+      // F3 : les 24 premiers points de la cosphere sont SUR la sphere ; tout
+      // tetraedre bien centre forme de quatre d'entre eux (l < 24, indices
+      // croissants) a pour niveau exactement 400 000 000 = 12000² + 16000².
+      // Les tetraedres qui touchent le centre ou le point interieur ont un
+      // autre niveau et ne sont pas soumis a F3.
+      const OB r2 = ob_i64(400000000);
       for (size_t i = 0; i < m; ++i)
         for (size_t j = i + 1; j < m; ++j)
           for (size_t k = j + 1; k < m; ++k)
-            for (size_t l = k + 1; l < m; ++l) harvest_q4(cloud, pts[i], pts[j], pts[k], pts[l], &q4);
+            for (size_t l = k + 1; l < m; ++l) {
+              if (!harvest_q4(cloud, pts[i], pts[j], pts[k], pts[l], &q4)) continue;
+              if (cloud == 3 && l < kCosphereOnSphere) {
+                ++q4_on_sphere;
+                if (!same_fraction(q4.back().num, q4.back().den, r2, ob_i64(1)))
+                  fail("F3 cosphere : niveau q4 d'un tetraedre cospherique != 400000000");
+              }
+            }
       if (cloud == 3) {
         q4_cosphere = q4.size();
-        // F3 : tout niveau q4 de la cosphere vaut exactement 400 000 000.
-        const OB r2 = ob_i64(400000000);
-        for (const Level& l : q4)
-          if (!same_fraction(l.num, l.den, r2, ob_i64(1))) fail("F3 cosphere : niveau q4 != 400000000");
         const size_t stride = (q4.size() + (size_t)a.cap_cosphere - 1) / (size_t)a.cap_cosphere;
         for (size_t t = 0; t < q4.size(); t += std::max<size_t>(1, stride)) levels.push_back(q4[t]);
       } else {
@@ -391,10 +402,11 @@ int main(int argc, char** argv) {
   }
 
   std::printf(
-      "level_cmp : famille=%s n=%d coord=%d niveaux=%zu (q2=%llu q3=%llu q4=%llu, cosphere q4=%llu) paires=%llu "
+      "level_cmp : famille=%s n=%d coord=%d niveaux=%zu (q2=%llu q3=%llu q4=%llu, cosphere q4=%llu dont cospheriques=%llu) paires=%llu "
       "rationnelles=%llu plateaux=%llu repr_differentes=%llu inter_lanes=%llu desaccords=%d\n",
       cloud_family_name(a.family), a.n, coord, levels.size(), (unsigned long long)n_q2, (unsigned long long)n_q3,
-      (unsigned long long)n_q4, (unsigned long long)q4_cosphere, (unsigned long long)pairs,
+      (unsigned long long)n_q4, (unsigned long long)q4_cosphere, (unsigned long long)q4_on_sphere,
+      (unsigned long long)pairs,
       (unsigned long long)rational_pairs, (unsigned long long)ties, (unsigned long long)ties_repr_diff,
       (unsigned long long)ties_cross_lane, g_fail);
 
@@ -407,6 +419,10 @@ int main(int argc, char** argv) {
     return 3;
   }
   if (g_fail > 0) return 1;
+  if (q4_on_sphere == 0) {
+    std::fprintf(stderr, "PLANCHER : F3 vacue — aucun tetraedre cospherique bien centre\n");
+    return 3;
+  }
   if ((u64)levels.size() < a.min_levels || n_q4 < a.min_q4 || ties < a.min_ties || ties_repr_diff < a.min_repr_diff) {
     std::fprintf(stderr,
                  "PLANCHER : niveaux=%zu (>= %llu), q4=%llu (>= %llu), plateaux=%llu (>= %llu), "

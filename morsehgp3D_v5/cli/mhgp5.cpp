@@ -1,5 +1,7 @@
 // MorseHGP3D v5 — pilote en ligne de commande du pipeline (src/pipeline/run.hpp).
 // Codes : 0 complete_regular, 2 refus avant calcul, 3 invariant viole.
+#include <sys/resource.h>
+
 #include <cstdio>
 #include <cstring>
 #include <string>
@@ -53,5 +55,8 @@ int main(int argc, char** argv) {
     return status_exit_code(rr.status);
   }
   print_run(stdout, cloud_family_name(family), n, coord, seed, opt, rr);
+  // Pic de residence MESURE (RSS max du processus), jamais un pic annonce.
+  struct rusage ru;
+  if (getrusage(RUSAGE_SELF, &ru) == 0) std::printf("rss_max_kb=%ld\n", ru.ru_maxrss);
   return 0;
 }
