@@ -200,11 +200,27 @@ inline void build_q4_batch(const CloudIndex& ix, const AliveRect& ar, const u64 
           continue;
         }
       }
-      sc.fill_affine_sites(ix, pa, pb, D2);
+      // Seeds aigus de la lentille D'ABORD (sans materialiser) : une ancre
+      // sans seed n'entre jamais dans le lot (rien a scanner ni a completer).
       const size_t nc = sc.cover.size();
+      thread_local std::vector<u32> lens_idx;  // indices (dans le cover) des sites de la lentille
+      lens_idx.clear();
+      for (size_t i = 0; i < nc; ++i) {
+        const P3& p = ix.upos[(size_t)sc.cover[i].u];
+        if (p3_norm2(p3_sub(p, pa)) <= D2 && p3_norm2(p3_sub(p, pb)) <= D2) lens_idx.push_back((u32)i);
+      }
+      size_t nseeds = 0;
+      for (const u32 li : lens_idx) {
+        const i32 ux = sc.cover[li].u;
+        if (ux == ua || ux == ub) continue;
+        if (is_acute_seed(pa, pb, ix.upos[(size_t)ux], D2, ix.point_id(ua), ix.point_id(ub), ix.point_id(ux))) ++nseeds;
+      }
+      ls->seeds[1] += nseeds;
+      if (nseeds == 0) continue;
+      sc.fill_affine_sites(ix, pa, pb, D2);
       const bool to_device = nc >= lim.device_min_sites;
       Q4Batch* b = to_device ? bdev : bhost;
-      const size_t sites_before = b->u0.size(), lens_before = b->lens_sites.size(), seeds_before = b->seeds.size();
+      const size_t seeds_before = b->seeds.size();
       Q4BatchAnchor an;
       an.begin = (u32)b->u0.size();
       an.count = (u32)nc;
@@ -221,18 +237,16 @@ inline void build_q4_batch(const CloudIndex& ix, const AliveRect& ar, const u64 
         b->pid.push_back(ix.point_id(cz.u));
         if (cz.u == ua) an.skip_a = (u32)i;
         if (cz.u == ub) an.skip_b = (u32)i;
-        if (p3_norm2(p3_sub(p, pa)) <= D2 && p3_norm2(p3_sub(p, pb)) <= D2) b->lens_sites.push_back((u32)i);
       }
+      for (const u32 li : lens_idx) b->lens_sites.push_back(li);
       an.lens_count = (u32)b->lens_sites.size() - an.lens_begin;
       const u32 aidx = (u32)b->anchors.size();
       b->anchors.push_back(an);
-      for (u32 li = an.lens_begin; li < an.lens_begin + an.lens_count; ++li) {
-        const u32 xs = b->lens_sites[li];
+      for (const u32 xs : lens_idx) {
         const CoverPoint& cx = sc.cover[xs];
         if (cx.u == ua || cx.u == ub) continue;
         const P3& px = ix.upos[(size_t)cx.u];
         if (!is_acute_seed(pa, pb, px, D2, ix.point_id(ua), ix.point_id(ub), ix.point_id(cx.u))) continue;
-        ++ls->seeds[1];
         Q4BatchSeed sd;
         sd.anchor = aidx;
         sd.x_site = xs;
@@ -255,15 +269,6 @@ inline void build_q4_batch(const CloudIndex& ix, const AliveRect& ar, const u64 
         sd.core.Jhi = Jd * (1.0 + kJungGuard);
         sd.core.skip_x = xs;
         b->seeds.push_back(sd);
-      }
-      if (b->seeds.size() == seeds_before) {
-        // Aucun seed : l'ancre est retiree du lot (rien a scanner ni a completer).
-        b->anchors.pop_back();
-        b->u0.resize(sites_before); b->u1.resize(sites_before); b->u2.resize(sites_before); b->q.resize(sites_before);
-        b->u0d.resize(sites_before); b->u1d.resize(sites_before); b->u2d.resize(sites_before); b->qd.resize(sites_before);
-        b->px.resize(sites_before); b->py.resize(sites_before); b->pz.resize(sites_before); b->pid.resize(sites_before);
-        b->lens_sites.resize(lens_before);
-        continue;
       }
       const u64 anchor_seeds = (u64)(b->seeds.size() - seeds_before);
       const u64 anchor_pairs = anchor_seeds * (u64)an.lens_count;
