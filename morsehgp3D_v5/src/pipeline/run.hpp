@@ -19,6 +19,9 @@
 #include <string>
 #include <exception>
 #include <thread>
+#include <mutex>
+#include <deque>
+#include <condition_variable>
 #include <vector>
 
 #include "../tree/cloud_index.hpp"
@@ -34,9 +37,13 @@ struct RunOptions {
   int threads = 1;
   size_t shell_cap = 12;
   bool digest = false;
+  // Ordres K dont la reduction (etage B, sequentielle par ordre) peut etre en
+  // vol simultanement ; la publication reste dans l'ordre des K et la sortie
+  // bit-identique ; residence bornee a fold_inflight + 1 ordres.
+  int fold_inflight = 2;
   // Appele pour chaque K croissant, AVANT liberation du resultat, depuis le
-  // fil d'arriere-plan du pipeline (un seul a la fois, dans l'ordre des K) —
-  // PROVISOIRE jusqu'au statut terminal.
+  // fil d'arriere-plan de cet ordre (un seul a la fois, dans l'ordre des K,
+  // sous le verrou de publication) — PROVISOIRE jusqu'au statut terminal.
   std::function<void(u64 K, const std::vector<ForestEvent>& events, const ForestResult& r)> on_forest;
   // Executeurs de lane externes (device) — vides : lanes integrees. BACKEND
   // EXPERIMENTAL, NON AUTORITAIRE : un resultat obtenu avec un executeur
@@ -65,6 +72,7 @@ struct RunResult {
   double t_index_ms = 0, t_gen_ms = 0, t_rle_ms = 0, t_prefilter_ms = 0, t_census_ms = 0, t_expand_ms = 0,
          t_fold_ms = 0, t_count_ms = 0, t_digest_ms = 0;
   double t_fold_sort_ms = 0, t_fold_intern_ms = 0, t_fold_merge_ms = 0, t_fold_reduce_ms = 0;
+  double t_fold_wall_ms = 0;  // mur des etages A et B (premier ordre expanse -> derniere publication)
   double t_total_ms = 0;  // temps MUR de run_pipeline
   u64 fold_workers = 0, rle_workers = 0;
 };
@@ -206,40 +214,74 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
   // capacite) peut encore invalider la sortie apres un callback.
   // PIPELINE A DEUX ETAGES : etage A (expansion, tri, internement, fusion —
   // parallele, `threads` ouvriers) pour l'ordre K+1 pendant que l'etage B
-  // (reduction sequentielle, signature, callback, liberation) de l'ordre K
-  // s'execute dans UN fil d'arriere-plan. Un seul etage B a la fois, joint
-  // avant le lancement du suivant : l'ordre des callbacks et des sorties est
-  // celui de K croissant, la residence est bornee a deux ordres. Les callbacks
-  // s'executent dans le fil d'arriere-plan, l'un apres l'autre.
+  // (reduction sequentielle, signature, publication, liberation) des ordres
+  // precedents s'execute en arriere-plan. ETAGE B CONCURRENT PAR ORDRE :
+  // jusqu'a `fold_inflight` reductions en vol (ordres distincts,
+  // independantes — un fil chacune), mais une PUBLICATION strictement dans
+  // l'ordre des K sous un verrou (digest chaine, cartes, totaux, callback,
+  // l'un apres l'autre) : la sortie est bit-identique au pipeline sequentiel
+  // (chaque reduce est deterministe et ne depend que de son ordre), la
+  // residence est bornee a fold_inflight + 1 ordres. Les callbacks
+  // s'executent depuis le fil de l'ordre publie, jamais deux a la fois.
   struct Stage {
     u64 K = 0;
     std::vector<ForestEvent> events;
     FoldPrepared prep;
   };
-  std::thread bg;
-  std::string bg_message;
-  PipelineStatus bg_status = PipelineStatus::kCompleteRegular;
-  // CONTRAT D'EXCEPTION : une exception levee par `on_forest` (ou par l'etage
-  // B) est capturee dans le fil d'arriere-plan, le fil est JOINT, puis elle
-  // est relancee par run_pipeline dans le fil appelant — jamais
-  // std::terminate. Le joiner RAII joint aussi sur toute sortie anticipee du
-  // fil principal (exception de l'etage A comprise).
-  std::exception_ptr bg_exc;
-  struct BgJoiner {
-    std::thread& t;
-    ~BgJoiner() {
-      if (t.joinable()) t.join();
-    }
-  } bg_joiner{bg};
-  // Le fil principal n'ecrit que dans ses propres cumuls pendant qu'un etage B
-  // est en vol ; les cumuls du fil d'arriere-plan (t_fold_*, digests, cartes,
-  // totaux) ne sont lus qu'apres le join. Un seul champ etait partage
-  // (t_fold_ms) : il est accumule localement puis fusionne a la fin.
-  double t_prepare_total_ms = 0;
-  const auto join_bg = [&]() {
-    if (bg.joinable()) bg.join();
-    if (bg_exc) std::rethrow_exception(bg_exc);
+  struct BSlot {
+    std::thread t;
+    u64 K = 0;
+    std::exception_ptr exc;
+    PipelineStatus status = PipelineStatus::kCompleteRegular;
+    std::string message;
   };
+  const int inflight = std::max(1, opt.fold_inflight);
+  std::deque<std::unique_ptr<BSlot>> slots;
+  std::mutex pub_mutex;
+  std::condition_variable pub_cv;
+  u64 next_publish = 1;
+  bool pub_failed = false;
+  // CONTRAT D'EXCEPTION : une exception levee par `on_forest` (ou par l'etage
+  // B) est capturee dans son fil, TOUS les fils sont joints (le joiner RAII
+  // libere d'abord les ordres en attente de publication), puis elle est
+  // relancee par run_pipeline dans le fil appelant — jamais std::terminate.
+  // Le joiner agit aussi sur toute sortie anticipee du fil principal
+  // (exception ou refus de l'etage A compris).
+  struct BJoiner {
+    std::deque<std::unique_ptr<BSlot>>& s;
+    std::mutex& m;
+    std::condition_variable& cv;
+    bool& failed;
+    ~BJoiner() {
+      {
+        std::lock_guard<std::mutex> lk(m);
+        failed = true;
+      }
+      cv.notify_all();
+      for (auto& b : s)
+        if (b->t.joinable()) b->t.join();
+    }
+  } bjoiner{slots, pub_mutex, pub_cv, pub_failed};
+  // Le fil principal n'ecrit que dans ses propres cumuls ; les cumuls des
+  // fils d'arriere-plan (t_fold_*, digests, cartes, totaux) ne sont ecrits
+  // que sous le verrou de publication et lus apres le dernier join.
+  double t_prepare_total_ms = 0;
+  // Joint le plus ancien ordre en vol et propage son verdict (le premier
+  // defaut dans l'ordre des K fait foi ; les ordres suivants sont joints par
+  // le joiner sans publier).
+  const auto reap_front = [&]() -> bool {
+    std::unique_ptr<BSlot> b = std::move(slots.front());
+    slots.pop_front();
+    b->t.join();
+    if (b->exc) std::rethrow_exception(b->exc);
+    if (b->status != PipelineStatus::kCompleteRegular) {
+      rr.status = b->status;
+      rr.message = b->message;
+      return false;
+    }
+    return true;
+  };
+  const auto t_fold_wall = std::chrono::steady_clock::now();
   for (u64 K = 1; K <= rr.kmax_eff; ++K) {
     auto st = std::make_unique<Stage>();
     st->K = K;
@@ -247,7 +289,6 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
     expand_events_k(ix, balls, K, rr.kmax_eff, opt.threads, &st->events, &rr.expand);
     rr.t_expand_ms += ms(t_k);
     if (st->events.size() != kc[K].events) {
-      join_bg();
       rr.status = PipelineStatus::kInvariantViolated;
       rr.message = "invariant : comptage par K != expansion (K=" + std::to_string(K) + ")";
       return rr;
@@ -256,60 +297,76 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
     st->prep = prepare_fold(st->events, opt.threads);
     t_prepare_total_ms += ms(t_f);
     if (!st->prep.r.refusal.empty()) {  // impossible apres la garde amont ; traite en invariant
-      join_bg();
       rr.status = PipelineStatus::kInvariantViolated;
       rr.message = "invariant : refus de fold apres la garde de capacite (K=" + std::to_string(K) + ")";
       return rr;
     }
-    join_bg();
-    if (bg_status != PipelineStatus::kCompleteRegular) {
-      rr.status = bg_status;
-      rr.message = bg_message;
-      return rr;
-    }
-    bg = std::thread([&rr, &opt, &dg_all, &bg_status, &bg_message, &bg_exc, st = std::move(st)]() mutable {
-     try {
-      const u64 K = st->K;
-      const auto t_r = std::chrono::steady_clock::now();
-      ForestResult r = reduce_fold(std::move(st->prep));
-      rr.t_fold_ms += run_detail::ms(t_r);
-      rr.t_fold_sort_ms += r.t_sort_ms;
-      rr.t_fold_intern_ms += r.t_intern_ms;
-      rr.t_fold_merge_ms += r.t_merge_ms;
-      rr.t_fold_reduce_ms += r.t_reduce_ms + r.t_partition_ms;
-      rr.fold_workers = std::max(rr.fold_workers, r.workers);
-      if (r.attach_violations || r.birth_violations || r.partition_violations) {
-        bg_status = PipelineStatus::kInvariantViolated;
-        bg_message = "invariant : violations de roles ou de partition (K=" + std::to_string(K) + ")";
-        return;
+    if ((int)slots.size() >= inflight && !reap_front()) return rr;
+    auto slot = std::make_unique<BSlot>();
+    slot->K = K;
+    BSlot* sp = slot.get();
+    slot->t = std::thread([&rr, &opt, &dg_all, &pub_mutex, &pub_cv, &next_publish, &pub_failed, sp, st = std::move(st)]() mutable {
+      try {
+        const u64 K = st->K;
+        const auto t_r = std::chrono::steady_clock::now();
+        ForestResult r = reduce_fold(std::move(st->prep));
+        const double t_fold_local = run_detail::ms(t_r);
+        std::string dg;
+        double t_dg = 0;
+        if (opt.digest) {
+          const auto t_d = std::chrono::steady_clock::now();
+          dg = digest_forest_v4((u32)K, r);
+          t_dg = run_detail::ms(t_d);
+        }
+        std::unique_lock<std::mutex> lk(pub_mutex);
+        pub_cv.wait(lk, [&] { return pub_failed || next_publish == K; });
+        if (pub_failed) return;
+        rr.t_fold_ms += t_fold_local;
+        rr.t_fold_sort_ms += r.t_sort_ms;
+        rr.t_fold_intern_ms += r.t_intern_ms;
+        rr.t_fold_merge_ms += r.t_merge_ms;
+        rr.t_fold_reduce_ms += r.t_reduce_ms + r.t_partition_ms;
+        rr.fold_workers = std::max(rr.fold_workers, r.workers);
+        if (r.attach_violations || r.birth_violations || r.partition_violations) {
+          sp->status = PipelineStatus::kInvariantViolated;
+          sp->message = "invariant : violations de roles ou de partition (K=" + std::to_string(K) + ")";
+          pub_failed = true;
+          lk.unlock();
+          pub_cv.notify_all();
+          return;
+        }
+        rr.cards[K] = KCardinalities{st->events.size(), r.facets, r.deltas.size(), r.new_attachments, r.fusions, r.nodes};
+        rr.total_events += st->events.size();
+        rr.total_facets += r.facets;
+        rr.total_fusions += r.fusions;
+        rr.total_deltas += r.deltas.size();
+        rr.total_nodes += r.nodes;
+        if (opt.digest) {
+          rr.digest_forest[K] = dg;
+          dg_all.add(dg);
+          rr.t_digest_ms += t_dg;
+        }
+        if (opt.on_forest) opt.on_forest(K, st->events, r);
+        next_publish = K + 1;
+        lk.unlock();
+        pub_cv.notify_all();
+        // Liberation : evenements et resultat de cet ordre.
+        st.reset();
+      } catch (...) {
+        sp->exc = std::current_exception();
+        {
+          std::lock_guard<std::mutex> lk(pub_mutex);
+          pub_failed = true;
+        }
+        pub_cv.notify_all();
       }
-      rr.cards[K] = KCardinalities{st->events.size(), r.facets, r.deltas.size(), r.new_attachments, r.fusions, r.nodes};
-      rr.total_events += st->events.size();
-      rr.total_facets += r.facets;
-      rr.total_fusions += r.fusions;
-      rr.total_deltas += r.deltas.size();
-      rr.total_nodes += r.nodes;
-      if (opt.digest) {
-        const auto t_d = std::chrono::steady_clock::now();
-        rr.digest_forest[K] = digest_forest_v4((u32)K, r);
-        dg_all.add(rr.digest_forest[K]);
-        rr.t_digest_ms += run_detail::ms(t_d);
-      }
-      if (opt.on_forest) opt.on_forest(K, st->events, r);
-      // Liberation : evenements et resultat de cet ordre.
-      st.reset();
-     } catch (...) {
-      bg_exc = std::current_exception();
-     }
     });
+    slots.push_back(std::move(slot));
   }
-  join_bg();
+  while (!slots.empty())
+    if (!reap_front()) return rr;
+  rr.t_fold_wall_ms = ms(t_fold_wall);
   rr.t_fold_ms += t_prepare_total_ms;
-  if (bg_status != PipelineStatus::kCompleteRegular) {
-    rr.status = bg_status;
-    rr.message = bg_message;
-    return rr;
-  }
   std::vector<BallData>().swap(balls);
   if (opt.digest) rr.digest_all = dg_all.hex();
   rr.t_total_ms = ms(t_all);
@@ -359,6 +416,7 @@ inline void print_run(std::FILE* out, const char* family, int n, int coord, long
                rr.t_fold_reduce_ms, rr.t_digest_ms);
   std::fprintf(out, "temps_mur_ms=%.1f (etages A et B du fold pipelines : fold+digest ci-dessus sont des cumuls par etage, pas le mur)\n",
                rr.t_total_ms);
+  std::fprintf(out, "temps_fold_mur_ms=%.1f (etages A et B, %d ordre(s) en vol)\n", rr.t_fold_wall_ms, std::max(1, opt.fold_inflight));
   for (u64 K = 1; K <= rr.kmax_eff; ++K)
     std::fprintf(out, "cardinalites K=%llu evenements=%llu facettes=%llu deltas=%llu attachements=%llu fusions=%llu noeuds=%llu\n",
                  (unsigned long long)K, (unsigned long long)rr.cards[K].events, (unsigned long long)rr.cards[K].facets,

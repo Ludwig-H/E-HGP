@@ -9,6 +9,7 @@
 // Codes : 0 conforme, 3 contrat viole.
 #include <cstdio>
 #include <stdexcept>
+#include <atomic>
 #include <string>
 #include <vector>
 
@@ -113,6 +114,54 @@ int main() {
     }
     expect(caught, "exception du callback non propagee");
     expect(calls == 2, "exception du callback : le pipeline a continue apres K=2");
+  }
+  // ETAGE B CONCURRENT PAR ORDRE : sortie bit-identique quel que soit
+  // `fold_inflight` (1, 2, 3, 8), callbacks strictement dans l'ordre des K
+  // (1..K_max, un seul a la fois), et exception d'un callback avec trois
+  // ordres en vol : propagee, publication arretee a l'ordre fautif.
+  {
+    const std::vector<InputPoint> mid = make_family_input(CloudFamily::kUniform, 300, 0, 3);
+    std::string ref;
+    for (const int f : {1, 2, 3, 8}) {
+      RunOptions o;
+      o.threads = 4;
+      o.digest = true;
+      o.fold_inflight = f;
+      u64 last_k = 0;
+      bool ordered = true;
+      std::atomic<int> inside{0};
+      bool overlapped = false;
+      o.on_forest = [&](u64 K, const std::vector<ForestEvent>&, const ForestResult&) {
+        if (inside.fetch_add(1) != 0) overlapped = true;
+        if (K != last_k + 1) ordered = false;
+        last_k = K;
+        inside.fetch_sub(1);
+      };
+      const RunResult rr = run_pipeline(mid, o);
+      expect(rr.status == PipelineStatus::kCompleteRegular, "fold_inflight : statut non complet");
+      expect(ordered && last_k == rr.kmax_eff, "fold_inflight : callbacks hors ordre ou incomplets");
+      expect(!overlapped, "fold_inflight : deux callbacks simultanes");
+      if (f == 1) ref = rr.digest_all;
+      else expect(rr.digest_all == ref && !ref.empty(), "fold_inflight : digest_all different de la reference sequentielle");
+    }
+    for (const u64 kfail : {2ull, 5ull}) {
+      RunOptions o;
+      o.threads = 4;
+      o.fold_inflight = 3;
+      int calls = 0;
+      o.on_forest = [&](u64 K, const std::vector<ForestEvent>&, const ForestResult&) {
+        ++calls;
+        if (K == kfail) throw std::runtime_error("callback en vol");
+      };
+      bool caught = false;
+      try {
+        (void)run_pipeline(mid, o);
+      } catch (const std::runtime_error& e) {
+        caught = std::string(e.what()) == "callback en vol";
+      }
+      expect(caught, "fold_inflight=3 : exception du callback non propagee");
+      expect(calls == (int)kfail, "fold_inflight=3 : publication poursuivie apres l'ordre fautif");
+    }
   }
   // P1 : census sur un singleton — le point (1,1,1) est strictement interieur a
   // P(z) = |z|² − 4 : at_least(1) vrai ; at_least(2) faux avec count = 1 ;

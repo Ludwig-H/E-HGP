@@ -31,6 +31,7 @@ int main(int argc, char** argv) {
     else if (const char* v = val("--s=")) opt.s = std::atoll(v);
     else if (const char* v = val("--smax=")) opt.smax = (u64)std::atoll(v);
     else if (const char* v = val("--threads=")) opt.threads = std::atoi(v);
+    else if (const char* v = val("--fold-inflight=")) opt.fold_inflight = std::atoi(v);
     else if (const char* v = val("--shell-cap=")) opt.shell_cap = (size_t)std::atoll(v);
     else if (arg == "--digest") opt.digest = true;
     else {

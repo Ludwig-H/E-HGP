@@ -154,19 +154,6 @@ struct FacetIntern {
   }
 };
 
-struct UnionFind {
-  std::vector<i32> parent;
-  explicit UnionFind(size_t n) : parent(n) {
-    for (size_t i = 0; i < n; ++i) parent[i] = (i32)i;
-  }
-  i32 find(i32 v) {
-    while (parent[(size_t)v] != v) {
-      parent[(size_t)v] = parent[(size_t)parent[(size_t)v]];
-      v = parent[(size_t)v];
-    }
-    return v;
-  }
-};
 
 }  // namespace fold_detail
 
@@ -474,6 +461,35 @@ inline FoldPrepared prepare_fold(const std::vector<ForestEvent>& events, int thr
   return fp;
 }
 
+// Etat par facette PACKE sur une ligne de cache de 32 octets : le reduce est
+// sequentiel et lie a la latence memoire (a 200 k points, 56 M facettes par
+// ordre, ~6 facettes touchees par evenement, chacune dans ~5 tableaux
+// distincts = ~30 defauts de cache par evenement, ~1,6 us). Une seule ligne
+// par facette et une prefetch glissante (fenetre kReduceAhead evenements)
+// recouvrent ces defauts. SEMANTIQUE INCHANGEE : memes racines (la racine de
+// `first` absorbe), meme compression par moitie, memes epoques, meme ordre
+// des deltas (racines triees) — le digest v4 est bit-identique (conformites,
+// banc a signature identique).
+struct FidState {
+  i32 parent;
+  u32 canon;
+  u32 role_epoch, pre_epoch, post_epoch;
+  u32 pre_canon, post_slot;
+  u8 role_bits, seen;
+  u8 pad_[2];
+};
+static_assert(sizeof(FidState) == 32, "FidState : une ligne de 32 octets");
+
+inline constexpr size_t kReduceAhead = 8;
+
+inline void reduce_prefetch(const void* p) {
+#if defined(__GNUC__) || defined(__clang__)
+  __builtin_prefetch(p, 1, 3);
+#else
+  (void)p;
+#endif
+}
+
 inline ForestResult reduce_fold(FoldPrepared&& fp) {
   using namespace fold_detail;
   ForestResult r = std::move(fp.r);
@@ -495,61 +511,95 @@ inline ForestResult reduce_fold(FoldPrepared&& fp) {
   const size_t nfid = keys.size();
   r.facets = nfid;
 
-  UnionFind uf(nfid);
-  std::vector<u32> canon_fid(nfid);
-  for (size_t i = 0; i < nfid; ++i) canon_fid[i] = (u32)i;
+  std::vector<FidState> st(nfid);
+  for (size_t i = 0; i < nfid; ++i) st[i] = FidState{(i32)i, (u32)i, UINT32_MAX, UINT32_MAX, UINT32_MAX, 0, 0, 0, 0, {0, 0}};
+  const auto find = [&](i32 v) -> i32 {
+    while (st[(size_t)v].parent != v) {
+      st[(size_t)v].parent = st[(size_t)st[(size_t)v].parent].parent;
+      v = st[(size_t)v].parent;
+    }
+    return v;
+  };
   const auto unite_canon = [&](i32 a, i32 b) {
-    const i32 ra = uf.find(a), rb = uf.find(b);
+    const i32 ra = find(a), rb = find(b);
     if (ra == rb) return false;
-    const u32 mn = m_canon_root ? canon_fid[(size_t)ra] : std::min(canon_fid[(size_t)ra], canon_fid[(size_t)rb]);
-    uf.parent[(size_t)rb] = ra;
-    canon_fid[(size_t)ra] = mn;
+    const u32 mn = m_canon_root ? st[(size_t)ra].canon : std::min(st[(size_t)ra].canon, st[(size_t)rb].canon);
+    st[(size_t)rb].parent = ra;
+    st[(size_t)ra].canon = mn;
     return true;
   };
   constexpr u8 kActive = 1, kAttach = 2;
-  std::vector<u32> role_epoch(nfid, UINT32_MAX);
-  std::vector<u8> role_bits(nfid, 0), seen(nfid, 0);
-  std::vector<u32> pre_epoch(nfid, UINT32_MAX), post_epoch(nfid, UINT32_MAX);
-  std::vector<u32> pre_canon_fid(nfid), post_slot(nfid);
   std::vector<u32> touched;
   std::vector<i32> pre_list, post_list;
   std::vector<ComponentDelta> scratch;
+  const size_t ne = order.size();
+  r.deltas.reserve(batches.size());
+#ifdef MHGP5_PROFILE_REDUCE
+  double pt[6] = {0, 0, 0, 0, 0, 0};
+  auto pm = std::chrono::steady_clock::now();
+  const auto ptick = [&](int i) { const auto now = std::chrono::steady_clock::now(); pt[i] += std::chrono::duration<double, std::milli>(now - pm).count(); pm = now; };
+#else
+  const auto ptick = [](int) {};
+#endif
+  const auto prefetch_event = [&](size_t e) {
+    const ForestEvent& pv = evt(e);
+    const u32* f = &ev_fid[e * 11];
+    for (int s = 0; s < (int)pv.q + (int)pv.d; ++s) {
+      reduce_prefetch(&st[(size_t)f[s]]);
+      reduce_prefetch(&keys[(size_t)f[s]]);  // clef copiee dans parents/born
+    }
+  };
+  for (size_t e = 0; e < std::min(kReduceAhead, ne); ++e) {
+    reduce_prefetch(&events[(size_t)order[e]]);
+    prefetch_event(e);
+  }
   for (size_t b = 0; b < batches.size(); ++b) {
     const size_t e0 = batches[b].first, e1 = batches[b].second;
     touched.clear();
     const auto touch = [&](u32 fid, u8 bit) {
-      if (role_epoch[fid] != (u32)b) {
-        role_epoch[fid] = (u32)b;
-        role_bits[fid] = 0;
+      FidState& f = st[(size_t)fid];
+      if (f.role_epoch != (u32)b) {
+        f.role_epoch = (u32)b;
+        f.role_bits = 0;
         touched.push_back(fid);
       }
-      role_bits[fid] |= bit;
+      f.role_bits |= bit;
     };
+    // Fenetre de prefetch GLOBALE (les lots sont le plus souvent d'un seul
+    // evenement : une fenetre par lot ne recouvrirait rien).
     for (size_t e = e0; e < e1; ++e) {
+      if (e + kReduceAhead < ne) {
+        reduce_prefetch(&events[(size_t)order[e + kReduceAhead]]);
+        prefetch_event(e + kReduceAhead);
+      }
       const ForestEvent& ev = evt(e);
       for (int s = 0; s < (int)ev.q; ++s) touch(ev_fid[e * 11 + (size_t)s], ((ev.active_mask >> s) & 1u) ? kActive : kAttach);
       for (int z = 0; z < (int)ev.d; ++z) touch(ev_fid[e * 11 + (size_t)(ev.q + z)], kAttach);
     }
+    ptick(0);
     for (const u32 fid : touched) {
-      const bool active = role_bits[fid] & kActive;
-      const bool attach = role_bits[fid] & kAttach;
+      const FidState& f = st[(size_t)fid];
+      const bool active = f.role_bits & kActive;
+      const bool attach = f.role_bits & kAttach;
       if (!m_no_detector) {
-        if (attach && seen[fid]) ++r.attach_violations;
+        if (attach && f.seen) ++r.attach_violations;
         if (attach && active) ++r.birth_violations;
       }
       if (attach && !active) ++r.new_attachments;
     }
     pre_list.clear();
     for (const u32 fid : touched)
-      if (m_attach_pre || (role_bits[fid] & kActive)) {
-        const i32 pr = uf.find((i32)fid);
-        if (pre_epoch[(size_t)pr] != (u32)b) {
-          pre_epoch[(size_t)pr] = (u32)b;
-          pre_canon_fid[(size_t)pr] = canon_fid[(size_t)pr];
+      if (m_attach_pre || (st[(size_t)fid].role_bits & kActive)) {
+        const i32 pr = find((i32)fid);
+        FidState& fr = st[(size_t)pr];
+        if (fr.pre_epoch != (u32)b) {
+          fr.pre_epoch = (u32)b;
+          fr.pre_canon = fr.canon;
           pre_list.push_back(pr);
         }
       }
     std::sort(pre_list.begin(), pre_list.end());
+    ptick(1);
     for (size_t e = e0; e < e1; ++e) {
       const ForestEvent& ev = evt(e);
       i32 first = -1;
@@ -561,11 +611,13 @@ inline ForestResult reduce_fold(FoldPrepared&& fp) {
       for (int z = 0; z < (int)ev.d; ++z)
         if (unite_canon(first, (i32)ev_fid[e * 11 + (size_t)(ev.q + z)])) ++r.fusions;
     }
+    ptick(2);
     post_list.clear();
     const auto post_of = [&](i32 rt) -> ComponentDelta& {
-      if (post_epoch[(size_t)rt] != (u32)b) {
-        post_epoch[(size_t)rt] = (u32)b;
-        post_slot[(size_t)rt] = (u32)post_list.size();
+      FidState& fr = st[(size_t)rt];
+      if (fr.post_epoch != (u32)b) {
+        fr.post_epoch = (u32)b;
+        fr.post_slot = (u32)post_list.size();
         post_list.push_back(rt);
         if (scratch.size() < post_list.size()) scratch.emplace_back();
         ComponentDelta& cd = scratch[post_list.size() - 1];
@@ -573,14 +625,17 @@ inline ForestResult reduce_fold(FoldPrepared&& fp) {
         cd.born.clear();
         return cd;
       }
-      return scratch[post_slot[(size_t)rt]];
+      return scratch[fr.post_slot];
     };
-    for (const i32 pr : pre_list) post_of(uf.find(pr)).parents.push_back(keys[pre_canon_fid[(size_t)pr]]);
-    for (const u32 fid : touched)
-      if ((role_bits[fid] & kAttach) && !(role_bits[fid] & kActive)) post_of(uf.find((i32)fid)).born.push_back(keys[fid]);
+    for (const i32 pr : pre_list) post_of(find(pr)).parents.push_back(keys[st[(size_t)pr].pre_canon]);
+    for (const u32 fid : touched) {
+      const u8 bits = st[(size_t)fid].role_bits;
+      if ((bits & kAttach) && !(bits & kActive)) post_of(find((i32)fid)).born.push_back(keys[fid]);
+    }
+    ptick(3);
     std::sort(post_list.begin(), post_list.end());
     for (const i32 rt : post_list) {
-      ComponentDelta& cd = scratch[post_slot[(size_t)rt]];
+      ComponentDelta& cd = scratch[st[(size_t)rt].post_slot];
       std::sort(cd.parents.begin(), cd.parents.end());
       std::sort(cd.born.begin(), cd.born.end());
       if (cd.parents.size() >= 2) ++r.nodes;
@@ -588,23 +643,29 @@ inline ForestResult reduce_fold(FoldPrepared&& fp) {
       if (m_drop_nonmerge && cd.parents.size() < 2) continue;
       cd.batch = (u64)b;
       cd.level = evt(e0).level;
-      cd.output = keys[canon_fid[(size_t)uf.find(rt)]];
-      r.deltas.push_back(cd);
+      cd.output = keys[st[(size_t)find(rt)].canon];
+      r.deltas.push_back(cd);  // copie : le deplacement (mesure) ne fait que deplacer les allocations vers le scratch
     }
     r.batch_levels.push_back(evt(e0).level);
-    for (const u32 fid : touched) seen[fid] = 1;
+    for (const u32 fid : touched) st[(size_t)fid].seen = 1;
     ++r.batches;
+    ptick(4);
   }
+#ifdef MHGP5_PROFILE_REDUCE
+  std::fprintf(stderr, "profil_reduce facettes=%zu evenements=%zu lots=%llu touch=%.0f pre=%.0f unite=%.0f post=%.0f deltas=%.0f ms\n", nfid, ne,
+               (unsigned long long)r.batches, pt[0], pt[1], pt[2], pt[3], pt[4]);
+#endif
   mark(&r.t_reduce_ms);
   r.final_canon_fid.resize(nfid);
   for (size_t fid = 0; fid < nfid; ++fid) {
-    const u32 c = canon_fid[(size_t)uf.find((i32)fid)];
+    const u32 c = st[(size_t)find((i32)fid)].canon;
     r.final_canon_fid[fid] = c;
     if (c > (u32)fid || r.final_canon_fid[(size_t)c] != c) ++r.partition_violations;
   }
   for (size_t fid = 1; fid < nfid; ++fid)
     if (!(keys[fid - 1] < keys[fid])) ++r.partition_violations;
   std::vector<u32>().swap(ev_fid);
+  std::vector<FidState>().swap(st);
   r.facet_keys = std::move(keys);
   mark(&r.t_partition_ms);
   return r;

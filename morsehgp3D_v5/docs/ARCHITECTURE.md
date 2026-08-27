@@ -95,11 +95,14 @@ les requêtes de cover. Il n'existe ni octree séparé ni second arbre.
    étage A (parallèle, `threads` ouvriers) : expansion de l'ordre K,       forest/fold.hpp
    tri stable parallèle des événements, internement PARTITIONNÉ par        parallel/sort.hpp
    empreinte (64 partitions fixes), fusion parallèle par rangs de valeurs,
-   remap ; étage B (un fil d'arrière-plan, un seul à la fois, dans l'ordre
-   des K) : réduction (union-find à macro-lots, deltas, partition dense),
-   signature SHA-256 (SHA-NI si disponible), callback provisoire,
-   libération. L'étage B de K recouvre l'étage A de K+1 ; résidence
-   bornée à deux ordres.
+   remap ; étage B (un fil d'arrière-plan PAR ORDRE, jusqu'à
+   `fold_inflight` ordres en vol — les réductions d'ordres distincts sont
+   indépendantes —, PUBLICATION sous verrou dans l'ordre des K, un ordre à
+   la fois) : réduction (union-find à état packé, prefetch glissante,
+   deltas, partition dense), signature SHA-256 (SHA-NI si disponible),
+   callback provisoire, libération. Sortie bit-identique au pipeline
+   séquentiel ; les étages B de K−F+1..K recouvrent l'étage A de K+1 ;
+   résidence bornée à `fold_inflight` + 1 ordres (2 par défaut → 3).
 ```
 
 Chaque étape parallèle découpe par tranches d'index et fusionne **en ordre de
