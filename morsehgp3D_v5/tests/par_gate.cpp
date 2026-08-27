@@ -42,16 +42,16 @@ int main(int argc, char** argv) {
   if (r1.status != PipelineStatus::kCompleteRegular || rN.status != PipelineStatus::kCompleteRegular) return 2;
   const u64 w[] = {rN.gen.workers_wspd[0], rN.gen.workers_wspd[1], rN.gen.workers_wspd[2], rN.gen.workers_rects[0],
                    rN.gen.workers_rects[1], rN.gen.workers_rects[2], rN.expand.workers_prefilter,
-                   rN.expand.workers_census, rN.expand.workers_expand};
+                   rN.expand.workers_census, rN.expand.workers_expand, rN.rle_workers, rN.fold_workers};
   u64 wmax = 0;
   for (const u64 x : w) wmax = std::max(wmax, x);
   const bool same = r1.digest_balls == rN.digest_balls && r1.digest_all == rN.digest_all;
   std::printf("par_gate famille=%s n=%d fils=%d digests=%s ouvriers_max=%llu (wspd %llu/%llu/%llu rects %llu/%llu/%llu "
-              "prefiltre %llu census %llu expansion %llu)\n",
+              "prefiltre %llu census %llu expansion %llu rle %llu fold %llu)\n",
               cloud_family_name(family), n, threads, same ? "identiques" : "DIFFERENTS", (unsigned long long)wmax,
               (unsigned long long)w[0], (unsigned long long)w[1], (unsigned long long)w[2], (unsigned long long)w[3],
               (unsigned long long)w[4], (unsigned long long)w[5], (unsigned long long)w[6], (unsigned long long)w[7],
-              (unsigned long long)w[8]);
+              (unsigned long long)w[8], (unsigned long long)w[9], (unsigned long long)w[10]);
   if (wmax > (u64)threads) {
     std::fprintf(stderr, "INVARIANT : plus d'ouvriers crees (%llu) que demandes (%d)\n", (unsigned long long)wmax, threads);
     return 3;

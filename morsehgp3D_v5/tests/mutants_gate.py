@@ -25,7 +25,10 @@ for d in ("src", "tests", "oracle", "cli", "bench"):
     for f in sorted((ROOT / d).rglob("*")):
         if f.suffix not in (".hpp", ".cpp", ".cu") or f == REG:
             continue
-        for m in re.finditer(r'MHGP5_MUTANT\("([a-z0-9-]+)"\)', f.read_text(encoding="utf-8")):
+        # Les mentions en commentaire (`// ... MHGP5_MUTANT("x")`) ne sont pas
+        # des sites : chaque ligne est coupee a son `//` avant la recherche.
+        code = "\n".join(line.split("//", 1)[0] for line in f.read_text(encoding="utf-8").splitlines())
+        for m in re.finditer(r'MHGP5_MUTANT\("([a-z0-9-]+)"\)', code):
             sites.setdefault(m.group(1), []).append(str(f.relative_to(ROOT)))
 cmake = (ROOT / "CMakeLists.txt").read_text(encoding="utf-8")
 gated: set[str] = set(re.findall(r'mhgp5_gate\([A-Za-z0-9_${}-]+ 4 [A-Za-z0-9_]+ "[^"]*--inject=([a-z0-9-]+)', cmake))
