@@ -9,12 +9,14 @@ recopiés au tip.
 ## Entrées actives
 
 - [`ETAT_COURANT.md`](ETAT_COURANT.md) : verdict courant et ordre de fermeture.
+- [`QUESTION_CLAUDE_TESTS_D_ANCRE_20260827.md`](QUESTION_CLAUDE_TESTS_D_ANCRE_20260827.md) : question V7–V14 et réponse décisionnelle des auditeurs sur W3, secteurs, reçus et priorité GPU.
 - [`REPONSE_A_CLAUDE_APPLICATIONS_VERTICALES_20260827.md`](REPONSE_A_CLAUDE_APPLICATIONS_VERTICALES_20260827.md) : reçu de décision sur la future tour.
 - [`REPONSE_A_CLAUDE_87E915BD_VERROUS_OUVERTURE_20260827.md`](REPONSE_A_CLAUDE_87E915BD_VERROUS_OUVERTURE_20260827.md) : reçu des arbitrages V1–V4 désormais intégrés aux documents canoniques.
 
-Aucune question n'est ouverte au tip. Les deux questions historiques du
-27 août ont été retirées après intégration ; leurs pins restent nommés dans
-les réponses.
+La question V7–V14 reste ouverte jusqu'à intégration de ses décisions et
+requalification sur un pin propre. Les deux questions historiques précédentes
+ont été retirées après intégration ; leurs pins restent nommés dans les
+réponses.
 
 ## Convention de fraîcheur
 
