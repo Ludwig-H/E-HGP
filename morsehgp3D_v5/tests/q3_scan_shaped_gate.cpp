@@ -102,7 +102,7 @@ int main(int argc, char** argv) {
           bool dead_p = false;
           for (size_t iz = 0; iz < nc; ++iz) {
             // La lane de production ne saute PAS le carrier : son L vaut 0 (sur la sphere) et n'est jamais < 0.
-            const double lh = affine_l_hat(Gd, Nd0, Nd1, Nd2, du0[iz], du1[iz], du2[iz], dq[iz]);
+            const double lh = affine_l_hat(Gd, Nd0, Nd1, Nd2, (double)su0[iz], (double)su1[iz], (double)su2[iz], (double)sq[iz]);
             bool interior;
             if (lh < -bound) { ++pn; interior = true; }
             else if (lh > bound) { ++pp; interior = false; }
