@@ -24,8 +24,10 @@ struct CoverPoint {
   i64 dist2q;  // |2z-(a+b)|²
 };
 
+// `sorted = false` : resultat NON trie (pretests d'ancre, ordre indifferent —
+// le tri par dist2q d'un resultat dense dominait le cout de la requete).
 inline void cover_query(const CloudIndex& ix, const P3& pa, const P3& pb, i64 D2, i64 coef,
-                        std::vector<CoverPoint>* out) {
+                        std::vector<CoverPoint>* out, bool sorted = true) {
   out->clear();
   if (ix.unique_count() == 0) return;
   const i64 m2[3] = {pa.x + pb.x, pa.y + pb.y, pa.z + pb.z};
@@ -54,6 +56,7 @@ inline void cover_query(const CloudIndex& ix, const P3& pa, const P3& pb, i64 D2
     stack.push_back(ix.nodes[(size_t)z].left);
     stack.push_back(ix.nodes[(size_t)z].right);
   }
+  if (!sorted) return;
   std::sort(out->begin(), out->end(), [](const CoverPoint& x, const CoverPoint& y) {
     return x.dist2q != y.dist2q ? x.dist2q < y.dist2q : x.u < y.u;
   });

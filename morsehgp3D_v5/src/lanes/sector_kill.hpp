@@ -59,11 +59,11 @@ inline bool beyond_diametral_bins(i64 dist2q, i64 D2) { return (i128)32 * dist2q
 // Test W_q EXACT sur le cover trie : rend true si >= h sites sont universels
 // (in_spindle) ; sortie anticipee a h et a la classe radiale 11.
 inline bool anchor_universal_kill(const std::vector<CoverPoint>& cover, const std::vector<P3>& upos, i32 ua, i32 ub,
-                                  const P3& pa, const P3& pb, i64 D2, Lane lane, u64 h) {
+                                  const P3& pa, const P3& pb, i64 D2, Lane lane, u64 h, bool radially_sorted = true) {
   const u64 hh = MHGP5_MUTANT("anchor-kill-h-minus-one") && h > 1 ? h - 1 : h;
   u64 n = 0;
   for (const CoverPoint& cz : cover) {
-    if (sector_detail::beyond_diametral_bins(cz.dist2q, D2)) break;
+    if (sector_detail::beyond_diametral_bins(cz.dist2q, D2)) { if (radially_sorted) break; else continue; }
     if (cz.u == ua || cz.u == ub) continue;
     if (in_spindle(lane, pa, pb, upos[(size_t)cz.u]) && ++n >= hh) return true;
   }
@@ -74,7 +74,8 @@ inline bool anchor_universal_kill(const std::vector<CoverPoint>& cover, const st
 // 8 (q4) — rho² = D²/den. Compte dans `*witness_min` le minimum sur les
 // secteurs du nombre de temoins (mesure).
 inline bool anchor_sector_kill(const std::vector<CoverPoint>& cover, const std::vector<P3>& upos, i32 ua, i32 ub, const P3& pa,
-                               const P3& pb, i64 D2, i128 rho2_den, u64 h, u64* witness_min, u32* sector_counts = nullptr) {
+                               const P3& pb, i64 D2, i128 rho2_den, u64 h, u64* witness_min, u32* sector_counts = nullptr,
+                               bool radially_sorted = true) {
   using sector_detail::sq;
   const bool nonstrict = MHGP5_MUTANT("sector-kill-nonstrict");
   const u64 hh = MHGP5_MUTANT("anchor-kill-h-minus-one") && h > 1 ? h - 1 : h;
@@ -110,7 +111,7 @@ inline bool anchor_sector_kill(const std::vector<CoverPoint>& cover, const std::
   u32 cnt[8] = {0, 0, 0, 0, 0, 0, 0, 0};
   const i64 sx = pa.x + pb.x, sy = pa.y + pb.y, sz = pa.z + pb.z;
   for (const CoverPoint& cz : cover) {
-    if (sector_detail::beyond_diametral_bins(cz.dist2q, D2)) break;  // cover trie par classes radiales
+    if (sector_detail::beyond_diametral_bins(cz.dist2q, D2)) { if (radially_sorted) break; else continue; }  // cover trie par classes radiales
     if (cz.u == ua || cz.u == ub) continue;
     const P3& z = upos[(size_t)cz.u];
     const i64 w0 = 2 * z.x - sx, w1 = 2 * z.y - sy, w2 = 2 * z.z - sz;  // w2 = 2w
@@ -136,11 +137,24 @@ inline bool anchor_sector_kill(const std::vector<CoverPoint>& cover, const std::
 // sur les survivantes. `rho2_den` : 12 (q3) / 8 (q4). Rend 1 (W_q), 2
 // (secteurs) ou 0 (vivante).
 inline int anchor_kill_cumulated(const std::vector<CoverPoint>& cover, const std::vector<P3>& upos, i32 ua, i32 ub,
-                                 const P3& pa, const P3& pb, i64 D2, Lane lane, i128 rho2_den, u64 h) {
-  if (anchor_universal_kill(cover, upos, ua, ub, pa, pb, D2, lane, h)) return 1;
+                                 const P3& pa, const P3& pb, i64 D2, Lane lane, i128 rho2_den, u64 h,
+                                 bool radially_sorted = true) {
+  if (anchor_universal_kill(cover, upos, ua, ub, pa, pb, D2, lane, h, radially_sorted)) return 1;
   u64 wmin = 0;
-  if (anchor_sector_kill(cover, upos, ua, ub, pa, pb, D2, rho2_den, h, &wmin)) return 2;
+  if (anchor_sector_kill(cover, upos, ua, ub, pa, pb, D2, rho2_den, h, &wmin, nullptr, radially_sorted)) return 2;
   return 0;
+}
+
+// PRETESTS AVANT LE COVER : les deux tests ne lisent que les sites de la boule
+// diametrale ouverte ; sur un rectangle dense (beaucoup de points de handles),
+// une requete d'arbre de coefficient 1 par ancre (cover_query : O(log n +
+// sortie)) coute moins que le balayage des points de handles, et l'ancre morte
+// n'a jamais son cover complet construit. Meme verdict quel que soit le chemin
+// (sur-ensemble exact des temoins) : l'objet ne depend pas de la politique.
+inline int anchor_kill_from_query(const CloudIndex& ix, i32 ua, i32 ub, const P3& pa, const P3& pb, i64 D2, Lane lane,
+                                  i128 rho2_den, u64 h, std::vector<CoverPoint>* tmp) {
+  cover_query(ix, pa, pb, D2, 1, tmp, /*sorted=*/false);  // ordre indifferent pour les verdicts ; le tri dominait le cout
+  return anchor_kill_cumulated(*tmp, ix.upos, ua, ub, pa, pb, D2, lane, rho2_den, h, /*radially_sorted=*/false);
 }
 
 }  // namespace mhgp5

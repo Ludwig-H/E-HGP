@@ -65,6 +65,9 @@ struct GenerateStats {
   u64 seeds[2] = {0, 0};             // q3, q4
   u64 seeds_killed_core = 0;         // q4 : cœur de seed (Jung, K = 1)
   u64 seeds_killed_chord = 0;        // q4 : morceaux de corde (chord_kill.hpp) — seed vivant au cœur, mort par morceaux
+  // Profil q4 par etage (MESURE, compile seulement avec -DMHGP5_PROFILE_Q4 : cible mhgp5_q4_stage_probe) :
+  // nanosecondes cumulees dans les tests d'ancre, l'enumeration des seeds, les scans de cœur/corde, les completions.
+  u64 prof_q4_anchor_ns = 0, prof_q4_core_ns = 0, prof_q4_compl_ns = 0, prof_q4_cover_ns = 0;
   u64 q4_completions = 0, q4_rej_lens = 0, q4_rej_owner = 0, q4_rej_once = 0, q4_rej_i64 = 0,
       q4_rej_face_power = 0, q4_rej_det = 0, q4_rej_center = 0;
   u64 float_cert_neg = 0, float_cert_pos = 0, float_fallback = 0;
@@ -84,6 +87,8 @@ struct GenerateStats {
     }
     anchors_killed_w4 += o.anchors_killed_w4;
     for (int i = 0; i < 3; ++i) anchors_killed_sectors[i] += o.anchors_killed_sectors[i];
+    prof_q4_anchor_ns += o.prof_q4_anchor_ns; prof_q4_core_ns += o.prof_q4_core_ns;
+    prof_q4_compl_ns += o.prof_q4_compl_ns; prof_q4_cover_ns += o.prof_q4_cover_ns;
     anchors_killed_w3 += o.anchors_killed_w3;
     invariant_jneg += o.invariant_jneg;
     seeds[0] += o.seeds[0];
@@ -198,7 +203,8 @@ inline void corner_histograms(const CloudIndex& ix, Lane lane, const WspdRect& r
 struct AnchorScratch {
   std::vector<u64> ha, hb;
   std::vector<NodeRef> handles;
-  std::vector<CoverPoint> cover, cover_tmp, lens;
+  std::vector<CoverPoint> cover, cover_tmp, lens, query;  // query : boule diametrale par requete (pretests avant cover)
+  u64 handle_points = 0;                                    // points des handles du rectangle courant (politique de pretest)
   u64 cover_nodes = 0, visits = 0;
   // Sites affines de l'ancre : u = 2z−a−b, q = |u|²−D² (entiers < 2^36, exacts
   // en binaire64) ; remplis PARESSEUSEMENT au premier seed.
@@ -307,6 +313,14 @@ inline void scan_anchor_q3(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i32 
   }
 }
 
+#if defined(MHGP5_PROFILE_Q4)
+#define MHGP5_Q4_TICK() std::chrono::steady_clock::now()
+#define MHGP5_Q4_ACC(field, t0) (ls->field += (u64)std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now() - (t0)).count())
+#else
+#define MHGP5_Q4_TICK() 0
+#define MHGP5_Q4_ACC(field, t0) ((void)(t0))
+#endif
+
 // CORPS PAR ANCRE de la lane q4 (cover deja dans sc.cover) : W_4, lentille,
 // seeds aigus, cœur de seed de Jung, completions (owner, exact-once,
 // prefiltres, Cramer, centre strict, profondeur), emission. Partage par
@@ -315,6 +329,7 @@ inline void process_anchor_q4(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i
                               u64 h4, bool float_on, bool genfilter_nonstrict, bool seed_core_nonstrict, bool no_canonical,
                               std::vector<BallCandidate>* lo, GenerateStats* ls,
                               AnchorPretests pretests = AnchorPretests::kApply) {
+  const auto q4_t_anchor = MHGP5_Q4_TICK();
   // Compte W_4 exact par ancre : n4 >= h_4 tue l'ancre entiere ; puis secteurs.
   if (pretests == AnchorPretests::kApply) {
     u64 n4 = 0;
@@ -324,14 +339,17 @@ inline void process_anchor_q4(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i
     }
     if (n4 >= h4) {
       ++ls->anchors_killed_w4;
+      MHGP5_Q4_ACC(prof_q4_anchor_ns, q4_t_anchor);
       return;
     }
     u64 wmin = 0;
     if (anchor_sector_kill(sc.cover, ix.upos, ua, ub, pa, pb, D2, 8, h4, &wmin)) {
       ++ls->anchors_killed_sectors[2];
+      MHGP5_Q4_ACC(prof_q4_anchor_ns, q4_t_anchor);
       return;
     }
   }
+  MHGP5_Q4_ACC(prof_q4_anchor_ns, q4_t_anchor);
   sc.affine_filled = false;
   sc.lens.clear();
   for (const CoverPoint& cz : sc.cover) {
@@ -354,6 +372,7 @@ inline void process_anchor_q4(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i
     if (Jb < 0) ++ls->invariant_jneg;  // signale, ne decide pas silencieusement (run_pipeline refuse en invariant)
     bool dead = Jb < 0;
     bool dead_by_chord = false;
+    const auto q4_t_core = MHGP5_Q4_TICK();
     if (!dead) {
       if (!sc.affine_filled) sc.fill_affine_sites(ix, pa, pb, D2);
       const AffineSeed seed(f3s, pa, pb, sc, float_on);
@@ -410,11 +429,13 @@ inline void process_anchor_q4(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i
       }
       dead = fcount >= h4 || dead_by_chord;
     }
+    MHGP5_Q4_ACC(prof_q4_core_ns, q4_t_core);
     if (dead) {
       if (dead_by_chord) ++ls->seeds_killed_chord; else ++ls->seeds_killed_core;
       continue;
     }
     // Completions y sur la lentille.
+    const auto q4_t_compl = MHGP5_Q4_TICK();
     for (const CoverPoint& cy : sc.lens) {
       const i32 uy = cy.u;
       if (uy == cx.u || uy == ua || uy == ub) continue;
@@ -450,6 +471,7 @@ inline void process_anchor_q4(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i
       lo->push_back(BallCandidate{ball_key_reduce(q4_ball_form(f4)), q4_level_raw(f4), 4});
       ++ls->candidates[2];
     }
+    MHGP5_Q4_ACC(prof_q4_compl_ns, q4_t_compl);
   }
 }
 
@@ -462,10 +484,18 @@ struct GenerateOptions;
 // change pas : la porte d'egalite post-RLE de chaque lane en est la preuve.
 using LaneOverride = std::function<void(const CloudIndex&, const GenerateOptions&, std::vector<BallCandidate>*, GenerateStats*)>;
 
+// Politique (sans effet sur l'objet) : au-dela de ce nombre de points de
+// handles dans le rectangle, les pretests d'ancre (W_q exact + secteurs) sont
+// faits sur une requete d'arbre de coefficient 1 AVANT le cover, et le cover
+// complet n'est construit que pour les ancres survivantes ; en dessous, sur
+// le cover (balayage des handles). 0 = toujours par requete ; SIZE_MAX = jamais.
+inline constexpr size_t kPretestQueryMinPoints = 512;
+
 struct GenerateOptions {
   i64 s = 8;
   u64 smax = 11;
   int threads = 1;
+  size_t pretest_query_min_points = kPretestQueryMinPoints;
   LaneOverride q3_override;  // vide : lane q3 integree
   LaneOverride q4_override;  // vide : lane q4 integree
 };
@@ -549,6 +579,9 @@ inline void generate_candidates(const CloudIndex& ix, const GenerateOptions& opt
       corner_histograms(ix, Lane::kQ3, ar.r, &sc.ha, &sc.hb);
       const NodeRange ra = ix.range_of(ar.r.a), rb = ix.range_of(ar.r.b);
       rect_cover_handles(ix, ix.box_of(ar.r.a), ix.box_of(ar.r.b), 3, &sc.handles, &sc.cover_nodes);
+      sc.handle_points = 0;
+      for (const NodeRef h : sc.handles) { const NodeRange r = ix.range_of(h); sc.handle_points += (u64)(r.last - r.first + 1); }
+      const bool pretest_by_query = sc.handle_points >= opt.pretest_query_min_points;
       const u64 need = h_of[1] - ar.core;
       for (i32 ua = ra.first; ua <= ra.last; ++ua)
         for (i32 ub = rb.first; ub <= rb.last; ++ub) {
@@ -561,8 +594,14 @@ inline void generate_candidates(const CloudIndex& ix, const GenerateOptions& opt
           const P3& pb = ix.upos[(size_t)ub];
           const i64 D2 = p3_norm2(p3_sub(pb, pa));
           if (D2 == 0) continue;
+          if (pretest_by_query) {
+            const int k = anchor_kill_from_query(ix, ua, ub, pa, pb, D2, Lane::kQ3, 12, h_of[1], &sc.query);
+            if (k == 1) { ++ls->anchors_killed_w3; continue; }
+            if (k == 2) { ++ls->anchors_killed_sectors[1]; continue; }
+          }
           anchor_cover_from_handles(ix, sc.handles, pa, pb, D2, 3, &sc.cover, &sc.visits, &sc.cover_tmp);
-          scan_anchor_q3(ix, sc, ua, ub, pa, pb, D2, h_of[1], float_on, genfilter_nonstrict, lo, ls);
+          scan_anchor_q3(ix, sc, ua, ub, pa, pb, D2, h_of[1], float_on, genfilter_nonstrict, lo, ls,
+                         pretest_by_query ? AnchorPretests::kAlreadyApplied : AnchorPretests::kApply);
         }
     });
     st->t_rects_ms[1] += ms_since(t1);
@@ -584,6 +623,9 @@ inline void generate_candidates(const CloudIndex& ix, const GenerateOptions& opt
       corner_histograms(ix, Lane::kQ4, ar.r, &sc.ha, &sc.hb);
       const NodeRange ra = ix.range_of(ar.r.a), rb = ix.range_of(ar.r.b);
       rect_cover_handles(ix, ix.box_of(ar.r.a), ix.box_of(ar.r.b), q4_cover_coef, &sc.handles, &sc.cover_nodes);
+      sc.handle_points = 0;
+      for (const NodeRef h : sc.handles) { const NodeRange r = ix.range_of(h); sc.handle_points += (u64)(r.last - r.first + 1); }
+      const bool pretest_by_query = sc.handle_points >= opt.pretest_query_min_points;
       const u64 need = h_of[2] - ar.core;
       for (i32 ua = ra.first; ua <= ra.last; ++ua)
         for (i32 ub = rb.first; ub <= rb.last; ++ub) {
@@ -596,6 +638,11 @@ inline void generate_candidates(const CloudIndex& ix, const GenerateOptions& opt
           const P3& pb = ix.upos[(size_t)ub];
           const i64 D2 = p3_norm2(p3_sub(pb, pa));
           if (D2 == 0) continue;
+          if (pretest_by_query) {
+            const int k = anchor_kill_from_query(ix, ua, ub, pa, pb, D2, Lane::kQ4, 8, h_of[2], &sc.query);
+            if (k == 1) { ++ls->anchors_killed_w4; continue; }
+            if (k == 2) { ++ls->anchors_killed_sectors[2]; continue; }
+          }
           // Cover au coefficient 3 (la lentille des sommets). Les interieurs
           // et la coquille d'une boule q4 vivent dans le coefficient 4 (Jung),
           // mais ici le cover n'est qu'un SOUS-ENSEMBLE pour des minorants
@@ -607,7 +654,7 @@ inline void generate_candidates(const CloudIndex& ix, const GenerateOptions& opt
           // profonds (docs/PROVENANCE.md, conformite).
           anchor_cover_from_handles(ix, sc.handles, pa, pb, D2, q4_cover_coef, &sc.cover, &sc.visits, &sc.cover_tmp);
           process_anchor_q4(ix, sc, ua, ub, pa, pb, D2, h_of[2], float_on, genfilter_nonstrict, seed_core_nonstrict,
-                            no_canonical, lo, ls);
+                            no_canonical, lo, ls, pretest_by_query ? AnchorPretests::kAlreadyApplied : AnchorPretests::kApply);
         }
     });
     st->t_rects_ms[2] += ms_since(t1);

@@ -193,6 +193,9 @@ inline void build_q4_batch(const CloudIndex& ix, const AliveRect& ar, const u64 
   corner_histograms(ix, Lane::kQ4, ar.r, &sc.ha, &sc.hb);
   const NodeRange ra = ix.range_of(ar.r.a), rb = ix.range_of(ar.r.b);
   rect_cover_handles(ix, ix.box_of(ar.r.a), ix.box_of(ar.r.b), cover_coef, &sc.handles, &sc.cover_nodes);
+  sc.handle_points = 0;
+  for (const NodeRef h : sc.handles) { const NodeRange r = ix.range_of(h); sc.handle_points += (u64)(r.last - r.first + 1); }
+  const bool pretest_by_query = sc.handle_points >= lim.pretest_query_min_points;
   const u64 need = h_of[2] - ar.core;
   for (i32 ua = ra.first; ua <= ra.last; ++ua)
     for (i32 ub = rb.first; ub <= rb.last; ++ub) {
@@ -205,17 +208,23 @@ inline void build_q4_batch(const CloudIndex& ix, const AliveRect& ar, const u64 
       const P3& pb = ix.upos[(size_t)ub];
       const i64 D2 = p3_norm2(p3_sub(pb, pa));
       if (D2 == 0) continue;
+      if (pretest_by_query) {
+        const int k = anchor_kill_from_query(ix, ua, ub, pa, pb, D2, Lane::kQ4, 8, h_of[2], &sc.query);
+        if (k == 1) { ++ls->anchors_killed_w4; continue; }
+        if (k == 2) { ++ls->anchors_killed_sectors[2]; continue; }
+      }
       anchor_cover_from_handles(ix, sc.handles, pa, pb, D2, cover_coef, &sc.cover, &sc.visits, &sc.cover_tmp);
       const bool ignore_threshold = MHGP5_MUTANT("route-ignore-threshold");
       if (sc.cover.size() < lim.device_min_sites && !ignore_threshold) {
-        // Routage hote : lane de production par ancre, emission immediate.
+        // Routage hote : lane de production par ancre, emission immediate (pretests deja faits si requete).
         const u64 seeds_before_h = ls->seeds[1];
-        process_anchor_q4(ix, sc, ua, ub, pa, pb, D2, h_of[2], float_on, depth_nonstrict, core_nonstrict, no_canonical, lo, ls);
+        process_anchor_q4(ix, sc, ua, ub, pa, pb, D2, h_of[2], float_on, depth_nonstrict, core_nonstrict, no_canonical, lo, ls,
+                          pretest_by_query ? AnchorPretests::kAlreadyApplied : AnchorPretests::kApply);
         ++bs->anchors_host;
         bs->seeds_host += ls->seeds[1] - seeds_before_h;
         continue;
       }
-      {
+      if (!pretest_by_query) {
         u64 n4 = 0;
         for (const CoverPoint& cz : sc.cover) {
           if (cz.u == ua || cz.u == ub) continue;
@@ -225,8 +234,6 @@ inline void build_q4_batch(const CloudIndex& ix, const AliveRect& ar, const u64 
           ++ls->anchors_killed_w4;
           continue;
         }
-      }
-      {
         u64 wmin = 0;
         if (anchor_sector_kill(sc.cover, ix.upos, ua, ub, pa, pb, D2, 8, h_of[2], &wmin)) {
           ++ls->anchors_killed_sectors[2];
