@@ -247,10 +247,14 @@ struct AffineSeed {
 // repli exact i128), emission. Partage par generate_candidates et par les
 // lanes par lots (routage hote : src/gpu/q3_lane_batched.hpp) — une seule
 // definition de la lane de production.
+// `anchor_tests` : appliquer les tests d'ancre (W_3 exact puis secteurs) — false
+// quand l'appelant les a DEJA appliques sur ce cover (route hote des lanes par
+// lots) ou pour mesurer le contrefactuel (sonde) ; jamais false en production.
 inline void scan_anchor_q3(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i32 ub, const P3& pa, const P3& pb, i64 D2,
-                           u64 h3, bool float_on, bool genfilter_nonstrict, std::vector<BallCandidate>* lo, GenerateStats* ls) {
+                           u64 h3, bool float_on, bool genfilter_nonstrict, std::vector<BallCandidate>* lo, GenerateStats* ls,
+                           bool anchor_tests = true) {
   // Tests d'ancre cumules (sector_kill.hpp) : W_3 exact puis secteurs — suffisants, l'objet est inchange.
-  {
+  if (anchor_tests) {
     const int k = anchor_kill_cumulated(sc.cover, ix.upos, ua, ub, pa, pb, D2, Lane::kQ3, 12, h3);
     if (k == 1) { ++ls->anchors_killed_w3; return; }
     if (k == 2) { ++ls->anchors_killed_sectors[1]; return; }
@@ -301,9 +305,9 @@ inline void scan_anchor_q3(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i32 
 // generate_candidates et par les lanes par lots (routage hote).
 inline void process_anchor_q4(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i32 ub, const P3& pa, const P3& pb, i64 D2,
                               u64 h4, bool float_on, bool genfilter_nonstrict, bool seed_core_nonstrict, bool no_canonical,
-                              std::vector<BallCandidate>* lo, GenerateStats* ls) {
-  // Compte W_4 exact par ancre : n4 >= h_4 tue l'ancre entiere.
-  {
+                              std::vector<BallCandidate>* lo, GenerateStats* ls, bool anchor_tests = true) {
+  // Compte W_4 exact par ancre : n4 >= h_4 tue l'ancre entiere ; puis secteurs.
+  if (anchor_tests) {
     u64 n4 = 0;
     for (const CoverPoint& cz : sc.cover) {
       if (cz.u == ua || cz.u == ub) continue;
@@ -313,8 +317,6 @@ inline void process_anchor_q4(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i
       ++ls->anchors_killed_w4;
       return;
     }
-  }
-  {
     u64 wmin = 0;
     if (anchor_sector_kill(sc.cover, ix.upos, ua, ub, pa, pb, D2, 8, h4, &wmin)) {
       ++ls->anchors_killed_sectors[2];

@@ -14,6 +14,12 @@
 //     secteurs wmin = 8 < 9 : ancre vivante. Le mutant
 //     `anchor-kill-h-minus-one` tue l'ancre a 8 : la boule disparait, digest
 //     different (code 4).
+//  F4 « frontiere W_3 a h−1 » : 8 sites (1000+e, 550, 0) (|W_3| = 8 = h3 − 1) et
+//     le seed x = (1000, 1200, 0) : les 8 sites sont interieurs a sa boule
+//     (profondeur 8 < 9) ⟹ boule emise ; W_3 ne tue pas (8 < 9), les secteurs
+//     non plus (wmin = 0) ; le mutant `anchor-kill-h-minus-one` tue PAR W_3
+//     seul (secteurs a 8 : wmin = 0 < 8) : la frontiere W_3 est qualifiee
+//     separement des secteurs.
 //  F3 « W_3 tue, secteurs ne tuent pas » : 9 sites (1000+e, 550, 0) : u =
 //     (2e, 1100, 0), −q = 2 790 000 > 4·1100·D/√12 ⟹ 9 temoins universels
 //     (in_spindle) : W_3 tue ; le polygone circonscrit a des sommets HORS du
@@ -119,12 +125,24 @@ int main(int argc, char** argv) {
   const Verdict v2 = run(f2);
   std::printf("F2 : boules=%zu W3=%llu wmin=%llu W3-tue=%d secteurs-tue=%d cumule=%d mutant=%d\n", v2.balls, (unsigned long long)v2.w3,
               (unsigned long long)v2.wmin, v2.dead_by_w3, v2.dead_by_sectors, v2.kill, m_h1 ? 1 : 0);
+  // F4
+  Fixture f4;
+  f4.add(0, 0, 0); f4.add(2000, 0, 0);
+  for (i64 e = 0; e < 8; ++e) f4.add(1000 + e, 550, 0);
+  f4.add(1000, 1200, 0); f4.sites.push_back(P3{1000, 1200, 0});
+  const Verdict v4 = run(f4);
+  std::printf("F4 : boules=%zu W3=%llu wmin=%llu W3-tue=%d secteurs-tue=%d cumule=%d mutant=%d\n", v4.balls, (unsigned long long)v4.w3,
+              (unsigned long long)v4.wmin, v4.dead_by_w3, v4.dead_by_sectors, v4.kill, m_h1 ? 1 : 0);
   if (m_h1) {
-    // Mutant : l'ancre est tuee a h−1 = 8 alors que le seed x survit -> boule {a,b,x} perdue.
-    if (v2.kill != 0 && v2.balls == 0) return 4;
-    std::printf("MUTANT NON TUE\n");
+    // Mutant : F2 est tuee a h−1 = 8 par les SECTEURS (wmin = 8) et F4 par W_3 SEUL (|W_3| = 8, wmin = 0) ;
+    // dans les deux cas le seed x survivant perd sa boule -> code 4 seulement si les DEUX frontieres sont exercees.
+    const bool f2_killed = v2.kill == 2 && v2.balls == 0;
+    const bool f4_killed = v4.kill == 1 && !v4.dead_by_sectors && v4.balls == 0;
+    if (f2_killed && f4_killed) return 4;
+    std::printf("MUTANT NON TUE (F2 %d, F4 %d)\n", f2_killed ? 1 : 0, f4_killed ? 1 : 0);
     return 1;
   }
+  expect(v4.balls == 1 && v4.w3 == 8 && v4.wmin == 0 && v4.kill == 0, "F4 : |W_3| = 8, secteurs 0, ancre vivante, boule {a,b,x} emise");
   expect(v2.balls == 1, "F2 : la production emet la boule {a,b,x} (profondeur 8 < 9)");
   expect(v2.kill == 0 && v2.wmin == 8, "F2 : ancre vivante, wmin = 8 = h3 − 1");
   // F3

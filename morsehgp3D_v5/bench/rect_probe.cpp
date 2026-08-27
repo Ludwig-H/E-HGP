@@ -14,6 +14,7 @@
 
 #include "../src/cloud/families.hpp"
 #include "../src/lanes/edge_cover.hpp"
+#include "../src/lanes/sector_kill.hpp"
 #include "../src/pipeline/generate.hpp"
 #include "../src/spindle/spindle.hpp"
 
@@ -50,6 +51,7 @@ struct Q {
 // sqrt 2). K = 8 : on ajoute les sommets A e1 +- B e2 etc. (octogone).
 struct SectorKill {
   u64 killed4 = 0, killed8 = 0, seeds_avoided4 = 0, seeds_avoided8 = 0, wrong = 0;
+  u64 killed_prod = 0, seeds_avoided_prod = 0, killed_w = 0;  // test de production cumule (W_q puis secteurs)
 };
 inline i128 sq128(i64 x) { return (i128)x * x; }
 // Rend le nombre minimal de temoins universels sur les secteurs (K=4 puis K=8).
@@ -119,7 +121,12 @@ inline void sector_witness_min(const CloudIndex& ix, const std::vector<CoverPoin
   for (int k = 1; k < 8; ++k) *min8 = std::min(*min8, cnt8[k]);
 }
 
+#ifndef MHGP5_PROBE_PIN
+#define MHGP5_PROBE_PIN "inconnu"
+#endif
+
 int main(int argc, char** argv) {
+  std::printf("rect_probe pin_execution=%s (git rev-parse HEAD au moment de la compilation ; worktree : voir le recu)\n", MHGP5_PROBE_PIN);
   CloudFamily family = CloudFamily::kUniform;
   int n = 2000, coord = 0, lane = 3;
   for (int i = 1; i < argc; ++i) {
@@ -184,8 +191,10 @@ int main(int argc, char** argv) {
         GenerateStats ls;
         const u64 s0 = lane == 3 ? ls.seeds[0] : ls.seeds[1];
         const auto tp0 = std::chrono::steady_clock::now();
-        if (lane == 3) generate_detail::scan_anchor_q3(ix, sc, ua, ub, pa, pb, D2, h_of[1], float_on, false, &lo, &ls);
-        else generate_detail::process_anchor_q4(ix, sc, ua, ub, pa, pb, D2, h_of[2], float_on, false, false, false, &lo, &ls);
+        // CONTREFACTUEL : corps de production SANS les tests d'ancre (anchor_tests = false), sinon la mesure
+        // de « seeds evites » et de « faux positifs » serait circulaire (la production applique deja les tests).
+        if (lane == 3) generate_detail::scan_anchor_q3(ix, sc, ua, ub, pa, pb, D2, h_of[1], float_on, false, &lo, &ls, false);
+        else generate_detail::process_anchor_q4(ix, sc, ua, ub, pa, pb, D2, h_of[2], float_on, false, false, false, &lo, &ls, false);
         t_prod_ns += (u64)std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now() - tp0).count();
         const u64 sd = (lane == 3 ? ls.seeds[0] : ls.seeds[1]) - s0;
         r_seeds += sd; r_surv += lo.size();
@@ -194,6 +203,13 @@ int main(int argc, char** argv) {
         u64 m4 = 0, m8 = 0;
         const auto ts0 = std::chrono::steady_clock::now();
         sector_witness_min(ix, sc.cover, ua, ub, pa, pb, D2, lane, &m4, &m8);
+        // Test de PRODUCTION (W_q exact cumule avec les secteurs de sector_kill.hpp) : verdict et seeds evites.
+        {
+          const int k = anchor_kill_cumulated(sc.cover, ix.upos, ua, ub, pa, pb, D2, lane == 3 ? Lane::kQ3 : Lane::kQ4,
+                                              lane == 3 ? 12 : 8, h_of[li]);
+          if (k != 0) { ++sk.killed_prod; sk.seeds_avoided_prod += sd; if (!lo.empty()) ++sk.wrong; }
+          if (k == 1) ++sk.killed_w;
+        }
         t_sect_ns += (u64)std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now() - ts0).count();
         if (m4 >= h_of[li]) t_prod_killed_ns += (u64)std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now() - tp0).count() - (u64)std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now() - ts0).count() * 0;
         const u64 h = h_of[li];
@@ -226,6 +242,10 @@ int main(int argc, char** argv) {
               (unsigned long long)sk.killed8, anchors_alive_total ? 100.0 * (double)sk.killed8 / (double)anchors_alive_total : 0.0,
               (unsigned long long)sk.seeds_avoided8, seeds_total ? 100.0 * (double)sk.seeds_avoided8 / (double)seeds_total : 0.0,
               (unsigned long long)sk.wrong);
+  std::printf("production (W_q exact + secteurs cumules) : tue %llu ancres vivantes (%.1f %%), dont %llu par W_q, seeds evites %llu (%.1f %%)\n",
+              (unsigned long long)sk.killed_prod, anchors_alive_total ? 100.0 * (double)sk.killed_prod / (double)anchors_alive_total : 0.0,
+              (unsigned long long)sk.killed_w, (unsigned long long)sk.seeds_avoided_prod,
+              seeds_total ? 100.0 * (double)sk.seeds_avoided_prod / (double)seeds_total : 0.0);
   std::printf("temps : corps de production par ancre (total) = %.1f ms ; test par secteurs (K=4 et 8 ensemble) = %.1f ms\n",
               (double)t_prod_ns / 1e6, (double)t_sect_ns / 1e6);
   (void)t_prod_killed_ns;

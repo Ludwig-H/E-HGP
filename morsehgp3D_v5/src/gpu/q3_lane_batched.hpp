@@ -211,7 +211,7 @@ inline void build_q3_batch(const CloudIndex& ix, const AliveRect& ar, const u64 
       const bool oversized = nc > lim.sites || nseeds > lim.seeds || nc > (size_t)UINT32_MAX;
       if ((nc < lim.device_min_sites && !ignore_threshold) || oversized) {
         const u64 seeds_before_h = ls->seeds[0];
-        scan_anchor_q3(ix, sc, ua, ub, pa, pb, D2, h_of[1], float_on, nonstrict, lo, ls);
+        scan_anchor_q3(ix, sc, ua, ub, pa, pb, D2, h_of[1], float_on, nonstrict, lo, ls, /*anchor_tests=*/false);
         ++bs->anchors_host;
         if (oversized) ++bs->anchors_oversized;
         bs->seeds_host += ls->seeds[0] - seeds_before_h;

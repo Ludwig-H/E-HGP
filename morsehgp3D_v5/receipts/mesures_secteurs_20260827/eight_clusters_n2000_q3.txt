@@ -1,3 +1,4 @@
+rect_probe pin_execution=fa99b3f127e06aa686a301c084f8311e80d5c554 (git rev-parse HEAD au moment de la compilation ; worktree : voir le recu)
 rect_probe famille=eight_clusters n=2000 lane=q3 rectangles=113552 ancres=479929 tuees_hist=81390 tuees_w4=0 vivantes=398539 seeds=77545085 survivants=249130
 rect_points(handles)   somme=34335010 p50=220 p90=578 p99=2000 max=2000
 rect_handles           somme=1685670 p50=9 p90=30 p99=110 max=110
@@ -8,6 +9,7 @@ rect_seeds             somme=77545085 p50=20 p90=335 p99=15487 max=176580
 rect_survivants        somme=249130 p50=0 p90=7 p99=17 max=136
 ancre_cover            somme=237611597 p50=376 p90=1496 p99=2000 max=2000
 ancre_seeds            somme=77545085 p50=45 p90=505 p99=987 max=1065
-secteurs : K=4 tue 191311 ancres vivantes (48.0 %), seeds evites 68465482 (88.3 %) ; K=8 tue 192599 (48.3 %), seeds evites 68651312 (88.5 %) ; FAUX POSITIFS (ancre tuee avec survivant) = 0
-temps : corps de production par ancre (total) = 12224.9 ms ; test par secteurs (K=4 et 8 ensemble) = 2040.4 ms
+secteurs : K=4 tue 219726 ancres vivantes (55.1 %), seeds evites 71699292 (92.5 %) ; K=8 tue 239884 (60.2 %), seeds evites 72780045 (93.9 %) ; FAUX POSITIFS (ancre tuee avec survivant) = 0
+production (W_q exact + secteurs cumules) : tue 256998 ancres vivantes (64.5 %), dont 223780 par W_q, seeds evites 73654187 (95.0 %)
+temps : corps de production par ancre (total) = 12315.4 ms ; test par secteurs (K=4 et 8 ensemble) = 2560.0 ms
 ratio sum_covers_ancres / points_rectangles = 6.92 ; ancres vivantes par rectangle = 3.51 ; seeds par survivant = 311.3
