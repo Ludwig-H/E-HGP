@@ -270,7 +270,10 @@ inline void generate_candidates(const CloudIndex& ix, const GenerateOptions& opt
   const bool seed_core_nonstrict = MHGP5_MUTANT("q4-seed-core-nonstrict");
   const bool q4_from_q3_live = MHGP5_MUTANT("q4-seeds-from-q3-live");
   const bool no_canonical = MHGP5_MUTANT("q4-no-canonical");
-  const bool cover_coef3 = MHGP5_MUTANT("q4-cover-coef3");
+  // MUTANT q4-cover-coef4 : cover au coefficient 4 — sans effet sur l'objet,
+  // mais il tue des candidats profonds avant l'emission et change
+  // `digest_balls` (fixture q4_cover_fixture : la boule differentielle).
+  const i64 q4_cover_coef = MHGP5_MUTANT("q4-cover-coef4") ? 4 : 3;
   const u64 h_of[3] = {lane_h(Lane::kQ2, opt.smax), lane_h(Lane::kQ3, opt.smax), lane_h(Lane::kQ4, opt.smax)};
   const auto pid = [&](i32 u) { return ix.point_id(u); };
   std::vector<AliveRect> alive;
@@ -381,7 +384,7 @@ inline void generate_candidates(const CloudIndex& ix, const GenerateOptions& opt
     run_lane(alive, opt.threads, 2, out, st, [&](const AliveRect& ar, AnchorScratch& sc, std::vector<BallCandidate>* lo, GenerateStats* ls) {
       corner_histograms(ix, Lane::kQ4, ar.r, &sc.ha, &sc.hb);
       const NodeRange ra = ix.range_of(ar.r.a), rb = ix.range_of(ar.r.b);
-      rect_cover_handles(ix, ix.box_of(ar.r.a), ix.box_of(ar.r.b), cover_coef3 ? 3 : 4, &sc.handles, &sc.cover_nodes);
+      rect_cover_handles(ix, ix.box_of(ar.r.a), ix.box_of(ar.r.b), q4_cover_coef, &sc.handles, &sc.cover_nodes);
       const u64 need = h_of[2] - ar.core;
       for (i32 ua = ra.first; ua <= ra.last; ++ua)
         for (i32 ub = rb.first; ub <= rb.last; ++ub) {
@@ -394,9 +397,16 @@ inline void generate_candidates(const CloudIndex& ix, const GenerateOptions& opt
           const P3& pb = ix.upos[(size_t)ub];
           const i64 D2 = p3_norm2(p3_sub(pb, pa));
           if (D2 == 0) continue;
-          // Cover coefficient 4 : interieurs et coquille des boules q4 (Jung) ;
-          // les SOMMETS restent dans la lentille (coefficient 3).
-          anchor_cover_from_handles(ix, sc.handles, pa, pb, D2, cover_coef3 ? 3 : 4, &sc.cover, &sc.visits, &sc.cover_tmp);
+          // Cover au coefficient 3 (la lentille des sommets). Les interieurs
+          // et la coquille d'une boule q4 vivent dans le coefficient 4 (Jung),
+          // mais ici le cover n'est qu'un SOUS-ENSEMBLE pour des minorants
+          // fail-open (W_4, cœur de seed, profondeur a la generation) : le
+          // census exact passe par l'arbre entier. Le coefficient 3 est celui
+          // de la v4 ; un coefficient 4 tuerait quelques boules profondes de
+          // plus avant l'emission (23 sur 1,4 M a uniform n=8000) sans changer
+          // l'objet — mais changerait `digest_balls`, qui compte les candidats
+          // profonds (docs/PROVENANCE.md, conformite).
+          anchor_cover_from_handles(ix, sc.handles, pa, pb, D2, q4_cover_coef, &sc.cover, &sc.visits, &sc.cover_tmp);
           // Compte W_4 exact par ancre : n4 >= h_4 tue l'ancre entiere.
           {
             u64 n4 = 0;

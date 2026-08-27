@@ -38,7 +38,7 @@ struct BallData {
 
 struct ExpandStats {
   u64 unique_balls = 0, dead_depth = 0, survivors = 0, census_interior = 0, census_shell = 0;
-  u64 events_by_k[11] = {};
+  std::vector<u64> events_by_k;  // indexee par K, dimensionnee kmax + 1
   u64 workers_prefilter = 0, workers_census = 0, workers_expand = 0;
   DepthStats depth;
 };
@@ -149,6 +149,8 @@ inline PipelineStatus census_balls(const CloudIndex& ix, const std::vector<BallC
 }
 
 // Expansion des plateaux en evenements par K (1..kmax), en PointId externes.
+// PRECONDITION (V1 tranche par l'auditeur) : positions distinctes — l'index a
+// ete accepte par run_pipeline ; `kmax <= 10` (profil).
 inline void expand_events(const CloudIndex& ix, const std::vector<BallData>& balls, u64 kmax, int threads,
                           std::vector<std::vector<ForestEvent>>* ev_k, ExpandStats* st) {
   const bool m_dense = MHGP5_MUTANT("dense-pointid");
@@ -157,7 +159,7 @@ inline void expand_events(const CloudIndex& ix, const std::vector<BallData>& bal
   {
     size_t dummy = 0;
     expand_detail::chunked(balls.size(), threads, &dummy, [&](size_t, size_t, size_t) {});
-    lev.assign(dummy, std::vector<std::vector<ForestEvent>>(11));
+    lev.assign(dummy, std::vector<std::vector<ForestEvent>>((size_t)kmax + 1));
   }
   const size_t created = expand_detail::chunked(balls.size(), threads, &nchunks, [&](size_t c, size_t b, size_t e) {
     std::vector<PlateauEvent> pevents;
@@ -182,7 +184,8 @@ inline void expand_events(const CloudIndex& ix, const std::vector<BallData>& bal
     }
   });
   st->workers_expand = std::max(st->workers_expand, (u64)created);
-  ev_k->assign(11, {});
+  ev_k->assign((size_t)kmax + 1, {});
+  st->events_by_k.assign((size_t)kmax + 1, 0);
   for (size_t c = 0; c < nchunks; ++c)
     for (size_t K = 1; K <= (size_t)kmax; ++K)
       (*ev_k)[K].insert((*ev_k)[K].end(), lev[c][K].begin(), lev[c][K].end());

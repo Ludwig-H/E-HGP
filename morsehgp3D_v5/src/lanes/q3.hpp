@@ -139,10 +139,10 @@ inline i128 axis_max(const Q3Form& f, int i, i64 lo, i64 hi) {
 // `shell_extra` compte les coquilles rencontrees.
 inline u64 q3_ball_depth(const CloudIndex& ix, const Q3Form& f, i32 ua, i32 ub, i32 ux, u64 cap,
                          u64* shell_extra = nullptr, i32* interior_out = nullptr, u8* interior_n = nullptr) {
-  if (ix.nodes.empty()) return 0;
+  if (ix.unique_count() == 0) return 0;
   const bool prune_ge = MHGP5_MUTANT("q3-prune-ge");
   u64 count = 0;
-  std::vector<NodeRef> stack{0};
+  std::vector<NodeRef> stack{ix.root()};
   const auto skip_support = [&](i32 u) { return u == ua || u == ub || u == ux; };
   const auto record = [&](i32 u) {
     if (interior_out && interior_n && *interior_n < 8) interior_out[(*interior_n)++] = u;

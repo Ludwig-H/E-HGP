@@ -93,8 +93,9 @@ Front run_front(const CloudIndex& ix, i64 s) {
 // (MHGP5_MUTANT) — d'ou un sous-processus par bras, pas une bascule.
 int rerun_with(const char* self, const Args& a, const char* mutant, u64* rectangles) {
   char cmd[1024];
-  std::snprintf(cmd, sizeof(cmd), "%s --family=%s --n=%d --coord=%d --seed=%lld --s=%lld --inject=%s --print-rect",
-                self, cloud_family_name(a.family), a.n, a.coord, a.seed, (long long)a.s, mutant);
+  std::snprintf(cmd, sizeof(cmd), "%s --family=%s --n=%d --coord=%d --seed=%lld --s=%lld %s%s --print-rect",
+                self, cloud_family_name(a.family), a.n, a.coord, a.seed, (long long)a.s,
+                mutant[0] ? "--inject=" : "", mutant);
   FILE* p = popen(cmd, "r");
   if (!p) return -1;
   char line[256];
@@ -164,6 +165,25 @@ int main(int argc, char** argv) {
       std::fprintf(stderr, "EQUIVARIANCE : le front depend de l'ordre d'entree\n");
       return 3;
     }
+  }
+  // Bras apparie pour les mutants du critere : le front MUTANT doit etre
+  // strictement plus gros que le front nominal (sous-processus sans injection).
+  if (a.inject == "wspd-cap-terminal" || a.inject == "wspd-split-heaviest") {
+    Args nominal = a;
+    nominal.inject.clear();
+    u64 nominal_rects = 0;
+    if (rerun_with(argv[0], nominal, "", &nominal_rects) != 0) {
+      std::fprintf(stderr, "REFUS : bras nominal injouable\n");
+      return 2;
+    }
+    std::printf("nominal rectangles=%llu mutant=%llu\n", (unsigned long long)nominal_rects, (unsigned long long)f.st.rectangles);
+    if (f.st.rectangles > nominal_rects) {
+      std::fprintf(stderr, "MUTANT TUE : %s (front %llu > nominal %llu)\n", a.inject.c_str(),
+                   (unsigned long long)f.st.rectangles, (unsigned long long)nominal_rects);
+      return 4;
+    }
+    std::fprintf(stderr, "PORTE INEFFICACE : mutant %s non discrimine\n", a.inject.c_str());
+    return 3;
   }
   if (a.discriminate_cap || a.discriminate_split) {
     u64 witness = 0;

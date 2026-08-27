@@ -17,6 +17,13 @@
 // sert aucun K <= K_max ; coquille : resource_exhausted), jamais une
 // troncature. La passe 2 ne remplace jamais la passe 1 et reciproquement
 // (mutant `skip-full-census` : la passe count-only ne connait pas U_B).
+//
+// PRECONDITION (V1, tranchee par l'auditeur) : positions DISTINCTES — le
+// pipeline refuse les doublons avant tout appel. Les comptes utilisent
+// neanmoins `range_weight` (multiplicites) pour rester coherents avec l'index ;
+// un index a doublons n'est pas une entree contractuelle de ces fonctions.
+// Un index a UNE position unique n'a aucun nœud interne : sa racine est la
+// feuille `leaf_ref(0)` et se traite comme toute feuille (jamais comme le vide).
 #pragma once
 
 #include <algorithm>
@@ -66,11 +73,11 @@ struct DepthStats {
 // et *count = compte EXACT (recoupe par la passe 2).
 inline bool ball_depth_at_least(const CloudIndex& ix, const BallKey& k, u64 h, u64* count, DepthStats* st = nullptr) {
   *count = 0;
-  if (ix.nodes.empty()) return h == 0;
+  if (ix.unique_count() == 0) return h == 0;
   const bool range_le = MHGP5_MUTANT("range-add-max-le-zero");
   const census_detail::AxisBounds ab{k};
   u64 c = 0;
-  std::vector<NodeRef> stack{0};
+  std::vector<NodeRef> stack{ix.root()};
   while (!stack.empty()) {
     const NodeRef z = stack.back();
     stack.pop_back();
@@ -80,7 +87,7 @@ inline bool ball_depth_at_least(const CloudIndex& ix, const BallKey& k, u64 h, u
     if (mn >= 0) continue;
     if (mx < 0 || (range_le && mx <= 0)) {
       const NodeRange r = ix.range_of(z);
-      const u64 w = (u64)(r.last - r.first + 1);  // positions uniques
+      const u64 w = ix.range_weight(r.first, r.last);
       if (st) st->range_add_mass += w;
       c += w;
       if (c >= h) return true;
@@ -88,7 +95,11 @@ inline bool ball_depth_at_least(const CloudIndex& ix, const BallKey& k, u64 h, u
     }
     if (is_leaf(z)) {
       if (st) ++st->leaf_tests;
-      if (k.power(ix.upos[(size_t)leaf_index(z)]) < 0 && ++c >= h) return true;
+      const i32 u = leaf_index(z);
+      if (k.power(ix.upos[(size_t)u]) < 0) {
+        c += ix.range_weight(u, u);
+        if (c >= h) return true;
+      }
       continue;
     }
     stack.push_back(ix.nodes[(size_t)z].left);
@@ -104,10 +115,10 @@ inline CensusStatus ball_census(const CloudIndex& ix, const BallKey& k, size_t i
                                 std::vector<i32>* interior, std::vector<i32>* shell) {
   interior->clear();
   shell->clear();
-  if (ix.nodes.empty()) return CensusStatus::kOk;
+  if (ix.unique_count() == 0) return CensusStatus::kOk;
   const bool nonstrict = MHGP5_MUTANT("census-nonstrict");
   const census_detail::AxisBounds ab{k};
-  std::vector<NodeRef> stack{0};
+  std::vector<NodeRef> stack{ix.root()};
   while (!stack.empty()) {
     const NodeRef z = stack.back();
     stack.pop_back();

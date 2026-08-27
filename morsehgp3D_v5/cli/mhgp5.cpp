@@ -1,5 +1,6 @@
 // MorseHGP3D v5 — pilote en ligne de commande du pipeline (src/pipeline/run.hpp).
 // Codes : 0 complete_regular, 2 refus avant calcul, 3 invariant viole.
+// Binaire PRODUIT : compile sans MHGP5_TESTING — aucun mutant n'y existe.
 #include <sys/resource.h>
 
 #include <cstdio>
@@ -17,7 +18,6 @@ int main(int argc, char** argv) {
   int n = 8000, coord = 0;
   long long seed = 3;
   RunOptions opt;
-  std::string inject;
   for (int i = 1; i < argc; ++i) {
     const std::string arg = argv[i];
     const auto val = [&](const char* prefix) -> const char* {
@@ -32,7 +32,6 @@ int main(int argc, char** argv) {
     else if (const char* v = val("--smax=")) opt.smax = (u64)std::atoll(v);
     else if (const char* v = val("--threads=")) opt.threads = std::atoi(v);
     else if (const char* v = val("--shell-cap=")) opt.shell_cap = (size_t)std::atoll(v);
-    else if (const char* v = val("--inject=")) inject = v;
     else if (arg == "--digest") opt.digest = true;
     else {
       std::fprintf(stderr, "argument inconnu : %s\n", arg.c_str());
@@ -41,10 +40,6 @@ int main(int argc, char** argv) {
   }
   if (!ok || n < 2 || opt.s < 1 || opt.smax < 2 || opt.smax > 11) {
     std::fprintf(stderr, "REFUS : arguments (profil K_max <= 10 ⟺ smax <= 11)\n");
-    return 2;
-  }
-  if (!inject.empty() && !mutants_enable(inject)) {
-    std::fprintf(stderr, "REFUS : mutant inconnu %s\n", inject.c_str());
     return 2;
   }
   if (coord <= 0) coord = cloud_family_default_coord(family, n);

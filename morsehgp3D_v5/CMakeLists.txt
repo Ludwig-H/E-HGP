@@ -21,6 +21,11 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif()
 add_compile_options(-Wall -Wextra -Wpedantic -Werror)
+option(MHGP5_ENABLE_SANITIZERS "ASan + UBSan sur toutes les cibles (incompatible CUDA)" OFF)
+if(MHGP5_ENABLE_SANITIZERS)
+  add_compile_options(-fsanitize=address,undefined -fno-omit-frame-pointer)
+  add_link_options(-fsanitize=address,undefined)
+endif()
 find_package(Threads REQUIRED)
 enable_testing()
 
@@ -42,7 +47,14 @@ function(mhgp5_gate name expected target args)
   endif()
 endfunction()
 
+# Cible de TEST : les points d'injection des mutants y sont compiles
+# (MHGP5_TESTING). Une cible produit (mhgp5_product_executable) ne les a pas.
 function(mhgp5_executable name source)
+  add_executable(${name} ${source})
+  target_compile_definitions(${name} PRIVATE MHGP5_TESTING=1)
+  target_link_libraries(${name} PRIVATE Threads::Threads)
+endfunction()
+function(mhgp5_product_executable name source)
   add_executable(${name} ${source})
   target_link_libraries(${name} PRIVATE Threads::Threads)
 endfunction()
@@ -92,7 +104,7 @@ mhgp5_gate(mhgp5_spindle_mutant_mask 4 mhgp5_spindle_gate "--family=uniform --n=
 
 # ---- Pilote ------------------------------------------------------------------
 
-mhgp5_executable(mhgp5 cli/mhgp5.cpp)
+mhgp5_product_executable(mhgp5 cli/mhgp5.cpp)
 
 # ---- Conformite v4 ≡ v5 --------------------------------------------------------
 
@@ -171,3 +183,55 @@ mhgp5_executable(mhgp5_q3_affine_gate tests/q3_affine_gate.cpp)
 mhgp5_gate(mhgp5_q3_affine_gate 0 mhgp5_q3_affine_gate "")
 mhgp5_gate(mhgp5_q3_affine_mutant_small 4 mhgp5_q3_affine_gate "--inject=float-small-threshold")
 mhgp5_gate(mhgp5_q3_affine_mutant_jung 4 mhgp5_q3_affine_gate "--inject=jung-swap-bounds")
+
+# ---- Oracle : le juge du juge et l'ordre des niveaux -----------------------------
+mhgp5_executable(mhgp5_obig_selftest tests/obig_selftest.cpp)
+mhgp5_gate(mhgp5_obig_selftest 0 mhgp5_obig_selftest "" LABELS oracle gate)
+mhgp5_gate(mhgp5_obig_mutant_carry_lost 4 mhgp5_obig_selftest "--inject=obig-carry-lost")
+mhgp5_gate(mhgp5_obig_refus_mutant_inconnu 2 mhgp5_obig_selftest "--inject=inconnu")
+mhgp5_executable(mhgp5_level_cmp tests/level_cmp.cpp)
+mhgp5_gate(mhgp5_level_cmp_uniform 0 mhgp5_level_cmp
+    "--family=uniform --n=300 --seed=3 --min-levels=3000 --min-q4=400 --min-ties=50000 --min-repr-diff=30000" LABELS oracle gate)
+mhgp5_gate(mhgp5_level_cmp_eight_clusters 0 mhgp5_level_cmp
+    "--family=eight_clusters --n=400 --seed=3 --min-levels=3000 --min-q4=500 --min-ties=50000 --min-repr-diff=30000" LABELS oracle gate)
+mhgp5_gate(mhgp5_level_mutant_trunc_hi 4 mhgp5_level_cmp "--family=uniform --n=300 --seed=3 --inject=level-trunc-hi")
+mhgp5_gate(mhgp5_level_refus_famille 2 mhgp5_level_cmp "--family=inconnue")
+mhgp5_gate(mhgp5_level_refus_mutant_inconnu 2 mhgp5_level_cmp "--n=300 --inject=inconnu")
+
+# ---- Oracle rationnel independant de la lane q3 ----------------------------------
+mhgp5_executable(mhgp5_q3_oracle tests/q3_oracle.cpp)
+mhgp5_gate(mhgp5_q3_oracle_uniform 0 mhgp5_q3_oracle
+    "--family=uniform --n=80 --seed=3 --min-acute=30000 --min-events=5000 --min-shell=900 --min-deep=5000 --min-order-pairs=1000000" LABELS oracle gate)
+mhgp5_gate(mhgp5_q3_oracle_eight_clusters 0 mhgp5_q3_oracle
+    "--family=eight_clusters --n=100 --seed=3 --min-acute=50000 --min-events=4000 --min-shell=900 --min-deep=5000 --min-order-pairs=1000000" LABELS oracle gate)
+mhgp5_gate(mhgp5_q3_oracle_mutant_prune_ge 4 mhgp5_q3_oracle "--family=uniform --n=80 --seed=3 --inject=q3-prune-ge")
+mhgp5_gate(mhgp5_q3_oracle_mutant_level_4g 4 mhgp5_q3_oracle "--family=uniform --n=80 --seed=3 --inject=q3-level-4g")
+mhgp5_gate(mhgp5_q3_oracle_mutant_trunc_hi 4 mhgp5_q3_oracle "--family=uniform --n=80 --seed=3 --inject=level-trunc-hi")
+mhgp5_gate(mhgp5_q3_oracle_mutant_carry_lost 4 mhgp5_q3_oracle "--family=uniform --n=80 --seed=3 --inject=obig-carry-lost")
+mhgp5_gate(mhgp5_q3_oracle_mutant_sign_p 4 mhgp5_q3_oracle "--family=uniform --n=80 --seed=3 --inject=q3-sign-p")
+mhgp5_gate(mhgp5_q3_oracle_mutant_cramer_swap 4 mhgp5_q3_oracle "--family=uniform --n=80 --seed=3 --inject=q3-cramer-swap")
+mhgp5_gate(mhgp5_q3_oracle_refus_famille 2 mhgp5_q3_oracle "--family=inconnue")
+mhgp5_gate(mhgp5_q3_oracle_refus_mutant_inconnu 2 mhgp5_q3_oracle "--n=80 --inject=inconnu")
+
+# ---- Gardes d'API, fixture differentielle q4, oracle q4, source q4, juge de foret -----
+mhgp5_executable(mhgp5_api_guard_gate tests/api_guard_gate.cpp)
+mhgp5_gate(mhgp5_api_guard_gate 0 mhgp5_api_guard_gate "")
+mhgp5_executable(mhgp5_q4_cover_fixture tests/q4_cover_fixture.cpp)
+mhgp5_gate(mhgp5_q4_cover_fixture 0 mhgp5_q4_cover_fixture "")
+mhgp5_gate(mhgp5_q4_cover_mutant_coef4 4 mhgp5_q4_cover_fixture "--inject=q4-cover-coef4")
+mhgp5_gate(mhgp5_wspd_mutant_cap_terminal 4 mhgp5_wspd_gate "--family=two_lines --n=2000 --s=8 --inject=wspd-cap-terminal")
+mhgp5_gate(mhgp5_wspd_mutant_split_heaviest 4 mhgp5_wspd_gate "--family=eight_clusters --n=2000 --s=8 --seed=3 --inject=wspd-split-heaviest")
+mhgp5_executable(mhgp5_q4_oracle tests/q4_oracle.cpp)
+mhgp5_gate(mhgp5_q4_oracle 0 mhgp5_q4_oracle "" LABELS oracle gate)
+foreach(m q4-center-parity q4-eq-nonstrict q4-eq-sign q4-i64-drop-factor q4-i64-pair-min)
+  mhgp5_gate(mhgp5_q4_oracle_mutant_${m} 4 mhgp5_q4_oracle "--inject=${m}")
+endforeach()
+mhgp5_executable(mhgp5_q4_source_fixture tests/q4_source_fixture.cpp)
+mhgp5_gate(mhgp5_q4_source_fixture_22 0 mhgp5_q4_source_fixture "--fixture=22")
+mhgp5_gate(mhgp5_q4_source_fixture_13p8 0 mhgp5_q4_source_fixture "--fixture=13+8")
+mhgp5_gate(mhgp5_q4_source_mutant_q3_live 4 mhgp5_q4_source_fixture "--fixture=22 --inject=q4-seeds-from-q3-live")
+mhgp5_executable(mhgp5_forest_judge tests/forest_judge.cpp)
+mhgp5_gate(mhgp5_forest_judge 0 mhgp5_forest_judge "" LABELS oracle gate)
+foreach(m binary-ties repr-ties attach-prebatch drop-nonmerge canonical-is-uf-root rle-drop census-nonstrict genfilter-nonstrict dense-pointid)
+  mhgp5_gate(mhgp5_forest_judge_mutant_${m} 4 mhgp5_forest_judge "--inject=${m}")
+endforeach()

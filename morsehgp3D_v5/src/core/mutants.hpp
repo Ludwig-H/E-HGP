@@ -14,8 +14,11 @@
 //   - la lecture est un booleen statique par site : cout nul dans les
 //     boucles chaudes.
 //
-// Un mutant n'est JAMAIS une option de production : le registre est vide
-// dans tout chemin nominal.
+// Un mutant n'est JAMAIS une option de production : les points d'injection ne
+// sont COMPILES que dans les cibles de test (`MHGP5_TESTING`, pose par CMake sur
+// les executables de tests/) ; dans un binaire produit, `MHGP5_MUTANT` est la
+// constante false et `mutants_enable` refuse tout nom — aucun run produit ne
+// peut porter un mutant, et le cout dans les boucles chaudes est nul.
 #pragma once
 
 #include <cstring>
@@ -38,7 +41,7 @@ inline constexpr const char* kMutants[] = {
     "core-ball-ceil-distance", "witness-no-lane-mask", "cover-rect-dmin",
     // lanes
     "q3-prune-ge", "q3-level-4g",
-    "q4-seeds-from-q3-live", "q4-cover-coef3", "q4-no-canonical", "q4-center-parity",
+    "q4-seeds-from-q3-live", "q4-cover-coef4", "q4-no-canonical", "q4-center-parity",
     "q4-seed-core-nonstrict", "q4-eq-nonstrict", "q4-eq-sign", "q4-i64-drop-factor",
     "q4-i64-pair-min", "jung-swap-bounds",
     // entiers larges
@@ -54,7 +57,7 @@ inline constexpr const char* kMutants[] = {
     // rendu
     "render-active-only", "render-collapse-mult", "birth-from-events",
     // oracle et portes (points d'injection dans oracle/ et tests/)
-    "obig-carry-lost", "float-small-threshold",
+    "obig-carry-lost", "float-small-threshold", "q3-sign-p", "q3-cramer-swap",
 };
 
 inline std::vector<std::string>& mutant_registry() {
@@ -69,8 +72,12 @@ inline bool mutant_known(std::string_view name) {
 }
 
 // Active une liste `a,b,c`. Rend false (sans rien activer) si un nom est
-// inconnu : l'appelant refuse avec le code 2.
+// inconnu — ou, hors cible de test, TOUJOURS : l'appelant refuse avec le code 2.
 inline bool mutants_enable(std::string_view csv) {
+#if !defined(MHGP5_TESTING)
+  (void)csv;
+  return false;
+#else
   std::vector<std::string> names;
   size_t start = 0;
   while (start <= csv.size()) {
@@ -85,6 +92,7 @@ inline bool mutants_enable(std::string_view csv) {
   }
   for (std::string& n : names) mutant_registry().push_back(std::move(n));
   return true;
+#endif
 }
 
 inline bool mutant_enabled(std::string_view name) {
@@ -98,8 +106,8 @@ inline bool mutants_any() { return !mutant_registry().empty(); }
 }  // namespace mhgp5
 
 // Point d'injection : lecture memorisee par site (le registre est fige avant
-// tout calcul). En code device, aucun mutant n'existe : constante false.
-#if defined(__CUDA_ARCH__)
+// tout calcul). Hors cible de test ou en code device : constante false.
+#if defined(__CUDA_ARCH__) || !defined(MHGP5_TESTING)
 #define MHGP5_MUTANT(name) (false)
 #else
 #define MHGP5_MUTANT(name)                                    \

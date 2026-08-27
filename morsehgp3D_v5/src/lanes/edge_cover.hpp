@@ -27,10 +27,10 @@ struct CoverPoint {
 inline void cover_query(const CloudIndex& ix, const P3& pa, const P3& pb, i64 D2, i64 coef,
                         std::vector<CoverPoint>* out) {
   out->clear();
-  if (ix.nodes.empty()) return;
+  if (ix.unique_count() == 0) return;
   const i64 m2[3] = {pa.x + pb.x, pa.y + pb.y, pa.z + pb.z};
   const i64 bound = coef * D2;
-  std::vector<NodeRef> stack{0};
+  std::vector<NodeRef> stack{ix.root()};
   while (!stack.empty()) {
     const NodeRef z = stack.back();
     stack.pop_back();
@@ -62,7 +62,7 @@ inline void cover_query(const CloudIndex& ix, const P3& pa, const P3& pb, i64 D2
 inline void rect_cover_handles(const CloudIndex& ix, const AxisBox& A, const AxisBox& B, i64 coef,
                                std::vector<NodeRef>* out, u64* tree_nodes) {
   out->clear();
-  if (ix.nodes.empty()) return;
+  if (ix.unique_count() == 0) return;
   i64 slo[3], shi[3], dmax2 = 0, dmin2 = 0;
   for (int i = 0; i < 3; ++i) {
     slo[i] = A.lo[i] + B.lo[i];
@@ -77,7 +77,7 @@ inline void rect_cover_handles(const CloudIndex& ix, const AxisBox& A, const Axi
     dmin2 += lo * lo;
   }
   const i64 bound = coef * (MHGP5_MUTANT("cover-rect-dmin") ? dmin2 : dmax2);
-  std::vector<NodeRef> stack{0};
+  std::vector<NodeRef> stack{ix.root()};
   while (!stack.empty()) {
     const NodeRef z = stack.back();
     stack.pop_back();

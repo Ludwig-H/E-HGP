@@ -6,15 +6,21 @@
 // digest_all. Codes : 0 conforme, 1 divergence (a documenter : choix de
 // contrat ou fixture v5, jamais une difference silencieuse), 2 entree absente
 // du recu ou refus, 3 invariant.
-// PORTE DE MUTANTS DU PIPELINE : avec --inject=<mutant>, la divergence du
-// digest EST la mise a mort (code 4) ; un digest inchange sous mutant est une
-// porte inefficace (code 3). Un mutant qui fait REFUSER le pipeline (code 2
-// ou 3 du statut) est lui aussi tue : il a change le comportement observable.
+// PORTE DE MUTANTS DU PIPELINE : avec --inject=<mutant>, la porte execute
+// d'abord son BRAS NOMINAL APPARIE (le meme binaire, memes arguments sans
+// injection, en sous-processus : les points d'injection sont memorises par
+// site, une bascule intra-processus est impossible) et exige que ce bras soit
+// conforme au recu ; puis la divergence du bras mutant par rapport au nominal
+// EST la mise a mort (code 4). Un digest inchange sous mutant est une porte
+// inefficace (code 3) ; un nominal non conforme rend 3 (jamais un faux 4).
+// Un mutant qui fait REFUSER le pipeline est tue lui aussi.
 #include <cstdio>
 #include <cstring>
 #include <fstream>
 #include <sstream>
 #include <string>
+
+#include <stdio.h>
 
 #include "../src/cloud/families.hpp"
 #include "../src/pipeline/run.hpp"
@@ -60,6 +66,25 @@ int main(int argc, char** argv) {
     std::fprintf(stderr, "REFUS : aucune entree (%s, %d) dans le recu\n", fam_name.c_str(), n);
     return 2;
   }
+  // Bras nominal apparie (sous-processus) quand un mutant est injecte.
+  std::string nom_balls, nom_all;
+  if (!inject.empty()) {
+    char cmd[2048];
+    std::snprintf(cmd, sizeof(cmd), "%s --receipt=%s --family=%s --n=%d --threads=%d", argv[0], receipt.c_str(),
+                  fam_name.c_str(), n, threads);
+    FILE* pf = popen(cmd, "r");
+    if (!pf) return 2;
+    char line[512];
+    while (std::fgets(line, sizeof(line), pf)) {
+      if (std::strncmp(line, "digest_balls=", 13) == 0) nom_balls = std::string(line + 13, 64);
+      if (std::strncmp(line, "digest_all=", 11) == 0) nom_all = std::string(line + 11, 64);
+    }
+    const int st = pclose(pf);
+    if (st != 0 || nom_balls != exp_balls || nom_all != exp_all) {
+      std::fprintf(stderr, "PORTE INEFFICACE : le bras nominal n'est pas conforme au recu (statut %d)\n", st);
+      return 3;
+    }
+  }
   RunOptions opt;
   opt.threads = threads;
   opt.digest = true;
@@ -78,7 +103,8 @@ int main(int argc, char** argv) {
   std::printf("conformite_v4 famille=%s n=%d balls=%s all=%s\n", fam_name.c_str(), n, ok_b ? "egal" : "DIFFERENT",
               ok_a ? "egal" : "DIFFERENT");
   if (!inject.empty()) {
-    if (ok_b && ok_a) {
+    const bool same_as_nominal = rr.digest_balls == nom_balls && rr.digest_all == nom_all;
+    if (same_as_nominal) {
       std::fprintf(stderr, "PORTE INEFFICACE : mutant %s sans effet sur les digests\n", inject.c_str());
       return 3;
     }

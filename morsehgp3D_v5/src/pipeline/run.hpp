@@ -60,9 +60,29 @@ inline double ms(std::chrono::steady_clock::time_point t0) {
 }
 }  // namespace run_detail
 
+// Profil : K_max <= 10 ⟺ smax <= 11 (les tampons d'interieurs et les tableaux
+// par K sont dimensionnes pour ce profil ; au-dela, refus explicite).
+inline constexpr u64 kSmaxProfile = 11;
+
+// GARDES DE BIBLIOTHEQUE (pas seulement de CLI) : toute option hors profil et
+// toute entree qui ne definit pas l'objet sont refusees AVANT tout calcul,
+// avec le statut contractuel — jamais un debordement.
+inline bool validate_run_options(const std::vector<InputPoint>& in, const RunOptions& opt, std::string* why) {
+  if (in.size() < 2) { *why = "invalid_input : moins de deux points"; return false; }
+  if (opt.s < 1) { *why = "invalid_input : separation s < 1"; return false; }
+  if (opt.smax < 2 || opt.smax > kSmaxProfile) { *why = "invalid_input : smax hors du profil [2, 11]"; return false; }
+  if (opt.threads < 1) { *why = "invalid_input : threads < 1"; return false; }
+  if (opt.shell_cap < 4) { *why = "invalid_input : plafond de coquille < 4 (un support q4 a quatre points)"; return false; }
+  return true;
+}
+
 inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOptions& opt) {
   using run_detail::ms;
   RunResult rr;
+  if (!validate_run_options(in, opt, &rr.message)) {
+    rr.status = PipelineStatus::kInvalidInput;
+    return rr;
+  }
   const auto t_ix = std::chrono::steady_clock::now();
   const CloudIndex ix = build_cloud_index(in);
   rr.t_index_ms = ms(t_ix);
