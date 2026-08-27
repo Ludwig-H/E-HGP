@@ -16,6 +16,8 @@ int main(int argc, char** argv) {
   CloudFamily family = CloudFamily::kUniform;
   int n = 400, coord = 0, threads = 1;
   size_t spl = kSeedsPerLaunch;
+  u64 min_flushes = 1;
+  BatchStats bs;
   u64 min_candidates = 1000, min_deep = 100;
   std::string inject;
   for (int i = 1; i < argc; ++i) {
@@ -27,7 +29,11 @@ int main(int argc, char** argv) {
     else if (arg.rfind("--min-candidates=", 0) == 0) min_candidates = (u64)std::atoll(arg.c_str() + 17);
     else if (arg.rfind("--min-deep=", 0) == 0) min_deep = (u64)std::atoll(arg.c_str() + 11);
     else if (arg.rfind("--inject=", 0) == 0) inject = arg.substr(9);
-    else if (arg.rfind("--seeds-per-launch=", 0) == 0) spl = (size_t)std::atoll(arg.c_str() + 19);
+    else if (arg.rfind("--seeds-per-launch=", 0) == 0) {
+      const long long v = std::atoll(arg.c_str() + 19);
+      if (v < 1) return 2;
+      spl = (size_t)v;
+    } else if (arg.rfind("--min-flushes=", 0) == 0) min_flushes = (u64)std::atoll(arg.c_str() + 14);
     else return 2;
   }
   if (!inject.empty() && !mutants_enable(inject)) return 2;
@@ -50,7 +56,7 @@ int main(int argc, char** argv) {
   double kernel_ms = 0;
   u64 launches = 0;
   try {
-    gpu::generate_q4_device(ix, opt, &batched, &sb, &kernel_ms, &launches, spl);
+    gpu::generate_q4_device(ix, opt, &batched, &sb, &kernel_ms, &launches, spl, &bs);
   } catch (const std::exception& e) {
     std::fprintf(stderr, "REFUS : %s\n", e.what());
     return 2;
@@ -90,14 +96,19 @@ int main(int argc, char** argv) {
   rle_candidates(&prod, 1);
   rle_candidates(&batched, 1);
   vec_mism += count_mism(prod, batched);
-  std::printf("q4_lane_device famille=%s n=%d fils=%d candidats_q4=%zu lots=%zu seeds=%llu coeur_tues=%llu completions=%llu "
+  std::printf("q4_lane_device famille=%s n=%d fils=%d seuil=%zu vidages=%llu max_lot_seeds=%llu max_ancre_seeds=%llu candidats_q4=%zu candidats_lots=%zu seeds=%llu coeur_tues=%llu completions=%llu "
               "profonds=%llu lancements=%llu kernel_ms=%.1f desaccords_vecteur=%llu desaccords_compteurs=%llu\n",
-              cloud_family_name(family), n, threads, prod.size(), batched.size(), (unsigned long long)sp.seeds[1],
+              cloud_family_name(family), n, threads, spl, (unsigned long long)bs.flushes, (unsigned long long)bs.max_lot_seeds,
+              (unsigned long long)bs.max_anchor_seeds, prod.size(), batched.size(), (unsigned long long)sp.seeds[1],
               (unsigned long long)sp.seeds_killed_core, (unsigned long long)sp.q4_completions,
               (unsigned long long)sp.depth_killed[2], (unsigned long long)launches, kernel_ms, (unsigned long long)vec_mism, (unsigned long long)bad);
   if (sp.candidates[2] < min_candidates || sp.depth_killed[2] < min_deep) {
     std::printf("PLANCHER\n");
     return 3;
+  }
+  if (bs.max_lot_seeds > (u64)spl + bs.max_anchor_seeds || bs.flushes < min_flushes || launches < 1) {
+    std::printf("LOTISSEMENT : borne ou vidages ou lancements hors contrat\n");
+    return 1;
   }
   if (vec_mism || bad) return mutant ? 4 : 1;
   if (mutant) { std::printf("MUTANT NON TUE\n"); return 1; }

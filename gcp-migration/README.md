@@ -638,6 +638,16 @@ MAX_RUN_SECONDS=14400 GUEST_SHUTDOWN_MINUTES=230 ./gcp-migration/session_campagn
 Le contrat 50 000 points est une **mesure** (temps, RSS, digests gravés comme
 référence v5 à 50 k), jamais un claim : `public_status=not_claimed`.
 
+Reçus (`morsehgp3D_v5/receipts/campagne_g4_v5_<date>[_suffixe]/`) : les
+artefacts bruts (`*.txt`, `*.status`) sont dans `out/`, la synthèse `RECU.txt`
+et `session.log` (expurgé) à côté. Un reçu se **rejoue** avec le validateur de
+son pin, jamais celui du `HEAD` :
+
+```bash
+git show <source_commit>:gcp-migration/validate_v5_campaign.py > /tmp/validate_pin.py
+python3 /tmp/validate_pin.py <recu>/out <source_commit> <source_payload_sha256> <protocol_manifest_sha256> 0 0
+```
+
 ## Arrêter et vérifier après les calculs
 
 Depuis la machine locale, utilisez le script de fermeture après chaque session,

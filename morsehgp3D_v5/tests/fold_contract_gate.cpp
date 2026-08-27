@@ -21,6 +21,10 @@ ForestEvent make(int q, int d, u16 mask = 0) {
   e.q = (u8)q;
   e.d = (u8)d;
   e.active_mask = mask;
+  e.level.num[0] = 1;
+  e.level.num[1] = 0;
+  e.level.num[2] = 0;
+  e.level.den = 1;  // contrat ExactLevel : den > 0 (le constructeur par defaut donne den = 0, invalide)
   int id = 0;
   for (int t = 0; t < q && t < 11; ++t) e.support[t] = (PointId)id++;
   for (int t = 0; t < d && t < 9; ++t) e.interior[t] = (PointId)id++;
@@ -79,6 +83,17 @@ int main() {
   }
   expect_refusal("bit de masque haut (q=3, mask=8)", {make(3, 0, 8)});
   expect_refusal("bit de masque haut (q=2, mask=4) parmi des valides", {make(2, 0, 3), make(2, 0, 4)});
+  // Contrat ExactLevel : den > 0.
+  {
+    ForestEvent e = make(3, 0);
+    e.level.den = 0;
+    expect_refusal("niveau den = 0", {e});
+  }
+  {
+    ForestEvent e = make(3, 0);
+    e.level.den = -1;
+    expect_refusal("niveau den < 0", {e});
+  }
   // Limites positives.
   expect_accept("q11+d0 (mask plein)", {make(11, 0, 0x7ff)});
   expect_accept("q2+d9", {make(2, 9, 3)});

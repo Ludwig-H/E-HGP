@@ -38,6 +38,12 @@
 // « entiers larges ») : le mot haut du produit 64×64 est ignore sur le chemin
 // host. La porte le tue (code 4) sur les tirages et sur les formes : preuve
 // que les produits traversent reellement les 64 bits hauts.
+// CONTRAT DE BACKEND (docs/GPU.md, livraison 5) : DI128 est l'arithmetique
+// des formes et des scans device ; __int128 reste autorise en code device la
+// ou wide.hpp l'emploie deja (cmp_2p2_jb2 : mul_192x128_320 sur u128), via le
+// pont HD di_to_i128_hd (q4_core_shaped.hpp) — nvcc 12.9 + GCC hote. Les
+// ponts di_from_i128 / di_to_i128 ci-dessous sont HOTE seulement mais
+// visibles dans les deux passes de nvcc.
 #pragma once
 
 #include <cstdint>

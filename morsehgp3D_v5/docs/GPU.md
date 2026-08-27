@@ -110,10 +110,36 @@ en blocs.
    compaction ; profondeur warp-par-candidat) et sa porte sur G4.
 5. **Lotissement, kernels q4, pilote CUDA et mesure** :
    - 5a **livré (CPU)** : `generate_q3_batched_with` / `generate_q4_batched_with`
-     accumulent les rectangles de chaque ouvrier dans un lot vidé au seuil
-     `kSeedsPerLaunch = 2^16` seeds et en fin de séquence (ordre d'émission
-     préservé ; un lot = un lancement) ; portes à petit lot (1000 seeds,
-     plusieurs vidages) hôte et device.
+     accumulent les rectangles de chaque ouvrier dans un lot vidé dès que le
+     seuil `kSeedsPerLaunch = 2^16` seeds est atteint — testé **après chaque
+     ancre** (l'unité atomique), donc **borne dure** d'un lot = seuil + seeds
+     de la plus grosse ancre, mesurée et exigée par les portes
+     (`vidages`, `max_lot_seeds`, `max_ancre_seeds`, `--min-flushes`) ; un
+     seuil < 1 est refusé (code 2) ; une ancre q4 sans seed n'est pas
+     matérialisée. **Ordre** : l'ordre *local* de chaque ouvrier (rectangles,
+     ancres, seeds) est préservé ; à plusieurs fils, l'ordre brut global
+     n'est pas spécifié (tirage dynamique, fusion par ouvrier) — seule la
+     sortie post-RLE l'est, et c'est elle que les portes exigent (l'ordre
+     brut n'est comparé qu'à un fil). Contrat structurel des lots
+     (`validate_q3_batch_view`, `validate_q4_batch_view`,
+     `validate_q4_results_view` : SoA de même taille, tranches dans les
+     tableaux, indices de lentille, `x_site`/`skip` dans la tranche,
+     émissions ordonnées/distinctes/de seeds vivants, somme des étages =
+     complétions, limite `UINT32_MAX` gravée par vue synthétique) vérifié
+     avant tout scan et toute émission (`mhgp5_batch_contract_gate`) ; les
+     primitives parallèles capturent la première exception, joignent tous
+     les fils puis relancent (`mhgp5_parallel_exception_gate`, quatre fils,
+     vidage au seuil et vidage final) ; réserves device transactionnelles
+     (temporaires puis échange, instance inutilisable après échec) ;
+     comptage des paires q4 en `u64` refusé au-delà du domaine `u32` des
+     kernels ; `lots` et `kernels` comptés séparément.
+   - **Arithmétique device** : contrat retenu — `DI128` (`dint.hpp`) pour
+     les formes et les scans ; `__int128` autorisé en code device **là où
+     `wide.hpp` l'emploie déjà** (`cmp_2p2_jb2` via `mul_192x128_320`,
+     pont `di_to_i128_hd`), nvcc 12.9 le supportant avec GCC hôte. Ce choix
+     de backend est documenté et mesuré, jamais un claim ; la session
+     `24b3f164` compile ce chemin (témoin q3) et la session `2e75cb42` le
+     chemin q4.
    - 5b **écrit, en attente de G4** (session `2e75cb42`) :
      `src/gpu/q4_kernels.cuh` — `k_q4_core` (warp par seed, six compteurs par
      ballot, correction intra-warp au h4-ième témoin), `k_q4_complete` (bloc

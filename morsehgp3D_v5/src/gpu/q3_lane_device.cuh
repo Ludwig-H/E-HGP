@@ -9,6 +9,7 @@
 
 #include <stdexcept>
 #include <string>
+#include <vector>
 
 #include "q3_lane_batched.hpp"
 #include "q3_scan_kernel.cuh"
@@ -32,11 +33,16 @@ class Q3DeviceExecutor {
   Q3DeviceExecutor& operator=(const Q3DeviceExecutor&) = delete;
 
   double kernel_ms_total = 0;
-  u64 launches = 0;
+  u64 launches = 0;  // kernels lances (q3 : un par lot)
+  u64 lots = 0;      // lots scannes
 
   void scan(Q3Batch* b, u32 h3, bool nonstrict) {
+    if (broken_) throw std::runtime_error("cuda : executeur q3 inutilisable apres une erreur d'allocation");
+    std::string why;
+    if (!validate_q3_batch(*b, &why)) throw std::invalid_argument(why);
     const size_t ns = b->u0.size(), nj = b->seeds.size(), na = b->anchors.size();
     b->verdicts.resize(nj);
+    ++lots;
     if (nj == 0) return;
     reserve(ns, nj, na);
     static_assert(sizeof(Q3BatchSeed) == sizeof(SeedJob), "Q3BatchSeed et SeedJob doivent avoir le meme layout");
@@ -77,25 +83,53 @@ class Q3DeviceExecutor {
   void up(T* dst, const T* src, size_t n) {
     cuda_check(cudaMemcpyAsync(dst, src, n * sizeof(T), cudaMemcpyHostToDevice, stream_), "transfert");
   }
+  bool broken_ = false;
+  // RESERVE TRANSACTIONNELLE : les nouveaux tampons sont alloues dans des
+  // temporaires ; en cas d'echec, ils sont liberes, l'instance devient
+  // inutilisable (broken_) et l'exception est relancee — ni capacite
+  // mensongere ni pointeurs partiels.
+  struct Tmp {
+    std::vector<void*> ptrs;
+    ~Tmp() {
+      for (void* p : ptrs) cudaFree(p);
+    }
+    template <class T>
+    T* alloc(size_t n) {
+      T* p = nullptr;
+      cuda_check(cudaMalloc(&p, n * sizeof(T)), "cudaMalloc");
+      ptrs.push_back(p);
+      return p;
+    }
+    void commit() { ptrs.clear(); }
+  };
   template <class T>
-  static void grow(T** p, size_t n) {
-    if (*p) cudaFree(*p);
-    cuda_check(cudaMalloc(p, n * sizeof(T)), "cudaMalloc");
+  static void swap_in(T** dst, T* fresh) {
+    if (*dst) cudaFree(*dst);
+    *dst = fresh;
   }
   void reserve(size_t ns, size_t nj, size_t na) {
-    if (ns > cap_sites_) {
-      cap_sites_ = ns + ns / 2;
-      grow(&d_u0_, cap_sites_); grow(&d_u1_, cap_sites_); grow(&d_u2_, cap_sites_); grow(&d_q_, cap_sites_);
-      grow(&d_d0_, cap_sites_); grow(&d_d1_, cap_sites_); grow(&d_d2_, cap_sites_); grow(&d_dq_, cap_sites_);
-    }
-    if (nj > cap_jobs_) {
-      cap_jobs_ = nj + nj / 2;
-      grow(&d_jobs_, cap_jobs_);
-      grow(&d_out_, cap_jobs_);
-    }
-    if (na > cap_anchors_) {
-      cap_anchors_ = na + na / 2;
-      grow(&d_anchors_, cap_anchors_);
+    try {
+      Tmp t;
+      const bool gs = ns > cap_sites_, gj = nj > cap_jobs_, ga = na > cap_anchors_;
+      const size_t cs = gs ? ns + ns / 2 : 0, cj = gj ? nj + nj / 2 : 0, ca = ga ? na + na / 2 : 0;
+      i64 *u0 = nullptr, *u1 = nullptr, *u2 = nullptr, *q = nullptr;
+      double *d0 = nullptr, *d1 = nullptr, *d2 = nullptr, *dq = nullptr;
+      SeedJob* jobs = nullptr;
+      SeedOut* out = nullptr;
+      AnchorRange* anchors = nullptr;
+      if (gs) { u0 = t.alloc<i64>(cs); u1 = t.alloc<i64>(cs); u2 = t.alloc<i64>(cs); q = t.alloc<i64>(cs);
+                d0 = t.alloc<double>(cs); d1 = t.alloc<double>(cs); d2 = t.alloc<double>(cs); dq = t.alloc<double>(cs); }
+      if (gj) { jobs = t.alloc<SeedJob>(cj); out = t.alloc<SeedOut>(cj); }
+      if (ga) { anchors = t.alloc<AnchorRange>(ca); }
+      // Tout est alloue : echange.
+      if (gs) { swap_in(&d_u0_, u0); swap_in(&d_u1_, u1); swap_in(&d_u2_, u2); swap_in(&d_q_, q);
+                swap_in(&d_d0_, d0); swap_in(&d_d1_, d1); swap_in(&d_d2_, d2); swap_in(&d_dq_, dq); cap_sites_ = cs; }
+      if (gj) { swap_in(&d_jobs_, jobs); swap_in(&d_out_, out); cap_jobs_ = cj; }
+      if (ga) { swap_in(&d_anchors_, anchors); cap_anchors_ = ca; }
+      t.commit();
+    } catch (...) {
+      broken_ = true;
+      throw;
     }
   }
   void release() {
@@ -107,7 +141,8 @@ class Q3DeviceExecutor {
 
 // Lane q3 complete avec l'executeur device : un executeur par fil (thread_local).
 inline void generate_q3_device(const CloudIndex& ix, const GenerateOptions& opt, std::vector<BallCandidate>* out,
-                               GenerateStats* st, double* kernel_ms, u64* launches, size_t seeds_per_launch = kSeedsPerLaunch) {
+                               GenerateStats* st, double* kernel_ms, u64* launches, size_t seeds_per_launch = kSeedsPerLaunch,
+                               BatchStats* bs = nullptr) {
   std::mutex mu;
   generate_q3_batched_with(ix, opt, out, st, [&](Q3Batch* b, u32 h3, bool nonstrict) {
     thread_local Q3DeviceExecutor ex;
@@ -117,7 +152,7 @@ inline void generate_q3_device(const CloudIndex& ix, const GenerateOptions& opt,
     std::lock_guard<std::mutex> lk(mu);
     *kernel_ms += ex.kernel_ms_total - before_ms;
     *launches += ex.launches - before_l;
-  }, seeds_per_launch);
+  }, seeds_per_launch, bs);
 }
 #endif  // __CUDACC__
 

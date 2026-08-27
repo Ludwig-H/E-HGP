@@ -73,7 +73,7 @@ run_one() {
 NVCC_BIN="${NVCC_BIN:-$(command -v nvcc 2>/dev/null || ls /usr/local/cuda*/bin/nvcc 2>/dev/null | head -1 || true)}"
 if [ -n "${NVCC_BIN}" ] && [ "${SKIP_GPU_WITNESS:-0}" != "1" ]; then
   export PATH="$(dirname "${NVCC_BIN}"):${PATH}"
-  run_one gpu_witness device_witness bash -c "set -e; echo nvcc=${NVCC_BIN}; uname -m; ${NVCC_BIN} --version 2>&1 | tail -2; nvidia-smi --query-gpu=name,driver_version --format=csv,noheader 2>&1 | head -1; cmake -S morsehgp3D_v5 -B build-cuda -DCMAKE_BUILD_TYPE=Release -DMHGP5_ENABLE_CUDA=ON -DCMAKE_CUDA_COMPILER=${NVCC_BIN} 2>&1 | tail -40; test \${PIPESTATUS[0]} -eq 0; cmake --build build-cuda --target mhgp5_device_witness -j8 2>&1 | grep -vE '^\[|^Scanning' | tail -60; test \${PIPESTATUS[0]} -eq 0; ./build-cuda/mhgp5_device_witness"
+  run_one gpu_witness device_witness bash -c "set -e; echo nvcc=${NVCC_BIN}; uname -m; ${NVCC_BIN} --version 2>&1 | tail -2; nvidia-smi --query-gpu=name,driver_version --format=csv,noheader; cmake -S morsehgp3D_v5 -B build-cuda -DCMAKE_BUILD_TYPE=Release -DMHGP5_ENABLE_CUDA=ON -DCMAKE_CUDA_COMPILER=${NVCC_BIN} 2>&1 | tail -40; test \${PIPESTATUS[0]} -eq 0; cmake --build build-cuda --target mhgp5_device_witness -j8 2>&1 | grep -vE '^\[|^Scanning' | tail -60; test \${PIPESTATUS[0]} -eq 0; ./build-cuda/mhgp5_device_witness"
   # Refus IMMEDIAT des phases suivantes si le temoin n'est pas conforme
   # (P1 audit 9762daaf) : aucune conformite ni contrat sur une VM dont le
   # device n'est pas prouve ; le statut du temoin reste grave.

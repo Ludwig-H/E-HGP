@@ -71,6 +71,10 @@ def main():
         if name not in ("gpu_witness", "gpu_lane") and not counters.search(body):
             bad.append(f"{name}: ligne de compteurs absente")
         if name == "gpu_witness":
+            if not re.search(r"^nvcc=\S+$", body, re.M) or "release 12.9" not in body:
+                bad.append(f"{name}: provenance nvcc absente ou pas 12.9")
+            if not re.search(r"^NVIDIA .*, \d+\.\d+", body, re.M):
+                bad.append(f"{name}: provenance nvidia-smi absente (fail-closed)")
             # Les deux familles, leurs planchers et desaccords=0 partout — pas
             # la seule sous-chaine finale.
             arith = re.search(r"^arith cas=(\d+) desaccords=(\d+)$", body, re.M)
@@ -93,19 +97,31 @@ def main():
             if not d_gpu or not d_cpu or d_gpu.group(1) != d_cpu.group(1):
                 bad.append(f"{name}: digest_all DIFFERENT du contrat CPU de la meme famille (ou absent)")
         if name == "gpu_lane":
-            lanes = re.findall(r"^q3_lane_device famille=(\S+) n=(\d+) fils=\d+ candidats_q3=(\d+) .* desaccords_vecteur=(\d+) desaccords_compteurs=(\d+)$", body, re.M)
-            want = {("uniform", "1200"), ("eight_clusters", "1200"), ("uniform", "8000")}
-            got = {(f, n) for f, n, c, v, k in lanes if int(v) == 0 and int(k) == 0 and int(c) >= 200}
-            if not want <= got:
-                bad.append(f"{name}: lane device — portes manquantes ou en desaccord : {sorted(want - got)}")
-            if body.count("q3_lane_device OK") < 3:
-                bad.append(f"{name}: lane device — moins de trois OK")
-            lanes4 = re.findall(r"^q4_lane_device famille=(\S+) n=(\d+) fils=\d+ .* desaccords_vecteur=(\d+) desaccords_compteurs=(\d+)$", body, re.M)
-            got4 = {(f, n) for f, n, v, k in lanes4 if int(v) == 0 and int(k) == 0}
-            if not want <= got4:
-                bad.append(f"{name}: lane q4 device — portes manquantes ou en desaccord : {sorted(want - got4)}")
-            if body.count("q4_lane_device OK") < 3:
-                bad.append(f"{name}: lane q4 device — moins de trois OK")
+            # Triples EXACTS famille/taille/fils, planchers (100000 candidats a
+            # 8 k, seeds et morts non vides, lancements > 0), desaccords = 0,
+            # et une occurrence unique de chaque triple.
+            want = {("uniform", "1200", "1"): 200, ("eight_clusters", "1200", "4"): 200, ("uniform", "8000", "8"): 100000}
+            for lane, cand_key in (("q3_lane_device", "candidats_q3"), ("q4_lane_device", "candidats_q4")):
+                rx = re.compile(rf"^{lane} famille=(\S+) n=(\d+) fils=(\d+) (.*) desaccords_vecteur=(\d+) desaccords_compteurs=(\d+)$", re.M)
+                seen = {}
+                for f, n, t, mid, v, k in rx.findall(body):
+                    kv = dict(re.findall(r"(\w+)=([0-9.]+)", mid))
+                    key = (f, n, t)
+                    seen[key] = seen.get(key, 0) + 1
+                    if key not in want:
+                        bad.append(f"{name}: {lane} — triple inattendu {key}")
+                        continue
+                    if int(v) != 0 or int(k) != 0:
+                        bad.append(f"{name}: {lane} {key} — desaccords")
+                    if int(kv.get(cand_key, 0)) < want[key]:
+                        bad.append(f"{name}: {lane} {key} — plancher de candidats {want[key]} non atteint")
+                    if int(kv.get("seeds", 0)) < 1 or int(kv.get("tues", kv.get("coeur_tues", 0))) < 1 or int(kv.get("lancements", 0)) < 1:
+                        bad.append(f"{name}: {lane} {key} — seeds, morts ou lancements vides")
+                for key in want:
+                    if seen.get(key, 0) != 1:
+                        bad.append(f"{name}: {lane} {key} — {seen.get(key, 0)} occurrence(s), une attendue")
+                if body.count(f"{lane} OK") != 3:
+                    bad.append(f"{name}: {lane} — trois OK attendus, {body.count(lane + ' OK')} vus")
         if name.startswith("conf_") and not conformity.search(body):
             bad.append(f"{name}: conformite v4 non etablie")
         if name.startswith("contrat_") and not digest.search(body):

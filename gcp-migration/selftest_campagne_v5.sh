@@ -96,8 +96,14 @@ echo "# faux reçu" > "${WORK}/recu.txt"
 mkdir -p "${WORK}/fakebin"
 cat > "${WORK}/fakebin/nvcc" <<'EOS'
 #!/usr/bin/env bash
-echo "nvcc: faux"
+echo "nvcc: NVIDIA (R) Cuda compiler driver (faux)"
+echo "Cuda compilation tools, release 12.9, V12.9.41"
 EOS
+cat > "${WORK}/fakebin/nvidia-smi" <<'EOS'
+#!/usr/bin/env bash
+echo "NVIDIA RTX PRO 6000 Blackwell Server Edition (faux), 580.173.02"
+EOS
+chmod +x "${WORK}/fakebin/nvidia-smi"
 cat > "${WORK}/fakebin/cmake" <<'EOS'
 #!/usr/bin/env bash
 # faux cmake : cree le faux temoin device au premier appel (-S), rien au build.
@@ -114,9 +120,9 @@ EOT
 chmod +x build-cuda/mhgp5_device_witness
 cat > build-cuda/mhgp5_q3_lane_device_gate <<'EOT'
 #!/usr/bin/env bash
-fam=uniform; n=1200
-for a in "$@"; do case "$a" in --family=*) fam="${a#--family=}";; --n=*) n="${a#--n=}";; esac; done
-echo "q3_lane_device famille=${fam} n=${n} fils=1 candidats_q3=176250 seeds=3373964 tues=3197714 replis=768748 lancements=10 kernel_ms=1.0 desaccords_vecteur=${LANE_MISM:-0} desaccords_compteurs=0"
+fam=uniform; n=1200; t=1
+for a in "$@"; do case "$a" in --family=*) fam="${a#--family=}";; --n=*) n="${a#--n=}";; --threads=*) t="${a#--threads=}";; esac; done
+echo "q3_lane_device famille=${fam} n=${n} fils=${t} seuil=65536 vidages=10 max_lot_seeds=1 max_ancre_seeds=1 candidats_q3=1176250 seeds=3373964 tues=3197714 replis=768748 lancements=10 kernel_ms=1.0 desaccords_vecteur=${LANE_MISM:-0} desaccords_compteurs=0"
 [ "${LANE_MISM:-0}" = "0" ] && { echo "q3_lane_device OK"; exit 0; }
 exit 1
 EOT
@@ -125,7 +131,7 @@ cat > build-cuda/mhgp5_q4_lane_device_gate <<'EOT'
 #!/usr/bin/env bash
 fam=uniform; n=1200; t=1
 for a in "$@"; do case "$a" in --family=*) fam="${a#--family=}";; --n=*) n="${a#--n=}";; --threads=*) t="${a#--threads=}";; esac; done
-echo "q4_lane_device famille=${fam} n=${n} fils=${t} candidats_q4=44020 lots=44020 seeds=508979 coeur_tues=357862 completions=3992025 profonds=363074 lancements=3 kernel_ms=1.0 desaccords_vecteur=0 desaccords_compteurs=0"
+echo "q4_lane_device famille=${fam} n=${n} fils=${t} seuil=65536 vidages=10 max_lot_seeds=1 max_ancre_seeds=1 candidats_q4=144020 candidats_lots=144020 seeds=508979 coeur_tues=357862 completions=3992025 profonds=363074 lancements=3 kernel_ms=1.0 desaccords_vecteur=0 desaccords_compteurs=0"
 echo "q4_lane_device OK"
 EOT
 chmod +x build-cuda/mhgp5_q4_lane_device_gate

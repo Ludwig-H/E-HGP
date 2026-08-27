@@ -18,6 +18,8 @@
 #pragma once
 
 #include <limits>
+#include <stdexcept>
+#include <string>
 #include <vector>
 
 #include "../core/mutants.hpp"
@@ -80,10 +82,89 @@ struct Q4Batch {
   }
 };
 
-// Etage 1 : formation du lot (aucun verdict). Compte anchors, anchors_killed_hist,
-// anchors_killed_w4, seeds comme la lane de production.
+// VUE et CONTRAT STRUCTUREL d'un lot q4 (verifies avant tout scan et avant
+// toute emission ; fail-closed) : sites < 2^32, douze SoA de meme taille,
+// indices de lentille dans les sites, tranches d'ancres (sites et lentille)
+// dans les tableaux, ancre de chaque seed valide et x_site dans la tranche,
+// skip_a/skip_b dans la tranche ou UINT32_MAX ; apres scan : un verdict par
+// seed, emissions ordonnees (seed croissant, y croissant dans la lentille),
+// distinctes, issues de seeds vivants, y_site dans la tranche.
+struct Q4BatchView {
+  size_t n_sites = 0, n_lens = 0, n_anchors = 0, n_seeds = 0, n_verdicts = 0, n_emits = 0;
+  size_t soa_sizes[11] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};  // u1,u2,q,u0d,u1d,u2d,qd,px,py,pz,pid
+  const u32* lens_sites = nullptr;
+  const Q4BatchAnchor* anchors = nullptr;
+  const Q4BatchSeed* seeds = nullptr;
+  const Q4SeedVerdict* verdicts = nullptr;
+  const Q4Emit* emits = nullptr;
+};
+inline Q4BatchView q4_batch_view(const Q4Batch& b) {
+  Q4BatchView v;
+  v.n_sites = b.u0.size(); v.n_lens = b.lens_sites.size(); v.n_anchors = b.anchors.size(); v.n_seeds = b.seeds.size();
+  v.n_verdicts = b.verdicts.size(); v.n_emits = b.emits.size();
+  const size_t sz[11] = {b.u1.size(), b.u2.size(), b.q.size(), b.u0d.size(), b.u1d.size(), b.u2d.size(), b.qd.size(),
+                         b.px.size(), b.py.size(), b.pz.size(), b.pid.size()};
+  for (int i = 0; i < 11; ++i) v.soa_sizes[i] = sz[i];
+  v.lens_sites = b.lens_sites.data(); v.anchors = b.anchors.data(); v.seeds = b.seeds.data();
+  v.verdicts = b.verdicts.data(); v.emits = b.emits.data();
+  return v;
+}
+inline bool validate_q4_batch_view(const Q4BatchView& v, std::string* why) {
+  if (v.n_sites > (size_t)UINT32_MAX) { *why = "lot q4 : plus de 2^32 - 1 sites"; return false; }
+  for (int i = 0; i < 11; ++i)
+    if (v.soa_sizes[i] != v.n_sites) { *why = "lot q4 : tailles SoA differentes"; return false; }
+  if (v.n_lens > (size_t)UINT32_MAX || v.n_anchors > (size_t)UINT32_MAX || v.n_seeds > (size_t)UINT32_MAX) {
+    *why = "lot q4 : plus de 2^32 - 1 indices de lentille, ancres ou seeds"; return false;
+  }
+  for (size_t i = 0; i < v.n_lens; ++i)
+    if (v.lens_sites[i] >= v.n_sites) { *why = "lot q4 : indice de lentille hors des sites"; return false; }
+  for (size_t a = 0; a < v.n_anchors; ++a) {
+    const Q4BatchAnchor& an = v.anchors[a];
+    if ((u64)an.begin + an.count > v.n_sites) { *why = "lot q4 : tranche d'ancre hors des sites"; return false; }
+    if ((u64)an.lens_begin + an.lens_count > v.n_lens) { *why = "lot q4 : tranche de lentille hors du tableau"; return false; }
+    if (an.skip_a != UINT32_MAX && an.skip_a >= an.count) { *why = "lot q4 : skip_a hors de la tranche"; return false; }
+    if (an.skip_b != UINT32_MAX && an.skip_b >= an.count) { *why = "lot q4 : skip_b hors de la tranche"; return false; }
+    for (u32 li = an.lens_begin; li < an.lens_begin + an.lens_count; ++li)
+      if (v.lens_sites[li] >= an.count) { *why = "lot q4 : indice de lentille hors de la tranche de son ancre"; return false; }
+  }
+  for (size_t i = 0; i < v.n_seeds; ++i) {
+    const Q4BatchSeed& sd = v.seeds[i];
+    if (sd.anchor >= v.n_anchors) { *why = "lot q4 : ancre de seed invalide"; return false; }
+    if (sd.x_site >= v.anchors[sd.anchor].count) { *why = "lot q4 : x_site hors de la tranche"; return false; }
+  }
+  return true;
+}
+inline bool validate_q4_batch(const Q4Batch& b, std::string* why) { return validate_q4_batch_view(q4_batch_view(b), why); }
+// Apres le scan.
+inline bool validate_q4_results_view(const Q4BatchView& v, const Q4StageCounts& st, std::string* why) {
+  if (v.n_verdicts != v.n_seeds) { *why = "lot q4 : un verdict par seed attendu apres le scan"; return false; }
+  const u64 sum = st.lens + st.owner + st.once + st.i64_ + st.face + st.det + st.center + st.deep + st.emit;
+  if (sum != st.completions) { *why = "lot q4 : la somme des etages ne vaut pas le nombre de completions"; return false; }
+  for (size_t e = 0; e < v.n_emits; ++e) {
+    const Q4Emit& em = v.emits[e];
+    if (em.seed >= v.n_seeds) { *why = "lot q4 : emission hors des seeds"; return false; }
+    if (v.verdicts[em.seed].dead) { *why = "lot q4 : emission d'un seed mort"; return false; }
+    const Q4BatchAnchor& an = v.anchors[v.seeds[em.seed].anchor];
+    if (em.y_site >= an.count) { *why = "lot q4 : y_site hors de la tranche"; return false; }
+    if (e > 0) {
+      const Q4Emit& pr = v.emits[e - 1];
+      if (pr.seed > em.seed || (pr.seed == em.seed && pr.y_site >= em.y_site)) {
+        *why = "lot q4 : emissions non ordonnees ou non distinctes"; return false;
+      }
+    }
+  }
+  return true;
+}
+inline bool validate_q4_results(const Q4Batch& b, std::string* why) { return validate_q4_results_view(q4_batch_view(b), b.stages, why); }
+
+// Etage 1 : formation du lot (aucun verdict), AJOUT au lot courant ; `flush`
+// apres chaque ancre des que le lot atteint `threshold` seeds. Une ancre sans
+// seed n'est PAS materialisee (aucune completion possible). Compte anchors,
+// anchors_killed_hist, anchors_killed_w4, seeds comme la lane de production.
+template <class Flush>
 inline void build_q4_batch(const CloudIndex& ix, const AliveRect& ar, const u64 h_of[3], bool float_on, i64 cover_coef,
-                           generate_detail::AnchorScratch& sc, Q4Batch* b, GenerateStats* ls) {
+                           generate_detail::AnchorScratch& sc, Q4Batch* b, GenerateStats* ls, size_t threshold,
+                           BatchStats* bs, Flush&& flush) {
   using namespace generate_detail;
   corner_histograms(ix, Lane::kQ4, ar.r, &sc.ha, &sc.hb);
   const NodeRange ra = ix.range_of(ar.r.a), rb = ix.range_of(ar.r.b);
@@ -112,10 +193,9 @@ inline void build_q4_batch(const CloudIndex& ix, const AliveRect& ar, const u64 
           continue;
         }
       }
-      // Sites (toujours remplis : la lentille et les positions servent aux
-      // completions meme sans seed a scanner).
       sc.fill_affine_sites(ix, pa, pb, D2);
       const size_t nc = sc.cover.size();
+      const size_t sites_before = b->u0.size(), lens_before = b->lens_sites.size(), seeds_before = b->seeds.size();
       Q4BatchAnchor an;
       an.begin = (u32)b->u0.size();
       an.count = (u32)nc;
@@ -167,11 +247,24 @@ inline void build_q4_batch(const CloudIndex& ix, const AliveRect& ar, const u64 
         sd.core.skip_x = xs;
         b->seeds.push_back(sd);
       }
+      if (b->seeds.size() == seeds_before) {
+        // Aucun seed : l'ancre est retiree du lot (rien a scanner ni a completer).
+        b->anchors.pop_back();
+        b->u0.resize(sites_before); b->u1.resize(sites_before); b->u2.resize(sites_before); b->q.resize(sites_before);
+        b->u0d.resize(sites_before); b->u1d.resize(sites_before); b->u2d.resize(sites_before); b->qd.resize(sites_before);
+        b->px.resize(sites_before); b->py.resize(sites_before); b->pz.resize(sites_before); b->pid.resize(sites_before);
+        b->lens_sites.resize(lens_before);
+        continue;
+      }
+      bs->max_anchor_seeds = std::max(bs->max_anchor_seeds, (u64)(b->seeds.size() - seeds_before));
+      if (b->seeds.size() >= threshold) flush();
     }
 }
 
 // Etage 2 (executeur hote) : cœurs puis completions, boucles plates.
 inline void scan_q4_batch_host(Q4Batch* b, u32 h4, bool core_nonstrict, bool depth_nonstrict, bool no_canonical) {
+  std::string why;
+  if (!validate_q4_batch(*b, &why)) throw std::invalid_argument(why);
   b->verdicts.assign(b->seeds.size(), Q4SeedVerdict{});
   b->emits.clear();
   b->stages = Q4StageCounts{};
@@ -216,6 +309,8 @@ inline void scan_q4_batch_host(Q4Batch* b, u32 h4, bool core_nonstrict, bool dep
           ++b->stages.emit;
           b->emits.push_back(Q4Emit{(u32)si, ys});
           break;
+        default:
+          throw std::logic_error("lot q4 : etage inconnu");
       }
     }
   }
@@ -223,6 +318,8 @@ inline void scan_q4_batch_host(Q4Batch* b, u32 h4, bool core_nonstrict, bool dep
 
 // Etage 3 : compteurs et emission ordonnee (forme i128 recalculee par l'hote).
 inline void emit_q4_batch(const Q4Batch& b, std::vector<BallCandidate>* lo, GenerateStats* ls) {
+  std::string why;
+  if (!validate_q4_batch(b, &why) || !validate_q4_results(b, &why)) throw std::invalid_argument(why);
   for (const Q4SeedVerdict& v : b.verdicts) {
     if (v.dead) ++ls->seeds_killed_core;
     ls->float_cert_pos += v.c.cert_pos; ls->q4_cert[0] += v.c.cert_pos;
@@ -254,8 +351,10 @@ inline void emit_q4_batch(const Q4Batch& b, std::vector<BallCandidate>* lo, Gene
 
 template <class Scan>
 inline void generate_q4_batched_with(const CloudIndex& ix, const GenerateOptions& opt, std::vector<BallCandidate>* out,
-                                     GenerateStats* st, Scan&& scan, size_t seeds_per_launch = kSeedsPerLaunch) {
+                                     GenerateStats* st, Scan&& scan, size_t seeds_per_launch = kSeedsPerLaunch,
+                                     BatchStats* batch_stats = nullptr) {
   using namespace generate_detail;
+  if (seeds_per_launch < 1) throw std::invalid_argument("seeds_per_launch < 1");
   const bool float_on = float_filter_runtime_enabled();
   const bool depth_nonstrict = MHGP5_MUTANT("genfilter-nonstrict");
   const bool core_nonstrict = MHGP5_MUTANT("q4-seed-core-nonstrict");
@@ -274,15 +373,18 @@ inline void generate_q4_batched_with(const CloudIndex& ix, const GenerateOptions
   std::vector<GenerateStats> lst(T);
   std::vector<AnchorScratch> lsc(T);
   std::vector<Q4Batch> lb(T);
+  std::vector<BatchStats> lbs(T);
   const auto flush = [&](size_t t) {
     if (lb[t].seeds.empty() && lb[t].anchors.empty()) return;
+    lbs[t].max_lot_seeds = std::max(lbs[t].max_lot_seeds, (u64)lb[t].seeds.size());
+    lbs[t].max_lot_sites = std::max(lbs[t].max_lot_sites, (u64)lb[t].u0.size());
+    ++lbs[t].flushes;
     scan(&lb[t], (u32)h_of[2], core_nonstrict, depth_nonstrict, no_canonical);
     emit_q4_batch(lb[t], &louts[t], &lst[t]);
     lb[t].clear();
   };
   const size_t created = parallel_items(nrect, (int)T, [&](size_t i, size_t t) {
-    build_q4_batch(ix, alive[i], h_of, float_on, cover_coef, lsc[t], &lb[t], &lst[t]);
-    if (lb[t].seeds.size() >= seeds_per_launch) flush(t);
+    build_q4_batch(ix, alive[i], h_of, float_on, cover_coef, lsc[t], &lb[t], &lst[t], seeds_per_launch, &lbs[t], [&] { flush(t); });
   });
   for (size_t t = 0; t < T; ++t) flush(t);
   st->workers_rects[2] = std::max(st->workers_rects[2], (u64)created);
@@ -291,15 +393,16 @@ inline void generate_q4_batched_with(const CloudIndex& ix, const GenerateOptions
     if (drop && t == 0 && T > 1) continue;
     out->insert(out->end(), louts[t].begin(), louts[t].end());
     st->add_from(lst[t]);
+    if (batch_stats) batch_stats->add_from(lbs[t]);
   }
   st->t_rects_ms[2] += ms_since(t1);
 }
 
 inline void generate_q4_batched(const CloudIndex& ix, const GenerateOptions& opt, std::vector<BallCandidate>* out,
-                                GenerateStats* st, size_t seeds_per_launch = kSeedsPerLaunch) {
+                                GenerateStats* st, size_t seeds_per_launch = kSeedsPerLaunch, BatchStats* bs = nullptr) {
   generate_q4_batched_with(ix, opt, out, st, [](Q4Batch* b, u32 h4, bool cn, bool dn, bool nc) {
     scan_q4_batch_host(b, h4, cn, dn, nc);
-  }, seeds_per_launch);
+  }, seeds_per_launch, bs);
 }
 
 }  // namespace mhgp5

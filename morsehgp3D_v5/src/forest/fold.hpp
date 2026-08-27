@@ -241,25 +241,24 @@ inline bool fold_event_ok(const ForestEvent& ev, int K) {
 }
 
 inline bool validate_fold_events(const std::vector<ForestEvent>& events, int threads, std::string* why) {
+  // BALAYAGE SEQUENTIEL : aucune allocation ni fil avant que le contrat ne
+  // soit verifie (la revendication « avant toute allocation » est ainsi
+  // vraie ; cout mesure : ~60 ns par evenement). `threads` reste dans la
+  // signature pour les appelants ; il n'est pas utilise ici.
+  (void)threads;
   if (events.empty()) return true;
   const int K = (int)events[0].q + (int)events[0].d - 1;
-  std::atomic<u64> first_bad{~(u64)0};
-  parallel_ranges(events.size(), threads, [&](size_t b, size_t e, size_t) {
-    for (size_t i = b; i < e; ++i) {
-      if (fold_event_ok(events[i], K)) continue;
-      u64 cur = first_bad.load();
-      while ((u64)i < cur && !first_bad.compare_exchange_weak(cur, (u64)i)) {
-      }
-      return;
-    }
-  });
-  const u64 bad = first_bad.load();
-  if (bad == ~(u64)0) return true;
-  const ForestEvent& ev = events[(size_t)bad];
-  *why = "invalid_input : evenement " + std::to_string(bad) + " hors contrat (q=" + std::to_string((int)ev.q) +
-         ", d=" + std::to_string((int)ev.d) + ", K attendu=" + std::to_string(K) +
-         ") : q in [2,11], d <= 9, q+d <= 11, K constant, identifiants distincts, masque < 2^q";
-  return false;
+  for (size_t i = 0; i < events.size(); ++i) {
+    const ForestEvent& ev = events[i];
+    const bool level_ok = ev.level.den > 0;  // contrat ExactLevel : den > 0
+    if (fold_event_ok(ev, K) && level_ok) continue;
+    *why = "invalid_input : evenement " + std::to_string(i) + " hors contrat (q=" + std::to_string((int)ev.q) +
+           ", d=" + std::to_string((int)ev.d) + ", K attendu=" + std::to_string(K) +
+           (level_ok ? "" : ", niveau den <= 0") +
+           ") : q in [2,11], d <= 9, q+d <= 11, K constant, identifiants distincts, masque < 2^q, den > 0";
+    return false;
+  }
+  return true;
 }
 
 inline FoldPrepared prepare_fold(const std::vector<ForestEvent>& events, int threads = 1) {

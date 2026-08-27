@@ -299,6 +299,12 @@ mhgp5_gate(mhgp5_q4_completion_shaped_clusters 0 mhgp5_q4_completion_shaped_gate
 mhgp5_gate(mhgp5_q4_completion_shaped_cocirc 0 mhgp5_q4_completion_shaped_gate "--family=uniform --n=300 --coord=40 --min-emit=200 --min-deep=20 --min-center=20")
 mhgp5_gate(mhgp5_q4_completion_shaped_mutant_once 4 mhgp5_q4_completion_shaped_gate "--family=uniform --n=400 --inject=q4-shaped-once-flip")
 
+# Contrat structurel des lots q3/q4 et contrat d'exception des primitives paralleles (P1 audit d3144fb3).
+mhgp5_executable(mhgp5_batch_contract_gate tests/batch_contract_gate.cpp)
+mhgp5_gate(mhgp5_batch_contract 0 mhgp5_batch_contract_gate "")
+mhgp5_executable(mhgp5_parallel_exception_gate tests/parallel_exception_gate.cpp)
+mhgp5_gate(mhgp5_parallel_exception 0 mhgp5_parallel_exception_gate "")
+
 # Lane q3 par lots (etage hote de la lane device) : egalite vecteur a vecteur avec la production.
 # Contrat structurel du fold (P0 audit 9762daaf) : rejets permanents et limites positives.
 mhgp5_executable(mhgp5_fold_contract_gate tests/fold_contract_gate.cpp)
@@ -320,8 +326,10 @@ mhgp5_gate(mhgp5_q4_lane_batched_ordre 0 mhgp5_q4_lane_batched_gate "--family=un
 mhgp5_gate(mhgp5_q4_lane_batched_mutant_deep 4 mhgp5_q4_lane_batched_gate "--family=uniform --n=400 --min-candidates=200 --inject=q4-batched-emit-deep")
 mhgp5_gate(mhgp5_q4_lane_batched_uniform_8000 0 mhgp5_q4_lane_batched_gate "--family=uniform --n=8000 --threads=8 --min-candidates=100000" LABELS scale8000 TIMEOUT 1800)
 
-mhgp5_gate(mhgp5_q3_lane_batched_petit_lot 0 mhgp5_q3_lane_batched_gate "--family=uniform --n=400 --threads=1 --seeds-per-launch=1000 --min-candidates=200")
-mhgp5_gate(mhgp5_q4_lane_batched_petit_lot 0 mhgp5_q4_lane_batched_gate "--family=uniform --n=400 --threads=1 --seeds-per-launch=1000 --min-candidates=200")
+mhgp5_gate(mhgp5_q3_lane_batched_petit_lot 0 mhgp5_q3_lane_batched_gate "--family=uniform --n=400 --threads=1 --seeds-per-launch=1000 --min-candidates=200 --min-flushes=100")
+mhgp5_gate(mhgp5_q4_lane_batched_petit_lot 0 mhgp5_q4_lane_batched_gate "--family=uniform --n=400 --threads=1 --seeds-per-launch=1000 --min-candidates=200 --min-flushes=100")
+mhgp5_gate(mhgp5_q3_lane_batched_seuil_zero 2 mhgp5_q3_lane_batched_gate "--family=uniform --n=400 --seeds-per-launch=0")
+mhgp5_gate(mhgp5_q4_lane_batched_seuil_negatif 2 mhgp5_q4_lane_batched_gate "--family=uniform --n=400 --seeds-per-launch=-1")
 mhgp5_gate(mhgp5_q3_lane_batched_uniform_8000 0 mhgp5_q3_lane_batched_gate "--family=uniform --n=8000 --threads=8 --min-candidates=100000" LABELS scale8000 TIMEOUT 1800)
 
 # ---- Temoin device (docs/GPU.md, livraison 3) — nvcc seulement -------------------------
@@ -362,7 +370,7 @@ if(MHGP5_ENABLE_CUDA)
   mhgp5_gate(mhgp5_q4_lane_device_uniform 0 mhgp5_q4_lane_device_gate "--family=uniform --n=1200" LABELS gpu)
   mhgp5_gate(mhgp5_q4_lane_device_clusters 0 mhgp5_q4_lane_device_gate "--family=eight_clusters --n=1200 --threads=4" LABELS gpu)
   mhgp5_gate(mhgp5_q4_lane_device_cocirc 0 mhgp5_q4_lane_device_gate "--family=uniform --n=300 --coord=40 --min-candidates=200 --min-deep=20" LABELS gpu)
-  mhgp5_gate(mhgp5_q4_lane_device_petit_lot 0 mhgp5_q4_lane_device_gate "--family=uniform --n=400 --seeds-per-launch=1000 --min-candidates=200" LABELS gpu)
+  mhgp5_gate(mhgp5_q4_lane_device_petit_lot 0 mhgp5_q4_lane_device_gate "--family=uniform --n=400 --seeds-per-launch=1000 --min-candidates=200 --min-flushes=100" LABELS gpu)
   mhgp5_gate(mhgp5_q4_lane_device_mutant_deep 4 mhgp5_q4_lane_device_gate "--family=uniform --n=400 --min-candidates=200 --inject=q4-batched-emit-deep" LABELS gpu)
   mhgp5_gate(mhgp5_q4_lane_device_uniform_8000 0 mhgp5_q4_lane_device_gate "--family=uniform --n=8000 --threads=8 --min-candidates=100000" LABELS gpu scale8000 TIMEOUT 1800)
   # Pilote CUDA (produit : sans mutants) : --gpu remplace les lanes q3/q4 par le device.
@@ -370,6 +378,6 @@ if(MHGP5_ENABLE_CUDA)
   target_compile_options(mhgp5_cuda PRIVATE
     "$<$<COMPILE_LANGUAGE:CUDA>:-fmad=false;--expt-relaxed-constexpr;-Xcompiler=-Wall,-Wextra,-Werror>")
   target_link_libraries(mhgp5_cuda PRIVATE Threads::Threads)
-  mhgp5_gate(mhgp5_q3_lane_device_petit_lot 0 mhgp5_q3_lane_device_gate "--family=uniform --n=400 --seeds-per-launch=1000 --min-candidates=200" LABELS gpu)
+  mhgp5_gate(mhgp5_q3_lane_device_petit_lot 0 mhgp5_q3_lane_device_gate "--family=uniform --n=400 --seeds-per-launch=1000 --min-candidates=200 --min-flushes=100" LABELS gpu)
   mhgp5_gate(mhgp5_q3_lane_device_uniform_8000 0 mhgp5_q3_lane_device_gate "--family=uniform --n=8000 --threads=8 --min-candidates=100000" LABELS gpu scale8000 TIMEOUT 1800)
 endif()

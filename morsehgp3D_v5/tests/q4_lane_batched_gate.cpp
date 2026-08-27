@@ -16,6 +16,8 @@ int main(int argc, char** argv) {
   CloudFamily family = CloudFamily::kUniform;
   int n = 400, coord = 0, threads = 1;
   size_t spl = kSeedsPerLaunch;
+  u64 min_flushes = 1;
+  BatchStats bs;
   u64 min_candidates = 1000, min_deep = 100;
   std::string inject;
   for (int i = 1; i < argc; ++i) {
@@ -27,7 +29,11 @@ int main(int argc, char** argv) {
     else if (arg.rfind("--min-candidates=", 0) == 0) min_candidates = (u64)std::atoll(arg.c_str() + 17);
     else if (arg.rfind("--min-deep=", 0) == 0) min_deep = (u64)std::atoll(arg.c_str() + 11);
     else if (arg.rfind("--inject=", 0) == 0) inject = arg.substr(9);
-    else if (arg.rfind("--seeds-per-launch=", 0) == 0) spl = (size_t)std::atoll(arg.c_str() + 19);
+    else if (arg.rfind("--seeds-per-launch=", 0) == 0) {
+      const long long v = std::atoll(arg.c_str() + 19);
+      if (v < 1) return 2;  // contrat : seuil >= 1
+      spl = (size_t)v;
+    } else if (arg.rfind("--min-flushes=", 0) == 0) min_flushes = (u64)std::atoll(arg.c_str() + 14);
     else return 2;
   }
   if (!inject.empty() && !mutants_enable(inject)) return 2;
@@ -42,7 +48,7 @@ int main(int argc, char** argv) {
   generate_candidates(ix, opt, &prod_all, &sp);
   for (const BallCandidate& c : prod_all)
     if (c.arity == 4) prod.push_back(c);
-  generate_q4_batched(ix, opt, &batched, &sb, spl);
+  generate_q4_batched(ix, opt, &batched, &sb, spl, &bs);
   u64 bad = 0;
   auto cmp = [&](const char* what, u64 a, u64 b) {
     if (a != b) {
@@ -78,14 +84,23 @@ int main(int argc, char** argv) {
   rle_candidates(&prod, 1);
   rle_candidates(&batched, 1);
   vec_mism += count_mism(prod, batched);
-  std::printf("q4_lane_batched famille=%s n=%d fils=%d candidats_q4=%zu lots=%zu seeds=%llu coeur_tues=%llu completions=%llu "
+  std::printf("q4_lane_batched famille=%s n=%d fils=%d seuil=%zu vidages=%llu max_lot_seeds=%llu max_ancre_seeds=%llu max_lot_sites=%llu candidats_q4=%zu candidats_lots=%zu seeds=%llu coeur_tues=%llu completions=%llu "
               "profonds=%llu desaccords_vecteur=%llu desaccords_compteurs=%llu\n",
-              cloud_family_name(family), n, threads, prod.size(), batched.size(), (unsigned long long)sp.seeds[1],
+              cloud_family_name(family), n, threads, spl, (unsigned long long)bs.flushes, (unsigned long long)bs.max_lot_seeds,
+              (unsigned long long)bs.max_anchor_seeds, (unsigned long long)bs.max_lot_sites, prod.size(), batched.size(), (unsigned long long)sp.seeds[1],
               (unsigned long long)sp.seeds_killed_core, (unsigned long long)sp.q4_completions,
               (unsigned long long)sp.depth_killed[2], (unsigned long long)vec_mism, (unsigned long long)bad);
   if (sp.candidates[2] < min_candidates || sp.depth_killed[2] < min_deep) {
     std::printf("PLANCHER\n");
     return 3;
+  }
+  // Contrat de lotissement : borne dure seuil + plus grosse ancre ; nombre de
+  // vidages au moins min_flushes (un code ignorant le seuil resterait vert sinon).
+  if (bs.max_lot_seeds > (u64)spl + bs.max_anchor_seeds || bs.flushes < min_flushes) {
+    std::printf("LOTISSEMENT : max_lot_seeds=%llu > seuil %zu + max_ancre %llu, ou vidages %llu < %llu\n",
+                (unsigned long long)bs.max_lot_seeds, spl, (unsigned long long)bs.max_anchor_seeds,
+                (unsigned long long)bs.flushes, (unsigned long long)min_flushes);
+    return 1;
   }
   if (vec_mism || bad) return mutant ? 4 : 1;
   if (mutant) { std::printf("MUTANT NON TUE\n"); return 1; }

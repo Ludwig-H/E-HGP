@@ -19,6 +19,8 @@ int main(int argc, char** argv) {
   CloudFamily family = CloudFamily::kUniform;
   int n = 1200, coord = 0, threads = 1;
   size_t spl = kSeedsPerLaunch;
+  u64 min_flushes = 1;
+  BatchStats bs;
   u64 min_candidates = 1000, min_killed = 10;
   for (int i = 1; i < argc; ++i) {
     const std::string arg = argv[i];
@@ -28,7 +30,11 @@ int main(int argc, char** argv) {
     else if (arg.rfind("--threads=", 0) == 0) threads = std::atoi(arg.c_str() + 10);
     else if (arg.rfind("--min-candidates=", 0) == 0) min_candidates = (u64)std::atoll(arg.c_str() + 17);
     else if (arg.rfind("--min-killed=", 0) == 0) min_killed = (u64)std::atoll(arg.c_str() + 13);
-    else if (arg.rfind("--seeds-per-launch=", 0) == 0) spl = (size_t)std::atoll(arg.c_str() + 19);
+    else if (arg.rfind("--seeds-per-launch=", 0) == 0) {
+      const long long v = std::atoll(arg.c_str() + 19);
+      if (v < 1) return 2;
+      spl = (size_t)v;
+    } else if (arg.rfind("--min-flushes=", 0) == 0) min_flushes = (u64)std::atoll(arg.c_str() + 14);
     else return 2;
   }
   int ndev = 0;
@@ -49,7 +55,7 @@ int main(int argc, char** argv) {
   double kernel_ms = 0;
   u64 launches = 0;
   try {
-    gpu::generate_q3_device(ix, opt, &dev, &sd, &kernel_ms, &launches, spl);
+    gpu::generate_q3_device(ix, opt, &dev, &sd, &kernel_ms, &launches, spl, &bs);
   } catch (const std::exception& e) {
     std::fprintf(stderr, "REFUS : %s\n", e.what());
     return 2;
@@ -80,14 +86,19 @@ int main(int argc, char** argv) {
   rle_candidates(&prod, 1);
   rle_candidates(&dev, 1);
   vec_mism += count_mism(prod, dev);
-  std::printf("q3_lane_device famille=%s n=%d fils=%d candidats_q3=%zu seeds=%llu tues=%llu replis=%llu lancements=%llu "
+  std::printf("q3_lane_device famille=%s n=%d fils=%d seuil=%zu vidages=%llu max_lot_seeds=%llu max_ancre_seeds=%llu candidats_q3=%zu seeds=%llu tues=%llu replis=%llu lancements=%llu "
               "kernel_ms=%.1f desaccords_vecteur=%llu desaccords_compteurs=%llu\n",
-              cloud_family_name(family), n, threads, prod.size(), (unsigned long long)sp.seeds[0],
+              cloud_family_name(family), n, threads, spl, (unsigned long long)bs.flushes, (unsigned long long)bs.max_lot_seeds,
+              (unsigned long long)bs.max_anchor_seeds, prod.size(), (unsigned long long)sp.seeds[0],
               (unsigned long long)sp.depth_killed[1], (unsigned long long)sp.q3_cert[2], (unsigned long long)launches,
               kernel_ms, (unsigned long long)vec_mism, (unsigned long long)bad);
   if (sp.candidates[1] < min_candidates || sp.depth_killed[1] < min_killed) {
     std::printf("PLANCHER\n");
     return 3;
+  }
+  if (bs.max_lot_seeds > (u64)spl + bs.max_anchor_seeds || bs.flushes < min_flushes || launches < 1) {
+    std::printf("LOTISSEMENT : borne ou vidages ou lancements hors contrat\n");
+    return 1;
   }
   if (vec_mism || bad) return 1;
   std::printf("q3_lane_device OK\n");
