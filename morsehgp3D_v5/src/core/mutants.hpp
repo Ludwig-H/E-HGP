@@ -60,6 +60,7 @@ inline constexpr const char* kMutants[] = {
     "obig-carry-lost", "float-small-threshold", "q3-sign-p", "q3-cramer-swap", "q3-shaped-strict-flip",
     "q3-batched-emit-dead",
     "witness-no-warp-correction",
+    "q4-shaped-jung-skip-kills",
 };
 
 inline std::vector<std::string>& mutant_registry() {

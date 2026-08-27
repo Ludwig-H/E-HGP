@@ -281,6 +281,17 @@ mhgp5_gate(mhgp5_q3_scan_shaped_clusters 0 mhgp5_q3_scan_shaped_gate "--family=e
 mhgp5_gate(mhgp5_q3_scan_shaped_cocirc 0 mhgp5_q3_scan_shaped_gate "--family=uniform --n=300 --coord=40 --min-seeds=500 --min-fallback=100")
 mhgp5_gate(mhgp5_q3_scan_shaped_mutant_flip 4 mhgp5_q3_scan_shaped_gate "--family=uniform --n=300 --coord=40 --inject=q3-shaped-strict-flip")
 
+# Cœur de seed q4 en forme de kernel (livraison 4b) : egalite par seed avec la production.
+mhgp5_executable(mhgp5_q4_core_shaped_gate tests/q4_core_shaped_gate.cpp)
+# En position generale les replis exacts sont rares (2 et 0 a n=400) : leurs
+# planchers sont portes par la famille cocirculaire (coord=40 : 26 replis de
+# Jung, 163 replis flottants) ; les familles generales gardent les planchers
+# de seeds, de non-temoins certifies et de replis flottants.
+mhgp5_gate(mhgp5_q4_core_shaped_uniform 0 mhgp5_q4_core_shaped_gate "--family=uniform --n=400 --min-jung-fallback=0 --min-float-fallback=10")
+mhgp5_gate(mhgp5_q4_core_shaped_clusters 0 mhgp5_q4_core_shaped_gate "--family=eight_clusters --n=400 --min-jung-fallback=0 --min-float-fallback=5")
+mhgp5_gate(mhgp5_q4_core_shaped_cocirc 0 mhgp5_q4_core_shaped_gate "--family=uniform --n=300 --coord=40 --min-seeds=500 --min-jung-fallback=20 --min-float-fallback=100")
+mhgp5_gate(mhgp5_q4_core_shaped_mutant_skip 4 mhgp5_q4_core_shaped_gate "--family=uniform --n=300 --coord=40 --min-seeds=500 --inject=q4-shaped-jung-skip-kills")
+
 # Lane q3 par lots (etage hote de la lane device) : egalite vecteur a vecteur avec la production.
 # Contrat structurel du fold (P0 audit 9762daaf) : rejets permanents et limites positives.
 mhgp5_executable(mhgp5_fold_contract_gate tests/fold_contract_gate.cpp)
