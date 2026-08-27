@@ -2,240 +2,221 @@
 
 - **Date :** 27 août 2026
 - **Auditeur :** Codex
-- **Pin fonctionnel audité :** `94464cfb3ba23d8c65d780d981808f8a8e50ffa5`
-- **Tip produit observé hors verdict :** `10c46c87bbda13a3fda697c9dedb94fead273faa` (factorisation et routage hôte poussés pendant le rejeu ; qualification interrompue pour sauvegarde)
-- **Reçu G4 le plus récent :** [`campagne_g4_v5_20260827_lane_q4_device`](../receipts/campagne_g4_v5_20260827_lane_q4_device/RECU.txt), source `2e75cb42c36c72ed90f931e0dbf49980e669d1d1`
+- **Pin fonctionnel relu statiquement :** `10c46c87bbda13a3fda697c9dedb94fead273faa`
+- **Dernier pin exécuté par cet auditeur :** `94464cfb3ba23d8c65d780d981808f8a8e50ffa5`
+- **Reçu G4 le plus récent :** [`campagne_g4_v5_20260827_adaptatif`](../receipts/campagne_g4_v5_20260827_adaptatif/RECU.txt), source `8f95df2effd07ffa7a8aa7cf7fe79be1be9c7b2c`, publié par `a0d134205b5b4364ada1e6c12995f979f59698b4`
 - **Worktree observé hors verdict :** le probe racine `.codex_fold_contract_probe.cpp` appartient à un autre auditeur
 - **Cadre :** `phase=exploration_v5_hors_registre`, `backend=cpu_reference`, `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`
-- **GCP :** non utilisé par l'auditeur ; la cible Spot de Claude est certifiée `TERMINATED` dans le reçu
+- **GCP :** non utilisé par l'auditeur ; le nouveau reçu affirme l'arrêt ciblé, mais ne conserve pas la sortie de certification correspondante
 
 ## Verdict
 
-La v5 est **orange et progresse nettement**. Le pipeline CPU horizontal, ses
-oracles bornés, ses mutants et les lanes Q3/Q4 par lots passent une porte
-Release complète et propre au pin audité. Une vraie exécution Blackwell a aussi
-établi les lanes Q3 et Q4 device sans désaccord sur trois tailles bornées, puis
-l'égalité CPU/GPU de bout en bout sur deux familles à 50 000 points.
+La v5 reste **orange et avance dans la bonne direction**. Le nouveau reçu brut
+ferme empiriquement les deux anciens OOM à 50 000 points au pin `8f95df2e` :
+les quatre exécutions `--gpu` terminent avec le code 0 et leurs
+`digest_balls` **et** `digest_all` sont identiques aux sorties CPU appariées.
+La porte lane brute présente quatre cas Q3 et quatre cas Q4 non vides sans
+désaccord, et le mutant Q3 device est tué avec le code 4.
 
-Ce résultat ne ferme pas encore la ligne GPU. Les deux familles denses ont
-épuisé la mémoire de la G4 au pin reçu ; les limites ajoutées depuis sont des
-seuils contrôlés **après une ancre entière**, pas des plafonds de résidence.
-L'exécuteur adaptatif de `8f95df2e`, le précomptage Q4 de `987a18c8` et le
-layout SoA réduit de `94464cfb` sont prometteurs, mais n'ont aucun reçu G4.
-Enfin, le protocole peut déclarer un run adaptatif recevable sans prouver que
-les routes hôte et device ont réellement été exercées.
+La formulation correcte est toutefois **égalité bornée observée au pin
+`8f95df2e`**, pas « lane exacte » en général. La campagne est partielle : 24
+runs sur 25, adaptatif `scanline_single_pass` absent, journal de session perdu,
+trap non exécuté et aucun validateur final exécuté. Le reçu ne qualifie pas le
+précomptage Q4, le layout SoA réduit ni le routage hôte direct, tous postérieurs
+à sa source.
 
-Il n'y a pas de P0 CPU reproduit. Il reste trois ensembles de P1 localisés :
-capacité avant matérialisation, intégrité/autorité des résultats Q4, et
-non-vacuité du prochain reçu. Ils peuvent être fermés sans réécrire les
-oracles ni les étages mathématiques shaped.
+La factorisation `10c46c87` est utile et ne montre pas de P0 évident en lecture
+statique : la production et la route hôte partagent désormais
+`scan_anchor_q3` et `process_anchor_q4`, et la route hôte ne construit plus un
+second lot. Elle n'a pas été exécutée dans cet audit, conformément à la demande
+de ne lancer aucun test. Les trois P1 restent donc ouverts : capacité avant
+matérialisation device, intégrité/autorité des résultats Q4, et protocole de
+preuve reproductible avec non-vacuité démontrée.
 
-## Avancement et résultats actuels
+## Résultats actuels
 
-| Périmètre | Résultat effectivement établi | Limite du résultat |
+| Périmètre | Résultat établi | Portée exacte |
 |---|---|---|
-| CPU au pin `94464cfb` | build Release propre ; **156/156** tests `gate`, dont **7** étiquetés `oracle`, en 270,60 s réelles | pas de campagne `scale*` ni de compilation `nvcc` rejouée par cet audit |
-| Protocole au même pin | `selftest_campagne_v5.sh` : `violations=0`, `PROTOCOLE CONFORME` | le faux pilote ne falsifie pas encore un routage adaptatif ignoré |
-| Registre | **20 phases** et portes validées par `check_implementation_status.py` | aucune phase v5 formelle ouverte ; registre inchangé |
-| Q3 device reçu | 3,37 M, 25,65 M et 35,43 M seeds ; zéro désaccord vectoriel ou de compteurs | source reçue `2e75cb42`, pas le tip actuel |
-| Q4 device reçu | 2,33 M, 5,97 M et 22,50 M seeds ; jusqu'à **157 485 218** complétions ; zéro désaccord | source reçue `2e75cb42`, pas l'adaptatif |
+| CPU `94464cfb` | Release `gate` : **156/156**, dont 7 portes `oracle` ; campagnes ciblées 36/36 et ASan+UBSan 10/10 | dernières exécutions de cet auditeur, antérieures à `10c46c87` |
+| Code `10c46c87` | corps par ancre factorisés ; route hôte directe sans `Q3Batch`/`Q4Batch` ; un seul lot device par ouvrier | relecture statique seulement ; aucune preuve CUDA ni mesure 50 k à ce pin |
+| G4 source `8f95df2e` | témoin device code 0, lane Q3/Q4 sans désaccord brut, mutant code 4, quatre contrats GPU 50 k code 0 | artefacts bruts cohérents, mais campagne partielle et non validée automatiquement |
+| Adaptatif source `8f95df2e` | `eight_clusters` exerce les deux routes et conserve les deux digests | `scanline_single_pass` absent ; ancien chemin hôte matérialisé |
 
-Sur les contrats 50 000 reçus :
+### Temps de bout en bout sur 50 000 points
 
-| Famille | CPU | GPU | Égalité observée | Verdict |
-|---|---:|---:|---|---|
-| `uniform` | 78 s ; 19,96 Go RSS | 89 s ; 19,01 Go RSS | `digest_balls` et `digest_all` identiques | conforme mais GPU plus lent |
-| `terrain` | 23 s ; 3,64 Go RSS | 42 s ; 29,28 Go RSS | `digest_balls` et `digest_all` identiques | conforme mais GPU plus lent et plus résident |
-| `eight_clusters` | 247 s ; 17,56 Go RSS | code 134 ; 119,63 Go RSS | aucun digest GPU terminal | `cudaMalloc` hors mémoire |
-| `scanline_single_pass` | 38 s ; 3,13 Go RSS | code 134 ; 97,96 Go RSS | aucun digest GPU terminal | `cudaMalloc` hors mémoire |
+| Famille | CPU 48 fils | GPU 48 fils | Surcoût GPU | Pic RSS CPU / GPU | Digests appariés |
+|---|---:|---:|---:|---:|---|
+| `uniform` | 78 s | 89 s | +14 % | 19,3 / 19,0 Go | `balls` et `all` |
+| `terrain` | 23 s | 44 s | +91 % | 3,68 / 5,31 Go | `balls` et `all` |
+| `scanline_single_pass` | 38 s | 96 s | +153 % | 3,10 / 7,25 Go | `balls` et `all` |
+| `eight_clusters` | 246 s | 718 s | +192 % | 17,6 / 17,5 Go | `balls` et `all` |
 
-Le reçu est donc correctement marqué `partial_or_failed`. L'égalité des deux
-digests a été vérifiée directement dans les sorties `uniform` et `terrain`,
-mais le validateur de campagne n'impose actuellement que `digest_all`.
+L'adaptatif `eight_clusters` à `min_sites=256` prend **713 s** et 18,2 Go.
+Il n'envoie pas « presque toutes les ancres » au device : environ 70,7 % en Q3
+et 31,6 % en Q4, soit 59,9 % ensemble. En revanche, il y envoie 99,1 % des
+seeds Q3 et 91,3 % des seeds Q4 ; le seuil par taille de cover laisse donc la
+quasi-totalité du travail coûteux sur le GPU.
 
-Depuis ce reçu, Claude a bien fermé plusieurs défauts concrets : validation
-structurelle des lots, propagation des exceptions après jonction, réserves
-device par temporaires, dénominateur exact strictement positif, limites
-`seeds/sites/pairs`, distinction des lots et kernels, routage adaptatif et
-précomptage des seeds Q4 avant toute matérialisation. Le précomptage évite
-utilement de mettre une ancre sans seed dans un lot. Ces corrections sont
-confirmées par les portes CPU du pin ; elles ne doivent simplement pas être
-surinterprétées comme un plafond mémoire ou une preuve Blackwell.
+### Pourquoi le GPU est plus lent dans ce reçu
 
-Le retrait des quatre copies `double` par site est numériquement cohérent sous
-le profil déclaré. Pour des coordonnées u16, les composantes affines vérifient
-`|u| < 2^17` et `|q| < 2^36` ; leur conversion en binary64 est donc exacte et
-la suite des FMA reçoit les mêmes bits. Le stockage par site passe de 64 à
-32 octets en Q3 et de 92 à 60 octets en Q4. Cela réduit la résidence et les
-transferts H2D, mais ne réduit pas nécessairement les 32 octets lus par paire
-sur le hot path : quatre lectures `double` deviennent quatre lectures i64 puis
-quatre conversions. Ne revendiquer aucun gain de temps avant mesure device au
-même pin.
+Le pin mesuré fait encore sur CPU la descente WSPD, les covers par ancre,
+l'énumération des seeds, les formes et la matérialisation des lots, puis copie
+les SoA et résultats. Sur `eight_clusters`, la route tout-device traverse
+18,22 milliards de seeds Q3 et 1,49 milliard de seeds Q4. Le CPU de production
+peut tuer tôt ces seeds sans fabriquer les enregistrements intermédiaires ; le
+chemin GPU paie cette préparation avant que le kernel ne puisse aider.
 
-`q3_affine_gate` exerce déjà une emprise 50 000 et un témoin
-`u=131071, q=2^35+7`, mais les portes shaped/lots ne gravent pas directement
-les extrema dans le nouveau layout device. Ajouter cette frontière à une
-porte device et la recevoir par `nvcc` : les derniers reçus CUDA portent sur
-l'ancien layout. Le commit intermédiaire `0c835cf3` ne compilait pas
-`q3_scan_shaped_gate`; `94464cfb` corrige ce défaut et constitue le premier
-pin attribuable de cette optimisation.
+Les chiffres étayent fortement ce diagnostic : la génération passe de 189 s
+CPU à 659 s GPU, tandis que `kernel_ms=111196,5` est un cumul d'événements de
+48 exécuteurs, pas un mur GPU. Ils ne suffisent toutefois pas à isoler une
+cause unique : les fenêtres Q4 incluent aussi transferts, synchronisations et
+compaction hôte. Écrire « matérialisation et orchestration probablement
+dominantes » jusqu'à disposer de murs séparés préparation/H2D/kernel/D2H.
 
-## P1 — fermer la capacité avant le prochain reçu G4
+## Requalification de `10c46c87`
 
-Dans [`q4_lane_batched.hpp`](../src/gpu/q4_lane_batched.hpp), une ancre entière
-est encore copiée dans les SoA, puis `pairs_estimate` est incrémenté, puis les
-seuils sont testés. Une seule ancre peut donc dépasser arbitrairement
-`lim.sites` ou `lim.pairs`. Les casts `size_t -> u32` sont effectués pendant
-la matérialisation, avant que le validateur de vue puisse refuser. Le produit
-`anchor_seeds * lens_count` et l'addition au cumul ne sont pas vérifiés contre
-un débordement `u64`.
+Le changement ferme bien un sous-problème : il n'existe plus deux lots hôte et
+device simultanément par ouvrier. Une ancre routée hôte passe immédiatement par
+le même corps sémantique que la production ; seules les ancres routées device
+sont matérialisées. Cette factorisation réduit la duplication et donne une
+bonne base pour comparer les backends.
 
-L'ancien audit et [`GPU.md`](../docs/GPU.md) parlent par endroits de « borne
-dure » ou de paires « corrigées ». La formulation exacte est :
+Quatre limites doivent être explicites :
 
-> seuil post-ancre ; maximum observé inférieur au seuil plus la plus grosse
-> ancre observée.
+- Le reçu adaptatif à 713 s mesure l'ancien second lot hôte de `8f95df2e`, pas
+  la route directe actuelle. Fermer seulement le **tout-device matérialisé au
+  pin mesuré** comme voie de gain ; mesurer `10c46c87` avant de conclure sur
+  l'adaptatif courant.
+- Le callback générique de `generate_q3_batched_with` ou
+  `generate_q4_batched_with` ne voit désormais que les ancres device ; la route
+  hôte le contourne au profit du corps de production. Documenter cette
+  sémantique de backend, surtout pour les callbacks de mesure ou mutants.
+- Une émission hôte immédiate peut dépasser les émissions d'un lot device déjà
+  en attente. Seule la sortie post-RLE reste canonique en routage mixte ; ne pas
+  promettre l'ordre brut général.
+- `anchors_host` et `anchors_device` ne décrivent plus la même population. La
+  route hôte compte aussi les ancres sans seed Q3 et, en Q4, celles ensuite
+  tuées par W4 ou sans seed ; la route device ne compte que les ancres
+  matérialisées avec seeds. Pour prouver un mix, exiger `seeds_host > 0`,
+  `seeds_device > 0` et des lancements device, ou séparer compteurs « routés »
+  et « traités ». `host_flushes` est maintenant un champ mort toujours nul.
 
-Ce n'est pas une borne produit, car la plus grosse ancre n'a elle-même aucun
-plafond. Le double routage conserve en outre deux lots par ouvrier, hôte et
-device, qui peuvent être résidents simultanément.
+## P1 — capacité device avant matérialisation
+
+Le chemin hôte direct réduit la résidence, mais le chemin device garde le
+défaut principal. En Q3 et Q4, une ancre complète est encore copiée dans les
+SoA avant le test des seuils. Les conversions `size_t -> u32` précèdent le
+validateur ; en Q4, `anchor_seeds * lens_count` et son addition au cumul ne
+sont pas vérifiés. Une ancre isolée peut donc dépasser arbitrairement les caps
+de sites ou de paires.
 
 Fermeture recommandée :
 
-1. précompter sites, seeds et paires avec multiplication/addition vérifiées,
-   avant `fill_affine_sites` et avant tout cast ;
-2. vider le lot courant si l'ancre suivante le ferait dépasser ;
-3. tuiler une ancre isolée trop grande, en préservant l'ordre seed/lentille,
-   ou rendre un `resource_exhausted` structuré avant allocation ;
-4. borner aussi la somme résidente hôte/device par ouvrier et la grille CUDA ;
-5. graver une fixture `ancre > cap` et des helpers de frontière sans allocation
-   géante. La porte actuelle `lot <= seuil + max_ancre` ne suffit pas.
+1. précompter sites, seeds et paires avec casts, multiplication et addition
+   vérifiés avant toute écriture ;
+2. vider le lot avant l'ajout qui dépasserait le cap ;
+3. tuiler l'ancre isolée, la basculer vers le corps hôte, ou rendre un refus de
+   ressource structuré avant allocation ;
+4. appliquer le même contrat aux buffers, à la grille et aux sorties de la
+   future lane par rectangle ;
+5. conserver une fixture de frontière sans allocation géante lorsque les tests
+   seront de nouveau autorisés.
 
-## P1 — rendre les résultats Q4 fail-closed et autoritatifs
+## P1 — résultats Q4 et autorité
 
-[`validate_q4_results_view`](../src/gpu/q4_lane_batched.hpp) vérifie la taille
-des verdicts, une somme de compteurs et l'ordre sommaire des émissions. Il
-n'impose pas `st.emit == n_emits`, ne recalcule pas le nombre exact de
-complétions admissibles et ne vérifie pas qu'un `y_site` appartient à la
-lentille en étant distinct de `x`, `a` et `b`. La fixture actuellement dite
-valide accepte précisément `y=x` et `y=skip_a`. Une sortie artificiellement
-vide peut donc satisfaire le validateur avec des compteurs nuls.
+`validate_q4_results_view` vérifie une somme d'étages et l'ordre sommaire des
+émissions, mais n'impose pas `st.emit == n_emits`, ne recalcule pas le nombre
+exact de complétions admissibles et ne vérifie pas que `y_site` est dans la
+lentille et distinct de `x_site`, `skip_a` et `skip_b`. Les vues synthétiques
+doivent aussi refuser tout pointeur nul associé à un compte non nul et les
+sommes débordantes. Les mutants minimaux restent : émission perdue, `y=x`,
+`y=skip`, `y` hors lentille et compteurs débordants.
 
-Les vues synthétiques doivent aussi refuser un pointeur nul dès que le compte
-associé est non nul, avant toute déréférence. Ajouter les mutants « émission
-perdue », `y=x`, `y=skip`, `y` hors lentille et somme débordante.
-
-À une frontière plus haute, les hooks publics `q3_override` et `q4_override`
-peuvent ne rien produire tout en laissant le pipeline atteindre un statut
-terminal. Il faut soit les réserver à un backend interne scellé, soit marquer
-explicitement toute sortie issue d'un callback externe comme expérimentale et
-non autoritative. Une fixture de callback vide doit empêcher
+À la frontière produit, les `LaneOverride` publics peuvent ne rien émettre et
+laisser malgré tout le pipeline atteindre un statut terminal. Sceller ces
+callbacks comme backend interne, ou rendre toute sortie externe explicitement
+expérimentale et non autoritative. Un callback vide ne doit pas pouvoir produire
 `complete_regular`.
 
-## P1 preuve — empêcher un reçu adaptatif vacuement vert
+## P1 preuve — rendre la prochaine campagne terminale
 
-Le protocole doit comparer **à la fois** `digest_balls` et `digest_all` entre
-CPU et GPU. `digest_all` chaîne les forêts, pas le vecteur de boules ; une
-divergence de candidats éliminée avant le fold pourrait aujourd'hui passer.
-Ajouter au selftest un scénario où seul `digest_balls` diverge.
+Le nouveau reçu compense manuellement plusieurs faiblesses : les deux digests
+concordent sur les quatre couples bruts, et l'adaptatif `eight_clusters` a des
+seeds des deux côtés. Le contrat automatisé reste insuffisant :
 
-Pour les runs `contrat_gpuad_*`, le validateur n'exige que `gpu=1` et le
-digest final. Il ne vérifie ni `min_sites=256`, ni `ancres_device > 0`, ni
-`ancres_hote > 0`, ni lancement device, ni vidage hôte. Le faux pilote du
-selftest ignore actuellement `--gpu-min-sites`, imprime `min_sites=1` et reste
-vert : c'est une preuve constructive de vacuité.
+- le validateur n'impose que `digest_all`, pas `digest_balls` ;
+- il n'exige ni `min_sites=256`, ni seeds hôte/device non nulles, ni lancement
+  device pour les runs adaptatifs ;
+- son faux pilote ignore encore le seuil et ne falsifie donc pas ce défaut ;
+- la phase GPU n'est pas conditionnée par `gpu_lane code=0` et
+  `gpu_mutant code=4` ;
+- `--gpu-min-sites=-1` devient silencieusement `SIZE_MAX` au lieu d'être refusé
+  avec le code 2 ;
+- la campagne reçue manque le second adaptatif, le journal, le verdict du
+  validateur, les codes session/rapatriement et la sortie certifiant l'arrêt.
 
-Choisir une fixture qui exerce réellement les deux routes, parser leurs
-compteurs exacts, puis ajouter trois scénarios négatifs : option ignorée,
-tout-hôte et tout-device. Les petites portes de routage CPU et device doivent
-précéder les contrats 50 000 dans la session distante.
+La prochaine session doit recevoir séparément : petites portes device, mutant,
+deux routes réellement non vides, quatre couples CPU/GPU avec les deux digests,
+et stratégie adaptative. Le tout-device dense peut rester un diagnostic de
+ressource distinct ; ne pas rendre son succès obligatoire pour promouvoir une
+stratégie qui ne l'utilise pas.
 
-Elles doivent aussi les **conditionner** : `gpu_lane` doit avoir `code=0` et
-`gpu_mutant` `code=4` avant toute phase 3. Le lanceur actuel grave ces deux
-statuts puis active inconditionnellement `GPU_BIN`; six contrats GPU peuvent
-donc consommer la VM après l'échec d'une porte. Les phases CPU peuvent être
-conservées comme preuves partielles sans lancer cette phase GPU invalide.
+## Contrat conseillé pour la livraison 7 par rectangle
 
-La porte cocirculaire Q4 compare bien `det`, `jung_fallback` et
-`float_fallback`, mais ne leur impose aucun plancher. La fixture locale donne
-respectivement 264, 26 et 163 ; exiger ces compteurs évite qu'une régression
-vacuement égale à zéro soit reçue.
+La direction attaque le bon poste et reste compatible avec l'invariant
+d'architecture : elle ne matérialise pas la mosaïque de Delaunay d'ordre
+supérieur. Mais déplacer l'énumération sur le device ne suffit pas à garantir
+la mémoire ni le gain. Avant le kernel :
 
-Le plan et le code doivent aussi choisir la même politique. [`GPU.md`](../docs/GPU.md)
-annonce un coût `seeds × sites`, tandis que le code route uniquement sur
-`cover.size()`. Q4 connaît déjà `nseeds` et `lens_count` avant
-matérialisation. Enfin, `--gpu-min-sites=-1` est converti en `SIZE_MAX` et
-force silencieusement le tout-hôte ; le parseur doit refuser négatif, zéro et
-overflow avec le code 2 attendu.
+1. définir l'entrée comme le candidat rectangulaire issu des handles, pas comme
+   un « cover du rectangle » supposé exact ; mesurer somme et maximum des sites,
+   `|A| * |B|`, seeds, complétions et survivants ;
+2. reproduire l'ordre stable actuel des 32 seaux radiaux, ou redéfinir et
+   requalifier les compteurs : les arrêts précoces rendent les compteurs
+   dépendants de l'ordre de visite ;
+3. employer précomptage/prefix-sum vérifié et tuilage déterministe pour ancres,
+   seeds, complétions et survivants, avec reprise explicite d'overflow ;
+4. ne jamais matérialiser globalement le produit ancres × seeds ; borner aussi
+   le retour des survivants et agréger tous les compteurs contractuels ;
+5. établir d'abord sur CPU l'égalité par rectangle avec la production, puis
+   comparer post-RLE, compteurs et `digest_balls` sur device ;
+6. mesurer séparément préparation hôte, octets H2D/D2H, mur kernel et
+   compaction, au même pin et contre la production CPU.
 
-La campagne exige encore que les deux contrats denses tout-device réussissent
-avant que son statut puisse être complet. Il faut décider explicitement si le
-tout-device dense est un contrat obligatoire ou un diagnostic de ressource
-séparé ; sinon une réussite adaptative ne pourra pas fermer le reçu global.
+Cette voie est prometteuse si elle partage réellement un candidat de cover
+entre beaucoup d'ancres et émet peu de survivants. Ces deux rapports sont des
+quantités à recevoir, pas des hypothèses à transformer en claim.
 
-## P2 — durcissements utiles, non bloquants pour la correction CPU
+## P2 — nettoyage utile
 
-- Passer les événements CUDA et chaque allocation temporaire sous RAII ; ne
-  pas ignorer `cudaEventElapsedTime`, `cudaEventDestroy` ou `cudaFree`.
-- Renommer le `kernel_ms` Q4 ou mesurer chaque kernel : la fenêtre actuelle
-  inclut des synchronisations et travaux hôte entre les trois kernels.
-- Partager les types de transfert, ou vérifier aussi standard-layout,
-  trivialité, alignement et offsets ; une égalité de `sizeof` ne suffit pas.
-- Ajouter un mutant Q4 réellement exécuté sur device et des planchers reçus
-  pour les replis exacts cocirculaires ; le mutant device actuel porte sur le
-  témoin Q3.
-- Corriger les commentaires devenus faux : certaines lanes parlent encore de
-  copies « i64 et doubles exactes », et l'estimation Q4 utilise encore environ
-  96 octets par site au lieu des 60 octets du nouveau payload SoA.
-- Les lignes `temps_*_ms` mesurent le temps mural autour du pool, pas un
-  « cumul des ouvriers ». `--scan-noop` n'est disponible qu'en Q3, n'est pas
-  inscrit comme CTest et inclut encore l'émission ; il ne constitue pas une
-  mesure isolée du coût de matérialisation.
-- Rafraîchir [`GPU.md`](../docs/GPU.md) : son tableau supérieur connaît le reçu
-  Q4, mais des sections basses disent encore « en attente de G4 » et sa
-  provenance promise est périmée.
-
-## Verrous d'architecture au-delà de la lane GPU
-
-- Le refus des positions dupliquées est une décision cohérente du profil
-  actuel ; toute voie pondérée reste une phase distincte à définir et juger.
-- La compression des plateaux sphériques n'est pas prouvée : le chemin permis
-  reste census complet puis refus de capacité, sans troncature silencieuse.
-- Les dix forêts horizontales sont livrées, mais les applications verticales
-  entre ordres ne le sont pas. Ne pas appeler cet objet la « tour ».
-- Le flux de payload n'a pas encore de publication globale transactionnelle :
-  une sortie physique doit rester `provisional` jusqu'au statut terminal.
-- La conformité v4 est une porte différentielle, pas une preuve d'exactitude.
-  Garder les oracles bornés, le rejeu structurel et les autorités verticales
-  causalement séparés.
+- Rafraîchir [`GPU.md`](../docs/GPU.md) : remplacer « exacte » par l'égalité
+  bornée, corriger « presque toutes les ancres », séparer le layout 8f mesuré du
+  layout 10c courant et retirer les sections qui disent encore Q4 « en attente
+  de G4 ».
+- Passer événements et allocations CUDA sous RAII et distinguer temps kernel,
+  synchronisations, transferts et compaction.
+- Corriger les commentaires « i64 et doubles exactes », l'estimation Q4 à
+  environ 96 octets/site et le libellé « cumul des ouvriers » pour un temps
+  mural.
+- Retirer ou renommer `host_flushes`, puis aligner les compteurs imprimés et le
+  validateur de campagne sur leur nouvelle sémantique.
+- Conserver le mutant Q3 reçu et ajouter, lors d'une prochaine campagne
+  autorisée, un mutant propre à la lane Q4 réellement exécuté sur device.
 
 ## Ordre de fermeture conseillé à Claude
 
-1. Durcir le validateur Q4 et graver les mutants de sortie.
-2. Introduire le préflight vérifié et la politique ancre trop grande.
-3. Aligner politique adaptative, CLI et documentation.
-4. Durcir validateur et selftest de campagne sur les deux digests et la
-   non-vacuité des deux routes.
-5. Exécuter les petites portes device, puis seulement une nouvelle session G4
-   gardée ; recevoir séparément stratégie adaptative et diagnostic tout-device.
+1. Corriger immédiatement les claims et contradictions de `GPU.md`.
+2. Durcir le validateur Q4 et l'autorité des callbacks.
+3. Introduire le préflight vérifié et la politique d'ancre trop grande.
+4. Écrire la porte CPU par rectangle avec ordre et capacités explicites.
+5. Durcir le protocole sur les deux digests, les routes et les préconditions de
+   phase, puis seulement programmer une nouvelle session G4 gardée.
 
-## Reproduction de cet audit
+## Reproduction et limites de cet audit
 
-Le pin a été exporté dans une archive propre, configuré et construit hors du
-worktree partagé. Résultats exacts :
-
-```text
-cmake -S <archive-94464cfb> -B <build> -DCMAKE_BUILD_TYPE=Release : code 0
-cmake --build <build> --parallel 4 : code 0
-ctest --test-dir <build> --output-on-failure --parallel 4 -L gate : 156/156, 270.60 s
-ctest ciblé shaped/batch/lanes, exécution séquentielle : 36/36, 338.96 s
-ASan+UBSan ciblé shaped/batch/caps sites-paires : 10/10, 342.31 s
-bash gcp-migration/selftest_campagne_v5.sh : violations=0, PROTOCOLE CONFORME
-python tools/check_implementation_status.py : 20 phases validées
-```
-
-`nvcc` est absent localement : aucune compilation ou exécution CUDA nouvelle
-n'est revendiquée par cet audit. Tout travail non commité du worktree partagé,
-dont les fichiers de lotissement, `src/pipeline/generate.hpp` et
-`.codex_fold_contract_probe.cpp`, est hors du pin et hors verdict ; il n'a été
-ni modifié ni inclus par l'auditeur.
+Lecture statique de `10c46c87`, de `a0d13420`, des sorties brutes du nouveau
+reçu et du protocole. **Aucun build, test, validateur, benchmark ou accès GCP
+n'a été lancé pendant cette mise à jour.** Les résultats locaux historiques du
+pin `94464cfb` restent consultables dans l'historique de cet état ; les mesures
+G4 restent dans le reçu épinglé. Le probe `.codex_fold_contract_probe.cpp` n'a
+été ni modifié ni inclus.
