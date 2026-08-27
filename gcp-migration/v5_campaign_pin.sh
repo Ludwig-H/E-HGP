@@ -12,8 +12,12 @@
 set -euo pipefail
 WORK="${1:?repertoire de travail requis}"
 
+# `morsehgp3D_v5/audits` est le canal documentaire de l'auditeur : jamais
+# construit, jamais dans le payload ; ses modifications en cours n'empechent
+# pas une session (le bundle est extrait du COMMIT, pas du worktree).
 PROTOCOL_PATHS=(
   morsehgp3D_v5
+  ':(exclude)morsehgp3D_v5/audits'
   gcp-migration/session_campagne_v5_scale_g4.sh
   gcp-migration/v5_campaign_remote.sh
   gcp-migration/validate_v5_campaign.py
