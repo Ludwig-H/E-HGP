@@ -241,6 +241,15 @@ grep -q 'les deux routes' "${WORK}/v3g.log" || fail "scenario 3septies : la vacu
 # ---- Scenario 3octies : mutant du temoin survivant -> les contrats GPU ne doivent PAS tourner (precondition de phase).
 [ "$(ls "${WORK}/out3f"/contrat_gpu*.status 2>/dev/null | wc -l)" -eq 0 ] || fail "scenario 3octies : contrats GPU executes malgre un mutant survivant"
 
+# ---- Scenario 3novies : runs d'extension (EXTRA_N) presents et juges ; un run d'extension en echec refuse complete.
+RC3h=$(run_campaign "${WORK}/out3h" EXTRA_N="100000")
+[ "$(ls "${WORK}/out3h"/contrat_*_n100000.status 2>/dev/null | wc -l)" -eq 2 ] || fail "scenario 3novies : deux runs d'extension attendus"
+python3 "${HERE}/validate_v5_campaign.py" "${WORK}/out3h" cafedeca beefbeef feedf00d "${RC3h}" 0 > "${WORK}/v3h.log" 2>&1 || fail "scenario 3novies : extension nominale refusee ($(cat "${WORK}/v3h.log"))"
+RC3i=$(run_campaign "${WORK}/out3i" EXTRA_N="100000" FAIL_FAMILY=eight_clusters)
+if python3 "${HERE}/validate_v5_campaign.py" "${WORK}/out3i" cafedeca beefbeef feedf00d "${RC3i}" 0 > "${WORK}/v3i.log" 2>&1; then
+  fail "scenario 3novies : un run d'extension en echec devait refuser complete"
+fi
+
 # ---- Scenario 4 : code de session non nul.
 if python3 "${HERE}/validate_v5_campaign.py" "${WORK}/out1" cafedeca beefbeef feedf00d 255 0 > "${WORK}/v4.log" 2>&1; then
   fail "scenario 4 : remote_rc=255 devait refuser complete"

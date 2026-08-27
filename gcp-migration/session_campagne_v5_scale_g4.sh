@@ -143,7 +143,7 @@ set +e
 "${SSH[@]}" "set -euo pipefail
   export PATH=\$HOME/.local/bin:\$PATH
   cd ~/v5scale
-  THREADS=48 bash gcp-migration/v5_campaign_remote.sh ${SOURCE_COMMIT} ${SOURCE_PAYLOAD_SHA256} ${PROTOCOL_MANIFEST_SHA256}
+  THREADS=48 EXTRA_N='${EXTRA_N:-}' EXTRA_FAMILIES='${EXTRA_FAMILIES:-uniform eight_clusters}' bash gcp-migration/v5_campaign_remote.sh ${SOURCE_COMMIT} ${SOURCE_PAYLOAD_SHA256} ${PROTOCOL_MANIFEST_SHA256}
 " 2>&1 | tee -a "${LOG}"
 REMOTE_CAMPAIGN_RC=${PIPESTATUS[0]}
 set -e

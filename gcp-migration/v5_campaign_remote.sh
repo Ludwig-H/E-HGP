@@ -122,6 +122,17 @@ for fam in ${FAMILIES}; do
   run_one "contrat_${fam}_n50000" contract_50k \
     "${PROBE_BIN}" "--family=${fam}" --n=50000 --s=8 --smax=11 --seed=3 "--threads=${THREADS}" --digest
 done
+# PHASE 2bis (optionnelle, EXTRA_N="100000 200000") — contrats CPU aux tailles
+# d'extension (dizaines/centaines de milliers de points), mesure seulement :
+# le validateur exige code 0, compteurs et digest sur chaque run present, sans
+# les rendre obligatoires.
+for N in ${EXTRA_N:-}; do
+  for fam in ${EXTRA_FAMILIES:-uniform eight_clusters}; do
+    run_one "contrat_${fam}_n${N}" contract_extra \
+      "${PROBE_BIN}" "--family=${fam}" "--n=${N}" --s=8 --smax=11 --seed=3 "--threads=${THREADS}" --digest
+  done
+done
+
 # PHASE 3 — contrats 50 000 points sur le DEVICE (mhgp5_cuda --gpu, lanes q3
 # et q4 device) : memes familles, memes options ; le validateur exige
 # digest_all IDENTIQUE au contrat CPU de la meme famille (egalite de bout en

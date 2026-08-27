@@ -628,9 +628,11 @@ familles denses avec l'exécuteur adaptatif `--gpu-min-sites=256` — phase
 conditionnée à `gpu_lane` code 0 et `gpu_mutant` code 4 ; chaque run `--gpu`
 s'annonce `backend=override_experimental`, ses `digest_balls` **et**
 `digest_all` doivent être identiques au contrat CPU de la même famille, et
-l'adaptatif doit avoir des seeds sur les deux routes) → rapatriement avec reprises → `validate_v5_campaign.py`
+l'adaptatif doit avoir des seeds sur les deux routes ; phase 2 bis
+optionnelle `EXTRA_N="100000 200000"` : contrats CPU aux tailles d'extension,
+jugés s'ils sont présents) → rapatriement avec reprises → `validate_v5_campaign.py`
 (seule autorité du statut) → arrêt certifié `TERMINATED` par le trap. Porte
-transactionnelle sans GCP : `selftest_campagne_v5.sh` (treize scénarios, à
+transactionnelle sans GCP : `selftest_campagne_v5.sh` (quinze scénarios, à
 lancer à la main avant toute session payante ; jamais depuis la CI), dont un
 témoin device en désaccord qui doit refuser `complete`.
 

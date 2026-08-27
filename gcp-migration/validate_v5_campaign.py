@@ -43,7 +43,11 @@ def main():
         bad.append(f"session distante : remote_campaign_rc={remote_rc}")
     if scp_rc != "0":
         bad.append(f"rapatriement : scp_rc={scp_rc}")
-    for name in expected_names():
+    # Runs d'extension (contrat_<fam>_n<N>, N != 50000) : optionnels, mais s'ils sont presents ils sont juges.
+    extra = sorted(os.path.basename(f)[:-7] for f in os.listdir(out) if f.endswith(".status")
+                   and re.match(r"^contrat_[a-z_]+_n\d+$", os.path.basename(f)[:-7])
+                   and os.path.basename(f)[:-7] not in expected_names())
+    for name in expected_names() + extra:
         txt = os.path.join(out, name + ".txt")
         status = os.path.join(out, name + ".status")
         if not os.path.exists(status):
@@ -150,7 +154,7 @@ def main():
             bad.append(f"{name}: conformite v4 non etablie")
         if name.startswith("contrat_") and not digest.search(body):
             bad.append(f"{name}: digest_all absent")
-    known = set(expected_names())
+    known = set(expected_names()) | set(extra)
     for f in sorted(os.listdir(out)):
         if f.endswith(".txt") and f[:-4] not in known:
             bad.append(f"{f}: fichier inattendu")
