@@ -226,6 +226,13 @@ inline void build_q4_batch(const CloudIndex& ix, const AliveRect& ar, const u64 
           continue;
         }
       }
+      {
+        u64 wmin = 0;
+        if (anchor_sector_kill(sc.cover, ix.upos, ua, ub, pa, pb, D2, 8, h_of[2], &wmin)) {
+          ++ls->anchors_killed_sectors[2];
+          continue;
+        }
+      }
       // Seeds aigus de la lentille D'ABORD (sans materialiser) : une ancre
       // sans seed n'entre jamais dans le lot (rien a scanner ni a completer).
       const size_t nc = sc.cover.size();

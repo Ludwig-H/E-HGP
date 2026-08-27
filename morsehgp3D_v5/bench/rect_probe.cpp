@@ -56,22 +56,37 @@ inline i128 sq128(i64 x) { return (i128)x * x; }
 inline void sector_witness_min(const CloudIndex& ix, const std::vector<CoverPoint>& cover, i32 ua, i32 ub, const P3& pa,
                                const P3& pb, i64 D2, int lane, u64* min4, u64* min8) {
   const i64 dx = pb.x - pa.x, dy = pb.y - pa.y, dz = pb.z - pa.z;
-  // e1 = d x axe : l'axe qui maximise |e1|.
+  // Variante PARALLELOGRAMME : u = A e1, v = A' e1' avec e1, e1' les deux plus
+  // grands produits d x axe (tous deux dans le plan bissecteur, longueurs ~D,
+  // non orthogonaux) ; le parallelogramme (+-u, +-v) contient le disque de
+  // rayon rho ssi la distance de 0 a chacune de ses aretes >= rho :
+  // |u x v|^2 >= rho^2 |u - v|^2 et |u x v|^2 >= rho^2 |u + v|^2 (entiers ;
+  // rho^2 = D^2/12 en q3, D^2/8 en q4). Polygone bien moins allonge que le
+  // losange (e1, d x e1) — test plus fort.
   i64 e1[3], e2[3];
   {
     const i64 cands[3][3] = {{0, dz, -dy}, {-dz, 0, dx}, {dy, -dx, 0}};
-    int best = 0; i128 bn = -1;
-    for (int k = 0; k < 3; ++k) { const i128 nn = sq128(cands[k][0]) + sq128(cands[k][1]) + sq128(cands[k][2]); if (nn > bn) { bn = nn; best = k; } }
-    for (int i = 0; i < 3; ++i) e1[i] = cands[best][i];
-    e2[0] = dy * e1[2] - dz * e1[1]; e2[1] = dz * e1[0] - dx * e1[2]; e2[2] = dx * e1[1] - dy * e1[0];
+    i128 nn[3];
+    for (int k = 0; k < 3; ++k) nn[k] = sq128(cands[k][0]) + sq128(cands[k][1]) + sq128(cands[k][2]);
+    int b1 = 0;
+    for (int k = 1; k < 3; ++k) if (nn[k] > nn[b1]) b1 = k;
+    int b2 = (b1 + 1) % 3;
+    for (int k = 0; k < 3; ++k) if (k != b1 && nn[k] > nn[b2]) b2 = k;
+    for (int i = 0; i < 3; ++i) { e1[i] = cands[b1][i]; e2[i] = cands[b2][i]; }
   }
-  const i128 n1 = sq128(e1[0]) + sq128(e1[1]) + sq128(e1[2]);
-  const i128 n2 = sq128(e2[0]) + sq128(e2[1]) + sq128(e2[2]);
-  // 2 rho^2 = D^2/6 (q3) ou D^2/4 (q4) ; A = plus petit entier avec A^2 n1 >= 2 rho^2  <=>  6 A^2 n1 >= D^2 (q3).
-  const i128 num = D2, den = lane == 3 ? 6 : 4;
+  const i128 rho2_num = D2, rho2_den = lane == 3 ? 12 : 8;  // rho^2 = D2 / den
   i64 A = 1, B = 1;
-  while ((i128)A * A * n1 * den < num) ++A;
-  while ((i128)B * B * n2 * den < num) ++B;
+  for (;;) {
+    const i64 u[3] = {A * e1[0], A * e1[1], A * e1[2]}, v[3] = {B * e2[0], B * e2[1], B * e2[2]};
+    const i64 cx = u[1] * v[2] - u[2] * v[1], cy = u[2] * v[0] - u[0] * v[2], cz = u[0] * v[1] - u[1] * v[0];
+    const i128 cross2 = sq128(cx) + sq128(cy) + sq128(cz);
+    const i128 dm = sq128(u[0] - v[0]) + sq128(u[1] - v[1]) + sq128(u[2] - v[2]);
+    const i128 dp = sq128(u[0] + v[0]) + sq128(u[1] + v[1]) + sq128(u[2] + v[2]);
+    const bool ok = cross2 * rho2_den >= rho2_num * dm && cross2 * rho2_den >= rho2_num * dp;
+    if (ok) break;
+    if (A <= B) ++A; else ++B;
+    if (A > 64 || B > 64) break;  // garde (jamais atteint : |e| ~ D)
+  }
   i64 P[8][3];
   for (int i = 0; i < 3; ++i) {
     P[0][i] = A * e1[i]; P[2][i] = B * e2[i]; P[4][i] = -A * e1[i]; P[6][i] = -B * e2[i];

@@ -64,6 +64,8 @@ inline constexpr const char* kMutants[] = {
     "q4-shaped-once-flip",
     "q4-batched-emit-deep",
     "route-ignore-threshold",
+    "sector-kill-nonstrict",
+    "anchor-kill-h-minus-one",
 };
 
 inline std::vector<std::string>& mutant_registry() {

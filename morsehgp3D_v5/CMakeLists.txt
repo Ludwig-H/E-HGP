@@ -309,6 +309,16 @@ mhgp5_gate(mhgp5_parallel_exception 0 mhgp5_parallel_exception_gate "")
 # Sonde de mesure (jamais un claim) pour la lane par rectangle : tailles aplaties par rectangle, quantiles.
 mhgp5_executable(mhgp5_rect_probe bench/rect_probe.cpp)
 
+# Test d'ancre par secteurs : un mutant non strict cree des faux positifs -> divergence des digests v4 (code 4).
+# Le mutant non strict est INVISIBLE en position generale (aucune egalite) : la fixture gravee
+# (sites exactement sur la sphere diametrale, seed survivant) le tue ; les conformites v4 prouvent l'objet.
+mhgp5_executable(mhgp5_sector_kill_fixture tests/sector_kill_fixture.cpp)
+mhgp5_gate(mhgp5_sector_kill_fixture 0 mhgp5_sector_kill_fixture "")
+mhgp5_gate(mhgp5_sector_kill_mutant_nonstrict 4 mhgp5_sector_kill_fixture "--inject=sector-kill-nonstrict")
+mhgp5_executable(mhgp5_anchor_kill_fixture tests/anchor_kill_fixture.cpp)
+mhgp5_gate(mhgp5_anchor_kill_fixture 0 mhgp5_anchor_kill_fixture "")
+mhgp5_gate(mhgp5_anchor_kill_mutant_h1 4 mhgp5_anchor_kill_fixture "--inject=anchor-kill-h-minus-one")
+
 # Contrat structurel du fold (P0 audit 9762daaf) : rejets permanents et limites positives.
 mhgp5_executable(mhgp5_fold_contract_gate tests/fold_contract_gate.cpp)
 mhgp5_gate(mhgp5_fold_contract 0 mhgp5_fold_contract_gate "")
@@ -335,11 +345,13 @@ mhgp5_gate(mhgp5_q3_lane_batched_seuil_zero 2 mhgp5_q3_lane_batched_gate "--fami
 mhgp5_gate(mhgp5_q4_lane_batched_seuil_negatif 2 mhgp5_q4_lane_batched_gate "--family=uniform --n=400 --seeds-per-launch=-1")
 # Routage adaptatif (executeur externe = hote shaped ici) : l'objet post-RLE ne depend pas de la politique ;
 # NON-VACUITE contractuelle des routes (--expect-route) et mutant route-ignore-threshold tue en code 4.
-mhgp5_gate(mhgp5_q3_lane_batched_route_256 0 mhgp5_q3_lane_batched_gate "--family=uniform --n=1200 --threads=3 --device-min-sites=256 --expect-route=mixed")
+# (uniform n=1200 : apres les tests d'ancre W_3 + secteurs, plus aucune ancre survivante n'a un cover >= 256 — les
+#  covers denses sont exactement les ancres mortes ; la porte mixte q3 se mesure sur eight_clusters, comme q4.)
+mhgp5_gate(mhgp5_q3_lane_batched_route_256 0 mhgp5_q3_lane_batched_gate "--family=eight_clusters --n=1200 --threads=3 --device-min-sites=256 --expect-route=mixed")
 mhgp5_gate(mhgp5_q4_lane_batched_route_256 0 mhgp5_q4_lane_batched_gate "--family=eight_clusters --n=1200 --threads=3 --device-min-sites=256 --expect-route=mixed")
 mhgp5_gate(mhgp5_q3_lane_batched_route_tout_hote 0 mhgp5_q3_lane_batched_gate "--family=uniform --n=400 --threads=2 --device-min-sites=1000000000 --min-candidates=200 --min-flushes=0 --expect-route=host")
 mhgp5_gate(mhgp5_q4_lane_batched_route_tout_hote 0 mhgp5_q4_lane_batched_gate "--family=uniform --n=400 --threads=2 --device-min-sites=1000000000 --min-candidates=200 --min-flushes=0 --expect-route=host")
-mhgp5_gate(mhgp5_q3_lane_batched_route_mutant 4 mhgp5_q3_lane_batched_gate "--family=uniform --n=1200 --threads=3 --device-min-sites=256 --expect-route=mixed --inject=route-ignore-threshold")
+mhgp5_gate(mhgp5_q3_lane_batched_route_mutant 4 mhgp5_q3_lane_batched_gate "--family=eight_clusters --n=1200 --threads=3 --device-min-sites=256 --expect-route=mixed --inject=route-ignore-threshold")
 mhgp5_gate(mhgp5_q4_lane_batched_route_mutant 4 mhgp5_q4_lane_batched_gate "--family=eight_clusters --n=1200 --threads=3 --device-min-sites=256 --expect-route=mixed --inject=route-ignore-threshold")
 # Ancre trop grande pour un lot (seuil de seeds minuscule) : corps hote, egalite conservee, anchors_oversized > 0.
 mhgp5_gate(mhgp5_q3_lane_batched_ancre_trop_grande 0 mhgp5_q3_lane_batched_gate "--family=eight_clusters --n=400 --threads=2 --seeds-per-launch=50 --min-candidates=200 --expect-route=device")

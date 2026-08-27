@@ -37,6 +37,7 @@
 #include <vector>
 
 #include "../lanes/edge_cover.hpp"
+#include "../lanes/sector_kill.hpp"
 #include "../lanes/q2.hpp"
 #include "../lanes/q3.hpp"
 #include "../lanes/q4.hpp"
@@ -55,6 +56,8 @@ struct GenerateStats {
   u64 anchors[3] = {0, 0, 0};
   u64 anchors_killed_hist[3] = {0, 0, 0};
   u64 anchors_killed_w4 = 0;
+  u64 anchors_killed_sectors[3] = {0, 0, 0};  // test d'ancre par secteurs (sector_kill.hpp) : ancres mortes sans enumerer les seeds
+  u64 anchors_killed_w3 = 0;                   // test W_3 EXACT (temoins universels du disque des centres), lane q3
   u64 candidates[3] = {0, 0, 0};
   u64 depth_killed[3] = {0, 0, 0};
   u64 seeds[2] = {0, 0};             // q3, q4
@@ -77,6 +80,8 @@ struct GenerateStats {
       depth_killed[i] += o.depth_killed[i];
     }
     anchors_killed_w4 += o.anchors_killed_w4;
+    for (int i = 0; i < 3; ++i) anchors_killed_sectors[i] += o.anchors_killed_sectors[i];
+    anchors_killed_w3 += o.anchors_killed_w3;
     seeds[0] += o.seeds[0];
     seeds[1] += o.seeds[1];
     seeds_killed_core += o.seeds_killed_core;
@@ -244,6 +249,12 @@ struct AffineSeed {
 // definition de la lane de production.
 inline void scan_anchor_q3(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i32 ub, const P3& pa, const P3& pb, i64 D2,
                            u64 h3, bool float_on, bool genfilter_nonstrict, std::vector<BallCandidate>* lo, GenerateStats* ls) {
+  // Tests d'ancre cumules (sector_kill.hpp) : W_3 exact puis secteurs — suffisants, l'objet est inchange.
+  {
+    const int k = anchor_kill_cumulated(sc.cover, ix.upos, ua, ub, pa, pb, D2, Lane::kQ3, 12, h3);
+    if (k == 1) { ++ls->anchors_killed_w3; return; }
+    if (k == 2) { ++ls->anchors_killed_sectors[1]; return; }
+  }
   sc.affine_filled = false;
   for (const CoverPoint& cp : sc.cover) {
     if (cp.u == ua || cp.u == ub) continue;
@@ -303,6 +314,13 @@ inline void process_anchor_q4(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i
       return;
     }
   }
+  {
+    u64 wmin = 0;
+    if (anchor_sector_kill(sc.cover, ix.upos, ua, ub, pa, pb, D2, 8, h4, &wmin)) {
+      ++ls->anchors_killed_sectors[2];
+      return;
+    }
+  }
   sc.affine_filled = false;
   sc.lens.clear();
   for (const CoverPoint& cz : sc.cover) {
@@ -318,7 +336,9 @@ inline void process_anchor_q4(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i
     const i64 l_bx = p3_norm2(p3_sub(px, pb));
     const Q3Form f3s = q3_form(pa, pb, px);
     const P3 nrm = p3_cross(p3_sub(pb, pa), p3_sub(px, pa));
-    // Cœur universel du seed (Jung) : J = D²(3G − 2 l_ax l_bx).
+    // Cœur universel du seed (Jung) : J = D²(3G − 2 l_ax l_bx) = G(D² − 8|v3|²)
+    // >= G·D²/3 > 0 pour tout seed aigu (|v3|² <= D²/12) : la branche Jb < 0 est
+    // INATTEIGNABLE par theoreme et reste une garde fail-closed.
     const i128 Jb = (i128)D2 * (3 * f3s.g - 2 * (i128)l_ax * l_bx);
     bool dead = Jb < 0;
     if (!dead) {

@@ -191,6 +191,11 @@ inline void build_q3_batch(const CloudIndex& ix, const AliveRect& ar, const u64 
       const i64 D2 = p3_norm2(p3_sub(pb, pa));
       if (D2 == 0) continue;
       anchor_cover_from_handles(ix, sc.handles, pa, pb, D2, 3, &sc.cover, &sc.visits, &sc.cover_tmp);
+      {
+        const int k = anchor_kill_cumulated(sc.cover, ix.upos, ua, ub, pa, pb, D2, Lane::kQ3, 12, h_of[1]);
+        if (k == 1) { ++ls->anchors_killed_w3; continue; }
+        if (k == 2) { ++ls->anchors_killed_sectors[1]; continue; }
+      }
       // PREFLIGHT (avant toute ecriture) : taille du cover, nombre de seeds
       // aigus ; une ancre sous le seuil de routage, ou TROP GRANDE pour un lot
       // (cover > seuil de sites ou seeds > seuil de seeds), va au corps de
