@@ -80,6 +80,8 @@ int main(int argc, char** argv) {
   cmp("rect_alive", sp.rect_alive[1], sd.rect_alive[1]);
   cmp("anchors", sp.anchors[1], sd.anchors[1]);
   cmp("anchors_killed_hist", sp.anchors_killed_hist[1], sd.anchors_killed_hist[1]);
+  cmp("anchors_killed_w3", sp.anchors_killed_w3, sd.anchors_killed_w3);
+  cmp("anchors_killed_sectors", sp.anchors_killed_sectors[1], sd.anchors_killed_sectors[1]);
   cmp("seeds", sp.seeds[0], sd.seeds[0]);
   cmp("depth_killed", sp.depth_killed[1], sd.depth_killed[1]);
   cmp("candidates", sp.candidates[1], sd.candidates[1]);
@@ -103,6 +105,11 @@ int main(int argc, char** argv) {
               (unsigned long long)bs.max_anchor_seeds, (unsigned long long)bs.max_lot_sites, (unsigned long long)bs.max_anchor_sites, prod.size(), (unsigned long long)sp.seeds[0],
               (unsigned long long)sp.depth_killed[1], (unsigned long long)sp.q3_cert[2], (unsigned long long)launches,
               kernel_ms, (unsigned long long)vec_mism, (unsigned long long)bad);
+  // Non-vacuite des tests d'ancre (V7.3) : W_3 exact ET secteurs doivent chacun tuer au moins une ancre.
+  if (sp.anchors_killed_w3 < 1 || sp.anchors_killed_sectors[1] < 1) {
+    std::printf("VACUITE : tests d'ancre (W3 %llu, secteurs %llu)\n", (unsigned long long)sp.anchors_killed_w3, (unsigned long long)sp.anchors_killed_sectors[1]);
+    return 3;
+  }
   if (sp.candidates[1] < min_candidates || sp.depth_killed[1] < min_killed) {
     std::printf("PLANCHER\n");
     return 3;

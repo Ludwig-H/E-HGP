@@ -58,6 +58,7 @@ struct GenerateStats {
   u64 anchors_killed_w4 = 0;
   u64 anchors_killed_sectors[3] = {0, 0, 0};  // test d'ancre par secteurs (sector_kill.hpp) : ancres mortes sans enumerer les seeds
   u64 anchors_killed_w3 = 0;                   // test W_3 EXACT (temoins universels du disque des centres), lane q3
+  u64 invariant_jneg = 0;                      // seeds q4 aigus avec J < 0 : INATTEIGNABLE par theoreme — toute occurrence est une violation d'invariant
   u64 candidates[3] = {0, 0, 0};
   u64 depth_killed[3] = {0, 0, 0};
   u64 seeds[2] = {0, 0};             // q3, q4
@@ -82,6 +83,7 @@ struct GenerateStats {
     anchors_killed_w4 += o.anchors_killed_w4;
     for (int i = 0; i < 3; ++i) anchors_killed_sectors[i] += o.anchors_killed_sectors[i];
     anchors_killed_w3 += o.anchors_killed_w3;
+    invariant_jneg += o.invariant_jneg;
     seeds[0] += o.seeds[0];
     seeds[1] += o.seeds[1];
     seeds_killed_core += o.seeds_killed_core;
@@ -342,6 +344,7 @@ inline void process_anchor_q4(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i
     // >= G·D²/3 > 0 pour tout seed aigu (|v3|² <= D²/12) : la branche Jb < 0 est
     // INATTEIGNABLE par theoreme et reste une garde fail-closed.
     const i128 Jb = (i128)D2 * (3 * f3s.g - 2 * (i128)l_ax * l_bx);
+    if (Jb < 0) ++ls->invariant_jneg;  // signale, ne decide pas silencieusement (run_pipeline refuse en invariant)
     bool dead = Jb < 0;
     if (!dead) {
       if (!sc.affine_filled) sc.fill_affine_sites(ix, pa, pb, D2);

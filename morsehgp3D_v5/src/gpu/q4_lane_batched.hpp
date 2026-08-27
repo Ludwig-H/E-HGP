@@ -309,6 +309,7 @@ inline void build_q4_batch(const CloudIndex& ix, const AliveRect& ar, const u64 
         const P3 nrm = p3_cross(p3_sub(pb, pa), p3_sub(px, pa));
         const i128 Jb = (i128)D2 * (3 * f3s.g - 2 * (i128)sd.l_ax * sd.l_bx);
         sd.jneg = Jb < 0 ? 1 : 0;
+        if (Jb < 0) ++ls->invariant_jneg;  // inatteignable par theoreme : violation d'invariant signalee
         const AffineSeed as(f3s, pa, pb, sc, float_on);
         sd.core.aff.G = di_from_i128(as.G);
         sd.core.aff.N0 = di_from_i128(as.N0); sd.core.aff.N1 = di_from_i128(as.N1); sd.core.aff.N2 = di_from_i128(as.N2);

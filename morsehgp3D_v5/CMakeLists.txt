@@ -317,6 +317,8 @@ target_compile_definitions(mhgp5_rect_probe PRIVATE MHGP5_PROBE_PIN="${_mhgp5_pr
 mhgp5_executable(mhgp5_sector_kill_fixture tests/sector_kill_fixture.cpp)
 mhgp5_gate(mhgp5_sector_kill_fixture 0 mhgp5_sector_kill_fixture "")
 mhgp5_gate(mhgp5_sector_kill_mutant_nonstrict 4 mhgp5_sector_kill_fixture "--inject=sector-kill-nonstrict")
+mhgp5_executable(mhgp5_anchor_tests_oracle tests/anchor_tests_oracle.cpp)
+mhgp5_gate(mhgp5_anchor_tests_oracle 0 mhgp5_anchor_tests_oracle "" LABELS oracle)
 mhgp5_executable(mhgp5_anchor_kill_fixture tests/anchor_kill_fixture.cpp)
 mhgp5_gate(mhgp5_anchor_kill_fixture 0 mhgp5_anchor_kill_fixture "")
 mhgp5_gate(mhgp5_anchor_kill_mutant_h1 4 mhgp5_anchor_kill_fixture "--inject=anchor-kill-h-minus-one")

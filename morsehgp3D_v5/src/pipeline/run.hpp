@@ -147,6 +147,12 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
   go.threads = opt.threads;
   generate_candidates(ix, go, &cands, &rr.gen);
   rr.t_gen_ms = ms(t_g);
+  if (rr.gen.invariant_jneg) {
+    rr.status = PipelineStatus::kInvariantViolated;
+    rr.message = "invariant : seed q4 aigu avec J < 0 (inatteignable par theoreme, MATHEMATIQUES § 10) : " +
+                 std::to_string(rr.gen.invariant_jneg) + " occurrence(s)";
+    return rr;
+  }
   const auto t_r = std::chrono::steady_clock::now();
   rr.emitted = cands.size();
   rr.rle_workers = rle_candidates(&cands, opt.threads);

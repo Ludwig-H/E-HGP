@@ -86,6 +86,7 @@ int main(int argc, char** argv) {
   cmp("anchors", sp.anchors[2], sb.anchors[2]);
   cmp("anchors_killed_hist", sp.anchors_killed_hist[2], sb.anchors_killed_hist[2]);
   cmp("anchors_killed_w4", sp.anchors_killed_w4, sb.anchors_killed_w4);
+  cmp("anchors_killed_sectors", sp.anchors_killed_sectors[2], sb.anchors_killed_sectors[2]);
   cmp("seeds", sp.seeds[1], sb.seeds[1]);
   cmp("seeds_killed_core", sp.seeds_killed_core, sb.seeds_killed_core);
   cmp("q4_completions", sp.q4_completions, sb.q4_completions);
@@ -111,6 +112,7 @@ int main(int argc, char** argv) {
                             "rej_lens", "rej_owner", "rej_once", "rej_i64", "rej_face_power", "rej_center", "cert_pos",
                             "cert_neg", "jung_kill", "jung_skip"};
   u64 vacuous = 0;
+  if (sp.anchors_killed_sectors[2] == 0) { std::printf("VACUITE : secteurs q4 = 0\n"); ++vacuous; }
   for (int i = 0; i < 16; ++i)
     if (must[i] == 0) { std::printf("VACUITE : %s = 0\n", must_n[i]); ++vacuous; }
   std::printf("compteurs anchors=%llu hist=%llu w4=%llu seeds=%llu core=%llu compl=%llu lens=%llu owner=%llu once=%llu i64=%llu "
