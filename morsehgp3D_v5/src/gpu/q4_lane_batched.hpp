@@ -353,7 +353,7 @@ inline void scan_q4_batch_host(Q4Batch* b, u32 h4, bool core_nonstrict, bool dep
     }
     const AnchorSitesSoA sites{b->u0.data() + an.begin, b->u1.data() + an.begin, b->u2.data() + an.begin,
                                b->q.data() + an.begin, an.count};
-    v.dead = q4_seed_core_shaped(s.core, sites, an.skip_a, an.skip_b, h4, core_nonstrict, &v.c) ? 1u : 0u;
+    v.dead = q4_seed_core_shaped(s.core, sites, an.skip_a, an.skip_b, h4, core_nonstrict, &v.c, MHGP5_MUTANT("chord-nonstrict")) ? 1u : 0u;
     if (v.dead) continue;
     const AnchorPositionsSoA pos{b->px.data() + an.begin, b->py.data() + an.begin, b->pz.data() + an.begin, an.count};
     const P3 x{b->px[an.begin + s.x_site], b->py[an.begin + s.x_site], b->pz[an.begin + s.x_site]};
@@ -396,7 +396,7 @@ inline void emit_q4_batch(const Q4Batch& b, std::vector<BallCandidate>* lo, Gene
   if (!validate_q4_batch(b, &why) || !validate_q4_results(b, &why, !MHGP5_MUTANT("q4-batched-emit-deep")))
     throw std::invalid_argument(why);
   for (const Q4SeedVerdict& v : b.verdicts) {
-    if (v.dead) ++ls->seeds_killed_core;
+    if (v.dead) { if (v.c.dead_by_chord) ++ls->seeds_killed_chord; else ++ls->seeds_killed_core; }
     ls->float_cert_pos += v.c.cert_pos; ls->q4_cert[0] += v.c.cert_pos;
     ls->float_cert_neg += v.c.cert_neg; ls->q4_cert[1] += v.c.cert_neg;
     ls->jung_cert_kill += v.c.jung_kill; ls->q4_cert[2] += v.c.jung_kill;

@@ -31,6 +31,7 @@
 #include <vector>
 
 #include "../src/lanes/q3.hpp"
+#include "../src/lanes/chord_kill.hpp"
 #include "../src/lanes/sector_kill.hpp"
 #include "../src/pipeline/generate.hpp"
 #include "../src/tree/cloud_index.hpp"
@@ -108,6 +109,7 @@ int main(int argc, char** argv) {
   if (!inject.empty() && !mutants_enable(inject)) return 2;
   const bool m_h1 = MHGP5_MUTANT("anchor-kill-h-minus-one");
   const bool m_ns = MHGP5_MUTANT("sector-kill-nonstrict");
+  const bool m_chord = MHGP5_MUTANT("chord-nonstrict");
   bool f5_killed_by_mutant = false, f6_boundary_counted = false;
   // F1
   Fixture f1;
@@ -213,6 +215,25 @@ int main(int argc, char** argv) {
     const bool k4 = anchor_sector_kill(cover, ix7.upos, ua, ub, pa, pb, 4000000, 8, 8, &wmin);
     std::printf("F7 : secteurs q4 sur F1 : wmin=%llu tue=%d\n", (unsigned long long)wmin, k4 ? 1 : 0);
     expect(k4, "F7 : le test par secteurs q4 tue l'ancre de F1 (non-vacuite q4)");
+  }
+  // F8 « frontiere des morceaux de corde » (primitive chord_kill.hpp) : un site coplanaire (B = 0) et cospherique
+  // (L = 0) a v_j = L − c_j μ̂ B = 0 a TOUS les sommets ; strict : temoin d'aucun morceau ; non strict : de tous.
+  {
+    ChordPieces ch;
+    ch.init(2, m_chord);  // J = 2 -> μ̂ = 2
+    ch.update(0.0, 1.0, 0, []() { return (i128)0; });  // lh = 0, E = 1 : indecidable en flottant -> repli exact, L = 0
+    std::printf("F8 : morceaux = %u %u %u %u (mutant chord=%d)\n", ch.cnt[0], ch.cnt[1], ch.cnt[2], ch.cnt[3], m_chord ? 1 : 0);
+    if (m_chord) {
+      if (ch.cnt[0] == 1 && ch.cnt[1] == 1 && ch.cnt[2] == 1 && ch.cnt[3] == 1 && !failures) return 4;
+      std::printf("MUTANT NON TUE (chord)\n");
+      return 1;
+    }
+    expect(ch.cnt[0] == 0 && ch.cnt[1] == 0 && ch.cnt[2] == 0 && ch.cnt[3] == 0, "F8 : la frontiere v_j = 0 n'est pas un temoin (strict)");
+    // Un site franchement interieur (L = −16, B = 0) est temoin de tous les morceaux.
+    ChordPieces ch2;
+    ch2.init(2, false);
+    ch2.update(-16.0, 1.0, 0, []() { return (i128)-16; });
+    expect(ch2.cnt[0] == 1 && ch2.cnt[1] == 1 && ch2.cnt[2] == 1 && ch2.cnt[3] == 1, "F8 : un site interieur a toute la corde est temoin de tous les morceaux");
   }
   if (m_ns) {
     // Mutant non strict : F5 (frontiere diametrale, 28 sites a q = 0) tuee a tort ET F6 (frontiere des demi-plans)

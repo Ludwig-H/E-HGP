@@ -103,6 +103,11 @@ conformités 8 k / 16 k / 32 k à code 0 (`eight_clusters` 32 k : 83 s contre
 d'ancre tuent avant matérialisation ; adaptatif 256 : 174 / 24 s. Lecture
 V8 : sur ce pin, ni le tout-device ni l'adaptatif n'ont de gain net à 50 k ;
 le résidu de la lane q3 CPU est la construction des covers, pas le scan.
+Après cette session, la lane q4 (65 s) domine : le **test de seed par
+morceaux de corde** (`MATHEMATIQUES.md` § 10, théorème 10.4) est entré en
+production (corps partagé, cœur shaped, kernel `k_q4_core` avec ballots par
+morceau) — à 8000 `eight_clusters` (ratio local) : complétions atteignant la
+profondeur 23,8 M → 5,1 M, rectangles q4 22,3 s → 18,8 s ; à recevoir sur G4.
 
 ## 1. Ce que la mesure G4 a désigné (27 août 2026)
 

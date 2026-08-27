@@ -37,6 +37,7 @@
 #include <vector>
 
 #include "../lanes/edge_cover.hpp"
+#include "../lanes/chord_kill.hpp"
 #include "../lanes/sector_kill.hpp"
 #include "../lanes/q2.hpp"
 #include "../lanes/q3.hpp"
@@ -62,7 +63,8 @@ struct GenerateStats {
   u64 candidates[3] = {0, 0, 0};
   u64 depth_killed[3] = {0, 0, 0};
   u64 seeds[2] = {0, 0};             // q3, q4
-  u64 seeds_killed_core = 0;         // q4 : cœur de seed
+  u64 seeds_killed_core = 0;         // q4 : cœur de seed (Jung, K = 1)
+  u64 seeds_killed_chord = 0;        // q4 : morceaux de corde (chord_kill.hpp) — seed vivant au cœur, mort par morceaux
   u64 q4_completions = 0, q4_rej_lens = 0, q4_rej_owner = 0, q4_rej_once = 0, q4_rej_i64 = 0,
       q4_rej_face_power = 0, q4_rej_det = 0, q4_rej_center = 0;
   u64 float_cert_neg = 0, float_cert_pos = 0, float_fallback = 0;
@@ -87,6 +89,7 @@ struct GenerateStats {
     seeds[0] += o.seeds[0];
     seeds[1] += o.seeds[1];
     seeds_killed_core += o.seeds_killed_core;
+    seeds_killed_chord += o.seeds_killed_chord;
     q4_completions += o.q4_completions;
     q4_rej_lens += o.q4_rej_lens;
     q4_rej_owner += o.q4_rej_owner;
@@ -350,11 +353,17 @@ inline void process_anchor_q4(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i
     const i128 Jb = (i128)D2 * (3 * f3s.g - 2 * (i128)l_ax * l_bx);
     if (Jb < 0) ++ls->invariant_jneg;  // signale, ne decide pas silencieusement (run_pipeline refuse en invariant)
     bool dead = Jb < 0;
+    bool dead_by_chord = false;
     if (!dead) {
       if (!sc.affine_filled) sc.fill_affine_sites(ix, pa, pb, D2);
       const AffineSeed seed(f3s, pa, pb, sc, float_on);
       const double Jd = (double)Jb;
       const double Jlo = Jd * (1.0 - kJungGuard), Jhi = Jd * (1.0 + kJungGuard);
+      // Morceaux de corde (chord_kill.hpp), cumules avec le cœur : desactives en
+      // mode contrefactuel seulement (sondes, oracle ON/OFF).
+      const bool chord_on = pretests != AnchorPretests::kCounterfactual;
+      ChordPieces chord;
+      if (chord_on) chord.init(Jb, MHGP5_MUTANT("chord-nonstrict"));
       u64 fcount = 0;
       for (size_t iz = 0; iz < sc.cover.size(); ++iz) {
         const CoverPoint& cz = sc.cover[iz];
@@ -363,13 +372,14 @@ inline void process_anchor_q4(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i
         if (lh > seed.bound) {
           ++ls->float_cert_pos;
           ++ls->q4_cert[0];
-          continue;  // P > 0 certifie : jamais temoin
+          continue;  // P > 0 certifie : jamais temoin (d'aucune boule, d'aucun morceau)
         }
+        const P3& pz = ix.upos[(size_t)cz.u];
+        const i64 Bz = p3_dot(nrm, p3_sub(pz, f3s.a));
+        if (chord_on) chord.update(lh, seed.bound, Bz, [&]() { return seed.l_exact(sc, iz); });
         if (lh < -seed.bound) {
           ++ls->float_cert_neg;
           ++ls->q4_cert[1];
-          const P3& pz = ix.upos[(size_t)cz.u];
-          const i64 Bz = p3_dot(nrm, p3_sub(pz, f3s.a));
           const int js = jung_interval_sign(lh, seed.bound, Jlo, Jhi, Bz);
           if (js != 0) {
             if (js > 0) {
@@ -380,28 +390,28 @@ inline void process_anchor_q4(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i
               ++ls->jung_cert_skip;
               ++ls->q4_cert[3];
             }
-            continue;
+          } else {
+            ++ls->jung_fallback;
+            ++ls->q4_cert[4];
+            const i128 Pz = seed.l_exact(sc, iz) / 4;
+            const int c = cmp_2p2_jb2(Pz, Jb, Bz);
+            if ((seed_core_nonstrict ? (c >= 0) : (c > 0)) && ++fcount >= h4) break;
           }
-          ++ls->jung_fallback;
-          ++ls->q4_cert[4];
+        } else {
+          ++ls->float_fallback;
+          ++ls->q4_cert[5];
           const i128 Pz = seed.l_exact(sc, iz) / 4;
-          const int c = cmp_2p2_jb2(Pz, Jb, Bz);
-          if ((seed_core_nonstrict ? (c >= 0) : (c > 0)) && ++fcount >= h4) break;
-          continue;
+          if (!(seed_core_nonstrict ? (Pz > 0) : (Pz >= 0))) {
+            const int c = cmp_2p2_jb2(Pz, Jb, Bz);
+            if ((seed_core_nonstrict ? (c >= 0) : (c > 0)) && ++fcount >= h4) break;
+          }
         }
-        ++ls->float_fallback;
-        ++ls->q4_cert[5];
-        const i128 Pz = seed.l_exact(sc, iz) / 4;
-        if (seed_core_nonstrict ? (Pz > 0) : (Pz >= 0)) continue;
-        const P3& pz = ix.upos[(size_t)cz.u];
-        const i64 Bz = p3_dot(nrm, p3_sub(pz, f3s.a));
-        const int c = cmp_2p2_jb2(Pz, Jb, Bz);
-        if ((seed_core_nonstrict ? (c >= 0) : (c > 0)) && ++fcount >= h4) break;
+        if (chord_on && chord.dead(h4)) { dead_by_chord = true; break; }
       }
-      dead = fcount >= h4;
+      dead = fcount >= h4 || dead_by_chord;
     }
     if (dead) {
-      ++ls->seeds_killed_core;
+      if (dead_by_chord) ++ls->seeds_killed_chord; else ++ls->seeds_killed_core;
       continue;
     }
     // Completions y sur la lentille.

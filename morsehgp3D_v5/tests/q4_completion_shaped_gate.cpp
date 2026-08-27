@@ -142,7 +142,7 @@ int main(int argc, char** argv) {
               if (sc.cover[i].u == cx.u) sd.skip_x = (u32)i;
             const AnchorSitesSoA sites{sc.su0.data(), sc.su1.data(), sc.su2.data(), sc.sq.data(), (u32)nc};
             Q4CoreCounters hc;
-            if (q4_seed_core_shaped(sd, sites, skip_a, skip_b, (u32)h_of[2], false, &hc) != pdead) ++core_mism;
+            if (q4_seed_core_shaped(sd, sites, skip_a, skip_b, (u32)h_of[2], false, &hc, false, /*chord_on=*/false) != pdead) ++core_mism;
           }
           if (pdead) continue;
           ++seeds_alive;

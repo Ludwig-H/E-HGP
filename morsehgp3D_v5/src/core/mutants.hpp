@@ -66,6 +66,7 @@ inline constexpr const char* kMutants[] = {
     "route-ignore-threshold",
     "sector-kill-nonstrict",
     "anchor-kill-h-minus-one",
+    "chord-nonstrict",
 };
 
 inline std::vector<std::string>& mutant_registry() {

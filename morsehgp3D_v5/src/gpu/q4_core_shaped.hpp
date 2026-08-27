@@ -27,6 +27,7 @@
 #include "../core/dint.hpp"
 #include "../core/types.hpp"
 #include "../core/wide.hpp"
+#include "../lanes/chord_kill.hpp"
 #include "../pipeline/float_filter.hpp"
 #include "q3_scan_shaped.hpp"
 
@@ -42,6 +43,7 @@ struct SeedQ4D {
 
 struct Q4CoreCounters {
   u32 cert_pos = 0, cert_neg = 0, jung_kill = 0, jung_skip = 0, jung_fallback = 0, float_fallback = 0;
+  u32 dead_by_chord = 0;  // 1 si le seed est mort par morceaux de corde (et pas par le cœur)
 };
 
 // Pont DI128 -> __int128 utilisable des deux cotes (wide.hpp emploie deja
@@ -65,10 +67,15 @@ MHGP5_HD inline int jung_interval_sign_shaped(double lh, double e, double jlo, d
 
 // Rend true si le seed est MORT (>= h4 temoins). skip_a / skip_b : indices
 // de a et b dans les sites (UINT32_MAX si absents).
+// `chord_nonstrict` : mutant chord-nonstrict (drapeau hote, comme le mutant du cœur).
+// `chord_on` : morceaux de corde cumules (production) ; false = cœur K = 1 seul
+// (portes de transcription du cœur ; la corde est prouvee par les portes de lane et l'oracle ON/OFF).
 MHGP5_HD inline bool q4_seed_core_shaped(const SeedQ4D& s, const AnchorSitesSoA& sites, u32 skip_a, u32 skip_b, u32 h4,
-                                         bool nonstrict, Q4CoreCounters* c) {
+                                         bool nonstrict, Q4CoreCounters* c, bool chord_nonstrict = false, bool chord_on = true) {
   u32 fcount = 0;
   const i128 J = di_to_i128_hd(s.J);
+  ChordPieces chord;
+  chord.init(J, chord_nonstrict);
   for (u32 i = 0; i < sites.n; ++i) {
     if (i == skip_a || i == skip_b || i == s.skip_x) continue;
     const double lh = q3_l_hat_shaped(s.aff, (double)sites.u0[i], (double)sites.u1[i], (double)sites.u2[i], (double)sites.q[i]);
@@ -78,6 +85,10 @@ MHGP5_HD inline bool q4_seed_core_shaped(const SeedQ4D& s, const AnchorSitesSoA&
     }
     const i64 nu = s.n0 * sites.u0[i] + s.n1 * sites.u1[i] + s.n2 * sites.u2[i];  // = 2B, pair
     const i64 Bz = nu / 2;
+    if (chord_on)
+      chord.update(lh, s.aff.bound, Bz, [&]() {
+        return di_to_i128_hd(q3_l_exact_shaped(s.aff, sites.u0[i], sites.u1[i], sites.u2[i], sites.q[i]));
+      });
     if (lh < -s.aff.bound) {
       ++c->cert_neg;
       const int js = jung_interval_sign_shaped(lh, s.aff.bound, s.Jlo, s.Jhi, Bz);
@@ -88,20 +99,22 @@ MHGP5_HD inline bool q4_seed_core_shaped(const SeedQ4D& s, const AnchorSitesSoA&
         } else {
           ++c->jung_skip;
         }
-        continue;
+      } else {
+        ++c->jung_fallback;
+        const DI128 P = di_div_by_4_exact(q3_l_exact_shaped(s.aff, sites.u0[i], sites.u1[i], sites.u2[i], sites.q[i]));
+        const int cm = cmp_2p2_jb2(di_to_i128_hd(P), J, Bz);
+        if ((nonstrict ? (cm >= 0) : (cm > 0)) && ++fcount >= h4) return true;
       }
-      ++c->jung_fallback;
+    } else {
+      ++c->float_fallback;
       const DI128 P = di_div_by_4_exact(q3_l_exact_shaped(s.aff, sites.u0[i], sites.u1[i], sites.u2[i], sites.q[i]));
-      const int cm = cmp_2p2_jb2(di_to_i128_hd(P), J, Bz);
-      if ((nonstrict ? (cm >= 0) : (cm > 0)) && ++fcount >= h4) return true;
-      continue;
+      const int sg = di_sign(P);
+      if (!(nonstrict ? (sg > 0) : (sg >= 0))) {
+        const int cm = cmp_2p2_jb2(di_to_i128_hd(P), J, Bz);
+        if ((nonstrict ? (cm >= 0) : (cm > 0)) && ++fcount >= h4) return true;
+      }
     }
-    ++c->float_fallback;
-    const DI128 P = di_div_by_4_exact(q3_l_exact_shaped(s.aff, sites.u0[i], sites.u1[i], sites.u2[i], sites.q[i]));
-    const int sg = di_sign(P);
-    if (nonstrict ? (sg > 0) : (sg >= 0)) continue;
-    const int cm = cmp_2p2_jb2(di_to_i128_hd(P), J, Bz);
-    if ((nonstrict ? (cm >= 0) : (cm > 0)) && ++fcount >= h4) return true;
+    if (chord_on && chord.dead(h4)) { c->dead_by_chord = 1; return true; }
   }
   return false;
 }

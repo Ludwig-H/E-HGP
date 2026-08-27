@@ -146,7 +146,7 @@ int main(int argc, char** argv) {
             if (sc.cover[i].u == cx.u) sd.skip_x = (u32)i;
           const AnchorSitesSoA sites{sc.su0.data(), sc.su1.data(), sc.su2.data(), sc.sq.data(), (u32)sc.cover.size()};
           Q4CoreCounters hc;
-          bool hdead = q4_seed_core_shaped(sd, sites, skip_a, skip_b, (u32)h_of[2], false, &hc);
+          bool hdead = q4_seed_core_shaped(sd, sites, skip_a, skip_b, (u32)h_of[2], false, &hc, false, /*chord_on=*/false);
           if (m_skip_kills && hc.jung_skip > 0) {  // MUTANT de porte : les non-temoins certifies tuent
             hc.jung_kill += hc.jung_skip;
             hc.jung_skip = 0;

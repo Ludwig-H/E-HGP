@@ -31,6 +31,7 @@ class Q4DeviceExecutor {
   Q4DeviceExecutor(const Q4DeviceExecutor&) = delete;
   Q4DeviceExecutor& operator=(const Q4DeviceExecutor&) = delete;
   double kernel_ms_total = 0;  // mur des trois kernels et des transferts intermediaires du lot (evenements sur le flux)
+  bool chord_nonstrict_ = MHGP5_MUTANT("chord-nonstrict");  // drapeau hote passe au kernel
   u64 launches = 0;  // kernels lances (q4 : jusqu'a trois par lot)
   u64 lots = 0;      // lots scannes
 
@@ -58,7 +59,7 @@ class Q4DeviceExecutor {
     {
       const unsigned threads = 256, wpb = threads / 32;
       k_q4_core<<<(unsigned)((nsd + wpb - 1) / wpb), threads, 0, stream_>>>(d_seeds_, (unsigned)nsd, d_anchors_, S, h4,
-                                                                           core_nonstrict, d_verdicts_);
+                                                                           core_nonstrict, chord_nonstrict_, d_verdicts_);
       cuda_check(cudaGetLastError(), "lancement k_q4_core");
       ++launches;
     }

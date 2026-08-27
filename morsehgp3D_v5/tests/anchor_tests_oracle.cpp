@@ -104,7 +104,15 @@ void oracle_cloud(const CloudIndex& ix) {
 }
 }  // namespace
 
-int main() {
+int main(int argc, char** argv) {
+  std::string inject;
+  for (int i = 1; i < argc; ++i) {
+    const std::string a = argv[i];
+    if (a.rfind("--inject=", 0) == 0) inject = a.substr(9);
+    else return 2;
+  }
+  if (!inject.empty() && !mutants_enable(inject)) return 2;
+  const bool mutant = MHGP5_MUTANT("sector-kill-nonstrict") || MHGP5_MUTANT("anchor-kill-h-minus-one");
   const struct { CloudFamily f; int n; int coord; } clouds[] = {
       {CloudFamily::kUniform, 50, 0}, {CloudFamily::kEightClusters, 60, 0}, {CloudFamily::kTerrain, 50, 0},
       {CloudFamily::kUniform, 40, 14}, {CloudFamily::kEightClusters, 48, 14}};
@@ -120,6 +128,12 @@ int main() {
   if (killed_w3 == 0 || killed_s3 == 0 || killed_s4 == 0 || sign_checked < 1000 || anchors < 1000) {
     std::printf("VACUITE\n");
     return 3;
+  }
+  if (mutant) {
+    // Un mutant non strict / h−1 doit produire au moins un desaccord ON/OFF sur ces nuages (dont la grille cocirculaire).
+    if (mism_onoff) return 4;
+    std::printf("MUTANT NON TUE\n");
+    return 1;
   }
   if (mism_onoff || jneg || sign_mism) return 1;
   std::printf("anchor_tests_oracle OK\n");

@@ -46,8 +46,13 @@ __device__ inline unsigned keep_mask_upto(unsigned witness_mask, unsigned need) 
   return (kth == 31) ? 0xffffffffu : ((1u << (kth + 1)) - 1u);
 }
 
+// Corde (chord_kill.hpp) sur device : chaque lane evalue ses temoignages par
+// morceau ; les comptes par morceau sont des ballots ; la mort (fcount >= h4
+// OU tous les morceaux >= h4) est detectee a la premiere lane ou elle survient
+// (prefixes de popcount), et les compteurs des lanes suivantes sont retires —
+// meme sequence que le scalaire q4_seed_core_shaped.
 __global__ void k_q4_core(const Q4BatchSeed* seeds, unsigned nseeds, const Q4BatchAnchor* anchors, Q4SitesDev S,
-                          unsigned h4, bool nonstrict, Q4SeedVerdict* out) {
+                          unsigned h4, bool nonstrict, bool chord_nonstrict, Q4SeedVerdict* out) {
   const unsigned warp = (blockIdx.x * blockDim.x + threadIdx.x) >> 5;
   const unsigned lane = threadIdx.x & 31;
   if (warp >= nseeds) return;
@@ -60,12 +65,16 @@ __global__ void k_q4_core(const Q4BatchSeed* seeds, unsigned nseeds, const Q4Bat
     return;
   }
   const i128 J = di_to_i128_hd(sd.core.J);
+  ChordPieces chord;
+  chord.init(J, chord_nonstrict);
   unsigned fcount = 0;
-  bool dead = false;
+  unsigned piece_cnt[kChordPieces] = {0, 0, 0, 0};
+  bool dead = false, dead_chord = false;
   for (unsigned base = 0; base < an.count && !dead; base += 32) {
     const unsigned i = base + lane;
-    // Classification du site de la lane : un bit par compteur, un bit temoin.
+    // Classification du site de la lane : un bit par compteur, un bit temoin, un bit par morceau.
     unsigned my_pos = 0, my_neg = 0, my_kill = 0, my_skip = 0, my_jf = 0, my_ff = 0, my_wit = 0;
+    unsigned my_piece = 0;  // bit k : temoin du morceau k
     if (i < an.count && i != an.skip_a && i != an.skip_b && i != sd.core.skip_x) {
       const unsigned g = an.begin + i;
       const double lh = q3_l_hat_shaped(sd.core.aff, (double)S.u0[g], (double)S.u1[g], (double)S.u2[g], (double)S.q[g]);
@@ -74,6 +83,14 @@ __global__ void k_q4_core(const Q4BatchSeed* seeds, unsigned nseeds, const Q4Bat
       } else {
         const i64 nu = sd.core.n0 * S.u0[g] + sd.core.n1 * S.u1[g] + sd.core.n2 * S.u2[g];
         const i64 Bz = nu / 2;
+        {
+          ChordPieces local;
+          local.init(J, chord_nonstrict);
+          local.update(lh, sd.core.aff.bound, Bz, [&]() {
+            return di_to_i128_hd(q3_l_exact_shaped(sd.core.aff, S.u0[g], S.u1[g], S.u2[g], S.q[g]));
+          });
+          for (int k = 0; k < kChordPieces; ++k) if (local.cnt[k]) my_piece |= 1u << k;
+        }
         if (lh < -sd.core.aff.bound) {
           my_neg = 1;
           const int js = jung_interval_sign_shaped(lh, sd.core.aff.bound, sd.core.Jlo, sd.core.Jhi, Bz);
@@ -100,15 +117,37 @@ __global__ void k_q4_core(const Q4BatchSeed* seeds, unsigned nseeds, const Q4Bat
       }
     }
     const unsigned wit = __ballot_sync(0xffffffffu, my_wit != 0);
-    unsigned keep = 0xffffffffu;
+    unsigned pm[kChordPieces];
+    for (int k = 0; k < kChordPieces; ++k) pm[k] = __ballot_sync(0xffffffffu, (my_piece >> k) & 1u);
+    // Premiere lane ou la mort survient : par le cœur (h4-ieme temoin) ou par la corde (chaque morceau atteint h4).
+    unsigned death_lane = 32;  // 32 = pas de mort dans ce pas
     const unsigned add = __popc(wit);
     if (fcount + add >= h4) {
-      keep = keep_mask_upto(wit, h4 - fcount);
-      dead = true;
-      fcount = h4;
-    } else {
-      fcount += add;
+      const unsigned m = keep_mask_upto(wit, h4 - fcount);
+      death_lane = 31 - __clz(m);  // lane du h4-ieme temoin
     }
+    {
+      // Corde : lane ou le DERNIER morceau atteint h4 (max sur k de la lane du (h4 − piece_cnt[k])-ieme temoin du morceau k).
+      unsigned dl = 0;
+      bool all = true;
+      for (int k = 0; k < kChordPieces && all; ++k) {
+        const unsigned need = h4 > piece_cnt[k] ? h4 - piece_cnt[k] : 0;
+        if (need == 0) continue;
+        if ((unsigned)__popc(pm[k]) < need) { all = false; break; }
+        const unsigned mk = keep_mask_upto(pm[k], need);
+        const unsigned lk = 31 - __clz(mk);
+        if (lk > dl) dl = lk;
+      }
+      if (all && dl < death_lane) { death_lane = dl; dead_chord = true; }
+      else if (all && dl == death_lane) { dead_chord = false; }  // egalite : le cœur est constate d'abord (meme ordre que le scalaire : test du cœur avant la corde)
+    }
+    unsigned keep = 0xffffffffu;
+    if (death_lane < 32) {
+      keep = (death_lane == 31) ? 0xffffffffu : ((1u << (death_lane + 1)) - 1u);
+      dead = true;
+    }
+    fcount += __popc(wit & keep);
+    for (int k = 0; k < kChordPieces; ++k) piece_cnt[k] += __popc(pm[k] & keep);
     v.c.cert_pos += __popc(__ballot_sync(0xffffffffu, my_pos != 0) & keep);
     v.c.cert_neg += __popc(__ballot_sync(0xffffffffu, my_neg != 0) & keep);
     v.c.jung_kill += __popc(__ballot_sync(0xffffffffu, my_kill != 0) & keep);
@@ -117,6 +156,7 @@ __global__ void k_q4_core(const Q4BatchSeed* seeds, unsigned nseeds, const Q4Bat
     v.c.float_fallback += __popc(__ballot_sync(0xffffffffu, my_ff != 0) & keep);
   }
   v.dead = dead ? 1u : 0u;
+  v.c.dead_by_chord = (dead && dead_chord) ? 1u : 0u;
   if (lane == 0) out[warp] = v;
 }
 
