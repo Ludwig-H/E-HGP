@@ -34,7 +34,7 @@ phase, et non recalculer les mêmes 25 runs.
 ## Réponse des auditeurs — 27 août 2026
 
 - **Relecture :** `a9a2f509` pour l'activation initiale, `fa99b3f1` pour les analyses, `7eb33608` pour F4 et le contrefactuel, `d837adb2` pour `EXTRA_N`, `7d94aee9` pour la gate ON/OFF, `635951d6` pour F1–F7/sonde/lanceur, `259fe21e` pour les mesures, `fabd75bd` pour le plan de tests, `77e143b2` pour la lecture GPU, `e11ad8c7` pour les artefacts G4 et `ef5abbd5` pour la correction de racine du lanceur
-- **Nature :** revue mathématique et statique par Codex ; aucun test, CUDA ni GCP lancé dans cette passe. Des sorties concurrentes du build Release partagé, au contenu fonctionnel statiquement équivalent à `635951d6`, rapportent les résultats ci-dessous ; leurs journaux ont depuis été écrasés.
+- **Nature :** revue mathématique et statique par Codex ; aucun CTest, CUDA ni GCP lancé dans cette passe. La sonde Q4 non suivie a été compilée et exécutée sur cinq cas bornés ; des sorties concurrentes du build Release partagé, au contenu fonctionnel statiquement équivalent à `635951d6`, rapportent les autres résultats ci-dessous, sans journal CTest durable.
 - **Verdict borné :** les preuves de suffisance W3 et secteurs sont reçues au niveau statique sous le profil u16. Aucun faux rejet nominal n'a été trouvé. Les sorties concurrentes rapportent 166/166 portes `gate` et 8/8 tests `oracle`, sans journal durable. L'activation n'est pas qualifiée : la porte réutilise les corps produit, n'énumère pas indépendamment les profondeurs, F5/F7 sur-promettent leur portée et l'oracle d'ancre est omis de `-L gate`. `ef5abbd5` répare la racine de l'auto-copie, mais pas encore les garde-fous de démarrage/arrêt.
 
 ### V7 — objet, compteurs et reçus
@@ -145,13 +145,14 @@ deux digests CPU/GPU/adaptatif concordent.
 
 Le statut strict reste moins fort que sa prose : le commit suit seulement les
 25 `.status`, les 25 `.txt` et `RECU.txt`. Les logs de session/récupération et
-les 25 `.status.time` sont ignorés. `RECU.txt` promet le rejeu du validateur
-« ci-dessous », mais ne conserve ni commande, arguments, `validator_rc` ni
-sortie ; `remote_campaign_rc` est inconnu et `scp_rc=0` n'existe que dans le
-log local ignoré. Le contenu paraît validable en injectant `0 0`, mais cela ne
-rend pas `campaign_status=complete` autoportant. Versionner les pièces déjà
-acquises, noter le RC distant comme inféré et corriger « 24 runs tous code 0 » ;
-ne pas relancer les calculs. Le mini-script doit aussi refuser explicitement
+les 25 `.status.time` sont ignorés. Le validateur exact extrait de `fa99b3f1`,
+rejoué avec les arguments de récupération `0 0`, rend bien
+`campaign_status=complete (25 runs valides)`. Le contenu est donc validé, mais
+le reçu n'est pas transactionnellement autoportant : sa prose ne conserve ni
+commande, arguments, `validator_rc` ni sortie, `remote_campaign_rc` est inconnu
+et `scp_rc=0` n'existe que dans le log local ignoré. Conserver le transcript,
+noter le RC distant comme inféré et corriger « 24 runs tous code 0 » ; ne pas
+relancer les calculs. Le mini-script doit aussi refuser explicitement
 `scp_rc != 0` avant d'écrire `DONE`.
 
 `GPU.md` à `77e143b2` a anticipé cette récupération ; `e11ad8c7` fournit
@@ -163,10 +164,15 @@ une séparation interne cover/scan : le diagnostic sur les covers reste ouvert.
 
 ### Conseil sur la sonde de corde Q4 en cours
 
-Le découpage de la sur-corde en `K` intervalles est un certificat suffisant
-cohérent : `h4` témoins stricts aux deux extrémités de chaque intervalle tuent
-le seed, et l'arrondi entier supérieur reste fail-open. Avant de lire ses
-ratios ou d'en faire une lane :
+Les centres des complétions acceptables sont contenus dans la corde fermée
+`|mu| <= sqrt(J/2)` ; ils ne forment pas tout le continuum. Son découpage en
+`K` intervalles est un certificat suffisant cohérent : `h4` témoins stricts aux
+deux extrémités de chaque intervalle tuent le seed. Les facteurs `J/2` et
+`P-mu*B` et les comparaisons `< 0` sont corrects. L'arrondi entier courant
+`isqrt(J/2)+1` reste fail-open, mais surestime inutilement un carré parfait et
+peut biaiser fortement un petit `J` ; employer le plus petit `r` tel que
+`2*r*r >= J` ou publier ce mou. Avant de lire ses ratios ou d'en faire une
+lane :
 
 - appliquer à `mhgp5_q4_chord_probe` le pin/dirty actuellement réservé à
   `mhgp5_rect_probe`, puis imprimer toute la configuration et recevoir la
@@ -174,17 +180,28 @@ ratios ou d'en faire une lane :
 - rendre bloquants des planchers d'ancres, seeds vivants, morts additionnels et
   scans réellement évités ; le code 0 actuel accepte une sonde entièrement
   vide ;
-- comparer chaque support `(a,b,x,y)` et sa profondeur exacte, pas seulement un
-  `BallKey` déjà émis par le même corps produit. Le set masque les multiplicités
-  et peut confondre l'émission par l'autre seed canonique ;
-- séparer `wrong_K`, imposer la monotonie `K=2/4/8`, refuser `J <= 0` et borner
-  ou vérifier les agrégats `u64` ;
+- conserver `wrong` comme alarme géométrique **relative**, pas comme oracle
+  indépendant : le set des `BallKey` produites détecte utilement une sphère
+  émise qu'un seed dit mort peut engendrer, mais une omission du même corps peut
+  masquer un défaut et une cosphère portée ailleurs peut produire un signal
+  conservateur. Restreindre le nouveau contrôle aux seeds `!dead1`, puis faire
+  une vraie comparaison ON/OFF brute et post-RLE avant intégration ;
+- séparer `wrong_K`, imposer par seed `dead2 => dead4 => dead8`, refuser
+  `J <= 0`, vérifier idéalement `3J >= G*D2` et borner les agrégats `u64` ;
 - renommer le compteur courant en « tentatives `y` évitées » : il est incrémenté
   avant owner, canonicalisation et préfiltres, donc ne mesure ni les scans de
-  profondeur évités ni un gain temporel ;
+  profondeur évités ni un gain temporel. Ventiler les étages et comparer le
+  coût propre des `K` scans de cover au travail réellement retiré ;
+- remplacer `atoi` par un parse borné, refuser `n <= 0`, vérifier le cardinal
+  effectivement généré et imprimer `coord`, seed, `s`, `smax`, `h4`, filtre
+  flottant, pin et état du worktree ; `--n=abc` rend aujourd'hui un run vide à
+  code 0 ;
 - écrire chaque brut vers un temporaire, bloquer sur son RC puis renommer. La
   chaîne locale en cours emploie `;`, écrit directement le `.txt` et poursuivrait
   après un code 1 ; un fichier zéro octet a déjà été visible pendant le calcul.
 
 Cette sonde est une bonne prochaine falsification si elle reste distincte du
 chemin produit et si son coût propre est comparé au scan qu'elle prétend éviter.
+La compilation Release ciblée et cinq runs bornés (`n=200/400`, quatre
+familles) donnent `wrong=0` et des morts agrégées monotones `K=2/4/8` ; ce sont
+des observations exploratoires, pas un reçu.

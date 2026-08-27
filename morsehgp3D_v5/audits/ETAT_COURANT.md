@@ -3,7 +3,8 @@
 - **Date :** 27 août 2026
 - **Auditeur :** Codex, avec relecture critique des audits concurrents
 - **Pin fonctionnel de référence relu statiquement :** `635951d654f466cfa7fe1e2297c19b9acb5393a9`
-- **Tip du dépôt relu statiquement :** `ef5abbd5261763fc618692dd7cb9f6f24069dfea`
+- **Tip d'implémentation relu statiquement :** `ef5abbd5261763fc618692dd7cb9f6f24069dfea`
+- **Dernier audit concurrent critiqué :** `e0ac816617b5639117ca0b16e934803bc91539d3`
 - **Tip documentation/reçus relu et validé :** `e11ad8c7b66617d91c1cdcd74909a4970b5362b0`
 - **Worktree concurrent post-tip :** un probe Q4 et son inscription CMake sont en cours, hors verdict ; le probe racine non suivi appartient à un autre auditeur
 - **Dernier pin avec sorties locales de sonde observées :** `635951d654f466cfa7fe1e2297c19b9acb5393a9`, reçu commité par `259fe21e`
@@ -96,7 +97,7 @@ lancement GCP n'a été effectué par l'auditeur pour établir ces défauts.
 | Snapshot pré-commit devenu `7eb33608` | 10/10 fixtures et routes ciblées | F2/F4, non-strict, all-host, mixed et mutants ; subsumé par la suite complète |
 | ASan+UBSan Debug historique `6e8a6aba` | 11/11 portes ciblées | aucune généralisation à toute la suite |
 | ASan+UBSan RelWithDebInfo historique | échec de compilation dans `cloud_index.hpp:130-131` | warning GCC 13 `array-bounds` sous `-Werror`, pas un diagnostic sanitizer d'exécution |
-| G4 source `fa99b3f1` | 25 paires `.status`/`.txt` statiquement cohérentes, deux digests CPU/GPU égaux | `campaign_status=complete` déclaré mais non autoportant : transcript et `remote_campaign_rc` absents du reçu |
+| G4 source `fa99b3f1` | **25/25 runs acceptés** par le validateur exact du pin rejoué avec `0 0`, deux digests CPU/GPU égaux | contenu reproductiblement complet ; RC de récupération injectés au rejeu mais absents du reçu, donc transaction non autoportante |
 | G4 source `8f95df2e` | 4 couples CPU/GPU à 50 k, deux digests appariés | égalité bornée ; campagne partielle 24/25, non terminale |
 
 La sortie concurrente 166/166 rapporte une non-régression bornée du contenu
@@ -131,15 +132,17 @@ le code 4 attendu du mutant, `finished=1`, un triplet de pins commun et des RSS
 positives ; les deux digests CPU/GPU concordent pour chaque famille et pour les
 deux bras adaptatifs.
 
-Le contenu paraît donc **validable sous l'hypothèse** `remote_campaign_rc=0`,
-rendue plausible par la ligne finale distante, mais le statut transactionnel
-`campaign_status=complete` n'est pas autoportant dans le commit. `RECU.txt`
-annonce un rejeu « voir ci-dessous » sans conserver commande, arguments,
+Le validateur exact extrait du pin `fa99b3f1` a été rejoué sur ce bundle avec
+les arguments de récupération `0 0` et rend
+`campaign_status=complete (25 runs valides)`. Le **contenu** de campagne est
+donc reproductiblement complet ; le statut transactionnel n'est toutefois pas
+autoportant dans le commit, car ces deux RC ont dû être injectés au rejeu.
+`RECU.txt` annonce « voir ci-dessous » sans conserver commande, arguments,
 `validator_rc` ni sortie ; le RC distant exact est inconnu, et le `scp_rc=0`
 n'existe que dans un log local ignoré. Corriger aussi « 24 runs, tous code 0 »
 en « 24 nominaux à code 0 plus le mutant attendu à code 4 ». Ne pas recalculer
-les 25 runs : versionner les pièces existantes et qualifier explicitement le RC
-distant d'inféré suffit à fermer honnêtement cette provenance.
+les 25 runs : conserver le transcript du rejeu et qualifier explicitement le
+RC distant d'inféré suffit à fermer honnêtement cette provenance.
 
 `GPU.md` dispose donc maintenant de la pièce qu'il anticipait. Les écarts
 CPU/`--gpu` observés vont cependant de +4 % à +19 % : « aucun gain net sur ce
@@ -164,28 +167,43 @@ ablation causale, et ne justifie donc pas une généralisation de performance.
 
 ### Sonde de corde Q4 en cours dans le worktree
 
-Le critère de `bench/q4_chord_probe.cpp` est mathématiquement prometteur : sur
-chaque sous-intervalle de la sur-corde entière, compter `h4` sites strictement
-intérieurs aux deux extrémités est une condition suffisante de mort du seed ;
-les témoins peuvent changer d'un morceau à l'autre. L'arrondi supérieur
-`floor(sqrt(floor(J/2))) + 1` reste conservatif. Ce code est cependant une
-sonde non suivie et ne doit pas encore devenir une lane ni une preuve :
+Le critère de `bench/q4_chord_probe.cpp` est mathématiquement prometteur. Les
+centres des complétions acceptables sont **contenus dans** la corde fermée
+`|mu| <= sqrt(J/2)` ; ils ne « forment » pas tout ce continuum. Sur chaque
+sous-intervalle d'une sur-corde, compter `h4` sites strictement intérieurs aux
+deux extrémités est une condition suffisante de mort du seed ; les témoins
+peuvent changer d'un morceau à l'autre. Les facteurs `J/2` et `P-mu*B` ainsi
+que la stricte comparaison `< 0` sont corrects. L'entier courant
+`isqrt(J/2)+1` sur-approxime toujours la corde et reste donc fail-open, mais il
+dépasse inutilement d'une unité les carrés parfaits et peut être très pessimiste
+pour les petits `J`. Employer le plus petit entier `r` tel que `2*r*r >= J`, ou
+publier le mou de sur-couverture. Ce code est cependant une sonde non suivie et
+ne doit pas encore devenir une lane ni une preuve :
 
 - CMake ne lui transmet ni pin ni état dirty, et la sortie ne conserve ni
   commande, toolchain, temps, RSS, hash du binaire ou code de sortie ;
-- `wrong` compare à l'ensemble de boules **déjà émis par le même corps produit**.
-  Une omission produit peut donc masquer un faux rejet, tandis qu'une boule
-  émise par l'autre seed canonique peut faire accuser à tort un seed
-  non canonique ; conserver un verdict exact par seed/complétion et par `K` ;
+- `wrong` est une alarme géométrique relative utile : toute `BallKey` produite
+  que le seed déclaré mort peut engendrer contredit bien « toutes ses sphères
+  admissibles sont profondes ». Elle n'est toutefois ni indépendante du corps
+  produit ni une preuve d'invariance de l'objet ; une omission produit peut
+  masquer un défaut, et une cosphère émise par un autre carrier peut produire
+  un signal conservateur. Restreindre l'alarme additionnelle à `!dead1`, la
+  ventiler par `K`, puis ajouter une comparaison ON/OFF brute et post-RLE si le
+  certificat entre dans le produit ;
 - le `std::set<BallKey>` masque les multiplicités et `wrong` peut compter le
-  même seed pour `K=2/4/8`. Exiger l'égalité brute puis post-RLE, des compteurs
-  séparés et la monotonie des morts quand `K` augmente ;
+  même seed pour `K=2/4/8`. Imposer par seed `dead2 => dead4 => dead8`, faire de
+  toute violation un code non nul et ajouter une petite fixture indépendante
+  de bord avant d'en faire une gate ;
 - « complétions évitées » compte actuellement tous les `y` de la lentille,
   avant owner, canonicalisation et préfiltres. C'est un nombre d'itérations de
-  boucle évitées, pas un nombre de scans de profondeur ni un temps économisé ;
+  boucle évitées, pas un nombre de scans de profondeur ni un temps économisé.
+  Ventiler les rejets produit et mesurer aussi le coût propre des `K` scans du
+  cover ;
 - aucune non-vacuité n'est bloquante : zéro ancre, seed, mort, complétion ou
   émission rendrait encore le code 0. Ajouter des planchers avant toute lecture
-  de ratio et refuser `J <= 0`, conformément au théorème du seed aigu ;
+  de ratio, refuser les CLI permissives (`--n=abc` rend actuellement un run
+  vide à code 0), vérifier le cardinal réellement généré et refuser `J <= 0`,
+  conformément au théorème du seed aigu ;
 - la campagne locale en cours écrit directement dans les `.txt` et enchaîne
   les probes par `;` sans graver ni bloquer sur chaque RC : un fichier a été
   observé à zéro octet pendant le calcul et un `wrong != 0` n'empêcherait pas
@@ -195,6 +213,11 @@ sonde non suivie et ne doit pas encore devenir une lane ni une preuve :
 La bonne prochaine forme est un probe reçu, pas une intégration produit : même
 pin, comparaison exacte par complétion, `wrong_K=0`, planchers, coûts séparés
 du tri/segmentation et du scan effectivement évité.
+
+Une compilation Release ciblée et cinq runs bornés (`n=200/400`, quatre
+familles) ont rendu `wrong=0` et des morts agrégées strictement monotones
+`K=2/4/8`. Ils falsifient utilement le brouillon, sans constituer un reçu ni une
+mesure de performance.
 
 ## W3 et secteurs — ce qui est reçu
 
@@ -424,15 +447,24 @@ mais demeure une observation de famille/taille/pin, jamais un invariant.
 ```text
 build partagé, contenu fonctionnel 635951d6 : 166/166 gates, 254,07 s ; 8/8 oracles, 13,76 s — sorties rapportées, journaux écrasés
 selftest concurrent : violations=0, mais le wrapper de session n'est pas exécuté
-G4 fa99b3f1 : 25 paires statiquement cohérentes, deux digests appariés ; complete déclaré, RC distant/transcript absents
+G4 fa99b3f1 : validateur exact rejoué avec 0 0, 25 runs valides, deux digests appariés ; RC injectés/transcript absents du reçu
 sorties historiques 7eb33608 : 165/165 gates, 7 oracles, 105,73 s
 archive propre fa99b3f1 : 165/165 gates, 7 oracles, 101,58 s
 reçus/docs 259fe21e..e11ad8c7 et lanceur ef5abbd5 : relus statiquement
 ```
 
-Cette passe n'a lancé aucun test. Des sorties concurrentes du build partagé
-rapportent la construction Release, les portes CPU, les oracles et le selftest ;
-aucun journal CTest durable ni CUDA local n'est disponible. Les sorties G4
+Rejeu réellement exécuté depuis la racine :
+
+```text
+python <(git show fa99b3f1:gcp-migration/validate_v5_campaign.py) morsehgp3D_v5/receipts/campagne_g4_v5_20260827_tests_ancre/out fa99b3f127e06aa686a301c084f8311e80d5c554 efe87b9b7e3a65e218997c9bce43a2ec95f2fa38e0f4efcffd5cf2f9cdb149e1 d5d6c71efc44365c2bab311016315966ee7674d48923e1cf2bc2a9923806fdc8 0 0
+campaign_status=complete (25 runs valides, source_commit=fa99b3f127e0)
+=== CAMPAGNE COMPLETE ===
+```
+
+Cette passe n'a lancé aucun CTest, mais a compilé la cible Q4 en cours et lancé
+cinq probes bornés. Des sorties concurrentes du build partagé rapportent les
+portes CPU, les oracles et le selftest ; aucun journal CTest durable ni CUDA
+local n'est disponible. Les sorties G4
 `.txt/.status` sont suivies, contrairement aux logs de session et fichiers
 `.status.time`. Le probe racine
 `.codex_fold_contract_probe.cpp` appartient à un autre auditeur ; il n'a été ni
