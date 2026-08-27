@@ -57,6 +57,18 @@ echo "digest_all=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcde
 EOS
 chmod +x "${WORK}/fake_probe"
 
+# Faux pilote CUDA : meme sortie que la sonde, plus la ligne gpu=1 ; GPU_DIGEST_MISM=1
+# change le digest (doit etre refuse).
+cat > "${WORK}/fake_gpu" <<'EOS'
+#!/usr/bin/env bash
+fam=""; n=""
+for a in "$@"; do case "$a" in --family=*) fam="${a#--family=}";; --n=*) n="${a#--n=}";; esac; done
+echo "famille=${fam} n=${n} coord=1 s=8 smax=11 seed=3 threads=1 emis=1 boules_uniques=42 mortes_profondeur=0 survivantes=42 census_int=1 census_shell=0 evenements=7 facettes=9 fusions=3 deltas=1 noeuds=1"
+if [ "${GPU_DIGEST_MISM:-0}" = "1" ]; then echo "digest_all=ffff456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"; else echo "digest_all=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"; fi
+echo "gpu=1 kernel_ms=1.0 lancements=3"
+EOS
+chmod +x "${WORK}/fake_gpu"
+
 # Fausse conformite : egal partout sauf (DIVERGE_FAMILY, DIVERGE_N) -> code 1.
 cat > "${WORK}/fake_conformity" <<'EOS'
 #!/usr/bin/env bash
@@ -109,6 +121,14 @@ echo "q3_lane_device famille=${fam} n=${n} fils=1 candidats_q3=176250 seeds=3373
 exit 1
 EOT
 chmod +x build-cuda/mhgp5_q3_lane_device_gate
+cat > build-cuda/mhgp5_q4_lane_device_gate <<'EOT'
+#!/usr/bin/env bash
+fam=uniform; n=1200; t=1
+for a in "$@"; do case "$a" in --family=*) fam="${a#--family=}";; --n=*) n="${a#--n=}";; --threads=*) t="${a#--threads=}";; esac; done
+echo "q4_lane_device famille=${fam} n=${n} fils=${t} candidats_q4=44020 lots=44020 seeds=508979 coeur_tues=357862 completions=3992025 profonds=363074 lancements=3 kernel_ms=1.0 desaccords_vecteur=0 desaccords_compteurs=0"
+echo "q4_lane_device OK"
+EOT
+chmod +x build-cuda/mhgp5_q4_lane_device_gate
 exit 0
 EOS
 chmod +x "${WORK}/fakebin/nvcc" "${WORK}/fakebin/cmake"
@@ -118,7 +138,7 @@ run_campaign() {
   mkdir -p "${out}"
   local rc=0
   ( cd "${WORK}" && env "$@" PATH="${WORK}/fakebin:${PATH}" NVCC_BIN="${WORK}/fakebin/nvcc" \
-      PROBE_BIN="${WORK}/fake_probe" CONFORMITY_BIN="${WORK}/fake_conformity" \
+      PROBE_BIN="${WORK}/fake_probe" CONFORMITY_BIN="${WORK}/fake_conformity" GPU_BIN="${WORK}/fake_gpu" \
       RECEIPT="${WORK}/recu.txt" TIME_BIN="${WORK}/fake_time" THREADS=1 \
       OUT_DIR="${out}" RUN_TIMEOUT=2 \
       bash "${HERE}/v5_campaign_remote.sh" cafedeca beefbeef feedf00d ) \
@@ -129,7 +149,7 @@ run_campaign() {
 # ---- Scenario 1 : happy path -> complete.
 RC1=$(run_campaign "${WORK}/out1")
 [ "${RC1}" -eq 0 ] || fail "scenario 1 : script distant rc=${RC1}"
-[ "$(ls "${WORK}/out1"/*.status 2>/dev/null | wc -l)" -eq 18 ] || fail "scenario 1 : 18 statuts attendus (temoin + lane device + 12 conformites + 4 contrats)"
+[ "$(ls "${WORK}/out1"/*.status 2>/dev/null | wc -l)" -eq 22 ] || fail "scenario 1 : 22 statuts attendus (temoin + lane device + 12 conformites + 4 contrats CPU + 4 contrats GPU)"
 grep -L '^source_commit=cafedeca$' "${WORK}/out1"/*.status | grep -q . && fail "scenario 1 : pin source absent d'un statut"
 if ! python3 "${HERE}/validate_v5_campaign.py" "${WORK}/out1" cafedeca beefbeef feedf00d 0 0 > "${WORK}/v1.log" 2>&1; then
   fail "scenario 1 : validateur a refuse un happy path ($(cat "${WORK}/v1.log"))"
@@ -174,11 +194,18 @@ grep -q 'scan uniform' "${WORK}/v3c.log" || fail "scenario 3ter : le desaccord d
 
 # ---- Scenario 3quater : lane device en desaccord -> les phases CPU tournent (18 statuts) mais jamais complete.
 RC3d=$(run_campaign "${WORK}/out3d" LANE_MISM=1)
-[ "$(ls "${WORK}/out3d"/*.status 2>/dev/null | wc -l)" -eq 18 ] || fail "scenario 3quater : la lane device ne refuse pas les phases CPU"
+[ "$(ls "${WORK}/out3d"/*.status 2>/dev/null | wc -l)" -eq 22 ] || fail "scenario 3quater : la lane device ne refuse pas les phases CPU"
 if python3 "${HERE}/validate_v5_campaign.py" "${WORK}/out3d" cafedeca beefbeef feedf00d "${RC3d}" 0 > "${WORK}/v3d.log" 2>&1; then
   fail "scenario 3quater : une lane device en desaccord devait refuser complete"
 fi
 grep -q 'gpu_lane' "${WORK}/v3d.log" || fail "scenario 3quater : la lane device doit etre nommee"
+
+# ---- Scenario 3quinquies : digest GPU different du CPU -> jamais complete.
+RC3e=$(run_campaign "${WORK}/out3e" GPU_DIGEST_MISM=1)
+if python3 "${HERE}/validate_v5_campaign.py" "${WORK}/out3e" cafedeca beefbeef feedf00d "${RC3e}" 0 > "${WORK}/v3e.log" 2>&1; then
+  fail "scenario 3quinquies : un digest GPU different devait refuser complete"
+fi
+grep -q 'DIFFERENT du contrat CPU' "${WORK}/v3e.log" || fail "scenario 3quinquies : le desaccord de digest doit etre nomme"
 
 # ---- Scenario 4 : code de session non nul.
 if python3 "${HERE}/validate_v5_campaign.py" "${WORK}/out1" cafedeca beefbeef feedf00d 255 0 > "${WORK}/v4.log" 2>&1; then

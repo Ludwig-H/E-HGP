@@ -38,6 +38,8 @@ struct RunOptions {
   // fil d'arriere-plan du pipeline (un seul a la fois, dans l'ordre des K) —
   // PROVISOIRE jusqu'au statut terminal.
   std::function<void(u64 K, const std::vector<ForestEvent>& events, const ForestResult& r)> on_forest;
+  // Executeurs de lane externes (device) — vides : lanes integrees.
+  LaneOverride q3_override, q4_override;
 };
 
 struct KCardinalities {
@@ -132,6 +134,8 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
   const auto t_g = std::chrono::steady_clock::now();
   std::vector<BallCandidate> cands;
   GenerateOptions go;
+  go.q3_override = opt.q3_override;
+  go.q4_override = opt.q4_override;
   go.s = opt.s;
   go.smax = rr.smax_eff;
   go.threads = opt.threads;

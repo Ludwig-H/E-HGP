@@ -32,6 +32,7 @@
 #pragma once
 
 #include <chrono>
+#include <functional>
 #include <limits>
 #include <vector>
 
@@ -238,10 +239,19 @@ struct AffineSeed {
 
 }  // namespace generate_detail
 
+struct GenerateOptions;
+// Remplacement d'une lane entiere (q3 ou q4) par un executeur externe — la
+// lane device (src/gpu/*_lane_device.cuh). Meme signature d'effet que la lane
+// integree : candidats ajoutes a `out`, statistiques cumulees. L'objet ne
+// change pas : la porte d'egalite post-RLE de chaque lane en est la preuve.
+using LaneOverride = std::function<void(const CloudIndex&, const GenerateOptions&, std::vector<BallCandidate>*, GenerateStats*)>;
+
 struct GenerateOptions {
   i64 s = 8;
   u64 smax = 11;
   int threads = 1;
+  LaneOverride q3_override;  // vide : lane q3 integree
+  LaneOverride q4_override;  // vide : lane q4 integree
 };
 
 // Execute une lane sur ses rectangles vivants : chaque ouvrier a son brouillon,
@@ -312,7 +322,9 @@ inline void generate_candidates(const CloudIndex& ix, const GenerateOptions& opt
   }
 
   // ---- q3.
-  {
+  if (opt.q3_override) {
+    opt.q3_override(ix, opt, out, st);
+  } else {
     const auto t0 = std::chrono::steady_clock::now();
     alive_rectangles(ix, opt.s, h_of, 1, opt.threads, &alive, &st->rect_visited[1], &st->workers_wspd[1]);
     st->t_wspd_ms[1] += ms_since(t0);
@@ -379,7 +391,9 @@ inline void generate_candidates(const CloudIndex& ix, const GenerateOptions& opt
   }
 
   // ---- q4.
-  {
+  if (opt.q4_override) {
+    opt.q4_override(ix, opt, out, st);
+  } else {
     const auto t0 = std::chrono::steady_clock::now();
     // MUTANT q4-seeds-from-q3-live : la source q4 branchee sur la lane q3
     // (perd les ancres q3-mortes / q4-vivantes — fixture bloquante).

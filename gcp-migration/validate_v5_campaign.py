@@ -25,6 +25,8 @@ def expected_names():
             names.append(f"conf_{fam}_n{n}")
     for fam in FAMILIES:
         names.append(f"contrat_{fam}_n50000")
+    for fam in FAMILIES:
+        names.append(f"contrat_gpu_{fam}_n50000")
     return names
 
 
@@ -80,6 +82,16 @@ def main():
                     bad.append(f"{name}: scan {fam} absent, sous le plancher (1000 seeds) ou en desaccord")
             if "device_witness OK" not in body:
                 bad.append(f"{name}: temoin device non conforme")
+        if name.startswith("contrat_gpu_"):
+            if not re.search(r"^gpu=1 kernel_ms=", body, re.M):
+                bad.append(f"{name}: le run n'annonce pas gpu=1")
+            cpu_txt = os.path.join(out, name.replace("contrat_gpu_", "contrat_") + ".txt")
+            d_gpu = re.search(r"^digest_all=([0-9a-f]{64})$", body, re.M)
+            d_cpu = None
+            if os.path.exists(cpu_txt):
+                d_cpu = re.search(r"^digest_all=([0-9a-f]{64})$", open(cpu_txt, encoding="utf-8", errors="replace").read(), re.M)
+            if not d_gpu or not d_cpu or d_gpu.group(1) != d_cpu.group(1):
+                bad.append(f"{name}: digest_all DIFFERENT du contrat CPU de la meme famille (ou absent)")
         if name == "gpu_lane":
             lanes = re.findall(r"^q3_lane_device famille=(\S+) n=(\d+) fils=\d+ candidats_q3=(\d+) .* desaccords_vecteur=(\d+) desaccords_compteurs=(\d+)$", body, re.M)
             want = {("uniform", "1200"), ("eight_clusters", "1200"), ("uniform", "8000")}
@@ -88,6 +100,12 @@ def main():
                 bad.append(f"{name}: lane device — portes manquantes ou en desaccord : {sorted(want - got)}")
             if body.count("q3_lane_device OK") < 3:
                 bad.append(f"{name}: lane device — moins de trois OK")
+            lanes4 = re.findall(r"^q4_lane_device famille=(\S+) n=(\d+) fils=\d+ .* desaccords_vecteur=(\d+) desaccords_compteurs=(\d+)$", body, re.M)
+            got4 = {(f, n) for f, n, v, k in lanes4 if int(v) == 0 and int(k) == 0}
+            if not want <= got4:
+                bad.append(f"{name}: lane q4 device — portes manquantes ou en desaccord : {sorted(want - got4)}")
+            if body.count("q4_lane_device OK") < 3:
+                bad.append(f"{name}: lane q4 device — moins de trois OK")
         if name.startswith("conf_") and not conformity.search(body):
             bad.append(f"{name}: conformite v4 non etablie")
         if name.startswith("contrat_") and not digest.search(body):

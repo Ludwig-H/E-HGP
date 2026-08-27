@@ -51,7 +51,9 @@ inline S192 s192_mul(i128 x, i128 y) {
   return r;
 }
 
-inline U192 u192_add(const U192& a, const U192& b) {
+// (nom propre : dint.hpp definit aussi un u192_add HD ; les deux visibles dans
+// le pilote CUDA seraient ambigus)
+inline U192 u192_add_plateau(const U192& a, const U192& b) {
   U192 r;
   u128 acc = (u128)a.w[0] + b.w[0];
   r.w[0] = (u64)acc;
@@ -77,7 +79,7 @@ inline S192 s192_add(const S192& a, const S192& b) {
   S192 r;
   if (a.neg == b.neg) {
     r.neg = a.neg;
-    r.mag = u192_add(a.mag, b.mag);
+    r.mag = u192_add_plateau(a.mag, b.mag);
   } else {
     const int c = cmp_u192(a.mag, b.mag);
     if (c >= 0) {
