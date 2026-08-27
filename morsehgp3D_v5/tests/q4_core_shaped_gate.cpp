@@ -53,7 +53,6 @@ int main(int argc, char** argv) {
   u64 visited = 0, workers = 0;
   generate_detail::alive_rectangles(ix, 8, h_of, 2, 1, &alive, &visited, &workers);
   generate_detail::AnchorScratch sc;
-  std::vector<double> du0, du1, du2, dq;
   u64 seeds = 0, mism = 0, dead_n = 0;
   Q4CoreCounters tot;
   for (const AliveRect& ar : alive) {
@@ -99,14 +98,7 @@ int main(int argc, char** argv) {
           const i128 Jb = (i128)D2 * (3 * f3s.g - 2 * (i128)l_ax * l_bx);
           if (Jb < 0) continue;
           ++seeds;
-          if (!sc.affine_filled) {
-            sc.fill_affine_sites(ix, pa, pb, D2);
-            const size_t nc = sc.cover.size();
-            du0.resize(nc); du1.resize(nc); du2.resize(nc); dq.resize(nc);
-            for (size_t i = 0; i < nc; ++i) {
-              du0[i] = (double)sc.su0[i]; du1[i] = (double)sc.su1[i]; du2[i] = (double)sc.su2[i]; dq[i] = (double)sc.sq[i];
-            }
-          }
+          if (!sc.affine_filled) sc.fill_affine_sites(ix, pa, pb, D2);
           // (a) production.
           const generate_detail::AffineSeed seed(f3s, pa, pb, sc, float_on);
           const double Jd = (double)Jb;
@@ -152,8 +144,7 @@ int main(int argc, char** argv) {
           sd.skip_x = std::numeric_limits<u32>::max();
           for (size_t i = 0; i < sc.cover.size(); ++i)
             if (sc.cover[i].u == cx.u) sd.skip_x = (u32)i;
-          const AnchorSitesSoA sites{sc.su0.data(), sc.su1.data(), sc.su2.data(), sc.sq.data(),
-                                     du0.data(), du1.data(), du2.data(), dq.data(), (u32)sc.cover.size()};
+          const AnchorSitesSoA sites{sc.su0.data(), sc.su1.data(), sc.su2.data(), sc.sq.data(), (u32)sc.cover.size()};
           Q4CoreCounters hc;
           bool hdead = q4_seed_core_shaped(sd, sites, skip_a, skip_b, (u32)h_of[2], false, &hc);
           if (m_skip_kills && hc.jung_skip > 0) {  // MUTANT de porte : les non-temoins certifies tuent

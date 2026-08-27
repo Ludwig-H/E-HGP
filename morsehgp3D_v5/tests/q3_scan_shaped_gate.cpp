@@ -56,7 +56,6 @@ int main(int argc, char** argv) {
   std::vector<CoverPoint> cover, tmp;
   u64 cnodes = 0, visits = 0;
   std::vector<i64> su0, su1, su2, sq;
-  std::vector<double> du0, du1, du2, dq;
   std::vector<BallCandidate> prod, shaped;
   for (const AliveRect& ar : alive) {
     generate_detail::corner_histograms(ix, Lane::kQ3, ar.r, &ha, &hb);
@@ -74,7 +73,6 @@ int main(int argc, char** argv) {
         // Sites affines (comme AnchorScratch::fill_affine_sites).
         const size_t nc = cover.size();
         su0.resize(nc); su1.resize(nc); su2.resize(nc); sq.resize(nc);
-        du0.resize(nc); du1.resize(nc); du2.resize(nc); dq.resize(nc);
         i64 qmax = 1, umax = 1;
         const i64 sx = pa.x + pb.x, sy = pa.y + pb.y, sz = pa.z + pb.z;
         for (size_t i = 0; i < nc; ++i) {
@@ -82,11 +80,10 @@ int main(int argc, char** argv) {
           const i64 u0 = 2 * pz.x - sx, u1 = 2 * pz.y - sy, u2 = 2 * pz.z - sz;
           const i64 qz = u0 * u0 + u1 * u1 + u2 * u2 - D2;
           su0[i] = u0; su1[i] = u1; su2[i] = u2; sq[i] = qz;
-          du0[i] = (double)u0; du1[i] = (double)u1; du2[i] = (double)u2; dq[i] = (double)qz;
           qmax = std::max(qmax, qz < 0 ? -qz : qz);
           umax = std::max({umax, u0 < 0 ? -u0 : u0, u1 < 0 ? -u1 : u1, u2 < 0 ? -u2 : u2});
         }
-        const AnchorSitesSoA sites{su0.data(), su1.data(), su2.data(), sq.data(), du0.data(), du1.data(), du2.data(), dq.data(), (u32)nc};
+        const AnchorSitesSoA sites{su0.data(), su1.data(), su2.data(), sq.data(), (u32)nc};
         for (size_t ix_c = 0; ix_c < nc; ++ix_c) {
           const CoverPoint& cp = cover[ix_c];
           if (cp.u == ua || cp.u == ub) continue;

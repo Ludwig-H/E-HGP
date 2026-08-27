@@ -36,8 +36,7 @@ struct SeedOut {
 // « >= h3 interieurs » ne depend pas de l'ordre).
 
 __global__ void k_scan(const SeedJob* jobs, unsigned njobs, const AnchorRange* anchors, const i64* u0, const i64* u1,
-                       const i64* u2, const i64* q, const double* u0d, const double* u1d, const double* u2d,
-                       const double* qd, unsigned h3, bool no_warp_correction, bool nonstrict, SeedOut* out) {
+                       const i64* u2, const i64* q, unsigned h3, bool no_warp_correction, bool nonstrict, SeedOut* out) {
   const unsigned warp = (blockIdx.x * blockDim.x + threadIdx.x) >> 5;
   const unsigned lane = threadIdx.x & 31;
   if (warp >= njobs) return;
@@ -51,8 +50,9 @@ __global__ void k_scan(const SeedJob* jobs, unsigned njobs, const AnchorRange* a
     unsigned my_n = 0, my_p = 0, my_f = 0;
     if (i < ar.count) {
       const unsigned g = ar.begin + i;
-      const double t = fma(job.seed.Nd2, u2d[g], fma(job.seed.Nd1, u1d[g], job.seed.Nd0 * u0d[g]));
-      const double lh = fma(job.seed.Gd, qd[g], -(t + t));
+      const double u0d = (double)u0[g], u1d = (double)u1[g], u2d = (double)u2[g], qd = (double)q[g];
+      const double t = fma(job.seed.Nd2, u2d, fma(job.seed.Nd1, u1d, job.seed.Nd0 * u0d));
+      const double lh = fma(job.seed.Gd, qd, -(t + t));
       if (lh < -job.seed.bound) {
         my_n = 1;
         interior = true;

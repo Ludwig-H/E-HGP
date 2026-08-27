@@ -49,7 +49,6 @@ class Q3DeviceExecutor {
     static_assert(sizeof(Q3BatchAnchor) == sizeof(AnchorRange), "layout des ancres");
     static_assert(sizeof(Q3BatchVerdict) == sizeof(SeedOut), "layout des verdicts");
     up(d_u0_, b->u0.data(), ns); up(d_u1_, b->u1.data(), ns); up(d_u2_, b->u2.data(), ns); up(d_q_, b->q.data(), ns);
-    up(d_d0_, b->u0d.data(), ns); up(d_d1_, b->u1d.data(), ns); up(d_d2_, b->u2d.data(), ns); up(d_dq_, b->qd.data(), ns);
     up(d_jobs_, reinterpret_cast<const SeedJob*>(b->seeds.data()), nj);
     up(d_anchors_, reinterpret_cast<const AnchorRange*>(b->anchors.data()), na);
     const unsigned threads = 256, wpb = threads / 32;
@@ -57,8 +56,8 @@ class Q3DeviceExecutor {
     cudaEvent_t e0, e1;
     cuda_check(cudaEventCreate(&e0), "event"); cuda_check(cudaEventCreate(&e1), "event");
     cuda_check(cudaEventRecord(e0, stream_), "record");
-    k_scan<<<blocks, threads, 0, stream_>>>(d_jobs_, (unsigned)nj, d_anchors_, d_u0_, d_u1_, d_u2_, d_q_, d_d0_, d_d1_, d_d2_,
-                                            d_dq_, h3, false, nonstrict, d_out_);
+    k_scan<<<blocks, threads, 0, stream_>>>(d_jobs_, (unsigned)nj, d_anchors_, d_u0_, d_u1_, d_u2_, d_q_, h3, false, nonstrict,
+                                            d_out_);
     cuda_check(cudaGetLastError(), "lancement k_scan");
     cuda_check(cudaEventRecord(e1, stream_), "record");
     cuda_check(cudaMemcpyAsync(b->verdicts.data(), d_out_, nj * sizeof(SeedOut), cudaMemcpyDeviceToHost, stream_), "verdicts");
@@ -73,7 +72,6 @@ class Q3DeviceExecutor {
  private:
   cudaStream_t stream_{};
   i64 *d_u0_ = nullptr, *d_u1_ = nullptr, *d_u2_ = nullptr, *d_q_ = nullptr;
-  double *d_d0_ = nullptr, *d_d1_ = nullptr, *d_d2_ = nullptr, *d_dq_ = nullptr;
   SeedJob* d_jobs_ = nullptr;
   AnchorRange* d_anchors_ = nullptr;
   SeedOut* d_out_ = nullptr;
@@ -113,17 +111,14 @@ class Q3DeviceExecutor {
       const bool gs = ns > cap_sites_, gj = nj > cap_jobs_, ga = na > cap_anchors_;
       const size_t cs = gs ? ns + ns / 2 : 0, cj = gj ? nj + nj / 2 : 0, ca = ga ? na + na / 2 : 0;
       i64 *u0 = nullptr, *u1 = nullptr, *u2 = nullptr, *q = nullptr;
-      double *d0 = nullptr, *d1 = nullptr, *d2 = nullptr, *dq = nullptr;
       SeedJob* jobs = nullptr;
       SeedOut* out = nullptr;
       AnchorRange* anchors = nullptr;
-      if (gs) { u0 = t.alloc<i64>(cs); u1 = t.alloc<i64>(cs); u2 = t.alloc<i64>(cs); q = t.alloc<i64>(cs);
-                d0 = t.alloc<double>(cs); d1 = t.alloc<double>(cs); d2 = t.alloc<double>(cs); dq = t.alloc<double>(cs); }
+      if (gs) { u0 = t.alloc<i64>(cs); u1 = t.alloc<i64>(cs); u2 = t.alloc<i64>(cs); q = t.alloc<i64>(cs); }
       if (gj) { jobs = t.alloc<SeedJob>(cj); out = t.alloc<SeedOut>(cj); }
       if (ga) { anchors = t.alloc<AnchorRange>(ca); }
       // Tout est alloue : echange.
-      if (gs) { swap_in(&d_u0_, u0); swap_in(&d_u1_, u1); swap_in(&d_u2_, u2); swap_in(&d_q_, q);
-                swap_in(&d_d0_, d0); swap_in(&d_d1_, d1); swap_in(&d_d2_, d2); swap_in(&d_dq_, dq); cap_sites_ = cs; }
+      if (gs) { swap_in(&d_u0_, u0); swap_in(&d_u1_, u1); swap_in(&d_u2_, u2); swap_in(&d_q_, q); cap_sites_ = cs; }
       if (gj) { swap_in(&d_jobs_, jobs); swap_in(&d_out_, out); cap_jobs_ = cj; }
       if (ga) { swap_in(&d_anchors_, anchors); cap_anchors_ = ca; }
       t.commit();
@@ -133,8 +128,7 @@ class Q3DeviceExecutor {
     }
   }
   void release() {
-    for (void* p : {(void*)d_u0_, (void*)d_u1_, (void*)d_u2_, (void*)d_q_, (void*)d_d0_, (void*)d_d1_, (void*)d_d2_,
-                    (void*)d_dq_, (void*)d_jobs_, (void*)d_anchors_, (void*)d_out_})
+    for (void* p : {(void*)d_u0_, (void*)d_u1_, (void*)d_u2_, (void*)d_q_, (void*)d_jobs_, (void*)d_anchors_, (void*)d_out_})
       if (p) cudaFree(p);
   }
 };

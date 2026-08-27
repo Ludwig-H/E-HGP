@@ -52,7 +52,6 @@ int main(int argc, char** argv) {
   u64 visited = 0, workers = 0;
   generate_detail::alive_rectangles(ix, 8, h_of, 2, 1, &alive, &visited, &workers);
   generate_detail::AnchorScratch sc;
-  std::vector<double> du0, du1, du2, dq;
   std::vector<i64> px_, py_, pz_;
   u64 seeds_alive = 0, core_mism = 0, pairs = 0, mism = 0;
   u64 stages[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -108,10 +107,6 @@ int main(int argc, char** argv) {
           if (!pdead) {
             if (!sc.affine_filled) {
               sc.fill_affine_sites(ix, pa, pb, D2);
-              du0.resize(nc); du1.resize(nc); du2.resize(nc); dq.resize(nc);
-              for (size_t i = 0; i < nc; ++i) {
-                du0[i] = (double)sc.su0[i]; du1[i] = (double)sc.su1[i]; du2[i] = (double)sc.su2[i]; dq[i] = (double)sc.sq[i];
-              }
             }
             const generate_detail::AffineSeed seed(f3s, pa, pb, sc, float_on);
             const double Jd = (double)Jb;
@@ -145,8 +140,7 @@ int main(int argc, char** argv) {
             sd.skip_x = std::numeric_limits<u32>::max();
             for (size_t i = 0; i < nc; ++i)
               if (sc.cover[i].u == cx.u) sd.skip_x = (u32)i;
-            const AnchorSitesSoA sites{sc.su0.data(), sc.su1.data(), sc.su2.data(), sc.sq.data(),
-                                       du0.data(), du1.data(), du2.data(), dq.data(), (u32)nc};
+            const AnchorSitesSoA sites{sc.su0.data(), sc.su1.data(), sc.su2.data(), sc.sq.data(), (u32)nc};
             Q4CoreCounters hc;
             if (q4_seed_core_shaped(sd, sites, skip_a, skip_b, (u32)h_of[2], false, &hc) != pdead) ++core_mism;
           }

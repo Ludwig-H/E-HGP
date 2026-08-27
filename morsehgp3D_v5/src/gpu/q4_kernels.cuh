@@ -29,10 +29,6 @@ struct Q4SitesDev {
   const i64* u1;
   const i64* u2;
   const i64* q;
-  const double* u0d;
-  const double* u1d;
-  const double* u2d;
-  const double* qd;
   const i64* px;
   const i64* py;
   const i64* pz;
@@ -72,7 +68,7 @@ __global__ void k_q4_core(const Q4BatchSeed* seeds, unsigned nseeds, const Q4Bat
     unsigned my_pos = 0, my_neg = 0, my_kill = 0, my_skip = 0, my_jf = 0, my_ff = 0, my_wit = 0;
     if (i < an.count && i != an.skip_a && i != an.skip_b && i != sd.core.skip_x) {
       const unsigned g = an.begin + i;
-      const double lh = q3_l_hat_shaped(sd.core.aff, S.u0d[g], S.u1d[g], S.u2d[g], S.qd[g]);
+      const double lh = q3_l_hat_shaped(sd.core.aff, (double)S.u0[g], (double)S.u1[g], (double)S.u2[g], (double)S.q[g]);
       if (lh > sd.core.aff.bound) {
         my_pos = 1;
       } else {

@@ -71,7 +71,7 @@ MHGP5_HD inline bool q4_seed_core_shaped(const SeedQ4D& s, const AnchorSitesSoA&
   const i128 J = di_to_i128_hd(s.J);
   for (u32 i = 0; i < sites.n; ++i) {
     if (i == skip_a || i == skip_b || i == s.skip_x) continue;
-    const double lh = q3_l_hat_shaped(s.aff, sites.u0d[i], sites.u1d[i], sites.u2d[i], sites.qd[i]);
+    const double lh = q3_l_hat_shaped(s.aff, (double)sites.u0[i], (double)sites.u1[i], (double)sites.u2[i], (double)sites.q[i]);
     if (lh > s.aff.bound) {
       ++c->cert_pos;
       continue;

@@ -51,14 +51,12 @@ struct Q3BatchVerdict {
 // ouvrier) ; les vecteurs sont reutilises entre lots.
 struct Q3Batch {
   std::vector<i64> u0, u1, u2, q;
-  std::vector<double> u0d, u1d, u2d, qd;
   std::vector<Q3BatchAnchor> anchors;
   std::vector<Q3BatchSeed> seeds;
   std::vector<BallCandidate> emit_if_alive;  // un par seed
   std::vector<Q3BatchVerdict> verdicts;      // rempli par l'executeur
   void clear() {
     u0.clear(); u1.clear(); u2.clear(); q.clear();
-    u0d.clear(); u1d.clear(); u2d.clear(); qd.clear();
     anchors.clear(); seeds.clear(); emit_if_alive.clear(); verdicts.clear();
   }
 };
@@ -68,27 +66,25 @@ struct Q3Batch {
 // UINT32_MAX sans allocation geante (tests/batch_contract_gate.cpp).
 struct Q3BatchView {
   size_t n_sites = 0, n_seeds = 0, n_anchors = 0, n_emit = 0, n_verdicts = 0;
-  size_t n_u1 = 0, n_u2 = 0, n_q = 0, n_u0d = 0, n_u1d = 0, n_u2d = 0, n_qd = 0;  // tailles des autres SoA
+  size_t n_u1 = 0, n_u2 = 0, n_q = 0;  // tailles des autres SoA
   const Q3BatchAnchor* anchors = nullptr;
   const Q3BatchSeed* seeds = nullptr;
 };
 inline Q3BatchView q3_batch_view(const Q3Batch& b) {
   Q3BatchView v;
   v.n_sites = b.u0.size(); v.n_u1 = b.u1.size(); v.n_u2 = b.u2.size(); v.n_q = b.q.size();
-  v.n_u0d = b.u0d.size(); v.n_u1d = b.u1d.size(); v.n_u2d = b.u2d.size(); v.n_qd = b.qd.size();
   v.n_seeds = b.seeds.size(); v.n_anchors = b.anchors.size(); v.n_emit = b.emit_if_alive.size();
   v.n_verdicts = b.verdicts.size();
   v.anchors = b.anchors.data(); v.seeds = b.seeds.data();
   return v;
 }
 // CONTRAT STRUCTUREL d'un lot q3, verifie AVANT tout scan (fail-closed :
-// false + motif) : sites < 2^32 (indices u32 des kernels), huit SoA de meme
+// false + motif) : sites < 2^32 (indices u32 des kernels), quatre SoA de meme
 // taille, tranche de chaque ancre dans les sites (begin + count <= n_sites,
 // sans debordement), ancre de chaque seed valide, un candidat par seed.
 inline bool validate_q3_batch_view(const Q3BatchView& v, std::string* why) {
   if (v.n_sites > (size_t)UINT32_MAX) { *why = "lot q3 : plus de 2^32 - 1 sites"; return false; }
-  if (v.n_u1 != v.n_sites || v.n_u2 != v.n_sites || v.n_q != v.n_sites || v.n_u0d != v.n_sites || v.n_u1d != v.n_sites ||
-      v.n_u2d != v.n_sites || v.n_qd != v.n_sites) { *why = "lot q3 : tailles SoA differentes"; return false; }
+  if (v.n_u1 != v.n_sites || v.n_u2 != v.n_sites || v.n_q != v.n_sites) { *why = "lot q3 : tailles SoA differentes"; return false; }
   if (v.n_emit != v.n_seeds) { *why = "lot q3 : un candidat par seed attendu"; return false; }
   if (v.n_anchors > (size_t)UINT32_MAX || v.n_seeds > (size_t)UINT32_MAX) { *why = "lot q3 : plus de 2^32 - 1 ancres ou seeds"; return false; }
   for (size_t a = 0; a < v.n_anchors; ++a) {
@@ -202,8 +198,6 @@ inline void build_q3_batch(const CloudIndex& ix, const AliveRect& ar, const u64 
           b->anchors.push_back(Q3BatchAnchor{begin, (u32)nc});
           for (size_t i = 0; i < nc; ++i) {
             b->u0.push_back(sc.su0[i]); b->u1.push_back(sc.su1[i]); b->u2.push_back(sc.su2[i]); b->q.push_back(sc.sq[i]);
-            b->u0d.push_back((double)sc.su0[i]); b->u1d.push_back((double)sc.su1[i]);
-            b->u2d.push_back((double)sc.su2[i]); b->qd.push_back((double)sc.sq[i]);
           }
         }
         const Q3Form f3 = q3_form(pa, pb, px);
@@ -239,8 +233,7 @@ inline void scan_q3_batch_host(Q3Batch* b, u32 h3, bool nonstrict) {
     const Q3BatchSeed& s = b->seeds[i];
     const Q3BatchAnchor& a = b->anchors[s.anchor];
     const AnchorSitesSoA sites{b->u0.data() + a.begin, b->u1.data() + a.begin, b->u2.data() + a.begin,
-                               b->q.data() + a.begin,  b->u0d.data() + a.begin, b->u1d.data() + a.begin,
-                               b->u2d.data() + a.begin, b->qd.data() + a.begin, a.count};
+                               b->q.data() + a.begin, a.count};
     Q3BatchVerdict v;
     v.dead = q3_scan_seed_shaped(s.seed, sites, h3, std::numeric_limits<u32>::max(), &v.cert_neg, &v.cert_pos,
                                  &v.fallback, nonstrict) ? 1u : 0u;

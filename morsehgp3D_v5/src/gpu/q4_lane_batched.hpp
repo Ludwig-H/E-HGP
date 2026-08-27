@@ -70,7 +70,6 @@ struct Q4StageCounts {
 struct Q4Batch {
   u64 pairs_estimate = 0;  // somme sur les ancres de (seeds x sites de lentille) : borne des paires du lot
   std::vector<i64> u0, u1, u2, q;
-  std::vector<double> u0d, u1d, u2d, qd;
   std::vector<i64> px, py, pz;
   std::vector<PointId> pid;
   std::vector<u32> lens_sites;
@@ -82,7 +81,6 @@ struct Q4Batch {
   void clear() {
     pairs_estimate = 0;
     u0.clear(); u1.clear(); u2.clear(); q.clear();
-    u0d.clear(); u1d.clear(); u2d.clear(); qd.clear();
     px.clear(); py.clear(); pz.clear(); pid.clear();
     lens_sites.clear(); anchors.clear(); seeds.clear(); verdicts.clear(); emits.clear();
     stages = Q4StageCounts{};
@@ -90,7 +88,7 @@ struct Q4Batch {
 };
 
 // VUE et CONTRAT STRUCTUREL d'un lot q4 (verifies avant tout scan et avant
-// toute emission ; fail-closed) : sites < 2^32, douze SoA de meme taille,
+// toute emission ; fail-closed) : sites < 2^32, huit SoA de meme taille,
 // indices de lentille dans les sites, tranches d'ancres (sites et lentille)
 // dans les tableaux, ancre de chaque seed valide et x_site dans la tranche,
 // skip_a/skip_b dans la tranche ou UINT32_MAX ; apres scan : un verdict par
@@ -98,7 +96,7 @@ struct Q4Batch {
 // distinctes, issues de seeds vivants, y_site dans la tranche.
 struct Q4BatchView {
   size_t n_sites = 0, n_lens = 0, n_anchors = 0, n_seeds = 0, n_verdicts = 0, n_emits = 0;
-  size_t soa_sizes[11] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};  // u1,u2,q,u0d,u1d,u2d,qd,px,py,pz,pid
+  size_t soa_sizes[7] = {0, 0, 0, 0, 0, 0, 0};  // u1,u2,q,px,py,pz,pid
   const u32* lens_sites = nullptr;
   const Q4BatchAnchor* anchors = nullptr;
   const Q4BatchSeed* seeds = nullptr;
@@ -109,16 +107,15 @@ inline Q4BatchView q4_batch_view(const Q4Batch& b) {
   Q4BatchView v;
   v.n_sites = b.u0.size(); v.n_lens = b.lens_sites.size(); v.n_anchors = b.anchors.size(); v.n_seeds = b.seeds.size();
   v.n_verdicts = b.verdicts.size(); v.n_emits = b.emits.size();
-  const size_t sz[11] = {b.u1.size(), b.u2.size(), b.q.size(), b.u0d.size(), b.u1d.size(), b.u2d.size(), b.qd.size(),
-                         b.px.size(), b.py.size(), b.pz.size(), b.pid.size()};
-  for (int i = 0; i < 11; ++i) v.soa_sizes[i] = sz[i];
+  const size_t sz[7] = {b.u1.size(), b.u2.size(), b.q.size(), b.px.size(), b.py.size(), b.pz.size(), b.pid.size()};
+  for (int i = 0; i < 7; ++i) v.soa_sizes[i] = sz[i];
   v.lens_sites = b.lens_sites.data(); v.anchors = b.anchors.data(); v.seeds = b.seeds.data();
   v.verdicts = b.verdicts.data(); v.emits = b.emits.data();
   return v;
 }
 inline bool validate_q4_batch_view(const Q4BatchView& v, std::string* why) {
   if (v.n_sites > (size_t)UINT32_MAX) { *why = "lot q4 : plus de 2^32 - 1 sites"; return false; }
-  for (int i = 0; i < 11; ++i)
+  for (int i = 0; i < 7; ++i)
     if (v.soa_sizes[i] != v.n_sites) { *why = "lot q4 : tailles SoA differentes"; return false; }
   if (v.n_lens > (size_t)UINT32_MAX || v.n_anchors > (size_t)UINT32_MAX || v.n_seeds > (size_t)UINT32_MAX) {
     *why = "lot q4 : plus de 2^32 - 1 indices de lentille, ancres ou seeds"; return false;
@@ -231,8 +228,6 @@ inline void build_q4_batch(const CloudIndex& ix, const AliveRect& ar, const u64 
         const CoverPoint& cz = sc.cover[i];
         const P3& p = ix.upos[(size_t)cz.u];
         b->u0.push_back(sc.su0[i]); b->u1.push_back(sc.su1[i]); b->u2.push_back(sc.su2[i]); b->q.push_back(sc.sq[i]);
-        b->u0d.push_back((double)sc.su0[i]); b->u1d.push_back((double)sc.su1[i]);
-        b->u2d.push_back((double)sc.su2[i]); b->qd.push_back((double)sc.sq[i]);
         b->px.push_back(p.x); b->py.push_back(p.y); b->pz.push_back(p.z);
         b->pid.push_back(ix.point_id(cz.u));
         if (cz.u == ua) an.skip_a = (u32)i;
@@ -298,8 +293,7 @@ inline void scan_q4_batch_host(Q4Batch* b, u32 h4, bool core_nonstrict, bool dep
       continue;
     }
     const AnchorSitesSoA sites{b->u0.data() + an.begin, b->u1.data() + an.begin, b->u2.data() + an.begin,
-                               b->q.data() + an.begin,  b->u0d.data() + an.begin, b->u1d.data() + an.begin,
-                               b->u2d.data() + an.begin, b->qd.data() + an.begin, an.count};
+                               b->q.data() + an.begin, an.count};
     v.dead = q4_seed_core_shaped(s.core, sites, an.skip_a, an.skip_b, h4, core_nonstrict, &v.c) ? 1u : 0u;
     if (v.dead) continue;
     const AnchorPositionsSoA pos{b->px.data() + an.begin, b->py.data() + an.begin, b->pz.data() + an.begin, an.count};

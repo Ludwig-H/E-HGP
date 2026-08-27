@@ -168,7 +168,6 @@ int main(int argc, char** argv) {
     u64 visited = 0, workers = 0;
     generate_detail::alive_rectangles(ix, 8, h_of, 1, 1, &alive, &visited, &workers);
     std::vector<i64> U0, U1, U2, Q;
-    std::vector<double> F0, F1, F2, FQ;
     std::vector<AnchorRange> ranges;
     std::vector<SeedJob> jobs;
     std::vector<SeedOut> host;
@@ -197,14 +196,12 @@ int main(int argc, char** argv) {
             const i64 u0 = 2 * pz.x - sx, u1 = 2 * pz.y - sy, u2 = 2 * pz.z - sz;
             const i64 qz = u0 * u0 + u1 * u1 + u2 * u2 - D2;
             U0.push_back(u0); U1.push_back(u1); U2.push_back(u2); Q.push_back(qz);
-            F0.push_back((double)u0); F1.push_back((double)u1); F2.push_back((double)u2); FQ.push_back((double)qz);
             qmax = std::max(qmax, qz < 0 ? -qz : qz);
             umax = std::max({umax, u0 < 0 ? -u0 : u0, u1 < 0 ? -u1 : u1, u2 < 0 ? -u2 : u2});
           }
           const unsigned aidx = (unsigned)ranges.size();
           ranges.push_back(AnchorRange{begin, (unsigned)cover.size()});
           const AnchorSitesSoA sites{U0.data() + begin, U1.data() + begin, U2.data() + begin, Q.data() + begin,
-                                     F0.data() + begin, F1.data() + begin, F2.data() + begin, FQ.data() + begin,
                                      (u32)cover.size()};
           for (const CoverPoint& cp : cover) {
             if (cp.u == ua || cp.u == ub) continue;
@@ -234,14 +231,12 @@ int main(int argc, char** argv) {
       std::fprintf(stderr, "PLANCHER : %u seeds\n", njobs);
       return 3;
     }
-    SeedJob* d_jobs; AnchorRange* d_ranges; i64 *d_u0, *d_u1, *d_u2, *d_q; double *d_d0, *d_d1, *d_d2, *d_dq; SeedOut* d_out;
+    SeedJob* d_jobs; AnchorRange* d_ranges; i64 *d_u0, *d_u1, *d_u2, *d_q; SeedOut* d_out;
     const size_t ns = U0.size();
     CUDA_OK(cudaMalloc(&d_jobs, njobs * sizeof(SeedJob)));
     CUDA_OK(cudaMalloc(&d_ranges, ranges.size() * sizeof(AnchorRange)));
     CUDA_OK(cudaMalloc(&d_u0, ns * sizeof(i64))); CUDA_OK(cudaMalloc(&d_u1, ns * sizeof(i64)));
     CUDA_OK(cudaMalloc(&d_u2, ns * sizeof(i64))); CUDA_OK(cudaMalloc(&d_q, ns * sizeof(i64)));
-    CUDA_OK(cudaMalloc(&d_d0, ns * sizeof(double))); CUDA_OK(cudaMalloc(&d_d1, ns * sizeof(double)));
-    CUDA_OK(cudaMalloc(&d_d2, ns * sizeof(double))); CUDA_OK(cudaMalloc(&d_dq, ns * sizeof(double)));
     CUDA_OK(cudaMalloc(&d_out, njobs * sizeof(SeedOut)));
     CUDA_OK(cudaMemcpy(d_jobs, jobs.data(), njobs * sizeof(SeedJob), cudaMemcpyHostToDevice));
     CUDA_OK(cudaMemcpy(d_ranges, ranges.data(), ranges.size() * sizeof(AnchorRange), cudaMemcpyHostToDevice));
@@ -249,16 +244,12 @@ int main(int argc, char** argv) {
     CUDA_OK(cudaMemcpy(d_u1, U1.data(), ns * sizeof(i64), cudaMemcpyHostToDevice));
     CUDA_OK(cudaMemcpy(d_u2, U2.data(), ns * sizeof(i64), cudaMemcpyHostToDevice));
     CUDA_OK(cudaMemcpy(d_q, Q.data(), ns * sizeof(i64), cudaMemcpyHostToDevice));
-    CUDA_OK(cudaMemcpy(d_d0, F0.data(), ns * sizeof(double), cudaMemcpyHostToDevice));
-    CUDA_OK(cudaMemcpy(d_d1, F1.data(), ns * sizeof(double), cudaMemcpyHostToDevice));
-    CUDA_OK(cudaMemcpy(d_d2, F2.data(), ns * sizeof(double), cudaMemcpyHostToDevice));
-    CUDA_OK(cudaMemcpy(d_dq, FQ.data(), ns * sizeof(double), cudaMemcpyHostToDevice));
     const unsigned threads = 256, warps_per_block = threads / 32;
     cudaEvent_t e0, e1;
     cudaEventCreate(&e0); cudaEventCreate(&e1);
     cudaEventRecord(e0);
     k_scan<<<(njobs + warps_per_block - 1) / warps_per_block, threads>>>(d_jobs, njobs, d_ranges, d_u0, d_u1, d_u2, d_q,
-                                                                          d_d0, d_d1, d_d2, d_dq, (unsigned)h_of[1], m_warp, false, d_out);
+                                                                          (unsigned)h_of[1], m_warp, false, d_out);
     CUDA_OK(cudaGetLastError());
     cudaEventRecord(e1);
     CUDA_OK(cudaDeviceSynchronize());
@@ -267,7 +258,7 @@ int main(int argc, char** argv) {
     std::vector<SeedOut> dev(njobs);
     CUDA_OK(cudaMemcpy(dev.data(), d_out, njobs * sizeof(SeedOut), cudaMemcpyDeviceToHost));
     cudaFree(d_jobs); cudaFree(d_ranges); cudaFree(d_u0); cudaFree(d_u1); cudaFree(d_u2); cudaFree(d_q);
-    cudaFree(d_d0); cudaFree(d_d1); cudaFree(d_d2); cudaFree(d_dq); cudaFree(d_out);
+    cudaFree(d_out);
     unsigned mism = 0, dead = 0;
     for (unsigned i = 0; i < njobs; ++i) {
       // Verdict ET compteurs de certification pour TOUTES les seeds, mortes

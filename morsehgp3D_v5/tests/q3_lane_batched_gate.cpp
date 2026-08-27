@@ -23,6 +23,7 @@ int main(int argc, char** argv) {
   int n = 400, coord = 0, threads = 1;
   BatchLimits lim;
   u64 min_flushes = 1;
+  bool scan_noop = false;
   BatchStats bs;
   u64 min_candidates = 1000, min_killed = 10, min_fallback = 10;
   std::string inject;
@@ -49,6 +50,7 @@ int main(int argc, char** argv) {
       if (v < 1) return 2;
       lim.sites = (size_t)v;
     } else if (arg.rfind("--min-flushes=", 0) == 0) min_flushes = (u64)std::atoll(arg.c_str() + 14);
+    else if (arg == "--scan-noop") scan_noop = true;  // MESURE seulement : executeur vide (tout vivant) — desaccords attendus, code 1
     else return 2;
   }
   if (!inject.empty() && !mutants_enable(inject)) return 2;
@@ -64,7 +66,10 @@ int main(int argc, char** argv) {
   generate_candidates(ix, opt, &prod_all, &sp);
   for (const BallCandidate& c : prod_all)
     if (c.arity == 3) prod.push_back(c);
-  generate_q3_batched(ix, opt, &batched, &sb, lim, &bs);
+  if (scan_noop)
+    generate_q3_batched_with(ix, opt, &batched, &sb, [](Q3Batch* b, u32, bool) { b->verdicts.assign(b->seeds.size(), Q3BatchVerdict{}); }, lim, &bs);
+  else
+    generate_q3_batched(ix, opt, &batched, &sb, lim, &bs);
   // Compteurs de la lane q3 seule : la production cumule q2/q4 aussi, on ne
   // compare que les champs de la lane q3 ; les certifications flottantes de la
   // production incluent q4 (jung_*) separement, float_* est q3 seulement.
@@ -116,6 +121,8 @@ int main(int argc, char** argv) {
                 (unsigned long long)bs.flushes, (unsigned long long)min_flushes);
     return 1;
   }
+  // Mesure (jamais un claim) : temps des rectangles de la lane, production vs lots.
+  std::printf("temps_prod_ms=%.1f temps_lots_ms=%.1f (rectangles de la lane, cumul des ouvriers)\n", sp.t_rects_ms[1], sb.t_rects_ms[1]);
   if (vec_mism || bad) return mutant ? 4 : 1;
   if (mutant) {
     std::printf("MUTANT NON TUE\n");

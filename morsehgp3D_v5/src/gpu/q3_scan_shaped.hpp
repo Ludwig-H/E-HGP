@@ -29,15 +29,15 @@
 namespace mhgp5 {
 
 // Sites affines de l'ancre, en structure de tableaux (SoA : le layout device).
+// Les copies double ne sont PAS stockees : |u| < 2^18 et |q| < 2^36 sont
+// exactement representables, la conversion (double) est deterministe et
+// identique sur host et device — elle se fait a la volee (moitie moins de
+// memoire et de transferts par site).
 struct AnchorSitesSoA {
   const i64* u0;
   const i64* u1;
   const i64* u2;
   const i64* q;
-  const double* u0d;
-  const double* u1d;
-  const double* u2d;
-  const double* qd;
   u32 n;
 };
 
@@ -74,7 +74,7 @@ MHGP5_HD inline bool q3_scan_seed_shaped(const SeedAffineD& s, const AnchorSites
   u32 depth = 0;
   for (u32 i = 0; i < sites.n; ++i) {
     if (i == skip) continue;
-    const double lh = q3_l_hat_shaped(s, sites.u0d[i], sites.u1d[i], sites.u2d[i], sites.qd[i]);
+    const double lh = q3_l_hat_shaped(s, (double)sites.u0[i], (double)sites.u1[i], (double)sites.u2[i], (double)sites.q[i]);
     bool interior;
     if (lh < -s.bound) {
       ++*cert_neg;

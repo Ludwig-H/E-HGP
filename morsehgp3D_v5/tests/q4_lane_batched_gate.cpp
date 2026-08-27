@@ -138,6 +138,8 @@ int main(int argc, char** argv) {
                 (unsigned long long)bs.flushes, (unsigned long long)min_flushes);
     return 1;
   }
+  // Mesure (jamais un claim) : temps des rectangles de la lane, production vs lots.
+  std::printf("temps_prod_ms=%.1f temps_lots_ms=%.1f (rectangles de la lane, cumul des ouvriers)\n", sp.t_rects_ms[2], sb.t_rects_ms[2]);
   if (vec_mism || bad) return mutant ? 4 : 1;
   if (mutant) { std::printf("MUTANT NON TUE\n"); return 1; }
   return 0;

@@ -44,7 +44,6 @@ Q3Batch minimal3() {
   Q3Batch b;
   for (int i = 0; i < 3; ++i) {
     b.u0.push_back(i); b.u1.push_back(i); b.u2.push_back(i); b.q.push_back(i);
-    b.u0d.push_back(i); b.u1d.push_back(i); b.u2d.push_back(i); b.qd.push_back(i);
   }
   b.anchors.push_back(Q3BatchAnchor{0, 3});
   Q3BatchSeed s{};
@@ -58,7 +57,6 @@ Q4Batch minimal4() {
   Q4Batch b;
   for (int i = 0; i < 3; ++i) {
     b.u0.push_back(i); b.u1.push_back(i); b.u2.push_back(i); b.q.push_back(i);
-    b.u0d.push_back(i); b.u1d.push_back(i); b.u2d.push_back(i); b.qd.push_back(i);
     b.px.push_back(i); b.py.push_back(i); b.pz.push_back(i); b.pid.push_back((PointId)i);
   }
   b.lens_sites = {0, 1, 2};
@@ -83,7 +81,7 @@ int main() {
     Q3Batch e;
     expect(validate_q3_batch(e, &why), "q3 lot vide valide");
   }
-  { Q3Batch b = minimal3(); b.qd.pop_back(); std::string w; expect(!validate_q3_batch(b, &w), "q3 SoA tronquee refusee"); }
+  { Q3Batch b = minimal3(); b.q.pop_back(); std::string w; expect(!validate_q3_batch(b, &w), "q3 SoA tronquee refusee"); }
   { Q3Batch b = minimal3(); b.anchors[0].count = 4; std::string w; expect(!validate_q3_batch(b, &w), "q3 tranche debordante refusee"); }
   { Q3Batch b = minimal3(); b.anchors[0].begin = 2; b.anchors[0].count = 2; std::string w; expect(!validate_q3_batch(b, &w), "q3 tranche (begin+count) debordante refusee"); }
   { Q3Batch b = minimal3(); b.seeds[0].anchor = 1; std::string w; expect(!validate_q3_batch(b, &w), "q3 ancre de seed invalide refusee"); }
@@ -92,12 +90,12 @@ int main() {
     // Limite UINT32_MAX par vue synthetique : 2^32 sites annonces, aucune allocation.
     Q3BatchView v;
     v.n_sites = (size_t)UINT32_MAX + 1;
-    v.n_u1 = v.n_u2 = v.n_q = v.n_u0d = v.n_u1d = v.n_u2d = v.n_qd = v.n_sites;
+    v.n_u1 = v.n_u2 = v.n_q = v.n_sites;
     expect_reject3(v, "q3 2^32 sites refuses (vue synthetique)");
     Q3BatchAnchor an{UINT32_MAX, 1};
     Q3BatchView w;
     w.n_sites = (size_t)UINT32_MAX;
-    w.n_u1 = w.n_u2 = w.n_q = w.n_u0d = w.n_u1d = w.n_u2d = w.n_qd = w.n_sites;
+    w.n_u1 = w.n_u2 = w.n_q = w.n_sites;
     w.n_anchors = 1; w.anchors = &an;
     expect_reject3(w, "q3 begin + count = 2^32 refuse sans debordement");
   }
@@ -131,7 +129,7 @@ int main() {
   {
     Q4BatchView v;
     v.n_sites = (size_t)UINT32_MAX + 1;
-    for (int i = 0; i < 11; ++i) v.soa_sizes[i] = v.n_sites;
+    for (int i = 0; i < 7; ++i) v.soa_sizes[i] = v.n_sites;
     expect_reject4(v, "q4 2^32 sites refuses (vue synthetique)");
   }
   {

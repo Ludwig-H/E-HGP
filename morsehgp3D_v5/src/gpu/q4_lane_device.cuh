@@ -47,12 +47,11 @@ class Q4DeviceExecutor {
     reserve_sites(ns, nl);
     reserve_seeds(nsd, na);
     up(d_u0_, b->u0.data(), ns); up(d_u1_, b->u1.data(), ns); up(d_u2_, b->u2.data(), ns); up(d_q_, b->q.data(), ns);
-    up(d_d0_, b->u0d.data(), ns); up(d_d1_, b->u1d.data(), ns); up(d_d2_, b->u2d.data(), ns); up(d_dq_, b->qd.data(), ns);
     up(d_px_, b->px.data(), ns); up(d_py_, b->py.data(), ns); up(d_pz_, b->pz.data(), ns); up(d_pid_, b->pid.data(), ns);
     if (nl) up(d_lens_, b->lens_sites.data(), nl);
     up(d_seeds_, b->seeds.data(), nsd);
     up(d_anchors_, b->anchors.data(), na);
-    const Q4SitesDev S{d_u0_, d_u1_, d_u2_, d_q_, d_d0_, d_d1_, d_d2_, d_dq_, d_px_, d_py_, d_pz_, d_pid_, d_lens_};
+    const Q4SitesDev S{d_u0_, d_u1_, d_u2_, d_q_, d_px_, d_py_, d_pz_, d_pid_, d_lens_};
     cudaEvent_t e0, e1;
     cuda_check(cudaEventCreate(&e0), "event"); cuda_check(cudaEventCreate(&e1), "event");
     cuda_check(cudaEventRecord(e0, stream_), "record");
@@ -149,7 +148,6 @@ class Q4DeviceExecutor {
  private:
   cudaStream_t stream_{};
   i64 *d_u0_ = nullptr, *d_u1_ = nullptr, *d_u2_ = nullptr, *d_q_ = nullptr, *d_px_ = nullptr, *d_py_ = nullptr, *d_pz_ = nullptr;
-  double *d_d0_ = nullptr, *d_d1_ = nullptr, *d_d2_ = nullptr, *d_dq_ = nullptr;
   PointId* d_pid_ = nullptr;
   u32* d_lens_ = nullptr;
   Q4BatchSeed* d_seeds_ = nullptr;
@@ -195,15 +193,12 @@ class Q4DeviceExecutor {
       const bool gs = ns > cap_sites_, gl = nl > cap_lens_;
       const size_t cs = gs ? ns + ns / 2 : 0, cl = gl ? nl + nl / 2 : 0;
       i64 *u0 = nullptr, *u1 = nullptr, *u2 = nullptr, *q = nullptr, *px = nullptr, *py = nullptr, *pz = nullptr;
-      double *d0 = nullptr, *d1 = nullptr, *d2 = nullptr, *dq = nullptr;
       PointId* pid = nullptr;
       u32* lens = nullptr;
       if (gs) { u0 = t.alloc<i64>(cs); u1 = t.alloc<i64>(cs); u2 = t.alloc<i64>(cs); q = t.alloc<i64>(cs);
-                d0 = t.alloc<double>(cs); d1 = t.alloc<double>(cs); d2 = t.alloc<double>(cs); dq = t.alloc<double>(cs);
                 px = t.alloc<i64>(cs); py = t.alloc<i64>(cs); pz = t.alloc<i64>(cs); pid = t.alloc<PointId>(cs); }
       if (gl) lens = t.alloc<u32>(cl);
       if (gs) { swap_in(&d_u0_, u0); swap_in(&d_u1_, u1); swap_in(&d_u2_, u2); swap_in(&d_q_, q);
-                swap_in(&d_d0_, d0); swap_in(&d_d1_, d1); swap_in(&d_d2_, d2); swap_in(&d_dq_, dq);
                 swap_in(&d_px_, px); swap_in(&d_py_, py); swap_in(&d_pz_, pz); swap_in(&d_pid_, pid); cap_sites_ = cs; }
       if (gl) { swap_in(&d_lens_, lens); cap_lens_ = cl; }
       t.commit();
@@ -250,8 +245,7 @@ class Q4DeviceExecutor {
     } catch (...) { broken_ = true; throw; }
   }
   void release() {
-    for (void* p : {(void*)d_u0_, (void*)d_u1_, (void*)d_u2_, (void*)d_q_, (void*)d_d0_, (void*)d_d1_, (void*)d_d2_,
-                    (void*)d_dq_, (void*)d_px_, (void*)d_py_, (void*)d_pz_, (void*)d_pid_, (void*)d_lens_, (void*)d_seeds_,
+    for (void* p : {(void*)d_u0_, (void*)d_u1_, (void*)d_u2_, (void*)d_q_, (void*)d_px_, (void*)d_py_, (void*)d_pz_, (void*)d_pid_, (void*)d_lens_, (void*)d_seeds_,
                     (void*)d_anchors_, (void*)d_verdicts_, (void*)d_alive_, (void*)d_pair_off_, (void*)d_stage_,
                     (void*)d_deep_, (void*)d_cand_})
       if (p) cudaFree(p);
