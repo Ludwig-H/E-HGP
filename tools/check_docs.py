@@ -94,6 +94,10 @@ def validate(path: Path) -> list[str]:
 
         if line.endswith((" ", "\t")):
             errors.append(f"{relative}:{number}: trailing whitespace")
+        # Tabulations et caracteres de controle : une commande LaTeX ecrite via un
+        # echappement (\t -> TAB, \r -> CR) serait amputee silencieusement.
+        if "\t" in line or any(ord(ch) < 32 for ch in line):
+            errors.append(f"{relative}:{number}: tabulation ou caractere de controle (commande LaTeX amputee ?)")
 
         lint_line = INLINE_CODE.sub("", line)
         dollar_blocks = lint_line.count("$$")
