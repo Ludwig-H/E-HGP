@@ -1,0 +1,35 @@
+# Campagne de conformite v4 ≡ v5 — manifeste
+date_utc=2026-08-27T15:18:13.963205Z
+pin=50fee05c9b011ff4972d646027cd75bbb94f2d59
+worktree_v5_modifie=oui
+binaire=/workspaces/E-HGP/build/v5/mhgp5_conformity_v4
+sha256_binaire=013cf696f8a08ef9aa2a56903351013d831cc98d60ba2b1fa93ffe20d5e6b473
+sha256_recu=dc6e1d8a3eb18538b70d53f9488e1d11ccf0288e352d9f7ed4120258fef30249
+compilateur=c++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+cmake=cmake version 3.28.3
+machine=8 vCPU, 31 Go
+commande=mhgp5_conformity_v4 --receipt=<recu> --family=<f> --n=<n> --threads=8
+
+# fichiers v5 modifies dans le worktree :
+#   D morsehgp3D_v5/audits/AUDIT_BLOQUANT_87E915BD_SECURITE_CONFORMITE_PREUVES_20260827.md
+#    M morsehgp3D_v5/audits/ETAT_COURANT.md
+#    D morsehgp3D_v5/audits/NOTE_CLAUDE_CAMPAGNE_LOCALE_32000_20260827.md
+#    D morsehgp3D_v5/audits/NOTE_CLAUDE_FOLD_PARALLELE_20260827.md
+#    D morsehgp3D_v5/audits/NOTE_CLAUDE_SESSION_G4_50K_20260827.md
+#    M morsehgp3D_v5/audits/README.md
+#    D morsehgp3D_v5/audits/REPONSE_CLAUDE_87E915BD_AUDIT_BLOQUANT_20260827.md
+#   ?? morsehgp3D_v5/audits/REPONSE_A_CLAUDE_APPLICATIONS_VERTICALES_20260827.md
+
+# famille n code wall_s maxrss_kb digest_balls digest_all boules_uniques evenements conformite
+uniform 8000 0 40.4 2867028 c2e4b8b1d5dc2aa2d0046ba55f1d28f96a16becdb4f46b23a7c37598e7778666 f57157901b2a20282f5c418e48a376f3e33dab0047328020eb3f9846408974c7 3134427 3126158 egal/egal
+terrain 8000 0 6.9 2867028 8143e0592234f4c83f2f1f74203fd62a7d827e6badb06ae8baea0ef49fc6e3f9 7edc25dd80efc10334ba0a4a48def573fadad0b429fe424bd4194283f9282db3 601714 605870 egal/egal
+eight_clusters 8000 0 102.5 2867028 42a78b0cd4dded811daad3d8a6184271cf4547bd00608126b41c518625a81bb8 24674b8ffd83a8ced191bda8e80f58cfa10abe4af0732e8627a9327b1705a2d5 2723973 2658325 egal/egal
+scanline_single_pass 8000 0 8.0 2867028 942826ce1ca346160dc8b4ecec043911bc7789b39f8d6fb290ad3cb407940b3e 35ff98f818e1b021770f110c2058432ee4cd20d51ebe0ecd7f9b940b7be27209 588737 649646 egal/egal
+uniform 16000 0 107.9 5700488 5dc37edac743299b1575b4f023aac41cdc86bbd15048f6d1c6201378197f3f86 a35efb4cbe0f2978c6d907aede72fe7daefbbd0bf947bfad08e9cf2a7da3aaa9 6571550 6554724 egal/egal
+terrain 16000 0 19.6 5700488 c71da406d60636072101ad32690b7a8dc533367a4fd14335953aa371d209604b d3884a36cee16fd0702a58a1358433b41d3b08fa7587ff85eb38f5ad68986c7f 1235242 1238757 egal/egal
+eight_clusters 16000 0 391.5 5700488 956a167092ee30edc2a1e1da4d4ad21f15f40cc17bf645907cce24032333ebec 3541bfbcee9de8e1edbe3c7330109feb1d075c4c50cd961cfec81c01d498156d 5918250 5744440 egal/egal
+scanline_single_pass 16000 0 26.2 5700488 6aebb377cb6abd3b88c8bcde3908f62addf9c35facbe57bdbaf3d01284e99d8c 3ffb912b0976bbe9dce91ade357d6447209216912d0f351805982353dc1a0dcd 1184025 1298711 egal/egal
+uniform 32000 0 173.1 10509408 cad2fbce46786afef9316c079da83d8ee89dfcb2187b17f3be38b8107cbdc6d9 c3bb0ce9fce63c2bbde42ca5897713f427be88c464014a75a3441eb62d2dec57 13603587 13559848 egal/egal
+terrain 32000 0 59.8 10509408 35b2ca3dfd977bbd19af44e5edb8cf8f722335eda46edaceca1468f1fcd7df03 67a088549d762aa92dd7c0e0cc0ecd4a20befbd2915cbb707af9706831bb078b 2515409 2513238 egal/egal
+eight_clusters 32000 0 1065.5 10509408 7d46cd5546ce625470977835fde16f0e7dd0ace68c2450eee53b1ab01c2af496 0143c1748825202b4f0356e0b6321a78db3558f168247f33c6a44ecfc5e7bc03 12659104 12224972 egal/egal
+scanline_single_pass 32000 0 117.3 10509408 b1de9555a5cbee9444af659937e441c78000b4e28dfcb3edf3551e9b761b2afe 2bc14286dfa575adec3b2b1d4546de6d10426e965a25a28d237349f4cf052a2f 2392854 2561111 egal/egal
