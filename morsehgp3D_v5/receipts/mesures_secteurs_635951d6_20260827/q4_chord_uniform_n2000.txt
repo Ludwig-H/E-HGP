@@ -1,0 +1,5 @@
+q4_chord_probe famille=uniform n=2000 ancres_vivantes=143591 seeds=2380005 vivants_apres_cœur=1055673 (44.4 %) completions_vivantes=29937250 emis=297609
+  K=2 : seeds vivants tues 489050 (46.3 % des vivants), completions evitees 18896058 (63.1 % des completions vivantes)
+  K=4 : seeds vivants tues 610736 (57.9 % des vivants), completions evitees 22402092 (74.8 % des completions vivantes)
+  K=8 : seeds vivants tues 663566 (62.9 % des vivants), completions evitees 23788707 (79.5 % des completions vivantes)
+  FAUX POSITIFS (seed tue par morceaux avec une boule emise) = 0

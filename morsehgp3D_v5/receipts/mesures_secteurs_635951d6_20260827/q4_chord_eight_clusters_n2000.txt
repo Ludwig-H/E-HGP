@@ -1,0 +1,5 @@
+q4_chord_probe famille=eight_clusters n=2000 ancres_vivantes=137908 seeds=3594931 vivants_apres_cœur=1010299 (28.1 %) completions_vivantes=55939185 emis=217400
+  K=2 : seeds vivants tues 513101 (50.8 % des vivants), completions evitees 40651658 (72.7 % des completions vivantes)
+  K=4 : seeds vivants tues 623567 (61.7 % des vivants), completions evitees 46139893 (82.5 % des completions vivantes)
+  K=8 : seeds vivants tues 674779 (66.8 % des vivants), completions evitees 48554367 (86.8 % des completions vivantes)
+  FAUX POSITIFS (seed tue par morceaux avec une boule emise) = 0

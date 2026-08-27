@@ -307,6 +307,7 @@ mhgp5_gate(mhgp5_parallel_exception 0 mhgp5_parallel_exception_gate "")
 
 # Lane q3 par lots (etage hote de la lane device) : egalite vecteur a vecteur avec la production.
 # Sonde de mesure (jamais un claim) pour la lane par rectangle : tailles aplaties par rectangle, quantiles.
+mhgp5_executable(mhgp5_q4_chord_probe bench/q4_chord_probe.cpp)
 mhgp5_executable(mhgp5_rect_probe bench/rect_probe.cpp)
 execute_process(COMMAND git rev-parse HEAD WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} OUTPUT_VARIABLE _mhgp5_probe_pin OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_QUIET)
 execute_process(COMMAND git status --porcelain -- src bench tests CMakeLists.txt WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} OUTPUT_VARIABLE _mhgp5_probe_dirty OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_QUIET)

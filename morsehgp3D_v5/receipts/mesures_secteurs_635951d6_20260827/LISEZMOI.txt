@@ -14,3 +14,8 @@
 #   scanline_single_pass q3 : 29,5 % / 65,3 % ; 34,3 % / 76,2 %.   q4 : 6,6 % / 16,3 % ; 8,8 % / 25,4 %.
 #   Candidat de rectangle (points des handles) vs somme des covers d'ancres (cardinalites) : uniform 0,50, eight_clusters 6,9-10,
 #   scanline 2,2-3,5 ; ancres vivantes par rectangle 1,2-3,7.
+# q4_chord_*.txt (sonde bench/q4_chord_probe.cpp, meme pin, n=2000 seulement — la sonde exacte est lente) : test de SEED q4 par
+# morceaux de corde (les centres des boules d'un seed forment une corde du plan bissecteur ; un site est interieur ssi
+# P − μB < 0, affine en μ ; morceaux a bornes entieres sur-approximantes ; seed mort si chaque morceau compte >= h4 temoins).
+# Seeds vivants apres le cœur de Jung tues : eight_clusters K=2 50,8 % / K=4 61,7 % / K=8 66,8 % (completions evitees 72,7 /
+# 82,5 / 86,8 %) ; uniform K=4 57,9 % (74,8 %) ; FAUX POSITIFS (seed tue ayant une boule emise) = 0 partout.

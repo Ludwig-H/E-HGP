@@ -1,0 +1,5 @@
+q4_chord_probe famille=scanline_single_pass n=2000 ancres_vivantes=75695 seeds=855622 vivants_apres_cœur=177409 (20.7 %) completions_vivantes=4967170 emis=15219
+  K=2 : seeds vivants tues 44151 (24.9 % des vivants), completions evitees 2249776 (45.3 % des completions vivantes)
+  K=4 : seeds vivants tues 61900 (34.9 % des vivants), completions evitees 3015470 (60.7 % des completions vivantes)
+  K=8 : seeds vivants tues 69243 (39.0 % des vivants), completions evitees 3303390 (66.5 % des completions vivantes)
+  FAUX POSITIFS (seed tue par morceaux avec une boule emise) = 0
