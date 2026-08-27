@@ -162,8 +162,7 @@ comme contrat pour la future livraison de la tour :
   complet des intersections de témoins. Si le produit ne parcourt que les
   cofaces élémentaires, on invoque séparément l'égalité des composantes
   $H_0$ ; cela n'autorise pas à identifier les adjacences.
-- **État fermé, jamais « juste avant ».** À $r = 
-ho(\sigma)$, les facettes
+- **État fermé, jamais « juste avant ».** À $r = \rho(\sigma)$, les facettes
   de $\sigma$ peuvent encore être réparties entre plusieurs composantes de
   $\Gamma_K$ dans l'état strictement antérieur ; avec des niveaux ex æquo,
   aucun ordre interne au plateau n'est canonique. La valeur verticale est
