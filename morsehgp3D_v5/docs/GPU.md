@@ -108,8 +108,30 @@ en blocs.
    `q4-shaped-once-flip`, `q4-batched-emit-deep`. Reste : l'exécuteur device
    q4 (kernel cœur warp-par-seed ; complétions thread-par-paire avec
    compaction ; profondeur warp-par-candidat) et sa porte sur G4.
-5. **Lotissement et mesure** : regrouper les rectangles d'un ouvrier en lots
-   de plusieurs dizaines de milliers de seeds par lancement (l'ordre
-   d'émission est préservé : un ouvrier traite ses rectangles en séquence),
-   flux asynchrone, puis banc apparié CPU 48 fils / GPU sur `eight_clusters`
-   et `scanline_single_pass` 50 000 ; reçu ; jamais un claim.
+5. **Lotissement, kernels q4, pilote CUDA et mesure** :
+   - 5a **livré (CPU)** : `generate_q3_batched_with` / `generate_q4_batched_with`
+     accumulent les rectangles de chaque ouvrier dans un lot vidé au seuil
+     `kSeedsPerLaunch = 2^16` seeds et en fin de séquence (ordre d'émission
+     préservé ; un lot = un lancement) ; portes à petit lot (1000 seeds,
+     plusieurs vidages) hôte et device.
+   - 5b **écrit, en attente de G4** (session `2e75cb42`) :
+     `src/gpu/q4_kernels.cuh` — `k_q4_core` (warp par seed, six compteurs par
+     ballot, correction intra-warp au h4-ième témoin), `k_q4_complete` (bloc
+     par seed vivant, étage `Q4Stage` par paire de la lentille), `k_q4_depth`
+     (warp par paire candidate, `q4_power_d` par ballot) ;
+     `src/gpu/q4_lane_device.cuh` — `Q4DeviceExecutor` (l'hôte calcule les
+     offsets de paires des seeds vivants, compte les étages, compacte les
+     candidates dans l'ordre de la production entre les kernels) ;
+     `tests/q4_lane_device_gate.cu` (même contrat que la porte hôte : post-RLE
+     et dix-neuf compteurs). Pilote `cli/mhgp5_cuda.cu` (`--gpu` : hooks
+     `RunOptions::q3_override` / `q4_override`, sans mutants ; sans `--gpu` :
+     témoin CPU du même binaire). La campagne construit et exécute les portes
+     q4 device dans `gpu_lane` puis, en **phase 3**, les quatre contrats
+     50 000 par `mhgp5_cuda --gpu` dont `digest_all` doit être **identique**
+     au contrat CPU de la même famille — l'égalité de bout en bout à 50 k est
+     ainsi jugée par le validateur, et les temps GPU/CPU sont gravés dans le
+     même reçu (mesure, jamais un claim).
+   - Reste après la session : lecture des temps (le lotissement et les
+     transferts par lot sont la première marge), banc apparié CPU 48 fils /
+     GPU sur `eight_clusters` et `scanline_single_pass`, et le port du fold
+     n'est **pas** prévu (séquentiel par nature, déjà recouvert).
