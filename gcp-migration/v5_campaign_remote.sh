@@ -1,0 +1,91 @@
+#!/usr/bin/env bash
+# Script DISTANT de la campagne v5 — execute sur la VM par la session gardee
+# (session_campagne_v5_scale_g4.sh) ou localement par le selftest
+# transactionnel (selftest_campagne_v5.sh, faux pilote). Il ne demarre ni
+# n'arrete rien : la session locale detient les gardes.
+#   $1 = source_commit, $2 = source_payload_sha256, $3 = protocol_manifest_sha256,
+#   graves dans CHAQUE .status (le reçu sait quel code et quel protocole
+#   exacts ont produit ses compteurs).
+#
+# TRANSACTIONNEL : chaque run ecrit deux fichiers atomiques (.txt = sortie du
+# pilote, .status = code / duree / pic RSS par GNU time / portee / pin),
+# errexit desarme autour du run. GNU time OBLIGATOIRE (jamais un repli qui
+# mesurerait le wrapper).
+#
+# DEUX PHASES :
+#   1. CONFORMITE v4 ≡ v5 aux tailles d'interet (8000, 16000, 32000, quatre
+#      familles) par `mhgp5_conformity_v4` contre le reçu calcule par la v4
+#      (bundle) — chaque run doit imprimer `balls=egal all=egal` ; un echec
+#      ARRETE la campagne (exit 3, statuts conserves) : pas de mesure a 50 k
+#      sur un moteur non conforme ;
+#   2. CONTRAT 50 000 POINTS (mesure, jamais un claim) : `mhgp5 --digest` a
+#      n=50000 sur les quatre familles, THREADS fils (defaut nproc), digests
+#      et RSS graves — ces digests deviennent la reference v5 a 50 k.
+set -euo pipefail
+
+SOURCE_COMMIT="${1:?source_commit requis}"
+SOURCE_PAYLOAD_SHA256="${2:?source_payload_sha256 requis}"
+PROTOCOL_MANIFEST_SHA256="${3:?protocol_manifest_sha256 requis}"
+PROBE_BIN="${PROBE_BIN:-./build/mhgp5}"
+CONFORMITY_BIN="${CONFORMITY_BIN:-./build/mhgp5_conformity_v4}"
+RECEIPT="${RECEIPT:-morsehgp3D_v5/receipts/conformite_v4/digests_v4.txt}"
+OUT_DIR="${OUT_DIR:-out}"
+RUN_TIMEOUT="${RUN_TIMEOUT:-7200}"
+TIME_BIN="${TIME_BIN:-/usr/bin/time}"
+THREADS="${THREADS:-$(nproc)}"
+FAMILIES="${FAMILIES:-uniform terrain eight_clusters scanline_single_pass}"
+
+test -x "${TIME_BIN}" || {
+  echo "REFUS : GNU time requis (${TIME_BIN}) pour une campagne a RSS mesure" >&2
+  exit 2
+}
+test -f "${RECEIPT}" || { echo "REFUS : reçu de conformite absent (${RECEIPT})" >&2; exit 2; }
+mkdir -p "${OUT_DIR}"
+
+run_one() {
+  local name="$1" scope="$2"; shift 2
+  local out="${OUT_DIR}/${name}.txt" status="${OUT_DIR}/${name}.status"
+  local rc=0 t0 t1 hwm=""
+  t0=$(date +%s)
+  "${TIME_BIN}" -v -o "${status}.time" timeout "${RUN_TIMEOUT}" "$@" >"${out}" 2>&1 || rc=$?
+  t1=$(date +%s)
+  hwm=$(grep -oE 'Maximum resident set size[^0-9]*[0-9]+' "${status}.time" 2>/dev/null | grep -oE '[0-9]+$' || true)
+  {
+    printf 'code=%d\n' "${rc}"
+    printf 'duree_s=%d\n' "$((t1 - t0))"
+    printf 'peak_rss_kb=%s\n' "${hwm:-inconnu}"
+    printf 'timing_scope=%s\n' "${scope}"
+    printf 'threads=%s\n' "${THREADS}"
+    printf 'source_commit=%s\n' "${SOURCE_COMMIT}"
+    printf 'source_payload_sha256=%s\n' "${SOURCE_PAYLOAD_SHA256}"
+    printf 'protocol_manifest_sha256=%s\n' "${PROTOCOL_MANIFEST_SHA256}"
+    printf 'finished=1\n'
+  } > "${status}.tmp"
+  mv "${status}.tmp" "${status}"
+  echo "--- fini ${name} (code=${rc}, $((t1 - t0))s, rss=${hwm:-?}kB)"
+  return 0
+}
+
+# PHASE 1 — conformite v4 aux tailles d'interet, un run a la fois.
+for n in 8000 16000 32000; do
+  for fam in ${FAMILIES}; do
+    run_one "conf_${fam}_n${n}" conformity \
+      "${CONFORMITY_BIN}" "--receipt=${RECEIPT}" "--family=${fam}" "--n=${n}" "--threads=${THREADS}"
+  done
+done
+for n in 8000 16000 32000; do
+  for fam in ${FAMILIES}; do
+    st="${OUT_DIR}/conf_${fam}_n${n}.status"; tx="${OUT_DIR}/conf_${fam}_n${n}.txt"
+    if ! grep -q '^code=0$' "${st}" || ! grep -q 'balls=egal all=egal' "${tx}"; then
+      echo "CONFORMITE NON ETABLIE : conf_${fam}_n${n} — contrat 50 k refuse, statuts conserves" >&2
+      exit 3
+    fi
+  done
+done
+
+# PHASE 2 — contrat 50 000 points (mesure), un run a la fois, tous les fils.
+for fam in ${FAMILIES}; do
+  run_one "contrat_${fam}_n50000" contract_50k \
+    "${PROBE_BIN}" "--family=${fam}" --n=50000 --s=8 --smax=11 --seed=3 "--threads=${THREADS}" --digest
+done
+echo "=== fin des runs (la validation locale decide du statut, jamais cette ligne) ==="

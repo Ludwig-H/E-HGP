@@ -72,5 +72,7 @@ Campagnes counter-only aux 36 configurations (4 familles × 3 tailles × 3 s),
 graine 3 ; « vrai vivant » recalculé par juge d'échantillon. Trois exposants
 successifs par arité avant toute phrase sur une pente. Les temps G4 exigent
 un reçu (commande, HEAD, hashes, codes, arrêt certifié) ; un OK CPU ou une
-extrapolation ne qualifie aucun SLO. Étapes suivantes : contrats à 50 000
-points sur G4 (`gcp-migration/`, scripts gardés), puis dizaines de millions.
+extrapolation ne qualifie aucun SLO. Étape suivante : la campagne G4
+`gcp-migration/session_campagne_v5_scale_g4.sh` (conformité v4 aux trois
+tailles sur la VM, puis contrat 50 000 points mesuré ; porte transactionnelle
+`selftest_campagne_v5.sh`), puis les dizaines de millions de points.

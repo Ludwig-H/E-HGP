@@ -605,6 +605,31 @@ L'option APT `--no-remove` fait échouer la réparation plutôt que de désinsta
 automatiquement un pilote en conflit. Dans ce cas, examinez le plan APT et les
 paquets déjà installés avant toute intervention manuelle.
 
+## Campagne d'échelle v5 (conformité v4 puis contrat 50 000 points)
+
+Protocole hérité de la campagne v4, épinglé et transactionnel :
+`session_campagne_v5_scale_g4.sh` → `v5_campaign_pin.sh` (refus si
+`morsehgp3D_v5/` ou l'un des scripts du protocole diffère de `HEAD` ; bundle
+depuis le commit) → `set_max_run_duration_and_verify.sh` → clé OS Login
+éphémère → `start_and_verify.sh` (deux coupe-circuits) → build Release et
+`ctest -L gate` sur la VM → `v5_campaign_remote.sh` (phase 1 : conformité
+`mhgp5_conformity_v4` aux tailles 8000/16000/32000 contre le reçu
+`morsehgp3D_v5/receipts/conformite_v4/digests_v4.txt` ; phase 2 : contrat
+50 000 points par `mhgp5 --digest`, 48 fils, RSS par GNU time — refusée si une
+conformité manque) → rapatriement avec reprises → `validate_v5_campaign.py`
+(seule autorité du statut) → arrêt certifié `TERMINATED` par le trap. Porte
+transactionnelle sans GCP : `selftest_campagne_v5.sh` (six scénarios, à
+lancer à la main avant toute session payante ; jamais depuis la CI).
+
+```bash
+./gcp-migration/selftest_campagne_v5.sh
+GCP_ZONE=europe-west4-ai1a GCP_INSTANCE_NAME=ehgp-blackwell-spot-ai1a \
+MAX_RUN_SECONDS=14400 GUEST_SHUTDOWN_MINUTES=230 ./gcp-migration/session_campagne_v5_scale_g4.sh
+```
+
+Le contrat 50 000 points est une **mesure** (temps, RSS, digests gravés comme
+référence v5 à 50 k), jamais un claim : `public_status=not_claimed`.
+
 ## Arrêter et vérifier après les calculs
 
 Depuis la machine locale, utilisez le script de fermeture après chaque session,
