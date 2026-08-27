@@ -15,7 +15,7 @@
 //      scan shaped CPU, lui-meme prouve egal a la lane de production
 //      (mhgp5_q3_scan_shaped_gate).
 // Codes : 0 conforme, 1 desaccord device/hote, 2 refus (pas de device, erreur
-// CUDA), 3 plancher.
+// CUDA), 3 plancher, 4 mutant tue (--inject=witness-no-warp-correction).
 #include <cmath>
 #include <cstdio>
 #include <cstring>
@@ -26,6 +26,7 @@
 
 #include "../cloud/families.hpp"
 #include "../core/dint.hpp"
+#include "../core/mutants.hpp"
 #include "../lanes/edge_cover.hpp"
 #include "../lanes/q3.hpp"
 #include "../pipeline/float_filter.hpp"
@@ -86,7 +87,7 @@ struct SeedOut {
 
 __global__ void k_scan(const SeedJob* jobs, unsigned njobs, const AnchorRange* anchors, const i64* u0, const i64* u1,
                        const i64* u2, const i64* q, const double* u0d, const double* u1d, const double* u2d,
-                       const double* qd, unsigned h3, SeedOut* out) {
+                       const double* qd, unsigned h3, bool no_warp_correction, SeedOut* out) {
   const unsigned warp = (blockIdx.x * blockDim.x + threadIdx.x) >> 5;
   const unsigned lane = threadIdx.x & 31;
   if (warp >= njobs) return;
@@ -124,6 +125,13 @@ __global__ void k_scan(const SeedJob* jobs, unsigned njobs, const AnchorRange* a
     if (before + add >= h3) {
       // Sites au-dela du h3-ieme interieur : leurs compteurs ne sont pas vus
       // par le scalaire (sortie anticipee). Retirer leur contribution.
+      // MUTANT witness-no-warp-correction (drapeau hote) : ne rien retirer —
+      // les compteurs des seeds morts different alors du scalaire (code 4).
+      if (no_warp_correction) {
+        dead = true;
+        depth = h3;
+        break;
+      }
       const unsigned need = h3 - before;
       unsigned m = mask_int, kth = 0;
       for (unsigned k = 0; k < need; ++k) {
@@ -147,9 +155,16 @@ __global__ void k_scan(const SeedJob* jobs, unsigned njobs, const AnchorRange* a
 }  // namespace
 
 int main(int argc, char** argv) {
-  (void)argc;
-  (void)argv;
+  std::string inject;
+  for (int i = 1; i < argc; ++i) {
+    const std::string arg = argv[i];
+    if (arg.rfind("--inject=", 0) == 0) inject = arg.substr(9);
+    else return 2;
+  }
+  if (!inject.empty() && !mutants_enable(inject)) return 2;
+  const bool m_warp = MHGP5_MUTANT("witness-no-warp-correction");
 #if !defined(__CUDACC__)
+  (void)m_warp;
   std::fprintf(stderr, "REFUS : temoin device compile sans nvcc (aucun device)\n");
   return 2;
 #else
@@ -168,6 +183,11 @@ int main(int argc, char** argv) {
     const unsigned n = 1u << 18;
     std::vector<ArithCase> in(n);
     const i64 bords[] = {0, 1, -1, INT64_MAX, INT64_MIN, (i64)1 << 40, -((i64)1 << 40), 65535, -65535};
+    // Tous les cas sont DANS le contrat exact de dint.hpp (docs : |x·b| < 2^127
+    // pour mul_di128_i64) : mode A, x = produit de deux |·| < 2^31 (|x| < 2^62)
+    // et b sur tout i64 ; mode B, x = produit de deux |·| < 2^39 (|x| < 2^78) et
+    // |b| < 2^40. L'oracle hote est l'__int128 natif, sans debordement.
+    const auto rnd = [&](int bits) -> i64 { return (i64)(rng() % ((u64)1 << bits)) - ((i64)1 << (bits - 1)); };
     for (unsigned i = 0; i < n; ++i) {
       ArithCase c;
       if (i < 81) {
@@ -175,14 +195,19 @@ int main(int argc, char** argv) {
         c.b = bords[i % 9];
       } else {
         const int mode = (int)(rng() % 3);
-        c.a = mode == 0 ? (i64)rng() : (i64)(rng() % ((u64)1 << 36)) - ((i64)1 << 35);
-        c.b = mode == 1 ? (i64)rng() : (i64)(rng() % ((u64)1 << 36)) - ((i64)1 << 35);
+        c.a = mode == 0 ? (i64)rng() : rnd(36);
+        c.b = mode == 1 ? (i64)rng() : rnd(36);
       }
-      // x : produit de deux i64 (tient), y : idem — mul_di128_i64(x, b) doit tenir : |x| < 2^70 par construction moderee.
-      const i64 xa = (i64)(rng() % ((u64)1 << 40)) - ((i64)1 << 39), xb = (i64)(rng() % ((u64)1 << 40)) - ((i64)1 << 39);
-      c.x = di_mul_i64_i64(xa, xb);
-      c.y = di_mul_i64_i64((i64)(rng() % ((u64)1 << 40)) - ((i64)1 << 39), (i64)(rng() % ((u64)1 << 40)) - ((i64)1 << 39));
-      if (i >= 81 && (rng() & 1)) c.b = (i64)(rng() % ((u64)1 << 40)) - ((i64)1 << 39);
+      if (i & 1) {  // mode A
+        c.x = di_mul_i64_i64(rnd(31), rnd(31));
+        c.y = di_mul_i64_i64(rnd(31), rnd(31));
+        if (i >= 81 && (rng() & 1)) c.b = (i64)rng();
+      } else {  // mode B
+        c.x = di_mul_i64_i64(rnd(39), rnd(39));
+        c.y = di_mul_i64_i64(rnd(39), rnd(39));
+        if (i >= 81) c.b = rnd(40);
+        else if (c.b == INT64_MAX || c.b == INT64_MIN) c.b = rnd(40);
+      }
       in[i] = c;
     }
     ArithCase* d_in = nullptr;
@@ -201,13 +226,10 @@ int main(int argc, char** argv) {
     for (unsigned i = 0; i < n; ++i) {
       const ArithCase& c = in[i];
       const ArithOut& o = out[i];
-      const bool fits = di_fits_i64(c.x) || true;  // mulx : precondition assuree par construction (|x| < 2^79... verifiee ci-dessous)
-      (void)fits;
-      const bool ok = di_eq(o.sum, di_add(c.x, c.y)) && di_eq(o.dif, di_sub(c.x, c.y)) &&
-                      di_eq(o.mul64, di_mul_i64_i64(c.a, c.b)) && di_eq(o.shl, di_shl1(c.x)) && o.cmp == di_cmp(c.x, c.y) &&
-                      (di_to_i128(c.x) * (i128)c.b == di_to_i128(o.mulx) ||
-                       // hors precondition (produit ne tenant pas) : l'hote et le device doivent au moins concorder entre eux
-                       di_eq(o.mulx, di_mul_di128_i64(c.x, c.b)));
+      const i128 X = di_to_i128(c.x), Y = di_to_i128(c.y);
+      const bool ok = di_to_i128(o.sum) == X + Y && di_to_i128(o.dif) == X - Y &&
+                      di_to_i128(o.mul64) == (i128)c.a * (i128)c.b && di_to_i128(o.shl) == X * 2 &&
+                      o.cmp == (X < Y ? -1 : X > Y ? 1 : 0) && di_to_i128(o.mulx) == X * (i128)c.b;
       if (!ok) ++mism;
     }
     std::printf("arith cas=%u desaccords=%u\n", n, mism);
@@ -224,7 +246,7 @@ int main(int argc, char** argv) {
     u64 visited = 0, workers = 0;
     generate_detail::alive_rectangles(ix, 8, h_of, 1, 1, &alive, &visited, &workers);
     std::vector<i64> U0, U1, U2, Q;
-    std::vector<double> D0, D1, D2, DQ;
+    std::vector<double> F0, F1, F2, FQ;
     std::vector<AnchorRange> ranges;
     std::vector<SeedJob> jobs;
     std::vector<SeedOut> host;
@@ -253,14 +275,14 @@ int main(int argc, char** argv) {
             const i64 u0 = 2 * pz.x - sx, u1 = 2 * pz.y - sy, u2 = 2 * pz.z - sz;
             const i64 qz = u0 * u0 + u1 * u1 + u2 * u2 - D2;
             U0.push_back(u0); U1.push_back(u1); U2.push_back(u2); Q.push_back(qz);
-            D0.push_back((double)u0); D1.push_back((double)u1); D2.push_back((double)u2); DQ.push_back((double)qz);
+            F0.push_back((double)u0); F1.push_back((double)u1); F2.push_back((double)u2); FQ.push_back((double)qz);
             qmax = std::max(qmax, qz < 0 ? -qz : qz);
             umax = std::max({umax, u0 < 0 ? -u0 : u0, u1 < 0 ? -u1 : u1, u2 < 0 ? -u2 : u2});
           }
           const unsigned aidx = (unsigned)ranges.size();
           ranges.push_back(AnchorRange{begin, (unsigned)cover.size()});
           const AnchorSitesSoA sites{U0.data() + begin, U1.data() + begin, U2.data() + begin, Q.data() + begin,
-                                     D0.data() + begin, D1.data() + begin, D2.data() + begin, DQ.data() + begin,
+                                     F0.data() + begin, F1.data() + begin, F2.data() + begin, FQ.data() + begin,
                                      (u32)cover.size()};
           for (const CoverPoint& cp : cover) {
             if (cp.u == ua || cp.u == ub) continue;
@@ -305,16 +327,16 @@ int main(int argc, char** argv) {
     CUDA_OK(cudaMemcpy(d_u1, U1.data(), ns * sizeof(i64), cudaMemcpyHostToDevice));
     CUDA_OK(cudaMemcpy(d_u2, U2.data(), ns * sizeof(i64), cudaMemcpyHostToDevice));
     CUDA_OK(cudaMemcpy(d_q, Q.data(), ns * sizeof(i64), cudaMemcpyHostToDevice));
-    CUDA_OK(cudaMemcpy(d_d0, D0.data(), ns * sizeof(double), cudaMemcpyHostToDevice));
-    CUDA_OK(cudaMemcpy(d_d1, D1.data(), ns * sizeof(double), cudaMemcpyHostToDevice));
-    CUDA_OK(cudaMemcpy(d_d2, D2.data(), ns * sizeof(double), cudaMemcpyHostToDevice));
-    CUDA_OK(cudaMemcpy(d_dq, DQ.data(), ns * sizeof(double), cudaMemcpyHostToDevice));
+    CUDA_OK(cudaMemcpy(d_d0, F0.data(), ns * sizeof(double), cudaMemcpyHostToDevice));
+    CUDA_OK(cudaMemcpy(d_d1, F1.data(), ns * sizeof(double), cudaMemcpyHostToDevice));
+    CUDA_OK(cudaMemcpy(d_d2, F2.data(), ns * sizeof(double), cudaMemcpyHostToDevice));
+    CUDA_OK(cudaMemcpy(d_dq, FQ.data(), ns * sizeof(double), cudaMemcpyHostToDevice));
     const unsigned threads = 256, warps_per_block = threads / 32;
     cudaEvent_t e0, e1;
     cudaEventCreate(&e0); cudaEventCreate(&e1);
     cudaEventRecord(e0);
     k_scan<<<(njobs + warps_per_block - 1) / warps_per_block, threads>>>(d_jobs, njobs, d_ranges, d_u0, d_u1, d_u2, d_q,
-                                                                          d_d0, d_d1, d_d2, d_dq, (unsigned)h_of[1], d_out);
+                                                                          d_d0, d_d1, d_d2, d_dq, (unsigned)h_of[1], m_warp, d_out);
     CUDA_OK(cudaGetLastError());
     cudaEventRecord(e1);
     CUDA_OK(cudaDeviceSynchronize());
@@ -326,8 +348,11 @@ int main(int argc, char** argv) {
     cudaFree(d_d0); cudaFree(d_d1); cudaFree(d_d2); cudaFree(d_dq); cudaFree(d_out);
     unsigned mism = 0, dead = 0;
     for (unsigned i = 0; i < njobs; ++i) {
-      if (dev[i].dead != host[i].dead) ++mism;
-      else if (!dev[i].dead && (dev[i].cert_neg != host[i].cert_neg || dev[i].cert_pos != host[i].cert_pos || dev[i].fallback != host[i].fallback)) ++mism;
+      // Verdict ET compteurs de certification pour TOUTES les seeds, mortes
+      // comprises (la correction intra-warp de k_scan est ainsi exercee).
+      if (dev[i].dead != host[i].dead || dev[i].cert_neg != host[i].cert_neg || dev[i].cert_pos != host[i].cert_pos ||
+          dev[i].fallback != host[i].fallback)
+        ++mism;
       dead += host[i].dead;
     }
     std::printf("scan famille=%s ancres=%zu seeds=%u sites=%zu morts=%u desaccords=%u kernel_ms=%.3f\n", cloud_family_name(family),
@@ -336,6 +361,10 @@ int main(int argc, char** argv) {
   }
   if (bad) {
     std::fprintf(stderr, "DESACCORD device/hote\n");
+    return m_warp ? 4 : 1;
+  }
+  if (m_warp) {
+    std::fprintf(stderr, "MUTANT NON TUE\n");
     return 1;
   }
   std::printf("device_witness OK\n");

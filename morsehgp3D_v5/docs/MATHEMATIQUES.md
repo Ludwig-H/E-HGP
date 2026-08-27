@@ -43,6 +43,14 @@ de doute, le plus faible a été retenu, et la raison est dite.
 - `mesure` — fait chiffré (v3, v4 ou v5, daté), jamais une garantie.
 - `ouvert` — question posée, non résolue (§ 9).
 
+Les quatre verrous d'ouverture V1–V4 (§ 9) ont été **arbitrés** par
+l'auditeur v5 le 27 août 2026
+(`../audits/REPONSE_A_CLAUDE_87E915BD_VERROUS_OUVERTURE_20260827.md`, pin
+jugé `87e915bd`) ; chaque passage concerné cite « arbitrage V<n> ». Un
+arbitrage ferme une question de conception, il ne promeut aucun statut : les
+énoncés gardent le leur, les quatre verrous restent fermés pour tout claim et
+`public_status` reste `not_claimed`.
+
 Conventions : $D^2 = \left\Vert b-a \right\Vert^2$ pour une ancre $(a,b)$ ;
 $m = (a+b)/2$ ; le **niveau est un rayon au carré** exact ; « intérieur »
 signifie intérieur strict, « coquille » signifie sur la sphère.
@@ -167,10 +175,26 @@ Contrats issus des audits v4 (`ETAT_COURANT.md` v4 du 17 août, commit
   porté que par l'exécutable, pas par la frontière. En v5 : l'index spatial
   peut bucketiser (commodité d'index, `src/tree/cloud_index.hpp`), mais le
   pipeline **refuse** avant toute géométrie exacte ; les comptes de
-  multiplicité de l'index n'ont **aucune** sémantique HGP tant que le verrou
-  V1 (`../audits/QUESTION_CLAUDE_VERROUS_OUVERTURE_20260827.md`) n'est pas
-  tranché par l'auditeur. Statut : `recu_auditeur_v4` (le refus) ;
-  `ouvert` (toute extension pondérée, V1).
+  multiplicité de l'index n'ont **aucune** sémantique HGP. **Arbitrage V1**
+  (`../audits/REPONSE_A_CLAUDE_87E915BD_VERROUS_OUVERTURE_20260827.md`,
+  27 août 2026) : le refus normatif est **conservé**. Le HGP pondéré n'est
+  ni défini ni prouvé ; étendre la profondeur à un multi-ensemble
+  modifierait les seuils, les supports minimaux, la notion d'arité, les
+  événements et potentiellement les théorèmes invoqués ; la bucketisation de
+  l'index est une capacité de représentation, pas une autorisation
+  sémantique. Le refus doit être cohérent à toutes les frontières :
+  `run_pipeline` refuse les doublons avant génération
+  (`unsupported_degeneracy`) ; toute API basse acceptant un `CloudIndex`
+  déclare et vérifie la précondition « positions distinctes », ou devient
+  explicitement pondérée ; une fixture permanente vérifie le code de sortie
+  exact, l'absence de callback et l'absence de payload partiel ; la présence
+  de `range_weight()` ne doit pas laisser croire qu'un census pondéré est
+  livré. Une voie pondérée future serait une **phase distincte** (définition
+  de $\rho$, profondeur, supports de diamètre nul, oracles et reçus propres),
+  jamais une optimisation silencieuse du profil actuel. Statut :
+  `recu_auditeur_v4` (le refus), confirmé par l'arbitrage V1 ; l'extension
+  pondérée n'est plus une question posée au profil courant — elle est hors
+  profil.
 - **Seuils effectifs** : $K_{eff} = \min(K_{max}, n)$,
   $s_{max} = \min(K_{eff}+1, n)$ ; la constante 11 vaut pour la cible
   $n \geq 11$, $K_{max} = 10$, jamais comme vérité générale (les petits
@@ -187,9 +211,16 @@ Contrats issus des audits v4 (`ETAT_COURANT.md` v4 du 17 août, commit
   Statut : `recu_auditeur_v4` (idem, § 4).
 - **La sortie complète conserve les applications verticales entre ordres** :
   dix forêts indépendantes ne représentent pas seules la tour ordre-échelle.
-  La v5 ne les construit pas encore (`../audits/ETAT_COURANT.md`) — c'est une
-  partie du verrou V3. Statut du contrat : `recu_auditeur_v4` ; de sa
-  réalisation : `ouvert`.
+  La v5 ne les construit pas encore (`../audits/ETAT_COURANT.md`).
+  **Arbitrage V3**
+  (`../audits/REPONSE_A_CLAUDE_87E915BD_VERROUS_OUVERTURE_20260827.md`,
+  27 août 2026) : le terme « forêt complète K = 1..10 » est retiré ou borné
+  tant que la tour et la publication transactionnelle ne sont pas livrées ;
+  le payload livré se déclare pour ce qu'il est — dix forêts horizontales
+  indépendantes, **pas la tour** (`ARCHITECTURE.md` § 7 ; contrat de la
+  future livraison des applications verticales : § 7.1). Statut du
+  contrat : `recu_auditeur_v4` ; sa réalisation est un chantier non livré,
+  ce n'est plus une question.
 - **$F_K$ du rendu § 9.1 = TOUTES les facettes distinctes des événements**
   ($F_K^{render}$), pas seulement les actives ($F_K^{conn}$, suffisantes pour
   la connectivité seule) ; une variante active-only est une heuristique
@@ -234,8 +265,8 @@ Statut : `recu_auditeur_v4` — preuve déroulée par l'auditeur
 (`ETAT_COURANT.md` v4 du 17 août § 1 « Réponse Q1 »), confirmée par
 `AUDIT_MATHEMATIQUE_0FB32C3_A_5072E23_20260817.md` § 11 et par l'audit du
 22 août § 3.1. **Hors** position générale, l'énoncé est remplacé par le
-théorème du plateau (§ 7.5) ; **hors** sites distincts il n'a pas de sens
-(V1).
+théorème du plateau (§ 7.5) ; **hors** sites distincts il n'a pas de sens —
+d'où le refus normatif des positions dupliquées (§ 2, arbitrage V1).
 
 ### 3.2 Conséquences : arités, profondeurs, seuils de mort
 
@@ -1077,8 +1108,29 @@ re-dimensionner). Conséquences :
   $T \subseteq U_B$, plafond de coquille explicite, `resource_exhausted`
   au-delà, jamais une troncature ni un décalage hors largeur : l'UB v4 à
   $\left\vert U_B \right\vert = 32$ relevé par l'audit du 22 août § 3.5 est
-  un refus en v5) ; la **compression par supports minimaux** n'a pas
-  d'énoncé prouvé : verrou V2 ;
+  un refus en v5). **Arbitrage V2**
+  (`../audits/REPONSE_A_CLAUDE_87E915BD_VERROUS_OUVERTURE_20260827.md`,
+  27 août 2026) : la **compression par supports minimaux n'est pas
+  approuvée** — l'énoncé « les $T$ admissibles sont les sur-ensembles de
+  supports minimaux dans $U_B$, et les rôles actifs se lisent sur le support
+  minimal contenu » n'est pas prouvé, et aucune porte indépendante n'établit
+  qu'une compression conserve simultanément l'ensemble des événements, les
+  rôles actifs, les naissances, les attachements et les niveaux ; une
+  compression de représentation n'est pas une réduction de l'objet. Le seul
+  comportement autorisé est le census complet de la coquille, un plafond
+  explicite, puis `resource_exhausted` sans troncature ; **augmenter le
+  plafond n'est pas une solution de complexité, et réduire la coquille est
+  une perte silencieuse**. Aucune borne sur $\left\vert U_B \right\vert$ ne
+  rend le régime « exact plutôt que refusé » : le plafond est un profil, pas
+  un théorème. Ouvrir la compression exigerait, dans cet ordre : un énoncé
+  précisant l'objet reconstructible et les rôles conservés ; un oracle
+  exhaustif borné comparant l'expansion brute et la compression sur toutes
+  les sous-familles d'une petite coquille ; des fixtures de plateaux
+  cocycliques/cosphériques, d'attachement et de croissance unaire ; un
+  mutant qui perd un support minimal et un mutant qui attribue un mauvais
+  rôle actif ; un reçu de mémoire séparant sortie compressée, index de
+  reconstruction et temporaires. Statut de la compression : `ouvert` comme
+  chantier de preuve, **fermé** comme option d'implémentation à ce pin ;
 - le fold gèle les composantes avant le niveau puis applique ENSEMBLE tous
   les simplexes du plateau (le macro-lot § 7.4 : même boule ⟹ même niveau
   exact) ; un ordre binaire entre cosphériques serait aussi faux que leur
@@ -1175,9 +1227,17 @@ théorique de la trace exhaustive avant q3, q4, niveaux, deltas et
 verticales. Statut : théorème `recu_auditeur_v4` (dérivé par l'auditeur,
 `CONTRE_AUDIT_0328_BORNE_POISSON_SORTIE_Q2_30M_20260817.md` § 1–3 ; audit du
 22 août § 5) ; constantes de volume infini, terme de bord requis pour un
-reçu cubique (`AUDIT_MATHEMATIQUE_0FB32C3_A_5072E23_20260817.md` § 9) ;
-conséquence sur le contrat de sortie : verrou V3. `mesure` (v4,
-`uniform n=8000`) : ~391 événements tous ordres par point.
+reçu cubique (`AUDIT_MATHEMATIQUE_0FB32C3_A_5072E23_20260817.md` § 9).
+Conséquence sur le contrat de sortie — **arbitrage V3**
+(`../audits/REPONSE_A_CLAUDE_87E915BD_VERROUS_OUVERTURE_20260827.md`,
+27 août 2026) : aucun objet partiel (hiérarchie de connectivité seule par
+$K$, partition finale à une coupe $r$, requêtes ciblées) ne s'appelle à lui
+seul « hiérarchie HGP calculée » ; le flux par $K$ obéit au contrat de
+payload versionné de `ARCHITECTURE.md` § 7, une coupe ciblée est un
+**autre** payload versionné, et un flux physiquement émis avant le statut
+terminal n'est recevable que marqué `provisional` et invalidable
+atomiquement. `mesure` (v4, `uniform n=8000`) : ~391 événements tous ordres
+par point.
 
 ---
 
@@ -1202,7 +1262,35 @@ position → id reconstruite depuis les enregistrements d'entrée sans appeler
 la conversion du sujet. Le juge n'est jamais un backend ni un chemin
 produit. Statut : spécification `recu_auditeur_v4` (audit du 22 août § 3.4 :
 « le juge de forêt réénumère indépendamment les miniboules en grands
-entiers ») ; réalisation v5 : `ouvert` (V4 pour l'échelle).
+entiers ») ; réalisation v5 : non livrée.
+
+**À l'échelle ($n = 8000/16000/32000$ et au-delà) — arbitrage V4**
+(`../audits/REPONSE_A_CLAUDE_87E915BD_VERROUS_OUVERTURE_20260827.md`,
+27 août 2026) : il n'existe pas d'invariant unique qui transformerait une
+régression en preuve d'exactitude, et aucun des contrôles proposés (niveaux
+de naissance recalculés par miniboule sur un échantillon, monotonie des
+partitions entre $K$ et $K+1$ par le Théorème 2) ne suffit seul. La porte
+d'échelle combine des autorités causalement distinctes :
+
+1. conformité différentielle v4/v5 sur mêmes entrées, digests et codes ;
+2. $K = 1$ contre un calcul indépendant de single-linkage/MST ;
+3. rejeu intégral des deltas et vérification de la partition finale pour
+   chaque $K$ ;
+4. échantillon déterministe de boules et d'événements, rejugés par
+   miniboule, census et niveau indépendants ;
+5. invariants verticaux entre $K$ et $K+1$ dès que les applications
+   verticales existent ;
+6. planchers de non-vacuité pour chaque famille, arité, type de rôle et
+   chemin de rejet ;
+7. reçu complet : pin, worktree, toolchain, commande, hashes d'entrée et de
+   sortie, codes, compteurs, RSS et statut terminal.
+
+La conformité v4 est une porte de **divergence**, le juge échantillonné une
+porte de **falsification**, le rejeu structurel une porte de **cohérence** :
+leur conjonction augmente la confiance, mais seuls l'oracle borné ci-dessus
+et les preuves contractuelles autorisent le vocabulaire d'exactitude. La
+question « quel invariant ? » est close ; la matrice reste à réaliser
+(`PLAN_DE_TESTS.md`, `../audits/ETAT_COURANT.md`).
 
 ---
 
@@ -1212,8 +1300,9 @@ Héritées de la v4 avec leur état :
 
 - **Q1 (bijection événements-boules).** *Tranchée* sous sites distincts et
   position générale (§ 3.1, `recu_auditeur_v4`) ; le bord cosphérique est
-  couvert par le théorème du plateau (§ 7.5). Reste `ouvert` : les
-  multiplicités de positions — c'est le verrou V1.
+  couvert par le théorème du plateau (§ 7.5). Les multiplicités de
+  positions sont **hors profil** par l'arbitrage V1 (§ 2) : refus normatif ;
+  toute extension pondérée serait une phase distincte.
 - **Q2 (qualité du minorant de témoins).** `ouvert`. Ce qui est reçu : la
   loi conditionnelle et la constante $2\pi h/(3v_q)$ pour une région
   déterministe (§ 4.9). Ce qui manque : le passage à la WSPD aléatoire
@@ -1236,27 +1325,47 @@ Héritées de la v4 avec leur état :
   rendu v5 n'est pas livré.
 - Q5 (ex æquo) et Q12 (forme du niveau q4) restent tranchées (§ 7.5, § 6.4).
 
-Verrous posés à l'auditeur v5 (`../audits/QUESTION_CLAUDE_VERROUS_OUVERTURE_20260827.md`) :
+Verrous posés à l'auditeur v5
+(`../audits/QUESTION_CLAUDE_VERROUS_OUVERTURE_20260827.md`) et **arbitrés**
+le 27 août 2026
+(`../audits/REPONSE_A_CLAUDE_87E915BD_VERROUS_OUVERTURE_20260827.md`, pin
+jugé `87e915bd`). Les quatre restent fermés pour tout claim ; aucun
+arbitrage n'est une promotion :
 
-- **V1 — positions dupliquées** : le refus reste-t-il normatif, ou quelle
-  définition de $\rho(\sigma)$ et de $\left\vert I_B \right\vert$ pour un
-  multi-ensemble, et quel théorème (2 ou 4) y survit ? Jusqu'à réponse : refus
-  (§ 2).
-- **V2 — plateaux sphériques** : existe-t-il un énoncé prouvable donnant,
-  pour chaque $K$, les $\sigma = I_B \cup T$ **sans** énumérer tous les
-  $T \subseteq U_B$ (compression par supports minimaux), et quelle borne sur
-  $\left\vert U_B \right\vert$ rend le régime exact plutôt que refusé ?
-  Jusqu'à réponse : plafond de coquille puis `resource_exhausted` (§ 7.5).
-- **V3 — contrat de sortie à 30 M de points** : le flux symbolique complet
-  est impossible (§ 7.8) ; quel objet minimal (hiérarchie de connectivité par
-  $K$, partition à une coupe, requêtes) rend « hiérarchie HGP calculée »
-  vérifiable, et par quel certificat a posteriori ?
-- **V4 — le juge indépendant à l'échelle** : quel invariant global
-  vérifiable en $O(n \log n)$ à $n = 8000/16000/32000$, au-delà de
-  $K = 1 \equiv$ single-linkage (niveaux de naissance recalculés par
-  miniboule sur un échantillon, monotonie des partitions entre $K$ et $K+1$
-  par le Théorème 2) ? Jusqu'à réponse : l'égalité au digest v4 prouve
-  « même objet que la v4 », pas « objet exact ».
+- **V1 — positions dupliquées** : *tranché*. Le refus reste normatif (§ 2) ;
+  le HGP pondéré n'est ni défini ni prouvé et ne pourrait entrer que comme
+  phase distincte (définition de $\rho(\sigma)$ et de
+  $\left\vert I_B \right\vert$ pour un multi-ensemble, supports de diamètre
+  nul, oracles et reçus propres), jamais comme optimisation silencieuse du
+  profil. Reste à livrer, pas à trancher : la cohérence du refus à toutes
+  les frontières (§ 2).
+- **V2 — plateaux sphériques** : *chantier de preuve, fermé comme option
+  d'implémentation*. La compression par supports minimaux n'est pas
+  approuvée ; l'énumération des $T \subseteq U_B$ sous plafond explicite
+  puis `resource_exhausted` sans troncature est le seul comportement
+  autorisé, et aucune borne sur $\left\vert U_B \right\vert$ ne rend le
+  régime exact plutôt que refusé (§ 7.5, avec les cinq portes préalables à
+  toute compression).
+- **V3 — contrat de sortie à 30 M de points** : *tranché par un contrat,
+  non par un objet*. Le flux symbolique complet reste impossible (§ 7.8) ;
+  aucun des trois objets proposés (hiérarchie de connectivité par $K$,
+  partition à une coupe, requêtes) ne s'appelle seul « hiérarchie HGP
+  calculée ». Le flux par $K$ déclare version de représentation, niveaux de
+  lots, deltas (parents, naissances, représentant de sortie), partition
+  finale ou certificat de reconstruction, politique de rétention des
+  facettes, applications verticales si l'objet revendiqué est la tour, et
+  statut terminal global avant toute publication ; une coupe ciblée est un
+  **autre** payload versionné ; une émission avant le statut terminal exige
+  un marquage `provisional` invalidable atomiquement, que l'API actuelle ne
+  porte pas encore (`ARCHITECTURE.md` § 0 et § 7 ; § 2 ci-dessus).
+- **V4 — le juge indépendant à l'échelle** : *tranché* : pas d'invariant
+  unique en $O(n \log n)$ qui ferait d'une régression une preuve, mais la
+  matrice d'autorités causalement distinctes du § 8 (conformité v4/v5,
+  $K = 1$ contre MST indépendant, rejeu des deltas et partition finale par
+  $K$, échantillon rejugé, invariants verticaux quand ils existent,
+  planchers de non-vacuité, reçu complet). L'égalité au digest v4 prouve
+  « même objet que la v4 », pas « objet exact » : c'est une porte de
+  divergence.
 
 ---
 

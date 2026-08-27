@@ -94,7 +94,10 @@ mkdir -p build-cuda
 cat > build-cuda/mhgp5_device_witness <<'EOT'
 #!/usr/bin/env bash
 [ "${WITNESS_FAIL:-0}" = "1" ] && { echo "DESACCORD device/hote"; exit 1; }
-echo "device=faux sm=12.0"; echo "arith cas=262144 desaccords=0"; echo "device_witness OK"
+echo "device=faux sm=12.0"; echo "arith cas=262144 desaccords=0"
+echo "scan famille=uniform ancres=10 seeds=728347 sites=100 morts=1 desaccords=${WITNESS_SCAN_MISM:-0} kernel_ms=1.000"
+echo "scan famille=eight_clusters ancres=10 seeds=2308366 sites=100 morts=1 desaccords=0 kernel_ms=1.000"
+echo "device_witness OK"
 EOT
 chmod +x build-cuda/mhgp5_device_witness
 exit 0
@@ -146,10 +149,19 @@ fi
 # ---- Scenario 3bis : temoin device en desaccord -> jamais complete (statut code=1 conserve).
 RC3b=$(run_campaign "${WORK}/out3b" WITNESS_FAIL=1)
 grep -q '^code=1$' "${WORK}/out3b/gpu_witness.status" 2>/dev/null || fail "scenario 3bis : code=1 du temoin non materialise"
+[ "$(ls "${WORK}/out3b"/*.status 2>/dev/null | wc -l)" -eq 1 ] || fail "scenario 3bis : les phases 1 et 2 devaient etre REFUSEES apres un temoin en echec"
+[ "${RC3b}" -eq 3 ] || fail "scenario 3bis : code distant 3 attendu (refus des phases), obtenu ${RC3b}"
 if python3 "${HERE}/validate_v5_campaign.py" "${WORK}/out3b" cafedeca beefbeef feedf00d "${RC3b}" 0 > "${WORK}/v3b.log" 2>&1; then
   fail "scenario 3bis : un temoin device en desaccord devait refuser complete"
 fi
 grep -q 'gpu_witness' "${WORK}/v3b.log" || fail "scenario 3bis : le temoin doit etre LISTE"
+
+# ---- Scenario 3ter : temoin « OK » en sous-chaine mais desaccords=1 sur un scan -> refuse par le validateur.
+RC3c=$(run_campaign "${WORK}/out3c" WITNESS_SCAN_MISM=1)
+if python3 "${HERE}/validate_v5_campaign.py" "${WORK}/out3c" cafedeca beefbeef feedf00d "${RC3c}" 0 > "${WORK}/v3c.log" 2>&1; then
+  fail "scenario 3ter : desaccords=1 avec la sous-chaine OK devait etre refuse"
+fi
+grep -q 'scan uniform' "${WORK}/v3c.log" || fail "scenario 3ter : le desaccord du scan doit etre nomme"
 
 # ---- Scenario 4 : code de session non nul.
 if python3 "${HERE}/validate_v5_campaign.py" "${WORK}/out1" cafedeca beefbeef feedf00d 255 0 > "${WORK}/v4.log" 2>&1; then

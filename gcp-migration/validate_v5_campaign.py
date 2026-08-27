@@ -68,8 +68,18 @@ def main():
             bad.append(f"{name}: motif interdit ({fb.group(0)})")
         if name != "gpu_witness" and not counters.search(body):
             bad.append(f"{name}: ligne de compteurs absente")
-        if name == "gpu_witness" and "device_witness OK" not in body:
-            bad.append(f"{name}: temoin device non conforme")
+        if name == "gpu_witness":
+            # Les deux familles, leurs planchers et desaccords=0 partout — pas
+            # la seule sous-chaine finale.
+            arith = re.search(r"^arith cas=(\d+) desaccords=(\d+)$", body, re.M)
+            if not arith or int(arith.group(1)) < 1000 or int(arith.group(2)) != 0:
+                bad.append(f"{name}: lot arithmetique absent, sous le plancher ou en desaccord")
+            for fam in ("uniform", "eight_clusters"):
+                m = re.search(rf"^scan famille={fam} ancres=\d+ seeds=(\d+) sites=\d+ morts=\d+ desaccords=(\d+) kernel_ms=", body, re.M)
+                if not m or int(m.group(1)) < 1000 or int(m.group(2)) != 0:
+                    bad.append(f"{name}: scan {fam} absent, sous le plancher (1000 seeds) ou en desaccord")
+            if "device_witness OK" not in body:
+                bad.append(f"{name}: temoin device non conforme")
         if name.startswith("conf_") and not conformity.search(body):
             bad.append(f"{name}: conformite v4 non etablie")
         if name.startswith("contrat_") and not digest.search(body):

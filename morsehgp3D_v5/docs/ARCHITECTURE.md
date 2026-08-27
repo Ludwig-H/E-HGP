@@ -15,8 +15,18 @@ module : [`PROVENANCE.md`](PROVENANCE.md).
 - **Profil d'entrée** : u16 quantifié seulement (grille $[0, 65536)^3$),
   `PointId` u32 arbitraires (≠ index dense ≠ rang Morton), dégénérescences →
   refus explicite, jamais de jitter. Les positions dupliquées sont refusées
-  (`unsupported_degeneracy`) tant qu'un HGP pondéré n'est pas défini et prouvé
-  (question ouverte à l'auditeur).
+  (`unsupported_degeneracy`) — **arbitrage V1**
+  (`../audits/REPONSE_A_CLAUDE_87E915BD_VERROUS_OUVERTURE_20260827.md`,
+  27 août 2026) : le refus est la sémantique normative ; la bucketisation
+  de l'index (§ 1) est une capacité de représentation, pas une autorisation
+  sémantique, et un HGP pondéré (ni défini ni prouvé) ne pourrait entrer que
+  comme phase distincte, jamais comme optimisation silencieuse du profil.
+  Frontières à rendre cohérentes : `run_pipeline` refuse les doublons avant
+  génération ; toute API basse acceptant un `CloudIndex` déclare et vérifie
+  la précondition « positions distinctes » (ou devient explicitement
+  pondérée) ; une fixture permanente vérifie le code de sortie exact, zéro
+  callback et zéro payload partiel ; `range_weight()` ne laisse pas croire
+  qu'un census pondéré est livré.
 - **Interdits d'architecture** : aucune structure de Delaunay d'aucun ordre,
   aucun arrangement global, aucune matrice globale de cofaces, aucun catalogue
   résident de tous les supports, aucun tableau indexé par toutes les paires /
@@ -30,17 +40,33 @@ module : [`PROVENANCE.md`](PROVENANCE.md).
   `on_forest` sont **provisoires** jusqu'au statut terminal : seule une
   violation d'invariant (un défaut du calcul) peut encore invalider une
   sortie déjà publiée, et le consommateur doit lire `RunResult::status`
-  avant de tenir la sortie pour publiable.
+  avant de tenir la sortie pour publiable. Arbitrage V3
+  (`../audits/REPONSE_A_CLAUDE_87E915BD_VERROUS_OUVERTURE_20260827.md`,
+  27 août 2026) : un flux physiquement émis avant le statut terminal n'est
+  recevable que marqué `provisional` et invalidable **atomiquement** ; l'API
+  actuelle ne porte pas encore ce protocole (le caractère provisoire des
+  callbacks est documenté, pas marqué ni invalidable dans le payload), et
+  la sortie n'est publiable qu'au statut terminal global (§ 7).
 - **Cibles** : portes d'invariants et de mesure à n = 8000, 16000, 32000 sur
   la machine de développement (8 cœurs, 31 Go) ; puis 50 000 points sur G4 ;
   puis des dizaines de millions de points. Aucun claim de temps ni de
-  capacité sans reçu.
+  capacité sans reçu. À ces tailles, la porte d'échelle est la **matrice
+  d'autorités** de l'arbitrage V4 (MATHEMATIQUES § 8 ;
+  `../audits/REPONSE_A_CLAUDE_87E915BD_VERROUS_OUVERTURE_20260827.md`,
+  27 août 2026) : conformité différentielle v4/v5, K = 1 contre un
+  single-linkage/MST indépendant, rejeu intégral des deltas et partition
+  finale par K, échantillon déterministe rejugé par miniboule, census et
+  niveau indépendants, invariants verticaux dès que la tour existe,
+  planchers de non-vacuité, reçu complet — jamais un seul compteur, et la
+  conformité v4 n'est qu'une porte de divergence.
 
 ## 1. Une seule structure spatiale
 
 `src/tree/cloud_index.hpp` : tri par clé de Morton 48 bits, bucketisation des
 positions dupliquées (géométrie sur positions UNIQUES, identités et
-multiplicités dans un CSR), arbre radix binaire de Karras sur les clés
+multiplicités dans un CSR — capacité de représentation de l'index seulement :
+le pipeline refuse les doublons avant toute géométrie, § 0, arbitrage V1),
+arbre radix binaire de Karras sur les clés
 uniques, cellules alignées (borne d'empilement) et boîtes serrées
 (certificats). Le même arbre sert la source WSPD, le comptage de témoins et
 les requêtes de cover. Il n'existe ni octree séparé ni second arbre.
@@ -60,7 +86,9 @@ les requêtes de cover. Il n'existe ni octree séparé ni second arbre.
        complétions (owner, exact-once, préfiltres, Cramer, centre)
 2  RLE par BallKey : arité minimale puis plus petite représentation    candidates.hpp
 3  préfiltre count-only : mort à |I_B| ≥ h_qmin                         census.hpp, expand.hpp
-4  census I_B / U_B complets des survivantes (plafond de coquille)
+4  census I_B / U_B complets des survivantes : coquille COMPLÈTE sous
+   plafond explicite, puis resource_exhausted sans troncature — aucune
+   compression par supports minimaux (arbitrage V2, MATHEMATIQUES § 7.5)
 5  comptage des événements par K (sans matérialisation) → gardes de       expand.hpp
    capacité de TOUS les ordres avant toute publication
 6  pour K = 1..K_max, STREAMÉ en PIPELINE À DEUX ÉTAGES :                  forest/plateau.hpp,
@@ -131,6 +159,18 @@ registre est vide dans tout chemin nominal.
 
 ## 7. Contrat de payload (arbitrage V3)
 
+Arbitrage V3 (`../audits/REPONSE_A_CLAUDE_87E915BD_VERROUS_OUVERTURE_20260827.md`,
+27 août 2026) : aucun des objets partiels proposés (hiérarchie de
+connectivité seule par K, partition finale à une coupe, requêtes ciblées) ne
+peut être appelé à lui seul « hiérarchie HGP calculée » ; le terme « forêt
+complète K = 1..10 » est retiré tant que la tour et la publication
+transactionnelle ne sont pas livrées. Le contrat minimal recevable pour un
+flux par K déclare la version de représentation, les niveaux de lots, les
+deltas (parents, naissances, représentant de sortie), la partition finale ou
+un certificat de reconstruction, la politique de rétention des facettes, les
+applications verticales si l'objet revendiqué est la tour, et le statut
+terminal global avant publication. Le payload livré à ce pin :
+
 Version de représentation déclarée : `mhgp5-forests-horizontal-v1`
 (`src/pipeline/run.hpp`, imprimée par le pilote : `payload=… authority=…
 callbacks=… vertical_maps=…`).
@@ -146,7 +186,9 @@ callbacks=… vertical_maps=…`).
 
 Une coupe ciblée ou une partition à un rayon donné sera un **autre** payload
 versionné (nom, objet reconstructible, autorité, politique de coupe) ; elle
-ne prouve pas que les forêts ont été matérialisées.
+ne prouve pas que les forêts ont été matérialisées. À très grande taille, un
+flux émis avant le statut terminal n'est recevable que marqué `provisional`
+et invalidable atomiquement — protocole non porté par l'API actuelle (§ 0).
 
 ### 7.1 Applications verticales : décision d'architecture (réponse de l'auditeur du 27 août 2026)
 

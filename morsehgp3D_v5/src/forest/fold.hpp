@@ -32,6 +32,7 @@
 #pragma once
 
 #include <algorithm>
+#include <atomic>
 #include <array>
 #include <string>
 #include <vector>
@@ -203,7 +204,6 @@ inline std::vector<u32> sort_events_by_level(const std::vector<ForestEvent>& eve
 // dependent de rien d'autre : la sortie est bit-identique a 1 fil et a N fils.
 inline constexpr int kFoldPartitionBits = 6;
 inline constexpr size_t kFoldPartitions = (size_t)1 << kFoldPartitionBits;
-inline constexpr u32 kFoldTidMask = (1u << (32 - kFoldPartitionBits)) - 1u;
 
 // ETAT PREPARE d'un fold : tout ce qui est parallele (tri des evenements,
 // lots, internement partitionne, fusion, remap). La reduction (union-find a
@@ -220,6 +220,47 @@ struct FoldPrepared {
   std::vector<u32> ev_fid;
   bool mutants[6] = {false, false, false, false, false, false};  // binary, repr, attach_pre, drop_nonmerge, canon_root, no_detector
 };
+
+// VALIDATION STRUCTURELLE (P0 de l'audit 9762daaf), distincte de la garde de
+// capacite et AVANT toute allocation ou tri : q in [2, 11], d <= 9, q + d <= 11,
+// un meme K = q + d - 1 dans l'appel, identifiants distincts (support et
+// interieur), active_mask borne aux q bits. Un evenement hors contrat est un
+// refus `invalid_input`, jamais une ecriture hors des dix cases de FacetKey.
+inline bool fold_event_ok(const ForestEvent& ev, int K) {
+  if (ev.q < 2 || ev.q > 11 || ev.d > 9 || (int)ev.q + (int)ev.d > 11) return false;
+  if ((int)ev.q + (int)ev.d - 1 != K) return false;
+  if ((u32)ev.active_mask >= (1u << ev.q)) return false;
+  PointId ids[20];
+  int n = 0;
+  for (int t = 0; t < (int)ev.q; ++t) ids[n++] = ev.support[t];
+  for (int t = 0; t < (int)ev.d; ++t) ids[n++] = ev.interior[t];
+  for (int a = 0; a < n; ++a)
+    for (int b = a + 1; b < n; ++b)
+      if (ids[a] == ids[b]) return false;
+  return true;
+}
+
+inline bool validate_fold_events(const std::vector<ForestEvent>& events, int threads, std::string* why) {
+  if (events.empty()) return true;
+  const int K = (int)events[0].q + (int)events[0].d - 1;
+  std::atomic<u64> first_bad{~(u64)0};
+  parallel_ranges(events.size(), threads, [&](size_t b, size_t e, size_t) {
+    for (size_t i = b; i < e; ++i) {
+      if (fold_event_ok(events[i], K)) continue;
+      u64 cur = first_bad.load();
+      while ((u64)i < cur && !first_bad.compare_exchange_weak(cur, (u64)i)) {
+      }
+      return;
+    }
+  });
+  const u64 bad = first_bad.load();
+  if (bad == ~(u64)0) return true;
+  const ForestEvent& ev = events[(size_t)bad];
+  *why = "invalid_input : evenement " + std::to_string(bad) + " hors contrat (q=" + std::to_string((int)ev.q) +
+         ", d=" + std::to_string((int)ev.d) + ", K attendu=" + std::to_string(K) +
+         ") : q in [2,11], d <= 9, q+d <= 11, K constant, identifiants distincts, masque < 2^q";
+  return false;
+}
 
 inline FoldPrepared prepare_fold(const std::vector<ForestEvent>& events, int threads = 1) {
   using namespace fold_detail;
@@ -240,7 +281,8 @@ inline FoldPrepared prepare_fold(const std::vector<ForestEvent>& events, int thr
     *out += std::chrono::duration<double, std::milli>(now - tmark).count();
     tmark = now;
   };
-  // Garde de capacite AVANT toute allocation (la meme que fold_capacity_ok).
+  // Validation structurelle puis garde de capacite, AVANT toute allocation.
+  if (!validate_fold_events(events, threads, &r.refusal)) return fp;
   u64 total_recs = 0;
   for (const ForestEvent& ev : events) total_recs += (u64)ev.q + ev.d;
   if (!fold_capacity_ok((u64)events.size(), total_recs, &r.refusal)) return fp;
@@ -273,6 +315,7 @@ inline FoldPrepared prepare_fold(const std::vector<ForestEvent>& events, int thr
   std::vector<FacetKey>& keys = fp.keys;
   fp.ev_fid.assign(ne * 11, 0);
   std::vector<u32>& ev_fid = fp.ev_fid;
+  std::vector<u8> ev_part(ne * 11, 0);  // partition de chaque enregistrement (temporaire de prepare_fold)
   {
     struct Rec {
       u64 h;
@@ -339,8 +382,10 @@ inline FoldPrepared prepare_fold(const std::vector<ForestEvent>& events, int thr
         const size_t ev_i = rc.pos / 11, slot = rc.pos % 11;
         const ForestEvent& ev = evt(ev_i);
         const FacetKey f = slot < ev.q ? facet_minus(ev, (int)slot, -1) : facet_minus(ev, -1, (int)(slot - ev.q));
-        const u32 tid = in.intern_hashed(f, rc.h);
-        ev_fid[rc.pos] = ((u32)p << (32 - kFoldPartitionBits)) | tid;
+        // Temporaire {partition, tid} en deux tableaux : injectif sans borne
+        // sur le nombre de facettes par partition (P1 de l'audit 9762daaf).
+        ev_fid[rc.pos] = in.intern_hashed(f, rc.h);
+        ev_part[rc.pos] = (u8)p;
       }
       std::vector<u64>().swap(in.table);
       pools[p].swap(in.pool);
@@ -420,8 +465,7 @@ inline FoldPrepared prepare_fold(const std::vector<ForestEvent>& events, int thr
         const size_t ev_i = i / 11, slot = i % 11;
         const ForestEvent& ev = evt(ev_i);
         if (slot >= (size_t)ev.q + ev.d) continue;
-        const u32 v = ev_fid[i];
-        ev_fid[i] = g_of[(size_t)(v >> (32 - kFoldPartitionBits))][(size_t)(v & kFoldTidMask)];
+        ev_fid[i] = g_of[(size_t)ev_part[i]][(size_t)ev_fid[i]];
       }
     });
     r.workers = std::max(r.workers, (u64)created);

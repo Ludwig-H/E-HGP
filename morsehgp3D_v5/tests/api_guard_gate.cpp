@@ -8,6 +8,8 @@
 //   pas le vide) ; expansion a kmax = 1 (smax = 2).
 // Codes : 0 conforme, 3 contrat viole.
 #include <cstdio>
+#include <stdexcept>
+#include <string>
 #include <vector>
 
 #include "../src/cloud/families.hpp"
@@ -79,6 +81,38 @@ int main() {
     o = base;
     o.shell_cap = 3;
     run_case("shell_cap=3", small, o, PipelineStatus::kInvalidInput);
+    // P0 (audit 9762daaf) : plafond de coquille au-dela du profil [4, 12] —
+    // l'enumeration des plateaux indexe 1u << |coquille| ; 13, 32 et SIZE_MAX
+    // sont refuses AVANT calcul, zero callback.
+    for (const size_t cap : {(size_t)13, (size_t)32, (size_t)SIZE_MAX}) {
+      o = base;
+      o.shell_cap = cap;
+      char label[64];
+      std::snprintf(label, sizeof(label), "shell_cap=%zu", cap);
+      run_case(label, small, o, PipelineStatus::kInvalidInput);
+    }
+    o = base;
+    o.shell_cap = 12;
+    run_case("shell_cap=12 (limite haute du profil)", small, o, PipelineStatus::kCompleteRegular);
+  }
+  // P1 (audit 9762daaf) : une exception de `on_forest` est propagee par
+  // run_pipeline apres jonction du fil d'arriere-plan — pas d'abort.
+  {
+    RunOptions o;
+    o.threads = 2;
+    int calls = 0;
+    o.on_forest = [&](u64 K, const std::vector<ForestEvent>&, const ForestResult&) {
+      ++calls;
+      if (K == 2) throw std::runtime_error("callback K=2");
+    };
+    bool caught = false;
+    try {
+      (void)run_pipeline(small, o);
+    } catch (const std::runtime_error& e) {
+      caught = std::string(e.what()) == "callback K=2";
+    }
+    expect(caught, "exception du callback non propagee");
+    expect(calls == 2, "exception du callback : le pipeline a continue apres K=2");
   }
   // P1 : census sur un singleton — le point (1,1,1) est strictement interieur a
   // P(z) = |z|² − 4 : at_least(1) vrai ; at_least(2) faux avec count = 1 ;

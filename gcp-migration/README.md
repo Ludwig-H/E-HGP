@@ -615,13 +615,13 @@ depuis le commit) → `set_max_run_duration_and_verify.sh` → clé OS Login
 `ctest -L gate` sur la VM → `v5_campaign_remote.sh` (phase 0 : témoin device
 `mhgp5_device_witness` compilé par le `nvcc` de l'image — CUDA 12.9 — avec
 `-DMHGP5_ENABLE_CUDA=ON`, statut gravé comme un run, code 2 si `nvcc` est
-absent ; phase 1 : conformité
+absent ; un témoin non conforme **refuse** les phases suivantes ; phase 1 : conformité
 `mhgp5_conformity_v4` aux tailles 8000/16000/32000 contre le reçu
 `morsehgp3D_v5/receipts/conformite_v4/digests_v4.txt` ; phase 2 : contrat
 50 000 points par `mhgp5 --digest`, 48 fils, RSS par GNU time — refusée si une
 conformité manque) → rapatriement avec reprises → `validate_v5_campaign.py`
 (seule autorité du statut) → arrêt certifié `TERMINATED` par le trap. Porte
-transactionnelle sans GCP : `selftest_campagne_v5.sh` (sept scénarios, à
+transactionnelle sans GCP : `selftest_campagne_v5.sh` (huit scénarios, à
 lancer à la main avant toute session payante ; jamais depuis la CI), dont un
 témoin device en désaccord qui doit refuser `complete`.
 

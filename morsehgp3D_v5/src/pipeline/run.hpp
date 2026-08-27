@@ -17,6 +17,7 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <exception>
 #include <thread>
 #include <vector>
 
@@ -88,12 +89,19 @@ inline constexpr const char* kForestPayloadVersion = "mhgp5-forests-horizontal-v
 // GARDES DE BIBLIOTHEQUE (pas seulement de CLI) : toute option hors profil et
 // toute entree qui ne definit pas l'objet sont refusees AVANT tout calcul,
 // avec le statut contractuel — jamais un debordement.
+// Profil du plafond de coquille : 4 <= shell_cap <= 12 (arbitrage V2 ; une
+// coquille effectivement > 12 est resource_exhausted, jamais tronquee).
+inline constexpr size_t kShellCapProfile = 12;
+
 inline bool validate_run_options(const std::vector<InputPoint>& in, const RunOptions& opt, std::string* why) {
   if (in.size() < 2) { *why = "invalid_input : moins de deux points"; return false; }
   if (opt.s < 1) { *why = "invalid_input : separation s < 1"; return false; }
   if (opt.smax < 2 || opt.smax > kSmaxProfile) { *why = "invalid_input : smax hors du profil [2, 11]"; return false; }
   if (opt.threads < 1) { *why = "invalid_input : threads < 1"; return false; }
-  if (opt.shell_cap < 4) { *why = "invalid_input : plafond de coquille < 4 (un support q4 a quatre points)"; return false; }
+  if (opt.shell_cap < 4 || opt.shell_cap > kShellCapProfile) {
+    *why = "invalid_input : plafond de coquille hors du profil [4, 12] (l'enumeration des plateaux indexe 2^|coquille|)";
+    return false;
+  }
   return true;
 }
 
@@ -195,6 +203,18 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
   std::thread bg;
   std::string bg_message;
   PipelineStatus bg_status = PipelineStatus::kCompleteRegular;
+  // CONTRAT D'EXCEPTION : une exception levee par `on_forest` (ou par l'etage
+  // B) est capturee dans le fil d'arriere-plan, le fil est JOINT, puis elle
+  // est relancee par run_pipeline dans le fil appelant — jamais
+  // std::terminate. Le joiner RAII joint aussi sur toute sortie anticipee du
+  // fil principal (exception de l'etage A comprise).
+  std::exception_ptr bg_exc;
+  struct BgJoiner {
+    std::thread& t;
+    ~BgJoiner() {
+      if (t.joinable()) t.join();
+    }
+  } bg_joiner{bg};
   // Le fil principal n'ecrit que dans ses propres cumuls pendant qu'un etage B
   // est en vol ; les cumuls du fil d'arriere-plan (t_fold_*, digests, cartes,
   // totaux) ne sont lus qu'apres le join. Un seul champ etait partage
@@ -202,6 +222,7 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
   double t_prepare_total_ms = 0;
   const auto join_bg = [&]() {
     if (bg.joinable()) bg.join();
+    if (bg_exc) std::rethrow_exception(bg_exc);
   };
   for (u64 K = 1; K <= rr.kmax_eff; ++K) {
     auto st = std::make_unique<Stage>();
@@ -230,13 +251,14 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
       rr.message = bg_message;
       return rr;
     }
-    bg = std::thread([&rr, &opt, &dg_all, &bg_status, &bg_message, st = std::move(st)]() mutable {
+    bg = std::thread([&rr, &opt, &dg_all, &bg_status, &bg_message, &bg_exc, st = std::move(st)]() mutable {
+     try {
       const u64 K = st->K;
       const auto t_r = std::chrono::steady_clock::now();
       ForestResult r = reduce_fold(std::move(st->prep));
       rr.t_fold_ms += run_detail::ms(t_r);
       rr.t_fold_sort_ms += r.t_sort_ms;
-      rr.t_fold_intern_ms += r.t_intern_ms + r.t_merge_ms;
+      rr.t_fold_intern_ms += r.t_intern_ms;
       rr.t_fold_merge_ms += r.t_merge_ms;
       rr.t_fold_reduce_ms += r.t_reduce_ms + r.t_partition_ms;
       rr.fold_workers = std::max(rr.fold_workers, r.workers);
@@ -260,6 +282,9 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
       if (opt.on_forest) opt.on_forest(K, st->events, r);
       // Liberation : evenements et resultat de cet ordre.
       st.reset();
+     } catch (...) {
+      bg_exc = std::current_exception();
+     }
     });
   }
   join_bg();

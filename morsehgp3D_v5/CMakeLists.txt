@@ -20,11 +20,13 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif()
-add_compile_options(-Wall -Wextra -Wpedantic -Werror)
+# Options GCC bornees au C++ (nvcc recoit les siennes via -Xcompiler dans la
+# cible CUDA) — audit 9762daaf.
+add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-Wall;-Wextra;-Wpedantic;-Werror>")
 option(MHGP5_ENABLE_SANITIZERS "ASan + UBSan sur toutes les cibles (incompatible CUDA)" OFF)
 option(MHGP5_ENABLE_CUDA "Temoin device (nvcc, sm_120, -fmad=false) — docs/GPU.md" OFF)
 if(MHGP5_ENABLE_SANITIZERS)
-  add_compile_options(-fsanitize=address,undefined -fno-omit-frame-pointer)
+  add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-fsanitize=address,undefined;-fno-omit-frame-pointer>")
   add_link_options(-fsanitize=address,undefined)
 endif()
 find_package(Threads REQUIRED)
@@ -280,6 +282,10 @@ mhgp5_gate(mhgp5_q3_scan_shaped_cocirc 0 mhgp5_q3_scan_shaped_gate "--family=uni
 mhgp5_gate(mhgp5_q3_scan_shaped_mutant_flip 4 mhgp5_q3_scan_shaped_gate "--family=uniform --n=300 --coord=40 --inject=q3-shaped-strict-flip")
 
 # Lane q3 par lots (etage hote de la lane device) : egalite vecteur a vecteur avec la production.
+# Contrat structurel du fold (P0 audit 9762daaf) : rejets permanents et limites positives.
+mhgp5_executable(mhgp5_fold_contract_gate tests/fold_contract_gate.cpp)
+mhgp5_gate(mhgp5_fold_contract 0 mhgp5_fold_contract_gate "")
+
 mhgp5_executable(mhgp5_q3_lane_batched_gate tests/q3_lane_batched_gate.cpp)
 mhgp5_gate(mhgp5_q3_lane_batched_uniform 0 mhgp5_q3_lane_batched_gate "--family=uniform --n=1200 --threads=3")
 mhgp5_gate(mhgp5_q3_lane_batched_clusters 0 mhgp5_q3_lane_batched_gate "--family=eight_clusters --n=1200 --threads=3")
@@ -301,8 +307,10 @@ if(MHGP5_ENABLE_CUDA)
   endif()
   add_executable(mhgp5_device_witness src/gpu/device_witness.cu)
   # -fmad=false : aucune contraction hors des fma EXPLICITES de la sequence figee du filtre.
-  target_compile_options(mhgp5_device_witness PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-fmad=false --expt-relaxed-constexpr -Xcompiler=-Wall,-Wextra>)
+  target_compile_options(mhgp5_device_witness PRIVATE
+    "$<$<COMPILE_LANGUAGE:CUDA>:-fmad=false;--expt-relaxed-constexpr;-Xcompiler=-Wall,-Wextra,-Werror>")
   target_compile_definitions(mhgp5_device_witness PRIVATE MHGP5_TESTING=1)
   target_link_libraries(mhgp5_device_witness PRIVATE Threads::Threads)
   mhgp5_gate(mhgp5_device_witness 0 mhgp5_device_witness "" LABELS gpu)
+  mhgp5_gate(mhgp5_device_witness_mutant_warp 4 mhgp5_device_witness "--inject=witness-no-warp-correction" LABELS gpu)
 endif()

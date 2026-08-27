@@ -59,6 +59,7 @@ inline constexpr const char* kMutants[] = {
     // oracle et portes (points d'injection dans oracle/ et tests/)
     "obig-carry-lost", "float-small-threshold", "q3-sign-p", "q3-cramer-swap", "q3-shaped-strict-flip",
     "q3-batched-emit-dead",
+    "witness-no-warp-correction",
 };
 
 inline std::vector<std::string>& mutant_registry() {
