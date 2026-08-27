@@ -91,7 +91,8 @@ src/cloud     familles de nuages (port bit à bit v3/v4, digests gravés)
 src/tree      index spatial unique : positions uniques, buckets, arbre radix
 src/wspd      décomposition bien séparée par vagues
 src/spindle   fuseaux W_q, boule-cœur, comptage de témoins (h_coeur/h_a/h_b)
-src/lanes     formes exactes q2/q3/q4, clés, niveaux, cover d'arête
+src/lanes     formes exactes q2/q3/q4, clés, niveaux, cover d'arête ; tests d'ancre (W_q exact, témoins
+              sectoriels : sector_kill.hpp) et de seed q4 (morceaux de corde : chord_kill.hpp) — MATHEMATIQUES § 10
 src/pipeline  génération → RLE → préfiltre → census → plateaux → flux
 src/forest    fold par K (macro-lots, deltas), rendu § 9.1
 src/gpu       point 2 : arithmétique portable DI128, scans « en forme de kernel » (q3, cœur et complétions q4)
