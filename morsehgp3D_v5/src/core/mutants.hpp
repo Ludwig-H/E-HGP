@@ -45,7 +45,7 @@ inline constexpr const char* kMutants[] = {
     "q4-seed-core-nonstrict", "q4-eq-nonstrict", "q4-eq-sign", "q4-i64-drop-factor",
     "q4-i64-pair-min", "jung-swap-bounds",
     // entiers larges
-    "level-trunc-hi",
+    "level-trunc-hi", "dint-mulhi-dropped",
     // flux / census / plateaux
     "rle-drop", "census-nonstrict", "genfilter-nonstrict", "depth-threshold-minus-one",
     "range-add-max-le-zero", "skip-full-census",

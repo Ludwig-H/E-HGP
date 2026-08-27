@@ -262,3 +262,11 @@ mhgp5_gate(mhgp5_fold_bench_signature 0 mhgp5_fold_bench "--family=uniform --n=1
 # ---- SHA-256 : vecteurs FIPS et egalite portable / SHA-NI ---------------------------
 mhgp5_executable(mhgp5_sha256_gate tests/sha256_gate.cpp)
 mhgp5_gate(mhgp5_sha256_gate 0 mhgp5_sha256_gate "")
+
+# ---- Arithmetique 128 bits portable et formes device (preparation du port GPU) ----
+mhgp5_executable(mhgp5_dint_gate tests/dint_gate.cpp)
+mhgp5_gate(mhgp5_dint_gate 0 mhgp5_dint_gate
+    "--cases=200000 --min-cases=200000 --min-triangles=60000 --min-tetra=150000 --min-inside=12000 --min-spindle=380000")
+mhgp5_gate(mhgp5_dint_mutant_mulhi_dropped 4 mhgp5_dint_gate "--cases=20000 --inject=dint-mulhi-dropped")
+mhgp5_gate(mhgp5_dint_refus_mutant_inconnu 2 mhgp5_dint_gate "--inject=inconnu")
+mhgp5_gate(mhgp5_dint_refus_argument 2 mhgp5_dint_gate "--argument-inconnu")
