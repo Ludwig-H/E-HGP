@@ -92,6 +92,18 @@ d'ancre (ne jamais envoyer au device une ancre tuable en ~22 évaluations).
 Les compteurs des reçus 50 k antérieurs (seeds, `depth_killed`, `q3_cert`)
 sont périmés ; leurs digests ne le sont pas.
 
+**Session G4 n° 7 (pin `fa99b3f1`, tests d'ancre en production, 27 août
+2026 — d'après le journal de session ; artefacts rapatriés par mini-session
+gardée après une corruption du script de session, voir le reçu)** : 12
+conformités 8 k / 16 k / 32 k à code 0 (`eight_clusters` 32 k : 83 s contre
+122 s) ; contrats CPU 50 k : `uniform` 78 s (inchangé, fold), `terrain` 21 s
+(23), `eight_clusters` **162 s (246)**, `scanline` **23 s (38)** ; contrats
+`--gpu` : 81 / 25 / 174 / 24 s — le chemin device par lots revient à
+**parité** avec le CPU (au lieu de +14 % à +192 %), parce que les tests
+d'ancre tuent avant matérialisation ; adaptatif 256 : 174 / 24 s. Lecture
+V8 : sur ce pin, ni le tout-device ni l'adaptatif n'ont de gain net à 50 k ;
+le résidu de la lane q3 CPU est la construction des covers, pas le scan.
+
 ## 1. Ce que la mesure G4 a désigné (27 août 2026)
 
 Sur `g4-standard-48` à 48 fils, K = 1..10 exact (reçu
