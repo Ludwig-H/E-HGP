@@ -1,0 +1,9 @@
+code=0
+duree_s=11
+peak_rss_kb=2491980
+timing_scope=conformity
+threads=48
+source_commit=fa99b3f127e06aa686a301c084f8311e80d5c554
+source_payload_sha256=efe87b9b7e3a65e218997c9bce43a2ec95f2fa38e0f4efcffd5cf2f9cdb149e1
+protocol_manifest_sha256=d5d6c71efc44365c2bab311016315966ee7674d48923e1cf2bc2a9923806fdc8
+finished=1
