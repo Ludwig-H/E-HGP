@@ -6,6 +6,10 @@
 // digest_all. Codes : 0 conforme, 1 divergence (a documenter : choix de
 // contrat ou fixture v5, jamais une difference silencieuse), 2 entree absente
 // du recu ou refus, 3 invariant.
+// PORTE DE MUTANTS DU PIPELINE : avec --inject=<mutant>, la divergence du
+// digest EST la mise a mort (code 4) ; un digest inchange sous mutant est une
+// porte inefficace (code 3). Un mutant qui fait REFUSER le pipeline (code 2
+// ou 3 du statut) est lui aussi tue : il a change le comportement observable.
 #include <cstdio>
 #include <cstring>
 #include <fstream>
@@ -18,7 +22,7 @@
 using namespace mhgp5;
 
 int main(int argc, char** argv) {
-  std::string receipt, fam_name;
+  std::string receipt, fam_name, inject;
   int n = 0, threads = 1;
   for (int i = 1; i < argc; ++i) {
     const std::string arg = argv[i];
@@ -26,10 +30,15 @@ int main(int argc, char** argv) {
     else if (arg.rfind("--family=", 0) == 0) fam_name = arg.substr(9);
     else if (arg.rfind("--n=", 0) == 0) n = std::atoi(arg.c_str() + 4);
     else if (arg.rfind("--threads=", 0) == 0) threads = std::atoi(arg.c_str() + 10);
+    else if (arg.rfind("--inject=", 0) == 0) inject = arg.substr(9);
     else return 2;
   }
   CloudFamily family;
   if (receipt.empty() || n < 2 || !parse_cloud_family(fam_name.c_str(), &family)) return 2;
+  if (!inject.empty() && !mutants_enable(inject)) {
+    std::fprintf(stderr, "REFUS : mutant inconnu %s\n", inject.c_str());
+    return 2;
+  }
   std::ifstream f(receipt);
   if (!f) {
     std::fprintf(stderr, "REFUS : recu %s illisible\n", receipt.c_str());
@@ -58,12 +67,24 @@ int main(int argc, char** argv) {
   const RunResult rr = run_pipeline(make_family_input(family, n, coord, 3), opt);
   if (rr.status != PipelineStatus::kCompleteRegular) {
     std::fprintf(stderr, "REFUS %s\n", rr.message.c_str());
+    if (!inject.empty()) {
+      std::fprintf(stderr, "MUTANT TUE : %s change le statut\n", inject.c_str());
+      return 4;
+    }
     return status_exit_code(rr.status);
   }
   print_run(stdout, fam_name.c_str(), n, coord, 3, opt, rr);
   const bool ok_b = rr.digest_balls == exp_balls, ok_a = rr.digest_all == exp_all;
   std::printf("conformite_v4 famille=%s n=%d balls=%s all=%s\n", fam_name.c_str(), n, ok_b ? "egal" : "DIFFERENT",
               ok_a ? "egal" : "DIFFERENT");
+  if (!inject.empty()) {
+    if (ok_b && ok_a) {
+      std::fprintf(stderr, "PORTE INEFFICACE : mutant %s sans effet sur les digests\n", inject.c_str());
+      return 3;
+    }
+    std::fprintf(stderr, "MUTANT TUE : %s (balls %s, all %s)\n", inject.c_str(), ok_b ? "=" : "!=", ok_a ? "=" : "!=");
+    return 4;
+  }
   if (!ok_b || !ok_a) {
     std::fprintf(stderr, "DIVERGENCE v4/v5 : balls %s / all %s\n", ok_b ? "=" : "!=", ok_a ? "=" : "!=");
     return 1;

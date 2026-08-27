@@ -130,3 +130,27 @@ if(Python3_Interpreter_FOUND)
 else()
   message(WARNING "mhgp5 : Python 3 introuvable — porte du registre des mutants non enregistree")
 endif()
+
+# ---- Mutants du pipeline (tues par divergence de digest, code 4) ---------------
+# Les mutants FAIL-OPEN (ils ne changent pas l'objet sur une famille reguliere :
+# q3-prune-ge, q4-eq-nonstrict, q4-seeds-from-q3-live, q4-cover-coef3,
+# q4-no-canonical, q4-seed-core-nonstrict, jung-swap-bounds, cover-rect-dmin,
+# level-trunc-hi) ont chacun leur porte DEDIEE a fixture discriminante (oracles
+# q3/q4, fixture 13 points, level_cmp, affine) — jamais cette boucle.
+foreach(m rle-drop census-nonstrict genfilter-nonstrict depth-threshold-minus-one range-add-max-le-zero skip-full-census
+          binary-ties repr-ties attach-prebatch drop-nonmerge canonical-is-uf-root dense-pointid
+          q3-level-4g q4-center-parity q4-eq-sign q4-i64-drop-factor q4-i64-pair-min)
+  mhgp5_gate(mhgp5_pipeline_mutant_${m} 4 mhgp5_conformity_v4
+      "--receipt=${_recu} --family=eight_clusters --n=400 --threads=8 --inject=${m}")
+endforeach()
+
+# ---- Parallelisme et relabeling ------------------------------------------------
+mhgp5_executable(mhgp5_par_gate tests/par_gate.cpp)
+mhgp5_gate(mhgp5_par_gate_uniform 0 mhgp5_par_gate "--family=uniform --n=400 --threads=8")
+mhgp5_gate(mhgp5_par_gate_clusters 0 mhgp5_par_gate "--family=eight_clusters --n=400 --threads=8")
+mhgp5_gate(mhgp5_par_mutant_drop_shard 4 mhgp5_par_gate "--family=uniform --n=400 --threads=8 --inject=par-drop-shard")
+mhgp5_gate(mhgp5_par_mutant_drop_chunk 4 mhgp5_par_gate "--family=uniform --n=400 --threads=8 --inject=par-drop-ball-chunk")
+mhgp5_gate(mhgp5_par_mutant_one_worker 4 mhgp5_par_gate "--family=uniform --n=400 --threads=8 --inject=parallel-one-worker")
+mhgp5_executable(mhgp5_relabel_gate tests/relabel_gate.cpp)
+mhgp5_gate(mhgp5_relabel_gate 0 mhgp5_relabel_gate "--n=300")
+mhgp5_gate(mhgp5_relabel_mutant_dense 4 mhgp5_relabel_gate "--n=300 --inject=dense-pointid")
