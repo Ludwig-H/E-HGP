@@ -57,7 +57,7 @@ inline constexpr const char* kMutants[] = {
     // rendu
     "render-active-only", "render-collapse-mult", "birth-from-events",
     // oracle et portes (points d'injection dans oracle/ et tests/)
-    "obig-carry-lost", "float-small-threshold", "q3-sign-p", "q3-cramer-swap",
+    "obig-carry-lost", "float-small-threshold", "q3-sign-p", "q3-cramer-swap", "q3-shaped-strict-flip",
 };
 
 inline std::vector<std::string>& mutant_registry() {

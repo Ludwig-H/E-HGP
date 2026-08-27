@@ -270,3 +270,10 @@ mhgp5_gate(mhgp5_dint_gate 0 mhgp5_dint_gate
 mhgp5_gate(mhgp5_dint_mutant_mulhi_dropped 4 mhgp5_dint_gate "--cases=20000 --inject=dint-mulhi-dropped")
 mhgp5_gate(mhgp5_dint_refus_mutant_inconnu 2 mhgp5_dint_gate "--inject=inconnu")
 mhgp5_gate(mhgp5_dint_refus_argument 2 mhgp5_dint_gate "--argument-inconnu")
+
+# ---- Scan q3 en forme de kernel (DI128) ≡ lane q3 de production ---------------------
+mhgp5_executable(mhgp5_q3_scan_shaped_gate tests/q3_scan_shaped_gate.cpp)
+mhgp5_gate(mhgp5_q3_scan_shaped_uniform 0 mhgp5_q3_scan_shaped_gate "--family=uniform --n=400 --min-seeds=1000 --min-fallback=10")
+mhgp5_gate(mhgp5_q3_scan_shaped_clusters 0 mhgp5_q3_scan_shaped_gate "--family=eight_clusters --n=400 --min-seeds=1000 --min-fallback=10")
+mhgp5_gate(mhgp5_q3_scan_shaped_cocirc 0 mhgp5_q3_scan_shaped_gate "--family=uniform --n=300 --coord=40 --min-seeds=500 --min-fallback=100")
+mhgp5_gate(mhgp5_q3_scan_shaped_mutant_flip 4 mhgp5_q3_scan_shaped_gate "--family=uniform --n=300 --coord=40 --inject=q3-shaped-strict-flip")
