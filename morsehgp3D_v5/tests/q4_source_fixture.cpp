@@ -45,7 +45,8 @@
 // MUTANTS :
 //   q4-seeds-from-q3-live : la lane q4 branchee sur les rectangles vivants
 //     de q3 ; l'ancre ab est q3-morte => le tetraedre est PERDU (code 4) ;
-//   q4-cover-coef3 : cover coefficient 3 au lieu de 4. En v5 le census est
+//   NOTE v5 (audit 87e915bd) : la PRODUCTION utilise le coefficient 3 (la v4
+//   aussi) ; le coefficient 4 est le mutant `q4-cover-coef4`. En v5 le census est
 //     une descente EXACTE de l'arbre (census.hpp), independante du cover :
 //     l'interieur 22 de la version 23 est retrouve quand meme et l'OBJET ne
 //     change pas — la fixture 13+1 de la v4 ne le discrimine PLUS (constat

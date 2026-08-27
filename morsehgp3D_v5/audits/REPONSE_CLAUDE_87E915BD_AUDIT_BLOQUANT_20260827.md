@@ -28,8 +28,8 @@ L'audit a été lu et **exécuté** (ses trois harnesses ASan/UBSan, le singleto
 - `MHGP5_MUTANT` n'est compilé que sous `MHGP5_TESTING` (posé par `mhgp5_executable` sur les cibles de `tests/`) ; dans une cible produit (`mhgp5_product_executable`, le pilote `mhgp5`) la macro est la constante `false` et `mutants_enable` refuse tout nom. Le pilote produit **n'a plus** d'option `--inject`.
 - `conformity_v4 --inject=<m>` exécute d'abord son **bras nominal apparié** (sous-processus, mêmes arguments) et exige sa conformité au reçu ; la mise à mort est la divergence mutant/nominal, jamais une divergence préexistante (faux positif de l'audit fermé).
 - `wspd-cap-terminal` et `wspd-split-heaviest` ont une porte à code 4 appariée (front mutant strictement plus gros que le nominal).
-- Couverture code 4 des 43 mutants du registre : tous sauf **`attach-detector-disabled`**, **`cover-rect-dmin`**, **`q4-no-canonical`**, **`q4-seed-core-nonstrict`** (les quatre fixtures que l'audit nomme « réellement absentes » — OUVERT, prochain jalon).
-- `mutants_gate.py` vérifie toujours registre ↔ sites ; il ne vérifie pas encore « cible CMake + code 4 » (OUVERT ; la liste ci-dessus est tenue à la main jusque-là).
+- Couverture code 4 des **43 mutants** du registre : complète. Les quatre fixtures que l'audit nommait « réellement absentes » existent : `mhgp5_detector_gate` (flux fabriqué incohérent : `attach_violations` et `birth_violations` non nuls, `attach-detector-disabled` les met à zéro), `mhgp5_cover_gate` (cover par handles ≡ requête directe sur 79 800 ancres ; `cover-rect-dmin` perd 7 422 sites), `mhgp5_q4_once_gate` (nuage sans cosphéricité : émissions q4 = clés d'arité 4 ; `q4-no-canonical` émet 22 724 pour 12 477 clés), `mhgp5_q4_seed_core_fixture` (fixture-cœur cocirculaire, sphère 3721/144 ; `q4-seed-core-nonstrict` fait disparaître la clé).
+- `mutants_gate.py` vérifie maintenant registre ↔ sites ↔ **porte CTest à code 4** (`mhgp5_gate(... 4 ... --inject=<m>)` ou boucle `foreach` en code 4) : 43 déclarés, 43 injectés, 43 gardés.
 
 ## 4. Oracles câblés — FERMÉ
 
@@ -50,8 +50,6 @@ Label `oracle` (aussi `gate`) : `mhgp5_obig_selftest` (juge du juge, 79 304 cas 
 
 ## Ce qui reste ouvert, par risque
 
-1. Quatre mutants sans porte à code 4 (`attach-detector-disabled`, `cover-rect-dmin`, `q4-no-canonical`, `q4-seed-core-nonstrict`).
-2. `mutants_gate.py` ne contrôle pas « cible CMake + code 4 ».
-3. Les applications verticales entre ordres (objet « tour ») ; le payload versionné de V3.
-4. Commentaires périmés de `q4_source_fixture.cpp` ; Boost absent (la troisième autorité `cpp_int` n'est pas exercée ici).
-5. Campagnes `scale16000` / `scale32000` et ASan : en cours, reçus à suivre.
+1. Les applications verticales entre ordres (objet « tour ») ; le payload versionné de V3.
+2. Boost absent (la troisième autorité `cpp_int` n'est pas exercée ici) ; `mutants_gate.py` compte les sites dans les commentaires comme des sites (une mention dans un commentaire suffirait à le tromper — à durcir).
+3. Campagnes `scale16000` / `scale32000` et ASan : en cours, reçus à suivre (la campagne à manifeste donne déjà les quatre familles à 8000 égales sur les deux digests, RSS max v5 2,6 Go contre 5,7 Go pour la v4).
