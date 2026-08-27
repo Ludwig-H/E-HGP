@@ -37,11 +37,13 @@ set -euo pipefail
 if [ -z "${MHGP5_SESSION_SELF_COPY:-}" ]; then
   _self_copy="$(mktemp /tmp/ehgp-v5session-copy.XXXXXXXX.sh)"
   cp "$0" "${_self_copy}"
-  MHGP5_SESSION_SELF_COPY="${_self_copy}" exec bash "${_self_copy}" "$@"
+  MHGP5_SESSION_REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+  export MHGP5_SESSION_REPO_ROOT
+  MHGP5_SESSION_SELF_COPY="${_self_copy}" MHGP5_SESSION_SOURCE="$0" exec bash "${_self_copy}" "$@"
 fi
-echo "session executee depuis la copie ${MHGP5_SESSION_SELF_COPY} (source : $0)"
+echo "session executee depuis la copie ${MHGP5_SESSION_SELF_COPY} (source : ${MHGP5_SESSION_SOURCE:-?}, racine ${MHGP5_SESSION_REPO_ROOT:-?})"
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+REPO_ROOT="${MHGP5_SESSION_REPO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 cd "${REPO_ROOT}"
 
 export GCP_PROJECT_ID="${GCP_PROJECT_ID:-devpod-gpu-exploration}"
