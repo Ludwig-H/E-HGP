@@ -1,0 +1,15 @@
+rect_probe pin_configure=635951d654f466cfa7fe1e2297c19b9acb5393a9 worktree_src_modifie=non (HEAD et etat de src/ lus par CMake a la CONFIGURATION ; reconfigurer apres tout commit)
+rect_probe famille=scanline_single_pass n=4000 lane=q4 rectangles=86847 ancres=305981 tuees_hist=36172 tuees_w4=102941 vivantes=166868 seeds=2750044 survivants=28667
+rect_points(handles)   somme=10726673 p50=82 p90=228 p99=889 max=2443
+rect_handles           somme=524090 p50=4 p90=12 p99=45 max=126
+rect_|A|x|B|           somme=305981 p50=2 p90=6 p99=32 max=323
+rect_ancres_vivantes   somme=166868 p50=1 p90=4 p99=12 max=89
+rect_sum_covers        somme=12649790 p50=28 p90=213 p99=2220 max=66273
+rect_seeds             somme=2750044 p50=4 p90=38 p99=536 max=12911
+rect_survivants        somme=28667 p50=0 p90=1 p99=4 max=280
+ancre_cover            somme=12649790 p50=35 p90=197 p99=567 max=1349
+ancre_seeds            somme=2750044 p50=6 p90=50 p99=140 max=279
+secteurs : K=4 tue 11060 ancres vivantes (6.6 %), seeds evites 495132 (18.0 %) ; K=8 tue 14680 (8.8 %), seeds evites 697901 (25.4 %) ; FAUX POSITIFS (ancre tuee avec survivant) = 0
+production (W_q exact + secteurs cumules) : tue 14680 ancres vivantes (8.8 %), dont 0 par W_q, seeds evites 697901 (25.4 %)
+temps (ratios dans ce run, 1 fil, machine partagee — jamais un temps citable) : corps de production contrefactuel = 2128.0 ms ; variante de sonde K=4+K=8 = 159.6 ms ; test de production (W_q + secteurs) = 175.2 ms
+ratio sum_covers_ancres / points_rectangles = 1.18 ; ancres vivantes par rectangle = 1.92 ; seeds par survivant = 95.9

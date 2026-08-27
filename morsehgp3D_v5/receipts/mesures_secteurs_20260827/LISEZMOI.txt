@@ -3,14 +3,14 @@
 # somme des covers exacts, seeds, survivants ; quantiles) et TEST D'ANCRE PAR SECTEURS (temoins universels sur
 # un polygone circonscrit au disque des centres, K=4 et K=8) : ancres tuees, seeds evites, faux positifs
 # (= ancres tuees ayant pourtant un survivant : doit etre 0 par theoreme), temps du corps de production vs du test.
-# Synthese (fichiers regeneres apres integration en production, pin d'execution imprime en tete de chaque fichier ;
-#   le corps de production y est appele SANS ses tests d'ancre — contrefactuel — sinon la mesure serait circulaire ;
-#   « production » = W_q exact + secteurs cumules tels qu'en production ; FAUX POSITIFS = 0 dans tous les fichiers) :
-#   eight_clusters q3 : n=2000 tue 64,5 % des ancres vivantes, evite 95,0 % des seeds ; n=4000 : 67,8 % / 97,1 %.
-#   eight_clusters q4 : n=2000 30,2 % / 73,6 % ; n=4000 33,5 % / 77,8 % (W_4 deja compte avant, dans tuees_w4).
-#   uniform q3 : n=2000 33,4 % / 61,6 % ; n=4000 35,8 % / 64,6 % ; q4 : 24,3 % / 46,4 % ; 26,1 % / 48,9 %.
-#   scanline_single_pass q3 : n=2000 29,5 % / 65,3 % ; n=4000 34,3 % / 76,2 % ; q4 : 6,6 % / 16,3 % ; 8,8 % / 25,4 %.
-#   Les temps imprimes sont des ratios dans un meme run (1 fil, machine partagee), jamais des temps citables.
-#   Candidat de rectangle (points des handles) vs somme des covers d'ancres (cardinalites, pas des octets) :
-#   uniform 0,50 (2x plus cher), eight_clusters 6,9-10, scanline 2,2-3,5 ; ancres vivantes par rectangle : 1,2-3,7.
-#   Le test par secteurs NE CONTIENT PAS le test W_3 exact (fixture F3 de tests/anchor_kill_fixture.cpp) : cumules.
+# Synthese :
+#   DEUX variantes de polygone ont ete mesurees ; les fichiers de ce dossier portent la variante FINALE
+#   (parallelogramme des deux plus grands produits d x axe, K=4 et K=8). Chiffres des fichiers (n=2000, K=8) :
+#   eight_clusters q3 : 60,2 % des ancres vivantes tuees, 93,9 % des seeds evites ; q4 : 30,2 % / 73,6 % ;
+#   uniform q3 : 30,1 % / 57,4 % ; q4 : 24,3 % / 46,4 % ; n=4000 eight_clusters q3 : voir fichier (test non optimise :
+#   7,1 s pour 46,7 s de corps de production, 1 fil, machine partagee — les temps ne sont que des ratios dans un meme run).
+#   Variante initiale (losange e1, d x e1, K=4), non conservee : eight_clusters q3 n=2000 48,0 % / 88,3 %, n=4000 53,9 % / 92,9 %.
+#   0 faux positif partout. Le test par secteurs NE CONTIENT PAS le test W_3 exact (fixture F3 de tests/anchor_kill_fixture.cpp) :
+#   les deux sont cumules en production (sector_kill.hpp).
+#   Candidat de rectangle (points des handles) vs somme des covers d'ancres : uniform 0,50 (2x PLUS cher), eight_clusters 6,9-10 (partage utile),
+#   scanline 2,2-3,5 ; ancres vivantes par rectangle : 1,2-3,7.

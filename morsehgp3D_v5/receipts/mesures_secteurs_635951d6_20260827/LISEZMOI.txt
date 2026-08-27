@@ -1,0 +1,16 @@
+# Mesures (jamais un claim) — sonde bench/rect_probe.cpp, pin de CONFIGURATION 635951d6 (HEAD propre : worktree_src_modifie=non
+# imprime en tete de chaque fichier, CMake reconfigure APRES le commit), 27 aout 2026, 1 fil, machine partagee 8 vCPU.
+# Ce dossier remplace la variante finale qui avait ete ecrite a tort dans mesures_secteurs_20260827 (dossier restaure a son
+# contenu historique exact de a9a2f509, variante initiale losange K=4/K=8, sans contrefactuel).
+# Contenu par famille / taille / lane : tailles aplatees par rectangle (points des handles, |A|x|B|, ancres vivantes, somme
+# des covers exacts, seeds, survivants ; quantiles), test de sonde K=4 / K=8 (parallelogramme des deux plus grands produits
+# d x axe, octogone) et TEST DE PRODUCTION (W_q exact puis secteurs, sector_kill.hpp) — le corps de production est appele
+# en mode kCounterfactual (sans ses tests d'ancre), sinon « seeds evites » et « faux positifs » seraient circulaires.
+# FAUX POSITIF = ancre tuee ayant un survivant : code 1 (aucun dans ce dossier). Temps : ratios dans un meme run, jamais
+# des temps citables ; trois timers separes (contrefactuel / variante de sonde / test de production).
+# Synthese du test de production (ancres vivantes tuees / seeds evites) :
+#   eight_clusters q3 : n=2000 64,5 % / 95,0 % ; n=4000 67,8 % / 97,1 %.   q4 : 30,2 % / 73,6 % ; 33,5 % / 77,8 % (W_4 compte a part).
+#   uniform q3 : 33,4 % / 61,6 % ; 35,8 % / 64,6 %.   q4 : 24,3 % / 46,4 % ; 26,1 % / 48,9 %.
+#   scanline_single_pass q3 : 29,5 % / 65,3 % ; 34,3 % / 76,2 %.   q4 : 6,6 % / 16,3 % ; 8,8 % / 25,4 %.
+#   Candidat de rectangle (points des handles) vs somme des covers d'ancres (cardinalites) : uniform 0,50, eight_clusters 6,9-10,
+#   scanline 2,2-3,5 ; ancres vivantes par rectangle 1,2-3,7.
