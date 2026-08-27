@@ -299,12 +299,14 @@ if(MHGP5_ENABLE_CUDA)
   if(MHGP5_ENABLE_SANITIZERS)
     message(FATAL_ERROR "MHGP5_ENABLE_CUDA et MHGP5_ENABLE_SANITIZERS sont incompatibles")
   endif()
-  enable_language(CUDA)
-  set(CMAKE_CUDA_STANDARD 20)
-  set(CMAKE_CUDA_STANDARD_REQUIRED ON)
+  # sm_120 (RTX PRO 6000 Blackwell) : a fixer AVANT enable_language, sinon
+  # CMake initialise l'architecture par defaut (sm_52, session G4 50fee05c).
   if(NOT CMAKE_CUDA_ARCHITECTURES)
     set(CMAKE_CUDA_ARCHITECTURES 120)
   endif()
+  enable_language(CUDA)
+  set(CMAKE_CUDA_STANDARD 20)
+  set(CMAKE_CUDA_STANDARD_REQUIRED ON)
   add_executable(mhgp5_device_witness src/gpu/device_witness.cu)
   # -fmad=false : aucune contraction hors des fma EXPLICITES de la sequence figee du filtre.
   target_compile_options(mhgp5_device_witness PRIVATE
@@ -313,4 +315,14 @@ if(MHGP5_ENABLE_CUDA)
   target_link_libraries(mhgp5_device_witness PRIVATE Threads::Threads)
   mhgp5_gate(mhgp5_device_witness 0 mhgp5_device_witness "" LABELS gpu)
   mhgp5_gate(mhgp5_device_witness_mutant_warp 4 mhgp5_device_witness "--inject=witness-no-warp-correction" LABELS gpu)
+  # Lane q3 device (executeur k_scan) contre la production : egalite post-RLE.
+  add_executable(mhgp5_q3_lane_device_gate tests/q3_lane_device_gate.cu)
+  target_compile_options(mhgp5_q3_lane_device_gate PRIVATE
+    "$<$<COMPILE_LANGUAGE:CUDA>:-fmad=false;--expt-relaxed-constexpr;-Xcompiler=-Wall,-Wextra,-Werror>")
+  target_compile_definitions(mhgp5_q3_lane_device_gate PRIVATE MHGP5_TESTING=1)
+  target_link_libraries(mhgp5_q3_lane_device_gate PRIVATE Threads::Threads)
+  mhgp5_gate(mhgp5_q3_lane_device_uniform 0 mhgp5_q3_lane_device_gate "--family=uniform --n=1200" LABELS gpu)
+  mhgp5_gate(mhgp5_q3_lane_device_clusters 0 mhgp5_q3_lane_device_gate "--family=eight_clusters --n=1200 --threads=4" LABELS gpu)
+  mhgp5_gate(mhgp5_q3_lane_device_cocirc 0 mhgp5_q3_lane_device_gate "--family=uniform --n=300 --coord=40 --min-candidates=200" LABELS gpu)
+  mhgp5_gate(mhgp5_q3_lane_device_uniform_8000 0 mhgp5_q3_lane_device_gate "--family=uniform --n=8000 --threads=8 --min-candidates=100000" LABELS gpu scale8000 TIMEOUT 1800)
 endif()

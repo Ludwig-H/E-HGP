@@ -1,0 +1,48 @@
+nvcc=/usr/local/cuda-12.9/bin/nvcc
+x86_64
+Cuda compilation tools, release 12.9, V12.9.41
+Build cuda_12.9.r12.9/compiler.35813241_0
+NVIDIA RTX PRO 6000 Blackwell Server Edition, 580.173.02
+-- The CXX compiler identification is GNU 11.4.0
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE
+-- Found Python3: /usr/bin/python3.10 (found version "3.10.12") found components: Interpreter
+-- The CUDA compiler identification is NVIDIA 12.9.41 with host compiler GNU 11.4.0
+-- Detecting CUDA compiler ABI info
+-- Detecting CUDA compiler ABI info - done
+-- Check for working CUDA compiler: /usr/local/cuda-12.9/bin/nvcc - skipped
+-- Detecting CUDA compile features
+-- Detecting CUDA compile features - done
+-- Configuring done (3.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/louis_hauseux_gmail_com/v5scale/build-cuda
+nvcc warning : Support for offline compilation for architectures prior to '<compute/sm/lto>_75' will be removed in a future release (Use -Wno-deprecated-gpu-targets to suppress warning).
+/home/louis_hauseux_gmail_com/v5scale/morsehgp3D_v5/src/gpu/../lanes/q3.hpp(91): warning #20014-D: calling a __host__ function from a __host__ __device__ function is not allowed
+    if (l_ax > l_ab || (l_ax == l_ab && edge_key(ida, idx) < e_ab)) return false;
+                                                           ^
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+/home/louis_hauseux_gmail_com/v5scale/morsehgp3D_v5/src/gpu/../lanes/q3.hpp(92): warning #20014-D: calling a __host__ function from a __host__ __device__ function is not allowed
+    if (l_bx > l_ab || (l_bx == l_ab && edge_key(idb, idx) < e_ab)) return false;
+                                                           ^
+
+/home/louis_hauseux_gmail_com/v5scale/morsehgp3D_v5/src/gpu/device_witness.cu(229): error: identifier "di_to_i128" is undefined
+        const i128 X = di_to_i128(c.x), Y = di_to_i128(c.y);
+                       ^
+
+/home/louis_hauseux_gmail_com/v5scale/morsehgp3D_v5/src/gpu/device_witness.cu(296): error: identifier "di_from_i128" is undefined
+              sd.G = di_from_i128(f3.g);
+                     ^
+
+2 errors detected in the compilation of "/home/louis_hauseux_gmail_com/v5scale/morsehgp3D_v5/src/gpu/device_witness.cu".
+gmake[3]: *** [CMakeFiles/mhgp5_device_witness.dir/build.make:79: CMakeFiles/mhgp5_device_witness.dir/src/gpu/device_witness.cu.o] Error 1
+gmake[2]: *** [CMakeFiles/Makefile2:1137: CMakeFiles/mhgp5_device_witness.dir/all] Error 2
+gmake[1]: *** [CMakeFiles/Makefile2:1144: CMakeFiles/mhgp5_device_witness.dir/rule] Error 2
+gmake: *** [Makefile:524: mhgp5_device_witness] Error 2

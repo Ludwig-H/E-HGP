@@ -109,7 +109,10 @@ MHGP5_HD inline constexpr bool di_fits_i64(DI128 a) { return a.hi == ((i64)a.lo 
 // Precondition : di_fits_i64(a).
 MHGP5_HD inline constexpr i64 di_to_i64_unchecked(DI128 a) { return (i64)a.lo; }
 
-#if !defined(__CUDA_ARCH__)
+// Ponts vers __int128 : fonctions HOTE (jamais MHGP5_HD), visibles dans les
+// DEUX passes de nvcc — un `#if !defined(__CUDA_ARCH__)` les cacherait a la
+// passe device, qui parse aussi le code hote et refuse l'identifiant
+// (session G4 50fee05c).
 // Host seulement : pont vers __int128 (pour les portes et le chemin CPU).
 inline constexpr DI128 di_from_i128(i128 v) {
   const u128 u = (u128)v;
@@ -118,7 +121,7 @@ inline constexpr DI128 di_from_i128(i128 v) {
 inline constexpr i128 di_to_i128(DI128 a) { return (i128)(((u128)a.hi << 64) | a.lo); }
 inline constexpr u128 du_to_u128(DU128 a) { return ((u128)a.hi << 64) | a.lo; }
 inline constexpr DU128 du_from_u128(u128 u) { return DU128{(u64)u, (u64)(u >> 64)}; }
-#endif
+
 
 // ---- Anneau Z/2^128 -----------------------------------------------------------------
 

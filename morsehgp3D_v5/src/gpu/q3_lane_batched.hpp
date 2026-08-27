@@ -17,6 +17,7 @@
 #pragma once
 
 #include <limits>
+#include <mutex>
 #include <vector>
 
 #include "../core/mutants.hpp"
@@ -149,10 +150,13 @@ inline void emit_q3_batch(const Q3Batch& b, std::vector<BallCandidate>* lo, Gene
   }
 }
 
-// Lane q3 complete par lots (executeur hote) : meme signature d'effet que la
-// lane q3 de generate_candidates (candidats ajoutes a `out`, stats cumulees).
-inline void generate_q3_batched(const CloudIndex& ix, const GenerateOptions& opt, std::vector<BallCandidate>* out,
-                                GenerateStats* st) {
+// Lane q3 complete par lots avec un EXECUTEUR quelconque `scan(Q3Batch*, u32 h3,
+// bool nonstrict)` (hote : scan_q3_batch_host ; device : q3_lane_device.cuh) :
+// meme signature d'effet que la lane q3 de generate_candidates (candidats
+// ajoutes a `out`, stats cumulees).
+template <class Scan>
+inline void generate_q3_batched_with(const CloudIndex& ix, const GenerateOptions& opt, std::vector<BallCandidate>* out,
+                                     GenerateStats* st, Scan&& scan) {
   using namespace generate_detail;
   const bool float_on = float_filter_runtime_enabled();
   const bool nonstrict = MHGP5_MUTANT("genfilter-nonstrict");
@@ -167,10 +171,15 @@ inline void generate_q3_batched(const CloudIndex& ix, const GenerateOptions& opt
     // Un brouillon de lot par fil d'execution (reutilise entre rectangles).
     thread_local Q3Batch tl;
     build_q3_batch(ix, ar, h_of, float_on, sc, &tl, ls);
-    scan_q3_batch_host(&tl, (u32)h_of[1], nonstrict);
+    scan(&tl, (u32)h_of[1], nonstrict);
     emit_q3_batch(tl, lo, ls);
   });
   st->t_rects_ms[1] += ms_since(t1);
+}
+
+inline void generate_q3_batched(const CloudIndex& ix, const GenerateOptions& opt, std::vector<BallCandidate>* out,
+                                GenerateStats* st) {
+  generate_q3_batched_with(ix, opt, out, st, [](Q3Batch* b, u32 h3, bool nonstrict) { scan_q3_batch_host(b, h3, nonstrict); });
 }
 
 }  // namespace mhgp5

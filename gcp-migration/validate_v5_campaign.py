@@ -19,7 +19,7 @@ FAMILIES = ("uniform", "terrain", "eight_clusters", "scanline_single_pass")
 
 
 def expected_names():
-    names = ["gpu_witness"]
+    names = ["gpu_witness", "gpu_lane"]
     for n in (8000, 16000, 32000):
         for fam in FAMILIES:
             names.append(f"conf_{fam}_n{n}")
@@ -66,7 +66,7 @@ def main():
         fb = forbidden.search(body)
         if fb:
             bad.append(f"{name}: motif interdit ({fb.group(0)})")
-        if name != "gpu_witness" and not counters.search(body):
+        if name not in ("gpu_witness", "gpu_lane") and not counters.search(body):
             bad.append(f"{name}: ligne de compteurs absente")
         if name == "gpu_witness":
             # Les deux familles, leurs planchers et desaccords=0 partout — pas
@@ -80,6 +80,14 @@ def main():
                     bad.append(f"{name}: scan {fam} absent, sous le plancher (1000 seeds) ou en desaccord")
             if "device_witness OK" not in body:
                 bad.append(f"{name}: temoin device non conforme")
+        if name == "gpu_lane":
+            lanes = re.findall(r"^q3_lane_device famille=(\S+) n=(\d+) fils=\d+ candidats_q3=(\d+) .* desaccords_vecteur=(\d+) desaccords_compteurs=(\d+)$", body, re.M)
+            want = {("uniform", "1200"), ("eight_clusters", "1200"), ("uniform", "8000")}
+            got = {(f, n) for f, n, c, v, k in lanes if int(v) == 0 and int(k) == 0 and int(c) >= 200}
+            if not want <= got:
+                bad.append(f"{name}: lane device — portes manquantes ou en desaccord : {sorted(want - got)}")
+            if body.count("q3_lane_device OK") < 3:
+                bad.append(f"{name}: lane device — moins de trois OK")
         if name.startswith("conf_") and not conformity.search(body):
             bad.append(f"{name}: conformite v4 non etablie")
         if name.startswith("contrat_") and not digest.search(body):

@@ -31,9 +31,11 @@
 #include "../lanes/q3.hpp"
 #include "../pipeline/float_filter.hpp"
 #include "../pipeline/generate.hpp"
+#include "q3_scan_kernel.cuh"
 #include "q3_scan_shaped.hpp"
 
 using namespace mhgp5;
+using namespace mhgp5::gpu;
 
 namespace {
 
@@ -70,86 +72,6 @@ __global__ void k_arith(const ArithCase* in, ArithOut* out, unsigned n) {
   out[i] = o;
 }
 
-// Un warp par seed : les 32 fils balaient les sites de l'ancre par pas de 32 ;
-// compte des interieurs par __ballot_sync + __popc, arret quand le compte du
-// warp atteint h3 (meme objet que la sortie anticipee scalaire : le verdict
-// « >= h3 interieurs » ne depend pas de l'ordre).
-struct SeedJob {
-  SeedAffineD seed;
-  unsigned anchor;  // index de l'ancre (sites)
-};
-struct AnchorRange {
-  unsigned begin, count;  // dans les tableaux SoA concatenes
-};
-struct SeedOut {
-  unsigned dead, cert_neg, cert_pos, fallback;
-};
-
-__global__ void k_scan(const SeedJob* jobs, unsigned njobs, const AnchorRange* anchors, const i64* u0, const i64* u1,
-                       const i64* u2, const i64* q, const double* u0d, const double* u1d, const double* u2d,
-                       const double* qd, unsigned h3, bool no_warp_correction, SeedOut* out) {
-  const unsigned warp = (blockIdx.x * blockDim.x + threadIdx.x) >> 5;
-  const unsigned lane = threadIdx.x & 31;
-  if (warp >= njobs) return;
-  const SeedJob job = jobs[warp];
-  const AnchorRange ar = anchors[job.anchor];
-  unsigned depth = 0, cn = 0, cp = 0, cf = 0;
-  bool dead = false;
-  for (unsigned base = 0; base < ar.count && !dead; base += 32) {
-    const unsigned i = base + lane;
-    bool interior = false;
-    unsigned my_n = 0, my_p = 0, my_f = 0;
-    if (i < ar.count) {
-      const unsigned g = ar.begin + i;
-      const double t = fma(job.seed.Nd2, u2d[g], fma(job.seed.Nd1, u1d[g], job.seed.Nd0 * u0d[g]));
-      const double lh = fma(job.seed.Gd, qd[g], -(t + t));
-      if (lh < -job.seed.bound) {
-        my_n = 1;
-        interior = true;
-      } else if (lh > job.seed.bound) {
-        my_p = 1;
-      } else {
-        my_f = 1;
-        const DI128 L = q3_l_exact_shaped(job.seed, u0[g], u1[g], u2[g], q[g]);
-        interior = di_sign(L) < 0;
-      }
-    }
-    const unsigned mask_int = __ballot_sync(0xffffffffu, interior);
-    cn += __popc(__ballot_sync(0xffffffffu, my_n != 0));
-    cp += __popc(__ballot_sync(0xffffffffu, my_p != 0));
-    cf += __popc(__ballot_sync(0xffffffffu, my_f != 0));
-    // Compte ordonne : le nombre d'interieurs AVANT d'atteindre h3, comme le
-    // scalaire (les compteurs de certification s'arretent au meme site).
-    const unsigned before = depth;
-    const unsigned add = __popc(mask_int);
-    if (before + add >= h3) {
-      // Sites au-dela du h3-ieme interieur : leurs compteurs ne sont pas vus
-      // par le scalaire (sortie anticipee). Retirer leur contribution.
-      // MUTANT witness-no-warp-correction (drapeau hote) : ne rien retirer —
-      // les compteurs des seeds morts different alors du scalaire (code 4).
-      if (no_warp_correction) {
-        dead = true;
-        depth = h3;
-        break;
-      }
-      const unsigned need = h3 - before;
-      unsigned m = mask_int, kth = 0;
-      for (unsigned k = 0; k < need; ++k) {
-        kth = __ffs(m) - 1;
-        m &= m - 1;
-      }
-      const unsigned keep = (kth == 31) ? 0xffffffffu : ((1u << (kth + 1)) - 1u);
-      cn -= __popc(__ballot_sync(0xffffffffu, my_n != 0) & ~keep);
-      cp -= __popc(__ballot_sync(0xffffffffu, my_p != 0) & ~keep);
-      cf -= __popc(__ballot_sync(0xffffffffu, my_f != 0) & ~keep);
-      dead = true;
-      depth = h3;
-    } else {
-      depth += add;
-    }
-  }
-  if (lane == 0) out[warp] = SeedOut{dead ? 1u : 0u, cn, cp, cf};
-}
 #endif
 
 }  // namespace
@@ -336,7 +258,7 @@ int main(int argc, char** argv) {
     cudaEventCreate(&e0); cudaEventCreate(&e1);
     cudaEventRecord(e0);
     k_scan<<<(njobs + warps_per_block - 1) / warps_per_block, threads>>>(d_jobs, njobs, d_ranges, d_u0, d_u1, d_u2, d_q,
-                                                                          d_d0, d_d1, d_d2, d_dq, (unsigned)h_of[1], m_warp, d_out);
+                                                                          d_d0, d_d1, d_d2, d_dq, (unsigned)h_of[1], m_warp, false, d_out);
     CUDA_OK(cudaGetLastError());
     cudaEventRecord(e1);
     CUDA_OK(cudaDeviceSynchronize());

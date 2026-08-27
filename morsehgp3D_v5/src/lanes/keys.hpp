@@ -28,10 +28,11 @@ namespace mhgp5 {
 
 struct EdgeKey {
   PointId lo = 0, hi = 0;
-  bool operator==(const EdgeKey& o) const { return lo == o.lo && hi == o.hi; }
-  bool operator<(const EdgeKey& o) const { return lo != o.lo ? lo < o.lo : hi < o.hi; }
+  MHGP5_HD bool operator==(const EdgeKey& o) const { return lo == o.lo && hi == o.hi; }
+  MHGP5_HD bool operator<(const EdgeKey& o) const { return lo != o.lo ? lo < o.lo : hi < o.hi; }
 };
-inline EdgeKey edge_key(PointId x, PointId y) { return x < y ? EdgeKey{x, y} : EdgeKey{y, x}; }
+// Appele par anchor_owns_q3 (MHGP5_HD) : host + device.
+MHGP5_HD inline EdgeKey edge_key(PointId x, PointId y) { return x < y ? EdgeKey{x, y} : EdgeKey{y, x}; }
 
 struct SupportKey3 {
   PointId p[3];

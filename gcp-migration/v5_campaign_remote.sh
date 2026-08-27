@@ -81,6 +81,11 @@ if [ -n "${NVCC_BIN}" ] && [ "${SKIP_GPU_WITNESS:-0}" != "1" ]; then
     echo "REFUS : temoin device non conforme (voir gpu_witness.txt) — phases 1 et 2 refusees"
     exit 3
   fi
+  # Lane q3 DEVICE contre la production (docs/GPU.md, livraison 4) : trois
+  # portes (uniform 1200, eight_clusters 1200 a 4 fils, uniform 8000 a 8 fils),
+  # statut grave comme un run ; un echec ne refuse PAS les phases CPU (la lane
+  # device n'est pas sur le chemin produit), mais le validateur l'exige a 0.
+  run_one gpu_lane device_lane bash -c "set -e; cmake --build build-cuda --target mhgp5_q3_lane_device_gate -j8 2>&1 | grep -vE '^\[|^Scanning' | tail -40; test \${PIPESTATUS[0]} -eq 0; ./build-cuda/mhgp5_q3_lane_device_gate --family=uniform --n=1200; ./build-cuda/mhgp5_q3_lane_device_gate --family=eight_clusters --n=1200 --threads=4; ./build-cuda/mhgp5_q3_lane_device_gate --family=uniform --n=8000 --threads=8 --min-candidates=100000"
 else
   {
     printf 'code=2\nduree_s=0\npeak_rss_kb=0\ntiming_scope=device_witness\nthreads=%s\n' "${THREADS}"

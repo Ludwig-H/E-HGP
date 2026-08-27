@@ -1,0 +1,9 @@
+code=1
+duree_s=6
+peak_rss_kb=427776
+timing_scope=device_witness
+threads=48
+source_commit=50fee05c9b011ff4972d646027cd75bbb94f2d59
+source_payload_sha256=a7893e50fdeaf85d4751bf82bafc636d9e2a30a20aa1c2c4aaa96b5d5e419079
+protocol_manifest_sha256=2d93407cc25ccc235001d66fa6fb74d8384b39a8bf2a6b855c3a9b2845072f4e
+finished=1

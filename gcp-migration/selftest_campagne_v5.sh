@@ -100,6 +100,15 @@ echo "scan famille=eight_clusters ancres=10 seeds=2308366 sites=100 morts=1 desa
 echo "device_witness OK"
 EOT
 chmod +x build-cuda/mhgp5_device_witness
+cat > build-cuda/mhgp5_q3_lane_device_gate <<'EOT'
+#!/usr/bin/env bash
+fam=uniform; n=1200
+for a in "$@"; do case "$a" in --family=*) fam="${a#--family=}";; --n=*) n="${a#--n=}";; esac; done
+echo "q3_lane_device famille=${fam} n=${n} fils=1 candidats_q3=176250 seeds=3373964 tues=3197714 replis=768748 lancements=10 kernel_ms=1.0 desaccords_vecteur=${LANE_MISM:-0} desaccords_compteurs=0"
+[ "${LANE_MISM:-0}" = "0" ] && { echo "q3_lane_device OK"; exit 0; }
+exit 1
+EOT
+chmod +x build-cuda/mhgp5_q3_lane_device_gate
 exit 0
 EOS
 chmod +x "${WORK}/fakebin/nvcc" "${WORK}/fakebin/cmake"
@@ -120,7 +129,7 @@ run_campaign() {
 # ---- Scenario 1 : happy path -> complete.
 RC1=$(run_campaign "${WORK}/out1")
 [ "${RC1}" -eq 0 ] || fail "scenario 1 : script distant rc=${RC1}"
-[ "$(ls "${WORK}/out1"/*.status 2>/dev/null | wc -l)" -eq 17 ] || fail "scenario 1 : 17 statuts attendus (temoin device + 12 conformites + 4 contrats)"
+[ "$(ls "${WORK}/out1"/*.status 2>/dev/null | wc -l)" -eq 18 ] || fail "scenario 1 : 18 statuts attendus (temoin + lane device + 12 conformites + 4 contrats)"
 grep -L '^source_commit=cafedeca$' "${WORK}/out1"/*.status | grep -q . && fail "scenario 1 : pin source absent d'un statut"
 if ! python3 "${HERE}/validate_v5_campaign.py" "${WORK}/out1" cafedeca beefbeef feedf00d 0 0 > "${WORK}/v1.log" 2>&1; then
   fail "scenario 1 : validateur a refuse un happy path ($(cat "${WORK}/v1.log"))"
@@ -162,6 +171,14 @@ if python3 "${HERE}/validate_v5_campaign.py" "${WORK}/out3c" cafedeca beefbeef f
   fail "scenario 3ter : desaccords=1 avec la sous-chaine OK devait etre refuse"
 fi
 grep -q 'scan uniform' "${WORK}/v3c.log" || fail "scenario 3ter : le desaccord du scan doit etre nomme"
+
+# ---- Scenario 3quater : lane device en desaccord -> les phases CPU tournent (18 statuts) mais jamais complete.
+RC3d=$(run_campaign "${WORK}/out3d" LANE_MISM=1)
+[ "$(ls "${WORK}/out3d"/*.status 2>/dev/null | wc -l)" -eq 18 ] || fail "scenario 3quater : la lane device ne refuse pas les phases CPU"
+if python3 "${HERE}/validate_v5_campaign.py" "${WORK}/out3d" cafedeca beefbeef feedf00d "${RC3d}" 0 > "${WORK}/v3d.log" 2>&1; then
+  fail "scenario 3quater : une lane device en desaccord devait refuser complete"
+fi
+grep -q 'gpu_lane' "${WORK}/v3d.log" || fail "scenario 3quater : la lane device doit etre nommee"
 
 # ---- Scenario 4 : code de session non nul.
 if python3 "${HERE}/validate_v5_campaign.py" "${WORK}/out1" cafedeca beefbeef feedf00d 255 0 > "${WORK}/v4.log" 2>&1; then
