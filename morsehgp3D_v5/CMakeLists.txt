@@ -89,3 +89,24 @@ mhgp5_gate(mhgp5_spindle_judge_terrain 0 mhgp5_spindle_gate "--family=terrain --
 mhgp5_gate(mhgp5_spindle_judge_two_lines 0 mhgp5_spindle_gate "--family=two_lines --n=1200 --s=8")
 mhgp5_gate(mhgp5_spindle_mutant_ceil 4 mhgp5_spindle_gate "--family=uniform --n=1500 --s=8 --seed=3 --inject=core-ball-ceil-distance")
 mhgp5_gate(mhgp5_spindle_mutant_mask 4 mhgp5_spindle_gate "--family=uniform --n=1500 --s=8 --seed=3 --inject=witness-no-lane-mask")
+
+# ---- Pilote ------------------------------------------------------------------
+
+mhgp5_executable(mhgp5 cli/mhgp5.cpp)
+
+# ---- Conformite v4 ≡ v5 --------------------------------------------------------
+
+# Digests canoniques (format v4) calcules par la v4 sur les memes entrees :
+# receipts/conformite_v4/digests_v4.txt. Les tailles d'interet portent leur
+# label ; les petits n sont des portes rapides. Tous a 8 fils : la sortie est
+# bit-identique quel que soit le nombre de fils (porte --par-gate).
+mhgp5_executable(mhgp5_conformity_v4 tests/conformity_v4.cpp)
+set(_recu ${CMAKE_CURRENT_SOURCE_DIR}/receipts/conformite_v4/digests_v4.txt)
+foreach(fam uniform terrain eight_clusters scanline_single_pass)
+  mhgp5_gate(mhgp5_conformity_${fam}_n8000 0 mhgp5_conformity_v4
+      "--receipt=${_recu} --family=${fam} --n=8000 --threads=8" LABELS scale8000 TIMEOUT 3600)
+  mhgp5_gate(mhgp5_conformity_${fam}_n16000 0 mhgp5_conformity_v4
+      "--receipt=${_recu} --family=${fam} --n=16000 --threads=8" LABELS scale16000 TIMEOUT 7200)
+  mhgp5_gate(mhgp5_conformity_${fam}_n32000 0 mhgp5_conformity_v4
+      "--receipt=${_recu} --family=${fam} --n=32000 --threads=8" LABELS scale32000 TIMEOUT 14400)
+endforeach()
