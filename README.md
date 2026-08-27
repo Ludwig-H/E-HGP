@@ -7,6 +7,10 @@ L'objet scientifique implémenté est le HGP-Clusterer du [manuscrit de thèse d
 > [!IMPORTANT]
 > État courant : la Phase 15 reste `backend=reference_cpu`, `profile=hgp_reduced`, `mode=budgeted`, `deployment_status=architecture_only`, `public_status=not_claimed`. Son réducteur aval utilise le mode `exact_relative_multi_order_laminar_point_projection_v1` : il est disponible et testé relativement à une tour de $T_1$ à $T_K$ déclarée complète et exacte par son producteur, puis liée à son payload par reçus. Le réducteur n'authentifie pas cette vérité amont. Le producteur géométrique complet de la tour, sa qualification GCP et les capacités 50 000 ou 10 000 001 points ne sont pas terminés. Aucun benchmark ne promeut ce statut.
 
+## Chantier actif : morsehgp3D_v5
+
+Le chantier actif est [`morsehgp3D_v5/`](morsehgp3D_v5/README.md) (`phase=exploration_v5_hors_registre`, `public_status=not_claimed`) : la forêt HGP complète K = 1..10 sur le profil u16, reprise à propre de la v4 avec conformité prouvée par digests canoniques appariés. Il ne promeut rien dans le registre ci-dessous ; `AGENTS.md` fixe ses règles.
+
 ## API de hiérarchie de points
 
 L'en-tête public [`morsehgp3d/morsehgp3d.hpp`](morsehgp3d/include/morsehgp3d/morsehgp3d.hpp) et la cible CMake `morsehgp3d::morsehgp3d` exposent une seule voie aval :

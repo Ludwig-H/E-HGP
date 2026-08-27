@@ -14,10 +14,14 @@ Cadre : `phase=exploration_v5_hors_registre`, `backend=cpu_reference`,
   génération à trois lanes, RLE, préfiltre, census, plateaux, fold par K,
   digest au format v4, pipeline en bibliothèque (`src/pipeline/run.hpp`) et
   pilote `cli/mhgp5`.
-- **Conformité v4 ≡ v5 mesurée** : `digest_balls` et `digest_all` identiques
-  sur `uniform n=400` (3,5 s à 8 fils) et sur `terrain n=8000`
-  (`mhgp5_conformity_terrain_n8000`). Les autres tailles/familles sont en
-  campagne (`receipts/conformite_v4/`).
+- **Conformité v4 ≡ v5 mesurée** (`digest_balls` et `digest_all` identiques,
+  reçu `receipts/conformite_v4/digests_v4.txt` calculé par la v4) : toutes les
+  familles à n=400, `uniform`/`eight_clusters` à 1200, `two_lines` à 2000, et
+  **les quatre familles de mesure à n=8000** (`uniform` 129 s, `terrain`
+  19 s, `eight_clusters` 219 s, `scanline_single_pass` 24 s, 8 fils, machine
+  partagée avec la campagne de référence v4 — pas une mesure de coût). Les
+  tailles 16000 et 32000 sont enregistrées (labels `scale16000`,
+  `scale32000`) et restent à exécuter.
 - Portes CTest (label `gate`) : arbre, familles + mutant, WSPD (ledger,
   équivariance, `wspd-drop-rect`, portes appariées cap/scission), fuseaux
   (juge fail-open, `core-ball-ceil-distance`, `witness-no-lane-mask`).

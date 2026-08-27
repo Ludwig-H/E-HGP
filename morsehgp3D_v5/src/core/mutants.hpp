@@ -26,37 +26,31 @@
 namespace mhgp5 {
 
 // La liste EXHAUSTIVE des mutants declares (source unique). Toute entree a
-// exactement un point d'injection dans src/ et au moins une porte CTest a
-// code 4. `mhgp5_mutants_gate` verifie la premiere moitie par grep.
+// au moins un point d'injection dans src/ (ou tests/ pour un mutant
+// d'oracle) et au moins une porte CTest a code 4 ; un nom n'entre ici
+// qu'AVEC son point d'injection (`mhgp5_mutants_gate`), jamais par avance.
 inline constexpr const char* kMutants[] = {
     // familles
     "family-scanline-overshoot",
     // wspd
     "wspd-drop-rect", "wspd-cap-terminal", "wspd-split-heaviest",
-    // fuseaux / temoins
-    "core-ball-ceil-distance", "witness-no-lane-mask",
+    // fuseaux / temoins / cover
+    "core-ball-ceil-distance", "witness-no-lane-mask", "cover-rect-dmin",
     // lanes
-    "q2-radius-ceil", "q3-prune-ge", "q3-sign-p", "q3-cramer-swap", "q3-level-4g",
+    "q3-prune-ge", "q3-level-4g",
     "q4-seeds-from-q3-live", "q4-cover-coef3", "q4-no-canonical", "q4-center-parity",
     "q4-seed-core-nonstrict", "q4-eq-nonstrict", "q4-eq-sign", "q4-i64-drop-factor",
     "q4-i64-pair-min", "jung-swap-bounds",
     // entiers larges
-    "level-trunc-hi", "mul-carry-lost",
+    "level-trunc-hi",
     // flux / census / plateaux
     "rle-drop", "census-nonstrict", "genfilter-nonstrict", "depth-threshold-minus-one",
-    "range-add-max-le-zero", "skip-full-census", "shell-cap-before-depth",
-    "drop-shell-plateau",
+    "range-add-max-le-zero", "skip-full-census",
     // foret
     "binary-ties", "repr-ties", "attach-prebatch", "drop-nonmerge", "dense-pointid",
-    "canonical-is-uf-root", "fold-hardcodes-kmax10", "attach-detector-disabled",
-    // rendu
-    "render-active-only", "render-collapse-mult", "birth-from-events",
+    "canonical-is-uf-root", "attach-detector-disabled",
     // parallelisme
     "par-drop-shard", "par-drop-ball-chunk", "parallel-one-worker",
-    // sortie / budget
-    "budget-events-only", "birth-dup-tau",
-    // oracle
-    "obig-carry-lost",
 };
 
 inline std::vector<std::string>& mutant_registry() {

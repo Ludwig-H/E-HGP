@@ -110,3 +110,23 @@ foreach(fam uniform terrain eight_clusters scanline_single_pass)
   mhgp5_gate(mhgp5_conformity_${fam}_n32000 0 mhgp5_conformity_v4
       "--receipt=${_recu} --family=${fam} --n=32000 --threads=8" LABELS scale32000 TIMEOUT 14400)
 endforeach()
+# Petites tailles (portes rapides, label gate) : toutes les familles a n=400,
+# uniform/eight_clusters a 1200, two_lines a 2000.
+foreach(fam eight_clusters terrain scanline_single_pass scanline_overlap_multiecho)
+  mhgp5_gate(mhgp5_conformity_${fam}_n400 0 mhgp5_conformity_v4 "--receipt=${_recu} --family=${fam} --n=400 --threads=8")
+endforeach()
+mhgp5_gate(mhgp5_conformity_uniform_n1200 0 mhgp5_conformity_v4 "--receipt=${_recu} --family=uniform --n=1200 --threads=8")
+mhgp5_gate(mhgp5_conformity_eight_clusters_n1200 0 mhgp5_conformity_v4 "--receipt=${_recu} --family=eight_clusters --n=1200 --threads=8")
+mhgp5_gate(mhgp5_conformity_two_lines_n2000 0 mhgp5_conformity_v4 "--receipt=${_recu} --family=two_lines --n=2000 --threads=8" LABELS slow TIMEOUT 1800)
+mhgp5_gate(mhgp5_conformity_refus_absent 2 mhgp5_conformity_v4 "--receipt=${_recu} --family=collinear_seven --n=9")
+
+# ---- Registre des mutants (Python 3 requis, comme les portes F0 de la v3) -------
+find_package(Python3 COMPONENTS Interpreter)
+if(Python3_Interpreter_FOUND)
+  add_test(NAME mhgp5_mutants_gate
+           COMMAND ${CMAKE_COMMAND} -DEXPECTED=0 "-DCMD=${Python3_EXECUTABLE}"
+                   "-DARGS=${CMAKE_CURRENT_SOURCE_DIR}/tests/mutants_gate.py" -P ${_mhgp5_expect})
+  set_tests_properties(mhgp5_mutants_gate PROPERTIES LABELS gate)
+else()
+  message(WARNING "mhgp5 : Python 3 introuvable — porte du registre des mutants non enregistree")
+endif()
