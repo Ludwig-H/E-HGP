@@ -1,0 +1,15 @@
+# Digests des familles calcules par la v4 (morsehgp3D_v4/src/cloud/families.hpp, HEAD d4f3ce59)
+# serialisation : tag 'cloud' (u64 longueur + octets), u64 n, puis (x,y,z) en i64 little-endian ; graine 3, emprise par defaut.
+# programme : sha256 v4 + generateurs v4, compile hors depot le 27 aout 2026.
+uniform n=8000 coord=200 points=8000 digest=29b92e845eb453fb719dc4d881d28b330e372c1d9fd81cdb88dfb57df5e2712a
+terrain n=8000 coord=447 points=8000 digest=fb72ea8ac7b754a166ea3940caab7c9459cddeb5d5debac10006234c6c83e3fc
+eight_clusters n=8000 coord=400 points=8000 digest=db3b1e4578cb321d537be319102863cf41a49682a5bb8bf057fe391a4cb5c362
+scanline_single_pass n=8000 coord=565 points=8000 digest=9cae906ee9a10a2b4c1b9d4529af850b52d36546ebba0f02b78394d0102088ad
+scanline_overlap_multiecho n=8000 coord=565 points=8000 digest=a73402e2c0fd00423eaef770022159b698e3141554a13d26e50984a6a9f20c63
+uniform n=32000 coord=317 points=32000 digest=fbadf10d3de34343c24913faacfdcb878a0dd2860bb18d782c1bff496e7ec8be
+terrain n=32000 coord=894 points=32000 digest=c52f85211a2063fccb7bc0c8beb7aeddfd8dd2abe40947d53fa965201a3ab939
+eight_clusters n=32000 coord=634 points=32000 digest=62cda521131f2faa7dc5012a6669bfd35de8d62b5596670699e70dbda92935c3
+scanline_single_pass n=32000 coord=1131 points=32000 digest=e56db25cb02b3436731f143b79724934d42a102c71e4c5204542e0e5cb4c9351
+scanline_overlap_multiecho n=32000 coord=1131 points=32000 digest=2ef7254fc6df732c3996f5c30b007a78c1bc2c04be0a9685a6aeb88c5fb5b4c1
+two_lines n=2000 coord=65536 points=2000 digest=8aabdf091aa948d890d4e3884e10e6a1ef30abb83d35c0211f390c9cd31fa6e9
+collinear_seven n=9 coord=16 points=9 digest=191b0983bb7eb99d873510fb45b248dfffaf0f8337e7c85afc770e146c54af75
