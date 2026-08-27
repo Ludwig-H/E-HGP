@@ -107,7 +107,7 @@ class Q3DeviceExecutor {
 
 // Lane q3 complete avec l'executeur device : un executeur par fil (thread_local).
 inline void generate_q3_device(const CloudIndex& ix, const GenerateOptions& opt, std::vector<BallCandidate>* out,
-                               GenerateStats* st, double* kernel_ms, u64* launches) {
+                               GenerateStats* st, double* kernel_ms, u64* launches, size_t seeds_per_launch = kSeedsPerLaunch) {
   std::mutex mu;
   generate_q3_batched_with(ix, opt, out, st, [&](Q3Batch* b, u32 h3, bool nonstrict) {
     thread_local Q3DeviceExecutor ex;
@@ -117,7 +117,7 @@ inline void generate_q3_device(const CloudIndex& ix, const GenerateOptions& opt,
     std::lock_guard<std::mutex> lk(mu);
     *kernel_ms += ex.kernel_ms_total - before_ms;
     *launches += ex.launches - before_l;
-  });
+  }, seeds_per_launch);
 }
 #endif  // __CUDACC__
 

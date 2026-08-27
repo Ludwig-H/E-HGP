@@ -27,6 +27,7 @@
 #include "../pipeline/float_filter.hpp"
 #include "../pipeline/generate.hpp"
 #include "../spindle/spindle.hpp"
+#include "q3_lane_batched.hpp"
 #include "q4_completion_shaped.hpp"
 #include "q4_core_shaped.hpp"
 
@@ -84,7 +85,6 @@ struct Q4Batch {
 inline void build_q4_batch(const CloudIndex& ix, const AliveRect& ar, const u64 h_of[3], bool float_on, i64 cover_coef,
                            generate_detail::AnchorScratch& sc, Q4Batch* b, GenerateStats* ls) {
   using namespace generate_detail;
-  b->clear();
   corner_histograms(ix, Lane::kQ4, ar.r, &sc.ha, &sc.hb);
   const NodeRange ra = ix.range_of(ar.r.a), rb = ix.range_of(ar.r.b);
   rect_cover_handles(ix, ix.box_of(ar.r.a), ix.box_of(ar.r.b), cover_coef, &sc.handles, &sc.cover_nodes);
@@ -254,7 +254,7 @@ inline void emit_q4_batch(const Q4Batch& b, std::vector<BallCandidate>* lo, Gene
 
 template <class Scan>
 inline void generate_q4_batched_with(const CloudIndex& ix, const GenerateOptions& opt, std::vector<BallCandidate>* out,
-                                     GenerateStats* st, Scan&& scan) {
+                                     GenerateStats* st, Scan&& scan, size_t seeds_per_launch = kSeedsPerLaunch) {
   using namespace generate_detail;
   const bool float_on = float_filter_runtime_enabled();
   const bool depth_nonstrict = MHGP5_MUTANT("genfilter-nonstrict");
@@ -268,20 +268,38 @@ inline void generate_q4_batched_with(const CloudIndex& ix, const GenerateOptions
   st->t_wspd_ms[2] += ms_since(t0);
   st->rect_alive[2] = alive.size();
   const auto t1 = std::chrono::steady_clock::now();
-  run_lane(alive, opt.threads, 2, out, st, [&](const AliveRect& ar, AnchorScratch& sc, std::vector<BallCandidate>* lo, GenerateStats* ls) {
-    thread_local Q4Batch tl;
-    build_q4_batch(ix, ar, h_of, float_on, cover_coef, sc, &tl, ls);
-    scan(&tl, (u32)h_of[2], core_nonstrict, depth_nonstrict, no_canonical);
-    emit_q4_batch(tl, lo, ls);
+  const size_t nrect = alive.size();
+  const size_t T = planned_workers(nrect, opt.threads);
+  std::vector<std::vector<BallCandidate>> louts(T);
+  std::vector<GenerateStats> lst(T);
+  std::vector<AnchorScratch> lsc(T);
+  std::vector<Q4Batch> lb(T);
+  const auto flush = [&](size_t t) {
+    if (lb[t].seeds.empty() && lb[t].anchors.empty()) return;
+    scan(&lb[t], (u32)h_of[2], core_nonstrict, depth_nonstrict, no_canonical);
+    emit_q4_batch(lb[t], &louts[t], &lst[t]);
+    lb[t].clear();
+  };
+  const size_t created = parallel_items(nrect, (int)T, [&](size_t i, size_t t) {
+    build_q4_batch(ix, alive[i], h_of, float_on, cover_coef, lsc[t], &lb[t], &lst[t]);
+    if (lb[t].seeds.size() >= seeds_per_launch) flush(t);
   });
+  for (size_t t = 0; t < T; ++t) flush(t);
+  st->workers_rects[2] = std::max(st->workers_rects[2], (u64)created);
+  const bool drop = MHGP5_MUTANT("par-drop-shard");
+  for (size_t t = 0; t < T; ++t) {
+    if (drop && t == 0 && T > 1) continue;
+    out->insert(out->end(), louts[t].begin(), louts[t].end());
+    st->add_from(lst[t]);
+  }
   st->t_rects_ms[2] += ms_since(t1);
 }
 
 inline void generate_q4_batched(const CloudIndex& ix, const GenerateOptions& opt, std::vector<BallCandidate>* out,
-                                GenerateStats* st) {
+                                GenerateStats* st, size_t seeds_per_launch = kSeedsPerLaunch) {
   generate_q4_batched_with(ix, opt, out, st, [](Q4Batch* b, u32 h4, bool cn, bool dn, bool nc) {
     scan_q4_batch_host(b, h4, cn, dn, nc);
-  });
+  }, seeds_per_launch);
 }
 
 }  // namespace mhgp5

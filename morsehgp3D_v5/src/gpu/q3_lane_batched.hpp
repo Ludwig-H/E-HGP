@@ -55,12 +55,18 @@ struct Q3Batch {
   }
 };
 
-// Etage 1 : formation du lot (aucun verdict). Compte anchors/anchors_killed_hist/seeds
-// comme la lane de production.
+// Nombre de seeds par lancement (livraison 5 : LOTISSEMENT multi-rectangles).
+// Un ouvrier traite ses rectangles en sequence et les AJOUTE au meme lot
+// jusqu'a ce seuil ; l'ordre d'emission (rectangles, ancres, seeds) est
+// preserve. Un lot = un lancement device.
+inline constexpr size_t kSeedsPerLaunch = (size_t)1 << 16;
+
+// Etage 1 : formation du lot (aucun verdict), AJOUT au lot courant (l'appelant
+// vide le lot apres emission). Compte anchors/anchors_killed_hist/seeds comme
+// la lane de production.
 inline void build_q3_batch(const CloudIndex& ix, const AliveRect& ar, const u64 h_of[3], bool float_on,
                            generate_detail::AnchorScratch& sc, Q3Batch* b, GenerateStats* ls) {
   using namespace generate_detail;
-  b->clear();
   corner_histograms(ix, Lane::kQ3, ar.r, &sc.ha, &sc.hb);
   const NodeRange ra = ix.range_of(ar.r.a), rb = ix.range_of(ar.r.b);
   rect_cover_handles(ix, ix.box_of(ar.r.a), ix.box_of(ar.r.b), 3, &sc.handles, &sc.cover_nodes);
@@ -156,7 +162,7 @@ inline void emit_q3_batch(const Q3Batch& b, std::vector<BallCandidate>* lo, Gene
 // ajoutes a `out`, stats cumulees).
 template <class Scan>
 inline void generate_q3_batched_with(const CloudIndex& ix, const GenerateOptions& opt, std::vector<BallCandidate>* out,
-                                     GenerateStats* st, Scan&& scan) {
+                                     GenerateStats* st, Scan&& scan, size_t seeds_per_launch = kSeedsPerLaunch) {
   using namespace generate_detail;
   const bool float_on = float_filter_runtime_enabled();
   const bool nonstrict = MHGP5_MUTANT("genfilter-nonstrict");
@@ -167,19 +173,40 @@ inline void generate_q3_batched_with(const CloudIndex& ix, const GenerateOptions
   st->t_wspd_ms[1] += ms_since(t0);
   st->rect_alive[1] = alive.size();
   const auto t1 = std::chrono::steady_clock::now();
-  run_lane(alive, opt.threads, 1, out, st, [&](const AliveRect& ar, AnchorScratch& sc, std::vector<BallCandidate>* lo, GenerateStats* ls) {
-    // Un brouillon de lot par fil d'execution (reutilise entre rectangles).
-    thread_local Q3Batch tl;
-    build_q3_batch(ix, ar, h_of, float_on, sc, &tl, ls);
-    scan(&tl, (u32)h_of[1], nonstrict);
-    emit_q3_batch(tl, lo, ls);
+  // Comme run_lane (generate.hpp) : brouillons par ouvrier, fusion en ordre
+  // d'ouvrier — plus un LOT par ouvrier, vide (scan + emission) au seuil et
+  // a la fin de la sequence de l'ouvrier.
+  const size_t nrect = alive.size();
+  const size_t T = planned_workers(nrect, opt.threads);
+  std::vector<std::vector<BallCandidate>> louts(T);
+  std::vector<GenerateStats> lst(T);
+  std::vector<AnchorScratch> lsc(T);
+  std::vector<Q3Batch> lb(T);
+  const auto flush = [&](size_t t) {
+    if (lb[t].seeds.empty() && lb[t].anchors.empty()) return;
+    scan(&lb[t], (u32)h_of[1], nonstrict);
+    emit_q3_batch(lb[t], &louts[t], &lst[t]);
+    lb[t].clear();
+  };
+  const size_t created = parallel_items(nrect, (int)T, [&](size_t i, size_t t) {
+    build_q3_batch(ix, alive[i], h_of, float_on, lsc[t], &lb[t], &lst[t]);
+    if (lb[t].seeds.size() >= seeds_per_launch) flush(t);
   });
+  for (size_t t = 0; t < T; ++t) flush(t);
+  st->workers_rects[1] = std::max(st->workers_rects[1], (u64)created);
+  const bool drop = MHGP5_MUTANT("par-drop-shard");
+  for (size_t t = 0; t < T; ++t) {
+    if (drop && t == 0 && T > 1) continue;
+    out->insert(out->end(), louts[t].begin(), louts[t].end());
+    st->add_from(lst[t]);
+  }
   st->t_rects_ms[1] += ms_since(t1);
 }
 
 inline void generate_q3_batched(const CloudIndex& ix, const GenerateOptions& opt, std::vector<BallCandidate>* out,
-                                GenerateStats* st) {
-  generate_q3_batched_with(ix, opt, out, st, [](Q3Batch* b, u32 h3, bool nonstrict) { scan_q3_batch_host(b, h3, nonstrict); });
+                                GenerateStats* st, size_t seeds_per_launch = kSeedsPerLaunch) {
+  generate_q3_batched_with(ix, opt, out, st, [](Q3Batch* b, u32 h3, bool nonstrict) { scan_q3_batch_host(b, h3, nonstrict); },
+                           seeds_per_launch);
 }
 
 }  // namespace mhgp5

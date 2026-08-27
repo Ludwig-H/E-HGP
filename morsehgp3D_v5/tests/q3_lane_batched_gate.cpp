@@ -21,6 +21,7 @@ using namespace mhgp5;
 int main(int argc, char** argv) {
   CloudFamily family = CloudFamily::kUniform;
   int n = 400, coord = 0, threads = 1;
+  size_t spl = kSeedsPerLaunch;
   u64 min_candidates = 1000, min_killed = 10, min_fallback = 10;
   std::string inject;
   for (int i = 1; i < argc; ++i) {
@@ -33,6 +34,7 @@ int main(int argc, char** argv) {
     else if (arg.rfind("--min-killed=", 0) == 0) min_killed = (u64)std::atoll(arg.c_str() + 13);
     else if (arg.rfind("--min-fallback=", 0) == 0) min_fallback = (u64)std::atoll(arg.c_str() + 15);
     else if (arg.rfind("--inject=", 0) == 0) inject = arg.substr(9);
+    else if (arg.rfind("--seeds-per-launch=", 0) == 0) spl = (size_t)std::atoll(arg.c_str() + 19);
     else return 2;
   }
   if (!inject.empty() && !mutants_enable(inject)) return 2;
@@ -48,7 +50,7 @@ int main(int argc, char** argv) {
   generate_candidates(ix, opt, &prod_all, &sp);
   for (const BallCandidate& c : prod_all)
     if (c.arity == 3) prod.push_back(c);
-  generate_q3_batched(ix, opt, &batched, &sb);
+  generate_q3_batched(ix, opt, &batched, &sb, spl);
   // Compteurs de la lane q3 seule : la production cumule q2/q4 aussi, on ne
   // compare que les champs de la lane q3 ; les certifications flottantes de la
   // production incluent q4 (jung_*) separement, float_* est q3 seulement.
@@ -80,8 +82,8 @@ int main(int argc, char** argv) {
   rle_candidates(&prod, 1);
   rle_candidates(&batched, 1);
   vec_mism += count_mism(prod, batched);
-  std::printf("famille=%s n=%d fils=%d candidats_q3=%zu lots=%zu seeds=%llu tues=%llu replis=%llu desaccords_vecteur=%llu desaccords_compteurs=%llu\n",
-              cloud_family_name(family), n, threads, prod.size(), batched.size(), (unsigned long long)sp.seeds[0],
+  std::printf("famille=%s n=%d fils=%d lot=%zu candidats_q3=%zu lots=%zu seeds=%llu tues=%llu replis=%llu desaccords_vecteur=%llu desaccords_compteurs=%llu\n",
+              cloud_family_name(family), n, threads, spl, prod.size(), batched.size(), (unsigned long long)sp.seeds[0],
               (unsigned long long)sp.depth_killed[1], (unsigned long long)sp.q3_cert[2], (unsigned long long)vec_mism,
               (unsigned long long)bad);
   if (sp.candidates[1] < min_candidates || sp.depth_killed[1] < min_killed || sp.q3_cert[2] < min_fallback) {

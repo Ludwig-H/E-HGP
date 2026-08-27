@@ -18,6 +18,7 @@ using namespace mhgp5;
 int main(int argc, char** argv) {
   CloudFamily family = CloudFamily::kUniform;
   int n = 1200, coord = 0, threads = 1;
+  size_t spl = kSeedsPerLaunch;
   u64 min_candidates = 1000, min_killed = 10;
   for (int i = 1; i < argc; ++i) {
     const std::string arg = argv[i];
@@ -27,6 +28,7 @@ int main(int argc, char** argv) {
     else if (arg.rfind("--threads=", 0) == 0) threads = std::atoi(arg.c_str() + 10);
     else if (arg.rfind("--min-candidates=", 0) == 0) min_candidates = (u64)std::atoll(arg.c_str() + 17);
     else if (arg.rfind("--min-killed=", 0) == 0) min_killed = (u64)std::atoll(arg.c_str() + 13);
+    else if (arg.rfind("--seeds-per-launch=", 0) == 0) spl = (size_t)std::atoll(arg.c_str() + 19);
     else return 2;
   }
   int ndev = 0;
@@ -47,7 +49,7 @@ int main(int argc, char** argv) {
   double kernel_ms = 0;
   u64 launches = 0;
   try {
-    gpu::generate_q3_device(ix, opt, &dev, &sd, &kernel_ms, &launches);
+    gpu::generate_q3_device(ix, opt, &dev, &sd, &kernel_ms, &launches, spl);
   } catch (const std::exception& e) {
     std::fprintf(stderr, "REFUS : %s\n", e.what());
     return 2;

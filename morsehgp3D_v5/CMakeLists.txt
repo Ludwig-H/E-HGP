@@ -320,6 +320,8 @@ mhgp5_gate(mhgp5_q4_lane_batched_ordre 0 mhgp5_q4_lane_batched_gate "--family=un
 mhgp5_gate(mhgp5_q4_lane_batched_mutant_deep 4 mhgp5_q4_lane_batched_gate "--family=uniform --n=400 --min-candidates=200 --inject=q4-batched-emit-deep")
 mhgp5_gate(mhgp5_q4_lane_batched_uniform_8000 0 mhgp5_q4_lane_batched_gate "--family=uniform --n=8000 --threads=8 --min-candidates=100000" LABELS scale8000 TIMEOUT 1800)
 
+mhgp5_gate(mhgp5_q3_lane_batched_petit_lot 0 mhgp5_q3_lane_batched_gate "--family=uniform --n=400 --threads=1 --seeds-per-launch=1000 --min-candidates=200")
+mhgp5_gate(mhgp5_q4_lane_batched_petit_lot 0 mhgp5_q4_lane_batched_gate "--family=uniform --n=400 --threads=1 --seeds-per-launch=1000 --min-candidates=200")
 mhgp5_gate(mhgp5_q3_lane_batched_uniform_8000 0 mhgp5_q3_lane_batched_gate "--family=uniform --n=8000 --threads=8 --min-candidates=100000" LABELS scale8000 TIMEOUT 1800)
 
 # ---- Temoin device (docs/GPU.md, livraison 3) — nvcc seulement -------------------------
@@ -352,5 +354,6 @@ if(MHGP5_ENABLE_CUDA)
   mhgp5_gate(mhgp5_q3_lane_device_uniform 0 mhgp5_q3_lane_device_gate "--family=uniform --n=1200" LABELS gpu)
   mhgp5_gate(mhgp5_q3_lane_device_clusters 0 mhgp5_q3_lane_device_gate "--family=eight_clusters --n=1200 --threads=4" LABELS gpu)
   mhgp5_gate(mhgp5_q3_lane_device_cocirc 0 mhgp5_q3_lane_device_gate "--family=uniform --n=300 --coord=40 --min-candidates=200" LABELS gpu)
+  mhgp5_gate(mhgp5_q3_lane_device_petit_lot 0 mhgp5_q3_lane_device_gate "--family=uniform --n=400 --seeds-per-launch=1000 --min-candidates=200" LABELS gpu)
   mhgp5_gate(mhgp5_q3_lane_device_uniform_8000 0 mhgp5_q3_lane_device_gate "--family=uniform --n=8000 --threads=8 --min-candidates=100000" LABELS gpu scale8000 TIMEOUT 1800)
 endif()
