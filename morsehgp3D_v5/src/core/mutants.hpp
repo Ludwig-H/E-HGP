@@ -53,7 +53,7 @@ inline constexpr const char* kMutants[] = {
     "binary-ties", "repr-ties", "attach-prebatch", "drop-nonmerge", "dense-pointid",
     "canonical-is-uf-root", "attach-detector-disabled",
     // parallelisme
-    "par-drop-shard", "par-drop-ball-chunk", "parallel-one-worker",
+    "par-drop-shard", "par-drop-ball-chunk", "parallel-one-worker", "parallel-sort-unstable",
     // rendu
     "render-active-only", "render-collapse-mult", "birth-from-events",
     // oracle et portes (points d'injection dans oracle/ et tests/)

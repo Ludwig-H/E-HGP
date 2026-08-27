@@ -36,9 +36,13 @@
 #include <string>
 #include <vector>
 
+#include <chrono>
+
 #include "../core/mutants.hpp"
 #include "../lanes/keys.hpp"
 #include "../lanes/level.hpp"
+#include "../parallel/pool.hpp"
+#include "../parallel/sort.hpp"
 
 namespace mhgp5 {
 
@@ -68,7 +72,8 @@ struct ForestResult {
   std::vector<u32> final_canon_fid;    // fid -> plus petit fid de sa composante
   std::vector<ComponentDelta> deltas;  // le payload hierarchique complet
   std::vector<ExactLevel> batch_levels;
-  double t_intern_ms = 0, t_reduce_ms = 0;
+  u64 workers = 0;  // ouvriers reellement crees (max sur les phases paralleles)
+  double t_sort_ms = 0, t_intern_ms = 0, t_merge_ms = 0, t_reduce_ms = 0, t_partition_ms = 0;
 };
 
 namespace fold_detail {
@@ -169,40 +174,83 @@ struct UnionFind {
 // fid de l'union-find i32 ; lots <= evenements < UINT32_MAX, sentinelle des
 // tables a epoque).
 inline bool fold_capacity_ok(u64 events, u64 incidences, std::string* why) {
-  if (events >= (u64)UINT32_MAX) { *why = "resource_exhausted/requires_tiling : evenements >= 2^32-1"; return false; }
+  if (events >= (u64)UINT32_MAX / 11) { *why = "resource_exhausted/requires_tiling : evenements >= (2^32-1)/11 (positions d'incidence u32)"; return false; }
   if (incidences > (u64)INT32_MAX) { *why = "resource_exhausted/requires_tiling : incidences > 2^31-1"; return false; }
   return true;
 }
 
 // `order` : permutation des evenements triee par niveau exact (calculee par
 // l'appelant, qui peut la partager avec le rendu).
-inline std::vector<u32> sort_events_by_level(const std::vector<ForestEvent>& events) {
+inline std::vector<u32> sort_events_by_level(const std::vector<ForestEvent>& events, int threads = 1,
+                                             u64* workers = nullptr) {
   std::vector<u32> order(events.size());
   for (size_t i = 0; i < order.size(); ++i) order[i] = (u32)i;
-  std::stable_sort(order.begin(), order.end(),
-                   [&](u32 x, u32 y) { return compare_exact_level(events[x].level, events[y].level) < 0; });
+  // Tri STABLE (les ex aequo d'un lot gardent l'ordre d'entree : l'ordre des
+  // unions et l'emission des deltas en dependent) — parallele, identique a
+  // std::stable_sort par contrat (porte mhgp5_parallel_sort_gate).
+  const size_t w = parallel_stable_sort(
+      order.begin(), order.end(),
+      [&](u32 x, u32 y) { return compare_exact_level(events[x].level, events[y].level) < 0; }, threads);
+  if (workers) *workers = std::max(*workers, (u64)w);
   return order;
 }
 
-inline ForestResult build_forest(const std::vector<ForestEvent>& events) {
+// PARTITIONNEMENT PAR EMPREINTE (parallelisation du fold, session G4 du
+// 27 aout : le fold sequentiel pesait 115 s sur 219 a uniform 50k) :
+// 64 partitions FIXES par les six bits hauts de l'empreinte — independantes du
+// nombre de fils, donc les pools et les tid ne dependent que de l'ordre des
+// evenements ; les fid finaux viennent du tri global des cles uniques et ne
+// dependent de rien d'autre : la sortie est bit-identique a 1 fil et a N fils.
+inline constexpr int kFoldPartitionBits = 6;
+inline constexpr size_t kFoldPartitions = (size_t)1 << kFoldPartitionBits;
+inline constexpr u32 kFoldTidMask = (1u << (32 - kFoldPartitionBits)) - 1u;
+
+// ETAT PREPARE d'un fold : tout ce qui est parallele (tri des evenements,
+// lots, internement partitionne, fusion, remap). La reduction (union-find a
+// lots, deltas, partition finale) est sequentielle et vit dans
+// `reduce_fold`, pour pouvoir etre PIPELINEE avec la preparation de l'ordre
+// suivant (run.hpp). Non copiable ; `events` est non possede : l'appelant le
+// garde vivant jusqu'a la fin de la reduction.
+struct FoldPrepared {
+  const std::vector<ForestEvent>* events = nullptr;
+  ForestResult r;  // refusal, workers, chronos de preparation, facets
+  std::vector<u32> order;
+  std::vector<std::pair<size_t, size_t>> batches;
+  std::vector<FacetKey> keys;
+  std::vector<u32> ev_fid;
+  bool mutants[6] = {false, false, false, false, false, false};  // binary, repr, attach_pre, drop_nonmerge, canon_root, no_detector
+};
+
+inline FoldPrepared prepare_fold(const std::vector<ForestEvent>& events, int threads = 1) {
   using namespace fold_detail;
-  ForestResult r;
+  FoldPrepared fp;
+  fp.events = &events;
+  ForestResult& r = fp.r;
   const bool m_binary = MHGP5_MUTANT("binary-ties");
   const bool m_repr = MHGP5_MUTANT("repr-ties");
-  const bool m_attach_pre = MHGP5_MUTANT("attach-prebatch");
-  const bool m_drop_nonmerge = MHGP5_MUTANT("drop-nonmerge");
-  const bool m_canon_root = MHGP5_MUTANT("canonical-is-uf-root");
-  const bool m_no_detector = MHGP5_MUTANT("attach-detector-disabled");
-
+  fp.mutants[0] = m_binary;
+  fp.mutants[1] = m_repr;
+  fp.mutants[2] = MHGP5_MUTANT("attach-prebatch");
+  fp.mutants[3] = MHGP5_MUTANT("drop-nonmerge");
+  fp.mutants[4] = MHGP5_MUTANT("canonical-is-uf-root");
+  fp.mutants[5] = MHGP5_MUTANT("attach-detector-disabled");
+  auto tmark = std::chrono::steady_clock::now();
+  const auto mark = [&](double* out) {
+    const auto now = std::chrono::steady_clock::now();
+    *out += std::chrono::duration<double, std::milli>(now - tmark).count();
+    tmark = now;
+  };
   // Garde de capacite AVANT toute allocation (la meme que fold_capacity_ok).
   u64 total_recs = 0;
   for (const ForestEvent& ev : events) total_recs += (u64)ev.q + ev.d;
-  if (!fold_capacity_ok((u64)events.size(), total_recs, &r.refusal)) return r;
-  const std::vector<u32> order = sort_events_by_level(events);
+  if (!fold_capacity_ok((u64)events.size(), total_recs, &r.refusal)) return fp;
+  fp.order = sort_events_by_level(events, threads, &r.workers);
+  const std::vector<u32>& order = fp.order;
   const auto evt = [&](size_t i) -> const ForestEvent& { return events[(size_t)order[i]]; };
+  mark(&r.t_sort_ms);
 
   // Lots.
-  std::vector<std::pair<size_t, size_t>> batches;
+  std::vector<std::pair<size_t, size_t>>& batches = fp.batches;
   for (size_t b0 = 0; b0 < events.size();) {
     size_t b1 = b0 + 1;
     while (b1 < events.size() && !m_binary) {
@@ -214,54 +262,193 @@ inline ForestResult build_forest(const std::vector<ForestEvent>& events) {
     b0 = b1;
   }
 
-  // Internement en streaming, bloc de 48 avec prefetch.
-  std::vector<FacetKey> keys;
-  std::vector<u32> ev_fid(events.size() * 11);
+  // ---- Internement partitionne.
+  // Passe 1 (parallele par tranche d'evenements) : empreintes et positions,
+  // comptees par partition. Passe 2 : diffusion en ordre (partition, tranche).
+  // Passe 3 (parallele par partition) : table privee, tid locaux, ev_fid =
+  // partition << 26 | tid. Passe 4 (parallele par partition) : tri des cles
+  // uniques. Passe 5 : fusion k-aire des 64 listes triees -> fid globaux.
+  // Passe 6 (parallele par tranche) : remap des ev_fid.
+  const size_t ne = events.size();
+  std::vector<FacetKey>& keys = fp.keys;
+  fp.ev_fid.assign(ne * 11, 0);
+  std::vector<u32>& ev_fid = fp.ev_fid;
   {
-    FacetIntern in((size_t)total_recs);
-    constexpr size_t kBlock = 48;
-    struct Pending { FacetKey f; u64 h; size_t pos; };
-    std::array<Pending, kBlock> pend{};
-    size_t np = 0;
-    const auto flush = [&]() {
-      for (size_t i = 0; i < np; ++i) ev_fid[pend[i].pos] = in.intern_hashed(pend[i].f, pend[i].h);
-      np = 0;
+    struct Rec {
+      u64 h;
+      u32 pos;
     };
-    const auto push = [&](const FacetKey& f, size_t pos) {
-      Pending& p = pend[np];
-      p.f = f;
-      p.h = facet_fingerprint(f);
-      p.pos = pos;
-      in.prefetch(p.h);
-      if (++np == kBlock) flush();
-    };
-    for (size_t e = 0; e < events.size(); ++e) {
-      const ForestEvent& ev = evt(e);
-      for (int s = 0; s < (int)ev.q; ++s) push(facet_minus(ev, s, -1), e * 11 + (size_t)s);
-      for (int z = 0; z < (int)ev.d; ++z) push(facet_minus(ev, -1, z), e * 11 + (size_t)(ev.q + z));
+    const size_t T = planned_workers(ne, threads);
+    const size_t chunk = T <= 1 ? std::max<size_t>(ne, 1) : std::max<size_t>(1, (ne + 8 * T - 1) / (8 * T));
+    const size_t nchunks = ne == 0 ? 0 : (ne + chunk - 1) / chunk;
+    std::vector<std::vector<Rec>> crec(nchunks);
+    std::vector<std::vector<u32>> ccount(nchunks, std::vector<u32>(kFoldPartitions, 0));
+    size_t created = parallel_items(nchunks, (int)T, [&](size_t c, size_t) {
+      const size_t e0 = c * chunk, e1 = std::min(ne, e0 + chunk);
+      std::vector<Rec>& out = crec[c];
+      std::vector<u32>& cnt = ccount[c];
+      size_t inc = 0;
+      for (size_t e = e0; e < e1; ++e) inc += (size_t)evt(e).q + evt(e).d;
+      out.reserve(inc);
+      for (size_t e = e0; e < e1; ++e) {
+        const ForestEvent& ev = evt(e);
+        for (int s = 0; s < (int)ev.q; ++s) {
+          const u64 h = facet_fingerprint(facet_minus(ev, s, -1));
+          out.push_back(Rec{h, (u32)(e * 11 + (size_t)s)});
+          ++cnt[(size_t)(h >> (64 - kFoldPartitionBits))];
+        }
+        for (int z = 0; z < (int)ev.d; ++z) {
+          const u64 h = facet_fingerprint(facet_minus(ev, -1, z));
+          out.push_back(Rec{h, (u32)(e * 11 + (size_t)(ev.q + z))});
+          ++cnt[(size_t)(h >> (64 - kFoldPartitionBits))];
+        }
+      }
+    });
+    r.workers = std::max(r.workers, (u64)created);
+    // Offsets : base par partition, puis par (partition, tranche).
+    std::vector<size_t> pbase(kFoldPartitions + 1, 0);
+    for (size_t p = 0; p < kFoldPartitions; ++p) {
+      size_t tot = 0;
+      for (size_t c = 0; c < nchunks; ++c) tot += ccount[c][p];
+      pbase[p + 1] = pbase[p] + tot;
     }
-    flush();
-    std::vector<u64>().swap(in.table);  // liberee AVANT le tri
-    std::sort(in.pool.begin(), in.pool.end(),
-              [](const std::pair<FacetKey, u32>& x, const std::pair<FacetKey, u32>& y) {
-                return facet_less_k(x.first, y.first);
-              });
-    const size_t np2 = in.pool.size();
-    keys.resize(np2);
-    std::vector<u32> rank(np2);
-    for (size_t i = 0; i < np2; ++i) {
-      keys[i] = in.pool[i].first;
-      rank[(size_t)in.pool[i].second] = (u32)i;
-    }
-    std::vector<std::pair<FacetKey, u32>>().swap(in.pool);
-    for (size_t e = 0; e < events.size(); ++e) {
-      const ForestEvent& ev = evt(e);
-      for (int t = 0; t < (int)ev.q + (int)ev.d; ++t) {
-        u32& slot = ev_fid[e * 11 + (size_t)t];
-        slot = rank[(size_t)slot];
+    std::vector<std::vector<size_t>> coff(nchunks, std::vector<size_t>(kFoldPartitions, 0));
+    for (size_t p = 0; p < kFoldPartitions; ++p) {
+      size_t off = pbase[p];
+      for (size_t c = 0; c < nchunks; ++c) {
+        coff[c][p] = off;
+        off += ccount[c][p];
       }
     }
+    std::vector<Rec> parts((size_t)total_recs);
+    created = parallel_items(nchunks, (int)T, [&](size_t c, size_t) {
+      std::vector<size_t> off = coff[c];
+      for (const Rec& rc : crec[c]) parts[off[(size_t)(rc.h >> (64 - kFoldPartitionBits))]++] = rc;
+      std::vector<Rec>().swap(crec[c]);
+    });
+    r.workers = std::max(r.workers, (u64)created);
+    // Passe 3 : internement par partition (table privee), tid locaux.
+    std::vector<std::vector<std::pair<FacetKey, u32>>> pools(kFoldPartitions);
+    const size_t TP = planned_workers(kFoldPartitions, threads);
+    created = parallel_items(kFoldPartitions, (int)TP, [&](size_t p, size_t) {
+      const size_t b = pbase[p], e = pbase[p + 1];
+      if (b == e) return;
+      FacetIntern in(e - b);
+      for (size_t i = b; i < e; ++i) {
+        const Rec& rc = parts[i];
+        const size_t ev_i = rc.pos / 11, slot = rc.pos % 11;
+        const ForestEvent& ev = evt(ev_i);
+        const FacetKey f = slot < ev.q ? facet_minus(ev, (int)slot, -1) : facet_minus(ev, -1, (int)(slot - ev.q));
+        const u32 tid = in.intern_hashed(f, rc.h);
+        ev_fid[rc.pos] = ((u32)p << (32 - kFoldPartitionBits)) | tid;
+      }
+      std::vector<u64>().swap(in.table);
+      pools[p].swap(in.pool);
+      // Passe 4 : tri des cles uniques de la partition ; second = tid.
+      std::sort(pools[p].begin(), pools[p].end(),
+                [](const std::pair<FacetKey, u32>& x, const std::pair<FacetKey, u32>& y) {
+                  return facet_less_k(x.first, y.first);
+                });
+    });
+    r.workers = std::max(r.workers, (u64)created);
+    std::vector<Rec>().swap(parts);
+    mark(&r.t_intern_ms);
+    // Passe 5 : fusion k-aire des partitions triees -> keys globales et
+    // g_of[p][tid] = fid global. Les cles sont distinctes entre partitions
+    // (empreintes differentes) : aucune egalite a departager. PARALLELE PAR
+    // RANGS DE VALEURS : des separateurs pris dans la plus grosse partition
+    // decoupent l'ordre total en R rangs ; chaque rang fusionne (tas) les 64
+    // sous-listes [lower_bound(sep_t), lower_bound(sep_{t+1})) — les bornes
+    // par partition et les offsets de sortie sont connus avant la fusion.
+    size_t total_unique = 0, biggest = 0;
+    for (size_t p = 0; p < kFoldPartitions; ++p) {
+      total_unique += pools[p].size();
+      if (pools[p].size() > pools[biggest].size()) biggest = p;
+    }
+    keys.resize(total_unique);
+    std::vector<std::vector<u32>> g_of(kFoldPartitions);
+    for (size_t p = 0; p < kFoldPartitions; ++p) g_of[p].resize(pools[p].size());
+    {
+      const size_t R = std::max<size_t>(1, std::min<size_t>(planned_workers(total_unique, threads) * 2, pools[biggest].size()));
+      // Bornes lo[t][p] : debut du rang t dans la partition p (lo[R][p] = fin).
+      std::vector<std::vector<size_t>> lo(R + 1, std::vector<size_t>(kFoldPartitions, 0));
+      for (size_t p = 0; p < kFoldPartitions; ++p) lo[R][p] = pools[p].size();
+      for (size_t t = 1; t < R; ++t) {
+        const FacetKey& sep = pools[biggest][t * pools[biggest].size() / R].first;
+        for (size_t p = 0; p < kFoldPartitions; ++p) {
+          const auto it = std::lower_bound(pools[p].begin(), pools[p].end(), sep,
+                                           [](const std::pair<FacetKey, u32>& a, const FacetKey& k) {
+                                             return facet_less_k(a.first, k);
+                                           });
+          lo[t][p] = (size_t)(it - pools[p].begin());
+        }
+      }
+      std::vector<size_t> out_off(R + 1, 0);
+      for (size_t t = 0; t < R; ++t) {
+        size_t n = 0;
+        for (size_t p = 0; p < kFoldPartitions; ++p) n += lo[t + 1][p] - lo[t][p];
+        out_off[t + 1] = out_off[t] + n;
+      }
+      const size_t created_m = parallel_items(R, threads, [&](size_t t, size_t) {
+        std::vector<size_t> cur(kFoldPartitions);
+        for (size_t p = 0; p < kFoldPartitions; ++p) cur[p] = lo[t][p];
+        std::vector<u32> heap;
+        const auto less_p = [&](u32 a, u32 b) {
+          return facet_less_k(pools[b][cur[b]].first, pools[a][cur[a]].first);  // min-heap
+        };
+        for (u32 p = 0; p < (u32)kFoldPartitions; ++p)
+          if (cur[p] < lo[t + 1][p]) heap.push_back(p);
+        std::make_heap(heap.begin(), heap.end(), less_p);
+        for (size_t g = out_off[t]; g < out_off[t + 1]; ++g) {
+          std::pop_heap(heap.begin(), heap.end(), less_p);
+          const u32 p = heap.back();
+          heap.pop_back();
+          keys[g] = pools[p][cur[p]].first;
+          g_of[p][(size_t)pools[p][cur[p]].second] = (u32)g;
+          if (++cur[p] < lo[t + 1][p]) {
+            heap.push_back(p);
+            std::push_heap(heap.begin(), heap.end(), less_p);
+          }
+        }
+      });
+      r.workers = std::max(r.workers, (u64)created_m);
+    }
+    for (size_t p = 0; p < kFoldPartitions; ++p) std::vector<std::pair<FacetKey, u32>>().swap(pools[p]);
+    // Passe 6 : remap parallele.
+    created = parallel_ranges(ne * 11, threads, [&](size_t b, size_t e, size_t) {
+      for (size_t i = b; i < e; ++i) {
+        const size_t ev_i = i / 11, slot = i % 11;
+        const ForestEvent& ev = evt(ev_i);
+        if (slot >= (size_t)ev.q + ev.d) continue;
+        const u32 v = ev_fid[i];
+        ev_fid[i] = g_of[(size_t)(v >> (32 - kFoldPartitionBits))][(size_t)(v & kFoldTidMask)];
+      }
+    });
+    r.workers = std::max(r.workers, (u64)created);
+    mark(&r.t_merge_ms);
   }
+  r.facets = keys.size();
+  return fp;
+}
+
+inline ForestResult reduce_fold(FoldPrepared&& fp) {
+  using namespace fold_detail;
+  ForestResult r = std::move(fp.r);
+  if (!r.refusal.empty()) return r;
+  const std::vector<ForestEvent>& events = *fp.events;
+  const std::vector<u32>& order = fp.order;
+  const auto evt = [&](size_t i) -> const ForestEvent& { return events[(size_t)order[i]]; };
+  const std::vector<std::pair<size_t, size_t>>& batches = fp.batches;
+  std::vector<FacetKey>& keys = fp.keys;
+  std::vector<u32>& ev_fid = fp.ev_fid;
+  const bool m_attach_pre = fp.mutants[2], m_drop_nonmerge = fp.mutants[3], m_canon_root = fp.mutants[4],
+             m_no_detector = fp.mutants[5];
+  auto tmark = std::chrono::steady_clock::now();
+  const auto mark = [&](double* out) {
+    const auto now = std::chrono::steady_clock::now();
+    *out += std::chrono::duration<double, std::milli>(now - tmark).count();
+    tmark = now;
+  };
   const size_t nfid = keys.size();
   r.facets = nfid;
 
@@ -365,6 +552,7 @@ inline ForestResult build_forest(const std::vector<ForestEvent>& events) {
     for (const u32 fid : touched) seen[fid] = 1;
     ++r.batches;
   }
+  mark(&r.t_reduce_ms);
   r.final_canon_fid.resize(nfid);
   for (size_t fid = 0; fid < nfid; ++fid) {
     const u32 c = canon_fid[(size_t)uf.find((i32)fid)];
@@ -373,8 +561,15 @@ inline ForestResult build_forest(const std::vector<ForestEvent>& events) {
   }
   for (size_t fid = 1; fid < nfid; ++fid)
     if (!(keys[fid - 1] < keys[fid])) ++r.partition_violations;
+  std::vector<u32>().swap(ev_fid);
   r.facet_keys = std::move(keys);
+  mark(&r.t_partition_ms);
   return r;
+}
+
+// Le fold complet, sequentiel de bout en bout du point de vue de l'appelant.
+inline ForestResult build_forest(const std::vector<ForestEvent>& events, int threads = 1) {
+  return reduce_fold(prepare_fold(events, threads));
 }
 
 }  // namespace mhgp5

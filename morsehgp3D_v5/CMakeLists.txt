@@ -249,3 +249,16 @@ mhgp5_gate(mhgp5_q4_once_mutant_no_canonical 4 mhgp5_q4_once_gate "--inject=q4-n
 mhgp5_executable(mhgp5_q4_seed_core_fixture tests/q4_seed_core_fixture.cpp)
 mhgp5_gate(mhgp5_q4_seed_core_fixture 0 mhgp5_q4_seed_core_fixture "")
 mhgp5_gate(mhgp5_q4_seed_core_mutant_nonstrict 4 mhgp5_q4_seed_core_fixture "--inject=q4-seed-core-nonstrict")
+
+# ---- Tri stable parallele et banc apparie du fold -----------------------------------
+mhgp5_executable(mhgp5_parallel_sort_gate tests/parallel_sort_gate.cpp)
+mhgp5_gate(mhgp5_parallel_sort_gate 0 mhgp5_parallel_sort_gate "--bench-pairs=3 --bench-threads=8")
+mhgp5_gate(mhgp5_parallel_sort_mutant_unstable 4 mhgp5_parallel_sort_gate "--bench-pairs=0 --inject=parallel-sort-unstable")
+mhgp5_gate(mhgp5_parallel_sort_refus_mutant_inconnu 2 mhgp5_parallel_sort_gate "--inject=inconnu")
+# Banc apparie contrebalance (instrument, pas une porte de vitesse) : signature identique exigee.
+mhgp5_executable(mhgp5_fold_bench tests/fold_bench.cpp)
+mhgp5_gate(mhgp5_fold_bench_signature 0 mhgp5_fold_bench "--family=uniform --n=1200 --K=10 --pairs=2 --threads=4")
+
+# ---- SHA-256 : vecteurs FIPS et egalite portable / SHA-NI ---------------------------
+mhgp5_executable(mhgp5_sha256_gate tests/sha256_gate.cpp)
+mhgp5_gate(mhgp5_sha256_gate 0 mhgp5_sha256_gate "")

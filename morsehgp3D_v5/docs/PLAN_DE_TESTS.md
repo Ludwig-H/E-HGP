@@ -51,6 +51,8 @@ fixe son application v5.
 | niveaux | U192/U320 contre l'oracle 384 bits ; antisymétrie ; canonicité ; plancher de plateaux ; mot-haut | `mhgp5_level_cmp` |
 | arithmétique de l'oracle | le juge du juge : contre `__int128` (et `cpp_int` si présent) ; frontière du débordement | `mhgp5_obig_selftest` |
 | forêt | K = 1 ≡ single-linkage ; juge par miniboule indépendante + cliques + Kruskal à lots (n ≤ 14) ; fixtures plateau / attachement / croissance | `mhgp5_forest_judge` |
+| parallélisme | bit-identique 1 fil / N fils, ouvriers mesurés ; tri stable parallèle ≡ `std::stable_sort` ; SHA-256 accéléré ≡ portable | `mhgp5_par_gate`, `mhgp5_parallel_sort_gate`, `mhgp5_sha256_gate` |
+| coût (instrument) | banc apparié contrebalancé du fold, signature identique exigée, médiane des rapports par paire | `mhgp5_fold_bench` |
 | **conformité v4** | `digest_balls` et `digest_all` (format v4) identiques sur les mêmes entrées | `mhgp5_conformity_*` (n=400…2000 : `gate` ; 8000/16000/32000 : `scaleNNNN`) |
 
 ## 4. Fixtures permanentes reprises (coordonnées exactes)

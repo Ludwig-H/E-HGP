@@ -63,15 +63,27 @@ les requêtes de cover. Il n'existe ni octree séparé ni second arbre.
 4  census I_B / U_B complets des survivantes (plafond de coquille)
 5  comptage des événements par K (sans matérialisation) → gardes de       expand.hpp
    capacité de TOUS les ordres avant toute publication
-6  pour K = 1..K_max, STREAMÉ : expansion des plateaux de l'ordre K      forest/plateau.hpp,
-   seulement → fold (macro-lots, deltas, partition dense) → signature    forest/fold.hpp
-   → compteurs → callback provisoire → libération
+6  pour K = 1..K_max, STREAMÉ en PIPELINE À DEUX ÉTAGES :                  forest/plateau.hpp,
+   étage A (parallèle, `threads` ouvriers) : expansion de l'ordre K,       forest/fold.hpp
+   tri stable parallèle des événements, internement PARTITIONNÉ par        parallel/sort.hpp
+   empreinte (64 partitions fixes), fusion parallèle par rangs de valeurs,
+   remap ; étage B (un fil d'arrière-plan, un seul à la fois, dans l'ordre
+   des K) : réduction (union-find à macro-lots, deltas, partition dense),
+   signature SHA-256 (SHA-NI si disponible), callback provisoire,
+   libération. L'étage B de K recouvre l'étage A de K+1 ; résidence
+   bornée à deux ordres.
 ```
 
 Chaque étape parallèle découpe par tranches d'index et fusionne **en ordre de
 tranche** : la sortie est bit-identique au séquentiel quel que soit le nombre
 de fils, et le nombre d'ouvriers réellement créés est retourné, jamais
-déclaré (`src/parallel/pool.hpp`).
+déclaré (`src/parallel/pool.hpp`, `src/parallel/sort.hpp`). Le fold
+partitionné ne dépend pas non plus du nombre de fils : partitions fixes par
+les six bits hauts de l'empreinte, fid finaux par tri global des clés uniques
+(`mhgp5_par_gate`, `mhgp5_parallel_sort_gate`, conformité v4). Le gain d'une
+parallélisation se prouve par banc apparié contrebalancé intra-processus
+(`mhgp5_fold_bench` : médiane des rapports par paire), jamais par deux
+chronos.
 
 ## 3. Doctrine d'exactitude
 

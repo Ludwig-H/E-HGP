@@ -21,24 +21,54 @@
 namespace mhgp5 {
 
 namespace digest_detail {
+// Serialiseur TAMPONNE : les millions de champs de quelques octets sont
+// accumules dans un tampon de 64 Ko avant d'alimenter SHA-256 (13 s -> ~1 s a
+// uniform 8000 sur le meme flux d'octets ; le format est inchange).
 struct Writer {
   Sha256 h;
-  void tag(const char* t) { h.update(t, std::strlen(t)); }  // format v4 : sans longueur
-  void u8v(u8 v) { h.update(&v, 1); }
+  u8 buf[1 << 16];
+  size_t n = 0;
+  ~Writer() = default;
+  void flush() {
+    if (n) h.update(buf, n);
+    n = 0;
+  }
+  void put(const void* p, size_t k) {
+    if (n + k > sizeof(buf)) flush();
+    std::memcpy(buf + n, p, k);
+    n += k;
+  }
+  void tag(const char* t) { put(t, std::strlen(t)); }  // format v4 : sans longueur
+  void u8v(u8 v) { put(&v, 1); }
   void u32v(u32 v) {
     u8 b[4];
     for (int i = 0; i < 4; ++i) b[i] = (u8)(v >> (8 * i));
-    h.update(b, 4);
+    put(b, 4);
   }
-  void u64v(u64 v) { h.u64le(v); }
-  void i128v(i128 v) { h.i128le(v); }
+  void u64v(u64 v) {
+    u8 b[8];
+    for (int i = 0; i < 8; ++i) b[i] = (u8)(v >> (8 * i));
+    put(b, 8);
+  }
+  void i128v(i128 v) {
+    const u128 u = (u128)v;
+    u64v((u64)u);
+    u64v((u64)(u >> 64));
+  }
   void facet(const FacetKey& f) {
-    u8v(f.k);
-    for (int i = 0; i < kFacetMaxK; ++i) u32v(f.p[(size_t)i]);
+    u8 b[1 + 4 * kFacetMaxK];
+    b[0] = f.k;
+    for (int i = 0; i < kFacetMaxK; ++i)
+      for (int j = 0; j < 4; ++j) b[1 + 4 * i + j] = (u8)(f.p[(size_t)i] >> (8 * j));
+    put(b, sizeof(b));
   }
   void level(const ExactLevel& l) {
     for (int i = 0; i < 3; ++i) u64v(l.num[i]);
     i128v(l.den);
+  }
+  std::string hex() {
+    flush();
+    return h.hex();
   }
 };
 }  // namespace digest_detail
@@ -54,7 +84,7 @@ inline std::string digest_balls_v4(const std::vector<BallCandidate>& cands) {
     d.level(c.level);
     d.u8v(c.arity);
   }
-  return d.h.hex();
+  return d.hex();
 }
 
 inline std::string digest_forest_v4(u32 K, const ForestResult& r) {
@@ -75,15 +105,15 @@ inline std::string digest_forest_v4(u32 K, const ForestResult& r) {
     d.u64v((u64)cd.born.size());
     for (const FacetKey& f : cd.born) d.facet(f);
   }
-  return d.h.hex();
+  return d.hex();
 }
 
 // Chainage des hex par K croissant (le digest « all » du format v4).
 struct DigestAll {
   digest_detail::Writer d;
   DigestAll() { d.tag("mhgp4-digest-v1:all"); }
-  void add(const std::string& hex) { d.h.update(hex.data(), hex.size()); }
-  std::string hex() { return d.h.hex(); }
+  void add(const std::string& hex) { d.put(hex.data(), hex.size()); }
+  std::string hex() { return d.hex(); }
 };
 
 }  // namespace mhgp5

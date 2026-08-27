@@ -165,28 +165,45 @@ struct KCount {
   u64 events = 0, incidences = 0;
 };
 
-inline std::vector<KCount> count_events_by_k(const CloudIndex& ix, const std::vector<BallData>& balls, u64 kmax) {
-  std::vector<KCount> out((size_t)kmax + 1);
-  std::vector<PlateauEvent> pevents;
-  for (const BallData& bd : balls) {
-    const size_t q = bd.shell.size(), d = bd.interior.size();
-    if (q == (size_t)bd.arity) {  // regulier : un evenement, ordre q + d − 1
-      const size_t K = q + d - 1;
-      if (K >= 1 && K <= (size_t)kmax) {
-        ++out[K].events;
-        out[K].incidences += q + d;
-      }
-      continue;
-    }
-    pevents.clear();
-    expand_plateau(ball_center(bd.key), ix.upos, bd.interior, bd.shell, (size_t)(kmax + 1), &pevents);
-    for (const PlateauEvent& pe : pevents) {
-      const size_t K = pe.tpart.size() + pe.ipart.size() - 1;
-      if (K < 1 || K > (size_t)kmax) continue;
-      ++out[K].events;
-      out[K].incidences += pe.tpart.size() + pe.ipart.size();
-    }
+inline std::vector<KCount> count_events_by_k(const CloudIndex& ix, const std::vector<BallData>& balls, u64 kmax,
+                                             int threads = 1) {
+  size_t nchunks = 0;
+  std::vector<std::vector<KCount>> lc;
+  {
+    size_t dummy = 0;
+    expand_detail::chunked(balls.size(), threads, &dummy, [&](size_t, size_t, size_t) {});
+    lc.assign(dummy, std::vector<KCount>((size_t)kmax + 1));
   }
+  expand_detail::chunked(balls.size(), threads, &nchunks, [&](size_t c, size_t b, size_t e) {
+    std::vector<PlateauEvent> pevents;
+    std::vector<KCount>& out = lc[c];
+    for (size_t bi = b; bi < e; ++bi) {
+      const BallData& bd = balls[bi];
+      const size_t q = bd.shell.size(), d = bd.interior.size();
+      if (q == (size_t)bd.arity) {  // regulier : un evenement, ordre q + d − 1
+        const size_t K = q + d - 1;
+        if (K >= 1 && K <= (size_t)kmax) {
+          ++out[K].events;
+          out[K].incidences += q + d;
+        }
+        continue;
+      }
+      pevents.clear();
+      expand_plateau(ball_center(bd.key), ix.upos, bd.interior, bd.shell, (size_t)(kmax + 1), &pevents);
+      for (const PlateauEvent& pe : pevents) {
+        const size_t K = pe.tpart.size() + pe.ipart.size() - 1;
+        if (K < 1 || K > (size_t)kmax) continue;
+        ++out[K].events;
+        out[K].incidences += pe.tpart.size() + pe.ipart.size();
+      }
+    }
+  });
+  std::vector<KCount> out((size_t)kmax + 1);
+  for (size_t c = 0; c < nchunks; ++c)
+    for (size_t K = 0; K <= (size_t)kmax; ++K) {
+      out[K].events += lc[c][K].events;
+      out[K].incidences += lc[c][K].incidences;
+    }
   return out;
 }
 
