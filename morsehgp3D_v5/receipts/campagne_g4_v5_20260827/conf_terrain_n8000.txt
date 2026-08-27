@@ -1,0 +1,28 @@
+payload=mhgp5-forests-horizontal-v1 authority=status_terminal callbacks=provisional vertical_maps=none
+famille=terrain n=8000 coord=447 s=8 smax=11 seed=3 threads=48 emis=602219 boules_uniques=601714 mortes_profondeur=21065 survivantes=580649 census_int=2914949 census_shell=1651356 evenements=605870 facettes=3655983 fusions=3652025 deltas=477846 noeuds=374603
+generation rect_alive=129392/207772/215015 ancres=194837/436323/491665 candidats=182330/374500/45389 tues_profondeur=0/9834296/2188875 ancres_w4=138565 seeds_core_tues=4480239 float_cert=186805969/58072589 repli=1670817 jung=38545158/57770912/104
+ouvriers wspd=48/48/48 rects=48/48/48 prefiltre=48 census=48 expansion=48
+temps_ms index=1.3 gen=465.7 (wspd 54.1/96.6/105.6 rects 18.5/91.6/99.2) rle=96.0 prefiltre=127.8 census=83.1 expansion=78.1 fold=1489.5
+cardinalites K=1 evenements=18376 facettes=8000 deltas=6594 attachements=0 fusions=7999 noeuds=6594
+cardinalites K=2 evenements=27539 facettes=36173 deltas=15184 attachements=18313 fusions=36158 noeuds=12158
+cardinalites K=3 evenements=36689 facettes=83425 deltas=25060 attachements=54285 fusions=83340 noeuds=18765
+cardinalites K=4 evenements=46139 facettes=150010 deltas=33795 attachements=109170 fusions=149794 noeuds=25558
+cardinalites K=5 evenements=55419 facettes=234824 deltas=42556 attachements=181622 fusions=234480 noeuds=32751
+cardinalites K=6 evenements=64764 facettes=339048 deltas=51638 attachements=272937 fusions=338586 noeuds=40192
+cardinalites K=7 evenements=74621 facettes=464626 deltas=61292 attachements=385594 fusions=464053 noeuds=47836
+cardinalites K=8 evenements=84084 facettes=607180 deltas=70922 attachements=514783 fusions=606508 noeuds=55654
+cardinalites K=9 evenements=94012 facettes=772654 deltas=80536 attachements=666529 fusions=771906 noeuds=63643
+cardinalites K=10 evenements=104227 facettes=960043 deltas=90269 attachements=840172 fusions=959201 noeuds=71452
+digest_balls=8143e0592234f4c83f2f1f74203fd62a7d827e6badb06ae8baea0ef49fc6e3f9
+digest_forest_K1=50c1800310ba64743dba6dedab64eff2a0f0d24165b1bcae577ece2e94d2e87f
+digest_forest_K2=22c562bf1fe70ac7506df3658338a5b5f5e0f4886a5e1f81647d2dee8147a997
+digest_forest_K3=b83d2ca36c66341a284c2ab1a9125aad856b9ff9ea0f82b90072b9e28c4e00a2
+digest_forest_K4=039fe58f8edd5da25c6214f0e52ad8e5c63f1c08297403abae2fdec5c3de1c2c
+digest_forest_K5=795a0774ea31f33694039934c907a6d950e093e50085574171ae609183e66dbd
+digest_forest_K6=798dddf14861ce18948519a245c9b250423ba797c26178e5829f5b51c2a4ffd3
+digest_forest_K7=d2a629ddcb5e03ef1b6ab4a010d16c7548377fabfaf7c3d3ecc12bee88735695
+digest_forest_K8=4f05572baf6b215268e9dc6d01748083551cbb353b540cfd1a304debdc17711f
+digest_forest_K9=ffa96e8a88e45314c379efafbad9bc6578db349a9a8763354257e939bf4e31c9
+digest_forest_K10=ceaf9609cd86e07bb2e33abb7f233315aa5a182eb9a8d4f168fcfbd6aa5f1e71
+digest_all=7edc25dd80efc10334ba0a4a48def573fadad0b429fe424bd4194283f9282db3
+conformite_v4 famille=terrain n=8000 balls=egal all=egal

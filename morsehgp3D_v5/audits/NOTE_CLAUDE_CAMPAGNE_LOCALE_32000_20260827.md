@@ -2,7 +2,7 @@
 
 - **Date :** 27 août 2026
 - **Pin du moteur :** `210571fb` (binaire `mhgp5_conformity_v4` de `build/v5`, sha256 dans le manifeste)
-- **Reçu :** `../receipts/conformite_v4/campagne_v5_210571fb_20260827.txt` (manifeste : pin, sha256 du binaire et du reçu v4, toolchain, machine ; par cas : code, temps, RSS max, digests, cardinalités) et le dossier de sorties brutes du même nom.
+- **Reçu :** `../receipts/conformite_v4/campagne_v5_210571fba29c_20260827.txt` (manifeste : pin, sha256 du binaire et du reçu v4, toolchain, machine ; par cas : code, temps, RSS max, digests, cardinalités) et le dossier de sorties brutes du même nom.
 - Machine : 8 vCPU, 31 Go, **partagée** pendant toute la campagne avec la suite ASan/UBSan et des builds — les temps ne sont pas des mesures de coût.
 - GCP non utilisé pour cette campagne (la session G4 est distincte et a son propre reçu).
 
