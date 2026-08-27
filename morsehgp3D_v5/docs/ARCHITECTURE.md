@@ -158,11 +158,12 @@ comme contrat pour la future livraison de la tour :
   cardinal $K$ sont deux à deux adjacentes dans $\Gamma_K(r)$ (leur union est
   $\sigma$) ; deux cofaces adjacents dans $\Gamma_{K+1}(r)$ ont toutes leurs
   facettes dans une même composante inférieure (clôture par faces). D'où
-  $v_K^r : 	heta_{K+1}(r) 	o 	heta_K(r)$, bien définie sur le graphe
+  $v_K^r : \theta_{K+1}(r) \to \theta_K(r)$, bien définie sur le graphe
   complet des intersections de témoins. Si le produit ne parcourt que les
   cofaces élémentaires, on invoque séparément l'égalité des composantes
   $H_0$ ; cela n'autorise pas à identifier les adjacences.
-- **État fermé, jamais « juste avant ».** À $r = ho(\sigma)$, les facettes
+- **État fermé, jamais « juste avant ».** À $r = 
+ho(\sigma)$, les facettes
   de $\sigma$ peuvent encore être réparties entre plusieurs composantes de
   $\Gamma_K$ dans l'état strictement antérieur ; avec des niveaux ex æquo,
   aucun ordre interne au plateau n'est canonique. La valeur verticale est
