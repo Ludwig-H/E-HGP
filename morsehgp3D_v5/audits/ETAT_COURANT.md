@@ -38,13 +38,13 @@ total au lieu de 98, digests appariés et baisse H2D q3 visible. Les pins G1 q4
 complètent ensuite le wire sans remplacer SoA. Les contrats
 fail-closed/non-vacants G1 restent à fermer sans reprendre ces travaux.
 
-Le worktree G1 actif répond déjà correctement aux deux demandes les plus
-rentables : bornage **en valeur** avant lancement et témoin de la branche
-réellement exécutée. Conserver ce patch. Avant son pin hôte, séparer
-`geom_points` absent de la borne zéro, aligner le libellé des lots vides et
-supprimer une activation mutante q4 redondante. `PointId` adverse, le selftest
-de campagne et les deux mutants sur un vrai device ferment ensuite la réception
-CUDA ; cela ne justifie aucune refonte du wire.
+Le worktree G1 actif répond déjà aux deux demandes les plus rentables : bornage
+**en valeur** avant lancement et instrumentation qui rend la branche observable.
+Conserver ce patch. Pour un claim API fail-closed, séparer seulement
+`geom_points` absent de la borne zéro ; le libellé des lots vides et l'activation
+mutante q4 redondante sont des nettoyages non bloquants. `PointId` adverse, le
+selftest de campagne et les deux mutants sur un vrai device transforment ensuite
+l'instrumentation en témoin reçu ; cela ne justifie aucune refonte du wire.
 
 Le pin `bc66ade7` consolide le bon cœur L2 : égalité de vie par lot,
 balayages structurels, vacuité finale, plafond par alias, cas adverse court et
@@ -112,18 +112,20 @@ un vecteur contigu à indices recyclés. Après le banc corrigé, profiler sépa
 lifetime, naissances/morts, unions, tris, rejeu et `slot_alias`; n'essayer une
 seconde disposition par créneau que si les accès `cv` ressortent effectivement.
 La suppression L3 de `firstb`/`lastb`/`slot_of_fid` peut apporter davantage.
-Sur le seul [run reçu `uniform n=50000`](../receipts/campagne_g4_v5_20260828_instrument_scale/out/contrat_uniform_n50000.txt), la part mur du fold vaut
+Sur le seul
+[run reçu `uniform n=50000`](../receipts/campagne_g4_v5_20260828_instrument_scale/out/contrat_uniform_n50000.txt),
+la part mur du fold vaut
 `25245,8 / 56290,8 = 44,85 %` ; le calcul conditionnel d'Amdahl à environ +27 %
 est correct, sans devenir une part générale des autres familles ou du nouveau
 fold.
 
-Les deux prochains pins faciles à recevoir sont indépendants : **G1 hôte** avec
-sa sentinelle réparée, puis **fold à créneaux** avec refus causal, vraie
-partition et métriques catégorisées. Le durcissement G0 peut suivre dans un
-commit autonome avant la prochaine réception de sûreté device ; il n'est pas
-une raison de retenir ces progrès fonctionnels. Aucun nouveau G4 n'est
-nécessaire avant leur fermeture locale. T5, le fold massif et le protocole CPU
-sous cpuset restent indépendants.
+Les deux prochains pins faciles sont indépendants : **source G1**, avec réception
+hôte des indices et de la sentinelle mais réception de branche différée au
+device, puis **fold à créneaux** avec refus causal, vraie partition et métriques
+catégorisées. Le durcissement G0 peut suivre dans un commit autonome avant la
+prochaine réception de sûreté device ; il n'est pas une raison de retenir ces
+progrès fonctionnels. Aucun nouveau G4 n'est nécessaire avant leur fermeture
+locale. T5, le fold massif et le protocole CPU sous cpuset restent indépendants.
 
 ## Ce qui est reçu et réutilisable
 
@@ -171,15 +173,16 @@ DI128 ; q4 récupère le même `PointId`, les mêmes offsets locaux de lentille 
 le même ordre de cover que le SoA. La géométrie est copiée avant les jobs puis
 seulement lue, et `submit_and_wait` conserve aujourd'hui sa durée de vie.
 
-Les deux premiers points ferment le contrat fonctionnel G1 ; le troisième
+Les deux premiers points définissent le contrat fonctionnel G1 ; le troisième
 répare une porte CUDA déjà déclarée. Les trois derniers sont des durcissements
 de coût à mesurer ensuite, pas des conditions artificielles de réception :
 
 1. **Réception — indices.** Le validateur de lot ne borne que la **taille** de `site_index`, pas ses
    valeurs. Avant tout lancement, exiger chaque index strictement inférieur à
-   `GpuGeometry::count` et la présence conjointe index/géométrie d'ancre ; les
-   fixtures `index == count` et `UINT32_MAX` doivent lever sans lancement. Le
-   builder normal produit bien des indices valides : il s'agit d'un contrat
+   `GpuGeometry::count`. En q3 seulement, exiger aussi la présence conjointe
+   index/géométrie d'ancre ; q4 borne ses indices contre la géométrie résidente.
+   Les fixtures `index == count` et `UINT32_MAX` doivent lever sans lancement.
+   Le builder normal produit bien des indices valides : il s'agit d'un contrat
    fail-closed, pas d'une divergence des sorties actuelles ;
 2. **Réception — branche.** La porte imprime le wire demandé, sans prouver le wire exécuté. Un mutant
    remplaçant le branchement index par SoA garderait verdicts et digests verts,
@@ -217,12 +220,13 @@ bloquent ni les digests déjà obtenus ni la réception fonctionnelle bornée.
 
 ### Relecture constructive du worktree G1 actif
 
-Le patch ferme dans son principe les points 1 à 3 : `GpuGeometry::count` borne
-chaque valeur, les fixtures `index == count` et `UINT32_MAX` refusent, les
-compteurs distinguent index et SoA, le mutant `wire-index-force-soa` possède une
-signature dédiée, et q3 parse enfin `--inject`. La porte CPU
-`mhgp5_batch_contract` rend 0. L'agrégation des statistiques de lot reste sous
-le mutex de lane ; aucune nouvelle race hôte n'est visible.
+Le patch implémente les points 1 à 3 : `GpuGeometry::count` borne chaque valeur,
+les fixtures `index == count` et `UINT32_MAX` refusent, les compteurs distinguent
+index et SoA, le mutant `wire-index-force-soa` possède une signature dédiée, et
+q3 parse enfin `--inject`. Le contrat d'indices est exercé sur CPU et la porte
+`mhgp5_batch_contract` rend 0 ; branche et mutants restent à recevoir sur
+device. L'agrégation des statistiques de lot reste sous le mutex de lane ;
+aucune nouvelle race hôte n'est visible.
 
 Trois finitions évitent de sur-vendre ce bon patch. La valeur sentinelle
 `n_geom_points == 0` signifie à la fois « géométrie absente » et « géométrie
@@ -238,8 +242,8 @@ blocage du pin G1.
 
 Ensuite, `lots` est incrémenté avant le retour d'un scan sans seed, tandis que
 ses compteurs de branche restent à zéro. Le générateur produit ne soumet
-actuellement aucun lot vide, donc cela ne bloque pas G1 ; déplacer le comptage
-de branche avant ce retour, ajouter `noop_lots`, ou définir `lots` comme « lots
+actuellement aucun lot vide, donc cela ne bloque pas G1 ; déplacer `m.lots = 1`
+après le retour anticipé, ajouter `noop_lots`, ou définir `lots` comme « lots
 transférés » rend simplement l'API et son commentaire cohérents. Le champ q3
 `site_index_bytes` additionne indices **et** géométrie d'ancre, alors que le CLI
 l'appelle `octets_sites_index` et exclut l'upload résident. Le renommer en
@@ -546,11 +550,11 @@ valeurs, calculs et corrections détaillés restent dans
 
 ## Ordre recommandé, sans détour
 
-1. Pin hôte G1 fonctionnel, dans son propre commit : bornes d'indices,
-   compteurs/mutants de branche et réparation du CTest `--inject`. La sentinelle
-   de géométrie et le libellé des no-op peuvent entrer dans ce pin sans nouvelle
-   cible ; `PointId` q4 adverse et selftest de campagne ferment ensuite la
-   réception device.
+1. Pin source G1 avec réception hôte partielle, dans son propre commit : bornes
+   d'indices, compteurs/mutants de branche et réparation du CTest `--inject`.
+   La sentinelle de géométrie ferme le claim API ; le libellé des no-op peut
+   suivre sans nouvelle cible. `PointId` q4 adverse, selftest et vraie exécution
+   des mutants ferment ensuite la réception device.
 2. Pin fold séparé : garder le tableau de créneaux et le refus avant `kNil` ;
    compléter la bijection exacte, les assertions littérales des deux frontières,
    le contrat précis de `slot-cap-minus-one` et le périmètre des catégories
@@ -585,7 +589,7 @@ valeurs, calculs et corrections détaillés restent dans
   jonction transactionnelle : exception exacte, zéro objet vivant, en Release
   et ASan/UBSan.
 - Worktree G1 postérieur : construction et CTest
-  `mhgp5_batch_contract` verts en 0,04 s. CUDA désactivé localement ; aucune
+  `mhgp5_batch_contract` verts, 0,06 s au dernier passage ciblé. CUDA désactivé localement ; aucune
   porte device de ce delta n'est annoncée comme exécutée.
 - Worktree fold à créneaux : **7/7** CTests `mhgp5_fold_live*` verts. Le nominal
   de ce dernier passage dure 83,32 s sous forte contention locale — plusieurs
