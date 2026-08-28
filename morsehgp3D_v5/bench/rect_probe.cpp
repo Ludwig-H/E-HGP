@@ -134,12 +134,14 @@ int main(int argc, char** argv) {
               MHGP5_PROBE_PIN, MHGP5_PROBE_DIRTY);
   CloudFamily family = CloudFamily::kUniform;
   int n = 2000, coord = 0, lane = 3;
+  bool descent_only = false;  // ne joue QUE alive_rectangles + le raffinement post-separation (aucun cover, aucun seed)
   for (int i = 1; i < argc; ++i) {
     const std::string a = argv[i];
     if (a.rfind("--family=", 0) == 0) { if (!parse_cloud_family(a.c_str() + 9, &family)) return 2; }
     else if (a.rfind("--n=", 0) == 0) n = std::atoi(a.c_str() + 4);
     else if (a.rfind("--coord=", 0) == 0) coord = std::atoi(a.c_str() + 8);
     else if (a.rfind("--lane=", 0) == 0) lane = std::atoi(a.c_str() + 7);
+    else if (a == "--descente-seule") descent_only = true;
     else return 2;
   }
   if (lane != 3 && lane != 4) return 2;
@@ -154,6 +156,58 @@ int main(int argc, char** argv) {
   std::vector<AliveRect> alive;
   u64 visited = 0, workers = 0;
   generate_detail::alive_rectangles(ix, 8, h_of, li, 1, &alive, &visited, &workers);
+  // MODE DESCENTE SEULE : mesure du raffinement post-separation a grande
+  // echelle, sans payer le corps contrefactuel (qui est en O(n^2) et rend la
+  // sonde inutilisable au-dela de 16 000). Ne mesure que ce qui decide :
+  // la MASSE DE PAIRES que le raffinement retire, et son cout en visites.
+  if (descent_only) {
+    constexpr u64 kStop = 4;
+    constexpr int kMaxDepth = 40;
+    u64 pairs_in = 0, pairs_killed = 0, core_evals = 0, core_nodes = 0, subrects = 0, depth_max = 0, rect_tue = 0;
+    struct Sub { NodeRef a, b; int d; };
+    std::vector<Sub> st2;
+    for (const AliveRect& ar : alive) {
+      const NodeRange ra0 = ix.range_of(ar.r.a), rb0 = ix.range_of(ar.r.b);
+      const u64 nab0 = (u64)(ra0.last - ra0.first + 1) * (u64)(rb0.last - rb0.first + 1);
+      pairs_in += nab0;
+      u64 killed_here = 0;
+      st2.clear();
+      st2.push_back(Sub{ar.r.a, ar.r.b, 0});
+      while (!st2.empty()) {
+        const Sub sb = st2.back();
+        st2.pop_back();
+        ++subrects;
+        depth_max = std::max<u64>(depth_max, (u64)sb.d);
+        const NodeRange qa = ix.range_of(sb.a), qb = ix.range_of(sb.b);
+        const u64 npairs = (u64)(qa.last - qa.first + 1) * (u64)(qb.last - qb.first + 1);
+        ++core_evals;
+        const FusedCounts fc = count_universal_witnesses(ix, sb.a, sb.b, h_of, (u8)(1u << li), true);
+        core_nodes += fc.nodes_visited;
+        if (fc.c[li] >= h_of[li]) { killed_here += npairs; continue; }
+        if (npairs <= kStop || sb.d >= kMaxDepth || (sb.a < 0 && sb.b < 0)) continue;
+        const AxisBox va = ix.box_of(sb.a), vb = ix.box_of(sb.b);
+        const i64 w2a = wspd_detail::box_w2(va), w2b = wspd_detail::box_w2(vb);
+        const bool split_a = (sb.a >= 0) && (sb.b < 0 || w2a >= w2b);
+        const NodeRef keep = split_a ? sb.b : sb.a;
+        const RadixNode& nd = ix.nodes[(size_t)(split_a ? sb.a : sb.b)];
+        st2.push_back(split_a ? Sub{nd.left, keep, sb.d + 1} : Sub{keep, nd.left, sb.d + 1});
+        st2.push_back(split_a ? Sub{nd.right, keep, sb.d + 1} : Sub{keep, nd.right, sb.d + 1});
+      }
+      pairs_killed += killed_here;
+      if (killed_here == nab0) ++rect_tue;
+    }
+    const double frac_avant = (double)pairs_in / ((double)n * ((double)n - 1) / 2.0);
+    const double frac_apres = (double)(pairs_in - pairs_killed) / ((double)n * ((double)n - 1) / 2.0);
+    std::printf("descente_seule famille=%s n=%d lane=q%d rectangles=%zu paires_avant=%llu paires_apres=%llu tuees=%.1f %% "
+                "fraction_de_C(n,2) avant=%.4f %% apres=%.4f %% ; rectangles entierement tues=%llu ; "
+                "cout=%llu evaluations de coeur, %llu nœuds visites, %llu sous-rectangles, profondeur max %llu\n",
+                cloud_family_name(family), n, lane, alive.size(), (unsigned long long)pairs_in,
+                (unsigned long long)(pairs_in - pairs_killed), pairs_in ? 100.0 * (double)pairs_killed / (double)pairs_in : 0.0,
+                100.0 * frac_avant, 100.0 * frac_apres, (unsigned long long)rect_tue, (unsigned long long)core_evals,
+                (unsigned long long)core_nodes, (unsigned long long)subrects, (unsigned long long)depth_max);
+    return 0;
+  }
+
   generate_detail::AnchorScratch sc;
   Q rect_points, rect_handles, rect_ab, rect_anchors_alive, rect_cover_sum, rect_seeds, rect_surv, anchor_cover, anchor_seeds;
   u64 anchors_total = 0, anchors_hist = 0, anchors_w4 = 0, anchors_alive_total = 0, seeds_total = 0, surv_total = 0;
