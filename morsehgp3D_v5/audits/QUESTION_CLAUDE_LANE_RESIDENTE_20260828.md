@@ -587,7 +587,10 @@ l'enfant. Pour `core`, conserver `max(parent.core, fresh_child_core)` : les
 témoins du parent restent valides sur un sous-produit et les points du frère
 peuvent devenir éligibles. Le compte sémantique est donc monotone ; le `max`
 réutilise explicitement le minorant déjà prouvé et protège la couture
-d'implémentation. Une somme doublerait les témoins communs.
+d'implémentation. Avec `with_corners=true`, le compte frais complet est attendu
+monotone lui aussi ; graver `fresh_child >= parent.core` sur boîtes plates,
+frontières strictes, multiplicité et parent à `h-1`, puis tuer un mutant qui
+force `with_corners=false`. Une somme doublerait les témoins communs.
 
 La sûreté est courte. Les deux enfants radix forment une partition disjointe du
 facteur scindé ; leurs produits cartésiens forment donc une partition disjointe

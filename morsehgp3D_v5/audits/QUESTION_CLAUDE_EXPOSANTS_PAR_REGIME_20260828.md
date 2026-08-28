@@ -178,7 +178,12 @@ commentaire sont fausses :
   monotone sur un sous-produit : tout témoin du parent reste valable et des
   points du frère deviennent éligibles. Ne pas lui attribuer une régression au
   seul motif que le centre bouge. Conserver néanmoins le minorant déjà prouvé
-  par `child.core = max(parent.core, fresh_core)`, jamais leur somme ;
+  par `child.core = max(parent.core, fresh_core)`, jamais leur somme. Avec
+  `with_corners=true`, le comptage frais complet est lui-même attendu monotone ;
+  graver `fresh_child >= parent.core`, y compris aux frontières, avec
+  multiplicité et près de `h-1`. Le mutant `with_corners=false` distingue cette
+  garantie du raccourci par seule boule-cœur, dont les boules ne sont pas
+  imbriquées ;
 - `kMaxDepth=40` et une profondeur observée 11 ne sont pas la profondeur bornée
   `L=0..3` proposée. Chaque `count_universal_witnesses` peut lui-même parcourir
   l'arbre du nuage : le coût n'est donc pas borné par deux fois le nombre de
