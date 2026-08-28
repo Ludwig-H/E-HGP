@@ -72,6 +72,24 @@ Dans le worktree courant, un ordre K avance `next_publish`, notifie et libère s
 
 Correction minimale : ne faire avancer `next_publish` qu'après le retour réussi de l'observateur, ou rendre explicitement cet observateur non autoritatif. La première option correspond au contrat et aux tests existants. Ajouter un scénario déterministe où K = 2 lève sur `kPublished` pendant que K = 3 a fini sa réduction; K = 3 ne doit appeler ni `on_forest`, ni `kPublished`. Préserver aussi la première exception d'un ordre si `kReduceBegin` et `reduce_fold` lèvent tous deux.
 
+La porte active a depuis remplacé l'ordre strict des `kPublished` par un simple
+comptage. Ce relâchement ne ferme pas le défaut : `RunOptions` promet toujours
+qu'une exception du hook devient l'exception de l'ordre observé. Le plus petit
+raccord, sans changer cette API, est le suivant : après `on_forest` réussi,
+libérer `st` puis appeler `observe(kPublished)` hors verrou **sans** avancer
+`next_publish`; reprendre ensuite le verrou, poser `pub_failed` si le hook a
+levé, sinon seulement ouvrir le tour K + 1. L'ordre K a bien exécuté son
+callback provisoire, donc ne pas lui émettre `kNotPublished`; les ordres
+supérieurs, eux, sont abandonnés et reçoivent cette phase.
+
+Fixture déterministe minimale : `fold_inflight=3`; le callback de K = 2 attend
+`kReduceEnd` de K = 3, puis le hook lève sur `(K=2,kPublished)`. Attendre
+l'exception exacte après toutes les jointures, exactement deux `on_forest`
+(K = 1 puis K = 2), et K = 3 `kNotPublished` sans `kPublished`. Le code courant
+publie K = 3 pendant le drainage; le correctif ci-dessus le laisse bloqué
+jusqu'au verdict de K = 2, sans annuler K = 1. Restaurer alors le contrôle
+d'ordre strict dans `published_complete`.
+
 Le fil B a par ailleurs perdu l'enveloppe `catch (...)` globale de la version précédente. Les calculs principaux sont protégés, mais la construction de `sp->message` après une violation alloue encore hors `try`; un `bad_alloc` quittant la fonction de thread appelle `std::terminate`. Stocker seulement le statut et K puis construire le message après la jointure, ou rétablir une enveloppe externe qui transforme toute exception en verdict ordonné du slot.
 
 ## P1 — durcir sans agrandir le chantier
