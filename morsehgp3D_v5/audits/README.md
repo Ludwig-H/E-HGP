@@ -11,15 +11,19 @@ recopiés au tip.
 - [`ETAT_COURANT.md`](ETAT_COURANT.md) : verdict courant et ordre de fermeture.
 - [`AUDIT_RENDEMENT_GPU_MULTICPU_20260828.md`](AUDIT_RENDEMENT_GPU_MULTICPU_20260828.md) : chemin de résolution GPU/multi-CPU — pool persistant, géométrie résidente, compaction device et protocole cpuset.
 - [`AUDIT_PASSAGE_ECHELLE_20260828.md`](AUDIT_PASSAGE_ECHELLE_20260828.md) : fold vivant small-to-large, lifetime exact, wire u64, amont externe et reprise par K.
-- [`REPONSE_CLAUDE_PASSAGE_ECHELLE_20260828.md`](REPONSE_CLAUDE_PASSAGE_ECHELLE_20260828.md) : réponse active de Claude aux deux audits, à requalifier sur son prochain pin fonctionnel propre.
 - [`QUESTION_CLAUDE_GRILLE_DE_CELLULES_20260828.md`](QUESTION_CLAUDE_GRILLE_DE_CELLULES_20260828.md) : question V15 et réponse actionnable sur la grille, le fold concurrent et la mémoire.
+- [`QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md`](QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md) : arbitrages V17–V30 pour avancer de l'instrument vers G0/G1/G2 puis L7 sans bloquer les jalons indépendants.
+- [`REPONSE_CLAUDE_LANE_RESIDENTE_V17_V30_20260828.md`](REPONSE_CLAUDE_LANE_RESIDENTE_V17_V30_20260828.md) : engagements de Claude et annonce de la session G4 n° 13, conservés jusqu'à réception de ses artefacts.
 - [`QUESTION_CLAUDE_TESTS_D_ANCRE_20260827.md`](QUESTION_CLAUDE_TESTS_D_ANCRE_20260827.md) : pont historique condensé, conservé tant que le document mathématique canonique le référence.
 - [`REPONSE_A_CLAUDE_APPLICATIONS_VERTICALES_20260827.md`](REPONSE_A_CLAUDE_APPLICATIONS_VERTICALES_20260827.md) : reçu de décision sur la future tour.
 - [`REPONSE_A_CLAUDE_87E915BD_VERROUS_OUVERTURE_20260827.md`](REPONSE_A_CLAUDE_87E915BD_VERROUS_OUVERTURE_20260827.md) : reçu des arbitrages V1–V4 désormais intégrés aux documents canoniques.
 
-La question V15 reste au tip tant que ses corrections prioritaires ne sont pas
-requalifiées. La question V7–V14 a été condensée et la note de livraison
-périmée retirée ; leur contenu détaillé reste dans l'historique Git.
+La question V15 reste au tip tant que ses corrections documentaires ne sont pas
+requalifiées. Les réponses générales de fermeture de Claude ont été
+requalifiées jusqu'au pin `700a38c7` et retirées du tip ; leur contenu reste
+dans l'historique Git. La réponse V17–V30 reste active parce qu'elle annonce un
+reçu device qui n'est pas encore jugé. La question V7–V14 a été condensée de la
+même manière.
 
 ## Convention de fraîcheur
 
