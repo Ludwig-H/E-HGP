@@ -99,6 +99,59 @@ Cette porte a trois vertus : elle rend l'objectif **falsifiable** ; elle
 détecte une régression d'exposant que les temps absolus masquent ; et elle
 dit, famille par famille, si le contrat 10–30 M est encore atteignable.
 
+## 3 bis. Une piste qui ne demande aucun théorème nouveau — et sa mesure
+
+En lisant `alive_rectangles` (`src/pipeline/generate.hpp`), un fait saute aux
+yeux : **la descente ternaire s'arrête dès que le rectangle est séparé**, et
+pas quand il est *utile* de s'arrêter. Or rien n'oblige à s'y arrêter pour le
+travail :
+
+- scinder un rectangle **vivant** en sous-rectangles par le même mécanisme
+  (`ix.nodes[v].left` / `.right`) **partitionne** ses paires : ni l'objet, ni
+  la complétude, ni le critère terminal de la WSPD ne sont touchés ;
+- chaque scission **resserre les boîtes**, donc **augmente** le nombre de
+  témoins universels : un sous-rectangle peut mourir là où son parent vivait,
+  et avec **exactement le prédicat déjà utilisé** en production
+  (`count_universal_witnesses(...) >= h_q`) ;
+- le coût est borné : la descente d'un rectangle visite au plus deux fois son
+  nombre de feuilles, c'est-à-dire au plus ce que l'énumération de ses paires
+  coûtait déjà.
+
+Autrement dit, **cette piste ne demande aucun théorème nouveau et ne rouvre
+aucune piste fermée** — en particulier pas « cap de population dans le critère
+terminal de la WSPD », qui portait sur le critère de *terminaison* de la
+décomposition (et forçait $\#\mathrm{rect} \ge \binom{n}{2}/C^{2}$) ; ici le
+critère terminal est inchangé, seule la granularité du *travail* l'est.
+
+Je l'ai instrumentée (`descente_prolongee` dans `bench/rect_probe.cpp`), sans
+rien changer à la production. `scanline_single_pass` q3, $n = 8\,000$ :
+
+| grandeur | valeur |
+|---|---|
+| rectangles traités | 173 190 |
+| paires : entrantes → **tuées** → restantes | 626 015 → **210 975 (33,7 %)** → 415 040 |
+| rectangles **entièrement** tués | 3 411 |
+| sous-rectangles engendrés | 257 810 (1,49 par rectangle) |
+| profondeur maximale | **11** |
+| coût du test | 27 293 697 nœuds visités, 14 409 537 évaluations de coin |
+| sites de cover évités (estimation) | 92 145 445 |
+| seeds évités (estimation) | 20 635 455 / 29 907 237 (69,0 %) |
+
+Lecture honnête : **27,3 M de nœuds visités pour éviter 92,1 M de sites de
+cover**, soit un rapport d'environ 3 pour 1 en faveur du test — favorable,
+pas écrasant. Et les deux dernières lignes sont des **estimations au prorata**
+(je répartis les seeds et le cover d'un rectangle proportionnellement à ses
+paires) : c'est presque certainement faux, les ancres lourdes dominant. Elles
+donnent un ordre de grandeur, pas une mesure.
+
+Deux suites immédiates, avant toute implémentation :
+1. **Rendre la descente adaptative** — n'y entrer que sur les rectangles où
+   elle paie (6,2 % des rectangles portent 73,1 % du travail) : le coût du
+   test devrait chuter d'un ordre de grandeur à gain presque constant.
+2. **Vérifier que le gain croît avec $n$**, sans quoi il baisse la constante
+   sans toucher l'exposant — et c'est l'exposant qui décide des contrats
+   10–30 M. La mesure à 16 000 est en cours.
+
 ## 4. Verrous
 
 - **V36** — acceptez-vous le **contrat d'exposant par régime** comme critère
@@ -123,6 +176,11 @@ dit, famille par famille, si le contrat 10–30 M est encore atteignable.
   grossit dans une ancre `terrain`** (taille du cover ? nombre de seeds par
   ancre ? profondeur de la complétion q4 ?) — je penche pour oui, et je ne
   proposerai rien avant cette mesure.
+- **V41** — la **descente prolongée** du § 3 bis vous paraît-elle correcte
+  telle que je l'énonce (partition des paires, prédicat de mort inchangé,
+  critère terminal de la WSPD intact, donc objet inchangé et aucune piste
+  fermée rouverte) ? Si oui, elle est implémentable sans nouveau théorème et
+  je la propose comme premier commit ; si non, où est la faute ?
 - **V40** — l'asymétrie (médiane 5 seeds par rectangle contre un maximum de
   849 452) rend toute affectation « un rectangle par bloc GPU » inutilisable.
   Le découpage d'un rectangle **vivant** en sous-rectangles, à seule fin de

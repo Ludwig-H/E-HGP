@@ -301,6 +301,75 @@ int main(int argc, char** argv) {
                   seeds_avec_vivantes ? 100.0 * (double)seeds_tout_tue / (double)seeds_avec_vivantes : 0.0,
                   (unsigned long long)paires_tout_tue, (unsigned long long)covers_tout_tue);
     }
+    // DESCENTE PROLONGEE (l'experience decisive) : `alive_rectangles` arrete
+    // la descente ternaire des que le rectangle est SEPARE. Rien n'oblige a
+    // s'y arreter pour le TRAVAIL : scinder un rectangle vivant ne change ni
+    // les paires enumerees ni l'objet (la partition des paires est inchangee,
+    // le critere terminal de la WSPD n'est pas touche), mais chaque scission
+    // RESSERRE les boites, donc AUGMENTE le nombre de temoins universels — un
+    // sous-rectangle peut mourir la ou son parent vivait.
+    // On mesure ici, sans rien changer a la production : combien de paires la
+    // descente prolongee elimine, et ce qu'elle coute en evaluations de cœur.
+    // Le cout est borne : on ne descend jamais sous `kStop` paires, et la
+    // descente d'un rectangle visite au plus 2*(nombre de feuilles) nœuds,
+    // donc au plus 2*|A||B| — ce que l'enumeration des paires coutait deja.
+    {
+      constexpr u64 kStop = 4;      // en dessous, enumerer les paires est plus court que tester
+      constexpr int kMaxDepth = 40;
+      u64 pairs_in = 0, pairs_killed = 0, pairs_left = 0, core_evals = 0, subrects = 0, depth_max = 0;
+      u64 seeds_killed_est = 0, rect_entier_tue = 0, rect_touche = 0;
+      u64 core_nodes = 0, core_corners = 0, cover_evite_est = 0;
+      struct Sub { NodeRef a, b; int d; };
+      std::vector<Sub> st2;
+      for (const Heavy& hh : heavy) {
+        if (hh.alive == 0) continue;
+        const AliveRect& ar = alive[hh.idx];
+        const u64 nab0 = hh.nab;
+        pairs_in += nab0;
+        ++rect_touche;
+        u64 killed_here = 0;
+        st2.clear();
+        st2.push_back(Sub{ar.r.a, ar.r.b, 0});
+        while (!st2.empty()) {
+          const Sub sb = st2.back();
+          st2.pop_back();
+          ++subrects;
+          depth_max = std::max<u64>(depth_max, (u64)sb.d);
+          const NodeRange qa = ix.range_of(sb.a), qb = ix.range_of(sb.b);
+          const u64 npairs = (u64)(qa.last - qa.first + 1) * (u64)(qb.last - qb.first + 1);
+          ++core_evals;
+          const FusedCounts fc = count_universal_witnesses(ix, sb.a, sb.b, h_of, (u8)(1u << li), true);
+          core_nodes += fc.nodes_visited;
+          core_corners += fc.corner_evals;
+          if (fc.c[li] >= h_of[li]) { killed_here += npairs; continue; }  // sous-rectangle MORT
+          if (npairs <= kStop || sb.d >= kMaxDepth || (sb.a < 0 && sb.b < 0)) { pairs_left += npairs; continue; }
+          const AxisBox va = ix.box_of(sb.a), vb = ix.box_of(sb.b);
+          const i64 w2a = wspd_detail::box_w2(va), w2b = wspd_detail::box_w2(vb);
+          const bool split_a = (sb.a >= 0) && (sb.b < 0 || w2a >= w2b);
+          const NodeRef keep = split_a ? sb.b : sb.a;
+          const RadixNode& nd = ix.nodes[(size_t)(split_a ? sb.a : sb.b)];
+          st2.push_back(split_a ? Sub{nd.left, keep, sb.d + 1} : Sub{keep, nd.left, sb.d + 1});
+          st2.push_back(split_a ? Sub{nd.right, keep, sb.d + 1} : Sub{keep, nd.right, sb.d + 1});
+        }
+        pairs_killed += killed_here;
+        if (killed_here == nab0) { ++rect_entier_tue; seeds_killed_est += hh.seeds; cover_evite_est += hh.cover; }
+        else if (nab0) {
+          seeds_killed_est += (u64)((double)hh.seeds * (double)killed_here / (double)nab0);
+          cover_evite_est += (u64)((double)hh.cover * (double)killed_here / (double)nab0);
+        }
+      }
+      std::printf("descente_prolongee : %llu rectangles traites, %llu paires -> %llu tuees (%.1f %%), %llu restantes ; "
+                  "%llu sous-rectangles, %llu evaluations de coeur (%llu nœuds visites, %llu evaluations de coin), profondeur max %llu ; "
+                  "%llu rectangles ENTIEREMENT tues ; seeds evites (ESTIMATION AU PRORATA, non mesuree) %llu / %llu (%.1f %%) ; "
+                  "sites de cover evites (meme estimation) %llu — a comparer aux %llu nœuds visites du test\n",
+                  (unsigned long long)rect_touche, (unsigned long long)pairs_in, (unsigned long long)pairs_killed,
+                  pairs_in ? 100.0 * (double)pairs_killed / (double)pairs_in : 0.0, (unsigned long long)pairs_left,
+                  (unsigned long long)subrects, (unsigned long long)core_evals, (unsigned long long)core_nodes,
+                  (unsigned long long)core_corners, (unsigned long long)depth_max,
+                  (unsigned long long)rect_entier_tue, (unsigned long long)seeds_killed_est, (unsigned long long)seeds_total,
+                  seeds_total ? 100.0 * (double)seeds_killed_est / (double)seeds_total : 0.0,
+                  (unsigned long long)cover_evite_est, (unsigned long long)core_nodes);
+    }
     std::printf("classes_dmax (Dmax dans [2^c, 2^(c+1)))\n");
     for (int c = 0; c < kCls; ++c) {
       if (!cls[c].rects) continue;
