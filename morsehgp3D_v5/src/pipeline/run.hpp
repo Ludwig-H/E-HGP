@@ -586,7 +586,7 @@ inline void print_run(std::FILE* out, const char* family, int n, int coord, long
                (unsigned long long)rr.total_nodes);
   std::fprintf(out,
                "generation rect_alive=%llu/%llu/%llu ancres=%llu/%llu/%llu candidats=%llu/%llu/%llu "
-               "tues_profondeur=%llu/%llu/%llu ancres_w4=%llu ancres_w3=%llu ancres_secteurs=%llu/%llu ancres_cellules=%llu/%llu seeds_cellules=%llu/%llu grilles=%llu/%llu seeds_core_tues=%llu seeds_corde_tues=%llu float_cert=%llu/%llu repli=%llu "
+               "tues_profondeur=%llu/%llu/%llu ancres_w4=%llu ancres_w3=%llu ancres_secteurs=%llu/%llu ancres_cellules=%llu/%llu seeds_cellules=%llu/%llu grilles=%llu/%llu seeds=%llu/%llu completions_q4=%llu seeds_core_tues=%llu seeds_corde_tues=%llu float_cert=%llu/%llu repli=%llu "
                "jung=%llu/%llu/%llu\n",
                (unsigned long long)gs.rect_alive[0], (unsigned long long)gs.rect_alive[1], (unsigned long long)gs.rect_alive[2],
                (unsigned long long)gs.anchors[0], (unsigned long long)gs.anchors[1], (unsigned long long)gs.anchors[2],
@@ -595,7 +595,8 @@ inline void print_run(std::FILE* out, const char* family, int n, int coord, long
                (unsigned long long)gs.anchors_killed_w4, (unsigned long long)gs.anchors_killed_w3, (unsigned long long)gs.anchors_killed_sectors[1], (unsigned long long)gs.anchors_killed_sectors[2],
                (unsigned long long)gs.anchors_killed_cells[1], (unsigned long long)gs.anchors_killed_cells[2],
                (unsigned long long)gs.seeds_killed_cells[1], (unsigned long long)gs.seeds_killed_cells[2],
-               (unsigned long long)gs.grids_built[1], (unsigned long long)gs.grids_built[2], (unsigned long long)gs.seeds_killed_core, (unsigned long long)gs.seeds_killed_chord,
+               (unsigned long long)gs.grids_built[1], (unsigned long long)gs.grids_built[2],
+               (unsigned long long)gs.seeds[0], (unsigned long long)gs.seeds[1], (unsigned long long)gs.q4_completions, (unsigned long long)gs.seeds_killed_core, (unsigned long long)gs.seeds_killed_chord,
                (unsigned long long)gs.float_cert_neg, (unsigned long long)gs.float_cert_pos, (unsigned long long)gs.float_fallback,
                (unsigned long long)gs.jung_cert_kill, (unsigned long long)gs.jung_cert_skip, (unsigned long long)gs.jung_fallback);
   std::fprintf(out, "ouvriers wspd=%llu/%llu/%llu rects=%llu/%llu/%llu rle=%llu prefiltre=%llu census=%llu expansion=%llu fold=%llu\n",
