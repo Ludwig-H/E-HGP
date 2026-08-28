@@ -176,6 +176,23 @@ enregistrement de facette) sont les leviers suivants du fold. Sur `scanline`
 et sur les familles denses, la lane q4 est le poste : c'est la **grille de
 cellules** (théorème 10.5), livrée au pin suivant.
 
+**Session 11 (pin `82f613d3` : grille de cellules sans apex, théorème 10.5,
++ listes de census inline + fold concurrent ; reçu
+`campagne_g4_v5_20260828_grille`, campagne complète, 31 runs, validateur du
+pin rejoué)** — comparaison appariée avec la session 10, CPU 48 fils :
+`scanline` 50 k 15 → 13 s, 100 k **54 → 40 s**, 200 k **502 → 268 s** (lane q4
+438 → 215 s : 990 888 grilles, 687 851 ancres et 277,9 M seeds tués sans
+balayer un site, itérations du cœur 431 G → 195 G) ; `uniform` 200 k 258 →
+254 s (RSS 80 → 76 Go), `eight_clusters` 200 k 363 → 353 s (74 → 73 Go), 50 k
+RSS 21,1 → 17,8 Go ; `terrain` 20 → 17 s. Contrats `--gpu` à parité (59 / 16 /
+66 / 14 s), deux digests identiques. Paliers `rss_mb` à 200 k `uniform` :
+34,2 Go après census, **66,3 Go au maximum du fold** (trois ordres résidents,
+~11 Go par ordre : clés, état, internement, deltas) — la résidence du fold est
+désormais le pic ; c'est le prochain poste mémoire avant le million de points.
+Ce qui reste de la lane q4 `scanline` (215 s) tient aux ancres dont la grille
+n'est pas construite (politique) ou n'est pas entièrement morte ; la
+politique et $G$ sont des réglages sans effet sur l'objet.
+
 ## 1. Ce que la mesure G4 a désigné (27 août 2026)
 
 Sur `g4-standard-48` à 48 fils, K = 1..10 exact (reçu
