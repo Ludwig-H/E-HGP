@@ -1,8 +1,9 @@
 # Conception auditée de résolution — passage à 10–30 millions de points
 
-- **Derniers commits techniques relus :** `46f9f8c7` pour la conception du
-  fold vivant et `ba31c169` pour la porte de préfixe étendue aux événements
-  et niveaux de lots.
+- **Derniers commits techniques relus pour ce sujet :** `fb7e9d40` pour la
+  porte de préfixe durcie et `f4b554fe` pour le smoke T5
+  `(catalogue, deltas) -> partition` ; HEAD observé `556c421e`, dont les
+  changements G1 sont indépendants du passage à l'échelle du fold.
 - **Cadre :** `phase=exploration_v5_hors_registre`,
   `backend=cpu_reference`, `profile=quantized_u16_input_only`,
   `mode=audit_independant_math_and_architecture`,
@@ -35,25 +36,52 @@ par un invariant testable, puis par un budget par rôle à mesurer.
 
 ### Réception positive de la porte de préfixe
 
-Le commit `ba31c169` ferme substantiellement l'ancien angle mort du digest
-v4 : la signature couvre le tuple événement complet et la séquence de tous les
-`batch_levels` pour chaque K. Une construction Release détachée du worktree
-actif donne 6/6 CTests `mhgp5_prefix_*` en 24,49 s ; le mutant historique
-sort au code 4. La fixture de réseau quantifié contient effectivement 535
-événements K = 5 pour 408 lots : la porte n'est pas vacue.
+`ba31c169` a fermé l'ancien angle mort du digest v4 en couvrant le tuple
+événement complet et tous les `batch_levels`. `fb7e9d40` ferme ensuite les trois
+durcissements demandés : plancher correctement nommé `tie_excess`, fixture
+explicitement décrite sans fausse cocircularité et mutants propres aux champs
+d'événement et niveaux de lots. Ces remarques sont closes et ne doivent plus
+être remises dans l'ordre de travail.
 
-Trois renforcements sont utiles mais ne bloquent pas ce jalon :
+### Prototype L2 concurrent — cœur prometteur, porte à corriger
 
-- `min_plateau_batches` mesure actuellement `events - batches`, pas le
-  nombre de lots de multiplicité supérieure à un ; renommer ce seuil
-  `min_tie_excess` ou compter réellement ces lots ;
-- `uniform n=48 coord=14` est un réseau déterministe riche en ex æquo, pas une
-  fixture explicitement cocirculaire ; corriger le libellé ou construire cette
-  géométrie ;
-- le mutant de profondeur tue déjà l'ancien digest. Ajouter deux petits tampers
-  dédiés, l'un ne modifiant qu'un champ d'événement omis par le digest v4,
-  l'autre seulement `batch_levels`, donnera des dents propres aux nouveaux
-  contrôles.
+Le prototype non committé `fold_live.hpp` reproduit nominalement le résident :
+58 ordres, 5 194 737 facettes, mêmes deltas/compteurs et zéro invariant violé.
+Après contre-audit, sa porte nominale passe aussi : 5 660 568 relocalisations,
+zéro invariant, 15 grands ordres mesurés et un pic d'alias de 7,29 % sur ceux-ci.
+La fausse borne quatre fois trop stricte a été remplacée par la vraie borne
+small-to-large. Le commentaire initial sur `--reloc-ratio` reste à retirer ;
+une fixture où un nouveau singleton logique absorbe répétitivement une grande
+composante encore vivante doit encore tuer causalement
+`physical-root-is-logical-root`, de préférence via un compteur maximum par
+alias plutôt qu'un ratio empirique agrégé.
+
+Le mutant `free-on-absorb` initial recyclait un slot `Component` encore
+référencé et bouclait à 100 % CPU. Sa réécriture ne boucle plus, mais l'essai
+courant termine par un core dump au lieu du code 4 : elle n'est toujours pas
+structurellement sûre. Remplacer ce mutant par une faute qui conserve listes et
+index mais viole l'invariant attendu, auditer la structure avant recyclage et
+borner tous les CTests du réducteur par `TIMEOUT` ; ni hang ni crash ne doit
+tenir lieu de mutant tué.
+
+Deux contrats sont encore plus faibles que les commentaires : T6 compare les
+alias de chaque frontière au **pic global** des durées de vie, alors que les
+tableaux déjà construits permettent l'égalité
+`live_aliases == live_exact[b]`. Et la porte compare les vecteurs de deltas sans
+les rejouer : T5 reste donc `(catalogue externe, deltas) -> partition`, jamais
+`deltas -> facet_keys`, notamment à cause des singletons implicites. Raccorder
+le rejeu existant avec le catalogue du résident ferme cette couture sans
+modifier le chemin produit.
+
+Ce prototype ne démontre pas encore le gain CPU visé. Son chrono `reduce`
+commence après la passe FIRST/LAST et ses allocations ; `live_bytes_peak` omet
+ces tableaux, les capacités d'arènes/free-lists, scratchs, `keys` et `ev_fid` ;
+la porte ne compare aucun temps résident/vivant. Mesurer les deux chemins sur
+le même périmètre complet, avec RSS, et ajouter plateau mono-lot, chaîne à
+racine morte, absorption adverse et hash constant. L'exactitude nominale est un
+progrès réel ; le gain de mur et de mémoire reste à établir. En attendant,
+renommer `live_bytes_peak` en `logical_live_bytes` évite de lui attribuer une
+mesure d'allocation qu'il ne porte pas.
 
 ## Solution 1 — fold vivant sans ancienne forêt union-find
 
@@ -199,17 +227,15 @@ préfixe après tri est possible ; elle ne remplace pas la comparaison exacte.
 
 ## Solution 3 — prouver d'abord que les deltas suffisent
 
-Un décodeur borné existe déjà dans
-[`tests/forest_judge.cpp`](../tests/forest_judge.cpp) : il rejoue les deltas
-pour reconstruire la partition sans consulter `final_canon_fid` comme
-autorité. Le premier petit commit utile est de l'extraire en une porte
-indépendante :
+`f4b554fe` extrait désormais une porte de rejeu substantielle : union-find
+frais, 58 ordres, 733 029 deltas, 5 194 737 facettes et deux mutants
+d'intégration tués. Son claim utile est exactement :
 
 ```text
 catalogue de facettes + deltas -> final_canon_fid reconstruit
 ```
 
-Cette implication est **conditionnée à un flux accepté**, notamment
+Cette implication reste **conditionnée à un flux accepté**, notamment
 `attach_violations == birth_violations == partition_violations == 0`. Elle est
 fausse sur une entrée dont le détecteur de rôles lève déjà un invariant. Le
 contre-exemple minimal K = 1 est :
@@ -230,14 +256,26 @@ facette obtenue en retirant `support[s]`. Les commentaires actuels de
 `detector_gate` inversent donc les noms des facettes ; les compteurs existants
 sont bien déclenchés, mais pas par les facettes que ces commentaires annoncent.
 
-La porte compare ensuite tous les champs au `ForestResult` résident et
-calcule le véritable `mhgp4-digest-v1`. Elle doit dépasser les seules petites
-instances du juge et inclure les contre-fixtures ci-dessous.
+La porte actuelle reçoit un **smoke de cohérence**, pas encore toute cette
+autorité : catalogue, deltas et partition attendue proviennent du même
+`ForestResult`, et sa validation d'états/batches reste permissive. La renforcer
+avant le réducteur streamé, sans bloquer G0/G1 :
 
-Le juge actuel est permissif ; la porte extraite devient une autorité stricte.
-Elle rejette au minimum parent ressuscité, `born` déjà vu, doublon, clé hors
-catalogue, sortie non minimale, batch invalide et catalogue incomplet. Les
-deltas seuls ne reconstruisent pas les clés : le contrat est toujours
+- borner explicitement le claim à
+  `(catalogue, deltas) -> final_canon_fid`, jamais au `ForestResult` complet ni
+  à la source sémantique du catalogue ;
+- suivre `unseen`, `introduced`, `alive`, `absorbed`, avec singleton implicite
+  distinct d'une naissance ;
+- valider entièrement un delta avant union : parents/born triés uniques,
+  racines pré-delta distinctes et vivantes, clé présente, sortie minimale,
+  refus du no-op ;
+- juger `batch`, `level`, `batch_levels` et `batches`, en gelant les canoniques
+  vivants au début du lot pour interdire une chaîne intra-lot artificielle ;
+- graver de petites fixtures pour doublon, clé hors catalogue, sortie non
+  minimale, parent ressuscité, singleton puis naissance, chaîne intra-lot,
+  niveau/batch invalide et catalogue incomplet.
+
+Les deltas seuls ne reconstruisent pas les clés : le contrat demeure
 `(catalogue, deltas) -> final_canon_fid`.
 
 Le wire massif peut alors référencer les facettes par `fid_u64` et contenir,
@@ -327,8 +365,9 @@ l'état du digest et les offsets de sortie ne sont pas sérialisés.
 
 ## Ordre de commits proposé
 
-1. **Porte de rejeu** : promouvoir, sur flux accepté,
-   `catalogue + deltas -> final_canon_fid`, puis graver les huit fixtures.
+1. **Durcir T5 sans bloquer les lanes** : promouvoir, sur flux accepté,
+   `catalogue + deltas -> final_canon_fid`, puis graver les fixtures d'états et
+   de lots ci-dessus.
 2. **Réducteur vivant en RAM** : FIRST/LAST par clé exacte dans une
    `std::map`, composants small-to-large et égalité complète avec le résident.
 3. **Coutures externes** : RLE multi-runs, lifetime avec hash constant, puis
@@ -344,13 +383,9 @@ probabiliste.
 
 ## Corrections documentaires restantes
 
-- **fermés à `46f9f8c7` :** le cadre contient `mode`, la v3/v4 est requalifiée
-  comme différentiel, le fold vivant et le comptage exact par clé complète sont
-  retenus comme direction ; ce commit reste une conception, sans implémentation
-  ni preuve reçue ;
-- **fermé à `ba31c169` sur les familles et tailles gravées :** la porte de
-  préfixe signe les événements canoniques et tous les `batch_levels`, avec
-  des ex æquo non vacants ; les trois renforcements ci-dessus restent P2 ;
+- **fermés :** le cadre, le statut différentiel v3/v4, la direction fold vivant
+  et clé complète à `46f9f8c7`; la porte de préfixe et ses renforcements à
+  `ba31c169` puis `fb7e9d40`; le smoke T5 à `f4b554fe` ;
 - supprimer du premier § 4.3 la compression/reroot, l'ancien T3/T6 et « même
   union-find séquentiel », en contradiction avec le fold vivant ajouté plus bas ;
 - fusionner T3 et T6 en lemme du noyau vivant, corriger sa vieille fixture

@@ -20,14 +20,17 @@ Je retiens votre ordre (G0, G1, G2) comme premières livraisons ; la conception 
 - **V29 — requalification 200 k.** Le reçu 11 (`scanline` 200 k : lane q4 215 s sur 268 s) contredit le modèle par seed (~10 µs par seed) : quel chiffre fait foi et quelle sonde tranche avant qu'un budget 200 k entre dans un reçu ?
 - **V30 — occupation.** L'occupation K2 (blocs par SM, spills, `%smid`) est un compteur de classe *mesure* imprimé dans chaque reçu, avec le mutant `single-block` ; aucun débit n'est cité sans lui.
 
-## Réponse des auditeurs, requalifiée jusqu'au pin `700a38c7`
+## Réponse des auditeurs, requalifiée jusqu'au pin `556c421e`
 
 ### Verdict de séquencement
 
-**La direction est reçue comme conception bornée : conserver exactement
-instrument → G0 → G1 → G2. Aucun des verrous V17–V30 ne justifie de détourner
-ces trois premiers commits.** Ils conditionnent L7a–L7c et leurs chiffres, pas
-le pool, le wire par indices ni la compaction stable déjà ordonnés.
+**La direction reste reçue comme conception bornée : instrument → G0 → G1 →
+G2.** La baseline instrumentale est maintenant versionnée, G0 et les wires G1
+q3/q4 ont atterri, sans réception CUDA postérieure à leurs pins. Les petites
+coutures de sûreté et de non-vacuité qui précèdent cette réception sont tenues à
+jour dans [`ETAT_COURANT.md`](ETAT_COURANT.md) ; aucun verrou V17–V30 ne
+justifie de redessiner ces travaux. Ils conditionnent L7a–L7c et leurs chiffres,
+pas le pool ou le wire déjà implémentés.
 
 Quatre corrections doivent cependant entrer dans la conception avant qu'elles
 ne deviennent du code : la notation et la dérivation de V19 sont incomplètes,

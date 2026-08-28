@@ -1,0 +1,10 @@
+code=0
+duree_s=12
+peak_rss_kb=874048
+timing_scope=device_witness
+threads=48
+commande=bash -c set -e; echo nvcc=/usr/local/cuda-12.9/bin/nvcc; uname -m; /usr/local/cuda-12.9/bin/nvcc --version 2>&1 | tail -2; nvidia-smi --query-gpu=name,driver_version --format=csv,noheader; cmake -S morsehgp3D_v5 -B build-cuda -DCMAKE_BUILD_TYPE=Release -DMHGP5_ENABLE_CUDA=ON -DCMAKE_CUDA_COMPILER=/usr/local/cuda-12.9/bin/nvcc 2>&1 | tail -40; test ${PIPESTATUS[0]} -eq 0; cmake --build build-cuda --target mhgp5_device_witness -j8 2>&1 | grep -vE '^\[|^Scanning' | tail -60; test ${PIPESTATUS[0]} -eq 0; ./build-cuda/mhgp5_device_witness
+source_commit=839cf1ecafb834b9a155cc0ec6f18c6002a1cb91
+source_payload_sha256=ad961fdaa8bc27519a9f166c4435115c6092e68c0c1678e25071d533b60d0067
+protocol_manifest_sha256=8cdba745ea417992258695c6e6c48fa9eca6ee696faf35ca6b6953c4866a6346
+finished=1

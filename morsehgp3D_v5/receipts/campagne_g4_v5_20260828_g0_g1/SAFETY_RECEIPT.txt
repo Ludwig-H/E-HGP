@@ -1,0 +1,30 @@
+schema=e-hgp.gcp-session-safety.v1
+scope=transcription_expurgee_du_journal_local_observe_par_audit
+source_commit=839cf1ecafb834b9a155cc0ec6f18c6002a1cb91
+raw_session_log_sha256=81dd58cee5111cbfe5a3694f9ea8345ab5cb2c5b46b817bdfcdeaa72adb570a5
+raw_session_log_versioned=0
+project=devpod-gpu-exploration
+zone=europe-west4-ai1a
+instance=ehgp-blackwell-spot-ai1a
+machine_type=g4-standard-48
+provisioning_model=SPOT
+instance_termination_action=STOP
+max_run_duration_seconds=14400
+guest_shutdown_minutes=230
+remote_campaign_rc=0
+scp_rc=0
+validator_status=complete
+validated_runs=29
+final_instance_status=TERMINATED
+
+# SHA-256 des scripts gardes au pin source.
+sha256_session_campagne_v5_scale_g4=11e3cb63595bca0e52328970d19fd2afebb6193734a2ba67447fdb9ebc4adfc4
+sha256_set_max_run_duration_and_verify=6daaba153dee15da83afaba78062e798781855e6db720c9d90273d26c310e5a6
+sha256_start_and_verify=44ead455fe59eae69d4931fb75d14048b00190ce2d1ee891968c0dd1882f9393
+sha256_stop_and_verify=ddcad77aa995ebb334fd3f341f7bb81ac94f749593fec98f885fb1c4b7956f3c
+sha256_v5_campaign_remote=c417d6120112dd6654d21261bbe96b25a3b45e9e891e61f9d36d807b3f904a15
+sha256_validate_v5_campaign=623546a4f22768923df15d9558a88b94714272dde7129e0191b0941f6bc8eb9a
+
+# Ce fichier ne contient ni cle, ni adresse reseau, ni identifiant personnel.
+# Il lie une transcription expurgee au hash du journal brut local ; il ne
+# remplace pas le journal pour une expertise forensique ulterieure.

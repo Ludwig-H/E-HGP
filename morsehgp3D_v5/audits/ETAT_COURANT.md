@@ -1,109 +1,324 @@
 # État courant audité de MorseHGP3D v5 — 28 août 2026
 
-- **Dernier pin technique relu :** `700a38c7`, correction de la publication du fold et durcissements SCALE, au-dessus du smoke test de rejeu `f4b554fe` et des raccords `476a55fd`, `c95cfa95`, `4816ea27`.
-- **Réponse de conception active :** V17–V30 sont traités dans [QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md](QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md). L'ordre instrument → G0 → G1 → G2 est accepté et ne doit pas être retardé par les obligations propres à L7.
-- **Worktree produit au moment du verdict :** postérieur à `700a38c7`, sale sur un chantier G0 concurrent (`executor_pool.hpp`, sa porte, CMake et registre de mutants), ainsi que sur le probe `.codex_fold_contract_probe.cpp` de l'autre audit. Tous restent préservés, non reçus et hors du commit d'audit.
-- **Pins de performance conservés :** `82f613d3` pour les campagnes CPU 50–200 k et `63deda74` pour les étapes device à 50 k.
-- **Cadre :** `phase=exploration_v5_hors_registre`, `backend=cpu_reference`, `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`.
+- **Dernier pin fonctionnel inspecté :** `556c421e` ; les constats G0 portent
+  sur son introduction à `fe54ccca`, la campagne device/SCALE versionnée sur
+  `c95cfa95`, G1 q3 sur `dd928111`/`839cf1ec` et G1 q4 sur `556c421e`.
+- **Worktree produit observé :** postérieur à `556c421e`, sale sur le nouveau
+  réducteur vivant (`fold_live.hpp`, sa porte, CMake et mutants). Ce chantier
+  est préservé et audité provisoirement, mais ne fait pas partie du verdict du
+  HEAD. Le reçu G0/G1 q3 corrigé reste local et non versionné au HEAD ; il est
+  prêt à être versionné séparément par son propriétaire. Le probe
+  `.codex_fold_contract_probe.cpp` d'un autre audit reste lui aussi non intégré.
+- **Cadre :** `phase=exploration_v5_hors_registre`,
+  `backend=cpu_reference`, `profile=quantized_u16_input_only`,
+  `mode=audit_independant_math_and_architecture`,
+  `public_status=not_claimed`.
 
 ## Verdict utile à Claude
 
-**Orange constructif : `700a38c7` ferme le défaut d'ordre `kPublished` et plusieurs trous du pilote SCALE. `f4b554fe` est un bon smoke test de cohérence, mais ne ferme pas encore le décodeur indépendant T5. La session G4 n° 13 s'est terminée proprement et donne des signaux utiles de correction device et de scaling CPU ; elle reste un pilote à une répétition, sans cpuset imposé ni reçu versionné, donc tout claim de speedup ou de débit device demeure prématuré.**
+**Orange constructif : la direction est bonne.** La session 13 fournit une
+baseline CUDA cohérente. La nouvelle session au pin `839cf1ec` compile et
+exécute nominalement G0 et G1 q3 : huit exécuteurs au total au lieu de 98,
+digests appariés et baisse H2D q3 visible. Les pins G1 q4 complètent ensuite le
+wire sans remplacer SoA. Il ne faut jeter aucun de ces travaux ni redessiner la
+lane. Quatre coutures hôte G0 et les contrats fail-closed/non-vacants G1
+ci-dessous restent toutefois à fermer.
 
-La série ferme l'essentiel des défauts de vie du fold : slot possédé avant le lancement, drainage explicite, arbitrage des défauts au tour de K, domaine de `fold_inflight`, mesure du pic et portes à fautes injectées. `476a55fd` capture l'allocation du message d'invariant, `700a38c7` appelle le hook terminal avant d'ouvrir K+1 et ajoute le scénario N5, `c95cfa95` imprime les dénominateurs nécessaires à V29, et `f4b554fe` rejoue réellement 733 029 deltas sur 5 194 737 facettes. Elle apporte en outre un oracle indépendant substantiel pour la grille, des compteurs device mieux nommés, une porte de préfixe étendue et un pilote SCALE testable hors GCP. Ce sont des progrès fonctionnels réels, pas seulement de la documentation.
+Le prochain pin facile à recevoir est un **G0 sûr**, puis un petit pin hôte G1
+qui borne les indices et rend chaque branche index falsifiable. La session qui
+vient d'être exécutée est une bonne mesure exploratoire et prouve que le chemin
+q3 index a effectivement réduit ses copies ; elle ne remplace pas ces portes et
+ne couvre pas q4, absent de son pin source. Aucun nouveau G4 n'est nécessaire
+avant leur fermeture locale. T5, le fold massif et le protocole CPU sous cpuset
+restent indépendants et ne doivent pas détourner ce travail court.
 
-Le P0 de code `kPublished` est reçu au pin. La porte T5 reste provisoire avant le fold streamé, sans bloquer G0/G1/G2. Les autres corrections du fold sont des durcissements courts ; elles ne doivent pas détourner Claude du pool, du wire par indices et de la compaction stable.
+## Ce qui est reçu et réutilisable
 
-## Avant le fold streamé — transformer le smoke T5 en décodeur borné
+### Campagne 13 au pin `c95cfa95`
 
-Le cœur de `mhgp5_delta_replay` est utile : union-find frais, minimum de bloc recalculé, comparaison finale et deux corruptions d'intégration orthogonales réellement détectées. Mais `facet_keys`, `deltas` et `final_canon_fid` proviennent tous du même `ForestResult`. Supprimer de façon cohérente une facette ou une fusion des trois objets peut donc rester vert ; un ordre vide peut aussi être masqué par les seuls planchers agrégés. Le nom « autorité indépendante du fold » est trop fort à ce pin.
+Le reçu versionné contient 121 fichiers : 39 triplets
+`.status`/`.txt`/`.status.time`, `RECU.txt` et trois auxiliaires. Les 38 runs
+nominaux sortent à 0, le mutant device à 4, les statuts sont complets et les
+hashes du payload et du protocole se reconstruisent. Les six comparaisons
+CPU/GPU ou CPU/GPU-adaptatif disponibles ont les mêmes digests détaillés. Cela
+reçoit une **preuve fonctionnelle bornée** sur les quatre familles, la seed, le
+matériel et le pin annoncés.
 
-Cinq raccords font de ce travail le décodeur demandé sans le réécrire :
+Le journal local non versionné montre aussi que la cible exacte
+`devpod-gpu-exploration/europe-west4-ai1a/ehgp-blackwell-spot-ai1a` était
+`SPOT`, munie des deux coupe-circuits puis certifiée `TERMINATED`. Cette lecture
+est utile pour la sécurité de la session, mais le commit ne contient pas la
+preuve d'arrêt elle-même.
 
-1. Borner d'abord le claim à `(catalogue,deltas) -> final_canon_fid` sous flux accepté et compteurs de violations de rôles nuls. Si la porte doit aussi certifier la source du catalogue, énumérer alors indépendamment depuis les `ForestEvent` toutes les K-facettes attendues, avec un comparateur lexicographique local, puis comparer ce catalogue à `facet_keys`.
-2. Remplacer `born_count + alive_root` par les états `unseen`, `introduced`, `alive`, `absorbed`. Une facette est introduite exactement une fois, soit dans `born`, soit comme parent singleton implicite. « Jamais born ⇒ canonique final propre » est faux dès K=1 : un singleton implicite peut fusionner ensuite.
-3. Valider un delta entièrement avant toute union : `parents` et `born` strictement triés et uniques, racines pré-delta distinctes et vivantes, clé présente, sortie égale au minimum, et refus du no-op `parents=[A], born=[]`. Seulement ensuite unir et changer les états. La contre-fixture minimale `parents=[A,A], born=[], output=A` passe actuellement à tort.
-4. Juger `batch`, `level`, `batch_levels` et `batches` : batch dans le domaine et monotone, niveau égal à `batch_levels[batch]`, compteurs de violations nuls. Figer le snapshot des canoniques vivants au début du lot, valider tous ses deltas contre ce snapshot avant la moindre union et interdire une chaîne intra-lot artificielle.
-5. Ajouter de petites fixtures synthétiques pour doublon, clé hors catalogue, sortie non minimale, parent ressuscité, naissance après singleton implicite, chaîne de deux deltas dans le même lot, lot/niveau invalide et catalogue incomplet, avec mutants locaux du décodeur.
+Le validateur courant a depuis ajouté les quatre contrats `gpuidx`. Il rejette
+donc ce reçu historique, qui ne les contient pas. Cela n'annule pas son rejeu au
+validateur épinglé, mais impose désormais un `campaign_schema` explicite et un
+dispatch par version : la liste mouvante du HEAD ne doit pas redéfinir les
+obligations d'un reçu déjà figé.
 
-Jusqu'à ces raccords, conserver `f4b554fe` comme smoke test résident u32 de cohérence. Après eux, l'appeler « décodeur indépendant du fold » est exact ; l'autorité sémantique de la forêt reste aux juges/oracles prévus et le futur wire massif u64 reste à recevoir séparément.
+### Campagne G0/G1 q3 locale au pin `839cf1ec`
 
-## Requalifications du pin
+Le dossier local `receipts/campagne_g4_v5_20260828_g0_g1/` contient 29
+triplets : 28 codes 0 et le mutant device à 4. Hashes et statuts se
+reconstruisent, le validateur **du pin source** rend
+`campaign_status=complete`, et les quatre bras CPU/GPU/GPU-index ont les mêmes
+digests détaillés. Le validateur du HEAD attend désormais q4 index et refuse ce
+schéma plus ancien ; un `campaign_schema` versionné doit sélectionner les
+obligations du pin au lieu de les faire dériver avec HEAD.
 
-### Fold et mesures
+Deux preuves nominales sont acquises. G0 construit huit exécuteurs au total,
+deux pools de quatre avec `flux_pic=4`, contre 98 créations dans la baseline.
+G1 q3 exerce des lots index non vides et réduit les octets H2D de 43 à 65 % sur
+les quatre familles, avec mêmes sorties. Cela prouve le câblage emprunté sur ces
+runs, mais ni la sûreté générale de G0 ni G1 q4, absent du pin source.
 
-`700a38c7` déplace correctement le hook `kPublished` avant l'ouverture de K+1. N5 force K=3 à terminer sa réduction avant la publication de K=2 et prouve que la faute du hook K=2 empêche toute publication supérieure ; ce P0 est reçu.
+Les temps restent exploratoires : un passage SoA puis index, sans
+contrebalancement. La note locale corrigée indique que le temps H2D q3 baisse
+de 16 à 73 % ; sur `uniform`, q3+q4 vaut 6,015 s et 10,3 % du mur, les 6,251 s
+incluant q2 ; les parts « 9–11 % » et « fold 43 % » ne valent que pour
+`uniform`. Les bras `gpuidx` sont q3-index/q4-SoA. Sur ce passage q3-index
+reste plus lent que q3 CPU sur les quatre familles ; q4 device gagne sur
+`terrain`, `scanline` et légèrement les clusters, mais perd sur `uniform`. Le
+setup synchrone de `GpuGeometry` n'entre ni dans `h2d_ms` ni dans
+`lane_wall_ms`, bien que ses octets alimentent `h2d_octets`.
 
-Six durcissements ciblés restent utiles : le `catch` principal de réduction à la ligne qui affecte encore inconditionnellement `sp->exc` doit préserver une faute antérieure de `kReduceBegin` ; N3 doit exiger K=2 et K=3 `kNotPublished` sans `kPublished` quand `on_forest(K=2)` lève ; N5 doit exiger K=1/K=2 publiés et jamais `kNotPublished`, callbacks ordonnés/non chevauchés ; `published_complete` peut maintenant juger l'ordre strict des hooks ; N1 doit exiger un pic de trois ; le mutant A doit synchroniser `callback_K1_entered` vers `kStageABegin(K=2)` avant d'attendre `kStageAFailed`. Pour tuer l'écrasement d'exception sans nouveau mutant, faire lever le hook de K=3 à `kReduceBegin`, puis laisser le mutant B lever : l'exception finale doit rester celle du hook.
+Le verdict du validateur n'est pas une preuve suffisante de ces faits. Sur une
+copie, il reste `complete` après suppression des 29 `.status.time`, retrait des
+métriques G0/G1, remplacement des commandes `--gpu-wire=index` par `soa` et
+mise à zéro des replis q3 index. Le prochain schéma doit exiger les trois
+fichiers par run, la commande et le `timing_scope` exacts, les témoins de pool,
+wire/lots/octets et les planchers de replis. Les mesures ci-dessus viennent de
+la relecture directe des artefacts, pas du seul verdict vert.
 
-La porte nominale et ses mutants passent, mais aucun reçu TSan reproductible n'est acquis. GCC TSan échoue de manière intermittente avant les tests avec `unexpected memory mapping`; Clang TSan bute sur le builtin SHA du projet. Ce constat ne révèle ni n'exclut une race. Les phrases « rejouée sous TSan » du plan et « TSan propre » de `GPU.md` dépassent donc les preuves versionnées : joindre un reçu sur runner compatible ou les requalifier en protocole prévu. Cela ne bloque pas le chemin CPU nominal.
+Le `SAFETY_RECEIPT.txt` local transcrit les codes remote/scp à 0, les deux
+coupe-circuits, le modèle `SPOT` et l'arrêt exact `TERMINATED`, et le lie au
+SHA-256 du journal brut local. `SHA256SUMS` couvre chaque artefact du dossier. Le
+journal, qui contient des métadonnées de session, et toute clé restent exclus.
+Le propriétaire doit encore révoquer sa clé de session puis nettoyer uniquement
+son répertoire temporaire ; cet audit n'effectue aucune mutation GCP.
 
-Les portes concurrentes doivent recevoir un `TIMEOUT` CTest global. Dans N1, la poignée maintient réellement trois workers B vivants ; exiger `peak_fold_inflight == 3`, et non seulement `>= 2`, rend la non-vacuité exacte sans prétendre mesurer trois appels simultanés à `reduce_fold`.
+### Architecture G0 au pin `fe54ccca`
 
-`pic_mesure_en_vol` mesure des workers B vivants, y compris attente de publication et hooks, pas des appels `reduce_fold` simultanés. `rss_mb[4]` reste un maximum d'échantillons après callback, pas le pic RSS du fold. `t_fold_wall_ms` inclut drainage et hooks. Ces libellés suffisent s'ils restent exacts ; un second compteur autour de `reduce_fold` est nécessaire pour revendiquer une réduction réellement simultanée.
+Les choix structurants sont appropriés : nombre d'exécuteurs borné, un
+exécuteur persistant par worker, producteurs bloquants, sorties conservées dans
+le shard d'origine et raccord effectif aux lanes q3/q4. La porte hôte nominale
+et ses deux mutants passent. G0 reste donc une bonne base à corriger, pas un
+prototype à remplacer.
 
-Le domaine public `fold_inflight=1..16` dépasse le Kmax utile et ne possède pas encore de préflight mémoire agrégé. Conserver 1..3 comme domaine mesuré dans le prochain pilote, puis ouvrir davantage à partir d'un majorant de fenêtre et d'un pic RSS reçu ; ce n'est pas un blocage du code nominal.
+### G1 q3/q4 aux pins `dd928111`–`556c421e`
 
-La nouvelle porte `mhgp5_delta_replay` repart bien d'un union-find frais, ne lit pas `final_canon_fid` pendant le rejeu, puis compare la partition reconstruite au tableau final. Ses planchers et ses deux mutants empêchent un vert entièrement vide, mais les limites P0 détaillées plus haut interdisent encore de la recevoir comme décodeur indépendant. Elle ne prouve ni la compacité mémoire ni le fold streamé lui-même.
+Le chemin généré ne montre pas de faute arithmétique, d'ordre ou de durée de
+vie nominale. Sous le profil u16, chaque coordonnée affine a une valeur absolue
+au plus 131 070, `D2` est inférieur à `2^34` et la puissance q reste inférieure
+à `2^36` : i64 puis `double` sont exacts dans cette plage. q3 conserve le corps
+DI128 ; q4 récupère le même `PointId`, les mêmes offsets locaux de lentille et
+le même ordre de cover que le SoA. La géométrie est copiée avant les jobs puis
+seulement lue, et `submit_and_wait` conserve aujourd'hui sa durée de vie.
 
-### Grille de cellules
+Les deux premiers points ferment le contrat fonctionnel G1 ; le troisième
+répare une porte CUDA déjà déclarée. Les trois derniers sont des durcissements
+de coût à mesurer ensuite, pas des conditions artificielles de réception :
 
-Le code et l'oracle sont assez solides pour continuer : les sept CTests ciblés sont inclus dans la relecture indépendante, l'oracle compare le comptage optimisé à une évaluation i128 et tue ses mutants. Cela reçoit une intégration CPU conservatrice au pin, pas encore la formulation canonique du théorème 10.5.
+1. **Réception — indices.** Le validateur de lot ne borne que la **taille** de `site_index`, pas ses
+   valeurs. Avant tout lancement, exiger chaque index strictement inférieur à
+   `GpuGeometry::count` et la présence conjointe index/géométrie d'ancre ; les
+   fixtures `index == count` et `UINT32_MAX` doivent lever sans lancement. Le
+   builder normal produit bien des indices valides : il s'agit d'un contrat
+   fail-closed, pas d'une divergence des sorties actuelles ;
+2. **Réception — branche.** La porte imprime le wire demandé, sans prouver le wire exécuté. Un mutant
+   remplaçant le branchement index par SoA garderait verdicts et digests verts,
+   et le faux GPU du selftest ignore aujourd'hui `--gpu-wire` tout en étant
+   accepté. Ajouter `index_lots`, `soa_lots` et les octets catégoriels, puis
+   exiger `index_lots == launches > 0`, `soa_lots == 0` et
+   `site_soa_bytes == 0`. Un mutant `wire-index-force-soa` et un selftest
+   `GPU_IGNORE_WIRE=1` doivent être refusés. Pour q4, employer aussi des
+   `PointId` non monotones au-delà du bit 31 afin de tuer `PID=dense_index` ;
+3. **Suite CUDA — mutant.** La porte q3 ne parse pas `--inject`, bien que CMake passe
+   `--inject=route-ignore-threshold` au CTest attendu à 4 : sur device il
+   rendrait 2 par argument inconnu. Raccorder le registre de mutants et exercer
+   ce CTest, absent de la commande `gpu_lane` de la nouvelle session. Les
+   planchers q3/q4 supplémentaires sont des durcissements séparés ;
+4. **Performance — double wire.** Le gain `32 -> 4` en q3 et `60 -> 4` en q4 ne concerne encore que la copie
+   PCIe par lot. `Q3Batch` conserve 32+4 octets/site, `Q4Batch` 60+4, et chaque
+   exécuteur réserve les deux familles de buffers même en SoA. Passer les lots
+   et réserves à une représentation étiquetée exclusive ; le mode SoA ne doit
+   payer aucun index et le mode index ne doit conserver aucun payload SoA ;
+5. **Performance — contexte.** q3 puis q4 téléversent chacun `xyz + PointId`, soit 16 octets/point deux fois
+   et 320 Mo à 10 M de points. Créer une seule `GpuBackendContext` par run,
+   possédant une géométrie partagée et les deux pools, avec
+   `resident_uploads == 1`. Déclarer la géométrie avant les pools ou fermer et
+   drainer explicitement ceux-ci ;
+6. **Mesure — setup.** Les octets de cette géométrie sont ajoutés à `h2d_octets`, mais son upload
+   précède `lane_wall_ms` et n'entre pas dans `h2d_ms`. Graver séparément
+   `resident_h2d_bytes`, `resident_h2d_ms` et un mur incluant le setup. Une
+   spécialisation SoA/index ou un chargement local q4 ne se justifie qu'après
+   profil ; l'audit n'impose pas cette forme de code.
 
-Les sept corrections courtes déjà listées dans [QUESTION_CLAUDE_GRILLE_DE_CELLULES_20260828.md](QUESTION_CLAUDE_GRILLE_DE_CELLULES_20260828.md) ne sont pas toutes intégrées. La série ajoute bien F11 et l'oracle au plan de tests. Les écarts encore visibles comprennent : la couverture justifiée par la seule norme des vecteurs, le libellé des 4 799 488 comparaisons, le facteur déjà inclus dans `rhs`, l'affirmation trop forte sur FMA, la dernière borne d'arrondi et les gardes binary64 réduites à `FLT_EVAL_METHOD == 0`. Ces six corrections documentaires doivent précéder la formule « théorème reçu », mais ne justifient ni une réécriture de l'algorithme ni l'arrêt des raccords GPU.
+L'ordre interne est donc : sûreté d'index, preuve de branche et CTest mutant,
+tous testables localement ; puis seulement lots mono-wire, contexte partagé et
+métriques de setup selon leur effet mesuré. Ces derniers ne bloquent ni les
+digests déjà obtenus ni la réception fonctionnelle bornée.
 
-### Instrumentation GPU et campagne SCALE
+### Autres jalons
 
-Les portes hôte de l'instrument passent et le schéma sépare maintenant copies, événements kernels, attente, octets et tailles de lots. La session 13 au pin `c95cfa95`, antérieur aux durcissements SCALE de `700a38c7`, a produit localement les témoins device, les contrats CPU/GPU à 50 k et 14/14 points SCALE valides. Aucun désaccord de vecteur ou de compteur n'apparaît dans les portes de lane. Ce bundle n'est toutefois pas encore un reçu versionné et ne contient pas le profil d'occupation demandé par V30. Les événements inter-stream incluent la contention de planification entre leurs bornes ; ils ne sont pas des coûts intrinsèques isolés.
+- `700a38c7` ferme l'ordre de publication `kPublished` et durcit le pilote
+  SCALE.
+- `f4b554fe` est un smoke test substantiel du rejeu
+  `(catalogue, deltas) -> partition`, sans être encore une autorité sur la
+  production du catalogue ou sur tout le `ForestResult`.
+- La porte de préfixe renforcée à `fb7e9d40` ferme les trois anciens
+  durcissements de libellé, tie excess et tampering ciblé.
 
-Avant de prendre ce schéma comme autorité, ajouter une version explicite telle que `gpu_instrument_schema=v2` et faire exiger par le validateur exactement une ligne courante par lane, tous les champs obligatoires, finis et non négatifs. Un résidu temporel négatif ne doit pas être écrêté silencieusement à zéro : publier l'écart signé et faire échouer la porte au-delà d'une tolérance préenregistrée. Les octets H2D doivent aussi séparer au moins géométrie résidente/sites, seeds, ancres et intermédiaires ; sinon l'ablation G1 ne pourra pas attribuer les 112/288 octets annoncés par seed.
+Ces travaux n'empêchent ni G0 ni G1. Les détails de passage à l'échelle restent
+dans [AUDIT_PASSAGE_ECHELLE_20260828.md](AUDIT_PASSAGE_ECHELLE_20260828.md).
 
-Le cycle de vie reste incomplet si l'exécuteur `thread_local` du fil appelant est détruit après l'impression finale. Le contexte G0 doit posséder et drainer explicitement ses exécuteurs avant le reçu. De même, la jauge de flux et son reset doivent appartenir à une invocation, pas à un état statique partagé entre pipelines concurrents, et toute erreur CUDA observée après enqueue doit empoisonner puis drainer le slot avant réutilisation.
+### Réducteur vivant local — garder le cœur, réparer la porte
 
-### Aide au chantier G0 actuellement non committé
+Le prototype courant prend la bonne direction : il sépare racine logique et
+conteneur physique, copie le gel pré-lot avant les unions et libère après
+émission. Le différentiel nominal trouve zéro désaccord sur 58 ordres,
+5 194 737 facettes et 733 029 deltas. Après correction de la fausse borne, la
+porte nominale sort 0 avec 5 660 568 relocalisations, zéro invariant et un pic
+d'alias de 7,29 % sur 15 grands ordres. Il ne faut donc ni jeter ce code ni
+revenir au réducteur résident.
 
-Le helper `ExecutorPool` en cours possède déjà les bonnes briques nominales : un exécuteur local et persistant par worker, file bornée, résultat producteur-local, réémission de l'exception au soumetteur et compteurs atomiques cohérents. Ses trois portes hôte passent et tuent les deux mutants ; une répétition indépendante 30 fois reste verte et le registre est cohérent à 66 noms. C'est une bonne base, mais pas encore une primitive reçue :
+La porte n'est cependant pas recevable dans son état local :
 
-- fermer d'abord la durée de vie du ticket : le worker pose `done=true`, libère `t.mu`, puis notifie une `condition_variable` stockée dans le ticket de pile. Un réveil spurieux peut faire revenir le producteur, détruire le ticket puis laisser le worker notifier l'objet détruit. Notifier sous `t.mu`, avant sa libération, ou donner au ticket une propriété partagée ; graver une couture déterministe de destruction immédiate ;
-- refuser explicitement toute taille hors `{1,2,4,8}` au lieu de la clamper ; exercer les quatre valeurs et les refus 0/3/9. Forcer exactement N jobs simultanés par latch, sans dépendre du scheduler : sous `taskset -c 0`, le plancher courant `peak>=2` tombe légitimement à 1 ;
-- construire chaque `Executor` dans un `try` avec handshake d'initialisation. Si un constructeur d'exécuteur ou un lancement de `std::thread` échoue partiellement, poser l'arrêt, réveiller, joindre les fils déjà créés puis relancer ; aucun fil joignable ne doit atteindre le destructeur du vecteur ;
-- documenter et détecter la réentrance : `submit_and_wait()` depuis un job du même pool bloque certainement à N=1 et peut saturer tous les workers à N>1. G0 n'en a pas besoin ; un marqueur `thread_local` peut la refuser immédiatement, puis la porte vérifie que le pool demeure utilisable ;
-- distinguer une exception CPU déclarée récupérable, qui peut rester locale au job, d'une erreur device fatale. Pour cette dernière, passer `running -> poisoned`, fermer l'admission, mémoriser la première exception, annuler la queue en complétant tous ses tickets, réveiller `cv_`, `cv_space_` et les tickets, laisser finir les jobs déjà actifs puis retirer chaque exécuteur sans réutilisation. Exiger après `close/drain` : `submitted = succeeded + failed + cancelled` et `active = queued = 0` ;
-- brancher réellement ce pool dans q3 et q4. Le test hôte du helper ne reçoit pas G0 à lui seul. Aujourd'hui les résidus sont flushés par la boucle séquentielle après `parallel_items`; effectuer ce flush final depuis T producteurs concurrents ou ajouter un finalizer par shard, puis exiger pic `>=2` sur un plancher de résidus non vides ;
-- ajouter des fixtures d'échec du constructeur, démarrage partiel, réentrance, queue pleine avec soumetteur bloqué, poison sans réutilisation, rejet après poison et drainage normal, plus une comparaison q3/q4 avec scanner factice des sorties, compteurs et ordre. Compter constructions et destructions d'exécuteurs ; mesurer le cap avec `queue_cap=1` et un mutant d'ignorance de la limite ; ajouter les includes directs manquants et un `TIMEOUT` aux portes.
+- le commentaire annonce encore `--reloc-ratio`, option qui n'existe pas. Le
+  nominal emploie maintenant la vraie borne, mais le mutant physique doit être
+  tué par une fixture quadratique explicite et un maximum par alias ;
+- `free-on-absorb` bouclait plusieurs minutes dans sa première forme. La forme
+  réécrite termine maintenant par un core dump au lieu du code 4 : elle reste
+  non mémoire-sûre et aucun `TIMEOUT` CTest ne borne ce cas ;
+- T6 compare chaque frontière au pic global `peak_live_exact`, ce qui est trop
+  faible. Le compteur exact du lot permet de tester directement
+  `live_aliases == live_exact[b]` ;
+- la porte compare les deltas mais ne les rejoue pas. Le contrat T5 recevable
+  reste `(catalogue externe, deltas) -> partition`, car les deltas seuls ne
+  reconstruisent pas les singletons implicites ni `facet_keys` ;
+- `live_bytes_peak` additionne l'état logiquement vivant, pas la mémoire
+  allouée : capacités d'arènes, free-lists, scratchs, `firstb`/`lastb`, `keys`
+  et `ev_fid` sont hors compte.
 
-Cette fermeture conserve le jalon petit : elle ne demande ni géométrie résidente ni nouveau kernel. Elle transforme seulement le pool hôte en propriétaire fiable des exécuteurs actuels et rend l'ablation 1/2/4/8 causale.
+Le petit correctif utile est précis : remplacer `free-on-absorb` par un mutant
+terminant sans crash, poser un `TIMEOUT`, compter les relocalisations **par alias** et
+exiger `max_moves <= ceil(log2(nfid))`, puis tuer la racine physique sur une
+chaîne d'absorptions adverse. Ajouter ensuite l'égalité vivante par lot et le
+rejeu avec catalogue. Renommer enfin la métrique `logical_live_bytes`, ou lui
+adjoindre les capacités et le RSS. Ces cinq coutures reçoivent le prototype sans
+lui demander une autre architecture. Ne pas relancer toute la matrice de
+mutants avant d'avoir rendu `free-on-absorb` terminant.
 
-`700a38c7` aligne les faux producteurs sur `tower_scope=profile_complete_k10`, exige les deux `smax`, refuse axes dupliqués et familles inconnues, grave une troncature à l'échéance et s'arrête au premier code non nul. C'est reçu comme durcissement hôte. Le validateur accepte toutefois encore l'ancien format du fold sans pic et n'exige pas `pic == 1` lorsque `fold_inflight == 1`; réserver le legacy à une commande explicite de relecture historique et exiger le format courant dans toute nouvelle campagne.
+## Chemin minimal pour recevoir G0
 
-Un défaut du même pin est reproduit hors fixture : si la ligne `famille=...` manque mais que `tower_scope` est présent, le `elif` rattaché au mauvais `if` appelle `ident.group(...)` sur `None` et termine par `AttributeError`, au lieu de rendre un refus borné. Séparer les deux contrôles et graver les cas « identité absente/tower présent » et « identité fausse/tower absent ». Les 20 tests Python passent parce qu'ils ne couvrent pas encore ce mutant.
+### P0 — quatre corrections hôte ciblées
 
-Avant une campagne complète, la session doit calculer elle-même `SCALE_DEADLINE_EPOCH` depuis le minimum de ses deux coupe-circuits, réserver une marge de rapatriement et borner tout override ; elle ne fait actuellement que transmettre une valeur optionnelle fournie de l'extérieur. Le plan par défaut de 192 runs à 7200 s représente encore 16 jours théoriques et ne tient pas dans la session de quatre heures. Le protocole A doit imposer réellement son cpuset via `taskset` ou équivalent ; enregistrer seulement l'affinité observée ne mesure pas un speedup 1→N. Enfin, sérialiser les variables distantes avec `printf %q` ou un fichier d'environnement et parser les axes en tableaux quotés. Le pilote annoncé de 14 runs est une bonne taille exploratoire, mais avec une répétition et sans cpuset il ne doit pas être nommé speedup ni « contrebalancé ».
+1. **Ticket.** Dans `ExecutorPool::run`, poser `done=true` et appeler
+   `notify_all()` pendant que `Ticket::mu` est encore détenu, puis ne plus
+   toucher le ticket. Aujourd'hui un réveil spurieux peut laisser le producteur
+   détruire son ticket de pile avant la notification : c'est une UB réelle.
+2. **Démarrage.** Construire l'`Executor` sous capture d'exception et faire
+   remonter son état au constructeur du pool. Le constructeur ne doit revenir
+   que lorsque les N workers sont prêts. En cas d'échec d'un exécuteur ou d'un
+   lancement de thread après un démarrage partiel : fermer, réveiller, joindre
+   tous les threads déjà créés, puis relancer l'exception. Les chemins actuels
+   peuvent terminer le processus.
+3. **Réentrance.** Refuser immédiatement, par marqueur `thread_local`, un
+   `submit_and_wait()` appelé depuis un job du même pool. G0 n'a pas besoin de
+   réentrance ; le blocage N=1 est reproduit, donc un rejet clair est préférable
+   à un ordonnanceur plus complexe.
+4. **Porte déterministe.** Remplacer le test de pic dépendant du scheduler par
+   N jobs maintenus dans une latch avant libération. Sous `taskset -c 0`, la
+   porte actuelle répétée 100 fois ne sort à 0 que 22 fois ; 78 échecs portent
+   sur `N=4 peak_active=1`. Tester ainsi N=1, 2, 4 et 8 et ajouter un `TIMEOUT`
+   CTest.
 
-Le signal exploratoire CPU est néanmoins directement utile : sans digest, le mur descend de 215,041 s à un fil à 15,284 s à 48 fils ; avec digest, de 217,361 s à 19,409 s. Les sorties partagent les mêmes compteurs de travail et les dix digests de forêt. Le gain marginal 32→48 est déjà faible, tandis que le surcoût apparent du digest passe d'environ 2,3 s à un fil à 4,1 s à 48 fils. Avant de refaire cette campagne, Claude peut isoler le coût du digest/fold avec des répétitions appariées et un cpuset réellement fixé. Les runs SCALE appellent le binaire CPU sans `--gpu` : ils ne priorisent ni ne mesurent G0, dont la justification reste le cycle de vie et la contention observés dans les lanes device. Ces chiffres orientent le prochain instrument CPU ; ils ne suffisent pas à ajuster un modèle de performance.
+Le domaine le plus cohérent avec la CLI est **tout entier de 1 à 8**. Il n'est
+pas utile d'interdire 3 simplement parce que le sweep mesure 1, 2, 4 et 8.
+En revanche, le constructeur ne doit pas clamper silencieusement 0 ou 9 : il
+doit les refuser, et une fixture doit accepter 3.
 
-## Réponse constructive à V17–V30
+### P1 — avant la prochaine réception CUDA
 
-La réponse détaillée se trouve dans le fichier de question de Claude, afin de ne pas multiplier les audits. Les décisions qui changent immédiatement l'implémentation sont :
+- Distinguer l'exception de job hôte récupérable de l'erreur device fatale.
+  Pour le cas fatal, la solution minimale est un pool à usage unique qui ferme
+  l'admission, mémorise la première erreur, complète ou annule les tickets en
+  file, réveille toutes les attentes et draine les actifs sans réutiliser leurs
+  exécuteurs. Invariant final : `submitted = succeeded + failed + cancelled`,
+  `active = queued = 0`.
+- Documenter que le propriétaire détruit le pool seulement après jonction de
+  tous les producteurs, ce qui est déjà le contrat des lanes. G0 n'a pas besoin
+  d'une API générale autorisant destruction et soumissions concurrentes ; si
+  une fermeture explicite est ajoutée, elle doit réveiller `cv_` et
+  `cv_space_`.
+- Exposer le cap et son pic, puis exercer `queue_cap=1` avec une latch. La valeur
+  0 peut garder le sens documenté « auto = 2N ».
+- Ajouter les includes directs (`<cstddef>`, `<stdexcept>`, `<utility>` dans le
+  pool, `<algorithm>` dans la porte).
+- Comparer q3/q4 avec un scanner factice pour N=1/2/4/8 : sorties, ordre et
+  compteurs identiques au chemin direct. Le flush final séquentiel des reliquats
+  n'invalide pas la sûreté de G0, mais doit être parallélisé ou mesuré avant de
+  revendiquer que le pool est pleinement occupé.
 
-- V17 : le cover stable requiert des préfixes exclusifs par chunks dans l'ordre logique et une comparaison vectorielle directe, pas seulement des compteurs ;
-- V18 : la conversion DI128 doit conserver 55 bits avec garde, round et collant, traiter `-2^127` sans négation signée et disposer d'un oracle construit autrement ;
-- V19 : la notation et la dérivation annoncées pour le minimiseur séparable sont incomplètes ; en distinguant le centre continu du minimiseur entier, un correctif court prouve une erreur strictement inférieure à un demi, puis évalue exactement plancher et plafond en DI128 ; cela ferme seulement L7c ;
-- V20 : le seuil de repli CPU qualifie un reçu `device-dominant`, pas sa validité fonctionnelle ; conserver les reçus hybrides en les nommant correctement ;
-- V23 : `scanline_overlap_multiecho` déduplique bien ses XYZ et passe V1 ; une vraie entrée à doublon reste refusée avant la lane ;
-- V27 : une constante device modifiée par lot est incompatible avec des streams concurrents ; copier un masque immuable avant les launches ou le passer au kernel, avec plusieurs mots puisque le registre dépasse 32 puis 64 mutants ;
-- V28 : la fusion/RLE globale des runs est le premier jalon recommandé, sans prétendre qu'elle soit l'unique architecture correcte ;
-- V29 : les 214,5 s du reçu réfutent l'hypothèse `seeds ×4`, mais le calcul à partir d'un minorant de seeds n'est qu'un contrôle inférieur, pas encore un modèle prédictif ; `c95cfa95` imprime désormais `seeds` par lane et les complétions q4, le prochain reçu doit ajouter les autres dénominateurs et les temps-fil ;
-- V30 : séparer ressources statiques, plafond théorique et occupation dynamique ; `%smid` mesure le placement, pas des blocs simultanés.
+Ce paquet reste volontairement petit. Une machine à états très générale, un
+reorder buffer ou des lots asynchrones ne sont pas requis pour recevoir G0.
 
-Le passage de relais recommandé reste donc simple : finir les raccords CPU sans GCP, livrer G0, G1 et G2 avec leurs égalités locales, puis fermer les obligations L7 au moment où chaque kernel correspondant devient réel.
+## Signaux de performance, sans claim
 
-## État de validation
+Les campagnes ne disent pas « aucun GPU » : q3 reste derrière le CPU sur les
+quatre familles, tandis que q4 gagne nettement sur `terrain` et `scanline`,
+légèrement sur les clusters et perd sur `uniform`. Après G1, tester un routage
+par intensité `travail / octets` est donc plus utile qu'un backend GPU global.
 
-Dans un worktree détaché propre à `f4b554fe`, la relecture croisée a reconstruit les cibles rejeu T5, fold, API, préfixe et instrument GPU hôte, puis obtenu 21/21 CTests en 98,11 s. Le sous-ensemble T5 reproduit 58 ordres, 733 029 deltas, 5 194 737 facettes et zéro désaccord. Après passage du même worktree à `700a38c7`, les quatre CTests fold passent en 4,50 s et les tests Python SCALE passent 20/20 en 0,126 s ; le crash `ident=None` du validateur a été reproduit séparément. Dans le worktree sale, le prototype G0 passe ses 3/3 portes hôte, mais ces verts ne couvrent ni son démarrage, ni son poison, ni son intégration aux lanes.
+Le pilote CPU montre aussi une forte réponse à `--threads` jusqu'à 32, puis une
+traîne dominée par `reduce` et le digest. Cela justifie le réducteur vivant et
+un futur protocole cpuset physique/SMT ; cela ne justifie pas plus de
+producteurs aujourd'hui.
 
-`python3 tools/check_docs.py` valide 217 fichiers actifs, `python3 tools/check_implementation_status.py` valide 20 phases et la fonction `validate()` appliquée explicitement aux trois Markdown d'audit modifiés ne remonte aucune erreur avant commit.
+Ces chiffres restent à un passage, non contrebalancés. Le pilote SCALE n'impose
+pas de cpuset ; les sommes H2D, `issue`, réservations et vies d'exécuteurs se
+recouvrent ; `cycle_de_vie_ms_sum` inclut travail et attente. Les ratios sont des
+signaux de conception, jamais un speedup reçu ni le « protocole A ». Les
+valeurs, calculs et corrections détaillés restent dans
+[AUDIT_RENDEMENT_GPU_MULTICPU_20260828.md](AUDIT_RENDEMENT_GPU_MULTICPU_20260828.md).
 
-Les validations locales de l'audit n'exercent ni nvcc, ni device CUDA, ni TSan. Pour la session n°13 de Claude, le journal local confirme la cible `devpod-gpu-exploration/europe-west4-ai1a/ehgp-blackwell-spot-ai1a`, le modèle `SPOT`, l'action `STOP`, `maxRunDuration=14400 s`, l'arrêt invité à 230 minutes et le trap lié à la génération `c95cfa95`. Il se termine avec `remote_campaign_rc=0`, `scp_rc=0`, `campaign_status=complete`, 39 runs valides et `session_rc=0`. Le bundle rapatrié reste local dans `/tmp/ehgp-v5scale-session.5QEOVeYb/out` : il doit encore être trié, épinglé et versionné avant réception. Le trap a certifié cette cible exacte en état GCE `TERMINATED` et aucun processus local de session ne subsiste. Les validations plus anciennes restent bornées à leurs pins : suites CPU à `369f3ac0`, campagne CPU 50–200 k à `82f613d3` et session device à `63deda74`.
+## Ordre recommandé, sans détour
 
-GCP non utilisé par cet audit ; session n°13 lancée, détenue et arrêtée avec certification ciblée par Claude.
+1. Pin hôte G0 sûr : quatre P0, portes déterministes et correctifs P1 utiles au
+   prochain device.
+2. Pin hôte G1 fonctionnel : bornes d'indices, compteurs/mutants de branche,
+   `PointId` q4 adverse et réparation du CTest `--inject`.
+3. Si le fold vivant courant est poursuivi : remplacer son mutant qui plante,
+   borner les CTests, puis recevoir l'égalité vivante par lot et le rejeu T5.
+4. Après les deux pins hôte, une réception CUDA **minimale** de q4 index et des
+   nouvelles dents suffit ; ne pas rejouer la matrice 50 k déjà acquise.
+5. Mesurer ensuite la double représentation, le setup résident et le contexte
+   partagé ; n'optimiser que le poste visible.
+7. G2 seulement si cette ablation montre que les retours intermédiaires q4
+   dominent encore ; sinon attaquer G3, qui retire aussi le wire par seed.
+8. En parallèle : préparer le pilote CPU cpuset
+   physique/SMT à trois répétitions ; renforcer T5 avant le fold streamé.
+
+## Validation indépendante
+
+- Build Release CPU au HEAD `556c421e` : succès.
+- CTests API, pool, T5, préfixe et lanes q3/q4 batched : 41/41 verts en
+  158,04 s sur le HEAD.
+- Répétition de la porte nominale sous un seul CPU : 22 succès et 78 échecs sur
+  100, défaut de déterminisme reproduit.
+- La campagne versionnée est complète selon son validateur épinglé ; hashes,
+  codes et digests ci-dessus ont été rejoués indépendamment.
+- Le selftest campagne courant affiche `violations=0`, alors que son faux GPU
+  ignore `--gpu-wire` et omet wire, étapes et octets : ce vert reproduit la
+  permissivité à corriger, il ne reçoit pas G1.
+- Pas de nvcc ni de device CUDA local. La nouvelle session compile/exécute G0
+  et G1 q3 au pin `839cf1ec`; G1 q4 de `556c421e` reste sans réception device.
+- Prototype fold local : nominal code 0 sur 58 ordres, 5 194 737 facettes,
+  zéro désaccord/invariant et pic d'alias 7,29 % sur les grands ordres. Le
+  mutant `free-on-absorb` termine par core dump et les portes n'ont pas de
+  `TIMEOUT` ; suite mutante et claim de performance non reçus.
+
+GCP non utilisé par cet audit. Les deux sessions appartenaient à Claude et leurs
+journaux locaux montrent l'arrêt ciblé `TERMINATED`. Le dossier local de la
+nouvelle campagne lie cette observation à un reçu expurgé et au hash du journal ;
+la session 13 ne possède encore que sa preuve locale non versionnée.

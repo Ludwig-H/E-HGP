@@ -1,0 +1,23 @@
+	Command being timed: "timeout 7200 bash -c set -e; cmake --build build-cuda --target mhgp5_q3_lane_device_gate mhgp5_q4_lane_device_gate mhgp5_cuda -j8 2>&1 | grep -vE '^\[|^Scanning' | tail -60; test ${PIPESTATUS[0]} -eq 0; ./build-cuda/mhgp5_q3_lane_device_gate --family=uniform --n=1200; ./build-cuda/mhgp5_q3_lane_device_gate --family=eight_clusters --n=1200 --threads=4; ./build-cuda/mhgp5_q3_lane_device_gate --family=uniform --n=8000 --threads=8 --min-candidates=100000; ./build-cuda/mhgp5_q4_lane_device_gate --family=uniform --n=1200; ./build-cuda/mhgp5_q4_lane_device_gate --family=eight_clusters --n=1200 --threads=4; ./build-cuda/mhgp5_q4_lane_device_gate --family=uniform --n=8000 --threads=8 --min-candidates=100000; ./build-cuda/mhgp5_q3_lane_device_gate --family=uniform --n=300 --coord=40 --min-candidates=200; ./build-cuda/mhgp5_q4_lane_device_gate --family=uniform --n=300 --coord=40 --min-candidates=200 --min-deep=20; ./build-cuda/mhgp5_q3_lane_device_gate --family=uniform --n=1200 --wire=index; ./build-cuda/mhgp5_q3_lane_device_gate --family=eight_clusters --n=1200 --threads=4 --wire=index; ./build-cuda/mhgp5_q3_lane_device_gate --family=uniform --n=300 --coord=40 --min-candidates=200 --wire=index"
+	User time (seconds): 208.42
+	System time (seconds): 18.74
+	Percent of CPU this job got: 252%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 1:30.03
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 1919184
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 11
+	Minor (reclaiming a frame) page faults: 3987350
+	Voluntary context switches: 6059
+	Involuntary context switches: 1939
+	Swaps: 0
+	File system inputs: 1832
+	File system outputs: 136392
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

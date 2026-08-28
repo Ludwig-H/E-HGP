@@ -1,0 +1,10 @@
+code=0
+duree_s=60
+peak_rss_kb=19807788
+timing_scope=contract_50k_gpu
+threads=48
+commande=./build-cuda/mhgp5_cuda --gpu --family=uniform --n=50000 --s=8 --smax=11 --seed=3 --threads=48 --digest
+source_commit=839cf1ecafb834b9a155cc0ec6f18c6002a1cb91
+source_payload_sha256=ad961fdaa8bc27519a9f166c4435115c6092e68c0c1678e25071d533b60d0067
+protocol_manifest_sha256=8cdba745ea417992258695c6e6c48fa9eca6ee696faf35ca6b6953c4866a6346
+finished=1

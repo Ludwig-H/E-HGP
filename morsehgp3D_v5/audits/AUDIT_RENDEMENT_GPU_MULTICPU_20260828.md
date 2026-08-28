@@ -1,14 +1,24 @@
 # Audit de résolution — rendement GPU et multi-CPU
 
-- **Dernier pin reçu :** `ab2c2563` ; mesures CPU au pin `82f613d3` et
-  instrumentation device au pin `63deda74`.
-- **Worktree observé :** postérieur à `cce4b2b3`, encore non committé. Il
-  ajoute la sûreté du fold, des métriques CUDA et `SCALE_THREADS` ; les
-  remarques sur ce code guident Claude mais ne constituent pas une réception.
+- **Dernier pin inspecté :** `556c421e` ; la baseline device/SCALE versionnée
+  provient de `c95cfa95`, G0 de `fe54ccca` et G1 q3/q4 des trois commits
+  `dd928111`–`556c421e`. Le nouveau reçu device exécute G0 et G1 q3 au pin
+  `839cf1ec` ; il ne reçoit pas G1 q4, postérieur.
+- **État courant et priorités :** voir
+  [`ETAT_COURANT.md`](ETAT_COURANT.md). Les sections G1–G3 ci-dessous restent
+  des guides de conception ; les anciennes conditions de campagne sont
+  requalifiées par le reçu de session 13 et le contre-audit G0.
 - **Cadre :** `phase=exploration_v5_hors_registre`,
   `backend=cpu_reference`, `profile=quantized_u16_input_only`,
   `mode=audit_independant_math_and_architecture`,
   `public_status=not_claimed`.
+
+La nouvelle session locale au pin `839cf1ec` confirme nominalement huit
+exécuteurs G0 et le wire index q3 avec digests égaux et H2D réduit. Elle ne
+couvre pas G1 q4 et ne ferme pas les défauts de sûreté du pool ; son dossier
+est préparé avec un manifeste d'artefacts et un reçu de sûreté expurgé. La
+réception exacte et le plus petit ordre de correction sont centralisés dans
+`ETAT_COURANT.md`.
 
 ## Réponse et direction
 
@@ -31,10 +41,11 @@ Trois expériences architecturales bornées répondent directement aux suspects 
    par cover ;
 3. **la compaction q4 stable sur device**, sans les deux retours intermédiaires.
 
-G0 et G1 ne partent pas d'un soupçon arbitraire : le reçu n° 12 a déjà désigné
-la contention des exécuteurs et le wire répété des covers. Son ancien instrument
-ne séparait toutefois pas proprement leurs parts causales dans le mur ; G0 et G1
-sont donc les ablations qui les départagent. G1 retire le payload site répété en
+G0 et G1 ne partent pas d'un soupçon arbitraire : les reçus n° 12 et 13
+désignent la multiplication des exécuteurs et le wire répété des covers. Les
+sommes instrumentées se recouvrent et ne séparent pas causalement leurs parts
+dans le mur ; G0 et G1 restent donc les ablations qui les départagent. G1 retire
+le payload site répété en
 le remplaçant par des indices, mais l'hôte téléverse encore un `Q3BatchSeed` de
 112 octets ou un `Q4BatchSeed` de 288 octets par seed. La dominance de ce second
 terme n'est pas reçue. Si elle est ensuite établie, la conception qui le retire
@@ -43,79 +54,71 @@ est la lane **par rectangles avec index résident** déjà décrite dans
 le device reçoit handles et ancres, puis reconstruit covers et seeds. G1 est la
 couture réversible qui prouve d'abord l'index et l'arithmétique de cette cible.
 
-Le reçu n° 12 établit que le kernel q3 est petit et implique fortement le wire
-des covers et la contention ; la causalité q4 et la part propre du wire par seed
-restent ouvertes. Recevoir d'abord l'instrument corrigé sur une petite session
-G4 permettra donc d'ordonner G0, G1 et G2 au lieu de supposer leur gain. Pour le
+La session 13 reçoit la baseline comme preuve fonctionnelle bornée : digests
+appariés, métriques présentes et mutant device tué. Le reçu suivant exerce
+réellement le pool G0 et le wire q3 index, avec digests égaux. Il ne ferme ni la
+sûreté hôte G0, ni les lots mono-wire, ni la preuve de branche du protocole, ni
+q4 index. L'ordre utile devient donc G0 sûr, fermeture hôte G1, une petite
+réception CUDA commune au HEAD, puis G2 ou G3 selon l'ablation. Pour le
 multi-CPU, il faut séparer la sensibilité au budget d'ouvriers d'un véritable
 speedup 1→N sous cpuset.
 
 ## Base chiffrée conservée
 
-Au reçu n° 12, les murs CPU/GPU appariés à 50 k restent mixtes :
+Au reçu n° 13, les murs CPU/GPU appariés à 50 k restent mixtes :
 
 | famille | CPU (s) | GPU (s) | CPU / GPU |
 |---|---:|---:|---:|
-| `uniform` | 56,290 | 58,142 | 0,968× |
-| `terrain` | 16,423 | 14,605 | 1,124× |
-| `eight_clusters` | 61,920 | 64,618 | 0,958× |
-| `scanline_single_pass` | 12,635 | 12,445 | 1,015× |
+| `uniform` | 56,291 | 57,316 | 0,982× |
+| `terrain` | 16,910 | 14,200 | 1,191× |
+| `eight_clusters` | 61,812 | 62,709 | 0,986× |
+| `scanline_single_pass` | 12,740 | 11,652 | 1,093× |
 
 Le reçu prouve compilation/exécution CUDA, quatre digests CPU/GPU égaux et le
 mutant device tué. Un passage CPU puis GPU, non contrebalancé et non répété, ne
 prouve pas un gain reproductible. Il montre que le port conserve l'objet sur
-ces quatre entrées. Les variations de sous-étapes q4 sur un passage désignent
-des expériences causales, pas encore un levier reçu de bout en bout.
+ces quatre entrées. Le signal est toutefois actionnable : q3 régresse dans les
+quatre cas, tandis que la lane q4 gagne 2,18× sur `terrain` et 1,55× sur
+`scanline`, reste presque neutre sur `eight_clusters` et régresse sur `uniform`.
+Après G1, le routage doit donc être falsifié par une intensité
+`travail / octets`, pas par le seul seuil de sites ; q3 reste sur CPU tant que
+son ratio n'est pas inversé.
 
 Sur `uniform`, q3+q4 ne représente que 8,9 % du mur CPU : même leur disparition
 donnerait un plafond idéal proche de 1,10×. Sur `scanline` 200 k, q4 représente
 au contraire environ 80 % du mur ; c'est la cible principale du chantier.
 
-## P0 — finir correctement l'instrument avant toute campagne
+### Ablation G0/G1 q3 au pin `839cf1ec`
 
-Le travail courant apporte de bons éléments : événements CUDA séparés,
-compteurs d'octets, histogrammes de lots, attente/réservation hôte, compteur
-de concurrence et suppression de la barrière H2D intrusive. Aucun de ces
-points ne bloque un pin explicitement `cpu_reference`; les raccords suivants
-bloquent seulement la réception de l'instrument et tout nouveau reçu G4.
+Le reçu suivant borne `--gpu-executors=4` : huit exécuteurs au total pour q3 et
+q4, `flux_pic=4`, contre 98 exécuteurs éphémères dans la baseline. Les temps de
+réservation cumulés s'effondrent, mais le mur reste du même ordre. C'est un bon
+résultat d'architecture : G0 retire une source de variance et de ressources
+sans inventer un gain. Il n'exerce toutefois aucun des scénarios d'échec hôte
+qui bloquent encore sa sûreté.
 
-### Le validateur SCALE accepte encore l'ancien format et ignore le pic
+L'ablation q3 SoA→index réduit les octets H2D d'un facteur 1,76 à 2,88 et le mur
+de lane de 1,5 à 21,3 % selon la famille. Le mur complet varie de +0,8 % à
+-2,5 %, sur un seul passage toujours ordonné SoA puis index. Le payload index a
+donc un effet réel dans q3, mais Amdahl et les seeds/fold absorbent ce gain. La
+note du reçu surestime deux généralités : le temps H2D baisse de 16 à 73 %, pas
+de 21 à 73 %, et q3+q4 représente environ 9 % du mur CPU sur `uniform`, mais
+24 % sur `eight_clusters`, 49 % sur `scanline` et 53 % sur `terrain`.
 
-`run.hpp` imprime désormais :
+## Instrument reçu, interprétation encore bornée
 
-```text
-temps_fold_mur_ms=... (etages A et B, fold_inflight=N, pic_mesure_en_vol=P)
-```
+`700a38c7` ferme les défauts connus du validateur SCALE et `c95cfa95` raccorde
+les événements CUDA, octets, histogrammes, attente/réservation, concurrence et
+vie des exécuteurs. La session 13 exerce réellement nvcc et le device. Ces
+points sont reçus comme **instrument exploratoire fonctionnel**, pas comme une
+décomposition causale du mur.
 
-`validate_v5_campaign.py` reconnaît maintenant cette ligne, mais son alternative
-regex accepte toujours `N ordre(s) en vol`, ne capture jamais `P`, et les tests
-Python exigent même la compatibilité legacy. Ainsi `P=0`, `P>N` ou `N=1,P>1`
-restent verts alors qu'ils contredisent la mesure annoncée.
-
-Le parseur de cette campagne doit exiger les deux champs nommés, vérifier
-`1 <= pic_mesure_en_vol <= fold_inflight`, imposer `P=1` pour `N=1` et comparer
-le budget demandé. Ajouter les rejets legacy, `P=0` et `P>N`.
-
-### Les portes ont maintenant leur raccord local, à recevoir sur un pin
-
-Le worktree mouvant enregistre désormais `gpu_instrument_gate`,
-`fold_inflight_safety_gate`, `cell_grid_oracle` et leurs mutants dans CMake et
-`mutants.hpp`. Une construction Release puis le CTest ciblé donnent localement
-14/14 réussites en 50,57 s, y compris codes 4 et refus code 2. C'est la
-correction attendue, mais pas encore une réception sur pin propre ; aucun de ces
-tests n'exécute nvcc ou un device CUDA.
-
-### Le cycle de vie CUDA échappe à la décomposition
-
-Les `Q3DeviceExecutor` et `Q4DeviceExecutor` sont `thread_local` dans des
-ouvriers éphémères. Création de stream/événements, `cudaMalloc`, `cudaFree` et
-destruction du stream sont incluses dans le mur de lane mais absentes de
-`executor_ms_sum`. Ce dernier commence également après une partie de la
-validation et de la préparation des vecteurs.
-
-À court terme, ajouter `executors_created` et `lifecycle_ms` ou élargir
-explicitement le chrono. La correction architecturale est le pool persistant
-décrit ci-dessous.
+Le champ `cycle_de_vie_ms_sum` doit être lu littéralement comme une somme des
+durées construction→destruction, incluant activité et attente. Ce n'est pas un
+coût de création/destruction. Au pin de la campagne, deux exécuteurs
+`thread_local` du fil appelant sont en outre détruits après l'impression ; la
+somme publiée ne couvre donc pas les 98 créations annoncées. G0 corrige
+l'architecture, mais la campagne `c95cfa95` ne peut pas le recevoir.
 
 ### Les timelines ne sont pas additives
 
@@ -134,7 +137,7 @@ par deux pipelines potentiellement concurrents. Enfin, toute erreur après une
 copie asynchrone doit drainer au mieux, empoisonner l'exécuteur et interdire sa
 réutilisation.
 
-### Le nouveau schéma n'est ni versionné ni jugé par la campagne
+### Durcissements requis pour attribuer G1/G2
 
 La ligne historique `gpu=1 kernel_ms=...` conserve son nom alors que le champ
 passe d'un temps mêlant retours et boucles hôte à la somme des seuls kernels.
@@ -143,7 +146,8 @@ version. Surtout, `validate_v5_campaign.py` ne les exige pas : une campagne peut
 rester verte si elles manquent, contiennent `nan`, des octets faux ou une
 partition hôte incohérente.
 
-Correction minimale avant G4 : imprimer `gpu_instrument_schema=v2`, employer un
+Ce travail ne bloque pas le pin hôte G0. Avant une campagne qui prétend
+attribuer un gain à G1 ou G2, imprimer `gpu_instrument_schema=v2`, employer un
 nouveau nom tel que `kernels_device_ms_sum` au lieu de recycler `kernel_ms`, et
 faire exiger par le validateur exactement une ligne par lane. Tous les réels
 doivent être finis et non négatifs; `lots`, `launches`, octets et pic doivent
@@ -171,38 +175,54 @@ l'arithmétique du struct :
 - octets H2D/D2H strictement positifs sur les fixtures non vides ;
 - pic de concurrence dans le domaine du nombre d'exécuteurs.
 
+Pour G1, cela exige en plus `index_lots == launches > 0`, `soa_lots == 0` et
+`site_soa_bytes == 0`. Le selftest courant accepte pourtant un faux pilote qui
+ignore `--gpu-wire=index` et n'imprime ni wire, ni étapes, ni octets. Ajouter un
+mutant `wire-index-force-soa` et son faux reçu refusé. La porte q3 doit aussi
+parser `--inject` : son CTest de routage négatif attend actuellement 4 mais
+l'exécutable rendrait 2 sur l'argument inconnu.
+
 ## G0 — pool GPU borné et persistant
 
-Le contrat actuel de `scan()` est **synchrone**. La première version de G0 n'a
-donc besoin ni de lots possédés asynchrones, ni de file de completion, ni de
-reorder buffer :
+`fe54ccca` réalise la forme synchrone minimale : pool construit hors des
+producteurs, file bornée, un exécuteur persistant par worker, attente du
+producteur et sorties dans son shard d'origine. Cette architecture est reçue
+comme direction ; le reçu `839cf1ec` confirme sur device la borne de quatre
+exécuteurs par lane. Elle n'a besoin ni de lease RAII imposé, ni de completion
+queue, ni de reorder buffer.
 
-- créer hors de `parallel_items` un pool de 1, 2, 4 ou 8 exécuteurs, chacun
-  possédant stream, événements et buffers réutilisables ;
-- dans le callback `scan`, prendre un lease RAII, appeler le scan synchrone,
-  puis rendre l'exécuteur ; le lot reste possédé par son ouvrier et ses sorties
-  restent dans `louts[t]` ;
-- exécuter le flush final des `T` reliquats avec `parallel_items` au lieu de la
-  boucle séquentielle actuelle ; le même pool borne la concurrence device ;
-- agréger les statistiques une fois par exécuteur après drainage, sans mutex
-  par lot ;
-- sur exception CUDA, empoisonner l'exécuteur, annuler le pool et réveiller
-  tous les leases en attente ; un pool tombé à zéro ne doit jamais bloquer ;
-- la destruction draine les leases avant streams, puis la géométrie partagée.
+Quatre défauts hôte certains empêchent encore de recevoir l'implémentation :
 
-Cette version conserve exactement l'ordre local de chaque ouvrier. Une file
-asynchrone avec lots déplacés ne devient utile que si une mesure montre qu'il
-faut recouvrir le scan d'un même producteur avec son lot suivant.
+- notification d'un `Ticket` de pile après libération de son mutex, avec UB
+  possible après réveil spurieux ;
+- constructeur d'`Executor` hors capture dans le thread et déroulement non sûr
+  après création partielle des threads, deux chemins vers `std::terminate` ;
+- soumission récursive au même pool bloquante ;
+- porte de pic dépendante du scheduler, reproduite 78 fois en échec sur 100
+  sous `taskset -c 0`.
 
-Le sweep `gpu_executors={1,2,4,8}` devient alors interprétable. Le nombre de
-producteurs CPU peut rester 48 sans créer 48 exécuteurs/streams concurrents
-sur un seul GPU.
+Le correctif minimal est détaillé dans `ETAT_COURANT.md`. Garder le domaine CLI
+continu `1..8`, rejeter 0/9 au lieu de clamper et mesurer seulement
+`{1,2,4,8}`. Une erreur hôte explicitement récupérable peut rester locale au
+job ; une erreur device fatale doit fermer admission et file, réveiller les
+producteurs puis drainer sans réutilisation. Le contrat des lanes peut interdire
+la destruction concurrente puisque leur propriétaire rejoint déjà tous les
+producteurs avant de détruire le pool.
 
-Premier critère de réussite : mêmes digests et compteurs, moins
-`executors_created`, disparition du flush séquentiel et baisse du mur de lane.
-Un gain de bout en bout n'est pas exigé de ce commit isolé.
+Premier critère de réussite : mêmes digests, vecteurs et compteurs, nombre
+d'exécuteurs effectivement construit borné et aucun blocage/terminate injecté.
+Le flush final séquentiel doit être parallélisé ou mesuré avant le claim de
+rendement G0, mais n'oblige pas à redessiner la sûreté du pool. Un gain de bout
+en bout n'est pas exigé du pin hôte.
 
 ## G1 — géométrie résidente et covers par indices
+
+`dd928111` à `556c421e` implémentent désormais cette couture sur q3 puis q4,
+avec chemins SoA et index parallèles. Les arithmétiques q3 et q4 sont cohérentes
+sous le profil u16 ; les conditions de réception non vacante et les bornes
+d'indices sont centralisées dans `ETAT_COURANT.md`. La présente section conserve
+le contrat de coût visé. Le pin `839cf1ec` reçoit l'exécution nvcc/device q3 sur
+des fixtures bornées ; q4 index à `556c421e` reste sans réception device.
 
 Aujourd'hui, chaque ancre recopie environ 32 octets/site en q3 et 60
 octets/site en q4 pour des valeurs dérivées de la même géométrie. Or
@@ -247,6 +267,18 @@ q4 indexé :  4*S + 4*L + 288*J + 88*A
 Ici `S`, `L`, `J` et `A` comptent sites de cover, entrées de lentille, seeds et
 ancres. En q4, le terme linéaire de site vaut donc 4 à 8 octets selon la taille
 de la lentille, et les 288 octets par seed peuvent rester dominants.
+
+Le code courant ne réalise pas encore ce coût en mémoire. `Q3Batch` matérialise
+simultanément 32+4 octets/site, `Q4Batch` 60+4, et les exécuteurs réservent les
+buffers SoA et index dans les deux modes. Le chiffre 4 octets décrit seulement
+la copie PCIe du site indexé. Passer à un batch étiqueté exclusif et réserver
+uniquement les buffers du wire actif ; sinon même la baseline SoA paie G1.
+
+La géométrie n'est pas encore un contexte de backend : q3 téléverse
+`xyz + PointId`, puis q4 les retéléverse, soit 320 Mo cumulés à 10 M de points.
+Partager une `GpuBackendContext`, déclarée avant ses pools, donne un seul upload
+par run. Graver son temps séparément : ses octets sont actuellement inclus dans
+`h2d_octets`, mais son temps est hors `h2d_ms` et hors `lane_wall_ms`.
 
 La q4 récupère coordonnées et identifiants depuis la géométrie résidente.
 `x_site`, `lens_sites` et `skip_a/skip_b` restent des offsets **locaux** du
@@ -343,21 +375,30 @@ pendant qu'un fil B réduit K, et plusieurs B peuvent être actifs avec
 `fold_inflight > 1`. La phase `SCALE_THREADS` mesure donc une réponse au budget
 d'ouvriers, pas encore un speedup 1→N.
 
+Elle apporte néanmoins un signal substantiel. Sur `eight_clusters` 16 k, le
+mur sans digest passe de 215,041 à 15,284 s entre 1 et 48 fils, soit 14,07× ;
+avec digest, de 217,361 à 19,409 s, soit 11,20×. La génération gagne environ
+26,1×, mais le mur du fold seulement 5,09×. Son `reduce` ne gagne rien
+(5,430 contre 5,995 s) et occupe environ 71 % du cumul de fold à 48 fils ; le
+digest reste proche de 4,30 s. Le gain 32→48 tombe à 1,10×/1,08× et le RSS monte
+d'environ 3,30 à 4,89/4,96 Gio. Le verrou n'est donc plus le nombre de
+producteurs : c'est d'abord l'état vivant et le trafic mémoire du reduce.
+
 Scinder le protocole :
 
 ### A. Scaling des ouvriers
 
 - `fold_inflight=1` ;
 - digest OFF pour isoler le travail, puis une strate digest ON ;
-- processus sous cpuset exact et topologiquement déclaré de 1, 2, 4, 8, 16,
-  24, 32 et 48 CPU ; `--threads=t` ne remplace pas `taskset` ;
+- processus sous cpuset exact et topologiquement déclaré de 1, 8, 16, 24, 32
+  et 48 CPU, en remplissant d'abord les 24 cœurs physiques puis SMT ;
+  `--threads=t` ne remplace pas `taskset` ;
 - masque effectif gravé et validé dans chaque statut, topologie et CPU réellement
   utilisés ;
 - `perf stat` après preflight pour `task-clock`, CPU utilisés, cycles,
   instructions, changements de contexte, migrations et LLC/cache misses ; une
   permission absente est gravée sans invalider la campagne principale ;
-- échauffement et ordre miroir à nombre pair de répétitions, ou randomisation
-  épinglée si un nombre impair est nécessaire.
+- échauffement, ordre miroir et au moins trois répétitions conservées par bras.
 
 ### B. Chevauchement des ordres
 
@@ -395,25 +436,27 @@ vivant est précisément ce qui réduit d'abord son working set.
 
 ## Ordre de commits proposé à Claude
 
-1. **Finir l'instrument localement** : parseur au format réel, mutants/CMake,
-   lifecycle, erreur asynchrone et timelines non additives.
-2. **Recevoir ce seul instrument sur une petite session G4** : baseline causale
-   avant toute réécriture, puis choisir l'ordre G0/G1/G2.
-3. **Faire G0 dans sa forme synchrone minimale**, puis recevoir le sweep
-   d'exécuteurs ; aucune file asynchrone n'est requise.
-4. **Faire de G1 une couture réversible** : géométrie + indices +
-   matérialisation device bit-identique. Si les octets par seed dominent
-   ensuite, passer à la porte CPU `rect_shaped`; sinon conserver G1 comme
-   optimisation bornée.
-5. **N'engager G2 que si l'instrument isole les retours q4** comme poste
+1. **Fermer G0 sur hôte**, dans un commit séparé : ticket, démarrage,
+   réentrance, poison minimal et portes déterministes ; aucune file asynchrone
+   n'est requise.
+2. **Fermer le contrat fonctionnel G1 sur hôte** : indices bornés, branche
+   prouvée/mutée, `PointId` adverse et CTest `--inject`. Les lots mono-wire, le
+   contexte partagé et les métriques de setup sont des optimisations mesurées,
+   pas des prérequis sémantiques.
+3. **Conserver la nouvelle session `839cf1ec`** comme reçu nominal G0 + G1 q3,
+   après correction de sa portée et ajout d'un reçu de sûreté expurgé lié au
+   hash du journal ; ne jamais versionner le journal brut ni une clé. Une petite
+   réception CUDA de q4 index suffira après les correctifs ; ne pas rejouer la
+   matrice 50 k ni imposer un sweep device sans question nouvelle.
+4. **N'engager G2 que si l'instrument isole les retours q4** comme poste
    dominant et qu'un gain intermédiaire est utile ; comparer G3 seulement si
    le wire par seed devient le poste reçu.
-6. **Lancer en parallèle le pilote CPU sous cpuset** dès que son protocole local,
-   son budget et sa marge de rapatriement sont reçus ; il ne dépend pas des
+5. **Réduire en parallèle l'état du fold**, puis lancer le pilote CPU sous
+   cpuset physique/SMT avec trois répétitions ; il ne dépend pas des
    refactorings GPU.
 
-Cette séquence évite d'engager trois réécritures sur une causalité encore
-ouverte. Elle donne à Claude une baseline interprétable, puis une seule
-expérience falsifiable à la fois, tandis que la piste CPU avance indépendamment.
+La baseline fonctionnelle existe désormais. Cette séquence donne à Claude une
+seule couture falsifiable à la fois et évite qu'un défaut de sûreté G0 rende les
+mesures G1 ambiguës, tandis que la piste CPU avance indépendamment.
 
 GCP non utilisé pour cet audit.
