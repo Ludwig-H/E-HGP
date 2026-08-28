@@ -7,10 +7,11 @@
   constats historiques G0 portent sur `fe54ccca`, la campagne device/SCALE sur
   `c95cfa95`, G1 q3 sur `dd928111`/`839cf1ec` et G1 q4 sur `556c421e`.
 - **Pin de réception G0/G1 q3 :** `0656bf4c`, sans code produit.
-- **Worktree observé :** `HEAD=origin/main=55c1f105`; le produit est propre à ce
-  pin. Le probe non suivi `.codex_fold_contract_probe.cpp`, appartenant à un
-  autre audit, reste hors preuve. La réponse transitoire de Claude au miroir est
-  consolidée ici puis retirée du tip, conformément à la convention du dossier.
+- **Worktree observé avant ce delta :** `HEAD=origin/main=4fae1550`; aucun code
+  produit n'est postérieur à `55c1f105`. Le probe non suivi
+  `.codex_fold_contract_probe.cpp`, appartenant à un autre audit, reste hors
+  preuve. La réponse transitoire de Claude au miroir est consolidée ici puis
+  retirée du tip, conformément à la convention du dossier.
 - **Cadre :** `phase=exploration_v5_hors_registre`,
   `backend=cpu_reference`, `profile=quantized_u16_input_only`,
   `mode=audit_independant_math_and_architecture`,

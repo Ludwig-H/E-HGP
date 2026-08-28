@@ -374,6 +374,20 @@ le nombre de `x` ni le produit `x × y` de q4. Dans `docs/ECHELLE.md`, l'exposan
 montre 2,76 sur 50→200 k et 3,30 sur le dernier doublement, sans en faire une
 borne asymptotique.
 
+Relecture critique du complément concurrent : ne pas piloter le chantier avec
+les étiquettes globales « quartique q3 » ou « quintique q4 ». Ce sont des
+produits cartésiens syntaxiques très lâches, sans famille témoin qui les rende
+simultanément serrés. Deux petites ablations exactes valent néanmoins une
+mesure avant la refonte : conserver dans l'ordre la liste des `x` aigus quand
+`anchor_grid_stage` vient déjà de les tester, et ne développer que les `b` qui
+survivent au seuil d'histogramme tout en créditant les compteurs de masse. La
+seconde ne sera probablement pas le levier `scanline`, où l'histogramme tue
+peu. Le raffinement récursif des seules cellules vivantes occupées est la piste
+groupée prioritaire. En revanche, remplacer la boîte conservatrice de la corde
+par un supercover de segment, ou construire un sweep rationnel q4, exige
+d'abord un lemme indépendant, des fixtures de frontière et les compteurs
+ci-dessus ; aucune de ces deux idées n'est reçue par cet audit.
+
 ### V30 — occupation : trois objets, pas un compteur `%smid`
 
 Séparer dans le reçu : ressources de build (`regs/thread`, smem, local/stack,
