@@ -45,7 +45,9 @@ class Q4DeviceExecutor {
   bool chord_nonstrict_ = MHGP5_MUTANT("chord-nonstrict");  // drapeau hote passe au kernel
 
   // `d` (facultatif) recoit les mesures DE CE LOT (ajoutees) ; `total` les cumule toujours.
-  void scan(Q4Batch* b, u32 h4, bool core_nonstrict, bool depth_nonstrict, bool no_canonical, DeviceExecutorStats* d = nullptr) {
+  // `geom` + `wire_index` : chemin G1 (indices u32 + geometrie et PointId residents) ; sinon wire SoA.
+  void scan(Q4Batch* b, u32 h4, bool core_nonstrict, bool depth_nonstrict, bool no_canonical, DeviceExecutorStats* d = nullptr,
+            const GpuGeometry* geom = nullptr, bool wire_index = false) {
     if (broken_) throw std::runtime_error("cuda : executeur q4 inutilisable apres une erreur d'allocation");
     std::string why;
     if (!validate_q4_batch(*b, &why)) throw std::invalid_argument(why);
@@ -73,12 +75,19 @@ class Q4DeviceExecutor {
     reserve_seeds(nsd, na);
     tick(&m.reserve_ms);
     ev_[0].record(stream_);
-    m.h2d_bytes += up(d_u0_, b->u0.data(), ns) + up(d_u1_, b->u1.data(), ns) + up(d_u2_, b->u2.data(), ns) + up(d_q_, b->q.data(), ns);
-    m.h2d_bytes += up(d_px_, b->px.data(), ns) + up(d_py_, b->py.data(), ns) + up(d_pz_, b->pz.data(), ns) + up(d_pid_, b->pid.data(), ns);
+    const bool use_idx = wire_index && geom && b->site_index.size() == ns;
+    if (wire_index && !use_idx) throw std::invalid_argument("lot q4 : wire par indices demande sans indices/geometrie complets");
+    if (use_idx) {
+      m.h2d_bytes += up(d_idx_, b->site_index.data(), ns);
+    } else {
+      m.h2d_bytes += up(d_u0_, b->u0.data(), ns) + up(d_u1_, b->u1.data(), ns) + up(d_u2_, b->u2.data(), ns) + up(d_q_, b->q.data(), ns);
+      m.h2d_bytes += up(d_px_, b->px.data(), ns) + up(d_py_, b->py.data(), ns) + up(d_pz_, b->pz.data(), ns) + up(d_pid_, b->pid.data(), ns);
+    }
     if (nl) m.h2d_bytes += up(d_lens_, b->lens_sites.data(), nl);
     m.h2d_bytes += up(d_seeds_, b->seeds.data(), nsd);
     m.h2d_bytes += up(d_anchors_, b->anchors.data(), na);
-    const Q4SitesDev S{d_u0_, d_u1_, d_u2_, d_q_, d_px_, d_py_, d_pz_, d_pid_, d_lens_};
+    Q4SitesDev S{d_u0_, d_u1_, d_u2_, d_q_, d_px_, d_py_, d_pz_, d_pid_, d_lens_};
+    if (use_idx) { S.idx = d_idx_; S.geom = geom->dev(); S.gpid = geom->d_pid; }
     ev_[1].record(stream_);
     // K1 : cœurs.
     {
@@ -208,6 +217,7 @@ class Q4DeviceExecutor {
   i64 *d_u0_ = nullptr, *d_u1_ = nullptr, *d_u2_ = nullptr, *d_q_ = nullptr, *d_px_ = nullptr, *d_py_ = nullptr, *d_pz_ = nullptr;
   PointId* d_pid_ = nullptr;
   u32* d_lens_ = nullptr;
+  unsigned* d_idx_ = nullptr;  // wire G1 (capacite des sites)
   Q4BatchSeed* d_seeds_ = nullptr;
   Q4BatchAnchor* d_anchors_ = nullptr;
   Q4SeedVerdict* d_verdicts_ = nullptr;
@@ -254,12 +264,13 @@ class Q4DeviceExecutor {
       const size_t cs = gs ? ns + ns / 2 : 0, cl = gl ? nl + nl / 2 : 0;
       i64 *u0 = nullptr, *u1 = nullptr, *u2 = nullptr, *q = nullptr, *px = nullptr, *py = nullptr, *pz = nullptr;
       PointId* pid = nullptr;
+      unsigned* idx = nullptr;
       u32* lens = nullptr;
       if (gs) { u0 = t.alloc<i64>(cs); u1 = t.alloc<i64>(cs); u2 = t.alloc<i64>(cs); q = t.alloc<i64>(cs);
-                px = t.alloc<i64>(cs); py = t.alloc<i64>(cs); pz = t.alloc<i64>(cs); pid = t.alloc<PointId>(cs); }
+                px = t.alloc<i64>(cs); py = t.alloc<i64>(cs); pz = t.alloc<i64>(cs); pid = t.alloc<PointId>(cs); idx = t.alloc<unsigned>(cs); }
       if (gl) lens = t.alloc<u32>(cl);
       if (gs) { swap_in(&d_u0_, u0); swap_in(&d_u1_, u1); swap_in(&d_u2_, u2); swap_in(&d_q_, q);
-                swap_in(&d_px_, px); swap_in(&d_py_, py); swap_in(&d_pz_, pz); swap_in(&d_pid_, pid); cap_sites_ = cs; }
+                swap_in(&d_px_, px); swap_in(&d_py_, py); swap_in(&d_pz_, pz); swap_in(&d_pid_, pid); swap_in(&d_idx_, idx); cap_sites_ = cs; }
       if (gl) { swap_in(&d_lens_, lens); cap_lens_ = cl; }
       t.commit();
     } catch (...) { broken_ = true; throw; }
@@ -305,7 +316,7 @@ class Q4DeviceExecutor {
     } catch (...) { broken_ = true; throw; }
   }
   void release() {
-    for (void* p : {(void*)d_u0_, (void*)d_u1_, (void*)d_u2_, (void*)d_q_, (void*)d_px_, (void*)d_py_, (void*)d_pz_, (void*)d_pid_, (void*)d_lens_, (void*)d_seeds_,
+    for (void* p : {(void*)d_u0_, (void*)d_u1_, (void*)d_u2_, (void*)d_q_, (void*)d_px_, (void*)d_py_, (void*)d_pz_, (void*)d_pid_, (void*)d_idx_, (void*)d_lens_, (void*)d_seeds_,
                     (void*)d_anchors_, (void*)d_verdicts_, (void*)d_alive_, (void*)d_pair_off_, (void*)d_stage_,
                     (void*)d_deep_, (void*)d_cand_})
       if (p) cudaFree(p);
@@ -324,9 +335,15 @@ inline void generate_q4_device(const CloudIndex& ix, const GenerateOptions& opt,
   // G0 : pool BORNE et PERSISTANT (lim.gpu_executors executeurs crees une fois pour la lane, file avec
   // contre-pression ; les producteurs CPU attendent leur lot, donc l'ordre d'emission par ouvrier est inchange).
   ExecutorPool<Q4DeviceExecutor> pool(lim.gpu_executors);
+  // G1 : geometrie et PointId residents televerses UNE fois par lane quand le wire par indices est demande.
+  std::unique_ptr<GpuGeometry> geom;
+  if (lim.wire_index) {
+    geom = std::make_unique<GpuGeometry>(ix);
+    if (stages) stages->h2d_bytes += geom->bytes;
+  }
   generate_q4_batched_with(ix, opt, out, st, [&](Q4Batch* b, u32 h4, bool cn, bool dn, bool nc) {
     DeviceExecutorStats d;
-    pool.submit_and_wait([&](Q4DeviceExecutor& ex) { ex.scan(b, h4, cn, dn, nc, &d); });
+    pool.submit_and_wait([&](Q4DeviceExecutor& ex) { ex.scan(b, h4, cn, dn, nc, &d, geom.get(), lim.wire_index); });
     std::lock_guard<std::mutex> lk(mu);
     *kernel_ms += d.kernel_ms();
     *launches += d.launches;

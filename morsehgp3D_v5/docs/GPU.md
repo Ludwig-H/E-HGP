@@ -592,8 +592,9 @@ offsets, fold vivant), pas `threads = 48` seul.
   `gpu`) exigeant le même vecteur de verdicts et les mêmes compteurs que la
   production ; octets H2D gravés wire par wire. Réception : prochaine session
   G4 (compilation nvcc, portes `gpu`, contrats `--gpu --gpu-wire=index`,
-  digests identiques). Restent : le wire par indices de la lane q4
-  (positions et `PointId` résidents, 60 → 4 o par site) puis G2.
+  digests identiques). La lane **q4** a le même wire (`Q4SitesDev` à
+  accesseurs : indices + géométrie et `PointId` résidents, **60 → 4 o par
+  site**, portes `mhgp5_q4_lane_device_*_wire_index`) ; reste G2.
 
 ### Ordre de commits (auditeurs)
 

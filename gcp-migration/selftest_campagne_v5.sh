@@ -191,9 +191,9 @@ EOT
 chmod +x build-cuda/mhgp5_q3_lane_device_gate
 cat > build-cuda/mhgp5_q4_lane_device_gate <<'EOT'
 #!/usr/bin/env bash
-fam=uniform; n=1200; t=1
-for a in "$@"; do case "$a" in --family=*) fam="${a#--family=}";; --n=*) n="${a#--n=}";; --threads=*) t="${a#--threads=}";; esac; done
-echo "q4_lane_device famille=${fam} n=${n} fils=${t} seuil=65536 vidages=10 max_lot_seeds=1 max_ancre_seeds=1 candidats_q4=144020 candidats_lots=144020 seeds=508979 coeur_tues=357862 completions=3992025 profonds=363074 lancements=3 kernel_ms=1.0 desaccords_vecteur=0 desaccords_compteurs=0"
+fam=uniform; n=1200; t=1; w=soa
+for a in "$@"; do case "$a" in --family=*) fam="${a#--family=}";; --n=*) n="${a#--n=}";; --threads=*) t="${a#--threads=}";; --wire=*) w="${a#--wire=}";; esac; done
+echo "q4_lane_device famille=${fam} n=${n} fils=${t} wire=${w} seuil=65536 vidages=10 max_lot_seeds=1 max_ancre_seeds=1 candidats_q4=144020 candidats_lots=144020 seeds=508979 coeur_tues=357862 completions=3992025 profonds=363074 lancements=3 kernel_ms=1.0 desaccords_vecteur=0 desaccords_compteurs=0"
 echo "q4_lane_device OK"
 EOT
 chmod +x build-cuda/mhgp5_q4_lane_device_gate

@@ -63,12 +63,14 @@ inline double ms_host_since(std::chrono::steady_clock::time_point t0) {
 // executeurs du pool. RAII, jamais de fuite sur exception.
 struct GpuGeometry {
   int *d_px = nullptr, *d_py = nullptr, *d_pz = nullptr;
+  PointId* d_pid = nullptr;  // PointId par position (lane q4)
   size_t count = 0;
   u64 bytes = 0;
   explicit GpuGeometry(const CloudIndex& ix) {
     count = ix.upos.size();
     std::vector<int> hx(count), hy(count), hz(count);
-    for (size_t i = 0; i < count; ++i) { hx[i] = (int)ix.upos[i].x; hy[i] = (int)ix.upos[i].y; hz[i] = (int)ix.upos[i].z; }
+    std::vector<PointId> hp(count);
+    for (size_t i = 0; i < count; ++i) { hx[i] = (int)ix.upos[i].x; hy[i] = (int)ix.upos[i].y; hz[i] = (int)ix.upos[i].z; hp[i] = ix.point_id((i32)i); }
     try {
       cuda_check(cudaMalloc(&d_px, count * sizeof(int)), "cudaMalloc geometrie x");
       cuda_check(cudaMalloc(&d_py, count * sizeof(int)), "cudaMalloc geometrie y");
@@ -76,11 +78,13 @@ struct GpuGeometry {
       cuda_check(cudaMemcpy(d_px, hx.data(), count * sizeof(int), cudaMemcpyHostToDevice), "geometrie x");
       cuda_check(cudaMemcpy(d_py, hy.data(), count * sizeof(int), cudaMemcpyHostToDevice), "geometrie y");
       cuda_check(cudaMemcpy(d_pz, hz.data(), count * sizeof(int), cudaMemcpyHostToDevice), "geometrie z");
+      cuda_check(cudaMalloc(&d_pid, count * sizeof(PointId)), "cudaMalloc geometrie pid");
+      cuda_check(cudaMemcpy(d_pid, hp.data(), count * sizeof(PointId), cudaMemcpyHostToDevice), "geometrie pid");
     } catch (...) {
       release();
       throw;
     }
-    bytes = 3 * count * sizeof(int);
+    bytes = 3 * count * sizeof(int) + count * sizeof(PointId);
   }
   ~GpuGeometry() { release(); }
   GpuGeometry(const GpuGeometry&) = delete;
@@ -91,7 +95,9 @@ struct GpuGeometry {
     if (d_px) cudaFree(d_px);
     if (d_py) cudaFree(d_py);
     if (d_pz) cudaFree(d_pz);
+    if (d_pid) cudaFree(d_pid);
     d_px = d_py = d_pz = nullptr;
+    d_pid = nullptr;
   }
 };
 

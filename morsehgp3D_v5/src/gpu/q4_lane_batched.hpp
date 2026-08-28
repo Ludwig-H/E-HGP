@@ -72,6 +72,7 @@ struct Q4Batch {
   std::vector<i64> u0, u1, u2, q;
   std::vector<i64> px, py, pz;
   std::vector<PointId> pid;
+  std::vector<u32> site_index;  // wire G1 : indice de position unique par site (4 o), parallele a u0..pid
   std::vector<u32> lens_sites;
   std::vector<Q4BatchAnchor> anchors;
   std::vector<Q4BatchSeed> seeds;
@@ -81,7 +82,7 @@ struct Q4Batch {
   void clear() {
     pairs_estimate = 0;
     u0.clear(); u1.clear(); u2.clear(); q.clear();
-    px.clear(); py.clear(); pz.clear(); pid.clear();
+    px.clear(); py.clear(); pz.clear(); pid.clear(); site_index.clear();
     lens_sites.clear(); anchors.clear(); seeds.clear(); verdicts.clear(); emits.clear();
     stages = Q4StageCounts{};
   }
@@ -95,6 +96,7 @@ struct Q4Batch {
 // seed, emissions ordonnees (seed croissant, y croissant dans la lentille),
 // distinctes, issues de seeds vivants, y_site dans la tranche.
 struct Q4BatchView {
+  size_t n_index = 0;  // wire G1 (0 = absent)
   size_t n_sites = 0, n_lens = 0, n_anchors = 0, n_seeds = 0, n_verdicts = 0, n_emits = 0;
   size_t soa_sizes[7] = {0, 0, 0, 0, 0, 0, 0};  // u1,u2,q,px,py,pz,pid
   const u32* lens_sites = nullptr;
@@ -106,7 +108,7 @@ struct Q4BatchView {
 inline Q4BatchView q4_batch_view(const Q4Batch& b) {
   Q4BatchView v;
   v.n_sites = b.u0.size(); v.n_lens = b.lens_sites.size(); v.n_anchors = b.anchors.size(); v.n_seeds = b.seeds.size();
-  v.n_verdicts = b.verdicts.size(); v.n_emits = b.emits.size();
+  v.n_verdicts = b.verdicts.size(); v.n_emits = b.emits.size(); v.n_index = b.site_index.size();
   const size_t sz[7] = {b.u1.size(), b.u2.size(), b.q.size(), b.px.size(), b.py.size(), b.pz.size(), b.pid.size()};
   for (int i = 0; i < 7; ++i) v.soa_sizes[i] = sz[i];
   v.lens_sites = b.lens_sites.data(); v.anchors = b.anchors.data(); v.seeds = b.seeds.data();
@@ -117,6 +119,7 @@ inline bool validate_q4_batch_view(const Q4BatchView& v, std::string* why) {
   if (v.n_sites > (size_t)UINT32_MAX) { *why = "lot q4 : plus de 2^32 - 1 sites"; return false; }
   for (int i = 0; i < 7; ++i)
     if (v.soa_sizes[i] != v.n_sites) { *why = "lot q4 : tailles SoA differentes"; return false; }
+  if (v.n_index != 0 && v.n_index != v.n_sites) { *why = "lot q4 : wire par indices de taille differente des sites"; return false; }
   if (v.n_lens > (size_t)UINT32_MAX || v.n_anchors > (size_t)UINT32_MAX || v.n_seeds > (size_t)UINT32_MAX) {
     *why = "lot q4 : plus de 2^32 - 1 indices de lentille, ancres ou seeds"; return false;
   }
@@ -309,6 +312,7 @@ inline void build_q4_batch(const CloudIndex& ix, const AliveRect& ar, const u64 
         b->u0.push_back(sc.su0[i]); b->u1.push_back(sc.su1[i]); b->u2.push_back(sc.su2[i]); b->q.push_back(sc.sq[i]);
         b->px.push_back(p.x); b->py.push_back(p.y); b->pz.push_back(p.z);
         b->pid.push_back(ix.point_id(cz.u));
+        b->site_index.push_back((u32)cz.u);  // wire G1
         if (cz.u == ua) an.skip_a = (u32)i;
         if (cz.u == ub) an.skip_b = (u32)i;
       }

@@ -386,10 +386,10 @@ def main():
             # et une occurrence unique de chaque triple.
             want_soa = {("uniform", "1200", "1", "soa"): 200, ("eight_clusters", "1200", "4", "soa"): 200, ("uniform", "8000", "8", "soa"): 100000,
                         ("uniform", "300", "1", "soa"): 200}  # cocirculaire (coord=40) : replis exacts exerces
-            # G1 (q3 seulement) : wire par indices sur trois cas — memes verdicts et compteurs que la production.
+            # G1 (q3 et q4) : wire par indices sur trois cas — memes verdicts et compteurs que la production.
             want_q3 = dict(want_soa)
             want_q3.update({("uniform", "1200", "1", "index"): 200, ("eight_clusters", "1200", "4", "index"): 200, ("uniform", "300", "1", "index"): 200})
-            for lane, cand_key, want, n_ok in (("q3_lane_device", "candidats_q3", want_q3, 7), ("q4_lane_device", "candidats_q4", want_soa, 4)):
+            for lane, cand_key, want, n_ok in (("q3_lane_device", "candidats_q3", want_q3, 7), ("q4_lane_device", "candidats_q4", want_q3, 7)):
                 rx = re.compile(rf"^{lane} famille=(\S+) n=(\d+) fils=(\d+) (.*) desaccords_vecteur=(\d+) desaccords_compteurs=(\d+)$", re.M)
                 seen = {}
                 for f, n, t, mid, v, k in rx.findall(body):

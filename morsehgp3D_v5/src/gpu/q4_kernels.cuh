@@ -17,6 +17,7 @@
 #include "../core/dint.hpp"
 #include "../core/types.hpp"
 #include "q4_completion_shaped.hpp"
+#include "q3_scan_kernel.cuh"
 #include "q4_core_shaped.hpp"
 #include "q4_lane_batched.hpp"
 
@@ -24,6 +25,10 @@ namespace mhgp5 {
 namespace gpu {
 
 #if defined(__CUDACC__)
+// Sites d'un lot q4 : wire SoA (u0..q, px..pz, pid copies par ancre : 60 o/site)
+// ou wire G1 par INDICES (`idx` non nul : 4 o/site + geometrie et PointId
+// RESIDENTS) ; les accesseurs reconstruisent u = 2z − (a+b) et q = |u|² − D²
+// en i64 exacts — les memes entiers que fill_affine_sites sur l'hote.
 struct Q4SitesDev {
   const i64* u0;
   const i64* u1;
@@ -34,6 +39,21 @@ struct Q4SitesDev {
   const i64* pz;
   const PointId* pid;
   const u32* lens_sites;
+  const unsigned* idx = nullptr;  // wire G1
+  GeomDev geom{nullptr, nullptr, nullptr};
+  const PointId* gpid = nullptr;  // PointId par position residente
+  __device__ __forceinline__ i64 PX(unsigned g) const { return idx ? (i64)geom.px[idx[g]] : px[g]; }
+  __device__ __forceinline__ i64 PY(unsigned g) const { return idx ? (i64)geom.py[idx[g]] : py[g]; }
+  __device__ __forceinline__ i64 PZ(unsigned g) const { return idx ? (i64)geom.pz[idx[g]] : pz[g]; }
+  __device__ __forceinline__ PointId PID(unsigned g) const { return idx ? gpid[idx[g]] : pid[g]; }
+  __device__ __forceinline__ i64 U0(unsigned g, const Q4BatchAnchor& an) const { return idx ? 2 * PX(g) - (an.a.x + an.b.x) : u0[g]; }
+  __device__ __forceinline__ i64 U1(unsigned g, const Q4BatchAnchor& an) const { return idx ? 2 * PY(g) - (an.a.y + an.b.y) : u1[g]; }
+  __device__ __forceinline__ i64 U2(unsigned g, const Q4BatchAnchor& an) const { return idx ? 2 * PZ(g) - (an.a.z + an.b.z) : u2[g]; }
+  __device__ __forceinline__ i64 Q(unsigned g, const Q4BatchAnchor& an) const {
+    if (!idx) return q[g];
+    const i64 a0 = U0(g, an), a1 = U1(g, an), a2 = U2(g, an);
+    return a0 * a0 + a1 * a1 + a2 * a2 - an.D2;
+  }
 };
 
 __device__ inline unsigned keep_mask_upto(unsigned witness_mask, unsigned need) {
@@ -77,17 +97,17 @@ __global__ void k_q4_core(const Q4BatchSeed* seeds, unsigned nseeds, const Q4Bat
     unsigned my_piece = 0;  // bit k : temoin du morceau k
     if (i < an.count && i != an.skip_a && i != an.skip_b && i != sd.core.skip_x) {
       const unsigned g = an.begin + i;
-      const double lh = q3_l_hat_shaped(sd.core.aff, (double)S.u0[g], (double)S.u1[g], (double)S.u2[g], (double)S.q[g]);
+      const double lh = q3_l_hat_shaped(sd.core.aff, (double)S.U0(g, an), (double)S.U1(g, an), (double)S.U2(g, an), (double)S.Q(g, an));
       if (lh > sd.core.aff.bound) {
         my_pos = 1;
       } else {
-        const i64 nu = sd.core.n0 * S.u0[g] + sd.core.n1 * S.u1[g] + sd.core.n2 * S.u2[g];
+        const i64 nu = sd.core.n0 * S.U0(g, an) + sd.core.n1 * S.U1(g, an) + sd.core.n2 * S.U2(g, an);
         const i64 Bz = nu / 2;
         {
           ChordPieces local;
           local.init(J, chord_nonstrict);
           local.update(lh, sd.core.aff.bound, Bz, [&]() {
-            return di_to_i128_hd(q3_l_exact_shaped(sd.core.aff, S.u0[g], S.u1[g], S.u2[g], S.q[g]));
+            return di_to_i128_hd(q3_l_exact_shaped(sd.core.aff, S.U0(g, an), S.U1(g, an), S.U2(g, an), S.Q(g, an)));
           });
           for (int k = 0; k < kChordPieces; ++k) if (local.cnt[k]) my_piece |= 1u << k;
         }
@@ -101,13 +121,13 @@ __global__ void k_q4_core(const Q4BatchSeed* seeds, unsigned nseeds, const Q4Bat
             my_skip = 1;
           } else {
             my_jf = 1;
-            const DI128 P = di_div_by_4_exact(q3_l_exact_shaped(sd.core.aff, S.u0[g], S.u1[g], S.u2[g], S.q[g]));
+            const DI128 P = di_div_by_4_exact(q3_l_exact_shaped(sd.core.aff, S.U0(g, an), S.U1(g, an), S.U2(g, an), S.Q(g, an)));
             const int cm = cmp_2p2_jb2(di_to_i128_hd(P), J, Bz);
             my_wit = (nonstrict ? (cm >= 0) : (cm > 0)) ? 1 : 0;
           }
         } else {
           my_ff = 1;
-          const DI128 P = di_div_by_4_exact(q3_l_exact_shaped(sd.core.aff, S.u0[g], S.u1[g], S.u2[g], S.q[g]));
+          const DI128 P = di_div_by_4_exact(q3_l_exact_shaped(sd.core.aff, S.U0(g, an), S.U1(g, an), S.U2(g, an), S.Q(g, an)));
           const int sg = di_sign(P);
           if (!(nonstrict ? (sg > 0) : (sg >= 0))) {
             const int cm = cmp_2p2_jb2(di_to_i128_hd(P), J, Bz);
@@ -167,17 +187,17 @@ __global__ void k_q4_complete(const Q4BatchSeed* seeds, const Q4BatchAnchor* anc
   const Q4BatchSeed sd = seeds[alive[blockIdx.x]];
   const Q4BatchAnchor an = anchors[sd.anchor];
   const unsigned gx = an.begin + sd.x_site;
-  const P3 x{S.px[gx], S.py[gx], S.pz[gx]};
-  const PointId idx = S.pid[gx];
+  const P3 x{S.PX(gx), S.PY(gx), S.PZ(gx)};
+  const PointId idx = S.PID(gx);
   const u32 base = pair_off[blockIdx.x];
   for (unsigned li = threadIdx.x; li < an.lens_count; li += blockDim.x) {
     const u32 ys = S.lens_sites[an.lens_begin + li];
     u8 st = 255;  // paire ignoree (x, a ou b)
     if (ys != sd.x_site && ys != an.skip_a && ys != an.skip_b) {
       const unsigned gy = an.begin + ys;
-      const P3 y{S.px[gy], S.py[gy], S.pz[gy]};
+      const P3 y{S.PX(gy), S.PY(gy), S.PZ(gy)};
       Q4FormD f4;
-      st = (u8)q4_completion_stage_shaped(an.a, an.b, x, y, an.ida, an.idb, idx, S.pid[gy], an.D2, sd.l_ax, sd.l_bx,
+      st = (u8)q4_completion_stage_shaped(an.a, an.b, x, y, an.ida, an.idb, idx, S.PID(gy), an.D2, sd.l_ax, sd.l_bx,
                                           sd.face, no_canonical, false, &f4);
     }
     stage[base + li] = st;
@@ -194,8 +214,8 @@ __global__ void k_q4_depth(const Q4BatchSeed* seeds, const Q4BatchAnchor* anchor
   const Q4BatchSeed sd = seeds[e.seed];
   const Q4BatchAnchor an = anchors[sd.anchor];
   const unsigned gx = an.begin + sd.x_site, gy = an.begin + e.y_site;
-  const P3 x{S.px[gx], S.py[gx], S.pz[gx]};
-  const P3 y{S.px[gy], S.py[gy], S.pz[gy]};
+  const P3 x{S.PX(gx), S.PY(gx), S.PZ(gx)};
+  const P3 y{S.PX(gy), S.PY(gy), S.PZ(gy)};
   const Q4FormD f4 = q4_form_d(an.a, an.b, x, y);
   unsigned depth = 0;
   bool is_deep = false;
@@ -204,7 +224,7 @@ __global__ void k_q4_depth(const Q4BatchSeed* seeds, const Q4BatchAnchor* anchor
     bool in = false;
     if (i < an.count) {
       const unsigned g = an.begin + i;
-      const P3 pz{S.px[g], S.py[g], S.pz[g]};
+      const P3 pz{S.PX(g), S.PY(g), S.PZ(g)};
       const int sg = di_sign(q4_power_d(f4, pz));
       in = sg < 0 || (nonstrict && sg == 0);
     }
