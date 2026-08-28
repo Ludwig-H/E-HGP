@@ -483,7 +483,18 @@ inline void generate_q4_batched_with(const CloudIndex& ix, const GenerateOptions
   const u64 h_of[3] = {lane_h(Lane::kQ2, opt.smax), lane_h(Lane::kQ3, opt.smax), lane_h(Lane::kQ4, opt.smax)};
   std::vector<AliveRect> alive;
   const auto t0 = std::chrono::steady_clock::now();
-  alive_rectangles(ix, opt.s, h_of, 2, opt.threads, &alive, &st->rect_visited[2], &st->workers_wspd[2]);
+  // MEME POLITIQUE que la lane integree : le raffinement post-separation doit
+  // etre propage ici, sinon les compteurs (rectangles vivants, ancres, grand-livre)
+  // divergeraient entre le chemin integre et le chemin par lots, et les portes
+  // appariees echoueraient — alors meme que l'objet, lui, reste identique.
+  PostsepLedger led;
+  alive_rectangles(ix, opt.s, h_of, 2, opt.threads, &alive, &st->rect_visited[2], &st->workers_wspd[2],
+                   opt.postsep_refine_levels, &led);
+  st->postsep_base_mass[2] = led.base;
+  st->postsep_emitted_mass[2] = led.emitted;
+  st->postsep_killed_mass[2] = led.killed;
+  st->postsep_subrects[2] = led.subrects;
+  st->postsep_core_evals[2] = led.core_evals;
   st->t_wspd_ms[2] += ms_since(t0);
   st->rect_alive[2] = alive.size();
   const auto t1 = std::chrono::steady_clock::now();
