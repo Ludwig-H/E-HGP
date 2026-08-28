@@ -69,6 +69,50 @@ La mémoire, elle, est moins critique que je ne l'avais dit : le RSS par point
 73,9 à 50 000), ce qui donne ≈ 319 Go à 10 M — un facteur 1,8 au-dessus des
 180 Gio de la VM, pas 4. Sur `uniform` il reste à ≈ 2,6 To.
 
+## 3 bis. La formulation définitive : la fraction de paires survivantes
+
+La WSPD énumère toutes les paires ; l'élagage de rectangle en tue une partie ;
+le reste devient des ancres. **Le nombre d'ancres est linéaire en $n$ si et
+seulement si la fraction survivante décroît en $n^{-1}$.** Cette fraction est
+directement mesurable — ancres q4 divisées par $\binom{n}{2}$ :
+
+| famille | 8 000 | 16 000 | 32 000 | 100 000 | 200 000 | exposant de la fraction |
+|---|---|---|---|---|---|---|
+| `uniform` | 4,010 % | 2,125 % | 1,120 % | 0,379 % | 0,195 % | −0,92 / −0,92 / −0,95 / **−0,96** |
+| `eight_clusters` | 11,909 % | 8,345 % | 6,618 % | 3,495 % | 2,151 % | −0,51 / −0,33 / −0,56 / −0,70 |
+| `scanline_single_pass` | 2,515 % | 1,652 % | 1,358 % | 0,971 % | 0,959 % | −0,61 / −0,28 / −0,29 / **−0,02** |
+
+**Sur `scanline`, entre 100 000 et 200 000, la fraction survivante a cessé de
+décroître ($n^{-0{,}02}$).** Elle est bloquée à ≈ 0,96 % de toutes les paires.
+C'est, à la lettre, la définition de la quadraticité : un nombre d'ancres
+proportionnel à $\binom{n}{2}$.
+
+Sur `uniform` la même fraction décroît en $n^{-0{,}96}$ — presque exactement le
+$n^{-1}$ qu'exige la linéarité, ce qui explique que la famille soit saine.
+
+**L'objectif devient donc un énoncé unique, mesurable et falsifiable :**
+
+> faire décroître la fraction de paires survivantes de `scanline` en
+> $n^{-1}$ au lieu de $n^{-0{,}02}$.
+
+C'est un objectif d'**élagage au niveau du rectangle**, puisque c'est lui qui
+détermine cette fraction. Ni la WSPD (linéaire), ni le fold (linéaire), ni la
+sortie (sous-linéaire) n'y entrent.
+
+## 3 ter. Les compteurs sont indépendants de la machine — la mesure peut se faire localement
+
+Vérification faite : un run local à **8 fils** et le reçu G4 à **48 fils**
+donnent, à $n = 100\,000$ sur `scanline`, **exactement** les mêmes nombres —
+48 557 755 ancres q4 et 384 464 candidats q4. Les compteurs sont donc
+déterministes et citables hors G4 ; seuls les **temps** dépendent de la
+machine. Mesuré localement à 8 fils, `scanline` donne entre 100 000 et
+150 000 : mur $n^{2{,}10}$, ancres $n^{1{,}99}$, candidats $n^{0{,}87}$,
+RSS $n^{0{,}92}$ — cohérent avec le reçu G4.
+
+Conséquence pratique : les campagnes d'exposant sur les **compteurs** ne
+demandent pas de session payante. Seules les mesures de **temps** et de RSS à
+grande échelle en demandent une.
+
 ## 4. Où porter l'effort, désormais sans ambiguïté
 
 La cible est **le coût par ancre de `scanline`** : 14,6 → 60,0 µs-fil quand
