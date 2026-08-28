@@ -261,6 +261,49 @@ raffinement multiplie les produits émis par 1,66 : `rect_cover_handles` et
 mécanisme n'est pas activé en production. Il reste dans le code, gardé, comme
 sujet mesurable — pas comme optimisation.
 
+## 4 quater. La cible réelle : les 11 % d'ancres qui construisent un cover
+
+La même mesure qui réfute le raffinement désigne ce qu'il faut attaquer.
+`scanline_single_pass`, lane q4 :
+
+| grandeur | 100 000 | 200 000 | exposant |
+|---|---|---|---|
+| ancres q4 | 48 557 755 | 191 710 560 | $n^{1{,}98}$ |
+| **covers construits** | 5 436 957 | ≈ 11 M | $n^{1{,}04}$ |
+| grilles de cellules construites | 493 461 | 990 888 | **$n^{1{,}01}$** |
+| ancres tuées par la grille | 330 745 | 687 851 | $n^{1{,}06}$ |
+| **seeds tués par la grille, sans balayage** | 77 525 565 | 277 911 630 | $n^{1{,}84}$ |
+| seeds tués par le cœur (balayage) | 109 531 539 | 491 912 062 | **$n^{2{,}17}$** |
+| seeds tués par la corde | 41 529 741 | 171 517 481 | $n^{2{,}05}$ |
+
+Trois lectures :
+
+1. **Seuls 9,1 % des covers reçoivent une grille** (493 461 sur 5 436 957), et
+   les covers eux-mêmes ne sont que **11 %** des ancres (5,4 M sur 48,6 M) :
+   89 % des ancres meurent avant tout cover, gratuitement. C'est pourquoi tuer
+   des ancres plus tôt ne rapporte rien (§ 4 ter).
+2. **Le nombre de covers est quasi linéaire** ($n^{1{,}04}$) mais le travail
+   par cover explose : 423 sites par cover à 32 000, **986 à 100 000**, et les
+   tests de cœur croissent en $n^{2{,}40}$. Le coût n'est pas dans le *nombre*
+   de covers, il est dans leur *taille*.
+3. **La grille perd du terrain** : elle tue sans balayage 33,9 % des seeds à
+   100 000 mais 29,5 % à 200 000, parce que ses kills croissent en
+   $n^{1{,}84}$ contre $n^{2{,}17}$ pour le cœur. Sa politique
+   (`cover >= 256 sites`, `seeds aigus × 8 >= cover`, `near_m < h`) est donc le
+   levier le plus direct sur la masse dominante.
+
+**Balayage du seuil de grille** (`--cell-min-sites`), `scanline`
+$n = 32\,000$, 8 fils, **digest identique partout** (`2bc14286…`) :
+
+| seuil | 0 (forcé) | **32** | 64 | 128 | 256 (défaut) | 1024 |
+|---|---|---|---|---|---|---|
+| mur (ms) | 89 512 | **64 935** | 68 460 | 75 940 | 71 365 | 76 009 |
+
+Le seuil 32 donne 9,0 % de mur en moins que le défaut, et le mode forcé est
+25 % **pire** — mais la non-monotonie entre 128, 256 et 1024 montre une
+dispersion de ±5 à 7 % sur cette machine partagée. **Un seul run par point ne
+permet pas de conclure** ; la comparaison répétée et alternée est en cours.
+
 ## 5. Ce qui n'est pas établi
 
 - La série 8 000/32 000/100 000 du § 4 vient de la sonde. Les bras intégrés
