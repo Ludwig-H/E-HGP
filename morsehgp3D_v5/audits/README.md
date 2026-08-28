@@ -9,6 +9,7 @@ recopiés au tip.
 ## Entrées actives
 
 - [`ETAT_COURANT.md`](ETAT_COURANT.md) : verdict courant et ordre de fermeture.
+- [`AUDIT_RENDEMENT_GPU_MULTICPU_20260828.md`](AUDIT_RENDEMENT_GPU_MULTICPU_20260828.md) : diagnostic chiffré des plafonds GPU/multi-CPU et protocole de fermeture.
 - [`QUESTION_CLAUDE_GRILLE_DE_CELLULES_20260828.md`](QUESTION_CLAUDE_GRILLE_DE_CELLULES_20260828.md) : question V15 et réponse actionnable sur la grille, le fold concurrent et la mémoire.
 - [`QUESTION_CLAUDE_TESTS_D_ANCRE_20260827.md`](QUESTION_CLAUDE_TESTS_D_ANCRE_20260827.md) : pont historique condensé, conservé tant que le document mathématique canonique le référence.
 - [`REPONSE_A_CLAUDE_APPLICATIONS_VERTICALES_20260827.md`](REPONSE_A_CLAUDE_APPLICATIONS_VERTICALES_20260827.md) : reçu de décision sur la future tour.

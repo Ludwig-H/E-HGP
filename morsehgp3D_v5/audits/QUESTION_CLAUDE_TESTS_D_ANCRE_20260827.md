@@ -15,7 +15,7 @@ Les points V7 à V14 encore vérifiables au pin `369f3ac0` sont les suivants :
 - la borne intermédiaire annoncée pour `v_j` ne découle pas des majorations affichées, même si le chemin i128 conserve une large marge ;
 - F5 annonce 28 sites de frontière mais le tableau courant en construit 26 ;
 - F7 reste coplanaire et ne qualifie pas une vraie complétion q4 non coplanaire ;
-- la garde q4 doit refuser `J <= 0` avant tout cell-kill ; le chemin courant ne signale que `J < 0` après la grille et peut masquer le cas nul ;
+- le plan de tests et l'oracle annoncent `J > 0`, mais la porte et le chemin produit ne comptent que `J < 0`. Le théorème donne bien une positivité stricte pour toute seed aiguë valide : fermer le trou par un oracle borné `J <= 0`, sans imposer un scan défensif avant chaque certificat ni en faire un défaut produit observé ;
 - `AnchorPretests::kCounterfactual` désactive plusieurs certificats à la fois. Une ablation causale doit isoler W, secteurs, corde et grille.
 
 Ce pont pourra être supprimé lorsque le document canonique aura absorbé ces

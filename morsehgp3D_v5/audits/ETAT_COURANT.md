@@ -1,7 +1,8 @@
 # État courant audité de MorseHGP3D v5 — 28 août 2026
 
-- **Pin fonctionnel jugé :** `369f3ac0`.
-- **Pins principaux inclus :** `90baa0bb` (fold concurrent), `d86b4ec7` (census inline et RSS), `82f613d3` (grille de cellules), `b164fcbe` et `369f3ac0` (sondes du fold).
+- **HEAD relu :** `63deda74` (instrumentation GPU par étape).
+- **Pin de performance jugé :** `82f613d3`. Le HEAD ajoute une synchronisation q4 et n'est donc pas encore équivalent au chemin mesuré.
+- **Pins principaux inclus :** `90baa0bb` (fold concurrent), `d86b4ec7` (census inline et RSS), `82f613d3` (grille de cellules), `b164fcbe` et `369f3ac0` (sondes du fold), `9fba11a5` (préfixe et échelle), `63deda74` (temps device par étape).
 - **Reçus relus :** `69daa148` et `685e8e22`.
 - **Cadre :** `phase=exploration_v5_hors_registre`, `backend=cpu_reference`, `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`.
 - **Worktree observé :** les seules modifications suivies sont le présent nettoyage d'audit ; `.codex_fold_contract_probe.cpp`, non suivi et produit par un autre auditeur, est exclu du périmètre et du commit.
@@ -20,7 +21,32 @@ Trois verrous empêchent toutefois de prendre le tip comme base sûre d'une nouv
 
 La réception formelle de la grille reste également conditionnée à la correction du théorème publié et à une porte indépendante de localisation/comptage. Aucun faux kill produit n'a été observé dans les campagnes nominales relues.
 
-Le `README.md` produit n'est pas frais par rapport à ce pin et transforme encore une cible de conformité en affirmation générale (« même objet que la v4 », « niveaux et événements exacts »). Le présent état ne lève donc pas l'interdiction de claim.
+Le `README.md` produit n'est pas frais par rapport au HEAD et transforme encore une cible de conformité en affirmation générale (« même objet que la v4 », « niveaux et événements exacts »). Le présent état ne lève donc pas l'interdiction de claim.
+
+## Audit ciblé — rendement GPU et multi-CPU
+
+La réponse chiffrée et le plan expérimental sont dans
+[`AUDIT_RENDEMENT_GPU_MULTICPU_20260828.md`](AUDIT_RENDEMENT_GPU_MULTICPU_20260828.md).
+Synthèse :
+
+- au reçu courant, le GPU est à parité mixte : 0,984× `uniform`, 1,122× `terrain`, 0,973× `eight_clusters` et 1,023× `scanline` sur le mur interne CPU/GPU ; un seul passage CPU puis GPU ne permet pas un claim de gain ;
+- le port ne remplace que les corps q3/q4 après une préparation hôte coûteuse. Sur `uniform` 50 k, cette fraction ne vaut que 8,9 % du mur CPU, donc son plafond idéal est environ 1,10× ;
+- le faible scaling multi-CPU G4 n'est pas démontré : aucun reçu ne balaie 1 à 48 fils au même pin et `ouvriers=48` ne mesure que des fils créés ;
+- une contre-sonde locale non reçue donne néanmoins 58,04 / 31,40 / 17,70 / 13,57 s à 1 / 2 / 4 / 8 fils sur `uniform` 4 k. Le gain existe, mais son rendement chute au-delà des quatre cœurs locaux ;
+- les plafonds architecturaux sont le reduce et le digest séquentiels par K, deux ordres B en vol, des rectangles lourds indivisibles, les copies/fusions de gros vecteurs et, côté GPU, les matérialisations, trois synchronisations q4 et une télémétrie `kernel_ms` non homogène.
+
+La prochaine étape utile n'est pas une nouvelle optimisation spéculative : c'est
+une campagne contrebalancée `threads × fold_inflight × digest`, puis une
+décomposition GPU préparation/H2D/K1-K3/D2H/compactions en vrais murs. Le modèle
+de temps de `docs/ECHELLE.md` reste une hypothèse de conception issue d'un seul
+point 48 fils, pas une loi de scaling reçue.
+
+`63deda74` commence cette décomposition, mais additionne les durées `scan()` de
+fils concurrents et les nomme murs ; cette somme ne peut pas être soustraite au
+mur `rects`. La q4 ajoute en outre une synchronisation après H2D, donc
+l'instrument modifie potentiellement le recouvrement. Renommer les sommes,
+mesurer un vrai mur de lane et retirer ou neutraliser la barrière avant la
+prochaine campagne G4.
 
 ## P1 — sûreté du fold concurrent
 
@@ -28,7 +54,7 @@ Dans `src/pipeline/run.hpp`, `BJoiner` ne joint les fils que dans son destructeu
 
 Une seconde fenêtre d'exception existe entre la construction de `slot->t` et `slots.push_back`. Si l'insertion du `unique_ptr` lève, le `BSlot` local détruit un `std::thread` encore joignable et appelle `std::terminate`.
 
-Enfin, le `catch` d'un fil B pose immédiatement `pub_failed`, y compris lorsque l'exception vient d'un K supérieur qui a terminé avant les K précédents. Les fils inférieurs réveillés abandonnent alors leur publication. Le code ne garantit donc pas « le premier défaut dans l'ordre des K » pour les exceptions de réduction ou de digest ; la porte ne couvre que des exceptions de callback déjà sérialisées.
+Enfin, le `catch` d'un fil B pose immédiatement `pub_failed`, y compris lorsque l'exception vient d'un K supérieur qui a terminé avant les K précédents. Les fils inférieurs réveillés abandonnent alors leur publication et peuvent ne jamais contrôler leurs violations d'invariant. Nuance apportée au contre-audit précédent : `reap_front` relit normalement les seules exceptions de réduction/digest stockées en ordre de K. Le défaut certain est la suppression des publications inférieures et l'absence d'arbitrage commun entre un retour d'étage A supérieur et une erreur B inférieure, pas la seule identité de l'exception relancée en chemin nominal.
 
 Correction demandée :
 
@@ -82,7 +108,7 @@ Avant de conclure à un état borné, mesurer le pic intra-lot, la fermeture des
 - Le reçu G4 n° 11 contient 31 statuts terminés au pin `82f613d3`, dont 30 succès nominaux et le rejet attendu d'un mutant. Les digests communs aux sessions 10 et 11 concordent.
 - Sur le cas `scanline` 200 k, la session rapporte 502 vers 268 secondes, dont la lane q4 438 vers 215 secondes. Ce résultat justifie une ablation propre ; il n'isole pas la grille des listes inline et ne prouve pas l'exactitude générale.
 - Les deux tests cellule étiquetés uniquement `oracle` ne sont pas inclus dans la commande G4 `-L gate`. Ce n'est pas un besoin de GPU, mais le résumé « oracle » du reçu ne doit pas être lu comme un rejeu de la suite oracle complète.
-- Le reçu n° 11 est autoportant sur ce point : son `session.log` versionné contient `remote_campaign_rc=0`, `scp_rc=0`, la validation complète et la certification finale `TERMINATED`. Le reçu n° 10 ne versionne pas ce transcript et reste dépendant des deux RC fournis au validateur.
+- Les deux `session.log` présents dans le workspace au moment de l'audit contiennent `remote_campaign_rc=0`, `scp_rc=0`, la validation complète et la certification finale `TERMINATED`, mais `*.log` est ignoré et aucun des deux fichiers n'est suivi par Git. Les reçus n° 10 et n° 11 restent donc non autoportants sur cette transaction ; un checkout frais ne contient pas ces transcripts.
 
 ## Validation locale de cet audit
 
@@ -93,17 +119,22 @@ cmake -S morsehgp3D_v5 -B build/v5 -DCMAKE_BUILD_TYPE=Release
 cmake --build build/v5 --parallel
 ```
 
-Résultats au pin jugé :
+Réception exhaustive antérieure au pin fonctionnel `369f3ac0` :
 
 - build Release : succès ;
 - suite `gate` : 168/168 succès, 745,12 s réelles ;
 - suite `oracle` : 9/9 succès, 13,62 s réelles, y compris les deux oracles cellule absents de `gate` ;
 - complément exhaustif `-LE 'gate|oracle'` : 15/15 succès, 1 038,98 s réelles ; l'union couvre les 185 CTests ;
-- `python tools/check_docs.py` : 212 Markdown actifs validés ;
-- `python tools/check_implementation_status.py` : 20 phases et leurs portes validées ;
-- validation explicite du dossier `audits/` : 6 Markdown validés.
 
-Aucun test CUDA, sanitizer ou GPU n'a été revendiqué. Un vert CTest ne ferme ni la course de retour, ni la vacuité de la concurrence, ni les lacunes d'oracle décrites plus haut.
+Relecture au HEAD `63deda74` pendant le présent audit :
+
+- build Release CPU : succès ;
+- sélection pertinente parallélisme/API/préfixe : 15/15 CTests, 44,49 s ;
+- `python tools/check_docs.py` : 213 Markdown actifs validés ;
+- `python tools/check_implementation_status.py` : 20 phases et leurs portes validées ;
+- validation explicite du dossier `audits/` : 7 Markdown validés.
+
+Aucun `nvcc` n'est disponible localement : `63deda74` n'a été ni compilé CUDA ni exécuté GPU dans cet audit. Aucun sanitizer n'a été revendiqué. Un vert CTest ne ferme ni la course de retour, ni la vacuité de la concurrence, ni les lacunes d'oracle décrites plus haut.
 
 ## Ordre de fermeture proposé à Claude
 
