@@ -241,6 +241,16 @@ mhgp5_executable(mhgp5_delta_replay_gate tests/delta_replay_gate.cpp)
 mhgp5_gate(mhgp5_delta_replay 0 mhgp5_delta_replay_gate "")
 mhgp5_gate(mhgp5_delta_replay_mutant_drop_nonmerge 4 mhgp5_delta_replay_gate "--inject=drop-nonmerge")
 mhgp5_gate(mhgp5_delta_replay_mutant_attach_prebatch 4 mhgp5_delta_replay_gate "--inject=attach-prebatch")
+
+# Reducteur vivant (ECHELLE L2, theoreme T6) : egalite avec le fold resident,
+# invariant components <= alias <= pic exact, plafond de relocalisations.
+mhgp5_executable(mhgp5_fold_live_gate tests/fold_live_gate.cpp)
+mhgp5_gate(mhgp5_fold_live 0 mhgp5_fold_live_gate "")
+mhgp5_gate(mhgp5_fold_live_mutant_free_on_absorb 4 mhgp5_fold_live_gate "--inject=free-on-absorb")
+mhgp5_gate(mhgp5_fold_live_mutant_root_key_mutable 4 mhgp5_fold_live_gate "--inject=root-key-mutable")
+mhgp5_gate(mhgp5_fold_live_mutant_canon_not_min 4 mhgp5_fold_live_gate "--inject=canon-not-min-on-union")
+mhgp5_gate(mhgp5_fold_live_mutant_last_mark_shifted 4 mhgp5_fold_live_gate "--inject=last-mark-shifted")
+mhgp5_gate(mhgp5_fold_live_mutant_physical_root 4 mhgp5_fold_live_gate "--inject=physical-root-is-logical-root")
 # Prefixe exact de la tour (docs/ECHELLE.md § 3.3) : ordres K <= smax − 1 identiques a l'objet complet.
 mhgp5_executable(mhgp5_prefix_gate tests/prefix_gate.cpp)
 mhgp5_gate(mhgp5_prefix_k5_uniform 0 mhgp5_prefix_gate "--family=uniform --n=1200 --smax=6 --min-events=1000")

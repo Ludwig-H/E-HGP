@@ -1,0 +1,469 @@
+// MorseHGP3D v5 — REDUCTEUR VIVANT (docs/ECHELLE.md § 8 bis, etape L2 ;
+// theoreme T6 « components <= live_aliases »). Meme sortie que `reduce_fold`
+// (fold.hpp), mais l'etat n'est plus proportionnel au nombre de facettes de
+// l'ordre : il ne porte que les facettes ENCORE REUTILISABLES.
+//
+// Ce que le resident garde et que le vivant ne garde pas : un `FidState` par
+// facette (32 o x nfid) et `final_canon_fid` (4 o x nfid). Ce que le vivant
+// garde : un `Alias` par facette entre sa PREMIERE et sa DERNIERE incidence,
+// un `Component` par composante ayant au moins un alias, et une table
+// fid -> alias dimensionnee sur le vivant.
+//
+// EXACTITUDE — le vivant reproduit le resident evenement par evenement :
+//   - ROLES et DETECTEURS : identiques (kActive / kAttach, `seen`) ;
+//   - GEL PRE-LOT : le lot se fait en DEUX passes (tous les gels d'abord,
+//     puis toutes les unions), comme le resident ou `pre_list` precede les
+//     unions ; chaque gel copie la CLE canonique pre-lot, jamais un pointeur
+//     vers un enregistrement qui peut mourir dans la passe d'unions ;
+//   - UNION : la racine LOGIQUE est celle de `first` (regle exacte du
+//     resident, `unite_canon(first, v)`), le CANONIQUE est le minimum
+//     historique, et le conteneur PHYSIQUE est le record de plus grande
+//     masse historique (small-to-large : chaque alias est relocalise
+//     O(log) fois ; mutant `physical-root-is-logical-root`, tue par le
+//     plafond de relocalisations) ;
+//   - ORDRE DES DELTAS : `post_list` est triee par `logical_root_fid`, qui
+//     est par construction le fid de la racine union-find du resident ;
+//   - MORTS : les alias dont la DERNIERE incidence est le lot courant sont
+//     retires apres l'emission du lot ; une composante sans alias est
+//     definitivement liberable (toute connexion future passerait par une
+//     facette a une incidence deja depassee).
+//
+// Ce que le vivant NE produit PAS : `facet_keys` et `final_canon_fid`, qui
+// sont O(nfid). Le theoreme T5 les rend fonctions du flux de deltas et la
+// porte de rejeu (tests/delta_replay_gate.cpp, tests/fold_live_gate.cpp) les
+// reconstruit — c'est la seule autorite d'egalite avec le resident.
+//
+// Les durees de vie (PREMIERE / DERNIERE par facette) sont ici calculees en
+// RAM depuis `FoldPrepared` : a L2 c'est le sujet, pas la revendication ; a
+// L3 elles viennent du tri externe des cles completes (ECHELLE § 4.2) et
+// arrivent avec chaque occurrence.
+#pragma once
+
+#include <algorithm>
+#include <string>
+#include <vector>
+
+#include "fold.hpp"
+
+namespace mhgp5 {
+
+// Residence MESUREE du reducteur vivant (jamais annoncee).
+struct LiveFoldStats {
+  u64 facets = 0;                // alias crees = facettes distinctes (une creation par facette)
+  u64 peak_aliases = 0;          // pic d'alias vivants (dans un lot, apres les creations)
+  u64 peak_components = 0;       // pic de composantes vivantes
+  u64 peak_live_exact = 0;       // pic exact des durees de vie : live += nees[b] ; pic ; live -= mortes[b]
+  u64 peak_index_slots = 0;      // pic de cases de la table fid -> alias
+  u64 relocations = 0;           // alias deplaces par les unions (small-to-large)
+  u64 comps_freed = 0;           // composantes liberees faute d'alias
+  u64 orders_measured = 0;       // reserve (agregation par l'appelant)
+  u64 invariant_violations = 0;  // frontieres de lot ou components <= aliases <= peak_live_exact est faux
+  u64 live_bytes_peak = 0;       // octets de l'etat vivant au pic (alias + composantes + table)
+};
+
+namespace live_detail {
+
+inline constexpr u32 kNil = UINT32_MAX;
+
+inline u64 mix_fid(u32 f) {
+  u64 x = (u64)f * 0x9E3779B97F4A7C15ull;
+  x ^= x >> 29;
+  x *= 0xBF58476D1CE4E5B9ull;
+  x ^= x >> 32;
+  return x;
+}
+
+// TABLE fid -> alias en adressage ouvert LINEAIRE, avec suppression par
+// DECALAGE ARRIERE (Knuth 6.4 R) : aucune pierre tombale, donc la table ne se
+// degrade pas quand les facettes meurent et sa taille suit le vivant, pas le
+// cumul. La croissance double et rehache les seules entrees vivantes.
+struct LiveIndex {
+  std::vector<u32> key_, val_;
+  size_t mask_ = 0, used_ = 0;
+
+  void init(size_t cap) {
+    size_t n = 16;
+    while (n < cap * 2) n <<= 1;
+    key_.assign(n, kNil);
+    val_.assign(n, 0);
+    mask_ = n - 1;
+    used_ = 0;
+  }
+  size_t home(u32 fid) const { return (size_t)(mix_fid(fid) & (u64)mask_); }
+  u32 get(u32 fid) const {
+    for (size_t i = home(fid);; i = (i + 1) & mask_) {
+      if (key_[i] == kNil) return kNil;
+      if (key_[i] == fid) return val_[i];
+    }
+  }
+  void put(u32 fid, u32 a) {
+    if ((used_ + 1) * 2 > key_.size()) grow();
+    for (size_t i = home(fid);; i = (i + 1) & mask_) {
+      if (key_[i] == kNil) {
+        key_[i] = fid;
+        val_[i] = a;
+        ++used_;
+        return;
+      }
+      if (key_[i] == fid) {
+        val_[i] = a;
+        return;
+      }
+    }
+  }
+  void erase(u32 fid) {
+    size_t i = home(fid);
+    for (;; i = (i + 1) & mask_) {
+      if (key_[i] == kNil) return;
+      if (key_[i] == fid) break;
+    }
+    key_[i] = kNil;
+    --used_;
+    for (size_t j = (i + 1) & mask_;; j = (j + 1) & mask_) {
+      if (key_[j] == kNil) return;
+      const size_t h = home(key_[j]);
+      // La case j peut remonter en i si son domicile h n'est PAS cycliquement dans (i, j].
+      if (((j - h) & mask_) >= ((j - i) & mask_)) {
+        key_[i] = key_[j];
+        val_[i] = val_[j];
+        key_[j] = kNil;
+        i = j;
+      }
+    }
+  }
+  void grow() {
+    std::vector<u32> ok, ov;
+    ok.swap(key_);
+    ov.swap(val_);
+    const size_t n = ok.size() * 2;
+    key_.assign(n, kNil);
+    val_.assign(n, 0);
+    mask_ = n - 1;
+    used_ = 0;
+    for (size_t i = 0; i < ok.size(); ++i)
+      if (ok[i] != kNil) put(ok[i], ov[i]);
+  }
+  size_t slots() const { return key_.size(); }
+  size_t bytes() const { return key_.size() * sizeof(u32) * 2; }
+};
+
+// Un ALIAS par facette encore reutilisable : sa cle (le reducteur n'a donc
+// pas besoin du catalogue), sa composante, ses liens intrusifs, son lot de
+// DERNIERE incidence, son role dans le lot courant.
+struct Alias {
+  FacetKey key;
+  u32 fid = 0;
+  u32 comp = kNil;
+  u32 next = kNil, prev = kNil;
+  u32 last_batch = 0;
+  u32 role_epoch = UINT32_MAX;
+  u8 role_bits = 0;
+  u8 seen = 0;
+  u8 dead = 0;  // mutant `free-on-absorb` seulement : alias orphelin d'une absorption (jamais libere)
+};
+
+// Une COMPOSANTE par classe d'union ayant au moins un alias.
+struct Component {
+  FacetKey canon_key;             // cle du canonique = minimum HISTORIQUE (jamais relue d'un record)
+  u32 canon_fid = 0;
+  u32 logical_root_fid = 0;       // la racine que le resident aurait : celle de `first` absorbe
+  u32 head = kNil;
+  u32 count = 0;                  // alias vivants ; 0 => liberable
+  u64 mass = 0;                   // masse HISTORIQUE (small-to-large)
+  u32 post_epoch = UINT32_MAX, post_slot = 0;
+};
+
+}  // namespace live_detail
+
+// REDUCTION VIVANTE : meme `deltas`, memes `batch_levels`, memes compteurs
+// que `reduce_fold`, avec un etat borne par le vivant. `facet_keys` et
+// `final_canon_fid` restent vides (O(nfid), reconstruits par le rejeu T5).
+inline ForestResult reduce_fold_live(FoldPrepared&& fp, LiveFoldStats* out_stats = nullptr) {
+  using namespace live_detail;
+  ForestResult r = std::move(fp.r);
+  LiveFoldStats stats;
+  if (!r.refusal.empty()) {
+    if (out_stats) *out_stats = stats;
+    return r;
+  }
+  const std::vector<ForestEvent>& events = *fp.events;
+  const std::vector<u32>& order = fp.order;
+  const auto evt = [&](size_t i) -> const ForestEvent& { return events[(size_t)order[i]]; };
+  const std::vector<std::pair<size_t, size_t>>& batches = fp.batches;
+  const std::vector<FacetKey>& keys = fp.keys;
+  const std::vector<u32>& ev_fid = fp.ev_fid;
+  const bool m_attach_pre = fp.mutants[2], m_drop_nonmerge = fp.mutants[3], m_no_detector = fp.mutants[5];
+  const bool m_phys_is_log = MHGP5_MUTANT("physical-root-is-logical-root");
+  const bool m_free_on_absorb = MHGP5_MUTANT("free-on-absorb");
+  const bool m_root_key_mutable = MHGP5_MUTANT("root-key-mutable");
+  const bool m_canon_not_min = MHGP5_MUTANT("canon-not-min-on-union");
+  const bool m_last_shifted = MHGP5_MUTANT("last-mark-shifted");
+  const size_t nfid = keys.size();
+  const size_t nb = batches.size();
+  r.facets = nfid;
+
+  // ---- DUREES DE VIE (a L3 : le tri externe des cles completes ; ici : deux
+  // tableaux u32 par facette, hors de la revendication de residence).
+  std::vector<u32> firstb(nfid, UINT32_MAX), lastb(nfid, 0);
+  for (size_t b = 0; b < nb; ++b)
+    for (size_t e = batches[b].first; e < batches[b].second; ++e) {
+      const ForestEvent& ev = evt(e);
+      for (int t = 0; t < (int)ev.q + (int)ev.d; ++t) {
+        const u32 fid = ev_fid[e * 11 + (size_t)t];
+        if (firstb[fid] == UINT32_MAX) firstb[fid] = (u32)b;
+        lastb[fid] = (u32)b;
+      }
+    }
+  {  // Pic EXACT des durees de vie, inclusif par lot (sans heuristique).
+    std::vector<u32> born_at(nb + 1, 0), died_at(nb + 1, 0);
+    for (size_t f = 0; f < nfid; ++f) {
+      if (firstb[f] == UINT32_MAX) continue;
+      ++born_at[firstb[f]];
+      ++died_at[lastb[f]];
+    }
+    u64 live = 0;
+    for (size_t b = 0; b < nb; ++b) {
+      live += born_at[b];
+      stats.peak_live_exact = std::max(stats.peak_live_exact, live);
+      live -= died_at[b];
+    }
+  }
+
+  // ---- ARENES (listes libres : la memoire des morts sert aux naissantes).
+  std::vector<Alias> av;
+  std::vector<Component> cv;
+  std::vector<u32> afree, cfree;
+  LiveIndex idx;
+  idx.init(64);
+  u64 live_alias = 0, live_comp = 0;
+  const auto alloc_alias = [&]() -> u32 {
+    if (!afree.empty()) {
+      const u32 a = afree.back();
+      afree.pop_back();
+      av[a] = Alias{};
+      return a;
+    }
+    av.emplace_back();
+    return (u32)(av.size() - 1);
+  };
+  const auto alloc_comp = [&]() -> u32 {
+    if (!cfree.empty()) {
+      const u32 c = cfree.back();
+      cfree.pop_back();
+      cv[c] = Component{};  // epoques remises a UINT32_MAX : un slot recycle ne herite d'aucun lot
+      return c;
+    }
+    cv.emplace_back();
+    return (u32)(cv.size() - 1);
+  };
+
+  std::vector<u32> touched;
+  struct PreFreeze {
+    u32 rep_alias;
+    FacetKey pre_canon_key;
+  };
+  std::vector<PreFreeze> pre_list;
+  std::vector<u32> post_list;
+  std::vector<ComponentDelta> scratch;
+  r.deltas.reserve(nb);
+  auto tmark = std::chrono::steady_clock::now();
+
+  // UNION ORDONNEE : racine logique = celle de `first`, canonique = minimum
+  // historique, conteneur physique = plus grande masse.
+  const auto unite = [&](u32 a, u32 b) -> bool {
+    const u32 ca = av[a].comp, cb = av[b].comp;
+    if (ca == cb) return false;
+    const u32 lroot = cv[ca].logical_root_fid;
+    u32 canon_fid = cv[ca].canon_fid;
+    FacetKey canon_key = cv[ca].canon_key;
+    if (!m_canon_not_min && cv[cb].canon_fid < canon_fid) {
+      canon_fid = cv[cb].canon_fid;
+      canon_key = cv[cb].canon_key;
+    }
+    u32 big = ca, small = cb;
+    if (!m_phys_is_log && cv[cb].mass > cv[ca].mass) {
+      big = cb;
+      small = ca;
+    }
+    const u64 mass = cv[ca].mass + cv[cb].mass;
+    const u32 count = cv[ca].count + cv[cb].count;
+    if (m_free_on_absorb) {
+      // MUTANT : le record absorbe est detruit SANS relocaliser ses alias —
+      // le defaut causal exact que small-to-large doit interdire. Les alias
+      // restent joignables (rien n'est libere, aucun index n'est recycle :
+      // la memoire reste sure) mais referencent un record detruit, donc
+      // recycle : la SORTIE diverge des la premiere reutilisation.
+      for (u32 x = cv[small].head; x != kNil; x = av[x].next) av[x].dead = 1;
+    } else {
+      u32 tail = kNil;
+      for (u32 x = cv[small].head; x != kNil; x = av[x].next) {
+        av[x].comp = big;
+        tail = x;
+        ++stats.relocations;
+      }
+      if (tail != kNil) {
+        av[tail].next = cv[big].head;
+        if (cv[big].head != kNil) av[cv[big].head].prev = tail;
+        cv[big].head = cv[small].head;
+      }
+      cv[big].count = count;
+    }
+    cv[big].mass = mass;
+    cv[big].logical_root_fid = lroot;
+    if (m_root_key_mutable) {  // mutant : la cle canonique est relue du record physique
+      cv[big].canon_fid = av[cv[big].head].fid;
+      cv[big].canon_key = av[cv[big].head].key;
+    } else {
+      cv[big].canon_fid = canon_fid;
+      cv[big].canon_key = canon_key;
+    }
+    cv[small].head = kNil;
+    cv[small].count = 0;
+    cfree.push_back(small);
+    --live_comp;
+    return true;
+  };
+
+  for (size_t b = 0; b < nb; ++b) {
+    const size_t e0 = batches[b].first, e1 = batches[b].second;
+    touched.clear();
+    constexpr u8 kActive = 1, kAttach = 2;
+    const auto touch = [&](u32 fid, u8 bit) -> u32 {
+      u32 a = idx.get(fid);
+      if (a == kNil) {  // PREMIERE incidence : alias et composante singleton
+        a = alloc_alias();
+        Alias& al = av[a];
+        al.key = keys[fid];
+        al.fid = fid;
+        al.last_batch = m_last_shifted && lastb[fid] > 0 ? lastb[fid] - 1 : lastb[fid];
+        const u32 c = alloc_comp();
+        cv[c].canon_key = al.key;
+        cv[c].canon_fid = fid;
+        cv[c].logical_root_fid = fid;
+        cv[c].head = a;
+        cv[c].count = 1;
+        cv[c].mass = 1;
+        al.comp = c;
+        idx.put(fid, a);
+        ++live_alias;
+        ++live_comp;
+        ++stats.facets;
+      }
+      Alias& al = av[a];
+      if (al.role_epoch != (u32)b) {
+        al.role_epoch = (u32)b;
+        al.role_bits = 0;
+        touched.push_back(a);
+      }
+      al.role_bits |= bit;
+      return a;
+    };
+    for (size_t e = e0; e < e1; ++e) {
+      const ForestEvent& ev = evt(e);
+      for (int s = 0; s < (int)ev.q; ++s) touch(ev_fid[e * 11 + (size_t)s], ((ev.active_mask >> s) & 1u) ? kActive : kAttach);
+      for (int z = 0; z < (int)ev.d; ++z) touch(ev_fid[e * 11 + (size_t)(ev.q + z)], kAttach);
+    }
+    stats.peak_aliases = std::max(stats.peak_aliases, live_alias);
+    stats.peak_components = std::max(stats.peak_components, live_comp);
+    stats.peak_index_slots = std::max(stats.peak_index_slots, (u64)idx.slots());
+    stats.live_bytes_peak = std::max(stats.live_bytes_peak, (u64)(live_alias * sizeof(Alias) + live_comp * sizeof(Component) + idx.bytes()));
+    // Detecteurs (identiques au resident).
+    for (const u32 a : touched) {
+      const Alias& al = av[a];
+      const bool active = al.role_bits & kActive;
+      const bool attach = al.role_bits & kAttach;
+      if (!m_no_detector) {
+        if (attach && al.seen) ++r.attach_violations;
+        if (attach && active) ++r.birth_violations;
+      }
+      if (attach && !active) ++r.new_attachments;
+    }
+    // PASSE 1 : gels pre-lot (une entree par composante distincte, cle copiee).
+    pre_list.clear();
+    for (const u32 a : touched)
+      if (m_attach_pre || (av[a].role_bits & kActive)) {
+        const u32 c = av[a].comp;
+        if (cv[c].post_epoch != (u32)b) {  // post_epoch sert de marque de gel : reinitialisee en passe 2
+          cv[c].post_epoch = (u32)b;
+          pre_list.push_back(PreFreeze{a, cv[c].canon_key});
+        }
+      }
+    for (const PreFreeze& pf : pre_list) cv[av[pf.rep_alias].comp].post_epoch = UINT32_MAX;
+    // PASSE 2 : unions dans l'ordre total des evenements.
+    for (size_t e = e0; e < e1; ++e) {
+      const ForestEvent& ev = evt(e);
+      u32 first = kNil;
+      for (int s = 0; s < (int)ev.q; ++s) {
+        const u32 v = idx.get(ev_fid[e * 11 + (size_t)s]);
+        if (first == kNil) first = v;
+        else if (unite(first, v)) ++r.fusions;
+      }
+      for (int z = 0; z < (int)ev.d; ++z)
+        if (unite(first, idx.get(ev_fid[e * 11 + (size_t)(ev.q + z)]))) ++r.fusions;
+    }
+    // PASSE 3 : deltas par composante post-lot, ordonnes par racine logique.
+    post_list.clear();
+    const auto post_of = [&](u32 c) -> ComponentDelta& {
+      Component& cc = cv[c];
+      if (cc.post_epoch != (u32)b) {
+        cc.post_epoch = (u32)b;
+        cc.post_slot = (u32)post_list.size();
+        post_list.push_back(c);
+        if (scratch.size() < post_list.size()) scratch.emplace_back();
+        ComponentDelta& cd = scratch[post_list.size() - 1];
+        cd.parents.clear();
+        cd.born.clear();
+        return cd;
+      }
+      return scratch[cc.post_slot];
+    };
+    for (const PreFreeze& pf : pre_list) post_of(av[pf.rep_alias].comp).parents.push_back(pf.pre_canon_key);
+    for (const u32 a : touched) {
+      const u8 bits = av[a].role_bits;
+      if ((bits & kAttach) && !(bits & kActive)) post_of(av[a].comp).born.push_back(av[a].key);
+    }
+    std::sort(post_list.begin(), post_list.end(), [&](u32 x, u32 y) { return cv[x].logical_root_fid < cv[y].logical_root_fid; });
+    for (const u32 c : post_list) {
+      ComponentDelta& cd = scratch[cv[c].post_slot];
+      std::sort(cd.parents.begin(), cd.parents.end());
+      std::sort(cd.born.begin(), cd.born.end());
+      if (cd.parents.size() >= 2) ++r.nodes;
+      if (cd.parents.size() == 1 && cd.born.empty()) continue;
+      if (m_drop_nonmerge && cd.parents.size() < 2) continue;
+      cd.batch = (u64)b;
+      cd.level = evt(e0).level;
+      cd.output = cv[c].canon_key;
+      r.deltas.push_back(cd);
+    }
+    r.batch_levels.push_back(evt(e0).level);
+    for (const u32 a : touched) av[a].seen = 1;
+    ++r.batches;
+    // MORTS : les alias a leur DERNIERE incidence quittent l'etat ; une
+    // composante sans alias est definitivement liberable.
+    for (const u32 a : touched) {
+      Alias& al = av[a];
+      if (al.dead) continue;  // mutant `free-on-absorb` : alias deja jete, jamais libere deux fois
+      if (al.last_batch > (u32)b) continue;
+      const u32 c = al.comp;
+      if (al.prev != kNil) av[al.prev].next = al.next;
+      else cv[c].head = al.next;
+      if (al.next != kNil) av[al.next].prev = al.prev;
+      idx.erase(al.fid);
+      afree.push_back(a);
+      --live_alias;
+      if (--cv[c].count == 0) {
+        cfree.push_back(c);
+        --live_comp;
+        ++stats.comps_freed;
+      }
+    }
+    // INVARIANT T6 a la frontiere du lot.
+    if (!(live_comp <= live_alias && live_alias <= stats.peak_live_exact)) ++stats.invariant_violations;
+  }
+  const auto now = std::chrono::steady_clock::now();
+  r.t_reduce_ms += std::chrono::duration<double, std::milli>(now - tmark).count();
+  if (out_stats) *out_stats = stats;
+  return r;
+}
+
+}  // namespace mhgp5

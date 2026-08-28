@@ -78,6 +78,9 @@ inline constexpr const char* kMutants[] = {
     "pool-serial",
     "pool-drop-exception",
     "cell-locate-eps-zero",
+    // reducteur vivant (src/forest/fold_live.hpp, ECHELLE L2 / theoreme T6)
+    "physical-root-is-logical-root", "free-on-absorb", "root-key-mutable", "canon-not-min-on-union",
+    "last-mark-shifted",
 };
 
 inline std::vector<std::string>& mutant_registry() {
