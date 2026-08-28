@@ -33,6 +33,18 @@ deux binaires (`mhgp5_conformity_v4` et `mhgp5_probe`), le débit de
 $4{,}8 \times 10^{10}$/s n'est pas mesuré, et une pente locale sur moins d'une
 décade ne dit rien d'une asymptote.
 
+**⚠ Cette rétractation était elle-même trop optimiste.** Des reçus portent le
+**mur mesuré jusqu'à 200 000 points**
+(`receipts/campagne_g4_v5_20260828_grille/`) et je ne les avais pas exploités.
+Ils disent que la génération **est** le mur sur la famille LiDAR :
+`scanline_single_pass` croît en $n^{2{,}72}$ (100 k → 200 k), ses lanes en
+$n^{3{,}14}$, et elles passent de 19 % à **89,5 % du mur** ; sa sortie, elle,
+est **sous-linéaire** ($n^{0{,}89}$ : 710 211 candidats pour 191,7 M ancres à
+200 000). Le fold y est linéaire et ne pèse plus que 5,3 %. `uniform` reste
+linéaire ($n^{1{,}09}$, coût par ancre plat à 26 µs-fil, lanes 8,4 % du mur) ;
+`eight_clusters` est à $n^{1{,}32}$. Le détail et le contrat qui en découle
+sont dans `MESURE_CLAUDE_MUR_JUSQU_A_200K_20260828.md`.
+
 **Leçon de méthode, la vraie** : un compteur nommé comme s'il était le coût a
 produit trois documents et une extrapolation fausse de deux ordres de
 grandeur. Je vérifie désormais qu'un compteur mesure ce que son nom prétend
