@@ -7,8 +7,9 @@
   constats historiques G0 portent sur `fe54ccca`, la campagne device/SCALE sur
   `c95cfa95`, G1 q3 sur `dd928111`/`839cf1ec` et G1 q4 sur `556c421e`.
 - **Pin de réception G0/G1 q3 :** `0656bf4c`, sans code produit.
-- **Worktree observé avant ce delta :** `HEAD=origin/main=4fae1550`; aucun code
-  produit n'est postérieur à `55c1f105`. Le probe non suivi
+- **Worktree observé avant ce delta :** `HEAD=origin/main=0b3f3fd6`; aucun code
+  produit n'est postérieur à `55c1f105`. Le pin `ff5931fd` modifie seulement
+  la sonde exploratoire `rect_probe` et sa note de mesure. Le probe non suivi
   `.codex_fold_contract_probe.cpp`, appartenant à un autre audit, reste hors
   preuve. La réponse transitoire de Claude au miroir est consolidée ici puis
   retirée du tip, conformément à la convention du dossier.
@@ -175,6 +176,21 @@ est intégré à la question active. Ces 200 k prouvent un verrou au pin mesuré
 pas la performance de `55c1f105` : instrumenter les itérations puis rejouer
 50/100/200 k au pin courant avant toute extrapolation. Il n'existe encore
 aucune mesure 1 M ou 10 M.
+
+Les mesures Claude `954ec1af` à `ff5931fd` renforcent le bon diagnostic sans
+encore recevoir une architecture : le nombre de rectangles vivants est proche
+du linéaire aux tailles sondées, mais leur masse d'ancres et le travail q4 par
+seed se dégradent selon la famille. Deux erreurs de normalisation sont fermées
+dans la question active : le tableau q4 divisait par les rectangles q3, et
+`jung_cert_skip` total était présenté comme travail par ancre. La sonde de
+classes de rayon reste exploratoire : ses 159 M seeds `scanline` q3 16 k sont
+contrefactuels, tandis que le chemin reçu n'en énumère que 13,6 M ; elle
+n'imprime pas encore la masse post-filtres annoncée. Ne déduire ni `cover`
+proportionnel à `D^3`, ni un rectangle entier tuable, ni un verrou GPU de cette
+sonde sans sorties brutes, compteur résiduel et certificat exact par bloc.
+Réutiliser d'abord `q3_cert`/`q4_cert`, puis ajouter les visites de prétest,
+handles, grille et profondeur q4, ventilées après chaque filtre. Le détail
+constructif et les conservations sont dans la requalification V29.
 
 **Ablation immédiate multi-CPU :** ne pas commencer par un nouveau pool général.
 Sur le témoin qui porte `490143/1231555/1353144` rectangles à 48 workers,

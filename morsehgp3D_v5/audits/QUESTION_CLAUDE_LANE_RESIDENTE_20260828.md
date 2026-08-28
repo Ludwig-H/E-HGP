@@ -390,13 +390,15 @@ ci-dessus ; aucune de ces deux idées n'est reçue par cet audit.
 
 #### Requalification des mesures Claude `954ec1af` à `ff5931fd`
 
-Le nouveau document
-[`MESURE_CLAUDE_OU_EST_LA_QUADRATICITE_20260828.md`](MESURE_CLAUDE_OU_EST_LA_QUADRATICITE_20260828.md)
-apporte un bon raccord : à binaire et tailles appariés jusqu'à 50 k, il sépare
-rectangles, ancres, seeds, complétions et un compteur Jung. Conserver surtout
-les deux constats falsifiables : `ancres/rect_alive` reste presque constant sur
-`uniform` et croît sur `scanline`, puis le travail Jung croît encore plus vite
-que les ancres sur cette dernière famille.
+Les mesures historiques de Claude aux pins `954ec1af`, `c7ee791f`, `c03daa42`,
+`107051ce` et `ff5931fd`, ancrées pour leur partie reçue dans la
+[session 14](../receipts/campagne_g4_v5_20260828_g0_g1/RECU.txt), apportent un
+bon raccord : jusqu'à 50 k, elles séparent rectangles, ancres, seeds,
+complétions et un compteur Jung. Conserver surtout les deux constats
+falsifiables : `ancres/rect_alive` reste presque constant sur `uniform` et
+croît sur `scanline`, puis le proxy Jung croît encore plus vite que les ancres
+sur cette dernière famille. La longue note autonome a été retirée du tip après
+cette requalification ; ses versions restent dans l'historique Git.
 
 Dix formulations doivent toutefois être corrigées avant d'en faire une
 autorité de conception :
