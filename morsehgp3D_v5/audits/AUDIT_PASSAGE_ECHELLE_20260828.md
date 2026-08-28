@@ -1,8 +1,8 @@
-# Audit de résolution — passage à 10–30 millions de points
+# Conception auditée de résolution — passage à 10–30 millions de points
 
-- **Derniers commits techniques relus :** `17ab71e0` pour
-  `docs/ECHELLE.md` révisé et `ba31c169` pour la porte de préfixe étendue
-  aux événements et niveaux de lots.
+- **Derniers commits techniques relus :** `46f9f8c7` pour la conception du
+  fold vivant et `ba31c169` pour la porte de préfixe étendue aux événements
+  et niveaux de lots.
 - **Cadre :** `phase=exploration_v5_hors_registre`,
   `backend=cpu_reference`, `profile=quantized_u16_input_only`,
   `mode=audit_independant_math_and_architecture`,
@@ -26,10 +26,12 @@ supprimé par une représentation plus simple :
 > sémantique de son conteneur physique.
 
 Avec une prépasse PREMIÈRE/DERNIÈRE exacte sur les `FacetKey` complètes, cette
-représentation donne un vrai majorant mémoire : à toute frontière de lot, toute
-composante conservée contient au moins une facette encore vivante. Ainsi le
-nombre de composantes résidentes est au plus le nombre de facettes vivantes.
-Cela remplace utilement T3, T4 et T6 par un invariant directement testable.
+représentation donne un majorant **cardinal du noyau** : à toute frontière de
+lot, toute composante conservée contient au moins une facette encore vivante.
+Ainsi le nombre de composantes résidentes est au plus le nombre de facettes
+vivantes. Cela ne majore pas encore index, scratch d'un macro-lot, sorties,
+capacités d'allocateur ni octets engagés. T3, T4 et T6 sont remplacés utilement
+par un invariant testable, puis par un budget par rôle à mesurer.
 
 ### Réception positive de la porte de préfixe
 
@@ -115,9 +117,16 @@ Conséquences utiles :
 
 - aucune chaîne de parents morte, aucun reroot et aucun refcount d'ancêtres ;
 - `components <= aliases <= peak_live_exact` ;
-- les listes touchées, parents et naissances sont bornées par les alias du lot ;
+- les listes touchées, parents et naissances sont bornées par les alias du lot,
+  mais un macro-lot peut être trop grand pour la RAM et doit alors être relu en
+  deux passes depuis une tranche externe ;
 - la partition finale n'impose pas de garder les membres morts en RAM, si son
   rejeu depuis le catalogue et les deltas est reçu séparément.
+
+Cette borne n'est effective que si les slots `Alias` et `Component` sont
+recyclés. Une arène append-only conserverait les morts et annulerait le gain.
+L'index vivant est préalloué sur le pic exact, et la porte compare aussi octets
+engagés et high-water des scratchs au budget de la phase.
 
 ## Solution 2 — PREMIÈRE/DERNIÈRE et préflight exacts
 
@@ -129,13 +138,16 @@ arbitraire de clés.
 La prépasse exacte par ordre est :
 
 1. attribuer un `event_rank_u64` au flux déjà trié par
-   `(ExactLevel, BallKey, emit_rank)` ;
+   `(ExactLevel, BallKey, emit_rank)` et un `batch_id` par égalité sémantique
+   `compare_exact_level` ;
 2. émettre chaque incidence sous la forme logique
    `(FacetKey complète, event_rank_u64, slot)` ;
-3. partitionner éventuellement par hash pour les E/S, puis trier et comparer
-   chaque partition par `FacetKey` complète ;
-4. fusionner les partitions en ordre lexicographique, attribuer les
-   `fid_u64` et marquer exactement une incidence FIRST et une LAST ;
+3. partitionner éventuellement par hash pour les E/S, puis trier chaque
+   partition par `(FacetKey, event_rank, slot)` et comparer l'identité sur la
+   `FacetKey` complète ;
+4. fusionner les partitions en ordre lexicographique, attribuer les `fid_u64`,
+   prendre les extrema de chaque groupe de clé et les convertir en lots pour
+   marquer exactement une incidence FIRST et une LAST ;
 5. retrier le join `(event_rank, slot, fid, flags)` dans l'ordre du fold.
 
 Le pic inclusif par lot est ensuite calculé sans heuristique :
@@ -150,12 +162,15 @@ La première porte doit injecter un hash constant. Le résultat, FIRST/LAST et l
 pic doivent rester identiques ; un mutant `lifetime-by-hash-only` doit
 diverger.
 
-Cette exactitude a un coût de wire. La ligne actuelle « 620 Go par empreinte +
-position » ne dimensionne pas le tri de clés complètes. Le jalon L2 doit graver
-la taille sérialisée de `FacetOccurrenceWire`, le nombre d'octets écrits/lus
-et le facteur temporaire du tri K par K, puis recalculer le besoin SSD. Une
-compression préfixe après tri est possible ; elle ne doit pas remplacer la
-comparaison exacte.
+Cette exactitude a un coût de wire. Le reçu `uniform` 200 k contient
+769 871 673 incidences, soit 38,49 milliards par extrapolation ×50 à 10 M. Un
+wire logique compact `4K + rank_u64 + slot_u8` vaut déjà environ **1,60 To
+brut tous K**, dont environ 569 Go pour K = 10 seul, avant cadrage, tri et join.
+La ligne « 620 Go par empreinte + position » et le minimum d'E/S de 107 minutes
+sont donc obsolètes. L2 doit graver la taille sérialisée de
+`FacetOccurrenceWire`, les octets écrits/lus et le facteur temporaire du tri
+K par K, en distinguant pic disque par K et volume cumulé. Une compression
+préfixe après tri est possible ; elle ne remplace pas la comparaison exacte.
 
 ## Solution 3 — prouver d'abord que les deltas suffisent
 
@@ -173,6 +188,12 @@ La porte compare ensuite tous les champs au `ForestResult` résident et
 calcule le véritable `mhgp4-digest-v1`. Elle doit dépasser les seules petites
 instances du juge et inclure les contre-fixtures ci-dessous.
 
+Le juge actuel est permissif ; la porte extraite devient une autorité stricte.
+Elle rejette au minimum parent ressuscité, `born` déjà vu, doublon, clé hors
+catalogue, sortie non minimale, batch invalide et catalogue incomplet. Les
+deltas seuls ne reconstruisent pas les clés : le contrat est toujours
+`(catalogue, deltas) -> final_canon_fid`.
+
 Le wire massif peut alors référencer les facettes par `fid_u64` et contenir,
 par K :
 
@@ -185,10 +206,11 @@ par K :
 - dans le manifeste, tailles et SHA-256 des fichiers physiques.
 
 Le digest v4 n'est pas un format massif : `ForestResult::final_canon_fid` et
-`mhgp4-digest-v1` sérialisent des `u32`. L'extrapolation K = 10 à 10 M
-dépasse largement `UINT32_MAX`. Le convertisseur v4 reste donc une porte
-différentielle bornée ; le flux à grande échelle doit avoir son wire et son
-digest u64 propres. Aucun cast silencieux n'est acceptable.
+`mhgp4-digest-v1` sérialisent des `u32`. Pour `uniform`, les 182 530 632
+facettes K = 10 à 200 k extrapolent à 9,13 milliards à 10 M, au-delà de
+`UINT32_MAX`; ce n'est pas une loi pour toute famille. Le convertisseur v4
+reste donc une porte différentielle bornée ; le flux à grande échelle doit
+avoir son wire et son digest u64 propres. Aucun cast silencieux n'est acceptable.
 
 ## Solution 4 — amont externe plus simple
 
@@ -205,8 +227,8 @@ streamé peut être plus direct :
    `BallKey` source et `emit_rank` ;
 6. trier extérieurement chaque flux K par sa clé totale.
 
-Cette couture évite de matérialiser d'abord environ 1 To de `BallData` et
-évite la ré-expansion répétée par ordre. Le centre Morton pourra ensuite
+Sur l'extrapolation `uniform`, cette couture évite de matérialiser d'abord
+environ 1 To de `BallData` et évite la ré-expansion répétée par ordre. Le centre Morton pourra ensuite
 partitionner le census pour la localité, avec spill obligatoire, sans devenir
 une autorité de complétude ou de capacité.
 
@@ -222,8 +244,8 @@ SSD.
    souvent gagnant physique et racine logique à différer.
 2. **Chaîne K = 1** : événements `{0,1}`, puis `{0,2}` ; l'ancienne racine
    n'a plus d'incidence propre mais la composante continue.
-3. **Deux simplexes K = 2 partageant une facette** : ferme l'analogue
-   d'ordre supérieur.
+3. **Deux triangles K = 2 partageant une arête** : ferme l'analogue d'ordre
+   supérieur. Deux tétraèdres partageant une face relèveraient de K = 3.
 4. **Plateau mono-lot** : un seul événement q3 donne trois facettes
    FIRST = LAST et un pic transitoire de trois, jamais zéro.
 5. **Grand composant absorbé logiquement par un singleton** : le stockage
@@ -271,21 +293,28 @@ probabiliste.
 
 ## Corrections documentaires restantes
 
-- **fermés à `17ab71e0` :** le cadre contient désormais `mode`, la v3/v4
-  est requalifiée comme différentiel et le comptage exact par clé complète est
-  retenu dans le § 4.3 ;
+- **fermés à `46f9f8c7` :** le cadre contient `mode`, la v3/v4 est requalifiée
+  comme différentiel, le fold vivant et le comptage exact par clé complète sont
+  retenus comme direction ; ce commit reste une conception, sans implémentation
+  ni preuve reçue ;
 - **fermé à `ba31c169` sur les familles et tailles gravées :** la porte de
   préfixe signe les événements canoniques et tous les `batch_levels`, avec
   des ex æquo non vacants ; les trois renforcements ci-dessus restent P2 ;
-- remplacer encore T4 au § 6 : il décrit toujours une empreinte et une marge,
-  en contradiction avec le comptage exact déjà retenu au § 4.3 ;
-- remplacer T6 par l'invariant `components <= live_aliases` du réducteur
-  small-to-large ;
+- supprimer du premier § 4.3 la compression/reroot, l'ancien T3/T6 et « même
+  union-find séquentiel », en contradiction avec le fold vivant ajouté plus bas ;
+- fusionner T3 et T6 en lemme du noyau vivant, corriger sa vieille fixture
+  « deux tétraèdres à K = 2 », et écrire T5 comme
+  `(catalogue, deltas) -> final_canon_fid` ;
+- synchroniser § 3.4, la table § 4.2 et L0–L4 : `22/pt ×2,5`,
+  `composants=?`, RAM 110–140 Go et l'ancien coût PREMIÈRE/DERNIÈRE ne
+  décrivent plus le plan retenu ; marquer ces capacités à recalculer après L2 ;
+- choisir un seul nom entre `mhgp5-forests-stream-v1` et
+  `facet_hierarchy_stream-v1` ;
 - renommer T8 : le découpage déterministe n'est pas un théorème d'équilibre ;
 - retirer « surgénération aux frontières de seaux » si chaque rectangle est
   émis exactement une fois ;
 - ne plus promettre le digest v4 au-delà du domaine u32 ;
-- recalculer le poste SSD PREMIÈRE/DERNIÈRE à partir du wire exact de clés
-  complètes, et non des 16 octets empreinte/position encore tabulés.
+- qualifier explicitement les extrapolations `uniform`, et séparer pic disque
+  K-par-K du volume cumulé.
 
 GCP non utilisé pour cet audit.
