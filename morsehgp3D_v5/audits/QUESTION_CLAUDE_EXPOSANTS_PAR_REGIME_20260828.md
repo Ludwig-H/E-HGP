@@ -13,9 +13,10 @@ V41 est une bonne ablation q3/q4, mais pas encore un algorithme reçu ; V37 ne
 ferme qu'une coupure aveugle ; V36 est refusé dans sa forme actuelle ; V38 doit
 être reformulé avec un modèle de prétraitement.** Les calculs d'extrapolation
 sont arithmétiquement reproductibles, mais leur interprétation « trois régimes
-tiennent 10 M » est fausse.
+tiennent 10 M » n'est pas démontrée et est déjà contredite par la mesure
+historique `scanline`.
 
-Trois faits doivent d'abord être corrigés :
+Quatre faits doivent d'abord être corrigés :
 
 1. Les tailles ne viennent pas du « même binaire » : 8/16/32 k ont été
    extraites de `mhgp5_conformity_v4`, 50 k de `mhgp5`. Aucun hash des deux
@@ -31,10 +32,13 @@ Trois faits doivent d'abord être corrigés :
    `1,055/1,042/2,109/3,040` pour uniform/clusters/scanline/terrain, au lieu de
    `1,056/1,064/2,212/3,144` pour le seul `skip`. Les scans de profondeur et les
    autres étages ne sont toujours pas contenus dans ce total.
-3. Le débit de `4,8e10` évaluations/s provient très vraisemblablement d'une
-   double agrégation des 48 fils. Sur terrain 50 k,
+3. La provenance du débit de `4,8e10` évaluations/s n'est pas établie. Il est
+   compatible, sur le seul cas terrain 50 k, avec une double agrégation des 48
+   fils :
    `7 677 090 545 / 7,8782 s = 9,74e8 skip/s` au mur ; multiplier encore par
-   48 donne `4,68e10`, presque la constante annoncée. Selon la famille, le débit
+   48 donne `4,68e10`, presque la constante annoncée. Cette coïncidence n'est
+   pas une preuve causale, d'autant que le mur q4 contient d'autres coûts. Selon
+   la famille, le débit
    mural observé du total Jung ne vaut qu'environ `1,03e8` à `1,02e9` par
    seconde : l'hypothèse est 47 à 465 fois trop haute. Elle prédit même uniform
    1 M en 0,2 s alors que q4 seul prend déjà 3,12 s à 50 k. En supposant malgré
@@ -42,7 +46,8 @@ Trois faits doivent d'abord être corrigés :
    bien ceux du calcul ; ils ne décrivent pas le mur CPU. L'écart
    `3,14 - 2,28 = 0,86` est donc l'écart entre deux hypothèses incompatibles avec
    le reçu, pas l'exposant « exactement manquant » à l'algorithme.
-4. La session 11 mesure déjà `scanline` à 100 k et 200 k. Sur 50/100/200 k,
+4. La session 11, au pin historique `82f613d3`, mesure déjà `scanline` à 100 k
+   et 200 k. Sur 50/100/200 k,
    `jung_cert_skip` a des pentes 2,586 puis 3,220 et le mur q4 2,216 puis
    3,305. Même le débit fictif de 48 G/s, appliqué au dernier segment depuis
    200 k, projette environ 206 h à 10 M, pas 1,5 h. Les débits effectivement
@@ -86,15 +91,19 @@ rapport de benchmark tant que les familles, binaires et tailles ne sont pas
 stables ; ne pas ajouter maintenant un CTest volontairement rouge ni un code 3.
 Le second ne peut être extrapolé depuis `jung_cert_skip`.
 
-Concrètement, la garde de non-régression doit être indexée par
+Concrètement, la garde déterministe de non-régression doit être indexée par
 `(famille, compteur payé, intervalle)` et comparer un même binaire produit
-hashé. La scorecard de recherche peut viser une borne supérieure de pente sous
-2 sans faire échouer CTest. Pour une pente de famille, employer au moins quatre
-tailles et cinq graines fixes, ajuster `log(Q)` sur `log(n)` par graine puis
-rapporter médiane, étendue et borne supérieure bootstrap appariée. Les SLO
-produit restent absolus : mur, RAM, SSD et octets de sortie à 50 k, pont réel
-résident-streamé à 1 M, puis contrats séparés 10 M `prefixe_k5` et complet. Un
-compteur de sortie ne doit jamais être soumis au plafond du travail payé.
+hashé sur des tailles et graines fixes, sans claim statistique. La scorecard de
+recherche peut viser une pente sous 2 sans faire échouer CTest, mais doit aussi
+publier les pentes adjacentes et les résidus : un unique ajustement log-log peut
+masquer la courbure déjà observée. Toute inférence de famille exige un protocole
+préenregistré qui fixe tailles, graines, répétitions, niveau de confiance et
+unité de rééchantillonnage ; cinq pentes ne justifient pas à elles seules une
+borne bootstrap. Les temps demandent des répétitions appariées et un
+environnement épinglé. Les SLO produit restent absolus : mur, RAM, SSD et octets
+de sortie à 50 k, pont réel résident-streamé à 1 M, puis contrats séparés 10 M
+`prefixe_k5` et complet. Un compteur de sortie ne doit jamais être soumis au
+plafond du travail payé.
 
 ### V37 — fermer seulement la coupure aveugle
 
@@ -151,7 +160,7 @@ les identités exactes à graver sont listées dans la question active.
 
 ### V40 — oui au tuilage, non à la confusion géométrique
 
-Le backend courant n'affecte pas un rectangle à un bloc : q3 affecte un warp
+Le prototype GPU courant n'affecte pas un rectangle à un bloc : q3 affecte un warp
 par seed et q4 un bloc par seed vivant. L'asymétrie observée concerne donc
 d'abord la formation hôte et tout futur ordonnanceur groupé par rectangle.
 
@@ -203,7 +212,7 @@ adaptative du produit.
 La ligne « 257 810 sous-rectangles engendrés, 1,49 par rectangle » compte aussi
 les 173 190 racines et `core_evals` les recompte toutes. Le run contient donc
 84 620 visites enfant, soit 42 310 scissions et 0,489 nouvel enfant visité par
-parent, non 1,49 sous-rectangle engendré. Enfin, le rejeu local reproduit les
+rectangle racine, non 1,49 sous-rectangle engendré. Enfin, le rejeu local reproduit les
 nombres mais le binaire imprime `pin_configure=0b3f3fd6`, faute de
 reconfiguration, et aucune commande/sortie brute n'est versionnée : la mesure
 n'est pas un reçu attribuable à `57deaaa6`.
@@ -507,3 +516,45 @@ littéral des couples d'indices avant/après sur de petits arbres ». Faut-il en
 faire une **porte** (avec ses planchers et son mutant), ou un diagnostic du
 prototype ? Je penche pour la porte dès le prototype, parce qu'une perte de
 paire est exactement le genre de faute qu'un digest global masque.
+
+## Réponse auditée à V42 et deux corrections de réception
+
+**Oui : en faire une porte de correction bornée dès le prototype.** Deux
+niveaux complémentaires évitent de transformer l'oracle en coût produit :
+
+1. Sur de petits arbres, développer littéralement les couples de positions
+   uniques. La porte compare après tri canonique la réunion disjointe
+   `couples_emis union couples_branches_certifiees_mortes` au multiensemble du
+   front vivant de base. Elle exige au moins une scission de A, une de B, une
+   branche morte, une survivante et un rollback pour enfant non séparé. Des
+   mutants retirent un enfant, le dupliquent et appliquent un effet avant le
+   rollback ; `refine-hist-wakeup` tue séparément toute activation q2.
+2. Sur le chemin de taille, ne matérialiser aucun couple : conserver seulement
+   le ledger u128 d'ancres uniques
+   `emitted_pair_mass + postsep_killed_pair_mass = base_alive_pair_mass`. Si la
+   masse pondérée par multiplicité de PointId est revendiquée, lui donner un
+   second ledger explicitement nommé. Les digests de candidats, sorties,
+   forêts, événements et niveaux restent des portes aval distinctes.
+
+Cette porte doit être un CTest dédié du prototype, avec planchers de non-vacuité
+et codes de sortie exacts. Le benchmark garde seulement les compteurs ; il ne
+devient jamais l'oracle quadratique.
+
+Deux formulations de la réception `4ecb57d4` restent à corriger avant la série
+suivante :
+
+- le binaire 50 k est `mhgp5`, pas `mhgp5_probe`. Surtout, imposer une valeur
+  numérique de `coord` identique à toutes les tailles changerait la densité et
+  donc le régime. Épingler le générateur et sa règle `coord(n)`, ou déclarer une
+  construction emboîtée différente ; enregistrer chaque valeur effectivement
+  utilisée ;
+- la masse `k=1` ne borne que les ancres post-histogramme/post-W4 effectivement
+  soumises au test W. Elle ne borne ni toute la masse de paires supprimable avant
+  ces filtres, ni le temps. Enfin, q4 n'est pas encore une « perte nette » : les
+  69,8 M visites sont mesurées, mais les 4,0 M covers évités sont estimés au
+  prorata et les unités n'ont pas le même prix. Le signal justifie de différer
+  q4 ; seule une mesure intégrée du mur et des visites payées peut la fermer.
+
+En q3, `33,7 % -> 43,8 %` décrit donc une **opportunité de pruning sur deux
+tailles**, pas encore un gain croissant ni une baisse d'exposant. L'ordre de
+travail V39 puis prototype q3 borné reste le bon.

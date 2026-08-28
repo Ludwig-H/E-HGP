@@ -7,11 +7,12 @@
   constats historiques G0 portent sur `fe54ccca`, la campagne device/SCALE sur
   `c95cfa95`, G1 q3 sur `dd928111`/`839cf1ec` et G1 q4 sur `556c421e`.
 - **Pin de réception G0/G1 q3 :** `0656bf4c`, sans code produit.
-- **Worktree observé avant ce delta :** `HEAD=origin/main=57deaaa6`; aucun code
+- **Worktree observé avant ce delta :** `HEAD=origin/main=4ecb57d4`; aucun code
   produit n'est postérieur à `55c1f105`. `2192ec9e`–`3636d5b0` corrigent la
-  proposition de raffinement dans la question active ; `fd2844fb` et
-  `57deaaa6` ajoutent une question d'exposants et deux instruments exploratoires
-  dans `rect_probe.cpp`, sans modifier le produit. Le probe non suivi
+  proposition de raffinement dans la question active ; `fd2844fb`, `57deaaa6`
+  et `4ecb57d4` ajoutent puis requalifient une question d'exposants et des
+  instruments exploratoires dans `rect_probe.cpp`, sans modifier le produit.
+  Le probe non suivi
   `.codex_fold_contract_probe.cpp`, appartenant à un autre travail, reste hors
   preuve. La réponse transitoire de Claude au miroir est consolidée ici puis
   retirée du tip, conformément à la convention du dossier.
@@ -217,6 +218,13 @@ se comparent pas aux 27,3 M nœuds visités comme un speedup 3 pour 1. Les
 annonce encore `pin_configure=0b3f3fd6` : aucun reçu `57deaaa6` n'existe. La
 [réponse détaillée](QUESTION_CLAUDE_EXPOSANTS_PAR_REGIME_20260828.md#réponse-auditée--v36-à-v41)
 et les fixtures sont consolidées dans les deux questions actives.
+
+La réception `4ecb57d4` retire correctement le faux plafond et accepte les deux
+rails. Elle ne transforme toutefois pas les ratios de la sonde en verdict de
+temps : q4 reste une priorité basse, pas une perte nette mesurée. La prochaine
+série épingle la règle `coord(n)`, pas une valeur `coord` constante. V42 est
+tranché comme porte bornée : multiensemble littéral sur petits arbres, ledger
+u128 seul à l'échelle, mutants perte/doublon/effet avant rollback.
 
 **Ablation immédiate multi-CPU :** ne pas commencer par un nouveau pool général.
 Sur le témoin qui porte `490143/1231555/1353144` rectangles à 48 workers,
