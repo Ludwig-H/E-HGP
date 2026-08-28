@@ -54,6 +54,10 @@ inline constexpr const char* kMutants[] = {
     "canonical-is-uf-root", "attach-detector-disabled",
     // parallelisme
     "par-drop-shard", "par-drop-ball-chunk", "parallel-one-worker", "parallel-sort-unstable",
+    // fold concurrent (src/pipeline/run.hpp) : defaut d'etage A injecte a K=2, exception du fil B a K=3
+    "fold-inject-a-failure-k2", "fold-inject-b-exception-k3",
+    // instrument device, partie hote (src/gpu/device_stats.hpp, src/gpu/q3_lane_batched.hpp)
+    "gauge-no-peak", "log2hist-class-shift",
     // rendu
     "render-active-only", "render-collapse-mult", "birth-from-events",
     // oracle et portes (points d'injection dans oracle/ et tests/)
@@ -69,6 +73,7 @@ inline constexpr const char* kMutants[] = {
     "chord-nonstrict",
     "cell-kill-nonstrict",
     "cell-kill-h-minus-one",
+    "cell-locate-eps-zero",
 };
 
 inline std::vector<std::string>& mutant_registry() {

@@ -4,12 +4,15 @@
 // tout debordement serait un crash par signal, refuse par run_expect.
 //   entree vide, singleton, deux points, positions dupliquees, coordonnee hors
 //   profil, PointId duplique, smax ∈ {0, 1, 11, 12}, s < 1, threads <= 0,
-//   plafond de coquille < 4 ; census sur un singleton (P1 : nodes.empty() n'est
+//   fold_inflight hors de [1, 16], plafond de coquille < 4 ; census sur un singleton (P1 : nodes.empty() n'est
 //   pas le vide) ; expansion a kmax = 1 (smax = 2).
 // Codes : 0 conforme, 3 contrat viole.
-#include <cstdio>
-#include <stdexcept>
 #include <atomic>
+#include <chrono>
+#include <condition_variable>
+#include <cstdio>
+#include <mutex>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -79,6 +82,18 @@ int main() {
     o = base;
     o.threads = 0;
     run_case("threads=0", small, o, PipelineStatus::kInvalidInput);
+    // Domaine de fold_inflight [1, kFoldInflightMax] : hors domaine = refus
+    // explicite AVANT calcul (jamais un std::max silencieux).
+    for (const int f : {0, -1, kFoldInflightMax + 1, 1000}) {
+      o = base;
+      o.fold_inflight = f;
+      char label[64];
+      std::snprintf(label, sizeof(label), "fold_inflight=%d", f);
+      run_case(label, small, o, PipelineStatus::kInvalidInput);
+    }
+    o = base;
+    o.fold_inflight = kFoldInflightMax;
+    run_case("fold_inflight=16 (limite haute du domaine)", small, o, PipelineStatus::kCompleteRegular);
     o = base;
     o.shell_cap = 3;
     run_case("shell_cap=3", small, o, PipelineStatus::kInvalidInput);
@@ -101,7 +116,7 @@ int main() {
   {
     RunOptions o;
     o.threads = 2;
-    int calls = 0;
+    std::atomic<int> calls{0};
     o.on_forest = [&](u64 K, const std::vector<ForestEvent>&, const ForestResult&) {
       ++calls;
       if (K == 2) throw std::runtime_error("callback K=2");
@@ -117,8 +132,14 @@ int main() {
   }
   // ETAGE B CONCURRENT PAR ORDRE : sortie bit-identique quel que soit
   // `fold_inflight` (1, 2, 3, 8), callbacks strictement dans l'ordre des K
-  // (1..K_max, un seul a la fois), et exception d'un callback avec trois
-  // ordres en vol : propagee, publication arretee a l'ordre fautif.
+  // (1..K_max, un seul a la fois — journal sous MUTEX : `last_k`, `ordered`,
+  // `overlapped` entreraient eux-memes en course sur le chevauchement que la
+  // porte exclut), PIC MESURE d'ordres en vol : == 1 pour fold_inflight=1,
+  // >= 2 pour fold_inflight >= 2 (le callback de K=1 attend, par le hook de
+  // phase, que la reduction de K=2 ait commence : entrelacement force, jamais
+  // un vert par vacuite d'une execution serielle), toujours <= fold_inflight ;
+  // et exception d'un callback avec trois ordres en vol : propagee,
+  // publication arretee a l'ordre fautif.
   {
     const std::vector<InputPoint> mid = make_family_input(CloudFamily::kUniform, 300, 0, 3);
     std::string ref;
@@ -127,20 +148,37 @@ int main() {
       o.threads = 4;
       o.digest = true;
       o.fold_inflight = f;
+      std::mutex log_m;
+      std::condition_variable log_cv;
       u64 last_k = 0;
-      bool ordered = true;
-      std::atomic<int> inside{0};
-      bool overlapped = false;
+      int inside = 0;
+      bool ordered = true, overlapped = false, k2_reduce_begun = false, handshake = true;
+      o.on_fold_phase = [&](u64 K, FoldPhase p) {
+        if (K == 2 && p == FoldPhase::kReduceBegin) {
+          {
+            std::lock_guard<std::mutex> lk(log_m);
+            k2_reduce_begun = true;
+          }
+          log_cv.notify_all();
+        }
+      };
       o.on_forest = [&](u64 K, const std::vector<ForestEvent>&, const ForestResult&) {
-        if (inside.fetch_add(1) != 0) overlapped = true;
+        std::unique_lock<std::mutex> lk(log_m);
+        if (inside++ != 0) overlapped = true;
         if (K != last_k + 1) ordered = false;
         last_k = K;
-        inside.fetch_sub(1);
+        if (K == 1 && f >= 2)
+          handshake = log_cv.wait_for(lk, std::chrono::seconds(30), [&] { return k2_reduce_begun; });
+        --inside;
       };
       const RunResult rr = run_pipeline(mid, o);
       expect(rr.status == PipelineStatus::kCompleteRegular, "fold_inflight : statut non complet");
       expect(ordered && last_k == rr.kmax_eff, "fold_inflight : callbacks hors ordre ou incomplets");
       expect(!overlapped, "fold_inflight : deux callbacks simultanes");
+      expect(handshake, "fold_inflight >= 2 : PLANCHER — la reduction de K=2 n'a pas commence pendant la publication de K=1");
+      expect(rr.peak_fold_inflight <= (u64)f, "fold_inflight : pic en vol mesure > fold_inflight");
+      expect(f == 1 ? rr.peak_fold_inflight == 1 : rr.peak_fold_inflight >= 2,
+             "fold_inflight : pic en vol mesure incoherent (== 1 attendu pour 1, >= 2 au-dela)");
       if (f == 1) ref = rr.digest_all;
       else expect(rr.digest_all == ref && !ref.empty(), "fold_inflight : digest_all different de la reference sequentielle");
     }
@@ -148,7 +186,7 @@ int main() {
       RunOptions o;
       o.threads = 4;
       o.fold_inflight = 3;
-      int calls = 0;
+      std::atomic<int> calls{0};
       o.on_forest = [&](u64 K, const std::vector<ForestEvent>&, const ForestResult&) {
         ++calls;
         if (K == kfail) throw std::runtime_error("callback en vol");

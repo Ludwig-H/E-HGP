@@ -241,27 +241,10 @@ inline void build_q4_batch(const CloudIndex& ix, const AliveRect& ar, const u64 
           continue;
         }
       }
-      // Grille de cellules (theoreme 10.5), comme en production : ancre entiere
-      // ou corde de chaque seed (les seeds tues ne sont jamais materialises).
-      sc.grid.built = false;
-      if (sc.cover.size() >= sc.cell_min_sites) {
-        size_t nacute = 0, near_m = 0;  // seeds aigus de la lentille et sites pres de m, comme la production (meme politique)
-        for (const CoverPoint& cx : sc.cover) {
-          if (cx.u == ua || cx.u == ub) continue;
-          if (cell_grid_near_m(cx.dist2q, D2)) ++near_m;
-          const P3& px = ix.upos[(size_t)cx.u];
-          if (p3_norm2(p3_sub(px, pa)) <= D2 && p3_norm2(p3_sub(px, pb)) <= D2 &&
-              is_acute_seed(pa, pb, px, D2, ix.point_id(ua), ix.point_id(ub), ix.point_id(cx.u)))
-            ++nacute;
-        }
-        if (cell_grid_wanted(sc.cover.size(), nacute, near_m, h_of[2], sc.cell_min_sites, kCellGridSeedsRatioQ4)) {
-          ++ls->grids_built[2];
-          if (sc.grid.build(sc.cover, ix.upos, ua, ub, pa, pb, D2, 8, h_of[2]) && sc.grid.all_dead) {
-            ++ls->anchors_killed_cells[2];
-            continue;
-          }
-        }
-      }
+      // Grille de cellules (theoreme 10.5) — le MEME etage que la production
+      // (anchor_grid_stage), une seule fois par ancre : ancre entiere ou corde
+      // de chaque seed (les seeds tues ne sont jamais materialises).
+      if (anchor_grid_stage(ix, sc, ua, ub, pa, pb, D2, Lane::kQ4, h_of[2], float_on, ls)) continue;
       const i64 d4[3] = {pb.x - pa.x, pb.y - pa.y, pb.z - pa.z};
       const auto cell_dead_seed = [&](const P3& px) {
         if (!sc.grid.built) return false;
@@ -296,7 +279,7 @@ inline void build_q4_batch(const CloudIndex& ix, const AliveRect& ar, const u64 
       if (oversized) {
         const u64 seeds_before_h = ls->seeds[1];
         process_anchor_q4(ix, sc, ua, ub, pa, pb, D2, h_of[2], float_on, depth_nonstrict, core_nonstrict, no_canonical, lo, ls,
-                          AnchorPretests::kAlreadyApplied);  // W_4 et secteurs deja appliques ci-dessus
+                          AnchorPretests::kAlreadyAppliedWithGrid);  // W_4, secteurs ET grille deja appliques ci-dessus : rien n'est reconstruit
         ++bs->anchors_host;
         ++bs->anchors_oversized;
         bs->seeds_host += ls->seeds[1] - seeds_before_h;
@@ -487,7 +470,7 @@ inline void generate_q4_batched_with(const CloudIndex& ix, const GenerateOptions
   std::vector<std::vector<BallCandidate>> louts(T);
   std::vector<GenerateStats> lst(T);
   std::vector<AnchorScratch> lsc(T);
-  for (AnchorScratch& x : lsc) x.cell_min_sites = lim.cell_grid_min_sites;
+  for (AnchorScratch& x : lsc) x.cell_min_sites = opt.cell_grid_min_sites;  // une seule autorite (GenerateOptions)
   std::vector<Q4Batch> lb(T);
   std::vector<BatchStats> lbs(T);
   const auto flush = [&](size_t t) {
@@ -496,6 +479,9 @@ inline void generate_q4_batched_with(const CloudIndex& ix, const GenerateOptions
     lbs[t].max_lot_seeds = std::max(lbs[t].max_lot_seeds, (u64)b.seeds.size());
     lbs[t].max_lot_sites = std::max(lbs[t].max_lot_sites, (u64)b.u0.size());
     lbs[t].max_lot_pairs = std::max(lbs[t].max_lot_pairs, b.pairs_estimate);
+    lbs[t].lot_seeds.add((u64)b.seeds.size());
+    lbs[t].lot_sites.add((u64)b.u0.size());
+    lbs[t].lot_pairs.add(b.pairs_estimate);
     ++lbs[t].flushes;
     scan(&b, (u32)h_of[2], core_nonstrict, depth_nonstrict, no_canonical);
     emit_q4_batch(b, &louts[t], &lst[t]);

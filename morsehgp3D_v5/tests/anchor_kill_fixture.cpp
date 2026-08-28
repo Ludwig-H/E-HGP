@@ -25,6 +25,22 @@
 //     (in_spindle) : W_3 tue ; le polygone circonscrit a des sommets HORS du
 //     disque et le test par secteurs rend wmin = 0 : les deux tests sont
 //     incomparables et doivent etre CUMULES.
+//  F9 « ancre au-dessus d'une vallee » (theoreme 10.5) : toutes les cellules necessaires mortes, ancre tuee
+//     sans enumerer un seed ; F10 « frontiere des sommets de la grille » (13 sites entiers de la sphere
+//     diametrale, egalite exacte aux sommets i' = 0 : tue `cell-kill-nonstrict`).
+//  F11 « frontieres de la LOCALISATION » (reponse des auditeurs, 28 aout 2026) : ancre a = (0,0,0),
+//     b = (2000,0,0), base u = (0,0,2000), v = (0,−2000,0), cellule (i, j) = {z ∈ [250 i, 250 (i+1)],
+//     y ∈ [−250 (j+1), −250 j]} ; 9 sites (1000+e, 0, 1200), e = 0..8, temoins (y-independants : cy² se
+//     simplifie) de TOUTE cellule i >= 1 (centre a z > 183,4) et d'AUCUNE cellule i <= 0 : la colonne
+//     i = 1 est morte a EXACTEMENT h3 = 9 temoins, la colonne i = 0 vivante. Seeds : x_corner = (750, 0, 1250),
+//     centre v3 = (0, 0, 250) EXACTEMENT sur le coin (i' = 1, j' = 0) ; x_edge = (1020, −816, 1088), centre
+//     (αG, βG) = (1, 3/4) EXACTEMENT sur l'arete i' = 1 de la cellule j = 0 ; x_dead = (1000, 0, 1400), centre
+//     αG = 1,371 dans la cellule (1, 0) morte (tue en q3 ; sa corde q4, le long de y, ne rencontre que la
+//     colonne i = 1 : tuee) ; x_chord = (1000, 300, 1400), centre αG = 1,434 (mort) mais corde q4 d'extremites
+//     αG = 0,927 et 1,941 : la boite traverse la colonne i = 0 vivante. Contrat de localisation : la boite
+//     consultee contient TOUTES les cellules fermees contenant le centre exact (coin : i ∈ {0, 1}, j ∈ {−1, 0} ;
+//     arete : i ∈ {0, 1}, j = 0) ; le seed n'est PAS tue (conservatif) ; l'oracle ON/OFF est egal ; le
+//     mutant `cell-locate-eps-zero` (marge nulle) consulte une seule colonne : tue (code 4).
 // Codes : 0, 1 desaccord, 2 refus, 4 mutant tue.
 #include <algorithm>
 #include <cstdio>
@@ -113,6 +129,7 @@ int main(int argc, char** argv) {
   const bool m_ns = MHGP5_MUTANT("sector-kill-nonstrict");
   const bool m_cell_ns = MHGP5_MUTANT("cell-kill-nonstrict");
   const bool m_chord = MHGP5_MUTANT("chord-nonstrict");
+  const bool m_eps0 = MHGP5_MUTANT("cell-locate-eps-zero");
   bool f5_killed_by_mutant = false, f6_boundary_counted = false;
   // F1
   Fixture f1;
@@ -277,7 +294,7 @@ int main(int argc, char** argv) {
     const bool sect4 = anchor_sector_kill(sc.cover, ix.upos, ua, ub, pa, pb, D2, 8, 8, &wmin4);
     const bool w4 = anchor_universal_kill(sc.cover, ix.upos, ua, ub, pa, pb, D2, Lane::kQ4, 8);
     CellGrid g;
-    const bool built = g.build(sc.cover, ix.upos, ua, ub, pa, pb, D2, 8, 8);
+    const bool built = g.build(sc.cover, ix.upos, ua, ub, pa, pb, D2, 8, 8, float_filter_runtime_enabled());
     std::vector<BallCandidate> on, off;
     GenerateStats son, soff;
     const u64 h4 = lane_h(Lane::kQ4, 11);
@@ -301,6 +318,116 @@ int main(int argc, char** argv) {
     expect(built && g.all_dead, "F9 : toutes les cellules necessaires de la grille q4 sont mortes");
     expect(son.anchors_killed_cells[2] == 1 && on.empty(), "F9 : la production tue l'ancre par la grille sans enumerer un seed");
     expect(soff.seeds[1] >= 100 && off.empty(), "F9 : contrefactuel : >= 100 seeds aigus, tous morts, aucune boule (objet inchange)");
+  }
+  // F11 « frontieres de la localisation » (en-tete) : centre exactement sur un coin / une arete de cellule,
+  // cellule fermee adjacente vivante ; corde q4 dont la boite traverse une cellule vivante.
+  {
+    Fixture f;
+    f.add(0, 0, 0);
+    f.add(2000, 0, 0);
+    for (i64 e = 0; e < 9; ++e) f.add(1000 + e, 0, 1200);  // 9 temoins de toute cellule i >= 1, d'aucune cellule i <= 0
+    const P3 x_corner{750, 0, 1250}, x_edge{1020, -816, 1088}, x_dead{1000, 0, 1400}, x_chord{1000, 300, 1400};
+    for (const P3& x : {x_corner, x_edge, x_dead, x_chord}) f.add(x.x, x.y, x.z);
+    const CloudIndex ix = build_cloud_index(f.in);
+    expect(ix.valid && !ix.has_duplicate_positions(), "F11 : index valide");
+    const P3 pa{0, 1000, 1000}, pb{2000, 1000, 1000};
+    i32 ua = -1, ub = -1;
+    for (i32 u = 0; u < (i32)ix.upos.size(); ++u) {
+      const P3& p = ix.upos[(size_t)u];
+      if (p.x == pa.x && p.y == pa.y && p.z == pa.z) ua = u;
+      if (p.x == pb.x && p.y == pb.y && p.z == pb.z) ub = u;
+    }
+    const i64 D2 = p3_norm2(p3_sub(pb, pa));
+    const auto tr = [](const P3& p) { return P3{p.x, p.y + 1000, p.z + 1000}; };
+    generate_detail::AnchorScratch sc;
+    sc.cell_min_sites = 0;  // mode FORCE : grille sur cette (petite) ancre
+    cover_query(ix, pa, pb, D2, 3, &sc.cover);
+    const bool float_on = float_filter_runtime_enabled();
+    CellGrid g3, g4;
+    const bool b3 = g3.build(sc.cover, ix.upos, ua, ub, pa, pb, D2, 12, 9, float_on);
+    const bool b4 = g4.build(sc.cover, ix.upos, ua, ub, pa, pb, D2, 8, 8, float_on);
+    const int G = CellGrid::G;
+    std::printf("F11 : cover=%zu grilles=%d/%d base u=(%lld,%lld,%lld) v=(%lld,%lld,%lld) temoins (1,0)=%u (1,-1)=%u (0,0)=%u (0,-1)=%u ; q4 (1,0)=%u\n",
+                sc.cover.size(), b3 ? 1 : 0, b4 ? 1 : 0, (long long)g3.u[0], (long long)g3.u[1], (long long)g3.u[2], (long long)g3.v[0],
+                (long long)g3.v[1], (long long)g3.v[2], g3.cnt[G][G + 1], g3.cnt[G - 1][G + 1], g3.cnt[G][G], g3.cnt[G - 1][G], g4.cnt[G][G + 1]);
+    expect(b3 && b4, "F11 : grilles q3 (h = 9) et q4 (h = 8) construites");
+    expect(g3.u[0] == 0 && g3.u[1] == 0 && g3.u[2] == 2000 && g3.v[0] == 0 && g3.v[1] == -2000 && g3.v[2] == 0, "F11 : base u = (0,0,2000), v = (0,-2000,0)");
+    // x_corner est sur la sphere des boules centrees aux sommets i' = 1 (egalite EXACTE 8 w·p = 4|w|² − D²) :
+    // temoin strict d'aucune cellule i = 1, temoin NON STRICT (mutant cell-kill-nonstrict) de toutes : 9 -> 10.
+    const u32 col1_expected = m_cell_ns ? 10 : 9;
+    expect(g3.cnt[G][G + 1] == col1_expected && g3.cnt[G - 1][G + 1] == col1_expected && g3.cnt[G][G] == 0 && g3.cnt[G - 1][G] == 0,
+           "F11 : cellules (1,0), (1,-1) a EXACTEMENT h3 = 9 temoins stricts (10 non stricts : x_corner) ; (0,0), (0,-1) sans temoin");
+    expect(g3.cell_dead(1, 0) && g3.cell_dead(1, -1) && !g3.cell_dead(0, 0) && !g3.cell_dead(0, -1) && !g3.all_dead,
+           "F11 : colonne i = 1 morte, colonne i = 0 vivante, ancre vivante");
+    expect(g4.cell_dead(1, 0) && !g4.cell_dead(0, 0), "F11 : grille q4 : (1,0) morte, (0,0) vivante");
+    const i64 d[3] = {pb.x - pa.x, pb.y - pa.y, pb.z - pa.z};
+    const Q3Form f_corner = q3_form(pa, pb, tr(x_corner)), f_edge = q3_form(pa, pb, tr(x_edge)), f_dead = q3_form(pa, pb, tr(x_dead));
+    int rc[4] = {99, 99, 99, 99}, re[4] = {99, 99, 99, 99}, rd[4] = {99, 99, 99, 99}, rq[4] = {99, 99, 99, 99}, rqd[4] = {99, 99, 99, 99};
+    i128 pu, pv, den;
+    generate_detail::seed_center_coords(g3, f_corner, d, &pu, &pv, &den);
+    const bool okc = g3.locate_box(pu, pv, den, rc);
+    generate_detail::seed_center_coords(g3, f_edge, d, &pu, &pv, &den);
+    const bool oke = g3.locate_box(pu, pv, den, re);
+    generate_detail::seed_center_coords(g3, f_dead, d, &pu, &pv, &den);
+    const bool okd = g3.locate_box(pu, pv, den, rd);
+    // Cordes q4 : x_chord (boite traversant i = 0 vivante) et x_dead (colonne i = 1 seule).
+    const auto chord_box = [&](const P3& x, const CellGrid& g, int r[4]) {
+      const P3 px = tr(x);
+      const Q3Form f3 = q3_form(pa, pb, px);
+      const P3 nrm = p3_cross(p3_sub(pb, pa), p3_sub(px, pa));
+      i128 pu0, pv0, pu1, pv1, dn;
+      if (!generate_detail::seed_chord_coords(g, f3, d, nrm, D2, p3_norm2(p3_sub(px, pa)), p3_norm2(p3_sub(px, pb)), &pu0, &pv0, &pu1, &pv1, &dn)) return false;
+      return g.segment_box(pu0, pv0, pu1, pv1, dn, r);
+    };
+    const bool okq = chord_box(x_chord, g4, rq), okqd = chord_box(x_dead, g4, rqd);
+    std::printf("F11 : boites consultees (i0,i1,j0,j1) : coin=(%d,%d,%d,%d) arete=(%d,%d,%d,%d) mort=(%d,%d,%d,%d) corde=(%d,%d,%d,%d) corde_morte=(%d,%d,%d,%d) (mutant eps0=%d)\n",
+                rc[0], rc[1], rc[2], rc[3], re[0], re[1], re[2], re[3], rd[0], rd[1], rd[2], rd[3], rq[0], rq[1], rq[2], rq[3], rqd[0], rqd[1], rqd[2], rqd[3], m_eps0 ? 1 : 0);
+    expect(okc && oke && okd && okq && okqd, "F11 : toutes les localisations dans le domaine");
+    // Production par ancre, ON (grille forcee) contre OFF (contrefactuel) : meme multiensemble, grille exercee.
+    const u64 h3 = lane_h(Lane::kQ3, 11), h4 = lane_h(Lane::kQ4, 11);
+    std::vector<BallCandidate> on3, off3, on4, off4;
+    GenerateStats son3, soff3, son4, soff4;
+    sc.affine_filled = false;
+    generate_detail::scan_anchor_q3(ix, sc, ua, ub, pa, pb, D2, h3, float_on, false, &on3, &son3, generate_detail::AnchorPretests::kApply);
+    sc.affine_filled = false;
+    generate_detail::scan_anchor_q3(ix, sc, ua, ub, pa, pb, D2, h3, float_on, false, &off3, &soff3, generate_detail::AnchorPretests::kCounterfactual);
+    sc.affine_filled = false;
+    generate_detail::process_anchor_q4(ix, sc, ua, ub, pa, pb, D2, h4, float_on, false, false, false, &on4, &son4, generate_detail::AnchorPretests::kApply);
+    sc.affine_filled = false;
+    generate_detail::process_anchor_q4(ix, sc, ua, ub, pa, pb, D2, h4, float_on, false, false, false, &off4, &soff4, generate_detail::AnchorPretests::kCounterfactual);
+    const auto same = [](std::vector<BallCandidate> a, std::vector<BallCandidate> b) {
+      rle_candidates(&a, 1);
+      rle_candidates(&b, 1);
+      if (a.size() != b.size()) return false;
+      for (size_t i = 0; i < a.size(); ++i) if (!(a[i].key == b[i].key) || !(a[i].level == b[i].level)) return false;
+      return true;
+    };
+    std::printf("F11 : q3 ON seeds=%llu tues_cellules=%llu candidats=%zu / OFF candidats=%zu ; q4 ON seeds=%llu tues_cellules=%llu candidats=%zu / OFF candidats=%zu ; grilles tentees=%llu/%llu construites=%llu/%llu\n",
+                (unsigned long long)son3.seeds[0], (unsigned long long)son3.seeds_killed_cells[1], on3.size(), off3.size(), (unsigned long long)son4.seeds[1],
+                (unsigned long long)son4.seeds_killed_cells[2], on4.size(), off4.size(), (unsigned long long)son3.grids_attempted[1], (unsigned long long)son4.grids_attempted[2],
+                (unsigned long long)son3.grids_built[1], (unsigned long long)son4.grids_built[2]);
+    expect(same(on3, off3) && same(on4, off4), "F11 : oracle ON/OFF egal en q3 et en q4");
+    expect(son3.grids_attempted[1] == 1 && son3.grids_built[1] == 1 && son4.grids_attempted[2] == 1 && son4.grids_built[2] == 1 &&
+           son3.anchors_killed_cells[1] == 0 && son4.anchors_killed_cells[2] == 0, "F11 : mode force : une grille par lane, ancre vivante");
+    expect(son3.seeds_killed_cells[1] >= 1 && son4.seeds_killed_cells[2] >= 1 && !off3.empty(),
+           "F11 : non-vacuite : >= 1 seed tue par cellules en q3 (x_dead, x_chord) et en q4 (x_dead), boules q3 emises");
+    expect(generate_detail::seed_center_cell_dead(g3, f_dead, d) && rd[0] == 1 && rd[1] == 1, "F11 : x_dead : centre dans la cellule (1,0) morte, seed q3 tue");
+    expect(chord_box(x_dead, g4, rqd) && rqd[0] == 1 && rqd[1] == 1, "F11 : x_dead : corde q4 dans la colonne i = 1 seule (tuee)");
+    if (m_eps0) {
+      // Marge nulle : le centre exactement sur l'arete i' = 1 n'est plus localise dans ses DEUX cellules fermees
+      // (une seule colonne consultee, selon l'arrondi) — contrat de localisation viole.
+      const bool killed = (rc[0] == rc[1]) || (re[0] == re[1]);
+      if (killed && !failures) return 4;
+      std::printf("MUTANT NON TUE (cell-locate-eps-zero : coin i∈[%d,%d], arete i∈[%d,%d], echecs %d)\n", rc[0], rc[1], re[0], re[1], failures);
+      return 1;
+    }
+    expect(rc[0] == 0 && rc[1] == 1 && rc[2] == -1 && rc[3] == 0, "F11 : coin (1,0) exact : les quatre cellules fermees (0..1) x (-1..0) sont consultees");
+    expect(re[0] == 0 && re[1] == 1 && re[2] == 0 && re[3] == 0, "F11 : arete i' = 1 exacte (βG = 3/4) : les deux cellules fermees (0,0) et (1,0) sont consultees");
+    expect(!generate_detail::seed_center_cell_dead(g3, f_corner, d) && !generate_detail::seed_center_cell_dead(g3, f_edge, d),
+           "F11 : coin et arete : une cellule fermee consultee est vivante, seed NON tue (conservatif)");
+    expect(rq[0] == 0 && rq[1] == 1 && !generate_detail::seed_chord_cell_dead(g4, q3_form(pa, pb, tr(x_chord)), d, p3_cross(p3_sub(pb, pa), p3_sub(tr(x_chord), pa)), D2,
+                                                                          p3_norm2(p3_sub(tr(x_chord), pa)), p3_norm2(p3_sub(tr(x_chord), pb))),
+           "F11 : corde q4 de x_chord : boite i ∈ [0,1] traversant la colonne vivante, seed NON tue");
   }
   // F10 « frontiere des sommets de la grille » (primitive cell_grid.hpp) : ancre a=(0,0,0), b=(2000,0,0) ;
   // base u=(0,0,2000), v=(0,−2000,0), sommets p=(0,−250j',250i') ; 13 sites entiers de la sphere diametrale
@@ -328,7 +455,7 @@ int main(int argc, char** argv) {
     u64 on_sphere = 0;
     for (const CoverPoint& cz : cover) if (cz.u != ua && cz.u != ub && cz.dist2q == D2) ++on_sphere;
     CellGrid g;
-    const bool built = g.build(cover, ix.upos, ua, ub, pa, pb, D2, 8, 8);
+    const bool built = g.build(cover, ix.upos, ua, ub, pa, pb, D2, 8, 8, float_filter_runtime_enabled());
     u32 col0_min = 255, col0_max = 0, col1_min = 255, colm1_max = 0;
     for (int j = -CellGrid::G; j < CellGrid::G; ++j) {
       col0_min = std::min<u32>(col0_min, g.cnt[j + CellGrid::G][CellGrid::G]);

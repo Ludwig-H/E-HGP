@@ -61,7 +61,9 @@ struct GenerateStats {
   u64 anchors_killed_sectors[3] = {0, 0, 0};  // test d'ancre par secteurs (sector_kill.hpp) : ancres mortes sans enumerer les seeds
   u64 anchors_killed_cells[3] = {0, 0, 0};    // grille de cellules (cell_grid.hpp, theoreme 10.5) : toutes les cellules mortes
   u64 seeds_killed_cells[3] = {0, 0, 0};      // seeds dont le centre (q3) / la corde (q4) ne rencontre que des cellules mortes
-  u64 grids_built[3] = {0, 0, 0};             // grilles construites (politique cell_grid_wanted)
+  u64 grids_attempted[3] = {0, 0, 0};         // grilles VOULUES par la politique (cell_grid_wanted) : tentatives de construction
+  u64 grids_built[3] = {0, 0, 0};             // grilles effectivement construites (CellGrid::build a reussi) ; attempted − built = replis fail-open
+  u64 grids_all_dead[3] = {0, 0, 0};          // grilles construites dont toutes les cellules necessaires sont mortes (= anchors_killed_cells)
   u64 anchors_killed_w3 = 0;                   // test W_3 EXACT (temoins universels du disque des centres), lane q3
   u64 invariant_jneg = 0;                      // seeds q4 aigus avec J < 0 : INATTEIGNABLE par theoreme — toute occurrence est une violation d'invariant
   u64 candidates[3] = {0, 0, 0};
@@ -93,7 +95,9 @@ struct GenerateStats {
     for (int i = 0; i < 3; ++i) anchors_killed_sectors[i] += o.anchors_killed_sectors[i];
     for (int i = 0; i < 3; ++i) anchors_killed_cells[i] += o.anchors_killed_cells[i];
     for (int i = 0; i < 3; ++i) seeds_killed_cells[i] += o.seeds_killed_cells[i];
+    for (int i = 0; i < 3; ++i) grids_attempted[i] += o.grids_attempted[i];
     for (int i = 0; i < 3; ++i) grids_built[i] += o.grids_built[i];
+    for (int i = 0; i < 3; ++i) grids_all_dead[i] += o.grids_all_dead[i];
     prof_q4_anchor_ns += o.prof_q4_anchor_ns; prof_q4_core_ns += o.prof_q4_core_ns;
     prof_q4_compl_ns += o.prof_q4_compl_ns; prof_q4_cover_ns += o.prof_q4_cover_ns;
     anchors_killed_w3 += o.anchors_killed_w3;
@@ -219,7 +223,7 @@ struct AnchorScratch {
   double qmax_d = 1.0, umax_d = 1.0;
   bool affine_filled = false;
   CellGrid grid;  // grille de cellules de l'ancre courante (cell_grid.hpp) ; grid.built = false si non construite
-  size_t cell_min_sites = kCellGridMinSites;  // politique : grille seulement si cover >= ce seuil (0 : toujours ; oracle)
+  size_t cell_min_sites = kCellGridMinSites;  // politique : grille seulement si cover >= ce seuil ; 0 = mode FORCE (toute ancre, ratio et near_m ignores ; tests)
   void fill_affine_sites(const CloudIndex& ix, const P3& pa, const P3& pb, i64 D2) {
     const size_t nc = cover.size();
     su0.resize(nc); su1.resize(nc); su2.resize(nc); sq.resize(nc);
@@ -242,18 +246,29 @@ struct AnchorScratch {
 // GRILLE DE CELLULES (cell_grid.hpp) — helpers partages par la production et
 // les lanes par lots : centre v3 = N/(2G), N = W − G·d (q3) ; corde
 // (N ± μ̂·n)/(2G), μ̂ = isqrt(J/2) + 1 (q4, theoreme 10.4).
-inline bool seed_center_cell_dead(const CellGrid& g, const Q3Form& f3, const i64 d[3]) {
-  i128 pu = 0, pv = 0;
+// Produits scalaires entiers EXACTS du centre v3 = N/(2G3) avec la base :
+// pu = N·u, pv = N·v, den = 2·G3 (v3·u = pu/den) — partages avec l'oracle du
+// localisateur rationnel (tests/cell_grid_oracle.cpp).
+inline void seed_center_coords(const CellGrid& g, const Q3Form& f3, const i64 d[3], i128* pu, i128* pv, i128* den) {
+  *pu = 0; *pv = 0;
   for (int k = 0; k < 3; ++k) {
     const i128 Nk = f3.w[k] - f3.g * (i128)d[k];
-    pu += Nk * g.u[k];
-    pv += Nk * g.v[k];
+    *pu += Nk * g.u[k];
+    *pv += Nk * g.v[k];
   }
-  return g.point_dead(pu, pv, 2 * f3.g);
+  *den = 2 * f3.g;
 }
-inline bool seed_chord_cell_dead(const CellGrid& g, const Q3Form& f3, const i64 d[3], const P3& nrm, i64 D2, i64 l_ax, i64 l_bx) {
+inline bool seed_center_cell_dead(const CellGrid& g, const Q3Form& f3, const i64 d[3]) {
+  i128 pu, pv, den;
+  seed_center_coords(g, f3, d, &pu, &pv, &den);
+  return g.point_dead(pu, pv, den);
+}
+// Extremites de la corde (N ± μ̂·n)/(2G3) en produits scalaires exacts ; rend
+// false (fail-open) si J < 0 (inatteignable par theoreme).
+inline bool seed_chord_coords(const CellGrid& g, const Q3Form& f3, const i64 d[3], const P3& nrm, i64 D2, i64 l_ax, i64 l_bx,
+                              i128* pu0, i128* pv0, i128* pu1, i128* pv1, i128* den) {
   const i128 J = (i128)D2 * (3 * f3.g - 2 * (i128)l_ax * l_bx);
-  if (J < 0) return false;  // inatteignable par theoreme ; fail-open
+  if (J < 0) return false;
   const i128 mu_hat = isqrt128_floor(J / 2) + 1;
   const i64 nn[3] = {nrm.x, nrm.y, nrm.z};
   i128 pu = 0, pv = 0, qu = 0, qv = 0;
@@ -264,7 +279,49 @@ inline bool seed_chord_cell_dead(const CellGrid& g, const Q3Form& f3, const i64 
     qu += (i128)nn[k] * g.u[k];
     qv += (i128)nn[k] * g.v[k];
   }
-  return g.segment_dead(pu + mu_hat * qu, pv + mu_hat * qv, pu - mu_hat * qu, pv - mu_hat * qv, 2 * f3.g);
+  *pu0 = pu + mu_hat * qu; *pv0 = pv + mu_hat * qv;
+  *pu1 = pu - mu_hat * qu; *pv1 = pv - mu_hat * qv;
+  *den = 2 * f3.g;
+  return true;
+}
+inline bool seed_chord_cell_dead(const CellGrid& g, const Q3Form& f3, const i64 d[3], const P3& nrm, i64 D2, i64 l_ax, i64 l_bx) {
+  i128 pu0, pv0, pu1, pv1, den;
+  if (!seed_chord_coords(g, f3, d, nrm, D2, l_ax, l_bx, &pu0, &pv0, &pu1, &pv1, &den)) return false;
+  return g.segment_dead(pu0, pv0, pu1, pv1, den);
+}
+
+// ETAGE GRILLE d'une ancre (politique cell_grid_wanted + construction +
+// compteurs) : UNE definition pour les corps de production et les lanes par
+// lots (aucun chemin ne construit la grille deux fois : le jeton
+// AnchorPretests::kAlreadyAppliedWithGrid transmet « deja appliquee »).
+// Rend true si l'ancre est MORTE (toutes les cellules necessaires mortes) ;
+// sinon sc.grid.built dit si les seeds doivent etre localises. `acute_out` :
+// nombre de seeds aigus canoniques de l'ancre (is_acute_seed exige deja la
+// lentille : le compte vaut pour q3 comme pour q4), rendu meme quand la
+// politique ne veut pas la grille (preflight des lanes par lots) ; s'il est
+// nul et que le cover est sous le seuil, aucune passe n'est faite.
+inline bool anchor_grid_stage(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i32 ub, const P3& pa, const P3& pb, i64 D2,
+                              Lane lane, u64 h, bool float_on, GenerateStats* ls, size_t* acute_out = nullptr) {
+  const int li = lane == Lane::kQ3 ? 1 : 2;
+  sc.grid.built = false;
+  if (acute_out) *acute_out = 0;
+  if (sc.cell_min_sites != 0 && sc.cover.size() < sc.cell_min_sites && !acute_out) return false;
+  size_t nacute = 0, near_m = 0;
+  for (const CoverPoint& cz : sc.cover) {
+    if (cz.u == ua || cz.u == ub) continue;
+    if (cell_grid_near_m(cz.dist2q, D2)) ++near_m;
+    if (is_acute_seed(pa, pb, ix.upos[(size_t)cz.u], D2, ix.point_id(ua), ix.point_id(ub), ix.point_id(cz.u))) ++nacute;
+  }
+  if (acute_out) *acute_out = nacute;
+  const size_t ratio = lane == Lane::kQ3 ? kCellGridSeedsRatioQ3 : kCellGridSeedsRatioQ4;
+  if (!cell_grid_wanted(sc.cover.size(), nacute, near_m, h, sc.cell_min_sites, ratio)) return false;
+  ++ls->grids_attempted[li];
+  if (!sc.grid.build(sc.cover, ix.upos, ua, ub, pa, pb, D2, lane == Lane::kQ3 ? 12 : 8, h, float_on)) return false;
+  ++ls->grids_built[li];
+  if (!sc.grid.all_dead) return false;
+  ++ls->grids_all_dead[li];
+  ++ls->anchors_killed_cells[li];
+  return true;
 }
 
 // Kernel affine d'un seed sur les sites de l'ancre : N = W − G·d, borne E.
@@ -295,11 +352,16 @@ struct AffineSeed {
 // repli exact i128), emission. Partage par generate_candidates et par les
 // lanes par lots (routage hote : src/gpu/q3_lane_batched.hpp) — une seule
 // definition de la lane de production.
-// Jeton TYPE des pretests d'ancre (W_q exact puis secteurs) : kApply (defaut,
-// production) ; kAlreadyApplied — l'appelant les a DEJA appliques sur ce cover
-// (route hote / ancre trop grande des lanes par lots) ; kCounterfactual — mesure
-// seulement (sondes, oracle ON/OFF), jamais en production.
-enum class AnchorPretests : u8 { kApply, kAlreadyApplied, kCounterfactual };
+// Jeton TYPE des pretests d'ancre (W_q exact puis secteurs, puis grille de
+// cellules) : kApply (defaut, production) ; kAlreadyApplied — l'appelant a
+// DEJA applique W_q et secteurs sur ce cover (pretests par requete de la
+// production, route hote des lanes par lots), la grille reste a faire ;
+// kAlreadyAppliedWithGrid — l'appelant a aussi fait l'etage grille
+// (anchor_grid_stage) et laisse sc.grid dans l'etat qui en resulte (route
+// hote apres la grille / ancre trop grande des lanes par lots : la grille
+// n'est JAMAIS construite deux fois) ; kCounterfactual — mesure seulement
+// (sondes, oracle ON/OFF), jamais en production : ni pretests, ni grille.
+enum class AnchorPretests : u8 { kApply, kAlreadyApplied, kAlreadyAppliedWithGrid, kCounterfactual };
 
 inline void scan_anchor_q3(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i32 ub, const P3& pa, const P3& pb, i64 D2,
                            u64 h3, bool float_on, bool genfilter_nonstrict, std::vector<BallCandidate>* lo, GenerateStats* ls,
@@ -312,22 +374,11 @@ inline void scan_anchor_q3(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i32 
   }
   // Grille de cellules (theoreme 10.5) sur les covers denses : l'ancre entiere
   // si toutes les cellules sont mortes, sinon chaque seed par son centre.
-  sc.grid.built = false;
-  if (pretests != AnchorPretests::kCounterfactual && sc.cover.size() >= sc.cell_min_sites) {
-    size_t nacute = 0, near_m = 0;
-    for (const CoverPoint& cp : sc.cover) {
-      if (cp.u == ua || cp.u == ub) continue;
-      if (cell_grid_near_m(cp.dist2q, D2)) ++near_m;
-      if (is_acute_seed(pa, pb, ix.upos[(size_t)cp.u], D2, ix.point_id(ua), ix.point_id(ub), ix.point_id(cp.u))) ++nacute;
-    }
-    if (cell_grid_wanted(sc.cover.size(), nacute, near_m, h3, sc.cell_min_sites, kCellGridSeedsRatioQ3)) {
-      ++ls->grids_built[1];
-      if (sc.grid.build(sc.cover, ix.upos, ua, ub, pa, pb, D2, 12, h3) && sc.grid.all_dead) {
-        ++ls->anchors_killed_cells[1];
-        return;
-      }
-    }
-  }
+  if (pretests == AnchorPretests::kApply || pretests == AnchorPretests::kAlreadyApplied) {
+    if (anchor_grid_stage(ix, sc, ua, ub, pa, pb, D2, Lane::kQ3, h3, float_on, ls)) return;
+  } else if (pretests == AnchorPretests::kCounterfactual) {
+    sc.grid.built = false;
+  }  // kAlreadyAppliedWithGrid : sc.grid tel que laisse par l'appelant
   const i64 d3[3] = {pb.x - pa.x, pb.y - pa.y, pb.z - pa.z};
   sc.affine_filled = false;
   for (const CoverPoint& cp : sc.cover) {
@@ -414,21 +465,11 @@ inline void process_anchor_q4(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i
     if (p3_norm2(p3_sub(pz, pa)) <= D2 && p3_norm2(p3_sub(pz, pb)) <= D2) sc.lens.push_back(cz);
   }
   // Grille de cellules (theoreme 10.5) : ancre entiere ou corde de chaque seed.
-  sc.grid.built = false;
-  if (pretests != AnchorPretests::kCounterfactual && sc.cover.size() >= sc.cell_min_sites) {
-    size_t nacute = 0, near_m = 0;
-    for (const CoverPoint& cz : sc.cover)
-      if (cz.u != ua && cz.u != ub && cell_grid_near_m(cz.dist2q, D2)) ++near_m;
-    for (const CoverPoint& cx : sc.lens)
-      if (cx.u != ua && cx.u != ub && is_acute_seed(pa, pb, ix.upos[(size_t)cx.u], D2, ix.point_id(ua), ix.point_id(ub), ix.point_id(cx.u))) ++nacute;
-    if (cell_grid_wanted(sc.cover.size(), nacute, near_m, h4, sc.cell_min_sites, kCellGridSeedsRatioQ4)) {
-      ++ls->grids_built[2];
-      if (sc.grid.build(sc.cover, ix.upos, ua, ub, pa, pb, D2, 8, h4) && sc.grid.all_dead) {
-        ++ls->anchors_killed_cells[2];
-        return;
-      }
-    }
-  }
+  if (pretests == AnchorPretests::kApply || pretests == AnchorPretests::kAlreadyApplied) {
+    if (anchor_grid_stage(ix, sc, ua, ub, pa, pb, D2, Lane::kQ4, h4, float_on, ls)) return;
+  } else if (pretests == AnchorPretests::kCounterfactual) {
+    sc.grid.built = false;
+  }  // kAlreadyAppliedWithGrid : sc.grid tel que laisse par l'appelant
   const i64 d4[3] = {pb.x - pa.x, pb.y - pa.y, pb.z - pa.z};
   for (const CoverPoint& cx : sc.lens) {
     if (cx.u == ua || cx.u == ub) continue;

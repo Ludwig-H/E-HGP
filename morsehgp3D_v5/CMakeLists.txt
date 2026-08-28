@@ -168,6 +168,18 @@ mhgp5_gate(mhgp5_par_mutant_drop_chunk 4 mhgp5_par_gate "--family=uniform --n=40
 mhgp5_gate(mhgp5_par_mutant_one_worker 4 mhgp5_par_gate "--family=uniform --n=400 --threads=8 --inject=parallel-one-worker")
 mhgp5_executable(mhgp5_relabel_gate tests/relabel_gate.cpp)
 mhgp5_gate(mhgp5_relabel_gate 0 mhgp5_relabel_gate "--n=300")
+
+# ---- Surete du fold concurrent (P1 audit 28 aout 2026) -------------------------
+# -fno-elide-constructors : `return rr` copie/deplace la valeur de retour AVANT la
+# destruction des locales ; sans jonction explicite un fil B y ecrirait encore
+# (course prouvee sous TSan sur l'ancien code). Codes : 0 conforme, 2 refus,
+# 3 contrat/plancher d'entrelacement viole, 4 defaut injecte arbitre selon le contrat.
+mhgp5_executable(mhgp5_fold_inflight_safety_gate tests/fold_inflight_safety_gate.cpp)
+target_compile_options(mhgp5_fold_inflight_safety_gate PRIVATE -fno-elide-constructors)
+mhgp5_gate(mhgp5_fold_inflight_safety 0 mhgp5_fold_inflight_safety_gate "--n=300 --threads=4")
+mhgp5_gate(mhgp5_fold_inflight_mutant_a_failure_k2 4 mhgp5_fold_inflight_safety_gate "--n=300 --threads=4 --inject=fold-inject-a-failure-k2")
+mhgp5_gate(mhgp5_fold_inflight_mutant_b_exception_k3 4 mhgp5_fold_inflight_safety_gate "--n=300 --threads=4 --inject=fold-inject-b-exception-k3")
+mhgp5_gate(mhgp5_fold_inflight_refus_mutant_inconnu 2 mhgp5_fold_inflight_safety_gate "--inject=inconnu")
 mhgp5_gate(mhgp5_relabel_mutant_dense 4 mhgp5_relabel_gate "--n=300 --inject=dense-pointid")
 
 # ---- Rendu § 9.1 -----------------------------------------------------------------
@@ -313,6 +325,14 @@ mhgp5_gate(mhgp5_batch_contract 0 mhgp5_batch_contract_gate "")
 mhgp5_executable(mhgp5_parallel_exception_gate tests/parallel_exception_gate.cpp)
 mhgp5_gate(mhgp5_parallel_exception 0 mhgp5_parallel_exception_gate "")
 
+# ---- Instrument device recevable (audit 20260828 ; partie hote, sans nvcc) ------
+mhgp5_executable(mhgp5_gpu_instrument_gate tests/gpu_instrument_gate.cpp)
+mhgp5_gate(mhgp5_gpu_instrument 0 mhgp5_gpu_instrument_gate "--n=400 --threads=4 --gauge-threads=8 --min-flushes=100")
+mhgp5_gate(mhgp5_gpu_instrument_mutant_class 4 mhgp5_gpu_instrument_gate "--n=400 --threads=4 --gauge-threads=8 --min-flushes=100 --inject=log2hist-class-shift")
+mhgp5_gate(mhgp5_gpu_instrument_mutant_gauge 4 mhgp5_gpu_instrument_gate "--n=400 --threads=4 --gauge-threads=8 --min-flushes=100 --inject=gauge-no-peak")
+mhgp5_gate(mhgp5_gpu_instrument_plancher 3 mhgp5_gpu_instrument_gate "--n=400 --min-flushes=1000000")
+mhgp5_gate(mhgp5_gpu_instrument_refus 2 mhgp5_gpu_instrument_gate "--gauge-threads=1")
+
 # Lane q3 par lots (etage hote de la lane device) : egalite vecteur a vecteur avec la production.
 # Sonde de mesure (jamais un claim) pour la lane par rectangle : tailles aplaties par rectangle, quantiles.
 mhgp5_executable(mhgp5_q4_chord_probe bench/q4_chord_probe.cpp)
@@ -343,6 +363,17 @@ mhgp5_gate(mhgp5_anchor_kill_mutant_h1 4 mhgp5_anchor_kill_fixture "--inject=anc
 mhgp5_gate(mhgp5_anchor_kill_mutant_nonstrict 4 mhgp5_anchor_kill_fixture "--inject=sector-kill-nonstrict")
 mhgp5_gate(mhgp5_anchor_kill_mutant_chord 4 mhgp5_anchor_kill_fixture "--inject=chord-nonstrict")
 mhgp5_gate(mhgp5_anchor_kill_mutant_cell_nonstrict 4 mhgp5_anchor_kill_fixture "--inject=cell-kill-nonstrict")
+# Fixture F11 (frontieres de la localisation) : le mutant a marge nulle consulte une seule colonne.
+mhgp5_gate(mhgp5_anchor_kill_mutant_cell_eps0 4 mhgp5_anchor_kill_fixture "--inject=cell-locate-eps-zero")
+# Oracle brut de la grille de cellules (reception du theoreme 10.5, 28 aout 2026) : compteur deux pointeurs
+# contre evaluation directe i128 des 289 sommets (toutes les paires de trois petits nuages, F9/F10/F11, ancre u16
+# extreme, synthetiques i128), localisateur binaire64 contre le rationnel exact 256 bits ; garde d'environnement.
+# Label `oracle gate` : 4,5 s, doit etre rejoue par la commande G4 `-L gate` (remarque des auditeurs).
+mhgp5_executable(mhgp5_cell_grid_oracle tests/cell_grid_oracle.cpp)
+mhgp5_gate(mhgp5_cell_grid_oracle 0 mhgp5_cell_grid_oracle "" LABELS oracle gate)
+mhgp5_gate(mhgp5_cell_grid_oracle_mutant_nonstrict 4 mhgp5_cell_grid_oracle "--inject=cell-kill-nonstrict" LABELS oracle gate)
+mhgp5_gate(mhgp5_cell_grid_oracle_mutant_h1 4 mhgp5_cell_grid_oracle "--inject=cell-kill-h-minus-one" LABELS oracle gate)
+mhgp5_gate(mhgp5_cell_grid_oracle_mutant_eps0 4 mhgp5_cell_grid_oracle "--inject=cell-locate-eps-zero" LABELS oracle gate)
 
 # Contrat structurel du fold (P0 audit 9762daaf) : rejets permanents et limites positives.
 mhgp5_executable(mhgp5_fold_contract_gate tests/fold_contract_gate.cpp)

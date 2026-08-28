@@ -630,11 +630,16 @@ s'annonce `backend=override_experimental`, ses `digest_balls` **et**
 `digest_all` doivent être identiques au contrat CPU de la même famille, et
 l'adaptatif doit avoir des seeds sur les deux routes ; phase 2 bis
 optionnelle `EXTRA_N="100000 200000"` : contrats CPU aux tailles d'extension,
-jugés s'ils sont présents) → rapatriement avec reprises → `validate_v5_campaign.py`
+jugés s'ils sont présents ; phase 4 optionnelle `SCALE_THREADS`, décrite
+ci-dessous) → rapatriement avec reprises → `validate_v5_campaign.py`
 (seule autorité du statut) → arrêt certifié `TERMINATED` par le trap. Porte
-transactionnelle sans GCP : `selftest_campagne_v5.sh` (quinze scénarios, à
+transactionnelle sans GCP : `selftest_campagne_v5.sh` (vingt-cinq scénarios, à
 lancer à la main avant toute session payante ; jamais depuis la CI), dont un
-témoin device en désaccord qui doit refuser `complete`.
+témoin device en désaccord qui doit refuser `complete` et un jeu réduit
+`SCALE_THREADS` (deux fils, une famille, `n=400`, une répétition) avec ses
+mutants (digest ou compteurs différents selon les fils, `inflight` ignoré,
+digest imprimé sans `--digest`, run annoncé absent, plan réordonné, topologie
+absente, paramètre mal formé refusé avant tout run).
 
 ```bash
 ./gcp-migration/selftest_campagne_v5.sh
@@ -644,6 +649,61 @@ MAX_RUN_SECONDS=14400 GUEST_SHUTDOWN_MINUTES=230 ./gcp-migration/session_campagn
 
 Le contrat 50 000 points est une **mesure** (temps, RSS, digests gravés comme
 référence v5 à 50 k), jamais un claim : `public_status=not_claimed`.
+
+### Phase optionnelle `SCALE_THREADS` (campagne contrebalancée fils × inflight × digest)
+
+Demandée en P0 par l'audit « rendement GPU et multi-CPU » du 28 août 2026
+(`morsehgp3D_v5/audits/AUDIT_RENDEMENT_GPU_MULTICPU_20260828.md`) : aucun reçu ne
+balaie 1 à 48 fils au même pin sur les mêmes entrées. La phase est activée par
+`SCALE_THREADS` (liste de fils) et transmise telle quelle par la session au
+script distant, qui applique ses défauts :
+
+| variable | défaut | rôle |
+|---|---|---|
+| `SCALE_THREADS` | vide (phase non exécutée) | liste de fils, ex. `"1 2 4 8 16 24 32 48"` |
+| `SCALE_FAMILIES` | `eight_clusters scanline_single_pass` | familles mesurées |
+| `SCALE_N` | `50000` | taille du nuage |
+| `SCALE_INFLIGHT` | `1 2 3` | valeurs de `--fold-inflight` (entiers ≥ 1) |
+| `SCALE_DIGEST` | `0 1` | sans / avec `--digest` |
+| `SCALE_REPEATS` | `2` | répétitions |
+| `SCALE_RUN_TIMEOUT` | `RUN_TIMEOUT` (7200 s) | timeout par run |
+
+Pour chaque (famille, fils, inflight, digest) le binaire CPU `mhgp5` est
+exécuté `--family=<f> --n=<N> --s=8 --smax=11 --seed=3 --threads=<fils>
+--fold-inflight=<inflight> [--digest]`, un run à la fois, en ordre
+**contrebalancé** : la liste des fils dans l'ordre donné aux répétitions
+impaires, inversée aux répétitions paires (schéma ABBA par bloc famille ×
+inflight × digest). Le plan complet est **annoncé avant le premier run**
+(`out/scale_threads_plan.txt`), la topologie gravée une fois
+(`out/topologie.txt` : `nproc`, `lscpu`, affinité `taskset` du runner, mémoire,
+noyau) et chaque run grave `scale_<famille>_n<N>_t<fils>_f<inflight>_d<digest>_r<rép>.txt`
+(sortie complète), `.status` (code, `duree_s`, `peak_rss_kb`, `threads`,
+`fold_inflight`, `digest`, `family`, `n`, `repeat`, `seq`, `commande=` exacte,
+pin) et `.status.time` (sortie complète de GNU `time -v`). Avec les défauts
+(8 fils × 2 familles × 3 inflight × 2 digest × 2 répétitions) la phase compte
+**192 runs** : dimensionner `MAX_RUN_SECONDS` et `SCALE_RUN_TIMEOUT` en
+conséquence (le script distant imprime le nombre de runs annoncés et le budget
+maximal), ou réduire les listes.
+
+Le validateur, sur un plan présent, **recalcule** la séquence contrebalancée et
+exige : tous les runs annoncés présents et terminés, code 0, pin, RSS et GNU
+time, commande gravée conforme au nom (fils, inflight, `--digest` ssi
+`digest=1`, jamais `--gpu`), identité imprimée conforme (famille, `n`, fils,
+`fold_inflight=` dans `temps_fold_mur_ms`), **même `digest_all`** pour toutes les
+combinaisons d'une famille lorsque `digest=1` (et aucun digest lorsque
+`digest=0`), **même ligne `generation …`** et **mêmes `cardinalites K=1..10`**
+quels que soient fils et inflight, aucun motif interdit. Il écrit ensuite
+`out/scale_threads_resume.txt` (famille, fils, inflight, digest, nombre de runs,
+`temps_mur_ms` médian / min / max, `duree_s` médiane, RSS max) : un tableau de
+**complétude et de dispersion**, jamais une conclusion de speedup — le
+validateur ne juge que la complétude et l'égalité. Des runs `scale_*` sans plan
+annoncé sont des fichiers inattendus, jamais un sous-ensemble jugé.
+
+```bash
+SCALE_THREADS="1 2 4 8 16 24 32 48" SCALE_REPEATS=2 MAX_RUN_SECONDS=28800 GUEST_SHUTDOWN_MINUTES=470 \
+  ./gcp-migration/session_campagne_v5_scale_g4.sh
+python -m unittest tests.gcp.test_v5_campaign_scale_threads   # validateur sur fixture synthetique, sans GCP
+```
 
 Reçus (`morsehgp3D_v5/receipts/campagne_g4_v5_<date>[_suffixe]/`) : les
 artefacts bruts (`*.txt`, `*.status`) sont dans `out/`, la synthèse `RECU.txt`

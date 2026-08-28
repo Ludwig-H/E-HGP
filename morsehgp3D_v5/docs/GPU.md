@@ -195,31 +195,90 @@ politique et $G$ sont des réglages sans effet sur l'objet.
 
 **Session 12 (pin `63deda74` : exécuteurs device instrumentés par étape ;
 reçu `campagne_g4_v5_20260828_etapes_device`, 25 runs, validateur du pin
-rejoué) — pourquoi le device ne rapporte rien.** Murs *hôte* cumulés sur 48
-fils, `uniform` 50 k (lane q4 CPU 3,0 s, avec `--gpu` 4,3 s, `kernel_ms`
-7,5 s) : **H2D des sites 27,4 s**, **attente K1 + D2H des verdicts 42,2 s**,
+rejoué) — pourquoi le device ne rapporte rien.** Temps *hôte* cumulés sur
+48 fils (sommes de temps-exécuteur, **pas des murs** — voir l'instrument
+recevable ci-dessous), `uniform` 50 k (lane q4 CPU 3,0 s, avec `--gpu` 4,3 s,
+`kernel_ms` 7,5 s) : **H2D des sites 27,4 s**, **attente K1 + D2H des verdicts 42,2 s**,
 boucle hôte des vivants 0,4 s, K2 1,1 s, compaction hôte 3,8 s, K3 1,5 s,
 mur de `scan()` 76,4 s ; lane q3 : H2D 1,4 s, **K1 0,20 s pour 87 M seeds
 (2,3 ns par seed)**, D2H 0,14 s, mur 6,9 s. Mêmes proportions sur
 `eight_clusters` (q4 : H2D 38,9 s, K1 66,3 s, mur 114,7 s), `scanline` et
 `terrain`. Lecture : (1) le calcul device est négligeable — le noyau q3 tient
 en 0,2 s cumulés, le cœur q4 en quelques secondes ; (2) le chemin est borné
-par les **copies H2D des covers** : chaque ancre envoie son cover entier, 8
-tableaux i64 = 64 o par site, soit ≈ 37 Go par lane à 50 k pour une lane CPU
-de 3 s — le PCIe (≈ 9 Go/s agrégés) est le plafond ; (3) **48 fils** à
-exécuteurs `thread_local` se disputent un seul device (moteur de copie, file de
-lancement) et chaque étape est synchrone (`cudaStreamSynchronize` après H2D,
-K1, K2, K3) : le mur hôte d'un fil est l'attente des 47 autres ; (4) le reste
-de la lane (candidats, covers, assemblage des lots, émission) reste hôte, ≈
-2,7 s par fil sur 4,3 s. Conséquence : aucun réglage de lots ni de seuil ne
-change ce verdict ; le gain exige la forme de la doctrine (§ 1) — index et
+par les **copies H2D des covers** : chaque ancre envoie son cover entier, sept
+tableaux i64 et un `PointId` u32 = 60 o par site, plus seeds, ancres et
+lentille — « ≈ 37 Go par lane » et « ≈ 9 Go/s » étaient des *estimations*
+(aucun compteur d'octets à ce pin ; l'instrument ci-dessous les grave) ;
+(3) **48 fils** à exécuteurs `thread_local` se disputent un seul device
+(moteur de copie, file de lancement) et chaque étape est synchrone
+(`cudaStreamSynchronize` après K1, K2, K3 — et après H2D à ce seul pin, barrière
+d'instrument retirée depuis) : le temps hôte d'un fil contient l'attente des 47
+autres ; (4) le reste de la lane (candidats, covers, assemblage des lots,
+émission) reste hôte — sa part n'est **pas** déductible de ces sommes (le calcul
+« 4,3 s − 76,4/48 » de la première rédaction mélangeait un mur de lane et une
+moyenne de temps-exécuteur ; retiré). Conséquence : le réglage de lots ou de
+seuil déplace la charge (adaptatif : q4 cumulée 114,7 → 54,5 s sur
+`eight_clusters`) sans établir un avantage contre le CPU ; le gain exige la
+forme de la doctrine (§ 1) — index et
 positions **résidents sur device** (96 Go), covers, tests d'ancre, grille,
 seeds et cœurs calculés **sur device par rectangle** sans aller-retour, un
 petit nombre de flux asynchrones à double tampon, aucune boucle hôte par seed
 ou par paire — c'est-à-dire la livraison 7 conçue avec l'architecture tuilée
 (`ECHELLE.md`), où une tuile est l'unité de travail device. Tant que ce n'est
 pas fait, le chemin device reste un exécuteur prouvé exact et non autoritaire,
-sans usage en campagne.
+sans usage en campagne. Lecture recevable au sens de l'audit : **q3-kernel
+petit, transferts/orchestration et concurrence fortement suspects, causalité
+q4 encore ouverte.**
+
+**Instrument recevable (après `ab2c2563`, réponse à la réception de `63deda74`
+dans `audits/AUDIT_RENDEMENT_GPU_MULTICPU_20260828.md`)** — les demandes de
+l'auditeur, et ce que le code fait désormais :
+
+- « `sg3.wall` et `sg4.wall` additionnent des `scan()` concurrents ; ce ne
+  sont pas des murs et ils ne se soustraient pas à `rects` » → renommés
+  `executor_ms_sum` ; **toutes** les durées de `gpu::DeviceExecutorStats`
+  sont des sommes de temps-exécuteur sur les fils, documentées comme telles
+  dans l'en-tête ; le mur de lane (`t_rects_ms`, mesuré par le fil appelant,
+  assemblage hôte compris) est imprimé explicitement `lane_wall_ms` ;
+- « la barrière `cudaStreamSynchronize` après H2D change l'ordonnancement
+  qu'elle attribue » → **retirée** ; H2D mesuré par événements comme en q3
+  (événement avant les copies, événement après), récoltés après les
+  synchronisations qui existaient au pin `82f613d3` (K1, K2, K3) ; la « sync
+  fin » sur flux vide est retirée aussi ; l'instrument n'ajoute **aucune**
+  synchronisation ; les événements sont créés une fois par exécuteur ;
+- « `k1+d2h`, `k2+d2h`, `k3+d2h` mêlent réserve, H2D d'offsets, kernel et
+  retour » → séparés par événements `h2d | k1 | d2h1 || h2d2 | k2 | d2h2 ||
+  h2d3 | k3 | d2h3` ; côté hôte, `steady_clock` entre deux points hôte :
+  `reserve` (cudaMalloc transactionnels), `enfilement` (appels CUDA
+  asynchrones : driver, contention entre fils), `attente` (dans les
+  synchronisations existantes), `hote1` (vivants/offsets), `hote2`
+  (compaction), `hote3` (émissions), `reste` non classé — le résidu q3 signalé
+  (`wall` − H2D − K1 − D2H) est ainsi publié par poste ;
+- « aucun octet, percentile de lots ni pic de flux » → `h2d_octets` /
+  `d2h_octets` cumulés par lane (`sizeof` exact des copies enfilées :
+  sites 60 o + seeds + ancres + lentille + vivants/offsets + candidates ;
+  retours verdicts, un octet par paire, un octet par candidate) ; lots
+  `p50`/`p95` par classe log2 (`Log2Hist` dans `BatchStats` : 65 compteurs,
+  un échantillon par vidage, aucune allocation par lot ; `p50<2^k` signifie
+  que la valeur de rang médian est < 2^k et ≥ 2^(k−1)) et `max` exact ;
+  `flux_pic` = pic de `scan()` simultanés (compteur atomique RAII, remis à
+  zéro par lane) ;
+- `kernel_ms` de la ligne `gpu=1` (forme **inchangée**, validateur inchangé)
+  devient la somme des **kernels seuls** (q3 : K1 ; q4 : K1 + K2 + K3),
+  homogène entre lanes — il ne contient plus les retours ni les boucles hôte ;
+- sortie : deux lignes `gpu_q3_etapes …` et `gpu_q4_etapes …` après la ligne
+  `gpu=1` (`cli/mhgp5_cuda.cu`).
+
+Preuve hors nvcc : porte CPU `mhgp5_gpu_instrument_gate`
+(`tests/gpu_instrument_gate.cpp`) — classes log2 et quantiles gravés, fusion
+`add_from`, `BatchStats` des lanes par lots hôte (un échantillon par vidage,
+classe du max, plancher `--min-flushes`, un et quatre fils), pic sous barrière
+(plancher ≥ 2 fils retenus), RAII sous exception, `DeviceExecutorStats` ;
+mutants `log2hist-class-shift` et `gauge-no-peak` tués (code 4) ; TSan propre.
+Les `.cuh`/`.cu` sont vérifiés en syntaxe C++20 par un stub CUDA ; **ni
+compilation nvcc ni exécution G4** à ce commit : la prochaine session G4 doit
+rejouer les contrats `--gpu` au nouveau pin et graver ces deux lignes avant
+toute lecture ; aucune conclusion de débit device n'en est tirée ici.
 
 ## 1. Ce que la mesure G4 a désigné (27 août 2026)
 
@@ -384,3 +443,105 @@ en blocs.
      transferts par lot sont la première marge), banc apparié CPU 48 fils /
      GPU sur `eight_clusters` et `scanline_single_pass`, et le port du fold
      n'est **pas** prévu (séquentiel par nature, déjà recouvert).
+
+## Lane résidente sur device — conception (L7, 28 août 2026)
+
+Sources : audits de résolution des auditeurs
+(`audits/AUDIT_RENDEMENT_GPU_MULTICPU_20260828.md`, G0–G2), flux de
+conception contradictoire (`docs/analyses/gpu_20260828/`), reçu 12. Cadre
+inchangé, `public_status=not_claimed` ; aucun débit n'est cité sans le
+compteur d'occupation qui l'accompagne.
+
+### Décision
+
+Le chemin device actuel (48 exécuteurs `thread_local` synchrones, covers
+copiés à 32–64 o par site et par ancre) est non viable par construction (reçu
+12). Trois changements bornés, **dans l'ordre des auditeurs** :
+
+- **G0 — pool d'exécuteurs persistant et borné** (1, 2, 4 ou 8), découplé des
+  producteurs CPU : file bornée de descripteurs de lots avec contre-pression,
+  flux/événements/tampons créés une fois par lane, résidus soumis à la même
+  file (plus jamais vidés séquentiellement après la jointure), sortie numérotée
+  et fusionnée dans l'ordre déterministe actuel ; critère : mêmes digests et
+  compteurs, `executors_created` en baisse, mur de lane en baisse — aucun gain
+  de bout en bout exigé.
+- **G1 — géométrie résidente et covers par indices** : positions quantifiées
+  et `PointId` du `CloudIndex` téléversés une fois (objet RAII `GpuGeometry`
+  partagé en lecture seule) ; chaque cover n'envoie que ses indices u32 dans
+  l'ordre du cover, les paramètres d'ancre et de petits offsets ; le kernel
+  reconstruit $u = 2z - a - b$ et $q = u \cdot u - D^2$ en entiers exacts (q3 :
+  ≈ 32 → 4 o/site ; q4 : ≈ 60 → 4 o/site) ; deux wires conservés en parallèle
+  (SoA actuel et `site_index_u32`) jusqu'à réception CUDA bit à bit
+  (verdicts, profondeurs, émissions, compteurs, digests), compteur H2D et borne
+  par lot incluant le téléversement amorti ; fixtures : bornes u16, $D^2$
+  maximal, cocirculaire, permutation conservant l'ordre du cover, cover vide,
+  lot surdimensionné.
+- **G2 — compaction q4 stable sur device** : scans/sélections stables entre
+  K1, K2 et K3 (seeds vivants dans l'ordre initial, paires dans l'ordre
+  (seed, lentille)), un seul retour final (émissions et compteurs agrégés) ;
+  la stabilité est contractuelle et chaque tableau intermédiaire est comparé
+  sur de petits lots avant le digest final. G1 précède G2.
+
+Au-delà (L7a/L7b/L7c, conception `docs/analyses/gpu_20260828/synthese.txt`) :
+index radix **résident** (40 o/point : 400 Mo à 10 M), rectangles vivants
+envoyés par lots de 16 o, handles et ancres calculés sur device (K0 warp par
+rectangle, K1 bloc par rectangle sous contrat $n_a^2 + n_b^2 \le 2^{17}$),
+cover **paresseux** par ancre (histogramme des 32 classes radiales sans
+écriture, seules les classes 0..10 et le préfixe utile matérialisés en mémoire
+partagée, queue dans une arène seulement si un seed survit), tests d'ancre,
+grille de cellules (deux pointeurs, `cnt[16][16]` en mémoire partagée),
+seeds, cœur/corde, complétions et profondeur sur device, émission de
+**candidats compacts** (`CandD` 16 o : quatre indices, arité par sentinelles)
+compactés par bloc ; clé exacte, niveau, RLE, préfiltre, census, fold et
+digest restent hôte (census device = second étage optionnel, L7c). Régimes
+par ancre : S (cover ≤ 1024 sites, tout en mémoire partagée), M (préfixe en
+mémoire partagée, queue en arène), L (cover > 350 k sites, contrat K1 ou
+lentille dépassés) routé au corps hôte de production avec compteur
+`routed_host` exposé.
+
+### Exactitude et déterminisme
+
+Prédicats existants réutilisés tels quels (`lanes/device_forms.hpp`,
+`gpu/*_shaped.hpp` : DI128/U192, formes q3/q4, puissances, centre strict,
+`in_spindle_d`) ; à écrire avec fixture d'égalité hôte/device : `bin_of_d`,
+`spindle_sector_d`, `cell_grid_d` (deux pointeurs en DI128), `di_to_double_d`
+(décalage à bit collant, un seul arrondi, `ldexp` exact — preuve à inscrire
+dans `docs/math/STATUT_PREUVES_ET_HEURISTIQUES.md`), `seed_affine_d`
+(séquence FMA figée, `-fmad=false`), `isqrt128_floor_d` (boucle bornée
+prouvée, jamais un « ±1 » sur `sqrt(double)`). Filtre flottant seulement là
+où un repli exact existe. Objet : multiensemble de candidats → RLE →
+`digest_balls` identique CPU/GPU (cinq familles, $s$ = 6/8/10, 8000–50 000) ;
+ordre brut jugé à un fil seulement (`raw_order_gate` avec rangs de seed et de
+lentille) ; compteurs en trois classes (exacts, de politique, de mesure) ;
+verdict fonction pure du rectangle (porte à deux découpages de lots) ; mutants
+device résolus en index constant dans `kMutants` avec masque `__constant__`
+par lot.
+
+### Ce qui n'est pas promis
+
+Aucun « GPU 10× » : à 50 k `uniform` le plafond d'Amdahl est 1,10× tant que
+fold, digest, préfiltre et census restent hôte ; la valeur de G0–G1 est la
+viabilité du device (fin des 48 exécuteurs synchrones et des 37 Go de bus).
+`k_q4_core` mesuré à 7,5 s de « kernel_ms » pour 3,0 s de lane CPU n'est pas
+expliqué : une sonde isolée à pleine occupation doit le ramener sous la lane
+CPU avant tout budget L7b. À 10 M, le test de profondeur à la génération est
+le poste dominant identifié et non résolu (V24) ; le pic mémoire hôte des
+`BallCandidate` relève d'`ECHELLE.md`, pas de L7. Occupation, spills, ratio
+visites/cover, fraction routée hôte : mesurés dans chaque reçu, jamais
+déclarés.
+
+### Ordre de commits (auditeurs)
+
+1. Finir l'instrument (parseur au format réel, mutants et CMake, cycle de vie
+   CUDA dans la décomposition, timelines non additives) — sans GCP.
+2. G0 pool persistant : 1/2/4/8 exécuteurs, résidus dans la file, égalité des
+   sorties.
+3. G1 wire indices : `GpuGeometry` + `site_index_u32` en parallèle du wire
+   actuel ; réception CUDA à 50 k.
+4. G2 compaction q4 device : portes des intermédiaires, puis ablation du D2H.
+5. Pilote CPU sous cpuset (protocole A/B, ≤ 24 runs) seulement après
+   réception du protocole local et de son budget de session.
+
+Verrous à poser aux auditeurs : `audits/QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md`
+(V17–V30).
+

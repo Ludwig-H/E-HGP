@@ -1,0 +1,186 @@
+# Conception — Livraison 7 : lane résidente sur device (q2/q3/q4 par rectangle)
+
+Cadre : `phase=exploration_v5_hors_registre backend=cpu_reference profile=quantized_u16_input_only mode=audit_independant_math_and_architecture public_status=not_claimed`. Le device est un **producteur subordonné** : l'objet est défini par la production hôte (`generate.hpp`), le device doit lui être égal vecteur à vecteur après tri/RLE, jamais l'inverse. Tous les chiffres ci-dessous sont des **budgets à mesurer** (GPU.md § 3), ancrés sur les reçus 11/12 ; aucun ne promeut un statut.
+
+## 0. Ce qui change et ce qui ne change pas
+
+| Étage | Aujourd'hui (reçu 12) | L7 |
+|---|---|---|
+| Index (pos, arbre, ordre Morton) | hôte (168 o/pt) | **résident device** (40 o/pt) + hôte inchangé |
+| Rectangles vivants, ha/hb, need | hôte (4 µs/rect) | hôte, inchangé, envoyés par lots (16 o/rect) |
+| Handles, histogrammes de coins, ancres survivantes | hôte | **device** (warp/rect puis bloc/rect) |
+| Cover, tri radial 32 classes, W_q, secteurs, grille, seeds | hôte (30–80 µs/cover, 64 o/site copiés) | **device** (bloc/ancre, cover en mémoire partagée, jamais matérialisé côté hôte) |
+| Cœur de Jung, corde, complétions, profondeur | device existant mais alimenté par l'hôte | device, alimenté sur place |
+| Émission | `BallCandidate` 144 o hôte | **candidat compact 16 o** device, compaction par prefix-sum, D2H en bloc |
+| Clé exacte + niveau (pgcd i128) | hôte | hôte, 48 fils, **seuls survivants** (0,15 s à 50 k) |
+| RLE, prefiltre, census, fold, digest | hôte | inchangés (L7c : census device optionnel, second étage) |
+
+Invariants : aucun jitter, tout prédicat décidé en entier (DI128/U192 device, i128 hôte), filtre flottant certifié à repli exact, sorties bit-identiques après RLE, compteurs comparés par les portes, refus explicites (fail-closed → même corps hôte, `AnchorPretests::kAlreadyAppliedWithGrid`).
+
+## 1. Structures de données device (layouts)
+
+Tous les tableaux sont indexés par **GeometryIndex** `u` (position unique, ordre Morton, < 2^31, audit G1), jamais par `PointId`.
+
+```cpp
+// gpu/resident_index.cuh — namespace mhgp5::gpu
+struct PosD   { u16 x, y, z, pad; };                 // 8 o, chargement ushort4 coalescé ; élargi en i64 à la lecture
+struct NodeD  { i32 left, right, first, last; };     // 16 o ; feuille codée -1-u (convention NodeRef hôte conservée)
+struct BoxD   { u16 lo[3], hi[3]; };                 // 12 o, boîte serrée (tlo/thi) ; feuille : box = pos[u]
+struct ResidentIndex {
+  const PosD*  pos;      // m
+  const u32*   pid;      // m  (point_id(u) plat : positions distinctes = précondition V1)
+  const NodeD* node;     // m-1
+  const BoxD*  box;      // m-1
+  i32 m; i32 root;
+};
+```
+Empreinte : 40 o/point (8+4+16+12) → 50 k : 2 Mo (tient dans le L2 de 128 Mo) ; 10 M : **400 Mo** ; 30 M : **1,2 Go**. `clo/chi/parent/wsum/keys` ne sont pas résidents (52 o/nœud morts sur le chemin chaud, `wsum` redondant sous positions distinctes). L7c ajoute `NodeD::last-first+1` comme poids : rien de plus.
+
+```cpp
+struct RectD   { i32 a, b; u8 need; u8 lane; u16 flags; i32 coef_num; };   // 16 o (a, b = NodeRef, coef = coefficient de gap² du contrat WSPD)
+struct AnchorD { u32 rect; i32 ua, ub; u32 cost_class; };                   // 16 o, produite sur device
+struct CoverSiteD { i32 du, dv, dw; u32 u; u64 d2; };                       // 24 o en mémoire partagée (coordonnées relatives à a, |p-a|², index) ; 20 o si u en 27 bits
+struct CandD   { u32 ua, ub, ux, uy; };  // 16 o ; arité = 4 - nombre de sentinelles 0xFFFFFFFF (q2 : ux=uy=~0)
+struct CandTaggedD { u32 rect; CandD c; }; // 20 o, mode porte seulement (--raw-order-gate)
+```
+
+Tampons d'un lot (dimensionnés par contrat structurel, comme `q3/q4_lane_batched.hpp`) :
+
+| Tampon | Taille | 50 k | 10 M (par tuile) |
+|---|---|---|---|
+| `rects` H2D | 2^20 × 16 o | 16 Mo | 16 Mo |
+| `handle_cnt`/`handle_off` | 2^20 × 4 o × 2 | 8 Mo | 8 Mo |
+| `handles` | ≤ 2^24 × 4 o (contrat, sinon lot scindé) | 64 Mo | 64 Mo |
+| `anchors` | ≤ 2^24 × 16 o | 256 Mo | 256 Mo |
+| arène cover (queue radiale hors mémoire partagée) | blocs_en_vol × 1 Mo | 376 Mo | 376 Mo |
+| `cands` + compteur | 2^24 × 16 o | 256 Mo | 256 Mo |
+| compteurs u64 (GenerateStats) | 64 × 8 o | — | — |
+| **total device** hors index | | ≈ 1 Go par lot en vol × 2 lots | ≈ 2 Go |
+
+Hôte : double tampon **pinned** pour `rects` (2 × 16 Mo) et `cands` (2 × 256 Mo) ; **3 flux** (H2D, calcul, D2H) et **un seul thread exécuteur** propriétaire du device ; les 47 autres fils produisent les rectangles vivants (descente ternaire + `count_universal_witnesses`, 4 µs/rect) dans une file et consomment les `CandD` rapatriés (clé/niveau/émission). Fin des 48 exécuteurs `thread_local` synchrones.
+
+## 2. Kernels (signatures, grilles, mémoire partagée)
+
+Constantes : `kCoverShared = 2048` sites (48 Ko), `kClasses = 32`, `kWarpsPerBlock = 8` (256 fils), blocs persistants `grid = 2 × #SM` (GB202 : 188 SM → 376 blocs).
+
+**K0 `k_rect_handles`** — warp par rectangle, pile de 64 `NodeRef` en mémoire partagée par warp (l'arbre radix n'a pas de profondeur garantie, ECHELLE T8 : dépassement → `flags |= kOverflowHost`, rectangle routé à l'hôte, fail-closed). Reproduit `rect_cover_handles` : descente depuis la racine, test gap² i64 contre `box_of(a)`, `box_of(b)`, coupe à ≤ 32 positions, ordre de pile identique (push left puis right, pop back). Deux passes : comptage → `cub::DeviceScan::ExclusiveSum` → remplissage (contrat vérifié : `Σ cnt == off[last]`, sinon refus du lot, mutant `prefix-sum-off-by-one`).
+```cpp
+__global__ void k_rect_handles(ResidentIndex ix, const RectD* rects, u32 n_rect, u32* handle_cnt, i32* handles /*nullptr en passe 1*/, const u32* handle_off);
+```
+
+**K1 `k_rect_anchors`** — bloc par rectangle, thread par paire (ua, ub) ∈ A × B (|A|·|B| ≤ 2^16 par contrat WSPD ; au-delà → hôte). Histogrammes de coins (`universal_over_corners`, `in_spindle_d` DI128 existant) en mémoire partagée (|A|+|B| entrées de 4 o), puis ancres survivantes émises en ordre canonique **(ua asc, ub asc)** par prefix intra-bloc (sans atomique global : `anchor_cnt[rect]` puis scan device, comme K0). Classe de coût : `cost_class = log2(Σ handle_points(rect))` (0..15) écrite dans `AnchorD`.
+
+**K2 `k_anchor_lane`** — le cœur : **bloc persistant par ancre**, file de travail atomique sur `anchors` **triée par classe de coût décroissante** (tri par clé 4 bits, `cub::DeviceRadixSort`, stable → l'ordre intra-classe reste (rect, ua, ub) : reproductible) ; les blocs tirent `atomicAdd(&next, 1)`. Phases dans le bloc (256 fils) :
+
+1. *Cover* : les 8 warps parcourent les handles du rectangle **en ordre canonique** (handle k, puis `u` croissant : lecture coalescée de `pos[first..last]`) ; par site : `d2q = dist²(p, segment/fuseau)` en i64 (coordonnées u16 → tout < 2^36), test `d2q <= bound`. Classe radiale `bin = (32·d2q) / (bound+1)` en **u64** (32·d2q < 2^39 ; égal au résultat hôte i128, porte d'égalité `bin_of`). Tri stable par comptage sans atomique désordonné : chaque warp traite un chunk de 32 sites, 32 `__ballot_sync(class == c)` → rangs intra-chunk ; comptes par (warp, classe) dans `smem_cnt[8][32]`, `__syncthreads`, scan des chunks en ordre → position déterministe **identique au counting sort stable hôte**. Destination : les `kCoverShared` premiers sites radiaux en mémoire partagée (`CoverSiteD` 24 o × 2048 = 48 Ko), la queue dans l'arène globale du bloc (1 Mo = 43 k sites ; au-delà → `kOverflowHost`). Coût : 2 passes sur les handles (comptage puis scatter).
+2. *Tests d'ancre* : W_q exact = compte de témoins dans le fuseau (`in_spindle_d`), réduction par ballot+popc sur les classes 0..10 (ordre indifférent, c'est un compte) ; secteurs (`anchor_sector_kill`) : port DI128 de `bisector_basis` (boucle ≤ 128, un seul thread puis diffusion par smem) + 8 produits DI128 par site (`di_mul_i64_i64`). Ancre morte → compteurs `atomicAdd` u64 en smem puis un seul `atomicAdd` global par bloc ; bloc suivant.
+3. *Grille de cellules* (politique `cell_grid_wanted(cover_size, nacute, near_m)` — **une seule autorité** `GenerateOptions::cell_grid_min_sites`) : Gram en i64 (u16 → uu, vv, uv < 2^36), det en DI128 ; **thread par site**, deux pointeurs monotones sur les 16 lignes, `atomicAdd` sur `smem cnt[16][16]` (u32, sommes commutatives → déterministe) ; `dlo/dhi` 2,2 Ko en smem ; `locate` en binary64 avec l'eps explicite de `cell_grid.hpp:259`, conversions DI128→double **certifiées** (§ 3).
+4. *Seeds* : `is_acute_seed` (i64 pur, HD existant) sur le cover, `seed_center_cell_dead` via la grille ; liste des seeds vivants en smem (u16 index dans le cover, ≤ 2048 ; queue → boucle).
+5. *Scan q3* / *cœur q4* : **warp par seed**, corps `q3_scan_seed_shaped` / `q4_seed_core_shaped` **inchangés** (les SoA i64 `su0/su1/su2/sq` sont lus depuis `CoverSiteD` en smem au lieu du lot hôte), masque keep + correction intra-warp existants (compteurs des seeds morts égaux au scalaire). Affines du seed (`SeedAffineD` : N0..N2, G, l_exact DI128 + doubles) **formés sur device** par la lane 0 → conversions certifiées (§ 3).
+6. *Complétions q4* : par seed vivant, boucle sur la lentille (sites de la classe ≤ classe du seed, `lens_sites`), un thread par paire, `q4_completion_stage_shaped` existant (owner `tetra_owned_by` avec `pid[]` résident, exact-once, préfiltres i64, forme DI128, Cramer, centre strict `q4_center_strictly_inside_d`), puis *profondeur* `k_q4_depth` inline (warp par candidate, `q4_power_d` par ballot sur le cover complet — smem + arène).
+7. *Émission* : survivants dans un tampon smem de 512 `CandD` ; à saturation ou en fin d'ancre, **un** `atomicAdd(&cand_count, k)` par bloc, écriture coalescée. Compteurs : accumulés en smem, un `atomicAdd` u64 par compteur et par bloc.
+
+```cpp
+template <Lane L>  // Q2, Q3, Q4 : une instance par lane, même squelette
+__global__ void __launch_bounds__(256, 2)
+k_anchor_lane(ResidentIndex ix, const RectD* rects, const i32* handles, const u32* handle_off,
+              const AnchorD* anchors, u32 n_anchor, u32* next_anchor,
+              CoverSiteD* arena /*blocs × 1 Mo*/, LaneOptionsD opt,
+              CandD* cands, u32* cand_count, u32 cand_cap, u64* stats, u32* overflow_anchors, u32* overflow_count);
+```
+Mémoire partagée : 48 Ko cover + 4 Ko lens/seeds + 3 Ko grille + 8 Ko tampon d'émission + 1 Ko compteurs ≈ **64 Ko** → 2 blocs/SM (GB202 : 128 Ko/SM), 376 blocs en vol. `cand_count > cand_cap` → lot refusé et rejoué scindé (jamais un préfixe publié : `count → preflight → fill → validate → publish`).
+
+Lane q2 : même K2 réduit (paires diamétrales `rect_diametral_candidates`, prétest `kPretestQueryMinPoints = 512` conservé).
+
+## 3. Exactitude — inventaire des prédicats
+
+**Existent en DI128/U192 HD, réutilisés tels quels** : `di_*` (dint.hpp), `det3_d`, `q3_form_d`, `q3_power_d`, `q4_form_d`, `q4_power_d`, `q4_center_strictly_inside_d`, `q4_level_d` (non réduit), `in_spindle_d`, `is_acute_seed`, `anchor_owns_q3`, `q4_i64_prefilter`, `q4_face_power_prefilter`, `tetra_owned_by`, `q3_scan_seed_shaped`, `q4_seed_core_shaped`, `q4_completion_stage_shaped`, `q4_depth_shaped`, `cmp_2p2_jb2` (U320 via u128 natif, toléré par GPU.md § 2).
+
+**Manquent (à écrire, chacun avec sa fixture d'égalité hôte/device sur ≥ 10^7 tirages + cas gravés)** :
+1. `spindle_sector_d` : `bisector_basis` + test secteur en DI128 (hôte i128). Fixture : classes 0..10 de 10^5 ancres, verdict et compte égaux.
+2. `cell_grid_d` : Gram i64, `det` DI128, `count_site` deux pointeurs DI128 (le chemin i64 hôte est une optimisation : sur device on prend toujours DI128, égalité de `cnt[16][16]` par ancre).
+3. `chord_pieces_d` : `ChordPieces` est sur i128 natif + `std::sqrt` (`isqrt128_floor`). Port : `isqrt128_floor_d` = estimation `sqrt(double)` puis correction ±1 en DI128 (exact car `r² <= x < (r+1)²` vérifié en entier) ; `certified_sign` en DI128.
+4. `seed_affine_d` : N0..N2, G, l_exact formés sur device (aujourd'hui hôte, `build_q3_batch`), avec **`di_to_double_d` correctement arrondi** (une seule opération d'arrondi : normalisation 53 bits + sticky ; pas `(double)hi·2^64 + (double)lo`, qui double-arrondit). Porte : bit à bit avec `(double)(__int128)` hôte sur 10^7 valeurs dont les cas de milieu exacts (critique.txt:96). Sous `-fmad=false`, séquence FMA figée de `q3_l_hat_shaped` inchangée ; arrondi au plus proche = défaut device (pas de `--use_fast_math`, refus à la compilation sinon).
+5. `bin_of_d` (u64) : égalité prouvée par borne (32·d2q < 2^39) et fixture.
+6. Corner histograms device (`universal_over_corners`) : `in_spindle_d` déjà là ; fixture d'égalité des histogrammes.
+
+**Restent hôte** (GPU.md § 2) : `ugcd128`, `ball_key_reduce`, `rational_reduce`, `promote_level`, `q2_ball_key` → la clé et le niveau sont recalculés **sur hôte, 48 fils, pour les seuls survivants** depuis `upos[·]` (fonctions pures existantes ; 21,6 M × ≈ 0,3 µs ≈ 6,5 fil-s ≈ 0,15 s à 50 k ; 10 M : 4,3 G × 0,3 µs ≈ 27 s à 48 fils). Le niveau q4 non réduit `q4_level_d` n'est **pas** utilisé : il n'apporterait rien tant que le représentant du RLE (arité minimale, plus petite représentation du niveau) reste calculé sur hôte. Aucune clé n'est produite sur device.
+
+**Filtre flottant** : uniquement dans `q3_l_hat_shaped` et `jung_interval_sign_shaped` (existants) et `locate` de la grille ; chaque usage a son repli exact (`q3_l_exact_shaped`, `cmp_2p2_jb2`, `locate` conservateur avec eps explicite — la grille ne tue que sur un verdict `dead` prouvé conservateur, comme sur hôte). Interdit : tout flottant sans repli, toute comparaison de niveau par hash/== (level.hpp:326).
+
+**Replis** : dépassement de pile K0, |A|·|B| > 2^16, cover > arène, lentille > 2^16 paires, `cand_cap` → l'ancre/le rectangle est marqué `overflow` et **rejoué par le corps hôte de production** (`scan_anchor_q3`/`process_anchor_q4`), avec compteur `routed_host` ≥ 0 exposé ; un mutant `overflow-drop` (ignorer un overflow) doit être tué.
+
+## 4. Déterminisme et égalité avec la production
+
+- **Objet** : multiensemble des `CandD` → expansion hôte en `BallCandidate` → `rle_candidates` (stable_sort par clé, arité, niveau ; `unique`) → `digest_balls_v4`. Le digest est canonique par construction : **porte principale = digest identique cpu/gpu** sur les cinq familles, s = 6/8/10, n = 8000/16000/32000/50000.
+- **Ordre brut** : non spécifié à T > 1 (déjà le contrat). Le device ajoute `atomicAdd` par bloc → l'ordre des survivants dépend de l'ordonnancement. En mode `--raw-order-gate`, émission `CandTaggedD` (20 o), tri hôte par (rect, ua, ub, ux, uy) et comparaison **vecteur à vecteur** avec la production à T = 1 (ordre : `alive`, (ua, ub), seeds en ordre du cover radial, complétions en ordre de lentille — le device reproduit exactement cet ordre interne, donc le tri sur (rect, ua, ub) + rang d'émission dans le bloc restitue l'ordre à un fil ; on compare le tableau entier, pas seulement le multiensemble).
+- **Compteurs** : trois classes déclarées dans `GenerateStats` :
+  - *exacts, égalité exigée* (fonction pure de l'objet et de l'ordre canonique interne, sommes entières) : `rects`, `ancres_hist`, `ancres_w3/w4`, `ancres_secteurs`, `grids_attempted/built`, `seeds_acute`, `seeds_killed_cells`, `seeds_alive`, `jneg`, `pairs_tested`, `owned`, `exact_once`, `center_strict`, `depth_killed`, `emis` — les 7 (q3) / 22 (q4) actuels ;
+  - *exacts sous ordre radial reproduit* : `cert_neg/cert_pos/fallback/jung_*/chord_*` (sortie anticipée : égaux si le cover est dans l'ordre canonique, ce que garantit le tri stable par ballot ; porte `strict` par défaut, mutant `cover-sort-unstable` tué) ;
+  - *politique/mesure, comparés séparément* : `visits`, `cover_nodes`, `routed_host`, `max_lot_*`, `Log2Hist`, `kernel_ms`, occupation, nombre de blocs (mesuré, jamais déclaré : compteur d'ancres par SM via `%smid`, mutant `single-block`).
+- **Frontières de lots** : composition non déterministe selon le producteur hôte ; verdict fonction pure (rectangle, index) ; sortie post-RLE invariante ; `--lot-gate` : deux découpages différents (`kRectsPerLot` 2^20 et 2^12) → digest égal.
+- **Flottant** : `-fmad=false`, pas de fast-math, arrondi au plus proche ; `di_to_double_d` porte bit à bit ; aucune somme de doubles dans un verdict.
+
+## 5. Ordonnancement et équilibrage
+
+- Classes de coût sur `Σ handle_points(rect)` (16 classes log2) ; file atomique unique triée par classe décroissante (LPT) : les gros covers (jusqu'à n) partent en premier, les petits remplissent la fin.
+- Trois régimes par ancre : **S** (cover ≤ 2048 : tout en smem), **M** (2048 < cover ≤ 43 k : préfixe radial en smem, queue en arène — les seeds meurent sur les premiers sites (9,4 sites en moyenne, probe.txt) donc la queue n'est lue que par les seeds vivants et la profondeur), **L** (> 43 k ou |A|·|B| > 2^16 : hôte). À 50 k, cover moyen 3200 → majorité en M mais prefixe smem suffisant ; à 10 M cover moyen ≈ 35 k → M presque partout, arène 1 Mo/bloc dimensionnée pour ça ; L attendu < 0,1 % (à mesurer, compteur `routed_host` exposé).
+- Warp par seed avec vol de travail intra-bloc (`atomicAdd` smem sur l'index de seed) : les seeds d'une ancre ont des coûts très inégaux (mort à 10 sites vs vivant sur 35 k) ; une complétion q4 vivante = bloc entier sur la lentille.
+- Deux lots en vol (calcul sur le lot k pendant H2D du lot k+1 et D2H du lot k−1) ; `cudaEvent` par lot ; le thread exécuteur ne fait jamais `cudaDeviceSynchronize`.
+
+## 6. Modèle de temps chiffré (budgets, à mesurer par le banc contrebalancé)
+
+Hypothèses : GB202 ≈ 24 k cœurs à 2,5 GHz, ≈ 1 T tests de site/s effectifs sur pos coalescés (à mesurer par la sonde K2 seule), lectures d'index dans le L2 à 50 k.
+
+**50 k (48 fils, un device)** — par famille, lanes q3+q4 aujourd'hui / L7 budget :
+
+| Famille | ancres q3/q4 | cover moy. | sites-cover ×2 passes | lanes aujourd'hui | K0+K1 device | K2 cover+tests | K2 seeds/cœur (mesuré : k_scan 0,20 s / k_q4_core 7,5 s à réduire) | hôte clé/niveau | **L7 lanes** |
+|---|---|---|---|---|---|---|---|---|---|
+| uniform | 7,8 M / 9,2 M | 3200 | 110 G | 5,1–6,8 s | 0,1 s | 0,15 s | 0,2 + 2–4 s | 0,15 s | **2,5–4,5 s** |
+| terrain | 4,3 M / 5,4 M | ~3500 | 70 G | 8,5 s | 0,05 s | 0,1 s | 1–2 s | 0,03 s | **1,5–2,5 s** |
+| scanline | 9,9 M / 14,5 M | ~2000 | 100 G | 6,1 s | 0,1 s | 0,15 s | 1–2 s | 0,03 s | **1,5–2,5 s** |
+| eight_clusters | 41 M / 63 M (4,3 M covers) | 3200 | 30 G (+ histogrammes) | 14,8 s | 0,5 s (K1 lourd : |A|·|B|) | 0,1 s | 1–2 s | 0,15 s | **2–3 s** |
+
+Le poste incertain est `k_q4_core` : 7,5 s cumulés au reçu 12 pour une lane CPU de 3,0 s ; hypothèse = sous-occupation par lots de 48 exécuteurs synchrones, à requalifier : si la lane résidente ne descend pas sous 3 s à uniform, q4 device n'apporte rien à 50 k et la livraison L7b se juge à 10 M seulement. Le gain certain de L7a est la suppression de H2D 27,4 s + attente 42,2 s du chemin device actuel (le device devient viable, ce qu'il n'est pas aujourd'hui).
+
+**Mur 50 k** (uniform 57–62 s) : lanes 5–7 s → 2,5–4,5 s ; fold 27 s, prefiltre 7, census 4, digest 16 inchangés → **≈ 1,05–1,10×**, plafond Amdahl énoncé § 8. Terrain (lanes 52 %) : ≈ 1,6–1,9×.
+
+**200 k** (ancres ×4, cover ×1,9 ≈ 6000) : sites-cover ×7,6 ≈ 0,8 T → K2 cover 1 s ; seeds ×4 ; q4 core 8–16 s device-busy contre lane CPU 12–17 s (scanline lane q4 ~10 µs/seed) ; index 8 Mo. L7 lanes budget 10–20 s contre 25–45 s ; le reste du mur (fold/census/digest) domine toujours.
+
+**10 M dans le pipeline tuilé (ECHELLE.md)** : une tuile = un lot de rectangles groupés par seau Morton du milieu d'ancre (le centre d'une boule d'ancre (a,b) est à distance ≤ rayon de Jung du milieu ; la tuile porte donc les candidats d'un voisinage de seaux, le RLE par seau reste exact par la clé). Ancres q3 1,56 G, q4 1,84 G ; cover 35 k ; sites-cover ≈ 2 × 3,4 G × 35 k ≈ 240 T → **4–8 min** device (2 passes, en régime M ; queue en arène 1,8 To/s) ; K0+K1 : 400 M rectangles → 30 s device, **hôte 4 µs × 400 M = 1600 fil-s ≈ 35 s** à 48 fils ; seeds q3 17 G → 40 s ; q4 core 200 × (2–4 s) = **7–13 min** ; complétions/profondeur proportionnelles aux vivants (profondeur sur cover 35 k pour 8,8 M × 200 = 1,8 G candidates : 1,8 G × 35 k / (32 × 1 T/s) ≈ 30 min → **c'est le poste dominant à 10 M ; à traiter par la grille et par un test de profondeur borné aux classes radiales ≤ classe du centre**, à chiffrer en L7b) ; clé/niveau hôte 4,3 G × 0,3 µs / 48 ≈ 30 s ; D2H 4,3 G × 16 o = 69 Go ≈ 3 s. **Génération 10 M budget : 45–60 min device** contre ~2 h CPU (ECHELLE § 6), sur un mur de 6–7 h dominé par fold + census. 30 M : ×3,5 (ancres ×3, cover ×1,6) → 2,5–3,5 h, index 1,2 Go.
+
+## 7. L7c — census sur device (second étage, chiffré)
+
+Aujourd'hui : 21,6 M boules × 2 descentes, prefiltre 7,0 s + census 4,0 s à 48 fils, 21,4 M + 21,6 M allocations de pile (`census.hpp:80/121`). Device : **warp par boule**, pile de 64 entrées en smem par warp (dépassement → `routed_host`, fail-closed), expansion parallèle : les 32 lanes testent 32 nœuds de la pile par étape ; bornes séparables `AxisBounds` sans division : minimiseur entier t* de a·t² + b_i·t estimé en double puis évalué en DI128 aux entiers ⌊t̂⌋−1..⌊t̂⌋+1 bornés à [lo, hi] (exact : convexité + |t̂ − t*| < 1 garanti par t ∈ [0, 65535] et erreur relative 2^−52) ; feuille : `q4_power_d`/`q3_power_d`. Sortie : compte u64 (prefiltre) ou listes I/U bornées 9/12 en `i32` par boule (`BallData` réduit à 4 + 4 + 21 × 4 = 92 o, D2H), plafond dépassé → `unsupported_degeneracy` comme sur hôte. Les deux passes sont fusionnées en une descente (prefiltre = arrêt anticipé dès que la profondeur ≥ 9 est prouvée par range-add). Coût 50 k : 21,6 M × ~200 nœuds × 32 o = 140 Go depuis L2 (index 2 Mo) → **≈ 0,3–0,6 s** contre 11 s ; 10 M : 4,3 G × 200 × 32 o = 27 To en accès aléatoire GDDR ≈ **5–10 min** contre ~40–60 min hôte. Portes : listes I/U identiques par boule (ordre `u` croissant imposé, tri intra-warp), compteurs `nodes/leaf_tests/range_add_mass` (aujourd'hui non imprimés : à exposer d'abord côté CLI, prérequis L7c) comparés en classe « politique », mutants `census-skip-range-add`, `census-mn-strict`.
+
+## 8. Ce qui n'est PAS promis
+
+- Le mur 50 k uniform reste borné à **1,10×** tant que fold (27 s), prefiltre/census (11 s) et digest (16 s) sont hôte ; L7 ne touche ni au fold ni au digest (fold streamé et RLE par seau relèvent d'ECHELLE, pas de L7). Aucune promesse de « GPU 10× ».
+- `k_q4_core` à 7,5 s device n'est pas expliqué ; tant qu'une sonde à pleine occupation ne le ramène pas sous la lane CPU, L7b n'a pas de bénéfice à 50 k.
+- Le test de profondeur à 10 M (cover 35 k par candidate) est le poste dominant identifié et non résolu.
+- Aucun changement de `public_status` ; aucun digest « plausible » ; le device n'est jamais l'autorité : tout désaccord cpu/gpu est un bug device jusqu'à preuve d'une contre-fixture hôte.
+- Régime L (hôte) : sa fraction est mesurée, pas déclarée nulle.
+
+## 9. Plan de livraisons et portes
+
+**L7a — index résident + K0 + K1 + K2 q3 complet** (pin, reçu `receipts/lane_residente_L7a_<date>/`) :
+- Code : `gpu/resident_index.cuh`, `gpu/rect_kernels.cuh` (K0, K1), `gpu/anchor_lane_kernel.cuh<Q3>`, `lanes/device_sector.hpp`, `lanes/device_cell_grid.hpp`, `di_to_double_d`, `gpu/mutants_d.cuh` (`__constant__ u32 g_mutant_mask`, `MHGP5_MUTANT_D(name)` ; remplace le `(false)` sous `__CUDA_ARCH__` de mutants.hpp:67-68 — sans cela **aucun mutant device n'existe** aujourd'hui), exécuteur unique 3 flux, `q3_lane_resident.hpp` (préflight, routes, contrat de lot).
+- Portes CTest (`mhgp5_expect_code`, codes 0/1/2/3/4) : `digest_gate` cpu = gpu (5 familles × s 6/8/10 × n 8000/16000/32000, label `scale*`) ; `raw_order_gate` à T = 1 (vecteur entier, 4000/8000) ; `counters_gate=strict` (7 compteurs q3 + sortie anticipée) ; `lot_gate` (deux découpages) ; `bin_of`/`di_to_double`/`sector`/`grid` : fixtures d'égalité 10^7 + cas gravés (coordonnées exactes, milieux d'arrondi, covers = n) ; planchers `--min-anchors`, `--min-covers-M` (régime M exercé), `--min-seeds`, `--min-emis`, `--min-grids-built` > 0 contre le vert par vacuité ; mutants device tués (code 4) : `cover-sort-unstable`, `cover-drop-last-class`, `bin-off-by-one`, `w3-off-by-one`, `sector-sign-flip`, `grid-no-eps`, `seed-not-acute`, `l-hat-no-fallback`, `prefix-sum-off-by-one`, `overflow-drop`, `single-block` ; `--workers-gate` : nombre de SM actifs mesuré ; banc contrebalancé CPU/GPU **répété** (5 runs alternés cpu, gpu, cpu, gpu…, médiane et écart, reçu 11 comme témoin), rapporté par famille.
+- Verrou d'entrée : `sc.visits`, `cover_nodes`, `DepthStats` exposés par la CLI hôte d'abord (sinon rien à comparer).
+
+**L7b — q4 : cœur/corde/complétions/profondeur dans K2<Q4>** : `chord_pieces_d`, `seed_affine_d` q4, lentille en smem, complétions bloc/seed, profondeur inline ; portes : 22 compteurs, `raw_order_gate` q4, mutants `chord-sign-flip`, `jung-skip-fallback`, `completion-skip-exact-once`, `owner-wrong-pid`, `center-not-strict`, `depth-cover-prefix` ; sonde d'occupation `k_q4_core` (préalable : expliquer les 7,5 s) ; chiffrage 200 k et une tuile 10 M sur VM (session gardée, `TERMINATED` certifié).
+
+**L7c — census device** (§ 7), portes listes I/U par boule, mutants, banc.
+
+## 10. Verrous à poser aux auditeurs (`QUESTION_CLAUDE_LANE_RESIDENTE_*`)
+
+1. **Égalité du tri radial** : le counting sort par ballot + scan de chunks est-il accepté comme *le même* ordre que `anchor_cover_from_handles` (handles en ordre de pile, u croissant, stable par classe), ou exige-t-on que l'ordre interne soit déclaré « politique » et les compteurs de sortie anticipée sortis de la porte stricte ?
+2. **`di_to_double_d`** : fixture bit à bit (10^7 + milieux exacts + bornes 2^63, −2^127) suffit-elle, ou faut-il une preuve écrite de l'arrondi unique dans `docs/math/STATUT_PREUVES_ET_HEURISTIQUES.md` (statut `proof_internal`) ?
+3. **Bornes séparables sans division** (L7c) : accord sur l'argument convexité + |t̂ − t*| < 1 sur [0, 65535] ; fixture de la classe des cas où ⌊t̂⌋ ≠ t*.
+4. **Régime L (hôte)** : plancher sur la fraction max d'ancres routées hôte pour qu'une mesure GPU soit recevable (proposition : ≤ 1 % des sites-cover), sinon le banc est déclaré non comparatif.
+5. **Ordre brut** : confirmer que la porte `raw_order_gate` à T = 1 remplace l'égalité d'ordre brut à T > 1 (déjà non spécifiée) et que le multiensemble + digest sont la seule égalité exigée en production.
+6. **Mutants device** : accord sur le mécanisme `__constant__` (l'absence actuelle de mutants sous `__CUDA_ARCH__` est un trou à consigner dans `ETAT_COURANT.md`).
+7. **Tuile 10 M** : la définition « lot de rectangles par seau Morton du milieu d'ancre » garde-t-elle l'exactitude du RLE par seau du centre (ECHELLE T7) sans fusion k-aire supplémentaire, ou faut-il émettre le seau du centre calculé côté hôte à la clé ?
+8. **Profondeur à 10 M** : le filtre de profondeur à la génération n'est qu'un minorant ; accord pour le restreindre aux classes radiales ≤ classe du centre + rayon (borne prouvée à écrire) avant de compter sur un chiffrage.
+
+Fichiers de référence (chemins absolus) : `/workspaces/E-HGP/morsehgp3D_v5/src/lanes/device_forms.hpp`, `/workspaces/E-HGP/morsehgp3D_v5/src/gpu/q4_kernels.cuh`, `/workspaces/E-HGP/morsehgp3D_v5/src/gpu/q3_scan_kernel.cuh`, `/workspaces/E-HGP/morsehgp3D_v5/src/gpu/q4_core_shaped.hpp`, `/workspaces/E-HGP/morsehgp3D_v5/src/gpu/q4_completion_shaped.hpp`, `/workspaces/E-HGP/morsehgp3D_v5/src/lanes/edge_cover.hpp`, `/workspaces/E-HGP/morsehgp3D_v5/src/lanes/cell_grid.hpp`, `/workspaces/E-HGP/morsehgp3D_v5/src/lanes/sector_kill.hpp`, `/workspaces/E-HGP/morsehgp3D_v5/src/lanes/chord_kill.hpp`, `/workspaces/E-HGP/morsehgp3D_v5/src/pipeline/generate.hpp`, `/workspaces/E-HGP/morsehgp3D_v5/src/pipeline/candidates.hpp`, `/workspaces/E-HGP/morsehgp3D_v5/src/tree/cloud_index.hpp`, `/workspaces/E-HGP/morsehgp3D_v5/src/pipeline/census.hpp`, `/workspaces/E-HGP/morsehgp3D_v5/src/core/mutants.hpp`, `/workspaces/E-HGP/morsehgp3D_v5/docs/GPU.md`, `/workspaces/E-HGP/morsehgp3D_v5/docs/ECHELLE.md`.

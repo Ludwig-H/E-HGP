@@ -13,7 +13,16 @@
 #      aucun fichier contrat_*, statuts de conformite conserves ;
 #   4. codes de session non nuls -> jamais complete ;
 #   5. PIN DU PROTOCOLE : runner ou validateur modifie non commite -> refus ;
-#   6. statut sans manifeste de protocole -> jamais complete.
+#   6. statut sans manifeste de protocole -> jamais complete ;
+#   7. SCALE_THREADS a jeu reduit (SCALE_THREADS="1 2", une famille, n=400,
+#      repeats 1, inflight "1 2", digest "0 1" : 8 runs) : plan annonce,
+#      topologie gravee, statuts complets (fils, inflight, digest, commande,
+#      GNU time), validateur -> complete et tableau scale_threads_resume.txt
+#      SANS conclusion de speedup ; repeats 2 -> ordre CONTREBALANCE (1 2 puis
+#      2 1) verifie sur le plan ; puis les refus : digest different a 2 fils,
+#      ligne generation differente, inflight ignore par le pilote, digest
+#      imprime sans --digest, run annonce supprime, plan reordonne, topologie
+#      absente, parametre SCALE_* mal forme (refus code 2 AVANT tout run).
 # Codes : 0 conforme, 1 desaccord de scenario.
 set -euo pipefail
 
@@ -35,26 +44,69 @@ while [ $# -gt 0 ]; do
 done
 "$@"
 rc=$?
-echo "Maximum resident set size (kbytes): 300000" > "${out}"
+{
+  echo "	Command being timed: \"$*\""
+  echo "	User time (seconds): 0.10"
+  echo "	System time (seconds): 0.01"
+  echo "	Percent of CPU this job got: 99%"
+  echo "	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:00.11"
+  echo "	Maximum resident set size (kbytes): 300000"
+  echo "	Voluntary context switches: 1"
+  echo "	Exit status: ${rc}"
+} > "${out}"
 exit ${rc}
 EOS
 chmod +x "${WORK}/fake_time"
 
-# Faux pilote 50 k : compteurs v5 + digest ; FAIL_FAMILY -> 7, HANG_FAMILY -> timeout.
+# Faux pilote 50 k : SCHEMA COMPLET de production (identite depuis l'argv,
+# generation, ouvriers, temps, fold en vol, cardinalites K=1..10, digests
+# seulement sous --digest) ; FAIL_FAMILY -> 7, HANG_FAMILY -> timeout.
+# Mutants SCALE_THREADS : SCALE_DIGEST_DRIFT (digest different a 2 fils),
+# SCALE_GEN_DRIFT (compteurs de generation differents selon les fils),
+# SCALE_INFLIGHT_IGNORED (toujours 1 ordre en vol), SCALE_DIGEST_ALWAYS
+# (digests imprimes meme sans --digest).
 cat > "${WORK}/fake_probe" <<'EOS'
 #!/usr/bin/env bash
-fam=""; n=""
+fam=""; n=""; thr=1; infl=2; dig=0
 for a in "$@"; do
   case "$a" in
     --family=*) fam="${a#--family=}" ;;
     --n=*) n="${a#--n=}" ;;
+    --threads=*) thr="${a#--threads=}" ;;
+    --fold-inflight=*) infl="${a#--fold-inflight=}" ;;
+    --digest) dig=1 ;;
   esac
 done
 [ "${fam}" = "${FAIL_FAMILY:-}" ] && exit 7
 [ "${fam}" = "${HANG_FAMILY:-}" ] && sleep 30
-echo "famille=${fam} n=${n} coord=1 s=8 smax=11 seed=3 threads=1 emis=1 boules_uniques=42 mortes_profondeur=0 survivantes=42 census_int=1 census_shell=0 evenements=7 facettes=9 fusions=3 deltas=1 noeuds=1"
-echo "digest_balls=abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789"
-echo "digest_all=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+gen_w4=22860
+[ "${SCALE_GEN_DRIFT:-0}" = "1" ] && gen_w4=$((22860 + thr))
+[ "${SCALE_INFLIGHT_IGNORED:-0}" = "1" ] && infl=1
+echo "payload=mhgp5-forests-horizontal-v1 authority=status_terminal callbacks=provisional vertical_maps=none"
+echo "backend=cpu_reference"
+echo "profil=complet_k10"
+echo "famille=${fam} n=${n} coord=1 s=8 smax=11 seed=3 threads=${thr} emis=1 boules_uniques=42 mortes_profondeur=0 survivantes=42 census_int=1 census_shell=0 evenements=7 facettes=9 fusions=3 deltas=1 noeuds=1"
+echo "generation rect_alive=7379/14563/15374 ancres=11990/47282/53317 candidats=10982/32163/23942 tues_profondeur=0/388726/103000 ancres_w4=${gen_w4} ancres_w3=19562 ancres_secteurs=3061/5557 ancres_cellules=0/459 seeds_cellules=0/2382 grilles=0/536 seeds_core_tues=157009 seeds_corde_tues=130572 float_cert=7389726/6171068 repli=174685 jung=2255407/1473815/0"
+echo "ouvriers wspd=${thr}/${thr}/${thr} rects=${thr}/${thr}/${thr} rle=${thr} prefiltre=${thr} census=${thr} expansion=${thr} fold=${thr}"
+echo "temps_ms index=0.1 gen=5.0 (wspd 1.0/1.0/1.0 rects 1.0/1.0/1.0) rle=0.1 prefiltre=0.1 census=0.1 comptage=0.1 expansion=0.1 fold=1.0 (tri 0.1 intern 0.1 fusion 0.1 reduce 0.1) digest=0.1"
+echo "temps_mur_ms=$((100 / thr)).5 (etages A et B du fold pipelines : fold+digest ci-dessus sont des cumuls par etage, pas le mur)"
+echo "temps_fold_mur_ms=10.0 (etages A et B, fold_inflight=${infl}, pic_mesure_en_vol=1)"
+echo "rss_mb apres_generation=22 apres_rle=22 apres_prefiltre=24 apres_census=46 max_fold=62 fin=48"
+for k in $(seq 1 10); do
+  echo "cardinalites K=${k} evenements=$((k * 100)) facettes=$((k * 300)) deltas=$((k * 90)) attachements=$((k * 50)) fusions=$((k * 299)) noeuds=$((k * 40))"
+done
+if [ "${dig}" = "1" ] || [ "${SCALE_DIGEST_ALWAYS:-0}" = "1" ]; then
+  echo "digest_balls=abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789"
+  for k in $(seq 1 10); do
+    echo "digest_forest_K${k}=$(printf '%064d' "${k}")"
+  done
+  if [ "${SCALE_DIGEST_DRIFT:-0}" = "1" ] && [ "${thr}" = "2" ]; then
+    echo "digest_all=ffff56789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0"
+  else
+    echo "digest_all=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+  fi
+fi
+echo "rss_max_kb=62688"
 EOS
 chmod +x "${WORK}/fake_probe"
 
@@ -278,6 +330,96 @@ sed -i '/^protocol_manifest_sha256=/d' "${WORK}/out6/conf_uniform_n8000.status"
 if python3 "${HERE}/validate_v5_campaign.py" "${WORK}/out6" cafedeca beefbeef feedf00d 0 0 > "${WORK}/v6.log" 2>&1; then
   fail "scenario 6 : manifeste absent devait refuser"
 fi
+
+# ---- Scenario 7 : SCALE_THREADS a jeu reduit (8 runs) -> complete + resume.
+SCALE_ENV=(SCALE_THREADS="1 2" SCALE_FAMILIES=eight_clusters SCALE_N=400 SCALE_INFLIGHT="1 2" SCALE_DIGEST="0 1" SCALE_REPEATS=1)
+RC7=$(run_campaign "${WORK}/out7" "${SCALE_ENV[@]}")
+[ "${RC7}" -eq 0 ] || fail "scenario 7 : script distant rc=${RC7} ($(tail -3 "${WORK}/out7.log"))"
+[ "$(ls "${WORK}/out7"/scale_*.status 2>/dev/null | wc -l)" -eq 8 ] || fail "scenario 7 : 8 statuts scale_* attendus (2 fils x 2 inflight x 2 digest x 1 repetition)"
+[ -f "${WORK}/out7/topologie.txt" ] && grep -q '^nproc=' "${WORK}/out7/topologie.txt" || fail "scenario 7 : topologie.txt absente ou sans nproc"
+grep -q '^runs=8$' "${WORK}/out7/scale_threads_plan.txt" || fail "scenario 7 : plan annonce sans runs=8"
+ST7="${WORK}/out7/scale_eight_clusters_n400_t2_f2_d1_r1.status"
+for want in '^threads=2$' '^fold_inflight=2$' '^digest=1$' '^timing_scope=scale_threads$' '^commande=.*--threads=2 --fold-inflight=2 --digest$' '^seq=8$'; do
+  grep -qE "${want}" "${ST7}" || fail "scenario 7 : statut sans ${want}"
+done
+grep -q 'Elapsed (wall clock)' "${ST7}.time" || fail "scenario 7 : sortie complete de GNU time absente"
+grep -qE '^commande=.*--threads=1 --fold-inflight=1$' "${WORK}/out7/scale_eight_clusters_n400_t1_f1_d0_r1.status" || fail "scenario 7 : la commande digest=0 ne doit pas porter --digest"
+if ! python3 "${HERE}/validate_v5_campaign.py" "${WORK}/out7" cafedeca beefbeef feedf00d 0 0 > "${WORK}/v7.log" 2>&1; then
+  fail "scenario 7 : validateur a refuse le jeu reduit ($(cat "${WORK}/v7.log"))"
+fi
+grep -q 'scale_threads 8 runs annonces' "${WORK}/v7.log" || fail "scenario 7 : le validateur doit annoncer les 8 runs scale"
+RES7="${WORK}/out7/scale_threads_resume.txt"
+[ -f "${RES7}" ] || fail "scenario 7 : scale_threads_resume.txt absent"
+[ "$(grep -vc '^#' "${RES7}")" -eq 9 ] || fail "scenario 7 : 1 en-tete + 8 lignes (famille, fils, inflight, digest) attendues dans le resume"
+grep -qE '^eight_clusters	2	2	1	1	50\.5	50\.5	50\.5	' "${RES7}" || fail "scenario 7 : ligne de resume (eight_clusters, 2 fils, inflight 2, digest 1) absente ou mal formee"
+grep -v '^#' "${RES7}" | grep -qiE 'speedup|accelerat|gain' && fail "scenario 7 : le resume ne doit ecrire aucune conclusion de speedup"
+grep -q 'Aucune conclusion de speedup' "${RES7}" || fail "scenario 7 : l en-tete du resume doit dire qu aucune conclusion de speedup n est ecrite"
+
+# ---- Scenario 7bis : repeats=2 -> ordre CONTREBALANCE (1 2 puis 2 1) dans le plan, 16 runs.
+RC7b=$(run_campaign "${WORK}/out7b" "${SCALE_ENV[@]}" SCALE_REPEATS=2)
+[ "${RC7b}" -eq 0 ] || fail "scenario 7bis : rc=${RC7b}"
+ORDER7b="$(sed -n 's/^seq=[0-9]* name=scale_eight_clusters_n400_t\([0-9]*\)_f1_d0_r\([0-9]\).*/r\2t\1/p' "${WORK}/out7b/scale_threads_plan.txt" | tr '\n' ' ')"
+[ "${ORDER7b}" = "r1t1 r1t2 r2t2 r2t1 " ] || fail "scenario 7bis : ordre contrebalance attendu r1t1 r1t2 r2t2 r2t1, vu '${ORDER7b}'"
+[ "$(ls "${WORK}/out7b"/scale_*.status | wc -l)" -eq 16 ] || fail "scenario 7bis : 16 statuts attendus"
+python3 "${HERE}/validate_v5_campaign.py" "${WORK}/out7b" cafedeca beefbeef feedf00d 0 0 > "${WORK}/v7b.log" 2>&1 || fail "scenario 7bis : validateur a refuse ($(cat "${WORK}/v7b.log"))"
+grep -qE '^eight_clusters	1	1	0	2	' "${WORK}/out7b/scale_threads_resume.txt" || fail "scenario 7bis : le resume doit compter 2 runs par combinaison"
+
+# ---- Scenario 7ter : mutants du pilote -> refuses et NOMMES.
+scale_mutant() {
+  local label="$1" pattern="$2"; shift 2
+  local out="${WORK}/out7_${label}" rc
+  rc=$(run_campaign "${out}" "${SCALE_ENV[@]}" "$@")
+  if python3 "${HERE}/validate_v5_campaign.py" "${out}" cafedeca beefbeef feedf00d "${rc}" 0 > "${out}.vlog" 2>&1; then
+    fail "scenario 7ter (${label}) : devait etre refuse"
+  fi
+  grep -qE "${pattern}" "${out}.vlog" || fail "scenario 7ter (${label}) : le refus doit nommer '${pattern}' ($(cat "${out}.vlog"))"
+}
+scale_mutant digest_drift 'eight_clusters: digest_all DIFFERENT' SCALE_DIGEST_DRIFT=1
+scale_mutant gen_drift 'eight_clusters: ligne generation DIFFERENT' SCALE_GEN_DRIFT=1
+scale_mutant inflight_ignored 'fold_inflight imprime 1 != 2 demande' SCALE_INFLIGHT_IGNORED=1
+scale_mutant digest_always 'digest imprime alors que digest=0' SCALE_DIGEST_ALWAYS=1
+scale_mutant failed_run 'scale_eight_clusters_n400_t1_f1_d0_r1: code=7' FAIL_FAMILY=eight_clusters
+
+# ---- Scenario 7quater : mutations du reçu -> refusees (run annonce supprime, plan reordonne, topologie absente).
+cp -r "${WORK}/out7" "${WORK}/out7m1"; rm "${WORK}/out7m1/scale_eight_clusters_n400_t2_f1_d1_r1.status"
+if python3 "${HERE}/validate_v5_campaign.py" "${WORK}/out7m1" cafedeca beefbeef feedf00d 0 0 > "${WORK}/v7m1.log" 2>&1; then
+  fail "scenario 7quater : run annonce absent ACCEPTE"
+fi
+grep -q 'scale_eight_clusters_n400_t2_f1_d1_r1: .status ABSENT' "${WORK}/v7m1.log" || fail "scenario 7quater : le run annonce absent doit etre nomme"
+cp -r "${WORK}/out7" "${WORK}/out7m2"
+python3 - "${WORK}/out7m2/scale_threads_plan.txt" <<'PY'
+import sys
+p = sys.argv[1]
+lines = open(p).read().splitlines()
+i = [k for k, l in enumerate(lines) if l.startswith("seq=1 ")][0]
+lines[i], lines[i + 1] = lines[i + 1].replace("seq=2 ", "seq=1 "), lines[i].replace("seq=1 ", "seq=2 ")
+open(p, "w").write("\n".join(lines) + "\n")
+PY
+if python3 "${HERE}/validate_v5_campaign.py" "${WORK}/out7m2" cafedeca beefbeef feedf00d 0 0 > "${WORK}/v7m2.log" 2>&1; then
+  fail "scenario 7quater : plan reordonne (non contrebalance) ACCEPTE"
+fi
+grep -q 'sequence annoncee != sequence contrebalancee' "${WORK}/v7m2.log" || fail "scenario 7quater : le plan reordonne doit etre nomme"
+cp -r "${WORK}/out7" "${WORK}/out7m3"; rm "${WORK}/out7m3/topologie.txt"
+if python3 "${HERE}/validate_v5_campaign.py" "${WORK}/out7m3" cafedeca beefbeef feedf00d 0 0 > "${WORK}/v7m3.log" 2>&1; then
+  fail "scenario 7quater : topologie absente ACCEPTEE"
+fi
+grep -q 'topologie.txt: ABSENT' "${WORK}/v7m3.log" || fail "scenario 7quater : la topologie absente doit etre nommee"
+# Des runs scale_* sans plan annonce sont des fichiers inattendus, jamais un sous-ensemble juge.
+cp -r "${WORK}/out7" "${WORK}/out7m4"; rm "${WORK}/out7m4/scale_threads_plan.txt"
+if python3 "${HERE}/validate_v5_campaign.py" "${WORK}/out7m4" cafedeca beefbeef feedf00d 0 0 > "${WORK}/v7m4.log" 2>&1; then
+  fail "scenario 7quater : runs scale sans plan ACCEPTES"
+fi
+grep -q 'fichier inattendu' "${WORK}/v7m4.log" || fail "scenario 7quater : les runs sans plan doivent etre inattendus"
+
+# ---- Scenario 7quinquies : parametre SCALE_* mal forme -> refus code 2 AVANT tout run.
+RC7e=$(run_campaign "${WORK}/out7e" SCALE_THREADS="1 deux" SCALE_FAMILIES=eight_clusters SCALE_N=400 SCALE_REPEATS=1)
+[ "${RC7e}" -eq 2 ] || fail "scenario 7quinquies : refus code 2 attendu (rc=${RC7e})"
+[ "$(ls "${WORK}/out7e"/*.status 2>/dev/null | wc -l)" -eq 0 ] || fail "scenario 7quinquies : aucun run ne devait etre lance"
+RC7f=$(run_campaign "${WORK}/out7f" SCALE_THREADS="1 2" SCALE_INFLIGHT="0 1" SCALE_FAMILIES=eight_clusters SCALE_N=400 SCALE_REPEATS=1)
+[ "${RC7f}" -eq 2 ] || fail "scenario 7quinquies : inflight 0 hors domaine devait etre refuse (rc=${RC7f})"
+
+# ---- Scenario 7sexies : sans SCALE_THREADS, aucun fichier scale_*/topologie (phase strictement optionnelle).
+ls "${WORK}/out1"/scale_* "${WORK}/out1/topologie.txt" >/dev/null 2>&1 && fail "scenario 7sexies : la phase SCALE_THREADS ne doit rien produire quand elle n'est pas demandee"
 
 echo "selftest_campagne_v5 : violations=${BAD}"
 [ "${BAD}" -eq 0 ] || exit 1

@@ -5,13 +5,25 @@
 // fil d'execution (son propre flux CUDA) ; les tampons device croissent et
 // sont reutilises. Compile par nvcc seulement. Toute erreur CUDA est un refus
 // (exception std::runtime_error) — jamais un verdict invente.
+//
+// INSTRUMENT RECEVABLE (audit AUDIT_RENDEMENT_GPU_MULTICPU_20260828, § reception
+// de 63deda74) : toutes les durees de DeviceExecutorStats sont des SOMMES sur
+// les appels scan() de fils CONCURRENTS (`executor_ms_sum`) — aucune n'est un
+// mur et aucune ne se soustrait au mur de lane (t_rects_ms, imprime
+// `lane_wall_ms` par la CLI). Les etapes device (H2D, kernels, D2H) sont
+// mesurees par EVENEMENTS CUDA sur le flux de l'executeur et recoltees apres
+// les synchronisations qui existaient deja ; l'instrument n'ajoute aucune
+// synchronisation. Les temps hote (reservations, boucles) sont des
+// steady_clock entre deux points hote.
 #pragma once
 #include <chrono>
 
+#include <mutex>
 #include <stdexcept>
 #include <string>
 #include <vector>
 
+#include "device_stats.hpp"
 #include "q3_lane_batched.hpp"
 #include "q3_scan_kernel.cuh"
 
@@ -31,12 +43,17 @@ struct CudaEvent {
   CudaEvent(const CudaEvent&) = delete;
   CudaEvent& operator=(const CudaEvent&) = delete;
   void record(cudaStream_t s) { cuda_check(cudaEventRecord(e, s), "record"); }
+  // Valide seulement apres une synchronisation qui couvre les deux evenements.
   static float ms_between(const CudaEvent& a, const CudaEvent& b) {
     float ms = 0;
     cuda_check(cudaEventElapsedTime(&ms, a.e, b.e), "elapsed");
     return ms;
   }
 };
+
+inline double ms_host_since(std::chrono::steady_clock::time_point t0) {
+  return std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();
+}
 
 class Q3DeviceExecutor {
  public:
@@ -48,58 +65,78 @@ class Q3DeviceExecutor {
   Q3DeviceExecutor(const Q3DeviceExecutor&) = delete;
   Q3DeviceExecutor& operator=(const Q3DeviceExecutor&) = delete;
 
-  double kernel_ms_total = 0;  // mur kernel (evenements sur le flux de l'executeur)
-  double h2d_ms_total = 0, d2h_ms_total = 0;  // murs transferts, separes (audit : jamais un cumul indistinct)
-  double wall_ms_total = 0;                    // mur HOTE de scan() entier (transferts + kernel + synchronisations)
-  u64 launches = 0;  // kernels lances (q3 : un par lot)
-  u64 lots = 0;      // lots scannes
+  DeviceExecutorStats total;  // cumul de cet executeur (un fil)
+  inline static ConcurrencyGauge gauge;  // partage par tous les executeurs q3 du processus
 
-  void scan(Q3Batch* b, u32 h3, bool nonstrict) {
+  // `d` (facultatif) recoit les mesures DE CE LOT (ajoutees) ; `total` les cumule toujours.
+  void scan(Q3Batch* b, u32 h3, bool nonstrict, DeviceExecutorStats* d = nullptr) {
     if (broken_) throw std::runtime_error("cuda : executeur q3 inutilisable apres une erreur d'allocation");
     std::string why;
     if (!validate_q3_batch(*b, &why)) throw std::invalid_argument(why);
     const size_t ns = b->u0.size(), nj = b->seeds.size(), na = b->anchors.size();
     b->verdicts.resize(nj);
-    ++lots;
-    if (nj == 0) return;
-    const auto t_wall = std::chrono::steady_clock::now();
-    reserve(ns, nj, na);
+    DeviceExecutorStats m;
+    m.lots = 1;
+    if (nj == 0) {
+      total.add(m);
+      if (d) d->add(m);
+      return;
+    }
+    const ConcurrencyGauge::Scope active(gauge);
+    const auto t_scan = std::chrono::steady_clock::now();
+    {
+      const auto t_r = std::chrono::steady_clock::now();
+      reserve(ns, nj, na);
+      m.reserve_ms += ms_host_since(t_r);
+    }
     static_assert(sizeof(Q3BatchSeed) == sizeof(SeedJob), "Q3BatchSeed et SeedJob doivent avoir le meme layout");
     static_assert(sizeof(Q3BatchAnchor) == sizeof(AnchorRange), "layout des ancres");
     static_assert(sizeof(Q3BatchVerdict) == sizeof(SeedOut), "layout des verdicts");
-    CudaEvent e_h0, e_h1, e_k1, e_d1;
-    e_h0.record(stream_);
-    up(d_u0_, b->u0.data(), ns); up(d_u1_, b->u1.data(), ns); up(d_u2_, b->u2.data(), ns); up(d_q_, b->q.data(), ns);
-    up(d_jobs_, reinterpret_cast<const SeedJob*>(b->seeds.data()), nj);
-    up(d_anchors_, reinterpret_cast<const AnchorRange*>(b->anchors.data()), na);
-    e_h1.record(stream_);
+    const auto t_issue = std::chrono::steady_clock::now();
+    ev_h0_.record(stream_);
+    m.h2d_bytes += up(d_u0_, b->u0.data(), ns) + up(d_u1_, b->u1.data(), ns) + up(d_u2_, b->u2.data(), ns) + up(d_q_, b->q.data(), ns);
+    m.h2d_bytes += up(d_jobs_, reinterpret_cast<const SeedJob*>(b->seeds.data()), nj);
+    m.h2d_bytes += up(d_anchors_, reinterpret_cast<const AnchorRange*>(b->anchors.data()), na);
+    ev_h1_.record(stream_);
     const unsigned threads = 256, wpb = threads / 32;
     const unsigned blocks = (unsigned)((nj + wpb - 1) / wpb);
     k_scan<<<blocks, threads, 0, stream_>>>(d_jobs_, (unsigned)nj, d_anchors_, d_u0_, d_u1_, d_u2_, d_q_, h3, false, nonstrict,
                                             d_out_);
     cuda_check(cudaGetLastError(), "lancement k_scan");
-    e_k1.record(stream_);
+    m.launches += 1;
+    ev_k1_.record(stream_);
     cuda_check(cudaMemcpyAsync(b->verdicts.data(), d_out_, nj * sizeof(SeedOut), cudaMemcpyDeviceToHost, stream_), "verdicts");
-    e_d1.record(stream_);
-    cuda_check(cudaStreamSynchronize(stream_), "synchronisation");
-    h2d_ms_total += CudaEvent::ms_between(e_h0, e_h1);
-    kernel_ms_total += CudaEvent::ms_between(e_h1, e_k1);
-    d2h_ms_total += CudaEvent::ms_between(e_k1, e_d1);
-    wall_ms_total += std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t_wall).count();
-    ++launches;
+    m.d2h_bytes += nj * sizeof(SeedOut);
+    ev_d1_.record(stream_);
+    m.issue_ms += ms_host_since(t_issue);
+    {
+      const auto t_w = std::chrono::steady_clock::now();
+      cuda_check(cudaStreamSynchronize(stream_), "synchronisation");  // la synchronisation du contrat (deja presente)
+      m.wait_ms += ms_host_since(t_w);
+    }
+    // Recolte des evenements APRES la synchronisation existante.
+    m.h2d_ms += CudaEvent::ms_between(ev_h0_, ev_h1_);
+    m.k1_ms += CudaEvent::ms_between(ev_h1_, ev_k1_);
+    m.d2h1_ms += CudaEvent::ms_between(ev_k1_, ev_d1_);
+    m.executor_ms_sum += ms_host_since(t_scan);
+    total.add(m);
+    if (d) d->add(m);
   }
 
  private:
   cudaStream_t stream_{};
+  CudaEvent ev_h0_, ev_h1_, ev_k1_, ev_d1_;  // crees une fois par executeur (pas par lot)
   i64 *d_u0_ = nullptr, *d_u1_ = nullptr, *d_u2_ = nullptr, *d_q_ = nullptr;
   SeedJob* d_jobs_ = nullptr;
   AnchorRange* d_anchors_ = nullptr;
   SeedOut* d_out_ = nullptr;
   size_t cap_sites_ = 0, cap_jobs_ = 0, cap_anchors_ = 0;
 
+  // Copie H2D asynchrone ; rend les octets enfiles.
   template <class T>
-  void up(T* dst, const T* src, size_t n) {
+  u64 up(T* dst, const T* src, size_t n) {
     cuda_check(cudaMemcpyAsync(dst, src, n * sizeof(T), cudaMemcpyHostToDevice, stream_), "transfert");
+    return (u64)n * sizeof(T);
   }
   bool broken_ = false;
   // RESERVE TRANSACTIONNELLE : les nouveaux tampons sont alloues dans des
@@ -154,37 +191,27 @@ class Q3DeviceExecutor {
 };
 
 // Lane q3 complete avec l'executeur device : un executeur par fil (thread_local).
-// MURS PAR ETAPE d'un executeur device (cumul sur les fils ; instrument de
-// mesure, jamais un claim) : la somme des etapes est le mur de scan(), a
-// comparer au mur de la lane (rects) qui contient en plus l'assemblage hote.
-struct DeviceStageMs {
-  double h2d = 0, k1 = 0, d2h1 = 0, host1 = 0, k2 = 0, d2h2 = 0, host2 = 0, k3 = 0, d2h3 = 0, wall = 0;
-  void add(const DeviceStageMs& o) {
-    h2d += o.h2d; k1 += o.k1; d2h1 += o.d2h1; host1 += o.host1; k2 += o.k2; d2h2 += o.d2h2; host2 += o.host2; k3 += o.k3; d2h3 += o.d2h3; wall += o.wall;
-  }
-};
-
+// `kernel_ms` recoit la somme des durees d'evenements des KERNELS SEULS (q3 :
+// k_scan) sur tous les fils ; `stages` (facultatif) recoit le cumul complet
+// (DeviceExecutorStats) — sommes de temps-executeur, jamais un mur.
 inline void generate_q3_device(const CloudIndex& ix, const GenerateOptions& opt, std::vector<BallCandidate>* out,
                                GenerateStats* st, double* kernel_ms, u64* launches, BatchLimits lim = BatchLimits{},
-                               BatchStats* bs = nullptr, DeviceStageMs* stages = nullptr) {
+                               BatchStats* bs = nullptr, DeviceExecutorStats* stages = nullptr) {
   std::mutex mu;
+  Q3DeviceExecutor::gauge.reset_peak();
   generate_q3_batched_with(ix, opt, out, st, [&](Q3Batch* b, u32 h3, bool nonstrict) {
     thread_local Q3DeviceExecutor ex;
-    const double before_ms = ex.kernel_ms_total, before_h2d = ex.h2d_ms_total, before_d2h = ex.d2h_ms_total, before_wall = ex.wall_ms_total;
-    const u64 before_l = ex.launches;
-    ex.scan(b, h3, nonstrict);
+    DeviceExecutorStats d;
+    ex.scan(b, h3, nonstrict, &d);
     std::lock_guard<std::mutex> lk(mu);
-    *kernel_ms += ex.kernel_ms_total - before_ms;
-    *launches += ex.launches - before_l;
-    if (stages) {
-      DeviceStageMs d;
-      d.h2d = ex.h2d_ms_total - before_h2d;
-      d.k1 = ex.kernel_ms_total - before_ms;
-      d.d2h1 = ex.d2h_ms_total - before_d2h;
-      d.wall = ex.wall_ms_total - before_wall;
-      stages->add(d);
-    }
+    *kernel_ms += d.kernel_ms();
+    *launches += d.launches;
+    if (stages) stages->add(d);
   }, lim, bs);
+  if (stages) {
+    const u32 p = Q3DeviceExecutor::gauge.read_peak();
+    if (p > stages->peak_concurrent) stages->peak_concurrent = p;
+  }
 }
 #endif  // __CUDACC__
 

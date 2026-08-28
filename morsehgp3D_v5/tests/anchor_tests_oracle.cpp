@@ -28,6 +28,9 @@ using namespace mhgp5;
 namespace {
 u64 mism_onoff = 0, jneg = 0, sign_mism = 0, sign_checked = 0, killed_w3 = 0, killed_s3 = 0, killed_s4 = 0, anchors = 0;
 u64 killed_c3 = 0, killed_c4 = 0, seeds_c3 = 0, seeds_c4 = 0;  // grille de cellules (theoreme 10.5), seuil 0 : grille sur toute ancre
+// Mode FORCE (cell_min_sites = 0) : la grille est CONSTRUITE sur toute ancre survivante des pretests
+// (V15 des auditeurs : le seuil 0 ne suffisait pas, ratio et near_m restaient actifs) — compte de vacuite.
+u64 grids_attempted = 0, grids_built = 0, grid_missing = 0;
 int sgn128(i128 v) { return v < 0 ? -1 : v > 0 ? 1 : 0; }
 
 void oracle_cloud(const CloudIndex& ix) {
@@ -35,7 +38,7 @@ void oracle_cloud(const CloudIndex& ix) {
   const u64 h3 = lane_h(Lane::kQ3, smax), h4 = lane_h(Lane::kQ4, smax);
   const bool float_on = float_filter_runtime_enabled();
   generate_detail::AnchorScratch sc;
-  sc.cell_min_sites = 0;  // la grille de cellules sur TOUTE ancre : ON/OFF la juge aussi
+  sc.cell_min_sites = 0;  // mode FORCE : la grille de cellules est construite sur TOUTE ancre survivante (ratio et near_m ignores) : ON/OFF la juge aussi
   const i32 m = (i32)ix.upos.size();
   for (i32 ua = 0; ua < m; ++ua)
     for (i32 ub = ua + 1; ub < m; ++ub) {
@@ -57,6 +60,9 @@ void oracle_cloud(const CloudIndex& ix) {
           killed_s3 += son.anchors_killed_sectors[1];
           killed_c3 += son.anchors_killed_cells[1];
           seeds_c3 += son.seeds_killed_cells[1];
+          grids_attempted += son.grids_attempted[1];
+          grids_built += son.grids_built[1];
+          if (son.anchors_killed_w3 + son.anchors_killed_sectors[1] == 0 && son.grids_built[1] != 1) ++grid_missing;
         } else {
           generate_detail::process_anchor_q4(ix, sc, ua, ub, pa, pb, D2, h4, float_on, false, false, false, &on, &son, generate_detail::AnchorPretests::kApply);
           sc.affine_filled = false;
@@ -64,6 +70,9 @@ void oracle_cloud(const CloudIndex& ix) {
           killed_s4 += son.anchors_killed_sectors[2];
           killed_c4 += son.anchors_killed_cells[2];
           seeds_c4 += son.seeds_killed_cells[2];
+          grids_attempted += son.grids_attempted[2];
+          grids_built += son.grids_built[2];
+          if (son.anchors_killed_w4 + son.anchors_killed_sectors[2] == 0 && son.grids_built[2] != 1) ++grid_missing;
           jneg += soff.invariant_jneg + son.invariant_jneg;
         }
         // (1) meme multiensemble (tri canonique puis comparaison).
@@ -130,12 +139,15 @@ int main(int argc, char** argv) {
     oracle_cloud(ix);
   }
   std::printf("anchor_tests_oracle ancres=%llu desaccords_on_off=%llu J<0=%llu signes=%llu/%llu W3=%llu secteurs_q3=%llu secteurs_q4=%llu "
-              "cellules_ancres=%llu/%llu cellules_seeds=%llu/%llu\n",
+              "cellules_ancres=%llu/%llu cellules_seeds=%llu/%llu grilles_tentees=%llu construites=%llu manquantes=%llu\n",
               (unsigned long long)anchors, (unsigned long long)mism_onoff, (unsigned long long)jneg, (unsigned long long)sign_mism,
               (unsigned long long)sign_checked, (unsigned long long)killed_w3, (unsigned long long)killed_s3, (unsigned long long)killed_s4,
-              (unsigned long long)killed_c3, (unsigned long long)killed_c4, (unsigned long long)seeds_c3, (unsigned long long)seeds_c4);
-  // Non-vacuite : chaque test (W3, secteurs q3/q4, grille de cellules en q3 ET en q4 : seeds tues) a agi au moins une fois.
-  if (killed_w3 == 0 || killed_s3 == 0 || killed_s4 == 0 || seeds_c3 == 0 || seeds_c4 == 0 || sign_checked < 1000 || anchors < 1000) {
+              (unsigned long long)killed_c3, (unsigned long long)killed_c4, (unsigned long long)seeds_c3, (unsigned long long)seeds_c4,
+              (unsigned long long)grids_attempted, (unsigned long long)grids_built, (unsigned long long)grid_missing);
+  // Non-vacuite : chaque test (W3, secteurs q3/q4, grille de cellules en q3 ET en q4 : seeds tues) a agi au moins une fois,
+  // et le mode force a construit UNE grille sur CHAQUE ancre survivante des pretests, dans chaque lane.
+  if (killed_w3 == 0 || killed_s3 == 0 || killed_s4 == 0 || seeds_c3 == 0 || seeds_c4 == 0 || sign_checked < 1000 || anchors < 1000 ||
+      grid_missing != 0 || grids_built != grids_attempted || grids_built < anchors) {
     std::printf("VACUITE\n");
     return 3;
   }

@@ -77,6 +77,19 @@ int main(int argc, char** argv) {
   cmp("anchors_killed_sectors", sp.anchors_killed_sectors[2], sb.anchors_killed_sectors[2]);
   cmp("anchors_killed_cells", sp.anchors_killed_cells[2], sb.anchors_killed_cells[2]);
   cmp("seeds_killed_cells", sp.seeds_killed_cells[2], sb.seeds_killed_cells[2]);
+  // Grilles : tentees (politique), construites (build reussi), toutes mortes — les lanes par lots ne construisent
+  // JAMAIS une grille deux fois (jeton kAlreadyAppliedWithGrid sur la route trop grande).
+  cmp("grids_attempted", sp.grids_attempted[2], sb.grids_attempted[2]);
+  cmp("grids_built", sp.grids_built[2], sb.grids_built[2]);
+  cmp("grids_all_dead", sp.grids_all_dead[2], sb.grids_all_dead[2]);
+  if (sp.grids_all_dead[2] != sp.anchors_killed_cells[2] || sp.grids_built[2] > sp.grids_attempted[2]) {
+    std::printf("INVARIANT : grilles toutes mortes %llu != ancres tuees %llu, ou construites %llu > tentees %llu\n",
+                (unsigned long long)sp.grids_all_dead[2], (unsigned long long)sp.anchors_killed_cells[2], (unsigned long long)sp.grids_built[2],
+                (unsigned long long)sp.grids_attempted[2]);
+    return 3;
+  }
+  std::printf("grilles q4 : tentees=%llu construites=%llu toutes_mortes=%llu seeds_tues=%llu\n", (unsigned long long)sp.grids_attempted[2],
+              (unsigned long long)sp.grids_built[2], (unsigned long long)sp.grids_all_dead[2], (unsigned long long)sp.seeds_killed_cells[2]);
   cmp("seeds", sp.seeds[1], sb.seeds[1]);
   cmp("seeds_killed_core", sp.seeds_killed_core, sb.seeds_killed_core);
   cmp("seeds_killed_chord", sp.seeds_killed_chord, sb.seeds_killed_chord);

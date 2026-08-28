@@ -13,18 +13,22 @@
 // la porte de conformite.
 #pragma once
 
+#include <algorithm>
+#include <atomic>
 #include <chrono>
+#include <condition_variable>
 #include <cstdio>
+#include <deque>
+#include <exception>
 #include <functional>
 #include <memory>
-#include <string>
-#include <exception>
-#include <thread>
 #include <mutex>
-#include <deque>
-#include <condition_variable>
+#include <stdexcept>
+#include <string>
+#include <thread>
 #include <vector>
 
+#include "../core/mutants.hpp"
 #include "../tree/cloud_index.hpp"
 #include "digest.hpp"
 #include "expand.hpp"
@@ -32,16 +36,44 @@
 
 namespace mhgp5 {
 
+// Phases de l'etage B d'un ordre K, OBSERVEES par `RunOptions::on_fold_phase`
+// (instrument, jamais une garde) :
+//   kStageABegin   fil principal : expansion + preparation de l'ordre K commencent ;
+//   kStageAFailed  fil principal : l'etage A de K a produit un defaut (invariant
+//                  ou refus) — les ordres en vol vont etre draines, pas annules ;
+//   kReduceBegin   fil B de K : reduction (+ digest) commencee ;
+//   kReduceEnd     fil B de K : reduction terminee, en attente de son tour ;
+//   kReduceFailed  fil B de K : exception de reduction/digest CONSERVEE dans le
+//                  slot, en attente de son tour (aucun ordre inferieur annule) ;
+//   kPublished     fil B de K : publication terminee (callback compris) ;
+//   kNotPublished  fil B de K : pas de publication (defaut decide a son tour,
+//                  ou annule par un defaut d'ordre inferieur).
+enum class FoldPhase : u8 { kStageABegin, kStageAFailed, kReduceBegin, kReduceEnd, kReduceFailed, kPublished, kNotPublished };
+
+// Domaine de `RunOptions::fold_inflight` : [1, kFoldInflightMax]. Toute autre
+// valeur est REFUSEE (invalid_input) avant tout calcul, jamais ramenee en
+// silence a une valeur valide (une option hors profil n'est pas une mesure).
+inline constexpr int kFoldInflightMax = 16;
+
 struct RunOptions {
   i64 s = 8;
   u64 smax = 11;
   int threads = 1;
   size_t shell_cap = 12;
   bool digest = false;
-  // Ordres K dont la reduction (etage B, sequentielle par ordre) peut etre en
-  // vol simultanement ; la publication reste dans l'ordre des K et la sortie
-  // bit-identique ; residence bornee a fold_inflight + 1 ordres.
+  // Ordres K dont l'etage B (reduction sequentielle par ordre, signature,
+  // publication) peut etre en vol simultanement, dans [1, kFoldInflightMax] ;
+  // la publication reste dans l'ordre des K et la sortie bit-identique ;
+  // residence bornee a fold_inflight + 1 ordres. Le pic reellement atteint est
+  // MESURE (`RunResult::peak_fold_inflight`), jamais declare.
   int fold_inflight = 2;
+  // Observateur des phases du fold (vide : rien). Appele HORS de tout verrou,
+  // depuis le fil principal (kStageA*) ou depuis le fil B de l'ordre concerne
+  // (les autres phases), donc potentiellement depuis plusieurs fils a la fois :
+  // l'observateur se synchronise lui-meme. Il peut bloquer (les portes s'en
+  // servent pour forcer un entrelacement) ; une exception qu'il leve est
+  // traitee comme une exception de l'ordre observe (propagee apres jonction).
+  std::function<void(u64 K, FoldPhase phase)> on_fold_phase;
   size_t cell_grid_min_sites = kCellGridMinSites;  // grille de cellules (generate.hpp) ; SIZE_MAX : jamais (mesure contrefactuelle)
   // Appele pour chaque K croissant, AVANT liberation du resultat, depuis le
   // fil d'arriere-plan de cet ordre (un seul a la fois, dans l'ordre des K,
@@ -78,6 +110,10 @@ struct RunResult {
   double rss_mb[6] = {0, 0, 0, 0, 0, 0};  // paliers : apres generation, rle, prefiltre, census, max pendant le fold, fin
   double t_total_ms = 0;  // temps MUR de run_pipeline
   u64 fold_workers = 0, rle_workers = 0;
+  // Pic MESURE d'ordres simultanement en vol dans l'etage B (du demarrage du
+  // fil de reduction a la fin de sa publication ou de son abandon) ; toujours
+  // <= fold_inflight, et == 1 si fold_inflight == 1.
+  u64 peak_fold_inflight = 0;
 };
 
 namespace run_detail {
@@ -129,6 +165,10 @@ inline bool validate_run_options(const std::vector<InputPoint>& in, const RunOpt
   if (opt.s < 1) { *why = "invalid_input : separation s < 1"; return false; }
   if (opt.smax < 2 || opt.smax > kSmaxProfile) { *why = "invalid_input : smax hors du profil [2, 11]"; return false; }
   if (opt.threads < 1) { *why = "invalid_input : threads < 1"; return false; }
+  if (opt.fold_inflight < 1 || opt.fold_inflight > kFoldInflightMax) {
+    *why = "invalid_input : fold_inflight hors du domaine [1, " + std::to_string(kFoldInflightMax) + "]";
+    return false;
+  }
   if (opt.shell_cap < 4 || opt.shell_cap > kShellCapProfile) {
     *why = "invalid_input : plafond de coquille hors du profil [4, 12] (l'enumeration des plateaux indexe 2^|coquille|)";
     return false;
@@ -244,6 +284,29 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
   // (chaque reduce est deterministe et ne depend que de son ordre), la
   // residence est bornee a fold_inflight + 1 ordres. Les callbacks
   // s'executent depuis le fil de l'ordre publie, jamais deux a la fois.
+  //
+  // SURETE DES FILS (P1 de l'audit du 28 aout 2026) :
+  //   1. le slot d'un ordre est POSSEDE par `slots` AVANT le demarrage de son
+  //      fil : aucune fenetre ou un std::thread joignable serait detruit
+  //      (std::terminate) par l'echec d'une insertion ;
+  //   2. AUCUN `return rr` ni relance d'exception apres le premier lancement
+  //      ne precede la JONCTION EXPLICITE de tous les fils (`drain`) : le
+  //      joiner RAII ne suffit pas, car la valeur de retour est copiee ou
+  //      deplacee AVANT la destruction des locales (sans NRVO, `rr` serait
+  //      deplace pendant qu'un fil y ecrit) ; le joiner ne reste qu'un filet
+  //      de securite (annulation + jonction) pour un chemin d'exception que le
+  //      drain lui-meme n'aurait pas couvert ;
+  //   3. PREMIER DEFAUT DANS L'ORDRE DES K : chaque fil B conserve son verdict
+  //      (exception de reduction/digest/callback, ou statut d'invariant) dans
+  //      SON slot et ne le rend decisif qu'a SON tour de publication
+  //      (`next_publish == K`) — une exception d'un K superieur n'annule
+  //      jamais la publication d'un K inferieur ; un defaut d'etage A a l'ordre
+  //      K (fil principal) est lui aussi un defaut d'ordre K : les ordres en vol
+  //      (tous < K) sont DRAINES (publies ou decides a leur tour), et seul le
+  //      plus petit ordre en defaut fait foi (un defaut B inferieur l'emporte
+  //      sur le defaut A superieur). `pub_failed` n'est pose que par le slot
+  //      dont c'est le tour (ou par le filet RAII) : les ordres superieurs
+  //      s'arretent alors sans publier (`kNotPublished`).
   struct Stage {
     u64 K = 0;
     std::vector<ForestEvent> events;
@@ -252,141 +315,227 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
   struct BSlot {
     std::thread t;
     u64 K = 0;
+    bool decided = false;  // son tour est venu : `exc`/`status` font foi (sinon : annule, sans autorite)
     std::exception_ptr exc;
     PipelineStatus status = PipelineStatus::kCompleteRegular;
     std::string message;
   };
-  const int inflight = std::max(1, opt.fold_inflight);
+  const int inflight = opt.fold_inflight;  // valide dans [1, kFoldInflightMax] par validate_run_options
   std::deque<std::unique_ptr<BSlot>> slots;
   std::mutex pub_mutex;
   std::condition_variable pub_cv;
   u64 next_publish = 1;
-  bool pub_failed = false;
-  // CONTRAT D'EXCEPTION : une exception levee par `on_forest` (ou par l'etage
-  // B) est capturee dans son fil, TOUS les fils sont joints (le joiner RAII
-  // libere d'abord les ordres en attente de publication), puis elle est
-  // relancee par run_pipeline dans le fil appelant — jamais std::terminate.
-  // Le joiner agit aussi sur toute sortie anticipee du fil principal
-  // (exception ou refus de l'etage A compris).
+  // Pose sous `pub_mutex` (jamais de reveil perdu), mais ATOMIQUE pour que le
+  // fil principal puisse le lire sans prendre le verrou de publication, tenu
+  // pendant tout un callback (qui peut bloquer longtemps : les portes s'en servent).
+  std::atomic<bool> pub_failed{false};
+  std::atomic<u64> b_inflight{0}, b_peak{0};  // ordres en vol dans l'etage B ; pic MESURE
+  // Filet RAII (annulation + notification + jonction), NORMALEMENT INACTIF :
+  // tous les chemins de sortie post-lancement drainent explicitement avant de
+  // retourner ou de relancer. Il ne joue que si le drain lui-meme est
+  // interrompu par une exception (jonction impossible) — jamais std::terminate.
   struct BJoiner {
     std::deque<std::unique_ptr<BSlot>>& s;
     std::mutex& m;
     std::condition_variable& cv;
-    bool& failed;
+    std::atomic<bool>& failed;
     ~BJoiner() {
       {
         std::lock_guard<std::mutex> lk(m);
-        failed = true;
+        failed.store(true);
       }
       cv.notify_all();
       for (auto& b : s)
         if (b->t.joinable()) b->t.join();
     }
   } bjoiner{slots, pub_mutex, pub_cv, pub_failed};
+  const auto phase = [&](u64 K, FoldPhase p) {
+    if (opt.on_fold_phase) opt.on_fold_phase(K, p);
+  };
   // Le fil principal n'ecrit que dans ses propres cumuls ; les cumuls des
   // fils d'arriere-plan (t_fold_*, digests, cartes, totaux) ne sont ecrits
   // que sous le verrou de publication et lus apres le dernier join.
   double t_prepare_total_ms = 0;
-  // Joint le plus ancien ordre en vol et propage son verdict (le premier
-  // defaut dans l'ordre des K fait foi ; les ordres suivants sont joints par
-  // le joiner sans publier).
+  // Verdict global : le premier defaut dans l'ordre des K (B decide a son tour,
+  // ou A du fil principal — toujours d'ordre superieur aux slots en vol).
+  std::exception_ptr first_exc;
+  PipelineStatus first_status = PipelineStatus::kCompleteRegular;
+  std::string first_message;
+  bool have_first = false;
+  // Joint le plus ancien ordre en vol et RETIENT son verdict s'il est le premier
+  // (les slots sont en ordre de K ; un slot non decide a ete annule par un
+  // defaut inferieur deja retenu et n'a aucune autorite). Ne relance rien :
+  // toute relance attend la jonction de TOUS les fils.
   const auto reap_front = [&]() -> bool {
     std::unique_ptr<BSlot> b = std::move(slots.front());
     slots.pop_front();
-    b->t.join();
-    if (b->exc) std::rethrow_exception(b->exc);
-    if (b->status != PipelineStatus::kCompleteRegular) {
-      rr.status = b->status;
-      rr.message = b->message;
-      return false;
+    if (b->t.joinable()) b->t.join();
+    if (!have_first && b->decided && (b->exc || b->status != PipelineStatus::kCompleteRegular)) {
+      have_first = true;
+      first_exc = b->exc;
+      first_status = b->status;
+      first_message = b->message;
     }
-    return true;
+    return !have_first;
+  };
+  const auto drain = [&]() {
+    while (!slots.empty()) (void)reap_front();
+    rr.peak_fold_inflight = b_peak.load();
   };
   const auto t_fold_wall = std::chrono::steady_clock::now();
-  for (u64 K = 1; K <= rr.kmax_eff; ++K) {
-    auto st = std::make_unique<Stage>();
-    st->K = K;
-    const auto t_k = std::chrono::steady_clock::now();
-    expand_events_k(ix, balls, K, rr.kmax_eff, opt.threads, &st->events, &rr.expand);
-    rr.t_expand_ms += ms(t_k);
-    if (st->events.size() != kc[K].events) {
-      rr.status = PipelineStatus::kInvariantViolated;
-      rr.message = "invariant : comptage par K != expansion (K=" + std::to_string(K) + ")";
-      return rr;
-    }
-    const auto t_f = std::chrono::steady_clock::now();
-    st->prep = prepare_fold(st->events, opt.threads);
-    t_prepare_total_ms += ms(t_f);
-    if (!st->prep.r.refusal.empty()) {  // impossible apres la garde amont ; traite en invariant
-      rr.status = PipelineStatus::kInvariantViolated;
-      rr.message = "invariant : refus de fold apres la garde de capacite (K=" + std::to_string(K) + ")";
-      return rr;
-    }
-    if ((int)slots.size() >= inflight && !reap_front()) return rr;
-    auto slot = std::make_unique<BSlot>();
-    slot->K = K;
-    BSlot* sp = slot.get();
-    slot->t = std::thread([&rr, &opt, &dg_all, &pub_mutex, &pub_cv, &next_publish, &pub_failed, sp, st = std::move(st)]() mutable {
-      try {
+  std::exception_ptr main_exc;  // exception du fil principal (etage A ou lancement d'un fil)
+  PipelineStatus a_status = PipelineStatus::kCompleteRegular;  // defaut d'etage A (ordre courant)
+  std::string a_message;
+  try {
+    for (u64 K = 1; K <= rr.kmax_eff; ++K) {
+      if (pub_failed.load()) break;  // un defaut inferieur est decide : ne plus lancer d'ordre (lecture sans verrou)
+      phase(K, FoldPhase::kStageABegin);
+      auto st = std::make_unique<Stage>();
+      st->K = K;
+      const auto t_k = std::chrono::steady_clock::now();
+      expand_events_k(ix, balls, K, rr.kmax_eff, opt.threads, &st->events, &rr.expand);
+      rr.t_expand_ms += ms(t_k);
+      bool count_mismatch = st->events.size() != kc[K].events;
+      if (MHGP5_MUTANT("fold-inject-a-failure-k2") && K == 2) count_mismatch = true;  // echec d'etage A injecte a K=2
+      if (count_mismatch) {
+        a_status = PipelineStatus::kInvariantViolated;
+        a_message = "invariant : comptage par K != expansion (K=" + std::to_string(K) + ")";
+        phase(K, FoldPhase::kStageAFailed);
+        break;
+      }
+      const auto t_f = std::chrono::steady_clock::now();
+      st->prep = prepare_fold(st->events, opt.threads);
+      t_prepare_total_ms += ms(t_f);
+      if (!st->prep.r.refusal.empty()) {  // impossible apres la garde amont ; traite en invariant
+        a_status = PipelineStatus::kInvariantViolated;
+        a_message = "invariant : refus de fold apres la garde de capacite (K=" + std::to_string(K) + ")";
+        phase(K, FoldPhase::kStageAFailed);
+        break;
+      }
+      if ((int)slots.size() >= inflight && !reap_front()) break;
+      // Le slot appartient au conteneur AVANT le demarrage du fil (surete 1).
+      slots.push_back(std::make_unique<BSlot>());
+      BSlot* sp = slots.back().get();
+      sp->K = K;
+      sp->t = std::thread([&rr, &opt, &dg_all, &pub_mutex, &pub_cv, &next_publish, &pub_failed, &b_inflight, &b_peak, sp,
+                           st = std::move(st)]() mutable {
         const u64 K = st->K;
-        const auto t_r = std::chrono::steady_clock::now();
-        ForestResult r = reduce_fold(std::move(st->prep));
-        const double t_fold_local = run_detail::ms(t_r);
+        // Comptage des ordres en vol (demarrage -> fin de publication/abandon).
+        struct Inflight {
+          std::atomic<u64>& cur;
+          std::atomic<u64>& peak;
+          Inflight(std::atomic<u64>& c, std::atomic<u64>& p) : cur(c), peak(p) {
+            const u64 now = cur.fetch_add(1) + 1;
+            u64 seen = peak.load();
+            while (seen < now && !peak.compare_exchange_weak(seen, now)) {
+            }
+          }
+          ~Inflight() { cur.fetch_sub(1); }
+        } inflight_guard{b_inflight, b_peak};
+        const auto observe = [&](FoldPhase p) {
+          if (!opt.on_fold_phase) return;
+          try {
+            opt.on_fold_phase(K, p);
+          } catch (...) {
+            if (!sp->exc) sp->exc = std::current_exception();
+          }
+        };
+        ForestResult r;
         std::string dg;
-        double t_dg = 0;
-        if (opt.digest) {
-          const auto t_d = std::chrono::steady_clock::now();
-          dg = digest_forest_v4((u32)K, r);
-          t_dg = run_detail::ms(t_d);
+        double t_fold_local = 0, t_dg = 0;
+        try {
+          observe(FoldPhase::kReduceBegin);
+          const auto t_r = std::chrono::steady_clock::now();
+          r = reduce_fold(std::move(st->prep));
+          t_fold_local = run_detail::ms(t_r);
+          if (MHGP5_MUTANT("fold-inject-b-exception-k3") && K == 3)
+            throw std::runtime_error("mutant fold-inject-b-exception-k3 : exception de reduction (K=3)");
+          if (opt.digest) {
+            const auto t_d = std::chrono::steady_clock::now();
+            dg = digest_forest_v4((u32)K, r);
+            t_dg = run_detail::ms(t_d);
+          }
+        } catch (...) {
+          sp->exc = std::current_exception();
         }
+        observe(sp->exc ? FoldPhase::kReduceFailed : FoldPhase::kReduceEnd);
+        // SON TOUR : seul l'ordre `next_publish` decide ; un defaut conserve
+        // ici n'a annule personne jusqu'a present.
         std::unique_lock<std::mutex> lk(pub_mutex);
-        pub_cv.wait(lk, [&] { return pub_failed || next_publish == K; });
-        if (pub_failed) return;
-        rr.t_fold_ms += t_fold_local;
-        rr.t_fold_sort_ms += r.t_sort_ms;
-        rr.t_fold_intern_ms += r.t_intern_ms;
-        rr.t_fold_merge_ms += r.t_merge_ms;
-        rr.t_fold_reduce_ms += r.t_reduce_ms + r.t_partition_ms;
-        rr.fold_workers = std::max(rr.fold_workers, r.workers);
-        if (r.attach_violations || r.birth_violations || r.partition_violations) {
-          sp->status = PipelineStatus::kInvariantViolated;
-          sp->message = "invariant : violations de roles ou de partition (K=" + std::to_string(K) + ")";
-          pub_failed = true;
+        pub_cv.wait(lk, [&] { return pub_failed.load() || next_publish == K; });
+        if (pub_failed.load()) {  // un ordre INFERIEUR a decide un defaut : abandon sans autorite
           lk.unlock();
-          pub_cv.notify_all();
+          observe(FoldPhase::kNotPublished);
           return;
         }
-        rr.cards[K] = KCardinalities{st->events.size(), r.facets, r.deltas.size(), r.new_attachments, r.fusions, r.nodes};
-        rr.total_events += st->events.size();
-        rr.total_facets += r.facets;
-        rr.total_fusions += r.fusions;
-        rr.total_deltas += r.deltas.size();
-        rr.total_nodes += r.nodes;
-        if (opt.digest) {
-          rr.digest_forest[K] = dg;
-          dg_all.add(dg);
-          rr.t_digest_ms += t_dg;
+        sp->decided = true;
+        if (!sp->exc && (r.attach_violations || r.birth_violations || r.partition_violations)) {
+          sp->status = PipelineStatus::kInvariantViolated;
+          sp->message = "invariant : violations de roles ou de partition (K=" + std::to_string(K) + ")";
         }
-        if (opt.on_forest) opt.on_forest(K, st->events, r);
-        rr.rss_mb[4] = std::max(rr.rss_mb[4], run_detail::rss_mb_now());
+        if (sp->exc || sp->status != PipelineStatus::kCompleteRegular) {
+          pub_failed.store(true);  // premier defaut dans l'ordre des K : les ordres superieurs n'ont plus de tour
+          lk.unlock();
+          pub_cv.notify_all();
+          observe(FoldPhase::kNotPublished);
+          return;
+        }
+        try {
+          rr.t_fold_ms += t_fold_local;
+          rr.t_fold_sort_ms += r.t_sort_ms;
+          rr.t_fold_intern_ms += r.t_intern_ms;
+          rr.t_fold_merge_ms += r.t_merge_ms;
+          rr.t_fold_reduce_ms += r.t_reduce_ms + r.t_partition_ms;
+          rr.fold_workers = std::max(rr.fold_workers, r.workers);
+          rr.cards[K] = KCardinalities{st->events.size(), r.facets, r.deltas.size(), r.new_attachments, r.fusions, r.nodes};
+          rr.total_events += st->events.size();
+          rr.total_facets += r.facets;
+          rr.total_fusions += r.fusions;
+          rr.total_deltas += r.deltas.size();
+          rr.total_nodes += r.nodes;
+          if (opt.digest) {
+            rr.digest_forest[K] = dg;
+            dg_all.add(dg);
+            rr.t_digest_ms += t_dg;
+          }
+          if (opt.on_forest) opt.on_forest(K, st->events, r);
+          rr.rss_mb[4] = std::max(rr.rss_mb[4], run_detail::rss_mb_now());
+        } catch (...) {  // exception du callback (ou d'une publication) : defaut de CET ordre, a son tour
+          sp->exc = std::current_exception();
+          pub_failed.store(true);
+          lk.unlock();
+          pub_cv.notify_all();
+          observe(FoldPhase::kNotPublished);
+          return;
+        }
         next_publish = K + 1;
         lk.unlock();
         pub_cv.notify_all();
         // Liberation : evenements et resultat de cet ordre.
         st.reset();
-      } catch (...) {
-        sp->exc = std::current_exception();
-        {
-          std::lock_guard<std::mutex> lk(pub_mutex);
-          pub_failed = true;
-        }
-        pub_cv.notify_all();
-      }
-    });
-    slots.push_back(std::move(slot));
+        observe(FoldPhase::kPublished);
+      });
+    }
+  } catch (...) {
+    main_exc = std::current_exception();
   }
-  while (!slots.empty())
-    if (!reap_front()) return rr;
+  // JONCTION EXPLICITE de tous les fils AVANT tout retour ou relance (surete 2),
+  // puis ARBITRAGE (surete 3) : le plus petit ordre en defaut fait foi — un
+  // defaut B des ordres en vol (tous inferieurs a l'ordre courant du fil
+  // principal), sinon le defaut A ou l'exception du fil principal.
+  drain();
+  if (have_first) {
+    if (first_exc) std::rethrow_exception(first_exc);
+    rr.status = first_status;
+    rr.message = first_message;
+    return rr;
+  }
+  if (main_exc) std::rethrow_exception(main_exc);
+  if (a_status != PipelineStatus::kCompleteRegular) {
+    rr.status = a_status;
+    rr.message = a_message;
+    return rr;
+  }
   rr.t_fold_wall_ms = ms(t_fold_wall);
   rr.t_fold_ms += t_prepare_total_ms;
   std::vector<BallData>().swap(balls);
@@ -447,7 +596,8 @@ inline void print_run(std::FILE* out, const char* family, int n, int coord, long
                rr.t_fold_reduce_ms, rr.t_digest_ms);
   std::fprintf(out, "temps_mur_ms=%.1f (etages A et B du fold pipelines : fold+digest ci-dessus sont des cumuls par etage, pas le mur)\n",
                rr.t_total_ms);
-  std::fprintf(out, "temps_fold_mur_ms=%.1f (etages A et B, %d ordre(s) en vol)\n", rr.t_fold_wall_ms, std::max(1, opt.fold_inflight));
+  std::fprintf(out, "temps_fold_mur_ms=%.1f (etages A et B, fold_inflight=%d, pic_mesure_en_vol=%llu)\n", rr.t_fold_wall_ms,
+               opt.fold_inflight, (unsigned long long)rr.peak_fold_inflight);
   std::fprintf(out, "rss_mb apres_generation=%.0f apres_rle=%.0f apres_prefiltre=%.0f apres_census=%.0f max_fold=%.0f fin=%.0f\n",
                rr.rss_mb[0], rr.rss_mb[1], rr.rss_mb[2], rr.rss_mb[3], rr.rss_mb[4], rr.rss_mb[5]);
   for (u64 K = 1; K <= rr.kmax_eff; ++K)

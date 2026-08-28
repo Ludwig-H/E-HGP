@@ -21,6 +21,20 @@
 #   2. CONTRAT 50 000 POINTS (mesure, jamais un claim) : `mhgp5 --digest` a
 #      n=50000 sur les quatre familles, THREADS fils (defaut nproc), digests
 #      et RSS graves — ces digests deviennent la reference v5 a 50 k.
+#
+# PHASE OPTIONNELLE SCALE_THREADS (P0 de l'audit « rendement GPU et
+# multi-CPU » du 28 aout 2026) : activee par SCALE_THREADS="1 2 4 8 16 24 32 48"
+# (liste de fils). Pour chaque (famille, fils, inflight, digest) le binaire CPU
+# est execute `--threads=<fils> --fold-inflight=<inflight> [--digest]`, en ordre
+# CONTREBALANCE (liste des fils dans l'ordre donne aux repetitions impaires,
+# inversee aux repetitions paires : schema ABBA par bloc (famille, inflight,
+# digest)). Le plan complet est ANNONCE avant le premier run
+# (scale_threads_plan.txt), la topologie gravee une fois (topologie.txt),
+# chaque run grave .txt, .status (commande, fils, inflight, digest, repetition,
+# sequence, pin) et la sortie complete de GNU time (.status.time). Le
+# validateur exige la presence de tous les runs annonces, code 0, memes digests
+# (digest=1) et memes compteurs de travail par famille ; il ne conclut JAMAIS
+# sur une acceleration.
 set -euo pipefail
 
 SOURCE_COMMIT="${1:?source_commit requis}"
@@ -34,20 +48,55 @@ RUN_TIMEOUT="${RUN_TIMEOUT:-7200}"
 TIME_BIN="${TIME_BIN:-/usr/bin/time}"
 THREADS="${THREADS:-$(nproc)}"
 FAMILIES="${FAMILIES:-uniform terrain eight_clusters scanline_single_pass}"
+# Parametres de la phase SCALE_THREADS (vide = phase non executee).
+SCALE_THREADS="${SCALE_THREADS:-}"
+SCALE_FAMILIES="${SCALE_FAMILIES:-eight_clusters scanline_single_pass}"
+SCALE_N="${SCALE_N:-50000}"
+SCALE_INFLIGHT="${SCALE_INFLIGHT:-1 2 3}"
+SCALE_DIGEST="${SCALE_DIGEST:-0 1}"
+SCALE_REPEATS="${SCALE_REPEATS:-2}"
+SCALE_RUN_TIMEOUT="${SCALE_RUN_TIMEOUT:-${RUN_TIMEOUT}}"
 
 test -x "${TIME_BIN}" || {
   echo "REFUS : GNU time requis (${TIME_BIN}) pour une campagne a RSS mesure" >&2
   exit 2
 }
 test -f "${RECEIPT}" || { echo "REFUS : reçu de conformite absent (${RECEIPT})" >&2; exit 2; }
+# REFUS AVANT TOUT RUN d'un parametre SCALE_* mal forme : une liste vide ou
+# non entiere ne doit pas se decouvrir apres des heures de conformite.
+if [ -n "${SCALE_THREADS}" ]; then
+  scale_refuse() { echo "REFUS : parametre SCALE_THREADS — $1" >&2; exit 2; }
+  for t in ${SCALE_THREADS}; do
+    [[ "${t}" =~ ^[1-9][0-9]*$ ]] || scale_refuse "fils '${t}' non entier >= 1"
+  done
+  for i in ${SCALE_INFLIGHT}; do
+    [[ "${i}" =~ ^[1-9][0-9]*$ ]] || scale_refuse "inflight '${i}' non entier >= 1 (le domaine 0 n'est pas une mesure)"
+  done
+  for d in ${SCALE_DIGEST}; do
+    [ "${d}" = "0" ] || [ "${d}" = "1" ] || scale_refuse "digest '${d}' hors {0,1}"
+  done
+  for f in ${SCALE_FAMILIES}; do
+    [[ "${f}" =~ ^[a-z][a-z0-9_]*$ ]] || scale_refuse "famille '${f}' mal formee"
+  done
+  [[ "${SCALE_N}" =~ ^[1-9][0-9]*$ ]] || scale_refuse "n '${SCALE_N}' non entier"
+  [[ "${SCALE_REPEATS}" =~ ^[1-9][0-9]*$ ]] || scale_refuse "repeats '${SCALE_REPEATS}' non entier >= 1"
+  [[ "${SCALE_RUN_TIMEOUT}" =~ ^[1-9][0-9]*$ ]] || scale_refuse "timeout '${SCALE_RUN_TIMEOUT}' non entier"
+  [ -n "${SCALE_FAMILIES// /}" ] || scale_refuse "liste de familles vide"
+  [ -n "${SCALE_INFLIGHT// /}" ] || scale_refuse "liste inflight vide"
+  [ -n "${SCALE_DIGEST// /}" ] || scale_refuse "liste digest vide"
+fi
 mkdir -p "${OUT_DIR}"
 
+# run_one NAME SCOPE CMD... : un run transactionnel. RUN_THREADS (defaut
+# THREADS) est le nombre de fils grave ; EXTRA_STATUS (lignes cle=valeur,
+# vide par defaut) est ajoute au statut ; RUN_TIMEOUT_ONE (defaut RUN_TIMEOUT)
+# borne ce run. La commande exacte est gravee (commande=).
 run_one() {
   local name="$1" scope="$2"; shift 2
   local out="${OUT_DIR}/${name}.txt" status="${OUT_DIR}/${name}.status"
   local rc=0 t0 t1 hwm=""
   t0=$(date +%s)
-  "${TIME_BIN}" -v -o "${status}.time" timeout "${RUN_TIMEOUT}" "$@" >"${out}" 2>&1 || rc=$?
+  "${TIME_BIN}" -v -o "${status}.time" timeout "${RUN_TIMEOUT_ONE:-${RUN_TIMEOUT}}" "$@" >"${out}" 2>&1 </dev/null || rc=$?
   t1=$(date +%s)
   hwm=$(grep -oE 'Maximum resident set size[^0-9]*[0-9]+' "${status}.time" 2>/dev/null | grep -oE '[0-9]+$' || true)
   {
@@ -55,7 +104,9 @@ run_one() {
     printf 'duree_s=%d\n' "$((t1 - t0))"
     printf 'peak_rss_kb=%s\n' "${hwm:-inconnu}"
     printf 'timing_scope=%s\n' "${scope}"
-    printf 'threads=%s\n' "${THREADS}"
+    printf 'threads=%s\n' "${RUN_THREADS:-${THREADS}}"
+    if [ -n "${EXTRA_STATUS:-}" ]; then printf '%s\n' "${EXTRA_STATUS}"; fi
+    printf 'commande=%s\n' "$*"
     printf 'source_commit=%s\n' "${SOURCE_COMMIT}"
     printf 'source_payload_sha256=%s\n' "${SOURCE_PAYLOAD_SHA256}"
     printf 'protocol_manifest_sha256=%s\n' "${PROTOCOL_MANIFEST_SHA256}"
@@ -151,5 +202,78 @@ if [ -x "${GPU_BIN:-/nonexistent}" ] && grep -q '^code=0$' "${OUT_DIR}/gpu_lane.
   done
 else
   echo "REFUS : pilote CUDA absent (${GPU_BIN:-}) ou lane device / mutant non conformes — contrats device non executes"
+fi
+
+# PHASE 4 (optionnelle, SCALE_THREADS non vide) — campagne SCALE_THREADS
+# CONTREBALANCEE : threads x fold_inflight x digest, repetee, moteur CPU
+# seulement (le pilote produit, jamais --gpu). Mesure, jamais un claim :
+# aucune acceleration n'est conclue ici ni par le validateur.
+if [ -n "${SCALE_THREADS}" ]; then
+  # Liste des fils dans l'ordre donne, puis inversee (repetitions paires).
+  SCALE_THREADS_FWD="$(printf '%s\n' ${SCALE_THREADS} | tr '\n' ' ' | sed 's/ $//')"
+  SCALE_THREADS_REV="$(printf '%s\n' ${SCALE_THREADS} | tac | tr '\n' ' ' | sed 's/ $//')"
+  # TOPOLOGIE, une fois par campagne : coeurs, lscpu, affinite du runner,
+  # memoire, noyau. Le processus mesure herite de cette affinite.
+  {
+    echo "nproc=$(nproc)"
+    echo "affinite_runner=$(taskset -pc $$ 2>/dev/null | sed 's/.*: //' || echo inconnue)"
+    echo "date_utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+    echo "uname=$(uname -srm)"
+    grep -E '^(MemTotal|MemAvailable)' /proc/meminfo 2>/dev/null || true
+    echo "--- lscpu ---"
+    lscpu 2>/dev/null || echo "lscpu indisponible"
+    echo "--- affinite (taskset -pc) ---"
+    taskset -pc $$ 2>/dev/null || echo "taskset indisponible"
+  } > "${OUT_DIR}/topologie.txt.tmp"
+  mv "${OUT_DIR}/topologie.txt.tmp" "${OUT_DIR}/topologie.txt"
+  # PLAN ANNONCE avant le premier run : parametres et sequence exacte. Le
+  # validateur recalcule la sequence contrebalancee depuis les parametres et
+  # exige un statut par run annonce (jamais un sous-ensemble).
+  SCALE_PLAN="${OUT_DIR}/scale_threads_plan.txt"
+  {
+    echo "scale_threads_plan=v1"
+    echo "threads_list=${SCALE_THREADS_FWD}"
+    echo "families=$(printf '%s\n' ${SCALE_FAMILIES} | tr '\n' ' ' | sed 's/ $//')"
+    echo "n=${SCALE_N}"
+    echo "inflight_list=$(printf '%s\n' ${SCALE_INFLIGHT} | tr '\n' ' ' | sed 's/ $//')"
+    echo "digest_list=$(printf '%s\n' ${SCALE_DIGEST} | tr '\n' ' ' | sed 's/ $//')"
+    echo "repeats=${SCALE_REPEATS}"
+    echo "run_timeout_s=${SCALE_RUN_TIMEOUT}"
+    echo "s=8 smax=11 seed=3"
+    seq_no=0
+    for r in $(seq 1 "${SCALE_REPEATS}"); do
+      if [ $((r % 2)) -eq 1 ]; then order="${SCALE_THREADS_FWD}"; else order="${SCALE_THREADS_REV}"; fi
+      for fam in ${SCALE_FAMILIES}; do
+        for infl in ${SCALE_INFLIGHT}; do
+          for dig in ${SCALE_DIGEST}; do
+            for t in ${order}; do
+              seq_no=$((seq_no + 1))
+              echo "seq=${seq_no} name=scale_${fam}_n${SCALE_N}_t${t}_f${infl}_d${dig}_r${r} family=${fam} threads=${t} inflight=${infl} digest=${dig} repeat=${r}"
+            done
+          done
+        done
+      done
+    done
+    echo "runs=${seq_no}"
+  } > "${SCALE_PLAN}.tmp"
+  mv "${SCALE_PLAN}.tmp" "${SCALE_PLAN}"
+  SCALE_RUNS="$(sed -n 's/^runs=//p' "${SCALE_PLAN}")"
+  echo "=== SCALE_THREADS : ${SCALE_RUNS} runs annonces (budget maximal $((SCALE_RUNS * SCALE_RUN_TIMEOUT)) s au timeout ${SCALE_RUN_TIMEOUT} s/run) ==="
+  while read -r line; do
+    case "${line}" in seq=*) ;; *) continue ;; esac
+    name="$(printf '%s\n' "${line}" | sed 's/.* name=\([^ ]*\).*/\1/')"
+    fam="$(printf '%s\n' "${line}" | sed 's/.* family=\([^ ]*\).*/\1/')"
+    t="$(printf '%s\n' "${line}" | sed 's/.* threads=\([^ ]*\).*/\1/')"
+    infl="$(printf '%s\n' "${line}" | sed 's/.* inflight=\([^ ]*\).*/\1/')"
+    dig="$(printf '%s\n' "${line}" | sed 's/.* digest=\([^ ]*\).*/\1/')"
+    r="$(printf '%s\n' "${line}" | sed 's/.* repeat=\([^ ]*\).*/\1/')"
+    seq_no="$(printf '%s\n' "${line}" | sed 's/^seq=\([^ ]*\).*/\1/')"
+    dig_arg=()
+    if [ "${dig}" = "1" ]; then dig_arg=(--digest); fi
+    RUN_THREADS="${t}" RUN_TIMEOUT_ONE="${SCALE_RUN_TIMEOUT}" \
+    EXTRA_STATUS="$(printf 'fold_inflight=%s\ndigest=%s\nfamily=%s\nn=%s\nrepeat=%s\nseq=%s' "${infl}" "${dig}" "${fam}" "${SCALE_N}" "${r}" "${seq_no}")" \
+      run_one "${name}" scale_threads \
+      "${PROBE_BIN}" "--family=${fam}" "--n=${SCALE_N}" --s=8 --smax=11 --seed=3 "--threads=${t}" "--fold-inflight=${infl}" ${dig_arg[@]+"${dig_arg[@]}"}
+  done < "${SCALE_PLAN}"
 fi
 echo "=== fin des runs (la validation locale decide du statut, jamais cette ligne) ==="

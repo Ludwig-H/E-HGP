@@ -21,6 +21,13 @@
 #  - deux campagnes (latence isolee / couverture contendue), concurrence
 #    pilotee par la memoire, pilotes VALIDES avant toute vague (script
 #    distant : gcp-migration/v5_campaign_remote.sh) ;
+#  - PHASE SCALE_THREADS OPTIONNELLE (P0 audit rendement du 28 aout 2026) :
+#    SCALE_THREADS="1 2 4 8 16 24 32 48" (et SCALE_FAMILIES, SCALE_N,
+#    SCALE_INFLIGHT, SCALE_DIGEST, SCALE_REPEATS, SCALE_RUN_TIMEOUT) sont
+#    transmis TELS QUELS au script distant, qui applique ses defauts ; vide
+#    = phase non executee. Dimensionner MAX_RUN_SECONDS sur le nombre de
+#    runs annonces (le script distant l'imprime) : la borne de duree de la VM
+#    coupe une campagne trop longue sans validation possible ;
 #  - RAPATRIEMENT TOUJOURS : le retour SSH de campagne est capture SANS
 #    declencher le trap, puis le scp est tente trois fois — une rupture
 #    SSH ne peut plus eteindre la VM avant la recolte des statuts ;
@@ -155,7 +162,7 @@ set +e
 "${SSH[@]}" "set -euo pipefail
   export PATH=\$HOME/.local/bin:\$PATH
   cd ~/v5scale
-  THREADS=48 EXTRA_N='${EXTRA_N:-}' EXTRA_FAMILIES='${EXTRA_FAMILIES:-uniform eight_clusters}' bash gcp-migration/v5_campaign_remote.sh ${SOURCE_COMMIT} ${SOURCE_PAYLOAD_SHA256} ${PROTOCOL_MANIFEST_SHA256}
+  THREADS=48 EXTRA_N='${EXTRA_N:-}' EXTRA_FAMILIES='${EXTRA_FAMILIES:-uniform eight_clusters}' SCALE_THREADS='${SCALE_THREADS:-}' SCALE_FAMILIES='${SCALE_FAMILIES:-}' SCALE_N='${SCALE_N:-}' SCALE_INFLIGHT='${SCALE_INFLIGHT:-}' SCALE_DIGEST='${SCALE_DIGEST:-}' SCALE_REPEATS='${SCALE_REPEATS:-}' SCALE_RUN_TIMEOUT='${SCALE_RUN_TIMEOUT:-}' bash gcp-migration/v5_campaign_remote.sh ${SOURCE_COMMIT} ${SOURCE_PAYLOAD_SHA256} ${PROTOCOL_MANIFEST_SHA256}
 " 2>&1 | tee -a "${LOG}"
 REMOTE_CAMPAIGN_RC=${PIPESTATUS[0]}
 set -e

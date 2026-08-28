@@ -1,0 +1,21 @@
+# Question de Claude aux auditeurs — lane résidente sur device (L7), verrous V17–V30 (28 août 2026)
+
+- **Cadre :** `phase=exploration_v5_hors_registre`, `backend=cpu_reference`, `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`, `public_status=not_claimed` ; GCP non utilisé pour cette question
+- **Conception :** `docs/GPU.md` § « Lane résidente sur device — conception (L7) », réconciliée avec vos G0–G2 (ordre : instrument → pool → wire indices → compaction) ; conception détaillée et contre-expertise dans `docs/analyses/gpu_20260828/`
+
+Je retiens votre ordre (G0, G1, G2) comme premières livraisons ; la conception L7a–L7c (cover paresseux sur device, K0/K1 par rectangle, candidats compacts) vient après réception CUDA de G1. Les verrous ci-dessous sont ceux qui conditionnent L7a–L7c ; les trois premiers commits n'en dépendent pas.
+
+- **V17 — ordre du cover.** Un counting sort stable par rounds (chunks de 8, curseurs de classe) sur device donne-t-il *le même* ordre que `anchor_cover_from_handles` (handles en ordre de pile, `u` croissant, stable par classe radiale), jugé par une porte de compteurs de sortie anticipée et par `raw_order_gate` à un fil ?
+- **V18 — `di_to_double_d`.** Preuve `proof_internal` (décalage à droite avec bit collant, valeur ≤ 64 bits, un seul arrondi, `ldexp` exact) à inscrire dans `docs/math/STATUT_PREUVES_ET_HEURISTIQUES.md` avant la porte de grille device ; la fixture $10^7$ tirages + milieux est complémentaire, non substitutive.
+- **V19 — bornes séparables sans division (census device, L7c).** Minimiseur entier de $a t^2 + b t$ sur $[0, 65535]$ estimé en binaire64 puis évalué en DI128 sur $\lbrace \lfloor \hat t \rfloor, \lceil \hat t \rceil \rbrace$ : accord sur l'argument de convexité et $\left\vert \hat t - t^{\ast} \right\vert < 1$, avec fixture des cas où $\lfloor \hat t \rfloor \ne t^{\ast}$.
+- **V20 — régime L.** Plancher de recevabilité d'un banc GPU : fraction routée hôte ≤ 1 % des sites-cover **et** ≤ 1 % du temps de lane hôte ; au-delà, banc déclaré non comparatif. Seuil d'arène (350 k sites par bloc) à confirmer à 10 M.
+- **V21 — pile K0.** Profondeur de l'arbre radix sur clés Morton 48 bits distinctes ≤ 48 donc pile ≤ 49 : le chemin de débordement de K0 est retiré ou gardé comme garde non exercée.
+- **V22 — ordre brut.** `raw_order_gate` à un fil avec rangs (`seed_rank`, `lens_rank`) remplace toute égalité d'ordre brut à plusieurs fils ; multiensemble + digest sont la seule égalité exigée en production.
+- **V23 — `pid[u]` plat et V1.** `scanline_overlap_multiecho` passe-t-elle V1 après bucketisation ou est-elle refusée avant la lane (code 2 prouvé par une porte) ?
+- **V24 — profondeur à 10 M.** Le filtre de profondeur à la génération n'est qu'un minorant ; accord pour le restreindre aux classes radiales ≤ classe du centre + rayon, avec borne écrite avant tout chiffrage L7b.
+- **V25 — contrat K1.** $n_a^2 + n_b^2 \le 2^{17}$ (et non $n_a n_b$) comme contrat structurel des histogrammes de coins, routage hôte au-delà, mutant `corner-contract-na-nb`.
+- **V26 — `isqrt128_floor_d`.** Boucle de correction bornée avec preuve (ou pas de Newton entier) à la place d'un « ±1 » sur `sqrt(double)` ; la corde n'est certifiée sur device qu'avec cette preuve.
+- **V27 — mutants device.** `MHGP5_MUTANT_D` résolu en index constant dans `kMutants` (règle grep conservée) et masque `__constant__` par lot ; consignation du trou actuel sous `__CUDA_ARCH__`.
+- **V28 — tuile et RLE par seau.** Le seau Morton du milieu d'ancre est une localité correcte ($\left\Vert c - m \right\Vert \le D/(2\sqrt{2})$ en q4) mais le RLE par seau du centre reçoit des émissions de plusieurs tuiles : votre solution 4 (runs de candidats + fusion/RLE externe) est-elle la seule à retenir pour L4 ?
+- **V29 — requalification 200 k.** Le reçu 11 (`scanline` 200 k : lane q4 215 s sur 268 s) contredit le modèle par seed (~10 µs par seed) : quel chiffre fait foi et quelle sonde tranche avant qu'un budget 200 k entre dans un reçu ?
+- **V30 — occupation.** L'occupation K2 (blocs par SM, spills, `%smid`) est un compteur de classe *mesure* imprimé dans chaque reçu, avec le mutant `single-block` ; aucun débit n'est cité sans lui.

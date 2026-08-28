@@ -21,6 +21,7 @@
 // completion explicite ; ce n'est pas le contrat actuel.
 #pragma once
 
+#include <bit>
 #include <limits>
 #include <mutex>
 #include <stdexcept>
@@ -139,13 +140,54 @@ struct BatchLimits {
   size_t pairs = kPairsPerLaunch;  // q4 seulement (estimation : seeds de l'ancre x sites de sa lentille)
   size_t device_min_sites = 1;
   size_t pretest_query_min_points = kPretestQueryMinPoints;  // politique des pretests (generate.hpp)
-  size_t cell_grid_min_sites = kCellGridMinSites;            // grille de cellules (generate.hpp)
+  // Grille de cellules : UNE seule autorite, GenerateOptions::cell_grid_min_sites
+  // (l'option CLI --cell-min-sites gouverne la production ET les lanes par
+  // lots/device ; 0 = mode force des tests) — aucun doublon ici.
+};
+
+// HISTOGRAMME PAR CLASSE log2 (instrument recevable, audit du 28 aout 2026 :
+// percentiles des lots sans allocation par lot). Classe 0 = valeur 0 ;
+// classe k >= 1 = [2^(k-1), 2^k). 65 compteurs fixes. Le quantile q est
+// rendu comme l'indice k de la classe qui contient la valeur de rang
+// ceil(q * n) (n = nombre d'echantillons) : la valeur est < 2^k et, si k >= 1,
+// >= 2^(k-1) — une borne, jamais une valeur interpolee.
+struct Log2Hist {
+  u64 count[65] = {};
+  u64 n = 0;
+  static int class_of(u64 v) {
+    if (v == 0) return 0;
+    const int k = 64 - std::countl_zero(v);
+    return MHGP5_MUTANT("log2hist-class-shift") ? (k < 64 ? k + 1 : k) : k;  // mutant : classe decalee d'un cran
+  }
+  void add(u64 v) { ++count[class_of(v)]; ++n; }
+  void add_from(const Log2Hist& o) {
+    for (int k = 0; k < 65; ++k) count[k] += o.count[k];
+    n += o.n;
+  }
+  // q dans ]0, 1] ; n == 0 rend 0 (aucun lot : classe de la valeur 0).
+  int quantile_class(double q) const {
+    if (n == 0) return 0;
+    u64 rank = (u64)(q * (double)n);
+    if ((double)rank < q * (double)n) ++rank;  // ceil
+    if (rank < 1) rank = 1;
+    if (rank > n) rank = n;
+    u64 cum = 0;
+    for (int k = 0; k < 65; ++k) {
+      cum += count[k];
+      if (cum >= rank) return k;
+    }
+    return 64;
+  }
 };
 
 // Mesures de lotissement d'une lane (par ouvrier, fusionnees par max/somme).
 struct BatchStats {
   u64 flushes = 0, max_lot_seeds = 0, max_anchor_seeds = 0, max_lot_sites = 0, max_anchor_sites = 0;
   u64 max_lot_pairs = 0, max_anchor_pairs = 0;  // q4
+  // Distribution des lots vides (un echantillon par flush) : seeds, sites et,
+  // en q4, paires estimees (seeds x sites de lentille) — p50/p95 par classe
+  // log2, le max exact est max_lot_*.
+  Log2Hist lot_seeds, lot_sites, lot_pairs;
   // Routage : `anchors_device` = ancres MATERIALISEES dans un lot device (avec
   // seeds) ; `anchors_host` = ancres traitees par le corps de production
   // (cover sous le seuil, OU ancre trop grande pour un lot : `anchors_oversized`,
@@ -162,6 +204,7 @@ struct BatchStats {
     max_anchor_sites = std::max(max_anchor_sites, o.max_anchor_sites);
     max_lot_pairs = std::max(max_lot_pairs, o.max_lot_pairs);
     max_anchor_pairs = std::max(max_anchor_pairs, o.max_anchor_pairs);
+    lot_seeds.add_from(o.lot_seeds); lot_sites.add_from(o.lot_sites); lot_pairs.add_from(o.lot_pairs);
   }
 };
 
@@ -207,24 +250,12 @@ inline void build_q3_batch(const CloudIndex& ix, const AliveRect& ar, const u64 
         if (k == 1) { ++ls->anchors_killed_w3; continue; }
         if (k == 2) { ++ls->anchors_killed_sectors[1]; continue; }
       }
-      // Grille de cellules (theoreme 10.5), comme en production : ancre entiere
-      // ou centre de chaque seed (les seeds tues ne sont jamais materialises).
-      sc.grid.built = false;
-      if (sc.cover.size() >= sc.cell_min_sites) {
-        size_t nacute = 0, near_m = 0;
-        for (const CoverPoint& cp : sc.cover) {
-          if (cp.u == ua || cp.u == ub) continue;
-          if (cell_grid_near_m(cp.dist2q, D2)) ++near_m;
-          if (is_acute_seed(pa, pb, ix.upos[(size_t)cp.u], D2, ix.point_id(ua), ix.point_id(ub), ix.point_id(cp.u))) ++nacute;
-        }
-        if (cell_grid_wanted(sc.cover.size(), nacute, near_m, h_of[1], sc.cell_min_sites, kCellGridSeedsRatioQ3)) {
-          ++ls->grids_built[1];
-          if (sc.grid.build(sc.cover, ix.upos, ua, ub, pa, pb, D2, 12, h_of[1]) && sc.grid.all_dead) {
-            ++ls->anchors_killed_cells[1];
-            continue;
-          }
-        }
-      }
+      // Grille de cellules (theoreme 10.5) — le MEME etage que la production
+      // (anchor_grid_stage : politique, construction, compteurs), une seule
+      // fois par ancre : ancre entiere ou centre de chaque seed (les seeds
+      // tues ne sont jamais materialises) ; `nseeds` = seeds aigus (preflight).
+      size_t nseeds = 0;
+      if (anchor_grid_stage(ix, sc, ua, ub, pa, pb, D2, Lane::kQ3, h_of[1], float_on, ls, &nseeds)) continue;
       const i64 d3[3] = {pb.x - pa.x, pb.y - pa.y, pb.z - pa.z};
       // PREFLIGHT (avant toute ecriture) : taille du cover, nombre de seeds
       // aigus ; une ancre sous le seuil de routage, ou TROP GRANDE pour un lot
@@ -232,16 +263,12 @@ inline void build_q3_batch(const CloudIndex& ix, const AliveRect& ar, const u64 
       // production ; sinon le lot est vide AVANT l'ajout qui le ferait
       // depasser (borne dure : un lot <= seuils, jamais seuil + ancre).
       const size_t nc = sc.cover.size();
-      size_t nseeds = 0;
-      for (const CoverPoint& cp : sc.cover) {
-        if (cp.u == ua || cp.u == ub) continue;
-        if (is_acute_seed(pa, pb, ix.upos[(size_t)cp.u], D2, ix.point_id(ua), ix.point_id(ub), ix.point_id(cp.u))) ++nseeds;
-      }
       const bool ignore_threshold = MHGP5_MUTANT("route-ignore-threshold");
       const bool oversized = nc > lim.sites || nseeds > lim.seeds || nc > (size_t)UINT32_MAX;
       if ((nc < lim.device_min_sites && !ignore_threshold) || oversized) {
         const u64 seeds_before_h = ls->seeds[0];
-        scan_anchor_q3(ix, sc, ua, ub, pa, pb, D2, h_of[1], float_on, nonstrict, lo, ls, AnchorPretests::kAlreadyApplied);
+        // Pretests ET grille deja appliques sur ce cover : le corps hote ne reconstruit rien.
+        scan_anchor_q3(ix, sc, ua, ub, pa, pb, D2, h_of[1], float_on, nonstrict, lo, ls, AnchorPretests::kAlreadyAppliedWithGrid);
         ++bs->anchors_host;
         if (oversized) ++bs->anchors_oversized;
         bs->seeds_host += ls->seeds[0] - seeds_before_h;
@@ -364,7 +391,7 @@ inline void generate_q3_batched_with(const CloudIndex& ix, const GenerateOptions
   std::vector<std::vector<BallCandidate>> louts(T);
   std::vector<GenerateStats> lst(T);
   std::vector<AnchorScratch> lsc(T);
-  for (AnchorScratch& x : lsc) x.cell_min_sites = lim.cell_grid_min_sites;
+  for (AnchorScratch& x : lsc) x.cell_min_sites = opt.cell_grid_min_sites;  // une seule autorite (GenerateOptions)
   std::vector<Q3Batch> lb(T);
   std::vector<BatchStats> lbs(T);
   const auto flush = [&](size_t t) {
@@ -372,6 +399,8 @@ inline void generate_q3_batched_with(const CloudIndex& ix, const GenerateOptions
     if (b.seeds.empty() && b.anchors.empty()) return;
     lbs[t].max_lot_seeds = std::max(lbs[t].max_lot_seeds, (u64)b.seeds.size());
     lbs[t].max_lot_sites = std::max(lbs[t].max_lot_sites, (u64)b.u0.size());
+    lbs[t].lot_seeds.add((u64)b.seeds.size());
+    lbs[t].lot_sites.add((u64)b.u0.size());
     ++lbs[t].flushes;
     scan(&b, (u32)h_of[1], nonstrict);
     emit_q3_batch(b, &louts[t], &lst[t]);

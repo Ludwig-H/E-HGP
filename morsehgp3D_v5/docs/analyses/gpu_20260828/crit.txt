@@ -1,0 +1,78 @@
+**Contre-expertise adverse de la conception L7 (pin 6576e44c)**
+
+Note : **5/10** — recevable comme *plan de livraison L7a* après corrections ; **non recevable comme chiffrage** (50 k comme 10 M). Détail ci-dessous, calculs refaits.
+
+---
+
+## A. Erreurs de chiffrage (refaites)
+
+**A1. Occupation : « 64 Ko de smem → 2 blocs/SM » est faux sur sm_120.** Le plafond de mémoire partagée par SM en cc 12.0 est de 100 Ko (99 Ko opt-in par bloc), pas 128 Ko (128 Ko est l'unifié L1+smem ; à vérifier par `cudaDevAttrMaxSharedMemoryPerMultiprocessor` en préflight, mais la table du guide de programmation donne 100 Ko pour 8.6/8.9/12.0). Conséquence : **1 bloc/SM, 188 blocs, 8 warps/SM = 12,5 % d'occupation** sur un kernel qui lit `pos[]` et fait des divisions 64 bits. `__launch_bounds__(256, 2)` plafonne à 128 registres/thread avec du DI128/U192/U320 en ligne : spills en mémoire locale garantis. L'arène « 376 blocs × 1 Mo » et tous les débits de § 6 sont calés sur une occupation qui n'existe pas.
+
+**A2. « 1 T tests de site/s » : 3–10× trop optimiste.** Par site : chargement 8 o, 3 soustractions et 3 produits i64 (≈ 4 instr 32 bits chacun), somme, comparaison, puis `bin_of` = **division u64 logicielle** (~70–100 instructions, `edge_cover.hpp:184` est une division i128 hôte). ≈ 40 instr/site avec réciproque, ≈ 120 sans. Débit entier GB202 ≈ 188 SM × 64 INT32/clk × 2,5 GHz ≈ 30 T instr/s crête → 0,25–0,75 T sites/s à pleine occupation ; à 12,5 % (A1) : **0,1–0,35 T/s**. Correctif exact et sans division : les 32 seuils `c·(bound+1)` (i64 < 2^44) précalculés par ancre en smem, `bin = #{c : 32·d2 ≥ c·(bound+1)}` par recherche binaire à 5 comparaisons — égal au floor hôte, prouvable en une ligne.
+
+**A3. Sites-cover ≠ sites balayés.** K2 balaie Σ `handle_points` (`visits`), pas le cover accepté ; le tableau § 6 compte 110 G sites *acceptés*. Le ratio `visits/cover` n'est ni imprimé ni connu (les chiffres de la lecture sont même incohérents : « Σ covers 2,82 G » contre 281 M points de handles × 3,56 ancres/rect ≈ 1,0 G visites, ce qui donnerait cover > visites, impossible). Avec un ratio de 2–5 et le débit de A2 : K2 cover à 50 k uniform = **1–3 s, pas 0,15 s**. La conception le sait (« verrou d'entrée : exposer `sc.visits` ») mais publie le tableau sans.
+
+**A4. Arène à 10 M : la matérialisation de la queue est le poste caché.** Cover moyen 35 k × 24 o (`CoverSiteD`) = 840 Ko *écrits en DRAM par ancre* ; 3,4 G ancres → **2,9 Po d'écritures** ; à 1,8 To/s crête : **27 min** rien que pour scatter les queues, avant toute lecture — contre « 4–8 min » pour tout K2. Ajoutez 2 passes × 240 T × 8 o = 1,9 Po de lectures avec un index de 400 Mo > L2 128 Mo (la localité par tuile est supposée, pas prouvée) : ≥ 18 min à débit crête. Le « jamais matérialisé côté hôte » devient « matérialisé côté device en GDDR », à 35 k sites dont 9,4 en moyenne servent. Il manque un cover paresseux (classes matérialisées à la demande : les tests d'ancre ne lisent que les classes 0..10, les seeds meurent à 9,4 sites).
+
+**A5. Régime L à 10 M : « < 0,1 % » est contredit par la moyenne.** Seuil arène 43 k sites contre cover **moyen** 35 k, max = n. La fraction d'ancres au-delà de 1,23× la moyenne d'une distribution à queue longue est de l'ordre de 20–40 %, et ce sont les plus chères (coût ∝ cover). Le verrou 4 (≤ 1 % des sites-cover routés hôte) serait **violé par construction** ; l'hôte hériterait de la majorité du travail. Dimensionner l'arène en sites (≥ 8 Mo/bloc → 188 × 8 = 1,5 Go, acceptable) ou en paresseux (A4).
+
+**A6. K1 : le contrat est sur la mauvaise quantité.** `corner_histograms` (`generate.hpp:196-211`) est **O(|A|² + |B|²)**, pas |A|·|B|. Un rectangle |A| = 10 k, |B| = 5 passe « |A|·|B| ≤ 2^16 » et coûte 10^8 `universal_over_corners`. Contrat à écrire sur na² + nb², thread par (ia, iz). Le « 0,5 s » eight_clusters n'a aucune base : Σ(na² + nb²) n'est pas mesuré.
+
+**A7. `isqrt128_floor_d` par « sqrt(double) puis ±1 » : faux.** `chord_kill.hpp:41-47` : v < 2^120 → r ≈ 2^60, erreur absolue de `sqrt((double)v)` ≈ 1,5·2^-53·2^60 ≈ **2^8–2^9**, d'où les boucles `while` hôte. Sur device : boucle bornée (≤ 2^10 pas, `di_mul_i64_i64(r, r)` valide car r < 2^63) avec preuve de la borne, ou un pas de Newton entier. Un ±1 laisse µ̂ faux → corde non conservatrice → **kill non certifié**.
+
+**A8. Bornes : 32·d2q < 2^41, pas 2^39** (d2q = |2z−(a+b)|² < 3·2^34). u64 suffit toujours ; corriger la preuve.
+
+**A9. Clé/niveau hôte à 0,3 µs.** `ball_key_reduce` = pgcd binaire de 5 i128 + `q4_form` i128 (déterminants 3×3) + 4 lectures aléatoires de `upos` (24 o) : 1–3 µs, et à 10 M l'index hôte (1,7 Go) n'est pas en cache : 4,3 G × 4 défauts × 100 ns / 48 ≈ 6 min. 50 k : 0,5–1,3 s (pas 0,15). Non bloquant, mais du même ordre que le gain revendiqué.
+
+**A10. Profondeur à 10 M sous-chiffrée ×4–6.** 1,8 G × 35 k = 63 T `q4_power_d` (DI128, ≥ 40 instr) : à 10–20 T instr/s effectifs, **2–3 h**, pas 30 min. Le poste est bien identifié comme dominant ; il est plus dominant que dit.
+
+**A11. Amdahl 50 k.** Uniform : 57–62 s, lanes 5,1–6,8 → même à 2,5–4,5 s le mur gagne 2,5–4,3 s = **1,04–1,08×** ; avec A2–A3 (lanes 3–6 s) : **1,02–1,04×**. Terrain 1,6–1,75×. Le « 1,10× » est la borne haute d'une hypothèse déjà optimiste.
+
+**A12. D2H « 69 Go ≈ 3 s » = 23 Go/s.** Le reçu 12 a mesuré 37 Go en 27,4 s (1,35 Go/s) sur le même bus. Pinned + gros blocs rend 20 Go/s plausible, mais c'est **à sonder isolément** avant d'entrer dans un tableau.
+
+**A13. Contrats de lot inconsistants.** 2^20 rects × (≥ 16, typiquement 30–60 handles/rect) = 30–60 M > 2^24 ; ancres/rect (eight_clusters : 41 M ancres) > 2^24 → lots scindés à 2^17–2^18 rects. Pas faux (« sinon scindé »), mais le tableau des tampons ne sera jamais exercé et le nombre de préflights/synchronisations est 4–8× celui supposé par le recouvrement 3 flux.
+
+## B. Suppositions non prouvées
+
+**B1. Tri par comptage « ballot + smem_cnt[8][32] + un `__syncthreads` » ne donne pas l'ordre stable hôte.** La position d'un site = offset de classe + nombre de sites de même classe *avant lui dans l'ordre canonique* : c'est un préfixe sur les **chunks** (35 k/32 = 1100), pas sur les 8 warps. Il faut : passe 1 histogramme global ; passe 2 par rounds de 8 chunks avec curseurs de classe et barrière par round (137 rounds à 35 k, 13 à 3200). Déterministe et égal à `edge_cover.hpp:181-188`, mais pas comme écrit. Et le mutant `cover-sort-unstable` ne se voit **que** sur les compteurs à sortie anticipée (le verdict est un compte) : il peut survivre à la porte digest.
+
+**B2. `raw_order_gate` sous-spécifiée.** Avec vol de travail intra-bloc sur les seeds (atomicAdd smem), l'ordre d'émission dans le tampon de 512 est non déterministe. Trier par (rect, ua, ub, ux, uy) **ne restitue pas** l'ordre hôte à un fil (ux, uy sont des ids, pas des rangs). Il faut le rang du seed dans le cover radial et le rang dans la lentille dans `CandTaggedD` (24 o, pas 20).
+
+**B3. Grille : le théorème 10.5 (eps de `locate`, `cell_grid.hpp:259`) suppose sept conversions correctement arrondies et une division IEEE.** Sur device `(double)i128` n'existe pas : la porte `grid` n'a de sens qu'après la porte `di_to_double_d` ; `-prec-div=true` doit être exigé explicitement (fast-math le coupe silencieusement ; tester `__CUDA_PREC_DIV__`).
+
+**B4. LPT sur log2(Σ handle_points) ne modélise pas le coût.** Le coût réel ≈ cover × (seeds vivants) ; un seed q4 vivant = un bloc sur la lentille. Une ancre cover = n avec quelques centaines de seeds vivants en fin de lot est le mur du lot ; la classe ne la voit pas.
+
+**B5. Pile K0.** Sur clés Morton 48 bits *distinctes*, la profondeur d'un arbre radix est ≤ 48 (préfixe strictement croissant) → pile ≤ 49 : la garde 64 est **prouvable** (bon), donc le chemin `kOverflowHost` de K0 est mort et **le mutant `overflow-drop` ne peut pas être exercé par K0** : il faut une fixture forçant l'overflow ailleurs (arène, na²+nb²).
+
+**B6. `bisector_basis` (`sector_kill.hpp:65-91`)** : boucle ≤ 128 par un seul thread, 255 fils inactifs, ~4 k cycles morts par ancre : à 3,4 G ancres / 188 SM ≈ 30 s à 10 M. Petit, mais absent.
+
+**B7. `pid[u]` plat** exige positions distinctes (V1) — à confirmer que la famille `scanline_overlap_multiecho` passe encore la précondition ou est refusée avant la lane.
+
+**B8. `di_to_double_d`** : la construction proposée est correcte et prouvable en cinq lignes : décalage à droite de k bits avec bit collant, valeur sur ≤ 64 bits, `(double)u64` correctement arrondi (64 ≥ 53 + 2 : garde + collant), puis `ldexp` exact. **Réponse au verrou 2 : écrire la preuve** (`proof_internal`), elle est gratuite ; la fixture seule ne couvre pas les 2^127 milieux.
+
+## C. Coûts cachés non chiffrés
+
+- Expansion hôte `CandD` → `BallCandidate` 144 o avant RLE : le pic 6,2 Go (50 k) et 623 Go (10 M) **reste** ; « candidat compact » est un gain de bus, pas de mémoire.
+- Deux descentes K0 par rectangle, deux passes cover avec d2q recalculé, préflights ×4–8 (A13).
+- Recalcul de la clé = 4 lectures aléatoires d'`upos` par candidat (A9).
+- Rectangles à 10 M : 564 k à 8 k × 1250 ≈ 700 M, pas 400 M → hôte 60 s, K0 double.
+- Ancres routées hôte (A5) : le corps hôte rebâtit le cover sur l'hôte — c'est le poste de 0,6 h d'ECHELLE, réintroduit.
+
+## D. Plafonds
+
+- 50 k : ≤ 1,08× (A11) ; avec A2–A3 ≈ 1,03×. Le gain **certain** de L7a est structurel (fin des 48 exécuteurs synchrones, 27,4 + 42,2 s de bus/attente supprimés), pas un gain de mur.
+- 10 M : génération 2 h sur 6–7 h → même à zéro, 1,4×. Avec A4 (27 + 18 min), A5 (hôte), A10 (2–3 h) : génération device **≥ 2,5–3 h ≈ CPU**. L7b à 10 M n'a **pas de bénéfice démontré** tant que la profondeur n'est pas bornée (verrou 8) et l'arène redimensionnée.
+
+## E. Risques de non-réception
+
+- Mutants device par `__constant__ g_mutant_mask` cassent la règle « `grep MHGP5_MUTANT` = `kMutants` » (`mutants.hpp:12-13`) : il faut `MHGP5_MUTANT_D("nom")` résolu en index constexpr, sinon l'auditeur refuse. Le trou actuel (`(false)` sous `__CUDA_ARCH__`, ligne 126-127) est bien à consigner dans `ETAT_COURANT.md`.
+- `bin-off-by-one`, `cover-drop-last-class` : tués seulement si une fixture *prouve* qu'ils changent digest ou compteur strict ; assertion à ce stade.
+- Banc non comparatif sans `routed_host` mesuré (verrou 4) — la conception se l'impose, bien, mais A5 le rend probablement infranchissable à 10 M.
+- Verrou 7 : la tuile par seau Morton du *milieu* est correcte comme localité (|c−m| ≤ D/(2√2) pour q4, ok), mais le RLE par seau du **centre** reçoit des émissions de plusieurs tuiles → il faut émettre le seau du centre à la clé (hôte) et partitionner globalement, exactement la variante append-only qu'ECHELLE § 4.3 [audit] a déjà retenue. Répondre « le RLE reste exact par la clé » est vrai et insuffisant.
+- `k_q4_core` 7,5 s inexpliqué : tant qu'une sonde isolée ne le ramène pas sous la lane CPU, tout budget L7b sera refusé — la conception le dit ; qu'elle en fasse le verrou d'entrée de L7b et non une note.
+
+## F. Ce qui tient
+
+Index résident 40 o/pt avec champs morts identifiés ; doctrine DI128 + corps *shaped* réutilisés ; clés/niveaux hôte, aucune clé device ; digest post-RLE comme porte principale + ordre brut à T = 1 + compteurs en trois classes (conforme GPU.md § 2) ; routes fail-closed vers le même corps hôte ; exécuteur unique 3 flux (le vrai gain) ; pile K0 bornée prouvable ; u64 suffisant pour `bin_of` ; `di_to_double_d` prouvable (B8) ; § 8 honnête sur ce qui n'est pas promis.
+
+**Verdict** : direction correcte, chiffrage à refaire avant tout dépôt d'une session G4 : exposer `visits`/`cover_nodes`/distribution des covers et Σ(na²+nb²) sur l'hôte (gratuit), sonder smem/SM et `k_q4_core` seuls, corriger A1, A4–A7, B1–B2, puis republier § 6 avec des budgets mesurés.

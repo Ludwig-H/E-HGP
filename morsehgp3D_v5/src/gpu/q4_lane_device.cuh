@@ -22,6 +22,13 @@ namespace mhgp5 {
 namespace gpu {
 
 #if defined(__CUDACC__)
+// INSTRUMENT (voir q3_lane_device.cuh) : evenements par etape sur le flux —
+// H2D initial | K1 | D2H verdicts || H2D vivants/offsets | K2 | D2H etages ||
+// H2D candidates | K3 | D2H profondeurs — recoltes apres les synchronisations
+// qui existaient au pin 82f613d3 (K1, K2, K3) ; la barriere "sync H2D" de
+// 63deda74 est RETIREE et la "sync fin" (flux deja vide) aussi. Les temps hote
+// (boucle des vivants, compaction, emissions) et les reservations sont des
+// steady_clock entre deux points hote. Sommes sur les fils, jamais un mur.
 class Q4DeviceExecutor {
  public:
   Q4DeviceExecutor() { cuda_check(cudaStreamCreate(&stream_), "stream"); }
@@ -31,15 +38,12 @@ class Q4DeviceExecutor {
   }
   Q4DeviceExecutor(const Q4DeviceExecutor&) = delete;
   Q4DeviceExecutor& operator=(const Q4DeviceExecutor&) = delete;
-  double kernel_ms_total = 0;  // mur des trois kernels et des transferts intermediaires du lot (evenements sur le flux)
-  // MURS PAR ETAPE (hote, steady_clock, cumules) : transferts H2D des sites/seeds/ancres, K1 + D2H des verdicts,
-  // boucle hote des vivants/offsets, K2 + D2H des etages, compaction hote des candidates, K3 + D2H des profondeurs.
-  double st_h2d = 0, st_k1 = 0, st_host1 = 0, st_k2 = 0, st_host2 = 0, st_k3 = 0, st_wall = 0;
+  DeviceExecutorStats total;  // cumul de cet executeur (un fil)
+  inline static ConcurrencyGauge gauge;  // partage par tous les executeurs q4 du processus
   bool chord_nonstrict_ = MHGP5_MUTANT("chord-nonstrict");  // drapeau hote passe au kernel
-  u64 launches = 0;  // kernels lances (q4 : jusqu'a trois par lot)
-  u64 lots = 0;      // lots scannes
 
-  void scan(Q4Batch* b, u32 h4, bool core_nonstrict, bool depth_nonstrict, bool no_canonical) {
+  // `d` (facultatif) recoit les mesures DE CE LOT (ajoutees) ; `total` les cumule toujours.
+  void scan(Q4Batch* b, u32 h4, bool core_nonstrict, bool depth_nonstrict, bool no_canonical, DeviceExecutorStats* d = nullptr) {
     if (broken_) throw std::runtime_error("cuda : executeur q4 inutilisable apres une erreur d'allocation");
     std::string why;
     if (!validate_q4_batch(*b, &why)) throw std::invalid_argument(why);
@@ -47,34 +51,51 @@ class Q4DeviceExecutor {
     b->verdicts.assign(nsd, Q4SeedVerdict{});
     b->emits.clear();
     b->stages = Q4StageCounts{};
-    ++lots;
-    if (nsd == 0) return;
-    const auto t0 = std::chrono::steady_clock::now();
-    auto tm = t0;
+    DeviceExecutorStats m;
+    m.lots = 1;
+    if (nsd == 0) {
+      total.add(m);
+      if (d) d->add(m);
+      return;
+    }
+    const ConcurrencyGauge::Scope active(gauge);
+    const auto t_scan = std::chrono::steady_clock::now();
+    auto tm = t_scan;
     const auto tick = [&](double* acc) { const auto now = std::chrono::steady_clock::now(); *acc += std::chrono::duration<double, std::milli>(now - tm).count(); tm = now; };
+    const auto sync = [&](const char* what) {
+      const auto t_w = std::chrono::steady_clock::now();
+      cuda_check(cudaStreamSynchronize(stream_), what);
+      m.wait_ms += ms_host_since(t_w);
+    };
     reserve_sites(ns, nl);
     reserve_seeds(nsd, na);
-    up(d_u0_, b->u0.data(), ns); up(d_u1_, b->u1.data(), ns); up(d_u2_, b->u2.data(), ns); up(d_q_, b->q.data(), ns);
-    up(d_px_, b->px.data(), ns); up(d_py_, b->py.data(), ns); up(d_pz_, b->pz.data(), ns); up(d_pid_, b->pid.data(), ns);
-    if (nl) up(d_lens_, b->lens_sites.data(), nl);
-    up(d_seeds_, b->seeds.data(), nsd);
-    up(d_anchors_, b->anchors.data(), na);
+    tick(&m.reserve_ms);
+    ev_[0].record(stream_);
+    m.h2d_bytes += up(d_u0_, b->u0.data(), ns) + up(d_u1_, b->u1.data(), ns) + up(d_u2_, b->u2.data(), ns) + up(d_q_, b->q.data(), ns);
+    m.h2d_bytes += up(d_px_, b->px.data(), ns) + up(d_py_, b->py.data(), ns) + up(d_pz_, b->pz.data(), ns) + up(d_pid_, b->pid.data(), ns);
+    if (nl) m.h2d_bytes += up(d_lens_, b->lens_sites.data(), nl);
+    m.h2d_bytes += up(d_seeds_, b->seeds.data(), nsd);
+    m.h2d_bytes += up(d_anchors_, b->anchors.data(), na);
     const Q4SitesDev S{d_u0_, d_u1_, d_u2_, d_q_, d_px_, d_py_, d_pz_, d_pid_, d_lens_};
-    cuda_check(cudaStreamSynchronize(stream_), "sync H2D");  // mesure : borne l'etape H2D (les copies sont asynchrones)
-    tick(&st_h2d);
-    CudaEvent e0, e1;
-    e0.record(stream_);
+    ev_[1].record(stream_);
     // K1 : cœurs.
     {
       const unsigned threads = 256, wpb = threads / 32;
       k_q4_core<<<(unsigned)((nsd + wpb - 1) / wpb), threads, 0, stream_>>>(d_seeds_, (unsigned)nsd, d_anchors_, S, h4,
                                                                            core_nonstrict, chord_nonstrict_, d_verdicts_);
       cuda_check(cudaGetLastError(), "lancement k_q4_core");
-      ++launches;
+      m.launches += 1;
     }
+    ev_[2].record(stream_);
     cuda_check(cudaMemcpyAsync(b->verdicts.data(), d_verdicts_, nsd * sizeof(Q4SeedVerdict), cudaMemcpyDeviceToHost, stream_), "verdicts");
-    cuda_check(cudaStreamSynchronize(stream_), "sync K1");
-    tick(&st_k1);
+    m.d2h_bytes += nsd * sizeof(Q4SeedVerdict);
+    ev_[3].record(stream_);
+    tick(&m.issue_ms);
+    sync("sync K1");  // synchronisation du contrat (deja presente au pin)
+    m.h2d_ms += CudaEvent::ms_between(ev_[0], ev_[1]);
+    m.k1_ms += CudaEvent::ms_between(ev_[1], ev_[2]);
+    m.d2h1_ms += CudaEvent::ms_between(ev_[2], ev_[3]);
+    tm = std::chrono::steady_clock::now();
     // Hote : seeds vivants et offsets de paires (lens_count de leur ancre).
     alive_.clear();
     pair_off_.clear();
@@ -89,18 +110,28 @@ class Q4DeviceExecutor {
       total_pairs += b->anchors[b->seeds[si].anchor].lens_count;
     }
     if (total_pairs > (u64)UINT32_MAX) throw std::length_error("lot q4 : plus de 2^32 - 1 paires (seed, y) — reduire le seuil de lot");
-    tick(&st_host1);
+    tick(&m.host1_ms);
     if (!alive_.empty() && total_pairs > 0) {
       reserve_pairs(alive_.size(), total_pairs);
-      up(d_alive_, alive_.data(), alive_.size());
-      up(d_pair_off_, pair_off_.data(), pair_off_.size());
+      tick(&m.reserve_ms);
+      ev_[4].record(stream_);
+      m.h2d_bytes += up(d_alive_, alive_.data(), alive_.size());
+      m.h2d_bytes += up(d_pair_off_, pair_off_.data(), pair_off_.size());
+      ev_[5].record(stream_);
       k_q4_complete<<<(unsigned)alive_.size(), 128, 0, stream_>>>(d_seeds_, d_anchors_, S, d_alive_, d_pair_off_, no_canonical, d_stage_);
       cuda_check(cudaGetLastError(), "lancement k_q4_complete");
-      ++launches;
+      m.launches += 1;
+      ev_[6].record(stream_);
       stage_.resize(total_pairs);
       cuda_check(cudaMemcpyAsync(stage_.data(), d_stage_, total_pairs, cudaMemcpyDeviceToHost, stream_), "etages");
-      cuda_check(cudaStreamSynchronize(stream_), "sync K2");
-      tick(&st_k2);
+      m.d2h_bytes += total_pairs;
+      ev_[7].record(stream_);
+      tick(&m.issue_ms);
+      sync("sync K2");  // deja presente au pin
+      m.h2d2_ms += CudaEvent::ms_between(ev_[4], ev_[5]);
+      m.k2_ms += CudaEvent::ms_between(ev_[5], ev_[6]);
+      m.d2h2_ms += CudaEvent::ms_between(ev_[6], ev_[7]);
+      tm = std::chrono::steady_clock::now();
       // Hote : compteurs d'etages et compaction des candidates, dans l'ordre
       // (seed vivant, lentille) = ordre de la production.
       cand_.clear();
@@ -125,20 +156,30 @@ class Q4DeviceExecutor {
           }
         }
       }
-      tick(&st_host2);
+      tick(&m.host2_ms);
       if (!cand_.empty()) {
         reserve_cand(cand_.size());
-        up(d_cand_, cand_.data(), cand_.size());
+        tick(&m.reserve_ms);
+        ev_[8].record(stream_);
+        m.h2d_bytes += up(d_cand_, cand_.data(), cand_.size());
+        ev_[9].record(stream_);
         const unsigned threads = 256, wpb = threads / 32;
         k_q4_depth<<<(unsigned)((cand_.size() + wpb - 1) / wpb), threads, 0, stream_>>>(d_seeds_, d_anchors_, S, d_cand_,
                                                                                         (unsigned)cand_.size(), h4,
                                                                                         depth_nonstrict, d_deep_);
         cuda_check(cudaGetLastError(), "lancement k_q4_depth");
-        ++launches;
+        m.launches += 1;
+        ev_[10].record(stream_);
         deep_.resize(cand_.size());
         cuda_check(cudaMemcpyAsync(deep_.data(), d_deep_, cand_.size(), cudaMemcpyDeviceToHost, stream_), "profondeurs");
-        cuda_check(cudaStreamSynchronize(stream_), "sync K3");
-        tick(&st_k3);
+        m.d2h_bytes += cand_.size();
+        ev_[11].record(stream_);
+        tick(&m.issue_ms);
+        sync("sync K3");  // deja presente au pin
+        m.h2d3_ms += CudaEvent::ms_between(ev_[8], ev_[9]);
+        m.k3_ms += CudaEvent::ms_between(ev_[9], ev_[10]);
+        m.d2h3_ms += CudaEvent::ms_between(ev_[10], ev_[11]);
+        tm = std::chrono::steady_clock::now();
         const bool emit_deep = MHGP5_MUTANT("q4-batched-emit-deep");
         for (size_t c = 0; c < cand_.size(); ++c) {
           if (deep_[c]) {
@@ -149,17 +190,19 @@ class Q4DeviceExecutor {
             b->emits.push_back(cand_[c]);
           }
         }
+        tick(&m.host3_ms);
       }
     }
-    e1.record(stream_);
-    cuda_check(cudaStreamSynchronize(stream_), "sync fin");
-    kernel_ms_total += CudaEvent::ms_between(e0, e1);
-    tick(&st_host2);  // reste (emissions, fin) compte avec la compaction hote
-    st_wall += std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();
+    // Aucune synchronisation finale : chaque operation enfilee precede une des
+    // synchronisations ci-dessus, le flux est vide ici.
+    m.executor_ms_sum += ms_host_since(t_scan);
+    total.add(m);
+    if (d) d->add(m);
   }
 
  private:
   cudaStream_t stream_{};
+  CudaEvent ev_[12];  // crees une fois par executeur : (h2d, k1, d2h) x trois etapes
   i64 *d_u0_ = nullptr, *d_u1_ = nullptr, *d_u2_ = nullptr, *d_q_ = nullptr, *d_px_ = nullptr, *d_py_ = nullptr, *d_pz_ = nullptr;
   PointId* d_pid_ = nullptr;
   u32* d_lens_ = nullptr;
@@ -174,9 +217,11 @@ class Q4DeviceExecutor {
   std::vector<u8> stage_, deep_;
   std::vector<Q4Emit> cand_;
 
+  // Copie H2D asynchrone ; rend les octets enfiles.
   template <class T>
-  void up(T* dst, const T* src, size_t n) {
+  u64 up(T* dst, const T* src, size_t n) {
     cuda_check(cudaMemcpyAsync(dst, src, n * sizeof(T), cudaMemcpyHostToDevice, stream_), "transfert");
+    return (u64)n * sizeof(T);
   }
   bool broken_ = false;
   struct Tmp {
@@ -265,26 +310,28 @@ class Q4DeviceExecutor {
   }
 };
 
+// `kernel_ms` : somme des durees d'evenements des KERNELS SEULS (K1 + K2 + K3)
+// sur tous les fils — homogene avec q3 (avant 63deda74 il couvrait tout le lot
+// apres H2D, boucles hote comprises) ; `stages` : cumul complet, sommes de
+// temps-executeur, jamais un mur.
 inline void generate_q4_device(const CloudIndex& ix, const GenerateOptions& opt, std::vector<BallCandidate>* out,
                                GenerateStats* st, double* kernel_ms, u64* launches, BatchLimits lim = BatchLimits{},
-                               BatchStats* bs = nullptr, DeviceStageMs* stages = nullptr) {
+                               BatchStats* bs = nullptr, DeviceExecutorStats* stages = nullptr) {
   std::mutex mu;
+  Q4DeviceExecutor::gauge.reset_peak();
   generate_q4_batched_with(ix, opt, out, st, [&](Q4Batch* b, u32 h4, bool cn, bool dn, bool nc) {
     thread_local Q4DeviceExecutor ex;
-    const double before_ms = ex.kernel_ms_total;
-    const double b_h2d = ex.st_h2d, b_k1 = ex.st_k1, b_host1 = ex.st_host1, b_k2 = ex.st_k2, b_host2 = ex.st_host2, b_k3 = ex.st_k3, b_wall = ex.st_wall;
-    const u64 before_l = ex.launches;
-    ex.scan(b, h4, cn, dn, nc);
+    DeviceExecutorStats d;
+    ex.scan(b, h4, cn, dn, nc, &d);
     std::lock_guard<std::mutex> lk(mu);
-    *kernel_ms += ex.kernel_ms_total - before_ms;
-    *launches += ex.launches - before_l;
-    if (stages) {
-      DeviceStageMs d;
-      d.h2d = ex.st_h2d - b_h2d; d.k1 = ex.st_k1 - b_k1; d.host1 = ex.st_host1 - b_host1; d.k2 = ex.st_k2 - b_k2;
-      d.host2 = ex.st_host2 - b_host2; d.k3 = ex.st_k3 - b_k3; d.wall = ex.st_wall - b_wall;
-      stages->add(d);
-    }
+    *kernel_ms += d.kernel_ms();
+    *launches += d.launches;
+    if (stages) stages->add(d);
   }, lim, bs);
+  if (stages) {
+    const u32 p = Q4DeviceExecutor::gauge.read_peak();
+    if (p > stages->peak_concurrent) stages->peak_concurrent = p;
+  }
 }
 #endif  // __CUDACC__
 
