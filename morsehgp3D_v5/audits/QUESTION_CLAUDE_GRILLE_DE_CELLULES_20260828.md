@@ -70,7 +70,10 @@ d'appeler le théorème 10.5 reçu sur un pin propre :
    ce n'est pas ce compteur.
 3. Écrire `|rhs| < 2^62`, et non `|G*rhs| < 2^62`, puisque `rhs` contient déjà
    le facteur `G` dans le code. Corriger aussi le commentaire de
-   `cell_grid.hpp`, pas seulement le manuscrit mathématique.
+   `cell_grid.hpp`, pas seulement le manuscrit mathématique. Dans le même
+   commentaire, retirer « capacité jamais atteinte sous le profil » : u16 ne
+   borne pas à lui seul le nombre de points sous `2^31`; seule la garde
+   fail-open est démontrée ici.
 4. Dans la dernière borne d'arrondi, utiliser exactement la garde : pour
    l'opérande exact `x`, l'acceptation `|fl(x)| <= 4G` implique
    `|x| <= 4G/(1-u)`, donc une erreur au plus `4G*u/(1-u) < 2^-47`. Le seul
@@ -83,6 +86,10 @@ d'appeler le théorème 10.5 reçu sur un pin propre :
    `kCellLocateEvalOk` ne vérifie aujourd'hui que `FLT_EVAL_METHOD == 0` ; ajouter
    au minimum `std::numeric_limits<double>::is_iec559`, `radix == 2` et
    `digits == 53`, en plus de la garde d'arrondi déjà reçue de l'appelant.
+   Épingler aussi les flags stricts du pin : `__FAST_MATH__` ne détecte pas
+   nécessairement une option autonome de réassociation telle que
+   `-funsafe-math-optimizations`. Une réception explicitement bornée au
+   toolchain canonique suffit; une prétention portable exige ces gardes.
 7. Mettre `docs/PLAN_DE_TESTS.md` à jour : sa table s'arrête à F1–F10 et omet
    F11, `mhgp5_cell_grid_oracle` et `cell-locate-eps-zero`.
 

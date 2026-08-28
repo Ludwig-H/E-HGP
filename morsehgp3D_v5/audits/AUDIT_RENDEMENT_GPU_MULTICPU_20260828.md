@@ -75,8 +75,9 @@ au contraire environ 80 % du mur ; c'est la cible principale du chantier.
 
 Le travail courant apporte de bons éléments : événements CUDA séparés,
 compteurs d'octets, histogrammes de lots, attente/réservation hôte, compteur
-de concurrence et suppression de la barrière H2D intrusive. Quatre raccords
-restent à fermer.
+de concurrence et suppression de la barrière H2D intrusive. Aucun de ces
+points ne bloque un pin explicitement `cpu_reference`; les raccords suivants
+bloquent seulement la réception de l'instrument et tout nouveau reçu G4.
 
 ### Le validateur SCALE accepte encore l'ancien format et ignore le pic
 
@@ -132,6 +133,25 @@ doit appartenir à une invocation, pas être un singleton statique remis à zér
 par deux pipelines potentiellement concurrents. Enfin, toute erreur après une
 copie asynchrone doit drainer au mieux, empoisonner l'exécuteur et interdire sa
 réutilisation.
+
+### Le nouveau schéma n'est ni versionné ni jugé par la campagne
+
+La ligne historique `gpu=1 kernel_ms=...` conserve son nom alors que le champ
+passe d'un temps mêlant retours et boucles hôte à la somme des seuls kernels.
+Les deux nouvelles lignes `gpu_q3_etapes` et `gpu_q4_etapes` ne portent aucune
+version. Surtout, `validate_v5_campaign.py` ne les exige pas : une campagne peut
+rester verte si elles manquent, contiennent `nan`, des octets faux ou une
+partition hôte incohérente.
+
+Correction minimale avant G4 : imprimer `gpu_instrument_schema=v2`, employer un
+nouveau nom tel que `kernels_device_ms_sum` au lieu de recycler `kernel_ms`, et
+faire exiger par le validateur exactement une ligne par lane. Tous les réels
+doivent être finis et non négatifs; `lots`, `launches`, octets et pic doivent
+être non vacants sur la fixture prévue; la fermeture de la décomposition hôte
+doit être contrôlée avec une tolérance annoncée. Ajouter quatre faux reçus :
+ligne absente, `nan`, octets altérés et somme hôte supérieure au corps du scan.
+Le rabat actuel de `rest_ms()` à zéro ne doit pas transformer ce dernier cas en
+preuve verte.
 
 Le seul compteur `h2d_bytes` agrège actuellement sites, seeds, ancres, lentilles
 et tableaux intermédiaires. Il permet de mesurer le trafic total, mais pas
