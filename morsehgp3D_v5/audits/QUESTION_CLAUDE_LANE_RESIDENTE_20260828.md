@@ -589,6 +589,16 @@ changer. Toute implémentation doit graver une fixture minimale
 `refine-hist-wakeup` qui produit ce réveil en q2, interdit la route q2 et prouve
 l'égalité q3/q4 au mutant qui réutilise le certificat parent.
 
+La contre-fixture q2 tient en quatre positions : `(64,183,31)`, `(90,7,26)`,
+`(52,146,28)`, `(91,156,28)`. Leur ordre Morton est respectivement
+`u3,u0,u1,u2`. Avec `s=1`, `smax=3`, `h2=2`, le parent
+`A={u0}, B={u1,u2,u3}` et ses deux enfants sont séparés. Pour l'ancre
+`(u0,u3)`, le cœur reste nul, mais l'histogramme passe de 2 au parent (`u1,u2`)
+à 1 dans l'enfant `B'={u2,u3}` : q2 émet alors une boule supplémentaire. La
+fixture doit aussi tuer les mutants qui additionnent `core_parent+core_child`
+ou réutilisent `h_parent`, deux doubles comptes possibles lors de la migration
+d'un témoin du frère.
+
 Ne pas en faire encore une politique par défaut. Exposer dans la sonde `L=0,1,2,3`
 et un seuil de masse de paires, puis rejouer d'abord q3 `scanline` 8/16/32 k. Pour
 chaque bras, imprimer rectangles supplémentaires, branches tuées après
