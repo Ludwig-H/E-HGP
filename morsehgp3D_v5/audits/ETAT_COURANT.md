@@ -63,9 +63,12 @@ Deux coutures préservent la valeur de l'expérience. Au L2 courant,
 `11 * sizeof(u32) = 44` octets par événement du plus gros lot ; tous deux sont
 omis de `allocated_bytes`. Ils ne disparaîtront qu'au futur wire L3 : les
 inclure aujourd'hui, ou renommer la métrique et publier séparément état
-persistant, mapping et scratch. Avec `firstb`, `lastb` et les autres sidecars,
-le L2 courant reste O(facettes) en mémoire ; seul le futur flux pourrait retirer
-ces tableaux du réducteur.
+persistant, mapping et scratch. Les sidecars `firstb`, `lastb` et
+`slot_of_fid` sont bien en O(F), mais le chemin L2 complet ne l'est pas en F
+seul : `FoldPrepared` garde `events`/`ev_fid`, donc O(I) occurrences, et
+`slot_alias` ajoute O(I_max_lot) de scratch. Annoncer O(F + I) entrée comprise,
+ou publier séparément préparation, sidecars O(F), état vivant O(pic) et scratch
+du plus gros lot. Le futur flux pourra seul retirer ces tableaux du réducteur.
 `assign(..., kNil)` écrit aussi les onze slots à chaque lot alors que seuls les
 slots consultés sont relus ; un `resize` réutilisant la capacité suffit. Enfin,
 un débordement de créneau ne doit pas retourner `kNil` vers `unite`, qui
@@ -75,15 +78,19 @@ permettra d'attribuer le gain. Le ratio 1,9–3,5 issu de la sonde callback rest
 un signal de micro-banc, pas la mesure miroir que son commentaire annonce.
 
 La vérification `slots == peak_live_exact` est aujourd'hui tautologique : le
-premier champ est affecté depuis le second. Exiger plutôt
-`peak_aliases == peak_live_exact`, zéro débordement et la partition exacte
-`créneaux libres + créneaux vivants`. Un mutant `slot-cap-minus-one` doit
-produire un refus interne contrôlé, jamais un accès sentinelle. Deux fixtures
-littérales isolent la convention de frontière : deux événements K=1 disjoints
-au même niveau donnent quatre facettes `FIRST == LAST` et `peak=slots=4` ; les
-mêmes événements sur deux niveaux successifs donnent quatre facettes totales
-mais `peak=slots=2`, avec réutilisation seulement après la première émission.
-Enfin, qualifier le créneau comme champ du **wire L3 proposé** :
+premier champ est affecté depuis le second. `peak_aliases == peak_live_exact`
+reste une bonne cohérence de sortie, mais découle déjà de l'égalité de vie par
+lot ; la dent indépendante manquante est la bijection des créneaux. Prolonger
+le balayage structurel borné pour marquer les créneaux vivants puis libres et
+refuser tout hors-borne, doublon ou créneau manquant. Un mutant
+`slot-cap-minus-one` doit produire le code 4 par contradiction interne capturée
+avant tout accès sentinelle. Deux fixtures littérales isolent la convention de
+frontière : deux événements K=1 disjoints au même niveau donnent quatre
+facettes `FIRST == LAST` et `peak=slots=4` ; les mêmes événements sur deux
+niveaux successifs donnent quatre facettes totales mais `peak=slots=2`. Ce
+second cas vérifie la réutilisation entre lots ; un mutant de libération avant
+émission est nécessaire si l'on veut certifier précisément la phase. Enfin,
+qualifier le créneau comme champ du **wire L3 proposé** :
 `FacetOccurrenceWire` n'est pas encore une structure enregistrée, et
 `free_slots` reste bien une liste libre.
 
@@ -585,9 +592,10 @@ valeurs, calculs et corrections détaillés restent dans
 - Worktree G1 postérieur : construction et CTest
   `mhgp5_batch_contract` verts en 0,04 s. CUDA désactivé localement ; aucune
   porte device de ce delta n'est annoncée comme exécutée.
-- Worktree fold à créneaux : **6/6** CTests `mhgp5_fold_live*` verts ; trois
-  observations locales du nominal vont de 18,70 à 25,78 s et les cinq mutants
-  rendent leur code attendu en 0,02–0,03 s. Le nominal repasse aussi sous
+- Worktree fold à créneaux : **6/6** CTests `mhgp5_fold_live*` verts ; le rejeu
+  indépendant courant rend le nominal en 14,21 s, tandis que la plage locale
+  non reçue consignée par les auditeurs va jusqu'à 25,78 s ; les cinq mutants
+  rendent leur code attendu en 0,01–0,03 s. Le nominal repasse aussi sous
   ASan/UBSan en 125,89 s sans diagnostic. Ces exécutions confirment l'égalité
   fonctionnelle, la sûreté dynamique exercée et les invariants couverts, pas
   encore l'attribution du gain ni le claim mémoire corrigé. Les deux fixtures
