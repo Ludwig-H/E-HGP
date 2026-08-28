@@ -12,10 +12,11 @@
 
 La grille repose sur un certificat affine entier pertinent et le code emploie la bonne inégalité. Les campagnes appariées montrent des digests inchangés et un gain de temps borné sur les cas mesurés. Ces éléments sont utiles et justifient de poursuivre la voie.
 
-Deux verrous empêchent toutefois de prendre le tip comme base sûre d'une nouvelle optimisation :
+Trois verrous empêchent toutefois de prendre le tip comme base sûre d'une nouvelle optimisation :
 
-1. le fold concurrent peut déplacer son `RunResult` avant d'avoir joint les fils sur un retour anticipé ;
-2. la sonde de facettes « vivantes » sous-estime structurellement l'état nécessaire et ne dimensionne pas un fold streamé compact.
+1. le fold concurrent peut déplacer son `RunResult` avant d'avoir joint les fils sur un retour anticipé, ou terminer le processus si l'enregistrement d'un fil déjà lancé échoue ;
+2. une exception d'un K supérieur peut annuler les publications de K inférieurs et contredit donc l'arbitrage annoncé par ordre de K ;
+3. la sonde de facettes « vivantes » sous-estime structurellement l'état nécessaire et ne dimensionne pas un fold streamé compact.
 
 La réception formelle de la grille reste également conditionnée à la correction du théorème publié et à une porte indépendante de localisation/comptage. Aucun faux kill produit n'a été observé dans les campagnes nominales relues.
 
@@ -27,11 +28,15 @@ Dans `src/pipeline/run.hpp`, `BJoiner` ne joint les fils que dans son destructeu
 
 Une seconde fenêtre d'exception existe entre la construction de `slot->t` et `slots.push_back`. Si l'insertion du `unique_ptr` lève, le `BSlot` local détruit un `std::thread` encore joignable et appelle `std::terminate`.
 
+Enfin, le `catch` d'un fil B pose immédiatement `pub_failed`, y compris lorsque l'exception vient d'un K supérieur qui a terminé avant les K précédents. Les fils inférieurs réveillés abandonnent alors leur publication. Le code ne garantit donc pas « le premier défaut dans l'ordre des K » pour les exceptions de réduction ou de digest ; la porte ne couvre que des exceptions de callback déjà sérialisées.
+
 Correction demandée :
 
 - centraliser annulation, notification et jointure explicites avant chaque retour post-lancement ;
 - faire posséder le slot par le conteneur avant de démarrer le fil, ou joindre dans le chemin d'échec ;
-- injecter un échec d'étage A à `K >= 2` pendant qu'une réduction est active, avec `-fno-elide-constructors` et TSan ;
+- conserver le résultat ou l'exception dans chaque slot et ne décider l'échec global que lorsque ce slot atteint `next_publish` ;
+- injecter un échec d'étage A à `K >= 2` pendant qu'une réduction est active et une exception de réduction d'un K supérieur avant la fin d'un K inférieur, avec `-fno-elide-constructors` et TSan ;
+- protéger le journal de la porte par mutex ou atomiques : `last_k`, `ordered` et `overlapped` entrent eux-mêmes en course si le chevauchement interdit survient ;
 - ajouter un compteur atomique qui prouve `peak_fold_inflight >= 2`, car la porte courante passerait aussi avec des réductions entièrement sérielles.
 
 Cette correction doit précéder une nouvelle optimisation du fold.
@@ -56,12 +61,14 @@ Réparation minimale : corriger le théorème, graver une dérivation d'erreur c
 
 - La lane q3 construit la grille avant le routage puis la reconstruit dans `scan_anchor_q3` sur le chemin hôte ou surdimensionné. La lane q4 la reconstruit sur son chemin surdimensionné. Le coût et `grids_built` peuvent donc être doublés sans changer l'objet.
 - `GenerateOptions::cell_grid_min_sites` et `BatchLimits::cell_grid_min_sites` constituent deux autorités. Une option ON/OFF CPU n'a pas nécessairement le même effet dans la lane batched/device.
+- `grids_built` est incrémenté avant le succès de `CellGrid::build`, qui peut échouer ouvert sur la base ou la capacité. Le compteur mesure des tentatives, pas des grilles construites ; il faut séparer au moins `attempted`, `built` et les replis.
 - Les portes device ne comparent pas tous les nouveaux compteurs cellule, notamment `grids_built`. Les sorties G4 observées concordent ; l'enforcement permanent reste incomplet.
 
 Il faut différer la grille après le routage ou transmettre explicitement « grille déjà appliquée », unifier le seuil et comparer les compteurs sur les chemins hôte, device et surdimensionné.
 
 ### Profil du fold et mémoire
 
+- `fold_inflight <= 0` est silencieusement ramené à 1 par `std::max`, alors que les autres options hors profil sont refusées. Définir le domaine accepté et rejeter explicitement les autres valeurs.
 - `369f3ac0` échantillonne après chaque macro-lot. Une facette née et terminée dans le même lot disparaît avant l'échantillon ; un fold mono-lot peut donc annoncer zéro facette vivante tout en les ayant toutes requises.
 - Une facette sans incidence directe future peut rester racine ou ancêtre d'une composante ayant encore des incidences. Le payload final conserve en outre les clés et canoniques de toutes les facettes. La mesure directe n'est qu'une borne basse descriptive.
 - La sonde est insérée entre les `ptick` : son initialisation et ses mises à jour contaminent les temps attribués au lot suivant, tandis que la dernière mise à jour n'est pas imputée. Ses lignes concurrentes n'indiquent pas K.
@@ -75,23 +82,23 @@ Avant de conclure à un état borné, mesurer le pic intra-lot, la fermeture des
 - Le reçu G4 n° 11 contient 31 statuts terminés au pin `82f613d3`, dont 30 succès nominaux et le rejet attendu d'un mutant. Les digests communs aux sessions 10 et 11 concordent.
 - Sur le cas `scanline` 200 k, la session rapporte 502 vers 268 secondes, dont la lane q4 438 vers 215 secondes. Ce résultat justifie une ablation propre ; il n'isole pas la grille des listes inline et ne prouve pas l'exactitude générale.
 - Les deux tests cellule étiquetés uniquement `oracle` ne sont pas inclus dans la commande G4 `-L gate`. Ce n'est pas un besoin de GPU, mais le résumé « oracle » du reçu ne doit pas être lu comme un rejeu de la suite oracle complète.
-- Les journaux versionnés ne rendent pas encore les reçus G4 entièrement autoportants : le journal de session ignoré est le seul fichier qui agrège validation, transfert et certification finale `TERMINATED`.
+- Le reçu n° 11 est autoportant sur ce point : son `session.log` versionné contient `remote_campaign_rc=0`, `scp_rc=0`, la validation complète et la certification finale `TERMINATED`. Le reçu n° 10 ne versionne pas ce transcript et reste dépendant des deux RC fournis au validateur.
 
 ## Validation locale de cet audit
 
-Configuration indépendante :
+Configuration indépendante dans un worktree détaché propre au pin jugé :
 
 ```text
-cmake -S morsehgp3D_v5 -B build/v5-audit-codex -DCMAKE_BUILD_TYPE=Release
-cmake --build build/v5-audit-codex --parallel 8
+cmake -S morsehgp3D_v5 -B build/v5 -DCMAKE_BUILD_TYPE=Release
+cmake --build build/v5 --parallel
 ```
 
 Résultats au pin jugé :
 
 - build Release : succès ;
-- ciblés `api_guard`, fixture et oracles d'ancre/cellule : 4/4 succès ;
-- suite `gate` : 168/168 succès, 854,16 s réelles ;
-- suite `oracle` : 9/9 succès, 14,17 s réelles, y compris les deux oracles cellule absents de `gate` ;
+- suite `gate` : 168/168 succès, 745,12 s réelles ;
+- suite `oracle` : 9/9 succès, 13,62 s réelles, y compris les deux oracles cellule absents de `gate` ;
+- complément exhaustif `-LE 'gate|oracle'` : 15/15 succès, 1 038,98 s réelles ; l'union couvre les 185 CTests ;
 - `python tools/check_docs.py` : 212 Markdown actifs validés ;
 - `python tools/check_implementation_status.py` : 20 phases et leurs portes validées ;
 - validation explicite du dossier `audits/` : 6 Markdown validés.
