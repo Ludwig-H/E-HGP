@@ -1,7 +1,10 @@
 # Audit ciblé — pourquoi les gains GPU et multi-CPU plafonnent
 
-- **HEAD relu :** `63deda74` ; dernier chemin de performance reçu au pin `82f613d3`. Le HEAD ajoute une instrumentation q4 intrusive qui n'est pas encore mesurée.
-- **Reçu principal :** `receipts/campagne_g4_v5_20260828_grille/`, G4, 48 fils, 50 k et 200 k.
+- **Dernier commit fonctionnel relu :** `ab2c2563` ; chemins de performance
+  reçus aux pins `82f613d3` (CPU, 50–200 k) et `63deda74` (étapes device,
+  50 k).
+- **Reçus principaux :** `receipts/campagne_g4_v5_20260828_grille/` et
+  `receipts/campagne_g4_v5_20260828_etapes_device/`, G4, 48 fils.
 - **Cadre :** `phase=exploration_v5_hors_registre`, `backend=cpu_reference`, `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`.
 
 ## Verdict
@@ -124,33 +127,52 @@ historiques « la cause n'est pas le kernel » ne sont donc pas démontrées au 
 courant. Matérialisation et orchestration sont des suspects étayés par le code,
 pas encore une décomposition quantitative.
 
-### Réception du nouvel instrument `63deda74`
+### Réception de l'instrument et de la session G4 n° 12
 
-Le commit répond utilement à la demande en exposant les coupures q3 et q4, mais
-il ne produit pas encore les **murs** annoncés dans son sujet :
+`ab2c2563` apporte un vrai progrès de preuve : 25 runs terminés au pin
+`63deda74`, compilation/exécution CUDA, quatre digests CPU/GPU égaux et mutant
+device tué. Le résultat de bout en bout reste mixte : 0,968× `uniform`, 1,124×
+`terrain`, 0,958× `eight_clusters` et 1,015× `scanline` en CPU/GPU. Il confirme
+la réponse générale de cet audit sans établir un gain reproductible.
 
-- `sg3.wall` et `sg4.wall` additionnent les durées de tous les appels `scan()`
-  exécutés par des ouvriers concurrents. Ce sont des temps-exécuteur cumulés,
-  pas le chemin critique de la lane. Les soustraire à `rects q3/q4`, comme le
-  propose le commentaire CLI, est dimensionnellement invalide ; renommer
-  `executor_ms_sum` et mesurer séparément `lane_wall_ms` ;
-- q4 ajoute `cudaStreamSynchronize` juste après H2D. Cette barrière n'existait
-  pas au pin reçu et peut modifier le recouvrement entre flux. Un instrument ne
-  doit pas changer l'ordonnancement qu'il attribue ; employer des événements et
-  une récolte différée, ou démontrer par ablation que la barrière est neutre ;
-- `q4 h2d` inclut aussi les réservations/allocation ; `k2+d2h` inclut réserve,
-  H2D des offsets, kernel et retour ; `k3+d2h` inclut réserve, H2D des candidats,
-  kernel et retour. Ces agrégats sont utiles, mais leurs noms ne séparent pas
-  encore les coûts visés ;
-- q3 expose proprement H2D/kernel/D2H, mais son `wall` inclut réservations et
-  orchestration absentes de leur somme. Il faut publier cette différence comme
-  overhead local, pas la confondre avec toute la préparation de lane ;
-- aucun octet transféré, percentile de lots, pic de scans simultanés ou vrai mur
-  global n'est encore gravé. Le commit ne possède pas non plus de reçu nvcc/G4.
+La q3 permet maintenant une conclusion étroite : son événement K1 totalise
+204 ms pour 87 millions de seeds `uniform`; l'arithmétique du kernel q3 n'est
+pas le poste dominant de ce chemin matérialisé. Les conclusions plus larges de
+`docs/GPU.md:196-221` vont toutefois au-delà de la mesure :
 
-Verdict sur `63deda74` : **bon instrument exploratoire, métrique de mur non
-reçue**. Il faut corriger les noms et la barrière avant d'utiliser ses nombres
-pour choisir une architecture.
+- q4 ne sépare pas K1 de son D2H : `k1+d2h=42,2 s` contre `h2d=27,4 s` sur
+  `uniform`. `kernel_ms=7,5 s` mélange les trois kernels, les transferts
+  intermédiaires et les intervalles hôte. Le reçu ne prouve donc ni « cœur q4 en
+  quelques secondes » ni une causalité H2D dominante ;
+- `sg3.wall` et `sg4.wall` restent des sommes des appels `scan()` concurrents,
+  pas des chemins critiques. Le calcul « 4,3 s − 76,4/48 = 2,7 s de reste
+  hôte » mélange un mur de lane et une moyenne de temps-exécuteur ; il doit être
+  retiré ;
+- q3 conserve un résidu cumulé non classé majeur : respectivement 5,2 / 22,9 /
+  15,0 / 14,8 s sur `uniform` / `terrain` / `eight_clusters` / `scanline` entre
+  `wall` et H2D+K1+D2H. Réservations, appels CUDA, attente de contention et
+  ordonnanceur restent à séparer ;
+- q4 transfère sept tableaux `i64` et un `PointId` `u32`, soit 60 octets/site,
+  pas huit tableaux `i64` ni 64 octets/site. Les seeds, ancres, lentilles et
+  transferts intermédiaires s'ajoutent. Sans compteur d'octets, « 37 Go » et
+  « 9 Go/s » sont des estimations, pas des mesures ;
+- l'adaptatif change bien la charge : q4 cumulée passe de 114,7 à 54,5 s sur
+  `eight_clusters` et de 27,5 à 18,3 s sur `scanline`; le mur interne baisse
+  aussi sur ces passages. Cela ne prouve pas un avantage contre CPU, mais
+  contredit « aucun seuil ne change ce verdict » ;
+- la synchronisation ajoutée juste après H2D est toujours intrusive. La session
+  reçoit le chemin instrumenté, pas la neutralité de cette barrière.
+
+La conclusion recevable est donc : **q3-kernel petit, transferts/orchestration
+et concurrence fortement suspects, causalité q4 encore ouverte**. Conserver la
+direction index/positions résidents et compaction device, mais ajouter compteurs
+d'octets, événements autour de chaque kernel/D2H, vrai mur de lane et ablation
+de la barrière avant de figer l'architecture.
+
+Le `session.log` local contient campagne, copie et arrêt ciblé `TERMINATED`, mais
+`*.log` reste ignoré. Reporter les codes de campagne/copie et la certification
+d'arrêt dans le `RECU.txt` suivi rendrait le reçu autonome dans un checkout
+frais.
 
 ## Pourquoi le multi-CPU devient sous-linéaire
 

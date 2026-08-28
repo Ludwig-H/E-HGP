@@ -1,11 +1,11 @@
 # État courant audité de MorseHGP3D v5 — 28 août 2026
 
-- **HEAD relu :** `63deda74` (instrumentation GPU par étape).
-- **Pin de performance jugé :** `82f613d3`. Le HEAD ajoute une synchronisation q4 et n'est donc pas encore équivalent au chemin mesuré.
-- **Pins principaux inclus :** `90baa0bb` (fold concurrent), `d86b4ec7` (census inline et RSS), `82f613d3` (grille de cellules), `b164fcbe` et `369f3ac0` (sondes du fold), `9fba11a5` (préfixe et échelle), `63deda74` (temps device par étape).
-- **Reçus relus :** `69daa148` et `685e8e22`.
+- **Dernier commit fonctionnel relu :** `ab2c2563` (reçu G4 n° 12 et interprétation des étapes device).
+- **Pins de performance jugés :** `82f613d3` pour le chemin CPU 50–200 k et `63deda74` pour les étapes device à 50 k. La synchronisation q4 ajoutée au second pin reste intrusive.
+- **Pins principaux inclus :** `90baa0bb` (fold concurrent), `d86b4ec7` (census inline et RSS), `82f613d3` (grille de cellules), `b164fcbe` et `369f3ac0` (sondes du fold), `9fba11a5` (préfixe et échelle), `63deda74` et `ab2c2563` (étapes device et reçu).
+- **Reçus relus :** sessions G4 n° 10, 11 et 12.
 - **Cadre :** `phase=exploration_v5_hors_registre`, `backend=cpu_reference`, `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`.
-- **Worktree observé :** les seules modifications suivies sont le présent nettoyage d'audit ; `.codex_fold_contract_probe.cpp`, non suivi et produit par un autre auditeur, est exclu du périmètre et du commit.
+- **Worktree observé :** des modifications concurrentes non committées ajoutent notamment des histogrammes de lots dans `q3_lane_batched.hpp`/`q4_lane_batched.hpp` et préparent une phase `SCALE_THREADS` dans `gcp-migration/v5_campaign_remote.sh` ; elles sont postérieures à la validation, non jugées et exclues du commit. `.codex_fold_contract_probe.cpp`, non suivi et produit par un autre auditeur, est également exclu.
 
 ## Verdict
 
@@ -29,24 +29,51 @@ La réponse chiffrée et le plan expérimental sont dans
 [`AUDIT_RENDEMENT_GPU_MULTICPU_20260828.md`](AUDIT_RENDEMENT_GPU_MULTICPU_20260828.md).
 Synthèse :
 
-- au reçu courant, le GPU est à parité mixte : 0,984× `uniform`, 1,122× `terrain`, 0,973× `eight_clusters` et 1,023× `scanline` sur le mur interne CPU/GPU ; un seul passage CPU puis GPU ne permet pas un claim de gain ;
+- au reçu n° 12, le GPU est à parité mixte : 0,968× `uniform`, 1,124× `terrain`, 0,958× `eight_clusters` et 1,015× `scanline` sur le mur interne CPU/GPU ; un seul passage CPU puis GPU ne permet pas un claim de gain ;
 - le port ne remplace que les corps q3/q4 après une préparation hôte coûteuse. Sur `uniform` 50 k, cette fraction ne vaut que 8,9 % du mur CPU, donc son plafond idéal est environ 1,10× ;
 - le faible scaling multi-CPU G4 n'est pas démontré : aucun reçu ne balaie 1 à 48 fils au même pin et `ouvriers=48` ne mesure que des fils créés ;
 - une contre-sonde locale non reçue donne néanmoins 58,04 / 31,40 / 17,70 / 13,57 s à 1 / 2 / 4 / 8 fils sur `uniform` 4 k. Le gain existe, mais son rendement chute au-delà des quatre cœurs locaux ;
 - les plafonds architecturaux sont le reduce et le digest séquentiels par K, deux ordres B en vol, des rectangles lourds indivisibles, les copies/fusions de gros vecteurs et, côté GPU, les matérialisations, trois synchronisations q4 et une télémétrie `kernel_ms` non homogène.
 
-La prochaine étape utile n'est pas une nouvelle optimisation spéculative : c'est
-une campagne contrebalancée `threads × fold_inflight × digest`, puis une
-décomposition GPU préparation/H2D/K1-K3/D2H/compactions en vrais murs. Le modèle
-de temps de `docs/ECHELLE.md` reste une hypothèse de conception issue d'un seul
-point 48 fils, pas une loi de scaling reçue.
+La session n° 12 reçoit l'instrument `63deda74` : 25 runs terminés, quatre
+digests CPU/GPU égaux et mutant device tué. Elle établit que K1 q3 est petit
+(204 ms cumulés pour 87 M seeds `uniform`), mais pas que le kernel q4 est petit :
+`k1+d2h` reste agrégé. Les temps `scan()` sont toujours additionnés sur des fils
+concurrents et ne peuvent pas être soustraits au mur `rects`; le calcul de
+« 2,7 s de reste hôte » publié dans `docs/GPU.md` est invalide. Q4 transfère
+60 octets/site pour ses tableaux principaux, pas 64, et aucun compteur d'octets
+n'est gravé. L'adaptatif modifie sensiblement la charge device, sans gain global
+reproductible démontré. Mesurer un vrai mur de lane, chaque kernel/D2H et les
+octets, puis neutraliser ou ablater la barrière H2D.
 
-`63deda74` commence cette décomposition, mais additionne les durées `scan()` de
-fils concurrents et les nomme murs ; cette somme ne peut pas être soustraite au
-mur `rects`. La q4 ajoute en outre une synchronisation après H2D, donc
-l'instrument modifie potentiellement le recouvrement. Renommer les sommes,
-mesurer un vrai mur de lane et retirer ou neutraliser la barrière avant la
-prochaine campagne G4.
+## Audit ciblé — passage à l'échelle
+
+Le verdict détaillé et l'ordre de travail sont dans
+[`AUDIT_PASSAGE_ECHELLE_20260828.md`](AUDIT_PASSAGE_ECHELLE_20260828.md).
+`docs/ECHELLE.md` conserve une direction utile, mais ne dimensionne pas encore
+une exécution 10 M :
+
+- `profil_vivantes` échantillonne après le lot et omet la fermeture union-find ;
+  les 40 facettes/point et les 30/90 Go ne sont pas des majorants ;
+- « empreinte 64 bits → compte u8 » n'est ni une identité exacte, ni assez large,
+  ni une table à 7 octets ; l'oubli requiert reroot/compression prouvés ;
+- le stream doit reconstruire `batch_levels`, deltas, clés et partition finale.
+  Avec le wire courant, sa sortie vaut déjà au moins 1,495 To à 10 M sur
+  l'extrapolation `uniform`, avant cadrage et reprise ;
+- le routage par centre co-localise les doublons, mais ne borne pas une tuile à
+  200 k boules. Il faut spill, barrière globale puis tri/RLE exact ;
+- le manifeste décrit ne permet pas une reprise intra-K. Le premier contrat
+  honnête est `resume=replay_current_K` avec publication atomique par K ;
+- la G4 courante utilise un Hyperdisk Balanced 100 GB à 290 Mio/s, pas un
+  PD-SSD reçu à 1–2 Go/s. Le minimum séquentiel runs+sortie extrapolé vaut déjà
+  environ 107 minutes d'E/S idéales ;
+- le fold `uniform` ×50 donne 1,60–1,78 h selon la métrique, pas les 3–4 h du
+  tableau sans facteur supplémentaire. Les 6–7 h restent un scénario, pas une
+  loi ni une porte de session.
+
+Avant de coder le compactage, spécifier le wire et le décodeur, compter les
+dernières incidences par tri externe de `FacetKey` exactes, tuer les fixtures
+mono-lot/chaîne, puis recevoir un pilote 1 M avec pics et E/S externes.
 
 ## P1 — sûreté du fold concurrent
 
@@ -106,9 +133,10 @@ Avant de conclure à un état borné, mesurer le pic intra-lot, la fermeture des
 ## Preuves positives, mais bornées
 
 - Le reçu G4 n° 11 contient 31 statuts terminés au pin `82f613d3`, dont 30 succès nominaux et le rejet attendu d'un mutant. Les digests communs aux sessions 10 et 11 concordent.
+- Le reçu G4 n° 12 contient 25 statuts terminés au pin `63deda74`, quatre paires CPU/GPU au même digest et le rejet attendu du mutant device. Il reçoit l'instrumentation, pas ses surinterprétations causales.
 - Sur le cas `scanline` 200 k, la session rapporte 502 vers 268 secondes, dont la lane q4 438 vers 215 secondes. Ce résultat justifie une ablation propre ; il n'isole pas la grille des listes inline et ne prouve pas l'exactitude générale.
 - Les deux tests cellule étiquetés uniquement `oracle` ne sont pas inclus dans la commande G4 `-L gate`. Ce n'est pas un besoin de GPU, mais le résumé « oracle » du reçu ne doit pas être lu comme un rejeu de la suite oracle complète.
-- Les deux `session.log` présents dans le workspace au moment de l'audit contiennent `remote_campaign_rc=0`, `scp_rc=0`, la validation complète et la certification finale `TERMINATED`, mais `*.log` est ignoré et aucun des deux fichiers n'est suivi par Git. Les reçus n° 10 et n° 11 restent donc non autoportants sur cette transaction ; un checkout frais ne contient pas ces transcripts.
+- Les `session.log` présents dans le workspace au moment de l'audit contiennent `remote_campaign_rc=0`, `scp_rc=0`, la validation complète et la certification finale `TERMINATED`, mais `*.log` est ignoré. Les reçus n° 10 à 12 restent donc non autoportants sur toute la transaction ; un checkout frais ne contient pas ces transcripts.
 
 ## Validation locale de cet audit
 
@@ -126,23 +154,24 @@ Réception exhaustive antérieure au pin fonctionnel `369f3ac0` :
 - suite `oracle` : 9/9 succès, 13,62 s réelles, y compris les deux oracles cellule absents de `gate` ;
 - complément exhaustif `-LE 'gate|oracle'` : 15/15 succès, 1 038,98 s réelles ; l'union couvre les 185 CTests ;
 
-Relecture au HEAD `63deda74` pendant le présent audit :
+Validation locale au HEAD `ab2c2563` pendant le présent audit :
 
-- build Release CPU : succès ;
-- sélection pertinente parallélisme/API/préfixe : 15/15 CTests, 44,49 s ;
+- configuration et build Release CPU : succès ;
+- porte de préfixe, y compris son mutant : 5/5 CTests, 22,12 s ;
 - `python tools/check_docs.py` : 213 Markdown actifs validés ;
 - `python tools/check_implementation_status.py` : 20 phases et leurs portes validées ;
-- validation explicite du dossier `audits/` : 7 Markdown validés.
+- validation explicite du dossier `audits/` : 8 Markdown validés.
 
-Aucun `nvcc` n'est disponible localement : `63deda74` n'a été ni compilé CUDA ni exécuté GPU dans cet audit. Aucun sanitizer n'a été revendiqué. Un vert CTest ne ferme ni la course de retour, ni la vacuité de la concurrence, ni les lacunes d'oracle décrites plus haut.
+Aucun `nvcc` n'est disponible localement : le présent audit n'a pas rejoué CUDA. La session G4 n° 12 reçoit séparément compilation et exécution device au pin `63deda74`. Aucun sanitizer n'a été revendiqué. Un vert CTest ne ferme ni la course de retour, ni la vacuité de la concurrence, ni les lacunes d'oracle décrites plus haut.
 
 ## Ordre de fermeture proposé à Claude
 
 1. sécuriser tous les retours et l'ownership des fils du fold, puis ajouter les fautes injectées et le plancher de concurrence ;
-2. corriger le théorème 10.5 et fermer localisation, compteur direct et mode force-grid ;
-3. supprimer les doubles constructions batched, unifier les seuils et comparer les compteurs ;
-4. redéfinir les sondes de vie/RSS avant de parler de dimensionnement, puis faire les ablations au même pin ;
-5. rafraîchir `README.md`, `docs/PROVENANCE.md` et le plan de tests avec des formulations de cible et de preuve bornée.
+2. spécifier le wire du stream, son décodeur et `resume=replay_current_K`, puis fermer les comptes exacts et les fixtures d'éviction avant le compactage ;
+3. corriger le théorème 10.5 et fermer localisation, compteur direct et mode force-grid ;
+4. supprimer les doubles constructions batched, unifier les seuils et comparer les compteurs ;
+5. redéfinir les sondes de vie/RSS, recevoir le routage avec spill puis un pilote 1 M avant tout dimensionnement 10 M ;
+6. rafraîchir `README.md`, `docs/PROVENANCE.md` et le plan de tests avec des formulations de cible et de preuve bornée.
 
 Les erreurs de prose du théorème 10.4, F5 qui annonce 28 sites mais en construit 26, F7 qui reste coplanaire et l'ablation contrefactuelle agrégée sont conservées dans le pont V7–V14. Elles ne doivent pas interrompre les deux corrections P1 ci-dessus.
 
