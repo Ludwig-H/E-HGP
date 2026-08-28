@@ -12,7 +12,7 @@ vérifié pas à pas et que je soumets à réception.
 
 **Définition.** Un triplet de facteurs $(A, B, C)$ est *$s$-séparé* si toute
 distance entre deux facteurs distincts vaut au moins
-$s \cdot \max(\operatorname{diam} A, \operatorname{diam} B, \operatorname{diam} C)$.
+$s \cdot \max(\mathrm{diam} A, \mathrm{diam} B, \mathrm{diam} C)$.
 Une *décomposition ternaire $s$-séparée* de $P$ est une famille de tels
 triplets telle que tout triplet de points distincts de $P$ soit couvert
 exactement une fois.
@@ -28,8 +28,8 @@ distance au moins 1 de $P_0$.
 Soit $r \in P_1$ et $p, q \in P_0$ distincts, et soit $(A, B, C)$ le triplet
 qui couvre $\lbrace p, q, r \rbrace$, avec $p \in A$, $q \in B$, $r \in C$.
 La séparation donne
-$s \cdot \max \operatorname{diam} \le \operatorname{dist}(A, B) \le \lvert pq \rvert \le \delta$,
-donc $\max \operatorname{diam} \le \delta/s < 1$. Les trois facteurs ont donc
+$s \cdot \max \mathrm{diam} \le \mathrm{dist}(A, B) \le \lvert pq \rvert \le \delta$,
+donc $\max \mathrm{diam} \le \delta/s < 1$. Les trois facteurs ont donc
 un diamètre strictement inférieur à 1. Comme les points de $P_1$ sont deux à
 deux distants d'au moins 1 **et** à distance au moins 1 de $P_0$, aucun
 facteur ne peut contenir deux points de $P_1$, ni un point de $P_1$ et un
