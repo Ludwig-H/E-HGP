@@ -1,0 +1,22 @@
+# Question de Claude aux auditeurs — grille de cellules sans apex (théorème 10.5), fold concurrent par ordre, mémoire (28 août 2026)
+
+- **Pins :** `90baa0bb` (fold : étage B concurrent par ordre, `fold_inflight` = 2, reçu G4 n° 10 `campagne_g4_v5_20260828_fold_inflight`), `d86b4ec7` (listes de census inline, paliers `rss_mb`), `82f613d3` (grille de cellules ; session G4 n° 11 en cours sur ce pin)
+- **Cadre :** `phase=exploration_v5_hors_registre`, `public_status=not_claimed`
+
+## V15 — théorème 10.5 (`docs/MATHEMATIQUES.md` § 10, `src/lanes/cell_grid.hpp`)
+
+Énoncé à recevoir : base entière $(u, v)$ du plan bissecteur (celle des secteurs), cellules $C_{ij}$ de sommets $(i' u + j' v)/G$ ; un site $z$ est témoin de la cellule ssi $4 w' \cdot (i' u + j' v) > G(\left\vert w' \right\vert^2 - D^2)$ aux quatre sommets ($w' = 2z - (a+b)$) ; une cellule à $\ge h$ témoins est morte ; toute boule admissible dont le centre est dans une cellule morte a $\ge h$ intérieurs stricts. Verrous que je vous demande de poser :
+
+1. La condition « affine en $p$, donc vraie sur le parallélogramme ssi vraie aux sommets » (même argument que 10.3) — y compris pour un site *hors* de la boule diamétrale, dont le demi-plan de centres ne contient pas l'apex.
+2. La couverture : cellules nécessaires = celles dont la boîte $[i, i+1]/G \times [j, j+1]/G$ rencontre le losange $\left\vert \alpha \right\vert + \left\vert \beta \right\vert \le 1$ (test $\min\left\vert i' \right\vert + \min\left\vert j' \right\vert \le G$), losange $\supseteq$ disque des centres par `bisector_basis` ; une cellule hors losange ne contient aucun centre admissible, donc n'a rien à prouver.
+3. La localisation en binaire64 : $\alpha G = G (t_1 - t_2)/(\text{den} \cdot \det)$ avec $t_1 = (\text{den} \cdot p \cdot u)\, \left\vert v \right\vert^2$, $t_2 = (\text{den} \cdot p \cdot v)(u \cdot v)$, produits scalaires entiers exacts ($N \cdot u$, $N \cdot v$ en i128, $N = W - G_3 d$, den $= 2 G_3$), borne $\varepsilon = 2^{-46} G (\left\vert t_1 \right\vert + \left\vert t_2 \right\vert + \left\vert s_1 \right\vert + \left\vert s_2 \right\vert)/(\text{den} \cdot \det) + 2^{-40}$ ; le seed est tué seulement si TOUTES les cellules nécessaires de $[\alpha G \pm \varepsilon] \times [\beta G \pm \varepsilon]$ (q3) ou de la boîte des deux extrémités de corde $(N \pm \hat\mu n)/(2G_3)$ (q4, $\hat\mu = \lfloor \sqrt{J/2} \rfloor + 1$) sont mortes. Est-ce que $2^{-46}$ sur la somme des magnitudes majore bien l'erreur d'arrondi de ces cinq opérations (quatre produits, une soustraction, une division) ? Sinon, quelle borne ?
+4. Le comptage à deux pointeurs (`count_site_t`) : monotonie de $a[i'] = 4 i' du$ en $i'$ et de $b[j'] = rhs - 4 j' dv$ en $j'$ ; les cellules témoignées d'une ligne sont l'intervalle $[\max(lo_j, lo_{j+1}), 2G)$ (du $> 0$), $[0, \min(hi_j, hi_{j+1}))$ (du $< 0$), toute la ligne ou rien (du $= 0$). Les deux boucles `while` corrigent dans les deux sens sans hypothèse sur le signe de dv : est-ce exact et borné ?
+5. Fixtures : F9 (ancre au-dessus d'une vallée à fond plat : $W_4$ et secteurs impuissants, 172/172 cellules mortes, contrefactuel vide), F10 (13 sites entiers $s^2 + t^2 = 10^6$ exactement sur la frontière des sommets $i' = 0$ : témoins de la colonne $i = 0$ pour le mutant non strict, d'aucune cellule en strict). Manque-t-il une frontière (celle de la localisation : un centre exactement sur une arête de cellule) ?
+
+## Politique et mesure
+
+Grille ssi cover $\ge 256$, seeds aigus $\ge$ cover/8 (q4) ou cover/2 (q3), et moins de $h$ sites à moins de $0{,}30\,D$ de $m$ — sans effet sur l'objet (oracle ON/OFF à seuil 0, conformités). Localement (8 fils, ratios) : `scanline` 16 000 lane q4 4,86 → 4,41 s, `eight_clusters` 8000 neutre ; la cible est le régime 200 k (`scanline` : lane q4 438 s sur 499 s, 431 G itérations de balayage, ancres q4 en $n^{1{,}86}$), mesuré par la session 11. Si vous voyez une objection à la politique par `near_m` (dépend de la classe radiale, pas de l'objet), dites-la.
+
+## Fold et mémoire (pour information, reçus déjà gravés)
+
+Session 10 : `uniform` 200 k 346 → 258 s, `eight_clusters` 443 → 363 s avec deux ordres en vol (RSS +15–23 %) ; le mur du fold reste borné par l'étage A (internement 28 s à 200 k, ~1,3 µs de temps-fil par enregistrement de facette). Listes de census inline : −190 o par boule (à recevoir sur G4 avec la session 11). Vos remarques sur `fold_inflight` (résidence F + 1 ordres, callbacks sérialisés sous verrou depuis le fil de l'ordre publié, premier défaut en ordre de K) sont bienvenues.
