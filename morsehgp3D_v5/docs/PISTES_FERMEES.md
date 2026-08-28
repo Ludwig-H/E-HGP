@@ -29,6 +29,13 @@ survit. Les patterns d'erreur récurrents sont en fin de document.
   un huitième crédit fantôme. Survit : la contre-famille gravée.
 - **Cascade RNG–Jung bornée comme source sparse.** Incomplète sur une fixture
   rationnelle de rang fermé 11 (`docs/math/RNG_JUNG_CLIQUES_ET_NIVEAUX_PEUPROFONDS.md`).
+- **Décomposition ternaire symétrique, fortement séparée et exact-once de tous
+  les supports aigus comme source q3 linéaire.** Une famille cercle--axe force
+  au moins $m(m-1)=\Omega(n^{2})$ blocs, même lorsque tous les supports croisés
+  sont strictement aigus. Survivent : les WSSD approximatives, les sources
+  asymétriques ancre--tiers, la restriction par profondeur et l'arrangement
+  local de centres (`docs/math/RNG_JUNG_CLIQUES_ET_NIVEAUX_PEUPROFONDS.md`,
+  Théorème 4).
 
 ## Héritées de la v4
 

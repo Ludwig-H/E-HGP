@@ -117,7 +117,7 @@ Une expansion directe donne l'identité de puissance
 
 $$h_x(v)=r^{2}-\lVert x-(M+v)\rVert^{2}.$$
 
-Ainsi $h_x(v)>0$, $h_x(v)=0$ et $h_x(v)<0$ signifient respectivement que $x$ est strictement dans la sphère, sur son bord et strictement dehors. L'équation $h_x(v)=0$ est une droite; son intersection avec $J_{pq}$ est la corde de Jung de $x$ lorsqu'elle est non vide.
+Ainsi $h_x(v)>0$, $h_x(v)=0$ et $h_x(v)<0$ signifient respectivement que $x$ est strictement dans la sphère, sur son bord et strictement dehors. Lorsque la projection de $x-M$ sur $e^{\perp}$ est non nulle, l'équation $h_x(v)=0$ est une droite et son intersection avec $J_{pq}$ est la corde de Jung de $x$ lorsqu'elle est non vide. Un site collinéaire à $pq$ induit au contraire une fonction constante : il est intérieur universel si $\lVert x-M\rVert<D/2$, extérieur universel si $\lVert x-M\rVert>D/2$, et shell universel en cas d'égalité. Ce dernier cas, notamment un identifiant distinct à la coordonnée d'une extrémité, appartient au census de plateau et non à l'arrangement de droites.
 
 ### 4.3 Des cordes au support quatre
 
@@ -143,21 +143,23 @@ $$\kappa=11-4=7.$$
 
 La fixture permanente recalcule également ce fait : son ancre diamètre unique est $BC$, son centre appartient à $J_{BC}$, sa profondeur stricte vaut 7 et son rang fermé vaut 11.
 
-Sans position générale, plusieurs droites peuvent être concourantes. Si $t(v)$ droites passent par le même centre, $c_e$ points sont intérieurs dans tout le disque et $d(v)$ autres demi-plans le contiennent strictement, alors
+Le Théorème 3 compte tous les sites du nuage et porte donc sur une profondeur globale $\delta_e^{\mathrm{full}}$. Le chemin v5 historique emploie en q4 un cover de coefficient 3 qui contient les carriers utiles, mais peut omettre des intérieurs de leur sphère; `mhgp5_q4_cover_fixture` en donne un témoin permanent. Sa profondeur $\delta_e^{(3)}$ reproduit le filtre de génération et `digest_balls`, pas nécessairement le rang fermé. À l'inverse, le cover q3 de coefficient 3 contient tous les intérieurs. Une intégration compatible doit nommer ces deux profondeurs séparément; une route qui revendique le rang du Théorème 3 doit fournir le range-report global ou une recertification terminale équivalente.
 
-$$\mathrm{rang}_{\text{fermé}}(v)=2+c_e+d(v)+t(v).$$
+Sans position générale, plusieurs droites peuvent être concourantes et des sites collinéaires peuvent être shell universel. Notons $S_e(v)$ le shell complet hors des deux extrémités, $c_e$ le nombre d'intérieurs universels et $d(v)$ le nombre des autres demi-plans qui contiennent $v$ strictement. Le rang fermé de la **boule complète** vaut alors
 
-Le rang fermé 11 impose donc $t(v)\leq9-c_e$. La preuve par droite reste utile : en comptant une position concurrente une seule fois sur chaque droite, $\sum_v t(v)\leq2m_e(\kappa_e+1)$. Comme $\binom{t}{2}\leq t(T-1)/2$ pour $t\leq T=9-c_e$, le nombre total de quadruplets développables vérifie
+$$\mathrm{rang}_{\text{fermé}}(B_v)=2+c_e+d(v)+\lvert S_e(v)\rvert.$$
 
-$$\sum_v\binom{t(v)}{2}\leq(T-1)m_e(\kappa_e+1).$$
+Cette quantité ne constitue pas une porte de rejet des carriers pertinents. Le contrat de plateau impose tous les intérieurs stricts, mais permet un sous-ensemble $T$ du shell complet $U_e(v)=\left\lbrace p,q\right\rbrace\cup S_e(v)$ dès que le centre appartient à $\mathrm{conv}(T)$ et que $\lvert I\rvert+\lvert T\rvert\leq s_{\max}$. Pour un carrier minimal de cardinalité quatre, la profondeur de génération reste donc $c_e+d(v)\leq s_{\max}-4$, indépendamment de $\lvert S_e(v)\rvert$. En particulier, la conclusion antérieure $t(v)\leq9-c_e$ et le rejet avant développement lorsque le shell dépassait le rang étaient faux hors `RelevantGP`.
 
-Il reste donc linéaire en $m_e$ à rang fixé, à condition de grouper chaque concurrence en un batch exact et de rejeter avant développement lorsque son shell dépasse le rang. Une implémentation ne peut ni choisir arbitrairement deux droites, ni perturber la concurrence en intersections artificielles; elle doit appliquer la règle de carrier déjà enregistrée ou rendre `unsupported_degeneracy` pour les formes non couvertes.
+La fixture permanente `mhgp5_plateau_shell_relevance` fixe douze points entiers sur une même sphère : sa coquille complète dépasse 11, mais elle contient un tétraèdre affinement indépendant dont le centre a les quatre barycentriques égales à $1/4$. Pour l'ancre canonique de ce tétraèdre, les dix autres sites donnent dix droites géométriques distinctes et concurrentes, toutes présentes dans le cover q4 historique de coefficient 3. Ce carrier reste pertinent et doit atteindre le census puis l'expansion de plateau.
+
+Une implémentation exacte groupe chaque concurrence par centre ou `BallKey`, réalise le census complet puis laisse l'expansion de plateau décider les sous-supports. Elle ne perturbe pas la concurrence en intersections artificielles. Cependant, préserver le contrat historique de représentation peut encore exiger de retrouver le représentant `(BallKey, arity, ExactLevel)` minimal choisi par le RLE : `q4_level_raw` dépend du support même lorsque la boule sémantique est identique. Grouper seulement les `BallKey` ne prouve donc ni le digest ni la forêt. La borne locale ci-dessous est démontrée en position générale; le groupement évite les centres dupliqués mais ne fournit pas, à lui seul, une borne sur l'examen des paires incidentes d'une concurrence.
 
 ## 5. Complexité en $n$ et en $K$
 
 ### 5.1 Variables qui gouvernent réellement le coût
 
-Soit $\mathcal{A}$ l'ensemble des paires diamètre candidates produites par une autorité exacte, $a=\lvert\mathcal{A}\rvert$. Pour $e=pq$, soit $W_e$ l'ensemble local des points qui peuvent être intérieurs ou sur le shell d'une sphère dont le centre appartient à $J_{pq}$. Parmi eux, $c_e$ points sont strictement intérieurs pour tout le disque, tandis que $m_e$ autres ont une droite frontière qui rencontre le disque et participent à son arrangement. Les points dont le demi-plan positif manque tout le disque sont sans effet. Posons
+Soit $\mathcal{A}$ l'ensemble des paires diamètre candidates produites par une autorité exacte, $a=\lvert\mathcal{A}\rvert$. Pour $e=pq$, soit $W_e$ l'ensemble local des points qui peuvent être intérieurs ou sur le shell d'une sphère dont le centre appartient à $J_{pq}$. Parmi eux, $c_e$ points ont une puissance strictement positive sur tout le disque, tandis que $m_e$ autres ont une droite frontière qui rencontre le disque et participent à son arrangement. Les sites shell universels collinéaires sont conservés séparément pour le census. Les points dont la puissance reste strictement négative sur tout le disque sont sans effet. Posons
 
 $$M=\sum_{e\in\mathcal{A}}m_e,\qquad C=\sum_{e\in\mathcal{A}}c_e.$$
 
@@ -167,7 +169,7 @@ Les grandeurs $a$, $M$ et $C$, pas seulement $n$, décident la scalabilité. Ell
 
 ### 5.2 Borne combinatoire locale
 
-Pour l'ancre $e$, le budget de profondeur variable est $\kappa_e=s_{\max}-4-c_e$. La complexité cumulative $\Theta(m\kappa)$ des premiers niveaux d'un arrangement de demi-plans est connue par la méthode de Clarkson--Shor et rappelée par Chan. La constante utile ici possède une preuve élémentaire que nous reproduisons. Sur une droite frontière $\ell$, soient $u,v$ les intersections extrêmes de profondeur au plus $\kappa_e$. Toute autre droite coupant strictement l'intervalle $[u,v]$ place exactement l'un de ses deux bouts dans son demi-plan positif. Si cet intervalle contenait plus de $2\kappa_e$ intersections strictement entre ses extrémités, les profondeurs de $u$ et $v$ auraient donc une somme supérieure à $2\kappa_e$, ce qui est impossible. Chaque droite porte au plus $2\kappa_e+2$ sommets de profondeur au plus $\kappa_e$. Chaque sommet appartenant à deux droites en position générale, l'arrangement entier en possède au plus $m_e(\kappa_e+1)$. Le disque de Jung ne peut qu'en retirer. Ainsi, pour $\kappa_e\geq0$,
+Pour l'ancre $e$, le budget de profondeur variable est $\kappa_e=s_{\max}-4-c_e$. En position générale, la complexité cumulative $\Theta(m\kappa)$ des premiers niveaux d'un arrangement de demi-plans est connue par la méthode de Clarkson--Shor et rappelée par Chan. La constante utile ici possède une preuve élémentaire que nous reproduisons. Sur une droite frontière $\ell$, soient $u,v$ les intersections extrêmes de profondeur au plus $\kappa_e$. Toute autre droite coupant strictement l'intervalle $[u,v]$ place exactement l'un de ses deux bouts dans son demi-plan positif. Si cet intervalle contenait plus de $2\kappa_e$ intersections strictement entre ses extrémités, les profondeurs de $u$ et $v$ auraient donc une somme supérieure à $2\kappa_e$, ce qui est impossible. Chaque droite porte au plus $2\kappa_e+2$ sommets de profondeur au plus $\kappa_e$. Chaque sommet appartenant à deux droites, l'arrangement entier en possède au plus $m_e(\kappa_e+1)$. Le disque de Jung ne peut qu'en retirer. Ainsi, pour $\kappa_e\geq0$,
 
 $$Z_e\leq m_e(\kappa_e+1)=m_e(s_{\max}-3-c_e).$$
 
@@ -185,7 +187,7 @@ Un constructeur réel doit en plus payer le range-report, la préparation des de
 
 ### 5.3 Somme globale
 
-En sommant les bornes locales, on obtient immédiatement
+En position générale, en sommant les bornes locales, on obtient immédiatement
 
 $$\sum_{e\in\mathcal{A}}Z_e\leq\sum_{e\in\mathcal{A}:\kappa_e\geq0}m_e(\kappa_e+1)\leq(s_{\max}-3)M.$$
 
@@ -219,7 +221,31 @@ Une architecture hybride est plus forte que l'énumération brute des 4-cliques 
 
 La construction exacte du RNG initial ne doit pas elle-même passer par Delaunay : elle doit devenir une requête LBVH de lunes et un flux CSR borné. Son coût produit sera $T_{\mathrm{RNG}}+T_{\mathrm{growth}}$ et non gratuitement $O(n)$; un RNG de petite sortie peut encore être cher à certifier si la recherche visite des couples quadratiques.
 
-### 5.5 Complément exact des ancres par blocs de centres
+### 5.5 Obstruction étroite à une décomposition ternaire exact-once
+
+Une WSSD approximative peut avoir une taille linéaire en dimension fixée. Le résultat suivant ne l'interdit pas et ne doit donc pas être intitulé « la WSPD ne se généralise pas ». Il ferme seulement le remplacement de la source q3 par des blocs ternaires **symétriques**, fortement séparés et exact-once qui réaliseraient explicitement tous les supports aigus.
+
+> **Théorème 4.** Soient $P_0,P_1\subset\mathbb{R}^{3}$, avec $\lvert P_0\rvert=\lvert P_1\rvert=m$, $\mathrm{diam}(P_0)\leq\Delta$, et toutes les distances entre $P_0$ et $P_1$ ainsi qu'entre deux points distincts de $P_1$ au moins égales à $L>\Delta/s$, pour $s>1$. Un bloc ternaire est un triplet non ordonné $\left\lbrace A,B,C\right\rbrace$ de facteurs non vides, deux à deux disjoints et inclus dans $P_0\cup P_1$. Posons $D_\tau=\max(\mathrm{diam}(A),\mathrm{diam}(B),\mathrm{diam}(C))$ et exigeons $\mathrm{dist}(X,Y)\geq sD_\tau$ pour toute paire de facteurs. Si chaque support non ordonné $\left\lbrace p,q,r\right\rbrace$, avec $p\neq q\in P_0$ et $r\in P_1$, appartient au produit d'interaction d'un unique bloc, alors la famille contient au moins $m(m-1)$ blocs.
+
+*Preuve.* Dans le bloc qui couvre $\left\lbrace p,q,r\right\rbrace$, les trois points occupent trois facteurs distincts. Les facteurs de $p$ et $q$ donnent $sD_\tau\leq\lVert p-q\rVert\leq\Delta$, donc $D_\tau\leq\Delta/s<L$. Le facteur de $r$ ne peut contenir ni un autre point de $P_1$, ni un point de $P_0$; il vaut donc $\left\lbrace r\right\rbrace$, et les deux autres facteurs sont inclus dans $P_0$.
+
+Fixons $r$. Les couples de facteurs restants partitionnent exactement toutes les paires de $P_0$. Choisissons une arête représentative entre un point de chaque facteur de chaque couple. Le graphe ainsi obtenu sur $P_0$ est connexe. Sinon, choisissons $p,q$ de composantes distinctes à distance minimale et regardons le couple qui les couvre. Les diamètres de ses deux facteurs sont strictement inférieurs à $\lVert p-q\rVert$ puisque $s>1$; par minimalité, chaque représentant reste dans la composante du point correspondant, alors que son arête relie les deux composantes, contradiction. Il faut donc au moins $m-1$ couples pour chaque $r$. Deux points $r$ distincts ne partagent aucun bloc puisque leur facteur est singleton, d'où $m(m-1)$. $\square$
+
+Cette borne porte réellement sur des supports q3 aigus. Prenons $P_0$ sur un cercle de rayon $R$ dans le plan $z=0$ et $P_1=\left\lbrace(0,0,H_j)\right\rbrace$ sur son axe, avec $\min_j H_j>\max(R,2R/s)$ et des espacements supérieurs à $2R/s$. Pour $p\neq q\in P_0$ et $r=(0,0,H_j)$, les trois produits scalaires qui testent l'acuité sont strictement positifs :
+
+$$ (q-p)\mathbin{\cdot}(r-p)=R^{2}-p\mathbin{\cdot}q>0,\qquad(p-r)\mathbin{\cdot}(q-r)=p\mathbin{\cdot}q+H_j^{2}>0. $$
+
+Le premier calcul vaut symétriquement au sommet $q$. Les hypothèses du théorème sont satisfaites avec $\Delta=2R$ et un $L$ adéquat; toute réalisation symétrique fortement séparée et exact-once de ces supports aigus est donc quadratique.
+
+La portée négative s'arrête là. Le théorème ne borne pas une source asymétrique ancre--tiers, une source déjà restreinte aux centres de profondeur au plus huit, un arrangement de centres, ni une WSSD approximative. Il n'établit donc pas que q3 doit être quadratique dans l'architecture fibrée proposée ici.
+
+Enfin, l'acuité fournit précisément la localisation que perd une séparation métrique seule. Si $D$ est la plus longue arête d'un triangle aigu, $R_c$ son circumrayon et $m_D$ le milieu de cette arête, alors
+
+$$ R_c^{2}\leq\frac{D^{2}}{3},\qquad\lVert c-m_D\rVert^{2}=R_c^{2}-\frac{D^{2}}{4}\leq\frac{D^{2}}{12}. $$
+
+Un triangle proche de $89^{\circ}$--$89^{\circ}$--$2^{\circ}$ illustre donc une disparité de côtés, pas une délocalisation du centre q3 : son circumrayon tend vers $D/2$ et son centre vers le milieu de l'arête maximale. Dans le produit, le troisième sommet est le carrier proposé par le cover; les autres sites sont les témoins de profondeur.
+
+### 5.6 Complément exact des ancres par blocs de centres
 
 Le graphe RNG--Jung peut rester un excellent producteur de propositions, mais le Théorème 1 interdit de lui déléguer la complétude. `P15-HOCUDA-P1`, `backend=cuda_g4_plus_reference_cpu_oracle`, `profile=hgp_reduced`, `mode=complete_fail_open_center_cover_anchor_superset_v1`, confie cette complétude à un self-join dual-tree du LBVH. Un état contient deux nœuds d'extrémités disjoints $A,B$ et représente implicitement toutes leurs paires. La décomposition canonique $T(N)=T(L)\mathbin{\dot\cup}(L\times R)\mathbin{\dot\cup}T(R)$ et la subdivision d'un produit croisé sur un seul côté partitionnent chaque paire non ordonnée exactement une fois. Le RNG épaissi peut seulement ordonner ces états; il ne ferme aucun bloc et n'émet aucun second flux à dédupliquer.
 
@@ -231,7 +257,7 @@ Un patch $C$ est retiré seulement si l'égalité du plan médiateur est impossi
 
 Pour un patch encore faisable et un nœud témoin $W$ disjoint en plages de feuilles de $A\cup B$, les deux puissances coïncident sur tout centre pertinent. Les bornes renforcées sont donc $L_W=\max(L(C,A,W),L(C,B,W))$ et $U_W=\min(U(C,A,W),U(C,B,W))$. Si $L_W>0$, tous les points de $W$ sont strictement intérieurs et le parcours saute ses descendants; si $U_W\leq0$, aucun point du nœud n'est un témoin strict; sinon le LBVH descend et une feuille ambiguë ne compte pas. Les nœuds acceptés pour un patch forment ainsi une antichaîne de plages disjointes.
 
-> **Théorème 4.** Si chaque patch non certifié infaisable possède une antichaîne témoin de masse au moins $s_{\max}-3$, le produit $A\times B$ ne contient aucune paire diamètre d'un support quatre de rang fermé au plus $s_{\max}$.
+> **Théorème 5.** Si chaque patch non certifié infaisable possède une antichaîne témoin de masse au moins $s_{\max}-3$, le produit $A\times B$ ne contient aucune paire diamètre d'un support quatre de rang fermé au plus $s_{\max}$.
 
 *Preuve.* Le centre d'un éventuel support appartient à au moins un patch du recouvrement. Ce patch ne peut avoir été certifié infaisable. Chaque point de son antichaîne est distinct des extrémités et strictement intérieur à la sphère réelle. Un point qui serait l'un des deux futurs carriers aurait au contraire une puissance nulle; la positivité stricte l'exclut donc automatiquement, sans disjonction préalable avec des carriers encore inconnus. Avec $s_{\max}-3$ intérieurs et les quatre points du support sur le shell, le rang fermé vaut au moins $s_{\max}+1$, contradiction. $\square$
 
@@ -243,7 +269,7 @@ Dans le régime favorable $Q,V_W,a,M=O(n\,p(K))$, le coût est quasi linéaire e
 
 Une capacité prototype atteinte produit une continuation privée et rend ce profil `slo_eligible=false`. Elle n'autorise pas un « arrêt budgétaire » industriel. Le chemin industriel doit absorber le backpressure, reprendre la frontière en conservant $P_{\mathrm{prune}}+P_{\mathrm{emit}}+P_{\mathrm{pending}}=\binom{n}{2}$, puis rendre l'objet complet, ou échouer sur une ressource physique réelle. Il ne bascule jamais vers une mosaïque, une matrice de paires ou un catalogue global de cofaces et ne publie jamais `budget_exhausted`.
 
-### 5.6 Conséquence pour le contrat
+### 5.7 Conséquence pour le contrat
 
 Même un générateur d'arité quatre parfait ne suffit pas au chemin actuel. Le diagnostic direct frais sur G4 mesure la seule frontière paire à 50 000 points et rang fermé 11 à 2,395883 s dans sa fenêtre `frontier_ns`, et 3,927585 s depuis le début froid du processus, avant supports trois--quatre, classification exacte et réduction. La sonde de germination lancée sur cette VM n'est pas un kernel : elle exécute le prototype CPU séquentiel et ne parcourt que 0,363834 % des paires `uniform_latin` en 120 s. Le contrat sous la seconde exige donc un pipeline fusionné qui évite la recertification et la matérialisation intermédiaires actuelles, pas seulement un remplacement de la boucle quadratique d'arité quatre.
 
