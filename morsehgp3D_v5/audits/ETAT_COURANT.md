@@ -7,13 +7,18 @@
   constats historiques G0 portent sur `fe54ccca`, la campagne device/SCALE sur
   `c95cfa95`, G1 q3 sur `dd928111`/`839cf1ec` et G1 q4 sur `556c421e`.
 - **Pin de réception G0/G1 q3 :** `0656bf4c`, sans code produit.
-- **Worktree observé avant ce delta :** `HEAD=origin/main=b550ec0d`; aucun code
+- **Worktree observé avant ce delta :** `HEAD=origin/main=819cac3c`; aucun code
   produit n'est postérieur à `55c1f105`. `2192ec9e`–`3636d5b0` corrigent la
   proposition de raffinement dans la question active ; `fd2844fb`, `57deaaa6`
   et `4ecb57d4` ajoutent puis requalifient une question d'exposants et des
   instruments exploratoires dans `rect_probe.cpp`, sans modifier le produit.
   `905c5361` ajoute une mesure transitoire désormais consolidée dans la question
-  active et retirée du tip ; `b550ec0d` tranche V42 sans code produit.
+  active et retirée du tip ; `b550ec0d` tranche V42, `ad42438e` borne le taux
+  de récupération et `819cac3c` corrige dans l'instrument la population q4 du
+  compteur `k=1`. La rétractation `a54bd528` retire justement le claim des
+  31 jours, mais ses nouveaux temps 10 M restent fondés sur un débit non mesuré
+  appliqué à une autre unité ; elle est consolidée dans la question active puis
+  retirée du tip.
   Le probe non suivi
   `.codex_fold_contract_probe.cpp`, appartenant à un autre travail, reste hors
   preuve. La réponse transitoire de Claude au miroir est consolidée ici puis
@@ -182,6 +187,21 @@ pas la performance de `55c1f105` : instrumenter les itérations puis rejouer
 50/100/200 k au pin courant avant toute extrapolation. Il n'existe encore
 aucune mesure 1 M ou 10 M.
 
+**Architecture constructive reçue pour étude : WSPD de paires, puis arrangement
+local de centres par ancre.** Une WSSD standard couvre les simplexes pour une
+approximation, mais ne fournit ni partition exacte ni rang ; les produits
+symétriques de trois ou quatre boîtes ont déjà montré leur mélange jusqu'aux
+feuilles. Pour une ancre diamètre `(a,b)`, chaque tiers devient une droite
+orientée dans le plan médiateur. q3 interroge le point marqué de cette droite à
+profondeur au plus 8 ; q4 énumère seulement les intersections de profondeur au
+plus 7. La borne locale visée devient `O(m log m + m*K)` et au plus `8*m`
+sommets q4 à `smax=11`, au lieu de `binom(m,2)`. Elle ne borne pas le nombre
+global d'ancres ni `M=sum(m)` : mesurer d'abord `m`, `M`, `Z`, quantiles,
+fallbacks et scratch, puis construire un oracle exhaustif borné. Le producteur
+shallow échoue sa porte s'il forme d'abord toutes les intersections. Les
+[formules, dégénérescences et étapes R0–R3](QUESTION_CLAUDE_EXPOSANTS_PAR_REGIME_20260828.md#réponse-à-louis--généraliser-la-wspd-mais-par-les-centres)
+sont transmises à Claude ; aucun q5 n'est requis en dimension trois.
+
 Les mesures Claude `954ec1af` à `ff5931fd` renforcent le bon diagnostic sans
 encore recevoir une architecture : le nombre de rectangles vivants est proche
 du linéaire aux tailles sondées, mais leur masse d'ancres et le travail q4 par
@@ -223,7 +243,7 @@ et les fixtures sont consolidées dans les deux questions actives.
 
 La réception `4ecb57d4` retire correctement le faux plafond et accepte les deux
 rails. Elle ne transforme toutefois pas les ratios de la sonde en verdict de
-temps : q4 reste une priorité basse, pas une perte nette mesurée. La prochaine
+temps : ils ne classent pas la priorité q4. La prochaine
 série épingle la règle `coord(n)`, pas une valeur `coord` constante. V42 est
 tranché comme porte bornée : multiensemble littéral sur petits arbres, ledger
 u128 seul à l'échelle, mutants perte/doublon/effet avant rollback.

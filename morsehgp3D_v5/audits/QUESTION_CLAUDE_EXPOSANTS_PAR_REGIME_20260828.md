@@ -1,10 +1,158 @@
 # Question Claude — la sous-quadraticité **par régime**, et ce qu'elle exige (28 août 2026)
 
-Ancrage : mesures de `MESURE_CLAUDE_OU_EST_LA_QUADRATICITE_20260828.md`
-(reçus du pin `839cf1ec` et `bench/mhgp5_rect_probe` au HEAD `ff5931fd`).
+Ancrage : reçus de génération épinglés depuis `839cf1ec`, campagne directe
+`scanline` 200 k et instruments exploratoires jusqu'à `819cac3c` ; la fraîcheur
+du pin jugé est tenue dans [`ETAT_COURANT.md`](ETAT_COURANT.md).
 Cadre : `phase=exploration_v5_hors_registre`, `backend=cpu_reference`,
 `profile=quantized_u16_input_only`,
 `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`.
+
+## Réponse à Louis — généraliser la WSPD, mais par les centres
+
+### Verdict
+
+**Oui, il faut généraliser, mais pas en une WSPD symétrique de triplets ou de
+quadruplets.** La bonne cible est une décomposition à deux étages : la WSPD de
+paires reste le squelette exact et possède chaque ancre diamètre une fois ;
+derrière chaque ancre survivante, un arrangement local unique traite les
+complétions q3 et q4 sans développer leur produit cartésien.
+
+La généralisation nommée existe dans la littérature : la
+[WSSD de Kerber--Sharathkumar](https://arxiv.org/abs/1307.3272) couvre chaque
+simplexe par un tuple de cellules bien séparées et donne une approximation de
+Čech de taille linéaire à dimension fixée. Elle est utile comme broad phase ou
+comme vocabulaire, mais elle n'est ni une partition exacte des supports, ni une
+autorité de rang, de shell ou d'exact-once. La rendre exacte en développant
+`A x B x X` ou `A x B x X x Y` recrée précisément le coût recherché. La
+frontière directe de produits déjà testée confirme ce no-go pratique : ses
+boîtes mélangent presque toujours supports acceptés et refusés, et un certificat
+ne couvrait qu'environ 1,1 tuple dans
+[`RAPPORT_SESSION_20260808.md`](../../docs/research/RAPPORT_SESSION_20260808.md).
+
+Le nom de travail utile est donc **décomposition simpliciale bien séparée
+fibrée par l'ancre**, pas WSSD standard :
+
+1. `PairBlock(A,B)` partitionne les paires par la WSPD actuelle ; un certificat
+   universel peut tuer tout le bloc, sinon il est raffiné ou émet des ancres ;
+2. `AnchorCenterArrangement(a,b)` traite ensemble tous les tiers d'une ancre,
+   en scratch borné puis en flux vers le RLE existant.
+
+### L'objet commun q3/q4
+
+Fixons l'ancre possédée `e=(a,b)`, son milieu $M$, sa longueur $D$ et son plan
+médiateur. Chaque site $x$ induit dans ce plan la droite orientée
+$h_x(v)=0$, avec une identité exacte déjà démontrée :
+
+$$h_x(v)=2v\mathbin{\cdot}(x-M)-\left(\left\Vert x-M\right\Vert^{2}-\frac{D^{2}}{4}\right)=r^{2}-\left\Vert x-(M+v)\right\Vert^{2}.$$
+
+Ainsi `h_x(v)>0`, `=0`, `<0` signifie respectivement intérieur strict, shell,
+extérieur pour la sphère de centre `M+v`. Ce même arrangement donne les deux
+lanes :
+
+- **q3 :** `x` ne demande pas une nouvelle recherche géométrique. Le centre du
+  triangle `(a,b,x)` est le point marqué $v_x$ de norme minimale sur sa propre
+  droite `h_x=0` — son intersection avec le plan affine du triangle.
+  On conserve ce point si sa profondeur stricte est au plus
+  $\kappa_3=h_3-1=s_{\max}-3$, soit **8** pour `smax=11`. Le scan actuel
+  `x x cover` devient une localisation dans le préfixe peu profond commun ;
+- **q4 :** le centre de `(a,b,x,y)` est le sommet commun à `h_x=0` et `h_y=0`.
+  On énumère directement les sommets de profondeur au plus
+  $\kappa_4=h_4-1=s_{\max}-4$, soit **7**, puis seulement les filtres exacts de
+  diamètre, owner, bon centrage, shell et `BallKey`. On ne forme jamais les
+  $\binom{m_e}{2}$ paires de tiers.
+
+Les points intérieurs sur tout le disque sont comptés une fois dans
+`c_{e,q}` ; le budget résiduel devient `kappa_q-c_{e,q}`. Le disque q3 est
+contenu dans celui de q4 : rayons carrés respectifs `D2/12` et `D2/8`. Une
+préparation des droites du disque extérieur peut donc servir les deux lanes
+pour toute ancre commune, q3 n'interrogeant que son disque intérieur. Les
+certificats W/secteurs, grille et morceaux de corde restent des pré-prunes
+facultatifs : ils ne deviennent pas la source des sorties. Pour préserver
+d'abord le contrat v5 et `digest_balls`, l'intégration doit garder le cover
+coefficient 3 du chemin courant. Élargir le range-report q4 au confinement
+complet de Jung peut tuer davantage de candidats profonds et constitue un
+changement de contrat séparé, déjà averti par
+[`PISTES_FERMEES.md`](../docs/PISTES_FERMEES.md).
+
+L'abstraction se généralise en dimension $d$, sans généraliser naïvement les
+produits : une paire diamètre laisse un espace de centres de dimension $d-1$ ;
+chacun des $q-2$ porteurs supplémentaires y ajoute un hyperplan orienté ; le
+centre du support est le point de norme minimale de leur intersection, et son
+budget de profondeur stricte vaut $s_{\max}-q$. En 3D, cela donne `q2 = v=0`,
+`q3 = point marqué sur une droite`, `q4 = intersection de deux droites`. Cette
+formulation unifie les preuves et les données, mais ne promet pas la même borne
+combinatoire en dimension supérieure.
+
+### Gain obtenu, et limite honnête
+
+Pour une ancre `e`, notons `m_e` le nombre de droites actives. En position
+générale, le nombre de sommets q4 admissibles par profondeur vérifie
+$Z_e\leq m_e(\kappa_e+1)$ ; à `smax=11`, cela donne au plus `8*m_e`, contre
+`m_e*(m_e-1)/2` complétions. Les constructions de niveaux peu profonds donnent
+comme cible théorique locale
+$O(m_e\log m_e+m_e(\kappa_e+1))`. Le document
+[`RNG_JUNG_CLIQUES_ET_NIVEAUX_PEUPROFONDS.md`](../../docs/math/RNG_JUNG_CLIQUES_ET_NIVEAUX_PEUPROFONDS.md)
+porte la preuve géométrique, les bornes et leurs limites.
+
+La complexité totale revendicable reste conditionnelle :
+
+```text
+T = T_pair_blocks + T_range
+  + sum_e O(m_e log(m_e) + m_e*(kappa_e+1))
+  + T_exact + T_sink
+```
+
+Cette architecture supprime le carré **local** de q4 et le rescan q3 par `x`.
+Elle ne prouve pas que le nombre d'ancres `a`, les blocs visités ou
+`M=sum_e m_e` sont sous-quadratiques. C'est la WSPD extérieure et ses
+certificats center-cover qui doivent contenir ces quantités. Le pire cas reste
+dense ; le contrat réaliste est de mesurer `a`, `M` et `sum Z_e` par régime.
+En dimension trois, il n'existe pas de support minimal de miniboule au-delà de
+quatre points : il faut généraliser l'abstraction, pas ouvrir q5.
+
+### Plan qui aide Claude sans engager une refonte aveugle
+
+1. **R0, sonde sans décision :** sur les ancres courantes, publier
+   `m_e`, `c_e`, `kappa_e`, `Z_e`, `sum binom(m_e,2)`, `sum m_e*(kappa_e+1)`,
+   quantiles/maxima, temps de range, arrangement, exact et sink, plus le pic
+   scratch. La baseline quadratique est analytique, jamais exécutée aux grandes
+   tailles.
+2. **R1, oracle borné :** pour petits nuages seulement, développer toutes les
+   intersections, grouper les concurrences exactement et comparer le
+   multiensemble pré-RLE, les `BallKey` post-RLE, les compteurs sémantiques et
+   les digests au chemin courant.
+3. **R2, vrai constructeur shallow CPU :** scan plat pour les ancres légères,
+   arrangement q4 pour les moyennes/lourdes, puis q3 lourd si la préparation
+   commune paie. Un prototype qui calcule d'abord les
+   `binom(m_e,2)` intersections échoue la porte même s'il filtre ensuite.
+4. **R3 seulement si l'amont domine encore :** ajouter le center-cover exact
+   par blocs d'extrémités avant l'émission des ancres. Ne pas revenir au produit
+   symétrique de quatre nœuds.
+
+Les cas dégénérés sont contractuels : droites parallèles, identiques ou
+concourantes, centre sur la frontière du disque, profondeurs 8/9 en q3 et 7/8
+en q4, shell cosphérique jusqu'au cap, ties d'owner et `det=0`. Les concurrences
+sont groupées par centre/`BallKey` et passées au census complet ; aucun jitter.
+Au-delà du cap de shell, le statut reste `resource_exhausted`, jamais une
+omission. Les mutants minimaux retirent ou dupliquent une droite, changent
+`<` en `<=`, décalent `kappa` de un et éclatent une concurrence.
+
+### Correction du dernier contre-proxy
+
+La rétractation de « 31 jours » et de « il manque exactement 0,86 » est juste.
+En revanche, les nouveaux temps `2 s / 42 s / 1,3 min` ne sont pas reçus : ils
+appliquent encore le débit non mesuré `4,8e10/s`, cette fois à
+`completions_q4`, une unité différente de celle qui avait inspiré ce débit.
+`completions_q4` est un meilleur compteur de boucle que `jung_cert_skip`, mais
+pas une horloge.
+
+Le reçu direct `scanline` 200 k avec grille mesure déjà **214,544 s** dans le
+corps q4 sur **267,701 s** de mur. Il interdit donc la conclusion générale
+« la génération n'est pas le mur » et rend a fortiori le temps 10 M de 1,3 min
+non interprétable. La mémoire reste un chantier prioritaire, mais elle ne
+disqualifie pas la suppression architecturale de `x x y` : conserver deux rails
+séparés, mur/RSS mesurés d'une part, compteurs de travail d'autre part. La note
+autonome de rétractation est consolidée ici puis retirée du tip.
 
 ## Réponse auditée — V36 à V41
 
@@ -229,293 +377,6 @@ population post-histogramme/post-W4 qui atteignent effectivement le test W. Il
 ne borne ni toute la masse de paires que le raffinement peut certifier avant ces
 filtres, ni un gain de temps ; son commentaire doit conserver cette restriction.
 
-## Question initiale de Claude — conservée comme trace
-
-Les claims et seuils ci-dessous sont la proposition auditée, pas l'état courant.
-Le verdict qui fait autorité est la réponse V36–V41 ci-dessus.
-
-L'utilisateur a reformulé l'objectif, et cette reformulation change tout :
-
-> « Un algorithme sous-quadratique n'est peut-être pas possible dans le pire
-> des cas ; il faudrait au moins que ce soit le cas pour les différents
-> régimes considérés. »
-
-C'est un objectif **mesurable**, donc gardable par une porte. Ce document
-propose de le transformer en contrat chiffré, et pose les verrous.
-
-## 1. Où en est chaque régime, en un chiffre
-
-Exposant local mesuré entre $n = 32\,000$ et $n = 50\,000$ (reçus appariés,
-même graine, même binaire) sur le compteur d'évaluations Jung de la lane q4 —
-le poste qui explose :
-
-| régime | exposant mesuré | exposant admissible pour 10 M en 8 h | verdict |
-|---|---|---|---|
-| `uniform` | **1,06** | 2,89 | tient largement |
-| `eight_clusters` | **1,06** | 2,80 | tient largement |
-| `scanline_single_pass` | **2,21** | 2,52 | tient de justesse |
-| `terrain` | **3,14** | 2,28 | **ne tient pas, il manque 0,86** |
-
-Extrapolation à débit constant ($4{,}8 \times 10^{10}$ évaluations/s, 48 fils —
-un **ordre de grandeur**, jamais un temps citable) :
-
-| régime | 1 M | 10 M | 30 M |
-|---|---|---|---|
-| `uniform` | 0,2 s | 1,8 s | 5,6 s |
-| `eight_clusters` | 0,2 s | 2,8 s | 9,1 s |
-| `scanline_single_pass` | 33,6 s | 1,5 h | 17,2 h |
-| `terrain` | 32,4 min | **31 jours** | **979 jours** |
-
-**La conclusion tient en une phrase : trois régimes sur quatre tiennent déjà
-10 M ; le seul qui ne tienne pas est `terrain`, et il lui manque exactement
-0,86 d'exposant.** L'objectif n'est donc pas « rendre la génération
-sous-quadratique » — c'est **ramener l'exposant de `terrain` sous 2,28**, avec
-une marge, et empêcher `scanline` de dériver au-dessus de 2,52.
-
-Réserves, à charge : l'exposant est une pente locale sur moins d'une décade ;
-le supposer constant est une hypothèse forte et probablement fausse — sur
-`terrain` il **croît** (2,82 → 2,83 → 3,14), ce qui rend l'extrapolation
-optimiste, pas pessimiste. Les évaluations Jung sont un compteur d'instrument,
-pas un temps. Et la mémoire est un problème **séparé** (≈ 0,35 Mo par point au
-pic du fold, soit ≈ 3,5 To à 10 M : c'est L2–L4, pas la génération).
-
-## 2. Pourquoi la coupe par rayon, l'idée naturelle, est réfutée
-
-Le travail est dans les grands rayons et le résultat dans les petits — mais
-**pas partout**. Par classe $D_{\max}$ du rectangle, $n = 16\,000$ :
-
-| famille / lane | $D_{\max} < 32$ : travail | $D_{\max} < 32$ : survivants | $D_{\max} \ge 64$ : travail | $D_{\max} \ge 64$ : survivants |
-|---|---|---|---|---|
-| `uniform` q3 | 12,7 % | 97,8 % | 2,8 % | **0,0 %** |
-| `uniform` q4 | 20,2 % | 97,7 % | 0,1 % | **0,0 %** |
-| `scanline` q3 | 2,1 % | 93,6 % | 97,0 % | 5,1 % |
-| `scanline` q4 | 6,4 % | 57,5 % | 92,3 % | **36,8 %** |
-| `terrain` q4 | 13,9 % | 53,3 % | 77,4 % | **24,4 %** |
-
-Sur `uniform`, une coupe par rayon serait exacte — et ne gagnerait rien
-(2,8 % du travail). Sur `scanline` q4 et `terrain` q4, les grands rayons
-portent **24 % à 37 % des survivants** : une coupe y **changerait l'objet**,
-ce qui est interdit. La piste « ignorer les grandes ancres » est donc
-**fermée par la mesure**, et il faut le dire avant que quelqu'un ne la
-propose.
-
-Ce qui reste licite est un test de rectangle **exact** : ne tuer un rectangle
-que si l'on prouve qu'aucune de ses ancres ne peut produire de survivant. Son
-gain maximal est donc borné par le travail porté par les rectangles dont
-**toutes** les ancres sont déjà tuées par le test d'ancre exact. J'ai
-instrumenté ce plafond (`plafond_test_rectangle` dans `bench/rect_probe.cpp`) ;
-la mesure est en cours et sera versée avant toute conception.
-
-## 3. Ce que je propose comme contrat
-
-**Contrat d'exposant par régime.** Pour chaque famille de mesure $F$ et chaque
-grandeur instrumentée $Q$ (ancres q3/q4, seeds q3/q4, complétions q4,
-évaluations Jung), l'exposant local entre deux tailles consécutives de
-$\lbrace 8000, 16000, 32000, 50000 \rbrace$ doit vérifier
-$e_{F,Q} \le e^{*}_{F}$, avec $e^{*}$ gravé par famille et **vérifié par une
-porte** qui refuse (code 3) si le plafond est dépassé. Valeurs de départ
-proposées, choisies au-dessus des mesures actuelles sauf pour `terrain` :
-
-| famille | $e^{*}$ proposé | mesure actuelle |
-|---|---|---|
-| `uniform` | 1,20 | 1,06 |
-| `eight_clusters` | 1,20 | 1,06 |
-| `scanline_single_pass` | 2,30 | 2,21 |
-| `terrain` | **2,20** | 3,14 (échec assumé, c'est la cible) |
-
-Cette porte a trois vertus : elle rend l'objectif **falsifiable** ; elle
-détecte une régression d'exposant que les temps absolus masquent ; et elle
-dit, famille par famille, si le contrat 10–30 M est encore atteignable.
-
-## 3 bis. Une piste qui ne demande aucun théorème nouveau — et sa mesure
-
-En lisant `alive_rectangles` (`src/pipeline/generate.hpp`), un fait saute aux
-yeux : **la descente ternaire s'arrête dès que le rectangle est séparé**, et
-pas quand il est *utile* de s'arrêter. Or rien n'oblige à s'y arrêter pour le
-travail :
-
-- scinder un rectangle **vivant** en sous-rectangles par le même mécanisme
-  (`ix.nodes[v].left` / `.right`) **partitionne** ses paires : ni l'objet, ni
-  la complétude, ni le critère terminal de la WSPD ne sont touchés ;
-- chaque scission **resserre les boîtes**, donc **augmente** le nombre de
-  témoins universels : un sous-rectangle peut mourir là où son parent vivait,
-  et avec **exactement le prédicat déjà utilisé** en production
-  (`count_universal_witnesses(...) >= h_q`) ;
-- le coût est borné : la descente d'un rectangle visite au plus deux fois son
-  nombre de feuilles, c'est-à-dire au plus ce que l'énumération de ses paires
-  coûtait déjà.
-
-Autrement dit, **cette piste ne demande aucun théorème nouveau et ne rouvre
-aucune piste fermée** — en particulier pas « cap de population dans le critère
-terminal de la WSPD », qui portait sur le critère de *terminaison* de la
-décomposition (et forçait $\#\mathrm{rect} \ge \binom{n}{2}/C^{2}$) ; ici le
-critère terminal est inchangé, seule la granularité du *travail* l'est.
-
-Je l'ai instrumentée (`descente_prolongee` dans `bench/rect_probe.cpp`), sans
-rien changer à la production. `scanline_single_pass` q3, $n = 8\,000$ :
-
-| grandeur | valeur |
-|---|---|
-| rectangles traités | 173 190 |
-| paires : entrantes → **tuées** → restantes | 626 015 → **210 975 (33,7 %)** → 415 040 |
-| rectangles **entièrement** tués | 3 411 |
-| sous-rectangles engendrés | 257 810 (1,49 par rectangle) |
-| profondeur maximale | **11** |
-| coût du test | 27 293 697 nœuds visités, 14 409 537 évaluations de coin |
-| sites de cover évités (estimation) | 92 145 445 |
-| seeds évités (estimation) | 20 635 455 / 29 907 237 (69,0 %) |
-
-Lecture honnête : **27,3 M de nœuds visités pour éviter 92,1 M de sites de
-cover**, soit un rapport d'environ 3 pour 1 en faveur du test — favorable,
-pas écrasant. Et les deux dernières lignes sont des **estimations au prorata**
-(je répartis les seeds et le cover d'un rectangle proportionnellement à ses
-paires) : c'est presque certainement faux, les ancres lourdes dominant. Elles
-donnent un ordre de grandeur, pas une mesure.
-
-Deux suites immédiates, avant toute implémentation :
-1. **Rendre la descente adaptative** — n'y entrer que sur les rectangles où
-   elle paie (6,2 % des rectangles portent 73,1 % du travail) : le coût du
-   test devrait chuter d'un ordre de grandeur à gain presque constant.
-2. **Vérifier que le gain croît avec $n$**, sans quoi il baisse la constante
-   sans toucher l'exposant — et c'est l'exposant qui décide des contrats
-   10–30 M. La mesure à 16 000 est en cours.
-
-## 4. Verrous
-
-- **V36** — acceptez-vous le **contrat d'exposant par régime** comme critère
-  d'avancement (porte à code 3 sur les exposants locaux des compteurs de
-  génération, seuils gravés par famille), plutôt qu'un objectif de
-  sous-quadraticité au pire cas ?
-- **V37** — la coupe par rayon est réfutée par la mesure (24 à 37 % des
-  survivants q4 vivent à $D_{\max} \ge 64$ sur `terrain` et `scanline`).
-  Confirmez-vous qu'elle doit entrer dans `PISTES_FERMEES.md` **avec cette
-  mesure comme cause**, avant que quelqu'un ne la repropose ?
-- **V38** — existe-t-il un **minorant du nombre de points strictement
-  intérieurs valable pour toutes les ancres d'un rectangle** $A \times B$, et
-  serré ? Formellement : une fonction $\underline{I}(A, B)$ calculable en
-  $O(\text{polylog})$ telle que $\underline{I}(A, B) \le \min_{(a,b) \in A \times B} \lvert I_{B(a,b)} \rvert$
-  et qui atteigne le seuil $h_q$ aussi souvent que le test d'ancre. Les
-  histogrammes de coins actuels en sont un, mais lâche (ils ne tuent **rien**
-  dans les classes $c \le 3$ et 75 % en $c = 6$ là où le test d'ancre en tue
-  96 %). Est-ce un problème ouvert, ou connaissez-vous la construction ?
-- **V39** — sur `terrain` q4, l'exposant est de **3,14** alors que les ancres
-  ne croissent qu'en $n^{1{,}41}$ : le coût par ancre croît donc en
-  $n^{1{,}73}$. Avant de concevoir, faut-il d'abord instrumenter **ce qui
-  grossit dans une ancre `terrain`** (taille du cover ? nombre de seeds par
-  ancre ? profondeur de la complétion q4 ?) — je penche pour oui, et je ne
-  proposerai rien avant cette mesure.
-- **V41** — la **descente prolongée** du § 3 bis vous paraît-elle correcte
-  telle que je l'énonce (partition des paires, prédicat de mort inchangé,
-  critère terminal de la WSPD intact, donc objet inchangé et aucune piste
-  fermée rouverte) ? Si oui, elle est implémentable sans nouveau théorème et
-  je la propose comme premier commit ; si non, où est la faute ?
-- **V40** — l'asymétrie (médiane 5 seeds par rectangle contre un maximum de
-  849 452) rend toute affectation « un rectangle par bloc GPU » inutilisable.
-  Le découpage d'un rectangle **vivant** en sous-rectangles, à seule fin de
-  répartir le travail, ne change ni les paires énumérées ni l'objet — il ne
-  touche pas au critère terminal de la WSPD, donc pas à la piste fermée « cap
-  de population dans le critère terminal ». Confirmez-vous cette lecture ?
-
-## 5. Ce que je ne propose pas encore, et pourquoi
-
-Aucune conception. Trois mesures manquent, et chacune peut invalider une
-famille entière de solutions : le plafond d'un test de rectangle exact (en
-cours), la décomposition du coût par ancre sur `terrain` (V39), et le
-comportement des exposants au-delà de 50 000 points — sans quoi toute
-extrapolation à 10 M reste une pente sur moins d'une décade.
-
-
-## Réception Claude des réponses V36–V40 (même jour)
-
-**J'accepte les cinq corrections de fait, dont une qui invalide une phrase que
-j'ai publiée.**
-
-1. **« Gain MAXIMAL » était faux.** W, secteurs et grille sont des conditions
-   *suffisantes non nécessaires*, et les populations de mon quotient n'étaient
-   pas alignées (`alive` post-histogramme en q3, post-W4 en q4 ; `killed`
-   omettant W4 et la grille). Le bloc `plafond_test_rectangle` est **retiré**
-   de `bench/rect_probe.cpp`, pas renommé. Il est remplacé par la mesure que
-   vous désignez comme la seule bornante : la **ventilation de la mortalité par
-   cause**, `k=1` (W_q, certificat *universel*) contre `k=2` (secteurs,
-   *ancre-spécifique*) — seule la masse `k=1` borne ce qu'un raffinement de
-   boîtes peut retirer.
-2. **Les tailles ne viennent pas du même binaire ni du même `coord`.** Mes
-   exposants mélangent `mhgp5_conformity_v4` (8/16/32 k) et `mhgp5_probe`
-   (50 k) sur des nuages régénérés : ce n'est pas une série appariée. Je les
-   requalifie en **diagnostic de pente à source épinglée**, et je referai la
-   série avec un binaire et un `coord` uniques avant d'en tirer quoi que ce
-   soit.
-3. **La colonne « Jung » est `jung_cert_skip`**, pas le coût q4. Je la nomme
-   désormais ainsi.
-4. **Le débit $4{,}8 \times 10^{10}$/s n'est pas mesuré.** L'écart
-   $3{,}14 - 2{,}28 = 0{,}86$ est un écart entre deux hypothèses
-   conditionnelles, pas « l'exposant manquant à l'algorithme ». Je retire cette
-   formulation.
-5. **V36 : votre refus est fondé.** Mes seuils échouaient déjà sur
-   `eight_clusters` (ancres q3 à 1,54 pour un seuil de 1,20). Je retiens vos
-   deux rails : diagnostic de pente par compteur, source et intervalle
-   épinglés, d'un côté ; budget produit sur le **mur de bout en bout** et le
-   **pic mémoire** d'une taille cible de l'autre. Aucun CTest rouge n'est
-   ajouté.
-
-## Ce que ma mesure apporte à votre priorité q3 — et ce qu'elle réfute
-
-Vous écrivez : « Le zéro `W4` déjà observé sur le run q4 fait de ce raccord une
-priorité **q3** ». J'ai instrumenté le raffinement post-séparation
-(`descente_prolongee`) avant d'avoir lu votre réponse, et **la mesure va dans
-votre sens, y compris contre moi** :
-
-| cas ($n = 16\,000$ sauf mention) | paires tuées | coût (nœuds visités) | cover évité (estimation) | rapport |
-|---|---|---|---|---|
-| `scanline` q3, $n = 8\,000$ | 33,7 % | 27,3 M | 92,1 M | 3,4 : 1 |
-| `scanline` q3 | **43,8 %** | 84,4 M | 534,8 M | **6,3 : 1** |
-| `scanline` q4 | 21,2 % | 109,2 M | 29,6 M | **0,27 : 1** |
-| `terrain` q4 | **5,9 %** | 69,8 M | 4,0 M | **0,06 : 1** |
-
-Trois lectures :
-
-- **En q3 sur `scanline`, le gain croît avec $n$** (33,7 → 43,8 % des paires ;
-  rapport 3,4 → 6,3) : c'est le seul endroit où ce raccord touche peut-être
-  l'exposant et pas seulement la constante.
-- **En q4 il est une perte nette**, et d'autant plus que la famille est celle
-  qui échoue : sur `terrain` q4 il paie 69,8 M de visites pour éviter 4,0 M de
-  sites — dix-sept fois défavorable. Votre prédiction (« en q4 il ne pourrait
-  d'abord gagner que par des candidats de handles/requête plus petits ») est
-  confirmée par la mesure, pas seulement plausible.
-- Donc **ce raccord ne résout pas `terrain`**, qui est précisément le régime
-  qui ne tient pas. Je ne le proposerai pas comme réponse au problème d'échelle,
-  seulement comme une optimisation q3 conditionnelle.
-
-Réserves que je maintiens sur mes propres chiffres : « cover évité » et
-« seeds évités » sont des **estimations au prorata** des paires, presque
-certainement fausses puisque les ancres lourdes dominent ; et le succès, comme
-vous l'exigez, se juge sur le **temps et les visites payées**, pas sur
-`seeds_cf`. Ma colonne « coût » est en visites de nœuds réellement comptées,
-elle ; c'est la seule des trois qui soit une mesure.
-
-## Ordre de travail que j'adopte, dans le vôtre
-
-1. **Ventilation `k=1` / `k=2` par classe** (livrée ci-dessus dans le code,
-   mesure en cours) — c'est elle qui décide si le raffinement q3 a une masse
-   accessible, avant tout prototype.
-2. **V39 : instrumenter le vrai flux `terrain`** (handles/requêtes,
-   W/secteurs, constructions et visites de cover, grille, tests de `x`,
-   lentille, remplissage affine, puissance q4 ; avec `Dmax`, `D2`, population
-   des handles et taille de cover). C'est le régime qui échoue, et je n'ai
-   aucun modèle de son coût.
-3. **Série d'exposants appariée** — binaire unique, `coord` unique, mêmes
-   nuages — avant toute reprise de l'argument d'échelle.
-4. Seulement ensuite, et seulement si 1 donne une masse : prototype de
-   raffinement q3 avec `L = 0..3`, ledger de masse de paires
-   (`emitted + postsep_killed = base_alive`), **route q2 interdite**, fixture
-   `refine-hist-wakeup` gravée sur vos quatre positions, et abandon si le temps
-   et les visites payées ne baissent pas.
-
-Une question de méthode, V42 : vous demandez de comparer « le multiensemble
-littéral des couples d'indices avant/après sur de petits arbres ». Faut-il en
-faire une **porte** (avec ses planchers et son mutant), ou un diagnostic du
-prototype ? Je penche pour la porte dès le prototype, parce qu'une perte de
-paire est exactement le genre de faute qu'un digest global masque.
 
 ## Réponse auditée à V42 et deux corrections de réception
 
@@ -552,12 +413,14 @@ suivante :
   soumises au test W. Elle ne borne ni toute la masse de paires supprimable avant
   ces filtres, ni le temps. Enfin, q4 n'est pas encore une « perte nette » : les
   69,8 M visites sont mesurées, mais les 4,0 M covers évités sont estimés au
-  prorata et les unités n'ont pas le même prix. Le signal justifie de différer
-  q4 ; seule une mesure intégrée du mur et des visites payées peut la fermer.
+  prorata et les unités n'ont pas le même prix. Ce signal ne classe donc pas la
+  priorité q4 ; il refuse seulement ce raffinement tant qu'une mesure intégrée
+  du mur et des visites payées ne le rend pas favorable.
 
 En q3, `33,7 % -> 43,8 %` décrit donc une **opportunité de pruning sur deux
-tailles**, pas encore un gain croissant ni une baisse d'exposant. L'ordre de
-travail V39 puis prototype q3 borné reste le bon.
+tailles**, pas encore un gain croissant ni une baisse d'exposant. Cet ordre
+historique est remplacé par R0--R3 ci-dessus : partager le diagnostic puis
+traiter le carré local q4 avec le constructeur shallow.
 
 ## Requalification de la mesure prédicteur `905c5361`
 
