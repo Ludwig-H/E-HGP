@@ -103,9 +103,9 @@ int main(int argc, char** argv) {
   rle_candidates(&prod, 1);
   rle_candidates(&dev, 1);
   vec_mism += count_mism(prod, dev);
-  std::printf("q3_lane_device famille=%s n=%d fils=%d routage_min_sites=%zu ancres_device=%llu ancres_hote=%llu ancres_trop_grandes=%llu seeds_device=%llu seeds_hote=%llu seuil_seeds=%zu seuil_sites=%zu vidages=%llu max_lot_seeds=%llu max_ancre_seeds=%llu max_lot_sites=%llu max_ancre_sites=%llu candidats_q3=%zu seeds=%llu tues=%llu replis=%llu lancements=%llu "
+  std::printf("q3_lane_device famille=%s n=%d fils=%d wire=%s routage_min_sites=%zu ancres_device=%llu ancres_hote=%llu ancres_trop_grandes=%llu seeds_device=%llu seeds_hote=%llu seuil_seeds=%zu seuil_sites=%zu vidages=%llu max_lot_seeds=%llu max_ancre_seeds=%llu max_lot_sites=%llu max_ancre_sites=%llu candidats_q3=%zu seeds=%llu tues=%llu replis=%llu lancements=%llu "
               "kernel_ms=%.1f desaccords_vecteur=%llu desaccords_compteurs=%llu\n",
-              cloud_family_name(family), n, threads, lim.device_min_sites, (unsigned long long)bs.anchors_device, (unsigned long long)bs.anchors_host, (unsigned long long)bs.anchors_oversized,
+              cloud_family_name(family), n, threads, lim.wire_index ? "index" : "soa", lim.device_min_sites, (unsigned long long)bs.anchors_device, (unsigned long long)bs.anchors_host, (unsigned long long)bs.anchors_oversized,
               (unsigned long long)bs.seeds_device, (unsigned long long)bs.seeds_host, lim.seeds, lim.sites, (unsigned long long)bs.flushes, (unsigned long long)bs.max_lot_seeds,
               (unsigned long long)bs.max_anchor_seeds, (unsigned long long)bs.max_lot_sites, (unsigned long long)bs.max_anchor_sites, prod.size(), (unsigned long long)sp.seeds[0],
               (unsigned long long)sp.depth_killed[1], (unsigned long long)sp.q3_cert[2], (unsigned long long)launches,

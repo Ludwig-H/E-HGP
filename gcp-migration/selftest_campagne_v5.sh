@@ -182,9 +182,9 @@ EOT
 chmod +x build-cuda/mhgp5_device_witness
 cat > build-cuda/mhgp5_q3_lane_device_gate <<'EOT'
 #!/usr/bin/env bash
-fam=uniform; n=1200; t=1
-for a in "$@"; do case "$a" in --family=*) fam="${a#--family=}";; --n=*) n="${a#--n=}";; --threads=*) t="${a#--threads=}";; esac; done
-echo "q3_lane_device famille=${fam} n=${n} fils=${t} seuil=65536 vidages=10 max_lot_seeds=1 max_ancre_seeds=1 candidats_q3=1176250 seeds=3373964 tues=3197714 replis=768748 lancements=10 kernel_ms=1.0 desaccords_vecteur=${LANE_MISM:-0} desaccords_compteurs=0"
+fam=uniform; n=1200; t=1; w=soa
+for a in "$@"; do case "$a" in --family=*) fam="${a#--family=}";; --n=*) n="${a#--n=}";; --threads=*) t="${a#--threads=}";; --wire=*) w="${a#--wire=}";; esac; done
+echo "q3_lane_device famille=${fam} n=${n} fils=${t} wire=${w} seuil=65536 vidages=10 max_lot_seeds=1 max_ancre_seeds=1 candidats_q3=1176250 seeds=3373964 tues=3197714 replis=768748 lancements=10 kernel_ms=1.0 desaccords_vecteur=${LANE_MISM:-0} desaccords_compteurs=0"
 [ "${LANE_MISM:-0}" = "0" ] && { echo "q3_lane_device OK"; exit 0; }
 exit 1
 EOT
@@ -217,7 +217,7 @@ run_campaign() {
 # ---- Scenario 1 : happy path -> complete.
 RC1=$(run_campaign "${WORK}/out1")
 [ "${RC1}" -eq 0 ] || fail "scenario 1 : script distant rc=${RC1}"
-[ "$(ls "${WORK}/out1"/*.status 2>/dev/null | wc -l)" -eq 25 ] || fail "scenario 1 : 25 statuts attendus (temoin + lane device + mutant + 12 conformites + 4 contrats CPU + 4 contrats GPU + 2 adaptatifs)"
+[ "$(ls "${WORK}/out1"/*.status 2>/dev/null | wc -l)" -eq 29 ] || fail "scenario 1 : 29 statuts attendus (temoin + lane device + mutant + 12 conformites + 4 contrats CPU + 4 contrats GPU + 2 adaptatifs + 4 wire index)"
 grep -L '^source_commit=cafedeca$' "${WORK}/out1"/*.status | grep -q . && fail "scenario 1 : pin source absent d'un statut"
 if ! python3 "${HERE}/validate_v5_campaign.py" "${WORK}/out1" cafedeca beefbeef feedf00d 0 0 > "${WORK}/v1.log" 2>&1; then
   fail "scenario 1 : validateur a refuse un happy path ($(cat "${WORK}/v1.log"))"

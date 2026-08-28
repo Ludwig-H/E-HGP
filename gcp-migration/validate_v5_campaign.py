@@ -48,6 +48,8 @@ def expected_names():
         names.append(f"contrat_gpu_{fam}_n50000")
     for fam in ("eight_clusters", "scanline_single_pass"):
         names.append(f"contrat_gpuad_{fam}_n50000")
+    for fam in FAMILIES:
+        names.append(f"contrat_gpuidx_{fam}_n50000")  # G1 : wire par indices (q3), --gpu --gpu-wire=index
     return names
 
 
@@ -350,10 +352,10 @@ def main():
                     bad.append(f"{name}: scan {fam} absent, sous le plancher (1000 seeds) ou en desaccord")
             if "device_witness OK" not in body:
                 bad.append(f"{name}: temoin device non conforme")
-        if name.startswith("contrat_gpu_") or name.startswith("contrat_gpuad_"):
+        if name.startswith("contrat_gpu_") or name.startswith("contrat_gpuad_") or name.startswith("contrat_gpuidx_"):
             if not re.search(r"^gpu=1 kernel_ms=", body, re.M):
                 bad.append(f"{name}: le run n'annonce pas gpu=1")
-            cpu_txt = os.path.join(out, name.replace("contrat_gpuad_", "contrat_").replace("contrat_gpu_", "contrat_") + ".txt")
+            cpu_txt = os.path.join(out, name.replace("contrat_gpuad_", "contrat_").replace("contrat_gpuidx_", "contrat_").replace("contrat_gpu_", "contrat_") + ".txt")
             cpu_body = open(cpu_txt, encoding="utf-8", errors="replace").read() if os.path.exists(cpu_txt) else ""
             # Les DEUX digests (boules et forets) doivent etre identiques au contrat CPU.
             for key in ("digest_balls", "digest_all"):
@@ -382,14 +384,18 @@ def main():
             # Triples EXACTS famille/taille/fils, planchers (100000 candidats a
             # 8 k, seeds et morts non vides, lancements > 0), desaccords = 0,
             # et une occurrence unique de chaque triple.
-            want = {("uniform", "1200", "1"): 200, ("eight_clusters", "1200", "4"): 200, ("uniform", "8000", "8"): 100000,
-                    ("uniform", "300", "1"): 200}  # cocirculaire (coord=40) : replis exacts exerces
-            for lane, cand_key in (("q3_lane_device", "candidats_q3"), ("q4_lane_device", "candidats_q4")):
+            want_soa = {("uniform", "1200", "1", "soa"): 200, ("eight_clusters", "1200", "4", "soa"): 200, ("uniform", "8000", "8", "soa"): 100000,
+                        ("uniform", "300", "1", "soa"): 200}  # cocirculaire (coord=40) : replis exacts exerces
+            # G1 (q3 seulement) : wire par indices sur trois cas — memes verdicts et compteurs que la production.
+            want_q3 = dict(want_soa)
+            want_q3.update({("uniform", "1200", "1", "index"): 200, ("eight_clusters", "1200", "4", "index"): 200, ("uniform", "300", "1", "index"): 200})
+            for lane, cand_key, want, n_ok in (("q3_lane_device", "candidats_q3", want_q3, 7), ("q4_lane_device", "candidats_q4", want_soa, 4)):
                 rx = re.compile(rf"^{lane} famille=(\S+) n=(\d+) fils=(\d+) (.*) desaccords_vecteur=(\d+) desaccords_compteurs=(\d+)$", re.M)
                 seen = {}
                 for f, n, t, mid, v, k in rx.findall(body):
                     kv = dict(re.findall(r"(\w+)=([0-9.]+)", mid))
-                    key = (f, n, t)
+                    wire = re.search(r"\bwire=(\w+)", mid)
+                    key = (f, n, t, wire.group(1) if wire else "soa")
                     seen[key] = seen.get(key, 0) + 1
                     if key not in want:
                         bad.append(f"{name}: {lane} — triple inattendu {key}")
@@ -403,8 +409,8 @@ def main():
                 for key in want:
                     if seen.get(key, 0) != 1:
                         bad.append(f"{name}: {lane} {key} — {seen.get(key, 0)} occurrence(s), une attendue")
-                if body.count(f"{lane} OK") != 4:
-                    bad.append(f"{name}: {lane} — quatre OK attendus, {body.count(lane + ' OK')} vus")
+                if body.count(f"{lane} OK") != n_ok:
+                    bad.append(f"{name}: {lane} — {n_ok} OK attendus, {body.count(lane + ' OK')} vus")
         if name.startswith("conf_") and not conformity.search(body):
             bad.append(f"{name}: conformite v4 non etablie")
         if name.startswith("contrat_") and not digest.search(body):

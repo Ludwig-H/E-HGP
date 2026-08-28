@@ -150,7 +150,7 @@ if [ -n "${NVCC_BIN}" ] && [ "${SKIP_GPU_WITNESS:-0}" != "1" ]; then
   # portes (uniform 1200, eight_clusters 1200 a 4 fils, uniform 8000 a 8 fils),
   # statut grave comme un run ; un echec ne refuse PAS les phases CPU (la lane
   # device n'est pas sur le chemin produit), mais le validateur l'exige a 0.
-  run_one gpu_lane device_lane bash -c "set -e; cmake --build build-cuda --target mhgp5_q3_lane_device_gate mhgp5_q4_lane_device_gate mhgp5_cuda -j8 2>&1 | grep -vE '^\[|^Scanning' | tail -60; test \${PIPESTATUS[0]} -eq 0; ./build-cuda/mhgp5_q3_lane_device_gate --family=uniform --n=1200; ./build-cuda/mhgp5_q3_lane_device_gate --family=eight_clusters --n=1200 --threads=4; ./build-cuda/mhgp5_q3_lane_device_gate --family=uniform --n=8000 --threads=8 --min-candidates=100000; ./build-cuda/mhgp5_q4_lane_device_gate --family=uniform --n=1200; ./build-cuda/mhgp5_q4_lane_device_gate --family=eight_clusters --n=1200 --threads=4; ./build-cuda/mhgp5_q4_lane_device_gate --family=uniform --n=8000 --threads=8 --min-candidates=100000; ./build-cuda/mhgp5_q3_lane_device_gate --family=uniform --n=300 --coord=40 --min-candidates=200; ./build-cuda/mhgp5_q4_lane_device_gate --family=uniform --n=300 --coord=40 --min-candidates=200 --min-deep=20"
+  run_one gpu_lane device_lane bash -c "set -e; cmake --build build-cuda --target mhgp5_q3_lane_device_gate mhgp5_q4_lane_device_gate mhgp5_cuda -j8 2>&1 | grep -vE '^\[|^Scanning' | tail -60; test \${PIPESTATUS[0]} -eq 0; ./build-cuda/mhgp5_q3_lane_device_gate --family=uniform --n=1200; ./build-cuda/mhgp5_q3_lane_device_gate --family=eight_clusters --n=1200 --threads=4; ./build-cuda/mhgp5_q3_lane_device_gate --family=uniform --n=8000 --threads=8 --min-candidates=100000; ./build-cuda/mhgp5_q4_lane_device_gate --family=uniform --n=1200; ./build-cuda/mhgp5_q4_lane_device_gate --family=eight_clusters --n=1200 --threads=4; ./build-cuda/mhgp5_q4_lane_device_gate --family=uniform --n=8000 --threads=8 --min-candidates=100000; ./build-cuda/mhgp5_q3_lane_device_gate --family=uniform --n=300 --coord=40 --min-candidates=200; ./build-cuda/mhgp5_q4_lane_device_gate --family=uniform --n=300 --coord=40 --min-candidates=200 --min-deep=20; ./build-cuda/mhgp5_q3_lane_device_gate --family=uniform --n=1200 --wire=index; ./build-cuda/mhgp5_q3_lane_device_gate --family=eight_clusters --n=1200 --threads=4 --wire=index; ./build-cuda/mhgp5_q3_lane_device_gate --family=uniform --n=300 --coord=40 --min-candidates=200 --wire=index"
   # Mutant du temoin sur le DEVICE : code 4 exige (la seule inscription CTest
   # ne prouve pas qu'il a ete compile et tue sur la cible).
   run_one gpu_mutant device_mutant ./build-cuda/mhgp5_device_witness --inject=witness-no-warp-correction
@@ -213,6 +213,12 @@ if [ -x "${GPU_BIN:-/nonexistent}" ] && grep -q '^code=0$' "${OUT_DIR}/gpu_lane.
   for fam in eight_clusters scanline_single_pass; do
     run_one "contrat_gpuad_${fam}_n50000" contract_50k_gpu_adaptive \
       "${GPU_BIN}" --gpu --gpu-min-sites=256 "--family=${fam}" --n=50000 --s=8 --smax=11 --seed=3 "--threads=${THREADS}" --digest
+  done
+
+  # G1 : wire par INDICES (q3) sur les quatre familles — memes digests que le CPU exiges, octets H2D graves.
+  for fam in uniform terrain eight_clusters scanline_single_pass; do
+    run_one "contrat_gpuidx_${fam}_n50000" contract_50k_gpu_wire_index \
+      "${GPU_BIN}" --gpu --gpu-wire=index "--family=${fam}" --n=50000 --s=8 --smax=11 --seed=3 "--threads=${THREADS}" --digest
   done
 else
   echo "REFUS : pilote CUDA absent (${GPU_BIN:-}) ou lane device / mutant non conformes — contrats device non executes"
