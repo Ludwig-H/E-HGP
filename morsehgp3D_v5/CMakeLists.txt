@@ -270,7 +270,8 @@ mhgp5_gate(mhgp5_fold_live_mutant_slot_cap 4 mhgp5_fold_live_gate "--inject=slot
 mhgp5_executable(mhgp5_fold_fixtures_gate tests/fold_fixtures_gate.cpp)
 mhgp5_gate(mhgp5_fold_fixtures 0 mhgp5_fold_fixtures_gate "" TIMEOUT 120)
 
-# Raffinement post-separation : objet complet identique a L=0..3 et 1/4 fils,
+# Raffinement post-separation : objet complet identique a L=0..3 et, a L=3,
+# entre 1/4 fils,
 # grand-livre fail-closed, oracle litteral exact-once, rollback de separation,
 # route q2 interdite par une contre-fixture radix qui reveille une boule avec
 # ledger vert.

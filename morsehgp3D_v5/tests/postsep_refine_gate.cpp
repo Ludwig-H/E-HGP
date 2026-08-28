@@ -1,9 +1,12 @@
 // MorseHGP3D v5 — PORTE DU RAFFINEMENT POST-SEPARATION
 // (docs/MESURES_ECHELLE.md § 4). Le raffinement prolonge la descente ternaire
 // A L INTERIEUR d'un rectangle vivant : les sous-rectangles PARTITIONNENT les
-// paires du parent, donc l'objet ne change pas. Ce que la porte exige :
+// paires du parent. Cette partition est necessaire mais ne suffit pas a prouver
+// la conservation q3/q4, qui depend aussi du recomptage ponctuel exact de Wq
+// avant les seeds. Ce que la porte exige :
 //   (1) DIGESTS DES BOULES ET FORETS, candidats par lane, evenements et niveaux
-//       de lots identiques a L = 0, 1, 2, 3 et entre un et quatre fils ;
+//       de lots identiques a L = 0, 1, 2, 3 et, a L = 3, entre un et quatre
+//       fils ;
 //   (2) GRAND-LIVRE exact par lane : `emis + tues == base`, sans quoi une
 //       paire a ete perdue ou comptee deux fois ;
 //   (3) ROUTE q2 INTERDITE : `tues[q2] == 0` et `emis[q2] == base[q2]` a tout

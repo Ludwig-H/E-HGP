@@ -138,10 +138,11 @@ fonction constante : intérieur universel, extérieur universel ou shell
 universel selon sa position sur l'axe ; il faut le router vers le compte fixe
 ou le census, pas inventer une droite. Ce même arrangement donne les deux lanes :
 
-- **q3 :** `x` ne demande pas une nouvelle recherche géométrique. Le centre du
+- **q3 :** `x` ne demande pas une nouvelle recherche géométrique. Après les
+  filtres de lentille, d'acuité stricte et d'owner canonique, le centre du
   triangle `(a,b,x)` est le point marqué $v_x$ de norme minimale sur sa propre
-  droite `h_x=0` — son intersection avec le plan affine du triangle.
-  On conserve ce point si sa profondeur stricte est au plus
+  droite `h_x=0` — son intersection avec le plan affine du triangle. On ne
+  conserve ce point marqué que si sa profondeur stricte est au plus
   $\kappa_3=h_3-1=s_{\max}-3$, soit **8** pour `smax=11`. Le scan actuel
   `x x cover` devient une localisation dans le préfixe peu profond commun ;
 - **q4 :** le centre de `(a,b,x,y)` est le sommet commun à `h_x=0` et `h_y=0`.
@@ -164,14 +165,16 @@ changement de contrat séparé, déjà averti par
 [`PISTES_FERMEES.md`](../docs/PISTES_FERMEES.md).
 
 Deux profondeurs doivent donc rester nommées séparément. La profondeur
-$\delta_e^{\mathrm{full}}$ porte sur tous les intérieurs de la sphère et donne
-le rang mathématique. La profondeur $\delta_e^{(3)}$ ne parcourt que le cover
-coefficient 3 et reproduit le filtre historique de génération. Pour q3, ce
-cover contient tous les intérieurs ; pour q4, il contient les carriers utiles
-mais peut omettre des intérieurs, comme le grave `mhgp5_q4_cover_fixture`.
-Préserver d'abord `digest_balls` impose $\delta_e^{(3)}$ ; revendiquer la borne
-de rang exige $\delta_e^{\mathrm{full}}$ ou une recertification terminale
-équivalente. Ne jamais échanger silencieusement ces deux objets.
+$\delta_e^{\mathrm{full}}$ porte sur tous les intérieurs stricts de la sphère :
+elle donne la contribution intérieure à la porte de profondeur du carrier. Le
+rang fermé complet ajoute encore le shell, traité par le census et la politique
+de plateau. La profondeur $\delta_e^{(3)}$ ne parcourt que le cover coefficient
+3 et reproduit le filtre historique de génération. Pour q3, ce cover contient
+tous les intérieurs ; pour q4, il contient les carriers utiles mais peut omettre
+des intérieurs, comme le grave `mhgp5_q4_cover_fixture`. Préserver d'abord
+`digest_balls` impose $\delta_e^{(3)}$ ; revendiquer la borne de rang exige
+$\delta_e^{\mathrm{full}}$ avec le census du shell, ou une recertification
+terminale équivalente. Ne jamais échanger silencieusement ces objets.
 
 Le futur `center-cover` possède toutefois un garde de compatibilité exact,
 simple et conservateur. Pour des boîtes d'extrémités $A,B$ et un nœud témoin
@@ -182,10 +185,13 @@ $p\in A,q\in B$ et tout $x\in W$ vérifient
 $\lVert2x-p-q\rVert^2\leq U$ et $\lVert p-q\rVert^2\geq L$. Le test
 $U\leq3L$, ajouté au certificat d'intériorité stricte, prouve donc que chaque
 témoin crédité appartient aussi au cover coefficient 3 de **toute** ancre du
-bloc. Avec au moins $h_4$ tels témoins par patch, le bloc peut être tué sans
-changer le multiensemble historique ni `digest_balls`; si le garde échoue, la
-route compatible v4 reste fail-open. L'égalité $U=3L$ est admissible pour
-l'appartenance au cover, tandis que l'intériorité demeure stricte. Sous le
+produit. Pour que le compte soit additif, chaque $W$ doit être disjoint en
+plages de $A\cup B$ et les nœuds crédités doivent former une antichaîne sans
+descendants comptés deux fois. Avec au moins $h_4$ témoins distincts ainsi
+certifiés par patch, on peut supprimer ce produit de la **lane q4** sans changer
+le multiensemble historique ni `digest_balls`; si une précondition ou le garde
+échoue, la route compatible v4 reste fail-open. L'égalité $U=3L$ est admissible
+pour l'appartenance au cover, tandis que l'intériorité demeure stricte. Sous le
 profil u16, ces carrés tiennent en `i64`.
 
 L'abstraction se généralise en dimension $d$, sans généraliser naïvement les
@@ -197,6 +203,68 @@ budget de profondeur stricte vaut $s_{\max}-q$. En 3D, cela donne `q2 = v=0`,
 formulation unifie les preuves et les données, mais ne promet pas la même borne
 combinatoire en dimension supérieure.
 
+### Enveloppe entière immédiate : ne pas attendre l'arrangement
+
+Le dernier diagnostic de cover a posé comme ouverte l'existence d'un
+sur-ensemble entier plus serré que la boule coefficient 3. Cette existence se
+ferme directement. Posons
+
+$$d=b-a,\qquad D^{2}=\lVert d\rVert^{2},\qquad w=2z-a-b,\qquad S=\lVert w\rVert^{2}-D^{2},\qquad \Xi=\lVert d\times w\rVert^{2}.$$
+
+Pour q3, un centre admissible s'écrit $m+v$, avec $v\perp d$ et
+$\lVert v\rVert\leq D/(2\sqrt{3})$, et sa boule a
+$R^{2}=D^{2}/4+\lVert v\rVert^{2}$. Maximiser le produit scalaire transverse
+sur ce disque donne l'enveloppe continue exacte de toutes les circumboules q3
+géométriquement admissibles :
+
+$$z\in U_3(a,b)\quad\Longleftrightarrow\quad S\leq0\quad\text{ou}\quad 3S^{2}\leq4\Xi.$$
+
+En coordonnées axiale $t$ et radiale $r$, la même région est
+$t^{2}+(r-D/(2\sqrt{3}))^{2}\leq D^{2}/3$. Elle est un solide de révolution
+pour la famille **continue** des centres ; l'union finie des boules réellement
+proposées par un nuage ne l'est généralement pas. L'équilatéral atteint la
+frontière extérieure $\sqrt{3}D/2$ : la boule coefficient 3 est bien la plus
+petite boule centrée en $m$ qui englobe $U_3$, mais elle est strictement plus
+large que $U_3$ ; sur l'axe, par exemple, $U_3$ s'arrête à
+$\lvert t\rvert=D/2$ alors que la boule englobante va jusqu'à
+$\sqrt{3}D/2$.
+
+Pour q4, Jung donne seulement $\lVert v\rVert\leq D/(2\sqrt{2})$. Il en découle
+le sur-ensemble sûr, sans prétendre qu'il décrit exactement tous les centres de
+tétraèdres réalisables :
+
+$$z\in U_4^{J}(a,b)\quad\Longleftarrow\quad z\text{ appartient à une boule q4 admissible},\qquad U_4^{J}(a,b)=\left\lbrace z:S\leq0\text{ ou }S^{2}\leq2\Xi\right\rbrace.$$
+
+Le cover q4 historique coefficient 3 n'est pas un sur-ensemble de toutes les
+boules q4. La réduction compatible est donc son **intersection** avec
+$U_4^{J}$, jamais son remplacement par l'enveloppe Jung entière. Tout porteur,
+point de coquille ou intérieur réellement utile appartient à la boule
+candidate correspondante ; supprimer de ce cover un point hors $U_4^{J}$ ne
+peut donc pas changer une décision exacte. Cette dernière phrase doit néanmoins
+être reçue par oracle et digest avant intégration.
+
+Une descente d'arbre fail-open vient sans racine. Pour une boîte de nœud, soit
+$Q_{\min}$ la borne inférieure exacte de $\lVert w\rVert^{2}$ par distances aux
+trois intervalles et $\Xi_{\max}$ le maximum de $\lVert d\times w\rVert^{2}$
+aux huit coins — le maximum est aux coins car cette forme est convexe. Si
+$Q_{\min}>D^{2}$, le nœud est extérieur à q3 sous
+$3(Q_{\min}-D^{2})^{2}>4\Xi_{\max}$, et extérieur à l'enveloppe Jung q4 sous
+$(Q_{\min}-D^{2})^{2}>2\Xi_{\max}$. L'égalité reste conservée ; les feuilles
+emploient le prédicat ponctuel fermé. Le profil u16 tient en `i128`.
+
+Plan court et falsifiable pour Claude :
+
+1. filtrer d'abord les sites **après** la visite actuelle des handles, sans
+   changer l'arbre ; publier `sites_avant/après` séparément en q3/q4 et mesurer
+   le coût du produit vectoriel exact ;
+2. exiger le même multiensemble brut, `digest_balls`, événements, niveaux et
+   forêts sur les six familles, avec frontières équilatérale q3 et régulière q4
+   et mutants de stricte inégalité/facteur ;
+3. seulement si le filtre réduit le travail réel, pousser le certificat de
+   boîte dans la descente et comparer nœuds/visites/mur sur un protocole calme ;
+4. garder l'arrangement shallow : cette enveloppe réduit les scans et $m_e$,
+   mais ne change pas à elle seule le pire exposant du catalogue d'ancres.
+
 ### Borne locale visée, et limite honnête
 
 Pour une ancre `e`, notons `m_e` le nombre de droites actives. En position
@@ -206,7 +274,7 @@ $Z_e\leq m_e(\kappa_e+1)$ ; à `smax=11`, cela donne au plus `8*m_e`, contre
 n'est pas le compteur actuel `q4_completions`, placé après plusieurs filtres et
 gouverné aussi par le nombre de seeds. Les constructions de niveaux peu
 profonds donnent comme cible théorique locale
-$O(m_e\log m_e+m_e(\kappa_e+1))`. Le document
+$O(m_e\log m_e+m_e(\kappa_e+1))$. Le document
 [`RNG_JUNG_CLIQUES_ET_NIVEAUX_PEUPROFONDS.md`](../../docs/math/RNG_JUNG_CLIQUES_ET_NIVEAUX_PEUPROFONDS.md)
 porte la preuve géométrique, les bornes et leurs limites.
 
@@ -228,15 +296,20 @@ quatre points : il faut généraliser l'abstraction, pas ouvrir q5.
 
 ### Plan qui aide Claude sans engager une refonte aveugle
 
-1. **R0, sonde sans décision :** sur les ancres courantes, publier
-   `m_e`, `c_e`, `kappa_e`, `Z_e`, `sum binom(m_e,2)`, `sum m_e*(kappa_e+1)`,
-   quantiles/maxima, temps de range, arrangement, exact et sink, plus le pic
-   scratch. La baseline quadratique est analytique, jamais exécutée aux grandes
-   tailles.
+1. **R0, sonde sans décision :** à l'échelle, publier `m_e`, `c_e`, `kappa_e`,
+   `sum binom(m_e,2)` et `sum m_e*(kappa_e+1)` comme majorants analytiques,
+   quantiles/maxima, temps de range, exact et sink, plus le pic scratch. Ne
+   calculer `Z_e` que sur les petites ancres ou un échantillon explicitement
+   borné : le former exhaustivement reconstruit précisément les
+   $\binom{m_e}{2}$ intersections que la sonde doit éviter.
 2. **R1, oracle borné :** pour petits nuages seulement, développer toutes les
    intersections, grouper les concurrences exactement et comparer le
-   multiensemble pré-RLE, les `BallKey` post-RLE, les compteurs sémantiques et
-   les digests au chemin courant.
+   multiensemble de `BallCandidate` pré-RLE, les `BallKey` post-RLE,
+   `digest_balls`, le statut, les événements, niveaux et forêts au chemin
+   courant. Ne pas exiger l'égalité des compteurs de travail historiques
+   (`seeds`, `q4_completions`, rejets ou certificats), puisque les boucles qui
+   les définissent disparaissent ; versionner de nouveaux compteurs propres au
+   constructeur shallow.
 3. **R2, vrai constructeur shallow CPU :** scan plat pour les ancres légères,
    arrangement q4 pour les moyennes/lourdes, puis q3 lourd si la préparation
    commune paie. Un prototype qui calcule d'abord les

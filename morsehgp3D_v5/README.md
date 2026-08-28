@@ -84,7 +84,7 @@ bornés (label `oracle`) et des preuves de `docs/MATHEMATIQUES.md`.
 cmake -S morsehgp3D_v5 -B build/v5 -DCMAKE_BUILD_TYPE=Release
 cmake --build build/v5 --parallel
 ctest --test-dir build/v5 --output-on-failure
-ctest --test-dir build/v5 --output-on-failure -L gate        # fixtures, mutants, invariants (~5 min)
+ctest --test-dir build/v5 --output-on-failure -L gate        # fixtures, mutants, invariants
 ctest --test-dir build/v5 --output-on-failure -L oracle      # juges independants a petit n
 ctest --test-dir build/v5 --output-on-failure -L scale8000   # tailles d'interet (puis scale16000, scale32000)
 cmake -S morsehgp3D_v5 -B build/v5-asan -DCMAKE_BUILD_TYPE=Debug -DMHGP5_ENABLE_SANITIZERS=ON   # ASan + UBSan

@@ -306,8 +306,9 @@ $n = 32\,000$, 8 fils, **digest identique partout** (`2bc14286…`) :
 | mur (ms) | 89 512 | **64 935** | 68 460 | 75 940 | 71 365 | 76 009 |
 
 Le seuil 32 semblait donner 9,0 % de mur en moins que le défaut sur ce passage,
-et le mode forcé 25 % de plus. **La comparaison répétée et alternée (quatre
-runs par seuil, entrelacés) réfute ce signal** :
+et le mode forcé 25 % de plus. Une comparaison locale de quatre runs par seuil,
+annoncée comme entrelacée mais sans sorties brutes, ordre AB/BA, commande, pin
+fonctionnel ni hash de binaire versionnés, ne reproduit pas ce signal :
 
 | répétition | seuil 256 | seuil 32 |
 |---|---|---|
@@ -315,48 +316,47 @@ runs par seuil, entrelacés) réfute ce signal** :
 | 2 | 78 842 | 76 724 |
 | 3 | 59 762 | 63 674 |
 | 4 | 69 688 | 43 096 |
-| **moyenne** | 69 139 | 64 962 (− 6,0 %) |
+| **moyenne** | 69 140 | 64 962 (− 6,0 %) |
 | **médiane** | 68 977 | 70 014 (**+ 1,5 %**) |
-| étendue | 28 % | **52 %** |
+| `(max−min)/moyenne` | 28 % | **52 %** |
 
-Moyenne et médiane vont en sens **opposés** et l'étendue atteint 52 % : il n'y
-a **aucun signal**. Les 9,0 % du balayage étaient du bruit.
+Les quatre différences appariées sont de signes et d'amplitudes instables : le
+protocole est **inconclusif** et ne résout pas un effet de 5 à 10 %. Il ne permet
+ni d'attribuer le premier −9 % au bruit, ni d'estimer un seuil de détectabilité
+à 20 %. Le +34,0 % post-séparation du § 4 ter reste lui aussi un signal à un run
+par bras, cohérent avec les compteurs de travail mais non recertifié par ces
+runs de seuil. Les deux compteurs appariés du § 0 restent exacts sur le cas
+exercé ; aucune reproductibilité plus générale n'est déduite de ces murs.
 
-**Conséquence de méthode, mesurée et non supposée :** sur cette machine
-partagée à 8 cœurs, un écart de mur inférieur à ≈ 20 % n'est pas mesurable.
-Le + 34,0 % du § 4 ter est au-dessus de ce seuil et tient ; un réglage de
-politique valant 5 à 10 % ne peut se trancher que sur une machine calme,
-c'est-à-dire une session G4. **Les compteurs, eux, restent exacts et
-reproductibles localement** (§ 0).
+### Piste géométrique corrigée : enveloppe entière q3/q4
 
-### La question ouverte, chiffrée : l'amplification du cover
+En q3, le cover coefficient 3 est la plus petite **boule centrée en $m$** qui
+contient l'enveloppe continue de toutes les circumboules admissibles : le centre
+est à distance au plus $D/(2\sqrt{3})$ de $m$ et le rayon au plus
+$D/\sqrt{3}$. L'équilatéral et le point extérieur aligné atteignent
+$\sqrt{3}D/2$, ce qui prouve le serrage parmi ces boules englobantes. Cela ne
+signifie ni que le cover est égal à l'union, ni que l'union finie des candidats
+du nuage est un solide de révolution. Cette démonstration q3 ne s'étend pas au
+cover historique q4 coefficient 3, qui est un sous-ensemble fail-open pour les
+intérieurs et la coquille.
 
-Le cover d'ancre est la boule
-$\lbrace z : \lvert 2z - (a+b) \rvert^{2} \le 3 D^{2} \rbrace$, soit la boule
-de centre $m$ et de rayon $\sqrt{3}\,D/2$. C'est **exactement** le majorant de
-l'union des boules candidates : en q3 le centre est à distance
-$\le \rho_3 = D/(2\sqrt{3})$ de $m$ et le rayon vaut
-$R = \sqrt{D^{2}/4 + \lvert v \rvert^{2}} \le D/\sqrt{3}$, donc l'union tient
-dans la boule de rayon $D/\sqrt{3} + D/(2\sqrt{3}) = \sqrt{3}\,D/2$. **Le
-coefficient 3 est donc serré — comme boule.**
+Le ratio précédemment annoncé
+$\lvert\mathrm{cover}\rvert/\lvert P\cap W_q\rvert=0{,}48$ est retiré : pour
+une même ancre et une même multiplicité, $W_q\subset W_2$ est déjà inclus dans
+le cover coefficient 1, donc ce quotient doit être au moins un. Les valeurs
+0,48 et 15,3 mélangent nécessairement des cohortes, unités ou sens de quotient ;
+elles n'ont ni sortie brute ni reçu et ne chiffrent aucun gain.
 
-Mais l'union des boules candidates **n'est pas une boule** : c'est un solide de
-révolution autour de l'axe $ab$, bien plus mince. L'écart est mesuré :
-l'amplification $\lvert \text{cover} \rvert / \lvert P \cap W_q \rvert$ vaut
-**0,48 et stable** sur `uniform`, **15,3 et croissante** sur `scanline` q3 à
-$n = 16\,000$. Sur la famille qui pose problème, le cover contient donc
-**quinze fois plus de sites** que la région pouvant réellement contenir un
-témoin, et ce facteur croît.
-
-Question ouverte, à poser avant toute implémentation : **existe-t-il une
-requête d'arbre, exacte en entiers, sur un sur-ensemble de l'union des boules
-candidates strictement plus serré que la boule de rayon $\sqrt{3}\,D/2$ ?**
-(par exemple l'intersection de cette boule avec un cylindre autour de $ab$, ou
-une enveloppe par tranches le long de l'axe). C'est, à ce jour, le seul levier
-identifié qui porte sur la masse dominante — les tests de cœur, $n^{2{,}40}$ —
-sans être redondant avec les tests d'ancre existants. Il n'est **pas** mesuré :
-l'amplification dit ce qu'il y aurait à gagner, pas ce qu'une requête plus
-serrée coûterait.
+L'existence d'une enveloppe entière plus serrée n'est en revanche pas ouverte.
+Avec $d=b-a$, $D^{2}=\lVert d\rVert^{2}$, $w=2z-a-b$,
+$S=\lVert w\rVert^{2}-D^{2}$ et $\Xi=\lVert d\times w\rVert^{2}$, l'enveloppe
+continue q3 vérifie exactement $S\leq0$ ou $3S^{2}\leq4\Xi$. La borne de Jung
+q4 fournit le sur-ensemble sûr $S\leq0$ ou $S^{2}\leq2\Xi$ ; l'intersecter avec
+le cover q4 coefficient 3 ne l'élargit pas et peut retirer des sites incapables
+d'appartenir à une boule admissible. Le plan de test, la borne de boîte
+fail-open et la séparation q3/q4 sont détaillés dans
+[`QUESTION_CLAUDE_EXPOSANTS_PAR_REGIME_20260828.md`](../audits/QUESTION_CLAUDE_EXPOSANTS_PAR_REGIME_20260828.md#enveloppe-entière-immédiate--ne-pas-attendre-larrangement).
+Ce filtre n'a encore aucune mesure de mur ni preuve différentielle v5.
 
 ## 5. Ce qui n'est pas établi
 

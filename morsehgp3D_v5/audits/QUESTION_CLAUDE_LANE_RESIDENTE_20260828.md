@@ -690,7 +690,17 @@ défaut reste donc $L=0$; une profondeur plus grande est fermée.
 Le prochain raccord exact à sonder est moins ambitieux et moins cher. Si
 $A=A_0\mathbin{\dot\cup}A_1$, les témoins du `parent.core` sont hors de
 $A\cup B$, tandis que tout nouveau témoin cherché dans le frère $A_1$ en est
-disjoint. Pour l'enfant $A_0\times B$, la somme $\min(h,\,parent.core+sibling\_credit)$ est donc sûre — contrairement à `parent + fresh_global`, qui peut doubler des témoins. Tester d'abord le frère entier par `box_vs_ball`, puis au besoin son seul sous-arbre avec un budget de 16/64 nœuds et arrêt au slack. Commencer à $L=1$ et ne poursuivre qu'après progrès strict. Ce micro-raccord peut épargner les histogrammes; il ne remplace pas le center-cover ni l'arrangement shallow qui attaquent les seeds q3/q4.
+disjoint. Après validation transactionnelle des deux enfants, recalculer pour
+$A_0\times B$ la boule de **l'enfant** avec `core_ball(q, Box(A0), Box(B))` ; ne
+jamais réutiliser la boule du parent. Créditer le frère entier seulement si
+`box_vs_ball(Box(A1), child_ball) > 0` strict, sinon descendre son seul
+sous-arbre comme une antichaîne, avec budgets 16/64 et fail-open, et employer
+`corner64_universal` de l'enfant aux feuilles. Le résultat consommable est
+`max(fresh_core, min(h, parent.core + sibling_credit))` : ne jamais additionner
+`fresh_core` au compte parent. Commencer en q3 seulement, à $L=1$, et ne
+poursuivre qu'après progrès strict ; q2 reste fermée. Ce micro-raccord peut
+épargner les histogrammes ; il ne remplace pas le center-cover ni l'arrangement
+shallow qui attaquent les seeds q3/q4.
 
 Avant même ce prototype, ventiler par classe les verdicts
 `anchor_kill_cumulated` en `k=1` (`W_q`) et `k=2` (secteurs). Seule la masse

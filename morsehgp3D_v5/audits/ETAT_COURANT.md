@@ -3,35 +3,25 @@
 - **Pin fonctionnel committé inspecté :** `72090f79`, durcissement du
   raffinement post-séparation sur la base `7ac6ca86`. Il inclut le pin
   mathématique `fbcf2059`, qui borne le contre-théorème ternaire et grave les
-  fixtures q3 skinny et plateau shell. Le pin `7ac6ca86` reste une mesure
-  documentaire d'un run `scanline` 100 k qui confirme un bilan mural négatif
-  du raffinement, mais elle demeure diagnostique : un seul run par bras, sans
-  sortie brute ni hash de binaire versionnés. Le pin `3469d93c` avait propagé
-  le raffinement post-séparation aux lanes CPU par lots et `5a0a90d6` en avait
-  introduit le raccord CPU opt-in. Le pin historique `55c1f105` épingle le correctif de
-  complexité du miroir; il prolonge le fold à créneaux et les raccords hôte
-  G0/G1 de `c19dc60d`, le pool/sonde de `194a0bc2` et le réducteur vivant durci
-  de `bc66ade7`. Les
-  constats historiques G0 portent sur `fe54ccca`, la campagne device/SCALE sur
-  `c95cfa95`, G1 q3 sur `dd928111`/`839cf1ec` et G1 q4 sur `556c421e`.
-- **Dernier pin documentaire inspecté :** `2d0614e0`. Il corrige le claim de
-  redondance structurelle arrivé concurremment dans `469d6e41` : les mesures
-  disponibles donnent un signal local négatif, mais ne déterminent pas tout le
-  travail intermédiaire.
+  fixtures q3 skinny et plateau shell. Les pins `3469d93c` et `5a0a90d6`
+  avaient respectivement propagé puis introduit le raccord CPU opt-in. Le pin
+  historique `55c1f105` épingle le correctif de complexité du miroir ; il
+  prolonge le fold à créneaux et les raccords hôte G0/G1 de `c19dc60d`, le
+  pool/sonde de `194a0bc2` et le réducteur vivant durci de `bc66ade7`.
+- **Dernier pin documentaire inspecté :** `173f9181`, après `288f4d09` et
+  `d5990e7a`. Cette séquence localise utilement la croissance du travail par
+  cover et ajoute quatre répétitions par seuil, mais le présent contre-audit
+  retire le seuil de détectabilité à 20 %, la recertification du +34 %, le ratio
+  de cover impossible à 0,48 et le transfert silencieux d'une preuve q3 vers
+  q4. Il ferme en contrepartie l'existence mathématique d'enveloppes entières
+  plus serrées, sans encore leur attribuer un gain de mur.
 - **Pin de réception G0/G1 q3 :** `0656bf4c`, sans code produit.
-- **Base du contre-audit :** `7ac6ca86`, alors `HEAD=origin/main`; le pin
-  documentaire concurrent `469d6e41` a été relu, puis `main` a avancé jusqu'à
-  `2d0614e0` sans branche ni réécriture. Le commit qui
-  publie ce document peut être postérieur conformément à la convention de
-  fraîcheur du dossier.
-  `fd318929` avait ajouté un théorème ternaire trop large, `50dc6ef5` un reçu
-  200 k surinterprété, `bdad55d1` la fraction d'ancres,
-  `3e785622`/`e5ca5023` une sonde de raffinement et `beb8bc0b`/`6a2742f6` sa
-  consolidation documentaire. Le présent delta répare et borne le théorème,
-  requalifie le reçu historique, ferme les identités q4 par quatre CTests,
-  intègre le raffinement CPU derrière une option fail-closed et mesure son bilan
-  négatif à 4/8/16 k. Les notes transitoires consolidées et les probes locaux
-  non suivis sont supprimés; aucune promotion de registre n'est demandée.
+- **Base et fraîcheur du contre-audit :** démarré sur `7ac6ca86`, puis relu à
+  chaque avancée concurrente jusqu'à `173f9181`, alors `HEAD=origin/main`, sans
+  branche ni réécriture. `5fdda29e` a consolidé les notes transitoires dans les
+  neuf Markdown actifs. Le commit qui publie ce document peut être postérieur
+  conformément à la convention de fraîcheur ; aucune promotion de registre
+  n'est demandée.
 - **Cadre :** `phase=exploration_v5_hors_registre`,
   `backend=cpu_reference`, `profile=quantized_u16_input_only`,
   `mode=audit_independant_math_and_architecture`,
@@ -48,7 +38,9 @@ seulement une décomposition ternaire symétrique, fortement séparée et
 exact-once en $O(n)$; il ne ferme ni l'ancrage asymétrique, ni un arrangement de
 centres shallow, ni un traitement implicite certifié.
 
-Le raffinement post-séparation est maintenant un raccord correct et mesurable :
+Le raffinement post-séparation est maintenant un raccord gardé et mesurable ;
+sa conservation q3/q4 est appariée sur six familles, mais la fixture causale qui
+force le réveil d'histogramme sur les routes cover et requête reste à écrire :
 rollback transactionnel si un enfant perd `separated`, certificat
 `max(parent, frais)`, q2 fermée, API/CLI bornées, overrides refusés tant que la
 politique n'y est pas déclarée, ledger contrôlé avant publication, oracle
@@ -59,8 +51,8 @@ pipeline refuse en plus toute activité structurelle q2 ; le helper test-only
 conserve la preuve constructive du réveil. Le multiensemble brut pré-RLE est
 signé seulement sous l'option diagnostique de la porte, afin de ne pas ajouter
 ce hachage aux anciens contrats `--digest`. Boules canonisées, cardinalités par lane,
-événements, niveaux et forêts sont identiques à $L=0$ et entre un/quatre fils
-sur la porte bornée. Les lanes CPU par lots sont appariées à $L=1$ avec tous
+événements, niveaux et forêts sont identiques à $L=0$ et entre un/quatre fils à
+$L=3$ sur la porte bornée. Les lanes CPU par lots sont appariées à $L=1$ avec tous
 les compteurs; ni le CLI CUDA ni une porte device n'exercent encore cette option.
 Le contre-audit a aussi restauré et gravé le sens historique de `rect_alive` —
 nombre de sous-rectangles effectivement remis à la lane — par l'identité
@@ -88,12 +80,21 @@ $L=0$ et $L=3$, malgré 39,1 %, 43,7 % et 44,0 % de masse q4 tuée. À 16 k,
 les corps q3+q4 n'économisent que 0,137 s tandis que la phase
 WSPD+raffinement correspondante ajoute 1,913 s. La prochaine étape utile n'est
 donc pas une profondeur plus grande. Le prochain micro-certificat exact doit
-chercher les seuls témoins nouveaux dans le frère d'un enfant : ils sont
-disjoints des témoins hérités, ce qui autorise
-`min(h, parent.core + sibling_credit)` sans double comptage. Tester d'abord le
-frère entier, puis son seul sous-arbre sous budget, à $L=1$ et fail-open. Cette
-sonde doit être stratifiée par `h-core`, masse et géométrie et gagner sur le mur
-réel; elle ne remplace ni le center-cover ni l'arrangement shallow.
+chercher les seuls témoins nouveaux dans le frère d'un enfant, disjoints des
+témoins hérités. Après validation transactionnelle des deux enfants, recalculer
+la boule de l'enfant avec `core_ball(q, Box(A0), Box(B))`, créditer le frère
+entier seulement sous `box_vs_ball(Box(A1), child_ball) > 0` strict, puis au
+besoin descendre ce seul frère en antichaîne sous budgets 16/64 et fail-open,
+avec `corner64_universal` enfant aux feuilles. Consommer exactement
+`max(fresh_core, min(h, parent.core + sibling_credit))`, sans sommer le compte
+frais avec le parent. Commencer en q3 seulement, à $L=1$ ; q2 reste fermée.
+Cette sonde doit être stratifiée par `h-core`, masse et géométrie et gagner sur
+le mur réel ; elle ne remplace ni le center-cover ni l'arrangement shallow.
+Les trois tailles n'ont qu'un passage par bras. Les quatre répétitions locales
+du seuil de grille montrent une variance assez forte pour rendre un effet de
+5–10 % non résolu, mais ne permettent ni d'estimer un plancher de détectabilité
+à 20 %, ni de recertifier la valeur +34 % du raffinement. La direction négative
+reste un diagnostic cohérent avec les compteurs de travail, pas une mesure reçue.
 
 Le contre-audit du pin concurrent `469d6e41` retire toutefois sa conclusion de
 « redondance structurelle ». En q3, `depth_killed + candidates` omet les seeds
@@ -103,6 +104,17 @@ deux compteurs et du digest publié n'implique donc ni mêmes seeds, ni mêmes
 covers, tests de cœur ou complétions. Le pin `2d0614e0` conserve le signal utile
 — objet final inchangé sur ce run, mur à +34 % — et demande une comparaison
 intégrée directe de chaque étage avant toute causalité plus forte.
+
+Le contre-audit de `173f9181` transforme aussi sa « question ouverte » en plan
+constructif. Avec $w=2z-a-b$, $S=\lVert w\rVert^{2}-D^{2}$ et
+$\Xi=\lVert(b-a)\times w\rVert^{2}$, l'enveloppe continue q3 est exactement
+$S\leq0$ ou $3S^{2}\leq4\Xi$. Jung donne en q4 le sur-ensemble sûr
+$S\leq0$ ou $S^{2}\leq2\Xi$, à intersecter avec le cover historique coefficient
+3 pour ne jamais l'élargir. Un premier filtre ponctuel après les handles peut
+donc mesurer la réduction sans toucher l'arbre ; seulement ensuite, un rejet de
+nœud par $Q_{\min}$ et $\Xi_{\max}$ aux huit coins peut retirer des visites.
+Cette enveloppe réduit potentiellement les scans, mais pas le pire exposant des
+ancres ; l'arrangement shallow reste le jalon qui supprime le carré local q4.
 
 **Orange constructif : `c19dc60d` garde la bonne architecture.**
 Notification du ticket, démarrage transactionnel, domaine `1..8`, latch
@@ -273,10 +285,13 @@ symétriques de trois ou quatre boîtes ont déjà montré leur mélange jusqu'a
 feuilles. Pour une ancre diamètre `(a,b)`, chaque tiers devient une droite
 orientée dans le plan médiateur. q3 interroge le point marqué de cette droite à
 profondeur au plus 8 ; q4 énumère seulement les intersections de profondeur au
-plus 7. La borne locale visée devient `O(m log m + m*K)` et au plus `8*m`
-sommets q4 à `smax=11`, au lieu de `binom(m,2)`. Elle ne borne pas le nombre
-global d'ancres ni `M=sum(m)` : mesurer d'abord `m`, `M`, `Z`, quantiles,
-fallbacks et scratch, puis construire un oracle exhaustif borné. Le producteur
+plus 7. En position générale et pour des centres distincts, la borne locale
+visée devient `O(m log m + m*(kappa+1))` et au plus `8*m` sommets q4 à
+`smax=11`, au lieu de `binom(m,2)`. Les concurrences et coïncidences doivent
+être groupées puis routées vers le census. Cette borne ne limite pas le nombre
+global d'ancres ni `M=sum(m)` : mesurer d'abord `m`, `M`, quantiles, fallbacks
+et scratch, mais `Z` seulement sur petites ancres ou échantillon explicitement
+borné, puis construire un oracle exhaustif borné. Le producteur
 shallow échoue sa porte s'il forme d'abord toutes les intersections. Les
 [formules, dégénérescences et étapes R0–R3](QUESTION_CLAUDE_EXPOSANTS_PAR_REGIME_20260828.md#réponse-à-louis--généraliser-la-wspd-mais-par-les-centres)
 sont transmises à Claude ; aucun q5 n'est requis en dimension trois.
@@ -848,25 +863,25 @@ valeurs, calculs et corrections détaillés restent dans
 
 ## Validation indépendante
 
-- Pin fonctionnel `72090f79`, puis correctif documentaire `2d0614e0`, sur la
-  base `7ac6ca86` : configuration Release et construction CPU complètes
-  réussies, **242 CTests enregistrés**. La porte post-séparation
-  nominale et ses cinq mutants rendent **6/6** en 426,42 s ; les portes API,
-  lanes CPU par lots à `L=1`, q3 skinny, plateau shell et parseur CLI ciblées
-  ainsi que les quatre probes q4 rendent ensemble **16/16** sur le snapshot
-  final. Les deux cas CLI positifs `L=0` et `L=3` rendent **2/2** dans cet
-  ensemble. Les probes q4 forcées avec
-  `--pretest-query-min=0` rendent **4/4** et ferment les trois identités de
-  masse ainsi que la non-vacuité de la voie requête ; leurs couples
-  `(rectangles_requete, candidats_requete)` valent respectivement
-  `(21628, 488448)`, `(15374, 623335)`, `(8824, 113241)` et
-  `(7804, 111340)`. `tools/check_docs.py` valide 217 Markdown actifs,
+- Source fonctionnelle `72090f79`, documents concurrents relus jusqu'à
+  `173f9181`, puis présent contre-audit : configuration Release et construction
+  CPU complètes réussies, **242 CTests enregistrés et 242/242 verts** en
+  **2 049,83 s**. Les labels rendent `gate` 225 tests/543,90 s·proc, `oracle`
+  13/26,15 s·proc, `scale8000` 6/194,41 s·proc, `scale16000` 4/324,22 s·proc,
+  `scale32000` 4/774,32 s·proc et `slow` 1/211,70 s·proc. La porte
+  post-séparation nominale et ses cinq mutants sont donc incluses et rendent
+  6/6 ; les quatre probes q4 forcées avec `--pretest-query-min=0` ferment aussi
+  leurs trois identités de masse et la non-vacuité de la voie requête. Après la
+  correction d'un commentaire de test et du commentaire CMake, la
+  reconstruction finale conserve exactement les hashes des exécutables testés :
+  `mhgp5_postsep_refine_gate=acb36260e5103efaeba9751b1add0514af491d45300a74f3d0b6880288d0ad3a`
+  et `mhgp5=cd0d16d54101bcd42c56fc0d3b4ff9d72f775305e8553ea55823af5ba8d31e1a`.
+  Un smoke `--digest` standard ne publie pas le digest brut diagnostique.
+  `tools/check_docs.py` valide 217 Markdown actifs,
   `tools/check_implementation_status.py` valide 20 phases, les neuf Markdown
-  du dossier d'audit passent aussi explicitement `check_docs.validate`, et
-  `git diff --check` est propre. La suite complète finale n'a pas été rejouée :
-  une exécution antérieure, encore à 234 tests, a été arrêtée proprement après
-  32 succès pour ne pas mêler son snapshot au delta mouvant. Il n'y a donc ni
-  claim de suite complète, ni exécution CUDA/device dans ce verdict.
+  du dossier d'audit passent explicitement `check_docs.validate`, et
+  `git diff --check` est propre. Il n'y a ni exécution CUDA/device, ni claim
+  GPU, ni promotion publique dans ce verdict.
 - Pin `194a0bc2` : construction ciblée Release et trois CTests pool verts ;
   nominal 0,35 s, mutants série 15,35 s et exception 0,35 s. Le même source
   nominal a rendu 30/30 sous CPU 0, et 3/3 sous ASan/UBSan. Avec Clang 18, le
