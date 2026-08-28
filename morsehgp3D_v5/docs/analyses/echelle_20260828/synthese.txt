@@ -1,0 +1,106 @@
+Cadre : `phase=exploration_v5_hors_registre`, `backend=cpu_reference`, `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`. Lecture seule, rien modifié, GCP non utilisé. Les mesures locales `smax_*.txt` ne sont plus présentes dans le scratchpad (seuls `build-prof`, `o_t*_f*.txt`, `g4/`) ; les chiffres cités ci-dessous viennent des reçus G4 et des conceptions/critiques, et sont marqués comme tels.
+
+# PLAN D'ARCHITECTURE — MorseHGP3D v5 à 10–30 M points sur une g4-standard-48
+
+## 1. Décision
+
+**Combinaison retenue : B (fold streamé à état borné) comme cœur, avec le seau Morton du centre de A/C pour l'amont, le profil nommé `prefix_k5` de C comme premier échelon livrable, et la clé d'ex aequo explicite comme préalable commun.** Le tuilage spatial *du fold* (passes A/D de la conception A : halo `R_max`, journal de mort par cellule, reconstruction de la partition) est **rejeté** : il coûte un halo dépendant des données (eight_clusters : R_max = 23 % du domaine à 32 000), une amplification de lecture de 3 à 27 selon la granularité, un majorant du vivant faux pendant les lots géants, et 5 To d'E/S à 10 M — pour un résultat que la passe de comptage FIRST/LAST de B obtient par un tri externe *par ordre K*, sans géométrie et sans halo. Le seul tuilage spatial conservé est celui qui est un théorème trivial : le **seau Morton du centre de boule** (fonction pure de la `BallKey`), qui rend le RLE par seau exact et permet de ne jamais garder 1–3 To de boules résidentes.
+
+Pourquoi pas C seul : `prefix_k4` supprime 93 % des nœuds de l'objet et ne tient à 10 M qu'avec un mode `inflight=0` non écrit et un étage A dont le majorant est faux par compensation ; à 30 M il est refusé à tout K_max ≥ 3. C n'est qu'un échelon de mesure, pas une cible.
+
+Pourquoi pas A seul : la partie saine de A (exact-once par centre, ordre total des événements, compaction P3) **est** B ; le reste (rectangles résidents chiffrés ×10 trop bas, passe A halo, passe D) ne survit pas aux critiques.
+
+Ce que l'objet exige et que le plan ne compromet pas : mêmes lanes, même RLE `(clé, arité min, plus petit niveau)`, même census complet sous `shell_cap`, même tri stable par niveau exact, même union-find séquentiel « la racine de `first` absorbe », mêmes fid par tri global des clés, mêmes plateaux par quotient. Aucune de ces briques n'est touchée ; seule la **résidence** change.
+
+**Ordre de livraison (strict) :**
+
+| # | Livraison | Change l'objet ? | Digest v4 | Preuve d'entrée |
+|---|---|---|---|---|
+| L0 | Instrument `vivantes` promu en compteur de réception + reçu 32 000 (4 familles + terrain) | non | inchangé | — |
+| L1 | Clé d'ex aequo explicite `(niveau exact, BallKey, rang d'émission intra-boule)` ; positions d'incidence, fid, comp en u64 ; profil nommé `prefix_k5` / `prefix_k4` dans l'en-tête de reçu (jamais dans le jeton de statut) ; porte de préfixe par **digest** à 8 k/16 k/32 k | non | bit-identique | T1, T2 |
+| L2 | Fold résident à état borné : passe FIRST/LAST en RAM + table des vivantes + arène de composantes + convertisseur flux → tableaux v4 | non | bit-identique via convertisseur | T3, T4, T5 |
+| L3 | Payload `mhgp5-forests-stream-v1` + digest `mhgp5-digest-stream-v1` (nom unique, à unifier avec ECHELLE.md) ; manifeste atomique ; statuts SSD | non | second digest déclaré | T6 |
+| L4 | Amont streamé : seaux Morton du centre (fonction de l'entrée, pas de la charge), RLE par seau, magasin de boules SSD partitionné `(q,d)` + `plateau` en ordre global de clé, expansion en une passe vers dix runs, tri externe par ordre | non | `balls` v4 par fusion k-aire | T7, T8 |
+| L5 | Préflight par rôle (MemAvailable, cgroup `memory.max`, statvfs, débit SSD mesuré), jalon **1 M** G4 : résident ≡ streamé (deux digests + convertisseur) | non | — | — |
+| L6 | Campagne 10 000 001 : `prefix_k5` d'abord (porte de préfixe contre le run complet à 1 M), puis objet complet | non | flux + invariants + juges | — |
+| L7 | 30 M : `prefix_k5` (une session) puis complet en sessions gardées avec reprise déterministe ; charge compacte déclarée si le SSD l'impose | non | idem | — |
+
+## 2. Modèle mémoire et temps (uniform, 48 fils, décimal ; base reçu 200 k ; croissance des cardinalités +10–15 % à 10 M prise en compte : 118 événements/pt et 1 000 facettes/pt à K=10)
+
+| Poste | 1 M | 10 M | 30 M | Source / marge |
+|---|---|---|---|---|
+| Index radix résident | 0,17 Go | 1,7 Go | 5,1 Go | 170 o/pt, mesuré |
+| Rectangles WSPD (si résidents, 3 lanes) | 3,9 Go | **39–50 Go** | **116–150 Go** | 242/pt × 16 o, +8 %/doublement → **consommer par vague, jamais résidents à 30 M** |
+| Boules censusées (résidentes aujourd'hui) | 100 Go | 1,0 To | 3,0 To | → SSD (magasin `(q,d)`), RAM par seau ≤ 2 × 144 o × seau_max |
+| Événements tous K (runs SSD) | 72 Go | 720 Go | 2,2 To | 500/pt × 144 o, ×2 pour le tri externe |
+| Comptage FIRST/LAST (SSD, transitoire, par ordre) | 62 Go | 620 Go | 1,9 To | 3 850 incidences/pt × 16 o (empreinte + position **u64**) |
+| Fold K=10, facettes vivantes | 2,5 Go | 17–32 Go | 55–106 Go | 22/pt attendu (log n), ×2,5 majoré ; **pic exact calculé au préflight** |
+| Fold K=10, enregistrements de composantes | ? | ? | ? | **non borné par FIRST/LAST — poste à instrumenter en L0/L2 avant tout dimensionnement** |
+| RAM pic (objet complet, inflight=1) | ~15 Go | ~110–140 Go | ~165–200 Go | 30 M complet **non garanti** → repli `prefix_k5` ou compaction des clés |
+| RAM pic `prefix_k5` | ~6 Go | ~60 Go | ~90 Go | K=5 ≈ 19–21 vivantes/pt |
+| Payload complet (clés développées) | 0,18 To | 1,6–1,8 To | 5 To | parents ≈ 600 clés/pt ; niveaux de lots à **retirer du contrat ou compter** (240 Go à 10 M) |
+| SSD requis (complet, K par K, effacement des runs finis) | 0,4 To | ≥ 4 To | ≥ 12 To | à provisionner ; deploy.sh n'attache que 100 Go à 290 Mo/s |
+| SSD requis `prefix_k5` | 0,05 To | ~0,5 To | ~1,5 To | |
+| Temps, complet | ~25 min | 6–7,5 h | 17–20 h (3 sessions) | reduce 1,4 → 2,2 µs/évt (latence mémoire, +8 %/doublement) ; génération 75 min à 10 M |
+| Temps, `prefix_k5` | ~5 min | ~1,5–2 h | ~5–6 h | génération ÷3,8 mesurée à 32 000 |
+| Temps eight_clusters, complet | — | 8–9 h (hors session) | — | génération ×2,6, exposant ~1,55 mesuré |
+| Temps scanline | — | **non extrapolable** | — | lane q4 exposant ~3 entre 32 k et 200 k : la lane q4 (GPU subordonné) est le verrou, pas le fold |
+
+Toute ligne 10 M/30 M est une extrapolation ; les seules mesures opposables seront les reçus 1 M puis 10 000 001. Les colonnes « ? » interdisent de promettre 30 M complet avant L2.
+
+## 3. Théorèmes et lemmes à prouver AVANT le code (énoncés)
+
+**T1 (préfixe exact).** Soit `s ≤ s'` deux valeurs de `smax`, `h_q = s − q + 1`. Pour tout `K ≤ s − 1`, l'ensemble des événements d'ordre K, leur ordre `(niveau exact, BallKey, rang d'émission)`, et donc `forest[K]` (facet_keys, final_canon_fid, deltas, batch_levels) sont identiques entre les runs `smax = s` et `smax = s'`. *Preuve attendue :* une boule morte à `|I_B| ≥ h_{q_min}` n'engendre que des événements `K = |I_B| + |T| − 1 ≥ h_{q_min} + q_min − 1 = s`, tout `T` contenant un support minimal d'arité `≥ q_min` (RLE par arité minimale) ; le représentant de niveau et l'ordre RLE sont inchangés sur les survivantes communes. Fixture : mutant `prefix-hq-off` (mort à `h_q − 1`) doit diverger à `digest_forest[K_max]`. *Corollaire à graver :* `digest_balls` et `digest_all` ne sont **pas** comparables entre profils.
+
+**T2 (clé totale = ordre résident).** Sur les événements d'un ordre K, la clé `(niveau exact, BallKey, r)` où `r` est le rang d'émission intra-boule dans `expand_plateau` (masque `tm` croissant sur `shell_ids` en ordre de census, **pas** l'ordre lexicographique des `T` triés) est un ordre total qui coïncide avec l'ordre produit par `sort_events_by_level` (tri stable) sur l'ordre d'entrée (RLE puis émission). Fixture : mutants `tiebreak-cell-local` et `tie-by-sorted-T` tués.
+
+**T3 (dernière incidence).** Dans `reduce_fold`, après la dernière incidence d'une facette F dans le flux trié de l'ordre K, l'état de F n'est lu que via `find` (racine), `pre_canon`/`canon` et `keys[]` pour `born`/`output`. Si l'enregistrement de composante porte `root_key` (fixée à la création, l'absorbant garde sa racine) et `canon_key` (min des clés, mise à jour aux unions), alors la suite des deltas est inchangée quand F est retirée de la table après le **lot** de sa dernière incidence. Contre-fixtures gravées : « absorbée ⇒ oubliable » est faux (chemin de 3 points à K=1 ; deux tétraèdres partageant une face à K=2) ; mutant `free-on-absorb`.
+
+**T4 (libération jamais anticipée).** Avec des empreintes 64 bits, la marque DERNIÈRE d'une empreinte est ≥ la dernière position propre de chaque clé confondue ; le pic calculé par empreintes est un **minorant** du pic exact (PREMIÈRE = min des premières). Énoncé à graver avec sa marge : le préflight utilise `pic_empreinte × (1 + ε)` et le nombre de facettes distinctes par empreinte est un minorant vérifié ensuite par les insertions exactes. Le pic doit être calculé **à la granularité du lot** (libération après le lot), pas par incidence.
+
+**T5 (ordre intra-lot et partition sans catalogue).** `fid(x) < fid(y) ⟺ key(x) < key(y)` ; `post_list` triée par fid de racine ≡ triée par `root_key` ; les contenus des deltas sont indépendants de la séquence d'unions (clôture), seul l'ordre intra-lot en dépend et T2 le fixe. Chaque facette apparaît exactement une fois à sa première incidence dans le flux de deltas (dans `born`, ou comme parent égal à elle-même) ; `(facet_keys, final_canon_fid)` est une fonction du flux de deltas, calculable par tris externes. Invariant sans état : `output = min(parents ∪ born)`.
+
+**T6 (enregistrements de composantes).** À prouver *ou* mesurer avant L2 : borne sur le nombre d'enregistrements vivants (racines absorbées encore référencées par des enfants vivants). Sans borne prouvée, l'arène est dimensionnée par compteur instrumenté et le préflight refuse `resource_exhausted/live_state` sur un **majorant** déclaré comme tel (jamais « exact »). Le refcount doit compter les enfants ; le halving décrémente ; mutants `free-record-early`, `root-key-mutable`, `canon-not-min-on-union`.
+
+**T7 (exact-once par seau).** `c = −B/(2A)` est une fonction pure de la `BallKey` primitive (i128 exact, plancher exact, écrêtage à la boîte u16) ; deux candidats de même clé tombent dans le même seau ; l'ordre `(clé, arité, niveau)` est total et ses ex aequo sont des enregistrements identiques : le RLE par seau ne dépend ni de l'ordre d'arrivée ni du nombre d'ouvriers ni du nombre de seaux ; la fusion k-aire des seaux triés restitue l'ordre global (pour `digest_balls` v4, calculé sur les uniques **post-RLE pré-préfiltre**, comme `run.hpp`). Mutants `bucket-by-anchor`, `no-clamp`, `merge-order`.
+
+**T8 (équilibre des seaux, déterminisme).** Le découpage en seaux est une fonction fixe de l'entrée (plages de l'arbre radix à effectif de positions égal), jamais de la charge ; le majorant `2 × 144 o × seau_max` est **compté** après génération, pas déclaré. Les grandes boules inter-amas (K=1) sont dans un seau quelconque : aucun halo, le census lit l'index résident.
+
+**T9 (identité de masse par ordre).** événements comptés (`count_events_by_k`) = expansés = longueur du run trié ; Σ(q+d) = K+1 par événement aux trois étages ; fusions = facettes − composantes finales ; attachements = Σ|born| ; ledger WSPD inchangé. Le nombre exact de facettes n'est connu que par les insertions exactes : le juge d'échantillon (§ 4) est ce qui rend le comptage non circulaire.
+
+## 4. Fixtures et portes
+
+**Égalité tuilé / non tuilé.**
+- 8 k / 16 k / 32 k, quatre familles + `terrain`, s = 6/8/10, contre-familles `two_lines`, `collinear_seven` : `mhgp4-digest-v1` v4 ≡ résident v5 ≡ convertisseur(streamé v5) ; `mhgp5-digest-stream-v1` résident ≡ streamé ; seaux ∈ {1, 2, 3, 7, 31}, fils ∈ {1, 8, 48}, taille de run ∈ {minuscule, normale}, `inflight` ∈ {1, 2, 3}, frontière de run au milieu d'un niveau égal, kill + reprise après chaque phase.
+- 200 k G4 (trois familles + terrain), objet complet : résident ≡ streamé par les deux digests ; `rss_max ≤ majorant par rôle` ; mesure de la surgénération et des enregistrements vivants.
+- 400 k uniform (résident ~130 Go) et **1 M** (scanline complet résident ; uniform `prefix_k5` résident ~6 Go, complet streamé) : résident ≡ streamé + convertisseur ; reprise après interruption forcée après temporaire / écriture / sync / renommage / avant manifeste.
+
+**Invariants globaux à 10 M / 30 M (la v4 ne tourne pas) :** T9 par K ; `attach/birth/partition_violations = 0` ; K=1 : facettes = n, fusions = n − 1 ; `final_canon_fid[fid] ≤ fid` idempotent (par rejeu des deltas sur un union-find frais à fid seuls, autorité indépendante du fold) ; planchers de non-vacuité par K et famille ; porte de préfixe `prefix_k5` ≡ K ≤ 5 du run complet (digests par K) ; invariance du digest de flux entre deux découpages / deux nombres de fils ; équivariance par permutation des PointId (une permutation, blocs).
+
+**Juge d'échantillon (graine gravée, S = 10^4 par K) :** boules → census refait par balayage des seaux Morton de l'index (`bucket_start/bucket_ids`, pas la descente radix), niveau recalculé par `obigint` ; événements → re-expansion ; facettes → incidences **recomptées par un parcours différent** (rend T4/T9 non circulaires) ; deltas → `output = min`, chaîne des parents ; K=1 → EMST par Borůvka à arithmétique distincte sur l'index (validé n ≤ 14 contre `reference/`), **pas** Kruskal sur les arêtes q2 du même pipeline.
+
+**Mutants (tous à code de sortie 4) :** `prefix-hq-off`, `tiebreak-cell-local`, `tie-by-sorted-T`, `free-on-absorb`, `free-record-early`, `canon-not-min-on-union`, `root-key-mutable`, `bucket-by-anchor`, `no-clamp`, `merge-order`, `last-mark-shifted` (DERNIÈRE décalée d'une incidence), `pic-per-incidence` (pic calculé hors granularité de lot, doit refuser à tort un cas gravé), `dense-pointid`, `repr-ties`, `binary-ties`.
+
+**Comptabilité :** oracle de comptabilité à chaque frontière (TEST_PLAN § 14.6) ; aucune écriture si l'espace ne couvre pas ancien état + temporaire + merge + manifeste + marge.
+
+## 5. Première livraison concrète (L0 + L1, sans GCP)
+
+Fichiers (nouveaux ou modifiés, `morsehgp3D_v5/`) :
+- `src/forest/fold.hpp` : `profil_vivantes` promu en `LiveStats{peak_live_facets, peak_live_records, batches, first_singletons}` mesuré par lot ; positions d'incidence `e*11+s`, `order`, fid, `parent` en **u64/i64** (garde `fold_capacity_ok` conservée mais recalculée : refus `resource_exhausted/requires_tiling` seulement sur les vraies bornes restantes) ; `EventTieKey{ExactLevel, BallKey, u16 emit_rank}` gravée par `expand_plateau` et utilisée par `sort_events_by_level` (comparaison explicite, plus de dépendance à l'ordre d'entrée).
+- `src/pipeline/expand.hpp` : `emit_rank` écrit dans `ForestEvent` (144 → 152 o, ou récupéré dans le padding).
+- `src/pipeline/run.hpp` : `RunOptions.profile ∈ {complet_k10, prefix_k5, prefix_k4}` dérivant `smax` ; en-tête de reçu `profile=, smax_eff=, kmax_eff=, forests_not_computed=` ; jeton de statut **inchangé** (`complete_regular`), `payload_kind=mhgp5-forests-horizontal-v1;prefix` si K_max < 10.
+- `bench/forest_probe.cpp` : `--inject=prefix-hq-off|tiebreak-cell-local|tie-by-sorted-T`, `--profile=`, `--live-stats`.
+- `CMakeLists.txt` : `mhgp5_prefix_gate` (8 k/16 k/32 k, 4 familles, smax ∈ {5, 6, 11}, digest_forest[K] bit-identique, planchers ≥ 10^5 événements à K=4/32 k), `mhgp5_tie_gate`, `mhgp5_live_stats_receipt`.
+- `docs/MATHEMATIQUES.md` (§ 1.2/§ 3.2 : T1 ; § 7.4 : T2) ; `docs/ARCHITECTURE.md` § 7 (profils nommés) ; `docs/PLAN_DE_TESTS.md` ; `docs/PROVENANCE.md` ; `docs/ECHELLE.md` corrigé (rectangles 39–50 Go à 10 M, un seul nom de digest) ; `receipts/live_stats_20260828/` immuable ; `audits/QUESTION_CLAUDE_FOLD_STREAME_<date>.md` à l'auditeur.
+- Pas de touche à `docs/implementation_status.toml` (exploration hors registre).
+
+Statuts : `complete_regular | unsupported_degeneracy | resource_exhausted/{requires_tiling, live_state, disk, index, seau} | invalid_input | invariant_violated | incomplete_continuation` (reprise à une frontière de phase ; jamais `requires_checkpoint` sur une prédiction de temps). `public_status=not_claimed` partout.
+
+## 6. Ce qu'il faut demander à l'utilisateur
+
+1. **Profil accepté pour les premiers reçus 10 M :** `prefix_k5` (objet = préfixe K ≤ 5 déclaré, ~1,5–2 h, ~60 Go, ~0,5 To SSD) avant l'objet complet ? `prefix_k4` est-il utile ou abandonné ?
+2. **SSD local :** accord pour modifier `gcp-migration/deploy.sh` (ajout de local-ssd NVMe : ≥ 1,5 To pour 10 M `prefix_k5`/complet K par K, ≥ 4 To si rétention complète ; 30 M complet ≥ 12 To → disque persistant + charge compacte) et `containers/` pour le montage ; le débit sera **mesuré** au préflight, jamais supposé.
+3. **Budget de sessions G4 :** une mini-session (200 k + 1 M, ≤ 2 h) pour L5, une session ≤ 8 h pour 10 M, puis 30 M complet = 2–3 sessions avec reprise déterministe : accepté ?
+4. **Contrat de payload :** le digest de flux `mhgp5-digest-stream-v1` (deltas en octets v4 + certificat de reconstruction, convertisseur hors produit) peut-il être l'autorité de conformité au-delà de 1 M ? Les `batch_levels` (240 Go à 10 M, non signés par le digest v4) restent-ils dans le contrat ?
+5. **GPU :** la lane q4 subordonnée (exposant ~3 sur scanline) est le verrou de la famille LiDAR ; ouvre-t-on ce chantier en parallèle ou après L5 ?
+6. **Familles de campagne :** uniform puis eight_clusters (8–9 h à 10 M complet : hors session, donc `prefix_k5` seulement) ; `terrain` à profiler à 200 k avant tout engagement.

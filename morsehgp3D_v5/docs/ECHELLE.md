@@ -105,145 +105,169 @@ Rayon maximal : `uniform` 22 unités (2,2 pas moyens), `scanline` 84 (2,4 pas),
 halo par copie est donc impraticable sur les familles à vides ; la conception
 laisse l'index **résident** et ne tuile que le travail (§ 4).
 
-## 4. Architecture retenue (à prouver puis livrer, § 6–8)
+## 4. Architecture retenue (décision du 28 août, après trois conceptions et trois critiques adverses — `docs/analyses/echelle_20260828/`)
+
+**Cœur : fold streamé par ordre à état borné**, alimenté par un **amont
+streamé par seaux Morton du centre des boules** ; le profil nommé
+`prefixe_k5` est le premier échelon livrable ; une **clé d'ex aequo
+explicite** des événements est le préalable commun. Le tuilage spatial *du
+fold* (halo $R_{\max}$, journal de mort par cellule) est **rejeté** : halo
+dépendant des données (23 % du domaine sur `eight_clusters`), amplification
+de lecture ×3 à ×27, ~5 To d'E/S à 10 M — alors qu'une passe de comptage
+PREMIÈRE/DERNIÈRE par ordre, par tri externe, obtient l'oubli des facettes
+sans géométrie ni halo. La table des comptes en RAM envisagée au § 4.2
+initial (64 Go à 10 M) est remplacée par ce comptage externe.
+
+Ce que l'objet exige et que le plan ne touche pas : mêmes lanes, même RLE
+(clé, arité minimale, plus petit niveau), même census complet sous
+`shell_cap`, même tri stable par niveau exact, même union-find séquentiel
+(« la racine de `first` absorbe »), mêmes fid par tri global des clés, mêmes
+plateaux par quotient. Seule la **résidence** change.
 
 ### 4.1 Produit nommé
 
-- `product = facet_hierarchy_stream` (le B de `C829`/`772A8D`) : par ordre K,
-  le flux des deltas (fusions, naissances, croissances) avec leurs clés de
-  facettes, dans l'ordre des lots de niveau ; c'est l'objet des applications
-  (rendu § 9.1, segmentation) et il est **output-sensitive** : à 10 M et K = 10,
-  ≈ 2340 naissances/pt × 45 o ≈ **1 To** de clés nées ; K = 5 : ≈ 0,1 To.
-- Le digest v4 (`facet_keys` triées + `final_canon_fid` par facette + deltas)
-  reste la **porte de conformité** jusqu'à 200 k–1 M (calculable en résident)
-  ; à l'échelle, un **digest v5 de flux** versionné (`mhgp5-digest-v1:stream`)
-  signe le flux des deltas et des naissances par ordre, et son égalité avec le
-  digest v4 recalculé est prouvée aux tailles où les deux existent.
-- Statut public : jamais `exact` ; `complete_regular` pour le produit nommé,
-  `resource_exhausted/<rôle>` avant toute allocation qui dépasserait le
-  préflight, `incomplete_continuation` à la coupure de session.
+- `payload = mhgp5-forests-stream-v1` (flux des deltas par ordre, dans l'ordre
+  des lots de niveau, avec certificat de reconstruction de la partition) et
+  digest `mhgp5-digest-stream-v1` ; le digest v4 reste l'autorité de
+  conformité tant que le résident existe (≤ 1 M) et un **convertisseur** flux
+  → tableaux v4 (hors produit) prouve l'égalité aux tailles où les deux
+  existent. Output-sensitive : ≈ 1,6–1,8 To de clés développées à 10 M pour
+  K = 10 (parents ≈ 600 clés/pt), ≈ 0,15 To pour K = 5.
+- Statuts : `complete_regular | unsupported_degeneracy | resource_exhausted/{requires_tiling, live_state, disk, index, seau} | invalid_input | invariant_violated | incomplete_continuation` (reprise à une frontière de phase, jamais sur une prédiction de temps) ; `public_status=not_claimed`.
 
-### 4.2 Résident, streamé, externe
+### 4.2 Résident, streamé, externe (`uniform`, 48 fils ; base reçu 200 k, cardinalités +10–15 % à 10 M)
 
-| rôle | 10 M, K = 10 | 30 M, K = 10 | 10 M, K = 5 |
+| poste | 1 M | 10 M | 30 M |
 |---|---:|---:|---:|
-| index radix + positions (résident) | 1,7 Go | 5,1 Go | 1,7 Go |
-| rectangles WSPD vivants (résident ou par vague) | ~4 Go | ~12 Go | ~1 Go |
-| tuile de travail (boules 224 o, événements, tri) × 2 | ~2 × 10 Go | idem | idem |
-| flux d'événements par (K, niveau) sur disque (≈ 52 o/évt) | ~230 Go | ~700 Go | ~40 Go |
-| fold K = 10 : état vivant (76 o) | ~30 Go | ~90 Go | K = 5 : ~10 Go |
-| fold K = 10 : table des comptes de dernière incidence (7 o × facettes) | ~64 Go | ~190 Go ✗ | ~4 Go |
-| sortie `facet_hierarchy_stream` (disque) | ~1 To | ~3 To | ~0,1 To |
+| index radix résident | 0,17 Go | 1,7 Go | 5,1 Go |
+| rectangles WSPD vivants (3 lanes, 242/pt × 16 o) | 3,9 Go | **39–50 Go** → par vague | 116–150 Go → jamais résidents |
+| boules censusées (aujourd'hui résidentes) | 100 Go | 1,0 To → SSD par seau | 3,0 To |
+| événements tous K (runs SSD, ×2 pour le tri externe) | 72 Go | 720 Go | 2,2 To |
+| comptage PREMIÈRE/DERNIÈRE (SSD, transitoire, par ordre) | 62 Go | 620 Go | 1,9 To |
+| fold K = 10 : facettes vivantes (22/pt attendu, ×2,5 majoré) | 2,5 Go | 17–32 Go | 55–106 Go |
+| fold K = 10 : enregistrements de composantes | **à instrumenter (L0)** | ? | ? |
+| RAM de pointe, objet complet (`inflight` = 1) | ~15 Go | ~110–140 Go | ~165–200 Go (non garanti) |
+| RAM de pointe, `prefixe_k5` | ~6 Go | ~60 Go | ~90 Go |
+| SSD requis, complet (K par K, runs effacés) | 0,4 To | **≥ 4 To** | ≥ 12 To |
+| SSD requis, `prefixe_k5` | 0,05 To | ~0,5 To | ~1,5 To |
+| temps, complet | ~25 min | 6–7,5 h | 17–20 h (3 sessions) |
+| temps, `prefixe_k5` | ~5 min | 1,5–2 h | 5–6 h |
 
-Lecture : **K = 5 à 10 M tient dans 180 Go et sur un disque de ~150 Go** ;
-**K = 10 à 10 M tient en RAM (pic ≈ 100 Go) mais exige ≈ 1,3 To de disque**
-(flux + sortie) ; **K = 10 à 30 M** exige en plus un comptage externe des
-dernières incidences (la table ne tient plus) et ≈ 4 To de disque — hors de
-portée de la VM actuelle sans changement de configuration.
+`eight_clusters` complet à 10 M : 8–9 h (hors session, exposant ~1,55 sur la
+génération) ; `scanline` : **non extrapolable** (lane q4 en exposant ~3 entre
+32 k et 200 k — c'est le verrou de la famille LiDAR, et c'est la lane GPU
+résidente qui doit le lever). Toute ligne 10 M / 30 M est une extrapolation ;
+les seules mesures opposables seront les reçus 1 M puis 10 M.
 
 ### 4.3 Les trois étages
 
-1. **Génération tuilée par plages Morton du centre des boules.** L'index reste
-   résident ; les rectangles WSPD vivants sont attribués à la tuile de leur
-   boîte de milieux ; chaque boule émise est **routée vers la tuile de son
-   centre exact** ($c = -B/(2A)$, cellule Morton calculée en i128 : fonction
-   pure de la `BallKey`), ce qui rend le RLE par tuile **globalement exact**
-   (deux émissions d'une même boule se rencontrent dans la même tuile). Par
-   tuile : RLE, préfiltre, census contre l'index global, expansion en
-   événements par K, tri par niveau exact, écriture de *runs* sur disque.
-   Mémoire par tuile bornée (≈ 200 k boules), indépendante de $n$.
-2. **Fold streamé par ordre, état borné.** Pour chaque K : fusion k-aire des
-   runs de niveau (lecture séquentielle), lots de niveau exact, union-find sur
-   les seules facettes **vivantes** (identifiant attribué à la première
-   incidence, clé canonique portée par la racine, deltas émis avec les clés
-   recalculées depuis l'événement), **oubli** d'une facette à sa dernière
-   incidence (table des comptes construite pendant l'expansion : empreinte
-   64 bits → compte u8), compaction périodique de l'état. Sortie : flux de
-   deltas de l'ordre K sur disque + digest de flux.
-3. **Reprise.** Les runs et les sorties sont sur le disque persistant ; un
-   manifeste (pin, tailles, sha256 des runs, ordre courant, lot courant) permet
-   de reprendre un fold interrompu au lot suivant : `incomplete_continuation`
-   n'est jamais un préfixe publié comme résultat.
+1. **Amont streamé par seaux Morton du centre** : le seau d'une boule est une
+   fonction pure de la `BallKey` ($c = -B/(2A)$ exact en i128, écrêté à la
+   boîte u16 ; T7), donc le RLE par seau est globalement exact et la fusion
+   k-aire des seaux triés restitue l'ordre global (`digest_balls` v4) ; les
+   seaux sont des plages de l'arbre radix à effectif de positions égal (T8),
+   jamais fonction de la charge ; le census lit l'index résident (pas de
+   halo) ; magasin de boules SSD partitionné par $(q, d)$ ; expansion en une
+   passe vers dix runs par ordre ; tri externe par ordre.
+2. **Fold streamé à état borné** : clé d'ex aequo explicite (niveau exact,
+   `BallKey`, rang d'émission intra-boule ; T2) ; passe PREMIÈRE/DERNIÈRE par
+   empreinte 64 bits (minorant du pic exact, marge déclarée ; T4) ; table des
+   facettes vivantes libérée **au lot** de la dernière incidence (T3, avec
+   `root_key` figée à la création et `canon_key` = min mise à jour aux unions,
+   contre-fixtures « absorbée ⇒ oubliable » réfutée) ; arène des
+   enregistrements de composantes bornée par compteur instrumenté (T6) ;
+   indices et positions d'incidence en u64 ; deltas émis en flux.
+3. **Reprise** : manifeste atomique (pin, tailles, sha256 des runs, ordre et
+   lot courants), reprise à une frontière de phase ; comptabilité à chaque
+   frontière (aucune écriture sans espace pour ancien état + temporaire +
+   fusion + manifeste + marge).
 
-## 5. Modèle de temps (constantes du reçu 200 k, 48 fils)
+## 5. Modèle de temps
 
-| poste | 200 k mesuré | 10 M K = 10 (estimation) | 10 M K = 5 |
-|---|---:|---:|---:|
-| génération (lanes q2/q3/q4) | 69 s | ~75–100 min (×50, +30 % tuilage) | ~15 min |
-| RLE + préfiltre + census | 58 s | ~60 min | ~8 min |
-| expansion + tri + écriture des runs | ~15 s + E/S | ~30 min (230 Go à ≥ 1 Go/s) | ~5 min |
-| fold (reduce 1,4 µs/évt, digest) | 115 s mur | ~3–4 h (4,5 G évts séquentiels par ordre, ordres en parallèle bornés par la RAM) | ~25 min |
-| **total** | 254 s | **≈ 6–7 h** (une session de 8 h, sans marge) | **≈ 1 h** |
+Constantes du reçu 200 k (48 fils) avec dérive de latence du reduce
+(1,4 → 2,2 µs par événement à 10 M, +8 % par doublement) ; voir la table du
+§ 4.2. Hypothèses à mesurer avant tout engagement : débit du disque (le
+disque persistant de 100 Go actuel est mesuré à ~290 Mo/s par
+`gcp-migration/deploy.sh`, insuffisant), constante du reduce à état borné,
+surgénération aux frontières de seaux.
 
-Les hypothèses à mesurer avant tout engagement : débit du disque persistant
-(1–2 Go/s en séquentiel pour un PD-SSD de taille suffisante ; le disque de
-100 Go actuel est trop petit et trop lent), constante du reduce à état borné
-(l'état compact pourrait la faire baisser sous 1 µs), surgénération aux
-frontières de tuiles.
+## 6. Théorèmes à prouver avant le code (énoncés, `docs/analyses/echelle_20260828/synthese.txt` § 3)
 
-## 6. Théorèmes à prouver avant le code
-
-1. **Routage par centre.** Deux émissions d'une même boule (même `BallKey`)
-   ont le même centre exact, donc la même tuile : le RLE par tuile est
-   équivalent au RLE global ; la cellule Morton du centre écrêté est une
-   fonction pure de la clé (dénominateur $2A$, pgcd, i128 sans débordement).
-2. **Complétude par tuile.** Toute boule dont le centre est dans la tuile est
-   émise par un rectangle attribué à la tuile ou à une tuile voisine à
-   distance $\le R_{\max}$ (borne exacte du rayon admissible d'une ancre :
-   $R \le \sqrt{3/8}\,D$) ; les rectangles sont attribués avec ce recouvrement
-   et l'exact-once des seeds q4 est conservé.
-3. **Dernière incidence.** Le nombre d'incidences d'une facette dans le flux
-   d'un ordre est exactement le compte accumulé pendant l'expansion (même
-   fonction `facet_minus`, même règle de rôle) ; à la dernière incidence, la
-   facette n'est plus jamais référencée : elle peut être compactée si elle
-   n'est pas racine d'une composante à membres vivants (les racines gardent la
-   clé canonique).
-4. **Ordre du fold.** Les lots de niveau et l'ordre des ex aequo (tri stable
-   par rang d'entrée) sont reproduits par la fusion k-aire des runs avec une
-   clé d'ex aequo explicite (niveau exact, rang de boule, sous-index) : les
-   deltas et leur ordre par racine sont bit-identiques au fold résident.
-5. **Digest de flux.** Le digest v5 est une fonction du flux des deltas et
-   des naissances par ordre ; son égalité avec le digest v4 recalculé à
-   200 k–1 M (facettes triées, partition finale) prouve l'objet ; au-delà,
-   c'est le digest v5 qui fait foi, avec le produit nommé.
+- **T1 préfixe exact** : pour $s \le s'$ et tout $K \le s - 1$, événements,
+  ordre et `forest[K]` identiques entre `smax = s` et `smax = s'` (livré :
+  porte de préfixe ; corollaire : `digest_balls` et `digest_all` ne sont pas
+  comparables entre profils).
+- **T2 clé totale** : (niveau exact, `BallKey`, rang d'émission intra-boule)
+  est un ordre total qui coïncide avec le tri stable actuel sur l'ordre
+  d'entrée (RLE puis émission) ; mutants `tiebreak-cell-local`,
+  `tie-by-sorted-T`.
+- **T3 dernière incidence** : après le lot de sa dernière incidence, l'état
+  d'une facette n'est lu que par `find`, `canon` et les clés ; avec
+  `root_key`/`canon_key` portées par les enregistrements, la suite des deltas
+  est inchangée quand la facette est libérée ; contre-fixtures (chemin de 3
+  points à K = 1, deux tétraèdres partageant une face à K = 2) ; mutant
+  `free-on-absorb`.
+- **T4 libération jamais anticipée** : la marque DERNIÈRE par empreinte est
+  ≥ la dernière position de chaque clé confondue ; le pic par empreintes est
+  un minorant ; le préflight emploie une marge déclarée et calcule le pic à
+  la granularité du lot.
+- **T5 ordre intra-lot sans catalogue** : `fid(x) < fid(y)` ⟺
+  `key(x) < key(y)` ; `post_list` triée par racine ≡ triée par `root_key` ;
+  `(facet_keys, final_canon_fid)` est une fonction du flux de deltas ;
+  invariant sans état `output = min(parents ∪ born)`.
+- **T6 enregistrements de composantes** : borne à prouver ou majorant
+  instrumenté avec refus `resource_exhausted/live_state`.
+- **T7 exact-once par seau**, **T8 équilibre déterministe des seaux**,
+  **T9 identité de masse par ordre** (comptés = expansés = longueur du run ;
+  $\sum (q + d) = K + 1$ par événement ; fusions = facettes − composantes
+  finales ; attachements = $\sum \left\vert \text{born} \right\vert$).
 
 ## 7. Portes
 
-- égalité **tuilé / non tuilé** (boules uniques, `digest_balls`, `digest_all`)
-  à 8000–32 000 localement (cinq familles + contre-familles) et à 200 k puis
-  1 M sur G4 ; mutants `route-by-anchor`, `no-clamp`, `forget-early` (oubli
-  avant la dernière incidence), `tie-order` (ex aequo) tués ;
-- préflight par rôle (majorants publiés, `MemAvailable`, `statvfs`) et refus
-  `resource_exhausted/<rôle>` avant allocation ; porte à budget artificiel ;
-- reprise : coupure injectée à un lot, reprise, digest identique ;
-- invariants globaux à l'échelle (sommes de cardinalités par ordre, comptes
-  de naissances contre la borne de Poisson q2, juge d'échantillon sur des
-  boules tirées au sort) — jamais un juge $O(n^3)$.
+Égalité résident / streamé aux deux digests (v4 par convertisseur, flux) à
+8 k / 16 k / 32 k (quatre familles + `terrain`, $s$ = 6/8/10,
+contre-familles), seaux ∈ {1, 2, 3, 7, 31}, fils ∈ {1, 8, 48}, tailles de
+run, `inflight` ∈ {1, 2, 3}, frontière de run au milieu d'un niveau égal,
+coupure + reprise après chaque phase ; 200 k puis 400 k et **1 M** sur G4 ;
+invariants globaux à 10 M / 30 M (T9 par K, violations nulles, K = 1 :
+facettes = $n$, fusions = $n - 1$, idempotence de la partition par rejeu des
+deltas sur un union-find frais, planchers par K, porte de préfixe,
+invariance du digest de flux au découpage et aux fils, équivariance par
+permutation) ; juge d'échantillon ($10^4$ par K, graine gravée : census par
+balayage des seaux, niveau par `obigint`, ré-expansion, incidences recomptées
+par un parcours différent, K = 1 par Borůvka à arithmétique distincte) ;
+mutants à code 4 : `prefix-hq-off`, `tiebreak-cell-local`, `tie-by-sorted-T`,
+`free-on-absorb`, `free-record-early`, `canon-not-min-on-union`,
+`root-key-mutable`, `bucket-by-anchor`, `no-clamp`, `merge-order`,
+`last-mark-shifted`, `pic-per-incidence`.
 
 ## 8. Ordre des livraisons
 
-1. **Livré (28 août, `profil=` dans la sortie, `tests/prefix_gate.cpp`)** :
-   profil nommé K = 5 (`smax = 6`) ; porte de préfixe (digests et
-   cardinalités par ordre égaux à ceux de `smax = 11` sur trois familles,
-   K = 4 aussi ; mutant `anchor-kill-h-minus-one` tué). À 1200 `uniform` :
-   78 k boules au lieu de 382 k.
-2. Instrument de réception : pic de facettes vivantes et comptes d'incidence
-   par ordre (32 000 local, 200 k G4).
-3. Routage par centre + RLE par seau (théorème 1) ; portes d'égalité.
-4. Génération tuilée + runs de niveau sur disque (théorème 2) ; préflight par
-   rôle ; égalité tuilé / non tuilé à 200 k sur G4.
-5. Fold streamé à état borné (théorèmes 3–4) ; digest de flux (théorème 5) ;
-   reprise.
-6. Session G4 à 1 M (K = 5 puis K = 10) avec disque dimensionné ; puis 10 M
-   K = 5 ; puis 10 M K = 10 (deux sessions avec reprise si nécessaire).
+| # | livraison | objet | digest v4 |
+|---|---|---|---|
+| L0 | instrument `vivantes` promu en compteur de réception (pic par lot, enregistrements, singletons) + reçu 32 000 puis 200 k | inchangé | inchangé |
+| L1 | **livré en partie (28 août)** : profil nommé `prefixe_k5` / `prefixe_k4` dans la sortie et porte de préfixe par digests (K = 4, 5 ; trois familles ; mutant tué) — restent : clé d'ex aequo explicite, indices u64, mutants T2 | inchangé | bit-identique |
+| L2 | fold résident à état borné (PREMIÈRE/DERNIÈRE en RAM, table des vivantes, arène, convertisseur flux → tableaux v4) | inchangé | bit-identique par convertisseur |
+| L3 | payload et digest de flux, manifeste atomique, statuts SSD | inchangé | second digest déclaré |
+| L4 | amont streamé : seaux Morton du centre, RLE par seau, magasin de boules, expansion en runs, tri externe | inchangé | `balls` v4 par fusion k-aire |
+| L5 | préflight par rôle (`MemAvailable`, cgroup, `statvfs`, débit mesuré) ; jalon **1 M** G4 : résident ≡ streamé | — | — |
+| L6 | 10 M : `prefixe_k5` d'abord, puis objet complet | — | flux + invariants + juges |
+| L7 | 30 M : `prefixe_k5` (une session) puis complet en sessions gardées avec reprise | — | idem |
+
+Le GPU (lane résidente sur device, `GPU.md`) est un chantier **parallèle**
+visant la lane q4 de `scanline`/`eight_clusters` et la génération à 10 M ; il
+ne change ni l'objet ni ce plan.
 
 ## 9. Questions à trancher par l'utilisateur
 
-1. **Disque** : ajouter un disque persistant SSD (≥ 500 Go pour 10 M K = 5 ;
-   ≥ 2 To pour 10 M K = 10) à la VM — c'est une mutation hors des scripts
-   gardés actuels, à ajouter à `gcp-migration/` avec double coupe-circuit.
-2. **Produit** : le flux des deltas par ordre (`facet_hierarchy_stream`)
-   est-il la sortie attendue à l'échelle, ou faut-il aussi le rendu § 9.1 pour
-   un $\psi$ fixé (accumulé en flux, sans série symbolique) ?
-3. **30 M, K = 10** : accepter que cela exige un comptage externe et ≈ 4 To,
-   ou viser d'abord 10 M pour K = 10 et 30 M pour K = 5.
+1. **Profil des premiers reçus 10 M** : `prefixe_k5` d'abord (~1,5–2 h,
+   ~60 Go, ~0,5 To de disque) avant l'objet complet ? `prefixe_k4` utile ?
+2. **Disque** : accord pour attacher un SSD à la VM via les scripts gardés
+   (≥ 1,5 To pour 10 M `prefixe_k5` / complet K par K, ≥ 4 To avec rétention
+   complète ; 30 M complet ≥ 12 To) — débit **mesuré** au préflight.
+3. **Sessions** : une mini-session (200 k + 1 M, ≤ 2 h) pour L5, une session
+   ≤ 8 h pour 10 M, 30 M complet en 2–3 sessions avec reprise.
+4. **Contrat de payload** : le digest de flux comme autorité au-delà de 1 M ;
+   les `batch_levels` (240 Go à 10 M) restent-ils dans le contrat ?
+5. **Familles** : `uniform` puis `eight_clusters` (10 M complet hors session
+   → `prefixe_k5`) ; `terrain` à profiler à 200 k avant engagement.
