@@ -1,6 +1,49 @@
+# ⚠ RÉTRACTATION EN TÊTE — lire ceci avant le reste
+
+**Le § 1 de ce document est FAUX et je le retire.** J'y écrivais que `terrain`
+demanderait 31 jours de calcul agrégé à 10 M points et qu'il lui manquait
+« exactement 0,86 d'exposant ». La cause est celle que l'audit avait
+identifiée avant que je ne la mesure : ma colonne « évaluations Jung » était
+`jung_cert_skip`, un proxy étroit — ni le coût de la lane q4, ni son temps.
+
+Avec `completions_q4`, **vrai compteur de travail de production**, les mêmes
+reçus donnent des exposants locaux (8 000 → 16 000 → 32 000 → 50 000) :
+
+| famille | complétions q4 à 50 000 | exposants | extrapolation à 10 M |
+|---|---|---|---|
+| `uniform` | 366 947 557 | 1,08 → 1,06 → **1,05** | ≈ 2 s |
+| `terrain` | 514 838 729 | 2,07 → 1,80 → **1,56** (décroît) | ≈ 42 s |
+| `scanline_single_pass` | 335 781 778 | 1,44 → 1,72 → **1,76** (croît) | ≈ 1,3 min |
+
+Le coût par ancre de `terrain` **sature** (seeds par ancre 9,4 → 13,7 → 17,4 →
+17,9 ; complétions par seed 3,78 → 4,55 → 5,13 → 5,33). **La génération n'est
+pas le mur du passage à 10–30 M**, et `terrain` n'est pas le régime perdu : le
+seul exposant qui se dégrade est celui de `scanline`.
+
+Le mur réel est la **mémoire**, et il est mesuré ailleurs : la loi est
+linéaire (exposants 0,85–1,10 sur quatre familles et trois phases), le pic du
+fold vaut 73,9 ko par point sur `scanline`, 78,6 sur `terrain` et 363 sur
+`uniform`, ce qui fixe la taille maximale résidente sur les 180 Gio de la VM à
+**2,3–2,4 M points** pour un nuage LiDAR et **0,5 M** pour `uniform`. Il manque
+un facteur 4 à 13 sur les familles réalistes — c'est le chantier L2–L4, pas la
+sous-quadraticité.
+
+Les réserves sur ces chiffres tiennent aussi : les quatre tailles viennent de
+deux binaires (`mhgp5_conformity_v4` et `mhgp5_probe`), le débit de
+$4{,}8 \times 10^{10}$/s n'est pas mesuré, et une pente locale sur moins d'une
+décade ne dit rien d'une asymptote.
+
+**Leçon de méthode, la vraie** : un compteur nommé comme s'il était le coût a
+produit trois documents et une extrapolation fausse de deux ordres de
+grandeur. Je vérifie désormais qu'un compteur mesure ce que son nom prétend
+avant de bâtir dessus.
+
+---
+
 # Question Claude — la sous-quadraticité **par régime**, et ce qu'elle exige (28 août 2026)
 
-Ancrage : reçus de génération épinglés depuis `839cf1ec`, campagne directe
+Ancrage : reçus de génération épinglés depuis `839cf1ec`, compteurs
+`seeds`/`completions_q4` ajoutés et reçus à `c95cfa95`, campagne directe
 `scanline` 200 k et instruments exploratoires jusqu'à `819cac3c` ; la fraîcheur
 du pin jugé est tenue dans [`ETAT_COURANT.md`](ETAT_COURANT.md).
 Cadre : `phase=exploration_v5_hors_registre`, `backend=cpu_reference`,
@@ -153,6 +196,31 @@ non interprétable. La mémoire reste un chantier prioritaire, mais elle ne
 disqualifie pas la suppression architecturale de `x x y` : conserver deux rails
 séparés, mur/RSS mesurés d'une part, compteurs de travail d'autre part. La note
 autonome de rétractation est consolidée ici puis retirée du tip.
+
+La contradiction est visible sans extrapoler jusqu'à 200 k. À 50 k, le débit
+`completions_q4 / t_rects_q4` vaut seulement 121,5 M/s sur `uniform`, 66,5 M/s
+sur `terrain` et 67,5 M/s sur `scanline`, soit respectivement 395, 722 et 711
+fois moins que 48 G/s. En conservant malgré tout les masses 10 M publiées et en
+figeant ces débits, les temps conditionnels de la seule lane seraient environ
+13 min, 8 h 21 et 15 h 38, pas 2 s, 42 s et 1,3 min. Ils ne constituent pas
+plus une projection produit ; ils montrent seulement l'erreur d'unité.
+
+Surtout, la baisse du compteur masque une hausse du coût payé. Sur `terrain`,
+les exposants locaux 8→16 k, 16→32 k et 32→50 k valent :
+
+| grandeur | 8→16 k | 16→32 k | 32→50 k |
+|---|---:|---:|---:|
+| `completions_q4` | 2,065 | 1,805 | 1,561 |
+| corps q4 | 2,221 | 2,302 | 2,450 |
+| génération entière | 1,459 | 1,757 | 2,053 |
+| mur de bout en bout | 1,177 | 1,394 | 1,654 |
+
+Dire que `terrain` « s'améliore » ou que seul `scanline` se dégrade inverse
+donc la mesure temporelle. Enfin, 0,354 MiB/point est le pic du run **uniform**
+complet résident à 50 k ; les mêmes reçus donnent 0,075 sur `terrain` et 0,072
+sur `scanline`. Son extrapolation linéaire à environ 3,5 TiB reste utile pour
+refuser le chemin uniforme complet résident, pas pour déclarer la mémoire
+« mur réel » de toutes les familles ou du futur profil streamé.
 
 ## Réponse auditée — V36 à V41
 
