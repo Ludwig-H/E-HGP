@@ -226,6 +226,7 @@ mhgp5_gate(mhgp5_prefix_k5_clusters 0 mhgp5_prefix_gate "--family=eight_clusters
 mhgp5_gate(mhgp5_prefix_k5_scanline 0 mhgp5_prefix_gate "--family=scanline_single_pass --n=1500 --smax=6 --min-events=500")
 mhgp5_gate(mhgp5_prefix_k4_uniform 0 mhgp5_prefix_gate "--family=uniform --n=1200 --smax=5 --min-events=1000")
 mhgp5_gate(mhgp5_prefix_mutant_h1 4 mhgp5_prefix_gate "--family=uniform --n=1200 --smax=6 --min-events=1000 --inject=anchor-kill-h-minus-one")
+mhgp5_gate(mhgp5_prefix_k5_plateaux 0 mhgp5_prefix_gate "--family=uniform --n=48 --coord=14 --smax=6 --min-events=100 --min-plateau-batches=20")
 mhgp5_executable(mhgp5_q4_cover_fixture tests/q4_cover_fixture.cpp)
 mhgp5_gate(mhgp5_q4_cover_fixture 0 mhgp5_q4_cover_fixture "")
 mhgp5_gate(mhgp5_q4_cover_mutant_coef4 4 mhgp5_q4_cover_fixture "--inject=q4-cover-coef4")
