@@ -455,7 +455,7 @@ autorité de conception :
    rectangles ; elle ne doit pas être recopiée sur le sous-ensemble vivant.
 10. Les quatre tailles partagent source, options, famille et seed, mais pas le
     même exécutable : 8/16/32 k viennent de `mhgp5_conformity_v4`, 50 k de
-    `mhgp5_probe`. Les nuages sont régénérés avec un domaine `coord` différent,
+    `mhgp5`. Les nuages sont régénérés avec un domaine `coord` différent,
     non des préfixes point à point. Dire « série à densité approximativement
     constante au même pin » plutôt que « même binaire, tailles appariées ».
 
@@ -537,21 +537,37 @@ La phrase `uniform` « rien à rendre sous-quadratique » doit devenir : « aucu
 urgence de pente sur cette famille aux tailles reçues ». Sa constante, les
 autres familles et la borne déterministe restent des sujets distincts.
 
-La prochaine modification utile est donc uniquement instrumentale. Ne pas
-dupliquer ce qui existe : `q3_cert[0]+q3_cert[1]+q3_cert[2]` donne déjà les
-sites évalués par la profondeur q3 ; dans le cœur q4,
+La prochaine modification utile est donc uniquement instrumentale et doit
+observer le **flux produit partagé**, pas rejouer un corps contrefactuel dans la
+sonde. Ce rejeu construit toujours le cover avant les prétests, alors que le
+produit emploie aussi une route par requête et ne construit le cover qu'après
+survie ; ses coûts et ses verdicts ne sont donc pas ceux que l'on veut optimiser.
+
+Ne pas dupliquer ce qui existe : `q3_cert[0]+q3_cert[1]+q3_cert[2]` donne déjà
+les sites évalués par la profondeur q3 ; dans le cœur q4,
 `q4_cert[0]+q4_cert[1]+q4_cert[5]` donne les sites visités, tandis que
 `q4_cert[2..4]` sont des sous-catégories imbriquées et ne doivent pas être
-resommées. Imprimer ces compteurs, puis ajouter seulement `rect_visited`,
-`anchors_killed_hist`, visites de candidats des prétests, `sc.visits`/points de
-handles, sites de grille, complétions atteignant la profondeur et sites
-`q4_power`. Pour chaque masse, conserver somme, maximum et histogramme
-logarithmique. La porte doit graver les conservations suivantes :
+resommées. `q4_depth_entries` vaut déjà
+`depth_killed[2]+candidates[2]`, et `q4_completions` existe. Ajouter seulement,
+par classe `Dmax`, les masses de boucle non reconstructibles : nœuds de handles
+et de requête séparés, visites de sites W/secteurs, nombres de covers construits,
+delta de `sc.visits` et sites retenus, sites de politique/construction de grille,
+tests de `x` dans la grille et dans la vraie boucle de seeds, sites de lentille,
+remplissages affines et tests `q4_power`. Un compteur
+`anchors_enter_seed_stage` ferme la partition des ancres ; `rect_visited`, qui
+porte sur tout le front WSPD, ne peut pas être attribué aux seules classes des
+rectangles terminaux vivants. Pour chaque masse, conserver somme, maximum et
+histogramme logarithmique. La porte doit au minimum graver :
 
 ```text
 anchors = sum_alive_rect |A| |B|
 anchors = anchors_killed_hist + anchors_post_hist
+anchors_post_hist = zero_D2 + W_kill + sector_kill + cell_anchor_kill + anchors_enter_seed_stage
+grid_attempted = grid_built + grid_fail
+grid_built = grid_all_dead + grid_live
+q3_seeds = q3_seed_cell_kill + q3_depth_kill + q3_candidates
 q4_depth_entries = depth_killed_q4 + candidates_q4
+q4_completions = sum(q4_rejections) + depth_killed_q4 + candidates_q4
 ```
 
 #### Premier levier certifiable : raffiner après séparation, avant `A x B`
@@ -562,11 +578,16 @@ rectangle est déjà séparé mais reste vivant après
 `count_universal_witnesses(..., with_corners=true)`, autoriser une profondeur
 bornée `L` de subdivision supplémentaire du facteur interne de plus grand
 diamètre, **uniquement pour q3/q4, jamais q2**. Les deux enfants repassent
-ensuite par **le même** comptage universel ; si le prédicat entier `separated`
-n'est pas conservé pour les deux enfants, le raffinement facultatif est annulé
-transactionnellement, sans décision ni compteur d'enfant. Un enfant certifié
-mort disparaît, les autres sont à nouveau subdivisés ou émis. `core`, `ha` et
-`hb` sont toujours recalculés sur l'enfant, jamais hérités du parent.
+ensuite par **le même** comptage universel, mais seulement après avoir vérifié
+que le prédicat entier `separated` reste vrai pour **les deux**. S'il échoue
+pour l'un, le raffinement est annulé transactionnellement et le parent est émis
+inchangé, sans comptage ni décision d'enfant. Un enfant certifié mort disparaît,
+les autres sont à nouveau subdivisés ou émis. Recalculer `ha` et `hb` sur
+l'enfant. Pour `core`, conserver `max(parent.core, fresh_child_core)` : les
+témoins du parent restent valides sur un sous-produit et les points du frère
+peuvent devenir éligibles. Le compte sémantique est donc monotone ; le `max`
+réutilise explicitement le minorant déjà prouvé et protège la couture
+d'implémentation. Une somme doublerait les témoins communs.
 
 La sûreté est courte. Les deux enfants radix forment une partition disjointe du
 facteur scindé ; leurs produits cartésiens forment donc une partition disjointe
@@ -574,10 +595,27 @@ du rectangle parent. Aucun couple n'est perdu ni dupliqué. Une branche n'est
 supprimée que par le certificat suffisant déjà consommé par la production. En
 outre, les points du frère qui ne sont plus des extrémités du sous-rectangle
 deviennent des témoins extérieurs légitimes **s'ils** sont universels pour tout
-le sous-rectangle. Des boîtes plus petites peuvent ainsi renforcer le minorant,
-mais aucune monotonie du certificat total n'est supposée. La porte doit exiger
+le sous-rectangle. Le nombre de témoins universels ne peut ainsi que croître ;
+la porte ne doit cependant pas remplacer cette preuve par une hypothèse sur la
+valeur fraîche de l'implémentation. Elle doit exiger
 l'égalité des digests de candidats, des sorties et de la forêt, car c'est le
-contrat observable actuel.
+contrat observable actuel. Graver aussi `L=0` comme identité stricte, puis un
+ledger u128 d'ancres uniques
+`emitted_pair_mass + postsep_killed_pair_mass = base_alive_pair_mass` et, si la
+masse WSPD pondérée est revendiquée, son ledger distinct ; puis le
+multiensemble littéral des couples d'indices avant/après sur de petits arbres :
+les digests seuls localisent mal une perte ou un doublon de paire. L'ordre brut
+change notamment quand B est scindé ; comparer le multiensemble trié avant RLE,
+puis `digest_balls`, chaque forêt, les événements et `batch_levels`, pas l'ordre
+d'énumération.
+
+Le critère `separated` n'est pas héréditaire sous déplacement du centre de la
+boîte. La fixture 1D `x={0,99,100,512,612}`, `y=z=0`, `s=8` le grave : le parent
+`[0,100] x [512,612]` passe, puis l'enfant `[99,100] x [512,612]` échoue. Une
+fixture positive q3 doit en parallèle prouver le gain par le frère :
+`x={0} union {512..520} union {65000..65009}`, `s=8`, `smax=11`, où la branche
+`{0}` acquiert neuf témoins et le ledger partage 100 paires en 10 mortes et 90
+émises.
 
 La restriction q3/q4 est substantielle. Un témoin du frère compté dans
 `h_a(a)` au parent peut ne plus être compté ni par `h_a` ni par le cœur de
@@ -599,7 +637,8 @@ fixture doit aussi tuer les mutants qui additionnent `core_parent+core_child`
 ou réutilisent `h_parent`, deux doubles comptes possibles lors de la migration
 d'un témoin du frère.
 
-Ne pas en faire encore une politique par défaut. Exposer dans la sonde `L=0,1,2,3`
+Ne pas appeler ce post-traitement une nouvelle WSPD : le front canonique reste
+terminal à la première séparation. Exposer dans la sonde `L=0,1,2,3`
 et un seuil de masse de paires, puis rejouer d'abord q3 `scanline` 8/16/32 k. Pour
 chaque bras, imprimer rectangles supplémentaires, branches tuées après
 séparation, paires effectivement énumérées, opérations des histogrammes, sites
@@ -607,7 +646,10 @@ de prétest réellement visités, covers construits, `sc.visits`, seeds réels e
 temps. Le succès n'est pas une baisse de `seeds_cf` : il faut une baisse du temps
 et des visites **payées** supérieure au surcoût des nouveaux comptages. Si
 `L=1..3` ne réduit pas ces deux masses au pin courant, abandonner ce raccord ;
-si q3 répond, le tester ensuite séparément en q4 et sur `terrain`/clusters.
+si q3 répond, le tester ensuite séparément en q4 et sur `terrain`/clusters. `L`
+reste borné indépendamment de n : au plus 2/6/14 nouveaux comptages par parent
+pour `L=1/2/3`. Propager la même option aux chemins intégrés, batched et device ;
+leurs sorties doivent rester appariées sous une politique identique.
 
 Avant même ce prototype, ventiler par classe les verdicts
 `anchor_kill_cumulated` en `k=1` (`W_q`) et `k=2` (secteurs). Seule la masse
@@ -618,15 +660,19 @@ raccord une priorité **q3**. En q4, il ne pourrait d'abord gagner que par des
 candidats de handles/requête plus petits, ce qui doit être établi par la trace
 de production avant de payer de nouveaux comptages.
 
-Le compteur exploratoire en cours `killed==alive` doit, pour la même raison,
-être nommé `rectangles_entierement_certifies_par_les_pretests_courants`, pas
-« gain maximal de n'importe quel test de rectangle ». `W_q` et secteurs sont
-des conditions suffisantes, non nécessaires ; la grille, le corps complet ou
-un futur certificat peuvent tuer ce qu'ils laissent vivre, et la subdivision
-peut supprimer des enfants d'un parent mixte. Ses `seeds` et `covers` restent
-en outre contrefactuels. La seule masse directement évitable qu'il mesure est
-la masse de paires de ces rectangles, sous réserve d'inclure aussi les
-rectangles dont toutes les paires sont déjà mortes à l'histogramme.
+Le compteur exploratoire en cours `killed==alive` ne doit pas être publié, même
+sous le nom plus prudent
+`rectangles_entierement_certifies_par_les_pretests_courants`, avant d'avoir
+aligné ses populations. En q3, `alive` signifie post-histogramme ; en q4, il
+est déjà post-W4 manuel, alors que `killed` ne compte ensuite que W/secteurs et
+omet la grille. Les covers sont construits avant la politique de routage, et
+`seeds`/`survivants` viennent du corps contrefactuel. Ce quotient n'est donc ni
+comparable entre q3/q4, ni un plafond du gain d'un certificat de rectangle.
+Mesurer directement, dans le prototype de raffinement, la masse de paires des
+parents, des enfants émis et des enfants certifiés morts ; le delta exact est
+le travail d'énumération que ce raccord retire. W/secteurs/grille restent des
+conditions suffisantes non nécessaires et ne donnent que des diagnostics
+séparés.
 
 Ensuite : (A) conserver la liste des `x` aigus déjà calculée par la
 politique de grille ; (B) reporter directement les `b` post-histogramme avec

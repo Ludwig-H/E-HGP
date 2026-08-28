@@ -7,10 +7,12 @@
   constats historiques G0 portent sur `fe54ccca`, la campagne device/SCALE sur
   `c95cfa95`, G1 q3 sur `dd928111`/`839cf1ec` et G1 q4 sur `556c421e`.
 - **Pin de réception G0/G1 q3 :** `0656bf4c`, sans code produit.
-- **Worktree observé avant ce delta :** `HEAD=origin/main=0b3f3fd6`; aucun code
-  produit n'est postérieur à `55c1f105`. Le pin `ff5931fd` modifie seulement
-  la sonde exploratoire `rect_probe` et sa note de mesure. Le probe non suivi
-  `.codex_fold_contract_probe.cpp`, appartenant à un autre audit, reste hors
+- **Worktree observé avant ce delta :** `HEAD=origin/main=57deaaa6`; aucun code
+  produit n'est postérieur à `55c1f105`. `2192ec9e`–`3636d5b0` corrigent la
+  proposition de raffinement dans la question active ; `fd2844fb` et
+  `57deaaa6` ajoutent une question d'exposants et deux instruments exploratoires
+  dans `rect_probe.cpp`, sans modifier le produit. Le probe non suivi
+  `.codex_fold_contract_probe.cpp`, appartenant à un autre travail, reste hors
   preuve. La réponse transitoire de Claude au miroir est consolidée ici puis
   retirée du tip, conformément à la convention du dossier.
 - **Cadre :** `phase=exploration_v5_hors_registre`,
@@ -120,14 +122,14 @@ maintenant :
    dédié. Pour les frontières, comparer `liv.batches` à la valeur littérale
    `c.batches`, graver les vecteurs `batch_levels` attendus et inclure `level`
    dans le rendu des deltas.
-3. **Mesurer les capacités une seule fois, exactement.** Toutes les capacités
-   comptées sont monotones : un relevé final après la boucle donne leur maximum
-   exact et évite même jusqu'à 127 balayages induits par le stride plancher.
-   Comptabiliser `born_at`/`died_at` avant leur destruction, puis inclure au
-   relevé final `cfree`, `slot_mark`, les scratchs imbriqués, les deltas
-   imbriqués et `batch_levels`. Appeler le même helper de finalisation avant un
-   refus anticipé si ces métriques y sont promises. Publier ces cinq postes
-   comme capacités de conteneurs séparées, jamais comme somme allocator-précise.
+3. **Finaliser les capacités une seule fois, exactement.** `cfree`, `slot_mark`,
+   les scratchs imbriqués et les deltas imbriqués sont déjà comptés : ne pas
+   les réimplémenter. Il manque seulement `born_at`/`died_at`, détruits avant le
+   relevé, et `batch_levels`. Un helper commun appelé après la dernière
+   croissance, y compris avant un refus anticipé si ces métriques y sont
+   promises, donne les maxima exacts sans échantillonnage. Publier les cinq
+   postes comme capacités de conteneurs séparées, jamais comme somme
+   allocator-précise.
 4. **Comparer le même objet sans copie.** Conserver le bras sans rejeu comme
    ablation, puis faire du bras avec rejeu le miroir complet en utilisant
    `fp.keys` directement, le replayer strict et un digest commun. Versionner le
@@ -191,6 +193,30 @@ sonde sans sorties brutes, compteur résiduel et certificat exact par bloc.
 Réutiliser d'abord `q3_cert`/`q4_cert`, puis ajouter les visites de prétest,
 handles, grille et profondeur q4, ventilées après chaque filtre. Le détail
 constructif et les conservations sont dans la requalification V29.
+
+**Réponse V36–V41 : garder le signal, refuser les claims.** Les extrapolations
+10 M de `fd2844fb` sont arithmétiquement cohérentes sous un débit inventé et une
+pente figée, mais ne prouvent pas que trois régimes tiennent huit heures. Le
+seuil proposé ne définit pas non plus la sous-quadraticité et ferait déjà
+échouer clusters et `scanline` sur leurs autres compteurs/intervalles. Séparer
+diagnostic de pente et budget produit. Fermer seulement la coupure **aveugle**
+par `Dmax`, jamais tout certificat dépendant du rayon. La session 11 fournit en
+outre déjà 100/200 k `scanline` : le dernier doublement donne 3,220 sur
+`jung_cert_skip` et 3,305 sur le mur q4, ce qui réfute directement la projection
+1,5 h fondée sur la seule pente 32→50 k.
+
+La descente prolongée de `57deaaa6` trouve un signal q3 non vacant, mais sa
+profondeur 40, son ratio estimé et son commentaire ne sont pas recevables comme
+algorithme. `separated` n'est pas héréditaire, tandis que le compte sémantique
+de témoins universels est monotone sur un sous-produit ; tester les deux enfants
+avant effet, conserver par garde `core=max(parent,fresh)`, exclure q2, borner
+`L` à 0/1/2/3, puis graver ledger u128, multiensemble trié, digests, événements
+et niveaux. Les 92,1 M sites de cover évités sont un prorata contrefactuel et ne
+se comparent pas aux 27,3 M nœuds visités comme un speedup 3 pour 1. Les
+257 810 « sous-rectangles » incluent 173 190 racines, et le binaire rejoué
+annonce encore `pin_configure=0b3f3fd6` : aucun reçu `57deaaa6` n'existe. La
+[réponse détaillée](QUESTION_CLAUDE_EXPOSANTS_PAR_REGIME_20260828.md#réponse-auditée--v36-à-v41)
+et les fixtures sont consolidées dans les deux questions actives.
 
 **Ablation immédiate multi-CPU :** ne pas commencer par un nouveau pool général.
 Sur le témoin qui porte `490143/1231555/1353144` rectangles à 48 workers,
@@ -362,6 +388,21 @@ campagne device suivante exécute aussi les deux mutants de retombée SoA au cod
 Ces travaux n'empêchent ni G0 ni G1. Les détails de passage à l'échelle restent
 dans [AUDIT_PASSAGE_ECHELLE_20260828.md](AUDIT_PASSAGE_ECHELLE_20260828.md).
 
+### Grille V15 — noyau reçu, six coutures toujours ouvertes
+
+La réception bornée de `d090f2cb` reste réutilisable et il n'est pas utile de
+rouvrir l'algorithme. En revanche, aucun pin ultérieur n'a fermé les six raccords
+de [`QUESTION_CLAUDE_GRILLE_DE_CELLULES_20260828.md`](QUESTION_CLAUDE_GRILLE_DE_CELLULES_20260828.md) :
+le théorème canonique justifie encore le losange par le seul
+`|P_k| >= rho`, appelle 4 799 488 comparaisons `(grille, cellule)` des « paires
+(site, cellule) » et affirme qu'une contraction FMA ne peut qu'abaisser
+l'erreur ; `cell_grid.hpp` écrit encore `|G*rhs|` alors que `rhs` porte déjà
+`G`, prétend la capacité u32 garantie par le profil, et
+`kCellLocateEvalOk` ne vérifie que `FLT_EVAL_METHOD == 0`. Corriger ces six
+énoncés/gardes au même pin, puis rejouer les sept portes reçues, suffit pour
+soumettre la fermeture ; aucune nouvelle campagne G4 ni nouvelle grille n'est
+requise.
+
 ### Réducteur vivant `bc66ade7` — garder le cœur, fermer les coutures locales
 
 Le pin conserve l'égalité nominale du résident et ajoute les raccords utiles :
@@ -374,11 +415,11 @@ forte ; ne pas refaire l'architecture.
 
 Quelques claims doivent encore rester étroits :
 
-- les fixtures D/E distinguent maintenant racines logiques et clés, mais leur
-  rendu omet `level`, `batch_levels`, refus et compteurs. A-300 et E-50 restent
-  différentiels, non littéraux, et le plancher global ne protège pas chaque
-  motif. Ajouter un comparateur complet et des planchers nommés, ou réduire le
-  libellé à cinq sorties littérales plus deux stresses ;
+- `delta_equal` et `compare_order` couvrent déjà `level`, `batch_levels`, lots,
+  compteurs et deltas complets : ne pas ajouter un second comparateur. Seule la
+  petite table **littérale** de frontières omet encore `level`, les vecteurs
+  `batch_levels` attendus et la comparaison de `liv.batches` à `c.batches`.
+  A-300 et E-50 restent justement deux stresses différentiels ;
 - le replayer local de `fold_live_gate.cpp` reconstruit une connectivité finale,
   mais ignore `output`, lots, niveaux et clés absentes du catalogue. Il n'a ni
   mutant ni rejet propre. Extraire le replayer strict de la porte T5 dans un
@@ -388,20 +429,18 @@ Quelques claims doivent encore rester étroits :
   créneaux a supprimé `LiveIndex` : aucune fixture de décalage arrière n'est à
   ajouter tant que ce hash ne revient pas comme repli compilé. Le hash constant
   des lifetimes externes reste dû à L3 ;
-- les cinq postes remplacent utilement `g_alloc_bytes`. `55c1f105`
-  relève maintenant scratch et sortie après les croissances du lot et supprime
-  leur parcours quadratique. Comme toutes les capacités comptées sont
-  monotones, un relevé final unique est plus exact et moins cher ; enregistrer
-  séparément `born_at`/`died_at` avant leur destruction et inclure
-  `batch_levels`, `cfree` et `slot_mark` ;
+- les cinq postes remplacent utilement `g_alloc_bytes`. `55c1f105` compte déjà
+  `cfree`, `slot_mark`, scratch et deltas imbriqués. Un finaliseur unique après
+  la dernière croissance doit seulement conserver `born_at`/`died_at` avant
+  leur destruction et ajouter `batch_levels` ;
 
-Les balayages structurels sont un oracle, pas un coût produit : le stride
-actuel peut en exécuter jusqu'à 127 malgré le plafond commenté à 64, et un
-`next` hors arène est déréférencé avant rejet. Employer un stride plafond,
-valider les bornes, backlinks, le nombre de composantes non vides contre
-`live_comp`, l'index et les free-lists, puis réserver ces parcours au mode de
-vérification. Sinon le benchmark du vivant paiera lui-même des dizaines de
-scans O(vivant). Aligner aussi la formule publiée et celle exécutée : la marge
+Les balayages structurels sont un oracle, pas un coût produit. Le stride
+plancher peut en exécuter jusqu'à 127 malgré le plafond commenté à 64 : utiliser
+un quotient plafond. Surtout, tester `x < nslots` **avant** `av[x]`, puis
+`av[x].fid < slot_of_fid.size()` avant l'indexation, et balayer finalement tout
+`slot_of_fid` pour détecter les entrées stale. Les backlinks, comptes et
+free-lists sont déjà contrôlés ; les conserver sans construire un nouvel
+oracle générique. Aligner aussi la formule publiée et celle exécutée : la marge
 `ceil(log2(F + 2)) + 1` est sûre mais plus lâche que la borne de doublement
 `floor(log2(F))` par alias.
 
@@ -495,17 +534,14 @@ doit les refuser, et une fixture doit accepter 3.
   `active = queued = 0`.
 - Documenter que le propriétaire détruit le pool seulement après jonction de
   tous les producteurs, ce qui est déjà le contrat des lanes. G0 n'a pas besoin
-  d'une API générale autorisant destruction et soumissions concurrentes ; si
-  une fermeture explicite est ajoutée, elle doit réveiller `cv_` et
-  `cv_space_`.
-- Exposer le cap et son pic, puis exercer `queue_cap=1` avec une latch. La valeur
-  0 peut garder le sens documenté « auto = 2N ».
-- Ajouter les includes directs (`<cstddef>`, `<stdexcept>`, `<utility>` dans le
-  pool, `<algorithm>` dans la porte).
-- Comparer q3/q4 avec un scanner factice pour N=1/2/4/8 : sorties, ordre et
-  compteurs identiques au chemin direct. Le flush final séquentiel des reliquats
-  n'invalide pas la sûreté de G0, mais doit être parallélisé ou mesuré avant de
-  revendiquer que le pool est pleinement occupé.
+  d'une API générale autorisant destruction et soumissions concurrentes : ce
+  contrat est maintenant documenté et suffit.
+- Le cap, son pic et une porte `queue_cap=1` existent déjà. Il reste seulement
+  à rendre causal le cas « file pleine + admission retenue » et à en exiger la
+  comptabilité exacte ; ne pas refaire l'API.
+- Les includes directs sont présents et la compilation autonome est exercée.
+  Le sweep scanner q3/q4 N=1/2/4/8 est une intégration/performance ultérieure,
+  pas un verrou du contrat de sûreté G0.
 
 Ce paquet reste volontairement petit. Une machine à états très générale, un
 reorder buffer ou des lots asynchrones ne sont pas requis pour recevoir G0.
@@ -526,34 +562,39 @@ Release comme sous ASan/UBSan. Le cœur du correctif est à garder.
 Le pin `c19dc60d` ferme maintenant les deux défauts les plus dangereux de cette
 relecture : le vecteur TLS est remplacé par un pointeur non allouant qui refuse
 tout nesting, y compris entre pools, et `close_fatal` dépile la deque sans
-tableau temporaire. Conserver ces corrections. Quatre finitions évitent encore
-une preuve verte par vacuité :
+tableau temporaire. Conserver ces corrections. Quatre finitions locales, et
+seulement elles, restent au chemin critique G0 :
 
 1. déplacer `submitted_++` **après** `queue_.push_back(&t)` réussi. Une
    allocation de la deque peut encore laisser un soumis qui n'est ni réussi,
    ni échoué, ni annulé ;
-2. séparer les invariants communs du témoin ciblé : `pool-serial` ne meurt que
-   par `peak < N`, `pool-drop-exception` seulement par l'exception cible avalée,
-   et toutes les autres propriétés restent vraies ;
-3. intégrer le probe de constructeur fautif comme fixture permanente. Sans
-   seam de lancement de thread, borner le claim au constructeur d'Executor et
-   à la relecture du chemin de création partielle ;
-4. rendre contre-pression et fermeture fatale causales. Bloquer les workers,
+2. garantir un porteur fatal non nul même si `close_fatal(nullptr)` ne peut pas
+   allouer son `runtime_error` de repli. Sinon les tickets annulés reçoivent un
+   `exception_ptr` nul et peuvent sembler réussir ; employer un porteur
+   préalloué/non allouant et graver ce cas ;
+3. rendre contre-pression et fermeture fatale causales. Bloquer les workers,
    observer la file réellement pleine et au moins une admission retenue, puis
-   fermer ; `sleep_for(100/200 ms)` ne doit être qu'un coupe-circuit. Exiger
-   `peak_queued == cap`, `queue_waits > 0` et la comptabilité terminale exacte.
+   fermer ; `sleep_for(100/200 ms)` ne doit jamais décider du scénario. Exiger
+   les nombres exacts de succès, annulations et refus, ainsi que
+   `peak_queued == cap` et un témoin d'admission retenue ;
+4. typer l'exception CUDA et appeler `close_fatal` dans le worker ou son wrapper
+   **avant** qu'il puisse dépiler un autre lot. Les exceptions hôte ordinaires
+   restent récupérables et la première erreur device gagne.
 
 Le mutant série prend aujourd'hui 15,6 s parce que la latch attend N arrivées
 alors que le mutant n'a qu'un worker. Attendre `pool.executors()` arrivées puis
 comparer le pic au N demandé conserve la preuve nominale et tue le mutant
 immédiatement, sans réduire le timeout de sûreté.
 
-Le chemin P1 `close_fatal` est donc une bonne primitive hôte à garantie forte
-pour une exception non nulle, sous le contrat de durée de vie des producteurs.
-La fixture fatale doit encore remplacer ses attentes de 100/200 ms par deux
-barrières : deux jobs actifs, puis file réellement pleine, avant la fermeture.
-Enfin, tant que q3/q4 ne classent ni n'appellent ce chemin, le qualifier de
-mécanisme hôte exercé, pas encore de gestion reçue d'une erreur device réelle.
+Le chemin P1 `close_fatal` est donc une bonne primitive hôte sous le contrat de
+durée de vie des producteurs. Sa garantie forte ne couvre toutefois aujourd'hui
+que l'entrée non nulle : le repli de `close_fatal(nullptr)` peut échouer à
+allouer, laisser `fatal_` nul et acquitter les tickets annulés sans exception.
+Fournir un porteur non allouant, puis remplacer les attentes de 100/200 ms par
+deux barrières : deux jobs actifs, puis file réellement pleine, avant la
+fermeture. Enfin, tant que q3/q4 ne classent ni n'appellent ce chemin, le
+qualifier de mécanisme hôte exercé, pas encore de gestion reçue d'une erreur
+device réelle.
 
 Le raccord device doit se faire **avant que le worker puisse dépiler un nouveau
 lot**. Aujourd'hui `cuda_check` transforme toute erreur CUDA en
@@ -571,11 +612,10 @@ La machine d'état minimale tient sous `mu_` : `Open`, puis
 `Open -> Fatal(first_error)` qui rejette les admissions et transforme chaque
 `Queued` en `Cancelled(first_error)`. Le déplacement actuel de la deque vers
 `active_` et celui d'`active_` vers le compteur terminal sont séparés du mutex ;
-un snapshot peut donc observer un job en limbe et violer temporairement
-l'invariant annoncé. Soit `counters()` est explicitement terminal seulement,
-soit, préférable pour les barrières de test, pop+`running++` puis
-`running--`+compteur terminal deviennent des transitions atomiques sous ce
-même mutex.
+un snapshot vivant peut donc voir un job en limbe. Cela ne bloque pas G0 si
+`counters()` est documenté et exercé **après quiescence seulement**. Ne rendre
+les transitions atomiques sous `mu_` que si une future barrière consomme
+réellement ces compteurs pendant l'activité.
 
 La porte fatale peut alors être exacte et rapide : maintenir exactement deux
 jobs actifs, attendre quatre tickets en file et deux admissions bloquées,

@@ -6,6 +6,220 @@ Cadre : `phase=exploration_v5_hors_registre`, `backend=cpu_reference`,
 `profile=quantized_u16_input_only`,
 `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`.
 
+## Réponse auditée — V36 à V41
+
+**Verdict court : V39 oui ; V40 oui seulement comme tuilage de scheduling ;
+V41 est une bonne ablation q3/q4, mais pas encore un algorithme reçu ; V37 ne
+ferme qu'une coupure aveugle ; V36 est refusé dans sa forme actuelle ; V38 doit
+être reformulé avec un modèle de prétraitement.** Les calculs d'extrapolation
+sont arithmétiquement reproductibles, mais leur interprétation « trois régimes
+tiennent 10 M » est fausse.
+
+Trois faits doivent d'abord être corrigés :
+
+1. Les tailles ne viennent pas du « même binaire » : 8/16/32 k ont été
+   extraites de `mhgp5_conformity_v4`, 50 k de `mhgp5`. Aucun hash des deux
+   binaires n'est épinglé. Les nuages sont
+   régénérés avec un domaine `coord` différent ; ce ne sont pas des préfixes
+   point à point. Le fichier `MESURE_CLAUDE_OU_EST_LA_QUADRATICITE_20260828.md`
+   cité en ancrage a en outre été consolidé puis retiré du tip ; l'autorité
+   active est la requalification de
+   [`QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md`](QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md).
+2. La colonne « évaluations Jung » est `jung_cert_skip`, pas le total des
+   évaluations ni le temps q4. En sommant les trois champs imprimés
+   `jung_cert_kill + jung_cert_skip + jung_fallback`, les pentes 32→50 k sont
+   `1,055/1,042/2,109/3,040` pour uniform/clusters/scanline/terrain, au lieu de
+   `1,056/1,064/2,212/3,144` pour le seul `skip`. Les scans de profondeur et les
+   autres étages ne sont toujours pas contenus dans ce total.
+3. Le débit de `4,8e10` évaluations/s provient très vraisemblablement d'une
+   double agrégation des 48 fils. Sur terrain 50 k,
+   `7 677 090 545 / 7,8782 s = 9,74e8 skip/s` au mur ; multiplier encore par
+   48 donne `4,68e10`, presque la constante annoncée. Selon la famille, le débit
+   mural observé du total Jung ne vaut qu'environ `1,03e8` à `1,02e9` par
+   seconde : l'hypothèse est 47 à 465 fois trop haute. Elle prédit même uniform
+   1 M en 0,2 s alors que q4 seul prend déjà 3,12 s à 50 k. En supposant malgré
+   tout ce débit, une pente figée et aucun autre coût, les temps du tableau sont
+   bien ceux du calcul ; ils ne décrivent pas le mur CPU. L'écart
+   `3,14 - 2,28 = 0,86` est donc l'écart entre deux hypothèses incompatibles avec
+   le reçu, pas l'exposant « exactement manquant » à l'algorithme.
+4. La session 11 mesure déjà `scanline` à 100 k et 200 k. Sur 50/100/200 k,
+   `jung_cert_skip` a des pentes 2,586 puis 3,220 et le mur q4 2,216 puis
+   3,305. Même le débit fictif de 48 G/s, appliqué au dernier segment depuis
+   200 k, projette environ 206 h à 10 M, pas 1,5 h. Les débits effectivement
+   observés à 50 k ne valent d'ailleurs qu'environ 0,05 à 0,98 G de
+   `jung_cert_skip` par seconde selon la famille.
+
+À titre de diagnostic 32→50 k seulement, les pentes des temps effectivement
+mesurés sont très différentes de celle du proxy :
+
+| famille | rectangles q4 | génération | mur complet |
+|---|---:|---:|---:|
+| `uniform` | 1,285 | 1,195 | 1,105 |
+| `eight_clusters` | 1,365 | 1,271 | 1,198 |
+| `scanline_single_pass` | 2,160 | 1,815 | 1,440 |
+| `terrain` | 2,398 | 2,023 | 1,632 |
+
+Les deux extrémités utilisent encore des exécutables distincts : ces nombres
+localisent des postes, ils ne constituent ni des lois asymptotiques ni une
+preuve du budget 10 M.
+
+### V36 — séparer complexité et budget produit
+
+Ne pas recevoir la porte proposée. D'une part, un seuil 2,30 ou 2,20 ne définit
+pas une sous-quadraticité. D'autre part, un seuil unique par famille ne peut pas
+être appliqué à des compteurs de bases et d'unités différentes. La porte
+annoncée « au-dessus des mesures actuelles sauf `terrain` » échouerait déjà :
+
+- `eight_clusters`, seuil 1,20 : ancres q3 `1,54/1,53/1,34`, ancres q4
+  `1,49/1,67/1,40`, et proxy Jung `1,27` sur le premier intervalle ;
+- `scanline`, seuil 2,30 : proxy Jung `2,74` entre 16 k et 32 k ;
+- `terrain`, seuil 2,20 : proxy Jung `2,82/2,83/3,14`.
+
+Dans le même modèle fictif, les exposants admissibles pour 30 M ne seraient
+plus que `2,395/2,320/2,091/1,892` : les seuils 2,30 et 2,20 ne garantissent
+donc même pas le budget 30 M annoncé.
+
+Conserver deux rails distincts : un **diagnostic de pente** par compteur,
+source et intervalle explicitement épinglés, puis un **budget produit** sur le
+mur de bout en bout et le pic mémoire d'une taille cible. Le premier reste un
+rapport de benchmark tant que les familles, binaires et tailles ne sont pas
+stables ; ne pas ajouter maintenant un CTest volontairement rouge ni un code 3.
+Le second ne peut être extrapolé depuis `jung_cert_skip`.
+
+Concrètement, la garde de non-régression doit être indexée par
+`(famille, compteur payé, intervalle)` et comparer un même binaire produit
+hashé. La scorecard de recherche peut viser une borne supérieure de pente sous
+2 sans faire échouer CTest. Pour une pente de famille, employer au moins quatre
+tailles et cinq graines fixes, ajuster `log(Q)` sur `log(n)` par graine puis
+rapporter médiane, étendue et borne supérieure bootstrap appariée. Les SLO
+produit restent absolus : mur, RAM, SSD et octets de sortie à 50 k, pont réel
+résident-streamé à 1 M, puis contrats séparés 10 M `prefixe_k5` et complet. Un
+compteur de sortie ne doit jamais être soumis au plafond du travail payé.
+
+### V37 — fermer seulement la coupure aveugle
+
+La mesure rend injustifiable une règle du type « rejeter tout rectangle dont
+`Dmax >= 64` » : elle contient encore des candidats pré-RLE dans cette classe.
+Pour prouver un changement de l'objet canonique, il manque toutefois un mutant
+ON/OFF et l'inégalité de `digest_balls` ; un candidat brut peut être dupliqué.
+Elle ne réfute ni un certificat exact dépendant du rayon, ni un raffinement qui
+conserve toutes les paires. Inversement, zéro candidat observé sur un run
+`uniform` ne rend pas la coupure exacte sur cette famille.
+
+Les pourcentages cités sont `seeds` contrefactuels et candidats pré-RLE du
+probe, pas le travail résiduel du produit ni son objet final ; leurs sorties
+brutes ne sont pas versionnées. `Dmax=64` n'est en outre normalisé ni entre
+familles ni entre tailles. Une entrée de `PISTES_FERMEES.md` peut donc viser
+précisément la **coupure fixe aveugle par `Dmax`**, après fixture, sortie brute
+et mutant épinglés ; pas « toute coupe par rayon ».
+
+Le nouveau `plafond_test_rectangle` ne mesure pas un plafond. Les tests W,
+secteurs et grille sont suffisants mais non nécessaires ; un futur certificat
+peut tuer ce qu'ils laissent vivre, et le raffinement peut tuer les enfants
+d'un parent mixte. De plus, `alive` signifie post-histogramme en q3 mais
+post-W4 en q4, `killed` omet W4 et la grille, et `seeds`/`covers` suivent le
+rejeu contrefactuel. Renommer ce bloc en diagnostic après alignement du vrai
+flux, ou le retirer ; sa phrase « gain MAXIMAL » est fausse.
+
+### V38 — poser le modèle avant de demander du polylogarithmique
+
+Aucune construction v5 ne satisfait aujourd'hui la demande. Sans borne de
+prétraitement et d'espace, une table exhaustive rendrait artificiellement la
+requête constante : la question doit imposer au moins un prétraitement et un
+espace quasi linéaires. Le comptage
+universel courant est un minorant certifié, mais son parcours n'est pas
+polylogarithmique au pire cas ; les histogrammes sont ancre-spécifiques et leur
+précalcul n'est pas polylogarithmique non plus. Surtout, des ancres différentes
+peuvent être tuées par des ensembles de témoins différents : un certificat de
+témoins communs peut rester lâche alors que chaque test ponctuel tue.
+
+Ne pas qualifier cela de problème ouvert universel sans preuve bibliographique.
+La voie falsifiable immédiate est le raffinement post-séparation q3/q4 déjà
+décrit dans la question active : il resserre les boîtes, réutilise le certificat
+existant et s'abandonne si le temps et les visites payées ne baissent pas.
+
+### V39 — oui, dans le vrai flux produit
+
+Instrumenter avant de concevoir le chemin `terrain` est la bonne priorité.
+`3,14 - 1,41 = 1,73` est seulement la pente du quotient
+`jung_cert_skip/anchors_q4` sur le dernier intervalle, pas celle du coût complet
+par ancre. Réutiliser les compteurs existants et ajouter seulement les masses
+de boucle non reconstructibles : handles/requêtes, W/secteurs, constructions et
+visites de cover, grille, vrais tests de `x`, lentille, remplissage affine et
+puissance q4. Joindre `Dmax`, `D2`, population des handles et taille de cover ;
+les identités exactes à graver sont listées dans la question active.
+
+### V40 — oui au tuilage, non à la confusion géométrique
+
+Le backend courant n'affecte pas un rectangle à un bloc : q3 affecte un warp
+par seed et q4 un bloc par seed vivant. L'asymétrie observée concerne donc
+d'abord la formation hôte et tout futur ordonnanceur groupé par rectangle.
+
+Un tuilage de scheduling est sûr s'il partage seulement l'itération de
+`A x B`, tout en conservant le rectangle parent, son `core`, ses histogrammes,
+la sémantique de chaque ancre et un merge déterministe. Il répartit le travail
+mais n'en retire aucun. Un **sous-rectangle géométrique** qui recalcule boîtes,
+certificats ou histogrammes est une autre optimisation : elle est interdite en
+q2 par la contre-fixture `refine-hist-wakeup` et conditionnée en q3/q4 par les
+portes de conservation de la question active.
+
+### V41 — signal utile, descente non recevable telle quelle
+
+Le probe `57deaaa6` montre qu'un comptage universel sur des sous-produits peut
+certifier une masse non vacante de paires q3. Il ne prouve pas encore que la
+transformation proposée conserve le chemin produit, et trois phrases de son
+commentaire sont fausses :
+
+- `separated` n'est pas héréditaire : en 1D avec `s=8`, le parent
+  `A=[0,10], B=[50,60]` passe à égalité, tandis que l'enfant
+  `A'=[5,10], B=[50,60]` échoue. Construire les deux enfants, vérifier d'abord
+  leur séparation, puis seulement compter ; sinon réémettre le parent sans
+  effet. En revanche, le **nombre sémantique** de témoins universels est
+  monotone sur un sous-produit : tout témoin du parent reste valable et des
+  points du frère deviennent éligibles. Ne pas lui attribuer une régression au
+  seul motif que le centre bouge. Conserver néanmoins le minorant déjà prouvé
+  par `child.core = max(parent.core, fresh_core)`, jamais leur somme ;
+- `kMaxDepth=40` et une profondeur observée 11 ne sont pas la profondeur bornée
+  `L=0..3` proposée. Chaque `count_universal_witnesses` peut lui-même parcourir
+  l'arbre du nuage : le coût n'est donc pas borné par deux fois le nombre de
+  feuilles ou de paires ;
+- « objet inchangé » exige l'exclusion de q2, le ledger u128 des masses, le
+  multiensemble trié des candidats et les signatures complètes. Scinder B change
+  l'ordre brut ; ce n'est pas un défaut si la canonisation et toutes les sorties
+  restent identiques.
+
+Les `92,1 M` sites de cover et `20,6 M` seeds « évités » sont des proratas de
+compteurs contrefactuels. Les comparer aux `27,3 M` nœuds d'arbre ne donne pas
+un rapport de coût 3 pour 1 : les unités et prix par opération diffèrent, et le
+vrai routage requête/cover n'est pas rejoué. De même, le signal « 6,2 % des
+rectangles portent 73,1 % du travail » ne peut pas encore choisir une politique
+adaptative du produit.
+
+La ligne « 257 810 sous-rectangles engendrés, 1,49 par rectangle » compte aussi
+les 173 190 racines et `core_evals` les recompte toutes. Le run contient donc
+84 620 visites enfant, soit 42 310 scissions et 0,489 nouvel enfant visité par
+parent, non 1,49 sous-rectangle engendré. Enfin, le rejeu local reproduit les
+nombres mais le binaire imprime `pin_configure=0b3f3fd6`, faute de
+reconfiguration, et aucune commande/sortie brute n'est versionnée : la mesure
+n'est pas un reçu attribuable à `57deaaa6`.
+
+Action minimale : garder ce code comme sonde, mais remplacer sa descente 40 par
+les bras transactionnels `L=0/1/2/3`, graver les deux fixtures
+`refine-separated-not-hereditary` et `refine-sibling-witness`, puis mesurer dans
+le flux réel les paires retirées, visites de comptage ajoutées, visites de cover
+retirées et le mur. Le détail des portes et de la propagation aux chemins
+intégrés/batched/device est consolidé dans la question lane active.
+
+Le nouveau compteur `k=1` est seulement une borne sur les ancres de la
+population post-histogramme/post-W4 qui atteignent effectivement le test W. Il
+ne borne ni toute la masse de paires que le raffinement peut certifier avant ces
+filtres, ni un gain de temps ; son commentaire doit conserver cette restriction.
+
+## Question initiale de Claude — conservée comme trace
+
+Les claims et seuils ci-dessous sont la proposition auditée, pas l'état courant.
+Le verdict qui fait autorité est la réponse V36–V41 ci-dessus.
+
 L'utilisateur a reformulé l'objectif, et cette reformulation change tout :
 
 > « Un algorithme sous-quadratique n'est peut-être pas possible dans le pire
@@ -85,7 +299,7 @@ grandeur instrumentée $Q$ (ancres q3/q4, seeds q3/q4, complétions q4,
 évaluations Jung), l'exposant local entre deux tailles consécutives de
 $\lbrace 8000, 16000, 32000, 50000 \rbrace$ doit vérifier
 $e_{F,Q} \le e^{*}_{F}$, avec $e^{*}$ gravé par famille et **vérifié par une
-porte** qui refuse (code 3) si le plancher est franchi. Valeurs de départ
+porte** qui refuse (code 3) si le plafond est dépassé. Valeurs de départ
 proposées, choisies au-dessus des mesures actuelles sauf pour `terrain` :
 
 | famille | $e^{*}$ proposé | mesure actuelle |
