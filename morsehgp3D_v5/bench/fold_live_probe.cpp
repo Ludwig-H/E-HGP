@@ -2,6 +2,17 @@
 // resident/vivant en ordre miroir sur le meme endpoint, setup et
 // catalogue/rejeu inclus, avec temps par etape et RSS »).
 //
+// DEUX REGIMES, et il faut les distinguer (audit du 28 aout) :
+//   `--dump=<f>` puis `--from=<f>` : le MIROIR VRAI. La premiere invocation
+//     ecrit les evenements de l'ordre le plus gros ; les suivantes ne lancent
+//     AUCUN pipeline et n'executent qu'un seul reducteur — le pic de RSS est
+//     alors attribuable a ce reducteur et a lui seul.
+//   sans `--from` : un MICRO-BANC INCREMENTAL, et rien de plus. `run_pipeline`
+//     execute deja le fold RESIDENT avant le callback dans les DEUX bras ; le
+//     bras vivant ajoute ensuite un second reducteur. Les temps par etape y
+//     restent comparables (les deux reducteurs sont mesures au meme endroit,
+//     sur le meme etat prepare), mais le RSS n'y departage RIEN.
+//
 // Ce n'est pas une porte : c'est une MESURE, et elle est faite pour pouvoir
 // REFUTER l'idee que le reducteur vivant serait plus rapide ou plus leger de
 // bout en bout. Le perimetre est identique des deux cotes :
@@ -11,15 +22,15 @@
 //              si `--rejeu`, la reconstruction de la partition par les deltas
 //              (ce que le resident obtient gratuitement) — car sans elle les
 //              deux cotes ne rendent pas le meme objet.
-// Le RSS est le pic du PROCESSUS (`getrusage`), donc un majorant commun ; les
-// deux cotes sont joues dans deux processus separes (`--cote=resident` /
-// `--cote=vivant`) pour que ce pic soit attribuable. Un seul processus jouant
-// les deux ne pourrait pas les separer.
+// Le RSS est le pic du PROCESSUS (`getrusage`) ; les deux cotes sont joues
+// dans deux processus separes (`--cote=resident` / `--cote=vivant`). Cela ne
+// suffit a l'attribuer qu'en regime `--from`.
 //
 // Sortie : une ligne par ordre K et une ligne de total, en millisecondes.
 #include <sys/resource.h>
 
 #include <algorithm>
+#include <cstdio>
 #include <chrono>
 #include <cstdio>
 #include <cstdlib>
@@ -92,6 +103,7 @@ int main(int argc, char** argv) {
   int n = 8000, coord = 0, threads = 1;
   long long seed = 3;
   std::string side = "resident";
+  std::string dump, from;
   bool replay = false;
   RunOptions opt;
   for (int i = 1; i < argc; ++i) {
@@ -104,6 +116,8 @@ int main(int argc, char** argv) {
     else if (a.rfind("--threads=", 0) == 0) threads = std::atoi(a.c_str() + 10);
     else if (a.rfind("--smax=", 0) == 0) opt.smax = (u64)std::atoll(a.c_str() + 7);
     else if (a.rfind("--cote=", 0) == 0) side = a.substr(7);
+    else if (a.rfind("--dump=", 0) == 0) dump = a.substr(7);
+    else if (a.rfind("--from=", 0) == 0) from = a.substr(7);
     else if (a == "--rejeu") replay = true;
     else return 2;
   }
@@ -114,10 +128,12 @@ int main(int argc, char** argv) {
 
   double t_prepare = 0, t_reduce = 0, t_life = 0, t_replay = 0;
   u64 orders = 0, facets = 0, deltas = 0;
-  u64 peak_alias = 0, logical_bytes = 0, alloc_bytes = 0;
+  u64 peak_alias = 0, logical_bytes = 0, alloc_bytes = 0, map_bytes = 0;
   const long rss_before = rss_kb();
+  std::vector<ForestEvent> biggest;  // ordre le plus gros, pour `--dump`
 
-  opt.on_forest = [&](u64, const std::vector<ForestEvent>& events, const ForestResult&) {
+  // Un reducteur, un seul, sur un jeu d'evenements donne.
+  const auto measure = [&](const std::vector<ForestEvent>& events) {
     ++orders;
     const double t0 = now_ms();
     FoldPrepared fp = prepare_fold(events, threads);
@@ -128,27 +144,57 @@ int main(int argc, char** argv) {
       t_reduce += now_ms() - t1;
       facets += r.facets;
       deltas += r.deltas.size();
-    } else {
-      // Le cote vivant paie EN PLUS les durees de vie (mesurees a part : elles
-      // deviennent externes a L3) et, si demande, le rejeu qui lui rend la
-      // partition que le resident produit d'office.
-      const std::vector<FacetKey> keys = fp.keys;  // copie : le catalogue survit au reduce
-      LiveFoldStats st;
-      const double t2 = now_ms();
-      const ForestResult r = reduce_fold_live(std::move(fp), &st);
-      const double t3 = now_ms();
-      t_reduce += t3 - t2;
-      facets += r.facets;
-      deltas += r.deltas.size();
-      peak_alias = std::max(peak_alias, st.peak_aliases);
-      logical_bytes = std::max(logical_bytes, st.logical_live_bytes);
-      alloc_bytes = std::max(alloc_bytes, st.allocated_bytes);
-      if (replay) {
-        std::vector<u32> canon;
-        replay_partition(keys, r.deltas, &canon);
-        t_replay += now_ms() - t3;
-      }
+      return;
     }
+    // Le cote vivant paie EN PLUS les durees de vie (dans `reduce_fold_live`)
+    // et, si demande, le rejeu qui lui rend la partition que le resident
+    // produit d'office.
+    const std::vector<FacetKey> keys = fp.keys;  // le catalogue survit au reduce (necessaire au rejeu)
+    LiveFoldStats st;
+    const double t2 = now_ms();
+    const ForestResult r = reduce_fold_live(std::move(fp), &st);
+    const double t3 = now_ms();
+    t_reduce += t3 - t2;
+    facets += r.facets;
+    deltas += r.deltas.size();
+    peak_alias = std::max(peak_alias, st.peak_aliases);
+    logical_bytes = std::max(logical_bytes, st.logical_live_bytes);
+    alloc_bytes = std::max(alloc_bytes, st.persistent_bytes);
+    map_bytes = std::max(map_bytes, st.mapping_bytes);
+    if (replay) {
+      std::vector<u32> canon;
+      replay_partition(keys, r.deltas, &canon);
+      t_replay += now_ms() - t3;
+    }
+  };
+
+  // ---- MIROIR VRAI : aucun pipeline, un seul reducteur dans ce processus.
+  if (!from.empty()) {
+    std::FILE* f = std::fopen(from.c_str(), "rb");
+    if (!f) return 2;
+    u64 count = 0;
+    if (std::fread(&count, sizeof(u64), 1, f) != 1 || count > (u64)1e9) {
+      std::fclose(f);
+      return 2;
+    }
+    std::vector<ForestEvent> events((size_t)count);
+    const bool ok_read = count == 0 || std::fread(events.data(), sizeof(ForestEvent), (size_t)count, f) == (size_t)count;
+    std::fclose(f);
+    if (!ok_read) return 2;
+    measure(events);
+    std::printf(
+        "fold_live_probe regime=miroir cote=%s evenements=%llu ordres=%llu facettes=%llu deltas=%llu "
+        "preparation_ms=%.1f reduction_ms=%.1f rejeu_ms=%.1f total_fold_ms=%.1f "
+        "pic_alias=%llu octets_logiques=%llu octets_persistants=%llu octets_mapping=%llu rss_max_kb=%ld rss_avant_kb=%ld\n",
+        side.c_str(), (unsigned long long)count, (unsigned long long)orders, (unsigned long long)facets, (unsigned long long)deltas, t_prepare,
+        t_reduce, t_replay, t_prepare + t_reduce + t_replay, (unsigned long long)peak_alias, (unsigned long long)logical_bytes,
+        (unsigned long long)alloc_bytes, (unsigned long long)map_bytes, rss_kb(), rss_before);
+    return 0;
+  }
+
+  opt.on_forest = [&](u64, const std::vector<ForestEvent>& events, const ForestResult&) {
+    if (!dump.empty() && events.size() > biggest.size()) biggest = events;
+    measure(events);
   };
   const std::vector<InputPoint> in = make_family_input(family, n, coord, seed);
   const RunResult rr = run_pipeline(in, opt);
@@ -156,14 +202,25 @@ int main(int argc, char** argv) {
     std::fprintf(stderr, "REFUS %s\n", rr.message.c_str());
     return status_exit_code(rr.status);
   }
+  if (!dump.empty()) {
+    std::FILE* f = std::fopen(dump.c_str(), "wb");
+    if (!f) return 2;
+    const u64 count = (u64)biggest.size();
+    const bool ok_w = std::fwrite(&count, sizeof(u64), 1, f) == 1 &&
+                      (count == 0 || std::fwrite(biggest.data(), sizeof(ForestEvent), biggest.size(), f) == biggest.size());
+    std::fclose(f);
+    if (!ok_w) return 3;
+    std::printf("fold_live_probe dump=%s evenements=%llu octets=%llu\n", dump.c_str(), (unsigned long long)count,
+                (unsigned long long)(count * sizeof(ForestEvent) + sizeof(u64)));
+  }
   std::printf(
-      "fold_live_probe cote=%s famille=%s n=%d fils=%d ordres=%llu facettes=%llu deltas=%llu "
+      "fold_live_probe regime=micro_banc_incremental cote=%s famille=%s n=%d fils=%d ordres=%llu facettes=%llu deltas=%llu "
       "preparation_ms=%.1f reduction_ms=%.1f durees_de_vie_incluses=%s rejeu_ms=%.1f total_fold_ms=%.1f "
-      "pic_alias=%llu octets_logiques=%llu octets_alloues=%llu rss_max_kb=%ld rss_avant_kb=%ld\n",
+      "pic_alias=%llu octets_logiques=%llu octets_persistants=%llu octets_mapping=%llu rss_max_kb=%ld rss_avant_kb=%ld\n",
       side.c_str(), cloud_family_name(family), n, threads, (unsigned long long)orders, (unsigned long long)facets,
       (unsigned long long)deltas, t_prepare, t_reduce, side == "vivant" ? "oui" : "sans objet", t_replay,
       t_prepare + t_reduce + t_replay, (unsigned long long)peak_alias, (unsigned long long)logical_bytes,
-      (unsigned long long)alloc_bytes, rss_kb(), rss_before);
+      (unsigned long long)alloc_bytes, (unsigned long long)map_bytes, rss_kb(), rss_before);
   (void)t_life;
   return 0;
 }

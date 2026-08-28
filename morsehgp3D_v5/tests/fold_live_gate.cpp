@@ -43,8 +43,31 @@ u64 g_big_orders = 0;   // ordres assez gros pour porter une fraction de residen
 double g_worst_ratio = 0;  // pire fraction pic_alias / facettes sur ces ordres
 u64 g_wr_alias = 0, g_wr_comp = 0, g_wr_facets = 0;  // le temoin de CE pire ratio (jamais melange avec le pic absolu)
 u64 g_big_min = 100000;
-u64 g_moves_max = 0, g_life = 0, g_struct = 0, g_final = 0, g_scans = 0, g_alloc_bytes = 0;
+u64 g_moves_max = 0, g_life = 0, g_struct = 0, g_final = 0, g_scans = 0, g_slot_over = 0;
+u64 g_pers_bytes = 0, g_map_bytes = 0, g_scratch_bytes = 0, g_input_bytes = 0, g_output_bytes = 0;
 bool g_kill = false;  // un mutant est deja mort : la porte sort sans jouer la suite
+
+std::string key_str(const FacetKey& f) {
+  std::string s = "{";
+  for (u8 i = 0; i < f.k; ++i) {
+    if (i) s += ",";
+    s += std::to_string((unsigned long long)f.p[i]);
+  }
+  return s + "}";
+}
+
+// Rendu LITTERAL des deltas, dans l'ordre : c'est ce que les fixtures gravent.
+std::string render_deltas(const ForestResult& r) {
+  std::string s;
+  for (const ComponentDelta& d : r.deltas) {
+    s += "b=" + std::to_string((unsigned long long)d.batch) + " out=" + key_str(d.output) + " par=[";
+    for (size_t i = 0; i < d.parents.size(); ++i) s += (i ? "," : "") + key_str(d.parents[i]);
+    s += "] born=[";
+    for (size_t i = 0; i < d.born.size(); ++i) s += (i ? "," : "") + key_str(d.born[i]);
+    s += "]\n";
+  }
+  return s;
+}
 
 u64 log2_ceil(u64 x) {
   u64 l = 0;
@@ -127,7 +150,12 @@ void compare_order(u64 K, const std::vector<ForestEvent>& events, const ForestRe
   g_struct += st.structure_violations;
   g_final += st.final_nonempty;
   g_scans += st.structure_scans;
-  g_alloc_bytes = std::max(g_alloc_bytes, st.allocated_bytes);
+  g_slot_over += st.slot_overflows + st.slot_partition_violations;
+  g_pers_bytes = std::max(g_pers_bytes, st.persistent_bytes);
+  g_map_bytes = std::max(g_map_bytes, st.mapping_bytes);
+  g_scratch_bytes = std::max(g_scratch_bytes, st.scratch_bytes);
+  g_input_bytes = std::max(g_input_bytes, st.input_bytes);
+  g_output_bytes = std::max(g_output_bytes, st.output_bytes);
   if (st.peak_aliases > g_peak_alias) {
     g_peak_alias = st.peak_aliases;
     g_peak_comp = st.peak_components;
@@ -162,6 +190,12 @@ void compare_order(u64 K, const std::vector<ForestEvent>& events, const ForestRe
   if (liv.attach_violations != res.attach_violations || liv.birth_violations != res.birth_violations) ++bad;
   if (st.peak_components > st.peak_aliases || st.peak_aliases > st.peak_live_exact) ++bad;
   if (st.life_violations || st.structure_violations || st.final_nonempty) ++bad;
+  // CRENEAUX (audit du 28 aout) : `slots == peak_live_exact` serait
+  // tautologique (le premier est affecte depuis le second). Ce qui se verifie
+  // est que le coloriage ATTEINT le pic sans jamais le depasser, et que la
+  // partition creneaux libres + creneaux vivants tient a chaque frontiere.
+  if (st.slot_overflows || st.slot_partition_violations) ++bad;
+  if (st.peak_aliases != st.peak_live_exact) ++bad;
   // (4) rejeu T5 des deltas du VIVANT contre la partition du resident.
   if (!bad) {
     const u64 diff = replay_partition(res.facet_keys, liv.deltas, res.final_canon_fid);
@@ -220,6 +254,62 @@ void synthetic_cases(u64 n_chain, u64* worst_moves, u64* over_ceiling, u64* mism
          return e;
        }()},
   };
+  // FIXTURES DE FRONTIERE (audit du 28 aout) : la convention PREMIERE/DERNIERE
+  // se lit sur deux cas litteraux de quatre facettes.
+  //   (a) deux evenements K=1 DISJOINTS au MEME niveau : un seul lot, les
+  //       quatre facettes naissent et meurent ensemble -> pic = creneaux = 4 ;
+  //   (b) les MEMES evenements a deux niveaux successifs : deux lots, quatre
+  //       facettes au total mais jamais plus de deux vivantes -> pic =
+  //       creneaux = 2, les creneaux n'etant reutilises QU'APRES l'emission
+  //       du premier lot.
+  {
+    const struct {
+      const char* name;
+      std::vector<ForestEvent> e;
+      u64 facets, peak, batches;
+      const char* deltas;
+    } edge[] = {{"frontiere_meme_niveau",
+                 {ev1(0, 1, 0, 5), ev1(2, 3, 0, 5)},
+                 4,
+                 4,
+                 1,
+                 "b=0 out={0} par=[] born=[{0},{1}]\nb=0 out={2} par=[] born=[{2},{3}]\n"},
+                {"frontiere_niveaux_successifs",
+                 {ev1(0, 1, 0, 5), ev1(2, 3, 0, 6)},
+                 4,
+                 2,
+                 2,
+                 "b=0 out={0} par=[] born=[{0},{1}]\nb=1 out={2} par=[] born=[{2},{3}]\n"}};
+    const bool m_slot = MHGP5_MUTANT("slot-cap-minus-one");
+    for (const auto& c : edge) {
+      LiveFoldStats st;
+      const ForestResult res = build_forest(c.e, 1);
+      const ForestResult liv = reduce_fold_live(prepare_fold(c.e, 1), &st);
+      bool ok;
+      if (m_slot) {
+        // MUTANT DE CAPACITE : ce qui est exige n'est pas un desaccord
+        // generique mais le REFUS exact — prefixe `resource_exhausted`, les
+        // DEUX sorties vides, et exactement un debordement compte.
+        ok = liv.refusal.rfind("resource_exhausted", 0) == 0 && liv.deltas.empty() && liv.batch_levels.empty() && st.slot_overflows == 1;
+        std::printf("fold_live_frontiere %s (capacite -1) refus=\"%s\" deltas=%zu lots=%zu debordements=%llu -> %s\n", c.name,
+                    liv.refusal.substr(0, 18).c_str(), liv.deltas.size(), liv.batch_levels.size(), (unsigned long long)st.slot_overflows,
+                    ok ? "refus conforme" : "REFUS NON CONFORME");
+        if (!ok) ++*mismatches;
+        continue;
+      }
+      ok = res.facets == c.facets && st.facets == c.facets && st.peak_live_exact == c.peak && st.peak_aliases == c.peak && st.slots == c.peak &&
+           st.slot_overflows == 0 && st.slot_partition_violations == 0 && liv.batches == res.batches && liv.batch_levels == res.batch_levels &&
+           render_deltas(liv) == c.deltas && render_deltas(res) == c.deltas;
+      std::printf("fold_live_frontiere %s facettes=%llu (attendu %llu) pic=%llu creneaux=%llu (attendu %llu) lots=%llu (attendu %llu) deltas graves -> %s\n",
+                  c.name, (unsigned long long)st.facets, (unsigned long long)c.facets, (unsigned long long)st.peak_aliases,
+                  (unsigned long long)st.slots, (unsigned long long)c.peak, (unsigned long long)liv.batches, (unsigned long long)c.batches,
+                  ok ? "ok" : "DESACCORD");
+      if (!ok) {
+        std::printf("--- obtenu ---\n%s--- attendu ---\n%s", render_deltas(liv).c_str(), c.deltas);
+        ++*mismatches;
+      }
+    }
+  }
   for (const auto& c : cases) {
     LiveFoldStats st;
     const ForestResult res = build_forest(c.e, 1);
@@ -230,7 +320,7 @@ void synthetic_cases(u64 n_chain, u64* worst_moves, u64* over_ceiling, u64* mism
     else
       for (size_t i = 0; i < liv.deltas.size(); ++i)
         if (!delta_equal(liv.deltas[i], res.deltas[i])) ++bad;
-    if (st.life_violations || st.structure_violations || st.final_nonempty) ++bad;
+    if (st.life_violations || st.structure_violations || st.final_nonempty || st.slot_overflows || st.slot_partition_violations) ++bad;
     if (!bad && replay_partition(res.facet_keys, liv.deltas, res.final_canon_fid)) ++bad;
     if (st.max_moves_per_alias > per_alias) *over_ceiling += st.max_moves_per_alias - per_alias;
     if (st.relocations > (u64)res.facets * per_alias) *over_ceiling += st.relocations - (u64)res.facets * per_alias;
@@ -260,7 +350,7 @@ int main(int argc, char** argv) {
   // divergent de la sortie residente ; `physical-root-is-logical-root` ne
   // change pas la sortie mais depasse le plafond de relocalisations.
   const bool m_out = MHGP5_MUTANT("free-on-absorb") || MHGP5_MUTANT("root-key-mutable") || MHGP5_MUTANT("canon-not-min-on-union") ||
-                     MHGP5_MUTANT("last-mark-shifted");
+                     MHGP5_MUTANT("last-mark-shifted") || MHGP5_MUTANT("slot-cap-minus-one");
   const bool m_cost = MHGP5_MUTANT("physical-root-is-logical-root");
   // ---- Cas SYNTHETIQUES adverses d'abord : un mutant y meurt sans payer les nuages.
   u64 syn_moves = 0, syn_over = 0, syn_bad = 0;
@@ -307,16 +397,25 @@ int main(int argc, char** argv) {
   // les octets residents sont les deux champs par facette du fold resident
   // (`FidState` 32 o + `final_canon_fid` 4 o) — ce rapport est une ESTIMATION
   // de structures choisies, jamais un gain de RSS mesure.
-  std::printf("fold_live_pic_absolu pic_alias=%llu pic_composantes=%llu pic_vie_exact=%llu facettes_de_l_ordre=%llu fraction=%.2f %% octets_logiques=%llu octets_alloues=%llu octets_resident_estimes=%llu\n",
+  std::printf("fold_live_pic_absolu pic_alias=%llu pic_composantes=%llu pic_vie_exact=%llu facettes_de_l_ordre=%llu fraction=%.2f %% octets_logiques=%llu octets_resident_estimes=%llu\n",
               (unsigned long long)g_peak_alias, (unsigned long long)g_peak_comp, (unsigned long long)g_peak_live, (unsigned long long)g_facets_at_peak,
               g_facets_at_peak ? 100.0 * (double)g_peak_alias / (double)g_facets_at_peak : 0.0, (unsigned long long)g_live_bytes,
-              (unsigned long long)g_alloc_bytes, (unsigned long long)g_res_bytes);
+              (unsigned long long)g_res_bytes);
+  // TROIS POSTES SEPARES : seul le PERSISTANT est borne par le vivant ; le
+  // MAPPING reste O(facettes) et ne partira qu'avec le flux de L3.
+  // CINQ POSTES SEPARES, jamais une somme : seul le PERSISTANT est borne par
+  // le pic ; le mapping est O(facettes) et l'entree O(facettes + incidences),
+  // donc le L2 complet est O(facettes + incidences) — ce sont des capacites de
+  // conteneurs, pas une comptabilite d'allocateur.
+  std::printf("fold_live_octets persistant=%llu mapping=%llu entree=%llu scratch=%llu sortie=%llu (persistant borne par le pic ; mapping O(F) ; entree O(F+I) : le L2 complet est O(F+I))\n",
+              (unsigned long long)g_pers_bytes, (unsigned long long)g_map_bytes, (unsigned long long)g_input_bytes,
+              (unsigned long long)g_scratch_bytes, (unsigned long long)g_output_bytes);
   std::printf("fold_live_pire_ratio fraction=%.2f %% pic_alias=%llu pic_composantes=%llu facettes_de_l_ordre=%llu ordres_mesures=%llu (facettes >= %llu)\n",
               100.0 * g_worst_ratio, (unsigned long long)g_wr_alias, (unsigned long long)g_wr_comp, (unsigned long long)g_wr_facets,
               (unsigned long long)g_big_orders, (unsigned long long)g_big_min);
-  std::printf("fold_live_structure deplacements_max_par_alias=%llu vie_par_lot=%llu structure=%llu vacuite_finale=%llu balayages=%llu\n",
+  std::printf("fold_live_structure deplacements_max_par_alias=%llu vie_par_lot=%llu structure=%llu vacuite_finale=%llu balayages=%llu debordements_creneaux=%llu\n",
               (unsigned long long)g_moves_max, (unsigned long long)g_life, (unsigned long long)g_struct, (unsigned long long)g_final,
-              (unsigned long long)g_scans);
+              (unsigned long long)g_scans, (unsigned long long)g_slot_over);
   if (m_cost) {
     if (g_reloc_max) return 4;
     std::printf("MUTANT DE COUT NON TUE (plafond de relocalisations jamais depasse)\n");
@@ -335,7 +434,7 @@ int main(int argc, char** argv) {
     std::printf("PLAFOND DE RELOCALISATIONS DEPASSE de %llu\n", (unsigned long long)g_reloc_max);
     return 3;
   }
-  if (g_mism || g_inv || g_life || g_struct || g_final) return 1;
+  if (g_mism || g_inv || g_life || g_struct || g_final || g_slot_over) return 1;
   std::printf("fold_live_gate OK\n");
   return 0;
 }

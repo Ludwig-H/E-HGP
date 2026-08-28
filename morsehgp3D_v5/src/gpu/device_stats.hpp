@@ -47,12 +47,22 @@ struct DeviceExecutorStats {
   u64 h2d_bytes = 0, d2h_bytes = 0;
   u64 lots = 0, launches = 0;
   u32 peak_concurrent = 0;
+  // PREUVE DE BRANCHE du wire G1 (audit du 28 aout, reception « branche ») :
+  // imprimer le wire DEMANDE ne prouve pas le wire EXECUTE. Chaque scan
+  // incremente exactement un des deux compteurs et n'ajoute des octets qu'a
+  // la categorie qu'il a reellement televersee ; en wire index la porte exige
+  // `index_lots == lots > 0`, `soa_lots == 0` et `site_soa_bytes == 0` (et
+  // l'inverse en SoA). Un mutant qui retomberait sur SoA garderait verdicts
+  // et digests verts mais serait vu ici.
+  u64 index_lots = 0, soa_lots = 0;
+  u64 site_index_bytes = 0, site_soa_bytes = 0;
   void add(const DeviceExecutorStats& o) {
     h2d_ms += o.h2d_ms; k1_ms += o.k1_ms; d2h1_ms += o.d2h1_ms; h2d2_ms += o.h2d2_ms; k2_ms += o.k2_ms; d2h2_ms += o.d2h2_ms;
     h2d3_ms += o.h2d3_ms; k3_ms += o.k3_ms; d2h3_ms += o.d2h3_ms;
     reserve_ms += o.reserve_ms; issue_ms += o.issue_ms; wait_ms += o.wait_ms; host1_ms += o.host1_ms; host2_ms += o.host2_ms; host3_ms += o.host3_ms;
     executor_ms_sum += o.executor_ms_sum;
     h2d_bytes += o.h2d_bytes; d2h_bytes += o.d2h_bytes; lots += o.lots; launches += o.launches;
+    index_lots += o.index_lots; soa_lots += o.soa_lots; site_index_bytes += o.site_index_bytes; site_soa_bytes += o.site_soa_bytes;
     if (o.peak_concurrent > peak_concurrent) peak_concurrent = o.peak_concurrent;
   }
   double kernel_ms() const { return k1_ms + k2_ms + k3_ms; }  // kernels seuls (homogene q3/q4)

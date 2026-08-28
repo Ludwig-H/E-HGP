@@ -33,10 +33,27 @@
 // porte de rejeu (tests/delta_replay_gate.cpp, tests/fold_live_gate.cpp) les
 // reconstruit — c'est la seule autorite d'egalite avec le resident.
 //
-// Les durees de vie (PREMIERE / DERNIERE par facette) sont ici calculees en
-// RAM depuis `FoldPrepared` : a L2 c'est le sujet, pas la revendication ; a
-// L3 elles viennent du tri externe des cles completes (ECHELLE § 4.2) et
-// arrivent avec chaque occurrence.
+// CRENEAUX PLUTOT QU'UNE TABLE (28 aout, apres mesure) : une premiere version
+// retrouvait l'alias d'une facette par une table de hachage `fid -> alias`
+// avec suppression a la mort. La sonde miroir (bench/fold_live_probe.cpp) l'a
+// mesuree 1,9 a 3,5 fois plus lente que le fold resident, qui indexe un
+// tableau plat. Les durees de vie forment un GRAPHE D'INTERVALLES : un
+// coloriage glouton (pile de creneaux libres) en utilise exactement le nombre
+// maximal d'intervalles simultanes, c'est-a-dire le pic exact deja calcule.
+// Chaque facette vivante recoit donc un CRENEAU dans [0, pic), l'etat est un
+// tableau PLAT de `pic` alias reutilises en place — plus de sondage, plus de
+// suppression par decalage, plus de liste libre d'alias — et le creneau est
+// exactement ce que le wire de L3 portera avec chaque occurrence
+// (`FacetOccurrenceWire` — une structure PROPOSEE dans docs/ECHELLE.md, pas
+// encore enregistree), ce qui retirerait aussi les derniers tableaux indexes
+// par facette. En attendant, `free_slots` est bien une LISTE LIBRE (une pile
+// de creneaux rendus), et L2 reste O(facettes) en memoire par ses tables
+// `firstb`, `lastb` et `fid -> creneau`.
+//
+// Les durees de vie (PREMIERE / DERNIERE par facette) et la table
+// `fid -> creneau` sont ici en RAM depuis `FoldPrepared` : a L2 c'est le
+// sujet, pas la revendication ; a L3 elles viennent du tri externe des cles
+// completes (ECHELLE § 4.2) et arrivent avec chaque occurrence.
 #pragma once
 
 #include <algorithm>
@@ -53,7 +70,9 @@ struct LiveFoldStats {
   u64 peak_aliases = 0;          // pic d'alias vivants (dans un lot, apres les creations)
   u64 peak_components = 0;       // pic de composantes vivantes
   u64 peak_live_exact = 0;       // pic exact des durees de vie : live += nees[b] ; pic ; live -= mortes[b]
-  u64 peak_index_slots = 0;      // pic de cases de la table fid -> alias
+  u64 slots = 0;                 // creneaux alloues (= pic exact hors mutant de capacite)
+  u64 slot_overflows = 0;        // demandes de creneau au-dela du pic : provoque un REFUS controle, jamais un acces sentinelle
+  u64 slot_partition_violations = 0;  // frontieres ou creneaux libres + creneaux vivants != creneaux alloues
   u64 relocations = 0;           // alias deplaces par les unions (small-to-large)
   u64 max_moves_per_alias = 0;   // deplacements du PIRE alias (borne small-to-large : <= ceil(log2 facettes))
   u64 comps_freed = 0;           // composantes liberees faute d'alias
@@ -63,10 +82,21 @@ struct LiveFoldStats {
   u64 final_nonempty = 0;        // 1 si l'etat n'est pas VIDE apres le dernier lot
   u64 structure_scans = 0;       // balayages structurels effectues
   // DEUX metriques d'octets, jamais melangees (audit du 28 aout) :
-  u64 logical_live_bytes = 0;    // etat LOGIQUEMENT vivant au pic : alias + composantes vivants + cases de la table
-  u64 allocated_bytes = 0;       // memoire REELLEMENT tenue par le reducteur au pic : capacites des arenes,
-                                 // listes libres et table ; exclut encore `firstb`/`lastb`, `keys` et `ev_fid`,
-                                 // qui appartiennent a la preparation et deviennent externes a L3.
+  u64 logical_live_bytes = 0;    // etat LOGIQUEMENT vivant au pic : alias + composantes vivants
+  // TROIS POSTES SEPARES (audit du 28 aout : une metrique unique melangeait
+  // des choses de natures differentes et laissait croire a un etat borne) :
+  u64 persistent_bytes = 0;      // ETAT PERSISTANT, seul poste borne par le pic : tableau plat des creneaux,
+                                 // arene des composantes, listes libres, marquage du balayage ;
+  u64 mapping_bytes = 0;         // MAPPING O(facettes) : `firstb`, `lastb`, `fid -> creneau` — c'est ce que
+                                 // seul le flux de L3 pourrait retirer ;
+  u64 input_bytes = 0;           // PREPARATION ET ENTREE : `keys`, `ev_fid`, evenements, ordre, lots de
+                                 // `FoldPrepared` — O(facettes + incidences), ni mapping ni scratch ;
+  u64 scratch_bytes = 0;         // SCRATCH du plus gros lot : touches, gels, post-liste, alias par emplacement,
+                                 // deltas de travail ET les capacites de leurs vecteurs, comptes par lot ;
+  u64 output_bytes = 0;          // SORTIE : `r.deltas` et les capacites de leurs vecteurs.
+                                 // Aucun de ces postes n'est une somme allocator-precise : ce sont des
+                                 // capacites de conteneurs, publiees separement pour ne rien promettre de plus.
+                                 // Le L2 complet, entree et sortie comprises, est O(facettes + incidences).
 };
 
 namespace live_detail {
@@ -74,88 +104,6 @@ namespace live_detail {
 inline constexpr u32 kNil = UINT32_MAX;
 // Cadence maximale des balayages structurels (chacun coute O(vivant)).
 inline constexpr size_t kStructureScans = 64;
-
-inline u64 mix_fid(u32 f) {
-  u64 x = (u64)f * 0x9E3779B97F4A7C15ull;
-  x ^= x >> 29;
-  x *= 0xBF58476D1CE4E5B9ull;
-  x ^= x >> 32;
-  return x;
-}
-
-// TABLE fid -> alias en adressage ouvert LINEAIRE, avec suppression par
-// DECALAGE ARRIERE (Knuth 6.4 R) : aucune pierre tombale, donc la table ne se
-// degrade pas quand les facettes meurent et sa taille suit le vivant, pas le
-// cumul. La croissance double et rehache les seules entrees vivantes.
-struct LiveIndex {
-  std::vector<u32> key_, val_;
-  size_t mask_ = 0, used_ = 0;
-
-  void init(size_t cap) {
-    size_t n = 16;
-    while (n < cap * 2) n <<= 1;
-    key_.assign(n, kNil);
-    val_.assign(n, 0);
-    mask_ = n - 1;
-    used_ = 0;
-  }
-  size_t home(u32 fid) const { return (size_t)(mix_fid(fid) & (u64)mask_); }
-  u32 get(u32 fid) const {
-    for (size_t i = home(fid);; i = (i + 1) & mask_) {
-      if (key_[i] == kNil) return kNil;
-      if (key_[i] == fid) return val_[i];
-    }
-  }
-  void put(u32 fid, u32 a) {
-    if ((used_ + 1) * 2 > key_.size()) grow();
-    for (size_t i = home(fid);; i = (i + 1) & mask_) {
-      if (key_[i] == kNil) {
-        key_[i] = fid;
-        val_[i] = a;
-        ++used_;
-        return;
-      }
-      if (key_[i] == fid) {
-        val_[i] = a;
-        return;
-      }
-    }
-  }
-  void erase(u32 fid) {
-    size_t i = home(fid);
-    for (;; i = (i + 1) & mask_) {
-      if (key_[i] == kNil) return;
-      if (key_[i] == fid) break;
-    }
-    key_[i] = kNil;
-    --used_;
-    for (size_t j = (i + 1) & mask_;; j = (j + 1) & mask_) {
-      if (key_[j] == kNil) return;
-      const size_t h = home(key_[j]);
-      // La case j peut remonter en i si son domicile h n'est PAS cycliquement dans (i, j].
-      if (((j - h) & mask_) >= ((j - i) & mask_)) {
-        key_[i] = key_[j];
-        val_[i] = val_[j];
-        key_[j] = kNil;
-        i = j;
-      }
-    }
-  }
-  void grow() {
-    std::vector<u32> ok, ov;
-    ok.swap(key_);
-    ov.swap(val_);
-    const size_t n = ok.size() * 2;
-    key_.assign(n, kNil);
-    val_.assign(n, 0);
-    mask_ = n - 1;
-    used_ = 0;
-    for (size_t i = 0; i < ok.size(); ++i)
-      if (ok[i] != kNil) put(ok[i], ov[i]);
-  }
-  size_t slots() const { return key_.size(); }
-  size_t bytes() const { return key_.size() * sizeof(u32) * 2; }
-};
 
 // Un ALIAS par facette encore reutilisable : sa cle (le reducteur n'a donc
 // pas besoin du catalogue), sa composante, ses liens intrusifs, son lot de
@@ -212,6 +160,9 @@ inline ForestResult reduce_fold_live(FoldPrepared&& fp, LiveFoldStats* out_stats
   const size_t nfid = keys.size();
   const size_t nb = batches.size();
   r.facets = nfid;
+  // PREPARATION ET ENTREE : ce que le reducteur RECOIT et ne libere pas.
+  stats.input_bytes = (u64)(keys.capacity() * sizeof(FacetKey) + ev_fid.capacity() * sizeof(u32) + events.capacity() * sizeof(ForestEvent) +
+                            order.capacity() * sizeof(u32) + batches.capacity() * sizeof(std::pair<size_t, size_t>));
 
   // ---- DUREES DE VIE (a L3 : le tri externe des cles completes ; ici : deux
   // tableaux u32 par facette, hors de la revendication de residence).
@@ -247,23 +198,24 @@ inline ForestResult reduce_fold_live(FoldPrepared&& fp, LiveFoldStats* out_stats
     }
   }
 
-  // ---- ARENES (listes libres : la memoire des morts sert aux naissantes).
-  std::vector<Alias> av;
+  // ---- ETAT VIVANT : un TABLEAU PLAT de `pic` alias, un CRENEAU par facette
+  // vivante (coloriage glouton d'un graphe d'intervalles : le nombre de
+  // couleurs necessaires EST le nombre maximal d'intervalles simultanes, donc
+  // le pic exact). `slot_of_fid` est la seule table indexee par facette qui
+  // reste ici ; a L3 le creneau arrive avec l'occurrence et elle disparait.
+  // MUTANT `slot-cap-minus-one` : un creneau de moins que le pic. Le
+  // reducteur doit alors REFUSER proprement (statut, message) et ne jamais
+  // toucher une sentinelle.
+  size_t nslots = (size_t)stats.peak_live_exact;
+  if (MHGP5_MUTANT("slot-cap-minus-one") && nslots > 0) --nslots;
+  std::vector<Alias> av(nslots);
+  std::vector<u32> free_slots(nslots);
+  for (size_t i = 0; i < nslots; ++i) free_slots[i] = (u32)(nslots - 1 - i);  // creneaux rendus dans l'ordre croissant
+  std::vector<u32> slot_of_fid(nfid, kNil);
   std::vector<Component> cv;
-  std::vector<u32> afree, cfree;
-  LiveIndex idx;
-  idx.init(64);
+  std::vector<u32> cfree;
+  stats.slots = nslots;
   u64 live_alias = 0, live_comp = 0;
-  const auto alloc_alias = [&]() -> u32 {
-    if (!afree.empty()) {
-      const u32 a = afree.back();
-      afree.pop_back();
-      av[a] = Alias{};
-      return a;
-    }
-    av.emplace_back();
-    return (u32)(av.size() - 1);
-  };
   const auto alloc_comp = [&]() -> u32 {
     if (!cfree.empty()) {
       const u32 c = cfree.back();
@@ -276,6 +228,13 @@ inline ForestResult reduce_fold_live(FoldPrepared&& fp, LiveFoldStats* out_stats
   };
 
   std::vector<u32> touched;
+  std::vector<u8> slot_mark;  // balayage structurel : 1 libre, 2 vivant (jamais les deux, jamais aucun)
+  // ALIAS PAR EMPLACEMENT du lot : la passe de roles connait deja l'alias de
+  // chaque (evenement, slot) ; le memoriser evite un SECOND sondage de la
+  // table par site dans la passe d'unions. Mesure du 28 aout : le reducteur
+  // vivant etait 1,9 a 3,5 fois plus lent que le resident, dont une part
+  // vient de ces sondages a acces aleatoire.
+  std::vector<u32> slot_alias;
   struct PreFreeze {
     u32 rep_alias;
     FacetKey pre_canon_key;
@@ -348,9 +307,15 @@ inline ForestResult reduce_fold_live(FoldPrepared&& fp, LiveFoldStats* out_stats
     touched.clear();
     constexpr u8 kActive = 1, kAttach = 2;
     const auto touch = [&](u32 fid, u8 bit) -> u32 {
-      u32 a = idx.get(fid);
-      if (a == kNil) {  // PREMIERE incidence : alias et composante singleton
-        a = alloc_alias();
+      u32 a = slot_of_fid[fid];
+      if (a == kNil) {  // PREMIERE incidence : creneau, alias et composante singleton
+        if (free_slots.empty()) {  // impossible si le pic est exact : compte, jamais suppose
+          ++stats.slot_overflows;
+          return kNil;  // le lot est abandonne AVANT tout usage de cette valeur (refus controle)
+        }
+        a = free_slots.back();
+        free_slots.pop_back();
+        av[a] = Alias{};
         Alias& al = av[a];
         al.key = keys[fid];
         al.fid = fid;
@@ -363,7 +328,7 @@ inline ForestResult reduce_fold_live(FoldPrepared&& fp, LiveFoldStats* out_stats
         cv[c].count = 1;
         cv[c].mass = 1;
         al.comp = c;
-        idx.put(fid, a);
+        slot_of_fid[fid] = a;
         ++live_alias;
         ++live_comp;
         ++stats.facets;
@@ -377,18 +342,42 @@ inline ForestResult reduce_fold_live(FoldPrepared&& fp, LiveFoldStats* out_stats
       al.role_bits |= bit;
       return a;
     };
+    // Toutes les cases LUES sont ecrites juste apres : inutile de repeindre
+    // onze cases par evenement (ablation demandee par l'audit).
+    if (slot_alias.size() < (e1 - e0) * 11) slot_alias.resize((e1 - e0) * 11, kNil);
     for (size_t e = e0; e < e1; ++e) {
       const ForestEvent& ev = evt(e);
-      for (int s = 0; s < (int)ev.q; ++s) touch(ev_fid[e * 11 + (size_t)s], ((ev.active_mask >> s) & 1u) ? kActive : kAttach);
-      for (int z = 0; z < (int)ev.d; ++z) touch(ev_fid[e * 11 + (size_t)(ev.q + z)], kAttach);
+      u32* sa = &slot_alias[(e - e0) * 11];
+      for (int s = 0; s < (int)ev.q; ++s) sa[s] = touch(ev_fid[e * 11 + (size_t)s], ((ev.active_mask >> s) & 1u) ? kActive : kAttach);
+      for (int z = 0; z < (int)ev.d; ++z) sa[(size_t)ev.q + (size_t)z] = touch(ev_fid[e * 11 + (size_t)(ev.q + z)], kAttach);
+    }
+    if (stats.slot_overflows) {  // REFUS CONTROLE : rien n'est lu de la sentinelle, rien n'est publie
+      r.refusal = "resource_exhausted : creneaux vivants insuffisants (" + std::to_string(nslots) + " alloues, pic exact " +
+                  std::to_string(stats.peak_live_exact) + ")";
+      r.deltas.clear();
+      r.batch_levels.clear();
+      if (out_stats) *out_stats = stats;
+      return r;
     }
     stats.peak_aliases = std::max(stats.peak_aliases, live_alias);
     stats.peak_components = std::max(stats.peak_components, live_comp);
-    stats.peak_index_slots = std::max(stats.peak_index_slots, (u64)idx.slots());
-    stats.logical_live_bytes = std::max(stats.logical_live_bytes, (u64)(live_alias * sizeof(Alias) + live_comp * sizeof(Component) + idx.bytes()));
-    stats.allocated_bytes = std::max(stats.allocated_bytes, (u64)(av.capacity() * sizeof(Alias) + cv.capacity() * sizeof(Component) +
-                                                                  afree.capacity() * sizeof(u32) + cfree.capacity() * sizeof(u32) + idx.bytes()));
-    if (live_alias != live_in[b] || idx.used_ != live_alias) ++stats.life_violations;
+    stats.logical_live_bytes = std::max(stats.logical_live_bytes, (u64)(live_alias * sizeof(Alias) + live_comp * sizeof(Component)));
+    stats.persistent_bytes = std::max(stats.persistent_bytes, (u64)(av.capacity() * sizeof(Alias) + cv.capacity() * sizeof(Component) +
+                                                                    free_slots.capacity() * sizeof(u32) + cfree.capacity() * sizeof(u32) +
+                                                                    slot_mark.capacity()));
+    stats.mapping_bytes = std::max(stats.mapping_bytes, (u64)((firstb.capacity() + lastb.capacity() + slot_of_fid.capacity()) * sizeof(u32)));
+    {
+      u64 sc = (u64)(touched.capacity() * sizeof(u32) + pre_list.capacity() * sizeof(PreFreeze) + post_list.capacity() * sizeof(u32) +
+                     slot_alias.capacity() * sizeof(u32) + (live_in.capacity() + live_out.capacity()) * sizeof(u32) +
+                     scratch.capacity() * sizeof(ComponentDelta));
+      for (const ComponentDelta& cd : scratch) sc += (u64)((cd.parents.capacity() + cd.born.capacity()) * sizeof(FacetKey));
+      stats.scratch_bytes = std::max(stats.scratch_bytes, sc);
+      u64 ob = (u64)(r.deltas.capacity() * sizeof(ComponentDelta));
+      for (const ComponentDelta& cd : r.deltas) ob += (u64)((cd.parents.capacity() + cd.born.capacity()) * sizeof(FacetKey));
+      stats.output_bytes = std::max(stats.output_bytes, ob);
+    }
+    if (live_alias != live_in[b]) ++stats.life_violations;
+    if (free_slots.size() + live_alias != nslots) ++stats.slot_partition_violations;
     // Detecteurs (identiques au resident).
     for (const u32 a : touched) {
       const Alias& al = av[a];
@@ -414,14 +403,15 @@ inline ForestResult reduce_fold_live(FoldPrepared&& fp, LiveFoldStats* out_stats
     // PASSE 2 : unions dans l'ordre total des evenements.
     for (size_t e = e0; e < e1; ++e) {
       const ForestEvent& ev = evt(e);
+      const u32* sa = &slot_alias[(e - e0) * 11];
       u32 first = kNil;
       for (int s = 0; s < (int)ev.q; ++s) {
-        const u32 v = idx.get(ev_fid[e * 11 + (size_t)s]);
+        const u32 v = sa[s];
         if (first == kNil) first = v;
         else if (unite(first, v)) ++r.fusions;
       }
       for (int z = 0; z < (int)ev.d; ++z)
-        if (unite(first, idx.get(ev_fid[e * 11 + (size_t)(ev.q + z)]))) ++r.fusions;
+        if (unite(first, sa[(size_t)ev.q + (size_t)z])) ++r.fusions;
     }
     // PASSE 3 : deltas par composante post-lot, ordonnes par racine logique.
     post_list.clear();
@@ -470,8 +460,8 @@ inline ForestResult reduce_fold_live(FoldPrepared&& fp, LiveFoldStats* out_stats
       if (al.prev != kNil) av[al.prev].next = al.next;
       else cv[c].head = al.next;
       if (al.next != kNil) av[al.next].prev = al.prev;
-      idx.erase(al.fid);
-      afree.push_back(a);
+      slot_of_fid[al.fid] = kNil;
+      free_slots.push_back(a);  // le creneau retourne a la pile : l'etat reste dans [0, pic)
       --live_alias;
       if (--cv[c].count == 0) {
         cfree.push_back(c);
@@ -481,18 +471,31 @@ inline ForestResult reduce_fold_live(FoldPrepared&& fp, LiveFoldStats* out_stats
     }
     // INVARIANT T6 a la frontiere du lot, et EGALITE de vie exacte apres les morts.
     if (!(live_comp <= live_alias && live_alias <= stats.peak_live_exact)) ++stats.invariant_violations;
-    if (live_alias != live_out[b] || idx.used_ != live_alias) ++stats.life_violations;
+    if (live_alias != live_out[b]) ++stats.life_violations;
+    if (free_slots.size() + live_alias != nslots) ++stats.slot_partition_violations;
     // BALAYAGE STRUCTUREL a cadence bornee (au plus `kStructureScans` fois,
     // plus le dernier lot) : bijection index <-> alias, longueur de chaque
     // liste egale a son compte, aucun cycle ni doublon, aucune composante vide.
     if (nb <= kStructureScans || b + 1 == nb || (b % (nb / kStructureScans)) == 0) {
       ++stats.structure_scans;
+      // MARQUAGE EXACT DES CRENEAUX (audit du 28 aout) : l'egalite de
+      // cardinalite `libres + vivants == alloues` ne prouve ni la DISJONCTION
+      // (un creneau a la fois libre et vivant), ni la COUVERTURE (un creneau
+      // perdu), ni l'UNICITE (deux alias sur le meme creneau). Le balayage
+      // borne marque chaque creneau et exige exactement une marque par case.
+      slot_mark.assign(nslots, 0);
+      for (const u32 f : free_slots) {
+        if (f >= nslots || slot_mark[f] != 0) ++stats.slot_partition_violations;
+        else slot_mark[f] = 1;
+      }
       u64 seen_alias = 0;
       for (u32 c = 0; c < (u32)cv.size(); ++c) {
         if (cv[c].count == 0) continue;
         u64 len = 0;
         for (u32 x = cv[c].head; x != kNil; x = av[x].next) {
-          if (av[x].comp != c || idx.get(av[x].fid) != x) ++stats.structure_violations;
+          if (av[x].comp != c || slot_of_fid[av[x].fid] != x) ++stats.structure_violations;
+          if (x >= nslots || slot_mark[x] != 0) ++stats.slot_partition_violations;  // creneau double ou hors bornes
+          else slot_mark[x] = 2;
           if (++len > live_alias) {  // cycle ou doublon : la liste depasse le vivant total
             ++stats.structure_violations;
             break;
@@ -502,6 +505,8 @@ inline ForestResult reduce_fold_live(FoldPrepared&& fp, LiveFoldStats* out_stats
         seen_alias += len;
       }
       if (seen_alias != live_alias) ++stats.structure_violations;
+      for (size_t k = 0; k < nslots; ++k)
+        if (slot_mark[k] == 0) ++stats.slot_partition_violations;  // creneau ni libre ni vivant : perdu
     }
   }
   if (live_alias != 0 || live_comp != 0) stats.final_nonempty = 1;  // vacuite finale : toute facette a une DERNIERE incidence

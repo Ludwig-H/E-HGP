@@ -145,6 +145,18 @@ int main(int argc, char** argv) {
     });
     ++g_jobs;
     expect(refused, "soumission reentrante depuis un travail du meme pool : REFUS immediat");
+    // Aucun EMBOITEMENT n'est admis, meme vers un AUTRE pool.
+    gpu::ExecutorPool<FakeExecutor> other(2);
+    bool refused_other = false;
+    pool.submit_and_wait([&](FakeExecutor&) {
+      try {
+        other.submit_and_wait([](FakeExecutor&) {});
+      } catch (const std::runtime_error&) {
+        refused_other = true;
+      }
+    });
+    ++g_jobs;
+    expect(refused_other, "soumission emboitee vers un AUTRE pool : REFUS immediat");
   }
 
   // ---- (7) contre-pression : file de capacite 1.

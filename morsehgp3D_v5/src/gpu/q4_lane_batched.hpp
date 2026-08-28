@@ -96,7 +96,10 @@ struct Q4Batch {
 // seed, emissions ordonnees (seed croissant, y croissant dans la lentille),
 // distinctes, issues de seeds vivants, y_site dans la tranche.
 struct Q4BatchView {
-  size_t n_index = 0;  // wire G1 (0 = absent)
+  size_t n_index = 0;         // wire G1 (0 = absent)
+  bool geom_declared = false;  // la geometrie residente est-elle declaree ? (distinct d'une borne nulle)
+  size_t n_geom_points = 0;    // points de la geometrie residente (0 EST une borne valide)
+  const u32* site_index = nullptr;
   size_t n_sites = 0, n_lens = 0, n_anchors = 0, n_seeds = 0, n_verdicts = 0, n_emits = 0;
   size_t soa_sizes[7] = {0, 0, 0, 0, 0, 0, 0};  // u1,u2,q,px,py,pz,pid
   const u32* lens_sites = nullptr;
@@ -108,7 +111,7 @@ struct Q4BatchView {
 inline Q4BatchView q4_batch_view(const Q4Batch& b) {
   Q4BatchView v;
   v.n_sites = b.u0.size(); v.n_lens = b.lens_sites.size(); v.n_anchors = b.anchors.size(); v.n_seeds = b.seeds.size();
-  v.n_verdicts = b.verdicts.size(); v.n_emits = b.emits.size(); v.n_index = b.site_index.size();
+  v.n_verdicts = b.verdicts.size(); v.n_emits = b.emits.size(); v.n_index = b.site_index.size(); v.site_index = b.site_index.data();
   const size_t sz[7] = {b.u1.size(), b.u2.size(), b.q.size(), b.px.size(), b.py.size(), b.pz.size(), b.pid.size()};
   for (int i = 0; i < 7; ++i) v.soa_sizes[i] = sz[i];
   v.lens_sites = b.lens_sites.data(); v.anchors = b.anchors.data(); v.seeds = b.seeds.data();
@@ -120,6 +123,14 @@ inline bool validate_q4_batch_view(const Q4BatchView& v, std::string* why) {
   for (int i = 0; i < 7; ++i)
     if (v.soa_sizes[i] != v.n_sites) { *why = "lot q4 : tailles SoA differentes"; return false; }
   if (v.n_index != 0 && v.n_index != v.n_sites) { *why = "lot q4 : wire par indices de taille differente des sites"; return false; }
+  // FAIL-CLOSED du wire G1 (audit du 28 aout) : chaque index est verifie EN
+  // VALEUR contre la geometrie residente declaree — un index egal au nombre de
+  // points, ou UINT32_MAX, lirait hors des tableaux du device.
+  if (v.n_index != 0 && v.geom_declared) {
+    if (!v.site_index) { *why = "lot q4 : wire par indices sans tableau d'indices"; return false; }
+    for (size_t i = 0; i < v.n_index; ++i)
+      if ((size_t)v.site_index[i] >= v.n_geom_points) { *why = "lot q4 : index de site hors de la geometrie residente"; return false; }
+  }
   if (v.n_lens > (size_t)UINT32_MAX || v.n_anchors > (size_t)UINT32_MAX || v.n_seeds > (size_t)UINT32_MAX) {
     *why = "lot q4 : plus de 2^32 - 1 indices de lentille, ancres ou seeds"; return false;
   }
@@ -141,7 +152,14 @@ inline bool validate_q4_batch_view(const Q4BatchView& v, std::string* why) {
   }
   return true;
 }
-inline bool validate_q4_batch(const Q4Batch& b, std::string* why) { return validate_q4_batch_view(q4_batch_view(b), why); }
+// Meme convention que q3 : `geom_points < 0` = geometrie ABSENTE (tailles
+// seules), `>= 0` = geometrie DECLAREE de cette taille (valeurs bornees).
+inline bool validate_q4_batch(const Q4Batch& b, std::string* why, long long geom_points = -1) {
+  Q4BatchView v = q4_batch_view(b);
+  v.geom_declared = geom_points >= 0;
+  v.n_geom_points = geom_points >= 0 ? (size_t)geom_points : 0;
+  return validate_q4_batch_view(v, why);
+}
 // Apres le scan.
 // `emit_eq` : en nominal, le nombre d'emissions doit valoir st.emit (le mutant
 // q4-batched-emit-deep, qui emet aussi les profonds, le desactive).

@@ -254,6 +254,7 @@ mhgp5_gate(mhgp5_fold_live_mutant_root_key_mutable 4 mhgp5_fold_live_gate "--inj
 mhgp5_gate(mhgp5_fold_live_mutant_canon_not_min 4 mhgp5_fold_live_gate "--inject=canon-not-min-on-union" TIMEOUT 60)
 mhgp5_gate(mhgp5_fold_live_mutant_last_mark_shifted 4 mhgp5_fold_live_gate "--inject=last-mark-shifted" TIMEOUT 60)
 mhgp5_gate(mhgp5_fold_live_mutant_physical_root 4 mhgp5_fold_live_gate "--inject=physical-root-is-logical-root" TIMEOUT 60)
+mhgp5_gate(mhgp5_fold_live_mutant_slot_cap 4 mhgp5_fold_live_gate "--inject=slot-cap-minus-one" TIMEOUT 60)
 
 # Six fixtures gravees du fold (ECHELLE § 8 bis item 1) : sortie litterale,
 # egalite resident/vivant, invariance par hachage d'adressage constant.
@@ -506,6 +507,10 @@ if(MHGP5_ENABLE_CUDA)
   mhgp5_gate(mhgp5_q4_lane_device_route_256 0 mhgp5_q4_lane_device_gate "--family=eight_clusters --n=1200 --threads=4 --device-min-sites=256 --expect-route=mixed" LABELS gpu)
   mhgp5_gate(mhgp5_q3_lane_device_route_256 0 mhgp5_q3_lane_device_gate "--family=eight_clusters --n=1200 --threads=4 --device-min-sites=256 --expect-route=mixed" LABELS gpu)
   mhgp5_gate(mhgp5_q3_lane_device_route_mutant 4 mhgp5_q3_lane_device_gate "--family=eight_clusters --n=1200 --threads=4 --device-min-sites=256 --expect-route=mixed --inject=route-ignore-threshold" LABELS gpu)
+  # PREUVE DE BRANCHE du wire G1 : le mutant retombe silencieusement sur SoA
+  # (verdicts et digests verts) ; seuls les compteurs de branche le voient.
+  mhgp5_gate(mhgp5_q3_lane_device_mutant_wire_force_soa 4 mhgp5_q3_lane_device_gate "--family=uniform --n=1200 --wire=index --inject=wire-index-force-soa" LABELS gpu)
+  mhgp5_gate(mhgp5_q4_lane_device_mutant_wire_force_soa 4 mhgp5_q4_lane_device_gate "--family=uniform --n=1200 --wire=index --inject=wire-index-force-soa" LABELS gpu)
   mhgp5_gate(mhgp5_q3_lane_device_petit_lot 0 mhgp5_q3_lane_device_gate "--family=uniform --n=400 --seeds-per-launch=1000 --min-candidates=200 --min-flushes=100" LABELS gpu)
   mhgp5_gate(mhgp5_q3_lane_device_uniform_8000 0 mhgp5_q3_lane_device_gate "--family=uniform --n=8000 --threads=8 --min-candidates=100000" LABELS gpu scale8000 TIMEOUT 1800)
 endif()

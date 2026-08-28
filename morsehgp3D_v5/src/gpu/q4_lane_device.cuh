@@ -50,7 +50,7 @@ class Q4DeviceExecutor {
             const GpuGeometry* geom = nullptr, bool wire_index = false) {
     if (broken_) throw std::runtime_error("cuda : executeur q4 inutilisable apres une erreur d'allocation");
     std::string why;
-    if (!validate_q4_batch(*b, &why)) throw std::invalid_argument(why);
+    if (!validate_q4_batch(*b, &why, wire_index && geom ? (long long)geom->count : -1)) throw std::invalid_argument(why);
     const size_t ns = b->u0.size(), nsd = b->seeds.size(), na = b->anchors.size(), nl = b->lens_sites.size();
     b->verdicts.assign(nsd, Q4SeedVerdict{});
     b->emits.clear();
@@ -75,8 +75,11 @@ class Q4DeviceExecutor {
     reserve_seeds(nsd, na);
     tick(&m.reserve_ms);
     ev_[0].record(stream_);
-    const bool use_idx = wire_index && geom && b->site_index.size() == ns;
-    if (wire_index && !use_idx) throw std::invalid_argument("lot q4 : wire par indices demande sans indices/geometrie complets");
+    const bool use_idx = wire_index && !MHGP5_MUTANT("wire-index-force-soa") && geom && b->site_index.size() == ns;
+    if (wire_index && !use_idx && !MHGP5_MUTANT("wire-index-force-soa"))
+      throw std::invalid_argument("lot q4 : wire par indices demande sans indices/geometrie complets");
+    if (use_idx) { m.index_lots = 1; m.site_index_bytes += ns * sizeof(u32); }
+    else { m.soa_lots = 1; m.site_soa_bytes += ns * (4 * sizeof(i64) + 3 * sizeof(i64) + sizeof(PointId)); }
     if (use_idx) {
       m.h2d_bytes += up(d_idx_, b->site_index.data(), ns);
     } else {

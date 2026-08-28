@@ -121,7 +121,9 @@ class Q3DeviceExecutor {
             bool wire_index = false) {
     if (broken_) throw std::runtime_error("cuda : executeur q3 inutilisable apres une erreur d'allocation");
     std::string why;
-    if (!validate_q3_batch(*b, &why)) throw std::invalid_argument(why);
+    // Wire par indices : les VALEURS des indices sont bornees par la geometrie
+    // residente AVANT tout lancement (fail-closed).
+    if (!validate_q3_batch(*b, &why, wire_index && geom ? (long long)geom->count : -1)) throw std::invalid_argument(why);
     const size_t ns = b->u0.size(), nj = b->seeds.size(), na = b->anchors.size();
     b->verdicts.resize(nj);
     DeviceExecutorStats m;
@@ -142,8 +144,14 @@ class Q3DeviceExecutor {
     static_assert(sizeof(Q3BatchAnchor) == sizeof(AnchorRange), "layout des ancres");
     static_assert(sizeof(Q3BatchVerdict) == sizeof(SeedOut), "layout des verdicts");
     static_assert(sizeof(Q3BatchAnchorGeom) == sizeof(AnchorGeom), "layout de la geometrie d'ancre");
-    const bool use_idx = wire_index && geom && b->site_index.size() == ns && b->ageom.size() == na;
-    if (wire_index && !use_idx) throw std::invalid_argument("lot q3 : wire par indices demande sans indices/geometrie complets");
+    // MUTANT `wire-index-force-soa` : le wire index demande retombe
+    // silencieusement sur SoA — verdicts et digests resteraient verts ; seuls
+    // les compteurs de branche le voient.
+    const bool use_idx = wire_index && !MHGP5_MUTANT("wire-index-force-soa") && geom && b->site_index.size() == ns && b->ageom.size() == na;
+    if (wire_index && !use_idx && !MHGP5_MUTANT("wire-index-force-soa"))
+      throw std::invalid_argument("lot q3 : wire par indices demande sans indices/geometrie complets");
+    if (use_idx) { m.index_lots = 1; m.site_index_bytes += ns * sizeof(u32) + na * sizeof(Q3BatchAnchorGeom); }
+    else { m.soa_lots = 1; m.site_soa_bytes += ns * 4 * sizeof(i64); }
     const auto t_issue = std::chrono::steady_clock::now();
     ev_h0_.record(stream_);
     if (use_idx) {

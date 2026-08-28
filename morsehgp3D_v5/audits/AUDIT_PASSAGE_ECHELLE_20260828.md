@@ -115,7 +115,12 @@ qui exécute correctement dans deux processus le même flux d'événements avec
 exactement un réducteur chacun. Pour devenir un miroir attribuable de l'objet
 complet, il doit encore chronométrer la copie du catalogue vivant, imposer le
 replayer strict et refuser toute divergence de digest, deltas, niveaux et
-partition. Le régime callback historique reste explicitement un micro-banc.
+partition. Le fichier intermédiaire brut doit aussi devenir un wire canonique
+versionné : magic, schéma, K, taille de record, boutisme et digest, avec taille
+exacte contrôlée avant allocation et rejet de tout `ForestResult::refusal`.
+`ru_maxrss` reste le pic du processus dédié au fold, préparation et sortie
+comprises, pas la résidence du seul réducteur. Le régime callback historique
+reste explicitement un micro-banc.
 
 ## Solution 1 — fold vivant sans ancienne forêt union-find
 
@@ -519,6 +524,8 @@ complète et un probe à un seul réducteur par processus.
 - conserver les tableaux du callback 8 k/16 k comme micro-banc du second fold,
   sans les renommer rétroactivement ; le nouveau régime `--dump/--from` devient
   un miroir CPU/RSS seulement après égalité complète des objets, rejeu strict,
-  copie chronométrée et répétitions contrebalancées.
+  artefact canonique authentifié, copie chronométrée et répétitions
+  contrebalancées. Si le fold n'établit pas un nouveau pic du processus, le
+  verdict RSS reste inconclusif.
 
 GCP non utilisé pour cet audit.

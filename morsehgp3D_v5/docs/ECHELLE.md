@@ -425,6 +425,75 @@ ne change ni l'objet ni ce plan.
    un gain d'allocation de bout en bout, ni un gain de RSS : `firstb`/`lastb`,
    `keys` et `ev_fid` restent en RAM à L2 et ne partent qu'à L3, et
    `reduce_fold_live` n'est pas encore sur le chemin produit.
+   **Mesure résident / vivant** (`bench/fold_live_probe.cpp`, `uniform`,
+   4 fils) — c'est le chiffre qui *réfute* l'idée d'un gain CPU. La sonde a
+   **deux régimes**, et il faut les distinguer : sans `--from`, c'est un
+   **micro-banc incrémental** — `run_pipeline` exécute déjà le fold résident
+   avant le callback dans les *deux* bras, le bras vivant ajoutant un second
+   réducteur ; les temps par étape y restent comparables (les deux réducteurs
+   sont mesurés au même endroit, sur le même état préparé) mais **le RSS n'y
+   départage rien**. Avec `--dump` puis `--from`, c'est le **miroir vrai** :
+   aucun pipeline, un seul réducteur par processus, RSS attribuable. Le tableau
+   ci-dessous est le régime incrémental, donc ses colonnes de temps seulement :
+
+   | n | facettes de l'ordre le plus gros | réduction résidente | réduction vivante | total résident | total vivant (rejeu inclus) |
+   |---|---|---|---|---|---|
+   | 8 000 | 19,5 M | 4,91 s | 8,26 s (× 1,68) | 12,2 s | 22,6 s (× 1,86) |
+   | 16 000 | 40,9 M | 14,0 s | 22,1 s (× 1,58) | 34,3 s | 59,4 s (× 1,73) |
+
+   Le vivant est donc **plus lent**, d'un facteur ≈ 1,6 sur la réduction et
+   ≈ 1,8 de bout en bout — c'est le prix du travail par facette (création,
+   composante, mort) face à l'indexation d'un tableau plat, plus le **rejeu**
+   que le vivant doit payer pour rendre la partition que le résident produit
+   d'office. Ce facteur est désormais **constant** : une première version, qui
+   retrouvait l'alias par une table de hachage avec suppression par décalage,
+   se dégradait de × 1,9 à × 3,5 entre n = 4 000 et n = 16 000. Elle a été
+   remplacée par une **allocation de créneaux** : les durées de vie forment un
+   graphe d'intervalles, un coloriage glouton en utilise exactement le nombre
+   maximal d'intervalles simultanés — le pic exact déjà calculé — donc l'état
+   est un **tableau plat de `pic` alias** réutilisés en place, sans sondage ni
+   suppression, et le créneau est exactement ce que le wire de L3 portera avec
+   chaque occurrence. Effet mesuré à n = 16 000 : réduction 44,4 → 22,1 s,
+   total 104,2 → 59,4 s, état persistant 51 → 24 Mo, débordements de créneau
+   **0**. Ce qui se vérifie n'est pas `créneaux == pic` — ce serait
+   tautologique, le premier étant affecté depuis le second — mais que le
+   coloriage **atteint** le pic (`pic d'alias == pic exact`) sans jamais le
+   dépasser, et que la partition `créneaux libres + créneaux vivants ==
+   créneaux alloués` tient à **chaque** frontière. Le mutant
+   `slot-cap-minus-one` (un créneau de moins) doit produire un **refus
+   contrôlé**, et la porte n'accepte pas un désaccord générique : elle exige le
+   préfixe `resource_exhausted`, `deltas` **et** `batch_levels` vides, et
+   **exactement un** débordement compté — aucun accès sentinelle. Tué (code 4),
+   propre sous ASan/UBSan. Deux fixtures littérales isolent la convention de
+   frontière, avec leurs deltas **gravés**, leur nombre de lots et leurs
+   `batch_levels` : deux événements K = 1 disjoints au **même** niveau donnent
+   quatre facettes toutes vivantes ensemble (1 lot, pic = créneaux = 4), les
+   **mêmes** à deux niveaux successifs donnent quatre facettes mais 2 lots et
+   pic = créneaux = 2, les créneaux n'étant réutilisés qu'après l'émission du
+   premier lot.
+   La partition des créneaux n'est pas seulement comptée : le balayage
+   structurel borné **marque** chaque créneau et exige exactement une marque
+   par case — donc la disjonction (jamais libre *et* vivant), la couverture
+   (aucun créneau perdu) et l'unicité (jamais deux alias sur un créneau), et
+   pas seulement l'égalité de cardinalité.
+   Le `FacetOccurrenceWire` reste une structure **proposée**, pas enregistrée,
+   et `free_slots` est bien une liste libre : L2 reste O(facettes) en mémoire
+   par ses tables `firstb`, `lastb` et `fid -> créneau`. Les octets sont donc
+   publiés en **cinq postes séparés**, jamais en somme — ce sont des capacités
+   de conteneurs, pas une comptabilité d'allocateur. Au témoin du pic absolu :
+   persistant **1,41 Mo** (borné par le pic), mapping **8,80 Mo** (O(F)),
+   entrée **61,5 Mo** (`keys`, `ev_fid`, événements, ordre, lots :
+   O(F + incidences)), scratch **0,70 Mo**, sortie **61,8 Mo** (`r.deltas` et
+   les capacités de leurs vecteurs). L'état persistant pèse donc **1 %** du
+   total : **le L2 complet, entrée et sortie comprises, est O(F + I)**, et
+   seul le flux de L3 pourrait retirer les tableaux d'occurrences.
+   Le RSS des deux côtés est **confondu** par le fold résident du pipeline qui
+   tourne dans le même processus : à ces tailles il ne départage rien
+   (3,41 contre 3,57 Go à 8 000 ; 6,98 contre 6,97 Go à 16 000). La conclusion
+   utile n'est donc pas un gain, c'est un **échange borné** : ≈ 1,6 fois plus
+   de temps de réduction contre un état de fold de 24 Mo au lieu de 1,47 Go
+   (40,9 M facettes × 36 o) — sans intérêt là où le résident tient en RAM,
+   nécessaire là où il ne tient pas.
    Ce qui est *vérifié*, en revanche, l'est à **chaque** frontière de lot :
    `composantes <= alias <= pic exact` (T6), et l'égalité forte
    `alias == compte exact du lot` avant **et** après les morts, plus la

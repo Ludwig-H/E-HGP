@@ -75,8 +75,11 @@ struct Q3BatchView {
   size_t n_sites = 0, n_seeds = 0, n_anchors = 0, n_emit = 0, n_verdicts = 0;
   size_t n_u1 = 0, n_u2 = 0, n_q = 0;  // tailles des autres SoA
   size_t n_index = 0, n_ageom = 0;      // wire G1 (0 = absent ; sinon = n_sites et n_anchors)
+  bool geom_declared = false;           // la geometrie residente est-elle declaree ? (distinct d'une borne nulle)
+  size_t n_geom_points = 0;             // points de la geometrie residente (0 EST une borne valide : tout index est alors hors bornes)
   const Q3BatchAnchor* anchors = nullptr;
   const Q3BatchSeed* seeds = nullptr;
+  const u32* site_index = nullptr;      // valeurs des indices (bornes verifiees, pas seulement leur nombre)
 };
 inline Q3BatchView q3_batch_view(const Q3Batch& b) {
   Q3BatchView v;
@@ -84,7 +87,7 @@ inline Q3BatchView q3_batch_view(const Q3Batch& b) {
   v.n_index = b.site_index.size(); v.n_ageom = b.ageom.size();
   v.n_seeds = b.seeds.size(); v.n_anchors = b.anchors.size(); v.n_emit = b.emit_if_alive.size();
   v.n_verdicts = b.verdicts.size();
-  v.anchors = b.anchors.data(); v.seeds = b.seeds.data();
+  v.anchors = b.anchors.data(); v.seeds = b.seeds.data(); v.site_index = b.site_index.data();
   return v;
 }
 // CONTRAT STRUCTUREL d'un lot q3, verifie AVANT tout scan (fail-closed :
@@ -97,6 +100,26 @@ inline bool validate_q3_batch_view(const Q3BatchView& v, std::string* why) {
   if (v.n_u1 != v.n_sites || v.n_u2 != v.n_sites || v.n_q != v.n_sites) { *why = "lot q3 : tailles SoA differentes"; return false; }
   if (v.n_index != 0 && v.n_index != v.n_sites) { *why = "lot q3 : wire par indices de taille differente des sites"; return false; }
   if (v.n_ageom != 0 && v.n_ageom != v.n_anchors) { *why = "lot q3 : une geometrie par ancre attendue"; return false; }
+  // FAIL-CLOSED du wire G1 (audit du 28 aout, reception « indices ») : les
+  // indices et la geometrie d'ancre vont ENSEMBLE, la geometrie residente doit
+  // etre declaree, et chaque index est verifie EN VALEUR — jamais seulement en
+  // nombre : un index egal au nombre de points, ou UINT32_MAX, lirait hors des
+  // tableaux du device.
+  // Un lot VIDE (aucun site) ne porte ni indices ni geometrie d'ancre : les
+  // deux lanes le traitent identiquement, aucun contrat de wire ne s'y
+  // applique.
+  if (v.n_sites != 0) {
+    if (v.n_index != 0 && v.n_anchors != 0 && v.n_ageom == 0) { *why = "lot q3 : wire par indices sans geometrie d'ancre"; return false; }
+    if (v.n_ageom != 0 && v.n_index == 0) { *why = "lot q3 : geometrie d'ancre sans indices de site"; return false; }
+  }
+  // Les VALEURS ne sont verifiees que si la geometrie residente est DECLAREE.
+  // Une geometrie declaree VIDE (0 point) est une borne valide : tout index y
+  // est hors bornes — ce cas est distinct de « geometrie absente ».
+  if (v.n_index != 0 && v.geom_declared) {
+    if (!v.site_index) { *why = "lot q3 : wire par indices sans tableau d'indices"; return false; }
+    for (size_t i = 0; i < v.n_index; ++i)
+      if ((size_t)v.site_index[i] >= v.n_geom_points) { *why = "lot q3 : index de site hors de la geometrie residente"; return false; }
+  }
   if (v.n_emit != v.n_seeds) { *why = "lot q3 : un candidat par seed attendu"; return false; }
   if (v.n_anchors > (size_t)UINT32_MAX || v.n_seeds > (size_t)UINT32_MAX) { *why = "lot q3 : plus de 2^32 - 1 ancres ou seeds"; return false; }
   for (size_t a = 0; a < v.n_anchors; ++a) {
@@ -107,7 +130,16 @@ inline bool validate_q3_batch_view(const Q3BatchView& v, std::string* why) {
     if (v.seeds[i].anchor >= v.n_anchors) { *why = "lot q3 : ancre de seed invalide"; return false; }
   return true;
 }
-inline bool validate_q3_batch(const Q3Batch& b, std::string* why) { return validate_q3_batch_view(q3_batch_view(b), why); }
+// `geom_points < 0` (defaut) : geometrie residente ABSENTE, seules les tailles
+// sont verifiees (chemin SoA et portes hote historiques). `geom_points >= 0` :
+// geometrie DECLAREE de cette taille, les valeurs sont bornees — y compris
+// pour une geometrie vide, ou tout index est refuse.
+inline bool validate_q3_batch(const Q3Batch& b, std::string* why, long long geom_points = -1) {
+  Q3BatchView v = q3_batch_view(b);
+  v.geom_declared = geom_points >= 0;
+  v.n_geom_points = geom_points >= 0 ? (size_t)geom_points : 0;
+  return validate_q3_batch_view(v, why);
+}
 // Apres le scan : un verdict par seed.
 inline bool validate_q3_verdicts(const Q3Batch& b, std::string* why) {
   if (b.verdicts.size() != b.seeds.size()) { *why = "lot q3 : un verdict par seed attendu apres le scan"; return false; }

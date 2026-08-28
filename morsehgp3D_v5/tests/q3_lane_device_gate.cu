@@ -22,6 +22,7 @@ int main(int argc, char** argv) {
   u64 min_flushes = 1;
   std::string expect_route = "device";  // device | mixed | host : contrat de NON-VACUITE des routes
   BatchStats bs;
+  std::string inject;
   u64 min_candidates = 1000, min_killed = 10;
   for (int i = 1; i < argc; ++i) {
     const std::string arg = argv[i];
@@ -45,6 +46,7 @@ int main(int argc, char** argv) {
       lim.sites = (size_t)v;
     } else if (arg.rfind("--min-flushes=", 0) == 0) min_flushes = (u64)std::atoll(arg.c_str() + 14);
     else if (arg.rfind("--expect-route=", 0) == 0) expect_route = arg.substr(15);
+    else if (arg.rfind("--inject=", 0) == 0) inject = arg.substr(9);  // BUG corrige : CMake passe --inject et attendait le code 4
     else if (arg.rfind("--wire=", 0) == 0) {  // G1 : wire par indices (geometrie residente) ou SoA
       if (arg.substr(7) == "index") lim.wire_index = true;
       else if (arg.substr(7) == "soa") lim.wire_index = false;
@@ -57,6 +59,8 @@ int main(int argc, char** argv) {
     std::fprintf(stderr, "REFUS : aucun device CUDA visible\n");
     return 2;
   }
+  if (!inject.empty() && !mutants_enable(inject)) return 2;  // registre des mutants raccorde (audit du 28 aout)
+  gpu::DeviceExecutorStats sg;
   if (coord <= 0) coord = cloud_family_default_coord(family, n);
   const CloudIndex ix = build_cloud_index(make_family_input(family, n, coord, 3));
   if (!ix.valid || ix.has_duplicate_positions()) return 2;
@@ -70,7 +74,7 @@ int main(int argc, char** argv) {
   double kernel_ms = 0;
   u64 launches = 0;
   try {
-    gpu::generate_q3_device(ix, opt, &dev, &sd, &kernel_ms, &launches, lim, &bs);
+    gpu::generate_q3_device(ix, opt, &dev, &sd, &kernel_ms, &launches, lim, &bs, &sg);
   } catch (const std::exception& e) {
     std::fprintf(stderr, "REFUS : %s\n", e.what());
     return 2;
@@ -146,6 +150,25 @@ int main(int argc, char** argv) {
     return 1;
   }
   if (vec_mism || bad) return 1;
+  // PREUVE DE BRANCHE (audit du 28 aout) : imprimer le wire demande ne prouve
+  // pas le wire execute. En wire index, TOUS les lots doivent avoir pris la
+  // branche index et n'avoir televerse AUCUN octet SoA de site ; en SoA,
+  // l'inverse. Le mutant `wire-index-force-soa` retombe silencieusement sur
+  // SoA : verdicts et digests restent verts, ces compteurs ne le sont pas.
+  const bool wire_mut = MHGP5_MUTANT("wire-index-force-soa");
+  const bool branch_ok = lim.wire_index ? (sg.index_lots == sg.lots && sg.lots > 0 && sg.soa_lots == 0 && sg.site_soa_bytes == 0)
+                                        : (sg.soa_lots == sg.lots && sg.lots > 0 && sg.index_lots == 0 && sg.site_index_bytes == 0);
+  std::printf("branche wire=%s lots=%llu index_lots=%llu soa_lots=%llu octets_index=%llu octets_soa=%llu\n",
+              lim.wire_index ? "index" : "soa", (unsigned long long)sg.lots, (unsigned long long)sg.index_lots,
+              (unsigned long long)sg.soa_lots, (unsigned long long)sg.site_index_bytes, (unsigned long long)sg.site_soa_bytes);
+  if (!branch_ok) {
+    std::printf("BRANCHE : le wire execute ne correspond pas au wire demande\n");
+    return wire_mut ? 4 : 1;
+  }
+  if (wire_mut) {
+    std::printf("MUTANT NON TUE (wire-index-force-soa)\n");
+    return 1;
+  }
   std::printf("q3_lane_device OK\n");
   return 0;
 }

@@ -57,6 +57,7 @@ int main(int argc, char** argv) {
   }
   if (!inject.empty() && !mutants_enable(inject)) return 2;
   const bool mutant = MHGP5_MUTANT("q4-batched-emit-deep");
+  gpu::DeviceExecutorStats sg;
   if (coord <= 0) coord = cloud_family_default_coord(family, n);
   const CloudIndex ix = build_cloud_index(make_family_input(family, n, coord, 3));
   if (!ix.valid || ix.has_duplicate_positions()) return 2;
@@ -75,7 +76,7 @@ int main(int argc, char** argv) {
   double kernel_ms = 0;
   u64 launches = 0;
   try {
-    gpu::generate_q4_device(ix, opt, &batched, &sb, &kernel_ms, &launches, lim, &bs);
+    gpu::generate_q4_device(ix, opt, &batched, &sb, &kernel_ms, &launches, lim, &bs, &sg);
   } catch (const std::exception& e) {
     std::fprintf(stderr, "REFUS : %s\n", e.what());
     return 2;
@@ -181,6 +182,25 @@ int main(int argc, char** argv) {
   }
   if (vec_mism || bad) return mutant ? 4 : 1;
   if (mutant) { std::printf("MUTANT NON TUE\n"); return 1; }
+  // PREUVE DE BRANCHE (audit du 28 aout) : imprimer le wire demande ne prouve
+  // pas le wire execute. En wire index, TOUS les lots doivent avoir pris la
+  // branche index et n'avoir televerse AUCUN octet SoA de site ; en SoA,
+  // l'inverse. Le mutant `wire-index-force-soa` retombe silencieusement sur
+  // SoA : verdicts et digests restent verts, ces compteurs ne le sont pas.
+  const bool wire_mut = MHGP5_MUTANT("wire-index-force-soa");
+  const bool branch_ok = lim.wire_index ? (sg.index_lots == sg.lots && sg.lots > 0 && sg.soa_lots == 0 && sg.site_soa_bytes == 0)
+                                        : (sg.soa_lots == sg.lots && sg.lots > 0 && sg.index_lots == 0 && sg.site_index_bytes == 0);
+  std::printf("branche wire=%s lots=%llu index_lots=%llu soa_lots=%llu octets_index=%llu octets_soa=%llu\n",
+              lim.wire_index ? "index" : "soa", (unsigned long long)sg.lots, (unsigned long long)sg.index_lots,
+              (unsigned long long)sg.soa_lots, (unsigned long long)sg.site_index_bytes, (unsigned long long)sg.site_soa_bytes);
+  if (!branch_ok) {
+    std::printf("BRANCHE : le wire execute ne correspond pas au wire demande\n");
+    return wire_mut ? 4 : 1;
+  }
+  if (wire_mut) {
+    std::printf("MUTANT NON TUE (wire-index-force-soa)\n");
+    return 1;
+  }
   std::printf("q4_lane_device OK\n");
   return 0;
 }

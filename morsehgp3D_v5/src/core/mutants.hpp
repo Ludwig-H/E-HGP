@@ -80,7 +80,9 @@ inline constexpr const char* kMutants[] = {
     "cell-locate-eps-zero",
     // reducteur vivant (src/forest/fold_live.hpp, ECHELLE L2 / theoreme T6)
     "physical-root-is-logical-root", "free-on-absorb", "root-key-mutable", "canon-not-min-on-union",
-    "last-mark-shifted",
+    "last-mark-shifted", "slot-cap-minus-one",
+    // wire G1 : retombee silencieuse du wire index sur SoA (src/gpu/q3_lane_device.cuh, q4_lane_device.cuh)
+    "wire-index-force-soa",
 };
 
 inline std::vector<std::string>& mutant_registry() {

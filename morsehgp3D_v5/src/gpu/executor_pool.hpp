@@ -24,10 +24,10 @@
 //      tous les fils deja crees, puis relance. Auparavant l'exception
 //      s'echappait du corps du fil (`std::terminate`) et un `emplace_back`
 //      qui echouait laissait des fils non joints.
-//   3. REENTRANCE — `submit_and_wait()` appele DEPUIS un travail du meme pool
-//      est refuse immediatement (marqueur `thread_local` par fil). G0 n'a pas
-//      besoin de reentrance : un refus clair vaut mieux qu'un blocage (certain
-//      a N = 1).
+//   3. EMBOITEMENT — `submit_and_wait()` appele DEPUIS un travail de pool est
+//      refuse immediatement (marqueur `thread_local` NON ALLOUANT : un simple
+//      pointeur). G0 n'a besoin d'aucun emboitement : un refus clair vaut
+//      mieux qu'un blocage (certain a N = 1).
 //   4. DOMAINE — le nombre d'executeurs est REFUSE hors de [1, 8], jamais
 //      clampe silencieusement ; tout entier de 1 a 8 est accepte, 3 compris.
 //
@@ -58,11 +58,15 @@ namespace gpu {
 
 inline constexpr int kGpuExecutorsMax = 8;
 
-// Pools actifs SUR CE FIL (un travail en cours par niveau) : la reentrance se
-// decide par appartenance, donc deux pools distincts restent composables.
-inline std::vector<const void*>& pool_stack() {
-  thread_local std::vector<const void*> s;
-  return s;
+// TRAVAIL DE POOL EN COURS SUR CE FIL. Marqueur `thread_local` NON ALLOUANT
+// (un simple pointeur) : le durcissement demande par l'audit du 28 aout
+// interdit TOUT emboitement, pas seulement la reentrance sur le meme pool —
+// une soumission depuis un travail de pool, quel qu'il soit, est refusee. G0
+// n'a besoin d'aucun emboitement, et un refus clair vaut mieux qu'un blocage
+// (certain a N = 1) ou qu'une allocation dans un chemin chaud.
+inline const void*& current_pool_job() {
+  thread_local const void* p = nullptr;
+  return p;
 }
 
 template <class Executor>
@@ -136,16 +140,25 @@ class ExecutorPool {
   // chaque fil de pool sort apres son travail courant. Une exception de
   // travail ORDINAIRE, elle, reste recuperable : elle remonte au producteur
   // soumettant et le pool continue.
-  void close_fatal(std::exception_ptr e) {
-    std::vector<Ticket*> to_cancel;
+  void close_fatal(std::exception_ptr e) noexcept {
+    // GARANTIE FORTE : aucune allocation sous le verrou (l'exception_ptr est
+    // construit AVANT), la file est videe par l'avant et chaque ticket est
+    // acquitte au moment ou il en sort — un echec partiel est impossible.
+    std::exception_ptr fe = e;
+    if (!fe) {
+      try {
+        fe = std::make_exception_ptr(std::runtime_error("pool d'executeurs : erreur device fatale"));
+      } catch (...) {  // allocation impossible : on ferme quand meme, sans porteur d'erreur
+      }
+    }
     {
       std::lock_guard<std::mutex> lk(mu_);
-      if (!fatal_) fatal_ = e ? e : std::make_exception_ptr(std::runtime_error("pool d'executeurs : erreur device fatale"));
+      if (!fatal_) fatal_ = fe;
       stop_ = true;
-      to_cancel.assign(queue_.begin(), queue_.end());
-      cancelled_ += to_cancel.size();
-      queue_.clear();
-      for (Ticket* t : to_cancel) {
+      while (!queue_.empty()) {
+        Ticket* t = queue_.front();
+        queue_.pop_front();
+        ++cancelled_;
         std::lock_guard<std::mutex> tl(t->mu);
         t->exc = fatal_;
         t->done = true;
@@ -163,8 +176,8 @@ class ExecutorPool {
   // Soumet et ATTEND (contre-pression si la file est pleine) ; relance dans
   // l'appelant l'exception levee par le travail.
   void submit_and_wait(Job job) {
-    for (const void* p : pool_stack())
-      if (p == this) throw std::runtime_error("pool d'executeurs : soumission reentrante depuis un travail du meme pool");
+    if (current_pool_job() != nullptr)
+      throw std::runtime_error("pool d'executeurs : soumission depuis un travail de pool (aucun emboitement admis)");
     Ticket t;
     t.job = std::move(job);
     {
@@ -244,7 +257,7 @@ class ExecutorPool {
       const u32 cur = active_.fetch_add(1, std::memory_order_acq_rel) + 1;
       u32 p = peak_.load(std::memory_order_relaxed);
       while (cur > p && !peak_.compare_exchange_weak(p, cur, std::memory_order_acq_rel)) {}
-      pool_stack().push_back(this);
+      current_pool_job() = this;
       bool threw = false;
       try {
         t->job(*ex);
@@ -253,7 +266,7 @@ class ExecutorPool {
         std::lock_guard<std::mutex> lk(t->mu);
         t->exc = std::current_exception();
       }
-      pool_stack().pop_back();
+      current_pool_job() = nullptr;
       active_.fetch_sub(1, std::memory_order_acq_rel);
       done_.fetch_add(1, std::memory_order_acq_rel);
       bool poisoned = false;

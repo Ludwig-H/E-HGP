@@ -26,8 +26,9 @@
 Notification du ticket, démarrage transactionnel, domaine `1..8`, latch
 causale, TLS non allouant et fermeture en place sont de vraies corrections ; il
 ne faut ni les jeter ni redessiner la lane. La réception du **contrat de sûreté
-G0** demande maintenant trois raccords locaux : compter une soumission seulement
-après `queue_.push_back` réussi, rendre les scénarios de fermeture causaux sans
+G0** demande maintenant quatre raccords locaux : compter une soumission seulement
+après `queue_.push_back` réussi, garantir un `exception_ptr` fatal non nul sans
+allocation dans `close_fatal`, rendre les scénarios de fermeture causaux sans
 `sleep_for`, puis relier une exception CUDA typée à `close_fatal` avant que le
 worker puisse prendre un autre lot. Ces points ne bloquent ni G1 ni le fold,
 mais précèdent tout claim de confinement device.
@@ -36,7 +37,12 @@ La sonde fold historique reste correctement libellée micro-banc. Son nouveau
 régime `--dump/--from` exécute, lui, un seul réducteur par processus et constitue
 la bonne couture de miroir. Il ne reçoit pas encore un objet complet : la copie
 du catalogue vivant est hors chronométrage, le rejeu faible reste optionnel et
-aucun digest commun n'est comparé.
+aucun digest commun n'est comparé. Son artefact n'est pas encore recevable non
+plus : un compteur natif suivi de la représentation mémoire de `ForestEvent`,
+sans magic, schéma, K, taille de record, digest ni contrôle de fin de fichier,
+ne peut devenir un reçu stable. Un wire champ par champ à boutisme fixé doit
+être borné contre la taille réelle du fichier avant allocation ; tout refus du
+fold doit faire échouer la sonde.
 
 La session 13 fournit par ailleurs une baseline CUDA cohérente. La session au
 pin `839cf1ec` compile et exécute nominalement G0 et G1 q3 : huit exécuteurs au
@@ -82,6 +88,8 @@ et le compte de débordement. Trois coutures courtes restent avant le pin fold.
 Premièrement, le balayage doit aussi parcourir **tous** les `slot_of_fid` : une
 entrée stale non nulle échappe aujourd'hui à la bijection annoncée. Il doit
 tester `x < nslots` avant toute lecture de `av[x]`, puis valider les backlinks.
+Un mutant qui duplique un créneau libre tout en en perdant un autre, donc à
+cardinalité conservée, doit tuer précisément ce marquage.
 Deuxièmement, le mutant de capacité rend encore 4 si les cas synthétiques
 ultérieurs produisent un désaccord générique ; isoler un verdict causal où le
 seul chemin vers 4 est le refus exact observé et non vacant. Les fixtures doivent
@@ -99,10 +107,15 @@ Le nouveau `--dump/--from` enlève bien le pipeline des deux bras et exécute un
 seul réducteur. Pour devenir un miroir complet, démarrer le chronomètre vivant
 avant la copie de `keys`, imposer le replayer T5 strict, produire la même
 signature de partition/deltas/niveaux dans les deux bras et refuser tout
-désaccord. Choisir le témoin par facettes ou empreinte préparée plutôt que par le
-seul nombre d'événements, puis contrebalancer les répétitions sous cpuset et
-conserver les sorties brutes. Les tableaux 8 k/16 k historiques restent des
-micro-mesures ; ils ne deviennent pas rétroactivement des mesures miroir.
+désaccord. Versionner le wire d'entrée, contrôler son digest et sa taille exacte,
+puis choisir le témoin par facettes ou empreinte préparée plutôt que par le seul
+nombre d'événements. Le RSS reste le pic du processus dédié — lecture,
+préparation, sorties et rejeu compris — et devient inconclusif si le fold
+n'établit pas un nouveau pic ; il n'est jamais « la mémoire du réducteur seul ».
+Contrebalancer les répétitions sous cpuset et conserver les sorties brutes. Les
+tableaux 8 k/16 k historiques restent des micro-mesures ; ils ne deviennent pas
+rétroactivement des mesures miroir, et deux tailles ne prouvent pas un facteur
+asymptotiquement constant.
 
 **Réponse V35 :** retenir le vivant comme **baseline L2 candidate** d'une future
 voie d'échelle, à sélectionner lorsque le futur préflight prouvera que le

@@ -86,6 +86,34 @@ int main() {
   { Q3Batch b = minimal3(); b.anchors[0].begin = 2; b.anchors[0].count = 2; std::string w; expect(!validate_q3_batch(b, &w), "q3 tranche (begin+count) debordante refusee"); }
   { Q3Batch b = minimal3(); b.seeds[0].anchor = 1; std::string w; expect(!validate_q3_batch(b, &w), "q3 ancre de seed invalide refusee"); }
   { Q3Batch b = minimal3(); b.emit_if_alive.clear(); std::string w; expect(!validate_q3_batch(b, &w), "q3 candidat manquant refuse"); }
+  // ---- WIRE G1 fail-closed (audit du 28 aout, reception « indices ») : les
+  // indices vont avec la geometrie d'ancre, et leurs VALEURS sont bornees par
+  // la geometrie residente — un index egal au nombre de points ou UINT32_MAX
+  // lirait hors des tableaux du device, sans que la sortie change.
+  {
+    Q3Batch b = minimal3();
+    b.site_index = {0, 1, 2};
+    b.ageom.push_back(Q3BatchAnchorGeom{0, 0, 0, 1});
+    std::string w;
+    expect(validate_q3_batch(b, &w, 8), "q3 wire index valide (indices < points de geometrie)");
+    expect(validate_q3_batch(b, &w, 3), "q3 wire index valide a la borne exacte");
+    expect(!validate_q3_batch(b, &w, 2), "q3 index >= points de geometrie refuse");
+    Q3Batch c = b;
+    c.site_index[1] = 3;
+    expect(!validate_q3_batch(c, &w, 3), "q3 index == nombre de points refuse");
+    Q3Batch d = b;
+    d.site_index[2] = UINT32_MAX;
+    expect(!validate_q3_batch(d, &w, 3), "q3 index UINT32_MAX refuse");
+    Q3Batch e = b;
+    e.ageom.clear();
+    expect(!validate_q3_batch(e, &w, 3), "q3 indices sans geometrie d'ancre refuses");
+    Q3Batch f = minimal3();
+    f.ageom.push_back(Q3BatchAnchorGeom{0, 0, 0, 1});
+    expect(!validate_q3_batch(f, &w, 3), "q3 geometrie d'ancre sans indices refusee");
+    Q3Batch g = minimal3();
+    expect(validate_q3_batch(g, &w), "q3 wire SoA inchange (geometrie ABSENTE : tailles seules)");
+    expect(!validate_q3_batch(b, &w, 0), "q3 geometrie DECLAREE VIDE : tout index refuse (distinct de l'absence)");
+  }
   {
     // Limite UINT32_MAX par vue synthetique : 2^32 sites annonces, aucune allocation.
     Q3BatchView v;
@@ -120,6 +148,22 @@ int main() {
     expect(validate_q4_batch(e, &why), "q4 lot vide valide");
   }
   { Q4Batch b = minimal4(); b.pid.pop_back(); std::string w; expect(!validate_q4_batch(b, &w), "q4 SoA tronquee refusee"); }
+  {
+    Q4Batch b = minimal4();
+    b.site_index = {0, 1, 2, 3};
+    std::string w;
+    expect(validate_q4_batch(b, &w, 8), "q4 wire index valide (indices < points de geometrie)");
+    expect(validate_q4_batch(b, &w, 4), "q4 wire index valide a la borne exacte");
+    Q4Batch c = b;
+    c.site_index[2] = 4;
+    expect(!validate_q4_batch(c, &w, 4), "q4 index == nombre de points refuse");
+    Q4Batch d = b;
+    d.site_index[0] = UINT32_MAX;
+    expect(!validate_q4_batch(d, &w, 4), "q4 index UINT32_MAX refuse");
+    Q4Batch e = minimal4();
+    expect(validate_q4_batch(e, &w), "q4 wire SoA inchange (geometrie ABSENTE : tailles seules)");
+    expect(!validate_q4_batch(b, &w, 0), "q4 geometrie DECLAREE VIDE : tout index refuse (distinct de l'absence)");
+  }
   { Q4Batch b = minimal4(); b.lens_sites[1] = 7; std::string w; expect(!validate_q4_batch(b, &w), "q4 lentille hors sites refusee"); }
   { Q4Batch b = minimal4(); b.anchors[0].count = 2; b.lens_sites[2] = 2; std::string w; expect(!validate_q4_batch(b, &w), "q4 lentille hors tranche refusee"); }
   { Q4Batch b = minimal4(); b.anchors[0].lens_count = 5; std::string w; expect(!validate_q4_batch(b, &w), "q4 tranche de lentille debordante refusee"); }

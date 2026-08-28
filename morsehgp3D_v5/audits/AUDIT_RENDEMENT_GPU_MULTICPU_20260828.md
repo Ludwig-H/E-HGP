@@ -217,6 +217,9 @@ temporaire : conserver ces deux corrections. Avant réception complète, déplac
 `submitted_++` après `queue_.push_back` réussi, remplacer les attentes
 100/200 ms de la fixture fatale par des barrières causales, graver le
 constructeur fautif et rendre chaque verdict mutant propre à son défaut. Le
+secours construit dans `close_fatal(nullptr)` peut encore échouer puis acquitter
+un ticket annulé avec `exc == nullptr` ; préconstruire ce porteur avant le
+lancement des workers, ou rendre l'argument non nul contractuel et testé. Le
 poison CUDA typé reste un raccord device séparé, détaillé dans
 `ETAT_COURANT.md`.
 
@@ -407,8 +410,10 @@ vivant et le trafic mémoire sont une hypothèse explicative à profiler, pas
 encore une cause reçue. Le fold à créneaux du worktree reste hors du chemin
 produit ; son nouveau régime `--dump/--from` isole enfin un seul réducteur par
 processus, mais n'est pas encore un miroir d'objet complet tant que copie du
-catalogue, rejeu strict et digest commun ne sont pas inclus et vérifiés. Le mode
-callback historique reste un micro-banc du second fold.
+catalogue, rejeu strict et digest commun ne sont pas inclus et vérifiés. Son
+fichier natif sans magic, version, K, taille de record ni digest doit aussi être
+remplacé par un wire canonique borné avant allocation. Le mode callback
+historique reste un micro-banc du second fold.
 
 La machine expose 48 CPU logiques mais seulement 24 cœurs physiques SMT2, tous
 les bras gardent l'affinité `0-47`, et aucun point 24 ni cpuset par bras n'a été
