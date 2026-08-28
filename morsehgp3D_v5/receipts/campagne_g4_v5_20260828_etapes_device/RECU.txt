@@ -1,0 +1,48 @@
+# Session G4 v5 — campagne d echelle (temoin, lanes device, conformite v4, contrats 50 000 CPU et --gpu)
+date_utc=2026-08-28T07:34:09+00:00
+source_commit=63deda749c898ea758c2de09d5b94fb7206e875c
+head_local=8c93557095b979db87a17416d13cac55e50b83db
+source_payload_sha256=58ae925aa15bb4bdbe6bf42fb944ea6574566368e911d3879523940a2d0a92f1
+protocol_manifest_sha256=605ddc2d14bed68a1e5d4ab97aa84a0e42b52110d7c4e151f9e984dfd531f890
+machine=g4-standard-48 SPOT europe-west4-ai1a, 48 fils, RTX PRO 6000 Blackwell
+protocole=gcp-migration/session_campagne_v5_scale_g4.sh (pin, gardes, arret certifie)
+
+# note
+Session 12 : pin 63deda74 = executeurs device instrumentes par etape (murs hote cumules sur 48 fils : h2d, k1, boucles hote, k2, compaction, k3, mur de scan) ; protocole complet a 50 k sans extension (25 runs). Objet inchange (digests CPU/GPU identiques). Lecture : uniform q4 — h2d 27,4 s, attente K1 42,2 s, hote 4,2 s, K2/K3 2,6 s, mur executeur 76,4 s cumules pour kernel_ms 7,5 s et une lane CPU de 3,0 s ; q3 — k1 0,20 s cumules pour 87 M seeds (2,3 ns/seed), mur executeur 6,9 s. Le chemin device est borne par les copies H2D des covers (64 o par site et par ancre, ~37 Go par lane), la contention de 48 fils sur un device et la synchronisation par etape, pas par le calcul.
+
+# run code duree_s peak_rss_kb
+conf_eight_clusters_n16000 0 16 5864012
+conf_eight_clusters_n32000 0 37 10948516
+conf_eight_clusters_n8000 0 7 2834552
+conf_scanline_single_pass_n16000 0 3 1190084
+conf_scanline_single_pass_n32000 0 7 2273768
+conf_scanline_single_pass_n8000 0 1 666652
+conf_terrain_n16000 0 3 1318048
+conf_terrain_n32000 0 8 2420324
+conf_terrain_n8000 0 1 686364
+conf_uniform_n16000 0 16 6735440
+conf_uniform_n32000 0 34 12643008
+conf_uniform_n8000 0 7 3319280
+contrat_eight_clusters_n50000 0 62 17624108
+contrat_gpu_eight_clusters_n50000 0 66 18187784
+contrat_gpu_scanline_single_pass_n50000 0 14 5267824
+contrat_gpu_terrain_n50000 0 16 4936028
+contrat_gpu_uniform_n50000 0 60 19653648
+contrat_gpuad_eight_clusters_n50000 0 65 17893488
+contrat_gpuad_scanline_single_pass_n50000 0 13 5426956
+contrat_scanline_single_pass_n50000 0 12 3616856
+contrat_terrain_n50000 0 17 3910780
+contrat_uniform_n50000 0 56 19829804
+gpu_lane 0 76 1860364
+gpu_mutant 4 3 807460
+gpu_witness 0 12 872604
+contrat_eight_clusters_n50000 digest_all=b65c2b510d5a5e09170086fc3429290f0b0e960c97d652a53c483e39037f2158
+contrat_gpu_eight_clusters_n50000 digest_all=b65c2b510d5a5e09170086fc3429290f0b0e960c97d652a53c483e39037f2158
+contrat_gpu_scanline_single_pass_n50000 digest_all=7cc339c0f01987b6a0cff9045a8e5f8bec264baba4f8229027bb45e7e4ec8b26
+contrat_gpu_terrain_n50000 digest_all=700dbbc067bbebce48173d9cc1d1b79cf10274a0773ef4075abf014976e8bbb5
+contrat_gpu_uniform_n50000 digest_all=5fc1fdef4f439028b2f956dfcba22a5f9736a94e83d05e13e0eb362918cda2c0
+contrat_gpuad_eight_clusters_n50000 digest_all=b65c2b510d5a5e09170086fc3429290f0b0e960c97d652a53c483e39037f2158
+contrat_gpuad_scanline_single_pass_n50000 digest_all=7cc339c0f01987b6a0cff9045a8e5f8bec264baba4f8229027bb45e7e4ec8b26
+contrat_scanline_single_pass_n50000 digest_all=7cc339c0f01987b6a0cff9045a8e5f8bec264baba4f8229027bb45e7e4ec8b26
+contrat_terrain_n50000 digest_all=700dbbc067bbebce48173d9cc1d1b79cf10274a0773ef4075abf014976e8bbb5
+contrat_uniform_n50000 digest_all=5fc1fdef4f439028b2f956dfcba22a5f9736a94e83d05e13e0eb362918cda2c0

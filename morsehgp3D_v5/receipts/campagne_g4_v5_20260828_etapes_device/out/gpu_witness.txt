@@ -1,0 +1,29 @@
+nvcc=/usr/local/cuda-12.9/bin/nvcc
+x86_64
+Cuda compilation tools, release 12.9, V12.9.41
+Build cuda_12.9.r12.9/compiler.35813241_0
+NVIDIA RTX PRO 6000 Blackwell Server Edition, 580.173.02
+-- The CXX compiler identification is GNU 11.4.0
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE
+-- Found Python3: /usr/bin/python3.10 (found version "3.10.12") found components: Interpreter
+-- The CUDA compiler identification is NVIDIA 12.9.41 with host compiler GNU 11.4.0
+-- Detecting CUDA compiler ABI info
+-- Detecting CUDA compiler ABI info - done
+-- Check for working CUDA compiler: /usr/local/cuda-12.9/bin/nvcc - skipped
+-- Detecting CUDA compile features
+-- Detecting CUDA compile features - done
+-- Configuring done (3.1s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/louis_hauseux_gmail_com/v5scale/build-cuda
+device=NVIDIA RTX PRO 6000 Blackwell Server Edition sm=12.0
+arith cas=262144 desaccords=0
+scan famille=uniform ancres=31643 seeds=728347 sites=2554143 morts=679367 desaccords=0 kernel_ms=0.495
+scan famille=eight_clusters ancres=43266 seeds=2308366 sites=7436419 morts=2276203 desaccords=0 kernel_ms=1.208
+device_witness OK

@@ -193,6 +193,34 @@ Ce qui reste de la lane q4 `scanline` (215 s) tient aux ancres dont la grille
 n'est pas construite (politique) ou n'est pas entièrement morte ; la
 politique et $G$ sont des réglages sans effet sur l'objet.
 
+**Session 12 (pin `63deda74` : exécuteurs device instrumentés par étape ;
+reçu `campagne_g4_v5_20260828_etapes_device`, 25 runs, validateur du pin
+rejoué) — pourquoi le device ne rapporte rien.** Murs *hôte* cumulés sur 48
+fils, `uniform` 50 k (lane q4 CPU 3,0 s, avec `--gpu` 4,3 s, `kernel_ms`
+7,5 s) : **H2D des sites 27,4 s**, **attente K1 + D2H des verdicts 42,2 s**,
+boucle hôte des vivants 0,4 s, K2 1,1 s, compaction hôte 3,8 s, K3 1,5 s,
+mur de `scan()` 76,4 s ; lane q3 : H2D 1,4 s, **K1 0,20 s pour 87 M seeds
+(2,3 ns par seed)**, D2H 0,14 s, mur 6,9 s. Mêmes proportions sur
+`eight_clusters` (q4 : H2D 38,9 s, K1 66,3 s, mur 114,7 s), `scanline` et
+`terrain`. Lecture : (1) le calcul device est négligeable — le noyau q3 tient
+en 0,2 s cumulés, le cœur q4 en quelques secondes ; (2) le chemin est borné
+par les **copies H2D des covers** : chaque ancre envoie son cover entier, 8
+tableaux i64 = 64 o par site, soit ≈ 37 Go par lane à 50 k pour une lane CPU
+de 3 s — le PCIe (≈ 9 Go/s agrégés) est le plafond ; (3) **48 fils** à
+exécuteurs `thread_local` se disputent un seul device (moteur de copie, file de
+lancement) et chaque étape est synchrone (`cudaStreamSynchronize` après H2D,
+K1, K2, K3) : le mur hôte d'un fil est l'attente des 47 autres ; (4) le reste
+de la lane (candidats, covers, assemblage des lots, émission) reste hôte, ≈
+2,7 s par fil sur 4,3 s. Conséquence : aucun réglage de lots ni de seuil ne
+change ce verdict ; le gain exige la forme de la doctrine (§ 1) — index et
+positions **résidents sur device** (96 Go), covers, tests d'ancre, grille,
+seeds et cœurs calculés **sur device par rectangle** sans aller-retour, un
+petit nombre de flux asynchrones à double tampon, aucune boucle hôte par seed
+ou par paire — c'est-à-dire la livraison 7 conçue avec l'architecture tuilée
+(`ECHELLE.md`), où une tuile est l'unité de travail device. Tant que ce n'est
+pas fait, le chemin device reste un exécuteur prouvé exact et non autoritaire,
+sans usage en campagne.
+
 ## 1. Ce que la mesure G4 a désigné (27 août 2026)
 
 Sur `g4-standard-48` à 48 fils, K = 1..10 exact (reçu
