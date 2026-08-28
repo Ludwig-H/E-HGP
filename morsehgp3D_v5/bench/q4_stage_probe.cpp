@@ -40,6 +40,7 @@ int main(int argc, char** argv) {
   GenerateStats ls;
   std::vector<BallCandidate> lo;
   u64 t_hist = 0, t_handles = 0, t_cover = 0, t_body = 0, t_query = 0, anchors = 0;
+  u64 query_rectangles = 0, query_candidates = 0;
   const auto now = [] { return std::chrono::steady_clock::now(); };
   const auto ns = [](auto t0) { return (u64)std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now() - t0).count(); };
   const auto t_all = now();
@@ -54,7 +55,13 @@ int main(int argc, char** argv) {
     sc.handle_points = 0;
     for (const NodeRef h : sc.handles) { const NodeRange r = ix.range_of(h); sc.handle_points += (u64)(r.last - r.first + 1); }
     const bool by_query = sc.handle_points >= pretest_min;
-    if (by_query) { t0 = now(); rect_diametral_candidates(ix, ix.box_of(ar.r.a), ix.box_of(ar.r.b), &sc.query, &sc.cover_nodes); t_query += ns(t0); }
+    if (by_query) {
+      t0 = now();
+      rect_diametral_candidates(ix, ix.box_of(ar.r.a), ix.box_of(ar.r.b), &sc.query, &sc.cover_nodes);
+      t_query += ns(t0);
+      ++query_rectangles;
+      query_candidates += sc.query.size();
+    }
     const u64 need = h_of[2] - ar.core;
     for (i32 ua = ra.first; ua <= ra.last; ++ua)
       for (i32 ub = rb.first; ub <= rb.last; ++ub) {
@@ -73,8 +80,12 @@ int main(int argc, char** argv) {
           if (k == 2) { ++ls.anchors_killed_sectors[2]; continue; }
         }
         t0 = now();
+        const u64 cover_visits_before = sc.visits;
         anchor_cover_from_handles(ix, sc.handles, pa, pb, D2, 3, &sc.cover, &sc.visits, &sc.cover_tmp);
         t_cover += ns(t0);
+        ++ls.q4_covers_built;
+        ls.q4_cover_visits += sc.visits - cover_visits_before;
+        ls.q4_cover_sites += sc.cover.size();
         t0 = now();
         generate_detail::process_anchor_q4(ix, sc, ua, ub, pa, pb, D2, h_of[2], float_on, false, false, false, &lo, &ls,
                                            by_query ? generate_detail::AnchorPretests::kAlreadyApplied : generate_detail::AnchorPretests::kApply);
@@ -83,12 +94,32 @@ int main(int argc, char** argv) {
   }
   const double total = (double)ns(t_all) / 1e6;
   const auto ms = [](u64 x) { return (double)x / 1e6; };
+  const u128 core_partition = (u128)ls.q4_cert[0] + ls.q4_cert[1] + ls.q4_cert[5];
+  const u128 depth_partition = (u128)ls.depth_killed[2] + ls.candidates[2];
+  const u128 completion_partition = (u128)ls.q4_rej_lens + ls.q4_rej_owner + ls.q4_rej_once + ls.q4_rej_i64 +
+                                    ls.q4_rej_face_power + ls.q4_rej_det + ls.q4_rej_center + ls.depth_killed[2] +
+                                    ls.candidates[2];
+  const bool core_ok = core_partition == ls.q4_core_site_tests;
+  const bool depth_ok = depth_partition == ls.q4_depth_entries;
+  const bool completions_ok = completion_partition == ls.q4_completions;
+  const bool query_nonempty = pretest_min != 0 || (query_rectangles > 0 && query_candidates > 0);
+  const bool nonempty = query_nonempty && ls.q4_covers_built > 0 && ls.q4_cover_visits > 0 && ls.q4_cover_sites > 0 &&
+                        ls.q4_core_site_tests > 0 && ls.q4_depth_entries > 0 && ls.q4_power_tests > 0 &&
+                        ls.q4_completions > 0;
   std::printf("q4_stage_probe famille=%s n=%d rectangles=%zu ancres_post_hist=%llu candidats=%llu seeds=%llu core_tues=%llu corde_tues=%llu completions=%llu profonds=%llu\n",
               cloud_family_name(family), n, alive.size(), (unsigned long long)anchors, (unsigned long long)lo.size(),
               (unsigned long long)ls.seeds[1], (unsigned long long)ls.seeds_killed_core, (unsigned long long)ls.seeds_killed_chord,
               (unsigned long long)ls.q4_completions, (unsigned long long)ls.depth_killed[2]);
-  std::printf("profil (ms, 1 fil, ratios seulement ; pretest_query_min=%zu) : total=%.0f histogrammes=%.0f handles=%.0f requetes_pretest=%.0f covers=%.0f corps=%.0f dont tests_ancre=%.0f cœur+corde=%.0f completions=%.0f ; tuees W4=%llu secteurs=%llu\n",
-              pretest_min, total, ms(t_hist), ms(t_handles), ms(t_query), ms(t_cover), ms(t_body), ms(ls.prof_q4_anchor_ns), ms(ls.prof_q4_core_ns), ms(ls.prof_q4_compl_ns),
+  std::printf("profil (ms, 1 fil, ratios seulement ; pretest_query_min=%zu) : total=%.0f histogrammes=%.0f handles=%.0f requetes_pretest=%.0f rectangles_requete=%llu candidats_requete=%llu covers=%.0f corps=%.0f dont tests_ancre=%.0f cœur+corde=%.0f completions=%.0f ; tuees W4=%llu secteurs=%llu\n",
+              pretest_min, total, ms(t_hist), ms(t_handles), ms(t_query), (unsigned long long)query_rectangles,
+              (unsigned long long)query_candidates, ms(t_cover), ms(t_body), ms(ls.prof_q4_anchor_ns), ms(ls.prof_q4_core_ns), ms(ls.prof_q4_compl_ns),
               (unsigned long long)ls.anchors_killed_w4, (unsigned long long)ls.anchors_killed_sectors[2]);
-  return 0;
+  std::printf("masses_q4 covers=%llu visites_points_cover=%llu sites_retenus=%llu tests_cœur=%llu entrees_profondeur=%llu tests_q4_power=%llu\n",
+              (unsigned long long)ls.q4_covers_built, (unsigned long long)ls.q4_cover_visits,
+              (unsigned long long)ls.q4_cover_sites, (unsigned long long)ls.q4_core_site_tests,
+              (unsigned long long)ls.q4_depth_entries, (unsigned long long)ls.q4_power_tests);
+  std::printf("identites_q4 cœur=%s profondeur=%s completions=%s non_vacuite=%s\n", core_ok ? "OK" : "ECHEC",
+              depth_ok ? "OK" : "ECHEC", completions_ok ? "OK" : "ECHEC", nonempty ? "OK" : "ECHEC");
+  if (!nonempty) return 3;
+  return core_ok && depth_ok && completions_ok ? 0 : 1;
 }

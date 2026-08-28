@@ -435,8 +435,14 @@ inline void generate_q3_batched_with(const CloudIndex& ix, const GenerateOptions
   st->postsep_base_mass[1] = led.base;
   st->postsep_emitted_mass[1] = led.emitted;
   st->postsep_killed_mass[1] = led.killed;
+  st->postsep_parent_rects[1] = led.parents;
+  st->postsep_emitted_rects[1] = led.emitted_rects;
   st->postsep_subrects[1] = led.subrects;
   st->postsep_core_evals[1] = led.core_evals;
+  st->postsep_core_nodes[1] = led.core_nodes;
+  st->postsep_corner_evals[1] = led.corner_evals;
+  st->postsep_rollbacks[1] = led.rollbacks;
+  st->postsep_core_regressions[1] = led.core_regressions;
   st->t_wspd_ms[1] += ms_since(t0);
   st->rect_alive[1] = alive.size();
   const auto t1 = std::chrono::steady_clock::now();

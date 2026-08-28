@@ -71,19 +71,32 @@ struct Writer {
     return h.hex();
   }
 };
+
+inline void candidate_records(Writer* d, const std::vector<BallCandidate>& cands) {
+  d->u64v((u64)cands.size());
+  for (const BallCandidate& c : cands) {
+    d->i128v(c.key.a);
+    for (int i = 0; i < 3; ++i) d->i128v(c.key.b[i]);
+    d->i128v(c.key.c);
+    d->level(c.level);
+    d->u8v(c.arity);
+  }
+}
 }  // namespace digest_detail
 
 inline std::string digest_balls_v4(const std::vector<BallCandidate>& cands) {
   digest_detail::Writer d;
   d.tag("mhgp4-digest-v1:balls");
-  d.u64v((u64)cands.size());
-  for (const BallCandidate& c : cands) {
-    d.i128v(c.key.a);
-    for (int i = 0; i < 3; ++i) d.i128v(c.key.b[i]);
-    d.i128v(c.key.c);
-    d.level(c.level);
-    d.u8v(c.arity);
-  }
+  digest_detail::candidate_records(&d, cands);
+  return d.hex();
+}
+
+// Diagnostic v5 : multiensemble de candidats AVANT RLE, deja trie par l'ordre
+// canonique. Il ne remplace pas `digest_balls` et n'entre dans aucun claim v4.
+inline std::string digest_raw_candidates_v5(const std::vector<BallCandidate>& cands) {
+  digest_detail::Writer d;
+  d.tag("mhgp5-diagnostic-v1:raw-candidates");
+  digest_detail::candidate_records(&d, cands);
   return d.hex();
 }
 

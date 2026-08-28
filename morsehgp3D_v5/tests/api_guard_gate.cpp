@@ -4,8 +4,9 @@
 // tout debordement serait un crash par signal, refuse par run_expect.
 //   entree vide, singleton, deux points, positions dupliquees, coordonnee hors
 //   profil, PointId duplique, smax ∈ {0, 1, 11, 12}, s < 1, threads <= 0,
-//   fold_inflight hors de [1, 16], plafond de coquille < 4 ; census sur un singleton (P1 : nodes.empty() n'est
-//   pas le vide) ; expansion a kmax = 1 (smax = 2).
+//   fold_inflight hors de [1, 16], postsep hors de [0,3] ou combine a un
+//   override non propage, plafond de coquille < 4 ; census sur un singleton
+//   (P1 : nodes.empty() n'est pas le vide) ; expansion a kmax = 1 (smax = 2).
 // Codes : 0 conforme, 3 contrat viole.
 #include <atomic>
 #include <chrono>
@@ -82,6 +83,20 @@ int main() {
     o = base;
     o.threads = 0;
     run_case("threads=0", small, o, PipelineStatus::kInvalidInput);
+    o = base;
+    o.postsep_refine_levels = 4;
+    run_case("postsep=4", small, o, PipelineStatus::kInvalidInput);
+    o = base;
+    o.postsep_refine_levels = 1;
+    o.q3_override = [](const CloudIndex&, const GenerateOptions&, std::vector<BallCandidate>*, GenerateStats*) {};
+    run_case("postsep avec override q3", small, o, PipelineStatus::kInvalidInput);
+    o = base;
+    o.postsep_refine_levels = 1;
+    o.q4_override = [](const CloudIndex&, const GenerateOptions&, std::vector<BallCandidate>*, GenerateStats*) {};
+    run_case("postsep avec override q4", small, o, PipelineStatus::kInvalidInput);
+    o = base;
+    o.postsep_refine_levels = 3;
+    run_case("postsep=3 (limite haute du domaine)", small, o, PipelineStatus::kCompleteRegular);
     // Domaine de fold_inflight [1, kFoldInflightMax] : hors domaine = refus
     // explicite AVANT calcul (jamais un std::max silencieux).
     for (const int f : {0, -1, kFoldInflightMax + 1, 1000}) {

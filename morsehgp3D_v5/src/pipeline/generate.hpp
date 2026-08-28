@@ -59,8 +59,15 @@ struct GenerateStats {
   u64 postsep_base_mass[3] = {0, 0, 0};     // Σ |A||B| des rectangles vivants AVANT raffinement
   u64 postsep_emitted_mass[3] = {0, 0, 0};  // Σ |A||B| des sous-rectangles EMIS
   u64 postsep_killed_mass[3] = {0, 0, 0};   // Σ |A||B| des sous-rectangles certifies MORTS
-  u64 postsep_subrects[3] = {0, 0, 0};      // sous-rectangles visites
-  u64 postsep_core_evals[3] = {0, 0, 0};    // comptages universels payes par le raffinement
+  u64 postsep_parent_rects[3] = {0, 0, 0};  // rectangles vivants du front WSPD canonique
+  u64 postsep_emitted_rects[3] = {0, 0, 0}; // sous-produits effectivement remis aux lanes
+  u64 postsep_subrects[3] = {0, 0, 0};      // etats depiles, racines incluses
+  u64 postsep_core_evals[3] = {0, 0, 0};    // appels de comptage universel payes par le raffinement
+  u64 postsep_core_nodes[3] = {0, 0, 0};    // nœuds d'index visites dans ces appels
+  u64 postsep_corner_evals[3] = {0, 0, 0};  // evaluations de coins dans ces appels
+  u64 postsep_rollbacks[3] = {0, 0, 0};     // scissions annulees : au moins un enfant non separe
+  u64 postsep_core_regressions[3] = {0, 0, 0};  // compte frais < minorant du parent (invariant)
+  u64 postsep_ledger_violations = 0;             // rempli et refuse par run_pipeline avant publication
   u64 rect_visited[3] = {0, 0, 0};
   u64 anchors[3] = {0, 0, 0};
   u64 anchors_killed_hist[3] = {0, 0, 0};
@@ -115,9 +122,16 @@ struct GenerateStats {
       postsep_base_mass[i] += o.postsep_base_mass[i];
       postsep_emitted_mass[i] += o.postsep_emitted_mass[i];
       postsep_killed_mass[i] += o.postsep_killed_mass[i];
+      postsep_parent_rects[i] += o.postsep_parent_rects[i];
+      postsep_emitted_rects[i] += o.postsep_emitted_rects[i];
       postsep_subrects[i] += o.postsep_subrects[i];
       postsep_core_evals[i] += o.postsep_core_evals[i];
+      postsep_core_nodes[i] += o.postsep_core_nodes[i];
+      postsep_corner_evals[i] += o.postsep_corner_evals[i];
+      postsep_rollbacks[i] += o.postsep_rollbacks[i];
+      postsep_core_regressions[i] += o.postsep_core_regressions[i];
     }
+    postsep_ledger_violations += o.postsep_ledger_violations;
     prof_q4_anchor_ns += o.prof_q4_anchor_ns; prof_q4_core_ns += o.prof_q4_core_ns;
     prof_q4_compl_ns += o.prof_q4_compl_ns; prof_q4_cover_ns += o.prof_q4_cover_ns;
     q4_covers_built += o.q4_covers_built;
@@ -165,38 +179,51 @@ inline double ms_since(std::chrono::steady_clock::time_point t0) {
 // Descente WSPD ternaire d'une lane, parallele par tranches ORDONNEES de la
 // vague : chaque tranche ecrit ses tampons, la concatenation se fait en ordre
 // de tranche — sortie bit-identique au sequentiel.
-// RAFFINEMENT POST-SEPARATION d'UN rectangle vivant : prolonge la descente
-// ternaire de `levels` niveaux au plus, en reevaluant le comptage universel de
-// chaque sous-rectangle. Les sous-rectangles PARTITIONNENT les paires du
-// parent (`ix.nodes[v].left/right` partitionne la plage de feuilles de `v`),
-// donc l'objet, la completude et le critere terminal de la WSPD sont intacts ;
-// seul le decoupage du TRAVAIL change. Le comptage universel d'un enfant est
-// >= celui de son parent (boites incluses => l'ensemble des ancres est un
-// sous-ensemble), donc le raffinement ne peut que tuer davantage. En q2 il est
-// desactive : voir `GenerateOptions::postsep_refine_levels`.
+// RAFFINEMENT POST-SEPARATION d'UN rectangle vivant : partition post-WSPD,
+// jamais une nouvelle WSPD. Une scission n'est publiee que si ses DEUX enfants
+// satisfont encore le predicat entier `separated`; sinon elle est annulee et le
+// parent est emis atomiquement. Les produits enfants partitionnent alors les
+// paires du parent (`ix.nodes[v].left/right` partitionne sa plage de feuilles).
+// Le minorant de cœur du parent reste prouve sur tout sous-produit : on conserve
+// donc `max(parent, frais)`, jamais leur somme. En q2 la route reste desactivee :
+// voir `GenerateOptions::postsep_refine_levels`.
 struct PostsepLedger {
-  u64 base = 0, emitted = 0, killed = 0, subrects = 0, core_evals = 0;
+  // Les plages de positions sont indexees en i32 : leur masse totale est
+  // strictement inferieure a C(2^31, 2), donc u64 ferme sans ambiguite ce
+  // ledger, y compris `emitted + killed`. Les multiplicites de PointId ont un
+  // ledger distinct dans la WSPD et ne sont pas revendiquees ici.
+  u64 base = 0, emitted = 0, killed = 0;
+  u64 parents = 0, emitted_rects = 0, subrects = 0;
+  u64 core_evals = 0, core_nodes = 0, corner_evals = 0;
+  u64 rollbacks = 0, core_regressions = 0;
 };
 inline void postsep_refine(const CloudIndex& ix, const WspdRect& r, u64 core, const u64 h_of[3], int lane_idx, u8 mask,
-                           u32 levels, std::vector<AliveRect>* out, PostsepLedger* led) {
+                           i64 separation_s, u32 levels, std::vector<AliveRect>* out, PostsepLedger* led,
+                           std::vector<WspdRect>* killed_trace = nullptr) {
   const auto mass = [&](const WspdRect& q) -> u64 {
     const NodeRange qa = ix.range_of(q.a), qb = ix.range_of(q.b);
     return (u64)(qa.last - qa.first + 1) * (u64)(qb.last - qb.first + 1);
   };
+  const auto emit = [&](const WspdRect& q, u64 qcore) {
+    led->emitted += mass(q);
+    ++led->emitted_rects;
+    out->push_back(AliveRect{q, qcore});
+    if (MHGP5_MUTANT("postsep-duplicate-child")) {
+      led->emitted += mass(q);
+      ++led->emitted_rects;
+      out->push_back(AliveRect{q, qcore});
+    }
+  };
   led->base += mass(r);
-  // ROUTE q2 INTERDITE par CONCEPTION, et non par mutant : l'audit du 28 aout
-  // 2026 decrit un « reveil » d'histogramme possible en q2 (un temoin du frere
-  // compte dans `h_b` au parent peut ne l'etre ni par `h_b` ni par le cœur de
-  // l'enfant, faute de pretest ponctuel en q2). Je n'ai PAS su l'exhiber : ni
-  // sur les quatre positions de l'audit, ni sur 18 000 nuages entiers
-  // aleatoires (5 a 12 points, smax 3 a 7). Le cœur de l'enfant etant >= celui
-  // du parent, `need = h - core` diminue et compense la perte d'histogramme.
-  // La route reste fermee — elle ne coute rien et le risque est reel en
-  // theorie — mais aucun mutant ne peut la garder tant que le phenomene n'est
-  // pas realisable : la porte verifie l'INVARIANT (`tues[q2] == 0`).
-  if (levels == 0 || lane_idx == 0) {  // desactive, ou lane q2 (route interdite)
-    led->emitted += mass(r);
-    out->push_back(AliveRect{r, core});
+  ++led->parents;
+  // ROUTE q2 INTERDITE : la fixture radix a six points de la porte montre un
+  // reveil reel d'histogramme (13 -> 14 candidats, digest_balls different) sans
+  // aucune masse q2 tuee. Le ledger de paires reste donc vert et ne suffit pas.
+  // `postsep-refine-q2` ouvre seulement cette faute sous MHGP5_TESTING afin que
+  // la contre-fixture permanente la tue par sa divergence semantique.
+  const bool refine_q2 = MHGP5_MUTANT("postsep-refine-q2");
+  if (levels == 0 || (lane_idx == 0 && !refine_q2)) {  // desactive, ou lane q2 fermee
+    emit(r, core);
     return;
   }
   const u64 h = h_of[lane_idx];
@@ -213,8 +240,7 @@ inline void postsep_refine(const CloudIndex& ix, const WspdRect& r, u64 core, co
     ++led->subrects;
     const bool a_leaf = cur.r.a < 0, b_leaf = cur.r.b < 0;
     if (cur.d >= levels || (a_leaf && b_leaf)) {
-      led->emitted += mass(cur.r);
-      out->push_back(AliveRect{cur.r, cur.core});
+      emit(cur.r, cur.core);
       continue;
     }
     const AxisBox va = ix.box_of(cur.r.a), vb = ix.box_of(cur.r.b);
@@ -224,9 +250,26 @@ inline void postsep_refine(const CloudIndex& ix, const WspdRect& r, u64 core, co
     const RadixNode& nd = ix.nodes[(size_t)(split_a ? cur.r.a : cur.r.b)];
     const WspdRect kids[2] = {split_a ? WspdRect{nd.left, keep} : WspdRect{keep, nd.left},
                               split_a ? WspdRect{nd.right, keep} : WspdRect{keep, nd.right}};
+    // Le test de boites centre/rayon n'est pas hereditaire quand le centre de
+    // la boite enfant se deplace. Aucune decision enfant n'est donc consommee
+    // tant que les DEUX enfants ne sont pas separes (rollback transactionnel).
+    if (!wspd_detail::separated(ix.box_of(kids[0].a), ix.box_of(kids[0].b), separation_s, 1) ||
+        !wspd_detail::separated(ix.box_of(kids[1].a), ix.box_of(kids[1].b), separation_s, 1)) {
+      ++led->rollbacks;
+      emit(cur.r, cur.core);
+      continue;
+    }
     for (const WspdRect& k : kids) {
       ++led->core_evals;
-      const FusedCounts fc = count_universal_witnesses(ix, k.a, k.b, h_of, mask, true);
+      // MUTANT : retire l'autorite exacte aux feuilles. Une fixture q3 minimale
+      // rend alors le compte frais strictement inferieur au minorant herite ;
+      // la garde `core_regressions` doit refuser avant toute publication.
+      const bool with_corners = !MHGP5_MUTANT("postsep-core-without-corners");
+      const FusedCounts fc = count_universal_witnesses(ix, k.a, k.b, h_of, mask, with_corners);
+      led->core_nodes += fc.nodes_visited;
+      led->corner_evals += fc.corner_evals;
+      if (fc.c[lane_idx] < cur.core) ++led->core_regressions;
+      const u64 child_core = std::max(cur.core, fc.c[lane_idx]);
       // MUTANT `postsep-drop-child` : un enfant vivant est jete au lieu d'etre
       // emis — perte de paires, donc perte de boules ; le grand-livre
       // (emis + tues == base) le voit avant meme le digest.
@@ -236,16 +279,16 @@ inline void postsep_refine(const CloudIndex& ix, const WspdRect& r, u64 core, co
       // leurs boules disparaissent. C'est la faute la plus grave possible ici
       // (perte de completude), et le digest la voit.
       const u64 hk = MHGP5_MUTANT("postsep-kill-h-minus-one") && h > 0 ? h - 1 : h;
-      if (fc.c[lane_idx] >= hk) {  // sous-rectangle CERTIFIE MORT : ses paires ne seront jamais enumerees
+      if (child_core >= hk) {  // sous-rectangle CERTIFIE MORT : ses paires ne seront jamais enumerees
         led->killed += mass(k);
+        if (killed_trace) killed_trace->push_back(k);
         continue;
       }
       if (top >= 32) {  // majorant franc : on emet plutot que de deborder (fail-open, jamais une perte)
-        led->emitted += mass(k);
-        out->push_back(AliveRect{k, fc.c[lane_idx]});
+        emit(k, child_core);
         continue;
       }
-      st[top++] = Sub{k, fc.c[lane_idx], cur.d + 1};
+      st[top++] = Sub{k, child_core, cur.d + 1};
     }
   }
 }
@@ -286,7 +329,7 @@ inline void alive_rectangles(const CloudIndex& ix, i64 s, const u64 h_of[3], int
         if (wspd_detail::separated(va, vb, s, 1)) {
           const FusedCounts ff = count_universal_witnesses(ix, r.a, r.b, h_of, mask, true);
           if (ff.c[lane_idx] < h)
-            postsep_refine(ix, r, ff.c[lane_idx], h_of, lane_idx, mask, levels, &lout[c], &lstat[c]);
+            postsep_refine(ix, r, ff.c[lane_idx], h_of, lane_idx, mask, s, levels, &lout[c], &lstat[c]);
           continue;
         }
         const i64 w2a = wspd_detail::box_w2(va), w2b = wspd_detail::box_w2(vb);
@@ -306,8 +349,14 @@ inline void alive_rectangles(const CloudIndex& ix, i64 s, const u64 h_of[3], int
       led_total.base += lstat[c].base;
       led_total.emitted += lstat[c].emitted;
       led_total.killed += lstat[c].killed;
+      led_total.parents += lstat[c].parents;
+      led_total.emitted_rects += lstat[c].emitted_rects;
       led_total.subrects += lstat[c].subrects;
       led_total.core_evals += lstat[c].core_evals;
+      led_total.core_nodes += lstat[c].core_nodes;
+      led_total.corner_evals += lstat[c].corner_evals;
+      led_total.rollbacks += lstat[c].rollbacks;
+      led_total.core_regressions += lstat[c].core_regressions;
     }
     wave.swap(next);
   }
@@ -744,13 +793,13 @@ struct GenerateOptions {
   // Prolonge la descente ternaire A L INTERIEUR d'un rectangle vivant : la
   // partition des paires est INCHANGEE (donc l'objet aussi), mais les boites
   // se resserrent, le comptage universel croit, et un sous-rectangle peut
-  // mourir la ou son parent vivait. Cout borne : au plus 2/6/14 nouveaux
-  // comptages par parent pour L = 1/2/3.
-  // ROUTE q2 INTERDITE : en q2 aucun pretest ponctuel ne referme la couture du
-  // temoin du frere (contre-fixture `refine-hist-wakeup` de l'audit du 28 aout
-  // 2026), donc le multiensemble de candidats pourrait changer. En q3/q4 le
-  // pretest ponctuel est TOUJOURS applique (`kApply` sinon `kAlreadyApplied`),
-  // ce qui recompte le temoin et laisse l'objet inchange.
+  // mourir la ou son parent vivait. Une scission dont un enfant n'est plus
+  // `separated` est annulee avant tout effet. Cout borne : au plus 2/6/14
+  // nouveaux comptages par parent pour L = 1/2/3.
+  // ROUTE q2 INTERDITE : une contre-fixture radix a six points reveille une
+  // boule q2 apres subdivision alors que le ledger de paires reste exact. Le
+  // mutant test-only `postsep-refine-q2` garde cette fermeture. En q3/q4 le
+  // pretest ponctuel est toujours applique (`kApply` ou `kAlreadyApplied`).
   u32 postsep_refine_levels = 0;
   LaneOverride q3_override;  // vide : lane q3 integree
   LaneOverride q4_override;  // vide : lane q4 integree
@@ -803,6 +852,9 @@ inline void generate_candidates(const CloudIndex& ix, const GenerateOptions& opt
     st->postsep_base_mass[0] = led2.base; st->postsep_emitted_mass[0] = led2.emitted;
     st->postsep_killed_mass[0] = led2.killed; st->postsep_subrects[0] = led2.subrects;
     st->postsep_core_evals[0] = led2.core_evals;
+    st->postsep_parent_rects[0] = led2.parents; st->postsep_emitted_rects[0] = led2.emitted_rects;
+    st->postsep_core_nodes[0] = led2.core_nodes; st->postsep_corner_evals[0] = led2.corner_evals;
+    st->postsep_rollbacks[0] = led2.rollbacks; st->postsep_core_regressions[0] = led2.core_regressions;
     st->t_wspd_ms[0] += ms_since(t0);
     st->rect_alive[0] = alive.size();
     const auto t1 = std::chrono::steady_clock::now();
@@ -839,6 +891,9 @@ inline void generate_candidates(const CloudIndex& ix, const GenerateOptions& opt
     st->postsep_base_mass[1] = led3.base; st->postsep_emitted_mass[1] = led3.emitted;
     st->postsep_killed_mass[1] = led3.killed; st->postsep_subrects[1] = led3.subrects;
     st->postsep_core_evals[1] = led3.core_evals;
+    st->postsep_parent_rects[1] = led3.parents; st->postsep_emitted_rects[1] = led3.emitted_rects;
+    st->postsep_core_nodes[1] = led3.core_nodes; st->postsep_corner_evals[1] = led3.corner_evals;
+    st->postsep_rollbacks[1] = led3.rollbacks; st->postsep_core_regressions[1] = led3.core_regressions;
     st->t_wspd_ms[1] += ms_since(t0);
     st->rect_alive[1] = alive.size();
     const auto t1 = std::chrono::steady_clock::now();
@@ -888,6 +943,9 @@ inline void generate_candidates(const CloudIndex& ix, const GenerateOptions& opt
     st->postsep_base_mass[2] = led4.base; st->postsep_emitted_mass[2] = led4.emitted;
     st->postsep_killed_mass[2] = led4.killed; st->postsep_subrects[2] = led4.subrects;
     st->postsep_core_evals[2] = led4.core_evals;
+    st->postsep_parent_rects[2] = led4.parents; st->postsep_emitted_rects[2] = led4.emitted_rects;
+    st->postsep_core_nodes[2] = led4.core_nodes; st->postsep_corner_evals[2] = led4.corner_evals;
+    st->postsep_rollbacks[2] = led4.rollbacks; st->postsep_core_regressions[2] = led4.core_regressions;
     st->t_wspd_ms[2] += ms_since(t0);
     st->rect_alive[2] = alive.size();
     const auto t1 = std::chrono::steady_clock::now();

@@ -34,9 +34,8 @@ int main(int argc, char** argv) {
     else if (const char* v = val("--fold-inflight=")) opt.fold_inflight = std::atoi(v);
     else if (const char* v = val("--cell-min-sites=")) opt.cell_grid_min_sites = (size_t)std::atoll(v);
     else if (const char* v = val("--postsep=")) {  // raffinement post-separation : L in [0, 3], refus hors domaine
-      const long long L = std::atoll(v);
-      if (L < 0 || L > 3) ok = false;
-      else opt.postsep_refine_levels = (u32)L;
+      if (v[0] < '0' || v[0] > '3' || v[1] != '\0') ok = false;
+      else opt.postsep_refine_levels = (u32)(v[0] - '0');
     }
     else if (const char* v = val("--shell-cap=")) opt.shell_cap = (size_t)std::atoll(v);
     else if (arg == "--digest") opt.digest = true;

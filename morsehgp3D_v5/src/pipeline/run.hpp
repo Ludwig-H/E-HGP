@@ -61,6 +61,10 @@ struct RunOptions {
   int threads = 1;
   size_t shell_cap = 12;
   bool digest = false;
+  // Diagnostic opt-in : signe le multiensemble trie AVANT RLE. Le digest
+  // normal reste seul par defaut, afin de ne pas ajouter un second hachage du
+  // catalogue brut aux contrats de temps historiques.
+  bool diagnostic_raw_candidates_digest = false;
   // Ordres K dont l'etage B (reduction sequentielle par ordre, signature,
   // publication) peut etre en vol simultanement, dans [1, kFoldInflightMax] ;
   // la publication reste dans l'ordre des K et la sortie bit-identique ;
@@ -102,7 +106,7 @@ struct RunResult {
   ExpandStats expand;
   std::vector<KCardinalities> cards;  // indexee par K
   u64 total_facets = 0, total_fusions = 0, total_deltas = 0, total_nodes = 0, total_events = 0;
-  std::string digest_balls, digest_all;
+  std::string digest_raw_candidates, digest_balls, digest_all;
   std::vector<std::string> digest_forest;  // indexee par K
   double t_index_ms = 0, t_gen_ms = 0, t_rle_ms = 0, t_prefilter_ms = 0, t_census_ms = 0, t_expand_ms = 0,
          t_fold_ms = 0, t_count_ms = 0, t_digest_ms = 0;
@@ -166,6 +170,14 @@ inline bool validate_run_options(const std::vector<InputPoint>& in, const RunOpt
   if (opt.s < 1) { *why = "invalid_input : separation s < 1"; return false; }
   if (opt.smax < 2 || opt.smax > kSmaxProfile) { *why = "invalid_input : smax hors du profil [2, 11]"; return false; }
   if (opt.threads < 1) { *why = "invalid_input : threads < 1"; return false; }
+  if (opt.postsep_refine_levels > 3) {
+    *why = "invalid_input : postsep_refine_levels hors du domaine [0, 3]";
+    return false;
+  }
+  if (opt.postsep_refine_levels > 0 && (opt.q3_override || opt.q4_override)) {
+    *why = "invalid_input : raffinement post-separation non propage aux overrides q3/q4";
+    return false;
+  }
   if (opt.fold_inflight < 1 || opt.fold_inflight > kFoldInflightMax) {
     *why = "invalid_input : fold_inflight hors du domaine [1, " + std::to_string(kFoldInflightMax) + "]";
     return false;
@@ -215,6 +227,27 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
   generate_candidates(ix, go, &cands, &rr.gen);
   rr.t_gen_ms = ms(t_g);
   rr.rss_mb[0] = run_detail::rss_mb_now();
+  for (int q = 0; q < 3; ++q) {
+    const u128 accounted = (u128)rr.gen.postsep_emitted_mass[q] + rr.gen.postsep_killed_mass[q];
+    if (accounted != rr.gen.postsep_base_mass[q]) ++rr.gen.postsep_ledger_violations;
+    if (rr.gen.rect_alive[q] != rr.gen.postsep_emitted_rects[q]) ++rr.gen.postsep_ledger_violations;
+    if (opt.postsep_refine_levels == 0 &&
+        rr.gen.postsep_parent_rects[q] != rr.gen.postsep_emitted_rects[q])
+      ++rr.gen.postsep_ledger_violations;
+  }
+  if (rr.gen.postsep_killed_mass[0] != 0 || rr.gen.postsep_emitted_mass[0] != rr.gen.postsep_base_mass[0] ||
+      rr.gen.postsep_parent_rects[0] != rr.gen.postsep_emitted_rects[0] ||
+      rr.gen.postsep_subrects[0] != 0 || rr.gen.postsep_core_evals[0] != 0 ||
+      rr.gen.postsep_core_nodes[0] != 0 || rr.gen.postsep_corner_evals[0] != 0 ||
+      rr.gen.postsep_rollbacks[0] != 0)
+    ++rr.gen.postsep_ledger_violations;
+  if (rr.gen.postsep_core_regressions[0] || rr.gen.postsep_core_regressions[1] || rr.gen.postsep_core_regressions[2])
+    ++rr.gen.postsep_ledger_violations;
+  if (rr.gen.postsep_ledger_violations) {
+    rr.status = PipelineStatus::kInvariantViolated;
+    rr.message = "invariant : grand-livre, structure q2 ou monotonie du raffinement post-separation viole";
+    return rr;
+  }
   if (rr.gen.invariant_jneg) {
     rr.status = PipelineStatus::kInvariantViolated;
     rr.message = "invariant : seed q4 aigu avec J < 0 (inatteignable par theoreme, MATHEMATIQUES § 10) : " +
@@ -223,8 +256,16 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
   }
   const auto t_r = std::chrono::steady_clock::now();
   rr.emitted = cands.size();
-  rr.rle_workers = rle_candidates(&cands, opt.threads);
-  rr.t_rle_ms = ms(t_r);
+  rr.rle_workers = sort_candidates(&cands, opt.threads);
+  const double t_sort_candidates_ms = ms(t_r);
+  if (opt.diagnostic_raw_candidates_digest) {
+    const auto t_d = std::chrono::steady_clock::now();
+    rr.digest_raw_candidates = digest_raw_candidates_v5(cands);
+    rr.t_digest_ms += ms(t_d);
+  }
+  const auto t_u = std::chrono::steady_clock::now();
+  deduplicate_candidates(&cands);
+  rr.t_rle_ms = t_sort_candidates_ms + ms(t_u);
   rr.rss_mb[1] = run_detail::rss_mb_now();
   rr.expand.unique_balls = cands.size();
 
@@ -612,15 +653,25 @@ inline void print_run(std::FILE* out, const char* family, int n, int coord, long
                (unsigned long long)gs.float_cert_neg, (unsigned long long)gs.float_cert_pos, (unsigned long long)gs.float_fallback,
                (unsigned long long)gs.jung_cert_kill, (unsigned long long)gs.jung_cert_skip, (unsigned long long)gs.jung_fallback);
   // GRAND-LIVRE DU RAFFINEMENT POST-SEPARATION : identite exacte par lane.
-  std::fprintf(out, "postsep L=%u base=%llu/%llu/%llu emis=%llu/%llu/%llu tues=%llu/%llu/%llu sous_rects=%llu/%llu/%llu comptages=%llu/%llu/%llu\n",
-               opt.postsep_refine_levels, (unsigned long long)gs.postsep_base_mass[0], (unsigned long long)gs.postsep_base_mass[1],
+  std::fprintf(out, "postsep L=%u parents=%llu/%llu/%llu produits=%llu/%llu/%llu base=%llu/%llu/%llu emis=%llu/%llu/%llu tues=%llu/%llu/%llu etats=%llu/%llu/%llu comptages=%llu/%llu/%llu nœuds=%llu/%llu/%llu coins=%llu/%llu/%llu rollbacks=%llu/%llu/%llu regressions=%llu/%llu/%llu\n",
+               opt.postsep_refine_levels, (unsigned long long)gs.postsep_parent_rects[0],
+               (unsigned long long)gs.postsep_parent_rects[1], (unsigned long long)gs.postsep_parent_rects[2],
+               (unsigned long long)gs.postsep_emitted_rects[0], (unsigned long long)gs.postsep_emitted_rects[1],
+               (unsigned long long)gs.postsep_emitted_rects[2],
+               (unsigned long long)gs.postsep_base_mass[0], (unsigned long long)gs.postsep_base_mass[1],
                (unsigned long long)gs.postsep_base_mass[2], (unsigned long long)gs.postsep_emitted_mass[0],
                (unsigned long long)gs.postsep_emitted_mass[1], (unsigned long long)gs.postsep_emitted_mass[2],
                (unsigned long long)gs.postsep_killed_mass[0], (unsigned long long)gs.postsep_killed_mass[1],
                (unsigned long long)gs.postsep_killed_mass[2], (unsigned long long)gs.postsep_subrects[0],
                (unsigned long long)gs.postsep_subrects[1], (unsigned long long)gs.postsep_subrects[2],
                (unsigned long long)gs.postsep_core_evals[0], (unsigned long long)gs.postsep_core_evals[1],
-               (unsigned long long)gs.postsep_core_evals[2]);
+               (unsigned long long)gs.postsep_core_evals[2], (unsigned long long)gs.postsep_core_nodes[0],
+               (unsigned long long)gs.postsep_core_nodes[1], (unsigned long long)gs.postsep_core_nodes[2],
+               (unsigned long long)gs.postsep_corner_evals[0], (unsigned long long)gs.postsep_corner_evals[1],
+               (unsigned long long)gs.postsep_corner_evals[2], (unsigned long long)gs.postsep_rollbacks[0],
+               (unsigned long long)gs.postsep_rollbacks[1], (unsigned long long)gs.postsep_rollbacks[2],
+               (unsigned long long)gs.postsep_core_regressions[0], (unsigned long long)gs.postsep_core_regressions[1],
+               (unsigned long long)gs.postsep_core_regressions[2]);
   std::fprintf(out, "ouvriers wspd=%llu/%llu/%llu rects=%llu/%llu/%llu rle=%llu prefiltre=%llu census=%llu expansion=%llu fold=%llu\n",
                (unsigned long long)gs.workers_wspd[0], (unsigned long long)gs.workers_wspd[1], (unsigned long long)gs.workers_wspd[2],
                (unsigned long long)gs.workers_rects[0], (unsigned long long)gs.workers_rects[1], (unsigned long long)gs.workers_rects[2],
@@ -645,6 +696,8 @@ inline void print_run(std::FILE* out, const char* family, int n, int coord, long
                  (unsigned long long)rr.cards[K].deltas, (unsigned long long)rr.cards[K].attachments,
                  (unsigned long long)rr.cards[K].fusions, (unsigned long long)rr.cards[K].nodes);
   if (opt.digest) {
+    if (!rr.digest_raw_candidates.empty())
+      std::fprintf(out, "digest_raw_candidates=%s\n", rr.digest_raw_candidates.c_str());
     std::fprintf(out, "digest_balls=%s\n", rr.digest_balls.c_str());
     for (u64 K = 1; K <= rr.kmax_eff; ++K)
       std::fprintf(out, "digest_forest_K%llu=%s\n", (unsigned long long)K, rr.digest_forest[K].c_str());

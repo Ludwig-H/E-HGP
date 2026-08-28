@@ -51,7 +51,12 @@ machine (8 cœurs, 31 Go), puis contrats à 50 000 points sur G4 via
 `gcp-migration/`, puis des dizaines de millions de points. Aucun claim tant
 que les portes ne le prouvent pas : `public_status` reste `not_claimed`.
 L'état courant est le verdict de l'auditeur (`audits/ETAT_COURANT.md`) ;
-les réponses de l'implémenteur sont les `audits/REPONSE_CLAUDE_*`.
+les seuls échanges encore actifs sont indexés par `audits/README.md`.
+
+Le raffinement post-séparation CPU est un diagnostic opt-in borné
+(`postsep_refine_levels` dans $[0,3]$), désactivé par défaut. La route q2 reste
+fermée et les overrides publics, dont le CLI CUDA, refusent encore $L>0$ ;
+aucune optimisation ni réception device n'est revendiquée pour ce raccord.
 
 **Conformité v4 ≡ v5** (digests canoniques au format v4, `digest_balls` et
 `digest_all`, sur les mêmes entrées) : porte `mhgp5_conformity_*`, reçu

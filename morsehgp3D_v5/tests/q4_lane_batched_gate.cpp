@@ -15,6 +15,7 @@ using namespace mhgp5;
 int main(int argc, char** argv) {
   CloudFamily family = CloudFamily::kUniform;
   int n = 400, coord = 0, threads = 1;
+  u32 postsep = 0;
   BatchLimits lim;
   u64 min_flushes = 1;
   std::string expect_route = "device";  // device | mixed | host : contrat de NON-VACUITE des routes
@@ -27,6 +28,11 @@ int main(int argc, char** argv) {
     else if (arg.rfind("--n=", 0) == 0) n = std::atoi(arg.c_str() + 4);
     else if (arg.rfind("--coord=", 0) == 0) coord = std::atoi(arg.c_str() + 8);
     else if (arg.rfind("--threads=", 0) == 0) threads = std::atoi(arg.c_str() + 10);
+    else if (arg.rfind("--postsep=", 0) == 0) {
+      const char* v = arg.c_str() + 10;
+      if (v[0] < '0' || v[0] > '3' || v[1] != '\0') return 2;
+      postsep = (u32)(v[0] - '0');
+    }
     else if (arg.rfind("--min-candidates=", 0) == 0) min_candidates = (u64)std::atoll(arg.c_str() + 17);
     else if (arg.rfind("--min-deep=", 0) == 0) min_deep = (u64)std::atoll(arg.c_str() + 11);
     else if (arg.rfind("--inject=", 0) == 0) inject = arg.substr(9);
@@ -57,6 +63,7 @@ int main(int argc, char** argv) {
   if (!ix.valid || ix.has_duplicate_positions()) return 2;
   GenerateOptions opt;
   opt.threads = threads;
+  opt.postsep_refine_levels = postsep;
   std::vector<BallCandidate> prod_all, prod, batched;
   GenerateStats sp, sb;
   generate_candidates(ix, opt, &prod_all, &sp);
@@ -71,6 +78,17 @@ int main(int argc, char** argv) {
     }
   };
   cmp("rect_alive", sp.rect_alive[2], sb.rect_alive[2]);
+  cmp("postsep_base_mass", sp.postsep_base_mass[2], sb.postsep_base_mass[2]);
+  cmp("postsep_emitted_mass", sp.postsep_emitted_mass[2], sb.postsep_emitted_mass[2]);
+  cmp("postsep_killed_mass", sp.postsep_killed_mass[2], sb.postsep_killed_mass[2]);
+  cmp("postsep_parent_rects", sp.postsep_parent_rects[2], sb.postsep_parent_rects[2]);
+  cmp("postsep_emitted_rects", sp.postsep_emitted_rects[2], sb.postsep_emitted_rects[2]);
+  cmp("postsep_subrects", sp.postsep_subrects[2], sb.postsep_subrects[2]);
+  cmp("postsep_core_evals", sp.postsep_core_evals[2], sb.postsep_core_evals[2]);
+  cmp("postsep_core_nodes", sp.postsep_core_nodes[2], sb.postsep_core_nodes[2]);
+  cmp("postsep_corner_evals", sp.postsep_corner_evals[2], sb.postsep_corner_evals[2]);
+  cmp("postsep_rollbacks", sp.postsep_rollbacks[2], sb.postsep_rollbacks[2]);
+  cmp("postsep_core_regressions", sp.postsep_core_regressions[2], sb.postsep_core_regressions[2]);
   cmp("anchors", sp.anchors[2], sb.anchors[2]);
   cmp("anchors_killed_hist", sp.anchors_killed_hist[2], sb.anchors_killed_hist[2]);
   cmp("anchors_killed_w4", sp.anchors_killed_w4, sb.anchors_killed_w4);
@@ -139,14 +157,21 @@ int main(int argc, char** argv) {
   rle_candidates(&prod, 1);
   rle_candidates(&batched, 1);
   vec_mism += count_mism(prod, batched);
-  std::printf("q4_lane_batched famille=%s n=%d fils=%d routage_min_sites=%zu ancres_device=%llu ancres_hote=%llu ancres_trop_grandes=%llu seeds_device=%llu seeds_hote=%llu seuil_seeds=%zu seuil_sites=%zu vidages=%llu max_lot_seeds=%llu max_ancre_seeds=%llu max_lot_sites=%llu max_ancre_sites=%llu max_lot_paires=%llu max_ancre_paires=%llu candidats_q4=%zu candidats_lots=%zu seeds=%llu coeur_tues=%llu completions=%llu "
+  std::printf("q4_lane_batched famille=%s n=%d fils=%d postsep=%u routage_min_sites=%zu ancres_device=%llu ancres_hote=%llu ancres_trop_grandes=%llu seeds_device=%llu seeds_hote=%llu seuil_seeds=%zu seuil_sites=%zu vidages=%llu max_lot_seeds=%llu max_ancre_seeds=%llu max_lot_sites=%llu max_ancre_sites=%llu max_lot_paires=%llu max_ancre_paires=%llu candidats_q4=%zu candidats_lots=%zu seeds=%llu coeur_tues=%llu completions=%llu "
               "profonds=%llu desaccords_vecteur=%llu desaccords_compteurs=%llu\n",
-              cloud_family_name(family), n, threads, lim.device_min_sites, (unsigned long long)bs.anchors_device, (unsigned long long)bs.anchors_host, (unsigned long long)bs.anchors_oversized,
+              cloud_family_name(family), n, threads, postsep, lim.device_min_sites, (unsigned long long)bs.anchors_device, (unsigned long long)bs.anchors_host, (unsigned long long)bs.anchors_oversized,
               (unsigned long long)bs.seeds_device, (unsigned long long)bs.seeds_host, lim.seeds, lim.sites, (unsigned long long)bs.flushes, (unsigned long long)bs.max_lot_seeds,
               (unsigned long long)bs.max_anchor_seeds, (unsigned long long)bs.max_lot_sites, (unsigned long long)bs.max_anchor_sites, (unsigned long long)bs.max_lot_pairs,
               (unsigned long long)bs.max_anchor_pairs, prod.size(), batched.size(), (unsigned long long)sp.seeds[1],
               (unsigned long long)sp.seeds_killed_core, (unsigned long long)sp.q4_completions,
               (unsigned long long)sp.depth_killed[2], (unsigned long long)vec_mism, (unsigned long long)bad);
+  const bool ledger_ok = (u128)sp.postsep_emitted_mass[2] + sp.postsep_killed_mass[2] == sp.postsep_base_mass[2] &&
+                         (u128)sb.postsep_emitted_mass[2] + sb.postsep_killed_mass[2] == sb.postsep_base_mass[2] &&
+                         sp.postsep_core_regressions[2] == 0 && sb.postsep_core_regressions[2] == 0;
+  if (!ledger_ok || (postsep > 0 && sp.postsep_core_evals[2] == 0)) {
+    std::printf("POSTSEP : grand-livre, monotonie ou non-vacuite hors contrat\n");
+    return 3;
+  }
   if (sp.candidates[2] < min_candidates || sp.depth_killed[2] < min_deep || vacuous) {
     std::printf("PLANCHER\n");
     return 3;

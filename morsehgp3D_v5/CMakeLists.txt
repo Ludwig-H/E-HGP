@@ -108,6 +108,13 @@ mhgp5_gate(mhgp5_spindle_mutant_mask 4 mhgp5_spindle_gate "--family=uniform --n=
 # ---- Pilote ------------------------------------------------------------------
 
 mhgp5_product_executable(mhgp5 cli/mhgp5.cpp)
+mhgp5_gate(mhgp5_cli_postsep_l0 0 mhgp5 "--postsep=0 --n=2")
+mhgp5_gate(mhgp5_cli_postsep_l3 0 mhgp5 "--postsep=3 --n=2")
+mhgp5_gate(mhgp5_cli_refus_postsep_text 2 mhgp5 "--postsep=abc --n=2")
+mhgp5_gate(mhgp5_cli_refus_postsep_suffix 2 mhgp5 "--postsep=1junk --n=2")
+mhgp5_gate(mhgp5_cli_refus_postsep_empty 2 mhgp5 "--postsep= --n=2")
+mhgp5_gate(mhgp5_cli_refus_postsep_negative 2 mhgp5 "--postsep=-1 --n=2")
+mhgp5_gate(mhgp5_cli_refus_postsep_high 2 mhgp5 "--postsep=4 --n=2")
 
 # ---- Conformite v4 ≡ v5 --------------------------------------------------------
 
@@ -263,12 +270,17 @@ mhgp5_gate(mhgp5_fold_live_mutant_slot_cap 4 mhgp5_fold_live_gate "--inject=slot
 mhgp5_executable(mhgp5_fold_fixtures_gate tests/fold_fixtures_gate.cpp)
 mhgp5_gate(mhgp5_fold_fixtures 0 mhgp5_fold_fixtures_gate "" TIMEOUT 120)
 
-# Raffinement post-separation : digests identiques a L=0..3, grand-livre exact,
-# route q2 interdite, contre-fixture refine-hist-wakeup.
+# Raffinement post-separation : objet complet identique a L=0..3 et 1/4 fils,
+# grand-livre fail-closed, oracle litteral exact-once, rollback de separation,
+# route q2 interdite par une contre-fixture radix qui reveille une boule avec
+# ledger vert.
 mhgp5_executable(mhgp5_postsep_refine_gate tests/postsep_refine_gate.cpp)
 mhgp5_gate(mhgp5_postsep_refine 0 mhgp5_postsep_refine_gate "" TIMEOUT 600)
 mhgp5_gate(mhgp5_postsep_refine_mutant_h1 4 mhgp5_postsep_refine_gate "--inject=postsep-kill-h-minus-one" TIMEOUT 300)
 mhgp5_gate(mhgp5_postsep_refine_mutant_drop 4 mhgp5_postsep_refine_gate "--inject=postsep-drop-child" TIMEOUT 300)
+mhgp5_gate(mhgp5_postsep_refine_mutant_duplicate 4 mhgp5_postsep_refine_gate "--inject=postsep-duplicate-child" TIMEOUT 300)
+mhgp5_gate(mhgp5_postsep_refine_mutant_q2 4 mhgp5_postsep_refine_gate "--inject=postsep-refine-q2" TIMEOUT 60)
+mhgp5_gate(mhgp5_postsep_refine_mutant_core_corners 4 mhgp5_postsep_refine_gate "--inject=postsep-core-without-corners" TIMEOUT 60)
 # Prefixe exact de la tour (docs/ECHELLE.md § 3.3) : ordres K <= smax − 1 identiques a l'objet complet.
 mhgp5_executable(mhgp5_prefix_gate tests/prefix_gate.cpp)
 mhgp5_gate(mhgp5_prefix_k5_uniform 0 mhgp5_prefix_gate "--family=uniform --n=1200 --smax=6 --min-events=1000")
@@ -380,6 +392,9 @@ mhgp5_gate(mhgp5_gpu_instrument_refus 2 mhgp5_gpu_instrument_gate "--gauge-threa
 mhgp5_executable(mhgp5_q4_chord_probe bench/q4_chord_probe.cpp)
 mhgp5_executable(mhgp5_q4_stage_probe bench/q4_stage_probe.cpp)
 target_compile_definitions(mhgp5_q4_stage_probe PRIVATE MHGP5_PROFILE_Q4=1)
+foreach(fam uniform eight_clusters terrain scanline_single_pass)
+  mhgp5_gate(mhgp5_q4_stage_${fam} 0 mhgp5_q4_stage_probe "--family=${fam} --n=400 --pretest-query-min=0" TIMEOUT 180)
+endforeach()
 mhgp5_executable(mhgp5_rect_probe bench/rect_probe.cpp)
 # Sonde MIROIR resident/vivant (audit du 28 aout) : meme perimetre des deux
 # cotes, deux PROCESSUS separes pour que le pic de RSS soit attribuable.
@@ -430,7 +445,9 @@ mhgp5_gate(mhgp5_q3_lane_batched_clusters 0 mhgp5_q3_lane_batched_gate "--family
 mhgp5_gate(mhgp5_q3_lane_batched_terrain 0 mhgp5_q3_lane_batched_gate "--family=terrain --n=1200 --threads=2")
 mhgp5_gate(mhgp5_q3_lane_batched_cocirc 0 mhgp5_q3_lane_batched_gate "--family=uniform --n=300 --coord=40 --min-candidates=200 --min-fallback=100")
 mhgp5_gate(mhgp5_q3_lane_batched_mutant_dead 4 mhgp5_q3_lane_batched_gate "--family=uniform --n=400 --min-candidates=200 --inject=q3-batched-emit-dead")
-# Lane q4 par lots (etage hote de la lane q4 device) : egalite post-RLE et dix-neuf compteurs.
+mhgp5_gate(mhgp5_q3_lane_batched_postsep_l1 0 mhgp5_q3_lane_batched_gate "--family=uniform --n=400 --threads=1 --postsep=1 --min-candidates=200" TIMEOUT 300)
+# Lane q4 par lots (etage hote de la lane q4 device) : egalite post-RLE,
+# compteurs historiques et grand-livre post-separation complet.
 mhgp5_executable(mhgp5_q4_lane_batched_gate tests/q4_lane_batched_gate.cpp)
 mhgp5_gate(mhgp5_q4_lane_batched_uniform 0 mhgp5_q4_lane_batched_gate "--family=uniform --n=1200 --threads=3")
 mhgp5_gate(mhgp5_q4_lane_batched_clusters 0 mhgp5_q4_lane_batched_gate "--family=eight_clusters --n=1200 --threads=3")
@@ -438,6 +455,7 @@ mhgp5_gate(mhgp5_q4_lane_batched_terrain 0 mhgp5_q4_lane_batched_gate "--family=
 mhgp5_gate(mhgp5_q4_lane_batched_cocirc 0 mhgp5_q4_lane_batched_gate "--family=uniform --n=300 --coord=40 --min-candidates=200 --min-deep=20")
 mhgp5_gate(mhgp5_q4_lane_batched_ordre 0 mhgp5_q4_lane_batched_gate "--family=uniform --n=400 --threads=1 --min-candidates=200")
 mhgp5_gate(mhgp5_q4_lane_batched_mutant_deep 4 mhgp5_q4_lane_batched_gate "--family=uniform --n=400 --min-candidates=200 --inject=q4-batched-emit-deep")
+mhgp5_gate(mhgp5_q4_lane_batched_postsep_l1 0 mhgp5_q4_lane_batched_gate "--family=uniform --n=400 --threads=1 --postsep=1 --min-candidates=200" TIMEOUT 300)
 mhgp5_gate(mhgp5_q4_lane_batched_uniform_8000 0 mhgp5_q4_lane_batched_gate "--family=uniform --n=8000 --threads=8 --min-candidates=100000" LABELS scale8000 TIMEOUT 1800)
 
 mhgp5_gate(mhgp5_q3_lane_batched_petit_lot 0 mhgp5_q3_lane_batched_gate "--family=uniform --n=400 --threads=1 --seeds-per-launch=1000 --min-candidates=200 --min-flushes=100")

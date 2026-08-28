@@ -31,17 +31,26 @@ inline bool ball_candidate_less(const BallCandidate& x, const BallCandidate& y) 
   return x.level < y.level;
 }
 
+// Les deux etapes sont exposees separement pour signer, sans copie, le
+// multiensemble canonique AVANT RLE. `rle_candidates` conserve l'API historique.
+inline size_t sort_candidates(std::vector<BallCandidate>* cands, int threads = 1) {
+  return parallel_stable_sort(cands->begin(), cands->end(), ball_candidate_less, threads);
+}
+
+inline void deduplicate_candidates(std::vector<BallCandidate>* cands) {
+  if (MHGP5_MUTANT("rle-drop")) return;
+  cands->erase(std::unique(cands->begin(), cands->end(),
+                           [](const BallCandidate& x, const BallCandidate& y) { return x.key == y.key; }),
+               cands->end());
+}
+
 // Tri stable (parallele, identique a std::stable_sort par contrat) +
 // dedoublonnage par cle. Mutant `rle-drop` : le dedoublonnage est saute
 // (boules re-censusees, cardinalites doublees — le juge le voit). Retourne
 // le nombre d'ouvriers crees par le tri.
 inline size_t rle_candidates(std::vector<BallCandidate>* cands, int threads = 1) {
-  const size_t workers = parallel_stable_sort(cands->begin(), cands->end(), ball_candidate_less, threads);
-  (void)workers;
-  if (MHGP5_MUTANT("rle-drop")) return workers;
-  cands->erase(std::unique(cands->begin(), cands->end(),
-                           [](const BallCandidate& x, const BallCandidate& y) { return x.key == y.key; }),
-               cands->end());
+  const size_t workers = sort_candidates(cands, threads);
+  deduplicate_candidates(cands);
   return workers;
 }
 
