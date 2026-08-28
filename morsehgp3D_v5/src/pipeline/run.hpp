@@ -498,6 +498,10 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
             dg_all.add(dg);
             rr.t_digest_ms += t_dg;
           }
+          // Mutant `prefix-tamper-batch-levels` : altere les niveaux de lots du dernier ordre d'un PREFIXE (jamais
+          // signes par le digest v4) — tue par la porte de prefixe etendue (niveaux de tous les lots).
+          if (MHGP5_MUTANT("prefix-tamper-batch-levels") && rr.kmax_eff < 10 && K == rr.kmax_eff && !r.batch_levels.empty())
+            r.batch_levels.push_back(r.batch_levels.back());
           if (opt.on_forest) opt.on_forest(K, st->events, r);
           rr.rss_mb[4] = std::max(rr.rss_mb[4], run_detail::rss_mb_now());
         } catch (...) {  // exception du callback (ou d'une publication) : defaut de CET ordre, a son tour
@@ -555,9 +559,14 @@ inline void print_run(std::FILE* out, const char* family, int n, int coord, long
   std::fprintf(out, "backend=%s\n", rr.backend_override ? "override_experimental (executeur de lane externe : non autoritaire)" : "cpu_reference");
   // PROFIL NOMME (docs/ECHELLE.md § 1, § 3.3) : l'objet complet (smax = 11, K = 1..10) ou un PREFIXE exact de la tour
   // (smax = s : K = 1..s-1, memes digests par ordre que l'objet complet) — jamais confondus dans un recu.
-  if (rr.smax_eff == 11) std::fprintf(out, "profil=complet_k10\n");
-  else std::fprintf(out, "profil=prefixe_k%llu (K = 1..%llu, prefixe exact de l'objet complet : digests par ordre identiques)\n",
-                    (unsigned long long)(rr.smax_eff - 1), (unsigned long long)(rr.smax_eff - 1));
+  // PORTEE DE LA TOUR (docs/ECHELLE.md § 1, § 3.3 ; audit du passage a l'echelle P2) : `tower_scope` distinct du
+  // profil normatif `quantized_u16_input_only` ; « complet » = complet DANS le profil K <= 10, jamais une tour illimitee ;
+  // un prefixe (smax = s : K = 1..s-1) a les memes digests par ordre que l'objet complet.
+  if (rr.smax_eff == 11) std::fprintf(out, "tower_scope=profile_complete_k10 smax_requested=%llu smax_effective=%llu\n",
+                                      (unsigned long long)opt.smax, (unsigned long long)rr.smax_eff);
+  else std::fprintf(out, "tower_scope=prefix_k%llu smax_requested=%llu smax_effective=%llu (K = 1..%llu, prefixe exact de l'objet complet)\n",
+                    (unsigned long long)(rr.smax_eff - 1), (unsigned long long)opt.smax, (unsigned long long)rr.smax_eff,
+                    (unsigned long long)(rr.smax_eff - 1));
   std::fprintf(out,
                "famille=%s n=%d coord=%d s=%lld smax=%llu seed=%lld threads=%d emis=%zu boules_uniques=%llu "
                "mortes_profondeur=%llu survivantes=%llu census_int=%llu census_shell=%llu evenements=%llu "

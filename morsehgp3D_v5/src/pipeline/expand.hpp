@@ -16,6 +16,7 @@
 
 #include <algorithm>
 #include <span>
+#include <utility>
 #include <vector>
 
 #include "../forest/fold.hpp"
@@ -279,6 +280,15 @@ inline void expand_events_k(const CloudIndex& ix, const std::vector<BallData>& b
       }
     }
   });
+  // Mutant `prefix-tamper-event-order` : sur le dernier ordre d'un PREFIXE (kmax < 10), echange interior[0] et
+  // interior[1] des evenements a d >= 2 — l'ordre des interieurs n'entre ni dans les facettes (ensembles), ni dans
+  // le choix de la racine (support[0]), ni dans le digest v4 ; seule la signature des evenements canoniques de la
+  // porte de prefixe le voit.
+  if (MHGP5_MUTANT("prefix-tamper-event-order") && kmax < 10 && K == kmax)
+    for (std::vector<ForestEvent>& v : lev)
+      for (ForestEvent& e : v)
+        if (e.d >= 2) std::swap(e.interior[0], e.interior[1]);
+
   st->workers_expand = std::max(st->workers_expand, (u64)created);
   out->clear();
   for (size_t c = 0; c < nchunks; ++c) out->insert(out->end(), lev[c].begin(), lev[c].end());

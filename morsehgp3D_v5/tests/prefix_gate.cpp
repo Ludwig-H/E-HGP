@@ -5,8 +5,11 @@
 // ne tue que des boules dont tous les evenements ont K = q + d − 1 >= smax.
 // Planchers : >= --min-events evenements a l'ordre smax − 1 (jamais vert par
 // vacuite). Codes : 0 conforme ; 1 desaccord ; 2 arguments ; 3 plancher.
-// Mutant `anchor-kill-h-minus-one` : les tests d'ancre tuent a h − 1, h depend
-// de smax, donc le prefixe est brise (code 4 attendu).
+// Mutants : `anchor-kill-h-minus-one` (les tests d'ancre tuent a h − 1, h depend
+// de smax, donc le prefixe est brise) ; `prefix-tamper-event-order` (un champ
+// d'evenement omis par le digest v4) et `prefix-tamper-batch-levels` (seuls
+// les niveaux de lots) donnent des dents propres aux deux nouveaux controles
+// (code 4 attendu pour les trois).
 #include <cstdio>
 #include <cstdlib>
 #include <string>
@@ -54,14 +57,14 @@ int main(int argc, char** argv) {
   CloudFamily family = CloudFamily::kUniform;
   int n = 1200, coord = 0;
   u64 smax = 6;
-  u64 min_events = 1000, min_plateau_batches = 0;
+  u64 min_events = 1000, min_tie_excess = 0;
   std::string inject;
   for (int i = 1; i < argc; ++i) {
     const std::string a = argv[i];
     if (a.rfind("--family=", 0) == 0) { if (!parse_cloud_family(a.c_str() + 9, &family)) return 2; }
     else if (a.rfind("--n=", 0) == 0) n = std::atoi(a.c_str() + 4);
     else if (a.rfind("--coord=", 0) == 0) coord = std::atoi(a.c_str() + 8);
-    else if (a.rfind("--min-plateau-batches=", 0) == 0) min_plateau_batches = (u64)std::atoll(a.c_str() + 22);
+    else if (a.rfind("--min-tie-excess=", 0) == 0) min_tie_excess = (u64)std::atoll(a.c_str() + 17);
     else if (a.rfind("--smax=", 0) == 0) smax = (u64)std::atoll(a.c_str() + 7);
     else if (a.rfind("--min-events=", 0) == 0) min_events = (u64)std::atoll(a.c_str() + 13);
     else if (a.rfind("--inject=", 0) == 0) inject = a.substr(9);
@@ -69,7 +72,8 @@ int main(int argc, char** argv) {
   }
   if (smax < 3 || smax > 10) return 2;
   if (!inject.empty() && !mutants_enable(inject)) return 2;
-  const bool mutant = MHGP5_MUTANT("anchor-kill-h-minus-one");
+  const bool mutant = MHGP5_MUTANT("anchor-kill-h-minus-one") || MHGP5_MUTANT("prefix-tamper-event-order") ||
+                      MHGP5_MUTANT("prefix-tamper-batch-levels");
   if (coord <= 0) coord = cloud_family_default_coord(family, n);
   const std::vector<InputPoint> in = make_family_input(family, n, coord, 3);
   RunOptions full, pre;
@@ -102,10 +106,11 @@ int main(int argc, char** argv) {
                 same_digest ? "egal" : "DIFFERENT", same_events ? "egaux" : "DIFFERENTS", same_batches ? "egaux" : "DIFFERENTS");
   }
   const u64 top_events = rp.cards[rp.kmax_eff].events;
-  // Plateaux non triviaux (lots de plusieurs evenements) a l'ordre maximal du prefixe : plancher optionnel.
-  const u64 plateau_batches = sp[rp.kmax_eff].nevents > sp[rp.kmax_eff].nbatches ? sp[rp.kmax_eff].nevents - sp[rp.kmax_eff].nbatches : 0;
-  if (plateau_batches < min_plateau_batches) {
-    std::printf("PLANCHER : %llu evenements en exces sur les lots (plateaux) < %llu\n", (unsigned long long)plateau_batches, (unsigned long long)min_plateau_batches);
+  // Ex aequo de niveau a l'ordre maximal du prefixe : exces d'evenements sur les lots (evenements − lots), plancher
+  // optionnel — ce n'est PAS le nombre de lots de multiplicite > 1 (nommage exact demande par les auditeurs).
+  const u64 tie_excess = sp[rp.kmax_eff].nevents > sp[rp.kmax_eff].nbatches ? sp[rp.kmax_eff].nevents - sp[rp.kmax_eff].nbatches : 0;
+  if (tie_excess < min_tie_excess) {
+    std::printf("PLANCHER : exces d'ex aequo (evenements − lots) %llu < %llu\n", (unsigned long long)tie_excess, (unsigned long long)min_tie_excess);
     return 3;
   }
   std::printf("prefix_gate famille=%s n=%d smax=%llu ordres=%llu desaccords=%llu evenements_ordre_max=%llu boules=%llu/%llu\n",

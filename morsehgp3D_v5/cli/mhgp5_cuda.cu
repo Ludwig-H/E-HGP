@@ -129,6 +129,11 @@ int main(int argc, char** argv) {
                 bs4.lot_seeds.quantile_class(0.50), bs4.lot_seeds.quantile_class(0.95), (unsigned long long)bs4.max_lot_seeds,
                 bs4.lot_sites.quantile_class(0.50), bs4.lot_sites.quantile_class(0.95), (unsigned long long)bs4.max_lot_sites,
                 bs4.lot_pairs.quantile_class(0.50), bs4.lot_pairs.quantile_class(0.95), (unsigned long long)bs4.max_lot_pairs);
+    // Cycle de vie des executeurs (creation, flux, evenements, allocations, destruction) : HORS executor_ms_sum,
+    // cumule sur le processus (les executeurs thread_local des deux lanes), somme sur les fils — jamais un mur.
+    const gpu::ExecutorLifecycle& lc = gpu::ExecutorLifecycle::global();
+    std::printf("gpu_cycle_de_vie executeurs_crees=%llu cycle_de_vie_ms_sum=%.1f\n", (unsigned long long)lc.created.load(),
+                (double)lc.lifecycle_ns.load() / 1e6);
   }
   // Pic de residence MESURE (RSS max du processus), jamais un pic annonce.
   struct rusage ru;

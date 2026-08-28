@@ -73,6 +73,8 @@ inline constexpr const char* kMutants[] = {
     "chord-nonstrict",
     "cell-kill-nonstrict",
     "cell-kill-h-minus-one",
+    "prefix-tamper-event-order",
+    "prefix-tamper-batch-levels",
     "cell-locate-eps-zero",
 };
 

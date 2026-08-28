@@ -58,6 +58,7 @@ inline double ms_host_since(std::chrono::steady_clock::time_point t0) {
 class Q3DeviceExecutor {
  public:
   Q3DeviceExecutor() { cuda_check(cudaStreamCreate(&stream_), "stream"); }
+  ExecutorLifecycle::Scope lifecycle_;  // construction -> destruction, cumule dans ExecutorLifecycle::global()
   ~Q3DeviceExecutor() {
     release();
     cudaStreamDestroy(stream_);

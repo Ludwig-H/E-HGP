@@ -102,7 +102,15 @@ les requêtes de cover. Il n'existe ni octree séparé ni second arbre.
    deltas, partition dense), signature SHA-256 (SHA-NI si disponible),
    callback provisoire, libération. Sortie bit-identique au pipeline
    séquentiel ; les étages B de K−F+1..K recouvrent l'étage A de K+1 ;
-   résidence bornée à `fold_inflight` + 1 ordres (2 par défaut → 3).
+   résidence bornée à `fold_inflight` + 1 ordres (2 par défaut → 3 ;
+   domaine [1, 16], refusé sinon en `invalid_input`). Sûreté (audit du
+   28 août) : le slot d'un ordre est possédé par le conteneur avant le
+   démarrage de son fil ; aucun retour avant le drain explicite de tous les
+   fils ; chaque fil conserve son exception ou son statut et le premier
+   défaut est décidé **à son tour de publication** (un échec d'étage A ou
+   une exception d'un K supérieur n'annule jamais la publication d'un K
+   inférieur) ; observateur de phases `on_fold_phase` (hors verrou) et pic
+   mesuré `peak_fold_inflight` imprimé (`pic_mesure_en_vol`).
 ```
 
 Chaque étape parallèle découpe par tranches d'index et fusionne **en ordre de

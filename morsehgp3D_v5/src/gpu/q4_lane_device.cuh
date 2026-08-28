@@ -32,6 +32,7 @@ namespace gpu {
 class Q4DeviceExecutor {
  public:
   Q4DeviceExecutor() { cuda_check(cudaStreamCreate(&stream_), "stream"); }
+  ExecutorLifecycle::Scope lifecycle_;  // construction -> destruction, cumule dans ExecutorLifecycle::global()
   ~Q4DeviceExecutor() {
     release();
     cudaStreamDestroy(stream_);

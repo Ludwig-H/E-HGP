@@ -189,10 +189,15 @@ def check_scale_runs(out, params, runs, commit, payload_sha, manifest_sha, bad):
         # Ligne du fold : format courant `fold_inflight=<I>, pic_mesure_en_vol=<P>`
         # (domaine [1, kFoldInflightMax] valide par le pilote) ; l'ancien
         # `<I> ordre(s) en vol` reste accepte pour rejouer un reçu anterieur.
-        infl = re.search(r"^temps_fold_mur_ms=[0-9.]+ \(etages A et B, (?:fold_inflight=(\d+), pic_mesure_en_vol=\d+|(\d+) ordre\(s\) en vol)\)$", body, re.M)
-        infl_seen = (infl.group(1) or infl.group(2)) if infl else None
+        infl = re.search(r"^temps_fold_mur_ms=[0-9.]+ \(etages A et B, (?:fold_inflight=(\d+), pic_mesure_en_vol=(\d+)|(\d+) ordre\(s\) en vol)\)$", body, re.M)
+        infl_seen = (infl.group(1) or infl.group(3)) if infl else None
         if infl_seen != run["inflight"]:
             bad.append(f"{name}: fold_inflight imprime {infl_seen or '?'} != {run['inflight']} demande")
+        # Pic MESURE d'ordres en vol : 1 <= pic <= fold_inflight (audit rendement, P0) ; absent = ancien format tolere.
+        if infl and infl.group(2) is not None:
+            pic = int(infl.group(2))
+            if pic < 1 or pic > int(infl.group(1)):
+                bad.append(f"{name}: pic_mesure_en_vol={pic} hors [1, {infl.group(1)}]")
         if "--gpu" in body or re.search(r"^gpu=1", body, re.M) or re.search(r"^backend=override", body, re.M):
             bad.append(f"{name}: sortie device sur une campagne CPU")
         gen = re.search(r"^generation .*$", body, re.M)

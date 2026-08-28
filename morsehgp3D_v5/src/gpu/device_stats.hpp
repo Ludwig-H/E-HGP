@@ -14,6 +14,7 @@
 #pragma once
 
 #include <atomic>
+#include <chrono>
 
 #include "../core/mutants.hpp"
 #include "../core/types.hpp"
@@ -82,6 +83,31 @@ struct ConcurrencyGauge {
   };
   void reset_peak() { peak.store(active.load(std::memory_order_acquire), std::memory_order_release); }
   u32 read_peak() const { return peak.load(std::memory_order_acquire); }
+};
+
+// CYCLE DE VIE DES EXECUTEURS (audit rendement, P0 « le cycle de vie CUDA
+// echappe a la decomposition ») : nombre d'executeurs construits et duree
+// construction -> destruction (flux, evenements, allocations, destruction),
+// cumules sur le processus ; ces durees sont HORS executor_ms_sum et, comme
+// lui, des sommes sur les fils — jamais un mur. Les executeurs thread_local
+// sont detruits a la fin de leur fil, donc avant la lecture par la CLI.
+struct ExecutorLifecycle {
+  std::atomic<u64> created{0};
+  std::atomic<u64> lifecycle_ns{0};
+  static ExecutorLifecycle& global() {
+    static ExecutorLifecycle g;
+    return g;
+  }
+  struct Scope {
+    std::chrono::steady_clock::time_point t0 = std::chrono::steady_clock::now();
+    Scope() { ExecutorLifecycle::global().created.fetch_add(1, std::memory_order_relaxed); }
+    ~Scope() {
+      const auto ns = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now() - t0).count();
+      ExecutorLifecycle::global().lifecycle_ns.fetch_add((u64)(ns > 0 ? ns : 0), std::memory_order_relaxed);
+    }
+    Scope(const Scope&) = delete;
+    Scope& operator=(const Scope&) = delete;
+  };
 };
 
 }  // namespace gpu
