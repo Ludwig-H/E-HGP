@@ -6,12 +6,15 @@
   device/SCALE sur `c95cfa95`, G1 q3 sur `dd928111`/`839cf1ec` et G1 q4 sur
   `556c421e`.
 - **Pin de réception G0/G1 q3 :** `0656bf4c`, sans code produit.
-- **Worktree observé :** Claude durcit G1 après `194a0bc2` et remplace l'index
-  hash du fold vivant par des créneaux. Le refus de capacité, son mutant, deux
-  cas de frontière et trois catégories mémoire sont présents. Ces deltas non
-  épinglés restent exclus du verdict versionné ; leurs portes hôte sont vertes
-  sous les limites décrites ci-dessous. Le probe `.codex_fold_contract_probe.cpp`
-  d'un autre audit reste lui aussi non intégré.
+- **Worktree observé :** après `194a0bc2`, Claude durcit simultanément G0, G1,
+  le fold à créneaux et sa sonde. La géométrie vide est maintenant distincte de
+  l'absence, le marquage exact des créneaux, les cas de frontière, le refus de
+  capacité et cinq postes mémoire sont présents ; le pool emploie un marqueur
+  TLS non allouant et ferme sa file sans tableau temporaire. Le probe possède
+  désormais un régime `--dump/--from` sans pipeline dans les deux bras. Ces
+  deltas non épinglés restent exclus du verdict versionné et les coutures encore
+  ouvertes sont bornées ci-dessous. Le probe
+  `.codex_fold_contract_probe.cpp` d'un autre audit reste non intégré.
 - **Cadre :** `phase=exploration_v5_hors_registre`,
   `backend=cpu_reference`, `profile=quantized_u16_input_only`,
   `mode=audit_independant_math_and_architecture`,
@@ -19,18 +22,21 @@
 
 ## Verdict utile à Claude
 
-**Orange constructif : `194a0bc2` garde la bonne architecture.** Notification
-du ticket, démarrage transactionnel, domaine `1..8` et latch causale sont de
-vraies corrections ; il ne faut ni les jeter ni redessiner la lane. La réception
-du **contrat de sûreté G0** demande encore un petit durcissement local : marqueur
-TLS non allouant et refus de tout nesting, fermeture fatale à garantie forte,
-puis fixtures causales. Ces points rares ne bloquent ni le pin hôte G1 ni le
-fold, qui sont indépendants ; ils doivent en revanche précéder toute
-revendication de confinement d'une faute device. `close_fatal` est aujourd'hui
-une primitive hôte exercée, pas encore le poison CUDA q3/q4. La sonde fold du
-même pin mesure un second réducteur depuis le callback d'un pipeline qui a déjà
-exécuté le résident : elle reste un micro-banc incrémental, pas le miroir
-CPU/RSS annoncé.
+**Orange constructif : `194a0bc2` et le worktree gardent la bonne architecture.**
+Notification du ticket, démarrage transactionnel, domaine `1..8`, latch
+causale, TLS non allouant et fermeture en place sont de vraies corrections ; il
+ne faut ni les jeter ni redessiner la lane. La réception du **contrat de sûreté
+G0** demande maintenant trois raccords locaux : compter une soumission seulement
+après `queue_.push_back` réussi, rendre les scénarios de fermeture causaux sans
+`sleep_for`, puis relier une exception CUDA typée à `close_fatal` avant que le
+worker puisse prendre un autre lot. Ces points ne bloquent ni G1 ni le fold,
+mais précèdent tout claim de confinement device.
+
+La sonde fold historique reste correctement libellée micro-banc. Son nouveau
+régime `--dump/--from` exécute, lui, un seul réducteur par processus et constitue
+la bonne couture de miroir. Il ne reçoit pas encore un objet complet : la copie
+du catalogue vivant est hors chronométrage, le rejeu faible reste optionnel et
+aucun digest commun n'est comparé.
 
 La session 13 fournit par ailleurs une baseline CUDA cohérente. La session au
 pin `839cf1ec` compile et exécute nominalement G0 et G1 q3 : huit exécuteurs au
@@ -40,11 +46,13 @@ fail-closed/non-vacants G1 restent à fermer sans reprendre ces travaux.
 
 Le worktree G1 actif répond déjà aux deux demandes les plus rentables : bornage
 **en valeur** avant lancement et instrumentation qui rend la branche observable.
-Conserver ce patch. Pour un claim API fail-closed, séparer seulement
-`geom_points` absent de la borne zéro ; le libellé des lots vides et l'activation
-mutante q4 redondante sont des nettoyages non bloquants. `PointId` adverse, le
-selftest de campagne et les deux mutants sur un vrai device transforment ensuite
-l'instrumentation en témoin reçu ; cela ne justifie aucune refonte du wire.
+Il sépare désormais aussi géométrie absente et géométrie déclarée vide ; conserver
+ce patch. Le libellé des lots sans seed reste un nettoyage non bloquant. La
+réception device est, elle, encore fail-open : le validateur accepte un faux
+pilote qui ignore `--gpu-wire` et n'imprime aucun compteur de branche, la
+campagne n'exécute pas les deux mutants de retombée SoA et q4 n'a aucun
+`PointId` adverse au-delà du bit 31. Fermer ces trois témoins reçoit le wire sans
+refonte ni nouvelle matrice SCALE.
 
 Le pin `bc66ade7` consolide le bon cœur L2 : égalité de vie par lot,
 balayages structurels, vacuité finale, plafond par alias, cas adverse court et
@@ -68,40 +76,33 @@ naissances avant les morts du lot puis réutiliser la liste libre au lot suivant
 atteint exactement le chevauchement maximal. Il n'y a pas de verrou
 algorithmique caché à résoudre ici.
 
-Quatre coutures courtes suffisent avant le pin fold. Premièrement,
-`slot_partition_violations` ne vérifie encore que l'égalité de cardinalité
-`libres + vivants == alloués`, pas la disjonction, la couverture ni l'unicité des
-créneaux. Le renommer en comptabilité, ou faire un marquage exact dans le
-balayage structurel borné. Deuxièmement, les fixtures de frontière n'assertent
-pas encore `batches`, `batch_levels` ni les deltas littéraux ; le mutant de
-capacité meurt sur un désaccord générique sans exiger le préfixe du refus, la
-vacuité des deux sorties et le compte exact de débordement. Les comportements
-sont présents, leur preuve précise reste à graver.
+Le worktree ferme le marquage exact libre/vivant, les valeurs littérales des
+deltas de frontière, le préfixe `resource_exhausted`, la vacuité des deux sorties
+et le compte de débordement. Trois coutures courtes restent avant le pin fold.
+Premièrement, le balayage doit aussi parcourir **tous** les `slot_of_fid` : une
+entrée stale non nulle échappe aujourd'hui à la bijection annoncée. Il doit
+tester `x < nslots` avant toute lecture de `av[x]`, puis valider les backlinks.
+Deuxièmement, le mutant de capacité rend encore 4 si les cas synthétiques
+ultérieurs produisent un désaccord générique ; isoler un verdict causal où le
+seul chemin vers 4 est le refus exact observé et non vacant. Les fixtures doivent
+également graver `batches` et `batch_levels`, pas seulement les afficher.
 
-Troisièmement, les trois catégories d'octets améliorent nettement la lecture,
-mais ne forment pas encore un **pic complet**. `keys`, `ev_fid`, événements,
-ordre et lots de `FoldPrepared` appartiennent à la préparation/entrée, pas au
-mapping ; `scratch_bytes` omet le vecteur `scratch`, les capacités internes de
-ses `ComponentDelta`, `born_at`/`died_at` et plusieurs autres transitoires ; la
-sortie `r.deltas` doit avoir son poste propre. Les sidecars `firstb`, `lastb`,
-`slot_of_fid` sont O(F), mais le L2 complet, entrée et sortie comprises, est
-O(F + I). Publier séparément préparation/entrée, mapping O(F), état persistant
-O(pic), scratch du plus gros lot et sortie évite de promettre une somme
-allocator-précise. Le futur L3 pourra seul retirer les tableaux d'occurrences.
-`slot_alias.assign(..., kNil)` écrit aussi onze cases par événement ; si toutes
-les cases lues sont réécrites, un `resize` réutilisant la capacité est une
-ablation simple.
+Troisièmement, les cinq postes d'octets sont les bonnes catégories mais pas
+encore des pics : ils sont échantillonnés avant les croissances du lot courant,
+donc un unique ou dernier lot sous-compte `pre_list`, `post_list`, `scratch`,
+`r.deltas`, `cfree` et `slot_mark`; `born_at`, `died_at` et `batch_levels` sont
+omis. Échantillonner après chaque phase qui peut croître, puis publier ces
+nombres comme capacités de conteneurs, jamais comme somme allocator-précise. Le
+L2 complet reste O(F + I), et seul L3 peut retirer les tableaux d'occurrences.
 
-Enfin, la sonde lance bien deux invocations fraîches, mais `run_pipeline`
-exécute déjà le fold résident avant le callback dans **chacune** ; le bras vivant
-ajoute ensuite un second réducteur. Les temps sont donc un micro-banc incrémental
-utile et le RSS reste inconclusif, pas attribuable au réducteur choisi. Les
-facteurs observés sur 4 k–16 k ne prouvent pas encore un facteur asymptotiquement
-constant. Côté vivant, la copie O(F) de `keys` est en outre placée après `t1`
-mais avant `t2` : elle entre dans le RSS sans entrer dans le temps annoncé, et
-le rejeu optionnel ne juge pas l'objet complet. Le banc recevable injecte un
-seul réducteur par processus, rejoue strictement le même artefact, contrebalance
-des répétitions sous cpuset et versionne les sorties brutes.
+Le nouveau `--dump/--from` enlève bien le pipeline des deux bras et exécute un
+seul réducteur. Pour devenir un miroir complet, démarrer le chronomètre vivant
+avant la copie de `keys`, imposer le replayer T5 strict, produire la même
+signature de partition/deltas/niveaux dans les deux bras et refuser tout
+désaccord. Choisir le témoin par facettes ou empreinte préparée plutôt que par le
+seul nombre d'événements, puis contrebalancer les répétitions sous cpuset et
+conserver les sorties brutes. Les tableaux 8 k/16 k historiques restent des
+micro-mesures ; ils ne deviennent pas rétroactivement des mesures miroir.
 
 **Réponse V35 :** retenir le vivant comme **baseline L2 candidate** d'une future
 voie d'échelle, à sélectionner lorsque le futur préflight prouvera que le
@@ -119,13 +120,23 @@ la part mur du fold vaut
 est correct, sans devenir une part générale des autres familles ou du nouveau
 fold.
 
-Les deux prochains pins faciles sont indépendants : **source G1**, avec réception
-hôte des indices et de la sentinelle mais réception de branche différée au
-device, puis **fold à créneaux** avec refus causal, vraie partition et métriques
-catégorisées. Le durcissement G0 peut suivre dans un commit autonome avant la
-prochaine réception de sûreté device ; il n'est pas une raison de retenir ces
-progrès fonctionnels. Aucun nouveau G4 n'est nécessaire avant leur fermeture
-locale. T5, le fold massif et le protocole CPU sous cpuset restent indépendants.
+**Aide immédiate multi-CPU :** ne pas commencer par un nouveau pool général.
+Remplacer les `parallel_items(nrect, ...)` des lanes par le
+`parallel_ranges(...)` déjà reçu réduit mécaniquement environ 3,075 millions de
+tickets atomiques à au plus quelque 1 300 à 48 workers, tout en gardant les
+sorties par worker ; puis remplacer les treize équipes no-op d'`expand.hpp` par
+un `make_chunk_plan` pur. Ces deux petits commits sont indépendants du fold,
+gardent les mêmes post-RLE/digests et diront par mesure si création de threads et
+contention atomique expliquent une part du plafond avant d'engager l'équipe CPU
+persistante.
+
+Les trois prochains pins faciles sont indépendants : **source G1** avec réception
+hôte des indices et de la géométrie vide, **fold à créneaux** après causalité du
+mutant/bijection/mesure, puis **G0 hôte** après admission comptable et fixtures
+causales. La branche G1, `PointId` q4 et le poison G0 restent différés à une
+réception device minimale ; aucun nouveau G4 n'est nécessaire avant leur
+fermeture locale. T5, le fold massif et le protocole CPU sous cpuset restent
+indépendants.
 
 ## Ce qui est reçu et réutilisable
 
@@ -228,19 +239,13 @@ q3 parse enfin `--inject`. Le contrat d'indices est exercé sur CPU et la porte
 device. L'agrégation des statistiques de lot reste sous le mutex de lane ;
 aucune nouvelle race hôte n'est visible.
 
-Trois finitions évitent de sur-vendre ce bon patch. La valeur sentinelle
-`n_geom_points == 0` signifie à la fois « géométrie absente » et « géométrie
-déclarée vide » : dans le second cas, le contrôle des indices est sauté alors
-que `use_idx` peut devenir vrai. Le correctif minimal réserve
-`std::numeric_limits<size_t>::max()` à « non déclarée » et rend zéro à son sens
-naturel de géométrie vide ; les deux fixtures appellent le validateur avec un
-lot indexé non vide et une borne zéro, puis exigent le refus avant toute
-réservation. Le produit ne peut pas fabriquer ce cas aujourd'hui
-(`run_pipeline` part d'au moins deux points et les builders dérivent leurs
-indices de ce même `CloudIndex`) : c'est un durcissement d'API court, pas un
-blocage du pin G1.
+La sentinelle de géométrie est maintenant fermée proprement : la vue porte
+`geom_declared` séparément de `n_geom_points`, et les fixtures q3/q4 refusent un
+lot indexé non vide contre une géométrie déclarée de zéro point. Le doublon
+`mutants_enable` q4 a également disparu. Ces deux remarques sont closes.
 
-Ensuite, `lots` est incrémenté avant le retour d'un scan sans seed, tandis que
+Trois finitions évitent encore de sur-vendre ce bon patch. `lots` est incrémenté
+avant le retour d'un scan sans seed, tandis que
 ses compteurs de branche restent à zéro. Le générateur produit ne soumet
 actuellement aucun lot vide, donc cela ne bloque pas G1 ; déplacer `m.lots = 1`
 après le retour anticipé, ajouter `noop_lots`, ou définir `lots` comme « lots
@@ -249,12 +254,12 @@ transférés » rend simplement l'API et son commentaire cohérents. Le champ q3
 l'appelle `octets_sites_index` et exclut l'upload résident. Le renommer en
 `wire_index_bytes`, ou séparer ces trois catégories, évite une métrique ambiguë ;
 la porte peut alors exiger aussi que les octets de la branche choisie soient
-strictement positifs et exacts. Enfin, la porte q4 appelle
-`mutants_enable(inject)` deux fois : retirer le doublon. La réception reste
-device : sans nvcc local, ni les deux nouvelles portes mutantes, ni la conservation de
-`PointId` adverse au-delà du bit 31 ne sont encore rejoués. Le faux pilote de
-campagne qui ignore `--gpu-wire` doit toujours être refusé par le selftest avant
-de transformer ces compteurs en reçu.
+strictement positifs et exacts. La réception reste device : sans nvcc local, ni
+les deux nouvelles portes mutantes, ni la conservation de `PointId` adverse au
+delà du bit 31 ne sont encore rejoués. Surtout, le faux pilote de campagne qui
+ignore `--gpu-wire` rend toujours `violations=0` sans imprimer une seule ligne de
+branche ; le validateur doit refuser ce cas avant de transformer les compteurs
+en reçu.
 
 Le témoin q4 manquant peut rester petit : affecter `id = UINT32_MAX - i` aux
 entrées du gate index et tuer un mutant `wire-index-pid-is-dense` qui remplace
@@ -304,13 +309,13 @@ Quelques claims doivent encore rester étroits :
   utilitaire d'oracle commun, puis l'appliquer à `(catalogue résident,
   deltas vivants)` ;
 - l'empreinte constante atteint l'internement des `FacetKey`. Le chemin actif à
-  créneaux a supprimé `LiveIndex`, donc sa micro-fixture de décalage arrière
-  devient sans objet ; ne la conserver que si ce hash reste un repli compilé.
-  Le hash constant des lifetimes externes reste dû à L3 ;
-- les nouveaux postes remplacent `g_alloc_bytes`, mais `scratch_bytes` est
-  encore échantillonné avant le remplissage courant et omet les capacités
-  imbriquées. Employer les cinq postes du verdict et retirer d'`ECHELLE.md`
-  l'ancien paragraphe « deux postes / 3,19 Mo », désormais contradictoire.
+  créneaux a supprimé `LiveIndex` : aucune fixture de décalage arrière n'est à
+  ajouter tant que ce hash ne revient pas comme repli compilé. Le hash constant
+  des lifetimes externes reste dû à L3 ;
+- les cinq postes remplacent utilement `g_alloc_bytes`, mais sont échantillonnés
+  avant les croissances du lot courant. Les déplacer après chaque phase
+  allocatrice, inclure `born_at`/`died_at` et `batch_levels`, et retirer
+  d'`ECHELLE.md` l'ancien paragraphe « deux postes / 3,19 Mo » s'il subsiste.
 
 Les balayages structurels sont un oracle, pas un coût produit : le stride
 actuel peut en exécuter jusqu'à 127 malgré le plafond commenté à 64, et un
@@ -322,12 +327,12 @@ scans O(vivant). Aligner aussi la formule publiée et celle exécutée : la marg
 `ceil(log2(F + 2)) + 1` est sûre mais plus lâche que la borne de doublement
 `floor(log2(F))` par alias.
 
-D reçoit maintenant l'ordre logique annoncé, mais trois triangles disjoints
-font naître neuf alias. Ajouter séparément le témoin FIRST = LAST d'un unique
-simplex K = 2, avec `peak_aliases == 3` et état final vide. Pour le mutant de
-coût, le code 4 est mathématiquement légitime seulement après égalité complète
-des sorties et compteurs synthétiques ; une divergence sémantique doit garder
-priorité sur le plafond.
+Les deux fixtures de frontière FIRST/LAST sont maintenant présentes et gravent
+leurs deltas. Compléter seulement leur objet littéral par `batches` et
+`batch_levels`. Pour les mutants de coût et de capacité, le code 4 est
+mathématiquement légitime seulement après égalité complète des sorties et
+compteurs synthétiques ; une divergence sémantique doit garder priorité sur le
+plafond, et le refus de capacité doit posséder son propre verdict causal.
 
 Le mutant `free-on-absorb` ne recycle plus ses alias, mais recycle encore leur
 record de composante. Son code 4 Release court est reçu ; l'absence de
@@ -336,27 +341,16 @@ audit. Le qualifier d'injection diagnostiquement sale tant que ces alias
 gardent un indice placé dans `cfree`.
 
 Enfin, `reduce_fold_live` reste hors du chemin produit et aucun gain CPU/RSS
-n'est reçu. La sonde sale actuelle réexécute un second fold depuis
-`on_forest`, alors que le résident du pipeline est encore vivant : son RSS
-compare un résident à un résident plus un vivant. La mesure attribuable doit
-faire lire le même flux d'événements à deux processus, chacun exécutant un seul
-réducteur ; le bras vivant rattache sans copie le catalogue déplacé après
-réduction, exécute le replayer strict, et les deux digests doivent être
-identiques.
-
-Le raccord minimal n'est donc pas un autre callback terminal. Ajouter au point
-unique où `run_pipeline` appelle aujourd'hui `reduce_fold` une injection de
-réducteur réservée au banc, puis imposer `fold_inflight=1`. Le processus
-`resident` appelle une seule fois `reduce_fold`; le processus `vivant` appelle
-une seule fois `reduce_fold_live`, reconstruit strictement
-`final_canon_fid`, rattache le même catalogue, puis laisse le pipeline calculer
-le digest normal. Le catalogue ne doit surtout pas être copié avant la
-réduction vivante : une sortie réservée au test peut déplacer `fp.keys` après
-la réduction, quand celle-ci n'en a plus besoin. Une copie O(F) biaiserait le
-pic que le probe cherche précisément à mesurer. Cela donne le même objet publié
-et un seul réducteur par processus. Le pic `ru_maxrss` reste un pic de bout en
-bout — préparation comprise — ce qui est précisément la mesure utile ; les
-temps internes gardent séparément préparation, FIRST/LAST, réduction et rejeu.
+n'est reçu. Le nouveau régime `--dump/--from` fait maintenant lire le même flux
+d'événements à deux processus et chacun exécute un seul réducteur : la couture
+de mesure est donc correcte. Le bras vivant copie toutefois le catalogue après
+le temps de préparation mais avant son chronomètre de réduction, puis emploie un
+replayer faible et facultatif ; aucun digest commun ne refuse une divergence.
+Chronométrer cette copie, ou mieux rattacher sans copie le catalogue déplacé
+après réduction, imposer le replayer strict et publier la même signature
+d'objet dans les deux bras ferme le miroir sans modifier le pipeline produit.
+Le pic `ru_maxrss` reste un pic de bout en bout — entrée et préparation
+comprises — ce qui est précisément la mesure utile.
 
 Le protocole doit lancer deux invocations fraîches du binaire avec
 `digest=true` et exiger `fold_inflight=1`, `reduce_calls == orders`, les mêmes
@@ -439,47 +433,37 @@ Un probe séparé où le deuxième des quatre constructeurs d'Executor lève ren
 l'exception exacte, quatre tentatives, zéro vivant et trois destructions, en
 Release comme sous ASan/UBSan. Le cœur du correctif est à garder.
 
-Un dernier correctif de code et trois finitions de preuve évitent pourtant de
-recréer une preuve verte par vacuité :
+Le worktree ferme maintenant les deux défauts les plus dangereux de cette
+relecture : le vecteur TLS est remplacé par un pointeur non allouant qui refuse
+tout nesting, y compris entre pools, et `close_fatal` dépile la deque sans
+tableau temporaire. Conserver ces corrections. Quatre finitions évitent encore
+une preuve verte par vacuité :
 
-1. `pool_stack().push_back(this)` est encore hors capture. Sa première
-   allocation peut lever dans le worker, sortir de `run()` et appeler
-   `std::terminate`, avec ticket non complété ; une injection indépendante le
-   reproduit au code du handler 77. Le même stack autorise aussi le cycle
-   bloquant `A(1) -> B(1) -> A`, reproduit par timeout. Les lanes n'ont besoin
-   d'aucune soumission depuis un worker de pool : remplacer le vecteur par un
-   pointeur TLS restauré par RAII, sans allocation, et refuser toute soumission
-   quand ce pointeur est déjà non nul. Une composition acyclique entre pools
-   pourra être spécifiée séparément si un consommateur réel la demande ;
-2. le code 4 mutant est actuellement rendu si **n'importe quelle** attente
-   échoue. Séparer les invariants communs du témoin ciblé : `pool-serial` ne
-   meurt que par `peak < N`, `pool-drop-exception` seulement par l'exception
-   cible avalée, et toutes les autres propriétés doivent rester vraies ;
+1. déplacer `submitted_++` **après** `queue_.push_back(&t)` réussi. Une
+   allocation de la deque peut encore laisser un soumis qui n'est ni réussi,
+   ni échoué, ni annulé ;
+2. séparer les invariants communs du témoin ciblé : `pool-serial` ne meurt que
+   par `peak < N`, `pool-drop-exception` seulement par l'exception cible avalée,
+   et toutes les autres propriétés restent vraies ;
 3. intégrer le probe de constructeur fautif comme fixture permanente. Sans
    seam de lancement de thread, borner le claim au constructeur d'Executor et
-   à la relecture du chemin de création partielle, au lieu d'annoncer une
-   injection que la porte ne possède pas ;
-4. `peak_queued <= 1` vérifie la borne annoncée mais pas qu'un producteur a
-   réellement attendu. Bloquer les deux workers, placer un ticket en file puis
-   observer au moins une admission retenue. Un compteur `queue_waits` suffit ;
-   exiger aussi `peak_queued == 1` et `jobs_done == submitted` dans ce motif.
+   à la relecture du chemin de création partielle ;
+4. rendre contre-pression et fermeture fatale causales. Bloquer les workers,
+   observer la file réellement pleine et au moins une admission retenue, puis
+   fermer ; `sleep_for(100/200 ms)` ne doit être qu'un coupe-circuit. Exiger
+   `peak_queued == cap`, `queue_waits > 0` et la comptabilité terminale exacte.
 
 Le mutant série prend aujourd'hui 15,6 s parce que la latch attend N arrivées
 alors que le mutant n'a qu'un worker. Attendre `pool.executors()` arrivées puis
 comparer le pic au N demandé conserve la preuve nominale et tue le mutant
 immédiatement, sans réduire le timeout de sûreté.
 
-Le chemin P1 `close_fatal` ajouté ensuite est une bonne primitive hôte, mais sa
-fermeture doit elle-même être sans allocation. Le `vector<Ticket*>` rempli sous
-`mu_` peut lever après `stop_=true` et avant les notifications, laissant file
-et producteurs bloqués. Dépiler la deque en place, poser erreur/done sous le
-mutex de chaque ticket, puis notifier, sans tableau temporaire. Déplacer aussi
-`submitted_++` **après** le `queue_.push_back` réussi : sinon un `bad_alloc`
-crée un soumis qui n'est ni réussi, ni échoué, ni annulé. La fixture fatale
-doit remplacer ses attentes de 100/200 ms par deux barrières : deux jobs actifs,
-puis file réellement pleine, avant la fermeture. Enfin, tant que q3/q4 ne
-classent ni n'appellent ce chemin, le qualifier de mécanisme hôte exercé, pas
-encore de gestion reçue d'une erreur device réelle.
+Le chemin P1 `close_fatal` est donc une bonne primitive hôte à garantie forte
+pour une exception non nulle, sous le contrat de durée de vie des producteurs.
+La fixture fatale doit encore remplacer ses attentes de 100/200 ms par deux
+barrières : deux jobs actifs, puis file réellement pleine, avant la fermeture.
+Enfin, tant que q3/q4 ne classent ni n'appellent ce chemin, le qualifier de
+mécanisme hôte exercé, pas encore de gestion reçue d'une erreur device réelle.
 
 Le raccord device doit se faire **avant que le worker puisse dépiler un nouveau
 lot**. Aujourd'hui `cuda_check` transforme toute erreur CUDA en
@@ -552,17 +536,17 @@ valeurs, calculs et corrections détaillés restent dans
 
 1. Pin source G1 avec réception hôte partielle, dans son propre commit : bornes
    d'indices, compteurs/mutants de branche et réparation du CTest `--inject`.
-   La sentinelle de géométrie ferme le claim API ; le libellé des no-op peut
-   suivre sans nouvelle cible. `PointId` q4 adverse, selftest et vraie exécution
-   des mutants ferment ensuite la réception device.
+   La géométrie absente/vide est déjà séparée dans le worktree ; le libellé des
+   no-op peut suivre sans nouvelle cible. `PointId` q4 adverse, selftest et vraie
+   exécution des mutants ferment ensuite la réception device.
 2. Pin fold séparé : garder le tableau de créneaux et le refus avant `kNil` ;
-   compléter la bijection exacte, les assertions littérales des deux frontières,
-   le contrat précis de `slot-cap-minus-one` et le périmètre des catégories
-   mémoire.
-3. Durcir `194a0bc2` sans refonte : TLS non allouant, fermeture fatale sans
-   allocation, comptabilité après admission réussie et fixtures causales ; puis
-   brancher le poison typé dans q3/q4 avant tout claim de confinement d'une
-   erreur CUDA.
+   compléter le balayage de tout `slot_of_fid`, la causalité propre de
+   `slot-cap-minus-one`, les niveaux/lots littéraux, l'échantillonnage des cinq
+   catégories mémoire et le miroir strict.
+3. Durcir `194a0bc2` sans refonte : garder le TLS non allouant et la fermeture
+   en place, déplacer la comptabilité après admission réussie et rendre les
+   fixtures causales ; puis brancher le poison typé dans q3/q4 avant tout claim
+   de confinement d'une erreur CUDA.
 4. Pour L2/L3 : garder `bc66ade7`, partager le replayer strict, compléter les
    fixtures/listes et attribuer chaque métrique à son témoin ; puis ouvrir L3
    sans autre refonte du réducteur.
@@ -588,18 +572,22 @@ valeurs, calculs et corrections détaillés restent dans
   timeout. Le probe de constructeur d'Executor fautif confirme en revanche la
   jonction transactionnelle : exception exacte, zéro objet vivant, en Release
   et ASan/UBSan.
-- Worktree G1 postérieur : construction et CTest
-  `mhgp5_batch_contract` verts, 0,06 s au dernier passage ciblé. CUDA désactivé localement ; aucune
-  porte device de ce delta n'est annoncée comme exécutée.
-- Worktree fold à créneaux : **7/7** CTests `mhgp5_fold_live*` verts. Le nominal
-  de ce dernier passage dure 83,32 s sous forte contention locale — plusieurs
-  conformités et builds sanitizers concurrents — et n'est donc pas une mesure
-  de régression ; les six mutants rendent leur code attendu. Un lancement direct
-  de `slot-cap-minus-one` rend 4 sans crash, mais la porte le tue par désaccord
-  générique et n'assert pas encore le contrat exact de refus. Ces exécutions
-  reçoivent la sûreté du chemin exercé et l'égalité différentielle, pas encore
-  la bijection, les valeurs littérales des frontières, l'attribution du RSS ni
-  les trois sommes mémoire comme empreinte totale.
+- Worktree G1 postérieur : construction ciblée Release réussie ;
+  `mhgp5_batch_contract`, registre de mutants, instrumentation hôte et lanes
+  batched q3/q4 rendent **5/5**. CUDA est désactivé localement ; aucune porte
+  device de ce delta n'est annoncée comme exécutée.
+- Worktree fold à créneaux : **7/7** CTests fold nominal + six mutants verts au
+  dernier passage, en 54,15 s. `slot-cap-minus-one` rend 4, publie le refus exact
+  et reste propre sous ASan/UBSan, mais ses cas synthétiques ajoutent encore des
+  désaccords génériques suffisants au code 4. Ces exécutions reçoivent la sûreté
+  du chemin exercé et l'égalité différentielle, pas encore la causalité du
+  mutant, le mapping complet, les pics des cinq postes ni le miroir strict.
+- Rejeu indépendant de ce checkpoint : construction ciblée de
+  `mhgp5_batch_contract_gate`, `mhgp5_executor_pool_gate`,
+  `mhgp5_fold_live_gate` et `mhgp5_fold_live_probe` réussie ; cinq CTests ciblés
+  (batch, pool nominal/deux mutants, capacité fold) rendent **5/5** en 16,11 s.
+  Un smoke `--dump/--from` sur `uniform n=200` rend les mêmes 7 459 facettes et
+  2 385 deltas dans les deux bras, sans encore comparer leur objet complet.
 - Build Release CPU complet au pin `556c421e` : succès ; construction ciblée
   des portes fold au pin `bc66ade7` : succès.
 - CTests API, pool, T5, préfixe et lanes q3/q4 batched : 41/41 verts en

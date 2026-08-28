@@ -77,41 +77,45 @@ négatif. Extraire le replayer strict de `delta_replay_gate.cpp` dans l'oracle e
 le partager avec la porte vivante ; une clé absente ou un delta incohérent doit
 être rejeté. Cela ferme T5 sans mettre l'oracle sur le chemin produit.
 
-Les fixtures demandent encore deux dents distinctes. Le hash constant ne touche
-que `FacetIntern`, jamais les collisions et le décalage arrière de `LiveIndex` :
-ajouter une petite table traversant 15 vers 0, supprimer tête, milieu et queue,
-puis vérifier `get`, `used_` et réinsertion. Les trois triangles de D reçoivent
-l'ordre des sorties mais portent neuf alias ; conserver D et ajouter un unique
-simplex K = 2 qui vérifie explicitement le pic transitoire 3 et la vacuité.
+Le chemin actif à créneaux a supprimé `LiveIndex` : sa fixture de collision et
+de décalage arrière est devenue sans objet et ne doit pas être ajoutée, sauf si
+ce hash revient comme repli compilé. Les deux fixtures de frontière gravent
+maintenant quatre facettes au même niveau puis aux niveaux successifs, avec pics
+4 et 2 et deltas littéraux. Il reste à graver aussi `batches` et
+`batch_levels`, actuellement affichés ou comparés seulement au résident.
 
-Les scans structurels doivent rester un oracle de test. Le stride entier actuel
-peut produire jusqu'à 127 scans malgré le commentaire « au plus 64 » et le
-parcours déréférence `av[x]` avant d'avoir borné `x`. Utiliser un stride plafond,
-contrôler bornes, backlinks, nombre de composantes, table et free-lists, puis
-désactiver ces parcours dans le chemin mesuré. Les compteurs de vie exacts
-restent, eux, une garde O(1) par frontière.
+Les scans structurels doivent rester un oracle de test. Le marquage ajouté
+vérifie maintenant disjonction, couverture et unicité des créneaux libres et
+vivants ; il ne parcourt cependant pas tous les `slot_of_fid`, donc une entrée
+stale non nulle échappe encore à la bijection annoncée. Le parcours déréférence
+aussi `av[x]` avant d'avoir borné `x`. Utiliser un stride plafond, contrôler la
+borne avant lecture, backlinks, nombre de composantes, mapping complet et
+free-lists, puis désactiver ces parcours dans le chemin mesuré. Les compteurs de
+vie exacts restent, eux, une garde O(1) par frontière.
 
 La formule de porte doit aussi être distinguée du théorème. Le code autorise
 `ceil(log2(F + 2)) + 1`, alors que le doublement small-to-large donne la borne
 plus nette `floor(log2(F))` par alias. La première peut rester une marge sûre,
 mais les documents ne doivent pas les écrire comme une seule formule.
 
-La mesure mémoire reste un ratio de structures choisies. `g_alloc_bytes` prend
-un maximum global et l'imprime avec l'ordre du maximum d'alias ; les témoins
-peuvent diverger. Échantillonner aussi après les morts, où les free-lists
-grandissent, et conserver chaque valeur avec son ordre. Scratchs, sortie,
-FIRST/LAST, catalogue et `ev_fid` restent hors de ce compte : ne jamais le
-nommer RSS ni mémoire bout en bout.
+La mesure mémoire possède désormais cinq catégories utiles : entrée, mapping,
+persistant, scratch et sortie. Elles restent des **minorants** : l'échantillon
+précède les croissances du lot courant, si bien que le dernier ou unique lot
+omet les nouvelles capacités de `pre_list`, `post_list`, `scratch`, `r.deltas`,
+`cfree` et `slot_mark`; `born_at`/`died_at` et `batch_levels` manquent aussi.
+Échantillonner après chaque phase allocatrice et conserver chaque maximum avec
+son ordre. Ne jamais nommer leur somme RSS ni mémoire allocator-précise.
 
 `free-on-absorb` ne recycle plus ses alias mais recycle encore leur composante,
 dont ils gardent l'indice. Son code 4 Release est reçu ; le vert ASan/UBSan est
 rapporté par Claude mais n'a pas été rejoué par cet audit. Le mutant reste
 diagnostiquement sale. Enfin, aucune
-accélération CPU/RSS n'est reçue. La sonde de `194a0bc2` relance un fold
-depuis `on_forest`, donc mesure le résident déjà vivant plus le second
-réducteur. Un miroir attribuable exécute dans deux processus le même flux
-d'événements avec exactement un réducteur par processus, replayer strict et
-digest commun inclus côté vivant.
+accélération CPU/RSS n'est reçue. Le worktree ajoute un régime `--dump/--from`
+qui exécute correctement dans deux processus le même flux d'événements avec
+exactement un réducteur chacun. Pour devenir un miroir attribuable de l'objet
+complet, il doit encore chronométrer la copie du catalogue vivant, imposer le
+replayer strict et refuser toute divergence de digest, deltas, niveaux et
+partition. Le régime callback historique reste explicitement un micro-banc.
 
 ## Solution 1 — fold vivant sans ancienne forêt union-find
 
@@ -509,11 +513,12 @@ complète et un probe à un seul réducteur par processus.
 - ne plus promettre le digest v4 au-delà du domaine u32 ;
 - qualifier explicitement les extrapolations `uniform`, et séparer pic disque
   K-par-K du volume cumulé.
-- retirer la coexistence, dans `ECHELLE.md`, de l'ancien témoin « deux postes /
-  3,19 Mo » et du nouveau découpage en trois postes incomplets ; publier entrée,
-  mapping, état vivant, travail et sortie avec leurs témoins respectifs ;
-- requalifier les tableaux du callback 8 k/16 k en micro-banc du second fold :
-  ils ne deviennent un miroir CPU/RSS qu'après injection au point unique de
-  réduction, égalité complète des objets et un seul réducteur par processus.
+- retirer, dans `ECHELLE.md`, tout ancien témoin « deux postes / 3,19 Mo » s'il
+  subsiste ; conserver les cinq catégories entrée, mapping, état vivant,
+  travail et sortie, mais rééchantillonner leurs pics après les croissances ;
+- conserver les tableaux du callback 8 k/16 k comme micro-banc du second fold,
+  sans les renommer rétroactivement ; le nouveau régime `--dump/--from` devient
+  un miroir CPU/RSS seulement après égalité complète des objets, rejeu strict,
+  copie chronométrée et répétitions contrebalancées.
 
 GCP non utilisé pour cet audit.

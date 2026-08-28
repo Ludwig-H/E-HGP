@@ -9,7 +9,8 @@
 - **État courant et priorités :** voir
   [`ETAT_COURANT.md`](ETAT_COURANT.md). Les sections G1–G3 ci-dessous restent
   des guides de conception ; les anciennes conditions de campagne sont
-  requalifiées par le reçu de session 13 et le contre-audit G0.
+  requalifiées par le reçu de session 13, le contre-audit G0 et le worktree
+  courant (G0/G1/fold non épinglés).
 - **Cadre :** `phase=exploration_v5_hors_registre`,
   `backend=cpu_reference`, `profile=quantized_u16_input_only`,
   `mode=audit_independant_math_and_architecture`,
@@ -181,11 +182,13 @@ l'arithmétique du struct :
 - pic de concurrence dans le domaine du nombre d'exécuteurs.
 
 Pour G1, cela exige en plus `index_lots == lots > 0`, `soa_lots == 0` et
-`site_soa_bytes == 0`. Le selftest courant accepte pourtant un faux pilote qui
-ignore `--gpu-wire=index` et n'imprime ni wire, ni étapes, ni octets. Ajouter un
-mutant `wire-index-force-soa` et son faux reçu refusé. La porte q3 doit aussi
-parser `--inject` : son CTest de routage négatif attend actuellement 4 mais
-l'exécutable rendrait 2 sur l'argument inconnu.
+`site_soa_bytes == 0`. Le worktree ajoute ces compteurs, les deux mutants
+`wire-index-force-soa` et le parseur `--inject` q3 : conserver ce raccord. La
+réception reste ouverte, car le selftest courant accepte encore un faux pilote
+qui ignore `--gpu-wire=index` et n'imprime ni wire, ni étapes, ni octets ; le
+validateur `gpuidx` ne lit aucune ligne de branche et `gpu_lane` n'exécute pas
+les deux mutants. Ajouter le faux reçu refusé, rendre ces lignes obligatoires et
+exécuter les mutants sur la prochaine cible device minimale.
 
 ## G0 — pool GPU borné et persistant
 
@@ -208,12 +211,14 @@ l'implémentation :
   sous `taskset -c 0`.
 
 Le pin `194a0bc2` ferme ces quatre points dans la bonne architecture et ne doit
-pas être réécrit. Avant sa réception complète, il reste un P0 local :
-le vecteur TLS de réentrance peut allouer hors capture et autorise un cycle
-`A -> B -> A`. Un marqueur TLS non allouant qui refuse toute soumission depuis
-un worker suffit aux lanes actuelles. Les compléments de porte — constructeur
-fautif gravé, signatures mutantes causales et contre-pression effectivement
-bloquante — sont détaillés dans `ETAT_COURANT.md`.
+pas être réécrit. Le worktree remplace maintenant le vecteur TLS par un pointeur
+non allouant qui refuse tout nesting, et vide la file fatale sans tableau
+temporaire : conserver ces deux corrections. Avant réception complète, déplacer
+`submitted_++` après `queue_.push_back` réussi, remplacer les attentes
+100/200 ms de la fixture fatale par des barrières causales, graver le
+constructeur fautif et rendre chaque verdict mutant propre à son défaut. Le
+poison CUDA typé reste un raccord device séparé, détaillé dans
+`ETAT_COURANT.md`.
 
 Garder le domaine CLI continu `1..8`, rejeter 0/9 au lieu de clamper et mesurer
 seulement `{1,2,4,8}`. Une erreur hôte explicitement récupérable peut rester
@@ -399,11 +404,11 @@ digest reste proche de 4,30 s. Le gain 32→48 tombe à 1,10×/1,08× et le RSS 
 d'environ 3,30 à 4,89/4,96 Gio. Le verrou n'est donc plus le nombre de
 producteurs : c'est la phase de reduce séquentielle et le digest fixe. L'état
 vivant et le trafic mémoire sont une hypothèse explicative à profiler, pas
-encore une cause reçue ; une table de hash et des listes intrusives peuvent
-aussi ralentir le chemin court. Le fold vivant durci de `bc66ade7` reste hors
-du chemin produit et n'a pas encore été comparé au résident sur un périmètre
-attribuable ; la sonde ajoutée par `194a0bc2` relance un second fold depuis le
-callback du pipeline et ne fournit donc pas ce miroir CPU/RSS.
+encore une cause reçue. Le fold à créneaux du worktree reste hors du chemin
+produit ; son nouveau régime `--dump/--from` isole enfin un seul réducteur par
+processus, mais n'est pas encore un miroir d'objet complet tant que copie du
+catalogue, rejeu strict et digest commun ne sont pas inclus et vérifiés. Le mode
+callback historique reste un micro-banc du second fold.
 
 La machine expose 48 CPU logiques mais seulement 24 cœurs physiques SMT2, tous
 les bras gardent l'affinité `0-47`, et aucun point 24 ni cpuset par bras n'a été
@@ -460,6 +465,17 @@ temps de rapatriement.
 
 Les optimisations CPU à tester ensuite sont :
 
+- exploiter d'abord la primitive **déjà présente** `parallel_ranges` dans les
+  trois `run_lane` hôte et les deux générateurs de lots device, au lieu de
+  `parallel_items(nrect, ...)`. Le corps boucle sur `[begin,end)` et garde le
+  même scratch/output par `worker_id`. Avec les huit tranches par worker déjà
+  codées, le nombre de tickets atomiques tombe d'environ `nrect + T` à au plus
+  `9T` par invocation, soit de 3,075 millions à environ 1 300 pour trois lanes
+  à 48 workers, sans nouvelle infrastructure. La porte compare le post-RLE,
+  tous les compteurs et digests à 1/2/3/8/48 fils, puis l'instrument vérifie la
+  baisse de `atomic_tickets`; le gain mur reste à mesurer. Si quelques
+  rectangles lourds déséquilibrent huit paquets par worker, augmenter le nombre
+  de paquets avant d'introduire un ordonnanceur guidé ;
 - séparer un `make_chunk_plan(n, threads)` pur de son exécution. Les treize
   prépasses factices *no-op* se retrouvent exactement dans `expand.hpp` : préfiltre,
   census, comptage, puis une fois pour chacun des dix ordres d'expansion. Le
@@ -495,28 +511,30 @@ Le reduce ne doit pas être parallélisé par lots avant une preuve de conservat
 de l'ordre des racines et deltas. En revanche, réduire sa taille d'état et ses
 défauts de cache est compatible avec l'objet actuel.
 
-Deux petits changements attaquent directement les coûts visibles sans changer
-l'algorithme : remplacer le ticket atomique **par rectangle** de
-`parallel_items` par des paquets dynamiques bornés, puis fusionner `louts` et
-les sorties de census par préfixes d'offsets et copies parallèles disjointes.
-Aujourd'hui chaque primitive recrée aussi ses fils ; le pool global proposé
-doit réutiliser une équipe entre WSPD, lanes et préfiltre. Ces travaux ne feront
-pas scaler un reduce aléatoire déjà limité par la bande passante : le fold
-vivant est précisément ce qui réduit d'abord son working set.
+Deux petits changements attaquent donc directement les coûts visibles sans
+changer l'algorithme : raccorder `parallel_ranges` pour supprimer le ticket
+atomique **par rectangle**, puis remplacer les treize prépasses no-op par un
+plan pur. Ensuite seulement, fusionner `louts` et les sorties de census par
+préfixes d'offsets et copies parallèles disjointes. Aujourd'hui chaque primitive
+recrée aussi ses fils ; le pool global proposé doit réutiliser une équipe entre
+WSPD, lanes et préfiltre. Ces travaux ne feront pas scaler un reduce aléatoire
+déjà limité par la bande passante : le fold vivant est précisément ce qui réduit
+d'abord son working set.
 
 ## Ordre de commits proposé à Claude
 
-1. **Épingler le contrat fonctionnel G1 sur hôte dans son propre commit** :
-   indices bornés, branche prouvée/mutée et CTest `--inject`, après séparation
-   de « géométrie absente » et « géométrie vide » et cohérence des lots no-op.
-   `PointId` adverse et le selftest de campagne ferment ensuite la réception
-   q4 ; les lots mono-wire, le contexte partagé et les métriques de setup sont
-   des optimisations mesurées, pas des prérequis sémantiques.
-2. **Durcir le pin G0 `194a0bc2`**, sans refonte : TLS non allouant avec refus
-   de tout nesting, fermeture fatale sans allocation, transitions de compteurs
-   atomiques sous mutex, porte causale et poison CUDA typé déclenché avant que
-   le worker reprenne un lot. Ce point précède le claim de confinement device,
-   pas le pin fonctionnel G1.
+1. **Épingler le contrat fonctionnel G1 hôte dans son propre commit** : indices
+   bornés, géométrie absente/vide séparée, compteurs de branche et CTest
+   `--inject`. La branche n'est qu'instrumentée en source ; `PointId` q4
+   adverse, selftest fail-closed et exécution des deux mutants sur device
+   ferment ensuite sa réception. Les lots mono-wire, le contexte partagé et les
+   métriques de setup sont des optimisations mesurées, pas des prérequis
+   sémantiques.
+2. **Durcir le pin G0 `194a0bc2`**, sans refonte : garder le TLS non allouant et
+   la fermeture en place du worktree, déplacer le compteur après admission
+   réussie, rendre les portes causales, puis brancher le poison CUDA typé avant
+   que le worker reprenne un lot. Ce point précède le claim de confinement
+   device, pas le pin fonctionnel G1.
 3. **Conserver la nouvelle session `839cf1ec`** comme reçu nominal G0 + G1 q3,
    avec sa portée corrigée et le reçu de sûreté expurgé déjà lié au hash du
    journal ; ne jamais versionner le journal brut ni une clé. Une petite
