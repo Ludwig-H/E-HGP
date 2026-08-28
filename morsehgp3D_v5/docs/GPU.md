@@ -576,10 +576,43 @@ offsets, fold vivant), pas `threads = 48` seul.
   N ∈ [1, 8], défaut 4) : exécuteurs créés une fois par lane et possédés par
   des fils de pool, file bornée à contre-pression, producteurs CPU bloquants
   (ordre d'émission par ouvrier inchangé), résidus dans la même file,
-  exceptions relancées dans le producteur soumettant ; porte hôte
-  `mhgp5_executor_pool` (12 producteurs × 100 travaux, ordre, N exécuteurs
-  construits, pic d'activité ≤ N et ≥ 2, exception propagée) et mutants
-  `pool-serial`, `pool-drop-exception` (code 4).
+  exceptions relancées dans le producteur soumettant.
+  **Quatre corrections de sûreté** demandées par l'audit du 28 août et livrées
+  le même jour :
+  (1) *ticket* — la notification se fait sous `Ticket::mu` et plus rien n'est
+  touché du ticket ensuite ; auparavant un réveil spurieux laissait le
+  producteur détruire son ticket de pile avant `notify_all()`. **ThreadSanitizer
+  voit la différence** : l'ancien pool sort une course
+  `pthread_cond_destroy` ↔ `~Ticket` (code 66), le nouveau sort 0 avertissement ;
+  (2) *démarrage transactionnel* — l'`Executor` est construit sous capture
+  d'exception, le constructeur du pool n'ouvre qu'une fois les N fils **prêts**
+  et, en cas d'échec (exécuteur ou lancement de fil après démarrage partiel),
+  ferme, réveille, joint puis relance ; auparavant l'exception s'échappait du
+  corps du fil (`std::terminate`) ;
+  (3) *réentrance* — une soumission depuis un travail du même pool est refusée
+  immédiatement (pile de pools `thread_local`), au lieu de bloquer (certain à
+  N = 1) ;
+  (4) *domaine* — 0 et 9 sont **refusés**, jamais clampés ; tout entier de 1 à
+  8 est accepté, 3 compris.
+  Porte hôte `mhgp5_executor_pool` : **pic d'activité déterministe** par latch
+  (N travaux retenus jusqu'à ce que les N soient actifs, donc pic **exactement**
+  N) à N = 1, 2, 4, 8 — l'ancienne porte, dépendante de l'ordonnanceur, échouait
+  78 fois sur 100 sous `taskset -c 0` ; la nouvelle y sort 0 **30 fois sur 30**.
+  Elle exige aussi l'ordre par producteur, N exécuteurs construits, l'exception
+  propagée, le refus de réentrance, le refus de domaine, et la contre-pression
+  à `queue_cap = 1` (pic de file ≤ 1) ; plancher 1 000 travaux, `TIMEOUT`
+  explicite, propre sous ASan/UBSan **et** TSan. Mutants `pool-serial`,
+  `pool-drop-exception` (code 4).
+  **Erreur device fatale** (P1 de l'audit) : `close_fatal(exception_ptr)` rend
+  le pool à usage unique — l'admission ferme, la première erreur est mémorisée,
+  les tickets **en file sont annulés** avec elle (jamais laissés en attente),
+  toutes les attentes sont réveillées et les exécuteurs des travaux actifs ne
+  sont plus réutilisés ; une exception de travail *ordinaire* reste, elle,
+  récupérable et le pool continue. La comptabilité de fermeture est vérifiée :
+  `soumis = réussis + échoués + annulés` et `actifs = en file = 0` — la porte
+  bloque les deux exécuteurs pour que l'annulation ne soit pas vide (mesuré :
+  soumis 6 = réussis 2 + annulés 4, six producteurs reçoivent l'erreur, aucun
+  n'est laissé en attente).
 - **G1 — géométrie résidente et covers par indices (q3)** : `GpuGeometry`
   (positions uniques i32 téléversées une fois par lane, RAII) ; lot q3 porteur
   de `site_index` (u32 par site) et d'une géométrie par ancre

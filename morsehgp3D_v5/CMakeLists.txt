@@ -233,9 +233,9 @@ mhgp5_executable(mhgp5_api_guard_gate tests/api_guard_gate.cpp)
 mhgp5_gate(mhgp5_api_guard_gate 0 mhgp5_api_guard_gate "")
 # Pool d'executeurs device borne et persistant (G0 des auditeurs, src/gpu/executor_pool.hpp, hote pur).
 mhgp5_executable(mhgp5_executor_pool_gate tests/executor_pool_gate.cpp)
-mhgp5_gate(mhgp5_executor_pool 0 mhgp5_executor_pool_gate "")
-mhgp5_gate(mhgp5_executor_pool_mutant_serial 4 mhgp5_executor_pool_gate "--inject=pool-serial")
-mhgp5_gate(mhgp5_executor_pool_mutant_drop_exception 4 mhgp5_executor_pool_gate "--inject=pool-drop-exception")
+mhgp5_gate(mhgp5_executor_pool 0 mhgp5_executor_pool_gate "" TIMEOUT 180)
+mhgp5_gate(mhgp5_executor_pool_mutant_serial 4 mhgp5_executor_pool_gate "--inject=pool-serial" TIMEOUT 180)
+mhgp5_gate(mhgp5_executor_pool_mutant_drop_exception 4 mhgp5_executor_pool_gate "--inject=pool-drop-exception" TIMEOUT 180)
 # Porte de rejeu « catalogue + deltas -> partition » (docs/ECHELLE.md § 8 bis, T5) : autorite independante du fold.
 mhgp5_executable(mhgp5_delta_replay_gate tests/delta_replay_gate.cpp)
 mhgp5_gate(mhgp5_delta_replay 0 mhgp5_delta_replay_gate "")
@@ -369,6 +369,9 @@ mhgp5_executable(mhgp5_q4_chord_probe bench/q4_chord_probe.cpp)
 mhgp5_executable(mhgp5_q4_stage_probe bench/q4_stage_probe.cpp)
 target_compile_definitions(mhgp5_q4_stage_probe PRIVATE MHGP5_PROFILE_Q4=1)
 mhgp5_executable(mhgp5_rect_probe bench/rect_probe.cpp)
+# Sonde MIROIR resident/vivant (audit du 28 aout) : meme perimetre des deux
+# cotes, deux PROCESSUS separes pour que le pic de RSS soit attribuable.
+mhgp5_executable(mhgp5_fold_live_probe bench/fold_live_probe.cpp)
 execute_process(COMMAND git rev-parse HEAD WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} OUTPUT_VARIABLE _mhgp5_probe_pin OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_QUIET)
 execute_process(COMMAND git status --porcelain -- src bench tests CMakeLists.txt WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} OUTPUT_VARIABLE _mhgp5_probe_dirty OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_QUIET)
 if(_mhgp5_probe_dirty STREQUAL "")
