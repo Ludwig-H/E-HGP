@@ -558,3 +558,45 @@ suivante :
 En q3, `33,7 % -> 43,8 %` décrit donc une **opportunité de pruning sur deux
 tailles**, pas encore un gain croissant ni une baisse d'exposant. L'ordre de
 travail V39 puis prototype q3 borné reste le bon.
+
+## Requalification de la mesure prédicteur `905c5361`
+
+La ventilation `k=1/k=2` est utile, mais le coefficient `70,6 %` n'est pas
+identifié par les totaux publiés. Notons, dans les rectangles vivants de base :
+
+- `E` les paires éliminées avant le test W ponctuel — histogramme en q3,
+  histogramme puis W4 explicite en q4 ;
+- `P` la population restante qui atteint ce test, et `W1` les paires de `P`
+  tuées par `k=1` ;
+- `K` les paires certifiées mortes par la descente post-séparation.
+
+La relation sûre est `K subset E union W1`. Elle ne donne ni `E subset K`, ni
+une partition de `K` sans mesurer l'intersection. Pour `scanline q3` 16 k, les
+valeurs annoncées `|K|=696 537`, `|E|=310 615` et `|W1|=546 779` impliquent
+seulement :
+
+```text
+385922 <= |K inter P| <= 546779
+70,581 % <= |K inter P| / |W1| <= 100 %
+149758 <= |K inter E| <= 310615
+```
+
+Le `70,6 %` publié est donc la **borne inférieure** obtenue en supposant à tort
+que toutes les morts histogramme appartiennent à `K`. Pour l'identifier, la
+sonde doit imprimer la partition exacte
+`K = K_pretests + K_k1`, avec intersections calculées paire par paire et les
+conservations correspondantes. Sur uniform q3, `141 246 / 564 834 = 25,007 %`
+n'est également qu'une borne supérieure avant retrait de `K inter E`, pas un
+taux récupéré « inférieur à 25 % » déjà mesuré.
+
+Le zéro `k=1` q4 signifie `K inter P = emptyset`, pas `K = emptyset`. Il est
+donc compatible avec les 5,9 à 40,4 % de paires q4 supprimées par la sonde :
+ces paires doivent appartenir aux prétests `E` et peuvent encore éviter des
+coûts amont. Elles ne prouvent en revanche aucune économie du corps q4 aval.
+
+Enfin, les rapports 0,06:1 à 6,3:1 divisent des covers estimés au prorata par
+des visites d'arbre mesurées. Ils ne classent ni gain ni perte de temps. Les
+phrases « paie sur un seul cas », « perd partout ailleurs » et « gain croissant »
+restent donc rejetées jusqu'au prototype intégré. La note autonome de
+`905c5361`, sans commande, sortie brute, hash de binaire ni pin de configuration
+opposable, est consolidée ici puis retirée pour garder `audits/` propre.

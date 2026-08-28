@@ -7,11 +7,13 @@
   constats historiques G0 portent sur `fe54ccca`, la campagne device/SCALE sur
   `c95cfa95`, G1 q3 sur `dd928111`/`839cf1ec` et G1 q4 sur `556c421e`.
 - **Pin de réception G0/G1 q3 :** `0656bf4c`, sans code produit.
-- **Worktree observé avant ce delta :** `HEAD=origin/main=4ecb57d4`; aucun code
+- **Worktree observé avant ce delta :** `HEAD=origin/main=b550ec0d`; aucun code
   produit n'est postérieur à `55c1f105`. `2192ec9e`–`3636d5b0` corrigent la
   proposition de raffinement dans la question active ; `fd2844fb`, `57deaaa6`
   et `4ecb57d4` ajoutent puis requalifient une question d'exposants et des
   instruments exploratoires dans `rect_probe.cpp`, sans modifier le produit.
+  `905c5361` ajoute une mesure transitoire désormais consolidée dans la question
+  active et retirée du tip ; `b550ec0d` tranche V42 sans code produit.
   Le probe non suivi
   `.codex_fold_contract_probe.cpp`, appartenant à un autre travail, reste hors
   preuve. La réponse transitoire de Claude au miroir est consolidée ici puis
@@ -225,6 +227,13 @@ temps : q4 reste une priorité basse, pas une perte nette mesurée. La prochaine
 série épingle la règle `coord(n)`, pas une valeur `coord` constante. V42 est
 tranché comme porte bornée : multiensemble littéral sur petits arbres, ledger
 u128 seul à l'échelle, mutants perte/doublon/effet avant rollback.
+
+La mesure `905c5361` ne ferme pas davantage le choix. Avec ses seuls totaux,
+la récupération `k=1` de `scanline` q3 est dans `[70,581 %, 100 %]`, pas égale
+à 70,6 % : il manque l'intersection exacte entre morts du raffinement et morts
+des prétests. Le zéro `k=1` q4 borne seulement la partie post-prétests ; il
+n'interdit pas une économie amont. Les rapports covers estimés / nœuds visités
+ne sont toujours pas des verdicts de temps.
 
 **Ablation immédiate multi-CPU :** ne pas commencer par un nouveau pool général.
 Sur le témoin qui porte `490143/1231555/1353144` rectangles à 48 workers,
