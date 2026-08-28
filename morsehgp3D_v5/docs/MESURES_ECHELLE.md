@@ -13,13 +13,13 @@ Cadre : `phase=exploration_v5_hors_registre`, `backend=cpu_reference`,
 Sources : `receipts/campagne_g4_v5_20260828_grille/out/` (48 fils, G4),
 runs locaux 8 fils, `bench/mhgp5_rect_probe`, `bench/mhgp5_q4_stage_probe`.
 
-## 0. Les compteurs sont indépendants de la machine
+## 0. Les compteurs sémantiques de pente sont reproductibles sur le cas apparié
 
 Vérifié le 28 août 2026 : un run **local à 8 fils** et le reçu **G4 à 48 fils**
 donnent, sur `scanline_single_pass` à $n = 100\,000$, exactement les mêmes
-nombres — 48 557 755 ancres q4, 384 464 candidats q4. Les campagnes
-d'exposant sur compteurs ne demandent donc **pas** de session payante ; seuls
-les temps de mur et le RSS en demandent une.
+nombres — 48 557 755 ancres q4, 384 464 candidats q4. Ces deux compteurs
+sémantiques CPU peuvent donc servir aux campagnes locales de pente sur ce cas.
+Cela ne s'étend ni aux compteurs d'ouvriers/device, ni aux temps, ni au RSS.
 
 ## 1. Le mur, mesuré jusqu'à 200 000 points
 
@@ -90,10 +90,11 @@ Mécanisme : prolonger la descente ternaire **à l'intérieur** d'un rectangle
 vivant, en réévaluant le certificat universel de chaque sous-produit. Les
 enfants radix partitionnent les paires du parent et un témoin universel du
 parent le reste pour un enfant. Cela rend la mort d'un sous-produit sûre. Les
-enfants ne deviennent toutefois pas des rectangles WSPD : la séparation n'est
-pas héréditaire. L'objet reste inchangé seulement si l'aval itère exactement
-l'antichaîne survivante, réapplique ses prétests sûrs et ferme les portes
-post-RLE.
+enfants ne deviennent toutefois pas le nouveau front WSPD canonique : la
+séparation n'est pas héréditaire. L'intégration annule donc une scission avant
+tout effet si l'un des deux enfants échoue au prédicat entier `separated`, puis
+conserve `max(core_parent, core_enfant)`. L'aval itère exactement l'antichaîne
+survivante et réapplique ses prétests sûrs.
 
 `scanline_single_pass`, lane q4 (`mhgp5_rect_probe --descente-seule`) :
 
@@ -113,43 +114,100 @@ qui auraient réellement atteint un cover est inconnue. Multiplier toutes les
 paires tuées par la moyenne globale de 423 puis 986 visites attribue donc des
 covers inexistants et mélange visites de nœuds avec visites de points.
 
-## 4 bis. Livré en production, derrière une option, digests bit-identiques
+## 4 bis. Raccordé au chemin CPU de référence, opt-in, sous portes bornées
 
 `GenerateOptions::postsep_refine_levels` ($L \in [0, 3]$, défaut 0),
-`RunOptions::postsep_refine_levels`, CLI `--postsep=L` (refus hors domaine).
-Porte `mhgp5_postsep_refine` (+ deux mutants, code 4) :
+`RunOptions::postsep_refine_levels`, CLI `--postsep=L` (parse intégral et refus
+hors domaine dans la bibliothèque). Tant que les chemins externes ne propagent
+pas cette politique, `L>0` avec override q3/q4 est refusé explicitement. Porte
+`mhgp5_postsep_refine` (+ trois mutants, code 4) :
 
-- **digest bit-identique à $L = 0, 1, 2, 3$** sur six familles, dont les deux
-  contre-familles `two_lines` et `collinear_seven` — c'est la preuve que
-  l'objet ne change pas (l'*ordre* d'énumération, lui, change quand B est
-  scindé) ;
-- **grand-livre exact par lane** : `émis + tués == base`, vérifié à chaque $L$
-  et pour les trois lanes ; `base` est en outre invariante en $L$ ;
+- **objet complet identique à $L = 0, 1, 2, 3$** sur six familles :
+  `digest_raw_candidates` du multiensemble canonique pré-RLE,
+  `digest_balls`, cardinalités brutes par lane, événements, `batch_levels` et
+  forêts; le bras $L=3$ est aussi identique entre un et quatre fils ;
+- **grand-livre exact et fail-closed par lane** : `émis + tués == base`,
+  vérifié avant RLE et avant toute publication; `base` est invariante en $L$.
+  Un oracle test-only développe en outre le multiensemble littéral des couples
+  sur de petits arbres et exerce des scissions de A et B ;
 - **route q2 interdite** : `tués[q2] == 0` et `émis[q2] == base[q2]` à tout $L$ ;
-- planchers de non-vacuité : au moins 1 000 paires tuées en q3 **et** en q4
-  (mesuré : 180 959 et 224 667 à $L = 3$) ;
-- mutants tués : `postsep-drop-child` (un enfant vivant jeté : le grand-livre
-  le voit avant le digest) et `postsep-kill-h-minus-one` (seuil de mort à
-  $h - 1$ : sur-tue, donc perd des boules).
+- planchers de non-vacuité en q3 et q4, rollback non héréditaire gravé et
+  compte frais monotone sur les familles de la porte ;
+- mutants tués : perte d'un enfant, duplication d'un enfant et seuil de mort
+  à $h-1$. La somme scalaire et les signatures aval ne jouent pas le même rôle.
 
-Mesure à `scanline` $n = 4\,000$, masse de paires q4 : $L = 0$ → 305 981 ;
-$L = 1$ → 242 224 (−20,8 %) ; $L = 2$ → 203 371 (−33,5 %) ; $L = 3$ → 185 120
-(−39,5 %), pour 205 362 comptages universels.
+Première mesure **intégrée** locale, huit fils, worktree courant, un seul run
+par bras donc diagnostique et non reçu :
 
-**Le « réveil » d'histogramme q2 décrit par l'audit n'a pas pu être exhibé** :
-ni sur ses quatre positions, ni sur 18 000 nuages entiers aléatoires (5 à 12
-points, `smax` 3 à 7). Explication plausible : le cœur de l'enfant est
-$\ge$ celui du parent, donc `need = h - core` diminue et compense la perte
-d'histogramme. La route q2 reste fermée — elle ne coûte rien — mais elle est
-gardée par un **invariant**, pas par un mutant : un mutant non réalisable ne
-garde rien.
+| $n$ | $L$ | masse q4 tuée | appels de cœur q4 | nœuds visités q4 | génération |
+|---:|---:|---:|---:|---:|---:|
+| 4 000 | 0 | 0 % | 0 | 0 | 1,266 s |
+| 4 000 | 3 | 39,1 % | 203 062 | 19,90 M | 1,655 s |
+| 8 000 | 0 | 0 % | 0 | 0 | 3,356 s |
+| 8 000 | 1 | 21,8 % | 185 520 | 17,05 M | 3,781 s |
+| 8 000 | 2 | 36,0 % | 338 994 | 34,62 M | 3,961 s |
+| 8 000 | 3 | 43,7 % | 416 206 | 49,11 M | 4,294 s |
+| 16 000 | 0 | 0 % | 0 | 0 | 9,088 s |
+| 16 000 | 1 | 20,7 % | 363 952 | 34,52 M | 9,788 s |
+| 16 000 | 3 | 44,0 % | 775 762 | 99,13 M | 10,862 s |
+
+Le raccord tue donc une masse réelle, mais **ralentit tous les bras mesurés**.
+À 16 000, $L=3$ épargne seulement 0,137 s dans les corps q3+q4, tandis que
+la phase WSPD+raffinement q3+q4 ajoute 1,913 s. Le verrou est maintenant mieux
+localisé : raffiner tous les parents n'est pas recevable; la prochaine sonde
+doit stratifier rendement et coût par `h-core`, masse $\lvert A\rvert\lvert B\rvert$ et géométrie avant de tester une politique sélective. Une baisse de
+masse seule ne vaut pas un gain de complexité ni de mur.
+
+La première construction q2 à quatre positions n'était pas un rectangle radix
+valide, mais une fixture valide à six points réalise ensuite le réveil : à
+`s=1`, `smax=3`, un parent tue l'ancre `(2,5)` avec
+`core + h_a + h_b = 0 + 3 + 0`, puis un sous-rectangle séparé la réveille avec
+`0 + 1 + 0 < h2=2`. Le chemin test-only ouvert passe de 13 à 14 candidats et
+ajoute une boule RLE, alors même que `tués[q2] == 0` et
+`émis[q2] == base[q2]`. La monotonie du cœur ne compense donc pas
+universellement la perte d'histogramme ; la route q2 reste fermée et cette
+fixture doit tuer son mutant dédié. Les coordonnées et facteurs exacts sont
+épinglés dans
+[`QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md`](../audits/QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md).
+
+## 4 ter. En PRODUCTION, le raffinement coupe 47 % des ancres et le mur AUGMENTE de 34 %
+
+C'est la mesure que l'audit exigeait — « le succès n'est pas une baisse de
+`seeds_cf` : il faut une baisse du **temps** et des **visites payées**
+supérieure au surcoût des nouveaux comptages » — et elle est **défavorable**.
+
+`scanline_single_pass`, $n = 100\,000$, 8 fils, avec digest :
+
+| grandeur | `--postsep=0` | `--postsep=3` | écart |
+|---|---|---|---|
+| digest | `c5c40203…` | `c5c40203…` | **identique** ✓ |
+| ancres q3 | 31 478 160 | **16 750 196** | **− 46,8 %** |
+| ancres q4 | 48 557 755 | **25 590 309** | **− 47,3 %** |
+| rectangles produits (q3 / q4) | 2 142 760 / 2 181 866 | 3 562 300 / 3 635 193 | + 66 % |
+| **mur total** | **535 189 ms** | **717 202 ms** | **+ 34,0 %** |
+
+**Le raffinement échoue son critère de réception.** Il supprime près de la
+moitié des ancres et coûte quand même un tiers de mur en plus.
+
+Pourquoi mon estimation précédente (« 3,3 puis 5,3 pour 1 en faveur du
+raffinement ») était fausse : je comparais des visites de nœud à un **cover
+entier** par paire tuée. En production, le cover n'est pas payé par paire — il
+est **partagé par rectangle** via les handles, et les tests d'ancre en $O(1)$
+tuent la plupart des ancres **avant** toute construction de cover. Une paire
+tuée n'épargne donc qu'une fraction de cover, tandis que le raffinement, lui,
+multiplie les rectangles par 1,66 : `rect_cover_handles` et
+`corner_histograms` sont recalculés pour chaque sous-rectangle.
+
+**Conséquence : `postsep_refine_levels` reste à 0 par défaut**, et le
+mécanisme n'est pas activé en production. Il reste dans le code, gardé, comme
+sujet mesurable — pas comme optimisation.
 
 ## 5. Ce qui n'est pas établi
 
-- Le worktree contient une intégration CPU opt-in `L=0..3`, mais les chiffres
-  ci-dessus viennent de la sonde, jamais du flux intégré. Le critère de
-  réception — baisse du **temps** et des **visites payées**, à sorties exactes
-  identiques — reste à établir.
+- La série 8 000/32 000/100 000 du § 4 vient de la sonde. Les bras intégrés
+  4 000/8 000/16 000 du § 4 bis sont tous négatifs en mur et ne constituent
+  qu'un diagnostic local à un run. Aucune politique sélective n'est encore
+  mesurée ni reçue.
 - Rien au-delà de 100 000 pour le raffinement, or c'est entre 100 000 et
   200 000 que la fraction « avant » s'effondre à $n^{-0{,}02}$.
 - La lane q3 n'est pas mesurée à grande échelle, ni `terrain`, ni
@@ -159,10 +217,9 @@ garde rien.
 - La série 100 000 et les masses d'étages ne possèdent pas encore de reçu brut
   versionné; elles restent diagnostiques jusqu'au pin, à la commande, au hash
   de binaire et à la sortie complète.
-- La **route q2 doit rester interdite** : la contre-fixture
-  `refine-hist-wakeup` (quatre positions, `s=1`, `smax=3`, `h2=2`) montre
-  qu'un témoin du frère peut « revivre » dans l'histogramme enfant et faire
-  émettre une boule supplémentaire, faute de prétest ponctuel en q2.
+- La **route q2 doit rester interdite** : la fixture à six points exhibe une
+  divergence de candidats et de `digest_balls` que le ledger de masse ne voit
+  pas. Sa réception demande encore le mutant test-only et le CTest permanent.
 - Le critère `separated` n'est **pas héréditaire** (fixture 1D
   `x = {0, 99, 100, 512, 612}`, `s = 8`) : les sous-rectangles ne sont pas des
   rectangles WSPD, et ce post-traitement ne doit pas être appelé une nouvelle
