@@ -359,7 +359,7 @@ mutants à code 4 : `prefix-hq-off`, `tiebreak-cell-local`, `tie-by-sorted-T`,
 |---|---|---|---|
 | L0 | instrument `vivantes` promu en compteur de réception (pic par lot, enregistrements, singletons) + reçu 32 000 puis 200 k | inchangé | inchangé |
 | L1 | **livré en partie (28 août)** : portée nommée de la tour dans la sortie et porte de préfixe par digests (K = 4, 5 ; trois familles ; mutant tué) — **[audit]** à corriger : le champ `profil=` collisionne avec le profil normatif `quantized_u16_input_only` → `tower_scope=profile_complete_k10` / `tower_scope=prefix_k5` (« complet » = complet dans le profil K ≤ 10), distinguer `smax_requested` / `smax_effective`, étendre la porte aux événements canoniques et aux `batch_levels` de tous les lots (omis par le digest v4) avec un plateau non trivial — restent : clé d'ex aequo explicite, indices u64, mutants T2 | inchangé | bit-identique |
-| L2 | **livré en partie (28 août)** : réducteur vivant `reduce_fold_live` (`src/forest/fold_live.hpp`) — PREMIÈRE/DERNIÈRE en RAM, alias et composantes en arène, table `fid -> alias` à décalage arrière, union small-to-large ; porte `mhgp5_fold_live` : 58 ordres, 5 194 737 facettes, 733 029 deltas, **égalité champ à champ avec le fold résident**, 0 violation d'invariant, cinq mutants tués ; restent le convertisseur flux → tableaux v4 et les durées de vie externes (L3) | inchangé | bit-identique (deltas et `batch_levels` égaux ; catalogue et partition par le rejeu T5) |
+| L2 | **livré en partie (28 août)** : réducteur vivant `reduce_fold_live` (`src/forest/fold_live.hpp`) — PREMIÈRE/DERNIÈRE en RAM, alias et composantes en arène, table `fid -> alias` à décalage arrière, union small-to-large ; porte `mhgp5_fold_live` : 58 ordres, 5 194 737 facettes, 733 029 deltas, **égalité champ à champ avec le fold résident**, rejeu T5 des deltas vivants vers la même partition, 0 violation d'invariant, de vie par lot ni de structure, cinq mutants tués ; restent le convertisseur flux → tableaux v4 et les durées de vie externes (L3), et **aucun gain CPU ni RSS n'est mesuré** — `reduce_fold_live` est hors du chemin produit | inchangé | bit-identique (deltas et `batch_levels` égaux ; catalogue et partition par le rejeu T5) |
 | L3 | payload et digest de flux, manifeste atomique, statuts SSD | inchangé | second digest déclaré |
 | L4 | amont streamé (solution 4, § 4.3) : runs de candidats triés par vague, fusion externe globale et RLE exact sur la clé complète, préfiltre/census/expansion une seule fois par boule unique, runs par ordre triés par clé totale ; le seau Morton du centre reste une localité optionnelle (V28 : la réconciliation globale des occurrences d'une clé est la seule nécessité) | inchangé | `balls` v4 par fusion k-aire |
 | L5 | préflight par rôle (`MemAvailable`, cgroup, `statvfs`, débit mesuré) ; jalon **1 M** G4 : résident ≡ streamé | — | — |
@@ -374,7 +374,15 @@ ne change ni l'objet ni ce plan.
 
 1. **Porte de rejeu** — **livrée le 28 août** (`tests/delta_replay_gate.cpp`,
    portes `mhgp5_delta_replay*`, mutants `drop-nonmerge` et `attach-prebatch`
-   tués) ; les **six fixtures gravées restent dues**. Énoncé d'origine :
+   tués), **avec les six fixtures gravées** (`tests/fold_fixtures_gate.cpp`,
+   porte `mhgp5_fold_fixtures`) : sortie littérale, égalité résident/vivant,
+   et invariance par empreinte d'adressage constante — celle-ci est un
+   *crochet de stress* compilé sous `MHGP5_TESTING`
+   (`fold_detail::fold_hash_constant`) et non un mutant, son verdict attendu
+   étant l'absence de changement. Le plateau et l'absorption sont construits
+   pour que l'ordre des **racines logiques** contredise l'ordre des clés de
+   sortie ; une première version, qui ne les distinguait pas, aurait été verte
+   sous une implémentation triant par clé. Énoncé d'origine :
    extraire du juge (`tests/forest_judge.cpp`) la porte
    indépendante « catalogue de facettes + deltas → `final_canon_fid`
    reconstruit », comparée champ à champ au `ForestResult` résident avec le
@@ -387,22 +395,44 @@ ne change ni l'objet ni ce plan.
    `tests/fold_live_gate.cpp`, portes `mhgp5_fold_live*`). Cinq des six
    mutants demandés sont tués : `free-on-absorb`, `root-key-mutable`,
    `canon-not-min-on-union`, `last-mark-shifted` par désaccord de sortie,
-   `physical-root-is-logical-root` par le **plafond de relocalisations**
-   (small-to-large : `relocalisations <= facettes * (ceil(log2 facettes) + 1)`)
-   — c'est le seul des cinq qui ne change pas la sortie, seulement le coût :
-   1,09 relocalisation par facette conforme contre 138 pour le mutant (× 127).
+   `physical-root-is-logical-root` par les **plafonds de relocalisation** —
+   c'est le seul des cinq qui ne change pas la sortie, seulement le coût.
+   Deux témoins, agrégé et par alias : `relocalisations <= facettes *
+   (ceil(log2 facettes) + 1)` et `déplacements d'un alias <= ceil(log2
+   facettes) + 1`. Le second est le causal : sur une **chaîne d'absorptions
+   adverse** (un singleton frais est `first` à chaque niveau et absorbe
+   logiquement la composante qui grossit), small-to-large ne déplace que le
+   singleton — **1 déplacement** par alias — tandis que le mutant déplace
+   toute la composante à chaque pas : **200** pour un plafond de 9. Les cinq
+   mutants meurent donc sur deux cas synthétiques de quelques millisecondes,
+   joués avant tout nuage : les portes passent de 36–50 s à **0,06–0,09 s**,
+   et toutes portent un `TIMEOUT` explicite.
    `lifetime-by-hash-only` reste au chantier suivant : il porte sur le calcul
    **externe** des durées de vie, que L2 remplace encore par deux tableaux
    `u32` par facette (assumé et hors de la revendication de résidence).
    Résidence mesurée le 28 août (n = 1 000–1 500, quatre familles plus les
-   deux contre-familles, ordres d'au moins 100 000 facettes) : pic d'alias
-   **7,29 % au pire**, et sur l'ordre le plus gros (733 687 facettes) **16 929
-   alias pour 471 composantes**, soit **1,77 Mo d'état vivant contre 26,4 Mo
-   pour le résident** (`FidState` 32 o + `final_canon_fid` 4 o par facette) :
-   un facteur 15 à cette taille. Le pic d'alias égale le pic exact des durées
-   de vie (l'état vivant n'est jamais plus grand que le nécessaire), et
-   `composantes <= alias <= pic exact` tient à **toutes** les frontières de
-   lot (théorème T6 vérifié, jamais supposé).
+   deux contre-familles), publiée en **deux témoins séparés** — les mélanger
+   fabriquerait un chiffre qui n'existe nulle part :
+   *pic absolu* — l'ordre le plus gros (733 687 facettes) culmine à **16 929
+   alias pour 471 composantes**, soit **2,31 %** ;
+   *pire ratio* — sur les 15 ordres d'au moins 100 000 facettes, la pire
+   fraction est **7,29 %** (7 994 alias, 206 composantes, 109 721 facettes).
+   Les octets vont eux aussi par deux : **1,83 Mo** d'état logiquement vivant
+   et **3,19 Mo** réellement alloués (arènes, listes libres, table) au témoin
+   du pic absolu, contre **26,4 Mo** pour les deux champs par facette du
+   résident (`FidState` 32 o + `final_canon_fid` 4 o). Le rapport — 8,3 fois
+   sur les octets alloués — est une **estimation de structures choisies**, ni
+   un gain d'allocation de bout en bout, ni un gain de RSS : `firstb`/`lastb`,
+   `keys` et `ev_fid` restent en RAM à L2 et ne partent qu'à L3, et
+   `reduce_fold_live` n'est pas encore sur le chemin produit.
+   Ce qui est *vérifié*, en revanche, l'est à **chaque** frontière de lot :
+   `composantes <= alias <= pic exact` (T6), et l'égalité forte
+   `alias == compte exact du lot` avant **et** après les morts, plus la
+   bijection `index <-> alias`, la longueur de chaque liste égale à son
+   compte, l'absence de cycle et la **vacuité finale** de l'état — 0 violation
+   sur 2 785 balayages structurels. Les deltas du vivant sont en outre
+   **rejoués** (T5) sur le catalogue du résident et reconstruisent la même
+   partition, fid par fid.
 3. **Coutures externes** : RLE multi-runs (tailles 1, 2, 3, 7), lifetime avec
    hachage constant, join retour vers les événements.
 4. **Payload et reprise** : wire u64, digest logique indépendant du découpage

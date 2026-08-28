@@ -55,15 +55,25 @@ struct LiveFoldStats {
   u64 peak_live_exact = 0;       // pic exact des durees de vie : live += nees[b] ; pic ; live -= mortes[b]
   u64 peak_index_slots = 0;      // pic de cases de la table fid -> alias
   u64 relocations = 0;           // alias deplaces par les unions (small-to-large)
+  u64 max_moves_per_alias = 0;   // deplacements du PIRE alias (borne small-to-large : <= ceil(log2 facettes))
   u64 comps_freed = 0;           // composantes liberees faute d'alias
-  u64 orders_measured = 0;       // reserve (agregation par l'appelant)
-  u64 invariant_violations = 0;  // frontieres de lot ou components <= aliases <= peak_live_exact est faux
-  u64 live_bytes_peak = 0;       // octets de l'etat vivant au pic (alias + composantes + table)
+  u64 invariant_violations = 0;  // frontieres ou composantes <= alias <= pic exact est faux
+  u64 life_violations = 0;       // frontieres ou alias != compte EXACT du lot (avant et apres les morts)
+  u64 structure_violations = 0;  // incoherences index/listes/comptes relevees par les balayages
+  u64 final_nonempty = 0;        // 1 si l'etat n'est pas VIDE apres le dernier lot
+  u64 structure_scans = 0;       // balayages structurels effectues
+  // DEUX metriques d'octets, jamais melangees (audit du 28 aout) :
+  u64 logical_live_bytes = 0;    // etat LOGIQUEMENT vivant au pic : alias + composantes vivants + cases de la table
+  u64 allocated_bytes = 0;       // memoire REELLEMENT tenue par le reducteur au pic : capacites des arenes,
+                                 // listes libres et table ; exclut encore `firstb`/`lastb`, `keys` et `ev_fid`,
+                                 // qui appartiennent a la preparation et deviennent externes a L3.
 };
 
 namespace live_detail {
 
 inline constexpr u32 kNil = UINT32_MAX;
+// Cadence maximale des balayages structurels (chacun coute O(vivant)).
+inline constexpr size_t kStructureScans = 64;
 
 inline u64 mix_fid(u32 f) {
   u64 x = (u64)f * 0x9E3779B97F4A7C15ull;
@@ -156,6 +166,7 @@ struct Alias {
   u32 comp = kNil;
   u32 next = kNil, prev = kNil;
   u32 last_batch = 0;
+  u32 moves = 0;  // deplacements de conteneur physique subis par cet alias
   u32 role_epoch = UINT32_MAX;
   u8 role_bits = 0;
   u8 seen = 0;
@@ -214,7 +225,12 @@ inline ForestResult reduce_fold_live(FoldPrepared&& fp, LiveFoldStats* out_stats
         lastb[fid] = (u32)b;
       }
     }
-  {  // Pic EXACT des durees de vie, inclusif par lot (sans heuristique).
+  // COMPTE EXACT PAR LOT, inclusif et sans heuristique : `live_in[b]` facettes
+  // vivantes apres les naissances du lot b, `live_out[b]` apres ses morts. Le
+  // reducteur doit egaler ces deux nombres a chaque frontiere — c'est plus
+  // fort que la seule comparaison au pic global (audit du 28 aout).
+  std::vector<u32> live_in(nb, 0), live_out(nb, 0);
+  {
     std::vector<u32> born_at(nb + 1, 0), died_at(nb + 1, 0);
     for (size_t f = 0; f < nfid; ++f) {
       if (firstb[f] == UINT32_MAX) continue;
@@ -224,8 +240,10 @@ inline ForestResult reduce_fold_live(FoldPrepared&& fp, LiveFoldStats* out_stats
     u64 live = 0;
     for (size_t b = 0; b < nb; ++b) {
       live += born_at[b];
+      live_in[b] = (u32)live;
       stats.peak_live_exact = std::max(stats.peak_live_exact, live);
       live -= died_at[b];
+      live_out[b] = (u32)live;
     }
   }
 
@@ -300,6 +318,7 @@ inline ForestResult reduce_fold_live(FoldPrepared&& fp, LiveFoldStats* out_stats
         av[x].comp = big;
         tail = x;
         ++stats.relocations;
+        stats.max_moves_per_alias = std::max(stats.max_moves_per_alias, (u64)++av[x].moves);
       }
       if (tail != kNil) {
         av[tail].next = cv[big].head;
@@ -366,7 +385,10 @@ inline ForestResult reduce_fold_live(FoldPrepared&& fp, LiveFoldStats* out_stats
     stats.peak_aliases = std::max(stats.peak_aliases, live_alias);
     stats.peak_components = std::max(stats.peak_components, live_comp);
     stats.peak_index_slots = std::max(stats.peak_index_slots, (u64)idx.slots());
-    stats.live_bytes_peak = std::max(stats.live_bytes_peak, (u64)(live_alias * sizeof(Alias) + live_comp * sizeof(Component) + idx.bytes()));
+    stats.logical_live_bytes = std::max(stats.logical_live_bytes, (u64)(live_alias * sizeof(Alias) + live_comp * sizeof(Component) + idx.bytes()));
+    stats.allocated_bytes = std::max(stats.allocated_bytes, (u64)(av.capacity() * sizeof(Alias) + cv.capacity() * sizeof(Component) +
+                                                                  afree.capacity() * sizeof(u32) + cfree.capacity() * sizeof(u32) + idx.bytes()));
+    if (live_alias != live_in[b] || idx.used_ != live_alias) ++stats.life_violations;
     // Detecteurs (identiques au resident).
     for (const u32 a : touched) {
       const Alias& al = av[a];
@@ -457,9 +479,32 @@ inline ForestResult reduce_fold_live(FoldPrepared&& fp, LiveFoldStats* out_stats
         ++stats.comps_freed;
       }
     }
-    // INVARIANT T6 a la frontiere du lot.
+    // INVARIANT T6 a la frontiere du lot, et EGALITE de vie exacte apres les morts.
     if (!(live_comp <= live_alias && live_alias <= stats.peak_live_exact)) ++stats.invariant_violations;
+    if (live_alias != live_out[b] || idx.used_ != live_alias) ++stats.life_violations;
+    // BALAYAGE STRUCTUREL a cadence bornee (au plus `kStructureScans` fois,
+    // plus le dernier lot) : bijection index <-> alias, longueur de chaque
+    // liste egale a son compte, aucun cycle ni doublon, aucune composante vide.
+    if (nb <= kStructureScans || b + 1 == nb || (b % (nb / kStructureScans)) == 0) {
+      ++stats.structure_scans;
+      u64 seen_alias = 0;
+      for (u32 c = 0; c < (u32)cv.size(); ++c) {
+        if (cv[c].count == 0) continue;
+        u64 len = 0;
+        for (u32 x = cv[c].head; x != kNil; x = av[x].next) {
+          if (av[x].comp != c || idx.get(av[x].fid) != x) ++stats.structure_violations;
+          if (++len > live_alias) {  // cycle ou doublon : la liste depasse le vivant total
+            ++stats.structure_violations;
+            break;
+          }
+        }
+        if (len != cv[c].count) ++stats.structure_violations;
+        seen_alias += len;
+      }
+      if (seen_alias != live_alias) ++stats.structure_violations;
+    }
   }
+  if (live_alias != 0 || live_comp != 0) stats.final_nonempty = 1;  // vacuite finale : toute facette a une DERNIERE incidence
   const auto now = std::chrono::steady_clock::now();
   r.t_reduce_ms += std::chrono::duration<double, std::milli>(now - tmark).count();
   if (out_stats) *out_stats = stats;

@@ -108,8 +108,27 @@ inline bool facet_equal_k(const FacetKey& x, const FacetKey& y) {
   return true;
 }
 
+#ifdef MHGP5_TESTING
+// STRESS DE COLLISION (jamais compile en production : `MHGP5_TESTING` n'est
+// pose que sur les cibles de tests/). Force l'empreinte d'adressage a une
+// CONSTANTE : toutes les facettes tombent dans la meme partition et le meme
+// domicile de la table d'internement. Ce n'est pas un mutant — ce n'est pas
+// un defaut : l'appartenance etant tranchee par comparaison EXACTE de cle,
+// la sortie doit etre INCHANGEE, et c'est ce que verifie la porte des
+// fixtures (docs/ECHELLE.md § 8 bis, « frontieres externes avec hachage
+// constant »). A n'employer que sur des fixtures : le sondage lineaire y
+// devient quadratique.
+inline bool& fold_hash_constant() {
+  static bool b = false;
+  return b;
+}
+#endif
+
 // Empreinte d'adressage seulement : l'appartenance est tranchee par la cle.
 inline u64 facet_fingerprint(const FacetKey& f) {
+#ifdef MHGP5_TESTING
+  if (fold_hash_constant()) return 0;
+#endif
   u64 h = 0x9E3779B97F4A7C15ull ^ (u64)f.k;
   for (u8 i = 0; i < f.k; ++i) h = (h + (u64)f.p[i]) * 0x9E3779B97F4A7C15ull;
   h ^= h >> 31;
