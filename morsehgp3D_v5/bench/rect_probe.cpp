@@ -258,6 +258,32 @@ int main(int argc, char** argv) {
                   (unsigned long long)heavy[i].nab, (unsigned long long)heavy[i].alive, (unsigned long long)heavy[i].killed, (unsigned long long)heavy[i].seeds,
                   (unsigned long long)heavy[i].surv, (unsigned long long)heavy[i].cover);
   }
+  // CLASSES DE D_max (log2) : le palmares dit ou est le travail CONTREFACTUEL
+  // (celui que les tests d'ancre evitent) ; ce tableau dit ou est le travail
+  // QUI RESTE apres eux — le « regime intermediaire ». Par classe : nombre de
+  // rectangles, paires, ancres vivantes, ancres tuees par la production,
+  // seeds contrefactuels, seeds RESTANTS (contrefactuels des ancres NON tuees),
+  // survivants. Sans cette colonne « restants », on optimise ce qui est deja
+  // gratuit.
+  {
+    constexpr int kCls = 24;
+    struct Cls { u64 rects, nab, alive, killed, seeds, surv, cover; } cls[kCls] = {};
+    for (const Heavy& hh : heavy) {
+      int c = 0;
+      while (c + 1 < kCls && (hh.dmax2 >> (2 * (c + 1))) > 0) ++c;  // classe = floor(log2(Dmax))
+      cls[c].rects += 1; cls[c].nab += hh.nab; cls[c].alive += hh.alive; cls[c].killed += hh.killed;
+      cls[c].seeds += hh.seeds; cls[c].surv += hh.surv; cls[c].cover += hh.cover;
+    }
+    std::printf("classes_dmax (Dmax dans [2^c, 2^(c+1)))\n");
+    for (int c = 0; c < kCls; ++c) {
+      if (!cls[c].rects) continue;
+      const double part_ancres = cls[c].alive ? 100.0 * (double)cls[c].killed / (double)cls[c].alive : 0.0;
+      std::printf("  c=%2d Dmax<2^%d rects=%llu paires=%llu vivantes=%llu tuees_prod=%llu (%.1f %%) seeds_cf=%llu survivants=%llu covers=%llu\n", c, c + 1,
+                  (unsigned long long)cls[c].rects, (unsigned long long)cls[c].nab, (unsigned long long)cls[c].alive,
+                  (unsigned long long)cls[c].killed, part_ancres, (unsigned long long)cls[c].seeds, (unsigned long long)cls[c].surv,
+                  (unsigned long long)cls[c].cover);
+    }
+  }
   (void)seeds_in_killed_free;
   // VIDAGE de l'ancre la plus lourde (diagnostic : ou sont les centres des
   // seeds d'une ancre sans survivant ? apex ou couronne ?).

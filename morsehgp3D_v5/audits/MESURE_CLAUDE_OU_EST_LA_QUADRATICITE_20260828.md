@@ -203,6 +203,45 @@ Quatre lectures, dont deux corrigent ce que j'avais avancé :
    tués. C'est **là** qu'une idée nouvelle doit porter, et c'est beaucoup plus
    étroit que « rendre la génération sous-quadratique ».
 
+## 3 quater. Le travail est dans les grands rayons, le résultat dans les petits
+
+J'ai ajouté à la sonde un histogramme par classe de $D_{\max}$ du rectangle
+(classe $c$ : $D_{\max} \in [2^{c}, 2^{c+1})$), avec, par classe, les ancres
+vivantes, celles que la production tue, les seeds contrefactuels et les
+**survivants**. `scanline_single_pass` q3, $n = 16\,000$ :
+
+| classe | $D_{\max} <$ | rectangles | paires | ancres vivantes | tuées par la production | seeds contrefactuels | **survivants** |
+|---|---|---|---|---|---|---|---|
+| 3 | 16 | 124 426 | 156 565 | 156 565 | 0 (0,0 %) | 332 967 | **322 709** |
+| 4 | 32 | 152 682 | 412 513 | 383 553 | 75 053 (19,6 %) | 3 005 210 | **361 671** |
+| 5 | 64 | 12 765 | 93 382 | 73 647 | 51 883 (70,4 %) | 1 362 968 | 9 194 |
+| 6 | 128 | 12 268 | 494 421 | 433 449 | 326 486 (75,3 %) | **62 342 852** | 36 735 |
+| 7 | 256 | 1 920 | 325 978 | 176 085 | 169 759 (96,4 %) | **76 754 188** | **875** |
+| 8 | 512 | 69 | 69 414 | 18 359 | 18 146 (98,8 %) | 15 259 808 | **0** |
+
+Lu ainsi :
+
+- **Les classes $D_{\max} < 32$ (c ≤ 4) portent 93,6 % des survivants
+  (684 380 sur 731 432) pour 2,1 % du travail.**
+- **Les classes $D_{\max} \ge 64$ (c ≥ 6) portent 97,1 % du travail
+  (154,4 M seeds sur 159 M) pour 5,1 % des survivants** — et la classe 8 n'en
+  produit **aucun**.
+- L'écart de rendement entre les deux régimes est de l'ordre de **1 000**.
+
+Ce n'est pas une surprise géométrique : une boule de rayon $R$ contient
+$\approx \rho R^{3}$ points, donc pour n'avoir que $h \le 10$ points intérieurs
+il faut $R \lesssim (h/\rho)^{1/3}$. **Une ancre de grand $D$ est presque
+toujours morte**, sauf au bord ou dans un trou. Le pipeline le sait déjà — il
+tue 96,4 % et 98,8 % des ancres des classes 7 et 8 — mais **il le découvre
+ancre par ancre, après les avoir énumérées**.
+
+C'est la formulation la plus utile du problème que je puisse donner :
+
+> Le coût n'est pas « la génération est quadratique ». Le coût est que
+> l'élagage par rayon est appliqué **au niveau de l'ancre** alors que le
+> phénomène qu'il exploite est **au niveau du rectangle** : dans une classe où
+> 98,8 % des ancres meurent, c'est le rectangle entier qu'il fallait tuer.
+
 ## 4. Ce qui n'est pas mesuré, et que je ne prétends pas savoir
 
 - Aucune mesure au-delà de $n = 50\,000$ : les exposants ci-dessus sont des
@@ -219,5 +258,12 @@ Quatre lectures, dont deux corrigent ce que j'avais avancé :
 - Le palmarès n'a été lu que sur `scanline` q3 à $n = 16\,000$. Les autres
   familles et la lane q4 sont en cours ; sans elles, la phrase « le gain
   restant n'est pas sur les rectangles lourds » ne vaut que pour ce cas.
-- Le régime intermédiaire (§ 3 ter, point 4) n'est **pas** caractérisé : je
-  sais ce qu'il coûte, pas à quoi il ressemble. C'est la mesure suivante.
+- Le § 3 quater caractérise le régime : il est indexé par le **rayon**. Mais
+  il n'est mesuré que sur `scanline` q3 à $n = 16\,000$ ; les autres familles
+  et la lane q4 sont en cours.
+- Je ne sais **pas** encore si un test de rectangle peut atteindre le taux de
+  mise à mort du test d'ancre : `alive_rectangles` et les histogrammes de
+  coins existent déjà et laissent ces classes vivantes. Ce qui manque est un
+  minorant du nombre de points intérieurs valable pour **toutes** les ancres
+  d'un rectangle ; l'existence d'un tel minorant serré est une **conjecture**,
+  pas un résultat.
