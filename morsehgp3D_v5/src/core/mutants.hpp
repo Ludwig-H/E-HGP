@@ -83,6 +83,8 @@ inline constexpr const char* kMutants[] = {
     "last-mark-shifted", "slot-cap-minus-one",
     // wire G1 : retombee silencieuse du wire index sur SoA (src/gpu/q3_lane_device.cuh, q4_lane_device.cuh)
     "wire-index-force-soa",
+    // raffinement post-separation (src/pipeline/generate.hpp)
+    "postsep-drop-child", "postsep-kill-h-minus-one",
 };
 
 inline std::vector<std::string>& mutant_registry() {

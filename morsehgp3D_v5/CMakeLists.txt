@@ -215,6 +215,8 @@ mhgp5_gate(mhgp5_level_refus_mutant_inconnu 2 mhgp5_level_cmp "--n=300 --inject=
 
 # ---- Oracle rationnel independant de la lane q3 ----------------------------------
 mhgp5_executable(mhgp5_q3_oracle tests/q3_oracle.cpp)
+mhgp5_executable(mhgp5_q3_skinny_center_gate tests/q3_skinny_center_gate.cpp)
+mhgp5_gate(mhgp5_q3_skinny_center 0 mhgp5_q3_skinny_center_gate "")
 mhgp5_gate(mhgp5_q3_oracle_uniform 0 mhgp5_q3_oracle
     "--family=uniform --n=80 --seed=3 --min-acute=30000 --min-events=5000 --min-shell=900 --min-deep=5000 --min-order-pairs=1000000" LABELS oracle gate)
 mhgp5_gate(mhgp5_q3_oracle_eight_clusters 0 mhgp5_q3_oracle
@@ -260,6 +262,13 @@ mhgp5_gate(mhgp5_fold_live_mutant_slot_cap 4 mhgp5_fold_live_gate "--inject=slot
 # egalite resident/vivant, invariance par hachage d'adressage constant.
 mhgp5_executable(mhgp5_fold_fixtures_gate tests/fold_fixtures_gate.cpp)
 mhgp5_gate(mhgp5_fold_fixtures 0 mhgp5_fold_fixtures_gate "" TIMEOUT 120)
+
+# Raffinement post-separation : digests identiques a L=0..3, grand-livre exact,
+# route q2 interdite, contre-fixture refine-hist-wakeup.
+mhgp5_executable(mhgp5_postsep_refine_gate tests/postsep_refine_gate.cpp)
+mhgp5_gate(mhgp5_postsep_refine 0 mhgp5_postsep_refine_gate "" TIMEOUT 600)
+mhgp5_gate(mhgp5_postsep_refine_mutant_h1 4 mhgp5_postsep_refine_gate "--inject=postsep-kill-h-minus-one" TIMEOUT 300)
+mhgp5_gate(mhgp5_postsep_refine_mutant_drop 4 mhgp5_postsep_refine_gate "--inject=postsep-drop-child" TIMEOUT 300)
 # Prefixe exact de la tour (docs/ECHELLE.md § 3.3) : ordres K <= smax − 1 identiques a l'objet complet.
 mhgp5_executable(mhgp5_prefix_gate tests/prefix_gate.cpp)
 mhgp5_gate(mhgp5_prefix_k5_uniform 0 mhgp5_prefix_gate "--family=uniform --n=1200 --smax=6 --min-events=1000")
@@ -289,6 +298,8 @@ mhgp5_gate(mhgp5_forest_judge 0 mhgp5_forest_judge "" LABELS oracle gate)
 foreach(m binary-ties repr-ties attach-prebatch drop-nonmerge canonical-is-uf-root rle-drop census-nonstrict genfilter-nonstrict dense-pointid)
   mhgp5_gate(mhgp5_forest_judge_mutant_${m} 4 mhgp5_forest_judge "--inject=${m}")
 endforeach()
+mhgp5_executable(mhgp5_plateau_shell_relevance_gate tests/plateau_shell_relevance_gate.cpp)
+mhgp5_gate(mhgp5_plateau_shell_relevance 0 mhgp5_plateau_shell_relevance_gate "")
 
 # ---- Les quatre fixtures manquantes de l'audit 87e915bd ---------------------------
 mhgp5_executable(mhgp5_detector_gate tests/detector_gate.cpp)

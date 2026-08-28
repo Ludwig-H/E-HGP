@@ -54,6 +54,13 @@ namespace mhgp5 {
 // Compteurs de la generation (jamais une autorite).
 struct GenerateStats {
   u64 rect_alive[3] = {0, 0, 0};
+  // GRAND-LIVRE DU RAFFINEMENT POST-SEPARATION (docs/MESURES_ECHELLE.md § 4).
+  // Identite exigee par la porte : emis + tues == base, exactement, par lane.
+  u64 postsep_base_mass[3] = {0, 0, 0};     // Σ |A||B| des rectangles vivants AVANT raffinement
+  u64 postsep_emitted_mass[3] = {0, 0, 0};  // Σ |A||B| des sous-rectangles EMIS
+  u64 postsep_killed_mass[3] = {0, 0, 0};   // Σ |A||B| des sous-rectangles certifies MORTS
+  u64 postsep_subrects[3] = {0, 0, 0};      // sous-rectangles visites
+  u64 postsep_core_evals[3] = {0, 0, 0};    // comptages universels payes par le raffinement
   u64 rect_visited[3] = {0, 0, 0};
   u64 anchors[3] = {0, 0, 0};
   u64 anchors_killed_hist[3] = {0, 0, 0};
@@ -74,6 +81,12 @@ struct GenerateStats {
   // Profil q4 par etage (MESURE, compile seulement avec -DMHGP5_PROFILE_Q4 : cible mhgp5_q4_stage_probe) :
   // nanosecondes cumulees dans les tests d'ancre, l'enumeration des seeds, les scans de cœur/corde, les completions.
   u64 prof_q4_anchor_ns = 0, prof_q4_core_ns = 0, prof_q4_compl_ns = 0, prof_q4_cover_ns = 0;
+  // Masses de boucle q4 du meme profil. `cover_visits` est le delta exact des
+  // points balayes dans les handles ; `cover_sites` est la sortie retenue. Les trois
+  // compteurs suivants ferment les boucles cœur et profondeur sans resommer les
+  // sous-categories imbriquees de q4_cert.
+  u64 q4_covers_built = 0, q4_cover_visits = 0, q4_cover_sites = 0;
+  u64 q4_core_site_tests = 0, q4_depth_entries = 0, q4_power_tests = 0;
   u64 q4_completions = 0, q4_rej_lens = 0, q4_rej_owner = 0, q4_rej_once = 0, q4_rej_i64 = 0,
       q4_rej_face_power = 0, q4_rej_det = 0, q4_rej_center = 0;
   u64 float_cert_neg = 0, float_cert_pos = 0, float_fallback = 0;
@@ -98,8 +111,21 @@ struct GenerateStats {
     for (int i = 0; i < 3; ++i) grids_attempted[i] += o.grids_attempted[i];
     for (int i = 0; i < 3; ++i) grids_built[i] += o.grids_built[i];
     for (int i = 0; i < 3; ++i) grids_all_dead[i] += o.grids_all_dead[i];
+    for (int i = 0; i < 3; ++i) {
+      postsep_base_mass[i] += o.postsep_base_mass[i];
+      postsep_emitted_mass[i] += o.postsep_emitted_mass[i];
+      postsep_killed_mass[i] += o.postsep_killed_mass[i];
+      postsep_subrects[i] += o.postsep_subrects[i];
+      postsep_core_evals[i] += o.postsep_core_evals[i];
+    }
     prof_q4_anchor_ns += o.prof_q4_anchor_ns; prof_q4_core_ns += o.prof_q4_core_ns;
     prof_q4_compl_ns += o.prof_q4_compl_ns; prof_q4_cover_ns += o.prof_q4_cover_ns;
+    q4_covers_built += o.q4_covers_built;
+    q4_cover_visits += o.q4_cover_visits;
+    q4_cover_sites += o.q4_cover_sites;
+    q4_core_site_tests += o.q4_core_site_tests;
+    q4_depth_entries += o.q4_depth_entries;
+    q4_power_tests += o.q4_power_tests;
     anchors_killed_w3 += o.anchors_killed_w3;
     invariant_jneg += o.invariant_jneg;
     seeds[0] += o.seeds[0];
@@ -139,8 +165,94 @@ inline double ms_since(std::chrono::steady_clock::time_point t0) {
 // Descente WSPD ternaire d'une lane, parallele par tranches ORDONNEES de la
 // vague : chaque tranche ecrit ses tampons, la concatenation se fait en ordre
 // de tranche — sortie bit-identique au sequentiel.
+// RAFFINEMENT POST-SEPARATION d'UN rectangle vivant : prolonge la descente
+// ternaire de `levels` niveaux au plus, en reevaluant le comptage universel de
+// chaque sous-rectangle. Les sous-rectangles PARTITIONNENT les paires du
+// parent (`ix.nodes[v].left/right` partitionne la plage de feuilles de `v`),
+// donc l'objet, la completude et le critere terminal de la WSPD sont intacts ;
+// seul le decoupage du TRAVAIL change. Le comptage universel d'un enfant est
+// >= celui de son parent (boites incluses => l'ensemble des ancres est un
+// sous-ensemble), donc le raffinement ne peut que tuer davantage. En q2 il est
+// desactive : voir `GenerateOptions::postsep_refine_levels`.
+struct PostsepLedger {
+  u64 base = 0, emitted = 0, killed = 0, subrects = 0, core_evals = 0;
+};
+inline void postsep_refine(const CloudIndex& ix, const WspdRect& r, u64 core, const u64 h_of[3], int lane_idx, u8 mask,
+                           u32 levels, std::vector<AliveRect>* out, PostsepLedger* led) {
+  const auto mass = [&](const WspdRect& q) -> u64 {
+    const NodeRange qa = ix.range_of(q.a), qb = ix.range_of(q.b);
+    return (u64)(qa.last - qa.first + 1) * (u64)(qb.last - qb.first + 1);
+  };
+  led->base += mass(r);
+  // ROUTE q2 INTERDITE par CONCEPTION, et non par mutant : l'audit du 28 aout
+  // 2026 decrit un « reveil » d'histogramme possible en q2 (un temoin du frere
+  // compte dans `h_b` au parent peut ne l'etre ni par `h_b` ni par le cœur de
+  // l'enfant, faute de pretest ponctuel en q2). Je n'ai PAS su l'exhiber : ni
+  // sur les quatre positions de l'audit, ni sur 18 000 nuages entiers
+  // aleatoires (5 a 12 points, smax 3 a 7). Le cœur de l'enfant etant >= celui
+  // du parent, `need = h - core` diminue et compense la perte d'histogramme.
+  // La route reste fermee — elle ne coute rien et le risque est reel en
+  // theorie — mais aucun mutant ne peut la garder tant que le phenomene n'est
+  // pas realisable : la porte verifie l'INVARIANT (`tues[q2] == 0`).
+  if (levels == 0 || lane_idx == 0) {  // desactive, ou lane q2 (route interdite)
+    led->emitted += mass(r);
+    out->push_back(AliveRect{r, core});
+    return;
+  }
+  const u64 h = h_of[lane_idx];
+  struct Sub {
+    WspdRect r;
+    u64 core;
+    u32 d;
+  };
+  Sub st[32];  // profondeur <= 3 => au plus 8 feuilles et 15 nœuds ; 32 est un majorant franc
+  int top = 0;
+  st[top++] = Sub{r, core, 0};
+  while (top > 0) {
+    const Sub cur = st[--top];
+    ++led->subrects;
+    const bool a_leaf = cur.r.a < 0, b_leaf = cur.r.b < 0;
+    if (cur.d >= levels || (a_leaf && b_leaf)) {
+      led->emitted += mass(cur.r);
+      out->push_back(AliveRect{cur.r, cur.core});
+      continue;
+    }
+    const AxisBox va = ix.box_of(cur.r.a), vb = ix.box_of(cur.r.b);
+    const i64 w2a = wspd_detail::box_w2(va), w2b = wspd_detail::box_w2(vb);
+    const bool split_a = (!a_leaf) && (b_leaf || w2a >= w2b);  // toujours le plus grand DIAMETRE, jamais le plus peuple
+    const NodeRef keep = split_a ? cur.r.b : cur.r.a;
+    const RadixNode& nd = ix.nodes[(size_t)(split_a ? cur.r.a : cur.r.b)];
+    const WspdRect kids[2] = {split_a ? WspdRect{nd.left, keep} : WspdRect{keep, nd.left},
+                              split_a ? WspdRect{nd.right, keep} : WspdRect{keep, nd.right}};
+    for (const WspdRect& k : kids) {
+      ++led->core_evals;
+      const FusedCounts fc = count_universal_witnesses(ix, k.a, k.b, h_of, mask, true);
+      // MUTANT `postsep-drop-child` : un enfant vivant est jete au lieu d'etre
+      // emis — perte de paires, donc perte de boules ; le grand-livre
+      // (emis + tues == base) le voit avant meme le digest.
+      if (MHGP5_MUTANT("postsep-drop-child") && k.a != cur.r.a) continue;
+      // MUTANT `postsep-kill-h-minus-one` : le seuil de mort passe a h - 1, ce
+      // qui SUR-TUE — des sous-rectangles vivants sont certifies morts et
+      // leurs boules disparaissent. C'est la faute la plus grave possible ici
+      // (perte de completude), et le digest la voit.
+      const u64 hk = MHGP5_MUTANT("postsep-kill-h-minus-one") && h > 0 ? h - 1 : h;
+      if (fc.c[lane_idx] >= hk) {  // sous-rectangle CERTIFIE MORT : ses paires ne seront jamais enumerees
+        led->killed += mass(k);
+        continue;
+      }
+      if (top >= 32) {  // majorant franc : on emet plutot que de deborder (fail-open, jamais une perte)
+        led->emitted += mass(k);
+        out->push_back(AliveRect{k, fc.c[lane_idx]});
+        continue;
+      }
+      st[top++] = Sub{k, fc.c[lane_idx], cur.d + 1};
+    }
+  }
+}
+
 inline void alive_rectangles(const CloudIndex& ix, i64 s, const u64 h_of[3], int lane_idx, int threads,
-                             std::vector<AliveRect>* out, u64* visited, u64* workers) {
+                             std::vector<AliveRect>* out, u64* visited, u64* workers, u32 levels = 0,
+                             PostsepLedger* ledger_out = nullptr) {
   out->clear();
   if (ix.nodes.empty()) return;
   const u8 mask = (u8)(1u << lane_idx);
@@ -151,6 +263,8 @@ inline void alive_rectangles(const CloudIndex& ix, i64 s, const u64 h_of[3], int
   std::vector<std::vector<AliveRect>> lout;
   std::vector<std::vector<WspdRect>> lnext;
   std::vector<u64> lvis;
+  std::vector<PostsepLedger> lstat;
+  PostsepLedger led_total;
   while (!wave.empty()) {
     const size_t nw = wave.size();
     const int t_eff = nw < 256 ? 1 : threads;  // les premieres vagues sont minuscules
@@ -160,6 +274,7 @@ inline void alive_rectangles(const CloudIndex& ix, i64 s, const u64 h_of[3], int
     lout.assign(nchunks, {});
     lnext.assign(nchunks, {});
     lvis.assign(nchunks, 0);
+    lstat.assign(nchunks, PostsepLedger{});
     const size_t created = parallel_items(nchunks, (int)T, [&](size_t c, size_t) {
       const size_t b0 = c * chunk, b1 = std::min(nw, b0 + chunk);
       for (size_t i = b0; i < b1; ++i) {
@@ -170,7 +285,8 @@ inline void alive_rectangles(const CloudIndex& ix, i64 s, const u64 h_of[3], int
         const AxisBox va = ix.box_of(r.a), vb = ix.box_of(r.b);
         if (wspd_detail::separated(va, vb, s, 1)) {
           const FusedCounts ff = count_universal_witnesses(ix, r.a, r.b, h_of, mask, true);
-          if (ff.c[lane_idx] < h) lout[c].push_back(AliveRect{r, ff.c[lane_idx]});
+          if (ff.c[lane_idx] < h)
+            postsep_refine(ix, r, ff.c[lane_idx], h_of, lane_idx, mask, levels, &lout[c], &lstat[c]);
           continue;
         }
         const i64 w2a = wspd_detail::box_w2(va), w2b = wspd_detail::box_w2(vb);
@@ -187,9 +303,15 @@ inline void alive_rectangles(const CloudIndex& ix, i64 s, const u64 h_of[3], int
       out->insert(out->end(), lout[c].begin(), lout[c].end());
       next.insert(next.end(), lnext[c].begin(), lnext[c].end());
       *visited += lvis[c];
+      led_total.base += lstat[c].base;
+      led_total.emitted += lstat[c].emitted;
+      led_total.killed += lstat[c].killed;
+      led_total.subrects += lstat[c].subrects;
+      led_total.core_evals += lstat[c].core_evals;
     }
     wave.swap(next);
   }
+  if (ledger_out) *ledger_out = led_total;
 }
 
 // Histogrammes h_a/h_b (autorite 8 coins, exacte) d'un rectangle, pour une lane.
@@ -424,9 +546,11 @@ inline void scan_anchor_q3(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i32 
 #if defined(MHGP5_PROFILE_Q4)
 #define MHGP5_Q4_TICK() std::chrono::steady_clock::now()
 #define MHGP5_Q4_ACC(field, t0) (ls->field += (u64)std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now() - (t0)).count())
+#define MHGP5_Q4_ADD(field, value) (ls->field += (u64)(value))
 #else
 #define MHGP5_Q4_TICK() 0
 #define MHGP5_Q4_ACC(field, t0) ((void)(t0))
+#define MHGP5_Q4_ADD(field, value) ((void)(value))
 #endif
 
 // CORPS PAR ANCRE de la lane q4 (cover deja dans sc.cover) : W_4, lentille,
@@ -503,6 +627,7 @@ inline void process_anchor_q4(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i
       for (size_t iz = 0; iz < sc.cover.size(); ++iz) {
         const CoverPoint& cz = sc.cover[iz];
         if (cz.u == ua || cz.u == ub || cz.u == cx.u) continue;
+        MHGP5_Q4_ADD(q4_core_site_tests, 1);
         const double lh = seed.l_hat(sc, iz);
         if (lh > seed.bound) {
           ++ls->float_cert_pos;
@@ -577,9 +702,11 @@ inline void process_anchor_q4(const CloudIndex& ix, AnchorScratch& sc, i32 ua, i
       if (f4.det == 0) { ++ls->q4_rej_det; continue; }
       if (!q4_center_strictly_inside(f4, pa, pb, px, py)) { ++ls->q4_rej_center; continue; }
       // Filtre de profondeur a la generation.
+      MHGP5_Q4_ADD(q4_depth_entries, 1);
       u64 depth = 0;
       bool deep = false;
       for (const CoverPoint& cz : sc.cover) {
+        MHGP5_Q4_ADD(q4_power_tests, 1);
         const i128 pw = q4_power(f4, ix.upos[(size_t)cz.u]);
         if ((pw < 0 || (genfilter_nonstrict && pw <= 0)) && ++depth >= h4) { deep = true; break; }
       }
@@ -613,6 +740,18 @@ struct GenerateOptions {
   int threads = 1;
   size_t pretest_query_min_points = kPretestQueryMinPoints;
   size_t cell_grid_min_sites = kCellGridMinSites;  // grille de cellules (theoreme 10.5) des que le cover atteint ce seuil
+  // RAFFINEMENT POST-SEPARATION, niveaux L in [0, 3] (0 = desactive, defaut).
+  // Prolonge la descente ternaire A L INTERIEUR d'un rectangle vivant : la
+  // partition des paires est INCHANGEE (donc l'objet aussi), mais les boites
+  // se resserrent, le comptage universel croit, et un sous-rectangle peut
+  // mourir la ou son parent vivait. Cout borne : au plus 2/6/14 nouveaux
+  // comptages par parent pour L = 1/2/3.
+  // ROUTE q2 INTERDITE : en q2 aucun pretest ponctuel ne referme la couture du
+  // temoin du frere (contre-fixture `refine-hist-wakeup` de l'audit du 28 aout
+  // 2026), donc le multiensemble de candidats pourrait changer. En q3/q4 le
+  // pretest ponctuel est TOUJOURS applique (`kApply` sinon `kAlreadyApplied`),
+  // ce qui recompte le temoin et laisse l'objet inchange.
+  u32 postsep_refine_levels = 0;
   LaneOverride q3_override;  // vide : lane q3 integree
   LaneOverride q4_override;  // vide : lane q4 integree
 };
@@ -658,7 +797,12 @@ inline void generate_candidates(const CloudIndex& ix, const GenerateOptions& opt
   // ---- q2.
   {
     const auto t0 = std::chrono::steady_clock::now();
-    alive_rectangles(ix, opt.s, h_of, 0, opt.threads, &alive, &st->rect_visited[0], &st->workers_wspd[0]);
+    PostsepLedger led2;
+    alive_rectangles(ix, opt.s, h_of, 0, opt.threads, &alive, &st->rect_visited[0], &st->workers_wspd[0],
+                     opt.postsep_refine_levels, &led2);
+    st->postsep_base_mass[0] = led2.base; st->postsep_emitted_mass[0] = led2.emitted;
+    st->postsep_killed_mass[0] = led2.killed; st->postsep_subrects[0] = led2.subrects;
+    st->postsep_core_evals[0] = led2.core_evals;
     st->t_wspd_ms[0] += ms_since(t0);
     st->rect_alive[0] = alive.size();
     const auto t1 = std::chrono::steady_clock::now();
@@ -689,7 +833,12 @@ inline void generate_candidates(const CloudIndex& ix, const GenerateOptions& opt
     opt.q3_override(ix, opt, out, st);
   } else {
     const auto t0 = std::chrono::steady_clock::now();
-    alive_rectangles(ix, opt.s, h_of, 1, opt.threads, &alive, &st->rect_visited[1], &st->workers_wspd[1]);
+    PostsepLedger led3;
+    alive_rectangles(ix, opt.s, h_of, 1, opt.threads, &alive, &st->rect_visited[1], &st->workers_wspd[1],
+                     opt.postsep_refine_levels, &led3);
+    st->postsep_base_mass[1] = led3.base; st->postsep_emitted_mass[1] = led3.emitted;
+    st->postsep_killed_mass[1] = led3.killed; st->postsep_subrects[1] = led3.subrects;
+    st->postsep_core_evals[1] = led3.core_evals;
     st->t_wspd_ms[1] += ms_since(t0);
     st->rect_alive[1] = alive.size();
     const auto t1 = std::chrono::steady_clock::now();
@@ -733,8 +882,12 @@ inline void generate_candidates(const CloudIndex& ix, const GenerateOptions& opt
     const auto t0 = std::chrono::steady_clock::now();
     // MUTANT q4-seeds-from-q3-live : la source q4 branchee sur la lane q3
     // (perd les ancres q3-mortes / q4-vivantes — fixture bloquante).
+    PostsepLedger led4;
     alive_rectangles(ix, opt.s, h_of, q4_from_q3_live ? 1 : 2, opt.threads, &alive, &st->rect_visited[2],
-                     &st->workers_wspd[2]);
+                     &st->workers_wspd[2], opt.postsep_refine_levels, &led4);
+    st->postsep_base_mass[2] = led4.base; st->postsep_emitted_mass[2] = led4.emitted;
+    st->postsep_killed_mass[2] = led4.killed; st->postsep_subrects[2] = led4.subrects;
+    st->postsep_core_evals[2] = led4.core_evals;
     st->t_wspd_ms[2] += ms_since(t0);
     st->rect_alive[2] = alive.size();
     const auto t1 = std::chrono::steady_clock::now();
@@ -772,7 +925,11 @@ inline void generate_candidates(const CloudIndex& ix, const GenerateOptions& opt
           // plus avant l'emission (23 sur 1,4 M a uniform n=8000) sans changer
           // l'objet — mais changerait `digest_balls`, qui compte les candidats
           // profonds (docs/PROVENANCE.md, conformite).
+          const u64 cover_visits_before = sc.visits;
           anchor_cover_from_handles(ix, sc.handles, pa, pb, D2, q4_cover_coef, &sc.cover, &sc.visits, &sc.cover_tmp);
+          MHGP5_Q4_ADD(q4_covers_built, 1);
+          MHGP5_Q4_ADD(q4_cover_visits, sc.visits - cover_visits_before);
+          MHGP5_Q4_ADD(q4_cover_sites, sc.cover.size());
           process_anchor_q4(ix, sc, ua, ub, pa, pb, D2, h_of[2], float_on, genfilter_nonstrict, seed_core_nonstrict,
                             no_canonical, lo, ls, pretest_by_query ? AnchorPretests::kAlreadyApplied : AnchorPretests::kApply);
         }

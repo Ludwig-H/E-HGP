@@ -75,6 +75,7 @@ struct RunOptions {
   // traitee comme une exception de l'ordre observe (propagee apres jonction).
   std::function<void(u64 K, FoldPhase phase)> on_fold_phase;
   size_t cell_grid_min_sites = kCellGridMinSites;  // grille de cellules (generate.hpp) ; SIZE_MAX : jamais (mesure contrefactuelle)
+  u32 postsep_refine_levels = 0;  // raffinement post-separation, L in [0, 3] ; 0 = desactive. q2 jamais raffinee.
   // Appele pour chaque K croissant, AVANT liberation du resultat, depuis le
   // fil d'arriere-plan de cet ordre (un seul a la fois, dans l'ordre des K,
   // sous le verrou de publication) — PROVISOIRE jusqu'au statut terminal.
@@ -204,6 +205,7 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
   std::vector<BallCandidate> cands;
   GenerateOptions go;
   go.cell_grid_min_sites = opt.cell_grid_min_sites;
+  go.postsep_refine_levels = opt.postsep_refine_levels;
   go.q3_override = opt.q3_override;
   go.q4_override = opt.q4_override;
   rr.backend_override = (bool)opt.q3_override || (bool)opt.q4_override;
@@ -609,6 +611,16 @@ inline void print_run(std::FILE* out, const char* family, int n, int coord, long
                (unsigned long long)gs.seeds[0], (unsigned long long)gs.seeds[1], (unsigned long long)gs.q4_completions, (unsigned long long)gs.seeds_killed_core, (unsigned long long)gs.seeds_killed_chord,
                (unsigned long long)gs.float_cert_neg, (unsigned long long)gs.float_cert_pos, (unsigned long long)gs.float_fallback,
                (unsigned long long)gs.jung_cert_kill, (unsigned long long)gs.jung_cert_skip, (unsigned long long)gs.jung_fallback);
+  // GRAND-LIVRE DU RAFFINEMENT POST-SEPARATION : identite exacte par lane.
+  std::fprintf(out, "postsep L=%u base=%llu/%llu/%llu emis=%llu/%llu/%llu tues=%llu/%llu/%llu sous_rects=%llu/%llu/%llu comptages=%llu/%llu/%llu\n",
+               opt.postsep_refine_levels, (unsigned long long)gs.postsep_base_mass[0], (unsigned long long)gs.postsep_base_mass[1],
+               (unsigned long long)gs.postsep_base_mass[2], (unsigned long long)gs.postsep_emitted_mass[0],
+               (unsigned long long)gs.postsep_emitted_mass[1], (unsigned long long)gs.postsep_emitted_mass[2],
+               (unsigned long long)gs.postsep_killed_mass[0], (unsigned long long)gs.postsep_killed_mass[1],
+               (unsigned long long)gs.postsep_killed_mass[2], (unsigned long long)gs.postsep_subrects[0],
+               (unsigned long long)gs.postsep_subrects[1], (unsigned long long)gs.postsep_subrects[2],
+               (unsigned long long)gs.postsep_core_evals[0], (unsigned long long)gs.postsep_core_evals[1],
+               (unsigned long long)gs.postsep_core_evals[2]);
   std::fprintf(out, "ouvriers wspd=%llu/%llu/%llu rects=%llu/%llu/%llu rle=%llu prefiltre=%llu census=%llu expansion=%llu fold=%llu\n",
                (unsigned long long)gs.workers_wspd[0], (unsigned long long)gs.workers_wspd[1], (unsigned long long)gs.workers_wspd[2],
                (unsigned long long)gs.workers_rects[0], (unsigned long long)gs.workers_rects[1], (unsigned long long)gs.workers_rects[2],
