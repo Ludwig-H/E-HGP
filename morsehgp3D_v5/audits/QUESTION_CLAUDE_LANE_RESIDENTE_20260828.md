@@ -388,7 +388,7 @@ par un supercover de segment, ou construire un sweep rationnel q4, exige
 d'abord un lemme indépendant, des fixtures de frontière et les compteurs
 ci-dessus ; aucune de ces deux idées n'est reçue par cet audit.
 
-#### Requalification des mesures Claude `954ec1af` et `c7ee791f`
+#### Requalification des mesures Claude `954ec1af` à `ff5931fd`
 
 Le nouveau document
 [`MESURE_CLAUDE_OU_EST_LA_QUADRATICITE_20260828.md`](MESURE_CLAUDE_OU_EST_LA_QUADRATICITE_20260828.md)
@@ -398,7 +398,7 @@ les deux constats falsifiables : `ancres/rect_alive` reste presque constant sur
 `uniform` et croît sur `scanline`, puis le travail Jung croît encore plus vite
 que les ancres sur cette dernière famille.
 
-Huit formulations doivent toutefois être corrigées avant d'en faire une
+Dix formulations doivent toutefois être corrigées avant d'en faire une
 autorité de conception :
 
 1. Les « tests d'ancre en `O(1)` » ne le sont pas. Seule la consultation finale
@@ -447,6 +447,15 @@ autorité de conception :
    prouve ni la quasi-coplanarité comme cause, ni le transfert quantitatif à
    SemanticKITTI. Garder cette phrase comme hypothèse et la tester sur des scans
    réels, stratifiés par épaisseur locale et population des rectangles.
+9. Pour les seuls rectangles **vivants**, la conservation correcte est
+   `sum |A||B| <= binom(U,2)`, où `U` est le nombre de positions uniques.
+   L'égalité porte sur la partition WSPD terminale complète, avant les morts de
+   rectangles ; elle ne doit pas être recopiée sur le sous-ensemble vivant.
+10. Les quatre tailles partagent source, options, famille et seed, mais pas le
+    même exécutable : 8/16/32 k viennent de `mhgp5_conformity_v4`, 50 k de
+    `mhgp5_probe`. Les nuages sont régénérés avec un domaine `coord` différent,
+    non des préfixes point à point. Dire « série à densité approximativement
+    constante au même pin » plutôt que « même binaire, tailles appariées ».
 
 La sonde de rectangles ajoutée à `c03daa42` conserve un signal important : les
 quantiles et maxima de seeds montrent une forte asymétrie, et la somme des
@@ -480,16 +489,51 @@ payé requête ou cover. Conserver la fraction comme priorité relative ; décid
 la saturation sur temps et incidences évités, pas sur le seul nombre de seeds
 contre-factuels.
 
+Le palmarès ajouté à `107051ce` corrige utilement l'hypothèse « population
+seule », mais ne localise pas encore le travail résiduel :
+
+- `80,3 %` et `98,1 %` portent sur les **seeds contrefactuels** produits par
+  `AnchorPretests::kCounterfactual`. Les ancres des trois rectangles affichés
+  sont toutes tuées par `W_q`/secteurs ; la production n'exécute donc pas ces
+  seeds. Ce palmarès quantifie du travail évité, pas « 80,3 % du travail » du
+  chemin produit. Le coût résiduel de ces rectangles — histogrammes,
+  candidats de prétest, visites avant sortie — n'est pas encore compté.
+- `ff5931fd` annonce une colonne de seeds restants par classe de `Dmax`, mais
+  `Heavy`/`Cls` n'accumulent et n'impriment que `seeds_cf` et les candidats
+  émis sous le nom `survivants`. Les 159 M seeds du tableau sont
+  contrefactuels, alors que la génération reçue n'en énumère que 13,6 M sur
+  `scanline` q3 16 k. Les phrases « 2,1 % du travail » et « 97,1 % du travail »
+  ne décrivent donc pas le chemin produit. Porter pour chaque ancre `sd` dans
+  une masse séparée lorsque `anchor_kill_cumulated` la laisse vivre ; pour le
+  chemin complet, appliquer aussi la politique de grille et distinguer le coût
+  de la route prétest par requête. Un taux d'ancres tuées ou le nombre de
+  candidats finaux ne permet pas de reconstruire cette masse.
+- trois rectangles avec grand `Dmax` ne prouvent ni « rayon, pas population »
+  ni `cover` proportionnel à `D^3`. `Dmax` gouverne le candidat de handles,
+  tandis que le cover exact emploie le `D2` propre à l'ancre ; la famille
+  `scanline` a en outre une dimension intrinsèque plus proche de deux. Joindre
+  par classe `|A||B|`, `Dmax`, `D2`, `H_r`, visites et `C_e` avant toute loi
+  volumique.
+- le mapping device courant n'affecte pas un bloc à un rectangle : q3 lance un
+  warp par seed et q4 un bloc par seed vivant, avec lots bornés et repli hôte
+  des ancres surdimensionnées. La traîne contrefactuelle peut peser sur la
+  formation hôte des lots, mais sa seule valeur maximale ne prouve aucun mur
+  GPU. Mesurer le maximum après routage/subdivision.
+
 La phrase `uniform` « rien à rendre sous-quadratique » doit devenir : « aucune
 urgence de pente sur cette famille aux tailles reçues ». Sa constante, les
 autres familles et la borne déterministe restent des sujets distincts.
 
-La prochaine modification utile est donc uniquement instrumentale : agréger et
-imprimer `rect_visited`, `anchors_killed_hist`, `handle_point_visits`,
-`cover_sites`, `lens_sites`, `acute_x_tests`, sites de profondeur q3, sites
-cœur/corde q4, complétions atteignant la profondeur et sites `q4_power`. Pour
-chaque masse, conserver somme, maximum et histogramme logarithmique. La porte
-doit graver les conservations suivantes :
+La prochaine modification utile est donc uniquement instrumentale. Ne pas
+dupliquer ce qui existe : `q3_cert[0]+q3_cert[1]+q3_cert[2]` donne déjà les
+sites évalués par la profondeur q3 ; dans le cœur q4,
+`q4_cert[0]+q4_cert[1]+q4_cert[5]` donne les sites visités, tandis que
+`q4_cert[2..4]` sont des sous-catégories imbriquées et ne doivent pas être
+resommées. Imprimer ces compteurs, puis ajouter seulement `rect_visited`,
+`anchors_killed_hist`, visites de candidats des prétests, `sc.visits`/points de
+handles, sites de grille, complétions atteignant la profondeur et sites
+`q4_power`. Pour chaque masse, conserver somme, maximum et histogramme
+logarithmique. La porte doit graver les conservations suivantes :
 
 ```text
 anchors = sum_alive_rect |A| |B|
