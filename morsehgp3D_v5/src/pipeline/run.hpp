@@ -374,7 +374,9 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
       have_first = true;
       first_exc = b->exc;
       first_status = b->status;
-      first_message = b->message;
+      first_message = b->message.empty() && b->status != PipelineStatus::kCompleteRegular
+                          ? std::string("invariant : violations de roles ou de partition (message non formate)")
+                          : b->message;
     }
     return !have_first;
   };
@@ -471,7 +473,12 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
         sp->decided = true;
         if (!sp->exc && (r.attach_violations || r.birth_violations || r.partition_violations)) {
           sp->status = PipelineStatus::kInvariantViolated;
-          sp->message = "invariant : violations de roles ou de partition (K=" + std::to_string(K) + ")";
+          // Le formatage alloue : un bad_alloc ici ne doit ni quitter le fil ni masquer le statut (audit du 28 aout).
+          try {
+            sp->message = "invariant : violations de roles ou de partition (K=" + std::to_string(K) + ")";
+          } catch (...) {
+            sp->message.clear();  // le statut fait foi ; le fil principal fournit un message statique
+          }
         }
         if (sp->exc || sp->status != PipelineStatus::kCompleteRegular) {
           pub_failed.store(true);  // premier defaut dans l'ordre des K : les ordres superieurs n'ont plus de tour
