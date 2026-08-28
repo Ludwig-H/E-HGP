@@ -561,20 +561,33 @@ aucun nouveau certificat géométrique. Dans `alive_rectangles`, lorsqu'un
 rectangle est déjà séparé mais reste vivant après
 `count_universal_witnesses(..., with_corners=true)`, autoriser une profondeur
 bornée `L` de subdivision supplémentaire du facteur interne de plus grand
-diamètre. Les deux enfants repassent ensuite par **le même** comptage universel ;
-si le prédicat entier `separated` n'est pas conservé pour les deux enfants, le
-raffinement facultatif est annulé. Un enfant certifié mort disparaît, les autres
-sont à nouveau subdivisés ou émis.
+diamètre, **uniquement pour q3/q4, jamais q2**. Les deux enfants repassent
+ensuite par **le même** comptage universel ; si le prédicat entier `separated`
+n'est pas conservé pour les deux enfants, le raffinement facultatif est annulé
+transactionnellement, sans décision ni compteur d'enfant. Un enfant certifié
+mort disparaît, les autres sont à nouveau subdivisés ou émis. `core`, `ha` et
+`hb` sont toujours recalculés sur l'enfant, jamais hérités du parent.
 
 La sûreté est courte. Les deux enfants radix forment une partition disjointe du
 facteur scindé ; leurs produits cartésiens forment donc une partition disjointe
 du rectangle parent. Aucun couple n'est perdu ni dupliqué. Une branche n'est
 supprimée que par le certificat suffisant déjà consommé par la production. En
 outre, les points du frère qui ne sont plus des extrémités du sous-rectangle
-deviennent des témoins extérieurs légitimes : des boîtes plus petites peuvent
-ainsi renforcer le minorant sans changer l'objet. La porte doit néanmoins exiger
+deviennent des témoins extérieurs légitimes **s'ils** sont universels pour tout
+le sous-rectangle. Des boîtes plus petites peuvent ainsi renforcer le minorant,
+mais aucune monotonie du certificat total n'est supposée. La porte doit exiger
 l'égalité des digests de candidats, des sorties et de la forêt, car c'est le
 contrat observable actuel.
+
+La restriction q3/q4 est substantielle. Un témoin du frère compté dans
+`h_a(a)` au parent peut ne plus être compté ni par `h_a` ni par le cœur de
+l'enfant : une ancre morte à l'histogramme parent peut donc « revivre » dans
+l'histogramme enfant. En q3/q4, ce témoin reste un vrai point de `W_q(a,b)` et
+le prétest ponctuel obligatoire le recompte avant toute seed. En q2, aucun
+prétest ponctuel ne ferme cette couture et le multiensemble de candidats peut
+changer. Toute implémentation doit graver une fixture minimale
+`refine-hist-wakeup` qui produit ce réveil en q2, interdit la route q2 et prouve
+l'égalité q3/q4 au mutant qui réutilise le certificat parent.
 
 Ne pas en faire encore une politique par défaut. Exposer dans la sonde `L=0,1,2,3`
 et un seuil de masse de paires, puis rejouer d'abord q3 `scanline` 8/16/32 k. Pour
