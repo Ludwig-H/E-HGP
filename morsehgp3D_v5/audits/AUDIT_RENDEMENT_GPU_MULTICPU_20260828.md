@@ -1,7 +1,7 @@
 # Audit de résolution — rendement GPU et multi-CPU
 
-- **Pins inspectés par sujet :** `194a0bc2` pour le pool G0 et la sonde fold,
-  `bc66ade7` pour le réducteur vivant ; la baseline device/SCALE versionnée
+- **Pins inspectés par sujet :** `c19dc60d` pour les raccords G0/G1 et le fold à
+  créneaux, `194a0bc2` pour leur base pool/sonde, `bc66ade7` pour le réducteur vivant ; la baseline device/SCALE versionnée
   provient de `c95cfa95`, G0 historique de `fe54ccca` et G1 q3/q4 des trois
   commits `dd928111`–`556c421e`. Le nouveau reçu device exécute G0 et G1 q3 au
   pin `839cf1ec` ; il est versionné avec cet audit à `0656bf4c` et ne reçoit
@@ -9,8 +9,8 @@
 - **État courant et priorités :** voir
   [`ETAT_COURANT.md`](ETAT_COURANT.md). Les sections G1–G3 ci-dessous restent
   des guides de conception ; les anciennes conditions de campagne sont
-  requalifiées par le reçu de session 13, le contre-audit G0 et le worktree
-  courant (G0/G1/fold non épinglés).
+  requalifiées par le reçu de session 13, le contre-audit G0 et le pin courant
+  `c19dc60d`.
 - **Cadre :** `phase=exploration_v5_hors_registre`,
   `backend=cpu_reference`, `profile=quantized_u16_input_only`,
   `mode=audit_independant_math_and_architecture`,
@@ -182,7 +182,7 @@ l'arithmétique du struct :
 - pic de concurrence dans le domaine du nombre d'exécuteurs.
 
 Pour G1, cela exige en plus `index_lots == lots > 0`, `soa_lots == 0` et
-`site_soa_bytes == 0`. Le worktree ajoute ces compteurs, les deux mutants
+`site_soa_bytes == 0`. Le pin `c19dc60d` ajoute ces compteurs, les deux mutants
 `wire-index-force-soa` et le parseur `--inject` q3 : conserver ce raccord. La
 réception reste ouverte, car le selftest courant accepte encore un faux pilote
 qui ignore `--gpu-wire=index` et n'imprime ni wire, ni étapes, ni octets ; le
@@ -211,7 +211,7 @@ l'implémentation :
   sous `taskset -c 0`.
 
 Le pin `194a0bc2` ferme ces quatre points dans la bonne architecture et ne doit
-pas être réécrit. Le worktree remplace maintenant le vecteur TLS par un pointeur
+pas être réécrit. `c19dc60d` remplace maintenant le vecteur TLS par un pointeur
 non allouant qui refuse tout nesting, et vide la file fatale sans tableau
 temporaire : conserver ces deux corrections. Avant réception complète, déplacer
 `submitted_++` après `queue_.push_back` réussi, remplacer les attentes
@@ -407,7 +407,7 @@ digest reste proche de 4,30 s. Le gain 32→48 tombe à 1,10×/1,08× et le RSS 
 d'environ 3,30 à 4,89/4,96 Gio. Le verrou n'est donc plus le nombre de
 producteurs : c'est la phase de reduce séquentielle et le digest fixe. L'état
 vivant et le trafic mémoire sont une hypothèse explicative à profiler, pas
-encore une cause reçue. Le fold à créneaux du worktree reste hors du chemin
+encore une cause reçue. Le fold à créneaux de `c19dc60d` reste hors du chemin
 produit ; son nouveau régime `--dump/--from` isole enfin un seul réducteur par
 processus, mais n'est pas encore un miroir d'objet complet tant que copie du
 catalogue, rejeu strict et digest commun ne sont pas inclus et vérifiés. Son
@@ -473,14 +473,18 @@ Les optimisations CPU à tester ensuite sont :
 - exploiter d'abord la primitive **déjà présente** `parallel_ranges` dans les
   trois `run_lane` hôte et les deux générateurs de lots device, au lieu de
   `parallel_items(nrect, ...)`. Le corps boucle sur `[begin,end)` et garde le
-  même scratch/output par `worker_id`. Avec les huit tranches par worker déjà
-  codées, le nombre de tickets atomiques tombe d'environ `nrect + T` à au plus
-  `9T` par invocation, soit de 3,075 millions à environ 1 300 pour trois lanes
-  à 48 workers, sans nouvelle infrastructure. La porte compare le post-RLE,
-  tous les compteurs et digests à 1/2/3/8/48 fils, puis l'instrument vérifie la
-  baisse de `atomic_tickets`; le gain mur reste à mesurer. Si quelques
-  rectangles lourds déséquilibrent huit paquets par worker, augmenter le nombre
-  de paquets avant d'introduire un ordonnanceur guidé ;
+  même scratch/output par `worker_id`. Les au plus `8T` tranches **globales**
+  réduisent les prises atomiques d'environ `nrect + T` à au plus `9T` par
+  invocation. Sur le témoin `490143/1231555/1353144` à 48 workers, le compte
+  exact passe ainsi de 3 074 986 à 1 296, sans nouvelle infrastructure. La
+  porte compare post-RLE, digests et compteurs sémantiques additifs à
+  1/2/3/8/48 fils ; elle n'exige pas l'égalité de l'ordre brut, des frontières,
+  histogrammes/maxima de lots, octets ou timings device, que le regroupement
+  change légitimement. L'instrument vérifie `atomic_tickets`, travail par worker
+  et mur. Les paquets mesurent ici environ 1,3 k à 3,5 k rectangles : un scan ou
+  flush bloquant peut créer une traîne non volable. Augmenter un paramètre
+  `chunks_per_worker` avant d'introduire un ordonnanceur guidé si cette traîne
+  annule le gain de contention ;
 - séparer un `make_chunk_plan(n, threads)` pur de son exécution. Les treize
   prépasses factices *no-op* se retrouvent exactement dans `expand.hpp` : préfiltre,
   census, comptage, puis une fois pour chacun des dix ordres d'expansion. Le
@@ -516,10 +520,10 @@ Le reduce ne doit pas être parallélisé par lots avant une preuve de conservat
 de l'ordre des racines et deltas. En revanche, réduire sa taille d'état et ses
 défauts de cache est compatible avec l'objet actuel.
 
-Deux petits changements attaquent donc directement les coûts visibles sans
-changer l'algorithme : raccorder `parallel_ranges` pour supprimer le ticket
-atomique **par rectangle**, puis remplacer les treize prépasses no-op par un
-plan pur. Ensuite seulement, fusionner `louts` et les sorties de census par
+Deux petites ablations ciblent donc directement les coûts visibles sans changer
+l'objet : mesurer `parallel_ranges` pour supprimer le ticket atomique **par
+rectangle**, puis remplacer les treize prépasses no-op par un plan pur. Ensuite
+seulement, fusionner `louts` et les sorties de census par
 préfixes d'offsets et copies parallèles disjointes. Aujourd'hui chaque primitive
 recrée aussi ses fils ; le pool global proposé doit réutiliser une équipe entre
 WSPD, lanes et préfiltre. Ces travaux ne feront pas scaler un reduce aléatoire
@@ -528,15 +532,14 @@ d'abord son working set.
 
 ## Ordre de commits proposé à Claude
 
-1. **Épingler le contrat fonctionnel G1 hôte dans son propre commit** : indices
-   bornés, géométrie absente/vide séparée, compteurs de branche et CTest
-   `--inject`. La branche n'est qu'instrumentée en source ; `PointId` q4
-   adverse, selftest fail-closed et exécution des deux mutants sur device
-   ferment ensuite sa réception. Les lots mono-wire, le contexte partagé et les
-   métriques de setup sont des optimisations mesurées, pas des prérequis
-   sémantiques.
-2. **Durcir le pin G0 `194a0bc2`**, sans refonte : garder le TLS non allouant et
-   la fermeture en place du worktree, déplacer le compteur après admission
+1. **Conserver le contrat fonctionnel G1 hôte de `c19dc60d`** : indices bornés,
+   géométrie absente/vide séparée, compteurs de branche et CTest `--inject`.
+   La branche n'est qu'instrumentée en source ; `PointId` q4 adverse, selftest
+   fail-closed et exécution des deux mutants sur device ferment ensuite sa
+   réception. Les lots mono-wire, le contexte partagé et les métriques de setup
+   sont des optimisations mesurées, pas des prérequis sémantiques.
+2. **Suivre G0 à partir de `c19dc60d`**, sans refonte : garder le TLS non allouant et
+   la fermeture en place, déplacer le compteur après admission
    réussie, rendre les portes causales, puis brancher le poison CUDA typé avant
    que le worker reprenne un lot. Ce point précède le claim de confinement
    device, pas le pin fonctionnel G1.

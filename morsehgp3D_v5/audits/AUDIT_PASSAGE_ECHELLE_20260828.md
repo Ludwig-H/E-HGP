@@ -1,11 +1,11 @@
 # Conception auditée de résolution — passage à 10–30 millions de points
 
-- **Derniers commits techniques relus pour ce sujet :** `bc66ade7` pour le
-  réducteur vivant durci, `fb7e9d40` pour la
+- **Derniers commits techniques relus pour ce sujet :** `c19dc60d` pour le fold
+  à créneaux et sa sonde, `bc66ade7` pour le réducteur vivant durci, `fb7e9d40` pour la
   porte de préfixe durcie et `f4b554fe` pour le smoke T5
-  `(catalogue, deltas) -> partition`, ainsi que `194a0bc2` pour la sonde miroir
-  rejetée ci-dessous. Les changements G1 restent indépendants du passage à
-  l'échelle du fold.
+  `(catalogue, deltas) -> partition`, ainsi que `194a0bc2` pour la première
+  sonde requalifiée ci-dessous. Les changements G1 restent indépendants du
+  passage à l'échelle du fold.
 - **Cadre :** `phase=exploration_v5_hors_registre`,
   `backend=cpu_reference`, `profile=quantized_u16_input_only`,
   `mode=audit_independant_math_and_architecture`,
@@ -110,7 +110,7 @@ son ordre. Ne jamais nommer leur somme RSS ni mémoire allocator-précise.
 dont ils gardent l'indice. Son code 4 Release est reçu ; le vert ASan/UBSan est
 rapporté par Claude mais n'a pas été rejoué par cet audit. Le mutant reste
 diagnostiquement sale. Enfin, aucune
-accélération CPU/RSS n'est reçue. Le worktree ajoute un régime `--dump/--from`
+accélération CPU/RSS n'est reçue. Le pin `c19dc60d` ajoute un régime `--dump/--from`
 qui exécute correctement dans deux processus le même flux d'événements avec
 exactement un réducteur chacun. Pour devenir un miroir attribuable de l'objet
 complet, il doit encore chronométrer la copie du catalogue vivant, imposer le

@@ -1,20 +1,16 @@
 # État courant audité de MorseHGP3D v5 — 28 août 2026
 
-- **Dernier pin produit inspecté :** `194a0bc2`, qui consolide le pool G0 et
-  ajoute la sonde resident/vivant. Il succède au réducteur vivant L2 durci de
+- **Dernier pin produit inspecté :** `c19dc60d`, qui épingle le fold à créneaux,
+  les raccords hôte G0/G1 et les deux régimes de sonde décrits ci-dessous. Il
+  prolonge le pool/sonde de `194a0bc2` et le réducteur vivant durci de
   `bc66ade7`. Les constats historiques G0 portent sur `fe54ccca`, la campagne
   device/SCALE sur `c95cfa95`, G1 q3 sur `dd928111`/`839cf1ec` et G1 q4 sur
   `556c421e`.
 - **Pin de réception G0/G1 q3 :** `0656bf4c`, sans code produit.
-- **Worktree observé :** après `194a0bc2`, Claude durcit simultanément G0, G1,
-  le fold à créneaux et sa sonde. La géométrie vide est maintenant distincte de
-  l'absence, le marquage exact des créneaux, les cas de frontière, le refus de
-  capacité et cinq postes mémoire sont présents ; le pool emploie un marqueur
-  TLS non allouant et ferme sa file sans tableau temporaire. Le probe possède
-  désormais un régime `--dump/--from` sans pipeline dans les deux bras. Ces
-  deltas non épinglés restent exclus du verdict versionné et les coutures encore
-  ouvertes sont bornées ci-dessous. Le probe
-  `.codex_fold_contract_probe.cpp` d'un autre audit reste non intégré.
+- **Worktree observé :** le produit est propre au pin `c19dc60d`. Seul le probe
+  non suivi `.codex_fold_contract_probe.cpp`, appartenant à un autre audit,
+  reste hors du pin et n'est pas une preuve intégrée. Les corrections d'audit
+  postérieures requalifient les claims du pin sans modifier son code.
 - **Cadre :** `phase=exploration_v5_hors_registre`,
   `backend=cpu_reference`, `profile=quantized_u16_input_only`,
   `mode=audit_independant_math_and_architecture`,
@@ -22,7 +18,7 @@
 
 ## Verdict utile à Claude
 
-**Orange constructif : `194a0bc2` et le worktree gardent la bonne architecture.**
+**Orange constructif : `c19dc60d` garde la bonne architecture.**
 Notification du ticket, démarrage transactionnel, domaine `1..8`, latch
 causale, TLS non allouant et fermeture en place sont de vraies corrections ; il
 ne faut ni les jeter ni redessiner la lane. La réception du **contrat de sûreté
@@ -50,7 +46,7 @@ total au lieu de 98, digests appariés et baisse H2D q3 visible. Les pins G1 q4
 complètent ensuite le wire sans remplacer SoA. Les contrats
 fail-closed/non-vacants G1 restent à fermer sans reprendre ces travaux.
 
-Le worktree G1 actif répond déjà aux deux demandes les plus rentables : bornage
+Le pin `c19dc60d` répond déjà aux deux demandes G1 les plus rentables : bornage
 **en valeur** avant lancement et instrumentation qui rend la branche observable.
 Il sépare désormais aussi géométrie absente et géométrie déclarée vide ; conserver
 ce patch. Le libellé des lots sans seed reste un nettoyage non bloquant. La
@@ -82,7 +78,7 @@ naissances avant les morts du lot puis réutiliser la liste libre au lot suivant
 atteint exactement le chevauchement maximal. Il n'y a pas de verrou
 algorithmique caché à résoudre ici.
 
-Le worktree ferme le marquage exact libre/vivant, les valeurs littérales des
+Le pin ferme le marquage exact libre/vivant, les valeurs littérales des
 deltas de frontière, le préfixe `resource_exhausted`, la vacuité des deux sorties
 et le compte de débordement. Trois coutures courtes restent avant le pin fold.
 Premièrement, le balayage doit aussi parcourir **tous** les `slot_of_fid` : une
@@ -133,23 +129,27 @@ la part mur du fold vaut
 est correct, sans devenir une part générale des autres familles ou du nouveau
 fold.
 
-**Aide immédiate multi-CPU :** ne pas commencer par un nouveau pool général.
-Remplacer les `parallel_items(nrect, ...)` des lanes par le
-`parallel_ranges(...)` déjà reçu réduit mécaniquement environ 3,075 millions de
-tickets atomiques à au plus quelque 1 300 à 48 workers, tout en gardant les
-sorties par worker ; puis remplacer les treize équipes no-op d'`expand.hpp` par
-un `make_chunk_plan` pur. Ces deux petits commits sont indépendants du fold,
-gardent les mêmes post-RLE/digests et diront par mesure si création de threads et
+**Ablation immédiate multi-CPU :** ne pas commencer par un nouveau pool général.
+Sur le témoin qui porte `490143/1231555/1353144` rectangles à 48 workers,
+remplacer les `parallel_items(nrect, ...)` des lanes par le
+`parallel_ranges(...)` déjà reçu réduit statiquement 3 074 986 `fetch_add` à
+1 296. Il conserve l'objet post-RLE, les digests et les compteurs sémantiques
+additifs, mais pas l'ordre brut, les frontières, histogrammes/maxima de lots,
+octets ou timings device. Les paquets de 1,3 k à 3,5 k rectangles peuvent aussi
+créer une traîne non volable : instrumenter tickets et temps occupé, puis
+mesurer le mur à 1/2/3/8/48 fils avant de retenir ce découpage. Remplacer ensuite
+les treize équipes no-op d'`expand.hpp` par un `make_chunk_plan` pur. Ces deux
+petits essais sont indépendants du fold et diront si création de threads et
 contention atomique expliquent une part du plafond avant d'engager l'équipe CPU
 persistante.
 
-Les trois prochains pins faciles sont indépendants : **source G1** avec réception
-hôte des indices et de la géométrie vide, **fold à créneaux** après causalité du
-mutant/bijection/mesure, puis **G0 hôte** après admission comptable et fixtures
-causales. La branche G1, `PointId` q4 et le poison G0 restent différés à une
-réception device minimale ; aucun nouveau G4 n'est nécessaire avant leur
-fermeture locale. T5, le fold massif et le protocole CPU sous cpuset restent
-indépendants.
+`c19dc60d` a déjà épinglé ensemble les avancées source G1, fold à créneaux et G0
+hôte : ne pas les refaire. Leurs trois **suivis** restent indépendants : fold
+après sûreté du scan, causalité et pics ; G0 après admission comptable, secours
+fatal et barrières ; G1 après selftest fail-closed, `PointId` q4 adverse et
+exécution device minimale des deux mutants. Aucun nouveau G4 n'est nécessaire
+avant les fermetures locales du fold et de G0. T5, le fold massif et le
+protocole CPU sous cpuset restent indépendants.
 
 ## Ce qui est reçu et réutilisable
 
@@ -242,7 +242,7 @@ branche et CTest mutant à recevoir sur G4 ; ensuite seulement lots mono-wire,
 contexte partagé et métriques de setup selon leur effet mesuré. Ces derniers ne
 bloquent ni les digests déjà obtenus ni la réception fonctionnelle bornée.
 
-### Relecture constructive du worktree G1 actif
+### Relecture constructive du pin G1 hôte `c19dc60d`
 
 Le patch implémente les points 1 à 3 : `GpuGeometry::count` borne chaque valeur,
 les fixtures `index == count` et `UINT32_MAX` refusent, les compteurs distinguent
@@ -446,7 +446,7 @@ Un probe séparé où le deuxième des quatre constructeurs d'Executor lève ren
 l'exception exacte, quatre tentatives, zéro vivant et trois destructions, en
 Release comme sous ASan/UBSan. Le cœur du correctif est à garder.
 
-Le worktree ferme maintenant les deux défauts les plus dangereux de cette
+Le pin `c19dc60d` ferme maintenant les deux défauts les plus dangereux de cette
 relecture : le vecteur TLS est remplacé par un pointeur non allouant qui refuse
 tout nesting, y compris entre pools, et `close_fatal` dépile la deque sans
 tableau temporaire. Conserver ces corrections. Quatre finitions évitent encore
@@ -547,16 +547,15 @@ valeurs, calculs et corrections détaillés restent dans
 
 ## Ordre recommandé, sans détour
 
-1. Pin source G1 avec réception hôte partielle, dans son propre commit : bornes
-   d'indices, compteurs/mutants de branche et réparation du CTest `--inject`.
-   La géométrie absente/vide est déjà séparée dans le worktree ; le libellé des
-   no-op peut suivre sans nouvelle cible. `PointId` q4 adverse, selftest et vraie
-   exécution des mutants ferment ensuite la réception device.
-2. Pin fold séparé : garder le tableau de créneaux et le refus avant `kNil` ;
+1. Conserver le contrat G1 hôte de `c19dc60d` : bornes d'indices, géométrie
+   absente/vide, compteurs/mutants de branche et parseur `--inject`. Le libellé
+   des no-op peut suivre sans nouvelle cible. `PointId` q4 adverse, selftest et
+   vraie exécution des mutants ferment ensuite la réception device.
+2. Suivi fold séparé : garder le tableau de créneaux et le refus avant `kNil` ;
    compléter le balayage de tout `slot_of_fid`, la causalité propre de
    `slot-cap-minus-one`, les niveaux/lots littéraux, l'échantillonnage des cinq
    catégories mémoire et le miroir strict.
-3. Durcir `194a0bc2` sans refonte : garder le TLS non allouant et la fermeture
+3. Suivi G0 de `c19dc60d`, sans refonte : garder le TLS non allouant et la fermeture
    en place, déplacer la comptabilité après admission réussie et rendre les
    fixtures causales ; puis brancher le poison typé dans q3/q4 avant tout claim
    de confinement d'une erreur CUDA.
@@ -585,11 +584,11 @@ valeurs, calculs et corrections détaillés restent dans
   timeout. Le probe de constructeur d'Executor fautif confirme en revanche la
   jonction transactionnelle : exception exacte, zéro objet vivant, en Release
   et ASan/UBSan.
-- Worktree G1 postérieur : construction ciblée Release réussie ;
+- Pin `c19dc60d`, G1 hôte : construction ciblée Release réussie ;
   `mhgp5_batch_contract`, registre de mutants, instrumentation hôte et lanes
   batched q3/q4 rendent **5/5**. CUDA est désactivé localement ; aucune porte
   device de ce delta n'est annoncée comme exécutée.
-- Worktree fold à créneaux : **7/7** CTests fold nominal + six mutants verts au
+- Pin `c19dc60d`, fold à créneaux : **7/7** CTests fold nominal + six mutants verts au
   dernier passage, en 54,15 s. `slot-cap-minus-one` rend 4, publie le refus exact
   et reste propre sous ASan/UBSan, mais ses cas synthétiques ajoutent encore des
   désaccords génériques suffisants au code 4. Ces exécutions reçoivent la sûreté
@@ -601,6 +600,12 @@ valeurs, calculs et corrections détaillés restent dans
   (batch, pool nominal/deux mutants, capacité fold) rendent **5/5** en 16,11 s.
   Un smoke `--dump/--from` sur `uniform n=200` rend les mêmes 7 459 facettes et
   2 385 deltas dans les deux bras, sans encore comparer leur objet complet.
+- Contre-rejeu du pin `c19dc60d` : batch hôte, pool nominal/deux mutants, fold
+  nominal et ses six mutants rendent **11/11** en Release (51,32 s mur avec
+  deux jobs CTest). Les mêmes sources, avant leur pin, rendaient pool + six
+  mutants fold **9/9** sous ASan/UBSan (16,46 s). Cela couvre les chemins
+  exercés, pas les corruptions de partition encore sans mutant ni le nominal
+  fold massif sous sanitizer.
 - Build Release CPU complet au pin `556c421e` : succès ; construction ciblée
   des portes fold au pin `bc66ade7` : succès.
 - CTests API, pool, T5, préfixe et lanes q3/q4 batched : 41/41 verts en
