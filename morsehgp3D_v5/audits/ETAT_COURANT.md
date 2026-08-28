@@ -1,6 +1,6 @@
 # État courant audité de MorseHGP3D v5 — 28 août 2026
 
-- **Derniers commits techniques relus :** `46f9f8c7`, intégration de la conception du fold vivant, `5aceeed5` et `cce4b2b3`, consolidation critique des deux audits ; les raccords d'audit `0167c914`, `5ac6a95f` et `6576e44c` ont été croisés à leur tour. `ba31c169` reste la dernière porte fonctionnelle reçue.
+- **Derniers commits techniques relus :** `46f9f8c7`, intégration de la conception du fold vivant, `5aceeed5` et `cce4b2b3`, consolidation critique des deux audits ; les raccords d'audit `0167c914`, `5ac6a95f`, `6576e44c`, `3b6ead57` et `e6eebe93` ont été croisés à leur tour. `ba31c169` reste la dernière porte fonctionnelle reçue.
 - **Code en cours de relecture :** worktree postérieur à `cce4b2b3`, encore non committé. Il prépare la sûreté du fold, l'instrumentation device, l'oracle de grille et une campagne `SCALE_THREADS`. Les observations sur ce code sont des indications de travail, pas une réception sur pin.
 - **Pins de performance conservés :** `82f613d3` pour les campagnes CPU 50–200 k et `63deda74` pour les étapes device à 50 k.
 - **Cadre :** `phase=exploration_v5_hors_registre`, `backend=cpu_reference`, `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`.
@@ -88,6 +88,14 @@ exacte sur `(K=2,kPublished)`. Après toutes les jointures, exiger seulement deu
 `on_forest` (K = 1 puis K = 2), K = 3 `kNotPublished` sans `kPublished`, et
 restaurer dans `published_complete` la séquence stricte 1, 2, ..., Kmax.
 
+Le mutant A doit lui aussi forcer le scénario qu'il annonce. Son attente
+actuelle de `kStageAFailed` réussit même si l'échec précède l'entrée dans le
+callback K = 1; elle peut donc tester un drain avec ce callback déjà terminé.
+Correction minimale : `on_forest(K=1)` signale `callback_entered` puis attend
+`kStageAFailed`, tandis que le hook principal `(K=2,kStageABegin)` attend
+`callback_entered` avant de laisser continuer l'expansion mutante. Cette
+poignée bidirectionnelle transforme l'intention en interleaving déterministe.
+
 Deux raccords d'exception accompagnent ce changement. Le `catch` de
 réduction/digest ne doit affecter `sp->exc` que s'il est encore vide, sinon il
 écrase une faute antérieure de `kReduceBegin`. La construction de `sp->message`
@@ -101,6 +109,40 @@ elle aussi conserver le verdict dans le slot jusqu'au tour de K, jamais poser
 ### Domaine et résidence de `fold_inflight`
 
 Le profil accepte actuellement jusqu'à 16, alors que K est borné à 10 et que le préflight mémoire reste individuel par ordre. Une valeur 16 peut donc rendre les dix états B résidents; aucun majorant agrégé de fenêtre ne le couvre. Tant que ce préflight n'existe pas, le domaine public le plus honnête est `1..3`, qui correspond au chevauchement effectivement forcé par la porte. L'ouverture au-delà doit venir avec une somme majorée par rôle, une porte de pic RSS et un mutant qui force tous les ordres de la fenêtre à rester résidents.
+
+La porte N1 maintient par construction trois workers B vivants : K = 1 dans le
+callback et K = 2/K = 3 après `kReduceBegin`. Si le compteur conserve cette
+sémantique, exiger exactement 3 plutôt que seulement `>= 2` et le nommer comme
+un pic de workers vivants. Il couvre aussi les attentes de publication et les
+hooks; il ne prouve donc pas deux appels à `reduce_fold` simultanés. Une mesure
+de réduction concurrente exige un compteur distinct autour de cet appel.
+
+### Réception des portes concurrentes
+
+Le commentaire qui annonce une exécution sous TSan n'est pas encore une preuve :
+CMake n'enregistre que le mode ASan+UBSan. Dans l'environnement d'audit, GCC
+TSan s'arrête de façon intermittente avant le test avec `unexpected memory
+mapping`, et Clang TSan ne compile pas le builtin SHA employé par le projet. Ce
+constat ne révèle ni n'exclut une race. Ajouter une cible TSan dédiée et un reçu
+sur runner compatible, ou retirer l'affirmation; donner aussi un `TIMEOUT` CTest
+global aux portes concurrentes pour qu'un interleaving fautif échoue bornément.
+
+Deux assertions de porte doivent enfin suivre la sémantique réelle. Quand le
+callback K = 2 lève dans N3, il a été **invoqué**, mais K = 2 n'est pas publié :
+exiger son `kNotPublished` et l'absence de son `kPublished`, comme pour K = 3.
+Documenter aussi que `on_forest` tient le verrou de publication : un callback
+peut attendre une réduction déjà lançable dans la fenêtre, mais jamais son
+propre `kPublished` ni un tour de publication futur.
+
+### Sémantique des mesures du fold
+
+Trois commentaires dépassent actuellement l'instrument. `rss_mb[4]` est le
+maximum d'échantillons pris après les callbacks, pas le pic RSS du fold;
+`t_fold_wall_ms` inclut le drainage et les hooks et n'est rempli que sur succès,
+pas exactement « jusqu'à la dernière publication »; enfin `st.reset()` libère
+les événements mais pas le `ForestResult r`, qui reste vivant jusqu'au retour
+du hook terminal. Corriger les libellés suffit au jalon CPU; un vrai pic RSS et
+une libération explicite de `r` peuvent rester des améliorations mesurées.
 
 ### Validation et transport du plan SCALE
 
@@ -168,6 +210,15 @@ CPU et oracle grille en 23,53 s. Le sous-ensemble grille seul donne 7/7 en
 12,09 s et reproduit ses compteurs annoncés. Ces succès n'exercent toujours ni
 nvcc ni un device CUDA et ne ferment pas la porte `kPublished`, absente du test
 courant.
+
+Un build d'audit ASan+UBSan a en outre reçu les trois scénarios fold en 29,55 s.
+Les cibles instrument GPU hôte et oracle grille n'ont pas atteint leur runtime
+dans cette configuration : GCC 13 transforme en erreur `-Warray-bounds` les
+affectations `{0}` des vecteurs `bucket_start` et `wsum` de `CloudIndex` après
+inlining. C'est un blocage de réception sous `-Werror`, pas une preuve de
+dépassement; un `clear()` puis `push_back(0)` explicite, ou une isolation bornée
+du diagnostic dans la variante sanitizer, suffit à rouvrir ces deux portes.
+Aucun reçu TSan reproductible n'est acquis pour les raisons ci-dessus.
 
 Les validations antérieures restent bornées à leurs pins : suites CPU reçues à `369f3ac0`, campagne CPU 50–200 k à `82f613d3`, instrumentation device de la session G4 n° 12 à `63deda74`. Elles ne valident pas automatiquement le worktree courant.
 
