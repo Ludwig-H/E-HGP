@@ -1,15 +1,17 @@
 # État courant audité de MorseHGP3D v5 — 28 août 2026
 
-- **Dernier pin produit inspecté :** `bc66ade7`, qui durcit la réception du
-  réducteur vivant L2. Les constats G0 portent sur `fe54ccca`, la campagne
+- **Dernier pin produit inspecté :** `194a0bc2`, qui consolide le pool G0 et
+  ajoute la sonde resident/vivant. Il succède au réducteur vivant L2 durci de
+  `bc66ade7`. Les constats historiques G0 portent sur `fe54ccca`, la campagne
   device/SCALE sur `c95cfa95`, G1 q3 sur `dd928111`/`839cf1ec` et G1 q4 sur
   `556c421e`.
 - **Pin de réception G0/G1 q3 :** `0656bf4c`, sans code produit.
-- **Worktree observé :** Claude corrige G0 dans `executor_pool.hpp`, sa porte,
-  CMake, `docs/GPU.md` et `docs/PLAN_DE_TESTS.md`. Une sonde
-  `bench/fold_live_probe.cpp` et son raccord CMake sont aussi postérieurs au
-  HEAD ; tous restent exclus du verdict versionné. Le probe
-  `.codex_fold_contract_probe.cpp` d'un autre audit reste lui aussi non intégré.
+- **Worktree observé :** Claude durcit G1 après `194a0bc2` : valeurs des indices,
+  compteurs de branche et d'octets, mutant de retombée SoA, CLI et portes q3/q4.
+  Il expérimente aussi un cache `slot_alias` dans le fold vivant. Ces deltas non
+  épinglés restent exclus du verdict versionné ; la porte hôte de contrat G1 est
+  toutefois verte. Le probe `.codex_fold_contract_probe.cpp` d'un autre audit
+  reste lui aussi non intégré.
 - **Cadre :** `phase=exploration_v5_hors_registre`,
   `backend=cpu_reference`, `profile=quantized_u16_input_only`,
   `mode=audit_independant_math_and_architecture`,
@@ -17,15 +19,29 @@
 
 ## Verdict utile à Claude
 
-**Orange constructif : la direction est bonne.** La session 13 fournit une
-baseline CUDA cohérente. La nouvelle session au pin `839cf1ec` compile et
-exécute nominalement G0 et G1 q3 : huit exécuteurs au total au lieu de 98,
-digests appariés et baisse H2D q3 visible. Les pins G1 q4 complètent ensuite le
-wire sans remplacer SoA. Il ne faut jeter aucun de ces travaux ni redessiner la
-lane. Quatre coutures hôte G0 et les contrats fail-closed/non-vacants G1
-ci-dessous restent toutefois à fermer.
+**Orange constructif : `194a0bc2` garde la bonne architecture.** Notification
+du ticket, démarrage transactionnel, domaine `1..8` et latch causale sont de
+vraies corrections ; il ne faut ni les jeter ni redessiner la lane. La réception
+complète demande encore un petit durcissement local : marqueur TLS non allouant
+et refus de tout nesting, fermeture fatale à garantie forte, puis fixtures
+causales. `close_fatal` est aujourd'hui une primitive hôte exercée, pas encore
+le poison CUDA q3/q4. La sonde fold du même pin mesure un second réducteur depuis
+le callback d'un pipeline qui a déjà exécuté le résident : elle reste un
+micro-banc incrémental, pas le miroir CPU/RSS annoncé.
 
-Le HEAD `bc66ade7` consolide le bon cœur L2 : égalité de vie par lot,
+La session 13 fournit par ailleurs une baseline CUDA cohérente. La session au
+pin `839cf1ec` compile et exécute nominalement G0 et G1 q3 : huit exécuteurs au
+total au lieu de 98, digests appariés et baisse H2D q3 visible. Les pins G1 q4
+complètent ensuite le wire sans remplacer SoA. Les contrats
+fail-closed/non-vacants G1 restent à fermer sans reprendre ces travaux.
+
+Le worktree G1 actif répond déjà correctement aux deux demandes les plus
+rentables : bornage **en valeur** avant lancement et témoin de la branche
+réellement exécutée. Conserver ce patch. Il reste à aligner le libellé des lots
+vides, supprimer une activation mutante q4 redondante, puis recevoir les deux
+mutants sur un vrai device ; cela ne justifie aucune refonte du wire.
+
+Le pin `bc66ade7` consolide le bon cœur L2 : égalité de vie par lot,
 balayages structurels, vacuité finale, plafond par alias, cas adverse court et
 timeouts explicites. Il ne faut revenir sur aucune de ces corrections. Les
 finitions avant L3 sont locales : replayer T5 strict partagé, comparateur de
@@ -33,13 +49,36 @@ fixtures complet, micro-fixture du backshift, deux invariants de listes et
 attribution exacte des témoins mémoire. Elles bornent le claim, pas l'utilité
 du réducteur.
 
-Le prochain pin facile à recevoir est un **G0 sûr**, puis un petit pin hôte G1
-qui borne les indices et rend chaque branche index falsifiable. La session qui
-vient d'être exécutée est une bonne mesure exploratoire et prouve que le chemin
-q3 index a effectivement réduit ses copies ; elle ne remplace pas ces portes et
-ne couvre pas q4, absent de son pin source. Aucun nouveau G4 n'est nécessaire
-avant leur fermeture locale. T5, le fold massif et le protocole CPU sous cpuset
-restent indépendants et ne doivent pas détourner ce travail court.
+Le fold actif va plus loin : il remplace le hash vivant par un tableau de
+créneaux de taille `peak_live_exact`, une table directe `fid -> créneau`, puis
+réutilise l'alias résolu dans `slot_alias`. La construction par intervalles est
+cohérente avec l'ordre naissance-avant-mort du lot ; les indices d'arène restent
+valides après les relocalisations small-to-large. La porte différentielle
+complète rend déjà 6/6 et le nominal local tombe à 19,8 s, contre 72–83 s lors
+de la relecture de `bc66ade7`. C'est un signal très favorable, pas encore un
+benchmark apparié : garder cette piste.
+
+Deux coutures préservent la valeur de l'expérience. Au L2 courant,
+`slot_of_fid` occupe `4 * facettes` octets et `slot_alias` jusqu'à
+`11 * sizeof(u32) = 44` octets par événement du plus gros lot ; tous deux sont
+omis de `allocated_bytes`. Ils ne disparaîtront qu'au futur wire L3 : les
+inclure aujourd'hui, ou publier séparément état persistant, mapping et scratch.
+`assign(..., kNil)` écrit aussi les onze slots à chaque lot alors que seuls les
+slots consultés sont relus ; un `resize` réutilisant la capacité suffit. Enfin,
+un débordement de créneau ne doit pas retourner `kNil` vers `unite`, qui
+déréférencerait cet indice : lever immédiatement une contradiction interne.
+Comparer séparément « hash -> table directe » puis « second lookup -> cache »
+permettra d'attribuer le gain. Le ratio 1,9–3,5 issu de la sonde callback reste
+un signal de micro-banc, pas la mesure miroir que son commentaire annonce.
+
+Le prochain pin facile à recevoir est un **durcissement ciblé de `194a0bc2`**,
+puis un petit pin hôte G1 qui borne les indices et rend chaque branche index
+falsifiable. La session déjà exécutée est une bonne mesure exploratoire et
+prouve que le chemin q3 index a effectivement réduit ses copies ; elle ne
+remplace pas ces portes et ne couvre pas q4, absent de son pin source. Aucun
+nouveau G4 n'est nécessaire avant leur fermeture locale. T5, le fold massif et
+le protocole CPU sous cpuset restent indépendants et ne doivent pas détourner ce
+travail court.
 
 ## Ce qui est reçu et réutilisable
 
@@ -139,7 +178,7 @@ de coût à mesurer ensuite, pas des conditions artificielles de réception :
    remplaçant le branchement index par SoA garderait verdicts et digests verts,
    et le faux GPU du selftest ignore aujourd'hui `--gpu-wire` tout en étant
    accepté. Ajouter `index_lots`, `soa_lots` et les octets catégoriels, puis
-   exiger `index_lots == launches > 0`, `soa_lots == 0` et
+   exiger `index_lots == lots > 0`, `soa_lots == 0` et
    `site_soa_bytes == 0`. Un mutant `wire-index-force-soa` et un selftest
    `GPU_IGNORE_WIRE=1` doivent être refusés. Pour q4, employer aussi des
    `PointId` non monotones au-delà du bit 31 afin de tuer `PID=dense_index` ;
@@ -164,10 +203,54 @@ de coût à mesurer ensuite, pas des conditions artificielles de réception :
    spécialisation SoA/index ou un chargement local q4 ne se justifie qu'après
    profil ; l'audit n'impose pas cette forme de code.
 
-L'ordre interne est donc : sûreté d'index, preuve de branche et CTest mutant,
-tous testables localement ; puis seulement lots mono-wire, contexte partagé et
-métriques de setup selon leur effet mesuré. Ces derniers ne bloquent ni les
-digests déjà obtenus ni la réception fonctionnelle bornée.
+L'ordre interne est donc : sûreté d'index testable sur l'hôte, puis preuve de
+branche et CTest mutant à recevoir sur G4 ; ensuite seulement lots mono-wire,
+contexte partagé et métriques de setup selon leur effet mesuré. Ces derniers ne
+bloquent ni les digests déjà obtenus ni la réception fonctionnelle bornée.
+
+### Relecture constructive du worktree G1 actif
+
+Le patch ferme dans son principe les points 1 à 3 : `GpuGeometry::count` borne
+chaque valeur, les fixtures `index == count` et `UINT32_MAX` refusent, les
+compteurs distinguent index et SoA, le mutant `wire-index-force-soa` possède une
+signature dédiée, et q3 parse enfin `--inject`. La porte CPU
+`mhgp5_batch_contract` rend 0. L'agrégation des statistiques de lot reste sous
+le mutex de lane ; aucune nouvelle race hôte n'est visible.
+
+Trois finitions évitent de sur-vendre ce bon patch. La valeur sentinelle
+`n_geom_points == 0` signifie à la fois « géométrie absente » et « géométrie
+déclarée vide » : dans le second cas, le contrôle des indices est sauté alors
+que `use_idx` peut devenir vrai. Un booléen de présence ou un `optional<size_t>`
+permet de refuser explicitement un lot non vide contre une géométrie de taille
+zéro ; graver ce rejet en q3 et q4.
+
+Ensuite, `lots` est incrémenté avant le retour d'un scan sans seed, tandis que
+ses compteurs de branche restent à zéro. Le générateur produit ne soumet
+actuellement aucun lot vide, donc cela ne bloque pas G1 ; déplacer le comptage
+de branche avant ce retour, ajouter `noop_lots`, ou définir `lots` comme « lots
+transférés » rend simplement l'API et son commentaire cohérents. Le champ q3
+`site_index_bytes` additionne indices **et** géométrie d'ancre, alors que le CLI
+l'appelle `octets_sites_index` et exclut l'upload résident. Le renommer en
+`wire_index_bytes`, ou séparer ces trois catégories, évite une métrique ambiguë ;
+la porte peut alors exiger aussi que les octets de la branche choisie soient
+strictement positifs et exacts. Enfin, la porte q4 appelle
+`mutants_enable(inject)` deux fois : retirer le doublon. La réception reste
+device : sans nvcc local, ni les deux nouvelles portes mutantes, ni la conservation de
+`PointId` adverse au-delà du bit 31 ne sont encore rejoués. Le faux pilote de
+campagne qui ignore `--gpu-wire` doit toujours être refusé par le selftest avant
+de transformer ces compteurs en reçu.
+
+Le témoin q4 manquant peut rester petit : affecter `id = UINT32_MAX - i` aux
+entrées du gate index et tuer un mutant `wire-index-pid-is-dense` qui remplace
+`ix.point_id(u)` par `u`. Pour fermer la comptabilité, exiger aussi q3
+`lots == flushes`, `launches == lots` et q4 `lots == flushes`,
+`lots <= launches <= 3 * lots`, avec H2D/D2H strictement positifs. Enfin, le
+selftest campagne rend encore `violations=0` avec un faux GPU qui ignore
+`--gpu-wire` et n'imprime aucune ligne de branche. Le validateur doit exiger,
+pour chaque contrat `gpuidx`, exactement une ligne q3 et q4 avec
+`index_lots == lots > 0`, zéro lot/octet SoA et des octets index positifs ; la
+campagne device suivante exécute aussi les deux mutants de retombée SoA au code
+4. Cela reçoit le raccord sans rejouer la matrice SCALE.
 
 ### Autres jalons
 
@@ -243,8 +326,9 @@ n'est reçu. La sonde sale actuelle réexécute un second fold depuis
 `on_forest`, alors que le résident du pipeline est encore vivant : son RSS
 compare un résident à un résident plus un vivant. La mesure attribuable doit
 faire lire le même flux d'événements à deux processus, chacun exécutant un seul
-réducteur ; le bras vivant inclut copie du catalogue et replayer strict, et les
-deux digests doivent être identiques.
+réducteur ; le bras vivant rattache sans copie le catalogue déplacé après
+réduction, exécute le replayer strict, et les deux digests doivent être
+identiques.
 
 Le raccord minimal n'est donc pas un autre callback terminal. Ajouter au point
 unique où `run_pipeline` appelle aujourd'hui `reduce_fold` une injection de
@@ -252,32 +336,49 @@ réducteur réservée au banc, puis imposer `fold_inflight=1`. Le processus
 `resident` appelle une seule fois `reduce_fold`; le processus `vivant` appelle
 une seule fois `reduce_fold_live`, reconstruit strictement
 `final_canon_fid`, rattache le même catalogue, puis laisse le pipeline calculer
-le digest normal. Cela donne le même objet publié et un seul réducteur par
-processus. Le pic `ru_maxrss` reste un pic de bout en bout — préparation
-comprise — ce qui est précisément la mesure utile ; les temps internes gardent
-séparément préparation, FIRST/LAST, réduction et rejeu.
+le digest normal. Le catalogue ne doit surtout pas être copié avant la
+réduction vivante : une sortie réservée au test peut déplacer `fp.keys` après
+la réduction, quand celle-ci n'en a plus besoin. Une copie O(F) biaiserait le
+pic que le probe cherche précisément à mesurer. Cela donne le même objet publié
+et un seul réducteur par processus. Le pic `ru_maxrss` reste un pic de bout en
+bout — préparation comprise — ce qui est précisément la mesure utile ; les
+temps internes gardent séparément préparation, FIRST/LAST, réduction et rejeu.
+
+Le protocole doit lancer deux invocations fraîches du binaire avec
+`digest=true` et exiger `fold_inflight=1`, `reduce_calls == orders`, les mêmes
+cardinalités, `digest_balls`, chaque `digest_forest[K]`, `digest_all`, niveaux
+de lots et signature complète des événements. Le replayer commun refuse clé
+inconnue, lot ou niveau incohérent, parent mort/non canonique, naissance
+dupliquée ou ressuscitée et `output` différent du minimum. Pour la mémoire,
+`ru_maxrss` n'attribue un delta au fold que si ce fold établit un nouveau pic ;
+sinon le verdict mémoire est `inconclusif`, avec le RSS courant avant/après
+comme témoin complémentaire, jamais comme substitut.
 
 ## Chemin minimal pour recevoir G0
 
-### P0 — quatre corrections hôte ciblées
+### P0 initial — quatre corrections hôte fermées par `194a0bc2`
+
+Les quatre points ci-dessous décrivent le défaut de `fe54ccca` et la couture
+demandée ; `194a0bc2` les ferme dans leur principe. La relecture du pin révèle
+ensuite un dernier P0 plus local, détaillé plus bas.
 
 1. **Ticket.** Dans `ExecutorPool::run`, poser `done=true` et appeler
    `notify_all()` pendant que `Ticket::mu` est encore détenu, puis ne plus
-   toucher le ticket. Aujourd'hui un réveil spurieux peut laisser le producteur
+   toucher le ticket. Au pin `fe54ccca`, un réveil spurieux pouvait laisser le producteur
    détruire son ticket de pile avant la notification : c'est une UB réelle.
 2. **Démarrage.** Construire l'`Executor` sous capture d'exception et faire
    remonter son état au constructeur du pool. Le constructeur ne doit revenir
    que lorsque les N workers sont prêts. En cas d'échec d'un exécuteur ou d'un
    lancement de thread après un démarrage partiel : fermer, réveiller, joindre
-   tous les threads déjà créés, puis relancer l'exception. Les chemins actuels
-   peuvent terminer le processus.
+   tous les threads déjà créés, puis relancer l'exception. Ces chemins pouvaient
+   terminer le processus.
 3. **Réentrance.** Refuser immédiatement, par marqueur `thread_local`, un
    `submit_and_wait()` appelé depuis un job du même pool. G0 n'a pas besoin de
    réentrance ; le blocage N=1 est reproduit, donc un rejet clair est préférable
    à un ordonnanceur plus complexe.
 4. **Porte déterministe.** Remplacer le test de pic dépendant du scheduler par
-   N jobs maintenus dans une latch avant libération. Sous `taskset -c 0`, la
-   porte actuelle répétée 100 fois ne sort à 0 que 22 fois ; 78 échecs portent
+   N jobs maintenus dans une latch avant libération. Sous `taskset -c 0`,
+   l'ancienne porte répétée 100 fois ne sort à 0 que 22 fois ; 78 échecs portent
    sur `N=4 peak_active=1`. Tester ainsi N=1, 2, 4 et 8 et ajouter un `TIMEOUT`
    CTest.
 
@@ -311,9 +412,9 @@ doit les refuser, et une fixture doit accepter 3.
 Ce paquet reste volontairement petit. Une machine à états très générale, un
 reorder buffer ou des lots asynchrones ne sont pas requis pour recevoir G0.
 
-### Relecture constructive du correctif G0 en cours
+### Relecture constructive du pin G0 `194a0bc2`
 
-Le worktree observé ferme correctement l'essentiel : notification sans accès
+Le pin ferme correctement l'essentiel : notification sans accès
 au ticket après réveil, attente des workers prêts, refus de réentrance, domaine
 continu `1..8`, latch causale et timeouts CTest. La porte ciblée rend `0/4/4`,
 le nominal répété sous CPU 0 rend 30/30 et ASan/UBSan rend 3/3. Avec Clang 18,
@@ -366,6 +467,45 @@ puis file réellement pleine, avant la fermeture. Enfin, tant que q3/q4 ne
 classent ni n'appellent ce chemin, le qualifier de mécanisme hôte exercé, pas
 encore de gestion reçue d'une erreur device réelle.
 
+Le raccord device doit se faire **avant que le worker puisse dépiler un nouveau
+lot**. Aujourd'hui `cuda_check` transforme toute erreur CUDA en
+`std::runtime_error`, `broken_` ne couvre que les réservations et q3/q4
+n'appellent jamais `close_fatal` : une capture dans le producteur, après
+`submit_and_wait`, arriverait trop tard. Introduire une exception device typée
+qui conserve le `cudaError_t`, sans classification par texte, puis faire la
+transition fatale dans la capture du worker ou dans un wrapper de job qui
+ferme et relance avant son retour. Les `invalid_argument`, erreurs de fixture et
+exceptions hôte ordinaires restent récupérables ; la première erreur device
+gagne et tous les workers actifs sortent après leur lot courant.
+
+La machine d'état minimale tient sous `mu_` : `Open`, puis
+`Queued -> Running -> Succeeded|Failed`, ou une transition unique
+`Open -> Fatal(first_error)` qui rejette les admissions et transforme chaque
+`Queued` en `Cancelled(first_error)`. Le déplacement actuel de la deque vers
+`active_` et celui d'`active_` vers le compteur terminal sont séparés du mutex ;
+un snapshot peut donc observer un job en limbe et violer temporairement
+l'invariant annoncé. Soit `counters()` est explicitement terminal seulement,
+soit, préférable pour les barrières de test, pop+`running++` puis
+`running--`+compteur terminal deviennent des transitions atomiques sous ce
+même mutex.
+
+La porte fatale peut alors être exacte et rapide : maintenir exactement deux
+jobs actifs, attendre quatre tickets en file et deux admissions bloquées,
+fermer, puis libérer les actifs. Elle exige
+`submitted=6, succeeded=2, failed=0, cancelled=4, active=queued=0`, zéro corps
+annulé exécuté, deux résultats normaux et six producteurs voyant la première
+erreur (quatre annulations, deux admissions refusées). Un second `close_fatal`
+avec un autre marqueur et une soumission tardive prouvent `first-error-wins`.
+Les délais ne servent que de coupe-circuit ; aucun `sleep_for` ne décide du
+scénario.
+
+Le run direct du pin illustre la dent manquante : le nominal a observé par
+chance `6` erreurs et `2` succès, tandis que `pool-drop-exception` a observé
+`2` erreurs et `6` succès ; dans les deux cas, toute la sous-porte fatale a
+imprimé `ok`. Le mutant ne rend finalement 4 que grâce à l'exception ordinaire
+ultérieure. La fermeture et sa propagation ne sont donc pas encore un témoin
+causal du mutant.
+
 Le compteur de file peut rester un détail P2, mais son type doit suivre celui
 du cap : aujourd'hui `queue_cap` est un `size_t` alors que `peak_queued` tronque
 en `u32`. Avec le cap produit par défaut, inférieur à 16, cela ne bloque pas G0 ;
@@ -396,8 +536,9 @@ valeurs, calculs et corrections détaillés restent dans
 
 ## Ordre recommandé, sans détour
 
-1. Pin hôte G0 sûr : quatre P0, portes déterministes et correctifs P1 utiles au
-   prochain device.
+1. Durcir `194a0bc2` sans refonte : TLS non allouant, fermeture fatale sans
+   allocation, comptabilité après admission réussie et fixtures causales ; puis
+   brancher le poison typé dans q3/q4 avant la prochaine réception device.
 2. Pin hôte G1 fonctionnel : bornes d'indices, compteurs/mutants de branche,
    `PointId` q4 adverse et réparation du CTest `--inject`.
 3. Pour L2 : garder `bc66ade7`, partager le replayer strict, compléter les
@@ -414,12 +555,31 @@ valeurs, calculs et corrections détaillés restent dans
 
 ## Validation indépendante
 
+- Pin `194a0bc2` : construction ciblée Release et trois CTests pool verts ;
+  nominal 0,35 s, mutants série 15,35 s et exception 0,35 s. Le même source
+  nominal a rendu 30/30 sous CPU 0, et 3/3 sous ASan/UBSan. Avec Clang 18, le
+  nominal et les deux mutants rendent leurs codes attendus sous TSan sans
+  diagnostic. Ce rejeu TSan reste une observation locale non reçue ; le
+  runtime GCC 13 TSan échoue avant le test sur un mapping inattendu.
+- Deux observations locales non reçues réfutent les derniers cas non couverts : allocation
+  du vecteur TLS forcée en échec → handler 77 ; cycle `A(1) -> B(1) -> A` →
+  timeout. Le probe de constructeur d'Executor fautif confirme en revanche la
+  jonction transactionnelle : exception exacte, zéro objet vivant, en Release
+  et ASan/UBSan.
+- Worktree G1 postérieur : construction et CTest
+  `mhgp5_batch_contract` verts en 0,04 s. CUDA désactivé localement ; aucune
+  porte device de ce delta n'est annoncée comme exécutée.
+- Worktree fold à créneaux : **6/6** CTests `mhgp5_fold_live*` verts ; nominal
+  19,80 s et cinq mutants en 0,02–0,03 s. Le nominal repasse aussi sous
+  ASan/UBSan en 125,89 s sans diagnostic. Ces exécutions confirment l'égalité
+  fonctionnelle, la sûreté dynamique exercée et les invariants couverts, pas
+  encore l'attribution du gain ni le claim mémoire corrigé.
 - Build Release CPU complet au pin `556c421e` : succès ; construction ciblée
   des portes fold au pin `bc66ade7` : succès.
 - CTests API, pool, T5, préfixe et lanes q3/q4 batched : 41/41 verts en
   158,04 s au pin `556c421e`.
-- Répétition de la porte du pool sous un seul CPU : 22 succès et 78 échecs sur
-  100, défaut de déterminisme reproduit.
+- Répétition de l'ancienne porte du pool `fe54ccca` sous un seul CPU : 22 succès
+  et 78 échecs sur 100, défaut de déterminisme historique reproduit.
 - La campagne versionnée est complète selon son validateur épinglé ; hashes,
   codes et digests ci-dessus ont été rejoués indépendamment.
 - Le selftest campagne courant affiche `violations=0`, alors que son faux GPU

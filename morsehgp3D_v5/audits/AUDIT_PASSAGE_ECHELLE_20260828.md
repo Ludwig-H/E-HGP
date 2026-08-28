@@ -3,8 +3,9 @@
 - **Derniers commits techniques relus pour ce sujet :** `bc66ade7` pour le
   réducteur vivant durci, `fb7e9d40` pour la
   porte de préfixe durcie et `f4b554fe` pour le smoke T5
-  `(catalogue, deltas) -> partition`. Les changements G1 antérieurs restent
-  indépendants du passage à l'échelle du fold.
+  `(catalogue, deltas) -> partition`, ainsi que `194a0bc2` pour la sonde miroir
+  rejetée ci-dessous. Les changements G1 restent indépendants du passage à
+  l'échelle du fold.
 - **Cadre :** `phase=exploration_v5_hors_registre`,
   `backend=cpu_reference`, `profile=quantized_u16_input_only`,
   `mode=audit_independant_math_and_architecture`,
@@ -106,7 +107,7 @@ nommer RSS ni mémoire bout en bout.
 dont ils gardent l'indice. Son code 4 Release est reçu ; le vert ASan/UBSan est
 rapporté par Claude mais n'a pas été rejoué par cet audit. Le mutant reste
 diagnostiquement sale. Enfin, aucune
-accélération CPU/RSS n'est reçue. La sonde postérieure au pin relance un fold
+accélération CPU/RSS n'est reçue. La sonde de `194a0bc2` relance un fold
 depuis `on_forest`, donc mesure le résident déjà vivant plus le second
 réducteur. Un miroir attribuable exécute dans deux processus le même flux
 d'événements avec exactement un réducteur par processus, replayer strict et
@@ -329,50 +330,63 @@ avoir son wire et son digest u64 propres. Aucun cast silencieux n'est acceptable
 
 Le verrou de `logical_root_fid` n'est pas une impossibilité mathématique. Il
 interdit seulement une union parallèle naïve par minimum ou par taille. Le
-premier jalon exact est un **quotient local par lot** :
+premier candidat exact, encore à confronter au fold reçu, est un **quotient
+local par lot** à `W=1` :
 
 1. agréger les occurrences par fid, avec OR des rôles, FIRST/LAST et une seule
    résolution `fid -> alias` ;
 2. créer un sommet local dense par composante pré-lot touchée et par nouvelle
-   facette ; geler canonique et parent avant toute union ;
+   facette ; porter sur ce sommet racine logique, canonique historique et masse,
+   puis geler parent et naissance avant toute union ;
 3. rejouer dans ce petit DSU les étoiles dans l'ordre stable actuel. Pour
    chaque slot, la racine locale contenant `first` absorbe l'autre, sans
    union-by-size ;
 4. grouper ensuite en parallèle par racine finale les parents gelés, les
    naissances, le canonique minimum et la masse historique ;
 5. trier les groupes par `logical_root_fid`, émettre les mêmes deltas, puis
-   matérialiser chaque composante finale une seule fois dans le plus grand
-   record physique ; appliquer les morts seulement après l'émission.
+   matérialiser une seule fois dans le plus grand record physique les groupes
+   qui gardent au moins une facette après le lot ; émettre puis jeter depuis le
+   scratch les groupes entièrement éphémères. Les morts persistantes ne sont
+   appliquées qu'après l'émission.
 
-Une facette avec `FIRST == LAST == lot` reste ainsi une feuille de scratch :
-elle n'entre jamais dans `LiveIndex`, l'arène d'alias ou une composante durable.
-Les facettes persistantes ne paient qu'une recherche d'index par lot. Le cœur
-séquentiel subsiste, mais il devient un DSU dense cache-local ; agrégations,
-tris et mouvements groupés deviennent indépendants.
+Une facette avec `FIRST == LAST == lot` peut rester une feuille de scratch si
+ses rôles et détecteurs, son éventuel parent ou naissance, son canonique et sa
+racine logique sont transférés avant sa disparition. Elle n'entre alors jamais
+dans `LiveIndex`, l'arène d'alias ou une composante durable. Les facettes
+persistantes ne paient qu'une recherche d'index par lot. Le cœur séquentiel
+subsiste, mais il devient un DSU dense cache-local ; agrégations, tris et
+mouvements groupés deviennent indépendants.
 
 L'égalité se prouve par induction sur les étoiles ordonnées. À chaque arête,
 les DSU globaux et locaux joignent les mêmes classes ou ne font rien ; lorsqu'ils
 joignent, la classe de `first` gagne dans les deux. Partition et racine logique
-restent donc identiques. Le canonique est la réduction par minimum historique ;
-parents et naissances sont ceux gelés avant le lot ; leurs tris et celui des
-racines restituent alors exactement `ComponentDelta`. Choisir le record de plus
-grande masse pour la matérialisation conserve aussi small-to-large : tout alias
-déplacé rejoint une masse au moins double de celle qui le contenait.
+restent donc identiques. Le canonique est le minimum des **canoniques
+historiques gelés** des pré-composantes et des nouvelles facettes, pas le
+minimum des seuls fid encore vivants ; parents et naissances sont ceux gelés
+avant le lot. Leurs tris et celui des racines restituent alors exactement
+`ComponentDelta`. Choisir le record de plus grande masse historique pour la
+matérialisation conserve aussi small-to-large : tout alias déplacé rejoint une
+masse au moins double de celle qui le contenait.
 
-Une fenêtre de plusieurs lots complets peut retarder les seuls mouvements
-physiques tout en rejouant lots, deltas et morts logiques dans l'ordre. Elle
-doit être bornée en octets et ne jamais couper un niveau exact. Commencer par
-`W=1`, car des lots étroits peuvent rendre le scratch plus cher que la boucle
-actuelle.
+À `W=1`, le scratch peut déjà atteindre toutes les facettes et composantes
+touchées par un plateau. Il doit donc être borné en octets avec un chemin de
+repli vers le fold vivant actuel. Une fenêtre de plusieurs lots complets
+pourrait ensuite retarder les seuls mouvements physiques tout en rejouant lots,
+deltas et morts logiques dans l'ordre ; elle ne doit jamais couper un niveau
+exact. Commencer par `W=1`, car des lots étroits peuvent rendre le scratch plus
+cher que la boucle actuelle et `W>1` n'est pas encore reçu.
 
-La voie entièrement parallèle existe ensuite. Donner à chaque arête étoile la
-clé totale `(niveau exact, rang stable événement, rang du slot)` : les unions
-réussies actuelles sont exactement la forêt de Kruskal pour cet ordre. Dans
-l'arbre de reconstruction correspondant, préférer à chaque fusion le fils qui
-contient `first` restitue `logical_root_fid`; le minimum des feuilles restitue
-le canonique. Ce MSF/KRT permet des fenêtres plus larges, mais risque de
-rematérialiser un état proportionnel au flux. Ne le coder que si le profil du
-quotient dense montre que le replay séquentiel reste dominant.
+Une voie entièrement parallèle est ensuite un **candidat sous preuve**. Donner
+à chaque arête étoile la clé totale `(niveau exact, rang stable événement, rang
+du slot)` permet de retrouver les unions acceptées par une forêt de Kruskal.
+Cela ne restitue toutefois pas à lui seul parents, naissances, morts et
+`batch_levels` à chaque préfixe de lot. Un arbre de reconstruction qui préfère
+à chaque fusion le fils contenant `first` est une piste pour
+`logical_root_fid`, et le minimum des canoniques historiques gelés une piste
+pour le canonique. Ce MSF/KRT peut permettre des fenêtres plus larges, mais
+risque de rematérialiser un état proportionnel au flux. Ne le coder que si le
+profil du quotient dense montre que le replay séquentiel reste dominant et
+qu'une preuve de reconstruction préfixe par lot a été écrite.
 
 Avant branchement produit, comparer lot par lot classes, racines logiques,
 canoniques, deltas, compteurs et représentation des niveaux ; exercer les

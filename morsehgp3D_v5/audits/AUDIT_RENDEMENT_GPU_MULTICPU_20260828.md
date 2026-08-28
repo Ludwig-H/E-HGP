@@ -1,10 +1,11 @@
 # Audit de résolution — rendement GPU et multi-CPU
 
-- **Dernier pin produit inspecté :** `bc66ade7` ; la baseline device/SCALE versionnée
-  provient de `c95cfa95`, G0 de `fe54ccca` et G1 q3/q4 des trois commits
-  `dd928111`–`556c421e`. Le nouveau reçu device exécute G0 et G1 q3 au pin
-  `839cf1ec` ; il est versionné avec cet audit à `0656bf4c` et ne reçoit pas
-  G1 q4, postérieur.
+- **Pins inspectés par sujet :** `194a0bc2` pour le pool G0 et la sonde fold,
+  `bc66ade7` pour le réducteur vivant ; la baseline device/SCALE versionnée
+  provient de `c95cfa95`, G0 historique de `fe54ccca` et G1 q3/q4 des trois
+  commits `dd928111`–`556c421e`. Le nouveau reçu device exécute G0 et G1 q3 au
+  pin `839cf1ec` ; il est versionné avec cet audit à `0656bf4c` et ne reçoit
+  pas G1 q4, postérieur.
 - **État courant et priorités :** voir
   [`ETAT_COURANT.md`](ETAT_COURANT.md). Les sections G1–G3 ci-dessous restent
   des guides de conception ; les anciennes conditions de campagne sont
@@ -177,7 +178,7 @@ l'arithmétique du struct :
 - octets H2D/D2H strictement positifs sur les fixtures non vides ;
 - pic de concurrence dans le domaine du nombre d'exécuteurs.
 
-Pour G1, cela exige en plus `index_lots == launches > 0`, `soa_lots == 0` et
+Pour G1, cela exige en plus `index_lots == lots > 0`, `soa_lots == 0` et
 `site_soa_bytes == 0`. Le selftest courant accepte pourtant un faux pilote qui
 ignore `--gpu-wire=index` et n'imprime ni wire, ni étapes, ni octets. Ajouter un
 mutant `wire-index-force-soa` et son faux reçu refusé. La porte q3 doit aussi
@@ -204,8 +205,8 @@ l'implémentation :
 - porte de pic dépendante du scheduler, reproduite 78 fois en échec sur 100
   sous `taskset -c 0`.
 
-Le worktree postérieur à `bb0cc544` ferme ces quatre points dans la bonne
-architecture et ne doit pas être réécrit. Avant son pin, il reste un P0 local :
+Le pin `194a0bc2` ferme ces quatre points dans la bonne architecture et ne doit
+pas être réécrit. Avant sa réception complète, il reste un P0 local :
 le vecteur TLS de réentrance peut allouer hors capture et autorise un cycle
 `A -> B -> A`. Un marqueur TLS non allouant qui refuse toute soumission depuis
 un worker suffit aux lanes actuelles. Les compléments de porte — constructeur
@@ -399,26 +400,34 @@ vivant et le trafic mémoire sont une hypothèse explicative à profiler, pas
 encore une cause reçue ; une table de hash et des listes intrusives peuvent
 aussi ralentir le chemin court. Le fold vivant durci de `bc66ade7` reste hors
 du chemin produit et n'a pas encore été comparé au résident sur un périmètre
-attribuable ; la sonde postérieure au pin relance actuellement un second fold
-depuis le callback du pipeline et ne fournit donc pas ce miroir CPU/RSS.
+attribuable ; la sonde ajoutée par `194a0bc2` relance un second fold depuis le
+callback du pipeline et ne fournit donc pas ce miroir CPU/RSS.
 
-La topologie explique aussi la fin de courbe : la machine expose 48 CPU
-logiques mais seulement 24 cœurs physiques SMT2, tous les bras gardent
-l'affinité `0-47`, et aucun point 24 ni cpuset par bras n'a été gravé. Le gain
-32→48 mesure donc surtout le SMT tardif. Au point 48 hors digest, `reduce` vaut
-5,995 s sur 15,284 s de mur, soit 39,2 %, contre 5,430 s à un fil : cette phase
-ne scale pas et ralentit même de 10,4 %. K8–K10 portent 72,34 % des facettes ;
-la traîne est structurellement concentrée dans les derniers ordres.
+La machine expose 48 CPU logiques mais seulement 24 cœurs physiques SMT2, tous
+les bras gardent l'affinité `0-47`, et aucun point 24 ni cpuset par bras n'a été
+gravé. Les points au-delà de 24 incluent donc le régime SMT, mais le gain 32→48
+ne peut pas lui être attribué causalement avec ce protocole. Au point 48 hors
+digest, `reduce` vaut 5,995 s sur 15,284 s de mur, soit 39,2 %, contre 5,430 s à
+un fil : cette phase ne scale pas et ralentit même de 10,4 %. K8–K10 portent
+25 873 054 / 35 767 602 = 72,34 % des facettes et 57,65 % des événements. Cela
+localise une forte concentration du volume, pas encore celle du temps sans
+chronométrage par ordre.
 
 La lecture du runtime donne trois coûts plus directement réparables qu'un
-nouveau grand pipeline A. Sur ce run et ce pin, la borne source donne au moins
-4 138 créations de threads hors vagues WSPD, dont 624 pour treize équipes
-entièrement vides utilisées seulement afin de calculer `nchunks`.
-`parallel_items` distribue environ 3,075 millions de rectangles par autant de
-`fetch_add` atomiques. Enfin, les piles `std::vector<NodeRef>` locales de
-préfiltre et census représentent ensemble environ 11,62 millions
-d'allocations de parcours. Ces nombres sont des diagnostics du pin, pas des
-lois asymptotiques, mais ils désignent des coutures concrètes.
+nouveau grand pipeline A. Sur le run et le pin `c95cfa95`, le décompte statique du source
+donne au moins 4 138 créations de threads hors vagues WSPD : 10 fils B, 144 de
+lanes, 48 de RLE, 624 de prépasses factices, 624 de vraies équipes chunkées,
+2 400 de préparation du fold et 288 de tris. Les 624 prépasses sont treize
+lancements de 48 fils exécutant un callback *no-op* sur le découpage uniquement
+pour obtenir `nchunks`, pas des équipes sans item. Les trois `run_lane`
+distribuent 3 074 842 rectangles ; avec le
+ticket terminal de chaque ouvrier, ce chemin exécute 3 074 986 `fetch_add`.
+Enfin, 5 918 250 préfiltrages et 5 703 016 census, soit 11 621 266 traversées,
+construisent chacun une pile locale `std::vector<NodeRef>`. Le nombre
+d'allocations heap — possiblement supérieur avec les croissances — n'est pas
+instrumenté et ne doit pas être déduit de ce compte. Ces nombres sont des
+diagnostics du pin, pas des lois asymptotiques, mais ils désignent des coutures
+concrètes.
 
 Scinder le protocole :
 
@@ -449,10 +458,26 @@ temps de rapatriement.
 
 Les optimisations CPU à tester ensuite sont :
 
-- calculer un `chunk_plan` pur, sans lancer une équipe factice, et exiger
-  `empty_team_launches=0` ;
-- réutiliser un scratch `NodeRef` par chunk/worker au lieu d'un vecteur par
-  boule, avec compteur de croissances borné par le nombre de chunks ;
+- séparer un `make_chunk_plan(n, threads)` pur de son exécution. Les treize
+  prépasses factices *no-op* se retrouvent exactement dans `expand.hpp` : préfiltre,
+  census, comptage, puis une fois pour chacun des dix ordres d'expansion. Le
+  plan conserve `workers`, `chunk` et `nchunks` ; l'exécuteur reçoit
+  `(chunk_id, begin, end, worker_id)`. Les sorties restent indexées par
+  `chunk_id` et fusionnées dans l'ordre courant, donc frontières et digests ne
+  changent pas. Une porte indépendante couvre exactement `[0,n)` sans trou ni
+  doublon pour `n=0..4096` et `threads={1,2,3,8,48}`, puis l'instrument exige
+  treize lancements réels et jamais vingt-six ;
+- réutiliser un scratch `NodeRef` par worker dans le préfiltre et le census, au
+  lieu d'un vecteur par boule. Le callback doit recevoir `worker_id` ; un même
+  worker traite ses chunks séquentiellement et les sorties restent par chunk.
+  Chaque primitive doit faire `clear()` avant **tout** parcours, car la sortie
+  précoce de profondeur et l'overflow du census laissent volontairement des
+  nœuds sur la pile. La fixture enchaîne ces deux sorties puis une requête
+  complète et compare à trois piles fraîches. Sous le profil Morton 48 bits,
+  `reserve(64)` suffit à la profondeur maximale tout en gardant le vecteur
+  défensif. À 48 workers, ces deux phases passent ainsi d'environ 11,62
+  millions de constructions de piles, avec un nombre de croissances heap
+  encore non instrumenté, à au plus 96 piles réservées une fois ;
 - instrumenter `team_launches`, `threads_created`, `atomic_tickets` et
   `worker_busy_ns`, puis distribuer les rectangles par paquets bornés avant de
   toucher au découpage algorithmique ;
@@ -479,9 +504,10 @@ vivant est précisément ce qui réduit d'abord son working set.
 
 ## Ordre de commits proposé à Claude
 
-1. **Fermer G0 sur hôte**, dans un commit séparé : ticket, démarrage,
-   réentrance, poison minimal et portes déterministes ; aucune file asynchrone
-   n'est requise.
+1. **Durcir le pin G0 `194a0bc2`**, sans refonte : TLS non allouant avec refus
+   de tout nesting, fermeture fatale sans allocation, transitions de compteurs
+   atomiques sous mutex, porte causale et poison CUDA typé déclenché avant que
+   le worker reprenne un lot.
 2. **Fermer le contrat fonctionnel G1 sur hôte** : indices bornés, branche
    prouvée/mutée, `PointId` adverse et CTest `--inject`. Les lots mono-wire, le
    contexte partagé et les métriques de setup sont des optimisations mesurées,
