@@ -325,6 +325,64 @@ facettes K = 10 à 200 k extrapolent à 9,13 milliards à 10 M, au-delà de
 reste donc une porte différentielle bornée ; le flux à grande échelle doit
 avoir son wire et son digest u64 propres. Aucun cast silencieux n'est acceptable.
 
+## Solution 3 bis — paralléliser le fold sans rendre les unions commutatives
+
+Le verrou de `logical_root_fid` n'est pas une impossibilité mathématique. Il
+interdit seulement une union parallèle naïve par minimum ou par taille. Le
+premier jalon exact est un **quotient local par lot** :
+
+1. agréger les occurrences par fid, avec OR des rôles, FIRST/LAST et une seule
+   résolution `fid -> alias` ;
+2. créer un sommet local dense par composante pré-lot touchée et par nouvelle
+   facette ; geler canonique et parent avant toute union ;
+3. rejouer dans ce petit DSU les étoiles dans l'ordre stable actuel. Pour
+   chaque slot, la racine locale contenant `first` absorbe l'autre, sans
+   union-by-size ;
+4. grouper ensuite en parallèle par racine finale les parents gelés, les
+   naissances, le canonique minimum et la masse historique ;
+5. trier les groupes par `logical_root_fid`, émettre les mêmes deltas, puis
+   matérialiser chaque composante finale une seule fois dans le plus grand
+   record physique ; appliquer les morts seulement après l'émission.
+
+Une facette avec `FIRST == LAST == lot` reste ainsi une feuille de scratch :
+elle n'entre jamais dans `LiveIndex`, l'arène d'alias ou une composante durable.
+Les facettes persistantes ne paient qu'une recherche d'index par lot. Le cœur
+séquentiel subsiste, mais il devient un DSU dense cache-local ; agrégations,
+tris et mouvements groupés deviennent indépendants.
+
+L'égalité se prouve par induction sur les étoiles ordonnées. À chaque arête,
+les DSU globaux et locaux joignent les mêmes classes ou ne font rien ; lorsqu'ils
+joignent, la classe de `first` gagne dans les deux. Partition et racine logique
+restent donc identiques. Le canonique est la réduction par minimum historique ;
+parents et naissances sont ceux gelés avant le lot ; leurs tris et celui des
+racines restituent alors exactement `ComponentDelta`. Choisir le record de plus
+grande masse pour la matérialisation conserve aussi small-to-large : tout alias
+déplacé rejoint une masse au moins double de celle qui le contenait.
+
+Une fenêtre de plusieurs lots complets peut retarder les seuls mouvements
+physiques tout en rejouant lots, deltas et morts logiques dans l'ordre. Elle
+doit être bornée en octets et ne jamais couper un niveau exact. Commencer par
+`W=1`, car des lots étroits peuvent rendre le scratch plus cher que la boucle
+actuelle.
+
+La voie entièrement parallèle existe ensuite. Donner à chaque arête étoile la
+clé totale `(niveau exact, rang stable événement, rang du slot)` : les unions
+réussies actuelles sont exactement la forêt de Kruskal pour cet ordre. Dans
+l'arbre de reconstruction correspondant, préférer à chaque fusion le fils qui
+contient `first` restitue `logical_root_fid`; le minimum des feuilles restitue
+le canonique. Ce MSF/KRT permet des fenêtres plus larges, mais risque de
+rematérialiser un état proportionnel au flux. Ne le coder que si le profil du
+quotient dense montre que le replay séquentiel reste dominant.
+
+Avant branchement produit, comparer lot par lot classes, racines logiques,
+canoniques, deltas, compteurs et représentation des niveaux ; exercer les
+fenêtres `1,2,3,7,31`. Ajouter un plateau connecté où inverser deux étoiles
+change l'ordre des deltas sans changer partition ni canoniques, ainsi que les
+mutants `parallel-union-by-min-or-size`, coupure de plateau et gel du lot
+suivant trop tôt. Mesurer séparément index/rôles, gel, replay, mouvements,
+deltas et morts, plus la fraction de feuilles éphémères. Les ouvriers intra-B
+doivent consommer le même budget global que les B concurrents entre K.
+
 ## Solution 4 — amont externe plus simple
 
 Le Morton du centre reste une bonne optimisation de localité, mais il n'est pas

@@ -5,9 +5,10 @@
   device/SCALE sur `c95cfa95`, G1 q3 sur `dd928111`/`839cf1ec` et G1 q4 sur
   `556c421e`.
 - **Pin de réception G0/G1 q3 :** `0656bf4c`, sans code produit.
-- **Worktree observé :** une sonde `bench/fold_live_probe.cpp` et son raccord
-  CMake sont postérieurs au HEAD ; ils restent exclus du verdict et présentent
-  un biais d'attribution décrit ci-dessous. Le probe
+- **Worktree observé :** Claude corrige G0 dans `executor_pool.hpp`, sa porte,
+  CMake, `docs/GPU.md` et `docs/PLAN_DE_TESTS.md`. Une sonde
+  `bench/fold_live_probe.cpp` et son raccord CMake sont aussi postérieurs au
+  HEAD ; tous restent exclus du verdict versionné. Le probe
   `.codex_fold_contract_probe.cpp` d'un autre audit reste lui aussi non intégré.
 - **Cadre :** `phase=exploration_v5_hors_registre`,
   `backend=cpu_reference`, `profile=quantized_u16_input_only`,
@@ -245,6 +246,17 @@ faire lire le même flux d'événements à deux processus, chacun exécutant un 
 réducteur ; le bras vivant inclut copie du catalogue et replayer strict, et les
 deux digests doivent être identiques.
 
+Le raccord minimal n'est donc pas un autre callback terminal. Ajouter au point
+unique où `run_pipeline` appelle aujourd'hui `reduce_fold` une injection de
+réducteur réservée au banc, puis imposer `fold_inflight=1`. Le processus
+`resident` appelle une seule fois `reduce_fold`; le processus `vivant` appelle
+une seule fois `reduce_fold_live`, reconstruit strictement
+`final_canon_fid`, rattache le même catalogue, puis laisse le pipeline calculer
+le digest normal. Cela donne le même objet publié et un seul réducteur par
+processus. Le pic `ru_maxrss` reste un pic de bout en bout — préparation
+comprise — ce qui est précisément la mesure utile ; les temps internes gardent
+séparément préparation, FIRST/LAST, réduction et rejeu.
+
 ## Chemin minimal pour recevoir G0
 
 ### P0 — quatre corrections hôte ciblées
@@ -298,6 +310,70 @@ doit les refuser, et une fixture doit accepter 3.
 
 Ce paquet reste volontairement petit. Une machine à états très générale, un
 reorder buffer ou des lots asynchrones ne sont pas requis pour recevoir G0.
+
+### Relecture constructive du correctif G0 en cours
+
+Le worktree observé ferme correctement l'essentiel : notification sans accès
+au ticket après réveil, attente des workers prêts, refus de réentrance, domaine
+continu `1..8`, latch causale et timeouts CTest. La porte ciblée rend `0/4/4`,
+le nominal répété sous CPU 0 rend 30/30 et ASan/UBSan rend 3/3. Avec Clang 18,
+le nominal et les deux mutants rendent aussi leurs codes attendus sous TSan
+sans diagnostic ; le runtime TSan de GCC 13 échoue en revanche avant le test
+sur `unexpected memory mapping`, donc ce second environnement ne prouve rien.
+Un probe séparé où le deuxième des quatre constructeurs d'Executor lève rend
+l'exception exacte, quatre tentatives, zéro vivant et trois destructions, en
+Release comme sous ASan/UBSan. Le cœur du correctif est à garder.
+
+Un dernier correctif de code et trois finitions de preuve évitent pourtant de
+recréer une preuve verte par vacuité :
+
+1. `pool_stack().push_back(this)` est encore hors capture. Sa première
+   allocation peut lever dans le worker, sortir de `run()` et appeler
+   `std::terminate`, avec ticket non complété ; une injection indépendante le
+   reproduit au code du handler 77. Le même stack autorise aussi le cycle
+   bloquant `A(1) -> B(1) -> A`, reproduit par timeout. Les lanes n'ont besoin
+   d'aucune soumission depuis un worker de pool : remplacer le vecteur par un
+   pointeur TLS restauré par RAII, sans allocation, et refuser toute soumission
+   quand ce pointeur est déjà non nul. Une composition acyclique entre pools
+   pourra être spécifiée séparément si un consommateur réel la demande ;
+2. le code 4 mutant est actuellement rendu si **n'importe quelle** attente
+   échoue. Séparer les invariants communs du témoin ciblé : `pool-serial` ne
+   meurt que par `peak < N`, `pool-drop-exception` seulement par l'exception
+   cible avalée, et toutes les autres propriétés doivent rester vraies ;
+3. intégrer le probe de constructeur fautif comme fixture permanente. Sans
+   seam de lancement de thread, borner le claim au constructeur d'Executor et
+   à la relecture du chemin de création partielle, au lieu d'annoncer une
+   injection que la porte ne possède pas ;
+4. `peak_queued <= 1` vérifie la borne annoncée mais pas qu'un producteur a
+   réellement attendu. Bloquer les deux workers, placer un ticket en file puis
+   observer au moins une admission retenue. Un compteur `queue_waits` suffit ;
+   exiger aussi `peak_queued == 1` et `jobs_done == submitted` dans ce motif.
+
+Le mutant série prend aujourd'hui 15,6 s parce que la latch attend N arrivées
+alors que le mutant n'a qu'un worker. Attendre `pool.executors()` arrivées puis
+comparer le pic au N demandé conserve la preuve nominale et tue le mutant
+immédiatement, sans réduire le timeout de sûreté.
+
+Le chemin P1 `close_fatal` ajouté ensuite est une bonne primitive hôte, mais sa
+fermeture doit elle-même être sans allocation. Le `vector<Ticket*>` rempli sous
+`mu_` peut lever après `stop_=true` et avant les notifications, laissant file
+et producteurs bloqués. Dépiler la deque en place, poser erreur/done sous le
+mutex de chaque ticket, puis notifier, sans tableau temporaire. Déplacer aussi
+`submitted_++` **après** le `queue_.push_back` réussi : sinon un `bad_alloc`
+crée un soumis qui n'est ni réussi, ni échoué, ni annulé. La fixture fatale
+doit remplacer ses attentes de 100/200 ms par deux barrières : deux jobs actifs,
+puis file réellement pleine, avant la fermeture. Enfin, tant que q3/q4 ne
+classent ni n'appellent ce chemin, le qualifier de mécanisme hôte exercé, pas
+encore de gestion reçue d'une erreur device réelle.
+
+Le compteur de file peut rester un détail P2, mais son type doit suivre celui
+du cap : aujourd'hui `queue_cap` est un `size_t` alors que `peak_queued` tronque
+en `u32`. Avec le cap produit par défaut, inférieur à 16, cela ne bloque pas G0 ;
+borner l'API ou publier la métrique en `size_t` évite un futur wrap silencieux.
+Le libellé « déterministe » doit enfin devenir « latch causale à échéance » :
+les cinq secondes rendent la porte bornée, pas indépendante d'une famine totale
+de l'ordonnanceur. Épingler la commande et la version Clang du rejeu TSan avant
+de transformer l'observation locale en reçu.
 
 ## Signaux de performance, sans claim
 

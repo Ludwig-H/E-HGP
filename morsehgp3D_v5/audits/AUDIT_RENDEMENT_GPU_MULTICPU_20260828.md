@@ -193,7 +193,8 @@ comme direction ; le reçu `839cf1ec` confirme sur device la borne de quatre
 exécuteurs par lane. Elle n'a besoin ni de lease RAII imposé, ni de completion
 queue, ni de reorder buffer.
 
-Quatre défauts hôte certains empêchent encore de recevoir l'implémentation :
+Au pin `fe54ccca`, quatre défauts hôte certains empêchaient encore de recevoir
+l'implémentation :
 
 - notification d'un `Ticket` de pile après libération de son mutex, avec UB
   possible après réveil spurieux ;
@@ -203,13 +204,22 @@ Quatre défauts hôte certains empêchent encore de recevoir l'implémentation :
 - porte de pic dépendante du scheduler, reproduite 78 fois en échec sur 100
   sous `taskset -c 0`.
 
-Le correctif minimal est détaillé dans `ETAT_COURANT.md`. Garder le domaine CLI
-continu `1..8`, rejeter 0/9 au lieu de clamper et mesurer seulement
-`{1,2,4,8}`. Une erreur hôte explicitement récupérable peut rester locale au
-job ; une erreur device fatale doit fermer admission et file, réveiller les
-producteurs puis drainer sans réutilisation. Le contrat des lanes peut interdire
-la destruction concurrente puisque leur propriétaire rejoint déjà tous les
-producteurs avant de détruire le pool.
+Le worktree postérieur à `bb0cc544` ferme ces quatre points dans la bonne
+architecture et ne doit pas être réécrit. Avant son pin, il reste un P0 local :
+le vecteur TLS de réentrance peut allouer hors capture et autorise un cycle
+`A -> B -> A`. Un marqueur TLS non allouant qui refuse toute soumission depuis
+un worker suffit aux lanes actuelles. Les compléments de porte — constructeur
+fautif gravé, signatures mutantes causales et contre-pression effectivement
+bloquante — sont détaillés dans `ETAT_COURANT.md`.
+
+Garder le domaine CLI continu `1..8`, rejeter 0/9 au lieu de clamper et mesurer
+seulement `{1,2,4,8}`. Une erreur hôte explicitement récupérable peut rester
+locale au job : il n'est donc pas utile de bloquer ce pin **hôte** sur une
+machine à poison générale. Avant réception CUDA, une erreur device fatale doit
+en revanche fermer admission et file, réveiller les producteurs puis drainer
+sans réutilisation. Le contrat des lanes peut interdire la destruction
+concurrente puisque leur propriétaire rejoint déjà tous les producteurs avant
+de détruire le pool.
 
 Premier critère de réussite : mêmes digests, vecteurs et compteurs, nombre
 d'exécuteurs effectivement construit borné et aucun blocage/terminate injecté.
@@ -392,6 +402,24 @@ du chemin produit et n'a pas encore été comparé au résident sur un périmèt
 attribuable ; la sonde postérieure au pin relance actuellement un second fold
 depuis le callback du pipeline et ne fournit donc pas ce miroir CPU/RSS.
 
+La topologie explique aussi la fin de courbe : la machine expose 48 CPU
+logiques mais seulement 24 cœurs physiques SMT2, tous les bras gardent
+l'affinité `0-47`, et aucun point 24 ni cpuset par bras n'a été gravé. Le gain
+32→48 mesure donc surtout le SMT tardif. Au point 48 hors digest, `reduce` vaut
+5,995 s sur 15,284 s de mur, soit 39,2 %, contre 5,430 s à un fil : cette phase
+ne scale pas et ralentit même de 10,4 %. K8–K10 portent 72,34 % des facettes ;
+la traîne est structurellement concentrée dans les derniers ordres.
+
+La lecture du runtime donne trois coûts plus directement réparables qu'un
+nouveau grand pipeline A. Sur ce run et ce pin, la borne source donne au moins
+4 138 créations de threads hors vagues WSPD, dont 624 pour treize équipes
+entièrement vides utilisées seulement afin de calculer `nchunks`.
+`parallel_items` distribue environ 3,075 millions de rectangles par autant de
+`fetch_add` atomiques. Enfin, les piles `std::vector<NodeRef>` locales de
+préfiltre et census représentent ensemble environ 11,62 millions
+d'allocations de parcours. Ces nombres sont des diagnostics du pin, pas des
+lois asymptotiques, mais ils désignent des coutures concrètes.
+
 Scinder le protocole :
 
 ### A. Scaling des ouvriers
@@ -421,6 +449,13 @@ temps de rapatriement.
 
 Les optimisations CPU à tester ensuite sont :
 
+- calculer un `chunk_plan` pur, sans lancer une équipe factice, et exiger
+  `empty_team_launches=0` ;
+- réutiliser un scratch `NodeRef` par chunk/worker au lieu d'un vecteur par
+  boule, avec compteur de croissances borné par le nombre de chunks ;
+- instrumenter `team_launches`, `threads_created`, `atomic_tickets` et
+  `worker_busy_ns`, puis distribuer les rectangles par paquets bornés avant de
+  toucher au découpage algorithmique ;
 - un pool global persistant dont A et B consomment le même budget ;
 - subdivision des rectangles lourds par plages d'ancres, avec offsets de
   sortie déterministes ;
