@@ -150,7 +150,11 @@ plateaux par quotient. Seule la **résidence** change.
   digest `mhgp5-digest-stream-v1` ; le digest v4 reste l'autorité de
   conformité tant que le résident existe (≤ 1 M) et un **convertisseur** flux
   → tableaux v4 (hors produit) prouve l'égalité aux tailles où les deux
-  existent. **[audit]** Le flux doit d'abord être **spécifié** : le payload
+  existent — dans le domaine u32 seulement : `final_canon_fid` et le digest v4
+  sérialisent des u32, et K = 10 à 10 M dépasse `UINT32_MAX` ; le
+  convertisseur v4 est une porte différentielle bornée, le flux massif a son
+  wire et son digest u64 propres, sans cast silencieux. **[audit]** Le flux
+  doit d'abord être **spécifié** : le payload
   courant porte, par K, `batch_levels`, deltas, `facet_keys` et
   `final_canon_fid` ; `facet_hierarchy_stream-v1` doit dire comment ces quatre
   objets sont reconstruits (lots sans delta, partition finale), et la porte aux
@@ -210,7 +214,17 @@ les seules mesures opposables seront les reçus 1 M puis 10 M.
    jamais d'une hypothèse d'occupation ; le Morton du centre est une clé de
    localité, pas l'autorité d'une borne ; magasin de boules SSD partitionné
    par $(q, d)$ ; expansion en une passe vers dix runs par ordre ; tri externe
-   par ordre.
+   par ordre. **Amont retenu pour le premier jalon (audit de résolution,
+   solution 4)** : traiter les rectangles par vagues bornées et écrire des runs
+   de `BallCandidate` triés par le comparateur produit actuel ; fusion externe
+   globale et RLE exact sur la clé complète (`digest_balls` calculé au
+   passage) ; préfiltrer, censer et expanser chaque boule unique **une seule
+   fois**, en envoyant chaque événement dans le run de son K avec `BallKey`
+   source et `emit_rank` ; tri externe de chaque flux K par sa clé totale —
+   sans matérialiser ~1 To de `BallData` ni ré-expanser par ordre ; le Morton
+   du centre ne partitionnera le census (avec débordement obligatoire) qu'en
+   second temps. Première porte : les mêmes candidats découpés en runs de
+   tailles 1, 2, 3 et 7, fusionnés et RLE, égaux à `rle_candidates` résident.
 2. **Fold streamé à état borné** : clé d'ex aequo explicite (niveau exact,
    `BallKey`, rang d'émission intra-boule ; T2) ; **[audit]** passe
    PREMIÈRE/DERNIÈRE **exacte** : tri externe des enregistrements
@@ -273,18 +287,45 @@ gardée à ajouter aux scripts du dépôt.
   est inchangée quand la facette est libérée ; contre-fixtures (chemin de 3
   points à K = 1, deux tétraèdres partageant une face à K = 2) ; mutant
   `free-on-absorb`.
-- **T4 libération jamais anticipée** : la marque DERNIÈRE par empreinte est
-  ≥ la dernière position de chaque clé confondue ; le pic par empreintes est
-  un minorant ; le préflight emploie une marge déclarée et calcule le pic à
-  la granularité du lot.
+- **T4 PREMIÈRE/DERNIÈRE exacts** (remplace la version par empreinte) :
+  prépasse par ordre sur le flux trié par (niveau exact, `BallKey`,
+  `emit_rank`) avec `event_rank_u64` ; incidences émises comme
+  (`FacetKey` complète, `event_rank_u64`, slot), partition éventuelle par
+  hachage pour les E/S seulement, tri et comparaison par clé complète, fusion
+  lexicographique attribuant les `fid_u64` et marquant exactement une PREMIÈRE
+  et une DERNIÈRE par facette, join retrié dans l'ordre du fold ; pic inclusif
+  par lot `live += first[b] ; peak = max ; live -= last[b]` sans heuristique ;
+  porte à hachage constant injecté (résultat identique) et mutant
+  `lifetime-by-hash-only` divergent. Coût de wire (`FacetOccurrenceWire`,
+  octets écrits/lus, facteur temporaire du tri K par K) à graver en L2 avant
+  de recalculer le poste SSD — la ligne « 620 Go » du § 4.2 est un chiffre
+  d'empreinte, pas de clés complètes.
 - **T5 ordre intra-lot sans catalogue** : `fid(x) < fid(y)` ⟺
   `key(x) < key(y)` ; `post_list` triée par racine ≡ triée par `root_key` ;
   `(facet_keys, final_canon_fid)` est une fonction du flux de deltas ;
   invariant sans état `output = min(parents ∪ born)`.
-- **T6 enregistrements de composantes** : borne à prouver ou majorant
-  instrumenté avec refus `resource_exhausted/live_state`.
-- **T7 exact-once par seau**, **T8 équilibre déterministe des seaux**,
-  **T9 identité de masse par ordre** (comptés = expansés = longueur du run ;
+- **T6 → invariant `components <= live_aliases`** (fold vivant
+  *small-to-large*, audit de résolution) : un `Alias` par facette encore
+  réutilisable (`fid_u64`, clé, `seen`, rôles du lot, composante, liens
+  intrusifs) ; un `Component` par composante ayant au moins un alias
+  (`logical_root_fid` = règle actuelle « la racine du composant de `first`
+  absorbe », `canon_fid` = minimum historique, `historical_mass`, liste
+  d'alias) ; union ordonnée : racine logique = celle de `first`, conteneur
+  physique = le record de plus grande masse (small-to-large, relocalisations
+  logarithmiques), canonique = min, masses sommées, record vide détruit ; lot
+  en deux passes (rôles et gels pré-lot, puis unions dans l'ordre total) ;
+  alias à `last_batch == b` supprimés après l'émission du lot `b` ; une
+  composante sans alias est définitivement libérable (toute connexion future
+  réutiliserait une facette à sa dernière incidence passée) ; les deltas triés
+  par `logical_root_fid` reproduisent `post_list`. Aucune chaîne de parents
+  morte, aucun reroot, aucun refcount : à toute frontière de lot
+  `components <= aliases <= peak_live_exact`. Mutants
+  `physical-root-is-logical-root`, `free-on-absorb`, `root-key-mutable`,
+  `canon-not-min-on-union`.
+- **T7 exact-once par seau** (localité seulement : la complétude vient du
+  RLE par clé complète après fusion externe), **T8 découpage déterministe des
+  seaux** (fonction de l'entrée, jamais de la charge — ce n'est pas un
+  théorème d'équilibre), **T9 identité de masse par ordre** (comptés = expansés = longueur du run ;
   $\sum (q + d) = K + 1$ par événement ; fusions = facettes − composantes
   finales ; attachements = $\sum \left\vert \text{born} \right\vert$).
 
@@ -326,17 +367,29 @@ ne change ni l'objet ni ce plan.
 
 ## 8 bis. Ordre de travail retenu (audit du passage à l'échelle, 28 août)
 
-1. Spécifier `facet_hierarchy_stream-v1` (wire, décodeur vers `ForestResult`,
-   autorité terminale, `resume=replay_current_K`) et recalculer les bornes de
-   sortie.
-2. Comptage PREMIÈRE/DERNIÈRE par tri externe de clés exactes ; fixtures
-   mono-lot et chaîne adversariale tuées avant toute éviction.
-3. Routage append-only exact-once avec débordement et barrière globale ; aucun
-   halo.
-4. Comparer le flux décodé au `ForestResult` complet de 8 k à 200 k, puis
-   campagne 1 M avec pics externes, occupation des seaux et E/S mesurées.
-5. Refaire alors le tableau RAM/disque/temps et décider si 10 M K = 5 ou
-   K = 10 est la porte suivante.
+1. **Porte de rejeu** : extraire du juge (`tests/forest_judge.cpp`) la porte
+   indépendante « catalogue de facettes + deltas → `final_canon_fid`
+   reconstruit », comparée champ à champ au `ForestResult` résident avec le
+   vrai digest v4 ; graver les six fixtures (étoile K = 1 de 300 arêtes à
+   niveaux croissants ; chaîne K = 1 `{0,1}` puis `{0,2}` ; deux simplexes
+   K = 2 partageant une facette ; plateau mono-lot q3 à pic transitoire 3 ;
+   grand composant absorbé logiquement par un singleton ; frontières externes
+   avec hachage constant).
+2. **Réducteur vivant en RAM** : PREMIÈRE/DERNIÈRE par clé exacte (structure
+   ordonnée), composants small-to-large, égalité complète avec le résident
+   (mutants `last-mark-shifted`, `free-on-absorb`, `root-key-mutable`,
+   `canon-not-min-on-union`, `lifetime-by-hash-only`,
+   `physical-root-is-logical-root`).
+3. **Coutures externes** : RLE multi-runs (tailles 1, 2, 3, 7), lifetime avec
+   hachage constant, join retour vers les événements.
+4. **Payload et reprise** : wire u64, digest logique indépendant du découpage
+   physique, publication atomique par K (`resume=replay_current_K` :
+   temporaire unique, `fsync`, relecture et hachage, renommage, `fsync` du
+   répertoire, manifeste renommé atomiquement ; un K précédent n'est repris
+   que si son manifeste est `committed`).
+5. **Pilote 1 M** seulement après mesure des octets, du pic inclusif et du
+   débit du disque réellement attaché ; puis refaire le tableau et décider si
+   10 M K = 5 ou K = 10 est la porte suivante.
 
 ## 9. Questions à trancher par l'utilisateur
 
