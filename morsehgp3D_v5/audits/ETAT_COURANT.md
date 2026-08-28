@@ -1,7 +1,7 @@
 # État courant audité de MorseHGP3D v5 — 28 août 2026
 
-- **Derniers commits techniques relus :** `17ab71e0`, intégration des objections au plan d'échelle, et `ba31c169`, porte de préfixe étendue ; `a2597c1a` ne modifiait que le présent état d'audit.
-- **Code en cours de relecture :** worktree postérieur à `ba31c169`, encore non committé. Il prépare la sûreté du fold, l'instrumentation device et une campagne `SCALE_THREADS`. Les observations sur ce code sont des indications de travail, pas une réception sur pin.
+- **Derniers commits techniques relus :** `46f9f8c7`, intégration de la conception du fold vivant, `5aceeed5` et `cce4b2b3`, consolidation critique des deux audits ; `ba31c169` reste la dernière porte fonctionnelle reçue.
+- **Code en cours de relecture :** worktree postérieur à `cce4b2b3`, encore non committé. Il prépare la sûreté du fold, l'instrumentation device, l'oracle de grille et une campagne `SCALE_THREADS`. Les observations sur ce code sont des indications de travail, pas une réception sur pin.
 - **Pins de performance conservés :** `82f613d3` pour les campagnes CPU 50–200 k et `63deda74` pour les étapes device à 50 k.
 - **Cadre :** `phase=exploration_v5_hors_registre`, `backend=cpu_reference`, `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`.
 
@@ -9,7 +9,7 @@
 
 **Orange constructif : la trajectoire est bonne et les trois chantiers actifs méritent d'être terminés. Ne pas lancer encore la campagne G4 de scaling.**
 
-Les commits `2074b2f0` et `17ab71e0` répondent utilement à l'audit de conception : ils abandonnent le fold tuilé et les halos, séparent le digest d'intégrité du convertisseur v4, choisissent un comptage externe exact des premières et dernières incidences, bornent la reprise initiale à `resume=replay_current_K` et font du préfixe K = 1..5 un premier échelon. Le cadre et la doctrine différentielle v5 sont maintenant corrigés. `ba31c169` ferme en plus le trou du digest v4 sur les événements et les niveaux de lots. Le document est désormais une architecture falsifiable avec des portes, ce qui est le bon statut à ce stade.
+Les commits `2074b2f0`, `17ab71e0` et `46f9f8c7` répondent utilement à l'audit de conception : ils abandonnent le fold tuilé et les halos, séparent le digest d'intégrité du convertisseur v4, choisissent un comptage externe exact des premières et dernières incidences, bornent la reprise initiale à `resume=replay_current_K` et retiennent le fold vivant small-to-large. `ba31c169` ferme en plus le trou du digest v4 sur les événements et les niveaux de lots. Le document est désormais une architecture falsifiable avec des portes, pas une preuve ni une mesure d'échelle.
 
 Le worktree courant corrige également plusieurs défauts concrets du fold : ownership du slot avant lancement, drainage explicite, arbitrage par ordre K, validation de `fold_inflight`, pic mesuré et tests à fautes injectées. L'instrumentation device supprime une synchronisation H2D intrusive et sépare enfin copies, kernels, attente et tailles de lots. Ce sont des progrès directement réutilisables.
 
@@ -20,10 +20,12 @@ les commits suivants :
 
 - le fold streamé peut éviter entièrement le reroot union-find en séparant
   `logical_root_fid` du stockage small-to-large des seules facettes encore
-  vivantes ; l'invariant obtenu est `components <= live_aliases` ;
-- le GPU peut réduire le trafic répété en téléversant la géométrie une fois et
-  en envoyant un indice u32 par site, après mise en place d'un petit pool
-  d'exécuteurs persistant.
+  vivantes ; l'invariant obtenu est `components <= live_aliases`, sous lot
+  relisible et pré-composants référencés par alias stables ;
+- le GPU peut d'abord recevoir un pool synchrone minimal et une géométrie
+  résidente par indices. Ce wire reste une couture : le gain majeur exige
+  ensuite de reconstruire covers et seeds sur device depuis handles/ancres,
+  au lieu de téléverser 112/288 octets par seed.
 
 Les algorithmes, preuves locales, wires et fixtures sont détaillés dans
 [AUDIT_PASSAGE_ECHELLE_20260828.md](AUDIT_PASSAGE_ECHELLE_20260828.md) et
@@ -31,7 +33,7 @@ Les algorithmes, preuves locales, wires et fixtures sont détaillés dans
 
 ## P0 — trois raccords à fermer avant une campagne
 
-### 1. Le validateur SCALE ne lit pas encore la sortie réelle du fold
+### 1. Le validateur SCALE ne juge pas encore le pic réel du fold
 
 Le programme imprime maintenant une ligne de la forme :
 
@@ -39,9 +41,16 @@ Le programme imprime maintenant une ligne de la forme :
 temps_fold_mur_ms=... (..., fold_inflight=N, pic_mesure_en_vol=P)
 ```
 
-Le validateur et ses deux faux producteurs attendent encore l'ancien texte `N ordre(s) en vol`. Une vraie exécution est donc refusée alors que les selftests passent.
+Le worktree reconnaît maintenant cette ligne, mais accepte encore en parallèle
+l'ancien texte `N ordre(s) en vol`, ignore la valeur `P` et ses faux producteurs
+continuent d'exercer principalement l'ancien schéma. Une sortie avec
+`pic_mesure_en_vol=0` ou `P > N` peut donc passer.
 
-Correction minimale : faire reconnaître le nouveau schéma, exiger `1 <= P <= N`, `P == 1` lorsque `N == 1`, puis alimenter les fixtures avec cette même forme. Pour une porte qui prétend exercer le chevauchement, ajouter un plancher `P > 1`; ne pas l'exiger sur une charge qui peut légitimement se sérialiser.
+Correction minimale : exiger uniquement le nouveau schéma pour cette campagne,
+capturer `P`, vérifier `1 <= P <= N` et `P == 1` lorsque `N == 1`, puis alimenter
+les fixtures avec cette même forme. Pour une porte qui prétend exercer le
+chevauchement, ajouter un plancher `P > 1`; ne pas l'exiger sur une charge qui
+peut légitimement se sérialiser.
 
 ### 2. Le plan par défaut ne tient pas dans la session qu'il doit mesurer
 
@@ -89,29 +98,46 @@ Le compteur de concurrence ne doit pas être un singleton statique remis à zér
 
 ## Questions actives qui ne bloquent pas ce jalon
 
-- La réception de la grille cellulaire reste ouverte : corriger le théorème 10.5, comparer le compteur à une évaluation i128 directe et ajouter une frontière située juste du côté vivant. Un centre exactement sur une frontière touchant une cellule morte ne constitue pas un test anti-faux-kill valide.
-- Les doubles constructions de grille et les deux autorités de seuil restent à unifier, mais cette correction peut suivre le pin fold/instrumentation.
-- Les théorèmes T3–T6 de `docs/ECHELLE.md` restent des obligations de preuve, pas des résultats. L'audit de passage à l'échelle propose toutefois un réducteur sans parents historiques, une identité FIRST/LAST exacte et une porte de rejeu qui les transforment en petits jalons codables. Le terme `profil=prefixe_k5/complet_k10` doit éviter de collisionner avec le champ normatif `profile` ; `tower_scope` convient.
+- Le worktree corrige le facteur du théorème 10.5, ajoute l'oracle i128 et unifie
+  l'étage/autorité de grille. La fixture F11 reste exactement sur une frontière :
+  elle tue un localisateur sans marge, mais pas encore un faux-kill où un centre
+  strictement côté vivant serait arrondi côté mort. Recevoir le gros oracle sur
+  pin, puis ajouter ce cas ciblé sans rouvrir le chantier.
+- Les théorèmes T3–T6 de `docs/ECHELLE.md` restent des obligations de preuve,
+  pas des résultats. Le fold vivant est maintenant spécifié assez précisément
+  pour être codé. En revanche T5 doit être conditionné au flux accepté : un
+  attachement déjà vu donne un contre-exemple où le rejeu des deltas perd un
+  ancien membre, alors que le pipeline rejette justement ce flux.
+- Le terme `profil=prefixe_k5/complet_k10` doit éviter de collisionner avec le
+  champ normatif `profile` ; `tower_scope` convient.
 - Le débit de 290 Mio/s est provisionné par `deploy.sh`, pas mesuré. Une porte `fio` doit fournir le débit du disque effectivement attaché avant toute projection de durée.
 
 ## Passage de relais conseillé
 
-1. Corriger les trois P0 ci-dessus et faire enregistrer les nouveaux tests dans CMake/CTest.
+1. Corriger les trois P0 ci-dessus ; les raccords CMake/mutants présents dans le
+   worktree seront reçus dans le même pin.
 2. Exécuter localement la porte fold, les selftests du protocole et le validateur sur une sortie factice au format réel.
 3. Committer un pin cohérent sans lancer GCP; l'auditeur rejouera alors le build CPU, les portes et les checks documentaires.
-4. Une fois ce pin reçu, extraire la porte `catalogue + deltas -> final_canon_fid`, puis implémenter le réducteur vivant en mémoire avant toute externalisation.
-5. En parallèle, remplacer les exécuteurs CUDA éphémères par un pool borné ; le wire par indices vient dans le commit suivant.
+4. Une fois ce pin reçu, extraire la porte, sur flux accepté,
+   `catalogue + deltas -> final_canon_fid`, puis implémenter le réducteur vivant
+   en mémoire avant toute externalisation.
+5. En parallèle, remplacer les exécuteurs CUDA éphémères par le pool de leases
+   synchrones minimal ; le wire par indices et son kernel de matérialisation
+   viennent ensuite comme couture vers la lane par rectangles.
 6. Lancer seulement alors le pilote SCALE borné. La campagne complète viendra après interprétation du pilote.
 
 ## État de validation
 
-Les commits `2074b2f0` puis `17ab71e0` ont été relus comme décisions
+Les commits `2074b2f0`, `17ab71e0` puis `46f9f8c7` ont été relus comme décisions
 documentaires ; `ba31c169` est la dernière porte fonctionnelle reçue. Dans un
 worktree détaché propre à ce pin : configuration et build Release ciblé
 réussis, puis 6/6 CTests `^mhgp5_prefix_` réussis en 24,49 s. Le code actif
-décrit ci-dessus n'est pas encore committé et ses nouvelles portes ne sont pas
-encore enregistrées dans CMake au snapshot observé. Aucun résultat CUDA ou GCP
-nouveau n'est revendiqué.
+décrit ci-dessus n'est pas encore committé. Dans ce worktree, les quatre cibles
+fold/instrument/grille ont été construites en Release et leur CTest ciblé donne
+14/14 réussites en 50,57 s ; le test Python SCALE donne 20/20, mais entérine
+précisément l'acceptation legacy et l'absence de contrôle de `P`. Ces résultats
+locaux guident la fermeture, sans constituer un pin reçu. Aucun test CUDA, aucun
+résultat nvcc et aucun résultat GCP nouveau ne sont reçus.
 
 Les validations antérieures restent bornées à leurs pins : suites CPU reçues à `369f3ac0`, campagne CPU 50–200 k à `82f613d3`, instrumentation device de la session G4 n° 12 à `63deda74`. Elles ne valident pas automatiquement le worktree courant.
 

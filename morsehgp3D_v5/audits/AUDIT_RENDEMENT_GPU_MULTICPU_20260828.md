@@ -2,7 +2,7 @@
 
 - **Dernier pin reçu :** `ab2c2563` ; mesures CPU au pin `82f613d3` et
   instrumentation device au pin `63deda74`.
-- **Worktree observé :** postérieur à `46f9f8c7`, encore non committé. Il
+- **Worktree observé :** postérieur à `cce4b2b3`, encore non committé. Il
   ajoute la sûreté du fold, des métriques CUDA et `SCALE_THREADS` ; les
   remarques sur ce code guident Claude mais ne constituent pas une réception.
 - **Cadre :** `phase=exploration_v5_hors_registre`,
@@ -30,6 +30,15 @@ Trois expériences architecturales bornées répondent directement aux suspects 
 2. **la géométrie globale résidente**, avec seulement des indices u32 envoyés
    par cover ;
 3. **la compaction q4 stable sur device**, sans les deux retours intermédiaires.
+
+G0–G2 sont des coutures de mesure et de réduction du gaspillage, pas encore
+l'architecture qui supprime le terme dominant. Tant que l'hôte téléverse un
+`Q3BatchSeed` de 112 octets ou un `Q4BatchSeed` de 288 octets par seed, le vrai
+gain restera borné sur les familles riches. La cible qui retire ce terme est la
+lane **par rectangles avec index résident** déjà conçue dans
+[`docs/analyses/seeds_20260827/design.txt`](../docs/analyses/seeds_20260827/design.txt) :
+le device reçoit handles et ancres, puis reconstruit covers et seeds. G1 est la
+couture réversible qui prouve d'abord l'index et l'arithmétique de cette cible.
 
 Le reçu n° 12 établit seulement que le kernel q3 est petit ; la causalité q4
 reste ouverte. Recevoir d'abord l'instrument sur une petite session G4 permettra
@@ -65,7 +74,7 @@ compteurs d'octets, histogrammes de lots, attente/réservation hôte, compteur
 de concurrence et suppression de la barrière H2D intrusive. Quatre raccords
 restent à fermer.
 
-### Le validateur SCALE lit encore l'ancien format
+### Le validateur SCALE accepte encore l'ancien format et ignore le pic
 
 `run.hpp` imprime désormais :
 
@@ -73,23 +82,23 @@ restent à fermer.
 temps_fold_mur_ms=... (etages A et B, fold_inflight=N, pic_mesure_en_vol=P)
 ```
 
-`validate_v5_campaign.py`, son selftest et les tests Python fabriquent encore
-`N ordre(s) en vol`. Les tests passent donc sur un faux producteur, tandis que
-toute vraie sortie serait rejetée.
+`validate_v5_campaign.py` reconnaît maintenant cette ligne, mais son alternative
+regex accepte toujours `N ordre(s) en vol`, ne capture jamais `P`, et les tests
+Python exigent même la compatibilité legacy. Ainsi `P=0`, `P>N` ou `N=1,P>1`
+restent verts alors qu'ils contredisent la mesure annoncée.
 
-Le parseur doit exiger les deux champs nommés, vérifier
-`1 <= pic_mesure_en_vol <= fold_inflight` et comparer le budget demandé.
-Ajouter une fixture au format produit et un mutant de pic invalide.
+Le parseur de cette campagne doit exiger les deux champs nommés, vérifier
+`1 <= pic_mesure_en_vol <= fold_inflight`, imposer `P=1` pour `N=1` et comparer
+le budget demandé. Ajouter les rejets legacy, `P=0` et `P>N`.
 
-### Les nouveaux mutants ne sont pas encore enregistrés
+### Les portes ont maintenant leur raccord local, à recevoir sur un pin
 
-`log2hist-class-shift` et `gauge-no-peak` sont annoncés par
-`gpu_instrument_gate.cpp`, mais absents du registre de mutants et de CMake.
-La porte nominale compile et passe manuellement ; les deux injections rendent
-actuellement le code 2, pas le code 4 contractuel.
-
-Enregistrer les noms, les cibles nominale/mutantes et vérifier que le registre
-les reconnaît avant de documenter qu'ils sont tués.
+Le worktree mouvant enregistre désormais `gpu_instrument_gate`,
+`fold_inflight_safety_gate`, `cell_grid_oracle` et leurs mutants dans CMake et
+`mutants.hpp`. Une construction Release puis le CTest ciblé donnent localement
+14/14 réussites en 50,57 s, y compris codes 4 et refus code 2. C'est la
+correction attendue, mais pas encore une réception sur pin propre ; aucun de ces
+tests n'exécute nvcc ou un device CUDA.
 
 ### Le cycle de vie CUDA échappe à la décomposition
 
@@ -131,22 +140,26 @@ l'arithmétique du struct :
 
 ## G0 — pool GPU borné et persistant
 
-Découpler `threads_cpu` de `gpu_executors` :
+Le contrat actuel de `scan()` est **synchrone**. La première version de G0 n'a
+donc besoin ni de lots possédés asynchrones, ni de file de completion, ni de
+reorder buffer :
 
-- les producteurs CPU construisent des descripteurs de lots et les poussent
-  dans une file bornée avec backpressure ;
-- un pool de 1, 2, 4 ou 8 exécuteurs, créé une fois pour la lane, possède les
-  streams, événements et buffers réutilisables ;
-- les reliquats sont soumis à la même file, jamais vidés séquentiellement après
-  la jointure ;
-- chaque lot possède par déplacement tous ses buffers : aucun pointeur ne vise
-  une structure de worker réutilisable ;
-- la sortie porte `(worker, local_batch_seq)` et passe par un completion/reorder
-  borné ; l'ordre brut global n'est exigé qu'à un fil, l'égalité post-RLE étant
-  l'autorité multi-fil actuelle ;
-- annulation, drain et première exception ne doivent pas se bloquer contre la
-  backpressure ; le high-water de file et sa RAM sont mesurés ;
-- la géométrie device est partagée en lecture seule entre les exécuteurs.
+- créer hors de `parallel_items` un pool de 1, 2, 4 ou 8 exécuteurs, chacun
+  possédant stream, événements et buffers réutilisables ;
+- dans le callback `scan`, prendre un lease RAII, appeler le scan synchrone,
+  puis rendre l'exécuteur ; le lot reste possédé par son ouvrier et ses sorties
+  restent dans `louts[t]` ;
+- exécuter le flush final des `T` reliquats avec `parallel_items` au lieu de la
+  boucle séquentielle actuelle ; le même pool borne la concurrence device ;
+- agréger les statistiques une fois par exécuteur après drainage, sans mutex
+  par lot ;
+- sur exception CUDA, empoisonner l'exécuteur, annuler le pool et réveiller
+  tous les leases en attente ; un pool tombé à zéro ne doit jamais bloquer ;
+- la destruction draine les leases avant streams, puis la géométrie partagée.
+
+Cette version conserve exactement l'ordre local de chaque ouvrier. Une file
+asynchrone avec lots déplacés ne devient utile que si une mesure montre qu'il
+faut recouvrir le scan d'un même producteur avec son lot suivant.
 
 Le sweep `gpu_executors={1,2,4,8}` devient alors interprétable. Le nombre de
 producteurs CPU peut rester 48 sans créer 48 exécuteurs/streams concurrents
@@ -168,17 +181,39 @@ q = dot(u, u) - D2
 ```
 
 Téléverser une fois `ix.upos[u]` et l'identifiant représentatif
-`ix.point_id(u)`. Le wire transporte un **GeometryIndex**, jamais un `PointId`
-ni un rang Morton : les identifiants externes sont arbitraires. Pour chaque
-cover, envoyer l'ordre de ces indices u32, les paramètres d'ancre et les petits
-offsets nécessaires. Le kernel reconstruit `u` et `q` en arithmétique entière
-exacte, après élargissement en i64 avant les carrés.
+`ix.point_id(u)`. Le premier stockage simple est un SoA i32 + `PointId` u32,
+soit 16 octets par position unique : environ 153 Mio à 10 M et 458 Mio à
+30 M. Le compactage séparé en u16 abaisse ensuite ce poste à 10 octets/site,
+mais n'est pas nécessaire pour tenir en VRAM. Le cardinal géométrique reste
+borné par `INT32_MAX`, car `CloudIndex`, `CoverPoint::u` et `NodeRef` sont i32.
+
+Le wire transporte un **GeometryIndex**, jamais un `PointId` ni un rang Morton :
+les identifiants externes sont arbitraires. Pour chaque cover, envoyer les
+indices u32 dans leur ordre actuel, les paramètres d'ancre et les petits
+offsets nécessaires. Un petit kernel matérialise alors **une fois par
+`(ancre, site)`** les SoA device existants, après élargissement en i64 avant les
+carrés. Recalculer `u/q` dans chaque warp répéterait cette arithmétique pour
+chaque `(seed, site)` et n'est pas le premier patch sûr.
 
 Le terme linéaire par site passe ainsi :
 
 - q3 : environ 32 → 4 octets/site ;
 - q4 : le SoA principal 60 → 4 octets/site du cover, auxquels restent au moins
   les indices locaux de `lens_sites`, seeds/ancres et l'upload global amorti.
+
+Les tailles réelles empêchent de confondre ce gain local avec le wire total :
+
+```text
+q3 actuel : 32*S + 112*J + 8*A
+q3 indexé :  4*S + 112*J + environ 24*A
+
+q4 actuel : 60*S + 4*L + 288*J + 88*A
+q4 indexé :  4*S + 4*L + 288*J + 88*A
+```
+
+Ici `S`, `L`, `J` et `A` comptent sites de cover, entrées de lentille, seeds et
+ancres. En q4, le terme linéaire de site vaut donc 4 à 8 octets selon la taille
+de la lentille, et les 288 octets par seed peuvent rester dominants.
 
 La q4 récupère coordonnées et identifiants depuis la géométrie résidente.
 `x_site`, `lens_sites` et `skip_a/skip_b` restent des offsets **locaux** du
@@ -188,21 +223,28 @@ contre le chemin actuel.
 
 Implémentation sûre :
 
-1. introduire un objet RAII `GpuGeometry` partagé par les exécuteurs ;
+1. introduire un `GpuBackendContext` commun aux callbacks q3 et q4, contenant
+   une `GpuGeometry` en lecture seule puis le pool d'exécuteurs ; déclarer la
+   géométrie avant le pool pour que le pool soit drainé et détruit avant elle ;
 2. conserver temporairement les deux wires, SoA actuel et `site_index_u32` ;
 3. ajouter à l'ancre les paramètres suffisants (`ua/ub` ou `a+b`, `D2`) et
-   comparer deux variantes : préparation affine une fois par `(ancre, site)`
-   sur device, puis scans existants, ou recalcul dans le kernel ;
+   matérialiser sur device les quatre SoA q3 et les huit champs q4, puis garder
+   d'abord `k_scan`, K1, K2 et K3 inchangés ;
 4. comparer d'abord les SoA reconstruits bit à bit, puis verdicts, profondeurs,
    émissions, compteurs et digests ;
-5. graver le compteur H2D et une borne par lot incluant le téléversement
-   géométrique amorti ;
-6. retirer le wire SoA seulement après réception CUDA.
+5. remplacer `fill_affine_sites` côté hôte par une passe sans stockage qui
+   calcule exactement `qmax_d` et `umax_d`, encore requis par
+   `AffineSeed::bound` ; déplacer cette réduction sur device est une étape
+   ultérieure ;
+6. graver séparément les octets `geometry_once`, `site_index`, `lens`,
+   `anchors`, `seeds` et `intermediate`, ainsi que `materialize_ms` ;
+7. retirer le wire SoA seulement après réception CUDA.
 
 Fixtures prioritaires : coordonnées aux bornes u16, `D2` maximal, identifiants
-externes non monotones et bit 31, positions dupliquées avec identifiant
-représentatif, index hors géométrie rejeté, cas cocirculaire, permutation
-conservant l'ordre du cover, cover vide/minimal et lot surdimensionné.
+externes non monotones, bit 31 et `UINT32_MAX`, index hors géométrie rejeté,
+cas cocirculaire, permutation conservant l'ordre du cover, cover vide/minimal
+et lot surdimensionné. Les positions dupliquées ne sont pas une fixture GPU
+acceptée : `run_pipeline` doit les refuser avant toute exécution device.
 
 ## G2 — compaction q4 stable sur device
 
@@ -234,6 +276,31 @@ profondeurs, émissions et tous les compteurs `Q4CoreCounters`/dead/chord et
 `Q4StageCounts`, avec sommes u64 gardées. Le préflight VRAM couvre le nombre
 d'exécuteurs multiplié par les capacités de paires/stages. L'ordre G0/G1/G2 se
 décide après le reçu de l'instrument, avec un toggle d'ablation par changement.
+
+## G3 — retirer enfin le wire par seed
+
+Le chemin de gain réel est déjà esquissé dans
+[`design.txt`](../docs/analyses/seeds_20260827/design.txt). Après réception de
+`GpuGeometry`, envoyer par fenêtre seulement :
+
+- les `NodeRef` de `rect_cover_handles` et leurs plages résidentes ;
+- les couples `(ua, ub)` qui survivent à l'histogramme ;
+- les descripteurs de rectangles et les capacités de sortie.
+
+Le device reconstruit le cover exact dans son ordre stable de 32 classes,
+forme les seeds dans les registres et ne retourne que les survivants nécessaires
+à la clé/niveau. Cette étape élimine les 112/288 octets par seed, contrairement
+à G1. Elle ne doit toutefois pas commencer par un grand kernel CUDA : extraire
+d'abord une forme CPU `rect_shaped` qui prouve, ancre par ancre, cover comme
+**séquence**, extrema, seeds, verdicts, émissions et compteurs contre la
+production. Transcrire ensuite cette forme sur device.
+
+Deux risques restent des mesures, pas des objections générales : le débit des
+complétions q4 et la distribution des covers surdimensionnés. Si l'instrument
+montre que les retours K1/K2 dominent à court terme, G2 peut fournir un gain
+intermédiaire ; sinon G3 subsume ce chantier et mérite la priorité. Le routage
+hôte des covers hors capacité et le rejeu d'une fenêtre de sortie pleine sont
+fail-closed : jamais de cover tronqué ni de préfixe publié.
 
 ## Multi-CPU — mesurer puis corriger le vrai goulot
 
@@ -283,16 +350,29 @@ Le reduce ne doit pas être parallélisé par lots avant une preuve de conservat
 de l'ordre des racines et deltas. En revanche, réduire sa taille d'état et ses
 défauts de cache est compatible avec l'objet actuel.
 
+Deux petits changements attaquent directement les coûts visibles sans changer
+l'algorithme : remplacer le ticket atomique **par rectangle** de
+`parallel_items` par des paquets dynamiques bornés, puis fusionner `louts` et
+les sorties de census par préfixes d'offsets et copies parallèles disjointes.
+Aujourd'hui chaque primitive recrée aussi ses fils ; le pool global proposé
+doit réutiliser une équipe entre WSPD, lanes et préfiltre. Ces travaux ne feront
+pas scaler un reduce aléatoire déjà limité par la bande passante : le fold
+vivant est précisément ce qui réduit d'abord son working set.
+
 ## Ordre de commits proposé à Claude
 
 1. **Finir l'instrument localement** : parseur au format réel, mutants/CMake,
    lifecycle, erreur asynchrone et timelines non additives.
 2. **Recevoir ce seul instrument sur une petite session G4** : baseline causale
    avant toute réécriture, puis choisir l'ordre G0/G1/G2.
-3. **Exécuter l'expérience choisie avec toggle** : pool persistant, wire indices
-   ou compaction q4 ; recevoir d'abord l'égalité à 50 k, puis mesurer sur la
-   charge bornée où q4 domine.
-4. **Lancer en parallèle le pilote CPU sous cpuset** dès que son protocole local,
+3. **Faire G0 dans sa forme synchrone minimale**, puis recevoir le sweep
+   d'exécuteurs ; aucune file asynchrone n'est requise.
+4. **Faire de G1 une couture vers G3** : géométrie + indices + matérialisation
+   device bit-identique. Si les octets par seed dominent encore, passer à la
+   porte CPU `rect_shaped`; ne pas polir le lot par seed comme cible finale.
+5. **N'engager G2 que si l'instrument isole les retours q4** comme poste
+   dominant et qu'un gain intermédiaire est utile ; sinon G3 le remplace.
+6. **Lancer en parallèle le pilote CPU sous cpuset** dès que son protocole local,
    son budget et sa marge de rapatriement sont reçus ; il ne dépend pas des
    refactorings GPU.
 

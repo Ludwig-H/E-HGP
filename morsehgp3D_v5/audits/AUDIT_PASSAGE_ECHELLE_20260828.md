@@ -61,7 +61,7 @@ Trois renforcements sont utiles mais ne bloquent pas ce jalon :
 
 Pour un ordre K, le réducteur conserve :
 
-- un `Alias` par facette réutilisable, avec `fid_u64`, clé, `seen`,
+- un `Alias` par facette réutilisable, avec `fid_u64`, `last_batch`, `seen`,
   rôles du lot, pointeur de composante et liens intrusifs ;
 - un `Component` par composante ayant au moins un alias, avec
   `logical_root_fid`, `canon_fid`, `historical_mass` et la liste de ses
@@ -72,13 +72,26 @@ Pour un ordre K, le réducteur conserve :
 `logical_root_fid` reproduit exactement la règle actuelle « la racine du
 composant de `first` absorbe ». `canon_fid` reste le minimum de toutes les
 facettes historiques de la composante. Le record qui porte physiquement la
-liste n'a aucune autorité sémantique.
+liste n'a aucune autorité sémantique. Sur le chemin massif, aucune `FacetKey`
+n'est nécessaire dans cet état si les fid ont été attribués par le tri exact
+des clés complètes et si le join des incidences est collision-safe : le
+catalogue externe `fid -> FacetKey` reste l'autorité de rematérialisation.
+
+Aux quatre frontières d'un lot `b`, l'état exact est :
+
+```text
+avant le lot       : F(x) <  b <= L(x)
+après rôles/FIRST  : F(x) <= b <= L(x), nouvelles facettes singletons
+après unions       : mêmes alias, partition post-lot
+après émission     : F(x) <= b <  L(x)
+```
 
 ### Union exacte et compacte
 
 Pour chaque union ordonnée `unite(first, other)` :
 
-1. mémoriser comme nouvelle racine logique celle du composant de `first` ;
+1. capturer comme nouvelle racine logique celle du composant **courant** de
+   `first`, à chaque union réussie ;
 2. garder physiquement le record de plus grande `historical_mass` ;
 3. relier les alias du plus petit record au plus grand ;
 4. écrire le minimum des deux canoniques et la somme des masses ;
@@ -87,17 +100,29 @@ Pour chaque union ordonnée `unite(first, other)` :
 Le choix small-to-large peut donc être opposé à l'absorption sémantique sans
 changer le résultat. Chaque alias déplacé entre dans un composant dont la masse
 historique a au moins doublé, d'où au plus un nombre logarithmique de
-relocalisations par alias. Le tri des deltas par `logical_root_fid` reproduit
+relocalisations par alias. Les historiques des composantes vivantes restent
+disjoints et leur masse totale est au plus le nombre de facettes ; l'addition
+est néanmoins gardée contre le débordement. Le coût cumulé des déplacements est
+donc `O(F log F)`. Le tri des deltas par `logical_root_fid` reproduit
 le tri actuel de `post_list`, même lorsque le gagnant physique est l'autre
-composant.
+composant ou que la facette racine n'a plus d'alias vivant.
 
-Le lot doit rester une opération en deux passes :
+Les pré-composants gelés ne doivent jamais conserver un pointeur vers un
+`Component`, puisque le record perdant peut être détruit. Employer
+`PreRef{witness_alias, pre_canon_fid}` : un alias ACTIVE reste vivant jusqu'à
+l'émission et son pointeur de composante suit chaque déplacement. La
+construction post-lot retrouve ainsi le composant final par le témoin stable.
+
+Le lot doit rester une opération en deux passes **physiquement relisibles** :
 
 1. calculer tous les rôles et figer les composantes/canoniques pré-lot ;
-2. rejouer ensuite les unions dans l'ordre total des événements.
+2. rechercher ou relire exactement le même byte-range et rejouer les unions
+   dans l'ordre total des événements.
 
 Une réduction événement par événement changerait les multifusions à niveau
-égal et n'est pas admissible.
+égal et n'est pas admissible. Garder le macro-lot en RAM annulerait également
+la borne vivante : le scratch doit rester proportionnel aux alias touchés, pas
+au nombre d'événements du niveau.
 
 ### Libération prouvable
 
@@ -184,6 +209,27 @@ indépendante :
 catalogue de facettes + deltas -> final_canon_fid reconstruit
 ```
 
+Cette implication est **conditionnée à un flux accepté**, notamment
+`attach_violations == birth_violations == partition_violations == 0`. Elle est
+fausse sur une entrée dont le détecteur de rôles lève déjà un invariant. Le
+contre-exemple minimal K = 1 est :
+
+```text
+lot 0 : événement {A,B}, active_mask=0b11
+lot 1 : événement {A,C}, active_mask=0b01
+```
+
+Au lot 1, `A` est un attachement déjà vu et `C` est active. Le résident a pour
+partition finale `{A,B,C}`, mais son delta `parents=[C], born=[A], output=A`
+fait remplacer au rejeu le bloc `A={A,B}` par `{A,C}` et perd `B`. La porte
+doit donc rejeter ce flux, et l'énoncé T5 doit porter explicitement sa
+précondition au lieu de promettre une reconstruction inconditionnelle.
+
+Attention en gravant cette fixture : dans `ForestEvent`, le bit `s` qualifie la
+facette obtenue en retirant `support[s]`. Les commentaires actuels de
+`detector_gate` inversent donc les noms des facettes ; les compteurs existants
+sont bien déclenchés, mais pas par les facettes que ces commentaires annoncent.
+
 La porte compare ensuite tous les champs au `ForestResult` résident et
 calcule le véritable `mhgp4-digest-v1`. Elle doit dépasser les seules petites
 instances du juge et inclure les contre-fixtures ci-dessous.
@@ -253,6 +299,11 @@ SSD.
    rester celui du singleton.
 6. **Frontières externes** : même facette dans plusieurs runs et hash forcé
    constant.
+7. **Chemin mono-plateau `{A,B}`, `{B,C}`** : les trois pré-composants sont
+   gelés avant toute union et les deux événements sont relus, jamais réduits
+   séparément.
+8. **Attachement déjà vu** ci-dessus : tue l'énoncé T5 inconditionnel et exige
+   le rejet du décodeur strict.
 
 Mutants prioritaires : `last-mark-shifted`, `free-on-absorb`,
 `root-key-mutable`, `canon-not-min-on-union`,
@@ -276,8 +327,8 @@ l'état du digest et les offsets de sortie ne sont pas sérialisés.
 
 ## Ordre de commits proposé
 
-1. **Porte de rejeu** : promouvoir
-   `catalogue + deltas -> final_canon_fid`, puis graver les six fixtures.
+1. **Porte de rejeu** : promouvoir, sur flux accepté,
+   `catalogue + deltas -> final_canon_fid`, puis graver les huit fixtures.
 2. **Réducteur vivant en RAM** : FIRST/LAST par clé exacte dans une
    `std::map`, composants small-to-large et égalité complète avec le résident.
 3. **Coutures externes** : RLE multi-runs, lifetime avec hash constant, puis
@@ -304,7 +355,8 @@ probabiliste.
   union-find séquentiel », en contradiction avec le fold vivant ajouté plus bas ;
 - fusionner T3 et T6 en lemme du noyau vivant, corriger sa vieille fixture
   « deux tétraèdres à K = 2 », et écrire T5 comme
-  `(catalogue, deltas) -> final_canon_fid` ;
+  `(catalogue, deltas) -> final_canon_fid` **sous invariants de rôles et de
+  partition acceptés** ;
 - synchroniser § 3.4, la table § 4.2 et L0–L4 : `22/pt ×2,5`,
   `composants=?`, RAM 110–140 Go et l'ancien coût PREMIÈRE/DERNIÈRE ne
   décrivent plus le plan retenu ; marquer ces capacités à recalculer après L2 ;
