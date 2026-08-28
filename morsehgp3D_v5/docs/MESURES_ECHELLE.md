@@ -201,35 +201,51 @@ local sans sortie brute ni hash de binaire au tip :
 la moitié des ancres et coûte quand même un tiers de mur en plus. Ce verdict
 justifie le défaut $L=0$; la durée isolée reste diagnostique, pas un reçu.
 
-### Le compteur qui tranche : le raffinement est REDONDANT
+### Signal de redondance sur ce run, pas preuve structurelle
 
-Comparaison de **tous** les compteurs de génération entre les deux runs :
+Le tableau disponible compare seulement une partie des compteurs de génération
+entre les deux runs :
 
 | compteur | `--postsep=0` | `--postsep=3` | |
 |---|---|---|---|
-| `rect_alive` (parents) | 1 505 707 / 2 142 760 / 2 181 866 | idem | identique |
+| `rect_alive` au pin de mesure | 1 505 707 / 2 142 760 / 2 181 866 | idem | ancien sens : parents |
 | `ancres` | 4 012 092 / 31 478 160 / 48 557 755 | 4 012 092 / 16 750 196 / 25 590 309 | **− 47 %** |
 | `ancres_w3` | 8 190 272 | 5 427 276 | − 34 % |
 | `ancres_w4` | 12 487 587 | 8 592 501 | − 31 % |
 | **`candidats`** | 2 698 176 / 4 544 950 / 384 464 | **identique** | — |
 | **`tues_profondeur`** | 0 / 318 183 753 / 129 399 348 | **identique** | — |
 
-`tues_profondeur` est un compteur **par seed** : son identité prouve que le
-nombre de seeds est inchangé, donc que **tout l'aval — covers construits,
-seeds, tests de cœur, complétions, candidats — est identique au bit près**.
+Le libellé `rect_alive` avait alors été déplacé silencieusement vers le nombre
+de parents; le contrat courant l'a restauré au nombre de produits effectivement
+remis à la lane et expose `postsep_parent_rects` séparément. Les nombres de ce
+tableau restent donc historiques et ne doivent pas être relus avec le nouveau
+sens du compteur.
 
-**Le raffinement ne tue donc que des ancres que les tests d'ancre en $O(1)$
-(histogrammes de coins, $W_q$, secteurs) tuaient déjà, et pour rien.** Il est
-structurellement **redondant** avec eux : il fait le même travail, plus tôt,
-et plus cher. C'est un verdict bien plus fort qu'un mur en hausse de 34 %, et
-il explique pourquoi.
+Surtout, `tues_profondeur` ne compte pas chaque seed : il compte seulement les
+seeds q3 ou complétions q4 qui atteignent le filtre final puis y meurent. En q3,
+les seeds tués par cellules constituent une autre sortie. En q4, les seeds
+peuvent mourir par cellules, cœur ou corde, puis chaque survivant engendre des
+complétions qui se répartissent entre sept rejets amont, morts de profondeur et
+candidats. L'égalité de `tues_profondeur` et `candidats` n'implique donc ni
+l'égalité du nombre de seeds, ni celle des covers, des tests de cœur ou des
+complétions. Le digest final identique prouve l'objet publié sur ce run, pas le
+travail intermédiaire.
 
-**Ce qu'il faudrait attaquer à la place**, et que la même mesure désigne :
+La conclusion recevable est plus étroite : sur cet unique run `scanline`, le
+raffinement ne réduit ni les candidats ni les morts au filtre final rapportés,
+et le mur augmente de 34 %. Cela constitue un **signal** que beaucoup de ses
+mises à mort recouvrent les prétests d'ancre déjà payés, pas une preuve de
+redondance structurelle. Pour trancher, une cible de profil intégrée doit
+comparer à `L=0/3` les covers construits, visites et sites de cover, seeds,
+tests de cœur, complétions, entrées de profondeur, tests de puissance et chaque
+classe de rejet, avec sortie brute, pin/hash de binaire et répétitions appariées.
+
+**La cible candidate suivante**, indiquée mais non prouvée par la même mesure :
 seuls ≈ 11 % des ancres q4 construisent un cover (5 436 957 covers pour
 48 557 755 ancres à $n = 100\,000$) et ce sont elles qui engendrent les seeds
 et les **24,0 milliards de tests de cœur**. Un mécanisme utile doit réduire le
-travail de ces survivantes-là — pas tuer plus tôt celles qui mouraient déjà
-gratuitement.
+travail de ces survivantes-là; ce poste doit être mesuré directement avant de
+conclure que toutes les ancres supprimées mouraient déjà à coût négligeable.
 
 Pourquoi mon estimation précédente (« 3,3 puis 5,3 pour 1 en faveur du
 raffinement ») était fausse : je comparais des visites de nœud à un **cover
@@ -260,6 +276,10 @@ sujet mesurable — pas comme optimisation.
 - La série 100 000 et les masses d'étages ne possèdent pas encore de reçu brut
   versionné; elles restent diagnostiques jusqu'au pin, à la commande, au hash
   de binaire et à la sortie complète.
+- L'identité de `candidats` et `tues_profondeur` au § 4 ter ne prouve ni une
+  redondance structurelle avec les prétests d'ancre, ni l'identité des covers,
+  seeds, tests de cœur et complétions; ces étages doivent être profilés
+  directement sur les deux bras.
 - La **route q2 doit rester interdite** : la fixture à six points exhibe une
   divergence de candidats et de `digest_balls` que le ledger de masse ne voit
   pas. Le mutant test-only et son CTest permanent sont désormais présents.
