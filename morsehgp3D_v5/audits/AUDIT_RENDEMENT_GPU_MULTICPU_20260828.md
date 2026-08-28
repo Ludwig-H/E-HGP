@@ -2,7 +2,7 @@
 
 - **Dernier pin reçu :** `ab2c2563` ; mesures CPU au pin `82f613d3` et
   instrumentation device au pin `63deda74`.
-- **Worktree observé :** postérieur à `ba31c169`, encore non committé. Il
+- **Worktree observé :** postérieur à `46f9f8c7`, encore non committé. Il
   ajoute la sûreté du fold, des métriques CUDA et `SCALE_THREADS` ; les
   remarques sur ce code guident Claude mais ne constituent pas une réception.
 - **Cadre :** `phase=exploration_v5_hors_registre`,
@@ -23,17 +23,19 @@ Le faible gain n'est pas mystérieux :
 - côté CPU, `--threads` n'est pas un budget global et le dernier reduce/digest
   par K conserve une longue traîne séquentielle et mémoire.
 
-La solution utile n'est donc pas seulement une nouvelle campagne. Elle tient
-en trois changements bornés :
+La prochaine décision utile ne vient pas seulement d'une nouvelle campagne.
+Trois expériences architecturales bornées répondent directement aux suspects :
 
 1. **un petit pool GPU persistant**, indépendant des producteurs CPU ;
 2. **la géométrie globale résidente**, avec seulement des indices u32 envoyés
    par cover ;
-3. **la compaction q4 stable sur device**, avec un seul retour final.
+3. **la compaction q4 stable sur device**, sans les deux retours intermédiaires.
 
-Ces changements attaquent directement les octets et les synchronisations qui
-plafonnent le port actuel. Pour le multi-CPU, il faut d'abord séparer la
-sensibilité au budget d'ouvriers d'un véritable speedup 1→N sous cpuset.
+Le reçu n° 12 établit seulement que le kernel q3 est petit ; la causalité q4
+reste ouverte. Recevoir d'abord l'instrument sur une petite session G4 permettra
+donc de choisir et d'ordonner G0, G1 et G2 au lieu de supposer leur gain. Pour le
+multi-CPU, il faut séparer la sensibilité au budget d'ouvriers d'un véritable
+speedup 1→N sous cpuset.
 
 ## Base chiffrée conservée
 
@@ -41,15 +43,16 @@ Au reçu n° 12, les murs CPU/GPU appariés à 50 k restent mixtes :
 
 | famille | CPU (s) | GPU (s) | CPU / GPU |
 |---|---:|---:|---:|
-| `uniform` | 56,615 | 57,517 | 0,984× |
-| `terrain` | 16,432 | 14,650 | 1,122× |
-| `eight_clusters` | 62,157 | 63,898 | 0,973× |
-| `scanline_single_pass` | 12,629 | 12,348 | 1,023× |
+| `uniform` | 56,290 | 58,142 | 0,968× |
+| `terrain` | 16,423 | 14,605 | 1,124× |
+| `eight_clusters` | 61,920 | 64,618 | 0,958× |
+| `scanline_single_pass` | 12,635 | 12,445 | 1,015× |
 
 Le reçu prouve compilation/exécution CUDA, quatre digests CPU/GPU égaux et le
 mutant device tué. Un passage CPU puis GPU, non contrebalancé et non répété, ne
-prouve pas un gain reproductible. Il suffit cependant à montrer que le port
-n'est pas cassé et que certaines familles ont un levier q4.
+prouve pas un gain reproductible. Il montre que le port conserve l'objet sur
+ces quatre entrées. Les variations de sous-étapes q4 sur un passage désignent
+des expériences causales, pas encore un levier reçu de bout en bout.
 
 Sur `uniform`, q3+q4 ne représente que 8,9 % du mur CPU : même leur disparition
 donnerait un plafond idéal proche de 1,10×. Sur `scanline` 200 k, q4 représente
@@ -107,6 +110,16 @@ exécuteur. `host_sum=(issue,wait,prepare,...)` décrit la timeline hôte ;
 `wait` recouvre justement une partie du device. Les imprimer séparément et ne
 jamais soustraire ou additionner ces deux groupes comme un mur.
 
+Les buffers hôte sont des `std::vector` pageables : `issue_ms` mesure le temps
+passé dans les appels CUDA et peut inclure staging ou blocage, pas seulement un
+enfilement ([comportement de synchronisation de l'API CUDA](https://docs.nvidia.com/cuda/cuda-driver-api/api-sync-behavior.html)).
+En q4, `stage_.resize()` et `deep_.resize()` sont aussi dans ce champ. Les
+sortir ou nommer ce périmètre exactement. Le gauge de concurrence
+doit appartenir à une invocation, pas être un singleton statique remis à zéro
+par deux pipelines potentiellement concurrents. Enfin, toute erreur après une
+copie asynchrone doit drainer au mieux, empoisonner l'exécuteur et interdire sa
+réutilisation.
+
 La porte CUDA doit exercer les vraies copies/kernels, pas seulement
 l'arithmétique du struct :
 
@@ -126,12 +139,17 @@ Découpler `threads_cpu` de `gpu_executors` :
   streams, événements et buffers réutilisables ;
 - les reliquats sont soumis à la même file, jamais vidés séquentiellement après
   la jointure ;
-- la sortie porte un numéro de lot et est fusionnée dans l'ordre déterministe
-  actuel ;
+- chaque lot possède par déplacement tous ses buffers : aucun pointeur ne vise
+  une structure de worker réutilisable ;
+- la sortie porte `(worker, local_batch_seq)` et passe par un completion/reorder
+  borné ; l'ordre brut global n'est exigé qu'à un fil, l'égalité post-RLE étant
+  l'autorité multi-fil actuelle ;
+- annulation, drain et première exception ne doivent pas se bloquer contre la
+  backpressure ; le high-water de file et sa RAM sont mesurés ;
 - la géométrie device est partagée en lecture seule entre les exécuteurs.
 
 Le sweep `gpu_executors={1,2,4,8}` devient alors interprétable. Le nombre de
-producteurs CPU peut rester 48 sans créer 48 contextes de travail concurrents
+producteurs CPU peut rester 48 sans créer 48 exécuteurs/streams concurrents
 sur un seul GPU.
 
 Premier critère de réussite : mêmes digests et compteurs, moins
@@ -149,34 +167,42 @@ u = 2*z - a - b
 q = dot(u, u) - D2
 ```
 
-Téléverser une fois les positions quantifiées et `PointId` du `CloudIndex`.
-Pour chaque cover, n'envoyer ensuite que son ordre d'indices u32, les paramètres
-d'ancre et les petits offsets nécessaires. Le kernel reconstruit `u` et `q` en
-arithmétique entière exacte.
+Téléverser une fois `ix.upos[u]` et l'identifiant représentatif
+`ix.point_id(u)`. Le wire transporte un **GeometryIndex**, jamais un `PointId`
+ni un rang Morton : les identifiants externes sont arbitraires. Pour chaque
+cover, envoyer l'ordre de ces indices u32, les paramètres d'ancre et les petits
+offsets nécessaires. Le kernel reconstruit `u` et `q` en arithmétique entière
+exacte, après élargissement en i64 avant les carrés.
 
 Le terme linéaire par site passe ainsi :
 
 - q3 : environ 32 → 4 octets/site ;
-- q4 : environ 60 → 4 octets/site.
+- q4 : le SoA principal 60 → 4 octets/site du cover, auxquels restent au moins
+  les indices locaux de `lens_sites`, seeds/ancres et l'upload global amorti.
 
-La q4 récupère coordonnées et identifiants depuis la géométrie résidente ;
-`lens_sites` peut référencer les positions du cover. L'ordre du cover reste
-inchangé, donc l'ordre des seeds et émissions reste falsifiable contre le
-chemin actuel.
+La q4 récupère coordonnées et identifiants depuis la géométrie résidente.
+`x_site`, `lens_sites` et `skip_a/skip_b` restent des offsets **locaux** du
+cover ; un tableau séparé relie `an.begin+i` au GeometryIndex global. L'ordre
+du cover reste inchangé, donc l'ordre des seeds et émissions reste falsifiable
+contre le chemin actuel.
 
 Implémentation sûre :
 
 1. introduire un objet RAII `GpuGeometry` partagé par les exécuteurs ;
 2. conserver temporairement les deux wires, SoA actuel et `site_index_u32` ;
-3. ajouter un kernel alternatif qui reconstruit `u/q` ;
-4. comparer bit à bit verdicts, profondeurs, émissions, compteurs et digests ;
+3. ajouter à l'ancre les paramètres suffisants (`ua/ub` ou `a+b`, `D2`) et
+   comparer deux variantes : préparation affine une fois par `(ancre, site)`
+   sur device, puis scans existants, ou recalcul dans le kernel ;
+4. comparer d'abord les SoA reconstruits bit à bit, puis verdicts, profondeurs,
+   émissions, compteurs et digests ;
 5. graver le compteur H2D et une borne par lot incluant le téléversement
    géométrique amorti ;
 6. retirer le wire SoA seulement après réception CUDA.
 
-Fixtures prioritaires : coordonnées aux bornes u16, `D2` maximal, cas
-cocirculaire, permutation conservant l'ordre du cover, cover vide/minimal et
-lot surdimensionné.
+Fixtures prioritaires : coordonnées aux bornes u16, `D2` maximal, identifiants
+externes non monotones et bit 31, positions dupliquées avec identifiant
+représentatif, index hors géométrie rejeté, cas cocirculaire, permutation
+conservant l'ordre du cover, cover vide/minimal et lot surdimensionné.
 
 ## G2 — compaction q4 stable sur device
 
@@ -194,15 +220,20 @@ device :
 - compacter les seeds K1 dans l'ordre initial ;
 - construire et compacter les paires K2 dans l'ordre `(seed,lens)` ;
 - lancer K3 sur le résultat compact ;
-- rapatrier seulement les émissions finales et les compteurs agrégés.
+- produire un seul **résultat logique final** : selon sa taille, le protocole
+  peut employer une capacité préflightée, un compteur scalaire puis le payload,
+  ou une copie maximale bornée ; il ne promet pas encore un unique D2H.
 
 La stabilité est contractuelle : le résultat doit rester dans le même ordre
 que le filtrage CPU, indépendamment du découpage en blocs. Une porte compare
 chaque tableau intermédiaire sur de petits lots avant de se contenter du
 digest final.
 
-G1 précède G2 : réduire le trafic initial permet de mesurer proprement ce que
-les retours intermédiaires coûtent encore.
+La porte debug compare K1 verdicts et survivants, K2 états et candidats, K3
+profondeurs, émissions et tous les compteurs `Q4CoreCounters`/dead/chord et
+`Q4StageCounts`, avec sommes u64 gardées. Le préflight VRAM couvre le nombre
+d'exécuteurs multiplié par les capacités de paires/stages. L'ordre G0/G1/G2 se
+décide après le reçu de l'instrument, avec un toggle d'ablation par changement.
 
 ## Multi-CPU — mesurer puis corriger le vrai goulot
 
@@ -217,9 +248,15 @@ Scinder le protocole :
 
 - `fold_inflight=1` ;
 - digest OFF pour isoler le travail, puis une strate digest ON ;
-- processus sous cpuset exact de 1, 2, 4, 8, 16, 24, 32 et 48 CPU ;
-- cpuset, affinité, topologie et CPU réellement utilisés gravés ;
-- échauffement et au moins trois répétitions contrebalancées.
+- processus sous cpuset exact et topologiquement déclaré de 1, 2, 4, 8, 16,
+  24, 32 et 48 CPU ; `--threads=t` ne remplace pas `taskset` ;
+- masque effectif gravé et validé dans chaque statut, topologie et CPU réellement
+  utilisés ;
+- `perf stat` après preflight pour `task-clock`, CPU utilisés, cycles,
+  instructions, changements de contexte, migrations et LLC/cache misses ; une
+  permission absente est gravée sans invalider la campagne principale ;
+- échauffement et ordre miroir à nombre pair de répétitions, ou randomisation
+  épinglée si un nombre impair est nécessaire.
 
 ### B. Chevauchement des ordres
 
@@ -248,19 +285,19 @@ défauts de cache est compatible avec l'objet actuel.
 
 ## Ordre de commits proposé à Claude
 
-1. **Finir l'instrument** : parseur au format réel, mutants/CMake, lifecycle et
-   timelines non additives ; aucun run GCP nécessaire.
-2. **Pool persistant** : 1/2/4/8 exécuteurs, résidus dans la file, égalité des
-   sorties.
-3. **Wire indices** : `GpuGeometry` + `site_index_u32` en parallèle du wire
-   actuel ; réception CUDA à 50 k.
-4. **Compaction q4 device** : portes des intermédiaires, puis ablation du D2H.
-5. **Pilote CPU sous cpuset** : seulement après que le protocole local et son
-   budget de session sont reçus.
+1. **Finir l'instrument localement** : parseur au format réel, mutants/CMake,
+   lifecycle, erreur asynchrone et timelines non additives.
+2. **Recevoir ce seul instrument sur une petite session G4** : baseline causale
+   avant toute réécriture, puis choisir l'ordre G0/G1/G2.
+3. **Exécuter l'expérience choisie avec toggle** : pool persistant, wire indices
+   ou compaction q4 ; recevoir d'abord l'égalité à 50 k, puis mesurer sur la
+   charge bornée où q4 domine.
+4. **Lancer en parallèle le pilote CPU sous cpuset** dès que son protocole local,
+   son budget et sa marge de rapatriement sont reçus ; il ne dépend pas des
+   refactorings GPU.
 
-Cette séquence aide Claude à obtenir un gain réel : elle réduit d'abord les
-octets et les synchronisations, puis mesure le plafond résiduel. Elle évite de
-lui demander simultanément une réécriture GPU, un nouveau fold et une campagne
-longue.
+Cette séquence évite d'engager trois réécritures sur une causalité encore
+ouverte. Elle donne à Claude une baseline interprétable, puis une seule
+expérience falsifiable à la fois, tandis que la piste CPU avance indépendamment.
 
 GCP non utilisé pour cet audit.
