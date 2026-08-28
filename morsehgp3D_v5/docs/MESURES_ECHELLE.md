@@ -118,23 +118,33 @@ covers inexistants et mélange visites de nœuds avec visites de points.
 
 `GenerateOptions::postsep_refine_levels` ($L \in [0, 3]$, défaut 0),
 `RunOptions::postsep_refine_levels`, CLI `--postsep=L` (parse intégral et refus
-hors domaine dans la bibliothèque). Tant que les chemins externes ne propagent
-pas cette politique, `L>0` avec override q3/q4 est refusé explicitement. Porte
-`mhgp5_postsep_refine` (+ trois mutants, code 4) :
+hors domaine dans la bibliothèque). Les lanes CPU par lots propagent maintenant
+la politique et sont appariées à $L=1$. Un override `RunOptions` arbitraire
+reste refusé pour `L>0` faute de capacité déclarée; le CLI CUDA ne l'expose pas
+et aucune mesure device n'est annoncée. Porte
+`mhgp5_postsep_refine` (+ cinq mutants, code 4) :
 
 - **objet complet identique à $L = 0, 1, 2, 3$** sur six familles :
-  `digest_raw_candidates` du multiensemble canonique pré-RLE,
+  `digest_raw_candidates` du multiensemble canonique pré-RLE, activé seulement
+  par l'option diagnostique de la porte afin que le `--digest` historique ne
+  paie pas ce second hachage,
   `digest_balls`, cardinalités brutes par lane, événements, `batch_levels` et
   forêts; le bras $L=3$ est aussi identique entre un et quatre fils ;
 - **grand-livre exact et fail-closed par lane** : `émis + tués == base`,
   vérifié avant RLE et avant toute publication; `base` est invariante en $L$.
   Un oracle test-only développe en outre le multiensemble littéral des couples
   sur de petits arbres et exerce des scissions de A et B ;
-- **route q2 interdite** : `tués[q2] == 0` et `émis[q2] == base[q2]` à tout $L$ ;
+- **route q2 interdite structurellement** : en plus de `tués[q2] == 0` et
+  `émis[q2] == base[q2]`, le pipeline exige zéro état, comptage ou rollback de
+  raffinement et `parents == produits == rect_alive` à tout $L$ ;
 - planchers de non-vacuité en q3 et q4, rollback non héréditaire gravé et
   compte frais monotone sur les familles de la porte ;
-- mutants tués : perte d'un enfant, duplication d'un enfant et seuil de mort
-  à $h-1$. La somme scalaire et les signatures aval ne jouent pas le même rôle.
+- mutants tués : perte d'un enfant, duplication d'un enfant, seuil de mort à
+  $h-1$, ouverture q2 et recomptage enfant sans l'autorité de coin. Les deux
+  dernières fautes gardent un ledger exact : la première change le multiensemble
+  pré-RLE et `digest_balls`, la seconde est refusée par
+  `fresh_child < parent.core` avant digest. La somme scalaire et les signatures
+  aval ne jouent donc pas le même rôle.
 
 Première mesure **intégrée** locale, huit fils, worktree courant, un seul run
 par bras donc diagnostique et non reçu :
@@ -170,13 +180,14 @@ fixture doit tuer son mutant dédié. Les coordonnées et facteurs exacts sont
 épinglés dans
 [`QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md`](../audits/QUESTION_CLAUDE_LANE_RESIDENTE_20260828.md).
 
-## 4 ter. En PRODUCTION, le raffinement coupe 47 % des ancres et le mur AUGMENTE de 34 %
+## 4 ter. Sur le chemin CPU intégré local, le raffinement coupe 47 % des ancres et le mur augmente de 34 %
 
 C'est la mesure que l'audit exigeait — « le succès n'est pas une baisse de
 `seeds_cf` : il faut une baisse du **temps** et des **visites payées**
 supérieure au surcoût des nouveaux comptages » — et elle est **défavorable**.
 
-`scanline_single_pass`, $n = 100\,000$, 8 fils, avec digest :
+`scanline_single_pass`, $n = 100\,000$, 8 fils, avec digest, un seul passage
+local sans sortie brute ni hash de binaire au tip :
 
 | grandeur | `--postsep=0` | `--postsep=3` | écart |
 |---|---|---|---|
@@ -186,17 +197,49 @@ supérieure au surcoût des nouveaux comptages » — et elle est **défavorable
 | rectangles produits (q3 / q4) | 2 142 760 / 2 181 866 | 3 562 300 / 3 635 193 | + 66 % |
 | **mur total** | **535 189 ms** | **717 202 ms** | **+ 34,0 %** |
 
-**Le raffinement échoue son critère de réception.** Il supprime près de la
-moitié des ancres et coûte quand même un tiers de mur en plus.
+**Le raffinement échoue son critère local de réception.** Il supprime près de
+la moitié des ancres et coûte quand même un tiers de mur en plus. Ce verdict
+justifie le défaut $L=0$; la durée isolée reste diagnostique, pas un reçu.
+
+### Le compteur qui tranche : le raffinement est REDONDANT
+
+Comparaison de **tous** les compteurs de génération entre les deux runs :
+
+| compteur | `--postsep=0` | `--postsep=3` | |
+|---|---|---|---|
+| `rect_alive` (parents) | 1 505 707 / 2 142 760 / 2 181 866 | idem | identique |
+| `ancres` | 4 012 092 / 31 478 160 / 48 557 755 | 4 012 092 / 16 750 196 / 25 590 309 | **− 47 %** |
+| `ancres_w3` | 8 190 272 | 5 427 276 | − 34 % |
+| `ancres_w4` | 12 487 587 | 8 592 501 | − 31 % |
+| **`candidats`** | 2 698 176 / 4 544 950 / 384 464 | **identique** | — |
+| **`tues_profondeur`** | 0 / 318 183 753 / 129 399 348 | **identique** | — |
+
+`tues_profondeur` est un compteur **par seed** : son identité prouve que le
+nombre de seeds est inchangé, donc que **tout l'aval — covers construits,
+seeds, tests de cœur, complétions, candidats — est identique au bit près**.
+
+**Le raffinement ne tue donc que des ancres que les tests d'ancre en $O(1)$
+(histogrammes de coins, $W_q$, secteurs) tuaient déjà, et pour rien.** Il est
+structurellement **redondant** avec eux : il fait le même travail, plus tôt,
+et plus cher. C'est un verdict bien plus fort qu'un mur en hausse de 34 %, et
+il explique pourquoi.
+
+**Ce qu'il faudrait attaquer à la place**, et que la même mesure désigne :
+seuls ≈ 11 % des ancres q4 construisent un cover (5 436 957 covers pour
+48 557 755 ancres à $n = 100\,000$) et ce sont elles qui engendrent les seeds
+et les **24,0 milliards de tests de cœur**. Un mécanisme utile doit réduire le
+travail de ces survivantes-là — pas tuer plus tôt celles qui mouraient déjà
+gratuitement.
 
 Pourquoi mon estimation précédente (« 3,3 puis 5,3 pour 1 en faveur du
 raffinement ») était fausse : je comparais des visites de nœud à un **cover
-entier** par paire tuée. En production, le cover n'est pas payé par paire — il
-est **partagé par rectangle** via les handles, et les tests d'ancre en $O(1)$
-tuent la plupart des ancres **avant** toute construction de cover. Une paire
-tuée n'épargne donc qu'une fraction de cover, tandis que le raffinement, lui,
-multiplie les rectangles par 1,66 : `rect_cover_handles` et
-`corner_histograms` sont recalculés pour chaque sous-rectangle.
+entier** par paire tuée. Sur le chemin intégré, le cover n'est pas payé par
+paire : ses handles sont partagés par rectangle et beaucoup d'ancres meurent
+avant leur cover propre. Seule la consultation finale de l'histogramme est en
+$O(1)$ après pré-calcul; W, secteurs et requête lisent encore une population.
+Une paire tuée n'épargne donc qu'une fraction du travail aval, tandis que le
+raffinement multiplie les produits émis par 1,66 : `rect_cover_handles` et
+`corner_histograms` sont recalculés pour chaque sous-produit.
 
 **Conséquence : `postsep_refine_levels` reste à 0 par défaut**, et le
 mécanisme n'est pas activé en production. Il reste dans le code, gardé, comme
@@ -219,7 +262,7 @@ sujet mesurable — pas comme optimisation.
   de binaire et à la sortie complète.
 - La **route q2 doit rester interdite** : la fixture à six points exhibe une
   divergence de candidats et de `digest_balls` que le ledger de masse ne voit
-  pas. Sa réception demande encore le mutant test-only et le CTest permanent.
+  pas. Le mutant test-only et son CTest permanent sont désormais présents.
 - Le critère `separated` n'est **pas héréditaire** (fixture 1D
   `x = {0, 99, 100, 512, 612}`, `s = 8`) : les sous-rectangles ne sont pas des
   rectangles WSPD, et ce post-traitement ne doit pas être appelé une nouvelle
