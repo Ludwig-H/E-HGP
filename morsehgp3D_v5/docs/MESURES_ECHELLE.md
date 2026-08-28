@@ -305,11 +305,58 @@ $n = 32\,000$, 8 fils, **digest identique partout** (`2bc14286…`) :
 |---|---|---|---|---|---|---|
 | mur (ms) | 89 512 | **64 935** | 68 460 | 75 940 | 71 365 | 76 009 |
 
-Le seuil 32 donne 9,0 % de mur en moins que le défaut sur ce passage, et le mode
-forcé est 25 % **pire**. La non-monotonie entre 128, 256 et 1024 peut mêler un
-effet réel de politique et le bruit de la machine partagée ; elle ne mesure pas
-la dispersion, qui reste inconnue avec un seul run par point. La comparaison
-répétée et alternée est en cours.
+Le seuil 32 semblait donner 9,0 % de mur en moins que le défaut sur ce passage,
+et le mode forcé 25 % de plus. **La comparaison répétée et alternée (quatre
+runs par seuil, entrelacés) réfute ce signal** :
+
+| répétition | seuil 256 | seuil 32 |
+|---|---|---|
+| 1 | 68 266 | 76 353 |
+| 2 | 78 842 | 76 724 |
+| 3 | 59 762 | 63 674 |
+| 4 | 69 688 | 43 096 |
+| **moyenne** | 69 139 | 64 962 (− 6,0 %) |
+| **médiane** | 68 977 | 70 014 (**+ 1,5 %**) |
+| étendue | 28 % | **52 %** |
+
+Moyenne et médiane vont en sens **opposés** et l'étendue atteint 52 % : il n'y
+a **aucun signal**. Les 9,0 % du balayage étaient du bruit.
+
+**Conséquence de méthode, mesurée et non supposée :** sur cette machine
+partagée à 8 cœurs, un écart de mur inférieur à ≈ 20 % n'est pas mesurable.
+Le + 34,0 % du § 4 ter est au-dessus de ce seuil et tient ; un réglage de
+politique valant 5 à 10 % ne peut se trancher que sur une machine calme,
+c'est-à-dire une session G4. **Les compteurs, eux, restent exacts et
+reproductibles localement** (§ 0).
+
+### La question ouverte, chiffrée : l'amplification du cover
+
+Le cover d'ancre est la boule
+$\lbrace z : \lvert 2z - (a+b) \rvert^{2} \le 3 D^{2} \rbrace$, soit la boule
+de centre $m$ et de rayon $\sqrt{3}\,D/2$. C'est **exactement** le majorant de
+l'union des boules candidates : en q3 le centre est à distance
+$\le \rho_3 = D/(2\sqrt{3})$ de $m$ et le rayon vaut
+$R = \sqrt{D^{2}/4 + \lvert v \rvert^{2}} \le D/\sqrt{3}$, donc l'union tient
+dans la boule de rayon $D/\sqrt{3} + D/(2\sqrt{3}) = \sqrt{3}\,D/2$. **Le
+coefficient 3 est donc serré — comme boule.**
+
+Mais l'union des boules candidates **n'est pas une boule** : c'est un solide de
+révolution autour de l'axe $ab$, bien plus mince. L'écart est mesuré :
+l'amplification $\lvert \text{cover} \rvert / \lvert P \cap W_q \rvert$ vaut
+**0,48 et stable** sur `uniform`, **15,3 et croissante** sur `scanline` q3 à
+$n = 16\,000$. Sur la famille qui pose problème, le cover contient donc
+**quinze fois plus de sites** que la région pouvant réellement contenir un
+témoin, et ce facteur croît.
+
+Question ouverte, à poser avant toute implémentation : **existe-t-il une
+requête d'arbre, exacte en entiers, sur un sur-ensemble de l'union des boules
+candidates strictement plus serré que la boule de rayon $\sqrt{3}\,D/2$ ?**
+(par exemple l'intersection de cette boule avec un cylindre autour de $ab$, ou
+une enveloppe par tranches le long de l'axe). C'est, à ce jour, le seul levier
+identifié qui porte sur la masse dominante — les tests de cœur, $n^{2{,}40}$ —
+sans être redondant avec les tests d'ancre existants. Il n'est **pas** mesuré :
+l'amplification dit ce qu'il y aurait à gagner, pas ce qu'une requête plus
+serrée coûterait.
 
 ## 5. Ce qui n'est pas établi
 
