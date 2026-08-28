@@ -161,6 +161,48 @@ Trois lectures, et ce sont les plus utiles du document :
    marge d'élagage restante est en q4. Aucun faux positif nulle part
    (`FAUX POSITIFS = 0`) : les tests d'ancre sont sûrs.
 
+## 3 ter. Le palmarès des rectangles lourds — et la correction d'une explication
+
+La sonde possédait déjà le palmarès que je réclamais au § 4 ; mon extraction
+l'avait tronqué. Sur `scanline_single_pass` q3, $n = 16\,000$ :
+
+```
+palmares : 1 % des rectangles les plus lourds (3434) = 80,3 % des seeds,
+           0,2 % des survivants ; seeds dans les rectangles SANS survivant = 98,1 %
+  rect#0  Dmax=298 |A||B|=1600 vivantes=960 tuees_prod=960 seeds=849452 survivants=0 covers=4041952
+  rect#1  Dmax=291 |A||B|=1520 vivantes=798 tuees_prod=798 seeds=675964 survivants=0 covers=3179869
+  rect#2  Dmax=322 |A||B|=2200 vivantes=592 tuees_prod=592 seeds=649352 survivants=0 covers=2532935
+```
+
+(la colonne `seeds` est **contrefactuelle** — corps de production sans les
+tests d'ancre — c'est ce que les tests évitent, pas ce qui est produit.)
+
+Quatre lectures, dont deux corrigent ce que j'avais avancé :
+
+1. **La concentration est écrasante** : 1 % des rectangles portent 80,3 % du
+   travail et 0,2 % du résultat ; **98,1 % des seeds vivent dans des
+   rectangles qui ne produisent aucun survivant**. Le travail n'est pas
+   « réparti et coûteux », il est **massivement inutile et concentré**.
+2. **Mon explication du § 3 bis était trop rapide.** Les rectangles les plus
+   lourds n'ont pas des $\left\vert A \right\vert \left\vert B \right\vert$
+   démesurés (1 600, 1 520, 2 200 paires : deux à trois ordres en dessous de
+   $n$) ; ce qui les distingue est leur $D_{\max}$ — 298, 291, 322 sur un nuage
+   dont c'est une fraction notable du diamètre. Le coût vient donc du
+   **rayon**, pas de la population : un grand $D$ donne un cover
+   $\propto D^{3}$ et un nombre de seeds proportionnel.
+3. **Et la production les tue déjà tous** : `vivantes=960 tuees_prod=960` sur
+   le rectangle le plus lourd. Le vidage de son ancre la plus lourde
+   ($a = (126, 249, 11)$, $b = (92, 1, 147)$, $D = 284{,}9$) montre pourquoi :
+   sa boule diamétrale contient déjà **2 176 sites**, soit 218 fois le seuil
+   $h_3 = 10$. Ces ancres sont mortes d'avance et le test de cœur le voit.
+   Le gain restant n'est donc **pas** sur les rectangles lourds.
+4. **Ce qui reste coûteux est le régime intermédiaire.** Après élagage, il
+   reste 13,6 M seeds à $n = 16\,000$ sur `scanline` q3, et ils croissent en
+   $n^{1{,}50}$. Ils viennent des rectangles que les tests d'ancre ne tuent
+   pas — ni assez petits pour être triviaux, ni assez dégénérés pour être
+   tués. C'est **là** qu'une idée nouvelle doit porter, et c'est beaucoup plus
+   étroit que « rendre la génération sous-quadratique ».
+
 ## 4. Ce qui n'est pas mesuré, et que je ne prétends pas savoir
 
 - Aucune mesure au-delà de $n = 50\,000$ : les exposants ci-dessus sont des
@@ -172,7 +214,10 @@ Trois lectures, et ce sont les plus utiles du document :
   pas linéaire (vectorisation, cache).
 - La sonde des rectangles n'a été relancée qu'à 8 000 et 16 000 (§ 3 bis) :
   les exposants qu'elle donne reposent sur **deux** points, pas quatre.
-- La cause géométrique avancée au § 3 bis (« boîtes énormes des rectangles
-  vivants quasi-plans ») est une **explication**, pas une mesure : le
-  $D_{\max}$ des rectangles vivants n'a pas été instrumenté. C'est la première
-  mesure à faire avant de concevoir quoi que ce soit.
+- Le § 3 ter mesure le $D_{\max}$ et **corrige** l'explication du § 3 bis : le
+  coût des rectangles lourds vient de leur rayon, pas de leur population.
+- Le palmarès n'a été lu que sur `scanline` q3 à $n = 16\,000$. Les autres
+  familles et la lane q4 sont en cours ; sans elles, la phrase « le gain
+  restant n'est pas sur les rectangles lourds » ne vaut que pour ce cas.
+- Le régime intermédiaire (§ 3 ter, point 4) n'est **pas** caractérisé : je
+  sais ce qu'il coûte, pas à quoi il ressemble. C'est la mesure suivante.
