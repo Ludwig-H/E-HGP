@@ -231,6 +231,11 @@ mhgp5_gate(mhgp5_q3_oracle_refus_mutant_inconnu 2 mhgp5_q3_oracle "--n=80 --inje
 # ---- Gardes d'API, fixture differentielle q4, oracle q4, source q4, juge de foret -----
 mhgp5_executable(mhgp5_api_guard_gate tests/api_guard_gate.cpp)
 mhgp5_gate(mhgp5_api_guard_gate 0 mhgp5_api_guard_gate "")
+# Pool d'executeurs device borne et persistant (G0 des auditeurs, src/gpu/executor_pool.hpp, hote pur).
+mhgp5_executable(mhgp5_executor_pool_gate tests/executor_pool_gate.cpp)
+mhgp5_gate(mhgp5_executor_pool 0 mhgp5_executor_pool_gate "")
+mhgp5_gate(mhgp5_executor_pool_mutant_serial 4 mhgp5_executor_pool_gate "--inject=pool-serial")
+mhgp5_gate(mhgp5_executor_pool_mutant_drop_exception 4 mhgp5_executor_pool_gate "--inject=pool-drop-exception")
 # Porte de rejeu « catalogue + deltas -> partition » (docs/ECHELLE.md § 8 bis, T5) : autorite independante du fold.
 mhgp5_executable(mhgp5_delta_replay_gate tests/delta_replay_gate.cpp)
 mhgp5_gate(mhgp5_delta_replay 0 mhgp5_delta_replay_gate "")

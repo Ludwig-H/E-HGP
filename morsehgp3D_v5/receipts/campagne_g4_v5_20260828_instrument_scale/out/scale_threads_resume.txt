@@ -1,0 +1,20 @@
+# scale_threads_resume — tableau de COMPLETUDE et de DISPERSION, produit par validate_v5_campaign.py.
+# Aucune conclusion de speedup n'est ecrite ici : le validateur juge seulement la presence de
+# tous les runs annonces et l'egalite des digests / compteurs de travail par famille.
+# n=16000 threads_list=1 2 4 8 16 32 48 inflight_list=1 digest_list=0 1 repeats=1 runs_annonces=14
+# mur = temps_mur_ms interne du pilote ; duree = duree_s externe (GNU time / runner) ; rss = pic RSS GNU time.
+famille	fils	inflight	digest	runs	mur_median_ms	mur_min_ms	mur_max_ms	duree_med_s	rss_max_kb
+eight_clusters	1	1	0	1	215041.0	215041.0	215041.0	215.0	3459984
+eight_clusters	1	1	1	1	217360.6	217360.6	217360.6	217.0	3460172
+eight_clusters	2	1	0	1	122620.5	122620.5	122620.5	122.0	3562492
+eight_clusters	2	1	1	1	124418.5	124418.5	124418.5	125.0	3563660
+eight_clusters	4	1	0	1	65469.2	65469.2	65469.2	66.0	3678312
+eight_clusters	4	1	1	1	67829.1	67829.1	67829.1	68.0	3678912
+eight_clusters	8	1	0	1	37603.4	37603.4	37603.4	37.0	3848456
+eight_clusters	8	1	1	1	41050.6	41050.6	41050.6	41.0	3972928
+eight_clusters	16	1	0	1	22397.6	22397.6	22397.6	23.0	4543420
+eight_clusters	16	1	1	1	26311.8	26311.8	26311.8	26.0	4527988
+eight_clusters	32	1	0	1	16831.5	16831.5	16831.5	17.0	4711388
+eight_clusters	32	1	1	1	20993.8	20993.8	20993.8	21.0	4650336
+eight_clusters	48	1	0	1	15283.7	15283.7	15283.7	15.0	5125104
+eight_clusters	48	1	1	1	19408.6	19408.6	19408.6	20.0	5203572

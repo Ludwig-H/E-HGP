@@ -1,0 +1,16 @@
+code=0
+duree_s=41
+peak_rss_kb=3972928
+timing_scope=scale_threads
+threads=8
+fold_inflight=1
+digest=1
+family=eight_clusters
+n=16000
+repeat=1
+seq=11
+commande=./build/mhgp5 --family=eight_clusters --n=16000 --s=8 --smax=11 --seed=3 --threads=8 --fold-inflight=1 --digest
+source_commit=c95cfa95b83b908b4b02a1594f59350aada02538
+source_payload_sha256=9eee594fbb536074103a01173b70e79f771d47ec042c06687aeda5a58446c041
+protocol_manifest_sha256=f73d6313e73a42ddf648c24f218cda08fe61620ca431a10a9ea75ee68b922af7
+finished=1

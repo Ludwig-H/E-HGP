@@ -533,6 +533,43 @@ le poste dominant identifié et non résolu (V24) ; le pic mémoire hôte des
 visites/cover, fraction routée hôte : mesurés dans chaque reçu, jamais
 déclarés.
 
+### Session 13 (pin `c95cfa95`, instrument recevable + pilote `SCALE_THREADS`) — les nombres qui décident
+
+Reçu `campagne_g4_v5_20260828_instrument_scale` (39 runs, validateur du pin
+rejoué, digests CPU/GPU identiques). Sommes d'exécuteur sur 48 fils, 50 k :
+
+| lane, famille | mur de lane | kernels (K1 + K2 + K3) | H2D | enfilement | réservations | cycle de vie (98 exécuteurs) |
+|---|---:|---:|---:|---:|---:|---:|
+| q4 `uniform` | 3,3 s | **0,85 s** | 17,2 + 13,7 s, **40 Go** | 33,2 s | 12,6 s | 172 s |
+| q4 `eight_clusters` | 9,4 s | 1,27 s | 30,8 + 16,7 s, **95 Go** | 49,7 s | 14,7 s | 655 s |
+| q3 `uniform` | 2,3 s | 0,23 s | 3,9 s, 20 Go | 4,3 s | 2,1 s | (idem) |
+| q3 `scanline` | 2,2 s | 0,09 s | 15,0 s, 28 Go | 15,2 s | 11,9 s | (idem) |
+
+Le calcul device est de l'ordre du pour cent du temps d'exécuteur ; les
+postes sont, dans l'ordre, les **copies** (64 o par site et par ancre, et la
+copie des candidats avant K3), l'**enfilement** des appels CUDA par 48 fils
+sur un seul pilote, les **réservations** par exécuteur et le **cycle de vie**
+de 98 exécuteurs éphémères — exactement G0 (pool persistant, livré au pin
+suivant : `ExecutorPool`, `--gpu-executors`, porte hôte et mutants) et G1
+(indices u32 : 64 → 4 o par site). `kernel_ms` de la ligne `gpu=1` est
+désormais la somme des kernels seuls : les valeurs des sessions ≤ 12 ne sont
+pas comparables.
+
+**Pilote de scaling CPU** (protocole A des auditeurs : `eight_clusters`
+16 000, `fold_inflight = 1`, une répétition, `time -v` gravé) :
+
+| fils | 1 | 2 | 4 | 8 | 16 | 32 | 48 |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| mur, digest OFF | 215 s | 123 s | 65 s | 38 s | 22 s | 17 s | 15 s |
+| accélération | 1 | 1,75 | 3,3 | 5,7 | 9,6 | 12,8 | 14,1 |
+| mur, digest ON | 217 s | 124 s | 68 s | 41 s | 26 s | 21 s | 19 s |
+
+Lecture bornée (un passage, non contrebalancé) : le gain est quasi linéaire
+jusqu'à 8 fils puis sature vers 14× à 48 vCPU ; le digest coûte 2–4 s fixes
+(séquentiel par ordre). La prochaine marche multi-CPU est celle décrite par
+les auditeurs (pool persistant, subdivision des rectangles lourds, fusions par
+offsets, fold vivant), pas `threads = 48` seul.
+
 ### Ordre de commits (auditeurs)
 
 1. Finir l'instrument (parseur au format réel, mutants et CMake, cycle de vie

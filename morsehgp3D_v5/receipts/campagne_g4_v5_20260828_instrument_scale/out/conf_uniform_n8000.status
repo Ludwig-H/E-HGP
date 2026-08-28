@@ -1,0 +1,10 @@
+code=0
+duree_s=7
+peak_rss_kb=3302680
+timing_scope=conformity
+threads=48
+commande=./build/mhgp5_conformity_v4 --receipt=morsehgp3D_v5/receipts/conformite_v4/digests_v4.txt --family=uniform --n=8000 --threads=48
+source_commit=c95cfa95b83b908b4b02a1594f59350aada02538
+source_payload_sha256=9eee594fbb536074103a01173b70e79f771d47ec042c06687aeda5a58446c041
+protocol_manifest_sha256=f73d6313e73a42ddf648c24f218cda08fe61620ca431a10a9ea75ee68b922af7
+finished=1

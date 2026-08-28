@@ -143,6 +143,7 @@ struct BatchLimits {
   // Grille de cellules : UNE seule autorite, GenerateOptions::cell_grid_min_sites
   // (l'option CLI --cell-min-sites gouverne la production ET les lanes par
   // lots/device ; 0 = mode force des tests) — aucun doublon ici.
+  int gpu_executors = 4;  // pool d'executeurs device persistant (G0), 1..8
 };
 
 // HISTOGRAMME PAR CLASSE log2 (instrument recevable, audit du 28 aout 2026 :

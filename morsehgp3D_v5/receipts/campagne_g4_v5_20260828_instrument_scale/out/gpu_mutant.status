@@ -1,0 +1,10 @@
+code=4
+duree_s=3
+peak_rss_kb=874396
+timing_scope=device_mutant
+threads=48
+commande=./build-cuda/mhgp5_device_witness --inject=witness-no-warp-correction
+source_commit=c95cfa95b83b908b4b02a1594f59350aada02538
+source_payload_sha256=9eee594fbb536074103a01173b70e79f771d47ec042c06687aeda5a58446c041
+protocol_manifest_sha256=f73d6313e73a42ddf648c24f218cda08fe61620ca431a10a9ea75ee68b922af7
+finished=1

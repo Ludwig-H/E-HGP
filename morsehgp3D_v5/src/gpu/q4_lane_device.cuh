@@ -14,6 +14,7 @@
 #include <string>
 #include <vector>
 
+#include "executor_pool.hpp"
 #include "q3_lane_device.cuh"
 #include "q4_kernels.cuh"
 #include "q4_lane_batched.hpp"
@@ -320,10 +321,12 @@ inline void generate_q4_device(const CloudIndex& ix, const GenerateOptions& opt,
                                BatchStats* bs = nullptr, DeviceExecutorStats* stages = nullptr) {
   std::mutex mu;
   Q4DeviceExecutor::gauge.reset_peak();
+  // G0 : pool BORNE et PERSISTANT (lim.gpu_executors executeurs crees une fois pour la lane, file avec
+  // contre-pression ; les producteurs CPU attendent leur lot, donc l'ordre d'emission par ouvrier est inchange).
+  ExecutorPool<Q4DeviceExecutor> pool(lim.gpu_executors);
   generate_q4_batched_with(ix, opt, out, st, [&](Q4Batch* b, u32 h4, bool cn, bool dn, bool nc) {
-    thread_local Q4DeviceExecutor ex;
     DeviceExecutorStats d;
-    ex.scan(b, h4, cn, dn, nc, &d);
+    pool.submit_and_wait([&](Q4DeviceExecutor& ex) { ex.scan(b, h4, cn, dn, nc, &d); });
     std::lock_guard<std::mutex> lk(mu);
     *kernel_ms += d.kernel_ms();
     *launches += d.launches;

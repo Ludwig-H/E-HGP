@@ -1,0 +1,24 @@
+scale_threads_plan=v1
+threads_list=1 2 4 8 16 32 48
+families=eight_clusters
+n=16000
+inflight_list=1
+digest_list=0 1
+repeats=1
+run_timeout_s=7200
+s=8 smax=11 seed=3
+seq=1 name=scale_eight_clusters_n16000_t1_f1_d0_r1 family=eight_clusters threads=1 inflight=1 digest=0 repeat=1
+seq=2 name=scale_eight_clusters_n16000_t2_f1_d0_r1 family=eight_clusters threads=2 inflight=1 digest=0 repeat=1
+seq=3 name=scale_eight_clusters_n16000_t4_f1_d0_r1 family=eight_clusters threads=4 inflight=1 digest=0 repeat=1
+seq=4 name=scale_eight_clusters_n16000_t8_f1_d0_r1 family=eight_clusters threads=8 inflight=1 digest=0 repeat=1
+seq=5 name=scale_eight_clusters_n16000_t16_f1_d0_r1 family=eight_clusters threads=16 inflight=1 digest=0 repeat=1
+seq=6 name=scale_eight_clusters_n16000_t32_f1_d0_r1 family=eight_clusters threads=32 inflight=1 digest=0 repeat=1
+seq=7 name=scale_eight_clusters_n16000_t48_f1_d0_r1 family=eight_clusters threads=48 inflight=1 digest=0 repeat=1
+seq=8 name=scale_eight_clusters_n16000_t1_f1_d1_r1 family=eight_clusters threads=1 inflight=1 digest=1 repeat=1
+seq=9 name=scale_eight_clusters_n16000_t2_f1_d1_r1 family=eight_clusters threads=2 inflight=1 digest=1 repeat=1
+seq=10 name=scale_eight_clusters_n16000_t4_f1_d1_r1 family=eight_clusters threads=4 inflight=1 digest=1 repeat=1
+seq=11 name=scale_eight_clusters_n16000_t8_f1_d1_r1 family=eight_clusters threads=8 inflight=1 digest=1 repeat=1
+seq=12 name=scale_eight_clusters_n16000_t16_f1_d1_r1 family=eight_clusters threads=16 inflight=1 digest=1 repeat=1
+seq=13 name=scale_eight_clusters_n16000_t32_f1_d1_r1 family=eight_clusters threads=32 inflight=1 digest=1 repeat=1
+seq=14 name=scale_eight_clusters_n16000_t48_f1_d1_r1 family=eight_clusters threads=48 inflight=1 digest=1 repeat=1
+runs=14

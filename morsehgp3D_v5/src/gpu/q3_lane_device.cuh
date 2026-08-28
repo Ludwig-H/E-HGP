@@ -24,6 +24,7 @@
 #include <vector>
 
 #include "device_stats.hpp"
+#include "executor_pool.hpp"
 #include "q3_lane_batched.hpp"
 #include "q3_scan_kernel.cuh"
 
@@ -200,10 +201,12 @@ inline void generate_q3_device(const CloudIndex& ix, const GenerateOptions& opt,
                                BatchStats* bs = nullptr, DeviceExecutorStats* stages = nullptr) {
   std::mutex mu;
   Q3DeviceExecutor::gauge.reset_peak();
+  // G0 : pool BORNE et PERSISTANT (lim.gpu_executors executeurs crees une fois pour la lane, file avec
+  // contre-pression ; les producteurs CPU attendent leur lot, donc l'ordre d'emission par ouvrier est inchange).
+  ExecutorPool<Q3DeviceExecutor> pool(lim.gpu_executors);
   generate_q3_batched_with(ix, opt, out, st, [&](Q3Batch* b, u32 h3, bool nonstrict) {
-    thread_local Q3DeviceExecutor ex;
     DeviceExecutorStats d;
-    ex.scan(b, h3, nonstrict, &d);
+    pool.submit_and_wait([&](Q3DeviceExecutor& ex) { ex.scan(b, h3, nonstrict, &d); });
     std::lock_guard<std::mutex> lk(mu);
     *kernel_ms += d.kernel_ms();
     *launches += d.launches;

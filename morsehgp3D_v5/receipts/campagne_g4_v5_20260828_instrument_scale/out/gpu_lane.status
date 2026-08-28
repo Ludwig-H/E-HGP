@@ -1,0 +1,10 @@
+code=0
+duree_s=76
+peak_rss_kb=1795956
+timing_scope=device_lane
+threads=48
+commande=bash -c set -e; cmake --build build-cuda --target mhgp5_q3_lane_device_gate mhgp5_q4_lane_device_gate mhgp5_cuda -j8 2>&1 | grep -vE '^\[|^Scanning' | tail -60; test ${PIPESTATUS[0]} -eq 0; ./build-cuda/mhgp5_q3_lane_device_gate --family=uniform --n=1200; ./build-cuda/mhgp5_q3_lane_device_gate --family=eight_clusters --n=1200 --threads=4; ./build-cuda/mhgp5_q3_lane_device_gate --family=uniform --n=8000 --threads=8 --min-candidates=100000; ./build-cuda/mhgp5_q4_lane_device_gate --family=uniform --n=1200; ./build-cuda/mhgp5_q4_lane_device_gate --family=eight_clusters --n=1200 --threads=4; ./build-cuda/mhgp5_q4_lane_device_gate --family=uniform --n=8000 --threads=8 --min-candidates=100000; ./build-cuda/mhgp5_q3_lane_device_gate --family=uniform --n=300 --coord=40 --min-candidates=200; ./build-cuda/mhgp5_q4_lane_device_gate --family=uniform --n=300 --coord=40 --min-candidates=200 --min-deep=20
+source_commit=c95cfa95b83b908b4b02a1594f59350aada02538
+source_payload_sha256=9eee594fbb536074103a01173b70e79f771d47ec042c06687aeda5a58446c041
+protocol_manifest_sha256=f73d6313e73a42ddf648c24f218cda08fe61620ca431a10a9ea75ee68b922af7
+finished=1

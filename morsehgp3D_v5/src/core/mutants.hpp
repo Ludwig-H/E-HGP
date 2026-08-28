@@ -75,6 +75,8 @@ inline constexpr const char* kMutants[] = {
     "cell-kill-h-minus-one",
     "prefix-tamper-event-order",
     "prefix-tamper-batch-levels",
+    "pool-serial",
+    "pool-drop-exception",
     "cell-locate-eps-zero",
 };
 
