@@ -357,8 +357,16 @@ int main(int argc, char** argv) {
     {
       u64 tk1 = 0, tk2 = 0, talive = 0;
       for (const Heavy& hh : heavy) { tk1 += hh.kw; tk2 += hh.ks; talive += hh.alive; }
-      std::printf("mortalite_par_cause : ancres vivantes=%llu, tuees par k=1 (W_q, certificat UNIVERSEL) = %llu (%.1f %%), "
-                  "par k=2 (secteurs, ancre-specifique) = %llu (%.1f %%) — seule la masse k=1 borne le gain d'un raffinement de boites\n",
+      // AVERTISSEMENT DE POPULATION (audit du 28 aout) : en q3 « vivantes »
+      // est post-histogramme ; en q4 il est DEJA post-W4, car cette sonde
+      // applique W_4 elle-meme plus haut. Le k=1 nul de la lane q4 est donc un
+      // artefact de construction, PAS la preuve que le certificat universel q4
+      // serait inerte : sa masse reelle est `ancres_w4` des recus de production.
+      // Ne pas comparer les deux lanes sur cette ligne.
+      std::printf("mortalite_par_cause lane=q%d population=%s : ancres vivantes=%llu, tuees par k=1 (W_q, certificat UNIVERSEL) = %llu (%.1f %%), "
+                  "par k=2 (secteurs, ancre-specifique) = %llu (%.1f %%) — seule la masse k=1 borne le gain d'un raffinement de boites ; "
+                  "en q4 ce k=1 est nul PAR CONSTRUCTION (W_4 deja applique), voir ancres_w4 des recus\n",
+                  lane, lane == 3 ? "post-histogramme" : "post-histogramme ET post-W4",
                   (unsigned long long)talive, (unsigned long long)tk1, talive ? 100.0 * (double)tk1 / (double)talive : 0.0,
                   (unsigned long long)tk2, talive ? 100.0 * (double)tk2 / (double)talive : 0.0);
     }
