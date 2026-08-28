@@ -46,7 +46,27 @@ Coût **par point** stable : 160 → 184 ancres q4, 5 397 → 6 141 évaluations
 Jung. Sur cette famille il n'y a **rien à rendre sous-quadratique** : c'est
 déjà $n^{1{,}06}$ avec une constante élevée.
 
-### `scanline_single_pass` — c'est là que ça casse
+### `terrain` — le travail par ancre devient **cubique**
+
+| grandeur | 8 000 | 16 000 | 32 000 | 50 000 | exposants |
+|---|---|---|---|---|---|
+| rectangles vivants q3 | 207 772 | 424 347 | 862 401 | 1 362 505 | 1,03 → 1,02 → 1,02 |
+| ancres q3 | 436 323 | 1 004 603 | 2 355 773 | 4 292 160 | 1,20 → 1,23 → 1,34 |
+| ancres q4 | 491 665 | 1 178 984 | 2 875 525 | 5 405 171 | 1,26 → 1,29 → 1,41 |
+| évaluations Jung q4 | 37 434 927 | 265 061 893 | 1 887 474 598 | 7 677 090 545 | **2,82 → 2,83 → 3,14** |
+
+7,68 milliards d'évaluations à 50 000 points, soit **153 542 par point**.
+
+### `eight_clusters` — beaucoup d'ancres, mais bon marché
+
+| grandeur | 8 000 | 16 000 | 32 000 | 50 000 | exposants |
+|---|---|---|---|---|---|
+| rectangles vivants q3 | 564 502 | 1 231 555 | 2 610 700 | 4 202 134 | 1,13 → 1,08 → 1,07 |
+| ancres q3 | 2 689 569 | 7 843 126 | 22 703 890 | 41 359 603 | 1,54 → 1,53 → 1,34 |
+| ancres q4 | 3 810 453 | 10 681 086 | 33 884 685 | 63 319 157 | 1,49 → 1,67 → 1,40 |
+| évaluations Jung q4 | 60 702 910 | 146 058 120 | 307 794 390 | 494 934 575 | **1,27 → 1,08 → 1,06** |
+
+### `scanline_single_pass` — les deux mécanismes à la fois
 
 | grandeur | 8 000 | 16 000 | 32 000 | 50 000 | exposants |
 |---|---|---|---|---|---|
@@ -57,40 +77,55 @@ déjà $n^{1{,}06}$ avec une constante élevée.
 | complétions q4 | 17 139 132 | 46 483 440 | 152 913 065 | 335 781 778 | 1,44 → 1,72 → 1,76 |
 | évaluations Jung q4 | 33 560 242 | 119 704 289 | 801 555 291 | 2 151 583 810 | **1,83 → 2,74 → 2,21** |
 
-Coût **par point** en explosion : 101 → 291 ancres q4, et **4 195 → 43 032**
-évaluations Jung par point, soit × 10,3 quand $n$ est multiplié par 6,25.
+### Ancres q4 par rectangle vivant — la population des rectangles
 
-## 3. Les trois faits qui en découlent
+| famille | 8 000 | 16 000 | 32 000 | 50 000 |
+|---|---|---|---|---|
+| `uniform` | 1,93 | 1,93 | 1,97 | **1,98 (constant)** |
+| `terrain` | 2,37 | 2,78 | 3,33 | 3,97 |
+| `scanline_single_pass` | 4,65 | 6,16 | 10,10 | 13,52 |
+| `eight_clusters` | 6,75 | 8,67 | 12,98 | 15,07 |
 
-1. **La WSPD n'est pas en cause.** Le nombre de rectangles vivants croît en
-   $n^{1{,}00}$ sur `scanline` comme en $n^{1{,}05}$ sur `uniform`. Toute
-   proposition qui remplace la WSPD attaque un poste sain.
-2. **Le coupable est le rapport ancres / rectangle**, c'est-à-dire le
-   $\left\vert A \right\vert \left\vert B \right\vert$ moyen des rectangles
-   *vivants* : constant sur `uniform` (1,65 → 1,68) et **croissant sur
-   `scanline`** (3,61 → 4,63 → 6,58 → 9,18, soit $\approx n^{0{,}5}$). Les
-   rectangles vivants d'un nuage de balayage deviennent de plus en plus gros ;
-   la double boucle les paie intégralement.
-3. **Le travail par ancre croît lui aussi** sur `scanline` : les évaluations
-   Jung montent plus vite que les ancres ($n^{2{,}2}$ contre $n^{1{,}7}$),
-   donc le cover et le nombre de seeds par ancre grossissent également.
-   Le produit des deux est ce qui donne le $n^{2{,}2}$–$n^{2{,}7}$ observé.
+## 3. Deux mécanismes distincts, et ils ne frappent pas les mêmes familles
 
-Autrement dit, la question n'est **pas** « rendre l'algorithme
-sous-quadratique » en général — il est déjà en $n^{1{,}06}$ sur `uniform`.
-Elle est : **pourquoi les nuages de balayage produisent-ils des rectangles
-vivants dont la population croît, et comment énumérer leurs ancres de manière
-sensible à la sortie ?** C'est la géométrie quasi-coplanaire d'un passage
-LiDAR unique qui est en cause, et c'est exactement la famille qui compte pour
-`tests/SemanticKITTI/`.
+Le coût s'écrit $\sum_{\text{rect vivant}} \left\vert A \right\vert \left\vert B \right\vert \times (\text{travail par ancre})$.
+Les mesures séparent nettement les deux facteurs :
+
+1. **La WSPD n'est en cause dans aucune famille.** Les rectangles vivants
+   croissent en $n^{1{,}00}$ à $n^{1{,}07}$ partout. Toute proposition qui
+   remplace la WSPD attaque un poste sain — et la remplacer par une
+   décomposition d'ordre supérieur ne changerait pas ce constat.
+2. **Facteur A — la population des rectangles vivants** croît sur trois
+   familles sur quatre (× 1,7 sur `terrain`, × 2,2 sur `eight_clusters`,
+   × 2,9 sur `scanline` entre 8 000 et 50 000) et reste **constante** sur
+   `uniform`. C'est la double boucle `for ua × for ub` qui la paie
+   intégralement, après quoi seulement les tests d'ancre en $O(1)$ s'appliquent.
+3. **Facteur B — le travail par ancre** explose sur `terrain`
+   ($n^{3{,}14}$, 153 542 évaluations Jung par point à 50 000) et sur
+   `scanline` ($n^{2{,}21}$), mais reste **plat** sur `uniform` et
+   `eight_clusters` ($n^{1{,}06}$). C'est le produit cover × seeds.
+
+Conséquence pour la conception : **`eight_clusters` demande de couper le
+facteur A** (beaucoup d'ancres, chacune bon marché) ; **`terrain` demande de
+couper le facteur B** (peu d'ancres, chacune ruineuse) ; **`scanline` demande
+les deux**. Une solution qui n'attaque qu'un des deux facteurs laissera une
+famille de mesure en régime super-linéaire — et `terrain` comme `scanline`
+sont les deux familles réalistes pour un nuage LiDAR.
+
+La question n'est donc pas « rendre l'algorithme sous-quadratique » en
+général : il est déjà en $n^{1{,}06}$ sur `uniform`, à constante élevée. Elle
+est **double** : énumérer les ancres des rectangles peuplés de façon sensible
+à la sortie, et borner le travail par ancre sur les géométries quasi-planes.
 
 ## 4. Ce qui n'est pas mesuré, et que je ne prétends pas savoir
 
 - Aucune mesure au-delà de $n = 50\,000$ : les exposants ci-dessus sont des
   pentes locales sur moins d'une décade, pas des asymptotes.
-- `terrain` et `eight_clusters` ne sont pas dans ce tableau (les reçus les
-  portent, mais je n'ai pas encore calculé leurs exposants) ; `two_lines` et
-  `collinear_seven` sont des contre-familles de réfutation, pas des régimes.
+- `two_lines` et `collinear_seven` sont des contre-familles de réfutation, pas
+  des régimes : elles n'ont pas d'exposant.
+- Les évaluations Jung sont un **compteur d'instrument**, pas un temps : elles
+  mesurent le travail de la lane q4, pas le mur. Le lien travail → temps n'est
+  pas linéaire (vectorisation, cache).
 - Le $\left\vert A \right\vert \left\vert B \right\vert$ moyen est déduit du
   quotient ancres/rectangles, pas mesuré par un histogramme : la distribution
   (quelques rectangles énormes, ou un grossissement général ?) reste à établir
