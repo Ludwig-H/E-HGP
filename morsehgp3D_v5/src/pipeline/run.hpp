@@ -404,6 +404,11 @@ inline void print_run(std::FILE* out, const char* family, int n, int coord, long
   std::fprintf(out, "payload=%s authority=status_terminal callbacks=provisional vertical_maps=none\n",
                kForestPayloadVersion);
   std::fprintf(out, "backend=%s\n", rr.backend_override ? "override_experimental (executeur de lane externe : non autoritaire)" : "cpu_reference");
+  // PROFIL NOMME (docs/ECHELLE.md § 1, § 3.3) : l'objet complet (smax = 11, K = 1..10) ou un PREFIXE exact de la tour
+  // (smax = s : K = 1..s-1, memes digests par ordre que l'objet complet) — jamais confondus dans un recu.
+  if (rr.smax_eff == 11) std::fprintf(out, "profil=complet_k10\n");
+  else std::fprintf(out, "profil=prefixe_k%llu (K = 1..%llu, prefixe exact de l'objet complet : digests par ordre identiques)\n",
+                    (unsigned long long)(rr.smax_eff - 1), (unsigned long long)(rr.smax_eff - 1));
   std::fprintf(out,
                "famille=%s n=%d coord=%d s=%lld smax=%llu seed=%lld threads=%d emis=%zu boules_uniques=%llu "
                "mortes_profondeur=%llu survivantes=%llu census_int=%llu census_shell=%llu evenements=%llu "
