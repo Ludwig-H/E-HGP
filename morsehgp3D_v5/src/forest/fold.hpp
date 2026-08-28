@@ -298,6 +298,13 @@ inline FoldPrepared prepare_fold(const std::vector<ForestEvent>& events, int thr
   // uniques. Passe 5 : fusion k-aire des 64 listes triees -> fid globaux.
   // Passe 6 (parallele par tranche) : remap des ev_fid.
   const size_t ne = events.size();
+#ifdef MHGP5_PROFILE_REDUCE
+  double pi[6] = {0, 0, 0, 0, 0, 0};
+  auto pim = std::chrono::steady_clock::now();
+  const auto pitick = [&](int i) { const auto now = std::chrono::steady_clock::now(); pi[i] += std::chrono::duration<double, std::milli>(now - pim).count(); pim = now; };
+#else
+  const auto pitick = [](int) {};
+#endif
   std::vector<FacetKey>& keys = fp.keys;
   fp.ev_fid.assign(ne * 11, 0);
   std::vector<u32>& ev_fid = fp.ev_fid;
@@ -335,6 +342,7 @@ inline FoldPrepared prepare_fold(const std::vector<ForestEvent>& events, int thr
     });
     r.workers = std::max(r.workers, (u64)created);
     // Offsets : base par partition, puis par (partition, tranche).
+    pitick(0);
     std::vector<size_t> pbase(kFoldPartitions + 1, 0);
     for (size_t p = 0; p < kFoldPartitions; ++p) {
       size_t tot = 0;
@@ -357,6 +365,7 @@ inline FoldPrepared prepare_fold(const std::vector<ForestEvent>& events, int thr
     });
     r.workers = std::max(r.workers, (u64)created);
     // Passe 3 : internement par partition (table privee), tid locaux.
+    pitick(1);
     std::vector<std::vector<std::pair<FacetKey, u32>>> pools(kFoldPartitions);
     const size_t TP = planned_workers(kFoldPartitions, threads);
     created = parallel_items(kFoldPartitions, (int)TP, [&](size_t p, size_t) {
@@ -382,6 +391,7 @@ inline FoldPrepared prepare_fold(const std::vector<ForestEvent>& events, int thr
                 });
     });
     r.workers = std::max(r.workers, (u64)created);
+    pitick(2);
     std::vector<Rec>().swap(parts);
     mark(&r.t_intern_ms);
     // Passe 5 : fusion k-aire des partitions triees -> keys globales et
@@ -444,6 +454,7 @@ inline FoldPrepared prepare_fold(const std::vector<ForestEvent>& events, int thr
       });
       r.workers = std::max(r.workers, (u64)created_m);
     }
+    pitick(3);
     for (size_t p = 0; p < kFoldPartitions; ++p) std::vector<std::pair<FacetKey, u32>>().swap(pools[p]);
     // Passe 6 : remap parallele.
     created = parallel_ranges(ne * 11, threads, [&](size_t b, size_t e, size_t) {
@@ -455,6 +466,10 @@ inline FoldPrepared prepare_fold(const std::vector<ForestEvent>& events, int thr
       }
     });
     r.workers = std::max(r.workers, (u64)created);
+#ifdef MHGP5_PROFILE_REDUCE
+    pitick(4);
+    std::fprintf(stderr, "profil_intern evenements=%zu facettes=%zu empreintes=%.0f diffusion=%.0f intern+tri=%.0f fusion=%.0f remap=%.0f ms\n", ne, keys.size(), pi[0], pi[1], pi[2], pi[3], pi[4]);
+#endif
     mark(&r.t_merge_ms);
   }
   r.facets = keys.size();
