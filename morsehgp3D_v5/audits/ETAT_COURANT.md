@@ -1,14 +1,13 @@
 # État courant audité de MorseHGP3D v5 — 28 août 2026
 
-- **Dernier pin fonctionnel inspecté :** `556c421e` ; les constats G0 portent
-  sur son introduction à `fe54ccca`, la campagne device/SCALE versionnée sur
-  `c95cfa95`, G1 q3 sur `dd928111`/`839cf1ec` et G1 q4 sur `556c421e`.
-- **Worktree produit observé :** postérieur à `556c421e`, sale sur le nouveau
-  réducteur vivant (`fold_live.hpp`, sa porte, CMake et mutants). Ce chantier
-  est préservé et audité provisoirement, mais ne fait pas partie du verdict du
-  HEAD. Le reçu G0/G1 q3 corrigé reste local et non versionné au HEAD ; il est
-  prêt à être versionné séparément par son propriétaire. Le probe
-  `.codex_fold_contract_probe.cpp` d'un autre audit reste lui aussi non intégré.
+- **Dernier pin produit inspecté :** `615b9bcc`, qui ajoute le réducteur vivant
+  L2 et ses documents. Les constats G0 portent sur `fe54ccca`, la campagne
+  device/SCALE sur `c95cfa95`, G1 q3 sur `dd928111`/`839cf1ec` et G1 q4 sur
+  `556c421e`.
+- **Pin de réception G0/G1 q3 :** `0656bf4c`, sans code produit.
+- **Worktree observé :** aucun code produit postérieur au HEAD ; le probe
+  `.codex_fold_contract_probe.cpp` d'un autre audit reste non intégré et exclu
+  du présent verdict.
 - **Cadre :** `phase=exploration_v5_hors_registre`,
   `backend=cpu_reference`, `profile=quantized_u16_input_only`,
   `mode=audit_independant_math_and_architecture`,
@@ -23,6 +22,13 @@ digests appariés et baisse H2D q3 visible. Les pins G1 q4 complètent ensuite l
 wire sans remplacer SoA. Il ne faut jeter aucun de ces travaux ni redessiner la
 lane. Quatre coutures hôte G0 et les contrats fail-closed/non-vacants G1
 ci-dessous restent toutefois à fermer.
+
+Le HEAD `615b9bcc` ajoute en parallèle un bon cœur L2, exact sur son
+différentiel nominal. Son message et ses documents vont cependant trop loin en
+annonçant cinq mutants tués, T6 vérifié et un facteur mémoire 15 : une porte
+mutante corrompt sa structure, T6 n'est comparé qu'à un pic global et les
+octets publiés ne sont pas du RSS. Le pin reste une base utile ; son statut doit
+être corrigé avant de bâtir L3 dessus.
 
 Le prochain pin facile à recevoir est un **G0 sûr**, puis un petit pin hôte G1
 qui borne les indices et rend chaque branche index falsifiable. La session qui
@@ -56,9 +62,9 @@ validateur épinglé, mais impose désormais un `campaign_schema` explicite et u
 dispatch par version : la liste mouvante du HEAD ne doit pas redéfinir les
 obligations d'un reçu déjà figé.
 
-### Campagne G0/G1 q3 locale au pin `839cf1ec`
+### Campagne G0/G1 q3 versionnée à `0656bf4c`, source `839cf1ec`
 
-Le dossier local `receipts/campagne_g4_v5_20260828_g0_g1/` contient 29
+Le [reçu](../receipts/campagne_g4_v5_20260828_g0_g1/RECU.txt) contient 29
 triplets : 28 codes 0 et le mutant device à 4. Hashes et statuts se
 reconstruisent, le validateur **du pin source** rend
 `campaign_status=complete`, et les quatre bras CPU/GPU/GPU-index ont les mêmes
@@ -73,7 +79,7 @@ les quatre familles, avec mêmes sorties. Cela prouve le câblage emprunté sur 
 runs, mais ni la sûreté générale de G0 ni G1 q4, absent du pin source.
 
 Les temps restent exploratoires : un passage SoA puis index, sans
-contrebalancement. La note locale corrigée indique que le temps H2D q3 baisse
+contrebalancement. La note corrigée indique que le temps H2D q3 baisse
 de 16 à 73 % ; sur `uniform`, q3+q4 vaut 6,015 s et 10,3 % du mur, les 6,251 s
 incluant q2 ; les parts « 9–11 % » et « fold 43 % » ne valent que pour
 `uniform`. Les bras `gpuidx` sont q3-index/q4-SoA. Sur ce passage q3-index
@@ -90,8 +96,9 @@ fichiers par run, la commande et le `timing_scope` exacts, les témoins de pool,
 wire/lots/octets et les planchers de replis. Les mesures ci-dessus viennent de
 la relecture directe des artefacts, pas du seul verdict vert.
 
-Le `SAFETY_RECEIPT.txt` local transcrit les codes remote/scp à 0, les deux
-coupe-circuits, le modèle `SPOT` et l'arrêt exact `TERMINATED`, et le lie au
+Le [reçu de sécurité](../receipts/campagne_g4_v5_20260828_g0_g1/SAFETY_RECEIPT.txt)
+transcrit les codes remote/scp à 0, les deux coupe-circuits, le modèle `SPOT` et
+l'arrêt exact `TERMINATED`, et le lie au
 SHA-256 du journal brut local. `SHA256SUMS` couvre chaque artefact du dossier. Le
 journal, qui contient des métadonnées de session, et toute clé restent exclus.
 Le propriétaire doit encore révoquer sa clé de session puis nettoyer uniquement
@@ -172,9 +179,9 @@ digests déjà obtenus ni la réception fonctionnelle bornée.
 Ces travaux n'empêchent ni G0 ni G1. Les détails de passage à l'échelle restent
 dans [AUDIT_PASSAGE_ECHELLE_20260828.md](AUDIT_PASSAGE_ECHELLE_20260828.md).
 
-### Réducteur vivant local — garder le cœur, réparer la porte
+### Réducteur vivant `615b9bcc` — garder le cœur, réparer la réception
 
-Le prototype courant prend la bonne direction : il sépare racine logique et
+Le code versionné prend la bonne direction : il sépare racine logique et
 conteneur physique, copie le gel pré-lot avant les unions et libère après
 émission. Le différentiel nominal trouve zéro désaccord sur 58 ordres,
 5 194 737 facettes et 733 029 deltas. Après correction de la fausse borne, la
@@ -182,32 +189,71 @@ porte nominale sort 0 avec 5 660 568 relocalisations, zéro invariant et un pic
 d'alias de 7,29 % sur 15 grands ordres. Il ne faut donc ni jeter ce code ni
 revenir au réducteur résident.
 
-La porte n'est cependant pas recevable dans son état local :
+La suite committée n'est cependant pas recevable dans son état actuel :
 
-- le commentaire annonce encore `--reloc-ratio`, option qui n'existe pas. Le
-  nominal emploie maintenant la vraie borne, mais le mutant physique doit être
-  tué par une fixture quadratique explicite et un maximum par alias ;
-- `free-on-absorb` bouclait plusieurs minutes dans sa première forme. La forme
-  réécrite termine maintenant par un core dump au lieu du code 4 : elle reste
-  non mémoire-sûre et aucun `TIMEOUT` CTest ne borne ce cas ;
+- le nominal emploie maintenant une borne small-to-large valide et sort 0 : ce
+  point est corrigé. Le commentaire annonce toutefois encore `--reloc-ratio`,
+  option inexistante. Un maximum par alias et une fixture d'absorptions adverse
+  rendraient le mutant physique causal et court, sans remplacer la borne totale ;
+- `free-on-absorb` recycle `cv[small]` tout en laissant ses alias et l'index
+  pointer sur ce slot. Le champ `dead` empêche leur nettoyage ; le compteur de
+  composantes sous-déborde jusqu'à `UINT64_MAX` et une exécution a terminé par
+  signal au lieu du code 4. Le mutant vise de plus le perdant physique
+  `small`, pas nécessairement l'absorbé sémantique `cb`. Aucun `TIMEOUT` CTest
+  ne borne les six portes ;
+- `root-key-mutable` change le canonique, jamais `logical_root_fid`. Il double
+  essentiellement `canon-not-min-on-union` et ne falsifie pas la séparation
+  entre racine logique et conteneur physique ;
 - T6 compare chaque frontière au pic global `peak_live_exact`, ce qui est trop
   faible. Le compteur exact du lot permet de tester directement
-  `live_aliases == live_exact[b]` ;
+  l'égalité avant et après les morts. Il manque aussi `idx.used == live_alias`,
+  la bijection index/alias, la cohérence des listes et comptes de composantes,
+  l'absence de cycle/doublon et la vacuité finale ;
+- la mort accepte `last_batch < b`, alors que le nominal doit exiger
+  `last_batch == b`. Décaler d'un lot peut être vacant si la facette n'est pas
+  touchée au lot précédent ;
 - la porte compare les deltas mais ne les rejoue pas. Le contrat T5 recevable
   reste `(catalogue externe, deltas) -> partition`, car les deltas seuls ne
   reconstruisent pas les singletons implicites ni `facet_keys` ;
 - `live_bytes_peak` additionne l'état logiquement vivant, pas la mémoire
   allouée : capacités d'arènes, free-lists, scratchs, `firstb`/`lastb`, `keys`
-  et `ev_fid` sont hors compte.
+  et `ev_fid` sont hors compte ;
+- la ligne de résidence mélange deux témoins : `fraction_max=7,29 %` est le pire
+  ratio sur les grands ordres, tandis que `pic_alias=16929`,
+  `facettes_de_l_ordre=733687` et les octets viennent du plus grand pic absolu.
+  Ces deux nombres ne donnent que 2,31 %, pas 7,29 %. Publier deux lignes ou
+  conserver ensemble les champs du témoin qui maximise chaque métrique.
 
 Le petit correctif utile est précis : remplacer `free-on-absorb` par un mutant
-terminant sans crash, poser un `TIMEOUT`, compter les relocalisations **par alias** et
-exiger `max_moves <= ceil(log2(nfid))`, puis tuer la racine physique sur une
-chaîne d'absorptions adverse. Ajouter ensuite l'égalité vivante par lot et le
-rejeu avec catalogue. Renommer enfin la métrique `logical_live_bytes`, ou lui
-adjoindre les capacités et le RSS. Ces cinq coutures reçoivent le prototype sans
+terminant sans crash, poser un `TIMEOUT` dimensionné au nominal et faire sortir
+les mutants dès leur mise à mort. Compter ensuite les relocalisations **par
+alias** et exercer `max_moves <= ceil(log2(nfid))` sur une chaîne d'absorptions
+adverse ; le mutant de coût doit garder sorties et invariants exacts. Muter
+ensuite réellement `logical_root_fid`, puis ajouter l'égalité vivante par lot,
+les invariants structurels et le rejeu avec catalogue.
+Renommer enfin la métrique `logical_live_bytes`, ou lui adjoindre les capacités
+et le RSS, et séparer ses deux témoins. Ces coutures reçoivent le prototype sans
 lui demander une autre architecture. Ne pas relancer toute la matrice de
 mutants avant d'avoir rendu `free-on-absorb` terminant.
+
+Les documents versionnés dans `615b9bcc`, `docs/ECHELLE.md` et
+`docs/PLAN_DE_TESTS.md`,
+devancent donc les preuves en annonçant L2 « livré », cinq mutants tués, T6
+vérifié à toutes les frontières et un facteur mémoire 15. La formulation utile
+avant correction est : **prototype nominal, différentiel reçu ; suite
+mutante, T6 exact et gain mémoire non reçus**. Les 1,77 Mo sont une estimation
+de l'état logique au témoin du plus grand pic, face à 26,4 Mo de deux champs du
+résident ; ce n'est ni la mémoire allouée des deux chemins ni un facteur RSS.
+Rétablir cette phrase garde le pin exploitable sans attendre L3, tout en
+laissant les cases « livré » se fermer avec les portes correspondantes.
+
+Ce pin ne démontre pas encore le gain CPU recherché. `reduce_fold_live` reste
+hors du chemin produit, sa réduction reste séquentielle et son chrono commence
+après la construction FIRST/LAST. L'état vivant peut améliorer la localité ou
+autoriser davantage d'ordres en vol, mais ce sont deux hypothèses à mesurer.
+Comparer résident/vivant en ordre miroir sur le même endpoint, setup et
+catalogue/rejeu inclus, avec temps par étape et RSS ; seulement ensuite choisir
+un routage selon la fraction vivante.
 
 ## Chemin minimal pour recevoir G0
 
@@ -288,23 +334,25 @@ valeurs, calculs et corrections détaillés restent dans
    prochain device.
 2. Pin hôte G1 fonctionnel : bornes d'indices, compteurs/mutants de branche,
    `PointId` q4 adverse et réparation du CTest `--inject`.
-3. Si le fold vivant courant est poursuivi : remplacer son mutant qui plante,
-   borner les CTests, puis recevoir l'égalité vivante par lot et le rejeu T5.
+3. Pour L2 : requalifier les claims du pin, remplacer son mutant qui plante,
+   borner et raccourcir les CTests, puis recevoir structure, égalité vivante par
+   lot et rejeu T5.
 4. Après les deux pins hôte, une réception CUDA **minimale** de q4 index et des
    nouvelles dents suffit ; ne pas rejouer la matrice 50 k déjà acquise.
 5. Mesurer ensuite la double représentation, le setup résident et le contexte
    partagé ; n'optimiser que le poste visible.
-7. G2 seulement si cette ablation montre que les retours intermédiaires q4
+6. G2 seulement si cette ablation montre que les retours intermédiaires q4
    dominent encore ; sinon attaquer G3, qui retire aussi le wire par seed.
-8. En parallèle : préparer le pilote CPU cpuset
+7. En parallèle : préparer le pilote CPU cpuset
    physique/SMT à trois répétitions ; renforcer T5 avant le fold streamé.
 
 ## Validation indépendante
 
-- Build Release CPU au HEAD `556c421e` : succès.
+- Build Release CPU complet au pin `556c421e` : succès ; construction ciblée
+  `mhgp5_fold_live_gate` au pin `615b9bcc` : succès.
 - CTests API, pool, T5, préfixe et lanes q3/q4 batched : 41/41 verts en
-  158,04 s sur le HEAD.
-- Répétition de la porte nominale sous un seul CPU : 22 succès et 78 échecs sur
+  158,04 s au pin `556c421e`.
+- Répétition de la porte du pool sous un seul CPU : 22 succès et 78 échecs sur
   100, défaut de déterminisme reproduit.
 - La campagne versionnée est complète selon son validateur épinglé ; hashes,
   codes et digests ci-dessus ont été rejoués indépendamment.
@@ -313,12 +361,16 @@ valeurs, calculs et corrections détaillés restent dans
   permissivité à corriger, il ne reçoit pas G1.
 - Pas de nvcc ni de device CUDA local. La nouvelle session compile/exécute G0
   et G1 q3 au pin `839cf1ec`; G1 q4 de `556c421e` reste sans réception device.
-- Prototype fold local : nominal code 0 sur 58 ordres, 5 194 737 facettes,
-  zéro désaccord/invariant et pic d'alias 7,29 % sur les grands ordres. Le
-  mutant `free-on-absorb` termine par core dump et les portes n'ont pas de
-  `TIMEOUT` ; suite mutante et claim de performance non reçus.
+- Fold `615b9bcc` : nominal observé à code 0 en 49,2 s sur 58 ordres,
+  5 194 737 facettes, zéro désaccord/invariant et ratio maximal d'alias 7,29 %
+  sur les grands ordres. Sous forte saturation locale, une répétition nominale
+  a atteint son timeout externe de 60 s et chacun des cinq mutants 30 s : ce
+  n'est pas une mesure de régression, mais cela confirme que les portes ne sont
+  ni courtes ni bornées. Les quatre mutants de sortie avaient déjà produit des
+  désaccords sur `uniform`, sans rendre 4 immédiatement ; `free-on-absorb`
+  corrompt les compteurs. Suite mutante et claim de performance non reçus.
 
 GCP non utilisé par cet audit. Les deux sessions appartenaient à Claude et leurs
-journaux locaux montrent l'arrêt ciblé `TERMINATED`. Le dossier local de la
-nouvelle campagne lie cette observation à un reçu expurgé et au hash du journal ;
-la session 13 ne possède encore que sa preuve locale non versionnée.
+journaux locaux montrent l'arrêt ciblé `TERMINATED`. La nouvelle campagne lie
+cette observation à un reçu expurgé versionné et au hash du journal ; la session
+13 ne possède encore que sa preuve locale non versionnée.

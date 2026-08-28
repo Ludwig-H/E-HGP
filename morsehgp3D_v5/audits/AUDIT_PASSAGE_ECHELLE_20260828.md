@@ -1,9 +1,10 @@
 # Conception auditée de résolution — passage à 10–30 millions de points
 
-- **Derniers commits techniques relus pour ce sujet :** `fb7e9d40` pour la
+- **Derniers commits techniques relus pour ce sujet :** `615b9bcc` pour le
+  réducteur vivant, `fb7e9d40` pour la
   porte de préfixe durcie et `f4b554fe` pour le smoke T5
-  `(catalogue, deltas) -> partition` ; HEAD observé `556c421e`, dont les
-  changements G1 sont indépendants du passage à l'échelle du fold.
+  `(catalogue, deltas) -> partition`. Les changements G1 antérieurs restent
+  indépendants du passage à l'échelle du fold.
 - **Cadre :** `phase=exploration_v5_hors_registre`,
   `backend=cpu_reference`, `profile=quantized_u16_input_only`,
   `mode=audit_independant_math_and_architecture`,
@@ -43,31 +44,46 @@ explicitement décrite sans fausse cocircularité et mutants propres aux champs
 d'événement et niveaux de lots. Ces remarques sont closes et ne doivent plus
 être remises dans l'ordre de travail.
 
-### Prototype L2 concurrent — cœur prometteur, porte à corriger
+### Pin L2 `615b9bcc` — cœur prometteur, claims à requalifier
 
-Le prototype non committé `fold_live.hpp` reproduit nominalement le résident :
+Le réducteur `fold_live.hpp`, désormais versionné et poussé, reproduit
+nominalement le résident :
 58 ordres, 5 194 737 facettes, mêmes deltas/compteurs et zéro invariant violé.
 Après contre-audit, sa porte nominale passe aussi : 5 660 568 relocalisations,
-zéro invariant, 15 grands ordres mesurés et un pic d'alias de 7,29 % sur ceux-ci.
-La fausse borne quatre fois trop stricte a été remplacée par la vraie borne
-small-to-large. Le commentaire initial sur `--reloc-ratio` reste à retirer ;
+zéro invariant, 15 grands ordres mesurés et un ratio maximal d'alias de 7,29 %
+sur ceux-ci ; une exécution nominale indépendante termine au code 0 en 49,2 s.
+La fausse borne quatre fois trop stricte a été remplacée par une borne agrégée
+small-to-large valide mais lâche. Le commentaire initial sur `--reloc-ratio`
+reste à retirer ;
 une fixture où un nouveau singleton logique absorbe répétitivement une grande
 composante encore vivante doit encore tuer causalement
 `physical-root-is-logical-root`, de préférence via un compteur maximum par
 alias plutôt qu'un ratio empirique agrégé.
 
-Le mutant `free-on-absorb` initial recyclait un slot `Component` encore
-référencé et bouclait à 100 % CPU. Sa réécriture ne boucle plus, mais l'essai
-courant termine par un core dump au lieu du code 4 : elle n'est toujours pas
-structurellement sûre. Remplacer ce mutant par une faute qui conserve listes et
-index mais viole l'invariant attendu, auditer la structure avant recyclage et
-borner tous les CTests du réducteur par `TIMEOUT` ; ni hang ni crash ne doit
-tenir lieu de mutant tué.
+Le mutant `free-on-absorb` recycle encore `cv[small]` alors que ses alias et
+l'index conservent cet indice. Le champ `dead` empêche ensuite leur nettoyage :
+la réécriture n'est pas structurellement sûre, sous-décompte les composantes
+jusqu'à `UINT64_MAX` et peut terminer par signal au lieu du code 4. Elle cible
+en outre le perdant **physique** `small`, pas nécessairement l'absorbé
+sémantique `cb`. Simuler la faute sans mémoire invalide : mémoriser les alias de
+`cb`, faire l'union normale, puis les évincer proprement après émission. Auditer
+la structure avant recyclage et borner tous les CTests du réducteur par
+`TIMEOUT` ; ni hang ni crash ne doit tenir lieu de mutant tué.
 
-Deux contrats sont encore plus faibles que les commentaires : T6 compare les
+`root-key-mutable` ne teste pas non plus ce que son nom promet : il remplace le
+canonique par la tête physique et duplique essentiellement
+`canon-not-min-on-union`, sans muter `logical_root_fid`. Garder le canonique
+minimum, corrompre uniquement la racine logique et utiliser une fixture où
+gagnant physique et absorbant logique diffèrent, puis où au moins deux sorties
+rendent l'ordre post-lot observable.
+
+Trois contrats sont encore plus faibles que les commentaires : T6 compare les
 alias de chaque frontière au **pic global** des durées de vie, alors que les
 tableaux déjà construits permettent l'égalité
-`live_aliases == live_exact[b]`. Et la porte compare les vecteurs de deltas sans
+`live_aliases == live_exact[b]` avant morts et l'égalité exacte après morts.
+Elle ne valide ni `idx.used == live_alias`, ni la bijection index/alias, ni les
+listes `prev/next` et `count`, ni la vacuité finale. Enfin, la porte compare les
+vecteurs de deltas sans
 les rejouer : T5 reste donc `(catalogue externe, deltas) -> partition`, jamais
 `deltas -> facet_keys`, notamment à cause des singletons implicites. Raccorder
 le rejeu existant avec le catalogue du résident ferme cette couture sans
@@ -82,6 +98,20 @@ racine morte, absorption adverse et hash constant. L'exactitude nominale est un
 progrès réel ; le gain de mur et de mémoire reste à établir. En attendant,
 renommer `live_bytes_peak` en `logical_live_bytes` évite de lui attribuer une
 mesure d'allocation qu'il ne porte pas.
+
+La ligne imprimée doit aussi séparer deux témoins. `fraction_max=7,29 %` vient
+du pire ratio sur les grands ordres, alors que `pic_alias=16929`,
+`facettes_de_l_ordre=733687` et les octets viennent du plus grand pic absolu ;
+ce dernier couple vaut 2,31 %. Conserver ensemble numérateur, dénominateur et
+octets du témoin qui maximise chaque mesure, ou publier deux lignes nommées.
+
+En conséquence, les lignes du HEAD qui marquent L2 « livré » dans
+`docs/ECHELLE.md` et annoncent cinq mutants tués dans `docs/PLAN_DE_TESTS.md`
+sont prématurées : `run_expect.cmake` refuse explicitement un arrêt par signal,
+donc le core dump de `free-on-absorb` n'est pas un code 4. Remplacer
+provisoirement « livré » par « prototype nominal », `T6 vérifié` par le
+contrat faible effectivement testé et « facteur 15 » par « estimation logique
+au témoin ». Cette requalification n'enlève rien au progrès d'exactitude.
 
 ## Solution 1 — fold vivant sans ancienne forêt union-find
 

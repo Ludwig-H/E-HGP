@@ -1,9 +1,10 @@
 # Audit de résolution — rendement GPU et multi-CPU
 
-- **Dernier pin inspecté :** `556c421e` ; la baseline device/SCALE versionnée
+- **Dernier pin produit inspecté :** `615b9bcc` ; la baseline device/SCALE versionnée
   provient de `c95cfa95`, G0 de `fe54ccca` et G1 q3/q4 des trois commits
   `dd928111`–`556c421e`. Le nouveau reçu device exécute G0 et G1 q3 au pin
-  `839cf1ec` ; il ne reçoit pas G1 q4, postérieur.
+  `839cf1ec` ; il est versionné avec cet audit à `0656bf4c` et ne reçoit pas
+  G1 q4, postérieur.
 - **État courant et priorités :** voir
   [`ETAT_COURANT.md`](ETAT_COURANT.md). Les sections G1–G3 ci-dessous restent
   des guides de conception ; les anciennes conditions de campagne sont
@@ -13,10 +14,10 @@
   `mode=audit_independant_math_and_architecture`,
   `public_status=not_claimed`.
 
-La nouvelle session locale au pin `839cf1ec` confirme nominalement huit
+Le reçu de la nouvelle session au pin `839cf1ec` confirme nominalement huit
 exécuteurs G0 et le wire index q3 avec digests égaux et H2D réduit. Elle ne
 couvre pas G1 q4 et ne ferme pas les défauts de sûreté du pool ; son dossier
-est préparé avec un manifeste d'artefacts et un reçu de sûreté expurgé. La
+versionné contient un manifeste d'artefacts et un reçu de sûreté expurgé. La
 réception exacte et le plus petit ordre de correction sont centralisés dans
 `ETAT_COURANT.md`.
 
@@ -28,8 +29,9 @@ Le faible gain n'est pas mystérieux :
   ancres, seeds et formes sur CPU ;
 - les mêmes sites sont rematérialisés et recopiés pour chaque ancre ;
 - q4 revient trois fois sur le CPU pour filtrer et compacter ;
-- jusqu'à 48 producteurs CPU créent autant d'exécuteurs/streams éphémères,
-  puis leurs lots résiduels sont vidés séquentiellement ;
+- dans la baseline de session 13, jusqu'à 48 producteurs CPU créaient autant
+  d'exécuteurs/streams éphémères ; G0 les borne désormais, mais les lots
+  résiduels restent vidés séquentiellement ;
 - côté CPU, `--threads` n'est pas un budget global et le dernier reduce/digest
   par K conserve une longue traîne séquentielle et mémoire.
 
@@ -382,7 +384,11 @@ avec digest, de 217,361 à 19,409 s, soit 11,20×. La génération gagne environ
 (5,430 contre 5,995 s) et occupe environ 71 % du cumul de fold à 48 fils ; le
 digest reste proche de 4,30 s. Le gain 32→48 tombe à 1,10×/1,08× et le RSS monte
 d'environ 3,30 à 4,89/4,96 Gio. Le verrou n'est donc plus le nombre de
-producteurs : c'est d'abord l'état vivant et le trafic mémoire du reduce.
+producteurs : c'est la phase de reduce séquentielle et le digest fixe. L'état
+vivant et le trafic mémoire sont une hypothèse explicative à profiler, pas
+encore une cause reçue ; une table de hash et des listes intrusives peuvent
+aussi ralentir le chemin court. Le fold vivant de `615b9bcc` reste hors du
+chemin produit et n'a pas encore été comparé au résident sur le même périmètre.
 
 Scinder le protocole :
 
