@@ -1,292 +1,266 @@
-# Audit ciblé — pourquoi les gains GPU et multi-CPU plafonnent
+# Audit de résolution — rendement GPU et multi-CPU
 
-- **Dernier commit fonctionnel relu :** `ab2c2563` ; chemins de performance
-  reçus aux pins `82f613d3` (CPU, 50–200 k) et `63deda74` (étapes device,
-  50 k).
-- **Reçus principaux :** `receipts/campagne_g4_v5_20260828_grille/` et
-  `receipts/campagne_g4_v5_20260828_etapes_device/`, G4, 48 fils.
-- **Cadre :** `phase=exploration_v5_hors_registre`, `backend=cpu_reference`, `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`.
+- **Dernier pin reçu :** `ab2c2563` ; mesures CPU au pin `82f613d3` et
+  instrumentation device au pin `63deda74`.
+- **Worktree observé :** postérieur à `ba31c169`, encore non committé. Il
+  ajoute la sûreté du fold, des métriques CUDA et `SCALE_THREADS` ; les
+  remarques sur ce code guident Claude mais ne constituent pas une réception.
+- **Cadre :** `phase=exploration_v5_hors_registre`,
+  `backend=cpu_reference`, `profile=quantized_u16_input_only`,
+  `mode=audit_independant_math_and_architecture`,
+  `public_status=not_claimed`.
 
-## Verdict
+## Réponse et direction
 
-La réponse courte est : **le GPU actuel accélère une fraction devenue petite du
-pipeline, après avoir payé sa matérialisation sur CPU ; le multi-CPU rencontre
-ensuite des réductions séquentielles, des traînes indivisibles et beaucoup de
-trafic mémoire.** Les meilleurs gains récents viennent de certificats qui
-suppriment du travail, pas de l'ajout de matériel.
+Le faible gain n'est pas mystérieux :
 
-Deux nuances sont nécessaires :
+- le GPU ne remplace que les corps q3/q4, après construction des covers,
+  ancres, seeds et formes sur CPU ;
+- les mêmes sites sont rematérialisés et recopiés pour chaque ancre ;
+- q4 revient trois fois sur le CPU pour filtrer et compacter ;
+- jusqu'à 48 producteurs CPU créent autant d'exécuteurs/streams éphémères,
+  puis leurs lots résiduels sont vidés séquentiellement ;
+- côté CPU, `--threads` n'est pas un budget global et le dernier reduce/digest
+  par K conserve une longue traîne séquentielle et mémoire.
 
-1. Le GPU n'est pas uniformément sans gain. Au reçu courant, `terrain` gagne
-   10,8 % sur le mur interne et `scanline` 2,2 %, tandis que `uniform` et
-   `eight_clusters` régressent. Un passage unique et non contrebalancé ne suffit
-   toutefois pas à établir un gain reproductible.
-2. Le faible scaling multi-CPU sur G4 **n'est pas encore mesuré**. Les 221
-   sorties suivies à 48 fils et les 36 sorties à 8 fils diffèrent de machine,
-   de taille ou de pin ; aucune campagne ne balaie 1 à 48 fils sur le même cas.
-   `ouvriers=48` prouve la création de fils, pas leur occupation ni un speedup.
+La solution utile n'est donc pas seulement une nouvelle campagne. Elle tient
+en trois changements bornés :
 
-## Ce que dit réellement le reçu GPU courant
+1. **un petit pool GPU persistant**, indépendant des producteurs CPU ;
+2. **la géométrie globale résidente**, avec seulement des indices u32 envoyés
+   par cover ;
+3. **la compaction q4 stable sur device**, avec un seul retour final.
 
-Les murs ci-dessous viennent des sorties CPU/GPU appariées à 50 k. La dernière
-colonne est un plafond d'Amdahl volontairement trop favorable : elle suppose que
-**tout** le temps CPU `rects q3 + rects q4`, travail hôte inclus, disparaît.
+Ces changements attaquent directement les octets et les synchronisations qui
+plafonnent le port actuel. Pour le multi-CPU, il faut d'abord séparer la
+sensibilité au budget d'ouvriers d'un véritable speedup 1→N sous cpuset.
 
-| famille | CPU (s) | GPU (s) | CPU / GPU | q3 + q4 dans le mur CPU | plafond idéal |
-|---|---:|---:|---:|---:|---:|
-| `uniform` | 56,615 | 57,517 | 0,984× | 8,9 % | 1,10× |
-| `terrain` | 16,432 | 14,650 | 1,122× | 51,6 % | 2,06× |
-| `eight_clusters` | 62,157 | 63,898 | 0,973× | 23,7 % | 1,31× |
-| `scanline_single_pass` | 12,629 | 12,348 | 1,023× | 48,0 % | 1,92× |
+## Base chiffrée conservée
 
-La q3 device est plus lente dans les quatre familles. La q4 gagne sur `terrain`
-et `scanline`, mais perd sur `uniform` et `eight_clusters`. Le routage adaptatif
-par `cover >= 256` ne change pas la conclusion sur un passage : 62,936 s pour
-`eight_clusters` et 12,128 s pour `scanline`, contre 62,157 s et 12,629 s sur
-CPU. Il choisit selon la taille du cover, pas selon le travail restant après
-les certificats.
+Au reçu n° 12, les murs CPU/GPU appariés à 50 k restent mixtes :
 
-Le protocole `v5_campaign_remote.sh` exécute une seule série CPU, puis une seule
-série GPU, toujours dans cet ordre. Il ne contrebalance pas les passages, ne les
-répète pas et ne publie ni dispersion ni intervalle. Ces chiffres décrivent le
-pin ; ils ne séparent pas un petit effet du bruit de machine.
+| famille | CPU (s) | GPU (s) | CPU / GPU |
+|---|---:|---:|---:|
+| `uniform` | 56,615 | 57,517 | 0,984× |
+| `terrain` | 16,432 | 14,650 | 1,122× |
+| `eight_clusters` | 62,157 | 63,898 | 0,973× |
+| `scanline_single_pass` | 12,629 | 12,348 | 1,023× |
 
-## Pourquoi le GPU plafonne
+Le reçu prouve compilation/exécution CUDA, quatre digests CPU/GPU égaux et le
+mutant device tué. Un passage CPU puis GPU, non contrebalancé et non répété, ne
+prouve pas un gain reproductible. Il suffit cependant à montrer que le port
+n'est pas cassé et que certaines familles ont un levier q4.
 
-### 1. Le port ne couvre que les corps q3/q4
+Sur `uniform`, q3+q4 ne représente que 8,9 % du mur CPU : même leur disparition
+donnerait un plafond idéal proche de 1,10×. Sur `scanline` 200 k, q4 représente
+au contraire environ 80 % du mur ; c'est la cible principale du chantier.
 
-`mhgp5_cuda` remplace uniquement `q3_override` et `q4_override`. Index, trois
-WSPD, q2, RLE, préfiltre, census, expansion, fold et digests restent sur CPU.
-Sur `uniform` 50 k, même un q3+q4 instantané ne peut donc procurer qu'environ
-1,10×. À 200 k, le fold et le digest dominent encore `uniform`; le GPU courant
-ne les touche pas.
+## P0 — finir correctement l'instrument avant toute campagne
 
-### 2. Les certificats CPU ont retiré précisément le travail favorable au GPU
+Le travail courant apporte de bons éléments : événements CUDA séparés,
+compteurs d'octets, histogrammes de lots, attente/réservation hôte, compteur
+de concurrence et suppression de la barrière H2D intrusive. Quatre raccords
+restent à fermer.
 
-Les tests d'ancre, morceaux de corde, prétests et grille tuent les ancres/seeds
-avant le balayage. Entre l'ancien reçu et le pin courant, le volume device
-`eight_clusters` q3 est passé de 18,2 milliards à 126,5 millions de seeds,
-environ 144 fois moins ; q4 passe d'environ 1,5 milliard à 91 millions. C'est
-une bonne optimisation produit, mais elle réduit le levier du kernel.
+### Le validateur SCALE lit encore l'ancien format
 
-La sonde q3 indique en outre que 98 % des seeds tués le sont après 8 à 15 sites
-sur CPU. Un warp device évalue au minimum son premier paquet de 32 sites. Cette
-amplification logique est certaine ; son coût dans le mur ne l'est pas encore.
+`run.hpp` imprime désormais :
 
-### 3. Le « GPU » commence par construire le travail sur CPU
+```text
+temps_fold_mur_ms=... (etages A et B, fold_inflight=N, pic_mesure_en_vol=P)
+```
 
-Le chemin q3 construit sur l'hôte les covers, compte deux fois les seeds aigus,
-copie quatre tableaux SoA du cover, forme `AffineSeed` et calcule même la clé et
-le niveau de chaque `BallCandidate` avant de connaître le verdict du device
-(`q3_lane_batched.hpp:180-287`). Une seed morte a donc déjà payé une part
-importante du chemin exact.
+`validate_v5_campaign.py`, son selftest et les tests Python fabriquent encore
+`N ordre(s) en vol`. Les tests passent donc sur un faux producteur, tandis que
+toute vraie sortie serait rejetée.
 
-La q4 fait également sur l'hôte prétests, cover, grille, lentille, comptages et
-formes de toutes les seeds, puis recopie coordonnées et identifiants du cover
-dans chaque lot (`q4_lane_batched.hpp:193-365`). Le nuage et l'index ne sont pas
-résidents globalement sur le device ; les mêmes points peuvent être recopiés
-pour de nombreuses ancres.
+Le parseur doit exiger les deux champs nommés, vérifier
+`1 <= pic_mesure_en_vol <= fold_inflight` et comparer le budget demandé.
+Ajouter une fixture au format produit et un mutant de pic invalide.
 
-### 4. La q4 est un aller-retour CPU/GPU en trois actes
+### Les nouveaux mutants ne sont pas encore enregistrés
 
-Chaque lot q4 effectue :
+`log2hist-class-shift` et `gauge-no-peak` sont annoncés par
+`gpu_instrument_gate.cpp`, mais absents du registre de mutants et de CMake.
+La porte nominale compile et passe manuellement ; les deux injections rendent
+actuellement le code 2, pas le code 4 contractuel.
 
-- kernel K1, retour de tous les verdicts et synchronisation ;
-- sélection CPU des seeds vivants et calcul des offsets ;
-- kernel K2, retour d'un octet **par paire** et synchronisation ;
-- comptage et compaction CPU ;
-- kernel K3, retour des profondeurs et synchronisation.
+Enregistrer les noms, les cibles nominale/mutantes et vérifier que le registre
+les reconnaît avant de documenter qu'ils sont tués.
 
-Il n'y a ni compaction device entre K1/K2/K3, ni double buffering d'un même
-exécuteur. La q3 fait aussi H2D, kernel, D2H et synchronisation à chaque lot.
-Les buffers hôte sont des `std::vector` ordinaires, pas une mémoire épinglée
-prévue pour recouvrir sûrement copies et calcul.
+### Le cycle de vie CUDA échappe à la décomposition
 
-### 5. Quarante-huit producteurs ne forment pas un ordonnanceur GPU
+Les `Q3DeviceExecutor` et `Q4DeviceExecutor` sont `thread_local` dans des
+ouvriers éphémères. Création de stream/événements, `cudaMalloc`, `cudaFree` et
+destruction du stream sont incluses dans le mur de lane mais absentes de
+`executor_ms_sum`. Ce dernier commence également après une partie de la
+validation et de la préparation des vecteurs.
 
-Chaque ouvrier CPU possède un exécuteur `thread_local`, son flux et ses tampons.
-Les équipes `std::thread` sont recréées pour la lane puis détruites : les flux
-et allocations ne survivent pas à l'équipe. Les reliquats des 48 lots sont en
-outre vidés après la jointure depuis le fil appelant, donc séquentiellement.
+À court terme, ajouter `executors_created` et `lifecycle_ms` ou élargir
+explicitement le chrono. La correction architecturale est le pool persistant
+décrit ci-dessous.
 
-Cette architecture prouve l'égalité de chaque lot, mais ne borne ni le nombre
-optimal de flux, ni la contention, ni la traîne. Il faut mesurer avant de
-conclure que 48 flux sont trop nombreux ; le code actuel ne fait en tout cas ni
-agrégation globale des petits lots, ni pilotage par charge device.
+### Les timelines ne sont pas additives
 
-### 6. Le compteur historique `kernel_ms` ne permet pas le diagnostic
+Les événements `device_sum=(h2d,kernels,d2h)` décrivent la timeline CUDA par
+exécuteur. `host_sum=(issue,wait,prepare,...)` décrit la timeline hôte ;
+`wait` recouvre justement une partie du device. Les imprimer séparément et ne
+jamais soustraire ou additionner ces deux groupes comme un mur.
 
-La q3 sait mesurer H2D, kernel et D2H séparément, mais ne remonte que le kernel
-à la CLI. La q4 place son événement après les copies initiales et englobe les
-deux retours, les synchronisations et les boucles CPU entre ses trois kernels.
-La CLI additionne ensuite ces deux grandeurs de sens différent sur jusqu'à 48
-flux et les imprime sous un seul `kernel_ms`.
+La porte CUDA doit exercer les vraies copies/kernels, pas seulement
+l'arithmétique du struct :
 
-Cette somme n'est ni un mur GPU ni un temps kernel homogène. Les phrases
-historiques « la cause n'est pas le kernel » ne sont donc pas démontrées au pin
-courant. Matérialisation et orchestration sont des suspects étayés par le code,
-pas encore une décomposition quantitative.
+- `launches == compteur attendu` et `lots == flushes` ;
+- q3 : un lancement par lot ;
+- q4 : entre un et trois lancements par lot selon les survivants ;
+- octets H2D/D2H strictement positifs sur les fixtures non vides ;
+- pic de concurrence dans le domaine du nombre d'exécuteurs.
 
-### Réception de l'instrument et de la session G4 n° 12
+## G0 — pool GPU borné et persistant
 
-`ab2c2563` apporte un vrai progrès de preuve : 25 runs terminés au pin
-`63deda74`, compilation/exécution CUDA, quatre digests CPU/GPU égaux et mutant
-device tué. Le résultat de bout en bout reste mixte : 0,968× `uniform`, 1,124×
-`terrain`, 0,958× `eight_clusters` et 1,015× `scanline` en CPU/GPU. Il confirme
-la réponse générale de cet audit sans établir un gain reproductible.
+Découpler `threads_cpu` de `gpu_executors` :
 
-La q3 permet maintenant une conclusion étroite : son événement K1 totalise
-204 ms pour 87 millions de seeds `uniform`; l'arithmétique du kernel q3 n'est
-pas le poste dominant de ce chemin matérialisé. Les conclusions plus larges de
-`docs/GPU.md:196-221` vont toutefois au-delà de la mesure :
+- les producteurs CPU construisent des descripteurs de lots et les poussent
+  dans une file bornée avec backpressure ;
+- un pool de 1, 2, 4 ou 8 exécuteurs, créé une fois pour la lane, possède les
+  streams, événements et buffers réutilisables ;
+- les reliquats sont soumis à la même file, jamais vidés séquentiellement après
+  la jointure ;
+- la sortie porte un numéro de lot et est fusionnée dans l'ordre déterministe
+  actuel ;
+- la géométrie device est partagée en lecture seule entre les exécuteurs.
 
-- q4 ne sépare pas K1 de son D2H : `k1+d2h=42,2 s` contre `h2d=27,4 s` sur
-  `uniform`. `kernel_ms=7,5 s` mélange les trois kernels, les transferts
-  intermédiaires et les intervalles hôte. Le reçu ne prouve donc ni « cœur q4 en
-  quelques secondes » ni une causalité H2D dominante ;
-- `sg3.wall` et `sg4.wall` restent des sommes des appels `scan()` concurrents,
-  pas des chemins critiques. Le calcul « 4,3 s − 76,4/48 = 2,7 s de reste
-  hôte » mélange un mur de lane et une moyenne de temps-exécuteur ; il doit être
-  retiré ;
-- q3 conserve un résidu cumulé non classé majeur : respectivement 5,2 / 22,9 /
-  15,0 / 14,8 s sur `uniform` / `terrain` / `eight_clusters` / `scanline` entre
-  `wall` et H2D+K1+D2H. Réservations, appels CUDA, attente de contention et
-  ordonnanceur restent à séparer ;
-- q4 transfère sept tableaux `i64` et un `PointId` `u32`, soit 60 octets/site,
-  pas huit tableaux `i64` ni 64 octets/site. Les seeds, ancres, lentilles et
-  transferts intermédiaires s'ajoutent. Sans compteur d'octets, « 37 Go » et
-  « 9 Go/s » sont des estimations, pas des mesures ;
-- l'adaptatif change bien la charge : q4 cumulée passe de 114,7 à 54,5 s sur
-  `eight_clusters` et de 27,5 à 18,3 s sur `scanline`; le mur interne baisse
-  aussi sur ces passages. Cela ne prouve pas un avantage contre CPU, mais
-  contredit « aucun seuil ne change ce verdict » ;
-- la synchronisation ajoutée juste après H2D est toujours intrusive. La session
-  reçoit le chemin instrumenté, pas la neutralité de cette barrière.
+Le sweep `gpu_executors={1,2,4,8}` devient alors interprétable. Le nombre de
+producteurs CPU peut rester 48 sans créer 48 contextes de travail concurrents
+sur un seul GPU.
 
-La conclusion recevable est donc : **q3-kernel petit, transferts/orchestration
-et concurrence fortement suspects, causalité q4 encore ouverte**. Conserver la
-direction index/positions résidents et compaction device, mais ajouter compteurs
-d'octets, événements autour de chaque kernel/D2H, vrai mur de lane et ablation
-de la barrière avant de figer l'architecture.
+Premier critère de réussite : mêmes digests et compteurs, moins
+`executors_created`, disparition du flush séquentiel et baisse du mur de lane.
+Un gain de bout en bout n'est pas exigé de ce commit isolé.
 
-Le `session.log` local contient campagne, copie et arrêt ciblé `TERMINATED`, mais
-`*.log` reste ignoré. Reporter les codes de campagne/copie et la certification
-d'arrêt dans le `RECU.txt` suivi rendrait le reçu autonome dans un checkout
-frais.
+## G1 — géométrie résidente et covers par indices
 
-## Pourquoi le multi-CPU devient sous-linéaire
+Aujourd'hui, chaque ancre recopie environ 32 octets/site en q3 et 60
+octets/site en q4 pour des valeurs dérivées de la même géométrie. Or
+`AnchorScratch::fill_affine_sites` calcule essentiellement, pour un site `z` :
 
-### 1. Le fold conserve un noyau séquentiel par ordre
+```text
+u = 2*z - a - b
+q = dot(u, u) - D2
+```
 
-`prepare_fold` parallélise tri et internement, mais `reduce_fold` reste
-séquentiel et parcourt un état d'union-find à accès dispersés. Le digest v4
-parcourt ensuite séquentiellement clés, partition finale et deltas de chaque K.
-`fold_inflight=2` ne parallélise pas une réduction : il autorise seulement deux
-ordres B en vol. Le dernier gros K garde donc une traîne mono-fil.
+Téléverser une fois les positions quantifiées et `PointId` du `CloudIndex`.
+Pour chaque cover, n'envoyer ensuite que son ordre d'indices u32, les paramètres
+d'ancre et les petits offsets nécessaires. Le kernel reconstruit `u` et `q` en
+arithmétique entière exacte.
 
-Sur `uniform` 200 k, le mur total est 253,3 s et le mur du fold 115,0 s
-(45,4 %), avec 128,2 s de reduce et 66,1 s de digest cumulés. Sur
-`eight_clusters` 200 k, génération et fold représentent respectivement 50,4 %
-et 30,9 % du mur. Ajouter des fils à la préparation ne supprime aucun de ces
-octets ni la traîne du dernier ordre.
+Le terme linéaire par site passe ainsi :
 
-### 2. La famille lente ne place pas son goulot au même endroit
+- q3 : environ 32 → 4 octets/site ;
+- q4 : environ 60 → 4 octets/site.
 
-Sur `scanline` 200 k, la génération prend 244,1 s sur 267,7 s (91,2 %) et la
-q4 par rectangles 214,5 s (80,1 %). Les lanes q2, q3 et q4 sont exécutées les
-unes après les autres. À l'intérieur d'une lane, l'unité de travail est un
-rectangle entier : ancres, seeds et sites d'un rectangle ne sont pas subdivisés
-entre ouvriers. Les rectangles lourds produisent donc une traîne que le tirage
-dynamique par rectangle ne peut pas couper.
+La q4 récupère coordonnées et identifiants depuis la géométrie résidente ;
+`lens_sites` peut référencer les positions du cover. L'ordre du cover reste
+inchangé, donc l'ordre des seeds et émissions reste falsifiable contre le
+chemin actuel.
 
-Le reçu confirme le diagnostic algorithmique : rendre concurrent le fold fait
-346 → 258 s sur `uniform` (1,34×, avec +23 % de RSS) mais ne change pas
-`scanline` ; la grille, qui retire des balayages, fait 502 → 268 s sur
-`scanline` (1,87×). Retirer le travail lourd a plus d'effet que lui ajouter des
-fils.
+Implémentation sûre :
 
-### 3. Une partie importante du coût est du trafic, pas du calcul divisible
+1. introduire un objet RAII `GpuGeometry` partagé par les exécuteurs ;
+2. conserver temporairement les deux wires, SoA actuel et `site_index_u32` ;
+3. ajouter un kernel alternatif qui reconstruit `u/q` ;
+4. comparer bit à bit verdicts, profondeurs, émissions, compteurs et digests ;
+5. graver le compteur H2D et une borne par lot incluant le téléversement
+   géométrique amorti ;
+6. retirer le wire SoA seulement après réception CUDA.
 
-Les sorties par ouvrier sont concaténées séquentiellement après chaque passe.
-RLE termine par `unique/erase`; préfiltre, census et expansion fusionnent leurs
-vecteurs temporaires ; le tri stable parallèle copie un tableau complet et se
-synchronise à chaque niveau. Le fold `uniform` 200 k manipule 89,8 millions
-d'événements et 562 millions de facettes cumulées.
+Fixtures prioritaires : coordonnées aux bornes u16, `D2` maximal, cas
+cocirculaire, permutation conservant l'ordre du cover, cover vide/minimal et
+lot surdimensionné.
 
-Le commentaire du reduce attribue environ 30 défauts de cache par événement à
-ses tableaux historiques. Cette lecture est cohérente avec le plafonnement,
-mais aucune campagne ne publie encore bande passante, LLC misses ou topologie :
-une saturation mémoire reste à mesurer, pas à proclamer.
+## G2 — compaction q4 stable sur device
 
-### 4. `--threads` n'est pas un budget global
+Le chemin q4 courant fait :
 
-Les primitives recréent et joignent leurs équipes à chaque passe, sans pool
-persistant. Pendant qu'une préparation A emploie jusqu'à `threads` ouvriers,
-des fils B du fold peuvent tourner en plus. `--threads=1` n'impose donc pas un
-processus strictement mono-cœur ; `--threads=48` ne garantit pas non plus que 48
-cœurs font du travail utile. Le champ `fold=48` n'est que le maximum d'ouvriers
-créés par une préparation.
+1. K1, retour complet des verdicts ;
+2. sélection CPU des seeds ;
+3. K2, retour d'un octet par paire ;
+4. compaction CPU ;
+5. K3, retour des profondeurs.
 
-Une contre-sonde locale au HEAD, un passage non contrebalancé sur une machine
-4 cœurs / 8 fils matériels, `uniform`, n=4000, K=1..10, digest actif, donne :
+Remplacer les deux retours intermédiaires par des scans/sélections stables sur
+device :
 
-| `--threads` | mur (s) | accélération contre 1 |
-|---:|---:|---:|
-| 1 | 58,04 | 1,00× |
-| 2 | 31,40 | 1,85× |
-| 4 | 17,70 | 3,28× |
-| 8 | 13,57 | 4,28× |
+- compacter les seeds K1 dans l'ordre initial ;
+- construire et compacter les paires K2 dans l'ordre `(seed,lens)` ;
+- lancer K3 sur le résultat compact ;
+- rapatrier seulement les émissions finales et les compteurs agrégés.
 
-Ce n'est pas un reçu de performance : ordre non contrebalancé, un seul passage,
-machine partagée et baseline encore pipelinée par K. Cela réfute seulement la
-formulation « aucun grand gain CPU » : le gain existe jusqu'aux cœurs locaux,
-puis le rendement supplémentaire chute fortement sur les fils matériels.
+La stabilité est contractuelle : le résultat doit rester dans le même ordre
+que le filtrage CPU, indépendamment du découpage en blocs. Une porte compare
+chaque tableau intermédiaire sur de petits lots avant de se contenter du
+digest final.
 
-## Plan de fermeture utile
+G1 précède G2 : réduire le trafic initial permet de mesurer proprement ce que
+les retours intermédiaires coûtent encore.
 
-### P0 — mesurer avant la prochaine réécriture
+## Multi-CPU — mesurer puis corriger le vrai goulot
 
-1. Ajouter une campagne `SCALE_THREADS` au même pin, même G4, mêmes entrées :
-   `threads` dans 1, 2, 4, 8, 16, 24, 32, 48 ; `fold_inflight` dans 1, 2, 3 ;
-   digest ON et OFF séparés. Contrebalancer l'ordre, répéter et exiger les mêmes
-   digests et compteurs de travail.
-2. Graver topologie/affinité et les sorties GNU time complètes, puis au minimum
-   task-clock, CPUs réellement utilisés, cycles, LLC misses, migrations et
-   bande passante si disponible. Les `.status.time` actuels ne sont pas suivis.
-3. Pour le GPU, publier de vrais murs q3 et q4 : préparation, octets H2D,
-   K1/K2/K3, octets D2H, compactage, post-traitement, lots p50/p95/max et nombre
-   de flux actifs. Ne jamais additionner des flux et nommer la somme « mur ».
-4. Faire un banc CPU/GPU contrebalancé et répété, avec échauffement explicite,
-   sur les mêmes pins et au moins aux tailles où q4 domine. Le contrat 50 k seul
-   est trop favorable à Amdahl sur `uniform` et trop petit pour le cas
-   `scanline` 200 k qui motive le port.
+`--threads=1` n'est pas un run à un CPU. Le fil principal peut préparer K+1
+pendant qu'un fil B réduit K, et plusieurs B peuvent être actifs avec
+`fold_inflight > 1`. La phase `SCALE_THREADS` mesure donc une réponse au budget
+d'ouvriers, pas encore un speedup 1→N.
 
-### P1 — expériences étroites, chacune ablatée
+Scinder le protocole :
 
-- GPU q3 : différer clé et niveau aux seules seeds survivantes.
-- GPU q4 : faire prefix-sum et compaction sur device entre les kernels, puis ne
-  rapatrier que les émissions et compteurs agrégés.
-- Tester un tableau global de positions/identifiants résident et un ordonnanceur
-  borné à quelques flux, puis pinned + double buffering. Ce sont des hypothèses
-  à comparer au chemin courant, pas des gains annoncés.
-- CPU : pool persistant avec budget global incluant A et B ; mesurer la charge
-  par ouvrier et fractionner les rectangles/ancres au-dessus d'un seuil de
-  travail, sans changer l'ordre de fusion.
-- Réduire les copies par des offsets précomptés et des fusions déterministes
-  parallèles ; paralléliser au moins l'initialisation des gros états. Une vraie
-  parallélisation du reduce exige une nouvelle preuve de l'ordre des deltas.
+### A. Scaling des ouvriers
 
-`fold_inflight=3/4` ne doit venir qu'après correction des deux défauts P1 de
-sûreté déjà ouverts et une campagne mémoire : cela peut réduire le recouvrement
-ou la traîne, mais ne parallélise toujours pas le dernier K.
+- `fold_inflight=1` ;
+- digest OFF pour isoler le travail, puis une strate digest ON ;
+- processus sous cpuset exact de 1, 2, 4, 8, 16, 24, 32 et 48 CPU ;
+- cpuset, affinité, topologie et CPU réellement utilisés gravés ;
+- échauffement et au moins trois répétitions contrebalancées.
 
-## Conclusion pour Claude
+### B. Chevauchement des ordres
 
-Il ne faut pas chercher d'abord « un kernel plus rapide » ni « plus de fils ».
-Le chantier est : **mesurer la fraction accélérable, supprimer le travail avant
-de le déplacer, puis réduire les frontières hôte/device et les traînes
-indivisibles**. Le GPU a une cible crédible lorsque q4 reste dominante à grande
-taille ; le multi-CPU a déjà un gain réel, mais sa prochaine marche passe par le
-budget global, la granularité et le fold, pas par `threads=48` seul.
+- cpuset fixe ;
+- `fold_inflight={1,2,3}` ;
+- mêmes entrées, digests, comptes de travail et pic RSS ;
+- ne pas appeler ce tableau « scaling CPU ».
+
+La matrice factorielle actuelle de 192 runs dépasse très largement la session
+gardée. Commencer par un pilote d'au plus 24 runs et réserver explicitement le
+temps de rapatriement.
+
+Les optimisations CPU à tester ensuite sont :
+
+- un pool global persistant dont A et B consomment le même budget ;
+- subdivision des rectangles lourds par plages d'ancres, avec offsets de
+  sortie déterministes ;
+- fusion par offsets précomptés au lieu de concaténations répétées ;
+- le fold vivant small-to-large décrit dans
+[AUDIT_PASSAGE_ECHELLE_20260828.md](AUDIT_PASSAGE_ECHELLE_20260828.md),
+  qui remplace les accès UF historiques par un état réellement vivant.
+
+Le reduce ne doit pas être parallélisé par lots avant une preuve de conservation
+de l'ordre des racines et deltas. En revanche, réduire sa taille d'état et ses
+défauts de cache est compatible avec l'objet actuel.
+
+## Ordre de commits proposé à Claude
+
+1. **Finir l'instrument** : parseur au format réel, mutants/CMake, lifecycle et
+   timelines non additives ; aucun run GCP nécessaire.
+2. **Pool persistant** : 1/2/4/8 exécuteurs, résidus dans la file, égalité des
+   sorties.
+3. **Wire indices** : `GpuGeometry` + `site_index_u32` en parallèle du wire
+   actuel ; réception CUDA à 50 k.
+4. **Compaction q4 device** : portes des intermédiaires, puis ablation du D2H.
+5. **Pilote CPU sous cpuset** : seulement après que le protocole local et son
+   budget de session sont reçus.
+
+Cette séquence aide Claude à obtenir un gain réel : elle réduit d'abord les
+octets et les synchronisations, puis mesure le plafond résiduel. Elle évite de
+lui demander simultanément une réécriture GPU, un nouveau fold et une campagne
+longue.
 
 GCP non utilisé pour cet audit.

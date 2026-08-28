@@ -1,7 +1,7 @@
 # État courant audité de MorseHGP3D v5 — 28 août 2026
 
-- **Dernier commit relu :** `2074b2f0`, décision d'architecture pour le passage à l'échelle.
-- **Code en cours de relecture :** worktree postérieur à `2074b2f0`, encore non committé. Il prépare la sûreté du fold, l'instrumentation device et une campagne `SCALE_THREADS`. Les observations sur ce code sont des indications de travail, pas une réception sur pin.
+- **Derniers commits techniques relus :** `17ab71e0`, intégration des objections au plan d'échelle, et `ba31c169`, porte de préfixe étendue ; `a2597c1a` ne modifiait que le présent état d'audit.
+- **Code en cours de relecture :** worktree postérieur à `ba31c169`, encore non committé. Il prépare la sûreté du fold, l'instrumentation device et une campagne `SCALE_THREADS`. Les observations sur ce code sont des indications de travail, pas une réception sur pin.
 - **Pins de performance conservés :** `82f613d3` pour les campagnes CPU 50–200 k et `63deda74` pour les étapes device à 50 k.
 - **Cadre :** `phase=exploration_v5_hors_registre`, `backend=cpu_reference`, `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`.
 
@@ -9,11 +9,25 @@
 
 **Orange constructif : la trajectoire est bonne et les trois chantiers actifs méritent d'être terminés. Ne pas lancer encore la campagne G4 de scaling.**
 
-Le commit `2074b2f0` répond utilement à l'audit de conception : il abandonne le fold tuilé et les halos, sépare le digest d'intégrité du convertisseur v4, choisit un comptage externe exact des premières et dernières incidences, borne la reprise initiale aux frontières de phase et fait du préfixe K = 1..5 un premier échelon. Les bornes de sortie et de disque ont aussi été corrigées. Ce document est désormais une architecture falsifiable avec des portes, ce qui est le bon statut à ce stade.
+Les commits `2074b2f0` et `17ab71e0` répondent utilement à l'audit de conception : ils abandonnent le fold tuilé et les halos, séparent le digest d'intégrité du convertisseur v4, choisissent un comptage externe exact des premières et dernières incidences, bornent la reprise initiale à `resume=replay_current_K` et font du préfixe K = 1..5 un premier échelon. Le cadre et la doctrine différentielle v5 sont maintenant corrigés. `ba31c169` ferme en plus le trou du digest v4 sur les événements et les niveaux de lots. Le document est désormais une architecture falsifiable avec des portes, ce qui est le bon statut à ce stade.
 
 Le worktree courant corrige également plusieurs défauts concrets du fold : ownership du slot avant lancement, drainage explicite, arbitrage par ordre K, validation de `fold_inflight`, pic mesuré et tests à fautes injectées. L'instrumentation device supprime une synchronisation H2D intrusive et sépare enfin copies, kernels, attente et tailles de lots. Ce sont des progrès directement réutilisables.
 
 Le plus petit jalon sûr consiste maintenant à fermer trois raccords, graver les tests correspondants, puis donner un pin propre à l'auditeur. Les autres questions ne doivent pas détourner Claude de ce jalon.
+
+Deux solutions d'architecture sont désormais suffisamment précises pour guider
+les commits suivants :
+
+- le fold streamé peut éviter entièrement le reroot union-find en séparant
+  `logical_root_fid` du stockage small-to-large des seules facettes encore
+  vivantes ; l'invariant obtenu est `components <= live_aliases` ;
+- le GPU peut réduire le trafic répété en téléversant la géométrie une fois et
+  en envoyant un indice u32 par site, après mise en place d'un petit pool
+  d'exécuteurs persistant.
+
+Les algorithmes, preuves locales, wires et fixtures sont détaillés dans
+[AUDIT_PASSAGE_ECHELLE_20260828.md](AUDIT_PASSAGE_ECHELLE_20260828.md) et
+[AUDIT_RENDEMENT_GPU_MULTICPU_20260828.md](AUDIT_RENDEMENT_GPU_MULTICPU_20260828.md).
 
 ## P0 — trois raccords à fermer avant une campagne
 
@@ -49,6 +63,8 @@ Dans le worktree courant, un ordre K avance `next_publish`, notifie et libère s
 
 Correction minimale : ne faire avancer `next_publish` qu'après le retour réussi de l'observateur, ou rendre explicitement cet observateur non autoritatif. La première option correspond au contrat et aux tests existants. Ajouter un scénario déterministe où K = 2 lève sur `kPublished` pendant que K = 3 a fini sa réduction; K = 3 ne doit appeler ni `on_forest`, ni `kPublished`. Préserver aussi la première exception d'un ordre si `kReduceBegin` et `reduce_fold` lèvent tous deux.
 
+Le fil B a par ailleurs perdu l'enveloppe `catch (...)` globale de la version précédente. Les calculs principaux sont protégés, mais la construction de `sp->message` après une violation alloue encore hors `try`; un `bad_alloc` quittant la fonction de thread appelle `std::terminate`. Stocker seulement le statut et K puis construire le message après la jointure, ou rétablir une enveloppe externe qui transforme toute exception en verdict ordonné du slot.
+
 ## P1 — durcir sans agrandir le chantier
 
 ### Domaine et résidence de `fold_inflight`
@@ -75,7 +91,7 @@ Le compteur de concurrence ne doit pas être un singleton statique remis à zér
 
 - La réception de la grille cellulaire reste ouverte : corriger le théorème 10.5, comparer le compteur à une évaluation i128 directe et ajouter une frontière située juste du côté vivant. Un centre exactement sur une frontière touchant une cellule morte ne constitue pas un test anti-faux-kill valide.
 - Les doubles constructions de grille et les deux autorités de seuil restent à unifier, mais cette correction peut suivre le pin fold/instrumentation.
-- Les théorèmes T3 et T5 de `docs/ECHELLE.md` restent des obligations de preuve, pas des résultats. Le terme `profil=prefixe_k5/complet_k10` doit éviter de collisionner avec le champ normatif `profile`; `tower_scope` convient.
+- Les théorèmes T3–T6 de `docs/ECHELLE.md` restent des obligations de preuve, pas des résultats. L'audit de passage à l'échelle propose toutefois un réducteur sans parents historiques, une identité FIRST/LAST exacte et une porte de rejeu qui les transforment en petits jalons codables. Le terme `profil=prefixe_k5/complet_k10` doit éviter de collisionner avec le champ normatif `profile` ; `tower_scope` convient.
 - Le débit de 290 Mio/s est provisionné par `deploy.sh`, pas mesuré. Une porte `fio` doit fournir le débit du disque effectivement attaché avant toute projection de durée.
 
 ## Passage de relais conseillé
@@ -83,11 +99,19 @@ Le compteur de concurrence ne doit pas être un singleton statique remis à zér
 1. Corriger les trois P0 ci-dessus et faire enregistrer les nouveaux tests dans CMake/CTest.
 2. Exécuter localement la porte fold, les selftests du protocole et le validateur sur une sortie factice au format réel.
 3. Committer un pin cohérent sans lancer GCP; l'auditeur rejouera alors le build CPU, les portes et les checks documentaires.
-4. Une fois ce pin reçu, lancer seulement le pilote SCALE borné. La campagne complète viendra après interprétation du pilote.
+4. Une fois ce pin reçu, extraire la porte `catalogue + deltas -> final_canon_fid`, puis implémenter le réducteur vivant en mémoire avant toute externalisation.
+5. En parallèle, remplacer les exécuteurs CUDA éphémères par un pool borné ; le wire par indices vient dans le commit suivant.
+6. Lancer seulement alors le pilote SCALE borné. La campagne complète viendra après interprétation du pilote.
 
 ## État de validation
 
-Le commit `2074b2f0` a été relu comme décision documentaire. Le code actif décrit ci-dessus n'est pas encore committé et ses nouvelles portes ne sont pas encore enregistrées dans CMake au snapshot observé. Aucun résultat CUDA ou GCP nouveau n'est revendiqué.
+Les commits `2074b2f0` puis `17ab71e0` ont été relus comme décisions
+documentaires ; `ba31c169` est la dernière porte fonctionnelle reçue. Dans un
+worktree détaché propre à ce pin : configuration et build Release ciblé
+réussis, puis 6/6 CTests `^mhgp5_prefix_` réussis en 24,49 s. Le code actif
+décrit ci-dessus n'est pas encore committé et ses nouvelles portes ne sont pas
+encore enregistrées dans CMake au snapshot observé. Aucun résultat CUDA ou GCP
+nouveau n'est revendiqué.
 
 Les validations antérieures restent bornées à leurs pins : suites CPU reçues à `369f3ac0`, campagne CPU 50–200 k à `82f613d3`, instrumentation device de la session G4 n° 12 à `63deda74`. Elles ne valident pas automatiquement le worktree courant.
 

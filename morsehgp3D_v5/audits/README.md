@@ -9,8 +9,9 @@ recopiés au tip.
 ## Entrées actives
 
 - [`ETAT_COURANT.md`](ETAT_COURANT.md) : verdict courant et ordre de fermeture.
-- [`AUDIT_RENDEMENT_GPU_MULTICPU_20260828.md`](AUDIT_RENDEMENT_GPU_MULTICPU_20260828.md) : diagnostic chiffré des plafonds GPU/multi-CPU et protocole de fermeture.
-- [`AUDIT_PASSAGE_ECHELLE_20260828.md`](AUDIT_PASSAGE_ECHELLE_20260828.md) : requalification du plan 10–30 M, contrats de stream/reprise et portes RAM/E/S.
+- [`AUDIT_RENDEMENT_GPU_MULTICPU_20260828.md`](AUDIT_RENDEMENT_GPU_MULTICPU_20260828.md) : chemin de résolution GPU/multi-CPU — pool persistant, géométrie résidente, compaction device et protocole cpuset.
+- [`AUDIT_PASSAGE_ECHELLE_20260828.md`](AUDIT_PASSAGE_ECHELLE_20260828.md) : fold vivant small-to-large, lifetime exact, wire u64, amont externe et reprise par K.
+- [`REPONSE_CLAUDE_PASSAGE_ECHELLE_20260828.md`](REPONSE_CLAUDE_PASSAGE_ECHELLE_20260828.md) : réponse active de Claude aux deux audits, à requalifier sur son prochain pin fonctionnel propre.
 - [`QUESTION_CLAUDE_GRILLE_DE_CELLULES_20260828.md`](QUESTION_CLAUDE_GRILLE_DE_CELLULES_20260828.md) : question V15 et réponse actionnable sur la grille, le fold concurrent et la mémoire.
 - [`QUESTION_CLAUDE_TESTS_D_ANCRE_20260827.md`](QUESTION_CLAUDE_TESTS_D_ANCRE_20260827.md) : pont historique condensé, conservé tant que le document mathématique canonique le référence.
 - [`REPONSE_A_CLAUDE_APPLICATIONS_VERTICALES_20260827.md`](REPONSE_A_CLAUDE_APPLICATIONS_VERTICALES_20260827.md) : reçu de décision sur la future tour.
