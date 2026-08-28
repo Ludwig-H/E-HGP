@@ -231,6 +231,11 @@ mhgp5_gate(mhgp5_q3_oracle_refus_mutant_inconnu 2 mhgp5_q3_oracle "--n=80 --inje
 # ---- Gardes d'API, fixture differentielle q4, oracle q4, source q4, juge de foret -----
 mhgp5_executable(mhgp5_api_guard_gate tests/api_guard_gate.cpp)
 mhgp5_gate(mhgp5_api_guard_gate 0 mhgp5_api_guard_gate "")
+# Porte de rejeu « catalogue + deltas -> partition » (docs/ECHELLE.md § 8 bis, T5) : autorite independante du fold.
+mhgp5_executable(mhgp5_delta_replay_gate tests/delta_replay_gate.cpp)
+mhgp5_gate(mhgp5_delta_replay 0 mhgp5_delta_replay_gate "")
+mhgp5_gate(mhgp5_delta_replay_mutant_drop_nonmerge 4 mhgp5_delta_replay_gate "--inject=drop-nonmerge")
+mhgp5_gate(mhgp5_delta_replay_mutant_attach_prebatch 4 mhgp5_delta_replay_gate "--inject=attach-prebatch")
 # Prefixe exact de la tour (docs/ECHELLE.md § 3.3) : ordres K <= smax − 1 identiques a l'objet complet.
 mhgp5_executable(mhgp5_prefix_gate tests/prefix_gate.cpp)
 mhgp5_gate(mhgp5_prefix_k5_uniform 0 mhgp5_prefix_gate "--family=uniform --n=1200 --smax=6 --min-events=1000")
