@@ -146,8 +146,8 @@ et aucune mesure device n'est annoncée. Porte
   `fresh_child < parent.core` avant digest. La somme scalaire et les signatures
   aval ne jouent donc pas le même rôle.
 
-Première mesure **intégrée** locale, huit fils, worktree courant, un seul run
-par bras donc diagnostique et non reçu :
+Première mesure **intégrée** locale, huit fils, sur le worktree local de la
+campagne non épinglé par un reçu brut, un seul run par bras donc diagnostique :
 
 | $n$ | $L$ | masse q4 tuée | appels de cœur q4 | nœuds visités q4 | génération |
 |---:|---:|---:|---:|---:|---:|
@@ -261,15 +261,15 @@ raffinement multiplie les produits émis par 1,66 : `rect_cover_handles` et
 mécanisme n'est pas activé en production. Il reste dans le code, gardé, comme
 sujet mesurable — pas comme optimisation.
 
-## 4 quater. La cible réelle : les 11 % d'ancres qui construisent un cover
+## 4 quater. Hypothèse candidate : réduire le travail des covers construits
 
-La même mesure qui réfute le raffinement désigne ce qu'il faut attaquer.
+Les mesures négatives du raffinement invitent à isoler un autre poste candidat.
 `scanline_single_pass`, lane q4 :
 
 | grandeur | 100 000 | 200 000 | exposant |
 |---|---|---|---|
 | ancres q4 | 48 557 755 | 191 710 560 | $n^{1{,}98}$ |
-| **covers construits** | 5 436 957 | ≈ 11 M | $n^{1{,}04}$ |
+| **covers construits** | 5 436 957 | non mesuré | $n^{1{,}04}$ sur 32 k→100 k |
 | grilles de cellules construites | 493 461 | 990 888 | **$n^{1{,}01}$** |
 | ancres tuées par la grille | 330 745 | 687 851 | $n^{1{,}06}$ |
 | **seeds tués par la grille, sans balayage** | 77 525 565 | 277 911 630 | $n^{1{,}84}$ |
@@ -279,18 +279,24 @@ La même mesure qui réfute le raffinement désigne ce qu'il faut attaquer.
 Trois lectures :
 
 1. **Seuls 9,1 % des covers reçoivent une grille** (493 461 sur 5 436 957), et
-   les covers eux-mêmes ne sont que **11 %** des ancres (5,4 M sur 48,6 M) :
-   89 % des ancres meurent avant tout cover, gratuitement. C'est pourquoi tuer
-   des ancres plus tôt ne rapporte rien (§ 4 ter).
-2. **Le nombre de covers est quasi linéaire** ($n^{1{,}04}$) mais le travail
-   par cover explose : 423 sites par cover à 32 000, **986 à 100 000**, et les
-   tests de cœur croissent en $n^{2{,}40}$. Le coût n'est pas dans le *nombre*
-   de covers, il est dans leur *taille*.
-3. **La grille perd du terrain** : elle tue sans balayage 33,9 % des seeds à
-   100 000 mais 29,5 % à 200 000, parce que ses kills croissent en
-   $n^{1{,}84}$ contre $n^{2{,}17}$ pour le cœur. Sa politique
-   (`cover >= 256 sites`, `seeds aigus × 8 >= cover`, `near_m < h`) est donc le
-   levier le plus direct sur la masse dominante.
+   les covers eux-mêmes ne sont que **11 %** des ancres (5,4 M sur 48,6 M).
+   Les 89 % restants évitent la construction du cover, mais peuvent encore
+   payer W, secteurs ou requête : ils ne sont pas « gratuits ». La seule
+   conclusion intégrée disponible est que la politique post-séparation mesurée
+   au § 4 ter ralentit le mur total.
+2. **Le nombre de covers est quasi linéaire sur la seule plage 32 k→100 k**
+   ($n^{1{,}04}$), mais le travail par cover croît : 423 sites par cover à
+   32 000, **986 à 100 000**, et les tests de cœur suivent $n^{2{,}40}$ sur
+   cette plage. La taille des covers est donc un poste candidat à isoler. La
+   projection conditionnelle à 200 k serait d'environ 11 M covers, mais elle
+   n'est ni mesurée ni présente dans le reçu G4.
+3. **La part attribuée à la grille parmi les trois classes de morts rapportées**
+   `cellules + cœur + corde` passe de 33,9 % à 100 000 à 29,5 % à 200 000.
+   Ce n'est pas une fraction de tous les seeds : les survivants amont ne sont
+   pas dans ce dénominateur. Les kills de grille suivent $n^{1{,}84}$ contre
+   $n^{2{,}17}$ pour le cœur ; sa politique (`cover >= 256 sites`,
+   `seeds aigus × 8 >= cover`, `near_m < h`) est une hypothèse candidate à
+   mesurer, pas encore le levier causal dominant.
 
 **Balayage du seuil de grille** (`--cell-min-sites`), `scanline`
 $n = 32\,000$, 8 fils, **digest identique partout** (`2bc14286…`) :
@@ -299,10 +305,11 @@ $n = 32\,000$, 8 fils, **digest identique partout** (`2bc14286…`) :
 |---|---|---|---|---|---|---|
 | mur (ms) | 89 512 | **64 935** | 68 460 | 75 940 | 71 365 | 76 009 |
 
-Le seuil 32 donne 9,0 % de mur en moins que le défaut, et le mode forcé est
-25 % **pire** — mais la non-monotonie entre 128, 256 et 1024 montre une
-dispersion de ±5 à 7 % sur cette machine partagée. **Un seul run par point ne
-permet pas de conclure** ; la comparaison répétée et alternée est en cours.
+Le seuil 32 donne 9,0 % de mur en moins que le défaut sur ce passage, et le mode
+forcé est 25 % **pire**. La non-monotonie entre 128, 256 et 1024 peut mêler un
+effet réel de politique et le bruit de la machine partagée ; elle ne mesure pas
+la dispersion, qui reste inconnue avec un seul run par point. La comparaison
+répétée et alternée est en cours.
 
 ## 5. Ce qui n'est pas établi
 
