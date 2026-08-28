@@ -6,6 +6,7 @@
 // sont reutilises. Compile par nvcc seulement. Toute erreur CUDA est un refus
 // (exception std::runtime_error) — jamais un verdict invente.
 #pragma once
+#include <chrono>
 
 #include <stdexcept>
 #include <string>
@@ -49,6 +50,7 @@ class Q3DeviceExecutor {
 
   double kernel_ms_total = 0;  // mur kernel (evenements sur le flux de l'executeur)
   double h2d_ms_total = 0, d2h_ms_total = 0;  // murs transferts, separes (audit : jamais un cumul indistinct)
+  double wall_ms_total = 0;                    // mur HOTE de scan() entier (transferts + kernel + synchronisations)
   u64 launches = 0;  // kernels lances (q3 : un par lot)
   u64 lots = 0;      // lots scannes
 
@@ -60,6 +62,7 @@ class Q3DeviceExecutor {
     b->verdicts.resize(nj);
     ++lots;
     if (nj == 0) return;
+    const auto t_wall = std::chrono::steady_clock::now();
     reserve(ns, nj, na);
     static_assert(sizeof(Q3BatchSeed) == sizeof(SeedJob), "Q3BatchSeed et SeedJob doivent avoir le meme layout");
     static_assert(sizeof(Q3BatchAnchor) == sizeof(AnchorRange), "layout des ancres");
@@ -82,6 +85,7 @@ class Q3DeviceExecutor {
     h2d_ms_total += CudaEvent::ms_between(e_h0, e_h1);
     kernel_ms_total += CudaEvent::ms_between(e_h1, e_k1);
     d2h_ms_total += CudaEvent::ms_between(e_k1, e_d1);
+    wall_ms_total += std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t_wall).count();
     ++launches;
   }
 
@@ -150,18 +154,36 @@ class Q3DeviceExecutor {
 };
 
 // Lane q3 complete avec l'executeur device : un executeur par fil (thread_local).
+// MURS PAR ETAPE d'un executeur device (cumul sur les fils ; instrument de
+// mesure, jamais un claim) : la somme des etapes est le mur de scan(), a
+// comparer au mur de la lane (rects) qui contient en plus l'assemblage hote.
+struct DeviceStageMs {
+  double h2d = 0, k1 = 0, d2h1 = 0, host1 = 0, k2 = 0, d2h2 = 0, host2 = 0, k3 = 0, d2h3 = 0, wall = 0;
+  void add(const DeviceStageMs& o) {
+    h2d += o.h2d; k1 += o.k1; d2h1 += o.d2h1; host1 += o.host1; k2 += o.k2; d2h2 += o.d2h2; host2 += o.host2; k3 += o.k3; d2h3 += o.d2h3; wall += o.wall;
+  }
+};
+
 inline void generate_q3_device(const CloudIndex& ix, const GenerateOptions& opt, std::vector<BallCandidate>* out,
                                GenerateStats* st, double* kernel_ms, u64* launches, BatchLimits lim = BatchLimits{},
-                               BatchStats* bs = nullptr) {
+                               BatchStats* bs = nullptr, DeviceStageMs* stages = nullptr) {
   std::mutex mu;
   generate_q3_batched_with(ix, opt, out, st, [&](Q3Batch* b, u32 h3, bool nonstrict) {
     thread_local Q3DeviceExecutor ex;
-    const double before_ms = ex.kernel_ms_total;
+    const double before_ms = ex.kernel_ms_total, before_h2d = ex.h2d_ms_total, before_d2h = ex.d2h_ms_total, before_wall = ex.wall_ms_total;
     const u64 before_l = ex.launches;
     ex.scan(b, h3, nonstrict);
     std::lock_guard<std::mutex> lk(mu);
     *kernel_ms += ex.kernel_ms_total - before_ms;
     *launches += ex.launches - before_l;
+    if (stages) {
+      DeviceStageMs d;
+      d.h2d = ex.h2d_ms_total - before_h2d;
+      d.k1 = ex.kernel_ms_total - before_ms;
+      d.d2h1 = ex.d2h_ms_total - before_d2h;
+      d.wall = ex.wall_ms_total - before_wall;
+      stages->add(d);
+    }
   }, lim, bs);
 }
 #endif  // __CUDACC__

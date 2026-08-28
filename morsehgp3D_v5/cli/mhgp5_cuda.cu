@@ -60,6 +60,7 @@ int main(int argc, char** argv) {
   double kernel_ms = 0;
   u64 launches = 0;
   BatchStats bs3, bs4;
+  gpu::DeviceStageMs sg3, sg4;
   if (gpu) {
     int ndev = 0;
     if (cudaGetDeviceCount(&ndev) != cudaSuccess || ndev < 1) {
@@ -69,10 +70,10 @@ int main(int argc, char** argv) {
     BatchLimits lim;
     lim.device_min_sites = gpu_min_sites;
     opt.q3_override = [&, lim](const CloudIndex& ix, const GenerateOptions& g, std::vector<BallCandidate>* out, GenerateStats* st) {
-      gpu::generate_q3_device(ix, g, out, st, &kernel_ms, &launches, lim, &bs3);
+      gpu::generate_q3_device(ix, g, out, st, &kernel_ms, &launches, lim, &bs3, &sg3);
     };
     opt.q4_override = [&, lim](const CloudIndex& ix, const GenerateOptions& g, std::vector<BallCandidate>* out, GenerateStats* st) {
-      gpu::generate_q4_device(ix, g, out, st, &kernel_ms, &launches, lim, &bs4);
+      gpu::generate_q4_device(ix, g, out, st, &kernel_ms, &launches, lim, &bs4, &sg4);
     };
   }
   if (coord <= 0) coord = cloud_family_default_coord(family, n);
@@ -94,6 +95,11 @@ int main(int argc, char** argv) {
               (unsigned long long)bs3.anchors_host, (unsigned long long)bs3.seeds_device, (unsigned long long)bs3.seeds_host,
               (unsigned long long)bs4.anchors_device, (unsigned long long)bs4.anchors_host, (unsigned long long)bs4.seeds_device,
               (unsigned long long)bs4.seeds_host);
+  // MURS PAR ETAPE des executeurs device (cumul sur les fils ; instrument) — la difference entre le mur de la lane
+  // (rects) et `mur` est l'assemblage hote (candidats, covers, lots).
+  if (gpu)
+    std::printf("gpu_etapes_ms q3: h2d=%.1f k1=%.1f d2h=%.1f mur=%.1f ; q4: h2d=%.1f k1+d2h=%.1f hote1=%.1f k2+d2h=%.1f hote2=%.1f k3+d2h=%.1f mur=%.1f\n",
+                sg3.h2d, sg3.k1, sg3.d2h1, sg3.wall, sg4.h2d, sg4.k1, sg4.host1, sg4.k2, sg4.host2, sg4.k3, sg4.wall);
   // Pic de residence MESURE (RSS max du processus), jamais un pic annonce.
   struct rusage ru;
   if (getrusage(RUSAGE_SELF, &ru) == 0) std::printf("rss_max_kb=%ld\n", ru.ru_maxrss);

@@ -7,6 +7,7 @@
 // scan_q4_batch_host produirait (porte tests/q4_lane_device_gate.cu). Toute
 // erreur CUDA est une exception, jamais un verdict.
 #pragma once
+#include <chrono>
 
 #include <mutex>
 #include <stdexcept>
@@ -31,6 +32,9 @@ class Q4DeviceExecutor {
   Q4DeviceExecutor(const Q4DeviceExecutor&) = delete;
   Q4DeviceExecutor& operator=(const Q4DeviceExecutor&) = delete;
   double kernel_ms_total = 0;  // mur des trois kernels et des transferts intermediaires du lot (evenements sur le flux)
+  // MURS PAR ETAPE (hote, steady_clock, cumules) : transferts H2D des sites/seeds/ancres, K1 + D2H des verdicts,
+  // boucle hote des vivants/offsets, K2 + D2H des etages, compaction hote des candidates, K3 + D2H des profondeurs.
+  double st_h2d = 0, st_k1 = 0, st_host1 = 0, st_k2 = 0, st_host2 = 0, st_k3 = 0, st_wall = 0;
   bool chord_nonstrict_ = MHGP5_MUTANT("chord-nonstrict");  // drapeau hote passe au kernel
   u64 launches = 0;  // kernels lances (q4 : jusqu'a trois par lot)
   u64 lots = 0;      // lots scannes
@@ -45,6 +49,9 @@ class Q4DeviceExecutor {
     b->stages = Q4StageCounts{};
     ++lots;
     if (nsd == 0) return;
+    const auto t0 = std::chrono::steady_clock::now();
+    auto tm = t0;
+    const auto tick = [&](double* acc) { const auto now = std::chrono::steady_clock::now(); *acc += std::chrono::duration<double, std::milli>(now - tm).count(); tm = now; };
     reserve_sites(ns, nl);
     reserve_seeds(nsd, na);
     up(d_u0_, b->u0.data(), ns); up(d_u1_, b->u1.data(), ns); up(d_u2_, b->u2.data(), ns); up(d_q_, b->q.data(), ns);
@@ -53,6 +60,8 @@ class Q4DeviceExecutor {
     up(d_seeds_, b->seeds.data(), nsd);
     up(d_anchors_, b->anchors.data(), na);
     const Q4SitesDev S{d_u0_, d_u1_, d_u2_, d_q_, d_px_, d_py_, d_pz_, d_pid_, d_lens_};
+    cuda_check(cudaStreamSynchronize(stream_), "sync H2D");  // mesure : borne l'etape H2D (les copies sont asynchrones)
+    tick(&st_h2d);
     CudaEvent e0, e1;
     e0.record(stream_);
     // K1 : cœurs.
@@ -65,6 +74,7 @@ class Q4DeviceExecutor {
     }
     cuda_check(cudaMemcpyAsync(b->verdicts.data(), d_verdicts_, nsd * sizeof(Q4SeedVerdict), cudaMemcpyDeviceToHost, stream_), "verdicts");
     cuda_check(cudaStreamSynchronize(stream_), "sync K1");
+    tick(&st_k1);
     // Hote : seeds vivants et offsets de paires (lens_count de leur ancre).
     alive_.clear();
     pair_off_.clear();
@@ -79,6 +89,7 @@ class Q4DeviceExecutor {
       total_pairs += b->anchors[b->seeds[si].anchor].lens_count;
     }
     if (total_pairs > (u64)UINT32_MAX) throw std::length_error("lot q4 : plus de 2^32 - 1 paires (seed, y) — reduire le seuil de lot");
+    tick(&st_host1);
     if (!alive_.empty() && total_pairs > 0) {
       reserve_pairs(alive_.size(), total_pairs);
       up(d_alive_, alive_.data(), alive_.size());
@@ -89,6 +100,7 @@ class Q4DeviceExecutor {
       stage_.resize(total_pairs);
       cuda_check(cudaMemcpyAsync(stage_.data(), d_stage_, total_pairs, cudaMemcpyDeviceToHost, stream_), "etages");
       cuda_check(cudaStreamSynchronize(stream_), "sync K2");
+      tick(&st_k2);
       // Hote : compteurs d'etages et compaction des candidates, dans l'ordre
       // (seed vivant, lentille) = ordre de la production.
       cand_.clear();
@@ -113,6 +125,7 @@ class Q4DeviceExecutor {
           }
         }
       }
+      tick(&st_host2);
       if (!cand_.empty()) {
         reserve_cand(cand_.size());
         up(d_cand_, cand_.data(), cand_.size());
@@ -125,6 +138,7 @@ class Q4DeviceExecutor {
         deep_.resize(cand_.size());
         cuda_check(cudaMemcpyAsync(deep_.data(), d_deep_, cand_.size(), cudaMemcpyDeviceToHost, stream_), "profondeurs");
         cuda_check(cudaStreamSynchronize(stream_), "sync K3");
+        tick(&st_k3);
         const bool emit_deep = MHGP5_MUTANT("q4-batched-emit-deep");
         for (size_t c = 0; c < cand_.size(); ++c) {
           if (deep_[c]) {
@@ -140,6 +154,8 @@ class Q4DeviceExecutor {
     e1.record(stream_);
     cuda_check(cudaStreamSynchronize(stream_), "sync fin");
     kernel_ms_total += CudaEvent::ms_between(e0, e1);
+    tick(&st_host2);  // reste (emissions, fin) compte avec la compaction hote
+    st_wall += std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();
   }
 
  private:
@@ -251,16 +267,23 @@ class Q4DeviceExecutor {
 
 inline void generate_q4_device(const CloudIndex& ix, const GenerateOptions& opt, std::vector<BallCandidate>* out,
                                GenerateStats* st, double* kernel_ms, u64* launches, BatchLimits lim = BatchLimits{},
-                               BatchStats* bs = nullptr) {
+                               BatchStats* bs = nullptr, DeviceStageMs* stages = nullptr) {
   std::mutex mu;
   generate_q4_batched_with(ix, opt, out, st, [&](Q4Batch* b, u32 h4, bool cn, bool dn, bool nc) {
     thread_local Q4DeviceExecutor ex;
     const double before_ms = ex.kernel_ms_total;
+    const double b_h2d = ex.st_h2d, b_k1 = ex.st_k1, b_host1 = ex.st_host1, b_k2 = ex.st_k2, b_host2 = ex.st_host2, b_k3 = ex.st_k3, b_wall = ex.st_wall;
     const u64 before_l = ex.launches;
     ex.scan(b, h4, cn, dn, nc);
     std::lock_guard<std::mutex> lk(mu);
     *kernel_ms += ex.kernel_ms_total - before_ms;
     *launches += ex.launches - before_l;
+    if (stages) {
+      DeviceStageMs d;
+      d.h2d = ex.st_h2d - b_h2d; d.k1 = ex.st_k1 - b_k1; d.host1 = ex.st_host1 - b_host1; d.k2 = ex.st_k2 - b_k2;
+      d.host2 = ex.st_host2 - b_host2; d.k3 = ex.st_k3 - b_k3; d.wall = ex.st_wall - b_wall;
+      stages->add(d);
+    }
   }, lim, bs);
 }
 #endif  // __CUDACC__
