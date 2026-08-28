@@ -23,9 +23,9 @@ les commits suivants :
   vivantes ; l'invariant obtenu est `components <= live_aliases`, sous lot
   relisible et pré-composants référencés par alias stables ;
 - le GPU peut d'abord recevoir un pool synchrone minimal et une géométrie
-  résidente par indices. Ce wire reste une couture : le gain majeur exige
-  ensuite de reconstruire covers et seeds sur device depuis handles/ancres,
-  au lieu de téléverser 112/288 octets par seed.
+  résidente par indices. Si la baseline montre que les 112/288 octets par seed
+  dominent encore, la couture suivante reconstruira covers et seeds sur device
+  depuis handles/ancres ; ce n'est pas encore une priorité reçue.
 
 Les algorithmes, preuves locales, wires et fixtures sont détaillés dans
 [AUDIT_PASSAGE_ECHELLE_20260828.md](AUDIT_PASSAGE_ECHELLE_20260828.md) et

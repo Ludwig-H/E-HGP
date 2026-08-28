@@ -32,10 +32,11 @@ Trois expériences architecturales bornées répondent directement aux suspects 
 3. **la compaction q4 stable sur device**, sans les deux retours intermédiaires.
 
 G0–G2 sont des coutures de mesure et de réduction du gaspillage, pas encore
-l'architecture qui supprime le terme dominant. Tant que l'hôte téléverse un
-`Q3BatchSeed` de 112 octets ou un `Q4BatchSeed` de 288 octets par seed, le vrai
-gain restera borné sur les familles riches. La cible qui retire ce terme est la
-lane **par rectangles avec index résident** déjà conçue dans
+une architecture qui supprime un terme dominant reçu. L'hôte téléverse bien un
+`Q3BatchSeed` de 112 octets ou un `Q4BatchSeed` de 288 octets par seed ; seule
+la baseline instrumentée dira si ce terme domine pour une famille donnée. Si
+elle le confirme, la conception qui retire ce terme est la lane **par
+rectangles avec index résident** déjà décrite dans
 [`docs/analyses/seeds_20260827/design.txt`](../docs/analyses/seeds_20260827/design.txt) :
 le device reçoit handles et ancres, puis reconstruit covers et seeds. G1 est la
 couture réversible qui prouve d'abord l'index et l'arithmétique de cette cible.
@@ -277,9 +278,9 @@ profondeurs, émissions et tous les compteurs `Q4CoreCounters`/dead/chord et
 d'exécuteurs multiplié par les capacités de paires/stages. L'ordre G0/G1/G2 se
 décide après le reçu de l'instrument, avec un toggle d'ablation par changement.
 
-## G3 — retirer enfin le wire par seed
+## G3 — candidat pour retirer le wire par seed
 
-Le chemin de gain réel est déjà esquissé dans
+Cette conception est déjà esquissée dans
 [`design.txt`](../docs/analyses/seeds_20260827/design.txt). Après réception de
 `GpuGeometry`, envoyer par fenêtre seulement :
 
@@ -298,7 +299,8 @@ production. Transcrire ensuite cette forme sur device.
 Deux risques restent des mesures, pas des objections générales : le débit des
 complétions q4 et la distribution des covers surdimensionnés. Si l'instrument
 montre que les retours K1/K2 dominent à court terme, G2 peut fournir un gain
-intermédiaire ; sinon G3 subsume ce chantier et mérite la priorité. Le routage
+intermédiaire ; si le wire par seed domine, comparer G3 à G2 et lui donner la
+priorité seulement sur cette mesure. Le routage
 hôte des covers hors capacité et le rejeu d'une fenêtre de sortie pleine sont
 fail-closed : jamais de cover tronqué ni de préfixe publié.
 
@@ -367,11 +369,13 @@ vivant est précisément ce qui réduit d'abord son working set.
    avant toute réécriture, puis choisir l'ordre G0/G1/G2.
 3. **Faire G0 dans sa forme synchrone minimale**, puis recevoir le sweep
    d'exécuteurs ; aucune file asynchrone n'est requise.
-4. **Faire de G1 une couture vers G3** : géométrie + indices + matérialisation
-   device bit-identique. Si les octets par seed dominent encore, passer à la
-   porte CPU `rect_shaped`; ne pas polir le lot par seed comme cible finale.
+4. **Faire de G1 une couture réversible** : géométrie + indices +
+   matérialisation device bit-identique. Si les octets par seed dominent
+   ensuite, passer à la porte CPU `rect_shaped`; sinon conserver G1 comme
+   optimisation bornée.
 5. **N'engager G2 que si l'instrument isole les retours q4** comme poste
-   dominant et qu'un gain intermédiaire est utile ; sinon G3 le remplace.
+   dominant et qu'un gain intermédiaire est utile ; comparer G3 seulement si
+   le wire par seed devient le poste reçu.
 6. **Lancer en parallèle le pilote CPU sous cpuset** dès que son protocole local,
    son budget et sa marge de rapatriement sont reçus ; il ne dépend pas des
    refactorings GPU.
