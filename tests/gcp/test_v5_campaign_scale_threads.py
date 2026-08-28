@@ -53,7 +53,7 @@ def probe_output(family: str, n: str, threads: str, inflight: str, digest: bool,
     lines = [
         "payload=mhgp5-forests-horizontal-v1 authority=status_terminal callbacks=provisional vertical_maps=none",
         "backend=cpu_reference",
-        "profil=complet_k10",
+        "tower_scope=profile_complete_k10 smax_requested=11 smax_effective=11",
         f"famille={family} n={n} coord=147 s=8 smax=11 seed=3 threads={threads} emis=67087 "
         "boules_uniques=67077 mortes_profondeur=2307 survivantes=64770 census_int=317555 "
         "census_shell=210051 evenements=65247 facettes=394430 fusions=394259 deltas=63290 noeuds=44334",

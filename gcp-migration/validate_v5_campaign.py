@@ -183,6 +183,9 @@ def check_scale_runs(out, params, runs, commit, payload_sha, manifest_sha, bad):
         ident = re.search(r"^famille=(\S+) n=(\d+) coord=\d+ s=(\d+) smax=(\d+) seed=(\d+) threads=(\d+) ", body, re.M)
         if not ident:
             bad.append(f"{name}: ligne d'identite absente")
+        # Portee de la tour (audit du 28 aout) : objet complet du profil, smax demande = effectif = 11.
+        if not re.search(r"^tower_scope=profile_complete_k10 smax_requested=11 smax_effective=11$", body, re.M):
+            bad.append(f"{name}: ligne tower_scope=profile_complete_k10 smax_requested=11 smax_effective=11 absente")
         elif (ident.group(1), ident.group(2), ident.group(3), ident.group(4), ident.group(5), ident.group(6)) != \
                 (run["family"], params["n"], "8", "11", "3", run["threads"]):
             bad.append(f"{name}: identite imprimee ({'/'.join(ident.groups())}) != nom du run")
@@ -327,6 +330,10 @@ def main():
             bad.append(f"{name}: le mutant du temoin n'a pas ete tue sur le device")
         if name not in ("gpu_witness", "gpu_lane", "gpu_mutant") and not counters.search(body):
             bad.append(f"{name}: ligne de compteurs absente")
+        # Portee de la tour (audit du 28 aout) : chaque run pipeline annonce l'objet complet du profil, smax 11 demande et effectif.
+        if name.startswith("contrat_") and \
+                not re.search(r"^tower_scope=profile_complete_k10 smax_requested=11 smax_effective=11$", body, re.M):
+            bad.append(f"{name}: ligne tower_scope=profile_complete_k10 smax_requested=11 smax_effective=11 absente")
         if name == "gpu_witness":
             if not re.search(r"^nvcc=\S+$", body, re.M) or "release 12.9" not in body:
                 bad.append(f"{name}: provenance nvcc absente ou pas 12.9")
@@ -405,6 +412,8 @@ def main():
     # Phase SCALE_THREADS (optionnelle) : jugee si un plan a ete annonce ; des
     # runs scale_* sans plan sont des fichiers inattendus (jamais un
     # sous-ensemble juge a la place de l'annonce).
+    if os.path.exists(os.path.join(out, "scale_threads_truncated.txt")):
+        bad.append("scale_threads : phase TRONQUEE (" + read_text(os.path.join(out, "scale_threads_truncated.txt")).strip().replace("\n", " ; ") + ")")
     scale_params, scale_runs = read_scale_plan(out, bad)
     scale_note = ""
     if scale_params is not None:

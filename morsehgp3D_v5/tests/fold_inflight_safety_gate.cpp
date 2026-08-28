@@ -289,6 +289,34 @@ int main(int argc, char** argv) {
     expect(cb.calls == 2 && cb.last_k == 2, "N3 : K=1 et K=2 publies, rien apres");
     expect(ph.seen(3, FoldPhase::kNotPublished) && !ph.seen(3, FoldPhase::kPublished), "N3 : K=3 non publie");
   }
+  // N5 (P0 audit du 28 aout). L'observateur terminal `kPublished` de K=2 leve alors que K=3 a fini sa reduction :
+  // la faute est celle de K=2, K+1 n'est jamais publie (l'observateur est appele AVANT l'ouverture du tour K+1).
+  {
+    PhaseLog ph;
+    CallbackLog cb;
+    bool hs = false;
+    RunOptions o = base_options(threads, 3, &ph);
+    PhaseLog* php = &ph;
+    o.on_fold_phase = [php](u64 K, FoldPhase p) {
+      php->record(K, p);
+      if (K == 2 && p == FoldPhase::kPublished) throw std::runtime_error("hook K=2 kPublished");
+    };
+    o.on_forest = [&](u64 K, const std::vector<ForestEvent>&, const ForestResult&) {
+      cb.enter(K);
+      if (K == 2) hs = ph.wait_for(3, FoldPhase::kReduceEnd);
+      cb.leave();
+    };
+    bool caught = false;
+    try {
+      (void)run_pipeline(in, o);
+    } catch (const std::runtime_error& e) {
+      caught = std::string(e.what()) == "hook K=2 kPublished";
+    }
+    expect(caught, "N5 : exception de l'observateur kPublished de K=2 propagee");
+    expect(hs, "N5 : PLANCHER — K=3 avait fini sa reduction quand K=2 a ete publie");
+    expect(cb.calls == 2 && cb.last_k == 2, "N5 : deux callbacks produit seulement (K=1, K=2)");
+    expect(ph.seen(3, FoldPhase::kNotPublished) && !ph.seen(3, FoldPhase::kPublished), "N5 : K=3 jamais publie apres la faute de l'observateur de K=2");
+  }
   // N4. Domaine de fold_inflight.
   {
     for (const int f : {0, -1, kFoldInflightMax + 1}) {

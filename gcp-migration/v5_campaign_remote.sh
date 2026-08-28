@@ -84,6 +84,20 @@ if [ -n "${SCALE_THREADS}" ]; then
   [ -n "${SCALE_FAMILIES// /}" ] || scale_refuse "liste de familles vide"
   [ -n "${SCALE_INFLIGHT// /}" ] || scale_refuse "liste inflight vide"
   [ -n "${SCALE_DIGEST// /}" ] || scale_refuse "liste digest vide"
+  # Axes dupliques (un plan a doublons n'est pas une repetition contrebalancee) et familles inconnues (audit du 28 aout).
+  for axis in SCALE_THREADS SCALE_INFLIGHT SCALE_DIGEST SCALE_FAMILIES; do
+    vals="$(printf '%s\n' ${!axis} | sort)"
+    [ "$(printf '%s\n' "${vals}" | uniq -d | wc -l)" -eq 0 ] || scale_refuse "axe ${axis} avec doublon"
+  done
+  for f in ${SCALE_FAMILIES}; do
+    case "${f}" in uniform|terrain|eight_clusters|scanline_single_pass|scanline_overlap_multiecho) ;; *) scale_refuse "famille inconnue '${f}'" ;; esac
+  done
+  # Echeance globale (epoch, transmise par la session avec sa marge de rapatriement) : la phase s'arrete AVANT un run
+  # qui ne pourrait pas finir avant l'echeance, et au premier run a code non nul ; la troncature est gravee et le
+  # validateur la juge partielle.
+  if [ -n "${SCALE_DEADLINE_EPOCH:-}" ]; then
+    [[ "${SCALE_DEADLINE_EPOCH}" =~ ^[1-9][0-9]*$ ]] || scale_refuse "echeance '${SCALE_DEADLINE_EPOCH}' non entiere"
+  fi
 fi
 mkdir -p "${OUT_DIR}"
 
@@ -270,10 +284,21 @@ if [ -n "${SCALE_THREADS}" ]; then
     seq_no="$(printf '%s\n' "${line}" | sed 's/^seq=\([^ ]*\).*/\1/')"
     dig_arg=()
     if [ "${dig}" = "1" ]; then dig_arg=(--digest); fi
+    if [ -n "${SCALE_DEADLINE_EPOCH:-}" ] && [ "$(( $(date +%s) + SCALE_RUN_TIMEOUT ))" -gt "${SCALE_DEADLINE_EPOCH}" ]; then
+      printf 'truncated_at_seq=%s\nreason=echeance (run %s ne finirait pas avant %s)\n' "${seq_no}" "${name}" "${SCALE_DEADLINE_EPOCH}" > "${OUT_DIR}/scale_threads_truncated.txt"
+      echo "=== SCALE_THREADS TRONQUEE a seq=${seq_no} : echeance ===" >&2
+      break
+    fi
     RUN_THREADS="${t}" RUN_TIMEOUT_ONE="${SCALE_RUN_TIMEOUT}" \
     EXTRA_STATUS="$(printf 'fold_inflight=%s\ndigest=%s\nfamily=%s\nn=%s\nrepeat=%s\nseq=%s' "${infl}" "${dig}" "${fam}" "${SCALE_N}" "${r}" "${seq_no}")" \
       run_one "${name}" scale_threads \
       "${PROBE_BIN}" "--family=${fam}" "--n=${SCALE_N}" --s=8 --smax=11 --seed=3 "--threads=${t}" "--fold-inflight=${infl}" ${dig_arg[@]+"${dig_arg[@]}"}
+    last_code="$(sed -n 's/^code=//p' "${OUT_DIR}/${name}.status" 2>/dev/null | head -n 1)"
+    if [ "${last_code:-1}" != "0" ]; then
+      printf 'truncated_at_seq=%s\nreason=premier run non nul (%s code=%s)\n' "${seq_no}" "${name}" "${last_code:-?}" > "${OUT_DIR}/scale_threads_truncated.txt"
+      echo "=== SCALE_THREADS ARRETEE a seq=${seq_no} : code ${last_code:-?} ===" >&2
+      break
+    fi
   done < "${SCALE_PLAN}"
 fi
 echo "=== fin des runs (la validation locale decide du statut, jamais cette ligne) ==="

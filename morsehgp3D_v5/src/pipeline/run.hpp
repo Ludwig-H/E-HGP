@@ -512,19 +512,29 @@ inline RunResult run_pipeline(const std::vector<InputPoint>& in, const RunOption
           if (opt.on_forest) opt.on_forest(K, st->events, r);
           rr.rss_mb[4] = std::max(rr.rss_mb[4], run_detail::rss_mb_now());
         } catch (...) {  // exception du callback (ou d'une publication) : defaut de CET ordre, a son tour
-          sp->exc = std::current_exception();
+          if (!sp->exc) sp->exc = std::current_exception();  // jamais ecraser une exception anterieure de l'observateur
           pub_failed.store(true);
           lk.unlock();
           pub_cv.notify_all();
           observe(FoldPhase::kNotPublished);
           return;
         }
+        // P0 (audit du 28 aout) : l'observateur terminal `kPublished` est appele AVANT l'ouverture irreversible du
+        // tour K+1 — hors verrou (contrat de on_fold_phase), etat libere d'abord ; s'il leve, la faute est celle de
+        // CET ordre (pub_failed, K+1 jamais publie), exactement comme une exception de callback.
+        lk.unlock();
+        st.reset();  // liberation : evenements et resultat de cet ordre
+        observe(FoldPhase::kPublished);
+        lk.lock();
+        if (sp->exc) {
+          pub_failed.store(true);
+          lk.unlock();
+          pub_cv.notify_all();
+          return;
+        }
         next_publish = K + 1;
         lk.unlock();
         pub_cv.notify_all();
-        // Liberation : evenements et resultat de cet ordre.
-        st.reset();
-        observe(FoldPhase::kPublished);
       });
     }
   } catch (...) {

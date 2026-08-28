@@ -84,7 +84,7 @@ gen_w4=22860
 [ "${SCALE_INFLIGHT_IGNORED:-0}" = "1" ] && infl=1
 echo "payload=mhgp5-forests-horizontal-v1 authority=status_terminal callbacks=provisional vertical_maps=none"
 echo "backend=cpu_reference"
-echo "profil=complet_k10"
+echo "tower_scope=profile_complete_k10 smax_requested=11 smax_effective=11"
 echo "famille=${fam} n=${n} coord=1 s=8 smax=11 seed=3 threads=${thr} emis=1 boules_uniques=42 mortes_profondeur=0 survivantes=42 census_int=1 census_shell=0 evenements=7 facettes=9 fusions=3 deltas=1 noeuds=1"
 echo "generation rect_alive=7379/14563/15374 ancres=11990/47282/53317 candidats=10982/32163/23942 tues_profondeur=0/388726/103000 ancres_w4=${gen_w4} ancres_w3=19562 ancres_secteurs=3061/5557 ancres_cellules=0/459 seeds_cellules=0/2382 grilles=0/536 seeds_core_tues=157009 seeds_corde_tues=130572 float_cert=7389726/6171068 repli=174685 jung=2255407/1473815/0"
 echo "ouvriers wspd=${thr}/${thr}/${thr} rects=${thr}/${thr}/${thr} rle=${thr} prefiltre=${thr} census=${thr} expansion=${thr} fold=${thr}"
@@ -117,6 +117,7 @@ cat > "${WORK}/fake_gpu" <<'EOS'
 fam=""; n=""; ms=1
 for a in "$@"; do case "$a" in --family=*) fam="${a#--family=}";; --n=*) n="${a#--n=}";; --gpu-min-sites=*) ms="${a#--gpu-min-sites=}";; esac; done
 echo "backend=override_experimental (executeur de lane externe : non autoritaire)"
+echo "tower_scope=profile_complete_k10 smax_requested=11 smax_effective=11"
 echo "famille=${fam} n=${n} coord=1 s=8 smax=11 seed=3 threads=1 emis=1 boules_uniques=42 mortes_profondeur=0 survivantes=42 census_int=1 census_shell=0 evenements=7 facettes=9 fusions=3 deltas=1 noeuds=1"
 echo "digest_balls=abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789"
 if [ "${GPU_DIGEST_MISM:-0}" = "1" ]; then echo "digest_all=ffff456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"; else echo "digest_all=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"; fi

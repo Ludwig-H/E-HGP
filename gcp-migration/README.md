@@ -641,6 +641,16 @@ mutants (digest ou compteurs différents selon les fils, `inflight` ignoré,
 digest imprimé sans `--digest`, run annoncé absent, plan réordonné, topologie
 absente, paramètre mal formé refusé avant tout run).
 
+Durcissements du 28 août (audit rendement, P0) : axes `SCALE_*` à doublon ou
+famille inconnue refusés avant tout run ; échéance globale `SCALE_DEADLINE_EPOCH`
+(epoch, transmise par la session avec sa marge de rapatriement) — la phase
+s'arrête **avant** un run qui ne finirait pas à temps et au **premier run à
+code non nul** ; la troncature est gravée (`scale_threads_truncated.txt`) et le
+validateur juge alors la campagne partielle ; chaque run de contrat doit
+annoncer `tower_scope=profile_complete_k10 smax_requested=11 smax_effective=11`
+et le pic mesuré vérifie `1 <= pic_mesure_en_vol <= fold_inflight`.
+
+
 ```bash
 ./gcp-migration/selftest_campagne_v5.sh
 GCP_ZONE=europe-west4-ai1a GCP_INSTANCE_NAME=ehgp-blackwell-spot-ai1a \
