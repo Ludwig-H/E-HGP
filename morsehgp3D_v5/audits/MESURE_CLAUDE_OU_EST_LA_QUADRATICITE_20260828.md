@@ -117,6 +117,50 @@ général : il est déjà en $n^{1{,}06}$ sur `uniform`, à constante élevée. 
 est **double** : énumérer les ancres des rectangles peuplés de façon sensible
 à la sortie, et borner le travail par ancre sur les géométries quasi-planes.
 
+## 3 bis. La sonde des rectangles : l'amplification du cover et l'asymétrie
+
+`bench/mhgp5_rect_probe`, relancé le 28 août aux deux tailles disponibles
+localement (1 fil, machine partagée : les **compteurs** sont citables, pas les
+temps).
+
+| famille / lane | grandeur | 8 000 | 16 000 | exposant |
+|---|---|---|---|---|
+| `uniform` q3 | somme des covers d'ancre | 124 675 293 | 270 502 326 | $n^{1{,}12}$ |
+| `uniform` q3 | amplification cover / points de rectangle | 0,49 | 0,48 | — |
+| `uniform` q3 | seeds par survivant | 24,8 | 25,8 | — |
+| `uniform` q3 | seeds par rectangle : médiane / p99 / max | 24 / 461 / 4 066 | 26 / 476 / 3 242 | — |
+| `scanline` q3 | somme des covers d'ancre | 135 518 839 | 695 200 627 | **$n^{2{,}36}$** |
+| `scanline` q3 | amplification cover / points de rectangle | 6,21 | **15,32** | — |
+| `scanline` q3 | seeds par survivant | 82,4 | **217,5** | — |
+| `scanline` q3 | seeds par rectangle : médiane / p99 / max | 5 / 3 493 / 299 919 | **5 / 10 053 / 849 452** | — |
+| `scanline` q4 | somme des covers d'ancre | 46 823 188 | 188 958 845 | $n^{2{,}01}$ |
+| `scanline` q4 | amplification cover / points de rectangle | 1,84 | 3,49 | — |
+| `scanline` q4 | seeds par survivant | 215,1 | **484,7** | — |
+
+Trois lectures, et ce sont les plus utiles du document :
+
+1. **L'amplification du cover est le cœur.** Le rapport
+   « somme des covers d'ancre / points des rectangles » dit combien de fois
+   chaque point d'un rectangle est balayé. Il vaut **0,48 et stable** sur
+   `uniform` ; il vaut **15,32 et croissant** sur `scanline` q3. Le cover est
+   calculé depuis les **boîtes du rectangle** (`rect_cover_handles(ix,
+   box_of(a), box_of(b), coef, …)`) : quand la géométrie est quasi-plane, les
+   rectangles vivants ont des boîtes énormes, donc un $D_{\max}$ énorme, donc
+   un cover énorme — et **chaque ancre du rectangle le repaie**.
+2. **L'asymétrie est extrême et c'est un fait de charge, pas d'asymptote.**
+   Sur `scanline` q3 à 16 000, la **médiane** est de 5 seeds par rectangle et
+   le **maximum de 849 452** : un rapport de 169 890 (contre 125 sur
+   `uniform`). Un seul rectangle porte 0,53 % de tous les seeds. C'est
+   rédhibitoire pour un GPU : le bloc qui hérite de ce rectangle décide seul du
+   mur.
+3. **L'élagage d'ancre est déjà presque saturé en q3, pas en q4.** Sur
+   `scanline` q3 la production ($W_q$ exact + secteurs) tue **50,1 % des ancres
+   et 91,4 % des seeds** — il ne reste que 8,6 % à gagner, et ils croissent
+   quand même en $n^{2{,}4}$. Sur `scanline` q4 elle ne tue que **21,3 % des
+   ancres et 56,9 % des seeds**, et $W_q$ n'y tue **rien** (0 ancre) : toute la
+   marge d'élagage restante est en q4. Aucun faux positif nulle part
+   (`FAUX POSITIFS = 0`) : les tests d'ancre sont sûrs.
+
 ## 4. Ce qui n'est pas mesuré, et que je ne prétends pas savoir
 
 - Aucune mesure au-delà de $n = 50\,000$ : les exposants ci-dessus sont des
@@ -126,8 +170,9 @@ est **double** : énumérer les ancres des rectangles peuplés de façon sensibl
 - Les évaluations Jung sont un **compteur d'instrument**, pas un temps : elles
   mesurent le travail de la lane q4, pas le mur. Le lien travail → temps n'est
   pas linéaire (vectorisation, cache).
-- Le $\left\vert A \right\vert \left\vert B \right\vert$ moyen est déduit du
-  quotient ancres/rectangles, pas mesuré par un histogramme : la distribution
-  (quelques rectangles énormes, ou un grossissement général ?) reste à établir
-  — `bench/rect_probe.cpp` la donne, elle n'a pas encore été relancée aux
-  quatre tailles.
+- La sonde des rectangles n'a été relancée qu'à 8 000 et 16 000 (§ 3 bis) :
+  les exposants qu'elle donne reposent sur **deux** points, pas quatre.
+- La cause géométrique avancée au § 3 bis (« boîtes énormes des rectangles
+  vivants quasi-plans ») est une **explication**, pas une mesure : le
+  $D_{\max}$ des rectangles vivants n'a pas été instrumenté. C'est la première
+  mesure à faire avant de concevoir quoi que ce soit.
