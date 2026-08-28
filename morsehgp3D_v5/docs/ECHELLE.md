@@ -434,6 +434,31 @@ ne change ni l'objet ni ce plan.
    sont mesurés au même endroit, sur le même état préparé) mais **le RSS n'y
    départage rien**. Avec `--dump` puis `--from`, c'est le **miroir vrai** :
    aucun pipeline, un seul réducteur par processus, RSS attribuable. Le tableau
+   **Miroir vrai** — un seul ordre (le plus gros de `uniform` n = 8 000 :
+   718 440 événements, 6 223 223 facettes), aucun pipeline, un réducteur par
+   processus :
+
+   | bras | préparation | réduction | rejeu | total | RSS max du processus |
+   |---|---|---|---|---|---|
+   | résident | 2 564 ms | 1 533 ms | — | 4 097 ms | 1 166 Mo |
+   | vivant | 2 698 ms | 3 859 ms (**× 2,52**) | — | 6 557 ms | **1 065 Mo (− 8,6 %)** |
+   | vivant + rejeu | 2 700 ms | 3 718 ms | 3 872 ms | 10 569 ms | 1 330 Mo |
+
+   C'est la première mesure où l'économie de mémoire est **attribuable** :
+   − 8,6 % de RSS de processus, contre une réduction 2,5 fois plus lente. Elle
+   reste modeste parce que la **préparation** (`keys` 274 Mo, événements 92 Mo,
+   `ev_fid` 32 Mo) et les deltas dominent le pic : c'est exactement ce que dit
+   « L2 est O(F + I) », et seul le flux de L3 les retirera. Le rejeu, que le
+   vivant doit payer pour rendre la partition, coûte 3,9 s et 265 Mo de plus
+   (il conserve le catalogue).
+   Ce régime a par ailleurs **trouvé un défaut que le régime incrémental
+   masquait** : la comptabilité des octets de sortie parcourait tous les deltas
+   à *chaque* lot, soit un coût quadratique — 981 s de réduction au lieu de
+   3,1 s sur un ordre de 718 440 lots, sans qu'aucune porte ne rougisse (à
+   n ≤ 1 500 les deltas sont trop peu nombreux). Le parcours est désormais
+   réservé aux balayages à cadence bornée. C'est l'argument le plus net en
+   faveur d'un miroir vrai.
+
    ci-dessous est le régime incrémental, donc ses colonnes de temps seulement :
 
    | n | facettes de l'ordre le plus gros | réduction résidente | réduction vivante | total résident | total vivant (rejeu inclus) |

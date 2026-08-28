@@ -366,16 +366,11 @@ inline ForestResult reduce_fold_live(FoldPrepared&& fp, LiveFoldStats* out_stats
                                                                     free_slots.capacity() * sizeof(u32) + cfree.capacity() * sizeof(u32) +
                                                                     slot_mark.capacity()));
     stats.mapping_bytes = std::max(stats.mapping_bytes, (u64)((firstb.capacity() + lastb.capacity() + slot_of_fid.capacity()) * sizeof(u32)));
-    {
-      u64 sc = (u64)(touched.capacity() * sizeof(u32) + pre_list.capacity() * sizeof(PreFreeze) + post_list.capacity() * sizeof(u32) +
-                     slot_alias.capacity() * sizeof(u32) + (live_in.capacity() + live_out.capacity()) * sizeof(u32) +
-                     scratch.capacity() * sizeof(ComponentDelta));
-      for (const ComponentDelta& cd : scratch) sc += (u64)((cd.parents.capacity() + cd.born.capacity()) * sizeof(FacetKey));
-      stats.scratch_bytes = std::max(stats.scratch_bytes, sc);
-      u64 ob = (u64)(r.deltas.capacity() * sizeof(ComponentDelta));
-      for (const ComponentDelta& cd : r.deltas) ob += (u64)((cd.parents.capacity() + cd.born.capacity()) * sizeof(FacetKey));
-      stats.output_bytes = std::max(stats.output_bytes, ob);
-    }
+    // Les octets de SCRATCH et de SORTIE se comptent en parcourant des
+    // vecteurs de vecteurs : ce parcours est reserve aux balayages a cadence
+    // bornee (plus bas), jamais fait a chaque lot — le mesurer par lot serait
+    // quadratique en nombre de deltas (mesure : 981 s au lieu de 8 s sur un
+    // ordre de 718 440 lots, trouve par le regime miroir de la sonde).
     if (live_alias != live_in[b]) ++stats.life_violations;
     if (free_slots.size() + live_alias != nslots) ++stats.slot_partition_violations;
     // Detecteurs (identiques au resident).
@@ -478,6 +473,16 @@ inline ForestResult reduce_fold_live(FoldPrepared&& fp, LiveFoldStats* out_stats
     // liste egale a son compte, aucun cycle ni doublon, aucune composante vide.
     if (nb <= kStructureScans || b + 1 == nb || (b % (nb / kStructureScans)) == 0) {
       ++stats.structure_scans;
+      {  // Postes d'octets a parcours (scratch et sortie), a la cadence bornee.
+        u64 sc = (u64)(touched.capacity() * sizeof(u32) + pre_list.capacity() * sizeof(PreFreeze) + post_list.capacity() * sizeof(u32) +
+                       slot_alias.capacity() * sizeof(u32) + (live_in.capacity() + live_out.capacity()) * sizeof(u32) +
+                       scratch.capacity() * sizeof(ComponentDelta));
+        for (const ComponentDelta& cd : scratch) sc += (u64)((cd.parents.capacity() + cd.born.capacity()) * sizeof(FacetKey));
+        stats.scratch_bytes = std::max(stats.scratch_bytes, sc);
+        u64 ob = (u64)(r.deltas.capacity() * sizeof(ComponentDelta));
+        for (const ComponentDelta& cd : r.deltas) ob += (u64)((cd.parents.capacity() + cd.born.capacity()) * sizeof(FacetKey));
+        stats.output_bytes = std::max(stats.output_bytes, ob);
+      }
       // MARQUAGE EXACT DES CRENEAUX (audit du 28 aout) : l'egalite de
       // cardinalite `libres + vivants == alloues` ne prouve ni la DISJONCTION
       // (un creneau a la fois libre et vivant), ni la COUVERTURE (un creneau

@@ -149,7 +149,11 @@ int main(int argc, char** argv) {
     // Le cote vivant paie EN PLUS les durees de vie (dans `reduce_fold_live`)
     // et, si demande, le rejeu qui lui rend la partition que le resident
     // produit d'office.
-    const std::vector<FacetKey> keys = fp.keys;  // le catalogue survit au reduce (necessaire au rejeu)
+    // Le catalogue n'est copie QUE si le rejeu est demande (il lui est
+    // necessaire) : le copier sans cela ajoutait 274 Mo au bras vivant et
+    // faussait entierement l'attribution du RSS.
+    std::vector<FacetKey> keys;
+    if (replay) keys = fp.keys;
     LiveFoldStats st;
     const double t2 = now_ms();
     const ForestResult r = reduce_fold_live(std::move(fp), &st);
