@@ -466,21 +466,26 @@ l'état du digest et les offsets de sortie ne sont pas sérialisés.
 
 ## Ordre de commits proposé
 
-1. **Durcir T5 sans bloquer les lanes** : promouvoir, sur flux accepté,
-   `catalogue + deltas -> final_canon_fid`, puis graver les fixtures d'états et
-   de lots ci-dessus.
-2. **Réducteur vivant en RAM** : FIRST/LAST par clé exacte dans une
-   `std::map`, composants small-to-large et égalité complète avec le résident.
+1. **Acquis fonctionnel — T5 sans bloquer les lanes** (`f4b554fe`, puis
+   `bc66ade7`) : `catalogue + deltas -> final_canon_fid` est rejoué contre le
+   résident sur les cas exercés. La réception reste bornée à ce replayer local :
+   le partage d'un replayer strict qui juge aussi lots, niveaux, `output`, clés
+   absentes et refus demeure la courte couture de preuve avant le flux L3.
+2. **Livré — réducteur vivant en RAM** (`bc66ade7`) : FIRST/LAST par clé
+   exacte, composants small-to-large et égalité complète avec le résident. Le
+   remplacement expérimental du hash par des créneaux est requalifié dans
+   `ETAT_COURANT.md` ; il ne rouvre pas ce jalon fonctionnel.
 3. **Coutures externes** : RLE multi-runs, lifetime avec hash constant, puis
    join retour vers les événements.
 4. **Payload/reprise** : wire u64, digest logique et publication atomique par K.
 5. **Pilote 1 M** seulement après mesure des octets, du pic inclusif et du
    débit du disque réellement attaché.
 
-Cet ordre donne à Claude trois petits commits falsifiables avant le chantier
-SSD. Il conserve son architecture générale tout en retirant les deux
-inconnues les plus risquées : la fermeture union-find et la marge
-probabiliste.
+Les deux premiers jalons sont maintenant acquis fonctionnellement ; les
+coutures externes restent le prochain commit falsifiable avant le chantier
+SSD. L'expérience à créneaux ne rouvre ni T5 ni la fermeture union-find : elle
+demande seulement une partition réellement vérifiée, une comptabilité mémoire
+complète et un probe à un seul réducteur par processus.
 
 ## Corrections documentaires restantes
 
@@ -504,5 +509,11 @@ probabiliste.
 - ne plus promettre le digest v4 au-delà du domaine u32 ;
 - qualifier explicitement les extrapolations `uniform`, et séparer pic disque
   K-par-K du volume cumulé.
+- retirer la coexistence, dans `ECHELLE.md`, de l'ancien témoin « deux postes /
+  3,19 Mo » et du nouveau découpage en trois postes incomplets ; publier entrée,
+  mapping, état vivant, travail et sortie avec leurs témoins respectifs ;
+- requalifier les tableaux du callback 8 k/16 k en micro-banc du second fold :
+  ils ne deviennent un miroir CPU/RSS qu'après injection au point unique de
+  réduction, égalité complète des objets et un seul réducteur par processus.
 
 GCP non utilisé pour cet audit.

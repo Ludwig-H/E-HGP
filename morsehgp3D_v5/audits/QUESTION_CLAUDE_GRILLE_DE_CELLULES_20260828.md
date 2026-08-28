@@ -1,6 +1,6 @@
 # Question de Claude aux auditeurs — grille de cellules sans apex (théorème 10.5), fold concurrent par ordre, mémoire (28 août 2026)
 
-- **Pins fonctionnels relus :** `90baa0bb` (fold concurrent), `d86b4ec7` (listes de census et paliers RSS), `82f613d3` (grille), `369f3ac0` (sonde de facettes dites vivantes).
+- **Pins fonctionnels relus :** `90baa0bb` puis `d090f2cb` (fold concurrent et réception du noyau de grille), `d86b4ec7` (listes de census et paliers RSS), `82f613d3` (grille), `369f3ac0` (sonde de facettes dites vivantes).
 - **Reçus relus :** `69daa148` (session G4 n° 10) et `685e8e22` (session G4 n° 11, désormais terminée).
 - **Cadre :** `phase=exploration_v5_hors_registre`, `backend=cpu_reference`, `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`, `public_status=not_claimed`.
 
@@ -45,20 +45,18 @@ Le filtre `near_m` reste sûr pour l'objet, mais ce n'est pas un lemme garantiss
 
 Le reçu G4 n° 11 établit une amélioration appariée bornée et des digests inchangés au pin mesuré. Il combine cependant la grille et les listes inline : il ne permet pas d'attribuer causalement toute la baisse de temps ou de mémoire à la grille seule. Les deux oracles cellule, étiquetés uniquement `oracle`, n'ont pas été rejoués par la commande G4 `-L gate`; ils ont été rejoués localement pendant cette réponse.
 
-### Raccord du worktree actif — noyau local presque fermé, réception sur pin différée
+### Réception bornée du noyau au pin `d090f2cb`
 
-Le raccord CMake/mutants/oracle est maintenant cohérent localement : la fixture nominale,
-le registre des mutants, F11, l'oracle brut et ses trois mutants sont exécutés
-par les portes. La campagne ciblée donne 7/7 tests réussis en 12,6 s. L'oracle
-nominal exerce 18 748 grilles, 757 014 sites, 324 171 localisations réelles,
-447 frontières exactes et 4 000 cas i128 synthétiques sans désaccord; les trois
-mutants produisent respectivement `cnt_mism=42 660` et `meta_mism=1 006`,
-`meta_mism=8 921`, puis `contract_viol=444`. Le facteur `G` de l'inégalité
-témoin est corrigé et la dérivation binaire64 suit désormais le graphe du code.
-Ces résultats portent sur le worktree non committé ; ils ne sont pas encore une
-réception reproductible.
+Le raccord CMake/mutants/oracle, F11 et l'oracle brut ont atterri au pin
+`d090f2cb`. La campagne ciblée consignée lors de sa relecture donne 7/7 portes
+vertes en 12,6 s. L'oracle nominal exerce 18 748 grilles, 757 014 sites,
+324 171 localisations réelles, 447 frontières exactes et 4 000 cas i128
+synthétiques sans désaccord ; les trois mutants produisent respectivement
+`cnt_mism=42 660` et `meta_mism=1 006`, `meta_mism=8 921`, puis
+`contract_viol=444`. C'est une réception fonctionnelle bornée du noyau, pas
+encore celle des six raccords documentaires et d'environnement ci-dessous.
 
-Le noyau mathématique paraît fermable, mais sept raccords courts restent avant
+Le noyau mathématique paraît fermable, mais six raccords courts restent avant
 d'appeler le théorème 10.5 reçu sur un pin propre :
 
 1. Remplacer « le losange contient le disque car `|P_k| >= rho_q` », qui ne
@@ -90,26 +88,21 @@ d'appeler le théorème 10.5 reçu sur un pin propre :
    nécessairement une option autonome de réassociation telle que
    `-funsafe-math-optimizations`. Une réception explicitement bornée au
    toolchain canonique suffit; une prétention portable exige ces gardes.
-7. Mettre `docs/PLAN_DE_TESTS.md` à jour : sa table s'arrête à F1–F10 et omet
-   F11, `mhgp5_cell_grid_oracle` et `cell-locate-eps-zero`.
-
 La fixture strictement côté vivant, réalisable depuis une seed q3/q4 u16, peut
 attendre. Le mutant `cell-locate-eps-zero` est déjà une bonne preuve négative
 du contrat conservatif du localisateur, mais pas encore un faux-kill de l'objet;
 le texte courant respecte cette distinction. Davantage de non-vacuité sur les
 routes batch forcées est également un durcissement d'intégration, pas un verrou
-du certificat nominal. Une fois les sept raccords appliqués, rejouer les sept
+du certificat nominal. Une fois les six raccords appliqués, rejouer les sept
 portes sur le pin propre suffit pour soumettre cette réception ; il n'est pas
 utile de rouvrir l'algorithme de grille.
 
 ### Fold et mémoire
 
-Le fold concurrent contient des défauts de sûreté indépendants des digests nominaux. Après le démarrage d'un fil B, plusieurs `return rr` s'appuient seulement sur le destructeur de `BJoiner`. La valeur de retour est initialisée avant la destruction des variables locales ; si la NRVO n'est pas appliquée, `rr` peut donc être déplacé tandis qu'un fil le modifie encore. Il faut annuler, notifier et joindre explicitement avant tout retour post-lancement. Il faut aussi placer le `BSlot` dans un propriétaire avant de lancer son `std::thread` : une exception de `slots.push_back` détruirait sinon un thread encore joignable et appellerait `std::terminate`.
-
-Le `catch` d'un K supérieur pose en outre `pub_failed` avant que ce K atteigne son tour de publication. Un K inférieur encore en réduction abandonne alors sa publication et peut ne pas vérifier ses violations d'invariant. `reap_front` relit normalement en ordre de K les seules exceptions de réduction/digest qui ont été stockées ; la rupture certaine porte sur les publications et sur l'arbitrage entre retour d'étage A et faute d'étage B. Il faut enregistrer chaque verdict dans son slot, arbitrer seulement à `next_publish`, puis annuler les ordres ultérieurs.
-
-La porte doit injecter un échec d'étage A pendant qu'un fold est actif et une exception de réduction d'un K supérieur avant un K inférieur, être compilée avec `-fno-elide-constructors` et sous TSan, puis prouver par compteur atomique que deux réductions ont effectivement été simultanées. Le journal de callback doit lui-même être synchronisé : `last_k`, `ordered` et `overlapped` sont actuellement non atomiques sur le chemin de chevauchement que la porte cherche à exclure. Le test actuel prouve l'ordre nominal des callbacks et les digests, mais une implémentation entièrement sérielle pourrait encore le satisfaire.
-
-Enfin, `fold_inflight <= 0` est silencieusement ramené à 1. Le domaine de cette option doit être explicite et les valeurs hors domaine refusées avec le code contractuel, pas transformées en exécution valide.
-
-Enfin, les mesures mémoire doivent être renommées avant toute conclusion : `rss_mb[4]` est un échantillon après réduction/publication, pas un maximum du fold, et le brut `uniform` 200 k montre un pic externe supérieur. La sonde `369f3ac0` échantillonne les facettes après chaque lot ; elle manque celles nées et terminées dans le même lot et ne conserve pas la fermeture des racines d'union-find. Sa « fraction vivante » est une borne basse descriptive, pas encore le dimensionnement d'un fold à état borné. La sonde doit mesurer le pic intra-lot, les racines nécessaires, les octets persistants et indiquer K sans contaminer les chronos de réduction.
+Les défauts de sûreté du fold concurrent consignés dans la première réponse ont
+été fermés au pin `d090f2cb` : slot possédé avant lancement, arbitrage au tour
+de publication, drain explicite et domaine `fold_inflight` refusé. Leur détail
+historique n'est plus une liste d'actions. Le fold vivant L2, ses créneaux et la
+qualification mémoire courante sont désormais suivis dans
+[`ETAT_COURANT.md`](ETAT_COURANT.md) et
+[`AUDIT_PASSAGE_ECHELLE_20260828.md`](AUDIT_PASSAGE_ECHELLE_20260828.md).

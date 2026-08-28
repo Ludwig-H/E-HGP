@@ -3,7 +3,12 @@
 - **Cadre :** `phase=exploration_v5_hors_registre`, `backend=cpu_reference`, `profile=quantized_u16_input_only`, `mode=audit_independant_math_and_architecture`, `public_status=not_claimed` ; GCP non utilisé pour cette question
 - **Conception :** `docs/GPU.md` § « Lane résidente sur device — conception (L7) », réconciliée avec vos G0–G2 (ordre : instrument → pool → wire indices → compaction) ; conception détaillée et contre-expertise dans `docs/analyses/gpu_20260828/`
 
-Je retiens votre ordre (G0, G1, G2) comme premières livraisons ; la conception L7a–L7c (cover paresseux sur device, K0/K1 par rectangle, candidats compacts) vient après réception CUDA de G1. Les verrous ci-dessous sont ceux qui conditionnent L7a–L7c ; les trois premiers commits n'en dépendent pas.
+La baseline instrumentale, G0 et les wires G1 q3/q4 sont désormais implémentés,
+avec une réception CUDA encore bornée aux pins indiqués dans `ETAT_COURANT.md`.
+G2 reste conditionné par l'ablation des retours q4. La conception L7a–L7c
+(cover paresseux sur device, K0/K1 par rectangle, candidats compacts) vient
+après réception CUDA de G1 ; les verrous ci-dessous la conditionnent, sans
+redessiner le pool ni le wire déjà acquis.
 
 - **V17 — ordre du cover.** Un counting sort stable par rounds (chunks de 8, curseurs de classe) sur device donne-t-il *le même* ordre que `anchor_cover_from_handles` (handles en ordre de pile, `u` croissant, stable par classe radiale), jugé par une porte de compteurs de sortie anticipée et par `raw_order_gate` à un fil ?
 - **V18 — `di_to_double_d`.** Preuve `proof_internal` (décalage à droite avec bit collant, valeur ≤ 64 bits, un seul arrondi, `ldexp` exact) à inscrire dans `docs/math/STATUT_PREUVES_ET_HEURISTIQUES.md` avant la porte de grille device ; la fixture $10^7$ tirages + milieux est complémentaire, non substitutive.
@@ -291,8 +296,10 @@ et replay. `rle-per-midpoint-tile` doit laisser à tort deux exemplaires.
 
 ### V29 — le reçu 11 et le modèle ne se contredisent pas
 
-Le reçu `82f613d3` reste l'autorité pour son pin : q4 `t_rects_ms = 214544,4`
-ms à 200 k. Ses branches disjointes comptent au moins 277 911 630 seeds tués
+Le reçu de session 11, versionné au pin `685e8e22` dans
+`../receipts/campagne_g4_v5_20260828_grille/`, reste l'autorité pour sa source
+`82f613d3` : q4 `t_rects_ms = 214544,4` ms à 200 k. Ses branches disjointes
+comptent au moins 277 911 630 seeds tués
 par cellules, 491 912 062 par le cœur et 171 517 481 par la corde, soit
 941 341 173 seeds. À 10 µs de temps-fil par seed et 48 fils, ce **minorant**
 donne un contrôle de cohérence inférieur de 196,1 s, proche des 214,5 s
@@ -348,10 +355,15 @@ les intermédiaires stables G2.
 
 ### Passage de relais minimal
 
-1. Finir les raccords CPU et le schéma d'instrument déjà ouverts, sans GCP.
-2. Livrer G0, G1 puis G2 avec leurs égalités locales actuelles.
-3. Avant L7a, fermer les verrous de correction V17, V18, V21, V23, V25 et V27 ; poser les hooks V20/V30, puis mesurer seulement quand les kernels existent.
-4. Avant L7b, fermer les verrous de correction V24 et V26 ; V29 conditionne ses projections et reçus 200 k/10 M, pas l'écriture du kernel.
+1. Pinner les finitions hôte G1, puis recevoir `PointId` adverse, les deux
+   mutants de branche et le schéma de campagne sur une petite session CUDA.
+2. Fermer la sûreté G0 avant tout claim de confinement device ; n'ouvrir G2 que
+   si l'ablation montre que les retours q4 dominent encore.
+3. Avant L7a, fermer V17, V18, V21, V23, V25 et V27 ; poser les hooks V20/V30,
+   puis mesurer seulement quand les kernels existent.
+4. Avant L7b, fermer V24 et V26. V29 est déjà réfutée comme contradiction ; ses
+   compteurs supplémentaires conditionnent les projections 200 k/10 M, pas
+   l'écriture du kernel.
 5. Garder V19 pour L7c ; il ne doit pas retarder les étapes précédentes.
 
 GCP non utilisé pour cette réponse.

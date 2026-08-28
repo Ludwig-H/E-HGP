@@ -61,8 +61,10 @@ La session 13 reçoit la baseline comme preuve fonctionnelle bornée : digests
 appariés, métriques présentes et mutant device tué. Le reçu suivant exerce
 réellement le pool G0 et le wire q3 index, avec digests égaux. Il ne ferme ni la
 sûreté hôte G0, ni les lots mono-wire, ni la preuve de branche du protocole, ni
-q4 index. L'ordre utile devient donc G0 sûr, fermeture hôte G1, une petite
-réception CUDA commune au HEAD, puis G2 ou G3 selon l'ablation. Pour le
+q4 index. G1 hôte et G0 sûr sont indépendants : épingler d'abord le petit delta
+fonctionnel déjà prêt, puis fermer G0 avant tout claim de confinement device et
+faire une petite réception CUDA commune au HEAD ; G2 ou G3 vient ensuite selon
+l'ablation. Pour le
 multi-CPU, il faut séparer la sensibilité au budget d'ouvriers d'un véritable
 speedup 1→N sous cpuset.
 
@@ -504,17 +506,20 @@ vivant est précisément ce qui réduit d'abord son working set.
 
 ## Ordre de commits proposé à Claude
 
-1. **Durcir le pin G0 `194a0bc2`**, sans refonte : TLS non allouant avec refus
+1. **Épingler le contrat fonctionnel G1 sur hôte dans son propre commit** :
+   indices bornés, branche prouvée/mutée et CTest `--inject`, après séparation
+   de « géométrie absente » et « géométrie vide » et cohérence des lots no-op.
+   `PointId` adverse et le selftest de campagne ferment ensuite la réception
+   q4 ; les lots mono-wire, le contexte partagé et les métriques de setup sont
+   des optimisations mesurées, pas des prérequis sémantiques.
+2. **Durcir le pin G0 `194a0bc2`**, sans refonte : TLS non allouant avec refus
    de tout nesting, fermeture fatale sans allocation, transitions de compteurs
    atomiques sous mutex, porte causale et poison CUDA typé déclenché avant que
-   le worker reprenne un lot.
-2. **Fermer le contrat fonctionnel G1 sur hôte** : indices bornés, branche
-   prouvée/mutée, `PointId` adverse et CTest `--inject`. Les lots mono-wire, le
-   contexte partagé et les métriques de setup sont des optimisations mesurées,
-   pas des prérequis sémantiques.
+   le worker reprenne un lot. Ce point précède le claim de confinement device,
+   pas le pin fonctionnel G1.
 3. **Conserver la nouvelle session `839cf1ec`** comme reçu nominal G0 + G1 q3,
-   après correction de sa portée et ajout d'un reçu de sûreté expurgé lié au
-   hash du journal ; ne jamais versionner le journal brut ni une clé. Une petite
+   avec sa portée corrigée et le reçu de sûreté expurgé déjà lié au hash du
+   journal ; ne jamais versionner le journal brut ni une clé. Une petite
    réception CUDA de q4 index suffira après les correctifs ; ne pas rejouer la
    matrice 50 k ni imposer un sweep device sans question nouvelle.
 4. **N'engager G2 que si l'instrument isole les retours q4** comme poste

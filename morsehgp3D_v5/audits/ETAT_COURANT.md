@@ -6,12 +6,12 @@
   device/SCALE sur `c95cfa95`, G1 q3 sur `dd928111`/`839cf1ec` et G1 q4 sur
   `556c421e`.
 - **Pin de réception G0/G1 q3 :** `0656bf4c`, sans code produit.
-- **Worktree observé :** Claude durcit G1 après `194a0bc2` : valeurs des indices,
-  compteurs de branche et d'octets, mutant de retombée SoA, CLI et portes q3/q4.
-  Il expérimente aussi un cache `slot_alias` dans le fold vivant. Ces deltas non
-  épinglés restent exclus du verdict versionné ; la porte hôte de contrat G1 est
-  toutefois verte. Le probe `.codex_fold_contract_probe.cpp` d'un autre audit
-  reste lui aussi non intégré.
+- **Worktree observé :** Claude durcit G1 après `194a0bc2` et remplace l'index
+  hash du fold vivant par des créneaux. Le refus de capacité, son mutant, deux
+  cas de frontière et trois catégories mémoire sont présents. Ces deltas non
+  épinglés restent exclus du verdict versionné ; leurs portes hôte sont vertes
+  sous les limites décrites ci-dessous. Le probe `.codex_fold_contract_probe.cpp`
+  d'un autre audit reste lui aussi non intégré.
 - **Cadre :** `phase=exploration_v5_hors_registre`,
   `backend=cpu_reference`, `profile=quantized_u16_input_only`,
   `mode=audit_independant_math_and_architecture`,
@@ -22,12 +22,15 @@
 **Orange constructif : `194a0bc2` garde la bonne architecture.** Notification
 du ticket, démarrage transactionnel, domaine `1..8` et latch causale sont de
 vraies corrections ; il ne faut ni les jeter ni redessiner la lane. La réception
-complète demande encore un petit durcissement local : marqueur TLS non allouant
-et refus de tout nesting, fermeture fatale à garantie forte, puis fixtures
-causales. `close_fatal` est aujourd'hui une primitive hôte exercée, pas encore
-le poison CUDA q3/q4. La sonde fold du même pin mesure un second réducteur depuis
-le callback d'un pipeline qui a déjà exécuté le résident : elle reste un
-micro-banc incrémental, pas le miroir CPU/RSS annoncé.
+du **contrat de sûreté G0** demande encore un petit durcissement local : marqueur
+TLS non allouant et refus de tout nesting, fermeture fatale à garantie forte,
+puis fixtures causales. Ces points rares ne bloquent ni le pin hôte G1 ni le
+fold, qui sont indépendants ; ils doivent en revanche précéder toute
+revendication de confinement d'une faute device. `close_fatal` est aujourd'hui
+une primitive hôte exercée, pas encore le poison CUDA q3/q4. La sonde fold du
+même pin mesure un second réducteur depuis le callback d'un pipeline qui a déjà
+exécuté le résident : elle reste un micro-banc incrémental, pas le miroir
+CPU/RSS annoncé.
 
 La session 13 fournit par ailleurs une baseline CUDA cohérente. La session au
 pin `839cf1ec` compile et exécute nominalement G0 et G1 q3 : huit exécuteurs au
@@ -37,137 +40,118 @@ fail-closed/non-vacants G1 restent à fermer sans reprendre ces travaux.
 
 Le worktree G1 actif répond déjà correctement aux deux demandes les plus
 rentables : bornage **en valeur** avant lancement et témoin de la branche
-réellement exécutée. Conserver ce patch. Il reste à aligner le libellé des lots
-vides, supprimer une activation mutante q4 redondante, puis recevoir les deux
-mutants sur un vrai device ; cela ne justifie aucune refonte du wire.
+réellement exécutée. Conserver ce patch. Avant son pin hôte, séparer
+`geom_points` absent de la borne zéro, aligner le libellé des lots vides et
+supprimer une activation mutante q4 redondante. `PointId` adverse, le selftest
+de campagne et les deux mutants sur un vrai device ferment ensuite la réception
+CUDA ; cela ne justifie aucune refonte du wire.
 
 Le pin `bc66ade7` consolide le bon cœur L2 : égalité de vie par lot,
 balayages structurels, vacuité finale, plafond par alias, cas adverse court et
 timeouts explicites. Il ne faut revenir sur aucune de ces corrections. Les
 finitions avant L3 sont locales : replayer T5 strict partagé, comparateur de
-fixtures complet, micro-fixture du backshift, deux invariants de listes et
-attribution exacte des témoins mémoire. Elles bornent le claim, pas l'utilité
-du réducteur.
+fixtures complet, deux invariants de listes et attribution exacte des témoins
+mémoire. Une fixture du décalage arrière ne reste utile que si l'ancien hash est
+conservé comme repli ; le chemin actif à créneaux n'en a plus besoin. Ces
+finitions bornent le claim, pas l'utilité du réducteur.
 
 Le fold actif va plus loin : il remplace le hash vivant par un tableau de
 créneaux de taille `peak_live_exact`, une table directe `fid -> créneau`, puis
 réutilise l'alias résolu dans `slot_alias`. La construction par intervalles est
 cohérente avec l'ordre naissance-avant-mort du lot ; les indices d'arène restent
-valides après les relocalisations small-to-large. La porte différentielle
-complète rend déjà 6/6 et le nominal local tombe à 19,8 s, contre 72–83 s lors
-de la relecture de `bc66ade7`. C'est un signal très favorable, pas encore un
-benchmark apparié : garder cette piste.
+valides après les relocalisations small-to-large. Garder cette piste. Le nouveau
+chemin de débordement retourne maintenant avant tout `unite`, vide les sorties
+partielles et expose `resource_exhausted` ; le mutant et les deux cas de
+frontière sont des progrès réels. Mathématiquement, les vies fermées
+`[FIRST, LAST]` forment un graphe d'intervalles parfait : allouer toutes les
+naissances avant les morts du lot puis réutiliser la liste libre au lot suivant
+atteint exactement le chevauchement maximal. Il n'y a pas de verrou
+algorithmique caché à résoudre ici.
 
-Deux coutures préservent la valeur de l'expérience. Au L2 courant,
-`slot_of_fid` occupe `4 * facettes` octets et `slot_alias` jusqu'à
-`11 * sizeof(u32) = 44` octets par événement du plus gros lot ; tous deux sont
-omis de `allocated_bytes`. Ils ne disparaîtront qu'au futur wire L3 : les
-inclure aujourd'hui, ou renommer la métrique et publier séparément état
-persistant, mapping et scratch. Les sidecars `firstb`, `lastb` et
-`slot_of_fid` sont bien en O(F), mais le chemin L2 complet ne l'est pas en F
-seul : `FoldPrepared` garde `events`/`ev_fid`, donc O(I) occurrences, et
-`slot_alias` ajoute O(I_max_lot) de scratch. Annoncer O(F + I) entrée comprise,
-ou publier séparément préparation, sidecars O(F), état vivant O(pic) et scratch
-du plus gros lot. Le futur flux pourra seul retirer ces tableaux du réducteur.
-`assign(..., kNil)` écrit aussi les onze slots à chaque lot alors que seuls les
-slots consultés sont relus ; un `resize` réutilisant la capacité suffit. Enfin,
-un débordement de créneau ne doit pas retourner `kNil` vers `unite`, qui
-déréférencerait cet indice : lever immédiatement une contradiction interne.
-Comparer séparément « hash -> table directe » puis « second lookup -> cache »
-permettra d'attribuer le gain. Le ratio 1,9–3,5 issu de la sonde callback reste
-un signal de micro-banc, pas la mesure miroir que son commentaire annonce.
+Quatre coutures courtes suffisent avant le pin fold. Premièrement,
+`slot_partition_violations` ne vérifie encore que l'égalité de cardinalité
+`libres + vivants == alloués`, pas la disjonction, la couverture ni l'unicité des
+créneaux. Le renommer en comptabilité, ou faire un marquage exact dans le
+balayage structurel borné. Deuxièmement, les fixtures de frontière n'assertent
+pas encore `batches`, `batch_levels` ni les deltas littéraux ; le mutant de
+capacité meurt sur un désaccord générique sans exiger le préfixe du refus, la
+vacuité des deux sorties et le compte exact de débordement. Les comportements
+sont présents, leur preuve précise reste à graver.
 
-La vérification `slots == peak_live_exact` est aujourd'hui tautologique : le
-premier champ est affecté depuis le second. `peak_aliases == peak_live_exact`
-reste une bonne cohérence de sortie, mais découle déjà de l'égalité de vie par
-lot ; la dent indépendante manquante est la bijection des créneaux. Prolonger
-le balayage structurel borné pour marquer les créneaux vivants puis libres et
-refuser tout hors-borne, doublon ou créneau manquant. Un mutant
-`slot-cap-minus-one` doit produire le code 4 par contradiction interne capturée
-avant tout accès sentinelle. Deux fixtures littérales isolent la convention de
-frontière : deux événements K=1 disjoints au même niveau donnent quatre
-facettes `FIRST == LAST` et `peak=slots=4` ; les mêmes événements sur deux
-niveaux successifs donnent quatre facettes totales mais `peak=slots=2`. Ce
-second cas vérifie la réutilisation entre lots ; un mutant de libération avant
-émission est nécessaire si l'on veut certifier précisément la phase. Enfin,
-qualifier le créneau comme champ du **wire L3 proposé** :
-`FacetOccurrenceWire` n'est pas encore une structure enregistrée, et
-`free_slots` reste bien une liste libre.
+Troisièmement, les trois catégories d'octets améliorent nettement la lecture,
+mais ne forment pas encore un **pic complet**. `keys`, `ev_fid`, événements,
+ordre et lots de `FoldPrepared` appartiennent à la préparation/entrée, pas au
+mapping ; `scratch_bytes` omet le vecteur `scratch`, les capacités internes de
+ses `ComponentDelta`, `born_at`/`died_at` et plusieurs autres transitoires ; la
+sortie `r.deltas` doit avoir son poste propre. Les sidecars `firstb`, `lastb`,
+`slot_of_fid` sont O(F), mais le L2 complet, entrée et sortie comprises, est
+O(F + I). Publier séparément préparation/entrée, mapping O(F), état persistant
+O(pic), scratch du plus gros lot et sortie évite de promettre une somme
+allocator-précise. Le futur L3 pourra seul retirer les tableaux d'occurrences.
+`slot_alias.assign(..., kNil)` écrit aussi onze cases par événement ; si toutes
+les cases lues sont réécrites, un `resize` réutilisant la capacité est une
+ablation simple.
 
-Le prochain pin facile à recevoir est un **durcissement ciblé de `194a0bc2`**,
-puis un petit pin hôte G1 qui borne les indices et rend chaque branche index
-falsifiable. La session déjà exécutée est une bonne mesure exploratoire et
-prouve que le chemin q3 index a effectivement réduit ses copies ; elle ne
-remplace pas ces portes et ne couvre pas q4, absent de son pin source. Aucun
-nouveau G4 n'est nécessaire avant leur fermeture locale. T5, le fold massif et
-le protocole CPU sous cpuset restent indépendants et ne doivent pas détourner ce
-travail court.
+Enfin, la sonde lance bien deux invocations fraîches, mais `run_pipeline`
+exécute déjà le fold résident avant le callback dans **chacune** ; le bras vivant
+ajoute ensuite un second réducteur. Les temps sont donc un micro-banc incrémental
+utile et le RSS reste inconclusif, pas attribuable au réducteur choisi. Les
+facteurs observés sur 4 k–16 k ne prouvent pas encore un facteur asymptotiquement
+constant. Côté vivant, la copie O(F) de `keys` est en outre placée après `t1`
+mais avant `t2` : elle entre dans le RSS sans entrer dans le temps annoncé, et
+le rejeu optionnel ne juge pas l'objet complet. Le banc recevable injecte un
+seul réducteur par processus, rejoue strictement le même artefact, contrebalance
+des répétitions sous cpuset et versionne les sorties brutes.
+
+**Réponse V35 :** retenir le vivant comme **baseline L2 candidate** d'une future
+voie d'échelle, à sélectionner lorsque le futur préflight prouvera que le
+résident ne tient pas ; aujourd'hui L2 reste O(F + I), hors chemin produit et
+sans ce routeur. Le surcoût local d'environ 1,6 reste un budget à réduire, pas
+une destination. Ne pas remplacer encore l'arène de composantes : `cv` est déjà
+un vecteur contigu à indices recyclés. Après le banc corrigé, profiler séparément
+lifetime, naissances/morts, unions, tris, rejeu et `slot_alias`; n'essayer une
+seconde disposition par créneau que si les accès `cv` ressortent effectivement.
+La suppression L3 de `firstb`/`lastb`/`slot_of_fid` peut apporter davantage.
+Sur le seul [run reçu `uniform n=50000`](../receipts/campagne_g4_v5_20260828_instrument_scale/out/contrat_uniform_n50000.txt), la part mur du fold vaut
+`25245,8 / 56290,8 = 44,85 %` ; le calcul conditionnel d'Amdahl à environ +27 %
+est correct, sans devenir une part générale des autres familles ou du nouveau
+fold.
+
+Les deux prochains pins faciles à recevoir sont indépendants : **G1 hôte** avec
+sa sentinelle réparée, puis **fold à créneaux** avec refus causal, vraie
+partition et métriques catégorisées. Le durcissement G0 peut suivre dans un
+commit autonome avant la prochaine réception de sûreté device ; il n'est pas
+une raison de retenir ces progrès fonctionnels. Aucun nouveau G4 n'est
+nécessaire avant leur fermeture locale. T5, le fold massif et le protocole CPU
+sous cpuset restent indépendants.
 
 ## Ce qui est reçu et réutilisable
 
 ### Campagne 13 au pin `c95cfa95`
 
-Le reçu versionné contient 121 fichiers : 39 triplets
-`.status`/`.txt`/`.status.time`, `RECU.txt` et trois auxiliaires. Les 38 runs
-nominaux sortent à 0, le mutant device à 4, les statuts sont complets et les
-hashes du payload et du protocole se reconstruisent. Les six comparaisons
-CPU/GPU ou CPU/GPU-adaptatif disponibles ont les mêmes digests détaillés. Cela
-reçoit une **preuve fonctionnelle bornée** sur les quatre familles, la seed, le
-matériel et le pin annoncés.
-
-Le journal local non versionné montre aussi que la cible exacte
-`devpod-gpu-exploration/europe-west4-ai1a/ehgp-blackwell-spot-ai1a` était
-`SPOT`, munie des deux coupe-circuits puis certifiée `TERMINATED`. Cette lecture
-est utile pour la sécurité de la session, mais le commit ne contient pas la
-preuve d'arrêt elle-même.
-
-Le validateur courant a depuis ajouté les quatre contrats `gpuidx`. Il rejette
-donc ce reçu historique, qui ne les contient pas. Cela n'annule pas son rejeu au
-validateur épinglé, mais impose désormais un `campaign_schema` explicite et un
-dispatch par version : la liste mouvante du HEAD ne doit pas redéfinir les
-obligations d'un reçu déjà figé.
+Le [reçu versionné](../receipts/campagne_g4_v5_20260828_instrument_scale/RECU.txt)
+garde 38 runs nominaux au code 0, le mutant device au code 4 et six
+comparaisons CPU/GPU aux digests détaillés égaux. C'est une preuve fonctionnelle
+bornée de la baseline, jamais un speedup. Le validateur du pin l'accepte ; celui
+du HEAD demande depuis quatre contrats `gpuidx`. Cette dérive doit être traitée
+par un `campaign_schema` et un dispatch versionné, sans réécrire les obligations
+du reçu historique. La certification `SPOT`/`TERMINATED` n'existe que dans le
+journal local non versionné et ne devient donc pas une preuve archivée.
 
 ### Campagne G0/G1 q3 versionnée à `0656bf4c`, source `839cf1ec`
 
-Le [reçu](../receipts/campagne_g4_v5_20260828_g0_g1/RECU.txt) contient 29
-triplets : 28 codes 0 et le mutant device à 4. Hashes et statuts se
-reconstruisent, le validateur **du pin source** rend
-`campaign_status=complete`, et les quatre bras CPU/GPU/GPU-index ont les mêmes
-digests détaillés. Le validateur du HEAD attend désormais q4 index et refuse ce
-schéma plus ancien ; un `campaign_schema` versionné doit sélectionner les
-obligations du pin au lieu de les faire dériver avec HEAD.
-
-Deux preuves nominales sont acquises. G0 construit huit exécuteurs au total,
-deux pools de quatre avec `flux_pic=4`, contre 98 créations dans la baseline.
-G1 q3 exerce des lots index non vides et réduit les octets H2D de 43 à 65 % sur
-les quatre familles, avec mêmes sorties. Cela prouve le câblage emprunté sur ces
-runs, mais ni la sûreté générale de G0 ni G1 q4, absent du pin source.
-
-Les temps restent exploratoires : un passage SoA puis index, sans
-contrebalancement. La note corrigée indique que le temps H2D q3 baisse
-de 16 à 73 % ; sur `uniform`, q3+q4 vaut 6,015 s et 10,3 % du mur, les 6,251 s
-incluant q2 ; les parts « 9–11 % » et « fold 43 % » ne valent que pour
-`uniform`. Les bras `gpuidx` sont q3-index/q4-SoA. Sur ce passage q3-index
-reste plus lent que q3 CPU sur les quatre familles ; q4 device gagne sur
-`terrain`, `scanline` et légèrement les clusters, mais perd sur `uniform`. Le
-setup synchrone de `GpuGeometry` n'entre ni dans `h2d_ms` ni dans
-`lane_wall_ms`, bien que ses octets alimentent `h2d_octets`.
-
-Le verdict du validateur n'est pas une preuve suffisante de ces faits. Sur une
-copie, il reste `complete` après suppression des 29 `.status.time`, retrait des
-métriques G0/G1, remplacement des commandes `--gpu-wire=index` par `soa` et
-mise à zéro des replis q3 index. Le prochain schéma doit exiger les trois
-fichiers par run, la commande et le `timing_scope` exacts, les témoins de pool,
-wire/lots/octets et les planchers de replis. Les mesures ci-dessus viennent de
-la relecture directe des artefacts, pas du seul verdict vert.
-
-Le [reçu de sécurité](../receipts/campagne_g4_v5_20260828_g0_g1/SAFETY_RECEIPT.txt)
-transcrit les codes remote/scp à 0, les deux coupe-circuits, le modèle `SPOT` et
-l'arrêt exact `TERMINATED`, et le lie au
-SHA-256 du journal brut local. `SHA256SUMS` couvre chaque artefact du dossier. Le
-journal, qui contient des métadonnées de session, et toute clé restent exclus.
-Le propriétaire doit encore révoquer sa clé de session puis nettoyer uniquement
-son répertoire temporaire ; cet audit n'effectue aucune mutation GCP.
+Le [reçu](../receipts/campagne_g4_v5_20260828_g0_g1/RECU.txt) garde 28 runs au
+code 0, le mutant device au code 4 et des digests égaux. Il reçoit nominalement
+huit exécuteurs G0 au total et le wire q3 index non vide, avec moins d'octets
+H2D ; il ne reçoit ni la sûreté générale du pool ni q4 index. Son validateur
+épinglé l'accepte, tandis que celui du HEAD exige un schéma plus récent. La
+prochaine version doit donc figer commandes, trois artefacts par run,
+`timing_scope`, témoins de pool et branche réellement exécutée. Le
+[reçu de sécurité](../receipts/campagne_g4_v5_20260828_g0_g1/SAFETY_RECEIPT.txt)
+lie les deux coupe-circuits, le modèle `SPOT` et l'arrêt `TERMINATED` à une
+transcription expurgée elle-même liée au hash du journal brut local. Les mesures
+et corrections chiffrées restent dans
+[`AUDIT_RENDEMENT_GPU_MULTICPU_20260828.md`](AUDIT_RENDEMENT_GPU_MULTICPU_20260828.md).
 
 ### Architecture G0 au pin `fe54ccca`
 
@@ -243,9 +227,14 @@ le mutex de lane ; aucune nouvelle race hôte n'est visible.
 Trois finitions évitent de sur-vendre ce bon patch. La valeur sentinelle
 `n_geom_points == 0` signifie à la fois « géométrie absente » et « géométrie
 déclarée vide » : dans le second cas, le contrôle des indices est sauté alors
-que `use_idx` peut devenir vrai. Un booléen de présence ou un `optional<size_t>`
-permet de refuser explicitement un lot non vide contre une géométrie de taille
-zéro ; graver ce rejet en q3 et q4.
+que `use_idx` peut devenir vrai. Le correctif minimal réserve
+`std::numeric_limits<size_t>::max()` à « non déclarée » et rend zéro à son sens
+naturel de géométrie vide ; les deux fixtures appellent le validateur avec un
+lot indexé non vide et une borne zéro, puis exigent le refus avant toute
+réservation. Le produit ne peut pas fabriquer ce cas aujourd'hui
+(`run_pipeline` part d'au moins deux points et les builders dérivent leurs
+indices de ce même `CloudIndex`) : c'est un durcissement d'API court, pas un
+blocage du pin G1.
 
 Ensuite, `lots` est incrémenté avant le retour d'un scan sans seed, tandis que
 ses compteurs de branche restent à zéro. Le générateur produit ne soumet
@@ -310,16 +299,14 @@ Quelques claims doivent encore rester étroits :
   mutant ni rejet propre. Extraire le replayer strict de la porte T5 dans un
   utilitaire d'oracle commun, puis l'appliquer à `(catalogue résident,
   deltas vivants)` ;
-- l'empreinte constante atteint l'internement des `FacetKey`, jamais la table
-  `LiveIndex`. Ajouter une fixture directe de décalage arrière avec cluster
-  traversant la frontière de table, suppressions tête/milieu/queue, `get`,
-  `used_` et réinsertion. Le hash constant des lifetimes externes reste dû à
-  L3 ;
-- `g_alloc_bytes` est un maximum global, imprimé avec le témoin du maximum
-  d'alias. Garder l'ordre témoin avec la valeur ou publier un troisième témoin,
-  et échantillonner les capacités après les morts : les free-lists peuvent
-  croître au dernier lot. Ce nombre reste celui de structures sélectionnées,
-  pas une allocation bout en bout ni du RSS.
+- l'empreinte constante atteint l'internement des `FacetKey`. Le chemin actif à
+  créneaux a supprimé `LiveIndex`, donc sa micro-fixture de décalage arrière
+  devient sans objet ; ne la conserver que si ce hash reste un repli compilé.
+  Le hash constant des lifetimes externes reste dû à L3 ;
+- les nouveaux postes remplacent `g_alloc_bytes`, mais `scratch_bytes` est
+  encore échantillonné avant le remplissage courant et omet les capacités
+  imbriquées. Employer les cinq postes du verdict et retirer d'`ECHELLE.md`
+  l'ancien paragraphe « deux postes / 3,19 Mo », désormais contradictoire.
 
 Les balayages structurels sont un oracle, pas un coût produit : le stride
 actuel peut en exécuter jusqu'à 127 malgré le plafond commenté à 64, et un
@@ -559,21 +546,29 @@ valeurs, calculs et corrections détaillés restent dans
 
 ## Ordre recommandé, sans détour
 
-1. Durcir `194a0bc2` sans refonte : TLS non allouant, fermeture fatale sans
+1. Pin hôte G1 fonctionnel, dans son propre commit : bornes d'indices,
+   compteurs/mutants de branche et réparation du CTest `--inject`. La sentinelle
+   de géométrie et le libellé des no-op peuvent entrer dans ce pin sans nouvelle
+   cible ; `PointId` q4 adverse et selftest de campagne ferment ensuite la
+   réception device.
+2. Pin fold séparé : garder le tableau de créneaux et le refus avant `kNil` ;
+   compléter la bijection exacte, les assertions littérales des deux frontières,
+   le contrat précis de `slot-cap-minus-one` et le périmètre des catégories
+   mémoire.
+3. Durcir `194a0bc2` sans refonte : TLS non allouant, fermeture fatale sans
    allocation, comptabilité après admission réussie et fixtures causales ; puis
-   brancher le poison typé dans q3/q4 avant la prochaine réception device.
-2. Pin hôte G1 fonctionnel : bornes d'indices, compteurs/mutants de branche,
-   `PointId` q4 adverse et réparation du CTest `--inject`.
-3. Pour L2 : garder `bc66ade7`, partager le replayer strict, compléter les
-   fixtures/listes/backshift et attribuer chaque métrique à son témoin ; puis
-   ouvrir L3 sans autre refonte du réducteur.
-4. Après les deux pins hôte, une réception CUDA **minimale** de q4 index et des
+   brancher le poison typé dans q3/q4 avant tout claim de confinement d'une
+   erreur CUDA.
+4. Pour L2/L3 : garder `bc66ade7`, partager le replayer strict, compléter les
+   fixtures/listes et attribuer chaque métrique à son témoin ; puis ouvrir L3
+   sans autre refonte du réducteur.
+5. Après les pins hôte, une réception CUDA **minimale** de q4 index et des
    nouvelles dents suffit ; ne pas rejouer la matrice 50 k déjà acquise.
-5. Mesurer ensuite la double représentation, le setup résident et le contexte
+6. Mesurer ensuite la double représentation, le setup résident et le contexte
    partagé ; n'optimiser que le poste visible.
-6. G2 seulement si cette ablation montre que les retours intermédiaires q4
+7. G2 seulement si cette ablation montre que les retours intermédiaires q4
    dominent encore ; sinon attaquer G3, qui retire aussi le wire par seed.
-7. En parallèle : préparer le pilote CPU cpuset
+8. En parallèle : préparer le pilote CPU cpuset
    physique/SMT à trois répétitions ; renforcer T5 avant le fold streamé.
 
 ## Validation indépendante
@@ -592,14 +587,15 @@ valeurs, calculs et corrections détaillés restent dans
 - Worktree G1 postérieur : construction et CTest
   `mhgp5_batch_contract` verts en 0,04 s. CUDA désactivé localement ; aucune
   porte device de ce delta n'est annoncée comme exécutée.
-- Worktree fold à créneaux : **6/6** CTests `mhgp5_fold_live*` verts ; le rejeu
-  indépendant courant rend le nominal en 14,21 s, tandis que la plage locale
-  non reçue consignée par les auditeurs va jusqu'à 25,78 s ; les cinq mutants
-  rendent leur code attendu en 0,01–0,03 s. Le nominal repasse aussi sous
-  ASan/UBSan en 125,89 s sans diagnostic. Ces exécutions confirment l'égalité
-  fonctionnelle, la sûreté dynamique exercée et les invariants couverts, pas
-  encore l'attribution du gain ni le claim mémoire corrigé. Les deux fixtures
-  de frontière et le mutant de capacité ci-dessus manquent encore.
+- Worktree fold à créneaux : **7/7** CTests `mhgp5_fold_live*` verts. Le nominal
+  de ce dernier passage dure 83,32 s sous forte contention locale — plusieurs
+  conformités et builds sanitizers concurrents — et n'est donc pas une mesure
+  de régression ; les six mutants rendent leur code attendu. Un lancement direct
+  de `slot-cap-minus-one` rend 4 sans crash, mais la porte le tue par désaccord
+  générique et n'assert pas encore le contrat exact de refus. Ces exécutions
+  reçoivent la sûreté du chemin exercé et l'égalité différentielle, pas encore
+  la bijection, les valeurs littérales des frontières, l'attribution du RSS ni
+  les trois sommes mémoire comme empreinte totale.
 - Build Release CPU complet au pin `556c421e` : succès ; construction ciblée
   des portes fold au pin `bc66ade7` : succès.
 - CTests API, pool, T5, préfixe et lanes q3/q4 batched : 41/41 verts en
